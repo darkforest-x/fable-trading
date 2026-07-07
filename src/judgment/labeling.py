@@ -22,9 +22,17 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-TP_ATR_MULT = 2.0
-SL_ATR_MULT = 1.0
+# v2 barriers (owner decision 2026-07-07): wider barriers so the median gross
+# TP (~4 x atr_pct ~= 1.1%) clears the 0.2% round-trip cost by >5x. The v1
+# barriers (TP 2xATR / SL 1xATR) produced labels dominated by micro noise
+# (median exit 3 bars) and top-decile net returns below cost -- see
+# analysis/p2b_judgment_report.md.
+TP_ATR_MULT = 4.0
+SL_ATR_MULT = 2.0
 HORIZON_BARS = 72
+# Candidates whose atr_pct is below this floor are skipped entirely: their
+# barrier scale cannot cover trading costs no matter what the model says.
+ATR_PCT_MIN = 0.0015
 
 
 @dataclass(frozen=True)
@@ -36,11 +44,19 @@ class BarrierOutcome:
     realized_ret: float  # exit_price / entry_price - 1
 
 
-def label_candidate(frame: pd.DataFrame, signal_i: int) -> BarrierOutcome | None:
+def label_candidate(
+    frame: pd.DataFrame,
+    signal_i: int,
+    *,
+    tp_mult: float = TP_ATR_MULT,
+    sl_mult: float = SL_ATR_MULT,
+    atr_pct_min: float = ATR_PCT_MIN,
+) -> BarrierOutcome | None:
     """Label one candidate at position `signal_i` of an indicator frame.
 
     Requires columns open/high/low/close and atr14. Returns None when there
-    are not enough future bars for entry + full horizon.
+    are not enough future bars for entry + full horizon, or when atr_pct at
+    the signal bar is below `atr_pct_min` (barriers too narrow to trade).
     """
     entry_i = signal_i + 1
     last_i = entry_i + HORIZON_BARS - 1
@@ -50,8 +66,11 @@ def label_candidate(frame: pd.DataFrame, signal_i: int) -> BarrierOutcome | None
     entry = float(frame["open"].iloc[entry_i])
     if not np.isfinite(atr) or atr <= 0 or not np.isfinite(entry) or entry <= 0:
         return None
-    upper = entry + TP_ATR_MULT * atr
-    lower = entry - SL_ATR_MULT * atr
+    atr_pct = float(frame["atr_pct"].iloc[signal_i])
+    if atr_pct_min > 0 and (not np.isfinite(atr_pct) or atr_pct < atr_pct_min):
+        return None
+    upper = entry + tp_mult * atr
+    lower = entry - sl_mult * atr
 
     highs = frame["high"].to_numpy()[entry_i : last_i + 1]
     lows = frame["low"].to_numpy()[entry_i : last_i + 1]

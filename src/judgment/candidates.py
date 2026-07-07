@@ -40,6 +40,30 @@ STRICT_THRESHOLDS = {
     "volume_ratio_min": 0.7,
 }
 
+# "expanded" pool (owner decision 2026-07-07): a ~1.6x relaxation of the
+# strict spread/range gates, defined HERE (not ported from the old project's
+# expanded mode, whose exact thresholds we chose not to inherit). Purpose:
+# grow the candidate pool several-fold so the judgment model has more to
+# learn from; the in-pool base win rate is expected to drop, which is fine --
+# the model's job is ranking within the pool.
+EXPANDED_THRESHOLDS = {
+    "fast_spread_max": 0.0045,
+    "full_spread_max": 0.0088,
+    "fast_slow_gap_max": 0.0056,
+    "full_ratio_min48_max": 1.80,
+    "pre_range48_max": 0.048,
+    "pre_range168_max": 0.110,
+    "drawdown24_max": 0.012,
+    "ext_up_min": -0.0030,
+    "ext_up_max": 0.0120,
+    "order_score_min": 3,
+    "slow_slope_abs_max": 0.0015,
+    "zero_volume96_max": 0.02,
+    "volume_ratio_min": 0.5,
+}
+
+THRESHOLD_PRESETS = {"strict": STRICT_THRESHOLDS, "expanded": EXPANDED_THRESHOLDS}
+
 
 def add_indicators(frame: pd.DataFrame) -> pd.DataFrame:
     """Add EMAs, ATR, volume stats and strict-rule metrics (no lookahead)."""
@@ -108,9 +132,12 @@ def add_indicators(frame: pd.DataFrame) -> pd.DataFrame:
     return out.replace([np.inf, -np.inf], np.nan)
 
 
-def strict_mask(enriched: pd.DataFrame) -> pd.Series:
-    """The old strict rule, minus its lookahead (future_*) filters."""
-    t = STRICT_THRESHOLDS
+def strict_mask(enriched: pd.DataFrame, mode: str = "strict") -> pd.Series:
+    """The old strict rule, minus its lookahead (future_*) filters.
+
+    `mode` selects a threshold preset: "strict" or "expanded".
+    """
+    t = THRESHOLD_PRESETS[mode]
     return (
         (enriched["fast_spread"] <= t["fast_spread_max"])
         & (enriched["full_spread"] <= t["full_spread_max"])
@@ -127,7 +154,9 @@ def strict_mask(enriched: pd.DataFrame) -> pd.Series:
     )
 
 
-def scan_candidates(enriched: pd.DataFrame, *, horizon_bars: int = 72) -> list[int]:
+def scan_candidates(
+    enriched: pd.DataFrame, *, horizon_bars: int = 72, mode: str = "strict"
+) -> list[int]:
     """Return deduplicated candidate bar indices (positions in `enriched`).
 
     Requires `horizon_bars + 1` future bars so triple-barrier labeling is
@@ -135,7 +164,7 @@ def scan_candidates(enriched: pd.DataFrame, *, horizon_bars: int = 72) -> list[i
     """
     if len(enriched) < WARMUP_BARS + horizon_bars + 2:
         return []
-    mask = strict_mask(enriched).fillna(False)
+    mask = strict_mask(enriched, mode).fillna(False)
     idx = np.flatnonzero(mask.to_numpy())
     idx = idx[(idx >= WARMUP_BARS) & (idx + horizon_bars + 1 < len(enriched))]
     if len(idx) == 0:

@@ -54,8 +54,8 @@ LGB_PARAMS = {
 PURGE_WINDOW = pd.Timedelta(hours=18.25)  # 73 x 15m bars: outcome window length
 
 
-def load_splits() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    data = pd.read_csv(DATASET_PATH, parse_dates=["signal_time"])
+def load_splits(dataset_path: Path = DATASET_PATH) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    data = pd.read_csv(dataset_path, parse_dates=["signal_time"])
     data = data.sort_values("signal_time").reset_index(drop=True)
     dev = data[data["signal_time"] < HOLDOUT_START - PURGE_WINDOW].reset_index(drop=True)
     holdout = data[data["signal_time"] >= HOLDOUT_START].reset_index(drop=True)
@@ -134,14 +134,17 @@ def baseline_prob(scaler: StandardScaler, model: LogisticRegression, frame: pd.D
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--eval-holdout", action="store_true", help="Evaluate the frozen holdout (run once).")
+    parser.add_argument("--data", type=Path, default=DATASET_PATH, help="Dataset CSV from build_dataset.")
+    parser.add_argument("--tag", default="p2b", help="Output file prefix, e.g. p2b_v2_strict.")
     args = parser.parse_args()
 
-    train, val, holdout = load_splits()
+    train, val, holdout = load_splits(args.data)
     model = train_model(train, val)
     scaler, base = train_baseline(train)
 
     val_prob = model.predict(val[FEATURE_COLUMNS], num_iteration=model.best_iteration)
     results = {
+        "dataset": str(args.data),
         "holdout_start": str(HOLDOUT_START),
         "splits": {
             "train": {"n": len(train), "range": [str(train["signal_time"].min()), str(train["signal_time"].max())]},
@@ -172,8 +175,8 @@ def main() -> int:
         )
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    importance.to_csv(OUTPUT_DIR / "p2b_feature_importance.csv", index=False)
-    (OUTPUT_DIR / "p2b_metrics.json").write_text(
+    importance.to_csv(OUTPUT_DIR / f"{args.tag}_feature_importance.csv", index=False)
+    (OUTPUT_DIR / f"{args.tag}_metrics.json").write_text(
         json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     print(json.dumps(results, ensure_ascii=False, indent=2))

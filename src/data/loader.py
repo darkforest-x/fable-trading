@@ -17,6 +17,9 @@ from pathlib import Path
 import pandas as pd
 
 CACHE_DIR = Path(__file__).resolve().parents[2] / "data" / "kline_cache"
+# Freshly fetched history (src.data.fetch_okx) lives beside the old cache and
+# is merged per (source, symbol); load_series dedupes on open_time.
+FETCHED_DIR = Path(__file__).resolve().parents[2] / "data" / "kline_fetched"
 CACHE_PATTERN = re.compile(
     r"^(?:(?P<prefix>gate|okx)_)?(?P<symbol>.+?)_(?P<bar>5m|15m)_(?P<rows>[0-9]+)(?:_latest)?\.csv$"
 )
@@ -31,10 +34,19 @@ BLOCKED_BASES = {
 OHLCV_COLUMNS = ["open_time", "open", "high", "low", "close", "volume"]
 
 
-def list_series(cache_dir: Path = CACHE_DIR, *, bar: str = "15m") -> dict[tuple[str, str], list[Path]]:
-    """Group cache CSVs by (market_source, symbol) for the given bar."""
+def list_series(cache_dir: Path | None = None, *, bar: str = "15m") -> dict[tuple[str, str], list[Path]]:
+    """Group cache CSVs by (market_source, symbol) for the given bar.
+
+    Scans both the old-project cache and data/kline_fetched when `cache_dir`
+    is None; a broken symlink (old cache unavailable) is silently skipped.
+    """
+    dirs = [cache_dir] if cache_dir is not None else [CACHE_DIR, FETCHED_DIR]
+    paths: list[Path] = []
+    for d in dirs:
+        if d.is_dir():
+            paths.extend(d.glob("*.csv"))
     groups: dict[tuple[str, str], list[Path]] = {}
-    for path in sorted(cache_dir.glob("*.csv")):
+    for path in sorted(paths):
         matched = CACHE_PATTERN.match(path.name)
         if matched is None or matched.group("bar") != bar:
             continue
@@ -75,7 +87,7 @@ def load_series(paths: list[Path]) -> pd.DataFrame:
 
 
 def iter_series(
-    cache_dir: Path = CACHE_DIR,
+    cache_dir: Path | None = None,
     *,
     bar: str = "15m",
     min_bars: int = 500,
