@@ -10,26 +10,18 @@
 
 ## 排序后的下一步（期望价值从高到低）
 
-### 1. purged CV / embargo 泄漏修正（单变量改进，先做这个）
+### ~~1. purged CV / embargo 泄漏修正~~（作废，2026-07-08 核实已实现）
 
-- **为什么**：triple-barrier 标签有 72 根 15m 的前向窗口，train/val 时间边界附近的
-  训练样本标签窗口伸进了 val 区间，存在轻微泄漏。修正后指标更保守、更可信——
-  在把最后一发 holdout 子弹打出去之前，必须确认弹道没有虚高。
-- **怎么做**：只改 `src/judgment/train.py` 的切分逻辑——每个序列丢弃标签窗口
-  与 val 起点重叠的训练样本（embargo = 标签 horizon = 72 根）。不动 build_dataset、
-  不动特征、不动模型参数。对两个池分别重跑，tag 用 `p2b_v2_strict_purged` /
-  `p2b_v2_expanded_purged`，不加 `--eval-holdout`。
-- **完成的样子**：新旧四组指标同表对照追加进 `analysis/p2b_v2_report.md`。
-  若 expanded 仍满足 p<0.01 且 top-decile 净收益>0 → 进入第 2 步；
-  若指标塌了 → 如实记录，回到特征迭代，**不要**为了指标好看撤销 embargo。
-- **要告诉执行模型的话**：embargo 是按"每序列的 bar 序"算的，不是按全局时间戳直接减
-  ——不同币种的 bar 是对齐的 15m 网格，但要防止序列内索引错位；写完先在一个小池上
-  冒烟验证样本数变化是否合理（应减少约 val 边界附近的几十个样本，不应减半）。
+原以为 train/val 边界存在标签窗口泄漏——**读代码核实后确认 purge 已在
+`src/judgment/train.py` 实现**（`PURGE_WINDOW = 18.25h` = 73 根 outcome 窗口，
+dev/holdout 与 train/val 两个边界均清除；与 `labeling.py` 的 entry=i+1、
+HORIZON_BARS=72 精确对应）。v2 报告中的全部指标本来就是泄漏修正后的数字。
+教训见 `docs/learnings/grep-before-planning-fixes.md`。
 
-### 2. holdout 一次性评估（需项目所有者在对话中明确批准后才能执行）
+### 2. holdout 一次性评估（现在的第一优先级；需项目所有者在对话中明确批准后才能执行）
 
 - **为什么**：这是 2b 的正式验收。v1 已消耗过一次 holdout，v2 每个配置只许评一次。
-- **怎么做**：仅对通过第 1 步的配置跑
+- **怎么做**：
   `python3 -m src.judgment.train --data data/judgment_dataset_v2_expanded.csv --tag p2b_v2_expanded_final --eval-holdout`。
 - **完成的样子**：holdout AUC / p / top-decile 净收益写入报告，明确判定
   "2b 验收通过/未通过"。通过 → 阶段 3；未通过 → 回 val 迭代，holdout 不许再碰。
@@ -57,8 +49,9 @@
 
 ## 明天开工的第一条消息（可直接粘贴）
 
-> 读 CLAUDE.md、HANDOFF.md、analysis/p2b_v2_report.md，然后执行 HANDOFF 第 1 步
-> （purged CV/embargo），完成后汇报新旧指标对照，不要碰 holdout。
+> 读 CLAUDE.md、HANDOFF.md、analysis/p2b_v2_report.md。当前待决事项：是否批准
+> expanded × v2 的 holdout 一次性评估（HANDOFF 第 2 步）。批准后执行并如实报告；
+> 未批准则按第 3 步准备阶段 3 回测框架的骨架，仍不碰 holdout。
 
 ## 本仓库的知识地图
 

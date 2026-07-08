@@ -73,15 +73,18 @@ python3 -m src.judgment.train --data data/judgment_dataset_v2_expanded.csv --tag
   PROJECT_PLAN 规定 v2 仅允许最终对照时各评一次，何时动用由项目所有者决定；
 - **净期望仍然薄**（~0.10%/笔）：滑点若比 0.2% 假设差，利润可被吃掉。
   阶段 3 带完整成本的回测才是试金石；
-- **标签窗口重叠泄漏未处理**：triple-barrier 前向窗口在 train/val 边界附近存在重叠，
-  purged CV + embargo 是下一个单变量改进候选（预期让指标更保守、更可信）；
+- ~~标签窗口重叠泄漏未处理~~ **勘误（2026-07-08 核实）**：purge/embargo 已在
+  `train.py` 实现（`PURGE_WINDOW` = 73 根 outcome 窗口，dev/holdout 与 train/val
+  两个边界均清除，与 `labeling.py` 的 entry=i+1、HORIZON_BARS=72 精确对应）。
+  本报告最初版本误称泄漏未处理——上表全部指标本来就是泄漏修正后的数字；
 - 本轮同时改了障碍、数据、池三个变量，是项目所有者 2026-07-07 批准的打包决策
   （记录于 PROJECT_PLAN 2b-v2 节），此后恢复单变量纪律。
 
 ## 6. 下一步选项（待项目所有者决策）
 
-- **A（推荐）**：先做 purged CV/embargo 单变量改进，指标若仍达标，再动用 expanded 池的
-  holdout 一次性评估；通过则进阶段 3 回测框架；
-- **B**：直接用 expanded × v2 做 holdout 一次性评估（更快，但把最后一发子弹打在
-  未做泄漏修正的配置上）；
-- **C**：继续在 val 上做特征/参数单变量迭代，暂不动 holdout。
+（原选项 A"先做 purged CV"作废——核实后确认 purge 已实现，见第 5 节勘误。）
+
+- **A（推荐）**：用 expanded × v2 做 holdout 一次性评估——该配置已通过 val 全部验收
+  且泄漏修正已确认在位；通过则进阶段 3 回测框架；
+- **B**：继续在 val 上做特征/参数单变量迭代，暂不动 holdout（更保守，但 val 只有
+  1 598 样本，继续迭代的过拟合风险随次数上升）。
