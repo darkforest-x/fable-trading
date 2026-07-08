@@ -21,7 +21,7 @@ CACHE_DIR = Path(__file__).resolve().parents[2] / "data" / "kline_cache"
 # is merged per (source, symbol); load_series dedupes on open_time.
 FETCHED_DIR = Path(__file__).resolve().parents[2] / "data" / "kline_fetched"
 CACHE_PATTERN = re.compile(
-    r"^(?:(?P<prefix>gate|okx)_)?(?P<symbol>.+?)_(?P<bar>5m|15m)_(?P<rows>[0-9]+)(?:_latest)?\.csv$"
+    r"^(?:(?P<prefix>gate|okx)_)?(?P<symbol>.+?)_(?P<bar>5m|15m|30m|1H)_(?P<rows>[0-9]+)(?:_latest)?\.csv$"
 )
 # Ported from the old project's build_strict_dense_review_pack.py: stablecoins,
 # gold and tokenized stocks are excluded from candidate mining.

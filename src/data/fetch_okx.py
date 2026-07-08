@@ -166,7 +166,11 @@ def main() -> int:
     parser.add_argument("--symbols", nargs="*", default=DEFAULT_SYMBOLS)
     parser.add_argument("--days", type=int, default=400)
     parser.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
+    parser.add_argument("--bar", default="15m", choices=("5m", "15m", "30m", "1H"),
+                        help="candle timeframe (filenames and API both follow it)")
     args = parser.parse_args()
+    global BAR
+    BAR = args.bar
     FETCH_DIR.mkdir(parents=True, exist_ok=True)
     start_ms = int((datetime.now(timezone.utc) - timedelta(days=args.days)).timestamp() * 1000)
     pending: list[str] = []

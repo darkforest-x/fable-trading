@@ -132,3 +132,106 @@ def label_candidate_trailing(
         run_max = max(run_max, float(highs[j]))
     ret = float(frame["close"].iloc[last_i]) / entry - 1
     return BarrierOutcome(int(ret > 0), "timeout", horizon, entry, ret)
+
+
+def _entry_context(frame: pd.DataFrame, signal_i: int, horizon: int, atr_pct_min: float):
+    """Shared guards for exit-variant labelers; None when the trade is untakeable."""
+    entry_i = signal_i + 1
+    last_i = entry_i + horizon - 1
+    if last_i >= len(frame):
+        return None
+    atr = float(frame["atr14"].iloc[signal_i])
+    entry = float(frame["open"].iloc[entry_i])
+    if not np.isfinite(atr) or atr <= 0 or not np.isfinite(entry) or entry <= 0:
+        return None
+    atr_pct = float(frame["atr_pct"].iloc[signal_i])
+    if atr_pct_min > 0 and (not np.isfinite(atr_pct) or atr_pct < atr_pct_min):
+        return None
+    sl = slice(entry_i, last_i + 1)
+    return (entry, atr, frame["high"].to_numpy()[sl], frame["low"].to_numpy()[sl],
+            frame["open"].to_numpy()[sl], float(frame["close"].iloc[last_i]))
+
+
+def label_candidate_scaled(
+    frame: pd.DataFrame,
+    signal_i: int,
+    *,
+    tp1_mult: float = 2.5,
+    trail_mult: float = 3.0,
+    sl_mult: float = 2.0,
+    horizon: int = HORIZON_BARS,
+    atr_pct_min: float = ATR_PCT_MIN,
+) -> BarrierOutcome | None:
+    """H1 scaled exit: half the position banks at entry + tp1_mult x ATR; the
+    remainder trails trail_mult x ATR below the running high (seeded at the
+    TP1 price). Hard stop entry - sl_mult x ATR protects the whole position
+    until TP1. Conservative intra-bar ordering: the stop is always checked
+    BEFORE the target within a bar, and the trailing stop for bar j uses the
+    running high up to bar j-1. realized_ret is the half-and-half blend.
+    """
+    ctx = _entry_context(frame, signal_i, horizon, atr_pct_min)
+    if ctx is None:
+        return None
+    entry, atr, highs, lows, opens, timeout_close = ctx
+    hard_stop = entry - sl_mult * atr
+    tp1 = entry + tp1_mult * atr
+    ret1: float | None = None  # booked half, set once TP1 fills
+    run_max = tp1
+    for j in range(horizon):
+        if ret1 is None:
+            if lows[j] <= hard_stop:  # stop first: conservative
+                exit_price = min(hard_stop, float(opens[j]))
+                ret = exit_price / entry - 1
+                return BarrierOutcome(0, "sl", j + 1, entry, ret)
+            if highs[j] >= tp1:
+                ret1 = tp1 / entry - 1
+            continue  # phase-2 trailing starts on the NEXT bar (conservative)
+        stop = max(run_max - trail_mult * atr, hard_stop)
+        if lows[j] <= stop:
+            exit_price = min(stop, float(opens[j]))
+            ret = 0.5 * ret1 + 0.5 * (exit_price / entry - 1)
+            return BarrierOutcome(int(ret > 0), "scaled", j + 1, entry, ret)
+        run_max = max(run_max, float(highs[j]))
+    if ret1 is None:
+        ret = timeout_close / entry - 1
+        return BarrierOutcome(int(ret > 0), "timeout", horizon, entry, ret)
+    ret = 0.5 * ret1 + 0.5 * (timeout_close / entry - 1)
+    return BarrierOutcome(int(ret > 0), "scaled_timeout", horizon, entry, ret)
+
+
+def label_candidate_breakeven(
+    frame: pd.DataFrame,
+    signal_i: int,
+    *,
+    tp_mult: float = 5.0,
+    sl_mult: float = 2.0,
+    be_trigger: float = 1.5,
+    horizon: int = HORIZON_BARS,
+    atr_pct_min: float = ATR_PCT_MIN,
+) -> BarrierOutcome | None:
+    """H2 breakeven shift: classic TP/SL, but once price has traded
+    be_trigger x ATR in favor the stop moves to the entry price. Conservative
+    intra-bar ordering: the CURRENT stop is checked before the trigger or the
+    target inside the same bar, so a spike-up-then-down bar can't grant the
+    breakeven protection retroactively.
+    """
+    ctx = _entry_context(frame, signal_i, horizon, atr_pct_min)
+    if ctx is None:
+        return None
+    entry, atr, highs, lows, opens, timeout_close = ctx
+    upper = entry + tp_mult * atr
+    trigger = entry + be_trigger * atr
+    stop = entry - sl_mult * atr
+    armed = False
+    for j in range(horizon):
+        if lows[j] <= stop:  # current stop first: conservative
+            exit_price = min(stop, float(opens[j]))
+            ret = exit_price / entry - 1
+            return BarrierOutcome(int(ret > 0), "be" if armed else "sl", j + 1, entry, ret)
+        if highs[j] >= upper:
+            return BarrierOutcome(1, "tp", j + 1, entry, upper / entry - 1)
+        if not armed and highs[j] >= trigger:
+            armed = True
+            stop = entry
+    ret = timeout_close / entry - 1
+    return BarrierOutcome(int(ret > 0), "timeout", horizon, entry, ret)
