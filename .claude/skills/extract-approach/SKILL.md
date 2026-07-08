@@ -1,13 +1,3 @@
-# extract-approach skill（待安装）
-
-> 安装方法（需项目所有者执行，Claude 的自动权限不允许自行创建 skill）：
->
-> ```bash
-> mkdir -p .claude/skills/extract-approach
-> cp docs/extract-approach-skill.md .claude/skills/extract-approach/SKILL.md
-> # 然后删掉本说明块和这段注释，保留 frontmatter 起的正文
-> ```
-
 ---
 name: extract-approach
 description: 在解决非平凡问题（修复 bug、架构决策、反直觉实验结论）之后，把解决思路蒸馏成一条 learnings 笔记写入 docs/learnings/。CLAUDE.md 的 learning law 要求每次非平凡解决后自动执行本 skill。
