@@ -90,3 +90,8 @@ MacBook (M4)                          VPS 103.214.174.58 (Debian12)
 3. 成功指标 = 扣成本净收益 + 显著性，AUC 只是参考；
 4. 实验只做加法（新模块/新 tag），不改已验证路径的默认行为；
 5. 一切结论落在 report/learnings 里，"没写下来的工作等于没做"。
+
+## 图解（GitHub 直接可看）
+
+- **LightGBM 判断层十步流水线**：![](diagrams/lightgbm_pipeline.svg)
+- **triple-barrier 标签解剖**：![](diagrams/triple_barrier.svg)
