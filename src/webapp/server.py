@@ -14,6 +14,7 @@ Run:  python3 -m uvicorn src.webapp.server:app --port 8642
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import numpy as np
@@ -22,10 +23,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 
 from src.backtest.run import (
-    ACCEPT_START, BASE_COST, COST_SWEEP, DEFAULT_DATA, MAX_CONCURRENT,
+    ACCEPT_START, BASE_COST, DEFAULT_DATA, MAX_CONCURRENT,
     build_signals, window_metrics,
 )
-from src.data.loader import list_series, load_series
+from src.data.loader import FETCHED_DIR, list_series, load_series
 
 PROJECT_DIR = Path(__file__).resolve().parents[2]
 OUTPUT_DIR = PROJECT_DIR / "analysis" / "output"
@@ -34,6 +35,9 @@ SCORE_META = PROJECT_DIR / "data" / "scored_signals_meta.json"
 TRADES_CSV = OUTPUT_DIR / "p3_trades.csv"
 
 EMA_SPANS = (8, 13, 21, 34, 55, 144, 200)  # the judgment layer's MA set
+CACHE_COLUMNS = ["source", "symbol", "signal_time", "entry_time", "exit_time",
+                 "score", "outcome", "realized_ret", "entry_price", "label"]
+PF_COST_GRID = [round(c, 4) for c in np.arange(0.001, 0.00501, 0.0005)]
 
 app = FastAPI(title="fable-trading dashboard")
 
@@ -53,17 +57,19 @@ def scored_signals() -> tuple[pd.DataFrame, float]:
     """All candidates with model scores; built once, cached on disk."""
     global _signals, _threshold
     if _signals is None:
+        rebuild = True
         if SCORE_CACHE.exists() and SCORE_META.exists():
-            _signals = pd.read_csv(SCORE_CACHE, parse_dates=["signal_time", "entry_time", "exit_time"])
-            _threshold = json.loads(SCORE_META.read_text())["threshold"]
-        else:
+            cached = pd.read_csv(SCORE_CACHE, parse_dates=["signal_time", "entry_time", "exit_time"])
+            if set(CACHE_COLUMNS) <= set(cached.columns):  # stale schema -> rebuild
+                _signals = cached
+                _threshold = json.loads(SCORE_META.read_text())["threshold"]
+                rebuild = False
+        if rebuild:
             print("scoring signals (first boot, ~10s)...", flush=True)
             signals, threshold = build_signals(DEFAULT_DATA)
-            keep = ["source", "symbol", "signal_time", "entry_time", "exit_time",
-                    "score", "outcome", "realized_ret", "label"]
-            signals[keep].to_csv(SCORE_CACHE, index=False)
+            signals[CACHE_COLUMNS].to_csv(SCORE_CACHE, index=False)
             SCORE_META.write_text(json.dumps({"threshold": threshold}))
-            _signals, _threshold = signals[keep], threshold
+            _signals, _threshold = signals[CACHE_COLUMNS], threshold
     return _signals, float(_threshold)
 
 
@@ -76,12 +82,40 @@ def trades() -> pd.DataFrame:
     return _trades
 
 
+def _equity_points(w: pd.DataFrame, cost: float) -> tuple[list[dict], list[dict]]:
+    """Equity (% of capital) and underwater drawdown, one point per exit ts."""
+    s = w.sort_values("exit_time")
+    net = s["gross_ret"].to_numpy() - cost
+    eq: dict[int, float] = {}
+    for ts, v in zip(s["exit_time"], np.cumsum(net)):
+        eq[int(ts.timestamp())] = round(100 * v / MAX_CONCURRENT, 4)
+    points = [{"time": t, "value": v} for t, v in sorted(eq.items())]
+    peak, dd = 0.0, []
+    for p in points:
+        peak = max(peak, p["value"])
+        dd.append({"time": p["time"], "value": round(p["value"] - peak, 4)})
+    return points, dd
+
+
 @app.get("/api/overview")
 def overview() -> dict:
     p2b = _load_json("p2b_v2_expanded_final_metrics.json")
     p3 = _load_json("p3_backtest.json")
     hold = p2b.get("holdout", {})
     base = p3.get("cost_sweep_accept_window", {}).get("0.003", {})
+
+    n_files, n_rows = 0, 0
+    if FETCHED_DIR.is_dir():
+        for f in FETCHED_DIR.glob("okx_*_15m_*.csv"):
+            m = re.search(r"_(\d+)\.csv$", f.name)
+            if m:
+                n_files += 1
+                n_rows += int(m.group(1))
+    signals, threshold = scored_signals()
+    t = trades()
+    accept = t[t["entry_time"] >= ACCEPT_START]
+    spark, _ = _equity_points(accept, BASE_COST)
+
     return {
         "stages": [
             {"id": "P0", "name": "P0 信号检验", "status": "done",
@@ -101,6 +135,13 @@ def overview() -> dict:
             {"label": "回测 PF（0.3% 成本）", "value": "%.2f" % base.get("profit_factor", 0), "sub": "验收线 1.3，未达标"},
             {"label": "盈亏平衡成本", "value": "≈0.30%", "sub": "edge 与成本同数量级"},
         ],
+        "coverage": [
+            {"label": "K 线数据", "value": f"{n_rows / 1e6:.1f}M", "sub": f"{n_files} 个币种 × 400 天 15m（新拉取）"},
+            {"label": "候选信号", "value": f"{len(signals):,}", "sub": "expanded 池，13 个月"},
+            {"label": "入场阈值", "value": f"{threshold:.3f}", "sub": "val 分数 90 分位，事前定死"},
+            {"label": "回测成交", "value": f"{len(t):,}", "sub": f"验收窗口 {len(accept)} 笔"},
+        ],
+        "sparkline": spark,
         "acceptance": p3.get("acceptance_check_base_cost", {}),
         "next": "路线 D（已按推荐执行）：maker 成本模型 + 前向数据积累；验收窗口禁止参数级调优",
     }
@@ -109,28 +150,48 @@ def overview() -> dict:
 @app.get("/api/backtest")
 def backtest(cost: float = BASE_COST) -> dict:
     t = trades()
-    accept = t[t["entry_time"] >= ACCEPT_START]
-    windows = {"accept": accept, "full": t}
-    out = {"cost": cost, "sweep": _load_json("p3_backtest.json").get("cost_sweep_accept_window", {})}
-    for name, w in windows.items():
+    signals, _ = scored_signals()
+    accept_t = t[t["entry_time"] >= ACCEPT_START]
+    out: dict = {"cost": cost,
+                 "pf_curve": [{"cost": c, "pf": window_metrics(accept_t, c).get("profit_factor")}
+                              for c in PF_COST_GRID]}
+    for name, w, sig in (
+        ("accept", accept_t, signals[signals["entry_time"] >= ACCEPT_START]),
+        ("full", t, signals),
+    ):
         m = window_metrics(w, cost)
-        s = w.sort_values("exit_time")
-        net = s["gross_ret"].to_numpy() - cost
-        # one point per exit timestamp (lightweight-charts needs strictly
-        # ascending times); simultaneous exits collapse to the last cumsum
-        eq: dict[int, float] = {}
-        for ts, v in zip(s["exit_time"], np.cumsum(net)):
-            eq[int(ts.timestamp())] = round(100 * v / MAX_CONCURRENT, 4)
-        m["equity"] = [{"time": t, "value": v} for t, v in sorted(eq.items())]
+        m["equity"], m["drawdown"] = _equity_points(w, cost)
+
+        s = w.copy()
+        s["net"] = s["gross_ret"] - cost
+        month = s.groupby(s["exit_time"].dt.strftime("%Y-%m"))["net"].sum()
+        m["monthly"] = [{"month": k, "value": round(100 * v / MAX_CONCURRENT, 4)}
+                        for k, v in month.items()]
+
+        by_sym = s.groupby("symbol")["net"].agg(["sum", "size"]).sort_values("sum")
+        rows = [{"symbol": i, "net": round(100 * r["sum"], 3), "n": int(r["size"])}
+                for i, r in by_sym.iterrows()]
+        m["per_symbol"] = {"best": rows[-8:][::-1], "worst": rows[:8]}
+
+        # score-decile mean net over ALL candidates in window (model ranking power)
+        d = sig.copy()
+        d["net"] = d["realized_ret"] - cost
+        d["decile"] = (d["score"].rank(pct=True) * 10).clip(upper=9.999).astype(int) + 1
+        dec = d.groupby("decile")["net"].agg(["mean", "size"])
+        m["decile"] = [{"decile": int(i), "mean_net": round(100 * r["mean"], 4), "n": int(r["size"])}
+                       for i, r in dec.iterrows()]
         out[name] = m
     return out
 
 
 @app.get("/api/trades")
-def trade_rows(window: str = "accept", limit: int = 500, cost: float = BASE_COST) -> list[dict]:
+def trade_rows(window: str = "accept", limit: int = 1000, cost: float = BASE_COST,
+               symbol: str = "") -> list[dict]:
     t = trades()
     if window == "accept":
         t = t[t["entry_time"] >= ACCEPT_START]
+    if symbol:
+        t = t[t["symbol"] == symbol]
     t = t.sort_values("entry_time", ascending=False).head(limit).copy()
     t["net_ret"] = t["gross_ret"] - cost
     t["entry_time"] = t["entry_time"].astype(str)
@@ -152,23 +213,25 @@ def symbols() -> list[dict]:
             "n_trades": int(traded.get((source, symbol), 0)),
             "last_signal": str(g["signal_time"].max()),
         })
-    rows.sort(key=lambda r: -r["n_trades"])
+    rows.sort(key=lambda r: (-r["n_trades"], -r["n_eligible"]))
     return rows
 
 
 @app.get("/api/chart/{source}/{symbol}")
-def chart(source: str, symbol: str, bars: int = 1500) -> dict:
+def chart(source: str, symbol: str, bars: int = 3000) -> dict:
     groups = list_series()
     key = (source, symbol)
     if key not in groups:
         raise HTTPException(404, f"unknown series {source}:{symbol}")
-    frame = load_series(groups[key]).tail(max(bars, 300)).reset_index(drop=True)
+    frame = load_series(groups[key]).tail(min(max(bars, 300), 40000)).reset_index(drop=True)
     if frame.empty:
         raise HTTPException(404, "empty series")
     ts = (frame["open_time"].astype("int64") // 10**9).astype(int)
     candles = [
-        {"time": int(t), "open": float(o), "high": float(h), "low": float(l), "close": float(c)}
-        for t, o, h, l, c in zip(ts, frame["open"], frame["high"], frame["low"], frame["close"])
+        {"time": int(t), "open": float(o), "high": float(h), "low": float(l),
+         "close": float(c), "volume": float(v) if np.isfinite(v) else 0.0}
+        for t, o, h, l, c, v in zip(ts, frame["open"], frame["high"], frame["low"],
+                                    frame["close"], frame["volume"])
     ]
     emas = {}
     for span in EMA_SPANS:
@@ -180,19 +243,19 @@ def chart(source: str, symbol: str, bars: int = 1500) -> dict:
     sig = signals[(signals["source"] == source) & (signals["symbol"] == symbol)
                   & (signals["signal_time"] >= t0)]
     t = trades()
-    traded_keys = set(zip(
-        t[(t["source"] == source) & (t["symbol"] == symbol)]["entry_time"],
-    ))
+    traded_times = set(t[(t["source"] == source) & (t["symbol"] == symbol)]["entry_time"])
     markers = []
     for row in sig.itertuples():
-        is_trade = (row.entry_time,) in traded_keys
         markers.append({
             "time": int(pd.Timestamp(row.signal_time).timestamp()),
+            "entry_time": int(pd.Timestamp(row.entry_time).timestamp()),
+            "exit_time": int(pd.Timestamp(row.exit_time).timestamp()),
             "eligible": bool(row.score >= threshold),
-            "traded": bool(is_trade),
+            "traded": bool(row.entry_time in traded_times),
             "score": round(float(row.score), 4),
             "outcome": row.outcome,
             "ret": round(float(row.realized_ret), 5),
+            "entry_price": round(float(row.entry_price), 8),
         })
     return {"candles": candles, "emas": emas, "markers": markers, "threshold": round(threshold, 4)}
 

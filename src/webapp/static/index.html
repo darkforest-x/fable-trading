@@ -18,16 +18,28 @@
 </header>
 
 <main>
+  <!-- ============ 总览 ============ -->
   <section id="view-overview" class="view">
+    <div id="verdict-banner" class="banner"></div>
     <div id="stages" class="stage-row"></div>
-    <div id="tiles" class="tile-row"></div>
+    <div class="two-col">
+      <div class="panel">
+        <h2>关键指标</h2>
+        <div id="tiles" class="tile-grid"></div>
+      </div>
+      <div class="panel">
+        <h2>验收窗口净值 <span class="unit">（0.3% 成本）</span></h2>
+        <div id="spark-chart" class="chart short"></div>
+        <ul id="acceptance" class="check-list"></ul>
+      </div>
+    </div>
     <div class="panel">
-      <h2>阶段 3 验收对照（基准成本 0.3%）</h2>
-      <ul id="acceptance" class="check-list"></ul>
-      <p id="next-note" class="note"></p>
+      <h2>数据与信号规模</h2>
+      <div id="coverage" class="tile-grid cols-4"></div>
     </div>
   </section>
 
+  <!-- ============ 回测 ============ -->
   <section id="view-backtest" class="view hidden">
     <div class="controls">
       <div class="seg" id="cost-seg">
@@ -36,44 +48,101 @@
         <button data-cost="0.004">成本 0.4%</button>
       </div>
       <div class="seg" id="window-seg">
-        <button data-window="accept" class="active">验收窗口（≥2026-05-04）</button>
+        <button data-window="accept" class="active">验收窗口</button>
         <button data-window="full">全期（含 in-sample）</button>
       </div>
+      <span class="note">验收窗口曾被 2b holdout 消耗一次；全期含模型训练期，仅作对照。</span>
     </div>
-    <p class="note">验收窗口曾被 2b holdout 评估消耗一次（已声明）；全期数字含模型训练期，仅作对照不作证据。</p>
     <div id="bt-tiles" class="tile-row"></div>
+
     <div class="panel">
-      <h2>净值曲线 <span class="unit">（净收益 % 对账户资金，出场时点记账）</span></h2>
+      <h2>净值与回撤 <span class="unit">（净收益 % 对账户资金，出场时点记账）</span></h2>
       <div id="equity-chart" class="chart"></div>
+      <div id="dd-chart" class="chart mini"></div>
     </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <h2>分数十分位 → 平均净收益 <span class="unit">（候选全集，模型排序能力）</span></h2>
+        <div id="decile-bars" class="hbar-wrap"></div>
+      </div>
+      <div class="panel">
+        <h2>PF ↔ 成本曲线 <span class="unit">（验收窗口，虚线 = 验收线 1.3）</span></h2>
+        <div id="pf-chart" class="chart short"></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <h2>月度净收益 <span class="unit">（% 对资金）</span></h2>
+        <div id="monthly-bars" class="hbar-wrap"></div>
+      </div>
+      <div class="panel">
+        <h2>分币种盈亏 <span class="unit">（净收益 %·名义，前后各 8）</span></h2>
+        <div id="symbol-bars" class="hbar-wrap two-col-inner"></div>
+      </div>
+    </div>
+
     <div class="panel">
       <h2>成交明细 <span class="unit" id="trades-count"></span></h2>
+      <div class="controls">
+        <input id="trade-filter" placeholder="筛选币种，如 BTC" autocomplete="off">
+        <div class="seg" id="outcome-seg">
+          <button data-outcome="" class="active">全部</button>
+          <button data-outcome="tp">止盈</button>
+          <button data-outcome="sl">止损</button>
+          <button data-outcome="timeout">超时</button>
+        </div>
+        <span class="note">点击任意行 → 跳到该笔交易的 K 线位置</span>
+      </div>
       <div class="table-wrap">
         <table id="trades-table">
-          <thead><tr><th>入场时间</th><th>币种</th><th>分数</th><th>结果</th><th class="num">毛收益</th><th class="num">净收益</th></tr></thead>
+          <thead><tr>
+            <th data-sort="entry_time" class="sortable">入场时间 ↓</th>
+            <th>币种</th>
+            <th data-sort="score" class="sortable num">分数</th>
+            <th>结果</th>
+            <th data-sort="gross_ret" class="sortable num">毛收益</th>
+            <th data-sort="net_ret" class="sortable num">净收益</th>
+          </tr></thead>
           <tbody></tbody>
         </table>
       </div>
     </div>
   </section>
 
+  <!-- ============ 信号浏览 ============ -->
   <section id="view-signals" class="view hidden">
     <div class="controls">
       <input id="symbol-input" list="symbol-list" placeholder="输入或选择币种，如 BTC_USDT" autocomplete="off">
       <datalist id="symbol-list"></datalist>
+      <div class="seg" id="bars-seg">
+        <button data-bars="1500">15 天</button>
+        <button data-bars="3000" class="active">1 个月</button>
+        <button data-bars="9000">3 个月</button>
+        <button data-bars="40000">全部</button>
+      </div>
       <span id="symbol-info" class="note"></span>
     </div>
-    <div class="panel">
-      <div class="legend" id="chart-legend">
-        <span><i class="dot" style="background:#3987e5"></i>EMA 8-55（快带）</span>
-        <span><i class="dot" style="background:#9085e9"></i>EMA 144</span>
-        <span><i class="dot" style="background:#d55181"></i>EMA 200</span>
-        <span><i class="dot" style="background:#199e70"></i>▲ 成交·止盈</span>
-        <span><i class="dot" style="background:#e66767"></i>▲ 成交·止损</span>
-        <span><i class="dot" style="background:#c98500"></i>▲ 成交·超时</span>
-        <span><i class="dot" style="background:#8b93a1"></i>○ 合格信号未成交</span>
+    <div class="signals-layout">
+      <div class="panel grow">
+        <div class="legend">
+          <span><i class="dot" style="background:#3987e5"></i>EMA 8-55（快带）</span>
+          <span><i class="dot" style="background:#9085e9"></i>EMA 144</span>
+          <span><i class="dot" style="background:#d55181"></i>EMA 200</span>
+          <span><i class="dot" style="background:#199e70"></i>▲ 止盈</span>
+          <span><i class="dot" style="background:#e66767"></i>▲ 止损</span>
+          <span><i class="dot" style="background:#c98500"></i>▲ 超时</span>
+          <span><i class="dot" style="background:#8b93a1"></i>○ 合格未成交</span>
+        </div>
+        <div id="kline-chart" class="chart tall"></div>
       </div>
-      <div id="kline-chart" class="chart tall"></div>
+      <div class="panel side">
+        <h2>本币种成交 <span class="unit" id="side-count"></span></h2>
+        <div class="table-wrap side-table">
+          <table id="symbol-trades"><tbody></tbody></table>
+        </div>
+      </div>
     </div>
   </section>
 </main>
