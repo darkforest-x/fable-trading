@@ -51,6 +51,7 @@ def label_candidate(
     tp_mult: float = TP_ATR_MULT,
     sl_mult: float = SL_ATR_MULT,
     atr_pct_min: float = ATR_PCT_MIN,
+    horizon: int = HORIZON_BARS,
 ) -> BarrierOutcome | None:
     """Label one candidate at position `signal_i` of an indicator frame.
 
@@ -59,7 +60,7 @@ def label_candidate(
     the signal bar is below `atr_pct_min` (barriers too narrow to trade).
     """
     entry_i = signal_i + 1
-    last_i = entry_i + HORIZON_BARS - 1
+    last_i = entry_i + horizon - 1
     if last_i >= len(frame):
         return None
     atr = float(frame["atr14"].iloc[signal_i])
@@ -76,18 +77,18 @@ def label_candidate(
     lows = frame["low"].to_numpy()[entry_i : last_i + 1]
     hit_up = highs >= upper
     hit_dn = lows <= lower
-    up_first = int(np.argmax(hit_up)) if hit_up.any() else HORIZON_BARS
-    dn_first = int(np.argmax(hit_dn)) if hit_dn.any() else HORIZON_BARS
+    up_first = int(np.argmax(hit_up)) if hit_up.any() else horizon
+    dn_first = int(np.argmax(hit_dn)) if hit_dn.any() else horizon
 
     if up_first < dn_first:
         return BarrierOutcome(1, "tp", up_first + 1, entry, upper / entry - 1)
     if dn_first < up_first:
         return BarrierOutcome(0, "sl", dn_first + 1, entry, lower / entry - 1)
-    if up_first == dn_first < HORIZON_BARS:
+    if up_first == dn_first < horizon:
         # both barriers inside the same bar: order unknown, assume worst case
         return BarrierOutcome(0, "sl_ambiguous", dn_first + 1, entry, lower / entry - 1)
     timeout_close = float(frame["close"].iloc[last_i])
-    return BarrierOutcome(0, "timeout", HORIZON_BARS, entry, timeout_close / entry - 1)
+    return BarrierOutcome(0, "timeout", horizon, entry, timeout_close / entry - 1)
 
 
 def label_candidate_trailing(

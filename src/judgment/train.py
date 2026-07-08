@@ -51,19 +51,24 @@ LGB_PARAMS = {
 }
 
 
-PURGE_WINDOW = pd.Timedelta(hours=18.25)  # 73 x 15m bars: outcome window length
+DEFAULT_HORIZON_BARS = 72
+PURGE_WINDOW = pd.Timedelta(hours=18.25)  # 73 x 15m bars: default outcome window
 
 
-def load_splits(dataset_path: Path = DATASET_PATH) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def load_splits(
+    dataset_path: Path = DATASET_PATH, *, horizon_bars: int = DEFAULT_HORIZON_BARS
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    # purge width = entry offset (1 bar) + outcome horizon, in 15m bars
+    purge = pd.Timedelta(minutes=15 * (horizon_bars + 1))
     data = pd.read_csv(dataset_path, parse_dates=["signal_time"])
     data = data.sort_values("signal_time").reset_index(drop=True)
-    dev = data[data["signal_time"] < HOLDOUT_START - PURGE_WINDOW].reset_index(drop=True)
+    dev = data[data["signal_time"] < HOLDOUT_START - purge].reset_index(drop=True)
     holdout = data[data["signal_time"] >= HOLDOUT_START].reset_index(drop=True)
     split_i = int(len(dev) * TRAIN_FRACTION)
     train, val = dev.iloc[:split_i], dev.iloc[split_i:]
     # purge train samples whose triple-barrier window overlaps the val period
     val_start = val["signal_time"].min()
-    train = train[train["signal_time"] < val_start - PURGE_WINDOW]
+    train = train[train["signal_time"] < val_start - purge]
     return train, val, holdout
 
 
