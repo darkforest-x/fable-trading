@@ -116,6 +116,37 @@ tp 出场同理去掉止盈目标线的重复。
 
 ---
 
+## P1.5 —— 研究议程执行（与 P1 并行，Codex 可做大部分）
+
+> 总纲：`docs/RESEARCH_AGENDA.md`（假设发生器 + 两级验证制度）。按其"优先队列"执行；
+> 每个假设一个独立 commit + 报告小节；负结果同样入库并更新议程状态。
+
+### R0. 工程前置：sweep 台架泛化（先做，其余依赖它）
+- `fetch_okx.py`/`update_okx.py`：`--bar {5m,15m,30m,1H}` 参数化（API 原生支持），
+  文件名带 bar（loader 正则已兼容 5m/15m，补 30m/1H）；
+- `barrier_sweep.py`：出场函数插件化（dict 注册：fixed/trailing/scaled/breakeven/ma-exit），
+  labeling.py 只加新函数不改旧的；
+- `build`/`train` 路径支持 bar 参数（purge 随 horizon×bar 自动换算）。
+
+### R1. H9 高层趋势过滤（优先#1，最便宜）
+拉 1h 数据（主流 56 币）→ 给 15m 候选加"1h EMA55 斜率>0 / 价格在 1h EMA144 上"
+两个布尔特征 → 一次实验两种用法：作为特征重训 vs 作为硬过滤器（不重训只筛选）。
+判定：top-decile 净@maker 提升 ≥0.03%/笔 或胜率 +3pp。
+
+### R2. H10 做空侧（优先#2）
+`candidates.py` 镜像规则（新函数，不改多头路径）+ `labeling.py` 空头 barrier
+（TP 在下方）→ 独立池训练评估。判定：按 2b 验收标准（p<0.01 + 净@maker>0）。
+
+### R3. H1+H2 出场复合（同批 sweep）
+分批止盈（半仓 2.5×ATR + 尾仓 3×ATR 拖尾）与保本推移（+1.5×ATR 后 SL=entry），
+实现为 labeling 新函数进 sweep，与 TP5/SL2 基线同表对比。
+
+### R4. H7/H8 多时间框架池（工程量大，R0 完成后）
+- 主流 15 币 × 5m × 400 天拉取（量大：~11M 行，先拉 200 天试）；
+- 山寨全池 × 30m/1H（量小）；
+- 各池独立跑 expanded 规则 + TP5/SL2（horizon 按 RESEARCH_AGENDA 的折算网格 sweep）；
+- 交付：`analysis/p2b_mtf_report.md` 跨 TF 对比表。
+
 ## P2 —— 下周（工程加固 + 体验）
 
 ### 9. 冒烟测试 + CI
@@ -140,6 +171,39 @@ tp 出场同理去掉止盈目标线的重复。
   发现问题币种列入 loader 黑名单候选（改动需记录理由）。
 
 ---
+
+## P2.5 —— 前端"操作台化"（从数据展示进化为项目控制中枢）
+
+> owner 愿景：整个核心流程可在前端操作。分四期落地，**每期先做鉴权再做能力**
+> ——公网看板一旦有"执行"按钮，没有鉴权就是把实验室交给全网。
+
+### 第 0 期（硬前置）：鉴权
+nginx basic-auth 或 FastAPI 中间件 token（token 由 owner 生成放 VPS 环境变量，
+agent 不接触明文）。没有这个，后面全部不许上 VPS。
+
+### 第 1 期：实验注册表（只读，无风险先行）
+- 后端扫描 `analysis/output/*.json` 建实验索引（tag/日期/配置/关键指标）；
+- 前端"实验"页：全部历史实验一张可排序对比表 + 点击看详情 JSON + 关联报告
+  （markdown 渲染 `analysis/*.md`）；
+- 研究议程页：渲染 `docs/RESEARCH_AGENDA.md`，状态一目了然。
+
+### 第 2 期：任务运行器（核心）
+- 后端 job runner：sqlite 任务表 + subprocess 执行白名单命令
+  （**白名单硬编码**：build_dataset / barrier_sweep / swap_replication / update_okx /
+  forward_track / deploy 自身；绝不接受自由命令字符串）；
+- 前端"任务"页：从白名单发起任务（参数用表单约束）、实时日志（SSE 或轮询）、
+  任务历史与产物链接；
+- 跑在本机看板实例即可（训练资源在 Mac）；VPS 版默认禁用执行器。
+
+### 第 3 期：数据与模型中枢
+- 数据页：各宇宙/TF 覆盖热力图、缺口审计结果、一键增量更新（走任务运行器）；
+- 模型页：`models/` 冻结工件列表、当前生效配置、指纹校验、（owner 点击）晋升/回滚；
+- 配置页：阈值预设/成本假设的**只读**展示 + 修改申请流（生成 diff 供 owner 在
+  git 里确认——配置变更永远走代码评审，不走网页表单直改）。
+
+### 第 4 期：监控与告警
+- 前向页加异常标注（数据断更/连续止损/成交率骤降）；
+- 告警通道（owner 选定后接入）。
 
 ## P3 —— 阶段 4 准备（实盘前置，多数需 owner 参与）
 
