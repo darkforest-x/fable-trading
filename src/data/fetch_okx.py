@@ -14,18 +14,22 @@ Run ON A MACHINE WITH OKX ACCESS (the Cowork sandbox cannot reach okx.com):
 Resumable: progress is kept in {SYMBOL}_15m.part.csv (ignored by the loader);
 finished symbols are skipped on rerun. Safe to Ctrl-C and restart.
 
-Rate limit: history-candles allows 20 req / 2 s; we sleep 0.12 s per request.
-Expected runtime for ~55 symbols x 400 days: roughly 45-60 minutes.
+Rate limit: history-candles allows 20 req / 2 s; a global throttle spaces
+requests >=0.12 s apart across all workers (<=8.3 req/s). Symbols are fetched
+in parallel (--workers, default 8) so per-request network latency overlaps;
+expected runtime for ~55 symbols x 400 days is under 2 hours even at ~1.5 s
+per request.
 """
 from __future__ import annotations
 
 import argparse
 import csv
 import json
-import sys
+import threading
 import time
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -33,8 +37,11 @@ FETCH_DIR = Path(__file__).resolve().parents[2] / "data" / "kline_fetched"
 API = "https://www.okx.com/api/v5/market/history-candles"
 BAR = "15m"
 PAGE_LIMIT = 100
-SLEEP_S = 0.12
 MAX_RETRIES = 5
+DEFAULT_WORKERS = 8
+# Global request spacing shared by all workers: <=8.3 req/s, safely under
+# OKX's 20 req / 2 s limit for history-candles.
+MIN_REQUEST_INTERVAL_S = 0.12
 
 # Curated liquid symbols expected to have >=1 year of OKX history (spot,
 # matching the old cache's symbol keys), plus the one legacy swap series.
@@ -56,10 +63,35 @@ DEFAULT_SYMBOLS = [
 ]
 
 
+REQUEST_HEADERS = {
+    # OKX's WAF rejects the default Python-urllib user agent with 403.
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
+    "Accept": "application/json",
+}
+
+
+_rate_lock = threading.Lock()
+_last_request_at = 0.0
+
+
+def _throttle() -> None:
+    global _last_request_at
+    while True:
+        with _rate_lock:
+            now = time.monotonic()
+            wait = _last_request_at + MIN_REQUEST_INTERVAL_S - now
+            if wait <= 0:
+                _last_request_at = now
+                return
+        time.sleep(wait)
+
+
 def _request(url: str) -> dict:
     for attempt in range(MAX_RETRIES):
+        _throttle()
         try:
-            with urllib.request.urlopen(url, timeout=20) as resp:
+            req = urllib.request.Request(url, headers=REQUEST_HEADERS)
+            with urllib.request.urlopen(req, timeout=20) as resp:
                 return json.loads(resp.read().decode())
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
             wait = 2 ** attempt
@@ -83,7 +115,7 @@ def fetch_symbol(symbol: str, start_ms: int) -> None:
             rows = [r for r in csv.reader(fh)][1:]
         if rows:
             oldest_ms = min(int(r[0]) for r in rows)
-            print(f"  resuming at {datetime.fromtimestamp(oldest_ms / 1e3, tz=timezone.utc):%Y-%m-%d}", flush=True)
+            print(f"  {symbol}: resuming at {datetime.fromtimestamp(oldest_ms / 1e3, tz=timezone.utc):%Y-%m-%d}", flush=True)
 
     header = ["ts", "open", "high", "low", "close", "volume", "open_time"]
     if not part.exists():
@@ -95,7 +127,7 @@ def fetch_symbol(symbol: str, start_ms: int) -> None:
             url += f"&after={oldest_ms}"
         payload = _request(url)
         if payload.get("code") != "0":
-            print(f"  API error for {inst_id}: {payload.get('msg')} -- skipping", flush=True)
+            print(f"  {symbol}: API error: {payload.get('msg')} -- skipping", flush=True)
             break
         page = payload.get("data") or []
         if not page:
@@ -111,11 +143,10 @@ def fetch_symbol(symbol: str, start_ms: int) -> None:
             csv.writer(fh).writerows(new_rows)
         rows.extend(new_rows)
         oldest_ms = int(page[-1][0])
-        time.sleep(SLEEP_S)
 
     if not rows:
         part.unlink(missing_ok=True)
-        print("  no data", flush=True)
+        print(f"  {symbol}: no data", flush=True)
         return
     # dedupe + sort, write final file named to match the loader's pattern
     uniq = {int(r[0]): r for r in rows}
@@ -127,27 +158,39 @@ def fetch_symbol(symbol: str, start_ms: int) -> None:
         writer.writerows(final_rows)
     part.unlink(missing_ok=True)
     first = datetime.fromtimestamp(sorted(uniq)[0] / 1e3, tz=timezone.utc)
-    print(f"  done: {len(final_rows)} bars from {first:%Y-%m-%d} -> {out.name}", flush=True)
+    print(f"  {symbol}: done, {len(final_rows)} bars from {first:%Y-%m-%d} -> {out.name}", flush=True)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--symbols", nargs="*", default=DEFAULT_SYMBOLS)
     parser.add_argument("--days", type=int, default=400)
+    parser.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
     args = parser.parse_args()
     FETCH_DIR.mkdir(parents=True, exist_ok=True)
     start_ms = int((datetime.now(timezone.utc) - timedelta(days=args.days)).timestamp() * 1000)
-    for n, symbol in enumerate(args.symbols, 1):
+    pending: list[str] = []
+    for symbol in args.symbols:
         done = _finished_file(symbol)
         if done is not None:
-            print(f"[{n}/{len(args.symbols)}] {symbol}: already fetched ({done.name})", flush=True)
-            continue
-        print(f"[{n}/{len(args.symbols)}] {symbol}", flush=True)
-        try:
-            fetch_symbol(symbol, start_ms)
-        except RuntimeError as exc:
-            print(f"  FAILED: {exc} (rerun to resume)", flush=True)
-    return 0
+            print(f"{symbol}: already fetched ({done.name})", flush=True)
+        else:
+            pending.append(symbol)
+    print(f"fetching {len(pending)} symbols with {args.workers} workers", flush=True)
+    failed = 0
+    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+        futures = {pool.submit(fetch_symbol, s, start_ms): s for s in pending}
+        for n, future in enumerate(as_completed(futures), 1):
+            symbol = futures[future]
+            try:
+                future.result()
+            except RuntimeError as exc:
+                failed += 1
+                print(f"  {symbol}: FAILED: {exc} (rerun to resume)", flush=True)
+            print(f"[{n}/{len(pending)} finished]", flush=True)
+    if failed:
+        print(f"{failed} symbols failed -- rerun to resume them", flush=True)
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
