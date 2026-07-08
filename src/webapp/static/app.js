@@ -14,9 +14,7 @@ const CHART_LAYOUT = {
 const pctFormat = { type: "custom", formatter: (v) => v.toFixed(2) + "%" };
 
 function makeChart(el, opts = {}) {
-  const chart = LightweightCharts.createChart(el, { ...CHART_LAYOUT, ...opts });
-  new ResizeObserver(() => chart.applyOptions({ width: el.clientWidth })).observe(el);
-  return chart;
+  return LightweightCharts.createChart(el, { ...CHART_LAYOUT, autoSize: true, ...opts });
 }
 
 /* ---------- tabs ---------- */
@@ -189,9 +187,41 @@ function renderTrades() {
 
 /* ---------- signals browser ---------- */
 let symbolsLoaded = false, klineChart, klineSeries, volumeSeries, emaSeries = [];
-let currentKey = "", currentMarkers = [], priceLines = [];
+let bandSeries, pathSeries, barrier = { tp: 4, sl: 2 };
+let currentKey = "", currentMarkers = [], currentTimes = [], priceLines = [], chartReq = 0;
+let lastFocusRange = null;
 const sigState = { bars: 3000 };
 segWire("#bars-seg", sigState, "bars", Number, () => currentKey && loadChart(currentKey));
+
+function ensureKlineChart() {
+  if (klineChart) return;
+  klineChart = makeChart($("#kline-chart"));
+  // autoSize's first real layout resets the view; replay the focus position
+  klineChart.timeScale().subscribeSizeChange(() => {
+    if (lastFocusRange) klineChart.timeScale().setVisibleLogicalRange(lastFocusRange);
+  });
+  // full-height translucent band marking the dense-MA window of the focused trade
+  bandSeries = klineChart.addAreaSeries({
+    priceScaleId: "band", lineVisible: false, priceLineVisible: false,
+    lastValueVisible: false, crosshairMarkerVisible: false,
+    topColor: "rgba(57,135,229,0.14)", bottomColor: "rgba(57,135,229,0.14)",
+  });
+  klineChart.priceScale("band").applyOptions({ visible: false, scaleMargins: { top: 0, bottom: 0 } });
+  klineSeries = klineChart.addCandlestickSeries({
+    upColor: "#1fa77d", downColor: "#e66767", borderVisible: false,
+    wickUpColor: "#1fa77d", wickDownColor: "#e66767",
+  });
+  volumeSeries = klineChart.addHistogramSeries({
+    priceScaleId: "vol", priceFormat: { type: "volume" },
+    priceLineVisible: false, lastValueVisible: false,
+  });
+  klineChart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+  // entry->exit path segment of the focused trade
+  pathSeries = klineChart.addLineSeries({
+    lineWidth: 3, priceLineVisible: false, lastValueVisible: false,
+    crosshairMarkerVisible: false,
+  });
+}
 
 async function initSignals() {
   if (symbolsLoaded) return;
@@ -217,26 +247,21 @@ async function loadChart(key, focusEntry = null) {
   const [source, symbol] = key.split(":");
   if (!symbol) return;
   currentKey = key;
+  ensureKlineChart();          // synchronous: no await between check and create
+  const reqId = ++chartReq;    // stale responses (slow links) are dropped
   $("#view-signals").classList.add("loading");
   const resp = await fetch(`/api/chart/${source}/${symbol}?bars=${sigState.bars}`);
   $("#view-signals").classList.remove("loading");
+  if (reqId !== chartReq) return;
   if (!resp.ok) { $("#symbol-info").textContent = "找不到该序列"; return; }
   const d = await resp.json();
+  if (reqId !== chartReq) return;
+  barrier = { tp: d.tp_mult, sl: d.sl_mult };
 
-  if (!klineChart) {
-    klineChart = makeChart($("#kline-chart"));
-    klineSeries = klineChart.addCandlestickSeries({
-      upColor: "#1fa77d", downColor: "#e66767", borderVisible: false,
-      wickUpColor: "#1fa77d", wickDownColor: "#e66767",
-    });
-    volumeSeries = klineChart.addHistogramSeries({
-      priceScaleId: "vol", priceFormat: { type: "volume" },
-      priceLineVisible: false, lastValueVisible: false,
-    });
-    klineChart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
-  }
   priceLines.forEach((l) => klineSeries.removePriceLine(l)); priceLines = [];
   emaSeries.forEach((s) => klineChart.removeSeries(s)); emaSeries = [];
+  bandSeries.setData([]); pathSeries.setData([]);
+  currentTimes = d.candles.map((c) => c.time);
   klineSeries.setData(d.candles);
   volumeSeries.setData(d.candles.map((c) => ({
     time: c.time, value: c.volume,
@@ -251,15 +276,22 @@ async function loadChart(key, focusEntry = null) {
     emaSeries.push(s);
   }
   currentMarkers = d.markers;
-  klineSeries.setMarkers(d.markers
-    .filter((m) => m.eligible || m.traded)
-    .map((m) => ({
+  const markerList = [];
+  for (const m of d.markers) {
+    if (!m.eligible && !m.traded) continue;
+    markerList.push({
       time: m.time, position: "belowBar",
       shape: m.traded ? "arrowUp" : "circle",
       color: m.traded ? (OUTCOME_COLOR[m.outcome] || "#8b93a1") : "#8b93a1",
       text: m.traded ? `${(100 * m.ret).toFixed(1)}%` : "",
       size: m.traded ? 2 : 1,
-    })));
+    });
+    if (m.traded) markerList.push({  // exit marker: start->end is visible at a glance
+      time: m.exit_time, position: "aboveBar", shape: "square",
+      color: OUTCOME_COLOR[m.outcome] || "#8b93a1", size: 1,
+    });
+  }
+  klineSeries.setMarkers(markerList.sort((a, b) => a.time - b.time));
   klineChart.timeScale().fitContent();
 
   const n = d.markers.length, el = d.markers.filter((m) => m.eligible).length,
@@ -281,23 +313,56 @@ async function loadChart(key, focusEntry = null) {
       focusMarker(Number(row.dataset.entryTs));
     }));
 
-  if (focusEntry) focusMarker(focusEntry);
+  // default: focus the most recent trade so entry/exit/barriers show immediately
+  if (!focusEntry && traded.length) focusEntry = traded[0].entry_time;
+  if (focusEntry) {
+    focusMarker(focusEntry);
+    const row = $(`#symbol-trades tr[data-entry-ts="${focusEntry}"]`);
+    if (row) row.classList.add("focused");
+  }
 }
 
 function focusMarker(entryTs) {
   const m = currentMarkers.find((x) => x.entry_time === entryTs);
   if (!m) return;
   priceLines.forEach((l) => klineSeries.removePriceLine(l)); priceLines = [];
-  const exitPrice = m.entry_price * (1 + m.ret);
+  const entry = m.entry_price;
+  const exitPrice = entry * (1 + m.ret);
+  const outcomeColor = OUTCOME_COLOR[m.outcome] || "#9aa0a8";
   priceLines.push(klineSeries.createPriceLine({
-    price: m.entry_price, color: "#9aa0a8", lineStyle: 2, title: "入场",
+    price: entry, color: "#9aa0a8", lineStyle: 2, title: "入场",
+  }));
+  priceLines.push(klineSeries.createPriceLine({  // v-label barriers of this trade
+    price: entry * (1 + barrier.tp * m.atr_pct), color: "rgba(31,167,125,0.8)",
+    lineStyle: 3, title: `止盈目标 +${barrier.tp}×ATR`,
   }));
   priceLines.push(klineSeries.createPriceLine({
-    price: exitPrice, color: OUTCOME_COLOR[m.outcome] || "#9aa0a8", lineStyle: 0,
+    price: entry * (1 - barrier.sl * m.atr_pct), color: "rgba(230,103,103,0.8)",
+    lineStyle: 3, title: `止损线 -${barrier.sl}×ATR`,
+  }));
+  priceLines.push(klineSeries.createPriceLine({
+    price: exitPrice, color: outcomeColor, lineStyle: 0,
     title: `出场 ${OUTCOME_CN[m.outcome] || m.outcome}`,
   }));
-  const pad = 96 * 900; // ±1 day of 15m bars, in seconds
-  klineChart.timeScale().setVisibleRange({ from: m.time - pad, to: m.exit_time + pad });
+  // dense-MA window band (the "cluster box" this signal fired from)
+  bandSeries.setData([
+    { time: m.time - Math.max(m.dense_len, 1) * 900, value: 1 },
+    { time: m.time, value: 1 },
+  ]);
+  // entry -> exit path
+  pathSeries.applyOptions({ color: outcomeColor });
+  pathSeries.setData([
+    { time: m.entry_time, value: entry },
+    { time: m.exit_time, value: exitPrice },
+  ]);
+  // position via logical bar indices (robust against time-mapping quirks);
+  // setTimeout, not rAF -- rAF never fires in background tabs
+  let i0 = currentTimes.findIndex((t) => t >= m.time);
+  let i1 = currentTimes.findIndex((t) => t >= m.exit_time);
+  if (i0 < 0) i0 = currentTimes.length - 1;
+  if (i1 < 0) i1 = currentTimes.length - 1;
+  lastFocusRange = { from: i0 - 96, to: i1 + 96 };
+  setTimeout(() => klineChart.timeScale().setVisibleLogicalRange(lastFocusRange), 60);
 }
 
 async function focusTrade(source, symbol, entryTimeStr) {

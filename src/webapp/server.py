@@ -26,6 +26,7 @@ from src.backtest.run import (
     ACCEPT_START, BASE_COST, DEFAULT_DATA, MAX_CONCURRENT,
     build_signals, window_metrics,
 )
+from src.judgment.labeling import SL_ATR_MULT, TP_ATR_MULT
 from src.data.loader import FETCHED_DIR, list_series, load_series
 
 PROJECT_DIR = Path(__file__).resolve().parents[2]
@@ -36,10 +37,20 @@ TRADES_CSV = OUTPUT_DIR / "p3_trades.csv"
 
 EMA_SPANS = (8, 13, 21, 34, 55, 144, 200)  # the judgment layer's MA set
 CACHE_COLUMNS = ["source", "symbol", "signal_time", "entry_time", "exit_time",
-                 "score", "outcome", "realized_ret", "entry_price", "label"]
+                 "score", "outcome", "realized_ret", "entry_price", "label",
+                 "atr_pct", "dense_run_len"]
 PF_COST_GRID = [round(c, 4) for c in np.arange(0.001, 0.00501, 0.0005)]
 
 app = FastAPI(title="fable-trading dashboard")
+
+
+@app.middleware("http")
+async def no_cache_static(request, call_next):
+    """The dashboard is a living tool; stale cached JS has bitten us once."""
+    response = await call_next(request)
+    if not request.url.path.startswith("/api"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
 
 _signals: pd.DataFrame | None = None
 _threshold: float | None = None
@@ -226,7 +237,11 @@ def chart(source: str, symbol: str, bars: int = 3000) -> dict:
     frame = load_series(groups[key]).tail(min(max(bars, 300), 40000)).reset_index(drop=True)
     if frame.empty:
         raise HTTPException(404, "empty series")
-    ts = (frame["open_time"].astype("int64") // 10**9).astype(int)
+    # NOT astype(int64)//1e9: pandas may store datetime64 in us (not ns)
+    # depending on version, silently shifting times by 1000x. Timedelta
+    # division is unit-safe.
+    ts = ((frame["open_time"] - pd.Timestamp("1970-01-01", tz="UTC"))
+          // pd.Timedelta(seconds=1)).astype(int)
     candles = [
         {"time": int(t), "open": float(o), "high": float(h), "low": float(l),
          "close": float(c), "volume": float(v) if np.isfinite(v) else 0.0}
@@ -256,8 +271,12 @@ def chart(source: str, symbol: str, bars: int = 3000) -> dict:
             "outcome": row.outcome,
             "ret": round(float(row.realized_ret), 5),
             "entry_price": round(float(row.entry_price), 8),
+            "atr_pct": round(float(row.atr_pct), 6),
+            "dense_len": int(row.dense_run_len),
         })
-    return {"candles": candles, "emas": emas, "markers": markers, "threshold": round(threshold, 4)}
+    return {"candles": candles, "emas": emas, "markers": markers,
+            "threshold": round(threshold, 4),
+            "tp_mult": TP_ATR_MULT, "sl_mult": SL_ATR_MULT}
 
 
 app.mount("/", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="static")
