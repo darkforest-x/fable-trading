@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fable-trading 看板</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">fable-trading <span class="brand-sub">双均线密集启动 · 两层架构</span></div>
+  <nav class="tabs">
+    <button class="tab active" data-view="overview">总览</button>
+    <button class="tab" data-view="backtest">回测</button>
+    <button class="tab" data-view="signals">信号浏览</button>
+  </nav>
+</header>
+
+<main>
+  <section id="view-overview" class="view">
+    <div id="stages" class="stage-row"></div>
+    <div id="tiles" class="tile-row"></div>
+    <div class="panel">
+      <h2>阶段 3 验收对照（基准成本 0.3%）</h2>
+      <ul id="acceptance" class="check-list"></ul>
+      <p id="next-note" class="note"></p>
+    </div>
+  </section>
+
+  <section id="view-backtest" class="view hidden">
+    <div class="controls">
+      <div class="seg" id="cost-seg">
+        <button data-cost="0.002">成本 0.2%</button>
+        <button data-cost="0.003" class="active">成本 0.3%</button>
+        <button data-cost="0.004">成本 0.4%</button>
+      </div>
+      <div class="seg" id="window-seg">
+        <button data-window="accept" class="active">验收窗口（≥2026-05-04）</button>
+        <button data-window="full">全期（含 in-sample）</button>
+      </div>
+    </div>
+    <p class="note">验收窗口曾被 2b holdout 评估消耗一次（已声明）；全期数字含模型训练期，仅作对照不作证据。</p>
+    <div id="bt-tiles" class="tile-row"></div>
+    <div class="panel">
+      <h2>净值曲线 <span class="unit">（净收益 % 对账户资金，出场时点记账）</span></h2>
+      <div id="equity-chart" class="chart"></div>
+    </div>
+    <div class="panel">
+      <h2>成交明细 <span class="unit" id="trades-count"></span></h2>
+      <div class="table-wrap">
+        <table id="trades-table">
+          <thead><tr><th>入场时间</th><th>币种</th><th>分数</th><th>结果</th><th class="num">毛收益</th><th class="num">净收益</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-signals" class="view hidden">
+    <div class="controls">
+      <input id="symbol-input" list="symbol-list" placeholder="输入或选择币种，如 BTC_USDT" autocomplete="off">
+      <datalist id="symbol-list"></datalist>
+      <span id="symbol-info" class="note"></span>
+    </div>
+    <div class="panel">
+      <div class="legend" id="chart-legend">
+        <span><i class="dot" style="background:#3987e5"></i>EMA 8-55（快带）</span>
+        <span><i class="dot" style="background:#9085e9"></i>EMA 144</span>
+        <span><i class="dot" style="background:#d55181"></i>EMA 200</span>
+        <span><i class="dot" style="background:#199e70"></i>▲ 成交·止盈</span>
+        <span><i class="dot" style="background:#e66767"></i>▲ 成交·止损</span>
+        <span><i class="dot" style="background:#c98500"></i>▲ 成交·超时</span>
+        <span><i class="dot" style="background:#8b93a1"></i>○ 合格信号未成交</span>
+      </div>
+      <div id="kline-chart" class="chart tall"></div>
+    </div>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
