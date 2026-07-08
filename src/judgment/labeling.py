@@ -88,3 +88,46 @@ def label_candidate(
         return BarrierOutcome(0, "sl_ambiguous", dn_first + 1, entry, lower / entry - 1)
     timeout_close = float(frame["close"].iloc[last_i])
     return BarrierOutcome(0, "timeout", HORIZON_BARS, entry, timeout_close / entry - 1)
+
+
+def label_candidate_trailing(
+    frame: pd.DataFrame,
+    signal_i: int,
+    *,
+    trail_mult: float,
+    atr_pct_min: float = ATR_PCT_MIN,
+    horizon: int = HORIZON_BARS,
+) -> BarrierOutcome | None:
+    """Trend-following exit: no fixed TP, stop trails `trail_mult` x ATR14(i)
+    below the running high (seeded at entry). Conservative intra-bar rule: the
+    stop for bar j uses the running high up to bar j-1, so a new high and a
+    stop-out inside the same bar never help the trade; a gap below the stop
+    fills at the bar open. Timeout exits at the horizon close.
+
+    Label = 1 iff realized_ret > 0 (no barrier order to encode here).
+    """
+    entry_i = signal_i + 1
+    last_i = entry_i + horizon - 1
+    if last_i >= len(frame):
+        return None
+    atr = float(frame["atr14"].iloc[signal_i])
+    entry = float(frame["open"].iloc[entry_i])
+    if not np.isfinite(atr) or atr <= 0 or not np.isfinite(entry) or entry <= 0:
+        return None
+    atr_pct = float(frame["atr_pct"].iloc[signal_i])
+    if atr_pct_min > 0 and (not np.isfinite(atr_pct) or atr_pct < atr_pct_min):
+        return None
+
+    highs = frame["high"].to_numpy()[entry_i : last_i + 1]
+    lows = frame["low"].to_numpy()[entry_i : last_i + 1]
+    opens = frame["open"].to_numpy()[entry_i : last_i + 1]
+    run_max = entry
+    for j in range(horizon):
+        stop = run_max - trail_mult * atr
+        if lows[j] <= stop:
+            exit_price = min(stop, float(opens[j]))
+            ret = exit_price / entry - 1
+            return BarrierOutcome(int(ret > 0), "trail", j + 1, entry, ret)
+        run_max = max(run_max, float(highs[j]))
+    ret = float(frame["close"].iloc[last_i]) / entry - 1
+    return BarrierOutcome(int(ret > 0), "timeout", horizon, entry, ret)
