@@ -10,6 +10,8 @@
 owner 已委托"按推荐直接执行" → 出场结构扫描完成：TP5/SL2 为 v3 候选标签**
 （val 净@0.3% +0.077%/笔 vs 基线 +0.001%，p=0.001，见 `analysis/p2b_v3_barrier_sweep.md`）。
 进行中：P2-11 YOLO 迭代优化循环；Round 1 打标预审已由 owner 确认，下一步 E1（收 x_pad）。
+**07-10 追加（Grok）**：`codex/day1` 已合并进 `main`（`1c1344f`）并 push；owner 确认
+P2-11 打标 findings + P2-12 黑名单写入 BLOCKED。  
 **07-10 追加（Grok 接手）**：P2-12 数据审计完成（见 `analysis/p2_data_audit_report.md`）；
 每日定时任务已含 `update_okx → forward_track → daily_digest`；正式窗口前向日志已有
 **2 笔** closed 信号（冻结 TP5/SL2 SWAP）。`src/notify.py` + `scripts/daily_digest.py`

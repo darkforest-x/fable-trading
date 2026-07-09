@@ -85,4 +85,4 @@
 | 07-10 | 前向跟踪已入每日定时任务 | `daily-okx-data-update` 含 update+forward+digest |
 | 07-10 | P2-12 黑名单候选写入 BLOCKED | 报告表 22 个 thin equity/ETF base 入 loader |
 | 07-10 | P2-11 Round1 打标预审全部确认 | 批准 E1 收 x_pad 方向；改参另开 commit |
-| 07-10 | 合并 codex/day1 → main | 结束双 worktree 分叉 |
+| 07-10 | 合并 codex/day1 → main | 已合并并 push：`1c1344f`；冲突优先保留 codex 完整实现 |
