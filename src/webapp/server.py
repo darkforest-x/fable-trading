@@ -4,6 +4,7 @@ Routes are intentionally thin: `dashboard_payloads` owns universe-scoped
 overview/backtest/chart JSON, and `forward_payloads` owns forward validation
 JSON. P2.5 Phase 0+1 adds ops auth + experiment registry + agenda (read-only).
 Phase 2 adds hard-coded job whitelist runner under /api/ops/jobs*.
+Phase 3 adds read-only data/model hubs under /api/ops/data-hub and /api/ops/model-hub.
 Static assets are mounted last so API routes stay reachable.
 """
 from __future__ import annotations
@@ -27,11 +28,13 @@ from src.webapp.dashboard_payloads import (
     symbols_payload,
     trade_rows_payload,
 )
+from src.webapp.data_hub import data_hub_payload
 from src.webapp.experiment_registry import experiment_detail, list_experiments
 from src.webapp.forward_payloads import FORWARD_COST, forward_payload
 from src.webapp.jobs.runner import get_runner
 from src.webapp.jobs.store import get_store
 from src.webapp.jobs.whitelist import JobValidationError, list_job_types
+from src.webapp.model_hub import model_hub_payload
 from src.webapp.ops_flags import executor_enabled, ops_status_payload
 
 app = FastAPI(title="fable-trading dashboard")
@@ -228,6 +231,23 @@ def ops_jobs_cancel(job_id: str, request: Request):
     except KeyError:
         return JSONResponse({"detail": f"job not found: {job_id}"}, status_code=404)
     return job
+
+
+# ---------- P2.5 Phase 3: data + model hubs (read-only) ----------
+
+
+@app.get("/api/ops/data-hub")
+def ops_data_hub(request: Request) -> dict:
+    """Coverage by bar, audit summary embed, forward log health. No writes."""
+    verify_ops_request(request)
+    return data_hub_payload()
+
+
+@app.get("/api/ops/model-hub")
+def ops_model_hub(request: Request) -> dict:
+    """List frozen_* pairs + ACTIVE pointer. Promote POST not exposed yet."""
+    verify_ops_request(request)
+    return model_hub_payload()
 
 
 app.mount("/", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="static")

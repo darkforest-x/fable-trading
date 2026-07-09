@@ -46,12 +46,13 @@ def ops_status_payload() -> dict:
         "ops_auth_required": require_auth_for_ops(),
         "token_configured": bool(token),
         "executor_enabled": executor_enabled(),
-        "phase": "0+1+2",
+        "phase": "0+1+2+3",
         "notes": {
             "auth": "Set OPS_AUTH_MODE=token and OPS_API_TOKEN=<secret> to protect /api/ops/*",
             "executor": (
                 "ENABLE_JOB_EXECUTOR default 0; set 1 only on Mac to allow POST /api/ops/jobs. "
                 "VPS must stay 0."
             ),
+            "hubs": "GET /api/ops/data-hub and /api/ops/model-hub are read-only (Phase 3).",
         },
     }

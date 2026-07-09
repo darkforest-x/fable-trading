@@ -24,6 +24,8 @@
       <button class="tab" data-view="experiments">实验</button>
       <button class="tab" data-view="agenda">议程</button>
       <button class="tab" data-view="jobs">任务</button>
+      <button class="tab" data-view="data">数据</button>
+      <button class="tab" data-view="models">模型</button>
     </nav>
     <div class="ops-token-wrap" id="ops-token-wrap" hidden>
       <input id="ops-token-input" type="password" placeholder="OPS token" autocomplete="off" spellcheck="false">
@@ -331,7 +333,77 @@
       </div>
     </div>
   </section>
+
+  <!-- ============ P2.5 Phase3 数据中枢（只读） ============ -->
+  <section id="view-data" class="view hidden" hidden aria-hidden="true">
+    <div id="data-auth-note" class="banner" hidden></div>
+    <div class="panel">
+      <h2>数据覆盖 <span class="unit">P2.5 Phase3 · 只读 · list_series / kline_fetched</span></h2>
+      <div class="controls">
+        <button type="button" id="data-refresh" class="mini-btn">刷新</button>
+        <span class="note" id="data-generated"></span>
+      </div>
+      <div id="data-coverage-tiles" class="tile-grid cols-4"></div>
+      <div class="table-wrap">
+        <table id="data-coverage-table">
+          <thead><tr>
+            <th>bar</th>
+            <th class="num">series</th>
+            <th class="num">files</th>
+            <th class="num">named_rows∑</th>
+            <th class="num">fetched csv</th>
+            <th class="num">cache csv</th>
+            <th>latest mtime</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="panel">
+        <h2>审计摘要 <span class="unit">data_audit_summary.json</span></h2>
+        <div id="data-audit-meta" class="note"></div>
+        <div id="data-audit-tiles" class="tile-grid cols-4"></div>
+        <pre id="data-audit-json" class="ops-pre"></pre>
+      </div>
+      <div class="panel">
+        <h2>前向日志健康 <span class="unit">forward_log.csv</span></h2>
+        <div id="data-forward-tiles" class="tile-grid cols-4"></div>
+        <p class="note" id="data-forward-meta"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ P2.5 Phase3 模型中枢（只读） ============ -->
+  <section id="view-models" class="view hidden" hidden aria-hidden="true">
+    <div id="models-auth-note" class="banner" hidden></div>
+    <div class="panel">
+      <h2>冻结模型 <span class="unit">P2.5 Phase3 · 只读 · models/frozen_*</span></h2>
+      <div class="controls">
+        <button type="button" id="models-refresh" class="mini-btn">刷新</button>
+        <span class="note" id="models-generated"></span>
+        <span class="note" id="models-active-badge"></span>
+      </div>
+      <p class="note">晋升（promote ACTIVE 指针）本期未开放；阈值不可通过网页修改。</p>
+      <div class="table-wrap">
+        <table id="models-table">
+          <thead><tr>
+            <th>artifact</th>
+            <th>pair</th>
+            <th>config</th>
+            <th class="num">threshold_q90</th>
+            <th>dataset_sha</th>
+            <th>fingerprint</th>
+            <th class="num">n_feat</th>
+            <th>created</th>
+            <th>active</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 </main>
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>

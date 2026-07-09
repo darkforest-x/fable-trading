@@ -41,6 +41,8 @@ function showView(name) {
   if (name === "experiments") loadExperiments();
   if (name === "agenda") loadAgenda();
   if (name === "jobs") loadJobsView();
+  if (name === "data") loadDataHub();
+  if (name === "models") loadModelHub();
 }
 document.querySelectorAll(".tab").forEach((btn) =>
   btn.addEventListener("click", () => showView(btn.dataset.view)));
@@ -612,6 +614,8 @@ $("#ops-token-save")?.addEventListener("click", () => {
   if (active === "experiments") loadExperiments();
   if (active === "agenda") loadAgenda();
   if (active === "jobs") loadJobsView();
+  if (active === "data") loadDataHub();
+  if (active === "models") loadModelHub();
 });
 
 function fmtMetric(x, digits = 4) {
@@ -985,6 +989,184 @@ $("#job-cancel-btn")?.addEventListener("click", async () => {
     if (msg) msg.textContent = `取消失败：${err.message}`;
   }
 });
+
+/* ---------- P2.5 Phase3 data + model hubs (read-only) ---------- */
+
+function shortSha(s, n = 12) {
+  if (!s) return "—";
+  const t = String(s);
+  return t.length <= n ? t : t.slice(0, n) + "…";
+}
+
+function tileHtml(label, value, sub = "") {
+  return `<div class="tile"><div class="tile-label">${label}</div><div class="tile-value">${value}</div>${sub ? `<div class="tile-sub">${sub}</div>` : ""}</div>`;
+}
+
+async function loadDataHub() {
+  const note = $("#data-auth-note");
+  if (note) note.hidden = true;
+  const tbody = $("#data-coverage-table tbody");
+  if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="note">加载中…</td></tr>`;
+  try {
+    const d = await opsFetch("/api/ops/data-hub");
+    if ($("#data-generated")) {
+      $("#data-generated").textContent = d.generated_at
+        ? `生成于 ${d.generated_at} · 只读`
+        : "只读";
+    }
+    const cov = d.coverage || {};
+    const tiles = $("#data-coverage-tiles");
+    if (tiles) {
+      tiles.innerHTML = [
+        tileHtml("series 合计", cov.series_total ?? "—"),
+        tileHtml("files 合计", cov.file_total ?? "—"),
+        tileHtml("fetched", cov.fetched_exists ? "有" : "无", cov.fetched_dir || ""),
+        tileHtml("cache", cov.cache_exists ? "有" : "无", cov.cache_dir || ""),
+      ].join("");
+    }
+    if (tbody) {
+      const rows = cov.by_bar || [];
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">无 bar 覆盖数据</div></td></tr>`;
+      } else {
+        tbody.innerHTML = rows.map((r) => `
+          <tr>
+            <td>${r.bar}</td>
+            <td class="num">${r.series_n}</td>
+            <td class="num">${r.file_n}</td>
+            <td class="num">${r.named_rows_sum ?? "—"}</td>
+            <td class="num">${r.raw_fetched_csv ?? "—"}</td>
+            <td class="num">${r.raw_cache_csv ?? "—"}</td>
+            <td>${r.latest_mtime ? String(r.latest_mtime).slice(0, 19) : "—"}</td>
+          </tr>`).join("");
+      }
+    }
+    const audit = d.audit || {};
+    const ameta = $("#data-audit-meta");
+    if (ameta) {
+      if (!audit.exists) {
+        ameta.textContent = `审计摘要不存在（${audit.path || "analysis/output/data_audit_summary.json"}）。可先跑 scripts/data_audit.py。`;
+      } else {
+        ameta.textContent = `${audit.path || ""} · mtime ${audit.mtime ? String(audit.mtime).slice(0, 19) : "—"}${audit.report_exists ? ` · 报告 ${audit.report_path}` : ""}`;
+      }
+    }
+    const atiles = $("#data-audit-tiles");
+    const s = audit.summary || {};
+    if (atiles) {
+      if (audit.exists && s && typeof s === "object") {
+        atiles.innerHTML = [
+          tileHtml("series_total", s.series_total ?? "—"),
+          tileHtml("flagged", s.flagged ?? "—"),
+          tileHtml("blacklist 候选", s.blacklist_candidate_n ?? "—"),
+          tileHtml("okx swap15 stale", s.okx_swap15_stale ?? "—", s.okx_swap15_n != null ? `of ${s.okx_swap15_n}` : ""),
+        ].join("");
+      } else {
+        atiles.innerHTML = "";
+      }
+    }
+    const apre = $("#data-audit-json");
+    if (apre) {
+      if (audit.error) apre.textContent = audit.error;
+      else if (audit.summary) apre.textContent = JSON.stringify(audit.summary, null, 2);
+      else apre.textContent = "（无摘要）";
+    }
+    const fwd = d.forward || {};
+    const ftiles = $("#data-forward-tiles");
+    if (ftiles) {
+      ftiles.innerHTML = [
+        tileHtml("日志行", fwd.exists ? (fwd.total_rows ?? 0) : "无文件"),
+        tileHtml("closed", fwd.closed_rows ?? "—"),
+        tileHtml("决策笔数", `${fwd.decision_trades ?? 0} / ${fwd.decision_target ?? 100}`),
+        tileHtml("进度", fwd.progress != null ? `${Math.round(100 * Number(fwd.progress))}%` : "—",
+          fwd.decision_remaining != null ? `剩余 ${fwd.decision_remaining}` : ""),
+      ].join("");
+    }
+    const fmeta = $("#data-forward-meta");
+    if (fmeta) {
+      fmeta.textContent = fwd.exists
+        ? `path ${fwd.path || "—"} · latest detected_at ${fwd.latest_detected_at || "—"} · mtime ${fwd.mtime ? String(fwd.mtime).slice(0, 19) : "—"}`
+        : `无 forward 日志（${fwd.path || "data/forward_log.csv"}）`;
+    }
+  } catch (err) {
+    if (note) {
+      note.hidden = false;
+      note.innerHTML = `<b>无法加载数据中枢</b>：${err.message}<br>若 OPS_AUTH_MODE=token，请在右上角粘贴 token。`;
+    }
+    if (tbody) tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">加载失败</div></td></tr>`;
+  }
+}
+
+async function loadModelHub() {
+  const note = $("#models-auth-note");
+  if (note) note.hidden = true;
+  const tbody = $("#models-table tbody");
+  if (tbody) tbody.innerHTML = `<tr><td colspan="9" class="note">加载中…</td></tr>`;
+  try {
+    const d = await opsFetch("/api/ops/model-hub");
+    if ($("#models-generated")) {
+      $("#models-generated").textContent = d.generated_at
+        ? `生成于 ${d.generated_at} · ${d.count || 0} 个 · paired ${d.paired_count || 0}`
+        : "";
+    }
+    const active = d.active || {};
+    const badge = $("#models-active-badge");
+    if (badge) {
+      if (active.exists && active.artifact_id) {
+        badge.innerHTML = `ACTIVE → <b>${active.artifact_id}</b>`;
+      } else {
+        badge.textContent = "ACTIVE 指针未设置（models/ACTIVE 不存在）";
+      }
+    }
+    if (tbody) {
+      const items = d.items || [];
+      if (!items.length) {
+        tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">models/ 无 frozen_* 工件</div></td></tr>`;
+      } else {
+        tbody.innerHTML = items.map((it) => {
+          const fp = it.fingerprint || {};
+          const thr = it.threshold_val_q90;
+          const thrStr = thr === null || thr === undefined ? "—" : Number(thr).toFixed(6);
+          const pairCn = {
+            paired: "✓ 双文件",
+            missing_txt: "缺 .txt",
+            missing_json: "缺 .json",
+            missing_both: "—",
+          }[it.pair_status] || it.pair_status;
+          const fpCn = {
+            ok: "ok",
+            mismatch: "mismatch",
+            unverifiable: "unverifiable",
+            no_fingerprint: "—",
+            no_json: "—",
+            skipped: "skipped",
+            error: "error",
+          }[fp.fingerprint_status] || (fp.fingerprint_status || "—");
+          const rowCls = it.is_active ? "active-row" : "";
+          return `<tr class="${rowCls}">
+            <td><code>${it.artifact_id}</code></td>
+            <td>${pairCn}</td>
+            <td>${it.config || "—"}</td>
+            <td class="num">${thrStr}</td>
+            <td title="${it.dataset_sha256 || ""}"><code>${shortSha(it.dataset_sha256, 10)}</code></td>
+            <td title="${fp.note || fp.actual_sha256 || ""}">${fpCn}</td>
+            <td class="num">${it.n_features ?? "—"}</td>
+            <td>${it.created_at ? String(it.created_at).slice(0, 19) : "—"}</td>
+            <td>${it.is_active ? "●" : ""}</td>
+          </tr>`;
+        }).join("");
+      }
+    }
+  } catch (err) {
+    if (note) {
+      note.hidden = false;
+      note.innerHTML = `<b>无法加载模型中枢</b>：${err.message}<br>若 OPS_AUTH_MODE=token，请在右上角粘贴 token。`;
+    }
+    if (tbody) tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">加载失败</div></td></tr>`;
+  }
+}
+
+$("#data-refresh")?.addEventListener("click", () => loadDataHub());
+$("#models-refresh")?.addEventListener("click", () => loadModelHub());
 
 refreshOpsAuthUi();
 loadOverview();
