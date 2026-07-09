@@ -1,8 +1,9 @@
 """Funding-rate history for OKX perpetual swaps (P1-7, unblocks H12).
 
-Pages /api/v5/public/funding-rate-history backward (100/page, 8h cadence ->
-400 days ~= 1200 rows/symbol) into data/funding/{SYMBOL}.csv. Resumable the
-cheap way: a symbol with an existing file is skipped; delete to refetch.
+Pages /api/v5/public/funding-rate-history backward into
+data/funding/{SYMBOL}.csv. The requested horizon is 400 days, but OKX public
+history can cap earlier by symbol/API availability; downstream backtests must
+report funding coverage instead of silently treating missing history as zero.
 
 Usage: python3 -m src.data.fetch_funding
 """
@@ -17,6 +18,7 @@ from src.data.fetch_okx import DEFAULT_SYMBOLS, _request
 API = "https://www.okx.com/api/v5/public/funding-rate-history"
 OUT_DIR = Path(__file__).resolve().parents[2] / "data" / "funding"
 DAYS = 400
+PAGE_LIMIT = 400
 
 
 def fetch_symbol(symbol: str) -> int:
@@ -25,7 +27,7 @@ def fetch_symbol(symbol: str) -> int:
     rows: dict[int, list] = {}
     before: int | None = None
     while True:
-        url = f"{API}?instId={inst_id}&limit=100"
+        url = f"{API}?instId={inst_id}&limit={PAGE_LIMIT}"
         if before is not None:
             url += f"&after={before}"
         payload = _request(url)

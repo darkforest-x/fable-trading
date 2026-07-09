@@ -155,11 +155,22 @@ BNB_USDT 1 个月窗口 TP 与 SL 样例均只保留 3 条价格线，entry/exit
   追加一步，或 owner 自己跑 `python3 scripts/forward_track.py`）；
 - 3-4 周后累计 ≥100 笔时，用该日志算前向 PF——这是 v3 配置的最终裁决。
 
-### 7. 资金费率历史（合约回测的成本精度）
-- 新建 `src/data/fetch_funding.py`：OKX `/api/v5/public/funding-rate-history`
-  拉全部 SWAP 币种 400 天资金费率 → `data/funding/`（复用 UA/限速）；
-- 合约回测把"资金费近似 0.02%"替换为按持仓时段的真实费率累计；
-- 重跑 swap_replication 报告差异（预期影响 <2bp/笔，但要有真数）。
+### 7. ~~资金费率历史（合约回测的成本精度）~~ ✅ 已完成（2026-07-09）
+- ~~新建 `src/data/fetch_funding.py`：OKX `/api/v5/public/funding-rate-history`
+  拉全部 SWAP 币种 400 天资金费率 → `data/funding/`（复用 UA/限速）；~~
+  ✅ 已完成。脚本已由离线队列入库；当前本机 `data/funding/` 有 54 个 SWAP 文件，
+  每个约 278 条，覆盖约 `2026-04-07 08:00 UTC` → `2026-07-08 16:00 UTC`。
+  OKX public API 实际可返回历史短于 400 天，因此下游必须报告覆盖率。
+- ~~合约回测把"资金费近似 0.02%"替换为按持仓时段的真实费率累计；~~
+  ✅ 已完成。新增 `src/data/funding.py`：长仓在
+  `entry_time < funding_time <= exit_time` 的 funding settlement 上累计
+  `realized_rate`，正费率为成本、负费率为返还；缺历史返回缺失，不静默当 0。
+- ~~重跑 swap_replication 报告差异（预期影响 <2bp/笔，但要有真数）。~~
+  ✅ 已完成。`scripts/swap_replication.py` 保留旧 `maker0.06%` 近似列，并新增
+  覆盖样本上的真实资金费净值列。当前数据池复跑 TP5/SL2：top funding 覆盖 76.2%，
+  实测资金费均值约 +0.003%/笔，净@maker+真实资金费（覆盖样本）约 +0.003%/笔；
+  资金费本身较 0.02% 近似改善约 +1.7bp，但当前数据池复跑的 top 毛利弱于 P0 旧快照，
+  已在 `analysis/p2b_v3_barrier_sweep.md` 诚实记录。
 
 ### 8. 看板完善·第一批（依赖 5/6/7）
 - **前向验证页（新 tab）**：读 forward_log.csv，展示前向净值曲线、累计笔数/PF/
