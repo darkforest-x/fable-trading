@@ -1,5 +1,15 @@
 # NEXT_STEPS — 完整工程计划（2026-07-09 起，写给 Codex / 任何接手的 agent）
 
+## 过夜进度指针（2026-07-10，main 文档包）
+
+- H1 scaled 前向 **shadow 计划**（不替换 TP5/SL2 主线，owner 可后开）：
+  [`docs/H1_SCALED_FORWARD_SHADOW_PLAN.md`](docs/H1_SCALED_FORWARD_SHADOW_PLAN.md)
+- 前向样本加速选项（诚实利弊；**默认建议保持** q90 + 正式窗）：
+  [`docs/FORWARD_ACCELERATION_OPTIONS.md`](docs/FORWARD_ACCELERATION_OPTIONS.md)
+- 过夜 `forward_track` 冒烟：`new_signals=5`，`total_rows=7`
+  （`open=2` / `closed=5`；模型 `frozen_tp5_sl2_swap_20260709`；日志 `data/forward_log.csv`，不入 git）
+- 未做：YOLO 重训、改 BLOCKED/`auto_label`、VPS 部署、holdout 评估
+
 ## 工作方式（Codex 必读）
 
 - **工作目录**：`~/fable-trading-codex`（独立 worktree，分支 `codex/day1`）。
