@@ -1,14 +1,13 @@
-# Multi-day status 2026-07-09T20:02:02Z
+# Multi-day status 2026-07-09T20:04:56Z
 
-## This hour
-- YOLO E2.1: **alive epoch ~9/40**, best so far **epoch5 mAP50=0.664** (results.csv); collapse spikes at ep2/7
-- Expand: **DONE** FINAL reports already shipped
-- FO :5151 200, LS docker Up, audit 8643 up
-- Interim train curve: analysis/p2a_e21_train_interim.md
+## Durable 2h tick
+- YOLO: **epoch ~10/40**, train PID alive; **best mAP50=0.664 @ep5**
+- Expand: DONE (FINAL reports shipped)
+- FO 5151 / LS 8081 / VPS: up
+- pytest: **113 passed**
+- models/ACTIVE → frozen_tp5_sl2_swap_20260709.txt
+- Phase3 hub / H1 shadow / consistency_check: already on main
 - forward_track: running this cycle
 
-## Blocked only by
-- YOLO train completion for final report + consistency vs new best.pt
-
-## Done earlier multi-day
-- P2.5 Phases 0–3, FO/LS, H1 shadow logger, expand FINAL, consistency baseline
+## Waiting
+- Train complete → p2a_e21_train_report.md + consistency vs new best.pt

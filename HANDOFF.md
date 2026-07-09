@@ -17,6 +17,7 @@ P2-11 打标 findings + P2-12 黑名单写入 BLOCKED。
 每日定时任务已含 `update_okx → forward_track → daily_digest`；正式窗口前向日志已有
 **2 笔** closed 信号（冻结 TP5/SL2 SWAP）。`src/notify.py` + `scripts/daily_digest.py`
 已同步进本 worktree。
+**07-10 追加（多日无人值守）**：SWAP expand **完成**（399 个 15m 文件）；P2.5 Phase2/3 已合 main；H1 shadow logger 已上线；YOLO E2.1 重训进行中（best so far ep5 mAP50≈0.66）。
 **07-10 追加（P2.5 Phase 0+1）**：看板 ops 鉴权 + 实验注册表 + 研究议程只读页已落地
 （`auth` / `ops_flags` / `experiment_registry` / `agenda_payloads` + 顶栏 **实验/议程** tab）；
 **P2.5 Phase 2 job runner 已合 main**（默认 ENABLE_JOB_EXECUTOR=0）。公网/VPS 上 ops 前须设 `OPS_AUTH_MODE=token` +
