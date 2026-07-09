@@ -88,3 +88,11 @@ Grok 对 seed `20260709` 的 18 张抽图做了视觉预审；**2026-07-10 owner
 - 审计页已按 seed `20260709` 重建
 - 报告：`analysis/p2a_e1_xpad_report.md`
 - **仍未重训** YOLO
+
+## 07-10 E2 已实施（偏 B）
+
+- `MAX_DENSE_BARS=24`：超长 dense run 收到最紧 24 根
+- PAXG 左段 74→24 bar；`box_w_mean` 0.1176→0.0792；w>0.25 份额→0
+- 对照：`/label_audit_e2_compare.html`
+- 报告：`analysis/p2a_e2_max_dense_report.md`；坏图包：`analysis/p2a_bad_images_pack.md`
+- **仍未重训**

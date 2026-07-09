@@ -49,6 +49,33 @@ def test_e1_x_pad_default_is_six() -> None:
     assert Y_PAD_FRAC == 0.35  # E1 must not touch y pad
 
 
+def test_e2_max_dense_bars_trims_long_run() -> None:
+    from src.detection.auto_label import MAX_DENSE_BARS, find_dense_segments
+
+    assert MAX_DENSE_BARS == 24
+    n = 80
+    # Entire window satisfies density thresholds.
+    close = [100.0] * n
+    df = pd.DataFrame(
+        {
+            "close": close,
+            "sma20": close,
+            "ema20": close,
+            "sma60": close,
+            "ema60": close,
+            "sma120": close,
+            "ema120": close,
+            "fast_spread": [0.001] * n,
+            "full_spread": [0.002 + (i * 0.00001) for i in range(n)],  # tighter at left
+        }
+    )
+    segs = find_dense_segments(df, max_bars=24)
+    assert len(segs) == 1
+    assert segs[0].end - segs[0].start + 1 == 24
+    # Tightest window should start near the left (lowest full_spread).
+    assert segs[0].start == 0
+
+
 def test_tighter_x_pad_narrows_box_width() -> None:
     df = _flat_df()
     tf = _tf()

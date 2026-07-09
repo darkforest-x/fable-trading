@@ -25,10 +25,14 @@ MIN_DENSE_BARS = 5
 MERGE_GAP_BARS = 2  # merge runs separated by tiny gaps to avoid sliver boxes
 # Horizontal pad outside the first/last dense bar (pixels). smoke3 used 12 for
 # mAP IoU forgiveness; P2-11 E1 (2026-07-10) tightens back to 6 after owner
-# audit found systematic box_too_wide (e.g. PAXG_USDT_015960). Single-variable
-# only — do not change y_pad_frac / min_bars / merge_gap in the same experiment.
+# audit found systematic box_too_wide (e.g. PAXG_USDT_015960).
 X_PAD_PX = 6
 Y_PAD_FRAC = 0.35
+# P2-11 E2 (2026-07-10, path B): if a dense run is longer than this many bars,
+# keep only the tightest contiguous window of this length (min mean full_spread).
+# Single-variable — do not change x_pad / y_pad / min_bars / merge_gap here.
+# Rationale: pad-only E1 left mega-boxes (PAXG left run=74 bars) essentially unchanged.
+MAX_DENSE_BARS = 24
 
 CLASS_ID = 0  # single class: dense_cluster
 CLASS_NAME = "dense_cluster"
@@ -40,6 +44,29 @@ class DenseSegment:
     end: int    # inclusive
 
 
+def _tightest_window(
+    full_spread: np.ndarray,
+    start: int,
+    end: int,
+    max_bars: int,
+) -> DenseSegment:
+    """Within [start, end], pick contiguous window of max_bars with lowest mean spread."""
+    length = end - start + 1
+    if length <= max_bars:
+        return DenseSegment(start, end)
+    best_i = start
+    best_score = float("inf")
+    for i in range(start, end - max_bars + 2):
+        window = full_spread[i : i + max_bars]
+        if np.isnan(window).all():
+            continue
+        score = float(np.nanmean(window))
+        if score < best_score:
+            best_score = score
+            best_i = i
+    return DenseSegment(best_i, best_i + max_bars - 1)
+
+
 def find_dense_segments(
     df: pd.DataFrame,
     *,
@@ -47,11 +74,17 @@ def find_dense_segments(
     full_max: float = FULL_SPREAD_MAX,
     min_bars: int = MIN_DENSE_BARS,
     merge_gap: int = MERGE_GAP_BARS,
+    max_bars: int = MAX_DENSE_BARS,
 ) -> list[DenseSegment]:
-    """Find dense runs on the numeric series of one rendered window."""
+    """Find dense runs on the numeric series of one rendered window.
+
+    Long runs (> max_bars) are core-trimmed to the tightest sub-window so YOLO
+    learns compact dense clusters rather than multi-day consolidation slabs.
+    """
+    full_spread = pd.to_numeric(df["full_spread"], errors="coerce").to_numpy()
     dense = (
         (pd.to_numeric(df["fast_spread"], errors="coerce") <= fast_max)
-        & (pd.to_numeric(df["full_spread"], errors="coerce") <= full_max)
+        & (full_spread <= full_max)
     ).to_numpy()
     idx = np.flatnonzero(dense)
     if len(idx) == 0:
@@ -63,7 +96,12 @@ def find_dense_segments(
             runs[-1][1] = int(i)
         else:
             runs.append([int(i), int(i)])
-    return [DenseSegment(s, e) for s, e in runs if e - s + 1 >= min_bars]
+    out: list[DenseSegment] = []
+    for s, e in runs:
+        if e - s + 1 < min_bars:
+            continue
+        out.append(_tightest_window(full_spread, s, e, max_bars))
+    return out
 
 
 def segment_to_bbox(
