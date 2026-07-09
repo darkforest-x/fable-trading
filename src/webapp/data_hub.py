@@ -290,6 +290,52 @@ def _forward_health_from_path(path: Path, *, cost: float) -> dict[str, Any]:
     }
 
 
+def scan_live_part_files(fetched_dir: Path | None = None, *, limit: int = 30) -> dict[str, Any]:
+    """Live incomplete-fetch leftovers (`*.part.csv`). Loader ignores these.
+
+    Complements audit summary (which may be stale) with a filesystem scan.
+    """
+    fetched = fetched_dir if fetched_dir is not None else FETCHED_DIR
+    items: list[dict[str, Any]] = []
+    if fetched.is_dir():
+        for path in sorted(fetched.glob("*.part.csv")):
+            try:
+                st = path.stat()
+                size = int(st.st_size)
+                mtime = datetime.fromtimestamp(st.st_mtime, tz=timezone.utc).isoformat()
+            except OSError:
+                size = 0
+                mtime = None
+            # Best-effort line count without loading whole file into memory.
+            rows = 0
+            try:
+                with path.open("rb") as fh:
+                    for _ in fh:
+                        rows += 1
+                if rows > 0:
+                    rows -= 1  # header
+            except OSError:
+                rows = 0
+            items.append(
+                {
+                    "name": path.name,
+                    "path": _rel(path),
+                    "bytes": size,
+                    "rows_approx": rows,
+                    "mtime": mtime,
+                }
+            )
+    total = len(items)
+    truncated = total > limit
+    return {
+        "fetched_dir": _rel(fetched) if fetched.exists() or fetched_dir is not None else "data/kline_fetched",
+        "count": total,
+        "truncated": truncated,
+        "items": items[:limit],
+        "hint": "Resume with: python3 -m src.data.fetch_okx --symbols <SYM> --bar 15m --workers 1",
+    }
+
+
 def data_hub_payload(
     *,
     fetched_dir: Path | None = None,
@@ -301,10 +347,12 @@ def data_hub_payload(
     coverage = coverage_by_bar(fetched_dir=fetched_dir, cache_dir=cache_dir)
     audit = load_audit_summary(audit_path)
     forward = forward_log_health(forward_log_path)
+    parts = scan_live_part_files(fetched_dir)
     return {
         "generated_at": _iso_now(),
         "coverage": coverage,
         "audit": audit,
         "forward": forward,
+        "part_files_live": parts,
         "read_only": True,
     }

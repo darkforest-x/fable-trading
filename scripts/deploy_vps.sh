@@ -13,12 +13,28 @@ rsync -az \
   data/scored_signals*.csv data/scored_signals*.json \
   "$VPS:$DIR/data/"
 rsync -az data/sweep_v3 data/swap_replication data/kline_fetched "$VPS:$DIR/data/"
-ssh "$VPS" "systemctl restart fable-dashboard
+# Hard red line: never leave job executor enabled on public VPS.
+ssh "$VPS" "set -euo pipefail
+UNIT=/etc/systemd/system/fable-dashboard.service
+if [ -f \"\$UNIT\" ]; then
+  if grep -q '^Environment=ENABLE_JOB_EXECUTOR=' \"\$UNIT\"; then
+    sed -i 's/^Environment=ENABLE_JOB_EXECUTOR=.*/Environment=ENABLE_JOB_EXECUTOR=0/' \"\$UNIT\"
+  else
+    # Insert after [Service] if missing
+    if ! grep -q 'ENABLE_JOB_EXECUTOR' \"\$UNIT\"; then
+      sed -i '/^\[Service\]/a Environment=ENABLE_JOB_EXECUTOR=0' \"\$UNIT\"
+    fi
+  fi
+  systemctl daemon-reload
+fi
+systemctl restart fable-dashboard
 for i in 1 2 3 4 5 6; do
   if systemctl is-active fable-dashboard >/dev/null \
     && curl -s -o /dev/null -w 'http:%{http_code}\n' http://127.0.0.1:8642/api/overview | grep -q 'http:200'; then
     systemctl is-active fable-dashboard
     echo http:200
+    # surface executor flag for operators
+    systemctl show fable-dashboard -p Environment --value 2>/dev/null | tr ' ' '\n' | grep ENABLE_JOB || true
     exit 0
   fi
   sleep 2

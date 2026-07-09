@@ -102,9 +102,24 @@ def test_forward_log_health_missing(tmp_path: Path) -> None:
     assert health["decision_remaining"] == 100
 
 
+def test_scan_live_part_files(tmp_path: Path) -> None:
+    fetched = tmp_path / "fetched"
+    part = _write_csv(
+        fetched,
+        "ANIME_USDT_SWAP_15m.part.csv",
+        "ts,open,high,low,close,volume,open_time\n1,1,1,1,1,1,t\n2,2,2,2,2,2,t\n",
+    )
+    out = data_hub.scan_live_part_files(fetched)
+    assert out["count"] == 1
+    assert out["items"][0]["name"] == part.name
+    assert out["items"][0]["rows_approx"] == 2
+    assert out["truncated"] is False
+
+
 def test_data_hub_payload_composed(tmp_path: Path) -> None:
     fetched = tmp_path / "fetched"
     _write_csv(fetched, "okx_BTC_USDT_SWAP_15m_100.csv")
+    _write_csv(fetched, "MANA_USDT_SWAP_15m.part.csv", "ts,o,h,l,c,v,t\n1,1,1,1,1,1,t\n")
     audit = tmp_path / "audit.json"
     audit.write_text(json.dumps({"series_total": 1, "flagged": 0}), encoding="utf-8")
     flog = tmp_path / "fwd.csv"
@@ -124,6 +139,8 @@ def test_data_hub_payload_composed(tmp_path: Path) -> None:
     assert body["coverage"]["by_bar"]
     assert body["audit"]["summary"]["series_total"] == 1
     assert body["forward"]["exists"] is True
+    assert body["part_files_live"]["count"] == 1
+    assert body["part_files_live"]["items"][0]["name"].endswith(".part.csv")
 
 
 # ---------------------------------------------------------------------------
