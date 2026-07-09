@@ -1,5 +1,11 @@
 # NEXT_STEPS — 完整工程计划（2026-07-09 起，写给 Codex / 任何接手的 agent）
 
+## 多日无人值守（2026-07-10 owner 授权）
+
+owner 睡觉/上班/周末不在：**不要停**。读 `output/offline_tasks/AUTONOMOUS_CHARTER.md`。
+价值序：前向 → 数据 → YOLO 标签/模型 → 操作台修 bug → H1 影子 → 工程卫生。
+状态心跳：`output/offline_tasks/MULTI_DAY_STATUS.md`。
+
 ## 过夜进度指针（2026-07-10，main 文档包）
 
 - H1 scaled 前向 **shadow 计划**（不替换 TP5/SL2 主线，owner 可后开）：
@@ -346,10 +352,10 @@ agent 不接触明文）。没有这个，后面全部不许上 VPS。~~
 
 完成记录：`experiment_registry.py` + `agenda_payloads.py`；路由
 `/api/ops/experiments`、`/api/ops/experiments/{id}`、`/api/ops/agenda`；
-顶栏 **实验** / **议程** tab。**无 job runner**（执行器默认关）。
+顶栏 **实验** / **议程** tab。**job runner 已合 main**（`ENABLE_JOB_EXECUTOR` 默认关；VPS 禁止开）。
 
 ### 第 2 期：任务运行器（核心）
-- 后端 job runner：sqlite 任务表 + subprocess 执行白名单命令
+- ~~后端 job runner~~ ✅ Phase2 白名单+sqlite+runner；Phase3 只读 data/model hub 已合
   （**白名单硬编码**：build_dataset / barrier_sweep / swap_replication / update_okx /
   forward_track / deploy 自身；绝不接受自由命令字符串）；
 - 前端"任务"页：从白名单发起任务（参数用表单约束）、实时日志（SSE 或轮询）、
