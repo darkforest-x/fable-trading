@@ -4,17 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>fable-trading 看板</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="style.css">
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
 <header class="topbar">
   <div class="brand">fable-trading <span class="brand-sub">双均线密集启动 · 两层架构</span></div>
-  <nav class="tabs">
-    <button class="tab active" data-view="overview">总览</button>
-    <button class="tab" data-view="backtest">回测</button>
-    <button class="tab" data-view="signals">信号浏览</button>
-  </nav>
+  <div class="top-actions">
+    <div class="seg universe-seg" id="universe-seg">
+      <button data-universe="swap" class="active">合约</button>
+      <button data-universe="spot">现货</button>
+    </div>
+    <nav class="tabs">
+      <button class="tab active" data-view="overview">总览</button>
+      <button class="tab" data-view="backtest">回测</button>
+      <button class="tab" data-view="signals">信号浏览</button>
+      <button class="tab" data-view="forward">前向验证</button>
+    </nav>
+  </div>
 </header>
 
 <main>
@@ -40,7 +48,7 @@
   </section>
 
   <!-- ============ 回测 ============ -->
-  <section id="view-backtest" class="view hidden">
+  <section id="view-backtest" class="view hidden" hidden aria-hidden="true">
     <div class="controls">
       <div class="seg" id="cost-seg">
         <button data-cost="0.002">成本 0.2%</button>
@@ -93,6 +101,11 @@
           <button data-outcome="sl">止损</button>
           <button data-outcome="timeout">超时</button>
         </div>
+        <label class="slider-control" for="score-threshold">
+          <span>展示分数 ≥ <b id="score-threshold-label">0.000</b></span>
+          <input id="score-threshold" type="range" min="0" max="1" step="0.01" value="0">
+        </label>
+        <span class="note" id="threshold-note">只过滤下方成交明细，不改变净值/PF。</span>
         <span class="note">点击任意行 → 跳到该笔交易的 K 线位置</span>
       </div>
       <div class="table-wrap">
@@ -112,7 +125,7 @@
   </section>
 
   <!-- ============ 信号浏览 ============ -->
-  <section id="view-signals" class="view hidden">
+  <section id="view-signals" class="view hidden" hidden aria-hidden="true">
     <div class="controls">
       <input id="symbol-input" list="symbol-list" placeholder="输入或选择币种，如 BTC_USDT" autocomplete="off">
       <datalist id="symbol-list"></datalist>
@@ -138,14 +151,67 @@
         <div id="kline-chart" class="chart tall"></div>
       </div>
       <div class="panel side">
-        <h2>本币种成交 <span class="unit" id="side-count"></span></h2>
-        <div class="table-wrap side-table">
-          <table id="symbol-trades"><tbody></tbody></table>
+        <div class="side-section">
+          <h2>本币种成交 <span class="unit" id="side-count"></span></h2>
+          <div class="table-wrap side-table">
+            <table id="symbol-trades"><tbody></tbody></table>
+          </div>
         </div>
+        <div class="side-section">
+          <h2>合格未成交 <span class="unit" id="missed-count"></span></h2>
+          <div class="table-wrap side-table missed-table">
+            <table id="symbol-missed"><tbody></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="signal-tooltip" class="signal-tooltip" hidden></div>
+  </section>
+
+  <section id="view-forward" class="view hidden" hidden aria-hidden="true">
+    <div class="panel">
+      <h2>前向验证 <span class="unit">（SWAP 冻结模型 · maker-filled closed 样本）</span></h2>
+      <div id="forward-tiles" class="tile-row"></div>
+      <div class="progress-row">
+        <div class="progress-copy">
+          <b id="forward-progress-label">0 / 100</b>
+          <span class="note" id="forward-progress-note">等待新信号</span>
+        </div>
+        <div class="progress-track"><span id="forward-progress" class="progress-fill"></span></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <h2>前向净值 <span class="unit">（净收益 % 对账户资金，出场时点记账）</span></h2>
+        <div id="forward-chart" class="chart"></div>
+        <div id="forward-dd-chart" class="chart mini"></div>
+      </div>
+      <div class="panel">
+        <h2>结果分布 <span class="unit">（仅 maker-filled closed）</span></h2>
+        <div id="forward-outcomes" class="hbar-wrap"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>前向日志 <span class="unit" id="forward-count"></span></h2>
+      <div class="table-wrap">
+        <table id="forward-table">
+          <thead><tr>
+            <th>信号时间</th>
+            <th>币种</th>
+            <th>状态</th>
+            <th>Maker</th>
+            <th>结果</th>
+            <th class="num">分数</th>
+            <th class="num">净收益</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
       </div>
     </div>
   </section>
 </main>
-<script src="app.js?v=4"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>

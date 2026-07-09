@@ -5,8 +5,9 @@ pipeline must replicate there. This runs the UNCHANGED expanded-pool rules,
 features and training discipline on *_USDT_SWAP series only, labels with the
 v2 anchor (TP4/SL2) and the v3 candidate (TP5/SL2), and reports val-only
 metrics under swap economics:
-  taker 0.05%/side -> 0.10% round trip; maker 0.02%/side + ~0.02% funding
-  approx for the ~5h average hold -> 0.06% round trip.
+  taker 0.05%/side -> 0.10% round trip; maker 0.02%/side plus either the
+  legacy ~0.02% funding approximation or realized OKX funding history when
+  the trade interval is covered by data/funding/.
 No holdout access. Run offline via scripts/offline_pipeline.sh.
 """
 from __future__ import annotations
@@ -17,6 +18,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from src.data.funding import MAKER_FEE_ROUND_TRIP, funding_costs_for_trades
 from src.data.loader import iter_series
 from src.judgment.candidates import add_indicators, scan_candidates
 from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature_rows
@@ -26,7 +28,8 @@ from src.judgment.train import evaluate, load_splits, permutation_pvalue, train_
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 OUT_DIR = PROJECT_DIR / "data" / "swap_replication"
 OUT_JSON = PROJECT_DIR / "analysis" / "output" / "swap_replication.json"
-COSTS = {"taker_010": 0.0010, "maker_006": 0.0006}
+TAKER_FEE_ROUND_TRIP = 0.0010
+COSTS = {"taker_010": TAKER_FEE_ROUND_TRIP, "maker_006": 0.0006}
 CONFIGS = {"tp4_sl2": (4.0, 2.0), "tp5_sl2": (5.0, 2.0)}
 
 
@@ -81,6 +84,9 @@ def main() -> int:
         top_idx = np.argsort(prob)[-k:]
         filled = val["maker_filled"].to_numpy()[top_idx]
         top_rets = rets[top_idx]
+        funding_cost = funding_costs_for_trades(val).to_numpy()
+        top_funding_cost = funding_cost[top_idx]
+        top_funding_available = np.isfinite(top_funding_cost)
         row = {
             "config": name, "n_candidates": int(len(df)),
             "n_train": int(len(train)), "n_val": int(len(val)),
@@ -88,11 +94,30 @@ def main() -> int:
             "top_gross": m["top_decile"]["mean_realized_ret"],
             "top_win_rate": m["top_decile"]["win_rate"],
             "maker_fill_rate": round(float(filled.mean()), 3),
+            "funding_available_rate": round(float(np.isfinite(funding_cost).mean()), 3),
+            "top_funding_available_rate": round(float(top_funding_available.mean()), 3),
         }
         for cname, c in COSTS.items():
             row[f"top_net_{cname}"] = round(m["top_decile"]["mean_realized_ret"] - c, 5)
         if filled.any():
             row["top_net_maker_filled_only"] = round(float(top_rets[filled].mean()) - COSTS["maker_006"], 5)
+        if top_funding_available.any():
+            covered_rets = top_rets[top_funding_available]
+            covered_funding = top_funding_cost[top_funding_available]
+            row["top_mean_real_funding_cost"] = round(float(covered_funding.mean()), 5)
+            row["top_net_taker_real_funding_available"] = round(
+                float((covered_rets - TAKER_FEE_ROUND_TRIP - covered_funding).mean()), 5
+            )
+            maker_real_net = covered_rets - MAKER_FEE_ROUND_TRIP - covered_funding
+            row["top_net_maker_real_funding_available"] = round(float(maker_real_net.mean()), 5)
+            maker_approx_net = covered_rets - COSTS["maker_006"]
+            row["top_net_maker_real_vs_approx_delta"] = round(float(maker_real_net.mean() - maker_approx_net.mean()), 5)
+            filled_available = filled & top_funding_available
+            if filled_available.any():
+                row["top_net_maker_real_funding_filled_only"] = round(
+                    float((top_rets[filled_available] - MAKER_FEE_ROUND_TRIP - top_funding_cost[filled_available]).mean()),
+                    5,
+                )
         results.append(row)
         print(row, flush=True)
     OUT_JSON.write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")

@@ -1,6 +1,6 @@
 """Build the judgment-layer dataset: candidates + triple-barrier labels + features.
 
-Usage: python3 -m src.judgment.build_dataset [--mode strict|expanded] [--out PATH]
+Usage: python3 -m src.judgment.build_dataset [--mode strict|expanded] [--bar 15m] [--out PATH]
 Output: data/judgment_dataset.csv by default (data/ is gitignored) and a JSON
 summary on stdout. Barrier structure comes from src.judgment.labeling defaults
 (v2: TP 4xATR / SL 2xATR, atr_pct >= 0.0015).
@@ -13,6 +13,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.data.bars import BAR_CHOICES, normalize_bar
 from src.data.loader import iter_series
 from src.judgment.candidates import add_indicators, scan_candidates
 from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature_rows
@@ -23,24 +24,26 @@ OUTPUT_PATH = PROJECT_DIR / "data" / "judgment_dataset.csv"
 MIN_BARS = 500
 
 
-def build(mode: str = "strict") -> pd.DataFrame:
+def build(mode: str = "strict", *, bar: str = "15m", horizon_bars: int = HORIZON_BARS) -> pd.DataFrame:
+    bar = normalize_bar(bar)
     records: list[dict] = []
     series_count = 0
-    for source, symbol, frame in iter_series(bar="15m", min_bars=MIN_BARS):
+    for source, symbol, frame in iter_series(bar=bar, min_bars=MIN_BARS):
         series_count += 1
         enriched = add_indicators(frame)
-        signal_indices = scan_candidates(enriched, horizon_bars=HORIZON_BARS, mode=mode)
+        signal_indices = scan_candidates(enriched, horizon_bars=horizon_bars, mode=mode)
         if not signal_indices:
             continue
         featured = add_features(enriched)
         feature_rows = extract_feature_rows(featured, signal_indices)
         for row_pos, signal_i in enumerate(signal_indices):
-            outcome = label_candidate(enriched, signal_i)
+            outcome = label_candidate(enriched, signal_i, horizon=horizon_bars)
             if outcome is None:
                 continue
             record = {
                 "source": source,
                 "symbol": symbol,
+                "bar": bar,
                 "signal_i": signal_i,
                 "signal_time": enriched["open_time"].iloc[signal_i],
                 "label": outcome.label,
@@ -56,6 +59,8 @@ def build(mode: str = "strict") -> pd.DataFrame:
         dataset = _dedupe_cross_source(dataset)
         dataset = dataset.sort_values("signal_time").reset_index(drop=True)
     dataset.attrs["series_count"] = series_count
+    dataset.attrs["bar"] = bar
+    dataset.attrs["horizon_bars"] = horizon_bars
     return dataset
 
 
@@ -84,14 +89,18 @@ def _dedupe_cross_source(dataset: pd.DataFrame, *, min_gap_hours: float = 4.5) -
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=("strict", "expanded"), default="strict")
+    parser.add_argument("--bar", choices=BAR_CHOICES, default="15m")
+    parser.add_argument("--horizon-bars", type=int, default=HORIZON_BARS)
     parser.add_argument("--out", type=Path, default=OUTPUT_PATH)
     args = parser.parse_args()
-    dataset = build(mode=args.mode)
+    dataset = build(mode=args.mode, bar=args.bar, horizon_bars=args.horizon_bars)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     dataset.to_csv(args.out, index=False)
     n = len(dataset)
     summary = {
         "pool_mode": args.mode,
+        "bar": dataset.attrs.get("bar"),
+        "horizon_bars": dataset.attrs.get("horizon_bars"),
         "series_scanned": dataset.attrs.get("series_count"),
         "candidates": n,
         "symbols_with_candidates": int(dataset["symbol"].nunique()) if n else 0,

@@ -1,0 +1,147 @@
+{
+  "config": {
+    "name": "swap_short_tp5_sl2",
+    "tp": 5.0,
+    "sl": 2.0
+  },
+  "dataset": "/Users/zhangzc/fable-trading-codex/data/short_replication/swap_short_tp5_sl2.csv",
+  "n_candidates": 8976,
+  "splits": {
+    "train": {
+      "n": 5737,
+      "range": [
+        "2025-06-04 22:00:00+00:00",
+        "2026-03-17 15:00:00+00:00"
+      ],
+      "positive_rate": 0.3214
+    },
+    "val": {
+      "n": 1445,
+      "range": [
+        "2026-03-18 09:45:00+00:00",
+        "2026-05-03 05:00:00+00:00"
+      ],
+      "positive_rate": 0.2789
+    }
+  },
+  "best_iteration": 58,
+  "val": {
+    "n": 1445,
+    "positive_rate": 0.2789,
+    "roc_auc": 0.6174,
+    "pr_auc": 0.3599,
+    "thresholds": {
+      "0.4": {
+        "n_signals": 287,
+        "precision": 0.3798,
+        "recall": 0.2705
+      },
+      "0.5": {
+        "n_signals": 11,
+        "precision": 0.5455,
+        "recall": 0.0149
+      },
+      "0.6": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.7": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    },
+    "top_decile": {
+      "n": 144,
+      "mean_realized_ret": 0.00265,
+      "mean_net_ret": 0.00065,
+      "win_rate": 0.3681
+    },
+    "all_mean_net_ret": -0.0014
+  },
+  "val_permutation_p": 0.001,
+  "val_baseline_ma_spread_logreg": {
+    "n": 1445,
+    "positive_rate": 0.2789,
+    "roc_auc": 0.5711,
+    "pr_auc": 0.346,
+    "thresholds": {
+      "0.4": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.5": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.6": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.7": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    },
+    "top_decile": {
+      "n": 144,
+      "mean_realized_ret": 0.00403,
+      "mean_net_ret": 0.00203,
+      "win_rate": 0.4097
+    },
+    "all_mean_net_ret": -0.0014
+  },
+  "maker_fill_rate_top_decile": 0.861,
+  "top_net_taker_010": 0.00165,
+  "top_net_maker_006": 0.00205,
+  "baseline_top_net_taker_010": 0.00303,
+  "baseline_top_net_maker_006": 0.00343,
+  "feature_importance_top10": [
+    {
+      "feature": "ret_12",
+      "gain": 710.6134943962097
+    },
+    {
+      "feature": "atr_pct_ratio96",
+      "gain": 700.9080376625061
+    },
+    {
+      "feature": "ext_up",
+      "gain": 637.2581305503845
+    },
+    {
+      "feature": "close_vs_ema55",
+      "gain": 505.98492431640625
+    },
+    {
+      "feature": "drawdown24",
+      "gain": 409.86510038375854
+    },
+    {
+      "feature": "close_vs_ema200",
+      "gain": 391.04376316070557
+    },
+    {
+      "feature": "vol_ratio_mean8",
+      "gain": 378.7010407447815
+    },
+    {
+      "feature": "dense_frac48",
+      "gain": 326.42346000671387
+    },
+    {
+      "feature": "volume_z",
+      "gain": 317.6152997016907
+    },
+    {
+      "feature": "ret_48",
+      "gain": 311.72405195236206
+    }
+  ],
+  "top_net_maker_filled_only": 0.00131
+}

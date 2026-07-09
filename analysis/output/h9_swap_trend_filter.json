@@ -1,0 +1,38 @@
+{
+  "dataset": "data/swap_replication/swap_tp5_sl2.csv",
+  "threshold_q90": 0.38741,
+  "horizon_bars": 72,
+  "maker_cost": 0.0006,
+  "flag_coverage": 1.0,
+  "top_bucket": {
+    "no_filter": {
+      "n": 151,
+      "mean_net_maker": 0.00026,
+      "win_rate": 0.3576
+    },
+    "up_slope_only": {
+      "n": 52,
+      "mean_net_maker": 0.00073,
+      "win_rate": 0.4038
+    },
+    "above_ma_only": {
+      "n": 58,
+      "mean_net_maker": 0.00066,
+      "win_rate": 0.3966
+    },
+    "both": {
+      "n": 38,
+      "mean_net_maker": 0.00068,
+      "win_rate": 0.4211
+    },
+    "against_trend": {
+      "n": 79,
+      "mean_net_maker": -0.00014,
+      "win_rate": 0.3291
+    }
+  },
+  "all_val_pass_rate": {
+    "up_slope": 0.2788,
+    "above_ma": 0.3411
+  }
+}

@@ -16,20 +16,33 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.data.bars import BAR_CHOICES, normalize_bar
+
 CACHE_DIR = Path(__file__).resolve().parents[2] / "data" / "kline_cache"
 # Freshly fetched history (src.data.fetch_okx) lives beside the old cache and
 # is merged per (source, symbol); load_series dedupes on open_time.
 FETCHED_DIR = Path(__file__).resolve().parents[2] / "data" / "kline_fetched"
+_BAR_PATTERN = "|".join(re.escape(bar) for bar in BAR_CHOICES)
 CACHE_PATTERN = re.compile(
-    r"^(?:(?P<prefix>gate|okx)_)?(?P<symbol>.+?)_(?P<bar>5m|15m|30m|1H)_(?P<rows>[0-9]+)(?:_latest)?\.csv$"
+    rf"^(?:(?P<prefix>gate|okx)_)?(?P<symbol>.+?)_(?P<bar>{_BAR_PATTERN})_(?P<rows>[0-9]+)(?:_latest)?\.csv$"
 )
 # Ported from the old project's build_strict_dense_review_pack.py: stablecoins,
 # gold and tokenized stocks are excluded from candidate mining.
+# 2026-07-10 owner confirmed P2-12 thin equity/ETF SWAP candidates (zero_vol>2%
+# on OKX SWAP 15m audit) — see analysis/p2_data_audit_report.md.
 BLOCKED_BASES = {
+    # stables / fiat wrappers
     "USDC", "USDG", "USDT", "DAI", "FDUSD", "TUSD", "USDE", "USDS", "BUSD",
-    "XAU", "XAG", "XAUT", "PAXG", "QQQX", "NVDAX", "TSLAX", "MSTRX", "CRCLX",
-    "SPYX", "AAPLX", "SKHYNIX", "AAOI", "CBRS", "GLW", "MU", "RKLB", "SOXS",
-    "MRVL", "EWY", "SPCX", "SNDK", "CL", "INTC",
+    # metals
+    "XAU", "XAG", "XAUT", "PAXG",
+    # tokenized / leveraged equity wrappers (legacy list)
+    "QQQX", "NVDAX", "TSLAX", "MSTRX", "CRCLX", "SPYX", "AAPLX", "SKHYNIX",
+    "AAOI", "CBRS", "GLW", "MU", "RKLB", "SOXS", "MRVL", "EWY", "SPCX", "SNDK",
+    "CL", "INTC",
+    # P2-12 owner-approved thin equity/ETF SWAP bases (2026-07-10)
+    "EWZ", "CGNX", "DKNG", "BX", "CSCO", "CIEN", "GME", "CRWD", "COST",
+    "ADBE", "GEV", "CRDO", "EWJ", "FLNC", "ALAB", "ASML", "BMNR", "APLD",
+    "AMD", "AMAT", "AAPL", "AMZN",
 }
 OHLCV_COLUMNS = ["open_time", "open", "high", "low", "close", "volume"]
 
@@ -40,6 +53,7 @@ def list_series(cache_dir: Path | None = None, *, bar: str = "15m") -> dict[tupl
     Scans both the old-project cache and data/kline_fetched when `cache_dir`
     is None; a broken symlink (old cache unavailable) is silently skipped.
     """
+    bar = normalize_bar(bar)
     dirs = [cache_dir] if cache_dir is not None else [CACHE_DIR, FETCHED_DIR]
     paths: list[Path] = []
     for d in dirs:

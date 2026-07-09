@@ -104,7 +104,9 @@ def add_indicators(frame: pd.DataFrame) -> pd.DataFrame:
     out["pre_range48"] = (high.rolling(48).max() - low.rolling(48).min()) / close
     out["pre_range168"] = (high.rolling(168).max() - low.rolling(168).min()) / close
     out["drawdown24"] = high.rolling(24).max() / close - 1
+    out["runup24"] = close / low.rolling(24).min().replace(0, np.nan) - 1
     out["ext_up"] = close / out["cluster_max"].replace(0, np.nan) - 1
+    out["ext_down"] = out["cluster_min"] / close - 1
     out["slow_slope_12"] = out["ema200"].pct_change(12)
     out["slow_slope_abs"] = out["slow_slope_12"].abs()
     out["zero_volume96"] = (volume <= 0).rolling(96).mean()
@@ -123,6 +125,13 @@ def add_indicators(frame: pd.DataFrame) -> pd.DataFrame:
     out["trend_order_score"] = out[["order_score", "down_order_score"]].max(axis=1)
     # same shape score the old strict mode used to rank/dedupe candidates
     out["shape_score"] = (
+        (0.0028 - out["fast_spread"]).clip(lower=0) * 9000
+        + (0.0055 - out["full_spread"]).clip(lower=0) * 6500
+        + (0.0035 - out["fast_slow_gap"]).clip(lower=0) * 5000
+        + (1.45 - out["full_ratio_min48"]).clip(lower=0) * 8
+        + out["volume_ratio"].clip(upper=4)
+    )
+    out["short_shape_score"] = (
         (0.0028 - out["fast_spread"]).clip(lower=0) * 9000
         + (0.0055 - out["full_spread"]).clip(lower=0) * 6500
         + (0.0035 - out["fast_slow_gap"]).clip(lower=0) * 5000
@@ -154,6 +163,24 @@ def strict_mask(enriched: pd.DataFrame, mode: str = "strict") -> pd.Series:
     )
 
 
+def short_mask(enriched: pd.DataFrame, mode: str = "strict") -> pd.Series:
+    t = THRESHOLD_PRESETS[mode]
+    return (
+        (enriched["fast_spread"] <= t["fast_spread_max"])
+        & (enriched["full_spread"] <= t["full_spread_max"])
+        & (enriched["fast_slow_gap"] <= t["fast_slow_gap_max"])
+        & (enriched["full_ratio_min48"] <= t["full_ratio_min48_max"])
+        & (enriched["pre_range48"] <= t["pre_range48_max"])
+        & (enriched["pre_range168"] <= t["pre_range168_max"])
+        & (enriched["runup24"] <= t["drawdown24_max"])
+        & (enriched["ext_down"].between(t["ext_up_min"], t["ext_up_max"]))
+        & (enriched["down_order_score"] >= t["order_score_min"])
+        & (enriched["slow_slope_abs"] <= t["slow_slope_abs_max"])
+        & (enriched["zero_volume96"] <= t["zero_volume96_max"])
+        & (enriched["volume_ratio"] >= t["volume_ratio_min"])
+    )
+
+
 def scan_candidates(
     enriched: pd.DataFrame, *, horizon_bars: int = 72, mode: str = "strict"
 ) -> list[int]:
@@ -171,6 +198,24 @@ def scan_candidates(
         return []
     # Greedy dedupe by shape score, same as the old strict pack (min_gap=18).
     scores = enriched["shape_score"].to_numpy()
+    selected: list[int] = []
+    for i in sorted(idx, key=lambda j: scores[j], reverse=True):
+        if all(abs(i - prev) >= MIN_GAP_BARS for prev in selected):
+            selected.append(int(i))
+    return sorted(selected)
+
+
+def scan_short_candidates(
+    enriched: pd.DataFrame, *, horizon_bars: int = 72, mode: str = "strict"
+) -> list[int]:
+    if len(enriched) < WARMUP_BARS + horizon_bars + 2:
+        return []
+    mask = short_mask(enriched, mode).fillna(False)
+    idx = np.flatnonzero(mask.to_numpy())
+    idx = idx[(idx >= WARMUP_BARS) & (idx + horizon_bars + 1 < len(enriched))]
+    if len(idx) == 0:
+        return []
+    scores = enriched["short_shape_score"].to_numpy()
     selected: list[int] = []
     for i in sorted(idx, key=lambda j: scores[j], reverse=True):
         if all(abs(i - prev) >= MIN_GAP_BARS for prev in selected):

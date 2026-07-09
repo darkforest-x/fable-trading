@@ -1,0 +1,18 @@
+=== queue5 start Thu Jul  9 08:30:48 CST 2026 ===
+--- [1/3] tp5 discrepancy reconciliation
+replication: n=8828 symbols=90 range=2025-06-05..2026-07-07 mean_ret=0.00085 pos_rate=0.291
+stack: n=9312 symbols=92 range=2025-06-05..2026-07-07 mean_ret=0.00086 pos_rate=0.291
+portfolio: n=9312 symbols=92 range=2025-06-05..2026-07-07 mean_ret=0.00086 pos_rate=0.291
+replication vs stack: overlap=8827 only_a=1 only_b=485 ret_mismatch=0
+replication vs portfolio: overlap=8827 only_a=1 only_b=485 ret_mismatch=0
+stack vs portfolio: overlap=9312 only_a=0 only_b=0 ret_mismatch=0
+replication: n_val=1429 top_decile_net@0.06%=0.00225 win=0.444
+stack: n_val=1510 top_decile_net@0.06%=0.00026 win=0.358
+portfolio: n_val=1510 top_decile_net@0.06%=0.00026 win=0.358
+--- [2/3] freeze model artifacts (both contenders)
+frozen tp5_sl2: thr=0.3874 iter=25
+frozen scaled_25_t3: thr=0.6078 iter=38
+--- [3/3] forward tracker first pass
+forward log: 0 rows total (0 open); +0 scanned this run
+pushed
+=== queue5 done Thu Jul  9 08:31:45 CST 2026 ===

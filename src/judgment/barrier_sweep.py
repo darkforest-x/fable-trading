@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Callable, Optional
 
 import numpy as np
 import pandas as pd
@@ -32,7 +33,14 @@ from src.data.loader import iter_series
 from src.judgment.build_dataset import _dedupe_cross_source
 from src.judgment.candidates import add_indicators, scan_candidates
 from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature_rows
-from src.judgment.labeling import label_candidate, label_candidate_trailing
+from src.judgment.labeling import (
+    BarrierOutcome,
+    label_candidate,
+    label_candidate_breakeven,
+    label_candidate_ma_exit,
+    label_candidate_scaled,
+    label_candidate_trailing,
+)
 from src.judgment.train import evaluate, load_splits, permutation_pvalue, train_model
 
 PROJECT_DIR = Path(__file__).resolve().parents[2]
@@ -46,22 +54,84 @@ MAKER_COST = 0.0016  # 0.08%/side limit orders, owner route D
 # structures. Candidates are scanned once with the max horizon so every
 # config shares the same signal set.
 CONFIGS: dict[str, dict] = {
-    "tp5_sl2_h72": {"tp": 5.0, "sl": 2.0, "horizon": 72},    # round-1 winner (anchor)
-    "tp5_sl2_h144": {"tp": 5.0, "sl": 2.0, "horizon": 144},
-    "tp6_sl2_h144": {"tp": 6.0, "sl": 2.0, "horizon": 144},
-    "tp8_sl2_h192": {"tp": 8.0, "sl": 2.0, "horizon": 192},
-    "trail3_h144": {"trail": 3.0, "horizon": 144},
-    "trail4_h192": {"trail": 4.0, "horizon": 192},
+    "tp5_sl2_h72": {"exit": "fixed", "tp": 5.0, "sl": 2.0, "horizon": 72},    # round-1 winner (anchor)
+    "tp5_sl2_h144": {"exit": "fixed", "tp": 5.0, "sl": 2.0, "horizon": 144},
+    "tp6_sl2_h144": {"exit": "fixed", "tp": 6.0, "sl": 2.0, "horizon": 144},
+    "tp8_sl2_h192": {"exit": "fixed", "tp": 8.0, "sl": 2.0, "horizon": 192},
+    "trail3_h144": {"exit": "trailing", "trail": 3.0, "horizon": 144},
+    "trail4_h192": {"exit": "trailing", "trail": 4.0, "horizon": 192},
 }
 MAX_HORIZON = max(c["horizon"] for c in CONFIGS.values())
 
 
-def _label(enriched: pd.DataFrame, signal_i: int, cfg: dict):
-    if "trail" in cfg:
-        return label_candidate_trailing(
-            enriched, signal_i, trail_mult=cfg["trail"], horizon=cfg["horizon"])
+ExitPlugin = Callable[[pd.DataFrame, int, dict], Optional[BarrierOutcome]]
+
+
+def _fixed_exit(enriched: pd.DataFrame, signal_i: int, cfg: dict) -> BarrierOutcome | None:
     return label_candidate(
         enriched, signal_i, tp_mult=cfg["tp"], sl_mult=cfg["sl"], horizon=cfg["horizon"])
+
+
+def _trailing_exit(enriched: pd.DataFrame, signal_i: int, cfg: dict) -> BarrierOutcome | None:
+    return label_candidate_trailing(
+        enriched, signal_i, trail_mult=cfg["trail"], horizon=cfg["horizon"])
+
+
+def _scaled_exit(enriched: pd.DataFrame, signal_i: int, cfg: dict) -> BarrierOutcome | None:
+    return label_candidate_scaled(
+        enriched,
+        signal_i,
+        tp1_mult=cfg.get("tp1", 2.5),
+        trail_mult=cfg.get("trail", 3.0),
+        sl_mult=cfg.get("sl", 2.0),
+        horizon=cfg["horizon"],
+    )
+
+
+def _breakeven_exit(enriched: pd.DataFrame, signal_i: int, cfg: dict) -> BarrierOutcome | None:
+    return label_candidate_breakeven(
+        enriched,
+        signal_i,
+        tp_mult=cfg.get("tp", 5.0),
+        sl_mult=cfg.get("sl", 2.0),
+        be_trigger=cfg.get("be_trigger", 1.5),
+        horizon=cfg["horizon"],
+    )
+
+
+def _ma_exit(enriched: pd.DataFrame, signal_i: int, cfg: dict) -> BarrierOutcome | None:
+    return label_candidate_ma_exit(
+        enriched,
+        signal_i,
+        ma_col=cfg.get("ma_col", "ema21"),
+        horizon=cfg["horizon"],
+    )
+
+
+EXIT_PLUGINS: dict[str, ExitPlugin] = {
+    "fixed": _fixed_exit,
+    "trailing": _trailing_exit,
+    "scaled": _scaled_exit,
+    "breakeven": _breakeven_exit,
+    "ma-exit": _ma_exit,
+}
+
+
+def _exit_name(cfg: dict) -> str:
+    if "exit" in cfg:
+        return str(cfg["exit"])
+    if "trail" in cfg:
+        return "trailing"
+    return "fixed"
+
+
+def label_with_config(enriched: pd.DataFrame, signal_i: int, cfg: dict) -> BarrierOutcome | None:
+    exit_name = _exit_name(cfg)
+    try:
+        plugin = EXIT_PLUGINS[exit_name]
+    except KeyError as exc:
+        raise ValueError(f"unknown exit plugin {exit_name!r}") from exc
+    return plugin(enriched, signal_i, cfg)
 
 
 def build_all() -> dict[str, pd.DataFrame]:
@@ -87,7 +157,7 @@ def build_all() -> dict[str, pd.DataFrame]:
             }
             feats = feature_rows.iloc[row_pos].to_dict()
             for name, cfg in CONFIGS.items():
-                outcome = _label(enriched, signal_i, cfg)
+                outcome = label_with_config(enriched, signal_i, cfg)
                 if outcome is None:
                     continue
                 records[name].append({

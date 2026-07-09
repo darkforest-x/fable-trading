@@ -1,0 +1,106 @@
+=== queue3 start Thu Jul  9 08:23:03 CST 2026 ===
+--- [1/3] H1 x H9 stack on the SWAP mainline
+tp5_sl2 {'n_pool': 9312, 'threshold': 0.3874, 'top_all': {'n': 151, 'net_maker016': -0.00074, 'net_swap006': 0.00026, 'win': 0.3576}, 'top_above_ma': {'n': 58, 'net_maker016': -0.00034, 'net_swap006': 0.00066, 'win': 0.3966}, 'top_against': {'n': 93, 'net_maker016': -0.00099, 'net_swap006': 1e-05, 'win': 0.3333}}
+scaled_25_t3 {'n_pool': 9312, 'threshold': 0.6078, 'top_all': {'n': 151, 'net_maker016': 0.00226, 'net_swap006': 0.00326, 'win': 0.7285}, 'top_above_ma': {'n': 52, 'net_maker016': 0.00189, 'net_swap006': 0.00289, 'win': 0.75}, 'top_against': {'n': 99, 'net_maker016': 0.00245, 'net_swap006': 0.00345, 'win': 0.7172}}
+--- [2/3] multi-timeframe first pass (1H/30m/5m)
+{'config': '1H_h24', 'n_series': 54, 'n': 330, 'note': 'pool too small'}
+{'config': '1H_h36', 'n_series': 54, 'n': 330, 'note': 'pool too small'}
+{'config': '30m_h48', 'n_series': 54, 'n': 2222, 'n_val': 364, 'val_auc': 0.6476, 'perm_p': 0.001, 'top_gross': 0.00626, 'top_net_maker': 0.00466, 'top_win': 0.4722}
+{'config': '30m_h72', 'n_series': 54, 'n': 2218, 'n_val': 360, 'val_auc': 0.6297, 'perm_p': 0.001, 'top_gross': 0.00544, 'top_net_maker': 0.00384, 'top_win': 0.4444}
+{'config': '5m_h216', 'n_series': 327, 'n': 26293, 'n_val': 3367, 'val_auc': 0.6004, 'perm_p': 0.001, 'top_gross': 0.00219, 'top_net_maker': 0.00059, 'top_win': 0.4375}
+--- [3/3] data-quality audit
+{
+  "series_total": 802,
+  "by_bar": {
+    "15m": 365,
+    "1H": 54,
+    "30m": 54,
+    "5m": 329
+  },
+  "flagged": 359,
+  "worst_gaps": [
+    {
+      "bar": "5m",
+      "symbol": "BAS_USDT",
+      "n_gaps": 2,
+      "max_gap_hours": 0.2
+    },
+    {
+      "bar": "5m",
+      "symbol": "BCH_USDT",
+      "n_gaps": 2,
+      "max_gap_hours": 0.2
+    },
+    {
+      "bar": "5m",
+      "symbol": "BSB_USDT",
+      "n_gaps": 2,
+      "max_gap_hours": 0.2
+    },
+    {
+      "bar": "5m",
+      "symbol": "H_USDT",
+      "n_gaps": 2,
+      "max_gap_hours": 0.2
+    },
+    {
+      "bar": "5m",
+      "symbol": "NEAR_USDT",
+      "n_gaps": 2,
+      "max_gap_hours": 0.2
+    }
+  ],
+  "spike_series": [
+    {
+      "bar": "15m",
+      "symbol": "AAVE_USDT",
+      "spike_bars": 1
+    },
+    {
+      "bar": "15m",
+      "symbol": "AAVE_USDT_SWAP",
+      "spike_bars": 1
+    },
+    {
+      "bar": "15m",
+      "symbol": "ADA_USDT",
+      "spike_bars": 2
+    },
+    {
+      "bar": "15m",
+      "symbol": "ADA_USDT_SWAP",
+      "spike_bars": 2
+    },
+    {
+      "bar": "15m",
+      "symbol": "AIGENSYN_USDT",
+      "spike_bars": 2
+    },
+    {
+      "bar": "15m",
+      "symbol": "AI_USDT_SWAP",
+      "spike_bars": 1
+    },
+    {
+      "bar": "15m",
+      "symbol": "APE_USDT",
+      "spike_bars": 2
+    },
+    {
+      "bar": "15m",
+      "symbol": "APE_USDT_SWAP",
+      "spike_bars": 3
+    },
+    {
+      "bar": "15m",
+      "symbol": "APT_USDT",
+      "spike_bars": 1
+    },
+    {
+      "bar": "15m",
+      "symbol": "APT_USDT_SWAP",
+      "spike_bars": 1
+    }
+  ]
+}
+=== queue3 done Thu Jul  9 08:27:04 CST 2026 ===

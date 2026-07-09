@@ -33,11 +33,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from src.judgment.frozen import DEFAULT_FROZEN_CONFIG, latest_artifact, score_with_artifact
 from src.judgment.features import FEATURE_COLUMNS
 from src.judgment.train import load_splits, train_model
 
 PROJECT_DIR = Path(__file__).resolve().parents[2]
-DEFAULT_DATA = PROJECT_DIR / "data" / "judgment_dataset_v2_expanded.csv"
+DEFAULT_DATA = DEFAULT_FROZEN_CONFIG.dataset_path
 OUTPUT_DIR = PROJECT_DIR / "analysis" / "output"
 
 BAR = pd.Timedelta(minutes=15)
@@ -51,6 +52,10 @@ SCORE_QUANTILE = 0.90
 def build_signals(data_path: Path) -> tuple[pd.DataFrame, float]:
     """Train the judgment model (train/val discipline unchanged), score every
     candidate in the CSV, and fix the entry threshold from val scores only."""
+    artifact = latest_artifact(DEFAULT_FROZEN_CONFIG)
+    if artifact is not None and data_path.resolve() == artifact.dataset_path.resolve():
+        return score_with_artifact(artifact)
+
     train, val, _ = load_splits(data_path)
     model = train_model(train, val)
     val_scores = model.predict(val[FEATURE_COLUMNS], num_iteration=model.best_iteration)

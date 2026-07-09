@@ -1,8 +1,8 @@
-"""Resumable OKX 15m history fetcher (public API, no key needed).
+"""Resumable OKX history fetcher (public API, no key needed).
 
 Fills the data gap identified in p2b: the old cache has only one full-year
 series (ETH_USDT_SWAP); everything else is <6 months. This script pulls
-`DAYS` days of 15m candles for a curated list of liquid symbols into
+`DAYS` days of candles for a curated list of liquid symbols into
 data/kline_fetched/, in files the loader merges with the old cache.
 
 Run ON A MACHINE WITH OKX ACCESS (the Cowork sandbox cannot reach okx.com):
@@ -11,7 +11,7 @@ Run ON A MACHINE WITH OKX ACCESS (the Cowork sandbox cannot reach okx.com):
     python3 -m src.data.fetch_okx --symbols BTC_USDT ETH_USDT
     python3 -m src.data.fetch_okx --days 400
 
-Resumable: progress is kept in {SYMBOL}_15m.part.csv (ignored by the loader);
+Resumable: progress is kept in {SYMBOL}_{bar}.part.csv (ignored by the loader);
 finished symbols are skipped on rerun. Safe to Ctrl-C and restart.
 
 Rate limit: history-candles allows 20 req / 2 s; a global throttle spaces
@@ -33,9 +33,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from src.data.bars import BAR_CHOICES, normalize_bar
+
 FETCH_DIR = Path(__file__).resolve().parents[2] / "data" / "kline_fetched"
 API = "https://www.okx.com/api/v5/market/history-candles"
-BAR = "15m"
+DEFAULT_BAR = "15m"
 PAGE_LIMIT = 100
 MAX_RETRIES = 5
 DEFAULT_WORKERS = 8
@@ -100,14 +102,15 @@ def _request(url: str) -> dict:
     raise RuntimeError(f"giving up on {url}")
 
 
-def _finished_file(symbol: str) -> Path | None:
-    hits = sorted(FETCH_DIR.glob(f"okx_{symbol}_{BAR}_*.csv"))
+def _finished_file(symbol: str, bar: str) -> Path | None:
+    hits = sorted(FETCH_DIR.glob(f"okx_{symbol}_{bar}_*.csv"))
     return hits[-1] if hits else None
 
 
-def fetch_symbol(symbol: str, start_ms: int) -> None:
+def fetch_symbol(symbol: str, start_ms: int, bar: str = DEFAULT_BAR) -> None:
+    bar = normalize_bar(bar)
     inst_id = symbol.replace("_", "-")
-    part = FETCH_DIR / f"{symbol}_{BAR}.part.csv"
+    part = FETCH_DIR / f"{symbol}_{bar}.part.csv"
     rows: list[list] = []
     oldest_ms: int | None = None
     if part.exists():  # resume: reload progress, continue from oldest ts
@@ -122,7 +125,7 @@ def fetch_symbol(symbol: str, start_ms: int) -> None:
         part.write_text(",".join(header) + "\n")
 
     while oldest_ms is None or oldest_ms > start_ms:
-        url = f"{API}?instId={inst_id}&bar={BAR}&limit={PAGE_LIMIT}"
+        url = f"{API}?instId={inst_id}&bar={bar}&limit={PAGE_LIMIT}"
         if oldest_ms is not None:
             url += f"&after={oldest_ms}"
         payload = _request(url)
@@ -151,7 +154,7 @@ def fetch_symbol(symbol: str, start_ms: int) -> None:
     # dedupe + sort, write final file named to match the loader's pattern
     uniq = {int(r[0]): r for r in rows}
     final_rows = [uniq[k] for k in sorted(uniq)]
-    out = FETCH_DIR / f"okx_{symbol}_{BAR}_{len(final_rows)}.csv"
+    out = FETCH_DIR / f"okx_{symbol}_{bar}_{len(final_rows)}.csv"
     with out.open("w", newline="") as fh:
         writer = csv.writer(fh)
         writer.writerow(header)
@@ -166,16 +169,15 @@ def main() -> int:
     parser.add_argument("--symbols", nargs="*", default=DEFAULT_SYMBOLS)
     parser.add_argument("--days", type=int, default=400)
     parser.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
-    parser.add_argument("--bar", default="15m", choices=("5m", "15m", "30m", "1H"),
+    parser.add_argument("--bar", default=DEFAULT_BAR, choices=BAR_CHOICES,
                         help="candle timeframe (filenames and API both follow it)")
     args = parser.parse_args()
-    global BAR
-    BAR = args.bar
+    bar = normalize_bar(args.bar)
     FETCH_DIR.mkdir(parents=True, exist_ok=True)
     start_ms = int((datetime.now(timezone.utc) - timedelta(days=args.days)).timestamp() * 1000)
     pending: list[str] = []
     for symbol in args.symbols:
-        done = _finished_file(symbol)
+        done = _finished_file(symbol, bar)
         if done is not None:
             print(f"{symbol}: already fetched ({done.name})", flush=True)
         else:
@@ -183,7 +185,7 @@ def main() -> int:
     print(f"fetching {len(pending)} symbols with {args.workers} workers", flush=True)
     failed = 0
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        futures = {pool.submit(fetch_symbol, s, start_ms): s for s in pending}
+        futures = {pool.submit(fetch_symbol, s, start_ms, bar): s for s in pending}
         for n, future in enumerate(as_completed(futures), 1):
             symbol = futures[future]
             try:
