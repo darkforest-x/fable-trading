@@ -1,0 +1,17 @@
+# Example only — do NOT commit real passwords.
+# VPS optional outer gate (Phase 0 scheme A) in front of fable-dashboard :8642.
+#
+#   sudo htpasswd -c /etc/nginx/.htpasswd_fable <OWNER_USER>
+#   include this server block (paths are examples).
+
+# server {
+#   listen 80;
+#   server_name _;
+#   location / {
+#     auth_basic "fable-trading";
+#     auth_basic_user_file /etc/nginx/.htpasswd_fable;
+#     proxy_pass http://127.0.0.1:8642;
+#     proxy_set_header Host $host;
+#     proxy_set_header X-Real-IP $remote_addr;
+#   }
+# }

@@ -37,6 +37,30 @@ body {
   outline: 2px solid var(--accent); outline-offset: 2px;
 }
 .tab.active { background: var(--surface-2); color: var(--text); border-color: var(--border); }
+.ops-token-wrap { display: flex; align-items: center; gap: 6px; }
+.ops-token-wrap input {
+  width: 140px; background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); border-radius: 8px; padding: 6px 10px; font-size: 12px;
+}
+.mini-btn {
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+  border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px; min-height: 36px;
+}
+.mini-btn:hover { border-color: var(--accent); }
+.ops-pre {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 14px; overflow: auto; max-height: 420px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;
+  white-space: pre-wrap; word-break: break-word; color: var(--text-2); margin-top: 8px;
+}
+.md-pre { max-height: 70vh; color: var(--text); }
+.subhead { font-size: 14px; margin-top: 16px; }
+#exp-table tbody tr.clickable { cursor: pointer; }
+#exp-table tbody tr.clickable:hover { background: var(--surface-2); }
+#exp-kind, #exp-sort {
+  background: var(--surface); border: 1px solid var(--border); color: var(--text);
+  border-radius: 8px; padding: 6px 10px; font-size: 13px;
+}
 main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 60px; }
 .view.hidden { display: none; }
 

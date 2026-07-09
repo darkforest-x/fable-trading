@@ -319,15 +319,24 @@ OHLC 坏样本 0。5 个 `.part.csv` 未完成拉取已列报告。
 > owner 愿景：整个核心流程可在前端操作。分四期落地，**每期先做鉴权再做能力**
 > ——公网看板一旦有"执行"按钮，没有鉴权就是把实验室交给全网。
 
-### 第 0 期（硬前置）：鉴权
-nginx basic-auth 或 FastAPI 中间件 token（token 由 owner 生成放 VPS 环境变量，
-agent 不接触明文）。没有这个，后面全部不许上 VPS。
+### ~~第 0 期（硬前置）：鉴权~~ ✅ 已完成（2026-07-10）
+~~nginx basic-auth 或 FastAPI 中间件 token（token 由 owner 生成放 VPS 环境变量，
+agent 不接触明文）。没有这个，后面全部不许上 VPS。~~
 
-### 第 1 期：实验注册表（只读，无风险先行）
-- 后端扫描 `analysis/output/*.json` 建实验索引（tag/日期/配置/关键指标）；
-- 前端"实验"页：全部历史实验一张可排序对比表 + 点击看详情 JSON + 关联报告
-  （markdown 渲染 `analysis/*.md`）；
-- 研究议程页：渲染 `docs/RESEARCH_AGENDA.md`，状态一目了然。
+完成记录：`src/webapp/auth.py` + `ops_flags.py`；`OPS_AUTH_MODE` /
+`OPS_API_TOKEN` / `OPS_REQUIRE_AUTH`；Bearer 或 `X-Ops-Token`；
+`GET /api/ops/status` 公开探测门禁；token 模式且 token 空 → 503 防空门禁。
+操作说明：`docs/P2_5_PHASE01_README.md`。VPS 公网前 owner 须自设 secret。
+
+### ~~第 1 期：实验注册表（只读，无风险先行）~~ ✅ 已完成（2026-07-10）
+- ~~后端扫描 `analysis/output/*.json` 建实验索引（tag/日期/配置/关键指标）；~~
+- ~~前端"实验"页：全部历史实验一张可排序对比表 + 点击看详情 JSON + 关联报告
+  （markdown 渲染 `analysis/*.md`）；~~
+- ~~研究议程页：渲染 `docs/RESEARCH_AGENDA.md`，状态一目了然。~~
+
+完成记录：`experiment_registry.py` + `agenda_payloads.py`；路由
+`/api/ops/experiments`、`/api/ops/experiments/{id}`、`/api/ops/agenda`；
+顶栏 **实验** / **议程** tab。**无 job runner**（执行器默认关）。
 
 ### 第 2 期：任务运行器（核心）
 - 后端 job runner：sqlite 任务表 + subprocess 执行白名单命令

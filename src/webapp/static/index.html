@@ -21,7 +21,13 @@
       <button class="tab" data-view="backtest">回测</button>
       <button class="tab" data-view="signals">信号浏览</button>
       <button class="tab" data-view="forward">前向验证</button>
+      <button class="tab" data-view="experiments">实验</button>
+      <button class="tab" data-view="agenda">议程</button>
     </nav>
+    <div class="ops-token-wrap" id="ops-token-wrap" hidden>
+      <input id="ops-token-input" type="password" placeholder="OPS token" autocomplete="off" spellcheck="false">
+      <button type="button" id="ops-token-save" class="mini-btn">保存</button>
+    </div>
   </div>
 </header>
 
@@ -209,6 +215,72 @@
           <tbody></tbody>
         </table>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ P2.5 实验注册表 ============ -->
+  <section id="view-experiments" class="view hidden" hidden aria-hidden="true">
+    <div class="panel">
+      <h2>实验注册表 <span class="unit">P2.5 Phase1 · 只读 · analysis/output/*.json</span></h2>
+      <div class="controls">
+        <input id="exp-q" placeholder="搜索 id / config / 报告" autocomplete="off">
+        <select id="exp-kind">
+          <option value="">全部 kind</option>
+          <option value="p0">p0</option>
+          <option value="p2a">p2a</option>
+          <option value="p2b">p2b</option>
+          <option value="p3">p3</option>
+          <option value="p15">p15</option>
+          <option value="h9">h9</option>
+          <option value="mtf">mtf</option>
+          <option value="exit">exit</option>
+          <option value="swap">swap</option>
+          <option value="short">short</option>
+          <option value="audit">audit</option>
+          <option value="v3">v3</option>
+          <option value="other">other</option>
+        </select>
+        <select id="exp-sort">
+          <option value="mtime">按修改时间</option>
+          <option value="val_auc">按 val_auc</option>
+          <option value="perm_p">按 perm_p</option>
+        </select>
+        <button type="button" id="exp-refresh" class="mini-btn">刷新</button>
+        <span class="note" id="exp-count"></span>
+      </div>
+      <div id="exp-auth-note" class="banner" hidden></div>
+      <div class="table-wrap">
+        <table id="exp-table">
+          <thead><tr>
+            <th>id</th>
+            <th>kind</th>
+            <th>config</th>
+            <th class="num">val_auc</th>
+            <th class="num">perm_p</th>
+            <th class="num">top_net_maker</th>
+            <th class="num">n_val</th>
+            <th>报告</th>
+            <th>mtime</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel" id="exp-detail-panel" hidden>
+      <h2>详情 <span class="unit" id="exp-detail-id"></span></h2>
+      <div id="exp-detail-meta" class="note"></div>
+      <pre id="exp-detail-json" class="ops-pre"></pre>
+      <h2 class="subhead">关联报告</h2>
+      <pre id="exp-detail-report" class="ops-pre md-pre"></pre>
+    </div>
+  </section>
+
+  <!-- ============ P2.5 研究议程 ============ -->
+  <section id="view-agenda" class="view hidden" hidden aria-hidden="true">
+    <div class="panel">
+      <h2>研究议程 <span class="unit">docs/RESEARCH_AGENDA.md · 只读</span></h2>
+      <p class="note" id="agenda-meta"></p>
+      <pre id="agenda-md" class="ops-pre md-pre"></pre>
     </div>
   </section>
 </main>

@@ -1,6 +1,6 @@
 # P2.5 操作台化设计（Ops Console）
 
-> **状态**：设计文档 only，不包含实现代码。  
+> **状态**：Phase 0+1 **已实现**（2026-07-10）；Phase 2+ 仍为设计。  
 > **范围来源**：`NEXT_STEPS.md` §P2.5；对齐 `DESIGN.md` 暗色看板语言、`docs/ARCHITECTURE.md` 部署拓扑、`AGENTS.md` 纪律。  
 > **红线（本文不越）**：不评估 holdout、不重训 YOLO、不修改 `auto_label`、不新增重型依赖、配置变更永不走网页直改。
 

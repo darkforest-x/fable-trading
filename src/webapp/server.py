@@ -2,16 +2,20 @@
 
 Routes are intentionally thin: `dashboard_payloads` owns universe-scoped
 overview/backtest/chart JSON, and `forward_payloads` owns forward validation
-JSON. Static assets are mounted last so API routes stay reachable.
+JSON. P2.5 Phase 0+1 adds ops auth + experiment registry + agenda (read-only).
+Static assets are mounted last so API routes stay reachable.
 """
 from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query, Request
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from src.backtest.run import BASE_COST
+from src.webapp.agenda_payloads import agenda_payload
+from src.webapp.auth import verify_ops_request
 from src.webapp.dashboard_cache import DEFAULT_UNIVERSE
 from src.webapp.dashboard_payloads import (
     backtest_payload,
@@ -20,7 +24,9 @@ from src.webapp.dashboard_payloads import (
     symbols_payload,
     trade_rows_payload,
 )
+from src.webapp.experiment_registry import experiment_detail, list_experiments
 from src.webapp.forward_payloads import FORWARD_COST, forward_payload
+from src.webapp.ops_flags import ops_status_payload
 
 app = FastAPI(title="fable-trading dashboard")
 
@@ -67,6 +73,42 @@ def chart(source: str, symbol: str, bars: int = 3000, universe: str = DEFAULT_UN
 @app.get("/api/forward")
 def forward(cost: float = FORWARD_COST) -> dict:
     return forward_payload(cost)
+
+
+# ---------- P2.5 Phase 0+1: ops (read-only) ----------
+
+
+@app.get("/api/ops/status")
+def ops_status() -> dict:
+    """Public: whether ops auth is required (does not leak the token)."""
+    return ops_status_payload()
+
+
+@app.get("/api/ops/experiments")
+def ops_experiments(
+    request: Request,
+    kind: str = "",
+    q: str = "",
+    sort: str = Query(default="mtime", pattern="^(mtime|val_auc|perm_p)$"),
+    order: str = Query(default="desc", pattern="^(asc|desc)$"),
+) -> dict:
+    verify_ops_request(request)
+    return list_experiments(kind=kind, q=q, sort=sort, order=order)
+
+
+@app.get("/api/ops/experiments/{exp_id}")
+def ops_experiment_detail(exp_id: str, request: Request):
+    verify_ops_request(request)
+    detail = experiment_detail(exp_id)
+    if detail is None:
+        return JSONResponse({"detail": f"experiment not found: {exp_id}"}, status_code=404)
+    return detail
+
+
+@app.get("/api/ops/agenda")
+def ops_agenda(request: Request) -> dict:
+    verify_ops_request(request)
+    return agenda_payload()
 
 
 app.mount("/", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="static")

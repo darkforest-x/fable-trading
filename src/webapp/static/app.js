@@ -38,6 +38,8 @@ function showView(name) {
   if (name === "backtest") loadBacktest();
   if (name === "signals") initSignals();
   if (name === "forward") loadForward();
+  if (name === "experiments") loadExperiments();
+  if (name === "agenda") loadAgenda();
 }
 document.querySelectorAll(".tab").forEach((btn) =>
   btn.addEventListener("click", () => showView(btn.dataset.view)));
@@ -539,4 +541,149 @@ async function focusTrade(source, symbol, entryTimeStr) {
   await loadChart(key, entryTs);
 }
 
+/* ---------- P2.5 ops: token + experiments + agenda ---------- */
+const opsState = {
+  authRequired: false,
+  token: sessionStorage.getItem("ops_api_token") || "",
+};
+
+function opsHeaders() {
+  const h = {};
+  if (opsState.token) h["X-Ops-Token"] = opsState.token;
+  return h;
+}
+
+async function opsFetch(path, params = {}) {
+  const q = new URLSearchParams(params);
+  const url = q.toString() ? `${path}?${q}` : path;
+  const res = await fetch(url, { headers: opsHeaders() });
+  if (res.status === 401 || res.status === 503) {
+    const detail = (await res.json().catch(() => ({}))).detail || res.statusText;
+    throw new Error(detail);
+  }
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function refreshOpsAuthUi() {
+  try {
+    const st = await (await fetch("/api/ops/status")).json();
+    opsState.authRequired = !!st.ops_auth_required;
+    const wrap = $("#ops-token-wrap");
+    if (wrap) {
+      wrap.hidden = !opsState.authRequired;
+      if (opsState.token && $("#ops-token-input")) $("#ops-token-input").value = opsState.token;
+    }
+  } catch (_) { /* ignore */ }
+}
+
+$("#ops-token-save")?.addEventListener("click", () => {
+  opsState.token = ($("#ops-token-input")?.value || "").trim();
+  if (opsState.token) sessionStorage.setItem("ops_api_token", opsState.token);
+  else sessionStorage.removeItem("ops_api_token");
+  const active = document.querySelector(".tab.active")?.dataset.view;
+  if (active === "experiments") loadExperiments();
+  if (active === "agenda") loadAgenda();
+});
+
+function fmtMetric(x, digits = 4) {
+  if (x === null || x === undefined || Number.isNaN(Number(x))) return "—";
+  return Number(x).toFixed(digits);
+}
+
+async function loadExperiments() {
+  const note = $("#exp-auth-note");
+  const tbody = $("#exp-table tbody");
+  if (!tbody) return;
+  if (note) note.hidden = true;
+  tbody.innerHTML = `<tr><td colspan="9" class="note">加载中…</td></tr>`;
+  try {
+    const kind = $("#exp-kind")?.value || "";
+    const q = $("#exp-q")?.value || "";
+    const sort = $("#exp-sort")?.value || "mtime";
+    const data = await opsFetch("/api/ops/experiments", { kind, q, sort, order: "desc" });
+    if ($("#exp-count")) $("#exp-count").textContent = `${data.count} 个产物`;
+    if (!data.items?.length) {
+      tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">analysis/output 无 JSON，或筛选为空</div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.items.map((it) => {
+      const m = it.metrics || {};
+      const report = it.report_path
+        ? `<span class="note">${String(it.report_path).replace(/^analysis\//, "")}</span>`
+        : "—";
+      const mtime = it.mtime_iso ? it.mtime_iso.slice(0, 16).replace("T", " ") : "—";
+      return `<tr class="clickable" data-exp-id="${it.id}">
+        <td><b>${it.id}</b></td>
+        <td>${it.kind || "—"}</td>
+        <td>${it.config ?? "—"}</td>
+        <td class="num">${fmtMetric(m.val_auc, 3)}</td>
+        <td class="num">${fmtMetric(m.perm_p, 3)}</td>
+        <td class="num">${fmtMetric(m.top_net_maker, 4)}</td>
+        <td class="num">${m.n_val ?? m.n ?? "—"}</td>
+        <td>${report}</td>
+        <td class="note">${mtime}</td>
+      </tr>`;
+    }).join("");
+    tbody.querySelectorAll("tr[data-exp-id]").forEach((tr) => {
+      tr.addEventListener("click", () => openExperiment(tr.dataset.expId));
+    });
+  } catch (err) {
+    if (note) {
+      note.hidden = false;
+      note.innerHTML = `<b>无法加载实验表</b>：${err.message}<br>若 OPS_AUTH_MODE=token，请在右上角粘贴 token。`;
+    }
+    tbody.innerHTML = "";
+  }
+}
+
+async function openExperiment(id) {
+  const panel = $("#exp-detail-panel");
+  if (!panel) return;
+  panel.hidden = false;
+  $("#exp-detail-id").textContent = id;
+  $("#exp-detail-json").textContent = "加载中…";
+  $("#exp-detail-report").textContent = "";
+  try {
+    const d = await opsFetch(`/api/ops/experiments/${encodeURIComponent(id)}`);
+    $("#exp-detail-meta").textContent = [d.path, d.report_path || "无关联报告", d.kind].filter(Boolean).join(" · ");
+    $("#exp-detail-json").textContent = JSON.stringify({
+      rows_preview: (d.rows || []).slice(0, 20),
+      n_rows: (d.rows || []).length,
+    }, null, 2);
+    $("#exp-detail-report").textContent = d.report_markdown || "（无 markdown 报告）";
+  } catch (err) {
+    $("#exp-detail-json").textContent = String(err.message || err);
+  }
+}
+
+async function loadAgenda() {
+  const pre = $("#agenda-md");
+  const meta = $("#agenda-meta");
+  if (!pre) return;
+  pre.textContent = "加载中…";
+  try {
+    const d = await opsFetch("/api/ops/agenda");
+    if (meta) {
+      meta.textContent = d.exists
+        ? `${d.path} · ${d.mtime_iso || "—"}`
+        : (d.note || "议程不存在");
+    }
+    pre.textContent = d.markdown || "（空）";
+  } catch (err) {
+    if (meta) meta.textContent = "";
+    pre.textContent = `加载失败：${err.message}`;
+  }
+}
+
+$("#exp-refresh")?.addEventListener("click", () => loadExperiments());
+$("#exp-kind")?.addEventListener("change", () => loadExperiments());
+$("#exp-sort")?.addEventListener("change", () => loadExperiments());
+let expQTimer = null;
+$("#exp-q")?.addEventListener("input", () => {
+  clearTimeout(expQTimer);
+  expQTimer = setTimeout(() => loadExperiments(), 250);
+});
+
+refreshOpsAuthUi();
 loadOverview();
