@@ -291,7 +291,8 @@ Round 1 进度（2026-07-09）：
 - 已记录样本清单：`analysis/p2a_label_audit_round1.md`。
 - 已用 Playwright 验证 desktop 1280x900 / mobile 390x844：18 张图，横向溢出 0。
 - **07-10 owner 确认** findings（见 `output/offline_tasks/yolo_label_audit_findings.csv`）。
-  下一步：单变量 E1 收紧 `x_pad_px`（单独 commit），重建审计页确认后再谈训练。
+- **07-10 E1 完成**：`X_PAD_PX` 12→6；`dense_15m_full` 标签重写；
+  报告 `analysis/p2a_e1_xpad_report.md`。下一步：owner 过审计页 → 认可后再固定配置重训。
 
 ### 11b. YOLO 架构后续（视第 1/3 步结论）
 - 若 20/60/120 判断层胜出：检测+判断已对齐，做"YOLO 预测框 → 判断层候选"的

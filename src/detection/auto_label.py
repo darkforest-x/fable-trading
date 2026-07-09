@@ -23,6 +23,12 @@ FAST_SPREAD_MAX = 0.0028
 FULL_SPREAD_MAX = 0.0055
 MIN_DENSE_BARS = 5
 MERGE_GAP_BARS = 2  # merge runs separated by tiny gaps to avoid sliver boxes
+# Horizontal pad outside the first/last dense bar (pixels). smoke3 used 12 for
+# mAP IoU forgiveness; P2-11 E1 (2026-07-10) tightens back to 6 after owner
+# audit found systematic box_too_wide (e.g. PAXG_USDT_015960). Single-variable
+# only — do not change y_pad_frac / min_bars / merge_gap in the same experiment.
+X_PAD_PX = 6
+Y_PAD_FRAC = 0.35
 
 CLASS_ID = 0  # single class: dense_cluster
 CLASS_NAME = "dense_cluster"
@@ -65,8 +71,8 @@ def segment_to_bbox(
     seg: DenseSegment,
     tf: ChartTransform,
     *,
-    x_pad_px: int = 12,
-    y_pad_frac: float = 0.35,
+    x_pad_px: int = X_PAD_PX,
+    y_pad_frac: float = Y_PAD_FRAC,
 ) -> tuple[float, float, float, float] | None:
     """Map a dense segment to a normalized (x_center, y_center, w, h) YOLO box.
 

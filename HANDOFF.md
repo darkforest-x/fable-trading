@@ -9,7 +9,7 @@
 **2b 验收通过（holdout 已消耗）→ 阶段 3 第一轮未通过（PF 1.01@0.3%）→
 owner 已委托"按推荐直接执行" → 出场结构扫描完成：TP5/SL2 为 v3 候选标签**
 （val 净@0.3% +0.077%/笔 vs 基线 +0.001%，p=0.001，见 `analysis/p2b_v3_barrier_sweep.md`）。
-进行中：P2-11 YOLO 迭代优化循环；Round 1 打标预审已由 owner 确认，下一步 E1（收 x_pad）。
+进行中：P2-11 YOLO 迭代优化循环；E1（`x_pad_px` 12→6）已落地并 relabel，待 owner 过审计页后重训。
 **07-10 追加（Grok）**：`codex/day1` 已合并进 `main`（`1c1344f`）并 push；owner 确认
 P2-11 打标 findings + P2-12 黑名单写入 BLOCKED。  
 **07-10 追加（Grok 接手）**：P2-12 数据审计完成（见 `analysis/p2_data_audit_report.md`）；

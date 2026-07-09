@@ -79,6 +79,26 @@ def _price_bounds(df: pd.DataFrame, pad: float = 0.06) -> tuple[float, float]:
     return lo - span * pad, hi + span * pad
 
 
+def make_chart_transform(
+    df: pd.DataFrame,
+    *,
+    width: int = IMG_WIDTH,
+    height: int = IMG_HEIGHT,
+) -> ChartTransform:
+    """Build the pixel transform for a window without drawing (relabel path)."""
+    df = df.reset_index(drop=True)
+    n = len(df)
+    left = top = MARGIN
+    plot_w, plot_h = width - 2 * MARGIN, height - 2 * MARGIN
+    price_min, price_max = _price_bounds(df)
+    candle_half_w = max(1, int(plot_w / max(n, 1) * 0.34))
+    return ChartTransform(
+        n_bars=n, width=width, height=height, left=left, top=top,
+        plot_w=plot_w, plot_h=plot_h,
+        price_min=price_min, price_max=price_max, candle_half_w=candle_half_w,
+    )
+
+
 def render_chart(
     df: pd.DataFrame,
     *,
@@ -89,15 +109,8 @@ def render_chart(
     """Render one window of candles + 6 MAs. df rows must already contain MA columns."""
     df = df.reset_index(drop=True)
     n = len(df)
-    left = top = MARGIN
-    plot_w, plot_h = width - 2 * MARGIN, height - 2 * MARGIN
-    price_min, price_max = _price_bounds(df)
-    candle_half_w = max(1, int(plot_w / max(n, 1) * 0.34))
-    tf = ChartTransform(
-        n_bars=n, width=width, height=height, left=left, top=top,
-        plot_w=plot_w, plot_h=plot_h,
-        price_min=price_min, price_max=price_max, candle_half_w=candle_half_w,
-    )
+    tf = make_chart_transform(df, width=width, height=height)
+    candle_half_w = tf.candle_half_w
 
     img = np.full((height, width, 3), BG, dtype=np.uint8)
     for i in range(n):

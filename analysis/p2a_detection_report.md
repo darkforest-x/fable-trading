@@ -162,6 +162,11 @@ full_spread = (max-min of all six MAs) / close    ≤ 0.0055
 - precision 0.8003、recall 0.7112 说明仍有近密集误报和漏检，未达到替代规则扫描的稳定性。
 - 本轮结果来自 val split 官方评估；没有评估 holdout。
 
+### P2-11 E1 标签收紧（2026-07-10）
+
+单变量：`X_PAD_PX` 12→**6**；`dense_15m_full` 标签原地重写（图未动）。  
+box_w_mean 0.1267→0.1176，n_boxes 不变。**未重训**。详见 `analysis/p2a_e1_xpad_report.md`。
+
 ---
 
 ## 全量训练建议
