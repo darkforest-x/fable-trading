@@ -235,3 +235,36 @@ def label_candidate_breakeven(
             stop = entry
     ret = timeout_close / entry - 1
     return BarrierOutcome(int(ret > 0), "timeout", horizon, entry, ret)
+
+
+def label_candidate_ma_exit(
+    frame: pd.DataFrame,
+    signal_i: int,
+    *,
+    ma_col: str = "ema21",
+    atr_pct_min: float = ATR_PCT_MIN,
+    horizon: int = HORIZON_BARS,
+) -> BarrierOutcome | None:
+    entry_i = signal_i + 1
+    last_i = entry_i + horizon - 1
+    if last_i >= len(frame) or ma_col not in frame.columns:
+        return None
+    entry = float(frame["open"].iloc[entry_i])
+    atr = float(frame["atr14"].iloc[signal_i])
+    if not np.isfinite(entry) or entry <= 0 or not np.isfinite(atr) or atr <= 0:
+        return None
+    atr_pct = float(frame["atr_pct"].iloc[signal_i])
+    if atr_pct_min > 0 and (not np.isfinite(atr_pct) or atr_pct < atr_pct_min):
+        return None
+
+    closes = frame["close"].to_numpy()[entry_i : last_i + 1]
+    ma_values = frame[ma_col].to_numpy()[entry_i : last_i + 1]
+    for j in range(horizon):
+        close = float(closes[j])
+        ma_value = float(ma_values[j])
+        if np.isfinite(close) and np.isfinite(ma_value) and close < ma_value:
+            ret = close / entry - 1
+            return BarrierOutcome(int(ret > 0), "ma_exit", j + 1, entry, ret)
+    timeout_close = float(frame["close"].iloc[last_i])
+    ret = timeout_close / entry - 1
+    return BarrierOutcome(int(ret > 0), "timeout", horizon, entry, ret)

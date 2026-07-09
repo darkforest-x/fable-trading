@@ -25,6 +25,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import average_precision_score, precision_score, recall_score, roc_auc_score
 from sklearn.preprocessing import StandardScaler
 
+from src.data.bars import BAR_CHOICES, purge_window
 from src.judgment.features import FEATURE_COLUMNS
 
 PROJECT_DIR = Path(__file__).resolve().parents[2]
@@ -52,14 +53,14 @@ LGB_PARAMS = {
 
 
 DEFAULT_HORIZON_BARS = 72
-PURGE_WINDOW = pd.Timedelta(hours=18.25)  # 73 x 15m bars: default outcome window
+DEFAULT_BAR = "15m"
+PURGE_WINDOW = purge_window(DEFAULT_HORIZON_BARS, DEFAULT_BAR)
 
 
 def load_splits(
-    dataset_path: Path = DATASET_PATH, *, horizon_bars: int = DEFAULT_HORIZON_BARS
+    dataset_path: Path = DATASET_PATH, *, horizon_bars: int = DEFAULT_HORIZON_BARS, bar: str = DEFAULT_BAR
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    # purge width = entry offset (1 bar) + outcome horizon, in 15m bars
-    purge = pd.Timedelta(minutes=15 * (horizon_bars + 1))
+    purge = purge_window(horizon_bars, bar)
     data = pd.read_csv(dataset_path, parse_dates=["signal_time"])
     data = data.sort_values("signal_time").reset_index(drop=True)
     dev = data[data["signal_time"] < HOLDOUT_START - purge].reset_index(drop=True)
@@ -141,15 +142,20 @@ def main() -> int:
     parser.add_argument("--eval-holdout", action="store_true", help="Evaluate the frozen holdout (run once).")
     parser.add_argument("--data", type=Path, default=DATASET_PATH, help="Dataset CSV from build_dataset.")
     parser.add_argument("--tag", default="p2b", help="Output file prefix, e.g. p2b_v2_strict.")
+    parser.add_argument("--bar", choices=BAR_CHOICES, default=DEFAULT_BAR)
+    parser.add_argument("--horizon-bars", type=int, default=DEFAULT_HORIZON_BARS)
     args = parser.parse_args()
 
-    train, val, holdout = load_splits(args.data)
+    train, val, holdout = load_splits(args.data, horizon_bars=args.horizon_bars, bar=args.bar)
     model = train_model(train, val)
     scaler, base = train_baseline(train)
 
     val_prob = model.predict(val[FEATURE_COLUMNS], num_iteration=model.best_iteration)
     results = {
         "dataset": str(args.data),
+        "bar": args.bar,
+        "horizon_bars": args.horizon_bars,
+        "purge_window": str(purge_window(args.horizon_bars, args.bar)),
         "holdout_start": str(HOLDOUT_START),
         "splits": {
             "train": {"n": len(train), "range": [str(train["signal_time"].min()), str(train["signal_time"].max())]},

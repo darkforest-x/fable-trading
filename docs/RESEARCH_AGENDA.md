@@ -30,7 +30,7 @@
 
 ## B. 多时间框架（回应"不该写死 15m"）
 
-前提工程：fetch_okx/update_okx/loader/build 的 bar 参数化（工单 P1.5-0）。
+前提工程：fetch_okx/update_okx/loader/build/train 的 bar 参数化已完成（P1.5 R0，2026-07-09）。
 
 | # | 假设 | 设计 | 判定 | 状态 |
 |---|---|---|---|---|

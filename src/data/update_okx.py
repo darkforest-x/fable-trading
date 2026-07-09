@@ -1,4 +1,4 @@
-"""Incremental OKX updater: extend every okx_{SYM}_15m_{N}.csv in
+"""Incremental OKX updater: extend every okx_{SYM}_{bar}_{N}.csv in
 data/kline_fetched to the latest confirmed candle.
 
 This is the forward-validation data feed (route D): run it daily (manually or
@@ -11,18 +11,27 @@ Reuses fetch_okx's WAF-safe request + global throttle; a full daily update of
 """
 from __future__ import annotations
 
+import argparse
 import csv
 import re
 from datetime import datetime, timezone
 from pathlib import Path
 
-from src.data.fetch_okx import API, BAR, FETCH_DIR, PAGE_LIMIT, _request
+from src.data.bars import BAR_CHOICES, normalize_bar
+from src.data.fetch_okx import API, DEFAULT_BAR, FETCH_DIR, PAGE_LIMIT, _request
 
-FILE_RE = re.compile(r"^okx_(?P<symbol>.+?)_15m_(?P<rows>\d+)\.csv$")
+FILE_RE = re.compile(r"^okx_(?P<symbol>.+?)_(?P<bar>5m|15m|30m|1H)_(?P<rows>\d+)\.csv$")
 
 
-def update_file(path: Path) -> tuple[str, int]:
-    symbol = FILE_RE.match(path.name).group("symbol")
+def update_file(path: Path, *, bar: str | None = None) -> tuple[str, int]:
+    matched = FILE_RE.match(path.name)
+    if matched is None:
+        raise ValueError(f"unsupported OKX kline filename: {path.name}")
+    symbol = matched.group("symbol")
+    file_bar = matched.group("bar")
+    if bar is not None and file_bar != normalize_bar(bar):
+        raise ValueError(f"{path.name} is {file_bar}, not {bar}")
+    bar = file_bar
     inst_id = symbol.replace("_", "-")
     with path.open() as fh:
         reader = csv.reader(fh)
@@ -33,7 +42,7 @@ def update_file(path: Path) -> tuple[str, int]:
     new_rows: list[list] = []
     after: int | None = None  # page backward from now until we reach last_ts
     while True:
-        url = f"{API}?instId={inst_id}&bar={BAR}&limit={PAGE_LIMIT}"
+        url = f"{API}?instId={inst_id}&bar={bar}&limit={PAGE_LIMIT}"
         if after is not None:
             url += f"&after={after}"
         payload = _request(url)
@@ -59,7 +68,7 @@ def update_file(path: Path) -> tuple[str, int]:
     merged = {int(r[0]): r for r in rows}
     merged.update({int(r[0]): r for r in new_rows})
     final = [merged[k] for k in sorted(merged)]
-    out = FETCH_DIR / f"okx_{symbol}_{BAR}_{len(final)}.csv"
+    out = FETCH_DIR / f"okx_{symbol}_{bar}_{len(final)}.csv"
     with out.open("w", newline="") as fh:
         writer = csv.writer(fh)
         writer.writerow(header)
@@ -70,10 +79,18 @@ def update_file(path: Path) -> tuple[str, int]:
 
 
 def main() -> int:
-    files = sorted(p for p in FETCH_DIR.glob("okx_*_15m_*.csv") if FILE_RE.match(p.name))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--bar", default=DEFAULT_BAR, choices=BAR_CHOICES)
+    args = parser.parse_args()
+    bar = normalize_bar(args.bar)
+
+    files = sorted(
+        p for p in FETCH_DIR.glob(f"okx_*_{bar}_*.csv")
+        if (FILE_RE.match(p.name) and FILE_RE.match(p.name).group("bar") == bar)
+    )
     total = 0
     for n, path in enumerate(files, 1):
-        symbol, added = update_file(path)
+        symbol, added = update_file(path, bar=bar)
         total += added
         if added:
             print(f"[{n}/{len(files)}] {symbol}: +{added} bars", flush=True)

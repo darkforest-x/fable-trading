@@ -194,12 +194,12 @@ BNB_USDT 1 个月窗口 TP 与 SL 样例均只保留 3 条价格线，entry/exit
 > 总纲：`docs/RESEARCH_AGENDA.md`（假设发生器 + 两级验证制度）。按其"优先队列"执行；
 > 每个假设一个独立 commit + 报告小节；负结果同样入库并更新议程状态。
 
-### R0. 工程前置：sweep 台架泛化（先做，其余依赖它）
-- `fetch_okx.py`/`update_okx.py`：`--bar {5m,15m,30m,1H}` 参数化（API 原生支持），
-  文件名带 bar（loader 正则已兼容 5m/15m，补 30m/1H）；
-- `barrier_sweep.py`：出场函数插件化（dict 注册：fixed/trailing/scaled/breakeven/ma-exit），
-  labeling.py 只加新函数不改旧的；
-- `build`/`train` 路径支持 bar 参数（purge 随 horizon×bar 自动换算）。
+### ~~R0. 工程前置：sweep 台架泛化（先做，其余依赖它）~~（已完成，2026-07-09）
+- `fetch_okx.py`/`update_okx.py` 已支持 `--bar {5m,15m,30m,1H}`，文件名保留 bar；
+- loader/build/train 共用 `src/data/bars.py` 的 bar 白名单与 purge 换算，
+  `build_dataset.py --bar/--horizon-bars`、`train.py --bar/--horizon-bars` 已就绪；
+- `barrier_sweep.py` 已注册 `fixed/trailing/scaled/breakeven/ma-exit` 插件；
+  `labeling.py` 只新增 `label_candidate_ma_exit`，未改旧标签函数。
 
 ### R1'. H9 复测与推广（发现级已通过，见 scripts/h9_trend_filter.py 与议程记录）
 Claude 已验证："1h EMA144 上方"过滤使净@maker +0.152%→+0.203%（1h 从 15m 聚合，

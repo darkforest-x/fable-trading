@@ -16,6 +16,7 @@ import pandas as pd
 from fastapi import HTTPException
 
 from src.backtest.run import BAR, SCORE_QUANTILE, build_signals, simulate
+from src.data.bars import purge_window
 from src.judgment.features import FEATURE_COLUMNS
 from src.judgment.frozen import (
     DEFAULT_FROZEN_CONFIG,
@@ -178,7 +179,7 @@ def _build_signals_for_spec(spec: UniverseSpec) -> tuple[pd.DataFrame, float]:
 
 
 def _split_universe_frame(data: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    purge = pd.Timedelta(minutes=15 * (DEFAULT_HORIZON_BARS + 1))
+    purge = purge_window(DEFAULT_HORIZON_BARS, "15m")
     ordered = data.sort_values("signal_time").reset_index(drop=True)
     dev = ordered[ordered["signal_time"] < HOLDOUT_START - purge].reset_index(drop=True)
     holdout = ordered[ordered["signal_time"] >= HOLDOUT_START].reset_index(drop=True)

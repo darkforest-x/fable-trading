@@ -16,12 +16,15 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.data.bars import BAR_CHOICES, normalize_bar
+
 CACHE_DIR = Path(__file__).resolve().parents[2] / "data" / "kline_cache"
 # Freshly fetched history (src.data.fetch_okx) lives beside the old cache and
 # is merged per (source, symbol); load_series dedupes on open_time.
 FETCHED_DIR = Path(__file__).resolve().parents[2] / "data" / "kline_fetched"
+_BAR_PATTERN = "|".join(re.escape(bar) for bar in BAR_CHOICES)
 CACHE_PATTERN = re.compile(
-    r"^(?:(?P<prefix>gate|okx)_)?(?P<symbol>.+?)_(?P<bar>5m|15m|30m|1H)_(?P<rows>[0-9]+)(?:_latest)?\.csv$"
+    rf"^(?:(?P<prefix>gate|okx)_)?(?P<symbol>.+?)_(?P<bar>{_BAR_PATTERN})_(?P<rows>[0-9]+)(?:_latest)?\.csv$"
 )
 # Ported from the old project's build_strict_dense_review_pack.py: stablecoins,
 # gold and tokenized stocks are excluded from candidate mining.
@@ -40,6 +43,7 @@ def list_series(cache_dir: Path | None = None, *, bar: str = "15m") -> dict[tupl
     Scans both the old-project cache and data/kline_fetched when `cache_dir`
     is None; a broken symlink (old cache unavailable) is silently skipped.
     """
+    bar = normalize_bar(bar)
     dirs = [cache_dir] if cache_dir is not None else [CACHE_DIR, FETCHED_DIR]
     paths: list[Path] = []
     for d in dirs:
