@@ -332,17 +332,23 @@ function focusMarker(entryTs) {
   const entry = m.entry_price;
   const exitPrice = entry * (1 + m.ret);
   const outcomeColor = OUTCOME_COLOR[m.outcome] || "#9aa0a8";
+  const showTpBarrier = m.outcome !== "tp";
+  const showSlBarrier = m.outcome !== "sl" && m.outcome !== "sl_ambiguous";
   priceLines.push(klineSeries.createPriceLine({
     price: entry, color: "#9aa0a8", lineStyle: 2, title: "入场",
   }));
-  priceLines.push(klineSeries.createPriceLine({  // v-label barriers of this trade
-    price: entry * (1 + barrier.tp * m.atr_pct), color: "rgba(31,167,125,0.8)",
-    lineStyle: 3, title: `止盈目标 +${barrier.tp}×ATR`,
-  }));
-  priceLines.push(klineSeries.createPriceLine({
-    price: entry * (1 - barrier.sl * m.atr_pct), color: "rgba(230,103,103,0.8)",
-    lineStyle: 3, title: `止损线 -${barrier.sl}×ATR`,
-  }));
+  if (showTpBarrier) {
+    priceLines.push(klineSeries.createPriceLine({  // v-label barriers of this trade
+      price: entry * (1 + barrier.tp * m.atr_pct), color: "rgba(31,167,125,0.8)",
+      lineStyle: 3, title: `止盈目标 +${barrier.tp}×ATR`,
+    }));
+  }
+  if (showSlBarrier) {
+    priceLines.push(klineSeries.createPriceLine({
+      price: entry * (1 - barrier.sl * m.atr_pct), color: "rgba(230,103,103,0.8)",
+      lineStyle: 3, title: `止损线 -${barrier.sl}×ATR`,
+    }));
+  }
   priceLines.push(klineSeries.createPriceLine({
     price: exitPrice, color: outcomeColor, lineStyle: 0,
     title: `出场 ${OUTCOME_CN[m.outcome] || m.outcome}`,

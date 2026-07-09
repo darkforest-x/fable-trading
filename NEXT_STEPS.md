@@ -96,9 +96,12 @@ entry→exit path 并恢复右轴 autoscale。localhost:8643 与 VPS
 完成记录：localhost:8643 与 VPS `http://103.214.174.58:8642` 均用真实 Chrome 验证；
 BNB_USDT 1 个月窗口聚焦成交单后，色带列覆盖 430/452 像素（约 95%），y=0..451。
 
-**BUG-3：出场价与止损线重叠时标签互相遮挡**（sl 出场时两线同价）。
+**~~BUG-3：出场价与止损线重叠时标签互相遮挡~~** ✅ 已修复（2026-07-09，sl 出场时两线同价）。
 修法：outcome 为 sl/sl_ambiguous 时不再单独画止损障碍线（出场线已表达）；
 tp 出场同理去掉止盈目标线的重复。
+
+完成记录：localhost:8643 与 VPS `http://103.214.174.58:8642` 均用真实 Chrome 验证；
+BNB_USDT 1 个月窗口 TP 与 SL 样例均只保留 3 条价格线，entry/exit 坐标在面板内。
 
 修复过程遵守：只做外科手术式修改，禁止重构 app.js；每个 bug 单独 commit。
 
