@@ -125,13 +125,20 @@ BNB_USDT 1 个月窗口 TP 与 SL 样例均只保留 3 条价格线，entry/exit
 
 ## P1 —— 本周内（前向验证基础设施 + 数据补强，最终裁决的地基）
 
-### 5. 冻结模型工件（前向验证的前提）
+### 5. ~~冻结模型工件（前向验证的前提）~~ ✅ 已完成（2026-07-09）
 现在每次启动都重训模型——前向验证必须用**冻结的字节**：
 - 新建 `scripts/freeze_model.py`：用胜出配置（默认 tp5_sl2 SWAP；等第 2/3 步结论）
   训练一次，`booster.save_model("models/frozen_<config>_<date>.txt")` + 同名 json
   存阈值（val q90）、特征列表、数据指纹；`models/` 入 git；
 - 看板与前向跟踪一律加载冻结工件，不再重训（server.py 的 build_signals 路径
   加"若存在冻结工件则加载"分支）。
+
+完成记录：已生成并入库 `models/frozen_tp5_sl2_swap_20260709.txt/.json`；
+阈值为 val q90 = 0.3747093215963419，best_iteration=18，
+数据指纹 `818304cffcdb410612780e9d42dcdf7f8488c97e0044f93c1406ed2cb4856180`。
+`build_signals` 在数据路径匹配冻结工件时直接加载 LightGBM txt；看板分数缓存侧边车
+记录 model_path/dataset_path/dataset_sha256，不匹配即重建，避免旧缓存绕过冻结字节。
+本地 8643 API 已验收 `/api/symbols`、`/api/overview`、`/api/chart/okx/BTC_USDT_SWAP`。
 
 ### 6. 前向跟踪器（paper-trading 记录仪）
 - 新建 `scripts/forward_track.py`：读最新数据 → 扫描冻结配置的新候选 →

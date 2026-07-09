@@ -1,0 +1,59 @@
+{
+  "artifact_version": 1,
+  "config": "tp5_sl2_swap",
+  "created_at": "2026-07-09T08:12:17.761758+00:00",
+  "model_path": "models/frozen_tp5_sl2_swap_20260709.txt",
+  "dataset_path": "data/swap_replication/swap_tp5_sl2.csv",
+  "dataset_sha256": "818304cffcdb410612780e9d42dcdf7f8488c97e0044f93c1406ed2cb4856180",
+  "dataset_size_bytes": 5555342,
+  "threshold_val_q90": 0.3747093215963419,
+  "score_quantile": 0.9,
+  "feature_columns": [
+    "ma_spread_pct",
+    "full_spread",
+    "fast_slow_gap",
+    "full_ratio_min48",
+    "spread_mean8",
+    "spread_mean24",
+    "spread_chg8",
+    "spread_chg24",
+    "spread_pos96",
+    "dense_run_len",
+    "dense_frac48",
+    "ext_up",
+    "close_vs_ema55",
+    "close_vs_ema200",
+    "order_score",
+    "slow_slope_12",
+    "volume_ratio",
+    "volume_z",
+    "vol_ratio_mean8",
+    "atr_pct",
+    "atr_pct_ratio96",
+    "pre_range48",
+    "pre_range168",
+    "drawdown24",
+    "ret_4",
+    "ret_12",
+    "ret_24",
+    "ret_48"
+  ],
+  "best_iteration": 18,
+  "splits": {
+    "train": {
+      "n": 5708,
+      "range": [
+        "2025-06-05 05:15:00+00:00",
+        "2026-03-15 22:30:00+00:00"
+      ]
+    },
+    "val": {
+      "n": 1429,
+      "range": [
+        "2026-03-16 17:00:00+00:00",
+        "2026-05-03 01:15:00+00:00"
+      ]
+    }
+  },
+  "holdout_policy": "holdout excluded from training and threshold selection; not evaluated"
+}

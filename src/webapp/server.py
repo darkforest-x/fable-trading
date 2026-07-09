@@ -26,6 +26,12 @@ from src.backtest.run import (
     ACCEPT_START, BASE_COST, DEFAULT_DATA, MAX_CONCURRENT,
     build_signals, window_metrics,
 )
+from src.judgment.frozen import (
+    DEFAULT_FROZEN_CONFIG,
+    cache_matches_artifact,
+    cache_metadata,
+    latest_artifact,
+)
 from src.judgment.labeling import SL_ATR_MULT, TP_ATR_MULT
 from src.data.loader import FETCHED_DIR, list_series, load_series
 
@@ -68,18 +74,20 @@ def scored_signals() -> tuple[pd.DataFrame, float]:
     """All candidates with model scores; built once, cached on disk."""
     global _signals, _threshold
     if _signals is None:
+        artifact = latest_artifact(DEFAULT_FROZEN_CONFIG)
         rebuild = True
         if SCORE_CACHE.exists() and SCORE_META.exists():
+            meta = json.loads(SCORE_META.read_text(encoding="utf-8"))
             cached = pd.read_csv(SCORE_CACHE, parse_dates=["signal_time", "entry_time", "exit_time"])
-            if set(CACHE_COLUMNS) <= set(cached.columns):  # stale schema -> rebuild
+            if set(CACHE_COLUMNS) <= set(cached.columns) and "threshold" in meta and cache_matches_artifact(meta, artifact):
                 _signals = cached
-                _threshold = json.loads(SCORE_META.read_text())["threshold"]
+                _threshold = float(meta["threshold"])
                 rebuild = False
         if rebuild:
             print("scoring signals (first boot, ~10s)...", flush=True)
             signals, threshold = build_signals(DEFAULT_DATA)
             signals[CACHE_COLUMNS].to_csv(SCORE_CACHE, index=False)
-            SCORE_META.write_text(json.dumps({"threshold": threshold}))
+            SCORE_META.write_text(json.dumps(cache_metadata(threshold, latest_artifact(DEFAULT_FROZEN_CONFIG))))
             _signals, _threshold = signals[CACHE_COLUMNS], threshold
     return _signals, float(_threshold)
 
@@ -148,7 +156,7 @@ def overview() -> dict:
         ],
         "coverage": [
             {"label": "K 线数据", "value": f"{n_rows / 1e6:.1f}M", "sub": f"{n_files} 个币种 × 400 天 15m（新拉取）"},
-            {"label": "候选信号", "value": f"{len(signals):,}", "sub": "expanded 池，13 个月"},
+            {"label": "候选信号", "value": f"{len(signals):,}", "sub": "SWAP TP5/SL2，13 个月"},
             {"label": "入场阈值", "value": f"{threshold:.3f}", "sub": "val 分数 90 分位，事前定死"},
             {"label": "回测成交", "value": f"{len(t):,}", "sub": f"验收窗口 {len(accept)} 笔"},
         ],
