@@ -3,15 +3,18 @@
 Routes are intentionally thin: `dashboard_payloads` owns universe-scoped
 overview/backtest/chart JSON, and `forward_payloads` owns forward validation
 JSON. P2.5 Phase 0+1 adds ops auth + experiment registry + agenda (read-only).
+Phase 2 adds hard-coded job whitelist runner under /api/ops/jobs*.
 Static assets are mounted last so API routes stay reachable.
 """
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI, Query, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
 
 from src.backtest.run import BASE_COST
 from src.webapp.agenda_payloads import agenda_payload
@@ -26,9 +29,21 @@ from src.webapp.dashboard_payloads import (
 )
 from src.webapp.experiment_registry import experiment_detail, list_experiments
 from src.webapp.forward_payloads import FORWARD_COST, forward_payload
-from src.webapp.ops_flags import ops_status_payload
+from src.webapp.jobs.runner import get_runner
+from src.webapp.jobs.store import get_store
+from src.webapp.jobs.whitelist import JobValidationError, list_job_types
+from src.webapp.ops_flags import executor_enabled, ops_status_payload
 
 app = FastAPI(title="fable-trading dashboard")
+
+
+class CreateJobBody(BaseModel):
+    """Only job_type + constrained params. Extra free-cmd fields rejected."""
+
+    job_type: str = Field(..., min_length=1, max_length=64)
+    params: dict[str, Any] = Field(default_factory=dict)
+
+    model_config = {"extra": "forbid"}
 
 
 @app.middleware("http")
@@ -109,6 +124,110 @@ def ops_experiment_detail(exp_id: str, request: Request):
 def ops_agenda(request: Request) -> dict:
     verify_ops_request(request)
     return agenda_payload()
+
+
+# ---------- P2.5 Phase 2: job runner (whitelist only) ----------
+
+
+@app.get("/api/ops/job-types")
+def ops_job_types(request: Request) -> dict:
+    verify_ops_request(request)
+    return {
+        "items": list_job_types(),
+        "executor_enabled": executor_enabled(),
+    }
+
+
+@app.get("/api/ops/jobs")
+def ops_jobs_list(
+    request: Request,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    status: str = "",
+) -> dict:
+    verify_ops_request(request)
+    try:
+        return get_store().list_jobs(
+            limit=limit, offset=offset, status=status or None
+        )
+    except ValueError as exc:
+        return JSONResponse({"detail": str(exc)}, status_code=400)
+
+
+@app.get("/api/ops/jobs/{job_id}")
+def ops_job_detail(
+    job_id: str,
+    request: Request,
+    log_lines: int = Query(default=200, ge=1, le=2000),
+):
+    verify_ops_request(request)
+    job = get_store().get(job_id)
+    if job is None:
+        return JSONResponse({"detail": f"job not found: {job_id}"}, status_code=404)
+    try:
+        log_tail = get_runner().read_log_tail(job_id, max_lines=log_lines)
+    except KeyError:
+        log_tail = ""
+    return {**job, "log_tail": log_tail}
+
+
+@app.get("/api/ops/jobs/{job_id}/log")
+def ops_job_log(
+    job_id: str,
+    request: Request,
+    lines: int = Query(default=500, ge=1, le=5000),
+):
+    verify_ops_request(request)
+    if get_store().get(job_id) is None:
+        return JSONResponse({"detail": f"job not found: {job_id}"}, status_code=404)
+    try:
+        text = get_runner().read_log_tail(job_id, max_lines=lines)
+    except KeyError:
+        text = ""
+    return PlainTextResponse(text or "", media_type="text/plain; charset=utf-8")
+
+
+@app.post("/api/ops/jobs")
+def ops_jobs_create(body: CreateJobBody, request: Request):
+    verify_ops_request(request)
+    if not executor_enabled():
+        return JSONResponse(
+            {
+                "detail": "本实例已禁用任务执行器（ENABLE_JOB_EXECUTOR!=1；VPS 默认关闭）。"
+            },
+            status_code=403,
+        )
+    # Reject free-shell fields even if they sneak into params via nested misuse;
+    # whitelist validate also blocks forbidden keys.
+    if any(k in body.params for k in ("cmd", "shell", "argv", "command")):
+        return JSONResponse(
+            {"detail": "free cmd/shell/argv is not allowed; use job_type + params only"},
+            status_code=400,
+        )
+    try:
+        job = get_runner().enqueue(body.job_type, body.params)
+    except JobValidationError as exc:
+        return JSONResponse({"detail": str(exc)}, status_code=400)
+    except PermissionError as exc:
+        return JSONResponse({"detail": str(exc)}, status_code=403)
+    return JSONResponse(job, status_code=201)
+
+
+@app.post("/api/ops/jobs/{job_id}/cancel")
+def ops_jobs_cancel(job_id: str, request: Request):
+    verify_ops_request(request)
+    if not executor_enabled():
+        return JSONResponse(
+            {
+                "detail": "本实例已禁用任务执行器（ENABLE_JOB_EXECUTOR!=1；VPS 默认关闭）。"
+            },
+            status_code=403,
+        )
+    try:
+        job = get_runner().cancel(job_id)
+    except KeyError:
+        return JSONResponse({"detail": f"job not found: {job_id}"}, status_code=404)
+    return job
 
 
 app.mount("/", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="static")

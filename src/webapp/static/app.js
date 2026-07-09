@@ -40,6 +40,7 @@ function showView(name) {
   if (name === "forward") loadForward();
   if (name === "experiments") loadExperiments();
   if (name === "agenda") loadAgenda();
+  if (name === "jobs") loadJobsView();
 }
 document.querySelectorAll(".tab").forEach((btn) =>
   btn.addEventListener("click", () => showView(btn.dataset.view)));
@@ -544,31 +545,57 @@ async function focusTrade(source, symbol, entryTimeStr) {
 /* ---------- P2.5 ops: token + experiments + agenda ---------- */
 const opsState = {
   authRequired: false,
+  executorEnabled: false,
   token: sessionStorage.getItem("ops_api_token") || "",
+  jobTypes: [],
+  selectedJobId: null,
+  pollTimer: null,
 };
 
-function opsHeaders() {
-  const h = {};
+const JOB_STATUS_CN = {
+  queued: "排队",
+  running: "运行中",
+  succeeded: "成功",
+  failed: "失败",
+  cancelled: "已取消",
+  timeout: "超时",
+};
+
+function opsHeaders(extra = {}) {
+  const h = { ...extra };
   if (opsState.token) h["X-Ops-Token"] = opsState.token;
   return h;
 }
 
-async function opsFetch(path, params = {}) {
+async function opsFetch(path, params = {}, options = {}) {
   const q = new URLSearchParams(params);
   const url = q.toString() ? `${path}?${q}` : path;
-  const res = await fetch(url, { headers: opsHeaders() });
+  const res = await fetch(url, {
+    method: options.method || "GET",
+    headers: opsHeaders(options.headers || {}),
+    body: options.body,
+  });
   if (res.status === 401 || res.status === 503) {
     const detail = (await res.json().catch(() => ({}))).detail || res.statusText;
     throw new Error(detail);
   }
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  if (!res.ok) {
+    const detail = (await res.json().catch(() => ({}))).detail || `HTTP ${res.status}`;
+    const err = new Error(detail);
+    err.status = res.status;
+    throw err;
+  }
+  if (res.status === 204) return null;
+  const ct = res.headers.get("content-type") || "";
+  if (ct.includes("application/json")) return res.json();
+  return res.text();
 }
 
 async function refreshOpsAuthUi() {
   try {
     const st = await (await fetch("/api/ops/status")).json();
     opsState.authRequired = !!st.ops_auth_required;
+    opsState.executorEnabled = !!st.executor_enabled;
     const wrap = $("#ops-token-wrap");
     if (wrap) {
       wrap.hidden = !opsState.authRequired;
@@ -584,6 +611,7 @@ $("#ops-token-save")?.addEventListener("click", () => {
   const active = document.querySelector(".tab.active")?.dataset.view;
   if (active === "experiments") loadExperiments();
   if (active === "agenda") loadAgenda();
+  if (active === "jobs") loadJobsView();
 });
 
 function fmtMetric(x, digits = 4) {
@@ -683,6 +711,279 @@ let expQTimer = null;
 $("#exp-q")?.addEventListener("input", () => {
   clearTimeout(expQTimer);
   expQTimer = setTimeout(() => loadExperiments(), 250);
+});
+
+/* ---------- P2.5 Phase2 jobs tab ---------- */
+function stopJobsPoll() {
+  if (opsState.pollTimer) {
+    clearInterval(opsState.pollTimer);
+    opsState.pollTimer = null;
+  }
+}
+
+function startJobsPoll() {
+  stopJobsPoll();
+  opsState.pollTimer = setInterval(() => {
+    const active = document.querySelector(".tab.active")?.dataset.view;
+    if (active !== "jobs") {
+      stopJobsPoll();
+      return;
+    }
+    refreshJobsList(true);
+    if (opsState.selectedJobId) openJobDetail(opsState.selectedJobId, true);
+  }, 1000);
+}
+
+function selectedJobType() {
+  const id = $("#job-type-select")?.value;
+  return (opsState.jobTypes || []).find((j) => j.job_type === id) || null;
+}
+
+function collectJobParams() {
+  const form = $("#job-params-form");
+  const params = {};
+  if (!form) return params;
+  form.querySelectorAll("[data-param]").forEach((el) => {
+    const name = el.dataset.param;
+    if (el.type === "number") {
+      const v = el.value === "" ? null : Number(el.value);
+      if (v !== null && !Number.isNaN(v)) params[name] = v;
+    } else if (el.value !== "") {
+      params[name] = el.value;
+    }
+  });
+  return params;
+}
+
+function renderJobParamsForm() {
+  const jt = selectedJobType();
+  const form = $("#job-params-form");
+  const desc = $("#job-type-desc");
+  const preview = $("#job-cmd-preview");
+  if (!form) return;
+  if (!jt) {
+    form.innerHTML = "";
+    if (desc) desc.textContent = "";
+    if (preview) preview.textContent = "";
+    return;
+  }
+  if (desc) {
+    desc.textContent = `${jt.description_zh || ""} · 超时 ${Math.round((jt.timeout_sec || 0) / 60)} 分钟 · 产物 ${jt.artifacts_hint || "—"}`;
+  }
+  if (!jt.params?.length) {
+    form.innerHTML = `<div class="note">此任务无参数（固定 argv）。</div>`;
+  } else {
+    form.innerHTML = jt.params.map((p) => {
+      if (p.kind === "enum" || p.kind === "path_enum") {
+        const opts = (p.choices || []).map((c) =>
+          `<option value="${c}" ${c === p.default ? "selected" : ""}>${c}</option>`
+        ).join("");
+        return `<div class="param-row">
+          <label for="param-${p.name}">${p.name}</label>
+          <select id="param-${p.name}" data-param="${p.name}">${opts}</select>
+          <span class="note">${p.description || ""}</span>
+        </div>`;
+      }
+      if (p.kind === "int") {
+        return `<div class="param-row">
+          <label for="param-${p.name}">${p.name}</label>
+          <input id="param-${p.name}" data-param="${p.name}" type="number"
+            min="${p.min ?? ""}" max="${p.max ?? ""}" value="${p.default ?? ""}">
+          <span class="note">${p.description || ""} [${p.min ?? "?"}–${p.max ?? "?"}]</span>
+        </div>`;
+      }
+      return "";
+    }).join("");
+  }
+  form.querySelectorAll("[data-param]").forEach((el) => {
+    el.addEventListener("change", updateJobCmdPreview);
+    el.addEventListener("input", updateJobCmdPreview);
+  });
+  updateJobCmdPreview();
+  updateJobRunEnabled();
+}
+
+function updateJobCmdPreview() {
+  const jt = selectedJobType();
+  const preview = $("#job-cmd-preview");
+  if (!preview || !jt) return;
+  const params = collectJobParams();
+  // Client-side human summary only (server re-validates); mirror whitelist shape.
+  let parts = ["python3"];
+  const map = {
+    build_dataset: () => {
+      const a = ["-m", "src.judgment.build_dataset", "--mode", params.mode || "strict",
+        "--bar", params.bar || "15m", "--horizon-bars", String(params.horizon_bars ?? 96)];
+      if (params.out) a.push("--out", params.out);
+      return a;
+    },
+    barrier_sweep: () => ["-m", "src.judgment.barrier_sweep"],
+    swap_replication: () => ["scripts/swap_replication.py"],
+    update_okx: () => ["-m", "src.data.update_okx", "--bar", params.bar || "15m"],
+    forward_track: () => ["scripts/forward_track.py"],
+    deploy_self: () => null,
+  };
+  const builder = map[jt.job_type];
+  if (jt.job_type === "deploy_self") {
+    preview.textContent = "将执行：bash scripts/deploy_vps.sh";
+    return;
+  }
+  if (!builder) {
+    preview.textContent = "";
+    return;
+  }
+  preview.textContent = `将执行：python3 ${builder().join(" ")}`;
+}
+
+function updateJobRunEnabled() {
+  const btn = $("#job-run-btn");
+  if (!btn) return;
+  btn.disabled = !opsState.executorEnabled || !selectedJobType();
+}
+
+async function loadJobsView() {
+  await refreshOpsAuthUi();
+  const banner = $("#jobs-executor-banner");
+  const authNote = $("#jobs-auth-note");
+  if (banner) {
+    if (!opsState.executorEnabled) {
+      banner.hidden = false;
+      banner.classList.add("warn-banner");
+      banner.innerHTML = `<b>执行器已禁用</b>：本实例 ENABLE_JOB_EXECUTOR≠1（VPS 默认）。请在 Mac 看板用环境变量开启任务执行；此页仍可浏览 job 类型与历史。`;
+    } else {
+      banner.hidden = true;
+      banner.innerHTML = "";
+    }
+  }
+  if (authNote) authNote.hidden = true;
+  try {
+    const data = await opsFetch("/api/ops/job-types");
+    opsState.executorEnabled = !!data.executor_enabled;
+    opsState.jobTypes = data.items || [];
+    if (banner && !opsState.executorEnabled) {
+      banner.hidden = false;
+      banner.classList.add("warn-banner");
+      banner.innerHTML = `<b>执行器已禁用</b>：本实例 ENABLE_JOB_EXECUTOR≠1（VPS 默认）。请在 Mac 看板开启后再创建任务。`;
+    }
+    const sel = $("#job-type-select");
+    if (sel) {
+      const prev = sel.value;
+      sel.innerHTML = opsState.jobTypes.map((j) =>
+        `<option value="${j.job_type}">${j.title_zh} (${j.job_type})</option>`
+      ).join("");
+      if (prev && opsState.jobTypes.some((j) => j.job_type === prev)) sel.value = prev;
+      renderJobParamsForm();
+    }
+    await refreshJobsList();
+    startJobsPoll();
+  } catch (err) {
+    if (authNote) {
+      authNote.hidden = false;
+      authNote.innerHTML = `<b>无法加载任务页</b>：${err.message}<br>若 OPS_AUTH_MODE=token，请在右上角粘贴 token。`;
+    }
+  }
+  updateJobRunEnabled();
+}
+
+async function refreshJobsList(silent = false) {
+  const tbody = $("#jobs-table tbody");
+  if (!tbody) return;
+  try {
+    const data = await opsFetch("/api/ops/jobs", { limit: "50", offset: "0" });
+    if ($("#jobs-count")) $("#jobs-count").textContent = `（${data.total || 0}）`;
+    if (!data.items?.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">暂无任务</div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.items.map((j) => {
+      const st = j.status || "";
+      const created = (j.created_at || "").slice(0, 19).replace("T", " ");
+      const active = j.id === opsState.selectedJobId ? "active-row" : "";
+      return `<tr class="clickable ${active}" data-job-id="${j.id}">
+        <td class="note">${created || "—"}</td>
+        <td>${j.job_type || "—"}</td>
+        <td><span class="status-chip ${st}">${JOB_STATUS_CN[st] || st}</span></td>
+        <td class="note">${(j.summary || "").slice(0, 80)}</td>
+        <td class="num">${j.exit_code ?? "—"}</td>
+        <td class="note">${(j.id || "").slice(0, 8)}</td>
+      </tr>`;
+    }).join("");
+    tbody.querySelectorAll("tr[data-job-id]").forEach((tr) => {
+      tr.addEventListener("click", () => openJobDetail(tr.dataset.jobId));
+    });
+  } catch (err) {
+    if (!silent) {
+      tbody.innerHTML = `<tr><td colspan="6" class="note">加载失败：${err.message}</td></tr>`;
+    }
+  }
+}
+
+async function openJobDetail(jobId, silent = false) {
+  opsState.selectedJobId = jobId;
+  const meta = $("#job-active-meta");
+  const pre = $("#job-log-pre");
+  const cancelBtn = $("#job-cancel-btn");
+  try {
+    const d = await opsFetch(`/api/ops/jobs/${encodeURIComponent(jobId)}`, { log_lines: "300" });
+    if (meta) {
+      meta.textContent = `${d.job_type} · ${JOB_STATUS_CN[d.status] || d.status} · ${d.id?.slice(0, 12) || ""}`;
+    }
+    if (pre) pre.textContent = d.log_tail || "（日志为空）";
+    if (cancelBtn) {
+      const canCancel = opsState.executorEnabled && (d.status === "queued" || d.status === "running");
+      cancelBtn.hidden = !canCancel;
+    }
+    // Highlight row
+    document.querySelectorAll("#jobs-table tr[data-job-id]").forEach((tr) => {
+      tr.classList.toggle("active-row", tr.dataset.jobId === jobId);
+    });
+  } catch (err) {
+    if (!silent && pre) pre.textContent = `加载日志失败：${err.message}`;
+  }
+}
+
+$("#job-type-select")?.addEventListener("change", () => renderJobParamsForm());
+$("#job-refresh-btn")?.addEventListener("click", () => refreshJobsList());
+$("#job-run-btn")?.addEventListener("click", async () => {
+  const jt = selectedJobType();
+  const msg = $("#job-create-msg");
+  if (!jt) return;
+  if (!opsState.executorEnabled) {
+    if (msg) msg.textContent = "执行器已禁用";
+    return;
+  }
+  const params = collectJobParams();
+  const confirmText = `${jt.confirm_zh || "确认运行此任务？"}\n\n类型：${jt.job_type}\n预览见页面摘要（服务端按白名单组装 argv，不可编辑 shell）。`;
+  if (!window.confirm(confirmText)) return;
+  if (msg) msg.textContent = "提交中…";
+  try {
+    const job = await opsFetch("/api/ops/jobs", {}, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ job_type: jt.job_type, params }),
+    });
+    if (msg) msg.textContent = `已排队 ${job.id?.slice(0, 8) || ""}`;
+    opsState.selectedJobId = job.id;
+    await refreshJobsList();
+    await openJobDetail(job.id);
+    startJobsPoll();
+  } catch (err) {
+    if (msg) msg.textContent = `失败：${err.message}`;
+  }
+});
+$("#job-cancel-btn")?.addEventListener("click", async () => {
+  if (!opsState.selectedJobId || !opsState.executorEnabled) return;
+  if (!window.confirm("确认取消该任务？将发送 SIGTERM。")) return;
+  try {
+    await opsFetch(`/api/ops/jobs/${encodeURIComponent(opsState.selectedJobId)}/cancel`, {}, {
+      method: "POST",
+    });
+    await openJobDetail(opsState.selectedJobId);
+    await refreshJobsList();
+  } catch (err) {
+    const msg = $("#job-create-msg");
+    if (msg) msg.textContent = `取消失败：${err.message}`;
+  }
 });
 
 refreshOpsAuthUi();

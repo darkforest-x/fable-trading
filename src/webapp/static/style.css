@@ -57,10 +57,45 @@ body {
 .subhead { font-size: 14px; margin-top: 16px; }
 #exp-table tbody tr.clickable { cursor: pointer; }
 #exp-table tbody tr.clickable:hover { background: var(--surface-2); }
-#exp-kind, #exp-sort {
+#exp-kind, #exp-sort, #job-type-select, .jobs-params select, .jobs-params input {
   background: var(--surface); border: 1px solid var(--border); color: var(--text);
   border-radius: 8px; padding: 6px 10px; font-size: 13px;
 }
+.jobs-form-controls { align-items: center; }
+.jobs-label { color: var(--text-2); font-size: 13px; }
+.jobs-params {
+  display: flex; flex-direction: column; gap: 10px; margin: 12px 0;
+}
+.jobs-params .param-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+}
+.jobs-params .param-row label { min-width: 110px; color: var(--text-2); font-size: 13px; }
+.jobs-params input[type="number"] { width: 120px; }
+.danger-btn {
+  border-color: rgba(230,103,103,.55); color: var(--down);
+}
+.danger-btn:hover { border-color: var(--down); }
+.danger-btn:disabled, .mini-btn:disabled {
+  opacity: .45; cursor: not-allowed; pointer-events: none;
+}
+.job-log-pre { max-height: 360px; min-height: 180px; font-size: 12px; }
+.status-chip {
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  font-size: 12px; border: 1px solid var(--border);
+}
+.status-chip.queued { color: var(--text-2); }
+.status-chip.running { color: var(--accent); border-color: rgba(57,135,229,.45); }
+.status-chip.succeeded { color: var(--up); border-color: rgba(31,167,125,.45); }
+.status-chip.failed, .status-chip.timeout { color: var(--down); border-color: rgba(230,103,103,.45); }
+.status-chip.cancelled { color: var(--warn); border-color: rgba(201,133,0,.45); }
+#jobs-table tbody tr.clickable { cursor: pointer; }
+#jobs-table tbody tr.clickable:hover { background: var(--surface-2); }
+#jobs-table tbody tr.active-row { background: rgba(57,135,229,.08); }
+.banner.warn-banner {
+  background: linear-gradient(0deg, rgba(201,133,0,.1), rgba(201,133,0,.1)), var(--surface);
+  border-color: rgba(201,133,0,.4);
+}
+.banner.warn-banner b { color: var(--warn); }
 main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 60px; }
 .view.hidden { display: none; }
 

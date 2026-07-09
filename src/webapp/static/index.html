@@ -23,6 +23,7 @@
       <button class="tab" data-view="forward">前向验证</button>
       <button class="tab" data-view="experiments">实验</button>
       <button class="tab" data-view="agenda">议程</button>
+      <button class="tab" data-view="jobs">任务</button>
     </nav>
     <div class="ops-token-wrap" id="ops-token-wrap" hidden>
       <input id="ops-token-input" type="password" placeholder="OPS token" autocomplete="off" spellcheck="false">
@@ -283,7 +284,54 @@
       <pre id="agenda-md" class="ops-pre md-pre"></pre>
     </div>
   </section>
+
+  <!-- ============ P2.5 Phase2 任务运行器 ============ -->
+  <section id="view-jobs" class="view hidden" hidden aria-hidden="true">
+    <div id="jobs-executor-banner" class="banner" hidden></div>
+    <div id="jobs-auth-note" class="banner" hidden></div>
+    <div class="two-col">
+      <div class="panel">
+        <h2>创建任务 <span class="unit">硬编码白名单 · 无自由 shell</span></h2>
+        <div class="controls jobs-form-controls">
+          <label class="jobs-label" for="job-type-select">类型</label>
+          <select id="job-type-select"></select>
+        </div>
+        <p class="note" id="job-type-desc"></p>
+        <div id="job-params-form" class="jobs-params"></div>
+        <p class="note" id="job-cmd-preview"></p>
+        <div class="controls">
+          <button type="button" id="job-run-btn" class="mini-btn danger-btn">运行</button>
+          <button type="button" id="job-refresh-btn" class="mini-btn">刷新列表</button>
+          <span class="note" id="job-create-msg"></span>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>当前 / 最近任务日志</h2>
+        <div class="controls">
+          <span class="note" id="job-active-meta">未选择任务</span>
+          <button type="button" id="job-cancel-btn" class="mini-btn" hidden>取消</button>
+        </div>
+        <pre id="job-log-pre" class="ops-pre job-log-pre">（选择历史任务或创建新任务后显示日志）</pre>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>任务历史 <span class="unit" id="jobs-count"></span></h2>
+      <div class="table-wrap">
+        <table id="jobs-table">
+          <thead><tr>
+            <th>时间</th>
+            <th>类型</th>
+            <th>状态</th>
+            <th>摘要</th>
+            <th>exit</th>
+            <th>id</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 </main>
-<script src="app.js?v=7"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>
