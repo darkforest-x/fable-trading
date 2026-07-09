@@ -1,61 +1,58 @@
-# SWAP Universe Expansion Report (INTERIM)
+# SWAP Universe Expansion Report (FINAL)
 
-Date: 2026-07-10 ~00:52 CST  
-Status: **IN PROGRESS** — `fable_expand_swap_15m_fixed_20260709_220053` still running  
-Update this file to FINAL when log contains `expand swap fixed finished` and post-expand audit completes.
+**Date**: 2026-07-09T19:04:19.175091+00:00  
+**Status**: **FINISHED** — expand log marker `expand swap fixed finished` at 2026-07-10 03:00:28 CST
 
-## Snapshot numbers
+## Numbers
 
 | Metric | Value |
 |---|---:|
-| Live OKX USDT-SWAP (universe CSV) | **401** |
-| Planned missing at task start | **347** |
-| Fetched `okx_*_USDT_SWAP_15m_*.csv` now | **~190** (rising) |
-| Expand log symbols with `: done` | **~136** (batch progress continues) |
-| Enough history ≈400d (≥35k bars) | **~102** |
-| Enough history ≈90d (≥8k bars) | **~142** |
-| Very short (<2k bars) | **6** (e.g. APLD/BSP/DATA/BOT/CAP/ARX) |
-| `loader.BLOCKED_BASES` count | **33** (stables + equity/metal wrappers already blocked) |
+| Live OKX plan (original missing list) | 347 |
+| Fetched `okx_*_USDT_SWAP_15m_*.csv` | **399** |
+| ≥~400d bars (≥35000) | **181** |
+| ≥~90d bars (≥8000) | **286** |
+| Very short (<2000 bars) | **31** |
+| Among fetched in BLOCKED_BASES | **37** |
+| Usable non-blocked ≥90d | **274** |
+| BLOCKED_BASES size (loader) | **55** |
 
-Sources: `output/offline_tasks/okx_swap_universe.csv`, `data/kline_fetched/`, `src/data/loader.py`.
+## Post-expand data audit (scripts/data_audit.py)
 
-## Usability tiers (preliminary)
+| Metric | Value |
+|---|---:|
+| series_total | 1049 |
+| flagged | 603 |
+| structural_flagged | 299 |
+| part_files leftover | [{'path': 'ANIME_USDT_SWAP_15m.part.csv', 'approx_rows': 24899, 'size_bytes': 2075977}, {'path': 'MANA_USDT_SWAP_15m.part.csv', 'approx_rows': 24499, 'size_bytes': 1868552}] |
+| okx_swap15_n | 363 |
+| okx_swap15_stale | 1 |
 
-1. **Core liquid crypto (already used historically ~54–60)**  
-   Full 400d history, funding partially available, judgment mainline.
+Report: `analysis/p2_data_audit_report.md`  
+CSV: `analysis/output/data_audit.csv`
 
-2. **Long-history alt SWAP (~100 with ≥35k bars)**  
-   Usable for expanded candidate pools **if** liquidity/volume filters pass post-audit.
+## Recommendation
 
-3. **Mid/short listings (many stock-ticker SWAPs, <90d)**  
-   High listing churn, thin books, stock-like bases already dominate P2-12 blacklist candidates (EWZ/CGNX/DKNG/AAPL…). **Do not auto-include in mainline.**
+1. **Mainline judgment/forward**: keep liquid crypto SWAP set (historical ~54–60 + proven pool); do **not** auto-include all 399.
+2. **Research expanded pool**: non-blocked bases with ≥90d history (~274 symbols) OK for discovery-only experiments after volume filters.
+3. **Stock/thin listings**: remain in BLOCKED or short-history exclude; do not reverse BLOCKED without owner.
+4. **Short stubs** (<2k bars): watchlist only.
 
-4. **Too new / stub series (<2k bars)**  
-   Exclude from any train/val; optional watchlist only.
+## Shortest samples (examples)
 
-## Exclusions
+- APLD: 308 bars
+- BSP: 314 bars
+- OSCR: 318 bars
+- UNH: 320 bars
+- ON: 321 bars
+- SIMO: 321 bars
+- TTWO: 321 bars
+- VVV: 626 bars
+- DATA: 689 bars
+- BOT: 693 bars
+- MUU: 703 bars
+- MVLL: 704 bars
 
-- Existing `BLOCKED_BASES`: stables (USDC/DAI/…), equity/index wrappers (NVDAX/SPYX/…), metals (XAU/XAG/PAXG), etc.
-- P2-12 recommended **additional** stock/ETF thin SWAPs — still **not** written into loader (owner decision pending).
-- Expand task itself does **not** change BLOCKED; it only fetches.
+## Discipline
 
-## Recommendation (interim)
-
-| Option | Verdict |
-|---|---|
-| Include all 401 | **No** — noise, stock SWAPs, short history, funding gaps |
-| Liquid crypto subset | **Yes for mainline** — keep current judgment universe discipline |
-| Filtered expanded subset | **Yes for research-only pools** after post-expand data audit |
-
-**Practical default after finish:**
-
-1. Wait for post-expand `data_audit_after_expand_*`.
-2. Build a **research allowlist** = long-history + non-blocked + non-stock-ticker bases.
-3. Keep frozen mainline / forward_track on the **existing liquid SWAP set** until owner promotes a new universe with a single-variable retest.
-
-## Remaining offline watchers
-
-- `fable_post_expand_data_audit_20260709_220937` — waiting on expand finished marker
-- `fable_final_summary_rerun_20260710_001757` — waiting on expand + audit
-
-When expand finishes, re-run counts and replace INTERIM → FINAL in this file header.
+- No holdout eval from this expansion.
+- No automatic mainline universe switch.

@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-07-09 16:37 UTC",
-  "series_total": 892,
+  "generated_at": "2026-07-09 19:03 UTC",
+  "series_total": 1049,
   "by_bar": {
-    "15m": 455,
+    "15m": 612,
     "1H": 54,
     "30m": 54,
     "5m": 329
   },
-  "flagged": 594,
-  "structural_flagged": 248,
-  "blacklist_candidate_n": 172,
-  "okx_swap15_n": 206,
-  "okx_swap15_stale": 43,
+  "flagged": 603,
+  "structural_flagged": 299,
+  "blacklist_candidate_n": 200,
+  "okx_swap15_n": 363,
+  "okx_swap15_stale": 1,
   "part_files": [
     {
       "path": "ANIME_USDT_SWAP_15m.part.csv",
@@ -19,24 +19,9 @@
       "size_bytes": 2075977
     },
     {
-      "path": "GLM_USDT_SWAP_15m.part.csv",
-      "approx_rows": 33099,
-      "size_bytes": 2435106
-    },
-    {
-      "path": "GMT_USDT_SWAP_15m.part.csv",
-      "approx_rows": 18099,
-      "size_bytes": 1483489
-    },
-    {
-      "path": "GMX_USDT_SWAP_15m.part.csv",
-      "approx_rows": 16999,
-      "size_bytes": 1180393
-    },
-    {
-      "path": "GPS_USDT_SWAP_15m.part.csv",
-      "approx_rows": 12899,
-      "size_bytes": 1070688
+      "path": "MANA_USDT_SWAP_15m.part.csv",
+      "approx_rows": 24499,
+      "size_bytes": 1868552
     }
   ],
   "worst_gaps": [
@@ -100,14 +85,38 @@
   "spike_series": [
     {
       "bar": "15m",
+      "source": "okx",
+      "symbol": "SOON_USDT_SWAP",
+      "spike_bars": 11
+    },
+    {
+      "bar": "15m",
+      "source": "okx",
+      "symbol": "RAVE_USDT_SWAP",
+      "spike_bars": 9
+    },
+    {
+      "bar": "15m",
       "source": "gate",
       "symbol": "RAVE_USDT",
       "spike_bars": 8
     },
     {
       "bar": "15m",
+      "source": "okx",
+      "symbol": "LAB_USDT_SWAP",
+      "spike_bars": 8
+    },
+    {
+      "bar": "15m",
       "source": "gate",
       "symbol": "LAB_USDT",
+      "spike_bars": 8
+    },
+    {
+      "bar": "15m",
+      "source": "okx",
+      "symbol": "H_USDT_SWAP",
       "spike_bars": 8
     },
     {
@@ -118,15 +127,15 @@
     },
     {
       "bar": "15m",
-      "source": "gate",
-      "symbol": "H_USDT",
+      "source": "okx",
+      "symbol": "LIGHT_USDT_SWAP",
       "spike_bars": 6
     },
     {
       "bar": "15m",
       "source": "gate",
-      "symbol": "GUA_USDT",
-      "spike_bars": 5
+      "symbol": "H_USDT",
+      "spike_bars": 6
     },
     {
       "bar": "5m",
@@ -137,13 +146,19 @@
     {
       "bar": "15m",
       "source": "gate",
-      "symbol": "NFP_USDT",
+      "symbol": "GUA_USDT",
+      "spike_bars": 5
+    },
+    {
+      "bar": "15m",
+      "source": "okx",
+      "symbol": "MMT_USDT_SWAP",
       "spike_bars": 4
     },
     {
-      "bar": "30m",
+      "bar": "15m",
       "source": "okx",
-      "symbol": "APE_USDT_SWAP",
+      "symbol": "PARTI_USDT_SWAP",
       "spike_bars": 4
     },
     {
@@ -154,39 +169,9 @@
     },
     {
       "bar": "15m",
-      "source": "okx",
-      "symbol": "OKB_USDT",
-      "spike_bars": 3
-    },
-    {
-      "bar": "5m",
-      "source": "okx",
-      "symbol": "EDGE_USDT",
-      "spike_bars": 3
-    },
-    {
-      "bar": "1H",
-      "source": "okx",
-      "symbol": "APE_USDT_SWAP",
-      "spike_bars": 3
-    },
-    {
-      "bar": "15m",
       "source": "gate",
-      "symbol": "VELVET_USDT",
-      "spike_bars": 3
-    },
-    {
-      "bar": "15m",
-      "source": "okx",
-      "symbol": "UNI_USDT_SWAP",
-      "spike_bars": 3
-    },
-    {
-      "bar": "15m",
-      "source": "okx",
-      "symbol": "UNI_USDT",
-      "spike_bars": 3
+      "symbol": "NFP_USDT",
+      "spike_bars": 4
     }
   ],
   "zero_vol_series": [
@@ -257,6 +242,12 @@
       "zero_vol_share": 0.4811
     },
     {
+      "bar": "15m",
+      "source": "okx",
+      "symbol": "ISRG_USDT_SWAP",
+      "zero_vol_share": 0.4634
+    },
+    {
       "bar": "5m",
       "source": "gate",
       "symbol": "AGLD_USDT",
@@ -273,210 +264,366 @@
       "source": "gate",
       "symbol": "ETHW_USDT",
       "zero_vol_share": 0.4556
-    },
-    {
-      "bar": "5m",
-      "source": "gate",
-      "symbol": "TAIKO_USDT",
-      "zero_vol_share": 0.4448
     }
   ],
   "ohlc_bad_series": [],
   "blacklist_candidates_swap15": [
     {
       "source": "okx",
-      "symbol": "EWZ_USDT_SWAP",
+      "symbol": "ISRG_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.3694,
+      "zero_vol_share": 0.4634,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "CGNX_USDT_SWAP",
+      "symbol": "ROK_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.3224,
+      "zero_vol_share": 0.4223,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "DKNG_USDT_SWAP",
+      "symbol": "SONY_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.3015,
+      "zero_vol_share": 0.2748,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "BX_USDT_SWAP",
+      "symbol": "TTMI_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.2874,
+      "zero_vol_share": 0.2683,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "CSCO_USDT_SWAP",
+      "symbol": "SHLD_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.2632,
+      "zero_vol_share": 0.2477,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "CIEN_USDT_SWAP",
+      "symbol": "XLE_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.2337,
+      "zero_vol_share": 0.2162,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "GME_USDT_SWAP",
+      "symbol": "TWLO_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.1737,
+      "zero_vol_share": 0.2129,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "CRWD_USDT_SWAP",
+      "symbol": "USO_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.1706,
-      "spike_bars": 1,
-      "ohlc_bad": 0,
-      "reasons": "zero_vol>0.02"
-    },
-    {
-      "source": "okx",
-      "symbol": "COST_USDT_SWAP",
-      "n_gaps": 0,
-      "zero_vol_share": 0.1549,
+      "zero_vol_share": 0.1992,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "ADBE_USDT_SWAP",
+      "symbol": "TSEM_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.1503,
+      "zero_vol_share": 0.1987,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "GEV_USDT_SWAP",
+      "symbol": "ONDS_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.1204,
+      "zero_vol_share": 0.1962,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "CRDO_USDT_SWAP",
+      "symbol": "RIVN_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.1164,
+      "zero_vol_share": 0.1918,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "EWJ_USDT_SWAP",
+      "symbol": "OSCR_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.0886,
+      "zero_vol_share": 0.1855,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "FLNC_USDT_SWAP",
+      "symbol": "SOFTBANK_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.0612,
+      "zero_vol_share": 0.1828,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "ALAB_USDT_SWAP",
+      "symbol": "TER_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.0592,
+      "zero_vol_share": 0.1765,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "ASML_USDT_SWAP",
+      "symbol": "RDDT_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.0576,
+      "zero_vol_share": 0.1744,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "BMNR_USDT_SWAP",
+      "symbol": "ZHIPU_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.0516,
+      "zero_vol_share": 0.1688,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "APLD_USDT_SWAP",
+      "symbol": "MINIMAX_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.0487,
+      "zero_vol_share": 0.1676,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "AMD_USDT_SWAP",
+      "symbol": "URNM_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.0468,
+      "zero_vol_share": 0.1614,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "AMAT_USDT_SWAP",
+      "symbol": "EWT_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.035,
+      "zero_vol_share": 0.1501,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "AAPL_USDT_SWAP",
+      "symbol": "WEN_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.034,
+      "zero_vol_share": 0.1475,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"
     },
     {
       "source": "okx",
-      "symbol": "AMZN_USDT_SWAP",
+      "symbol": "UVXY_USDT_SWAP",
       "n_gaps": 0,
-      "zero_vol_share": 0.0323,
+      "zero_vol_share": 0.1461,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "VRT_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.1421,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "HYUNDAI_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.133,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "IWM_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.1321,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "POET_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.1321,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "SMH_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.1301,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "LLY_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.1052,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "SMCI_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.1032,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "LRCX_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.1004,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "NFLX_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.099,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "INFQ_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.0853,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "NOW_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.0847,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "HPE_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.0839,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "LUNR_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.0805,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "MSFT_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.0751,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "ORCL_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.0741,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "IREN_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.0705,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "META_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.0694,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "RDW_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.0663,
+      "spike_bars": 0,
+      "ohlc_bad": 0,
+      "reasons": "zero_vol>0.02"
+    },
+    {
+      "source": "okx",
+      "symbol": "XPD_USDT_SWAP",
+      "n_gaps": 0,
+      "zero_vol_share": 0.0653,
       "spike_bars": 0,
       "ohlc_bad": 0,
       "reasons": "zero_vol>0.02"

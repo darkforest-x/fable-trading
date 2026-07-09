@@ -1,8 +1,7 @@
 # P2-12 数据质量审计
 
-**日期**：2026-07-09 16:37 UTC
-**纪律（审计当时）**：只读扫描；不改 loader 黑名单、不碰 holdout、不调参。  
-**2026-07-10 owner 确认**：下表 SWAP 15m 候选已写入 `loader.BLOCKED_BASES`。
+**日期**：2026-07-09 19:03 UTC
+**纪律**：只读扫描；不改 loader 黑名单、不碰 holdout、不调参。
 
 ## 复现命令
 
@@ -15,17 +14,17 @@ python3 -m pytest tests/test_data_audit.py -q
 
 | 项 | 数值 |
 |---|---:|
-| 序列总数 | 892 |
-| 触发任一阈值 | 594 |
-| 结构性问题（缺口/零量/尖刺/OHLC） | 248 |
-| 黑名单候选（全宇宙） | 172 |
-| OKX SWAP 15m 序列 | 206 |
-| OKX SWAP 15m stale | 43 |
-| 未完成 `.part.csv` | 5 |
+| 序列总数 | 1049 |
+| 触发任一阈值 | 603 |
+| 结构性问题（缺口/零量/尖刺/OHLC） | 299 |
+| 黑名单候选（全宇宙） | 200 |
+| OKX SWAP 15m 序列 | 363 |
+| OKX SWAP 15m stale | 1 |
+| 未完成 `.part.csv` | 2 |
 
 分 bar：
 
-- `15m`: 455
+- `15m`: 612
 - `1H`: 54
 - `30m`: 54
 - `5m`: 329
@@ -58,21 +57,21 @@ python3 -m pytest tests/test_data_audit.py -q
 
 | bar | source | symbol | spikes |
 |---|---|---|---:|
+| 15m | okx | SOON_USDT_SWAP | 11 |
+| 15m | okx | RAVE_USDT_SWAP | 9 |
 | 15m | gate | RAVE_USDT | 8 |
+| 15m | okx | LAB_USDT_SWAP | 8 |
 | 15m | gate | LAB_USDT | 8 |
+| 15m | okx | H_USDT_SWAP | 8 |
 | 15m | gate | ESPORTS_USDT | 6 |
+| 15m | okx | LIGHT_USDT_SWAP | 6 |
 | 15m | gate | H_USDT | 6 |
-| 15m | gate | GUA_USDT | 5 |
 | 5m | gate | LAB_USDT | 5 |
-| 15m | gate | NFP_USDT | 4 |
-| 30m | okx | APE_USDT_SWAP | 4 |
+| 15m | gate | GUA_USDT | 5 |
+| 15m | okx | MMT_USDT_SWAP | 4 |
+| 15m | okx | PARTI_USDT_SWAP | 4 |
 | 15m | okx | BABY_USDT_SWAP | 4 |
-| 15m | okx | OKB_USDT | 3 |
-| 5m | okx | EDGE_USDT | 3 |
-| 1H | okx | APE_USDT_SWAP | 3 |
-| 15m | gate | VELVET_USDT | 3 |
-| 15m | okx | UNI_USDT_SWAP | 3 |
-| 15m | okx | UNI_USDT | 3 |
+| 15m | gate | NFP_USDT | 4 |
 
 ### zero_vol
 
@@ -89,10 +88,10 @@ python3 -m pytest tests/test_data_audit.py -q
 | 5m | gate | THE_USDT | 0.497 |
 | 15m | gate | AVA_USDT | 0.4903 |
 | 5m | gate | VELODROME_USDT | 0.4811 |
+| 15m | okx | ISRG_USDT_SWAP | 0.4634 |
 | 5m | gate | AGLD_USDT | 0.4591 |
 | 5m | gate | BROCCOLI_USDT | 0.4567 |
 | 5m | gate | ETHW_USDT | 0.4556 |
-| 5m | gate | TAIKO_USDT | 0.4448 |
 
 ### ohlc_bad
 
@@ -103,45 +102,60 @@ python3 -m pytest tests/test_data_audit.py -q
 | file | approx_rows | size_bytes |
 |---|---:|---:|
 | `ANIME_USDT_SWAP_15m.part.csv` | 24899 | 2075977 |
-| `GLM_USDT_SWAP_15m.part.csv` | 33099 | 2435106 |
-| `GMT_USDT_SWAP_15m.part.csv` | 18099 | 1483489 |
-| `GMX_USDT_SWAP_15m.part.csv` | 16999 | 1180393 |
-| `GPS_USDT_SWAP_15m.part.csv` | 12899 | 1070688 |
+| `MANA_USDT_SWAP_15m.part.csv` | 24499 | 1868552 |
 
 这些文件**不会**被 loader 读入。重跑 `python3 -m src.data.fetch_okx` 对应币种可续传；不要手改文件名假装完成。
 
 ## 黑名单候选（SWAP 15m 结构性问题）
 
-> **2026-07-10 owner 已确认写入** `loader.BLOCKED_BASES`（按 base 名：EWZ/CGNX/…/AMZN）。
+> 仅建议，**未写入** `loader.BLOCKED_BASES`。owner 确认后再改。
 
 | symbol | gaps | zero_vol | spikes | ohlc_bad | reasons |
 |---|---:|---:|---:|---:|---|
-| EWZ_USDT_SWAP | 0 | 0.3694 | 0 | 0 | zero_vol>0.02 |
-| CGNX_USDT_SWAP | 0 | 0.3224 | 0 | 0 | zero_vol>0.02 |
-| DKNG_USDT_SWAP | 0 | 0.3015 | 0 | 0 | zero_vol>0.02 |
-| BX_USDT_SWAP | 0 | 0.2874 | 0 | 0 | zero_vol>0.02 |
-| CSCO_USDT_SWAP | 0 | 0.2632 | 0 | 0 | zero_vol>0.02 |
-| CIEN_USDT_SWAP | 0 | 0.2337 | 0 | 0 | zero_vol>0.02 |
-| GME_USDT_SWAP | 0 | 0.1737 | 0 | 0 | zero_vol>0.02 |
-| CRWD_USDT_SWAP | 0 | 0.1706 | 1 | 0 | zero_vol>0.02 |
-| COST_USDT_SWAP | 0 | 0.1549 | 0 | 0 | zero_vol>0.02 |
-| ADBE_USDT_SWAP | 0 | 0.1503 | 0 | 0 | zero_vol>0.02 |
-| GEV_USDT_SWAP | 0 | 0.1204 | 0 | 0 | zero_vol>0.02 |
-| CRDO_USDT_SWAP | 0 | 0.1164 | 0 | 0 | zero_vol>0.02 |
-| EWJ_USDT_SWAP | 0 | 0.0886 | 0 | 0 | zero_vol>0.02 |
-| FLNC_USDT_SWAP | 0 | 0.0612 | 0 | 0 | zero_vol>0.02 |
-| ALAB_USDT_SWAP | 0 | 0.0592 | 0 | 0 | zero_vol>0.02 |
-| ASML_USDT_SWAP | 0 | 0.0576 | 0 | 0 | zero_vol>0.02 |
-| BMNR_USDT_SWAP | 0 | 0.0516 | 0 | 0 | zero_vol>0.02 |
-| APLD_USDT_SWAP | 0 | 0.0487 | 0 | 0 | zero_vol>0.02 |
-| AMD_USDT_SWAP | 0 | 0.0468 | 0 | 0 | zero_vol>0.02 |
-| AMAT_USDT_SWAP | 0 | 0.035 | 0 | 0 | zero_vol>0.02 |
-| AAPL_USDT_SWAP | 0 | 0.034 | 0 | 0 | zero_vol>0.02 |
-| AMZN_USDT_SWAP | 0 | 0.0323 | 0 | 0 | zero_vol>0.02 |
+| ISRG_USDT_SWAP | 0 | 0.4634 | 0 | 0 | zero_vol>0.02 |
+| ROK_USDT_SWAP | 0 | 0.4223 | 0 | 0 | zero_vol>0.02 |
+| SONY_USDT_SWAP | 0 | 0.2748 | 0 | 0 | zero_vol>0.02 |
+| TTMI_USDT_SWAP | 0 | 0.2683 | 0 | 0 | zero_vol>0.02 |
+| SHLD_USDT_SWAP | 0 | 0.2477 | 0 | 0 | zero_vol>0.02 |
+| XLE_USDT_SWAP | 0 | 0.2162 | 0 | 0 | zero_vol>0.02 |
+| TWLO_USDT_SWAP | 0 | 0.2129 | 0 | 0 | zero_vol>0.02 |
+| USO_USDT_SWAP | 0 | 0.1992 | 0 | 0 | zero_vol>0.02 |
+| TSEM_USDT_SWAP | 0 | 0.1987 | 0 | 0 | zero_vol>0.02 |
+| ONDS_USDT_SWAP | 0 | 0.1962 | 0 | 0 | zero_vol>0.02 |
+| RIVN_USDT_SWAP | 0 | 0.1918 | 0 | 0 | zero_vol>0.02 |
+| OSCR_USDT_SWAP | 0 | 0.1855 | 0 | 0 | zero_vol>0.02 |
+| SOFTBANK_USDT_SWAP | 0 | 0.1828 | 0 | 0 | zero_vol>0.02 |
+| TER_USDT_SWAP | 0 | 0.1765 | 0 | 0 | zero_vol>0.02 |
+| RDDT_USDT_SWAP | 0 | 0.1744 | 0 | 0 | zero_vol>0.02 |
+| ZHIPU_USDT_SWAP | 0 | 0.1688 | 0 | 0 | zero_vol>0.02 |
+| MINIMAX_USDT_SWAP | 0 | 0.1676 | 0 | 0 | zero_vol>0.02 |
+| URNM_USDT_SWAP | 0 | 0.1614 | 0 | 0 | zero_vol>0.02 |
+| EWT_USDT_SWAP | 0 | 0.1501 | 0 | 0 | zero_vol>0.02 |
+| WEN_USDT_SWAP | 0 | 0.1475 | 0 | 0 | zero_vol>0.02 |
+| UVXY_USDT_SWAP | 0 | 0.1461 | 0 | 0 | zero_vol>0.02 |
+| VRT_USDT_SWAP | 0 | 0.1421 | 0 | 0 | zero_vol>0.02 |
+| HYUNDAI_USDT_SWAP | 0 | 0.133 | 0 | 0 | zero_vol>0.02 |
+| IWM_USDT_SWAP | 0 | 0.1321 | 0 | 0 | zero_vol>0.02 |
+| POET_USDT_SWAP | 0 | 0.1321 | 0 | 0 | zero_vol>0.02 |
+| SMH_USDT_SWAP | 0 | 0.1301 | 0 | 0 | zero_vol>0.02 |
+| LLY_USDT_SWAP | 0 | 0.1052 | 0 | 0 | zero_vol>0.02 |
+| SMCI_USDT_SWAP | 0 | 0.1032 | 0 | 0 | zero_vol>0.02 |
+| LRCX_USDT_SWAP | 0 | 0.1004 | 0 | 0 | zero_vol>0.02 |
+| NFLX_USDT_SWAP | 0 | 0.099 | 0 | 0 | zero_vol>0.02 |
+| INFQ_USDT_SWAP | 0 | 0.0853 | 0 | 0 | zero_vol>0.02 |
+| NOW_USDT_SWAP | 0 | 0.0847 | 0 | 0 | zero_vol>0.02 |
+| HPE_USDT_SWAP | 0 | 0.0839 | 0 | 0 | zero_vol>0.02 |
+| LUNR_USDT_SWAP | 0 | 0.0805 | 0 | 0 | zero_vol>0.02 |
+| MSFT_USDT_SWAP | 0 | 0.0751 | 0 | 0 | zero_vol>0.02 |
+| ORCL_USDT_SWAP | 0 | 0.0741 | 0 | 0 | zero_vol>0.02 |
+| IREN_USDT_SWAP | 0 | 0.0705 | 0 | 0 | zero_vol>0.02 |
+| META_USDT_SWAP | 0 | 0.0694 | 0 | 0 | zero_vol>0.02 |
+| RDW_USDT_SWAP | 0 | 0.0663 | 0 | 0 | zero_vol>0.02 |
+| XPD_USDT_SWAP | 0 | 0.0653 | 0 | 0 | zero_vol>0.02 |
 
 ## 解读
 
-- 15m 序列：okx=280，gate=175。主线宇宙是 **OKX SWAP**；gate 与 spot 仅作对照。
+- 15m 序列：okx=437，gate=175。主线宇宙是 **OKX SWAP**；gate 与 spot 仅作对照。
 - 单 bar >25% 尖刺在山寨上偶发，可能是真实插针；列入候选时需人工 spot-check K 线。
 - stale 优先跑每日 `update_okx`，不要当成永久坏币。
 
@@ -151,8 +165,8 @@ python3 -m pytest tests/test_data_audit.py -q
 - 旧 cache 与 kline_fetched 合并后的序列会一起审计；决策应以 OKX fetched 为准。
 - 本审计不修改任何训练数据或黑名单。
 
-## 下一步
+## 下一步（需 owner 决策的标为决策）
 
-1. ~~对上表 SWAP 15m 黑名单候选逐币 spot-check（决策）。~~ ✅ 2026-07-10 owner 确认写入 BLOCKED。
-2. 清掉或续传 `.part.csv` 未完成币种（expand 任务进行中）。
+1. 对上表 SWAP 15m 黑名单候选逐币 spot-check（决策）。
+2. 清掉或续传 `.part.csv` 未完成币种。
 3. 确认每日 `update_okx` 仍在跑，stale 应在 24h 内消失。
