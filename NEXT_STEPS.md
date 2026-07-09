@@ -245,10 +245,16 @@ H7 5m 证伪：val 样本仅 15m 基线的 0.63×，未达到机会数 ≥3×，
 
 ## P2 —— 下周（工程加固 + 体验）
 
-### 9. 冒烟测试 + CI
-- `tests/`：labeling 障碍数学（构造 OHLC 验证 tp/sl/timeout/ambiguous 四路径）、
-  组合模拟不变量（同币种不重叠、并发≤10）、loader 合并去重、update_okx 幂等；
-- GitHub Actions：push 时跑测试（无 secrets，纯 python）。
+### ~~9. 冒烟测试 + CI~~ ✅ 已完成（2026-07-09）
+- ~~`tests/`：labeling 障碍数学（构造 OHLC 验证 tp/sl/timeout/ambiguous 四路径）、
+  组合模拟不变量（同币种不重叠、并发≤10）、loader 合并去重、update_okx 幂等；~~
+- ~~GitHub Actions：push 时跑测试（无 secrets，纯 python）。~~
+
+完成记录：新增 `tests/test_labeling_paths.py`、`tests/test_portfolio_simulation.py`、
+`tests/test_loader_update_smoke.py`，覆盖长仓 barrier 四路径、组合模拟同币种/并发不变量、
+loader 合并去重、update_okx 无新增 confirmed bar 幂等；新增 `.github/workflows/tests.yml`，
+push 到 `codex/day1` 或 PR 时运行 compileall + pytest。CI 只安装判断层/看板测试所需轻量依赖，
+不把 torch/ultralytics 放进普通 push gate。
 
 ### 10. 看板完善·第二批
 - 移动端适配细化（手机看盘）；
