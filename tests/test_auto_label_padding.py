@@ -52,7 +52,7 @@ def test_e1_x_pad_default_is_six() -> None:
 def test_e2_max_dense_bars_trims_long_run() -> None:
     from src.detection.auto_label import MAX_DENSE_BARS, find_dense_segments
 
-    assert MAX_DENSE_BARS == 24
+    assert MAX_DENSE_BARS == 12
     n = 80
     # Entire window satisfies density thresholds.
     close = [100.0] * n
@@ -69,9 +69,9 @@ def test_e2_max_dense_bars_trims_long_run() -> None:
             "full_spread": [0.002 + (i * 0.00001) for i in range(n)],  # tighter at left
         }
     )
-    segs = find_dense_segments(df, max_bars=24)
+    segs = find_dense_segments(df, max_bars=12)
     assert len(segs) == 1
-    assert segs[0].end - segs[0].start + 1 == 24
+    assert segs[0].end - segs[0].start + 1 == 12
     # Tightest window should start near the left (lowest full_spread).
     assert segs[0].start == 0
 

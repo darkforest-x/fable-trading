@@ -48,3 +48,8 @@ MAX_DENSE_BARS = 24  # 新增
 1. Owner 看 E2 对照页：绿框是否符合「密集核心」。  
 2. 认可 → 固定配置重训；不认可 → 调 `MAX_DENSE_BARS`（18/32）仍算同族单变量续做。  
 3. 下一变量候选：E4 `MERGE_GAP`（ALLO）或 E3 边缘丢弃。
+
+
+## E2.1（owner：仍宽）
+
+`MAX_DENSE_BARS` **24 → 12**。PAXG 段长 12；`box_w_mean` 0.079→**0.057**。对照页红=24/绿=12。

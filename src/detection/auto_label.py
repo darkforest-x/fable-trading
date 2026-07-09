@@ -31,8 +31,8 @@ Y_PAD_FRAC = 0.35
 # P2-11 E2 (2026-07-10, path B): if a dense run is longer than this many bars,
 # keep only the tightest contiguous window of this length (min mean full_spread).
 # Single-variable — do not change x_pad / y_pad / min_bars / merge_gap here.
-# Rationale: pad-only E1 left mega-boxes (PAXG left run=74 bars) essentially unchanged.
-MAX_DENSE_BARS = 24
+# E2.1: owner said 24 still too wide → tighten 24 → 12 (dataset p50 segment len ≈12).
+MAX_DENSE_BARS = 12
 
 CLASS_ID = 0  # single class: dense_cluster
 CLASS_NAME = "dense_cluster"
