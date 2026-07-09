@@ -1,13 +1,12 @@
-# Multi-day status 2026-07-09T20:04:56Z
+# Multi-day status 2026-07-09T21:03:29Z
 
-## Durable 2h tick
-- YOLO: **epoch ~10/40**, train PID alive; **best mAP50=0.664 @ep5**
-- Expand: DONE (FINAL reports shipped)
-- FO 5151 / LS 8081 / VPS: up
-- pytest: **113 passed**
-- models/ACTIVE → frozen_tp5_sl2_swap_20260709.txt
-- Phase3 hub / H1 shadow / consistency_check: already on main
-- forward_track: running this cycle
+## This hour
+- YOLO E2.1: **alive ~ep13**, best still **ep5 mAP50=0.664** (patience 12; early-stop may near)
+- Expand: DONE + FINAL
+- forward: mainline 9 / H1 shadow 8 (new=0)
+- FO/LS: up
+- daily_digest: dual-book board (main + H1 shadow) + E2.1 mAP line
 
-## Waiting
-- Train complete → p2a_e21_train_report.md + consistency vs new best.pt
+## Shipped this hour
+- scripts/daily_digest.py fix/enhancement
+- analysis/p2a_e21_train_interim.md refresh

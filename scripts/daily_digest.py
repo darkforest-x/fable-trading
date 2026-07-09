@@ -17,6 +17,7 @@ sys.path.insert(0, str(PROJECT_DIR))
 from src.notify import send  # noqa: E402
 
 LOG = PROJECT_DIR / "data" / "forward_log.csv"
+LOG_H1 = PROJECT_DIR / "data" / "forward_log_h1_scaled.csv"
 KLINE_DIR = PROJECT_DIR / "data" / "kline_fetched"
 
 
@@ -30,22 +31,39 @@ def data_freshness() -> tuple[str, bool]:
     return (f"⚠️ {line}（疑似断更）", True) if age_h > 26 else (line, False)
 
 
-def forward_board() -> str:
-    if not LOG.exists():
-        return "前向日志：尚未生成"
-    df = pd.read_csv(LOG, parse_dates=["signal_time"])
+def _forward_segment(path: Path, title: str) -> str:
+    if not path.exists():
+        return f"{title}：尚未生成"
+    df = pd.read_csv(path, parse_dates=["signal_time"])
     if df.empty:
-        return "前向信号：累计 0 笔（等待新密集形成）"
+        return f"{title}：累计 0 笔"
+    # status column preferred; fall back to outcome==open
+    if "status" in df.columns:
+        open_n = int((df["status"].astype(str) == "open").sum())
+        closed = df[df["status"].astype(str) == "closed"]
+    else:
+        open_n = int((df.get("outcome", pd.Series(dtype=str)).astype(str) == "open").sum())
+        closed = df[df.get("outcome", pd.Series(dtype=str)).astype(str) != "open"]
+    closed = closed.dropna(subset=["realized_ret"]) if "realized_ret" in closed.columns else closed
     today = pd.Timestamp.now(tz=timezone.utc).normalize()
-    lines = []
-    for config, g in df.groupby("config"):
-        closed = g[g["outcome"] != "open"].dropna(subset=["realized_ret"])
-        new_today = int((g["signal_time"] >= today).sum())
-        seg = f"<b>{config}</b>：今日新增 {new_today}，累计 {len(g)} 笔（未平 {int((g['outcome']=='open').sum())}）"
-        if len(closed):
-            net = closed["realized_ret"] - 0.0006
-            seg += f"｜已平净收益 {100*net.sum():+.2f}%，胜率 {100*(net>0).mean():.0f}%，距100笔裁决线 {len(closed)}/100"
-        lines.append(seg)
+    st = df["signal_time"]
+    if getattr(st.dt, "tz", None) is None:
+        st = st.dt.tz_localize("UTC")
+    new_today = int((st >= today).sum())
+    seg = f"<b>{title}</b>：今日+{new_today}，累计 {len(df)}（开仓中 {open_n}）"
+    if len(closed) and "realized_ret" in closed.columns:
+        net = closed["realized_ret"].astype(float) - 0.0006
+        seg += (
+            f"｜已平净 {100 * net.sum():+.2f}% 胜率 {100 * (net > 0).mean():.0f}% "
+            f"裁决 {len(closed)}/100"
+        )
+    return seg
+
+
+def forward_board() -> str:
+    lines = [_forward_segment(LOG, "主线 TP5/SL2")]
+    if LOG_H1.exists():
+        lines.append(_forward_segment(LOG_H1, "影子 H1 scaled"))
     return "\n".join(lines)
 
 
@@ -57,13 +75,29 @@ def system_health() -> str:
             tail = p.read_text()[-400:]
             if "Traceback" in tail:
                 notes.append(f"⚠️ {name} 日志尾部有异常，需要人看")
-    results = PROJECT_DIR / "runs/detect/runs/detect/dense_15m_full_s/results.csv"
-    if results.exists():
+    # Prefer E2.1 retrain curve if present, else legacy full_s
+    for label, rel in (
+        ("yolo11s E2.1", "runs/detect/runs/detect/dense_15m_full_s_e21/results.csv"),
+        ("yolo11s", "runs/detect/runs/detect/dense_15m_full_s/results.csv"),
+    ):
+        results = PROJECT_DIR / rel
+        if not results.exists():
+            continue
         import csv
-        rows = list(csv.reader(results.open()))
-        if len(rows) > 1:
-            best = max(float(r[7]) for r in rows[1:] if len(r) > 7)
-            notes.append(f"yolo11s：{len(rows)-1} epochs，最佳 mAP50 {best:.3f}（线 0.90）")
+
+        rows = list(csv.DictReader(results.open()))
+        if not rows:
+            continue
+        best = None
+        for r in rows:
+            for k, v in r.items():
+                if k.strip().endswith("mAP50(B)") and "95" not in k:
+                    m = float(v)
+                    if best is None or m > best:
+                        best = m
+        if best is not None:
+            notes.append(f"{label}：{len(rows)} epochs，最佳 mAP50 {best:.3f}（线 0.90）")
+        break
     return "\n".join(notes) if notes else "系统：无异常"
 
 
