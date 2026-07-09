@@ -140,11 +140,17 @@ BNB_USDT 1 个月窗口 TP 与 SL 样例均只保留 3 条价格线，entry/exit
 记录 model_path/dataset_path/dataset_sha256，不匹配即重建，避免旧缓存绕过冻结字节。
 本地 8643 API 已验收 `/api/symbols`、`/api/overview`、`/api/chart/okx/BTC_USDT_SWAP`。
 
-### 6. 前向跟踪器（paper-trading 记录仪）
-- 新建 `scripts/forward_track.py`：读最新数据 → 扫描冻结配置的新候选 →
+### 6. 前向跟踪器（paper-trading 记录仪；脚本已完成，定时任务待 owner 点头）
+- ~~新建 `scripts/forward_track.py`：读最新数据 → 扫描冻结配置的新候选 →
   冻结模型打分 → 阈值以上记为信号 → 结果已知的（barrier 已触发）补记出场，
-  追加写 `data/forward_log.csv`（append-only，含 maker_filled 判定）；
-- 幂等：重复运行不重复记录（按 signal_time+symbol 去重）；
+  追加写 `data/forward_log.csv`（append-only，含 maker_filled 判定）；~~
+  ✅ 已完成（2026-07-09）。实现拆在 `src/judgment/forward*.py`：
+  默认从 `2026-07-08 00:00 UTC` 起记录 SWAP TP5/SL2 冻结模型信号；
+  新信号按 `(source, symbol, signal_time)` 加入，已打开信号只补 outcome/exit 字段，
+  保留原 detected_at/model_path/dataset_sha256。
+- ~~幂等：重复运行不重复记录（按 signal_time+symbol 去重）；~~
+  ✅ 已验证。正式窗口当前 0 条新信号；临时回放 `--start 2026-07-01`
+  写入 19 条 closed 信号，第二次运行新增 0、重复 0。
 - 每日运行：**需 owner 点头**后把它加进每日定时任务（在现有 8 点任务的 prompt 里
   追加一步，或 owner 自己跑 `python3 scripts/forward_track.py`）；
 - 3-4 周后累计 ≥100 笔时，用该日志算前向 PF——这是 v3 配置的最终裁决。
