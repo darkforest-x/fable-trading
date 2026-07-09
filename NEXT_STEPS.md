@@ -290,7 +290,8 @@ Round 1 进度（2026-07-09）：
   → `src/webapp/static/label_audit.html`（看板 `/label_audit.html`）。
 - 已记录样本清单：`analysis/p2a_label_audit_round1.md`。
 - 已用 Playwright 验证 desktop 1280x900 / mobile 390x844：18 张图，横向溢出 0。
-- 当前阻塞在 owner 人工审计：需要按图名记录漏标 / 误标 / 框形不贴，未收到前禁止进入规则修正。
+- **07-10 owner 确认** findings（见 `output/offline_tasks/yolo_label_audit_findings.csv`）。
+  下一步：单变量 E1 收紧 `x_pad_px`（单独 commit），重建审计页确认后再谈训练。
 
 ### 11b. YOLO 架构后续（视第 1/3 步结论）
 - 若 20/60/120 判断层胜出：检测+判断已对齐，做"YOLO 预测框 → 判断层候选"的
@@ -305,9 +306,10 @@ Round 1 进度（2026-07-09）：
 完成记录：`scripts/data_audit.py` + `tests/test_data_audit.py` +
 `analysis/p2_data_audit_report.md` / `analysis/output/data_audit.csv`。
 扫描 892 序列；OKX SWAP 15m = 206（stale 43，优先 update_okx）。
-黑名单候选（未写入 loader）主要是股票/ETF 类薄流动性 SWAP（EWZ/CGNX/DKNG/… 与
-AAPL/AMD 等）；OHLC 坏样本 0。5 个 `.part.csv` 未完成拉取已列报告。
-**未**改 `BLOCKED_BASES`——等 owner spot-check 后决定。
+黑名单候选主要是股票/ETF 类薄流动性 SWAP（EWZ/CGNX/DKNG/… 与 AAPL/AMD 等）；
+OHLC 坏样本 0。5 个 `.part.csv` 未完成拉取已列报告。
+**2026-07-10 owner 确认**：报告表 SWAP 15m thin equity/ETF 候选已写入
+`loader.BLOCKED_BASES`（EWZ/CGNX/…/AAPL/AMZN 等 22 个 base）。
 
 ---
 
@@ -366,5 +368,5 @@ agent 不接触明文）。没有这个，后面全部不许上 VPS。
 | 3 | 看板要不要加访问控制 | P2-10：owner 2026-07-09 决定暂不加 |
 | 4 | 8-55 专用 YOLO 训不训（仅当 8-55 保持主线） | P2-11 |
 | 5 | 模拟盘 API key（demo 账户） | P3 |
-| 6 | P2-12 黑名单候选是否写入 BLOCKED_BASES | 见 analysis/p2_data_audit_report.md |
-| 7 | P2-11 Round 1 打标人工过图（漏标/误标/框形） | 未过图前禁改 auto_label |
+| 6 | P2-12 黑名单候选是否写入 BLOCKED_BASES | ✅ 07-10 owner 确认已写入 |
+| 7 | P2-11 Round 1 打标人工过图（漏标/误标/框形） | ✅ 07-10 owner 确认 findings；下一步 E1 x_pad |

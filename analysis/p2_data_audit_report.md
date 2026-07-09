@@ -1,7 +1,8 @@
 # P2-12 数据质量审计
 
 **日期**：2026-07-09 16:37 UTC
-**纪律**：只读扫描；不改 loader 黑名单、不碰 holdout、不调参。
+**纪律（审计当时）**：只读扫描；不改 loader 黑名单、不碰 holdout、不调参。  
+**2026-07-10 owner 确认**：下表 SWAP 15m 候选已写入 `loader.BLOCKED_BASES`。
 
 ## 复现命令
 
@@ -111,7 +112,7 @@ python3 -m pytest tests/test_data_audit.py -q
 
 ## 黑名单候选（SWAP 15m 结构性问题）
 
-> 仅建议，**未写入** `loader.BLOCKED_BASES`。owner 确认后再改。
+> **2026-07-10 owner 已确认写入** `loader.BLOCKED_BASES`（按 base 名：EWZ/CGNX/…/AMZN）。
 
 | symbol | gaps | zero_vol | spikes | ohlc_bad | reasons |
 |---|---:|---:|---:|---:|---|
@@ -150,8 +151,8 @@ python3 -m pytest tests/test_data_audit.py -q
 - 旧 cache 与 kline_fetched 合并后的序列会一起审计；决策应以 OKX fetched 为准。
 - 本审计不修改任何训练数据或黑名单。
 
-## 下一步（需 owner 决策的标为决策）
+## 下一步
 
-1. 对上表 SWAP 15m 黑名单候选逐币 spot-check（决策）。
-2. 清掉或续传 `.part.csv` 未完成币种。
+1. ~~对上表 SWAP 15m 黑名单候选逐币 spot-check（决策）。~~ ✅ 2026-07-10 owner 确认写入 BLOCKED。
+2. 清掉或续传 `.part.csv` 未完成币种（expand 任务进行中）。
 3. 确认每日 `update_okx` 仍在跑，stale 应在 24h 内消失。

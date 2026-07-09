@@ -83,5 +83,6 @@
 | 07-09 | 真实资金费率接入 | OKX API 覆盖短于 400 天；当前 TP5/SL2 覆盖样本净@maker+真实资金费仅约 +0.003%/笔 |
 | 07-09 | 看板访问控制暂不加 | P2-10 访问控制跳过，继续主线 P2-11；若后续进入操作台化/P2.5，再重新拍板 |
 | 07-10 | 前向跟踪已入每日定时任务 | `daily-okx-data-update` 含 update+forward+digest |
-| 待定 | P2-12 黑名单候选是否写入 BLOCKED | 见 p2_data_audit_report |
-| 待定 | P2-11 Round1 打标过图结论 | 未过图前禁改 auto_label |
+| 07-10 | P2-12 黑名单候选写入 BLOCKED | 报告表 22 个 thin equity/ETF base 入 loader |
+| 07-10 | P2-11 Round1 打标预审全部确认 | 批准 E1 收 x_pad 方向；改参另开 commit |
+| 07-10 | 合并 codex/day1 → main | 结束双 worktree 分叉 |

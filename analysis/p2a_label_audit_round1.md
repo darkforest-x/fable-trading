@@ -71,12 +71,12 @@ python3 -m uvicorn src.webapp.server:app --host 127.0.0.1 --port 8643
 owner 人工打开 `/label_audit.html`，按图名记录三类问题：
 漏标、有框但不密集、框形不贴。收到问题图名后，才能进入 P2-11 第 2 步规则修正。
 
-## 07-10 代理预审（非 owner 终裁）
+## 07-10 代理预审 → owner 确认
 
-Grok 对 seed `20260709` 的 18 张抽图做了视觉预审（**不能替代 owner 签字**）：
+Grok 对 seed `20260709` 的 18 张抽图做了视觉预审；**2026-07-10 owner 全部确认**：
 
 - 明细：`output/offline_tasks/yolo_label_audit_findings.csv`
 - 建议：`output/offline_tasks/yolo_label_audit_recommendations.md`
 - 粗计：normal 12 / box_too_wide 2 / box_too_narrow 2 / split-merge 1 / unclear 1
 - 头号问题图：`PAXG_USDT_015960`（超宽框）；边缘残框：`ICP_USDT_000760`、`BNB_USDT_011660`
-- **仍禁止**在无 owner 确认前改 `auto_label.py` 或重训
+- **下一步（已批准方向）**：P2-11 第 2 步优先单变量 E1（收紧 `x_pad_px`），改动单独 PR/commit；未实施前不重训
