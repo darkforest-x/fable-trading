@@ -63,6 +63,14 @@
 | `scripts/offline_pipeline.sh` | 无人值守接力 | nohup 脱离会话 |
 | `scripts/swap_replication.py` | 合约复制检验 | 冻结规则，val only |
 
+## ⚠️ 已知不一致（owner 于 07-09 在架构图中发现）
+
+**检测层与判断层的均线定义不同**：2a YOLO 打标/训练用 SMA/EMA 20/60/120（继承旧项目
+画图管线），2b 判断层用 EMA 8/13/21/34/55+144/200（唯一有 P0 alpha 证据的均线组）。
+至今无害的原因：交易候选直接来自 8-55 规则扫描，YOLO 不在关键路径。但 YOLO 要成为
+实盘视觉入口前必须对齐——出路由 NEXT_STEPS P0-3 均线对比实验裁决：20/60/120 胜出则
+判断层切换（两层自动对齐、YOLO 免重训）；8-55 胜出则重训 YOLO（P2-11b）或改两级漏斗。
+
 ## 数据资产与产物约定
 
 - `data/`（不入 git）：`kline_fetched/okx_{SYM}_15m_{rows}.csv`（现货与 `_USDT_SWAP`
