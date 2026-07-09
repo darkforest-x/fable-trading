@@ -201,12 +201,15 @@ BNB_USDT 1 个月窗口 TP 与 SL 样例均只保留 3 条价格线，entry/exit
 - `barrier_sweep.py` 已注册 `fixed/trailing/scaled/breakeven/ma-exit` 插件；
   `labeling.py` 只新增 `label_candidate_ma_exit`，未改旧标签函数。
 
-### R1'. H9 复测与推广（发现级已通过，见 scripts/h9_trend_filter.py 与议程记录）
+### ~~R1'. H9 复测与推广~~（已完成，2026-07-09）
 Claude 已验证："1h EMA144 上方"过滤使净@maker +0.152%→+0.203%（1h 从 15m 聚合，
 无前视处理见脚本 docstring——复用它，别重写）。Codex 接力三件事：
-1. 把该过滤器接入 maker_val_sim 组合模拟，看 PF 变化（信号减半后并发占用更低）；
-2. 合约宇宙就绪后在 SWAP 池复测；
-3. 作为特征（而非硬过滤）重训一版对比——若模型能自己学会用它，特征版更优雅。
+1. ✅ 把该过滤器接入 maker_val_sim 组合模拟：spot PF 1.271→1.520；
+2. ✅ SWAP 池复测：maker PF 0.964→1.204（above_ma）/1.281（up_slope），未过 1.3；
+3. ✅ 特征版重训：`h1_above_ma` 使 SWAP top 净@maker +0.026%→+0.180%，AUC 0.560→0.553。
+
+结论：H9 在 SWAP 方向复现但样本小、仍未确认达标；不切主线，详见
+`analysis/p15_h9_report.md`。
 
 ### R2. H10 做空侧（优先#2）
 `candidates.py` 镜像规则（新函数，不改多头路径）+ `labeling.py` 空头 barrier

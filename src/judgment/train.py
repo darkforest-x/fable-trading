@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections.abc import Sequence
 from pathlib import Path
 
 import lightgbm as lgb
@@ -112,9 +113,11 @@ def permutation_pvalue(y_true: np.ndarray, y_prob: np.ndarray, *, n_perm: int = 
     return (hits + 1) / (n_perm + 1)
 
 
-def train_model(train: pd.DataFrame, val: pd.DataFrame) -> lgb.Booster:
-    dtrain = lgb.Dataset(train[FEATURE_COLUMNS], label=train["label"])
-    dval = lgb.Dataset(val[FEATURE_COLUMNS], label=val["label"], reference=dtrain)
+def train_model(
+    train: pd.DataFrame, val: pd.DataFrame, *, feature_columns: Sequence[str] = FEATURE_COLUMNS
+) -> lgb.Booster:
+    dtrain = lgb.Dataset(train[list(feature_columns)], label=train["label"])
+    dval = lgb.Dataset(val[list(feature_columns)], label=val["label"], reference=dtrain)
     return lgb.train(
         LGB_PARAMS,
         dtrain,

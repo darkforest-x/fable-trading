@@ -4,12 +4,12 @@
 
 ## 当前状态一句话
 
-**07-09 追加：合约复制性检验通过**（TP5/SL2 纯 SWAP 池 AUC 0.560/p=0.001，top-decile 净@maker +0.225%/笔，判定标准全过）——**主线宇宙即日起为 SWAP**；H1 分批止盈为 v3 出场头号挑战者（AUC 0.608/胜率 65%）。前向验证与后续实验一律用合约配置。YOLO11s 离线验收 mAP50 0.8569，低于正式线 0.90，检测层正式验收未达成，标记为非关键路径并暂停。P1-5 已完成：`models/frozen_tp5_sl2_swap_20260709.txt/.json` 入库，看板信号路径加载冻结模型并按 model_path/dataset_sha256 失效旧缓存。P1-8 已完成：看板新增前向验证 tab、现货/合约切换、动态总览与分宇宙 score cache，localhost 与 VPS 真浏览器验收通过。P1.5 R0 已完成：fetch/update/build/train 支持 5m/15m/30m/1H，sweep exit registry 注册 fixed/trailing/scaled/breakeven/ma-exit，下一步按 `NEXT_STEPS.md` 做 R1'。
+**07-09 追加：合约复制性检验通过**（TP5/SL2 纯 SWAP 池 AUC 0.560/p=0.001，top-decile 净@maker +0.225%/笔，判定标准全过）——**主线宇宙即日起为 SWAP**；H1 分批止盈为 v3 出场头号挑战者（AUC 0.608/胜率 65%）。前向验证与后续实验一律用合约配置。YOLO11s 离线验收 mAP50 0.8569，低于正式线 0.90，检测层正式验收未达成，标记为非关键路径并暂停。P1-5 已完成：`models/frozen_tp5_sl2_swap_20260709.txt/.json` 入库，看板信号路径加载冻结模型并按 model_path/dataset_sha256 失效旧缓存。P1-8 已完成：看板新增前向验证 tab、现货/合约切换、动态总览与分宇宙 score cache，localhost 与 VPS 真浏览器验收通过。P1.5 R0/R1' 已完成：多周期 sweep 台架就绪；H9 在 SWAP 上方向复现（maker PF 0.964→1.204/1.281），但交易数少且未过 PF 1.3，不切主线。
 
 **2b 验收通过（holdout 已消耗）→ 阶段 3 第一轮未通过（PF 1.01@0.3%）→
 owner 已委托"按推荐直接执行" → 出场结构扫描完成：TP5/SL2 为 v3 候选标签**
 （val 净@0.3% +0.077%/笔 vs 基线 +0.001%，p=0.001，见 `analysis/p2b_v3_barrier_sweep.md`）。
-进行中：P1.5 R1'，把 H9 趋势过滤接入 maker_val_sim 组合模拟并在 SWAP 池复测。
+进行中：P1.5 R2/H10 做空侧。
 纪律红线：holdout 与验收窗口均已消耗，v3 的确认性验证只能用前向新数据；
 val 已被多次选型使用，其数字只用于排序不用于宣称绩效。
 
