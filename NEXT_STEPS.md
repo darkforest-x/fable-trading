@@ -298,9 +298,16 @@ Round 1 进度（2026-07-09）：
 - 若 8-55 保持主线：评估是否需要为 8-55 渲染训练新 YOLO（工作量：改 render.py
   的均线组 + 重建数据集 + 训练；价值：仅在坚持视觉检测路线时存在——先问 owner）。
 
-### 12. 数据质量审计
-- 新建 `scripts/data_audit.py`：全部序列的缺口/异常值/零成交量统计 → 报告；
-  发现问题币种列入 loader 黑名单候选（改动需记录理由）。
+### ~~12. 数据质量审计~~ ✅ 已完成（2026-07-10）
+- ~~新建 `scripts/data_audit.py`：全部序列的缺口/异常值/零成交量统计 → 报告；
+  发现问题币种列入 loader 黑名单候选（改动需记录理由）。~~
+
+完成记录：`scripts/data_audit.py` + `tests/test_data_audit.py` +
+`analysis/p2_data_audit_report.md` / `analysis/output/data_audit.csv`。
+扫描 892 序列；OKX SWAP 15m = 206（stale 43，优先 update_okx）。
+黑名单候选（未写入 loader）主要是股票/ETF 类薄流动性 SWAP（EWZ/CGNX/DKNG/… 与
+AAPL/AMD 等）；OHLC 坏样本 0。5 个 `.part.csv` 未完成拉取已列报告。
+**未**改 `BLOCKED_BASES`——等 owner spot-check 后决定。
 
 ---
 
@@ -354,8 +361,10 @@ agent 不接触明文）。没有这个，后面全部不许上 VPS。
 
 | # | 事项 | 依赖 |
 |---|---|---|
-| 1 | 均线主线：8-55 还是 20/60/120（看第 3 步对比表） | P0-3 |
-| 2 | 前向跟踪加入每日定时任务 | P1-6 |
+| 1 | 均线主线：8-55 还是 20/60/120（看第 3 步对比表） | P0-3：owner 已定 8-55 |
+| 2 | 前向跟踪加入每日定时任务 | P1-6：scheduled-tasks 已含 forward_track + digest（2026-07-10 核实） |
 | 3 | 看板要不要加访问控制 | P2-10：owner 2026-07-09 决定暂不加 |
 | 4 | 8-55 专用 YOLO 训不训（仅当 8-55 保持主线） | P2-11 |
 | 5 | 模拟盘 API key（demo 账户） | P3 |
+| 6 | P2-12 黑名单候选是否写入 BLOCKED_BASES | 见 analysis/p2_data_audit_report.md |
+| 7 | P2-11 Round 1 打标人工过图（漏标/误标/框形） | 未过图前禁改 auto_label |
