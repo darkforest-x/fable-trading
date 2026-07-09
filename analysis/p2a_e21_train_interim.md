@@ -1,8 +1,8 @@
 # YOLO E2.1 training interim
 
-**Updated**: 2026-07-09T21:00:53.808212+00:00
+**Updated**: 2026-07-09T22:04:42.193682+00:00
 
-Run: `runs/detect/runs/detect/dense_15m_full_s_e21` · yolo11s · E2.1 labels · patience=12
+Run: `dense_15m_full_s_e21` · yolo11s · E2.1 · patience=12
 
 | epoch | P | R | mAP50 |
 |---:|---:|---:|---:|
@@ -18,9 +18,13 @@ Run: `runs/detect/runs/detect/dense_15m_full_s_e21` · yolo11s · E2.1 labels ·
 | 10 | 0.2992 | 0.2930 | 0.2345 |
 | 11 | 0.5492 | 0.5485 | 0.5700 |
 | 12 | 0.2778 | 0.0077 | 0.0050 |
+| 13 | 0.7796 | 0.6572 | 0.8203 |
+| 14 | 0.0189 | 0.0008 | 0.0017 |
+| 15 | 0.3000 | 0.0139 | 0.0087 |
+| 16 | 0.4502 | 0.6608 | 0.4726 |
+| 17 | 0.3469 | 0.6040 | 0.3935 |
 
-**Best so far**: epoch **5** mAP50=**0.6642** P=0.6231 R=0.6361
+**Best so far**: epoch **13** mAP50=**0.8203** P=0.7796 R=0.6572
 
-best.pt last updated at epoch of best metric (ultralytics keeps peak).
-Train still running; final report after exit.
+Finalize watchdog `fable_yolo_e21_finalize` will write formal report when train exits.
 
