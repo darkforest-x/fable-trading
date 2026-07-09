@@ -1,17 +1,14 @@
-# Multi-day status 2026-07-09T19:04:19Z
+# Multi-day status 2026-07-09T20:02:02Z
 
 ## This hour
-- **EXPAND FINISHED**: 399 SWAP 15m files; FINAL report written
-- data_audit re-ran (series_total from audit summary)
-- forward_track: total_rows=9 mainline; H1 shadow updated
-- YOLO E2.1: still training (~epoch 5 area earlier; check log) — no full report yet
-- FO 5151 / LS 8081 / VPS up
+- YOLO E2.1: **alive epoch ~9/40**, best so far **epoch5 mAP50=0.664** (results.csv); collapse spikes at ep2/7
+- Expand: **DONE** FINAL reports already shipped
+- FO :5151 200, LS docker Up, audit 8643 up
+- Interim train curve: analysis/p2a_e21_train_interim.md
+- forward_track: running this cycle
 
-## Deliverables this hour
-- output/offline_tasks/swap_universe_expansion_report.md (FINAL)
-- output/offline_tasks/FINAL_OFFLINE_SUMMARY.md
-- analysis/p2_data_audit_report.md refreshed by data_audit.py
+## Blocked only by
+- YOLO train completion for final report + consistency vs new best.pt
 
-## Still running
-- fable_yolo_e21_train
-- fable_fiftyone
+## Done earlier multi-day
+- P2.5 Phases 0–3, FO/LS, H1 shadow logger, expand FINAL, consistency baseline
