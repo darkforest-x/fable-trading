@@ -1,7 +1,7 @@
 # H1 Scaled Exit — Forward Shadow Plan
 
-**Status**: plan only (2026-07-10 overnight). **Not enabled.** No code path
-evaluates holdout. Owner may implement and flip on later.
+**Status**: MVP shadow logger **implemented** (2026-07-10). Manual opt-in only —
+not on daily cron, not on dashboard. No holdout. Mainline TP5/SL2 untouched.
 
 **Purpose**: log H1 scaled exit (half bank at 2.5×ATR + half trail 3×ATR) as a
 **shadow** parallel to the frozen mainline TP5/SL2 forward log — without
@@ -187,3 +187,58 @@ compare PF.
 
 Until then: mainline forward continues as today; this document is the package
 for a later implementer.
+
+---
+
+## 8. MVP implemented — how to run (shadow only)
+
+### What shipped
+
+| Piece | Path / behavior |
+|---|---|
+| CLI | `scripts/forward_track_h1_shadow.py` |
+| Library | `run_forward_tracking_h1_shadow` / `resolve_forward_exit_scaled` in `src/judgment/forward*.py` |
+| Log | **`data/forward_log_h1_scaled.csv`** only (refuses mainline `data/forward_log.csv`) |
+| Entries | Same as mainline: `frozen_tp5_sl2_swap_*` scores + val-q90 threshold + expanded SWAP candidates |
+| Exits | Scaled math (half @ 2.5×ATR + trail 3×ATR, hard SL2 until TP1) — outcomes `sl` / `scaled` / `scaled_timeout` / `timeout` |
+| Tests | `tests/test_h1_scaled_shadow.py` (synthetic OHLC; no live data required) |
+
+### Scaled freeze stub (honest)
+
+`models/frozen_scaled_25_t3_2026-07-09.json` is a **lightweight stub** (`features` instead of
+`feature_columns`, short `pool_sha256`, no `dataset_path`). `load_artifact` will not accept it.
+
+**MVP choice**: do **not** load that stub. Score entries with the **mainline freeze** and label
+exits with `resolve_forward_exit_scaled` (parity with `label_candidate_scaled`). This is a
+**single-variable exit** shadow relative to mainline signals — not a separately trained
+scaled-label booster. A proper `train_frozen_artifact` freeze on scaled labels remains an
+owner-approved step before promotion discussion.
+
+### Commands
+
+```bash
+# from repo root; needs OKX 15m SWAP under data/kline_fetched/ for a real scan
+PYTHONPATH=. python3 scripts/forward_track_h1_shadow.py
+
+# optional: custom start (does not change mainline FORWARD_START default when omitted)
+PYTHONPATH=. python3 scripts/forward_track_h1_shadow.py --start "2026-07-08 00:00:00+00:00"
+
+# optional: non-default side log (still cannot be data/forward_log.csv)
+PYTHONPATH=. python3 scripts/forward_track_h1_shadow.py --out data/forward_log_h1_scaled.csv
+
+# unit tests (no network)
+PYTHONPATH=. python3 -m pytest tests/test_h1_scaled_shadow.py tests/test_forward_tracking.py -q
+```
+
+Mainline remains:
+
+```bash
+PYTHONPATH=. python3 scripts/forward_track.py   # → data/forward_log.csv only
+```
+
+### Non-goals still in force
+
+- No cron wiring for shadow.
+- No digest / dashboard merge into the mainline 0/100 PF gate.
+- No holdout evaluation.
+- No auto-promotion of H1.

@@ -1,5 +1,13 @@
-"""SWAP candidate scanning and partial TP5/SL2 outcome resolution."""
+"""SWAP candidate scanning and partial barrier outcome resolution.
+
+Mainline uses fixed TP5/SL2 (`resolve_forward_exit`). H1 shadow reuses the same
+candidate/score path but resolves exits via scaled math
+(`resolve_forward_exit_scaled` / `label_candidate_scaled`).
+"""
 from __future__ import annotations
+
+from collections.abc import Callable
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -10,6 +18,9 @@ from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature
 from src.judgment.forward_records import forward_key, open_keys
 from src.judgment.forward_types import (
     BAR,
+    SCALED_SL_MULT,
+    SCALED_TP1_MULT,
+    SCALED_TRAIL_MULT,
     SL_MULT,
     TP_MULT,
     ForwardExit,
@@ -19,8 +30,20 @@ from src.judgment.forward_types import (
 )
 from src.judgment.labeling import ATR_PCT_MIN, HORIZON_BARS
 
+ExitResolver = Callable[[pd.DataFrame, int], Optional[ForwardExit]]
 
-def scan_forward_records(scan: ForwardScanInput) -> ForwardScanResult:
+
+def scan_forward_records(
+    scan: ForwardScanInput,
+    *,
+    exit_resolver: Optional[ExitResolver] = None,
+) -> ForwardScanResult:
+    """Scan SWAP series for threshold signals and resolve exits.
+
+    `exit_resolver` defaults to mainline TP5/SL2. Pass
+    `resolve_forward_exit_scaled` for the H1 shadow paper book.
+    """
+    resolve = exit_resolver or resolve_forward_exit
     records: list[ForwardRecord] = []
     scanned_series = 0
     candidates_seen = 0
@@ -52,7 +75,7 @@ def scan_forward_records(scan: ForwardScanInput) -> ForwardScanResult:
             score = float(scores[row_pos])
             if not tracked_open and score < scan.artifact.threshold:
                 continue
-            exit_state = resolve_forward_exit(enriched, signal_i)
+            exit_state = resolve(enriched, signal_i)
             if exit_state is None:
                 continue
             threshold_signals_seen += 1
@@ -138,6 +161,82 @@ def resolve_forward_exit(enriched: pd.DataFrame, signal_i: int) -> ForwardExit |
         realized_ret = float(enriched["close"].iloc[last_i]) / entry - 1
         return ForwardExit(
             "closed", "timeout", 0, HORIZON_BARS, _exit_time(entry_time, HORIZON_BARS), realized_ret
+        )
+    return ForwardExit("open", "", -1, 0, "", float("nan"))
+
+
+def resolve_forward_exit_scaled(
+    enriched: pd.DataFrame,
+    signal_i: int,
+    *,
+    tp1_mult: float = SCALED_TP1_MULT,
+    trail_mult: float = SCALED_TRAIL_MULT,
+    sl_mult: float = SCALED_SL_MULT,
+    horizon: int = HORIZON_BARS,
+) -> ForwardExit | None:
+    """Partial-horizon port of `label_candidate_scaled` for forward shadow logs.
+
+    Math matches labeling.py: hard SL until TP1 (half bank), then trail under
+    running high; stop checked before target within a bar; trail uses prior-bar
+    run_max. Incomplete horizon without a terminal barrier → status=open.
+    """
+    entry_i = signal_i + 1
+    if entry_i >= len(enriched):
+        return None
+    atr = float(enriched["atr14"].iloc[signal_i])
+    entry = float(enriched["open"].iloc[entry_i])
+    atr_pct = float(enriched["atr_pct"].iloc[signal_i])
+    if not np.isfinite(atr) or atr <= 0 or not np.isfinite(entry) or entry <= 0:
+        return None
+    if not np.isfinite(atr_pct) or atr_pct < ATR_PCT_MIN:
+        return None
+
+    last_i = entry_i + horizon - 1
+    available_last_i = min(last_i, len(enriched) - 1)
+    n_bars = available_last_i - entry_i + 1
+    if n_bars <= 0:
+        return None
+
+    highs = enriched["high"].to_numpy()[entry_i : available_last_i + 1]
+    lows = enriched["low"].to_numpy()[entry_i : available_last_i + 1]
+    opens = enriched["open"].to_numpy()[entry_i : available_last_i + 1]
+    entry_time = pd.Timestamp(enriched["open_time"].iloc[entry_i])
+
+    hard_stop = entry - sl_mult * atr
+    tp1 = entry + tp1_mult * atr
+    ret1: float | None = None
+    run_max = tp1
+
+    for j in range(n_bars):
+        if ret1 is None:
+            if lows[j] <= hard_stop:  # stop first: conservative
+                exit_price = min(hard_stop, float(opens[j]))
+                ret = exit_price / entry - 1
+                exit_offset = j + 1
+                return ForwardExit("closed", "sl", 0, exit_offset, _exit_time(entry_time, exit_offset), ret)
+            if highs[j] >= tp1:
+                ret1 = tp1 / entry - 1
+            continue  # phase-2 trailing starts on the NEXT bar
+        stop = max(run_max - trail_mult * atr, hard_stop)
+        if lows[j] <= stop:
+            exit_price = min(stop, float(opens[j]))
+            ret = 0.5 * ret1 + 0.5 * (exit_price / entry - 1)
+            exit_offset = j + 1
+            return ForwardExit(
+                "closed", "scaled", int(ret > 0), exit_offset, _exit_time(entry_time, exit_offset), ret
+            )
+        run_max = max(run_max, float(highs[j]))
+
+    if available_last_i >= last_i:
+        timeout_close = float(enriched["close"].iloc[last_i])
+        if ret1 is None:
+            ret = timeout_close / entry - 1
+            return ForwardExit(
+                "closed", "timeout", int(ret > 0), horizon, _exit_time(entry_time, horizon), ret
+            )
+        ret = 0.5 * ret1 + 0.5 * (timeout_close / entry - 1)
+        return ForwardExit(
+            "closed", "scaled_timeout", int(ret > 0), horizon, _exit_time(entry_time, horizon), ret
         )
     return ForwardExit("open", "", -1, 0, "", float("nan"))
 

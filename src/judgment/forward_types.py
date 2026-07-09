@@ -12,10 +12,16 @@ from src.judgment.frozen import FrozenArtifact
 
 PROJECT_DIR: Final = Path(__file__).resolve().parents[2]
 FORWARD_LOG_PATH: Final = PROJECT_DIR / "data" / "forward_log.csv"
+# H1 scaled shadow paper book — never mixed into mainline 100-trade gate.
+FORWARD_LOG_H1_SCALED_PATH: Final = PROJECT_DIR / "data" / "forward_log_h1_scaled.csv"
 FORWARD_START: Final = pd.Timestamp("2026-07-08 00:00:00", tz="UTC")
 BAR: Final = pd.Timedelta(minutes=15)
 TP_MULT: Final = 5.0
 SL_MULT: Final = 2.0
+# H1 scaled exit params (single-variable vs mainline TP5/SL2).
+SCALED_TP1_MULT: Final = 2.5
+SCALED_TRAIL_MULT: Final = 3.0
+SCALED_SL_MULT: Final = 2.0
 FORWARD_COLUMNS: Final = (
     "source",
     "symbol",
