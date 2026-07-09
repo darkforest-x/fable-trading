@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from src.data.bars import BAR_CHOICES, normalize_bar
-from src.data.loader import BLOCKED_BASES, CACHE_DIR, CACHE_PATTERN, FETCHED_DIR, list_series
+from src.data.loader import BLOCKED_BASES, CACHE_DIR, CACHE_PATTERN, FETCHED_DIR
 from src.judgment.forward_types import FORWARD_LOG_PATH
 from src.webapp.forward_payloads import FORWARD_COST, FORWARD_DECISION_TRADES, forward_payload
 
@@ -47,11 +47,8 @@ def coverage_by_bar(fetched_dir: Path | None = None, cache_dir: Path | None = No
 
     by_bar: list[dict[str, Any]] = []
     for bar in BAR_CHOICES:
-        # list_series merges cache + fetched when cache_dir is None; here we
-        # always merge both dirs when they exist (mirror loader default).
-        groups = list_series(None, bar=bar) if fetched_dir is None and cache_dir is None else _list_series_dirs(
-            [cache, fetched], bar=bar
-        )
+        # Mirror loader.list_series: scan cache + fetched, group by (source, symbol).
+        groups = _list_series_dirs([cache, fetched], bar=bar)
         series_n = len(groups)
         # Approximate row budget from filename `_rows` suffix (same as naming convention).
         named_rows = 0
