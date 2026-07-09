@@ -77,7 +77,29 @@ lines += ['','## Best from results.csv', str(best), '',
 Path('analysis/p2a_e21_train_report.md').write_text('\n'.join(lines)+'\n')
 print('WROTE', official, best, cons.get('match_rate_vs_gt'))
 PY
-git add analysis/p2a_e21_train_report.md analysis/output/p2a_e21_val_metrics.json analysis/output/consistency_e21_vs_new_best.json 2>/dev/null || true
-git commit -m 'Finalize YOLO E2.1 retrain report and consistency vs new best' || true
+
+# Recompute FO hard list on E2.1 best preds (optional; needs fiftyone tools venv)
+FO_PY=""
+for c in \
+  /Users/zhangzc/fable-trading-codex/.venv_yolo_tools/bin/python \
+  /Users/zhangzc/fable-trading/.venv_yolo_tools/bin/python; do
+  if [ -x "$c" ]; then FO_PY=$c; break; fi
+done
+if [ -n "$FO_PY" ] && [ -d datasets/dense_15m_full/preds_val_e21_best ]; then
+  echo "FO hardlist recompute with $FO_PY $(date)"
+  "$FO_PY" scripts/fiftyone_label_audit.py \
+    --split val \
+    --preds datasets/dense_15m_full/preds_val_e21_best \
+    --export-hard output/offline_tasks/fiftyone_hard_e21 \
+    2>&1 || echo "FO hardlist failed (non-fatal)"
+else
+  echo "skip FO hardlist (no fiftyone venv or preds)"
+fi
+
+git add analysis/p2a_e21_train_report.md \
+  analysis/output/p2a_e21_val_metrics.json \
+  analysis/output/consistency_e21_vs_new_best.json \
+  output/offline_tasks/fiftyone_hard_e21 2>/dev/null || true
+git commit -m 'Finalize YOLO E2.1 retrain report, consistency, FO hardlist' || true
 git push origin main || true
 echo FINALIZE_DONE

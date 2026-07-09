@@ -96,7 +96,25 @@ def system_health() -> str:
                     if best is None or m > best:
                         best = m
         if best is not None:
-            notes.append(f"{label}：{len(rows)} epochs，最佳 mAP50 {best:.3f}（线 0.90）")
+            import subprocess
+
+            train_alive = False
+            try:
+                # pgrep returns 0 if any match; ignore self
+                train_alive = (
+                    subprocess.call(
+                        ["pgrep", "-f", "src.detection.train"],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                    )
+                    == 0
+                )
+            except OSError:
+                train_alive = False
+            state = "训练中" if train_alive else "已结束/未跑"
+            notes.append(
+                f"{label}：{len(rows)} epochs，最佳 mAP50 {best:.3f}（线 0.90）· {state}"
+            )
         break
     return "\n".join(notes) if notes else "系统：无异常"
 
