@@ -231,11 +231,17 @@ p=0.001、top 净@maker +0.326%、maker 组合 PF 2.825、maxDD 0.29%；H2 break
 单独不通过（AUC 0.5172、p=0.1738）。H1 记录为最强发现级候选，但不替换冻结主线，
 需前向确认。详见 `analysis/p15_h1_h2_exit_report.md`。
 
-### R4. H7/H8 多时间框架池（工程量大，R0 完成后）
+### ~~R4. H7/H8 多时间框架池（工程量大，R0 完成后）~~（已完成，2026-07-09）
 - 主流 15 币 × 5m × 400 天拉取（量大：~11M 行，先拉 200 天试）；
 - 山寨全池 × 30m/1H（量小）；
 - 各池独立跑 expanded 规则 + TP5/SL2（horizon 按 RESEARCH_AGENDA 的折算网格 sweep）；
 - 交付：`analysis/p2b_mtf_report.md` 跨 TF 对比表。
+
+完成记录：新增 `scripts/mtf_sweep.py` 与 `analysis/output/mtf_sweep.json`。
+H7 5m 证伪：val 样本仅 15m 基线的 0.63×，未达到机会数 ≥3×，filled-only
+净@maker 为负。H8 30m 发现级通过：30m h72 AUC 0.6297、p=0.001、top 净@maker
++0.484%、filled-only +0.521%，但样本仅 0.24× 15m，属于低频高质量线索。
+1H 样本 52-55，p 未达 0.01，不确认。详见 `analysis/p2b_mtf_report.md`。
 
 ## P2 —— 下周（工程加固 + 体验）
 
