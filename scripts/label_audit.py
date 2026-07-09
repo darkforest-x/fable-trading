@@ -81,10 +81,11 @@ def main() -> int:
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>打标抽样审计 · dense_15m_full</title>
 <style>
+*,*::before,*::after{{box-sizing:border-box}}
 body{{background:#131519;color:#e8e9eb;font-family:"PingFang SC",system-ui,sans-serif;
      margin:0;padding:24px;line-height:1.7}}
 h1{{font-size:20px}} p{{color:#9aa0a8;max-width:56em;font-size:14px}}
-.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:16px;margin-top:16px}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(480px,100%),1fr));gap:16px;margin-top:16px}}
 figure{{margin:0;background:#1b1e24;border:1px solid #2e3340;border-radius:10px;padding:10px}}
 img{{width:100%;border-radius:6px;display:block}}
 figcaption{{font-size:12.5px;color:#9aa0a8;margin-top:6px}}
@@ -94,7 +95,8 @@ b{{color:#e8e9eb}}
 <p>绿框 = auto_label.py 规则画的"均线密集区"标注（YOLO 学习的标准答案）。审计要点：
 ① 框是否恰好罩住均线收拢段；② 有明显密集却没框 = 漏标；③ 框住不密集的区段 = 误标；
 ④ 背景图里是否混有该标的密集区。发现问题请记下图名，规则阈值可修（改动走 owner 审批）。
-换一批样本：<code>PYTHONPATH=. .venv/bin/python scripts/label_audit.py --seed 42</code></p>
+本页 seed：<code>{args.seed}</code>；换一批样本：
+<code>PYTHONPATH=. .venv/bin/python scripts/label_audit.py --seed 42</code></p>
 <div class="grid">{''.join(cards)}</div>
 </body></html>"""
     OUT.write_text(html, encoding="utf-8")
