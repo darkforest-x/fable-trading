@@ -19,7 +19,7 @@ P2-11 打标 findings + P2-12 黑名单写入 BLOCKED。
 已同步进本 worktree。
 **07-10 追加（P2.5 Phase 0+1）**：看板 ops 鉴权 + 实验注册表 + 研究议程只读页已落地
 （`auth` / `ops_flags` / `experiment_registry` / `agenda_payloads` + 顶栏 **实验/议程** tab）；
-**无 job runner**（Phase 2 未做）。公网/VPS 上 ops 前须设 `OPS_AUTH_MODE=token` +
+**P2.5 Phase 2 job runner 已合 main**（默认 ENABLE_JOB_EXECUTOR=0）。公网/VPS 上 ops 前须设 `OPS_AUTH_MODE=token` +
 `OPS_API_TOKEN`（见 `docs/P2_5_PHASE01_README.md`）。
 纪律红线：holdout 与验收窗口均已消耗，v3 的确认性验证只能用前向新数据；
 val 已被多次选型使用，其数字只用于排序不用于宣称绩效。
