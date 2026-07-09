@@ -17,13 +17,15 @@ P2-11 打标 findings + P2-12 黑名单写入 BLOCKED。
 每日定时任务已含 `update_okx → forward_track → daily_digest`；正式窗口前向日志已有
 **2 笔** closed 信号（冻结 TP5/SL2 SWAP）。`src/notify.py` + `scripts/daily_digest.py`
 已同步进本 worktree。
-**07-10 追加（多日无人值守）**：SWAP expand **完成**（399 个 15m 文件）；P2.5 Phase2/3 已合 main；H1 shadow logger 已上线；YOLO E2.1 重训进行中（best so far ep5 mAP50≈0.66）。
-**07-10 追加（P2.5 Phase 0+1）**：看板 ops 鉴权 + 实验注册表 + 研究议程只读页已落地
-（`auth` / `ops_flags` / `experiment_registry` / `agenda_payloads` + 顶栏 **实验/议程** tab）；
-**P2.5 Phase 2 job runner 已合 main**（默认 ENABLE_JOB_EXECUTOR=0）。公网/VPS 上 ops 前须设 `OPS_AUTH_MODE=token` +
-`OPS_API_TOKEN`（见 `docs/P2_5_PHASE01_README.md`）。
+**07-10 追加（多日无人值守）**：SWAP expand **完成**（399 个 15m 文件）；P2.5 Phase0–3 已合 main；
+H1 shadow logger 已上线；YOLO E2.1 重训进行中（interim **best ep13 mAP50≈0.820**，曲线剧烈振荡，等 train 结束 + finalize）。
+FO :5151 / Label Studio :8081 本机评审就绪；前向主线 + H1 双账本 digest。
+章程：`output/offline_tasks/AUTONOMOUS_CHARTER.md`；状态：`MULTI_DAY_STATUS.md`。
+**07-10 追加（P2.5）**：ops 鉴权 + 实验/议程 + **白名单 job runner**（默认 executor 关）+ **只读 data/model hub**。
+公网/VPS 上 ops 前须设 `OPS_AUTH_MODE=token` + `OPS_API_TOKEN`；**禁止** VPS `ENABLE_JOB_EXECUTOR=1`。
 纪律红线：holdout 与验收窗口均已消耗，v3 的确认性验证只能用前向新数据；
 val 已被多次选型使用，其数字只用于排序不用于宣称绩效。
+fable 拍板：主线 **SWAP** · **EMA 8-55** · 冻结 **TP5/SL2** · YOLO **非关键** · H1 **挑战者/影子**。
 
 ## 排序后的下一步（期望价值从高到低）
 

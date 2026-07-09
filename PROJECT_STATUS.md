@@ -31,18 +31,25 @@
 | 07-09 | P1.5 R4 多时间框架完成 | 5m 机会扩张证伪；30m h72 AUC 0.6297 / p=0.001 / 净@maker +0.484%；1H 样本过小 |
 | 07-10 | P2-12 数据质量审计完成 | 892 序列；SWAP15 黑名单候选≈股票薄流动性；5 个 .part 未完成；未改 BLOCKED |
 | 07-10 | 前向日志正式窗口破零 | forward_track 冒烟 new=2 / total=2 closed；定时任务已含前向+TG 日报 |
-| 07-10 | **P2.5 Phase 0+1 落地** | ops auth + 实验注册表 + 议程只读；无 job runner；见 `docs/P2_5_PHASE01_README.md` |
+| 07-10 | **P2.5 Phase 0+1 落地** | ops auth + 实验注册表 + 议程只读；见 `docs/P2_5_PHASE01_README.md` |
+| 07-10 | **P2.5 Phase 2 job runner** | 白名单 + sqlite；默认 `ENABLE_JOB_EXECUTOR=0`；合 main |
+| 07-10 | **P2.5 Phase 3 数据/模型 hub** | 只读 data/model hub；无 promote POST |
+| 07-10 | P2-11 E2.1 `MAX_DENSE_BARS=12` | 最紧 full_spread 窗口；relabel 后 yolo11s 重训中 |
+| 07-10 | SWAP 宇宙 expand FINAL | 399 个 15m 文件；黑名单仅候选笔记 |
+| 07-10 | H1 scaled 影子前向 | 并行主线日志；不换 ACTIVE |
+| 07-10 | 多日无人值守章程 | `output/offline_tasks/AUTONOMOUS_CHARTER.md` |
 
 ## 二、当前状态一屏
 
 | 维度 | 状态 |
 |---|---|
-| 关键路径 | 阶段 3 未过 → 三味药已配（TP5/maker/合约）→ **等前向数据终审** |
-| 数据 | 现货 56×400d ✅；合约/SWAP 56×400d ✅；资金费率 54 SWAP×约278条 ✅；1H/30m/5m 多时间框架 ✅；每日增量 ✅自动 |
-| 模型 | 判断层 v3 候选（TP5/SL2）val 验证完；YOLO11s 正式验收未达成（mAP50 0.8569<0.90），非关键路径暂停 |
-| 纪律账本 | holdout 已消耗 1 次（2b）；验收窗口已看 2 次（2b+p3）；val 选型 ~33 次（R4 新增 9 个输出） |
-| 部署 | 看板 VPS 运行中；P0-4 三个前端 bug 与 P1-8 看板一批均已双端验证 |
-| 交接 | Codex P0–P1.5、P2-9/10 已完成；Grok 07-10 完成 P2-12 + 前向冒烟；P2-11 等 owner 过图；**P2.5 Phase 0+1 已实现**（鉴权+注册表+议程只读；Phase 2 job runner 未做） |
+| 关键路径 | 阶段 3 未过 → 三味药已配（TP5/maker/合约）→ **等前向数据终审**（~08-05 ≥100 笔） |
+| 数据 | SWAP expand ✅（399×15m）；ANIME/MANA 仍 `.part`；每日 update→forward→digest |
+| 模型 | **ACTIVE=冻结 TP5/SL2 SWAP**；H1 仅影子；YOLO E2.1 重训中（interim best ep13 mAP50≈0.820） |
+| 操作台 | P2.5 Phase0–3 已在 main；VPS **禁止**开 job executor |
+| 纪律账本 | holdout 已消耗 1 次（2b）；验收窗口已看 2 次（2b+p3）；val 选型 ~33 次 |
+| 部署 | 看板 VPS 运行中；FO :5151 / LS :8081 本机就绪 |
+| 交接 | `HANDOFF.md` + `MULTI_DAY_STATUS.md`；owner 多日不在 → 按章程自迭代 |
 
 ## 三、排期（滚动两周）
 
@@ -52,9 +59,9 @@
 | 07-10 | **P0**：管道产出判读、YOLO 验收判定、前端 3 bug、均线 20/60/120 对比 | Codex | 已完成 |
 | 07-11~12 | **P1**：冻结模型工件、前向跟踪器、资金费率历史、看板前向页+宇宙切换 | Codex | 已完成；前向定时任务仍需 owner 点头 |
 | 07-11~14 | **P1.5 研究议程**：R1 趋势过滤→R2 做空侧→R3 出场复合→R4 多时间框架 | Codex | 已完成；后续研究只作 P2 后续候选 |
-| 07-13~16 | **P2**：冒烟测试+CI、看板二批、数据审计、YOLO 后续（视裁决） | Codex/Grok | P2-9/10/12 已完成；P2-11 Round 1 等 owner 看图 |
-| 07-14~20 | **P2.5 前端操作台**：鉴权→实验注册表→任务运行器→数据/模型中枢 | Codex/Grok | **Phase 0+1 已完成**（auth+registry+agenda）；Phase 2+ 待做 |
-| 07-10 起每日 | 数据增量（8:00 自动）+ 前向信号记录 | 定时任务 | 前向跟踪需 owner 点头 |
+| 07-13~16 | **P2**：冒烟测试+CI、看板二批、数据审计、YOLO 后续（视裁决） | Codex/Grok | P2-9/10/12 完成；P2-11 E1/E2/E2.1 已落地，E2.1 重训中 |
+| 07-14~20 | **P2.5 前端操作台**：鉴权→注册表→任务运行器→数据/模型中枢 | Codex/Grok | **Phase 0–3 已合 main**；VPS executor 保持关 |
+| 07-10 起每日 | 数据增量 + 前向主线/H1 影子 + digest | 定时任务 | 已在跑；多日 agent 看 MULTI_DAY_STATUS |
 | **~08-05** | **前向样本预计 ≥100 笔 → 阶段 3 第二轮验收（终审）** | Claude+owner | 唯一硬闸门 |
 | 08 月上旬 | 通过 → 阶段 4（模拟盘）；未通过 → 回阶段 2 或结项讨论 | owner 决策 | |
 
@@ -90,3 +97,6 @@
 | 07-10 | P2-11 E1 x_pad 12→6 | dense_15m_full 标签重写；w_mean 0.1267→0.1176；未重训 |
 | 07-10 | P2-11 E2 MAX_DENSE_BARS=24 | 长段收核；w_mean 0.1176→0.0792；PAXG 74→24 bar；未重训 |
 | 07-10 | 合并 codex/day1 → main | 已合并并 push：`1c1344f`；冲突优先保留 codex 完整实现 |
+| 07-10 | P2-11 E2.1 MAX_DENSE_BARS=12 | 更紧收核 + relabel；启动 `dense_15m_full_s_e21` 重训 |
+| 07-10 | 多日无人值守 | 任务空也按价值排序自迭代；不问（holdout/密钥除外） |
+| 07-10 | BLOCKED 不自动扩 | expand 后候选仅 `blacklist_candidates_after_expand.tsv` 笔记 |

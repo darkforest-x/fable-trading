@@ -1,6 +1,6 @@
 # P2.5 Phase 3 — Data + Model Hubs（只读）
 
-**Status (2026-07-10):** Phase 3 **read-only** hubs on branch `feat/p2.5-phase3-data-model-hub`.
+**Status (2026-07-10):** Phase 3 **read-only** hubs **merged to main**. Branch history: `feat/p2.5-phase3-data-model-hub`.
 
 Design: `docs/P2_5_OPS_CONSOLE_DESIGN.md` §5（数据/模型页只读部分；**不含** promote POST）。
 

@@ -1,6 +1,6 @@
 # YOLO E2.1 training interim
 
-**Updated**: 2026-07-09T22:04:42.193682+00:00
+**Updated**: 2026-07-09T22:06:48.801917+00:00
 
 Run: `dense_15m_full_s_e21` · yolo11s · E2.1 · patience=12
 
@@ -26,5 +26,8 @@ Run: `dense_15m_full_s_e21` · yolo11s · E2.1 · patience=12
 
 **Best so far**: epoch **13** mAP50=**0.8203** P=0.7796 R=0.6572
 
+Training **still running** (epoch 18 train in progress when this was written; results.csv has 17 completed epochs).
 Finalize watchdog `fable_yolo_e21_finalize` will write formal report when train exits.
 
+Notes: mAP oscillates heavily after ep13; do not stop early — patience/best.pt.
+Formal gate mAP50≥0.90 still open; if best stays ~0.82 → FAIL path documented, FO hardlist drives next single-var only within approved core-trim family.

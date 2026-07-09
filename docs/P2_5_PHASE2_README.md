@@ -1,6 +1,6 @@
 # P2.5 Phase 2 — Job Runner（白名单任务）
 
-**Status (2026-07-10):** Phase 2 implemented on branch `feat/p2.5-phase2-job-runner`.
+**Status (2026-07-10):** Phase 2 **merged to main** (default `ENABLE_JOB_EXECUTOR=0`). Branch history: `feat/p2.5-phase2-job-runner`.
 
 Design: `docs/P2_5_OPS_CONSOLE_DESIGN.md` §4.
 
