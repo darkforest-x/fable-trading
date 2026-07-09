@@ -152,6 +152,37 @@ def _entry_context(frame: pd.DataFrame, signal_i: int, horizon: int, atr_pct_min
             frame["open"].to_numpy()[sl], float(frame["close"].iloc[last_i]))
 
 
+def label_short_candidate(
+    frame: pd.DataFrame,
+    signal_i: int,
+    *,
+    tp_mult: float = TP_ATR_MULT,
+    sl_mult: float = SL_ATR_MULT,
+    atr_pct_min: float = ATR_PCT_MIN,
+    horizon: int = HORIZON_BARS,
+) -> BarrierOutcome | None:
+    ctx = _entry_context(frame, signal_i, horizon, atr_pct_min)
+    if ctx is None:
+        return None
+    entry, atr, highs, lows, _, timeout_close = ctx
+    lower = entry - tp_mult * atr
+    upper = entry + sl_mult * atr
+    if lower <= 0:
+        return None
+    hit_dn = lows <= lower
+    hit_up = highs >= upper
+    dn_first = int(np.argmax(hit_dn)) if hit_dn.any() else horizon
+    up_first = int(np.argmax(hit_up)) if hit_up.any() else horizon
+
+    if dn_first < up_first:
+        return BarrierOutcome(1, "tp", dn_first + 1, entry, entry / lower - 1)
+    if up_first < dn_first:
+        return BarrierOutcome(0, "sl", up_first + 1, entry, entry / upper - 1)
+    if dn_first == up_first < horizon:
+        return BarrierOutcome(0, "sl_ambiguous", up_first + 1, entry, entry / upper - 1)
+    return BarrierOutcome(0, "timeout", horizon, entry, entry / timeout_close - 1)
+
+
 def label_candidate_scaled(
     frame: pd.DataFrame,
     signal_i: int,
