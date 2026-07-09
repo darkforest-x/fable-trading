@@ -1,9 +1,12 @@
 /* fable-trading dashboard frontend (vanilla JS + Lightweight Charts v4) */
 const $ = (sel) => document.querySelector(sel);
-const fmtPct = (x, digits = 2) => (100 * x).toFixed(digits) + "%";
+const fmtPct = (x, digits = 2) => (x === null || x === undefined || Number.isNaN(Number(x)) ? "—" : (100 * x).toFixed(digits) + "%");
+const fmtPF = (x) => (x === null || x === undefined || Number.isNaN(Number(x)) ? "—" : Number(x).toFixed(2));
 const cls = (x) => (x > 0 ? "pos" : x < 0 ? "neg" : "");
-const OUTCOME_CN = { tp: "止盈", sl: "止损", timeout: "超时", sl_ambiguous: "止损*" };
+const OUTCOME_CN = { tp: "止盈", sl: "止损", timeout: "超时", sl_ambiguous: "止损*", "": "未结束" };
 const OUTCOME_COLOR = { tp: "#199e70", sl: "#e66767", timeout: "#c98500", sl_ambiguous: "#e66767" };
+const STATUS_CN = { open: "持有中", closed: "已结束" };
+const appState = { universe: "swap" };
 const CHART_LAYOUT = {
   layout: { background: { type: "solid", color: "#1b1e24" }, textColor: "#9aa0a8" },
   grid: { vertLines: { color: "#242833" }, horzLines: { color: "#242833" } },
@@ -17,19 +20,47 @@ function makeChart(el, opts = {}) {
   return LightweightCharts.createChart(el, { ...CHART_LAYOUT, autoSize: true, ...opts });
 }
 
+function apiUrl(path, params = {}) {
+  const query = new URLSearchParams({ universe: appState.universe, ...params });
+  return `${path}?${query.toString()}`;
+}
+
 /* ---------- tabs ---------- */
 function showView(name) {
   document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("active", b.dataset.view === name));
-  document.querySelectorAll(".view").forEach((v) => v.classList.add("hidden"));
-  $("#view-" + name).classList.remove("hidden");
+  document.querySelectorAll(".view").forEach((v) => {
+    const active = v.id === "view-" + name;
+    v.classList.toggle("hidden", !active);
+    v.hidden = !active;
+    v.setAttribute("aria-hidden", active ? "false" : "true");
+  });
   if (name === "backtest") loadBacktest();
   if (name === "signals") initSignals();
+  if (name === "forward") loadForward();
 }
 document.querySelectorAll(".tab").forEach((btn) =>
   btn.addEventListener("click", () => showView(btn.dataset.view)));
 
+document.querySelectorAll("#universe-seg button").forEach((btn) =>
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#universe-seg button").forEach((b) => b.classList.toggle("active", b === btn));
+    appState.universe = btn.dataset.universe;
+    symbolsLoaded = false;
+    currentKey = "";
+    $("#symbol-list").innerHTML = "";
+    $("#symbol-input").value = "";
+    const active = document.querySelector(".tab.active")?.dataset.view || "overview";
+    if (active === "overview") loadOverview();
+    if (active === "backtest") loadBacktest();
+    if (active === "signals") initSignals(true);
+  }));
+
 /* ---------- generic horizontal bars ---------- */
 function renderHBars(el, rows) {
+  if (!rows.length) {
+    el.innerHTML = `<div class="empty-state">暂无数据</div>`;
+    return;
+  }
   const maxAbs = Math.max(...rows.map((r) => Math.abs(r.value)), 1e-9);
   el.innerHTML = rows.map((r) => {
     const w = (50 * Math.abs(r.value)) / maxAbs;
@@ -43,11 +74,10 @@ function renderHBars(el, rows) {
 }
 
 /* ---------- overview ---------- */
-let sparkChart = null;
+let sparkChart = null, sparkSeries = null;
 async function loadOverview() {
-  const d = await (await fetch("/api/overview")).json();
-  $("#verdict-banner").innerHTML =
-    `当前判定：<b>阶段 3 第一轮验收未通过（PF 1.01 @ 0.3% 成本）</b> —— ${d.next}`;
+  const d = await (await fetch(apiUrl("/api/overview"))).json();
+  $("#verdict-banner").innerHTML = `<b>${d.verdict}</b> ${d.next}`;
   $("#stages").innerHTML = d.stages.map((s) => `
     <div class="stage">
       <h3>${s.name} <span class="chip ${s.status}">${
@@ -68,13 +98,64 @@ async function loadOverview() {
     .map(([k, ok]) => `<li class="${ok ? "ok" : "fail"}">${names[k] || k}</li>`).join("");
   if (!sparkChart) {
     sparkChart = makeChart($("#spark-chart"), { timeScale: { visible: true, borderColor: "#2e3340" } });
-    const s = sparkChart.addAreaSeries({
+    sparkSeries = sparkChart.addAreaSeries({
       lineColor: "#3987e5", lineWidth: 2, priceFormat: pctFormat,
       topColor: "rgba(57,135,229,0.25)", bottomColor: "rgba(57,135,229,0.02)",
     });
-    s.setData(d.sparkline);
-    sparkChart.timeScale().fitContent();
   }
+  sparkSeries.setData(d.sparkline);
+  sparkChart.timeScale().fitContent();
+}
+
+let forwardChart, forwardSeries, forwardDdChart, forwardDdSeries;
+async function loadForward() {
+  $("#view-forward").classList.add("loading");
+  const d = await (await fetch("/api/forward")).json();
+  $("#view-forward").classList.remove("loading");
+  const m = d.metrics;
+  $("#forward-tiles").innerHTML = `
+    <div class="tile"><span class="lbl">裁决样本</span><b>${d.decision_trades}</b><small>maker-filled closed / ${d.decision_target}</small></div>
+    <div class="tile"><span class="lbl">前向 PF</span><b class="${m.profit_factor >= 1.3 ? "pos" : m.profit_factor === null ? "" : "neg"}">${fmtPF(m.profit_factor)}</b><small>${d.cost_label}</small></div>
+    <div class="tile"><span class="lbl">胜率</span><b>${fmtPct(m.win_rate, 1)}</b><small>仅已成交闭合样本</small></div>
+    <div class="tile"><span class="lbl">净收益（对资金）</span><b class="${cls(m.net_return_on_capital)}">${fmtPct(m.net_return_on_capital)}</b><small>累计 ${fmtPct(m.total_net_units, 2)} 名义</small></div>`;
+  $("#forward-progress").style.width = `${Math.round(100 * d.progress)}%`;
+  $("#forward-progress-label").textContent = `${d.decision_trades} / ${d.decision_target}`;
+  $("#forward-progress-note").textContent =
+    d.decision_remaining > 0 ? `距裁决线还差 ${d.decision_remaining} 笔；日志 ${d.total_rows} 条，open ${d.open_rows} 条` : "已达到裁决样本线";
+  $("#forward-count").textContent = `（${d.total_rows} 条；closed ${d.closed_rows}）`;
+
+  if (!forwardChart) {
+    forwardChart = makeChart($("#forward-chart"));
+    forwardSeries = forwardChart.addAreaSeries({
+      lineColor: "#3987e5", lineWidth: 2, priceFormat: pctFormat,
+      topColor: "rgba(57,135,229,0.25)", bottomColor: "rgba(57,135,229,0.02)",
+    });
+    forwardDdChart = makeChart($("#forward-dd-chart"), { timeScale: { visible: false } });
+    forwardDdSeries = forwardDdChart.addAreaSeries({
+      lineColor: "#e66767", lineWidth: 1, priceFormat: pctFormat,
+      topColor: "rgba(230,103,103,0.02)", bottomColor: "rgba(230,103,103,0.3)",
+      invertFilledArea: true,
+    });
+  }
+  forwardSeries.setData(d.equity);
+  forwardDdSeries.setData(d.drawdown);
+  forwardChart.timeScale().fitContent();
+  forwardDdChart.timeScale().fitContent();
+  renderHBars($("#forward-outcomes"), d.outcomes.map((r) => ({
+    label: OUTCOME_CN[r.label] || r.label,
+    value: r.value,
+    text: `${r.value.toFixed(2)}%·${r.text}`,
+  })));
+  $("#forward-table tbody").innerHTML = d.rows.length ? d.rows.map((r) => `
+    <tr>
+      <td>${String(r.signal_time || "").slice(0, 16).replace("T", " ")}</td>
+      <td>${r.symbol || ""}</td>
+      <td>${STATUS_CN[r.status] || r.status || ""}</td>
+      <td>${r.maker_filled ? "filled" : "miss"}</td>
+      <td class="outcome-${r.outcome || "open"}">${OUTCOME_CN[r.outcome || ""] || r.outcome || ""}</td>
+      <td class="num">${r.score === null ? "—" : Number(r.score).toFixed(3)}</td>
+      <td class="num"><span class="${cls(r.net_ret)}">${fmtPct(r.net_ret)}</span></td>
+    </tr>`).join("") : `<tr class="no-click"><td colspan="7" class="empty-state">暂无前向信号</td></tr>`;
 }
 
 /* ---------- backtest ---------- */
@@ -106,16 +187,16 @@ document.querySelectorAll("#trades-table th.sortable").forEach((th) =>
 async function loadBacktest() {
   $("#view-backtest").classList.add("loading");
   const [d, rows] = await Promise.all([
-    (await fetch(`/api/backtest?cost=${btState.cost}`)).json(),
-    (await fetch(`/api/trades?window=${btState.window}&cost=${btState.cost}`)).json(),
+    (await fetch(apiUrl("/api/backtest", { cost: btState.cost }))).json(),
+    (await fetch(apiUrl("/api/trades", { window: btState.window, cost: btState.cost }))).json(),
   ]);
   tradeRows = rows;
   const w = d[btState.window];
 
   $("#bt-tiles").innerHTML = `
-    <div class="tile"><span class="lbl">交易笔数</span><b>${w.n_trades}</b><small>${btState.window === "accept" ? "验收窗口" : "全期"}</small></div>
+    <div class="tile"><span class="lbl">交易笔数</span><b>${w.n_trades}</b><small>${d.universe_label} · ${btState.window === "accept" ? "验收窗口" : "全期"}</small></div>
     <div class="tile"><span class="lbl">净收益（对资金）</span><b class="${cls(w.net_return_on_capital)}">${fmtPct(w.net_return_on_capital)}</b><small>单笔均值 ${fmtPct(w.mean_net_per_trade, 3)}</small></div>
-    <div class="tile"><span class="lbl">盈亏比 PF</span><b class="${w.profit_factor >= 1.3 ? "pos" : "neg"}">${w.profit_factor}</b><small>验收线 1.3</small></div>
+    <div class="tile"><span class="lbl">盈亏比 PF</span><b class="${w.profit_factor >= 1.3 ? "pos" : "neg"}">${fmtPF(w.profit_factor)}</b><small>验收线 1.3</small></div>
     <div class="tile"><span class="lbl">最大回撤 / 胜率</span><b>${fmtPct(w.max_drawdown_pct)}</b><small>胜率 ${fmtPct(w.win_rate)}</small></div>`;
 
   if (!equityChart) {
@@ -156,7 +237,7 @@ async function loadBacktest() {
   })));
   const sym = [...w.per_symbol.best, ...w.per_symbol.worst.slice().reverse()];
   renderHBars($("#symbol-bars"), sym.map((r) => ({
-    label: r.symbol.replace("_USDT", ""), value: r.net, text: `${r.net.toFixed(1)}%·${r.n}笔`,
+    label: r.symbol.replace("_USDT_SWAP", "").replace("_USDT", ""), value: r.net, text: `${r.net.toFixed(1)}%·${r.n}笔`,
   })));
 
   renderTrades();
@@ -190,6 +271,7 @@ let symbolsLoaded = false, klineChart, klineSeries, volumeSeries, emaSeries = []
 let bandSeries, pathSeries, barrier = { tp: 4, sl: 2 };
 let currentKey = "", currentMarkers = [], currentTimes = [], priceLines = [], chartReq = 0;
 let lastFocusRange = null;
+let symbolInputWired = false;
 const sigState = { bars: 3000 };
 segWire("#bars-seg", sigState, "bars", Number, () => currentKey && loadChart(currentKey));
 
@@ -224,13 +306,16 @@ function ensureKlineChart() {
   });
 }
 
-async function initSignals() {
-  if (symbolsLoaded) return;
+async function initSignals(force = false) {
+  if (symbolsLoaded && !force) return;
   symbolsLoaded = true;
-  const rows = await (await fetch("/api/symbols")).json();
+  const rows = await (await fetch(apiUrl("/api/symbols"))).json();
   $("#symbol-list").innerHTML = rows.map((r) =>
     `<option value="${r.source}:${r.symbol}">${r.symbol}（成交 ${r.n_trades} / 合格 ${r.n_eligible}）</option>`).join("");
-  $("#symbol-input").addEventListener("change", () => loadChart($("#symbol-input").value));
+  if (!symbolInputWired) {
+    $("#symbol-input").addEventListener("change", () => loadChart($("#symbol-input").value));
+    symbolInputWired = true;
+  }
   const first = rows.find((r) => r.n_trades > 0) || rows[0];
   if (first && !currentKey) {
     $("#symbol-input").value = `${first.source}:${first.symbol}`;
@@ -251,7 +336,7 @@ async function loadChart(key, focusEntry = null) {
   ensureKlineChart();          // synchronous: no await between check and create
   const reqId = ++chartReq;    // stale responses (slow links) are dropped
   $("#view-signals").classList.add("loading");
-  const resp = await fetch(`/api/chart/${source}/${symbol}?bars=${sigState.bars}`);
+  const resp = await fetch(apiUrl(`/api/chart/${source}/${symbol}`, { bars: sigState.bars }));
   $("#view-signals").classList.remove("loading");
   if (reqId !== chartReq) return;
   if (!resp.ok) { $("#symbol-info").textContent = "找不到该序列"; return; }
