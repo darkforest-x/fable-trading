@@ -1,4 +1,5 @@
 /* fable-trading dashboard frontend (vanilla JS + Lightweight Charts v4) */
+/* allow: SIZE_OK -- legacy single-file dashboard kept stable for scoped P2-10 UI polish. */
 const $ = (sel) => document.querySelector(sel);
 const fmtPct = (x, digits = 2) => (x === null || x === undefined || Number.isNaN(Number(x)) ? "—" : (100 * x).toFixed(digits) + "%");
 const fmtPF = (x) => (x === null || x === undefined || Number.isNaN(Number(x)) ? "—" : Number(x).toFixed(2));
@@ -159,7 +160,7 @@ async function loadForward() {
 }
 
 /* ---------- backtest ---------- */
-const btState = { cost: 0.003, window: "accept", outcome: "", filter: "", sort: "entry_time", dir: -1 };
+const btState = { cost: 0.003, window: "accept", outcome: "", filter: "", scoreMin: 0, sort: "entry_time", dir: -1 };
 let equityChart, equitySeries, ddChart, ddSeries, pfChart, pfSeries, pfLine;
 let tradeRows = [];
 
@@ -174,6 +175,11 @@ segWire("#cost-seg", btState, "cost", Number, loadBacktest);
 segWire("#window-seg", btState, "window", String, loadBacktest);
 segWire("#outcome-seg", btState, "outcome", String, renderTrades);
 $("#trade-filter").addEventListener("input", (e) => { btState.filter = e.target.value.toUpperCase(); renderTrades(); });
+$("#score-threshold").addEventListener("input", (e) => {
+  btState.scoreMin = Number(e.target.value);
+  $("#score-threshold-label").textContent = btState.scoreMin.toFixed(3);
+  renderTrades();
+});
 document.querySelectorAll("#trades-table th.sortable").forEach((th) =>
   th.addEventListener("click", () => {
     const k = th.dataset.sort;
@@ -248,11 +254,16 @@ function renderTrades() {
   let rows = tradeRows;
   if (btState.outcome) rows = rows.filter((r) => r.outcome.startsWith(btState.outcome));
   if (btState.filter) rows = rows.filter((r) => r.symbol.includes(btState.filter));
+  const beforeScoreFilter = rows.length;
+  if (btState.scoreMin > 0) rows = rows.filter((r) => r.score >= btState.scoreMin);
   rows = rows.slice().sort((a, b) => {
     const va = a[btState.sort], vb = b[btState.sort];
     return (va < vb ? -1 : va > vb ? 1 : 0) * btState.dir;
   });
-  $("#trades-count").textContent = `（${rows.length} 笔）`;
+  $("#trades-count").textContent =
+    btState.scoreMin > 0 ? `（${rows.length}/${beforeScoreFilter} 笔）` : `（${rows.length} 笔）`;
+  $("#threshold-note").textContent =
+    btState.scoreMin > 0 ? "只过滤下方成交明细，不改变净值/PF 或验收结论。" : "只过滤下方成交明细，不改变净值/PF。";
   $("#trades-table tbody").innerHTML = rows.slice(0, 400).map((r, i) => `
     <tr data-i="${i}" data-source="${r.source}" data-symbol="${r.symbol}" data-entry="${r.entry_time}">
       <td>${r.entry_time.slice(0, 16)}</td>
@@ -270,6 +281,7 @@ function renderTrades() {
 let symbolsLoaded = false, klineChart, klineSeries, volumeSeries, emaSeries = [];
 let bandSeries, pathSeries, barrier = { tp: 4, sl: 2 };
 let currentKey = "", currentMarkers = [], currentTimes = [], priceLines = [], chartReq = 0;
+let currentThreshold = 0;
 let lastFocusRange = null;
 let symbolInputWired = false;
 const sigState = { bars: 3000 };
@@ -343,6 +355,7 @@ async function loadChart(key, focusEntry = null) {
   const d = await resp.json();
   if (reqId !== chartReq) return;
   barrier = { tp: d.tp_mult, sl: d.sl_mult };
+  currentThreshold = d.threshold;
 
   priceLines.forEach((l) => klineSeries.removePriceLine(l)); priceLines = [];
   emaSeries.forEach((s) => klineChart.removeSeries(s)); emaSeries = [];
@@ -386,18 +399,38 @@ async function loadChart(key, focusEntry = null) {
     `${symbol}：窗口内候选 ${n}，合格（≥${d.threshold}）${el}，成交 ${tr}`;
 
   const traded = d.markers.filter((m) => m.traded).sort((a, b) => b.time - a.time);
+  const missed = d.markers.filter((m) => m.eligible && !m.traded).sort((a, b) => b.time - a.time);
   $("#side-count").textContent = `（${traded.length} 笔）`;
-  $("#symbol-trades").innerHTML = "<tbody>" + traded.map((m) => `
+  $("#symbol-trades").innerHTML = "<tbody>" + (traded.length ? traded.map((m) => `
     <tr data-entry-ts="${m.entry_time}">
       <td>${new Date(m.time * 1000).toISOString().slice(5, 16).replace("T", " ")}</td>
       <td class="outcome-${m.outcome}">${OUTCOME_CN[m.outcome] || m.outcome}</td>
       <td class="num"><span class="${cls(m.ret)}">${fmtPct(m.ret, 1)}</span></td>
-    </tr>`).join("") + "</tbody>";
-  $("#symbol-trades").querySelectorAll("tr").forEach((row) =>
+    </tr>`).join("") : `<tr class="no-click"><td colspan="3" class="empty-state">暂无成交</td></tr>`) + "</tbody>";
+  $("#symbol-trades").querySelectorAll("tr[data-entry-ts]").forEach((row) =>
     row.addEventListener("click", () => {
       $("#symbol-trades").querySelectorAll("tr").forEach((x) => x.classList.toggle("focused", x === row));
       focusMarker(Number(row.dataset.entryTs));
     }));
+  $("#missed-count").textContent = `（${missed.length} 条）`;
+  $("#symbol-missed").innerHTML = "<tbody>" + (missed.length ? missed.slice(0, 80).map((m) => `
+    <tr tabindex="0" data-entry-ts="${m.entry_time}">
+      <td>${new Date(m.time * 1000).toISOString().slice(5, 16).replace("T", " ")}</td>
+      <td class="num">${Number(m.score).toFixed(3)}</td>
+      <td class="num">${m.dense_len}根</td>
+    </tr>`).join("") : `<tr class="no-click"><td colspan="3" class="empty-state">暂无合格未成交</td></tr>`) + "</tbody>";
+  $("#symbol-missed").querySelectorAll("tr[data-entry-ts]").forEach((row, i) => {
+    const marker = missed[i];
+    row.addEventListener("click", () => {
+      $("#symbol-missed").querySelectorAll("tr").forEach((x) => x.classList.toggle("focused", x === row));
+      focusMarker(Number(row.dataset.entryTs));
+    });
+    row.addEventListener("mouseenter", (e) => showSignalTooltip(e, marker));
+    row.addEventListener("mousemove", (e) => positionSignalTooltip(e));
+    row.addEventListener("mouseleave", hideSignalTooltip);
+    row.addEventListener("focus", (e) => showSignalTooltip(e, marker));
+    row.addEventListener("blur", hideSignalTooltip);
+  });
 
   // default: focus the most recent trade so entry/exit/barriers show immediately
   if (!focusEntry && traded.length) focusEntry = traded[0].entry_time;
@@ -406,6 +439,41 @@ async function loadChart(key, focusEntry = null) {
     const row = $(`#symbol-trades tr[data-entry-ts="${focusEntry}"]`);
     if (row) row.classList.add("focused");
   }
+}
+
+function showSignalTooltip(event, marker) {
+  const edge = marker.score - currentThreshold;
+  $("#signal-tooltip").innerHTML = `<b>合格未成交 · ${new Date(marker.time * 1000).toISOString().slice(5, 16).replace("T", " ")}</b>
+    <dl>
+      <dt>score</dt><dd>${Number(marker.score).toFixed(4)}</dd>
+      <dt>阈值差</dt><dd class="${cls(edge)}">${edge >= 0 ? "+" : ""}${edge.toFixed(4)}</dd>
+      <dt>ATR%</dt><dd>${fmtPct(marker.atr_pct, 2)}</dd>
+      <dt>密集长度</dt><dd>${marker.dense_len} 根</dd>
+      <dt>标签收益</dt><dd class="${cls(marker.ret)}">${fmtPct(marker.ret, 2)}</dd>
+      <dt>入场价</dt><dd>${Number(marker.entry_price).toPrecision(7)}</dd>
+    </dl>`;
+  $("#signal-tooltip").hidden = false;
+  positionSignalTooltip(event);
+}
+
+function positionSignalTooltip(event) {
+  const tip = $("#signal-tooltip");
+  if (tip.hidden) return;
+  const pad = 12, width = tip.offsetWidth || 260, height = tip.offsetHeight || 170;
+  let x = event.clientX, y = event.clientY;
+  if (!Number.isFinite(x) || !Number.isFinite(y)) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    x = rect.right;
+    y = rect.top;
+  }
+  const left = Math.min(window.innerWidth - width - pad, Math.max(pad, x + pad));
+  const top = Math.min(window.innerHeight - height - pad, Math.max(pad, y + pad));
+  tip.style.left = `${left}px`;
+  tip.style.top = `${top}px`;
+}
+
+function hideSignalTooltip() {
+  $("#signal-tooltip").hidden = true;
 }
 
 function focusMarker(entryTs) {

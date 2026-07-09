@@ -113,6 +113,22 @@ All spacing derives from a base of 4px.
 - **Accessibility**: sorting direction is visible in header text.
 - **Motion**: no motion.
 
+### Read-Only Threshold Slider
+- **Structure**: `.slider-control` label containing a numeric threshold readout and native range input.
+- **Variants**: backtest display filter only; never mutates model thresholds or acceptance metrics.
+- **Spacing**: compact inline layout inside `.controls`, full-width row on mobile.
+- **States**: native focus ring, live count text beside the trades table.
+- **Accessibility**: visible label states that the control filters displayed rows only.
+- **Motion**: no motion.
+
+### Signal Detail Tooltip
+- **Structure**: fixed `.signal-tooltip` over side-table rows, with title and two-column feature snapshot.
+- **Variants**: eligible-but-untraded signal details; anchored by hover or keyboard focus.
+- **Spacing**: 10px x 12px padding, 260px width on desktop, bottom sheet style on narrow mobile.
+- **States**: hidden, hover, focus.
+- **Accessibility**: missed-signal rows are keyboard-focusable and expose the same snapshot on focus.
+- **Motion**: no motion.
+
 ### Lightweight Chart Panel
 - **Structure**: fixed-height `.chart` region powered by Lightweight Charts.
 - **Variants**: default, `short`, `mini`, `tall`.

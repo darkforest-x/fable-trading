@@ -101,6 +101,11 @@
           <button data-outcome="sl">止损</button>
           <button data-outcome="timeout">超时</button>
         </div>
+        <label class="slider-control" for="score-threshold">
+          <span>展示分数 ≥ <b id="score-threshold-label">0.000</b></span>
+          <input id="score-threshold" type="range" min="0" max="1" step="0.01" value="0">
+        </label>
+        <span class="note" id="threshold-note">只过滤下方成交明细，不改变净值/PF。</span>
         <span class="note">点击任意行 → 跳到该笔交易的 K 线位置</span>
       </div>
       <div class="table-wrap">
@@ -146,12 +151,21 @@
         <div id="kline-chart" class="chart tall"></div>
       </div>
       <div class="panel side">
-        <h2>本币种成交 <span class="unit" id="side-count"></span></h2>
-        <div class="table-wrap side-table">
-          <table id="symbol-trades"><tbody></tbody></table>
+        <div class="side-section">
+          <h2>本币种成交 <span class="unit" id="side-count"></span></h2>
+          <div class="table-wrap side-table">
+            <table id="symbol-trades"><tbody></tbody></table>
+          </div>
+        </div>
+        <div class="side-section">
+          <h2>合格未成交 <span class="unit" id="missed-count"></span></h2>
+          <div class="table-wrap side-table missed-table">
+            <table id="symbol-missed"><tbody></tbody></table>
+          </div>
         </div>
       </div>
     </div>
+    <div id="signal-tooltip" class="signal-tooltip" hidden></div>
   </section>
 
   <section id="view-forward" class="view hidden" hidden aria-hidden="true">
@@ -198,6 +212,6 @@
     </div>
   </section>
 </main>
-<script src="app.js?v=6"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>
