@@ -22,7 +22,7 @@ python3 -m src.data.fetch_okx --symbols $SWAPS
 ls data/kline_fetched/okx_*_USDT_SWAP_15m_*.csv | wc -l | xargs echo "swap files ready:"
 
 echo "--- [2/5] swap-universe replication test (val only)"
-python3 scripts/swap_replication.py
+PYTHONPATH=. python3 scripts/swap_replication.py
 
 echo "--- [3/5] waiting for YOLO training to finish..."
 while pgrep -f "src.detection.train" >/dev/null; do sleep 300; done
