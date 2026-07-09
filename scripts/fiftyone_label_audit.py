@@ -26,24 +26,21 @@ def _load_yolo_split(dataset_dir: Path, split: str, name: str) -> fo.Dataset:
     """Load images + ground-truth boxes (YOLO txt, no conf column)."""
     if name in fo.list_datasets():
         fo.delete_dataset(name)
-    # YOLOv5Dataset expects dataset_dir with data.yaml or images/labels layout.
+    # FiftyOne YOLOv5 importer looks for dataset.yaml (not data.yaml).
     data_yaml = dataset_dir / "data.yaml"
-    kwargs = dict(
+    dataset_yaml = dataset_dir / "dataset.yaml"
+    if data_yaml.is_file() and not dataset_yaml.exists():
+        try:
+            dataset_yaml.symlink_to("data.yaml")
+        except OSError:
+            dataset_yaml.write_text(data_yaml.read_text(encoding="utf-8"), encoding="utf-8")
+    dataset = fo.Dataset.from_dir(
+        dataset_dir=str(dataset_dir),
         dataset_type=fo.types.YOLOv5Dataset,
         split=split,
         label_field="ground_truth",
         name=name,
     )
-    if data_yaml.exists():
-        dataset = fo.Dataset.from_dir(dataset_dir=str(dataset_dir), **kwargs)
-    else:
-        dataset = fo.Dataset.from_dir(
-            dataset_dir=str(dataset_dir),
-            dataset_type=fo.types.YOLOv5Dataset,
-            split=split,
-            label_field="ground_truth",
-            name=name,
-        )
     return dataset
 
 

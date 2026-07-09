@@ -1,3 +1,5 @@
+**运行状态见** `output/offline_tasks/REVIEW_TOOLS_READY.md`（本地访问 URL）。
+
 # 标注可视化审查：FiftyOne + Label Studio
 
 给 owner 用的「看框对不对」工具。**不改主 `.venv`**；不自动改 `auto_label`；不碰 holdout。
