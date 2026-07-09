@@ -999,7 +999,7 @@ function shortSha(s, n = 12) {
 }
 
 function tileHtml(label, value, sub = "") {
-  return `<div class="tile"><div class="tile-label">${label}</div><div class="tile-value">${value}</div>${sub ? `<div class="tile-sub">${sub}</div>` : ""}</div>`;
+  return `<div class="tile"><span class="lbl">${label}</span><b>${value}</b><small>${sub || ""}</small></div>`;
 }
 
 async function loadDataHub() {

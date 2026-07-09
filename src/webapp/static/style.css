@@ -90,7 +90,8 @@ body {
 .status-chip.cancelled { color: var(--warn); border-color: rgba(201,133,0,.45); }
 #jobs-table tbody tr.clickable { cursor: pointer; }
 #jobs-table tbody tr.clickable:hover { background: var(--surface-2); }
-#jobs-table tbody tr.active-row { background: rgba(57,135,229,.08); }
+#jobs-table tbody tr.active-row,
+#models-table tbody tr.active-row { background: rgba(57,135,229,.08); }
 .banner.warn-banner {
   background: linear-gradient(0deg, rgba(201,133,0,.1), rgba(201,133,0,.1)), var(--surface);
   border-color: rgba(201,133,0,.4);
