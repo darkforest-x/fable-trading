@@ -219,7 +219,7 @@ function ensureKlineChart() {
   // entry->exit path segment of the focused trade
   pathSeries = klineChart.addLineSeries({
     lineWidth: 3, priceLineVisible: false, lastValueVisible: false,
-    crosshairMarkerVisible: false,
+    crosshairMarkerVisible: false, autoscaleInfoProvider: () => null,
   });
 }
 
@@ -326,6 +326,8 @@ function focusMarker(entryTs) {
   const m = currentMarkers.find((x) => x.entry_time === entryTs);
   if (!m) return;
   priceLines.forEach((l) => klineSeries.removePriceLine(l)); priceLines = [];
+  pathSeries.setData([]);
+  klineChart.priceScale("right").applyOptions({ autoScale: true });
   const entry = m.entry_price;
   const exitPrice = entry * (1 + m.ret);
   const outcomeColor = OUTCOME_COLOR[m.outcome] || "#9aa0a8";
