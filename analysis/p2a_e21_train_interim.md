@@ -1,6 +1,6 @@
 # YOLO E2.1 training interim
 
-**Updated**: 2026-07-09T22:14:55.369455+00:00
+**Updated**: 2026-07-09T22:19:38.650539+00:00
 
 Run: `dense_15m_full_s_e21` · yolo11s · E2.1 · patience=12
 
@@ -27,7 +27,5 @@ Run: `dense_15m_full_s_e21` · yolo11s · E2.1 · patience=12
 
 **Best so far**: epoch **13** mAP50=**0.8203** P=0.7796 R=0.6572
 
-Patience=12 from best epoch → earliest stop ≈ ep25 if no new peak.
-Finalize watchdog `fable_yolo_e21_finalize` writes formal report on train exit.
-
-ANIME/MANA incomplete pulls **resolved** (38399 bars each).
+Train **alive** on epoch **19/40** (results has 18 completed). Finalize + FO hardlist armed.
+Patience left est from best: **7** epochs.
