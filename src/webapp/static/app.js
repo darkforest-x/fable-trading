@@ -1087,6 +1087,34 @@ async function loadDataHub() {
         ? `path ${fwd.path || "—"} · latest detected_at ${fwd.latest_detected_at || "—"} · mtime ${fwd.mtime ? String(fwd.mtime).slice(0, 19) : "—"}`
         : `无 forward 日志（${fwd.path || "data/forward_log.csv"}）`;
     }
+    const parts = d.part_files_live || {};
+    const ptiles = $("#data-parts-tiles");
+    if (ptiles) {
+      ptiles.innerHTML = [
+        tileHtml("part 文件数", parts.count ?? 0),
+        tileHtml("fetched_dir", parts.fetched_dir || "—"),
+        tileHtml("截断", parts.truncated ? "是" : "否"),
+      ].join("");
+    }
+    const pmeta = $("#data-parts-meta");
+    if (pmeta) {
+      pmeta.textContent = parts.hint || "Resume: python3 -m src.data.fetch_okx --symbols <SYM> --bar 15m --workers 1";
+    }
+    const pbody = $("#data-parts-table tbody");
+    if (pbody) {
+      const items = parts.items || [];
+      if (!items.length) {
+        pbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">无 .part.csv（拉取已齐或目录空）</div></td></tr>`;
+      } else {
+        pbody.innerHTML = items.map((it) => `
+          <tr>
+            <td>${it.name || "—"}</td>
+            <td class="num">${it.rows_approx ?? "—"}</td>
+            <td class="num">${it.bytes != null ? it.bytes : "—"}</td>
+            <td>${it.mtime ? String(it.mtime).slice(0, 19) : "—"}</td>
+          </tr>`).join("");
+      }
+    }
   } catch (err) {
     if (note) {
       note.hidden = false;
