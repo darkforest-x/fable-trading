@@ -204,6 +204,7 @@ function ensureKlineChart() {
   bandSeries = klineChart.addAreaSeries({
     priceScaleId: "band", lineVisible: false, priceLineVisible: false,
     lastValueVisible: false, crosshairMarkerVisible: false,
+    autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 1 } }),
     topColor: "rgba(57,135,229,0.14)", bottomColor: "rgba(57,135,229,0.14)",
   });
   klineChart.priceScale("band").applyOptions({ visible: false, scaleMargins: { top: 0, bottom: 0 } });

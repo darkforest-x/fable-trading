@@ -89,9 +89,12 @@ entry→exit path 并恢复右轴 autoscale。localhost:8643 与 VPS
 `http://103.214.174.58:8642` 均用真实 Chrome 验收通过：BNB/BTC/LTC ×
 15 天/1 个月/3 个月/全部，49 次成交单切换，蜡烛像素与 entry/exit 坐标均正常。
 
-**BUG-2：均线密集色带只渲染半高悬浮块**（应为全高背景带）。
+**~~BUG-2：均线密集色带只渲染半高悬浮块~~** ✅ 已修复（2026-07-09，应为全高背景带）。
 修法：给 bandSeries 设 `autoscaleInfoProvider: () => ({priceRange: {minValue: 0, maxValue: 1}})`
 配合现有 scaleMargins {top:0,bottom:0}，令 value=1 的两点撑满全高。
+
+完成记录：localhost:8643 与 VPS `http://103.214.174.58:8642` 均用真实 Chrome 验证；
+BNB_USDT 1 个月窗口聚焦成交单后，色带列覆盖 430/452 像素（约 95%），y=0..451。
 
 **BUG-3：出场价与止损线重叠时标签互相遮挡**（sl 出场时两线同价）。
 修法：outcome 为 sl/sl_ambiguous 时不再单独画止损障碍线（出场线已表达）；
