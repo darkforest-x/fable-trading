@@ -20,7 +20,7 @@ from src.data.loader import iter_series
 from src.judgment.candidates import add_indicators
 from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature_rows
 from src.judgment.forward_records import merge_forward_log, read_forward_log, write_forward_log
-from src.judgment.forward_scan import forward_candidate_indices, scan_forward_records
+from src.judgment.forward_scan import forward_candidate_indices, resolve_forward_exit, scan_forward_records
 from src.judgment.forward_types import (
     FORWARD_LOG_H1_SCALED_PATH,
     FORWARD_LOG_PATH,
@@ -53,6 +53,9 @@ class ThresholdScoreSummary:
     q90_signals: int
     q80_signals: int
     q80_incremental_signals: int
+    q90_actionable_signals: int
+    q80_actionable_signals: int
+    q80_non_actionable_signals: int
     q90_pass_rate: float
     q80_pass_rate: float
 
@@ -76,15 +79,22 @@ class ThresholdFunnel:
 def summarize_threshold_scores(
     scores: np.ndarray,
     *,
+    actionable: np.ndarray,
     q90_threshold: float,
     q80_threshold: float,
 ) -> ThresholdScoreSummary:
     """Compare q90 and q80 on one identical set of forward candidates."""
     if q80_threshold > q90_threshold:
         raise ValueError(f"q80 threshold {q80_threshold} exceeds q90 threshold {q90_threshold}")
-    finite = scores[np.isfinite(scores)]
+    if len(actionable) != len(scores):
+        raise ValueError("actionable mask length must match scores")
+    finite_mask = np.isfinite(scores)
+    finite = scores[finite_mask]
+    finite_actionable = actionable[finite_mask].astype(bool)
     q90_signals = int((finite >= q90_threshold).sum())
     q80_signals = int((finite >= q80_threshold).sum())
+    q90_actionable = int(((finite >= q90_threshold) & finite_actionable).sum())
+    q80_actionable = int(((finite >= q80_threshold) & finite_actionable).sum())
     denominator = len(finite)
     return ThresholdScoreSummary(
         candidates_after_start=int(len(scores)),
@@ -92,6 +102,9 @@ def summarize_threshold_scores(
         q90_signals=q90_signals,
         q80_signals=q80_signals,
         q80_incremental_signals=q80_signals - q90_signals,
+        q90_actionable_signals=q90_actionable,
+        q80_actionable_signals=q80_actionable,
+        q80_non_actionable_signals=q80_signals - q80_actionable,
         q90_pass_rate=q90_signals / denominator if denominator else 0.0,
         q80_pass_rate=q80_signals / denominator if denominator else 0.0,
     )
@@ -142,6 +155,7 @@ def scan_threshold_funnel(
     booster = lgb.Booster(model_file=str(artifact.model_path))
     q80_threshold = derive_q80_threshold(artifact, booster)
     scores_after_start: list[float] = []
+    actionable_after_start: list[bool] = []
     scanned_series = 0
     series_with_forward_bars = 0
     latest_bar: pd.Timestamp | None = None
@@ -166,8 +180,10 @@ def scan_threshold_funnel(
         rows = extract_feature_rows(featured, indices)
         scores = booster.predict(rows[FEATURE_COLUMNS], num_iteration=artifact.best_iteration)
         scores_after_start.extend(float(score) for score in scores)
+        actionable_after_start.extend(resolve_forward_exit(enriched, signal_i) is not None for signal_i in indices)
     summary = summarize_threshold_scores(
         np.asarray(scores_after_start, dtype=float),
+        actionable=np.asarray(actionable_after_start, dtype=bool),
         q90_threshold=artifact.threshold,
         q80_threshold=q80_threshold,
     )

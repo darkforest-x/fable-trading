@@ -16,6 +16,7 @@ from src.judgment.forward_types import FORWARD_LOG_H1_SCALED_PATH, FORWARD_LOG_P
 def test_summarize_threshold_scores_compares_the_same_forward_candidates() -> None:
     result = summarize_threshold_scores(
         np.array([np.nan, 0.20, 0.30, 0.40, 0.50]),
+        actionable=np.array([True, True, False, True, True]),
         q90_threshold=0.45,
         q80_threshold=0.30,
     )
@@ -25,6 +26,9 @@ def test_summarize_threshold_scores_compares_the_same_forward_candidates() -> No
     assert result.q90_signals == 1
     assert result.q80_signals == 3
     assert result.q80_incremental_signals == 2
+    assert result.q90_actionable_signals == 1
+    assert result.q80_actionable_signals == 2
+    assert result.q80_non_actionable_signals == 1
     assert result.q90_pass_rate == pytest.approx(0.25)
     assert result.q80_pass_rate == pytest.approx(0.75)
 
@@ -33,6 +37,7 @@ def test_summarize_threshold_scores_rejects_reversed_thresholds() -> None:
     with pytest.raises(ValueError, match="q80"):
         summarize_threshold_scores(
             np.array([0.2, 0.3]),
+            actionable=np.array([True, True]),
             q90_threshold=0.2,
             q80_threshold=0.3,
         )
