@@ -154,6 +154,14 @@ def test_nginx_tls_proxy(nginx_src: str, deploy_src: str) -> None:
     assert "self-signed" in deploy_src.lower() or "self-signed" in deploy_src
 
 
+def test_nginx_config_directories_exist_before_rsync(deploy_src: str) -> None:
+    mkdir_marker = "/etc/nginx/sites-available /etc/nginx/sites-enabled"
+    rsync_marker = 'rsync -az "$NGINX_SRC"'
+    assert mkdir_marker in deploy_src
+    assert rsync_marker in deploy_src
+    assert deploy_src.index(mkdir_marker) < deploy_src.index(rsync_marker)
+
+
 def test_private_key_permissions_enforced(deploy_src: str) -> None:
     assert "chmod 600 /etc/ssl/fable/label-studio.key" in deploy_src
     assert "/etc/ssl/fable/label-studio.key" in deploy_src

@@ -120,7 +120,7 @@ umask 077
 chmod 600 "$ACCESS_NOTE"
 
 echo "Syncing pack + unit + nginx conf to ${VPS}:${REMOTE_DIR} (no secrets in this step)..."
-ssh "$VPS" "mkdir -p ${REMOTE_DIR}/{data,import,files} /opt/fable-label-studio"
+ssh "$VPS" "mkdir -p ${REMOTE_DIR}/{data,import,files} /opt/fable-label-studio /etc/nginx/sites-available /etc/nginx/sites-enabled"
 rsync -az --delete \
   "${PACK_DIR}/dense_15m_full/" \
   "${VPS}:${REMOTE_DIR}/files/dense_15m_full/"
