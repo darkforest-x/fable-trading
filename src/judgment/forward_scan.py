@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 
 from src.data.loader import iter_series
-from src.judgment.candidates import MIN_GAP_BARS, WARMUP_BARS, add_indicators, strict_mask
+from src.judgment.candidates import WARMUP_BARS, add_indicators, causal_gap_dedupe, strict_mask
 from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature_rows
 from src.judgment.forward_records import forward_key, open_keys
 from src.judgment.forward_types import (
@@ -116,12 +116,7 @@ def forward_candidate_indices(enriched: pd.DataFrame) -> list[int]:
     idx = idx[(idx >= WARMUP_BARS) & (idx + 1 < len(enriched))]
     if len(idx) == 0:
         return []
-    scores = enriched["shape_score"].to_numpy()
-    selected: list[int] = []
-    for signal_i in sorted(idx, key=lambda item: scores[item], reverse=True):
-        if all(abs(signal_i - previous) >= MIN_GAP_BARS for previous in selected):
-            selected.append(int(signal_i))
-    return sorted(selected)
+    return causal_gap_dedupe(idx)
 
 
 def resolve_forward_exit(enriched: pd.DataFrame, signal_i: int) -> ForwardExit | None:

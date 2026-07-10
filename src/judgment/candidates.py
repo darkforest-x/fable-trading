@@ -6,6 +6,8 @@ anchors. Every metric is causal and uses only the signal bar or earlier bars.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
+
 import numpy as np
 import pandas as pd
 
@@ -174,26 +176,34 @@ def scan_candidates(
     enriched: pd.DataFrame, *, horizon_bars: int = 72, mode: str = "strict"
 ) -> list[int]:
     """Return deduplicated long candidate positions with a complete label horizon."""
-    return _scan(enriched, strict_mask(enriched, mode), "shape_score", horizon_bars)
+    return _scan(enriched, strict_mask(enriched, mode), horizon_bars)
 
 
 def scan_short_candidates(
     enriched: pd.DataFrame, *, horizon_bars: int = 72, mode: str = "strict"
 ) -> list[int]:
     """Return deduplicated short candidate positions with a complete label horizon."""
-    return _scan(enriched, short_mask(enriched, mode), "short_shape_score", horizon_bars)
+    return _scan(enriched, short_mask(enriched, mode), horizon_bars)
 
 
-def _scan(enriched: pd.DataFrame, mask: pd.Series, score_column: str, horizon_bars: int) -> list[int]:
+def causal_gap_dedupe(
+    indices: Iterable[int],
+    *,
+    min_gap_bars: int = MIN_GAP_BARS,
+) -> list[int]:
+    """Keep the earliest signal in each gap so future rows cannot rewrite history."""
+    selected: list[int] = []
+    for index in sorted(int(item) for item in indices):
+        if not selected or index - selected[-1] >= min_gap_bars:
+            selected.append(index)
+    return selected
+
+
+def _scan(enriched: pd.DataFrame, mask: pd.Series, horizon_bars: int) -> list[int]:
     if len(enriched) < WARMUP_BARS + horizon_bars + 2:
         return []
     indices = np.flatnonzero(mask.fillna(False).to_numpy())
     indices = indices[(indices >= WARMUP_BARS) & (indices + horizon_bars + 1 < len(enriched))]
     if len(indices) == 0:
         return []
-    scores = enriched[score_column].to_numpy()
-    selected: list[int] = []
-    for index in sorted(indices, key=lambda item: scores[item], reverse=True):
-        if all(abs(index - previous) >= MIN_GAP_BARS for previous in selected):
-            selected.append(int(index))
-    return sorted(selected)
+    return causal_gap_dedupe(indices)
