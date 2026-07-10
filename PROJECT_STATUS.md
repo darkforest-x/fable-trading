@@ -86,4 +86,5 @@
 | 07-10 | P2-12 黑名单候选写入 BLOCKED | 报告表 22 个 thin equity/ETF base 入 loader |
 | 07-10 | P2-11 Round1 打标预审全部确认 | 批准 E1 收 x_pad 方向；改参另开 commit |
 | 07-10 | P2-11 E1 x_pad 12→6 | dense_15m_full 标签重写；w_mean 0.1267→0.1176；未重训 |
+| 07-10 | YOLO HSV 合规缺陷修复 | 历史 hsv_s/v=0.05 违反铁律；旧指标仅诊断，代码改全 0 并加回归测试 |
 | 07-10 | 合并 codex/day1 → main | 已合并并 push：`1c1344f`；冲突优先保留 codex 完整实现 |

@@ -10,6 +10,9 @@
 owner 已委托"按推荐直接执行" → 出场结构扫描完成：TP5/SL2 为 v3 候选标签**
 （val 净@0.3% +0.077%/笔 vs 基线 +0.001%，p=0.001，见 `analysis/p2b_v3_barrier_sweep.md`）。
 进行中：P2-11 YOLO 迭代优化循环；E1（`x_pad_px` 12→6）已落地并 relabel，待 owner 过审计页后重训。
+**07-10 合规更正**：运行参数审计发现历史 YOLO 训练实际使用 `hsv_s/v=0.05`，违反
+HSV 全关铁律；修复前指标仅作诊断。`src/detection/train.py` 已改为全 0，待启动独立
+E2.1b 合规重训（不碰 holdout、不改标签/模型/阈值）。
 **07-10 追加（Grok）**：`codex/day1` 已合并进 `main`（`1c1344f`）并 push；owner 确认
 P2-11 打标 findings + P2-12 黑名单写入 BLOCKED。  
 **07-10 追加（Grok 接手）**：P2-12 数据审计完成（见 `analysis/p2_data_audit_report.md`）；

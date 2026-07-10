@@ -293,6 +293,8 @@ Round 1 进度（2026-07-09）：
 - **07-10 owner 确认** findings（见 `output/offline_tasks/yolo_label_audit_findings.csv`）。
 - **07-10 E1 完成**：`X_PAD_PX` 12→6；`dense_15m_full` 标签重写；
   报告 `analysis/p2a_e1_xpad_report.md`。下一步：owner 过审计页 → 认可后再固定配置重训。
+- **07-10 训练合规审计**：历史 `SAFE_AUG` 实际为 `hsv_s/v=0.05`，与 HSV 全关铁律冲突；
+  修复前 YOLO 指标降级为诊断。代码与回归测试已修，下一步以 E2.1b 新 run 名合规重训。
 
 ### 11b. YOLO 架构后续（视第 1/3 步结论）
 - 若 20/60/120 判断层胜出：检测+判断已对齐，做"YOLO 预测框 → 判断层候选"的
