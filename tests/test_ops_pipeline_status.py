@@ -8,7 +8,7 @@ from fastapi import HTTPException
 
 from src.webapp import pipeline_status
 from src.webapp.auth import verify_ops_request
-from src.webapp.server import ops_pipeline
+from src.webapp.server import ops_pipeline, public_pipeline
 
 
 def _req(headers: dict | None = None):
@@ -67,6 +67,20 @@ def test_ops_pipeline_requires_token(monkeypatch: pytest.MonkeyPatch) -> None:
     out = ops_pipeline(_req({"Authorization": "Bearer pipe-test-token"}))
     assert out["read_only"] is True
     assert "stages" in out
+
+
+def test_public_pipeline_stays_read_only_when_ops_require_token(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OPS_AUTH_MODE", "token")
+    monkeypatch.setenv("OPS_API_TOKEN", "pipe-test-token")
+
+    out = public_pipeline()
+
+    assert out["read_only"] is True
+    assert out["write_actions"] == []
+    assert out["executor_enabled"] is False
+    assert pipeline_status.assert_pipeline_payload_safe(out) == []
 
 
 def test_deploy_stage_role_local_by_default(monkeypatch: pytest.MonkeyPatch) -> None:

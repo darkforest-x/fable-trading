@@ -81,10 +81,17 @@
   "console_errors": [],
   "pass": true,
   "api": {
-    "anon": 401,
-    "auth": 200,
+    "public_pipeline": 200,
+    "ops_pipeline_anon": 401,
+    "ops_pipeline_auth": 200,
+    "ops_job_post_auth_executor_off": 403,
     "n_stages": 7,
     "executor_enabled": false,
-    "read_only": true
+    "read_only": true,
+    "write_actions": [],
+    "current_ma206": true,
+    "absolute_path_leak": false,
+    "secret_value_leak": false,
+    "public_mobile_no_token": true
   }
 }

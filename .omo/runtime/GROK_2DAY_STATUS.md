@@ -6,10 +6,10 @@
 - grok_worker: stopped_by_owner_request_2026-07-10T16:20+08:00
 - scheduler: stopped
 - codex_heartbeat: e2-1b active every 4 hours; Codex-only execution
-- current_todo: Todo 6 acceptance remains open; E2.1b is still observe-only
+- current_todo: Todo 6 accepted on current MA206 VPS; E2.1b is still observe-only
 - last_slot: 2026-07-10T16:18 three-iter-digest-h1-e21bobserve
 - last_result: owner-directed SMA/EMA20/60/120 migration active; new freeze and forward books verified at 0/100
-- next_action: close Todo 6 against its original VPS acceptance criteria while observing E2.1b; Todo 7 starts only after natural exit, then Todo 8
+- next_action: if E2.1b has exited, close Todo 7 formal report; otherwise continue non-owner-gated daily-workflow verification, then Todo 8 SAHI only after Todo 7
 - final_complete: false
 
 ## Guardrails
@@ -30,12 +30,11 @@
 3. E2.1b observe snapshot (not exited) — `.omo/evidence/task-7-e21b-observe-snapshot.md`
 4. Full multi-book shadow matrix ×2 idempotent — `.omo/evidence/task-shadow-matrix-idempotency.md`
 5. ACTIVE fingerprint mismatch root cause confirmed — `.omo/evidence/task-fingerprint-mismatch-diagnostic.md`
+6. Todo 6 current-MA206 VPS acceptance — `.omo/evidence/task-6-vps-current-ma206-acceptance.md`; public redacted pipeline 200, ops auth retained, executor 0, desktop/mobile passed
 
 ## Implemented but not accepted as complete
 
-- Todo 6 has pipeline API/UI, anomaly/auth code, and older browser evidence, but the original
-  public-redacted/current-MA206 desktop+mobile acceptance has not been closed. Do not mark it done.
-- Todo 9 mainline workflow/idempotency evidence exists independently of Todo 6 completion.
+- Todo 9 mainline workflow/idempotency evidence exists independently of Todo 7/8 completion.
 
 ## Blocked Or Deferred
 

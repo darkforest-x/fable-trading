@@ -94,6 +94,12 @@ def forward(cost: float = FORWARD_COST) -> dict:
     return forward_payload(cost)
 
 
+@app.get("/api/pipeline")
+def public_pipeline() -> dict:
+    """Public coarse pipeline snapshot; redacted and strictly read-only."""
+    return pipeline_status_payload()
+
+
 # ---------- P2.5 Phase 0+1: ops (read-only) ----------
 
 

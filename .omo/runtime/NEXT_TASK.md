@@ -11,13 +11,12 @@ model: deep
 
 ## Preferred next atom (non-owner-gated)
 
-### Option 0 — Close Todo 6 VPS pipeline acceptance
+### Completed — Todo 6 VPS pipeline acceptance
 
-Treat existing API/UI/screenshots as partial implementation, not completion. Re-run the original
-Todo 6 criteria against the current MA206 deployment: coarse redacted public status, authenticated
-controls, every pipeline stage, forward caveat, YOLO gate, executor off, no local paths/secrets,
-and real desktop plus 390px browser QA. Fix reproduced gaps, then write fresh evidence before
-checking Todo 6.
+Closed on current MA206 deployment: public redacted `/api/pipeline`, authenticated controls,
+all seven stages, forward caveat, YOLO diagnostic gate, executor off, no local paths/secrets,
+and real desktop plus 390px browser QA. Evidence:
+`.omo/evidence/task-6-vps-current-ma206-acceptance.md`.
 
 ### Option A — Todo 7 E2.1b formal report (only if training exited)
 

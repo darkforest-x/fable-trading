@@ -1210,7 +1210,7 @@ async function loadPipelineStatus() {
   }
   if (host) host.innerHTML = "<div class='note'>加载中…</div>";
   try {
-    const d = await opsFetch("/api/ops/pipeline");
+    const d = await (await fetch("/api/pipeline")).json();
     if (gen) gen.textContent = d.generated_at ? `generated ${d.generated_at}` : "";
     if (badge) {
       const nAnom = Array.isArray(d.anomalies) ? d.anomalies.length : (d.anomaly_count || 0);
