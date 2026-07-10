@@ -37,6 +37,18 @@ class ClassificationMetrics:
     per_class: tuple[PerClassMetrics, PerClassMetrics, PerClassMetrics]
 
 
+@dataclass(frozen=True)
+class ProfitGateResult:
+    round_trip_cost: float
+    requires_net_mean_per_trade_gt: float
+    requires_profit_factor_gte: float
+    requires_n_trades_gte: int
+    observed_net_mean_per_trade: float | None
+    observed_profit_factor: float | None
+    observed_n_trades: int
+    passed: bool
+
+
 def _validate_classes(values: list[str], *, role: str) -> None:
     unsupported = sorted(set(values) - set(DIRECTION_CLASSES))
     if unsupported:
@@ -64,6 +76,42 @@ def ordered_model_names(names: Mapping[int, str]) -> tuple[str, str, str]:
     if sorted(names) != [0, 1, 2] or set(names.values()) != set(DIRECTION_CLASSES):
         raise DirectionEvaluationError(f"model classes must equal {DIRECTION_CLASSES}, observed {dict(names)}")
     return names[0], names[1], names[2]
+
+
+def path_batches(paths: list[str], *, batch_size: int) -> list[list[str]]:
+    """Bound Ultralytics list-source memory while preserving manifest order."""
+    if batch_size <= 0:
+        raise DirectionEvaluationError(f"batch_size must be positive, observed {batch_size}")
+    return [paths[start : start + batch_size] for start in range(0, len(paths), batch_size)]
+
+
+def profit_gate_result(
+    *,
+    round_trip_cost: float,
+    net_mean_per_trade: float | None,
+    profit_factor: float | None,
+    n_trades: int,
+    profit_factor_min: float = 1.3,
+    minimum_trades: int = 100,
+) -> ProfitGateResult:
+    """Report fixed economic requirements beside the observed values."""
+    passed = bool(
+        net_mean_per_trade is not None
+        and net_mean_per_trade > 0.0
+        and profit_factor is not None
+        and profit_factor >= profit_factor_min
+        and n_trades >= minimum_trades
+    )
+    return ProfitGateResult(
+        round_trip_cost=round_trip_cost,
+        requires_net_mean_per_trade_gt=0.0,
+        requires_profit_factor_gte=profit_factor_min,
+        requires_n_trades_gte=minimum_trades,
+        observed_net_mean_per_trade=net_mean_per_trade,
+        observed_profit_factor=profit_factor,
+        observed_n_trades=n_trades,
+        passed=passed,
+    )
 
 
 def classification_metrics(truth: list[str], predictions: list[str]) -> ClassificationMetrics:

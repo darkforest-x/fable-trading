@@ -4,6 +4,7 @@
 #   "lightgbm>=4.0",
 #   "numpy>=1.24",
 #   "pandas>=2.0",
+#   "scikit-learn>=1.3",
 #   "ultralytics>=8.4",
 # ]
 # ///
@@ -29,6 +30,8 @@ from src.detection.evaluate_direction_classifier import (
     candidate_side_predictions,
     classification_metrics,
     ordered_model_names,
+    path_batches,
+    profit_gate_result,
 )
 from src.judgment.direction_economics import (
     CLASS_TO_INDEX,
@@ -59,17 +62,18 @@ def _image_predictions(
     raw_names = ordered_model_names(model.names)
     paths = [str(dataset / value) for value in val["image_path"]]
     raw_probabilities: list[np.ndarray] = []
-    for result in model.predict(
-        source=paths,
-        imgsz=320,
-        batch=64,
-        device=device,
-        stream=True,
-        verbose=False,
-    ):
-        if result.probs is None:
-            raise RuntimeError(f"classification probabilities missing for {result.path}")
-        raw_probabilities.append(result.probs.data.cpu().numpy())
+    for batch_paths in path_batches(paths, batch_size=32):
+        for result in model.predict(
+            source=batch_paths,
+            imgsz=320,
+            batch=32,
+            device=device,
+            stream=True,
+            verbose=False,
+        ):
+            if result.probs is None:
+                raise RuntimeError(f"classification probabilities missing for {result.path}")
+            raw_probabilities.append(result.probs.data.cpu().numpy())
     raw = np.vstack(raw_probabilities)
     canonical = np.zeros_like(raw)
     for raw_index, class_name in enumerate(raw_names):
@@ -135,17 +139,16 @@ def main() -> int:
         for item in evaluations["image_yolo11n"]["economics"]["cost_metrics"]
         if item["round_trip_cost"] == 0.002
     )
-    gate_passed = bool(
-        image_cost["net_mean_per_trade"] is not None
-        and image_cost["net_mean_per_trade"] > 0
-        and image_cost["profit_factor"] is not None
-        and image_cost["profit_factor"] >= 1.3
-        and evaluations["image_yolo11n"]["economics"]["n_trades"] >= 100
+    gate = profit_gate_result(
+        round_trip_cost=image_cost["round_trip_cost"],
+        net_mean_per_trade=image_cost["net_mean_per_trade"],
+        profit_factor=image_cost["profit_factor"],
+        n_trades=evaluations["image_yolo11n"]["economics"]["n_trades"],
     )
     payload = {
-        "dataset": str(args.dataset.resolve()),
+        "dataset": str(args.dataset),
         "manifest_sha256": _sha256(manifest_path),
-        "weights": str(args.weights.resolve()),
+        "weights": str(args.weights),
         "weights_sha256": _sha256(args.weights),
         "holdout_used": False,
         "policy": "argmax_only",
@@ -154,12 +157,7 @@ def main() -> int:
         "val_time_range": [str(val["signal_time"].min()), str(val["signal_time"].max())],
         "class_order": list(DIRECTION_CLASSES),
         "evaluations": evaluations,
-        "gate": {
-            "net_at_0_2pct_positive": True,
-            "profit_factor_min": 1.3,
-            "minimum_trades": 100,
-            "passed": gate_passed,
-        },
+        "gate": asdict(gate),
         "elapsed_seconds": time.monotonic() - started,
         "predictions_csv": str(predictions_path),
     }

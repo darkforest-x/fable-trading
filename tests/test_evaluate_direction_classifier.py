@@ -8,6 +8,8 @@ from src.detection.evaluate_direction_classifier import (
     candidate_side_predictions,
     classification_metrics,
     ordered_model_names,
+    path_batches,
+    profit_gate_result,
 )
 
 
@@ -43,3 +45,30 @@ def test_ordered_model_names_requires_exact_canonical_classes() -> None:
 
     with pytest.raises(DirectionEvaluationError, match="classes"):
         ordered_model_names({0: "up", 1: "flat", 2: "down"})
+
+
+def test_path_batches_bounds_inference_memory_without_reordering() -> None:
+    paths = [f"image-{index}.png" for index in range(5)]
+
+    assert path_batches(paths, batch_size=2) == [
+        ["image-0.png", "image-1.png"],
+        ["image-2.png", "image-3.png"],
+        ["image-4.png"],
+    ]
+
+
+def test_profit_gate_reports_requirements_and_observations_separately() -> None:
+    result = profit_gate_result(
+        round_trip_cost=0.002,
+        net_mean_per_trade=-0.0015,
+        profit_factor=0.75,
+        n_trades=4_850,
+    )
+
+    assert result.requires_net_mean_per_trade_gt == 0.0
+    assert result.requires_profit_factor_gte == 1.3
+    assert result.requires_n_trades_gte == 100
+    assert result.observed_net_mean_per_trade == -0.0015
+    assert result.observed_profit_factor == 0.75
+    assert result.observed_n_trades == 4_850
+    assert result.passed is False
