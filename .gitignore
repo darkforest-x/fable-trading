@@ -10,7 +10,15 @@ runs/
 __pycache__/
 *.pyc
 .venv/
+.venv_label_studio/
 venv/
 
 # macOS
 .DS_Store
+
+# Label Studio local secrets / data (never commit)
+label_studio_data/
+scripts/.label_studio.env
+output/label_studio/pack_80/
+output/offline_tasks/LABEL_STUDIO_ACCESS.md
+output/offline_tasks/LABEL_STUDIO_VPS_ACCESS.md

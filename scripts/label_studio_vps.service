@@ -1,0 +1,29 @@
+[Unit]
+Description=fable Label Studio public review pack (80 images, auth required)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/fable-label-studio
+EnvironmentFile=/etc/fable-label-studio.env
+# Resource bounds — VPS is shared with fable-dashboard (MemoryMax=900M)
+MemoryMax=1400M
+MemoryHigh=1100M
+CPUQuota=150%
+TasksMax=256
+# Do not enable job executor paths; this unit is labeling-only
+ExecStart=/opt/fable-label-studio/.venv/bin/label-studio start \
+  --host 0.0.0.0 \
+  --port 8081 \
+  -b \
+  --data-dir /opt/fable-label-studio/data
+Restart=on-failure
+RestartSec=5
+# Harden process environment visibility somewhat (password still in EnvironmentFile only)
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
