@@ -1,5 +1,5 @@
 [Unit]
-Description=fable Label Studio public review pack (80 images, auth required)
+Description=fable Label Studio review pack (80 images, loopback-only, auth required)
 After=network-online.target
 Wants=network-online.target
 
@@ -14,9 +14,10 @@ MemoryHigh=1100M
 CPUQuota=150%
 TasksMax=256
 # Do not enable job executor paths; this unit is labeling-only
+# Bind loopback only — public access is nginx TLS on 8081 → 127.0.0.1:8082
 ExecStart=/opt/fable-label-studio/.venv/bin/label-studio start \
-  --host 0.0.0.0 \
-  --port 8081 \
+  --host 127.0.0.1 \
+  --port 8082 \
   -b \
   --data-dir /opt/fable-label-studio/data
 Restart=on-failure
