@@ -1,0 +1,477 @@
+{
+  "evidence_label": "historical_candidate_evidence_preholdout_only",
+  "holdout_start": "2026-05-04 00:00:00+00:00",
+  "cost_maker_rt": 0.0006,
+  "score_quantile": 0.9,
+  "n_folds": 4,
+  "candidates": [
+    {
+      "candidate": "tp5_sl2_long_swap",
+      "role": "frozen_champion",
+      "notes": "Frozen ACTIVE long TP5/SL2 on expanded SWAP universe.",
+      "path": "data/swap_replication/swap_tp5_sl2.csv",
+      "bar": "15m",
+      "horizon_bars": 72,
+      "n_preholdout": 7547,
+      "preholdout_start": "2025-06-05 05:15:00+00:00",
+      "preholdout_end": "2026-05-03 01:15:00+00:00",
+      "holdout_start": "2026-05-04 00:00:00+00:00",
+      "n_folds_requested": 4,
+      "n_test_folds": 3,
+      "n_ok_folds": 3,
+      "folds": [
+        {
+          "fold": 1,
+          "status": "ok",
+          "n_train": 1835,
+          "n_test": 1887,
+          "test_start": "2025-09-07 22:00:00+00:00",
+          "test_end": "2025-12-13 12:45:00+00:00",
+          "train_score_q90": 0.47529,
+          "top_decile": {
+            "n": 188,
+            "gross_per_trade": -0.00078,
+            "net_per_trade_maker": -0.00138,
+            "win_rate": 0.2979,
+            "maker_fill_rate": 0.9043
+          },
+          "top_decile_funding": {
+            "funding_available_rate": 0.0,
+            "n_with_funding": 0
+          },
+          "portfolio_maker_filled": {
+            "n_trades": 104,
+            "profit_factor": 0.581,
+            "net_per_trade": -0.00242,
+            "win_rate": 0.2404,
+            "max_drawdown_pct": 0.0295,
+            "net_total_units": -0.2519,
+            "real_funding_coverage": 0.0
+          },
+          "maker_fill_rate_test": 0.9046
+        },
+        {
+          "fold": 2,
+          "status": "ok",
+          "n_train": 3757,
+          "n_test": 1887,
+          "test_start": "2025-12-13 13:30:00+00:00",
+          "test_end": "2026-03-04 02:00:00+00:00",
+          "train_score_q90": 0.4351,
+          "top_decile": {
+            "n": 188,
+            "gross_per_trade": 0.00183,
+            "net_per_trade_maker": 0.00123,
+            "win_rate": 0.4043,
+            "maker_fill_rate": 0.8617
+          },
+          "top_decile_funding": {
+            "funding_available_rate": 0.0,
+            "n_with_funding": 0
+          },
+          "portfolio_maker_filled": {
+            "n_trades": 124,
+            "profit_factor": 1.193,
+            "net_per_trade": 0.00077,
+            "win_rate": 0.3629,
+            "max_drawdown_pct": 0.0111,
+            "net_total_units": 0.096,
+            "real_funding_coverage": 0.0
+          },
+          "maker_fill_rate_test": 0.9078
+        },
+        {
+          "fold": 3,
+          "status": "ok",
+          "n_train": 5638,
+          "n_test": 1887,
+          "test_start": "2026-03-04 02:00:00+00:00",
+          "test_end": "2026-05-03 01:15:00+00:00",
+          "train_score_q90": 0.41906,
+          "top_decile": {
+            "n": 188,
+            "gross_per_trade": 0.00206,
+            "net_per_trade_maker": 0.00146,
+            "win_rate": 0.4255,
+            "maker_fill_rate": 0.8511
+          },
+          "top_decile_funding": {
+            "funding_available_rate": 0.633,
+            "n_with_funding": 119
+          },
+          "portfolio_maker_filled": {
+            "n_trades": 142,
+            "profit_factor": 1.105,
+            "net_per_trade": 0.00043,
+            "win_rate": 0.3803,
+            "max_drawdown_pct": 0.0103,
+            "net_total_units": 0.0615,
+            "real_funding_coverage": 0.5845
+          },
+          "maker_fill_rate_test": 0.8892
+        }
+      ],
+      "evidence_label": "historical_candidate_evidence_preholdout_only",
+      "not_final_profitability_proof": true,
+      "aggregate": {
+        "top_decile_net_maker_mean": 0.00044,
+        "top_decile_net_maker_min": -0.00138,
+        "top_decile_net_maker_max": 0.00146,
+        "top_decile_positive_fold_share": 0.6667,
+        "portfolio_pf_mean": 0.96,
+        "portfolio_trades_total": 370
+      }
+    },
+    {
+      "candidate": "h1_scaled_25_t3",
+      "role": "challenger",
+      "notes": "H1 scaled take-profit (half @2.5xATR + trail 3xATR); discovery-tier only.",
+      "path": "data/sweep_exits_swap/scaled_25_t3.csv",
+      "bar": "15m",
+      "horizon_bars": 72,
+      "n_preholdout": 7547,
+      "preholdout_start": "2025-06-05 05:15:00+00:00",
+      "preholdout_end": "2026-05-03 01:15:00+00:00",
+      "holdout_start": "2026-05-04 00:00:00+00:00",
+      "n_folds_requested": 4,
+      "n_test_folds": 3,
+      "n_ok_folds": 3,
+      "folds": [
+        {
+          "fold": 1,
+          "status": "ok",
+          "n_train": 1835,
+          "n_test": 1887,
+          "test_start": "2025-09-07 22:00:00+00:00",
+          "test_end": "2025-12-13 12:45:00+00:00",
+          "train_score_q90": 0.72166,
+          "top_decile": {
+            "n": 188,
+            "gross_per_trade": 0.00021,
+            "net_per_trade_maker": -0.00039,
+            "win_rate": 0.4894,
+            "maker_fill_rate": 0.8723
+          },
+          "top_decile_funding": {
+            "funding_available_rate": 0.0,
+            "n_with_funding": 0
+          },
+          "portfolio_maker_filled": {
+            "n_trades": 81,
+            "profit_factor": 0.784,
+            "net_per_trade": -0.00088,
+            "win_rate": 0.4691,
+            "max_drawdown_pct": 0.0102,
+            "net_total_units": -0.0711,
+            "real_funding_coverage": 0.0
+          },
+          "maker_fill_rate_test": 0.9046
+        },
+        {
+          "fold": 2,
+          "status": "ok",
+          "n_train": 3757,
+          "n_test": 1887,
+          "test_start": "2025-12-13 13:30:00+00:00",
+          "test_end": "2026-03-04 02:00:00+00:00",
+          "train_score_q90": 0.60437,
+          "top_decile": {
+            "n": 188,
+            "gross_per_trade": -0.00069,
+            "net_per_trade_maker": -0.00129,
+            "win_rate": 0.4681,
+            "maker_fill_rate": 0.8617
+          },
+          "top_decile_funding": {
+            "funding_available_rate": 0.0,
+            "n_with_funding": 0
+          },
+          "portfolio_maker_filled": {
+            "n_trades": 131,
+            "profit_factor": 0.505,
+            "net_per_trade": -0.00294,
+            "win_rate": 0.3893,
+            "max_drawdown_pct": 0.0396,
+            "net_total_units": -0.3858,
+            "real_funding_coverage": 0.0
+          },
+          "maker_fill_rate_test": 0.9078
+        },
+        {
+          "fold": 3,
+          "status": "ok",
+          "n_train": 5638,
+          "n_test": 1887,
+          "test_start": "2026-03-04 02:00:00+00:00",
+          "test_end": "2026-05-03 01:15:00+00:00",
+          "train_score_q90": 0.60417,
+          "top_decile": {
+            "n": 188,
+            "gross_per_trade": 0.0027,
+            "net_per_trade_maker": 0.0021,
+            "win_rate": 0.6862,
+            "maker_fill_rate": 0.8936
+          },
+          "top_decile_funding": {
+            "funding_available_rate": 0.6223,
+            "n_with_funding": 117
+          },
+          "portfolio_maker_filled": {
+            "n_trades": 174,
+            "profit_factor": 1.883,
+            "net_per_trade": 0.00198,
+            "win_rate": 0.6724,
+            "max_drawdown_pct": 0.0032,
+            "net_total_units": 0.345,
+            "real_funding_coverage": 0.5977
+          },
+          "maker_fill_rate_test": 0.8892
+        }
+      ],
+      "evidence_label": "historical_candidate_evidence_preholdout_only",
+      "not_final_profitability_proof": true,
+      "aggregate": {
+        "top_decile_net_maker_mean": 0.00014,
+        "top_decile_net_maker_min": -0.00129,
+        "top_decile_net_maker_max": 0.0021,
+        "top_decile_positive_fold_share": 0.3333,
+        "portfolio_pf_mean": 1.057,
+        "portfolio_trades_total": 386
+      }
+    },
+    {
+      "candidate": "h8_30m_h48",
+      "role": "challenger",
+      "notes": "H8 30m TP5/SL2 pool (horizon 48 bars); discovery-tier only.",
+      "path": "data/mtf_sweep/h8_30m_h48.csv",
+      "bar": "30m",
+      "horizon_bars": 48,
+      "n_preholdout": 1818,
+      "preholdout_start": "2025-06-07 16:00:00+00:00",
+      "preholdout_end": "2026-05-02 21:30:00+00:00",
+      "holdout_start": "2026-05-04 00:00:00+00:00",
+      "n_folds_requested": 4,
+      "n_test_folds": 3,
+      "n_ok_folds": 3,
+      "folds": [
+        {
+          "fold": 1,
+          "status": "ok",
+          "n_train": 432,
+          "n_test": 455,
+          "test_start": "2025-09-06 06:30:00+00:00",
+          "test_end": "2025-12-25 01:00:00+00:00",
+          "train_score_q90": 0.5504,
+          "top_decile": {
+            "n": 45,
+            "gross_per_trade": 0.00658,
+            "net_per_trade_maker": 0.00598,
+            "win_rate": 0.4889,
+            "maker_fill_rate": 0.8667
+          },
+          "top_decile_funding": {
+            "funding_available_rate": 0.0,
+            "n_with_funding": 0
+          },
+          "portfolio_maker_filled": {
+            "n_trades": 25,
+            "profit_factor": 2.549,
+            "net_per_trade": 0.00754,
+            "win_rate": 0.56,
+            "max_drawdown_pct": 0.0042,
+            "net_total_units": 0.1885,
+            "real_funding_coverage": 0.0
+          },
+          "maker_fill_rate_test": 0.9231
+        },
+        {
+          "fold": 2,
+          "status": "ok",
+          "n_train": 905,
+          "n_test": 454,
+          "test_start": "2025-12-25 02:30:00+00:00",
+          "test_end": "2026-03-20 07:00:00+00:00",
+          "train_score_q90": 0.54363,
+          "top_decile": {
+            "n": 45,
+            "gross_per_trade": 0.00183,
+            "net_per_trade_maker": 0.00123,
+            "win_rate": 0.4,
+            "maker_fill_rate": 0.9111
+          },
+          "top_decile_funding": {
+            "funding_available_rate": 0.0,
+            "n_with_funding": 0
+          },
+          "portfolio_maker_filled": {
+            "n_trades": 18,
+            "profit_factor": 1.605,
+            "net_per_trade": 0.00334,
+            "win_rate": 0.4444,
+            "max_drawdown_pct": 0.0038,
+            "net_total_units": 0.06,
+            "real_funding_coverage": 0.0
+          },
+          "maker_fill_rate_test": 0.9251
+        },
+        {
+          "fold": 3,
+          "status": "ok",
+          "n_train": 1362,
+          "n_test": 455,
+          "test_start": "2026-03-20 22:00:00+00:00",
+          "test_end": "2026-05-02 21:30:00+00:00",
+          "train_score_q90": 0.42216,
+          "top_decile": {
+            "n": 45,
+            "gross_per_trade": 0.00288,
+            "net_per_trade_maker": 0.00228,
+            "win_rate": 0.4667,
+            "maker_fill_rate": 0.8889
+          },
+          "top_decile_funding": {
+            "funding_available_rate": 0.8667,
+            "n_with_funding": 39
+          },
+          "portfolio_maker_filled": {
+            "n_trades": 32,
+            "profit_factor": 1.461,
+            "net_per_trade": 0.00192,
+            "win_rate": 0.4375,
+            "max_drawdown_pct": 0.0051,
+            "net_total_units": 0.0616,
+            "real_funding_coverage": 0.8438
+          },
+          "maker_fill_rate_test": 0.8967
+        }
+      ],
+      "evidence_label": "historical_candidate_evidence_preholdout_only",
+      "not_final_profitability_proof": true,
+      "aggregate": {
+        "top_decile_net_maker_mean": 0.00316,
+        "top_decile_net_maker_min": 0.00123,
+        "top_decile_net_maker_max": 0.00598,
+        "top_decile_positive_fold_share": 1.0,
+        "portfolio_pf_mean": 1.872,
+        "portfolio_trades_total": 75
+      }
+    },
+    {
+      "candidate": "h10_short_tp5_sl2",
+      "role": "challenger",
+      "notes": "H10 short-side mirror TP5/SL2; discovery-tier only.",
+      "path": "data/short_replication/swap_short_tp5_sl2.csv",
+      "bar": "15m",
+      "horizon_bars": 72,
+      "n_preholdout": 7222,
+      "preholdout_start": "2025-06-04 22:00:00+00:00",
+      "preholdout_end": "2026-05-03 05:00:00+00:00",
+      "holdout_start": "2026-05-04 00:00:00+00:00",
+      "n_folds_requested": 4,
+      "n_test_folds": 3,
+      "n_ok_folds": 3,
+      "folds": [
+        {
+          "fold": 1,
+          "status": "ok",
+          "n_train": 1773,
+          "n_test": 1806,
+          "test_start": "2025-09-12 15:45:00+00:00",
+          "test_end": "2025-12-13 23:00:00+00:00",
+          "train_score_q90": 0.48203,
+          "top_decile": {
+            "n": 180,
+            "gross_per_trade": 0.00537,
+            "net_per_trade_maker": 0.00477,
+            "win_rate": 0.4556,
+            "maker_fill_rate": 0.8778
+          },
+          "top_decile_funding": {
+            "funding_available_rate": 0.0,
+            "n_with_funding": 0
+          },
+          "portfolio_maker_filled": {
+            "n_trades": 101,
+            "profit_factor": 1.703,
+            "net_per_trade": 0.00379,
+            "win_rate": 0.4257,
+            "max_drawdown_pct": 0.0118,
+            "net_total_units": 0.3826,
+            "real_funding_coverage": 0.0
+          },
+          "maker_fill_rate_test": 0.8926
+        },
+        {
+          "fold": 2,
+          "status": "ok",
+          "n_train": 3583,
+          "n_test": 1805,
+          "test_start": "2025-12-13 23:00:00+00:00",
+          "test_end": "2026-03-05 12:00:00+00:00",
+          "train_score_q90": 0.32116,
+          "top_decile": {
+            "n": 180,
+            "gross_per_trade": 0.00526,
+            "net_per_trade_maker": 0.00466,
+            "win_rate": 0.4778,
+            "maker_fill_rate": 0.8778
+          },
+          "top_decile_funding": {
+            "funding_available_rate": 0.0,
+            "n_with_funding": 0
+          },
+          "portfolio_maker_filled": {
+            "n_trades": 162,
+            "profit_factor": 2.15,
+            "net_per_trade": 0.00536,
+            "win_rate": 0.4938,
+            "max_drawdown_pct": 0.0101,
+            "net_total_units": 0.8676,
+            "real_funding_coverage": 0.0
+          },
+          "maker_fill_rate_test": 0.897
+        },
+        {
+          "fold": 3,
+          "status": "ok",
+          "n_train": 5407,
+          "n_test": 1806,
+          "test_start": "2026-03-05 13:00:00+00:00",
+          "test_end": "2026-05-03 05:00:00+00:00",
+          "train_score_q90": 0.37972,
+          "top_decile": {
+            "n": 180,
+            "gross_per_trade": 0.00155,
+            "net_per_trade_maker": 0.00095,
+            "win_rate": 0.4056,
+            "maker_fill_rate": 0.8167
+          },
+          "top_decile_funding": {
+            "funding_available_rate": 0.3556,
+            "n_with_funding": 64
+          },
+          "portfolio_maker_filled": {
+            "n_trades": 141,
+            "profit_factor": 1.038,
+            "net_per_trade": 0.00021,
+            "win_rate": 0.3759,
+            "max_drawdown_pct": 0.0241,
+            "net_total_units": 0.0301,
+            "real_funding_coverage": 0.3688
+          },
+          "maker_fill_rate_test": 0.8621
+        }
+      ],
+      "evidence_label": "historical_candidate_evidence_preholdout_only",
+      "not_final_profitability_proof": true,
+      "aggregate": {
+        "top_decile_net_maker_mean": 0.00346,
+        "top_decile_net_maker_min": 0.00095,
+        "top_decile_net_maker_max": 0.00477,
+        "top_decile_positive_fold_share": 1.0,
+        "portfolio_pf_mean": 1.63,
+        "portfolio_trades_total": 404
+      }
+    }
+  ]
+}
