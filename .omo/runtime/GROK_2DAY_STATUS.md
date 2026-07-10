@@ -6,10 +6,10 @@
 - success_cooldown_seconds: 60
 - failure_backoff_seconds: 18000
 - max_slots: 24
-- current_todo: todo-5-p25-local-verification-inprogress
-- last_slot: 2026-07-10T15:18 iteration-2-started
-- last_result: Phase C PASS (693dc5f); OSS benchmark PASS (63714f8); writeback design PASS (220143a); full-80 baseline PASS (49596be, 80 stems, source_counts annotation=0/prediction=53/none=27); iteration-2 (Todo 5 P2.5 local verification) started, awaiting completion log
-- next_action: Continue Todo 5 P2.5 local verification first; if completed, append owner-gated review task with explicit promote request.
+- current_todo: todo-6-pipeline-local-done-vps-deploy-pending
+- last_slot: 2026-07-10T15:35 three-iter-batch-complete
+- last_result: full-80 writeback baseline PASS (49596be); P2.5 local 58 tests PASS (6d144ed); pipeline API+UI local PASS (ff07060)
+- next_action: Owner LS review still open; or Todo 6 VPS deploy of pipeline surface; or Playwright 390px for P2.5
 - final_complete: false
 
 ## Guardrails
@@ -23,12 +23,12 @@
 
 ## Completed (this batch)
 
-1. Phase C: project init + browser QA — commit `693dc5f`
-2. OSS label-tool benchmark — commit `63714f8`
-3. Label writeback design + 5-stem dry-run — script + evidence (this slot)
-4. Full-80 writeback export baseline pass — commit `49596be` + `.omo/evidence/task-full80-writeback-baseline.md`
+1. Full-80 LS writeback baseline + export fix — `49596be` (annotation=0, prediction=53, none=27)
+2. P2.5 local verify — `6d144ed` (58 pytest + loopback curl; Playwright deferred)
+3. Redacted pipeline status API + 流水线 tab — `ff07060` (local only; VPS deferred)
 
 ## Blocked Or Deferred
 
 - Telegram deferred until token rotation + chat ID.
-- Full-80 annotation writeback remains blocked on owner LS review (human annotations).
+- Full-80 annotation writeback waits on owner review in LS (0 annotations).
+- Todo 6 VPS browser deploy + Playwright visual QA deferred.
