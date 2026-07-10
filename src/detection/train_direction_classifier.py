@@ -13,8 +13,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Final, TypedDict
 
-from src.detection.train import pick_device
-
 MODEL: Final = "yolo11n-cls.pt"
 EXPECTED_CLASSES: Final = frozenset({"long", "no_trade", "short"})
 EXPECTED_IMAGE_SIZE: Final = (640, 640)
@@ -90,13 +88,18 @@ def _validate_dataset(dataset: Path) -> Path:
 def build_train_options(config: DirectionTrainConfig) -> DirectionTrainOptions:
     """Return the predeclared one-run recipe after validating the dataset."""
     dataset = _validate_dataset(config.dataset)
+    device = config.device
+    if device is None:
+        from src.detection.train import pick_device
+
+        device = pick_device()
     return {
         "data": str(dataset),
         "epochs": 20,
         "imgsz": 320,
         "batch": 32,
         "patience": 8,
-        "device": config.device or pick_device(),
+        "device": device,
         "workers": 2,
         "project": "runs/classify",
         "name": config.name,

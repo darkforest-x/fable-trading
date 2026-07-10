@@ -13,9 +13,6 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-import torch
-from ultralytics import YOLO
-
 # Chart images have a fixed meaning per axis and per color: never flip,
 # never mosaic/mix, keep colors intact, allow only tiny geometric jitter.
 SAFE_AUG = dict(
@@ -38,10 +35,14 @@ SAFE_AUG = dict(
 
 
 def pick_device() -> str:
+    import torch
+
     return "mps" if torch.backends.mps.is_available() else "cpu"
 
 
 def main() -> None:
+    from ultralytics import YOLO
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data", default="datasets/dense_15m/data.yaml")
     parser.add_argument("--model", default="yolo11n.pt")
