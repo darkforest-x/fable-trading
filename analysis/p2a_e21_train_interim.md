@@ -1,6 +1,6 @@
 # YOLO E2.1 training interim
 
-**Updated**: 2026-07-09T23:03:35.681404+00:00
+**Updated**: 2026-07-10T00:18:16.422311+00:00
 
 Run: `dense_15m_full_s_e21` · yolo11s · E2.1 · patience=12
 
@@ -27,9 +27,13 @@ Run: `dense_15m_full_s_e21` · yolo11s · E2.1 · patience=12
 | 19 | 0.3493 | 0.5706 | 0.4008 |
 | 20 | 0.3691 | 0.5474 | 0.4140 |
 | 21 | 0.4173 | 0.6438 | 0.4857 |
+| 22 | 0.7986 | 0.6885 | 0.8304 |
+| 23 | 0.6345 | 0.5559 | 0.5938 |
+| 24 | 0.1973 | 0.1804 | 0.0771 |
+| 25 | 0.7766 | 0.7047 | 0.8443 |
+| 26 | 0.3929 | 0.5875 | 0.4294 |
 
-**Best so far**: epoch **13** mAP50=**0.8203** P=0.7796 R=0.6572
+**Best so far**: epoch **25** mAP50=**0.8443** P=0.7766 R=0.7047
 
-Train alive; ~ep22/40 in progress; 21 epochs in results.csv.
-Patience left est **4**. Finalize + FO hardlist after exit.
-Gate ≥0.90: FAIL path likely if best stays ~0.82.
+26 epochs in results; train alive; patience_left_est **11**.
+Peak moved ep13→ep25. Gate ≥0.90 still open. Finalize after exit.
