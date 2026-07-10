@@ -1,6 +1,8 @@
-# YOLO E2.1 training interim
+# YOLO E2.1 training interim (train EXITED)
 
-**Updated**: 2026-07-10T03:04:02.387686+00:00
+**Updated**: 2026-07-10T04:11:30.050834+00:00
+
+**Train finished** 2026-07-10 ~12:06 CST exit=0 · 40/40 epochs completed.
 
 Run: `dense_15m_full_s_e21` · yolo11s · E2.1 · patience=12
 
@@ -42,9 +44,15 @@ Run: `dense_15m_full_s_e21` · yolo11s · E2.1 · patience=12
 | 34 | 0.7889 | 0.7140 | 0.8520 |
 | 35 | 0.8027 | 0.7001 | 0.8488 |
 | 36 | 0.7948 | 0.7039 | 0.8469 |
+| 37 | 0.8147 | 0.6970 | 0.8524 |
+| 38 | 0.7830 | 0.7440 | 0.8543 |
+| 39 | 0.8072 | 0.7178 | 0.8532 |
+| 40 | 0.8103 | 0.7047 | 0.8502 |
 
-**Best so far**: epoch **30** mAP50=**0.8551** P=0.8269 R=0.6996
+**Best from results.csv**: epoch **30** mAP50=**0.8551** P=0.8269 R=0.6996 mAP50-95=0.6565
 
-36 epochs in results; train log ~**ep37**/40 mid-train.
-Patience left est **6**. Gate ≥0.90 still open (best ~0.855).
-Peaks: ep13 0.820 → ep25 0.844 → ep29 0.851 → **ep30 0.855**. Finalize after exit.
+Last epoch 40 mAP50=0.8502
+
+Gate mAP50≥0.90: **FAIL** (best ~0.855 from curve; official val in finalize progress).
+
+Finalize running: official val + preds export + consistency + FO hard_e21.
