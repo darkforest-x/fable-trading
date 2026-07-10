@@ -103,7 +103,7 @@ full_spread = (max-min of all six MAs) / close    ≤ 0.0055
 | device | mps（Apple M4） |
 | patience | 10 |
 | rect | True |
-| **增强（全部关闭或极小）** | fliplr=0, flipud=0, mosaic=0, mixup=0, copy_paste=0, hsv_h=0, hsv_s=0.05, hsv_v=0.05, degrees=0, shear=0, perspective=0, translate=0.02, scale=0.1 |
+| **增强（历史实际配置）** | fliplr=0, flipud=0, mosaic=0, mixup=0, copy_paste=0, hsv_h=0, **hsv_s=0.05, hsv_v=0.05（违反 HSV 全关铁律）**, degrees=0, shear=0, perspective=0, translate=0.02, scale=0.1 |
 
 权重路径：`runs/detect/runs/detect/dense_15m_smoke3/weights/best.pt`（不入 git）
 
@@ -135,7 +135,7 @@ full_spread = (max-min of all six MAs) / close    ≤ 0.0055
 |---|---|---|
 | 冒烟 mAP50 | ≥ 0.80 | **0.835 ✅** |
 | 标签自动生成、框随密集区变化 | 是 | ✅ |
-| 增强不破坏时间/颜色语义 | 全关 | ✅ |
+| 增强不破坏时间/颜色语义 | 全关 | ❌ 历史训练含 hsv_s/v=0.05；2026-07-10 已修复代码，需合规重训 |
 | val 按时间切分 | 80/20 per symbol | ✅ |
 | PROJECT_PLAN 正式标准 mAP50 ≥ 0.90 + 规则一致率 ≥ 95% | 未测 | ⬜ 待全量训练后对照 |
 
@@ -159,6 +159,9 @@ full_spread = (max-min of all six MAs) / close    ≤ 0.0055
 风险与诚实声明：
 
 - yolo11s 相比 smoke3 的 mAP50 仅从 0.8353 提升到 0.8569，模型容量不是当前瓶颈。
+- **2026-07-10 合规更正**：审计训练日志与 `args.yaml` 后确认，smoke/full/E2.1 等修复前
+  训练均继承 `hsv_s=0.05`、`hsv_v=0.05`。这些结果可保留为诊断证据，但不满足项目
+  “HSV 全关”铁律，不能作为合规正式验收；代码已改为全 0，后续须用新 run 名重训。
 - precision 0.8003、recall 0.7112 说明仍有近密集误报和漏检，未达到替代规则扫描的稳定性。
 - 本轮结果来自 val split 官方评估；没有评估 holdout。
 
