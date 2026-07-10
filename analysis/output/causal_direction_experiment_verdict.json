@@ -1,0 +1,21 @@
+{
+  "experiment": "ma206_direction_causal_yolo11n",
+  "status": "rejected",
+  "holdout_used": false,
+  "promotion": false,
+  "reason": "fixed 0.20% round-trip cost net mean is negative and profit factor is below 1.3",
+  "manifest_sha256": "ad174ad4dc6914dc87dc746fb7df1c7f9ff91fa7a5b27ae6476a3ccb29c9f1a2",
+  "weights_sha256": "d28b830927adf35559294198312dcbcd850a97e00a7d46ea5c7958560c1b0363",
+  "gate": {
+    "round_trip_cost": 0.002,
+    "observed_net_mean_per_trade": -0.001523562253342323,
+    "observed_profit_factor": 0.7471825770364536,
+    "observed_n_trades": 4850,
+    "passed": false
+  },
+  "unchanged_artifacts": {
+    "models/ACTIVE": "42df83c98247188873613eec3af04ffd258520a98e8b4b089c5f322b9db8b9c7",
+    "data/forward_log_ma206.csv": "c903d37798d374bef59404adcc18c92e3024ac77ab348b1435bb760e19198527",
+    "data/forward_log_h1_scaled_ma206.csv": "02ecccec22dceca0dd324460e6a9baa6e73997aabd22783784502a870a87af36"
+  }
+}

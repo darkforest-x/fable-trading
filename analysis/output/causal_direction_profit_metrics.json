@@ -1,0 +1,255 @@
+{
+  "dataset": "datasets/ma206_direction_causal_v1",
+  "manifest_sha256": "ad174ad4dc6914dc87dc746fb7df1c7f9ff91fa7a5b27ae6476a3ccb29c9f1a2",
+  "weights": "runs/classify/runs/classify/ma206_direction_causal_yolo11n/weights/best.pt",
+  "weights_sha256": "d28b830927adf35559294198312dcbcd850a97e00a7d46ea5c7958560c1b0363",
+  "holdout_used": false,
+  "policy": "argmax_only",
+  "train_rows": 23520,
+  "val_rows": 5900,
+  "val_time_range": [
+    "2026-03-24 11:00:00+00:00",
+    "2026-05-03 05:00:00+00:00"
+  ],
+  "class_order": [
+    "long",
+    "short",
+    "no_trade"
+  ],
+  "evaluations": {
+    "image_yolo11n": {
+      "classification": {
+        "n_samples": 5900,
+        "accuracy": 0.34779661016949154,
+        "balanced_accuracy": 0.3407193170152128,
+        "confusion": [
+          [
+            1226,
+            531,
+            348
+          ],
+          [
+            1005,
+            434,
+            310
+          ],
+          [
+            1184,
+            470,
+            392
+          ]
+        ],
+        "per_class": [
+          {
+            "class_name": "long",
+            "precision": 0.35900439238653004,
+            "recall": 0.5824228028503563,
+            "f1": 0.44420289855072465,
+            "support": 2105
+          },
+          {
+            "class_name": "short",
+            "precision": 0.3024390243902439,
+            "recall": 0.24814179531160663,
+            "f1": 0.27261306532663315,
+            "support": 1749
+          },
+          {
+            "class_name": "no_trade",
+            "precision": 0.37333333333333335,
+            "recall": 0.19159335288367546,
+            "f1": 0.2532299741602067,
+            "support": 2046
+          }
+        ]
+      },
+      "economics": {
+        "n_candidates": 5900,
+        "n_trades": 4850,
+        "trade_coverage": 0.8220338983050848,
+        "gross_mean_per_trade": 0.0004764377466576772,
+        "gross_win_rate": 0.3668041237113402,
+        "cost_metrics": [
+          {
+            "round_trip_cost": 0.0006,
+            "net_mean_per_trade": -0.00012356225334232275,
+            "profit_factor": 0.9759432270095884,
+            "max_drawdown_pct": 0.9094861957900685
+          },
+          {
+            "round_trip_cost": 0.002,
+            "net_mean_per_trade": -0.001523562253342323,
+            "profit_factor": 0.7471825770364536,
+            "max_drawdown_pct": 0.9995616495489351
+          },
+          {
+            "round_trip_cost": 0.003,
+            "net_mean_per_trade": -0.0025235622533423224,
+            "profit_factor": 0.6214275087732674,
+            "max_drawdown_pct": 0.9999965939812681
+          }
+        ]
+      }
+    },
+    "numeric_lightgbm": {
+      "classification": {
+        "n_samples": 5900,
+        "accuracy": 0.29694915254237286,
+        "balanced_accuracy": 0.3336284328371973,
+        "confusion": [
+          [
+            0,
+            2090,
+            15
+          ],
+          [
+            0,
+            1742,
+            7
+          ],
+          [
+            0,
+            2036,
+            10
+          ]
+        ],
+        "per_class": [
+          {
+            "class_name": "long",
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2105
+          },
+          {
+            "class_name": "short",
+            "precision": 0.29686434901158826,
+            "recall": 0.9959977129788451,
+            "f1": 0.45739792569252985,
+            "support": 1749
+          },
+          {
+            "class_name": "no_trade",
+            "precision": 0.3125,
+            "recall": 0.004887585532746823,
+            "f1": 0.009624639076034648,
+            "support": 2046
+          }
+        ]
+      },
+      "economics": {
+        "n_candidates": 5900,
+        "n_trades": 5868,
+        "trade_coverage": 0.9945762711864407,
+        "gross_mean_per_trade": -0.00038120738024456305,
+        "gross_win_rate": 0.32021131561008864,
+        "cost_metrics": [
+          {
+            "round_trip_cost": 0.0006,
+            "net_mean_per_trade": -0.000981207380244563,
+            "profit_factor": 0.8202044206492706,
+            "max_drawdown_pct": 0.9998856832830906
+          },
+          {
+            "round_trip_cost": 0.002,
+            "net_mean_per_trade": -0.002381207380244563,
+            "profit_factor": 0.6286582391276923,
+            "max_drawdown_pct": 0.9999998621043731
+          },
+          {
+            "round_trip_cost": 0.003,
+            "net_mean_per_trade": -0.003381207380244563,
+            "profit_factor": 0.5235822211668266,
+            "max_drawdown_pct": 0.9999999990063873
+          }
+        ]
+      }
+    },
+    "candidate_side": {
+      "classification": {
+        "n_samples": 5900,
+        "accuracy": 0.2972881355932203,
+        "balanced_accuracy": 0.30501963117030567,
+        "confusion": [
+          [
+            908,
+            1197,
+            0
+          ],
+          [
+            903,
+            846,
+            0
+          ],
+          [
+            965,
+            1081,
+            0
+          ]
+        ],
+        "per_class": [
+          {
+            "class_name": "long",
+            "precision": 0.3270893371757925,
+            "recall": 0.431353919239905,
+            "f1": 0.3720549067813973,
+            "support": 2105
+          },
+          {
+            "class_name": "short",
+            "precision": 0.2708066581306018,
+            "recall": 0.483704974271012,
+            "f1": 0.3472193720500718,
+            "support": 1749
+          },
+          {
+            "class_name": "no_trade",
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2046
+          }
+        ]
+      },
+      "economics": {
+        "n_candidates": 5900,
+        "n_trades": 5900,
+        "trade_coverage": 1.0,
+        "gross_mean_per_trade": -0.00037599782742919296,
+        "gross_win_rate": 0.32,
+        "cost_metrics": [
+          {
+            "round_trip_cost": 0.0006,
+            "net_mean_per_trade": -0.0009759978274291927,
+            "profit_factor": 0.8216701837218157,
+            "max_drawdown_pct": 0.9991177652076536
+          },
+          {
+            "round_trip_cost": 0.002,
+            "net_mean_per_trade": -0.0023759978274291932,
+            "profit_factor": 0.6303865286595813,
+            "max_drawdown_pct": 0.9999994375036364
+          },
+          {
+            "round_trip_cost": 0.003,
+            "net_mean_per_trade": -0.003375997827429193,
+            "profit_factor": 0.5254304907123081,
+            "max_drawdown_pct": 0.999999998486152
+          }
+        ]
+      }
+    }
+  },
+  "gate": {
+    "round_trip_cost": 0.002,
+    "requires_net_mean_per_trade_gt": 0.0,
+    "requires_profit_factor_gte": 1.3,
+    "requires_n_trades_gte": 100,
+    "observed_net_mean_per_trade": -0.001523562253342323,
+    "observed_profit_factor": 0.7471825770364536,
+    "observed_n_trades": 4850,
+    "passed": false
+  },
+  "elapsed_seconds": 49.96056266699452,
+  "predictions_csv": "analysis/output/causal_direction_val_predictions.csv"
+}
