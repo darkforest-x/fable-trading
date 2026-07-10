@@ -1,0 +1,52 @@
+{
+  "experiment": "e21b_hsv0_fixed_sahi_full_val",
+  "status": "rejected",
+  "holdout_used": false,
+  "official_map": false,
+  "promotion": false,
+  "weights": "runs/detect/runs/detect/dense_15m_full_s_e21b_hsv0/weights/best.pt",
+  "weights_sha256": "f9618b357a0bd8022c5dd1022482b785ac75899e317c7ed65bb061d26f4c6a65",
+  "config": {
+    "images": 1255,
+    "confidence": 0.3,
+    "direct_imgsz": 960,
+    "direct_nms_iou": 0.7,
+    "match_iou": 0.5,
+    "slice_width": 640,
+    "slice_height": 371,
+    "overlap_ratio": 0.2,
+    "perform_standard_pred": true,
+    "sahi_postprocess_type": "GREEDYNMM",
+    "sahi_postprocess_metric": "IOS",
+    "sahi_postprocess_threshold": 0.5
+  },
+  "direct": {
+    "n_images": 1255,
+    "n_gt_boxes": 1297,
+    "n_pred_boxes": 1629,
+    "matched_iou50": 665,
+    "recall_like_iou50": 0.51272166538165,
+    "precision_like_iou50": 0.40822590546347454,
+    "pred_per_gt": 1.2559753276792598,
+    "elapsed_seconds": 41.005512802978046,
+    "seconds_per_image": 0.032673715380859
+  },
+  "sahi": {
+    "n_images": 1255,
+    "n_gt_boxes": 1297,
+    "n_pred_boxes": 2753,
+    "matched_iou50": 625,
+    "recall_like_iou50": 0.4818812644564379,
+    "precision_like_iou50": 0.2270250635670178,
+    "pred_per_gt": 2.122590593677718,
+    "elapsed_seconds": 462.07974728924455,
+    "seconds_per_image": 0.3681910336966092
+  },
+  "delta_sahi_minus_direct": {
+    "n_pred_boxes": 1124,
+    "matched_iou50": -40,
+    "recall_like_percentage_points": -3.0840400925212066,
+    "precision_like_percentage_points": -18.120084189645674,
+    "latency_multiple": 11.268722561998683
+  }
+}
