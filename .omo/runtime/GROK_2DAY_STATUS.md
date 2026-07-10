@@ -6,10 +6,10 @@
 - grok_worker: stopped_by_owner_request_2026-07-10T16:20+08:00
 - scheduler: stopped
 - codex_heartbeat: e2-1b active every 4 hours; Codex-only execution
-- current_todo: MA206 migration complete; await-e21b-exit-then-formal-report
+- current_todo: Todo 6 acceptance remains open; E2.1b is still observe-only
 - last_slot: 2026-07-10T16:18 three-iter-digest-h1-e21bobserve
 - last_result: owner-directed SMA/EMA20/60/120 migration active; new freeze and forward books verified at 0/100
-- next_action: Codex observes E2.1b natural exit, then writes Todo7 formal report
+- next_action: close Todo 6 against its original VPS acceptance criteria while observing E2.1b; Todo 7 starts only after natural exit, then Todo 8
 - final_complete: false
 
 ## Guardrails
@@ -31,12 +31,15 @@
 4. Full multi-book shadow matrix ×2 idempotent — `.omo/evidence/task-shadow-matrix-idempotency.md`
 5. ACTIVE fingerprint mismatch root cause confirmed — `.omo/evidence/task-fingerprint-mismatch-diagnostic.md`
 
-## Prior green (do not redo)
+## Implemented but not accepted as complete
 
-- VPS pipeline 7 stages + anomalies + auth; Todo 6B/9; mainline forward idempotent
+- Todo 6 has pipeline API/UI, anomaly/auth code, and older browser evidence, but the original
+  public-redacted/current-MA206 desktop+mobile acceptance has not been closed. Do not mark it done.
+- Todo 9 mainline workflow/idempotency evidence exists independently of Todo 6 completion.
 
 ## Blocked Or Deferred
 
 - Telegram until token rotation + chat ID.
 - Full-80 annotation writeback waits owner LS (0 annotations).
 - Todo 7 formal report waits E2.1b exit.
+- Todo 8 SAHI has not started and is blocked by Todo 7.

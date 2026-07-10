@@ -11,6 +11,14 @@ model: deep
 
 ## Preferred next atom (non-owner-gated)
 
+### Option 0 — Close Todo 6 VPS pipeline acceptance
+
+Treat existing API/UI/screenshots as partial implementation, not completion. Re-run the original
+Todo 6 criteria against the current MA206 deployment: coarse redacted public status, authenticated
+controls, every pipeline stage, forward caveat, YOLO gate, executor off, no local paths/secrets,
+and real desktop plus 390px browser QA. Fix reproduced gaps, then write fresh evidence before
+checking Todo 6.
+
 ### Option A — Todo 7 E2.1b formal report (only if training exited)
 
 **Observe-only:** if `dense_15m_full_s_e21b_hsv0` finished (log has
@@ -45,11 +53,12 @@ unproven future returns. Do not merge or push main.
 - No holdout, live orders, model promote, force-push, main, Telegram paste.
 - E2.1b train remains observe-only until natural exit.
 
-## Already green (do not redo unless regression)
+## Partial evidence (does not close Todo 6/7/8)
 
 - Digest anomaly glue: `1856936`, dry-run anomaly_ids match pipeline.
 - H1 shadow ×2: new_signals=0, dup_keys=0, ACTIVE + mainline SHA stable.
 - Full shadow registry ×2: champion + H1 idempotent; H8/H10 unsupported and not approximated.
 - Fingerprint mismatch diagnosed: the mutable dataset path was rewritten after freeze; metadata was not falsified to hide it.
-- VPS pipeline anomalies + auth + executor 0.
+- VPS pipeline anomaly/auth implementation and executor 0 are verified components, but Todo 6
+  still needs its complete current-MA206 public/browser acceptance.
 - Mainline forward idempotent (Todo 9).
