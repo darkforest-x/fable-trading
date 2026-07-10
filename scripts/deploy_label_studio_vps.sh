@@ -108,11 +108,17 @@ umask 077
   echo "Label Studio itself binds 127.0.0.1:${LS_PORT}; only nginx TLS on ${PUBLIC_PORT} is public."
   echo
   echo "## First-time project import"
+  echo "Preferred (API, no secret echo):"
+  echo "  .venv_label_studio_qa/bin/python scripts/init_label_studio_vps_project.py"
+  echo "Manual UI fallback:"
   echo "1. Open URL and sign in with the credentials above."
   echo "2. Create Project → name \`dense_15m_val_audit\`."
   echo "3. Labeling Interface → paste remote \`/opt/fable-label-studio/import/label_config.xml\`."
   echo "4. Import → upload \`/opt/fable-label-studio/import/tasks_val.json\` (or the copy under output/label_studio/)."
-  echo "5. Confirm prelabels (green dense_cluster boxes), edit one box, save, reopen."
+  echo "5. Settings → Cloud Storage → Local files → path"
+  echo "   \`/opt/fable-label-studio/files/dense_15m_full\` (must be a *child* of DOCUMENT_ROOT;"
+  echo "   without this LS 1.15 serves /data/local-files/ as 404)."
+  echo "6. Confirm prelabels (green dense_cluster boxes), edit one box, save, reopen."
   echo
   echo "Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "Telegram notify: BLOCKED until rotated bot token + valid chat_id are set in env (compromised paste never used)."
