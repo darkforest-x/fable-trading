@@ -2,8 +2,12 @@
 message per day, numbers first, alerts only when something is wrong).
 
 Sections: data freshness | forward signals (new + cumulative scoreboard) |
-champion/challenger shadow comparison | system health. Run after update_okx +
-forward_track (and optional forward_track_shadows).
+champion/challenger shadow comparison | system health | pipeline anomalies.
+Run after update_okx + forward_track (and optional forward_track_shadows).
+
+Pipeline anomaly glue (Todo 9b): read-only import of webapp
+``collect_anomalies`` / ``pipeline_status_payload`` — no writes, no Telegram
+side effects from the loader. Prefer ``--dry-run`` until token rotation.
 """
 from __future__ import annotations
 
@@ -11,6 +15,7 @@ import argparse
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -22,6 +27,9 @@ from src.notify import send  # noqa: E402
 LOG = PROJECT_DIR / "data" / "forward_log.csv"
 LOG_H1 = PROJECT_DIR / "data" / "forward_log_h1_scaled.csv"
 KLINE_DIR = PROJECT_DIR / "data" / "kline_fetched"
+
+# Severity order for ranking "top" anomalies in the digest (crit first).
+_SEV_RANK = {"crit": 0, "warn": 1, "info": 2}
 
 
 def data_freshness() -> tuple[str, bool]:
@@ -72,11 +80,61 @@ def forward_board() -> str:
     return "\n".join(lines)
 
 
-def build_message() -> tuple[str, bool]:
+def load_pipeline_anomalies() -> list[dict[str, Any]]:
+    """Read-only: pipeline health flags from stage metadata (no I/O writes)."""
+    from src.webapp.pipeline_status import pipeline_status_payload
+
+    payload = pipeline_status_payload()
+    raw = payload.get("anomalies") or []
+    return [a for a in raw if isinstance(a, dict)]
+
+
+def format_pipeline_anomalies(
+    anomalies: list[dict[str, Any]],
+    *,
+    limit: int = 5,
+) -> tuple[str, bool]:
+    """Format top pipeline anomaly ids for the digest body.
+
+    Returns (section_text, alert_flag). alert_flag is True when any
+    warn/crit flag is present (info-only does not raise the header alert).
+    Pure function of the provided list — no I/O; unit-test with injected flags.
+    """
+    if not anomalies:
+        return "管道健康：ok（0 anomalies）", False
+
+    ranked = sorted(
+        anomalies,
+        key=lambda a: (
+            _SEV_RANK.get(str(a.get("severity") or "info"), 9),
+            str(a.get("id") or ""),
+        ),
+    )
+    top = ranked[: max(1, int(limit))]
+    lines = [f"管道健康：{len(anomalies)} flag(s)（top {len(top)}）"]
+    for a in top:
+        sev = str(a.get("severity") or "info")
+        aid = str(a.get("id") or "?")
+        msg = str(a.get("message") or "").strip()
+        if len(msg) > 120:
+            msg = msg[:117] + "..."
+        suffix = f" — {msg}" if msg else ""
+        lines.append(f"- {sev} <code>{aid}</code>{suffix}")
+    alert = any(str(a.get("severity") or "") in {"warn", "crit"} for a in anomalies)
+    return "\n".join(lines), alert
+
+
+def build_message(
+    anomalies: list[dict[str, Any]] | None = None,
+) -> tuple[str, bool]:
+    """Build digest text. If anomalies is None, load live pipeline flags."""
     fresh, alert = data_freshness()
+    flags = load_pipeline_anomalies() if anomalies is None else list(anomalies)
+    anom_sec, anom_alert = format_pipeline_anomalies(flags)
+    alert = alert or anom_alert
     msg = (
         f"📊 <b>fable-trading 日报</b> {datetime.now():%m-%d %H:%M}\n"
-        f"{fresh}\n{forward_board()}\n{system_health()}\n"
+        f"{fresh}\n{forward_board()}\n{system_health()}\n{anom_sec}\n"
         f"看板：http://103.214.174.58:8642"
     )
     if alert:
@@ -144,10 +202,17 @@ def main(argv: list[str] | None = None) -> int:
         help="Print message only; never call Telegram send.",
     )
     args = parser.parse_args(argv)
-    msg, alert = build_message()
+    flags = load_pipeline_anomalies()
+    msg, alert = build_message(anomalies=flags)
     if args.dry_run:
+        ids = [str(a.get("id") or "") for a in flags if a.get("id")]
         print(msg)
-        print(f"telegram_send: SKIPPED\nalert_flag: {alert}")
+        print(
+            f"telegram_send: SKIPPED\n"
+            f"alert_flag: {alert}\n"
+            f"anomaly_count: {len(flags)}\n"
+            f"anomaly_ids: {','.join(ids) if ids else '(none)'}"
+        )
         return 0
     ok = send(msg)
     print(f"digest sent: {ok}")
