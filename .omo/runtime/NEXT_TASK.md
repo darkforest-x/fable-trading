@@ -4,31 +4,38 @@ model: deep
 
 ## Preferred next atom (non-owner-gated)
 
-### Option A — Digest ↔ pipeline anomaly glue (small)
+### Option A — Todo 7 E2.1b formal report (only if training exited)
 
-Wire `scripts/daily_digest.py` dry-run summary to include top pipeline anomaly
-ids (read-only import of `collect_anomalies` / payload). Keep Telegram send
-disabled by default. Tests for “healthy” vs injected flags. Evidence
-`.omo/evidence/task-9b-digest-anomalies.md`.
+**Observe-only:** if `dense_15m_full_s_e21b_hsv0` finished (log has
+`E2.1b train finished` / process gone), parse
+`runs/.../dense_15m_full_s_e21b_hsv0/results.csv` + log into
+`analysis/p2a_e21b_hsv0_report.md`. Never start/stop training.
+If still running, refresh observe snapshot and pick Option B/C.
 
-### Option B — Todo 7 E2.1b report (only if training already exited)
+Evidence path: `.omo/evidence/task-7-e21b-report.md` when done.
 
-**Observe-only:** if E2.1b finished, parse existing artifacts into
-`analysis/p2a_e21b_hsv0_report.md`. Never start/stop training. If still running,
-record observe snapshot and skip.
+### Option B — Multi-book shadow matrix slice
 
-### Option C — Shadow forward idempotency slice
+`PYTHONPATH=. python3 scripts/forward_track_shadows.py` once ×2 (or
+`--books` supported only); prove no duplicate rows across champion+H1;
+unsupported books reported only. Do not change ACTIVE.
 
-Run `forward_track_shadows` / H1 shadow once ×2; prove no duplicate rows; do not
-change ACTIVE.
+Evidence: `.omo/evidence/task-shadow-matrix-idempotency.md`.
+
+### Option C — Fingerprint mismatch diagnostic (read-only)
+
+Document why pipeline flag `fingerprint_mismatch` fires (ACTIVE metadata
+vs dataset path); no repair, no promote, no holdout. Evidence only.
 
 ## Still parallel / owner gates
 
-- Label Studio: 80 tasks, 53 prelabels, 0 human annotations.
+- Label Studio: 80 tasks, 53 prelabels, 0 human annotations → writeback blocked.
 - No holdout, live orders, model promote, force-push, main, Telegram paste.
+- E2.1b train remains observe-only until natural exit.
 
 ## Already green (do not redo unless regression)
 
-- VPS pipeline: 7 stages, anomalies, auth 401/200, executor 0, screenshots
-  under `.omo/evidence/task-6-vps-screens/`.
-- Commits: `dc441fa` and Todo9 follow-up on `codex/grok-2day`.
+- Digest anomaly glue: `1856936`, dry-run anomaly_ids match pipeline.
+- H1 shadow ×2: new_signals=0, dup_keys=0, ACTIVE + mainline SHA stable.
+- VPS pipeline anomalies + auth + executor 0.
+- Mainline forward idempotent (Todo 9).

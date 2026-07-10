@@ -6,10 +6,10 @@
 - success_cooldown_seconds: 60
 - failure_backoff_seconds: 18000
 - max_slots: 24
-- current_todo: todo-9-done-next-e21b-or-digest-glue
-- last_slot: 2026-07-10T15:52 three-iter-todo6b-deployrole-todo9
-- last_result: Todo6B VPS PASS; deploy-role harden PASS; Todo9 anomalies+workflow smoke PASS (7 tests; forward idempotent; VPS anomaly_count=2)
-- next_action: Optional digest←anomalies glue; or observe E2.1b exit for Todo7 report; owner LS review parallel
+- current_todo: post-9b-await-e21b-or-ls
+- last_slot: 2026-07-10T16:18 three-iter-digest-h1-e21bobserve
+- last_result: 9b digest anomaly glue PASS (1856936); H1 shadow×2 idempotent PASS; E2.1b still running (~epoch 10, best mAP50 0.51) observe skip
+- next_action: Observe E2.1b exit → Todo7 report; owner LS review parallel; optional multi-book shadow matrix
 - final_complete: false
 
 ## Guardrails
@@ -24,13 +24,17 @@
 
 ## Completed (this batch)
 
-1. Todo 6B VPS pipeline deploy + Playwright desktop/390px + fail-closed auth — `dc441fa` (+evidence)
-2. Deploy stage `vps_executor_off` + `deploy_vps.sh` EnvironmentFile re-assert — same commit / follow-up
-3. Todo 9 pipeline `anomalies[]` + UI badges + forward×2 idempotency + digest dry-run + VPS redeploy
+1. Todo 9b digest ↔ pipeline anomalies — `1856936` + `.omo/evidence/task-9b-digest-anomalies.md`
+2. H1 shadow forward ×2 idempotency — `.omo/evidence/task-9c-h1-shadow-idempotency.md` (data/ untracked)
+3. E2.1b observe snapshot (not exited) — `.omo/evidence/task-7-e21b-observe-snapshot.md`
+
+## Prior green (do not redo)
+
+- VPS pipeline 7 stages + anomalies + auth; Todo 6B/9; mainline forward idempotent
 
 ## Blocked Or Deferred
 
-- Telegram deferred until token rotation + chat ID.
-- Full-80 annotation writeback waits on owner LS review (0 annotations).
-- Todo 7 E2.1b formal report waits training exit (observe-only).
-- Shadow forward matrix full re-run deferred; mainline idempotency proven.
+- Telegram until token rotation + chat ID.
+- Full-80 annotation writeback waits owner LS (0 annotations).
+- Todo 7 formal report waits E2.1b exit.
+- Multi-book `forward_track_shadows` full matrix optional (H1 proven).
