@@ -14,11 +14,6 @@ If still running, refresh observe snapshot and pick Option B/C.
 
 Evidence path: `.omo/evidence/task-7-e21b-report.md` when done.
 
-### Option B — Fingerprint mismatch diagnostic (read-only)
-
-Document why pipeline flag `fingerprint_mismatch` fires (ACTIVE metadata
-vs dataset path); no repair, no promote, no holdout. Evidence only.
-
 ## Still parallel / owner gates
 
 - Label Studio: 80 tasks, 53 prelabels, 0 human annotations → writeback blocked.
@@ -30,5 +25,6 @@ vs dataset path); no repair, no promote, no holdout. Evidence only.
 - Digest anomaly glue: `1856936`, dry-run anomaly_ids match pipeline.
 - H1 shadow ×2: new_signals=0, dup_keys=0, ACTIVE + mainline SHA stable.
 - Full shadow registry ×2: champion + H1 idempotent; H8/H10 unsupported and not approximated.
+- Fingerprint mismatch diagnosed: the mutable dataset path was rewritten after freeze; metadata was not falsified to hide it.
 - VPS pipeline anomalies + auth + executor 0.
 - Mainline forward idempotent (Todo 9).

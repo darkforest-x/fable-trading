@@ -5,10 +5,10 @@
 - executor: codex
 - grok_worker: stopped_by_owner_request_2026-07-10T16:20+08:00
 - scheduler: stopped
-- current_todo: fingerprint-diagnostic-then-e21b-report
+- current_todo: await-e21b-exit-then-formal-report
 - last_slot: 2026-07-10T16:18 three-iter-digest-h1-e21bobserve
 - last_result: 9b digest anomaly glue PASS (1856936); H1 shadow×2 idempotent PASS; E2.1b still running (~epoch 10, best mAP50 0.51) observe skip
-- next_action: Codex diagnoses fingerprint mismatch, then observes E2.1b exit for Todo7 report
+- next_action: Codex observes E2.1b natural exit, then writes Todo7 formal report
 - final_complete: false
 
 ## Guardrails
@@ -27,6 +27,7 @@
 2. H1 shadow forward ×2 idempotency — `.omo/evidence/task-9c-h1-shadow-idempotency.md` (data/ untracked)
 3. E2.1b observe snapshot (not exited) — `.omo/evidence/task-7-e21b-observe-snapshot.md`
 4. Full multi-book shadow matrix ×2 idempotent — `.omo/evidence/task-shadow-matrix-idempotency.md`
+5. ACTIVE fingerprint mismatch root cause confirmed — `.omo/evidence/task-fingerprint-mismatch-diagnostic.md`
 
 ## Prior green (do not redo)
 
