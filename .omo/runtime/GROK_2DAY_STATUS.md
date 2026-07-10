@@ -5,6 +5,7 @@
 - executor: codex
 - grok_worker: stopped_by_owner_request_2026-07-10T16:20+08:00
 - scheduler: stopped
+- codex_heartbeat: e2-1b active every 4 hours; Codex-only execution
 - current_todo: await-e21b-exit-then-formal-report
 - last_slot: 2026-07-10T16:18 three-iter-digest-h1-e21bobserve
 - last_result: 9b digest anomaly glue PASS (1856936); H1 shadow×2 idempotent PASS; E2.1b still running (~epoch 10, best mAP50 0.51) observe skip
