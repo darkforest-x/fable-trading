@@ -97,6 +97,39 @@ def test_list_experiments_dict_schema(tmp_path: Path, monkeypatch: pytest.Monkey
     assert payload["items"][0]["kind"] == "audit"
 
 
+def test_list_experiments_formats_structured_config_for_display(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    out = tmp_path / "analysis" / "output"
+    out.mkdir(parents=True)
+    (out / "short_replication.json").write_text(
+        json.dumps({"config": {"name": "swap_short_tp5_sl2", "tp": 5.0, "sl": 2.0}}),
+        encoding="utf-8",
+    )
+    (out / "p3_backtest.json").write_text(
+        json.dumps(
+            {
+                "config": {
+                    "max_concurrent": 10,
+                    "base_cost_round_trip": 0.003,
+                    "score_scope": "pre_holdout_only",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(experiment_registry, "OUTPUT_DIR", out)
+    monkeypatch.setattr(experiment_registry, "ANALYSIS_DIR", tmp_path / "analysis")
+    monkeypatch.setattr(experiment_registry, "PROJECT_ROOT", tmp_path)
+
+    payload = experiment_registry.list_experiments()
+
+    configs = {item["id"]: item["config"] for item in payload["items"]}
+    assert configs["short_replication"] == "swap_short_tp5_sl2"
+    assert configs["p3_backtest"] == "base_cost_round_trip=0.003, max_concurrent=10 (+1)"
+
+
 def test_experiment_detail_blocks_path_traversal() -> None:
     assert experiment_registry.experiment_detail("../secret") is None
     assert experiment_registry.experiment_detail("a/b") is None

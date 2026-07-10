@@ -113,6 +113,25 @@ def _pick_metrics(row: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def _config_label(value: Any) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, dict):
+        name = value.get("name")
+        if isinstance(name, str) and name:
+            return name
+        pairs = []
+        for key, item in sorted(value.items())[:2]:
+            encoded = item if isinstance(item, str) else json.dumps(item, ensure_ascii=False)
+            pairs.append(f"{key}={encoded}")
+        remaining = len(value) - len(pairs)
+        suffix = f" (+{remaining})" if remaining else ""
+        return ", ".join(pairs) + suffix
+    if isinstance(value, list):
+        return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return str(value)
+
+
 def _flatten_json(raw: Any) -> list[dict[str, Any]]:
     """Turn heterogeneous experiment JSON into list of row dicts."""
     if isinstance(raw, list):
@@ -188,7 +207,7 @@ def list_experiments(
                 best_auc = auc
                 primary = r
         metrics = _pick_metrics(primary) if isinstance(primary, dict) else {}
-        config = primary.get("config") if isinstance(primary, dict) else None
+        config = _config_label(primary.get("config")) if isinstance(primary, dict) else None
         entry = {
             "id": stem,
             "path": str(path.relative_to(PROJECT_ROOT)),

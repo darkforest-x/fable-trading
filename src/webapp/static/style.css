@@ -57,6 +57,15 @@ body {
 .subhead { font-size: 14px; margin-top: 16px; }
 #exp-table tbody tr.clickable { cursor: pointer; }
 #exp-table tbody tr.clickable:hover { background: var(--surface-2); }
+#exp-table { table-layout: fixed; min-width: 1060px; }
+#exp-table th:nth-child(1) { width: 230px; }
+#exp-table th:nth-child(2) { width: 60px; }
+#exp-table th:nth-child(3) { width: 220px; }
+#exp-table th:nth-child(4), #exp-table th:nth-child(5) { width: 72px; }
+#exp-table th:nth-child(6), #exp-table th:nth-child(7) { width: 88px; }
+#exp-table th:nth-child(8) { width: 180px; }
+#exp-table th:nth-child(9) { width: 120px; }
+#exp-table td { overflow: hidden; text-overflow: ellipsis; }
 #exp-kind, #exp-sort, #job-type-select, .jobs-params select, .jobs-params input {
   background: var(--surface); border: 1px solid var(--border); color: var(--text);
   border-radius: 8px; padding: 6px 10px; font-size: 13px;
