@@ -25,7 +25,7 @@
   且置换检验 p<0.01；v1 的教训就是 AUC 0.59 照样亏钱。AUC 只是参考量。
 - **在 holdout 上"看一眼"** → 看一眼就是消耗一次，见铁律 1。
 - **重跑 build_dataset 覆盖别的池的数据集** → 输出文件名必须带池名
-  （`judgment_dataset_v2_strict.csv` / `..._expanded.csv`），tag 必须带池名。
+  （`data/ma206/judgment_dataset_strict.csv` / `..._expanded.csv`），tag 必须带池名。
 - **顺手调 strict/expanded 阈值预设** → 阈值是项目所有者决策，改动需批准。
 - **只汇报好消息** → 报告必须含"风险与诚实声明"节；隐瞒失败的实验记录等于污染实验日志。
 - **默认拉全部币种重新 fetch** → 先检查 `data/kline_fetched/` 已有 `okx_*_15m_*.csv`，

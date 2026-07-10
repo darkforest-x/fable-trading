@@ -1,7 +1,7 @@
 # H1 Scaled Exit — Forward Shadow Plan
 
-**Status**: MVP shadow logger **implemented** (2026-07-10). Manual opt-in only —
-not on daily cron, not on dashboard. No holdout. Mainline TP5/SL2 untouched.
+**Status**: MA206 MVP shadow logger **implemented** (2026-07-10). Manual opt-in only —
+not on daily cron or the mainline 0/100 dashboard counter. No holdout. Mainline TP5/SL2 untouched.
 
 **Purpose**: log H1 scaled exit (half bank at 2.5×ATR + half trail 3×ATR) as a
 **shadow** parallel to the frozen mainline TP5/SL2 forward log — without
@@ -14,8 +14,8 @@ jobs until owner approves promotion.
 
 | Fact | Implication |
 |---|---|
-| Frozen mainline is `models/frozen_tp5_sl2_swap_20260709.*` | `scripts/forward_track.py` + dashboard forward tab + 100-trade PF gate all bind to TP5/SL2 |
-| H1 is discovery-grade only | SWAP val AUC 0.6106 / p=0.001 / top net@maker +0.326% / maker PF 2.825 — strong on val, val already used for selection many times |
+| Frozen mainline is `models/frozen_tp5_sl2_swap_ma206_20260710.*` | `scripts/forward_track.py` + dashboard forward tab + 100-trade PF gate all bind to TP5/SL2 |
+| H1 is discovery-grade only | Under MA206, scaled maker PF is 1.096 and maker+H9 PF is 1.230; both remain below 1.3. The former PF 2.825 belongs to the archived 8-55 experiment. |
 | Confirmation needs out-of-sample time | Only new forward rows (or a future owner-frozen window) can upgrade H1 |
 | Replacing mainline early is a discipline break | Would contaminate the 100-trade TP5/SL2 verdict with a different exit economics |
 
@@ -29,8 +29,8 @@ Reference discovery report: `analysis/p15_h1_h2_exit_report.md`.
 
 ## 2. Non-goals (explicit)
 
-- Do **not** change `DEFAULT_FROZEN_CONFIG` / `DEFAULT_CONFIG_NAME` (`tp5_sl2_swap`).
-- Do **not** overwrite `data/forward_log.csv` or change its schema semantics.
+- Do **not** change `DEFAULT_FROZEN_CONFIG` / `DEFAULT_CONFIG_NAME` (`tp5_sl2_swap_ma206`).
+- Do **not** overwrite `data/forward_log_ma206.csv` or change its schema semantics.
 - Do **not** retrain YOLO, edit `BLOCKED_BASES`, or touch `auto_label.py`.
 - Do **not** call `train.py --eval-holdout` or otherwise score holdout.
 - Do **not** auto-promote H1 into HANDOFF mainline or daily digest PF.
@@ -45,22 +45,22 @@ Reference discovery report: `analysis/p15_h1_h2_exit_report.md`.
 
 Mainline (unchanged):
 
-- Model: `models/frozen_tp5_sl2_swap_20260709.txt`
-- Meta: `models/frozen_tp5_sl2_swap_20260709.json`
-- Log: `data/forward_log.csv`
+- Model: `models/frozen_tp5_sl2_swap_ma206_20260710.txt`
+- Meta: `models/frozen_tp5_sl2_swap_ma206_20260710.json`
+- Log: `data/forward_log_ma206.csv`
 - Exit resolver: fixed TP5 / SL2 (`src/judgment/forward_scan.resolve_forward_exit`)
 
 Shadow (new, opt-in):
 
 | Piece | Proposed path / contract |
 |---|---|
-| Config name | `scaled_25_t3_swap` (or `h1_scaled_swap`) — must not collide with mainline glob `frozen_tp5_sl2_swap_*` |
+| Config name | `scaled_25_t3_swap_ma206` (or `h1_scaled_swap_ma206`) — must not collide with mainline glob `frozen_tp5_sl2_swap_ma206_*` |
 | Model + meta | `models/frozen_<config>_<YYYYMMDD>.txt/.json` via the same freeze pipeline as mainline (`src.judgment.frozen.train_frozen_artifact`) |
 | Training labels | `label_candidate_scaled` / barrier registry `scaled` with `tp1=2.5`, `trail=3.0`, `sl=2.0`, `horizon=72` on SWAP expanded candidates |
-| Dataset | Dedicated CSV under e.g. `data/swap_replication/swap_scaled_25_t3.csv` (or reuse sweep product `data/sweep_exits_swap/scaled_25_t3.csv` only after SHA + freeze identity are recorded) |
-| Log | **`data/forward_log_h1_scaled.csv`** (append/idempotent same rules as mainline) |
+| Dataset | Dedicated CSV under e.g. `data/ma206/swap_scaled_25_t3_ma206.csv` only after SHA + freeze identity are recorded |
+| Log | **`data/forward_log_h1_scaled_ma206.csv`** (append/idempotent same rules as mainline) |
 | Exit resolver | Port of `label_candidate_scaled` into a `resolve_forward_exit_scaled` (or exit-plugin dispatch) — half/half `realized_ret`, outcomes like `sl` / `scaled` / `scaled_timeout` / `timeout` |
-| CLI | e.g. `scripts/forward_track.py --config scaled_25_t3_swap --out data/forward_log_h1_scaled.csv` **or** a thin wrapper `scripts/forward_track_h1_shadow.py` that only ever writes the shadow path |
+| CLI | `scripts/forward_track_h1_shadow.py`, which only writes the MA206 shadow path |
 
 ### 3.2 What must match mainline (single-variable discipline)
 
@@ -69,7 +69,7 @@ Keep identical unless a separate experiment is registered:
 - Universe: OKX `*_USDT_SWAP`, 15m, expanded candidate mask
 - Features: current `FEATURE_COLUMNS` (no new features in the first shadow freeze)
 - Score quantile for threshold: val **q90** (same selection rule as mainline freeze)
-- Forward start: same `FORWARD_START` (default `2026-07-08 00:00 UTC`) unless owner
+- Forward start: same `FORWARD_START` (default `2026-07-10 10:30 UTC`) unless owner
   opens a **named** shadow-only backfill window (must not redefine mainline start)
 - Signal key: `(source, symbol, signal_time)` — see
   `docs/learnings/forward-logs-need-stable-signal-keys.md`
@@ -81,9 +81,9 @@ Keep identical unless a separate experiment is registered:
 | Dimension | Mainline | H1 shadow |
 |---|---|---|
 | Label / exit | Fixed TP5 / SL2 | Scaled 2.5 bank + 3 trail, hard SL2 until TP1 |
-| Booster | Trained on TP5/SL2 labels | Trained on scaled labels (different positive rate ~53% vs ~32% on val) |
-| Threshold value | Mainline val q90 (~0.375) | Shadow model’s own val q90 (legacy stub had ~0.608 — **do not trust without re-freeze**) |
-| Log path | `data/forward_log.csv` | `data/forward_log_h1_scaled.csv` |
+| Booster | Trained on TP5/SL2 labels | Current MVP reuses the same frozen entry booster; a scaled-label booster is only a future owner-approved experiment |
+| Threshold value | Mainline val q90 (`0.340933`) | Current MVP uses the same `0.340933` entry threshold |
+| Log path | `data/forward_log_ma206.csv` | `data/forward_log_h1_scaled_ma206.csv` |
 | Adjudication gate | 100 maker-filled closed → PF | Separate counter; no auto merge |
 
 ### 3.4 Incomplete legacy artifact (do not wire as-is)
@@ -128,7 +128,7 @@ it. Before shadow runs:
    - Digest must **not** silently fold shadow rows into mainline PF.
 
 5. **Dashboard (optional, read-only)**  
-   - Extra panel or toggle: “H1 shadow” reading `forward_log_h1_scaled.csv`.  
+   - Extra panel or toggle: “H1 shadow” reading `forward_log_h1_scaled_ma206.csv`.
    - Progress bar labeled **shadow** (e.g. n/100 shadow), not the mainline
      0/100 chip.  
    - Clear copy: “discovery confirmation log — not mainline adjudication.”
@@ -198,8 +198,8 @@ for a later implementer.
 |---|---|
 | CLI | `scripts/forward_track_h1_shadow.py` |
 | Library | `run_forward_tracking_h1_shadow` / `resolve_forward_exit_scaled` in `src/judgment/forward*.py` |
-| Log | **`data/forward_log_h1_scaled.csv`** only (refuses mainline `data/forward_log.csv`) |
-| Entries | Same as mainline: `frozen_tp5_sl2_swap_*` scores + val-q90 threshold + expanded SWAP candidates |
+| Log | **`data/forward_log_h1_scaled_ma206.csv`** only (refuses mainline `data/forward_log_ma206.csv`) |
+| Entries | Same as mainline: `frozen_tp5_sl2_swap_ma206_*` scores + val-q90 threshold + expanded SWAP candidates |
 | Exits | Scaled math (half @ 2.5×ATR + trail 3×ATR, hard SL2 until TP1) — outcomes `sl` / `scaled` / `scaled_timeout` / `timeout` |
 | Tests | `tests/test_h1_scaled_shadow.py` (synthetic OHLC; no live data required) |
 
@@ -221,10 +221,10 @@ owner-approved step before promotion discussion.
 PYTHONPATH=. python3 scripts/forward_track_h1_shadow.py
 
 # optional: custom start (does not change mainline FORWARD_START default when omitted)
-PYTHONPATH=. python3 scripts/forward_track_h1_shadow.py --start "2026-07-08 00:00:00+00:00"
+PYTHONPATH=. python3 scripts/forward_track_h1_shadow.py --start "2026-07-10 10:30:00+00:00"
 
-# optional: non-default side log (still cannot be data/forward_log.csv)
-PYTHONPATH=. python3 scripts/forward_track_h1_shadow.py --out data/forward_log_h1_scaled.csv
+# optional: non-default side log (still cannot be data/forward_log_ma206.csv)
+PYTHONPATH=. python3 scripts/forward_track_h1_shadow.py --out data/forward_log_h1_scaled_ma206.csv
 
 # unit tests (no network)
 PYTHONPATH=. python3 -m pytest tests/test_h1_scaled_shadow.py tests/test_forward_tracking.py -q
@@ -233,7 +233,7 @@ PYTHONPATH=. python3 -m pytest tests/test_h1_scaled_shadow.py tests/test_forward
 Mainline remains:
 
 ```bash
-PYTHONPATH=. python3 scripts/forward_track.py   # → data/forward_log.csv only
+PYTHONPATH=. python3 scripts/forward_track.py   # → data/forward_log_ma206.csv only
 ```
 
 ### Non-goals still in force

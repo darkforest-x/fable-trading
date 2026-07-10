@@ -3,14 +3,14 @@
 **Status**: decision aid (2026-07-10 overnight). **Default recommendation: stay.**
 
 **Context**: stage-3 / mainline confirmation is gated on forward paper trades
-from the frozen TP5/SL2 SWAP model (`FORWARD_START = 2026-07-08 UTC`), not on
+from the frozen MA206 TP5/SL2 SWAP model (`FORWARD_START = 2026-07-10 10:30 UTC`), not on
 another val sweep. Infrastructure is ready (`forward_track`, daily
 `update_okx → forward_track → daily_digest`, dashboard forward tab). What is
 scarce is **calendar time and threshold-crossing rate**, not code.
 
-As of 2026-07-10 overnight packaging: formal-window log had on the order of
-**~2 closed rows** (see `data/forward_log.csv`; re-run summary after any
-`forward_track` execution). Path to ~100 maker-filled closed trades is measured
+After the MA206 migration: the independent formal-window log has **0 closed rows**
+(see `data/forward_log_ma206.csv`; re-run summary after any `forward_track`
+execution). Path to ~100 maker-filled closed trades is measured
 in weeks, not hours.
 
 ---
@@ -32,12 +32,12 @@ in weeks, not hours.
 
 | Knob | Value |
 |---|---|
-| Model | `frozen_tp5_sl2_swap_20260709` |
-| Threshold | val q90 (~0.3747) |
-| Start | 2026-07-08 00:00 UTC |
+| Model | `frozen_tp5_sl2_swap_ma206_20260710` |
+| Threshold | val q90 (`0.340933`) |
+| Start | 2026-07-10 10:30 UTC |
 | Universe | OKX SWAP 15m expanded candidates |
 | Exit | TP5 / SL2 |
-| Log | `data/forward_log.csv` only |
+| Log | `data/forward_log_ma206.csv` only |
 
 **Pros**
 
@@ -122,7 +122,7 @@ Run several pre-registered streams in parallel (not sequential threshold shoppin
 
 | Stream | Role |
 |---|---|
-| Mainline TP5/SL2 q90 from 2026-07-08 | Sole 100-trade gate |
+| Mainline MA206 TP5/SL2 q90 from 2026-07-10 10:30 UTC | Sole 100-trade gate |
 | H1 scaled shadow | Exit challenger (see `docs/H1_SCALED_FORWARD_SHADOW_PLAN.md`) |
 | Optional H9-filtered mainline | Filter challenger |
 | Optional short side | Direction expansion (H10) |
@@ -235,7 +235,7 @@ Reasons:
 
 | Question | Answer if default |
 |---|---|
-| What counts toward 100? | Maker-filled **closed** rows in `data/forward_log.csv`, model = frozen TP5/SL2 SWAP, score ≥ val q90, signal_time ≥ 2026-07-08 UTC |
+| What counts toward 100? | Maker-filled **closed** rows in `data/forward_log_ma206.csv`, model = frozen MA206 TP5/SL2 SWAP, score ≥ 0.340933, signal_time ≥ 2026-07-10 10:30 UTC |
 | Can we get 100 by next week by logging harder? | Only by changing the experiment (not recommended) |
 | What should agents do overnight? | Keep running `forward_track`; draft shadow/acceleration **docs**; no threshold edits |
 | Next code change that is still “default” | Optional H1 shadow **after** owner enable (separate file) |
@@ -245,7 +245,7 @@ Reasons:
 ## 6. Related
 
 - Mainline forward: `scripts/forward_track.py`, `src/judgment/forward*.py`
-- Freeze contract: `src/judgment/frozen.py`, `models/frozen_tp5_sl2_swap_20260709.json`
+- Freeze contract: `src/judgment/frozen.py`, `models/frozen_tp5_sl2_swap_ma206_20260710.json`
 - H1 discovery: `analysis/p15_h1_h2_exit_report.md`, `docs/RESEARCH_AGENDA.md` H1
 - Shadow packaging: `docs/H1_SCALED_FORWARD_SHADOW_PLAN.md`
 - Stable keys learning: `docs/learnings/forward-logs-need-stable-signal-keys.md`
