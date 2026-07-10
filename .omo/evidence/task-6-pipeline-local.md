@@ -1,7 +1,7 @@
 # Todo 6 (local atom) — redacted pipeline status surface
 
-**Result: PASS (local API + UI shell; VPS deploy deferred)**  
-**When:** 2026-07-10  
+**Result: PASS (local API + UI shell; VPS deploy deferred)**
+**When:** 2026-07-10
 **Branch:** `codex/grok-2day`
 
 ## Hypothesis

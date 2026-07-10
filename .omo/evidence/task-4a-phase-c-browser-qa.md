@@ -1,9 +1,9 @@
 # Todo 4A Phase C — Project init + browser QA
 
-**Result: PASS**  
-**When:** 2026-07-10  
-**Branch:** `codex/grok-2day`  
-**Public URL:** `https://103.214.174.58:8081` (self-signed IP SAN)  
+**Result: PASS**
+**When:** 2026-07-10
+**Branch:** `codex/grok-2day`
+**Public URL:** `https://103.214.174.58:8081` (self-signed IP SAN)
 **Secrets:** credentials only in untracked `output/offline_tasks/LABEL_STUDIO_VPS_ACCESS.md`; never logged, never committed.
 
 ## Hypothesis

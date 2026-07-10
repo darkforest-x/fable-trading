@@ -1,8 +1,8 @@
 # Todo 6B — VPS pipeline surface deploy + browser QA
 
-**Result: PASS**  
-**When:** 2026-07-10  
-**Branch:** `codex/grok-2day`  
+**Result: PASS**
+**When:** 2026-07-10
+**Branch:** `codex/grok-2day`
 **Baseline:** local atom `ff07060` / evidence `task-6-pipeline-local.md`
 
 ## Hypothesis
@@ -56,7 +56,7 @@ stages: data:ok, detection_yolo:ok, judgment:ok, backtest:label_only,
         forward:ok, jobs:executor_off, deploy:local_ops
 ```
 
-Browser: `.omo/evidence/task-6-vps-screens/{desktop,mobile390}_{pipeline,data,models}.png`  
+Browser: `.omo/evidence/task-6-vps-screens/{desktop,mobile390}_{pipeline,data,models}.png`
 Machine JSON: `.omo/evidence/task-6-vps-browser.json` (`pass: true`)
 
 ## Comparison vs baseline

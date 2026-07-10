@@ -1,8 +1,8 @@
 # OSS architecture benchmark — labeling / review tooling
 
-**Result: PASS (recommendation: keep Label Studio + FiftyOne hybrid)**  
-**When:** 2026-07-10  
-**Branch:** `codex/grok-2day`  
+**Result: PASS (recommendation: keep Label Studio + FiftyOne hybrid)**
+**When:** 2026-07-10
+**Branch:** `codex/grok-2day`
 **Scope:** Architecture comparison only — no new VPS deploy, no training jobs, no secrets.
 
 ## Hypothesis

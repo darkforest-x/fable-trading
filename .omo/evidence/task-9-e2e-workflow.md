@@ -1,8 +1,8 @@
 # Todo 9 — workflow smoke + pipeline anomaly flags
 
-**Result: PASS (anomaly code + local workflow smoke + VPS redeploy)**  
-**When:** 2026-07-10  
-**Branch:** `codex/grok-2day`  
+**Result: PASS (anomaly code + local workflow smoke + VPS redeploy)**
+**When:** 2026-07-10
+**Branch:** `codex/grok-2day`
 **Baseline:** Todo 6B `dc441fa` / `task-6-vps-pipeline.md`
 
 ## Hypothesis

@@ -1,8 +1,13 @@
 # Todo 5 — P2.5 local verify and harden
 
-**Result: PASS (tests + loopback API; browser Playwright deferred)**  
-**When:** 2026-07-10  
+**Result: PASS (initial tests + loopback API; final browser acceptance followed)**
+**When:** 2026-07-10
 **Branch:** `codex/grok-2day`
+
+> Follow-up: commit `7c0839d` completed desktop and 390px browser QA with zero
+> console errors or warnings. The final evidence is
+> `analysis/p25_local_acceptance_20260710.md`; the deferred note below describes
+> only this earlier baseline run.
 
 ## Hypothesis
 

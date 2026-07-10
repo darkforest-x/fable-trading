@@ -1,7 +1,7 @@
 # Full-80 writeback baseline + export fix
 
-**Result: PASS**  
-**When:** 2026-07-10  
+**Result: PASS**
+**When:** 2026-07-10
 **Branch:** `codex/grok-2day`
 
 ## Hypothesis

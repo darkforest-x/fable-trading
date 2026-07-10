@@ -24,7 +24,8 @@ and real desktop plus 390px browser QA. Evidence:
 `E2.1b train finished` / process gone), parse
 `runs/.../dense_15m_full_s_e21b_hsv0/results.csv` + log into
 `analysis/p2a_e21b_hsv0_report.md`. Never start/stop training.
-If still running, refresh observe snapshot and pick Option B/C.
+If still running, refresh the observe snapshot only when facts change and execute independent
+pre-final checks. Do not start Option B before Option A.
 
 Evidence path: `.omo/evidence/task-7-e21b-report.md` when done.
 
@@ -52,12 +53,14 @@ unproven future returns. Do not merge or push main.
 - No holdout, live orders, model promote, force-push, main, Telegram paste.
 - E2.1b train remains observe-only until natural exit.
 
-## Partial evidence (does not close Todo 6/7/8)
+## Reconciled evidence (does not close Todo 7/8/final)
 
 - Digest anomaly glue: `1856936`, dry-run anomaly_ids match pipeline.
 - H1 shadow ×2: new_signals=0, dup_keys=0, ACTIVE + mainline SHA stable.
 - Full shadow registry ×2: champion + H1 idempotent; H8/H10 unsupported and not approximated.
 - Fingerprint mismatch diagnosed: the mutable dataset path was rewritten after freeze; metadata was not falsified to hide it.
-- VPS pipeline anomaly/auth implementation and executor 0 are verified components, but Todo 6
-  still needs its complete current-MA206 public/browser acceptance.
-- Mainline forward idempotent (Todo 9).
+- Todo 6 is accepted on the current MA206 deployment by
+  `.omo/evidence/task-6-vps-current-ma206-acceptance.md` and commit `3033c99`.
+- Todo 9 is accepted by `analysis/p25_daily_workflow_acceptance_20260710.md` and commit `3c51c1c`.
+- F1/F2/F4 pre-final checks are recorded in `analysis/two_day_pre_final_audit_20260710.md`;
+  F3 still waits for Todo 7/8.

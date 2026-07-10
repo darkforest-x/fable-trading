@@ -1,7 +1,7 @@
 # Label writeback design + 5-stem dry-run
 
-**Result: PASS (design + dry-run; no datasets overwrite)**  
-**When:** 2026-07-10  
+**Result: PASS (design + dry-run; no datasets overwrite)**
+**When:** 2026-07-10
 **Branch:** `codex/grok-2day`
 
 ## Hypothesis

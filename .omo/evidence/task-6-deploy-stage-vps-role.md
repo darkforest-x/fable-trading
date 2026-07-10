@@ -1,7 +1,7 @@
 # Todo 6 follow-up — accurate VPS deploy stage + durable ops.env wire
 
-**Result: PASS**  
-**When:** 2026-07-10  
+**Result: PASS**
+**When:** 2026-07-10
 **Branch:** `codex/grok-2day`
 
 ## Hypothesis
