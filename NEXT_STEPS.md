@@ -305,10 +305,16 @@ Round 1 进度（2026-07-09）：
 - 已用 Playwright 验证 desktop 1280x900 / mobile 390x844：18 张图，横向溢出 0。
 - **07-10 owner 确认** findings（见 `output/offline_tasks/yolo_label_audit_findings.csv`）。
 - **07-10 E1 完成**：`X_PAD_PX` 12→6；`dense_15m_full` 标签重写；
-  报告 `analysis/p2a_e1_xpad_report.md`。下一步：owner 过审计页 → 认可后再固定配置重训。
+  报告 `analysis/p2a_e1_xpad_report.md`。
+- **07-11 E2.1b 完成并失败**：HSV 全关，official mAP50 `0.8505`、一致率 `51.27%`，
+  未达 `0.90/95%`；报告 `analysis/p2a_e21b_hsv0_report.md`。
+- **07-11 因果方向分类完成并失败**：accuracy `34.78%`，净@0.20%
+  `-0.15236%/笔`、PF `0.7472`；不接 ACTIVE 或前向链。
 
 ### 11b. YOLO 架构后续
-- 检测与判断已统一 20/60/120；E2.1b 自然结束并完成正式报告后，再做固定 SAHI 评估；
+- ✅ 固定 SAHI 全 val 已完成：matched IoU50 `665→625`，预测框 `1629→2753`，
+  precision-like `40.82%→22.70%`，延迟 `11.27×`；报告
+  `analysis/p2a_e21b_sahi_report.md`，结论为不晋升；
 - YOLO 仍是非关键路径，不阻塞 MA206 规则扫描 + LightGBM 前向验证。
 
 ### ~~12. 数据质量审计~~ ✅ 已完成（2026-07-10）
@@ -387,7 +393,7 @@ agent 不接触明文）。没有这个，后面全部不许上 VPS。~~
 | 1 | 均线主线 | ✅ 07-10 owner 定为 SMA/EMA20/60/120，覆盖旧决定 |
 | 2 | 前向跟踪加入每日定时任务 | P1-6：scheduled-tasks 已含 forward_track + digest（2026-07-10 核实） |
 | 3 | 看板要不要加访问控制 | P2-10：owner 2026-07-09 决定暂不加 |
-| 4 | 20/60/120 YOLO 后续 | E2.1b 报告后固定 SAHI；不改增强/conf/IoU |
+| 4 | 20/60/120 YOLO 后续 | ✅ E2.1b 与固定 SAHI 均已验收失败；不晋升 |
 | 5 | 模拟盘 API key（demo 账户） | P3 |
 | 6 | P2-12 黑名单候选是否写入 BLOCKED_BASES | ✅ 07-10 owner 确认已写入 |
 | 7 | P2-11 Round 1 打标人工过图（漏标/误标/框形） | ✅ 07-10 owner 确认 findings；下一步 E1 x_pad |

@@ -21,8 +21,13 @@
 **2b 验收通过（holdout 已消耗）→ 阶段 3 第一轮未通过（PF 1.01@0.3%）→
 owner 已委托"按推荐直接执行" → 出场结构扫描完成：TP5/SL2 为 v3 候选标签**
 （val 净@0.3% +0.077%/笔 vs 基线 +0.001%，p=0.001，见 `analysis/p2b_v3_barrier_sweep.md`）。
-进行中：P2-11 偏 B；E1 pad 后 **E2 `MAX_DENSE_BARS=24` 长段收核** 已 relabel（PAXG 74→24 bar），
-待 owner 看 `/label_audit_e2_compare.html` 后决定是否重训。
+**07-11 最新验收**：P2-11 E2.1b HSV0 自然完成，official mAP50 `0.8505`、固定
+conf=0.30 一致率 `51.27%`，均未过门；固定 SAHI 全 val 使匹配 `665→625`、预测框
+`1629→2753`、延迟 `11.27×`，拒绝接入。独立因果 long/short/no_trade YOLO 分类器
+准确率 `34.78%`，固定 0.20% 成本后净 `-0.15236%/笔`、PF `0.7472`，同样拒绝接入。
+q80 只诊断影子继续运行；截至 `19:45 UTC`，358 个 SWAP 同窗漏斗为
+`67 候选 → q90 10 可执行 / q80 16 可执行`。这证明扫描和评分都压缩信号，但放宽到
+q80 只增加 6 个可执行信号，不能替代前向盈利验证。
 **07-10 追加（Grok）**：`codex/day1` 已合并进 `main`（`1c1344f`）并 push；owner 确认
 P2-11 打标 findings + P2-12 黑名单写入 BLOCKED。  
 **07-10 追加（Grok 接手）**：P2-12 数据审计完成（见 `analysis/p2_data_audit_report.md`）；

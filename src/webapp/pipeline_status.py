@@ -21,10 +21,12 @@ from src.webapp.ops_flags import executor_enabled, ops_status_payload
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 # Coarse YOLO evidence only — never claims production validation.
 YOLO_REPORT_CANDIDATES = (
+    PROJECT_ROOT / "analysis" / "p2a_e21b_hsv0_report.md",
     PROJECT_ROOT / "analysis" / "p2a_e21_train_report.md",
     PROJECT_ROOT / "analysis" / "p2a_detection_report.md",
 )
 YOLO_METRICS_CANDIDATES = (
+    PROJECT_ROOT / "analysis" / "output" / "p2a_e21b_hsv0_val_metrics.json",
     PROJECT_ROOT / "analysis" / "output" / "p2a_val_metrics.json",
     PROJECT_ROOT / "analysis" / "p2a_val_metrics.json",
 )
@@ -114,14 +116,32 @@ def _yolo_stage() -> dict[str, Any]:
     # Prefer coarse named metrics only.
     coarse: dict[str, Any] = {}
     if isinstance(metrics, dict):
-        for key in ("map50", "mAP50", "map50-95", "mAP50-95", "precision", "recall"):
+        for key in (
+            "map50",
+            "mAP50",
+            "map50_95",
+            "map50-95",
+            "mAP50-95",
+            "precision",
+            "recall",
+            "gate_map50_ge_0_90",
+        ):
             if key in metrics:
                 coarse[key] = metrics[key]
         # Nested common shapes
         for nest in ("metrics", "val", "summary"):
             block = metrics.get(nest)
             if isinstance(block, dict):
-                for key in ("map50", "mAP50", "map50-95", "mAP50-95", "precision", "recall"):
+                for key in (
+                    "map50",
+                    "mAP50",
+                    "map50_95",
+                    "map50-95",
+                    "mAP50-95",
+                    "precision",
+                    "recall",
+                    "gate_map50_ge_0_90",
+                ):
                     if key in block and key not in coarse:
                         coarse[key] = block[key]
     status = "ok" if report or coarse else "unknown"
@@ -139,11 +159,11 @@ def _yolo_stage() -> dict[str, Any]:
             "metrics_path": _rel(metrics_path) if metrics_path else None,
             "metrics_coarse": coarse or None,
             "gate_note": (
-                "E2.1b observe-only when training; this stage is diagnostic evidence, "
-                "not production trading validation."
+                "E2.1b final mAP50 and consistency gates failed; fixed SAHI was also rejected. "
+                "Detection remains diagnostic, not production trading validation."
             ),
         },
-        "caveat": "Per-symbol eval history ≠ global wall-clock separation.",
+        "caveat": "Custom consistency and SAHI metrics are not official Ultralytics mAP.",
     }
 
 

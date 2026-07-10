@@ -18,42 +18,39 @@ all seven stages, forward caveat, YOLO diagnostic gate, executor off, no local p
 and real desktop plus 390px browser QA. Evidence:
 `.omo/evidence/task-6-vps-current-ma206-acceptance.md`.
 
-### Option A — Todo 7 E2.1b formal report (only if training exited)
+### Completed — Todo 7 E2.1b formal report
 
-**Observe-only:** if `dense_15m_full_s_e21b_hsv0` finished (log has
-`E2.1b train finished` / process gone), parse
-`runs/.../dense_15m_full_s_e21b_hsv0/results.csv` + log into
-`analysis/p2a_e21b_hsv0_report.md`. Never start/stop training.
-If still running, refresh the observe snapshot only when facts change and execute independent
-pre-final checks. Do not start Option B before Option A.
+E2.1b ended naturally. Official mAP50 `0.8505` and consistency `51.27%` both failed;
+`analysis/p2a_e21b_hsv0_report.md` is final and the model was not promoted.
 
-Evidence path: `.omo/evidence/task-7-e21b-report.md` when done.
+Evidence: `.omo/evidence/task-e21b-hsv0-final.md` and the tracked report.
 
-### Option B — Todo 8 fixed SAHI benchmark (only after Option A)
+### Completed — Todo 8 fixed SAHI benchmark
 
-Use the approved isolated SAHI environment. Predeclare and keep fixed:
-`slice_width=640`, `slice_height=371`, overlap `0.2`, and the existing
-confidence/IoU definitions. Reconcile a tiny sample before full val. Report
-latency and clearly named metrics in `analysis/p2a_e21b_sahi_report.md`; never
-call a custom evaluator an official Ultralytics metric unless definitions are
-identical. Do not modify the main `.venv`.
+Fixed `640x371`, overlap `0.2` full-val benchmark completed. SAHI reduced matches
+`665→625`, increased predictions `1629→2753`, and cost `11.27×` latency. It is rejected;
+see `analysis/p2a_e21b_sahi_report.md`.
 
-Evidence path: `.omo/evidence/task-8-sahi.txt`.
+Evidence: tracked report plus `analysis/output/e21b_sahi_fixed_benchmark.json`.
 
-### Option C — Todo 10 and final verification (after Options A/B)
+### Completed — Todo 10 and final verification
 
-Reconcile completed evidence, focused tests, VPS executor-off state, tracked
-diff and secrets scan. Update the durable project status reports with a clear
-separation between historical backtest, short forward observation, and
-unproven future returns. Do not merge or push main.
+Final evidence, 210 tests, VPS current E2.1b status, executor-off gate and durable reports are
+reconciled in `analysis/two_day_final_audit_20260711.md`.
+
+### Active next atom — q80 24-hour diagnostic
+
+Keep q80 shadow accumulating to at least 24 hours and continue the frozen forward books.
+Do not tune from the short shadow sample. At 24 hours, snapshot the same-window funnel and
+closed q90-range versus q80-only diagnostics without changing thresholds.
 
 ## Still parallel / owner gates
 
 - Label Studio: 80 tasks, 53 prelabels, 0 human annotations → writeback blocked.
 - No holdout, live orders, model promote, force-push, main, Telegram paste.
-- E2.1b train remains observe-only until natural exit.
+- E2.1b and SAHI are closed failures; do not repeat either fixed recipe.
 
-## Reconciled evidence (does not close Todo 7/8/final)
+## Reconciled evidence
 
 - Digest anomaly glue: `1856936`, dry-run anomaly_ids match pipeline.
 - H1 shadow ×2: new_signals=0, dup_keys=0, ACTIVE + mainline SHA stable.
@@ -63,4 +60,4 @@ unproven future returns. Do not merge or push main.
   `.omo/evidence/task-6-vps-current-ma206-acceptance.md` and commit `3033c99`.
 - Todo 9 is accepted by `analysis/p25_daily_workflow_acceptance_20260710.md` and commit `3c51c1c`.
 - F1/F2/F4 pre-final checks are recorded in `analysis/two_day_pre_final_audit_20260710.md`;
-  F3 still waits for Todo 7/8.
+  F3 and Todo 10 are closed by `analysis/two_day_final_audit_20260711.md`.

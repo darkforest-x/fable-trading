@@ -5,19 +5,19 @@
 - executor: codex
 - grok_worker: stopped_by_owner_request_2026-07-10T16:20+08:00
 - scheduler: stopped
-- codex_heartbeat: e2-1b active every 4 hours; Codex-only execution
-- current_todo: Todo 7 blocked on natural E2.1b exit; F1/F2/F4 pre-final audit complete
-- last_slot: 2026-07-10T23:47 ma206-profitability-diagnosis
-- last_result: MA206 gross edge is 0.095%/trade and fails 0.2%-0.3% costs; train-to-val net/trade drops 0.55pp; E2.1b still running
-- next_action: if E2.1b has exited, close Todo 7 formal report; otherwise keep observe-only and do not start Todo 8
-- final_complete: false
+- codex_heartbeat: active every 4 hours; Codex-only execution
+- current_todo: q80 24-hour diagnostic accumulation and frozen forward monitoring
+- last_slot: 2026-07-11T04:20 fixed-sahi-and-direction-economics
+- last_result: E2.1b, fixed SAHI, and causal direction YOLO all failed their gates; q80 shadow remains diagnostic-only
+- next_action: keep q80 shadow accumulating to 24h; only forward evidence may change the profitability conclusion
+- final_complete: true
 
 ## Guardrails
 
 - MA206 holdout was accidentally scored once by the legacy dashboard during migration QA; quarantined and guarded by pre_holdout_only cache scope.
 - Owner approved the MA206 architecture/freeze migration on 2026-07-10; no further parameter, secret, or live-order changes.
 - VPS Label Studio deploy is authorized for Todo 4A only; no force-push; no main.
-- No duplicate or stopped training; E2.1b is observe-only.
+- No duplicate training; E2.1b ended naturally and no detector was promoted.
 - Push only codex/grok-2day; never merge or push main.
 - Compromised Telegram paste never used.
 - VPS `ENABLE_JOB_EXECUTOR=0`; ops token only in root `/etc/fable-trading/ops.env`.
@@ -34,14 +34,17 @@
 7. Current-MA206 daily workflow — `.omo/evidence/task-10-daily-workflow-current-ma206.md`; forward byte-idempotent, digest dry-run, VPS data mirror 456/456, Codex daily automation active
 8. F1/F2/F4 pre-final audit — `analysis/two_day_pre_final_audit_20260710.md`; 173 tests, secret/dependency/scope checks, VPS executor 0
 9. MA206 profitability diagnosis — `analysis/ma206_profitability_diagnosis.md`; cost bridge, generalization drop, score/return alignment and rejected causes
+10. E2.1b final report — `analysis/p2a_e21b_hsv0_report.md`; mAP50 0.8505, consistency 51.27%, rejected
+11. Fixed SAHI full val — `analysis/p2a_e21b_sahi_report.md`; 625/1297 matched, 2753 predictions, rejected
+12. Causal direction YOLO — `analysis/p2a_causal_direction_profit_report.md`; net@0.2% negative, PF 0.7472, rejected
+13. q80 same-window shadow — `analysis/ma206_q80_shadow_diagnosis.md`; separate ledger, no ACTIVE/main-book writes
 
-## Implemented but not accepted as complete
+## Implemented but not accepted as profitable
 
-- F3 and Todo 10 remain open until Todo 7/8 produce final detector evidence.
+- Engineering pipeline and final detector evidence are complete; future profitability is still unproven.
+- MA206 q90 and q80 books need forward accumulation; no threshold may be selected from the short shadow sample.
 
 ## Blocked Or Deferred
 
 - Telegram until token rotation + chat ID.
 - Full-80 annotation writeback waits owner LS (0 annotations).
-- Todo 7 formal report waits E2.1b exit.
-- Todo 8 SAHI has not started and is blocked by Todo 7.

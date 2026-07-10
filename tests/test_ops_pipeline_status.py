@@ -1,6 +1,7 @@
 """P2.5 redacted pipeline status: structure + redaction + auth gate."""
 from __future__ import annotations
 
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -57,6 +58,31 @@ def test_redact_strings_strips_absolute_and_secrets() -> None:
     assert clean["ok"] == "models/ACTIVE"
 
 
+def test_yolo_stage_prefers_final_e21b_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    report = tmp_path / "analysis" / "p2a_e21b_hsv0_report.md"
+    metrics = tmp_path / "analysis" / "output" / "p2a_e21b_hsv0_val_metrics.json"
+    report.parent.mkdir(parents=True)
+    metrics.parent.mkdir(parents=True)
+    report.write_text("# final\n", encoding="utf-8")
+    metrics.write_text(
+        '{"map50": 0.8505, "map50_95": 0.6622, "gate_map50_ge_0_90": false}',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(pipeline_status, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(pipeline_status, "YOLO_REPORT_CANDIDATES", (report,))
+    monkeypatch.setattr(pipeline_status, "YOLO_METRICS_CANDIDATES", (metrics,))
+
+    stage = pipeline_status._yolo_stage()
+
+    assert stage["detail"]["report_path"] == "analysis/p2a_e21b_hsv0_report.md"
+    assert stage["detail"]["metrics_coarse"]["map50"] == pytest.approx(0.8505)
+    assert stage["detail"]["metrics_coarse"]["map50_95"] == pytest.approx(0.6622)
+    assert stage["detail"]["metrics_coarse"]["gate_map50_ge_0_90"] is False
+    assert "failed" in stage["detail"]["gate_note"]
+
+
 def test_ops_pipeline_requires_token(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("OPS_AUTH_MODE", "token")
     monkeypatch.setenv("OPS_API_TOKEN", "pipe-test-token")
@@ -94,8 +120,6 @@ def test_deploy_stage_role_local_by_default(monkeypatch: pytest.MonkeyPatch) -> 
 
 
 def test_deploy_stage_role_vps_tree(monkeypatch: pytest.MonkeyPatch) -> None:
-    from pathlib import Path
-
     monkeypatch.setattr(pipeline_status, "PROJECT_ROOT", Path("/opt/fable-trading"))
     monkeypatch.delenv("ENABLE_JOB_EXECUTOR", raising=False)
     stage = pipeline_status._deploy_stage()
