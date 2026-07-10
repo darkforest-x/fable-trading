@@ -1,4 +1,4 @@
-"""H9 feature-version retrain: add completed-1h above-EMA144 flag on val only."""
+"""H9 feature-version retrain: add completed-1h above-EMA120 flag on val only."""
 from __future__ import annotations
 
 import argparse

@@ -52,7 +52,7 @@ class CandidateSpec:
 CANDIDATES: tuple[CandidateSpec, ...] = (
     CandidateSpec(
         name="tp5_sl2_long_swap",
-        path=PROJECT_DIR / "data" / "swap_replication" / "swap_tp5_sl2.csv",
+        path=PROJECT_DIR / "data" / "ma206" / "swap_tp5_sl2_ma206.csv",
         bar="15m",
         horizon_bars=72,
         role="frozen_champion",

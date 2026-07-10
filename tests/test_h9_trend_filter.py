@@ -9,7 +9,7 @@ from src.judgment.trend_filter import add_h9_flags
 
 
 def test_add_h9_flags_uses_only_completed_hourly_bars() -> None:
-    open_time = pd.date_range("2026-01-01", periods=320, freq="15min", tz="UTC")
+    open_time = pd.date_range("2026-01-01", periods=600, freq="15min", tz="UTC")
     frame = pd.DataFrame(
         {
             "open_time": open_time,
@@ -20,12 +20,12 @@ def test_add_h9_flags_uses_only_completed_hourly_bars() -> None:
             "volume": 1.0,
         }
     )
-    frame.loc[frame["open_time"] == open_time[247], "close"] = 1000.0
+    frame.loc[frame["open_time"] == open_time[487], "close"] = 1000.0
     rows = pd.DataFrame(
         {
             "source": ["okx", "okx"],
             "symbol": ["BTC_USDT", "BTC_USDT"],
-            "signal_time": [open_time[243], open_time[247]],
+            "signal_time": [open_time[483], open_time[487]],
         }
     )
 
@@ -37,7 +37,7 @@ def test_add_h9_flags_uses_only_completed_hourly_bars() -> None:
 
 
 def test_maker_val_sim_costs_follow_dataset_universe() -> None:
-    assert maker_cost_for_dataset(Path("data/swap_replication/swap_tp5_sl2.csv")) == 0.0006
-    assert taker_cost_for_dataset(Path("data/swap_replication/swap_tp5_sl2.csv")) == 0.0010
+    assert maker_cost_for_dataset(Path("data/ma206/swap_tp5_sl2_ma206.csv")) == 0.0006
+    assert taker_cost_for_dataset(Path("data/ma206/swap_tp5_sl2_ma206.csv")) == 0.0010
     assert maker_cost_for_dataset(Path("data/sweep_v3/judgment_v3_tp5_sl2_h72.csv")) == 0.0016
     assert taker_cost_for_dataset(Path("data/sweep_v3/judgment_v3_tp5_sl2_h72.csv")) == 0.003

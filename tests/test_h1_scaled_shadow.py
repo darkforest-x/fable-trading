@@ -160,6 +160,6 @@ def test_h1_shadow_refuses_mainline_log_path(tmp_path: Path, monkeypatch: pytest
 
 
 def test_shadow_default_path_differs_from_mainline() -> None:
-    assert FORWARD_LOG_H1_SCALED_PATH.name == "forward_log_h1_scaled.csv"
+    assert FORWARD_LOG_H1_SCALED_PATH.name == "forward_log_h1_scaled_ma206.csv"
     assert FORWARD_LOG_H1_SCALED_PATH != FORWARD_LOG_PATH
-    assert FORWARD_LOG_PATH.name == "forward_log.csv"
+    assert FORWARD_LOG_PATH.name == "forward_log_ma206.csv"

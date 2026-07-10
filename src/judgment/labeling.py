@@ -272,7 +272,7 @@ def label_candidate_ma_exit(
     frame: pd.DataFrame,
     signal_i: int,
     *,
-    ma_col: str = "ema21",
+    ma_col: str = "ema20",
     atr_pct_min: float = ATR_PCT_MIN,
     horizon: int = HORIZON_BARS,
 ) -> BarrierOutcome | None:

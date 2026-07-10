@@ -9,10 +9,10 @@ cd "$(dirname "$0")/.."
 rsync -az --exclude='__pycache__' --exclude='*.pyc' \
   src analysis models requirements.txt "$VPS:$DIR/"
 rsync -az \
-  data/judgment_dataset_v2_expanded.csv data/forward_log.csv \
+  data/forward_log_ma206.csv data/forward_log_h1_scaled_ma206.csv \
   data/scored_signals*.csv data/scored_signals*.json \
   "$VPS:$DIR/data/"
-rsync -az data/sweep_v3 data/swap_replication data/kline_fetched "$VPS:$DIR/data/"
+rsync -az data/ma206 data/kline_fetched "$VPS:$DIR/data/"
 # Hard red line: never leave job executor enabled on public VPS.
 # Also re-assert EnvironmentFile for root-only ops auth (token never written here).
 ssh "$VPS" "set -euo pipefail

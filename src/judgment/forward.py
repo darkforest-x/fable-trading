@@ -2,7 +2,7 @@
 
 Also provides H1 scaled *shadow* tracking: same mainline freeze for entry
 scoring/threshold, but exit outcomes from scaled barrier math, written only to
-`data/forward_log_h1_scaled.csv` (never mainline `forward_log.csv`).
+`data/forward_log_h1_scaled_ma206.csv` (never mainline `forward_log_ma206.csv`).
 """
 from __future__ import annotations
 
@@ -82,7 +82,7 @@ def run_forward_tracking_h1_shadow(
     resolved = Path(output_path).resolve()
     if resolved == Path(FORWARD_LOG_PATH).resolve():
         raise ValueError(
-            "H1 shadow must not write to mainline data/forward_log.csv; "
+            "H1 shadow must not write to mainline data/forward_log_ma206.csv; "
             f"use {FORWARD_LOG_H1_SCALED_PATH} (or another non-mainline path)"
         )
     return _run_forward_tracking(

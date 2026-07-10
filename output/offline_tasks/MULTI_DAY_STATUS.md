@@ -3,7 +3,7 @@
 Owner away. 2h durable tick.
 
 ## fable / red lines
-SWAP · EMA 8-55 · TP5/SL2 freeze · YOLO non-critical · H1 shadow  
+SWAP · SMA/EMA 20/60/120 · TP5/SL2 freeze · YOLO non-critical · H1 shadow
 no holdout · no secrets · VPS `ENABLE_JOB_EXECUTOR=0`
 
 ## Checklist
@@ -31,4 +31,4 @@ Reports: `analysis/p2a_e21_train_report.md`, hardlist `output/offline_tasks/fift
 
 ## Side note
 Secondary screen `fable_yolo_e21b_hsv0` started from codex worktree (same SAFE_AUG train CLI; name only). Not promoted; mainline unchanged.
-ACTIVE=`models/frozen_tp5_sl2_swap_20260709.txt`
+ACTIVE=`models/frozen_tp5_sl2_swap_ma206_20260710.txt`

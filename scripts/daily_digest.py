@@ -22,10 +22,11 @@ import pandas as pd
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_DIR))
 from src.judgment.shadow_compare import format_comparison_text  # noqa: E402
+from src.judgment.forward_types import FORWARD_LOG_H1_SCALED_PATH, FORWARD_LOG_PATH  # noqa: E402
 from src.notify import send  # noqa: E402
 
-LOG = PROJECT_DIR / "data" / "forward_log.csv"
-LOG_H1 = PROJECT_DIR / "data" / "forward_log_h1_scaled.csv"
+LOG = FORWARD_LOG_PATH
+LOG_H1 = FORWARD_LOG_H1_SCALED_PATH
 KLINE_DIR = PROJECT_DIR / "data" / "kline_fetched"
 
 # Severity order for ranking "top" anomalies in the digest (crit first).

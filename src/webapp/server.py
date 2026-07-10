@@ -70,7 +70,7 @@ def backtest(cost: float = BASE_COST, universe: str = DEFAULT_UNIVERSE) -> dict:
 
 @app.get("/api/trades")
 def trade_rows(
-    window: str = "accept",
+    window: str = "validation",
     limit: int = 1000,
     cost: float = BASE_COST,
     symbol: str = "",

@@ -103,7 +103,7 @@ def _ma_exit(enriched: pd.DataFrame, signal_i: int, cfg: dict) -> BarrierOutcome
     return label_candidate_ma_exit(
         enriched,
         signal_i,
-        ma_col=cfg.get("ma_col", "ema21"),
+        ma_col=cfg.get("ma_col", "ema20"),
         horizon=cfg["horizon"],
     )
 

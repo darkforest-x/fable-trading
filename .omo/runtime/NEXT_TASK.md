@@ -2,6 +2,13 @@
 
 model: deep
 
+## Current judgment mainline
+
+- SMA20/60/120 + EMA20/60/120 only; do not restore or reuse 8-55 paths.
+- ACTIVE: `models/frozen_tp5_sl2_swap_ma206_20260710.txt`.
+- Forward books: `data/forward_log_ma206.csv` and `data/forward_log_h1_scaled_ma206.csv`, start 2026-07-10 10:30 UTC.
+- Full-pool MA206 val maker PF is 1.072 (H9 EMA120: 1.154); no profitability claim and no threshold tuning from forward data.
+
 ## Preferred next atom (non-owner-gated)
 
 ### Option A — Todo 7 E2.1b formal report (only if training exited)

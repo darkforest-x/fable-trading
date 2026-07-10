@@ -1,16 +1,8 @@
-"""Feature engineering for the judgment classifier.
-
-All features are computed causally: at bar i only data from bars <= i is used
-(rolling / shift / pct_change on past values only). Features are added as
-columns on the enriched indicator frame from candidates.add_indicators, then
-sampled at candidate positions.
-"""
+"""Causal features for the SMA/EMA 20/60/120 judgment classifier."""
 from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-
-DENSE_SPREAD_MAX = 0.0028  # strict fast_spread threshold, reused for duration
 
 FEATURE_COLUMNS = [
     # MA-spread level and convergence dynamics
@@ -28,8 +20,8 @@ FEATURE_COLUMNS = [
     "dense_frac48",
     # price position relative to MAs
     "ext_up",
-    "close_vs_ema55",
-    "close_vs_ema200",
+    "close_vs_ema60",
+    "close_vs_ema120",
     "order_score",
     "slow_slope_12",
     # volume
@@ -50,8 +42,8 @@ FEATURE_COLUMNS = [
 ]
 
 
-def add_features(enriched: pd.DataFrame) -> pd.DataFrame:
-    """Add FEATURE_COLUMNS to an indicator frame (causal only)."""
+def add_features(enriched: pd.DataFrame, *, mode: str = "expanded") -> pd.DataFrame:
+    """Add causal features using the dense state for the selected threshold preset."""
     out = enriched.copy()
     close = out["close"].replace(0, np.nan)
     spread = out["ma_spread_pct"]
@@ -66,14 +58,13 @@ def add_features(enriched: pd.DataFrame) -> pd.DataFrame:
     roll_max = spread.rolling(96, min_periods=48).max()
     out["spread_pos96"] = (spread - roll_min) / (roll_max - roll_min).replace(0, np.nan)
 
-    dense = (spread <= DENSE_SPREAD_MAX).astype(int)
-    # consecutive dense bars ending at i
-    grp = (dense == 0).cumsum()
-    out["dense_run_len"] = dense.groupby(grp).cumsum()
+    dense = out[f"is_dense_{mode}"]
+    group = (dense == 0).cumsum()
+    out["dense_run_len"] = dense.groupby(group).cumsum()
     out["dense_frac48"] = dense.rolling(48, min_periods=24).mean()
 
-    out["close_vs_ema55"] = close / out["ema55"].replace(0, np.nan) - 1
-    out["close_vs_ema200"] = close / out["ema200"].replace(0, np.nan) - 1
+    out["close_vs_ema60"] = close / out["ema60"].replace(0, np.nan) - 1
+    out["close_vs_ema120"] = close / out["ema120"].replace(0, np.nan) - 1
 
     out["vol_ratio_mean8"] = out["volume_ratio"].rolling(8).mean()
     atr_mean96 = out["atr_pct"].rolling(96, min_periods=48).mean().replace(0, np.nan)

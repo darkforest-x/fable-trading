@@ -6,6 +6,7 @@ frozen-model scoring so dashboards and forward tracking do not retrain.
 """
 from __future__ import annotations
 
+import csv
 import hashlib
 import json
 from dataclasses import dataclass
@@ -18,12 +19,12 @@ import numpy as np
 import pandas as pd
 
 from src.judgment.features import FEATURE_COLUMNS
-from src.judgment.train import DEFAULT_HORIZON_BARS, load_splits, train_model
+from src.judgment.train import DEFAULT_HORIZON_BARS, HOLDOUT_START, load_splits, train_model
 
 PROJECT_DIR: Final = Path(__file__).resolve().parents[2]
 BAR: Final = pd.Timedelta(minutes=15)
 DEFAULT_SCORE_QUANTILE: Final = 0.90
-DEFAULT_CONFIG_NAME: Final = "tp5_sl2_swap"
+DEFAULT_CONFIG_NAME: Final = "tp5_sl2_swap_ma206"
 
 
 class ScoreCacheMetadata(TypedDict, total=False):
@@ -59,6 +60,7 @@ class FrozenArtifact:
         "dataset_sha256",
         "dataset_size_bytes",
         "best_iteration",
+        "val_start",
     )
 
     config: FrozenConfig
@@ -72,6 +74,7 @@ class FrozenArtifact:
     dataset_sha256: str
     dataset_size_bytes: int
     best_iteration: int
+    val_start: pd.Timestamp | None
 
 
 class FrozenArtifactError(RuntimeError):
@@ -85,7 +88,7 @@ def default_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
     return FrozenConfig(
         name=DEFAULT_CONFIG_NAME,
         project_dir=project_dir,
-        dataset_path=project_dir / "data" / "swap_replication" / "swap_tp5_sl2.csv",
+        dataset_path=project_dir / "data" / "ma206" / "swap_tp5_sl2_ma206.csv",
         models_dir=project_dir / "models",
         score_quantile=DEFAULT_SCORE_QUANTILE,
         horizon_bars=DEFAULT_HORIZON_BARS,
@@ -104,6 +107,7 @@ def latest_artifact(config: FrozenConfig = DEFAULT_FROZEN_CONFIG) -> FrozenArtif
 
 def load_artifact(config: FrozenConfig, metadata_path: Path) -> FrozenArtifact:
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    val_range = metadata.get("splits", {}).get("val", {}).get("range", [])
     feature_columns = tuple(metadata["feature_columns"])
     if feature_columns != tuple(FEATURE_COLUMNS):
         raise FrozenArtifactError(metadata_path, "feature list does not match current FEATURE_COLUMNS")
@@ -123,6 +127,7 @@ def load_artifact(config: FrozenConfig, metadata_path: Path) -> FrozenArtifact:
         dataset_sha256=str(metadata["dataset_sha256"]),
         dataset_size_bytes=int(metadata["dataset_size_bytes"]),
         best_iteration=int(metadata["best_iteration"]),
+        val_start=pd.Timestamp(val_range[0]) if val_range else None,
     )
 
 
@@ -160,13 +165,45 @@ def train_frozen_artifact(config: FrozenConfig, artifact_date: str) -> FrozenArt
     return load_artifact(config, metadata_path)
 
 
-def score_with_artifact(artifact: FrozenArtifact) -> tuple[pd.DataFrame, float]:
+def score_with_artifact(
+    artifact: FrozenArtifact,
+    *,
+    end_before: pd.Timestamp = HOLDOUT_START,
+) -> tuple[pd.DataFrame, float]:
+    """Score only rows strictly before ``end_before``.
+
+    The default seals the judgment holdout. Callers must not relax it without
+    owner approval and explicit holdout-consumption accounting.
+    """
     model = lgb.Booster(model_file=str(artifact.model_path))
-    full = pd.read_csv(artifact.dataset_path, parse_dates=["signal_time"])
+    full = read_dataset_before(artifact.dataset_path, end_before=end_before)
     full["score"] = model.predict(full[list(artifact.feature_columns)], num_iteration=artifact.best_iteration)
     full["entry_time"] = full["signal_time"] + BAR
     full["exit_time"] = full["entry_time"] + full["exit_offset"] * BAR
     return full.sort_values(["entry_time", "score"], ascending=[True, False]), artifact.threshold
+
+
+def read_dataset_before(
+    path: Path,
+    *,
+    end_before: pd.Timestamp = HOLDOUT_START,
+) -> pd.DataFrame:
+    """Read a chronological dataset up to, but never including, a cutoff."""
+    safe_rows = 0
+    previous_time: pd.Timestamp | None = None
+    with path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        if "signal_time" not in (reader.fieldnames or []):
+            raise FrozenArtifactError(path, "dataset has no signal_time column")
+        for row in reader:
+            signal_time = pd.Timestamp(row["signal_time"])
+            if previous_time is not None and signal_time < previous_time:
+                raise FrozenArtifactError(path, "dataset must be sorted by signal_time")
+            previous_time = signal_time
+            if signal_time >= end_before:
+                break
+            safe_rows += 1
+    return pd.read_csv(path, nrows=safe_rows, parse_dates=["signal_time"])
 
 
 def cache_metadata(threshold: float, artifact: FrozenArtifact | None) -> ScoreCacheMetadata:

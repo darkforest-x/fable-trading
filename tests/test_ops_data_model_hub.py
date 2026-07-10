@@ -157,7 +157,7 @@ def test_list_frozen_models_pair_and_meta(tmp_path: Path) -> None:
     sha = hashlib.sha256(dataset.read_bytes()).hexdigest()
 
     meta = {
-        "config": "tp5_sl2_swap",
+        "config": "tp5_sl2_swap_ma206",
         "created_at": "2026-07-09T00:00:00+00:00",
         "threshold_val_q90": 0.37,
         "dataset_path": "data/ds.csv",
@@ -165,10 +165,10 @@ def test_list_frozen_models_pair_and_meta(tmp_path: Path) -> None:
         "feature_columns": ["f1", "f2", "f3"],
         "best_iteration": 10,
     }
-    (models / "frozen_tp5_sl2_swap_20260709.json").write_text(
+    (models / "frozen_tp5_sl2_swap_ma206_20260710.json").write_text(
         json.dumps(meta), encoding="utf-8"
     )
-    (models / "frozen_tp5_sl2_swap_20260709.txt").write_text("tree\n", encoding="utf-8")
+    (models / "frozen_tp5_sl2_swap_ma206_20260710.txt").write_text("tree\n", encoding="utf-8")
     # orphan json without txt
     (models / "frozen_orphan_20260101.json").write_text(
         json.dumps({"config": "orphan", "threshold_val_q90": 0.1}),
@@ -176,7 +176,7 @@ def test_list_frozen_models_pair_and_meta(tmp_path: Path) -> None:
     )
     # ACTIVE pointer
     active_path = models / "ACTIVE"
-    active_path.write_text("models/frozen_tp5_sl2_swap_20260709.txt\n", encoding="utf-8")
+    active_path.write_text("models/frozen_tp5_sl2_swap_ma206_20260710.txt\n", encoding="utf-8")
 
     body = model_hub.model_hub_payload(
         models_dir=models,
@@ -189,10 +189,10 @@ def test_list_frozen_models_pair_and_meta(tmp_path: Path) -> None:
     assert body["count"] == 2
     assert body["paired_count"] == 1
     assert body["active"]["exists"] is True
-    assert body["active"]["artifact_id"] == "frozen_tp5_sl2_swap_20260709"
+    assert body["active"]["artifact_id"] == "frozen_tp5_sl2_swap_ma206_20260710"
 
     by_id = {it["artifact_id"]: it for it in body["items"]}
-    main = by_id["frozen_tp5_sl2_swap_20260709"]
+    main = by_id["frozen_tp5_sl2_swap_ma206_20260710"]
     assert main["pair_status"] == "paired"
     assert main["is_active"] is True
     assert main["threshold_val_q90"] == 0.37

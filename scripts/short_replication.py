@@ -32,8 +32,8 @@ def _as_short_features(
     source = featured.iloc[signal_indices].reset_index(drop=True)
     close = source["close"].replace(0, np.nan)
     aligned["ext_up"] = source["ext_down"]
-    aligned["close_vs_ema55"] = source["ema55"] / close - 1
-    aligned["close_vs_ema200"] = source["ema200"] / close - 1
+    aligned["close_vs_ema60"] = source["ema60"] / close - 1
+    aligned["close_vs_ema120"] = source["ema120"] / close - 1
     aligned["order_score"] = source["down_order_score"]
     aligned["slow_slope_12"] = -source["slow_slope_12"]
     aligned["drawdown24"] = source["runup24"]

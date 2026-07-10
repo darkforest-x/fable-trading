@@ -13,44 +13,47 @@ import numpy as np
 import pandas as pd
 from fastapi import HTTPException
 
-from src.backtest.run import ACCEPT_START, BASE_COST, MAX_CONCURRENT, window_metrics
+from src.backtest.run import BASE_COST, MAX_CONCURRENT, window_metrics
 from src.data.loader import FETCHED_DIR, list_series, load_series
 from src.judgment.labeling import SL_ATR_MULT, TP_ATR_MULT
 from src.webapp.dashboard_cache import (
     DEFAULT_UNIVERSE, UniverseSpec, load_json, relative_path, scored_signals,
-    symbol_matches_universe, trades, universe_spec,
+    symbol_matches_universe, trades, universe_spec, validation_start,
 )
 
-EMA_SPANS = (8, 13, 21, 34, 55, 144, 200)
+MA_PERIODS = (20, 60, 120)
 PF_COST_GRID = [round(c, 4) for c in np.arange(0.001, 0.00501, 0.0005)]
 
 
 def overview_payload(universe: str = DEFAULT_UNIVERSE) -> dict:
     spec = universe_spec(universe)
-    p2b = load_json("p2b_v2_expanded_final_metrics.json")
+    ma206 = load_json("p2b_ma206_mainline_20260710_metrics.json")
     p2a = load_json("p2a_val_metrics.json")
     p0 = load_json("p0_summary.json")
-    hold = p2b.get("holdout", {})
     signals, threshold = scored_signals(spec.key)
     all_trades = trades(spec.key)
-    accept = all_trades[all_trades["entry_time"] >= ACCEPT_START] if not all_trades.empty else all_trades
-    base = window_metrics(accept, BASE_COST)
+    val_start = validation_start(spec.key)
+    validation = all_trades[all_trades["entry_time"] >= val_start] if not all_trades.empty else all_trades
+    base = window_metrics(validation, BASE_COST)
     n_files, n_rows = _fetched_coverage(spec)
-    spark, _ = equity_points(accept, BASE_COST)
+    spark, _ = equity_points(validation, BASE_COST)
     pf = base.get("profit_factor", 0)
     return {
         "universe": spec.key,
         "universe_label": spec.label,
         "verdict": (
-            f"当前宇宙：{spec.label}；阶段 3 动态回测 PF {pf:.2f} @ {BASE_COST * 100:.1f}% 成本，"
+            f"当前宇宙：{spec.label}；MA206 验证集发现级 PF {pf:.2f} @ {BASE_COST * 100:.1f}% 成本，"
             f"交易 {base.get('n_trades', 0)} 笔。"
         ),
-        "stages": _stage_rows(spec, p0, p2a, p2b, hold, base),
+        "stages": _stage_rows(spec, p0, p2a, ma206, base),
         "tiles": _overview_tiles(spec, base, threshold),
-        "coverage": _coverage_tiles(spec, n_files, n_rows, signals, threshold, all_trades, accept),
+        "coverage": _coverage_tiles(spec, n_files, n_rows, signals, threshold, all_trades, validation),
         "sparkline": spark,
         "acceptance": _acceptance(base),
-        "next": "下一硬闸门：冻结配置前向 maker-filled closed 样本累计到 100 笔后看 PF；验收窗口禁止参数级调优",
+        "next": (
+            "下一硬闸门：冻结配置前向 maker-filled closed 样本累计到 100 笔后看 PF；"
+            "MA206 holdout 曾意外读取 1 次并已隔离"
+        ),
     }
 
 
@@ -58,16 +61,22 @@ def backtest_payload(cost: float = BASE_COST, universe: str = DEFAULT_UNIVERSE) 
     spec = universe_spec(universe)
     all_trades = trades(spec.key)
     signals, _ = scored_signals(spec.key)
-    accept_t = all_trades[all_trades["entry_time"] >= ACCEPT_START]
+    val_start = validation_start(spec.key)
+    validation_t = all_trades[all_trades["entry_time"] >= val_start]
     out: dict = {
         "cost": cost,
         "universe": spec.key,
         "universe_label": spec.label,
-        "pf_curve": [{"cost": c, "pf": window_metrics(accept_t, c).get("profit_factor")} for c in PF_COST_GRID],
+        "pf_curve": [
+            {"cost": c, "pf": window_metrics(validation_t, c).get("profit_factor")}
+            for c in PF_COST_GRID
+        ],
+        "score_scope": "pre_holdout_only",
+        "validation_start": str(val_start),
     }
     for name, window_trades, window_signals in (
-        ("accept", accept_t, signals[signals["entry_time"] >= ACCEPT_START]),
-        ("full", all_trades, signals),
+        ("validation", validation_t, signals[signals["entry_time"] >= val_start]),
+        ("preholdout", all_trades, signals),
     ):
         metrics = window_metrics(window_trades, cost)
         metrics["equity"], metrics["drawdown"] = equity_points(window_trades, cost)
@@ -90,11 +99,11 @@ def backtest_payload(cost: float = BASE_COST, universe: str = DEFAULT_UNIVERSE) 
     return out
 
 
-def trade_rows_payload(window: str = "accept", limit: int = 1000, cost: float = BASE_COST,
+def trade_rows_payload(window: str = "validation", limit: int = 1000, cost: float = BASE_COST,
                        symbol: str = "", universe: str = DEFAULT_UNIVERSE) -> list[dict]:
     rows = trades(universe)
-    if window == "accept":
-        rows = rows[rows["entry_time"] >= ACCEPT_START]
+    if window == "validation":
+        rows = rows[rows["entry_time"] >= validation_start(universe)]
     if symbol:
         rows = rows[rows["symbol"] == symbol]
     rows = rows.sort_values("entry_time", ascending=False).head(limit).copy()
@@ -137,16 +146,24 @@ def chart_payload(source: str, symbol: str, bars: int = 3000, universe: str = DE
          "volume": float(v) if np.isfinite(v) else 0.0}
         for t, o, h, l, c, v in zip(ts, frame["open"], frame["high"], frame["low"], frame["close"], frame["volume"])
     ]
-    emas = {
-        str(span): [{"time": int(t), "value": float(v)} for t, v in zip(ts, frame["close"].ewm(span=span, adjust=False).mean().round(8))]
-        for span in EMA_SPANS
-    }
+    moving_averages = {}
+    for period in MA_PERIODS:
+        moving_averages[f"sma{period}"] = [
+            {"time": int(timestamp), "value": float(value)}
+            for timestamp, value in zip(ts, frame["close"].rolling(period, min_periods=period).mean().round(8))
+            if np.isfinite(value)
+        ]
+        moving_averages[f"ema{period}"] = [
+            {"time": int(timestamp), "value": float(value)}
+            for timestamp, value in zip(ts, frame["close"].ewm(span=period, adjust=False).mean().round(8))
+        ]
     signals, threshold = scored_signals(spec.key)
     t0 = frame["open_time"].iloc[0]
     sig = signals[(signals["source"] == source) & (signals["symbol"] == symbol) & (signals["signal_time"] >= t0)]
     traded_times = set(trades(spec.key)[lambda df: (df["source"] == source) & (df["symbol"] == symbol)]["entry_time"])
     markers = [_marker_payload(row, threshold, traded_times) for row in sig.itertuples()]
-    return {"candles": candles, "emas": emas, "markers": markers, "threshold": round(threshold, 4),
+    return {"candles": candles, "moving_averages": moving_averages, "markers": markers,
+            "threshold": round(threshold, 4),
             "tp_mult": TP_ATR_MULT, "sl_mult": SL_ATR_MULT}
 
 
@@ -168,18 +185,18 @@ def series_groups(spec: UniverseSpec) -> dict[tuple[str, str], list[Path]]:
     return {key: paths for key, paths in list_series().items() if symbol_matches_universe(key[1], spec.key)}
 
 
-def _stage_rows(spec: UniverseSpec, p0: dict, p2a: dict, p2b: dict, hold: dict, base: dict) -> list[dict]:
+def _stage_rows(spec: UniverseSpec, p0: dict, p2a: dict, ma206: dict, base: dict) -> list[dict]:
     pf = base.get("profit_factor", 0)
+    val = ma206.get("val", {})
     return [
         {"id": "P0", "name": "P0 信号检验", "status": "done", "summary": _p0_summary(p0)},
         {"id": "2a", "name": "2a 检测层 YOLO", "status": "done",
          "summary": "正式验收 mAP50 %.4f，低于 0.90；非关键路径暂停" % p2a.get("mAP50", 0)},
-        {"id": "2b", "name": "2b 判断层 LightGBM", "status": "passed",
-         "summary": "holdout 一次性评估通过：AUC %.3f / p=%.3f / top-decile 净 %+.3f%%" % (
-             hold.get("roc_auc", 0), p2b.get("holdout_permutation_p", 1),
-             100 * hold.get("top_decile", {}).get("mean_net_ret", 0))},
+        {"id": "2b", "name": "2b MA206 判断层", "status": "pending",
+         "summary": "val AUC %.3f / p=%.3f；holdout 意外读取已作废，等待前向 100 笔" % (
+             val.get("roc_auc", 0), ma206.get("val_permutation_p", 1))},
         {"id": "3", "name": "3 事件驱动回测", "status": "passed" if pf >= 1.3 else "failed",
-         "summary": "%s 动态回测：PF %.2f @%.1f%% 成本，%s 笔；终审仍以前向 100 笔为准" % (
+         "summary": "%s 验证集发现级：PF %.2f @%.1f%% 成本，%s 笔；不作为最终验收" % (
              spec.label, pf, BASE_COST * 100, base.get("n_trades", 0))},
     ]
 
@@ -187,21 +204,29 @@ def _stage_rows(spec: UniverseSpec, p0: dict, p2a: dict, p2b: dict, hold: dict, 
 def _overview_tiles(spec: UniverseSpec, base: dict, threshold: float) -> list[dict]:
     return [
         {"label": "当前宇宙", "value": spec.label, "sub": relative_path(spec.dataset_path)},
-        {"label": "动态回测 PF", "value": "%.2f" % base.get("profit_factor", 0),
-         "sub": f"{BASE_COST * 100:.1f}% 成本；验收线 1.3"},
-        {"label": "动态回测胜率", "value": "%.1f%%" % (100 * base.get("win_rate", 0)),
+        {"label": "验证集发现级 PF", "value": "%.2f" % base.get("profit_factor", 0),
+         "sub": f"{BASE_COST * 100:.1f}% 成本；研究参考线 1.3"},
+        {"label": "验证集胜率", "value": "%.1f%%" % (100 * base.get("win_rate", 0)),
          "sub": f"{base.get('n_trades', 0)} 笔"},
         {"label": "模型阈值", "value": "%.3f" % threshold, "sub": "val 分数 90 分位，事前固定"},
     ]
 
 
 def _coverage_tiles(spec: UniverseSpec, n_files: int, n_rows: int, signals: pd.DataFrame,
-                    threshold: float, all_trades: pd.DataFrame, accept: pd.DataFrame) -> list[dict]:
+                    threshold: float, all_trades: pd.DataFrame, validation: pd.DataFrame) -> list[dict]:
     return [
-        {"label": "K 线数据", "value": f"{n_rows / 1e6:.1f}M", "sub": f"{n_files} 个 {spec.label} 15m 新拉取文件"},
+        {
+            "label": "K 线数据",
+            "value": f"{n_rows / 1e6:.1f}M",
+            "sub": f"{n_files} 个 {spec.label} 15m 新拉取文件",
+        },
         {"label": "候选信号", "value": f"{len(signals):,}", "sub": "TP5/SL2 h72 数据集"},
-        {"label": "合格信号", "value": f"{int((signals['score'] >= threshold).sum()):,}", "sub": "score ≥ 阈值"},
-        {"label": "回测成交", "value": f"{len(all_trades):,}", "sub": f"验收窗口 {len(accept)} 笔"},
+        {
+            "label": "合格信号",
+            "value": f"{int((signals['score'] >= threshold).sum()):,}",
+            "sub": "score ≥ 阈值",
+        },
+        {"label": "回测成交", "value": f"{len(all_trades):,}", "sub": f"验证集 {len(validation)} 笔"},
     ]
 
 

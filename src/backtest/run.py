@@ -33,16 +33,20 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src.judgment.frozen import DEFAULT_FROZEN_CONFIG, latest_artifact, score_with_artifact
+from src.judgment.frozen import (
+    DEFAULT_FROZEN_CONFIG,
+    latest_artifact,
+    read_dataset_before,
+    score_with_artifact,
+)
 from src.judgment.features import FEATURE_COLUMNS
-from src.judgment.train import load_splits, train_model
+from src.judgment.train import HOLDOUT_START, load_splits, train_model
 
 PROJECT_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_DATA = DEFAULT_FROZEN_CONFIG.dataset_path
 OUTPUT_DIR = PROJECT_DIR / "analysis" / "output"
 
 BAR = pd.Timedelta(minutes=15)
-ACCEPT_START = pd.Timestamp("2026-05-04 00:00:00", tz="UTC")  # disclosed: spent once by 2b
 COST_SWEEP = (0.002, 0.003, 0.004)  # round-trip cost on notional
 BASE_COST = 0.003
 MAX_CONCURRENT = 10
@@ -50,22 +54,31 @@ SCORE_QUANTILE = 0.90
 
 
 def build_signals(data_path: Path) -> tuple[pd.DataFrame, float]:
-    """Train the judgment model (train/val discipline unchanged), score every
-    candidate in the CSV, and fix the entry threshold from val scores only."""
+    """Score pre-holdout candidates and fix the threshold from val only."""
     artifact = latest_artifact(DEFAULT_FROZEN_CONFIG)
     if artifact is not None and data_path.resolve() == artifact.dataset_path.resolve():
-        return score_with_artifact(artifact)
+        return score_with_artifact(artifact, end_before=HOLDOUT_START)
 
     train, val, _ = load_splits(data_path)
     model = train_model(train, val)
     val_scores = model.predict(val[FEATURE_COLUMNS], num_iteration=model.best_iteration)
     threshold = float(np.quantile(val_scores, SCORE_QUANTILE))
 
-    full = pd.read_csv(data_path, parse_dates=["signal_time"])
+    full = read_dataset_before(data_path, end_before=HOLDOUT_START)
     full["score"] = model.predict(full[FEATURE_COLUMNS], num_iteration=model.best_iteration)
     full["entry_time"] = full["signal_time"] + BAR              # next-bar open
     full["exit_time"] = full["entry_time"] + full["exit_offset"] * BAR
     return full.sort_values(["entry_time", "score"], ascending=[True, False]), threshold
+
+
+def validation_start(data_path: Path) -> pd.Timestamp:
+    artifact = latest_artifact(DEFAULT_FROZEN_CONFIG)
+    if artifact is not None and data_path.resolve() == artifact.dataset_path.resolve():
+        if artifact.val_start is None:
+            raise ValueError(f"frozen metadata has no validation range: {artifact.metadata_path}")
+        return artifact.val_start
+    _, val, _ = load_splits(data_path)
+    return pd.Timestamp(val["signal_time"].min())
 
 
 def simulate(signals: pd.DataFrame, threshold: float) -> pd.DataFrame:
@@ -124,8 +137,9 @@ def main() -> int:
 
     signals, threshold = build_signals(args.data)
     trades = simulate(signals, threshold)
-    accept = trades[trades["entry_time"] >= ACCEPT_START]
-    insample = trades[trades["entry_time"] < ACCEPT_START]
+    val_start = validation_start(args.data)
+    validation = trades[trades["entry_time"] >= val_start]
+    insample = trades[trades["entry_time"] < val_start]
 
     results = {
         "dataset": str(args.data),
@@ -134,17 +148,17 @@ def main() -> int:
         "n_eligible": int((signals["score"] >= threshold).sum()),
         "config": {
             "max_concurrent": MAX_CONCURRENT, "base_cost_round_trip": BASE_COST,
-            "accept_window_start": str(ACCEPT_START),
-            "accept_window_disclaimer": "window consumed once by 2b holdout eval (2026-07-08)",
+            "validation_window_start": str(val_start),
+            "score_scope": f"signal_time < {HOLDOUT_START}; holdout not scored",
         },
-        "cost_sweep_accept_window": {
-            f"{c:.3f}": window_metrics(accept, c) for c in COST_SWEEP
+        "cost_sweep_validation_window": {
+            f"{c:.3f}": window_metrics(validation, c) for c in COST_SWEEP
         },
         "insample_pre_window_base_cost": window_metrics(insample, BASE_COST),
         "full_period_base_cost": window_metrics(trades, BASE_COST),
     }
-    base = results["cost_sweep_accept_window"][f"{BASE_COST:.3f}"]
-    results["acceptance_check_base_cost"] = {
+    base = results["cost_sweep_validation_window"][f"{BASE_COST:.3f}"]
+    results["discovery_check_base_cost"] = {
         "net_positive": base.get("net_total_units", 0) > 0,
         "profit_factor_ge_1.3": base.get("profit_factor", 0) >= 1.3,
         "max_drawdown_le_20pct": base.get("max_drawdown_pct", 1) <= 0.20,

@@ -17,7 +17,7 @@
               ▼               ▼                ▼
 ┌──── 2a 检测层（旁路）──┐ ┌── 2b 判断层（主线）────────────┐
 │ render.py 画 K 线图    │ │ candidates.py 密集规则扫描      │
-│ （SMA/EMA 20/60/120） │ │ （EMA 8/13/21/34/55+144/200，  │
+│ （SMA/EMA 20/60/120） │ │ （SMA/EMA 20/60/120，           │
 │ auto_label.py 规则标注 │ │  strict/expanded 双阈值预设）   │
 │ YOLO11 训练/评估       │ │ labeling.py triple-barrier /    │
 │ ＝"规则的视觉替身"     │ │  拖尾止损（tp/sl/horizon 参数化）│
@@ -38,7 +38,7 @@
    ┌─── 看板（全栈）────┐    ┌── 报告体系 ────────┐    ┌─ 前向验证（P1 在建）─┐
    │ webapp/server.py    │    │ analysis/p*_report │    │ freeze_model.py 冻结 │
    │ FastAPI 只读 API    │    │ docs/learnings/    │    │ forward_track.py 记录│
-   │ static/ 原生JS+LWC  │    │ HANDOFF/NEXT_STEPS │    │ data/forward_log.csv │
+   │ static/ 原生JS+LWC  │    │ HANDOFF/NEXT_STEPS │    │ forward_log_ma206.csv│
    │ 本机 + VPS 双部署   │    └────────────────────┘    └──────────────────────┘
    └────────────────────┘
 ```
@@ -63,19 +63,17 @@
 | `scripts/offline_pipeline.sh` | 无人值守接力 | nohup 脱离会话 |
 | `scripts/swap_replication.py` | 合约复制检验 | 冻结规则，val only |
 
-## ⚠️ 已知不一致（owner 于 07-09 在架构图中发现）
+## 均线定义（2026-07-10 已统一）
 
-**检测层与判断层的均线定义不同**：2a YOLO 打标/训练用 SMA/EMA 20/60/120（继承旧项目
-画图管线），2b 判断层用 EMA 8/13/21/34/55+144/200（唯一有 P0 alpha 证据的均线组）。
-至今无害的原因：交易候选直接来自 8-55 规则扫描，YOLO 不在关键路径。但 YOLO 要成为
-实盘视觉入口前必须对齐——出路由 NEXT_STEPS P0-3 均线对比实验裁决：20/60/120 胜出则
-判断层切换（两层自动对齐、YOLO 免重训）；8-55 胜出则重训 YOLO（P2-11b）或改两级漏斗。
+2a YOLO 打标/训练、2b 候选扫描、LightGBM 特征、前向跟踪和看板全部使用
+SMA20/60/120 + EMA20/60/120。20/60 四线构成快束，120 双线作为慢锚；密集段至少连续
+5 根。旧 8-55 工件与报告只用于历史审计，不在任何默认运行路径中。
 
 ## 数据资产与产物约定
 
 - `data/`（不入 git）：`kline_fetched/okx_{SYM}_15m_{rows}.csv`（现货与 `_USDT_SWAP`
   同目录共存）、`judgment_dataset_v2_*.csv`、`sweep_v3/`、`scored_signals.csv`（缓存，
-  schema 变更自动重建）、（在建）`forward_log.csv`；
+  schema 变更自动重建）、`forward_log_ma206.csv`；
 - `analysis/output/`（入 git）：指标 JSON/CSV，命名 `p{阶段}[_变体]_{内容}`；
 - `analysis/p*_report.md`（入 git）：每轮实验的正式记录，含复现命令与诚实声明；
 - `models/`（P1 起）：冻结模型工件 + 阈值/指纹 sidecar；

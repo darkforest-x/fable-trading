@@ -122,6 +122,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 60px; }
 .chip.done   { background: rgba(31,167,125,.15); color: var(--up); }
 .chip.passed { background: rgba(57,135,229,.15); color: var(--accent); }
 .chip.failed { background: rgba(230,103,103,.15); color: var(--down); }
+.chip.pending { background: rgba(201,133,0,.15); color: var(--warn); }
 
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .two-col > *, .signals-layout > * { min-width: 0; }

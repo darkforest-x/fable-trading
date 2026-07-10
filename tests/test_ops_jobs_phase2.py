@@ -60,13 +60,13 @@ def test_build_dataset_argv_expanded() -> None:
             "mode": "expanded",
             "bar": "1H",
             "horizon_bars": 144,
-            "out": "data/judgment_dataset_v2_expanded.csv",
+            "out": "data/ma206/judgment_dataset_expanded.csv",
         },
     )
     assert argv[argv.index("--mode") + 1] == "expanded"
     assert argv[argv.index("--bar") + 1] == "1H"
     assert argv[argv.index("--horizon-bars") + 1] == "144"
-    assert argv[argv.index("--out") + 1] == "data/judgment_dataset_v2_expanded.csv"
+    assert argv[argv.index("--out") + 1] == "data/ma206/judgment_dataset_expanded.csv"
 
 
 def test_update_okx_argv() -> None:

@@ -15,9 +15,8 @@ from src.data.bars import BAR_CHOICES
 # Relative to repo root; only these dataset paths may be written by build_dataset.
 ALLOWED_BUILD_OUT = frozenset(
     {
-        "data/judgment_dataset.csv",
-        "data/judgment_dataset_v2_strict.csv",
-        "data/judgment_dataset_v2_expanded.csv",
+        "data/ma206/judgment_dataset_strict.csv",
+        "data/ma206/judgment_dataset_expanded.csv",
     }
 )
 
@@ -190,7 +189,7 @@ JOB_TYPES: dict[str, JobTypeSpec] = {
         title_zh="构建判断层数据集",
         description_zh="python3 -m src.judgment.build_dataset（strict/expanded）",
         timeout_sec=2 * 3600,
-        artifacts_hint="data/judgment_dataset_*.csv",
+        artifacts_hint="data/ma206/judgment_dataset_*.csv",
         confirm_zh="将在仓库根目录构建判断层数据集（可能覆盖已有 CSV）。",
         params=(
             ParamSpec(
@@ -218,7 +217,7 @@ JOB_TYPES: dict[str, JobTypeSpec] = {
             ParamSpec(
                 "out",
                 "path_enum",
-                default="data/judgment_dataset_v2_strict.csv",
+                default="data/ma206/judgment_dataset_strict.csv",
                 choices=tuple(sorted(ALLOWED_BUILD_OUT)),
                 description="output CSV under data/ (preset names only)",
             ),
@@ -268,7 +267,7 @@ JOB_TYPES: dict[str, JobTypeSpec] = {
         title_zh="前向跟踪刷新",
         description_zh="python3 scripts/forward_track.py（正式窗口，不改 --start）",
         timeout_sec=30 * 60,
-        artifacts_hint="data/forward_log.csv",
+        artifacts_hint="data/forward_log_ma206.csv",
         confirm_zh="将刷新前向日志（不暴露正式窗口 --start）。",
         params=(),
         build_argv=_argv_forward_track,

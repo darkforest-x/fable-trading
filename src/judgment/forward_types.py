@@ -11,10 +11,10 @@ import pandas as pd
 from src.judgment.frozen import FrozenArtifact
 
 PROJECT_DIR: Final = Path(__file__).resolve().parents[2]
-FORWARD_LOG_PATH: Final = PROJECT_DIR / "data" / "forward_log.csv"
+FORWARD_LOG_PATH: Final = PROJECT_DIR / "data" / "forward_log_ma206.csv"
 # H1 scaled shadow paper book — never mixed into mainline 100-trade gate.
-FORWARD_LOG_H1_SCALED_PATH: Final = PROJECT_DIR / "data" / "forward_log_h1_scaled.csv"
-FORWARD_START: Final = pd.Timestamp("2026-07-08 00:00:00", tz="UTC")
+FORWARD_LOG_H1_SCALED_PATH: Final = PROJECT_DIR / "data" / "forward_log_h1_scaled_ma206.csv"
+FORWARD_START: Final = pd.Timestamp("2026-07-10 10:30:00", tz="UTC")
 BAR: Final = pd.Timedelta(minutes=15)
 TP_MULT: Final = 5.0
 SL_MULT: Final = 2.0

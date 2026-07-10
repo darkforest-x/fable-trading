@@ -1,7 +1,7 @@
 """Build the judgment-layer dataset: candidates + triple-barrier labels + features.
 
 Usage: python3 -m src.judgment.build_dataset [--mode strict|expanded] [--bar 15m] [--out PATH]
-Output: data/judgment_dataset.csv by default (data/ is gitignored) and a JSON
+Output: data/ma206/judgment_dataset_strict.csv by default (data/ is gitignored) and a JSON
 summary on stdout. Barrier structure comes from src.judgment.labeling defaults
 (v2: TP 4xATR / SL 2xATR, atr_pct >= 0.0015).
 """
@@ -20,7 +20,7 @@ from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature
 from src.judgment.labeling import HORIZON_BARS, label_candidate
 
 PROJECT_DIR = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = PROJECT_DIR / "data" / "judgment_dataset.csv"
+OUTPUT_PATH = PROJECT_DIR / "data" / "ma206" / "judgment_dataset_strict.csv"
 MIN_BARS = 500
 
 
@@ -34,7 +34,7 @@ def build(mode: str = "strict", *, bar: str = "15m", horizon_bars: int = HORIZON
         signal_indices = scan_candidates(enriched, horizon_bars=horizon_bars, mode=mode)
         if not signal_indices:
             continue
-        featured = add_features(enriched)
+        featured = add_features(enriched, mode=mode)
         feature_rows = extract_feature_rows(featured, signal_indices)
         for row_pos, signal_i in enumerate(signal_indices):
             outcome = label_candidate(enriched, signal_i, horizon=horizon_bars)

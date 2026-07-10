@@ -73,6 +73,7 @@ def test_short_mask_uses_down_order_and_down_extension_not_long_order() -> None:
             "slow_slope_abs": [0.0],
             "zero_volume96": [0.0],
             "volume_ratio": [1.0],
+            "dense_run_len_expanded": [5],
         }
     )
 

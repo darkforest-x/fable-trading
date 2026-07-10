@@ -37,8 +37,8 @@ fi
 PARTS=$(find data/kline_fetched -maxdepth 1 -name '*.part.csv' 2>/dev/null | wc -l | tr -d ' ')
 FO=$(curl -s -o /dev/null -w '%{http_code}' --connect-timeout 2 http://127.0.0.1:5151/ || echo 000)
 LS=$(curl -s -o /dev/null -w '%{http_code}' --connect-timeout 2 http://127.0.0.1:8081/ || echo 000)
-FW=$(wc -l < data/forward_log.csv 2>/dev/null | tr -d ' ')
-H1=$(wc -l < data/forward_log_h1_scaled.csv 2>/dev/null | tr -d ' ')
+FW=$(wc -l < data/forward_log_ma206.csv 2>/dev/null | tr -d ' ')
+H1=$(wc -l < data/forward_log_h1_scaled_ma206.csv 2>/dev/null | tr -d ' ')
 DF=$(df -h /System/Volumes/Data 2>/dev/null | tail -1 | awk '{print $4" free ("$5")"}')
 FORMAL=0
 [ -f analysis/p2a_e21_train_report.md ] && FORMAL=1
@@ -48,7 +48,7 @@ cat > "$OUT" <<MD
 Owner away. Agent continues per \`AUTONOMOUS_CHARTER.md\` — **do not stop**.
 
 ## fable 拍板
-SWAP · EMA 8-55 · 冻结 TP5/SL2 · YOLO 非关键 · H1 影子 · VPS \`ENABLE_JOB_EXECUTOR=0\`
+SWAP · SMA/EMA20/60/120 · 冻结 TP5/SL2 · YOLO 非关键 · H1 影子 · VPS \`ENABLE_JOB_EXECUTOR=0\`
 
 ## Pulse
 | check | value |

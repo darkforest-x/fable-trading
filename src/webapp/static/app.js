@@ -88,7 +88,7 @@ async function loadOverview() {
   $("#stages").innerHTML = d.stages.map((s) => `
     <div class="stage">
       <h3>${s.name} <span class="chip ${s.status}">${
-        { done: "已完成", passed: "验收通过", failed: "未通过" }[s.status] || s.status
+        { done: "已完成", passed: "验收通过", failed: "未通过", pending: "前向待验收" }[s.status] || s.status
       }</span></h3>
       <p>${s.summary}</p>
     </div>`).join("");
@@ -166,7 +166,7 @@ async function loadForward() {
 }
 
 /* ---------- backtest ---------- */
-const btState = { cost: 0.003, window: "accept", outcome: "", filter: "", scoreMin: 0, sort: "entry_time", dir: -1 };
+const btState = { cost: 0.003, window: "validation", outcome: "", filter: "", scoreMin: 0, sort: "entry_time", dir: -1 };
 let equityChart, equitySeries, ddChart, ddSeries, pfChart, pfSeries, pfLine;
 let tradeRows = [];
 
@@ -206,9 +206,9 @@ async function loadBacktest() {
   const w = d[btState.window];
 
   $("#bt-tiles").innerHTML = `
-    <div class="tile"><span class="lbl">交易笔数</span><b>${w.n_trades}</b><small>${d.universe_label} · ${btState.window === "accept" ? "验收窗口" : "全期"}</small></div>
+    <div class="tile"><span class="lbl">交易笔数</span><b>${w.n_trades}</b><small>${d.universe_label} · ${btState.window === "validation" ? "验证集（发现级）" : "holdout 前全期"}</small></div>
     <div class="tile"><span class="lbl">净收益（对资金）</span><b class="${cls(w.net_return_on_capital)}">${fmtPct(w.net_return_on_capital)}</b><small>单笔均值 ${fmtPct(w.mean_net_per_trade, 3)}</small></div>
-    <div class="tile"><span class="lbl">盈亏比 PF</span><b class="${w.profit_factor >= 1.3 ? "pos" : "neg"}">${fmtPF(w.profit_factor)}</b><small>验收线 1.3</small></div>
+    <div class="tile"><span class="lbl">盈亏比 PF</span><b class="${w.profit_factor >= 1.3 ? "pos" : "neg"}">${fmtPF(w.profit_factor)}</b><small>研究参考线 1.3</small></div>
     <div class="tile"><span class="lbl">最大回撤 / 胜率</span><b>${fmtPct(w.max_drawdown_pct)}</b><small>胜率 ${fmtPct(w.win_rate)}</small></div>`;
 
   if (!equityChart) {
@@ -238,7 +238,7 @@ async function loadBacktest() {
       color: "#3987e5", lineWidth: 2,
       priceFormat: { type: "custom", formatter: (v) => v.toFixed(2) },
     });
-    pfLine = pfSeries.createPriceLine({ price: 1.3, color: "#9aa0a8", lineStyle: 2, title: "验收线" });
+    pfLine = pfSeries.createPriceLine({ price: 1.3, color: "#9aa0a8", lineStyle: 2, title: "参考线" });
   }
   // x 轴借用 time 槽位表示成本（0.10% -> 0.50%），仅作形状展示
   pfSeries.setData(d.pf_curve.map((p, i) => ({ time: 1700000000 + i * 86400, value: p.pf })));
@@ -284,13 +284,13 @@ function renderTrades() {
 }
 
 /* ---------- signals browser ---------- */
-let symbolsLoaded = false, klineChart, klineSeries, volumeSeries, emaSeries = [];
+let symbolsLoaded = false, klineChart, klineSeries, volumeSeries, movingAverageSeries = [];
 let bandSeries, pathSeries, barrier = { tp: 4, sl: 2 };
 let currentKey = "", currentMarkers = [], currentTimes = [], priceLines = [], chartReq = 0;
 let currentThreshold = 0;
 let lastFocusRange = null;
 let symbolInputWired = false;
-const sigState = { bars: 3000 };
+const sigState = { bars: 9000 };
 segWire("#bars-seg", sigState, "bars", Number, () => currentKey && loadChart(currentKey));
 
 function ensureKlineChart() {
@@ -341,10 +341,10 @@ async function initSignals(force = false) {
   }
 }
 
-const EMA_COLORS = {
-  8: "rgba(57,135,229,0.9)", 13: "rgba(57,135,229,0.7)", 21: "rgba(57,135,229,0.55)",
-  34: "rgba(57,135,229,0.4)", 55: "rgba(57,135,229,0.3)",
-  144: "#9085e9", 200: "#d55181",
+const MA_COLORS = {
+  sma20: "#c47220", ema20: "#2460f0",
+  sma60: "#2f927c", ema60: "#3ca0fa",
+  sma120: "#8c6e6e", ema120: "#9646c8",
 };
 
 async function loadChart(key, focusEntry = null) {
@@ -364,7 +364,7 @@ async function loadChart(key, focusEntry = null) {
   currentThreshold = d.threshold;
 
   priceLines.forEach((l) => klineSeries.removePriceLine(l)); priceLines = [];
-  emaSeries.forEach((s) => klineChart.removeSeries(s)); emaSeries = [];
+  movingAverageSeries.forEach((s) => klineChart.removeSeries(s)); movingAverageSeries = [];
   bandSeries.setData([]); pathSeries.setData([]);
   currentTimes = d.candles.map((c) => c.time);
   klineSeries.setData(d.candles);
@@ -372,13 +372,13 @@ async function loadChart(key, focusEntry = null) {
     time: c.time, value: c.volume,
     color: c.close >= c.open ? "rgba(31,167,125,0.35)" : "rgba(230,103,103,0.35)",
   })));
-  for (const [span, data] of Object.entries(d.emas)) {
+  for (const [name, data] of Object.entries(d.moving_averages)) {
     const s = klineChart.addLineSeries({
-      color: EMA_COLORS[span] || "#666", lineWidth: span >= 144 ? 2 : 1,
+      color: MA_COLORS[name] || "#666", lineWidth: name.endsWith("120") ? 2 : 1,
       priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
     });
     s.setData(data);
-    emaSeries.push(s);
+    movingAverageSeries.push(s);
   }
   currentMarkers = d.markers;
   const markerList = [];
@@ -1087,7 +1087,7 @@ async function loadDataHub() {
     if (fmeta) {
       fmeta.textContent = fwd.exists
         ? `path ${fwd.path || "—"} · latest detected_at ${fwd.latest_detected_at || "—"} · mtime ${fwd.mtime ? String(fwd.mtime).slice(0, 19) : "—"}`
-        : `无 forward 日志（${fwd.path || "data/forward_log.csv"}）`;
+        : `无 forward 日志（${fwd.path || "data/forward_log_ma206.csv"}）`;
     }
     const parts = d.part_files_live || {};
     const ptiles = $("#data-parts-tiles");

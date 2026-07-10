@@ -6,16 +6,16 @@
 - grok_worker: stopped_by_owner_request_2026-07-10T16:20+08:00
 - scheduler: stopped
 - codex_heartbeat: e2-1b active every 4 hours; Codex-only execution
-- current_todo: await-e21b-exit-then-formal-report
+- current_todo: MA206 migration complete; await-e21b-exit-then-formal-report
 - last_slot: 2026-07-10T16:18 three-iter-digest-h1-e21bobserve
-- last_result: E2.1b still running at epoch 13; best mAP50 0.51028 (epoch 7); epochs 8-11 zero, epoch 12 recovered to 0.31475
+- last_result: owner-directed SMA/EMA20/60/120 migration active; new freeze and forward books verified at 0/100
 - next_action: Codex observes E2.1b natural exit, then writes Todo7 formal report
 - final_complete: false
 
 ## Guardrails
 
-- No judgment holdout or consumed trading validation reads.
-- No owner-gated parameter, frozen candidate, secret, or live-order changes.
+- MA206 holdout was accidentally scored once by the legacy dashboard during migration QA; quarantined and guarded by pre_holdout_only cache scope.
+- Owner approved the MA206 architecture/freeze migration on 2026-07-10; no further parameter, secret, or live-order changes.
 - VPS Label Studio deploy is authorized for Todo 4A only; no force-push; no main.
 - No duplicate or stopped training; E2.1b is observe-only.
 - Push only codex/grok-2day; never merge or push main.
@@ -24,6 +24,7 @@
 
 ## Completed (this batch)
 
+0. MA206 full-path migration — ACTIVE `frozen_tp5_sl2_swap_ma206_20260710`; new forward start 2026-07-10 10:30 UTC
 1. Todo 9b digest ↔ pipeline anomalies — `1856936` + `.omo/evidence/task-9b-digest-anomalies.md`
 2. H1 shadow forward ×2 idempotency — `.omo/evidence/task-9c-h1-shadow-idempotency.md` (data/ untracked)
 3. E2.1b observe snapshot (not exited) — `.omo/evidence/task-7-e21b-observe-snapshot.md`

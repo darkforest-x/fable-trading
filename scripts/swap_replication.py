@@ -26,8 +26,8 @@ from src.judgment.labeling import label_candidate
 from src.judgment.train import evaluate, load_splits, permutation_pvalue, train_model
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
-OUT_DIR = PROJECT_DIR / "data" / "swap_replication"
-OUT_JSON = PROJECT_DIR / "analysis" / "output" / "swap_replication.json"
+OUT_DIR = PROJECT_DIR / "data" / "ma206"
+OUT_JSON = PROJECT_DIR / "analysis" / "output" / "swap_replication_ma206.json"
 TAKER_FEE_ROUND_TRIP = 0.0010
 COSTS = {"taker_010": TAKER_FEE_ROUND_TRIP, "maker_006": 0.0006}
 CONFIGS = {"tp4_sl2": (4.0, 2.0), "tp5_sl2": (5.0, 2.0)}
@@ -73,7 +73,7 @@ def main() -> int:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     results = []
     for name, df in build().items():
-        path = OUT_DIR / f"swap_{name}.csv"
+        path = OUT_DIR / f"swap_{name}_ma206.csv"
         df.to_csv(path, index=False)
         train, val, _ = load_splits(path, horizon_bars=72)  # holdout unused
         model = train_model(train, val)

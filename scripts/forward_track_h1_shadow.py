@@ -12,7 +12,7 @@
 
 Same mainline freeze for entries (candidates + score + val-q90 threshold);
 outcomes resolved with scaled 2.5 bank + 3 trail math. Writes only to
-`data/forward_log_h1_scaled.csv` — never replaces mainline `forward_log.csv`
+`data/forward_log_h1_scaled_ma206.csv` — never replaces mainline `forward_log_ma206.csv`
 or the TP5/SL2 frozen model path.
 
 See docs/H1_SCALED_FORWARD_SHADOW_PLAN.md.
@@ -40,7 +40,7 @@ SHADOW_MODE = "main_freeze_entries_scaled_exits"
 SCALED_STUB_NOTE = (
     "models/frozen_scaled_25_t3_2026-07-09.json is a lightweight stub "
     "(missing feature_columns / dataset_path / full SHA); load_artifact rejects it. "
-    "This shadow run scores entries with mainline frozen_tp5_sl2_swap and labels "
+    "This shadow run scores entries with mainline frozen_tp5_sl2_swap_ma206 and labels "
     "exits via resolve_forward_exit_scaled (label_candidate_scaled math)."
 )
 
@@ -68,7 +68,7 @@ def main() -> int:
                 {
                     "error": "refusing_mainline_log",
                     "message": (
-                        "H1 shadow must not write to data/forward_log.csv. "
+                        "H1 shadow must not write to data/forward_log_ma206.csv. "
                         f"Default is {FORWARD_LOG_H1_SCALED_PATH}."
                     ),
                 },

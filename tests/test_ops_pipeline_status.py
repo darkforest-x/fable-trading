@@ -47,13 +47,13 @@ def test_redact_strings_strips_absolute_and_secrets() -> None:
         "ok": "models/ACTIVE",
         "leak": "/Users/zhangzc/secret/path/file.txt",
         "password": "should-not-appear",
-        "nested": [{"token": "abc", "rel": "data/forward_log.csv"}],
+        "nested": [{"token": "abc", "rel": "data/forward_log_ma206.csv"}],
     }
     clean = pipeline_status._redact_strings(dirty)
     assert clean["leak"] == "file.txt"
     assert clean["password"] == "[redacted]"
     assert clean["nested"][0]["token"] == "[redacted]"
-    assert clean["nested"][0]["rel"] == "data/forward_log.csv"
+    assert clean["nested"][0]["rel"] == "data/forward_log_ma206.csv"
     assert clean["ok"] == "models/ACTIVE"
 
 

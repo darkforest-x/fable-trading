@@ -12,16 +12,16 @@ from src.data.loader import list_series, load_series
 SeriesKey = tuple[str, str]
 SIGNAL_BAR: Final = pd.Timedelta(minutes=15)
 H1_BAR: Final = pd.Timedelta(hours=1)
-H1_EMA_MIN_BARS: Final = 55
+H1_EMA_MIN_BARS: Final = 120
 H9_FLAG_COLUMNS: Final = ("h1_up_slope", "h1_above_ma", "h1_ok")
 
 
 def hourly_state(frame: pd.DataFrame) -> tuple[pd.DatetimeIndex, np.ndarray, np.ndarray]:
     close = frame.set_index("open_time")["close"].resample("1h").last().dropna()
-    ema55 = close.ewm(span=55, adjust=False).mean()
-    ema144 = close.ewm(span=144, adjust=False).mean()
-    up_slope = (ema55.diff(12) > 0).to_numpy()
-    above_ma = (close > ema144).to_numpy()
+    ema60 = close.ewm(span=60, adjust=False).mean()
+    ema120 = close.ewm(span=120, adjust=False).mean()
+    up_slope = (ema60.diff(12) > 0).to_numpy()
+    above_ma = (close > ema120).to_numpy()
     return close.index, up_slope, above_ma
 
 

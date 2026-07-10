@@ -14,7 +14,6 @@
   <div class="top-actions">
     <div class="seg universe-seg" id="universe-seg">
       <button data-universe="swap" class="active">合约</button>
-      <button data-universe="spot">现货</button>
     </div>
     <nav class="tabs">
       <button class="tab active" data-view="overview">总览</button>
@@ -46,7 +45,7 @@
         <div id="tiles" class="tile-grid"></div>
       </div>
       <div class="panel">
-        <h2>验收窗口净值 <span class="unit">（0.3% 成本）</span></h2>
+        <h2>验证集发现级净值 <span class="unit">（0.3% 成本 · holdout 已隔离）</span></h2>
         <div id="spark-chart" class="chart short"></div>
         <ul id="acceptance" class="check-list"></ul>
       </div>
@@ -66,10 +65,10 @@
         <button data-cost="0.004">成本 0.4%</button>
       </div>
       <div class="seg" id="window-seg">
-        <button data-window="accept" class="active">验收窗口</button>
-        <button data-window="full">全期（含 in-sample）</button>
+        <button data-window="validation" class="active">验证集（发现级）</button>
+        <button data-window="preholdout">holdout 前全期</button>
       </div>
-      <span class="note">验收窗口曾被 2b holdout 消耗一次；全期含模型训练期，仅作对照。</span>
+      <span class="note">MA206 holdout 曾被旧看板意外读取 1 次，结果作废；当前不评分。全期含模型训练期，仅作对照。</span>
     </div>
     <div id="bt-tiles" class="tile-row"></div>
 
@@ -85,7 +84,7 @@
         <div id="decile-bars" class="hbar-wrap"></div>
       </div>
       <div class="panel">
-        <h2>PF ↔ 成本曲线 <span class="unit">（验收窗口，虚线 = 验收线 1.3）</span></h2>
+        <h2>PF ↔ 成本曲线 <span class="unit">（验证集发现级，虚线 = 研究参考线 1.3）</span></h2>
         <div id="pf-chart" class="chart short"></div>
       </div>
     </div>
@@ -141,8 +140,8 @@
       <datalist id="symbol-list"></datalist>
       <div class="seg" id="bars-seg">
         <button data-bars="1500">15 天</button>
-        <button data-bars="3000" class="active">1 个月</button>
-        <button data-bars="9000">3 个月</button>
+        <button data-bars="3000">1 个月</button>
+        <button data-bars="9000" class="active">3 个月</button>
         <button data-bars="40000">全部</button>
       </div>
       <span id="symbol-info" class="note"></span>
@@ -150,9 +149,8 @@
     <div class="signals-layout">
       <div class="panel grow">
         <div class="legend">
-          <span><i class="dot" style="background:#3987e5"></i>EMA 8-55（快带）</span>
-          <span><i class="dot" style="background:#9085e9"></i>EMA 144</span>
-          <span><i class="dot" style="background:#d55181"></i>EMA 200</span>
+          <span><i class="dot" style="background:#c47220"></i>SMA 20/60/120</span>
+          <span><i class="dot" style="background:#2460f0"></i>EMA 20/60/120</span>
           <span><i class="dot" style="background:#199e70"></i>▲入场 ▪出场（绿盈/红损/黄超时）</span>
           <span><i class="dot" style="background:#8b93a1"></i>○ 合格未成交</span>
           <span><i class="dot" style="background:rgba(57,135,229,.35)"></i>色带 = 均线密集区</span>
@@ -386,7 +384,7 @@
         <pre id="data-audit-json" class="ops-pre"></pre>
       </div>
       <div class="panel">
-        <h2>前向日志健康 <span class="unit">forward_log.csv</span></h2>
+        <h2>前向日志健康 <span class="unit">forward_log_ma206.csv</span></h2>
         <div id="data-forward-tiles" class="tile-grid cols-4"></div>
         <p class="note" id="data-forward-meta"></p>
       </div>
@@ -439,6 +437,6 @@
     </div>
   </section>
 </main>
-<script src="app.js?v=10"></script>
+<script src="app.js?v=11"></script>
 </body>
 </html>

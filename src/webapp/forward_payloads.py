@@ -1,4 +1,4 @@
-"""Forward-validation dashboard payloads from append-only forward_log.csv.
+"""Forward-validation dashboard payloads from append-only MA206 forward logs.
 
 The forward tab reports only maker-filled closed rows for the 100-trade
 decision counter, while keeping all logged threshold signals visible in the
