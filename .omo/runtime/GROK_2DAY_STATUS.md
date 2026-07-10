@@ -7,9 +7,9 @@
 - scheduler: stopped
 - codex_heartbeat: active every 4 hours; Codex-only execution
 - current_todo: q80 24-hour diagnostic accumulation and frozen forward monitoring
-- last_slot: 2026-07-11T04:20 fixed-sahi-and-direction-economics
-- last_result: E2.1b, fixed SAHI, and causal direction YOLO all failed their gates; q80 shadow remains diagnostic-only
-- next_action: keep q80 shadow accumulating to 24h; only forward evidence may change the profitability conclusion
+- last_slot: 2026-07-11T04:30 q80-auto-seal
+- last_result: q80 at 9.25/24 market hours, 67 candidates, 16 ledger rows; automatic first-ready snapshot armed
+- next_action: when q80_shadow_24h_ready.json appears, finalize the fixed 24h report without tuning thresholds
 - final_complete: true
 
 ## Guardrails
@@ -38,6 +38,7 @@
 11. Fixed SAHI full val — `analysis/p2a_e21b_sahi_report.md`; 625/1297 matched, 2753 predictions, rejected
 12. Causal direction YOLO — `analysis/p2a_causal_direction_profit_report.md`; net@0.2% negative, PF 0.7472, rejected
 13. q80 same-window shadow — `analysis/ma206_q80_shadow_diagnosis.md`; separate ledger, no ACTIVE/main-book writes
+14. q80 24h auto-seal — first market-time-ready snapshot is atomic and never overwritten; 213 tests pass
 
 ## Implemented but not accepted as profitable
 

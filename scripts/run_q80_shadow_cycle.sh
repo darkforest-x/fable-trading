@@ -33,4 +33,9 @@ printf 'q80 shadow cycle start: %s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 "$PYTHON_BIN" -m src.data.update_okx --bar 15m
 "$PYTHON_BIN" scripts/forward_threshold_shadow.py > "$OUTPUT_DIR/q80_shadow_latest.json.tmp"
 mv "$OUTPUT_DIR/q80_shadow_latest.json.tmp" "$OUTPUT_DIR/q80_shadow_latest.json"
+"$PYTHON_BIN" scripts/q80_shadow_checkpoint.py \
+  --latest "$OUTPUT_DIR/q80_shadow_latest.json" \
+  --ledger "$ROOT/data/forward_log_ma206_q80_shadow.csv" \
+  --status-out "$OUTPUT_DIR/q80_shadow_checkpoint_status.json" \
+  --ready-out "$OUTPUT_DIR/q80_shadow_24h_ready.json"
 printf 'q80 shadow cycle complete: %s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"

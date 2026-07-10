@@ -42,7 +42,10 @@ reconciled in `analysis/two_day_final_audit_20260711.md`.
 
 Keep q80 shadow accumulating to at least 24 hours and continue the frozen forward books.
 Do not tune from the short shadow sample. At 24 hours, snapshot the same-window funnel and
-closed q90-range versus q80-only diagnostics without changing thresholds.
+closed q90-range versus q80-only diagnostics without changing thresholds. The cycle now writes
+`output/offline_tasks/q80_shadow_checkpoint_status.json` every run and atomically creates
+`output/offline_tasks/q80_shadow_24h_ready.json` only on the first ready cycle. If the ready file
+is absent, do not manufacture a report or rerun the scanner in parallel.
 
 ## Still parallel / owner gates
 
