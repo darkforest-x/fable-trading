@@ -13,6 +13,7 @@ from src.judgment.frozen import (
     cache_metadata,
     latest_artifact,
     read_dataset_before,
+    snapshot_dataset,
 )
 from src.judgment.features import FEATURE_COLUMNS
 from src.judgment.train import HOLDOUT_START
@@ -118,3 +119,20 @@ def test_read_dataset_before_rejects_unsorted_input(tmp_path: Path) -> None:
 
     with pytest.raises(FrozenArtifactError, match="sorted by signal_time"):
         read_dataset_before(path, end_before=HOLDOUT_START)
+
+
+def test_snapshot_dataset_is_content_addressed_and_preserves_old_bytes(tmp_path: Path) -> None:
+    source = tmp_path / "data" / "ma206" / "dataset.csv"
+    source.parent.mkdir(parents=True)
+    source.write_text("signal_time,value\n2026-01-01T00:00:00Z,1\n", encoding="utf-8")
+
+    first = snapshot_dataset(source, project_dir=tmp_path)
+    repeated = snapshot_dataset(source, project_dir=tmp_path)
+    source.write_text("signal_time,value\n2026-01-01T00:00:00Z,2\n", encoding="utf-8")
+    second = snapshot_dataset(source, project_dir=tmp_path)
+
+    assert first == repeated
+    assert first != second
+    assert first.parent == tmp_path / "data" / "frozen_datasets"
+    assert first.read_text(encoding="utf-8").endswith(",1\n")
+    assert second.read_text(encoding="utf-8").endswith(",2\n")

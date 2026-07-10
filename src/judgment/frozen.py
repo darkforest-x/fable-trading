@@ -9,6 +9,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import shutil
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -133,7 +134,8 @@ def load_artifact(config: FrozenConfig, metadata_path: Path) -> FrozenArtifact:
 
 def train_frozen_artifact(config: FrozenConfig, artifact_date: str) -> FrozenArtifact:
     config.models_dir.mkdir(parents=True, exist_ok=True)
-    train, val, _ = load_splits(config.dataset_path, horizon_bars=config.horizon_bars)
+    dataset_path = snapshot_dataset(config.dataset_path, project_dir=config.project_dir)
+    train, val, _ = load_splits(dataset_path, horizon_bars=config.horizon_bars)
     model = train_model(train, val)
     best_iteration = int(model.best_iteration or model.current_iteration())
     val_scores = model.predict(val[FEATURE_COLUMNS], num_iteration=best_iteration)
@@ -144,13 +146,14 @@ def train_frozen_artifact(config: FrozenConfig, artifact_date: str) -> FrozenArt
     metadata_path = config.models_dir / f"{stem}.json"
     model.save_model(str(model_path), num_iteration=best_iteration)
     metadata = {
-        "artifact_version": 1,
+        "artifact_version": 2,
         "config": config.name,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "model_path": _relative_path(config, model_path),
-        "dataset_path": _relative_path(config, config.dataset_path),
-        "dataset_sha256": file_sha256(config.dataset_path),
-        "dataset_size_bytes": config.dataset_path.stat().st_size,
+        "dataset_path": _relative_path(config, dataset_path),
+        "dataset_source_path": _relative_path(config, config.dataset_path),
+        "dataset_sha256": file_sha256(dataset_path),
+        "dataset_size_bytes": dataset_path.stat().st_size,
         "threshold_val_q90": threshold,
         "score_quantile": config.score_quantile,
         "feature_columns": list(FEATURE_COLUMNS),
@@ -234,6 +237,26 @@ def file_sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def snapshot_dataset(source_path: Path, *, project_dir: Path) -> Path:
+    """Copy a training dataset into a content-addressed immutable path."""
+    digest = file_sha256(source_path)
+    target_dir = project_dir / "data" / "frozen_datasets"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target = target_dir / f"{digest}{source_path.suffix or '.bin'}"
+    if target.exists():
+        if file_sha256(target) != digest:
+            raise FrozenArtifactError(target, "content-addressed snapshot hash mismatch")
+        return target
+
+    temporary = target.with_suffix(f"{target.suffix}.tmp")
+    shutil.copyfile(source_path, temporary)
+    if file_sha256(temporary) != digest:
+        temporary.unlink(missing_ok=True)
+        raise FrozenArtifactError(source_path, "dataset changed while creating snapshot")
+    temporary.replace(target)
+    return target
 
 
 def _project_path(config: FrozenConfig, value: str) -> Path:
