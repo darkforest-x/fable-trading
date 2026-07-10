@@ -17,7 +17,7 @@ services:
       - LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
       - LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/label-studio/files
       # Local-only bootstrap (override via env). Not for public VPS.
-      - LABEL_STUDIO_USERNAME=${LABEL_STUDIO_USERNAME:-fable-review@local}
+      - LABEL_STUDIO_USERNAME=${LABEL_STUDIO_USERNAME:-fable-review@example.com}
       - LABEL_STUDIO_PASSWORD=${LABEL_STUDIO_PASSWORD:-fable-review-local}
       - LABEL_STUDIO_DISABLE_SIGNUP_WITHOUT_LINK=true
     volumes:

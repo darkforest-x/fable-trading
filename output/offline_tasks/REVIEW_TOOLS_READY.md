@@ -31,7 +31,7 @@ screen -dmS fable_fiftyone bash -lc 'cd ~/fable-trading && bash scripts/start_fi
 | 项 | 值 |
 |----|-----|
 | URL | **http://127.0.0.1:8081** |
-| 用户 | `fable-review@local` |
+| 用户 | `fable-review@example.com` |
 | 密码 | `fable-review-local` |
 | Docker | `fable_label_studio` Up |
 | 任务包 | `output/label_studio/tasks_val.json`（80 张） |
