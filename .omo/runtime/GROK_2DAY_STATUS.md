@@ -7,8 +7,8 @@
 - scheduler: stopped
 - codex_heartbeat: e2-1b active every 4 hours; Codex-only execution
 - current_todo: Todo 7 blocked on natural E2.1b exit; F1/F2/F4 pre-final audit complete
-- last_slot: 2026-07-10T22:28 codex-pre-final-audit
-- last_result: 173 tests passed; VPS services active and executor 0; no tracked secret/dependency drift; E2.1b still at 29 epochs
+- last_slot: 2026-07-10T23:47 ma206-profitability-diagnosis
+- last_result: MA206 gross edge is 0.095%/trade and fails 0.2%-0.3% costs; train-to-val net/trade drops 0.55pp; E2.1b still running
 - next_action: if E2.1b has exited, close Todo 7 formal report; otherwise keep observe-only and do not start Todo 8
 - final_complete: false
 
@@ -33,6 +33,7 @@
 6. Todo 6 current-MA206 VPS acceptance — `.omo/evidence/task-6-vps-current-ma206-acceptance.md`; public redacted pipeline 200, ops auth retained, executor 0, desktop/mobile passed
 7. Current-MA206 daily workflow — `.omo/evidence/task-10-daily-workflow-current-ma206.md`; forward byte-idempotent, digest dry-run, VPS data mirror 456/456, Codex daily automation active
 8. F1/F2/F4 pre-final audit — `analysis/two_day_pre_final_audit_20260710.md`; 173 tests, secret/dependency/scope checks, VPS executor 0
+9. MA206 profitability diagnosis — `analysis/ma206_profitability_diagnosis.md`; cost bridge, generalization drop, score/return alignment and rejected causes
 
 ## Implemented but not accepted as complete
 
