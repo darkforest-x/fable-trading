@@ -6,9 +6,11 @@ import cv2
 import numpy as np
 import pandas as pd
 
+from src.detection import build_direction_dataset as direction_builder
 from src.detection.build_direction_dataset import (
     LOOKBACK_BARS,
     build_direction_manifest,
+    materialize_images,
     render_causal_image,
     select_manifest_rows,
     summarize_manifest,
@@ -63,7 +65,7 @@ def test_render_causal_image_is_invariant_to_future_rows(tmp_path: Path) -> None
 
     baseline = cv2.imread(str(baseline_path), cv2.IMREAD_UNCHANGED)
     mutated = cv2.imread(str(changed_path), cv2.IMREAD_UNCHANGED)
-    assert baseline.shape == (742, 1280, 3)
+    assert baseline.shape == (640, 640, 3)
     assert np.array_equal(baseline, mutated)
 
 
@@ -92,3 +94,41 @@ def test_select_and_summarize_manifest_reconcile_class_counts() -> None:
         "val": {"long": 2, "no_trade": 2, "short": 2},
     }
     assert summary["lookback_bars"] == 200
+
+
+def test_materialize_images_relocates_signal_by_time_when_source_index_shifts(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    original = _synthetic_dense_frame(periods=900)
+    prefix = original.iloc[:10].copy()
+    prefix["open_time"] = prefix["open_time"] - pd.Timedelta(minutes=150)
+    shifted = pd.concat([prefix, original], ignore_index=True)
+    signal_i = 800
+    signal_time = original["open_time"].iloc[signal_i]
+    manifest = pd.DataFrame(
+        [
+            {
+                "source": "okx",
+                "symbol": "TEST_USDT_SWAP",
+                "signal_i": signal_i,
+                "signal_time": signal_time,
+                "split": "train",
+                "direction_class": "long",
+            }
+        ]
+    )
+    monkeypatch.setattr(
+        direction_builder,
+        "list_series",
+        lambda bar="15m": {("okx", "TEST_USDT_SWAP"): [Path("ignored.csv")]},
+    )
+    monkeypatch.setattr(direction_builder, "load_series", lambda paths: shifted)
+
+    rendered = materialize_images(manifest, out_dir=tmp_path / "actual")
+    expected_path = tmp_path / "expected.png"
+    render_causal_image(add_indicators(shifted), signal_i=signal_i + 10, out_path=expected_path)
+
+    actual = cv2.imread(str(tmp_path / "actual" / rendered.iloc[0]["image_path"]))
+    expected = cv2.imread(str(expected_path))
+    assert np.array_equal(actual, expected)

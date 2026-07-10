@@ -33,6 +33,7 @@ from src.judgment.labeling import HORIZON_BARS, label_candidate, label_short_can
 from src.judgment.train import HOLDOUT_START
 
 LOOKBACK_BARS = 200
+DIRECTION_IMAGE_SIZE = 640
 DEFAULT_OUTPUT = Path("datasets/ma206_direction_causal_v1")
 
 
@@ -115,16 +116,37 @@ def render_causal_image(
     signal_i: int,
     out_path: Path,
     lookback_bars: int = LOOKBACK_BARS,
+    image_size: int = DIRECTION_IMAGE_SIZE,
 ) -> None:
     """Render one fixed lookback that ends exactly at `signal_i`."""
     window = causal_window(enriched, signal_i=signal_i, lookback_bars=lookback_bars)
-    render_chart(window, out_path=out_path)
+    render_chart(window, width=image_size, height=image_size, out_path=out_path)
 
 
 def _relative_image_path(row: pd.Series) -> Path:
     timestamp = pd.Timestamp(row["signal_time"]).strftime("%Y%m%dT%H%M%S")
     stem = f"{row['source']}_{row['symbol']}_{timestamp}_{int(row['signal_i']):06d}.png"
     return Path(str(row["split"])) / str(row["direction_class"]) / stem
+
+
+def _load_current_series(
+    source: str,
+    symbol: str,
+    required_times: set[pd.Timestamp],
+) -> pd.DataFrame:
+    """Reload renamed OKX files until every manifest signal time is present."""
+    available: set[pd.Timestamp] = set()
+    for _ in range(3):
+        paths = list_series(bar="15m").get((source, symbol))
+        if not paths:
+            continue
+        frame = load_series(paths)
+        frame = frame[frame["open_time"] < HOLDOUT_START].copy().reset_index(drop=True)
+        available = set(pd.to_datetime(frame["open_time"], utc=True))
+        if required_times.issubset(available):
+            return frame
+    missing = sorted(str(item) for item in required_times - available)
+    raise DirectionDatasetBuildError(f"missing manifest times for {source}/{symbol}: {missing[:3]}")
 
 
 def materialize_images(
@@ -136,20 +158,18 @@ def materialize_images(
     """Render manifest rows from the same filtered source-series indexing."""
     result = manifest.copy()
     result["image_path"] = [str(_relative_image_path(row)) for _, row in result.iterrows()]
-    grouped_paths = list_series(bar="15m")
     for (source, symbol), rows in result.groupby(["source", "symbol"]):
-        paths = grouped_paths.get((str(source), str(symbol)))
-        if not paths:
-            raise DirectionDatasetBuildError(f"missing source files for {source}/{symbol}")
-        frame = load_series(paths)
-        frame = frame[frame["open_time"] < HOLDOUT_START].copy().reset_index(drop=True)
+        required_times = set(pd.to_datetime(rows["signal_time"], utc=True))
+        frame = _load_current_series(str(source), str(symbol), required_times)
         enriched = add_indicators(frame)
+        index_by_time = pd.Series(frame.index, index=pd.to_datetime(frame["open_time"], utc=True))
         for row in rows.itertuples(index=False):
             path = out_dir / row.image_path
             path.parent.mkdir(parents=True, exist_ok=True)
+            signal_i = int(index_by_time.loc[pd.Timestamp(row.signal_time)])
             render_causal_image(
                 enriched,
-                signal_i=int(row.signal_i),
+                signal_i=signal_i,
                 out_path=path,
                 lookback_bars=lookback_bars,
             )
@@ -170,6 +190,7 @@ def summarize_manifest(manifest: pd.DataFrame, *, lookback_bars: int) -> dict:
         "images": int(len(manifest)),
         "symbols": int(manifest["symbol"].nunique()) if "symbol" in manifest else 0,
         "lookback_bars": lookback_bars,
+        "image_size": [DIRECTION_IMAGE_SIZE, DIRECTION_IMAGE_SIZE],
         "horizon_bars": HORIZON_BARS,
         "class_counts": class_counts,
         "time_ranges": {
