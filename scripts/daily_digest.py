@@ -2,10 +2,12 @@
 message per day, numbers first, alerts only when something is wrong).
 
 Sections: data freshness | forward signals (new + cumulative scoreboard) |
-system health (training/pipeline states). Run after update_okx + forward_track.
+champion/challenger shadow comparison | system health. Run after update_okx +
+forward_track (and optional forward_track_shadows).
 """
 from __future__ import annotations
 
+import argparse
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -14,6 +16,7 @@ import pandas as pd
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_DIR))
+from src.judgment.shadow_compare import format_comparison_text  # noqa: E402
 from src.notify import send  # noqa: E402
 
 LOG = PROJECT_DIR / "data" / "forward_log.csv"
@@ -61,10 +64,24 @@ def _forward_segment(path: Path, title: str) -> str:
 
 
 def forward_board() -> str:
+    """Mainline + H1 segment plus full registry comparison (unsupported named)."""
     lines = [_forward_segment(LOG, "主线 TP5/SL2")]
     if LOG_H1.exists():
         lines.append(_forward_segment(LOG_H1, "影子 H1 scaled"))
+    lines.append(format_comparison_text())
     return "\n".join(lines)
+
+
+def build_message() -> tuple[str, bool]:
+    fresh, alert = data_freshness()
+    msg = (
+        f"📊 <b>fable-trading 日报</b> {datetime.now():%m-%d %H:%M}\n"
+        f"{fresh}\n{forward_board()}\n{system_health()}\n"
+        f"看板：http://103.214.174.58:8642"
+    )
+    if alert:
+        msg = "‼️ 有异常需要处理\n" + msg
+    return msg, alert
 
 
 def system_health() -> str:
@@ -119,13 +136,19 @@ def system_health() -> str:
     return "\n".join(notes) if notes else "系统：无异常"
 
 
-def main() -> int:
-    fresh, alert = data_freshness()
-    msg = (f"📊 <b>fable-trading 日报</b> {datetime.now():%m-%d %H:%M}\n"
-           f"{fresh}\n{forward_board()}\n{system_health()}\n"
-           f"看板：http://103.214.174.58:8642")
-    if alert:
-        msg = "‼️ 有异常需要处理\n" + msg
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Daily digest (Telegram or dry-run).")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print message only; never call Telegram send.",
+    )
+    args = parser.parse_args(argv)
+    msg, alert = build_message()
+    if args.dry_run:
+        print(msg)
+        print(f"telegram_send: SKIPPED\nalert_flag: {alert}")
+        return 0
     ok = send(msg)
     print(f"digest sent: {ok}")
     return 0
