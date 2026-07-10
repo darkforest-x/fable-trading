@@ -1,32 +1,34 @@
-# Multi-day status 2026-07-10T04:31:16.757915+00:00
+# Multi-day status 2026-07-10T04:36:49.636702+00:00
 
-Owner away. Hourly tick — **E2.1 TRAIN + FINALIZE DONE**.
+Owner away. 2h durable tick.
 
 ## fable / red lines
 SWAP · EMA 8-55 · TP5/SL2 freeze · YOLO non-critical · H1 shadow  
-no holdout · no secrets · VPS executor=0
+no holdout · no secrets · VPS `ENABLE_JOB_EXECUTOR=0`
 
-## Hour checklist
-| # | item | result |
-|---|------|--------|
-| 1 | train | **DONE** 40/40 exit=0 |
-| 2 | formal report | **DONE** `analysis/p2a_e21_train_report.md` + consistency + FO hard_e21 |
-| 3 | expand FINAL | DONE 401 |
-| 4 | forward | main 9 new=0 · H1 8 new=0 |
-| 5 | FO/LS | up |
-| 6 | deploy | no UI this tick |
-| 7 | next | mainline forward accumulation; YOLO remains non-critical FAIL |
-| 8 | this file | updated |
+## Checklist
+| item | status |
+|------|--------|
+| train done? | **YES** E2.1 formal DONE (mAP50=0.8503 **FAIL** gate 0.90) |
+| expand done? | **YES** 401 · 0 parts · FINAL |
+| FO/LS up? | FO 200 · LS 302 · docker Up |
+| forward_track? | main 9 (2o/7c) **new=0**; H1 8 (1o/7c) **new=0** |
+| merge branches? | Phase2/3 on main |
+| pytest? | **114 passed** |
+| deploy? | no UI change → skip; executor=False |
+| next | **P0 forward life**; optional secondary e21b_hsv0 train running (non-mainline); docs sync |
 
-## E2.1 formal metrics (official val best.pt)
+## E2.1 formal (locked)
 | metric | value |
 |--------|------:|
 | mAP50 | 0.8503 |
 | mAP50-95 | 0.6655 |
-| precision | 0.8106 |
-| recall | 0.7047 |
-| Gate ≥0.90 | **FAIL** |
-| consistency match_rate | 0.5042 |
-| gate_match ≥0.95 | False |
+| P / R | 0.8106 / 0.7047 |
+| consistency match | 0.5042 |
+| gate_match≥0.95 | False |
 
-Mainline ACTIVE unchanged (frozen TP5/SL2 SWAP).
+Reports: `analysis/p2a_e21_train_report.md`, hardlist `output/offline_tasks/fiftyone_hard_e21/`
+
+## Side note
+Secondary screen `fable_yolo_e21b_hsv0` started from codex worktree (same SAFE_AUG train CLI; name only). Not promoted; mainline unchanged.
+ACTIVE=`models/frozen_tp5_sl2_swap_20260709.txt`
