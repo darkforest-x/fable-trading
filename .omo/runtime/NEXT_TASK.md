@@ -2,31 +2,34 @@
 
 model: deep
 
-## Priority queue (pick one atom)
+## Todo 9: Daily workflow smoke + pipeline health anomaly indicators
 
-### A. Owner review gate (unchanged dependency)
+Todo 6 / 6B are done on VPS (redacted 7-stage API, fail-closed token auth,
+executor off, desktop+390px screenshots). Plan Todo 7 (E2.1b report) stays
+blocked/observe-only until training exits — do **not** start/stop E2.1b.
+Start Todo 9 immediately; do not wait for owner Label Studio annotations.
 
-- URL: `https://103.214.174.58:8081` (self-signed)
-- Project: `dense_15m_val_audit` (80 tasks; **0 annotations**, 53 prelabels)
-- Creds: untracked `output/offline_tasks/LABEL_STUDIO_VPS_ACCESS.md`
-- After annotations: re-run
-  `.venv_label_studio_qa/bin/python scripts/export_ls_yolo_writeback.py --limit 80`
-  Diff source_counts vs baseline MANIFEST `cc462204c4650986…`; propose owner-gated
-  promote only. Never overwrite `datasets/dense_15m_full` without approval.
+1. Reconcile `codex/grok-2day`; reuse `.omo/evidence/task-6-vps-pipeline.md`.
+2. Safe local sequence only: data status → forward main/shadows (idempotent) →
+   digest dry-run → pipeline API. No Telegram send, no VPS job execution, no
+   new market-data source swap.
+3. Add **read-only** anomaly flags on pipeline payload for:
+   - stale market data (15m mtime threshold)
+   - judgment ACTIVE fingerprint mismatch
+   - low forward sample vs decision target
+   - YOLO diagnostic evidence missing/stale
+   - executor unexpectedly on
+4. Redaction unchanged: no secrets, absolute paths, holdout scores, write actions.
+5. Tests: healthy + injected stale/mismatch; auth fail-closed still holds.
+6. Optional light UI badges on 流水线. Redeploy VPS if code lands; prove
+   executor=0 and anon 401.
+7. Evidence `.omo/evidence/task-9-e2e-workflow.md`; update status + NEXT_TASK;
+   commit/push non-secret tracked changes.
 
-### B. Todo 6 remainder — VPS pipeline deploy (Recommended if no LS annotations)
+Pass: second forward run creates no duplicate rows; anomaly flags deterministic
+from existing metadata; CLI/API agree; VPS executor remains off.
 
-1. Deploy current branch ops console to VPS via existing deploy script (executor must stay 0).
-2. Curl + browser: `/api/ops/pipeline` auth, stages visible, no secrets/abs paths.
-3. Desktop + 390px screenshots; evidence `.omo/evidence/task-6-vps-pipeline.md`.
-4. Must NOT enable job executor, touch holdout, or promote models.
+Boundaries: no holdout, live orders, model/label promotion, dataset overwrite,
+Telegram token, force-push, main, or E2.1b start/stop.
 
-Pass: VPS matches local redacted contract; executor_off; secrets absent.
-
-### C. Todo 5 remainder — Playwright visual QA
-
-Loopback Playwright: no console errors, 390px no overflow on pipeline/data/models tabs.
-
-### Out of scope
-
-- Holdout, champion promotion, Telegram, job executor on, force-push, main, stop/start E2.1b.
+Owner LS review remains parallel only (80 tasks / 53 prelabels / 0 annotations).

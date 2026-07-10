@@ -65,3 +65,26 @@ def test_ops_pipeline_requires_token(monkeypatch: pytest.MonkeyPatch) -> None:
     out = ops_pipeline(_req({"Authorization": "Bearer pipe-test-token"}))
     assert out["read_only"] is True
     assert "stages" in out
+
+
+def test_deploy_stage_role_local_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("ENABLE_JOB_EXECUTOR", raising=False)
+    stage = pipeline_status._deploy_stage()
+    # CI/dev trees are never /opt/fable-trading.
+    assert stage["detail"]["role"] == "local"
+    assert stage["status"] == "local_ops"
+    assert "/opt/" not in str(stage)
+    assert "/Users/" not in str(stage)
+
+
+def test_deploy_stage_role_vps_tree(monkeypatch: pytest.MonkeyPatch) -> None:
+    from pathlib import Path
+
+    monkeypatch.setattr(pipeline_status, "PROJECT_ROOT", Path("/opt/fable-trading"))
+    monkeypatch.delenv("ENABLE_JOB_EXECUTOR", raising=False)
+    stage = pipeline_status._deploy_stage()
+    assert stage["detail"]["role"] == "vps"
+    assert stage["status"] == "vps_executor_off"
+    # Boolean role only — no absolute path leak in public fields.
+    blob = str(stage)
+    assert "/opt/fable-trading" not in blob

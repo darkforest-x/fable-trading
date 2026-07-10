@@ -14,8 +14,10 @@ rsync -az \
   "$VPS:$DIR/data/"
 rsync -az data/sweep_v3 data/swap_replication data/kline_fetched "$VPS:$DIR/data/"
 # Hard red line: never leave job executor enabled on public VPS.
+# Also re-assert EnvironmentFile for root-only ops auth (token never written here).
 ssh "$VPS" "set -euo pipefail
 UNIT=/etc/systemd/system/fable-dashboard.service
+ENVF=/etc/fable-trading/ops.env
 if [ -f \"\$UNIT\" ]; then
   if grep -q '^Environment=ENABLE_JOB_EXECUTOR=' \"\$UNIT\"; then
     sed -i 's/^Environment=ENABLE_JOB_EXECUTOR=.*/Environment=ENABLE_JOB_EXECUTOR=0/' \"\$UNIT\"
@@ -25,6 +27,10 @@ if [ -f \"\$UNIT\" ]; then
       sed -i '/^\[Service\]/a Environment=ENABLE_JOB_EXECUTOR=0' \"\$UNIT\"
     fi
   fi
+  # Wire optional root-only env file without creating/overwriting secrets.
+  if ! grep -q 'EnvironmentFile=-/etc/fable-trading/ops.env' \"\$UNIT\"; then
+    sed -i '/^\[Service\]/a EnvironmentFile=-/etc/fable-trading/ops.env' \"\$UNIT\"
+  fi
   systemctl daemon-reload
 fi
 systemctl restart fable-dashboard
@@ -33,8 +39,13 @@ for i in 1 2 3 4 5 6; do
     && curl -s -o /dev/null -w 'http:%{http_code}\n' http://127.0.0.1:8642/api/overview | grep -q 'http:200'; then
     systemctl is-active fable-dashboard
     echo http:200
-    # surface executor flag for operators
+    # surface executor flag for operators (never dump OPS_API_TOKEN)
     systemctl show fable-dashboard -p Environment --value 2>/dev/null | tr ' ' '\n' | grep ENABLE_JOB || true
+    if [ -f \"\$ENVF\" ]; then
+      echo \"ops_env:present mode=\$(stat -c %a \"\$ENVF\" 2>/dev/null || echo ?)\"
+    else
+      echo 'ops_env:missing (public /api/ops/* will be open unless token mode is set)'
+    fi
     exit 0
   fi
   sleep 2

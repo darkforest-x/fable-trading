@@ -240,13 +240,32 @@ def _jobs_stage() -> dict[str, Any]:
 
 
 def _deploy_stage() -> dict[str, Any]:
+    """Coarse deploy role without leaking host paths or secrets.
+
+    Detect known VPS install root (/opt/fable-trading) only as a boolean role
+    flag — never put absolute paths into the public JSON.
+    """
+    root = PROJECT_ROOT.resolve()
+    on_vps_tree = root.as_posix() == "/opt/fable-trading"
+    ex = executor_enabled()
+    if on_vps_tree:
+        status = "vps_executor_off" if not ex else "vps_executor_on"
+        summary = (
+            "VPS ops console; executor must stay off; auth via env file."
+            if not ex
+            else "VPS ops console with executor ON (unexpected on public host)."
+        )
+    else:
+        status = "local_ops"
+        summary = "Loopback/local ops console; VPS deploy is a separate verified step."
     return {
         "id": "deploy",
         "title": "Deployment",
-        "status": "local_ops",
-        "summary": "Loopback/local ops console; VPS deploy is a separate verified step.",
+        "status": status,
+        "summary": summary,
         "detail": {
-            "bind_expectation": "127.0.0.1 or VPS with executor=0",
+            "role": "vps" if on_vps_tree else "local",
+            "bind_expectation": "VPS public with executor=0" if on_vps_tree else "127.0.0.1 or Mac-local",
             "label_studio": "public review workflow separate from trading executor",
             "env_flags_visible": {
                 "OPS_AUTH_MODE": os.environ.get("OPS_AUTH_MODE", "off"),
