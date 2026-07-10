@@ -31,6 +31,7 @@
 | 07-09 | P1.5 R4 多时间框架完成 | 5m 机会扩张证伪；30m h72 AUC 0.6297 / p=0.001 / 净@maker +0.484%；1H 样本过小 |
 | 07-10 | P2-12 数据质量审计完成 | 892 序列；SWAP15 黑名单候选≈股票薄流动性；5 个 .part 未完成；未改 BLOCKED |
 | 07-10 | 前向日志正式窗口破零 | forward_track 冒烟 new=2 / total=2 closed；定时任务已含前向+TG 日报 |
+| 07-10 | **YOLO E2.1 正式重训 FAIL 0.90** | official mAP50=0.8503 P=0.811 R=0.705；非关键；见 p2a_e21_train_report |
 | 07-10 | **P2.5 Phase 0+1 落地** | ops auth + 实验注册表 + 议程只读；见 `docs/P2_5_PHASE01_README.md` |
 | 07-10 | **P2.5 Phase 2 job runner** | 白名单 + sqlite；默认 `ENABLE_JOB_EXECUTOR=0`；合 main |
 | 07-10 | **P2.5 Phase 3 数据/模型 hub** | 只读 data/model hub；无 promote POST |

@@ -10,7 +10,7 @@ mkdir -p label_studio_data output/offline_tasks output/label_studio
 python3 scripts/label_studio_prepare_import.py --split val --limit 80 --seed 20260709 --stratify
 
 # Local-only bootstrap user (NOT for VPS/public). File is gitignored via output/ or local.
-USER_EMAIL="${LABEL_STUDIO_USERNAME:-fable-review@local}"
+USER_EMAIL="${LABEL_STUDIO_USERNAME:-fable-review@example.com}"
 USER_PASS="${LABEL_STUDIO_PASSWORD:-fable-review-local}"
 
 cat > output/offline_tasks/LABEL_STUDIO_ACCESS.md <<EOF

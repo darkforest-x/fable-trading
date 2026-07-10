@@ -18,7 +18,7 @@ P2-11 打标 findings + P2-12 黑名单写入 BLOCKED。
 **2 笔** closed 信号（冻结 TP5/SL2 SWAP）。`src/notify.py` + `scripts/daily_digest.py`
 已同步进本 worktree。
 **07-10 追加（多日无人值守）**：SWAP expand **完成**（399 个 15m 文件）；P2.5 Phase0–3 已合 main；
-H1 shadow logger 已上线；YOLO E2.1 重训进行中（interim **best ep13 mAP50≈0.820**，曲线剧烈振荡，等 train 结束 + finalize）。
+H1 shadow logger 已上线；**YOLO E2.1 正式重训已完成**：official val mAP50=**0.8503**（gate≥0.90 **FAIL**）；consistency match≈0.50；hardlist `fiftyone_hard_e21`；检测层仍非关键。
 FO :5151 / Label Studio :8081 本机评审就绪；前向主线 + H1 双账本 digest。
 章程：`output/offline_tasks/AUTONOMOUS_CHARTER.md`；状态：`MULTI_DAY_STATUS.md`。
 **07-10 追加（P2.5）**：ops 鉴权 + 实验/议程 + **白名单 job runner**（默认 executor 关）+ **只读 data/model hub**。
