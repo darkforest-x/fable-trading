@@ -85,6 +85,8 @@ def evaluate_direction_predictions(
         raise DirectionPredictionError(f"unsupported direction classes: {unsupported}")
 
     selected: list[float] = []
+    selected_times: list[pd.Timestamp] = []
+    has_signal_time = "signal_time" in manifest.columns
     for row, prediction in zip(manifest.itertuples(index=False), predictions):
         if prediction == "no_trade":
             continue
@@ -93,8 +95,12 @@ def evaluate_direction_predictions(
         if not np.isfinite(value):
             raise DirectionPredictionError(f"selected {column} must be finite")
         selected.append(value)
+        if has_signal_time:
+            selected_times.append(pd.Timestamp(row.signal_time))
 
     gross = np.asarray(selected, dtype=float)
+    if selected_times:
+        gross = gross[np.argsort(pd.DatetimeIndex(selected_times).asi8)]
     n_candidates = len(manifest)
     n_trades = len(gross)
     cost_metrics = tuple(

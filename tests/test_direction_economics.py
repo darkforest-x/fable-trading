@@ -55,6 +55,23 @@ def test_evaluate_direction_predictions_handles_all_no_trade() -> None:
     assert all(metric.profit_factor is None for metric in result.cost_metrics)
 
 
+def test_evaluate_direction_predictions_orders_drawdown_by_signal_time() -> None:
+    manifest = pd.DataFrame(
+        {
+            "signal_time": pd.to_datetime(
+                ["2026-01-02", "2026-01-01", "2026-01-03"],
+                utc=True,
+            ),
+            "long_realized_ret": [0.20, -0.05, -0.05],
+            "short_realized_ret": [-0.20, 0.05, 0.05],
+        }
+    )
+
+    result = evaluate_direction_predictions(manifest, ["long", "long", "long"], costs=(0.0,))
+
+    assert result.cost_metrics[0].max_drawdown_pct == pytest.approx(0.05)
+
+
 def test_evaluate_direction_predictions_rejects_invalid_or_nonfinite_inputs() -> None:
     manifest = pd.DataFrame(
         {
