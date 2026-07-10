@@ -14,15 +14,7 @@ If still running, refresh observe snapshot and pick Option B/C.
 
 Evidence path: `.omo/evidence/task-7-e21b-report.md` when done.
 
-### Option B — Multi-book shadow matrix slice
-
-`PYTHONPATH=. python3 scripts/forward_track_shadows.py` once ×2 (or
-`--books` supported only); prove no duplicate rows across champion+H1;
-unsupported books reported only. Do not change ACTIVE.
-
-Evidence: `.omo/evidence/task-shadow-matrix-idempotency.md`.
-
-### Option C — Fingerprint mismatch diagnostic (read-only)
+### Option B — Fingerprint mismatch diagnostic (read-only)
 
 Document why pipeline flag `fingerprint_mismatch` fires (ACTIVE metadata
 vs dataset path); no repair, no promote, no holdout. Evidence only.
@@ -37,5 +29,6 @@ vs dataset path); no repair, no promote, no holdout. Evidence only.
 
 - Digest anomaly glue: `1856936`, dry-run anomaly_ids match pipeline.
 - H1 shadow ×2: new_signals=0, dup_keys=0, ACTIVE + mainline SHA stable.
+- Full shadow registry ×2: champion + H1 idempotent; H8/H10 unsupported and not approximated.
 - VPS pipeline anomalies + auth + executor 0.
 - Mainline forward idempotent (Todo 9).
