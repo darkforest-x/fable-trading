@@ -14,6 +14,24 @@ If still running, refresh observe snapshot and pick Option B/C.
 
 Evidence path: `.omo/evidence/task-7-e21b-report.md` when done.
 
+### Option B — Todo 8 fixed SAHI benchmark (only after Option A)
+
+Use the approved isolated SAHI environment. Predeclare and keep fixed:
+`slice_width=640`, `slice_height=371`, overlap `0.2`, and the existing
+confidence/IoU definitions. Reconcile a tiny sample before full val. Report
+latency and clearly named metrics in `analysis/p2a_e21b_sahi_report.md`; never
+call a custom evaluator an official Ultralytics metric unless definitions are
+identical. Do not modify the main `.venv`.
+
+Evidence path: `.omo/evidence/task-8-sahi.txt`.
+
+### Option C — Todo 10 and final verification (after Options A/B)
+
+Reconcile completed evidence, focused tests, VPS executor-off state, tracked
+diff and secrets scan. Update the durable project status reports with a clear
+separation between historical backtest, short forward observation, and
+unproven future returns. Do not merge or push main.
+
 ## Still parallel / owner gates
 
 - Label Studio: 80 tasks, 53 prelabels, 0 human annotations → writeback blocked.
