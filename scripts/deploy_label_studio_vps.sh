@@ -228,7 +228,8 @@ curl -skf -o /dev/null https://127.0.0.1:${PUBLIC_PORT}/user/login/ \
   || curl -skf -o /dev/null https://127.0.0.1:${PUBLIC_PORT}/ \
   || { echo FAIL: nginx TLS proxy not serving; exit 1; }
 # loopback-only: Label Studio must not listen on all interfaces for public port
-ss -lntp | grep -E ':${LS_PORT}\\b' | grep -q '127.0.0.1' || ss -lntp | grep -E ':${LS_PORT}\\b' | grep -q '::1' || true
+ss -lntp | grep -E ':${LS_PORT}\\b' | grep -Eq '127\\.0\\.0\\.1|\\[::1\\]' \
+  || { echo FAIL: Label Studio backend is not loopback-only; ss -lntp | grep -E ':${LS_PORT}\\b' || true; exit 1; }
 # private key permissions
 stat -c '%a' /etc/ssl/fable/label-studio.key | grep -qE '^(600|400)\$' \
   || { echo FAIL: private key not root-only; ls -l /etc/ssl/fable/; exit 1; }

@@ -16,7 +16,7 @@ TasksMax=256
 # Do not enable job executor paths; this unit is labeling-only
 # Bind loopback only — public access is nginx TLS on 8081 → 127.0.0.1:8082
 ExecStart=/opt/fable-label-studio/.venv/bin/label-studio start \
-  --host 127.0.0.1 \
+  --internal-host 127.0.0.1 \
   --port 8082 \
   -b \
   --data-dir /opt/fable-label-studio/data

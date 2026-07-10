@@ -134,10 +134,11 @@ def test_public_url_is_https(deploy_src: str) -> None:
 
 
 def test_label_studio_loopback_only(unit_src: str, deploy_src: str) -> None:
-    assert "--host 127.0.0.1" in unit_src
+    assert "--internal-host 127.0.0.1" in unit_src
     assert "--port 8082" in unit_src
-    assert "--host 0.0.0.0" not in unit_src
+    assert "--internal-host 0.0.0.0" not in unit_src
     assert "LS_PORT=8082" in deploy_src
+    assert "FAIL: Label Studio backend is not loopback-only" in deploy_src
     # Public HTTP to app port must not be the public URL surface
     assert "0.0.0.0" not in unit_src
 
