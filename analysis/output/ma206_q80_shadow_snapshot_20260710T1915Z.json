@@ -1,0 +1,49 @@
+{
+  "snapshot_time": "2026-07-10 19:15:00+00:00",
+  "holdout_used": false,
+  "mainline_changed": false,
+  "funnel": {
+    "scanned_series": 358,
+    "candidates_after_start": 63,
+    "q90_threshold": 0.34093332021594785,
+    "q90_score_signals": 10,
+    "q90_actionable_signals": 9,
+    "q80_threshold": 0.3098941865808003,
+    "q80_score_signals": 17,
+    "q80_actionable_signals": 15,
+    "q80_incremental_actionable_signals": 6
+  },
+  "shadow_ledger": {
+    "path": "data/forward_log_ma206_q80_shadow.csv",
+    "total_rows": 15,
+    "closed_rows": 9,
+    "open_rows": 6
+  },
+  "closed_economics_at_0_2pct_cost": {
+    "q90_score_range": {
+      "trades": 6,
+      "tp": 3,
+      "sl": 3,
+      "gross_mean_per_trade": 0.00467645068421585,
+      "net_mean_per_trade": 0.002676450684215849,
+      "profit_factor": 1.6732993129312739
+    },
+    "q80_only": {
+      "trades": 3,
+      "tp": 1,
+      "sl": 2,
+      "gross_mean_per_trade": 0.0019566115219329327,
+      "net_mean_per_trade": -0.00004338847806706752,
+      "profit_factor": 0.9914381328802817
+    },
+    "all_q80": {
+      "trades": 9,
+      "tp": 4,
+      "sl": 5,
+      "gross_mean_per_trade": 0.003769837630121544,
+      "net_mean_per_trade": 0.001769837630121544,
+      "profit_factor": 1.4078625583597346
+    }
+  },
+  "warning": "Nine closed trades are insufficient for a profitability conclusion."
+}
