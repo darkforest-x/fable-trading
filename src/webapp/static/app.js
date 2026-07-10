@@ -1213,25 +1213,43 @@ async function loadPipelineStatus() {
     const d = await opsFetch("/api/ops/pipeline");
     if (gen) gen.textContent = d.generated_at ? `generated ${d.generated_at}` : "";
     if (badge) {
+      const nAnom = Array.isArray(d.anomalies) ? d.anomalies.length : (d.anomaly_count || 0);
       badge.textContent = d.executor_enabled
         ? "executor ON（异常于 VPS 预期）"
-        : "executor OFF";
+        : `executor OFF · anomalies ${nAnom}`;
     }
     if (host) {
       const stages = d.stages || [];
-      host.innerHTML = stages
-        .map((s) => {
-          const st = (s.status || "").replace(/</g, "");
-          const title = (s.title || s.id || "").replace(/</g, "");
-          const summary = (s.summary || "").replace(/</g, "");
-          const caveat = (s.caveat || "").replace(/</g, "");
-          return `<div class="stage">
+      const anom = d.anomalies || [];
+      const anomHtml = anom.length
+        ? `<div class="stage" style="grid-column:1/-1">
+            <div class="stage-title">健康异常 <span class="unit">${anom.length}</span></div>
+            <div class="stage-body">${anom
+              .map((a) => {
+                const sev = (a.severity || "info").replace(/</g, "");
+                const msg = (a.message || a.id || "").replace(/</g, "");
+                const st = (a.stage || "").replace(/</g, "");
+                return `<div class="note">[${sev}] ${st}: ${msg}</div>`;
+              })
+              .join("")}</div>
+            <div class="note">只读标志；不发送告警、不触发任务。</div>
+          </div>`
+        : "";
+      host.innerHTML =
+        anomHtml +
+        stages
+          .map((s) => {
+            const st = (s.status || "").replace(/</g, "");
+            const title = (s.title || s.id || "").replace(/</g, "");
+            const summary = (s.summary || "").replace(/</g, "");
+            const caveat = (s.caveat || "").replace(/</g, "");
+            return `<div class="stage">
             <div class="stage-title">${title} <span class="unit">${st}</span></div>
             <div class="stage-body">${summary}</div>
             <div class="note">${caveat}</div>
           </div>`;
-        })
-        .join("");
+          })
+          .join("");
     }
   } catch (err) {
     if (host) host.innerHTML = "";

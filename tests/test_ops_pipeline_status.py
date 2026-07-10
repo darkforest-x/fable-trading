@@ -36,6 +36,8 @@ def test_pipeline_payload_structure_and_safety(monkeypatch: pytest.MonkeyPatch) 
     jobs = next(s for s in payload["stages"] if s["id"] == "jobs")
     assert jobs["detail"]["executor_enabled"] is False
     assert jobs["detail"]["write_actions"] == []
+    assert isinstance(payload.get("anomalies"), list)
+    assert payload.get("anomaly_count") == len(payload["anomalies"])
     violations = pipeline_status.assert_pipeline_payload_safe(payload)
     assert violations == []
 
@@ -88,3 +90,78 @@ def test_deploy_stage_role_vps_tree(monkeypatch: pytest.MonkeyPatch) -> None:
     # Boolean role only — no absolute path leak in public fields.
     blob = str(stage)
     assert "/opt/fable-trading" not in blob
+
+
+def _stage(
+    sid: str,
+    *,
+    status: str = "ok",
+    detail: dict | None = None,
+) -> dict:
+    return {"id": sid, "status": status, "detail": detail or {}, "summary": "", "title": sid}
+
+
+def test_collect_anomalies_healthy_minimal() -> None:
+    stages = [
+        _stage(
+            "data",
+            detail={"series_total": 10, "latest_mtime_15m": "2099-01-01T00:00:00+00:00"},
+        ),
+        _stage(
+            "detection_yolo",
+            detail={
+                "report_path": "analysis/p2a_e21_train_report.md",
+                "report_mtime": "2099-01-01T00:00:00+00:00",
+                "metrics_coarse": {"mAP50": 0.5},
+            },
+        ),
+        _stage(
+            "judgment",
+            detail={
+                "active": {"exists": True, "artifact_id": "frozen_x"},
+                "fingerprint_status": "ok",
+            },
+        ),
+        _stage("backtest", status="label_only"),
+        _stage(
+            "forward",
+            detail={"total_rows": 50, "decision_trades": 40, "decision_target": 100},
+        ),
+        _stage("jobs", detail={"executor_enabled": False}),
+        _stage("deploy", status="local_ops", detail={"role": "local"}),
+    ]
+    flags = pipeline_status.collect_anomalies(stages)
+    assert flags == []
+
+
+def test_collect_anomalies_injected_failures() -> None:
+    stages = [
+        _stage(
+            "data",
+            detail={"series_total": 10, "latest_mtime_15m": "2020-01-01T00:00:00+00:00"},
+        ),
+        _stage("detection_yolo", status="unknown", detail={}),
+        _stage(
+            "judgment",
+            detail={
+                "active": {"exists": True, "artifact_id": "frozen_x"},
+                "fingerprint_status": "mismatch",
+            },
+        ),
+        _stage("backtest", status="label_only"),
+        _stage(
+            "forward",
+            detail={"total_rows": 9, "decision_trades": 7, "decision_target": 100},
+        ),
+        _stage("jobs", status="executor_on", detail={"executor_enabled": True}),
+        _stage("deploy", status="vps_executor_on", detail={"role": "vps"}),
+    ]
+    flags = pipeline_status.collect_anomalies(stages)
+    ids = {f["id"] for f in flags}
+    assert "data_stale" in ids
+    assert "yolo_evidence_missing" in ids
+    assert "fingerprint_mismatch" in ids
+    assert "forward_low_sample" in ids
+    assert "executor_enabled" in ids
+    assert "vps_executor_on" in ids
+    assert all(f.get("severity") in {"info", "warn", "crit"} for f in flags)

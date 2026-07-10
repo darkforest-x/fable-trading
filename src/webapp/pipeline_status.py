@@ -278,6 +278,187 @@ def _deploy_stage() -> dict[str, Any]:
     }
 
 
+# Coarse thresholds for read-only anomaly flags (not trading parameters).
+DATA_STALE_HOURS = 36.0
+YOLO_EVIDENCE_STALE_DAYS = 14.0
+FORWARD_LOW_SAMPLE_FRACTION = 0.25  # vs decision_target
+
+
+def _parse_iso(ts: str | None) -> datetime | None:
+    if not ts or not isinstance(ts, str):
+        return None
+    try:
+        return datetime.fromisoformat(ts.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def _hours_since(ts: str | None) -> float | None:
+    dt = _parse_iso(ts)
+    if dt is None:
+        return None
+    now = datetime.now(timezone.utc)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return max(0.0, (now - dt).total_seconds() / 3600.0)
+
+
+def collect_anomalies(stages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Derive read-only health flags from stage metadata (no I/O, no writes).
+
+    Each flag: id, severity (info|warn|crit), stage, message.
+    Deterministic from the provided stages list only.
+    """
+    by_id = {s.get("id"): s for s in stages}
+    flags: list[dict[str, Any]] = []
+
+    data = by_id.get("data") or {}
+    ddet = data.get("detail") or {}
+    if data.get("status") == "missing" or not ddet.get("series_total"):
+        flags.append(
+            {
+                "id": "data_missing",
+                "severity": "crit",
+                "stage": "data",
+                "message": "No market-data series detected on disk metadata scan.",
+            }
+        )
+    else:
+        age_h = _hours_since(ddet.get("latest_mtime_15m"))
+        if age_h is None:
+            flags.append(
+                {
+                    "id": "data_mtime_unknown",
+                    "severity": "warn",
+                    "stage": "data",
+                    "message": "15m latest_mtime missing; cannot judge data freshness.",
+                }
+            )
+        elif age_h > DATA_STALE_HOURS:
+            flags.append(
+                {
+                    "id": "data_stale",
+                    "severity": "warn",
+                    "stage": "data",
+                    "message": (
+                        f"15m data mtime age ~{age_h:.1f}h exceeds "
+                        f"{DATA_STALE_HOURS:.0f}h freshness threshold."
+                    ),
+                }
+            )
+
+    yolo = by_id.get("detection_yolo") or {}
+    ydet = yolo.get("detail") or {}
+    if yolo.get("status") in {"unknown", "missing"} or (
+        not ydet.get("report_path") and not ydet.get("metrics_coarse")
+    ):
+        flags.append(
+            {
+                "id": "yolo_evidence_missing",
+                "severity": "info",
+                "stage": "detection_yolo",
+                "message": "YOLO diagnostic report/metrics not found (not a live gate).",
+            }
+        )
+    else:
+        y_age_h = _hours_since(ydet.get("report_mtime"))
+        if y_age_h is not None and y_age_h > YOLO_EVIDENCE_STALE_DAYS * 24:
+            flags.append(
+                {
+                    "id": "yolo_evidence_stale",
+                    "severity": "info",
+                    "stage": "detection_yolo",
+                    "message": (
+                        f"YOLO report mtime age ~{y_age_h / 24:.1f}d exceeds "
+                        f"{YOLO_EVIDENCE_STALE_DAYS:.0f}d diagnostic window."
+                    ),
+                }
+            )
+
+    judg = by_id.get("judgment") or {}
+    jdet = judg.get("detail") or {}
+    fp = jdet.get("fingerprint_status")
+    if judg.get("status") == "missing" or not (jdet.get("active") or {}).get("exists"):
+        flags.append(
+            {
+                "id": "active_missing",
+                "severity": "crit",
+                "stage": "judgment",
+                "message": "ACTIVE judgment pointer missing.",
+            }
+        )
+    elif fp == "mismatch":
+        flags.append(
+            {
+                "id": "fingerprint_mismatch",
+                "severity": "warn",
+                "stage": "judgment",
+                "message": "ACTIVE dataset fingerprint mismatch vs frozen metadata.",
+            }
+        )
+    elif fp in {"error", "unverifiable"}:
+        flags.append(
+            {
+                "id": "fingerprint_unverifiable",
+                "severity": "warn",
+                "stage": "judgment",
+                "message": f"ACTIVE fingerprint status={fp}.",
+            }
+        )
+
+    fwd = by_id.get("forward") or {}
+    fdet = fwd.get("detail") or {}
+    if fwd.get("status") == "missing" or not fdet.get("total_rows"):
+        flags.append(
+            {
+                "id": "forward_log_missing",
+                "severity": "warn",
+                "stage": "forward",
+                "message": "Forward paper log missing or empty.",
+            }
+        )
+    else:
+        decision = int(fdet.get("decision_trades") or 0)
+        target = int(fdet.get("decision_target") or 100) or 100
+        if decision < max(1, int(target * FORWARD_LOW_SAMPLE_FRACTION)):
+            flags.append(
+                {
+                    "id": "forward_low_sample",
+                    "severity": "info",
+                    "stage": "forward",
+                    "message": (
+                        f"Decision trades {decision}/{target} below "
+                        f"{FORWARD_LOW_SAMPLE_FRACTION:.0%} of target "
+                        "(not promotion evidence)."
+                    ),
+                }
+            )
+
+    jobs = by_id.get("jobs") or {}
+    if (jobs.get("detail") or {}).get("executor_enabled") or jobs.get("status") == "executor_on":
+        flags.append(
+            {
+                "id": "executor_enabled",
+                "severity": "crit",
+                "stage": "jobs",
+                "message": "ENABLE_JOB_EXECUTOR is on; unexpected on public VPS.",
+            }
+        )
+
+    deploy = by_id.get("deploy") or {}
+    if deploy.get("status") == "vps_executor_on":
+        flags.append(
+            {
+                "id": "vps_executor_on",
+                "severity": "crit",
+                "stage": "deploy",
+                "message": "Deploy role reports VPS with executor ON.",
+            }
+        )
+
+    return flags
+
+
 def pipeline_status_payload() -> dict[str, Any]:
     """Build redacted multi-stage pipeline snapshot."""
     stages = [
@@ -289,6 +470,7 @@ def pipeline_status_payload() -> dict[str, Any]:
         _jobs_stage(),
         _deploy_stage(),
     ]
+    anomalies = collect_anomalies(stages)
     ops = ops_status_payload()
     raw = {
         "generated_at": _iso_now(),
@@ -299,10 +481,13 @@ def pipeline_status_payload() -> dict[str, Any]:
         "auth_mode": ops.get("auth_mode"),
         "token_configured": ops.get("token_configured"),
         "stages": stages,
+        "anomalies": anomalies,
+        "anomaly_count": len(anomalies),
         "notes": {
             "purpose": "Coarse redacted pipeline view for operators",
             "not_proof": "Historical backtest and short forward are not future-return guarantees",
             "holdout": "Judgment holdout remains sealed on this surface",
+            "anomalies": "Read-only health flags from stage metadata; not alerts/actions",
         },
     }
     return _redact_strings(raw)

@@ -6,10 +6,10 @@
 - success_cooldown_seconds: 60
 - failure_backoff_seconds: 18000
 - max_slots: 24
-- current_todo: todo-9-e2e-workflow-anomalies
-- last_slot: 2026-07-10T15:46 todo-6b-vps-pipeline-plus-deploy-role
-- last_result: Todo6B VPS pipeline+browser PASS; deploy role vps_executor_off + deploy_vps EnvironmentFile harden PASS
-- next_action: Todo 9 workflow smoke + anomaly flags; Todo 7 E2.1b report waits training exit (observe-only); owner LS parallel
+- current_todo: todo-9-done-next-e21b-or-digest-glue
+- last_slot: 2026-07-10T15:52 three-iter-todo6b-deployrole-todo9
+- last_result: Todo6B VPS PASS; deploy-role harden PASS; Todo9 anomalies+workflow smoke PASS (7 tests; forward idempotent; VPS anomaly_count=2)
+- next_action: Optional digest←anomalies glue; or observe E2.1b exit for Todo7 report; owner LS review parallel
 - final_complete: false
 
 ## Guardrails
@@ -24,12 +24,13 @@
 
 ## Completed (this batch)
 
-1. Todo 6B VPS deploy + auth fail-closed + Playwright desktop/390px — evidence `task-6-vps-pipeline.md`
-2. Deploy stage VPS role + durable EnvironmentFile in `deploy_vps.sh` — evidence `task-6-deploy-stage-vps-role.md`
-3. Prior batch still valid: full-80 writeback `49596be`; P2.5 local `6d144ed`; pipeline local `ff07060`
+1. Todo 6B VPS pipeline deploy + Playwright desktop/390px + fail-closed auth — `dc441fa` (+evidence)
+2. Deploy stage `vps_executor_off` + `deploy_vps.sh` EnvironmentFile re-assert — same commit / follow-up
+3. Todo 9 pipeline `anomalies[]` + UI badges + forward×2 idempotency + digest dry-run + VPS redeploy
 
 ## Blocked Or Deferred
 
 - Telegram deferred until token rotation + chat ID.
-- Full-80 annotation writeback waits on owner review in LS (0 annotations).
-- Owner may rotate VPS OPS_API_TOKEN (agent-generated, root-only env file).
+- Full-80 annotation writeback waits on owner LS review (0 annotations).
+- Todo 7 E2.1b formal report waits training exit (observe-only).
+- Shadow forward matrix full re-run deferred; mainline idempotency proven.
