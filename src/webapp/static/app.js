@@ -43,6 +43,7 @@ function showView(name) {
   if (name === "jobs") loadJobsView();
   if (name === "data") loadDataHub();
   if (name === "models") loadModelHub();
+  if (name === "pipeline") loadPipelineStatus();
 }
 document.querySelectorAll(".tab").forEach((btn) =>
   btn.addEventListener("click", () => showView(btn.dataset.view)));
@@ -616,6 +617,7 @@ $("#ops-token-save")?.addEventListener("click", () => {
   if (active === "jobs") loadJobsView();
   if (active === "data") loadDataHub();
   if (active === "models") loadModelHub();
+  if (active === "pipeline") loadPipelineStatus();
 });
 
 function fmtMetric(x, digits = 4) {
@@ -1195,6 +1197,50 @@ async function loadModelHub() {
 
 $("#data-refresh")?.addEventListener("click", () => loadDataHub());
 $("#models-refresh")?.addEventListener("click", () => loadModelHub());
+$("#pipeline-refresh")?.addEventListener("click", () => loadPipelineStatus());
+
+async function loadPipelineStatus() {
+  const note = $("#pipeline-auth-note");
+  const host = $("#pipeline-stages");
+  const gen = $("#pipeline-generated");
+  const badge = $("#pipeline-executor-badge");
+  if (note) {
+    note.hidden = true;
+    note.textContent = "";
+  }
+  if (host) host.innerHTML = "<div class='note'>加载中…</div>";
+  try {
+    const d = await opsFetch("/api/ops/pipeline");
+    if (gen) gen.textContent = d.generated_at ? `generated ${d.generated_at}` : "";
+    if (badge) {
+      badge.textContent = d.executor_enabled
+        ? "executor ON（异常于 VPS 预期）"
+        : "executor OFF";
+    }
+    if (host) {
+      const stages = d.stages || [];
+      host.innerHTML = stages
+        .map((s) => {
+          const st = (s.status || "").replace(/</g, "");
+          const title = (s.title || s.id || "").replace(/</g, "");
+          const summary = (s.summary || "").replace(/</g, "");
+          const caveat = (s.caveat || "").replace(/</g, "");
+          return `<div class="stage">
+            <div class="stage-title">${title} <span class="unit">${st}</span></div>
+            <div class="stage-body">${summary}</div>
+            <div class="note">${caveat}</div>
+          </div>`;
+        })
+        .join("");
+    }
+  } catch (err) {
+    if (host) host.innerHTML = "";
+    if (note) {
+      note.hidden = false;
+      note.textContent = String(err?.message || err || "pipeline load failed");
+    }
+  }
+}
 
 refreshOpsAuthUi();
 loadOverview();

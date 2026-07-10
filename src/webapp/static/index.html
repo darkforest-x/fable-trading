@@ -26,6 +26,7 @@
       <button class="tab" data-view="jobs">任务</button>
       <button class="tab" data-view="data">数据</button>
       <button class="tab" data-view="models">模型</button>
+      <button class="tab" data-view="pipeline">流水线</button>
     </nav>
     <div class="ops-token-wrap" id="ops-token-wrap" hidden>
       <input id="ops-token-input" type="password" placeholder="OPS token" autocomplete="off" spellcheck="false">
@@ -331,6 +332,24 @@
           <tbody></tbody>
         </table>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ P2.5 redacted end-to-end pipeline (read-only) ============ -->
+  <section id="view-pipeline" class="view hidden" hidden aria-hidden="true">
+    <div id="pipeline-auth-note" class="banner" hidden></div>
+    <div class="panel">
+      <h2>端到端流水线 <span class="unit">P2.5 · 只读 · 粗粒度状态 · 非收益证明</span></h2>
+      <div class="controls">
+        <button type="button" id="pipeline-refresh" class="mini-btn">刷新</button>
+        <span class="note" id="pipeline-generated"></span>
+        <span class="note" id="pipeline-executor-badge"></span>
+      </div>
+      <p class="note" id="pipeline-notes">
+        历史回测与短前向样本不是未来收益保证；judgment holdout 不在此面读取；无写操作。
+      </p>
+      <div id="pipeline-stages" class="stage-row"></div>
+      <pre id="pipeline-json" class="ops-pre" hidden></pre>
     </div>
   </section>
 

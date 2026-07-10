@@ -36,6 +36,7 @@ from src.webapp.jobs.store import get_store
 from src.webapp.jobs.whitelist import JobValidationError, list_job_types
 from src.webapp.model_hub import model_hub_payload
 from src.webapp.ops_flags import executor_enabled, ops_status_payload
+from src.webapp.pipeline_status import pipeline_status_payload
 
 app = FastAPI(title="fable-trading dashboard")
 
@@ -248,6 +249,13 @@ def ops_model_hub(request: Request) -> dict:
     """List frozen_* pairs + ACTIVE pointer. Promote POST not exposed yet."""
     verify_ops_request(request)
     return model_hub_payload()
+
+
+@app.get("/api/ops/pipeline")
+def ops_pipeline(request: Request) -> dict:
+    """Redacted end-to-end pipeline stages. Read-only; no job writes."""
+    verify_ops_request(request)
+    return pipeline_status_payload()
 
 
 app.mount("/", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="static")
