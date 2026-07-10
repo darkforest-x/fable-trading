@@ -12,7 +12,8 @@ rsync -az \
   data/forward_log_ma206.csv data/forward_log_h1_scaled_ma206.csv \
   data/scored_signals*.csv data/scored_signals*.json \
   "$VPS:$DIR/data/"
-rsync -az data/ma206 data/kline_fetched "$VPS:$DIR/data/"
+rsync -az --delete data/ma206/ "$VPS:$DIR/data/ma206/"
+rsync -az --delete data/kline_fetched/ "$VPS:$DIR/data/kline_fetched/"
 # Hard red line: never leave job executor enabled on public VPS.
 # Also re-assert EnvironmentFile for root-only ops auth (token never written here).
 ssh "$VPS" "set -euo pipefail

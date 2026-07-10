@@ -12,7 +12,7 @@ from src.judgment.forward_types import FORWARD_COLUMNS, OUTCOME_COLUMNS, Forward
 def read_forward_log(path: Path) -> pd.DataFrame:
     if not path.exists():
         return pd.DataFrame(columns=FORWARD_COLUMNS)
-    return normalize_log(pd.read_csv(path))
+    return normalize_log(pd.read_csv(path, float_precision="round_trip"))
 
 
 def write_forward_log(path: Path, frame: pd.DataFrame) -> None:

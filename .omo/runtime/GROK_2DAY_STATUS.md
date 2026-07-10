@@ -8,7 +8,7 @@
 - codex_heartbeat: e2-1b active every 4 hours; Codex-only execution
 - current_todo: Todo 6 accepted on current MA206 VPS; E2.1b is still observe-only
 - last_slot: 2026-07-10T16:18 three-iter-digest-h1-e21bobserve
-- last_result: owner-directed SMA/EMA20/60/120 migration active; new freeze and forward books verified at 0/100
+- last_result: MA206 daily safe chain passed; 39,141 bars added, main/H1 at 2 rows and 1/100 closed, VPS mirror deduplicated
 - next_action: if E2.1b has exited, close Todo 7 formal report; otherwise continue non-owner-gated daily-workflow verification, then Todo 8 SAHI only after Todo 7
 - final_complete: false
 
@@ -31,6 +31,7 @@
 4. Full multi-book shadow matrix ×2 idempotent — `.omo/evidence/task-shadow-matrix-idempotency.md`
 5. ACTIVE fingerprint mismatch root cause confirmed — `.omo/evidence/task-fingerprint-mismatch-diagnostic.md`
 6. Todo 6 current-MA206 VPS acceptance — `.omo/evidence/task-6-vps-current-ma206-acceptance.md`; public redacted pipeline 200, ops auth retained, executor 0, desktop/mobile passed
+7. Current-MA206 daily workflow — `.omo/evidence/task-10-daily-workflow-current-ma206.md`; forward byte-idempotent, digest dry-run, VPS data mirror 456/456, Codex daily automation active
 
 ## Implemented but not accepted as complete
 

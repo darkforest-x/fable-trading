@@ -151,13 +151,14 @@ def system_health() -> str:
             tail = p.read_text()[-400:]
             if "Traceback" in tail:
                 notes.append(f"⚠️ {name} 日志尾部有异常，需要人看")
-    # Prefer E2.1 retrain curve if present, else legacy full_s
+    run_roots = (PROJECT_DIR, *sorted(PROJECT_DIR.parent.glob("fable-trading*")))
     for label, rel in (
+        ("yolo11s E2.1b", "runs/detect/runs/detect/dense_15m_full_s_e21b_hsv0/results.csv"),
         ("yolo11s E2.1", "runs/detect/runs/detect/dense_15m_full_s_e21/results.csv"),
         ("yolo11s", "runs/detect/runs/detect/dense_15m_full_s/results.csv"),
     ):
-        results = PROJECT_DIR / rel
-        if not results.exists():
+        results = next((root / rel for root in run_roots if (root / rel).exists()), None)
+        if results is None:
             continue
         import csv
 
@@ -179,7 +180,7 @@ def system_health() -> str:
                 # pgrep returns 0 if any match; ignore self
                 train_alive = (
                     subprocess.call(
-                        ["pgrep", "-f", "src.detection.train"],
+                        ["pgrep", "-f", results.parent.name],
                         stdout=subprocess.DEVNULL,
                         stderr=subprocess.DEVNULL,
                     )

@@ -136,3 +136,30 @@ def test_main_dry_run_skips_telegram(digest, monkeypatch, capsys) -> None:
     assert "anomaly_count: 1" in out
     assert "fingerprint_mismatch" in out
     assert "anomaly_ids: fingerprint_mismatch" in out
+
+
+def test_system_health_discovers_e21b_in_sibling_run_root(
+    digest,
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    project = tmp_path / "fable-trading-grok-2day"
+    project.mkdir()
+    results = (
+        tmp_path
+        / "fable-trading"
+        / "runs"
+        / "detect"
+        / "runs"
+        / "detect"
+        / "dense_15m_full_s_e21b_hsv0"
+        / "results.csv"
+    )
+    results.parent.mkdir(parents=True)
+    results.write_text("epoch,metrics/mAP50(B)\n1,0.81\n", encoding="utf-8")
+    monkeypatch.setattr(digest, "PROJECT_DIR", project)
+
+    text = digest.system_health()
+
+    assert "E2.1b" in text
+    assert "0.810" in text

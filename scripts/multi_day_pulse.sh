@@ -2,20 +2,30 @@
 # Lightweight multi-day heartbeat. Never kills train. Safe to cron/screen loop.
 set -u
 cd "$(dirname "$0")/.." || exit 1
-OUT=output/offline_tasks/MULTI_DAY_STATUS.md
-mkdir -p output/offline_tasks logs
+ROOT=$(pwd)
+OUT=${FABLE_PULSE_OUT:-output/offline_tasks/MULTI_DAY_STATUS.md}
+mkdir -p "$(dirname "$OUT")" logs
 TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 TRAIN_ALIVE=0
-pgrep -f 'src.detection.train' >/dev/null 2>&1 && TRAIN_ALIVE=1
-RES=runs/detect/runs/detect/dense_15m_full_s_e21/results.csv
+pgrep -f 'dense_15m_full_s_e21b_hsv0' >/dev/null 2>&1 && TRAIN_ALIVE=1
+RES=${FABLE_E21B_RESULTS:-}
+if [ -z "$RES" ]; then
+  for candidate in "$ROOT"/../fable-trading*/runs/detect/runs/detect/dense_15m_full_s_e21b_hsv0/results.csv; do
+    if [ -f "$candidate" ]; then
+      RES=$candidate
+      break
+    fi
+  done
+fi
 NEPOCH=0
 BEST="n/a"
 PATIENCE="n/a"
-if [ -f "$RES" ]; then
-  METRICS=$(python3 - <<'PY'
+if [ -n "$RES" ] && [ -f "$RES" ]; then
+  METRICS=$(python3 - "$RES" <<'PY'
 import csv
+import sys
 from pathlib import Path
-p = Path("runs/detect/runs/detect/dense_15m_full_s_e21/results.csv")
+p = Path(sys.argv[1])
 rows = list(csv.DictReader(p.open())) if p.exists() else []
 print(len(rows))
 if rows:
@@ -41,7 +51,7 @@ FW=$(wc -l < data/forward_log_ma206.csv 2>/dev/null | tr -d ' ')
 H1=$(wc -l < data/forward_log_h1_scaled_ma206.csv 2>/dev/null | tr -d ' ')
 DF=$(df -h /System/Volumes/Data 2>/dev/null | tail -1 | awk '{print $4" free ("$5")"}')
 FORMAL=0
-[ -f analysis/p2a_e21_train_report.md ] && FORMAL=1
+[ -f analysis/p2a_e21b_hsv0_report.md ] && FORMAL=1
 cat > "$OUT" <<MD
 # Multi-day status $TS
 
@@ -54,8 +64,8 @@ SWAP · SMA/EMA20/60/120 · 冻结 TP5/SL2 · YOLO 非关键 · H1 影子 · VPS
 | check | value |
 |-------|-------|
 | YOLO train alive | $TRAIN_ALIVE |
-| E2.1 epochs logged | $NEPOCH |
-| E2.1 best | $BEST |
+| E2.1b epochs logged | $NEPOCH |
+| E2.1b best | $BEST |
 | patience_left_est | $PATIENCE |
 | formal report | $FORMAL |
 | .part leftovers | $PARTS |
@@ -66,7 +76,7 @@ SWAP · SMA/EMA20/60/120 · 冻结 TP5/SL2 · YOLO 非关键 · H1 影子 · VPS
 | disk | $DF |
 
 ## Waiting
-- Train exit → finalize formal report + consistency + FO hard_e21
+- E2.1b exit → formal report + consistency + fixed SAHI benchmark
 - No holdout / no ACTIVE swap / no auto BLOCKED expand
 MD
 echo "pulse wrote $OUT train=$TRAIN_ALIVE best=$BEST patience=$PATIENCE parts=$PARTS"

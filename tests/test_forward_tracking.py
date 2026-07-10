@@ -5,6 +5,7 @@ import math
 import pandas as pd
 
 from src.judgment.forward import ForwardRecord, merge_forward_log, resolve_forward_exit
+from src.judgment.forward_records import read_forward_log, write_forward_log
 
 
 def _record(status: str, detected_at: str = "2026-07-09T00:00:00+00:00") -> ForwardRecord:
@@ -55,6 +56,19 @@ def test_merge_forward_log_is_idempotent_for_closed_rows() -> None:
     assert result.closed_updates == 0
     assert len(result.frame) == 1
     assert result.frame.iloc[0]["detected_at"] == "first-seen"
+
+
+def test_forward_log_read_write_preserves_float_bytes(tmp_path) -> None:
+    record = _record("open")
+    record["score"] = 0.38561348070839486
+    record["threshold"] = 0.34093332021594785
+    path = tmp_path / "forward.csv"
+    write_forward_log(path, pd.DataFrame([record]))
+    first = path.read_bytes()
+
+    write_forward_log(path, read_forward_log(path))
+
+    assert path.read_bytes() == first
 
 
 def test_resolve_forward_exit_marks_open_before_horizon_without_barrier() -> None:
