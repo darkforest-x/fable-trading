@@ -1,34 +1,24 @@
-# Multi-day status 2026-07-10T04:36:49.636702+00:00
+# Multi-day status 2026-07-10T05:04:07.177379+00:00
 
-Owner away. 2h durable tick.
+Owner away. Hourly tick.
 
 ## fable / red lines
 SWAP · EMA 8-55 · TP5/SL2 freeze · YOLO non-critical · H1 shadow  
 no holdout · no secrets · VPS `ENABLE_JOB_EXECUTOR=0`
 
-## Checklist
-| item | status |
-|------|--------|
-| train done? | **YES** E2.1 formal DONE (mAP50=0.8503 **FAIL** gate 0.90) |
-| expand done? | **YES** 401 · 0 parts · FINAL |
-| FO/LS up? | FO 200 · LS 302 · docker Up |
-| forward_track? | main 9 (2o/7c) **new=0**; H1 8 (1o/7c) **new=0** |
-| merge branches? | Phase2/3 on main |
-| pytest? | **114 passed** |
-| deploy? | no UI change → skip; executor=False |
-| next | **P0 forward life**; optional secondary e21b_hsv0 train running (non-mainline); docs sync |
+## Hour checklist
+| # | item | result |
+|---|------|--------|
+| 1 | E2.1 formal | **DONE** mAP50=0.8503 **FAIL** 0.90 |
+| 2 | e21b_hsv0 side | running (early epochs); not promoted |
+| 3 | expand FINAL | **DONE** 401 · 0 parts |
+| 4 | forward | main 9 (2o/7c) **new=0**; H1 8 (1o/7c) **new=0** |
+| 5 | FO/LS | 200 / 302; LS=`fable-review@example.com` |
+| 6 | merge/deploy | phase2/3 on main; no UI → no deploy |
+| 7 | idle | P0 forward accumulation only |
+| 8 | this file | updated |
 
-## E2.1 formal (locked)
-| metric | value |
-|--------|------:|
-| mAP50 | 0.8503 |
-| mAP50-95 | 0.6655 |
-| P / R | 0.8106 / 0.7047 |
-| consistency match | 0.5042 |
-| gate_match≥0.95 | False |
+## E2.1 formal
+mAP50=0.8503 · P=0.8106 · R=0.7047 · consistency=0.5042 · gate FAIL
 
-Reports: `analysis/p2a_e21_train_report.md`, hardlist `output/offline_tasks/fiftyone_hard_e21/`
-
-## Side note
-Secondary screen `fable_yolo_e21b_hsv0` started from codex worktree (same SAFE_AUG train CLI; name only). Not promoted; mainline unchanged.
 ACTIVE=`models/frozen_tp5_sl2_swap_20260709.txt`
