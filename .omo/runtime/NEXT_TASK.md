@@ -56,10 +56,10 @@ closed q90-range versus q80-only diagnostics without changing thresholds. The cy
 `output/offline_tasks/q80_shadow_24h_ready.json` only on the first ready cycle. If the ready file
 is absent, do not manufacture a report or rerun the scanner in parallel.
 
-Latest integrity checkpoint at 2026-07-11 12:15 CST: `17.25/24` market hours, 167 candidates,
-51 q80 ledger rows (20 closed, 31 open), 0 duplicate. Fixed-cost closed diagnostics remain
-negative for both q90-range (PF `0.878`) and q80-only (PF `0.635`); this is still too short for
-threshold selection.
+Latest integrity checkpoint at 2026-07-11 16:15 CST: `21.25/24` market hours, 197 candidates,
+64 q80 ledger rows (34 closed, 30 open), 0 duplicate. The cycle added 1,023 bars across all 456
+tracked symbols without an error. Fixed-cost closed diagnostics deteriorated for both q90-range
+(PF `0.499`) and q80-only (PF `0.574`); this is still too short for threshold selection.
 
 ## Still parallel / owner gates
 
