@@ -1,0 +1,209 @@
+{
+  "models": {
+    "lightgbm": {
+      "best_iteration": 32,
+      "fit_seconds": 0.191638124990277,
+      "single_row_ms": 0.266315839253366,
+      "batch_us_per_row": 0.482776402818537,
+      "val": {
+        "n": 3030,
+        "positive_rate": 0.2776,
+        "roc_auc": 0.5775,
+        "pr_auc": 0.3245,
+        "thresholds": {
+          "0.4": {
+            "n_signals": 55,
+            "precision": 0.3273,
+            "recall": 0.0214
+          },
+          "0.5": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.6": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.7": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        },
+        "top_decile": {
+          "n": 303,
+          "mean_realized_ret": 0.00131,
+          "mean_net_ret": -0.00069,
+          "win_rate": 0.3465
+        },
+        "all_mean_net_ret": -0.00149
+      },
+      "val_permutation_p": 0.000999000999000999
+    },
+    "catboost": {
+      "best_iteration": 33,
+      "fit_seconds": 0.3273880000342615,
+      "single_row_ms": 0.39666500058956444,
+      "batch_us_per_row": 0.23728412523767342,
+      "val": {
+        "n": 3030,
+        "positive_rate": 0.2776,
+        "roc_auc": 0.5731,
+        "pr_auc": 0.3191,
+        "thresholds": {
+          "0.4": {
+            "n_signals": 8,
+            "precision": 0.25,
+            "recall": 0.0024
+          },
+          "0.5": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.6": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.7": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        },
+        "top_decile": {
+          "n": 303,
+          "mean_realized_ret": 0.00119,
+          "mean_net_ret": -0.00081,
+          "win_rate": 0.3399
+        },
+        "all_mean_net_ret": -0.00149
+      },
+      "val_permutation_p": 0.000999000999000999
+    },
+    "xgboost": {
+      "best_iteration": 5,
+      "fit_seconds": 0.12814820901257917,
+      "single_row_ms": 0.6260791595559567,
+      "batch_us_per_row": 0.23594059445049995,
+      "val": {
+        "n": 3030,
+        "positive_rate": 0.2776,
+        "roc_auc": 0.5774,
+        "pr_auc": 0.3268,
+        "thresholds": {
+          "0.4": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.5": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.6": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.7": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        },
+        "top_decile": {
+          "n": 303,
+          "mean_realized_ret": 0.00202,
+          "mean_net_ret": 2e-05,
+          "win_rate": 0.3696
+        },
+        "all_mean_net_ret": -0.00149
+      },
+      "val_permutation_p": 0.000999000999000999
+    },
+    "ensemble": {
+      "best_iteration": 0,
+      "fit_seconds": 0.6471743340371177,
+      "single_row_ms": 1.3149833399802446,
+      "batch_us_per_row": 0.7437898684446715,
+      "val": {
+        "n": 3030,
+        "positive_rate": 0.2776,
+        "roc_auc": 0.5763,
+        "pr_auc": 0.3253,
+        "thresholds": {
+          "0.4": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.5": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.6": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.7": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        },
+        "top_decile": {
+          "n": 303,
+          "mean_realized_ret": 0.00141,
+          "mean_net_ret": -0.00059,
+          "win_rate": 0.3531
+        },
+        "all_mean_net_ret": -0.00149
+      },
+      "val_permutation_p": 0.000999000999000999
+    }
+  },
+  "base_score_spearman": {
+    "lightgbm": {
+      "lightgbm": 1.0,
+      "catboost": 0.8961993908236927,
+      "xgboost": 0.8982425493316385
+    },
+    "catboost": {
+      "lightgbm": 0.8961993908236927,
+      "catboost": 1.0,
+      "xgboost": 0.8524201560376057
+    },
+    "xgboost": {
+      "lightgbm": 0.8982425493316385,
+      "catboost": 0.8524201560376057,
+      "xgboost": 1.0
+    }
+  },
+  "warning": "Diagnostic on reused pre-holdout val; not model-selection or profitability evidence.",
+  "dataset": "/Users/zhangzc/fable-trading-grok-2day/data/ma206/swap_tp5_sl2_ma206.csv",
+  "dataset_sha256": "8df081a1374c0edb1ef8a869cc4825830ecb2f07fd00209306c44dcc272040d1",
+  "holdout_used": false,
+  "split": {
+    "train": {
+      "n": 12032,
+      "range": [
+        "2025-06-04 15:00:00+00:00",
+        "2026-03-21 01:30:00+00:00"
+      ]
+    },
+    "val": {
+      "n": 3030,
+      "range": [
+        "2026-03-21 20:00:00+00:00",
+        "2026-05-03 05:30:00+00:00"
+      ]
+    }
+  }
+}
