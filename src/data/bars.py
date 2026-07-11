@@ -5,8 +5,10 @@ from typing import Final
 
 import pandas as pd
 
-BAR_CHOICES: Final = ("5m", "15m", "30m", "1H")
+BAR_CHOICES: Final = ("2m", "3m", "5m", "15m", "30m", "1H")
 _BAR_MINUTES: Final = {
+    "2m": 2,
+    "3m": 3,
     "5m": 5,
     "15m": 15,
     "30m": 30,

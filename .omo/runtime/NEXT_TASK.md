@@ -77,6 +77,11 @@ Owner additionally requested 2m and 3m research on 2026-07-12. Treat each timefr
 shadow experiment: add data support first, never apply the 15m freeze directly, use chronological
 pre-holdout evaluation and fixed cost/slippage reporting, and do not change ACTIVE or the 15m books.
 
+Data support and BTC/ETH 120-day smoke history are complete for both bars. Next, expand a liquid
+SWAP research pool and close the 2m pre-holdout experiment at the single pre-registered 18-hour
+horizon (`h540`). Begin the independent 3m `h360` experiment only after the 2m report is closed.
+Evidence: `analysis/p2b_hf_2m_3m_data_feasibility.md`.
+
 ## Still parallel / owner gates
 
 - Label Studio: 80 tasks, 53 prelabels, 0 human annotations → writeback blocked.

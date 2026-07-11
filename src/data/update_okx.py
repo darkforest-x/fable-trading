@@ -20,7 +20,8 @@ from pathlib import Path
 from src.data.bars import BAR_CHOICES, normalize_bar
 from src.data.fetch_okx import API, DEFAULT_BAR, FETCH_DIR, PAGE_LIMIT, _request
 
-FILE_RE = re.compile(r"^okx_(?P<symbol>.+?)_(?P<bar>5m|15m|30m|1H)_(?P<rows>\d+)\.csv$")
+_BAR_PATTERN = "|".join(re.escape(bar) for bar in BAR_CHOICES)
+FILE_RE = re.compile(rf"^okx_(?P<symbol>.+?)_(?P<bar>{_BAR_PATTERN})_(?P<rows>\d+)\.csv$")
 
 
 def update_file(path: Path, *, bar: str | None = None) -> tuple[str, int]:

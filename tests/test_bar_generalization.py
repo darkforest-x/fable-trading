@@ -24,6 +24,8 @@ def _minimal_dataset(path: Path) -> None:
 
 
 def test_bar_helpers_validate_and_convert_widths() -> None:
+    assert normalize_bar("2m") == "2m"
+    assert bar_to_timedelta("3m") == pd.Timedelta(minutes=3)
     assert normalize_bar("1H") == "1H"
     assert bar_to_timedelta("30m") == pd.Timedelta(minutes=30)
     assert purge_window(72, "5m") == pd.Timedelta(minutes=365)
@@ -48,6 +50,14 @@ def test_update_okx_filename_regex_accepts_supported_bars() -> None:
     assert matched is not None
     assert matched.group("symbol") == "BTC_USDT_SWAP"
     assert matched.group("bar") == "1H"
+
+
+@pytest.mark.parametrize("bar", ["2m", "3m"])
+def test_update_okx_filename_regex_accepts_high_frequency_bars(bar: str) -> None:
+    matched = FILE_RE.match(f"okx_BTC_USDT_SWAP_{bar}_123.csv")
+
+    assert matched is not None
+    assert matched.group("bar") == bar
 
 
 def test_update_okx_uses_file_bar_in_api_and_output(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

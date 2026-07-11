@@ -44,6 +44,7 @@
 17. q80 24-hour final — `analysis/ma206_q80_shadow_24h_report.md`; q80 increased actionable signals 69.8% but q90-range and q80-only both failed fixed-cost economics; q80 loop stopped after immutable snapshot
 18. Frozen daily forward refresh — `.omo/evidence/task-forward-refresh-20260711.md`; 456-symbol data refresh, q90/H1 ledgers, dry-run digest and VPS deploy passed; orphan q80 updater was removed after process-group diagnosis
 19. Frozen daily forward refresh — `.omo/evidence/task-forward-refresh-20260712.md`; 4,073 new bars, q90/H1 uniform economics positive at fixed cost but only 50/56 closed; digest and VPS passed
+20. 2m/3m shadow data support — `analysis/p2b_hf_2m_3m_data_feasibility.md`; OKX live API and BTC/ETH 120-day files passed continuity checks; no model or mainline change
 
 ## Implemented but not accepted as profitable
 
