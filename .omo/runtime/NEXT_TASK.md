@@ -73,6 +73,11 @@ both with 0 duplicate. Uniform semantics leaves main 57 / 50 closed and H1 57 / 
 0.20% cost, main PF is `1.4356` and H1 PF is `1.2077`; both are positive but remain below the
 100-closed gate. Evidence: `.omo/evidence/task-forward-refresh-20260712.md`.
 
+Latest accepted refresh (`2026-07-12 04:30 +08:00`): main 67 total / 56 closed and H1 67 / 59,
+both with 0 duplicate. Uniform semantics leaves main 65 / 54 closed and H1 65 / 57. At fixed
+0.20% cost, main PF is `1.4330` and H1 PF is `1.3032`; both remain positive but below the gate.
+Evidence: `.omo/evidence/task-forward-refresh-20260712-0430.md`.
+
 Owner additionally requested 2m and 3m research on 2026-07-12. Treat each timeframe as a separate
 shadow experiment: add data support first, never apply the 15m freeze directly, use chronological
 pre-holdout evaluation and fixed cost/slippage reporting, and do not change ACTIVE or the 15m books.

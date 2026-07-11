@@ -7,8 +7,8 @@
 - scheduler: stopped
 - codex_heartbeat: active every 4 hours; Codex-only execution
 - current_todo: frozen q90 and H1 forward monitoring toward 100 closed rows
-- last_slot: 2026-07-12T00:38 frozen-forward-refresh
-- last_result: q90 main 59 total / 52 closed and H1 59 / 58, both with 0 duplicate; uniform main is 50 closed / PF 1.4356 and H1 is 56 / PF 1.2077 at fixed 0.20% cost, still below the 100-closed gate
+- last_slot: 2026-07-12T04:30 frozen-forward-refresh
+- last_result: q90 main 67 total / 56 closed and H1 67 / 59, both with 0 duplicate; uniform main is 54 closed / PF 1.4330 and H1 is 57 / PF 1.3032 at fixed 0.20% cost, still below the 100-closed gate
 - next_action: continue the existing daily q90/H1 paper books unchanged until at least 100 uniform-semantics closed rows; report the fixed 0.20% economics at that pre-registered checkpoint
 - final_complete: true
 
@@ -45,6 +45,7 @@
 18. Frozen daily forward refresh — `.omo/evidence/task-forward-refresh-20260711.md`; 456-symbol data refresh, q90/H1 ledgers, dry-run digest and VPS deploy passed; orphan q80 updater was removed after process-group diagnosis
 19. Frozen daily forward refresh — `.omo/evidence/task-forward-refresh-20260712.md`; 4,073 new bars, q90/H1 uniform economics positive at fixed cost but only 50/56 closed; digest and VPS passed
 20. 2m/3m shadow data support — `analysis/p2b_hf_2m_3m_data_feasibility.md`; OKX live API and BTC/ETH 120-day files passed continuity checks; no model or mainline change
+21. Frozen daily forward refresh — `.omo/evidence/task-forward-refresh-20260712-0430.md`; 7,124 new bars, uniform q90/H1 remain positive at 54/57 closed; digest and VPS passed
 
 ## Implemented but not accepted as profitable
 
