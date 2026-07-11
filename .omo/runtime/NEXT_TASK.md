@@ -68,6 +68,15 @@ both with 0 duplicate. Excluding the two legacy rows leaves main 55 / 37 closed 
 At fixed 0.20% cost, uniform main PF is `0.9980` and H1 PF is `0.6056`; neither is accepted as
 profitable. Evidence: `.omo/evidence/task-forward-refresh-20260711.md`.
 
+Latest accepted refresh (`2026-07-12 00:38 +08:00`): main 59 total / 52 closed and H1 59 / 58,
+both with 0 duplicate. Uniform semantics leaves main 57 / 50 closed and H1 57 / 56. At fixed
+0.20% cost, main PF is `1.4356` and H1 PF is `1.2077`; both are positive but remain below the
+100-closed gate. Evidence: `.omo/evidence/task-forward-refresh-20260712.md`.
+
+Owner additionally requested 2m and 3m research on 2026-07-12. Treat each timeframe as a separate
+shadow experiment: add data support first, never apply the 15m freeze directly, use chronological
+pre-holdout evaluation and fixed cost/slippage reporting, and do not change ACTIVE or the 15m books.
+
 ## Still parallel / owner gates
 
 - Label Studio: 80 tasks, 53 prelabels, 0 human annotations → writeback blocked.

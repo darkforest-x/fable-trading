@@ -7,8 +7,8 @@
 - scheduler: stopped
 - codex_heartbeat: active every 4 hours; Codex-only execution
 - current_todo: frozen q90 and H1 forward monitoring toward 100 closed rows
-- last_slot: 2026-07-11T22:36 frozen-forward-refresh
-- last_result: q90 main 57 total / 39 closed and H1 57 / 40, both with 0 duplicate; uniform-semantics main has 37 closed, PF 1.3976 at 0.06% but PF 0.9980 at fixed 0.20%, so profitability remains unproven
+- last_slot: 2026-07-12T00:38 frozen-forward-refresh
+- last_result: q90 main 59 total / 52 closed and H1 59 / 58, both with 0 duplicate; uniform main is 50 closed / PF 1.4356 and H1 is 56 / PF 1.2077 at fixed 0.20% cost, still below the 100-closed gate
 - next_action: continue the existing daily q90/H1 paper books unchanged until at least 100 uniform-semantics closed rows; report the fixed 0.20% economics at that pre-registered checkpoint
 - final_complete: true
 
@@ -43,6 +43,7 @@
 16. Booster shadow benchmark — `858bc8f`; LightGBM remains ACTIVE, XGBoost is forward-challenger-only, CatBoost and equal-weight ensemble rejected for now; 218 tests pass
 17. q80 24-hour final — `analysis/ma206_q80_shadow_24h_report.md`; q80 increased actionable signals 69.8% but q90-range and q80-only both failed fixed-cost economics; q80 loop stopped after immutable snapshot
 18. Frozen daily forward refresh — `.omo/evidence/task-forward-refresh-20260711.md`; 456-symbol data refresh, q90/H1 ledgers, dry-run digest and VPS deploy passed; orphan q80 updater was removed after process-group diagnosis
+19. Frozen daily forward refresh — `.omo/evidence/task-forward-refresh-20260712.md`; 4,073 new bars, q90/H1 uniform economics positive at fixed cost but only 50/56 closed; digest and VPS passed
 
 ## Implemented but not accepted as profitable
 
