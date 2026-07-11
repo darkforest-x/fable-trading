@@ -47,19 +47,21 @@ independent forward challenger; no model, threshold or ledger was promoted. CatB
 highly-correlated ensemble were rejected for now. Evidence:
 `analysis/shadow_booster_framework_comparison.md` and commit `858bc8f`.
 
-### Active next atom — q80 24-hour diagnostic
+### Completed — q80 24-hour diagnostic
 
-Keep q80 shadow accumulating to at least 24 hours and continue the frozen forward books.
-Do not tune from the short shadow sample. At 24 hours, snapshot the same-window funnel and
-closed q90-range versus q80-only diagnostics without changing thresholds. The cycle now writes
-`output/offline_tasks/q80_shadow_checkpoint_status.json` every run and atomically creates
-`output/offline_tasks/q80_shadow_24h_ready.json` only on the first ready cycle. If the ready file
-is absent, do not manufacture a report or rerun the scanner in parallel.
+The first immutable ready snapshot covers exactly 24.0 market hours. q80 increased actionable
+signals from 43 to 73, but fixed-cost economics failed for q90-range (25 closed, PF `0.4085`,
+net/trade `-0.3613%`) and q80-only (15 closed, PF `0.5510`, net/trade `-0.2856%`). q80 promotion
+is rejected; no threshold or ACTIVE change is authorized. The completed q80 loop was stopped.
+Evidence: `analysis/ma206_q80_shadow_24h_report.md`,
+`analysis/output/ma206_q80_shadow_24h.json`, and `.omo/evidence/task-q80-24h-final.md`.
 
-Latest integrity checkpoint at 2026-07-11 16:15 CST: `21.25/24` market hours, 197 candidates,
-64 q80 ledger rows (34 closed, 30 open), 0 duplicate. The cycle added 1,023 bars across all 456
-tracked symbols without an error. Fixed-cost closed diagnostics deteriorated for both q90-range
-(PF `0.499`) and q80-only (PF `0.574`); this is still too short for threshold selection.
+### Active next atom — frozen forward confirmation
+
+Continue the existing daily q90 and H1 paper books without changing the frozen model, threshold,
+candidate rule, cost or exits. The next confirmation gate is at least 100 closed rows on a uniform
+candidate-semantics window. Keep the two preserved legacy-semantics rows out of the uniform-window
+economics, and do not use the q80 diagnostic window to tune parameters.
 
 ## Still parallel / owner gates
 
@@ -73,6 +75,7 @@ tracked symbols without an error. Fixed-cost closed diagnostics deteriorated for
 - H1 shadow ×2: new_signals=0, dup_keys=0, ACTIVE + mainline SHA stable.
 - Full shadow registry ×2: champion + H1 idempotent; H8/H10 unsupported and not approximated.
 - Fingerprint mismatch diagnosed: the mutable dataset path was rewritten after freeze; metadata was not falsified to hide it.
+- q80 24-hour immutable snapshot: SHA-256 `2aaa403c02ef73654c8cc709d01f8e7ce18589875d48a7bc037ca61121afc51c`; holdout false, mainline unchanged, 0 duplicate.
 - Todo 6 is accepted on the current MA206 deployment by
   `.omo/evidence/task-6-vps-current-ma206-acceptance.md` and commit `3033c99`.
 - Todo 9 is accepted by `analysis/p25_daily_workflow_acceptance_20260710.md` and commit `3c51c1c`.

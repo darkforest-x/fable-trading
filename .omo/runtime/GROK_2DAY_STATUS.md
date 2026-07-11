@@ -6,10 +6,10 @@
 - grok_worker: stopped_by_owner_request_2026-07-10T16:20+08:00
 - scheduler: stopped
 - codex_heartbeat: active every 4 hours; Codex-only execution
-- current_todo: q80 24-hour diagnostic accumulation and frozen forward monitoring
-- last_slot: 2026-07-11T16:15 q80-pre24-integrity
-- last_result: q80 at 21.25/24 market hours, 197 candidates, 64 ledger rows (34 closed, 0 duplicate); q90-range PF 0.499 and q80-only PF 0.574 at fixed 0.20% cost
-- next_action: when q80_shadow_24h_ready.json appears, finalize the fixed 24h report without tuning thresholds
+- current_todo: frozen q90 and H1 forward monitoring toward 100 closed rows
+- last_slot: 2026-07-11T20:17 q80-24h-final
+- last_result: immutable 24h q80 snapshot closed with 236 candidates and 73 actionable rows; q90-range PF 0.4085 and q80-only PF 0.5510 at fixed 0.20% cost; q80 promotion rejected
+- next_action: continue the existing daily q90/H1 paper books without changing model, threshold, cost or exits; report at the next pre-registered closed-row checkpoint
 - final_complete: true
 
 ## Guardrails
@@ -41,12 +41,14 @@
 14. q80 24h auto-seal — first market-time-ready snapshot is atomic and never overwritten; 213 tests pass
 15. Frozen LightGBM score explanations — `5d13413`; 21/21 scores replayed, 19 current-candidate rows and 2 preserved legacy-semantics rows
 16. Booster shadow benchmark — `858bc8f`; LightGBM remains ACTIVE, XGBoost is forward-challenger-only, CatBoost and equal-weight ensemble rejected for now; 218 tests pass
+17. q80 24-hour final — `analysis/ma206_q80_shadow_24h_report.md`; q80 increased actionable signals 69.8% but q90-range and q80-only both failed fixed-cost economics; q80 loop stopped after immutable snapshot
 
 ## Implemented but not accepted as profitable
 
 - Engineering pipeline and final detector evidence are complete; future profitability is still unproven.
 - MA206 q90 and q80 books need forward accumulation; no threshold may be selected from the short shadow sample.
 - XGBoost's reused-val top-decile net was approximately flat (`+0.002%` at 0.20% cost); it is not promotion evidence.
+- q80 is closed as a failed promotion candidate; its 24-hour result must not be reused for threshold selection.
 
 ## Blocked Or Deferred
 
