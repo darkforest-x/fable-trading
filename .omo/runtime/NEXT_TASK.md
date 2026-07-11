@@ -63,6 +63,11 @@ candidate rule, cost or exits. The next confirmation gate is at least 100 closed
 candidate-semantics window. Keep the two preserved legacy-semantics rows out of the uniform-window
 economics, and do not use the q80 diagnostic window to tune parameters.
 
+Latest accepted refresh (`2026-07-11 22:36 +08:00`): main 57 total / 39 closed and H1 57 / 40,
+both with 0 duplicate. Excluding the two legacy rows leaves main 55 / 37 closed and H1 55 / 38.
+At fixed 0.20% cost, uniform main PF is `0.9980` and H1 PF is `0.6056`; neither is accepted as
+profitable. Evidence: `.omo/evidence/task-forward-refresh-20260711.md`.
+
 ## Still parallel / owner gates
 
 - Label Studio: 80 tasks, 53 prelabels, 0 human annotations → writeback blocked.

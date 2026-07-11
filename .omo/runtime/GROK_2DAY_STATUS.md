@@ -7,9 +7,9 @@
 - scheduler: stopped
 - codex_heartbeat: active every 4 hours; Codex-only execution
 - current_todo: frozen q90 and H1 forward monitoring toward 100 closed rows
-- last_slot: 2026-07-11T20:17 q80-24h-final
-- last_result: immutable 24h q80 snapshot closed with 236 candidates and 73 actionable rows; q90-range PF 0.4085 and q80-only PF 0.5510 at fixed 0.20% cost; q80 promotion rejected
-- next_action: continue the existing daily q90/H1 paper books without changing model, threshold, cost or exits; report at the next pre-registered closed-row checkpoint
+- last_slot: 2026-07-11T22:36 frozen-forward-refresh
+- last_result: q90 main 57 total / 39 closed and H1 57 / 40, both with 0 duplicate; uniform-semantics main has 37 closed, PF 1.3976 at 0.06% but PF 0.9980 at fixed 0.20%, so profitability remains unproven
+- next_action: continue the existing daily q90/H1 paper books unchanged until at least 100 uniform-semantics closed rows; report the fixed 0.20% economics at that pre-registered checkpoint
 - final_complete: true
 
 ## Guardrails
@@ -42,11 +42,12 @@
 15. Frozen LightGBM score explanations — `5d13413`; 21/21 scores replayed, 19 current-candidate rows and 2 preserved legacy-semantics rows
 16. Booster shadow benchmark — `858bc8f`; LightGBM remains ACTIVE, XGBoost is forward-challenger-only, CatBoost and equal-weight ensemble rejected for now; 218 tests pass
 17. q80 24-hour final — `analysis/ma206_q80_shadow_24h_report.md`; q80 increased actionable signals 69.8% but q90-range and q80-only both failed fixed-cost economics; q80 loop stopped after immutable snapshot
+18. Frozen daily forward refresh — `.omo/evidence/task-forward-refresh-20260711.md`; 456-symbol data refresh, q90/H1 ledgers, dry-run digest and VPS deploy passed; orphan q80 updater was removed after process-group diagnosis
 
 ## Implemented but not accepted as profitable
 
 - Engineering pipeline and final detector evidence are complete; future profitability is still unproven.
-- MA206 q90 and q80 books need forward accumulation; no threshold may be selected from the short shadow sample.
+- MA206 q90 and H1 books need forward accumulation; no threshold may be selected from the short forward sample.
 - XGBoost's reused-val top-decile net was approximately flat (`+0.002%` at 0.20% cost); it is not promotion evidence.
 - q80 is closed as a failed promotion candidate; its 24-hour result must not be reused for threshold selection.
 
