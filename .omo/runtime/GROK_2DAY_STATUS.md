@@ -7,8 +7,8 @@
 - scheduler: stopped
 - codex_heartbeat: active every 4 hours; Codex-only execution
 - current_todo: q80 24-hour diagnostic accumulation and frozen forward monitoring
-- last_slot: 2026-07-11T04:30 q80-auto-seal
-- last_result: q80 at 9.25/24 market hours, 67 candidates, 16 ledger rows; automatic first-ready snapshot armed
+- last_slot: 2026-07-11T12:15 q80-integrity-and-booster-shadow
+- last_result: q80 at 17.25/24 market hours, 167 candidates, 51 ledger rows (20 closed, 0 duplicate); q90-range and q80-only both net-negative at fixed 0.20% cost
 - next_action: when q80_shadow_24h_ready.json appears, finalize the fixed 24h report without tuning thresholds
 - final_complete: true
 
@@ -39,11 +39,14 @@
 12. Causal direction YOLO — `analysis/p2a_causal_direction_profit_report.md`; net@0.2% negative, PF 0.7472, rejected
 13. q80 same-window shadow — `analysis/ma206_q80_shadow_diagnosis.md`; separate ledger, no ACTIVE/main-book writes
 14. q80 24h auto-seal — first market-time-ready snapshot is atomic and never overwritten; 213 tests pass
+15. Frozen LightGBM score explanations — `5d13413`; 21/21 scores replayed, 19 current-candidate rows and 2 preserved legacy-semantics rows
+16. Booster shadow benchmark — `858bc8f`; LightGBM remains ACTIVE, XGBoost is forward-challenger-only, CatBoost and equal-weight ensemble rejected for now; 218 tests pass
 
 ## Implemented but not accepted as profitable
 
 - Engineering pipeline and final detector evidence are complete; future profitability is still unproven.
 - MA206 q90 and q80 books need forward accumulation; no threshold may be selected from the short shadow sample.
+- XGBoost's reused-val top-decile net was approximately flat (`+0.002%` at 0.20% cost); it is not promotion evidence.
 
 ## Blocked Or Deferred
 

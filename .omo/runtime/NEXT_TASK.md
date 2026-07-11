@@ -38,6 +38,15 @@ Evidence: tracked report plus `analysis/output/e21b_sahi_fixed_benchmark.json`.
 Final evidence, 210 tests, VPS current E2.1b status, executor-off gate and durable reports are
 reconciled in `analysis/two_day_final_audit_20260711.md`.
 
+### Completed — judgment booster shadow benchmark
+
+LightGBM, CatBoost, XGBoost and fixed equal-weight ensemble were compared on the identical
+28-feature, pre-holdout chronological split. LightGBM remains ACTIVE. XGBoost's reused-val
+top-decile net was only `+0.002%` at fixed 0.20% cost, so it is eligible only for a future
+independent forward challenger; no model, threshold or ledger was promoted. CatBoost and the
+highly-correlated ensemble were rejected for now. Evidence:
+`analysis/shadow_booster_framework_comparison.md` and commit `858bc8f`.
+
 ### Active next atom — q80 24-hour diagnostic
 
 Keep q80 shadow accumulating to at least 24 hours and continue the frozen forward books.
@@ -46,6 +55,11 @@ closed q90-range versus q80-only diagnostics without changing thresholds. The cy
 `output/offline_tasks/q80_shadow_checkpoint_status.json` every run and atomically creates
 `output/offline_tasks/q80_shadow_24h_ready.json` only on the first ready cycle. If the ready file
 is absent, do not manufacture a report or rerun the scanner in parallel.
+
+Latest integrity checkpoint at 2026-07-11 12:15 CST: `17.25/24` market hours, 167 candidates,
+51 q80 ledger rows (20 closed, 31 open), 0 duplicate. Fixed-cost closed diagnostics remain
+negative for both q90-range (PF `0.878`) and q80-only (PF `0.635`); this is still too short for
+threshold selection.
 
 ## Still parallel / owner gates
 
