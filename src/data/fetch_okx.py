@@ -171,8 +171,14 @@ def main() -> int:
     parser.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
     parser.add_argument("--bar", default=DEFAULT_BAR, choices=BAR_CHOICES,
                         help="candle timeframe (filenames and API both follow it)")
+    parser.add_argument("--out-dir", type=Path, default=None,
+                        help="write to a different directory (e.g. data/kline_deep for "
+                             "deep-history pulls kept apart from the live universe)")
     args = parser.parse_args()
     bar = normalize_bar(args.bar)
+    if args.out_dir is not None:
+        global FETCH_DIR
+        FETCH_DIR = args.out_dir
     FETCH_DIR.mkdir(parents=True, exist_ok=True)
     start_ms = int((datetime.now(timezone.utc) - timedelta(days=args.days)).timestamp() * 1000)
     pending: list[str] = []
