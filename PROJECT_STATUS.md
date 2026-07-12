@@ -101,3 +101,10 @@
 | 07-10 | P2-11 E2.1 MAX_DENSE_BARS=12 | 更紧收核 + relabel；启动 `dense_15m_full_s_e21` 重训 |
 | 07-10 | 多日无人值守 | 任务空也按价值排序自迭代；不问（holdout/密钥除外） |
 | 07-10 | BLOCKED 不自动扩 | expand 后候选仅 `blacklist_candidates_after_expand.tsv` 笔记 |
+
+## 预注册规则（在数据到来之前写死的裁决标准）
+
+- **07-12 前向终审计数规则**（Claude 按委托执行，owner 可否决）：8 月 ≥100 笔 / PF≥1.3
+  终审只统计**加密货币 swap**；股票/ETF 型 swap（NFLX/QQQ/ORCL/EWJ 等，旧黑名单仅覆盖
+  X 后缀老代码，新上架的漏网）继续记录但单列旁路统计——交易时段与流动性结构不同，
+  不得与 crypto 混算。注册时前向日志仅 ~17 行，属事前规则而非事后筛选。
