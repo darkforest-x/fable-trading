@@ -32,8 +32,14 @@ def main() -> int:
     title, tasks_file = sys.argv[1], sys.argv[2]
     config = Path(sys.argv[3] if len(sys.argv) > 3 else "output/label_studio/label_config_v2.xml").read_text()
     tok = session()
-    proj = api(tok, "POST", "/api/projects", {"title": title, "label_config": config})
-    pid = proj["id"]
+    existing = api(tok, "GET", "/api/projects?page_size=100").get("results", [])
+    hit = next((p for p in existing if p.get("title") == title), None)
+    if hit:
+        pid = hit["id"]
+        print(f"reusing existing project '{title}' (id {pid})")
+    else:
+        proj = api(tok, "POST", "/api/projects", {"title": title, "label_config": config})
+        pid = proj["id"]
     api(tok, "POST", "/api/storages/localfiles", {
         "project": pid, "title": "datasets", "path": "/label-studio/files",
         "use_blob_urls": False})
