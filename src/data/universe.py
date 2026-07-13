@@ -9,6 +9,7 @@ STOCKISH_BASES = frozenset({
     "AAPL", "ADBE", "AMAT", "AMD", "AMZN", "ASML", "AVGO", "COIN", "CRCL",
     "GOOGL", "HOOD", "INTC", "META", "MSFT", "MSTR", "NVDA", "PLTR", "TSLA",
     "QQQ", "SPY", "ALAB", "APLD", "MU", "ORCL", "NFLX", "BABA", "EWJ", "NEO0",
+    "HIMS", "SBET", "RDDT", "TSM", "OPEN", "GME", "AMC", "UNH", "LLY", "FIG",
 })
 
 
