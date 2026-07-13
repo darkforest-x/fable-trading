@@ -1,0 +1,19 @@
+{
+  "dataset": "datasets/dense_owner_v2",
+  "base_model": "runs/detect/runs/detect/dense_owner_v1/weights/best.pt",
+  "base_note": "continue from owner v1 (itself fine-tuned from E2.1); more owner boxes should pull away from rule prior",
+  "counts": {
+    "train": [
+      570,
+      301
+    ],
+    "val": [
+      198,
+      122
+    ],
+    "missing": 0
+  },
+  "chunk1_export": "/Users/zhangzc/fable-trading/output/label_studio/export_round3_chunk1.json",
+  "pool_images": 768,
+  "pool_boxes": 423
+}

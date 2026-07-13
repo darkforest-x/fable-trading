@@ -6,7 +6,7 @@ mkdir -p logs
 exec >> logs/offline_queue11b.log 2>&1
 echo "=== queue11b start $(date) ==="
 nice -n 15 python3 -m src.detection.build_dataset --out datasets/dense_swap_v1 \
-  --stride 100 --max-images 5000 --symbol-contains _USDT_SWAP --seed 20260713 2>&1 | tail -3
+  --cache-dir data/kline_fetched --stride 100 --max-images 5000 --symbol-contains _USDT_SWAP --seed 20260713 2>&1 | tail -3
 for i in 1 2 3; do
   PYTHONPATH=. python3 scripts/label_studio_prepare_import.py --dataset datasets/dense_swap_v1 \
     --split train --limit 500 --seed $((20260714+i)) --out output/label_studio/tasks_round4_swap_chunk$i.json --stratify

@@ -13,8 +13,10 @@ from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 POOL = PROJECT_DIR / "data/golden_pool.json"
-SRC_IMAGES = PROJECT_DIR / "datasets/dense_15m_full/images/val"
-DST = PROJECT_DIR / "datasets/dense_owner_v1"
+SRC_DIRS = [PROJECT_DIR / "datasets/dense_15m_full/images/val",
+            PROJECT_DIR / "datasets/dense_15m_full/images/train"]
+import sys
+DST = PROJECT_DIR / "datasets" / (sys.argv[1] if len(sys.argv) > 1 else "dense_owner_v1")
 
 
 def split_of(stem: str) -> str:
@@ -28,8 +30,8 @@ def main() -> int:
     for sub in ("images/train", "images/val", "labels/train", "labels/val"):
         (DST / sub).mkdir(parents=True, exist_ok=True)
     for stem, boxes in pool.items():
-        src = SRC_IMAGES / f"{stem}.png"
-        if not src.exists():
+        src = next((d / f"{stem}.png" for d in SRC_DIRS if (d / f"{stem}.png").exists()), None)
+        if src is None:
             continue
         split = split_of(stem)
         shutil.copy2(src, DST / "images" / split / src.name)

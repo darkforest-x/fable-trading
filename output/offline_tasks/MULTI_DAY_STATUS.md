@@ -1,24 +1,25 @@
-# Multi-day status 2026-07-10T05:04:07.177379+00:00
+# Multi-day status 2026-07-12T12:44:10Z
 
-Owner away. Hourly tick.
+Owner away. Agent continues per `AUTONOMOUS_CHARTER.md` — **do not stop**.
 
-## fable / red lines
-SWAP · EMA 8-55 · TP5/SL2 freeze · YOLO non-critical · H1 shadow  
-no holdout · no secrets · VPS `ENABLE_JOB_EXECUTOR=0`
+## fable 拍板
+SWAP · EMA 8-55 · 冻结 TP5/SL2 · YOLO 非关键 · H1 影子 · VPS `ENABLE_JOB_EXECUTOR=0`
 
-## Hour checklist
-| # | item | result |
-|---|------|--------|
-| 1 | E2.1 formal | **DONE** mAP50=0.8503 **FAIL** 0.90 |
-| 2 | e21b_hsv0 side | running (early epochs); not promoted |
-| 3 | expand FINAL | **DONE** 401 · 0 parts |
-| 4 | forward | main 9 (2o/7c) **new=0**; H1 8 (1o/7c) **new=0** |
-| 5 | FO/LS | 200 / 302; LS=`fable-review@example.com` |
-| 6 | merge/deploy | phase2/3 on main; no UI → no deploy |
-| 7 | idle | P0 forward accumulation only |
-| 8 | this file | updated |
+## Pulse
+| check | value |
+|-------|-------|
+| YOLO train alive | 0 |
+| E2.1 epochs logged | 40 |
+| E2.1 best | ep30 mAP50=0.8551 |
+| patience_left_est | 2 |
+| formal report | 1 |
+| .part leftovers | 2 |
+| FO :5151 | 200 |
+| LS :8081 | 302 |
+| forward_log lines | 10 |
+| H1 shadow lines | 9 |
+| disk | 104Gi free (75%) |
 
-## E2.1 formal
-mAP50=0.8503 · P=0.8106 · R=0.7047 · consistency=0.5042 · gate FAIL
-
-ACTIVE=`models/frozen_tp5_sl2_swap_20260709.txt`
+## Waiting
+- Train exit → finalize formal report + consistency + FO hard_e21
+- No holdout / no ACTIVE swap / no auto BLOCKED expand
