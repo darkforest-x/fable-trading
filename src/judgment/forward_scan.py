@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from src.data.loader import iter_series
+from src.data.universe import is_stockish
 from src.judgment.candidates import MIN_GAP_BARS, WARMUP_BARS, add_indicators, strict_mask
 from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature_rows
 from src.judgment.forward_records import forward_key, open_keys
@@ -85,6 +86,7 @@ def scan_forward_records(
                 {
                     "source": source,
                     "symbol": symbol,
+                    "is_stockish": is_stockish(symbol),
                     "signal_time": str(signal_time),
                     "detected_at": scan.detected_at,
                     "status": exit_state.status,

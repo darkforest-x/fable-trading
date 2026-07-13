@@ -21,7 +21,7 @@ from pathlib import Path
 import cv2
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
-DATASET = PROJECT_DIR / "datasets" / "dense_15m_full"
+DATASET = None  # set from --dataset in main()
 OUT = PROJECT_DIR / "src" / "webapp" / "static" / "label_audit.html"
 GREEN = (60, 200, 120)  # BGR
 
@@ -55,7 +55,10 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--per-cell", type=int, default=6, help="images per (split x has-box) cell")
+    parser.add_argument("--dataset", default="dense_15m_full")
     args = parser.parse_args()
+    global DATASET
+    DATASET = PROJECT_DIR / "datasets" / args.dataset
     rng = random.Random(args.seed)
 
     cards = []

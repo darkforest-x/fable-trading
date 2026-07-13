@@ -132,7 +132,9 @@ def main() -> int:
   <Header value="stem=$stem split=$split — 拖动/删除/新增框；通过=接受预标"/>
 </View>
 """.strip()
-    (out.parent / "label_config.xml").write_text(labeling_config + "\n", encoding="utf-8")
+    cfg_path = out.parent / "label_config.xml"
+    if not cfg_path.exists():  # never clobber a curated config (two agents already collided here)
+        cfg_path.write_text(labeling_config + "\n", encoding="utf-8")
     (out.parent / "README_IMPORT.txt").write_text(
         f"""Label Studio import pack
 ========================

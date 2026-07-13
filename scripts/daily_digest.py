@@ -50,7 +50,8 @@ def _forward_segment(path: Path, title: str) -> str:
     if getattr(st.dt, "tz", None) is None:
         st = st.dt.tz_localize("UTC")
     new_today = int((st >= today).sum())
-    seg = f"<b>{title}</b>：今日+{new_today}，累计 {len(df)}（开仓中 {open_n}）"
+    crypto = df[~df["is_stockish"].fillna(False)] if "is_stockish" in df.columns else df
+    seg = f"<b>{title}</b>：今日+{new_today}，累计 {len(df)}（开仓中 {open_n}；crypto 口径 {len(crypto)}，终审只计此数）"
     if len(closed) and "realized_ret" in closed.columns:
         net = closed["realized_ret"].astype(float) - 0.0006
         seg += (
