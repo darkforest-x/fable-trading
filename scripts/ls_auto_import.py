@@ -19,14 +19,16 @@ def session():
     op.open(urllib.request.Request(f"{BASE}/user/login/",
         data=urllib.parse.urlencode({"email": u, "password": p, "csrfmiddlewaretoken": csrf}).encode(),
         headers={"Referer": f"{BASE}/user/login/"}), timeout=15)
-    tok = json.loads(op.open(f"{BASE}/api/current-user/token", timeout=15).read())["token"]
-    return tok
+    csrf_now = next((c.value for c in jar if c.name == "csrftoken"), csrf)
+    return op, csrf_now
 
-def api(tok, method, path, payload=None):
+def api(sess, method, path, payload=None):
+    op, csrf = sess
     data = json.dumps(payload).encode() if payload is not None else None
     req = urllib.request.Request(f"{BASE}{path}", data=data, method=method,
-        headers={"Authorization": f"Token {tok}", "Content-Type": "application/json"})
-    return json.loads(urllib.request.urlopen(req, timeout=120).read() or b"{}")
+        headers={"Content-Type": "application/json", "X-CSRFToken": csrf,
+                 "Referer": f"{BASE}/projects"})
+    return json.loads(op.open(req, timeout=120).read() or b"{}")
 
 def main() -> int:
     title, tasks_file = sys.argv[1], sys.argv[2]

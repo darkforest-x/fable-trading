@@ -80,11 +80,14 @@ def _balance(specs: list[WindowSpec], *, target_bg_frac: float, max_images: int,
 
 
 def build(out_dir: Path, *, window: int, stride: int, train_frac: float,
-          target_bg_frac: float, max_images: int, seed: int) -> dict:
+          target_bg_frac: float, max_images: int, seed: int, symbol_contains: str = "",
+          cache_dir=None) -> dict:
     rng = random.Random(seed)
-    cache_files = list_cache_files(min_rows=10000)
+    cache_files = list_cache_files(cache_dir, min_rows=10000) if cache_dir else list_cache_files(min_rows=10000)
     all_specs: list[WindowSpec] = []
     for path in cache_files:
+        if symbol_contains and symbol_contains not in path.name:
+            continue
         all_specs.extend(_scan_symbol(path, window=window, stride=stride, train_frac=train_frac))
     chosen = _balance(all_specs, target_bg_frac=target_bg_frac, max_images=max_images, rng=rng)
 
@@ -145,11 +148,14 @@ def main() -> None:
     parser.add_argument("--target-bg-frac", type=float, default=0.35)
     parser.add_argument("--max-images", type=int, default=3200)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--cache-dir", default=None, help="candle csv dir (default: old cache)")
+    parser.add_argument("--symbol-contains", default="", help="only cache files whose name contains this (e.g. _USDT_SWAP)")
     args = parser.parse_args()
     summary = build(
         Path(args.out), window=args.window, stride=args.stride,
         train_frac=args.train_frac, target_bg_frac=args.target_bg_frac,
-        max_images=args.max_images, seed=args.seed,
+        max_images=args.max_images, seed=args.seed, symbol_contains=args.symbol_contains,
+        cache_dir=args.cache_dir,
     )
     print(json.dumps(summary, indent=2))
 
