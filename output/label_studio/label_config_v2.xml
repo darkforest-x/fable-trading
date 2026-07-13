@@ -1,0 +1,10 @@
+<View>
+  <Image name="image" value="$image" zoom="true" zoomControl="true"/>
+  <RectangleLabels name="label" toName="image" strokeWidth="2">
+    <Label value="dense_cluster" background="#3cc878" hotkey="1"/>
+  </RectangleLabels>
+  <Header value="stem=$stem split=$split — 1画框 · 2⭐标杆 · ⌘↵提交"/>
+  <Choices name="quality" toName="image" choice="single" showInline="true">
+    <Choice value="⭐标杆" hotkey="2"/>
+  </Choices>
+</View>

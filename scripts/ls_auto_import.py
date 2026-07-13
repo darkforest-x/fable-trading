@@ -42,9 +42,15 @@ def main() -> int:
     else:
         proj = api(tok, "POST", "/api/projects", {"title": title, "label_config": config})
         pid = proj["id"]
-    api(tok, "POST", "/api/storages/localfiles", {
-        "project": pid, "title": "datasets", "path": "/label-studio/files",
-        "use_blob_urls": False})
+    import re as _re, urllib.error
+    m = _re.search(r"d=([^/]+)/", json.loads(Path(tasks_file).read_text())[0]["data"]["image"])
+    subdir = m.group(1) if m else "dense_15m_full"
+    try:
+        api(tok, "POST", "/api/storages/localfiles", {
+            "project": pid, "title": subdir,
+            "path": f"/label-studio/files/{subdir}", "use_blob_urls": False})
+    except urllib.error.HTTPError as e:
+        print(f"storage warn ({e.code}):", e.read().decode()[:200])
     tasks = json.loads(Path(tasks_file).read_text())
     api(tok, "POST", f"/api/projects/{pid}/import", tasks)
     print(f"project '{title}' (id {pid}): imported {len(tasks)} tasks")

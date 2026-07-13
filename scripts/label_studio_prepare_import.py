@@ -80,7 +80,7 @@ def main() -> int:
     for p in sample:
         boxes = load_boxes(lbl_dir / f"{p.stem}.txt")
         # Local files storage path as configured in compose
-        image_url = f"/data/local-files/?d=dense_15m_full/images/{args.split}/{p.name}"
+        image_url = f"/data/local-files/?d={Path(args.dataset).name}/images/{args.split}/{p.name}"
         results = []
         for i, (cx, cy, w, h) in enumerate(boxes):
             results.append(
@@ -114,16 +114,9 @@ def main() -> int:
             if results
             else [],
         }
-        # Also put GT in annotations so it shows as ground truth layer if preferred
-        if results:
-            task["annotations"] = [
-                {
-                    "completed_by": 0,
-                    "result": results,
-                    "was_cancelled": False,
-                    "ground_truth": True,
-                }
-            ]
+        # Put GT only in predictions (pre-annotations). LS 1.23+ rejects
+        # annotations.completed_by=0 ("not a valid annotator's email or ID").
+        # Predictions show as reviewable boxes without requiring a real user id.
         tasks.append(task)
 
     out = Path(args.out) if args.out else Path(f"output/label_studio/tasks_{args.split}.json")
@@ -134,7 +127,7 @@ def main() -> int:
 <View>
   <Image name="image" value="$image" zoom="true" zoomControl="true"/>
   <RectangleLabels name="label" toName="image" strokeWidth="2">
-    <Label value="dense_cluster" background="#3cc878"/>
+    <Label value="dense_cluster" background="#3cc878" hotkey="1"/>
   </RectangleLabels>
   <Header value="stem=$stem split=$split — 拖动/删除/新增框；通过=接受预标"/>
 </View>
