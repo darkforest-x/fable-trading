@@ -38,7 +38,7 @@ CONFIGS = [
 ]
 
 
-def run_config(tag: str, bar: str, bar_min: int, horizon: int) -> dict | None:
+def run_config(tag: str, bar: str, bar_min: int, horizon: int, tp_mult: float = 5.0) -> dict | None:
     rows = []
     n_series = 0
     for source, symbol, frame in iter_series(bar=bar, min_bars=500):
@@ -50,7 +50,7 @@ def run_config(tag: str, bar: str, bar_min: int, horizon: int) -> dict | None:
         featured = add_features(enriched)
         feature_rows = extract_feature_rows(featured, signal_indices)
         for row_pos, signal_i in enumerate(signal_indices):
-            o = label_candidate(enriched, signal_i, tp_mult=5.0, sl_mult=2.0, horizon=horizon)
+            o = label_candidate(enriched, signal_i, tp_mult=tp_mult, sl_mult=2.0, horizon=horizon)
             if o is None:
                 continue
             rows.append({
