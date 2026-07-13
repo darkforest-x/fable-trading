@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -96,10 +97,18 @@ DEFAULT_FROZEN_CONFIG: Final = default_config()
 
 
 def latest_artifact(config: FrozenConfig = DEFAULT_FROZEN_CONFIG) -> FrozenArtifact | None:
-    metadata_paths = sorted(config.models_dir.glob(f"frozen_{config.name}_*.json"))
-    if not metadata_paths:
-        return None
-    return load_artifact(config, metadata_paths[-1])
+    # date-suffix only: frozen_{name}_YYYYMMDD.json -- a greedy * here once
+    # matched a different config (…_ma206_…) and crashed the dashboard
+    pattern = re.compile(rf"^frozen_{re.escape(config.name)}_\d{{8}}\.json$")
+    metadata_paths = sorted(
+        p for p in config.models_dir.glob(f"frozen_{config.name}_*.json")
+        if pattern.match(p.name))
+    for path in reversed(metadata_paths):  # newest valid wins; corrupt ones skip
+        try:
+            return load_artifact(config, path)
+        except FrozenArtifactError as exc:
+            print(f"frozen: skipping {path.name}: {exc}")
+    return None
 
 
 def load_artifact(config: FrozenConfig, metadata_path: Path) -> FrozenArtifact:
