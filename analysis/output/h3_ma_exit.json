@@ -1,0 +1,104 @@
+[
+  {
+    "config": "tp5_sl2_base",
+    "dataset": "/Users/zhangzc/fable-trading-grok/data/sweep_h3_ma_exit/tp5_sl2_base.csv",
+    "n": 31059,
+    "n_train": 18836,
+    "n_val": 4739,
+    "positive_rate_val": 0.3429,
+    "val_auc": 0.5549,
+    "perm_p": 0.001,
+    "top_gross": 0.00211,
+    "top_net_taker_010": 0.00111,
+    "top_net_maker_006": 0.00151,
+    "top_win_rate": 0.3763,
+    "top_maker_fill_rate": 0.808,
+    "top_net_maker_filled_only": 0.00117,
+    "threshold_val_q90": 0.35578,
+    "portfolio_maker": {
+      "n_trades": 346,
+      "net_total_units": 0.3682,
+      "net_return_on_capital": 0.0368,
+      "mean_net_per_trade": 0.00106,
+      "win_rate": 0.3844,
+      "profit_factor": 1.264,
+      "max_drawdown_pct": 0.011,
+      "outcome_counts": {
+        "sl": 207,
+        "tp": 122,
+        "timeout": 16,
+        "sl_ambiguous": 1
+      }
+    },
+    "portfolio_taker": {
+      "n_trades": 404,
+      "net_total_units": 0.3362,
+      "net_return_on_capital": 0.0336,
+      "mean_net_per_trade": 0.00083,
+      "win_rate": 0.3985,
+      "profit_factor": 1.198,
+      "max_drawdown_pct": 0.0149,
+      "outcome_counts": {
+        "sl": 237,
+        "tp": 146,
+        "timeout": 20,
+        "sl_ambiguous": 1
+      }
+    },
+    "mean_exit_bars": 20.1,
+    "outcomes": {
+      "sl": 2859,
+      "tp": 1625,
+      "timeout": 249,
+      "sl_ambiguous": 6
+    }
+  },
+  {
+    "config": "ma_exit_ema21",
+    "dataset": "/Users/zhangzc/fable-trading-grok/data/sweep_h3_ma_exit/ma_exit_ema21.csv",
+    "n": 31059,
+    "n_train": 18836,
+    "n_val": 4739,
+    "positive_rate_val": 0.3881,
+    "val_auc": 0.5784,
+    "perm_p": 0.001,
+    "top_gross": 0.00572,
+    "top_net_taker_010": 0.00472,
+    "top_net_maker_006": 0.00512,
+    "top_win_rate": 0.5095,
+    "top_maker_fill_rate": 0.812,
+    "top_net_maker_filled_only": 0.0049,
+    "threshold_val_q90": 0.45655,
+    "portfolio_maker": {
+      "n_trades": 348,
+      "net_total_units": 1.6972,
+      "net_return_on_capital": 0.1697,
+      "mean_net_per_trade": 0.00488,
+      "win_rate": 0.4425,
+      "profit_factor": 3.202,
+      "max_drawdown_pct": 0.0098,
+      "outcome_counts": {
+        "ma_exit": 346,
+        "timeout": 2
+      }
+    },
+    "portfolio_taker": {
+      "n_trades": 401,
+      "net_total_units": 1.9755,
+      "net_return_on_capital": 0.1975,
+      "mean_net_per_trade": 0.00493,
+      "win_rate": 0.4389,
+      "profit_factor": 3.239,
+      "max_drawdown_pct": 0.0093,
+      "outcome_counts": {
+        "ma_exit": 399,
+        "timeout": 2
+      }
+    },
+    "mean_exit_bars": 11.7,
+    "outcomes": {
+      "ma_exit": 4731,
+      "timeout": 8
+    }
+  }
+]
