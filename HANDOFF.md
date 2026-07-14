@@ -2,6 +2,12 @@
 
 **写于 2026-07-08。** 读完本文件 + `CLAUDE.md` + `analysis/p2b_v2_report.md`，即可无损接手本项目。
 
+
+## YOLO 上关键路径 A/B（owner 2026-07-15 决策，v6 后自动跑）
+方式=并行PK不替换现有验证。设计见 docs/design/yolo_critical_path_ab.md。
+YOLO候选源(scripts/yolo_candidate_source.py)与规则源同闸门对比;赢了(top净≥规则且p<0.01)
+才冻结+独立前向确认才切主线,输了回侦察岗。前向时钟(路径A)全程不动。
+
 ## 当前状态一句话
 
 **07-09 追加：合约复制性检验通过**（TP5/SL2 纯 SWAP 池 AUC 0.560/p=0.001，top-decile 净@maker +0.225%/笔，判定标准全过）——**主线宇宙即日起为 SWAP**；H1 分批止盈为 v3 出场头号挑战者（AUC 0.608/胜率 65%）。前向验证与后续实验一律用合约配置。YOLO11s 离线验收 mAP50 0.8569，低于正式线 0.90，检测层正式验收未达成，标记为非关键路径并暂停。P1-5 已完成：`models/frozen_tp5_sl2_swap_20260709.txt/.json` 入库，看板信号路径加载冻结模型并按 model_path/dataset_sha256 失效旧缓存。P1-8 已完成：看板新增前向验证 tab、现货/合约切换、动态总览与分宇宙 score cache，localhost 与 VPS 真浏览器验收通过。P1.5 R0~R4 已完成：H9/H10 有线索但不切主线；H1 scaled 是最强发现级候选；5m 机会扩张证伪，30m 是低频高质量新线索。P2-9 已完成：补齐冒烟测试并新增 GitHub Actions。P2-10 已完成：移动端、合格未成交 tooltip、只读分数滑块；owner 拍板暂不加访问控制。
