@@ -340,3 +340,46 @@ def label_candidate_time_decay(
             return BarrierOutcome(1, "tp", j + 1, entry, upper / entry - 1)
     ret = timeout_close / entry - 1
     return BarrierOutcome(int(ret > 0), "timeout", horizon, entry, ret)
+
+
+def vol_adaptive_mults(
+    atr_pct: float,
+    q33: float,
+    q66: float,
+    *,
+    tp_by_tertile: tuple[float, float, float] = (4.0, 5.0, 6.0),
+    sl_by_tertile: tuple[float, float, float] = (1.6, 2.0, 2.4),
+) -> tuple[float, float, int]:
+    """Map atr_pct to (tp_mult, sl_mult, tertile_index 0/1/2). Low vol → narrow."""
+    if not np.isfinite(atr_pct):
+        return tp_by_tertile[1], sl_by_tertile[1], 1
+    if atr_pct <= q33:
+        return tp_by_tertile[0], sl_by_tertile[0], 0
+    if atr_pct <= q66:
+        return tp_by_tertile[1], sl_by_tertile[1], 1
+    return tp_by_tertile[2], sl_by_tertile[2], 2
+
+
+def label_candidate_vol_adaptive(
+    frame: pd.DataFrame,
+    signal_i: int,
+    *,
+    q33: float,
+    q66: float,
+    tp_by_tertile: tuple[float, float, float] = (4.0, 5.0, 6.0),
+    sl_by_tertile: tuple[float, float, float] = (1.6, 2.0, 2.4),
+    horizon: int = HORIZON_BARS,
+    atr_pct_min: float = ATR_PCT_MIN,
+) -> BarrierOutcome | None:
+    """H5 vol-adaptive barriers: TP/SL mults from atr_pct tertiles (low=narrow).
+
+    Tertile edges (q33, q66) must be precomputed on train/dev only — caller
+    responsibility. Delegates to label_candidate with the chosen mults.
+    """
+    atr_pct = float(frame["atr_pct"].iloc[signal_i])
+    tp, sl, _ = vol_adaptive_mults(
+        atr_pct, q33, q66, tp_by_tertile=tp_by_tertile, sl_by_tertile=sl_by_tertile
+    )
+    return label_candidate(
+        frame, signal_i, tp_mult=tp, sl_mult=sl, horizon=horizon, atr_pct_min=atr_pct_min
+    )

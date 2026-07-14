@@ -1,0 +1,94 @@
+{
+  "q33": 0.003738595808901358,
+  "q66": 0.004993411193891654,
+  "tp_by_tertile": [
+    4.0,
+    5.0,
+    6.0
+  ],
+  "sl_by_tertile": [
+    1.6,
+    2.0,
+    2.4
+  ],
+  "results": [
+    {
+      "config": "tp5_sl2_fixed",
+      "n": 23854,
+      "n_train": 18836,
+      "n_val": 4739,
+      "positive_rate_val": 0.3429,
+      "val_auc": 0.5499,
+      "perm_p": 0.001,
+      "top_gross": 0.00211,
+      "top_net_maker_006": 0.00151,
+      "top_win_rate": 0.3848,
+      "mean_exit_bars": 20.1,
+      "by_vol_tier_val": [
+        {
+          "tier": 0,
+          "n": 1580,
+          "top_n": 158,
+          "top_gross": 0.002,
+          "top_net_maker": 0.0014,
+          "top_win_rate": 0.4304
+        },
+        {
+          "tier": 1,
+          "n": 1579,
+          "top_n": 157,
+          "top_gross": 0.00357,
+          "top_net_maker": 0.00297,
+          "top_win_rate": 0.4395
+        },
+        {
+          "tier": 2,
+          "n": 1580,
+          "top_n": 158,
+          "top_gross": 0.00447,
+          "top_net_maker": 0.00387,
+          "top_win_rate": 0.4494
+        }
+      ]
+    },
+    {
+      "config": "vol_adaptive",
+      "n": 23854,
+      "n_train": 18836,
+      "n_val": 4739,
+      "positive_rate_val": 0.3478,
+      "val_auc": 0.5757,
+      "perm_p": 0.001,
+      "top_gross": 0.00232,
+      "top_net_maker_006": 0.00172,
+      "top_win_rate": 0.4355,
+      "mean_exit_bars": 18.6,
+      "by_vol_tier_val": [
+        {
+          "tier": 0,
+          "n": 1580,
+          "top_n": 158,
+          "top_gross": 0.00296,
+          "top_net_maker": 0.00236,
+          "top_win_rate": 0.5063
+        },
+        {
+          "tier": 1,
+          "n": 1579,
+          "top_n": 157,
+          "top_gross": 0.00194,
+          "top_net_maker": 0.00134,
+          "top_win_rate": 0.3885
+        },
+        {
+          "tier": 2,
+          "n": 1580,
+          "top_n": 158,
+          "top_gross": 0.00435,
+          "top_net_maker": 0.00375,
+          "top_win_rate": 0.4367
+        }
+      ]
+    }
+  ]
+}
