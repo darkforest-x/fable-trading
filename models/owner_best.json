@@ -1,8 +1,12 @@
 {
-  "source_run": "owner_v4",
-  "frozen_eval_f1": 0.563,
-  "metrics": {"f1": 0.563, "p": 0.498, "r": 0.646},
-  "eval_set": "owner_eval_frozen",
-  "note": "晋升自冻结集对照 (v3 0.558 vs v4 0.563); v5 在自身漂移验证集上 0.495, 不采信",
-  "leaderboard": [{"run": "owner_v4", "frozen_f1": 0.563}, {"run": "owner_v3_coco", "frozen_f1": 0.558}]
+  "source_run": "owner_v5_from_v4",
+  "frozen_eval_f1": 0.663,
+  "metrics": {"f1": 0.663, "p": 0.758, "r": 0.590},
+  "eval_set": "owner_eval_frozen (464图/229框, 同一把尺子)",
+  "leaderboard": [
+    {"run": "owner_v5_from_v4", "frozen_f1": 0.663, "note": "P0.758 R0.590 最强且最精确"},
+    {"run": "owner_v5_coco", "frozen_f1": 0.641, "note": "P0.567 R0.738 召回型"},
+    {"run": "owner_v4", "frozen_f1": 0.563},
+    {"run": "owner_v3_coco", "frozen_f1": 0.558}
+  ]
 }
