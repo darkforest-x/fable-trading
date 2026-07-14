@@ -36,3 +36,6 @@ b = json.load(open('models/owner_best.json'))
 curve = ' → '.join(f\"{k}:{v['f1']}\" for k,v in d.items() if 'v' in k)
 send(f'🧠 v6训练完成(4501张)。冻结集曲线: {curve}。生效模型: {b[\"source_run\"]} F1 {b[\"frozen_eval_f1\"]}')" || true
 echo "=== queue15 done $(date) ==="
+# v6 训练+晋升完成后自动重启侦察兵（用新的 owner_best）
+nohup bash scripts/scout_loop.sh >/dev/null 2>&1 & disown
+echo "侦察兵已重启（新模型执勤）$(date)"
