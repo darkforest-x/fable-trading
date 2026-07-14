@@ -276,6 +276,13 @@ def label_candidate_ma_exit(
     atr_pct_min: float = ATR_PCT_MIN,
     horizon: int = HORIZON_BARS,
 ) -> BarrierOutcome | None:
+    """H3 structure exit: leave when close drops below `ma_col` (default EMA21).
+
+    Entry / ATR floor / horizon match the TP5/SL2 mainline contract (next-bar
+    open entry, atr_pct_min gate, HORIZON_BARS timeout). There is no fixed
+    TP/SL barrier — the MA cross defines the pulse end. Label = 1 iff
+    realized_ret > 0 at exit.
+    """
     entry_i = signal_i + 1
     last_i = entry_i + horizon - 1
     if last_i >= len(frame) or ma_col not in frame.columns:
