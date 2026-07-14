@@ -98,6 +98,54 @@ def alpha_vwap_dev(df):
     return _safe(df["close"] / vwap - 1)
 
 
+def alpha_obv_slope(df):
+    """20-bar slope of On-Balance Volume (accumulation vs distribution).
+
+    Cols: close, volume. Window: 20 bars ending at t (causal).
+    """
+    direction = np.sign(df["close"].diff()).fillna(0.0)
+    obv = (direction * df["volume"]).cumsum()
+    # raw slope; scale by recent |OBV| level so cross-symbol ranks stay meaningful
+    slope = (obv - obv.shift(20)) / 20.0
+    scale = obv.abs().rolling(20, min_periods=10).mean().replace(0, np.nan)
+    return _safe(slope / scale)
+
+
+def alpha_vol_dryup(df):
+    """Dense-period volume / prior-48-bar mean volume (VSA dry-up).
+
+    Dense window = last 8 bars with ma_spread_pct <= 0.0028 when that column
+    exists (from add_indicators); otherwise plain last-8 volume mean.
+    Baseline = mean volume of the 48 bars ending 8 bars ago (no overlap).
+    Cols: volume [, ma_spread_pct]. Windows: 8 + 48 lookback only.
+    """
+    vol = df["volume"]
+    baseline = vol.shift(8).rolling(48, min_periods=24).mean()
+    if "ma_spread_pct" in df.columns:
+        dense = (df["ma_spread_pct"] <= 0.0028).astype(float)
+        dens_vol = (vol * dense).rolling(8, min_periods=1).sum()
+        dens_n = dense.rolling(8, min_periods=1).sum().replace(0, np.nan)
+        dense_mean = dens_vol / dens_n
+        dense_mean = dense_mean.fillna(vol.rolling(8, min_periods=1).mean())
+    else:
+        dense_mean = vol.rolling(8, min_periods=1).mean()
+    return _safe(dense_mean / baseline.replace(0, np.nan))
+
+
+def alpha_taker_imbalance(df):
+    """Approx buy-pressure: 20-bar mean of (close-low)/(high-low) * volume.
+
+    Proxy for taker buy share when true taker volume is unavailable.
+    Cols: high, low, close, volume. Window: 20 bars ending at t.
+    """
+    hl = (df["high"] - df["low"]).replace(0, np.nan)
+    buy_share = (df["close"] - df["low"]) / hl  # 1 = close at high (buy pressure)
+    buy_vol = buy_share * df["volume"]
+    # normalize by mean volume so level is roughly a share in [0, 1]
+    vol_mean = df["volume"].rolling(20, min_periods=10).mean().replace(0, np.nan)
+    return _safe(buy_vol.rolling(20, min_periods=10).mean() / vol_mean)
+
+
 # registry: name -> callable. Add here; screening picks up automatically.
 FACTORS = {
     "rev5": alpha_reversal_5, "mom20": alpha_mom_20, "hl_pos": alpha_hl_range_pos,
@@ -106,4 +154,8 @@ FACTORS = {
     "ret_skew": alpha_ret_skew, "vol_of_vol": alpha_vol_of_vol,
     "ts_rank_close": alpha_ts_rank_close, "boll_pos": alpha_bollinger_pos,
     "range_compress": alpha_range_compression, "vwap_dev": alpha_vwap_dev,
+    # H14/H17/H18 volume family
+    "obv_slope": alpha_obv_slope,
+    "vol_dryup": alpha_vol_dryup,
+    "taker_imbalance": alpha_taker_imbalance,
 }
