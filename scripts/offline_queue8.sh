@@ -12,33 +12,14 @@ caffeinate -i $PY -m src.detection.train --data datasets/dense_owner_v1/data.yam
 $PY - <<'PYEOF'
 import json
 from pathlib import Path
-from ultralytics import YOLO
-import sys
-sys.path.insert(0, 'scripts')
-from golden_disagreement import iou
-model = YOLO('runs/detect/runs/detect/dense_owner_v1/weights/best.pt')
-val_img = Path('datasets/dense_owner_v1/images/val')
-val_lbl = Path('datasets/dense_owner_v1/labels/val')
-def load_txt(p):
-    if not p.exists(): return []
-    return [tuple(map(float, l.split()[1:])) for l in p.read_text().splitlines() if len(l.split())==5]
-best = None
-for conf in (0.20, 0.30, 0.40, 0.50):
-    tp=fp=fn=0
-    for img in sorted(val_img.glob('*.png')):
-        gt = load_txt(val_lbl / (img.stem + '.txt'))
-        res = model.predict(str(img), conf=conf, verbose=False)[0]
-        preds = [tuple(map(float, b)) for b in res.boxes.xywhn.cpu().numpy()] if res.boxes is not None else []
-        used=set()
-        for g in gt:
-            m = next((k for k,p in enumerate(preds) if k not in used and iou(g,p)>=0.3), None)
-            if m is None: fn+=1
-            else: used.add(m); tp+=1
-        fp += len(preds)-len(used)
-    prec = tp/max(tp+fp,1); rec = tp/max(tp+fn,1); f1 = 2*prec*rec/max(prec+rec,1e-9)
-    row = {'conf': conf, 'f1': round(f1,3), 'p': round(prec,3), 'r': round(rec,3), 'tp': tp, 'fp': fp, 'fn': fn}
+from src.detection.owner_eval import evaluate_owner_f1
+best, sweep = evaluate_owner_f1(
+    'runs/detect/runs/detect/dense_owner_v1/weights/best.pt',
+    'datasets/dense_owner_v1',
+    confs=(0.20, 0.30, 0.40, 0.50),
+)
+for row in sweep:
     print(row)
-    if best is None or f1 > best['f1']: best = row
 Path('analysis/output/owner_detector_v1.json').write_text(json.dumps(best, indent=2))
 print('BEST', best)
 PYEOF

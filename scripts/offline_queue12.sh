@@ -17,31 +17,15 @@ echo "v4 base = $BASE"
 caffeinate -i $PY -m src.detection.train --data datasets/dense_owner_v4/data.yaml \
   --model "$BASE" --epochs 100 --patience 25 --name owner_v4
 $PY - <<'PYEOF'
-import json, sys
+import json
 from pathlib import Path
-from ultralytics import YOLO
-sys.path.insert(0, 'scripts')
-from golden_disagreement import iou
-def load_txt(p):
-    return [tuple(map(float, l.split()[1:])) for l in p.read_text().splitlines() if len(l.split())==5] if p.exists() else []
-vi, vl = Path('datasets/dense_owner_v4/images/val'), Path('datasets/dense_owner_v4/labels/val')
-model = YOLO('runs/detect/runs/detect/owner_v4/weights/best.pt'); best=None
-for conf in (0.15,0.2,0.3,0.4):
-    tp=fp=fn=0
-    for img in sorted(vi.glob('*.png')):
-        gt = load_txt(vl/(img.stem+'.txt'))
-        res = model.predict(str(img), conf=conf, verbose=False)[0]
-        preds = [tuple(map(float,b)) for b in res.boxes.xywhn.cpu().numpy()] if res.boxes is not None else []
-        used=set()
-        for g in gt:
-            m = next((k for k,p in enumerate(preds) if k not in used and iou(g,p)>=0.3), None)
-            if m is None: fn+=1
-            else: used.add(m); tp+=1
-        fp += len(preds)-len(used)
-    pr=tp/max(tp+fp,1); rc=tp/max(tp+fn,1); f1=2*pr*rc/max(pr+rc,1e-9)
-    row={'conf':conf,'f1':round(f1,3),'p':round(pr,3),'r':round(rc,3)}
+from src.detection.owner_eval import evaluate_owner_f1
+best, sweep = evaluate_owner_f1(
+    'runs/detect/runs/detect/owner_v4/weights/best.pt',
+    'datasets/dense_owner_v4',
+)
+for row in sweep:
     print(row, flush=True)
-    if best is None or f1>best['f1']: best=row
 Path('analysis/output/owner_detector_v4.json').write_text(json.dumps(best, indent=2))
 PYEOF
 git add analysis/output/owner_detector_v4.json data/golden_pool.json output/label_studio/export_round3_chunk3.json output/label_studio/export_round3_chunk4.json 2>/dev/null

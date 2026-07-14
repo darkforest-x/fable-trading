@@ -13,34 +13,14 @@ for PAIR in "yolo11s.pt owner_v3_coco" "runs/detect/runs/detect/dense_owner_v1/w
     --model "$1" --epochs 100 --patience 25 --name "$2"
 done
 $PY - <<'PYEOF'
-import json, sys
+import json
 from pathlib import Path
-from ultralytics import YOLO
-sys.path.insert(0, 'scripts')
-from golden_disagreement import iou
-def load_txt(p):
-    return [tuple(map(float, l.split()[1:])) for l in p.read_text().splitlines() if len(l.split())==5] if p.exists() else []
-vi, vl = Path('datasets/dense_owner_v3/images/val'), Path('datasets/dense_owner_v3/labels/val')
+from src.detection.owner_eval import evaluate_owner_f1
 out = {}
 for run in ('owner_v3_coco', 'owner_v3_chain'):
     w = Path(f'runs/detect/runs/detect/{run}/weights/best.pt')
     if not w.exists(): continue
-    model = YOLO(str(w)); best = None
-    for conf in (0.15, 0.2, 0.3, 0.4):
-        tp=fp=fn=0
-        for img in sorted(vi.glob('*.png')):
-            gt = load_txt(vl / (img.stem + '.txt'))
-            res = model.predict(str(img), conf=conf, verbose=False)[0]
-            preds = [tuple(map(float, b)) for b in res.boxes.xywhn.cpu().numpy()] if res.boxes is not None else []
-            used=set()
-            for g in gt:
-                m = next((k for k,p in enumerate(preds) if k not in used and iou(g,p)>=0.3), None)
-                if m is None: fn+=1
-                else: used.add(m); tp+=1
-            fp += len(preds)-len(used)
-        pr=tp/max(tp+fp,1); rc=tp/max(tp+fn,1); f1=2*pr*rc/max(pr+rc,1e-9)
-        if best is None or f1 > best['f1']:
-            best = {'conf':conf,'f1':round(f1,3),'p':round(pr,3),'r':round(rc,3),'tp':tp,'fp':fp,'fn':fn}
+    best, _ = evaluate_owner_f1(w, 'datasets/dense_owner_v3')
     out[run] = best
     print(run, best, flush=True)
 Path('analysis/output/owner_detector_v3.json').write_text(json.dumps(out, indent=2))
