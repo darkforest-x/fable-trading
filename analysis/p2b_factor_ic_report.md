@@ -14,11 +14,14 @@
 | obv_slope | +0.0246 | +0.14 | 12 | ✗ | dead |
 | vol_dryup | +0.0206 | +0.31 | 12 | ✗ | dead |
 | updown_vol | +0.0194 | +0.28 | 12 | ✗ | dead |
+| convergence_speed | +0.0163 | +0.08 | 12 | ✗ | dead |
 | mom20 | +0.0149 | +0.09 | 12 | ✗ | dead |
+| ma_order_score | +0.0129 | +0.27 | 12 | ✗ | dead |
 | range_compress | +0.0058 | +0.10 | 12 | ✗ | dead |
 | illiq | +0.0050 | +0.43 | 12 | ✓ | dead |
 | vol_share | -0.0041 | -0.10 | 12 | ✗ | dead |
 | vp_corr | +0.0020 | -0.09 | 12 | ✗ | dead |
+| ma_bandwidth_pct | +0.0018 | -0.21 | 12 | ✗ | dead |
 | taker_imbalance | -0.0017 | -0.23 | 12 | ✗ | dead |
 
 ## 存活因子(2个, |IC|≥0.03且符号稳定) → 候选新特征
