@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fable · Hummingbot Dashboard 风格 Mock</title>
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+  :root {
+    --bg: #0e1117;           /* Streamlit dark-ish */
+    --sidebar: #161b22;
+    --panel: #1c2128;
+    --panel-2: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --purple: #a371f7;
+    --orange: #d29922;
+    --grad-a: #667eea;
+    --grad-b: #764ba2;
+    --sidebar-w: 260px;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, "PingFang SC", monospace;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* —— Streamlit-like sidebar —— */
+  .sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    height: 100%;
+    overflow: auto;
+  }
+  .sb-brand {
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sb-brand h1 { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; }
+  .sb-brand p { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .sb-group { padding: 12px 10px 4px; }
+  .sb-group-title {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); padding: 4px 8px 6px; font-weight: 600;
+  }
+  .sb-item {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%; text-align: left;
+    background: transparent; border: 0; color: var(--text);
+    padding: 8px 10px; border-radius: 8px;
+    font: inherit; font-size: 13px; cursor: pointer;
+  }
+  .sb-item:hover { background: var(--panel-2); }
+  .sb-item.active {
+    background: rgba(88, 166, 255, 0.12);
+    color: var(--accent);
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+  .sb-item .ico { width: 1.4em; text-align: center; opacity: 0.9; }
+  .sb-foot {
+    margin-top: auto; padding: 12px; border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--muted);
+  }
+
+  /* —— main —— */
+  .main {
+    flex: 1; min-width: 0; height: 100%;
+    overflow: auto;
+    padding: 20px 28px 48px;
+  }
+  .page { display: none; max-width: 1200px; }
+  .page.on { display: block; }
+  .page-title {
+    font-size: 1.65rem; font-weight: 700; margin-bottom: 4px;
+    letter-spacing: -0.02em;
+  }
+  .page-sub { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+
+  /* hero (landing) */
+  .hero {
+    text-align: center; padding: 28px 12px 8px;
+  }
+  .hero h1 { font-size: 2rem; margin-bottom: 8px; }
+  .hero p { color: var(--muted); font-size: 14px; }
+
+  .warn {
+    background: rgba(210, 153, 34, 0.12);
+    border: 1px solid rgba(210, 153, 34, 0.35);
+    color: #e3b341;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    margin: 12px 0 18px;
+  }
+
+  /* metric cards — Hummingbot landing style */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .metric-card {
+    background: linear-gradient(135deg, var(--grad-a) 0%, var(--grad-b) 100%);
+    border-radius: 12px;
+    padding: 16px 18px;
+    color: #fff;
+    min-height: 110px;
+  }
+  .metric-card.alt1 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+  .metric-card.alt2 { background: linear-gradient(135deg, #4b6cb7, #182848); }
+  .metric-card.alt3 { background: linear-gradient(135deg, #f12711, #f5af19); }
+  .metric-card h3 { font-size: 13px; font-weight: 600; opacity: 0.95; margin-bottom: 8px; }
+  .metric-card .n { font-size: 1.75rem; font-weight: 800; line-height: 1.1; }
+  .metric-card .s { font-size: 12px; opacity: 0.9; margin-top: 6px; }
+
+  .section-h {
+    font-size: 1.05rem; font-weight: 700; margin: 22px 0 12px;
+  }
+
+  .cards-2 {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  .feature-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .feature-card h3 { font-size: 14px; margin-bottom: 6px; }
+  .feature-card p { font-size: 12px; color: var(--muted); }
+  .feature-card .links { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font-size: 11px; padding: 3px 8px; border-radius: 999px;
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
+    cursor: pointer;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* form + chart strategy page (HB config generator) */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .panel h3 {
+    font-size: 13px; font-weight: 700; margin-bottom: 12px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .field label {
+    display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px;
+  }
+  .field input, .field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 7px 9px;
+    font: inherit; font-size: 13px;
+  }
+  .field .hint { font-size: 10px; color: var(--muted); margin-top: 3px; }
+  .row-actions {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center;
+  }
+  .btn {
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font: inherit; font-size: 13px;
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary {
+    background: linear-gradient(180deg, #58a6ff, #1f6feb);
+    border-color: transparent; color: #fff; font-weight: 600;
+  }
+  .btn.success {
+    background: linear-gradient(180deg, #3fb950, #238636);
+    border-color: transparent; color: #fff; font-weight: 600;
+  }
+  .checks { display: flex; gap: 14px; font-size: 12px; color: var(--muted); }
+  .checks label { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+  .checks input { accent-color: var(--accent); }
+
+  .chart-wrap {
+    height: 480px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: #0a0c10;
+    position: relative;
+  }
+  #chart-dense, #chart-bt { position: absolute; inset: 0; }
+
+  .bt-metrics {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .bt-m {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .bt-m .lbl { font-size: 11px; color: var(--muted); }
+  .bt-m .val { font-size: 1.25rem; font-weight: 700; margin-top: 4px; }
+  .bt-m .val.up { color: var(--green); }
+  .bt-m .val.down { color: var(--red); }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 12px;
+  }
+  table.simple {
+    width: 100%; border-collapse: collapse; font-size: 12px;
+  }
+  table.simple th {
+    text-align: left; color: var(--muted); font-weight: 600;
+    padding: 8px 10px; border-bottom: 1px solid var(--border);
+  }
+  table.simple td {
+    padding: 8px 10px; border-bottom: 1px solid rgba(48,54,61,.6);
+  }
+  table.simple tr:hover td { background: rgba(255,255,255,0.03); cursor: pointer; }
+  table.simple tr.sel td { background: rgba(88,166,255,0.1); }
+  .tag {
+    display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px;
+  }
+  .tag.ok { background: rgba(63,185,80,.15); color: var(--green); }
+  .tag.warn { background: rgba(210,153,34,.15); color: var(--orange); }
+  .tag.bad { background: rgba(248,81,73,.15); color: var(--red); }
+
+  .instance-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+  }
+  .instance-card h4 { font-size: 14px; }
+  .instance-card .meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .instance-card .actions { display: flex; gap: 6px; align-items: start; }
+
+  .mock-note {
+    position: fixed; right: 16px; bottom: 16px; z-index: 40;
+    max-width: 300px;
+    background: rgba(22,27,34,.96);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 11px; color: var(--muted); line-height: 1.45;
+    box-shadow: 0 12px 40px rgba(0,0,0,.4);
+  }
+  .mock-note strong { color: var(--orange); display: block; margin-bottom: 4px; font-size: 12px; }
+  .mock-note a { color: var(--accent); }
+
+  .about {
+    margin-top: 8px; margin-bottom: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+  }
+  .about summary {
+    cursor: pointer; padding: 8px 12px; font-size: 12px; color: var(--muted);
+    list-style: none;
+  }
+  .about summary::-webkit-details-marker { display: none; }
+  .about[open] summary { border-bottom: 1px solid var(--border); }
+  .about .body { padding: 10px 12px; font-size: 12px; color: var(--muted); }
+
+  @media (max-width: 1000px) {
+    body { flex-direction: column; overflow: auto; }
+    .sidebar { width: 100%; height: auto; max-height: 40vh; }
+    .metrics, .form-grid, .bt-metrics { grid-template-columns: 1fr 1fr; }
+    .two-col, .cards-2 { grid-template-columns: 1fr; }
+    .chart-wrap { height: 360px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== SIDEBAR (Streamlit multipage groups) ========== -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <h1>🤖 fable dashboard</h1>
+    <p>Hummingbot 风格 mock · 非生产</p>
+  </div>
+
+  <div class="sb-group">
+    <div class="sb-group-title">Main</div>
+    <button class="sb-item active" data-page="landing" type="button"><span class="ico">📊</span> Overview</button>
+  </div>
+
+  <div class="sb-group">
+    <div class="sb-group-title">Config / Visualize</div>
+    <button class="sb-item" data-page="dense" type="button"><span class="ico">📈</span> Dense MA Explore</button>
+    <button class="sb-item" data-page="signals" type="button"><span class="ico">🎯</span> Signal Browser</button>
+    <button class="sb-item" data-page="backtest" type="button"><span class="ico">📉</span> Backtest Review</button>
+  </div>
+
+  <div class="sb-group">
+    <div class="sb-group-title">Orchestration</div>
+    <button class="sb-item" data-page="forward" type="button"><span class="ico">🚀</span> Forward Gate</button>
+    <button class="sb-item" data-page="jobs" type="button"><span class="ico">🦅</span> Jobs / Instances</button>
+    <button class="sb-item" data-page="models" type="button"><span class="ico">🔑</span> Models / Detector</button>
+  </div>
+
+  <div class="sb-group">
+    <div class="sb-group-title">Data</div>
+    <button class="sb-item" data-page="data" type="button"><span class="ico">💹</span> Data Hub</button>
+  </div>
+
+  <div class="sb-foot">
+    对标 <a href="https://github.com/hummingbot/dashboard" style="color:var(--accent)">hummingbot/dashboard</a><br>
+    侧栏分组 · 指标卡 · 表单→图→指标
+  </div>
+</aside>
+
+<!-- ========== MAIN ========== -->
+<main class="main">
+
+  <!-- LANDING -->
+  <section class="page on" id="page-landing">
+    <div class="hero">
+      <h1>🤖 fable Dashboard</h1>
+      <p>Your command center for dual-MA dense detection · judgment · forward gate</p>
+    </div>
+    <div class="warn">
+      ⚠️ <b>Mock notice</b>：下列指标/图表为示意数据，演示 Hummingbot Dashboard 落地页节奏；接上 fable API 后换成真值。
+    </div>
+
+    <div class="section-h">📊 Live Overview</div>
+    <div class="metrics">
+      <div class="metric-card">
+        <h3>🔄 检测器</h3>
+        <div class="n">F1 0.66</div>
+        <div class="s">ACTIVE · frozen eval</div>
+      </div>
+      <div class="metric-card alt1">
+        <h3>🚀 前向闸门</h3>
+        <div class="n">7 / 100</div>
+        <div class="s">decision trades · 7%</div>
+      </div>
+      <div class="metric-card alt2">
+        <h3>💰 信号池</h3>
+        <div class="n">1,284</div>
+        <div class="s">scored · swap universe</div>
+      </div>
+      <div class="metric-card alt3">
+        <h3>📈 密集覆盖</h3>
+        <div class="n">9.2%</div>
+        <div class="s">BTC 近 7 天 K 线</div>
+      </div>
+    </div>
+
+    <div class="section-h">⚡ Quick Launch</div>
+    <div class="cards-2">
+      <div class="feature-card">
+        <h3>Config / Visualize</h3>
+        <p>像 HB 策略页一样：调参 → 看图 → 跑回测指标 → 存配置。fable 对应「密集探索 / 信号 / 回测」。</p>
+        <div class="links">
+          <span class="chip" data-go="dense">Dense Explore</span>
+          <span class="chip" data-go="signals">Signals</span>
+          <span class="chip" data-go="backtest">Backtest</span>
+        </div>
+      </div>
+      <div class="feature-card">
+        <h3>Bot Orchestration</h3>
+        <p>HB 的 Instances / Deploy / Credentials。fable 对应前向闸门、任务实例、检测器模型。</p>
+        <div class="links">
+          <span class="chip" data-go="forward">Forward</span>
+          <span class="chip" data-go="jobs">Jobs</span>
+          <span class="chip" data-go="models">Models</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-h">🗺️ 与 Hummingbot 导航映射</div>
+    <div class="panel">
+      <table class="simple">
+        <thead><tr><th>Hummingbot</th><th>fable mock</th><th>现网页面</th></tr></thead>
+        <tbody>
+          <tr><td>Landing metrics</td><td>Overview 四卡</td><td>总览 + 状态条</td></tr>
+          <tr><td>Config Generator</td><td>Dense / Signal / Backtest</td><td>体验 · 信号 · 回测</td></tr>
+          <tr><td>Bot Orchestration</td><td>Forward / Jobs / Models</td><td>前向 · 任务 · 模型</td></tr>
+          <tr><td>Data</td><td>Data Hub</td><td>数据</td></tr>
+          <tr><td>Performance</td><td>（并入 Backtest / Forward）</td><td>回测结果 + 前向</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- DENSE EXPLORE = strategy visualize page -->
+  <section class="page" id="page-dense">
+    <div class="page-title">📈 Dense MA Explore</div>
+    <div class="page-sub">对标 HB「Bollinger V1」：user → Plotly/LWC 图 → 信号标记 → 指标条</div>
+
+    <details class="about">
+      <summary>About This Page ▸</summary>
+      <div class="body">
+        Hummingbot 策略页固定节奏：<b>user inputs → candles + indicators + buy/sell markers → backtest metrics → save config</b>。
+        本页把 fable 的「均线密集」放进同一节奏；标记用 ▲ 圆点（HB signals.py 风格），不用全图飘标签。
+      </div>
+    </details>
+
+    <div class="panel">
+      <h3>User inputs</h3>
+      <div class="form-grid">
+        <div class="field">
+          <label>Connector / Source</label>
+          <select><option>okx</option><option>binance</option></select>
+        </div>
+        <div class="field">
+          <label>Trading pair</label>
+          <select id="pair-sel">
+            <option>BTC-USDT</option><option>ETH-USDT</option><option>SOL-USDT</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Interval</label>
+          <select><option>15m</option><option>5m</option><option>1h</option></select>
+        </div>
+        <div class="field">
+          <label>Days to visualize</label>
+          <input type="number" value="7" min="1" max="90" id="days">
+        </div>
+        <div class="field">
+          <label>fast_spread_max</label>
+          <input type="number" value="0.0028" step="0.0001">
+          <div class="hint">对齐 auto_label</div>
+        </div>
+        <div class="field">
+          <label>full_spread_max</label>
+          <input type="number" value="0.0055" step="0.0001">
+        </div>
+        <div class="field">
+          <label>min_dense_bars</label>
+          <input type="number" value="5" min="3" max="48">
+        </div>
+        <div class="field">
+          <label>max_dense_bars</label>
+          <input type="number" value="12" min="5" max="48">
+        </div>
+      </div>
+      <div class="row-actions">
+        <button class="btn primary" type="button" id="btn-run">▶ Visualize / Scan</button>
+        <button class="btn" type="button" id="btn-fit">Fit content</button>
+        <div class="checks">
+          <label><input type="checkbox" checked id="tg-ema"> EMAs</label>
+          <label><input type="checkbox" checked id="tg-vol"> Volume</label>
+          <label><input type="checkbox" checked id="tg-sig"> Dense markers</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-h">Candlestick + dense signals</div>
+    <div class="chart-wrap"><div id="chart-dense"></div></div>
+
+    <div class="section-h">Scan metrics</div>
+    <div class="bt-metrics">
+      <div class="bt-m"><div class="lbl">n_boxes</div><div class="val" id="m-n">7</div></div>
+      <div class="bt-m"><div class="lbl">boxes / day</div><div class="val">1.0</div></div>
+      <div class="bt-m"><div class="lbl">avg bars</div><div class="val">8.9</div></div>
+      <div class="bt-m"><div class="lbl">coverage</div><div class="val up">9.2%</div></div>
+      <div class="bt-m"><div class="lbl">mean full_spread</div><div class="val">0.28%</div></div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <h3>Dense segments</h3>
+        <table class="simple" id="seg-table">
+          <thead><tr><th>#</th><th>start</th><th>bars</th><th>spread</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <h3>Save config（示意）</h3>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px">
+          HB 每页底部 <code>render_save_config</code>。fable 可存 spread 阈值 / 宇宙 / 窗口。
+        </p>
+        <div class="field" style="margin-bottom:10px">
+          <label>Config id</label>
+          <input value="dense_v1_btc_7d">
+        </div>
+        <button class="btn success" type="button">💾 Save config</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SIGNALS -->
+  <section class="page" id="page-signals">
+    <div class="page-title">🎯 Signal Browser</div>
+    <div class="page-sub">对标 HB signals：买卖三角标记 + 列表筛选（示意）</div>
+    <div class="panel">
+      <div class="form-grid">
+        <div class="field"><label>Universe</label><select><option>swap</option><option>spot</option></select></div>
+        <div class="field"><label>Min score</label><input type="number" value="0.65" step="0.01"></div>
+        <div class="field"><label>Outcome</label><select><option>all</option><option>tp</option><option>sl</option></select></div>
+        <div class="field"><label>Limit</label><input type="number" value="50"></div>
+      </div>
+      <div class="row-actions"><button class="btn primary" type="button">Load signals</button></div>
+    </div>
+    <div class="panel">
+      <table class="simple">
+        <thead><tr><th>time</th><th>pair</th><th>side</th><th>score</th><th>dense</th><th>outcome</th></tr></thead>
+        <tbody>
+          <tr><td>07-12 14:30</td><td>BTC-USDT</td><td><span class="tag ok">LONG</span></td><td>0.81</td><td>12</td><td><span class="tag ok">TP</span></td></tr>
+          <tr><td>07-11 23:00</td><td>ETH-USDT</td><td><span class="tag ok">LONG</span></td><td>0.74</td><td>8</td><td><span class="tag bad">SL</span></td></tr>
+          <tr><td>07-09 16:15</td><td>SOL-USDT</td><td><span class="tag ok">LONG</span></td><td>0.69</td><td>6</td><td><span class="tag warn">timeout</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- BACKTEST -->
+  <section class="page" id="page-backtest">
+    <div class="page-title">📉 Backtest Review</div>
+    <div class="page-sub">对标 HB backtesting_section + metrics 条</div>
+    <div class="bt-metrics">
+      <div class="bt-m"><div class="lbl">Net PnL</div><div class="val up">+18.4%</div></div>
+      <div class="bt-m"><div class="lbl">Sharpe</div><div class="val">1.42</div></div>
+      <div class="bt-m"><div class="lbl">Max DD</div><div class="val down">-9.1%</div></div>
+      <div class="bt-m"><div class="lbl">Win rate</div><div class="val">54%</div></div>
+      <div class="bt-m"><div class="lbl">Trades</div><div class="val">326</div></div>
+    </div>
+    <div class="chart-wrap" style="height:320px"><div id="chart-bt"></div></div>
+    <div class="panel" style="margin-top:12px">
+      <h3>Close types</h3>
+      <div class="checks" style="gap:20px">
+        <span class="tag ok">TP 48%</span>
+        <span class="tag bad">SL 31%</span>
+        <span class="tag warn">timeout 21%</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORWARD -->
+  <section class="page" id="page-forward">
+    <div class="page-title">🚀 Forward Gate</div>
+    <div class="page-sub">对标 HB Deploy / live monitoring</div>
+    <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
+      <div class="metric-card alt1"><h3>Decision progress</h3><div class="n">7%</div><div class="s">7 / 100 trades</div></div>
+      <div class="metric-card"><h3>Closed rows</h3><div class="n">7</div><div class="s">remaining 93</div></div>
+      <div class="metric-card alt2"><h3>Status</h3><div class="n">RUN</div><div class="s">paper forward</div></div>
+    </div>
+    <div class="panel"><p style="font-size:12px;color:var(--muted)">真实页接 <code>/api/forward</code> 与 equity 曲线；此处仅布局。</p></div>
+  </section>
+
+  <!-- JOBS = instances -->
+  <section class="page" id="page-jobs">
+    <div class="page-title">🦅 Jobs / Instances</div>
+    <div class="page-sub">对标 HB Instances：卡片 + Start/Stop</div>
+    <div class="instance-card">
+      <div>
+        <h4>owner_detector_train <span class="tag ok">running</span></h4>
+        <div class="meta">v5 · GPU · started 07-14 09:12 · eta 2h</div>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button">Logs</button>
+        <button class="btn" type="button">Stop</button>
+      </div>
+    </div>
+    <div class="instance-card">
+      <div>
+        <h4>forward_track <span class="tag ok">running</span></h4>
+        <div class="meta">swap · poll 60s · last tick 21:40</div>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button">Logs</button>
+        <button class="btn" type="button">Stop</button>
+      </div>
+    </div>
+    <div class="instance-card">
+      <div>
+        <h4>scout_loop <span class="tag warn">idle</span></h4>
+        <div class="meta">last frame BCH · 17 frames</div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" type="button">Start</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODELS -->
+  <section class="page" id="page-models">
+    <div class="page-title">🔑 Models / Detector</div>
+    <div class="page-sub">对标 HB Credentials：登记与切换「活跃」工件</div>
+    <div class="panel">
+      <table class="simple">
+        <thead><tr><th>run</th><th>F1</th><th>P</th><th>status</th></tr></thead>
+        <tbody>
+          <tr><td>owner_v5_from_v4</td><td>0.663</td><td>0.76</td><td><span class="tag ok">ACTIVE</span></td></tr>
+          <tr><td>owner_v4_frozen</td><td>0.641</td><td>0.71</td><td><span class="tag warn">archived</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- DATA -->
+  <section class="page" id="page-data">
+    <div class="page-title">💹 Data Hub</div>
+    <div class="page-sub">对标 HB Download Candles</div>
+    <div class="panel">
+      <div class="form-grid">
+        <div class="field"><label>Source</label><select><option>okx</option></select></div>
+        <div class="field"><label>Symbol</label><input value="BTC_USDT_SWAP"></div>
+        <div class="field"><label>Bar</label><select><option>15m</option></select></div>
+        <div class="field"><label>Days</label><input type="number" value="90"></div>
+      </div>
+      <div class="row-actions"><button class="btn primary" type="button">Check / Refresh series</button></div>
+    </div>
+  </section>
+</main>
+
+<div class="mock-note">
+  <strong>Hummingbot Dashboard mock</strong>
+  技术：Streamlit 多页 + Plotly 深色；fable 用静态 HTML 模拟壳。<br>
+  打开：<a href="hummingbot-mock.html">本页</a> · 对照
+  <a href="https://github.com/hummingbot/dashboard" target="_blank" rel="noopener">源码</a>
+  · <a href="REFERENCES.md">REFERENCES</a>
+</div>
+
+<script>
+/* —— nav —— */
+function showPage(id) {
+  document.querySelectorAll(".page").forEach((p) => p.classList.toggle("on", p.id === "page-" + id));
+  document.querySelectorAll(".sb-item").forEach((b) => b.classList.toggle("active", b.dataset.page === id));
+  if (id === "dense") setTimeout(() => { window._denseChart && window._denseChart.timeScale().fitContent(); }, 50);
+  if (id === "backtest") setTimeout(() => { window._btChart && window._btChart.timeScale().fitContent(); }, 50);
+}
+document.querySelectorAll(".sb-item").forEach((b) => {
+  b.addEventListener("click", () => showPage(b.dataset.page));
+});
+document.querySelectorAll("[data-go]").forEach((c) => {
+  c.addEventListener("click", () => showPage(c.dataset.go));
+});
+// deep-link: ?page=dense | #dense
+(() => {
+  const q = new URLSearchParams(location.search).get("page");
+  const h = (location.hash || "").replace(/^#/, "");
+  const id = q || h;
+  if (id && document.getElementById("page-" + id)) showPage(id);
+})();
+
+/* —— synthetic market —— */
+function synth(n = 200, start = 63000) {
+  const out = [];
+  let t = Math.floor(Date.now() / 1000) - n * 900;
+  let p = start;
+  for (let i = 0; i < n; i++) {
+    const drift = Math.sin(i / 16) * 140 + (Math.random() - 0.48) * 160;
+    const o = p, c = p + drift;
+    const h = Math.max(o, c) + Math.random() * 70;
+    const l = Math.min(o, c) - Math.random() * 70;
+    out.push({ time: t, open: o, high: h, low: l, close: c, volume: 500 + Math.random() * 3000 });
+    p = c; t += 900;
+  }
+  return out;
+}
+function ema(data, period) {
+  const k = 2 / (period + 1);
+  let prev = data[0].close;
+  return data.map((c, i) => {
+    prev = i === 0 ? c.close : c.close * k + prev * (1 - k);
+    return { time: c.time, value: prev };
+  });
+}
+function pickSignals(candles) {
+  // Hummingbot-style buy markers on local "dense-ish" troughs
+  const markers = [];
+  const rows = [];
+  let id = 1;
+  for (let i = 25; i < candles.length - 10; i += 22) {
+    const c = candles[i];
+    markers.push({
+      time: c.time,
+      position: "belowBar",
+      color: "#1E90FF",
+      shape: "arrowUp",
+      text: "D" + id,
+    });
+    rows.push({
+      id,
+      start: new Date(c.time * 1000).toISOString().slice(5, 16).replace("T", " "),
+      bars: 6 + (id % 4),
+      spread: (0.15 + Math.random() * 0.3).toFixed(2) + "%",
+      time: c.time,
+    });
+    id++;
+    if (id > 7) break;
+  }
+  return { markers, rows };
+}
+
+const candles = synth(220, 63200);
+const { markers, rows } = pickSignals(candles);
+
+/* dense chart */
+const denseHost = document.getElementById("chart-dense");
+const denseChart = LightweightCharts.createChart(denseHost, {
+  layout: { background: { type: "solid", color: "#0a0c10" }, textColor: "#8b949e" },
+  grid: { vertLines: { color: "#161b22" }, horzLines: { color: "#161b22" } },
+  rightPriceScale: { borderColor: "#30363d" },
+  timeScale: { borderColor: "#30363d", timeVisible: true },
+  crosshair: { mode: 0 },
+  autoSize: true,
+});
+window._denseChart = denseChart;
+const candleSeries = denseChart.addCandlestickSeries({
+  upColor: "#2ECC71", downColor: "#E74C3C",
+  borderVisible: false, wickUpColor: "#2ECC71", wickDownColor: "#E74C3C",
+});
+candleSeries.setData(candles);
+const vol = denseChart.addHistogramSeries({
+  priceScaleId: "vol", priceFormat: { type: "volume" },
+  priceLineVisible: false, lastValueVisible: false,
+});
+denseChart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.8, bottom: 0 } });
+vol.setData(candles.map((c) => ({
+  time: c.time, value: c.volume,
+  color: c.close >= c.open ? "rgba(46,204,113,0.3)" : "rgba(231,76,60,0.3)",
+})));
+const emas = [];
+[[8, "#58a6ff"], [21, "#79b8ff"], [55, "#a5d6ff"], [144, "#a371f7"], [200, "#f778ba"]].forEach(([p, color]) => {
+  const s = denseChart.addLineSeries({
+    color, lineWidth: p >= 144 ? 2 : 1,
+    priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+  });
+  s.setData(ema(candles, p));
+  emas.push(s);
+});
+function applyMarkers(on) {
+  candleSeries.setMarkers(on ? markers : []);
+}
+applyMarkers(true);
+denseChart.timeScale().fitContent();
+
+const tbody = document.querySelector("#seg-table tbody");
+tbody.innerHTML = rows.map((r) =>
+  `<tr data-t="${r.time}"><td>${r.id}</td><td>${r.start}</td><td>${r.bars}</td><td>${r.spread}</td></tr>`
+).join("");
+tbody.addEventListener("click", (e) => {
+  const tr = e.target.closest("tr");
+  if (!tr) return;
+  tbody.querySelectorAll("tr").forEach((x) => x.classList.remove("sel"));
+  tr.classList.add("sel");
+  const t = Number(tr.dataset.t);
+  const idx = candles.findIndex((c) => c.time === t);
+  if (idx >= 0) {
+    denseChart.timeScale().setVisibleLogicalRange({ from: idx - 30, to: idx + 30 });
+  }
+});
+
+document.getElementById("tg-ema").onchange = (e) => emas.forEach((s) => s.applyOptions({ visible: e.target.checked }));
+document.getElementById("tg-vol").onchange = (e) => vol.applyOptions({ visible: e.target.checked });
+document.getElementById("tg-sig").onchange = (e) => applyMarkers(e.target.checked);
+document.getElementById("btn-fit").onclick = () => denseChart.timeScale().fitContent();
+document.getElementById("btn-run").onclick = () => {
+  document.getElementById("m-n").textContent = String(rows.length);
+  applyMarkers(true);
+  denseChart.timeScale().fitContent();
+};
+
+/* backtest equity mock */
+const btHost = document.getElementById("chart-bt");
+const btChart = LightweightCharts.createChart(btHost, {
+  layout: { background: { type: "solid", color: "#0a0c10" }, textColor: "#8b949e" },
+  grid: { vertLines: { color: "#161b22" }, horzLines: { color: "#161b22" } },
+  rightPriceScale: { borderColor: "#30363d" },
+  timeScale: { borderColor: "#30363d" },
+  autoSize: true,
+});
+window._btChart = btChart;
+const eq = btChart.addAreaSeries({
+  lineColor: "#58a6ff", topColor: "rgba(88,166,255,0.35)", bottomColor: "rgba(88,166,255,0.02)",
+  lineWidth: 2,
+});
+let v = 10000;
+const eqData = candles.filter((_, i) => i % 3 === 0).map((c) => {
+  v *= 1 + (Math.random() - 0.45) * 0.01;
+  return { time: c.time, value: v };
+});
+eq.setData(eqData);
+</script>
+</body>
+</html>

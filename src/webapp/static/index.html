@@ -3,41 +3,183 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>fable-trading 看板</title>
+<title>fable dashboard</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css">
-<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="stylesheet" href="style.css?v=20260714i">
+<script defer src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script defer src="app.js?v=20260714i"></script>
 </head>
-<body>
-<header class="topbar">
-  <div class="brand">fable-trading <span class="brand-sub">双均线密集启动 · 两层架构</span></div>
-  <div class="top-actions">
-    <div class="seg universe-seg" id="universe-seg">
-      <button data-universe="swap" class="active">合约</button>
-      <button data-universe="spot">现货</button>
+<body class="hb-shell">
+<aside class="sidebar" id="sidebar" aria-label="主导航">
+  <div class="sb-brand">
+    <h1>🤖 fable dashboard</h1>
+    <p>dense · judgment · forward</p>
+  </div>
+  <div class="sb-group">
+    <div class="sb-group-title">Main</div>
+    <button type="button" class="sb-item" data-view="overview"><span class="ico">📊</span> Overview</button>
+  </div>
+  <div class="sb-group">
+    <div class="sb-group-title">Config / Visualize</div>
+    <button type="button" class="sb-item active" data-view="explore"><span class="ico">📈</span> Dense Explore</button>
+    <button type="button" class="sb-item" data-view="signals"><span class="ico">🎯</span> Signals</button>
+    <button type="button" class="sb-item" data-view="backtest"><span class="ico">📉</span> Backtest</button>
+  </div>
+  <div class="sb-group">
+    <div class="sb-group-title">Orchestration</div>
+    <button type="button" class="sb-item" data-view="forward"><span class="ico">🚀</span> Forward Gate</button>
+    <button type="button" class="sb-item" data-view="jobs"><span class="ico">🦅</span> Jobs</button>
+    <button type="button" class="sb-item" data-view="models"><span class="ico">🔑</span> Models</button>
+    <button type="button" class="sb-item" data-view="experiments"><span class="ico">🧪</span> Experiments</button>
+    <button type="button" class="sb-item" data-view="agenda"><span class="ico">📋</span> Agenda</button>
+  </div>
+  <div class="sb-group">
+    <div class="sb-group-title">Data</div>
+    <button type="button" class="sb-item" data-view="data"><span class="ico">💹</span> Data Hub</button>
+    <a class="sb-item sb-link" href="/scout.html" target="_blank" rel="noopener"><span class="ico">🔭</span> Scout ↗</a>
+  </div>
+  <div class="sb-foot">
+    <div class="sb-universe seg universe-seg" id="universe-seg">
+      <button type="button" data-universe="swap" class="active">合约</button>
+      <button type="button" data-universe="spot">现货</button>
     </div>
-    <nav class="tabs">
-      <button class="tab active" data-view="overview">总览</button>
-      <button class="tab" data-view="backtest">回测</button>
-      <button class="tab" data-view="signals">信号浏览</button>
-      <button class="tab" data-view="forward">前向验证</button>
-      <button class="tab" data-view="experiments">实验</button>
-      <button class="tab" data-view="agenda">议程</button>
-      <button class="tab" data-view="jobs">任务</button>
-      <button class="tab" data-view="data">数据</button>
-      <button class="tab" data-view="models">模型</button>
-    </nav>
+    <div class="sb-foot-row">
+      <button type="button" class="mini-btn theme-toggle" id="theme-toggle" title="切换浅色/深色">浅色</button>
+      <button type="button" class="mini-btn status-refresh" id="status-refresh" title="刷新状态（r）">刷新</button>
+    </div>
     <div class="ops-token-wrap" id="ops-token-wrap" hidden>
       <input id="ops-token-input" type="password" placeholder="OPS token" autocomplete="off" spellcheck="false">
       <button type="button" id="ops-token-save" class="mini-btn">保存</button>
     </div>
+    <div class="sb-kbd note">1–9 切页 · r 状态 · / 搜币</div>
   </div>
-</header>
+</aside>
 
-<main>
+<div class="app-main">
+  <div class="status-bar" id="status-bar">
+    <div id="status-strip" class="status-strip" aria-live="polite">
+      <div class="status-item skeleton" id="status-owner"><span class="status-k">检测器</span><span class="status-v">…</span></div>
+      <div class="status-item skeleton" id="status-forward"><span class="status-k">前向</span><span class="status-v">…</span></div>
+      <div class="status-item skeleton" id="status-scout"><span class="status-k">侦察</span><span class="status-v">…</span></div>
+    </div>
+  </div>
+
+  <div id="toast-host" class="toast-host" aria-live="assertive"></div>
+
+  <main class="content">
+  <!-- ============ Dense Explore (HB strategy page rhythm) ============ -->
+  <section id="view-explore" class="view">
+    <div class="page-head">
+      <h1 class="page-title">📈 Dense MA Explore</h1>
+      <p class="page-sub">表单 → 图 → 密集标记 → 指标（Hummingbot Config 节奏）</p>
+    </div>
+    <details class="about-box">
+      <summary>About This Page</summary>
+      <div class="about-body">
+        半透明标记处 = 多条均线缠绕的密集区（规则扫描，与检测层同源）。
+        真正开仓还要过判断模型分数与趋势过滤——见 Signals。
+        <ol class="explore-steps" id="explore-howto"></ol>
+      </div>
+    </details>
+
+    <div class="panel hb-inputs">
+      <h2>User inputs</h2>
+      <div class="form-grid explore-form">
+        <label class="field">
+          <span class="note">币种</span>
+          <select id="explore-symbol"></select>
+        </label>
+        <label class="field">
+          <span class="note">或输入后回车</span>
+          <input id="explore-symbol-free" list="explore-symbol-list" placeholder="BTC / BTC_USDT_SWAP" autocomplete="off">
+          <datalist id="explore-symbol-list"></datalist>
+        </label>
+        <div class="field">
+          <span class="note">时间范围</span>
+          <div class="seg" id="explore-range-seg"></div>
+        </div>
+        <div class="field field-actions">
+          <span class="note">操作</span>
+          <div class="explore-actions">
+            <button type="button" class="mini-btn" id="explore-prev" title="上一个">←</button>
+            <button type="button" class="mini-btn" id="explore-next" title="下一个">→</button>
+            <button type="button" class="mini-btn" id="explore-random" title="随机">🎲</button>
+            <button type="button" class="primary-btn" id="explore-go">▶ Visualize / Scan</button>
+          </div>
+        </div>
+      </div>
+      <div class="row-actions explore-row">
+        <div class="explore-toggles">
+          <label class="toggle"><input type="checkbox" id="explore-show-ema" checked> EMAs</label>
+          <label class="toggle"><input type="checkbox" id="explore-show-vol" checked> Volume</label>
+          <label class="toggle"><input type="checkbox" id="explore-show-boxes" checked> Dense markers</label>
+        </div>
+        <button type="button" class="mini-btn" id="explore-fit" hidden>Fit content</button>
+        <button type="button" class="mini-btn" id="explore-copy" title="复制分享链接">复制链接</button>
+        <button type="button" class="mini-btn" id="explore-to-signals">去 Signals</button>
+      </div>
+      <div id="explore-recent" class="explore-recent" hidden></div>
+      <div class="explore-progress" id="explore-progress" hidden><span></span></div>
+      <div class="explore-meta" id="explore-meta"><span>选择币种后点 Visualize / Scan</span></div>
+    </div>
+
+    <div class="section-h">Candlestick + dense signals</div>
+    <div class="legend compact-legend">
+      <span><i class="dot" style="background:#5b9cf5"></i>EMA 8–55</span>
+      <span><i class="dot" style="background:#a78bfa"></i>144</span>
+      <span><i class="dot" style="background:#f472b6"></i>200</span>
+      <span><i class="dot" style="background:#2dd4bf"></i>▲ 密集标记</span>
+      <span><i class="dot" style="background:#fbbf24"></i>聚焦</span>
+      <span class="note">← → 换币 · j/k 切框 · 0 全图 · Enter 重扫</span>
+    </div>
+    <div class="explore-chart-wrap hb-chart">
+      <div id="explore-chart"></div>
+      <canvas id="explore-overlay" hidden></canvas>
+    </div>
+    <div class="chart-badge" id="explore-badge" hidden>
+      <span id="explore-badge-ohlc">—</span>
+    </div>
+
+    <div class="section-h">Scan metrics</div>
+    <div id="explore-stats" class="tile-row explore-stats bt-metrics" hidden></div>
+    <div class="explore-tip" id="explore-tip" hidden></div>
+
+    <div class="two-col explore-bottom">
+      <div class="panel explore-side">
+        <h2>Dense segments <span class="unit" id="explore-box-count"></span></h2>
+        <p class="note">点击一行放大该段（列表驱动图）</p>
+        <div class="table-wrap explore-box-table">
+          <table id="explore-boxes-table">
+            <thead><tr><th>#</th><th>起止</th><th class="num">根数</th><th class="num">缠绕度</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>对照 / 下一步</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>你看到的</th><th>含义</th><th>下一步</th></tr></thead>
+            <tbody>
+              <tr class="no-click"><td>▲ 标记</td><td>均线密集区起点</td><td>点列表放大</td></tr>
+              <tr class="no-click"><td>标记多 / 覆盖率高</td><td>缠绕频繁</td><td>≠ 多单信号</td></tr>
+              <tr class="no-click"><td>缠绕度小</td><td>均线更紧</td><td>对比币种</td></tr>
+              <tr class="no-click"><td>真实候选成交</td><td>判断层过滤后</td><td>Signals</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ 总览 ============ -->
-  <section id="view-overview" class="view">
+  <section id="view-overview" class="view hidden" hidden aria-hidden="true">
     <div id="verdict-banner" class="banner"></div>
+    <div class="banner explore-cta" id="overview-explore-cta">
+      <b>新用户？</b> 先到「Dense Explore」选 BTC，看均线密集标记长什么样。
+      <button type="button" class="mini-btn" id="overview-go-explore">打开 Dense Explore</button>
+    </div>
     <div id="stages" class="stage-row"></div>
     <div class="two-col">
       <div class="panel">
@@ -130,6 +272,7 @@
           <tbody></tbody>
         </table>
       </div>
+      <button type="button" id="trades-more" class="mini-btn more-btn" hidden>再显示更多</button>
     </div>
   </section>
 
@@ -419,7 +562,12 @@
       </div>
     </div>
   </section>
-</main>
-<script src="app.js?v=10"></script>
+
+  </main>
+  <footer class="site-footer">
+    <span>Config 从 Dense Explore 开始 · Orchestration 看 Forward / Jobs / Models</span>
+    <span class="note">键位 1–9 · r 刷新 · / 搜币（Signals）</span>
+  </footer>
+</div>
 </body>
 </html>

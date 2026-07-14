@@ -36,6 +36,8 @@ from src.webapp.jobs.store import get_store
 from src.webapp.jobs.whitelist import JobValidationError, list_job_types
 from src.webapp.model_hub import model_hub_payload
 from src.webapp.ops_flags import executor_enabled, ops_status_payload
+from src.webapp.status_strip import status_strip_payload
+from src.webapp.explore_payloads import explore_catalog, explore_chart_payload
 
 app = FastAPI(title="fable-trading dashboard")
 
@@ -60,6 +62,29 @@ async def no_cache_static(request, call_next):
 @app.get("/api/overview")
 def overview(universe: str = DEFAULT_UNIVERSE) -> dict:
     return overview_payload(universe)
+
+
+@app.get("/api/status-strip")
+def status_strip() -> dict:
+    """Owner detector + forward progress + scout freshness for the top strip."""
+    return status_strip_payload()
+
+
+@app.get("/api/explore/catalog")
+def explore_catalog_route(universe: str = DEFAULT_UNIVERSE) -> dict:
+    """Beginner coin list + time ranges + howto steps."""
+    return explore_catalog(universe)
+
+
+@app.get("/api/explore/chart/{source}/{symbol}")
+def explore_chart_route(
+    source: str,
+    symbol: str,
+    bars: int = 2880,
+    universe: str = DEFAULT_UNIVERSE,
+) -> dict:
+    """Candles + EMAs + dense-MA boxes for the beginner explore view."""
+    return explore_chart_payload(source=source, symbol=symbol, bars=bars, universe=universe)
 
 
 @app.get("/api/backtest")

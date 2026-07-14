@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fable · 终端壳 Mock（设计稿 · 非生产）</title>
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+  :root {
+    --bg: #0a0c10;
+    --panel: #0f131a;
+    --panel-2: #151a22;
+    --border: #1e2633;
+    --border-hi: #2a3548;
+    --text: #e8ecf2;
+    --muted: #7a8499;
+    --accent: #3d9cf0;
+    --teal: #2dd4bf;
+    --up: #26a69a;
+    --down: #ef5350;
+    --warn: #fbbf24;
+    --sidebar-w: 200px;
+    --right-w: 280px;
+    --top-h: 44px;
+    --status-h: 32px;
+    --bottom-h: 160px;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 13px/1.45 "Inter", "PingFang SC", "Helvetica Neue", system-ui, sans-serif;
+    overflow: hidden;
+  }
+
+  /* —— top chrome (FreqUI-like: few tabs) —— */
+  .topbar {
+    height: var(--top-h);
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 12px;
+    background: #0c1018;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand {
+    font-weight: 700; font-size: 13px; letter-spacing: 0.02em;
+    color: var(--text); white-space: nowrap;
+  }
+  .brand span { color: var(--muted); font-weight: 500; margin-left: 6px; font-size: 12px; }
+  .nav { display: flex; gap: 2px; flex: 1; min-width: 0; }
+  .nav a {
+    color: var(--muted); text-decoration: none; padding: 6px 12px;
+    border-radius: 6px; font-size: 13px;
+  }
+  .nav a:hover { color: var(--text); background: var(--panel-2); }
+  .nav a.active { color: var(--text); background: var(--panel-2); box-shadow: inset 0 -2px 0 var(--accent); border-radius: 6px 6px 0 0; }
+  .top-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .pill {
+    font-size: 11px; color: var(--muted); border: 1px solid var(--border);
+    padding: 3px 8px; border-radius: 999px; background: var(--panel);
+  }
+  .pill.ok { color: var(--teal); border-color: rgba(45,212,191,.35); }
+  .btn {
+    border: 1px solid var(--border-hi); background: var(--panel-2); color: var(--text);
+    border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: linear-gradient(180deg,#3d9cf0,#2b7fd4); border-color: transparent; color: #fff; }
+
+  /* —— thin status —— */
+  .status {
+    height: var(--status-h);
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 12px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px; color: var(--muted);
+  }
+  .status b { color: var(--text); font-weight: 600; }
+  .status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); display: inline-block; margin-right: 4px; }
+
+  /* —— app shell —— */
+  .shell {
+    height: calc(100% - var(--top-h) - var(--status-h));
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr var(--right-w);
+    grid-template-rows: 1fr var(--bottom-h);
+    grid-template-areas:
+      "side chart list"
+      "side bottom bottom";
+  }
+
+  /* left: pairs (FreqUI) */
+  .side {
+    grid-area: side;
+    border-right: 1px solid var(--border);
+    background: var(--panel);
+    display: flex; flex-direction: column; min-height: 0;
+  }
+  .side-head {
+    padding: 8px 10px; border-bottom: 1px solid var(--border);
+    display: flex; gap: 6px; align-items: center;
+  }
+  .side-head input {
+    flex: 1; min-width: 0;
+    background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px; padding: 6px 8px; font-size: 12px;
+  }
+  .side-tabs { display: flex; border-bottom: 1px solid var(--border); }
+  .side-tabs button {
+    flex: 1; background: none; border: 0; color: var(--muted);
+    padding: 7px 4px; font-size: 11px; cursor: pointer;
+  }
+  .side-tabs button.on { color: var(--text); box-shadow: inset 0 -2px 0 var(--teal); }
+  .pair-list { overflow: auto; flex: 1; }
+  .pair {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 7px 10px; border-bottom: 1px solid rgba(30,38,51,.6);
+    cursor: pointer; font-size: 12px;
+  }
+  .pair:hover { background: var(--panel-2); }
+  .pair.active { background: rgba(61,156,240,.12); border-left: 2px solid var(--accent); }
+  .pair .sym { font-weight: 600; }
+  .pair .meta { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .pair .meta.up { color: var(--up); }
+  .pair .meta.down { color: var(--down); }
+
+  /* center chart */
+  .chart-col {
+    grid-area: chart;
+    display: flex; flex-direction: column; min-width: 0; min-height: 0;
+    background: var(--bg);
+  }
+  .chart-toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .chart-toolbar .title { font-weight: 600; font-size: 13px; margin-right: 4px; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .seg button {
+    background: transparent; border: 0; color: var(--muted);
+    padding: 4px 9px; font-size: 11px; cursor: pointer;
+  }
+  .seg button.on { background: var(--panel-2); color: var(--text); }
+  .toggles { display: flex; gap: 10px; color: var(--muted); font-size: 11px; margin-left: 4px; }
+  .toggles label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+  .toggles input { accent-color: var(--teal); }
+  .legend-inline {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-left: auto;
+    font-size: 11px; color: var(--muted);
+  }
+  .legend-inline i {
+    display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 3px;
+  }
+  .tip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 10px;
+    background: rgba(61,156,240,.06);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px; color: var(--muted);
+  }
+  .tip b { color: var(--accent); font-weight: 600; }
+  .tip button {
+    margin-left: auto; background: none; border: 0; color: var(--muted);
+    cursor: pointer; font-size: 11px;
+  }
+  .chart-host {
+    flex: 1; min-height: 0; position: relative;
+  }
+  #tv { position: absolute; inset: 0; }
+  .chart-badge {
+    position: absolute; left: 10px; top: 10px; z-index: 3;
+    background: rgba(15,19,26,.85); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 8px; font-size: 11px; color: var(--muted);
+    pointer-events: none; font-variant-numeric: tabular-nums;
+  }
+  .chart-badge b { color: var(--text); }
+
+  /* right: dense segments */
+  .list-col {
+    grid-area: list;
+    border-left: 1px solid var(--border);
+    background: var(--panel);
+    display: flex; flex-direction: column; min-height: 0;
+  }
+  .list-head {
+    padding: 10px 12px; border-bottom: 1px solid var(--border);
+  }
+  .list-head h2 { font-size: 13px; font-weight: 600; }
+  .list-head p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .list-body { overflow: auto; flex: 1; }
+  table.dense { width: 100%; border-collapse: collapse; font-size: 11px; }
+  table.dense th {
+    text-align: left; color: var(--muted); font-weight: 500;
+    padding: 6px 10px; border-bottom: 1px solid var(--border); position: sticky; top: 0;
+    background: var(--panel);
+  }
+  table.dense td {
+    padding: 7px 10px; border-bottom: 1px solid rgba(30,38,51,.7);
+    font-variant-numeric: tabular-nums;
+  }
+  table.dense tr { cursor: pointer; }
+  table.dense tr:hover td { background: var(--panel-2); }
+  table.dense tr.focused td {
+    background: rgba(45,212,191,.1);
+    box-shadow: inset 2px 0 0 var(--teal);
+  }
+  table.dense .num { text-align: right; }
+  .list-foot {
+    padding: 8px 10px; border-top: 1px solid var(--border);
+    display: flex; gap: 6px;
+  }
+
+  /* bottom strip: open trades / recent signals (FreqUI) */
+  .bottom {
+    grid-area: bottom;
+    border-top: 1px solid var(--border);
+    background: var(--panel);
+    display: flex; flex-direction: column; min-height: 0;
+  }
+  .bottom-tabs {
+    display: flex; gap: 0; border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .bottom-tabs button {
+    background: none; border: 0; color: var(--muted);
+    padding: 7px 14px; cursor: pointer;
+  }
+  .bottom-tabs button.on { color: var(--text); box-shadow: inset 0 -2px 0 var(--accent); }
+  .bottom-body { overflow: auto; flex: 1; }
+  table.trades { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.trades th {
+    text-align: left; color: var(--muted); font-weight: 500;
+    padding: 6px 12px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--panel);
+  }
+  table.trades td { padding: 6px 12px; border-bottom: 1px solid rgba(30,38,51,.6); }
+  .tag {
+    display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px;
+  }
+  .tag.long { background: rgba(38,166,154,.2); color: var(--up); }
+  .tag.dense { background: rgba(45,212,191,.15); color: var(--teal); }
+
+  /* mock banner */
+  .mock-banner {
+    position: fixed; right: 12px; bottom: 12px; z-index: 50;
+    max-width: 320px;
+    background: rgba(15,19,26,.95); border: 1px solid var(--border-hi);
+    border-radius: 10px; padding: 10px 12px;
+    font-size: 11px; color: var(--muted); line-height: 1.5;
+    box-shadow: 0 12px 40px rgba(0,0,0,.45);
+  }
+  .mock-banner strong { color: var(--warn); display: block; margin-bottom: 4px; font-size: 12px; }
+  .mock-banner a { color: var(--accent); }
+  .mock-banner ul { margin: 6px 0 0 14px; padding: 0; }
+  .mock-banner li { margin: 2px 0; }
+
+  @media (max-width: 960px) {
+    .shell {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr auto auto;
+      grid-template-areas: "side" "chart" "list" "bottom";
+      overflow: auto;
+      height: auto;
+    }
+    body { overflow: auto; }
+    .side { max-height: 160px; }
+    .chart-host { height: 420px; position: relative; }
+    .list-col { max-height: 240px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">fable<span>terminal mock</span></div>
+  <nav class="nav">
+    <a class="active" href="#">图表</a>
+    <a href="#">信号</a>
+    <a href="#">回测</a>
+    <a href="#">前向</a>
+    <a href="#" title="实验 / 任务 / 数据 / 模型">更多 ▾</a>
+  </nav>
+  <div class="top-right">
+    <span class="pill ok">检测器 F1 0.66</span>
+    <span class="pill">前向 7/100</span>
+    <div class="seg" title="宇宙">
+      <button class="on">合约</button>
+      <button>现货</button>
+    </div>
+    <button class="btn" type="button">浅色</button>
+  </div>
+</header>
+
+<div class="status">
+  <span><span class="dot"></span>BTC_USDT_SWAP · 15m · <b>672</b> 根</span>
+  <span>密集框 <b>7</b> · 覆盖 <b>9.2%</b></span>
+  <span>快捷键 <b>← →</b> 换币 · <b>j/k</b> 框 · <b>0</b> 全图</span>
+</div>
+
+<div class="shell">
+  <!-- LEFT: pairs -->
+  <aside class="side">
+    <div class="side-head">
+      <input placeholder="搜索币种…" value="" id="search">
+    </div>
+    <div class="side-tabs">
+      <button class="on" type="button">热门</button>
+      <button type="button">最近</button>
+      <button type="button">全部</button>
+    </div>
+    <div class="pair-list" id="pairs">
+      <!-- filled by js -->
+    </div>
+  </aside>
+
+  <!-- CENTER: chart -->
+  <section class="chart-col">
+    <div class="chart-toolbar">
+      <span class="title">BTC_USDT_SWAP</span>
+      <div class="seg" id="range">
+        <button type="button" data-bars="672" class="on">7天</button>
+        <button type="button" data-bars="1344">14天</button>
+        <button type="button" data-bars="2880">30天</button>
+        <button type="button" data-bars="8640">90天</button>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" checked id="tog-ema"> 均线</label>
+        <label><input type="checkbox" checked id="tog-vol"> 量</label>
+        <label><input type="checkbox" checked id="tog-box"> 密集</label>
+      </div>
+      <button class="btn primary" type="button" id="btn-scan">识别密集框</button>
+      <button class="btn" type="button" id="btn-fit">全图</button>
+      <div class="legend-inline">
+        <span><i style="background:#5b9cf5"></i>EMA 快</span>
+        <span><i style="background:#a78bfa"></i>144</span>
+        <span><i style="background:#f472b6"></i>200</span>
+        <span><i style="background:var(--teal)"></i>密集</span>
+        <span><i style="background:var(--warn)"></i>聚焦</span>
+      </div>
+    </div>
+    <div class="tip" id="tip">
+      <b>小白提示</b>
+      半透明框 = 均线缠绕区（规则扫描）。点右侧列表放大；真正开仓还要过判断层分数。
+      <button type="button" id="tip-hide">收起</button>
+    </div>
+    <div class="chart-host">
+      <div id="tv"></div>
+      <div class="chart-badge" id="badge">
+        OHLC mock · 十字线移动时更新<br>
+        <b id="badge-ohlc">—</b>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT: dense list -->
+  <aside class="list-col">
+    <div class="list-head">
+      <h2>密集段 <span style="color:var(--muted);font-weight:500" id="box-count">（7）</span></h2>
+      <p>点击放大 · 对齐 FreqUI「列表驱动图」</p>
+    </div>
+    <div class="list-body">
+      <table class="dense">
+        <thead>
+          <tr><th>#</th><th>起止</th><th class="num">根</th><th class="num">缠绕</th></tr>
+        </thead>
+        <tbody id="box-rows"></tbody>
+      </table>
+    </div>
+    <div class="list-foot">
+      <button class="btn" type="button" style="flex:1" id="btn-fit2">恢复全图</button>
+    </div>
+  </aside>
+
+  <!-- BOTTOM -->
+  <section class="bottom">
+    <div class="bottom-tabs">
+      <button class="on" type="button">最近信号（示意）</button>
+      <button type="button">说明</button>
+    </div>
+    <div class="bottom-body">
+      <table class="trades">
+        <thead>
+          <tr>
+            <th>时间</th><th>币种</th><th>方向</th><th>密集长</th><th>分数</th><th>结果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>07-12 14:30</td><td>BTC_USDT_SWAP</td>
+            <td><span class="tag long">LONG</span></td>
+            <td><span class="tag dense">12 根</span></td>
+            <td>0.81</td><td style="color:var(--up)">TP</td>
+          </tr>
+          <tr>
+            <td>07-11 23:00</td><td>ETH_USDT_SWAP</td>
+            <td><span class="tag long">LONG</span></td>
+            <td><span class="tag dense">8 根</span></td>
+            <td>0.74</td><td style="color:var(--down)">SL</td>
+          </tr>
+          <tr>
+            <td>07-09 16:15</td><td>SOL_USDT_SWAP</td>
+            <td><span class="tag long">LONG</span></td>
+            <td><span class="tag dense">6 根</span></td>
+            <td>0.69</td><td style="color:var(--muted)">timeout</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<div class="mock-banner">
+  <strong>⚠ 静态设计稿 · 非生产页面</strong>
+  对标：FreqUI 三栏壳 + LWC markers 风格标注 + TV 图优先。<br>
+  文档：<a href="REFERENCES.md">REFERENCES.md</a>
+  <ul>
+    <li>顶栏 4～5 入口（现在 10 个 Tab 砍掉）</li>
+    <li>图占主区；教程缩成一行 tip</li>
+    <li>密集：缩略 markers，聚焦再画矩形</li>
+  </ul>
+</div>
+
+<script>
+/* —— mock data (synthetic, for layout only) —— */
+const PAIRS = [
+  ["BTC_USDT_SWAP", +0.42], ["ETH_USDT_SWAP", -0.18], ["SOL_USDT_SWAP", +1.2],
+  ["XRP_USDT_SWAP", +0.05], ["DOGE_USDT_SWAP", -0.9], ["BNB_USDT_SWAP", +0.3],
+  ["ADA_USDT_SWAP", -0.2], ["LINK_USDT_SWAP", +0.7], ["AVAX_USDT_SWAP", -0.4],
+  ["SUI_USDT_SWAP", +2.1], ["PEPE_USDT_SWAP", -1.5], ["DOT_USDT_SWAP", +0.1],
+];
+
+function synthCandles(n = 220, start = 63000) {
+  const out = [];
+  let t = Math.floor(Date.now() / 1000) - n * 900;
+  let p = start;
+  for (let i = 0; i < n; i++) {
+    const drift = Math.sin(i / 18) * 120 + (Math.random() - 0.48) * 180;
+    const o = p;
+    const c = p + drift;
+    const h = Math.max(o, c) + Math.random() * 80;
+    const l = Math.min(o, c) - Math.random() * 80;
+    out.push({ time: t, open: o, high: h, low: l, close: c, volume: 800 + Math.random() * 4000 });
+    p = c;
+    t += 900;
+  }
+  return out;
+}
+
+function ema(data, period) {
+  const k = 2 / (period + 1);
+  let prev = data[0].close;
+  return data.map((c, i) => {
+    prev = i === 0 ? c.close : c.close * k + prev * (1 - k);
+    return { time: c.time, value: prev };
+  });
+}
+
+/** dense segments: pick low-range windows of 6–12 bars */
+function findDense(candles) {
+  const boxes = [];
+  let id = 1;
+  for (let i = 20; i < candles.length - 12; i += 17 + (id % 5)) {
+    const len = 6 + (id % 5);
+    const slice = candles.slice(i, i + len);
+    if (slice.length < 5) continue;
+    const highs = slice.map((c) => c.high);
+    const lows = slice.map((c) => c.low);
+    const hi = Math.max(...highs);
+    const lo = Math.min(...lows);
+    const mid = (hi + lo) / 2;
+    // tighten to "ma-like" band
+    const band = (hi - lo) * 0.35;
+    boxes.push({
+      id: id++,
+      t0: slice[0].time,
+      t1: slice[slice.length - 1].time,
+      hi: mid + band,
+      lo: mid - band,
+      bars: slice.length,
+      start_iso: new Date(slice[0].time * 1000).toISOString().slice(5, 16).replace("T", " "),
+      end_iso: new Date(slice[slice.length - 1].time * 1000).toISOString().slice(5, 16).replace("T", " "),
+      spread: (0.001 + Math.random() * 0.003),
+    });
+    if (boxes.length >= 7) break;
+  }
+  return boxes;
+}
+
+/* —— pairs UI —— */
+const pairsEl = document.getElementById("pairs");
+PAIRS.forEach(([sym, chg], i) => {
+  const div = document.createElement("div");
+  div.className = "pair" + (i === 0 ? " active" : "");
+  div.innerHTML = `<span class="sym">${sym.replace("_USDT_SWAP", "")}</span>
+    <span class="meta ${chg >= 0 ? "up" : "down"}">${chg >= 0 ? "+" : ""}${chg.toFixed(2)}%</span>`;
+  div.onclick = () => {
+    pairsEl.querySelectorAll(".pair").forEach((p) => p.classList.remove("active"));
+    div.classList.add("active");
+  };
+  pairsEl.appendChild(div);
+});
+
+/* —— chart —— */
+const candles = synthCandles(240, 63200);
+const boxes = findDense(candles);
+const times = candles.map((c) => c.time);
+
+const chart = LightweightCharts.createChart(document.getElementById("tv"), {
+  layout: {
+    background: { type: "solid", color: "#0a0c10" },
+    textColor: "#7a8499",
+  },
+  grid: {
+    vertLines: { color: "#141a24" },
+    horzLines: { color: "#141a24" },
+  },
+  rightPriceScale: { borderColor: "#1e2633" },
+  timeScale: { borderColor: "#1e2633", timeVisible: true },
+  crosshair: { mode: 0 },
+  autoSize: true,
+});
+
+const series = chart.addCandlestickSeries({
+  upColor: "#26a69a",
+  downColor: "#ef5350",
+  borderVisible: false,
+  wickUpColor: "#26a69a",
+  wickDownColor: "#ef5350",
+});
+series.setData(candles);
+
+const vol = chart.addHistogramSeries({
+  priceScaleId: "vol",
+  priceFormat: { type: "volume" },
+  priceLineVisible: false,
+  lastValueVisible: false,
+});
+chart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.8, bottom: 0 } });
+vol.setData(candles.map((c) => ({
+  time: c.time,
+  value: c.volume,
+  color: c.close >= c.open ? "rgba(38,166,154,0.28)" : "rgba(239,83,80,0.28)",
+})));
+
+const emaSeries = [];
+[[8, "rgba(91,156,245,0.95)"], [21, "rgba(91,156,245,0.55)"], [55, "rgba(91,156,245,0.35)"],
+ [144, "#a78bfa"], [200, "#f472b6"]].forEach(([p, color]) => {
+  const s = chart.addLineSeries({
+    color, lineWidth: p >= 144 ? 2 : 1,
+    priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+  });
+  s.setData(ema(candles, p));
+  emaSeries.push(s);
+});
+
+/* markers = FreqUI / LWC way (not floating #labels soup) */
+function applyMarkers(focusId) {
+  if (!document.getElementById("tog-box").checked) {
+    series.setMarkers([]);
+    return;
+  }
+  const markers = boxes.map((b) => {
+    const focused = b.id === focusId;
+    return {
+      time: b.t0,
+      position: "aboveBar",
+      color: focused ? "#fbbf24" : "#2dd4bf",
+      shape: focused ? "arrowDown" : "circle",
+      text: focused ? `#${b.id}` : String(b.id),
+    };
+  });
+  series.setMarkers(markers);
+}
+
+/* focus rectangle via price lines + time range (mock of primitive box) */
+let focusLines = [];
+function clearFocusLines() {
+  focusLines.forEach((pl) => { try { series.removePriceLine(pl); } catch (_) {} });
+  focusLines = [];
+}
+function focusBox(id) {
+  const b = boxes.find((x) => x.id === id);
+  if (!b) return;
+  document.querySelectorAll("#box-rows tr").forEach((tr) => {
+    tr.classList.toggle("focused", Number(tr.dataset.id) === id);
+  });
+  applyMarkers(id);
+  clearFocusLines();
+  focusLines.push(series.createPriceLine({
+    price: b.hi, color: "rgba(251,191,36,0.7)", lineWidth: 1, lineStyle: 2, title: `#${id} hi`,
+  }));
+  focusLines.push(series.createPriceLine({
+    price: b.lo, color: "rgba(251,191,36,0.7)", lineWidth: 1, lineStyle: 2, title: `#${id} lo`,
+  }));
+  const pad = 20;
+  let i0 = times.findIndex((t) => t >= b.t0);
+  let i1 = times.findIndex((t) => t >= b.t1);
+  if (i0 < 0) i0 = 0;
+  if (i1 < 0) i1 = times.length - 1;
+  chart.timeScale().setVisibleLogicalRange({
+    from: Math.max(0, i0 - pad),
+    to: Math.min(times.length - 1, i1 + pad),
+  });
+}
+
+function fitAll() {
+  clearFocusLines();
+  applyMarkers(null);
+  document.querySelectorAll("#box-rows tr").forEach((tr) => tr.classList.remove("focused"));
+  chart.timeScale().fitContent();
+}
+
+/* box table */
+const tbody = document.getElementById("box-rows");
+document.getElementById("box-count").textContent = `（${boxes.length}）`;
+tbody.innerHTML = boxes.slice().reverse().map((b) => `
+  <tr data-id="${b.id}">
+    <td>${b.id}</td>
+    <td style="color:var(--muted)">${b.start_iso} → ${b.end_iso.slice(6)}</td>
+    <td class="num">${b.bars}</td>
+    <td class="num">${(b.spread * 100).toFixed(2)}%</td>
+  </tr>
+`).join("");
+tbody.addEventListener("click", (e) => {
+  const tr = e.target.closest("tr[data-id]");
+  if (tr) focusBox(Number(tr.dataset.id));
+});
+
+applyMarkers(null);
+chart.timeScale().fitContent();
+
+/* crosshair → FreqUI-style badge */
+chart.subscribeCrosshairMove((param) => {
+  const el = document.getElementById("badge-ohlc");
+  if (!param || !param.time || !param.seriesData) {
+    el.textContent = "—";
+    return;
+  }
+  const c = param.seriesData.get(series);
+  if (!c) { el.textContent = "—"; return; }
+  el.textContent = `O ${c.open.toFixed(1)}  H ${c.high.toFixed(1)}  L ${c.low.toFixed(1)}  C ${c.close.toFixed(1)}`;
+});
+
+/* toggles */
+document.getElementById("tog-ema").onchange = (e) => {
+  emaSeries.forEach((s) => s.applyOptions({ visible: e.target.checked }));
+};
+document.getElementById("tog-vol").onchange = (e) => {
+  vol.applyOptions({ visible: e.target.checked });
+};
+document.getElementById("tog-box").onchange = () => applyMarkers(null);
+document.getElementById("btn-fit").onclick = fitAll;
+document.getElementById("btn-fit2").onclick = fitAll;
+document.getElementById("btn-scan").onclick = () => {
+  applyMarkers(null);
+  fitAll();
+};
+document.getElementById("tip-hide").onclick = () => {
+  document.getElementById("tip").style.display = "none";
+};
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "0") fitAll();
+  if (e.key === "j" || e.key === "k") {
+    const ids = boxes.map((b) => b.id);
+    const cur = document.querySelector("#box-rows tr.focused");
+    let i = cur ? ids.indexOf(Number(cur.dataset.id)) : -1;
+    i = e.key === "j" ? (i + 1) % ids.length : (i - 1 + ids.length) % ids.length;
+    focusBox(ids[i]);
+  }
+});
+</script>
+</body>
+</html>
