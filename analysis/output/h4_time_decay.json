@@ -1,0 +1,74 @@
+[
+  {
+    "config": "tp5_sl2_base",
+    "n": 31059,
+    "n_train": 18836,
+    "n_val": 4739,
+    "positive_rate_val": 0.3429,
+    "val_auc": 0.5549,
+    "perm_p": 0.001,
+    "top_gross": 0.00211,
+    "top_net_taker_010": 0.00111,
+    "top_net_maker_006": 0.00151,
+    "top_win_rate": 0.3763,
+    "top_maker_fill_rate": 0.808,
+    "top_net_maker_filled_only": 0.00117,
+    "portfolio_maker": {
+      "n_trades": 346,
+      "net_total_units": 0.3682,
+      "net_return_on_capital": 0.0368,
+      "mean_net_per_trade": 0.00106,
+      "win_rate": 0.3844,
+      "profit_factor": 1.264,
+      "max_drawdown_pct": 0.011,
+      "outcome_counts": {
+        "sl": 207,
+        "tp": 122,
+        "timeout": 16,
+        "sl_ambiguous": 1
+      }
+    },
+    "mean_exit_bars": 20.1,
+    "outcomes": {
+      "sl": 2859,
+      "tp": 1625,
+      "timeout": 249,
+      "sl_ambiguous": 6
+    }
+  },
+  {
+    "config": "time_decay_12x025",
+    "n": 31059,
+    "n_train": 18836,
+    "n_val": 4739,
+    "positive_rate_val": 0.3577,
+    "val_auc": 0.5555,
+    "perm_p": 0.001,
+    "top_gross": 0.0021,
+    "top_net_taker_010": 0.0011,
+    "top_net_maker_006": 0.0015,
+    "top_win_rate": 0.37,
+    "top_maker_fill_rate": 0.812,
+    "top_net_maker_filled_only": 0.00074,
+    "portfolio_maker": {
+      "n_trades": 348,
+      "net_total_units": 0.2393,
+      "net_return_on_capital": 0.0239,
+      "mean_net_per_trade": 0.00069,
+      "win_rate": 0.3362,
+      "profit_factor": 1.17,
+      "max_drawdown_pct": 0.013,
+      "outcome_counts": {
+        "sl_decay": 231,
+        "tp": 110,
+        "timeout": 7
+      }
+    },
+    "mean_exit_bars": 18.5,
+    "outcomes": {
+      "sl_decay": 3033,
+      "tp": 1569,
+      "timeout": 137
+    }
+  }
+]
