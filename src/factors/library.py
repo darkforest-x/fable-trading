@@ -146,6 +146,62 @@ def alpha_taker_imbalance(df):
     return _safe(buy_vol.rolling(20, min_periods=10).mean() / vol_mean)
 
 
+def _ensure_emas(df: pd.DataFrame) -> pd.DataFrame:
+    """Return a frame that has ema8..ema200; compute missing ones causally."""
+    need = [s for s in (8, 13, 21, 34, 55, 144, 200) if f"ema{s}" not in df.columns]
+    if not need:
+        return df
+    out = df.copy()
+    for span in need:
+        out[f"ema{span}"] = out["close"].ewm(span=span, adjust=False).mean()
+    return out
+
+
+def alpha_ma_order_score(df):
+    """Bullish stack score for six EMAs (8>=13>=21>=34>=55>=144), range 0..5.
+
+    Cols: close (or precomputed ema*). EMA is causal (no lookahead).
+    """
+    d = _ensure_emas(df)
+    pairs = (
+        ("ema8", "ema13"),
+        ("ema13", "ema21"),
+        ("ema21", "ema34"),
+        ("ema34", "ema55"),
+        ("ema55", "ema144"),
+    )
+    return sum((d[a] >= d[b]).astype(float) for a, b in pairs)
+
+
+def alpha_convergence_speed(df):
+    """Second difference of MA-bundle width (spread acceleration).
+
+    Negative = spread shrinking faster (convergence accelerating).
+    Cols: ma_spread_pct or close+ema*. Windows: two 4-bar first diffs.
+    """
+    if "ma_spread_pct" in df.columns:
+        spread = df["ma_spread_pct"]
+    else:
+        d = _ensure_emas(df)
+        close = d["close"].replace(0, np.nan)
+        cluster = d[["ema8", "ema13", "ema21", "ema34", "ema55"]]
+        spread = (cluster.max(axis=1) - cluster.min(axis=1)) / close
+    d1 = spread - spread.shift(4)
+    d2 = d1 - d1.shift(4)
+    return _safe(d2)
+
+
+def alpha_ma_bandwidth_pct(df):
+    """Six-EMA bundle width / close (bandwidth of the dense stack).
+
+    Cols: close or ema*. Instantaneous at bar t only.
+    """
+    d = _ensure_emas(df)
+    close = d["close"].replace(0, np.nan)
+    mas = d[["ema8", "ema13", "ema21", "ema34", "ema55", "ema144"]]
+    return _safe((mas.max(axis=1) - mas.min(axis=1)) / close)
+
+
 # registry: name -> callable. Add here; screening picks up automatically.
 FACTORS = {
     "rev5": alpha_reversal_5, "mom20": alpha_mom_20, "hl_pos": alpha_hl_range_pos,
@@ -158,4 +214,8 @@ FACTORS = {
     "obv_slope": alpha_obv_slope,
     "vol_dryup": alpha_vol_dryup,
     "taker_imbalance": alpha_taker_imbalance,
+    # H15 dense-quality second-order family
+    "ma_order_score": alpha_ma_order_score,
+    "convergence_speed": alpha_convergence_speed,
+    "ma_bandwidth_pct": alpha_ma_bandwidth_pct,
 }
