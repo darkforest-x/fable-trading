@@ -1,13 +1,8 @@
 {
-  "source_run": "owner_v5_coco",
-  "metrics": {
-    "conf": 0.2,
-    "f1": 0.495,
-    "p": 0.472,
-    "r": 0.52,
-    "tp": 247,
-    "fp": 276,
-    "fn": 228
-  },
-  "pool_images": 3581
+  "source_run": "owner_v4",
+  "frozen_eval_f1": 0.563,
+  "metrics": {"f1": 0.563, "p": 0.498, "r": 0.646},
+  "eval_set": "owner_eval_frozen",
+  "note": "晋升自冻结集对照 (v3 0.558 vs v4 0.563); v5 在自身漂移验证集上 0.495, 不采信",
+  "leaderboard": [{"run": "owner_v4", "frozen_f1": 0.563}, {"run": "owner_v3_coco", "frozen_f1": 0.558}]
 }
