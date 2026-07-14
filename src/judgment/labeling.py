@@ -306,3 +306,37 @@ def label_candidate_ma_exit(
     timeout_close = float(frame["close"].iloc[last_i])
     ret = timeout_close / entry - 1
     return BarrierOutcome(int(ret > 0), "timeout", horizon, entry, ret)
+
+
+def label_candidate_time_decay(
+    frame: pd.DataFrame,
+    signal_i: int,
+    *,
+    tp_mult: float = 5.0,
+    sl_mult: float = 2.0,
+    tighten_every: int = 12,
+    tighten_step: float = 0.25,
+    horizon: int = HORIZON_BARS,
+    atr_pct_min: float = ATR_PCT_MIN,
+) -> BarrierOutcome | None:
+    """H4 time-decay stop: TP fixed, SL tightens by tighten_step x ATR every
+    tighten_every bars held (long: stop moves up). Conservative intra-bar
+    order: current stop checked before TP. Ambiguous same-bar hit → SL.
+    """
+    ctx = _entry_context(frame, signal_i, horizon, atr_pct_min)
+    if ctx is None:
+        return None
+    entry, atr, highs, lows, opens, timeout_close = ctx
+    upper = entry + tp_mult * atr
+    for j in range(horizon):
+        steps = j // max(1, tighten_every)
+        sl_dist = max(sl_mult - steps * tighten_step, 0.0) * atr
+        stop = entry - sl_dist
+        if lows[j] <= stop:
+            exit_price = min(stop, float(opens[j]))
+            ret = exit_price / entry - 1
+            return BarrierOutcome(int(ret > 0), "sl_decay", j + 1, entry, ret)
+        if highs[j] >= upper:
+            return BarrierOutcome(1, "tp", j + 1, entry, upper / entry - 1)
+    ret = timeout_close / entry - 1
+    return BarrierOutcome(int(ret > 0), "timeout", horizon, entry, ret)
