@@ -14,37 +14,14 @@ for BASE in yolo11s.yaml yolo11s.pt runs/detect/runs/detect/dense_15m_full_s_e21
     --model "$BASE" --epochs 80 --patience 20 --name "$NAME"
 done
 $PY - <<'PYEOF'
-import json, sys
+import json
 from pathlib import Path
-from ultralytics import YOLO
-sys.path.insert(0, 'scripts')
-from golden_disagreement import iou
-def load_txt(p):
-    if not p.exists(): return []
-    return [tuple(map(float, l.split()[1:])) for l in p.read_text().splitlines() if len(l.split())==5]
-val_img = Path('datasets/dense_owner_v1/images/val')
-val_lbl = Path('datasets/dense_owner_v1/labels/val')
+from src.detection.owner_eval import evaluate_owner_f1
 out = {}
 for run in ('owner_base_yolo11s_yaml','owner_base_yolo11s_pt','owner_base_best_pt'):
     w = Path(f'runs/detect/runs/detect/{run}/weights/best.pt')
     if not w.exists(): continue
-    model = YOLO(str(w))
-    best = None
-    for conf in (0.15, 0.2, 0.3, 0.4):
-        tp=fp=fn=0
-        for img in sorted(val_img.glob('*.png')):
-            gt = load_txt(val_lbl / (img.stem + '.txt'))
-            res = model.predict(str(img), conf=conf, verbose=False)[0]
-            preds = [tuple(map(float, b)) for b in res.boxes.xywhn.cpu().numpy()] if res.boxes is not None else []
-            used=set()
-            for g in gt:
-                m = next((k for k,p in enumerate(preds) if k not in used and iou(g,p)>=0.3), None)
-                if m is None: fn+=1
-                else: used.add(m); tp+=1
-            fp += len(preds)-len(used)
-        pr = tp/max(tp+fp,1); rc = tp/max(tp+fn,1); f1 = 2*pr*rc/max(pr+rc,1e-9)
-        if best is None or f1 > best['f1']:
-            best = {'conf': conf, 'f1': round(f1,3), 'p': round(pr,3), 'r': round(rc,3)}
+    best, _ = evaluate_owner_f1(w, 'datasets/dense_owner_v1')
     out[run] = best
     print(run, best, flush=True)
 Path('analysis/output/owner_base_comparison.json').write_text(json.dumps(out, indent=2))

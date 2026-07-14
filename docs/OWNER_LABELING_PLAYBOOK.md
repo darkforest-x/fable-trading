@@ -52,7 +52,8 @@
 # Mac 上
 export VPS_HOST=root@你的VPS_IP
 export VPS_PORT=18081
-bash scripts/ls_reverse_tunnel.sh
+bash scripts/tunnel_labelstudio.sh
+# (legacy alias: scripts/ls_reverse_tunnel.sh → same script)
 ```
 
 浏览器访问：`http://VPS_IP:18081`  
