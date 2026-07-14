@@ -14,7 +14,9 @@ from pathlib import Path
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 POOL = PROJECT_DIR / "data/golden_pool.json"
 SRC_DIRS = [PROJECT_DIR / "datasets/dense_15m_full/images/val",
-            PROJECT_DIR / "datasets/dense_15m_full/images/train"]
+            PROJECT_DIR / "datasets/dense_15m_full/images/train",
+            PROJECT_DIR / "datasets/dense_swap_v1/images/train",
+            PROJECT_DIR / "datasets/dense_swap_v1/images/val"]
 import sys
 DST = PROJECT_DIR / "datasets" / (sys.argv[1] if len(sys.argv) > 1 else "dense_owner_v1")
 
