@@ -14,6 +14,11 @@ PROJECT_DIR = Path(__file__).resolve().parents[1]
 EVAL = PROJECT_DIR / "datasets/owner_eval_frozen"
 DST = PROJECT_DIR / "models/owner_best.pt"
 
+
+# NOTE: models trained before the frozen eval set existed (v3-v5) leaked
+# eval symbols into training -> their frozen-F1 is inflated and must not be
+# promoted. Only eval-excluded models (v6+, built with is_eval filter) get a
+# fair score. Restrict the leaderboard to runs whose training excluded eval.
 def main() -> int:
     weights = sorted(PROJECT_DIR.glob("runs/detect/runs/detect/owner_v*/weights/best.pt"))
     board = []

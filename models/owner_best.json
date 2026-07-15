@@ -1,44 +1,12 @@
 {
-  "source_run": "owner_v5_from_v4",
-  "frozen_eval_f1": 0.663,
-  "metrics": {
-    "conf": 0.3,
-    "f1": 0.663,
-    "p": 0.758,
-    "r": 0.59,
-    "tp": 135,
-    "fp": 43,
-    "fn": 94
-  },
-  "eval_set": "owner_eval_frozen",
-  "leaderboard": [
-    {
-      "run": "owner_v5_from_v4",
-      "f1": 0.663
-    },
-    {
-      "run": "owner_v5_coco",
-      "f1": 0.641
-    },
-    {
-      "run": "owner_v6_chain",
-      "f1": 0.595
-    },
-    {
-      "run": "owner_v4",
-      "f1": 0.563
-    },
-    {
-      "run": "owner_v3_coco",
-      "f1": 0.558
-    },
-    {
-      "run": "owner_v6_coco",
-      "f1": 0.554
-    },
-    {
-      "run": "owner_v3_chain",
-      "f1": 0.441
-    }
+  "source_run": "owner_v6_chain",
+  "frozen_eval_f1": 0.595,
+  "metrics": {"f1": 0.595},
+  "eval_set": "owner_eval_frozen (47币种从未参训)",
+  "note": "v5(0.663)因训练集含43/47个eval币种而虚高(泄漏),不采信;v6_chain是首个干净测量的最强模型。晋升逻辑需修:只比较eval-excluded的模型。",
+  "clean_leaderboard": [
+    {"run": "owner_v6_chain", "frozen_f1": 0.595, "leaked": false},
+    {"run": "owner_v6_coco", "frozen_f1": 0.554, "leaked": false},
+    {"run": "owner_v5_from_v4", "frozen_f1": 0.663, "leaked": "43/47 eval symbols in train -- INVALID"}
   ]
 }
