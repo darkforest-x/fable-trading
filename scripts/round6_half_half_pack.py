@@ -108,15 +108,40 @@ def find_swap_image(stem: str) -> Path | None:
     return None
 
 
+def _iou_xywhn(a, b) -> float:
+    ax1, ay1 = a[0] - a[2] / 2, a[1] - a[3] / 2
+    ax2, ay2 = a[0] + a[2] / 2, a[1] + a[3] / 2
+    bx1, by1 = b[0] - b[2] / 2, b[1] - b[3] / 2
+    bx2, by2 = b[0] + b[2] / 2, b[1] + b[3] / 2
+    iw = max(0.0, min(ax2, bx2) - max(ax1, bx1))
+    ih = max(0.0, min(ay2, by2) - max(ay1, by1))
+    inter = iw * ih
+    union = a[2] * a[3] + b[2] * b[3] - inter
+    return inter / union if union > 0 else 0.0
+
+
+def nms_xywhn(boxes_conf: list[tuple], iou_thr: float = 0.45) -> list[tuple]:
+    """Greedy NMS: keep highest conf, drop overlaps. boxes are (cx,cy,w,h,conf)."""
+    order = sorted(boxes_conf, key=lambda x: -x[4])
+    keep = []
+    for b in order:
+        if all(_iou_xywhn(b[:4], k[:4]) < iou_thr for k in keep):
+            keep.append(b)
+    return keep
+
+
 def score_image(model, img: Path, conf_floor: float = 0.10):
+    """Return NMS-deduped boxes (xywhn) and top conf. One box per dense region."""
     res = model.predict(str(img), conf=conf_floor, verbose=False)[0]
-    boxes = []
+    raw = []
     top = 0.0
     if res.boxes is not None and len(res.boxes):
         top = float(res.boxes.conf.max())
         for b, c in zip(res.boxes.xywhn.cpu().numpy(), res.boxes.conf.cpu().numpy()):
             if float(c) >= 0.20:
-                boxes.append(tuple(map(float, b[:4])))
+                raw.append((*map(float, b[:4]), float(c)))
+    kept = nms_xywhn(raw, iou_thr=0.45)
+    boxes = [k[:4] for k in kept]
     return boxes, top
 
 
