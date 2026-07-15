@@ -20,12 +20,15 @@ from src.detection.render import render_chart
 from src.judgment.candidates import MIN_GAP_BARS, WARMUP_BARS
 from src.judgment.labeling import HORIZON_BARS
 
+import os
+
 PROJECT_DIR = Path(__file__).resolve().parents[2]
 WINDOW = 200
 STRIDE = 50
 DEFAULT_CONF = 0.30
 DEFAULT_WEIGHTS = PROJECT_DIR / "models" / "owner_best.pt"
-TMP_PNG = PROJECT_DIR / "data" / "_yolo_cand_tmp.png"
+# per-process temp path avoids collisions when multiple scans run
+TMP_PNG = PROJECT_DIR / "data" / f"_yolo_cand_tmp_{os.getpid()}.png"
 
 _model_cache: dict[str, Any] = {}
 
