@@ -134,10 +134,11 @@ def forward_candidate_indices(
     start_from_i = None
     if start_time is not None and "open_time" in raw.columns:
         times = pd.to_datetime(raw["open_time"], utc=True)
-        # only need signals near/after start (keep some lookback via window)
         hits = np.flatnonzero(times >= pd.Timestamp(start_time))
-        if len(hits):
-            start_from_i = max(0, int(hits[0]) - 5)
+        if len(hits) == 0:
+            # series ends before forward clock — skip (do NOT full-history YOLO)
+            return []
+        start_from_i = max(0, int(hits[0]) - 5)
     return scan_series_with_yolo(raw, yolo_model, start_from_i=start_from_i)
 
 
