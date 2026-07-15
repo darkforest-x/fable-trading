@@ -43,15 +43,24 @@ def main() -> int:
         proj = api(tok, "POST", "/api/projects", {"title": title, "label_config": config})
         pid = proj["id"]
     import re as _re, urllib.error
-    m = _re.search(r"d=([^/]+)/", json.loads(Path(tasks_file).read_text())[0]["data"]["image"])
-    subdir = m.group(1) if m else "dense_15m_full"
-    try:
-        api(tok, "POST", "/api/storages/localfiles", {
-            "project": pid, "title": subdir,
-            "path": f"/label-studio/files/{subdir}", "use_blob_urls": False})
-    except urllib.error.HTTPError as e:
-        print(f"storage warn ({e.code}):", e.read().decode()[:200])
     tasks = json.loads(Path(tasks_file).read_text())
+    # Register EVERY local-files root used by tasks (mixed packs e.g. dense_swap + round6_scout).
+    # Only wiring the first task's root leaves the rest as "issue loading URL from $image".
+    subdirs = []
+    for t in tasks:
+        m = _re.search(r"d=([^/]+)/", (t.get("data") or {}).get("image") or "")
+        if m and m.group(1) not in subdirs:
+            subdirs.append(m.group(1))
+    if not subdirs:
+        subdirs = ["dense_15m_full"]
+    for subdir in subdirs:
+        try:
+            api(tok, "POST", "/api/storages/localfiles", {
+                "project": pid, "title": subdir,
+                "path": f"/label-studio/files/{subdir}", "use_blob_urls": False})
+            print(f"storage ok: {subdir}")
+        except urllib.error.HTTPError as e:
+            print(f"storage warn {subdir} ({e.code}):", e.read().decode()[:200])
     api(tok, "POST", f"/api/projects/{pid}/import", tasks)
     print(f"project '{title}' (id {pid}): imported {len(tasks)} tasks")
     return 0
