@@ -35,11 +35,16 @@ owner 指示：**先把 YOLO 候选源切进主线**；round6 新标训出更好
 # 冻结（已执行）
 PYTHONPATH=. python3 scripts/freeze_model.py --date 20260715 --write-active
 
-# 前向（需 .venv：含 ultralytics）
-PYTHONPATH=. .venv/bin/python scripts/forward_track.py
+# 前向（必须 .venv，且含 ultralytics + lightgbm）
+# 先加载 YOLO 再 LightGBM；OMP 线程钉 1，避免 Apple Silicon 上挂死
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 \
+  PYTHONPATH=. .venv/bin/python -u scripts/forward_track.py
 
-# 回滚候选源：改 forward_types.CANDIDATE_SOURCE="rules" 并 ACTIVE 指回规则冻结
+# 回滚候选源：改 forward_types.CANDIDATE_SOURCE="rules" 并 ACTIVE 指回
+# models/frozen_tp5_sl2_swap_20260709.txt
 ```
+
+前向 live 模式只扫每币最近 ~6 个窗口；全历史离线建池仍用 `yolo_candidate_source.py` 的 full 模式。
 
 ## 风险
 
