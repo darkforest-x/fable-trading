@@ -95,7 +95,9 @@ def scan_series_with_yolo(
         sub = enriched_ma.iloc[start : start + window]
         try:
             _, tf = render_chart(sub, out_path=tmp_png)
-            res = model.predict(str(tmp_png), conf=conf, verbose=False)
+            # device=cpu: MPS predict has hung mid multi-series forward scans on
+            # M4 Air; CPU is slower per call but finishes reliably for live mode.
+            res = model.predict(str(tmp_png), conf=conf, verbose=False, device="cpu")
         except Exception:
             continue
         if not res:
