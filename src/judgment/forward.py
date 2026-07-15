@@ -98,11 +98,25 @@ def _run_forward_tracking(
     start_time: pd.Timestamp,
     exit_resolver: ExitResolver,
 ) -> ForwardRunSummary:
+    import os
+
+    # OpenMP/thread clash between torch and lightgbm can hang multi-series YOLO scans.
+    os.environ.setdefault("OMP_NUM_THREADS", "1")
+    os.environ.setdefault("MKL_NUM_THREADS", "1")
+    os.environ.setdefault("VECLIB_MAXIMUM_THREADS", "1")
+
     normalized_start = normalize_start_time(start_time)
     artifact = latest_artifact(DEFAULT_FROZEN_CONFIG)
     if artifact is None:
         raise FileNotFoundError("missing frozen artifact; run scripts/freeze_model.py first")
     existing = read_forward_log(output_path)
+    # Load YOLO *before* LightGBM booster when YOLO is the candidate source —
+    # reverse order has hung on Apple Silicon mid-scan (0% CPU sleep).
+    from src.judgment.forward_types import CANDIDATE_SOURCE
+    from src.judgment.yolo_candidates import load_yolo_model
+
+    if CANDIDATE_SOURCE == "yolo":
+        load_yolo_model()
     scan = scan_forward_records(
         ForwardScanInput(
             artifact=artifact,
