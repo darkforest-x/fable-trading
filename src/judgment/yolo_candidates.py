@@ -61,29 +61,43 @@ def scan_series_with_yolo(
     min_gap: int = MIN_GAP_BARS,
     tmp_png: Path = TMP_PNG,
     start_from_i: int | None = None,
+    mode: str = "full",
 ) -> list[int]:
     """Return sorted signal bar indices for one OHLCV frame (causal at each bar).
 
-    `start_from_i`: optional lower bound on signal_i to skip ancient history
-    (still renders windows that end after this for context).
+    mode:
+      - "full": offline dataset build (stride over history)
+      - "live": forward/mainline — only windows near the right edge (and
+        covering start_from_i..end). Avoids multi-hour full-history scans.
     """
     if model is None:
         model = load_yolo_model()
-    if len(frame) < WARMUP_BARS + window + HORIZON_BARS + 2:
+    if len(frame) < WARMUP_BARS + window + 2:
         return []
     enriched_ma = add_mas(frame)
     tmp_png.parent.mkdir(parents=True, exist_ok=True)
-    chosen: list[int] = []
     last_start = len(frame) - window
     first_start = WARMUP_BARS
     if start_from_i is not None:
-        # window must cover signal >= start_from_i → start <= start_from_i
-        # and start + window > start_from_i
         first_start = max(first_start, int(start_from_i) - window + 1)
-    for start in range(first_start, last_start, stride):
+    if mode == "live":
+        # at most ~6 windows walking back from the tip (≈ stride*5 + one tip)
+        starts = []
+        s = last_start
+        while s >= first_start and len(starts) < 6:
+            starts.append(s)
+            s -= stride
+    else:
+        starts = list(range(first_start, last_start + 1, stride))
+
+    chosen: list[int] = []
+    for start in starts:
         sub = enriched_ma.iloc[start : start + window]
-        _, tf = render_chart(sub, out_path=tmp_png)
-        res = model.predict(str(tmp_png), conf=conf, verbose=False)
+        try:
+            _, tf = render_chart(sub, out_path=tmp_png)
+            res = model.predict(str(tmp_png), conf=conf, verbose=False)
+        except Exception:
+            continue
         if not res:
             continue
         boxes = res[0].boxes
@@ -93,12 +107,8 @@ def scan_series_with_yolo(
             cx, _, w, _ = map(float, b[:4])
             bar_in_win = right_edge_to_bar(cx, w, tf, n_bars=window)
             signal_i = start + bar_in_win
-            if signal_i < WARMUP_BARS:
+            if signal_i < WARMUP_BARS or signal_i + 1 >= len(frame):
                 continue
-            if signal_i + 1 + HORIZON_BARS >= len(frame):
-                # allow open forward trades: only need entry bar present
-                if signal_i + 1 >= len(frame):
-                    continue
             if start_from_i is not None and signal_i < start_from_i:
                 continue
             chosen.append(int(signal_i))

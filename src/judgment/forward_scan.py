@@ -139,7 +139,7 @@ def forward_candidate_indices(
             # series ends before forward clock — skip (do NOT full-history YOLO)
             return []
         start_from_i = max(0, int(hits[0]) - 5)
-    return scan_series_with_yolo(raw, yolo_model, start_from_i=start_from_i)
+    return scan_series_with_yolo(raw, yolo_model, start_from_i=start_from_i, mode="live")
 
 
 def _rule_candidate_indices(enriched: pd.DataFrame) -> list[int]:
