@@ -17,6 +17,10 @@ Meta fields: data.bucket = swap_hard | scout_gallery | model_uncertain
 Usage:
   PYTHONPATH=. .venv/bin/python scripts/round6_half_half_pack.py \\
       --count 500 --chunks 2
+  # append more without reusing prior round6 stems:
+  PYTHONPATH=. .venv/bin/python scripts/round6_half_half_pack.py \\
+      --count 1500 --chunks 3 --chunk-start 3 \\
+      --exclude-glob 'tasks_round6_halfhalf_chunk*.json'
 """
 from __future__ import annotations
 
@@ -37,6 +41,7 @@ HARD_TSVS = [
     PROJECT_DIR / "output/offline_tasks/fiftyone_hard_e21/top50_mistakenness.tsv",
     PROJECT_DIR / "output/offline_tasks/fiftyone_hard/top50_mistakenness.tsv",
 ]
+LS_DIR = PROJECT_DIR / "output/label_studio"
 
 
 def pick_model() -> Path:
@@ -61,6 +66,23 @@ def load_pool() -> set[str]:
     if isinstance(raw, dict):
         return set(raw.keys())
     return set(raw)
+
+
+def load_exclude_from_glob(pattern: str) -> set[str]:
+    """Stems already packed in prior task JSON files (avoid re-queuing)."""
+    out: set[str] = set()
+    if not pattern:
+        return out
+    for path in sorted(LS_DIR.glob(pattern)):
+        try:
+            tasks = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        for t in tasks:
+            stem = (t.get("data") or {}).get("stem")
+            if stem:
+                out.add(stem)
+    return out
 
 
 def load_hard_stems() -> set[str]:
@@ -131,19 +153,28 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--count", type=int, default=500, help="total tasks across chunks")
     parser.add_argument("--chunks", type=int, default=2)
+    parser.add_argument("--chunk-start", type=int, default=1, help="first chunk index in filenames")
     parser.add_argument("--seed", type=int, default=20260715)
-    parser.add_argument("--score-pool", type=int, default=0, help="0 = count*4 candidates")
+    parser.add_argument("--score-pool", type=int, default=0, help="0 = max(count*3, 2500) candidates")
+    parser.add_argument(
+        "--exclude-glob",
+        default="",
+        help="glob under output/label_studio/ of task JSONs whose stems to skip",
+    )
     args = parser.parse_args()
 
     from ultralytics import YOLO
 
     rng = random.Random(args.seed)
     pool = load_pool()
+    already = load_exclude_from_glob(args.exclude_glob)
+    blocked = pool | already
     hard_pref = load_hard_stems()
     weights = pick_model()
     model = YOLO(str(weights))
     n_half = args.count // 2
-    score_n = args.score_pool or args.count * 4
+    score_n = args.score_pool or max(args.count * 3, 2500)
+    print(f"exclude: golden={len(pool)} prior_tasks={len(already)} blocked={len(blocked)}", flush=True)
 
     # --- prepare scout gallery under datasets/ for LS local-files ---
     scout_dst = PROJECT_DIR / "datasets" / SCOUT_DS / "images" / "train"
@@ -151,7 +182,7 @@ def main() -> int:
     scout_stems = []
     for src in sorted(SCOUT_SRC.glob("*.png")):
         stem = src.stem
-        if stem in pool:
+        if stem in blocked:
             continue
         shutil.copy2(src, scout_dst / src.name)
         scout_stems.append(stem)
@@ -162,13 +193,14 @@ def main() -> int:
         p.stem
         for split in ("train", "val")
         for p in (ds / "images" / split).glob("*.png")
-        if p.stem not in pool
+        if p.stem not in blocked
     ]
     rng.shuffle(swap_stems)
     # boost hardlist stems to front of scoring queue
     hard_first = [s for s in swap_stems if s in hard_pref]
     rest = [s for s in swap_stems if s not in hard_pref]
     candidates = (hard_first + rest)[:score_n]
+    print(f"swap candidates available={len(swap_stems)} scoring={len(candidates)}", flush=True)
 
     print(f"scoring {len(candidates)} swap candidates with {weights.name}…", flush=True)
     scored = []
@@ -245,13 +277,14 @@ def main() -> int:
     mixed = mixed[: args.count]
     rng.shuffle(mixed)  # avoid long runs of one type in the UI
 
-    out_dir = PROJECT_DIR / "output/label_studio"
+    out_dir = LS_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
     chunk_size = (len(mixed) + args.chunks - 1) // args.chunks
     paths = []
     for i in range(args.chunks):
         chunk = mixed[i * chunk_size : (i + 1) * chunk_size]
-        path = out_dir / f"tasks_round6_halfhalf_chunk{i+1}.json"
+        idx = args.chunk_start + i
+        path = out_dir / f"tasks_round6_halfhalf_chunk{idx}.json"
         path.write_text(json.dumps(chunk, ensure_ascii=False), encoding="utf-8")
         paths.append(path)
         buckets = {}
@@ -260,12 +293,20 @@ def main() -> int:
         n_pred = sum(1 for t in chunk if t["predictions"][0]["result"])
         print(f"wrote {path.name}: {len(chunk)} tasks, with_boxes={n_pred}, buckets={buckets}")
 
+    all_r6 = sorted(out_dir.glob("tasks_round6_halfhalf_chunk*.json"))
+    total_r6 = sum(len(json.loads(p.read_text())) for p in all_r6)
     readme = out_dir / "README_ROUND6.md"
+    import_lines = "\n".join(
+        f"PYTHONPATH=. python3 scripts/ls_auto_import.py round6_halfhalf_chunk{args.chunk_start + i} \\\n"
+        f"  output/label_studio/{paths[i].name}"
+        for i in range(len(paths))
+    )
     readme.write_text(
         f"""# Round-6 打标包（一半 SWAP 难例 + 一半 scout/分歧）
 
 **模型预标**：`{weights.name}`（改框 / 删框 / 补框即可）  
-**总量**：{len(mixed)} 张，{args.chunks} 个 chunk  
+**本批新增**：{len(mixed)} 张（chunk {args.chunk_start}–{args.chunk_start + args.chunks - 1}）  
+**Round-6 累计**：{total_r6} 张（{len(all_r6)} 个 chunk 文件）
 
 ## bucket 含义
 
@@ -275,26 +316,23 @@ def main() -> int:
 | `scout_gallery` | 侦察兵当前 gallery 图 |
 | `model_uncertain` | 补齐「分歧半」的模型犹豫区（scout 图不够时） |
 
-## 导入
+## 导入本批
 
 1. Label Studio :8081，label_config 用 `label_config_v2.xml`（含 ⭐ 标杆）
-2. 每个 chunk 一个项目，或同一项目分批 import：
+2. 每个 chunk 一个项目：
 ```bash
-PYTHONPATH=. python3 scripts/ls_auto_import.py round6_halfhalf_chunk1 \\
-  output/label_studio/tasks_round6_halfhalf_chunk1.json
-PYTHONPATH=. python3 scripts/ls_auto_import.py round6_halfhalf_chunk2 \\
-  output/label_studio/tasks_round6_halfhalf_chunk2.json
+{import_lines}
 ```
 3. 标完 export → 合并 golden_pool → build dense_owner_v7 → 再训
 
 ## 纪律
 
 - 勿把 `owner_eval_frozen` 符号的新标并进训练集（build 时 `--exclude-eval`）
-- 已在 golden_pool 的 stem 已排除
+- 已在 golden_pool / 已有 round6 chunk 的 stem 已排除
 """,
         encoding="utf-8",
     )
-    print(f"readme → {readme}")
+    print(f"readme → {readme} (round6 total tasks ≈ {total_r6})")
     return 0
 
 
