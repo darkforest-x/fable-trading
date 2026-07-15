@@ -8,11 +8,27 @@ cd "$(dirname "$0")/.."
 
 rsync -az --exclude='__pycache__' --exclude='*.pyc' \
   src analysis models requirements.txt "$VPS:$DIR/"
-rsync -az \
-  data/judgment_dataset_v2_expanded.csv data/forward_log.csv \
-  data/scored_signals*.csv data/scored_signals*.json \
-  "$VPS:$DIR/data/"
+
+# Data files (skip missing — e.g. forward_log cleared at YOLO clock reset)
+ssh "$VPS" "mkdir -p $DIR/data"
+for f in \
+  data/judgment_dataset_v2_expanded.csv \
+  data/judgment_yolo_swap.csv \
+  data/forward_log.csv \
+  data/forward_log_rules_pre_yolo_20260715.csv \
+  data/scored_signals_swap.csv \
+  data/scored_signals_swap_meta.json \
+  data/scored_signals_spot.csv \
+  data/scored_signals_spot_meta.json \
+  data/scored_signals.csv \
+  data/scored_signals.json
+do
+  if [ -f "$f" ]; then
+    rsync -az "$f" "$VPS:$DIR/data/"
+  fi
+done
 rsync -az data/sweep_v3 data/swap_replication data/kline_fetched "$VPS:$DIR/data/"
+
 # Hard red line: never leave job executor enabled on public VPS.
 ssh "$VPS" "set -euo pipefail
 UNIT=/etc/systemd/system/fable-dashboard.service
@@ -20,7 +36,6 @@ if [ -f \"\$UNIT\" ]; then
   if grep -q '^Environment=ENABLE_JOB_EXECUTOR=' \"\$UNIT\"; then
     sed -i 's/^Environment=ENABLE_JOB_EXECUTOR=.*/Environment=ENABLE_JOB_EXECUTOR=0/' \"\$UNIT\"
   else
-    # Insert after [Service] if missing
     if ! grep -q 'ENABLE_JOB_EXECUTOR' \"\$UNIT\"; then
       sed -i '/^\[Service\]/a Environment=ENABLE_JOB_EXECUTOR=0' \"\$UNIT\"
     fi
@@ -28,13 +43,15 @@ if [ -f \"\$UNIT\" ]; then
   systemctl daemon-reload
 fi
 systemctl restart fable-dashboard
-for i in 1 2 3 4 5 6; do
+for i in 1 2 3 4 5 6 7 8 9 10; do
   if systemctl is-active fable-dashboard >/dev/null \
     && curl -s -o /dev/null -w 'http:%{http_code}\n' http://127.0.0.1:8642/api/overview | grep -q 'http:200'; then
     systemctl is-active fable-dashboard
     echo http:200
-    # surface executor flag for operators
     systemctl show fable-dashboard -p Environment --value 2>/dev/null | tr ' ' '\n' | grep ENABLE_JOB || true
+    # show which freeze the API thinks is active if endpoint exists
+    curl -s http://127.0.0.1:8642/api/overview 2>/dev/null | head -c 400 || true
+    echo
     exit 0
   fi
   sleep 2

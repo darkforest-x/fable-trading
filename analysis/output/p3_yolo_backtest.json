@@ -1,0 +1,90 @@
+{
+  "dataset": "data/judgment_yolo_swap.csv",
+  "score_threshold_val_q90": 0.71087,
+  "n_candidates": 2385,
+  "n_eligible": 272,
+  "config": {
+    "max_concurrent": 10,
+    "base_cost_round_trip": 0.003,
+    "accept_window_start": "2026-05-04 00:00:00+00:00",
+    "accept_window_disclaimer": "window consumed once by 2b holdout eval (2026-07-08)"
+  },
+  "cost_sweep_accept_window": {
+    "0.002": {
+      "n_trades": 49,
+      "net_total_units": 1.0768,
+      "net_return_on_capital": 0.1077,
+      "mean_net_per_trade": 0.02198,
+      "win_rate": 0.8163,
+      "profit_factor": 8.665,
+      "max_drawdown_pct": 0.0042,
+      "outcome_counts": {
+        "tp": 39,
+        "sl": 9,
+        "timeout": 1
+      }
+    },
+    "0.003": {
+      "n_trades": 49,
+      "net_total_units": 1.0278,
+      "net_return_on_capital": 0.1028,
+      "mean_net_per_trade": 0.02098,
+      "win_rate": 0.8163,
+      "profit_factor": 7.876,
+      "max_drawdown_pct": 0.0043,
+      "outcome_counts": {
+        "tp": 39,
+        "sl": 9,
+        "timeout": 1
+      }
+    },
+    "0.004": {
+      "n_trades": 49,
+      "net_total_units": 0.9788,
+      "net_return_on_capital": 0.0979,
+      "mean_net_per_trade": 0.01998,
+      "win_rate": 0.7959,
+      "profit_factor": 7.17,
+      "max_drawdown_pct": 0.0044,
+      "outcome_counts": {
+        "tp": 39,
+        "sl": 9,
+        "timeout": 1
+      }
+    }
+  },
+  "insample_pre_window_base_cost": {
+    "n_trades": 223,
+    "net_total_units": 6.9137,
+    "net_return_on_capital": 0.6914,
+    "mean_net_per_trade": 0.031,
+    "win_rate": 0.9686,
+    "profit_factor": 98.887,
+    "max_drawdown_pct": 0.0015,
+    "outcome_counts": {
+      "tp": 215,
+      "sl": 6,
+      "timeout": 2
+    }
+  },
+  "full_period_base_cost": {
+    "n_trades": 272,
+    "net_total_units": 7.9415,
+    "net_return_on_capital": 0.7942,
+    "mean_net_per_trade": 0.0292,
+    "win_rate": 0.9412,
+    "profit_factor": 37.08,
+    "max_drawdown_pct": 0.0026,
+    "outcome_counts": {
+      "tp": 254,
+      "sl": 15,
+      "timeout": 3
+    }
+  },
+  "acceptance_check_base_cost": {
+    "net_positive": true,
+    "profit_factor_ge_1.3": true,
+    "max_drawdown_le_20pct": true,
+    "n_trades_ge_100": false
+  }
+}

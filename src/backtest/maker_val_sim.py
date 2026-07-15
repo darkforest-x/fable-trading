@@ -70,11 +70,22 @@ def main() -> int:
     sig["score"] = model.predict(sig[FEATURE_COLUMNS], num_iteration=model.best_iteration)
     sig["entry_time"] = sig["signal_time"] + BAR
     sig["exit_time"] = sig["entry_time"] + sig["exit_offset"] * BAR
+    # YOLO candidate CSVs may omit maker_filled; treat as all filled and flag it.
+    if "maker_filled" not in sig.columns:
+        sig["maker_filled"] = True
+        maker_filled_assumed = True
+    else:
+        maker_filled_assumed = False
     sig = add_h9_flags(sig)
     sig = sig.sort_values(["entry_time", "score"], ascending=[True, False])
 
     maker_cost = maker_cost_for_dataset(args.data)
-    taker_cost = taker_cost_for_dataset(args.data)
+    # judgment_yolo_swap is SWAP economics even if path has no "swap_replication"
+    if "yolo" in args.data.name or "swap" in args.data.name.lower():
+        maker_cost = SWAP_MAKER_COST
+        taker_cost = SWAP_TAKER_COST
+    else:
+        taker_cost = taker_cost_for_dataset(args.data)
     maker = sig[sig["maker_filled"]]
     h9_above = sig[sig["maker_filled"] & sig["h1_ok"] & sig["h1_above_ma"]]
     h9_slope = sig[sig["maker_filled"] & sig["h1_ok"] & sig["h1_up_slope"]]
@@ -84,6 +95,7 @@ def main() -> int:
         "threshold_val_q90": round(threshold, 5),
         "val_range": [str(sig["signal_time"].min()), str(sig["signal_time"].max())],
         "costs": {"maker": maker_cost, "taker": taker_cost},
+        "maker_filled_assumed": maker_filled_assumed,
         "flag_coverage": round(float(sig["h1_ok"].mean()), 4),
         "pass_rate": {
             "h1_above_ma": round(float((sig["h1_ok"] & sig["h1_above_ma"]).mean()), 4),
