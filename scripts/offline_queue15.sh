@@ -5,12 +5,16 @@ cd "$(dirname "$0")/.."
 exec >> logs/offline_queue15.log 2>&1
 PY=.venv/bin/python
 echo "=== queue15 start $(date) ==="
-for PAIR in "runs/detect/runs/detect/owner_v5_from_v4/weights/best.pt owner_v6_chain" "yolo11s.pt owner_v6_coco"; do
-  set -- $PAIR
-  echo "--- training $2 from $1"
-  caffeinate -i $PY -m src.detection.train --data datasets/dense_owner_v6/data.yaml \
-    --model "$1" --epochs 100 --patience 25 --name "$2"
-done
+# Speed recipe (accuracy-preserving): workers/cache/plots via train.py defaults.
+# Chain fine-tune peaks early → patience 10 / epochs 40. Cold start keeps longer wait.
+echo "--- training owner_v6_chain (fine-tune, patience=10)"
+caffeinate -i $PY -m src.detection.train --data datasets/dense_owner_v6/data.yaml \
+  --model runs/detect/runs/detect/owner_v5_from_v4/weights/best.pt \
+  --epochs 40 --patience 10 --name owner_v6_chain
+echo "--- training owner_v6_coco (cold start, patience=20)"
+caffeinate -i $PY -m src.detection.train --data datasets/dense_owner_v6/data.yaml \
+  --model yolo11s.pt \
+  --epochs 100 --patience 20 --name owner_v6_coco
 echo "--- 冻结集评估 + 晋升最强"
 PYTHONPATH=. $PY - <<'PYEOF'
 import json

@@ -6,12 +6,13 @@ mkdir -p logs
 exec >> logs/offline_queue10.log 2>&1
 PY=.venv/bin/python
 echo "=== queue10 start $(date) ==="
-for PAIR in "yolo11s.pt owner_v3_coco" "runs/detect/runs/detect/dense_owner_v1/weights/best.pt owner_v3_chain"; do
-  set -- $PAIR
-  echo "--- training $2 from $1"
-  caffeinate -i $PY -m src.detection.train --data datasets/dense_owner_v3/data.yaml \
-    --model "$1" --epochs 100 --patience 25 --name "$2"
-done
+echo "--- training owner_v3_coco (cold, patience=20)"
+caffeinate -i $PY -m src.detection.train --data datasets/dense_owner_v3/data.yaml \
+  --model yolo11s.pt --epochs 100 --patience 20 --name owner_v3_coco
+echo "--- training owner_v3_chain (fine-tune, patience=10)"
+caffeinate -i $PY -m src.detection.train --data datasets/dense_owner_v3/data.yaml \
+  --model runs/detect/runs/detect/dense_owner_v1/weights/best.pt \
+  --epochs 40 --patience 10 --name owner_v3_chain
 $PY - <<'PYEOF'
 import json
 from pathlib import Path

@@ -14,8 +14,9 @@ coco = d.get('owner_v3_coco', {}).get('f1', 0)
 chain = d.get('owner_v3_chain', {}).get('f1', 0)
 print('runs/detect/runs/detect/owner_v3_coco/weights/best.pt' if coco >= chain else 'runs/detect/runs/detect/owner_v3_chain/weights/best.pt')")
 echo "v4 base = $BASE"
+# v4 continues from v3 winner = fine-tune path
 caffeinate -i $PY -m src.detection.train --data datasets/dense_owner_v4/data.yaml \
-  --model "$BASE" --epochs 100 --patience 25 --name owner_v4
+  --model "$BASE" --epochs 40 --patience 10 --name owner_v4
 $PY - <<'PYEOF'
 import json
 from pathlib import Path
