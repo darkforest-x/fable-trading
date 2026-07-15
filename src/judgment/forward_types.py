@@ -14,7 +14,11 @@ PROJECT_DIR: Final = Path(__file__).resolve().parents[2]
 FORWARD_LOG_PATH: Final = PROJECT_DIR / "data" / "forward_log.csv"
 # H1 scaled shadow paper book — never mixed into mainline 100-trade gate.
 FORWARD_LOG_H1_SCALED_PATH: Final = PROJECT_DIR / "data" / "forward_log_h1_scaled.csv"
-FORWARD_START: Final = pd.Timestamp("2026-07-08 00:00:00", tz="UTC")
+# YOLO mainline cutover (owner 2026-07-15): new candidate source → new forward clock.
+# Pre-cutover rule-scan log archived as data/forward_log_rules_pre_yolo_20260715.csv
+FORWARD_START: Final = pd.Timestamp("2026-07-15 00:00:00", tz="UTC")
+# "yolo" = detector proposes bars; "rules" = expanded dense-MA scan (legacy).
+CANDIDATE_SOURCE: Final = "yolo"
 BAR: Final = pd.Timedelta(minutes=15)
 TP_MULT: Final = 5.0
 SL_MULT: Final = 2.0

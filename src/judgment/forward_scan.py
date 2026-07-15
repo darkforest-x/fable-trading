@@ -1,8 +1,8 @@
 """SWAP candidate scanning and partial barrier outcome resolution.
 
-Mainline uses fixed TP5/SL2 (`resolve_forward_exit`). H1 shadow reuses the same
-candidate/score path but resolves exits via scaled math
-(`resolve_forward_exit_scaled` / `label_candidate_scaled`).
+Mainline (2026-07-15+): YOLO detector proposes candidates; LightGBM freeze
+scores them; exits stay fixed TP5/SL2 (`resolve_forward_exit`). H1 shadow
+reuses the same candidate/score path with scaled exits.
 """
 from __future__ import annotations
 
@@ -19,6 +19,7 @@ from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature
 from src.judgment.forward_records import forward_key, open_keys
 from src.judgment.forward_types import (
     BAR,
+    CANDIDATE_SOURCE,
     SCALED_SL_MULT,
     SCALED_TP1_MULT,
     SCALED_TRAIL_MULT,
@@ -30,6 +31,7 @@ from src.judgment.forward_types import (
     ForwardScanResult,
 )
 from src.judgment.labeling import ATR_PCT_MIN, HORIZON_BARS
+from src.judgment.yolo_candidates import load_yolo_model, scan_series_with_yolo
 
 ExitResolver = Callable[[pd.DataFrame, int], Optional[ForwardExit]]
 
@@ -50,12 +52,19 @@ def scan_forward_records(
     candidates_seen = 0
     threshold_signals_seen = 0
     tracked_keys = open_keys(scan.existing_log)
+    yolo_model = None
+    if CANDIDATE_SOURCE == "yolo":
+        yolo_model = load_yolo_model()
     for source, symbol, frame in iter_series(bar="15m", min_bars=500):
         if source != "okx" or not symbol.endswith("_USDT_SWAP"):
             continue
+        if is_stockish(symbol):
+            continue
         scanned_series += 1
         enriched = add_indicators(frame)
-        signal_indices = set(forward_candidate_indices(enriched))
+        signal_indices = set(
+            forward_candidate_indices(enriched, frame=frame, yolo_model=yolo_model, start_time=scan.start_time)
+        )
         tracked_times = {key[2] for key in tracked_keys if key[0] == source and key[1] == symbol}
         if tracked_times:
             signal_times = enriched["open_time"].astype(str)
@@ -110,7 +119,29 @@ def scan_forward_records(
     return ForwardScanResult(records, scanned_series, candidates_seen, threshold_signals_seen)
 
 
-def forward_candidate_indices(enriched: pd.DataFrame) -> list[int]:
+def forward_candidate_indices(
+    enriched: pd.DataFrame,
+    *,
+    frame: pd.DataFrame | None = None,
+    yolo_model=None,
+    start_time: pd.Timestamp | None = None,
+) -> list[int]:
+    """Mainline candidate bars: YOLO by default, rules if CANDIDATE_SOURCE=rules."""
+    if CANDIDATE_SOURCE == "rules":
+        return _rule_candidate_indices(enriched)
+    # YOLO path
+    raw = frame if frame is not None else enriched
+    start_from_i = None
+    if start_time is not None and "open_time" in raw.columns:
+        times = pd.to_datetime(raw["open_time"], utc=True)
+        # only need signals near/after start (keep some lookback via window)
+        hits = np.flatnonzero(times >= pd.Timestamp(start_time))
+        if len(hits):
+            start_from_i = max(0, int(hits[0]) - 5)
+    return scan_series_with_yolo(raw, yolo_model, start_from_i=start_from_i)
+
+
+def _rule_candidate_indices(enriched: pd.DataFrame) -> list[int]:
     if len(enriched) < WARMUP_BARS + 2:
         return []
     mask = strict_mask(enriched, mode="expanded").fillna(False)

@@ -3,10 +3,12 @@
 **写于 2026-07-08。** 读完本文件 + `CLAUDE.md` + `analysis/p2b_v2_report.md`，即可无损接手本项目。
 
 
-## YOLO 上关键路径 A/B（owner 2026-07-15 决策，v6 后自动跑）
-方式=并行PK不替换现有验证。设计见 docs/design/yolo_critical_path_ab.md。
-YOLO候选源(scripts/yolo_candidate_source.py)与规则源同闸门对比;赢了(top净≥规则且p<0.01)
-才冻结+独立前向确认才切主线,输了回侦察岗。前向时钟(路径A)全程不动。
+## YOLO 主线（owner 2026-07-15 切流）
+**候选源=YOLO（owner_best）+ 判断=冻结 `tp5_sl2_swap_yolo_20260715` + 出场仍 TP5/SL2。**
+前向时钟从 2026-07-15 重启；规则时代 `forward_log` 已归档
+`data/forward_log_rules_pre_yolo_20260715.csv`。说明见
+`analysis/p2a_yolo_mainline_cutover.md`。A/B 报告：`analysis/p2a_yolo_critical_path_ab.md`。
+round6 新标后只换检测权重再重扫；回滚规则：`CANDIDATE_SOURCE=rules` + 旧冻结。
 
 ## 当前状态一句话
 

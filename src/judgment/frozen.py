@@ -24,7 +24,10 @@ from src.judgment.train import DEFAULT_HORIZON_BARS, load_splits, train_model
 PROJECT_DIR: Final = Path(__file__).resolve().parents[2]
 BAR: Final = pd.Timedelta(minutes=15)
 DEFAULT_SCORE_QUANTILE: Final = 0.90
-DEFAULT_CONFIG_NAME: Final = "tp5_sl2_swap"
+# Mainline after 2026-07-15 owner cutover: YOLO candidates + TP5/SL2 labels.
+DEFAULT_CONFIG_NAME: Final = "tp5_sl2_swap_yolo"
+# Legacy rule-scan freeze (pre-cutover); kept for rollback / comparisons.
+LEGACY_RULES_CONFIG_NAME: Final = "tp5_sl2_swap"
 
 
 class ScoreCacheMetadata(TypedDict, total=False):
@@ -83,8 +86,21 @@ class FrozenArtifactError(RuntimeError):
 
 
 def default_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
+    """YOLO-candidate mainline freeze (judgment trained on judgment_yolo_swap)."""
     return FrozenConfig(
         name=DEFAULT_CONFIG_NAME,
+        project_dir=project_dir,
+        dataset_path=project_dir / "data" / "judgment_yolo_swap.csv",
+        models_dir=project_dir / "models",
+        score_quantile=DEFAULT_SCORE_QUANTILE,
+        horizon_bars=DEFAULT_HORIZON_BARS,
+    )
+
+
+def rules_legacy_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
+    """Pre-cutover rule-scan freeze (rollback only)."""
+    return FrozenConfig(
+        name=LEGACY_RULES_CONFIG_NAME,
         project_dir=project_dir,
         dataset_path=project_dir / "data" / "swap_replication" / "swap_tp5_sl2.csv",
         models_dir=project_dir / "models",
