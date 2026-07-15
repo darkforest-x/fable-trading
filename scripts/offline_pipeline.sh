@@ -36,6 +36,7 @@ MAP=$(python3 -c "import json; print(json.load(open('analysis/output/p2a_val_met
 echo "dense_15m_full mAP50=$MAP"
 if python3 -c "import sys; sys.exit(0 if float('$MAP') < 0.90 else 1)"; then
   echo "below 0.90 -> retraining with yolo11s (this takes hours)"
+  # cold start: moderate patience; workers/cache via train.py defaults
   caffeinate -i $PY -m src.detection.train --data datasets/dense_15m_full/data.yaml \
     --model yolo11s.pt --epochs 60 --patience 15 --name dense_15m_full_s
   $PY -m src.detection.eval_visualize \
