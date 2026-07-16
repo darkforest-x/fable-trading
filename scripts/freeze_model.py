@@ -26,6 +26,7 @@ from pathlib import Path
 
 from src.judgment.frozen import (
     binary_yolo_shadow_config,
+    yolo_v8_pool_config,
     default_config,
     rules_legacy_config,
     train_frozen_artifact,
@@ -48,6 +49,12 @@ def parse_args() -> argparse.Namespace:
         help="freeze/point at previous YOLO binary config (shadow / rollback)",
     )
     parser.add_argument(
+        "--yolo-v8-pool",
+        action="store_true",
+        help="freeze regression on the clean v8_chain candidate pool "
+             "(judgment_yolo_swap_v8.csv; ACTIVE-candidate, compare before switching)",
+    )
+    parser.add_argument(
         "--write-active",
         action="store_true",
         help="write models/ACTIVE to the new artifact model path",
@@ -57,13 +64,16 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    if args.legacy_rules and args.binary_yolo:
-        raise SystemExit("choose at most one of --legacy-rules / --binary-yolo")
+    if sum((args.legacy_rules, args.binary_yolo, args.yolo_v8_pool)) > 1:
+        raise SystemExit("choose at most one of --legacy-rules / --binary-yolo / --yolo-v8-pool")
     if args.legacy_rules:
         config = rules_legacy_config()
         candidate_source = "rules"
     elif args.binary_yolo:
         config = binary_yolo_shadow_config()
+        candidate_source = "yolo"
+    elif args.yolo_v8_pool:
+        config = yolo_v8_pool_config()
         candidate_source = "yolo"
     else:
         config = default_config()

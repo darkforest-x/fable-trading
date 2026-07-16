@@ -104,6 +104,28 @@ def default_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
     )
 
 
+def yolo_v8_pool_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
+    """Regression on the CLEAN candidate pool (rescanned 2026-07-16).
+
+    Same recipe as default_config; the only change is the pool. The old
+    judgment_yolo_swap.csv came from a detector that (a) was never really
+    trained (lr bug: best.pt = epoch 1) and (b) scanned only 101 symbols.
+    The v8 pool comes from owner_v8_chain (frozen-F1 0.650, verified clean)
+    over all 267 fetched swaps: 17,573 candidates vs 2,385. Candidate for the
+    next ACTIVE once compared -- val first; the accept-window comparison needs
+    owner sign-off (holdout accounting).
+    """
+    return FrozenConfig(
+        name="tp5_sl2_swap_yolo_v8_reg",
+        project_dir=project_dir,
+        dataset_path=project_dir / "data" / "judgment_yolo_swap_v8.csv",
+        models_dir=project_dir / "models",
+        score_quantile=DEFAULT_SCORE_QUANTILE,
+        horizon_bars=DEFAULT_HORIZON_BARS,
+        objective="regression",
+    )
+
+
 def binary_yolo_shadow_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
     """Previous YOLO binary freeze — shadow compare / emergency rollback."""
     return FrozenConfig(
