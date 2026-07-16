@@ -351,11 +351,10 @@ def test_job_types_endpoint(route_env) -> None:
     assert len(body["items"]) == 6
 
 
-def test_post_jobs_with_auth_token(
+def test_post_jobs_without_auth_token(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from fastapi import HTTPException
-
+    """OPS auth removed: job create works with no token (executor still gated separately)."""
     from src.webapp.auth import verify_ops_request
 
     monkeypatch.setenv("OPS_JOBS_DB", str(tmp_path / "ops.sqlite"))
@@ -373,14 +372,9 @@ def test_post_jobs_with_auth_token(
     monkeypatch.setattr(runner_mod, "build_argv", fake_build)
     monkeypatch.setattr(runner_mod, "human_summary", lambda *a, **k: "noop")
 
-    with pytest.raises(HTTPException) as ei:
-        verify_ops_request(_req())
-    assert ei.value.status_code == 401
-
-    # Auth OK path then create
-    verify_ops_request(_req({"X-Ops-Token": "phase2-test-token"}))
+    verify_ops_request(_req())  # no token, still OK
     body = CreateJobBody(job_type="forward_track", params={})
-    res = ops_jobs_create(body, _req({"X-Ops-Token": "phase2-test-token"}))
+    res = ops_jobs_create(body, _req())
     assert res.status_code == 201
     payload = json_loads_response(res)
     assert payload["status"] == "queued"

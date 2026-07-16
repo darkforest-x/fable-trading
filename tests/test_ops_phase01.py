@@ -6,7 +6,6 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-from fastapi import HTTPException
 
 from src.webapp import agenda_payloads, experiment_registry, ops_flags
 from src.webapp.auth import verify_ops_request
@@ -34,32 +33,16 @@ def test_auth_off_allows_ops(monkeypatch: pytest.MonkeyPatch) -> None:
     verify_ops_request(_req())  # no raise
 
 
-def test_auth_token_rejects_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_auth_permanently_disabled_even_if_env_token(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Owner removed OPS auth: env token mode must not gate /api/ops/*."""
     monkeypatch.setenv("OPS_AUTH_MODE", "token")
     monkeypatch.setenv("OPS_API_TOKEN", "test-secret-token")
-    with pytest.raises(HTTPException) as ei:
-        verify_ops_request(_req())
-    assert ei.value.status_code == 401
-
-
-def test_auth_token_accepts_bearer(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("OPS_AUTH_MODE", "token")
-    monkeypatch.setenv("OPS_API_TOKEN", "test-secret-token")
-    verify_ops_request(_req({"Authorization": "Bearer test-secret-token"}))
-
-
-def test_auth_token_accepts_x_ops_token(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("OPS_AUTH_MODE", "token")
-    monkeypatch.setenv("OPS_API_TOKEN", "test-secret-token")
-    verify_ops_request(_req({"X-Ops-Token": "test-secret-token"}))
-
-
-def test_auth_token_mode_without_secret_is_503(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("OPS_AUTH_MODE", "token")
-    monkeypatch.delenv("OPS_API_TOKEN", raising=False)
-    with pytest.raises(HTTPException) as ei:
-        verify_ops_request(_req({"Authorization": "Bearer anything"}))
-    assert ei.value.status_code == 503
+    monkeypatch.setenv("OPS_REQUIRE_AUTH", "1")
+    assert ops_flags.require_auth_for_ops() is False
+    assert ops_flags.auth_mode() == "off"
+    verify_ops_request(_req())  # no raise without token
+    verify_ops_request(_req({"Authorization": "Bearer anything"}))
+    verify_ops_request(_req({"X-Ops-Token": "wrong"}))
 
 
 def test_list_experiments_reads_output_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

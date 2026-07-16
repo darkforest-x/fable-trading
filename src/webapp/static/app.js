@@ -13,10 +13,10 @@ const appState = { universe: "swap", view: "explore" };
 const viewLoaded = new Set();
 const VIEW_ORDER = ["explore", "overview", "backtest", "signals", "forward", "experiments", "agenda", "jobs", "data", "models"];
 const CHART_LAYOUT = {
-  layout: { background: { type: "solid", color: "#0a0c10" }, textColor: "#8b949e" },
-  grid: { vertLines: { color: "#161b22" }, horzLines: { color: "#161b22" } },
-  timeScale: { borderColor: "#30363d", timeVisible: true },
-  rightPriceScale: { borderColor: "#30363d" },
+  layout: { background: { type: "solid", color: "#ffffff" }, textColor: "#6b7280" },
+  grid: { vertLines: { color: "#eef1f6" }, horzLines: { color: "#eef1f6" } },
+  timeScale: { borderColor: "#e5e7eb", timeVisible: true },
+  rightPriceScale: { borderColor: "#e5e7eb" },
   crosshair: { mode: 0 },
 };
 const pctFormat = { type: "custom", formatter: (v) => v.toFixed(2) + "%" };
@@ -961,6 +961,8 @@ $("#trades-more")?.addEventListener("click", () => {
 /* ---------- signals browser ---------- */
 let symbolsLoaded = false, klineChart, klineSeries, volumeSeries, emaSeries = [];
 let bandSeries, pathSeries, barrier = { tp: 4, sl: 2 };
+/** Horizontal TV-style order segments (entry / TP / SL) for focused trade */
+let tradeLevelSeries = [];
 let currentKey = "", currentMarkers = [], currentTimes = [], priceLines = [], chartReq = 0;
 let currentThreshold = 0;
 let lastFocusRange = null;
@@ -1065,6 +1067,7 @@ async function loadChart(key, focusEntry = null) {
   priceLines.forEach((l) => klineSeries.removePriceLine(l)); priceLines = [];
   emaSeries.forEach((s) => klineChart.removeSeries(s)); emaSeries = [];
   bandSeries.setData([]); pathSeries.setData([]);
+  if (typeof _clearTradeLevels === "function") _clearTradeLevels();
   currentTimes = d.candles.map((c) => c.time);
   klineSeries.setData(d.candles);
   volumeSeries.setData(d.candles.map((c) => ({
@@ -1181,49 +1184,110 @@ function hideSignalTooltip() {
   $("#signal-tooltip").hidden = true;
 }
 
+function _clearTradeLevels() {
+  priceLines.forEach((l) => {
+    try { klineSeries.removePriceLine(l); } catch (_) { /* ignore */ }
+  });
+  priceLines = [];
+  tradeLevelSeries.forEach((s) => {
+    try { klineChart.removeSeries(s); } catch (_) { /* ignore */ }
+  });
+  tradeLevelSeries = [];
+  if (pathSeries) pathSeries.setData([]);
+}
+
+function _addTradeLevel(price, color, title, t0, t1, lineStyle = 0) {
+  if (price == null || !Number.isFinite(Number(price))) return;
+  const p = Number(price);
+  priceLines.push(klineSeries.createPriceLine({
+    price: p,
+    color,
+    lineWidth: 1,
+    lineStyle,
+    axisLabelVisible: true,
+    title: title || "",
+  }));
+  if (t0 != null && t1 != null && t1 >= t0 && klineChart) {
+    const seg = klineChart.addLineSeries({
+      color,
+      lineWidth: 2,
+      lineStyle,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+      autoscaleInfoProvider: () => null,
+    });
+    seg.setData([
+      { time: t0, value: p },
+      { time: t1, value: p },
+    ]);
+    tradeLevelSeries.push(seg);
+  }
+}
+
 function focusMarker(entryTs) {
   const m = currentMarkers.find((x) => x.entry_time === entryTs);
   if (!m) return;
-  priceLines.forEach((l) => klineSeries.removePriceLine(l)); priceLines = [];
-  pathSeries.setData([]);
+  _clearTradeLevels();
   klineChart.priceScale("right").applyOptions({ autoScale: true });
   const entry = m.entry_price;
   const exitPrice = entry * (1 + m.ret);
   const outcomeColor = OUTCOME_COLOR[m.outcome] || "#9aa0a8";
-  const showTpBarrier = m.outcome !== "tp";
-  const showSlBarrier = m.outcome !== "sl" && m.outcome !== "sl_ambiguous";
-  priceLines.push(klineSeries.createPriceLine({
-    price: entry, color: "#9aa0a8", lineStyle: 2, title: "入场",
-  }));
-  if (showTpBarrier) {
-    priceLines.push(klineSeries.createPriceLine({  // v-label barriers of this trade
-      price: entry * (1 + barrier.tp * m.atr_pct), color: "rgba(31,167,125,0.8)",
-      lineStyle: 3, title: `止盈目标 +${barrier.tp}×ATR`,
-    }));
-  }
-  if (showSlBarrier) {
-    priceLines.push(klineSeries.createPriceLine({
-      price: entry * (1 - barrier.sl * m.atr_pct), color: "rgba(230,103,103,0.8)",
-      lineStyle: 3, title: `止损线 -${barrier.sl}×ATR`,
-    }));
-  }
-  priceLines.push(klineSeries.createPriceLine({
-    price: exitPrice, color: outcomeColor, lineStyle: 0,
-    title: `出场 ${OUTCOME_CN[m.outcome] || m.outcome}`,
-  }));
-  // dense-MA window band (the "cluster box" this signal fired from)
+  const tpPx = entry * (1 + barrier.tp * m.atr_pct);
+  const slPx = entry * (1 - barrier.sl * m.atr_pct);
+  const t0 = m.entry_time || m.time;
+  const t1 = m.exit_time || m.time;
+  const retPct = (100 * m.ret).toFixed(2);
+  const retSign = m.ret >= 0 ? "+" : "";
+  _addTradeLevel(tpPx, "#26a69a", `TP +${barrier.tp}ATR`, t0, t1, 2);
+  _addTradeLevel(slPx, "#ff9800", `SL -${barrier.sl}ATR`, t0, t1, 2);
+  _addTradeLevel(entry, "#2962ff", "入场", t0, t1, 0);
+  _addTradeLevel(
+    exitPrice,
+    outcomeColor,
+    `出场 ${OUTCOME_CN[m.outcome] || m.outcome} ${retSign}${retPct}%`,
+    t0,
+    t1,
+    0,
+  );
   bandSeries.setData([
     { time: m.time - Math.max(m.dense_len, 1) * 900, value: 1 },
     { time: m.time, value: 1 },
   ]);
-  // entry -> exit path
-  pathSeries.applyOptions({ color: outcomeColor });
+  pathSeries.applyOptions({ color: outcomeColor, lineWidth: 2 });
   pathSeries.setData([
-    { time: m.entry_time, value: entry },
-    { time: m.exit_time, value: exitPrice },
+    { time: t0, value: entry },
+    { time: t1, value: exitPrice },
   ]);
-  // position via logical bar indices (robust against time-mapping quirks);
-  // setTimeout, not rAF -- rAF never fires in background tabs
+  const baseMarkers = [];
+  for (const x of currentMarkers) {
+    if (!x.eligible && !x.traded) continue;
+    const isFocus = x.entry_time === entryTs;
+    if (x.traded) {
+      baseMarkers.push({
+        time: x.time,
+        position: "belowBar",
+        shape: "arrowUp",
+        color: isFocus ? "#2962ff" : (OUTCOME_COLOR[x.outcome] || "#8b93a1"),
+        text: isFocus ? "入" : `${(100 * x.ret).toFixed(1)}%`,
+        size: isFocus ? 3 : 2,
+      });
+      baseMarkers.push({
+        time: x.exit_time,
+        position: "aboveBar",
+        shape: isFocus ? "arrowDown" : "square",
+        color: OUTCOME_COLOR[x.outcome] || "#8b93a1",
+        text: isFocus ? (OUTCOME_CN[x.outcome] || "").slice(0, 2) : "",
+        size: isFocus ? 3 : 1,
+      });
+    } else {
+      baseMarkers.push({
+        time: x.time, position: "belowBar", shape: "circle",
+        color: "#8b93a1", text: "", size: 1,
+      });
+    }
+  }
+  klineSeries.setMarkers(baseMarkers.sort((a, b) => a.time - b.time));
   let i0 = currentTimes.findIndex((t) => t >= m.time);
   let i1 = currentTimes.findIndex((t) => t >= m.exit_time);
   if (i0 < 0) i0 = currentTimes.length - 1;
@@ -1363,7 +1427,7 @@ async function loadExperiments() {
   } catch (err) {
     if (note) {
       note.hidden = false;
-      note.innerHTML = `<b>无法加载实验表</b>：${err.message}<br>若 OPS_AUTH_MODE=token，请在右上角粘贴 token。`;
+      note.innerHTML = `<b>无法加载实验表</b>：${err.message}`;
     }
     tbody.innerHTML = "";
   }
@@ -1583,7 +1647,7 @@ async function loadJobsView() {
   } catch (err) {
     if (authNote) {
       authNote.hidden = false;
-      authNote.innerHTML = `<b>无法加载任务页</b>：${err.message}<br>若 OPS_AUTH_MODE=token，请在右上角粘贴 token。`;
+      authNote.innerHTML = `<b>无法加载任务页</b>：${err.message}`;
     }
   }
   updateJobRunEnabled();
@@ -1818,7 +1882,7 @@ async function loadDataHub() {
   } catch (err) {
     if (note) {
       note.hidden = false;
-      note.innerHTML = `<b>无法加载数据中枢</b>：${err.message}<br>若 OPS_AUTH_MODE=token，请在右上角粘贴 token。`;
+      note.innerHTML = `<b>无法加载数据中枢</b>：${err.message}`;
     }
     if (tbody) tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">加载失败</div></td></tr>`;
   }
@@ -1887,7 +1951,7 @@ async function loadModelHub() {
   } catch (err) {
     if (note) {
       note.hidden = false;
-      note.innerHTML = `<b>无法加载模型中枢</b>：${err.message}<br>若 OPS_AUTH_MODE=token，请在右上角粘贴 token。`;
+      note.innerHTML = `<b>无法加载模型中枢</b>：${err.message}`;
     }
     if (tbody) tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">加载失败</div></td></tr>`;
   }
@@ -1899,7 +1963,8 @@ $("#models-refresh")?.addEventListener("click", () => loadModelHub());
 
 /* ---------- theme ---------- */
 function initTheme() {
-  const saved = localStorage.getItem("fable_theme") || "dark";
+  // Default light (white UI). Only explicit "dark" in localStorage stays dark.
+  const saved = localStorage.getItem("fable_theme") === "dark" ? "dark" : "light";
   applyTheme(saved);
   $("#theme-toggle")?.addEventListener("click", () => {
     const next = document.body.classList.contains("theme-light") ? "dark" : "light";
@@ -1909,18 +1974,17 @@ function initTheme() {
 }
 function applyTheme(mode) {
   document.body.classList.toggle("theme-light", mode === "light");
+  document.body.classList.toggle("theme-dark", mode === "dark");
   const btn = $("#theme-toggle");
   if (btn) btn.textContent = mode === "light" ? "深色" : "浅色";
-  // chart layout colors
   if (mode === "light") {
     CHART_LAYOUT.layout.background.color = "#ffffff";
-    CHART_LAYOUT.layout.textColor = "#5c6b82";
+    CHART_LAYOUT.layout.textColor = "#6b7280";
     CHART_LAYOUT.grid.vertLines.color = "#eef1f6";
     CHART_LAYOUT.grid.horzLines.color = "#eef1f6";
-    CHART_LAYOUT.timeScale.borderColor = "#d8dee9";
-    CHART_LAYOUT.rightPriceScale.borderColor = "#d8dee9";
+    CHART_LAYOUT.timeScale.borderColor = "#e5e7eb";
+    CHART_LAYOUT.rightPriceScale.borderColor = "#e5e7eb";
   } else {
-    // Hummingbot-ish dark chart paper
     CHART_LAYOUT.layout.background.color = "#0a0c10";
     CHART_LAYOUT.layout.textColor = "#8b949e";
     CHART_LAYOUT.grid.vertLines.color = "#161b22";

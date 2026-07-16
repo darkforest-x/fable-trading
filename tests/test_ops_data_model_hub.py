@@ -7,7 +7,6 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-from fastapi import HTTPException
 
 from src.webapp import data_hub, model_hub, ops_flags
 from src.webapp.auth import verify_ops_request
@@ -275,15 +274,21 @@ def test_ops_status_phase_includes_3(monkeypatch: pytest.MonkeyPatch) -> None:
     assert body["executor_enabled"] is False
 
 
-def test_data_hub_route_requires_auth(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_data_hub_route_open_without_token(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """OPS auth removed: data-hub must work with no token even if env says token."""
     monkeypatch.setenv("OPS_AUTH_MODE", "token")
     monkeypatch.setenv("OPS_API_TOKEN", "phase3-secret")
-    with pytest.raises(HTTPException) as ei:
-        ops_data_hub(_req())
-    assert ei.value.status_code == 401
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    monkeypatch.setattr(data_hub, "FETCHED_DIR", empty)
+    monkeypatch.setattr(data_hub, "CACHE_DIR", empty)
+    monkeypatch.setattr(data_hub, "AUDIT_SUMMARY_PATH", tmp_path / "no_audit.json")
+    monkeypatch.setattr(data_hub, "FORWARD_LOG_PATH", tmp_path / "no_fwd.csv")
+    body = ops_data_hub(_req())  # no token header
+    assert body["read_only"] is True
 
 
-def test_model_hub_route_accepts_token(
+def test_model_hub_route_open_without_token(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     monkeypatch.setenv("OPS_AUTH_MODE", "token")
@@ -299,8 +304,7 @@ def test_model_hub_route_accepts_token(
     monkeypatch.setattr(model_hub, "PROJECT_ROOT", tmp_path)
     monkeypatch.setattr(model_hub, "DEFAULT_ACTIVE_POINTER", models / "ACTIVE")
 
-    # Route calls model_hub_payload() with defaults — patch module-level defaults used inside.
-    out = ops_model_hub(_req({"X-Ops-Token": "phase3-secret"}))
+    out = ops_model_hub(_req())  # no token
     assert out["read_only"] is True
     assert out["count"] >= 1
 

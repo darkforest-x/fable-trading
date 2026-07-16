@@ -1,4 +1,8 @@
-"""Feature flags for P2.5 ops console (env only; never hardcode secrets)."""
+"""Feature flags for ops console (env only; never hardcode secrets).
+
+OPS auth is permanently off (owner request 2026-07). Env vars OPS_AUTH_MODE /
+OPS_API_TOKEN are ignored for gating; status still reports them for diagnostics.
+"""
 from __future__ import annotations
 
 import os
@@ -9,11 +13,8 @@ def _truthy(name: str, default: str = "0") -> bool:
 
 
 def auth_mode() -> str:
-    """off | token | nginx (nginx = document that reverse proxy auth is external)."""
-    mode = os.environ.get("OPS_AUTH_MODE", "off").strip().lower()
-    if mode not in {"off", "token", "nginx"}:
-        return "off"
-    return mode
+    """Always report off — app-layer ops auth is removed."""
+    return "off"
 
 
 def api_token() -> str:
@@ -21,16 +22,7 @@ def api_token() -> str:
 
 
 def require_auth_for_ops() -> bool:
-    """When token mode and token is set, ops API requires Bearer.
-
-    OPS_REQUIRE_AUTH=1 forces ops auth even if token empty (then all requests 503/401).
-    nginx mode assumes edge auth; app-layer ops still open unless REQUIRE_AUTH=1 + token.
-    """
-    mode = auth_mode()
-    if mode == "token":
-        return True
-    if _truthy("OPS_REQUIRE_AUTH", "0"):
-        return True
+    """Always False: no token required for /api/ops/*."""
     return False
 
 
@@ -39,16 +31,14 @@ def executor_enabled() -> bool:
 
 
 def ops_status_payload() -> dict:
-    token = api_token()
-    mode = auth_mode()
     return {
-        "auth_mode": mode,
+        "auth_mode": auth_mode(),
         "ops_auth_required": require_auth_for_ops(),
-        "token_configured": bool(token),
+        "token_configured": bool(api_token()),
         "executor_enabled": executor_enabled(),
         "phase": "0+1+2+3",
         "notes": {
-            "auth": "Set OPS_AUTH_MODE=token and OPS_API_TOKEN=<secret> to protect /api/ops/*",
+            "auth": "OPS auth disabled — /api/ops/* is open (no token).",
             "executor": (
                 "ENABLE_JOB_EXECUTOR default 0; set 1 only on Mac to allow POST /api/ops/jobs. "
                 "VPS must stay 0."
