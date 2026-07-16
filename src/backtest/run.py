@@ -33,7 +33,16 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src.judgment.frozen import DEFAULT_FROZEN_CONFIG, latest_artifact, score_with_artifact
+from src.costs import BASE_COST, COST_SWEEP  # route table (owner-controlled)
+from src.judgment.frozen import (
+    DEFAULT_FROZEN_CONFIG,
+    binary_yolo_shadow_config,
+    default_config,
+    latest_artifact,
+    rules_legacy_config,
+    score_with_artifact,
+    yolo_old_pool_config,
+)
 from src.judgment.features import FEATURE_COLUMNS
 from src.judgment.train import load_splits, train_model
 
@@ -43,21 +52,38 @@ OUTPUT_DIR = PROJECT_DIR / "analysis" / "output"
 
 BAR = pd.Timedelta(minutes=15)
 ACCEPT_START = pd.Timestamp("2026-05-04 00:00:00", tz="UTC")  # disclosed: spent once by 2b
-COST_SWEEP = (0.002, 0.003, 0.004)  # round-trip cost on notional
-BASE_COST = 0.003
 MAX_CONCURRENT = 10
 SCORE_QUANTILE = 0.90
 
+# Explicit artifact selection. Dataset-path matching alone cannot distinguish
+# configs that share a CSV: the binary shadow lives on the same file as the old
+# regression mainline, so path matching always returned the regression artifact
+# and a "binary shadow backtest" run on 2026-07-16 silently replayed regression
+# numbers under the wrong name.
+FROZEN_CONFIGS = {
+    "default": default_config,
+    "old_pool": yolo_old_pool_config,
+    "binary_shadow": binary_yolo_shadow_config,
+    "legacy_rules": rules_legacy_config,
+}
 
-def build_signals(data_path: Path) -> tuple[pd.DataFrame, float]:
+
+def build_signals(data_path: Path, frozen_config: str | None = None) -> tuple[pd.DataFrame, float]:
     """Train the judgment model (train/val discipline unchanged), score every
     candidate in the CSV, and fix the entry threshold from val scores only."""
-    # Match the dataset against EVERY frozen config, not just the default:
-    # otherwise a backtest of a non-default pool silently retrains a fresh
-    # binary model instead of replaying the frozen regression artifact, and the
-    # comparison stops being about the pools.
-    from src.judgment.frozen import (binary_yolo_shadow_config, default_config,
-                                     yolo_old_pool_config)
+    if frozen_config:
+        artifact = latest_artifact(FROZEN_CONFIGS[frozen_config]())
+        if artifact is None:
+            raise SystemExit(f"no frozen artifact for config '{frozen_config}'")
+        if data_path.resolve() != artifact.dataset_path.resolve():
+            raise SystemExit(
+                f"--frozen-config {frozen_config} expects dataset "
+                f"{artifact.dataset_path}, got {data_path}"
+            )
+        return score_with_artifact(artifact)
+
+    # Fallback: match the dataset against every frozen config. First match wins,
+    # so configs sharing a CSV need --frozen-config to disambiguate.
     for cfg_fn in (default_config, yolo_old_pool_config, binary_yolo_shadow_config):
         artifact = latest_artifact(cfg_fn())
         if artifact is not None and data_path.resolve() == artifact.dataset_path.resolve():
@@ -127,9 +153,16 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
     parser.add_argument("--tag", default="p3")
+    parser.add_argument(
+        "--frozen-config",
+        choices=sorted(FROZEN_CONFIGS),
+        default=None,
+        help="score with this frozen artifact explicitly (required for configs "
+             "that share a dataset CSV, e.g. binary_shadow)",
+    )
     args = parser.parse_args()
 
-    signals, threshold = build_signals(args.data)
+    signals, threshold = build_signals(args.data, frozen_config=args.frozen_config)
     trades = simulate(signals, threshold)
     accept = trades[trades["entry_time"] >= ACCEPT_START]
     insample = trades[trades["entry_time"] < ACCEPT_START]

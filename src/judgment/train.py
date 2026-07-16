@@ -36,7 +36,7 @@ OUTPUT_DIR = PROJECT_DIR / "analysis" / "output"
 HOLDOUT_START = pd.Timestamp("2026-05-04 00:00:00", tz="UTC")  # frozen, do not tune on >= this
 TRAIN_FRACTION = 0.8
 THRESHOLDS = (0.4, 0.5, 0.6, 0.7)
-ROUND_TRIP_COST = 0.002  # 0.2% taker + slippage assumption from P0
+from src.costs import LEGACY_P0_ROUND_TRIP as ROUND_TRIP_COST  # reporting-only, see src/costs.py
 SEED = 42
 
 LGB_PARAMS = {

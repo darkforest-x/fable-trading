@@ -24,10 +24,8 @@ from src.judgment.trend_filter import add_h9_flags
 PROJECT_DIR = Path(__file__).resolve().parents[2]
 DATA = DEFAULT_FROZEN_CONFIG.dataset_path
 OUT = PROJECT_DIR / "analysis" / "output" / "p3_maker_val_sim.json"
-MAKER_COST = 0.0016
-TAKER_COST = 0.003
-SWAP_MAKER_COST = 0.0006
-SWAP_TAKER_COST = 0.0010
+from src.costs import (SPOT_MAKER as MAKER_COST, SPOT_TAKER as TAKER_COST,
+                       SWAP_MAKER as SWAP_MAKER_COST, SWAP_TAKER as SWAP_TAKER_COST)
 
 
 def is_swap_dataset(data_path: Path) -> bool:

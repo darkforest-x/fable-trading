@@ -47,8 +47,7 @@ PROJECT_DIR = Path(__file__).resolve().parents[2]
 SWEEP_DIR = PROJECT_DIR / "data" / "sweep_v3"
 OUTPUT_JSON = PROJECT_DIR / "analysis" / "output" / "p2b_v3_sweep2.json"
 MIN_BARS = 500
-TAKER_COST = 0.003   # 0.15%/side incl. slippage (stage-3 base case)
-MAKER_COST = 0.0016  # 0.08%/side limit orders, owner route D
+from src.costs import SPOT_MAKER as MAKER_COST, SPOT_TAKER as TAKER_COST  # route table
 
 # Round-2 grid: the two round-1 leaders anchored at h72, then time-extended
 # structures. Candidates are scanned once with the max horizon so every

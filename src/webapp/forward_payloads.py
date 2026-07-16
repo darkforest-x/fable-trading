@@ -13,7 +13,7 @@ from src.backtest.run import MAX_CONCURRENT
 from src.judgment.forward_types import FORWARD_COLUMNS, FORWARD_LOG_PATH
 from src.webapp.dashboard_cache import relative_path
 
-FORWARD_COST = 0.0006
+from src.costs import FORWARD_COST  # mainline swap-maker route
 FORWARD_DECISION_TRADES = 100
 
 

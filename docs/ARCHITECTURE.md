@@ -103,3 +103,36 @@ MacBook (M4)                          VPS 103.214.174.58 (Debian12)
 
 - **LightGBM 判断层十步流水线**：![](diagrams/lightgbm_pipeline.svg)
 - **triple-barrier 标签解剖**：![](diagrams/triple_barrier.svg)
+
+
+---
+
+## 2026-07-16 现状补记(此前章节按历史阅读)
+
+**两层主线**(全部经由 `src/judgment/frozen.py::default_config()` 一个咽喉):
+
+```
+K线(267 合约) → 渲染 200bar 窗口
+  → 检测层 YOLO(models/owner_best.pt = owner_v9_chain, frozen-F1 0.627, 高召回)
+  → 判断层 LightGBM 回归 predicted_realized_ret(frozen_tp5_sl2_swap_yolo_v8_reg_20260716,
+     阈值 val-q90 = 0.0217)
+  → TP5/SL2 出场 → forward / 看板 / scout 通知
+```
+
+**关键治理设施**(都是 2026-07-16 修复日加的):
+
+| 设施 | 位置 | 防什么 |
+|---|---|---|
+| 冻结尺子清单 | `datasets/owner_eval_frozen/MANIFEST.json` | 改解析函数移动尺子;拼写跨线泄漏 |
+| eval/val 切分唯一实现 | `src/detection/owner_eval.py` | 6 份拷贝漂移(23% 静默判错) |
+| 续训 lr 配方 | `src/detection/train.py::FINETUNE_OPT` | optimizer='auto' 在 epoch 3 炸权重 |
+| 标杆体检门 | `scripts/benchmark_check.py` | "没训过的模型带着合理 F1 上生产" |
+| 成本路由表 | `src/costs.py` | 30 处硬编码漂移(owner 管控项) |
+| promote 泄漏门 | `scripts/promote_owner_best.py` | 训过 eval 币种的模型上生产 |
+
+**训练分工**:3060(CUDA, 7 倍速)做一切 YOLO 拟合;Mac 是唯一真相
+(golden_pool / 尺子 / promote / 看板 / 前向)。LightGBM 是 CPU 秒级,留 Mac。
+
+**已验证的标注价值模型**:F1 ≈ 0.067·log2(train图数) − 0.265(出样本外偏差 0.004);
+质量杠杆:152 张标杆 ≈ 1600 张普通标注。渲染窗口 stride=50 导致存量池 96% 窗口重叠
+——round8 起生成器必须强制窗口不重叠。
