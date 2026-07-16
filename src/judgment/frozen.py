@@ -24,8 +24,10 @@ from src.judgment.train import DEFAULT_HORIZON_BARS, load_splits, train_model
 PROJECT_DIR: Final = Path(__file__).resolve().parents[2]
 BAR: Final = pd.Timedelta(minutes=15)
 DEFAULT_SCORE_QUANTILE: Final = 0.90
-# Mainline after 2026-07-15 owner cutover: YOLO candidates + TP5/SL2 labels.
-DEFAULT_CONFIG_NAME: Final = "tp5_sl2_swap_yolo"
+# Mainline 2026-07-15+ (owner): YOLO candidates + regression-on-realized_ret judgment.
+DEFAULT_CONFIG_NAME: Final = "tp5_sl2_swap_yolo_reg"
+# Previous YOLO binary freeze (shadow / rollback / dashboard compare).
+BINARY_YOLO_CONFIG_NAME: Final = "tp5_sl2_swap_yolo"
 # Legacy rule-scan freeze (pre-cutover); kept for rollback / comparisons.
 LEGACY_RULES_CONFIG_NAME: Final = "tp5_sl2_swap"
 
@@ -39,7 +41,10 @@ class ScoreCacheMetadata(TypedDict, total=False):
 
 @dataclass(frozen=True)
 class FrozenConfig:
-    __slots__ = ("name", "project_dir", "dataset_path", "models_dir", "score_quantile", "horizon_bars")
+    __slots__ = (
+        "name", "project_dir", "dataset_path", "models_dir",
+        "score_quantile", "horizon_bars", "objective",
+    )
 
     name: str
     project_dir: Path
@@ -47,6 +52,7 @@ class FrozenConfig:
     models_dir: Path
     score_quantile: float
     horizon_bars: int
+    objective: str  # binary | regression
 
 
 @dataclass(frozen=True)
@@ -86,7 +92,7 @@ class FrozenArtifactError(RuntimeError):
 
 
 def default_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
-    """YOLO-candidate mainline freeze (judgment trained on judgment_yolo_swap)."""
+    """YOLO-candidate mainline: regression on realized_ret (economic ranking)."""
     return FrozenConfig(
         name=DEFAULT_CONFIG_NAME,
         project_dir=project_dir,
@@ -94,6 +100,20 @@ def default_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
         models_dir=project_dir / "models",
         score_quantile=DEFAULT_SCORE_QUANTILE,
         horizon_bars=DEFAULT_HORIZON_BARS,
+        objective="regression",
+    )
+
+
+def binary_yolo_shadow_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
+    """Previous YOLO binary freeze — shadow compare / emergency rollback."""
+    return FrozenConfig(
+        name=BINARY_YOLO_CONFIG_NAME,
+        project_dir=project_dir,
+        dataset_path=project_dir / "data" / "judgment_yolo_swap.csv",
+        models_dir=project_dir / "models",
+        score_quantile=DEFAULT_SCORE_QUANTILE,
+        horizon_bars=DEFAULT_HORIZON_BARS,
+        objective="binary",
     )
 
 
@@ -106,6 +126,7 @@ def rules_legacy_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
         models_dir=project_dir / "models",
         score_quantile=DEFAULT_SCORE_QUANTILE,
         horizon_bars=DEFAULT_HORIZON_BARS,
+        objective="binary",
     )
 
 
@@ -154,7 +175,7 @@ def load_artifact(config: FrozenConfig, metadata_path: Path) -> FrozenArtifact:
 def train_frozen_artifact(config: FrozenConfig, artifact_date: str) -> FrozenArtifact:
     config.models_dir.mkdir(parents=True, exist_ok=True)
     train, val, _ = load_splits(config.dataset_path, horizon_bars=config.horizon_bars)
-    model = train_model(train, val)
+    model = train_model(train, val, objective=config.objective)
     best_iteration = int(model.best_iteration or model.current_iteration())
     val_scores = model.predict(val[FEATURE_COLUMNS], num_iteration=best_iteration)
     threshold = float(np.quantile(val_scores, config.score_quantile))
@@ -166,6 +187,7 @@ def train_frozen_artifact(config: FrozenConfig, artifact_date: str) -> FrozenArt
     metadata = {
         "artifact_version": 1,
         "config": config.name,
+        "objective": config.objective,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "model_path": _relative_path(config, model_path),
         "dataset_path": _relative_path(config, config.dataset_path),
@@ -180,6 +202,9 @@ def train_frozen_artifact(config: FrozenConfig, artifact_date: str) -> FrozenArt
             "val": _split_summary(val),
         },
         "holdout_policy": "holdout excluded from training and threshold selection; not evaluated",
+        "score_semantics": (
+            "predicted_realized_ret" if config.objective == "regression" else "class_probability"
+        ),
     }
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
     return load_artifact(config, metadata_path)

@@ -1,0 +1,61 @@
+{
+  "artifact_version": 1,
+  "config": "tp5_sl2_swap_yolo_reg",
+  "objective": "regression",
+  "created_at": "2026-07-15T11:51:28.513199+00:00",
+  "model_path": "models/frozen_tp5_sl2_swap_yolo_reg_20260715.txt",
+  "dataset_path": "data/judgment_yolo_swap.csv",
+  "dataset_sha256": "bc35fb23cf9d98cdadb97c449b28879954f4c1a9793679795d6eede91e9160b3",
+  "dataset_size_bytes": 1472943,
+  "threshold_val_q90": 0.01653540601244291,
+  "score_quantile": 0.9,
+  "feature_columns": [
+    "ma_spread_pct",
+    "full_spread",
+    "fast_slow_gap",
+    "full_ratio_min48",
+    "spread_mean8",
+    "spread_mean24",
+    "spread_chg8",
+    "spread_chg24",
+    "spread_pos96",
+    "dense_run_len",
+    "dense_frac48",
+    "ext_up",
+    "close_vs_ema55",
+    "close_vs_ema200",
+    "order_score",
+    "slow_slope_12",
+    "volume_ratio",
+    "volume_z",
+    "vol_ratio_mean8",
+    "atr_pct",
+    "atr_pct_ratio96",
+    "pre_range48",
+    "pre_range168",
+    "drawdown24",
+    "ret_4",
+    "ret_12",
+    "ret_24",
+    "ret_48"
+  ],
+  "best_iteration": 38,
+  "splits": {
+    "train": {
+      "n": 1382,
+      "range": [
+        "2025-06-08 14:45:00+00:00",
+        "2026-03-12 00:45:00+00:00"
+      ]
+    },
+    "val": {
+      "n": 349,
+      "range": [
+        "2026-03-12 23:30:00+00:00",
+        "2026-05-03 01:30:00+00:00"
+      ]
+    }
+  },
+  "holdout_policy": "holdout excluded from training and threshold selection; not evaluated",
+  "score_semantics": "predicted_realized_ret"
+}

@@ -46,6 +46,7 @@ def test_latest_artifact_picks_highest_dated_metadata(tmp_path: Path) -> None:
         models_dir=tmp_path / "models",
         score_quantile=0.9,
         horizon_bars=72,
+        objective="binary",
     )
     _write_artifact(tmp_path, "20260708", "old")
     _write_artifact(tmp_path, "20260709", "new")
@@ -65,6 +66,7 @@ def test_cache_metadata_must_match_current_artifact(tmp_path: Path) -> None:
         models_dir=tmp_path / "models",
         score_quantile=0.9,
         horizon_bars=72,
+        objective="binary",
     )
     _write_artifact(tmp_path, "20260709", "expected")
     artifact = latest_artifact(config)

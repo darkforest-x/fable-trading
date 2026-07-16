@@ -7,14 +7,15 @@
 # ]
 # ///
 # --- How to run ---
-# PYTHONPATH=. python3 scripts/freeze_model.py
+# PYTHONPATH=. python3 scripts/freeze_model.py --write-active
 """Freeze the selected judgment model for forward validation.
 
-Default config (2026-07-15+): tp5_sl2_swap_yolo — LightGBM on YOLO-proposed
-candidates (data/judgment_yolo_swap.csv). Trains train-only, threshold = val
-q90, never evaluates holdout.
+Default (2026-07-15+ owner): tp5_sl2_swap_yolo_reg — LightGBM regression on
+realized_ret over YOLO candidates (data/judgment_yolo_swap.csv).
 
-Rollback: --legacy-rules freezes/points at the old rule-scan config name.
+Rollback:
+  --binary-yolo   previous YOLO binary freeze config name
+  --legacy-rules  pre-cutover rule-scan config
 """
 from __future__ import annotations
 
@@ -24,7 +25,7 @@ from datetime import date
 from pathlib import Path
 
 from src.judgment.frozen import (
-    DEFAULT_FROZEN_CONFIG,
+    binary_yolo_shadow_config,
     default_config,
     rules_legacy_config,
     train_frozen_artifact,
@@ -42,6 +43,11 @@ def parse_args() -> argparse.Namespace:
         help="use pre-cutover rule-scan dataset/config name (rollback)",
     )
     parser.add_argument(
+        "--binary-yolo",
+        action="store_true",
+        help="freeze/point at previous YOLO binary config (shadow / rollback)",
+    )
+    parser.add_argument(
         "--write-active",
         action="store_true",
         help="write models/ACTIVE to the new artifact model path",
@@ -51,7 +57,17 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    config = rules_legacy_config() if args.legacy_rules else default_config()
+    if args.legacy_rules and args.binary_yolo:
+        raise SystemExit("choose at most one of --legacy-rules / --binary-yolo")
+    if args.legacy_rules:
+        config = rules_legacy_config()
+        candidate_source = "rules"
+    elif args.binary_yolo:
+        config = binary_yolo_shadow_config()
+        candidate_source = "yolo"
+    else:
+        config = default_config()
+        candidate_source = "yolo"
     if not config.dataset_path.exists():
         raise SystemExit(f"dataset missing: {config.dataset_path}")
     artifact = train_frozen_artifact(config, args.date)
@@ -63,13 +79,24 @@ def main() -> int:
         "threshold_val_q90": artifact.threshold,
         "best_iteration": artifact.best_iteration,
         "config": config.name,
-        "candidate_source": "rules" if args.legacy_rules else "yolo",
+        "objective": config.objective,
+        "candidate_source": candidate_source,
     }
     print(json.dumps(meta, ensure_ascii=False, indent=2))
     if args.write_active:
         active = PROJECT / "models" / "ACTIVE"
+        prev = PROJECT / "models" / "ACTIVE_PREV"
+        if active.exists():
+            prev.write_text(active.read_text(encoding="utf-8"), encoding="utf-8")
         active.write_text(artifact.relative_model_path + "\n", encoding="utf-8")
+        shadow = PROJECT / "models" / "SHADOW_BINARY_YOLO"
+        shadow.write_text(
+            "models/frozen_tp5_sl2_swap_yolo_20260715.txt\n"
+            "# previous binary YOLO freeze; dashboard compare + emergency rollback\n",
+            encoding="utf-8",
+        )
         print(f"ACTIVE -> {artifact.relative_model_path}")
+        print(f"ACTIVE_PREV kept; SHADOW_BINARY_YOLO -> binary yolo freeze")
     return 0
 
 
