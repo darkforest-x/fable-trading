@@ -334,9 +334,8 @@
       <button class="btn primary" type="button" id="btn-scan">识别密集框</button>
       <button class="btn" type="button" id="btn-fit">全图</button>
       <div class="legend-inline">
-        <span><i style="background:#5b9cf5"></i>EMA 快</span>
-        <span><i style="background:#a78bfa"></i>144</span>
-        <span><i style="background:#f472b6"></i>200</span>
+        <span><i style="background:#3d8fd1"></i>SMA 20/60/120</span>
+        <span><i style="background:#f06024"></i>EMA 20/60/120</span>
         <span><i style="background:var(--teal)"></i>密集</span>
         <span><i style="background:var(--warn)"></i>聚焦</span>
       </div>
@@ -457,6 +456,14 @@ function ema(data, period) {
     return { time: c.time, value: prev };
   });
 }
+function sma(data, period) {
+  return data.map((c, i) => {
+    if (i + 1 < period) return null;
+    let s = 0;
+    for (let j = i - period + 1; j <= i; j++) s += data[j].close;
+    return { time: c.time, value: s / period };
+  }).filter(Boolean);
+}
 
 /** dense segments: pick low-range windows of 6–12 bars */
 function findDense(candles) {
@@ -546,13 +553,16 @@ vol.setData(candles.map((c) => ({
 })));
 
 const emaSeries = [];
-[[8, "rgba(91,156,245,0.95)"], [21, "rgba(91,156,245,0.55)"], [55, "rgba(91,156,245,0.35)"],
- [144, "#a78bfa"], [200, "#f472b6"]].forEach(([p, color]) => {
+// SMA/EMA 20·60·120 — same display stack as live dashboard / TG
+[
+  [20, "#3d8fd1", 0, sma], [60, "#5cb8b0", 0, sma], [120, "#8a8aaa", 0, sma],
+  [20, "#f06024", 0, ema], [60, "#faa03c", 0, ema], [120, "#c84696", 0, ema],
+].forEach(([p, color, lineStyle, fn]) => {
   const s = chart.addLineSeries({
-    color, lineWidth: p >= 144 ? 2 : 1,
+    color, lineWidth: 1, lineStyle,
     priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
   });
-  s.setData(ema(candles, p));
+  s.setData(fn(candles, p));
   emaSeries.push(s);
 });
 

@@ -15,8 +15,8 @@ import pandas as pd
 from fastapi import HTTPException
 
 from src.data.loader import load_series
-from src.judgment.candidates import ALL_MAS, CLUSTER_EMAS, add_indicators
-from src.webapp.dashboard_payloads import series_groups
+from src.judgment.candidates import CLUSTER_EMAS, add_indicators
+from src.webapp.dashboard_payloads import chart_ma_series, series_groups
 from src.webapp.dashboard_cache import DEFAULT_UNIVERSE, universe_spec
 
 # Keep in sync with src.detection.auto_label defaults
@@ -151,15 +151,8 @@ def explore_chart_payload(
             ts, frame["open"], frame["high"], frame["low"], frame["close"], frame["volume"]
         )
     ]
-    emas = {
-        name: [
-            {"time": int(t), "value": float(v)}
-            for t, v in zip(ts, frame[name].round(8))
-            if pd.notna(v)
-        ]
-        for name in ALL_MAS
-        if name in frame.columns
-    }
+    # Display lines = YOLO/TG stack. Dense boxes still use rule EMAs (8–55).
+    mas = chart_ma_series(frame, ts)
 
     segs = find_dense_segments(frame)
     boxes = []
@@ -213,13 +206,14 @@ def explore_chart_payload(
         "n_boxes": len(boxes),
         "stats": stats,
         "candles": candles,
-        "emas": emas,
+        "mas": mas,
+        "emas": mas,  # alias for older frontends
         "dense_boxes": boxes,
         "legend": {
             "candles": "K 线（绿涨红跌）",
-            "ema_fast": "EMA 8–55 快带（蓝系）",
-            "ema_slow": "EMA 144 / 200 慢锚（紫/粉）",
-            "box": "半透明框 = 均线密集区（规则扫描，与检测层同源）",
+            "sma": "SMA 20/60/120（冷色实线）",
+            "ema": "EMA 20/60/120（暖色虚线）",
+            "box": "半透明框 = 规则密集区（EMA 8–55 扫描，展示均线为 20/60/120）",
         },
         "tip": (
             f"本窗口共标出 {len(boxes)} 个密集框"

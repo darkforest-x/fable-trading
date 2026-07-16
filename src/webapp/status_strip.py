@@ -1,7 +1,7 @@
 """Lightweight status strip for the dashboard header / overview.
 
-Surfaces owner-detector promotion, forward decision progress, and scout
-freshness without pulling full ops hubs. Safe when artifacts are missing.
+Surfaces owner-detector promotion, judgment ACTIVE (threshold + dataset),
+forward decision progress, and scout freshness. Safe when artifacts missing.
 """
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from src.webapp.dashboard_cache import relative_path
+from src.webapp.model_hub import read_active_pointer
 
 PROJECT = Path(__file__).resolve().parents[2]
 OWNER_BEST_JSON = PROJECT / "models" / "owner_best.json"
@@ -24,6 +25,7 @@ def status_strip_payload() -> dict:
     return {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "owner_detector": _owner_detector(),
+        "judgment_active": _judgment_active(),
         "forward": _forward_progress(),
         "scout": _scout_status(),
         "links": {
@@ -62,6 +64,53 @@ def _owner_detector() -> dict:
     out["mtime"] = datetime.fromtimestamp(
         OWNER_BEST_JSON.stat().st_mtime, tz=timezone.utc
     ).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return out
+
+
+def _judgment_active() -> dict:
+    """models/ACTIVE pointer + frozen JSON meta (threshold / dataset)."""
+    ptr = read_active_pointer()
+    out: dict = {
+        "exists": bool(ptr.get("exists") and ptr.get("artifact_id")),
+        "artifact_id": ptr.get("artifact_id"),
+        "pointer_path": ptr.get("path"),
+        "threshold_val_q90": None,
+        "dataset_path": None,
+        "dataset_name": None,
+        "objective": None,
+        "config": None,
+        "created_at": None,
+        "note": None,
+    }
+    if not out["exists"]:
+        out["note"] = "models/ACTIVE 未设置"
+        return out
+    aid = str(ptr.get("artifact_id") or "")
+    meta_path = PROJECT / "models" / f"{aid}.json"
+    if not meta_path.is_file():
+        # pointer may be .txt path; try sibling .json
+        raw = str(ptr.get("raw") or "")
+        cand = PROJECT / raw
+        if cand.suffix == ".txt":
+            meta_path = cand.with_suffix(".json")
+        elif cand.suffix == ".json":
+            meta_path = cand
+    if not meta_path.is_file():
+        out["note"] = f"找不到 {aid}.json"
+        return out
+    try:
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        out["note"] = f"读取失败: {exc}"
+        return out
+    ds = meta.get("dataset_path")
+    out["threshold_val_q90"] = _num(meta.get("threshold_val_q90"))
+    out["dataset_path"] = ds
+    out["dataset_name"] = Path(str(ds)).name if ds else None
+    out["objective"] = meta.get("objective")
+    out["config"] = meta.get("config")
+    out["created_at"] = meta.get("created_at")
+    out["meta_path"] = relative_path(meta_path)
     return out
 
 

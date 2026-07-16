@@ -202,15 +202,39 @@ let exploreWired = false;
 let exploreTimes = [];
 let exploreTimeIndex = new Map(); // time -> bar index for logical coords
 
-const EXPLORE_EMA_COLORS = {
-  ema8: "rgba(91,156,245,0.95)",
-  ema13: "rgba(91,156,245,0.8)",
-  ema21: "rgba(91,156,245,0.65)",
-  ema34: "rgba(91,156,245,0.5)",
-  ema55: "rgba(91,156,245,0.38)",
-  ema144: "#a78bfa",
-  ema200: "#f472b6",
+// SMA/EMA 20·60·120 — same palette as TG/YOLO notify charts (display only).
+const CHART_MA_ORDER = ["sma120", "sma60", "sma20", "ema120", "ema60", "ema20"];
+const CHART_MA_STYLE = {
+  sma20: { color: "#3d8fd1", lineStyle: 0, lineWidth: 1.2 },
+  sma60: { color: "#5cb8b0", lineStyle: 0, lineWidth: 1.1 },
+  sma120: { color: "#8a8aaa", lineStyle: 0, lineWidth: 1.0 },
+  ema20: { color: "#f06024", lineStyle: 0, lineWidth: 1.2 },
+  ema60: { color: "#faa03c", lineStyle: 0, lineWidth: 1.1 },
+  ema120: { color: "#c84696", lineStyle: 0, lineWidth: 1.0 },
 };
+
+function chartMaMap(payload) {
+  return payload?.mas || payload?.emas || {};
+}
+
+function addChartMaSeries(chart, payload, sink) {
+  const lines = chartMaMap(payload);
+  for (const name of CHART_MA_ORDER) {
+    const data = lines[name];
+    if (!data || !data.length) continue;
+    const st = CHART_MA_STYLE[name] || { color: "#666", lineStyle: 0, lineWidth: 1 };
+    const s = chart.addLineSeries({
+      color: st.color,
+      lineWidth: st.lineWidth,
+      lineStyle: st.lineStyle,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+    });
+    s.setData(data);
+    sink.push(s);
+  }
+}
 
 function normalizeSymbol(raw) {
   let symbol = String(raw || "").trim().toUpperCase();
@@ -499,18 +523,10 @@ async function runExplore() {
       time: c.time, value: c.volume,
       color: c.close >= c.open ? "rgba(46,204,113,0.28)" : "rgba(231,76,60,0.28)",
     })));
-    for (const [name, data] of Object.entries(d.emas || {})) {
-      const s = exploreChart.addLineSeries({
-        color: EXPLORE_EMA_COLORS[name] || "#666",
-        lineWidth: name === "ema144" || name === "ema200" ? 2 : 1,
-        priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
-      });
-      s.setData(data);
-      exploreEmas.push(s);
-    }
+    addChartMaSeries(exploreChart, d, exploreEmas);
     exploreBoxes = d.dense_boxes || [];
     exploreState.lastCandles = d.candles;
-    exploreState.lastEmas = d.emas;
+    exploreState.lastEmas = chartMaMap(d);
     clearExploreFocusLines();
     exploreChart.timeScale().fitContent();
     applyExploreVisibility();
@@ -673,9 +689,11 @@ async function loadStatusStrip(force = false) {
   try {
     const d = await apiGet("/api/status-strip", { cache: !force, quiet: true });
     const od = d.owner_detector || {};
+    const ja = d.judgment_active || {};
     const fw = d.forward || {};
     const sc = d.scout || {};
     const ownerEl = $("#status-owner");
+    const judEl = $("#status-judgment");
     const fwdEl = $("#status-forward");
     const scoutEl = $("#status-scout");
     if (ownerEl) {
@@ -684,9 +702,21 @@ async function loadStatusStrip(force = false) {
       const p = od.precision != null ? Number(od.precision).toFixed(2) : "—";
       ownerEl.classList.toggle("good", (od.frozen_eval_f1 || 0) >= 0.6);
       ownerEl.classList.toggle("warn", (od.frozen_eval_f1 || 0) > 0 && od.frozen_eval_f1 < 0.6);
-      ownerEl.innerHTML = `<span class="status-k">检测器 ACTIVE</span>
+      ownerEl.innerHTML = `<span class="status-k">检测器</span>
         <span class="status-v">F1 ${f1} · P ${p}</span>
-        <span class="status-sub">${escapeHtml(od.source_run || "—")} · ${escapeHtml(od.eval_set || "冻结集")}</span>`;
+        <span class="status-sub">${escapeHtml(od.source_run || "—")} · 冻结评测</span>`;
+    }
+    if (judEl) {
+      judEl.classList.remove("skeleton");
+      const thr = ja.threshold_val_q90 != null ? Number(ja.threshold_val_q90).toFixed(4) : "—";
+      const shortId = ja.artifact_id
+        ? String(ja.artifact_id).replace(/^frozen_/, "").replace(/_\d{8}$/, "")
+        : "—";
+      judEl.classList.toggle("good", !!ja.exists && ja.threshold_val_q90 != null);
+      judEl.classList.toggle("warn", !ja.exists);
+      judEl.innerHTML = `<span class="status-k">判断 ACTIVE</span>
+        <span class="status-v">阈值 ${thr}</span>
+        <span class="status-sub" title="${escapeHtml(ja.artifact_id || "")}">${escapeHtml(shortId)} · ${escapeHtml(ja.dataset_name || ja.note || "—")}</span>`;
     }
     if (fwdEl) {
       fwdEl.classList.remove("skeleton");
@@ -706,7 +736,7 @@ async function loadStatusStrip(force = false) {
     }
     if (force) toast("状态条已刷新", "ok");
   } catch (_) {
-    ["status-owner", "status-forward", "status-scout"].forEach((id) => {
+    ["status-owner", "status-judgment", "status-forward", "status-scout"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) {
         el.classList.remove("skeleton");
@@ -923,17 +953,34 @@ function renderBacktestCompare(cmp) {
     return;
   }
   panel.hidden = false;
+  panel.classList.toggle("stale-panel", !!cmp.stale);
   if (note) {
-    note.textContent = cmp.note || "ACTIVE=回归预测收益；SHADOW=旧二分类。验收窗已披露消耗，仅对照。";
+    note.hidden = false;
+    note.classList.toggle("warn-banner", !!cmp.stale);
+    note.classList.toggle("note", !cmp.stale);
+    if (cmp.stale) {
+      const live = cmp.live_active || {};
+      const liveBits = [
+        live.artifact_id ? `当前 ACTIVE=${live.artifact_id}` : null,
+        live.threshold_val_q90 != null ? `阈值=${Number(live.threshold_val_q90).toFixed(4)}` : null,
+        live.dataset_name ? `池=${live.dataset_name}` : null,
+      ].filter(Boolean).join(" · ");
+      note.innerHTML = `<b>对照表已过期</b> — 以下数字不是当前主线。${liveBits ? `<br><span class="status-sub">${escapeHtml(liveBits)}</span>` : ""}`
+        + (cmp.stale_reasons || []).map((r) => `<br>· ${escapeHtml(r)}`).join("")
+        + `<br>请以总览/动态回测（本页上方磁贴）为准。`;
+    } else {
+      note.textContent = cmp.note || "ACTIVE=回归；SHADOW=二分类。验收窗已消耗，仅对照。";
+    }
   }
   tbody.innerHTML = (cmp.rows || []).map((r) => {
     const a = r.accept || {};
     const f = r.full || {};
     const ok100 = (r.acceptance_check || {}).n_trades_ge_100;
     const thr = r.threshold == null ? "—" : (Math.abs(r.threshold) < 0.05 ? Number(r.threshold).toFixed(4) : Number(r.threshold).toFixed(3));
-    const roleChip = r.role === "ACTIVE" ? "chip passed" : r.role === "SHADOW" ? "chip done" : "chip";
-    return `<tr>
-      <td><span class="${roleChip}">${escapeHtml(r.role)}</span> ${escapeHtml(r.label || r.key)}</td>
+    const roleLabel = cmp.stale && r.role === "ACTIVE" ? "旧ACTIVE" : r.role;
+    const roleChip = r.role === "ACTIVE" ? (cmp.stale ? "chip warn" : "chip passed") : r.role === "SHADOW" ? "chip done" : "chip";
+    return `<tr class="${cmp.stale ? "row-stale" : ""}">
+      <td><span class="${roleChip}">${escapeHtml(roleLabel)}</span> ${escapeHtml(r.label || r.key)}</td>
       <td>${escapeHtml(r.objective || "—")}</td>
       <td class="num">${thr}</td>
       <td class="num">${r.n_eligible ?? "—"}</td>
@@ -1103,8 +1150,12 @@ let currentKey = "", currentMarkers = [], currentTimes = [], priceLines = [], ch
 let currentThreshold = 0;
 let lastFocusRange = null;
 let symbolInputWired = false;
-const sigState = { bars: 3000 };
+const sigState = { bars: 1500, showMa: true };
 segWire("#bars-seg", sigState, "bars", Number, () => currentKey && loadChart(currentKey));
+$("#signals-show-ma")?.addEventListener("change", (e) => {
+  sigState.showMa = !!e.target.checked;
+  emaSeries.forEach((s) => s.applyOptions({ visible: sigState.showMa }));
+});
 
 function ensureKlineChart() {
   if (klineChart) return;
@@ -1169,11 +1220,7 @@ async function initSignals(force = false) {
   }
 }
 
-const EMA_COLORS = {
-  8: "rgba(91,156,245,0.95)", 13: "rgba(91,156,245,0.8)", 21: "rgba(91,156,245,0.65)",
-  34: "rgba(91,156,245,0.5)", 55: "rgba(91,156,245,0.38)",
-  144: "#a78bfa", 200: "#f472b6",
-};
+
 
 async function loadChart(key, focusEntry = null) {
   const [source, symbol] = key.split(":");
@@ -1209,14 +1256,8 @@ async function loadChart(key, focusEntry = null) {
     time: c.time, value: c.volume,
     color: c.close >= c.open ? "rgba(31,167,125,0.35)" : "rgba(230,103,103,0.35)",
   })));
-  for (const [span, data] of Object.entries(d.emas)) {
-    const s = klineChart.addLineSeries({
-      color: EMA_COLORS[span] || "#666", lineWidth: span >= 144 ? 2 : 1,
-      priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
-    });
-    s.setData(data);
-    emaSeries.push(s);
-  }
+  addChartMaSeries(klineChart, d, emaSeries);
+  emaSeries.forEach((s) => s.applyOptions({ visible: sigState.showMa }));
   currentMarkers = d.markers;
   const markerList = [];
   for (const m of d.markers) {
@@ -2068,13 +2109,39 @@ function applyTheme(mode) {
   }
 }
 
+function initNavDrawer() {
+  const burger = $("#nav-burger");
+  const closeBtn = $("#nav-close");
+  const backdrop = $("#nav-backdrop");
+  const sidebar = $("#sidebar");
+  if (!burger || !sidebar) return;
+  const setOpen = (open) => {
+    document.body.classList.toggle("nav-open", open);
+    burger.setAttribute("aria-expanded", open ? "true" : "false");
+    if (backdrop) backdrop.hidden = !open;
+  };
+  burger.addEventListener("click", () => setOpen(!document.body.classList.contains("nav-open")));
+  closeBtn?.addEventListener("click", () => setOpen(false));
+  backdrop?.addEventListener("click", () => setOpen(false));
+  // close after navigating on small screens
+  $$(".sb-item[data-view]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (window.matchMedia("(max-width: 960px)").matches) setOpen(false);
+    });
+  });
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && document.body.classList.contains("nav-open")) setOpen(false);
+  });
+}
+
 function boot() {
   initTheme();
+  initNavDrawer();
   refreshOpsAuthUi();
   loadStatusStrip();
   if (!localStorage.getItem("fable_explore_seen")) {
     setTimeout(() => {
-      toast("提示：从「体验」选 BTC 看密集框；←→ 换币，j/k 切换框", "ok");
+      toast("提示：从「密集探索」选币看密集框；←→ 换币，j/k 切换框", "ok");
       localStorage.setItem("fable_explore_seen", "1");
     }, 800);
   }

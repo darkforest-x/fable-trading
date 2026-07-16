@@ -692,6 +692,14 @@ function ema(data, period) {
     return { time: c.time, value: prev };
   });
 }
+function sma(data, period) {
+  return data.map((c, i) => {
+    if (i + 1 < period) return null;
+    let s = 0;
+    for (let j = i - period + 1; j <= i; j++) s += data[j].close;
+    return { time: c.time, value: s / period };
+  }).filter(Boolean);
+}
 function pickSignals(candles) {
   // Hummingbot-style buy markers on local "dense-ish" troughs
   const markers = [];
@@ -748,12 +756,16 @@ vol.setData(candles.map((c) => ({
   color: c.close >= c.open ? "rgba(46,204,113,0.3)" : "rgba(231,76,60,0.3)",
 })));
 const emas = [];
-[[8, "#58a6ff"], [21, "#79b8ff"], [55, "#a5d6ff"], [144, "#a371f7"], [200, "#f778ba"]].forEach(([p, color]) => {
+// SMA/EMA 20·60·120 display stack (aligned with live dashboard / TG)
+[
+  [20, "#3d8fd1", 0, sma], [60, "#5cb8b0", 0, sma], [120, "#8a8aaa", 0, sma],
+  [20, "#f06024", 0, ema], [60, "#faa03c", 0, ema], [120, "#c84696", 0, ema],
+].forEach(([p, color, lineStyle, fn]) => {
   const s = denseChart.addLineSeries({
-    color, lineWidth: p >= 144 ? 2 : 1,
+    color, lineWidth: 1, lineStyle,
     priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
   });
-  s.setData(ema(candles, p));
+  s.setData(fn(candles, p));
   emas.push(s);
 });
 function applyMarkers(on) {

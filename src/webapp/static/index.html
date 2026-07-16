@@ -5,40 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>fable dashboard</title>
 <link rel="icon" href="data:,">
-<link rel="preconnect" href="https://unpkg.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=20260714i">
-<script defer src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
-<script defer src="app.js?v=20260714i"></script>
+<link rel="stylesheet" href="style.css?v=20260716ui">
+<script defer src="vendor/lightweight-charts.standalone.production.js"></script>
+<script defer src="app.js?v=20260716zh"></script>
 </head>
 <body class="hb-shell">
+<button type="button" class="nav-burger" id="nav-burger" aria-label="打开导航" aria-controls="sidebar" aria-expanded="false">☰</button>
+<div class="nav-backdrop" id="nav-backdrop" hidden></div>
 <aside class="sidebar" id="sidebar" aria-label="主导航">
   <div class="sb-brand">
-    <h1>🤖 fable dashboard</h1>
-    <p>dense · judgment · forward</p>
+    <div class="sb-brand-row">
+      <h1>🤖 fable dashboard</h1>
+      <button type="button" class="nav-close mini-btn" id="nav-close" aria-label="关闭导航">✕</button>
+    </div>
+    <p>检测 · 判断 · 前向</p>
   </div>
   <div class="sb-group">
-    <div class="sb-group-title">Main</div>
-    <button type="button" class="sb-item" data-view="overview"><span class="ico">📊</span> Overview</button>
+    <div class="sb-group-title">主页</div>
+    <button type="button" class="sb-item" data-view="overview"><span class="ico">📊</span> 总览</button>
   </div>
   <div class="sb-group">
-    <div class="sb-group-title">Config / Visualize</div>
-    <button type="button" class="sb-item active" data-view="explore"><span class="ico">📈</span> Dense Explore</button>
-    <button type="button" class="sb-item" data-view="signals"><span class="ico">🎯</span> Signals</button>
-    <button type="button" class="sb-item" data-view="backtest"><span class="ico">📉</span> Backtest</button>
+    <div class="sb-group-title">配置 / 可视化</div>
+    <button type="button" class="sb-item active" data-view="explore"><span class="ico">📈</span> 密集探索</button>
+    <button type="button" class="sb-item" data-view="signals"><span class="ico">🎯</span> 信号</button>
+    <button type="button" class="sb-item" data-view="backtest"><span class="ico">📉</span> 回测</button>
   </div>
   <div class="sb-group">
-    <div class="sb-group-title">Orchestration</div>
-    <button type="button" class="sb-item" data-view="forward"><span class="ico">🚀</span> Forward Gate</button>
-    <button type="button" class="sb-item" data-view="ethmicro"><span class="ico">⚡</span> ETH Micro</button>
-    <button type="button" class="sb-item" data-view="jobs"><span class="ico">🦅</span> Jobs</button>
-    <button type="button" class="sb-item" data-view="models"><span class="ico">🔑</span> Models</button>
-    <button type="button" class="sb-item" data-view="experiments"><span class="ico">🧪</span> Experiments</button>
-    <button type="button" class="sb-item" data-view="agenda"><span class="ico">📋</span> Agenda</button>
+    <div class="sb-group-title">编排</div>
+    <button type="button" class="sb-item" data-view="forward"><span class="ico">🚀</span> 前向闸门</button>
+    <button type="button" class="sb-item" data-view="ethmicro"><span class="ico">⚡</span> ETH 微周期</button>
+    <button type="button" class="sb-item" data-view="jobs"><span class="ico">🦅</span> 任务</button>
+    <button type="button" class="sb-item" data-view="models"><span class="ico">🔑</span> 模型</button>
+    <button type="button" class="sb-item" data-view="experiments"><span class="ico">🧪</span> 实验</button>
+    <button type="button" class="sb-item" data-view="agenda"><span class="ico">📋</span> 议程</button>
   </div>
   <div class="sb-group">
-    <div class="sb-group-title">Data</div>
-    <button type="button" class="sb-item" data-view="data"><span class="ico">💹</span> Data Hub</button>
-    <a class="sb-item sb-link" href="/scout.html" target="_blank" rel="noopener"><span class="ico">🔭</span> Scout ↗</a>
+    <div class="sb-group-title">数据</div>
+    <button type="button" class="sb-item" data-view="data"><span class="ico">💹</span> 数据中枢</button>
+    <a class="sb-item sb-link" href="/scout.html" target="_blank" rel="noopener"><span class="ico">🔭</span> 视觉侦察 ↗</a>
   </div>
   <div class="sb-foot">
     <div class="sb-universe seg universe-seg" id="universe-seg">
@@ -61,6 +65,7 @@
   <div class="status-bar" id="status-bar">
     <div id="status-strip" class="status-strip" aria-live="polite">
       <div class="status-item skeleton" id="status-owner"><span class="status-k">检测器</span><span class="status-v">…</span></div>
+      <div class="status-item skeleton" id="status-judgment"><span class="status-k">判断 ACTIVE</span><span class="status-v">…</span></div>
       <div class="status-item skeleton" id="status-forward"><span class="status-k">前向</span><span class="status-v">…</span></div>
       <div class="status-item skeleton" id="status-scout"><span class="status-k">侦察</span><span class="status-v">…</span></div>
     </div>
@@ -72,20 +77,21 @@
   <!-- ============ Dense Explore (HB strategy page rhythm) ============ -->
   <section id="view-explore" class="view">
     <div class="page-head">
-      <h1 class="page-title">📈 Dense MA Explore</h1>
-      <p class="page-sub">表单 → 图 → 密集标记 → 指标（Hummingbot Config 节奏）</p>
+      <h1 class="page-title">📈 密集探索</h1>
+      <p class="page-sub">选币 → K 线 → 密集标记 → 指标</p>
     </div>
     <details class="about-box">
-      <summary>About This Page</summary>
+      <summary>本页说明</summary>
       <div class="about-body">
-        半透明标记处 = 多条均线缠绕的密集区（规则扫描，与检测层同源）。
-        真正开仓还要过判断模型分数与趋势过滤——见 Signals。
+        图上均线为 <b>SMA/EMA 20·60·120</b>（与 YOLO/TG 展示一致）。
+        半透明框 = 规则密集区（内部仍按 EMA 8–55 扫描，与线周期不同属正常）。
+        真正开仓还要过判断模型分数——见「信号」。
         <ol class="explore-steps" id="explore-howto"></ol>
       </div>
     </details>
 
     <div class="panel hb-inputs">
-      <h2>User inputs</h2>
+      <h2>参数</h2>
       <div class="form-grid explore-form">
         <label class="field">
           <span class="note">币种</span>
@@ -106,31 +112,30 @@
             <button type="button" class="mini-btn" id="explore-prev" title="上一个">←</button>
             <button type="button" class="mini-btn" id="explore-next" title="下一个">→</button>
             <button type="button" class="mini-btn" id="explore-random" title="随机">🎲</button>
-            <button type="button" class="primary-btn" id="explore-go">▶ Visualize / Scan</button>
+            <button type="button" class="primary-btn" id="explore-go">▶ 可视化 / 扫描</button>
           </div>
         </div>
       </div>
       <div class="row-actions explore-row">
         <div class="explore-toggles">
-          <label class="toggle"><input type="checkbox" id="explore-show-ema" checked> EMAs</label>
-          <label class="toggle"><input type="checkbox" id="explore-show-vol" checked> Volume</label>
-          <label class="toggle"><input type="checkbox" id="explore-show-boxes" checked> Dense markers</label>
+          <label class="toggle"><input type="checkbox" id="explore-show-ema" checked> 均线 20/60/120</label>
+          <label class="toggle"><input type="checkbox" id="explore-show-vol" checked> 成交量</label>
+          <label class="toggle"><input type="checkbox" id="explore-show-boxes" checked> 密集标记</label>
         </div>
         <button type="button" class="mini-btn" id="explore-fit" hidden>Fit content</button>
         <button type="button" class="mini-btn" id="explore-copy" title="复制分享链接">复制链接</button>
-        <button type="button" class="mini-btn" id="explore-to-signals">去 Signals</button>
+        <button type="button" class="mini-btn" id="explore-to-signals">去信号</button>
       </div>
       <div id="explore-recent" class="explore-recent" hidden></div>
       <div class="explore-progress" id="explore-progress" hidden><span></span></div>
-      <div class="explore-meta" id="explore-meta"><span>选择币种后点 Visualize / Scan</span></div>
+      <div class="explore-meta" id="explore-meta"><span>选择币种后点「可视化 / 扫描」</span></div>
     </div>
 
-    <div class="section-h">Candlestick + dense signals</div>
+    <div class="section-h">K 线 + 密集信号</div>
     <div class="legend compact-legend">
-      <span><i class="dot" style="background:#5b9cf5"></i>EMA 8–55</span>
-      <span><i class="dot" style="background:#a78bfa"></i>144</span>
-      <span><i class="dot" style="background:#f472b6"></i>200</span>
-      <span><i class="dot" style="background:#2dd4bf"></i>▲ 密集标记</span>
+      <span><i class="dot" style="background:#3d8fd1"></i>SMA 20/60/120 实线</span>
+      <span><i class="dot" style="background:#f06024"></i>EMA 20/60/120 暖色</span>
+      <span><i class="dot" style="background:#2dd4bf"></i>▲ 规则密集框（8–55）</span>
       <span><i class="dot" style="background:#fbbf24"></i>聚焦</span>
       <span class="note">← → 换币 · j/k 切框 · 0 全图 · Enter 重扫</span>
     </div>
@@ -142,7 +147,7 @@
       <span id="explore-badge-ohlc">—</span>
     </div>
 
-    <div class="section-h">Scan metrics</div>
+    <div class="section-h">扫描指标</div>
     <div id="explore-stats" class="tile-row explore-stats bt-metrics" hidden></div>
     <div class="explore-tip" id="explore-tip" hidden></div>
 
@@ -166,7 +171,7 @@
               <tr class="no-click"><td>▲ 标记</td><td>均线密集区起点</td><td>点列表放大</td></tr>
               <tr class="no-click"><td>标记多 / 覆盖率高</td><td>缠绕频繁</td><td>≠ 多单信号</td></tr>
               <tr class="no-click"><td>缠绕度小</td><td>均线更紧</td><td>对比币种</td></tr>
-              <tr class="no-click"><td>真实候选成交</td><td>判断层过滤后</td><td>Signals</td></tr>
+              <tr class="no-click"><td>真实候选成交</td><td>判断层过滤后</td><td>信号</td></tr>
             </tbody>
           </table>
         </div>
@@ -178,8 +183,8 @@
   <section id="view-overview" class="view hidden" hidden aria-hidden="true">
     <div id="verdict-banner" class="banner"></div>
     <div class="banner explore-cta" id="overview-explore-cta">
-      <b>新用户？</b> 先到「Dense Explore」选 BTC，看均线密集标记长什么样。
-      <button type="button" class="mini-btn" id="overview-go-explore">打开 Dense Explore</button>
+      <b>新用户？</b> 先到「密集探索」选 BTC，看均线密集标记长什么样。
+      <button type="button" class="mini-btn" id="overview-go-explore">打开密集探索</button>
     </div>
     <div id="stages" class="stage-row"></div>
     <div class="two-col">
@@ -216,8 +221,8 @@
     <div id="bt-tiles" class="tile-row"></div>
 
     <div class="panel" id="bt-compare-panel">
-      <h2>判断层对照 <span class="unit">ACTIVE 回归 vs SHADOW 二分类 · 同池同模拟器</span></h2>
-      <p class="note" id="bt-compare-note"></p>
+      <h2>判断层对照 <span class="unit">预计算表 · 可能过期</span></h2>
+      <p class="note warn-banner" id="bt-compare-note" hidden></p>
       <div class="table-wrap">
         <table id="bt-compare-table">
           <thead>
@@ -309,22 +314,22 @@
       <input id="symbol-input" list="symbol-list" placeholder="输入或选择币种，如 BTC_USDT" autocomplete="off">
       <datalist id="symbol-list"></datalist>
       <div class="seg" id="bars-seg">
-        <button data-bars="1500">15 天</button>
-        <button data-bars="3000" class="active">1 个月</button>
+        <button data-bars="1500" class="active">15 天</button>
+        <button data-bars="3000">1 个月</button>
         <button data-bars="9000">3 个月</button>
         <button data-bars="40000">全部</button>
       </div>
+      <label class="toggle"><input type="checkbox" id="signals-show-ma" checked> 均线</label>
       <span id="symbol-info" class="note"></span>
     </div>
     <div class="signals-layout">
       <div class="panel grow">
         <div class="legend">
-          <span><i class="dot" style="background:#3987e5"></i>EMA 8-55（快带）</span>
-          <span><i class="dot" style="background:#9085e9"></i>EMA 144</span>
-          <span><i class="dot" style="background:#d55181"></i>EMA 200</span>
+          <span><i class="dot" style="background:#3d8fd1"></i>SMA 20/60/120（冷色实线）</span>
+          <span><i class="dot" style="background:#f06024"></i>EMA 20/60/120（暖色）</span>
           <span><i class="dot" style="background:#199e70"></i>▲入场 ▪出场（绿盈/红损/黄超时）</span>
           <span><i class="dot" style="background:#8b93a1"></i>○ 合格未成交</span>
-          <span><i class="dot" style="background:rgba(57,135,229,.35)"></i>色带 = 均线密集区</span>
+          <span><i class="dot" style="background:rgba(57,135,229,.35)"></i>色带 = 持仓窗口</span>
           <span><i class="dot" style="background:#2e3340"></i>点右侧列表看止盈/止损线</span>
         </div>
         <div id="kline-chart" class="chart tall"></div>
@@ -451,7 +456,7 @@
   <!-- ============ ETH 小周期通道 ============ -->
   <section id="view-ethmicro" class="view hidden" hidden aria-hidden="true">
     <div class="panel">
-      <h2>ETH Micro <span class="unit">1m / 2m / 3m / 5m · 与 15m 主线隔离</span></h2>
+      <h2>ETH 微周期 <span class="unit">1m / 2m / 3m / 5m · 与 15m 主线隔离</span></h2>
       <p class="note" id="ethmicro-note">加载中…</p>
       <div id="ethmicro-tiles" class="tile-row"></div>
     </div>
@@ -649,8 +654,8 @@
 
   </main>
   <footer class="site-footer">
-    <span>Config 从 Dense Explore 开始 · Orchestration 看 Forward / Jobs / Models</span>
-    <span class="note">键位 1–9 · r 刷新 · / 搜币（Signals）</span>
+    <span>从「密集探索」开始 · 编排区看前向 / 任务 / 模型</span>
+    <span class="note">键位 1–9 · r 刷新 · / 搜币（信号）</span>
   </footer>
 </div>
 </body>

@@ -22,9 +22,27 @@ from src.webapp.dashboard_cache import (
     symbol_matches_universe, trades, universe_spec,
 )
 
-EMA_SPANS = (8, 13, 21, 34, 55, 144, 200)
+# Chart display only (Signals / Explore). Matches YOLO + TG stack:
+# SMA/EMA 20·60·120 — NOT the judgment dense rule set (EMA 8–55–144–200).
+CHART_MA_PERIODS = (20, 60, 120)
 PF_COST_GRID = [round(c, 4) for c in np.arange(0.001, 0.00501, 0.0005)]
 COMPARE_JSON = OUTPUT_DIR / "p3_ml_opt_backtest_compare.json"
+
+
+def chart_ma_series(frame: pd.DataFrame, ts: pd.Series) -> dict[str, list[dict]]:
+    """Causal SMA/EMA 20/60/120 series for lightweight-charts (display only)."""
+    close = frame["close"].astype(float)
+    out: dict[str, list[dict]] = {}
+    for period in CHART_MA_PERIODS:
+        sma = close.rolling(period, min_periods=period).mean()
+        ema = close.ewm(span=period, adjust=False).mean()
+        for name, series in ((f"sma{period}", sma), (f"ema{period}", ema)):
+            out[name] = [
+                {"time": int(t), "value": float(v)}
+                for t, v in zip(ts, series.round(8))
+                if pd.notna(v)
+            ]
+    return out
 
 
 def overview_payload(universe: str = DEFAULT_UNIVERSE) -> dict:
@@ -98,7 +116,12 @@ def backtest_payload(cost: float = BASE_COST, universe: str = DEFAULT_UNIVERSE) 
 
 
 def backtest_compare_payload(cost: float = BASE_COST) -> dict:
-    """ACTIVE regression vs shadow binary portfolio backtest (precomputed JSON)."""
+    """ACTIVE vs shadow portfolio table from precomputed JSON.
+
+    Marks the table *stale* when the frozen JSON no longer matches models/ACTIVE
+    (dataset name or val-q90 threshold). Stale numbers stay visible for forensics
+    but must not be read as current mainline.
+    """
     if not COMPARE_JSON.exists():
         return {"available": False, "reason": "missing analysis/output/p3_ml_opt_backtest_compare.json"}
     raw = json.loads(COMPARE_JSON.read_text(encoding="utf-8"))
@@ -125,15 +148,88 @@ def backtest_compare_payload(cost: float = BASE_COST) -> dict:
         })
     # stable order: ACTIVE first
     rows.sort(key=lambda r: (0 if r["role"] == "ACTIVE" else 1 if r["role"] == "SHADOW" else 2, r["key"]))
+
+    live = _live_active_judgment()
+    compare_ds = raw.get("dataset")
+    compare_thr = None
+    for r in rows:
+        if r["role"] == "ACTIVE" and r.get("threshold") is not None:
+            compare_thr = float(r["threshold"])
+            break
+    stale_reasons: list[str] = []
+    if live.get("dataset_name") and compare_ds:
+        if Path(str(compare_ds)).name != live["dataset_name"]:
+            stale_reasons.append(
+                f"数据集不一致：对照表={Path(str(compare_ds)).name}，ACTIVE={live['dataset_name']}"
+            )
+    if live.get("threshold_val_q90") is not None and compare_thr is not None:
+        if abs(float(live["threshold_val_q90"]) - compare_thr) > 1e-5:
+            stale_reasons.append(
+                f"阈值不一致：对照表={compare_thr:.5f}，ACTIVE={float(live['threshold_val_q90']):.5f}"
+            )
+    if live.get("artifact_id") and rows:
+        active_models = {r.get("model_path") for r in rows if r["role"] == "ACTIVE"}
+        # model_path may be relative; match stem
+        live_stem = live["artifact_id"]
+        if active_models and not any(
+            m and live_stem in str(m) for m in active_models
+        ):
+            # soft check — only if compare stores a path that clearly differs
+            pass
+    stale = bool(stale_reasons)
+    base_note = raw.get("generated_note") or "ACTIVE vs shadow judgment model, same stage-3 simulator"
+    if stale:
+        note = (
+            "⚠️ 对照表已过期（非当前 ACTIVE）——数字仅供考古，请以总览/动态回测与 ACTIVE 阈值为准。"
+            + " · " + "；".join(stale_reasons)
+        )
+    else:
+        note = base_note
+
     return {
         "available": True,
         "cost": cost,
-        "dataset": raw.get("dataset"),
-        "note": raw.get("generated_note") or "ACTIVE vs shadow judgment model, same stage-3 simulator",
+        "dataset": compare_ds,
+        "note": note,
+        "stale": stale,
+        "stale_reasons": stale_reasons,
+        "live_active": live,
         "active": raw.get("active"),
         "shadow": raw.get("shadow"),
         "rows": rows,
     }
+
+
+def _live_active_judgment() -> dict:
+    """Current models/ACTIVE freeze meta for honesty checks."""
+    from src.webapp.model_hub import read_active_pointer
+
+    ptr = read_active_pointer()
+    out = {
+        "artifact_id": ptr.get("artifact_id"),
+        "threshold_val_q90": None,
+        "dataset_path": None,
+        "dataset_name": None,
+    }
+    aid = ptr.get("artifact_id")
+    if not aid:
+        return out
+    meta_path = Path(__file__).resolve().parents[2] / "models" / f"{aid}.json"
+    if not meta_path.is_file():
+        return out
+    try:
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return out
+    ds = meta.get("dataset_path")
+    thr = meta.get("threshold_val_q90")
+    out["dataset_path"] = ds
+    out["dataset_name"] = Path(str(ds)).name if ds else None
+    try:
+        out["threshold_val_q90"] = float(thr) if thr is not None else None
+    except (TypeError, ValueError):
+        out["threshold_val_q90"] = None
+    return out
 
 
 def trade_rows_payload(window: str = "accept", limit: int = 1000, cost: float = BASE_COST,
@@ -183,17 +279,22 @@ def chart_payload(source: str, symbol: str, bars: int = 3000, universe: str = DE
          "volume": float(v) if np.isfinite(v) else 0.0}
         for t, o, h, l, c, v in zip(ts, frame["open"], frame["high"], frame["low"], frame["close"], frame["volume"])
     ]
-    emas = {
-        str(span): [{"time": int(t), "value": float(v)} for t, v in zip(ts, frame["close"].ewm(span=span, adjust=False).mean().round(8))]
-        for span in EMA_SPANS
-    }
+    mas = chart_ma_series(frame, ts)
     signals, threshold = scored_signals(spec.key)
     t0 = frame["open_time"].iloc[0]
     sig = signals[(signals["source"] == source) & (signals["symbol"] == symbol) & (signals["signal_time"] >= t0)]
     traded_times = set(trades(spec.key)[lambda df: (df["source"] == source) & (df["symbol"] == symbol)]["entry_time"])
     markers = [_marker_payload(row, threshold, traded_times) for row in sig.itertuples()]
-    return {"candles": candles, "emas": emas, "markers": markers, "threshold": round(threshold, 4),
-            "tp_mult": TP_ATR_MULT, "sl_mult": SL_ATR_MULT}
+    return {
+        "candles": candles,
+        "mas": mas,
+        "emas": mas,  # alias for older frontends
+        "markers": markers,
+        "threshold": round(threshold, 4),
+        "tp_mult": TP_ATR_MULT,
+        "sl_mult": SL_ATR_MULT,
+        "ma_legend": "SMA/EMA 20·60·120（展示用，与 YOLO/TG 一致）",
+    }
 
 
 def equity_points(frame: pd.DataFrame, cost: float) -> tuple[list[dict], list[dict]]:
