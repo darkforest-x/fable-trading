@@ -1,59 +1,98 @@
 # fable-trading
 
-K 线双均线密集"启动初期"信号的量化验证与建模项目。
+验证一个交易假设:**K 线多均线"密集后启动"形态,在启动初期可被视觉模型识别,且其中
+一小部分在扣除成本后可交易**。两层架构——YOLO 检测"长得像的",LightGBM 回归排序
+"值得进的"——外加一套防自欺的实验纪律。
 
-> **⚡ 当前状态一律以 [`HANDOFF.md`](HANDOFF.md) 顶部"当前真相"区为准**(2026-07-16 起)。
-> 主线:YOLO 检测(owner_v9_chain)→ 回归判断(v8 池,frozen 20260716)→ TP5/SL2;
-> 训练一律走局域网 3060;前向 100 笔是唯一最终验收。本 README 其余部分讲背景与动机,
-> 不追踪进度。
+> **实时状态只看一处:[`HANDOFF.md`](HANDOFF.md) 顶部"当前真相"区。**
+> 本 README 讲不随进度变化的东西:动机、架构、纪律、怎么跑。
 
-## 项目定位
+## 为什么会有这个项目(旧方案尸检)
 
-替代旧的 YOLO 视觉检测方案（`/Users/zhangzc/Documents/Codex/2026-06-17/yolo-yolo-okx-20-k`，只读参考）。
-旧方案迭代 180+ 版本后确认失败，根因诊断：
+前身(`yolo-yolo-okx-20-k`,只读参考)迭代 180+ 版本后确认失败,根因:
 
-1. 所有正样本标注框坐标固定在图像右缘，任务本质是"右缘是否为启动初期"的**二分类**，不是目标检测；
-2. v176–v181 误开 fliplr/mosaic/hsv 增强，破坏时间方向与红绿颜色语义；
-3. 正样本仅 79–271 个，验证集指标全是噪声；2911 组回测参数搜索是过拟合发生器；
-4. ETH 近一年回测 671 笔，收益 -26.3%，胜率 34.9%，PF 0.47。
+1. 所有正样本标注框固定在图像右缘——任务实为"右缘是否启动初期"的二分类,不是检测;
+2. v176–v181 误开 fliplr/mosaic/hsv 增强,破坏时间方向与红绿 K 线语义;
+3. 正样本仅 79–271 个,验证集指标全是噪声;2911 组回测参数搜索是过拟合发生器;
+4. ETH 近一年回测 671 笔,-26.3%,胜率 34.9%,PF 0.47。
 
-本项目从头验证：**信号定义本身是否含 alpha**（P0），有 alpha 才进入特征工程与建模。
+本项目从 P0(信号定义是否含 alpha)重做,每一步有验收标准,失败照样入库。
 
-## 目录说明
+## 架构(2026-07 形态)
 
 ```
-fable-trading/
-├── README.md            # 本文件
-├── PROJECT_PLAN.md      # 三阶段路线图（目标 + 验收标准）
-├── requirements.txt     # Python 依赖
-├── analysis/            # P0 alpha 检验脚本与产出
-│   ├── p0_alpha_check.py    # 分析脚本（可复现）
-│   ├── p0_alpha_report.md   # P0 分析报告（核心交付物）
-│   └── output/              # 统计表 CSV 与分布对比图 PNG
-├── src/                 # 预留：阶段 2 特征与模型代码（当前为空）
-└── data/                # 软链接/小型提取数据（已 gitignore，不复制大文件）
+OKX 合约 15m K线(267 币种)
+   │  src/data/fetch_okx.py(断点续传)
+   ▼
+渲染 200-bar 窗口(K线 + SMA/EMA 20/60/120)          src/detection/render.py
+   ▼
+[2a 检测层] YOLO11 —— 在项目所有者手工标注(~9500张)上训练
+   │         权重: models/owner_best.pt(晋升制,泄漏审计,标杆体检门)
+   ▼
+[2b 判断层] LightGBM 回归 predicted_realized_ret      src/judgment/
+   │         冻结工件 + val-q90 阈值,事前锁定          (frozen.py 是唯一咽喉)
+   ▼
+TP5/SL2 三重障碍出场 → 前向验证(100 笔硬闸) → 看板 / TG 信号
 ```
 
-## 看板（前后端）
+- **看板**: http://103.214.174.58:8642(部署 `bash scripts/deploy_vps.sh`)
+- **训练**: 一律在局域网 RTX 3060(比 Mac MPS 快 ~7 倍),Mac 只做数据/评估/决策;
+  见 `scripts/train_on_3060.sh`
+- **打标**: Label Studio :8081,轮次制;round8 起生成器保证窗口零重叠、排除冻结评估币种
 
-双击 `启动看板.command`（或 `python3 -m uvicorn src.webapp.server:app --port 8642`），
-浏览器打开 http://127.0.0.1:8642 ——三个页面：
+## 纪律(为什么这个项目还没自欺)
 
-- **总览**：四阶段状态、关键指标、阶段 3 验收对照；
-- **回测**：成本档切换（0.2/0.3/0.4%）、验收窗口/全期切换、净值曲线、成交明细；
-- **信号浏览**：任选币种看 K 线 + EMA 带 + 信号/成交标记（▲ 按止盈/止损/超时着色）。
+细则在 [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md),不可协商的几条:
 
-后端只读仓库自身产物（analysis/output、数据集、K 线缓存），不改动任何实验状态；
-首次启动训练一次模型生成分数缓存（data/scored_signals.csv，删除即重建）。
+1. **holdout(≥2026-05-04)每次动用需项目所有者批准并记账**(已消耗 3 次,均有记录)
+2. **成功标准是 top-decile 扣成本净收益 + 置换检验 p<0.01**,AUC 只是参考量
+3. **冻结评估尺子是清单不是规则**:`datasets/owner_eval_frozen/MANIFEST.json`
+   (47 币种从未参训);训过尺子币种的模型会被晋升门自动拒绝
+4. **每轮实验交付 `analysis/pXX_report.md`**,必含复现命令与"风险与诚实声明"
+5. **每个非平凡问题解决后写 `docs/learnings/` 笔记**(现有 15+ 篇,含
+   "optimizer=auto 炸掉所有续训"、"nice 不隔离 GPU"等真实事故)
 
-## 如何运行
+## 快速上手
 
 ```bash
-# 依赖（系统 python3 已有 pandas/scipy/matplotlib 则可跳过）
-pip3 install -r requirements.txt
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 
-# P0 分析：读取旧项目各版本 metadata.csv，输出统计表 + 图到 analysis/output/
-python3 analysis/p0_alpha_check.py
+# 数据(断点续传,~1h)
+PYTHONPATH=. .venv/bin/python -m src.data.fetch_okx
+
+# 判断层训练/评估(不带 --eval-holdout 即安全)
+PYTHONPATH=. .venv/bin/python -m src.judgment.train --data data/judgment_yolo_swap_v8.csv
+
+# 阶段3回测(accept 窗口是 holdout,跑之前先读 CLAUDE.md 铁律 1)
+PYTHONPATH=. .venv/bin/python -m src.backtest.run --frozen-config default \
+    --data data/judgment_yolo_swap_v8.csv
+
+# 检测层评估(冻结尺子) + 标杆体检
+PYTHONPATH=. .venv/bin/python scripts/promote_owner_best.py
+PYTHONPATH=. .venv/bin/python scripts/benchmark_check.py
+
+# 本地看板
+.venv/bin/uvicorn src.webapp.server:app --port 8642
 ```
 
-脚本只读旧项目文件，不做任何修改；所有产出写入本仓库 `analysis/output/`。
+## 仓库地图
+
+| 路径 | 内容 |
+|---|---|
+| `src/detection/` | 渲染、YOLO 训练配方(含续训 lr 修复)、评估尺子(唯一实现) |
+| `src/judgment/` | 候选→特征→三重障碍标签→LightGBM→冻结工件→前向 |
+| `src/backtest/` | 阶段3 事件驱动模拟(成本扫描、并发上限、`--frozen-config`) |
+| `src/costs.py` | 成本路由表(owner 管控,唯一来源) |
+| `src/webapp/` | FastAPI 看板(总览/回测/前向/探索/ops) |
+| `scripts/` | 流水线与实验脚本;**跑过的实验脚本冻结不改**(保复现) |
+| `analysis/` | 每轮实验报告(p0 → p3),结论以此为准 |
+| `docs/learnings/` | 事故与反直觉结论笔记 |
+| `docs/archive/` | 已被取代的历史文档(只增不删) |
+| `models/` | 冻结工件、ACTIVE 指针、owner_best 检测权重、yolo11* 冷启动基座 |
+
+## 历史(一句话版)
+
+规则族表达不了所有者的"可交易密集"概念(网格上限 F1≈0.45 vs 自洽 0.88)→ 转向
+手工标注训练 YOLO → 2026-07-16 审计发现 `optimizer='auto'` 曾使所有续训失效,修复后
+检测层 F1 0.65+,判断层切换到干净候选池(accept 窗口 PF 7.50/428 笔,**该数字仍待
+前向 100 笔裁决,不构成收益宣称**)。完整履历:`git log` + `analysis/`。

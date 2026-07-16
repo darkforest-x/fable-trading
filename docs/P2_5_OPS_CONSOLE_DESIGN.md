@@ -1,7 +1,7 @@
 # P2.5 操作台化设计（Ops Console）
 
 > **状态**：Phase 0+1 **已实现**（2026-07-10）；Phase 2+ 仍为设计。  
-> **范围来源**：`NEXT_STEPS.md` §P2.5；对齐 `DESIGN.md` 暗色看板语言、`docs/ARCHITECTURE.md` 部署拓扑、`AGENTS.md` 纪律。  
+> **范围来源**：`docs/archive/NEXT_STEPS.md` §P2.5(已归档)；对齐 `docs/design/DESIGN.md` 暗色看板语言、`docs/ARCHITECTURE.md` 部署拓扑、`AGENTS.md` 纪律。  
 > **红线（本文不越）**：不评估 holdout、不重训 YOLO、不修改 `auto_label`、不新增重型依赖、配置变更永不走网页直改。
 
 ---
@@ -570,7 +570,7 @@ Environment=OPS_AUTH_MODE=token
 | 资产 | 路径 |
 |------|------|
 | 本设计 | `docs/P2_5_OPS_CONSOLE_DESIGN.md` |
-| 计划原文 | `NEXT_STEPS.md` §P2.5 |
+| 计划原文 | `docs/archive/NEXT_STEPS.md` §P2.5(已归档) |
 | 设计系统 | `DESIGN.md` |
 | 架构/部署 | `docs/ARCHITECTURE.md` |
 | 议程 | `docs/RESEARCH_AGENDA.md` |
