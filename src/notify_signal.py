@@ -101,6 +101,15 @@ def atr_from_record(record: Mapping[str, Any]) -> float:
     return float("nan")
 
 
+def _score_cmp(score, thr) -> str:
+    try:
+        if score is None or thr is None:
+            return "/"
+        return "≥" if float(score) >= float(thr) else "<"
+    except (TypeError, ValueError):
+        return "/"
+
+
 def format_signal_caption(record: Mapping[str, Any]) -> str:
     """HTML caption for Telegram (photo or message)."""
     side = signal_side(record)
@@ -131,6 +140,12 @@ def format_signal_caption(record: Mapping[str, Any]) -> str:
     title = "🚀 <b>信号</b>"
     if ch == "eth_micro" or (isinstance(bar, str) and bar in {"1m", "2m", "3m", "5m"}):
         title = "⚡ <b>ETH Micro 信号</b>"
+    elif ch == "scout":
+        # Right-edge detection, NOT a threshold-passed trade signal: same layout
+        # so the owner reads one format, but the title/status must not let a
+        # forming cluster be mistaken for an executable entry.
+        title = "👁 <b>视觉侦察</b>（右缘密集）"
+        bar_line = ""
     lines = [
         title,
         f"品种: <b>{symbol}</b>   ({side}) {side_emoji}",
@@ -142,7 +157,8 @@ def format_signal_caption(record: Mapping[str, Any]) -> str:
         f"止盈: <b>{px(tp)}</b>  <i>(TP {TP_MULT:g}×ATR)</i>",
         f"止损: <b>{px(sl)}</b>  <i>(SL {SL_MULT:g}×ATR)</i>",
         f"时间: {entry_time} UTC",
-        f"分数: {score_s}  ≥ 阈值 {thr_s}",
+        # honest comparator: a scout hit below threshold must not read as "≥"
+        f"分数: {score_s}  {_score_cmp(score, thr)} 阈值 {thr_s}",
         f"状态: {status}",
     ]
     return "\n".join(lines)
@@ -172,11 +188,17 @@ def render_signal_chart(
     out_path: Path | None = None,
     lookback: int = LOOKBACK_BARS,
     lookahead: int = LOOKAHEAD_BARS,
+    frame: pd.DataFrame | None = None,
 ) -> Path | None:
-    """Draw candles + entry/TP/SL dashed lines. Returns PNG path or None."""
+    """Draw candles + entry/TP/SL dashed lines. Returns PNG path or None.
+
+    `frame` lets a caller with FRESH data (the live scout) bypass the disk
+    cache, whose last bar can lag by 10+ minutes.
+    """
     source = str(record.get("source") or "okx")
     symbol = str(record.get("symbol") or "")
-    frame = _load_ohlc(source, symbol)
+    if frame is None:
+        frame = _load_ohlc(source, symbol)
     if frame is None or frame.empty:
         print(f"tg_signal: no kline for {source}/{symbol}")
         return None

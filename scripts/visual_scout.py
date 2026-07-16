@@ -150,6 +150,89 @@ def universe_frames():
         yield symbol, live
 
 
+_JUDGMENT_CACHE: dict = {}
+
+
+def _judgment_score(raw: "pd.DataFrame") -> tuple[float | None, float | None]:
+    """Score the LAST bar of a live frame with the ACTIVE frozen judgment model.
+
+    Returns (score, threshold); (None, threshold) when the frame is too short
+    for the causal features. Never raises -- the scout must not die on scoring.
+    """
+    try:
+        if "art" not in _JUDGMENT_CACHE:
+            import lightgbm as lgb
+            from src.judgment.frozen import default_config, latest_artifact
+            art = latest_artifact(default_config())
+            if art is None:
+                _JUDGMENT_CACHE["art"] = None
+                return None, None
+            _JUDGMENT_CACHE["art"] = art
+            _JUDGMENT_CACHE["booster"] = lgb.Booster(model_file=str(art.model_path))
+        art = _JUDGMENT_CACHE.get("art")
+        if art is None:
+            return None, None
+        from src.judgment.candidates import add_indicators
+        from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature_rows
+
+        enriched = add_indicators(raw)
+        featured = add_features(enriched)
+        i = len(featured) - 1
+        rows = extract_feature_rows(featured, [i])
+        score = float(_JUDGMENT_CACHE["booster"].predict(
+            rows[FEATURE_COLUMNS], num_iteration=art.best_iteration)[0])
+        return score, float(art.threshold)
+    except Exception as exc:  # noqa: BLE001 -- notification garnish, not the mission
+        print(f"scout: judgment score failed: {exc}")
+        art = _JUDGMENT_CACHE.get("art")
+        return None, float(art.threshold) if art else None
+
+
+def notify_scout_hit(h: dict, raw, *, weights_name: str) -> bool:
+    """One signal-style photo alert for a right-edge hit (owner format 2026-07-16)."""
+    try:
+        from src.notify_signal import format_signal_caption, render_signal_chart
+        from src.notify import send_photo
+
+        enriched_atr = None
+        try:
+            from src.judgment.candidates import add_indicators
+            enriched_atr = float(add_indicators(raw)["atr14"].iloc[-1])
+        except Exception:  # noqa: BLE001
+            enriched_atr = float((raw["high"] - raw["low"]).tail(14).mean())
+        score, thr = _judgment_score(raw)
+        entry = float(raw["close"].iloc[-1])
+        last_ts = str(raw["open_time"].iloc[-1])[:19]
+        passed = score is not None and thr is not None and score >= thr
+        record = {
+            "channel": "scout",
+            "source": "okx",
+            "symbol": h["symbol"],
+            "side": "LONG",
+            "signal_time": last_ts,
+            "entry_time": last_ts,
+            "entry_price": entry,
+            "atr14": enriched_atr,
+            "score": score,
+            "threshold": thr,
+            "status": ("forming · " + ("✅过判断阈值" if passed else "未过阈值,仅侦察")
+                       + f" · conf {h['conf']}"),
+        }
+        caption = format_signal_caption(record) + (
+            f"\n右缘约{h['age_min']}分钟前 · 数据延迟{h['data_lag_min']}m · {weights_name}"
+            f"\n图库: http://103.214.174.58:8642/scout.html"
+        )
+        chart = render_signal_chart(record, frame=raw)
+        if chart is not None and send_photo(chart, caption=caption):
+            return True
+        return send(caption)
+    except Exception as exc:  # noqa: BLE001
+        print(f"scout: signal-style notify failed: {exc}")
+        return send(
+            f"👁 视觉侦察 {h['symbol']}  conf {h['conf']}  右缘约{h['age_min']}分钟前"
+        )
+
+
 def main() -> int:
     from ultralytics import YOLO
 
@@ -159,6 +242,7 @@ def main() -> int:
     state = json.loads(STATE.read_text()) if STATE.exists() else {}
     SCOUT_DIR.mkdir(parents=True, exist_ok=True)
     hits = []
+    hit_frames: dict = {}
     scanned = 0
     now = datetime.now(timezone.utc)
 
@@ -226,6 +310,9 @@ def main() -> int:
                 "data_lag_min": round(lag_min, 1),
             }
         )
+        # Keep the LIVE frame for the signal-style alert: the disk cache the
+        # chart renderer would otherwise read lags by 10+ minutes.
+        hit_frames[symbol] = raw
 
     if hits:
         LOG.parent.mkdir(exist_ok=True)
@@ -240,17 +327,20 @@ def main() -> int:
             for h in hits:
                 w.writerow({"scanned_at": now.isoformat(), **h})
         hits.sort(key=lambda h: -h["conf"])
-        lines = [
-            f"👁 视觉侦察：{len(hits)} 个币种右缘密集（{weights.name}）",
-            f"条件：右缘 ≤ 最近 {MAX_AGE_BARS} 根 15m · live K 线",
-        ]
-        for h in hits[:10]:
-            lines.append(
-                f"· {h['symbol']}  conf {h['conf']}  "
-                f"右缘约{h['age_min']}分钟前  数据延迟{h['data_lag_min']}m"
-            )
-        lines.append("图: http://103.214.174.58:8642/scout.html")
-        send("\n".join(lines))
+        # Signal-style photo per hit (owner request 2026-07-16): same layout as
+        # the 🚀 forward alerts, judgment score included, TV-style chart attached.
+        # Cap at 3 photos per cycle; overflow goes into one text summary.
+        for h in hits[:3]:
+            frame = hit_frames.get(h["symbol"])
+            if frame is None or not notify_scout_hit(h, frame, weights_name=weights.name):
+                break  # notify path degraded to text already; don't spam
+        if len(hits) > 3:
+            extra = [
+                f"· {h['symbol']}  conf {h['conf']}  右缘约{h['age_min']}分钟前"
+                for h in hits[3:10]
+            ]
+            send("👁 本轮另有 " + str(len(hits) - 3) + " 个右缘密集:\n" + "\n".join(extra)
+                 + "\n图库: http://103.214.174.58:8642/scout.html")
     STATE.write_text(json.dumps(state, ensure_ascii=False))
 
     pngs = sorted(SCOUT_DIR.glob("*.png"), key=lambda p: -p.stat().st_mtime)[:40]
