@@ -5,8 +5,12 @@ from typing import Final
 
 import pandas as pd
 
-BAR_CHOICES: Final = ("5m", "15m", "30m", "1H")
+# Mainline trading bar is 15m; 1m/2m/3m/5m/30m/1H are research-only paths.
+BAR_CHOICES: Final = ("1m", "2m", "3m", "5m", "15m", "30m", "1H")
 _BAR_MINUTES: Final = {
+    "1m": 1,
+    "2m": 2,
+    "3m": 3,
     "5m": 5,
     "15m": 15,
     "30m": 30,

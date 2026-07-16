@@ -9,9 +9,9 @@ const OUTCOME_CN = { tp: "止盈", sl: "止损", timeout: "超时", sl_ambiguous
 const OUTCOME_COLOR = { tp: "#199e70", sl: "#e66767", timeout: "#c98500", sl_ambiguous: "#e66767" };
 const STATUS_CN = { open: "持有中", closed: "已结束" };
 const appState = { universe: "swap", view: "explore" };
-/** views loaded for current universe — skip refetch when tabbing back */
-const viewLoaded = new Set();
-const VIEW_ORDER = ["explore", "overview", "backtest", "signals", "forward", "experiments", "agenda", "jobs", "data", "models"];
+/** views loaded for current universe — skip refetch when tabbing back (TTL, not forever) */
+const viewLoadedAt = new Map(); // view -> timestamp
+const VIEW_ORDER = ["explore", "overview", "backtest", "signals", "forward", "ethmicro", "experiments", "agenda", "jobs", "data", "models"];
 const CHART_LAYOUT = {
   layout: { background: { type: "solid", color: "#0a0c10" }, textColor: "#8b949e" },
   grid: { vertLines: { color: "#161b22" }, horzLines: { color: "#161b22" } },
@@ -24,7 +24,20 @@ const pctFormat = { type: "custom", formatter: (v) => v.toFixed(2) + "%" };
 /* ---------- fetch helpers (cache + abort + toast) ---------- */
 const _jsonCache = new Map(); // url -> { t, data }
 const CACHE_TTL_MS = 30_000;
+/** Keep view-level skip aligned with JSON cache TTL so deploy updates surface without hard refresh. */
+const VIEW_CACHE_TTL_MS = CACHE_TTL_MS;
 let chartAbort = null;
+
+function viewNeedsLoad(name, force = false) {
+  if (force) return true;
+  const t = viewLoadedAt.get(name);
+  if (t == null) return true;
+  return Date.now() - t >= VIEW_CACHE_TTL_MS;
+}
+
+function markViewLoaded(name) {
+  viewLoadedAt.set(name, Date.now());
+}
 
 function escapeHtml(s) {
   return String(s ?? "")
@@ -82,7 +95,7 @@ function apiUrl(path, params = {}) {
 }
 
 function invalidateViews() {
-  viewLoaded.clear();
+  viewLoadedAt.clear();
   _jsonCache.clear();
 }
 
@@ -105,8 +118,8 @@ function showView(name, { pushHash = true, force = false } = {}) {
   // stop jobs poll when leaving
   if (name !== "jobs") stopJobsPoll?.();
 
-  const need = force || !viewLoaded.has(name);
-  const mark = () => viewLoaded.add(name);
+  const need = viewNeedsLoad(name, force);
+  const mark = () => markViewLoaded(name);
   if (name === "explore") {
     if (need) { loadExplore().then(mark); } else {
       mark();
@@ -120,8 +133,9 @@ function showView(name, { pushHash = true, force = false } = {}) {
     return;
   }
   if (name === "backtest") { if (need) loadBacktest().then(mark); else mark(); return; }
-  if (name === "signals") { initSignals(force); mark(); return; }
+  if (name === "signals") { initSignals(force || need); mark(); return; }
   if (name === "forward") { if (need) loadForward().then(mark); else mark(); return; }
+  if (name === "ethmicro") { if (need) loadEthMicro().then(mark); else mark(); return; }
   // ops tabs always refresh lightly (cheap + may change)
   if (name === "experiments") loadExperiments();
   if (name === "agenda") loadAgenda();
@@ -162,7 +176,10 @@ document.addEventListener("keydown", (e) => {
     return;
   }
   if (e.key === "r" && !e.metaKey && !e.ctrlKey) {
+    // Force-refresh status strip + current view (clears session view cache).
+    invalidateViews();
     loadStatusStrip(true);
+    showView(appState.view || "overview", { force: true, pushHash: false });
     return;
   }
   const n = Number(e.key);
@@ -743,6 +760,65 @@ async function loadOverview() {
   }
 }
 
+async function loadEthMicro() {
+  const view = $("#view-ethmicro");
+  view?.classList.add("loading");
+  try {
+    const d = await apiGet("/api/eth-micro", { cache: true });
+    $("#ethmicro-note").textContent = d.note || "";
+    const best = d.best_bar_by_top_net || "—";
+    const mon = d.monitor || {};
+    const nSig = (d.recent_signals || []).length;
+    $("#ethmicro-tiles").innerHTML = `
+      <div class="tile"><span class="lbl">品种</span><b>${escapeHtml(d.symbol || "ETH_USDT_SWAP")}</b><small>独立通道</small></div>
+      <div class="tile"><span class="lbl">回测最优 bar</span><b>${escapeHtml(best)}</b><small>按 top 净@0.2%</small></div>
+      <div class="tile"><span class="lbl">监控最近</span><b>${escapeHtml((mon.ts || "—").toString().slice(0, 19))}</b><small>新信号 ${mon.new_signals ?? "—"}</small></div>
+      <div class="tile"><span class="lbl">信号日志</span><b>${nSig}</b><small>最近最多 50 条</small></div>`;
+    const tbody = $("#ethmicro-bt-table tbody");
+    if (tbody) {
+      tbody.innerHTML = (d.backtest_table || []).map((r) => {
+        if (r.status !== "ok") {
+          return `<tr><td>${escapeHtml(r.bar)}</td><td>${escapeHtml(r.status)}</td><td class="num">${r.n_candidates ?? "—"}</td>
+            <td class="num" colspan="8">—</td></tr>`;
+        }
+        return `<tr>
+          <td><b>${escapeHtml(r.bar)}</b></td>
+          <td class="pos">ok</td>
+          <td class="num">${r.n_candidates ?? "—"}</td>
+          <td class="num">${r.n_val ?? "—"}</td>
+          <td class="num">${r.val_auc != null ? Number(r.val_auc).toFixed(3) : "—"}</td>
+          <td class="num ${cls(r.top_net_0p2)}">${r.top_net_0p2 != null ? fmtPct(r.top_net_0p2, 3) : "—"}</td>
+          <td class="num">${r.accept_n ?? "—"}</td>
+          <td class="num ${r.accept_pf >= 1.3 ? "pos" : "neg"}">${fmtPF(r.accept_pf)}</td>
+          <td class="num ${cls(r.accept_net_cap)}">${fmtPct(r.accept_net_cap)}</td>
+          <td class="num">${r.full_n ?? "—"}</td>
+          <td class="num">${fmtPF(r.full_pf)}</td>
+        </tr>`;
+      }).join("") || `<tr><td colspan="11">尚无回测产物，请跑 scripts/eth_micro_backtest.py</td></tr>`;
+    }
+    $("#ethmicro-monitor").textContent = mon && Object.keys(mon).length
+      ? JSON.stringify(mon, null, 2)
+      : "监控尚未运行。PYTHONPATH=. python3 scripts/eth_micro_monitor.py --loop";
+    const sigBody = $("#ethmicro-sig-table tbody");
+    $("#ethmicro-sig-count").textContent = `（${nSig}）`;
+    if (sigBody) {
+      sigBody.innerHTML = (d.recent_signals || []).map((s) => `<tr>
+        <td>${escapeHtml(String(s.signal_time || "").slice(0, 19))}</td>
+        <td>${escapeHtml(s.bar)}</td>
+        <td class="num">${s.entry_price != null ? Number(s.entry_price).toFixed(2) : "—"}</td>
+        <td class="num">${s.score != null ? Number(s.score).toFixed(4) : "—"}</td>
+        <td class="num">${s.tp_price != null ? Number(s.tp_price).toFixed(2) : "—"}</td>
+        <td class="num">${s.sl_price != null ? Number(s.sl_price).toFixed(2) : "—"}</td>
+        <td>${escapeHtml(String(s.notified_at || "").slice(0, 19))}</td>
+      </tr>`).join("") || `<tr><td colspan="7">暂无实时信号</td></tr>`;
+    }
+  } catch (err) {
+    if (err?.name !== "AbortError") toast(`ETH Micro：${err.message || err}`);
+  } finally {
+    view?.classList.remove("loading");
+  }
+}
+
 let forwardChart, forwardSeries, forwardDdChart, forwardDdSeries;
 async function loadForward() {
   $("#view-forward").classList.add("loading");
@@ -837,16 +913,78 @@ document.querySelectorAll("#trades-table th.sortable").forEach((th) =>
     renderTrades();
   }));
 
+function renderBacktestCompare(cmp) {
+  const panel = $("#bt-compare-panel");
+  const note = $("#bt-compare-note");
+  const tbody = $("#bt-compare-table tbody");
+  if (!panel || !tbody) return;
+  if (!cmp || !cmp.available) {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  if (note) {
+    note.textContent = cmp.note || "ACTIVE=回归预测收益；SHADOW=旧二分类。验收窗已披露消耗，仅对照。";
+  }
+  tbody.innerHTML = (cmp.rows || []).map((r) => {
+    const a = r.accept || {};
+    const f = r.full || {};
+    const ok100 = (r.acceptance_check || {}).n_trades_ge_100;
+    const thr = r.threshold == null ? "—" : (Math.abs(r.threshold) < 0.05 ? Number(r.threshold).toFixed(4) : Number(r.threshold).toFixed(3));
+    const roleChip = r.role === "ACTIVE" ? "chip passed" : r.role === "SHADOW" ? "chip done" : "chip";
+    return `<tr>
+      <td><span class="${roleChip}">${escapeHtml(r.role)}</span> ${escapeHtml(r.label || r.key)}</td>
+      <td>${escapeHtml(r.objective || "—")}</td>
+      <td class="num">${thr}</td>
+      <td class="num">${r.n_eligible ?? "—"}</td>
+      <td class="num"><b>${a.n_trades ?? "—"}</b></td>
+      <td class="num ${cls(a.net_return_on_capital)}">${fmtPct(a.net_return_on_capital)}</td>
+      <td class="num ${a.profit_factor >= 1.3 ? "pos" : "neg"}">${fmtPF(a.profit_factor)}</td>
+      <td class="num">${fmtPct(a.win_rate)}</td>
+      <td class="num">${f.n_trades ?? "—"}</td>
+      <td class="num ${cls(f.net_return_on_capital)}">${fmtPct(f.net_return_on_capital)}</td>
+      <td class="num">${fmtPF(f.profit_factor)}</td>
+      <td class="${ok100 ? "pos" : "neg"}">${ok100 ? "✓" : "✗"}</td>
+    </tr>`;
+  }).join("");
+}
+
 async function loadBacktest() {
   $("#view-backtest").classList.add("loading");
   try {
-  const [d, rows] = await Promise.all([
+  const [d, rows, cmp] = await Promise.all([
     apiGet(apiUrl("/api/backtest", { cost: btState.cost }), { cache: true }),
     apiGet(apiUrl("/api/trades", { window: btState.window, cost: btState.cost }), { cache: true }),
+    apiGet(`/api/backtest/compare?cost=${btState.cost}`, { cache: true }).catch(() => ({ available: false })),
   ]);
   tradeRows = rows;
   tradesShow = TRADES_PAGE;
   const w = d[btState.window];
+  renderBacktestCompare(cmp);
+
+  // regression scores are not probabilities — stretch the filter slider to score range
+  const slider = $("#score-threshold");
+  if (slider && d.score_range) {
+    const lo = Number(d.score_range.min);
+    const hi = Number(d.score_range.max);
+    if (Number.isFinite(lo) && Number.isFinite(hi) && hi > lo) {
+      const step = Math.max((hi - lo) / 200, 1e-5);
+      slider.min = String(lo);
+      slider.max = String(hi);
+      slider.step = String(step);
+      if (btState.scoreMin < lo || btState.scoreMin > hi) {
+        btState.scoreMin = lo;
+        slider.value = String(lo);
+        $("#score-threshold-label").textContent = lo.toFixed(4);
+      }
+    }
+  }
+  const thrNote = d.score_semantics === "predicted_realized_ret"
+    ? `ACTIVE 回归 · 阈值 ${d.score_threshold != null ? Number(d.score_threshold).toFixed(4) : "—"}（预测收益 q90）`
+    : null;
+  if (thrNote && $("#threshold-note")) {
+    $("#threshold-note").textContent = thrNote + "；滑块只过滤明细。";
+  }
 
   $("#bt-tiles").innerHTML = `
     <div class="tile"><span class="lbl">交易笔数</span><b>${w.n_trades}</b><small>${escapeHtml(d.universe_label)} · ${btState.window === "accept" ? "验收窗口" : "全期"}</small></div>

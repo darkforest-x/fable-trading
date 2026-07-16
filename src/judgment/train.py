@@ -114,12 +114,32 @@ def permutation_pvalue(y_true: np.ndarray, y_prob: np.ndarray, *, n_perm: int = 
 
 
 def train_model(
-    train: pd.DataFrame, val: pd.DataFrame, *, feature_columns: Sequence[str] = FEATURE_COLUMNS
+    train: pd.DataFrame,
+    val: pd.DataFrame,
+    *,
+    feature_columns: Sequence[str] = FEATURE_COLUMNS,
+    objective: str = "binary",
 ) -> lgb.Booster:
-    dtrain = lgb.Dataset(train[list(feature_columns)], label=train["label"])
-    dval = lgb.Dataset(val[list(feature_columns)], label=val["label"], reference=dtrain)
+    """Train judgment model.
+
+    objective:
+      - binary: classify label (TP vs not) — historical default
+      - regression: rank by predicted realized_ret (economic target; 2026-07-15+)
+    """
+    cols = list(feature_columns)
+    params = dict(LGB_PARAMS)
+    if objective == "regression":
+        params["objective"] = "regression"
+        y_train, y_val = train["realized_ret"], val["realized_ret"]
+    elif objective == "binary":
+        params["objective"] = "binary"
+        y_train, y_val = train["label"], val["label"]
+    else:
+        raise ValueError(f"unknown objective {objective!r}; expected binary|regression")
+    dtrain = lgb.Dataset(train[cols], label=y_train)
+    dval = lgb.Dataset(val[cols], label=y_val, reference=dtrain)
     return lgb.train(
-        LGB_PARAMS,
+        params,
         dtrain,
         num_boost_round=600,
         valid_sets=[dval],

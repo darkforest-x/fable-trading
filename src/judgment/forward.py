@@ -129,6 +129,27 @@ def _run_forward_tracking(
     )
     merged = merge_forward_log(existing, scan.records)
     write_forward_log(output_path, merged.frame)
+    # Telegram: only mainline path, only brand-new signal keys (not exit updates).
+    if Path(output_path).resolve() == Path(FORWARD_LOG_PATH).resolve() and merged.new_signals:
+        try:
+            from src.judgment.forward_records import forward_key, row_key
+            from src.notify_signal import notify_new_forward_signals
+
+            existing_keys = {row_key(r) for r in existing.to_dict("records")} if not existing.empty else set()
+            brand_new: list[dict] = []
+            for rec in scan.records:
+                key = forward_key(rec["source"], rec["symbol"], pd.Timestamp(rec["signal_time"]))
+                if key in existing_keys:
+                    continue
+                row = dict(rec)
+                # absolute ATR for chart TP/SL (atr_pct ≈ atr14/close)
+                if row.get("atr14") is None and row.get("atr_pct") and row.get("entry_price"):
+                    row["atr14"] = float(row["entry_price"]) * float(row["atr_pct"])
+                brand_new.append(row)
+            n_sent = notify_new_forward_signals(brand_new)
+            print(f"tg_signal: new={len(brand_new)} sent_ok={n_sent}")
+        except Exception as exc:  # noqa: BLE001 -- never block forward tracking
+            print(f"tg_signal: skipped ({exc})")
     open_rows = int((merged.frame["status"] != "closed").sum()) if not merged.frame.empty else 0
     closed_rows = int((merged.frame["status"] == "closed").sum()) if not merged.frame.empty else 0
     return ForwardRunSummary(

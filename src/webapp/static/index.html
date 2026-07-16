@@ -29,6 +29,7 @@
   <div class="sb-group">
     <div class="sb-group-title">Orchestration</div>
     <button type="button" class="sb-item" data-view="forward"><span class="ico">🚀</span> Forward Gate</button>
+    <button type="button" class="sb-item" data-view="ethmicro"><span class="ico">⚡</span> ETH Micro</button>
     <button type="button" class="sb-item" data-view="jobs"><span class="ico">🦅</span> Jobs</button>
     <button type="button" class="sb-item" data-view="models"><span class="ico">🔑</span> Models</button>
     <button type="button" class="sb-item" data-view="experiments"><span class="ico">🧪</span> Experiments</button>
@@ -213,6 +214,32 @@
       <span class="note">验收窗口曾被 2b holdout 消耗一次；全期含模型训练期，仅作对照。</span>
     </div>
     <div id="bt-tiles" class="tile-row"></div>
+
+    <div class="panel" id="bt-compare-panel">
+      <h2>判断层对照 <span class="unit">ACTIVE 回归 vs SHADOW 二分类 · 同池同模拟器</span></h2>
+      <p class="note" id="bt-compare-note"></p>
+      <div class="table-wrap">
+        <table id="bt-compare-table">
+          <thead>
+            <tr>
+              <th>角色</th>
+              <th>目标</th>
+              <th class="num">阈值</th>
+              <th class="num">合格</th>
+              <th class="num">验收笔数</th>
+              <th class="num">验收净/资金</th>
+              <th class="num">验收 PF</th>
+              <th class="num">验收胜率</th>
+              <th class="num">全期笔数</th>
+              <th class="num">全期净/资金</th>
+              <th class="num">全期 PF</th>
+              <th>≥100 笔</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
 
     <div class="panel">
       <h2>净值与回撤 <span class="unit">（净收益 % 对账户资金，出场时点记账）</span></h2>
@@ -418,6 +445,63 @@
       <pre id="exp-detail-json" class="ops-pre"></pre>
       <h2 class="subhead">关联报告</h2>
       <pre id="exp-detail-report" class="ops-pre md-pre"></pre>
+    </div>
+  </section>
+
+  <!-- ============ ETH 小周期通道 ============ -->
+  <section id="view-ethmicro" class="view hidden" hidden aria-hidden="true">
+    <div class="panel">
+      <h2>ETH Micro <span class="unit">1m / 2m / 3m / 5m · 与 15m 主线隔离</span></h2>
+      <p class="note" id="ethmicro-note">加载中…</p>
+      <div id="ethmicro-tiles" class="tile-row"></div>
+    </div>
+    <div class="panel">
+      <h2>回测对照 <span class="unit">规则 expanded + TP5/SL2 + 回归 LGB · 验收窗 @0.3%</span></h2>
+      <div class="table-wrap">
+        <table id="ethmicro-bt-table">
+          <thead>
+            <tr>
+              <th>周期</th>
+              <th>状态</th>
+              <th class="num">候选</th>
+              <th class="num">val n</th>
+              <th class="num">AUC</th>
+              <th class="num">top 净@0.2%</th>
+              <th class="num">验收笔数</th>
+              <th class="num">验收 PF</th>
+              <th class="num">验收净/资金</th>
+              <th class="num">全期笔数</th>
+              <th class="num">全期 PF</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="panel">
+        <h2>实时监控状态</h2>
+        <pre id="ethmicro-monitor" class="ops-pre" style="max-height:220px;overflow:auto"></pre>
+      </div>
+      <div class="panel">
+        <h2>最近信号 <span class="unit" id="ethmicro-sig-count"></span></h2>
+        <div class="table-wrap">
+          <table id="ethmicro-sig-table">
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th>bar</th>
+                <th class="num">价格</th>
+                <th class="num">分数</th>
+                <th class="num">TP</th>
+                <th class="num">SL</th>
+                <th>通知</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </section>
 

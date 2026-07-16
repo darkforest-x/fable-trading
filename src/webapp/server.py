@@ -22,6 +22,7 @@ from src.webapp.agenda_payloads import agenda_payload
 from src.webapp.auth import verify_ops_request
 from src.webapp.dashboard_cache import DEFAULT_UNIVERSE
 from src.webapp.dashboard_payloads import (
+    backtest_compare_payload,
     backtest_payload,
     chart_payload,
     overview_payload,
@@ -38,6 +39,7 @@ from src.webapp.model_hub import model_hub_payload
 from src.webapp.ops_flags import executor_enabled, ops_status_payload
 from src.webapp.status_strip import status_strip_payload
 from src.webapp.explore_payloads import explore_catalog, explore_chart_payload
+from src.eth_micro.payloads import eth_micro_payload
 
 app = FastAPI(title="fable-trading dashboard")
 
@@ -92,6 +94,12 @@ def backtest(cost: float = BASE_COST, universe: str = DEFAULT_UNIVERSE) -> dict:
     return backtest_payload(cost=cost, universe=universe)
 
 
+@app.get("/api/backtest/compare")
+def backtest_compare(cost: float = BASE_COST) -> dict:
+    """ACTIVE regression vs shadow binary stage-3 backtest table."""
+    return backtest_compare_payload(cost=cost)
+
+
 @app.get("/api/trades")
 def trade_rows(
     window: str = "accept",
@@ -116,6 +124,12 @@ def chart(source: str, symbol: str, bars: int = 3000, universe: str = DEFAULT_UN
 @app.get("/api/forward")
 def forward(cost: float = FORWARD_COST) -> dict:
     return forward_payload(cost)
+
+
+@app.get("/api/eth-micro")
+def eth_micro() -> dict:
+    """ETH-only 1/2/3/5m channel: backtest table + monitor status + recent signals."""
+    return eth_micro_payload()
 
 
 # ---------- P2.5 Phase 0+1: ops (read-only) ----------

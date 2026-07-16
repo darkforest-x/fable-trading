@@ -6,6 +6,7 @@ spot/swap universe.
 """
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -17,12 +18,13 @@ from src.backtest.run import ACCEPT_START, BASE_COST, MAX_CONCURRENT, window_met
 from src.data.loader import FETCHED_DIR, list_series, load_series
 from src.judgment.labeling import SL_ATR_MULT, TP_ATR_MULT
 from src.webapp.dashboard_cache import (
-    DEFAULT_UNIVERSE, UniverseSpec, load_json, relative_path, scored_signals,
+    DEFAULT_UNIVERSE, OUTPUT_DIR, UniverseSpec, load_json, relative_path, scored_signals,
     symbol_matches_universe, trades, universe_spec,
 )
 
 EMA_SPANS = (8, 13, 21, 34, 55, 144, 200)
 PF_COST_GRID = [round(c, 4) for c in np.arange(0.001, 0.00501, 0.0005)]
+COMPARE_JSON = OUTPUT_DIR / "p3_ml_opt_backtest_compare.json"
 
 
 def overview_payload(universe: str = DEFAULT_UNIVERSE) -> dict:
@@ -57,12 +59,17 @@ def overview_payload(universe: str = DEFAULT_UNIVERSE) -> dict:
 def backtest_payload(cost: float = BASE_COST, universe: str = DEFAULT_UNIVERSE) -> dict:
     spec = universe_spec(universe)
     all_trades = trades(spec.key)
-    signals, _ = scored_signals(spec.key)
+    signals, threshold = scored_signals(spec.key)
     accept_t = all_trades[all_trades["entry_time"] >= ACCEPT_START]
+    score_min = float(signals["score"].min()) if not signals.empty else 0.0
+    score_max = float(signals["score"].max()) if not signals.empty else 1.0
     out: dict = {
         "cost": cost,
         "universe": spec.key,
         "universe_label": spec.label,
+        "score_threshold": threshold,
+        "score_semantics": "predicted_realized_ret" if abs(threshold) < 0.2 else "class_probability",
+        "score_range": {"min": score_min, "max": score_max},
         "pf_curve": [{"cost": c, "pf": window_metrics(accept_t, c).get("profit_factor")} for c in PF_COST_GRID],
     }
     for name, window_trades, window_signals in (
@@ -88,6 +95,45 @@ def backtest_payload(cost: float = BASE_COST, universe: str = DEFAULT_UNIVERSE) 
         ]
         out[name] = metrics
     return out
+
+
+def backtest_compare_payload(cost: float = BASE_COST) -> dict:
+    """ACTIVE regression vs shadow binary portfolio backtest (precomputed JSON)."""
+    if not COMPARE_JSON.exists():
+        return {"available": False, "reason": "missing analysis/output/p3_ml_opt_backtest_compare.json"}
+    raw = json.loads(COMPARE_JSON.read_text(encoding="utf-8"))
+    variants = raw.get("variants") or {}
+    cost_key = f"{cost:.3f}"
+    rows = []
+    for key, variant in variants.items():
+        accept = (variant.get("cost_sweep_accept_window") or {}).get(cost_key) or {}
+        full = variant.get("full_period_base_cost") or {}
+        checks = variant.get("acceptance_check_base_cost") or {}
+        rows.append({
+            "key": key,
+            "label": variant.get("variant") or key,
+            "role": "ACTIVE" if key == raw.get("active") or "ACTIVE" in str(variant.get("variant", "")) else (
+                "SHADOW" if "SHADOW" in str(variant.get("variant", "")) or key == raw.get("shadow") else "other"
+            ),
+            "objective": variant.get("objective"),
+            "model_path": variant.get("model_path"),
+            "threshold": variant.get("score_threshold_val_q90"),
+            "n_eligible": variant.get("n_eligible"),
+            "accept": accept,
+            "full": full,
+            "acceptance_check": checks,
+        })
+    # stable order: ACTIVE first
+    rows.sort(key=lambda r: (0 if r["role"] == "ACTIVE" else 1 if r["role"] == "SHADOW" else 2, r["key"]))
+    return {
+        "available": True,
+        "cost": cost,
+        "dataset": raw.get("dataset"),
+        "note": raw.get("generated_note") or "ACTIVE vs shadow judgment model, same stage-3 simulator",
+        "active": raw.get("active"),
+        "shadow": raw.get("shadow"),
+        "rows": rows,
+    }
 
 
 def trade_rows_payload(window: str = "accept", limit: int = 1000, cost: float = BASE_COST,
@@ -173,25 +219,41 @@ def _stage_rows(spec: UniverseSpec, p0: dict, p2a: dict, p2b: dict, hold: dict, 
     return [
         {"id": "P0", "name": "P0 信号检验", "status": "done", "summary": _p0_summary(p0)},
         {"id": "2a", "name": "2a 检测层 YOLO", "status": "done",
-         "summary": "正式验收 mAP50 %.4f，低于 0.90；非关键路径暂停" % p2a.get("mAP50", 0)},
+         "summary": (
+             "主线候选源已切到 YOLO（owner detector）；历史 mAP50 %.4f 仅作检测质量参考，"
+             "主线以 2b 打分 + 阶段 3 回测/前向为准"
+         ) % p2a.get("mAP50", 0)},
         {"id": "2b", "name": "2b 判断层 LightGBM", "status": "passed",
-         "summary": "holdout 一次性评估通过：AUC %.3f / p=%.3f / top-decile 净 %+.3f%%" % (
-             hold.get("roc_auc", 0), p2b.get("holdout_permutation_p", 1),
-             100 * hold.get("top_decile", {}).get("mean_net_ret", 0))},
+         "summary": (
+             "ACTIVE：YOLO 池 + 回归 realized_ret（预测收益排序）；数据集 %s；"
+             "阈值 = val 分数 90 分位。二分类 YOLO 保留为 SHADOW 对照。"
+         ) % relative_path(spec.dataset_path)},
         {"id": "3", "name": "3 事件驱动回测", "status": "passed" if pf >= 1.3 else "failed",
          "summary": "%s 动态回测：PF %.2f @%.1f%% 成本，%s 笔；终审仍以前向 100 笔为准" % (
              spec.label, pf, BASE_COST * 100, base.get("n_trades", 0))},
     ]
 
 
+def _fmt_threshold(threshold: float) -> str:
+    # regression thresholds are small (predicted ret); binary probs near 0.7
+    if abs(threshold) < 0.05:
+        return f"{threshold:.4f}"
+    return f"{threshold:.3f}"
+
+
 def _overview_tiles(spec: UniverseSpec, base: dict, threshold: float) -> list[dict]:
+    thr_sub = (
+        "val 预测收益 90 分位（回归 ACTIVE）"
+        if abs(threshold) < 0.2
+        else "val 分数 90 分位，事前固定"
+    )
     return [
         {"label": "当前宇宙", "value": spec.label, "sub": relative_path(spec.dataset_path)},
         {"label": "动态回测 PF", "value": "%.2f" % base.get("profit_factor", 0),
          "sub": f"{BASE_COST * 100:.1f}% 成本；验收线 1.3"},
         {"label": "动态回测胜率", "value": "%.1f%%" % (100 * base.get("win_rate", 0)),
          "sub": f"{base.get('n_trades', 0)} 笔"},
-        {"label": "模型阈值", "value": "%.3f" % threshold, "sub": "val 分数 90 分位，事前固定"},
+        {"label": "模型阈值", "value": _fmt_threshold(threshold), "sub": thr_sub},
     ]
 
 
