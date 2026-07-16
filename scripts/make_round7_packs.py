@@ -21,7 +21,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import random
 import sys
@@ -31,15 +30,12 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
 
+from src.detection.owner_eval import is_eval_stem  # noqa: E402  (needs sys.path above)
+
 ROUND = 7
 N_TOTAL = 3000
 N_CHUNKS = 6
 UNCERTAIN_LO, UNCERTAIN_HI = 0.15, 0.45
-
-
-def is_eval_symbol(sym: str) -> bool:
-    """Frozen-eval membership: the same sha1%7 rule scripts/frozen_eval_set.py uses."""
-    return int(hashlib.sha1(sym.encode()).hexdigest(), 16) % 7 == 0
 
 
 def main() -> int:
@@ -62,8 +58,7 @@ def main() -> int:
             if not d.exists():
                 continue
             for p in d.glob("*.png"):
-                sym = p.stem.rsplit("_", 1)[0]
-                if p.stem in pool or is_eval_symbol(sym):
+                if p.stem in pool or is_eval_stem(p.stem):
                     continue
                 cands.append((p, ds, sp, p.stem))
     rng.shuffle(cands)

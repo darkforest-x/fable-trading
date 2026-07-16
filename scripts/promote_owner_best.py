@@ -14,23 +14,17 @@ trusted: assuming a model was clean is exactly how that 0.663 was believed.
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import shutil
 from pathlib import Path
 
 import yaml
 
-from src.detection.owner_eval import evaluate_owner_f1
+from src.detection.owner_eval import evaluate_owner_f1, is_eval_stem
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 EVAL = PROJECT_DIR / "datasets/owner_eval_frozen"
 DST = PROJECT_DIR / "models/owner_best.pt"
-
-
-def is_eval_symbol(sym: str) -> bool:
-    """Frozen-eval membership: same sha1%7 rule as scripts/frozen_eval_set.py."""
-    return int(hashlib.sha1(sym.encode()).hexdigest(), 16) % 7 == 0
 
 
 def dataset_of(run_dir: Path) -> Path | None:
@@ -71,7 +65,7 @@ def eval_leak_count(dataset: Path) -> int | None:
             continue
         for img in d.glob("*.png"):
             seen_any = True
-            if is_eval_symbol(img.stem.rsplit("_", 1)[0]):
+            if is_eval_stem(img.stem):
                 n += 1
     return n if seen_any else None
 

@@ -1,17 +1,60 @@
-"""Shared owner-taste F1 evaluation (single source of truth).
+"""Shared owner-taste F1 evaluation + eval/val split membership (single source
+of truth).
 
-Four queue scripts grew their own copies of this loop and they were one
-tweak away from drifting apart. Import this instead:
+Four queue scripts grew their own copies of the F1 loop and they were one tweak
+away from drifting apart. Import this instead:
 
     from src.detection.owner_eval import evaluate_owner_f1
     best, sweep = evaluate_owner_f1("runs/.../best.pt", "datasets/dense_owner_v4")
 
 Matching rule (identical to all published numbers so far): greedy IoU>=0.30
 per GT box against unused predictions; F1 sweep over confidences.
+
+2026-07-16: the same drift happened again, to the split rules. `is_eval` had
+grown SIX copies across scripts, and — worse — the name meant two different
+things: some took a stem and split it internally, others required the caller to
+split first. Passing the wrong one does not raise; it hashes
+"BTC_USDT_SWAP_001234" instead of "BTC_USDT_SWAP", silently deciding eval
+membership at random. Meanwhile scripts/build_owner_dataset.py had no filter at
+all and is the likely origin of dense_owner_v7h's 596 leaked eval images, which
+invalidated the decisive A/B.
+
+So the split rules live here now, with names that make the argument type
+impossible to get wrong: is_eval_symbol takes a SYMBOL, is_eval_stem takes a
+STEM. Do not re-copy them.
 """
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
+
+# The frozen eval set is every symbol whose sha1 lands on 0 mod 7 (~1/7 of the
+# universe, 47 symbols). It is the project's one honest ruler: a model that
+# trained on any of these has an inflated F1, which is exactly how v5_from_v4's
+# 0.663 was believed for a week. 5 and 7 are coprime by design so the val split
+# below cannot systematically shadow it.
+EVAL_MOD = 7
+VAL_MOD = 5
+
+
+def symbol_of(stem: str) -> str:
+    """Image stem -> symbol. "BTC_USDT_SWAP_001234" -> "BTC_USDT_SWAP"."""
+    return stem.rsplit("_", 1)[0]
+
+
+def is_eval_symbol(sym: str) -> bool:
+    """Is this SYMBOL in the frozen eval set? Pass a symbol, not a stem."""
+    return int(hashlib.sha1(sym.encode()).hexdigest(), 16) % EVAL_MOD == 0
+
+
+def is_eval_stem(stem: str) -> bool:
+    """Is this image STEM's symbol in the frozen eval set?"""
+    return is_eval_symbol(symbol_of(stem))
+
+
+def split_of(stem: str) -> str:
+    """train/val for a stem, split by SYMBOL so no symbol straddles the split."""
+    return "val" if int(hashlib.sha1(symbol_of(stem).encode()).hexdigest(), 16) % VAL_MOD == 0 else "train"
 
 
 def _iou(a, b) -> float:

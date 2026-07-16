@@ -14,6 +14,8 @@ from __future__ import annotations
 import hashlib, json, shutil
 from pathlib import Path
 
+from src.detection.owner_eval import is_eval_stem as is_eval_symbol
+
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 POOL = PROJECT_DIR / "data/golden_pool.json"
 DST = PROJECT_DIR / "datasets/owner_eval_frozen"
@@ -22,9 +24,7 @@ SRC_DIRS = [PROJECT_DIR / "datasets/dense_15m_full/images/val",
             PROJECT_DIR / "datasets/dense_swap_v1/images/train",
             PROJECT_DIR / "datasets/dense_swap_v1/images/val"]
 
-def is_eval_symbol(stem: str) -> bool:
-    sym = stem.rsplit("_", 1)[0]
-    return int(hashlib.sha1(sym.encode()).hexdigest(), 16) % 7 == 0
+
 
 def main() -> int:
     pool = json.loads(POOL.read_text())
