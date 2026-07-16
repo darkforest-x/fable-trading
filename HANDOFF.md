@@ -1,5 +1,39 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## ⚡ 2026-07-16 当前真相（本节之下的内容为历史，多处已被推翻）
+
+**主线**：YOLO 检测（`owner_v8_chain`，frozen-F1 0.650）→ 回归判断
+（`frozen_tp5_sl2_swap_yolo_v8_reg_20260716`，阈值 val-q90=0.0217）→ TP5/SL2 出场。
+`models/ACTIVE` 与 `frozen.default_config()` 均已指向 v8 池；forward / 看板 / scout
+判断分走同一咽喉。VPS 看板已部署（PF 7.50 @0.3%，428 笔，accept 窗口）。
+
+**今天推翻的历史结论**（详见 `analysis/p2a_lr_bug_audit.md` + `p3_v8_pool_cutover.md`）：
+- `optimizer='auto'` 的 lr=0.002 炸掉了**所有** chain 续训（epoch 3 精确崩溃，
+  best.pt=epoch 1）——v7 及之前的 chain 模型等于没训过；已修（`FINETUNE_OPT` lr=1e-4）。
+- "v6 0.595→v7 0.625 证明加标注有效"——撤回。干净的学习曲线（嵌套三臂，同机同val）
+  给出真答案：**F1 ≈ 0.067·log2(train图数) − 0.265，未饱和**。
+- "coco 血统连输两轮已弃"——补跑后反而证实（v8_coco 0.549 ≈ v6_coco 0.554）；
+  但续训血统更强（0.650）。
+- 旧判断池（101 币，脏检测器）→ 新池（267 币，17573 候选）：accept 窗口全指标胜，
+  **holdout 第 3 次消耗，owner 明确批准**（第1次 07-08，第2次 07-15）。
+
+**冻结尺子已物化**：`datasets/owner_eval_frozen/MANIFEST.json`（47 币/464 图）；
+`is_eval` 查清单优先（两个拼写泄漏向量已封死：`_SWAP` 后缀 + `okx_` 前缀）。
+**标杆基建**：`data/benchmark_exemplars.json`（176 张）；`scripts/benchmark_check.py`
+体检门（训≥0.90/评≥0.60）已入 v9 流水线；**152 张标杆 ≈ 1600 张普通标注（10倍质量杠杆）**；
+过采样×3 已证伪（0.636<0.650）。
+
+**进行中**：owner 打标 round7（1000/3000，chunk3-6 已换 v8 预标）→ 标完跑
+`bash scripts/train_owner_v9_from_round7.sh`（90% 闸门；曲线预测 v9_coco≈0.584 已登记）。
+**训练一律走 3060**（`zzc@192.168.1.5`，7 倍速；WMI 启动防 SSH 杀进程；
+`--cache false --workers 4` 防 16GB 内存爆；见 memory/training-on-3060.md）。
+
+**最大未决疑点**：PF 7.5 属"好得反常"——检测层训练无时间切分（~2.5% 标注图落在
+accept 窗口内）是结构性弱点；**前向 100 笔规则是唯一最终裁决**。v10 应登记
+"检测层训练图截止 2026-05-04" 实验。
+
+---
+
 **写于 2026-07-08。** 读完本文件 + `CLAUDE.md` + `analysis/p2b_v2_report.md`，即可无损接手本项目。
 
 

@@ -14,6 +14,7 @@ ssh "$VPS" "mkdir -p $DIR/data"
 for f in \
   data/judgment_dataset_v2_expanded.csv \
   data/judgment_yolo_swap.csv \
+  data/judgment_yolo_swap_v8.csv \
   data/forward_log.csv \
   data/forward_log_rules_pre_yolo_20260715.csv \
   data/scored_signals_swap.csv \
