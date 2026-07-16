@@ -1,12 +1,67 @@
 {
-  "source_run": "owner_v6_chain",
-  "frozen_eval_f1": 0.595,
-  "metrics": {"f1": 0.595},
-  "eval_set": "owner_eval_frozen (47币种从未参训)",
-  "note": "v5(0.663)因训练集含43/47个eval币种而虚高(泄漏),不采信;v6_chain是首个干净测量的最强模型。晋升逻辑需修:只比较eval-excluded的模型。",
-  "clean_leaderboard": [
-    {"run": "owner_v6_chain", "frozen_f1": 0.595, "leaked": false},
-    {"run": "owner_v6_coco", "frozen_f1": 0.554, "leaked": false},
-    {"run": "owner_v5_from_v4", "frozen_f1": 0.663, "leaked": "43/47 eval symbols in train -- INVALID"}
+  "source_run": "owner_v8_chain",
+  "frozen_eval_f1": 0.65,
+  "metrics": {
+    "conf": 0.3,
+    "f1": 0.65,
+    "p": 0.668,
+    "r": 0.633,
+    "tp": 145,
+    "fp": 72,
+    "fn": 84
+  },
+  "eval_set": "owner_eval_frozen(47币种从未参训)",
+  "eligibility": "仅限已验证训练集不含 eval 币种的 run",
+  "leaderboard": [
+    {
+      "run": "owner_v8_chain",
+      "f1": 0.65
+    },
+    {
+      "run": "owner_v7_chain",
+      "f1": 0.625
+    },
+    {
+      "run": "owner_v6_chain",
+      "f1": 0.595
+    },
+    {
+      "run": "owner_v6_coco",
+      "f1": 0.554
+    },
+    {
+      "run": "owner_v8_coco",
+      "f1": 0.549
+    },
+    {
+      "run": "owner_v7_coco",
+      "f1": 0.311
+    }
+  ],
+  "rejected": [
+    {
+      "run": "owner_v3_chain",
+      "reason": "训练集含 146 张 eval 币种图 -> F1 虚高"
+    },
+    {
+      "run": "owner_v3_coco",
+      "reason": "训练集含 146 张 eval 币种图 -> F1 虚高"
+    },
+    {
+      "run": "owner_v4",
+      "reason": "训练集含 271 张 eval 币种图 -> F1 虚高"
+    },
+    {
+      "run": "owner_v5_coco",
+      "reason": "训练集含 464 张 eval 币种图 -> F1 虚高"
+    },
+    {
+      "run": "owner_v5_from_v4",
+      "reason": "训练集含 464 张 eval 币种图 -> F1 虚高"
+    },
+    {
+      "run": "owner_v7_holdout",
+      "reason": "训练集含 596 张 eval 币种图 -> F1 虚高"
+    }
   ]
 }
