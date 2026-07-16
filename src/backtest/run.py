@@ -52,9 +52,16 @@ SCORE_QUANTILE = 0.90
 def build_signals(data_path: Path) -> tuple[pd.DataFrame, float]:
     """Train the judgment model (train/val discipline unchanged), score every
     candidate in the CSV, and fix the entry threshold from val scores only."""
-    artifact = latest_artifact(DEFAULT_FROZEN_CONFIG)
-    if artifact is not None and data_path.resolve() == artifact.dataset_path.resolve():
-        return score_with_artifact(artifact)
+    # Match the dataset against EVERY frozen config, not just the default:
+    # otherwise a backtest of a non-default pool silently retrains a fresh
+    # binary model instead of replaying the frozen regression artifact, and the
+    # comparison stops being about the pools.
+    from src.judgment.frozen import (binary_yolo_shadow_config, default_config,
+                                     yolo_old_pool_config)
+    for cfg_fn in (default_config, yolo_old_pool_config, binary_yolo_shadow_config):
+        artifact = latest_artifact(cfg_fn())
+        if artifact is not None and data_path.resolve() == artifact.dataset_path.resolve():
+            return score_with_artifact(artifact)
 
     train, val, _ = load_splits(data_path)
     model = train_model(train, val)
