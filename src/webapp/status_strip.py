@@ -1,7 +1,9 @@
 """Lightweight status strip for the dashboard header / overview.
 
 Surfaces owner-detector promotion, judgment ACTIVE (threshold + dataset),
-forward decision progress, and scout freshness. Safe when artifacts missing.
+and forward decision progress. Safe when artifacts missing.
+
+Visual scout (scout.html) was retired — multi-TF radar is scout_mtf.html.
 """
 from __future__ import annotations
 
@@ -17,8 +19,6 @@ OWNER_BEST_JSON = PROJECT / "models" / "owner_best.json"
 OWNER_BEST_PT = PROJECT / "models" / "owner_best.pt"
 FORWARD_LOG_PATH = PROJECT / "data" / "forward_log.csv"
 FORWARD_DECISION_TRADES = 100
-SCOUT_HTML = PROJECT / "src" / "webapp" / "static" / "scout.html"
-SCOUT_DIR = PROJECT / "src" / "webapp" / "static" / "scout"
 
 
 def status_strip_payload() -> dict:
@@ -27,9 +27,8 @@ def status_strip_payload() -> dict:
         "owner_detector": _owner_detector(),
         "judgment_active": _judgment_active(),
         "forward": _forward_progress(),
-        "scout": _scout_status(),
         "links": {
-            "scout": "/scout.html",
+            "scout_mtf": "/scout_mtf.html",
             "label_studio_hint": "http://127.0.0.1:8081",
         },
     }
@@ -137,9 +136,12 @@ def _forward_progress() -> dict:
         return out
     out["total_rows"] = int(len(frame))
     closed = frame
+    open_rows = frame
     if "status" in frame.columns:
         closed = frame[frame["status"] == "closed"]
+        open_rows = frame[frame["status"] == "open"]
     out["closed_rows"] = int(len(closed))
+    out["open_rows"] = int(len(open_rows))
     decision = closed
     if "maker_filled" in closed.columns:
         decision = closed[closed["maker_filled"].fillna(False).astype(bool)]
@@ -147,23 +149,12 @@ def _forward_progress() -> dict:
     out["decision_trades"] = n
     out["decision_remaining"] = max(FORWARD_DECISION_TRADES - n, 0)
     out["progress"] = round(min(n / FORWARD_DECISION_TRADES, 1.0), 4)
+    # stall hint for the UI when the clock has not started
+    if n == 0 and out["total_rows"] == 0:
+        out["stall_reason"] = "forward_log 为空：前向扫描未跑或日志被清空"
+    elif n == 0 and out["open_rows"] > 0:
+        out["stall_reason"] = f"有 {out['open_rows']} 笔 open，等待 TP/SL 关闭（闸门只计 maker-filled closed）"
     return out
-
-
-def _scout_status() -> dict:
-    pngs = sorted(SCOUT_DIR.glob("*.png"), key=lambda p: p.stat().st_mtime, reverse=True) if SCOUT_DIR.exists() else []
-    latest = pngs[0] if pngs else None
-    return {
-        "exists": SCOUT_HTML.exists(),
-        "n_frames": len(pngs),
-        "latest_symbol": latest.stem if latest else None,
-        "latest_mtime": datetime.fromtimestamp(latest.stat().st_mtime, tz=timezone.utc).strftime(
-            "%Y-%m-%dT%H:%M:%SZ"
-        )
-        if latest
-        else None,
-        "href": "/scout.html",
-    }
 
 
 def _num(x):

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>多周期雷达</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="scout_mtf.css?v=20260717tv1">
+<script defer src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script defer src="scout_mtf_app.js?v=20260717tv1"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div>
+        <a class="back" href="/">← 主看板</a>
+        <h1>多周期雷达</h1>
+        <p class="sub">榜单热币 · 五周期观察 · 可做纸面模拟</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn ghost" id="btn-paper">模拟测试</button>
+        <button type="button" class="btn primary" id="btn-run">开始扫描</button>
+      </div>
+    </header>
+
+    <p class="hint" id="hint">支线工具：不改主线，不自动下单。点榜单币 / 持仓 / 模拟成交 → 打开 K 线；点周期标签可切换 1m–30m。</p>
+
+    <div class="stats" id="stats">
+      <div class="stat">
+        <span class="stat-l">状态</span>
+        <strong id="st-run">—</strong>
+        <span class="stat-s" id="st-time"></span>
+      </div>
+      <div class="stat grade-a">
+        <span class="stat-l">值得看</span>
+        <strong id="st-a">0</strong>
+      </div>
+      <div class="stat grade-b">
+        <span class="stat-l">观察</span>
+        <strong id="st-b">0</strong>
+      </div>
+      <div class="stat grade-c">
+        <span class="stat-l">忽略</span>
+        <strong id="st-c">0</strong>
+      </div>
+    </div>
+
+    <section class="chart-card" id="chart-card" hidden>
+      <div class="paper-head">
+        <div>
+          <h2 id="chart-title">K 线</h2>
+          <p class="paper-sub" id="chart-sub">入场 / 出场 / 止盈止损线</p>
+        </div>
+        <div class="header-actions">
+          <div class="tf-seg" id="chart-tf-seg" title="周期">
+            <button type="button" data-bar="5m">5m</button>
+            <button type="button" data-bar="15m" class="active">15m</button>
+            <button type="button" data-bar="30m">30m</button>
+            <button type="button" data-bar="1H">1H</button>
+          </div>
+          <button type="button" class="btn ghost" id="btn-chart-close">关闭</button>
+        </div>
+      </div>
+      <div class="chart-legend" id="chart-legend">
+        <span><i class="dot" style="background:#2962ff"></i>入场</span>
+        <span><i class="dot" style="background:#26a69a"></i>止盈</span>
+        <span><i class="dot" style="background:#ff9800"></i>止损</span>
+        <span><i class="dot" style="background:#7b61ff"></i>出场</span>
+        <span><i class="dot" style="background:#9ca3af"></i>均线</span>
+        <span class="muted">滚轮缩放 · 拖拽 · 十字线吸附</span>
+      </div>
+      <div class="chart-host">
+        <div class="ohlc-legend" id="scout-ohlc">—</div>
+        <div id="scout-chart" class="scout-chart"></div>
+      </div>
+    </section>
+
+    <section class="paper-card" id="pos-card">
+      <div class="paper-head">
+        <div>
+          <h2>账户持仓</h2>
+          <p class="paper-sub">只读查看当前合约仓位，点一行打开 K 线（入场价 / 标记价 / 浮盈）</p>
+        </div>
+        <button type="button" class="btn ghost" id="btn-pos">刷新持仓</button>
+      </div>
+      <div class="paper-list" id="pos-list">
+        <div class="empty soft">加载中…</div>
+      </div>
+    </section>
+
+    <section class="paper-card" id="paper-card">
+      <div class="paper-head">
+        <div>
+          <h2>模拟测试</h2>
+          <p class="paper-sub">纸面回放 · 点某一币展开明细，再点某一笔打开 K 线</p>
+        </div>
+      </div>
+      <div class="paper-stats" id="paper-stats">
+        <div class="pstat"><span>状态</span><b id="p-st">未跑</b></div>
+        <div class="pstat"><span>笔数</span><b id="p-n">—</b></div>
+        <div class="pstat"><span>胜率</span><b id="p-wr">—</b></div>
+        <div class="pstat"><span>合计净</span><b id="p-net">—</b></div>
+      </div>
+      <div class="paper-list" id="paper-list">
+        <div class="empty soft">先扫描，再点右上角「模拟测试」</div>
+      </div>
+    </section>
+
+    <div class="toolbar">
+      <div class="tabs" id="tabs">
+        <button type="button" class="tab active" data-g="">全部</button>
+        <button type="button" class="tab" data-g="A">值得看</button>
+        <button type="button" class="tab" data-g="B">观察</button>
+        <button type="button" class="tab" data-g="C">忽略</button>
+      </div>
+      <button type="button" class="btn ghost" id="btn-refresh">刷新</button>
+    </div>
+
+    <div class="card">
+      <div class="list" id="list">
+        <div class="empty">加载中…</div>
+      </div>
+    </div>
+
+    <p class="foot">
+      不写 forward_log · 不碰实盘执行器 · 模拟仅本地记账
+    </p>
+  </div>
+</body>
+</html>

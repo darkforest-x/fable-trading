@@ -32,17 +32,20 @@ from src.notify import send, send_photo
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 CHART_DIR = PROJECT_DIR / "data" / "signal_charts"
 LOOKBACK_BARS = 96
-LOOKAHEAD_BARS = 16
+# No future candles in the frame — empty right margin is set via xlim (see render).
+LOOKAHEAD_BARS = 0
+# Right blank fraction of the full plot width (signal sits near left 2/3 edge).
+RIGHT_BLANK_FRAC = 1.0 / 3.0
 # Same dual-MA stack as YOLO detection charts (src/detection/render.py).
 MA_PERIODS = (20, 60, 120)
-# Dark-theme hex; SMA cool / EMA warm (mirrors detection BGR palette).
+# Dark-theme hex; SMA cool / EMA warm — all solid lines (owner 2026-07-17).
 MA_STYLE = {
     "sma20": {"color": "#3d8fd1", "ls": "-", "lw": 1.15, "alpha": 0.95},
     "sma60": {"color": "#5cb8b0", "ls": "-", "lw": 1.05, "alpha": 0.9},
     "sma120": {"color": "#8a8aaa", "ls": "-", "lw": 1.0, "alpha": 0.85},
-    "ema20": {"color": "#f06024", "ls": (0, (4, 2)), "lw": 1.2, "alpha": 0.95},
-    "ema60": {"color": "#faa03c", "ls": (0, (4, 2)), "lw": 1.1, "alpha": 0.9},
-    "ema120": {"color": "#c84696", "ls": (0, (4, 2)), "lw": 1.05, "alpha": 0.85},
+    "ema20": {"color": "#f06024", "ls": "-", "lw": 1.2, "alpha": 0.95},
+    "ema60": {"color": "#faa03c", "ls": "-", "lw": 1.1, "alpha": 0.9},
+    "ema120": {"color": "#c84696", "ls": "-", "lw": 1.05, "alpha": 0.85},
 }
 
 
@@ -190,10 +193,11 @@ def render_signal_chart(
     lookahead: int = LOOKAHEAD_BARS,
     frame: pd.DataFrame | None = None,
 ) -> Path | None:
-    """Draw candles + entry/TP/SL dashed lines. Returns PNG path or None.
+    """Draw candles + SMA/EMA (solid) + entry/TP/SL. Returns PNG path or None.
 
-    `frame` lets a caller with FRESH data (the live scout) bypass the disk
-    cache, whose last bar can lag by 10+ minutes.
+    Right ~1/3 of the plot is empty margin so the signal is not jammed against
+    the right edge (owner 2026-07-17). `frame` lets a caller with fresh data
+    bypass the disk cache.
     """
     source = str(record.get("source") or "okx")
     symbol = str(record.get("symbol") or "")
@@ -236,9 +240,10 @@ def render_signal_chart(
         entry_price = float(frame["open"].iloc[entry_i])
 
     # Dual MA on full series so SMA120 has real warmup, then cut window.
+    # Window ends at the entry bar — no future candles; blank margin is pure xlim pad.
     frame_ma = add_dual_mas(frame)
     start = max(0, entry_i - lookback)
-    end = min(len(frame_ma), entry_i + lookahead + 1)
+    end = min(len(frame_ma), entry_i + max(0, int(lookahead)) + 1)
     sub = frame_ma.iloc[start:end].reset_index(drop=True)
     entry_pos = entry_i - start
 
@@ -271,7 +276,7 @@ def render_signal_chart(
             )
         )
 
-    # SMA solid + EMA dashed (20/60/120), same stack as YOLO training charts.
+    # SMA + EMA all solid (20/60/120).
     ma_handles = []
     for name, style in MA_STYLE.items():
         if name not in sub.columns:
@@ -284,7 +289,7 @@ def render_signal_chart(
             x[mask],
             y[mask],
             color=style["color"],
-            linestyle=style["ls"],
+            linestyle="-",  # solid — never dashed
             linewidth=style["lw"],
             alpha=style["alpha"],
             zorder=3.5,
@@ -363,7 +368,16 @@ def render_signal_chart(
     ax.xaxis.set_major_locator(mdates.AutoDateLocator(minticks=4, maxticks=8))
     fig.autofmt_xdate(rotation=20, ha="right")
     ax.grid(True, color="#21262d", linewidth=0.6, alpha=0.8)
-    ax.set_xlim(x[0] - width, x[-1] + width)
+    # Data occupies left ~2/3; right ~1/3 is empty margin so signal is not edge-cramped.
+    x_left = float(x[0] - width)
+    x_data_right = float(x[-1] + width)
+    data_span = max(x_data_right - x_left, 1e-9)
+    blank_frac = float(RIGHT_BLANK_FRAC)
+    blank_frac = min(max(blank_frac, 0.05), 0.6)
+    # data_span / total = (1 - blank_frac)  →  total = data_span / (1 - blank_frac)
+    total_span = data_span / (1.0 - blank_frac)
+    x_right = x_left + total_span
+    ax.set_xlim(x_left, x_right)
 
     # keep TP/SL + MA bundle in view
     y_vals = [float(highs.max()), float(lows.min()), entry_price]

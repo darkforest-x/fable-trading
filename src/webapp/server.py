@@ -39,6 +39,15 @@ from src.webapp.model_hub import model_hub_payload
 from src.webapp.ops_flags import executor_enabled, ops_status_payload
 from src.webapp.status_strip import status_strip_payload
 from src.webapp.explore_payloads import explore_catalog, explore_chart_payload
+from src.webapp.scout_mtf_payloads import (
+    scout_mtf_latest,
+    scout_mtf_chart,
+    scout_mtf_open_positions,
+    scout_mtf_paper_latest,
+    scout_mtf_paper_run,
+    scout_mtf_run,
+    scout_mtf_status,
+)
 from src.eth_micro.payloads import eth_micro_payload
 
 app = FastAPI(title="fable-trading dashboard")
@@ -49,6 +58,17 @@ class CreateJobBody(BaseModel):
 
     job_type: str = Field(..., min_length=1, max_length=64)
     params: dict[str, Any] = Field(default_factory=dict)
+
+    model_config = {"extra": "forbid"}
+
+
+class ScoutMtfRunBody(BaseModel):
+    """Side-branch multi-TF radar controls (no secrets, no live orders)."""
+
+    top: int = Field(default=12, ge=3, le=40)
+    min_vol: float = Field(default=5_000_000.0, ge=0)
+    include_loss: bool = True
+    max_symbols: int | None = Field(default=None, ge=1, le=80)
 
     model_config = {"extra": "forbid"}
 
@@ -130,6 +150,56 @@ def forward(cost: float = FORWARD_COST) -> dict:
 def eth_micro() -> dict:
     """ETH-only 1/2/3/5m channel: backtest table + monitor status + recent signals."""
     return eth_micro_payload()
+
+
+# ---------- scout_mtf side branch (rank + multi-TF radar) ----------
+
+
+@app.get("/api/scout-mtf/status")
+def scout_mtf_status_route() -> dict:
+    return scout_mtf_status()
+
+
+@app.get("/api/scout-mtf/latest")
+def scout_mtf_latest_route() -> dict:
+    """Last scan result for the multi-TF console (may be empty)."""
+    return scout_mtf_latest()
+
+
+@app.post("/api/scout-mtf/run")
+def scout_mtf_run_route(body: ScoutMtfRunBody | None = None) -> dict:
+    """Run one multi-TF rank scan (blocking, 30–90s). Not mainline / not orders."""
+    b = body or ScoutMtfRunBody()
+    return scout_mtf_run(
+        top=b.top,
+        min_vol=b.min_vol,
+        include_loss=b.include_loss,
+        max_symbols=b.max_symbols,
+    )
+
+
+@app.get("/api/scout-mtf/paper")
+def scout_mtf_paper_route() -> dict:
+    """Latest paper-sim summary for radar picks."""
+    return scout_mtf_paper_latest()
+
+
+@app.post("/api/scout-mtf/paper-run")
+def scout_mtf_paper_run_route() -> dict:
+    """Paper-test A/B gainers from latest scan (no exchange orders)."""
+    return scout_mtf_paper_run()
+
+
+@app.get("/api/scout-mtf/positions")
+def scout_mtf_positions_route() -> dict:
+    """Read-only open SWAP positions (for drill-down on the radar console)."""
+    return scout_mtf_open_positions()
+
+
+@app.get("/api/scout-mtf/chart")
+def scout_mtf_chart_route(inst_id: str, bar: str = "15m", limit: int = 300) -> dict:
+    """OHLCV + display MAs for scout position / paper trade drill-down charts."""
+    return scout_mtf_chart(inst_id, bar=bar, limit=limit)
 
 
 # ---------- P2.5 Phase 0+1: ops (read-only) ----------

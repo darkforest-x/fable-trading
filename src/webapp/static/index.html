@@ -2,12 +2,12 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>fable dashboard</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=20260716ui">
+<link rel="stylesheet" href="style.css?v=20260717mnav">
 <script defer src="vendor/lightweight-charts.standalone.production.js"></script>
-<script defer src="app.js?v=20260716zh"></script>
+<script defer src="app.js?v=20260717mnav"></script>
 </head>
 <body class="hb-shell">
 <button type="button" class="nav-burger" id="nav-burger" aria-label="打开导航" aria-controls="sidebar" aria-expanded="false">☰</button>
@@ -42,7 +42,7 @@
   <div class="sb-group">
     <div class="sb-group-title">数据</div>
     <button type="button" class="sb-item" data-view="data"><span class="ico">💹</span> 数据中枢</button>
-    <a class="sb-item sb-link" href="/scout.html" target="_blank" rel="noopener"><span class="ico">🔭</span> 视觉侦察 ↗</a>
+    <a class="sb-item sb-link" href="/scout_mtf.html?v=tv1" target="_blank" rel="noopener"><span class="ico">📡</span> 多周期雷达 ↗</a>
   </div>
   <div class="sb-foot">
     <div class="sb-universe seg universe-seg" id="universe-seg">
@@ -50,7 +50,7 @@
       <button type="button" data-universe="spot">现货</button>
     </div>
     <div class="sb-foot-row">
-      <button type="button" class="mini-btn theme-toggle" id="theme-toggle" title="切换浅色/深色">浅色</button>
+      <button type="button" class="mini-btn theme-toggle" id="theme-toggle" title="切换浅色/深色">深色</button>
       <button type="button" class="mini-btn status-refresh" id="status-refresh" title="刷新状态（r）">刷新</button>
     </div>
     <div class="ops-token-wrap" id="ops-token-wrap" hidden>
@@ -67,7 +67,6 @@
       <div class="status-item skeleton" id="status-owner"><span class="status-k">检测器</span><span class="status-v">…</span></div>
       <div class="status-item skeleton" id="status-judgment"><span class="status-k">判断 ACTIVE</span><span class="status-v">…</span></div>
       <div class="status-item skeleton" id="status-forward"><span class="status-k">前向</span><span class="status-v">…</span></div>
-      <div class="status-item skeleton" id="status-scout"><span class="status-k">侦察</span><span class="status-v">…</span></div>
     </div>
   </div>
 
@@ -139,12 +138,13 @@
       <span><i class="dot" style="background:#fbbf24"></i>聚焦</span>
       <span class="note">← → 换币 · j/k 切框 · 0 全图 · Enter 重扫</span>
     </div>
-    <div class="explore-chart-wrap hb-chart">
+    <div class="explore-chart-wrap hb-chart chart-host">
+      <div class="ohlc-legend" id="explore-badge-ohlc">—</div>
       <div id="explore-chart"></div>
       <canvas id="explore-overlay" hidden></canvas>
     </div>
     <div class="chart-badge" id="explore-badge" hidden>
-      <span id="explore-badge-ohlc">—</span>
+      <span id="explore-badge-ohlc-legacy">—</span>
     </div>
 
     <div class="section-h">扫描指标</div>
@@ -313,6 +313,11 @@
     <div class="controls">
       <input id="symbol-input" list="symbol-list" placeholder="输入或选择币种，如 BTC_USDT" autocomplete="off">
       <datalist id="symbol-list"></datalist>
+      <div class="seg" id="tf-seg" title="客户端聚合（源数据 15m）">
+        <button type="button" data-tf="15" class="active">15m</button>
+        <button type="button" data-tf="60">1H</button>
+        <button type="button" data-tf="240">4H</button>
+      </div>
       <div class="seg" id="bars-seg">
         <button data-bars="1500" class="active">15 天</button>
         <button data-bars="3000">1 个月</button>
@@ -325,14 +330,18 @@
     <div class="signals-layout">
       <div class="panel grow">
         <div class="legend">
-          <span><i class="dot" style="background:#3d8fd1"></i>SMA 20/60/120（冷色实线）</span>
-          <span><i class="dot" style="background:#f06024"></i>EMA 20/60/120（暖色）</span>
-          <span><i class="dot" style="background:#199e70"></i>▲入场 ▪出场（绿盈/红损/黄超时）</span>
-          <span><i class="dot" style="background:#8b93a1"></i>○ 合格未成交</span>
-          <span><i class="dot" style="background:rgba(57,135,229,.35)"></i>色带 = 持仓窗口</span>
-          <span><i class="dot" style="background:#2e3340"></i>点右侧列表看止盈/止损线</span>
+          <span><i class="dot" style="background:#3d8fd1"></i>SMA 20/60/120</span>
+          <span><i class="dot" style="background:#f06024"></i>EMA 20/60/120</span>
+          <span><i class="dot" style="background:#2962ff"></i>入场</span>
+          <span><i class="dot" style="background:#26a69a"></i>TP</span>
+          <span><i class="dot" style="background:#ff9800"></i>SL</span>
+          <span><i class="dot" style="background:#199e70"></i>出场</span>
+          <span class="note">滚轮缩放 · 拖拽平移 · 十字线吸附</span>
         </div>
-        <div id="kline-chart" class="chart tall"></div>
+        <div class="chart-host">
+          <div class="ohlc-legend" id="kline-ohlc" aria-live="polite">—</div>
+          <div id="kline-chart" class="chart tall"></div>
+        </div>
       </div>
       <div class="panel side">
         <div class="side-section">
@@ -379,6 +388,7 @@
 
     <div class="panel">
       <h2>前向日志 <span class="unit" id="forward-count"></span></h2>
+      <p class="note" style="margin:0 0 8px">点击任意行 → K 线显示入场 / 止盈(+5ATR) / 止损(-2ATR) / 出场</p>
       <div class="table-wrap">
         <table id="forward-table">
           <thead><tr>

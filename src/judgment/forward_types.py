@@ -18,7 +18,9 @@ FORWARD_LOG_H1_SCALED_PATH: Final = PROJECT_DIR / "data" / "forward_log_h1_scale
 # Pre-cutover rule-scan log archived as data/forward_log_rules_pre_yolo_20260715.csv
 FORWARD_START: Final = pd.Timestamp("2026-07-15 00:00:00", tz="UTC")
 # "yolo" = detector proposes bars; "rules" = expanded dense-MA scan (legacy).
-CANDIDATE_SOURCE: Final = "yolo"
+# Override with env FABLE_CANDIDATE_SOURCE=rules when VPS has no ultralytics/torch.
+import os as _os
+CANDIDATE_SOURCE: Final = _os.environ.get("FABLE_CANDIDATE_SOURCE", "yolo").strip().lower() or "yolo"
 BAR: Final = pd.Timedelta(minutes=15)
 TP_MULT: Final = 5.0
 SL_MULT: Final = 2.0

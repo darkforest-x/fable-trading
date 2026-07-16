@@ -13,13 +13,168 @@ const appState = { universe: "swap", view: "explore" };
 const viewLoadedAt = new Map(); // view -> timestamp
 const VIEW_ORDER = ["explore", "overview", "backtest", "signals", "forward", "ethmicro", "experiments", "agenda", "jobs", "data", "models"];
 const CHART_LAYOUT = {
-  layout: { background: { type: "solid", color: "#0a0c10" }, textColor: "#8b949e" },
-  grid: { vertLines: { color: "#161b22" }, horzLines: { color: "#161b22" } },
-  timeScale: { borderColor: "#30363d", timeVisible: true },
-  rightPriceScale: { borderColor: "#30363d" },
-  crosshair: { mode: 0 },
+  layout: { background: { type: "solid", color: "#ffffff" }, textColor: "#6b7280", fontSize: 12 },
+  grid: { vertLines: { color: "#eef1f6" }, horzLines: { color: "#eef1f6" } },
+  timeScale: {
+    borderColor: "#e5e7eb",
+    timeVisible: true,
+    secondsVisible: false,
+    rightOffset: 8,
+    barSpacing: 7,
+    minBarSpacing: 2,
+  },
+  rightPriceScale: {
+    borderColor: "#e5e7eb",
+    scaleMargins: { top: 0.08, bottom: 0.12 },
+    entireTextOnly: false,
+  },
+  // Magnet snaps crosshair to bar OHLC like TradingView
+  crosshair: {
+    mode: 1, // Magnet
+    vertLine: { color: "rgba(107,114,128,0.45)", width: 1, style: 2, labelBackgroundColor: "#6b7280" },
+    horzLine: { color: "rgba(107,114,128,0.45)", width: 1, style: 2, labelBackgroundColor: "#6b7280" },
+  },
+  handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
+  handleScale: { axisPressedMouseMove: { time: true, price: true }, mouseWheel: true, pinch: true },
 };
 const pctFormat = { type: "custom", formatter: (v) => v.toFixed(2) + "%" };
+
+/* ---------- Lightweight Charts TV-ish helpers (free tier) ---------- */
+function fmtPx(v, digits) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return "—";
+  if (digits != null) return n.toFixed(digits);
+  const a = Math.abs(n);
+  if (a >= 1000) return n.toFixed(2);
+  if (a >= 1) return n.toFixed(4);
+  if (a >= 0.01) return n.toFixed(6);
+  return n.toPrecision(4);
+}
+
+function fmtChartTime(t) {
+  if (t == null) return "";
+  // UTCTimestamp seconds
+  const d = new Date((typeof t === "number" ? t : t) * 1000);
+  if (Number.isNaN(d.getTime())) return "";
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
+}
+
+/** Aggregate 15m candles into higher TF (client-side; data stays 15m on server). */
+function aggregateCandles(candles, minutes) {
+  if (!candles?.length || !minutes || minutes <= 15) return candles || [];
+  const sec = minutes * 60;
+  const out = [];
+  let cur = null;
+  for (const c of candles) {
+    const bt = Math.floor(Number(c.time) / sec) * sec;
+    if (!cur || cur.time !== bt) {
+      if (cur) out.push(cur);
+      cur = {
+        time: bt,
+        open: c.open,
+        high: c.high,
+        low: c.low,
+        close: c.close,
+        volume: Number(c.volume) || 0,
+      };
+    } else {
+      cur.high = Math.max(cur.high, c.high);
+      cur.low = Math.min(cur.low, c.low);
+      cur.close = c.close;
+      cur.volume += Number(c.volume) || 0;
+    }
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+function snapTimeToTf(t, minutes) {
+  if (t == null || !minutes || minutes <= 15) return t;
+  const sec = minutes * 60;
+  return Math.floor(Number(t) / sec) * sec;
+}
+
+function smaSeries(candles, span) {
+  const out = [];
+  let sum = 0;
+  for (let i = 0; i < candles.length; i++) {
+    sum += candles[i].close;
+    if (i >= span) sum -= candles[i - span].close;
+    if (i >= span - 1) out.push({ time: candles[i].time, value: sum / span });
+  }
+  return out;
+}
+
+function emaSeriesFrom(candles, span) {
+  const out = [];
+  if (!candles.length) return out;
+  const k = 2 / (span + 1);
+  let ema = candles[0].close;
+  for (let i = 0; i < candles.length; i++) {
+    ema = i === 0 ? candles[i].close : candles[i].close * k + ema * (1 - k);
+    if (i >= span - 1) out.push({ time: candles[i].time, value: ema });
+  }
+  return out;
+}
+
+/** Zoom to last N bars (TV-like default), leave room on the right. */
+function showLastBars(chart, nBars, total) {
+  if (!chart || !total) return;
+  const n = Math.min(Math.max(nBars || 80, 20), total);
+  const from = Math.max(0, total - n);
+  const to = total + 4;
+  try {
+    chart.timeScale().setVisibleLogicalRange({ from: from - 0.5, to: to + 0.5 });
+  } catch (_) { /* ignore */ }
+}
+
+/**
+ * Wire OHLC legend strip for a candle series (TV-style top-left info).
+ * @param {HTMLElement|null} el  e.g. #kline-ohlc
+ * @param {*} candleSeries
+ */
+function wireOhlcLegend(chart, candleSeries, el, opts = {}) {
+  if (!chart || !candleSeries || !el) return () => {};
+  const onMove = (param) => {
+    if (!param || !param.time || !param.seriesData) {
+      if (opts.hideWhenEmpty) el.hidden = true;
+      return;
+    }
+    const c = param.seriesData.get(candleSeries);
+    if (!c || c.open == null) {
+      if (opts.hideWhenEmpty) el.hidden = true;
+      return;
+    }
+    el.hidden = false;
+    const chg = c.close - c.open;
+    const chgPct = c.open ? (100 * chg) / c.open : 0;
+    const up = chg >= 0;
+    const clsName = up ? "up" : "down";
+    const timeStr = fmtChartTime(param.time);
+    el.innerHTML =
+      `<span class="ohlc-time">${timeStr}</span>` +
+      `<span>O <b>${fmtPx(c.open)}</b></span>` +
+      `<span>H <b>${fmtPx(c.high)}</b></span>` +
+      `<span>L <b>${fmtPx(c.low)}</b></span>` +
+      `<span>C <b class="${clsName}">${fmtPx(c.close)}</b></span>` +
+      `<span class="${clsName}">${up ? "+" : ""}${chgPct.toFixed(2)}%</span>` +
+      (c.volume != null
+        ? ""
+        : "");
+    // volume comes from a separate series — optional second arg via opts.volByTime
+    if (opts.volByTime && param.time != null) {
+      const v = opts.volByTime.get(param.time);
+      if (v != null) {
+        el.innerHTML += `<span class="ohlc-vol">Vol <b>${Number(v).toLocaleString(undefined, { maximumFractionDigits: 0 })}</b></span>`;
+      }
+    }
+  };
+  chart.subscribeCrosshairMove(onMove);
+  return () => {
+    try { chart.unsubscribeCrosshairMove(onMove); } catch (_) { /* ignore */ }
+  };
+}
 
 /* ---------- fetch helpers (cache + abort + toast) ---------- */
 const _jsonCache = new Map(); // url -> { t, data }
@@ -86,7 +241,26 @@ function makeChart(el, opts = {}) {
     toast("图表库未加载，请刷新页面");
     throw new Error("LightweightCharts missing");
   }
-  return LightweightCharts.createChart(el, { ...CHART_LAYOUT, autoSize: true, ...opts });
+  // deep-merge crosshair so callers can override pieces without wiping Magnet mode
+  const base = {
+    ...CHART_LAYOUT,
+    autoSize: true,
+    ...opts,
+    layout: { ...CHART_LAYOUT.layout, ...(opts.layout || {}) },
+    grid: {
+      vertLines: { ...CHART_LAYOUT.grid.vertLines, ...(opts.grid?.vertLines || {}) },
+      horzLines: { ...CHART_LAYOUT.grid.horzLines, ...(opts.grid?.horzLines || {}) },
+    },
+    timeScale: { ...CHART_LAYOUT.timeScale, ...(opts.timeScale || {}) },
+    rightPriceScale: { ...CHART_LAYOUT.rightPriceScale, ...(opts.rightPriceScale || {}) },
+    crosshair: {
+      ...CHART_LAYOUT.crosshair,
+      ...(opts.crosshair || {}),
+      vertLine: { ...CHART_LAYOUT.crosshair.vertLine, ...(opts.crosshair?.vertLine || {}) },
+      horzLine: { ...CHART_LAYOUT.crosshair.horzLine, ...(opts.crosshair?.horzLine || {}) },
+    },
+  };
+  return LightweightCharts.createChart(el, base);
 }
 
 function apiUrl(path, params = {}) {
@@ -479,19 +653,8 @@ function ensureExploreChart() {
   exploreChart.timeScale().subscribeVisibleLogicalRangeChange(redraw);
   exploreChart.timeScale().subscribeSizeChange(redraw);
   window.addEventListener("resize", redraw);
-  exploreChart.subscribeCrosshairMove((param) => {
-    const badge = $("#explore-badge");
-    const ohlc = $("#explore-badge-ohlc");
-    if (!badge || !ohlc) return;
-    if (!param || !param.time || !param.seriesData) {
-      badge.hidden = true;
-      return;
-    }
-    const c = param.seriesData.get(exploreSeries);
-    if (!c || c.open == null) { badge.hidden = true; return; }
-    badge.hidden = false;
-    ohlc.textContent = `O ${Number(c.open).toFixed(2)}  H ${Number(c.high).toFixed(2)}  L ${Number(c.low).toFixed(2)}  C ${Number(c.close).toFixed(2)}`;
-  });
+  // TV-style OHLC strip (top-left over chart)
+  wireOhlcLegend(exploreChart, exploreSeries, $("#explore-badge-ohlc"), { hideWhenEmpty: false });
 }
 
 async function runExplore() {
@@ -528,9 +691,10 @@ async function runExplore() {
     exploreState.lastCandles = d.candles;
     exploreState.lastEmas = chartMaMap(d);
     clearExploreFocusLines();
-    exploreChart.timeScale().fitContent();
+    // TV-like default: last ~120 bars, not full history crammed
+    showLastBars(exploreChart, 120, (d.candles || []).length);
     applyExploreVisibility();
-    // setTimeout (not only rAF): fitContent/layout may settle after a frame
+    // setTimeout (not only rAF): layout may settle after a frame
     requestAnimationFrame(() => applyExploreMarkers());
     setTimeout(() => applyExploreMarkers(), 60);
     setTimeout(() => applyExploreMarkers(), 200);
@@ -679,7 +843,7 @@ function renderHBars(el, rows) {
   }).join("");
 }
 
-/* ---------- status strip (owner detector / forward / scout) ---------- */
+/* ---------- status strip (owner detector / judgment / forward) ---------- */
 async function loadStatusStrip(force = false) {
   if (force) {
     for (const [k] of [..._jsonCache.keys()]) {
@@ -691,11 +855,9 @@ async function loadStatusStrip(force = false) {
     const od = d.owner_detector || {};
     const ja = d.judgment_active || {};
     const fw = d.forward || {};
-    const sc = d.scout || {};
     const ownerEl = $("#status-owner");
     const judEl = $("#status-judgment");
     const fwdEl = $("#status-forward");
-    const scoutEl = $("#status-scout");
     if (ownerEl) {
       ownerEl.classList.remove("skeleton");
       const f1 = od.frozen_eval_f1 != null ? Number(od.frozen_eval_f1).toFixed(3) : "—";
@@ -722,21 +884,17 @@ async function loadStatusStrip(force = false) {
       fwdEl.classList.remove("skeleton");
       const prog = Math.round(100 * (fw.progress || 0));
       fwdEl.classList.toggle("good", (fw.decision_trades || 0) >= (fw.decision_target || 100));
+      fwdEl.classList.toggle("warn", (fw.decision_trades || 0) === 0);
+      const openN = fw.open_rows ?? 0;
+      const totalN = fw.total_rows ?? 0;
+      const stall = fw.stall_reason ? ` · ${fw.stall_reason}` : "";
       fwdEl.innerHTML = `<span class="status-k">前向闸门</span>
         <span class="status-v">${fw.decision_trades ?? 0} / ${fw.decision_target ?? 100}（${prog}%）</span>
-        <span class="status-sub">closed ${fw.closed_rows ?? 0} · 剩余 ${fw.decision_remaining ?? "—"}</span>`;
-    }
-    if (scoutEl) {
-      scoutEl.classList.remove("skeleton");
-      const when = sc.latest_mtime ? sc.latest_mtime.slice(5, 16).replace("T", " ") : "—";
-      const sym = escapeHtml(sc.latest_symbol || "打开哨兵");
-      scoutEl.innerHTML = `<span class="status-k">视觉侦察</span>
-        <span class="status-v"><a href="${sc.href || "/scout.html"}" target="_blank" rel="noopener">${sym} ↗</a></span>
-        <span class="status-sub">${sc.n_frames ?? 0} 帧 · ${when}</span>`;
+        <span class="status-sub" title="${escapeHtml(fw.stall_reason || "")}">open ${openN} · closed ${fw.closed_rows ?? 0} · 日志 ${totalN}${stall}</span>`;
     }
     if (force) toast("状态条已刷新", "ok");
   } catch (_) {
-    ["status-owner", "status-judgment", "status-forward", "status-scout"].forEach((id) => {
+    ["status-owner", "status-judgment", "status-forward"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) {
         el.classList.remove("skeleton");
@@ -888,16 +1046,51 @@ async function loadForward() {
     value: r.value,
     text: `${r.value.toFixed(2)}%·${r.text}`,
   })));
-  $("#forward-table tbody").innerHTML = d.rows.length ? d.rows.map((r) => `
-    <tr>
-      <td>${String(r.signal_time || "").slice(0, 16).replace("T", " ")}</td>
-      <td>${r.symbol || ""}</td>
-      <td>${STATUS_CN[r.status] || r.status || ""}</td>
+  const tbody = $("#forward-table tbody");
+  tbody.innerHTML = d.rows.length ? d.rows.map((r) => {
+    const source = r.source || "okx";
+    const entry = r.entry_time || r.signal_time || "";
+    // Full overlay so K-line can draw TP/SL even when trade is not in backtest markers
+    const overlay = {
+      source,
+      symbol: r.symbol || "",
+      signal_time: r.signal_time || "",
+      entry_time: r.entry_time || r.signal_time || "",
+      exit_time: r.exit_time || "",
+      entry_price: r.entry_price,
+      atr_pct: r.atr_pct,
+      outcome: r.outcome || "",
+      status: r.status || "",
+      realized_ret: r.realized_ret != null ? r.realized_ret : r.net_ret,
+      net_ret: r.net_ret,
+      dense_run_len: r.dense_run_len || 0,
+      tp_mult: 5,
+      sl_mult: 2,
+    };
+    const ovAttr = escapeHtml(JSON.stringify(overlay));
+    return `
+    <tr class="clickable" data-source="${escapeHtml(source)}" data-symbol="${escapeHtml(r.symbol || "")}" data-entry="${escapeHtml(entry)}" data-overlay="${ovAttr}" title="点击查看 K 线：入场 / 止盈(+5ATR) / 止损(-2ATR) / 出场">
+      <td>${escapeHtml(String(r.signal_time || "").slice(0, 16).replace("T", " "))}</td>
+      <td>${escapeHtml(r.symbol || "")}</td>
+      <td>${escapeHtml(STATUS_CN[r.status] || r.status || "")}</td>
       <td>${r.maker_filled ? "filled" : "miss"}</td>
-      <td class="outcome-${r.outcome || "open"}">${OUTCOME_CN[r.outcome || ""] || r.outcome || ""}</td>
-      <td class="num">${r.score === null ? "—" : Number(r.score).toFixed(3)}</td>
+      <td class="outcome-${escapeHtml(r.outcome || "open")}">${OUTCOME_CN[r.outcome || ""] || escapeHtml(r.outcome || "") || "—"}</td>
+      <td class="num">${r.score === null || r.score === undefined ? "—" : Number(r.score).toFixed(3)}</td>
       <td class="num"><span class="${cls(r.net_ret)}">${fmtPct(r.net_ret)}</span></td>
-    </tr>`).join("") : `<tr class="no-click"><td colspan="7" class="empty-state">暂无前向信号</td></tr>`;
+    </tr>`;
+  }).join("") : `<tr class="no-click"><td colspan="7" class="empty-state">暂无前向信号</td></tr>`;
+  if (tbody && !tbody.dataset.delegated) {
+    tbody.dataset.delegated = "1";
+    tbody.addEventListener("click", (e) => {
+      const tr = e.target.closest("tr[data-entry]");
+      if (!tr || !tr.dataset.symbol) return;
+      let overlay = null;
+      try {
+        overlay = tr.dataset.overlay ? JSON.parse(tr.dataset.overlay) : null;
+      } catch (_) { overlay = null; }
+      focusTrade(tr.dataset.source || "okx", tr.dataset.symbol, tr.dataset.entry, overlay);
+    });
+  }
   } catch (err) {
     if (err?.name !== "AbortError") toast(`前向页：${err.message || err}`);
   } finally {
@@ -1146,12 +1339,174 @@ $("#trades-more")?.addEventListener("click", () => {
 /* ---------- signals browser ---------- */
 let symbolsLoaded = false, klineChart, klineSeries, volumeSeries, emaSeries = [];
 let bandSeries, pathSeries, barrier = { tp: 4, sl: 2 };
+/** Horizontal TV-style order segments (entry / TP / SL) for focused trade */
+let tradeLevelSeries = [];
 let currentKey = "", currentMarkers = [], currentTimes = [], priceLines = [], chartReq = 0;
 let currentThreshold = 0;
 let lastFocusRange = null;
 let symbolInputWired = false;
-const sigState = { bars: 1500, showMa: true };
-segWire("#bars-seg", sigState, "bars", Number, () => currentKey && loadChart(currentKey));
+/** raw 15m payload from /api/chart — re-rendered when TF changes */
+let sigRawPayload = null;
+let sigVolByTime = new Map();
+let sigLastFocusEntry = null;
+/** When set, paint entry/exit/TP/SL from this trade (forward log) after chart loads */
+let pendingTradeOverlay = null;
+const sigState = { bars: 1500, showMa: true, tfMin: 15 };
+
+function parseTimeToUnix(entryTimeStr) {
+  if (entryTimeStr == null || entryTimeStr === "") return null;
+  const raw = String(entryTimeStr).trim();
+  if (/^\d{10}$/.test(raw)) return Number(raw);
+  if (/^\d{13}$/.test(raw)) return Math.floor(Number(raw) / 1000);
+  let s = raw.replace(" ", "T");
+  if (!/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) s += "Z";
+  const ms = Date.parse(s);
+  return Number.isFinite(ms) ? Math.floor(ms / 1000) : null;
+}
+
+/**
+ * Draw entry / TP / SL / exit from an explicit trade record (forward log etc.).
+ * Does not require the trade to be in backtest markers.
+ * @param {object} ov
+ */
+function paintTradeOverlay(ov) {
+  if (!ov || !klineSeries || !klineChart) return false;
+  const entry = Number(ov.entry_price);
+  if (!Number.isFinite(entry) || entry <= 0) return false;
+
+  const tf = sigState.tfMin || 15;
+  const atr = Number(ov.atr_pct);
+  // Forward mainline is TP5/SL2; fall back to chart barrier if missing
+  const tpM = Number(ov.tp_mult ?? barrier.tp ?? 5);
+  const slM = Number(ov.sl_mult ?? barrier.sl ?? 2);
+  const atrOk = Number.isFinite(atr) && atr > 0;
+  const tpPx = atrOk ? entry * (1 + tpM * atr) : null;
+  const slPx = atrOk ? entry * (1 - slM * atr) : null;
+
+  let t0 = parseTimeToUnix(ov.entry_time) || parseTimeToUnix(ov.signal_time) || sigLastFocusEntry;
+  let t1 = parseTimeToUnix(ov.exit_time);
+  const openPos = !t1 || ov.status === "open" || (!ov.outcome && ov.status !== "closed");
+  if (!t1 && currentTimes.length) t1 = currentTimes[currentTimes.length - 1];
+  if (t0 != null) t0 = snapTimeToTf(t0, tf);
+  if (t1 != null) t1 = snapTimeToTf(t1, tf);
+  if (t0 == null) return false;
+  if (t1 == null || t1 < t0) t1 = t0;
+
+  const ret = ov.realized_ret != null ? Number(ov.realized_ret)
+    : (ov.net_ret != null ? Number(ov.net_ret)
+      : (ov.ret != null ? Number(ov.ret) : null));
+  const exitPrice = Number.isFinite(ret) ? entry * (1 + ret)
+    : (openPos ? null : entry);
+  const outcome = ov.outcome || (openPos ? "" : "");
+  const outcomeColor = OUTCOME_COLOR[outcome] || (openPos ? "#2962ff" : "#9aa0a8");
+
+  _clearTradeLevels();
+  klineChart.priceScale("right").applyOptions({ autoScale: true });
+
+  if (tpPx != null) _addTradeLevel(tpPx, "#26a69a", `TP +${tpM}ATR`, t0, t1, 2);
+  if (slPx != null) _addTradeLevel(slPx, "#ff9800", `SL -${slM}ATR`, t0, t1, 2);
+  _addTradeLevel(entry, "#2962ff", openPos ? "持仓入场" : "Entry", t0, t1, 0);
+  if (exitPrice != null && !openPos) {
+    const retPct = Number.isFinite(ret) ? (100 * ret).toFixed(2) : null;
+    const retSign = ret != null && ret >= 0 ? "+" : "";
+    const label = `${OUTCOME_CN[outcome] || "出场"}${retPct != null ? ` ${retSign}${retPct}%` : ""}`;
+    _addTradeLevel(exitPrice, outcomeColor, label, t0, t1, 0);
+  }
+
+  // path entry → exit (or last bar for open)
+  const pathEnd = openPos
+    ? (currentTimes.length ? candlesCloseAt(t1) ?? entry : entry)
+    : (exitPrice ?? entry);
+  pathSeries.applyOptions({
+    color: outcomeColor,
+    lineWidth: 2,
+  });
+  pathSeries.setData([
+    { time: t0, value: entry },
+    { time: t1, value: pathEnd },
+  ]);
+
+  // markers for this trade only (plus keep existing series markers if any)
+  const extra = [
+    {
+      time: t0,
+      position: "belowBar",
+      shape: "arrowUp",
+      color: "#2962ff",
+      text: "入",
+      size: 3,
+    },
+  ];
+  if (!openPos && exitPrice != null) {
+    extra.push({
+      time: t1,
+      position: "aboveBar",
+      shape: "arrowDown",
+      color: outcomeColor,
+      text: (OUTCOME_CN[outcome] || "出").slice(0, 2),
+      size: 3,
+    });
+  }
+  try {
+    // merge with whatever markers already on series is hard; re-set focus markers
+    klineSeries.setMarkers(extra);
+  } catch (_) { /* ignore */ }
+
+  let i0 = currentTimes.findIndex((t) => t >= t0);
+  let i1 = currentTimes.findIndex((t) => t >= t1);
+  if (i0 < 0) i0 = currentTimes.length - 1;
+  if (i1 < 0) i1 = currentTimes.length - 1;
+  const pad = Math.max(32, Math.floor((i1 - i0) * 1.2) || 32);
+  lastFocusRange = { from: Math.max(0, i0 - pad), to: i1 + pad };
+  setTimeout(() => klineChart.timeScale().setVisibleLogicalRange(lastFocusRange), 60);
+
+  // info strip
+  const info = $("#symbol-info");
+  if (info) {
+    const bits = [
+      openPos ? "前向持仓" : "前向已平",
+      `入 ${fmtPx(entry)}`,
+      atrOk ? `ATR ${(100 * atr).toFixed(3)}%` : null,
+      atrOk ? `TP ${fmtPx(tpPx)} / SL ${fmtPx(slPx)}` : null,
+      outcome ? (OUTCOME_CN[outcome] || outcome) : null,
+      Number.isFinite(ret) ? `收益 ${ret >= 0 ? "+" : ""}${(100 * ret).toFixed(2)}%` : null,
+    ].filter(Boolean);
+    info.textContent = bits.join(" · ");
+  }
+  return true;
+}
+
+function candlesCloseAt(t) {
+  if (!sigRawPayload?.candles?.length) return null;
+  // find last candle at or before t in displayed TF is hard; use raw
+  let best = null;
+  for (const c of sigRawPayload.candles) {
+    if (c.time <= t) best = c.close;
+    else break;
+  }
+  return best;
+}
+segWire("#bars-seg", sigState, "bars", Number, () => currentKey && loadChart(currentKey, sigLastFocusEntry));
+// TF seg (client aggregate)
+(function wireTfSeg() {
+  const host = $("#tf-seg");
+  if (!host) return;
+  host.querySelectorAll("button[data-tf]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      host.querySelectorAll("button").forEach((b) => b.classList.toggle("active", b === btn));
+      sigState.tfMin = Number(btn.dataset.tf) || 15;
+      if (sigRawPayload) {
+        applySignalChartData(sigRawPayload, null);
+        // re-paint last forward overlay if any
+        if (window.__lastTradeOverlay) {
+          setTimeout(() => paintTradeOverlay(window.__lastTradeOverlay), 20);
+        } else if (sigLastFocusEntry) {
+          focusMarker(sigLastFocusEntry);
+        }
+      }
+    });
+  });
+})();
 $("#signals-show-ma")?.addEventListener("change", (e) => {
   sigState.showMa = !!e.target.checked;
   emaSeries.forEach((s) => s.applyOptions({ visible: sigState.showMa }));
@@ -1173,8 +1528,8 @@ function ensureKlineChart() {
   });
   klineChart.priceScale("band").applyOptions({ visible: false, scaleMargins: { top: 0, bottom: 0 } });
   klineSeries = klineChart.addCandlestickSeries({
-    upColor: "#34d399", downColor: "#f87171", borderVisible: false,
-    wickUpColor: "#34d399", wickDownColor: "#f87171",
+    upColor: "#26a69a", downColor: "#ef5350", borderVisible: false,
+    wickUpColor: "#26a69a", wickDownColor: "#ef5350",
   });
   volumeSeries = klineChart.addHistogramSeries({
     priceScaleId: "vol", priceFormat: { type: "volume" },
@@ -1186,6 +1541,102 @@ function ensureKlineChart() {
     lineWidth: 3, priceLineVisible: false, lastValueVisible: false,
     crosshairMarkerVisible: false, autoscaleInfoProvider: () => null,
   });
+  wireOhlcLegend(klineChart, klineSeries, $("#kline-ohlc"), {
+    hideWhenEmpty: false,
+    volByTime: sigVolByTime,
+  });
+}
+
+/** Paint candles/MAs/markers for current TF from cached 15m payload. */
+function applySignalChartData(d, focusEntry = null) {
+  if (!d || !klineSeries) return;
+  const tf = sigState.tfMin || 15;
+  const candles = aggregateCandles(d.candles || [], tf);
+  sigVolByTime.clear();
+  for (const c of candles) sigVolByTime.set(c.time, c.volume);
+
+  if (typeof _clearTradeLevels === "function") _clearTradeLevels();
+  emaSeries.forEach((s) => {
+    try { klineChart.removeSeries(s); } catch (_) { /* ignore */ }
+  });
+  emaSeries = [];
+  bandSeries.setData([]);
+  pathSeries.setData([]);
+
+  currentTimes = candles.map((c) => c.time);
+  klineSeries.setData(candles);
+  volumeSeries.setData(candles.map((c) => ({
+    time: c.time,
+    value: c.volume,
+    color: c.close >= c.open ? "rgba(38,166,154,0.35)" : "rgba(239,83,80,0.35)",
+  })));
+
+  // MAs: recompute on displayed TF so 1H/4H still show smooth averages
+  const maDefs = [
+    { key: "sma20", span: 20, color: "rgba(61,143,209,0.85)", w: 1 },
+    { key: "sma60", span: 60, color: "rgba(61,143,209,0.65)", w: 1 },
+    { key: "sma120", span: 120, color: "rgba(61,143,209,0.45)", w: 1 },
+    { key: "ema20", span: 20, color: "rgba(240,96,36,0.95)", w: 2 },
+    { key: "ema60", span: 60, color: "rgba(240,96,36,0.75)", w: 1 },
+    { key: "ema120", span: 120, color: "rgba(240,96,36,0.55)", w: 1 },
+  ];
+  for (const m of maDefs) {
+    const pts = m.key.startsWith("ema") ? emaSeriesFrom(candles, m.span) : smaSeries(candles, m.span);
+    if (!pts.length) continue;
+    const s = klineChart.addLineSeries({
+      color: m.color,
+      lineWidth: m.w,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+      visible: sigState.showMa,
+    });
+    s.setData(pts);
+    emaSeries.push(s);
+  }
+
+  currentMarkers = d.markers || [];
+  const markerList = [];
+  for (const m of currentMarkers) {
+    if (!m.eligible && !m.traded) continue;
+    const t = snapTimeToTf(m.time, tf);
+    markerList.push({
+      time: t,
+      position: "belowBar",
+      shape: m.traded ? "arrowUp" : "circle",
+      color: m.traded ? (OUTCOME_COLOR[m.outcome] || "#8b93a1") : "#8b93a1",
+      text: m.traded ? `${(100 * m.ret).toFixed(1)}%` : "",
+      size: m.traded ? 2 : 1,
+    });
+    if (m.traded && m.exit_time) {
+      markerList.push({
+        time: snapTimeToTf(m.exit_time, tf),
+        position: "aboveBar",
+        shape: "square",
+        color: OUTCOME_COLOR[m.outcome] || "#8b93a1",
+        size: 1,
+      });
+    }
+  }
+  // de-dupe same time markers (aggregation can collide)
+  const seen = new Set();
+  const deduped = [];
+  for (const mk of markerList.sort((a, b) => a.time - b.time || (a.position === "belowBar" ? -1 : 1))) {
+    const k = `${mk.time}|${mk.position}|${mk.shape}`;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    deduped.push(mk);
+  }
+  klineSeries.setMarkers(deduped);
+
+  // Default zoom: last ~120 bars of current TF (TV-like), unless focusing a trade
+  if (focusEntry) {
+    focusMarker(focusEntry);
+  } else {
+    lastFocusRange = null;
+    const nShow = tf >= 240 ? 90 : tf >= 60 ? 120 : 140;
+    showLastBars(klineChart, nShow, candles.length);
+  }
 }
 
 async function initSignals(force = false) {
@@ -1246,41 +1697,32 @@ async function loadChart(key, focusEntry = null) {
   if (reqId !== chartReq) return;
   barrier = { tp: d.tp_mult, sl: d.sl_mult };
   currentThreshold = d.threshold;
-
-  priceLines.forEach((l) => klineSeries.removePriceLine(l)); priceLines = [];
-  emaSeries.forEach((s) => klineChart.removeSeries(s)); emaSeries = [];
-  bandSeries.setData([]); pathSeries.setData([]);
-  currentTimes = d.candles.map((c) => c.time);
-  klineSeries.setData(d.candles);
-  volumeSeries.setData(d.candles.map((c) => ({
-    time: c.time, value: c.volume,
-    color: c.close >= c.open ? "rgba(31,167,125,0.35)" : "rgba(230,103,103,0.35)",
-  })));
-  addChartMaSeries(klineChart, d, emaSeries);
-  emaSeries.forEach((s) => s.applyOptions({ visible: sigState.showMa }));
-  currentMarkers = d.markers;
-  const markerList = [];
-  for (const m of d.markers) {
-    if (!m.eligible && !m.traded) continue;
-    markerList.push({
-      time: m.time, position: "belowBar",
-      shape: m.traded ? "arrowUp" : "circle",
-      color: m.traded ? (OUTCOME_COLOR[m.outcome] || "#8b93a1") : "#8b93a1",
-      text: m.traded ? `${(100 * m.ret).toFixed(1)}%` : "",
-      size: m.traded ? 2 : 1,
-    });
-    if (m.traded) markerList.push({  // exit marker: start->end is visible at a glance
-      time: m.exit_time, position: "aboveBar", shape: "square",
-      color: OUTCOME_COLOR[m.outcome] || "#8b93a1", size: 1,
-    });
+  sigRawPayload = d;
+  sigLastFocusEntry = focusEntry;
+  // If we have an explicit forward/backtest overlay, skip marker-only focus
+  const useOverlay = pendingTradeOverlay && (
+    !focusEntry
+    || Math.abs(parseTimeToUnix(pendingTradeOverlay.entry_time) - Number(focusEntry)) < 2
+    || parseTimeToUnix(pendingTradeOverlay.entry_time) === Number(focusEntry)
+  );
+  applySignalChartData(d, useOverlay ? null : focusEntry);
+  if (pendingTradeOverlay) {
+    const ov = pendingTradeOverlay;
+    pendingTradeOverlay = null;
+    window.__lastTradeOverlay = ov;
+    // paint after series data is set
+    setTimeout(() => paintTradeOverlay(ov), 30);
+  } else {
+    window.__lastTradeOverlay = null;
   }
-  klineSeries.setMarkers(markerList.sort((a, b) => a.time - b.time));
-  klineChart.timeScale().fitContent();
 
   const n = d.markers.length, el = d.markers.filter((m) => m.eligible).length,
     tr = d.markers.filter((m) => m.traded).length;
-  $("#symbol-info").textContent =
-    `${symbol}：窗口内候选 ${n}，合格（≥${d.threshold}）${el}，成交 ${tr}`;
+  const tfLabel = sigState.tfMin >= 240 ? "4H" : sigState.tfMin >= 60 ? "1H" : "15m";
+  if (!$("#symbol-info")?.textContent?.includes("前向")) {
+    $("#symbol-info").textContent =
+      `${symbol} · ${tfLabel}：候选 ${n}，合格（≥${d.threshold}）${el}，成交 ${tr}`;
+  }
 
   const traded = d.markers.filter((m) => m.traded).sort((a, b) => b.time - a.time);
   const missed = d.markers.filter((m) => m.eligible && !m.traded).sort((a, b) => b.time - a.time);
@@ -1316,12 +1758,15 @@ async function loadChart(key, focusEntry = null) {
     row.addEventListener("blur", hideSignalTooltip);
   });
 
-  // default: focus the most recent trade so entry/exit/barriers show immediately
-  if (!focusEntry && traded.length) focusEntry = traded[0].entry_time;
-  if (focusEntry) {
-    focusMarker(focusEntry);
-    const row = $(`#symbol-trades tr[data-entry-ts="${focusEntry}"]`);
-    if (row) row.classList.add("focused");
+  // default: focus the most recent trade — but not if a forward-log overlay is active
+  if (!window.__lastTradeOverlay) {
+    if (!focusEntry && traded.length) focusEntry = traded[0].entry_time;
+    if (focusEntry) {
+      sigLastFocusEntry = focusEntry;
+      focusMarker(focusEntry);
+      const row = $(`#symbol-trades tr[data-entry-ts="${focusEntry}"]`);
+      if (row) row.classList.add("focused");
+    }
   }
 }
 
@@ -1360,62 +1805,153 @@ function hideSignalTooltip() {
   $("#signal-tooltip").hidden = true;
 }
 
+function _clearTradeLevels() {
+  priceLines.forEach((l) => {
+    try { klineSeries.removePriceLine(l); } catch (_) { /* ignore */ }
+  });
+  priceLines = [];
+  tradeLevelSeries.forEach((s) => {
+    try { klineChart.removeSeries(s); } catch (_) { /* ignore */ }
+  });
+  tradeLevelSeries = [];
+  if (pathSeries) pathSeries.setData([]);
+}
+
+function _addTradeLevel(price, color, title, t0, t1, lineStyle = 0) {
+  if (price == null || !Number.isFinite(Number(price))) return;
+  const p = Number(price);
+  // TV-like axis tag: short title + price
+  const axisTitle = title ? `${title} ${fmtPx(p)}` : fmtPx(p);
+  priceLines.push(klineSeries.createPriceLine({
+    price: p,
+    color,
+    lineWidth: 1,
+    lineStyle,
+    axisLabelVisible: true,
+    title: axisTitle,
+  }));
+  // Segment only spans the trade window (not full chart width feel)
+  if (t0 != null && t1 != null && t1 >= t0 && klineChart) {
+    const seg = klineChart.addLineSeries({
+      color,
+      lineWidth: 2,
+      lineStyle,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+      autoscaleInfoProvider: () => null,
+    });
+    seg.setData([
+      { time: t0, value: p },
+      { time: t1, value: p },
+    ]);
+    tradeLevelSeries.push(seg);
+  }
+}
+
 function focusMarker(entryTs) {
-  const m = currentMarkers.find((x) => x.entry_time === entryTs);
-  if (!m) return;
-  priceLines.forEach((l) => klineSeries.removePriceLine(l)); priceLines = [];
-  pathSeries.setData([]);
+  const ts = Number(entryTs);
+  const m = currentMarkers.find((x) => Number(x.entry_time) === ts || Number(x.time) === ts);
+  if (!m) {
+    // Forward/open rows may not be in backtest marker list — still zoom to time
+    if (Number.isFinite(ts) && currentTimes.length && klineChart) {
+      sigLastFocusEntry = ts;
+      let i0 = currentTimes.findIndex((t) => t >= ts);
+      if (i0 < 0) i0 = currentTimes.length - 1;
+      lastFocusRange = { from: i0 - 80, to: i0 + 80 };
+      setTimeout(() => klineChart.timeScale().setVisibleLogicalRange(lastFocusRange), 60);
+    }
+    return;
+  }
+  sigLastFocusEntry = ts;
+  _clearTradeLevels();
   klineChart.priceScale("right").applyOptions({ autoScale: true });
+  const tf = sigState.tfMin || 15;
   const entry = m.entry_price;
   const exitPrice = entry * (1 + m.ret);
   const outcomeColor = OUTCOME_COLOR[m.outcome] || "#9aa0a8";
-  const showTpBarrier = m.outcome !== "tp";
-  const showSlBarrier = m.outcome !== "sl" && m.outcome !== "sl_ambiguous";
-  priceLines.push(klineSeries.createPriceLine({
-    price: entry, color: "#9aa0a8", lineStyle: 2, title: "入场",
-  }));
-  if (showTpBarrier) {
-    priceLines.push(klineSeries.createPriceLine({  // v-label barriers of this trade
-      price: entry * (1 + barrier.tp * m.atr_pct), color: "rgba(31,167,125,0.8)",
-      lineStyle: 3, title: `止盈目标 +${barrier.tp}×ATR`,
-    }));
-  }
-  if (showSlBarrier) {
-    priceLines.push(klineSeries.createPriceLine({
-      price: entry * (1 - barrier.sl * m.atr_pct), color: "rgba(230,103,103,0.8)",
-      lineStyle: 3, title: `止损线 -${barrier.sl}×ATR`,
-    }));
-  }
-  priceLines.push(klineSeries.createPriceLine({
-    price: exitPrice, color: outcomeColor, lineStyle: 0,
-    title: `出场 ${OUTCOME_CN[m.outcome] || m.outcome}`,
-  }));
-  // dense-MA window band (the "cluster box" this signal fired from)
+  const tpPx = entry * (1 + barrier.tp * m.atr_pct);
+  const slPx = entry * (1 - barrier.sl * m.atr_pct);
+  const t0 = snapTimeToTf(m.entry_time || m.time, tf);
+  const t1 = snapTimeToTf(m.exit_time || m.time, tf);
+  const retPct = (100 * m.ret).toFixed(2);
+  const retSign = m.ret >= 0 ? "+" : "";
+  // TV-style order tags on the price axis
+  _addTradeLevel(tpPx, "#26a69a", "TP", t0, t1, 2);
+  _addTradeLevel(slPx, "#ff9800", "SL", t0, t1, 2);
+  _addTradeLevel(entry, "#2962ff", "Entry", t0, t1, 0);
+  _addTradeLevel(
+    exitPrice,
+    outcomeColor,
+    `${OUTCOME_CN[m.outcome] || "Exit"} ${retSign}${retPct}%`,
+    t0,
+    t1,
+    0,
+  );
+  // dense-MA window band
+  const denseStart = snapTimeToTf(m.time - Math.max(m.dense_len, 1) * 900, tf);
+  const denseEnd = snapTimeToTf(m.time, tf);
   bandSeries.setData([
-    { time: m.time - Math.max(m.dense_len, 1) * 900, value: 1 },
-    { time: m.time, value: 1 },
+    { time: denseStart, value: 1 },
+    { time: denseEnd, value: 1 },
   ]);
-  // entry -> exit path
-  pathSeries.applyOptions({ color: outcomeColor });
+  pathSeries.applyOptions({ color: outcomeColor, lineWidth: 2 });
   pathSeries.setData([
-    { time: m.entry_time, value: entry },
-    { time: m.exit_time, value: exitPrice },
+    { time: t0, value: entry },
+    { time: t1, value: exitPrice },
   ]);
-  // position via logical bar indices (robust against time-mapping quirks);
-  // setTimeout, not rAF -- rAF never fires in background tabs
-  let i0 = currentTimes.findIndex((t) => t >= m.time);
-  let i1 = currentTimes.findIndex((t) => t >= m.exit_time);
+  const baseMarkers = [];
+  for (const x of currentMarkers) {
+    if (!x.eligible && !x.traded) continue;
+    const isFocus = Number(x.entry_time) === ts || Number(x.time) === ts;
+    if (x.traded) {
+      baseMarkers.push({
+        time: snapTimeToTf(x.time, tf),
+        position: "belowBar",
+        shape: "arrowUp",
+        color: isFocus ? "#2962ff" : (OUTCOME_COLOR[x.outcome] || "#8b93a1"),
+        text: isFocus ? "入" : `${(100 * x.ret).toFixed(1)}%`,
+        size: isFocus ? 3 : 2,
+      });
+      baseMarkers.push({
+        time: snapTimeToTf(x.exit_time, tf),
+        position: "aboveBar",
+        shape: isFocus ? "arrowDown" : "square",
+        color: OUTCOME_COLOR[x.outcome] || "#8b93a1",
+        text: isFocus ? (OUTCOME_CN[x.outcome] || "").slice(0, 2) : "",
+        size: isFocus ? 3 : 1,
+      });
+    } else {
+      baseMarkers.push({
+        time: snapTimeToTf(x.time, tf), position: "belowBar", shape: "circle",
+        color: "#8b93a1", text: "", size: 1,
+      });
+    }
+  }
+  const seen = new Set();
+  const deduped = [];
+  for (const mk of baseMarkers.sort((a, b) => a.time - b.time)) {
+    const k = `${mk.time}|${mk.position}|${mk.text || ""}`;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    deduped.push(mk);
+  }
+  klineSeries.setMarkers(deduped);
+  let i0 = currentTimes.findIndex((t) => t >= t0);
+  let i1 = currentTimes.findIndex((t) => t >= t1);
   if (i0 < 0) i0 = currentTimes.length - 1;
   if (i1 < 0) i1 = currentTimes.length - 1;
-  lastFocusRange = { from: i0 - 96, to: i1 + 96 };
+  const pad = Math.max(24, Math.floor((i1 - i0) * 0.8) || 24);
+  lastFocusRange = { from: i0 - pad, to: i1 + pad };
   setTimeout(() => klineChart.timeScale().setVisibleLogicalRange(lastFocusRange), 60);
 }
 
-async function focusTrade(source, symbol, entryTimeStr) {
+async function focusTrade(source, symbol, entryTimeStr, overlay = null) {
   showView("signals");
   await initSignals();
-  const entryTs = Math.floor(new Date(entryTimeStr.replace(" ", "T") + (entryTimeStr.includes("+") ? "" : "Z")).getTime() / 1000);
-  const key = `${source}:${symbol}`;
+  const entryTs = parseTimeToUnix(entryTimeStr);
+  pendingTradeOverlay = overlay || null;
+  const key = `${source || "okx"}:${symbol}`;
   $("#symbol-input").value = key;
   sigState.bars = 40000;
   document.querySelectorAll("#bars-seg button").forEach((b) =>
@@ -2078,34 +2614,34 @@ $("#models-refresh")?.addEventListener("click", () => loadModelHub());
 
 /* ---------- theme ---------- */
 function initTheme() {
-  const saved = localStorage.getItem("fable_theme") || "dark";
+  // Default light (same as scout_mtf). Optional dark via toggle.
+  const saved = localStorage.getItem("fable_theme") === "dark" ? "dark" : "light";
   applyTheme(saved);
   $("#theme-toggle")?.addEventListener("click", () => {
-    const next = document.body.classList.contains("theme-light") ? "dark" : "light";
+    const next = document.body.classList.contains("theme-dark") ? "light" : "dark";
     localStorage.setItem("fable_theme", next);
     location.reload();
   });
 }
 function applyTheme(mode) {
-  document.body.classList.toggle("theme-light", mode === "light");
+  document.body.classList.toggle("theme-dark", mode === "dark");
+  document.body.classList.remove("theme-light");
   const btn = $("#theme-toggle");
-  if (btn) btn.textContent = mode === "light" ? "深色" : "浅色";
-  // chart layout colors
-  if (mode === "light") {
-    CHART_LAYOUT.layout.background.color = "#ffffff";
-    CHART_LAYOUT.layout.textColor = "#5c6b82";
-    CHART_LAYOUT.grid.vertLines.color = "#eef1f6";
-    CHART_LAYOUT.grid.horzLines.color = "#eef1f6";
-    CHART_LAYOUT.timeScale.borderColor = "#d8dee9";
-    CHART_LAYOUT.rightPriceScale.borderColor = "#d8dee9";
-  } else {
-    // Hummingbot-ish dark chart paper
+  if (btn) btn.textContent = mode === "dark" ? "浅色" : "深色";
+  if (mode === "dark") {
     CHART_LAYOUT.layout.background.color = "#0a0c10";
     CHART_LAYOUT.layout.textColor = "#8b949e";
     CHART_LAYOUT.grid.vertLines.color = "#161b22";
     CHART_LAYOUT.grid.horzLines.color = "#161b22";
     CHART_LAYOUT.timeScale.borderColor = "#30363d";
     CHART_LAYOUT.rightPriceScale.borderColor = "#30363d";
+  } else {
+    CHART_LAYOUT.layout.background.color = "#ffffff";
+    CHART_LAYOUT.layout.textColor = "#6b7280";
+    CHART_LAYOUT.grid.vertLines.color = "#eef1f6";
+    CHART_LAYOUT.grid.horzLines.color = "#eef1f6";
+    CHART_LAYOUT.timeScale.borderColor = "#e5e7eb";
+    CHART_LAYOUT.rightPriceScale.borderColor = "#e5e7eb";
   }
 }
 

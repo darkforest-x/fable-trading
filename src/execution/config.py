@@ -1,0 +1,72 @@
+"""Executor knobs (no secrets). Demo path is not configurable."""
+from __future__ import annotations
+
+import json
+from dataclasses import asdict, dataclass
+from pathlib import Path
+
+PROJECT = Path(__file__).resolve().parents[2]
+DEFAULT_CONFIG_PATH = PROJECT / "data" / "executor_config.json"
+# Relative paths so example JSON is portable across machines.
+DEFAULT_KILL_PATH = "data/executor_KILL"
+DEFAULT_LEDGER = "data/executor_ledger.jsonl"
+DEFAULT_FORWARD_LOG = "data/forward_log.csv"
+
+# Mainline barriers (freeze name tp5_sl2; HANDOFF TP5/SL2).
+TP_ATR_MULT = 5.0
+SL_ATR_MULT = 2.0
+
+
+@dataclass
+class ExecutorConfig:
+    """Paper/live executor knobs (secrets stay in okx keys file).
+
+    Sizing (owner 2026-07-17):
+      sizing_mode=equity_times_leverage → target gross notional = equity * leverage
+      e.g. 100U equity, leverage 3 → ~300U total notional budget (cross).
+      Concurrent slots share the remaining budget (not 3x each).
+      sizing_mode=fixed → always use notional_usdt per entry (legacy).
+    """
+
+    max_concurrent: int = 1
+    notional_usdt: float = 20.0  # fixed mode, or floor/fallback when equity missing
+    leverage: int = 3
+    # equity_times_leverage | fixed
+    sizing_mode: str = "equity_times_leverage"
+    # min notional per entry (USDT); skip if remaining budget below this
+    min_notional_usdt: float = 5.0
+    max_consecutive_losses: int = 5
+    poll_seconds: int = 60
+    td_mode: str = "cross"  # full cross margin
+    kill_switch_file: str = DEFAULT_KILL_PATH
+    forward_log: str = DEFAULT_FORWARD_LOG
+    ledger: str = DEFAULT_LEDGER
+    # Only take signals with score >= row threshold (already filtered in log)
+    # and status in these sets:
+    open_statuses: tuple[str, ...] = ("open", "pending")
+    require_score_ge_threshold: bool = True
+
+    @classmethod
+    def load(cls, path: Path | None = None) -> "ExecutorConfig":
+        p = Path(path) if path else DEFAULT_CONFIG_PATH
+        if not p.exists():
+            return cls()
+        raw = json.loads(p.read_text(encoding="utf-8"))
+        known = {f.name for f in cls.__dataclass_fields__.values()}  # type: ignore[attr-defined]
+        kwargs = {k: v for k, v in raw.items() if k in known}
+        if "open_statuses" in kwargs and isinstance(kwargs["open_statuses"], list):
+            kwargs["open_statuses"] = tuple(kwargs["open_statuses"])
+        return cls(**kwargs)
+
+    def save_example(self, path: Path | None = None) -> Path:
+        p = Path(path) if path else DEFAULT_CONFIG_PATH.with_suffix(".example.json")
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps(asdict(self), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        return p
+
+
+def kill_switch_active(cfg: ExecutorConfig) -> bool:
+    p = Path(cfg.kill_switch_file)
+    if not p.is_absolute():
+        p = PROJECT / p
+    return p.exists()
