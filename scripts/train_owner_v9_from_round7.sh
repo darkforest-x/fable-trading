@@ -240,7 +240,15 @@ for run in ("owner_v9_chain", "owner_v9_coco"):
     w = Path(f"runs/detect/runs/detect/{run}/weights/best.pt")
     if w.exists():
         best, _ = evaluate_owner_f1(w, "datasets/owner_eval_frozen")
-        lines.append(f"{run}  F1 {best['f1']:.3f}  P {best['p']:.3f}  R {best['r']:.3f}  {shape}")
+        # Exemplar gate: a model that misses the owner's textbook cases is broken
+        # regardless of its F1 -- this is what would have caught the lr bug on day 1.
+        import importlib.util as _il
+        spec = _il.spec_from_file_location("bc", "scripts/benchmark_check.py")
+        bc = _il.module_from_spec(spec); spec.loader.exec_module(bc)
+        gate = bc.run(w)
+        g = "⭐通过" if gate["passed"] else "⭐❌不通过"
+        lines.append(f"{run}  F1 {best['f1']:.3f}  P {best['p']:.3f}  R {best['r']:.3f}  "
+                     f"{shape}  {g}(训{gate['train']['recall']}/评{gate['eval']['recall']})")
         print("  " + lines[-1], flush=True)
 
 n = len(list(Path("datasets/dense_owner_v8/images/train").glob("*.png")))

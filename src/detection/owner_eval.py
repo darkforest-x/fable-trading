@@ -26,34 +26,67 @@ STEM. Do not re-copy them.
 from __future__ import annotations
 
 import hashlib
+import json
+import re
+from functools import lru_cache
 from pathlib import Path
 
-# The frozen eval set is every symbol whose sha1 lands on 0 mod 7 (~1/7 of the
-# universe, 47 symbols). It is the project's one honest ruler: a model that
-# trained on any of these has an inflated F1, which is exactly how v5_from_v4's
-# 0.663 was believed for a week. 5 and 7 are coprime by design so the val split
-# below cannot systematically shadow it.
+# The frozen eval ruler is the LIST in datasets/owner_eval_frozen/MANIFEST.json
+# (47 symbols / 464 images, materialized 2026-07-16), not a live hash rule.
+# It was a hash rule (sha1 % 7 == 0) before, and that broke twice in one day:
+# stems come in two spellings ("okx_BCH_USDT_SWAP_012340" vs "BCH_USDT_SWAP"),
+# the rule hashed the raw spelling, and BCH_USDT_SWAP ended up on BOTH sides of
+# the eval line -- 18 images in the ruler, 1 sibling in training. A ruler whose
+# membership shifts when someone edits a parsing function is not frozen; the
+# hash now only classifies symbols the manifest has never heard of (new fetches).
 EVAL_MOD = 7
 VAL_MOD = 5
+_MANIFEST = Path(__file__).resolve().parents[2] / "datasets/owner_eval_frozen/MANIFEST.json"
 
 
 def symbol_of(stem: str) -> str:
-    """Image stem -> symbol. "BTC_USDT_SWAP_001234" -> "BTC_USDT_SWAP"."""
-    return stem.rsplit("_", 1)[0]
+    """Image stem -> normalized symbol, tolerant of both stem spellings.
+
+    "okx_BCH_USDT_SWAP_012340" -> "BCH_USDT_SWAP"
+    "BCH_USDT_SWAP_012340"     -> "BCH_USDT_SWAP"
+    "BCH_USDT_SWAP"            -> "BCH_USDT_SWAP"  (no index to strip)
+    """
+    s = re.sub(r"^okx_", "", stem)
+    return re.sub(r"_\d+$", "", s)
+
+
+@lru_cache(maxsize=1)
+def _manifest_symbols() -> frozenset[str]:
+    if _MANIFEST.exists():
+        return frozenset(json.loads(_MANIFEST.read_text())["symbols"])
+    return frozenset()
 
 
 def is_eval_symbol(sym: str) -> bool:
-    """Is this SYMBOL in the frozen eval set? Pass a symbol, not a stem."""
+    """Is this SYMBOL in the frozen eval ruler? Manifest first, hash fallback.
+
+    The fallback only fires for symbols absent from every dataset the manifest
+    was built from -- i.e. genuinely new fetches -- so it can never move an
+    existing symbol across the line.
+    """
+    sym = symbol_of(sym)  # normalize even if a raw spelling sneaks in
+    manifest = _manifest_symbols()
+    if manifest:
+        return sym in manifest
     return int(hashlib.sha1(sym.encode()).hexdigest(), 16) % EVAL_MOD == 0
 
 
 def is_eval_stem(stem: str) -> bool:
-    """Is this image STEM's symbol in the frozen eval set?"""
+    """Is this image STEM's symbol in the frozen eval ruler?"""
     return is_eval_symbol(symbol_of(stem))
 
 
 def split_of(stem: str) -> str:
-    """train/val for a stem, split by SYMBOL so no symbol straddles the split."""
+    """train/val for a stem, split by SYMBOL so no symbol straddles the split.
+
+    Deliberately still hash-based (it is a working split, not a frozen ruler),
+    but on the NORMALIZED symbol so both spellings land on the same side.
+    """
     return "val" if int(hashlib.sha1(symbol_of(stem).encode()).hexdigest(), 16) % VAL_MOD == 0 else "train"
 
 
