@@ -8,6 +8,7 @@ Hard rules:
 """
 from __future__ import annotations
 
+import math
 import time
 import traceback
 from datetime import datetime, timezone
@@ -56,10 +57,16 @@ def load_actionable_signals(cfg: ExecutorConfig) -> pd.DataFrame:
 
 
 def barriers(entry: float, atr_pct: float) -> tuple[float, float]:
-    atr = abs(entry * float(atr_pct))
-    if atr <= 0:
-        # fallback 1% ATR proxy if missing
-        atr = entry * 0.01
+    try:
+        atr = abs(entry * float(atr_pct))
+    except (TypeError, ValueError):
+        atr = float("nan")
+    # `atr <= 0` misses NaN (all NaN comparisons are False): a forward row with
+    # atr_pct=None sailed through here on 2026-07-16, produced tp=sl=NaN -> 0.0
+    # after tick rounding, OKX rejected the bracket (51250) and a REAL DOGE long
+    # sat naked. `not (atr > 0)` is True for NaN, zero, and negatives alike.
+    if not (atr > 0) or not math.isfinite(atr):
+        atr = entry * 0.01  # 1% proxy so the position is never unprotected
     tp = entry + TP_ATR_MULT * atr
     sl = entry - SL_ATR_MULT * atr
     return tp, sl
@@ -172,6 +179,14 @@ def open_one(
         "notional_usdt": notional,
         "leverage": cfg.leverage,
     })
+
+    # The bracket IS the risk control: if these numbers are unusable, there is
+    # nothing safe to place afterwards, so refuse the ENTRY -- do not discover
+    # the problem with a live position already open (2026-07-16 DOGE incident).
+    if not (math.isfinite(tp_px) and math.isfinite(sl_px) and 0 < sl_px < mark < tp_px):
+        event["event"] = "skipped_invalid_barriers"
+        event["note"] = f"tp/sl unusable: tp={tp_px} sl={sl_px} mark={mark}"
+        return event
 
     try:
         client.set_leverage(inst_id, str(cfg.leverage), mgn_mode=cfg.td_mode)
