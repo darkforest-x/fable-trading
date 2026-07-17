@@ -1,0 +1,92 @@
+{
+  "dataset": "data/judgment_yolo_swap_v10.csv",
+  "score_threshold_val_q90": 0.7544,
+  "n_candidates": 23480,
+  "n_eligible": 2235,
+  "config": {
+    "max_concurrent": 10,
+    "base_cost_round_trip": 0.003,
+    "accept_window_start": "2026-05-04 00:00:00+00:00",
+    "accept_window_disclaimer": "window consumed once by 2b holdout eval (2026-07-08)"
+  },
+  "cost_sweep_accept_window": {
+    "0.002": {
+      "n_trades": 414,
+      "net_total_units": 10.7145,
+      "net_return_on_capital": 1.0715,
+      "mean_net_per_trade": 0.02588,
+      "win_rate": 0.8575,
+      "profit_factor": 15.3,
+      "max_drawdown_pct": 0.0036,
+      "outcome_counts": {
+        "tp": 342,
+        "sl": 57,
+        "timeout": 15
+      }
+    },
+    "0.003": {
+      "n_trades": 414,
+      "net_total_units": 10.3005,
+      "net_return_on_capital": 1.0301,
+      "mean_net_per_trade": 0.02488,
+      "win_rate": 0.8575,
+      "profit_factor": 13.744,
+      "max_drawdown_pct": 0.0039,
+      "outcome_counts": {
+        "tp": 342,
+        "sl": 57,
+        "timeout": 15
+      }
+    },
+    "0.004": {
+      "n_trades": 414,
+      "net_total_units": 9.8865,
+      "net_return_on_capital": 0.9887,
+      "mean_net_per_trade": 0.02388,
+      "win_rate": 0.8527,
+      "profit_factor": 12.388,
+      "max_drawdown_pct": 0.0041,
+      "outcome_counts": {
+        "tp": 342,
+        "sl": 57,
+        "timeout": 15
+      }
+    }
+  },
+  "insample_pre_window_base_cost": {
+    "n_trades": 1426,
+    "net_total_units": 37.3857,
+    "net_return_on_capital": 3.7386,
+    "mean_net_per_trade": 0.02622,
+    "win_rate": 0.9011,
+    "profit_factor": 19.704,
+    "max_drawdown_pct": 0.0048,
+    "outcome_counts": {
+      "tp": 1252,
+      "sl": 126,
+      "timeout": 47,
+      "sl_ambiguous": 1
+    }
+  },
+  "full_period_base_cost": {
+    "n_trades": 1840,
+    "net_total_units": 47.6862,
+    "net_return_on_capital": 4.7686,
+    "mean_net_per_trade": 0.02592,
+    "win_rate": 0.8913,
+    "profit_factor": 17.988,
+    "max_drawdown_pct": 0.0048,
+    "outcome_counts": {
+      "tp": 1594,
+      "sl": 183,
+      "timeout": 62,
+      "sl_ambiguous": 1
+    }
+  },
+  "acceptance_check_base_cost": {
+    "net_positive": true,
+    "profit_factor_ge_1.3": true,
+    "max_drawdown_le_20pct": true,
+    "n_trades_ge_100": true
+  }
+}
