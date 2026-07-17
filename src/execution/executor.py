@@ -32,6 +32,39 @@ def signal_key(row: pd.Series) -> str:
     return f"{row.get('source','okx')}|{row.get('symbol')}|{row.get('signal_time')}|{row.get('score')}"
 
 
+_NOTIFY_EVENTS = {
+    "order_placed": "🟢 <b>实盘开仓</b>",
+    "order_partial": "🟡 <b>开仓成功·括号失败</b>(需人工补止损!)",
+    "order_failed": "🔴 <b>下单失败</b>",
+    "skipped_invalid_barriers": "⚠️ <b>拒单</b>(止盈止损价不可用)",
+}
+
+
+def _notify_event(ev: dict) -> None:
+    """Push trade events to Telegram. Fire-and-forget: the trading loop must
+    never stall or die because a notification did."""
+    label = _NOTIFY_EVENTS.get(str(ev.get("event")))
+    if label is None:
+        return
+    try:
+        from src.notify import send
+
+        parts = [label, f"品种: <b>{ev.get('inst_id') or ev.get('symbol')}</b>"]
+        if ev.get("mark_px"):
+            parts.append(f"价格: {ev['mark_px']}")
+        if ev.get("tp_px") and ev.get("sl_px"):
+            parts.append(f"止盈 {ev['tp_px']} / 止损 {ev['sl_px']}")
+        if ev.get("sz"):
+            parts.append(f"数量: {ev['sz']}  名义: {ev.get('notional_usdt', '?')}U")
+        if ev.get("error"):
+            parts.append(f"错误: {str(ev['error'])[:160]}")
+        if ev.get("note"):
+            parts.append(str(ev["note"])[:160])
+        send("\n".join(parts))
+    except Exception as exc:  # noqa: BLE001
+        print(f"executor notify failed: {exc}")
+
+
 def _resolve(path_str: str) -> Path:
     p = Path(path_str)
     if p.is_absolute():
@@ -50,8 +83,14 @@ def load_actionable_signals(cfg: ExecutorConfig) -> pd.DataFrame:
         df = df[df["status"].astype(str).isin(cfg.open_statuses)]
     if cfg.require_score_ge_threshold and "score" in df.columns and "threshold" in df.columns:
         df = df[pd.to_numeric(df["score"], errors="coerce") >= pd.to_numeric(df["threshold"], errors="coerce")]
-    # oldest first
+    # Freshness gate: a signal stays status=open until its barrier resolves (up
+    # to 18h), but the EDGE is the launch moment -- entering hours late is a
+    # different, untested trade. Only rows younger than max_signal_age_min may
+    # open positions (the backtest enters at the very next bar).
     if "signal_time" in df.columns:
+        age_cap = pd.Timestamp.now(tz="UTC") - pd.Timedelta(minutes=cfg.max_signal_age_min)
+        ts = pd.to_datetime(df["signal_time"], errors="coerce", utc=True)
+        df = df[ts >= age_cap]
         df = df.sort_values("signal_time")
     return df.reset_index(drop=True)
 
@@ -292,6 +331,7 @@ def run_once(cfg: ExecutorConfig, *, dry_run: bool = False) -> dict[str, Any]:
                 notional_usdt=notional, sizing_meta=sizing,
             )
             led.append(ledger_path, ev)
+            _notify_event(ev)
             if ev.get("event") in {"order_placed", "order_partial", "dry_run"}:
                 summary["opened"] += 1
                 slots -= 1
@@ -302,16 +342,15 @@ def run_once(cfg: ExecutorConfig, *, dry_run: bool = False) -> dict[str, Any]:
                 summary["skipped"] += 1
         except Exception as exc:  # noqa: BLE001 — one bad symbol must not kill the loop
             summary["errors"] += 1
-            led.append(
-                ledger_path,
-                {
-                    "event": "order_failed",
-                    "signal_key": sk,
-                    "symbol": row.get("symbol"),
-                    "error": str(exc),
-                    "trace": traceback.format_exc(limit=4),
-                },
-            )
+            fail_ev = {
+                "event": "order_failed",
+                "signal_key": sk,
+                "symbol": row.get("symbol"),
+                "error": str(exc),
+                "trace": traceback.format_exc(limit=4),
+            }
+            led.append(ledger_path, fail_ev)
+            _notify_event(fail_ev)
     return summary
 
 

@@ -36,6 +36,9 @@ class ExecutorConfig:
     # min notional per entry (USDT); skip if remaining budget below this
     min_notional_usdt: float = 5.0
     max_consecutive_losses: int = 5
+    # A forward row stays "open" for up to the 18h barrier horizon, but the edge
+    # is the launch moment: refuse to open positions on signals older than this.
+    max_signal_age_min: int = 45
     poll_seconds: int = 60
     td_mode: str = "cross"  # full cross margin
     kill_switch_file: str = DEFAULT_KILL_PATH
