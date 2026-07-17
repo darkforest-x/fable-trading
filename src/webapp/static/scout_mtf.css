@@ -199,6 +199,43 @@ h1 {
   font-size: 14px;
 }
 
+.list-section-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 12px 16px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+  border-bottom: 1px solid var(--line-2);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.list-section-h span {
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 12px;
+}
+.tag-core {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  vertical-align: middle;
+  color: var(--blue);
+  background: var(--blue-soft);
+}
+.tag-core.tag-vol {
+  color: #0f766e;
+  background: #ccfbf1;
+}
+.row.core {
+  background: #fafcff;
+}
 .row {
   display: grid;
   grid-template-columns: 56px minmax(0, 1.4fr) 88px 72px minmax(180px, 1.6fr);

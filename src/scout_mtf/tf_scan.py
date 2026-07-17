@@ -190,12 +190,14 @@ def composite_from_votes(
     base = (vsum / wsum) if wsum > 0 else 0.0
 
     # Rank boost: light — top-3 gainer +0.05, top-3 loser slight penalty on longs
+    # major/volume: no momentum boost (structure-only grade for always-on names)
     boost = 0.0
     if rank_side == "gain":
         boost = max(0.0, 0.06 - 0.01 * (rank - 1))
-    else:
+    elif rank_side == "loss":
         # losers: structure can still be good for bounce, but damp momentum chase
         boost = max(-0.04, -0.02 + 0.005 * (rank - 1))
+    # major / volume → boost stays 0
 
     # Alignment bonuses
     tf_map = {v.bar: v for v in votes if v.ok}

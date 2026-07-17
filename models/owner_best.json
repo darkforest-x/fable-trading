@@ -1,18 +1,22 @@
 {
-  "source_run": "owner_v9_chain",
-  "frozen_eval_f1": 0.627,
+  "source_run": "owner_v10_chain",
+  "frozen_eval_f1": 0.645,
   "metrics": {
-    "conf": 0.2,
-    "f1": 0.627,
-    "p": 0.549,
-    "r": 0.729,
-    "tp": 167,
-    "fp": 137,
-    "fn": 62
+    "conf": 0.3,
+    "f1": 0.645,
+    "p": 0.678,
+    "r": 0.616,
+    "tp": 141,
+    "fp": 67,
+    "fn": 88
   },
   "eval_set": "owner_eval_frozen(47币种从未参训)",
   "eligibility": "仅限已验证训练集不含 eval 币种的 run",
   "leaderboard": [
+    {
+      "run": "owner_v10_chain",
+      "f1": 0.645
+    },
     {
       "run": "owner_v9_chain",
       "f1": 0.627
@@ -20,6 +24,10 @@
     {
       "run": "owner_v6_chain",
       "f1": 0.595
+    },
+    {
+      "run": "owner_v10_coco",
+      "f1": 0.572
     },
     {
       "run": "owner_v9_coco",

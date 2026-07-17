@@ -6,7 +6,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from src.scout_mtf.rank import RankedSymbol, pool_as_dicts, rank_pool
+from src.scout_mtf.rank import (
+    DEFAULT_VOLUME_TOP,
+    RankedSymbol,
+    build_scan_pool,
+    pool_as_dicts,
+)
 from src.scout_mtf.tf_scan import TIMEFRAMES, composite_from_votes, scan_symbol_all_tf
 
 PROJECT = Path(__file__).resolve().parents[2]
@@ -19,13 +24,20 @@ def run_scout(
     min_vol_usdt: float = 5_000_000.0,
     include_loss: bool = True,
     max_symbols: int | None = None,
+    volume_top: int = DEFAULT_VOLUME_TOP,
+    include_majors: bool = True,
     bars: tuple[str, ...] = TIMEFRAMES,
     out_dir: Path | None = None,
 ) -> dict[str, Any]:
     """Run one radar pass. Writes latest.json under data/scout_mtf/."""
-    pool = rank_pool(top_n=top_n, min_vol_usdt=min_vol_usdt, include_loss=include_loss)
-    if max_symbols is not None:
-        pool = pool[: max(1, int(max_symbols))]
+    pool = build_scan_pool(
+        top_n=top_n,
+        min_vol_usdt=min_vol_usdt,
+        include_loss=include_loss,
+        volume_top=volume_top,
+        include_majors=include_majors,
+        max_symbols=max_symbols,
+    )
 
     results: list[dict[str, Any]] = []
     for item in pool:
@@ -51,19 +63,33 @@ def run_scout(
             }
         )
 
-    results.sort(key=lambda r: (-ord_grade(r["grade"]), -r["composite"]))
+    # Keep majors/volume pinned on top (by grade within group), then movers
+    def sort_key(r: dict[str, Any]) -> tuple:
+        side = r.get("rank_side") or ""
+        pin = 0 if side in {"major", "volume"} else 1
+        side_ord = {"major": 0, "volume": 1, "gain": 2, "loss": 3}.get(side, 9)
+        return (pin, side_ord, -ord_grade(r["grade"]), -float(r.get("composite") or 0))
+
+    results.sort(key=sort_key)
 
     report = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "branch": "scout_mtf",
         "disclaimer": (
             "Side branch only. Not mainline forward_log / ACTIVE. "
-            "Rank pool is 24h movers (momentum bias). Multi-TF votes are rule-dense + regime, "
-            "not full YOLO+LGB. Grades A/B/C are research radar, not trade orders."
+            "Pool = pinned majors (BTC/ETH/SOL…) + top-10 24h volume + 24h gain/loss movers. "
+            "Multi-TF votes are rule-dense + regime, not full YOLO+LGB. "
+            "Grades A/B/C are research radar, not trade orders."
         ),
         "timeframes": list(bars),
         "pool_size": len(pool),
         "pool": pool_as_dicts(pool),
+        "pool_breakdown": {
+            "major": sum(1 for x in pool if x.rank_side == "major"),
+            "volume": sum(1 for x in pool if x.rank_side == "volume"),
+            "gain": sum(1 for x in pool if x.rank_side == "gain"),
+            "loss": sum(1 for x in pool if x.rank_side == "loss"),
+        },
         "results": results,
         "summary": {
             "A": sum(1 for r in results if r["grade"] == "A"),

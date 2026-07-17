@@ -70,6 +70,19 @@ function gradeTitle(g) {
   return { A: "值得看", B: "观察", C: "忽略" }[g] || g;
 }
 
+function sideTitle(side) {
+  return {
+    major: "主流",
+    volume: "成交额前排",
+    gain: "涨幅榜",
+    loss: "跌幅榜",
+  }[side] || side || "—";
+}
+
+function isCoreSide(side) {
+  return side === "major" || side === "volume";
+}
+
 function tfClass(cell) {
   if (!cell || !cell.ok || cell.vote == null) return "cold";
   const v = Number(cell.vote);
@@ -532,6 +545,45 @@ function renderStats(d) {
   }
 }
 
+function renderRow(r) {
+  const open = state.open === r.symbol ? "open" : "";
+  const chgCls = Number(r.chg24h_pct) >= 0 ? "up" : "down";
+  const side = sideTitle(r.rank_side);
+  const core = isCoreSide(r.rank_side) ? " core" : "";
+  const vol = r.vol24h_usdt != null && Number(r.vol24h_usdt) > 0
+    ? ` · 24h ${(Number(r.vol24h_usdt) / 1e6).toFixed(1)}M`
+    : "";
+  const tfs = TF_ORDER.map((bar) => {
+    const c = r.tf?.[bar];
+    return `<span class="tf ${tfClass(c)}" data-bar="${escapeAttr(bar)}" title="${escapeAttr((c?.note || bar) + " · 点此看该周期K线")}">${escapeHtml(tfText(bar, c))}</span>`;
+  }).join("");
+
+  const details = TF_ORDER.map((bar) => {
+    const c = r.tf?.[bar] || {};
+    const vote = c.vote == null ? "—" : Number(c.vote).toFixed(2);
+    const dens = c.dense ? "密集" : "一般";
+    const pos = c.above_ema55 === true ? "站上均线" : c.above_ema55 === false ? "均线下方" : "—";
+    return `<div class="detail-item" data-bar="${escapeAttr(bar)}" title="点此看 ${escapeAttr(bar)} K线"><b>${bar} · ${vote}</b><span>${dens} · ${pos}</span></div>`;
+  }).join("");
+
+  const inst = r.inst_id || String(r.symbol || "").replace(/_/g, "-");
+  return `
+    <article class="row ${open}${core}" data-symbol="${escapeAttr(r.symbol)}" data-inst="${escapeAttr(inst)}" data-last="${escapeAttr(r.last ?? "")}">
+      <div class="badge ${escapeAttr(r.grade)}" title="${escapeAttr(gradeTitle(r.grade))}">${escapeHtml(gradeLabel(r.grade))}</div>
+      <div class="main">
+        <div class="sym">${escapeHtml(shortSym(r.symbol))}${r.rank_side === "major" ? '<span class="tag-core">主流</span>' : r.rank_side === "volume" ? '<span class="tag-core tag-vol">额前</span>' : ""}</div>
+        <div class="sym-sub">${escapeHtml(side)} #${r.rank ?? "—"} · 综合 ${r.composite != null ? Number(r.composite).toFixed(2) : "—"}${vol} · 点开看K线</div>
+      </div>
+      <div class="chg ${chgCls}">${fmtChg(r.chg24h_pct)}</div>
+      <div class="score">${r.composite != null ? Number(r.composite).toFixed(2) : "—"}</div>
+      <div class="tfs">${tfs}</div>
+      <div class="detail">
+        <div>${escapeHtml(gradeTitle(r.grade))} · 点周期标签切换 K 线周期</div>
+        <div class="detail-grid">${details}</div>
+      </div>
+    </article>`;
+}
+
 function renderList(d) {
   const host = $("#list");
   const rows = filtered(d.rows || []);
@@ -542,40 +594,18 @@ function renderList(d) {
     return;
   }
 
-  host.innerHTML = rows.map((r) => {
-    const open = state.open === r.symbol ? "open" : "";
-    const chgCls = Number(r.chg24h_pct) >= 0 ? "up" : "down";
-    const side = r.rank_side === "gain" ? "涨幅榜" : "跌幅榜";
-    const tfs = TF_ORDER.map((bar) => {
-      const c = r.tf?.[bar];
-      return `<span class="tf ${tfClass(c)}" data-bar="${escapeAttr(bar)}" title="${escapeAttr((c?.note || bar) + " · 点此看该周期K线")}">${escapeHtml(tfText(bar, c))}</span>`;
-    }).join("");
-
-    const details = TF_ORDER.map((bar) => {
-      const c = r.tf?.[bar] || {};
-      const vote = c.vote == null ? "—" : Number(c.vote).toFixed(2);
-      const dens = c.dense ? "密集" : "一般";
-      const pos = c.above_ema55 === true ? "站上均线" : c.above_ema55 === false ? "均线下方" : "—";
-      return `<div class="detail-item" data-bar="${escapeAttr(bar)}" title="点此看 ${escapeAttr(bar)} K线"><b>${bar} · ${vote}</b><span>${dens} · ${pos}</span></div>`;
-    }).join("");
-
-    const inst = r.inst_id || String(r.symbol || "").replace(/_/g, "-");
-    return `
-      <article class="row ${open}" data-symbol="${escapeAttr(r.symbol)}" data-inst="${escapeAttr(inst)}" data-last="${escapeAttr(r.last ?? "")}">
-        <div class="badge ${escapeAttr(r.grade)}" title="${escapeAttr(gradeTitle(r.grade))}">${escapeHtml(gradeLabel(r.grade))}</div>
-        <div class="main">
-          <div class="sym">${escapeHtml(shortSym(r.symbol))}</div>
-          <div class="sym-sub">${escapeHtml(side)} #${r.rank ?? "—"} · 综合 ${r.composite != null ? Number(r.composite).toFixed(2) : "—"} · 点开看K线</div>
-        </div>
-        <div class="chg ${chgCls}">${fmtChg(r.chg24h_pct)}</div>
-        <div class="score">${r.composite != null ? Number(r.composite).toFixed(2) : "—"}</div>
-        <div class="tfs">${tfs}</div>
-        <div class="detail">
-          <div>${escapeHtml(gradeTitle(r.grade))} · 点周期标签切换 K 线周期</div>
-          <div class="detail-grid">${details}</div>
-        </div>
-      </article>`;
-  }).join("");
+  const core = rows.filter((r) => isCoreSide(r.rank_side));
+  const movers = rows.filter((r) => !isCoreSide(r.rank_side));
+  let html = "";
+  if (core.length) {
+    html += `<div class="list-section-h">主流 / 高流动性 <span>${core.length}</span></div>`;
+    html += core.map(renderRow).join("");
+  }
+  if (movers.length) {
+    html += `<div class="list-section-h">涨跌榜动量 <span>${movers.length}</span></div>`;
+    html += movers.map(renderRow).join("");
+  }
+  host.innerHTML = html;
 }
 
 async function openRadarChart(rowEl, bar = "15m") {
@@ -805,7 +835,8 @@ async function runScan() {
         top: 12,
         min_vol: 5_000_000,
         include_loss: true,
-        max_symbols: 16,
+        // allow majors+volume+movers (~10+10+24) without truncating core
+        max_symbols: 40,
       }),
     });
     if (d.ok === false) {
