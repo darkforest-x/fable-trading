@@ -1,11 +1,20 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
-## ⚡ 2026-07-16 当前真相（本节之下的内容为历史，多处已被推翻）
+## ⚡ 2026-07-18 当前真相（本节之下的内容为历史，多处已被推翻）
 
-**主线**：YOLO 检测（`owner_v8_chain`，frozen-F1 0.650）→ 回归判断
-（`frozen_tp5_sl2_swap_yolo_v8_reg_20260716`，阈值 val-q90=0.0217）→ TP5/SL2 出场。
-`models/ACTIVE` 与 `frozen.default_config()` 均已指向 v8 池；forward / 看板 / scout
-判断分走同一咽喉。VPS 看板已部署（PF 7.50 @0.3%，428 笔，accept 窗口）。
+**主线**：YOLO 检测（`owner_v11_chain`，frozen-F1 **0.658**，已 promote → `models/owner_best.pt`）
+→ 回归判断（仍 `frozen_tp5_sl2_swap_yolo_v8_reg_20260716`，阈值 val-q90=0.0217，
+池 `judgment_yolo_swap_v8.csv`）→ TP5/SL2 出场。
+**未**做 v11 全池重扫/重冻判断层——回测 428 笔 / PF 7.50 仍是 v8 池数字；前向 live
+检测用 v11 权重，判断分仍走 v8 冻结件。
+
+**执行层（VPS）**：`fable-executor` active；`data/okx_demo_keys.json` 的
+`environment=live`（真账户，~92U 权益）；`fable-forward.timer` 2h 一跳；
+前向曾因缺 `libGL.so.1` 崩（import cv2），已 `apt install libgl1`；override 从
+强制 `rules` 改回 `FABLE_CANDIDATE_SOURCE=yolo`。`ENABLE_JOB_EXECUTOR=0` 红线仍在。
+
+**2026-07-16 快照（已被上方部分覆盖）**：当时检测为 v8_chain F1 0.650；判断层 v8 池
+切流经 holdout 第 3 次消耗；VPS 看板回测 PF 7.50 @0.3% / 428 笔（accept 窗口）。
 
 **今天推翻的历史结论**（详见 `analysis/p2a_lr_bug_audit.md` + `p3_v8_pool_cutover.md`）：
 - `optimizer='auto'` 的 lr=0.002 炸掉了**所有** chain 续训（epoch 3 精确崩溃，

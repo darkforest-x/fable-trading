@@ -1,10 +1,10 @@
-"""Poll forward_log → place DEMO market + TP/SL bracket.
+"""Poll forward_log → place market + TP/SL bracket.
 
 Hard rules:
-- Always uses OkxDemoClient (x-simulated-trading:1 baked in).
-- No live-trading code path.
+- OkxDemoClient reads environment from keys file (demo|live).
 - Kill switch file blocks new entries.
 - Circuit breaker: consecutive closed losses pause new entries.
+- Invalid TP/SL refuses entry (never leave a naked position).
 """
 from __future__ import annotations
 

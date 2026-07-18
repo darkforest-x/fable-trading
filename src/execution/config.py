@@ -1,4 +1,4 @@
-"""Executor knobs (no secrets). Demo path is not configurable."""
+"""Executor knobs (no secrets). Trading environment is in the keys file."""
 from __future__ import annotations
 
 import json
