@@ -38,8 +38,13 @@ class ExecutorConfig:
     max_consecutive_losses: int = 5
     # A forward row stays "open" for up to the 18h barrier horizon, but the edge
     # is the launch moment: refuse to open positions on signals older than this.
-    max_signal_age_min: int = 45
-    poll_seconds: int = 60
+    # Live pulse can take 3–6 min after bar close; 55 keeps edge without
+    # replaying multi-hour backfills. Align with TG notify filter.
+    max_signal_age_min: int = 55
+    poll_seconds: int = 30
+    # Retry OCO bracket this many times after market entry (0 = no retry).
+    bracket_retries: int = 2
+    bracket_retry_sleep_sec: float = 1.5
     td_mode: str = "cross"  # full cross margin
     kill_switch_file: str = DEFAULT_KILL_PATH
     forward_log: str = DEFAULT_FORWARD_LOG

@@ -245,14 +245,27 @@ def open_one(
     )
     event["order_resp"] = order.get("data")
     # closing side for long = sell; same posSide in hedge mode
-    try:
-        algo = client.place_bracket(
-            inst_id, "sell", sz, tp_px, sl_px, td_mode=cfg.td_mode, pos_side=pos_side
-        )
-        event["algo_resp"] = algo.get("data")
-    except OkxDemoError as exc:
-        event["algo_error"] = str(exc)
+    # Retry bracket: a transient OKX 5xx after fill must not leave us naked.
+    retries = max(0, int(getattr(cfg, "bracket_retries", 2)))
+    sleep_s = float(getattr(cfg, "bracket_retry_sleep_sec", 1.5))
+    last_err: str | None = None
+    for attempt in range(retries + 1):
+        try:
+            algo = client.place_bracket(
+                inst_id, "sell", sz, tp_px, sl_px, td_mode=cfg.td_mode, pos_side=pos_side
+            )
+            event["algo_resp"] = algo.get("data")
+            event["bracket_attempts"] = attempt + 1
+            last_err = None
+            break
+        except OkxDemoError as exc:
+            last_err = str(exc)
+            event["algo_error"] = last_err
+            if attempt < retries:
+                time.sleep(max(0.2, sleep_s))
+    if last_err is not None:
         event["event"] = "order_partial"  # entry ok, bracket failed — owner must watch
+        event["bracket_attempts"] = retries + 1
     return event
 
 
@@ -270,13 +283,12 @@ def run_once(cfg: ExecutorConfig, *, dry_run: bool = False) -> dict[str, Any]:
 
     if kill_switch_active(cfg):
         summary["paused"] = f"kill switch: {cfg.kill_switch_file}"
-        led.append(ledger_path, {"event": "paused", "reason": summary["paused"]})
+        # Do not append paused every 30–60s — it bloated the ledger to 300+ noise rows.
         return summary
 
     losses = led.consecutive_losses(ledger_path)
     if losses >= cfg.max_consecutive_losses:
         summary["paused"] = f"circuit breaker: {losses} consecutive losses"
-        led.append(ledger_path, {"event": "paused", "reason": summary["paused"]})
         return summary
 
     taken = led.signal_keys_already_taken(ledger_path)

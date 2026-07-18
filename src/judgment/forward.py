@@ -147,14 +147,14 @@ def _run_forward_tracking(
                 # signal bar hours old) -- on 2026-07-18 the first yolo-source
                 # pulse pushed dozens of those to the channel and the owner
                 # reasonably asked why OKX had not traded them. Match the
-                # executor freshness gate (max_signal_age_min=45) so TG never
+                # executor freshness gate (max_signal_age_min=55) so TG never
                 # pages about trades nobody can take.
                 if str(rec.get("status", "")).lower() != "open":
                     continue
                 sig_ts = pd.Timestamp(rec["signal_time"])
                 if sig_ts.tzinfo is None:
                     sig_ts = sig_ts.tz_localize("UTC")
-                if now_utc - sig_ts > pd.Timedelta(minutes=45):
+                if now_utc - sig_ts > pd.Timedelta(minutes=55):
                     continue
                 row = dict(rec)
                 # absolute ATR for chart TP/SL (atr_pct ≈ atr14/close)

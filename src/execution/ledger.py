@@ -31,10 +31,22 @@ def load_all(path: Path) -> list[dict[str, Any]]:
 
 
 def signal_keys_already_taken(path: Path) -> set[str]:
-    """Return signal_key values we already tried to open (success or fail)."""
+    """Return signal_key values we already tried to open (success, fail, or partial).
+
+    order_partial MUST be included: entry already filled, retrying would double
+    the position (2026-07-16 DOGE-style incident class).
+    """
     out: set[str] = set()
     for row in load_all(path):
-        if row.get("event") in {"order_placed", "order_skipped", "order_failed", "dry_run"}:
+        if row.get("event") in {
+            "order_placed",
+            "order_partial",
+            "order_skipped",
+            "order_failed",
+            "skipped",
+            "skipped_invalid_barriers",
+            "dry_run",
+        }:
             k = row.get("signal_key")
             if k:
                 out.add(str(k))

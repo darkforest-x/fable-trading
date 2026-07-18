@@ -24,6 +24,13 @@ candidates_seen=0）。裁决计数从 0 重计至 100。
 **2026-07-19 链路优化**：tip 扫描在 start 超前数据时不再整表跳过；脉冲 `update_okx
 --swap-only`；YOLO live 多线程发现 + predict 锁；时钟/设备日志。
 
+**2026-07-19 实盘加固（overnight）**：
+- forward timer 对齐 15m 收盘后 1 分钟（`:01/:16/:31/:46`）
+- 脉冲结束立刻 `executor --once`（不等 30s 轮询）
+- 括号 OCO 失败重试 2 次；ledger 计入 `order_partial` 防重复开仓
+- 新鲜度 55min；轮询 30s；paused 不再每轮刷 ledger
+- `scripts/live_health.py` + 30min timer TG 告警
+
 **2026-07-16 快照（已被上方覆盖）**：v8 检测+判断；accept PF 7.50 / 428 笔。
 
 **今天推翻的历史结论**（详见 `analysis/p2a_lr_bug_audit.md` + `p3_v8_pool_cutover.md`）：

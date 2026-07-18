@@ -1,0 +1,9 @@
+[Unit]
+Description=fable live stack health check (alert on fail)
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/fable-trading
+Environment=PYTHONPATH=/opt/fable-trading
+ExecStart=/opt/fable-trading/.venv/bin/python scripts/live_health.py --alert

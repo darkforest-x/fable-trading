@@ -1,0 +1,11 @@
+[Unit]
+Description=Run fable live_health every 30 minutes
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=30min
+Persistent=true
+Unit=fable-live-health.service
+
+[Install]
+WantedBy=timers.target

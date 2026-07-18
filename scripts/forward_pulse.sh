@@ -34,4 +34,10 @@ fi
 echo "forward_track start $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 "$PY" scripts/forward_track.py
 echo "forward_log lines=$(wc -l < data/forward_log.csv 2>/dev/null || echo 0)"
+
+# Immediately try to trade any fresh open rows — do not wait up to 30s for the
+# executor loop. Failures here must never fail the pulse unit.
+echo "executor --once (post-pulse)"
+"$PY" -m src.execution --once 2>&1 | tail -5 || echo "executor once failed/skipped"
+
 echo "=== done $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="

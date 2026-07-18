@@ -1,0 +1,12 @@
+[Unit]
+Description=fable forward pulse aligned to 15m bar close (+1 min)
+
+[Timer]
+# 15m bars confirm shortly after :00/:15/:30/:45; fire +1 min so OKX confirm=1.
+OnCalendar=*-*-* *:01,16,31,46:00
+AccuracySec=20s
+Persistent=true
+Unit=fable-forward.service
+
+[Install]
+WantedBy=timers.target
