@@ -136,10 +136,25 @@ def _run_forward_tracking(
             from src.notify_signal import notify_new_forward_signals
 
             existing_keys = {row_key(r) for r in existing.to_dict("records")} if not existing.empty else set()
+            now_utc = pd.Timestamp.now(tz="UTC")
             brand_new: list[dict] = []
             for rec in scan.records:
                 key = forward_key(rec["source"], rec["symbol"], pd.Timestamp(rec["signal_time"]))
                 if key in existing_keys:
+                    continue
+                # Alert only on ACTIONABLE signals. A catch-up scan backfills
+                # history whose outcome is already sealed (status=closed, or a
+                # signal bar hours old) -- on 2026-07-18 the first yolo-source
+                # pulse pushed dozens of those to the channel and the owner
+                # reasonably asked why OKX had not traded them. Match the
+                # executor freshness gate (max_signal_age_min=45) so TG never
+                # pages about trades nobody can take.
+                if str(rec.get("status", "")).lower() != "open":
+                    continue
+                sig_ts = pd.Timestamp(rec["signal_time"])
+                if sig_ts.tzinfo is None:
+                    sig_ts = sig_ts.tz_localize("UTC")
+                if now_utc - sig_ts > pd.Timedelta(minutes=45):
                     continue
                 row = dict(rec)
                 # absolute ATR for chart TP/SL (atr_pct ≈ atr14/close)

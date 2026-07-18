@@ -159,12 +159,37 @@ function fmtPx(v) {
   return n.toPrecision(4);
 }
 
+const BJ_OFFSET_MS = 8 * 3600 * 1000;
+
+/** UTC storage → Beijing wall clock for owner-facing UI. */
+function fmtBjTime(input, { seconds = false } = {}) {
+  if (input == null || input === "") return "—";
+  let d;
+  if (typeof input === "number") {
+    d = new Date(input < 1e12 ? input * 1000 : input);
+  } else if (input instanceof Date) {
+    d = input;
+  } else {
+    let s = String(input).trim();
+    if (/^\d{4}-\d{2}-\d{2}/.test(s) && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) {
+      s = s.replace(" ", "T");
+      if (!s.endsWith("Z")) s += "Z";
+    }
+    d = new Date(s);
+  }
+  if (Number.isNaN(d.getTime())) {
+    return String(input).slice(0, 16).replace("T", " ");
+  }
+  const bj = new Date(d.getTime() + BJ_OFFSET_MS);
+  const p = (n) => String(n).padStart(2, "0");
+  let out = `${bj.getUTCFullYear()}-${p(bj.getUTCMonth() + 1)}-${p(bj.getUTCDate())} ${p(bj.getUTCHours())}:${p(bj.getUTCMinutes())}`;
+  if (seconds) out += `:${p(bj.getUTCSeconds())}`;
+  return out;
+}
+
 function fmtChartTime(t) {
   if (t == null) return "";
-  const d = new Date(Number(t) * 1000);
-  if (Number.isNaN(d.getTime())) return "";
-  const p = (n) => String(n).padStart(2, "0");
-  return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
+  return fmtBjTime(typeof t === "number" ? t : Number(t));
 }
 
 /* ---------- chart (TradingView-style entry / TP / SL / exit) ---------- */
@@ -540,7 +565,7 @@ function renderStats(d) {
     box?.classList.remove("running");
     const t = d.generated_at || st.latest_mtime || "";
     $("#st-time").textContent = t
-      ? String(t).replace("T", " ").replace(/\+00:00|Z/, " UTC").slice(0, 19)
+      ? fmtBjTime(t)
       : "点右上角开始";
   }
 }
@@ -670,7 +695,7 @@ function renderPaper(p) {
           const n = Number(t.net_ret || 0);
           const cls = n >= 0 ? "up" : "down";
           return `<div class="trade-line" data-paper-trade="${escapeAttr(s.symbol)}" data-trade-i="${i}">
-            <span><b>#${i + 1}</b> ${escapeHtml(String(t.signal_time || t.entry_time || "").slice(0, 16))}</span>
+            <span><b>#${i + 1}</b> ${escapeHtml(fmtBjTime(t.signal_time || t.entry_time))}</span>
             <span>${escapeHtml(outcomeLabel(t.outcome))}</span>
             <span>进 ${t.entry_px ?? "—"}</span>
             <span>出 ${t.exit_px ?? "—"}</span>

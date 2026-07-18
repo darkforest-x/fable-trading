@@ -113,6 +113,71 @@ def _score_cmp(score, thr) -> str:
         return "/"
 
 
+def _score_star_count(score: Any, thr: Any, *, max_stars: int = 5) -> int:
+    """Map model score → star count (0..max_stars). Higher score = more stars.
+
+    When a threshold is present (mainline / micro), stars scale by score/thr:
+      < thr          → 0  (scout / miss — no strength claim)
+      [1.00, 1.10)   → 1  barely above gate
+      [1.10, 1.25)   → 2
+      [1.25, 1.50)   → 3
+      [1.50, 2.00)   → 4
+      ≥ 2.00         → 5  standout
+    Without thr, fall back to absolute regression-score bins (realized_ret scale).
+    """
+    try:
+        s = float(score)
+    except (TypeError, ValueError):
+        return 0
+    if not np.isfinite(s):
+        return 0
+    try:
+        t = float(thr) if thr is not None else float("nan")
+    except (TypeError, ValueError):
+        t = float("nan")
+    if np.isfinite(t) and t > 0:
+        r = s / t
+        if r < 1.0:
+            n = 0
+        elif r < 1.10:
+            n = 1
+        elif r < 1.25:
+            n = 2
+        elif r < 1.50:
+            n = 3
+        elif r < 2.00:
+            n = 4
+        else:
+            n = 5
+    else:
+        # absolute fallback for captions that omit threshold
+        if s < 0.015:
+            n = 0
+        elif s < 0.022:
+            n = 1
+        elif s < 0.028:
+            n = 2
+        elif s < 0.035:
+            n = 3
+        elif s < 0.050:
+            n = 4
+        else:
+            n = 5
+    return max(0, min(int(max_stars), n))
+
+
+def _score_stars(score: Any, thr: Any, *, max_stars: int = 5) -> str:
+    """e.g. '★★★☆☆' — empty string if score unusable."""
+    try:
+        s = float(score)
+        if not np.isfinite(s):
+            return ""
+    except (TypeError, ValueError):
+        return ""
+    n = _score_star_count(score, thr, max_stars=max_stars)
+    return "★" * n + "☆" * (max_stars - n)
+
+
 def format_signal_caption(record: Mapping[str, Any]) -> str:
     """HTML caption for Telegram (photo or message)."""
     side = signal_side(record)
@@ -125,7 +190,15 @@ def format_signal_caption(record: Mapping[str, Any]) -> str:
     score_s = f"{float(score):.4f}" if score is not None and np.isfinite(float(score)) else "—"
     thr = record.get("threshold")
     thr_s = f"{float(thr):.4f}" if thr is not None and np.isfinite(float(thr)) else "—"
-    entry_time = str(record.get("entry_time") or record.get("signal_time") or "")[:19]
+    stars = _score_stars(score, thr)
+    from src.timefmt import format_beijing
+
+    entry_time = format_beijing(
+        record.get("entry_time") or record.get("signal_time"),
+        with_seconds=False,
+        with_label=True,
+        fallback=str(record.get("entry_time") or record.get("signal_time") or "—")[:19],
+    )
     status = str(record.get("status") or "open")
 
     def px(x: float) -> str:
@@ -149,19 +222,26 @@ def format_signal_caption(record: Mapping[str, Any]) -> str:
         # forming cluster be mistaken for an executable entry.
         title = "👁 <b>视觉侦察</b>（右缘密集）"
         bar_line = ""
+    # Put stars on the title when score clears the gate (n≥1) for glanceability.
+    n_stars = _score_star_count(score, thr)
+    if n_stars > 0 and stars:
+        title = f"{title}  {stars}"
     lines = [
         title,
         f"品种: <b>{symbol}</b>   ({side}) {side_emoji}",
     ]
     if bar_line:
         lines.append(bar_line)
+    score_line = f"分数: {score_s}  {_score_cmp(score, thr)} 阈值 {thr_s}"
+    if stars:
+        score_line = f"{score_line}  {stars}"
     lines += [
         f"价格: <b>{px(entry)}</b>",
         f"止盈: <b>{px(tp)}</b>  <i>(TP {TP_MULT:g}×ATR)</i>",
         f"止损: <b>{px(sl)}</b>  <i>(SL {SL_MULT:g}×ATR)</i>",
-        f"时间: {entry_time} UTC",
+        f"时间: {entry_time}",
         # honest comparator: a scout hit below threshold must not read as "≥"
-        f"分数: {score_s}  {_score_cmp(score, thr)} 阈值 {thr_s}",
+        score_line,
         f"状态: {status}",
     ]
     return "\n".join(lines)

@@ -51,13 +51,46 @@ function fmtPx(v, digits) {
   return n.toPrecision(4);
 }
 
+/** Fixed UTC+8 (no DST). Storage stays UTC; owner-facing UI is Beijing. */
+const BJ_OFFSET_MS = 8 * 3600 * 1000;
+
+/**
+ * Format a UTC instant as Beijing wall time.
+ * @param {string|number|Date|null|undefined} input
+ *   - number: unix seconds (chart) if < 1e12, else ms
+ *   - string: ISO / "YYYY-MM-DD HH:MM" treated as UTC when tz missing
+ */
+function fmtBjTime(input, { seconds = false } = {}) {
+  if (input == null || input === "") return "—";
+  let d;
+  if (typeof input === "number") {
+    const ms = input < 1e12 ? input * 1000 : input;
+    d = new Date(ms);
+  } else if (input instanceof Date) {
+    d = input;
+  } else {
+    let s = String(input).trim();
+    // Naive project timestamps are UTC (OKX / forward_log).
+    if (/^\d{4}-\d{2}-\d{2}/.test(s) && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) {
+      s = s.replace(" ", "T");
+      if (!s.endsWith("Z")) s += "Z";
+    }
+    d = new Date(s);
+  }
+  if (Number.isNaN(d.getTime())) {
+    return String(input).slice(0, 16).replace("T", " ");
+  }
+  const bj = new Date(d.getTime() + BJ_OFFSET_MS);
+  const p = (n) => String(n).padStart(2, "0");
+  let out = `${bj.getUTCFullYear()}-${p(bj.getUTCMonth() + 1)}-${p(bj.getUTCDate())} ${p(bj.getUTCHours())}:${p(bj.getUTCMinutes())}`;
+  if (seconds) out += `:${p(bj.getUTCSeconds())}`;
+  return out;
+}
+
 function fmtChartTime(t) {
   if (t == null) return "";
-  // UTCTimestamp seconds
-  const d = new Date((typeof t === "number" ? t : t) * 1000);
-  if (Number.isNaN(d.getTime())) return "";
-  const p = (n) => String(n).padStart(2, "0");
-  return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
+  // Lightweight-charts UTCTimestamp (seconds) → Beijing display
+  return fmtBjTime(typeof t === "number" ? t : Number(t));
 }
 
 /** Aggregate 15m candles into higher TF (client-side; data stays 15m on server). */
@@ -991,13 +1024,13 @@ async function loadEthMicro() {
     $("#ethmicro-sig-count").textContent = `（${nSig}）`;
     if (sigBody) {
       sigBody.innerHTML = (d.recent_signals || []).map((s) => `<tr>
-        <td>${escapeHtml(String(s.signal_time || "").slice(0, 19))}</td>
+        <td>${escapeHtml(fmtBjTime(s.signal_time))}</td>
         <td>${escapeHtml(s.bar)}</td>
         <td class="num">${s.entry_price != null ? Number(s.entry_price).toFixed(2) : "—"}</td>
         <td class="num">${s.score != null ? Number(s.score).toFixed(4) : "—"}</td>
         <td class="num">${s.tp_price != null ? Number(s.tp_price).toFixed(2) : "—"}</td>
         <td class="num">${s.sl_price != null ? Number(s.sl_price).toFixed(2) : "—"}</td>
-        <td>${escapeHtml(String(s.notified_at || "").slice(0, 19))}</td>
+        <td>${escapeHtml(fmtBjTime(s.notified_at))}</td>
       </tr>`).join("") || `<tr><td colspan="7">暂无实时信号</td></tr>`;
     }
   } catch (err) {
@@ -1070,7 +1103,7 @@ async function loadForward() {
     const ovAttr = escapeHtml(JSON.stringify(overlay));
     return `
     <tr class="clickable" data-source="${escapeHtml(source)}" data-symbol="${escapeHtml(r.symbol || "")}" data-entry="${escapeHtml(entry)}" data-overlay="${ovAttr}" title="点击查看 K 线：入场 / 止盈(+5ATR) / 止损(-2ATR) / 出场">
-      <td>${escapeHtml(String(r.signal_time || "").slice(0, 16).replace("T", " "))}</td>
+      <td>${escapeHtml(fmtBjTime(r.signal_time))}</td>
       <td>${escapeHtml(r.symbol || "")}</td>
       <td>${escapeHtml(STATUS_CN[r.status] || r.status || "")}</td>
       <td>${r.maker_filled ? "filled" : "miss"}</td>
@@ -1308,7 +1341,7 @@ function renderTrades() {
   const shown = rows.slice(0, tradesShow);
   tbody.innerHTML = shown.map((r, i) => `
     <tr data-i="${i}" data-source="${escapeHtml(r.source)}" data-symbol="${escapeHtml(r.symbol)}" data-entry="${escapeHtml(r.entry_time)}">
-      <td>${escapeHtml(String(r.entry_time).slice(0, 16))}</td>
+      <td>${escapeHtml(fmtBjTime(r.entry_time))}</td>
       <td>${escapeHtml(r.symbol)}</td>
       <td class="num">${r.score.toFixed(3)}</td>
       <td class="outcome-${escapeHtml(r.outcome)}">${OUTCOME_CN[r.outcome] || escapeHtml(r.outcome)}</td>
@@ -1729,7 +1762,7 @@ async function loadChart(key, focusEntry = null) {
   $("#side-count").textContent = `（${traded.length} 笔）`;
   $("#symbol-trades").innerHTML = "<tbody>" + (traded.length ? traded.map((m) => `
     <tr data-entry-ts="${m.entry_time}">
-      <td>${new Date(m.time * 1000).toISOString().slice(5, 16).replace("T", " ")}</td>
+      <td>${escapeHtml(fmtBjTime(m.time))}</td>
       <td class="outcome-${m.outcome}">${OUTCOME_CN[m.outcome] || m.outcome}</td>
       <td class="num"><span class="${cls(m.ret)}">${fmtPct(m.ret, 1)}</span></td>
     </tr>`).join("") : `<tr class="no-click"><td colspan="3" class="empty-state">暂无成交</td></tr>`) + "</tbody>";
@@ -1741,7 +1774,7 @@ async function loadChart(key, focusEntry = null) {
   $("#missed-count").textContent = `（${missed.length} 条）`;
   $("#symbol-missed").innerHTML = "<tbody>" + (missed.length ? missed.slice(0, 80).map((m) => `
     <tr tabindex="0" data-entry-ts="${m.entry_time}">
-      <td>${new Date(m.time * 1000).toISOString().slice(5, 16).replace("T", " ")}</td>
+      <td>${escapeHtml(fmtBjTime(m.time))}</td>
       <td class="num">${Number(m.score).toFixed(3)}</td>
       <td class="num">${m.dense_len}根</td>
     </tr>`).join("") : `<tr class="no-click"><td colspan="3" class="empty-state">暂无合格未成交</td></tr>`) + "</tbody>";
@@ -1772,7 +1805,7 @@ async function loadChart(key, focusEntry = null) {
 
 function showSignalTooltip(event, marker) {
   const edge = marker.score - currentThreshold;
-  $("#signal-tooltip").innerHTML = `<b>合格未成交 · ${new Date(marker.time * 1000).toISOString().slice(5, 16).replace("T", " ")}</b>
+  $("#signal-tooltip").innerHTML = `<b>合格未成交 · ${escapeHtml(fmtBjTime(marker.time))}</b>
     <dl>
       <dt>score</dt><dd>${Number(marker.score).toFixed(4)}</dd>
       <dt>阈值差</dt><dd class="${cls(edge)}">${edge >= 0 ? "+" : ""}${edge.toFixed(4)}</dd>

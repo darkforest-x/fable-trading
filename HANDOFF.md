@@ -2,19 +2,26 @@
 
 ## ⚡ 2026-07-18 当前真相（本节之下的内容为历史，多处已被推翻）
 
-**主线**：YOLO 检测（`owner_v11_chain`，frozen-F1 **0.658**，已 promote → `models/owner_best.pt`）
-→ 回归判断（仍 `frozen_tp5_sl2_swap_yolo_v8_reg_20260716`，阈值 val-q90=0.0217，
-池 `judgment_yolo_swap_v8.csv`）→ TP5/SL2 出场。
-**未**做 v11 全池重扫/重冻判断层——回测 428 笔 / PF 7.50 仍是 v8 池数字；前向 live
-检测用 v11 权重，判断分仍走 v8 冻结件。
+**主线**：YOLO 检测（`owner_v11_chain`，frozen-F1 **0.658** → `models/owner_best.pt`）
+→ 回归判断（`frozen_tp5_sl2_swap_yolo_v11_reg_20260718`，阈值 val-q90=**0.02022**，
+池 `judgment_yolo_swap_v11.csv` · **26653** 候选 / 344 币）→ TP5/SL2 出场。
+`models/ACTIVE` 与 `frozen.default_config()` 均已指向 v11 池。
 
-**执行层（VPS）**：`fable-executor` active；`data/okx_demo_keys.json` 的
-`environment=live`（真账户，~92U 权益）；`fable-forward.timer` 2h 一跳；
-前向曾因缺 `libGL.so.1` 崩（import cv2），已 `apt install libgl1`；override 从
-强制 `rules` 改回 `FABLE_CANDIDATE_SOURCE=yolo`。`ENABLE_JOB_EXECUTOR=0` 红线仍在。
+**accept 回测（holdout 第 4 次消耗，owner 批准全量切流）** @0.3% 成本：
+**703 笔 · 净资金 +245.8% · PF 6.61 · 胜率 77.1% · maxDD 0.76%**（验收 4/4）。
+对照 v8：428 笔 / +154.9% / PF 7.50。见 `analysis/p3_v11_pool_cutover.md`。
 
-**2026-07-16 快照（已被上方部分覆盖）**：当时检测为 v8_chain F1 0.650；判断层 v8 池
-切流经 holdout 第 3 次消耗；VPS 看板回测 PF 7.50 @0.3% / 428 笔（accept 窗口）。
+**执行层（VPS）**：`fable-executor` active · keys `environment=live`（~92U 权益）·
+`fable-forward.timer` **每 15 分钟** YOLO live 脉冲 · `ENABLE_JOB_EXECUTOR=0`。
+TG 通知只推 `status=open` 且 signal_age≤**45min**（与执行器新鲜度闸门对齐，防积压刷屏）。
+无 open 且 ≤45min 的信号时执行器会安静空转——属正常，不是挂死。
+
+**前向时钟重启（owner 2026-07-19）**：清空主线 `forward_log.csv` 重测 v11 闸门；
+旧账本归档 `data/forward_log_pre_v11_retest_20260719.csv`；
+`FORWARD_START=2026-07-18 16:30 UTC`（避免脉冲把 07-15 起的历史又扫回来）。
+裁决计数从 0 重计至 100。
+
+**2026-07-16 快照（已被上方覆盖）**：v8 检测+判断；accept PF 7.50 / 428 笔。
 
 **今天推翻的历史结论**（详见 `analysis/p2a_lr_bug_audit.md` + `p3_v8_pool_cutover.md`）：
 - `optimizer='auto'` 的 lr=0.002 炸掉了**所有** chain 续训（epoch 3 精确崩溃，

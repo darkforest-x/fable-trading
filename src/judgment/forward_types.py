@@ -16,7 +16,9 @@ FORWARD_LOG_PATH: Final = PROJECT_DIR / "data" / "forward_log.csv"
 FORWARD_LOG_H1_SCALED_PATH: Final = PROJECT_DIR / "data" / "forward_log_h1_scaled.csv"
 # YOLO mainline cutover (owner 2026-07-15): new candidate source → new forward clock.
 # Pre-cutover rule-scan log archived as data/forward_log_rules_pre_yolo_20260715.csv
-FORWARD_START: Final = pd.Timestamp("2026-07-15 00:00:00", tz="UTC")
+# Owner 2026-07-18/19: clear pre-v11 mixed book and restart gate for clean retest.
+# Archived: data/forward_log_pre_v11_retest_20260719.csv (VPS + local).
+FORWARD_START: Final = pd.Timestamp("2026-07-18 16:30:00", tz="UTC")
 # "yolo" = detector proposes bars; "rules" = expanded dense-MA scan (legacy).
 # Override with env FABLE_CANDIDATE_SOURCE=rules when VPS has no ultralytics/torch.
 import os as _os
