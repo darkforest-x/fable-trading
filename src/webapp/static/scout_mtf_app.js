@@ -63,39 +63,33 @@ function fmtChg(x) {
 }
 
 function gradeLabel(g) {
-  return { A: "看", B: "观", C: "略" }[g] || g || "—";
+  return { A: "A", B: "B", C: "C" }[g] || g || "—";
 }
 
 function gradeTitle(g) {
-  return { A: "值得看", B: "观察", C: "忽略" }[g] || g;
+  return { A: "强对齐", B: "部分对齐", C: "弱 / 可忽略" }[g] || g;
 }
 
 function sideTitle(side) {
   return {
     major: "主流",
-    volume: "成交额前排",
-    gain: "涨幅榜",
-    loss: "跌幅榜",
-  }[side] || side || "—";
+    volume: "额前",
+    gain: "涨幅",
+    loss: "跌幅",
+  }[side] || side || "";
 }
 
 function isCoreSide(side) {
   return side === "major" || side === "volume";
 }
 
+/** hot=密集/高分 warm=中 cold=弱 na=无数据 */
 function tfClass(cell) {
-  if (!cell || !cell.ok || cell.vote == null) return "cold";
+  if (!cell || !cell.ok || cell.vote == null) return "na";
   const v = Number(cell.vote);
   if (cell.dense || v >= 0.62) return "hot";
   if (v >= 0.48) return "warm";
   return "cold";
-}
-
-function tfText(bar, cell) {
-  if (!cell || !cell.ok || cell.vote == null) return `${bar} ·`;
-  const n = Math.round(100 * Number(cell.vote));
-  const mark = cell.dense ? "●" : "○";
-  return `${bar} ${mark}${n}`;
 }
 
 function filtered(rows) {
@@ -555,56 +549,61 @@ function renderStats(d) {
   $("#st-b").textContent = sum.B ?? 0;
   $("#st-c").textContent = sum.C ?? 0;
   const run = $("#st-run");
-  const box = run.closest(".stat");
+  const box = run?.closest(".st");
   if (st.running) {
     run.textContent = "扫描中";
     box?.classList.add("running");
-    $("#st-time").textContent = "请稍候…";
+    $("#st-time").textContent = "约 30–90 秒";
   } else {
-    run.textContent = d.available ? "已更新" : "未扫描";
+    run.textContent = d.available ? "就绪" : "未扫";
     box?.classList.remove("running");
     const t = d.generated_at || st.latest_mtime || "";
-    $("#st-time").textContent = t
-      ? fmtBjTime(t)
-      : "点右上角开始";
+    $("#st-time").textContent = t ? fmtBjTime(t) + " 北京" : "点「扫描」";
   }
 }
 
 function renderRow(r) {
-  const open = state.open === r.symbol ? "open" : "";
+  const open = state.open === r.symbol ? "on" : "";
   const chgCls = Number(r.chg24h_pct) >= 0 ? "up" : "down";
   const side = sideTitle(r.rank_side);
-  const core = isCoreSide(r.rank_side) ? " core" : "";
-  const vol = r.vol24h_usdt != null && Number(r.vol24h_usdt) > 0
-    ? ` · 24h ${(Number(r.vol24h_usdt) / 1e6).toFixed(1)}M`
-    : "";
-  const tfs = TF_ORDER.map((bar) => {
+  const tag =
+    r.rank_side === "major"
+      ? '<span class="tag">主流</span>'
+      : r.rank_side === "volume"
+        ? '<span class="tag">额前</span>'
+        : "";
+  const dots = TF_ORDER.map((bar) => {
     const c = r.tf?.[bar];
-    return `<span class="tf ${tfClass(c)}" data-bar="${escapeAttr(bar)}" title="${escapeAttr((c?.note || bar) + " · 点此看该周期K线")}">${escapeHtml(tfText(bar, c))}</span>`;
+    const cls = tfClass(c);
+    const tip = c?.ok
+      ? `${bar} 分${c.vote != null ? Number(c.vote).toFixed(2) : "—"} ${c.dense ? "密集" : ""}`
+      : `${bar} 无数据`;
+    return `<span class="dot ${cls}" data-bar="${escapeAttr(bar)}" title="${escapeAttr(tip)}"></span>`;
   }).join("");
 
   const details = TF_ORDER.map((bar) => {
     const c = r.tf?.[bar] || {};
     const vote = c.vote == null ? "—" : Number(c.vote).toFixed(2);
     const dens = c.dense ? "密集" : "一般";
-    const pos = c.above_ema55 === true ? "站上均线" : c.above_ema55 === false ? "均线下方" : "—";
-    return `<div class="detail-item" data-bar="${escapeAttr(bar)}" title="点此看 ${escapeAttr(bar)} K线"><b>${bar} · ${vote}</b><span>${dens} · ${pos}</span></div>`;
+    const pos =
+      c.above_ema55 === true ? "站上均线" : c.above_ema55 === false ? "均线下" : "—";
+    return `<div class="tf-cell" data-bar="${escapeAttr(bar)}"><b>${bar} · ${vote}</b><span>${dens} · ${pos}</span></div>`;
   }).join("");
 
   const inst = r.inst_id || String(r.symbol || "").replace(/_/g, "-");
   return `
-    <article class="row ${open}${core}" data-symbol="${escapeAttr(r.symbol)}" data-inst="${escapeAttr(inst)}" data-last="${escapeAttr(r.last ?? "")}">
-      <div class="badge ${escapeAttr(r.grade)}" title="${escapeAttr(gradeTitle(r.grade))}">${escapeHtml(gradeLabel(r.grade))}</div>
-      <div class="main">
-        <div class="sym">${escapeHtml(shortSym(r.symbol))}${r.rank_side === "major" ? '<span class="tag-core">主流</span>' : r.rank_side === "volume" ? '<span class="tag-core tag-vol">额前</span>' : ""}</div>
-        <div class="sym-sub">${escapeHtml(side)} #${r.rank ?? "—"} · 综合 ${r.composite != null ? Number(r.composite).toFixed(2) : "—"}${vol} · 点开看K线</div>
+    <article class="row ${open}" data-symbol="${escapeAttr(r.symbol)}" data-inst="${escapeAttr(inst)}" data-last="${escapeAttr(r.last ?? "")}">
+      <div class="badge ${escapeAttr(r.grade || "")}" title="${escapeAttr(gradeTitle(r.grade))}">${escapeHtml(gradeLabel(r.grade))}</div>
+      <div>
+        <div class="sym">${escapeHtml(shortSym(r.symbol))}${tag}</div>
+        <div class="sym-sub">${escapeHtml(side)}${r.rank != null ? " #" + r.rank : ""}</div>
       </div>
-      <div class="chg ${chgCls}">${fmtChg(r.chg24h_pct)}</div>
-      <div class="score">${r.composite != null ? Number(r.composite).toFixed(2) : "—"}</div>
-      <div class="tfs">${tfs}</div>
+      <div class="chg r ${chgCls}">${fmtChg(r.chg24h_pct)}</div>
+      <div class="score r">${r.composite != null ? Number(r.composite).toFixed(2) : "—"}</div>
+      <div class="dots r">${dots}</div>
       <div class="detail">
-        <div>${escapeHtml(gradeTitle(r.grade))} · 点周期标签切换 K 线周期</div>
-        <div class="detail-grid">${details}</div>
+        <div>${escapeHtml(gradeTitle(r.grade))} · 点色点或下方格子切换周期</div>
+        <div class="tf-grid">${details}</div>
       </div>
     </article>`;
 }
@@ -614,23 +613,16 @@ function renderList(d) {
   const rows = filtered(d.rows || []);
   if (!rows.length) {
     host.innerHTML = `<div class="empty">${
-      d.available ? "这一档暂时没有币" : (d.message || "还没有结果，点右上角「开始扫描」")
+      d.available ? "这一档没有币" : d.message || "还没有结果，点右上角「扫描」"
     }</div>`;
     return;
   }
-
-  const core = rows.filter((r) => isCoreSide(r.rank_side));
-  const movers = rows.filter((r) => !isCoreSide(r.rank_side));
-  let html = "";
-  if (core.length) {
-    html += `<div class="list-section-h">主流 / 高流动性 <span>${core.length}</span></div>`;
-    html += core.map(renderRow).join("");
-  }
-  if (movers.length) {
-    html += `<div class="list-section-h">涨跌榜动量 <span>${movers.length}</span></div>`;
-    html += movers.map(renderRow).join("");
-  }
-  host.innerHTML = html;
+  // Core (major/volume) first, then movers — no extra section chrome
+  const sorted = [
+    ...rows.filter((r) => isCoreSide(r.rank_side)),
+    ...rows.filter((r) => !isCoreSide(r.rank_side)),
+  ];
+  host.innerHTML = sorted.map(renderRow).join("");
 }
 
 async function openRadarChart(rowEl, bar = "15m") {
@@ -655,21 +647,23 @@ async function openRadarChart(rowEl, bar = "15m") {
 }
 
 function renderPaper(p) {
+  const list = $("#paper-list");
+  if (!list) return;
   if (!p || (p.ok === false && !p.available && !p.n_trades)) {
     $("#p-st").textContent = p?.error ? "失败" : "未跑";
     $("#p-n").textContent = "—";
     $("#p-wr").textContent = "—";
     $("#p-net").textContent = "—";
-    $("#p-net").classList.remove("up", "down");
-    $("#paper-list").innerHTML = `<div class="empty soft">${escapeHtml(p?.error || p?.message || "先扫描，再点「模拟测试」")}</div>`;
+    $("#p-net")?.classList.remove("up", "down");
+    list.innerHTML = `<div class="empty soft">${escapeHtml(p?.error || p?.message || "先扫描，再跑模拟")}</div>`;
     return;
   }
   if (p.ok === false && p.error) {
     $("#p-st").textContent = "失败";
-    $("#paper-list").innerHTML = `<div class="empty soft">${escapeHtml(p.error)}</div>`;
+    list.innerHTML = `<div class="empty soft">${escapeHtml(p.error)}</div>`;
     return;
   }
-  $("#p-st").textContent = "已完成";
+  $("#p-st").textContent = "完成";
   $("#p-n").textContent = p.n_trades ?? 0;
   $("#p-wr").textContent = p.win_rate == null ? "—" : (100 * Number(p.win_rate)).toFixed(0) + "%";
   const net = Number(p.total_net_units || 0);
@@ -680,38 +674,44 @@ function renderPaper(p) {
 
   const rows = (p.symbols || []).filter((s) => s.ok);
   if (!rows.length) {
-    $("#paper-list").innerHTML = `<div class="empty soft">这些币最近历史上几乎没有「密集+站上均线」入场</div>`;
+    list.innerHTML = `<div class="empty soft">这些币近期几乎没有「密集+站上均线」入场</div>`;
     return;
   }
-  $("#paper-list").innerHTML = rows.map((s) => {
-    const mean = s.mean_net == null ? "—" : ((100 * Number(s.mean_net)).toFixed(2) + "%");
-    const total = s.total_net == null ? "—" : ((Number(s.total_net) >= 0 ? "+" : "") + (100 * Number(s.total_net)).toFixed(2) + "%");
-    const wr = s.win_rate == null ? "—" : ((100 * Number(s.win_rate)).toFixed(0) + "%");
-    const name = String(s.symbol || "").replace(/_USDT_SWAP$/, "");
-    const open = state.paperOpen === s.symbol ? "open" : "";
-    const trades = s.trades || [];
-    const tradeHtml = trades.length
-      ? trades.map((t, i) => {
-          const n = Number(t.net_ret || 0);
-          const cls = n >= 0 ? "up" : "down";
-          return `<div class="trade-line" data-paper-trade="${escapeAttr(s.symbol)}" data-trade-i="${i}">
-            <span><b>#${i + 1}</b> ${escapeHtml(fmtBjTime(t.signal_time || t.entry_time))}</span>
+  list.innerHTML = rows
+    .map((s) => {
+      const total =
+        s.total_net == null
+          ? "—"
+          : (Number(s.total_net) >= 0 ? "+" : "") + (100 * Number(s.total_net)).toFixed(2) + "%";
+      const wr = s.win_rate == null ? "—" : (100 * Number(s.win_rate)).toFixed(0) + "%";
+      const name = String(s.symbol || "").replace(/_USDT_SWAP$/, "");
+      const open = state.paperOpen === s.symbol ? "on" : "";
+      const trades = s.trades || [];
+      const tradeHtml = trades.length
+        ? trades
+            .map((t, i) => {
+              const n = Number(t.net_ret || 0);
+              const cls = n >= 0 ? "up" : "down";
+              return `<div class="trade-line" data-paper-trade="${escapeAttr(s.symbol)}" data-trade-i="${i}">
+            <span>#${i + 1} ${escapeHtml(fmtBjTime(t.signal_time || t.entry_time))}</span>
             <span>${escapeHtml(outcomeLabel(t.outcome))}</span>
-            <span>进 ${t.entry_px ?? "—"}</span>
-            <span>出 ${t.exit_px ?? "—"}</span>
+            <span>${t.entry_px ?? "—"}</span>
+            <span>${t.exit_px ?? "—"}</span>
             <span class="${cls}">${(n >= 0 ? "+" : "") + (100 * n).toFixed(2)}%</span>
           </div>`;
-        }).join("")
-      : `<div class="muted">暂无成交明细</div>`;
-    return `<div class="paper-row ${open}" data-paper-sym="${escapeAttr(s.symbol)}" data-inst="${escapeAttr(s.inst_id || "")}">
-      <div><div class="name">${escapeHtml(name)}</div><div class="muted">${escapeHtml(s.grade || "")} · 点开看每笔 · 再点一笔看 K 线</div></div>
-      <div class="num">${s.n_trades ?? 0} 笔</div>
+            })
+            .join("")
+        : `<div class="muted">无明细</div>`;
+      return `<div class="mini-row ${open}" data-paper-sym="${escapeAttr(s.symbol)}">
+      <div><div class="name">${escapeHtml(name)}</div><div class="muted">${escapeHtml(s.grade || "")}</div></div>
+      <div class="num">${s.n_trades ?? 0}笔</div>
       <div class="num">${wr}</div>
-      <div class="num">${mean}</div>
       <div class="num ${Number(s.total_net) >= 0 ? "up" : "down"}">${total}</div>
+      <div></div>
       <div class="trade-detail">${tradeHtml}</div>
     </div>`;
-  }).join("");
+    })
+    .join("");
 }
 
 function renderPositions(pos) {
@@ -723,37 +723,28 @@ function renderPositions(pos) {
   }
   const rows = pos.positions || [];
   if (!rows.length) {
-    host.innerHTML = `<div class="empty soft">当前没有合约持仓 · ${escapeHtml(pos.environment || "")}</div>`;
+    host.innerHTML = `<div class="empty soft">无持仓 · ${escapeHtml(pos.environment || "")}</div>`;
     return;
   }
-  host.innerHTML = rows.map((p) => {
-    const open = state.posOpen === p.inst_id ? "open" : "";
-    const name = String(p.symbol || p.inst_id || "").replace(/_USDT_SWAP$/, "").replace(/-USDT-SWAP$/, "");
-    const upl = Number(p.upl || 0);
-    const uplCls = upl >= 0 ? "up" : "down";
-    const side = p.pos_side === "long" ? "多" : p.pos_side === "short" ? "空" : (p.pos_side || "—");
-    return `<div class="paper-row pos-row ${open}" data-pos-id="${escapeAttr(p.inst_id)}">
-      <div>
-        <div class="name">${escapeHtml(name)}</div>
-        <div class="muted">${escapeHtml(side)} · ${escapeHtml(String(p.pos))} 张 · 点开看 K 线</div>
-      </div>
+  host.innerHTML = rows
+    .map((p) => {
+      const open = state.posOpen === p.inst_id ? "on" : "";
+      const name = String(p.symbol || p.inst_id || "")
+        .replace(/_USDT_SWAP$/, "")
+        .replace(/-USDT-SWAP$/, "");
+      const upl = Number(p.upl || 0);
+      const uplCls = upl >= 0 ? "up" : "down";
+      const side =
+        p.pos_side === "long" ? "多" : p.pos_side === "short" ? "空" : p.pos_side || "—";
+      return `<div class="mini-row ${open}" data-pos-id="${escapeAttr(p.inst_id)}">
+      <div><div class="name">${escapeHtml(name)}</div><div class="muted">${escapeHtml(side)} · ${escapeHtml(String(p.pos))} 张</div></div>
       <div class="num">${escapeHtml(String(p.lever || "—"))}x</div>
-      <div class="num">${p.avg_px != null ? Number(p.avg_px).toPrecision(6) : "—"}</div>
-      <div class="num">${p.notional_usd != null ? Number(p.notional_usd).toFixed(1) + "U" : "—"}</div>
-      <div class="num ${uplCls}">${(upl >= 0 ? "+" : "") + upl.toFixed(3)}U</div>
-      <div class="pos-detail">
-        <div>合约 ${escapeHtml(p.inst_id || "")} · 模式 ${escapeHtml(p.mgn_mode || "—")} · 环境 ${escapeHtml(pos.environment || "—")}</div>
-        <div class="pos-detail-grid">
-          <div><span>均价</span><b>${p.avg_px != null ? Number(p.avg_px) : "—"}</b></div>
-          <div><span>标记价</span><b>${p.mark_px != null ? Number(p.mark_px) : "—"}</b></div>
-          <div><span>浮盈</span><b class="${uplCls}">${(upl >= 0 ? "+" : "") + upl.toFixed(4)} U</b></div>
-          <div><span>名义</span><b>${p.notional_usd != null ? Number(p.notional_usd).toFixed(2) + " U" : "—"}</b></div>
-          <div><span>保证金</span><b>${p.margin != null ? Number(p.margin).toFixed(4) : "—"}</b></div>
-          <div><span>收益率</span><b>${p.upl_ratio != null ? (100 * Number(p.upl_ratio)).toFixed(2) + "%" : "—"}</b></div>
-        </div>
-      </div>
+      <div class="num">${p.avg_px != null ? Number(p.avg_px).toPrecision(5) : "—"}</div>
+      <div class="num">${p.notional_usd != null ? Number(p.notional_usd).toFixed(0) + "U" : "—"}</div>
+      <div class="num ${uplCls}">${(upl >= 0 ? "+" : "") + upl.toFixed(2)}U</div>
     </div>`;
-  }).join("");
+    })
+    .join("");
 }
 
 async function openPositionChart(p) {
@@ -841,14 +832,14 @@ function setBusy(busy, label) {
   });
   if (label) $("#btn-run").textContent = label;
   if (!busy) {
-    $("#btn-run").textContent = "开始扫描";
-    $("#btn-paper").textContent = "模拟测试";
+    $("#btn-run").textContent = "扫描";
+    if ($("#btn-paper")) $("#btn-paper").textContent = "跑模拟";
   }
 }
 
 async function runScan() {
   setBusy(true, "扫描中…");
-  hint("正在扫描榜单与多周期，大约半分钟…", "ok");
+  hint("扫描主流 / 额前 / 涨跌榜的多周期对齐…", "ok");
   if (state.data) {
     state.data.status = { ...(state.data.status || {}), running: true };
     renderStats(state.data);
@@ -860,7 +851,6 @@ async function runScan() {
         top: 12,
         min_vol: 5_000_000,
         include_loss: true,
-        // allow majors+volume+movers (~10+10+24) without truncating core
         max_symbols: 40,
       }),
     });
@@ -873,7 +863,7 @@ async function runScan() {
     renderStats(d);
     renderList(d);
     const s = d.summary || {};
-    hint(`扫描完成：值得看 ${s.A ?? 0} · 观察 ${s.B ?? 0} · 忽略 ${s.C ?? 0}`, "ok");
+    hint(`完成 · A ${s.A ?? 0} / B ${s.B ?? 0} / C ${s.C ?? 0}`, "ok");
   } catch (err) {
     hint(err.message, "err");
   } finally {
@@ -883,8 +873,8 @@ async function runScan() {
 
 async function runPaper() {
   setBusy(true);
-  $("#btn-paper").textContent = "模拟中…";
-  hint("纸面回放 A/B 涨幅币最近 15m…", "ok");
+  if ($("#btn-paper")) $("#btn-paper").textContent = "…";
+  hint("纸面回放…", "ok");
   try {
     const p = await api("/api/scout-mtf/paper-run", { method: "POST", body: "{}" });
     state.paper = p;
@@ -895,9 +885,9 @@ async function runPaper() {
     }
     const net = Number(p.total_net_units || 0);
     hint(
-      `模拟完成：${p.n_trades ?? 0} 笔 · 胜率 ${
+      `模拟 ${p.n_trades ?? 0} 笔 · 胜率 ${
         p.win_rate == null ? "—" : (100 * p.win_rate).toFixed(0) + "%"
-      } · 合计净 ${(net >= 0 ? "+" : "") + (100 * net).toFixed(2)}%`,
+      } · 净 ${(net >= 0 ? "+" : "") + (100 * net).toFixed(2)}%`,
       "ok"
     );
   } catch (err) {
@@ -918,27 +908,25 @@ function wire() {
     if (!btn || !state.lastChartOpts) return;
     const bar = btn.dataset.bar;
     state.chartBar = bar;
-    $$("#chart-tf-seg button").forEach((b) => b.classList.toggle("active", b === btn));
+    $$("#chart-tf-seg button").forEach((b) => b.classList.toggle("on", b === btn));
     await openTradeChart({ ...state.lastChartOpts, bar });
   });
-  $$("#tabs .tab").forEach((b) => {
-    b.addEventListener("click", () => {
-      $$("#tabs .tab").forEach((x) => x.classList.toggle("active", x === b));
-      state.grade = b.dataset.g || "";
-      if (state.data) renderList(state.data);
-    });
+  $("#tabs")?.addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-g]");
+    if (!b) return;
+    $$("#tabs button").forEach((x) => x.classList.toggle("on", x === b));
+    state.grade = b.dataset.g || "";
+    if (state.data) renderList(state.data);
   });
   $("#list")?.addEventListener("click", async (e) => {
     const row = e.target.closest(".row[data-symbol]");
     if (!row) return;
-    // Click a TF pill / detail cell → that timeframe's kline
-    const tfHit = e.target.closest(".tf[data-bar], .detail-item[data-bar]");
+    const tfHit = e.target.closest(".dot[data-bar], .tf-cell[data-bar]");
     const bar = tfHit?.dataset?.bar || "15m";
     const sym = row.dataset.symbol;
     const same = state.open === sym;
     state.open = same && !tfHit ? null : sym;
     if (state.data) renderList(state.data);
-    // Re-query row after re-render (DOM replaced)
     const fresh = $(`#list .row[data-symbol="${CSS.escape(sym)}"]`);
     if (state.open) {
       await openRadarChart(fresh || row, bar);
@@ -955,18 +943,17 @@ function wire() {
       const row = (state.paper?.symbols || []).find((s) => s.symbol === sym);
       const trade = row?.trades?.[i];
       if (!row || !trade) return;
-      $$(".trade-line").forEach((x) => x.classList.toggle("active", x === tradeEl));
       await openPaperTradeChart(row, trade);
       return;
     }
-    const row = e.target.closest(".paper-row[data-paper-sym]");
+    const row = e.target.closest(".mini-row[data-paper-sym]");
     if (!row) return;
     const sym = row.dataset.paperSym;
     state.paperOpen = state.paperOpen === sym ? null : sym;
     if (state.paper) renderPaper(state.paper);
   });
   $("#pos-list")?.addEventListener("click", async (e) => {
-    const row = e.target.closest(".pos-row[data-pos-id]");
+    const row = e.target.closest(".mini-row[data-pos-id]");
     if (!row) return;
     const id = row.dataset.posId;
     state.posOpen = state.posOpen === id ? null : id;
