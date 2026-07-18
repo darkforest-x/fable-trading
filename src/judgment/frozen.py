@@ -24,11 +24,16 @@ from src.judgment.train import DEFAULT_HORIZON_BARS, load_splits, train_model
 PROJECT_DIR: Final = Path(__file__).resolve().parents[2]
 BAR: Final = pd.Timedelta(minutes=15)
 DEFAULT_SCORE_QUANTILE: Final = 0.90
-# Mainline 2026-07-16+ (owner-approved cutover, holdout consumption #3):
-# regression on the CLEAN v8_chain candidate pool. Accept-window sweep beat the
-# old pool on every metric at every cost (428 trades vs 102, PF 7.50 vs 6.86,
-# net +154.9% vs +32.4% at 0.3%). See analysis/p3_v8_pool_cutover.md.
+# Mainline: v8_chain pool (2026-07-16 cutover, holdout consumption #3).
+# The v11-pool cutover is PENDING: its rescan is running and no frozen artifact
+# exists yet -- a default that resolves to nothing breaks forward/dashboard/
+# scout in one stroke (observed 2026-07-18 when the flip landed before the
+# freeze). Flip DEFAULT_CONFIG_NAME to tp5_sl2_swap_yolo_v11_reg only after
+# freeze_model --yolo-v11-pool has produced the artifact and the val compare
+# is recorded.
 DEFAULT_CONFIG_NAME: Final = "tp5_sl2_swap_yolo_v8_reg"
+V8_POOL_CONFIG_NAME: Final = DEFAULT_CONFIG_NAME
+V11_POOL_CONFIG_NAME: Final = "tp5_sl2_swap_yolo_v11_reg"
 # 2026-07-15 mainline (old pool, pre-lr-fix detector); rollback only.
 OLD_POOL_CONFIG_NAME: Final = "tp5_sl2_swap_yolo_reg"
 # Previous YOLO binary freeze (shadow / rollback / dashboard compare).
@@ -97,12 +102,7 @@ class FrozenArtifactError(RuntimeError):
 
 
 def default_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
-    """Mainline: regression on the clean v8_chain candidate pool (267 swaps).
-
-    Cut over 2026-07-16 with the owner's explicit holdout sign-off (consumption
-    #3 of the accept window). The previous pool came from a detector that was
-    never really trained (lr bug: best.pt = epoch 1) and covered 101 symbols.
-    """
+    """Mainline: regression on the v8_chain candidate pool (2026-07-16 cutover)."""
     return FrozenConfig(
         name=DEFAULT_CONFIG_NAME,
         project_dir=project_dir,
@@ -112,6 +112,10 @@ def default_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
         horizon_bars=DEFAULT_HORIZON_BARS,
         objective="regression",
     )
+
+
+# Alias: v8 pool IS the default until the v11 flip.
+yolo_v8_pool_config = default_config
 
 
 def yolo_old_pool_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
@@ -127,8 +131,17 @@ def yolo_old_pool_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
     )
 
 
-# Deprecated alias: the v8 pool IS the default since the 2026-07-16 cutover.
-yolo_v8_pool_config = default_config
+def yolo_v11_pool_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
+    """v11_chain candidate pool (rescan in progress 2026-07-18). Cutover target."""
+    return FrozenConfig(
+        name=V11_POOL_CONFIG_NAME,
+        project_dir=project_dir,
+        dataset_path=project_dir / "data" / "judgment_yolo_swap_v11.csv",
+        models_dir=project_dir / "models",
+        score_quantile=DEFAULT_SCORE_QUANTILE,
+        horizon_bars=DEFAULT_HORIZON_BARS,
+        objective="regression",
+    )
 
 
 def binary_yolo_shadow_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:

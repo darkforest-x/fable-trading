@@ -26,10 +26,11 @@ from pathlib import Path
 
 from src.judgment.frozen import (
     binary_yolo_shadow_config,
-    yolo_v8_pool_config,
     default_config,
     rules_legacy_config,
     train_frozen_artifact,
+    yolo_v8_pool_config,
+    yolo_v11_pool_config,
 )
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -51,8 +52,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--yolo-v8-pool",
         action="store_true",
-        help="freeze regression on the clean v8_chain candidate pool "
-             "(judgment_yolo_swap_v8.csv; ACTIVE-candidate, compare before switching)",
+        help="freeze regression on the v8_chain candidate pool "
+             "(judgment_yolo_swap_v8.csv; rollback / compare)",
+    )
+    parser.add_argument(
+        "--yolo-v11-pool",
+        action="store_true",
+        help="freeze regression on the v11_chain candidate pool "
+             "(judgment_yolo_swap_v11.csv; mainline after 2026-07-18 cutover)",
     )
     parser.add_argument(
         "--write-active",
@@ -64,8 +71,12 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    if sum((args.legacy_rules, args.binary_yolo, args.yolo_v8_pool)) > 1:
-        raise SystemExit("choose at most one of --legacy-rules / --binary-yolo / --yolo-v8-pool")
+    pool_flags = (args.legacy_rules, args.binary_yolo, args.yolo_v8_pool, args.yolo_v11_pool)
+    if sum(pool_flags) > 1:
+        raise SystemExit(
+            "choose at most one of --legacy-rules / --binary-yolo / "
+            "--yolo-v8-pool / --yolo-v11-pool"
+        )
     if args.legacy_rules:
         config = rules_legacy_config()
         candidate_source = "rules"
@@ -74,6 +85,9 @@ def main() -> int:
         candidate_source = "yolo"
     elif args.yolo_v8_pool:
         config = yolo_v8_pool_config()
+        candidate_source = "yolo"
+    elif args.yolo_v11_pool:
+        config = yolo_v11_pool_config()
         candidate_source = "yolo"
     else:
         config = default_config()
@@ -99,14 +113,22 @@ def main() -> int:
         if active.exists():
             prev.write_text(active.read_text(encoding="utf-8"), encoding="utf-8")
         active.write_text(artifact.relative_model_path + "\n", encoding="utf-8")
-        shadow = PROJECT / "models" / "SHADOW_BINARY_YOLO"
+        # Keep prior mainline as SHADOW for dashboard compare / rollback.
+        shadow = PROJECT / "models" / "SHADOW_V8_REG"
         shadow.write_text(
-            "models/frozen_tp5_sl2_swap_yolo_20260715.txt\n"
-            "# previous binary YOLO freeze; dashboard compare + emergency rollback\n",
+            "models/frozen_tp5_sl2_swap_yolo_v8_reg_20260716.txt\n"
+            "# previous v8 pool regression freeze; compare + emergency rollback\n",
             encoding="utf-8",
         )
+        shadow_bin = PROJECT / "models" / "SHADOW_BINARY_YOLO"
+        if not shadow_bin.exists():
+            shadow_bin.write_text(
+                "models/frozen_tp5_sl2_swap_yolo_20260715.txt\n"
+                "# previous binary YOLO freeze; emergency rollback\n",
+                encoding="utf-8",
+            )
         print(f"ACTIVE -> {artifact.relative_model_path}")
-        print(f"ACTIVE_PREV kept; SHADOW_BINARY_YOLO -> binary yolo freeze")
+        print(f"ACTIVE_PREV kept; SHADOW_V8_REG -> v8 pool freeze")
     return 0
 
 
