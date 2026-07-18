@@ -81,6 +81,11 @@ def update_file(path: Path, *, bar: str | None = None) -> tuple[str, int]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--bar", default=DEFAULT_BAR, choices=BAR_CHOICES)
+    parser.add_argument(
+        "--swap-only",
+        action="store_true",
+        help="only update *_USDT_SWAP files (faster forward pulse path)",
+    )
     args = parser.parse_args()
     bar = normalize_bar(args.bar)
 
@@ -88,6 +93,8 @@ def main() -> int:
         p for p in FETCH_DIR.glob(f"okx_*_{bar}_*.csv")
         if (FILE_RE.match(p.name) and FILE_RE.match(p.name).group("bar") == bar)
     )
+    if args.swap_only:
+        files = [p for p in files if "_USDT_SWAP_" in p.name]
     total = 0
     for n, path in enumerate(files, 1):
         symbol, added = update_file(path, bar=bar)

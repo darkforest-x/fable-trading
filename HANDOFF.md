@@ -18,8 +18,11 @@ TG 通知只推 `status=open` 且 signal_age≤**45min**（与执行器新鲜度
 
 **前向时钟重启（owner 2026-07-19）**：清空主线 `forward_log.csv` 重测 v11 闸门；
 旧账本归档 `data/forward_log_pre_v11_retest_20260719.csv`；
-`FORWARD_START=2026-07-18 16:30 UTC`（避免脉冲把 07-15 起的历史又扫回来）。
-裁决计数从 0 重计至 100。
+`FORWARD_START=2026-07-18 16:15 UTC`（对齐最后收盘 bar，避免「start 在未收盘 bar 内」导致
+candidates_seen=0）。裁决计数从 0 重计至 100。
+
+**2026-07-19 链路优化**：tip 扫描在 start 超前数据时不再整表跳过；脉冲 `update_okx
+--swap-only`；YOLO live 多线程发现 + predict 锁；时钟/设备日志。
 
 **2026-07-16 快照（已被上方覆盖）**：v8 检测+判断；accept PF 7.50 / 428 笔。
 

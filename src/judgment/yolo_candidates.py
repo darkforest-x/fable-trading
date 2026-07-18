@@ -9,6 +9,8 @@ Requires ultralytics/torch (use `.venv/bin/python` for any path that calls
 """
 from __future__ import annotations
 
+import os
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -20,17 +22,38 @@ from src.detection.render import render_chart
 from src.judgment.candidates import MIN_GAP_BARS, WARMUP_BARS
 from src.judgment.labeling import HORIZON_BARS
 
-import os
-
 PROJECT_DIR = Path(__file__).resolve().parents[2]
 WINDOW = 200
 STRIDE = 50
 DEFAULT_CONF = 0.30
 DEFAULT_WEIGHTS = PROJECT_DIR / "models" / "owner_best.pt"
-# per-process temp path avoids collisions when multiple scans run
-TMP_PNG = PROJECT_DIR / "data" / f"_yolo_cand_tmp_{os.getpid()}.png"
+# Base temp dir; each predict call uses a unique filename (thread-safe live scan).
+_TMP_DIR = PROJECT_DIR / "data"
 
 _model_cache: dict[str, Any] = {}
+_predict_lock = threading.Lock()
+_predict_device: str | None = None
+
+
+def _resolve_predict_device() -> str:
+    """Prefer CUDA on VPS; fall back to CPU (MPS has hung multi-series scans)."""
+    global _predict_device
+    if _predict_device is not None:
+        return _predict_device
+    forced = os.environ.get("FABLE_YOLO_DEVICE", "").strip()
+    if forced:
+        _predict_device = forced
+        return _predict_device
+    try:
+        import torch
+
+        if torch.cuda.is_available():
+            _predict_device = "0"
+            return _predict_device
+    except Exception:  # noqa: BLE001
+        pass
+    _predict_device = "cpu"
+    return _predict_device
 
 
 def right_edge_to_bar(cx: float, w: float, tf, *, n_bars: int) -> int:
@@ -62,7 +85,7 @@ def scan_series_with_yolo(
     window: int = WINDOW,
     stride: int = STRIDE,
     min_gap: int = MIN_GAP_BARS,
-    tmp_png: Path = TMP_PNG,
+    tmp_png: Path | None = None,
     start_from_i: int | None = None,
     mode: str = "full",
 ) -> list[int]:
@@ -78,7 +101,10 @@ def scan_series_with_yolo(
     if len(frame) < WARMUP_BARS + window + 2:
         return []
     enriched_ma = add_mas(frame)
-    tmp_png.parent.mkdir(parents=True, exist_ok=True)
+    _TMP_DIR.mkdir(parents=True, exist_ok=True)
+    # Unique path per call (thread id + pid) so parallel live scans never clobber.
+    if tmp_png is None:
+        tmp_png = _TMP_DIR / f"_yolo_cand_tmp_{os.getpid()}_{threading.get_ident()}.png"
     last_start = len(frame) - window
     first_start = WARMUP_BARS
     if start_from_i is not None:
@@ -94,13 +120,14 @@ def scan_series_with_yolo(
         starts = list(range(first_start, last_start + 1, stride))
 
     chosen: list[int] = []
+    device = _resolve_predict_device()
     for start in starts:
         sub = enriched_ma.iloc[start : start + window]
         try:
             _, tf = render_chart(sub, out_path=tmp_png)
-            # device=cpu: MPS predict has hung mid multi-series forward scans on
-            # M4 Air; CPU is slower per call but finishes reliably for live mode.
-            res = model.predict(str(tmp_png), conf=conf, verbose=False, device="cpu")
+            # Serialize predict: ultralytics is not reliably thread-safe.
+            with _predict_lock:
+                res = model.predict(str(tmp_png), conf=conf, verbose=False, device=device)
         except Exception:
             continue
         if not res:

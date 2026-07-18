@@ -6,7 +6,9 @@ reuses the same candidate/score path with scaled exits.
 """
 from __future__ import annotations
 
+import os
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Optional
 
 import numpy as np
@@ -36,6 +38,18 @@ from src.judgment.yolo_candidates import load_yolo_model, scan_series_with_yolo
 ExitResolver = Callable[[pd.DataFrame, int], Optional[ForwardExit]]
 
 
+def _forward_workers() -> int:
+    """Series-level parallelism for live YOLO. Override with FABLE_FORWARD_WORKERS."""
+    raw = os.environ.get("FABLE_FORWARD_WORKERS", "").strip()
+    if raw:
+        try:
+            return max(1, min(8, int(raw)))
+        except ValueError:
+            pass
+    # Default 3: render can overlap; predict is locked inside yolo_candidates.
+    return 3
+
+
 def scan_forward_records(
     scan: ForwardScanInput,
     *,
@@ -55,26 +69,53 @@ def scan_forward_records(
     yolo_model = None
     if CANDIDATE_SOURCE == "yolo":
         yolo_model = load_yolo_model()
+
+    jobs: list[tuple[str, str, pd.DataFrame]] = []
     for source, symbol, frame in iter_series(bar="15m", min_bars=500):
         if source != "okx" or not symbol.endswith("_USDT_SWAP"):
             continue
         if is_stockish(symbol):
             continue
-        scanned_series += 1
+        jobs.append((source, symbol, frame))
+    scanned_series = len(jobs)
+    workers = _forward_workers() if CANDIDATE_SOURCE == "yolo" else 1
+    print(f"forward_scan: series={scanned_series} workers={workers} source={CANDIDATE_SOURCE}", flush=True)
+
+    def _discover(job: tuple[str, str, pd.DataFrame]) -> tuple[str, str, pd.DataFrame, pd.DataFrame, list[int]]:
+        """Phase 1 (parallel-safe): indicators + YOLO/rules indices only."""
+        source, symbol, frame = job
         enriched = add_indicators(frame)
         signal_indices = set(
-            forward_candidate_indices(enriched, frame=frame, yolo_model=yolo_model, start_time=scan.start_time)
+            forward_candidate_indices(
+                enriched, frame=frame, yolo_model=yolo_model, start_time=scan.start_time
+            )
         )
         tracked_times = {key[2] for key in tracked_keys if key[0] == source and key[1] == symbol}
         if tracked_times:
             signal_times = enriched["open_time"].astype(str)
-            signal_indices.update(int(idx) for idx in signal_times[signal_times.isin(tracked_times)].index)
-        if not signal_indices:
+            signal_indices.update(
+                int(idx) for idx in signal_times[signal_times.isin(tracked_times)].index
+            )
+        return source, symbol, frame, enriched, sorted(signal_indices)
+
+    discovered: list[tuple[str, str, pd.DataFrame, pd.DataFrame, list[int]]] = []
+    if workers <= 1:
+        discovered = [_discover(job) for job in jobs]
+    else:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futs = [pool.submit(_discover, job) for job in jobs]
+            for fut in as_completed(futs):
+                discovered.append(fut.result())
+
+    # Phase 2 (sequential): LightGBM predict + barrier resolve (not thread-safe).
+    for source, symbol, frame, enriched, ordered_indices in discovered:
+        if not ordered_indices:
             continue
         featured = add_features(enriched)
-        ordered_indices = sorted(signal_indices)
         feature_rows = extract_feature_rows(featured, ordered_indices)
-        scores = scan.booster.predict(feature_rows[FEATURE_COLUMNS], num_iteration=scan.artifact.best_iteration)
+        scores = scan.booster.predict(
+            feature_rows[FEATURE_COLUMNS], num_iteration=scan.artifact.best_iteration
+        )
         candidates_seen += len(ordered_indices)
         for row_pos, signal_i in enumerate(ordered_indices):
             signal_time = pd.Timestamp(enriched["open_time"].iloc[signal_i])
@@ -106,7 +147,9 @@ def scan_forward_records(
                     "signal_i": int(signal_i),
                     "entry_time": str(pd.Timestamp(enriched["open_time"].iloc[entry_i])),
                     "entry_price": float(enriched["open"].iloc[entry_i]),
-                    "maker_filled": bool(float(enriched["low"].iloc[entry_i]) < float(enriched["open"].iloc[entry_i])),
+                    "maker_filled": bool(
+                        float(enriched["low"].iloc[entry_i]) < float(enriched["open"].iloc[entry_i])
+                    ),
                     "outcome": exit_state.outcome,
                     "label": exit_state.label,
                     "exit_offset": exit_state.exit_offset,
@@ -134,11 +177,21 @@ def forward_candidate_indices(
     start_from_i = None
     if start_time is not None and "open_time" in raw.columns:
         times = pd.to_datetime(raw["open_time"], utc=True)
-        hits = np.flatnonzero(times >= pd.Timestamp(start_time))
+        st = pd.Timestamp(start_time)
+        if st.tzinfo is None:
+            st = st.tz_localize("UTC")
+        else:
+            st = st.tz_convert("UTC")
+        hits = np.flatnonzero(times >= st)
         if len(hits) == 0:
-            # series ends before forward clock — skip (do NOT full-history YOLO)
-            return []
-        start_from_i = max(0, int(hits[0]) - 5)
+            # FORWARD_START often sits *inside* the still-open 15m bar (e.g. start
+            # 16:30 while last *closed* open_time is 16:15). Returning [] here
+            # blanked the whole live gate after the 2026-07-19 retest clock reset
+            # (candidates_seen=0 on 344 series). Still scan the tip; the score
+            # stage already drops signal_time < start_time for new rows.
+            start_from_i = max(0, len(raw) - 10)
+        else:
+            start_from_i = max(0, int(hits[0]) - 5)
     return scan_series_with_yolo(raw, yolo_model, start_from_i=start_from_i, mode="live")
 
 
