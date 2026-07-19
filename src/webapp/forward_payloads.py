@@ -17,7 +17,13 @@ from src.costs import FORWARD_COST  # mainline swap-maker route
 FORWARD_DECISION_TRADES = 100
 
 
-FRESH_DETECT_MIN = 20.0  # a verdict trade must have been KNOWABLE at the tip
+# A verdict trade must have been KNOWABLE (and tradeable) at detection time.
+# Structural floor: signal bar closes at +15 min, the scan can only record it
+# after the ENTRY bar exists, so the earliest honest detected_at lag is ~31-37
+# min (:01/:16/:31/:46 pulse + scan runtime). 20 was too tight and would have
+# excluded even the fastest possible live detection; align with the executor's
+# max_signal_age_min=55 so the verdict counts exactly what live could trade.
+FRESH_DETECT_MIN = 55.0
 
 
 def forward_payload(cost: float = FORWARD_COST) -> dict:
