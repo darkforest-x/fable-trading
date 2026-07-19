@@ -69,6 +69,63 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def run_walkforward(config, n_folds: int = 5) -> dict:
+    """Expanding-window fold stability for the freeze's own metadata.
+
+    Same recipe as the freeze (train_model on the config's objective), five
+    sequential val slices over the dev period, purge on both sides. A single
+    val split can look fine while the model is broken -- the judgment audit's
+    five-fold table is what exposed stability, so every freeze now ships one.
+    Holdout is never touched (load_splits already fences it).
+    """
+    import numpy as np
+    from scipy.stats import spearmanr
+
+    from src.costs import SWAP_MAKER
+    from src.data.bars import purge_window
+    from src.judgment.features import FEATURE_COLUMNS
+    from src.judgment.train import HOLDOUT_START, load_splits, train_model
+
+    purge = purge_window(config.horizon_bars, "15m")
+    import pandas as pd
+
+    data = pd.read_csv(config.dataset_path, parse_dates=["signal_time"])
+    data = data.sort_values("signal_time").reset_index(drop=True)
+    dev = data[data["signal_time"] < HOLDOUT_START - purge].reset_index(drop=True)
+    n = len(dev)
+    edges = [int(n * x) for x in (0.40, 0.52, 0.64, 0.76, 0.88, 1.00)][: n_folds + 1]
+    folds = []
+    for f in range(len(edges) - 1):
+        val = dev.iloc[edges[f]: edges[f + 1]]
+        train = dev[dev["signal_time"] < val["signal_time"].min() - purge]
+        if len(train) < 500 or len(val) < 100:
+            continue
+        model = train_model(train, val, objective=config.objective)
+        sc = model.predict(val[FEATURE_COLUMNS], num_iteration=model.best_iteration)
+        ret = val["realized_ret"].to_numpy()
+        k = max(1, len(val) // 10)
+        top = np.argsort(-sc)[:k]
+        folds.append({
+            "val_start": str(val["signal_time"].min())[:10],
+            "n_val": int(len(val)),
+            "spearman": round(float(spearmanr(sc, ret).statistic), 4),
+            "top_decile_net_maker": round(float(ret[top].mean() - SWAP_MAKER), 5),
+            "top_decile_win": round(float((ret[top] > 0).mean()), 3),
+        })
+    rhos = [f["spearman"] for f in folds]
+    nets = [f["top_decile_net_maker"] for f in folds]
+    out = {
+        "folds": folds,
+        "rho_mean": round(sum(rhos) / len(rhos), 4) if rhos else None,
+        "rho_min": min(rhos) if rhos else None,
+        "net_min": min(nets) if nets else None,
+        "all_folds_net_positive": bool(nets and all(x > 0 for x in nets)),
+    }
+    print(f"walkforward: rho_mean={out['rho_mean']} rho_min={out['rho_min']} "
+          f"all_net_positive={out['all_folds_net_positive']}")
+    return out
+
+
 def main() -> int:
     args = parse_args()
     pool_flags = (args.legacy_rules, args.binary_yolo, args.yolo_v8_pool, args.yolo_v11_pool)
@@ -95,6 +152,7 @@ def main() -> int:
     if not config.dataset_path.exists():
         raise SystemExit(f"dataset missing: {config.dataset_path}")
     artifact = train_frozen_artifact(config, args.date)
+    walkforward = run_walkforward(config)
     meta = {
         "model_path": artifact.relative_model_path,
         "metadata_path": artifact.metadata_path.relative_to(artifact.config.project_dir).as_posix(),
@@ -105,7 +163,16 @@ def main() -> int:
         "config": config.name,
         "objective": config.objective,
         "candidate_source": candidate_source,
+        "walkforward": walkforward,
     }
+    # Persist fold stability inside the artifact metadata so every freeze
+    # carries its own robustness evidence (single-split val numbers alone hid
+    # the lr bug for weeks; the five-fold table is what caught the pattern).
+    art_meta = json.loads(artifact.metadata_path.read_text(encoding="utf-8"))
+    art_meta["walkforward"] = walkforward
+    artifact.metadata_path.write_text(
+        json.dumps(art_meta, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     print(json.dumps(meta, ensure_ascii=False, indent=2))
     if args.write_active:
         active = PROJECT / "models" / "ACTIVE"

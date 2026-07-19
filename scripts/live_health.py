@@ -30,6 +30,76 @@ def _age_min(path: Path) -> float | None:
     return (datetime.now(timezone.utc) - m).total_seconds() / 60.0
 
 
+def pass_rate_digest(hours: float = 24.0) -> str:
+    """Live funnel summary for the daily TG digest.
+
+    Answers the standing question -- is the live tip pass-rate consistent with
+    the pool's ~8-10%? -- without anyone having to ssh in: pulses, candidate
+    sightings, new threshold passes (and how many were fresh enough to trade),
+    detection lag, executor events, all over the last `hours`.
+    """
+    import csv
+    import re
+    from collections import Counter
+    from datetime import datetime, timedelta, timezone
+
+    since = datetime.now(timezone.utc) - timedelta(hours=hours)
+    lines: list[str] = []
+
+    log = PROJECT / "logs" / "forward_pulse.log"
+    if log.exists():
+        pulses = cands = thr = 0
+        for block in log.read_text(errors="ignore").split("=== forward_pulse ")[1:]:
+            m = re.match(r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})", block)
+            if not m:
+                continue
+            try:
+                ts = datetime.fromisoformat(m.group(1)).replace(tzinfo=timezone.utc)
+            except ValueError:
+                continue
+            if ts < since:
+                continue
+            pulses += 1
+            mc = re.search(r'"candidates_seen": (\d+)', block)
+            mt = re.search(r'"threshold_signals_seen": (\d+)', block)
+            cands += int(mc.group(1)) if mc else 0
+            thr += int(mt.group(1)) if mt else 0
+        lines.append(f"脉冲 {pulses} 轮 · 候选目击 {cands} 次")
+
+    def _ts(raw: str) -> datetime | None:
+        try:
+            return datetime.fromisoformat(str(raw).replace("+00:00", "")).replace(tzinfo=timezone.utc)
+        except ValueError:
+            return None
+
+    fl = PROJECT / "data" / "forward_log.csv"
+    if fl.exists():
+        lags = []
+        for r in csv.DictReader(fl.open()):
+            d, s = _ts(r.get("detected_at", "")), _ts(r.get("signal_time", ""))
+            if d and s and d >= since:
+                lags.append((d - s).total_seconds() / 60)
+        fresh = sum(1 for x in lags if x <= 55)
+        lines.append(f"新过线信号 {len(lags)}(其中新鲜≤55min可交易: {fresh})")
+        if lags:
+            lines.append(f"检出延迟中位 {sorted(lags)[len(lags)//2]:.0f} 分")
+
+    led = PROJECT / "data" / "executor_ledger.jsonl"
+    if led.exists():
+        events: list[str] = []
+        for ln in led.read_text().splitlines():
+            try:
+                r = json.loads(ln)
+            except json.JSONDecodeError:
+                continue
+            t = _ts(r.get("ts", ""))
+            if t and t >= since:
+                events.append(str(r.get("event")))
+        summary = ", ".join(f"{k}×{v}" for k, v in Counter(events).items()) or "无事件"
+        lines.append(f"执行器: {summary}")
+    return "\n".join(lines)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--alert", action="store_true", help="TG on hard fail")
@@ -104,6 +174,18 @@ def main() -> int:
             )
         except Exception as exc:  # noqa: BLE001
             print(f"alert failed: {exc}", flush=True)
+
+    # Daily funnel digest: the health timer fires every 30 min; the run that
+    # lands in the 09:00-09:29 Beijing window (01:00-01:29 UTC) also reports
+    # the last 24h live funnel, so "is the pass-rate normal?" answers itself.
+    now_utc = datetime.now(timezone.utc)
+    if args.alert and now_utc.hour == 1 and now_utc.minute < 30:
+        try:
+            from src.notify import send as _send
+
+            _send("📈 <b>实盘日报(过去24h)</b>\n<code>" + pass_rate_digest(24.0) + "</code>")
+        except Exception as exc:  # noqa: BLE001
+            print(f"digest failed: {exc}", flush=True)
     return 1 if issues else 0
 
 

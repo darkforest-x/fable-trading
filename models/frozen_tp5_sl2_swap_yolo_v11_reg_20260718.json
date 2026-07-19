@@ -57,5 +57,48 @@
     }
   },
   "holdout_policy": "holdout excluded from training and threshold selection; not evaluated",
-  "score_semantics": "predicted_realized_ret"
+  "score_semantics": "predicted_realized_ret",
+  "walkforward": {
+    "folds": [
+      {
+        "val_start": "2025-11-05",
+        "n_val": 2472,
+        "spearman": 0.5924,
+        "top_decile_net_maker": 0.04905,
+        "top_decile_win": 0.777
+      },
+      {
+        "val_start": "2025-12-12",
+        "n_val": 2472,
+        "spearman": 0.6441,
+        "top_decile_net_maker": 0.0342,
+        "top_decile_win": 0.765
+      },
+      {
+        "val_start": "2026-01-18",
+        "n_val": 2471,
+        "spearman": 0.5694,
+        "top_decile_net_maker": 0.03817,
+        "top_decile_win": 0.745
+      },
+      {
+        "val_start": "2026-02-27",
+        "n_val": 2472,
+        "spearman": 0.5897,
+        "top_decile_net_maker": 0.03498,
+        "top_decile_win": 0.777
+      },
+      {
+        "val_start": "2026-04-02",
+        "n_val": 2472,
+        "spearman": 0.663,
+        "top_decile_net_maker": 0.0423,
+        "top_decile_win": 0.83
+      }
+    ],
+    "rho_mean": 0.6117,
+    "rho_min": 0.5694,
+    "net_min": 0.0342,
+    "all_folds_net_positive": true
+  }
 }
