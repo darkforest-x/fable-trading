@@ -17,13 +17,31 @@ from src.costs import FORWARD_COST  # mainline swap-maker route
 FORWARD_DECISION_TRADES = 100
 
 
+FRESH_DETECT_MIN = 20.0  # a verdict trade must have been KNOWABLE at the tip
+
+
 def forward_payload(cost: float = FORWARD_COST) -> dict:
     frame = _read_forward_log()
     closed = frame[(frame["status"] == "closed") & frame["realized_ret"].notna()].copy()
     decision = closed[closed["maker_filled"].fillna(False)].copy()
+    # Hindsight exclusion (2026-07-19): the live detector often recognises a
+    # signal only HOURS after its bar, once the launch has printed -- KAITO
+    # 03:00 was detected 07:17, EDEN 04:30 at 14:17, and all such rows closed
+    # as TPs precisely because detection was conditioned on the move having
+    # happened. Counting them would let hindsight buy the verdict. Only rows
+    # detected within FRESH_DETECT_MIN of their signal bar are decidable.
+    if "detected_at" in decision.columns and not decision.empty:
+        det = pd.to_datetime(decision["detected_at"], errors="coerce", utc=True)
+        sig = pd.to_datetime(decision["signal_time"], errors="coerce", utc=True)
+        lag_min = (det - sig).dt.total_seconds() / 60.0
+        hindsight = decision[(lag_min > FRESH_DETECT_MIN) | lag_min.isna()]
+        decision = decision[lag_min <= FRESH_DETECT_MIN]
+    else:
+        hindsight = decision.iloc[0:0]
     decision["net_ret"] = decision["realized_ret"] - cost
     equity, drawdown = _forward_equity(decision)
     decision_count = int(len(decision))
+    hindsight_count = int(len(hindsight))
     rows = frame.sort_values("signal_time", ascending=False).head(200).copy()
     if not rows.empty:
         rows["net_ret"] = rows["realized_ret"] - cost
@@ -42,6 +60,8 @@ def forward_payload(cost: float = FORWARD_COST) -> dict:
         "decision_target": FORWARD_DECISION_TRADES,
         "decision_remaining": max(FORWARD_DECISION_TRADES - decision_count, 0),
         "progress": round(min(decision_count / FORWARD_DECISION_TRADES, 1.0), 4),
+        "hindsight_excluded": hindsight_count,
+        "fresh_detect_min": FRESH_DETECT_MIN,
         "latest_detected_at": _latest_timestamp(frame, "detected_at"),
         "metrics": forward_metrics(decision),
         "outcomes": _outcome_rows(decision),

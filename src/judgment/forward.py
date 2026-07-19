@@ -127,7 +127,35 @@ def _run_forward_tracking(
         ),
         exit_resolver=exit_resolver,
     )
-    merged = merge_forward_log(existing, scan.records)
+    # Same-symbol minimum gap (2026-07-19): the validated pool spaces signals
+    # >= MIN_GAP_BARS (18 bars = 4.5h) per symbol, but each live pulse scans
+    # independently, so one move emitted KAITO signals at 03:00/03:15/03:30/
+    # 04:00 -- four counts of the same trade. Enforce the pool's spacing here:
+    # a NEW signal is dropped if the log (or this batch) already has one for
+    # the same symbol within the gap. Exit updates of existing keys pass through.
+    from src.judgment.candidates import MIN_GAP_BARS
+    from src.judgment.forward_records import row_key as _row_key
+
+    gap = pd.Timedelta(minutes=15 * MIN_GAP_BARS)
+    known_keys = {_row_key(r) for r in existing.to_dict("records")} if not existing.empty else set()
+    sym_times: dict[str, list[pd.Timestamp]] = {}
+    if not existing.empty:
+        for _, r in existing.iterrows():
+            sym_times.setdefault(str(r["symbol"]), []).append(
+                pd.Timestamp(r["signal_time"]).tz_localize("UTC")
+                if pd.Timestamp(r["signal_time"]).tzinfo is None
+                else pd.Timestamp(r["signal_time"]).tz_convert("UTC"))
+    gapped_records = []
+    for rec in scan.records:
+        key = _row_key(rec) if isinstance(rec, dict) else None
+        ts = pd.Timestamp(rec["signal_time"])
+        ts = ts.tz_localize("UTC") if ts.tzinfo is None else ts.tz_convert("UTC")
+        sym = str(rec["symbol"])
+        if key not in known_keys and any(abs(ts - t) < gap for t in sym_times.get(sym, [])):
+            continue
+        gapped_records.append(rec)
+        sym_times.setdefault(sym, []).append(ts)
+    merged = merge_forward_log(existing, gapped_records)
     write_forward_log(output_path, merged.frame)
     # Telegram: only mainline path, only brand-new signal keys (not exit updates).
     if Path(output_path).resolve() == Path(FORWARD_LOG_PATH).resolve() and merged.new_signals:
