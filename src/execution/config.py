@@ -36,6 +36,8 @@ class ExecutorConfig:
     # min notional per entry (USDT); skip if remaining budget below this
     min_notional_usdt: float = 5.0
     max_consecutive_losses: int = 5
+    # validated strategy exits at 72 bars (18h); live must too
+    timeout_hours: float = 18.0
     # A forward row stays "open" for up to the 18h barrier horizon, but the edge
     # is the launch moment: refuse to open positions on signals older than this.
     # Live pulse can take 3–6 min after bar close; 55 keeps edge without

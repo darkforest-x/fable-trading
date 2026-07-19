@@ -37,6 +37,8 @@ _NOTIFY_EVENTS = {
     "order_partial": "🟡 <b>开仓成功·括号失败</b>(需人工补止损!)",
     "order_failed": "🔴 <b>下单失败</b>",
     "skipped_invalid_barriers": "⚠️ <b>拒单</b>(止盈止损价不可用)",
+    "timeout_close": "⏱ <b>超时平仓</b>(72bar 到期,按验证策略出场)",
+    "timeout_close_failed": "🔴 <b>超时平仓失败</b>(需人工处理!)",
 }
 
 
@@ -269,6 +271,90 @@ def open_one(
     return event
 
 
+def enforce_timeout_exits(client, cfg: ExecutorConfig, ledger_path: Path) -> int:
+    """Close positions older than the validated 72-bar horizon (18h).
+
+    The strategy every backtest and the forward gate validated has exactly three
+    exits: TP, SL, or timeout at 72 bars. Live had only the OCO bracket, so a
+    position that touched neither barrier would linger indefinitely -- an
+    untested trade. Closing is reduce-only, and the bracket algo is cancelled
+    FIRST: a leftover OCO on a flat position would otherwise fire later and
+    open a naked short.
+    """
+    import src.execution.ledger as led
+
+    timeout = pd.Timedelta(hours=float(getattr(cfg, "timeout_hours", 18.0)))
+    now = pd.Timestamp.now(tz="UTC")
+    rows = led.load_all(ledger_path)
+    # last entry event + algo id per instrument, minus anything already closed
+    entries: dict[str, dict] = {}
+    for r in rows:
+        inst = r.get("inst_id")
+        if not inst:
+            continue
+        ev = r.get("event")
+        if ev in {"order_placed", "order_partial"}:
+            algo_id = None
+            for a in r.get("algo_resp") or []:
+                algo_id = a.get("algoId") or algo_id
+            entries[inst] = {"ts": r.get("ts"), "algo_id": algo_id}
+        elif ev == "timeout_close":
+            entries.pop(inst, None)
+    closed = 0
+    try:
+        positions = client.positions()
+    except Exception as exc:  # noqa: BLE001 -- position read failing must not kill the loop
+        print(f"timeout check: positions read failed: {exc}")
+        return 0
+    for p in positions:
+        try:
+            pos_sz = abs(float(p.get("pos") or 0))
+            if pos_sz <= 0:
+                continue
+            inst = p.get("instId")
+            meta = entries.get(inst) or {}
+            # Entry time: ledger first, OKX cTime fallback, explicit NaT checks.
+            # pd.Timestamp(None) returns NaT WITHOUT raising, and `now - NaT <
+            # timeout` is False -- the unit test caught this closing every
+            # position that lacked a ledger row. Unknown age => never close.
+            entry_ts = pd.NaT
+            if meta.get("ts"):
+                entry_ts = pd.Timestamp(meta["ts"])
+                entry_ts = (entry_ts.tz_localize("UTC") if entry_ts.tzinfo is None
+                            else entry_ts.tz_convert("UTC"))
+            if pd.isna(entry_ts):
+                ctime = int(p.get("cTime") or 0)
+                if ctime <= 0:
+                    continue
+                entry_ts = pd.Timestamp(ctime, unit="ms", tz="UTC")
+            if pd.isna(entry_ts) or now - entry_ts < timeout:
+                continue
+            if meta.get("algo_id"):
+                try:
+                    client.cancel_algo(inst, meta["algo_id"])
+                except Exception as exc:  # noqa: BLE001 -- may be gone already
+                    print(f"timeout close {inst}: cancel_algo: {exc}")
+            side = "sell" if str(p.get("posSide", "net")) != "short" else "buy"
+            resp = client.place_market(
+                inst, side, str(pos_sz), td_mode=cfg.td_mode,
+                pos_side=(p.get("posSide") if p.get("posSide") in {"long", "short"} else None),
+                reduce_only=True,
+            )
+            ev = {
+                "event": "timeout_close", "inst_id": inst, "sz": str(pos_sz),
+                "held_hours": round((now - entry_ts).total_seconds() / 3600, 1),
+                "order_resp": resp.get("data"),
+            }
+            led.append(ledger_path, ev)
+            _notify_event(ev)
+            closed += 1
+        except Exception as exc:  # noqa: BLE001 -- one bad position must not skip the rest
+            ev = {"event": "timeout_close_failed", "inst_id": p.get("instId"), "error": str(exc)}
+            led.append(ledger_path, ev)
+            _notify_event(ev)
+    return closed
+
+
 def run_once(cfg: ExecutorConfig, *, dry_run: bool = False) -> dict[str, Any]:
     """Single poll cycle. Returns summary counters."""
     ledger_path = _resolve(cfg.ledger)
@@ -285,6 +371,18 @@ def run_once(cfg: ExecutorConfig, *, dry_run: bool = False) -> dict[str, Any]:
         summary["paused"] = f"kill switch: {cfg.kill_switch_file}"
         # Do not append paused every 30–60s — it bloated the ledger to 300+ noise rows.
         return summary
+
+    # Enforce the validated 72-bar exit BEFORE any early return: a position ages
+    # past its horizon precisely on quiet cycles, when no-signal returns would
+    # otherwise skip the check. Runs under circuit-breaker pause too (it reduces
+    # exposure); only the explicit kill switch above silences everything.
+    if not dry_run:
+        try:
+            n_to = enforce_timeout_exits(OkxDemoClient(), cfg, ledger_path)
+            if n_to:
+                summary["timeout_closed"] = n_to
+        except Exception as exc:  # noqa: BLE001
+            print(f"timeout enforcement failed: {exc}")
 
     losses = led.consecutive_losses(ledger_path)
     if losses >= cfg.max_consecutive_losses:

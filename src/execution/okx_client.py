@@ -230,6 +230,7 @@ class OkxDemoClient:
         td_mode: str = "cross",
         cl_ord_id: str | None = None,
         pos_side: str | None = None,
+        reduce_only: bool = False,
     ) -> dict:
         body: dict[str, Any] = {
             "instId": inst_id,
@@ -241,6 +242,9 @@ class OkxDemoClient:
         # hedge mode requires long|short; net mode uses net (or omit)
         if pos_side:
             body["posSide"] = pos_side
+        if reduce_only:
+            # closing orders must never be able to flip into a fresh position
+            body["reduceOnly"] = "true"
         if cl_ord_id:
             body["clOrdId"] = cl_ord_id[:32]
         return self._request("POST", "/api/v5/trade/order", body)
