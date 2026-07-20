@@ -1,0 +1,245 @@
+{
+  "dataset": "data/judgment_yolo_swap_v11.csv",
+  "frozen_artifact": "frozen_tp5_sl2_swap_yolo_v11_reg_20260718",
+  "threshold_val_q90": 0.02022,
+  "tier_bounds_val": {
+    "q90": 0.02022,
+    "q95": 0.02548,
+    "q99": 0.04857
+  },
+  "calibration": {
+    "fit_on": "train window (in-sample scores, disclosed)",
+    "p_min_at_threshold": 0.6326,
+    "scale_mean_p_minus_pmin": 0.0697
+  },
+  "windows": {
+    "val": [
+      "2026-03-12 06:45:00+00:00",
+      "2026-05-04 00:00:00+00:00"
+    ],
+    "train_insample": [
+      "2025-06-05 07:15:00+00:00",
+      "2026-03-12 06:45:00+00:00"
+    ],
+    "holdout": "NOT simulated (entries >= 2026-05-04 excluded before the event loop)"
+  },
+  "capital_units": 10.0,
+  "variants": {
+    "baseline_binary": {
+      "val": {
+        "cost_0.002": {
+          "n_trades": 391,
+          "net_total_units": 14.4946,
+          "net_return_on_capital": 1.4495,
+          "mean_net_per_trade_unitized": 0.03707,
+          "win_rate": 0.8159,
+          "profit_factor": 8.05,
+          "max_drawdown_pct": 0.0079,
+          "utilisation": 0.1894,
+          "turnover_units": 391.0,
+          "turnover_units_per_day": 7.417,
+          "mean_weight": 1.0
+        },
+        "cost_0.003": {
+          "n_trades": 391,
+          "net_total_units": 14.1036,
+          "net_return_on_capital": 1.4104,
+          "mean_net_per_trade_unitized": 0.03607,
+          "win_rate": 0.8159,
+          "profit_factor": 7.627,
+          "max_drawdown_pct": 0.0083,
+          "utilisation": 0.1894,
+          "turnover_units": 391.0,
+          "turnover_units_per_day": 7.417,
+          "mean_weight": 1.0
+        }
+      },
+      "train_insample": {
+        "cost_0.002": {
+          "n_trades": 1778,
+          "net_total_units": 68.3493,
+          "net_return_on_capital": 6.8349,
+          "mean_net_per_trade_unitized": 0.03844,
+          "win_rate": 0.7975,
+          "profit_factor": 7.879,
+          "max_drawdown_pct": 0.0095,
+          "utilisation": 0.1756,
+          "turnover_units": 1778.0,
+          "turnover_units_per_day": 6.35,
+          "mean_weight": 1.0
+        },
+        "cost_0.003": {
+          "n_trades": 1778,
+          "net_total_units": 66.5713,
+          "net_return_on_capital": 6.6571,
+          "mean_net_per_trade_unitized": 0.03744,
+          "win_rate": 0.797,
+          "profit_factor": 7.465,
+          "max_drawdown_pct": 0.01,
+          "utilisation": 0.1756,
+          "turnover_units": 1778.0,
+          "turnover_units_per_day": 6.35,
+          "mean_weight": 1.0
+        }
+      },
+      "val_monthly_net_cost_0.003": {
+        "2026-03": {
+          "n": 121,
+          "net_units": 3.3253
+        },
+        "2026-04": {
+          "n": 257,
+          "net_units": 10.2572
+        },
+        "2026-05": {
+          "n": 13,
+          "net_units": 0.5211
+        }
+      }
+    },
+    "tiered_q90_95_99": {
+      "val": {
+        "cost_0.002": {
+          "n_trades": 375,
+          "net_total_units": 19.7221,
+          "net_return_on_capital": 1.9722,
+          "mean_net_per_trade_unitized": 0.05259,
+          "win_rate": 0.8133,
+          "profit_factor": 7.741,
+          "max_drawdown_pct": 0.0105,
+          "utilisation": 0.2381,
+          "turnover_units": 488.5,
+          "turnover_units_per_day": 9.266,
+          "mean_weight": 1.303
+        },
+        "cost_0.003": {
+          "n_trades": 375,
+          "net_total_units": 19.2336,
+          "net_return_on_capital": 1.9234,
+          "mean_net_per_trade_unitized": 0.05129,
+          "win_rate": 0.8133,
+          "profit_factor": 7.374,
+          "max_drawdown_pct": 0.0108,
+          "utilisation": 0.2381,
+          "turnover_units": 488.5,
+          "turnover_units_per_day": 9.266,
+          "mean_weight": 1.303
+        }
+      },
+      "train_insample": {
+        "cost_0.002": {
+          "n_trades": 1647,
+          "net_total_units": 95.7169,
+          "net_return_on_capital": 9.5717,
+          "mean_net_per_trade_unitized": 0.05812,
+          "win_rate": 0.7942,
+          "profit_factor": 8.493,
+          "max_drawdown_pct": 0.0082,
+          "utilisation": 0.2133,
+          "turnover_units": 2217.5,
+          "turnover_units_per_day": 7.92,
+          "mean_weight": 1.346
+        },
+        "cost_0.003": {
+          "n_trades": 1647,
+          "net_total_units": 93.4994,
+          "net_return_on_capital": 9.3499,
+          "mean_net_per_trade_unitized": 0.05677,
+          "win_rate": 0.7936,
+          "profit_factor": 8.078,
+          "max_drawdown_pct": 0.0087,
+          "utilisation": 0.2133,
+          "turnover_units": 2217.5,
+          "turnover_units_per_day": 7.92,
+          "mean_weight": 1.346
+        }
+      },
+      "val_monthly_net_cost_0.003": {
+        "2026-03": {
+          "n": 116,
+          "net_units": 4.171
+        },
+        "2026-04": {
+          "n": 246,
+          "net_units": 14.3162
+        },
+        "2026-05": {
+          "n": 13,
+          "net_units": 0.7464
+        }
+      }
+    },
+    "calib_isotonic": {
+      "val": {
+        "cost_0.002": {
+          "n_trades": 318,
+          "net_total_units": 15.8619,
+          "net_return_on_capital": 1.5862,
+          "mean_net_per_trade_unitized": 0.04988,
+          "win_rate": 0.805,
+          "profit_factor": 8.039,
+          "max_drawdown_pct": 0.0109,
+          "utilisation": 0.1756,
+          "turnover_units": 335.85,
+          "turnover_units_per_day": 6.371,
+          "mean_weight": 1.056
+        },
+        "cost_0.003": {
+          "n_trades": 318,
+          "net_total_units": 15.5261,
+          "net_return_on_capital": 1.5526,
+          "mean_net_per_trade_unitized": 0.04882,
+          "win_rate": 0.805,
+          "profit_factor": 7.699,
+          "max_drawdown_pct": 0.0114,
+          "utilisation": 0.1756,
+          "turnover_units": 335.85,
+          "turnover_units_per_day": 6.371,
+          "mean_weight": 1.056
+        }
+      },
+      "train_insample": {
+        "cost_0.002": {
+          "n_trades": 1538,
+          "net_total_units": 81.8588,
+          "net_return_on_capital": 8.1859,
+          "mean_net_per_trade_unitized": 0.05322,
+          "win_rate": 0.8095,
+          "profit_factor": 10.03,
+          "max_drawdown_pct": 0.0081,
+          "utilisation": 0.1583,
+          "turnover_units": 1646.48,
+          "turnover_units_per_day": 5.881,
+          "mean_weight": 1.071
+        },
+        "cost_0.003": {
+          "n_trades": 1538,
+          "net_total_units": 80.2124,
+          "net_return_on_capital": 8.0212,
+          "mean_net_per_trade_unitized": 0.05215,
+          "win_rate": 0.8088,
+          "profit_factor": 9.576,
+          "max_drawdown_pct": 0.0086,
+          "utilisation": 0.1583,
+          "turnover_units": 1646.48,
+          "turnover_units_per_day": 5.881,
+          "mean_weight": 1.071
+        }
+      },
+      "val_monthly_net_cost_0.003": {
+        "2026-03": {
+          "n": 101,
+          "net_units": 3.3207
+        },
+        "2026-04": {
+          "n": 209,
+          "net_units": 11.6764
+        },
+        "2026-05": {
+          "n": 8,
+          "net_units": 0.529
+        }
+      }
+    }
+  }
+}
