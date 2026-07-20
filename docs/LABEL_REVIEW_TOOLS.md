@@ -2,9 +2,13 @@
 
 # 标注可视化审查：FiftyOne + Label Studio
 
+> **2026-07-20**：工具链仍可用。当前主线检测是 **owner 金标 + YOLO v11**，不是 E2 规则 relabel 时代。  
+> 标签语义以 `golden_pool` / round 导出为准；E2（`MAX_DENSE_BARS`）数字仅历史参考。  
+> 若开 tip 右缘新打标包，流程仍走 Label Studio（见周计划备选）。
+
 给 owner 用的「看框对不对」工具。**不改主 `.venv`**；不自动改 `auto_label`；不碰 holdout。
 
-当前标签语义：E2（`MAX_DENSE_BARS=24` + `X_PAD_PX=6`）。
+当前标签语义（历史 E2 说明）：E2（`MAX_DENSE_BARS=24` + `X_PAD_PX=6`）。
 
 ---
 

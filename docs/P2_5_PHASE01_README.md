@@ -1,5 +1,8 @@
 # P2.5 Phase 0+1 — Ops Auth + Experiment Registry + Agenda
 
+> **2026-07-20**：Phase 0–3 均已合主线；本文件是实现说明，**非当前待办**。  
+> 实盘红线：VPS **禁止** `ENABLE_JOB_EXECUTOR=1`；实时状态见 `HANDOFF.md`。
+
 **Status (2026-07-10):** Phase 0+1 implemented (read-only). **No job runner** yet (Phase 2).
 
 Design details: `docs/P2_5_OPS_CONSOLE_DESIGN.md`.

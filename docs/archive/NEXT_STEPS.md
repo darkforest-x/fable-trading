@@ -4,8 +4,9 @@
 2026-07-16 的审计推翻(lr bug 连带撤回了多个结论)。为避免三份"下一步"互相漂移,
 **待办从此只在一处**:
 
-- **下一步** → [`HANDOFF.md`](HANDOFF.md) 顶部"当前真相"区的"进行中"段
-- **研究假设队列** → `docs/RESEARCH_AGENDA.md`
-- **无人值守章程** → `output/offline_tasks/AUTONOMOUS_CHARTER.md`(仍有效)
+- **下一步** → [`HANDOFF.md`](../../HANDOFF.md) 顶部
+- **本周执行** → [`analysis/week_plan_20260720.md`](../../analysis/week_plan_20260720.md)
+- **研究假设队列** → [`docs/RESEARCH_AGENDA.md`](../RESEARCH_AGENDA.md)
+- **无人值守章程** → `output/offline_tasks/AUTONOMOUS_CHARTER.md`(历史;实盘期以 HANDOFF 为准)
 
 历史版本:`git log -- NEXT_STEPS.md`。

@@ -1,7 +1,9 @@
 # AGENTS.md — fable-trading 工作规范
 
-一句话：两层架构验证"双均线密集启动"信号——YOLO 检测层（2a）+ LightGBM 判断层（2b）。
-当前进度与下一步看 `HANDOFF.md`；各阶段结论看 `analysis/p*_report.md`；路线图看 `PROJECT_PLAN.md`。
+一句话：两层架构验证"双均线密集启动"信号——YOLO 检测层（2a）+ LightGBM 判断层（2b），
+2026-07 起进入 **VPS 实盘阶段**（执行层 + 前向 100 笔新鲜裁决）。
+当前进度与下一步看 `HANDOFF.md` 顶部"当前真相"；各阶段结论看 `analysis/p*_report.md`；
+本周执行计划看 `analysis/week_plan_20260720.md`；路线图（历史）看 `PROJECT_PLAN.md`。
 
 ## 铁律（违反 = 返工，没有例外）
 
@@ -18,6 +20,18 @@
 6. **数据**：`data/` 不入 git；`data/kline_cache` 是旧项目缓存的只读软链接；
    新数据用 `python3 -m src.data.fetch_okx`（可断点续传，需本机网络）。
 
+## 实盘纪律（2026-07-20 起，与铁律同级）
+
+7. **新鲜度三门同值**：执行器 max_signal_age_min / TG 过滤 / 看板 FRESH_DETECT_MIN
+   当前 30min，由管道时序推导（15 bar + 7 脉冲/扫描 + 余量）；改动必须附延迟预算表
+   且三处同改（见 `docs/learnings/freshness-gates-must-be-derived-from-pipeline-arithmetic.md`）。
+8. **脉冲预算 <15min**：禁止往 forward 脉冲加扫描窗或新任务；阶段耗时看
+   discover_wall / phase2_wall 日志，>600s 要查因。
+9. **VPS 是唯一写者**：K 线与 forward_log.csv 只在 VPS 写；deploy 不推 data/kline_fetched。
+10. **不自动 promote**：models/ACTIVE 与 frozen 默认配置的切换需 owner 点头；
+    forward_log 不清空（清账 = owner 决策）。
+11. **真金操作**（下单/撤单/kill 开关/改仓位/改 API key）只有 owner 亲手做或明确逐次授权。
+
 ## 弱模型在本仓库最容易犯的错（每条都真实发生过或差点发生）
 
 - **把 AUC 当成功标准** → 本项目成功标准是 top-decile 扣 0.2% 往返成本后的净收益为正
@@ -29,6 +43,10 @@
 - **只汇报好消息** → 报告必须含"风险与诚实声明"节；隐瞒失败的实验记录等于污染实验日志。
 - **默认拉全部币种重新 fetch** → 先检查 `data/kline_fetched/` 已有 `okx_*_15m_*.csv`，
   fetcher 会自动跳过已完成币种。
+- **把 val/accept PF 当实盘** → 确认级只有前向新鲜 100 笔；v11 accept PF 高仍要前向终审。
+- **改一道新鲜度门忘了另两道** → 三门必须同值，见实盘纪律 7。
+- **往脉冲里塞实验扫描** → 超 15min 节拍 = 结构性挡 tip；见实盘纪律 8。
+- **自动 promote / 清 forward_log** → 禁止；owner 点头。
 
 ## 质量标准（可检查，不是形容词）
 
@@ -49,9 +67,11 @@
 
 - 涉及 **holdout、阈值预设、障碍参数（TP/SL 倍数、atr 下限）、成本假设（0.2%）** 的任何
   改动 → 停下来问项目所有者，不要"先试试"。
+- 涉及 **新鲜度门、脉冲预算、ACTIVE/frozen 切换、清空 forward_log、promote owner_best、
+  真下单/改仓** → 同上，见实盘纪律 7–11。
 - 数据源不可用或返回结构变化 → 如实报告现象，不要静默换数据源或造数据。
-- 结果好得反常（AUC 突然 >0.7、净收益突然翻倍）→ 第一假设是泄漏或 bug，
-  写最小复现验证后再汇报。
+- 结果好得反常（AUC 突然 >0.7、净收益突然翻倍、accept PF 夸张）→ 第一假设是泄漏或 bug，
+  写最小复现验证后再汇报；确认级只认前向新鲜样本。
 - 项目所有者用中文交流，汇报用中文；代码与注释用英文。
 
 ## learning law

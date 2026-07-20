@@ -1,8 +1,8 @@
 # P2.5 操作台化设计（Ops Console）
 
-> **状态**：Phase 0+1 **已实现**（2026-07-10）；Phase 2+ 仍为设计。  
-> **范围来源**：`docs/archive/NEXT_STEPS.md` §P2.5(已归档)；对齐 `docs/design/DESIGN.md` 暗色看板语言、`docs/ARCHITECTURE.md` 部署拓扑、`AGENTS.md` 纪律。  
-> **红线（本文不越）**：不评估 holdout、不重训 YOLO、不修改 `auto_label`、不新增重型依赖、配置变更永不走网页直改。
+> **2026-07-20 状态**：Phase 0–3 **均已实现并合主线**（job runner 默认关；data/model hub 只读）。  
+> 本文保留为设计底稿；**待办不在此文件**。实时纪律见 `CLAUDE.md` 实盘节 + `HANDOFF.md`。  
+> **红线（本文不越）**：不评估 holdout、配置变更不走网页直改、VPS 禁止开 job executor。
 
 ---
 

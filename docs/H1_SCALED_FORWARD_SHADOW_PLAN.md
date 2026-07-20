@@ -1,5 +1,9 @@
 # H1 Scaled Exit — Forward Shadow Plan
 
+> **2026-07-20**：MVP 已实现；主线仍是 **TP5/SL2**（YOLO v11 判断池）。  
+> H1 仅 shadow / 发现级候选；**不自动进 executor、不计主线 0/100**。  
+> 续跑前确认 crypto-only / stockish 过滤与当前 ACTIVE 阈值一致。
+
 **Status**: MVP shadow logger **implemented** (2026-07-10). Manual opt-in only —
 not on daily cron, not on dashboard. No holdout. Mainline TP5/SL2 untouched.
 

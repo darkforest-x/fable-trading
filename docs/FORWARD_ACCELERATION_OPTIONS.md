@@ -1,17 +1,20 @@
 # Forward Sample Acceleration Options
 
-**Status**: decision aid (2026-07-10 overnight). **Default recommendation: stay.**
+> **2026-07-20 状态横幅（请先读）**  
+> - 主线已切 **YOLO v11 池 + 实盘执行**；前向时钟曾于 **07-19 清空重启**（`FORWARD_START≈2026-07-18`）。  
+> - **默认仍是 stay**：不靠降 q90 / 掺事后检出来「加速 N」。  
+> - 真正阻塞 N 的是 **tip 检出率**（v11≈0.9%）→ 靠 **H-TIP v12**，不是本文件里的阈值魔术。  
+> - 实时 tip 路径、新鲜度 30min、脉冲预算：见 `HANDOFF.md` 顶部与 `CLAUDE.md` 实盘纪律。  
+> 下文保留 07-10 决策备忘，数字以当时为准。
 
-**Context**: stage-3 / mainline confirmation is gated on forward paper trades
-from the frozen TP5/SL2 SWAP model (`FORWARD_START = 2026-07-08 UTC`), not on
-another val sweep. Infrastructure is ready (`forward_track`, daily
-`update_okx → forward_track → daily_digest`, dashboard forward tab). What is
-scarce is **calendar time and threshold-crossing rate**, not code.
+**Status (historical)**: decision aid (2026-07-10 overnight). **Default recommendation: stay.**
 
-As of 2026-07-10 overnight packaging: formal-window log had on the order of
-**~2 closed rows** (see `data/forward_log.csv`; re-run summary after any
-`forward_track` execution). Path to ~100 maker-filled closed trades is measured
-in weeks, not hours.
+**Context (historical)**: stage-3 confirmation gated on forward paper trades from
+frozen TP5/SL2 SWAP (`FORWARD_START = 2026-07-08 UTC` at the time). What is scarce
+is calendar time and **fresh tip rate**, not code.
+
+As of 2026-07-10 packaging: formal-window log had ~2 closed rows. Path to ~100
+maker-filled closed trades is measured in weeks (still true under v11 tip scarcity).
 
 ---
 

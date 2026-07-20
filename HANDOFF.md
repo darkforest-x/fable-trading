@@ -1,5 +1,7 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+> 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
+
 ## ⚡ 2026-07-20（实时 tip 路径上线）— 最新
 
 **盘口 bar 当场入账**（commit 67d8733，已部署 VPS）：信号 bar = 最新收盘 bar 时
@@ -26,15 +28,15 @@
 
 ## 2026-07-19 晚间（H-TIP / 事后检出）
 
+> 注：本节「新鲜度 20min」已被 **07-20 顶部「三门 30min」** 覆盖；以顶部为准。
+
 **定性**：打标/训练不是「全错」，是**分布错位**（框多在图中、右侧有启动后文；
 实盘 tip 无后文）。对 tip 开单：检测层欠训；金标形态仍有用。见
 `analysis/p_forward_hindsight_20260719.md`。
 
-**前向**：10 行 **0 笔 lag≤20m**；EDEN `tip_fire=false`。闸门/TG/executor 新鲜度
-**≤20min**（已部署）。看板：延迟列 + 北京时间。
-
-**H-TIP 本机执行中**：`build_htip_dataset` → `dense_owner_v12_htip` → train
-`owner_v12_htip`（`logs/owner_v12_htip_train.log`）。**不自动 promote**。
+**前向（当时）**：10 行 **0 笔 lag≤20m**；EDEN `tip_fire=false`。  
+**H-TIP 本机**：`dense_owner_v12_htip` → train `owner_v12_htip`。**不自动 promote**
+（进度/通过线见 `analysis/week_plan_20260720.md`）。
 
 ## ⚡ 2026-07-18 主线快照（池仍 v11；细节历史）
 
@@ -50,8 +52,8 @@
 
 **执行层（VPS）**：`fable-executor` active · keys `environment=live`（~92U 权益）·
 `fable-forward.timer` **每 15 分钟** YOLO live 脉冲 · `ENABLE_JOB_EXECUTOR=0`。
-TG 通知只推 `status=open` 且 signal_age≤**20min**（与执行器新鲜度闸门对齐，防积压刷屏）。
-无 open 且 ≤20min 的信号时执行器会安静空转——属正常，不是挂死。
+TG 通知只推 `status=open` 且 signal_age 新鲜（**现为 30min 三门**，见顶部 07-20；
+本节写于 07-18 时曾用 20min）。无新鲜 open 时执行器安静空转——属正常。
 
 **前向时钟重启（owner 2026-07-19）**：清空主线 `forward_log.csv` 重测 v11 闸门；
 旧账本归档 `data/forward_log_pre_v11_retest_20260719.csv`；
