@@ -28,6 +28,8 @@ DEFAULT_SCORE_QUANTILE: Final = 0.90
 # Accept-window compare vs v8 = holdout consumption #4.
 DEFAULT_CONFIG_NAME: Final = "tp5_sl2_swap_yolo_v11_reg"
 V11_POOL_CONFIG_NAME: Final = DEFAULT_CONFIG_NAME
+# v12 pool artifact name only — DEFAULT stays v11 until owner promotes.
+V12_POOL_CONFIG_NAME: Final = "tp5_sl2_swap_yolo_v12_reg"
 V8_POOL_CONFIG_NAME: Final = "tp5_sl2_swap_yolo_v8_reg"
 # 2026-07-15 mainline (old pool, pre-lr-fix detector); rollback only.
 OLD_POOL_CONFIG_NAME: Final = "tp5_sl2_swap_yolo_reg"
@@ -110,6 +112,19 @@ def default_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
 
 
 yolo_v11_pool_config = default_config
+
+
+def yolo_v12_pool_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
+    """v12 H-TIP candidate pool (2026-07-20). Artifact ready; promote needs owner."""
+    return FrozenConfig(
+        name=V12_POOL_CONFIG_NAME,
+        project_dir=project_dir,
+        dataset_path=project_dir / "data" / "judgment_yolo_swap_v12.csv",
+        models_dir=project_dir / "models",
+        score_quantile=DEFAULT_SCORE_QUANTILE,
+        horizon_bars=DEFAULT_HORIZON_BARS,
+        objective="regression",
+    )
 
 
 def yolo_v8_pool_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:

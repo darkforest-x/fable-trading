@@ -31,6 +31,7 @@ from src.judgment.frozen import (
     train_frozen_artifact,
     yolo_v8_pool_config,
     yolo_v11_pool_config,
+    yolo_v12_pool_config,
 )
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -60,6 +61,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="freeze regression on the v11_chain candidate pool "
              "(judgment_yolo_swap_v11.csv; mainline after 2026-07-18 cutover)",
+    )
+    parser.add_argument(
+        "--yolo-v12-pool",
+        action="store_true",
+        help="freeze regression on the v12 H-TIP candidate pool "
+             "(judgment_yolo_swap_v12.csv; artifact only until owner promotes)",
     )
     parser.add_argument(
         "--write-active",
@@ -128,11 +135,14 @@ def run_walkforward(config, n_folds: int = 5) -> dict:
 
 def main() -> int:
     args = parse_args()
-    pool_flags = (args.legacy_rules, args.binary_yolo, args.yolo_v8_pool, args.yolo_v11_pool)
+    pool_flags = (
+        args.legacy_rules, args.binary_yolo, args.yolo_v8_pool,
+        args.yolo_v11_pool, args.yolo_v12_pool,
+    )
     if sum(pool_flags) > 1:
         raise SystemExit(
             "choose at most one of --legacy-rules / --binary-yolo / "
-            "--yolo-v8-pool / --yolo-v11-pool"
+            "--yolo-v8-pool / --yolo-v11-pool / --yolo-v12-pool"
         )
     if args.legacy_rules:
         config = rules_legacy_config()
@@ -145,6 +155,9 @@ def main() -> int:
         candidate_source = "yolo"
     elif args.yolo_v11_pool:
         config = yolo_v11_pool_config()
+        candidate_source = "yolo"
+    elif args.yolo_v12_pool:
+        config = yolo_v12_pool_config()
         candidate_source = "yolo"
     else:
         config = default_config()

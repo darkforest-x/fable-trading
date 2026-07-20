@@ -43,6 +43,7 @@ from src.judgment.frozen import (
     score_with_artifact,
     yolo_old_pool_config,
     yolo_v8_pool_config,
+    yolo_v12_pool_config,
 )
 from src.judgment.features import FEATURE_COLUMNS
 from src.judgment.train import load_splits, train_model
@@ -64,6 +65,7 @@ SCORE_QUANTILE = 0.90
 FROZEN_CONFIGS = {
     "default": default_config,
     "v8_pool": yolo_v8_pool_config,
+    "v12_pool": yolo_v12_pool_config,
     "old_pool": yolo_old_pool_config,
     "binary_shadow": binary_yolo_shadow_config,
     "legacy_rules": rules_legacy_config,
@@ -88,6 +90,7 @@ def build_signals(data_path: Path, frozen_config: str | None = None) -> tuple[pd
     # so configs sharing a CSV need --frozen-config to disambiguate.
     for cfg_fn in (
         default_config,
+        yolo_v12_pool_config,
         yolo_v8_pool_config,
         yolo_old_pool_config,
         binary_yolo_shadow_config,
