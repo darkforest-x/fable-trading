@@ -10,7 +10,7 @@
 <script defer src="vendor/lightweight-charts.standalone.production.js"></script>
 <script defer src="format_helpers.js?v=20260720sym"></script>
 <script defer src="scout_mtf_app.js?v=20260719embed"></script>
-<script defer src="app.js?v=20260720sym"></script>
+<script defer src="app.js?v=20260721probe"></script>
 </head>
 <body class="hb-shell">
 <button type="button" class="nav-burger" id="nav-burger" aria-label="打开导航" aria-controls="sidebar" aria-expanded="false">☰</button>
@@ -32,6 +32,7 @@
     <button type="button" class="sb-item" data-view="signals"><span class="sb-label">信号</span></button>
     <button type="button" class="sb-item" data-view="backtest"><span class="sb-label">回测</span></button>
     <div class="sb-section-label">工具</div>
+    <button type="button" class="sb-item sb-item-muted" data-view="probe"><span class="sb-label">盘口检测</span></button>
     <button type="button" class="sb-item sb-item-muted" data-view="labeling"><span class="sb-label">打标</span></button>
     <button type="button" class="sb-item sb-item-muted" data-view="shorttf"><span class="sb-label">短周期</span></button>
     <button type="button" class="sb-item sb-item-muted" data-view="radar"><span class="sb-label">雷达</span></button>
@@ -665,6 +666,24 @@
       <pre id="exp-detail-json" class="ops-pre"></pre>
       <h2 class="subhead">关联报告</h2>
       <pre id="exp-detail-report" class="ops-pre md-pre"></pre>
+    </div>
+  </section>
+
+  <!-- ============ 盘口检测（单币一键探测） ============ -->
+  <section id="view-probe" class="view hidden" hidden aria-hidden="true">
+    <div class="page-head">
+      <h1 class="page-title">盘口检测</h1>
+      <p class="page-sub">单币即时探测 · 最新K线 → YOLO 检测 → v11 判断打分 → 30min 新鲜度 · 只读不下单</p>
+    </div>
+    <div class="panel">
+      <h2>一键检测 <span class="unit">scripts/check_symbol.py · 子进程 · 同时只跑一个</span></h2>
+      <div class="controls">
+        <input id="probe-symbol" placeholder="BTC / eth / MOODENG_USDT_SWAP" autocomplete="off" spellcheck="false" style="min-width:220px">
+        <button type="button" class="primary-btn" id="probe-run">▶ 检测</button>
+        <span class="note" id="probe-meta">输入币种后点「检测」或回车（约 5–60 秒）</span>
+      </div>
+      <pre id="probe-result" class="ops-pre" style="min-height:140px;white-space:pre-wrap">（尚未检测）</pre>
+      <p class="note">本页是即时探测：不写 forward_log、不下单、不动主线数据；增量 K 线只进内存，与 VPS 主线脉冲互不影响。</p>
     </div>
   </section>
 

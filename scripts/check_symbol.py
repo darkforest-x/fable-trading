@@ -32,6 +32,10 @@ Usage (local machine with OKX network):
     # lenient symbol forms all resolve to the SWAP series:
     #   btc / BTC / btc_usdt / BTC-USDT-SWAP / btcusdt
     # optional: --mode tip (single tip window; default live = mainline schedule)
+    # optional: --json  machine-readable output (last stdout line is one JSON
+    #           object incl. a "text" field with the human rendering; always
+    #           exits 0 with an "error" field on data problems) -- this is the
+    #           contract the dashboard /api/check-symbol subprocess relies on
 """
 from __future__ import annotations
 
@@ -42,6 +46,7 @@ os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 
 import argparse
+import json
 import sys
 import tempfile
 from pathlib import Path
@@ -219,28 +224,26 @@ def _score_candidates(frame: pd.DataFrame, indices: list[int]):
     return artifact, enriched, feature_rows, scores
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="单币一键盘口检测(只读, 不写账本不下单)")
-    parser.add_argument("symbol", help="币种, 宽容格式: btc / BTC_USDT / BTC_USDT_SWAP")
-    parser.add_argument(
-        "--mode", choices=("live", "tip"), default="live",
-        help="YOLO 窗口调度: live=主线前向调度(默认, ≤6 窗), tip=仅最右窗",
-    )
-    args = parser.parse_args()
-    symbol = normalize_symbol(args.symbol)
+def run_check(symbol: str, mode: str) -> dict:
+    """Full probe for one symbol; returns a JSON-safe result dict."""
     now = pd.Timestamp.now(tz="UTC")
-
-    print(f"=== 一键盘口检测: {symbol} (mode={args.mode}) ===")
+    result: dict = {
+        "symbol": symbol,
+        "mode": mode,
+        "generated_at": str(now),
+        "error": None,
+        "signals": [],
+    }
 
     # --- klines: local history + in-memory incremental tail ---
     local = load_local_bars(symbol)
     after_ts = int(local["open_time"].max().timestamp() * 1000) if not local.empty else None
-    fetch_note = ""
+    fetch_warning = ""
     try:
         fresh = fetch_bars_memory(symbol, after_ts=after_ts, min_bars=TAIL_BARS + 200)
     except Exception as exc:  # noqa: BLE001 -- degrade to local bars, but say so
         fresh = pd.DataFrame(columns=OHLCV_COLUMNS)
-        fetch_note = f" [警告: OKX 增量拉取失败({exc}), 仅用本地缓存]"
+        fetch_warning = f"OKX 增量拉取失败({exc}), 仅用本地缓存"
     frame = pd.concat([local, fresh], ignore_index=True)
     frame = (
         frame.drop_duplicates("open_time", keep="last")
@@ -249,20 +252,21 @@ def main() -> int:
         .tail(TAIL_BARS)
         .reset_index(drop=True)
     )
+    result["local_bars"] = int(len(local))
+    result["fetched_bars"] = int(len(fresh))
+    result["fetch_warning"] = fetch_warning
     if len(frame) < WARMUP_BARS + WINDOW + 2:
-        print(f"数据不足: 本地+增量仅 {len(frame)} bars (需 ≥{WARMUP_BARS + WINDOW + 2}), 无法检测")
-        return 1
-    print(f"数据: 本地 {len(local)} bars, OKX 增量 {len(fresh)} bars (内存合并, 不落盘){fetch_note}")
+        result["error"] = (
+            f"数据不足: 本地+增量仅 {len(frame)} bars (需 ≥{WARMUP_BARS + WINDOW + 2}), 无法检测"
+        )
+        return result
 
     last_open = pd.Timestamp(frame["open_time"].iloc[-1])
     data_age_min = (now - (last_open + pd.Timedelta(minutes=BAR_MIN))).total_seconds() / 60
-    stale = data_age_min > BAR_MIN
-    print(
-        f"最新已收 bar: {last_open} (收盘距今 {data_age_min:.1f} min)"
-        + (" [警告: 数据疑似滞后]" if stale else " [数据新鲜]")
-    )
-    if is_stockish(symbol):
-        print("注意: 该币属 stockish(代币化股票), 主线裁决不计入 crypto 口径")
+    result["last_bar"] = str(last_open)
+    result["data_age_min"] = round(float(data_age_min), 1)
+    result["data_stale"] = bool(data_age_min > BAR_MIN)
+    result["stockish"] = is_stockish(symbol)
 
     # --- detect: mainline entry point + display-only confidence pass ---
     from src.judgment.yolo_candidates import scan_series_with_yolo
@@ -270,55 +274,119 @@ def main() -> int:
     model = load_yolo_model()
     with tempfile.TemporaryDirectory(prefix="check_symbol_") as td:
         tmpdir = Path(td)
-        indices = scan_series_with_yolo(
-            frame, model, mode=args.mode, tmp_png=tmpdir / "win.png"
-        )
-        conf_by_bar = harvest_confidences(frame, model, args.mode, tmpdir)
+        indices = scan_series_with_yolo(frame, model, mode=mode, tmp_png=tmpdir / "win.png")
+        conf_by_bar = harvest_confidences(frame, model, mode, tmpdir)
 
     # --- score + freshness (lightgbm only from here on) ---
     artifact, enriched, feature_rows, scores = _score_candidates(frame, indices)
-    print(
-        f"检测器: models/owner_best.pt | 判断层: {artifact.relative_model_path} "
-        f"(阈值 {artifact.threshold:.5f})"
+    result["detector"] = "models/owner_best.pt"
+    result["artifact"] = artifact.relative_model_path
+    result["threshold"] = float(artifact.threshold)
+    result["fresh_gate_min"] = FRESH_GATE_MIN
+
+    for n, signal_i in enumerate(indices, 1):
+        signal_time = pd.Timestamp(enriched["open_time"].iloc[signal_i])
+        conf = conf_by_bar.get(signal_i)
+        score = scores[n - 1]
+        passed = score >= artifact.threshold
+        if artifact.sizing_tiers is not None:
+            tier, size_mult = artifact.sizing_tiers.tier_for_score(score, artifact.threshold)
+        else:
+            tier, size_mult = None, None
+        atr_pct = float(feature_rows["atr_pct"].iloc[n - 1])
+        atr_ok = bool(pd.notna(atr_pct) and atr_pct >= ATR_PCT_MIN)
+        age_min = (now - signal_time).total_seconds() / 60
+        fresh_ok = bool(age_min <= FRESH_GATE_MIN)
+        result["signals"].append(
+            {
+                "signal_time": str(signal_time),
+                "bars_back": int(len(frame) - 1 - signal_i),
+                "conf": round(float(conf), 3) if conf is not None else None,
+                "score": round(float(score), 6),
+                "passed": bool(passed),
+                "tier": tier,
+                "size_mult": float(size_mult) if size_mult is not None else None,
+                "atr_pct": round(atr_pct, 5) if pd.notna(atr_pct) else None,
+                "atr_ok": atr_ok,
+                "age_min": round(float(age_min), 1),
+                "fresh": fresh_ok,
+                "tradeable": bool(passed and atr_ok and fresh_ok),
+            }
+        )
+    return result
+
+
+DISCLAIMER = "免责: 本地即时探测, 不写账本、不下单、不动主线数据, 与 VPS 主线管道互不影响。"
+
+
+def render_text(r: dict) -> str:
+    """Human-readable single-screen rendering of a run_check result."""
+    lines = [f"=== 一键盘口检测: {r['symbol']} (mode={r['mode']}) ==="]
+    note = f" [警告: {r['fetch_warning']}]" if r.get("fetch_warning") else ""
+    lines.append(
+        f"数据: 本地 {r['local_bars']} bars, OKX 增量 {r['fetched_bars']} bars (内存合并, 不落盘){note}"
     )
-
-    if not indices:
-        print("YOLO: 当前盘口无信号 (live 调度窗口内无检出)")
+    if r.get("error"):
+        lines.append(r["error"])
+        return "\n".join(lines)
+    lines.append(
+        f"最新已收 bar: {r['last_bar']} (收盘距今 {r['data_age_min']:.1f} min)"
+        + (" [警告: 数据疑似滞后]" if r["data_stale"] else " [数据新鲜]")
+    )
+    if r["stockish"]:
+        lines.append("注意: 该币属 stockish(代币化股票), 主线裁决不计入 crypto 口径")
+    lines.append(
+        f"检测器: {r['detector']} | 判断层: {r['artifact']} (阈值 {r['threshold']:.5f})"
+    )
+    if not r["signals"]:
+        lines.append("YOLO: 当前盘口无信号 (调度窗口内无检出)")
     else:
-        print(f"YOLO 检出 {len(indices)} 个信号:")
-        for n, signal_i in enumerate(indices, 1):
-            signal_time = pd.Timestamp(enriched["open_time"].iloc[signal_i])
-            bars_back = len(frame) - 1 - signal_i
-            conf = conf_by_bar.get(signal_i)
-            conf_txt = f"conf {conf:.2f}" if conf is not None else "conf n/a"
-            score = scores[n - 1]
-            passed = score >= artifact.threshold
-            if artifact.sizing_tiers is not None:
-                tier, mult = artifact.sizing_tiers.tier_for_score(score, artifact.threshold)
-                tier_txt = f"tier {tier} ({mult:g}x)" if passed else "不进 tier"
-            else:
+        lines.append(f"YOLO 检出 {len(r['signals'])} 个信号:")
+        for n, s in enumerate(r["signals"], 1):
+            conf_txt = f"conf {s['conf']:.2f}" if s["conf"] is not None else "conf n/a"
+            if s["tier"] is None:
                 tier_txt = "tier n/a (sidecar 无 sizing_tiers)"
-            atr_pct = float(feature_rows["atr_pct"].iloc[n - 1])
-            atr_ok = pd.notna(atr_pct) and atr_pct >= ATR_PCT_MIN
-            age_min = (now - signal_time).total_seconds() / 60
-            fresh_ok = age_min <= FRESH_GATE_MIN
-            tradeable = passed and atr_ok and fresh_ok
-            print(f"  [{n}] 信号 bar {signal_time} (距最新 bar {bars_back} 根, {conf_txt})")
-            print(
-                f"      判断分 {score:.5f} vs 阈值 {artifact.threshold:.5f} → "
-                f"{'过' if passed else '不过'}, {tier_txt}"
+            elif s["passed"]:
+                tier_txt = f"tier {s['tier']} ({s['size_mult']:g}x)"
+            else:
+                tier_txt = "不进 tier"
+            lines.append(f"  [{n}] 信号 bar {s['signal_time']} (距最新 bar {s['bars_back']} 根, {conf_txt})")
+            lines.append(
+                f"      判断分 {s['score']:.5f} vs 阈值 {r['threshold']:.5f} → "
+                f"{'过' if s['passed'] else '不过'}, {tier_txt}"
             )
-            print(
-                f"      atr_pct {atr_pct:.4f} vs 下限 {ATR_PCT_MIN} → {'过' if atr_ok else '不过'}"
+            lines.append(
+                f"      atr_pct {s['atr_pct']:.4f} vs 下限 {ATR_PCT_MIN} → {'过' if s['atr_ok'] else '不过'}"
             )
-            print(
-                f"      信号年龄 {age_min:.1f} min vs 新鲜度门 {FRESH_GATE_MIN:.0f} min → "
-                f"{'新鲜' if fresh_ok else '超龄'};"
-                f" 若进主线管道{'可开单' if tradeable else '不会开单'}"
+            lines.append(
+                f"      信号年龄 {s['age_min']:.1f} min vs 新鲜度门 {r['fresh_gate_min']:.0f} min → "
+                f"{'新鲜' if s['fresh'] else '超龄'};"
+                f" 若进主线管道{'可开单' if s['tradeable'] else '不会开单'}"
             )
+    lines.append(DISCLAIMER)
+    return "\n".join(lines)
 
-    print("免责: 本地即时探测, 不写账本、不下单、不动主线数据, 与 VPS 主线管道互不影响。")
-    return 0
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="单币一键盘口检测(只读, 不写账本不下单)")
+    parser.add_argument("symbol", help="币种, 宽容格式: btc / BTC_USDT / BTC_USDT_SWAP")
+    parser.add_argument(
+        "--mode", choices=("live", "tip"), default="live",
+        help="YOLO 窗口调度: live=主线前向调度(默认, ≤6 窗), tip=仅最右窗",
+    )
+    parser.add_argument(
+        "--json", action="store_true",
+        help="输出 JSON(最后一行, 含 text 字段; 数据问题走 error 字段且 exit 0)",
+    )
+    args = parser.parse_args()
+    symbol = normalize_symbol(args.symbol)
+    result = run_check(symbol, args.mode)
+    if args.json:
+        result["text"] = render_text(result)
+        print(json.dumps(result, ensure_ascii=False))
+        return 0
+    print(render_text(result))
+    return 1 if result.get("error") else 0
 
 
 if __name__ == "__main__":

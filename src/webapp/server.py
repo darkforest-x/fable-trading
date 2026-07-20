@@ -20,6 +20,7 @@ from pydantic import BaseModel, Field
 from src.backtest.run import BASE_COST
 from src.webapp.agenda_payloads import agenda_payload
 from src.webapp.auth import verify_ops_request
+from src.webapp.check_symbol_api import check_symbol_payload
 from src.webapp.dashboard_cache import DEFAULT_UNIVERSE
 from src.webapp.dashboard_payloads import (
     backtest_compare_payload,
@@ -60,6 +61,15 @@ class CreateJobBody(BaseModel):
 
     job_type: str = Field(..., min_length=1, max_length=64)
     params: dict[str, Any] = Field(default_factory=dict)
+
+    model_config = {"extra": "forbid"}
+
+
+class CheckSymbolBody(BaseModel):
+    """One-shot symbol probe input (subprocess-backed, read-only)."""
+
+    symbol: str = Field(..., min_length=1, max_length=32)
+    mode: str = Field(default="live", pattern="^(live|tip)$")
 
     model_config = {"extra": "forbid"}
 
@@ -152,6 +162,12 @@ def chart(source: str, symbol: str, bars: int = 3000, universe: str = DEFAULT_UN
 @app.get("/api/forward")
 def forward(cost: float = FORWARD_COST) -> dict:
     return forward_payload(cost)
+
+
+@app.post("/api/check-symbol")
+def check_symbol_route(body: CheckSymbolBody) -> dict:
+    """单币一键盘口检测：子进程跑 scripts/check_symbol.py（只读，5–60s，单飞）。"""
+    return check_symbol_payload(body.symbol.strip(), mode=body.mode)
 
 
 @app.get("/api/eth-micro")

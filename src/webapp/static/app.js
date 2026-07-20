@@ -16,7 +16,7 @@ const appState = { universe: "swap", view: "overview" };
 /** views loaded for current universe — skip refetch when tabbing back (TTL, not forever) */
 const viewLoadedAt = new Map(); // view -> timestamp
 /* keyboard 1–n: daily loop first, then tools */
-const VIEW_ORDER = ["overview", "forward", "signals", "backtest", "labeling", "shorttf", "radar"];
+const VIEW_ORDER = ["overview", "forward", "signals", "backtest", "probe", "labeling", "shorttf", "radar"];
 const chartTickMarkBj = _F.chartTickMarkBj || function chartTickMarkBj(time) {
   if (time == null) return "";
   if (typeof time === "object" && time.year != null) {
@@ -354,6 +354,7 @@ function showView(name, { pushHash = true, force = false } = {}) {
   if (name === "signals") { initSignals(force || need); mark(); return; }
   if (name === "forward") { if (need) loadForward().then(mark); else mark(); return; }
   if (name === "labeling") { if (need) loadLabelingHub().then(mark); else mark(); return; }
+  if (name === "probe") { mark(); $("#probe-symbol")?.focus(); return; }
   if (name === "radar") {
     if (need) {
       const init = window.initScoutMtf;
@@ -1131,6 +1132,55 @@ async function loadShortTf() {
   }
 }
 $("#shorttf-to-ethmicro")?.addEventListener("click", () => showView("ethmicro", { force: true }));
+
+/* ---------- 盘口检测（单币一键探测, subprocess-backed） ---------- */
+let probeRunning = false;
+async function runProbe() {
+  if (probeRunning) return;
+  const symbol = ($("#probe-symbol")?.value || "").trim();
+  const meta = $("#probe-meta");
+  const out = $("#probe-result");
+  const btn = $("#probe-run");
+  if (!symbol) { toast("请输入币种，如 BTC 或 MOODENG_USDT_SWAP"); return; }
+  probeRunning = true;
+  if (btn) btn.disabled = true;
+  if (meta) meta.textContent = "检测中…（拉最新K线 + YOLO + 判断打分，约 5–60 秒）";
+  if (out) out.textContent = "…";
+  try {
+    const res = await fetch("/api/check-symbol", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ symbol }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data) throw new Error(`HTTP ${res.status}`);
+    if (!data.ok) {
+      if (meta) meta.textContent = data.detail || "检测失败";
+      if (out) out.textContent = "（无结果）";
+      if (!data.busy) toast(data.detail || "检测失败");
+      return;
+    }
+    const r = data.result || {};
+    if (out) out.textContent = r.text || JSON.stringify(r, null, 2);
+    if (meta) {
+      if (r.error) meta.textContent = r.error;
+      else if (!(r.signals || []).length) meta.textContent = `${r.symbol}：当前盘口无信号`;
+      else {
+        const tradeable = (r.signals || []).filter((s) => s.tradeable).length;
+        meta.textContent = `${r.symbol}：检出 ${r.signals.length} 个信号，其中 ${tradeable} 个可开单级`;
+      }
+    }
+  } catch (err) {
+    if (meta) meta.textContent = "";
+    if (out) out.textContent = "（请求失败）";
+    toast(`盘口检测失败：${err.message || err}`);
+  } finally {
+    probeRunning = false;
+    if (btn) btn.disabled = false;
+  }
+}
+$("#probe-run")?.addEventListener("click", runProbe);
+$("#probe-symbol")?.addEventListener("keydown", (e) => { if (e.key === "Enter") runProbe(); });
 
 async function loadEthMicro() {
   const view = $("#view-ethmicro");
