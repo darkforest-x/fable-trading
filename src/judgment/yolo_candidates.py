@@ -137,20 +137,35 @@ def scan_series_with_yolo(
     device = _resolve_predict_device()
     n_fail = 0
     last_err: str | None = None
-    for start in starts:
+    # Render all windows first, then ONE batched predict per series: on CPU
+    # the per-call setup (source pipeline, backend checks) dominated with 6
+    # single-image calls under the global lock (2026-07-20 telemetry: discover
+    # ~500s/pulse ≈ all render+predict). Order of results matches input order.
+    rendered: list[tuple[int, object, Path]] = []
+    for k, start in enumerate(starts):
         sub = enriched_ma.iloc[start : start + window]
+        win_png = tmp_png.with_name(f"{tmp_png.stem}_{k}.png")
         try:
-            _, tf = render_chart(sub, out_path=tmp_png)
-            # Serialize predict: ultralytics is not reliably thread-safe.
-            with _predict_lock:
-                res = model.predict(str(tmp_png), conf=conf, verbose=False, device=device)
+            _, tf = render_chart(sub, out_path=win_png)
         except Exception as exc:  # noqa: BLE001 — keep series alive; count failures
             n_fail += 1
             last_err = f"{type(exc).__name__}: {exc}"
             continue
-        if not res:
-            continue
-        boxes = res[0].boxes
+        rendered.append((start, tf, win_png))
+    results = []
+    if rendered:
+        try:
+            # Serialize predict: ultralytics is not reliably thread-safe.
+            with _predict_lock:
+                results = model.predict(
+                    [str(p) for _, _, p in rendered], conf=conf, verbose=False, device=device
+                )
+        except Exception as exc:  # noqa: BLE001
+            n_fail += len(rendered)
+            last_err = f"{type(exc).__name__}: {exc}"
+            results = []
+    for (start, tf, _), res in zip(rendered, results):
+        boxes = res.boxes
         if boxes is None:
             continue
         for b in boxes.xywhn.cpu().numpy():
@@ -167,7 +182,7 @@ def scan_series_with_yolo(
             if start_from_i is not None and signal_i < start_from_i:
                 continue
             chosen.append(int(signal_i))
-    if n_fail and n_fail == len(starts):
+    if n_fail and n_fail >= len(starts):
         # Only noisy when the whole series failed (data/render/device issue).
         print(f"yolo_live: all {n_fail} windows failed last={last_err}", flush=True)
     if not chosen:
