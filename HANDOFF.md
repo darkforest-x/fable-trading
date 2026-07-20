@@ -2,18 +2,16 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 2026-07-20 夜（v12 D1 通过 → 影子）— 最新
+## ⚡ 2026-07-20 夜（owner：检测主线 = v12）— 最新
 
-**H-TIP v12 训练+评测完成**（ep32 early stop）：
-- tip_hit_rate **0.925** vs v11 **0.009**（门槛 ≥0.20）→ 过  
-- frozen-F1 **0.650** vs v11 **0.658**（回撤 0.008 ≤0.03）→ 过  
-- 报告：`analysis/p_v12_htip_eval.md`；权重 `models/owner_v12_htip.pt`（**未 promote**）
+**Owner 拍板「主线直接换 v12」**（检测层强制 promote，**未**耗 holdout）：
+- `models/owner_best.pt` = H-TIP v12（tip_hit **0.925** / frozen-F1 **0.650**）
+- 备份回滚：`models/owner_best_pre_v12.pt`（原 v11 chain F1 0.658）
+- **判断层未改**：`ACTIVE` / `frozen_tp5_sl2_swap_yolo_v11_reg_20260718` / 池 v11  
+- 报告：`analysis/p2a_v12_mainline_cutover.md` + `analysis/p_v12_htip_eval.md`
+- 无 v12 历史组合回测；确认级仍靠前向 100 笔新鲜
 
-**影子（D2）代码已合**：
-- `scripts/forward_track_v12_shadow.py` → **只写** `data/forward_log_v12_shadow.csv`  
-- 检测：v12 + **tip 单窗**；判断：主线 v11 freeze + TP5/SL2  
-- 脉冲可选：`FABLE_V12_SHADOW=1`（`scripts/forward_pulse.sh`）  
-- **主线 ACTIVE / owner_best / forward_log 未动**；切流=holdout 第 6 次=owner 决策
+**影子**：`FABLE_V12_SHADOW` 可关（主线已是 v12）；留作对照亦可。
 
 ## ⚡ 2026-07-20（实时 tip 路径上线）
 
@@ -29,8 +27,7 @@
 见 `docs/learnings/freshness-gates-must-be-derived-from-pipeline-arithmetic.md`。
 端到端保护：`tests/test_tip_realtime_path.py`。
 
-**依赖**：实时路径只有配上会在 tip 开火的检测器才有产出——v11 tip 检出率 0.9%，
-等 `owner_v12_htip` 训完(H-TIP)达标后 tip 信号才会真正流进来。
+**依赖**：实时 tip 依赖会在盘口开火的检测器——**现主线已是 v12**（原 v11 tip≈0.9%）。
 
 **脉冲性能（2026-07-20 实测）**：update 76s + discover ~500s + phase2 1s ≈ 10min
 < 15min 节拍，最坏落账龄 26min < 30 门。已做：14→6 窗、全帧→2000 根尾巴
