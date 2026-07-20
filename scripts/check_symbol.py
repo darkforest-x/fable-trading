@@ -289,8 +289,11 @@ def run_check(symbol: str, mode: str) -> dict:
         conf = conf_by_bar.get(signal_i)
         score = scores[n - 1]
         passed = score >= artifact.threshold
-        if artifact.sizing_tiers is not None:
-            tier, size_mult = artifact.sizing_tiers.tier_for_score(score, artifact.threshold)
+        # getattr like forward_scan: pre-tiered-sizing frozen.py (still live on
+        # the VPS until that deploy lands) has no sizing_tiers attribute.
+        tiers = getattr(artifact, "sizing_tiers", None)
+        if tiers is not None:
+            tier, size_mult = tiers.tier_for_score(score, artifact.threshold)
         else:
             tier, size_mult = None, None
         atr_pct = float(feature_rows["atr_pct"].iloc[n - 1])
