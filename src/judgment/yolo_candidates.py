@@ -110,19 +110,25 @@ def scan_series_with_yolo(
     if start_from_i is not None:
         first_start = max(first_start, int(start_from_i) - window + 1)
     if mode == "live":
-        # Tip-dense schedule (2026-07-20): old path only stepped `stride=50`
-        # six times, so bars between tip-1..tip-49 were rarely the *right edge*
-        # of any window — exactly the live decision bars we care about.
-        # Always pin tip + a few bars back, then coarse stride for context.
+        # Live schedule (2026-07-20): pin the tip and two bars back, then
+        # coarse stride for context — at most 6 windows. The 14-window
+        # "tip-dense" schedule (backs 0..21 + half-stride walk) rested on a
+        # false premise: a box's right edge maps to ANY bar inside the window
+        # (right_edge_to_bar), so recent-but-not-tip bars are already
+        # discoverable from the tip window itself (EDEN 2026-07-19: the tip
+        # window's mid-window box mapped 35 bars back). Its real effect was
+        # 14/6 x predict cost: pulses went 6->25 min wall, the 15-min cadence
+        # degraded to 25 min, and rows landed older than the 30-min freshness
+        # gate — the dense schedule destroyed the very tip-latency it chased.
         starts_set: set[int] = set()
-        for back in (0, 1, 2, 3, 5, 8, 13, 21):
+        for back in (0, 1, 2):
             s = last_start - back
             if s >= first_start:
                 starts_set.add(s)
-        s = last_start - 25
-        while s >= first_start and len(starts_set) < 14:
+        s = last_start - stride
+        while s >= first_start and len(starts_set) < 6:
             starts_set.add(s)
-            s -= max(25, stride // 2)
+            s -= stride
         starts = sorted(starts_set, reverse=True)
     else:
         starts = list(range(first_start, last_start + 1, stride))
