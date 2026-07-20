@@ -33,6 +33,12 @@ FO :5151 / Label Studio :8081 本机评审就绪；前向主线 + H1 双账本 d
 val 已被多次选型使用，其数字只用于排序不用于宣称绩效。
 fable 拍板：主线 **SWAP** · **EMA 8-55** · 冻结 **TP5/SL2** · YOLO **非关键** · H1 **挑战者/影子**。
 
+**07-20 追加（Grok，Claude 额度见底）**：主线前向诚实摘要见
+`analysis/forward_mainline_status_20260720.md`——`data/forward_log.csv` 仅表头；
+早期样本混 stockish；K 线约停在 07-16；**不改主线配置**。过夜规格 v2：
+`grok_tasks/overnight_batch_v2.md`（task11–15：前向健康 / crypto-only /
+H3 shadow / H16 / H1 续记）。
+
 ## 排序后的下一步（期望价值从高到低）
 
 ### ~~1. purged CV / embargo 泄漏修正~~（作废，2026-07-08 核实已实现）
