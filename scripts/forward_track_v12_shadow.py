@@ -82,7 +82,8 @@ def main() -> int:
         start_time=normalize_start_time(pd.Timestamp(args.start)),
         yolo_weights=args.weights,
     )
-    payload = summary_to_json(summary)
+    # summary_to_json returns a JSON string; build a dict for extra fields.
+    payload = summary.to_json() if hasattr(summary, "to_json") else json.loads(summary_to_json(summary))
     payload["shadow"] = "v12_htip_tip_only"
     payload["note"] = (
         "detector=v12 tip-window; judgment=mainline freeze; not counted in 0/100"
