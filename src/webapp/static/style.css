@@ -1732,6 +1732,212 @@ body.hb-shell :focus-visible {
   outline-offset: 2px;
 }
 
+/* ========== Symbol combobox (signals) ========== */
+.sym-combo {
+  position: relative;
+  flex: 0 1 200px;
+  min-width: 140px;
+  max-width: 240px;
+}
+.sym-combo-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-elevated, #fff);
+  color: var(--text);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .12s, box-shadow .12s;
+}
+.sym-combo-btn:hover {
+  border-color: #cbd5e1;
+}
+.sym-combo-btn[aria-expanded="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+.sym-combo-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sym-combo-caret {
+  color: var(--text-2);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.sym-combo-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
+  width: min(320px, 88vw);
+  background: var(--surface, #fff);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sym-combo-panel[hidden] { display: none !important; }
+.sym-combo-search {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 13px;
+  background: var(--surface-2, #f5f7fb);
+  color: var(--text);
+}
+.sym-combo-search:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+.sym-combo-list {
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sym-combo-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  color: var(--text);
+}
+.sym-combo-item:hover {
+  background: var(--surface-2, #f5f7fb);
+}
+.sym-combo-item.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 650;
+}
+.sym-combo-name {
+  font-weight: 650;
+  font-size: 13.5px;
+}
+.sym-combo-meta {
+  font-size: 11.5px;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.sym-combo-item.active .sym-combo-meta { color: var(--accent); opacity: 0.85; }
+.sym-combo-empty {
+  padding: 16px 10px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+body.theme-dark .sym-combo-btn {
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+body.theme-dark .sym-combo-panel {
+  background: var(--surface);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+body.theme-dark .sym-combo-search {
+  background: #0b0f14;
+  border-color: var(--border);
+}
+body.theme-dark .sym-combo-item:hover {
+  background: #1a222d;
+}
+
+/* ========== Signals K-line P0 polish ========== */
+body.hb-shell .signals-kline.chart.tall,
+body.hb-shell #kline-chart.signals-kline {
+  height: min(62vh, 580px);
+  min-height: 420px;
+}
+.ohlc-legend-slim {
+  top: 6px;
+  left: 8px;
+  padding: 3px 8px;
+  font-size: 11px;
+  gap: 6px 10px;
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 6px;
+  box-shadow: none;
+  max-width: min(520px, calc(100% - 16px));
+  backdrop-filter: blur(6px);
+}
+body.theme-dark .ohlc-legend-slim {
+  background: rgba(15, 18, 24, 0.72);
+}
+.trade-focus-card {
+  background: var(--accent-soft);
+  border-radius: 12px;
+  padding: 10px 12px !important;
+  margin: -4px 0 10px;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+}
+.trade-focus-card h2 {
+  font-size: 12px !important;
+  color: var(--accent);
+  margin-bottom: 8px !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.trade-focus-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.trade-focus-body .tf-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 12.5px;
+}
+.trade-focus-body .tf-row > span:first-child {
+  color: var(--text-2);
+  flex-shrink: 0;
+}
+.trade-focus-body .tf-row b {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.trade-focus-body .tf-row b.mono {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+body.hb-shell .panel.side {
+  position: sticky;
+  top: 12px;
+}
+#signals-fit-trade {
+  flex-shrink: 0;
+}
+
 /* reduced motion already partially handled; keep charts calm */
 @media (prefers-reduced-motion: reduce) {
   body.hb-shell .view.loading,

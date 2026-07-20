@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>darkforest-trading</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=20260720ui3">
+<link rel="stylesheet" href="style.css?v=20260720sym">
 <link rel="stylesheet" href="scout_mtf.css?v=20260719embed">
 <script defer src="vendor/lightweight-charts.standalone.production.js"></script>
-<script defer src="format_helpers.js?v=20260720ui3"></script>
+<script defer src="format_helpers.js?v=20260720sym"></script>
 <script defer src="scout_mtf_app.js?v=20260719embed"></script>
-<script defer src="app.js?v=20260720ui3"></script>
+<script defer src="app.js?v=20260720sym"></script>
 </head>
 <body class="hb-shell">
 <button type="button" class="nav-burger" id="nav-burger" aria-label="打开导航" aria-controls="sidebar" aria-expanded="false">☰</button>
@@ -487,8 +487,19 @@
       </div>
     </div>
     <div class="controls toolbar">
-      <input id="symbol-input" list="symbol-list" placeholder="币种，如 BTC" autocomplete="off">
-      <datalist id="symbol-list"></datalist>
+      <div class="sym-combo" id="sym-combo">
+        <button type="button" class="sym-combo-btn" id="sym-combo-btn" aria-haspopup="listbox" aria-expanded="false" title="选择币种">
+          <span class="sym-combo-label" id="sym-combo-label">选择币种…</span>
+          <span class="sym-combo-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="sym-combo-panel" id="sym-combo-panel" hidden>
+          <input type="search" class="sym-combo-search" id="sym-combo-search" placeholder="搜索 BTC / ETH…" autocomplete="off" aria-label="搜索币种">
+          <div class="sym-combo-list" id="sym-combo-list" role="listbox"></div>
+          <div class="sym-combo-empty" id="sym-combo-empty" hidden>无匹配币种</div>
+        </div>
+      </div>
+      <!-- kept for keyboard / deep-link compat; not shown -->
+      <input id="symbol-input" type="hidden" value="">
       <div class="seg" id="tf-seg" title="客户端聚合（源数据 15m）">
         <button type="button" data-tf="15" class="active">15m</button>
         <button type="button" data-tf="60">1H</button>
@@ -500,26 +511,35 @@
         <button data-bars="9000">3 个月</button>
         <button data-bars="40000">全部</button>
       </div>
-      <label class="toggle"><input type="checkbox" id="signals-show-ma" checked> 均线</label>
+      <div class="seg" id="ma-seg" title="均线显示">
+        <button type="button" data-ma="off">关</button>
+        <button type="button" data-ma="ema" class="active">EMA</button>
+        <button type="button" data-ma="sma">SMA</button>
+        <button type="button" data-ma="all">全</button>
+      </div>
+      <button type="button" class="mini-btn" id="signals-fit-trade" title="缩放到当前聚焦交易">Fit 本笔</button>
       <span id="symbol-info" class="note"></span>
     </div>
     <div class="signals-layout">
       <div class="panel grow panel-chart">
-        <div class="legend compact-legend">
-          <span><i class="dot" style="background:#3b82f6"></i>SMA</span>
-          <span><i class="dot" style="background:#f97316"></i>EMA</span>
+        <div class="legend compact-legend" id="signals-legend">
+          <span data-leg="ma"><i class="dot" style="background:#f97316"></i>EMA 20/60/120</span>
           <span><i class="dot" style="background:#2563eb"></i>入场</span>
           <span><i class="dot" style="background:#059669"></i>TP</span>
           <span><i class="dot" style="background:#d97706"></i>SL</span>
-          <span><i class="dot" style="background:#0d9488"></i>出场</span>
-          <span class="note">滚轮缩放 · 拖拽</span>
+          <span><i class="dot" style="background:rgba(37,99,235,0.25)"></i>密集窗</span>
+          <span class="note">点侧栏成交聚焦 · 滚轮缩放</span>
         </div>
-        <div class="chart-host">
-          <div class="ohlc-legend" id="kline-ohlc" aria-live="polite">—</div>
-          <div id="kline-chart" class="chart tall"></div>
+        <div class="chart-host chart-host-signals">
+          <div class="ohlc-legend ohlc-legend-slim" id="kline-ohlc" aria-live="polite">—</div>
+          <div id="kline-chart" class="chart tall signals-kline"></div>
         </div>
       </div>
       <div class="panel side">
+        <div class="side-section trade-focus-card" id="trade-focus-card" hidden>
+          <h2>当前聚焦</h2>
+          <div id="trade-focus-body" class="trade-focus-body"></div>
+        </div>
         <div class="side-section">
           <h2>本币种成交 <span class="unit" id="side-count"></span></h2>
           <div class="table-wrap side-table">

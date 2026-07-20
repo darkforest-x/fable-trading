@@ -398,7 +398,7 @@ document.addEventListener("keydown", (e) => {
   if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.target?.isContentEditable) return;
   if (e.key === "/" && appState.view === "signals") {
     e.preventDefault();
-    $("#symbol-input")?.focus();
+    openSymbolCombo();
     return;
   }
   if (e.key === "r" && !e.metaKey && !e.ctrlKey) {
@@ -579,7 +579,7 @@ async function loadExplore() {
       showView("signals", { force: true });
       initSignals(true).then(() => {
         const key = `okx:${sym}`;
-        if ($("#symbol-input")) $("#symbol-input").value = key;
+        setSymbolComboValue(key, { silent: true });
         loadChart(key);
       });
     });
@@ -1560,7 +1560,31 @@ let sigVolByTime = new Map();
 let sigLastFocusEntry = null;
 /** When set, paint entry/exit/TP/SL from this trade (forward log) after chart loads */
 let pendingTradeOverlay = null;
-const sigState = { bars: 1500, showMa: true, tfMin: 15 };
+/** maMode: off | ema | sma | all — default EMA only (cleaner chart). */
+const sigState = { bars: 1500, maMode: "ema", tfMin: 15 };
+
+function setTradeFocusCard(html) {
+  const card = $("#trade-focus-card");
+  const body = $("#trade-focus-body");
+  if (!card || !body) return;
+  if (!html) {
+    card.hidden = true;
+    body.innerHTML = "";
+    return;
+  }
+  body.innerHTML = html;
+  card.hidden = false;
+}
+
+function updateSignalsLegend() {
+  const el = $("#signals-legend span[data-leg='ma']");
+  if (!el) return;
+  const mode = sigState.maMode || "ema";
+  if (mode === "off") el.innerHTML = `<i class="dot" style="background:#94a3b8"></i>均线关`;
+  else if (mode === "sma") el.innerHTML = `<i class="dot" style="background:#3b82f6"></i>SMA 20/60/120`;
+  else if (mode === "all") el.innerHTML = `<i class="dot" style="background:#f97316"></i>SMA+EMA`;
+  else el.innerHTML = `<i class="dot" style="background:#f97316"></i>EMA 20/60/120`;
+}
 
 function parseTimeToUnix(entryTimeStr) {
   if (entryTimeStr == null || entryTimeStr === "") return null;
@@ -1612,14 +1636,12 @@ function paintTradeOverlay(ov) {
   _clearTradeLevels();
   klineChart.priceScale("right").applyOptions({ autoScale: true });
 
-  if (tpPx != null) _addTradeLevel(tpPx, "#26a69a", `TP +${tpM}ATR`, t0, t1, 2);
-  if (slPx != null) _addTradeLevel(slPx, "#ff9800", `SL -${slM}ATR`, t0, t1, 2);
-  _addTradeLevel(entry, "#2962ff", openPos ? "持仓入场" : "Entry", t0, t1, 0);
+  // One narrative: short axis tags only (details go to focus card / symbol-info)
+  if (tpPx != null) _addTradeLevel(tpPx, "#059669", "TP", t0, t1, 2);
+  if (slPx != null) _addTradeLevel(slPx, "#d97706", "SL", t0, t1, 2);
+  _addTradeLevel(entry, "#2563eb", "入", t0, t1, 0);
   if (exitPrice != null && !openPos) {
-    const retPct = Number.isFinite(ret) ? (100 * ret).toFixed(2) : null;
-    const retSign = ret != null && ret >= 0 ? "+" : "";
-    const label = `${OUTCOME_CN[outcome] || "出场"}${retPct != null ? ` ${retSign}${retPct}%` : ""}`;
-    _addTradeLevel(exitPrice, outcomeColor, label, t0, t1, 0);
+    _addTradeLevel(exitPrice, outcomeColor, "出", t0, t1, 0);
   }
 
   // path entry → exit (or last bar for open)
@@ -1635,15 +1657,15 @@ function paintTradeOverlay(ov) {
     { time: t1, value: pathEnd },
   ]);
 
-  // markers for this trade only (plus keep existing series markers if any)
+  // Markers: entry/exit arrows only — no long Chinese on chart
   const extra = [
     {
       time: t0,
       position: "belowBar",
       shape: "arrowUp",
-      color: "#2962ff",
-      text: "入",
-      size: 3,
+      color: "#2563eb",
+      text: "",
+      size: 2,
     },
   ];
   if (!openPos && exitPrice != null) {
@@ -1652,12 +1674,11 @@ function paintTradeOverlay(ov) {
       position: "aboveBar",
       shape: "arrowDown",
       color: outcomeColor,
-      text: (OUTCOME_CN[outcome] || "出").slice(0, 2),
-      size: 3,
+      text: "",
+      size: 2,
     });
   }
   try {
-    // merge with whatever markers already on series is hard; re-set focus markers
     klineSeries.setMarkers(extra);
   } catch (_) { /* ignore */ }
 
@@ -1669,19 +1690,23 @@ function paintTradeOverlay(ov) {
   lastFocusRange = { from: Math.max(0, i0 - pad), to: i1 + pad };
   setTimeout(() => klineChart.timeScale().setVisibleLogicalRange(lastFocusRange), 60);
 
-  // info strip
+  const retPctStr = Number.isFinite(ret) ? `${ret >= 0 ? "+" : ""}${(100 * ret).toFixed(2)}%` : "—";
   const info = $("#symbol-info");
   if (info) {
-    const bits = [
-      openPos ? "前向持仓" : "前向已平",
-      `入 ${fmtPx(entry)}`,
-      atrOk ? `ATR ${(100 * atr).toFixed(3)}%` : null,
-      atrOk ? `TP ${fmtPx(tpPx)} / SL ${fmtPx(slPx)}` : null,
+    info.textContent = [
+      openPos ? "持仓中" : "已平",
       outcome ? (OUTCOME_CN[outcome] || outcome) : null,
-      Number.isFinite(ret) ? `收益 ${ret >= 0 ? "+" : ""}${(100 * ret).toFixed(2)}%` : null,
-    ].filter(Boolean);
-    info.textContent = bits.join(" · ");
+      Number.isFinite(ret) ? retPctStr : null,
+    ].filter(Boolean).join(" · ");
   }
+  setTradeFocusCard(`
+    <div class="tf-row"><span>来源</span><b>${escapeHtml(openPos ? "前向持仓" : "前向成交")}</b></div>
+    <div class="tf-row"><span>入场</span><b>${fmtPx(entry)}</b></div>
+    ${atrOk ? `<div class="tf-row"><span>ATR</span><b>${(100 * atr).toFixed(3)}%</b></div>` : ""}
+    ${tpPx != null ? `<div class="tf-row"><span>TP / SL</span><b>${fmtPx(tpPx)} / ${fmtPx(slPx)}</b></div>` : ""}
+    <div class="tf-row"><span>结果</span><b class="${cls(ret)}">${escapeHtml(OUTCOME_CN[outcome] || (openPos ? "持有" : "—"))} ${retPctStr}</b></div>
+    <div class="tf-row"><span>时间</span><b class="mono">${escapeHtml(fmtBjTime(ov.entry_time || ov.signal_time))}</b></div>
+  `);
   return true;
 }
 
@@ -1716,9 +1741,34 @@ segWire("#bars-seg", sigState, "bars", Number, () => currentKey && loadChart(cur
     });
   });
 })();
-$("#signals-show-ma")?.addEventListener("change", (e) => {
-  sigState.showMa = !!e.target.checked;
-  emaSeries.forEach((s) => s.applyOptions({ visible: sigState.showMa }));
+// MA mode: off | ema | sma | all
+(function wireMaSeg() {
+  const host = $("#ma-seg");
+  if (!host) return;
+  host.querySelectorAll("button[data-ma]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      host.querySelectorAll("button").forEach((b) => b.classList.toggle("active", b === btn));
+      sigState.maMode = btn.dataset.ma || "ema";
+      updateSignalsLegend();
+      if (sigRawPayload) {
+        const keepFocus = sigLastFocusEntry;
+        const ov = window.__lastTradeOverlay;
+        applySignalChartData(sigRawPayload, null);
+        if (ov) setTimeout(() => paintTradeOverlay(ov), 20);
+        else if (keepFocus) focusMarker(keepFocus);
+      }
+    });
+  });
+  updateSignalsLegend();
+})();
+$("#signals-fit-trade")?.addEventListener("click", () => {
+  if (!klineChart || !lastFocusRange) {
+    toast("请先点一笔成交聚焦", "info");
+    return;
+  }
+  try {
+    klineChart.timeScale().setVisibleLogicalRange(lastFocusRange);
+  } catch (_) { /* ignore */ }
 });
 
 function ensureKlineChart() {
@@ -1733,21 +1783,23 @@ function ensureKlineChart() {
     priceScaleId: "band", lineVisible: false, priceLineVisible: false,
     lastValueVisible: false, crosshairMarkerVisible: false,
     autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 1 } }),
-    topColor: "rgba(57,135,229,0.14)", bottomColor: "rgba(57,135,229,0.14)",
+    topColor: "rgba(37,99,235,0.10)", bottomColor: "rgba(37,99,235,0.10)",
   });
   klineChart.priceScale("band").applyOptions({ visible: false, scaleMargins: { top: 0, bottom: 0 } });
   klineSeries = klineChart.addCandlestickSeries({
-    upColor: "#26a69a", downColor: "#ef5350", borderVisible: false,
-    wickUpColor: "#26a69a", wickDownColor: "#ef5350",
+    upColor: "#059669", downColor: "#dc2626", borderVisible: false,
+    wickUpColor: "#059669", wickDownColor: "#dc2626",
   });
   volumeSeries = klineChart.addHistogramSeries({
     priceScaleId: "vol", priceFormat: { type: "volume" },
     priceLineVisible: false, lastValueVisible: false,
   });
-  klineChart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+  // taller volume pane for scannable density
+  klineChart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.72, bottom: 0 } });
+  klineChart.priceScale("right").applyOptions({ scaleMargins: { top: 0.08, bottom: 0.22 } });
   // entry->exit path segment of the focused trade
   pathSeries = klineChart.addLineSeries({
-    lineWidth: 3, priceLineVisible: false, lastValueVisible: false,
+    lineWidth: 2, priceLineVisible: false, lastValueVisible: false,
     crosshairMarkerVisible: false, autoscaleInfoProvider: () => null,
   });
   wireOhlcLegend(klineChart, klineSeries, $("#kline-ohlc"), {
@@ -1777,18 +1829,26 @@ function applySignalChartData(d, focusEntry = null) {
   volumeSeries.setData(candles.map((c) => ({
     time: c.time,
     value: c.volume,
-    color: c.close >= c.open ? "rgba(38,166,154,0.35)" : "rgba(239,83,80,0.35)",
+    color: c.close >= c.open ? "rgba(5,150,105,0.40)" : "rgba(220,38,38,0.35)",
   })));
 
-  // MAs: recompute on displayed TF so 1H/4H still show smooth averages
-  const maDefs = [
-    { key: "sma20", span: 20, color: "rgba(61,143,209,0.85)", w: 1 },
-    { key: "sma60", span: 60, color: "rgba(61,143,209,0.65)", w: 1 },
-    { key: "sma120", span: 120, color: "rgba(61,143,209,0.45)", w: 1 },
-    { key: "ema20", span: 20, color: "rgba(240,96,36,0.95)", w: 2 },
-    { key: "ema60", span: 60, color: "rgba(240,96,36,0.75)", w: 1 },
-    { key: "ema120", span: 120, color: "rgba(240,96,36,0.55)", w: 1 },
-  ];
+  // MAs: default EMA only; mode off|ema|sma|all
+  const maMode = sigState.maMode || "ema";
+  const maDefs = [];
+  if (maMode === "sma" || maMode === "all") {
+    maDefs.push(
+      { key: "sma20", span: 20, color: "rgba(59,130,246,0.90)", w: 1 },
+      { key: "sma60", span: 60, color: "rgba(59,130,246,0.65)", w: 1 },
+      { key: "sma120", span: 120, color: "rgba(59,130,246,0.40)", w: 1 },
+    );
+  }
+  if (maMode === "ema" || maMode === "all") {
+    maDefs.push(
+      { key: "ema20", span: 20, color: "rgba(249,115,22,0.95)", w: 2 },
+      { key: "ema60", span: 60, color: "rgba(249,115,22,0.70)", w: 1 },
+      { key: "ema120", span: 120, color: "rgba(249,115,22,0.45)", w: 1 },
+    );
+  }
   for (const m of maDefs) {
     const pts = m.key.startsWith("ema") ? emaSeriesFrom(candles, m.span) : smaSeries(candles, m.span);
     if (!pts.length) continue;
@@ -1798,13 +1858,13 @@ function applySignalChartData(d, focusEntry = null) {
       priceLineVisible: false,
       lastValueVisible: false,
       crosshairMarkerVisible: false,
-      visible: sigState.showMa,
     });
     s.setData(pts);
     emaSeries.push(s);
   }
 
   currentMarkers = d.markers || [];
+  // Overview markers: traded = small arrows, no % text (focus paints details)
   const markerList = [];
   for (const m of currentMarkers) {
     if (!m.eligible && !m.traded) continue;
@@ -1813,17 +1873,17 @@ function applySignalChartData(d, focusEntry = null) {
       time: t,
       position: "belowBar",
       shape: m.traded ? "arrowUp" : "circle",
-      color: m.traded ? (OUTCOME_COLOR[m.outcome] || "#8b93a1") : "#8b93a1",
-      text: m.traded ? `${(100 * m.ret).toFixed(1)}%` : "",
-      size: m.traded ? 2 : 1,
+      color: m.traded ? (OUTCOME_COLOR[m.outcome] || "#64748b") : "rgba(100,116,139,0.55)",
+      text: "",
+      size: m.traded ? 1 : 0,
     });
     if (m.traded && m.exit_time) {
       markerList.push({
         time: snapTimeToTf(m.exit_time, tf),
         position: "aboveBar",
         shape: "square",
-        color: OUTCOME_COLOR[m.outcome] || "#8b93a1",
-        size: 1,
+        color: OUTCOME_COLOR[m.outcome] || "#64748b",
+        size: 0,
       });
     }
   }
@@ -1848,6 +1908,120 @@ function applySignalChartData(d, focusEntry = null) {
   }
 }
 
+/** Symbol rows for combobox: { key, source, symbol, short, n_trades, n_eligible } */
+let sigSymbolRows = [];
+
+function shortSymbol(sym) {
+  return String(sym || "").replace(/_USDT_SWAP$/, "").replace(/_USDT$/, "");
+}
+
+function setSymbolComboValue(key, { silent = false } = {}) {
+  const hidden = $("#symbol-input");
+  const label = $("#sym-combo-label");
+  if (hidden) hidden.value = key || "";
+  if (label) {
+    if (!key) label.textContent = "选择币种…";
+    else {
+      const [, sym] = key.split(":");
+      label.textContent = shortSymbol(sym || key);
+      label.title = key;
+    }
+  }
+  // highlight selected in open list
+  $$("#sym-combo-list .sym-combo-item").forEach((el) => {
+    el.classList.toggle("active", el.dataset.key === key);
+  });
+  if (!silent && key) loadChart(key);
+}
+
+function renderSymbolComboList(filter = "") {
+  const list = $("#sym-combo-list");
+  const empty = $("#sym-combo-empty");
+  if (!list) return;
+  const q = filter.trim().toUpperCase();
+  const rows = !q
+    ? sigSymbolRows
+    : sigSymbolRows.filter((r) =>
+        r.short.toUpperCase().includes(q) ||
+        r.symbol.toUpperCase().includes(q) ||
+        r.key.toUpperCase().includes(q));
+  // prefer traded first already sorted; cap display for perf
+  const show = rows.slice(0, 200);
+  list.innerHTML = show.map((r) => {
+    const meta = r.n_trades > 0
+      ? `成交 ${r.n_trades}`
+      : (r.n_eligible > 0 ? `合格 ${r.n_eligible}` : "—");
+    const active = r.key === currentKey || r.key === ($("#symbol-input")?.value || "");
+    return `<button type="button" class="sym-combo-item${active ? " active" : ""}" role="option" data-key="${escapeHtml(r.key)}">
+      <span class="sym-combo-name">${escapeHtml(r.short)}</span>
+      <span class="sym-combo-meta">${escapeHtml(meta)}</span>
+    </button>`;
+  }).join("");
+  if (empty) empty.hidden = show.length > 0;
+}
+
+function openSymbolCombo() {
+  const panel = $("#sym-combo-panel");
+  const btn = $("#sym-combo-btn");
+  if (!panel || !btn) return;
+  panel.hidden = false;
+  btn.setAttribute("aria-expanded", "true");
+  document.body.classList.add("sym-combo-open");
+  renderSymbolComboList($("#sym-combo-search")?.value || "");
+  setTimeout(() => $("#sym-combo-search")?.focus(), 0);
+}
+
+function closeSymbolCombo() {
+  const panel = $("#sym-combo-panel");
+  const btn = $("#sym-combo-btn");
+  if (panel) panel.hidden = true;
+  if (btn) btn.setAttribute("aria-expanded", "false");
+  document.body.classList.remove("sym-combo-open");
+}
+
+function wireSymbolCombo() {
+  if (symbolInputWired) return;
+  symbolInputWired = true;
+  const btn = $("#sym-combo-btn");
+  const panel = $("#sym-combo-panel");
+  const search = $("#sym-combo-search");
+  const list = $("#sym-combo-list");
+  if (!btn || !panel) return;
+
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (panel.hidden) openSymbolCombo();
+    else closeSymbolCombo();
+  });
+  search?.addEventListener("input", () => renderSymbolComboList(search.value));
+  search?.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeSymbolCombo();
+      btn.focus();
+    }
+    if (e.key === "Enter") {
+      const first = list?.querySelector(".sym-combo-item");
+      if (first) {
+        e.preventDefault();
+        setSymbolComboValue(first.dataset.key);
+        closeSymbolCombo();
+      }
+    }
+  });
+  list?.addEventListener("click", (e) => {
+    const item = e.target.closest(".sym-combo-item");
+    if (!item) return;
+    setSymbolComboValue(item.dataset.key);
+    closeSymbolCombo();
+  });
+  document.addEventListener("click", (e) => {
+    if (!panel.hidden && !e.target.closest("#sym-combo")) closeSymbolCombo();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !panel.hidden) closeSymbolCombo();
+  });
+}
+
 async function initSignals(force = false) {
   if (symbolsLoaded && !force) return;
   symbolsLoaded = true;
@@ -1858,25 +2032,25 @@ async function initSignals(force = false) {
     $("#symbol-info").textContent = "币种列表加载失败";
     return;
   }
-  $("#symbol-list").innerHTML = rows.map((r) =>
-    `<option value="${r.source}:${r.symbol}">${r.symbol}（成交 ${r.n_trades} / 合格 ${r.n_eligible}）</option>`).join("");
-  if (!symbolInputWired) {
-    let t = null;
-    const input = $("#symbol-input");
-    input.addEventListener("change", () => loadChart(input.value));
-    input.addEventListener("input", () => {
-      clearTimeout(t);
-      t = setTimeout(() => {
-        const v = input.value.trim();
-        if (v.includes(":") || v.includes("_USDT")) loadChart(v.includes(":") ? v : `okx:${v}`);
-      }, 350);
-    });
-    symbolInputWired = true;
-  }
-  const first = rows.find((r) => r.n_trades > 0) || rows[0];
+  sigSymbolRows = (rows || []).map((r) => ({
+    key: `${r.source}:${r.symbol}`,
+    source: r.source,
+    symbol: r.symbol,
+    short: shortSymbol(r.symbol),
+    n_trades: r.n_trades || 0,
+    n_eligible: r.n_eligible || 0,
+  }));
+  // traded first, then by name
+  sigSymbolRows.sort((a, b) => (b.n_trades - a.n_trades) || a.short.localeCompare(b.short));
+  wireSymbolCombo();
+  renderSymbolComboList();
+
+  const first = sigSymbolRows.find((r) => r.n_trades > 0) || sigSymbolRows[0];
   if (first && !currentKey) {
-    $("#symbol-input").value = `${first.source}:${first.symbol}`;
-    loadChart($("#symbol-input").value);
+    setSymbolComboValue(first.key, { silent: true });
+    loadChart(first.key);
+  } else if (currentKey) {
+    setSymbolComboValue(currentKey, { silent: true });
   }
 }
 
@@ -1886,6 +2060,7 @@ async function loadChart(key, focusEntry = null) {
   const [source, symbol] = key.split(":");
   if (!symbol) return;
   currentKey = key;
+  setSymbolComboValue(key, { silent: true });
   ensureKlineChart();          // synchronous: no await between check and create
   const reqId = ++chartReq;    // stale responses (slow links) are dropped
   if (chartAbort) chartAbort.abort();
@@ -1923,6 +2098,7 @@ async function loadChart(key, focusEntry = null) {
     setTimeout(() => paintTradeOverlay(ov), 30);
   } else {
     window.__lastTradeOverlay = null;
+    if (!focusEntry) setTradeFocusCard(null);
   }
 
   const n = d.markers.length, el = d.markers.filter((m) => m.eligible).length,
@@ -2029,8 +2205,8 @@ function _clearTradeLevels() {
 function _addTradeLevel(price, color, title, t0, t1, lineStyle = 0) {
   if (price == null || !Number.isFinite(Number(price))) return;
   const p = Number(price);
-  // TV-like axis tag: short title + price
-  const axisTitle = title ? `${title} ${fmtPx(p)}` : fmtPx(p);
+  // Short axis tag only (price is on the scale); avoid "止盈 +4.74% 0.086…" walls
+  const axisTitle = title || "";
   priceLines.push(klineSeries.createPriceLine({
     price: p,
     color,
@@ -2073,6 +2249,7 @@ function focusMarker(entryTs) {
     return;
   }
   sigLastFocusEntry = ts;
+  window.__lastTradeOverlay = null;
   _clearTradeLevels();
   klineChart.priceScale("right").applyOptions({ autoScale: true });
   const tf = sigState.tfMin || 15;
@@ -2085,18 +2262,11 @@ function focusMarker(entryTs) {
   const t1 = snapTimeToTf(m.exit_time || m.time, tf);
   const retPct = (100 * m.ret).toFixed(2);
   const retSign = m.ret >= 0 ? "+" : "";
-  // TV-style order tags on the price axis
-  _addTradeLevel(tpPx, "#26a69a", "TP", t0, t1, 2);
-  _addTradeLevel(slPx, "#ff9800", "SL", t0, t1, 2);
-  _addTradeLevel(entry, "#2962ff", "Entry", t0, t1, 0);
-  _addTradeLevel(
-    exitPrice,
-    outcomeColor,
-    `${OUTCOME_CN[m.outcome] || "Exit"} ${retSign}${retPct}%`,
-    t0,
-    t1,
-    0,
-  );
+  // Clean levels: short tags only
+  _addTradeLevel(tpPx, "#059669", "TP", t0, t1, 2);
+  _addTradeLevel(slPx, "#d97706", "SL", t0, t1, 2);
+  _addTradeLevel(entry, "#2563eb", "入", t0, t1, 0);
+  _addTradeLevel(exitPrice, outcomeColor, "出", t0, t1, 0);
   // dense-MA window band
   const denseStart = snapTimeToTf(m.time - Math.max(m.dense_len, 1) * 900, tf);
   const denseEnd = snapTimeToTf(m.time, tf);
@@ -2109,38 +2279,48 @@ function focusMarker(entryTs) {
     { time: t0, value: entry },
     { time: t1, value: exitPrice },
   ]);
+  // Focus-only markers (others dim / no text clutter)
   const baseMarkers = [];
   for (const x of currentMarkers) {
     if (!x.eligible && !x.traded) continue;
     const isFocus = Number(x.entry_time) === ts || Number(x.time) === ts;
-    if (x.traded) {
+    if (!x.traded) {
+      if (!isFocus) continue; // hide non-focus eligible dots when focused
+      continue;
+    }
+    if (!isFocus) {
+      // dim other trades
       baseMarkers.push({
         time: snapTimeToTf(x.time, tf),
         position: "belowBar",
         shape: "arrowUp",
-        color: isFocus ? "#2962ff" : (OUTCOME_COLOR[x.outcome] || "#8b93a1"),
-        text: isFocus ? "入" : `${(100 * x.ret).toFixed(1)}%`,
-        size: isFocus ? 3 : 2,
+        color: "rgba(148,163,184,0.45)",
+        text: "",
+        size: 0,
       });
-      baseMarkers.push({
-        time: snapTimeToTf(x.exit_time, tf),
-        position: "aboveBar",
-        shape: isFocus ? "arrowDown" : "square",
-        color: OUTCOME_COLOR[x.outcome] || "#8b93a1",
-        text: isFocus ? (OUTCOME_CN[x.outcome] || "").slice(0, 2) : "",
-        size: isFocus ? 3 : 1,
-      });
-    } else {
-      baseMarkers.push({
-        time: snapTimeToTf(x.time, tf), position: "belowBar", shape: "circle",
-        color: "#8b93a1", text: "", size: 1,
-      });
+      continue;
     }
+    baseMarkers.push({
+      time: snapTimeToTf(x.time, tf),
+      position: "belowBar",
+      shape: "arrowUp",
+      color: "#2563eb",
+      text: "",
+      size: 2,
+    });
+    baseMarkers.push({
+      time: snapTimeToTf(x.exit_time, tf),
+      position: "aboveBar",
+      shape: "arrowDown",
+      color: outcomeColor,
+      text: "",
+      size: 2,
+    });
   }
   const seen = new Set();
   const deduped = [];
   for (const mk of baseMarkers.sort((a, b) => a.time - b.time)) {
-    const k = `${mk.time}|${mk.position}|${mk.text || ""}`;
+    const k = `${mk.time}|${mk.position}|${mk.shape}`;
     if (seen.has(k)) continue;
     seen.add(k);
     deduped.push(mk);
@@ -2153,6 +2333,20 @@ function focusMarker(entryTs) {
   const pad = Math.max(24, Math.floor((i1 - i0) * 0.8) || 24);
   lastFocusRange = { from: i0 - pad, to: i1 + pad };
   setTimeout(() => klineChart.timeScale().setVisibleLogicalRange(lastFocusRange), 60);
+
+  setTradeFocusCard(`
+    <div class="tf-row"><span>结果</span><b class="${cls(m.ret)}">${escapeHtml(OUTCOME_CN[m.outcome] || m.outcome || "—")} ${retSign}${retPct}%</b></div>
+    <div class="tf-row"><span>入场</span><b>${fmtPx(entry)}</b></div>
+    <div class="tf-row"><span>出场</span><b>${fmtPx(exitPrice)}</b></div>
+    <div class="tf-row"><span>TP / SL</span><b>${fmtPx(tpPx)} / ${fmtPx(slPx)}</b></div>
+    <div class="tf-row"><span>分数</span><b>${m.score != null ? Number(m.score).toFixed(4) : "—"}</b></div>
+    <div class="tf-row"><span>密集</span><b>${m.dense_len != null ? m.dense_len + " 根" : "—"}</b></div>
+    <div class="tf-row"><span>时间</span><b class="mono">${escapeHtml(fmtBjTime(m.time))}</b></div>
+  `);
+  const info = $("#symbol-info");
+  if (info) {
+    info.textContent = `${OUTCOME_CN[m.outcome] || ""} ${retSign}${retPct}% · 分数 ${m.score != null ? Number(m.score).toFixed(3) : "—"}`;
+  }
 }
 
 async function focusTrade(source, symbol, entryTimeStr, overlay = null) {
@@ -2161,7 +2355,7 @@ async function focusTrade(source, symbol, entryTimeStr, overlay = null) {
   const entryTs = parseTimeToUnix(entryTimeStr);
   pendingTradeOverlay = overlay || null;
   const key = `${source || "okx"}:${symbol}`;
-  $("#symbol-input").value = key;
+  setSymbolComboValue(key, { silent: true });
   sigState.bars = 40000;
   document.querySelectorAll("#bars-seg button").forEach((b) =>
     b.classList.toggle("active", b.dataset.bars === "40000"));
