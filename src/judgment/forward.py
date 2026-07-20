@@ -173,14 +173,14 @@ def _run_forward_tracking(
                 sig_ts = sig_ts.tz_localize("UTC")
             lag_m = (now_utc - sig_ts).total_seconds() / 60.0
             lags.append(lag_m)
-            if lag_m <= 20:
+            if lag_m <= 30:
                 fresh_n += 1
             else:
                 stale_n += 1
         if lags:
             med = sorted(lags)[len(lags) // 2]
             print(
-                f"forward_freshness: new_open={len(lags)} tip_fresh≤20m={fresh_n} "
+                f"forward_freshness: new_open={len(lags)} tip_fresh≤30m={fresh_n} "
                 f"hindsight={stale_n} lag_med={med:.0f}m",
                 flush=True,
             )
@@ -204,15 +204,16 @@ def _run_forward_tracking(
                 # signal bar hours old) -- on 2026-07-18 the first yolo-source
                 # pulse pushed dozens of those to the channel and the owner
                 # reasonably asked why OKX had not traded them. Match the
-                # executor freshness gate (max_signal_age_min=20) so TG never
-                # pages about trades nobody can take (owner 2026-07-19 tip target).
+                # executor freshness gate (max_signal_age_min=30: 15 bar + 7
+                # pulse/scan + headroom) so TG never pages about trades nobody
+                # can take.
                 if str(rec.get("status", "")).lower() != "open":
                     continue
                 sig_ts = pd.Timestamp(rec["signal_time"])
                 if sig_ts.tzinfo is None:
                     sig_ts = sig_ts.tz_localize("UTC")
                 lag_m = (now_utc - sig_ts).total_seconds() / 60.0
-                if lag_m > 20:
+                if lag_m > 30:
                     continue
                 row = dict(rec)
                 row["lag_min"] = round(lag_m, 1)

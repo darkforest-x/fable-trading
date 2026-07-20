@@ -151,7 +151,12 @@ def scan_series_with_yolo(
             cx, _, w, _ = map(float, b[:4])
             bar_in_win = right_edge_to_bar(cx, w, tf, n_bars=window)
             signal_i = start + bar_in_win
-            if signal_i < WARMUP_BARS or signal_i + 1 >= len(frame):
+            if signal_i < WARMUP_BARS or signal_i >= len(frame):
+                continue
+            # Offline dataset builds need the entry bar for labels; the live
+            # path must NOT wait for it -- the tip bar is the whole point of
+            # real-time detection (entry fields backfill next pulse).
+            if mode != "live" and signal_i + 1 >= len(frame):
                 continue
             if start_from_i is not None and signal_i < start_from_i:
                 continue

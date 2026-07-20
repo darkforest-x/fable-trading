@@ -18,11 +18,12 @@ FORWARD_DECISION_TRADES = 100
 
 
 # A verdict trade must have been KNOWABLE at the same 15m pulse as the signal.
-# signal_time = bar open; bar closes +15m; pulse ~+16m → honest lag ≈ 15–20m.
-# Owner 2026-07-19: multi-hour hindsight must not count; target tip-fire same
-# pulse. Align with executor max_signal_age_min (20). Structural 15m bar delay
-# remains; this kills post-hoc recognition hours later.
-FRESH_DETECT_MIN = 20.0
+# signal_time = bar open; bar closes +15m; the pulse fires ~+16m and the
+# 344-symbol scan takes up to ~7m, so an honest same-pulse tip detection lands
+# at lag 16-23m. 30 = 15 (bar) + 7 (pulse+scan) + headroom, matching the
+# executor max_signal_age_min and the TG filter: the verdict counts exactly
+# what live could trade, and still kills multi-hour hindsight recognition.
+FRESH_DETECT_MIN = 30.0
 
 
 def forward_payload(cost: float = FORWARD_COST) -> dict:

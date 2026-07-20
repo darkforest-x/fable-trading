@@ -70,7 +70,8 @@ class ForwardRecord(TypedDict):
     signal_i: int
     entry_time: str
     entry_price: float
-    maker_filled: bool
+    # None while a tip-recorded row awaits its entry-bar backfill
+    maker_filled: bool | None
     outcome: str
     label: int
     exit_offset: int

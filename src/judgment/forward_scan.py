@@ -132,6 +132,23 @@ def scan_forward_records(
             threshold_signals_seen += 1
             entry_i = signal_i + 1
             feature_row = feature_rows.iloc[row_pos]
+            # Tip signal: entry bar hasn't printed. entry_time is known (next
+            # bar open = signal bar close time); entry_price uses the signal
+            # bar close as a PROXY so TG/executor have a sane number, and
+            # maker_filled stays empty as the "entry pending backfill" sentinel
+            # -- merge_forward_log overwrites all three with the true next-bar
+            # values on the following pulse.
+            tip_pending = entry_i >= len(enriched)
+            if tip_pending:
+                entry_time = str(signal_time + pd.Timedelta(minutes=15))
+                entry_price = float(enriched["close"].iloc[signal_i])
+                maker_filled = None
+            else:
+                entry_time = str(pd.Timestamp(enriched["open_time"].iloc[entry_i]))
+                entry_price = float(enriched["open"].iloc[entry_i])
+                maker_filled = bool(
+                    float(enriched["low"].iloc[entry_i]) < float(enriched["open"].iloc[entry_i])
+                )
             records.append(
                 {
                     "source": source,
@@ -145,11 +162,9 @@ def scan_forward_records(
                     "model_path": scan.artifact.relative_model_path,
                     "dataset_sha256": scan.artifact.dataset_sha256,
                     "signal_i": int(signal_i),
-                    "entry_time": str(pd.Timestamp(enriched["open_time"].iloc[entry_i])),
-                    "entry_price": float(enriched["open"].iloc[entry_i]),
-                    "maker_filled": bool(
-                        float(enriched["low"].iloc[entry_i]) < float(enriched["open"].iloc[entry_i])
-                    ),
+                    "entry_time": entry_time,
+                    "entry_price": entry_price,
+                    "maker_filled": maker_filled,
                     "outcome": exit_state.outcome,
                     "label": exit_state.label,
                     "exit_offset": exit_state.exit_offset,
@@ -200,7 +215,8 @@ def _rule_candidate_indices(enriched: pd.DataFrame) -> list[int]:
         return []
     mask = strict_mask(enriched, mode="expanded").fillna(False)
     idx = np.flatnonzero(mask.to_numpy())
-    idx = idx[(idx >= WARMUP_BARS) & (idx + 1 < len(enriched))]
+    # live fallback path: the tip bar is a valid signal (entry backfills next pulse)
+    idx = idx[(idx >= WARMUP_BARS) & (idx < len(enriched))]
     if len(idx) == 0:
         return []
     scores = enriched["shape_score"].to_numpy()
@@ -213,14 +229,20 @@ def _rule_candidate_indices(enriched: pd.DataFrame) -> list[int]:
 
 def resolve_forward_exit(enriched: pd.DataFrame, signal_i: int) -> ForwardExit | None:
     entry_i = signal_i + 1
-    if entry_i >= len(enriched):
-        return None
     atr = float(enriched["atr14"].iloc[signal_i])
-    entry = float(enriched["open"].iloc[entry_i])
     atr_pct = float(enriched["atr_pct"].iloc[signal_i])
-    if not np.isfinite(atr) or atr <= 0 or not np.isfinite(entry) or entry <= 0:
+    if not np.isfinite(atr) or atr <= 0:
         return None
     if not np.isfinite(atr_pct) or atr_pct < ATR_PCT_MIN:
+        return None
+    if entry_i >= len(enriched):
+        # Tip signal (2026-07-20 real-time path): the signal bar IS the newest
+        # closed bar, so the entry bar has not printed yet. Record it as open
+        # with pending entry fields (backfilled next pulse) instead of dropping
+        # it -- dropping cost 15-22 min of edge on every live signal.
+        return ForwardExit("open", "", -1, 0, "", float("nan"))
+    entry = float(enriched["open"].iloc[entry_i])
+    if not np.isfinite(entry) or entry <= 0:
         return None
     last_i = entry_i + HORIZON_BARS - 1
     available_last_i = min(last_i, len(enriched) - 1)
@@ -268,14 +290,17 @@ def resolve_forward_exit_scaled(
     run_max. Incomplete horizon without a terminal barrier → status=open.
     """
     entry_i = signal_i + 1
-    if entry_i >= len(enriched):
-        return None
     atr = float(enriched["atr14"].iloc[signal_i])
-    entry = float(enriched["open"].iloc[entry_i])
     atr_pct = float(enriched["atr_pct"].iloc[signal_i])
-    if not np.isfinite(atr) or atr <= 0 or not np.isfinite(entry) or entry <= 0:
+    if not np.isfinite(atr) or atr <= 0:
         return None
     if not np.isfinite(atr_pct) or atr_pct < ATR_PCT_MIN:
+        return None
+    if entry_i >= len(enriched):
+        # tip signal: entry bar not printed yet (see resolve_forward_exit)
+        return ForwardExit("open", "", -1, 0, "", float("nan"))
+    entry = float(enriched["open"].iloc[entry_i])
+    if not np.isfinite(entry) or entry <= 0:
         return None
 
     last_i = entry_i + horizon - 1

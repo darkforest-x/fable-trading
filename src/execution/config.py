@@ -40,10 +40,13 @@ class ExecutorConfig:
     timeout_hours: float = 18.0
     # A forward row stays "open" for up to the 18h barrier horizon, but the edge
     # is the launch moment: refuse to open positions on signals older than this.
-    # Live pulse can take 3–6 min after bar close; 55 keeps edge without
-    # replaying multi-hour backfills. Align with TG notify + forward verdict.
-    # Owner 2026-07-19: tip must fire same pulse; 55m was too loose for hindsight.
-    max_signal_age_min: int = 20
+    # Arithmetic (2026-07-20 tip path): age counts from the signal bar OPEN, so
+    # a tip detection is already 16 min old at the first possible pulse (:01/
+    # :16/:31/:46) and the 344-symbol scan adds up to ~7 min before the log is
+    # written. 30 = 15 (bar) + 7 (pulse+scan) + headroom; 20 would drop real
+    # tip signals scanned late in the pulse, and the pre-tip pipeline could not
+    # record ANYTHING younger than 31 min. Align with TG + dashboard verdict.
+    max_signal_age_min: int = 30
     poll_seconds: int = 30
     # Retry OCO bracket this many times after market entry (0 = no retry).
     bracket_retries: int = 2

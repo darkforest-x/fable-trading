@@ -66,7 +66,7 @@
 
   /** Human lag: minutes → "12m" / "1.5h" / "—" */
   function fmtLagMin(lagMin, freshMax) {
-    const max = freshMax == null ? 20 : Number(freshMax);
+    const max = freshMax == null ? 30 : Number(freshMax);
     if (lagMin == null || lagMin === "" || Number.isNaN(Number(lagMin))) {
       return { text: "—", fresh: false, cls: "" };
     }
