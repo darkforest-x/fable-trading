@@ -36,7 +36,12 @@ echo "forward_track start $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "forward_log lines=$(wc -l < data/forward_log.csv 2>/dev/null || echo 0)"
 
 # Optional H-TIP v12 tip-only shadow (never writes mainline log; never promotes).
-# Enable on VPS with: FABLE_V12_SHADOW=1 and models/owner_v12_htip.pt present.
+# Enable on VPS with: FABLE_V12_SHADOW=1 and models/owner_v12_htip.pt present
+# (or data/v12_shadow.env written by scripts/enable_v12_shadow_vps.sh).
+if [ -f data/v12_shadow.env ]; then
+  # shellcheck disable=SC1091
+  set -a; . data/v12_shadow.env; set +a
+fi
 if [ "${FABLE_V12_SHADOW:-0}" = "1" ]; then
   W="${FABLE_V12_WEIGHTS:-models/owner_v12_htip.pt}"
   if [ -f "$W" ] || [ -f runs/detect/runs/detect/owner_v12_htip/weights/best.pt ]; then
