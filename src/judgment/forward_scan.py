@@ -10,6 +10,7 @@ import os
 import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 from typing import Optional
 
 import numpy as np
@@ -58,11 +59,16 @@ def scan_forward_records(
     scan: ForwardScanInput,
     *,
     exit_resolver: Optional[ExitResolver] = None,
+    yolo_weights: str | Path | None = None,
+    yolo_mode: str = "live",
 ) -> ForwardScanResult:
     """Scan SWAP series for threshold signals and resolve exits.
 
     `exit_resolver` defaults to mainline TP5/SL2. Pass
     `resolve_forward_exit_scaled` for the H1 shadow paper book.
+
+    `yolo_weights` / `yolo_mode` override the mainline detector for shadow
+    books (e.g. v12 tip-only). Mainline callers leave defaults.
     """
     resolve = exit_resolver or resolve_forward_exit
     records: list[ForwardRecord] = []
@@ -72,7 +78,7 @@ def scan_forward_records(
     tracked_keys = open_keys(scan.existing_log)
     yolo_model = None
     if CANDIDATE_SOURCE == "yolo":
-        yolo_model = load_yolo_model()
+        yolo_model = load_yolo_model(yolo_weights) if yolo_weights is not None else load_yolo_model()
 
     jobs: list[tuple[str, str, pd.DataFrame]] = []
     for source, symbol, frame in iter_series(bar="15m", min_bars=500):
@@ -91,7 +97,12 @@ def scan_forward_records(
         jobs.append((source, symbol, frame.tail(LIVE_TAIL_BARS).reset_index(drop=True)))
     scanned_series = len(jobs)
     workers = _forward_workers() if CANDIDATE_SOURCE == "yolo" else 1
-    print(f"forward_scan: series={scanned_series} workers={workers} source={CANDIDATE_SOURCE}", flush=True)
+    wlabel = str(yolo_weights) if yolo_weights is not None else "owner_best"
+    print(
+        f"forward_scan: series={scanned_series} workers={workers} source={CANDIDATE_SOURCE} "
+        f"yolo_mode={yolo_mode} weights={wlabel}",
+        flush=True,
+    )
 
     def _discover(job: tuple[str, str, pd.DataFrame]) -> tuple[str, str, pd.DataFrame, pd.DataFrame, list[int]]:
         """Phase 1 (parallel-safe): indicators + YOLO/rules indices only."""
@@ -99,7 +110,11 @@ def scan_forward_records(
         enriched = add_indicators(frame)
         signal_indices = set(
             forward_candidate_indices(
-                enriched, frame=frame, yolo_model=yolo_model, start_time=scan.start_time
+                enriched,
+                frame=frame,
+                yolo_model=yolo_model,
+                start_time=scan.start_time,
+                yolo_mode=yolo_mode,
             )
         )
         tracked_times = {key[2] for key in tracked_keys if key[0] == source and key[1] == symbol}
@@ -207,6 +222,7 @@ def forward_candidate_indices(
     frame: pd.DataFrame | None = None,
     yolo_model=None,
     start_time: pd.Timestamp | None = None,
+    yolo_mode: str = "live",
 ) -> list[int]:
     """Mainline candidate bars: YOLO by default, rules if CANDIDATE_SOURCE=rules."""
     if CANDIDATE_SOURCE == "rules":
@@ -231,7 +247,8 @@ def forward_candidate_indices(
             start_from_i = max(0, len(raw) - 10)
         else:
             start_from_i = max(0, int(hits[0]) - 5)
-    return scan_series_with_yolo(raw, yolo_model, start_from_i=start_from_i, mode="live")
+    mode = yolo_mode if yolo_mode in ("live", "tip", "full") else "live"
+    return scan_series_with_yolo(raw, yolo_model, start_from_i=start_from_i, mode=mode)
 
 
 def _rule_candidate_indices(enriched: pd.DataFrame) -> list[int]:

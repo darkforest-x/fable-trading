@@ -1,0 +1,18 @@
+{
+  "name": "owner_v12_htip",
+  "created_at": "2026-07-20T11:30:00+00:00",
+  "source_run": "runs/detect/runs/detect/owner_v12_htip/weights/best.pt",
+  "stable_path": "models/owner_v12_htip.pt",
+  "base": "models/owner_best.pt",
+  "dataset": "datasets/dense_owner_v12_htip",
+  "train_epochs_completed": 32,
+  "patience": 10,
+  "tip_hit_rate_val": 0.925,
+  "tip_hit_rate_file": "analysis/output/tip_rate_v12.json",
+  "frozen_f1": 0.65,
+  "frozen_f1_file": "analysis/output/owner_v12_htip_frozen.json",
+  "v11_tip_baseline": 0.009,
+  "v11_frozen_f1": 0.658,
+  "promoted": false,
+  "note": "H-TIP shadow only until owner promotes; do not set as owner_best without D2-D3 + owner OK"
+}

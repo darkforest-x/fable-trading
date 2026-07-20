@@ -2,7 +2,20 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 2026-07-20（实时 tip 路径上线）— 最新
+## ⚡ 2026-07-20 夜（v12 D1 通过 → 影子）— 最新
+
+**H-TIP v12 训练+评测完成**（ep32 early stop）：
+- tip_hit_rate **0.925** vs v11 **0.009**（门槛 ≥0.20）→ 过  
+- frozen-F1 **0.650** vs v11 **0.658**（回撤 0.008 ≤0.03）→ 过  
+- 报告：`analysis/p_v12_htip_eval.md`；权重 `models/owner_v12_htip.pt`（**未 promote**）
+
+**影子（D2）代码已合**：
+- `scripts/forward_track_v12_shadow.py` → **只写** `data/forward_log_v12_shadow.csv`  
+- 检测：v12 + **tip 单窗**；判断：主线 v11 freeze + TP5/SL2  
+- 脉冲可选：`FABLE_V12_SHADOW=1`（`scripts/forward_pulse.sh`）  
+- **主线 ACTIVE / owner_best / forward_log 未动**；切流=holdout 第 6 次=owner 决策
+
+## ⚡ 2026-07-20（实时 tip 路径上线）
 
 **盘口 bar 当场入账**（commit 67d8733，已部署 VPS）：信号 bar = 最新收盘 bar 时
 不再丢弃——当脉冲即写入账本（status=open，entry_time=下根开盘时刻，entry_price=

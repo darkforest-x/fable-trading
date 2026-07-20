@@ -26,8 +26,10 @@ from src.judgment.forward_scan import (
     scan_forward_records,
 )
 from src.judgment.forward_types import (
+    DEFAULT_V12_WEIGHTS,
     FORWARD_LOG_H1_SCALED_PATH,
     FORWARD_LOG_PATH,
+    FORWARD_LOG_V12_SHADOW_PATH,
     FORWARD_START,
     ForwardRecord,
     ForwardRunSummary,
@@ -37,8 +39,10 @@ from src.judgment.forward_types import (
 from src.judgment.frozen import DEFAULT_FROZEN_CONFIG, latest_artifact
 
 __all__ = (
+    "DEFAULT_V12_WEIGHTS",
     "FORWARD_LOG_H1_SCALED_PATH",
     "FORWARD_LOG_PATH",
+    "FORWARD_LOG_V12_SHADOW_PATH",
     "FORWARD_START",
     "ForwardRecord",
     "ForwardRunSummary",
@@ -50,6 +54,7 @@ __all__ = (
     "resolve_forward_exit_scaled",
     "run_forward_tracking",
     "run_forward_tracking_h1_shadow",
+    "run_forward_tracking_v12_shadow",
     "summary_to_json",
 )
 
@@ -62,6 +67,46 @@ def run_forward_tracking(
         output_path=output_path,
         start_time=start_time,
         exit_resolver=resolve_forward_exit,
+    )
+
+
+def run_forward_tracking_v12_shadow(
+    output_path: Path = FORWARD_LOG_V12_SHADOW_PATH,
+    start_time: pd.Timestamp = FORWARD_START,
+    *,
+    yolo_weights: Path | None = None,
+) -> ForwardRunSummary:
+    """H-TIP v12 detector shadow: tip-window YOLO + mainline judgment freeze.
+
+    Single variable vs mainline: detector weights + tip-only scan mode.
+    Scoring/threshold/exits stay TP5/SL2 mainline freeze. Never writes
+    mainline `data/forward_log.csv`. Does not promote owner_best.
+    """
+    resolved = Path(output_path).resolve()
+    if resolved == Path(FORWARD_LOG_PATH).resolve():
+        raise ValueError(
+            "v12 shadow must not write to mainline data/forward_log.csv; "
+            f"use {FORWARD_LOG_V12_SHADOW_PATH}"
+        )
+    weights = Path(yolo_weights) if yolo_weights is not None else DEFAULT_V12_WEIGHTS
+    if not weights.exists():
+        # Fall back to training run path (local Mac) before failing hard.
+        alt = (
+            Path(__file__).resolve().parents[2]
+            / "runs/detect/runs/detect/owner_v12_htip/weights/best.pt"
+        )
+        if alt.exists():
+            weights = alt
+        else:
+            raise FileNotFoundError(
+                f"v12 weights missing: {weights} (and no run best.pt at {alt})"
+            )
+    return _run_forward_tracking(
+        output_path=output_path,
+        start_time=start_time,
+        exit_resolver=resolve_forward_exit,
+        yolo_weights=weights,
+        yolo_mode="tip",
     )
 
 
@@ -97,6 +142,8 @@ def _run_forward_tracking(
     output_path: Path,
     start_time: pd.Timestamp,
     exit_resolver: ExitResolver,
+    yolo_weights: Path | None = None,
+    yolo_mode: str = "live",
 ) -> ForwardRunSummary:
     import os
 
@@ -116,7 +163,7 @@ def _run_forward_tracking(
     from src.judgment.yolo_candidates import load_yolo_model
 
     if CANDIDATE_SOURCE == "yolo":
-        load_yolo_model()
+        load_yolo_model(yolo_weights) if yolo_weights is not None else load_yolo_model()
     scan = scan_forward_records(
         ForwardScanInput(
             artifact=artifact,
@@ -126,6 +173,8 @@ def _run_forward_tracking(
             existing_log=existing,
         ),
         exit_resolver=exit_resolver,
+        yolo_weights=yolo_weights,
+        yolo_mode=yolo_mode,
     )
     # Same-symbol minimum gap (2026-07-19): the validated pool spaces signals
     # >= MIN_GAP_BARS (18 bars = 4.5h) per symbol, but each live pulse scans

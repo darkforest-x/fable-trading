@@ -95,6 +95,8 @@ def scan_series_with_yolo(
       - "full": offline dataset build (stride over history)
       - "live": forward/mainline — only windows near the right edge (and
         covering start_from_i..end). Avoids multi-hour full-history scans.
+      - "tip": single rightmost window only (H-TIP v12 shadow CPU budget;
+        ~1 predict/series vs live's ≤6).
     """
     if model is None:
         model = load_yolo_model()
@@ -109,7 +111,10 @@ def scan_series_with_yolo(
     first_start = WARMUP_BARS
     if start_from_i is not None:
         first_start = max(first_start, int(start_from_i) - window + 1)
-    if mode == "live":
+    if mode == "tip":
+        # Shadow budget: only the tip window (right edge = last closed bar).
+        starts = [last_start] if last_start >= first_start else []
+    elif mode == "live":
         # Live schedule (2026-07-20): pin the tip and two bars back, then
         # coarse stride for context — at most 6 windows. The 14-window
         # "tip-dense" schedule (backs 0..21 + half-stride walk) rested on a

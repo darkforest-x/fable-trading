@@ -35,6 +35,20 @@ echo "forward_track start $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 "$PY" scripts/forward_track.py
 echo "forward_log lines=$(wc -l < data/forward_log.csv 2>/dev/null || echo 0)"
 
+# Optional H-TIP v12 tip-only shadow (never writes mainline log; never promotes).
+# Enable on VPS with: FABLE_V12_SHADOW=1 and models/owner_v12_htip.pt present.
+if [ "${FABLE_V12_SHADOW:-0}" = "1" ]; then
+  W="${FABLE_V12_WEIGHTS:-models/owner_v12_htip.pt}"
+  if [ -f "$W" ] || [ -f runs/detect/runs/detect/owner_v12_htip/weights/best.pt ]; then
+    echo "v12_shadow start $(date -u +%Y-%m-%dT%H:%M:%SZ) weights=$W"
+    "$PY" scripts/forward_track_v12_shadow.py --weights "$W" 2>&1 | tail -30 \
+      || echo "v12_shadow failed/skipped"
+    echo "v12_shadow lines=$(wc -l < data/forward_log_v12_shadow.csv 2>/dev/null || echo 0)"
+  else
+    echo "v12_shadow skipped: weights missing ($W)"
+  fi
+fi
+
 # Immediately try to trade any fresh open rows — do not wait up to 30s for the
 # executor loop. Failures here must never fail the pulse unit.
 echo "executor --once (post-pulse)"
