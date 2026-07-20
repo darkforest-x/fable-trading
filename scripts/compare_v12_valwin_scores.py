@@ -85,7 +85,9 @@ def main() -> int:
     v12 = pd.read_csv(V12_PATH, parse_dates=["signal_time"])
     v11 = pd.read_csv(artifact.dataset_path, parse_dates=["signal_time"])
     assert v12["signal_time"].max() < HOLDOUT_START
-    assert v11["signal_time"].max() < HOLDOUT_START
+    # The v11 pool CSV physically contains holdout-period rows (split happens
+    # in load_splits). Drop them by timestamp BEFORE any stats — never scored.
+    v11 = v11[v11["signal_time"] < HOLDOUT_START]
 
     # Common window = v12 rescan's effective span (same bars offered to both
     # detectors; v11 pool covers it as a sub-range of its val split).

@@ -1,0 +1,98 @@
+{
+  "model": "models/frozen_tp5_sl2_swap_yolo_v11_reg_20260718.txt",
+  "threshold_val_q90": 0.02022141847381547,
+  "round_trip_cost": 0.002,
+  "common_window": [
+    "2026-04-03 18:45:00+00:00",
+    "2026-05-03 03:15:00+00:00"
+  ],
+  "window_days": 29.35,
+  "holdout_touched": false,
+  "v11_baseline": {
+    "n_candidates": 2400,
+    "n_symbols": 263,
+    "candidates_per_day": 81.76,
+    "pos_rate": 0.4279,
+    "score_quantiles": {
+      "p10": -0.01124,
+      "p25": -0.0086,
+      "p50": 0.01022,
+      "p75": 0.01449,
+      "p90": 0.02062,
+      "p99": 0.05098
+    },
+    "score_mean": 0.00563,
+    "pass_threshold": {
+      "threshold": 0.02022141847381547,
+      "n_passed": 255,
+      "pass_rate": 0.1062,
+      "passed_returns": {
+        "n": 255,
+        "gross_mean": 0.04258,
+        "net_mean": 0.04058,
+        "win_rate": 0.8275,
+        "net_win_rate": 0.8235
+      }
+    },
+    "top_decile": {
+      "n": 240,
+      "gross_mean": 0.04322,
+      "net_mean": 0.04122,
+      "win_rate": 0.8208,
+      "net_win_rate": 0.8167
+    },
+    "all_returns": {
+      "n": 2400,
+      "gross_mean": 0.00747,
+      "net_mean": 0.00547,
+      "win_rate": 0.4612,
+      "net_win_rate": 0.4575
+    }
+  },
+  "v12_rescan": {
+    "n_candidates": 2473,
+    "n_symbols": 263,
+    "candidates_per_day": 84.25,
+    "pos_rate": 0.4193,
+    "score_quantiles": {
+      "p10": -0.0112,
+      "p25": -0.0086,
+      "p50": 0.01023,
+      "p75": 0.01447,
+      "p90": 0.0205,
+      "p99": 0.05402
+    },
+    "score_mean": 0.00569,
+    "pass_threshold": {
+      "threshold": 0.02022141847381547,
+      "n_passed": 258,
+      "pass_rate": 0.1043,
+      "passed_returns": {
+        "n": 258,
+        "gross_mean": 0.03586,
+        "net_mean": 0.03386,
+        "win_rate": 0.7674,
+        "net_win_rate": 0.7674
+      }
+    },
+    "top_decile": {
+      "n": 248,
+      "gross_mean": 0.03617,
+      "net_mean": 0.03417,
+      "win_rate": 0.7621,
+      "net_win_rate": 0.7621
+    },
+    "all_returns": {
+      "n": 2473,
+      "gross_mean": 0.00678,
+      "net_mean": 0.00478,
+      "win_rate": 0.4553,
+      "net_win_rate": 0.4521
+    }
+  },
+  "ks": {
+    "statistic": 0.0087,
+    "pvalue": 0.9999799415589469
+  },
+  "v11_full_val_pass_rate_note": "v11 pass rate is ~10% by construction only over the FULL val split; within this sub-window it may differ."
+}
