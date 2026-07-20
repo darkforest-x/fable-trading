@@ -1,6 +1,23 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
-## ⚡ 2026-07-19 晚间（H-TIP / 事后检出）— 最新
+## ⚡ 2026-07-20（实时 tip 路径上线）— 最新
+
+**盘口 bar 当场入账**（commit 67d8733，已部署 VPS）：信号 bar = 最新收盘 bar 时
+不再丢弃——当脉冲即写入账本（status=open，entry_time=下根开盘时刻，entry_price=
+信号 bar 收盘价代理，maker_filled 留空作待回填哨兵），TG 立即通知、执行器立即可
+开单；下一脉冲由 merge 回填真实下根开盘入场（detected_at 保留首见，延迟统计不失真）。
+检出落账时点从信号后 31~37min 压到 **16~23min**。离线建数据集路径不变（仍要求入场 bar）。
+
+**新鲜度三门统一 30min**（执行器 max_signal_age_min / TG 过滤 / 看板 FRESH_DETECT_MIN）：
+30 = 15（bar 时长）+ 7（脉冲对齐+344 币扫描）+ 余量。**20 会结构性挡死一切**
+（旧管道最快 31min 才能入账），55 会放进非 tip 迟到检出——阈值必须从管道时序推导，
+见 `docs/learnings/freshness-gates-must-be-derived-from-pipeline-arithmetic.md`。
+端到端保护：`tests/test_tip_realtime_path.py`。
+
+**依赖**：实时路径只有配上会在 tip 开火的检测器才有产出——v11 tip 检出率 0.9%，
+等 `owner_v12_htip` 训完(H-TIP)达标后 tip 信号才会真正流进来。
+
+## 2026-07-19 晚间（H-TIP / 事后检出）
 
 **定性**：打标/训练不是「全错」，是**分布错位**（框多在图中、右侧有启动后文；
 实盘 tip 无后文）。对 tip 开单：检测层欠训；金标形态仍有用。见
