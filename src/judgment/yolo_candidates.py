@@ -110,17 +110,27 @@ def scan_series_with_yolo(
     if start_from_i is not None:
         first_start = max(first_start, int(start_from_i) - window + 1)
     if mode == "live":
-        # at most ~6 windows walking back from the tip (≈ stride*5 + one tip)
-        starts = []
-        s = last_start
-        while s >= first_start and len(starts) < 6:
-            starts.append(s)
-            s -= stride
+        # Tip-dense schedule (2026-07-20): old path only stepped `stride=50`
+        # six times, so bars between tip-1..tip-49 were rarely the *right edge*
+        # of any window — exactly the live decision bars we care about.
+        # Always pin tip + a few bars back, then coarse stride for context.
+        starts_set: set[int] = set()
+        for back in (0, 1, 2, 3, 5, 8, 13, 21):
+            s = last_start - back
+            if s >= first_start:
+                starts_set.add(s)
+        s = last_start - 25
+        while s >= first_start and len(starts_set) < 14:
+            starts_set.add(s)
+            s -= max(25, stride // 2)
+        starts = sorted(starts_set, reverse=True)
     else:
         starts = list(range(first_start, last_start + 1, stride))
 
     chosen: list[int] = []
     device = _resolve_predict_device()
+    n_fail = 0
+    last_err: str | None = None
     for start in starts:
         sub = enriched_ma.iloc[start : start + window]
         try:
@@ -128,7 +138,9 @@ def scan_series_with_yolo(
             # Serialize predict: ultralytics is not reliably thread-safe.
             with _predict_lock:
                 res = model.predict(str(tmp_png), conf=conf, verbose=False, device=device)
-        except Exception:
+        except Exception as exc:  # noqa: BLE001 — keep series alive; count failures
+            n_fail += 1
+            last_err = f"{type(exc).__name__}: {exc}"
             continue
         if not res:
             continue
@@ -144,6 +156,9 @@ def scan_series_with_yolo(
             if start_from_i is not None and signal_i < start_from_i:
                 continue
             chosen.append(int(signal_i))
+    if n_fail and n_fail == len(starts):
+        # Only noisy when the whole series failed (data/render/device issue).
+        print(f"yolo_live: all {n_fail} windows failed last={last_err}", flush=True)
     if not chosen:
         return []
     chosen = sorted(set(chosen))

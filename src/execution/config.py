@@ -41,8 +41,9 @@ class ExecutorConfig:
     # A forward row stays "open" for up to the 18h barrier horizon, but the edge
     # is the launch moment: refuse to open positions on signals older than this.
     # Live pulse can take 3–6 min after bar close; 55 keeps edge without
-    # replaying multi-hour backfills. Align with TG notify filter.
-    max_signal_age_min: int = 55
+    # replaying multi-hour backfills. Align with TG notify + forward verdict.
+    # Owner 2026-07-19: tip must fire same pulse; 55m was too loose for hindsight.
+    max_signal_age_min: int = 20
     poll_seconds: int = 30
     # Retry OCO bracket this many times after market entry (0 = no retry).
     bracket_retries: int = 2

@@ -2,37 +2,55 @@
 /* allow: SIZE_OK -- single-file; r2: view-cache, trades page, a11y, keyboard, escape. */
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
-const fmtPct = (x, digits = 2) => (x === null || x === undefined || Number.isNaN(Number(x)) ? "—" : (100 * x).toFixed(digits) + "%");
-const fmtPF = (x) => (x === null || x === undefined || Number.isNaN(Number(x)) ? "—" : Number(x).toFixed(2));
+/* Shared pure formatters from format_helpers.js (loaded before app.js). */
+const _F = globalThis.FableFmt || {};
+const fmtPct = _F.fmtPct
+  ? (x, digits = 2) => _F.fmtPct(x, digits)
+  : (x, digits = 2) => (x === null || x === undefined || Number.isNaN(Number(x)) ? "—" : (100 * x).toFixed(digits) + "%");
+const fmtPF = _F.fmtPF || ((x) => (x === null || x === undefined || Number.isNaN(Number(x)) ? "—" : Number(x).toFixed(2)));
 const cls = (x) => (x > 0 ? "pos" : x < 0 ? "neg" : "");
 const OUTCOME_CN = { tp: "止盈", sl: "止损", timeout: "超时", sl_ambiguous: "止损*", "": "未结束" };
 const OUTCOME_COLOR = { tp: "#199e70", sl: "#e66767", timeout: "#c98500", sl_ambiguous: "#e66767" };
 const STATUS_CN = { open: "持有中", closed: "已结束" };
-const appState = { universe: "swap", view: "explore" };
+const appState = { universe: "swap", view: "overview" };
 /** views loaded for current universe — skip refetch when tabbing back (TTL, not forever) */
 const viewLoadedAt = new Map(); // view -> timestamp
-const VIEW_ORDER = ["explore", "overview", "backtest", "signals", "forward", "ethmicro", "experiments", "agenda", "jobs", "data", "models"];
+/* keyboard 1–n: daily loop first, then tools */
+const VIEW_ORDER = ["overview", "forward", "signals", "backtest", "labeling", "shorttf", "radar"];
+const chartTickMarkBj = _F.chartTickMarkBj || function chartTickMarkBj(time) {
+  if (time == null) return "";
+  if (typeof time === "object" && time.year != null) {
+    return `${time.year}-${String(time.month).padStart(2, "0")}-${String(time.day).padStart(2, "0")}`;
+  }
+  const s = fmtBjTime(typeof time === "number" ? time : Number(time));
+  return s.length >= 16 ? s.slice(5, 16) : s;
+};
+
 const CHART_LAYOUT = {
   layout: { background: { type: "solid", color: "#ffffff" }, textColor: "#6b7280", fontSize: 12 },
   grid: { vertLines: { color: "#eef1f6" }, horzLines: { color: "#eef1f6" } },
+  localization: {
+    locale: "zh-CN",
+    timeFormatter: (t) => fmtChartTime(t),
+  },
   timeScale: {
     borderColor: "#e5e7eb",
     timeVisible: true,
     secondsVisible: false,
-    rightOffset: 8,
-    barSpacing: 7,
+    rightOffset: 10,
+    barSpacing: 8,
     minBarSpacing: 2,
+    tickMarkFormatter: chartTickMarkBj,
   },
   rightPriceScale: {
     borderColor: "#e5e7eb",
-    scaleMargins: { top: 0.08, bottom: 0.12 },
+    scaleMargins: { top: 0.1, bottom: 0.14 },
     entireTextOnly: false,
   },
-  // Magnet snaps crosshair to bar OHLC like TradingView
   crosshair: {
-    mode: 1, // Magnet
-    vertLine: { color: "rgba(107,114,128,0.45)", width: 1, style: 2, labelBackgroundColor: "#6b7280" },
-    horzLine: { color: "rgba(107,114,128,0.45)", width: 1, style: 2, labelBackgroundColor: "#6b7280" },
+    mode: 1,
+    vertLine: { color: "rgba(37,99,235,0.35)", width: 1, style: 2, labelBackgroundColor: "#2563eb" },
+    horzLine: { color: "rgba(107,114,128,0.35)", width: 1, style: 2, labelBackgroundColor: "#6b7280" },
   },
   handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
   handleScale: { axisPressedMouseMove: { time: true, price: true }, mouseWheel: true, pinch: true },
@@ -51,16 +69,9 @@ function fmtPx(v, digits) {
   return n.toPrecision(4);
 }
 
-/** Fixed UTC+8 (no DST). Storage stays UTC; owner-facing UI is Beijing. */
-const BJ_OFFSET_MS = 8 * 3600 * 1000;
-
-/**
- * Format a UTC instant as Beijing wall time.
- * @param {string|number|Date|null|undefined} input
- *   - number: unix seconds (chart) if < 1e12, else ms
- *   - string: ISO / "YYYY-MM-DD HH:MM" treated as UTC when tz missing
- */
-function fmtBjTime(input, { seconds = false } = {}) {
+const BJ_OFFSET_MS = _F.BJ_OFFSET_MS || 8 * 3600 * 1000;
+const fmtBjTime = _F.fmtBjTime || function fmtBjTime(input, opts) {
+  const seconds = opts && opts.seconds;
   if (input == null || input === "") return "—";
   let d;
   if (typeof input === "number") {
@@ -70,28 +81,28 @@ function fmtBjTime(input, { seconds = false } = {}) {
     d = input;
   } else {
     let s = String(input).trim();
-    // Naive project timestamps are UTC (OKX / forward_log).
     if (/^\d{4}-\d{2}-\d{2}/.test(s) && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) {
       s = s.replace(" ", "T");
       if (!s.endsWith("Z")) s += "Z";
     }
     d = new Date(s);
   }
-  if (Number.isNaN(d.getTime())) {
-    return String(input).slice(0, 16).replace("T", " ");
-  }
+  if (Number.isNaN(d.getTime())) return String(input).slice(0, 16).replace("T", " ");
   const bj = new Date(d.getTime() + BJ_OFFSET_MS);
   const p = (n) => String(n).padStart(2, "0");
   let out = `${bj.getUTCFullYear()}-${p(bj.getUTCMonth() + 1)}-${p(bj.getUTCDate())} ${p(bj.getUTCHours())}:${p(bj.getUTCMinutes())}`;
   if (seconds) out += `:${p(bj.getUTCSeconds())}`;
   return out;
-}
-
-function fmtChartTime(t) {
-  if (t == null) return "";
-  // Lightweight-charts UTCTimestamp (seconds) → Beijing display
-  return fmtBjTime(typeof t === "number" ? t : Number(t));
-}
+};
+const fmtChartTime = _F.fmtChartTime || ((t) => (t == null ? "" : fmtBjTime(typeof t === "number" ? t : Number(t))));
+const fmtLagMin = _F.fmtLagMin || function fmtLagMin(lagMin, freshMax) {
+  const max = freshMax == null ? 20 : Number(freshMax);
+  if (lagMin == null || lagMin === "" || Number.isNaN(Number(lagMin))) return { text: "—", fresh: false, cls: "" };
+  const n = Number(lagMin);
+  const fresh = n <= max;
+  const text = n >= 60 ? (n / 60).toFixed(1) + "h" : Math.round(n) + "m";
+  return { text: text + (fresh ? "" : " ·事后"), fresh, cls: fresh ? "pos" : "neg" };
+};
 
 /** Aggregate 15m candles into higher TF (client-side; data stays 15m on server). */
 function aggregateCandles(candles, minutes) {
@@ -342,6 +353,23 @@ function showView(name, { pushHash = true, force = false } = {}) {
   if (name === "backtest") { if (need) loadBacktest().then(mark); else mark(); return; }
   if (name === "signals") { initSignals(force || need); mark(); return; }
   if (name === "forward") { if (need) loadForward().then(mark); else mark(); return; }
+  if (name === "labeling") { if (need) loadLabelingHub().then(mark); else mark(); return; }
+  if (name === "radar") {
+    if (need) {
+      const init = window.initScoutMtf;
+      if (typeof init === "function") {
+        Promise.resolve(init(force)).then(mark).catch((err) => {
+          toast(`雷达：${err.message || err}`);
+          mark();
+        });
+      } else {
+        toast("雷达脚本未加载");
+        mark();
+      }
+    } else mark();
+    return;
+  }
+  if (name === "shorttf") { if (need) loadShortTf().then(mark); else mark(); return; }
   if (name === "ethmicro") { if (need) loadEthMicro().then(mark); else mark(); return; }
   // ops tabs always refresh lightly (cheap + may change)
   if (name === "experiments") loadExperiments();
@@ -357,21 +385,12 @@ function showView(name, { pushHash = true, force = false } = {}) {
 $$(".sb-item[data-view], .tab[data-view]").forEach((btn) =>
   btn.addEventListener("click", () => showView(btn.dataset.view)));
 window.addEventListener("hashchange", () => {
-  const name = (location.hash || "#explore").slice(1);
+  const name = (location.hash || "#overview").slice(1);
   if (name && document.getElementById("view-" + name)) showView(name, { pushHash: false });
 });
 
-$$("#universe-seg button").forEach((btn) =>
-  btn.addEventListener("click", () => {
-    $$("#universe-seg button").forEach((b) => b.classList.toggle("active", b === btn));
-    appState.universe = btn.dataset.universe;
-    invalidateViews();
-    symbolsLoaded = false;
-    currentKey = "";
-    $("#symbol-list").innerHTML = "";
-    $("#symbol-input").value = "";
-    showView(appState.view || "overview", { force: true, pushHash: false });
-  }));
+/* Universe fixed to SWAP mainline — spot toggle removed from UI. */
+appState.universe = "swap";
 
 /* keyboard: 1-9 tabs, r refresh strip, / focus symbol when on signals */
 document.addEventListener("keydown", (e) => {
@@ -598,7 +617,6 @@ async function loadExplore() {
       if (!e.target.checked) clearExploreFocusLines();
       applyExploreMarkers();
     });
-    $("#overview-go-explore")?.addEventListener("click", () => showView("explore", { force: true }));
     $("#explore-symbol")?.addEventListener("change", (e) => {
       if (e.target.value) {
         exploreState.symbol = e.target.value;
@@ -938,48 +956,181 @@ async function loadStatusStrip(force = false) {
   }
 }
 
-/* ---------- overview ---------- */
+/* ---------- labeling hub ---------- */
+async function loadLabelingHub() {
+  const view = $("#view-labeling");
+  view?.classList.add("loading");
+  try {
+    const d = await apiGet("/api/labeling-hub", { cache: false });
+    const s = d.summary || {};
+    $("#label-summary").innerHTML = `
+      <div class="tile"><span class="lbl">网站入口</span><b>${s.n_sites ?? 0}</b><small>hub.json 可改</small></div>
+      <div class="tile"><span class="lbl">最新轮次</span><b>${s.latest_round != null ? "R" + s.latest_round : "—"}</b><small>manifest</small></div>
+      <div class="tile"><span class="lbl">任务包</span><b>${s.n_packs ?? 0}</b><small>tasks_*.json</small></div>
+      <div class="tile"><span class="lbl">审计页</span><b>${s.n_audits ?? 0}</b><small>静态 HTML</small></div>`;
+    $("#label-account-hint").textContent = d.account_hint || "";
+
+    const roleBadge = (role) => {
+      const map = { primary: "主", tunnel: "隧道", local: "本机" };
+      return map[role] || role || "";
+    };
+    $("#label-sites").innerHTML = (d.sites || []).length
+      ? (d.sites || []).map((site) => `
+        <a class="link-card ${site.role === "primary" ? "primary" : ""}" href="${escapeHtml(site.url)}" target="_blank" rel="noopener">
+          <div class="link-card-top">
+            <strong>${escapeHtml(site.name || site.url)}</strong>
+            ${site.role ? `<span class="chip ${site.role === "primary" ? "passed" : "done"}">${escapeHtml(roleBadge(site.role))}</span>` : ""}
+          </div>
+          <div class="link-card-url">${escapeHtml(site.url)}</div>
+          <div class="link-card-note">${escapeHtml(site.note || "")}</div>
+        </a>`).join("")
+      : `<div class="empty-state">暂无入口，编辑 output/label_studio/hub.json</div>`;
+
+    $("#label-audits").innerHTML = (d.audits || []).map((a) => `
+      <a class="link-row ${a.exists ? "" : "missing"}" href="${escapeHtml(a.url)}" target="_blank" rel="noopener">
+        <span class="link-row-name">${escapeHtml(a.name)}</span>
+        <span class="link-row-meta">${a.exists ? (a.size_kb != null ? a.size_kb + " KB" : "打开") : "缺失"} · ${escapeHtml(a.note || "")}</span>
+      </a>`).join("") || `<div class="empty-state">无审计页</div>`;
+
+    $("#label-maintain").innerHTML = (d.maintain || []).map((m) => `
+      <div class="maintain-item">
+        <b>${escapeHtml(m.title || "")}</b>
+        <p>${escapeHtml(m.body || "")}</p>
+      </div>`).join("") || "";
+
+    const mbody = $("#label-manifest-table tbody");
+    if (mbody) {
+      $("#label-manifest-count").textContent = (d.manifests || []).length
+        ? `（${(d.manifests || []).length}）` : "";
+      mbody.innerHTML = (d.manifests || []).length
+        ? (d.manifests || []).map((m) => `
+          <tr class="no-click">
+            <td><b>R${escapeHtml(String(m.round ?? "—"))}</b> <span class="note">${escapeHtml(m.file || "")}</span></td>
+            <td class="num">${m.count ?? "—"}</td>
+            <td class="num">${m.chunks ?? "—"}</td>
+            <td class="note">${escapeHtml(m.weights || "—")}</td>
+            <td class="num">${m.seed ?? "—"}</td>
+          </tr>`).join("")
+        : `<tr class="no-click"><td colspan="5" class="empty-state">暂无 round*_manifest.json</td></tr>`;
+    }
+
+    const pbody = $("#label-pack-table tbody");
+    if (pbody) {
+      $("#label-pack-count").textContent = (d.packs || []).length
+        ? `（显示 ${(d.packs || []).length}）` : "";
+      pbody.innerHTML = (d.packs || []).length
+        ? (d.packs || []).map((p) => `
+          <tr class="no-click">
+            <td title="${escapeHtml(p.path || "")}"><code>${escapeHtml(p.file)}</code></td>
+            <td class="num">${p.n_tasks ?? "—"}</td>
+            <td class="num">${p.size_mb != null ? p.size_mb + " MB" : "—"}</td>
+            <td class="note">${escapeHtml(p.mtime || "")}</td>
+          </tr>`).join("")
+        : `<tr class="no-click"><td colspan="4" class="empty-state">output/label_studio 下无 tasks_*.json（需 rsync 到 VPS）</td></tr>`;
+    }
+  } catch (err) {
+    if (err?.name !== "AbortError") {
+      toast(`打标页：${err.message || err}`);
+      $("#label-sites").innerHTML = `<div class="empty-state neg">加载失败：${escapeHtml(String(err.message || err))}</div>`;
+    }
+  } finally {
+    view?.classList.remove("loading");
+  }
+}
+$("#label-refresh")?.addEventListener("click", () => loadLabelingHub());
+
+/* ---------- overview (minimal: verdict + tiles + spark + checklist) ---------- */
 let sparkChart = null, sparkSeries = null;
 async function loadOverview() {
   $("#view-overview")?.classList.add("loading");
   try {
     const d = await apiGet(apiUrl("/api/overview"), { cache: true });
-  $("#verdict-banner").innerHTML = `<b>${d.verdict}</b> ${d.next}`;
-  $("#stages").innerHTML = d.stages.map((s) => `
-    <div class="stage">
-      <h3>${s.name} <span class="chip ${s.status}">${
-        { done: "已完成", passed: "验收通过", failed: "未通过" }[s.status] || s.status
-      }</span></h3>
-      <p>${s.summary}</p>
-    </div>`).join("");
-  const tile = (t) => `<div class="tile"><span class="lbl">${t.label}</span><b>${t.value}</b><small>${t.sub}</small></div>`;
-  $("#tiles").innerHTML = d.tiles.map(tile).join("");
-  $("#coverage").innerHTML = d.coverage.map(tile).join("");
-  const names = {
-    net_positive: "扣费后净收益为正",
-    "profit_factor_ge_1.3": "盈亏比 PF ≥ 1.3",
-    max_drawdown_le_20pct: "最大回撤 ≤ 20%",
-    n_trades_ge_100: "交易数 ≥ 100 笔",
-  };
-  $("#acceptance").innerHTML = Object.entries(d.acceptance)
-    .map(([k, ok]) => `<li class="${ok ? "ok" : "fail"}">${names[k] || k}</li>`).join("");
-  if (!sparkChart) {
-    sparkChart = makeChart($("#spark-chart"), { timeScale: { visible: true, borderColor: "#2e3340" } });
-    sparkSeries = sparkChart.addAreaSeries({
-      lineColor: "#3987e5", lineWidth: 2, priceFormat: pctFormat,
-      topColor: "rgba(57,135,229,0.25)", bottomColor: "rgba(57,135,229,0.02)",
-    });
-  }
-  sparkSeries.setData(d.sparkline);
-  sparkChart.timeScale().fitContent();
+    const v = escapeHtml(d.verdict || "暂无摘要");
+    const n = d.next ? `<span class="banner-next">${escapeHtml(d.next)}</span>` : "";
+    $("#verdict-banner").innerHTML = `<span class="banner-k">状态</span><b>${v}</b>${n}`;
+    const tile = (t) =>
+      `<div class="tile"><span class="lbl">${escapeHtml(t.label)}</span><b>${escapeHtml(String(t.value))}</b><small>${escapeHtml(t.sub || "")}</small></div>`;
+    const tiles = d.tiles || [];
+    $("#tiles").innerHTML = tiles.length
+      ? tiles.map(tile).join("")
+      : `<div class="empty-state">暂无关键指标 · 检查 /api/overview</div>`;
+    const names = {
+      net_positive: "扣费后净收益为正",
+      "profit_factor_ge_1.3": "盈亏比 PF ≥ 1.3",
+      max_drawdown_le_20pct: "最大回撤 ≤ 20%",
+      n_trades_ge_100: "交易数 ≥ 100 笔",
+    };
+    const acc = Object.entries(d.acceptance || {});
+    $("#acceptance").innerHTML = acc.length
+      ? acc.map(([k, ok]) =>
+          `<li class="${ok ? "ok" : "fail"}"><span class="check-mark" aria-hidden="true">${ok ? "✓" : "○"}</span>${names[k] || k}</li>`
+        ).join("")
+      : `<li class="fail"><span class="check-mark" aria-hidden="true">○</span>暂无验收数据</li>`;
+    const sparkEl = $("#spark-chart");
+    if (sparkEl && Array.isArray(d.sparkline) && d.sparkline.length) {
+      if (!sparkChart) {
+        sparkChart = makeChart(sparkEl, { timeScale: { visible: true, borderColor: "#e5e7eb" } });
+        sparkSeries = sparkChart.addAreaSeries({
+          lineColor: "#2563eb", lineWidth: 2, priceFormat: pctFormat,
+          topColor: "rgba(37,99,235,0.22)", bottomColor: "rgba(37,99,235,0.02)",
+        });
+      }
+      sparkSeries.setData(d.sparkline);
+      sparkChart.timeScale().fitContent();
+    } else if (sparkEl && !(d.sparkline && d.sparkline.length)) {
+      /* leave chart host empty; parent shows panel chrome */
+    }
   } catch (err) {
     if (err?.name !== "AbortError") {
-      $("#verdict-banner").innerHTML = `<b>总览加载失败</b> ${err.message || err}`;
+      $("#verdict-banner").innerHTML = `<b class="neg">总览加载失败</b> ${escapeHtml(String(err.message || err))}`;
     }
   } finally {
     $("#view-overview")?.classList.remove("loading");
   }
 }
+
+async function loadShortTf() {
+  const view = $("#view-shorttf");
+  view?.classList.add("loading");
+  try {
+    const d = await apiGet("/api/short-tf", { cache: false });
+    $("#shorttf-note").textContent = d.note || "";
+    const st = d.status || {};
+    const by = st.by_bar || {};
+    $("#shorttf-tiles").innerHTML = `
+      <div class="tile"><span class="lbl">通道</span><b>short_tf</b><small>规则 tip · 隔离主线</small></div>
+      <div class="tile"><span class="lbl">币种</span><b>${(d.symbols || []).length}</b><small>${(d.bars || []).join(" / ")}</small></div>
+      <div class="tile"><span class="lbl">最近扫描新信号</span><b>${st.new_signals ?? "—"}</b><small>1m ${by["1m"]?.new ?? "—"} · 5m ${by["5m"]?.new ?? "—"}</small></div>
+      <div class="tile"><span class="lbl">日志条数</span><b>${d.n_log_total ?? 0}</b><small>data/short_tf/</small></div>`;
+    $("#shorttf-status").textContent = st && Object.keys(st).length
+      ? JSON.stringify(st, null, 2)
+      : "尚未扫描。运行：PYTHONPATH=. python3 scripts/short_tf_scan.py --once";
+    const rows = d.recent_signals || [];
+    $("#shorttf-sig-count").textContent = `（${rows.length}）`;
+    const tbody = $("#shorttf-sig-table tbody");
+    if (tbody) {
+      tbody.innerHTML = rows.length
+        ? rows.map((r) => {
+            const lag = r.lag_min != null ? Number(r.lag_min) : null;
+            const lagS = lag == null ? "—" : (lag < 60 ? `${Math.round(lag)}m` : `${(lag / 60).toFixed(1)}h`);
+            return `<tr class="no-click">
+              <td>${escapeHtml(fmtBjTime(r.signal_time))}</td>
+              <td>${escapeHtml(String(r.symbol || "").replace("_USDT_SWAP", ""))}</td>
+              <td>${escapeHtml(r.bar || "")}</td>
+              <td class="num">${lagS}</td>
+              <td class="num">${r.score != null ? Number(r.score).toFixed(3) : "—"}</td>
+              <td class="num">${r.entry_price != null ? Number(r.entry_price).toPrecision(6) : "—"}</td>
+            </tr>`;
+          }).join("")
+        : `<tr class="no-click"><td colspan="6" class="empty-state">暂无信号</td></tr>`;
+    }
+  } catch (err) {
+    if (err?.name !== "AbortError") toast(`短周期：${err.message || err}`);
+  } finally {
+    view?.classList.remove("loading");
+  }
+}
+$("#shorttf-to-ethmicro")?.addEventListener("click", () => showView("ethmicro", { force: true }));
 
 async function loadEthMicro() {
   const view = $("#view-ethmicro");
@@ -1046,39 +1197,58 @@ async function loadForward() {
   try {
   const d = await apiGet("/api/forward", { cache: true });
   const m = d.metrics;
+  const hEx = d.hindsight_excluded ?? 0;
+  const freshMin = d.fresh_detect_min ?? 20;
   $("#forward-tiles").innerHTML = `
-    <div class="tile"><span class="lbl">裁决样本</span><b>${d.decision_trades}</b><small>maker-filled closed / ${d.decision_target}</small></div>
-    <div class="tile"><span class="lbl">前向 PF</span><b class="${m.profit_factor >= 1.3 ? "pos" : m.profit_factor === null ? "" : "neg"}">${fmtPF(m.profit_factor)}</b><small>${d.cost_label}</small></div>
-    <div class="tile"><span class="lbl">胜率</span><b>${fmtPct(m.win_rate, 1)}</b><small>仅已成交闭合样本</small></div>
-    <div class="tile"><span class="lbl">净收益（对资金）</span><b class="${cls(m.net_return_on_capital)}">${fmtPct(m.net_return_on_capital)}</b><small>累计 ${fmtPct(m.total_net_units, 2)} 名义</small></div>`;
+    <div class="tile"><span class="lbl">裁决样本</span><b>${d.decision_trades}</b><small>新鲜≤${freshMin}m · / ${d.decision_target}</small></div>
+    <div class="tile"><span class="lbl">事后剔除</span><b>${hEx}</b><small>检出延迟 &gt; ${freshMin} 分钟</small></div>
+    <div class="tile"><span class="lbl">前向 PF</span><b class="${m.profit_factor >= 1.3 ? "pos" : m.profit_factor === null ? "" : "neg"}">${fmtPF(m.profit_factor)}</b><small>${d.cost_label} · 仅裁决样本</small></div>
+    <div class="tile"><span class="lbl">净收益（对资金）</span><b class="${cls(m.net_return_on_capital)}">${fmtPct(m.net_return_on_capital)}</b><small>裁决样本 · 日志 ${d.total_rows} 条</small></div>`;
   $("#forward-progress").style.width = `${Math.round(100 * d.progress)}%`;
   $("#forward-progress-label").textContent = `${d.decision_trades} / ${d.decision_target}`;
   $("#forward-progress-note").textContent =
-    d.decision_remaining > 0 ? `距裁决线还差 ${d.decision_remaining} 笔；日志 ${d.total_rows} 条，open ${d.open_rows} 条` : "已达到裁决样本线";
-  $("#forward-count").textContent = `（${d.total_rows} 条；closed ${d.closed_rows}）`;
+    d.decision_remaining > 0
+      ? `距裁决线还差 ${d.decision_remaining} 笔；日志 ${d.total_rows} 条，open ${d.open_rows} 条；事后剔除 ${hEx}`
+      : "已达到裁决样本线";
+  $("#forward-count").textContent = `（${d.total_rows} 条；closed ${d.closed_rows}；延迟列=检出−信号）`;
 
   if (!forwardChart) {
     forwardChart = makeChart($("#forward-chart"));
     forwardSeries = forwardChart.addAreaSeries({
-      lineColor: "#3987e5", lineWidth: 2, priceFormat: pctFormat,
-      topColor: "rgba(57,135,229,0.25)", bottomColor: "rgba(57,135,229,0.02)",
+      lineColor: "#2563eb", lineWidth: 2, priceFormat: pctFormat,
+      topColor: "rgba(37,99,235,0.22)", bottomColor: "rgba(37,99,235,0.02)",
     });
     forwardDdChart = makeChart($("#forward-dd-chart"), { timeScale: { visible: false } });
     forwardDdSeries = forwardDdChart.addAreaSeries({
-      lineColor: "#e66767", lineWidth: 1, priceFormat: pctFormat,
-      topColor: "rgba(230,103,103,0.02)", bottomColor: "rgba(230,103,103,0.3)",
+      lineColor: "#dc2626", lineWidth: 1, priceFormat: pctFormat,
+      topColor: "rgba(220,38,38,0.02)", bottomColor: "rgba(220,38,38,0.28)",
       invertFilledArea: true,
     });
   }
-  forwardSeries.setData(d.equity);
-  forwardDdSeries.setData(d.drawdown);
-  forwardChart.timeScale().fitContent();
-  forwardDdChart.timeScale().fitContent();
-  renderHBars($("#forward-outcomes"), d.outcomes.map((r) => ({
-    label: OUTCOME_CN[r.label] || r.label,
-    value: r.value,
-    text: `${r.value.toFixed(2)}%·${r.text}`,
-  })));
+  const eq = d.equity || [];
+  const dd = d.drawdown || [];
+  if (eq.length) {
+    forwardSeries.setData(eq);
+    forwardChart.timeScale().fitContent();
+  } else {
+    forwardSeries.setData([]);
+  }
+  if (dd.length) {
+    forwardDdSeries.setData(dd);
+    forwardDdChart.timeScale().fitContent();
+  } else {
+    forwardDdSeries.setData([]);
+  }
+  const outcomes = d.outcomes || [];
+  if (outcomes.length) {
+    renderHBars($("#forward-outcomes"), outcomes.map((r) => ({
+      label: OUTCOME_CN[r.label] || r.label,
+      value: r.value,
+      text: `${r.value.toFixed(2)}%·${r.text}`,
+    })));
+  } else {
+    $("#forward-outcomes").innerHTML = `<div class="empty-state">暂无裁决样本 · 新鲜 maker 成交后显示分布</div>`;
+  }
   const tbody = $("#forward-table tbody");
   tbody.innerHTML = d.rows.length ? d.rows.map((r) => {
     const source = r.source || "okx";
@@ -1101,17 +1271,23 @@ async function loadForward() {
       sl_mult: 2,
     };
     const ovAttr = escapeHtml(JSON.stringify(overlay));
+    const lagInfo = fmtLagMin(r.lag_min, d.fresh_detect_min ?? 20);
+    const isFresh = r.fresh === true || lagInfo.fresh;
+    const rowCls = isFresh ? "" : "row-stale";
+    const symShort = String(r.symbol || "").replace(/_USDT_SWAP$/, "").replace(/_USDT$/, "");
     return `
-    <tr class="clickable" data-source="${escapeHtml(source)}" data-symbol="${escapeHtml(r.symbol || "")}" data-entry="${escapeHtml(entry)}" data-overlay="${ovAttr}" title="点击查看 K 线：入场 / 止盈(+5ATR) / 止损(-2ATR) / 出场">
-      <td>${escapeHtml(fmtBjTime(r.signal_time))}</td>
-      <td>${escapeHtml(r.symbol || "")}</td>
+    <tr class="clickable ${rowCls}" data-source="${escapeHtml(source)}" data-symbol="${escapeHtml(r.symbol || "")}" data-entry="${escapeHtml(entry)}" data-overlay="${ovAttr}" title="点击查看 K 线">
+      <td class="td-time">${escapeHtml(fmtBjTime(r.signal_time))}</td>
+      <td class="td-time">${escapeHtml(fmtBjTime(r.detected_at))}</td>
+      <td class="num ${lagInfo.cls}" title="检出−信号">${escapeHtml(lagInfo.text)}</td>
+      <td><b>${escapeHtml(symShort)}</b></td>
       <td>${escapeHtml(STATUS_CN[r.status] || r.status || "")}</td>
-      <td>${r.maker_filled ? "filled" : "miss"}</td>
+      <td>${r.maker_filled ? "<span class=\"chip passed\">filled</span>" : "<span class=\"chip\">miss</span>"}</td>
       <td class="outcome-${escapeHtml(r.outcome || "open")}">${OUTCOME_CN[r.outcome || ""] || escapeHtml(r.outcome || "") || "—"}</td>
       <td class="num">${r.score === null || r.score === undefined ? "—" : Number(r.score).toFixed(3)}</td>
       <td class="num"><span class="${cls(r.net_ret)}">${fmtPct(r.net_ret)}</span></td>
     </tr>`;
-  }).join("") : `<tr class="no-click"><td colspan="7" class="empty-state">暂无前向信号</td></tr>`;
+  }).join("") : `<tr class="no-click"><td colspan="9"><div class="empty-state">暂无前向信号 · 脉冲扫到 tip 新鲜成交后显示在此</div></td></tr>`;
   if (tbody && !tbody.dataset.delegated) {
     tbody.dataset.delegated = "1";
     tbody.addEventListener("click", (e) => {
@@ -2042,29 +2218,13 @@ async function opsFetch(path, params = {}, options = {}) {
 }
 
 async function refreshOpsAuthUi() {
+  // OPS token UI removed from sidebar (VPS job executor is off; no daily need).
   try {
     const st = await (await fetch("/api/ops/status")).json();
     opsState.authRequired = !!st.ops_auth_required;
     opsState.executorEnabled = !!st.executor_enabled;
-    const wrap = $("#ops-token-wrap");
-    if (wrap) {
-      wrap.hidden = !opsState.authRequired;
-      if (opsState.token && $("#ops-token-input")) $("#ops-token-input").value = opsState.token;
-    }
   } catch (_) { /* ignore */ }
 }
-
-$("#ops-token-save")?.addEventListener("click", () => {
-  opsState.token = ($("#ops-token-input")?.value || "").trim();
-  if (opsState.token) sessionStorage.setItem("ops_api_token", opsState.token);
-  else sessionStorage.removeItem("ops_api_token");
-  const active = document.querySelector(".tab.active")?.dataset.view;
-  if (active === "experiments") loadExperiments();
-  if (active === "agenda") loadAgenda();
-  if (active === "jobs") loadJobsView();
-  if (active === "data") loadDataHub();
-  if (active === "models") loadModelHub();
-});
 
 function fmtMetric(x, digits = 4) {
   if (x === null || x === undefined || Number.isNaN(Number(x))) return "—";
@@ -2662,12 +2822,16 @@ function applyTheme(mode) {
   const btn = $("#theme-toggle");
   if (btn) btn.textContent = mode === "dark" ? "浅色" : "深色";
   if (mode === "dark") {
-    CHART_LAYOUT.layout.background.color = "#0a0c10";
-    CHART_LAYOUT.layout.textColor = "#8b949e";
-    CHART_LAYOUT.grid.vertLines.color = "#161b22";
-    CHART_LAYOUT.grid.horzLines.color = "#161b22";
-    CHART_LAYOUT.timeScale.borderColor = "#30363d";
-    CHART_LAYOUT.rightPriceScale.borderColor = "#30363d";
+    CHART_LAYOUT.layout.background.color = "#141a22";
+    CHART_LAYOUT.layout.textColor = "#8b98a8";
+    CHART_LAYOUT.grid.vertLines.color = "#1e2630";
+    CHART_LAYOUT.grid.horzLines.color = "#1e2630";
+    CHART_LAYOUT.timeScale.borderColor = "#2a3441";
+    CHART_LAYOUT.rightPriceScale.borderColor = "#2a3441";
+    CHART_LAYOUT.crosshair.vertLine.color = "rgba(96,165,250,0.4)";
+    CHART_LAYOUT.crosshair.vertLine.labelBackgroundColor = "#3b82f6";
+    CHART_LAYOUT.crosshair.horzLine.color = "rgba(139,152,168,0.35)";
+    CHART_LAYOUT.crosshair.horzLine.labelBackgroundColor = "#64748b";
   } else {
     CHART_LAYOUT.layout.background.color = "#ffffff";
     CHART_LAYOUT.layout.textColor = "#6b7280";
@@ -2675,6 +2839,10 @@ function applyTheme(mode) {
     CHART_LAYOUT.grid.horzLines.color = "#eef1f6";
     CHART_LAYOUT.timeScale.borderColor = "#e5e7eb";
     CHART_LAYOUT.rightPriceScale.borderColor = "#e5e7eb";
+    CHART_LAYOUT.crosshair.vertLine.color = "rgba(37,99,235,0.35)";
+    CHART_LAYOUT.crosshair.vertLine.labelBackgroundColor = "#2563eb";
+    CHART_LAYOUT.crosshair.horzLine.color = "rgba(107,114,128,0.35)";
+    CHART_LAYOUT.crosshair.horzLine.labelBackgroundColor = "#6b7280";
   }
 }
 
@@ -2708,16 +2876,9 @@ function boot() {
   initNavDrawer();
   refreshOpsAuthUi();
   loadStatusStrip();
-  if (!localStorage.getItem("fable_explore_seen")) {
-    setTimeout(() => {
-      toast("提示：从「密集探索」选币看密集框；←→ 换币，j/k 切换框", "ok");
-      localStorage.setItem("fable_explore_seen", "1");
-    }, 800);
-  }
   $("#status-refresh")?.addEventListener("click", () => loadStatusStrip(true));
-  $("#overview-go-explore")?.addEventListener("click", () => showView("explore", { force: true }));
   const hash = (location.hash || "").slice(1);
-  const initial = hash && document.getElementById("view-" + hash) ? hash : "explore";
+  const initial = hash && document.getElementById("view-" + hash) ? hash : "overview";
   showView(initial, { pushHash: false });
   // refresh strip every 2 min (cheap)
   setInterval(() => loadStatusStrip(false), 120_000);

@@ -1,6 +1,18 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
-## ⚡ 2026-07-18 当前真相（本节之下的内容为历史，多处已被推翻）
+## ⚡ 2026-07-19 晚间（H-TIP / 事后检出）— 最新
+
+**定性**：打标/训练不是「全错」，是**分布错位**（框多在图中、右侧有启动后文；
+实盘 tip 无后文）。对 tip 开单：检测层欠训；金标形态仍有用。见
+`analysis/p_forward_hindsight_20260719.md`。
+
+**前向**：10 行 **0 笔 lag≤20m**；EDEN `tip_fire=false`。闸门/TG/executor 新鲜度
+**≤20min**（已部署）。看板：延迟列 + 北京时间。
+
+**H-TIP 本机执行中**：`build_htip_dataset` → `dense_owner_v12_htip` → train
+`owner_v12_htip`（`logs/owner_v12_htip_train.log`）。**不自动 promote**。
+
+## ⚡ 2026-07-18 主线快照（池仍 v11；细节历史）
 
 **主线**：YOLO 检测（`owner_v11_chain`，frozen-F1 **0.658** → `models/owner_best.pt`）
 → 回归判断（`frozen_tp5_sl2_swap_yolo_v11_reg_20260718`，阈值 val-q90=**0.02022**，
@@ -14,8 +26,8 @@
 
 **执行层（VPS）**：`fable-executor` active · keys `environment=live`（~92U 权益）·
 `fable-forward.timer` **每 15 分钟** YOLO live 脉冲 · `ENABLE_JOB_EXECUTOR=0`。
-TG 通知只推 `status=open` 且 signal_age≤**45min**（与执行器新鲜度闸门对齐，防积压刷屏）。
-无 open 且 ≤45min 的信号时执行器会安静空转——属正常，不是挂死。
+TG 通知只推 `status=open` 且 signal_age≤**20min**（与执行器新鲜度闸门对齐，防积压刷屏）。
+无 open 且 ≤20min 的信号时执行器会安静空转——属正常，不是挂死。
 
 **前向时钟重启（owner 2026-07-19）**：清空主线 `forward_log.csv` 重测 v11 闸门；
 旧账本归档 `data/forward_log_pre_v11_retest_20260719.csv`；
@@ -29,7 +41,7 @@ candidates_seen=0）。裁决计数从 0 重计至 100。
 - forward timer 对齐 15m 收盘后 1 分钟（`:01/:16/:31/:46`）
 - 脉冲结束立刻 `executor --once`（不等 30s 轮询）
 - 括号 OCO 失败重试 2 次；ledger 计入 `order_partial` 防重复开仓
-- 新鲜度 55min；轮询 30s；paused 不再每轮刷 ledger
+- 新鲜度 20min；轮询 30s；paused 不再每轮刷 ledger
 - `scripts/live_health.py` + 30min timer TG 告警
 
 **2026-07-16 快照（已被上方覆盖）**：v8 检测+判断；accept PF 7.50 / 428 笔。

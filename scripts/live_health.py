@@ -79,10 +79,16 @@ def pass_rate_digest(hours: float = 24.0) -> str:
             d, s = _ts(r.get("detected_at", "")), _ts(r.get("signal_time", ""))
             if d and s and d >= since:
                 lags.append((d - s).total_seconds() / 60)
-        fresh = sum(1 for x in lags if x <= 55)
-        lines.append(f"新过线信号 {len(lags)}(其中新鲜≤55min可交易: {fresh})")
+        # Align with executor / forward verdict (owner 2026-07-19 tip target).
+        fresh = sum(1 for x in lags if x <= 20)
+        hindsight = sum(1 for x in lags if x > 20)
+        lines.append(
+            f"新过线 {len(lags)} · tip新鲜≤20m: {fresh} · 事后: {hindsight}"
+        )
         if lags:
             lines.append(f"检出延迟中位 {sorted(lags)[len(lags)//2]:.0f} 分")
+        if lags and fresh == 0 and hindsight > 0:
+            lines.append("⚠️ 窗口内 0 笔 tip 新鲜 — 检测层仍偏事后")
 
     led = PROJECT / "data" / "executor_ledger.jsonl"
     if led.exists():
@@ -103,7 +109,12 @@ def pass_rate_digest(hours: float = 24.0) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--alert", action="store_true", help="TG on hard fail")
-    ap.add_argument("--forward-stale-min", type=float, default=45.0)
+    ap.add_argument(
+        "--forward-stale-min",
+        type=float,
+        default=40.0,
+        help="pulse/log older than this → FAIL (default 40 ≈ missed 2×15m ticks)",
+    )
     args = ap.parse_args()
 
     issues: list[str] = []

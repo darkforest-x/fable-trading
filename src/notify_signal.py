@@ -244,6 +244,14 @@ def format_signal_caption(record: Mapping[str, Any]) -> str:
         score_line,
         f"状态: {status}",
     ]
+    lag = record.get("lag_min")
+    if lag is not None:
+        try:
+            lag_f = float(lag)
+            tag = "tip✓" if lag_f <= 20 else "事后"
+            lines.append(f"检出延迟: <b>{lag_f:.0f}m</b> ({tag})")
+        except (TypeError, ValueError):
+            pass
     return "\n".join(lines)
 
 

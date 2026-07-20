@@ -1,0 +1,41 @@
+{
+  "sites": [
+    {
+      "name": "Label Studio（主入口 HTTPS）",
+      "url": "https://103.214.174.58:8081",
+      "role": "primary",
+      "note": "日常远程打标主入口（nginx SSL）"
+    },
+    {
+      "name": "Label Studio（反向隧道 :18081）",
+      "url": "http://103.214.174.58:18081",
+      "role": "tunnel",
+      "note": "Mac 本机 LS 开着时：bash scripts/tunnel_labelstudio.sh"
+    },
+    {
+      "name": "本机 Label Studio",
+      "url": "http://127.0.0.1:8081",
+      "role": "local",
+      "note": "仅本机浏览器"
+    }
+  ],
+  "account_hint": "账号见 docs/OWNER_LABELING_PLAYBOOK.md",
+  "maintain": [
+    {
+      "title": "改本页网站入口",
+      "body": "编辑本文件 output/label_studio/hub.json 的 sites，rsync 到 VPS 后刷新看板「打标」页。"
+    },
+    {
+      "title": "起本机 Label Studio",
+      "body": "docker compose -f scripts/label_studio_compose.yml up -d"
+    },
+    {
+      "title": "远程隧道",
+      "body": "export VPS_HOST=root@103.214.174.58 VPS_PORT=18081 && bash scripts/tunnel_labelstudio.sh"
+    },
+    {
+      "title": "新一轮任务包",
+      "body": "生成 tasks_roundN_*.json 到 output/label_studio/，在 LS 里 Import；本页会自动列出文件。"
+    }
+  ]
+}

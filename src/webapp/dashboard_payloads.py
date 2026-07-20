@@ -61,16 +61,17 @@ def overview_payload(universe: str = DEFAULT_UNIVERSE) -> dict:
     return {
         "universe": spec.key,
         "universe_label": spec.label,
+        # Keep stages/coverage in payload for API consumers; overview UI no longer renders them.
         "verdict": (
-            f"当前宇宙：{spec.label}；阶段 3 动态回测 PF {pf:.2f} @ {BASE_COST * 100:.1f}% 成本，"
-            f"交易 {base.get('n_trades', 0)} 笔。"
+            f"{spec.label} · 验收回测 PF {pf:.2f} @ {BASE_COST * 100:.1f}% · "
+            f"{base.get('n_trades', 0)} 笔"
         ),
         "stages": _stage_rows(spec, p0, p2a, p2b, hold, base),
         "tiles": _overview_tiles(spec, base, threshold),
         "coverage": _coverage_tiles(spec, n_files, n_rows, signals, threshold, all_trades, accept),
         "sparkline": spark,
         "acceptance": _acceptance(base),
-        "next": "下一硬闸门：冻结配置前向 maker-filled closed 样本累计到 100 笔后看 PF；验收窗口禁止参数级调优",
+        "next": "前向 maker-filled closed 满 100 笔再看 PF",
     }
 
 
@@ -343,18 +344,16 @@ def _fmt_threshold(threshold: float) -> str:
 
 
 def _overview_tiles(spec: UniverseSpec, base: dict, threshold: float) -> list[dict]:
-    thr_sub = (
-        "val 预测收益 90 分位（回归 ACTIVE）"
-        if abs(threshold) < 0.2
-        else "val 分数 90 分位，事前固定"
-    )
+    thr_sub = "val q90 · 回归 ACTIVE" if abs(threshold) < 0.2 else "val q90 · 二分类"
+    net = base.get("net_return_on_capital")
+    net_s = f"{100 * net:+.1f}%" if net is not None else "—"
     return [
-        {"label": "当前宇宙", "value": spec.label, "sub": relative_path(spec.dataset_path)},
-        {"label": "动态回测 PF", "value": "%.2f" % base.get("profit_factor", 0),
-         "sub": f"{BASE_COST * 100:.1f}% 成本；验收线 1.3"},
-        {"label": "动态回测胜率", "value": "%.1f%%" % (100 * base.get("win_rate", 0)),
-         "sub": f"{base.get('n_trades', 0)} 笔"},
-        {"label": "模型阈值", "value": _fmt_threshold(threshold), "sub": thr_sub},
+        {"label": "宇宙", "value": spec.label, "sub": "主线 SWAP"},
+        {"label": "验收 PF", "value": "%.2f" % base.get("profit_factor", 0),
+         "sub": f"{BASE_COST * 100:.1f}% 成本 · 线 1.3"},
+        {"label": "净收益 / 胜率", "value": net_s,
+         "sub": f"胜率 {100 * base.get('win_rate', 0):.1f}% · {base.get('n_trades', 0)} 笔"},
+        {"label": "阀门阈值", "value": _fmt_threshold(threshold), "sub": thr_sub},
     ]
 
 

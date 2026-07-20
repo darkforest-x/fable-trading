@@ -3,11 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>fable dashboard</title>
+<title>darkforest-trading</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=20260717mnav">
+<link rel="stylesheet" href="style.css?v=20260720ui3">
+<link rel="stylesheet" href="scout_mtf.css?v=20260719embed">
 <script defer src="vendor/lightweight-charts.standalone.production.js"></script>
-<script defer src="app.js?v=20260717mnav"></script>
+<script defer src="format_helpers.js?v=20260720ui3"></script>
+<script defer src="scout_mtf_app.js?v=20260719embed"></script>
+<script defer src="app.js?v=20260720ui3"></script>
 </head>
 <body class="hb-shell">
 <button type="button" class="nav-burger" id="nav-burger" aria-label="打开导航" aria-controls="sidebar" aria-expanded="false">☰</button>
@@ -15,42 +18,29 @@
 <aside class="sidebar" id="sidebar" aria-label="主导航">
   <div class="sb-brand">
     <div class="sb-brand-row">
-      <h1>🤖 fable dashboard</h1>
+      <div class="sb-brand-text">
+        <h1>darkforest</h1>
+        <p>实盘 · 前向 · 回测</p>
+      </div>
       <button type="button" class="nav-close mini-btn" id="nav-close" aria-label="关闭导航">✕</button>
     </div>
-    <p>检测 · 判断 · 前向</p>
   </div>
-  <div class="sb-group">
-    <div class="sb-group-title">主页</div>
-    <button type="button" class="sb-item active" data-view="overview"><span class="ico">📊</span> 总览</button>
-  </div>
-  <div class="sb-group">
-    <div class="sb-group-title">配置 / 可视化</div>
-    <button type="button" class="sb-item" data-view="signals"><span class="ico">🎯</span> 信号</button>
-    <button type="button" class="sb-item" data-view="backtest"><span class="ico">📉</span> 回测</button>
-  </div>
-  <div class="sb-group">
-    <div class="sb-group-title">编排</div>
-    <button type="button" class="sb-item" data-view="forward"><span class="ico">🚀</span> 前向闸门</button>
-  </div>
-  <div class="sb-group">
-    <div class="sb-group-title">数据</div>
-    <a class="sb-item sb-link" href="/scout_mtf.html?v=20260719simple" target="_blank" rel="noopener"><span class="ico">📡</span> 多周期雷达 ↗</a>
-  </div>
+  <nav class="sb-nav" aria-label="日常">
+    <div class="sb-section-label">日常</div>
+    <button type="button" class="sb-item active" data-view="overview"><span class="sb-label">总览</span></button>
+    <button type="button" class="sb-item" data-view="forward"><span class="sb-label">前向</span></button>
+    <button type="button" class="sb-item" data-view="signals"><span class="sb-label">信号</span></button>
+    <button type="button" class="sb-item" data-view="backtest"><span class="sb-label">回测</span></button>
+    <div class="sb-section-label">工具</div>
+    <button type="button" class="sb-item sb-item-muted" data-view="labeling"><span class="sb-label">打标</span></button>
+    <button type="button" class="sb-item sb-item-muted" data-view="shorttf"><span class="sb-label">短周期</span></button>
+    <button type="button" class="sb-item sb-item-muted" data-view="radar"><span class="sb-label">雷达</span></button>
+  </nav>
   <div class="sb-foot">
-    <div class="sb-universe seg universe-seg" id="universe-seg">
-      <button type="button" data-universe="swap" class="active">合约</button>
-      <button type="button" data-universe="spot">现货</button>
-    </div>
     <div class="sb-foot-row">
       <button type="button" class="mini-btn theme-toggle" id="theme-toggle" title="切换浅色/深色">深色</button>
       <button type="button" class="mini-btn status-refresh" id="status-refresh" title="刷新状态（r）">刷新</button>
     </div>
-    <div class="ops-token-wrap" id="ops-token-wrap" hidden>
-      <input id="ops-token-input" type="password" placeholder="OPS token" autocomplete="off" spellcheck="false">
-      <button type="button" id="ops-token-save" class="mini-btn">保存</button>
-    </div>
-    <div class="sb-kbd note">1–9 切页 · r 状态 · / 搜币</div>
   </div>
 </aside>
 
@@ -66,8 +56,8 @@
   <div id="toast-host" class="toast-host" aria-live="assertive"></div>
 
   <main class="content">
-  <!-- ============ Dense Explore (HB strategy page rhythm) ============ -->
-  <section id="view-explore" class="view">
+  <!-- ============ Dense Explore (deep-link only; not in main nav) ============ -->
+  <section id="view-explore" class="view hidden" hidden aria-hidden="true">
     <div class="page-head">
       <h1 class="page-title">📈 密集探索</h1>
       <p class="page-sub">选币 → K 线 → 密集标记 → 指标</p>
@@ -172,34 +162,221 @@
     </div>
   </section>
 
-  <!-- ============ 总览 ============ -->
-  <section id="view-overview" class="view hidden" hidden aria-hidden="true">
-    <div id="verdict-banner" class="banner"></div>
-    <div class="banner explore-cta" id="overview-explore-cta">
-      <b>新用户？</b> 先到「密集探索」选 BTC，看均线密集标记长什么样。
-      <button type="button" class="mini-btn" id="overview-go-explore">打开密集探索</button>
+  <!-- ============ 总览（默认落地页） ============ -->
+  <section id="view-overview" class="view">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">总览</h1>
+        <p class="page-sub">状态条看链路 · 下面看回测验收 · 前向裁决看「前向」</p>
+      </div>
     </div>
-    <div id="stages" class="stage-row"></div>
+    <div id="verdict-banner" class="banner banner-verdict" role="status"></div>
+    <div id="tiles" class="tile-row"></div>
+    <div class="two-col">
+      <div class="panel panel-chart">
+        <h2>验收净值 <span class="unit">0.3% 成本 · 北京时间</span></h2>
+        <div id="spark-chart" class="chart short"></div>
+      </div>
+      <div class="panel">
+        <h2>验收清单</h2>
+        <ul id="acceptance" class="check-list"></ul>
+        <p class="note note-foot">明细 → <b>回测</b> · 新鲜成交 → <b>前向</b></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 多周期雷达（原 scout_mtf 独立页，已并入主壳） ============ -->
+  <section id="view-radar" class="view hidden" hidden aria-hidden="true">
+    <div class="radar-wrap">
+      <header class="top">
+        <div class="top-left">
+          <h1 class="radar-title">多周期雷达</h1>
+          <p class="panel-sub" style="margin-top:4px">支线观察 · 不写前向账本 · 不接下单</p>
+        </div>
+        <div class="top-actions">
+          <button type="button" class="btn" id="btn-refresh" title="重新拉取结果">刷新</button>
+          <button type="button" class="btn primary" id="btn-run">扫描</button>
+        </div>
+      </header>
+
+      <section class="def-card">
+        <p class="def-title">这是什么</p>
+        <p class="def-body">
+          从主流币 + 成交额前列 + 涨跌榜里挑币，在 <b>1m / 3m / 5m / 15m / 30m</b>
+          上看「均线是否密集、是否站上慢线」。多周期越齐 → 分数越高 →
+          分档 <b>A 强 / B 中 / C 弱</b>。
+        </p>
+        <ul class="def-list">
+          <li>与主线 v11 闸门独立；点币名看 K 线，点周期点切换该周期图</li>
+        </ul>
+      </section>
+
+      <section class="status" id="status">
+        <div class="st">
+          <span class="st-l">状态</span>
+          <strong id="st-run">—</strong>
+          <span class="st-s" id="st-time"></span>
+        </div>
+        <div class="st a"><span class="st-l">A 强</span><strong id="st-a">0</strong></div>
+        <div class="st b"><span class="st-l">B 中</span><strong id="st-b">0</strong></div>
+        <div class="st c"><span class="st-l">C 弱</span><strong id="st-c">0</strong></div>
+      </section>
+
+      <p class="hint" id="hint">点「扫描」更新榜单（约 1 分钟）。</p>
+
+      <section class="panel chart-panel" id="chart-card" hidden>
+        <div class="panel-head">
+          <div>
+            <h2 id="chart-title">K 线</h2>
+            <p class="panel-sub" id="chart-sub"></p>
+          </div>
+          <div class="panel-actions">
+            <div class="seg" id="chart-tf-seg">
+              <button type="button" data-bar="5m">5m</button>
+              <button type="button" data-bar="15m" class="on">15m</button>
+              <button type="button" data-bar="30m">30m</button>
+              <button type="button" data-bar="1H">1H</button>
+            </div>
+            <button type="button" class="btn" id="btn-chart-close">关闭</button>
+          </div>
+        </div>
+        <div class="chart-legend">
+          <span><i style="background:#3b82f6"></i>入场</span>
+          <span><i style="background:#22c55e"></i>止盈</span>
+          <span><i style="background:#f59e0b"></i>止损</span>
+          <span class="dim">滚轮缩放 · 拖拽</span>
+        </div>
+        <div class="chart-box">
+          <div class="ohlc" id="scout-ohlc">—</div>
+          <div id="scout-chart" class="chart"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head compact">
+          <h2>榜单</h2>
+          <div class="seg tabs" id="tabs">
+            <button type="button" class="on" data-g="">全部</button>
+            <button type="button" data-g="A">A</button>
+            <button type="button" data-g="B">B</button>
+            <button type="button" data-g="C">C</button>
+          </div>
+        </div>
+        <div class="list-head">
+          <span>档</span>
+          <span>币种</span>
+          <span class="r">24h</span>
+          <span class="r">分</span>
+          <span class="r">多周期</span>
+        </div>
+        <div class="list" id="list">
+          <div class="empty">加载中…</div>
+        </div>
+      </section>
+
+      <details class="more">
+        <summary>更多 · 账户持仓 / 纸面模拟</summary>
+        <div class="more-block">
+          <div class="more-head">
+            <h3>账户持仓</h3>
+            <button type="button" class="btn" id="btn-pos">刷新</button>
+          </div>
+          <p class="more-note">只读 OKX 仓位，点行看 K 线。与雷达扫描无关。</p>
+          <div id="pos-list" class="mini-list"><div class="empty soft">—</div></div>
+        </div>
+        <div class="more-block">
+          <div class="more-head">
+            <h3>纸面模拟</h3>
+            <button type="button" class="btn" id="btn-paper">跑模拟</button>
+          </div>
+          <p class="more-note">用当前榜单币做历史纸面回放，仅本地记账。</p>
+          <div class="mini-stats">
+            <div><span>状态</span><b id="p-st">未跑</b></div>
+            <div><span>笔数</span><b id="p-n">—</b></div>
+            <div><span>胜率</span><b id="p-wr">—</b></div>
+            <div><span>合计净</span><b id="p-net">—</b></div>
+          </div>
+          <div id="paper-list" class="mini-list"><div class="empty soft">先扫描，再跑模拟</div></div>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ 打标一览 / 入口维护 ============ -->
+  <section id="view-labeling" class="view hidden" hidden aria-hidden="true">
+    <div class="page-head">
+      <h1 class="page-title">打标</h1>
+      <p class="page-sub">网站入口 · 审计页 · 任务包一览 · 维护说明</p>
+    </div>
+    <div id="label-summary" class="tile-row"></div>
+
+    <div class="panel">
+      <div class="panel-head-row">
+        <h2>打标网站入口</h2>
+        <button type="button" class="mini-btn" id="label-refresh" title="刷新">刷新</button>
+      </div>
+      <p class="note" id="label-account-hint"></p>
+      <div id="label-sites" class="link-card-grid"></div>
+    </div>
+
     <div class="two-col">
       <div class="panel">
-        <h2>关键指标</h2>
-        <div id="tiles" class="tile-grid"></div>
+        <h2>审计页</h2>
+        <div id="label-audits" class="link-list"></div>
       </div>
       <div class="panel">
-        <h2>验收窗口净值 <span class="unit">（0.3% 成本）</span></h2>
-        <div id="spark-chart" class="chart short"></div>
-        <ul id="acceptance" class="check-list"></ul>
+        <h2>维护</h2>
+        <div id="label-maintain" class="maintain-list"></div>
+        <p class="note" style="margin-top:10px">配置文件：<code>output/label_studio/hub.json</code>（改 sites 后 rsync 到 VPS）</p>
       </div>
     </div>
+
     <div class="panel">
-      <h2>数据与信号规模</h2>
-      <div id="coverage" class="tile-grid cols-4"></div>
+      <h2>轮次清单 <span class="unit" id="label-manifest-count"></span></h2>
+      <div class="table-wrap">
+        <table id="label-manifest-table">
+          <thead>
+            <tr>
+              <th>轮次</th>
+              <th class="num">张数</th>
+              <th class="num">分块</th>
+              <th>权重</th>
+              <th>seed</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>任务包文件 <span class="unit" id="label-pack-count"></span></h2>
+      <p class="note">来自 <code>output/label_studio/tasks_*.json</code>，导入 Label Studio 用</p>
+      <div class="table-wrap">
+        <table id="label-pack-table">
+          <thead>
+            <tr>
+              <th>文件</th>
+              <th class="num">任务数</th>
+              <th class="num">大小</th>
+              <th>更新</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </section>
 
   <!-- ============ 回测 ============ -->
   <section id="view-backtest" class="view hidden" hidden aria-hidden="true">
-    <div class="controls">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">回测</h1>
+        <p class="page-sub">验收窗看成绩 · 全期只作对照 · 点成交行跳 K 线</p>
+      </div>
+    </div>
+    <div class="controls toolbar">
       <div class="seg" id="cost-seg">
         <button data-cost="0.002">成本 0.2%</button>
         <button data-cost="0.003" class="active">成本 0.3%</button>
@@ -207,9 +384,9 @@
       </div>
       <div class="seg" id="window-seg">
         <button data-window="accept" class="active">验收窗口</button>
-        <button data-window="full">全期（含 in-sample）</button>
+        <button data-window="full">全期对照</button>
       </div>
-      <span class="note">验收窗口曾被 2b holdout 消耗一次；全期含模型训练期，仅作对照。</span>
+      <span class="note">验收窗已消耗 holdout 一次；全期含训练期。</span>
     </div>
     <div id="bt-tiles" class="tile-row"></div>
 
@@ -303,8 +480,14 @@
 
   <!-- ============ 信号浏览 ============ -->
   <section id="view-signals" class="view hidden" hidden aria-hidden="true">
-    <div class="controls">
-      <input id="symbol-input" list="symbol-list" placeholder="输入或选择币种，如 BTC_USDT" autocomplete="off">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">信号</h1>
+        <p class="page-sub">K 线复盘 · 成交 / 合格未成交 · 时间轴北京时间</p>
+      </div>
+    </div>
+    <div class="controls toolbar">
+      <input id="symbol-input" list="symbol-list" placeholder="币种，如 BTC" autocomplete="off">
       <datalist id="symbol-list"></datalist>
       <div class="seg" id="tf-seg" title="客户端聚合（源数据 15m）">
         <button type="button" data-tf="15" class="active">15m</button>
@@ -321,15 +504,15 @@
       <span id="symbol-info" class="note"></span>
     </div>
     <div class="signals-layout">
-      <div class="panel grow">
-        <div class="legend">
-          <span><i class="dot" style="background:#3d8fd1"></i>SMA 20/60/120</span>
-          <span><i class="dot" style="background:#f06024"></i>EMA 20/60/120</span>
-          <span><i class="dot" style="background:#2962ff"></i>入场</span>
-          <span><i class="dot" style="background:#26a69a"></i>TP</span>
-          <span><i class="dot" style="background:#ff9800"></i>SL</span>
-          <span><i class="dot" style="background:#199e70"></i>出场</span>
-          <span class="note">滚轮缩放 · 拖拽平移 · 十字线吸附</span>
+      <div class="panel grow panel-chart">
+        <div class="legend compact-legend">
+          <span><i class="dot" style="background:#3b82f6"></i>SMA</span>
+          <span><i class="dot" style="background:#f97316"></i>EMA</span>
+          <span><i class="dot" style="background:#2563eb"></i>入场</span>
+          <span><i class="dot" style="background:#059669"></i>TP</span>
+          <span><i class="dot" style="background:#d97706"></i>SL</span>
+          <span><i class="dot" style="background:#0d9488"></i>出场</span>
+          <span class="note">滚轮缩放 · 拖拽</span>
         </div>
         <div class="chart-host">
           <div class="ohlc-legend" id="kline-ohlc" aria-live="polite">—</div>
@@ -355,8 +538,13 @@
   </section>
 
   <section id="view-forward" class="view hidden" hidden aria-hidden="true">
-    <div class="panel">
-      <h2>前向验证 <span class="unit">（SWAP 冻结模型 · maker-filled closed 样本）</span></h2>
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">前向</h1>
+        <p class="page-sub">只计 tip 新鲜成交进裁决 · 事后检出不算成绩</p>
+      </div>
+    </div>
+    <div class="panel panel-hero">
       <div id="forward-tiles" class="tile-row"></div>
       <div class="progress-row">
         <div class="progress-copy">
@@ -368,24 +556,28 @@
     </div>
 
     <div class="two-col">
-      <div class="panel">
-        <h2>前向净值 <span class="unit">（净收益 % 对账户资金，出场时点记账）</span></h2>
+      <div class="panel panel-chart">
+        <h2>裁决净值 <span class="unit">% 对资金 · 北京时间</span></h2>
         <div id="forward-chart" class="chart"></div>
         <div id="forward-dd-chart" class="chart mini"></div>
       </div>
       <div class="panel">
-        <h2>结果分布 <span class="unit">（仅 maker-filled closed）</span></h2>
+        <h2>结果分布 <span class="unit">仅新鲜 maker 成交</span></h2>
         <div id="forward-outcomes" class="hbar-wrap"></div>
       </div>
     </div>
 
     <div class="panel">
-      <h2>前向日志 <span class="unit" id="forward-count"></span></h2>
-      <p class="note" style="margin:0 0 8px">点击任意行 → K 线显示入场 / 止盈(+5ATR) / 止损(-2ATR) / 出场</p>
-      <div class="table-wrap">
-        <table id="forward-table">
+      <div class="panel-head-row">
+        <h2>前向日志 <span class="unit" id="forward-count"></span></h2>
+      </div>
+      <p class="note note-foot">北京时间 · 延迟=检出−信号 · 超阈标「事后」不进裁决 · 点行看 K 线</p>
+      <div class="table-wrap table-sticky">
+        <table id="forward-table" class="data-table">
           <thead><tr>
-            <th>信号时间（北京）</th>
+            <th>信号</th>
+            <th>检出</th>
+            <th class="num">延迟</th>
             <th>币种</th>
             <th>状态</th>
             <th>Maker</th>
@@ -453,6 +645,57 @@
       <pre id="exp-detail-json" class="ops-pre"></pre>
       <h2 class="subhead">关联报告</h2>
       <pre id="exp-detail-report" class="ops-pre md-pre"></pre>
+    </div>
+  </section>
+
+  <!-- ============ 短周期支线 1m/5m ============ -->
+  <section id="view-shorttf" class="view hidden" hidden aria-hidden="true">
+    <div class="page-head">
+      <h1 class="page-title">短周期</h1>
+      <p class="page-sub">1m / 5m 规则 tip · 主流币 · 不写 forward_log · 不接主线 executor</p>
+    </div>
+    <div id="shorttf-tiles" class="tile-row"></div>
+    <div class="panel">
+      <h2>说明</h2>
+      <p class="note" id="shorttf-note"></p>
+      <p class="note" style="margin-top:8px">
+        复现：
+        <code>PYTHONPATH=. python3 scripts/short_tf_scan.py --once</code>
+        · 循环
+        <code>--loop --interval 60</code>
+        · TG 需
+        <code>--notify</code>
+      </p>
+    </div>
+    <div class="two-col">
+      <div class="panel">
+        <h2>最近扫描</h2>
+        <pre id="shorttf-status" class="ops-pre" style="max-height:240px;overflow:auto"></pre>
+      </div>
+      <div class="panel">
+        <h2>最近信号 <span class="unit" id="shorttf-sig-count"></span></h2>
+        <div class="table-wrap">
+          <table id="shorttf-sig-table">
+            <thead>
+              <tr>
+                <th>信号（北京）</th>
+                <th>币</th>
+                <th>bar</th>
+                <th class="num">延迟</th>
+                <th class="num">分数</th>
+                <th class="num">价格</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>ETH 微周期（旧通道）</h2>
+      <p class="note">ETH 单币 1/2/3/5m + LGB 模型产物见
+        <button type="button" class="mini-btn" id="shorttf-to-ethmicro">打开 ETH 微周期</button>
+      </p>
     </div>
   </section>
 

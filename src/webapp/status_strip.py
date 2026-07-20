@@ -3,7 +3,7 @@
 Surfaces owner-detector promotion, judgment ACTIVE (threshold + dataset),
 and forward decision progress. Safe when artifacts missing.
 
-Visual scout (scout.html) was retired — multi-TF radar is scout_mtf.html.
+Visual scout (scout.html) was retired — multi-TF radar is dashboard #radar.
 """
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ def status_strip_payload() -> dict:
         "judgment_active": _judgment_active(),
         "forward": _forward_progress(),
         "links": {
-            "scout_mtf": "/scout_mtf.html",
+            "scout_mtf": "/#radar",
             "label_studio_hint": "http://127.0.0.1:8081",
         },
     }

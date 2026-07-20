@@ -38,6 +38,7 @@ from src.webapp.jobs.whitelist import JobValidationError, list_job_types
 from src.webapp.model_hub import model_hub_payload
 from src.webapp.ops_flags import executor_enabled, ops_status_payload
 from src.webapp.status_strip import status_strip_payload
+from src.webapp.labeling_hub import labeling_hub_payload
 from src.webapp.explore_payloads import explore_catalog, explore_chart_payload
 from src.webapp.scout_mtf_payloads import (
     scout_mtf_latest,
@@ -49,6 +50,7 @@ from src.webapp.scout_mtf_payloads import (
     scout_mtf_status,
 )
 from src.eth_micro.payloads import eth_micro_payload
+from src.short_tf.payloads import short_tf_payload
 
 app = FastAPI(title="fable-trading dashboard")
 
@@ -90,6 +92,12 @@ def overview(universe: str = DEFAULT_UNIVERSE) -> dict:
 def status_strip() -> dict:
     """Owner detector + forward progress + scout freshness for the top strip."""
     return status_strip_payload()
+
+
+@app.get("/api/labeling-hub")
+def labeling_hub() -> dict:
+    """Owner labeling entries, audit pages, and task-pack inventory (read-only)."""
+    return labeling_hub_payload()
 
 
 @app.get("/api/explore/catalog")
@@ -150,6 +158,12 @@ def forward(cost: float = FORWARD_COST) -> dict:
 def eth_micro() -> dict:
     """ETH-only 1/2/3/5m channel: backtest table + monitor status + recent signals."""
     return eth_micro_payload()
+
+
+@app.get("/api/short-tf")
+def short_tf() -> dict:
+    """Multi-symbol 1m/5m tip rules channel (isolated from 15m forward_log)."""
+    return short_tf_payload()
 
 
 # ---------- scout_mtf side branch (rank + multi-TF radar) ----------

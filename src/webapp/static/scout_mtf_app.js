@@ -1,7 +1,13 @@
-/* scout_mtf light console — radar + TV-style trade kline drill-down */
-const $ = (s) => document.querySelector(s);
-const $$ = (s) => [...document.querySelectorAll(s)];
+/* scout_mtf — radar embedded in main dashboard (#view-radar) or standalone */
+(function (global) {
+  "use strict";
+  function rootEl() {
+    return document.getElementById("view-radar") || document.body;
+  }
+  const $ = (s) => rootEl().querySelector(s);
+  const $$ = (s) => [...rootEl().querySelectorAll(s)];
 
+/* scout_mtf light console — radar + TV-style trade kline drill-down */
 const state = {
   data: null,
   paper: null,
@@ -967,5 +973,22 @@ function wire() {
   });
 }
 
-wire();
-loadLatest();
+
+  let _wired = false;
+  function initScoutMtf(force) {
+    if (!_wired) {
+      wire();
+      _wired = true;
+    }
+    return loadLatest();
+  }
+  global.initScoutMtf = initScoutMtf;
+  // Standalone page (no main shell): auto-boot
+  if (!document.getElementById("sidebar")) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => initScoutMtf());
+    } else {
+      initScoutMtf();
+    }
+  }
+})(window);

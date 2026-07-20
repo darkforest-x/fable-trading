@@ -17,13 +17,12 @@ from src.costs import FORWARD_COST  # mainline swap-maker route
 FORWARD_DECISION_TRADES = 100
 
 
-# A verdict trade must have been KNOWABLE (and tradeable) at detection time.
-# Structural floor: signal bar closes at +15 min, the scan can only record it
-# after the ENTRY bar exists, so the earliest honest detected_at lag is ~31-37
-# min (:01/:16/:31/:46 pulse + scan runtime). 20 was too tight and would have
-# excluded even the fastest possible live detection; align with the executor's
-# max_signal_age_min=55 so the verdict counts exactly what live could trade.
-FRESH_DETECT_MIN = 55.0
+# A verdict trade must have been KNOWABLE at the same 15m pulse as the signal.
+# signal_time = bar open; bar closes +15m; pulse ~+16m → honest lag ≈ 15–20m.
+# Owner 2026-07-19: multi-hour hindsight must not count; target tip-fire same
+# pulse. Align with executor max_signal_age_min (20). Structural 15m bar delay
+# remains; this kills post-hoc recognition hours later.
+FRESH_DETECT_MIN = 20.0
 
 
 def forward_payload(cost: float = FORWARD_COST) -> dict:
@@ -51,6 +50,13 @@ def forward_payload(cost: float = FORWARD_COST) -> dict:
     rows = frame.sort_values("signal_time", ascending=False).head(200).copy()
     if not rows.empty:
         rows["net_ret"] = rows["realized_ret"] - cost
+        # Detection lag (minutes): how late the live scan recognized the bar.
+        # Fresh ⇔ lag <= FRESH_DETECT_MIN; larger = hindsight (not tradeable live).
+        det = pd.to_datetime(rows["detected_at"], errors="coerce", utc=True)
+        sig = pd.to_datetime(rows["signal_time"], errors="coerce", utc=True)
+        lag = (det - sig).dt.total_seconds() / 60.0
+        rows["lag_min"] = lag.round(1)
+        rows["fresh"] = lag.notna() & (lag <= FRESH_DETECT_MIN)
         for column in ("score", "threshold", "entry_price", "realized_ret", "atr_pct", "net_ret"):
             rows[column] = rows[column].round(5)
         for column in ("signal_time", "detected_at", "entry_time", "exit_time"):
