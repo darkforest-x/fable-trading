@@ -1349,6 +1349,7 @@ function renderBacktestCompare(cmp) {
   const panel = $("#bt-compare-panel");
   const note = $("#bt-compare-note");
   const tbody = $("#bt-compare-table tbody");
+  const titleUnit = panel?.querySelector("h2 .unit");
   if (!panel || !tbody) return;
   if (!cmp || !cmp.available) {
     panel.hidden = true;
@@ -1356,6 +1357,9 @@ function renderBacktestCompare(cmp) {
   }
   panel.hidden = false;
   panel.classList.toggle("stale-panel", !!cmp.stale);
+  if (titleUnit) {
+    titleUnit.textContent = cmp.stale ? "预计算表 · 已过期" : "预计算表 · 当前主线";
+  }
   if (note) {
     note.hidden = false;
     note.classList.toggle("warn-banner", !!cmp.stale);
@@ -1371,7 +1375,12 @@ function renderBacktestCompare(cmp) {
         + (cmp.stale_reasons || []).map((r) => `<br>· ${escapeHtml(r)}`).join("")
         + `<br>请以总览/动态回测（本页上方磁贴）为准。`;
     } else {
-      note.textContent = cmp.note || "ACTIVE=回归；SHADOW=二分类。验收窗已消耗，仅对照。";
+      const det = [
+        cmp.detector_mainline ? `检测主线=${cmp.detector_mainline}` : null,
+        cmp.generated_at ? `表生成 ${String(cmp.generated_at).slice(0, 19)}` : null,
+      ].filter(Boolean).join(" · ");
+      note.innerHTML = escapeHtml(cmp.note || "ACTIVE=当前判断冻结；SHADOW=历史对照。验收窗已消耗。")
+        + (det ? `<br><span class="status-sub">${escapeHtml(det)}</span>` : "");
     }
   }
   tbody.innerHTML = (cmp.rows || []).map((r) => {

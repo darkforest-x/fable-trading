@@ -197,6 +197,9 @@ def backtest_compare_payload(cost: float = BASE_COST) -> dict:
         "live_active": live,
         "active": raw.get("active"),
         "shadow": raw.get("shadow"),
+        "detector_mainline": raw.get("detector_mainline"),
+        "detector_previous": raw.get("detector_previous"),
+        "generated_at": raw.get("generated_at"),
         "rows": rows,
     }
 
