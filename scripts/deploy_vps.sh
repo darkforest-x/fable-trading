@@ -28,7 +28,10 @@ do
     rsync -az "$f" "$VPS:$DIR/data/"
   fi
 done
-rsync -az data/sweep_v3 data/swap_replication data/kline_fetched "$VPS:$DIR/data/"
+# NOTE: data/kline_fetched deliberately NOT pushed — the VPS forward pulse
+# updates its own klines every 15 min (single writer); pushing the Mac's
+# stale copies would roll live data backwards mid-pulse (2026-07-20).
+rsync -az data/sweep_v3 data/swap_replication "$VPS:$DIR/data/"
 
 # Hard red line: never leave job executor enabled on public VPS.
 ssh "$VPS" "set -euo pipefail
