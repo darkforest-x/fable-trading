@@ -7,6 +7,7 @@ reuses the same candidate/score path with scaled exits.
 from __future__ import annotations
 
 import os
+import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Optional
@@ -98,6 +99,7 @@ def scan_forward_records(
             )
         return source, symbol, frame, enriched, sorted(signal_indices)
 
+    t_discover = time.monotonic()
     discovered: list[tuple[str, str, pd.DataFrame, pd.DataFrame, list[int]]] = []
     if workers <= 1:
         discovered = [_discover(job) for job in jobs]
@@ -106,6 +108,12 @@ def scan_forward_records(
             futs = [pool.submit(_discover, job) for job in jobs]
             for fut in as_completed(futs):
                 discovered.append(fut.result())
+    t_phase2 = time.monotonic()
+    print(
+        f"forward_scan: discover_wall={t_phase2 - t_discover:.0f}s "
+        f"(indicators+render+predict, {workers} workers)",
+        flush=True,
+    )
 
     # Phase 2 (sequential): LightGBM predict + barrier resolve (not thread-safe).
     for source, symbol, frame, enriched, ordered_indices in discovered:
@@ -174,6 +182,11 @@ def scan_forward_records(
                     "dense_run_len": int(feature_row["dense_run_len"]),
                 }
             )
+    print(
+        f"forward_scan: phase2_wall={time.monotonic() - t_phase2:.0f}s "
+        f"(features+score+resolve, {sum(1 for d in discovered if d[4])} series with candidates)",
+        flush=True,
+    )
     return ForwardScanResult(records, scanned_series, candidates_seen, threshold_signals_seen)
 
 
