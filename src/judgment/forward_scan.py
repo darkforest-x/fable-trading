@@ -38,6 +38,9 @@ from src.judgment.yolo_candidates import load_yolo_model, scan_series_with_yolo
 
 ExitResolver = Callable[[pd.DataFrame, int], Optional[ForwardExit]]
 
+# Recent-tail length for live scans (see jobs assembly below).
+LIVE_TAIL_BARS = 2000
+
 
 def _forward_workers() -> int:
     """Series-level parallelism for live YOLO. Override with FABLE_FORWARD_WORKERS."""
@@ -77,7 +80,15 @@ def scan_forward_records(
             continue
         if is_stockish(symbol):
             continue
-        jobs.append((source, symbol, frame))
+        # Live scans only need a recent tail, not 400 days: indicators/MAs were
+        # recomputed over the FULL history for every series every pulse, and
+        # that pandas cost grows with the archive. 2000 bars (~3 weeks) keeps
+        # every lookback numerically converged at the bars we score (max
+        # rolling=168, WARMUP=288; the EWMs -- EMA120/ATR14 -- differ only at
+        # the 1e-11 level after this much warm-up) and caps how far back a
+        # pulse can "discover" old signals, which the freshness gates would
+        # reject anyway.
+        jobs.append((source, symbol, frame.tail(LIVE_TAIL_BARS).reset_index(drop=True)))
     scanned_series = len(jobs)
     workers = _forward_workers() if CANDIDATE_SOURCE == "yolo" else 1
     print(f"forward_scan: series={scanned_series} workers={workers} source={CANDIDATE_SOURCE}", flush=True)
