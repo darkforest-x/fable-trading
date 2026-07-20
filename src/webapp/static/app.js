@@ -1144,7 +1144,7 @@ async function runProbe() {
   if (!symbol) { toast("请输入币种，如 BTC 或 MOODENG_USDT_SWAP"); return; }
   probeRunning = true;
   if (btn) btn.disabled = true;
-  if (meta) meta.textContent = "检测中…（拉最新K线 + YOLO + 判断打分，约 5–60 秒）";
+  if (meta) meta.textContent = "检测中…（拉最新K线 + YOLO + 判断打分，约 1 分钟）";
   if (out) out.textContent = "…";
   try {
     const res = await fetch("/api/check-symbol", {

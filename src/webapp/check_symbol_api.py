@@ -22,10 +22,10 @@ from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[2]
 SCRIPT = PROJECT / "scripts" / "check_symbol.py"
-# Local Mac run is ~6s; VPS CPU predict is slower and the incremental fetch
-# adds a few OKX round-trips. 90s is generous without letting a hung child
-# pin the single-flight lock forever.
-TIMEOUT_S = 90
+# Local Mac run is ~6s; measured VPS CPU run is ~41s and the forward pulse
+# can contend for cores every 15 min. 150s keeps headroom without letting a
+# hung child pin the single-flight lock forever.
+TIMEOUT_S = 150
 
 _busy = threading.Lock()
 
@@ -42,7 +42,7 @@ def check_symbol_payload(symbol: str, mode: str = "live") -> dict:
         return {
             "ok": False,
             "busy": True,
-            "detail": "已有一个检测在跑，请等它结束后再试（单次约 5–60 秒）",
+            "detail": "已有一个检测在跑，请等它结束后再试（单次约 40–90 秒）",
         }
     try:
         env = {
