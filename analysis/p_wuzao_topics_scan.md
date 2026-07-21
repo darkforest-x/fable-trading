@@ -32,8 +32,12 @@
 | 检测 | ultralytics / supervision / FiftyOne / netron / Label Studio·CVAT 有用；SD / ComfyUI / vLLM = 噪音 |
 | 与既有报告 | FiftyOne / ONNX / Basana / Protections / CVAT 与 `p_github_optimize_candidates` **交叉引用**，不重复开训假设 |
 
-**发现级已做**（无 GPU）：3 窗 hardneg CSV→LWC → `analysis/output/wuzao_lwc_tip_compare/`。  
-本轮口径改正**只改文档**；未再开第二件发现级（避免抢 v13）。
+**发现级已做**（无 GPU）：
+- 3 窗 hardneg CSV→LWC → `analysis/output/wuzao_lwc_tip_compare/`
+- **本夜加深**：10 窗图层批量 → `analysis/output/wuzao_lwc_hardneg_batch/`；叠框画廊；LS 小包；Protections 规格  
+  详见 `analysis/p_wuzao_a_tier_done.md` / `analysis/p_overnight_20260722.md`。
+
+口径改正本身只改文档；A 档落地在 Owner「可以做的先做掉」授权后完成（仍不抢 v13）。
 
 ---
 
@@ -144,16 +148,21 @@
 
 ### A. 现在就能用 / 便宜发现级（不抢 v13 GPU）
 
-| # | 项目 | 服务 tip | 用在哪 | 怎么用 | 风险 |
-|---|------|----------|--------|--------|------|
-| 1 | [lightweight-charts](https://github.com/tradingview/lightweight-charts) | 是 | 看板/检测调试 | 加深时间带/primitive；CSV→LWC 发现级已过 | 禁止 LWC 截图进 YOLO |
-| 2 | [ultralytics](https://github.com/ultralytics/ultralytics) | 是 | 检测 2a | 已用；跟官方 export | 勿换检测栈 |
-| 3 | [matplotlib](https://github.com/matplotlib/matplotlib) | 间接 | TG/分析报告 | 保持静态图脚本 | 勿替代 cv2 训练渲染 |
-| 4 | [supervision](https://github.com/roboflow/supervision) | 间接 | 标注/调试 | 离线 hardneg/漏检叠框 HTML | 不进脉冲、不抢 MPS |
-| 5 | [fiftyone](https://github.com/voxel51/fiftyone) | 间接 | 难例策展 | 本机 Dataset + hardness 队列 | App 偏重；不抬 tip_fire |
-| 6 | Label Studio / [CVAT](https://github.com/cvat-ai/cvat) | 间接 | 标注 | LS 已接；CVAT 仅备选 | 双写污染 |
-| 7 | [netron](https://github.com/lutzroeder/netron) | 间接 | 模型调试 | ONNX 导出后看结构 | 低；无则跳过 |
-| 8 | [nvitop](https://github.com/XuehaiPan/nvitop) | 间接 | 本机训 | pip 自用看 GPU | 不进 VPS |
+| # | 项目 | 服务 tip | 用在哪 | 怎么用 | 风险 | **本夜状态** |
+|---|------|----------|--------|--------|------|-------------|
+| 1 | [lightweight-charts](https://github.com/tradingview/lightweight-charts) | 是 | 看板/检测调试 | 加深时间带/primitive；CSV→LWC | 禁止 LWC 截图进 YOLO | ✅ 批量图层 `analysis/output/wuzao_lwc_hardneg_batch/`（+旧 3 窗对照） |
+| 2 | [ultralytics](https://github.com/ultralytics/ultralytics) | 是 | 检测 2a | 已用；跟官方 export | 勿换检测栈 | 已用；训中不 export |
+| 3 | [matplotlib](https://github.com/matplotlib/matplotlib) | 间接 | TG/分析报告 | 保持静态图脚本 | 勿替代 cv2 训练渲染 | ✅ 叠框后端 `hardneg_overlay_gallery/` |
+| 4 | [supervision](https://github.com/roboflow/supervision) | 间接 | 标注/调试 | 离线 hardneg 叠框 | 不进脉冲、不抢 MPS | ⏭ 未装（避污染训 .venv）；脚本 `--prefer-supervision` 可切换 |
+| 5 | [fiftyone](https://github.com/voxel51/fiftyone) | 间接 | 难例策展 | 本机 Dataset | App 偏重 | ⏭ 改走 LS 小包（同目标更轻） |
+| 6 | Label Studio / [CVAT](https://github.com/cvat-ai/cvat) | 间接 | 标注 | LS 已接；CVAT 备选 | 双写污染 | ✅ `output/label_studio/tasks_hardneg_discovery.json`（24 条） |
+| 7 | [netron](https://github.com/lutzroeder/netron) | 间接 | 模型调试 | ONNX 后看结构 | 训中 export 可能碰 MPS | 📝 一键命令 `docs/LOCAL_DEBUG_TOOLS.md`（未 export） |
+| 8 | [nvitop](https://github.com/XuehaiPan/nvitop) | 间接 | 本机训 | pip 自用看 GPU | 不进 VPS | 📝 说明+alias 同文档；`scripts/v13_train_status.sh` |
+
+**B 档提前只做规格**：Freqtrade Protections → `docs/EXEC_PROTECTIONS_SPEC.md`（未改 executor）。  
+**C 档**：`docs/ops/VPS_OBSERVABILITY_PENDING.md`（待批，未装机）。
+
+短报告：`analysis/p_wuzao_a_tier_done.md` · 夜间总纪要：`analysis/p_overnight_20260722.md`。
 
 ### B. tip 过关后再用（判断 / 执行 / 前向）
 
@@ -202,16 +211,16 @@ TradingAgents / OpenBB 整站 / Hummingbot 做市引擎 / FinRL / Qbot / Superse
 
 | ID | 一句话 | 相对 tip | 状态 |
 |----|--------|----------|------|
-| **H-FE-1** | LWC 时间带/primitive 增强 tip·hardneg 调试 | 可并行（不抢 GPU） | 🟡 CSV 通路已过 |
+| **H-FE-1** | LWC 时间带/primitive 增强 tip·hardneg 调试 | 可并行（不抢 GPU） | 🟡 批量图层已过 `wuzao_lwc_hardneg_batch/` |
 | **H-FE-2** | 前向/信号表 LWC markers 统一语义 | tip_fire>0 后 | ⚪ |
-| **H-FE-3** | ECharts 叠 PF/权益（不换 K 线主图） | tip/前向有样本后更有用 | ⚪ 新增 |
-| **H-TOOL-1** | 脉冲耗时轻量指标（Grafana 思路） | 可议；装栈排队 | ⚪ |
-| **H-TOOL-2** | supervision 叠框 hardneg/漏检 | 可并行离线 | ⚪ |
-| **H-TOOL-3** | uptime-kuma 探活 | 随时可议；**需 owner 批 VPS** | ⚪ |
-| **H-TOOL-4** | FiftyOne 难例策展队列 | 可并行离线 | ⚪ 新增（交叉已评） |
-| **H-TOOL-5** | ONNX Runtime（± OpenVINO）压 discover | tip 通且仍慢再做 | ⚪ 新增（交叉已评） |
-| **H-JUDG-WUZAO-1** | 轻量 regime 特征草稿（dominance 等） | tip 通后单变量；不进 ACTIVE | ⚪ 新增指针 |
-| **H-EXEC-WUZAO-1** | Protections / 事件语义对照规格 | 前向样本够 | ⚪ 新增指针 |
+| **H-FE-3** | ECharts 叠 PF/权益（不换 K 线主图） | tip/前向有样本后更有用 | ⚪ |
+| **H-TOOL-1** | 脉冲耗时轻量指标（Grafana 思路） | 可议；装栈排队 | ⚪ 待批清单已写 |
+| **H-TOOL-2** | hardneg 叠框（matplotlib≡supervision） | 可并行离线 | 🟢 `hardneg_overlay_gallery/` |
+| **H-TOOL-3** | uptime-kuma 探活 | 随时可议；**需 owner 批 VPS** | ⚪ 待批 |
+| **H-TOOL-4** | FiftyOne 难例策展队列 | 可并行离线 | ⚪ 本夜用 LS 小包代替 |
+| **H-TOOL-5** | ONNX Runtime（± OpenVINO）压 discover | tip 通且仍慢再做 | ⚪；netron 命令已记 |
+| **H-JUDG-WUZAO-1** | 轻量 regime 特征草稿（dominance 等） | tip 通后单变量；不进 ACTIVE | ⚪ |
+| **H-EXEC-WUZAO-1** | Protections / 事件语义对照规格 | 前向样本够再上线 | 🟡 `docs/EXEC_PROTECTIONS_SPEC.md` |
 
 **不立项（仍噪音）**：Streamlit/Dash/Superset **换栈**、ECharts **替换** LWC 主图、Qlib/Nautilus/Backtrader **替换**本仓、TradingAgents、K8s、React/Next 重写看板。
 
@@ -230,8 +239,8 @@ TradingAgents / OpenBB 整站 / Hummingbot 做市引擎 / FinRL / Qbot / Superse
 
 ## 8. 下一步（需 Owner 决策的标出）
 
-1. **主线不变**：等 v13 终局 → `eval_v13_vs_v12_tip.sh` / tip-smoke。  
-2. **可并行（不抢 GPU）**：H-FE-1 挂看板 explore、H-TOOL-2/4 离线策展——要做哪条请点名。  
-3. **H-TOOL-3 / Grafana·netdata 上 VPS**：**明确 Owner 批准**后再动。  
-4. B 层（Protections / ECharts PF / ONNX / regime 特征）默认等 tip 通；若 Owner 要提前开规格文档可说。  
+1. **主线不变**：等 v13 终局 → `bash scripts/v13_train_status.sh` → `bash scripts/eval_v13_vs_v12_tip.sh` / tip-smoke。  
+2. **A 档本夜已落地**：LWC/叠框/LS/规格 — 见 `p_wuzao_a_tier_done.md`；挂看板 explore（H-FE-1 余量）仍可议。  
+3. **H-TOOL-3 / Grafana·netdata 上 VPS**：**明确 Owner 批准**后再动（清单 `docs/ops/VPS_OBSERVABILITY_PENDING.md`）。  
+4. B 层大项（ECharts PF / ONNX Runtime / regime 特征）默认等 tip 通；Protections **规格已有**，上线阈值另批。  
 5. 不要安排「大前端重构」或「可视化选型周」。

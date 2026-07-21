@@ -5,11 +5,15 @@
 ## ⚡ 当前真相（2026-07-22）
 
 - **v13 pad200 训练在跑**（本机 `owner_v13_pad200`；勿打断、勿顺手改生产）。
+  状态旁路：`bash scripts/v13_train_status.sh`；落盘后：`bash scripts/eval_v13_vs_v12_tip.sh`（**不** auto-promote）。
+- **夜间旁路（不抢 MPS）已落地**：LWC hardneg 批量 / 叠框画廊 / LS 小包 / Protections 规格 —
+  见 **`analysis/p_overnight_20260722.md`** + `analysis/p_wuzao_topics_scan.md` A 档「已做」。
 - 近期讨论过、现在不做的优化（检测 tip + 判断/执行/风控）统一记在
   **`analysis/backlog_future_optimizations.md`**——瓶颈仍在 tip；判断层多数要等 tip 通了再拧。
   判断层开源专搜（校准/熔断/一致性积木，无现成两层整机）见该文 **B4**。
 - **议程与实盘**：不是「没按 `RESEARCH_AGENDA` 走」，而是旧 H9→H10→H1 发现级已结；
   07-20 起优先队列就是 H-TIP + 前向 100。实盘运维与 tip 迭代并行；H1/H3/H16 等确认级排队等 tip。
+- **VPS 装机（Kuma/Grafana/exporter）**：仅清单 `docs/ops/VPS_OBSERVABILITY_PENDING.md`，**未装**。
 
 ## ⚡ 2026-07-21（A′ 贴边入账过滤上线）
 

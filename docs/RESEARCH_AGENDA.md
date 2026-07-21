@@ -81,16 +81,16 @@
 
 | # | 假设（说人话） | 外源 | 迁移点 | 相对 tip | 发现级测法 | 状态 |
 |---|---|---|---|---|---|---|
-| **H-FE-1** | LWC 时间带/primitive 比纯 YOLO PNG 更利于 hardneg·tip 几何调试，且可直接吃 `okx_*_15m_*.csv` | [lightweight-charts](https://github.com/tradingview/lightweight-charts)（本仓已用） | 离线对照或 explore 叠时间带；**不**改 `render.py` | 可并行（不抢 GPU） | 3 窗 hardneg 已做 `wuzao_lwc_tip_compare/` | 🟡 **CSV 通路已通过**；精框/挂看板 ⚪ |
+| **H-FE-1** | LWC 时间带/primitive 比纯 YOLO PNG 更利于 hardneg·tip 几何调试，且可直接吃 `okx_*_15m_*.csv` | [lightweight-charts](https://github.com/tradingview/lightweight-charts)（本仓已用） | 离线对照或 explore 叠时间带；**不**改 `render.py` | 可并行（不抢 GPU） | 3 窗 + **10 窗批量图层** | 🟡 **加深完成** `wuzao_lwc_hardneg_batch/`；挂看板 explore 仍 ⚪ |
 | **H-FE-2** | 前向/信号密集窗用统一 LWC markers 语义 | 同上 + 本仓 markers | 只打磨 `app.js` | tip_fire>0 后 | 目视 10 笔 | ⚪ |
-| **H-FE-3** | ECharts 叠 PF/权益/分位，**不**换 K 线主图 | [apache/echarts](https://github.com/apache/echarts) | 看板复盘页或静态报告 | 前向有样本后更有用 | 一页权益曲线原型 | ⚪ **新增** |
-| **H-TOOL-1** | 脉冲 `discover_wall` / phase2 做成可扫轻量指标（Grafana **思路**，未必装） | [grafana/grafana](https://github.com/grafana/grafana) | 日志→状态条/小 CSV；禁塞脉冲 | 可议；装栈需 owner | journal 是否已够 >600s 查因 | ⚪ |
-| **H-TOOL-2** | supervision 批注漏检/hardneg PNG | [roboflow/supervision](https://github.com/roboflow/supervision) | 离线脚本；**不进**脉冲 | 可并行离线 | hardneg previews → HTML | ⚪ |
-| **H-TOOL-3** | uptime-kuma 探活 dashboard / forward / executor | [louislam/uptime-kuma](https://github.com/louislam/uptime-kuma) | VPS 旁路容器 | 随时可议；**需 Owner 批 VPS** | 探针≠新鲜度门 | ⚪ **需 Owner 批** |
-| **H-TOOL-4** | FiftyOne 难例/hardness 策展队列 | [voxel51/fiftyone](https://github.com/voxel51/fiftyone)（亦见 `p_github_optimize_candidates`） | 本机 App；不进脉冲 | 可并行离线 | tip 漏检 PNG Dataset | ⚪ **新增** |
-| **H-TOOL-5** | ONNX Runtime（± OpenVINO）压 discover_wall | onnxruntime / OpenVINO（已评） | export → VPS A/B 延迟表 | tip 通且仍慢 | 同图同框延迟对照 | ⚪ **新增** |
-| **H-JUDG-WUZAO-1** | 轻量 regime 特征草稿（如 BTC dominance） | pycoingecko 等（已评） | 离线草稿；**不进 ACTIVE** | tip 通后单变量立项 | 与 H13 对照一张表 | ⚪ **新增指针** |
-| **H-EXEC-WUZAO-1** | Freqtrade Protections / Basana 事件语义 → 本仓熔断·对照规格 | freqtrade / basana（不 pip） | 规格文档；不换执行器 | 前向样本够 | 清单 + 与现有 kill/贴边对照 | ⚪ **新增指针** |
+| **H-FE-3** | ECharts 叠 PF/权益/分位，**不**换 K 线主图 | [apache/echarts](https://github.com/apache/echarts) | 看板复盘页或静态报告 | 前向有样本后更有用 | 一页权益曲线原型 | ⚪ |
+| **H-TOOL-1** | 脉冲 `discover_wall` / phase2 做成可扫轻量指标（Grafana **思路**，未必装） | [grafana/grafana](https://github.com/grafana/grafana) | 日志→状态条/小 CSV；禁塞脉冲 | 可议；装栈需 owner | journal 是否已够 >600s 查因 | ⚪ 待批见 `docs/ops/VPS_OBSERVABILITY_PENDING.md` |
+| **H-TOOL-2** | hardneg PNG 叠框批注（supervision 或 matplotlib 等价） | [roboflow/supervision](https://github.com/roboflow/supervision) | 离线脚本；**不进**脉冲 | 可并行离线 | hardneg previews → HTML | 🟢 **发现级** matplotlib 画廊 `hardneg_overlay_gallery/`（未装 supervision，避免污染训环境） |
+| **H-TOOL-3** | uptime-kuma 探活 dashboard / forward / executor | [louislam/uptime-kuma](https://github.com/louislam/uptime-kuma) | VPS 旁路容器 | 随时可议；**需 Owner 批 VPS** | 探针≠新鲜度门 | ⚪ **需 Owner 批**（清单已写） |
+| **H-TOOL-4** | FiftyOne 难例/hardness 策展队列 | [voxel51/fiftyone](https://github.com/voxel51/fiftyone)（亦见 `p_github_optimize_candidates`） | 本机 App；不进脉冲 | 可并行离线 | tip 漏检 PNG Dataset | ⚪ 本夜改走 **LS 小包** `tasks_hardneg_discovery.json`（FO App 偏重，跳过） |
+| **H-TOOL-5** | ONNX Runtime（± OpenVINO）压 discover_wall | onnxruntime / OpenVINO（已评） | export → VPS A/B 延迟表 | tip 通且仍慢 | 同图同框延迟对照 | ⚪；netron 一键命令见 `docs/LOCAL_DEBUG_TOOLS.md`（训中不 export） |
+| **H-JUDG-WUZAO-1** | 轻量 regime 特征草稿（如 BTC dominance） | pycoingecko 等（已评） | 离线草稿；**不进 ACTIVE** | tip 通后单变量立项 | 与 H13 对照一张表 | ⚪ |
+| **H-EXEC-WUZAO-1** | Freqtrade Protections / Basana 事件语义 → 本仓熔断·对照规格 | freqtrade / basana（不 pip） | 规格文档；不换执行器 | 前向样本够再上线阈值 | 清单 + 与现有 kill/贴边对照 | 🟡 **规格已写** `docs/EXEC_PROTECTIONS_SPEC.md`（未改 executor 默认） |
 
 **明确不立项（噪音）**：Streamlit/Dash/Superset **换栈**、ECharts **替换** LWC 主图、Qlib/Nautilus/Backtrader **替换**本仓、TradingAgents 类 LLM 交易、K8s/dockprom 全家桶、React/Next 重写看板。  
 （回测框架作**对照规格**、ECharts 作 **PF 辅图**、Prometheus 作**可选运维**——见扫描报告分层，不在此「不立项」斧下。）

@@ -6,8 +6,14 @@
 # Mid-run best.pt under runs/.../owner_v13_pad200/weights/ is noisy — wait for train exit.
 #
 # Usage:
-#   bash scripts/eval_v13_vs_v12_tip.sh           # full (needs stable weights)
+#   bash scripts/v13_train_status.sh              # CPU status while train runs
 #   bash scripts/eval_v13_vs_v12_tip.sh --dry-run # CPU preflight only (safe while v13 trains)
+#   bash scripts/eval_v13_vs_v12_tip.sh           # full (needs stable models/owner_v13_pad200.pt)
+#
+# Morning path after train exits:
+#   1) ls -lh models/owner_v13_pad200.pt   # or copy from runs/.../weights/best.pt
+#   2) bash scripts/eval_v13_vs_v12_tip.sh
+#   3) Owner decides promote — script NEVER auto-promotes
 set -euo pipefail
 cd "$(dirname "$0")/.."
 PY="${PY:-.venv/bin/python}"
