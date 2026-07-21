@@ -2,24 +2,36 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 2026-07-20 深夜（tiered sizing：代码就绪，部署被保证金冲突挡下）— 最新
+## ⚡ 2026-07-21（tiered sizing 真仓上线 · 口径①）— 最新
 
-**Owner 已批准 tiered sizing 上实盘**（q90-95/q95-99/q99+ → 1x/1.5x/2x，
-依据 `analysis/p_weight_centric_val.md`：val 净 +141%→+192%）。本机已完成并通过全部测试：
-- tier 分界写入 `models/frozen_tp5_sl2_swap_yolo_v11_reg_20260718.json` 的 `sizing_tiers`
-  （q95=0.025480 / q99=0.048569，与实验产物一致；老 sidecar 无该块 = 1x，校验兼容）
-- forward_log 末尾追加 `tier` / `size_mult` 列（脉冲检出时打标；老行缺列按 1x 读，
-  merge 不回写旧行；**裁决口径仍按笔数 100 笔不变**）
-- executor `signal_size_mult`：基础仓位 × 乘数，上限 2x，脏数据只会缩不会放
-- 测试：`tests/test_tiered_sizing.py`（24 用例）+ 全套 191 通过
+**Owner 批准**：tiered 上 VPS 实盘；口径 **① 基础仓位减半**（不提杠杆、不充值）。
 
-**部署被挡（owner 决策点）**：VPS 实配 equity_times_leverage × max_concurrent=1 ×
-leverage=3 下，1x 基础仓位 = 权益×3 ≈ 277U，保证金已用满全部权益（92.4U）；
-1.5x/2x 下单保证金需 138.7U/184.9U，必吃 OKX 51008 拒单（台账 2026-07-16 有 5 次同码
-先例），高分档信号会整笔丢失。**未部署 VPS，实盘行为零变化**。等 owner 选口径：
-①基础仓位改为预算/2（1x 名义降为 ~139U）②提杠杆（红线，owner 亲手）③充值
-④先只上 tier 记账不动 executor。见
-`docs/learnings/tier-multiplier-needs-margin-headroom-in-base-notional.md`。
+**已上线核验**（VPS live，equity≈**92.46U**，lev=3，max_concurrent=1，KILL 未置）：
+| tier | size_mult | 名义 USDT | 保证金≈名义/3 | vs 权益 |
+|------|-----------|-----------|---------------|--------|
+| q90–q95 | 1.0 | ~138.7 | ~46.2 | 半仓 |
+| q95–q99 | 1.5 | ~208.0 | ~69.3 | OK |
+| q99+ | 2.0 | ~277.4 | ~92.46 | **=权益，≤可用** |
+
+公式：`unit = (equity×lev) / 2`，`notional = unit × size_mult`（真乘仓位，`tier_headroom=True`）。
+sidecar `sizing_tiers` q95≈0.02548 / q99≈0.04857；阈值仍 **0.02022**；三门 **30min**；
+TP5/SL2；**未** clear forward_log。forward_log 已有 `tier`/`size_mult` 列（老行缺列=1x）。
+
+**回滚**（止血 → 恢复 1x 满槽，去掉乘数）：
+```bash
+# 1) 立刻停新开仓
+ssh root@103.214.174.58 'touch /opt/fable-trading/data/executor_KILL'
+# 2) 回退 executor 头寸公式：把 unit_notional 段改回 notional=base*size_mult
+#    或 git checkout <pre-headroom> -- src/execution/executor.py 后 rsync + restart
+ssh root@103.214.174.58 'systemctl restart fable-executor'
+# 3) 恢复开仓：rm data/executor_KILL
+```
+完整撤 tier：sidecar 删 `sizing_tiers` + forward 停打标（需另一次 owner 批准）。
+
+**风险重申**：q99+ val 仅约 **41** 笔；2x 止损冲击 ≈ 名义×(2×atr)/权益，满档接近单笔打满保证金。
+确认级仍靠前向新鲜 100 笔。
+
+**五项其余进度**：滑点报告 ✅；tip 子集 / v12 池 / 晨报见并行会话。status-strip 新鲜度门已对齐。
 
 ## ⚡ 2026-07-20 夜（owner：检测主线 = v12）
 

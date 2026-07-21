@@ -461,12 +461,18 @@ def run_once(cfg: ExecutorConfig, *, dry_run: bool = False) -> dict[str, Any]:
             base_notional = float(sizing.get("notional_usdt") or cfg.notional_usdt)
             # Tiered sizing (owner 2026-07-20): per-signal multiplier stamped
             # by the forward pulse; legacy rows without the column trade 1x.
+            # Headroom (owner deploy option ①, 2026-07-21): unit = full-slot
+            # budget / TIER_SIZE_MULT_CAP so q99+ (2x) fills equity*leverage
+            # and never trips OKX 51008. 1x trades at half budget.
             size_mult = signal_size_mult(row)
-            notional = base_notional * size_mult
+            unit_notional = base_notional / TIER_SIZE_MULT_CAP
+            notional = unit_notional * size_mult
             sizing["tier"] = row.get("tier")
             sizing["size_mult"] = size_mult
             sizing["base_notional_usdt"] = base_notional
+            sizing["unit_notional_usdt"] = unit_notional
             sizing["notional_usdt"] = notional
+            sizing["tier_headroom"] = True
             summary["last_sizing"] = sizing
             ev = open_one(
                 client, cfg, row, dry_run=dry_run,

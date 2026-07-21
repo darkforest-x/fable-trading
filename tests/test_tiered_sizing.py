@@ -272,14 +272,40 @@ class TestExecutorSizing:
             row["size_mult"] = size_mult
         pd.DataFrame([row]).to_csv(path, index=False)
 
-    def _config(self, tmp_path: Path, log: Path) -> ExecutorConfig:
-        return ExecutorConfig(
+    def _config(self, tmp_path: Path, log: Path, **kwargs) -> ExecutorConfig:
+        base = dict(
             sizing_mode="fixed",
             notional_usdt=10.0,
             forward_log=str(log),
             ledger=str(tmp_path / "ledger.jsonl"),
             kill_switch_file=str(tmp_path / "KILL"),
         )
+        base.update(kwargs)
+        return ExecutorConfig(**base)
+
+    @pytest.mark.parametrize(
+        ("size_mult", "expected_notional"),
+        [
+            (1.0, 5.0),    # unit * 1x
+            (1.5, 7.5),    # unit * 1.5x
+            (2.0, 10.0),   # unit * 2x == full slot budget
+        ],
+    )
+    def test_dry_run_headroom_tiers(
+        self, tmp_path: Path, size_mult: float, expected_notional: float
+    ) -> None:
+        """Owner option ①: unit = base/2, then × tier — real notional, not bookkeeping."""
+        log = tmp_path / "forward_log.csv"
+        self._write_forward_log(log, size_mult=size_mult)
+        cfg = self._config(tmp_path, log)
+        summary = run_once(cfg, dry_run=True)
+        assert summary["opened"] == 1
+        sizing = summary["last_sizing"]
+        assert sizing["size_mult"] == size_mult
+        assert sizing["base_notional_usdt"] == 10.0
+        assert sizing["unit_notional_usdt"] == 5.0
+        assert sizing["notional_usdt"] == expected_notional
+        assert sizing["tier_headroom"] is True
 
     def test_dry_run_applies_tier_multiplier(self, tmp_path: Path) -> None:
         log = tmp_path / "forward_log.csv"
@@ -290,7 +316,10 @@ class TestExecutorSizing:
         sizing = summary["last_sizing"]
         assert sizing["size_mult"] == 2.0
         assert sizing["base_notional_usdt"] == 10.0
-        assert sizing["notional_usdt"] == 20.0
+        # Headroom option ①: unit = base / 2 so q99+ fills the slot budget.
+        assert sizing["unit_notional_usdt"] == 5.0
+        assert sizing["notional_usdt"] == 10.0  # unit * 2x
+        assert sizing["tier_headroom"] is True
 
     def test_dry_run_legacy_log_stays_1x(self, tmp_path: Path) -> None:
         log = tmp_path / "forward_log.csv"
@@ -299,4 +328,29 @@ class TestExecutorSizing:
         summary = run_once(cfg, dry_run=True)
         assert summary["opened"] == 1
         assert summary["last_sizing"]["size_mult"] == 1.0
-        assert summary["last_sizing"]["notional_usdt"] == 10.0
+        # Legacy mult=1x still uses unit sizing so max tier can fit later.
+        assert summary["last_sizing"]["notional_usdt"] == 5.0
+
+    def test_vps_style_margin_2x_fits_equity(self) -> None:
+        """Mirror VPS arithmetic: max_concurrent=1, lev=3, unit=budget/2.
+
+        2x notional margin must be ≤ equity so OKX 51008 cannot fire on q99+.
+        """
+        from src.execution.executor import TIER_SIZE_MULT_CAP
+
+        equity = 92.46246113495992
+        leverage = 3.0
+        base = equity * leverage  # full-slot budget under equity_times_leverage
+        unit = base / TIER_SIZE_MULT_CAP
+        table = {
+            1.0: (unit * 1.0, unit * 1.0 / leverage),
+            1.5: (unit * 1.5, unit * 1.5 / leverage),
+            2.0: (unit * 2.0, unit * 2.0 / leverage),
+        }
+        assert abs(table[1.0][0] - 138.6937) < 0.01
+        assert abs(table[1.5][0] - 208.0406) < 0.01
+        assert abs(table[2.0][0] - 277.3874) < 0.01
+        assert table[2.0][1] <= equity + 1e-9
+        # Without headroom, naive base*2 would need 2× equity as margin → reject.
+        naive_2x_margin = (base * 2.0) / leverage
+        assert naive_2x_margin > equity

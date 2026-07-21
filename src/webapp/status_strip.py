@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from src.webapp.dashboard_cache import relative_path
+from src.webapp.forward_payloads import FRESH_DETECT_MIN
 from src.webapp.model_hub import read_active_pointer
 
 PROJECT = Path(__file__).resolve().parents[2]
@@ -114,6 +115,12 @@ def _judgment_active() -> dict:
 
 
 def _forward_progress() -> dict:
+    """Decision counter must match /api/forward: closed + maker_filled + lag≤30m.
+
+    See docs/learnings/status-strip-decision-counter-skips-freshness-gate.md —
+    counting maker-filled closed without the freshness gate made the strip
+    show 15/100 while the forward tab correctly showed 0/100.
+    """
     out = {
         "exists": FORWARD_LOG_PATH.exists(),
         "path": relative_path(FORWARD_LOG_PATH),
@@ -123,16 +130,22 @@ def _forward_progress() -> dict:
         "decision_remaining": FORWARD_DECISION_TRADES,
         "closed_rows": 0,
         "total_rows": 0,
+        "hindsight_excluded": 0,
+        "fresh_detect_min": FRESH_DETECT_MIN,
+        "open_rows": 0,
     }
     if not FORWARD_LOG_PATH.exists():
+        out["stall_reason"] = "forward_log 不存在"
         return out
     try:
         import pandas as pd
 
         frame = pd.read_csv(FORWARD_LOG_PATH)
     except Exception:  # noqa: BLE001 — status strip must never crash the page
+        out["stall_reason"] = "forward_log 读取失败"
         return out
     if frame.empty:
+        out["stall_reason"] = "forward_log 为空：前向扫描未跑或日志被清空"
         return out
     out["total_rows"] = int(len(frame))
     closed = frame
@@ -145,15 +158,31 @@ def _forward_progress() -> dict:
     decision = closed
     if "maker_filled" in closed.columns:
         decision = closed[closed["maker_filled"].fillna(False).astype(bool)]
+    hindsight_n = 0
+    # Same freshness gate as forward_payloads (tip-tradable only).
+    if "detected_at" in decision.columns and "signal_time" in decision.columns and not decision.empty:
+        det = pd.to_datetime(decision["detected_at"], errors="coerce", utc=True)
+        sig = pd.to_datetime(decision["signal_time"], errors="coerce", utc=True)
+        lag_min = (det - sig).dt.total_seconds() / 60.0
+        hindsight_n = int(((lag_min > FRESH_DETECT_MIN) | lag_min.isna()).sum())
+        decision = decision[lag_min <= FRESH_DETECT_MIN]
+    out["hindsight_excluded"] = hindsight_n
     n = int(len(decision))
     out["decision_trades"] = n
     out["decision_remaining"] = max(FORWARD_DECISION_TRADES - n, 0)
     out["progress"] = round(min(n / FORWARD_DECISION_TRADES, 1.0), 4)
-    # stall hint for the UI when the clock has not started
     if n == 0 and out["total_rows"] == 0:
         out["stall_reason"] = "forward_log 为空：前向扫描未跑或日志被清空"
+    elif n == 0 and hindsight_n > 0:
+        out["stall_reason"] = (
+            f"{hindsight_n} 笔 closed 但延迟>{int(FRESH_DETECT_MIN)}min（事后），不进裁决"
+        )
     elif n == 0 and out["open_rows"] > 0:
-        out["stall_reason"] = f"有 {out['open_rows']} 笔 open，等待 TP/SL 关闭（闸门只计 maker-filled closed）"
+        out["stall_reason"] = (
+            f"有 {out['open_rows']} 笔 open，等待关闭（闸门只计新鲜 maker closed）"
+        )
+    elif n == 0 and out["closed_rows"] > 0:
+        out["stall_reason"] = "有 closed 行但未过 maker+新鲜度门"
     return out
 
 
