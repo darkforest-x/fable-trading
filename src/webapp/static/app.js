@@ -896,6 +896,49 @@ function renderHBars(el, rows) {
 }
 
 /* ---------- status strip (owner detector / judgment / forward) ---------- */
+function paintLiveTruth(od, ja, fw) {
+  const n = fw.decision_trades ?? 0;
+  const target = fw.decision_target ?? 100;
+  const prog = Math.round(100 * (fw.progress || 0));
+  const countEl = $("#live-fwd-count");
+  const barEl = $("#live-fwd-bar");
+  const noteEl = $("#live-fwd-note");
+  if (countEl) countEl.textContent = `${n} / ${target}`;
+  if (barEl) barEl.style.width = `${prog}%`;
+  if (noteEl) {
+    if (fw.stall_reason) noteEl.textContent = fw.stall_reason;
+    else if (n >= target) noteEl.textContent = "裁决样本已满 · 可做终审";
+    else noteEl.textContent = `还差 ${fw.decision_remaining ?? target - n} 笔新鲜 maker 成交 · lag≤${fw.fresh_detect_min ?? 30}min`;
+  }
+  const det = $("#live-det");
+  if (det) det.textContent = od.source_run || (od.exists ? "已加载" : "缺失");
+  const jud = $("#live-jud");
+  if (jud) {
+    const thr = ja.threshold_val_q90 != null ? Number(ja.threshold_val_q90).toFixed(4) : "—";
+    jud.textContent = ja.exists ? `阈值 ${thr}` : "未设置";
+  }
+  const log = $("#live-log");
+  if (log) {
+    const hs = fw.hindsight_excluded ?? 0;
+    log.textContent = `open ${fw.open_rows ?? 0} · closed ${fw.closed_rows ?? 0} · 事后排除 ${hs}`;
+  }
+  const hintWrap = $("#live-hint-wrap");
+  const hint = $("#live-hint");
+  if (hintWrap && hint) {
+    if (fw.stall_reason && n === 0) {
+      hintWrap.hidden = false;
+      hint.textContent = fw.stall_reason;
+    } else {
+      hintWrap.hidden = true;
+    }
+  }
+  const truth = $("#live-truth");
+  if (truth) {
+    truth.classList.toggle("is-empty", n === 0);
+    truth.classList.toggle("is-ready", n >= target);
+  }
+}
+
 async function loadStatusStrip(force = false) {
   if (force) {
     for (const [k] of [..._jsonCache.keys()]) {
@@ -912,13 +955,17 @@ async function loadStatusStrip(force = false) {
     const fwdEl = $("#status-forward");
     if (ownerEl) {
       ownerEl.classList.remove("skeleton");
+      ownerEl.classList.add("status-click");
+      ownerEl.dataset.jump = "probe";
+      ownerEl.title = "点此打开盘口检测";
       const f1 = od.frozen_eval_f1 != null ? Number(od.frozen_eval_f1).toFixed(3) : "—";
-      const p = od.precision != null ? Number(od.precision).toFixed(2) : "—";
+      const run = od.source_run || "—";
+      const shortRun = String(run).replace(/^owner_/, "");
       ownerEl.classList.toggle("good", (od.frozen_eval_f1 || 0) >= 0.6);
-      ownerEl.classList.toggle("warn", (od.frozen_eval_f1 || 0) > 0 && od.frozen_eval_f1 < 0.6);
+      ownerEl.classList.toggle("warn", !od.exists || ((od.frozen_eval_f1 || 0) > 0 && od.frozen_eval_f1 < 0.6));
       ownerEl.innerHTML = `<span class="status-k">检测器</span>
-        <span class="status-v">F1 ${f1} · P ${p}</span>
-        <span class="status-sub">${escapeHtml(od.source_run || "—")} · 冻结评测</span>`;
+        <span class="status-v">${escapeHtml(shortRun)}</span>
+        <span class="status-sub">F1 ${f1} · 冻结评测</span>`;
     }
     if (judEl) {
       judEl.classList.remove("skeleton");
@@ -934,16 +981,24 @@ async function loadStatusStrip(force = false) {
     }
     if (fwdEl) {
       fwdEl.classList.remove("skeleton");
+      fwdEl.classList.add("status-click");
+      fwdEl.dataset.jump = "forward";
+      fwdEl.title = "点此打开前向裁决";
+      const n = fw.decision_trades ?? 0;
+      const target = fw.decision_target ?? 100;
       const prog = Math.round(100 * (fw.progress || 0));
-      fwdEl.classList.toggle("good", (fw.decision_trades || 0) >= (fw.decision_target || 100));
-      fwdEl.classList.toggle("warn", (fw.decision_trades || 0) === 0);
+      fwdEl.classList.toggle("good", n >= target);
+      fwdEl.classList.toggle("warn", n === 0);
       const openN = fw.open_rows ?? 0;
       const totalN = fw.total_rows ?? 0;
-      const stall = fw.stall_reason ? ` · ${fw.stall_reason}` : "";
-      fwdEl.innerHTML = `<span class="status-k">前向闸门</span>
-        <span class="status-v">${fw.decision_trades ?? 0} / ${fw.decision_target ?? 100}（${prog}%）</span>
-        <span class="status-sub" title="${escapeHtml(fw.stall_reason || "")}">open ${openN} · closed ${fw.closed_rows ?? 0} · 日志 ${totalN}${stall}</span>`;
+      const hs = fw.hindsight_excluded ?? 0;
+      const stall = fw.stall_reason || "";
+      fwdEl.innerHTML = `<span class="status-k">前向裁决 <span class="status-fresh">lag≤${fw.fresh_detect_min ?? 30}m</span></span>
+        <span class="status-v">${n} / ${target}（${prog}%）</span>
+        <span class="status-bar-mini"><span style="width:${prog}%"></span></span>
+        <span class="status-sub" title="${escapeHtml(stall)}">open ${openN} · 事后 ${hs} · 日志 ${totalN}${stall ? " · " + escapeHtml(stall) : ""}</span>`;
     }
+    paintLiveTruth(od, ja, fw);
     if (force) toast("状态条已刷新", "ok");
   } catch (_) {
     ["status-owner", "status-judgment", "status-forward"].forEach((id) => {
@@ -1040,15 +1095,17 @@ async function loadLabelingHub() {
 }
 $("#label-refresh")?.addEventListener("click", () => loadLabelingHub());
 
-/* ---------- overview (minimal: verdict + tiles + spark + checklist) ---------- */
+/* ---------- overview (live truth + backtest reference) ---------- */
 let sparkChart = null, sparkSeries = null;
 async function loadOverview() {
   $("#view-overview")?.classList.add("loading");
   try {
+    // Refresh strip so live-truth panel matches current forward clock.
+    await loadStatusStrip(false);
     const d = await apiGet(apiUrl("/api/overview"), { cache: true });
     const v = escapeHtml(d.verdict || "暂无摘要");
     const n = d.next ? `<span class="banner-next">${escapeHtml(d.next)}</span>` : "";
-    $("#verdict-banner").innerHTML = `<span class="banner-k">状态</span><b>${v}</b>${n}`;
+    $("#verdict-banner").innerHTML = `<span class="banner-k">回测验收</span><b>${v}</b>${n}`;
     const tile = (t) =>
       `<div class="tile"><span class="lbl">${escapeHtml(t.label)}</span><b>${escapeHtml(String(t.value))}</b><small>${escapeHtml(t.sub || "")}</small></div>`;
     const tiles = d.tiles || [];
@@ -1135,17 +1192,60 @@ $("#shorttf-to-ethmicro")?.addEventListener("click", () => showView("ethmicro", 
 
 /* ---------- 盘口检测（单币一键探测, subprocess-backed） ---------- */
 let probeRunning = false;
+
+function renderProbeCards(r) {
+  const host = $("#probe-cards");
+  if (!host) return;
+  const signals = r.signals || [];
+  if (r.error) {
+    host.hidden = false;
+    host.innerHTML = `<div class="probe-card bad"><div class="probe-card-k">错误</div><div class="probe-card-v">${escapeHtml(String(r.error))}</div></div>`;
+    return;
+  }
+  if (!signals.length) {
+    host.hidden = false;
+    host.innerHTML = `
+      <div class="probe-card">
+        <div class="probe-card-k">结果</div>
+        <div class="probe-card-v">当前盘口无信号</div>
+        <div class="probe-card-s">${escapeHtml(r.symbol || "—")} · bar ${escapeHtml(String(r.bar_time || r.last_bar || "—"))}</div>
+      </div>
+      <div class="probe-card">
+        <div class="probe-card-k">检测</div>
+        <div class="probe-card-v">${escapeHtml(r.detector || r.weights || "v12")}</div>
+        <div class="probe-card-s">无 tip 开火属常态</div>
+      </div>`;
+    return;
+  }
+  host.hidden = false;
+  host.innerHTML = signals.map((s, i) => {
+    const tradeable = !!s.tradeable;
+    const score = s.score != null ? Number(s.score).toFixed(4) : "—";
+    const thr = s.threshold != null ? Number(s.threshold).toFixed(4) : "—";
+    const lag = s.lag_min != null ? `${Number(s.lag_min).toFixed(1)}m` : "—";
+    const conf = s.conf != null ? Number(s.conf).toFixed(2) : (s.confidence != null ? Number(s.confidence).toFixed(2) : "—");
+    const tier = s.tier || s.size_mult != null ? `${s.tier || "—"} ×${s.size_mult ?? 1}` : "—";
+    return `<div class="probe-card ${tradeable ? "good" : "warn"}">
+      <div class="probe-card-k">信号 ${i + 1} · ${tradeable ? "可开单级" : "不可开"}</div>
+      <div class="probe-card-v">score ${score} <span class="probe-thr">/ ${thr}</span></div>
+      <div class="probe-card-s">conf ${conf} · lag ${lag} · tier ${escapeHtml(String(tier))}</div>
+    </div>`;
+  }).join("");
+}
+
 async function runProbe() {
   if (probeRunning) return;
   const symbol = ($("#probe-symbol")?.value || "").trim();
   const meta = $("#probe-meta");
   const out = $("#probe-result");
+  const cards = $("#probe-cards");
   const btn = $("#probe-run");
   if (!symbol) { toast("请输入币种，如 BTC 或 MOODENG_USDT_SWAP"); return; }
   probeRunning = true;
-  if (btn) btn.disabled = true;
-  if (meta) meta.textContent = "检测中…（拉最新K线 + YOLO + 判断打分，约 1 分钟）";
+  if (btn) { btn.disabled = true; btn.textContent = "检测中…"; }
+  if (meta) meta.textContent = "拉最新K线 + YOLO + 判断打分…";
   if (out) out.textContent = "…";
+  if (cards) { cards.hidden = true; cards.innerHTML = ""; }
   try {
     const res = await fetch("/api/check-symbol", {
       method: "POST",
@@ -1157,17 +1257,22 @@ async function runProbe() {
     if (!data.ok) {
       if (meta) meta.textContent = data.detail || "检测失败";
       if (out) out.textContent = "（无结果）";
+      if (cards) {
+        cards.hidden = false;
+        cards.innerHTML = `<div class="probe-card bad"><div class="probe-card-k">失败</div><div class="probe-card-v">${escapeHtml(data.detail || "检测失败")}</div></div>`;
+      }
       if (!data.busy) toast(data.detail || "检测失败");
       return;
     }
     const r = data.result || {};
     if (out) out.textContent = r.text || JSON.stringify(r, null, 2);
+    renderProbeCards(r);
     if (meta) {
       if (r.error) meta.textContent = r.error;
-      else if (!(r.signals || []).length) meta.textContent = `${r.symbol}：当前盘口无信号`;
+      else if (!(r.signals || []).length) meta.textContent = `${r.symbol || symbol}：当前盘口无信号`;
       else {
         const tradeable = (r.signals || []).filter((s) => s.tradeable).length;
-        meta.textContent = `${r.symbol}：检出 ${r.signals.length} 个信号，其中 ${tradeable} 个可开单级`;
+        meta.textContent = `${r.symbol || symbol}：检出 ${(r.signals || []).length} 个 · 可开单 ${tradeable}`;
       }
     }
   } catch (err) {
@@ -1176,11 +1281,29 @@ async function runProbe() {
     toast(`盘口检测失败：${err.message || err}`);
   } finally {
     probeRunning = false;
-    if (btn) btn.disabled = false;
+    if (btn) { btn.disabled = false; btn.textContent = "▶ 检测"; }
   }
 }
 $("#probe-run")?.addEventListener("click", runProbe);
 $("#probe-symbol")?.addEventListener("keydown", (e) => { if (e.key === "Enter") runProbe(); });
+$("#probe-chips")?.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-sym]");
+  if (!btn) return;
+  const input = $("#probe-symbol");
+  if (input) input.value = btn.dataset.sym;
+  $$("#probe-chips .chip-btn").forEach((b) => b.classList.toggle("active", b === btn));
+  runProbe();
+});
+// Jump buttons (overview / status strip)
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-jump]");
+  if (!el) return;
+  const name = el.dataset.jump;
+  if (name && document.getElementById("view-" + name)) {
+    e.preventDefault();
+    showView(name);
+  }
+});
 
 async function loadEthMicro() {
   const view = $("#view-ethmicro");
