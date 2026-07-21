@@ -183,6 +183,14 @@ def scan_forward_records(
                 maker_filled = bool(
                     float(enriched["low"].iloc[entry_i]) < float(enriched["open"].iloc[entry_i])
                 )
+            # Tiered sizing (owner 2026-07-20): tier is stamped at detection
+            # time from the artifact sidecar; artifacts without sizing_tiers
+            # (shadow books, stubs) log the legacy 1x.
+            tiers = getattr(scan.artifact, "sizing_tiers", None)
+            if tiers is not None:
+                tier, size_mult = tiers.tier_for_score(score, scan.artifact.threshold)
+            else:
+                tier, size_mult = "", 1.0
             records.append(
                 {
                     "source": source,
@@ -206,6 +214,8 @@ def scan_forward_records(
                     "realized_ret": exit_state.realized_ret,
                     "atr_pct": float(feature_row["atr_pct"]),
                     "dense_run_len": int(feature_row["dense_run_len"]),
+                    "tier": tier,
+                    "size_mult": size_mult,
                 }
             )
     print(

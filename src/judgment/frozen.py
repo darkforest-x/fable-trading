@@ -24,6 +24,11 @@ from src.judgment.train import DEFAULT_HORIZON_BARS, load_splits, train_model
 PROJECT_DIR: Final = Path(__file__).resolve().parents[2]
 BAR: Final = pd.Timedelta(minutes=15)
 DEFAULT_SCORE_QUANTILE: Final = 0.90
+# Tiered sizing (owner 2026-07-20, analysis/p_weight_centric_val.md):
+# val-score quantile bands [q90,q95) / [q95,q99) / q99+ -> notional multiplier.
+# Band edges live in the artifact sidecar ("sizing_tiers"); multipliers are a
+# fixed owner decision, not a tunable.
+TIER_MULTIPLIERS: Final = {"q90_q95": 1.0, "q95_q99": 1.5, "q99_plus": 2.0}
 # Mainline 2026-07-18+: v11_chain pool (owner-authorized full cutover).
 # Accept-window compare vs v8 = holdout consumption #4.
 DEFAULT_CONFIG_NAME: Final = "tp5_sl2_swap_yolo_v11_reg"
@@ -63,6 +68,37 @@ class FrozenConfig:
 
 
 @dataclass(frozen=True)
+class SizingTiers:
+    """Val-score quantile band edges for tiered notional sizing.
+
+    Owner-approved 2026-07-20 (analysis/p_weight_centric_val.md): bands
+    [q90,q95) / [q95,q99) / q99+ map to 1x / 1.5x / 2x. q90 is the existing
+    entry threshold (threshold_val_q90); q95/q99 come from the same frozen
+    val-score distribution and live in the artifact sidecar.
+    """
+
+    __slots__ = ("q95", "q99")
+
+    q95: float
+    q99: float
+
+    def tier_for_score(self, score: float, threshold: float) -> tuple[str, float]:
+        """Map a frozen score to (tier name, notional multiplier).
+
+        Below-threshold scores never trade (multiplier 0.0) — same semantics
+        as the experiment's weight function, so a bad caller can only shrink
+        exposure, never inflate it.
+        """
+        if not (score >= threshold):  # catches NaN too
+            return "below_q90", 0.0
+        if score >= self.q99:
+            return "q99_plus", TIER_MULTIPLIERS["q99_plus"]
+        if score >= self.q95:
+            return "q95_q99", TIER_MULTIPLIERS["q95_q99"]
+        return "q90_q95", TIER_MULTIPLIERS["q90_q95"]
+
+
+@dataclass(frozen=True)
 class FrozenArtifact:
     __slots__ = (
         "config",
@@ -76,6 +112,7 @@ class FrozenArtifact:
         "dataset_sha256",
         "dataset_size_bytes",
         "best_iteration",
+        "sizing_tiers",
     )
 
     config: FrozenConfig
@@ -89,6 +126,8 @@ class FrozenArtifact:
     dataset_sha256: str
     dataset_size_bytes: int
     best_iteration: int
+    # None when the sidecar predates tiered sizing → everything trades 1x.
+    sizing_tiers: SizingTiers | None
 
 
 class FrozenArtifactError(RuntimeError):
@@ -206,6 +245,7 @@ def load_artifact(config: FrozenConfig, metadata_path: Path) -> FrozenArtifact:
     if not model_path.exists():
         raise FrozenArtifactError(metadata_path, "model file is missing")
     dataset_path = _project_path(config, metadata["dataset_path"])
+    sizing_tiers = _load_sizing_tiers(metadata_path, metadata)
     return FrozenArtifact(
         config=config,
         model_path=model_path,
@@ -218,7 +258,30 @@ def load_artifact(config: FrozenConfig, metadata_path: Path) -> FrozenArtifact:
         dataset_sha256=str(metadata["dataset_sha256"]),
         dataset_size_bytes=int(metadata["dataset_size_bytes"]),
         best_iteration=int(metadata["best_iteration"]),
+        sizing_tiers=sizing_tiers,
     )
+
+
+def _load_sizing_tiers(metadata_path: Path, metadata: Mapping) -> SizingTiers | None:
+    """Optional "sizing_tiers" sidecar block. Missing → None (legacy 1x).
+
+    A malformed block raises: silently trading 1x when the owner enabled
+    tiered sizing would misreport live risk, so fail loudly instead.
+    """
+    raw = metadata.get("sizing_tiers")
+    if raw is None:
+        return None
+    try:
+        q95 = float(raw["q95"])
+        q99 = float(raw["q99"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise FrozenArtifactError(metadata_path, f"bad sizing_tiers block: {exc}")
+    threshold = float(metadata["threshold_val_q90"])
+    if not (threshold < q95 < q99):
+        raise FrozenArtifactError(
+            metadata_path, f"sizing_tiers not ordered: q90={threshold} q95={q95} q99={q99}"
+        )
+    return SizingTiers(q95=q95, q99=q99)
 
 
 def train_frozen_artifact(config: FrozenConfig, artifact_date: str) -> FrozenArtifact:

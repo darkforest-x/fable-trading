@@ -57,6 +57,10 @@ FORWARD_COLUMNS: Final = (
     "realized_ret",
     "atr_pct",
     "dense_run_len",
+    # Tiered sizing (owner 2026-07-20). Appended LAST so pre-tier readers of
+    # positional CSVs are unaffected; legacy rows read back as NaN → 1x.
+    "tier",
+    "size_mult",
 )
 OUTCOME_COLUMNS: Final = ("status", "outcome", "label", "exit_offset", "exit_time", "realized_ret")
 
@@ -83,6 +87,9 @@ class ForwardRecord(TypedDict):
     realized_ret: float
     atr_pct: float
     dense_run_len: int
+    # score→size tier of the frozen val distribution (q90_q95/q95_q99/q99_plus)
+    tier: str
+    size_mult: float
 
 
 class ForwardSummaryJson(TypedDict):

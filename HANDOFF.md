@@ -2,7 +2,26 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 2026-07-20 夜（owner：检测主线 = v12）— 最新
+## ⚡ 2026-07-20 深夜（tiered sizing：代码就绪，部署被保证金冲突挡下）— 最新
+
+**Owner 已批准 tiered sizing 上实盘**（q90-95/q95-99/q99+ → 1x/1.5x/2x，
+依据 `analysis/p_weight_centric_val.md`：val 净 +141%→+192%）。本机已完成并通过全部测试：
+- tier 分界写入 `models/frozen_tp5_sl2_swap_yolo_v11_reg_20260718.json` 的 `sizing_tiers`
+  （q95=0.025480 / q99=0.048569，与实验产物一致；老 sidecar 无该块 = 1x，校验兼容）
+- forward_log 末尾追加 `tier` / `size_mult` 列（脉冲检出时打标；老行缺列按 1x 读，
+  merge 不回写旧行；**裁决口径仍按笔数 100 笔不变**）
+- executor `signal_size_mult`：基础仓位 × 乘数，上限 2x，脏数据只会缩不会放
+- 测试：`tests/test_tiered_sizing.py`（24 用例）+ 全套 191 通过
+
+**部署被挡（owner 决策点）**：VPS 实配 equity_times_leverage × max_concurrent=1 ×
+leverage=3 下，1x 基础仓位 = 权益×3 ≈ 277U，保证金已用满全部权益（92.4U）；
+1.5x/2x 下单保证金需 138.7U/184.9U，必吃 OKX 51008 拒单（台账 2026-07-16 有 5 次同码
+先例），高分档信号会整笔丢失。**未部署 VPS，实盘行为零变化**。等 owner 选口径：
+①基础仓位改为预算/2（1x 名义降为 ~139U）②提杠杆（红线，owner 亲手）③充值
+④先只上 tier 记账不动 executor。见
+`docs/learnings/tier-multiplier-needs-margin-headroom-in-base-notional.md`。
+
+## ⚡ 2026-07-20 夜（owner：检测主线 = v12）
 
 **Owner 拍板「主线直接换 v12」**（检测层强制 promote，**未**耗 holdout）：
 - `models/owner_best.pt` = H-TIP v12（tip_hit **0.925** / frozen-F1 **0.650**）

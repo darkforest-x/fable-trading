@@ -97,6 +97,30 @@ def load_actionable_signals(cfg: ExecutorConfig) -> pd.DataFrame:
     return df.reset_index(drop=True)
 
 
+# Owner-approved tier cap (2026-07-20, analysis/p_weight_centric_val.md):
+# q90-q95 / q95-q99 / q99+ → 1x / 1.5x / 2x. The cap guards against a corrupt
+# forward_log ever inflating risk past the approved maximum.
+TIER_SIZE_MULT_CAP = 2.0
+
+
+def signal_size_mult(row: pd.Series) -> float:
+    """Tiered sizing multiplier from the forward-log row.
+
+    Legacy rows (pre-tier log, missing column or NaN) trade the historic 1x.
+    A stamped 0.0 (below-threshold, should never be logged) yields notional 0,
+    which the min_notional gate then skips — corrupt data can only shrink
+    exposure, never inflate it beyond TIER_SIZE_MULT_CAP.
+    """
+    raw = row.get("size_mult")
+    try:
+        mult = float(raw)
+    except (TypeError, ValueError):
+        return 1.0
+    if not math.isfinite(mult):
+        return 1.0
+    return min(max(mult, 0.0), TIER_SIZE_MULT_CAP)
+
+
 def barriers(entry: float, atr_pct: float) -> tuple[float, float]:
     try:
         atr = abs(entry * float(atr_pct))
@@ -434,7 +458,15 @@ def run_once(cfg: ExecutorConfig, *, dry_run: bool = False) -> dict[str, Any]:
             sizing = compute_entry_notional(
                 client, cfg, open_n=open_n, open_notional=open_notional
             )
-            notional = float(sizing.get("notional_usdt") or cfg.notional_usdt)
+            base_notional = float(sizing.get("notional_usdt") or cfg.notional_usdt)
+            # Tiered sizing (owner 2026-07-20): per-signal multiplier stamped
+            # by the forward pulse; legacy rows without the column trade 1x.
+            size_mult = signal_size_mult(row)
+            notional = base_notional * size_mult
+            sizing["tier"] = row.get("tier")
+            sizing["size_mult"] = size_mult
+            sizing["base_notional_usdt"] = base_notional
+            sizing["notional_usdt"] = notional
             summary["last_sizing"] = sizing
             ev = open_one(
                 client, cfg, row, dry_run=dry_run,

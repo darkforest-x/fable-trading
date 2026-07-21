@@ -100,5 +100,16 @@
     "rho_min": 0.5694,
     "net_min": 0.0342,
     "all_folds_net_positive": true
+  },
+  "sizing_tiers": {
+    "q95": 0.025479598857399685,
+    "q99": 0.04856856696929689,
+    "multipliers": {
+      "q90_q95": 1.0,
+      "q95_q99": 1.5,
+      "q99_plus": 2.0
+    },
+    "source": "val-score quantiles of this artifact (same convention as threshold_val_q90); analysis/p_weight_centric_val.md, owner-approved live 2026-07-20",
+    "added_at": "2026-07-20T16:35:00+00:00"
   }
 }
