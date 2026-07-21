@@ -2,7 +2,13 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 2026-07-21（A′ 贴边入账过滤上线）— 最新
+## ⚡ 当前真相（2026-07-22）
+
+- **v13 pad200 训练在跑**（本机 `owner_v13_pad200`；勿打断、勿顺手改生产）。
+- 近期讨论过、现在不做的优化（检测 tip + 判断/执行/风控）统一记在
+  **`analysis/backlog_future_optimizations.md`**——瓶颈仍在 tip；判断层多数要等 tip 通了再拧。
+
+## ⚡ 2026-07-21（A′ 贴边入账过滤上线）
 
 **Owner 批准并已落地**：YOLO live/tip 入账只收扫描窗最后 **N=2** 根
 （`bar_in_win ≥ 198`；按 bar 偏移而非像素%）。KORU 类 tip−3 / EDEN 中段框不再进账本；
