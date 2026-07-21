@@ -27,12 +27,42 @@ WINDOW = 200
 STRIDE = 50
 DEFAULT_CONF = 0.30
 DEFAULT_WEIGHTS = PROJECT_DIR / "models" / "owner_best.pt"
+# A′ tip-edge gate (owner-approved 2026-07-21): only accept boxes whose
+# mapped signal bar sits in the last N bars of the scan window.
+# Source: analysis/p_box_to_bar_lag.md — KORU right_norm≈97.5% still mapped
+# 3 bars back of tip, so the gate is bar-offset based, not pixel %.
+# N=2 → bar_in_win >= window-2 (tip or tip-1; offset 0..1). Does NOT invent
+# tip fires when the model draws 0 boxes on tip/tip-1.
+TIP_EDGE_BARS = 2
 # Base temp dir; each predict call uses a unique filename (thread-safe live scan).
 _TMP_DIR = PROJECT_DIR / "data"
 
 _model_cache: dict[str, Any] = {}
 _predict_lock = threading.Lock()
 _predict_device: str | None = None
+_tip_edge_lock = threading.Lock()
+_tip_edge_rejected_total = 0
+
+
+def reset_tip_edge_rejected() -> None:
+    """Zero the process-wide tip_edge_rejected counter (call before a pulse)."""
+    global _tip_edge_rejected_total
+    with _tip_edge_lock:
+        _tip_edge_rejected_total = 0
+
+
+def get_tip_edge_rejected() -> int:
+    """Boxes dropped by the A′ tip-edge gate since last reset."""
+    with _tip_edge_lock:
+        return _tip_edge_rejected_total
+
+
+def _bump_tip_edge_rejected(n: int = 1) -> None:
+    global _tip_edge_rejected_total
+    if n <= 0:
+        return
+    with _tip_edge_lock:
+        _tip_edge_rejected_total += n
 
 
 def _resolve_predict_device() -> str:
@@ -88,15 +118,21 @@ def scan_series_with_yolo(
     tmp_png: Path | None = None,
     start_from_i: int | None = None,
     mode: str = "full",
+    tip_edge_bars: int = TIP_EDGE_BARS,
 ) -> list[int]:
     """Return sorted signal bar indices for one OHLCV frame (causal at each bar).
 
     mode:
-      - "full": offline dataset build (stride over history)
+      - "full": offline dataset build (stride over history); no tip-edge gate
       - "live": forward/mainline — only windows near the right edge (and
         covering start_from_i..end). Avoids multi-hour full-history scans.
       - "tip": single rightmost window only (H-TIP v12 shadow CPU budget;
         ~1 predict/series vs live's ≤6).
+
+    tip_edge_bars (live/tip only): keep boxes with
+    ``bar_in_win >= window - tip_edge_bars`` (default TIP_EDGE_BARS=2).
+    See analysis/p_box_to_bar_lag.md option A′. Rejected boxes increment
+    ``tip_edge_rejected`` (get_tip_edge_rejected). Set 0 to disable.
     """
     if model is None:
         model = load_yolo_model()
@@ -169,6 +205,9 @@ def scan_series_with_yolo(
             n_fail += len(rendered)
             last_err = f"{type(exc).__name__}: {exc}"
             results = []
+    tip_edge_rejected = 0
+    apply_tip_edge = mode in ("live", "tip") and tip_edge_bars > 0
+    min_bar_in_win = window - tip_edge_bars if apply_tip_edge else 0
     for (start, tf, _), res in zip(rendered, results):
         boxes = res.boxes
         if boxes is None:
@@ -176,6 +215,9 @@ def scan_series_with_yolo(
         for b in boxes.xywhn.cpu().numpy():
             cx, _, w, _ = map(float, b[:4])
             bar_in_win = right_edge_to_bar(cx, w, tf, n_bars=window)
+            if apply_tip_edge and bar_in_win < min_bar_in_win:
+                tip_edge_rejected += 1
+                continue
             signal_i = start + bar_in_win
             if signal_i < WARMUP_BARS or signal_i >= len(frame):
                 continue
@@ -187,6 +229,8 @@ def scan_series_with_yolo(
             if start_from_i is not None and signal_i < start_from_i:
                 continue
             chosen.append(int(signal_i))
+    if tip_edge_rejected:
+        _bump_tip_edge_rejected(tip_edge_rejected)
     if n_fail and n_fail >= len(starts):
         # Only noisy when the whole series failed (data/render/device issue).
         print(f"yolo_live: all {n_fail} windows failed last={last_err}", flush=True)

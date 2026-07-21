@@ -20,6 +20,9 @@
   2. 离线 `tip_hit`（金标重渲）≠ 实盘 tip 出生率；裁决只认墙钟 lag / tip_fresh。
   3. 改入账几何（只收 tip 附近 N 根）是产品决策，需 owner；默认强制 `signal_i=tip`
      会制造假信号。
+- **已落地（2026-07-21，owner 批 A′）**：`TIP_EDGE_BARS=2` 于 live/tip 入账硬门
+  （`bar_in_win >= window-N`）；脉冲汇总 `tip_edge_rejected=`。止血事后行，不抬
+  模型 tip 出生率。
 - **牵连**：`src/judgment/yolo_candidates.py`（`right_edge_to_bar`、live/tip 调度、
   tip 模式 `signal_i+1>=len` 过滤）、三门 30min、报告 `analysis/p_box_to_bar_lag.md`、
   复现打印 `analysis/output/box_to_bar_repro.txt`。

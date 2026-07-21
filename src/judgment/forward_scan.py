@@ -35,7 +35,12 @@ from src.judgment.forward_types import (
     ForwardScanResult,
 )
 from src.judgment.labeling import ATR_PCT_MIN, HORIZON_BARS
-from src.judgment.yolo_candidates import load_yolo_model, scan_series_with_yolo
+from src.judgment.yolo_candidates import (
+    get_tip_edge_rejected,
+    load_yolo_model,
+    reset_tip_edge_rejected,
+    scan_series_with_yolo,
+)
 
 ExitResolver = Callable[[pd.DataFrame, int], Optional[ForwardExit]]
 
@@ -103,6 +108,7 @@ def scan_forward_records(
         f"yolo_mode={yolo_mode} weights={wlabel}",
         flush=True,
     )
+    reset_tip_edge_rejected()
 
     def _discover(job: tuple[str, str, pd.DataFrame]) -> tuple[str, str, pd.DataFrame, pd.DataFrame, list[int]]:
         """Phase 1 (parallel-safe): indicators + YOLO/rules indices only."""
@@ -135,9 +141,11 @@ def scan_forward_records(
             for fut in as_completed(futs):
                 discovered.append(fut.result())
     t_phase2 = time.monotonic()
+    tip_edge_n = get_tip_edge_rejected()
     print(
         f"forward_scan: discover_wall={t_phase2 - t_discover:.0f}s "
-        f"(indicators+render+predict, {workers} workers)",
+        f"(indicators+render+predict, {workers} workers) "
+        f"tip_edge_rejected={tip_edge_n}",
         flush=True,
     )
 

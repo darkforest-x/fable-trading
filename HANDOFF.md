@@ -2,7 +2,15 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 2026-07-21（tiered sizing 真仓上线 · 口径①）— 最新
+## ⚡ 2026-07-21（A′ 贴边入账过滤上线）— 最新
+
+**Owner 批准并已落地**：YOLO live/tip 入账只收扫描窗最后 **N=2** 根
+（`bar_in_win ≥ 198`；按 bar 偏移而非像素%）。KORU 类 tip−3 / EDEN 中段框不再进账本；
+脉冲日志 `tip_edge_rejected=`。**不过滤≠产生 tip**——模型 tip/tip−1 仍 0 框则
+fresh 仍可为 0。见 `analysis/p_box_to_bar_lag.md` A′、`TIP_EDGE_BARS`。
+三门 30min / 阈值 / TP·SL / tiered / forward_log **未改**。
+
+## ⚡ 2026-07-21（tiered sizing 真仓上线 · 口径①）
 
 **Owner 批准**：tiered 上 VPS 实盘；口径 **① 基础仓位减半**（不提杠杆、不充值）。
 
