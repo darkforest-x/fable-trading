@@ -15,12 +15,25 @@
 
 - 上次开源大搜（`p_github_optimize_candidates.md`）**偏检测层**（FiftyOne / ONNX / ChartScan…）。  
 - **本次专搜判断层**：公开仓库里几乎没有「加密 + YOLO 检测 + LightGBM 判断」现成两层方案；能抄的是**通用积木**——概率校准、组合风控规格、回测↔实盘一致性思路。  
-- 详见下文 **「B4. 判断层 · 开源可借鉴」**。
+- 详见下文 **「B4. 判断层 · GitHub 可借鉴」**。
 
 **相关报告**：
 
 - 检测侧：`p_github_optimize_candidates.md`、`p_realtime_yolo_within_bar.md`、`p_chartscanai_review.md`、`p_tip_only_smoke.md`
 - 判断侧：`p_tip_subset_val.md`、`p_weight_centric_val.md`、`p_exit_parity.md`、`p2b_h13_btc_regime.md`、`week_plan_20260720.md`
+
+**文档里已写的「研究课题 / 研究方向」**（本 backlog 不另造一套；细节以议程为准）：
+
+| 文件 | 写了什么 |
+|------|----------|
+| [`docs/RESEARCH_AGENDA.md`](../docs/RESEARCH_AGENDA.md) | **主入口**：研究议程（进化引擎）；H1–H19 + H-TIP；发现级/确认级；优先队列 |
+| [`PROJECT_PLAN.md`](../PROJECT_PLAN.md) | 两层定稿：2a YOLO + 2b LightGBM；triple-barrier；2b 验收标准 |
+| [`docs/DOC_MAP.md`](../docs/DOC_MAP.md) | 活文档索引：`RESEARCH_AGENDA` = 假设状态表 |
+| [`docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md) | 现行：检测→判断（回归排序）→冻结→前向 |
+| [`docs/archive/NEXT_STEPS.md`](../docs/archive/NEXT_STEPS.md) | 历史指针 → 研究假设队列 |
+| [`docs/archive/SESSION_LOG_2026-07-07_09.md`](../docs/archive/SESSION_LOG_2026-07-07_09.md) | 07-09：议程首版 18 假设 + 两级验证 |
+
+判断层假设簇：**出场** H1–H6 · **多 TF/趋势** H7–H9 · **方向/宇宙** H10–H12 · **特征质量** H13–H19。实盘期确认级靠前向，勿 val 挖矿。
 
 ---
 
@@ -199,31 +212,31 @@
 
 ---
 
-### B4. 判断层 · 开源可借鉴（本次 GitHub 专搜）
+### B4. 判断层 · GitHub 可借鉴（2026-07-22 专搜）
 
-**搜了什么**：校准（sklearn / betacal）、信号评分/meta-labeling、组合风险（riskfolio / empyrical）、回测一致性（basana / backtesting.py）、Freqtrade Protections 深化。
+**搜了什么**：概率校准、组合风险/熔断、回测↔实盘一致、特征/时间切分工具；并复查是否存在 OKX+YOLO+LGBM 两层整仓。  
+**没找到什么**：**没有**现成「OKX + YOLO 检测 + LightGBM 判断（+ 新鲜度三门）」整仓可换——公开物是通用积木或 chart-YOLO demo；**不能**指望 GitHub 治 tip 供给。检测向候选见 `p_github_optimize_candidates.md`，此处不重复排期。  
+**纪律**：不打断 v13；GPL/AGPL **不进主依赖**；isotonic→仓位同构已证伪（B1 / `p_weight_centric_val.md`），校准项勿复读失败路径。
 
-**没找到什么**：没有「OKX 15m + 均线密集 YOLO + LightGBM 判断 + 新鲜度门」的现成仓库可 drop-in。公开物多为**通用积木**或股票/动量案例；**不能**指望 GitHub 治 tip 供给。
+| # | 积木 | 地址 | 干嘛 | 借鉴什么（人话） | 何时做 | 许可证注意 |
+|---|------|------|------|------------------|--------|------------|
+| 1 | **概率校准（现有 sklearn，不新装重库）** | [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn) → [`CalibratedClassifierCV`](https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/calibration.py)；LGBM 实践线索 [lightgbm#1562](https://github.com/microsoft/LightGBM/issues/1562) | 把排序分拧成「更像概率」的数，方便读盘/分层，不是换模型 | **怎么用现有栈**：① 本仓已有 `sklearn`；② 时间切分 train→fit LGBM 后，用**未参与调参的校准窗** `CalibratedClassifierCV(est, method="sigmoid", cv="prefit").fit(X_cal, y_cal)`（Platt）；③ 或 `IsotonicRegression`（`weight_centric_backtest.py` 已走过）；④ **校准与仓位映射拆开评估**——禁止把校准 P 再乘成连续仓位同构（isotonic 台阶化已证伪）。可选对照：[betacal/python](https://github.com/betacal/python)（MIT，★少，仅 val-only 实验） | tip 通 + 有前向/校准样本后；现在只读书 | sklearn **BSD-3**（已在依赖，零增量）；betacal 不进生产默认 |
+| 2 | **组合风险：Freqtrade Protections（只抄思路）** | [freqtrade/freqtrade](https://github.com/freqtrade/freqtrade) → `freqtrade/plugins/protections/`（`max_drawdown_protection` / `stoploss_guard` / `cooldown_period` / `low_profit_pairs`）；文档 [Protections](https://www.freqtrade.io/en/stable/plugins/) | 连亏、回撤、冷却：何时停手、歇多久 | **只抄规格清单** → 映射本仓 touch KILL / 临时拒开；对照已有 KILL+tiered+max_concurrent，缺的是「日损% / 连亏 N」**产品阈值**。**禁止** `pip install freqtrade` 或粘 GPL 源码 | 前向新鲜 ≥50–100；规格草案可先写 | **GPL-3.0** → **不引依赖、不 copy-paste**；自写门槛即可 |
+| 3 | **组合优化（可选）vs 更轻自写** | [dcajasn/Riskfolio-Lib](https://github.com/dcajasn/Riskfolio-Lib)；报表指标可选 [quantopian/empyrical](https://github.com/quantopian/empyrical) / empyrical-reloaded | 多资产权重、CVaR、风险平价；或 maxDD/Sharpe 报表 | 本仓是**稀疏 tip + 低并发**，不是全市场再平衡——Riskfolio **ROI 低**（还拖 CVXPY）。优先自写敞口/同币冷却/日损熔断；empyrical 类最多作看板指标，或 20 行自写回撤 | **更远**；默认自写 | Riskfolio **BSD-3**（可引但重）；empyrical **Apache-2.0**（原版维护停） |
+| 4 | **回测↔实盘一致：Basana（思路）** | [gbeced/basana](https://github.com/gbeced/basana) | async 事件驱动；回测 exchange 与 live 尽量同一策略路径（偏加密） | **抄边界清单**：信号时序、entry 代理 vs merge、费用、并发帽；对照 forward_log vs executor。**不**整框替换（OKX tip、三门、tiered 是本仓专有） | 前向 100 后再做一致性审计 | LICENSE 正文 **Apache-2.0**（GitHub SPDX 偶显 Other——以文件为准）；建议思路级，勿整仓迁入 |
+| 5 | **回测引擎对照（仅思路）** | [polakowo/vectorbt](https://github.com/polakowo/vectorbt)；[kernc/backtesting.py](https://github.com/kernc/backtesting.py) | 向量化 / 轻量策略回测，快速扫参数与成本假设 | 对照「成本、滑点、并发槽」叙事是否自洽；**不**换掉本仓障碍标签回测。成功标准仍是 top-decile 净收益 + 置换 p | tip 有成交、要对齐成本/槽位口径时当检查清单 | vectorbt：**Apache-2.0 + Commons Clause**（商用/转售受限）；backtesting.py：**AGPL-3.0** → **禁止引入**，只读文档 |
+| 6 | **特征/时间切分（轻量、少污染）** | 首选已有 sklearn [`TimeSeriesSplit`](https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/model_selection/_split.py)（`gap=`）；可选 [eslazarev/purged-cross-validation](https://github.com/eslazarev/purged-cross-validation)（`purgedcv`：PurgedKFold / embargo / CPCV） | 防标签重叠泄漏的 CV；本仓判断训练已有双边 purge（`p2b_judgment_audit.md`） | **默认不新装**：卫生复查用现有时间切分 + docstring。若要多折敏感性 / CPCV 路径再评估 `purgedcv`（sklearn 协议友好）。**不要**为「看起来更 AFML」把主训练改随机折 | 池重建 / 新特征 PR 前做卫生；CPCV 属更远诊断 | sklearn **BSD-3**（已有）；purgedcv **MIT**（可引非必须，星少先读） |
 
-| # | 项目 | 地址 | 干嘛的 | 对判断层哪条痛点 | 借鉴方式 | 许可证风险 | 现在 vs 等 tip |
-|---|------|------|--------|------------------|----------|------------|----------------|
-| 1 | **scikit-learn calibration** | [sklearn calibration](https://scikit-learn.org/stable/modules/calibration.html) / [CalibratedClassifierCV](https://github.com/scikit-learn/scikit-learn) | Platt（sigmoid）/ isotonic 后校准 | 校准与 sizing；本仓 isotonic→仓位已踩坑 | **已有依赖可直接用**；若再实验优先试 **sigmoid/Platt on raw margin**，且**校准与仓位映射拆开评估**；勿默认 isotonic | BSD | **等 tip**（小样本更易过拟合）；现在只读书 |
-| 2 | **betacal** | https://github.com/betacal/python | Beta 校准（比 logistic 更适合「分太极端/太挤」） | 同上；isotonic 台阶的替代假设 | 可选 `pip install betacal` 做 **val-only 对照**；不进生产默认；单变量 | MIT | **等 tip** + 有足够校准样本；★少、维护慢 → 实验库 |
-| 3 | **meta-labeling 实践**（例） | https://github.com/gautierpetit/meta-labeling-alpha-filter ；综述向 https://github.com/hudson-and-thames/meta-labeling | 主策略出方向、二级模型估「值不值得做」+ 概率仓位 | 本仓 2a/2b **已经是** meta 结构（YOLO=侧，LGBM=滤）；痛点是 tip 子集供给不是缺二级模型 | **只抄评估卫生**：PIT、校准后再门槛、成本不对称；**不要**再叠第三层元模型赶时髦 | 各仓自查（案例仓杂） | **等 tip**；结构已齐，缺数据 |
-| 4 | **Freqtrade Protections** | https://www.freqtrade.io/en/stable/plugins/ （源码在 freqtrade/freqtrade） | MaxDrawdown / StoplossGuard / CooldownPeriod / LowProfitPairs | 组合熔断规格 | **只抄思路与参数表** → 本仓 KILL/拒开；**不引 GPL 依赖、不换执行器** | **GPL-3.0** → 严禁进主依赖 | **更远**（前向 ≥50–100）；规格可先写草案 |
-| 5 | **Riskfolio-Lib** | https://github.com/dcajasn/Riskfolio-Lib | 组合优化 / 风险平价 / CVaR 等（CVXPY） | 多仓分配、组合风险 | **过重**（求解器栈）；本仓 max_concurrent=1 时几乎用不上。最多离线算「若开多槽」的热度图 | BSD-3 | **更远**或干脆不引；手写回撤/连亏计数更贴 |
-| 6 | **empyrical**（或 empyrical-reloaded） | https://github.com/quantopian/empyrical | max_drawdown、Sharpe 等收益序列指标 | 熔断阈值、前向报表 | 可作 **报表指标** 轻量参考；也可 20 行自写回撤。原版维护停，reloaded 社区续 | Apache-2.0 | tip 有成交后做看板指标即可 |
-| 7 | **Basana** | https://github.com/gbeced/basana | 事件驱动；回测 exchange ↔ live 同策略路径 | 回测↔前向一致性 | **思路**：边界清单；**不可**替换本仓 executor/tip 路径 | Apache-2.0（以 LICENSE 为准） | **更远**（前向 100 后审计） |
-| 8 | **backtesting.py** | https://github.com/kernc/backtesting.py | 轻量 K 线策略回测 | 一致性/可视化对照 | **只读思路**；本仓已有 maker_val_sim / weight_centric | **AGPL-3.0** → **不引依赖** | 不接入；免污染 |
+**结构提醒（非新仓）**：公开 meta-labeling 案例（如 [gautierpetit/meta-labeling-alpha-filter](https://github.com/gautierpetit/meta-labeling-alpha-filter)）说明「一级出侧、二级估值不值」——本仓 2a/2b **已经是**该结构；缺的是 tip 供给，不是再叠第三层元模型。
 
-**补充（上次已提、判断相关）**：`pycoingecko`（MIT）→ BTC dominance 草稿特征；资金费率本仓已有。仍须单变量 + owner 立项进 2b。
+**补充（判断相关、上次已提）**：`pycoingecko`（MIT）→ BTC dominance 草稿；资金费率本仓已有。仍须单变量 + owner 立项进 2b。
 
-**推荐排序（判断层开源）**：
+**推荐排序（判断层 GitHub）**：
 
 1. 先把 **tip 子集口径**写进预期（零依赖）。  
 2. tip 通后：sklearn **Platt** 对照（避开已失败的 isotonic→仓位）；Freqtrade **熔断规格草案**（不装包）。  
-3. 再远：Basana 一致性审计清单；empyrical 类指标进报表。  
-4. 默认否决：Riskfolio 进生产、backtesting.py/Freqtrade **整框**、再叠一层 meta-labeling 赶时髦。
+3. 再远：Basana 一致性审计；自写/empyrical 类指标进报表；必要时读 `purgedcv`。  
+4. 默认否决：Riskfolio/vectorbt/backtesting.py/Freqtrade **进生产或整框**；再叠一层 meta-labeling 赶时髦。
 
 ---
 
@@ -244,5 +257,5 @@ v13 训完 → tip-smoke / 成败预览（owner 目视）
 
 - 本 backlog **不是**排期承诺。  
 - 「等 tip」不是永久拖延特征卫生；**改特征表时**仍要做无前视复查。  
-- 判断层 GitHub 专搜结论：**积木有、整机方案无**；上次大搜偏检测属实，本轮已补。  
+- 判断层 GitHub 专搜结论：**积木有、整机方案无**（B4）；上次大搜偏检测属实，本轮已补校准/风控/回测一致/时间切分。  
 - holdout#6 与「现在不做池重建」并存：下次想重建必须先问 owner 并记账。
