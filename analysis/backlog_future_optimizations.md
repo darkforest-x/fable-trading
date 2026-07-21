@@ -1,6 +1,6 @@
 # 未来优化 backlog（现在不做）
 
-**日期**：2026-07-22  
+**日期**：2026-07-22（同日补：判断层详写 + 判断层专搜 GitHub）  
 **用途**：把近期讨论过、**此刻不落地**的优化项记清楚，避免下次会话「又从头聊一遍」。  
 **纪律**：不改生产默认、不打断 v13 训练、不自动 promote、不清 forward_log。
 
@@ -9,19 +9,18 @@
 ## 一句话先说清楚
 
 **当前瓶颈在检测层 tip 出生率≈0**（盘口无后文窗几乎点不着火）。  
-判断层 / 执行 / 风控里多数「看起来很香」的优化，要等 tip 稳定开火后再做——否则是在优化一个几乎吃不到的子集（见 tip 子集折扣 ~0.05）。  
-检测层条目仍保留；下面另开「判断层 / 执行与风控」专节。
+判断层 / 执行 / 风控里多数「看起来很香」的优化，要等 tip 稳定开火后再做——否则是在优化一个几乎吃不到的子集（见 tip 子集折扣 ~0.05）。
 
-**相关报告（已写过的详细版）**：
+**诚实声明（关于 GitHub）**：
 
-- `analysis/p_github_optimize_candidates.md`
-- `analysis/p_realtime_yolo_within_bar.md`
-- `analysis/p_chartscanai_review.md`
-- `analysis/p_tip_only_smoke.md`
-- `analysis/p_tip_subset_val.md`
-- `analysis/p_exit_parity.md`
-- `analysis/p_weight_centric_val.md`
-- `analysis/p_v13_real_tip_collect_plan.md`
+- 上次开源大搜（`p_github_optimize_candidates.md`）**偏检测层**（FiftyOne / ONNX / ChartScan…）。  
+- **本次专搜判断层**：公开仓库里几乎没有「加密 + YOLO 检测 + LightGBM 判断」现成两层方案；能抄的是**通用积木**——概率校准、组合风控规格、回测↔实盘一致性思路。  
+- 详见下文 **「B4. 判断层 · 开源可借鉴」**。
+
+**相关报告**：
+
+- 检测侧：`p_github_optimize_candidates.md`、`p_realtime_yolo_within_bar.md`、`p_chartscanai_review.md`、`p_tip_only_smoke.md`
+- 判断侧：`p_tip_subset_val.md`、`p_weight_centric_val.md`、`p_exit_parity.md`、`p2b_h13_btc_regime.md`、`week_plan_20260720.md`
 
 ---
 
@@ -29,103 +28,221 @@
 
 | 桶 | 含义 |
 |----|------|
-| **现在不做** | 有结论或会分心；代码开关可留，默认关 / 不切主线 |
-| **等 tip 通了 / 等 v13 后** | tip_fire 稳定 >0，或 v13 pad200 训完并过 owner 目视后再立项 |
-| **更远** | 前向新鲜样本够多、或硬件/产品条件具备后再看 |
-
-每项一行：**是什么 · 为何暂缓 · 何时再看 · 是否需 owner**。
+| **现在不做** | 有结论或会分心；开关可留，默认关 |
+| **等 tip 通了 / 等 v13 后** | tip_fire 稳定 >0，或 v13 过 owner 目视后再立项 |
+| **更远** | 前向新鲜样本够多，或硬件/产品条件具备 |
 
 ---
 
-## A. 检测层（2a / YOLO / tip）
+## A. 检测层（2a / YOLO / tip）— 摘要
 
-### A1. 现在不做
+详细表格仍以检测几何/加速为主（上次已评）。要点：
 
-| 项 | 是什么 | 为何暂缓 | 何时再看 | 需 owner？ |
-|----|--------|----------|----------|------------|
-| **永久 tip-only 主线** | 脉冲只扫 tip 窗 | tip-smoke：强制 tip 仍 0/27 开火；不抬 tip_fire，只省 CPU | tip 通了若要压 discover_wall，再议 shadow/临时 tip | **是**（切主线） |
-| **RIGHT_BIAS 默认开** | min_gap 内留最右框 | 可选开关已有；不指望抬 tip_fresh | tip 有框但仍偏左时再 A/B | 否（开默认时最好点头） |
-| **降 TIP_CONF 当解药** | tip 窗 conf 0.22 vs 0.30 | 诊断：0/27 与 1/32 无增益；瓶颈是几何不是阈值 | tip 有大量近阈框时再扫 | 否 |
-| **ChartScanAI 权重/BuySell** | 外来 K 线 YOLO Demo | 事后形态同构失败；增强开着违铁律 5；**仅作警示** | 永不接主线；只当反面教材 | — |
-| **VLM-AutoYOLO 等 AGPL 自动标** | VLM→框→YOLO | AGPL + 重依赖，污染发布面 | 不进主依赖 | — |
-| **bar 内未收盘推理（路线 B）** | 形成中 K 就 detect | 与 30min 预算、判断层特征因果冲突；今日卡的是 L3 几何 | tip 收盘窗 tip_fire>0 后再试点 | **是** |
-| **1m/5m 触发再确认 15m（路线 C）** | 更细周期喊话 | 易炸脉冲预算；语义变大 | tip 通了 + 影子旁路设计后 | **是** |
-| **TensorRT / DeepStream / Savant** | GPU 视频流加速 | VPS 未必有 CUDA；不治 tip_fire；架构错配 CSV 脉冲 | 证明有 GPU **且** discover_wall 成新鲜门唯一阻塞 | 否（上生产栈时点头） |
+| 桶 | 项 | 一句话 |
+|----|-----|--------|
+| 现在不做 | 永久 tip-only / 默认 RIGHT_BIAS / 降 TIP_CONF 当解药 | tip-smoke 已证伪抬 tip_fire |
+| 现在不做 | ChartScanAI 权重 | **仅警示**；不接主线 |
+| 现在不做 | bar 内未收盘 / TensorRT·DeepStream | 不治出生率；要 tip>0 + 硬件证据 |
+| 等 v13 | tip-smoke 复测、真实 tip 成败扩采、是否切主线 | **切主线需 owner** |
+| 等 tip | FiftyOne / CVAT / FDAL / ONNX / OpenVINO | 策展或加速，不抬 tip_fire |
 
-### A2. 等 tip 通了 / 等 v13 后
-
-| 项 | 是什么 | 为何暂缓 | 何时再看 | 需 owner？ |
-|----|--------|----------|----------|------------|
-| **v13 tip-smoke 复测** | pad200 权重上再跑 tip 强制扫描 | 训练还在跑；现在测的是 v12 | v13 训完 → 本机/VPS tip-smoke | 否（切主线才要） |
-| **真实 tip 成败采集扩采** | tip/+1/+2 带框预览 → 金标 | 小样已跑；扩采张数未定 | owner 目视小样后 | **是**（张数/是否开训） |
-| **是否把某检测权重切主线** | promote `owner_best` | 不自动 promote | tip 证据够 + owner 点头 | **是** |
-| **FiftyOne 难例队列** | 可视化 tip 漏/误检 | 不抬 tip_fire；纯策展 | 随时可做本机；不挡 v13 | 否 |
-| **CVAT（备选打标）** | 替代/并存 Label Studio | LS Community 已是 Apache-2.0；不必恐慌迁 | LS UX 卡住时 | 换工具时点头 |
-| **FDAL / PPAL 主动学习思路** | 难例采样策略 | 要 unlabeled tip 池 + 标注预算 | v13/盘口打标包启动后 | **是**（扩标立项） |
-| **ONNX Runtime** | 跨平台推理加速 | tip≈0 时加速=省空转 | tip 稳定且 discover 仍偏慢 | 否（先 shadow 测速） |
-| **OpenVINO** | Intel CPU 加速 | 先确认 VPS CPU；排在 ONNX 后 | ONNX 有收益且 VPS 是 Intel | 否 |
-
-### A3. 更远（检测）
-
-| 项 | 是什么 | 为何暂缓 | 何时再看 | 需 owner？ |
-|----|--------|----------|----------|------------|
-| **每 worker 独立 YOLO 实例并行** | 压 discover ~1.7x | 内存/复杂度；今日最坏龄已 <30 | tip 通了仍墙钟紧 | 否 |
-| **回看窗 6→3–4** | 再砍扫描窗 | tip 起来后再量延迟表 | tip 通后 + 新延迟预算 | 三门若动则 **是** |
+完整检测行表见历史版本段落结构；本轮重点扩 **B**。
 
 ---
 
-## B. 判断层 / 执行与风控（2b + 实盘）
+## B. 判断层 / 执行与风控（详写）
 
-> **为何多数「现在不做」**：实盘能吃到的近似 tip 可检子集；val 上 tip_strict 净收益相对全量折扣约 **0.05**（`p_tip_subset_val.md`）。通 tip 前再拧判断层，很难复现 accept/全量回测的漂亮数字。
+> 实盘能吃到的近似 tip 可检子集。val 上 tip_strict 净收益 / 全量净 ≈ **0.0465**（`p_tip_subset_val.md`）。  
+> **通 tip 前别指望复现 accept / 全量回测的漂亮数字。** 确认级仍是前向新鲜 100 笔，不是 val PF。
 
-### B1. 现在不做
+### B0. 口径前提：tip 子集折扣 + 前向 100
 
-| 项 | 是什么 | 为何暂缓 | 何时再看 | 需 owner？ |
-|----|--------|----------|----------|------------|
-| **指望 tip 子集复现 accept 收益** | 用全量 PF/净收益当实盘预期 | 折扣 ~0.0465；供给塌缩为主因 | tip 供给上来后再对账 tip 子集口径 | —（口径提醒，非实验） |
-| **v12/v13 候选池重建 + 判断重冻 + accept** | 新检测池 → 重建 judgment → 冻阈值 → accept；**holdout#6** | 检测主线刚切 v12、判断仍 v11；池重建耗 holdout；v13 未定 | tip/检测稳定后单独立项 | **是**（含 holdout 消耗记账） |
-| **isotonic 分数校准 → 仓位** | score 校准成 P 再乘仓 | weight-centric：台阶化，阈值附近静默弃单（已证伪） | 不重试同构；换法要新假设 | **是**（新仓位实验） |
-| **判断层大特征包 / 多变量打包** | 一次塞一堆特征 | 违单变量纪律；tip 未通时信号噪声 | tip 通后按单变量排期 | **是**（打包时） |
-| **动 holdout「看一眼」** | 验收窗外偷看 | 铁律 1；#6 留给池 cutover 终审 | 仅最终验收且书面批准 | **是** |
+| 字段 | 内容 |
+|------|------|
+| **是什么问题** | 主线 val/accept 漂亮数字大量来自「扫描窗中部、事后才看得见」的盒子；live tip + 30min 门只能吃到约 **5%** 量级的群体净收益（折扣~0.05）。把全量 PF 当实盘预期会高估约 **20×**。 |
+| **为什么现在先不做「拧 2b 追全量」** | tip_fire≈0 时，再校准、再加特征、再熔断，优化的是几乎空集合。 |
+| **怎么做（本仓已有）** | `scripts/tip_subset_backtest.py`；报告 `analysis/p_tip_subset_val.md`；看板/周报应写 tip 子集口径，不写全量净当实盘。前向：`data/forward_log.csv` + 新鲜度三门 30min；确认级 = 新鲜 100 笔。 |
+| **需 owner？** | 改成功标准叙事/成本假设时 **是**。 |
+| **耗 holdout？** | tip 子集 val 实验未碰 holdout；**前向 100 不是 holdout**。 |
+
+---
+
+### B1. 现在不做（判断层）
+
+#### 1）v12/v13 候选池重建 + 判断重冻 + accept（holdout#6）
+
+| 字段 | 内容 |
+|------|------|
+| **是什么问题** | 检测主线已是 v12，判断层仍冻在 **v11 池**（`frozen_tp5_sl2_swap_yolo_v11_reg_20260718`）。检测换了、判断候选分布没换 → 分数/阈值可能错位；要「真·同池」需重建 judgment 数据集、重训/重冻、accept。 |
+| **为什么现在先不做** | (1) tip 未通，重建池也喂不饱实盘；(2) accept 级动作会触发 **holdout 第 6 次消耗**；(3) v13 pad200 还在训，过早重建可能白做。 |
+| **怎么做（本仓已有）** | `src/judgment/build_dataset.py`（输出文件名带池名）→ `src/judgment/train.py`（不加 `--eval-holdout`）→ `scripts/freeze_model.py` → cutover 脚本如 `scripts/cutover_v12_after_rescan.sh`；对照 `analysis/week_plan_20260720.md` 里「v12 池 + holdout#6」项；报告须记「第 N 次消耗 holdout」。 |
+| **需 owner？** | **是**（立项 + 批准耗 holdout + 是否 promote ACTIVE）。 |
+| **耗 holdout？** | **是**（accept/终审配置；当前账本目标为 **#6**）。发现级 val-only 可先跑，但最终验收必批。 |
+
+#### 2）isotonic（及同构「校准分→仓位」）再试一轮
+
+| 字段 | 内容 |
+|------|------|
+| **是什么问题** | 想把 LGBM 排序分变成「概率」再乘仓位；直觉好听。 |
+| **为什么现在先不做** | `p_weight_centric_val.md` + learning：isotonic 把分压成**台阶**，阈值附近交易被静默弃单，输给 plain tiered。同构方案禁止「再碰运气」。 |
+| **怎么做（若将来换假设）** | 已有对照：`scripts/weight_centric_backtest.py`；学习笔记 `docs/learnings/isotonic-sizing-collapses-rank-scores-to-steps.md`。若试 **Platt/beta** 等，必须单变量、train 窗拟合、val 看是否仍弃单——见 B4。 |
+| **需 owner？** | **是**（新仓位实验）。 |
+| **耗 holdout？** | **否**（发现级）；上生产仓位公式才另批。 |
+
+#### 3）判断层大特征包 / 多变量打包
+
+| 字段 | 内容 |
+|------|------|
+| **是什么问题** | 一次塞 dominance + funding + 新技术因子，想「一次到位」。 |
+| **为什么现在先不做** | 违单变量纪律；tip 未通时信号噪声主导，归因不能。 |
+| **怎么做** | `src/judgment/features.py` 单特征 PR；先例打包须 PROJECT_PLAN 记录 + owner 批（2b-v2 先例）。 |
+| **需 owner？** | 打包时 **是**；单变量实验立项也建议点头。 |
+| **耗 holdout？** | 训练/调参 **否**；最终验收才 **是**。 |
+
+#### 4）动 holdout「看一眼」
+
+| 字段 | 内容 |
+|------|------|
+| **是什么问题** | 想确认新池/新特征在验收窗的手感。 |
+| **为什么现在先不做** | 铁律 1：看一眼 = 消耗一次；#6 留给池 cutover 终审。 |
+| **怎么做** | `train.py` **不加** `--eval-holdout` 即安全；要评必须对话书面批准 + 报告记账。 |
+| **需 owner？** | **是**。 |
+| **耗 holdout？** | 一旦评就是 **是**。 |
+
+---
 
 ### B2. 等 tip 通了 / 等 v13 后
 
-| 项 | 是什么 | 为何暂缓 | 何时再看 | 需 owner？ |
-|----|--------|----------|----------|------------|
-| **分数→仓位深化** | tiered 已上线（口径①）；更多档/连续映射 | isotonic 已失败；tiered 需前向样本验证 | tip 有成交后看前向分层 PF | **是**（改档/改公式） |
-| **regime 特征（BTC dominance 等）** | `pycoingecko` 等轻量全局状态；资金费率本仓已有 | 须单变量立项；不进 ACTIVE 草稿可先行 | tip 通后 / 判断层空窗 | **是**（进 2b） |
-| **特征卫生 / 无前视复查** | 列与窗口 docstring、泄漏审计 | tip 未通时优先检测；卫生是常备债 | 任何新特征 PR 前；池重建前必做 | 否（改特征表时） |
-| **单特征基线重跑** | 新池上对照单特征 vs LGBM | 池换了才有意义 | v12/v13 池重建同批 | 否（报告必报） |
-| **成本口径对齐** | 看板/回测常 maker；实盘易 taker/滑点 | 混用会美化纸面 | tip 有成交后做真实成本表 | **是**（改成功标准假设） |
-| **仓位口径与回测 10 槽对齐** | 回测常 10 并发单位；实盘 max_concurrent=1 + tiered | 苹果对橘子；确认级靠前向 | tip 通后统一叙事或改仿真帽 | **是**（改仿真/并发） |
+#### 5）分数 → 仓位深化（tiered 已上线一部分）
 
-### B3. 更远（判断 / 执行）
+| 字段 | 内容 |
+|------|------|
+| **是什么问题** | 高分该不该加仓；如何与保证金/权益对齐。 |
+| **为什么暂缓深化** | 口径① tiered 已上 VPS；q99+ val 样本少；**前向分层 PF 还没数据**（tip≈0）。isotonic 路线已证伪。 |
+| **怎么做（本仓已有）** | `src/judgment/frozen.py` 的 `SizingTiers`；sidecar `sizing_tiers`；`scripts/weight_centric_backtest.py` 对照；learnings：`tier-multiplier-needs-margin-headroom-in-base-notional.md`。改档/改公式先 shadow 再真仓。 |
+| **需 owner？** | **是**（改档、改 unit 公式、提杠杆/充值）。 |
+| **耗 holdout？** | **否**。 |
 
-| 项 | 是什么 | 为何暂缓 | 何时再看 | 需 owner？ |
-|----|--------|----------|----------|------------|
-| **单一出场实现重构** | 回测↔前向出场已 parity（显式传参）；再抽成一份实现 | 等价已测过；重构有回归风险 | 要改出场规则/障碍参数前 | **是**（动 TP/SL 语义） |
-| **组合熔断（回撤/连亏）** | Freqtrade Protections / CryptoGuardian **只抄思路** | 已有 KILL + tiered + max_concurrent；日损%/连亏 N 是产品决策 | 前向新鲜 ≥50–100 后再立项 | **是**（真金） |
-| **Basana 事件驱动同构思路** | 回测↔实盘同一 API 边界 | 不可整框换 executor | 前向 100 后再做一致性审计清单 | **是**（涉执行） |
-| **Freqtrade 整框替换** | 用 FT 当主执行 | 本仓 tip/三门/tiered 专有；GPL → 不引依赖 | **不做替换**；熔断只抄规格 | — |
+#### 6）regime 特征（资金费率已有；BTC dominance 等）
+
+| 字段 | 内容 |
+|------|------|
+| **是什么问题** | 大盘状态可能调节密集启动胜率；想加全局特征。 |
+| **为什么暂缓进 ACTIVE** | H13 BTC regime 斜率类增益≈噪声（`p2b_h13_btc_regime.md`）；dominance 须单变量立项；tip 未通时看不到实盘交互。 |
+| **怎么做（本仓已有）** | 资金费率：`src/data/fetch_funding.py`（已有，勿重复造轮）。dominance 草稿：`pycoingecko`（见 B4）→ CSV → `features.py` 一列 → `train.py` val-only。脚本参考 `scripts/h13_btc_regime.py`。 |
+| **需 owner？** | 进 2b / ACTIVE **是**；纯离线草稿可先写不进主线。 |
+| **耗 holdout？** | 发现级 **否**。 |
+
+#### 7）特征卫生 / 无前视复查 + 单特征基线
+
+| 字段 | 内容 |
+|------|------|
+| **是什么问题** | 新列是否偷看未来；新池上 LGBM 是否只是赢了单特征噪声。 |
+| **为什么不「现在大扫」** | tip 优先；但 **改特征表时**卫生不是可选项。 |
+| **怎么做** | `features.py` docstring 写清列与窗口；时间切分 + purge；报告必报单特征基线（质量标准）。池重建同批重跑基线。 |
+| **需 owner？** | 改特征表建议知会；**不**自动耗 holdout。 |
+| **耗 holdout？** | **否**（直到验收）。 |
+
+#### 8）成本口径（看板 maker vs 实盘 taker/滑点）
+
+| 字段 | 内容 |
+|------|------|
+| **是什么问题** | 纸面常用 maker 0.06%/往返更低成本；实盘 tip 急单可能 taker + 滑点 → 纸面美化。 |
+| **为什么暂缓改成功标准** | tip 无成交时改口径只改叙事；先记债。 |
+| **怎么做** | `src/backtest/maker_val_sim.py`；weight_centric / tip_subset 已有 0.2%/0.3% 对照；成交后用 forward_log 实测往返成本表，再决定看板默认假设。 |
+| **需 owner？** | **是**（改成功标准成本假设）。 |
+| **耗 holdout？** | **否**。 |
+
+#### 9）仓位口径与回测「10 槽」对齐
+
+| 字段 | 内容 |
+|------|------|
+| **是什么问题** | 回测常按 ~10 并发单位仿真；实盘 `max_concurrent=1` + tiered → 收益曲线形状不同，不能直接比 PF。 |
+| **为什么暂缓** | tip 通前没有「真实槽位占用」序列。 |
+| **怎么做** | `maker_val_sim` / weight_centric 的并发帽参数；executor 配置对照；统一叙事或改仿真帽到 1（单变量）。 |
+| **需 owner？** | **是**（改仿真帽或提高实盘并发）。 |
+| **耗 holdout？** | **否**。 |
 
 ---
 
-## C. 推荐再开聊的顺序（备忘）
+### B3. 更远（判断 / 执行）
+
+#### 10）单一出场实现重构
+
+| 字段 | 内容 |
+|------|------|
+| **是什么问题** | 回测与前向各有一套出场路径；已靠**显式传参**做到 parity（`p_exit_parity.md`），但不是「一份代码」。 |
+| **为什么暂缓** | 等价已测；重构有回归风险；tip 未通时改出场 ROI 低。 |
+| **怎么做** | `src/judgment/forward_scan.py` 的 `resolve_forward_exit*`；`tests/test_exit_parity.py`；learning：`exit-parity-holds-only-via-explicit-call-args.md`。抽共享函数后必须绿测再动 TP/SL。 |
+| **需 owner？** | 动 TP/SL/障碍语义 **是**；纯重构知会即可。 |
+| **耗 holdout？** | **否**（除非顺带验收新障碍）。 |
+
+#### 11）组合熔断（回撤 / 连亏）
+
+| 字段 | 内容 |
+|------|------|
+| **是什么问题** | 已有 `executor_KILL`、tiered、max_concurrent=1；缺「日损% / 连亏 N / 回撤超阈 → 自动冷却」产品规则。 |
+| **为什么暂缓** | 真金规则；样本太少时阈值无法校准；易误杀唯一 tip。 |
+| **怎么做** | **只抄规格** 自 Freqtrade Protections（见 B4）：MaxDrawdown / StoplossGuard / CooldownPeriod → 映射到本仓 touch KILL 或临时拒开。禁止 `pip install freqtrade` 进主依赖（GPL）。 |
+| **需 owner？** | **是**（真金，逐次授权）。 |
+| **耗 holdout？** | **否**。 |
+
+#### 12）回测↔前向一致性（Basana 思路，不换框）
+
+| 字段 | 内容 |
+|------|------|
+| **是什么问题** | 标签回放、入场代理、成本扣法与 live executor 边界是否漂移。 |
+| **为什么暂缓** | 出场 parity 已做；整框换 Basana 成本高且无 YOLO 层。 |
+| **怎么做** | 审计清单：信号时序、entry 代理 vs merge 回填、费用、并发帽；对照 Basana「策略同路径、exchange 可替换」思路（B4）。 |
+| **需 owner？** | 改执行边界 **是**。 |
+| **耗 holdout？** | **否**。 |
+
+---
+
+### B4. 判断层 · 开源可借鉴（本次 GitHub 专搜）
+
+**搜了什么**：校准（sklearn / betacal）、信号评分/meta-labeling、组合风险（riskfolio / empyrical）、回测一致性（basana / backtesting.py）、Freqtrade Protections 深化。
+
+**没找到什么**：没有「OKX 15m + 均线密集 YOLO + LightGBM 判断 + 新鲜度门」的现成仓库可 drop-in。公开物多为**通用积木**或股票/动量案例；**不能**指望 GitHub 治 tip 供给。
+
+| # | 项目 | 地址 | 干嘛的 | 对判断层哪条痛点 | 借鉴方式 | 许可证风险 | 现在 vs 等 tip |
+|---|------|------|--------|------------------|----------|------------|----------------|
+| 1 | **scikit-learn calibration** | [sklearn calibration](https://scikit-learn.org/stable/modules/calibration.html) / [CalibratedClassifierCV](https://github.com/scikit-learn/scikit-learn) | Platt（sigmoid）/ isotonic 后校准 | 校准与 sizing；本仓 isotonic→仓位已踩坑 | **已有依赖可直接用**；若再实验优先试 **sigmoid/Platt on raw margin**，且**校准与仓位映射拆开评估**；勿默认 isotonic | BSD | **等 tip**（小样本更易过拟合）；现在只读书 |
+| 2 | **betacal** | https://github.com/betacal/python | Beta 校准（比 logistic 更适合「分太极端/太挤」） | 同上；isotonic 台阶的替代假设 | 可选 `pip install betacal` 做 **val-only 对照**；不进生产默认；单变量 | MIT | **等 tip** + 有足够校准样本；★少、维护慢 → 实验库 |
+| 3 | **meta-labeling 实践**（例） | https://github.com/gautierpetit/meta-labeling-alpha-filter ；综述向 https://github.com/hudson-and-thames/meta-labeling | 主策略出方向、二级模型估「值不值得做」+ 概率仓位 | 本仓 2a/2b **已经是** meta 结构（YOLO=侧，LGBM=滤）；痛点是 tip 子集供给不是缺二级模型 | **只抄评估卫生**：PIT、校准后再门槛、成本不对称；**不要**再叠第三层元模型赶时髦 | 各仓自查（案例仓杂） | **等 tip**；结构已齐，缺数据 |
+| 4 | **Freqtrade Protections** | https://www.freqtrade.io/en/stable/plugins/ （源码在 freqtrade/freqtrade） | MaxDrawdown / StoplossGuard / CooldownPeriod / LowProfitPairs | 组合熔断规格 | **只抄思路与参数表** → 本仓 KILL/拒开；**不引 GPL 依赖、不换执行器** | **GPL-3.0** → 严禁进主依赖 | **更远**（前向 ≥50–100）；规格可先写草案 |
+| 5 | **Riskfolio-Lib** | https://github.com/dcajasn/Riskfolio-Lib | 组合优化 / 风险平价 / CVaR 等（CVXPY） | 多仓分配、组合风险 | **过重**（求解器栈）；本仓 max_concurrent=1 时几乎用不上。最多离线算「若开多槽」的热度图 | BSD-3 | **更远**或干脆不引；手写回撤/连亏计数更贴 |
+| 6 | **empyrical**（或 empyrical-reloaded） | https://github.com/quantopian/empyrical | max_drawdown、Sharpe 等收益序列指标 | 熔断阈值、前向报表 | 可作 **报表指标** 轻量参考；也可 20 行自写回撤。原版维护停，reloaded 社区续 | Apache-2.0 | tip 有成交后做看板指标即可 |
+| 7 | **Basana** | https://github.com/gbeced/basana | 事件驱动；回测 exchange ↔ live 同策略路径 | 回测↔前向一致性 | **思路**：边界清单；**不可**替换本仓 executor/tip 路径 | Apache-2.0（以 LICENSE 为准） | **更远**（前向 100 后审计） |
+| 8 | **backtesting.py** | https://github.com/kernc/backtesting.py | 轻量 K 线策略回测 | 一致性/可视化对照 | **只读思路**；本仓已有 maker_val_sim / weight_centric | **AGPL-3.0** → **不引依赖** | 不接入；免污染 |
+
+**补充（上次已提、判断相关）**：`pycoingecko`（MIT）→ BTC dominance 草稿特征；资金费率本仓已有。仍须单变量 + owner 立项进 2b。
+
+**推荐排序（判断层开源）**：
+
+1. 先把 **tip 子集口径**写进预期（零依赖）。  
+2. tip 通后：sklearn **Platt** 对照（避开已失败的 isotonic→仓位）；Freqtrade **熔断规格草案**（不装包）。  
+3. 再远：Basana 一致性审计清单；empyrical 类指标进报表。  
+4. 默认否决：Riskfolio 进生产、backtesting.py/Freqtrade **整框**、再叠一层 meta-labeling 赶时髦。
+
+---
+
+## C. 推荐再开聊的顺序
 
 ```
 v13 训完 → tip-smoke / 成败预览（owner 目视）
     → tip 供给是否起来
-        → 是：再谈 ONNX、池重建+holdout#6、regime、熔断、成本/槽位对齐
-        → 否：继续检测几何/打标，别空转拧 2b
+        → 是：池重建+holdout#6（owner）→ 成本/槽位对齐 → Platt/仓位深化 → 熔断规格
+        → 否：继续检测几何/打标；判断层只做口径提醒与特征卫生，别空转拧收益
 ```
 
-**禁止顺手做**：脉冲里塞 AL/HP 扫描；自动 promote；清 forward_log；ChartScan 权重试验。
+**禁止顺手做**：脉冲塞实验；自动 promote；清 forward_log；耗 holdout 偷看；ChartScan 权重；AGPL/GPL 回测框进主依赖。
 
 ---
 
 ## 风险与诚实声明
 
-- 本 backlog **不是**任务承诺，是「讨论过先记账」。落地仍要单变量 + owner 门槛。  
-- 「等 tip」不是借口永久拖延特征卫生；**改特征表时**卫生复查仍要做。  
-- holdout#6 与「现在不做池重建」不矛盾：记账提醒下次想重建时必须先问 owner。  
-- 检测层优化不抬 tip_fire 的项（FiftyOne/ONNX）可以工程空窗做，但别宣称解决了实盘出生率。
+- 本 backlog **不是**排期承诺。  
+- 「等 tip」不是永久拖延特征卫生；**改特征表时**仍要做无前视复查。  
+- 判断层 GitHub 专搜结论：**积木有、整机方案无**；上次大搜偏检测属实，本轮已补。  
+- holdout#6 与「现在不做池重建」并存：下次想重建必须先问 owner 并记账。
