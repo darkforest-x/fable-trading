@@ -7,15 +7,27 @@ For each *positive* train image with owner/GT boxes:
   3. Rewrite YOLO labels so the same bar span sits at the right edge
   4. Write as ``{stem}_tip.png`` into train only (val stays original-only)
 
-Final dataset = original images (train+val) ∪ tip clones (train only).
+Default dataset = original images (train+val) ∪ tip clones (train only)  → v12.
+
+``--tip-only`` (v13): train = tip clones + empty-label backgrounds only —
+mid-image positives are **not** copied into train. Val stays original-only
+(same frozen-F1 / YOLO val ruler as v11/v12). Single variable vs v12:
+drop mid-image positives from train.
+
+Optional ``--reuse-tips-from``: copy existing ``*_tip`` from a prior htip
+dataset (e.g. dense_owner_v12_htip) instead of re-rendering — identical
+geometry, faster, less RAM.
 
 Red lines: no holdout, no eval-symbol leak (stems already filtered in v11),
-no flip/mosaic. Single variable: tip framing only.
+no flip/mosaic.
 
 Usage:
   PYTHONPATH=. .venv/bin/python scripts/build_htip_dataset.py \\
       --src datasets/dense_owner_v11 --out datasets/dense_owner_v12_htip \\
       --limit 0
+  PYTHONPATH=. .venv/bin/python scripts/build_htip_dataset.py \\
+      --src datasets/dense_owner_v11 --out datasets/dense_owner_v13_tiponly \\
+      --tip-only --reuse-tips-from datasets/dense_owner_v12_htip
 """
 from __future__ import annotations
 
