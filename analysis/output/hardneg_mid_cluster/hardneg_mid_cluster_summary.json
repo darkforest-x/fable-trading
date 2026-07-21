@@ -1,0 +1,182 @@
+{
+  "generated_at": "2026-07-21T16:29:05.388062+00:00",
+  "hypothesis": "H-DET-2",
+  "status": "inventory_only_train_after_v13",
+  "src": "/Users/zhangzc/fable-trading/datasets/dense_owner_v11",
+  "splits": [
+    "train"
+  ],
+  "filters": {
+    "right_lo": 0.3,
+    "right_hi": 0.9,
+    "min_bars_after": 8,
+    "win_bars": 200,
+    "note": "right in [lo,hi) AND bars_after >= min \u2192 mid cluster with aftermath"
+  },
+  "n_candidates": 2892,
+  "n_unique_stems": 2835,
+  "n_symbols": 197,
+  "top_symbols": [
+    [
+      "ETH",
+      60
+    ],
+    [
+      "LTC",
+      59
+    ],
+    [
+      "XRP",
+      58
+    ],
+    [
+      "PEPE",
+      57
+    ],
+    [
+      "BNB",
+      56
+    ],
+    [
+      "LINK",
+      54
+    ],
+    [
+      "SOL",
+      53
+    ],
+    [
+      "AVAX",
+      50
+    ],
+    [
+      "OKB",
+      48
+    ],
+    [
+      "TIA",
+      44
+    ],
+    [
+      "PI",
+      43
+    ],
+    [
+      "TRX",
+      42
+    ],
+    [
+      "ADA",
+      41
+    ],
+    [
+      "UNI",
+      39
+    ],
+    [
+      "BCH",
+      38
+    ]
+  ],
+  "right": {
+    "p10": 0.3570016,
+    "p50": 0.5825595,
+    "p90": 0.82416
+  },
+  "box_h": {
+    "p10": 0.0660519,
+    "p50": 0.1053215,
+    "p90": 0.153846
+  },
+  "bars_after": {
+    "p10": 35.171,
+    "p50": 83.49000000000001,
+    "p90": 128.599,
+    "mean": 82.59904564315353
+  },
+  "csv": "analysis/output/hardneg_mid_cluster/hardneg_mid_cluster_candidates.csv",
+  "protocol": "analysis/output/hardneg_mid_cluster/PROTOCOL_train_after_v13.md",
+  "previews": [
+    {
+      "preview": "analysis/output/hardneg_mid_cluster/previews/00_TAO_USDT_SWAP_006130_hardneg.png",
+      "stem": "TAO_USDT_SWAP_006130",
+      "right": 0.337279,
+      "bars_after": 132.54,
+      "h": 0.148236,
+      "symbol_key": "TAO"
+    },
+    {
+      "preview": "analysis/output/hardneg_mid_cluster/previews/01_LQTY_USDT_SWAP_010330_hardneg.png",
+      "stem": "LQTY_USDT_SWAP_010330",
+      "right": 0.3076,
+      "bars_after": 138.48,
+      "h": 0.09385,
+      "symbol_key": "LQTY"
+    },
+    {
+      "preview": "analysis/output/hardneg_mid_cluster/previews/02_AVAX_USDT_SWAP_024389_hardneg.png",
+      "stem": "AVAX_USDT_SWAP_024389",
+      "right": 0.300291,
+      "bars_after": 139.94,
+      "h": 0.10457,
+      "symbol_key": "AVAX"
+    },
+    {
+      "preview": "analysis/output/hardneg_mid_cluster/previews/03_SUSHI_USDT_SWAP_028082_hardneg.png",
+      "stem": "SUSHI_USDT_SWAP_028082",
+      "right": 0.393709,
+      "bars_after": 121.26,
+      "h": 0.120075,
+      "symbol_key": "SUSHI"
+    },
+    {
+      "preview": "analysis/output/hardneg_mid_cluster/previews/04_okx_OL_USDT_SWAP_003060_hardneg.png",
+      "stem": "okx_OL_USDT_SWAP_003060",
+      "right": 0.341068,
+      "bars_after": 131.79,
+      "h": 0.134661,
+      "symbol_key": "OL"
+    },
+    {
+      "preview": "analysis/output/hardneg_mid_cluster/previews/05_okx_GLM_USDT_SWAP_022560_hardneg.png",
+      "stem": "okx_GLM_USDT_SWAP_022560",
+      "right": 0.301563,
+      "bars_after": 139.69,
+      "h": 0.08221,
+      "symbol_key": "GLM"
+    },
+    {
+      "preview": "analysis/output/hardneg_mid_cluster/previews/06_ADA_USDT_015760_hardneg.png",
+      "stem": "ADA_USDT_015760",
+      "right": 0.321094,
+      "bars_after": 135.78,
+      "h": 0.133423,
+      "symbol_key": "ADA"
+    },
+    {
+      "preview": "analysis/output/hardneg_mid_cluster/previews/07_okx_SIGN_USDT_SWAP_024160_hardneg.png",
+      "stem": "okx_SIGN_USDT_SWAP_024160",
+      "right": 0.301563,
+      "bars_after": 139.69,
+      "h": 0.11186,
+      "symbol_key": "SIGN"
+    },
+    {
+      "preview": "analysis/output/hardneg_mid_cluster/previews/08_ZORA_USDT_SWAP_013922_hardneg.png",
+      "stem": "ZORA_USDT_SWAP_013922",
+      "right": 0.324183,
+      "bars_after": 135.16,
+      "h": 0.155777,
+      "symbol_key": "ZORA"
+    },
+    {
+      "preview": "analysis/output/hardneg_mid_cluster/previews/09_SNX_USDT_SWAP_009930_hardneg.png",
+      "stem": "SNX_USDT_SWAP_009930",
+      "right": 0.315402,
+      "bars_after": 136.92,
+      "h": 0.212008,
+      "symbol_key": "SNX"
+    }
+  ],
+  "next": "Do NOT train until v13 pad200 finishes + owner approves single-variable hard-neg add-on."
+}

@@ -19,7 +19,8 @@
 | 🟢 已证实（发现级） | H-DET-3 右缘 N 验收口径；H-DET-7 离线 tip_hit≠实盘 tip_fire；H-DET-8 A′ 止血事后账；H-DET-EXT-3 流式口径登记 |
 | 🔵/🟡 等 v13 | **H-DET-1 pad200**（训练中；终局评测脚本已备） |
 | 🟡 外源已离线审计 | H-DET-EXT-1/2/4/7（框宽≈11–12 bar、v13 train 右缘≥0.95 占 96%；见 `analysis/output/tip_box_geometry_vs_lit.json`） |
-| 🟡/⚪ 可排期 | H-DET-4 / EXT-5 渲染；H-DET-2 硬负；EXT-6/8（tip 后） |
+| 🟡 清单已备、未训 | **H-DET-2** 硬负（`analysis/output/hardneg_mid_cluster/`，v13 后再训） |
+| 🟡/⚪ 可排期 | H-DET-4 / EXT-5 渲染；EXT-6/8（tip 后） |
 
 ## 下一步唯一推荐（与 v13 不冲突）
 
@@ -27,14 +28,14 @@
 
 - 外源便宜小测（标签几何对照文献）**已完成**，不另插 GPU 实验。  
 - 勿用 mid-run `best.pt` 抢 MPS；勿用 v13 val mAP 冒充 tip（val 标签与 v11 相同，未 pad）。  
-- 若 tip-smoke 仍≈0：再开 H-DET-4；并行策划 H-DET-2（需批准）。
+- 若 tip-smoke 仍≈0：再开 H-DET-4；H-DET-2 用已备清单立项开训（需批准）。
 
 ## 1. 假设表（人话）
 
 | # | 人话 | 设计 | 判定 | 状态 |
 |---|---|---|---|---|
 | H-DET-1 | pad200（框后无后文）训出的 v13 比 v12 更能 tip 贴边开火 | `dense_owner_v13_pad200` finetune from v12 | tip-smoke 贴边开火 ≫ v12 的 0；true_tip 不崩 F1 | 🔵 训中；🟡 等终局对照 |
-| H-DET-2 | 有后文的中段簇作硬负 → 抑制事后框 | 只加 hard-neg，其它不变 | 中段框↓ 且 tip 召回不塌 | ⚪ |
+| H-DET-2 | 有后文的中段簇作硬负 → 抑制事后框 | 只加 hard-neg，其它不变 | 中段框↓ 且 tip 召回不塌 | 🟡 清单 2892 已备；未训 |
 | H-DET-3 | 验收只评右缘 N 根有框，不只 mAP | tip_hit / tip_edge / tip_subset strict | 每份检测报告必报 | 🟢 |
 | H-DET-4 | MA 线宽/颜色/留白影响 tip | 固定权重极小消融 | 开火率相对基线可测变化 | 🟡 协议已写 |
 | H-DET-5 | tip 窗单独 conf 阈值抬 tip_fire | TIP_CONF=0.22 vs 0.30 | tip-smoke / tip_fire↑ | 🔴 |
@@ -84,7 +85,7 @@
 |---|---|
 | 进程 | `python -m src.detection.train ... --name owner_v13_pad200`（勿杀） |
 | 稳定权重 | **尚无** `models/owner_v13_pad200.pt` |
-| 本轮动作 | 外源文档 + 标签几何；**不**抢 MPS 对照 |
+| 本轮动作 | 外源文档 + 标签几何；H-DET-2 硬负清单 + tip-smoke 评测包加固（`p_yolo_while_v13_trains.md`）；**不**抢 MPS 对照 |
 
 ## 3. 复现 / 训完命令
 
@@ -115,5 +116,5 @@ PYTHONPATH=. .venv/bin/python -c "print('see analysis/p_yolo_external_sources.md
 
 | 若 tip-smoke 开火明显 >0 | owner 目视小样 → 再议影子（需批准） |
 |---|---|
-| 若仍≈0 | H-DET-4；策划 H-DET-2；EXT-7 改窗长须批准 |
+| 若仍≈0 | H-DET-4；H-DET-2 按已备清单开训（须批准）；EXT-7 改窗长须批准 |
 | 不做 | 自动 promote、ChartScan 权重、StreamYOLO 整栈、再降 TIP_CONF |
