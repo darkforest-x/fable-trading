@@ -119,4 +119,5 @@ GPU 被 v13 占用时：**只写协议，不跑**。
 - 本簇汇总：`analysis/p_yolo_dense_hypotheses.md`  
 - 外源调研：`analysis/p_yolo_external_sources.md`  
 - 主议程指针：`docs/RESEARCH_AGENDA.md` § D / 优先队列  
+- **前端/工具旁路**（H-FE / H-TOOL，**不**混入本检测优先队列）：`docs/RESEARCH_AGENDA.md` § E · 扫描 `analysis/p_wuzao_topics_scan.md`
 

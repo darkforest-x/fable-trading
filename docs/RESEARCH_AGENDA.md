@@ -71,6 +71,22 @@
 | H-TS | 检测训练图截止 holdout | 踢 post_cutoff 重训 | frozen-F1 | 🟢 **已跑（07-17）**：非 F1 虚高主因 |
 | H-EX | 执行层实盘括号/滑点 | VPS executor | 可运行+ledger | 🟢 **已上线 live**（确认级仍靠前向 100 笔） |
 
+## E. 前端 / 工具旁路（H-FE / H-TOOL）— 不抢 tip
+
+> 来源：wuzao 全站扫描 `analysis/p_wuzao_topics_scan.md`（2026-07-22）。  
+> **与 H-DET 分离**：此处不声称抬 tip_fire；禁止借「可视化」开大前端重构或换检测栈。  
+> 铁律同 CLAUDE：不耗 holdout、不 promote、不改 LIVE 真金、不杀 v13。
+
+| # | 假设（说人话） | 外源 | 迁移点 | 发现级测法 | 状态 |
+|---|---|---|---|---|---|
+| **H-FE-1** | LWC 时间带/primitive 比纯 YOLO PNG 更利于 hardneg·tip 几何调试，且可直接吃 `okx_*_15m_*.csv` | [lightweight-charts](https://github.com/tradingview/lightweight-charts)（wuzao 量化页；本仓已用） | 离线对照页或 explore 叠时间带；**不**改 `render.py` / 训练图 | 3 窗 hardneg：CSV→LWC vs PNG（已做 `analysis/output/wuzao_lwc_tip_compare/`） | 🟡 **CSV 通路已通过**；精框 primitive / 挂看板 ⚪ |
+| **H-FE-2** | 前向/信号密集窗用统一 LWC markers 语义，减少「表一眼、图一眼」 | 同上 + 本仓已有 markers 代码 | 只打磨 `app.js` 标注一致性 | tip_fire>0 后目视 10 笔 | ⚪ **等 tip 开火** |
+| **H-TOOL-1** | 把脉冲 `discover_wall` / phase2 耗时做成可扫的轻量指标（Grafana **思路**，未必装 Grafana） | [grafana/grafana](https://github.com/grafana/grafana) | 日志→状态条或小 CSV；禁往脉冲塞新扫描 | 对照现有 journal 字段能否覆盖「>600s 查因」 | ⚪ 暂缓装栈 |
+| **H-TOOL-2** | supervision 批注漏检/hardneg PNG，加速人工策展 | [roboflow/supervision](https://github.com/roboflow/supervision) | 离线脚本；**不进** VPS 脉冲 | 对 `hardneg_mid_cluster/previews` 叠框导出一页 HTML | ⚪ 不抢 v13 GPU |
+| **H-TOOL-3** | uptime-kuma（或等价）探活 dashboard / forward / executor | [louislam/uptime-kuma](https://github.com/louislam/uptime-kuma) | VPS 旁路容器；与业务看板分离 | Owner 批准后装；探针延迟≠交易新鲜度门 | ⚪ **需 Owner 批** |
+
+**明确不立项（噪音）**：Streamlit/Dash/Superset 换栈、ECharts 换 LWC 主图、Qlib/Nautilus/Backtrader、TradingAgents 类 LLM 交易、K8s/Prometheus 全家桶（tip≈0 时）、React/Next 重写看板。
+
 ## 优先队列（2026-07-22 起）
 
 1. **H-TIP / H-DET-1（v13 pad200）**——v12 已上主线仍 tip≈0；训完跑 `scripts/eval_v13_vs_v12_tip.sh`；子假设状态见 `RESEARCH_AGENDA_DETECT.md`  
@@ -78,6 +94,7 @@
 3. **H1 shadow 确认级**（可选带宽）——发现级已强；主线仍 TP5/SL2  
 4. **H3 shadow**（可选）——发现级通过；不接 executor  
 5. H16 / H-DET-2·4 等——仅在 tip 稳定开火或 H-DET-1 仍失败后按检测议程排  
+6. **H-FE / H-TOOL**——旁路；**永不**插入到 1–2 之前；见上表 E
 
 历史队列 H9/H10/H1/H7–H8 的发现级结果保留在上表，**不再作为默认开工顺序**。  
 实盘运维（贴边过滤 / tiered / 三门）与上表并行，不替代假设队列。
