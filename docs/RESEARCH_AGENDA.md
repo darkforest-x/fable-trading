@@ -71,21 +71,29 @@
 | H-TS | 检测训练图截止 holdout | 踢 post_cutoff 重训 | frozen-F1 | 🟢 **已跑（07-17）**：非 F1 虚高主因 |
 | H-EX | 执行层实盘括号/滑点 | VPS executor | 可运行+ledger | 🟢 **已上线 live**（确认级仍靠前向 100 笔） |
 
-## E. 前端 / 工具旁路（H-FE / H-TOOL）— 不抢 tip
+## E. 前端 / 工具 / 整仓旁路（H-FE / H-TOOL / …）— 不抢 tip 关路径
 
-> 来源：wuzao 全站扫描 `analysis/p_wuzao_topics_scan.md`（2026-07-22）。  
+> 来源：wuzao 全站扫描 `analysis/p_wuzao_topics_scan.md`（2026-07-22；**同日 v2 口径改正**）。  
+> **口径**：「能用」= 对本仓**任一子系统**有明确用法（检测/判断/执行/看板/运维/数据/标注），不是「有 tip 解药才留」。  
+> tip = **优先级最高**；「是否服务 tip」只用于排队。A/C 层可与 v13 **并行**（不抢 GPU、不改 LIVE）；B 层默认 tip/前向后再拧。  
 > **与 H-DET 分离**：此处不声称抬 tip_fire；禁止借「可视化」开大前端重构或换检测栈。  
 > 铁律同 CLAUDE：不耗 holdout、不 promote、不改 LIVE 真金、不杀 v13。
 
-| # | 假设（说人话） | 外源 | 迁移点 | 发现级测法 | 状态 |
-|---|---|---|---|---|---|
-| **H-FE-1** | LWC 时间带/primitive 比纯 YOLO PNG 更利于 hardneg·tip 几何调试，且可直接吃 `okx_*_15m_*.csv` | [lightweight-charts](https://github.com/tradingview/lightweight-charts)（wuzao 量化页；本仓已用） | 离线对照页或 explore 叠时间带；**不**改 `render.py` / 训练图 | 3 窗 hardneg：CSV→LWC vs PNG（已做 `analysis/output/wuzao_lwc_tip_compare/`） | 🟡 **CSV 通路已通过**；精框 primitive / 挂看板 ⚪ |
-| **H-FE-2** | 前向/信号密集窗用统一 LWC markers 语义，减少「表一眼、图一眼」 | 同上 + 本仓已有 markers 代码 | 只打磨 `app.js` 标注一致性 | tip_fire>0 后目视 10 笔 | ⚪ **等 tip 开火** |
-| **H-TOOL-1** | 把脉冲 `discover_wall` / phase2 耗时做成可扫的轻量指标（Grafana **思路**，未必装 Grafana） | [grafana/grafana](https://github.com/grafana/grafana) | 日志→状态条或小 CSV；禁往脉冲塞新扫描 | 对照现有 journal 字段能否覆盖「>600s 查因」 | ⚪ 暂缓装栈 |
-| **H-TOOL-2** | supervision 批注漏检/hardneg PNG，加速人工策展 | [roboflow/supervision](https://github.com/roboflow/supervision) | 离线脚本；**不进** VPS 脉冲 | 对 `hardneg_mid_cluster/previews` 叠框导出一页 HTML | ⚪ 不抢 v13 GPU |
-| **H-TOOL-3** | uptime-kuma（或等价）探活 dashboard / forward / executor | [louislam/uptime-kuma](https://github.com/louislam/uptime-kuma) | VPS 旁路容器；与业务看板分离 | Owner 批准后装；探针延迟≠交易新鲜度门 | ⚪ **需 Owner 批** |
+| # | 假设（说人话） | 外源 | 迁移点 | 相对 tip | 发现级测法 | 状态 |
+|---|---|---|---|---|---|---|
+| **H-FE-1** | LWC 时间带/primitive 比纯 YOLO PNG 更利于 hardneg·tip 几何调试，且可直接吃 `okx_*_15m_*.csv` | [lightweight-charts](https://github.com/tradingview/lightweight-charts)（本仓已用） | 离线对照或 explore 叠时间带；**不**改 `render.py` | 可并行（不抢 GPU） | 3 窗 hardneg 已做 `wuzao_lwc_tip_compare/` | 🟡 **CSV 通路已通过**；精框/挂看板 ⚪ |
+| **H-FE-2** | 前向/信号密集窗用统一 LWC markers 语义 | 同上 + 本仓 markers | 只打磨 `app.js` | tip_fire>0 后 | 目视 10 笔 | ⚪ |
+| **H-FE-3** | ECharts 叠 PF/权益/分位，**不**换 K 线主图 | [apache/echarts](https://github.com/apache/echarts) | 看板复盘页或静态报告 | 前向有样本后更有用 | 一页权益曲线原型 | ⚪ **新增** |
+| **H-TOOL-1** | 脉冲 `discover_wall` / phase2 做成可扫轻量指标（Grafana **思路**，未必装） | [grafana/grafana](https://github.com/grafana/grafana) | 日志→状态条/小 CSV；禁塞脉冲 | 可议；装栈需 owner | journal 是否已够 >600s 查因 | ⚪ |
+| **H-TOOL-2** | supervision 批注漏检/hardneg PNG | [roboflow/supervision](https://github.com/roboflow/supervision) | 离线脚本；**不进**脉冲 | 可并行离线 | hardneg previews → HTML | ⚪ |
+| **H-TOOL-3** | uptime-kuma 探活 dashboard / forward / executor | [louislam/uptime-kuma](https://github.com/louislam/uptime-kuma) | VPS 旁路容器 | 随时可议；**需 Owner 批 VPS** | 探针≠新鲜度门 | ⚪ **需 Owner 批** |
+| **H-TOOL-4** | FiftyOne 难例/hardness 策展队列 | [voxel51/fiftyone](https://github.com/voxel51/fiftyone)（亦见 `p_github_optimize_candidates`） | 本机 App；不进脉冲 | 可并行离线 | tip 漏检 PNG Dataset | ⚪ **新增** |
+| **H-TOOL-5** | ONNX Runtime（± OpenVINO）压 discover_wall | onnxruntime / OpenVINO（已评） | export → VPS A/B 延迟表 | tip 通且仍慢 | 同图同框延迟对照 | ⚪ **新增** |
+| **H-JUDG-WUZAO-1** | 轻量 regime 特征草稿（如 BTC dominance） | pycoingecko 等（已评） | 离线草稿；**不进 ACTIVE** | tip 通后单变量立项 | 与 H13 对照一张表 | ⚪ **新增指针** |
+| **H-EXEC-WUZAO-1** | Freqtrade Protections / Basana 事件语义 → 本仓熔断·对照规格 | freqtrade / basana（不 pip） | 规格文档；不换执行器 | 前向样本够 | 清单 + 与现有 kill/贴边对照 | ⚪ **新增指针** |
 
-**明确不立项（噪音）**：Streamlit/Dash/Superset 换栈、ECharts 换 LWC 主图、Qlib/Nautilus/Backtrader、TradingAgents 类 LLM 交易、K8s/Prometheus 全家桶（tip≈0 时）、React/Next 重写看板。
+**明确不立项（噪音）**：Streamlit/Dash/Superset **换栈**、ECharts **替换** LWC 主图、Qlib/Nautilus/Backtrader **替换**本仓、TradingAgents 类 LLM 交易、K8s/dockprom 全家桶、React/Next 重写看板。  
+（回测框架作**对照规格**、ECharts 作 **PF 辅图**、Prometheus 作**可选运维**——见扫描报告分层，不在此「不立项」斧下。）
 
 ## 优先队列（2026-07-22 起）
 
@@ -94,7 +102,7 @@
 3. **H1 shadow 确认级**（可选带宽）——发现级已强；主线仍 TP5/SL2  
 4. **H3 shadow**（可选）——发现级通过；不接 executor  
 5. H16 / H-DET-2·4 等——仅在 tip 稳定开火或 H-DET-1 仍失败后按检测议程排  
-6. **H-FE / H-TOOL**——旁路；**永不**插入到 1–2 之前；见上表 E
+6. **H-FE / H-TOOL / 整仓旁路**——**不插入 tip 关路径**（不抢 GPU、不改 LIVE）；A/C 便宜项可与 1–2 **并行**；B 层排队见上表「相对 tip」列与 `p_wuzao_topics_scan.md` §4
 
 历史队列 H9/H10/H1/H7–H8 的发现级结果保留在上表，**不再作为默认开工顺序**。  
 实盘运维（贴边过滤 / tiered / 三门）与上表并行，不替代假设队列。
