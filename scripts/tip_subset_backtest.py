@@ -124,9 +124,12 @@ def _locate_signal(frame: pd.DataFrame, signal_i: int, signal_time: pd.Timestamp
     return int(hits[0]) if len(hits) else None
 
 
-def stage_rerender(limit: int) -> int:
+def stage_rerender(limit: int, max_symbols: int = 0) -> int:
+    import faulthandler
     import gc
     import os
+
+    faulthandler.enable()  # dump traceback on SIGSEGV to stderr/log
 
     from src.data.loader import list_series, load_series
     from src.detection.data import add_mas
@@ -204,6 +207,13 @@ def stage_rerender(limit: int) -> int:
         tmp_dir.mkdir(parents=True, exist_ok=True)
 
         groups = list(remaining.groupby(["source", "symbol"], sort=True))
+        if max_symbols > 0:
+            groups = groups[:max_symbols]
+            print(
+                f"  chunk: processing {len(groups)} symbols this process "
+                f"(max_symbols={max_symbols})",
+                flush=True,
+            )
         n_groups_total = eligible.groupby(["source", "symbol"]).ngroups
         for gi, ((source, symbol), grp) in enumerate(groups, 1):
             key = (source, symbol)
@@ -323,7 +333,7 @@ def stage_backtest() -> int:
             "tip_strict_total": int(len(subsets["tip_strict"])),
             "tip_strict_val": n_val["tip_strict"],
             "tip_92_total": int(len(subsets["tip_92_loose"])),
-            "tip_92_val": n_val["tip_92"],
+            "tip_92_val": n_val["tip_92_loose"],
         },
         "variants": {},
     }
@@ -351,11 +361,18 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--stage", choices=["score", "rerender", "backtest"], required=True)
     ap.add_argument("--limit", type=int, default=0, help="rerender smoke-test cap (0 = all)")
+    ap.add_argument(
+        "--max-symbols",
+        type=int,
+        default=0,
+        help="rerender: exit after N remaining symbols (0=all). "
+        "Driver loops resume; isolates SIGSEGV to one chunk.",
+    )
     args = ap.parse_args()
     if args.stage == "score":
         return stage_score()
     if args.stage == "rerender":
-        return stage_rerender(args.limit)
+        return stage_rerender(args.limit, args.max_symbols)
     return stage_backtest()
 
 
