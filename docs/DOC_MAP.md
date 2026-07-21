@@ -12,6 +12,7 @@
 | `README.md` | 动机/架构/怎么跑（不堆日报） |
 | `docs/ARCHITECTURE.md` | 现行系统图与模块地图 |
 | `docs/RESEARCH_AGENDA.md` | 假设状态表 + 优先队列 |
+| `docs/RESEARCH_AGENDA_DETECT.md` | 检测层 H-DET 子簇（tip/pad200/渲染）；汇总见 `analysis/p_yolo_dense_hypotheses.md` |
 | `docs/DENSE_CLUSTER_DEFINITION.md` | 形态视觉定义（标杆） |
 | `analysis/week_plan_*.md` | 当周执行计划 |
 | `analysis/p*_report.md` | 单次实验记录（只增不改结论） |

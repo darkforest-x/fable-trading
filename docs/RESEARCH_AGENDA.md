@@ -1,8 +1,9 @@
 # 研究议程（进化引擎）— 2026-07-09 首版
 
-> **2026-07-20 现状**：主线已进入 **VPS 实盘 + 前向 100 笔新鲜裁决**。  
-> 当前最高优先假设是 **H-TIP**（`owner_v12_htip` 训练中，不自动 promote）。  
-> 周执行清单：`analysis/week_plan_20260720.md`；实时状态：`HANDOFF.md` 顶部。  
+> **2026-07-22 现状**：主线已进入 **VPS 实盘 + 前向 100 笔新鲜裁决**。  
+> **H-TIP / H-DET**：v12 已强制切检测主线（07-20）；现跟 **v13 pad200**（本机训练中，不自动 promote）。  
+> 检测层子假设簇 → **[`docs/RESEARCH_AGENDA_DETECT.md`](RESEARCH_AGENDA_DETECT.md)**（汇总报告 `analysis/p_yolo_dense_hypotheses.md`）。  
+> tip 仍≈0 → 判断层 H* 确认级先排队。周计划：`analysis/week_plan_20260720.md`；真相：`HANDOFF.md` 顶部。  
 > 旧优先序 H9→H10→H1 的发现级已完成；**确认级一律前向**，勿再 val 挖矿。
 
 > **2026-07-16 增补（历史）**:①标注价值曲线已出样本外验证;②标杆过采样×3 证伪;
@@ -65,19 +66,21 @@
 | H17 | 缩量深度 vol_dryup | factor | IC / 净增益 | 🔴 **dead IC（07-15）** |
 | H18 | OBV 斜率区分真假密集 | factor | 同 H17 | 🔴 **dead IC（07-15）** |
 | H19 | 外部 alpha 因子 IC 筛选 | factor_ic_screen | 存活再单变量 | 🟡 已有脚本；非实盘阻塞 |
-| **H-TIP** | **tip 右缘分布**：中图标注→右缘重渲克隆，使 live tip 可被检出 | `build_htip_dataset` + finetune v12 | tip_hit≥0.20 且 frozen-F1 回撤≤0.03；再 shadow→owner 切流 | 🔵 **进行中（07-19/20）** `owner_v12_htip`；计划 `analysis/h_tip_plan.md` + `week_plan_20260720.md` |
+| **H-TIP** | **tip 右缘分布**：中图标注→右缘重渲克隆，使 live tip 可被检出 | `build_htip_dataset` + finetune v12/v13 | tip_hit≥0.20 且 frozen-F1 回撤≤0.03；再 shadow→owner 切流 | 🔵 **v12 已切主线（07-20）** tip_hit 0.925 / F1 0.650，但 live tip≈0；**v13 pad200 训练中**（07-22）。计划 `analysis/h_tip_plan.md` + `week_plan` |
+| **H-DET** | **检测层子簇**（pad200 / 硬负 / 右缘验收 / 渲染 / tip conf / tip-only …） | 见专文 | tip 贴边开火率（发现级）→ 前向（确认级） | 📋 **[`RESEARCH_AGENDA_DETECT.md`](RESEARCH_AGENDA_DETECT.md)** · 汇总 `analysis/p_yolo_dense_hypotheses.md`：H-DET-5/6 🔴；H-DET-1 🔵 等 v13；H-DET-3/7/8 🟢 |
 | H-TS | 检测训练图截止 holdout | 踢 post_cutoff 重训 | frozen-F1 | 🟢 **已跑（07-17）**：非 F1 虚高主因 |
 | H-EX | 执行层实盘括号/滑点 | VPS executor | 可运行+ledger | 🟢 **已上线 live**（确认级仍靠前向 100 笔） |
 
-## 优先队列（2026-07-20 起）
+## 优先队列（2026-07-22 起）
 
-1. **H-TIP / v12**——唯一阻塞「实时 tip 进裁决」的检测层假设；周计划见 `week_plan_20260720.md`  
-2. **前向 100 笔新鲜积累**——被动；不调门、不清账  
+1. **H-TIP / H-DET-1（v13 pad200）**——v12 已上主线仍 tip≈0；训完跑 `scripts/eval_v13_vs_v12_tip.sh`；子假设状态见 `RESEARCH_AGENDA_DETECT.md`  
+2. **前向 100 笔新鲜积累**——被动；不调门、不清账（有 tip 才有有效样本）  
 3. **H1 shadow 确认级**（可选带宽）——发现级已强；主线仍 TP5/SL2  
 4. **H3 shadow**（可选）——发现级通过；不接 executor  
-5. H16 等发现级——仅在 H-TIP 落地或明确放弃后  
+5. H16 / H-DET-2·4 等——仅在 tip 稳定开火或 H-DET-1 仍失败后按检测议程排  
 
-历史队列 H9/H10/H1/H7–H8 的发现级结果保留在上表，**不再作为默认开工顺序**。
+历史队列 H9/H10/H1/H7–H8 的发现级结果保留在上表，**不再作为默认开工顺序**。  
+实盘运维（贴边过滤 / tiered / 三门）与上表并行，不替代假设队列。
 
 ## 议程维护规则
 
