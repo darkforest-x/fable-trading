@@ -570,6 +570,16 @@ def main() -> int:
         help="preview/compare output dir (default: analysis/output/pad200_try)",
     )
     ap.add_argument("--limit", type=int, default=0, help="max train clones (0=all); needs --out")
+    ap.add_argument(
+        "--resume",
+        action="store_true",
+        help="continue into existing --out (skip stems that already have *_pad200.png or skip log)",
+    )
+    ap.add_argument(
+        "--mad-gate",
+        action="store_true",
+        help="load stored PNG + multi-render MAD (heavy RAM; default off for bulk on 16GB)",
+    )
     args = ap.parse_args()
 
     if not args.src.exists():
@@ -615,40 +625,66 @@ def main() -> int:
 
     # Full build skeleton (not run unless --out given).
     dst = args.out
-    if dst.exists():
+    if dst.exists() and not args.resume:
         print(f"refusing to clobber existing out: {dst}", file=sys.stderr)
         return 2
     for sub in ("images/train", "images/val", "labels/train", "labels/val"):
-        (dst / sub).mkdir(parents=True)
+        (dst / sub).mkdir(parents=True, exist_ok=True)
     # val: copy originals unchanged (same frozen ruler as v11/v12/v13)
     import shutil
+    import gc
 
     n_val = 0
     for img in sorted((args.src / "images" / "val").glob("*.png")):
-        shutil.copy2(img, dst / "images" / "val" / img.name)
+        dest = dst / "images" / "val" / img.name
+        if not dest.exists():
+            shutil.copy2(img, dest)
         lbl = args.src / "labels" / "val" / f"{img.stem}.txt"
         if lbl.exists():
-            shutil.copy2(lbl, dst / "labels" / "val" / lbl.name)
+            dl = dst / "labels" / "val" / lbl.name
+            if not dl.exists():
+                shutil.copy2(lbl, dl)
         n_val += 1
 
-    import gc
-
-    n_ok = n_skip = n_bg = 0
+    already_ok = {p.name.replace("_pad200.png", "") for p in (dst / "images" / "train").glob("*_pad200.png")}
     skip_log = dst / "pad200_skip.log"
-    skip_fh = skip_log.open("w", encoding="utf-8")
+    already_skip: set[str] = set()
+    if skip_log.exists():
+        for line in skip_log.read_text(encoding="utf-8").splitlines():
+            stem0 = line.split("\t", 1)[0].strip()
+            if stem0:
+                already_skip.add(stem0)
+
+    n_ok = len(already_ok)
+    n_skip = len(already_skip)
+    n_bg = 0
+    skip_fh = skip_log.open("a" if args.resume else "w", encoding="utf-8")
+    print(
+        f"bulk start resume={args.resume} mad_gate={args.mad_gate} "
+        f"already_ok={n_ok} already_skip={n_skip}",
+        flush=True,
+    )
     for img in sorted((args.src / "images" / "train").glob("*.png")):
         stem = img.stem
         lbl = args.src / "labels" / "train" / f"{stem}.txt"
         if not lbl.exists() or not read_boxes(lbl):
             # empty-label backgrounds: copy as-is (no pad200 re-render)
-            shutil.copy2(img, dst / "images" / "train" / img.name)
+            dest = dst / "images" / "train" / img.name
+            if not dest.exists():
+                shutil.copy2(img, dest)
             if lbl.exists():
-                shutil.copy2(lbl, dst / "labels" / "train" / lbl.name)
+                dl = dst / "labels" / "train" / lbl.name
+                if not dl.exists():
+                    shutil.copy2(lbl, dl)
             n_bg += 1
+            continue
+        if stem in already_ok or stem in already_skip:
             continue
         out_img = dst / "images" / "train" / f"{stem}_pad200.png"
         out_lbl = dst / "labels" / "train" / f"{stem}_pad200.txt"
-        # Pass stored PNG so end_incl/start MAD disambiguation + high-MAD gate run.
+        # Default: end_incl (v11 convention) + close-corr gate. Optional MAD is
+        # RAM-heavy (multi full-frame re-render) and was jetsam-killing 16GB bulk.
+        orig = img if args.mad_gate else None
         try:
             res = process_pad200(
                 stem,
@@ -656,7 +692,7 @@ def main() -> int:
                 out_img,
                 out_lbl,
                 draw_preview=False,
-                orig_img_path=img,
+                orig_img_path=orig,
             )
         except Exception as exc:  # noqa: BLE001 — keep bulk build alive on one bad stem
             n_skip += 1
@@ -699,6 +735,8 @@ def main() -> int:
         "val_orig": n_val,
         "empty_bg_policy": "copy_as_is",
         "val_policy": "copy_orig_unchanged",
+        "mad_gate": bool(args.mad_gate),
+        "win_index_default": "end_incl",
         "skip_log": str(skip_log),
     }
     (dst / "pad200_summary.json").write_text(json.dumps(summary, indent=2) + "\n")

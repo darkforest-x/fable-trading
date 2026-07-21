@@ -14,16 +14,16 @@ export MKL_NUM_THREADS=1
 echo "=== v13 pad200 pipeline start $(date) ==="
 
 OUT=datasets/dense_owner_v13_pad200
-if [ -d "$OUT" ]; then
-  echo "REFUSE: $OUT already exists (will not clobber). Delete first."
-  exit 2
-fi
+# Existing dir is OK: build uses --resume (will not clobber v11/v12).
 
 echo "--- 1) build pad200 dataset"
-caffeinate -i "$PY" scripts/build_crop_pad200_dataset.py \
-  --src datasets/dense_owner_v11 \
-  --out "$OUT" \
-  --limit 0
+# No --mad-gate: end_incl + close-corr only (16GB safe). Resume if dir exists.
+BUILD_ARGS=(--src datasets/dense_owner_v11 --out "$OUT" --limit 0)
+if [ -d "$OUT" ]; then
+  BUILD_ARGS+=(--resume)
+  echo "resuming existing $OUT"
+fi
+caffeinate -i "$PY" scripts/build_crop_pad200_dataset.py "${BUILD_ARGS[@]}"
 BUILD_RC=$?
 echo "build exit=$BUILD_RC $(date)"
 if [ "$BUILD_RC" -ne 0 ] || [ ! -f "$OUT/data.yaml" ] || [ ! -f "$OUT/pad200_summary.json" ]; then
