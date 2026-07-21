@@ -22,6 +22,13 @@ else
   echo "candidate_source=$FABLE_CANDIDATE_SOURCE"
 fi
 
+# Optional tip-only mainline (default unchanged = live 6-window).
+#   FABLE_YOLO_MODE=tip          # pure tip window only
+#   TIP_CONF=0.22                # tip-window conf floor (other live windows stay 0.30)
+#   FABLE_YOLO_RIGHT_BIAS=1      # within min_gap prefer rightmost box
+# Rollback: unset the three vars (or set FABLE_YOLO_MODE=live).
+echo "yolo_mode=${FABLE_YOLO_MODE:-live} tip_conf=${TIP_CONF:-off} right_bias=${FABLE_YOLO_RIGHT_BIAS:-0}"
+
 # Optional light kline refresh (skip if offline). SWAP-only: mainline universe;
 # full-universe update is a separate daily job.
 if [ "${SKIP_UPDATE_OKX:-0}" != "1" ]; then

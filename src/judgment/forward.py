@@ -63,10 +63,14 @@ def run_forward_tracking(
     output_path: Path = FORWARD_LOG_PATH,
     start_time: pd.Timestamp = FORWARD_START,
 ) -> ForwardRunSummary:
+    """Mainline forward pulse. Scan mode from env FABLE_YOLO_MODE (default live)."""
+    from src.judgment.yolo_candidates import resolve_yolo_mode
+
     return _run_forward_tracking(
         output_path=output_path,
         start_time=start_time,
         exit_resolver=resolve_forward_exit,
+        yolo_mode=resolve_yolo_mode("live"),
     )
 
 

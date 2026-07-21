@@ -39,6 +39,8 @@ from src.judgment.yolo_candidates import (
     get_tip_edge_rejected,
     load_yolo_model,
     reset_tip_edge_rejected,
+    resolve_tip_conf,
+    resolve_yolo_mode,
     scan_series_with_yolo,
 )
 
@@ -65,7 +67,7 @@ def scan_forward_records(
     *,
     exit_resolver: Optional[ExitResolver] = None,
     yolo_weights: str | Path | None = None,
-    yolo_mode: str = "live",
+    yolo_mode: str | None = None,
 ) -> ForwardScanResult:
     """Scan SWAP series for threshold signals and resolve exits.
 
@@ -73,9 +75,13 @@ def scan_forward_records(
     `resolve_forward_exit_scaled` for the H1 shadow paper book.
 
     `yolo_weights` / `yolo_mode` override the mainline detector for shadow
-    books (e.g. v12 tip-only). Mainline callers leave defaults.
+    books (e.g. v12 tip-only). Mainline callers leave defaults; unset
+    `yolo_mode` resolves from env ``FABLE_YOLO_MODE`` (default live).
     """
     resolve = exit_resolver or resolve_forward_exit
+    if yolo_mode is None:
+        yolo_mode = resolve_yolo_mode("live")
+    tip_conf = resolve_tip_conf()
     records: list[ForwardRecord] = []
     scanned_series = 0
     candidates_seen = 0
@@ -103,9 +109,10 @@ def scan_forward_records(
     scanned_series = len(jobs)
     workers = _forward_workers() if CANDIDATE_SOURCE == "yolo" else 1
     wlabel = str(yolo_weights) if yolo_weights is not None else "owner_best"
+    tip_conf_s = f"{tip_conf:.2f}" if tip_conf is not None else "off"
     print(
         f"forward_scan: series={scanned_series} workers={workers} source={CANDIDATE_SOURCE} "
-        f"yolo_mode={yolo_mode} weights={wlabel}",
+        f"yolo_mode={yolo_mode} tip_conf={tip_conf_s} weights={wlabel}",
         flush=True,
     )
     reset_tip_edge_rejected()
@@ -266,7 +273,13 @@ def forward_candidate_indices(
         else:
             start_from_i = max(0, int(hits[0]) - 5)
     mode = yolo_mode if yolo_mode in ("live", "tip", "full") else "live"
-    return scan_series_with_yolo(raw, yolo_model, start_from_i=start_from_i, mode=mode)
+    return scan_series_with_yolo(
+        raw,
+        yolo_model,
+        start_from_i=start_from_i,
+        mode=mode,
+        tip_conf=resolve_tip_conf(),
+    )
 
 
 def _rule_candidate_indices(enriched: pd.DataFrame) -> list[int]:

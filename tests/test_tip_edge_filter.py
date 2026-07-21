@@ -121,8 +121,21 @@ def test_tip_edge_rejects_koru_offset_three() -> None:
     assert get_tip_edge_rejected() >= 1
 
 
+def test_tip_mode_accepts_tip_bar() -> None:
+    """tip mode aligns with live realtime path: tip bar itself may enter."""
+    tf = _tf()
+    frame = _frame()
+    tip = len(frame) - 1
+    model = _predict_with_bars(tf, [WINDOW - 1])
+    with patch("src.judgment.yolo_candidates.add_mas", side_effect=lambda df: df), patch(
+        "src.judgment.yolo_candidates.render_chart", return_value=(None, tf)
+    ):
+        out = scan_series_with_yolo(frame, model=model, mode="tip", window=WINDOW, tip_edge_bars=2)
+    assert out == [tip]
+
+
 def test_tip_mode_accepts_tip_minus_one() -> None:
-    """tip mode still needs entry bar, so tip-1 (198) is the accept case."""
+    """tip-1 (198) still passes tip-edge N=2."""
     tf = _tf()
     frame = _frame()
     tip = len(frame) - 1
@@ -132,6 +145,42 @@ def test_tip_mode_accepts_tip_minus_one() -> None:
     ):
         out = scan_series_with_yolo(frame, model=model, mode="tip", window=WINDOW, tip_edge_bars=2)
     assert out == [tip - 1]
+
+
+def test_right_bias_keeps_rightmost_within_gap() -> None:
+    """With right_bias, min_gap keeps the later (rightmost) signal."""
+    tf = _tf()
+    frame = _frame()
+    tip = len(frame) - 1
+    # Two tip-edge boxes on tip window → tip and tip-1; gap default would keep tip-1 first
+    # under left-prefer; right_bias keeps tip.
+    model = _predict_with_bars(tf, [WINDOW - 1, WINDOW - 2])
+    with patch("src.judgment.yolo_candidates.add_mas", side_effect=lambda df: df), patch(
+        "src.judgment.yolo_candidates.render_chart", return_value=(None, tf)
+    ):
+        out = scan_series_with_yolo(
+            frame,
+            model=model,
+            mode="live",
+            window=WINDOW,
+            tip_edge_bars=2,
+            min_gap=18,
+            right_bias=True,
+        )
+    assert out == [tip]
+
+
+def test_resolve_yolo_mode_env(monkeypatch) -> None:
+    from src.judgment.yolo_candidates import resolve_tip_conf, resolve_yolo_mode
+
+    monkeypatch.delenv("FABLE_YOLO_MODE", raising=False)
+    assert resolve_yolo_mode("live") == "live"
+    monkeypatch.setenv("FABLE_YOLO_MODE", "tip")
+    assert resolve_yolo_mode("live") == "tip"
+    monkeypatch.setenv("TIP_CONF", "0.22")
+    assert resolve_tip_conf() == 0.22
+    monkeypatch.setenv("TIP_CONF", "nope")
+    assert resolve_tip_conf() is None
 
 
 def test_full_mode_keeps_mid_window_boxes() -> None:

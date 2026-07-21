@@ -34,8 +34,46 @@ DEFAULT_WEIGHTS = PROJECT_DIR / "models" / "owner_best.pt"
 # N=2 → bar_in_win >= window-2 (tip or tip-1; offset 0..1). Does NOT invent
 # tip fires when the model draws 0 boxes on tip/tip-1.
 TIP_EDGE_BARS = 2
+# Optional tip-window conf floor (env TIP_CONF). When set, the tip window
+# (rightmost start) may use a lower floor than other live windows; predict
+# runs at min(tip_conf, conf) then non-tip windows post-filter to `conf`.
+# Unset → every window uses the same `conf` (default 0.30).
+# Optional right-bias (env FABLE_YOLO_RIGHT_BIAS=1): within min_gap, keep the
+# rightmost signal instead of the leftmost (live multi-window only).
 # Base temp dir; each predict call uses a unique filename (thread-safe live scan).
 _TMP_DIR = PROJECT_DIR / "data"
+
+
+def resolve_yolo_mode(default: str = "live") -> str:
+    """Mainline scan mode from FABLE_YOLO_MODE (tip|live|full). Default live."""
+    raw = os.environ.get("FABLE_YOLO_MODE", "").strip().lower()
+    if raw in ("tip", "live", "full"):
+        return raw
+    return default if default in ("tip", "live", "full") else "live"
+
+
+def resolve_tip_conf(fallback: float | None = None) -> float | None:
+    """Optional tip-window conf from TIP_CONF. None = use the shared conf."""
+    raw = os.environ.get("TIP_CONF", "").strip()
+    if not raw:
+        return fallback
+    try:
+        v = float(raw)
+    except ValueError:
+        return fallback
+    if not (0.0 < v < 1.0):
+        return fallback
+    return v
+
+
+def resolve_right_bias(default: bool = False) -> bool:
+    """Prefer rightmost signal within min_gap when FABLE_YOLO_RIGHT_BIAS=1."""
+    raw = os.environ.get("FABLE_YOLO_RIGHT_BIAS", "").strip().lower()
+    if raw in ("1", "true", "yes", "on"):
+        return True
+    if raw in ("0", "false", "no", "off"):
+        return False
+    return default
 
 _model_cache: dict[str, Any] = {}
 _predict_lock = threading.Lock()
@@ -119,6 +157,8 @@ def scan_series_with_yolo(
     start_from_i: int | None = None,
     mode: str = "full",
     tip_edge_bars: int = TIP_EDGE_BARS,
+    tip_conf: float | None = None,
+    right_bias: bool | None = None,
 ) -> list[int]:
     """Return sorted signal bar indices for one OHLCV frame (causal at each bar).
 
@@ -126,18 +166,25 @@ def scan_series_with_yolo(
       - "full": offline dataset build (stride over history); no tip-edge gate
       - "live": forward/mainline — only windows near the right edge (and
         covering start_from_i..end). Avoids multi-hour full-history scans.
-      - "tip": single rightmost window only (H-TIP v12 shadow CPU budget;
-        ~1 predict/series vs live's ≤6).
+      - "tip": single rightmost window only (H-TIP / FABLE_YOLO_MODE=tip;
+        ~1 predict/series vs live's ≤6). Allows tip-bar pending entry like live.
 
     tip_edge_bars (live/tip only): keep boxes with
     ``bar_in_win >= window - tip_edge_bars`` (default TIP_EDGE_BARS=2).
     See analysis/p_box_to_bar_lag.md option A′. Rejected boxes increment
     ``tip_edge_rejected`` (get_tip_edge_rejected). Set 0 to disable.
+
+    tip_conf: optional lower floor for the tip window only (else env TIP_CONF).
+    right_bias: within min_gap keep rightmost signal (else env FABLE_YOLO_RIGHT_BIAS).
     """
     if model is None:
         model = load_yolo_model()
     if len(frame) < WARMUP_BARS + window + 2:
         return []
+    if tip_conf is None:
+        tip_conf = resolve_tip_conf()
+    if right_bias is None:
+        right_bias = resolve_right_bias(False)
     enriched_ma = add_mas(frame)
     _TMP_DIR.mkdir(parents=True, exist_ok=True)
     # Unique path per call (thread id + pid) so parallel live scans never clobber.
@@ -148,7 +195,7 @@ def scan_series_with_yolo(
     if start_from_i is not None:
         first_start = max(first_start, int(start_from_i) - window + 1)
     if mode == "tip":
-        # Shadow budget: only the tip window (right edge = last closed bar).
+        # Tip-only: single rightmost window (right edge = last closed bar).
         starts = [last_start] if last_start >= first_start else []
     elif mode == "live":
         # Live schedule (2026-07-20): pin the tip and two bars back, then
@@ -193,13 +240,21 @@ def scan_series_with_yolo(
             last_err = f"{type(exc).__name__}: {exc}"
             continue
         rendered.append((start, tf, win_png))
+    # Tip window may use a lower conf floor; batch predict at the minimum, then
+    # post-filter non-tip windows back up to `conf` via box confidence scores.
+    predict_conf = conf
+    if tip_conf is not None and tip_conf < conf:
+        predict_conf = tip_conf
     results = []
     if rendered:
         try:
             # Serialize predict: ultralytics is not reliably thread-safe.
             with _predict_lock:
                 results = model.predict(
-                    [str(p) for _, _, p in rendered], conf=conf, verbose=False, device=device
+                    [str(p) for _, _, p in rendered],
+                    conf=predict_conf,
+                    verbose=False,
+                    device=device,
                 )
         except Exception as exc:  # noqa: BLE001
             n_fail += len(rendered)
@@ -208,11 +263,18 @@ def scan_series_with_yolo(
     tip_edge_rejected = 0
     apply_tip_edge = mode in ("live", "tip") and tip_edge_bars > 0
     min_bar_in_win = window - tip_edge_bars if apply_tip_edge else 0
+    allow_pending_entry = mode in ("live", "tip")
     for (start, tf, _), res in zip(rendered, results):
         boxes = res.boxes
         if boxes is None:
             continue
-        for b in boxes.xywhn.cpu().numpy():
+        is_tip_window = start == last_start
+        floor = tip_conf if (is_tip_window and tip_conf is not None) else conf
+        xywhn = boxes.xywhn.cpu().numpy()
+        confs = boxes.conf.cpu().numpy() if boxes.conf is not None else None
+        for bi, b in enumerate(xywhn):
+            if confs is not None and float(confs[bi]) < floor:
+                continue
             cx, _, w, _ = map(float, b[:4])
             bar_in_win = right_edge_to_bar(cx, w, tf, n_bars=window)
             if apply_tip_edge and bar_in_win < min_bar_in_win:
@@ -221,10 +283,9 @@ def scan_series_with_yolo(
             signal_i = start + bar_in_win
             if signal_i < WARMUP_BARS or signal_i >= len(frame):
                 continue
-            # Offline dataset builds need the entry bar for labels; the live
-            # path must NOT wait for it -- the tip bar is the whole point of
-            # real-time detection (entry fields backfill next pulse).
-            if mode != "live" and signal_i + 1 >= len(frame):
+            # Offline full builds need the entry bar for labels; live/tip must
+            # NOT wait — tip bar is the real-time path (entry backfills next pulse).
+            if not allow_pending_entry and signal_i + 1 >= len(frame):
                 continue
             if start_from_i is not None and signal_i < start_from_i:
                 continue
@@ -236,8 +297,16 @@ def scan_series_with_yolo(
         print(f"yolo_live: all {n_fail} windows failed last={last_err}", flush=True)
     if not chosen:
         return []
+    if right_bias:
+        # Prefer rightmost within min_gap (position bias for multi-window live).
+        chosen_desc = sorted(set(chosen), reverse=True)
+        deduped: list[int] = []
+        for si in chosen_desc:
+            if not deduped or deduped[-1] - si >= min_gap:
+                deduped.append(si)
+        return sorted(deduped)
     chosen = sorted(set(chosen))
-    deduped: list[int] = []
+    deduped = []
     for si in chosen:
         if not deduped or si - deduped[-1] >= min_gap:
             deduped.append(si)
