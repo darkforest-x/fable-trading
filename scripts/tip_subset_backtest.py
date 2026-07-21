@@ -31,7 +31,8 @@ ultralytics-predict-segfaults.md):
                eligible (score >= val-q90, entry < HOLDOUT_START) signals.
   2. rerender (torch only, NO lightgbm anywhere in the import chain): tip
                re-render + v12 predict for every eligible signal, sequential,
-               one symbol at a time (memory discipline).
+               one symbol at a time, predict batch=1 / workers=0, checkpoint
+               CSV after each symbol (resume-safe; 16GB RSS discipline).
   3. backtest (pandas/lightgbm ok): same simulate()/window_metrics() as
                scripts/weight_centric_backtest.py on full vs tip subsets.
 
@@ -39,12 +40,12 @@ Scope guards: entries strictly < 2026-05-04 (holdout never simulated), accept
 window never touched, no production defaults changed.
 
 Usage:
-    OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONPATH=. .venv/bin/python \
-        scripts/tip_subset_backtest.py --stage score
-    OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONPATH=. .venv/bin/python \
-        scripts/tip_subset_backtest.py --stage rerender [--limit N]
-    OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONPATH=. .venv/bin/python \
-        scripts/tip_subset_backtest.py --stage backtest
+    OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 PYTHONPATH=. \
+        .venv/bin/python scripts/tip_subset_backtest.py --stage score
+    OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 PYTHONPATH=. \
+        .venv/bin/python scripts/tip_subset_backtest.py --stage rerender [--limit N]
+    OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 PYTHONPATH=. \
+        .venv/bin/python scripts/tip_subset_backtest.py --stage backtest
 """
 from __future__ import annotations
 
@@ -124,107 +125,159 @@ def _locate_signal(frame: pd.DataFrame, signal_i: int, signal_time: pd.Timestamp
 
 
 def stage_rerender(limit: int) -> int:
+    import gc
+    import os
+
     from src.data.loader import list_series, load_series
     from src.detection.data import add_mas
     from src.detection.render import render_chart
     from src.judgment.yolo_candidates import load_yolo_model, right_edge_to_bar
 
+    def score_one_png(model, png: Path, tf) -> dict:
+        """Single-image predict (batch=1) to keep RSS under ~4GB on 16GB machines."""
+        res = model.predict(
+            str(png), conf=TIP_CONF, verbose=False, device="cpu", workers=0
+        )[0]
+        n_boxes = 0
+        max_right_bar = -1
+        max_right_norm = 0.0
+        max_conf = 0.0
+        tip_conf = 0.0
+        if res.boxes is not None and len(res.boxes):
+            n_boxes = len(res.boxes)
+            xywhn = res.boxes.xywhn.cpu().numpy()
+            confs = res.boxes.conf.cpu().numpy()
+            for (cx, _, w, _), c in zip(xywhn, confs):
+                bar = right_edge_to_bar(float(cx), float(w), tf, n_bars=WINDOW)
+                max_right_bar = max(max_right_bar, bar)
+                max_right_norm = max(max_right_norm, float(cx + w / 2))
+                max_conf = max(max_conf, float(c))
+                if bar >= WINDOW - 1:
+                    tip_conf = max(tip_conf, float(c))
+        return {
+            "rerender_ok": True,
+            "skip_reason": "",
+            "n_boxes": n_boxes,
+            "max_right_bar": max_right_bar,
+            "max_right_norm": round(max_right_norm, 4),
+            "max_conf": round(max_conf, 4),
+            "tip_conf": round(tip_conf, 4),
+            "tip_hit_strict": bool(max_right_bar >= WINDOW - 1),
+            "tip_hit_92": bool(max_right_norm >= 0.92),
+        }
+
     eligible = pd.read_csv(ELIGIBLE_CSV, parse_dates=["signal_time", "entry_time", "exit_time"])
     if limit > 0:
         eligible = eligible.head(limit)
-    series_paths = {
-        (src, sym): [str(p) for p in paths]
-        for (src, sym), paths in list_series(bar="15m").items()
-    }
-    model = load_yolo_model(WEIGHTS)
-    tmp_dir = PROJECT_DIR / "data" / "_tip_subset_tmp"
-    tmp_dir.mkdir(parents=True, exist_ok=True)
 
+    # Resume: skip (source, symbol, signal_i) already on disk from a prior run.
+    done_keys: set[tuple[str, str, int]] = set()
     rows: list[dict] = []
-    groups = list(eligible.groupby(["source", "symbol"], sort=True))
-    for gi, ((source, symbol), grp) in enumerate(groups, 1):
-        key = (source, symbol)
-        if key not in series_paths:
-            rows.extend(
-                {"source": source, "symbol": symbol, "signal_i": int(r.signal_i),
-                 "rerender_ok": False, "skip_reason": "series_missing"}
-                for r in grp.itertuples()
-            )
-            continue
-        frame = load_series([Path(p) for p in series_paths[key]])
-        enriched = add_mas(frame)  # full-series MAs, then slice == live semantics
-        pending: list[tuple[dict, object, Path]] = []  # (row, tf, png)
-        for r in grp.itertuples():
-            base = {"source": source, "symbol": symbol, "signal_i": int(r.signal_i)}
-            pos = _locate_signal(frame, int(r.signal_i), r.signal_time)
-            if pos is None:
-                rows.append({**base, "rerender_ok": False, "skip_reason": "signal_time_mismatch"})
-                continue
-            start = pos - WINDOW + 1
-            if start < 0:
-                rows.append({**base, "rerender_ok": False, "skip_reason": "window_short"})
-                continue
-            sub = enriched.iloc[start : pos + 1]
-            png = tmp_dir / f"{symbol}_{pos}.png"
-            try:
-                _, tf = render_chart(sub, out_path=png)
-            except Exception as exc:  # noqa: BLE001 — keep the sweep alive
-                rows.append({**base, "rerender_ok": False, "skip_reason": f"render:{exc}"})
-                continue
-            pending.append((base, tf, png))
-        if pending:
-            results = model.predict(
-                [str(p) for _, _, p in pending], conf=TIP_CONF, verbose=False, device="cpu"
-            )
-            for (base, tf, png), res in zip(pending, results):
-                n_boxes = 0
-                max_right_bar = -1
-                max_right_norm = 0.0
-                max_conf = 0.0
-                tip_conf = 0.0
-                if res.boxes is not None and len(res.boxes):
-                    n_boxes = len(res.boxes)
-                    xywhn = res.boxes.xywhn.cpu().numpy()
-                    confs = res.boxes.conf.cpu().numpy()
-                    for (cx, _, w, _), c in zip(xywhn, confs):
-                        bar = right_edge_to_bar(float(cx), float(w), tf, n_bars=WINDOW)
-                        max_right_bar = max(max_right_bar, bar)
-                        max_right_norm = max(max_right_norm, float(cx + w / 2))
-                        max_conf = max(max_conf, float(c))
-                        if bar >= WINDOW - 1:
-                            tip_conf = max(tip_conf, float(c))
-                rows.append({
-                    **base,
-                    "rerender_ok": True,
-                    "skip_reason": "",
-                    "n_boxes": n_boxes,
-                    "max_right_bar": max_right_bar,
-                    "max_right_norm": round(max_right_norm, 4),
-                    "max_conf": round(max_conf, 4),
-                    "tip_conf": round(tip_conf, 4),
-                    "tip_hit_strict": bool(max_right_bar >= WINDOW - 1),
-                    "tip_hit_92": bool(max_right_norm >= 0.92),
-                })
-                png.unlink(missing_ok=True)
-        del frame, enriched
-        if gi % 20 == 0 or gi == len(groups):
-            done = len(rows)
-            hit = sum(1 for r in rows if r.get("tip_hit_strict"))
-            print(f"  … {gi}/{len(groups)} symbols, {done} signals, strict_hits={hit}", flush=True)
+    if RERENDER_CSV.exists():
+        prev = pd.read_csv(RERENDER_CSV)
+        if len(prev):
+            rows = prev.to_dict("records")
+            done_keys = {
+                (str(r["source"]), str(r["symbol"]), int(r["signal_i"])) for r in rows
+            }
+            print(f"  resume: {len(done_keys)} signals already on disk", flush=True)
 
-    out = pd.DataFrame(rows)
-    out.to_csv(RERENDER_CSV, index=False)
+    remaining = eligible[
+        ~eligible.apply(
+            lambda r: (r["source"], r["symbol"], int(r["signal_i"])) in done_keys, axis=1
+        )
+    ]
+    if remaining.empty:
+        print("  nothing left to rerender", flush=True)
+        out = pd.DataFrame(rows)
+    else:
+        series_paths = {
+            (src, sym): [str(p) for p in paths]
+            for (src, sym), paths in list_series(bar="15m").items()
+        }
+        model = load_yolo_model(WEIGHTS)
+        # Per-pid tmp so a crashed sibling cannot leave thousands of PNGs shared.
+        tmp_dir = PROJECT_DIR / "data" / f"_tip_subset_tmp_{os.getpid()}"
+        if tmp_dir.exists():
+            for stale in tmp_dir.glob("*.png"):
+                stale.unlink(missing_ok=True)
+        tmp_dir.mkdir(parents=True, exist_ok=True)
+
+        groups = list(remaining.groupby(["source", "symbol"], sort=True))
+        n_groups_total = eligible.groupby(["source", "symbol"]).ngroups
+        for gi, ((source, symbol), grp) in enumerate(groups, 1):
+            key = (source, symbol)
+            sym_rows: list[dict] = []
+            if key not in series_paths:
+                sym_rows.extend(
+                    {"source": source, "symbol": symbol, "signal_i": int(r.signal_i),
+                     "rerender_ok": False, "skip_reason": "series_missing"}
+                    for r in grp.itertuples()
+                )
+            else:
+                frame = load_series([Path(p) for p in series_paths[key]])
+                enriched = add_mas(frame)  # full-series MAs, then slice == live semantics
+                for r in grp.itertuples():
+                    base = {"source": source, "symbol": symbol, "signal_i": int(r.signal_i)}
+                    pos = _locate_signal(frame, int(r.signal_i), r.signal_time)
+                    if pos is None:
+                        sym_rows.append({**base, "rerender_ok": False,
+                                         "skip_reason": "signal_time_mismatch"})
+                        continue
+                    start = pos - WINDOW + 1
+                    if start < 0:
+                        sym_rows.append({**base, "rerender_ok": False,
+                                         "skip_reason": "window_short"})
+                        continue
+                    sub = enriched.iloc[start : pos + 1]
+                    png = tmp_dir / f"{symbol}_{pos}.png"
+                    try:
+                        _, tf = render_chart(sub, out_path=png)
+                        scored = score_one_png(model, png, tf)
+                        sym_rows.append({**base, **scored})
+                    except Exception as exc:  # noqa: BLE001 — keep the sweep alive
+                        sym_rows.append({**base, "rerender_ok": False,
+                                         "skip_reason": f"render_or_predict:{exc}"})
+                    finally:
+                        png.unlink(missing_ok=True)
+                del frame, enriched
+                gc.collect()
+
+            rows.extend(sym_rows)
+            # Checkpoint after every symbol — OOM mid-run must not lose progress.
+            pd.DataFrame(rows).to_csv(RERENDER_CSV, index=False)
+            if gi % 5 == 0 or gi == len(groups):
+                hit = sum(1 for r in rows if r.get("tip_hit_strict") in (True, "True", 1))
+                n_png = len(list(tmp_dir.glob("*.png")))
+                print(
+                    f"  … {gi}/{len(groups)} remaining symbols "
+                    f"(~{n_groups_total} total), {len(rows)} signals, "
+                    f"strict_hits={hit}, tmp_png={n_png}",
+                    flush=True,
+                )
+
+        # Best-effort cleanup of per-pid tmp.
+        for stale in tmp_dir.glob("*.png"):
+            stale.unlink(missing_ok=True)
+        try:
+            tmp_dir.rmdir()
+        except OSError:
+            pass
+        out = pd.DataFrame(rows)
+
     ok = out[out["rerender_ok"] == True]  # noqa: E712
     summary = {
         "n_signals": int(len(out)),
         "n_rerendered": int(len(ok)),
         "n_skipped": int(len(out) - len(ok)),
-        "tip_hit_strict": int(ok["tip_hit_strict"].sum()) if len(ok) else 0,
-        "tip_hit_92": int(ok["tip_hit_92"].sum()) if len(ok) else 0,
-        "strict_rate": round(float(ok["tip_hit_strict"].mean()), 4) if len(ok) else None,
-        "rate_92": round(float(ok["tip_hit_92"].mean()), 4) if len(ok) else None,
+        "tip_hit_strict": int(ok["tip_hit_strict"].astype(bool).sum()) if len(ok) else 0,
+        "tip_hit_92": int(ok["tip_hit_92"].astype(bool).sum()) if len(ok) else 0,
+        "strict_rate": round(float(ok["tip_hit_strict"].astype(bool).mean()), 4) if len(ok) else None,
+        "rate_92": round(float(ok["tip_hit_92"].astype(bool).mean()), 4) if len(ok) else None,
         "weights": str(WEIGHTS),
         "conf": TIP_CONF,
+        "predict_batch": 1,
+        "workers": 0,
     }
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0
