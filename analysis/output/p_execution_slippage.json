@@ -1,0 +1,27 @@
+{
+  "forward": {
+    "n_rows": 28,
+    "fresh_rows": 0,
+    "decision_trades": 0,
+    "hindsight_excluded": 22,
+    "lag_min_min": 77.6,
+    "lag_min_med": 542.3,
+    "lag_min_max": 2307.1,
+    "lag_min_mean": 735.6714285714285,
+    "note": "lag = detected_at - signal_time; not fill slippage. All tradeable verdict rows require lag<=30."
+  },
+  "ledger": {
+    "events": {
+      "order_partial": 1,
+      "order_failed": 5,
+      "paused": 328
+    },
+    "fail_reasons": {
+      "51008_margin": 5
+    },
+    "n_order_partial": 1,
+    "n_clean_fill_with_price_diff": 0,
+    "note": "Only 1 order_partial historically; no closed fill vs mark comparison available. 5x 51008 margin rejects."
+  },
+  "honest": "Cannot estimate live fill slippage in bp from current artifacts. Latency gate is the binding execution discount."
+}
