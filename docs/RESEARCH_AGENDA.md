@@ -67,7 +67,7 @@
 | H18 | OBV 斜率区分真假密集 | factor | 同 H17 | 🔴 **dead IC（07-15）** |
 | H19 | 外部 alpha 因子 IC 筛选 | factor_ic_screen | 存活再单变量 | 🟡 已有脚本；非实盘阻塞 |
 | **H-TIP** | **tip 右缘分布**：中图标注→右缘重渲克隆，使 live tip 可被检出 | `build_htip_dataset` + finetune v12/v13 | tip_hit≥0.20 且 frozen-F1 回撤≤0.03；再 shadow→owner 切流 | 🔵 **v12 已切主线（07-20）** tip_hit 0.925 / F1 0.650，但 live tip≈0；**v13 pad200 训练中**（07-22）。计划 `analysis/h_tip_plan.md` + `week_plan` |
-| **H-DET** | **检测层子簇**（pad200 / 硬负 / 右缘验收 / 渲染 / tip conf / tip-only …） | 见专文 | tip 贴边开火率（发现级）→ 前向（确认级） | 📋 **[`RESEARCH_AGENDA_DETECT.md`](RESEARCH_AGENDA_DETECT.md)** · 汇总 `analysis/p_yolo_dense_hypotheses.md`：H-DET-5/6 🔴；H-DET-1 🔵 等 v13；H-DET-3/7/8 🟢 |
+| **H-DET** | **检测层子簇**（pad200 / 硬负 / 右缘验收 / 渲染 / tip conf / tip-only …）+ **外源 EXT**（右缘锚定 / 禁事后烛 / 流式口径 …） | 见专文 | tip 贴边开火率（发现级）→ 前向（确认级） | 📋 **[`RESEARCH_AGENDA_DETECT.md`](RESEARCH_AGENDA_DETECT.md)** · 汇总 `analysis/p_yolo_dense_hypotheses.md` · 外源 `analysis/p_yolo_external_sources.md`：H-DET-5/6 🔴；H-DET-1 🔵 等 v13；EXT 几何审计已做 |
 | H-TS | 检测训练图截止 holdout | 踢 post_cutoff 重训 | frozen-F1 | 🟢 **已跑（07-17）**：非 F1 虚高主因 |
 | H-EX | 执行层实盘括号/滑点 | VPS executor | 可运行+ledger | 🟢 **已上线 live**（确认级仍靠前向 100 笔） |
 
