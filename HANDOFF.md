@@ -8,9 +8,14 @@
   `analysis/output/v13_real_tip_preview/index.html`（tip+0 **48** 张预标：hit4 /
   miss-dense6 / noise5 / empty33）。报告 `analysis/p_real_tip_collect_started.md`。
   **下一步=Owner 目视填 `review_sheet.csv`**；审过才谈扩采/开训。**未**开训、**未** promote。
+- **v15 败因定论（07-23）：正负样本两条渲染管线（风格捷径）**——训练集正样本
+  100% `_pad200` 重渲、负样本 100% 旧式原图，模型学风格不学密集 → val mAP 0.72
+  虚高 + 真 tip 空背景误火 58% + 真密集 0/6 全漏。**修复 = v16 一条管线渲染一切**
+  （规格见 `analysis/p_v15_dataset_confound.md`，待 Owner 批）。
 - **v15 已裁（07-23）：Hypothesis B 否决**——val 也 tip-align 后 tip_hit 仅 **0.017**、
-  tip-smoke 仍 **0/27**，未向 v12 的 0.925 恢复；坐实主因 **C**、勿再同构 pad200。
-  见 `analysis/p_v15_tip_val.md`。**未 promote**，主线仍 v12。
+  tip-smoke 仍 **0/27**，未向 v12 的 0.925 恢复。公平重验（full-MA + 真 tip 分母）
+  仍否决：应开火 2/9、空背景误火 19/33，见 `analysis/p_v15_revalidate_fair.md`。
+  **未 promote**，主线仍 v12。
 - **tip 验收协议审计（07-23，Owner 质疑触发）**：tip_hit（val 重渲）与 tip-smoke
   （实盘同管线）测的不是同一件事；v12 的 0.925 属**过宽赦免**（slice-MA + 同分布 val），
   以后 tip 裁决以 **tip-smoke 为准**。见 `analysis/p_tip_eval_fairness.md`。
