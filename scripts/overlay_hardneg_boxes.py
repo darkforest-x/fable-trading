@@ -87,9 +87,18 @@ def annotate_supervision(img_bgr, row: dict, out_path: Path) -> None:
     x2 = x1 + float(row["w"]) * w
     y2 = y1 + float(row["h"]) * h
     xyxy = np.array([[x1, y1, x2, y2]], dtype=float)
-    detections = sv.Detections(xyxy=xyxy)
-    box_annotator = sv.BoxAnnotator(thickness=2, color=sv.Color.from_hex("#22d3ee"))
-    label_annotator = sv.LabelAnnotator(text_thickness=1, text_scale=0.5)
+    # class_id required by supervision>=0.2x ColorLookup.CLASS default
+    detections = sv.Detections(xyxy=xyxy, class_id=np.array([0], dtype=int))
+    box_annotator = sv.BoxAnnotator(
+        thickness=2,
+        color=sv.Color.from_hex("#22d3ee"),
+        color_lookup=sv.ColorLookup.INDEX,
+    )
+    label_annotator = sv.LabelAnnotator(
+        text_thickness=1,
+        text_scale=0.5,
+        color_lookup=sv.ColorLookup.INDEX,
+    )
     annotated = box_annotator.annotate(scene=img_bgr.copy(), detections=detections)
     annotated = label_annotator.annotate(
         scene=annotated,
@@ -148,7 +157,8 @@ def main() -> int:
 
     use_sv = args.prefer_supervision and try_supervision()
     backend = "supervision" if use_sv else "matplotlib"
-    ann_dir = args.out_dir / "annotated"
+    out_dir = args.out_dir if args.out_dir.is_absolute() else PROJECT / args.out_dir
+    ann_dir = out_dir / "annotated"
     ann_dir.mkdir(parents=True, exist_ok=True)
 
     # need full geometry — reload candidates
@@ -190,17 +200,17 @@ def main() -> int:
             }
         )
 
-    write_index(args.out_dir, items, backend)
+    write_index(out_dir, items, backend)
     manifest = {
         "n": len(items),
         "backend": backend,
         "supervision_available": try_supervision(),
-        "index": str((args.out_dir / "index.html").relative_to(PROJECT)),
+        "index": str((out_dir / "index.html").relative_to(PROJECT)),
         "items": items,
         "gpu_used": False,
     }
-    (args.out_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    print(f"backend={backend} n={len(items)} -> {args.out_dir / 'index.html'}")
+    (out_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    print(f"backend={backend} n={len(items)} -> {out_dir / 'index.html'}")
     return 0
 
 

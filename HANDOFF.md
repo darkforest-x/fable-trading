@@ -2,14 +2,19 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-07-22）
+## ⚡ 当前真相（2026-07-22 晚）
 
-- **v13 pad200 训练在跑**（15:33 快照：**ALIVE · epoch 25/40 ~56%**，已跑 ~16h；满 40 ≈ **再 ~10h**，patience=10 或更早停；**无** `models/owner_v13_pad200.pt`，有 mid-run `best.pt`）。
-  tip 对照 / H-DET-1 **未跑**（拒 mid-run，勿 `FORCE_MIDRUN`）。状态：`bash scripts/v13_train_status.sh`；落盘后：`bash scripts/eval_v13_vs_v12_tip.sh`（**不** auto-promote）。
+- **v13 pad200 已终局**：ep32 early stop（best=ep22，~20h）；`models/owner_v13_pad200.pt` 已落盘（= best.pt）。
+  Owner 贴的 P/R/mAP≈0.11/0.05/0.027 = **ep22 官方 val**（val=未 pad 中段金标）——**勿用 val mAP 判 tip**。
+- **H-DET-1 发现级未过**：true_tip tip_hit **0.008**（v12=0.925）；tip-smoke **0/27**（=v12）。报告
+  `analysis/p_v13_pad200_train.md`。**未** promote；主线仍 v12。下一步排队 H-DET-4 / H-DET-2（需 owner）。
 - **前端可视化真落地**（不抢 MPS）：前向 Tabulator + 状态条 train/fresh/tip + LWC 密集框/调试入口 —
   见 **`analysis/p_frontend_viz_opt.md`**（预览 `uvicorn …:8642`）。
 - **夜间旁路（不抢 MPS）已落地**：LWC hardneg 批量 / 叠框画廊 / LS 小包 / Protections 规格 —
   见 **`analysis/p_overnight_20260722.md`** + `analysis/p_wuzao_topics_scan.md` A 档「已做」。
+- **本机旁路工具集（发现级收尾）**：`.venv-tools` + `.venv-fo`；supervision 叠框 / FO 小批 /
+  LS check / nvitop·mitm·marimo·profiling / ML4T+LEAN 只读对照 —
+  见 **`analysis/p_side_tools_landed.md`** + `docs/LOCAL_DEBUG_TOOLS.md`（不杀 v13、不装 VPS）。
 - 近期讨论过、现在不做的优化（检测 tip + 判断/执行/风控）统一记在
   **`analysis/backlog_future_optimizations.md`**——瓶颈仍在 tip；判断层多数要等 tip 通了再拧。
   判断层开源专搜（校准/熔断/一致性积木，无现成两层整机）见该文 **B4**。
