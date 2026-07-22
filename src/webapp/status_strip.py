@@ -37,7 +37,7 @@ V13_MIDRUN_PT = (
     / "weights"
     / "best.pt"
 )
-V13_EPOCHS_TARGET = 40
+V13_EPOCHS_TARGET = 60  # owner_v16_tipuni_cold: 60 ep cold start (patience 15)
 # results.csv / log quieter than one epoch → treat as stale (not ALIVE).
 TRAIN_ALIVE_MAX_AGE_MIN = 45.0
 PULSE_LOG = PROJECT / "logs" / "forward_pulse.log"

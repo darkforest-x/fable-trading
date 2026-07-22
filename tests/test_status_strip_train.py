@@ -29,9 +29,9 @@ def test_v13_train_payload_shape(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setattr(ss, "V13_STABLE_PT", tmp_path / "missing.pt")
     monkeypatch.setattr(ss, "V13_MIDRUN_PT", tmp_path / "missing_best.pt")
     out = ss._v13_train()
-    assert out["name"] == "owner_v13_pad200"
+    assert out["name"] == "owner_v16_tipuni_cold"
     assert out["epoch"] == 3
-    assert out["epochs_target"] == 40
+    assert out["epochs_target"] == 60
     assert "alive" in out
     assert "progress" in out
 
