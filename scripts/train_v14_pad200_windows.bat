@@ -9,7 +9,7 @@ if "%DEVICE%"=="" set DEVICE=0
 if "%PY%"=="" set PY=python
 
 if not exist datasets\dense_owner_v14_pad200\data.yaml (
-  echo Missing datasets\dense_owner_v14_pad200\data.yaml — copy from Mac first.
+  echo Missing datasets\dense_owner_v14_pad200\data.yaml — on Mac: bash scripts/sync_v14_to_windows.sh
   exit /b 1
 )
 
