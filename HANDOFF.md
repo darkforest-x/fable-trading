@@ -4,13 +4,12 @@
 
 ## ⚡ 当前真相（2026-07-22 晚）
 
-- **v13 失败根因含标签错窗**：pad200 bulk 关 MAD、盲用 `end_incl`，把 `okx_*`（实为 start）切错 →
-  ~31% 正样本框罩错 K 线；审计 `analysis/p_pad200_cut_audit.md`，对照
-  `analysis/output/v13_train_sample20_corrected/`。脚本 MAD 默认已开；**未**重建集、**未**重训（需 Owner 点头）。
-- **v13 pad200 已终局**：ep32 early stop（best=ep22，~20h）；`models/owner_v13_pad200.pt` 已落盘（= best.pt）。
-  Owner 贴的 P/R/mAP≈0.11/0.05/0.027 = **ep22 官方 val**（val=未 pad 中段金标）——**勿用 val mAP 判 tip**。
-- **H-DET-1 发现级未过**：true_tip tip_hit **0.008**（v12=0.925）；tip-smoke **0/27**（=v12）。报告
-  `analysis/p_v13_pad200_train.md`。**未** promote；主线仍 v12。下一步排队 H-DET-4 / H-DET-2（需 owner）。
+- **v14 pad200 已重建（MAD-on）**：`datasets/dense_owner_v14_pad200` 正样本 **2635**（skip 1406，mainly
+  both_high）；v13 目录保留不动。报告 `analysis/p_v14_pad200_rebuild.md`；抽查
+  `analysis/output/v14_train_sample20/`。**未** Mac 开训、**未** promote——开训去 **Windows**，交接
+  `analysis/p_v14_windows_train.md` + `scripts/train_v14_pad200_windows.ps1`。
+- **v13 失败根因含标签错窗**（关 MAD 盲 end_incl → okx 错窗）；审计 `analysis/p_pad200_cut_audit.md`。
+  `models/owner_v13_pad200.pt` 仍在盘；H-DET-1 tip_hit **0.008** / tip-smoke **0/27**。主线仍 v12。
 - **前端可视化真落地**（不抢 MPS）：前向 Tabulator + 状态条 train/fresh/tip + LWC 密集框/调试入口 —
   见 **`analysis/p_frontend_viz_opt.md`**（预览 `uvicorn …:8642`）。
 - **夜间旁路（不抢 MPS）已落地**：LWC hardneg 批量 / 叠框画廊 / LS 小包 / Protections 规格 —

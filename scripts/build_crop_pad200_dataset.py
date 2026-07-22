@@ -66,6 +66,15 @@ MAX_BOX_CLOSE_REL_ERR = 1e-6
 MAX_STORED_MAD = 5.0
 
 
+class Pad200Skip(Exception):
+    """Skip one stem with a stable reason tag for pad200_skip.log stats."""
+
+    def __init__(self, reason: str, detail: str = ""):
+        self.reason = reason
+        self.detail = detail or reason
+        super().__init__(self.detail)
+
+
 @dataclass
 class Pad200Result:
     stem: str
@@ -373,35 +382,38 @@ def process_pad200(
     # v11 okx_* stems are start-indexed — blind end_incl remaps gold onto
     # the wrong OHLC (~31% of v13 pad200 positives). Prefer skip over poison.
     if stored_img is None and stem.startswith("okx_") and win_mode == "end_incl":
-        print(
+        # Reason tag consumed by bulk skip_log (okx blind-cut guard).
+        raise Pad200Skip(
+            "okx_blind_end_incl",
             f"SKIP blind end_incl on okx_ stem {stem}: "
             "need MAD vs stored PNG (start vs end_incl mix)",
-            flush=True,
         )
-        return None
     if (
         stored_img is not None
         and np.isfinite(stored_mad)
         and stored_mad > MAX_STORED_MAD
     ):
-        print(
+        # Includes both_high drift coins (all cand MAD > threshold).
+        raise Pad200Skip(
+            "mad_fail_both_high",
             f"SKIP high MAD {stem}: stored_mad={stored_mad:.3f} > {MAX_STORED_MAD}",
-            flush=True,
         )
-        return None
     sub = enriched.iloc[win_start : win_start + WINDOW].reset_index(drop=True)
     if len(sub) != WINDOW:
-        return None
+        raise Pad200Skip("short_or_bad_window", f"SKIP bad window len {stem}")
     tf_old = make_chart_transform(sub)
     cut_local, spans = boxes_cut_and_spans(boxes, tf_old)
     cut_global = win_start + cut_local
     pad_start = cut_global - WINDOW + 1
     # Strict: never stretch a short sequence. Skip if history < 200.
     if pad_start < 0 or cut_global >= n:
-        return None
+        raise Pad200Skip(
+            "short_history",
+            f"SKIP short history {stem}: pad_start={pad_start} cut_global={cut_global} n={n}",
+        )
     pad_sub = enriched.iloc[pad_start : cut_global + 1].reset_index(drop=True)
     if len(pad_sub) != WINDOW:
-        return None
+        raise Pad200Skip("short_history", f"SKIP short pad_sub {stem}")
 
     # Primary (rightmost) span for OHLC gate + reporting.
     b0, b1, _, _ = spans[0]
@@ -416,8 +428,7 @@ def process_pad200(
     try:
         corr, max_rel = assert_box_close_aligned(orig_closes, pad_closes)
     except AssertionError as exc:
-        print(f"SKIP align fail {stem}: {exc}", flush=True)
-        return None
+        raise Pad200Skip("align_fail", f"SKIP align fail {stem}: {exc}") from exc
 
     img, tip_tf = render_chart(pad_sub, out_path=None)
     new_boxes = remap_gold_boxes(
@@ -428,7 +439,7 @@ def process_pad200(
         pad_df=pad_sub,
     )
     if not new_boxes:
-        return None
+        raise Pad200Skip("empty_remap", f"SKIP empty remap {stem}")
 
     # Sanity: window must be exactly WINDOW bars (no stretch path).
     assert tip_tf.n_bars == WINDOW, tip_tf.n_bars
@@ -721,6 +732,14 @@ def main() -> int:
                 draw_preview=False,
                 orig_img_path=orig,
             )
+        except Pad200Skip as skip:
+            n_skip += 1
+            skip_fh.write(f"{stem}\t{skip.reason}\t{skip.detail}\n")
+            skip_fh.flush()
+            print(skip.detail, flush=True)
+            # MAD path holds multiple full-frame renders; free aggressively on 16GB.
+            gc.collect()
+            continue
         except Exception as exc:  # noqa: BLE001 — keep bulk build alive on one bad stem
             n_skip += 1
             skip_fh.write(f"{stem}\texc\t{exc}\n")
@@ -729,14 +748,16 @@ def main() -> int:
             gc.collect()
             continue
         if res is None:
+            # Early guards (eval stem / missing series / no win cand) — untagged.
             n_skip += 1
-            skip_fh.write(f"{stem}\n")
+            skip_fh.write(f"{stem}\tother\tprocess_returned_none\n")
             skip_fh.flush()
-            print(f"SKIP {stem}", flush=True)
+            print(f"SKIP {stem} (other)", flush=True)
+            gc.collect()
             continue
         n_ok += 1
-        if n_ok % 20 == 0:
-            gc.collect()
+        # Every sample: MAD re-renders 2–3 windows; jetsam killed prior bulk runs.
+        gc.collect()
         if n_ok % 50 == 0:
             print(
                 f"  pad200_ok={n_ok} skip={n_skip} bg_copied={n_bg}",
@@ -745,6 +766,13 @@ def main() -> int:
         if args.limit and n_ok >= args.limit:
             break
     skip_fh.close()
+
+    skip_reasons: dict[str, int] = {}
+    if skip_log.exists():
+        for line in skip_log.read_text(encoding="utf-8").splitlines():
+            parts = line.split("\t")
+            reason = parts[1].strip() if len(parts) >= 2 else "untagged"
+            skip_reasons[reason] = skip_reasons.get(reason, 0) + 1
 
     (dst / "data.yaml").write_text(
         f"path: {dst.resolve()}\ntrain: images/train\nval: images/val\n"
@@ -758,6 +786,7 @@ def main() -> int:
         "window": WINDOW,
         "train_pad200": n_ok,
         "train_skip": n_skip,
+        "train_skip_reasons": skip_reasons,
         "train_bg_copied": n_bg,
         "val_orig": n_val,
         "empty_bg_policy": "copy_as_is",
@@ -765,7 +794,8 @@ def main() -> int:
         "mad_gate": bool(args.mad_gate),
         "win_index_default": "mad_vs_stored_png" if args.mad_gate else "end_incl_fallback",
         "skip_log": str(skip_log),
-        "note": "v11 stem index is MIXED; mad_gate=false corrupts okx_* pad200 boxes",
+        "note": "v11 stem index is MIXED; mad_gate=false corrupts okx_* pad200 boxes; "
+        "mad_fail_both_high = best stored MAD>5 (drift / both_high skip)",
     }
     (dst / "pad200_summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     print(json.dumps(summary, indent=2))
