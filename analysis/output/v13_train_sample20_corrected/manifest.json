@@ -1,0 +1,202 @@
+[
+  {
+    "idx": 1,
+    "stem": "LUNA_USDT_SWAP_006930_pad200",
+    "bucket": "typical_tip",
+    "audit_status": "ok_end_incl",
+    "note": "end_incl MAD=0.00 — bulk window OK; boxes match gold OHLC",
+    "mismatch": false,
+    "annotated_rel": "annotated/01_LUNA_USDT_SWAP_006930_pad200_gt.png",
+    "n_boxes": 1
+  },
+  {
+    "idx": 2,
+    "stem": "okx_PNUT_USDT_SWAP_028760_pad200",
+    "bucket": "typical_tip",
+    "audit_status": "BUG_wrong_window",
+    "note": "okx/start stem; bulk used end_incl (MAD_end=10.7) but start MAD=0.00=0 — BOX ON WRONG BARS",
+    "mismatch": true,
+    "annotated_rel": "annotated/02_okx_PNUT_USDT_SWAP_028760_pad200_gt.png",
+    "n_boxes": 1
+  },
+  {
+    "idx": 3,
+    "stem": "ETH_USDT_007860_pad200",
+    "bucket": "typical_tip",
+    "audit_status": "drift_both_high",
+    "note": "archive≠kline both MAD>5 (end=12.8 start=9.9); bulk still wrote end_incl",
+    "mismatch": false,
+    "annotated_rel": "annotated/03_ETH_USDT_007860_pad200_gt.png",
+    "n_boxes": 1
+  },
+  {
+    "idx": 4,
+    "stem": "OKB_USDT_002660_pad200",
+    "bucket": "typical_tip",
+    "audit_status": "drift_both_high",
+    "note": "archive≠kline both MAD>5 (end=8.4 start=8.6); bulk still wrote end_incl",
+    "mismatch": false,
+    "annotated_rel": "annotated/04_OKB_USDT_002660_pad200_gt.png",
+    "n_boxes": 1
+  },
+  {
+    "idx": 5,
+    "stem": "okx_PEOPLE_USDT_SWAP_026560_pad200",
+    "bucket": "typical_tip",
+    "audit_status": "BUG_wrong_window",
+    "note": "okx/start stem; bulk used end_incl (MAD_end=10.7) but start MAD=0.00=0 — BOX ON WRONG BARS",
+    "mismatch": true,
+    "annotated_rel": "annotated/05_okx_PEOPLE_USDT_SWAP_026560_pad200_gt.png",
+    "n_boxes": 1
+  },
+  {
+    "idx": 6,
+    "stem": "SUI_USDT_001860_pad200",
+    "bucket": "typical_tip",
+    "audit_status": "drift_both_high",
+    "note": "archive≠kline both MAD>5 (end=9.9 start=8.4); bulk still wrote end_incl",
+    "mismatch": false,
+    "annotated_rel": "annotated/06_SUI_USDT_001860_pad200_gt.png",
+    "n_boxes": 1
+  },
+  {
+    "idx": 7,
+    "stem": "okx_LINK_USDT_SWAP_027660_pad200",
+    "bucket": "typical_tip",
+    "audit_status": "BUG_wrong_window",
+    "note": "okx/start stem; bulk used end_incl (MAD_end=9.5) but start MAD=0.00=0 — BOX ON WRONG BARS",
+    "mismatch": true,
+    "annotated_rel": "annotated/07_okx_LINK_USDT_SWAP_027660_pad200_gt.png",
+    "n_boxes": 1
+  },
+  {
+    "idx": 8,
+    "stem": "OL_USDT_SWAP_013703_pad200",
+    "bucket": "typical_tip",
+    "audit_status": "ok_end_incl",
+    "note": "end_incl MAD=0.00 — bulk window OK; boxes match gold OHLC",
+    "mismatch": false,
+    "annotated_rel": "annotated/08_OL_USDT_SWAP_013703_pad200_gt.png",
+    "n_boxes": 1
+  },
+  {
+    "idx": 9,
+    "stem": "okx_AAVE_USDT_SWAP_006660_pad200",
+    "bucket": "mid_leak",
+    "audit_status": "BUG_wrong_window",
+    "note": "okx/start stem; bulk used end_incl (MAD_end=10.3) but start MAD=0.00=0 — BOX ON WRONG BARS",
+    "mismatch": true,
+    "annotated_rel": "annotated/09_okx_AAVE_USDT_SWAP_006660_pad200_gt.png",
+    "n_boxes": 2
+  },
+  {
+    "idx": 10,
+    "stem": "okx_APT_USDT_SWAP_018660_pad200",
+    "bucket": "mid_leak",
+    "audit_status": "BUG_wrong_window",
+    "note": "okx/start stem; bulk used end_incl (MAD_end=9.8) but start MAD=0.00=0 — BOX ON WRONG BARS",
+    "mismatch": true,
+    "annotated_rel": "annotated/10_okx_APT_USDT_SWAP_018660_pad200_gt.png",
+    "n_boxes": 2
+  },
+  {
+    "idx": 11,
+    "stem": "ETH_USDT_014660_pad200",
+    "bucket": "narrow",
+    "audit_status": "drift_both_high",
+    "note": "archive≠kline both MAD>5 (end=10.3 start=10.0); bulk still wrote end_incl",
+    "mismatch": false,
+    "annotated_rel": "annotated/11_ETH_USDT_014660_pad200_gt.png",
+    "n_boxes": 1
+  },
+  {
+    "idx": 12,
+    "stem": "okx_PNUT_USDT_SWAP_017160_pad200",
+    "bucket": "narrow",
+    "audit_status": "BUG_wrong_window",
+    "note": "okx/start stem; bulk used end_incl (MAD_end=8.8) but start MAD=0.00=0 — BOX ON WRONG BARS",
+    "mismatch": true,
+    "annotated_rel": "annotated/12_okx_PNUT_USDT_SWAP_017160_pad200_gt.png",
+    "n_boxes": 1
+  },
+  {
+    "idx": 13,
+    "stem": "okx_PNUT_USDT_SWAP_022460_pad200",
+    "bucket": "wide",
+    "audit_status": "BUG_wrong_window",
+    "note": "okx/start stem; bulk used end_incl (MAD_end=12.1) but start MAD=0.00=0 — BOX ON WRONG BARS",
+    "mismatch": true,
+    "annotated_rel": "annotated/13_okx_PNUT_USDT_SWAP_022460_pad200_gt.png",
+    "n_boxes": 1
+  },
+  {
+    "idx": 14,
+    "stem": "HOME_USDT_SWAP_016130_pad200",
+    "bucket": "wide",
+    "audit_status": "ok_end_incl",
+    "note": "end_incl MAD=0.00 — bulk window OK; boxes match gold OHLC",
+    "mismatch": false,
+    "annotated_rel": "annotated/14_HOME_USDT_SWAP_016130_pad200_gt.png",
+    "n_boxes": 1
+  },
+  {
+    "idx": 15,
+    "stem": "PEPE_USDT_003160_pad200",
+    "bucket": "flat",
+    "audit_status": "drift_both_high",
+    "note": "archive≠kline both MAD>5 (end=8.6 start=8.8); bulk still wrote end_incl",
+    "mismatch": false,
+    "annotated_rel": "annotated/15_PEPE_USDT_003160_pad200_gt.png",
+    "n_boxes": 1
+  },
+  {
+    "idx": 16,
+    "stem": "WLFI_USDT_013760_pad200",
+    "bucket": "tall",
+    "audit_status": "drift_both_high",
+    "note": "archive≠kline both MAD>5 (end=9.1 start=8.5); bulk still wrote end_incl",
+    "mismatch": false,
+    "annotated_rel": "annotated/16_WLFI_USDT_013760_pad200_gt.png",
+    "n_boxes": 1
+  },
+  {
+    "idx": 17,
+    "stem": "MORPHO_USDT_SWAP_012130_pad200",
+    "bucket": "multi",
+    "audit_status": "ok_end_incl",
+    "note": "end_incl MAD=0.00 — bulk window OK; boxes match gold OHLC",
+    "mismatch": false,
+    "annotated_rel": "annotated/17_MORPHO_USDT_SWAP_012130_pad200_gt.png",
+    "n_boxes": 2
+  },
+  {
+    "idx": 18,
+    "stem": "SUI_USDT_004460",
+    "bucket": "background",
+    "audit_status": "bg",
+    "note": "empty background copy",
+    "mismatch": false,
+    "annotated_rel": "annotated/18_SUI_USDT_004460_gt.png",
+    "n_boxes": 0
+  },
+  {
+    "idx": 19,
+    "stem": "W_USDT_SWAP_010730",
+    "bucket": "background",
+    "audit_status": "bg",
+    "note": "empty background copy",
+    "mismatch": false,
+    "annotated_rel": "annotated/19_W_USDT_SWAP_010730_gt.png",
+    "n_boxes": 0
+  },
+  {
+    "idx": 20,
+    "stem": "JELLYJELLY_USDT_SWAP_003130",
+    "bucket": "background",
+    "audit_status": "bg",
+    "note": "empty background copy",
+    "mismatch": false,
+    "annotated_rel": "annotated/20_JELLYJELLY_USDT_SWAP_003130_gt.png",
+    "n_boxes": 0
+  }
+]

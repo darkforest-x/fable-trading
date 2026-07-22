@@ -9,10 +9,15 @@ Protocol (NOT H-TIP true_tip re-anchor):
   4. Remap the *same* gold box onto the new bar span (dense MA zone stays;
      box sits near the right edge because the window ends at cut).
 
-Stem index (dense_owner_v11 / round8/9): the numeric suffix is the window END
-bar (inclusive). Do NOT treat it as window start — that shifts cut_global by
-~200 bars and remaps the box onto a different OHLC segment. When the stored
-PNG is available, candidates are disambiguated by pixel MAD vs re-render.
+Stem index (dense_owner_v11 is a MIX):
+  - round8/9-style stems: numeric suffix = window END bar (inclusive)
+    → ``win_start = idx - 199`` (``end_incl``).
+  - older / ``okx_*`` stems: numeric suffix = window START bar
+    → ``win_start = idx`` (``start``).
+Blindly preferring ``end_incl`` (bulk with MAD off) remaps gold boxes onto
+the wrong OHLC for ~all ``okx_*`` positives — Owner sees "框不对". When the
+stored PNG is available, candidates MUST be disambiguated by pixel MAD vs
+re-render (default on; ``--no-mad-gate`` only for emergency resume).
 
 Usage:
   PYTHONPATH=. .venv/bin/python scripts/build_crop_pad200_dataset.py --preview 4
@@ -133,9 +138,10 @@ def _find_image(src: Path, stem: str) -> Path | None:
 def _candidate_win_starts(n: int, idx: int) -> list[tuple[str, int]]:
     """Stem-index conventions used across owner packs.
 
-    Prefer end-inclusive first: round8/round9/dense_owner_v11 encode the
-    window END bar (``iloc[idx-199:idx+1]``). Older packs used start index.
-    ``find_window_start`` in build_htip_dataset prefers start and mis-aligns v11.
+    Order is only a fallback when no stored PNG is available. v11 mixes
+    end-inclusive (round8/9) and start-index (``okx_*`` / older); MAD vs the
+    archived PNG is required to pick the right one. ``find_window_start`` in
+    build_htip_dataset prefers start and mis-aligns round8/9-style stems.
     """
     out: list[tuple[str, int]] = []
     for mode, start in (
@@ -577,8 +583,11 @@ def main() -> int:
     )
     ap.add_argument(
         "--mad-gate",
-        action="store_true",
-        help="load stored PNG + multi-render MAD (heavy RAM; default off for bulk on 16GB)",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="disambiguate stem index via stored PNG MAD (default ON; "
+        "required for v11 okx_*=start vs round8=end_incl mix). "
+        "Use --no-mad-gate only for emergency resume without PNGs.",
     )
     args = ap.parse_args()
 
@@ -592,7 +601,7 @@ def main() -> int:
         lines = [
             "pad200 try — crop after GT box right edge + left-pad to 200",
             "Protocol: cut at box right edge; window = [cut-199, cut]; n_bars MUST be 200.",
-            "Stem index: prefer end-inclusive (round8/v11); disambiguate vs stored PNG by MAD.",
+            "Stem index: v11 MIX — round8-style=end_incl, okx_*=start; ALWAYS MAD vs stored PNG.",
             "fixed_compare_10_*: LEFT = stored orig + Owner GT (cyan); RIGHT = pad200 + remapped (green).",
             "Gate: remapped box close corr >= 0.999 and max rel err <= 1e-6; stored MAD <= 5.",
             "No red cut line on preview compares. Does NOT overwrite dense_owner_v11.",
@@ -682,8 +691,9 @@ def main() -> int:
             continue
         out_img = dst / "images" / "train" / f"{stem}_pad200.png"
         out_lbl = dst / "labels" / "train" / f"{stem}_pad200.txt"
-        # Default: end_incl (v11 convention) + close-corr gate. Optional MAD is
-        # RAM-heavy (multi full-frame re-render) and was jetsam-killing 16GB bulk.
+        # Default: MAD vs stored PNG (v11 mixes end_incl and start). Blind
+        # end_incl remaps okx_* gold onto the wrong OHLC. gc every N samples
+        # to keep 16GB machines alive (jetsam risk if MAD left off for RAM).
         orig = img if args.mad_gate else None
         try:
             res = process_pad200(
@@ -736,8 +746,9 @@ def main() -> int:
         "empty_bg_policy": "copy_as_is",
         "val_policy": "copy_orig_unchanged",
         "mad_gate": bool(args.mad_gate),
-        "win_index_default": "end_incl",
+        "win_index_default": "mad_vs_stored_png" if args.mad_gate else "end_incl_fallback",
         "skip_log": str(skip_log),
+        "note": "v11 stem index is MIXED; mad_gate=false corrupts okx_* pad200 boxes",
     }
     (dst / "pad200_summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     print(json.dumps(summary, indent=2))

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"/>
+<title>pad200 cut audit — sample20 corrected</title>
+<style>
+body{font-family:system-ui;margin:16px;background:#111;color:#eee}
+.card{margin:16px 0;padding:12px;border:1px solid #444;border-radius:8px}
+.BUG_wrong_window{border-color:#e33}
+.ok_end_incl{border-color:#3a3}
+.drift_both_high{border-color:#e8a}
+.bg{border-color:#666}
+code{color:#8cf}
+</style></head><body>
+<h1>pad200 切割审计 · sample20 纠正对照</h1>
+<p>红框卡 = <b>BUG_wrong_window</b>（数据集用了 end_incl，但存档图是 start）。绿 = bulk 窗正确。橙 = 存档与当前 kline 双高 MAD。</p>
+<p>详见 <code>analysis/p_pad200_cut_audit.md</code>。未重训、未 promote。</p>
+
+<div class="card ok_end_incl">
+  <h3>#01 <code>LUNA_USDT_SWAP_006930_pad200</code></h3>
+  <p><b>ok_end_incl</b> — end_incl MAD=0.00 — bulk window OK; boxes match gold OHLC</p>
+  <img src="annotated/01_LUNA_USDT_SWAP_006930_pad200_gt.png" style="max-width:100%"/>
+  
+</div>
+<div class="card BUG_wrong_window">
+  <h3>#02 <code>okx_PNUT_USDT_SWAP_028760_pad200</code></h3>
+  <p><b>BUG_wrong_window</b> — okx/start stem; bulk used end_incl (MAD_end=10.7) but start MAD=0.00=0 — BOX ON WRONG BARS</p>
+  <img src="annotated/02_okx_PNUT_USDT_SWAP_028760_pad200_gt.png" style="max-width:100%"/>
+  <p><img src="compare_bulk_vs_mad/02_okx_PNUT_USDT_SWAP_028760_pad200_bulk_vs_mad.png" style="max-width:100%"/><br/>左=数据集错窗 / 右=MAD纠正</p>
+</div>
+<div class="card drift_both_high">
+  <h3>#03 <code>ETH_USDT_007860_pad200</code></h3>
+  <p><b>drift_both_high</b> — archive≠kline both MAD>5 (end=12.8 start=9.9); bulk still wrote end_incl</p>
+  <img src="annotated/03_ETH_USDT_007860_pad200_gt.png" style="max-width:100%"/>
+  
+</div>
+<div class="card drift_both_high">
+  <h3>#04 <code>OKB_USDT_002660_pad200</code></h3>
+  <p><b>drift_both_high</b> — archive≠kline both MAD>5 (end=8.4 start=8.6); bulk still wrote end_incl</p>
+  <img src="annotated/04_OKB_USDT_002660_pad200_gt.png" style="max-width:100%"/>
+  
+</div>
+<div class="card BUG_wrong_window">
+  <h3>#05 <code>okx_PEOPLE_USDT_SWAP_026560_pad200</code></h3>
+  <p><b>BUG_wrong_window</b> — okx/start stem; bulk used end_incl (MAD_end=10.7) but start MAD=0.00=0 — BOX ON WRONG BARS</p>
+  <img src="annotated/05_okx_PEOPLE_USDT_SWAP_026560_pad200_gt.png" style="max-width:100%"/>
+  <p><img src="compare_bulk_vs_mad/05_okx_PEOPLE_USDT_SWAP_026560_pad200_bulk_vs_mad.png" style="max-width:100%"/><br/>左=数据集错窗 / 右=MAD纠正</p>
+</div>
+<div class="card drift_both_high">
+  <h3>#06 <code>SUI_USDT_001860_pad200</code></h3>
+  <p><b>drift_both_high</b> — archive≠kline both MAD>5 (end=9.9 start=8.4); bulk still wrote end_incl</p>
+  <img src="annotated/06_SUI_USDT_001860_pad200_gt.png" style="max-width:100%"/>
+  
+</div>
+<div class="card BUG_wrong_window">
+  <h3>#07 <code>okx_LINK_USDT_SWAP_027660_pad200</code></h3>
+  <p><b>BUG_wrong_window</b> — okx/start stem; bulk used end_incl (MAD_end=9.5) but start MAD=0.00=0 — BOX ON WRONG BARS</p>
+  <img src="annotated/07_okx_LINK_USDT_SWAP_027660_pad200_gt.png" style="max-width:100%"/>
+  <p><img src="compare_bulk_vs_mad/07_okx_LINK_USDT_SWAP_027660_pad200_bulk_vs_mad.png" style="max-width:100%"/><br/>左=数据集错窗 / 右=MAD纠正</p>
+</div>
+<div class="card ok_end_incl">
+  <h3>#08 <code>OL_USDT_SWAP_013703_pad200</code></h3>
+  <p><b>ok_end_incl</b> — end_incl MAD=0.00 — bulk window OK; boxes match gold OHLC</p>
+  <img src="annotated/08_OL_USDT_SWAP_013703_pad200_gt.png" style="max-width:100%"/>
+  
+</div>
+<div class="card BUG_wrong_window">
+  <h3>#09 <code>okx_AAVE_USDT_SWAP_006660_pad200</code></h3>
+  <p><b>BUG_wrong_window</b> — okx/start stem; bulk used end_incl (MAD_end=10.3) but start MAD=0.00=0 — BOX ON WRONG BARS</p>
+  <img src="annotated/09_okx_AAVE_USDT_SWAP_006660_pad200_gt.png" style="max-width:100%"/>
+  <p><img src="compare_bulk_vs_mad/09_okx_AAVE_USDT_SWAP_006660_pad200_bulk_vs_mad.png" style="max-width:100%"/><br/>左=数据集错窗 / 右=MAD纠正</p>
+</div>
+<div class="card BUG_wrong_window">
+  <h3>#10 <code>okx_APT_USDT_SWAP_018660_pad200</code></h3>
+  <p><b>BUG_wrong_window</b> — okx/start stem; bulk used end_incl (MAD_end=9.8) but start MAD=0.00=0 — BOX ON WRONG BARS</p>
+  <img src="annotated/10_okx_APT_USDT_SWAP_018660_pad200_gt.png" style="max-width:100%"/>
+  <p><img src="compare_bulk_vs_mad/10_okx_APT_USDT_SWAP_018660_pad200_bulk_vs_mad.png" style="max-width:100%"/><br/>左=数据集错窗 / 右=MAD纠正</p>
+</div>
+<div class="card drift_both_high">
+  <h3>#11 <code>ETH_USDT_014660_pad200</code></h3>
+  <p><b>drift_both_high</b> — archive≠kline both MAD>5 (end=10.3 start=10.0); bulk still wrote end_incl</p>
+  <img src="annotated/11_ETH_USDT_014660_pad200_gt.png" style="max-width:100%"/>
+  
+</div>
+<div class="card BUG_wrong_window">
+  <h3>#12 <code>okx_PNUT_USDT_SWAP_017160_pad200</code></h3>
+  <p><b>BUG_wrong_window</b> — okx/start stem; bulk used end_incl (MAD_end=8.8) but start MAD=0.00=0 — BOX ON WRONG BARS</p>
+  <img src="annotated/12_okx_PNUT_USDT_SWAP_017160_pad200_gt.png" style="max-width:100%"/>
+  <p><img src="compare_bulk_vs_mad/12_okx_PNUT_USDT_SWAP_017160_pad200_bulk_vs_mad.png" style="max-width:100%"/><br/>左=数据集错窗 / 右=MAD纠正</p>
+</div>
+<div class="card BUG_wrong_window">
+  <h3>#13 <code>okx_PNUT_USDT_SWAP_022460_pad200</code></h3>
+  <p><b>BUG_wrong_window</b> — okx/start stem; bulk used end_incl (MAD_end=12.1) but start MAD=0.00=0 — BOX ON WRONG BARS</p>
+  <img src="annotated/13_okx_PNUT_USDT_SWAP_022460_pad200_gt.png" style="max-width:100%"/>
+  <p><img src="compare_bulk_vs_mad/13_okx_PNUT_USDT_SWAP_022460_pad200_bulk_vs_mad.png" style="max-width:100%"/><br/>左=数据集错窗 / 右=MAD纠正</p>
+</div>
+<div class="card ok_end_incl">
+  <h3>#14 <code>HOME_USDT_SWAP_016130_pad200</code></h3>
+  <p><b>ok_end_incl</b> — end_incl MAD=0.00 — bulk window OK; boxes match gold OHLC</p>
+  <img src="annotated/14_HOME_USDT_SWAP_016130_pad200_gt.png" style="max-width:100%"/>
+  
+</div>
+<div class="card drift_both_high">
+  <h3>#15 <code>PEPE_USDT_003160_pad200</code></h3>
+  <p><b>drift_both_high</b> — archive≠kline both MAD>5 (end=8.6 start=8.8); bulk still wrote end_incl</p>
+  <img src="annotated/15_PEPE_USDT_003160_pad200_gt.png" style="max-width:100%"/>
+  
+</div>
+<div class="card drift_both_high">
+  <h3>#16 <code>WLFI_USDT_013760_pad200</code></h3>
+  <p><b>drift_both_high</b> — archive≠kline both MAD>5 (end=9.1 start=8.5); bulk still wrote end_incl</p>
+  <img src="annotated/16_WLFI_USDT_013760_pad200_gt.png" style="max-width:100%"/>
+  
+</div>
+<div class="card ok_end_incl">
+  <h3>#17 <code>MORPHO_USDT_SWAP_012130_pad200</code></h3>
+  <p><b>ok_end_incl</b> — end_incl MAD=0.00 — bulk window OK; boxes match gold OHLC</p>
+  <img src="annotated/17_MORPHO_USDT_SWAP_012130_pad200_gt.png" style="max-width:100%"/>
+  
+</div>
+<div class="card bg">
+  <h3>#18 <code>SUI_USDT_004460</code></h3>
+  <p><b>bg</b> — empty background copy</p>
+  <img src="annotated/18_SUI_USDT_004460_gt.png" style="max-width:100%"/>
+  
+</div>
+<div class="card bg">
+  <h3>#19 <code>W_USDT_SWAP_010730</code></h3>
+  <p><b>bg</b> — empty background copy</p>
+  <img src="annotated/19_W_USDT_SWAP_010730_gt.png" style="max-width:100%"/>
+  
+</div>
+<div class="card bg">
+  <h3>#20 <code>JELLYJELLY_USDT_SWAP_003130</code></h3>
+  <p><b>bg</b> — empty background copy</p>
+  <img src="annotated/20_JELLYJELLY_USDT_SWAP_003130_gt.png" style="max-width:100%"/>
+  
+</div>
+</body></html>
