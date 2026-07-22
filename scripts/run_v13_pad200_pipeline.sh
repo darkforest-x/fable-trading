@@ -17,7 +17,9 @@ OUT=datasets/dense_owner_v13_pad200
 # Existing dir is OK: build uses --resume (will not clobber v11/v12).
 
 echo "--- 1) build pad200 dataset"
-# No --mad-gate: end_incl + close-corr only (16GB safe). Resume if dir exists.
+# MAD default ON in build_crop_pad200_dataset.py (v11 mixes end_incl + okx_*=start).
+# Do NOT pass --no-mad-gate for bulk — that poisoned v13 (~31% okx wrong window).
+# 16GB: expect slower / more RAM; caffeinate already wraps the build.
 BUILD_ARGS=(--src datasets/dense_owner_v11 --out "$OUT" --limit 0)
 if [ -d "$OUT" ]; then
   BUILD_ARGS+=(--resume)

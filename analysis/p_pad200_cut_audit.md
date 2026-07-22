@@ -4,6 +4,8 @@
 `dense_owner_v13_pad200` bulk 构建时 **`mad_gate=false`**，一律按 `end_incl`（stem=窗末）回算原窗；但 v11 里 **`okx_*` stem 实际是窗起点**。金标框被映射到错窗的 OHLC → Owner 目视「框罩错 K 线」。  
 **未**重导出全量数据集、**未**重训、**未** promote。代码已改：MAD 默认开。
 
+> Owner「昨天不是修过吗」→ 没错，修的是 preview；同晚 bulk 关 MAD。短答：`analysis/p_pad200_regression_why.md`。
+
 ---
 
 ## 1. 切割步骤（说人话）
