@@ -1,0 +1,378 @@
+{
+  "generated_at": "2026-07-22T22:46:24.084963+00:00",
+  "protocol": {
+    "true_tip_ma": "full-MA (add_mas on full series then cut)",
+    "real_tip_ma": "full-MA (same as collect_v13 / live)",
+    "conf": 0.3,
+    "tip_edge_bars": 2,
+    "tip_dense_hit_bars": 16,
+    "preview": "/Users/zhangzc/fable-trading/analysis/output/v13_real_tip_preview",
+    "note": "Discovery-level only; not trade PF. No promote."
+  },
+  "models": {
+    "v12": {
+      "weights": "models/owner_v16_tipuni_cold.pt",
+      "true_tip_full_ma": null,
+      "real_tip": {
+        "weights": "models/owner_v16_tipuni_cold.pt",
+        "conf": 0.3,
+        "tip_edge_bars": 2,
+        "window": 200,
+        "ma_protocol": "full-MA",
+        "preview_dir": "/Users/zhangzc/fable-trading/analysis/output/v13_real_tip_preview",
+        "gold_source": "owner_class if set else provisional_class (Owner-accepted prelabel)",
+        "n_sheet": 47,
+        "n_eval": 47,
+        "n_skipped": 0,
+        "skipped_head": [],
+        "gold_counts_eval": {
+          "tip-empty-ok": 33,
+          "tip-miss-dense": 6,
+          "tip-hit": 3,
+          "tip-noise": 5
+        },
+        "should_fire": {
+          "classes": [
+            "tip-hit",
+            "tip-miss-dense"
+          ],
+          "hit_raw": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          },
+          "hit_edge": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          },
+          "tipish_raw": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          },
+          "tipish_edge": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          },
+          "right_edge_raw": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          },
+          "right_edge_kept": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          }
+        },
+        "empty_ok": {
+          "classes": [
+            "tip-empty-ok"
+          ],
+          "false_fire_raw": {
+            "n": 33,
+            "k": 17,
+            "rate": 0.5152
+          },
+          "false_fire_edge": {
+            "n": 33,
+            "k": 17,
+            "rate": 0.5152
+          }
+        },
+        "noise": {
+          "classes": [
+            "tip-noise"
+          ],
+          "fire_raw": {
+            "n": 5,
+            "k": 1,
+            "rate": 0.2
+          },
+          "fire_edge": {
+            "n": 5,
+            "k": 1,
+            "rate": 0.2
+          }
+        },
+        "confusion_edge": {
+          "tp_should_fire": 3,
+          "fn_should_fire": 6,
+          "fp_empty": 17,
+          "tn_empty": 16,
+          "fp_noise_bucket": 1,
+          "note": "positive = A′ KEEP (bar_in_win >= window-tip_edge_bars)"
+        },
+        "by_gold_edge_hit": {
+          "tip-empty-ok": {
+            "n": 33,
+            "k": 17,
+            "rate": 0.5152
+          },
+          "tip-hit": {
+            "n": 3,
+            "k": 2,
+            "rate": 0.6667
+          },
+          "tip-miss-dense": {
+            "n": 6,
+            "k": 1,
+            "rate": 0.1667
+          },
+          "tip-noise": {
+            "n": 5,
+            "k": 1,
+            "rate": 0.2
+          }
+        },
+        "by_gold_raw_hit": {
+          "tip-empty-ok": {
+            "n": 33,
+            "k": 17,
+            "rate": 0.5152
+          },
+          "tip-hit": {
+            "n": 3,
+            "k": 2,
+            "rate": 0.6667
+          },
+          "tip-miss-dense": {
+            "n": 6,
+            "k": 1,
+            "rate": 0.1667
+          },
+          "tip-noise": {
+            "n": 5,
+            "k": 1,
+            "rate": 0.2
+          }
+        }
+      }
+    },
+    "v15": {
+      "weights": "models/owner_v16_tipuni_cold.pt",
+      "true_tip_full_ma": null,
+      "real_tip": {
+        "weights": "models/owner_v16_tipuni_cold.pt",
+        "conf": 0.3,
+        "tip_edge_bars": 2,
+        "window": 200,
+        "ma_protocol": "full-MA",
+        "preview_dir": "/Users/zhangzc/fable-trading/analysis/output/v13_real_tip_preview",
+        "gold_source": "owner_class if set else provisional_class (Owner-accepted prelabel)",
+        "n_sheet": 47,
+        "n_eval": 47,
+        "n_skipped": 0,
+        "skipped_head": [],
+        "gold_counts_eval": {
+          "tip-empty-ok": 33,
+          "tip-miss-dense": 6,
+          "tip-hit": 3,
+          "tip-noise": 5
+        },
+        "should_fire": {
+          "classes": [
+            "tip-hit",
+            "tip-miss-dense"
+          ],
+          "hit_raw": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          },
+          "hit_edge": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          },
+          "tipish_raw": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          },
+          "tipish_edge": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          },
+          "right_edge_raw": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          },
+          "right_edge_kept": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          }
+        },
+        "empty_ok": {
+          "classes": [
+            "tip-empty-ok"
+          ],
+          "false_fire_raw": {
+            "n": 33,
+            "k": 17,
+            "rate": 0.5152
+          },
+          "false_fire_edge": {
+            "n": 33,
+            "k": 17,
+            "rate": 0.5152
+          }
+        },
+        "noise": {
+          "classes": [
+            "tip-noise"
+          ],
+          "fire_raw": {
+            "n": 5,
+            "k": 1,
+            "rate": 0.2
+          },
+          "fire_edge": {
+            "n": 5,
+            "k": 1,
+            "rate": 0.2
+          }
+        },
+        "confusion_edge": {
+          "tp_should_fire": 3,
+          "fn_should_fire": 6,
+          "fp_empty": 17,
+          "tn_empty": 16,
+          "fp_noise_bucket": 1,
+          "note": "positive = A′ KEEP (bar_in_win >= window-tip_edge_bars)"
+        },
+        "by_gold_edge_hit": {
+          "tip-empty-ok": {
+            "n": 33,
+            "k": 17,
+            "rate": 0.5152
+          },
+          "tip-hit": {
+            "n": 3,
+            "k": 2,
+            "rate": 0.6667
+          },
+          "tip-miss-dense": {
+            "n": 6,
+            "k": 1,
+            "rate": 0.1667
+          },
+          "tip-noise": {
+            "n": 5,
+            "k": 1,
+            "rate": 0.2
+          }
+        },
+        "by_gold_raw_hit": {
+          "tip-empty-ok": {
+            "n": 33,
+            "k": 17,
+            "rate": 0.5152
+          },
+          "tip-hit": {
+            "n": 3,
+            "k": 2,
+            "rate": 0.6667
+          },
+          "tip-miss-dense": {
+            "n": 6,
+            "k": 1,
+            "rate": 0.1667
+          },
+          "tip-noise": {
+            "n": 5,
+            "k": 1,
+            "rate": 0.2
+          }
+        }
+      }
+    }
+  },
+  "summary": [
+    {
+      "tag": "v12",
+      "real_tip": {
+        "n_eval": 47,
+        "n_skipped": 0,
+        "should_fire_hit_raw": {
+          "n": 9,
+          "k": 3,
+          "rate": 0.3333
+        },
+        "should_fire_hit_edge": {
+          "n": 9,
+          "k": 3,
+          "rate": 0.3333
+        },
+        "empty_false_fire_raw": {
+          "n": 33,
+          "k": 17,
+          "rate": 0.5152
+        },
+        "empty_false_fire_edge": {
+          "n": 33,
+          "k": 17,
+          "rate": 0.5152
+        },
+        "noise_fire_edge": {
+          "n": 5,
+          "k": 1,
+          "rate": 0.2
+        },
+        "confusion_edge": {
+          "tp_should_fire": 3,
+          "fn_should_fire": 6,
+          "fp_empty": 17,
+          "tn_empty": 16,
+          "fp_noise_bucket": 1,
+          "note": "positive = A′ KEEP (bar_in_win >= window-tip_edge_bars)"
+        }
+      }
+    },
+    {
+      "tag": "v15",
+      "real_tip": {
+        "n_eval": 47,
+        "n_skipped": 0,
+        "should_fire_hit_raw": {
+          "n": 9,
+          "k": 3,
+          "rate": 0.3333
+        },
+        "should_fire_hit_edge": {
+          "n": 9,
+          "k": 3,
+          "rate": 0.3333
+        },
+        "empty_false_fire_raw": {
+          "n": 33,
+          "k": 17,
+          "rate": 0.5152
+        },
+        "empty_false_fire_edge": {
+          "n": 33,
+          "k": 17,
+          "rate": 0.5152
+        },
+        "noise_fire_edge": {
+          "n": 5,
+          "k": 1,
+          "rate": 0.2
+        },
+        "confusion_edge": {
+          "tp_should_fire": 3,
+          "fn_should_fire": 6,
+          "fp_empty": 17,
+          "tn_empty": 16,
+          "fp_noise_bucket": 1,
+          "note": "positive = A′ KEEP (bar_in_win >= window-tip_edge_bars)"
+        }
+      }
+    }
+  ]
+}

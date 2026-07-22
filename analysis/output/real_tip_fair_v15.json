@@ -1,10 +1,10 @@
 {
-  "weights": "models/owner_v15_tipval.pt",
+  "weights": "models/owner_v16_tipuni_cold.pt",
   "conf": 0.3,
   "tip_edge_bars": 2,
   "window": 200,
   "ma_protocol": "full-MA",
-  "preview_dir": "analysis/output/v13_real_tip_preview",
+  "preview_dir": "/Users/zhangzc/fable-trading/analysis/output/v13_real_tip_preview",
   "gold_source": "owner_class if set else provisional_class (Owner-accepted prelabel)",
   "n_sheet": 47,
   "n_eval": 47,
@@ -23,33 +23,33 @@
     ],
     "hit_raw": {
       "n": 9,
-      "k": 2,
-      "rate": 0.2222
+      "k": 3,
+      "rate": 0.3333
     },
     "hit_edge": {
       "n": 9,
-      "k": 2,
-      "rate": 0.2222
+      "k": 3,
+      "rate": 0.3333
     },
     "tipish_raw": {
       "n": 9,
-      "k": 2,
-      "rate": 0.2222
+      "k": 3,
+      "rate": 0.3333
     },
     "tipish_edge": {
       "n": 9,
-      "k": 2,
-      "rate": 0.2222
+      "k": 3,
+      "rate": 0.3333
     },
     "right_edge_raw": {
       "n": 9,
-      "k": 2,
-      "rate": 0.2222
+      "k": 3,
+      "rate": 0.3333
     },
     "right_edge_kept": {
       "n": 9,
-      "k": 2,
-      "rate": 0.2222
+      "k": 3,
+      "rate": 0.3333
     }
   },
   "empty_ok": {
@@ -58,13 +58,13 @@
     ],
     "false_fire_raw": {
       "n": 33,
-      "k": 19,
-      "rate": 0.5758
+      "k": 17,
+      "rate": 0.5152
     },
     "false_fire_edge": {
       "n": 33,
-      "k": 19,
-      "rate": 0.5758
+      "k": 17,
+      "rate": 0.5152
     }
   },
   "noise": {
@@ -83,18 +83,18 @@
     }
   },
   "confusion_edge": {
-    "tp_should_fire": 2,
-    "fn_should_fire": 7,
-    "fp_empty": 19,
-    "tn_empty": 14,
+    "tp_should_fire": 3,
+    "fn_should_fire": 6,
+    "fp_empty": 17,
+    "tn_empty": 16,
     "fp_noise_bucket": 1,
     "note": "positive = A′ KEEP (bar_in_win >= window-tip_edge_bars)"
   },
   "by_gold_edge_hit": {
     "tip-empty-ok": {
       "n": 33,
-      "k": 19,
-      "rate": 0.5758
+      "k": 17,
+      "rate": 0.5152
     },
     "tip-hit": {
       "n": 3,
@@ -103,8 +103,8 @@
     },
     "tip-miss-dense": {
       "n": 6,
-      "k": 0,
-      "rate": 0.0
+      "k": 1,
+      "rate": 0.1667
     },
     "tip-noise": {
       "n": 5,
@@ -115,8 +115,8 @@
   "by_gold_raw_hit": {
     "tip-empty-ok": {
       "n": 33,
-      "k": 19,
-      "rate": 0.5758
+      "k": 17,
+      "rate": 0.5152
     },
     "tip-hit": {
       "n": 3,
@@ -125,8 +125,8 @@
     },
     "tip-miss-dense": {
       "n": 6,
-      "k": 0,
-      "rate": 0.0
+      "k": 1,
+      "rate": 0.1667
     },
     "tip-noise": {
       "n": 5,
@@ -141,22 +141,6 @@
       "source": "forward_log",
       "gold": "tip-empty-ok",
       "tip_dense_rule": false,
-      "n_boxes_raw": 1,
-      "n_kept": 1,
-      "fired_raw": true,
-      "fired_edge": true,
-      "tipish_raw": true,
-      "tipish_edge": true,
-      "right_edge_raw": true,
-      "right_edge_kept": true,
-      "max_conf": 0.3129
-    },
-    {
-      "symbol": "MVLL_USDT_SWAP",
-      "signal_time": "2026-07-19 02:45:00+00:00",
-      "source": "forward_log",
-      "gold": "tip-empty-ok",
-      "tip_dense_rule": false,
       "n_boxes_raw": 0,
       "n_kept": 0,
       "fired_raw": false,
@@ -166,6 +150,22 @@
       "right_edge_raw": false,
       "right_edge_kept": false,
       "max_conf": 0.0
+    },
+    {
+      "symbol": "MVLL_USDT_SWAP",
+      "signal_time": "2026-07-19 02:45:00+00:00",
+      "source": "forward_log",
+      "gold": "tip-empty-ok",
+      "tip_dense_rule": false,
+      "n_boxes_raw": 1,
+      "n_kept": 1,
+      "fired_raw": true,
+      "fired_edge": true,
+      "tipish_raw": true,
+      "tipish_edge": true,
+      "right_edge_raw": true,
+      "right_edge_kept": true,
+      "max_conf": 0.4513
     },
     {
       "symbol": "KAITO_USDT_SWAP",
@@ -197,11 +197,27 @@
       "tipish_edge": true,
       "right_edge_raw": true,
       "right_edge_kept": true,
-      "max_conf": 0.4073
+      "max_conf": 0.4605
     },
     {
       "symbol": "KAITO_USDT_SWAP",
       "signal_time": "2026-07-19 03:15:00+00:00",
+      "source": "forward_log",
+      "gold": "tip-empty-ok",
+      "tip_dense_rule": false,
+      "n_boxes_raw": 0,
+      "n_kept": 0,
+      "fired_raw": false,
+      "fired_edge": false,
+      "tipish_raw": false,
+      "tipish_edge": false,
+      "right_edge_raw": false,
+      "right_edge_kept": false,
+      "max_conf": 0.0
+    },
+    {
+      "symbol": "KAITO_USDT_SWAP",
+      "signal_time": "2026-07-19 03:30:00+00:00",
       "source": "forward_log",
       "gold": "tip-empty-ok",
       "tip_dense_rule": false,
@@ -213,23 +229,7 @@
       "tipish_edge": true,
       "right_edge_raw": true,
       "right_edge_kept": true,
-      "max_conf": 0.3307
-    },
-    {
-      "symbol": "KAITO_USDT_SWAP",
-      "signal_time": "2026-07-19 03:30:00+00:00",
-      "source": "forward_log",
-      "gold": "tip-empty-ok",
-      "tip_dense_rule": false,
-      "n_boxes_raw": 2,
-      "n_kept": 2,
-      "fired_raw": true,
-      "fired_edge": true,
-      "tipish_raw": true,
-      "tipish_edge": true,
-      "right_edge_raw": true,
-      "right_edge_kept": true,
-      "max_conf": 0.7711
+      "max_conf": 0.4295
     },
     {
       "symbol": "KAITO_USDT_SWAP",
@@ -237,15 +237,15 @@
       "source": "forward_log",
       "gold": "tip-empty-ok",
       "tip_dense_rule": false,
-      "n_boxes_raw": 2,
-      "n_kept": 2,
+      "n_boxes_raw": 1,
+      "n_kept": 1,
       "fired_raw": true,
       "fired_edge": true,
       "tipish_raw": true,
       "tipish_edge": true,
       "right_edge_raw": true,
       "right_edge_kept": true,
-      "max_conf": 0.826
+      "max_conf": 0.7577
     },
     {
       "symbol": "MUU_USDT_SWAP",
@@ -285,35 +285,19 @@
       "source": "forward_log",
       "gold": "tip-empty-ok",
       "tip_dense_rule": false,
-      "n_boxes_raw": 1,
-      "n_kept": 1,
-      "fired_raw": true,
-      "fired_edge": true,
-      "tipish_raw": true,
-      "tipish_edge": true,
-      "right_edge_raw": true,
-      "right_edge_kept": true,
-      "max_conf": 0.3067
+      "n_boxes_raw": 0,
+      "n_kept": 0,
+      "fired_raw": false,
+      "fired_edge": false,
+      "tipish_raw": false,
+      "tipish_edge": false,
+      "right_edge_raw": false,
+      "right_edge_kept": false,
+      "max_conf": 0.0
     },
     {
       "symbol": "EDEN_USDT_SWAP",
       "signal_time": "2026-07-19 04:45:00+00:00",
-      "source": "forward_log",
-      "gold": "tip-empty-ok",
-      "tip_dense_rule": false,
-      "n_boxes_raw": 1,
-      "n_kept": 1,
-      "fired_raw": true,
-      "fired_edge": true,
-      "tipish_raw": true,
-      "tipish_edge": true,
-      "right_edge_raw": true,
-      "right_edge_kept": true,
-      "max_conf": 0.3265
-    },
-    {
-      "symbol": "HOME_USDT_SWAP",
-      "signal_time": "2026-07-19 05:15:00+00:00",
       "source": "forward_log",
       "gold": "tip-empty-ok",
       "tip_dense_rule": false,
@@ -326,6 +310,22 @@
       "right_edge_raw": false,
       "right_edge_kept": false,
       "max_conf": 0.0
+    },
+    {
+      "symbol": "HOME_USDT_SWAP",
+      "signal_time": "2026-07-19 05:15:00+00:00",
+      "source": "forward_log",
+      "gold": "tip-empty-ok",
+      "tip_dense_rule": false,
+      "n_boxes_raw": 1,
+      "n_kept": 1,
+      "fired_raw": true,
+      "fired_edge": true,
+      "tipish_raw": true,
+      "tipish_edge": true,
+      "right_edge_raw": true,
+      "right_edge_kept": true,
+      "max_conf": 0.5434
     },
     {
       "symbol": "RECALL_USDT_SWAP",
@@ -341,7 +341,7 @@
       "tipish_edge": true,
       "right_edge_raw": true,
       "right_edge_kept": true,
-      "max_conf": 0.384
+      "max_conf": 0.5052
     },
     {
       "symbol": "PARTI_USDT_SWAP",
@@ -357,7 +357,7 @@
       "tipish_edge": true,
       "right_edge_raw": true,
       "right_edge_kept": true,
-      "max_conf": 0.3572
+      "max_conf": 0.3525
     },
     {
       "symbol": "CAP_USDT_SWAP",
@@ -373,7 +373,7 @@
       "tipish_edge": true,
       "right_edge_raw": true,
       "right_edge_kept": true,
-      "max_conf": 0.3362
+      "max_conf": 0.4049
     },
     {
       "symbol": "XPL_USDT_SWAP",
@@ -397,15 +397,15 @@
       "source": "forward_log",
       "gold": "tip-miss-dense",
       "tip_dense_rule": true,
-      "n_boxes_raw": 0,
-      "n_kept": 0,
-      "fired_raw": false,
-      "fired_edge": false,
-      "tipish_raw": false,
-      "tipish_edge": false,
-      "right_edge_raw": false,
-      "right_edge_kept": false,
-      "max_conf": 0.0
+      "n_boxes_raw": 2,
+      "n_kept": 2,
+      "fired_raw": true,
+      "fired_edge": true,
+      "tipish_raw": true,
+      "tipish_edge": true,
+      "right_edge_raw": true,
+      "right_edge_kept": true,
+      "max_conf": 0.6731
     },
     {
       "symbol": "RECALL_USDT_SWAP",
@@ -413,15 +413,15 @@
       "source": "forward_log",
       "gold": "tip-empty-ok",
       "tip_dense_rule": false,
-      "n_boxes_raw": 0,
-      "n_kept": 0,
-      "fired_raw": false,
-      "fired_edge": false,
-      "tipish_raw": false,
-      "tipish_edge": false,
-      "right_edge_raw": false,
-      "right_edge_kept": false,
-      "max_conf": 0.0
+      "n_boxes_raw": 1,
+      "n_kept": 1,
+      "fired_raw": true,
+      "fired_edge": true,
+      "tipish_raw": true,
+      "tipish_edge": true,
+      "right_edge_raw": true,
+      "right_edge_kept": true,
+      "max_conf": 0.3156
     },
     {
       "symbol": "BONK_USDT_SWAP",
@@ -437,7 +437,7 @@
       "tipish_edge": true,
       "right_edge_raw": true,
       "right_edge_kept": true,
-      "max_conf": 0.546
+      "max_conf": 0.3409
     },
     {
       "symbol": "UB_USDT_SWAP",
@@ -445,15 +445,15 @@
       "source": "forward_log",
       "gold": "tip-empty-ok",
       "tip_dense_rule": false,
-      "n_boxes_raw": 1,
-      "n_kept": 1,
-      "fired_raw": true,
-      "fired_edge": true,
-      "tipish_raw": true,
-      "tipish_edge": true,
-      "right_edge_raw": true,
-      "right_edge_kept": true,
-      "max_conf": 0.3294
+      "n_boxes_raw": 0,
+      "n_kept": 0,
+      "fired_raw": false,
+      "fired_edge": false,
+      "tipish_raw": false,
+      "tipish_edge": false,
+      "right_edge_raw": false,
+      "right_edge_kept": false,
+      "max_conf": 0.0
     },
     {
       "symbol": "LIGHT_USDT_SWAP",
@@ -469,7 +469,7 @@
       "tipish_edge": true,
       "right_edge_raw": true,
       "right_edge_kept": true,
-      "max_conf": 0.3601
+      "max_conf": 0.3217
     },
     {
       "symbol": "PEPE_USDT_SWAP",
@@ -477,15 +477,15 @@
       "source": "forward_log",
       "gold": "tip-empty-ok",
       "tip_dense_rule": false,
-      "n_boxes_raw": 1,
-      "n_kept": 1,
-      "fired_raw": true,
-      "fired_edge": true,
-      "tipish_raw": true,
-      "tipish_edge": true,
-      "right_edge_raw": true,
-      "right_edge_kept": true,
-      "max_conf": 0.3764
+      "n_boxes_raw": 0,
+      "n_kept": 0,
+      "fired_raw": false,
+      "fired_edge": false,
+      "tipish_raw": false,
+      "tipish_edge": false,
+      "right_edge_raw": false,
+      "right_edge_kept": false,
+      "max_conf": 0.0
     },
     {
       "symbol": "SPX_USDT_SWAP",
@@ -509,15 +509,15 @@
       "source": "forward_log",
       "gold": "tip-empty-ok",
       "tip_dense_rule": false,
-      "n_boxes_raw": 1,
-      "n_kept": 1,
-      "fired_raw": true,
-      "fired_edge": true,
-      "tipish_raw": true,
-      "tipish_edge": true,
-      "right_edge_raw": true,
-      "right_edge_kept": true,
-      "max_conf": 0.4303
+      "n_boxes_raw": 0,
+      "n_kept": 0,
+      "fired_raw": false,
+      "fired_edge": false,
+      "tipish_raw": false,
+      "tipish_edge": false,
+      "right_edge_raw": false,
+      "right_edge_kept": false,
+      "max_conf": 0.0
     },
     {
       "symbol": "KITE_USDT_SWAP",
@@ -533,7 +533,7 @@
       "tipish_edge": true,
       "right_edge_raw": true,
       "right_edge_kept": true,
-      "max_conf": 0.5391
+      "max_conf": 0.6549
     },
     {
       "symbol": "SOON_USDT_SWAP",
@@ -549,7 +549,7 @@
       "tipish_edge": true,
       "right_edge_raw": true,
       "right_edge_kept": true,
-      "max_conf": 0.4561
+      "max_conf": 0.5789
     },
     {
       "symbol": "MMT_USDT_SWAP",
@@ -557,15 +557,15 @@
       "source": "forward_log",
       "gold": "tip-empty-ok",
       "tip_dense_rule": false,
-      "n_boxes_raw": 0,
-      "n_kept": 0,
-      "fired_raw": false,
-      "fired_edge": false,
-      "tipish_raw": false,
-      "tipish_edge": false,
-      "right_edge_raw": false,
-      "right_edge_kept": false,
-      "max_conf": 0.0
+      "n_boxes_raw": 1,
+      "n_kept": 1,
+      "fired_raw": true,
+      "fired_edge": true,
+      "tipish_raw": true,
+      "tipish_edge": true,
+      "right_edge_raw": true,
+      "right_edge_kept": true,
+      "max_conf": 0.3939
     },
     {
       "symbol": "KORU_USDT_SWAP",
@@ -581,7 +581,7 @@
       "tipish_edge": true,
       "right_edge_raw": true,
       "right_edge_kept": true,
-      "max_conf": 0.8035
+      "max_conf": 0.7211
     },
     {
       "symbol": "ROBO_USDT_SWAP",
@@ -597,7 +597,7 @@
       "tipish_edge": true,
       "right_edge_raw": true,
       "right_edge_kept": true,
-      "max_conf": 0.5971
+      "max_conf": 0.5127
     },
     {
       "symbol": "KGEN_USDT_SWAP",
@@ -613,7 +613,7 @@
       "tipish_edge": true,
       "right_edge_raw": true,
       "right_edge_kept": true,
-      "max_conf": 0.5201
+      "max_conf": 0.5731
     },
     {
       "symbol": "ONE_USDT_SWAP",
@@ -637,15 +637,15 @@
       "source": "forward_log",
       "gold": "tip-noise",
       "tip_dense_rule": false,
-      "n_boxes_raw": 2,
-      "n_kept": 2,
+      "n_boxes_raw": 1,
+      "n_kept": 1,
       "fired_raw": true,
       "fired_edge": true,
       "tipish_raw": true,
       "tipish_edge": true,
       "right_edge_raw": true,
       "right_edge_kept": true,
-      "max_conf": 0.6573
+      "max_conf": 0.6072
     },
     {
       "symbol": "FIL_USDT",
@@ -741,7 +741,7 @@
       "tipish_edge": true,
       "right_edge_raw": true,
       "right_edge_kept": true,
-      "max_conf": 0.5855
+      "max_conf": 0.7545
     },
     {
       "symbol": "YFI_USDT_SWAP",
@@ -877,15 +877,15 @@
       "source": "scout_preholdout",
       "gold": "tip-empty-ok",
       "tip_dense_rule": false,
-      "n_boxes_raw": 0,
-      "n_kept": 0,
-      "fired_raw": false,
-      "fired_edge": false,
-      "tipish_raw": false,
-      "tipish_edge": false,
-      "right_edge_raw": false,
-      "right_edge_kept": false,
-      "max_conf": 0.0
+      "n_boxes_raw": 1,
+      "n_kept": 1,
+      "fired_raw": true,
+      "fired_edge": true,
+      "tipish_raw": true,
+      "tipish_edge": true,
+      "right_edge_raw": true,
+      "right_edge_kept": true,
+      "max_conf": 0.3224
     }
   ]
 }
