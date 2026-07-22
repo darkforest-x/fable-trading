@@ -1,94 +1,124 @@
-# v14 pad200 → Windows 训练交接
+# v14 pad200 → Windows（3060）训练交接
 
-> 状态：Mac **只重建数据集**，**不在 Mac 开 YOLO 大训**。不 promote、不耗 holdout。  
-> 数据集：`datasets/dense_owner_v14_pad200`（MAD 默认开；v13 保留不动）。
+> 状态：Mac **只建数据集**，**不在 Mac 开 YOLO 大训**。不 promote、不耗 holdout。  
+> 数据集：`datasets/dense_owner_v14_pad200`（MAD 默认开；v13 保留不动）。  
+> **主路径 = SSH/scp 到局域网 Windows RTX 3060**（与 v8–v10 / H-TS 同一套路）。  
+> 之前交接里写「U 盘 / 手动拷」是错的——已纠正。
 
-## 1. 拷到 Windows 什么
+## 0. 标准主机（仓库惯例）
 
-| 必拷 | 说明 | 体积量级 |
-|------|------|----------|
-| `datasets/dense_owner_v14_pad200/` 整目录 | `images/{train,val}` + `labels/{train,val}` + `data.yaml` + `pad200_summary.json` | **~1.6 GB**（正样本 2635；对照 v13≈1.8G） |
-| `models/owner_v12_htip.pt` 或 `models/owner_best.pt` | chain 基座（v12） | ~数十 MB |
-| 仓库代码（`git pull`） | `src/detection/train.py` 已内置禁增强 | — |
+| 项 | 默认值 | 覆盖 |
+|----|--------|------|
+| SSH | `zzc@192.168.1.5` | `FABLE_3060_HOST` |
+| 远端根 | `C:/fable` | `FABLE_3060_REMOTE` |
+| 传数 | `tar` + `scp`（排除 `.npy` / `.cache` / `._*`） | 见 `scripts/sync_v14_to_windows.sh` |
+| 长训 | **WMI `Win32_Process.Create`**（防 SSH 断线杀进程） | 同 `train_owner_hts.sh` |
 
-**不要拷**：`dense_owner_v13_pad200`（错窗对照集）、`data/kline_*`（训练不需要）、`runs/` 旧 run。
+先例：`scripts/train_on_3060.sh`、`scripts/train_owner_hts.sh`、`scripts/train_owner_v9_from_round7.sh`。  
+密码不进仓库；本机用 `ssh-agent` / 已配好的密钥（`BatchMode=yes`）。
 
-建议（Mac → 移动硬盘 / scp / 局域网）：
+## 1. Owner 在 Mac 上跑这一条（传数）
 
 ```bash
-# Mac 打 tar（重建完成后）
-tar -C datasets -cf - dense_owner_v14_pad200 | pigz -1 > /tmp/dense_owner_v14_pad200.tar.gz
-# 或
-rsync -a --info=progress2 datasets/dense_owner_v14_pad200/ /Volumes/USB/dense_owner_v14_pad200/
+bash scripts/sync_v14_to_windows.sh
+# 只测连通：
+# bash scripts/sync_v14_to_windows.sh --check
 ```
 
-Windows 解到仓库根下：`datasets\dense_owner_v14_pad200\`（保持 `data.yaml` 内 path 可用；`src.detection.train` 会 `resolve()`）。
+脚本会：
 
-## 2. Windows 第一条训练命令
+1. 检查 SSH → `C:/fable`  
+2. 打包 `datasets/dense_owner_v14_pad200`（~1.6G）+ scp  
+3. scp 基座 `models/owner_v12_htip.pt`（缺则 `owner_best.pt`）→ 远端 `models/`  
+4. 远端解包并打印 train/val 图数  
 
-PowerShell（仓库根，已装 torch+ultralytics+CUDA）：
+**不要拷**：`dense_owner_v13_pad200`、`data/kline_*`、旧 `runs/`。  
+代码用 Windows 上已有的 `C:/fable` 仓库 `git pull`（datasets 不入 git）。
 
-```powershell
-$env:PYTHONPATH="."
-python -m src.detection.train `
-  --data datasets/dense_owner_v14_pad200/data.yaml `
-  --model models/owner_v12_htip.pt `
-  --epochs 40 --patience 10 `
-  --batch 16 --workers 8 `
-  --device 0 `
-  --cache disk `
-  --name owner_v14_pad200
+### 传数之后：开训（二选一）
+
+**A. 推荐 — Mac 上 SSH + WMI（断 SSH 也不杀训）**
+
+```bash
+HOST="${FABLE_3060_HOST:-zzc@192.168.1.5}"
+ssh "$HOST" "New-Item -ItemType Directory -Force -Path C:\fable\logs | Out-Null; Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine='cmd.exe /c cd /d C:\fable && .venv\Scripts\python.exe -m src.detection.train --data datasets/dense_owner_v14_pad200/data.yaml --model models/owner_v12_htip.pt --epochs 40 --patience 10 --batch 16 --workers 4 --device 0 --cache false --name owner_v14_pad200 > logs\owner_v14_pad200.log 2>&1'} | Out-Null; Write-Output started"
 ```
 
-一键脚本：`.\scripts\train_v14_pad200_windows.ps1` 或 `scripts\train_v14_pad200_windows.bat`。
+看进度：
+
+```bash
+ssh zzc@192.168.1.5 "Get-Content C:\fable\logs\owner_v14_pad200.log -Tail 20"
+```
+
+**B. 人在 Windows 盒子上** — `.\scripts\train_v14_pad200_windows.ps1`（或 `.bat`）。
 
 | 旋钮 | 建议 | 备注 |
 |------|------|------|
-| batch | **16**（8GB VRAM 用 8；12GB+ 可用 16–24） | OOM 再降 |
-| workers | **8** | CPU 核多可 8–12 |
+| batch | **16**（8GB 用 8） | OOM 再降 |
+| workers | **4**（16GB 机）/ 8（内存够） | 历史 3060 训用 `--cache false --workers 4` |
 | device | `0` | CUDA |
-| 增强 | **勿改** | `train.py` 的 `SAFE_AUG`：`fliplr/flipud/mosaic/mixup=0`，`hsv_h=0`，`hsv_s/v=0.05` |
-| finetune | 自动开 | 非 `yolo*.pt` 基座 → AdamW `lr0=1e-4` |
+| 增强 | **勿改** | `SAFE_AUG` 全关 |
+| finetune | 自动 | 非 `yolo*.pt` → AdamW `lr0=1e-4` |
 
-预计墙钟：RTX 3060/4060 级 **数小时～一夜**（40 ep / patience 10；v13 Mac MPS ~20h 参考，CUDA 通常快数倍）。
+预计墙钟：RTX 3060 **数小时～一夜**。
 
-## 3. 权重落点
+## 2. 权重取回 Mac（训完）
 
-| 路径 | 含义 |
-|------|------|
-| `runs/detect/owner_v14_pad200/weights/best.pt` | ultralytics 产出（有时多一层 `runs/detect/`） |
-| `models/owner_v14_pad200.pt` | 脚本稳定拷贝（**未** promote） |
+ultralytics 路径可能多一层 `runs/detect/`：
+
+```bash
+HOST="${FABLE_3060_HOST:-zzc@192.168.1.5}"
+REMOTE="${FABLE_3060_REMOTE:-C:/fable}"
+NAME=owner_v14_pad200
+mkdir -p "runs/detect/runs/detect/$NAME/weights" models
+# 试双路径
+scp "$HOST:$REMOTE/runs/detect/runs/detect/$NAME/weights/best.pt" \
+    "runs/detect/runs/detect/$NAME/weights/best.pt" \
+  || scp "$HOST:$REMOTE/runs/detect/$NAME/weights/best.pt" \
+    "runs/detect/runs/detect/$NAME/weights/best.pt"
+cp "runs/detect/runs/detect/$NAME/weights/best.pt" models/owner_v14_pad200.pt
+```
 
 **禁止**自动覆盖 `models/owner_best.pt` / `ACTIVE`。
 
-## 4. 验收（可回 Mac / VPS 跑）
+## 3. 验收（回 Mac 跑；发现级）
 
 ```bash
-# tip_hit（发现级）
 PYTHONPATH=. python scripts/tip_detectability.py --true-tip --split val --limit 120 \
   --dataset datasets/dense_owner_v11 --weights models/owner_v14_pad200.pt \
   --out analysis/output/tip_rate_v14_pad200.json
 
-# tip-smoke（对照 v12 的 0/27；需 forward_log + kline）
 PYTHONPATH=. python scripts/diag_forward_detect_lag.py --from-log --tip-smoke \
   --weights models/owner_v14_pad200.pt \
   --out analysis/output/diag_tip_smoke_v14.json
 ```
 
-对照包：`bash scripts/eval_v13_vs_v12_tip.sh` 可改权重变量仿跑。通过标准仍是 tip-smoke / tip_hit，**不是** val mAP。
+通过标准仍是 tip-smoke / tip_hit，**不是** val mAP。**promote 另一次点头**。
 
-## 5. Owner 同步清单
+## 4. Owner 同步清单（SSH 主路径）
 
-1. Mac：等重建 `pad200_summary.json` + `mad_gate: true`  
-2. `git pull`（文档/脚本；**默认不 push 大数据集**——datasets 在 gitignore）  
-3. 拷 `datasets/dense_owner_v14_pad200` + v12 基座权重到 Windows  
-4. 跑 §2 命令或 `.ps1`  
-5. 把 `models/owner_v14_pad200.pt` 拷回 Mac 再 tip 验收  
+1. Mac：重建已完成（`pad200_summary.json` + `mad_gate: true`）— 见 §5  
+2. Windows：`git pull`（脚本/文档；大数据集不走 git）  
+3. Mac：`bash scripts/sync_v14_to_windows.sh`  
+4. 开训：§1A WMI 或 §1B `.ps1`  
+5. Mac：§2 scp 取回 → §3 tip 验收  
 6. **promote 另一次点头**
 
-## 6. 重建状态（Mac）— **已完成**
+### 降级（仅 SSH 不通时）
+
+U 盘 / 本机拖文件 **不是默认路径**。只有 `sync_v14_to_windows.sh --check` 失败、且 Owner 确认局域网不可用时，才临时用外置盘；解到 `C:\fable\datasets\dense_owner_v14_pad200\`。
+
+## 5. 重建状态（Mac）— **已完成**
 
 - `mad_gate: true`；正样本 **2635**；skip 1406（其中 both_high/MAD 1318）  
 - 日志：`logs/build_v14_pad200.log`；报告：`analysis/p_v14_pad200_rebuild.md`  
 - 抽查：`analysis/output/v14_train_sample20/`  
-- **可以拷盘开训**（Mac 不训 YOLO）。
+- **可 SSH 开训**（Mac 不训 YOLO）。
+
+## 6. 若连不上要 Owner 补什么
+
+默认已写在仓库里（`zzc@192.168.1.5` / `C:/fable`）。若机器换了，只需告诉 agent / 设环境变量：
+
+- 新 `FABLE_3060_HOST`（`user@ip`）  
+- 新 `FABLE_3060_REMOTE`（Windows 仓库根，正斜杠如 `D:/fable`）  
+- 本机对该主机的 **SSH 密钥登录**（脚本用 `BatchMode=yes`，不读密码）

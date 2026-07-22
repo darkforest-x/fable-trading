@@ -64,7 +64,7 @@ v13 关 MAD 盲 `end_incl` → ~31% okx 错窗；v14 MAD-on + both_high skip →
 
 ## 下一步（Owner 决策）
 
-1. **拷** `datasets/dense_owner_v14_pad200`（~1.6G）+ `models/owner_v12_htip.pt` 到 Windows  
-2. **`git pull`** 拿训练脚本/文档（datasets 不在 git）  
-3. Windows 跑 `analysis/p_v14_windows_train.md` §2 或 `scripts/train_v14_pad200_windows.ps1`  
-4. 权重拷回后 tip-smoke / tip_hit；**promote 另批**
+1. Mac：`bash scripts/sync_v14_to_windows.sh`（SSH → `zzc@192.168.1.5` / `C:/fable`；**不是** U 盘拷）  
+2. Windows：`git pull` 拿训练脚本/文档（datasets 不在 git）  
+3. 开训：见 `analysis/p_v14_windows_train.md`（WMI 或 `.ps1`）  
+4. 权重 scp 回 Mac 后 tip-smoke / tip_hit；**promote 另批**

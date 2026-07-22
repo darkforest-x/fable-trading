@@ -1,9 +1,9 @@
 # Train owner_v14_pad200 on Windows + NVIDIA. Do NOT promote; do NOT eval holdout.
-# Prerequisites:
-#   1) git pull (docs/scripts)
-#   2) Copy datasets/dense_owner_v14_pad200/ onto this machine (see analysis/p_v14_windows_train.md)
+# Prerequisites (Mac ships data over SSH — do NOT USB-copy by default):
+#   1) On Mac: bash scripts/sync_v14_to_windows.sh  (host zzc@192.168.1.5 → C:/fable)
+#   2) On this box: git pull (docs/scripts); dataset already under datasets/dense_owner_v14_pad200
 #   3) Base weights: models/owner_v12_htip.pt (or models/owner_best.pt = v12)
-# Usage (from repo root, PowerShell):
+# Usage (from repo root, PowerShell) — or start via WMI from Mac (see p_v14_windows_train.md):
 #   .\scripts\train_v14_pad200_windows.ps1
 # Optional env:
 #   $env:BATCH=16; $env:WORKERS=8; $env:DEVICE=0
@@ -14,7 +14,7 @@ Set-Location (Split-Path -Parent $PSScriptRoot)
 $Out = "datasets\dense_owner_v14_pad200"
 $Data = Join-Path $Out "data.yaml"
 if (-not (Test-Path $Data)) {
-  Write-Error "Missing $Data — copy dense_owner_v14_pad200 from Mac first."
+  Write-Error "Missing $Data — on Mac run: bash scripts/sync_v14_to_windows.sh"
 }
 
 $Base = "models\owner_v12_htip.pt"
