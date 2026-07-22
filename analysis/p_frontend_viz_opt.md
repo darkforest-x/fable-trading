@@ -1,69 +1,70 @@
-# 前端可视化优化 — 真落地（非再扫清单）
+# 前端可视化优化 — 真落地 + 风格收敛
 
 **日期**：2026-07-22  
 **约束**：不杀 v13 / 不 promote / 不耗 holdout / 不动真金 / K 线主图继续 LWC  
-**对照**：`analysis/p_wuzao_topics_scan.md` B11 ECharts（辅图，本轮未上）· A1 LWC 加深 · DESIGN-REFERENCES Tabulator 节奏
+**对照**：`analysis/p_wuzao_topics_scan.md` · `src/webapp/static/DESIGN-REFERENCES.md` · wuzao [数据可视化](https://www.wuzao.com/topics/data-visualization/)
 
 ---
 
 ## 结论先行
 
-Owner 要「看见变好」。本轮在主看板落地 **3 处可见优化**，开源只进 vendor / CDN 风格本地拷贝，**未**换 React、**未**用 ECharts 抢主图。
+第一轮（`4b0c403`）把 Tabulator / 状态灯 / explore 框落地后，Owner 反馈 **整体风格变土**——不是功能错，是视觉像「AI 监控大屏」：6 格状态卡、midnight 表头、seg pill 滤镜、侧栏调试区喧宾夺主。
 
-| # | 可见点 | 开源 | 打开哪里看 |
-|---|--------|------|------------|
-| 1 | 前向日志可排序/筛选（新鲜·事后·币种） | **Tabulator 6.3**（MIT） | `#forward` 表 |
-| 2 | 状态条多三灯：新鲜度门 / v13 训练旁路 / tip_fire | 读本地 `results.csv` + pulse 日志 | 顶栏 |
-| 3 | 密集探索：canvas 框 + 起点▲/右缘 tip◆；调试入口打通 hardneg | **LWC v4**（已有）+ 静态产物挂载 | `#explore` · `/debug_viz.html` |
+第二轮按 wuzao 可视化主题里**克制看板**气质收敛：信息保留，权重压低。
 
----
-
-## 用了哪些开源
-
-| 库 | 版本/路径 | 用途 | 刻意没用 |
-|----|-----------|------|----------|
-| TradingView **lightweight-charts** | 已有 `vendor/…standalone…js` | 主 K 线 + markers；加深 canvas 叠框 | 不换 ECharts/TV 商业库做主图 |
-| **Tabulator Tables** | `vendor/tabulator.min.{js,css}` + midnight | 前向表排序筛选 | 不整站 AG Grid / React table |
-| （对照扫过）uPlot / ECharts / lucide | — | **本轮未 vendor** | ECharts 留给权益辅图（B 档）；lucide 用现有 CSS chip 够 |
-
-另扫确认（WebSearch）：LWC v5 才把 markers 拆成 `createSeriesMarkers`；本仓仍是 **v4 `setMarkers`**，加深路径走 canvas overlay（见 learnings），不升大版本。
+| # | 可见点 | 现在的样子 | 打开哪里看 |
+|---|--------|------------|------------|
+| 1 | 前向日志可排序/筛选 | Tabulator + **自定义 quiet theme**（去 midnight / 少 chip） | `#forward` |
+| 2 | train / tip / 新鲜度 | **一行 muted meta**，不再多三张状态卡 | 顶栏三卡下方 |
+| 3 | 密集探索框 | LWC + canvas 仍在；图例收紧；overlay 不挡 pan | `#explore` |
+| 4 | 调试入口 | 侧栏脚注小链，不占导航分区 | 侧栏底 / `debug_viz.html` |
 
 ---
 
-## 改了哪些文件
+## wuzao 参考（本轮气质，不换栈）
+
+扫自 https://www.wuzao.com/topics/ 与 [数据可视化](https://www.wuzao.com/topics/data-visualization/)；只学密度/层级，不引入喧闹组件库、不 React 重写。
+
+| 参考 | 链接 | 可学的一句 | 刻意没抄 |
+|------|------|------------|----------|
+| **Grafana** | [wuzao 条目](https://www.wuzao.com/topics/data-visualization/) · [github](https://github.com/grafana/grafana) | 面板顶栏用小号弱对比 meta，不是再堆一排「状态卡」 | 不装 Grafana 栈、不抄霓虹状态灯墙 |
+| **Redash** | 同上 · [github](https://github.com/getredash/redash) | 筛选用安静 select/input，表头细线、少圆角胶囊 | 不换 BI 拖拽仪表盘 |
+| **Metabase** | 同上 · [github](https://github.com/metabase/metabase) | 字号层级：标签弱、数字才重；表格像文档不像软件皮肤 | 不整站 BI、不问数聊天 UI |
+| **FreqUI / Hummingbot**（仓内已记） | [DESIGN-REFERENCES](../src/webapp/static/DESIGN-REFERENCES.md) · wuzao Hummingbot 文档 | 图优先、侧栏分组克制；调试别抢日常导航 | 不 Streamlit 整站 |
+
+---
+
+## 风格问题承认（第一轮）
+
+- 顶栏 3→6 格 + good/warn 渐变卡 = 监控大屏感  
+- Tabulator **midnight** 块状表头 + 单元格 chip pill = 表格软件土味  
+- 前向「全部/仅新鲜/仅事后」seg 条 = 高对比滤镜条  
+- 侧栏「调试」分区 + 密集探索重复入口 = 喧宾夺主  
+
+功能本身（排序、新鲜度筛选、train/tip 只读旁路）可以留；错在**视觉权重**。
+
+---
+
+## 第二轮改了啥
 
 | 文件 | 改动 |
 |------|------|
-| `src/webapp/static/vendor/tabulator*` + `README.md` | 新增本地 vendor |
-| `src/webapp/static/index.html` | 状态灯 ×3、侧栏调试链、前向 Tabulator 宿主、探索图例 |
-| `src/webapp/static/app.js` | Tabulator 前向表；`drawExploreBoxes` canvas；状态条 train/fresh/tip |
-| `src/webapp/static/style.css` | 6 格状态条、Tabulator 深色、overlay 可点 |
-| `src/webapp/static/debug_viz.html` | **新**调试入口页 |
-| `src/webapp/status_strip.py` | `train` / `freshness` / `tip_pulse` / `debug_links` |
-| `src/webapp/server.py` | `mount /debug-artifacts` → `analysis/output` |
-| `tests/test_status_strip_train.py` | 只读旁路单测 |
-| `analysis/p_frontend_viz_opt.md` | 本报告 |
-| `HANDOFF.md` | 一行指针 |
-| `docs/learnings/dashboard-viz-deepen-lwc-not-replace.md` | learning |
+| `index.html` | 恢复 3 状态卡 + `#status-meta`；滤镜改 select；去 midnight CSS；调试沉底脚注；图例收紧 |
+| `app.js` | meta 渲染 lag/v13/tip；Tabulator 去 chip、去 midnight class；滤镜绑 select |
+| `style.css` | 去掉 6 列；quiet toolbar；Tabulator 贴合 data-table 细线；overlay `pointer-events: none` |
+| `vendor/README.md` | 注明 midnight 不用 |
 
 ---
 
 ## 怎么本地打开预览
 
 ```bash
-# 勿杀 v13；用仓库 .venv
-cd /Users/zhangzc/fable-trading
-PYTHONPATH=. .venv/bin/uvicorn src.webapp.server:app --host 127.0.0.1 --port 8642
+# 勿杀 v13；launchd 已托管则直接刷
+open http://127.0.0.1:8642/
+# 硬刷新（cache bust: ?v=20260722quiet）
 ```
 
-浏览器：
-
-1. http://127.0.0.1:8642/ — 顶栏应见 **新鲜度 ≤30min**、**v13 训练 epoch x/40**、**tip_fire**（本机无 pulse 日志则 —）
-2. 侧栏 **前向** — Tabulator：点表头排序；「仅新鲜 / 仅事后」+ 币种筛选（本机 `forward_log` 若空则空表仍可见控件）
-3. 侧栏 **可视化调试** 或 http://127.0.0.1:8642/debug_viz.html — hardneg LWC / tip 对照 / 叠框画廊
-4. http://127.0.0.1:8642/#explore — 开「密集标记」：半透明框 + 粉红右缘 tip 带；点框可聚焦
-
-单测：`PYTHONPATH=. python3 -m pytest tests/test_status_strip_train.py -q`
+看：顶栏仍是三卡，其下有一行淡字 `lag≤30m · v13 … · tip …`；前向表像原表、控件安静；侧栏底才有「调试产物」。
 
 ---
 
@@ -71,26 +72,23 @@ PYTHONPATH=. .venv/bin/uvicorn src.webapp.server:app --host 127.0.0.1 --port 864
 
 | 项 | 原因 |
 |----|------|
-| ECharts 权益/PF 辅图 | 前向页已有 LWC area；再叠双库体积，留给 tip 通后 B11 |
-| uPlot | 与现有 LWC 辅图重复 ROI 低 |
-| React / Streamlit 整站 | DESIGN + wuzao 扫描已否决 |
-| 改 VPS / promote / 清 forward_log | 纪律禁止；本机预览即可 |
-| 升 LWC v5 | markers API 破坏；本轮加深 overlay 足够看见差异 |
-| 假数据灌前向表 | 空表诚实；VPS 有日志后自然满 |
+| 换 React / Streamlit / Superset | wuzao 扫过但 DESIGN 已否决 |
+| ECharts 抢主图 | 主图锁 LWC |
+| 删掉 Tabulator / 排序筛选 | 功能有用；只去土味皮肤 |
+| 装 Grafana 到 VPS | 运维项需 owner；本轮只学气质 |
 
 ---
 
 ## 风险与诚实声明
 
-- 本机 `data/forward_log.csv` 可能只有表头 → 前向表空，但排序/筛选 UI 仍可见。  
-- `train.alive` 用 **results.csv / log mtime ≤45min** 启发，不是 `pgrep`；落盘后以 `stable_pt` 为准。  
-- `/debug-artifacts` 只读挂载 `analysis/output`；勿把 LWC 截图当 YOLO 训练图。  
-- **未**验证 VPS 部署；commit 默认不 push。
+- 本机 forward 表可能仍空（诚实空态）。  
+- meta 的 train 仍是 results.csv mtime 启发，不是 pgrep。  
+- 未 push / 未动 VPS。  
 
 ---
 
 ## 下一步（需 Owner）
 
-- [ ] 是否 rsync 静态到 VPS dashboard（纯前端，仍不改装机栈）  
-- [ ] tip 通后是否叠 ECharts 前向 PF 辅图（单变量）  
-- [ ] 信号页成交表是否同样换 Tabulator（本轮只做前向，单变量）
+- [ ] 刷新本机看板：气质是否够干净  
+- [ ] 是否 rsync 静态到 VPS（仍不改装机栈）  
+- [ ] tip 通后是否单变量叠 ECharts PF 辅图（辅图，不抢 LWC）

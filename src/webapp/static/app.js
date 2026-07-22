@@ -1084,9 +1084,7 @@ async function loadStatusStrip(force = false) {
     const ownerEl = $("#status-owner");
     const judEl = $("#status-judgment");
     const fwdEl = $("#status-forward");
-    const freshEl = $("#status-fresh");
-    const trainEl = $("#status-train");
-    const tipEl = $("#status-tip");
+    const metaEl = $("#status-meta");
     if (ownerEl) {
       ownerEl.classList.remove("skeleton");
       ownerEl.classList.add("status-click");
@@ -1127,59 +1125,34 @@ async function loadStatusStrip(force = false) {
       const totalN = fw.total_rows ?? 0;
       const hs = fw.hindsight_excluded ?? 0;
       const stall = fw.stall_reason || "";
-      fwdEl.innerHTML = `<span class="status-k">前向裁决 <span class="status-fresh">lag≤${fw.fresh_detect_min ?? 30}m</span></span>
+      fwdEl.innerHTML = `<span class="status-k">前向裁决</span>
         <span class="status-v">${n} / ${target}（${prog}%）</span>
         <span class="status-bar-mini"><span style="width:${prog}%"></span></span>
         <span class="status-sub" title="${escapeHtml(stall)}">open ${openN} · 事后 ${hs} · 日志 ${totalN}${stall ? " · " + escapeHtml(stall) : ""}</span>`;
     }
-    if (freshEl) {
-      freshEl.classList.remove("skeleton");
-      const g = fr.gate_min ?? 30;
-      freshEl.classList.add("good");
-      freshEl.title = fr.note || "三门同值";
-      freshEl.innerHTML = `<span class="status-k">新鲜度门</span>
-        <span class="status-v">≤ ${g} min</span>
-        <span class="status-sub">${escapeHtml(fr.note || "执行器 / TG / 看板")}</span>`;
-    }
-    if (trainEl) {
-      trainEl.classList.remove("skeleton");
-      trainEl.classList.add("status-click");
-      trainEl.dataset.href = "/debug_viz.html";
-      trainEl.title = "只读旁路 · 不杀训练 · 点开调试页";
+    if (metaEl) {
+      const g = fr.gate_min ?? fw.fresh_detect_min ?? 30;
       const ep = tr.epoch;
       const tgt = tr.epochs_target ?? 40;
-      const prog = tr.progress != null ? Math.round(100 * tr.progress) : null;
-      const alive = !!tr.alive;
       const done = tr.status === "done" || tr.stable_pt;
-      trainEl.classList.toggle("good", done || alive);
-      trainEl.classList.toggle("warn", !done && !alive && ep != null);
-      const v = done
-        ? "已落盘"
-        : (ep != null ? `${ep}/${tgt}${prog != null ? ` · ${prog}%` : ""}` : "—");
-      const sub = done
-        ? "models/owner_v13_pad200.pt"
-        : (alive ? `ALIVE · ${escapeHtml(tr.note || "")}` : escapeHtml(tr.note || "idle"));
-      trainEl.innerHTML = `<span class="status-k">v13 训练</span>
-        <span class="status-v">${escapeHtml(String(v))}</span>
-        ${prog != null && !done ? `<span class="status-bar-mini"><span style="width:${prog}%"></span></span>` : ""}
-        <span class="status-sub">${sub}</span>`;
-    }
-    if (tipEl) {
-      tipEl.classList.remove("skeleton");
-      tipEl.classList.add("status-click");
-      tipEl.dataset.href = "/debug_viz.html";
-      tipEl.title = tip.note || "本机 tip_fire 旁路";
+      const alive = !!tr.alive;
+      let trainTxt = "v13 —";
+      if (done) trainTxt = "v13 已落盘";
+      else if (ep != null) trainTxt = `v13 ${ep}/${tgt}${alive ? "" : " · idle"}`;
       const tf = tip.tip_fire;
-      tipEl.classList.toggle("good", tf != null && Number(tf) > 0);
-      tipEl.classList.toggle("warn", tip.exists && (tf === 0 || tf === "0"));
-      tipEl.innerHTML = `<span class="status-k">tip_fire</span>
-        <span class="status-v">${tf != null ? escapeHtml(String(tf)) : "—"}</span>
-        <span class="status-sub">${escapeHtml(tip.note || "—")}</span>`;
+      const tipTxt = tf != null ? `tip ${tf}` : "tip —";
+      metaEl.innerHTML = [
+        `lag≤${g}m`,
+        trainTxt,
+        tipTxt,
+        `<a href="/debug_viz.html">调试</a>`,
+      ].join(`<span class="sep">·</span>`);
+      metaEl.title = [fr.note, tr.note, tip.note].filter(Boolean).join(" · ");
     }
     paintLiveTruth(od, ja, fw);
     if (force) toast("状态条已刷新", "ok");
   } catch (_) {
-    ["status-owner", "status-judgment", "status-forward", "status-fresh", "status-train", "status-tip"].forEach((id) => {
+    ["status-owner", "status-judgment", "status-forward"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) {
         el.classList.remove("skeleton");
@@ -1187,6 +1160,8 @@ async function loadStatusStrip(force = false) {
         if (v) v.textContent = "暂不可用";
       }
     });
+    const metaEl = $("#status-meta");
+    if (metaEl) metaEl.textContent = "状态暂不可用";
   }
 }
 
@@ -1558,14 +1533,13 @@ let forwardTableWired = false;
 function wireForwardTableControls() {
   if (forwardTableWired) return;
   forwardTableWired = true;
-  const seg = $("#forward-fresh-seg");
-  seg?.querySelectorAll("button").forEach((b) => {
-    b.addEventListener("click", () => {
-      seg.querySelectorAll("button").forEach((x) => x.classList.toggle("active", x === b));
-      forwardFreshFilter = b.dataset.fresh || "";
+  const sel = $("#forward-fresh-sel");
+  if (sel) {
+    sel.addEventListener("change", () => {
+      forwardFreshFilter = sel.value || "";
       applyForwardTableFilters();
     });
-  });
+  }
   $("#forward-sym-filter")?.addEventListener("input", (e) => {
     forwardSymFilter = String(e.target.value || "").trim().toUpperCase();
     applyForwardTableFilters();
@@ -1634,8 +1608,6 @@ function ensureForwardTabulator() {
   const host = $("#forward-table");
   if (!host || typeof Tabulator === "undefined") return null;
   if (forwardTabulator) return forwardTabulator;
-  const dark = document.body.classList.contains("theme-dark");
-  host.classList.toggle("tabulator-theme-midnight", dark);
   forwardTabulator = new Tabulator(host, {
     data: [],
     layout: "fitDataStretch",
@@ -1667,8 +1639,8 @@ function ensureForwardTabulator() {
       {
         title: "Maker", field: "maker_filled", width: 72, hozAlign: "center",
         formatter: (cell) => cell.getValue()
-          ? `<span class="chip passed">filled</span>`
-          : `<span class="chip">miss</span>`,
+          ? `<span class="fwd-plain">filled</span>`
+          : `<span class="fwd-plain">miss</span>`,
       },
       {
         title: "结果", field: "outcome", width: 72, sorter: "string",
@@ -1692,10 +1664,10 @@ function ensureForwardTabulator() {
         },
       },
       {
-        title: "新鲜", field: "_fresh", width: 64, hozAlign: "center",
+        title: "新鲜", field: "_fresh", width: 56, hozAlign: "center",
         formatter: (cell) => cell.getValue()
-          ? `<span class="chip passed">新鲜</span>`
-          : `<span class="chip warn">事后</span>`,
+          ? `<span class="fwd-plain">新鲜</span>`
+          : `<span class="fwd-plain warn">事后</span>`,
       },
     ],
     initialSort: [{ column: "signal_time", dir: "desc" }],

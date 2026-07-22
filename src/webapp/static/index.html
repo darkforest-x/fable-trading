@@ -5,15 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>darkforest-trading</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=20260722viz">
+<link rel="stylesheet" href="style.css?v=20260722quiet">
 <link rel="stylesheet" href="scout_mtf.css?v=20260719embed">
 <link rel="stylesheet" href="vendor/tabulator.min.css">
-<link rel="stylesheet" href="vendor/tabulator_midnight.min.css">
 <script defer src="vendor/lightweight-charts.standalone.production.js"></script>
 <script defer src="vendor/tabulator.min.js"></script>
 <script defer src="format_helpers.js?v=20260720sym"></script>
 <script defer src="scout_mtf_app.js?v=20260719embed"></script>
-<script defer src="app.js?v=20260722viz"></script>
+<script defer src="app.js?v=20260722quiet"></script>
 </head>
 <body class="hb-shell">
 <button type="button" class="nav-burger" id="nav-burger" aria-label="打开导航" aria-controls="sidebar" aria-expanded="false">☰</button>
@@ -39,15 +38,13 @@
     <button type="button" class="sb-item sb-item-muted" data-view="labeling"><span class="sb-label">打标</span></button>
     <button type="button" class="sb-item sb-item-muted" data-view="shorttf"><span class="sb-label">短周期</span></button>
     <button type="button" class="sb-item sb-item-muted" data-view="radar"><span class="sb-label">雷达</span></button>
-    <div class="sb-section-label">调试</div>
-    <a class="sb-item sb-item-muted" href="/debug_viz.html"><span class="sb-label">可视化调试</span></a>
-    <a class="sb-item sb-item-muted" href="/#explore"><span class="sb-label">密集探索</span></a>
   </nav>
   <div class="sb-foot">
     <div class="sb-foot-row">
       <button type="button" class="mini-btn theme-toggle" id="theme-toggle" title="切换浅色/深色">深色</button>
       <button type="button" class="mini-btn status-refresh" id="status-refresh" title="刷新状态（r）">刷新</button>
     </div>
+    <a class="sb-debug-link" href="/debug_viz.html">调试产物</a>
   </div>
 </aside>
 
@@ -57,10 +54,8 @@
       <div class="status-item skeleton" id="status-owner"><span class="status-k">检测器</span><span class="status-v">…</span></div>
       <div class="status-item skeleton" id="status-judgment"><span class="status-k">判断 ACTIVE</span><span class="status-v">…</span></div>
       <div class="status-item skeleton" id="status-forward"><span class="status-k">前向</span><span class="status-v">…</span></div>
-      <div class="status-item skeleton" id="status-fresh"><span class="status-k">新鲜度</span><span class="status-v">…</span></div>
-      <div class="status-item skeleton" id="status-train"><span class="status-k">v13 训练</span><span class="status-v">…</span></div>
-      <div class="status-item skeleton" id="status-tip"><span class="status-k">tip_fire</span><span class="status-v">…</span></div>
     </div>
+    <p id="status-meta" class="status-meta" aria-live="polite"></p>
   </div>
 
   <div id="toast-host" class="toast-host" aria-live="assertive"></div>
@@ -127,9 +122,7 @@
     <div class="legend compact-legend">
       <span><i class="dot" style="background:#3d8fd1"></i>SMA 20/60/120 实线</span>
       <span><i class="dot" style="background:#f06024"></i>EMA 20/60/120 暖色</span>
-      <span><i class="dot" style="background:#2dd4bf"></i>半透明框 = 密集段</span>
-      <span><i class="dot" style="background:#1E90FF"></i>▲ 起点</span>
-      <span><i class="dot" style="background:#f472b6"></i>◆ 右缘 tip 候选</span>
+      <span><i class="dot" style="background:#2dd4bf"></i>▲ 密集框（右缘 tip）</span>
       <span><i class="dot" style="background:#fbbf24"></i>聚焦</span>
       <span class="note">← → 换币 · j/k 切框 · 0 全图 · Enter 重扫</span>
     </div>
@@ -624,14 +617,16 @@
       <div class="panel-head-row">
         <h2>前向日志 <span class="unit" id="forward-count"></span></h2>
       </div>
-      <p class="note note-foot">北京时间 · 延迟=检出−信号 · 超阈标「事后」不进裁决 · 点行看 K 线 · 表头可排序/筛选（Tabulator）</p>
+      <p class="note note-foot">北京时间 · 延迟=检出−信号 · 超阈标「事后」不进裁决 · 点行看 K 线 · 表头可排序</p>
       <div class="fwd-table-toolbar" id="forward-table-filters">
-        <div class="seg" id="forward-fresh-seg" title="新鲜度筛选">
-          <button type="button" data-fresh="" class="active">全部</button>
-          <button type="button" data-fresh="1">仅新鲜</button>
-          <button type="button" data-fresh="0">仅事后</button>
-        </div>
-        <input id="forward-sym-filter" type="search" placeholder="筛选币种…" autocomplete="off" aria-label="筛选币种">
+        <label class="fwd-quiet-label" for="forward-fresh-sel">新鲜度
+          <select id="forward-fresh-sel" aria-label="新鲜度筛选">
+            <option value="">全部</option>
+            <option value="1">仅新鲜</option>
+            <option value="0">仅事后</option>
+          </select>
+        </label>
+        <input id="forward-sym-filter" type="search" placeholder="币种" autocomplete="off" aria-label="筛选币种">
       </div>
       <div id="forward-table" class="tabulator-host"></div>
     </div>
