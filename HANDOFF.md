@@ -8,9 +8,15 @@
   `analysis/output/v13_real_tip_preview/index.html`（tip+0 **48** 张预标：hit4 /
   miss-dense6 / noise5 / empty33）。报告 `analysis/p_real_tip_collect_started.md`。
   **下一步=Owner 目视填 `review_sheet.csv`**；审过才谈扩采/开训。**未**开训、**未** promote。
+- **v15 已裁（07-23）：Hypothesis B 否决**——val 也 tip-align 后 tip_hit 仅 **0.017**、
+  tip-smoke 仍 **0/27**，未向 v12 的 0.925 恢复；坐实主因 **C**、勿再同构 pad200。
+  见 `analysis/p_v15_tip_val.md`。**未 promote**，主线仍 v12。
+- **tip 验收协议审计（07-23，Owner 质疑触发）**：tip_hit（val 重渲）与 tip-smoke
+  （实盘同管线）测的不是同一件事；v12 的 0.925 属**过宽赦免**（slice-MA + 同分布 val），
+  以后 tip 裁决以 **tip-smoke 为准**。见 `analysis/p_tip_eval_fairness.md`。
 - **v14 tip 根因已写清（未过线）**：`analysis/p_v14_failure_rootcause.md`。
   主因 **C 语义≠盘口 tip**；**勿再同构 pad200**；主线仍 v12。
-- **H-DET 状态**：H-DET-1 🔴（v13+v14）；H-DET-7 🟢；议程
+- **H-DET 状态**：H-DET-1 🔴（v13+v14+v15）；H-DET-7 🟢；议程
   `docs/RESEARCH_AGENDA_DETECT.md`。
 - **v14 终局数字**：3060 ep26 / best=ep16；`models/owner_v14_pad200.pt`；报告
   `analysis/p_v14_pad200_train.md`。v13 错窗审计 `analysis/p_pad200_cut_audit.md`（已修仍挂）。

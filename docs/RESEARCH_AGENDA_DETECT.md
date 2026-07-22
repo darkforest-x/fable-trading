@@ -12,7 +12,7 @@
 
 | # | 人话 | 状态 | 今晚？ |
 |---|---|---|---|
-| H-DET-1 | pad200「框后无后文」训出的检测器，比 v12 更能在盘口 tip 贴边开火 | 🔴 **发现级未过**（v13+v14） | 根因 `p_v14_failure_rootcause.md`；tip-smoke **0/27**、tip_hit **0.033** |
+| H-DET-1 | pad200「框后无后文」训出的检测器，比 v12 更能在盘口 tip 贴边开火 | 🔴 **发现级未过**（v13+v14+v15） | 根因 `p_v14_failure_rootcause.md`；tip-smoke **0/27**、tip_hit v14 **0.033** / v15 **0.017**；07-23 v15 否决 Hypothesis B（val 也 tip-align 无济于事），见 `p_v15_tip_val.md`；验收协议公平性审计见 `p_tip_eval_fairness.md`（tip_hit 有 slice-MA 瑕疵但主结论站得住） |
 | H-DET-2 | 把「有后文的中段簇」当硬负样本，能压住事后框 | 🟡 清单已备（v13 后再训） | 清单/预览已做；勿抢训 |
 | H-DET-3 | 验收只看右缘 N 根有没有框，不只看 mAP | 🟢 已作必报口径 | — |
 | H-DET-4 | MA 线宽/颜色/留白等渲染差会伤 tip | 🟡 线索有、消融未跑 | 协议已写；GPU 忙则不动 |
@@ -47,6 +47,8 @@
 | `analysis/p_v13_pad200_train.md` | H-DET-1、H-DET-3 | v13 终局；tip-smoke 0/27；**勿用** val mAP 冒充 tip 裁决 |
 | `analysis/p_v14_pad200_train.md` | H-DET-1、H-DET-3 | v14 MAD-on 复验；tip_hit 0.033 / tip-smoke 0/27；**勿再同构 pad200** |
 | `analysis/p_v14_failure_rootcause.md` | H-DET-1、H-DET-7 | 根因排序 C>B>A；v12 tip_hit≠smoke 协议差说清；下一步=真实 tip 金标 |
+| `analysis/p_v15_tip_val.md` | H-DET-1 | v15（val 也 tip-align）**否决 B**：tip_hit 0.017 / smoke 0/27；勿再同构 pad200 |
+| `analysis/p_tip_eval_fairness.md` | H-DET-7 | 验收协议审计：tip_hit slice-MA 偏严 + val 重渲偏松（v12 0.925 属过宽赦免）；tip-smoke 与实盘同管线，为准 |
 
 ## 训完后最小对照（H-DET-1，发现级）
 
