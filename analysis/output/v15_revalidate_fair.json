@@ -1,0 +1,1355 @@
+{
+  "generated_at": "2026-07-22T16:50:44.467390+00:00",
+  "protocol": {
+    "true_tip_ma": "full-MA",
+    "real_tip_ma": "full-MA",
+    "conf": 0.3,
+    "tip_edge_bars": 2,
+    "preview": "analysis/output/v13_real_tip_preview",
+    "gold": "owner_class if set else provisional_class (Owner-accepted prelabel)",
+    "note": "Discovery-level only; not trade PF. No promote."
+  },
+  "legacy_unfair": {
+    "slice_ma_tip_hit": {
+      "v12": 0.925,
+      "v14": 0.0333,
+      "v15": 0.0167
+    },
+    "tip_smoke_27": {
+      "v12": "0/27",
+      "v14": "0/27",
+      "v15": "0/27",
+      "note": "unconditional current tip; mostly tip-empty-ok"
+    }
+  },
+  "models": {
+    "v12": {
+      "weights": "models/owner_best.pt",
+      "true_tip_full_ma": {
+        "method": "true_tip_rerender",
+        "ma_mode": "full-MA",
+        "dataset": "datasets/dense_owner_v11",
+        "split": "val",
+        "weights": "models/owner_best.pt",
+        "conf": 0.3,
+        "n": 120,
+        "skipped": 0,
+        "tip_hits": 2,
+        "tip_hit_rate": 0.0167,
+        "details_head": [
+          {
+            "stem": "2Z_USDT_SWAP_000530",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "2Z_USDT_SWAP_009884",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_000460",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_001460",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.3689,
+            "n_boxes": 1
+          },
+          {
+            "stem": "AAVE_USDT_001860",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_002160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_002860",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.492,
+            "n_boxes": 2
+          },
+          {
+            "stem": "AAVE_USDT_003060",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.867,
+            "n_boxes": 1
+          },
+          {
+            "stem": "AAVE_USDT_003160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.7339,
+            "n_boxes": 1
+          },
+          {
+            "stem": "AAVE_USDT_004060",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_005260",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.5166,
+            "n_boxes": 1
+          },
+          {
+            "stem": "AAVE_USDT_005360",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.5166,
+            "n_boxes": 1
+          },
+          {
+            "stem": "AAVE_USDT_006060",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_006160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_006660",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_007160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_007260",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_007460",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_007560",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_007660",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.3045,
+            "n_boxes": 1
+          },
+          {
+            "stem": "AAVE_USDT_008160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_008260",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_008760",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.6233,
+            "n_boxes": 3
+          },
+          {
+            "stem": "AAVE_USDT_009060",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.5494,
+            "n_boxes": 1
+          },
+          {
+            "stem": "AAVE_USDT_009160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.6742,
+            "n_boxes": 1
+          },
+          {
+            "stem": "AAVE_USDT_009260",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_009860",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_010160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.3359,
+            "n_boxes": 1
+          },
+          {
+            "stem": "AAVE_USDT_010460",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.5335,
+            "n_boxes": 1
+          },
+          {
+            "stem": "AAVE_USDT_011160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          }
+        ],
+        "generated_at": "2026-07-22T16:49:52.352959+00:00"
+      },
+      "real_tip": {
+        "weights": "models/owner_best.pt",
+        "conf": 0.3,
+        "tip_edge_bars": 2,
+        "window": 200,
+        "ma_protocol": "full-MA",
+        "preview_dir": "analysis/output/v13_real_tip_preview",
+        "gold_source": "owner_class if set else provisional_class (Owner-accepted prelabel)",
+        "n_sheet": 47,
+        "n_eval": 47,
+        "n_skipped": 0,
+        "skipped_head": [],
+        "gold_counts_eval": {
+          "tip-empty-ok": 33,
+          "tip-miss-dense": 6,
+          "tip-hit": 3,
+          "tip-noise": 5
+        },
+        "should_fire": {
+          "classes": [
+            "tip-hit",
+            "tip-miss-dense"
+          ],
+          "hit_raw": {
+            "n": 9,
+            "k": 2,
+            "rate": 0.2222
+          },
+          "hit_edge": {
+            "n": 9,
+            "k": 1,
+            "rate": 0.1111
+          },
+          "tipish_raw": {
+            "n": 9,
+            "k": 1,
+            "rate": 0.1111
+          },
+          "tipish_edge": {
+            "n": 9,
+            "k": 1,
+            "rate": 0.1111
+          },
+          "right_edge_raw": {
+            "n": 9,
+            "k": 1,
+            "rate": 0.1111
+          },
+          "right_edge_kept": {
+            "n": 9,
+            "k": 1,
+            "rate": 0.1111
+          }
+        },
+        "empty_ok": {
+          "classes": [
+            "tip-empty-ok"
+          ],
+          "false_fire_raw": {
+            "n": 33,
+            "k": 6,
+            "rate": 0.1818
+          },
+          "false_fire_edge": {
+            "n": 33,
+            "k": 0,
+            "rate": 0.0
+          }
+        },
+        "noise": {
+          "classes": [
+            "tip-noise"
+          ],
+          "fire_raw": {
+            "n": 5,
+            "k": 5,
+            "rate": 1.0
+          },
+          "fire_edge": {
+            "n": 5,
+            "k": 5,
+            "rate": 1.0
+          }
+        },
+        "confusion_edge": {
+          "tp_should_fire": 1,
+          "fn_should_fire": 8,
+          "fp_empty": 0,
+          "tn_empty": 33,
+          "fp_noise_bucket": 5,
+          "note": "positive = A′ KEEP (bar_in_win >= window-tip_edge_bars)"
+        },
+        "by_gold_edge_hit": {
+          "tip-empty-ok": {
+            "n": 33,
+            "k": 0,
+            "rate": 0.0
+          },
+          "tip-hit": {
+            "n": 3,
+            "k": 1,
+            "rate": 0.3333
+          },
+          "tip-miss-dense": {
+            "n": 6,
+            "k": 0,
+            "rate": 0.0
+          },
+          "tip-noise": {
+            "n": 5,
+            "k": 5,
+            "rate": 1.0
+          }
+        },
+        "by_gold_raw_hit": {
+          "tip-empty-ok": {
+            "n": 33,
+            "k": 6,
+            "rate": 0.1818
+          },
+          "tip-hit": {
+            "n": 3,
+            "k": 1,
+            "rate": 0.3333
+          },
+          "tip-miss-dense": {
+            "n": 6,
+            "k": 1,
+            "rate": 0.1667
+          },
+          "tip-noise": {
+            "n": 5,
+            "k": 5,
+            "rate": 1.0
+          }
+        }
+      }
+    },
+    "v14": {
+      "weights": "models/owner_v14_pad200.pt",
+      "true_tip_full_ma": {
+        "method": "true_tip_rerender",
+        "ma_mode": "full-MA",
+        "dataset": "datasets/dense_owner_v11",
+        "split": "val",
+        "weights": "models/owner_v14_pad200.pt",
+        "conf": 0.3,
+        "n": 120,
+        "skipped": 0,
+        "tip_hits": 3,
+        "tip_hit_rate": 0.025,
+        "details_head": [
+          {
+            "stem": "2Z_USDT_SWAP_000530",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "2Z_USDT_SWAP_009884",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_000460",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_001460",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_001860",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_002160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_002860",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_003060",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.3387,
+            "n_boxes": 1
+          },
+          {
+            "stem": "AAVE_USDT_003160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.4264,
+            "n_boxes": 1
+          },
+          {
+            "stem": "AAVE_USDT_004060",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_005260",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_005360",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_006060",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_006160",
+            "ok": true,
+            "tip_hit": true,
+            "max_conf": 0.5229,
+            "n_boxes": 1
+          },
+          {
+            "stem": "AAVE_USDT_006660",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_007160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_007260",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_007460",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_007560",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_007660",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_008160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_008260",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_008760",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_009060",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_009160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_009260",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_009860",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_010160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_010460",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_011160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          }
+        ],
+        "generated_at": "2026-07-22T16:50:12.545990+00:00"
+      },
+      "real_tip": {
+        "weights": "models/owner_v14_pad200.pt",
+        "conf": 0.3,
+        "tip_edge_bars": 2,
+        "window": 200,
+        "ma_protocol": "full-MA",
+        "preview_dir": "analysis/output/v13_real_tip_preview",
+        "gold_source": "owner_class if set else provisional_class (Owner-accepted prelabel)",
+        "n_sheet": 47,
+        "n_eval": 47,
+        "n_skipped": 0,
+        "skipped_head": [],
+        "gold_counts_eval": {
+          "tip-empty-ok": 33,
+          "tip-miss-dense": 6,
+          "tip-hit": 3,
+          "tip-noise": 5
+        },
+        "should_fire": {
+          "classes": [
+            "tip-hit",
+            "tip-miss-dense"
+          ],
+          "hit_raw": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          },
+          "hit_edge": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          },
+          "tipish_raw": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          },
+          "tipish_edge": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          },
+          "right_edge_raw": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          },
+          "right_edge_kept": {
+            "n": 9,
+            "k": 3,
+            "rate": 0.3333
+          }
+        },
+        "empty_ok": {
+          "classes": [
+            "tip-empty-ok"
+          ],
+          "false_fire_raw": {
+            "n": 33,
+            "k": 18,
+            "rate": 0.5455
+          },
+          "false_fire_edge": {
+            "n": 33,
+            "k": 18,
+            "rate": 0.5455
+          }
+        },
+        "noise": {
+          "classes": [
+            "tip-noise"
+          ],
+          "fire_raw": {
+            "n": 5,
+            "k": 2,
+            "rate": 0.4
+          },
+          "fire_edge": {
+            "n": 5,
+            "k": 2,
+            "rate": 0.4
+          }
+        },
+        "confusion_edge": {
+          "tp_should_fire": 3,
+          "fn_should_fire": 6,
+          "fp_empty": 18,
+          "tn_empty": 15,
+          "fp_noise_bucket": 2,
+          "note": "positive = A′ KEEP (bar_in_win >= window-tip_edge_bars)"
+        },
+        "by_gold_edge_hit": {
+          "tip-empty-ok": {
+            "n": 33,
+            "k": 18,
+            "rate": 0.5455
+          },
+          "tip-hit": {
+            "n": 3,
+            "k": 2,
+            "rate": 0.6667
+          },
+          "tip-miss-dense": {
+            "n": 6,
+            "k": 1,
+            "rate": 0.1667
+          },
+          "tip-noise": {
+            "n": 5,
+            "k": 2,
+            "rate": 0.4
+          }
+        },
+        "by_gold_raw_hit": {
+          "tip-empty-ok": {
+            "n": 33,
+            "k": 18,
+            "rate": 0.5455
+          },
+          "tip-hit": {
+            "n": 3,
+            "k": 2,
+            "rate": 0.6667
+          },
+          "tip-miss-dense": {
+            "n": 6,
+            "k": 1,
+            "rate": 0.1667
+          },
+          "tip-noise": {
+            "n": 5,
+            "k": 2,
+            "rate": 0.4
+          }
+        }
+      }
+    },
+    "v15": {
+      "weights": "models/owner_v15_tipval.pt",
+      "true_tip_full_ma": {
+        "method": "true_tip_rerender",
+        "ma_mode": "full-MA",
+        "dataset": "datasets/dense_owner_v11",
+        "split": "val",
+        "weights": "models/owner_v15_tipval.pt",
+        "conf": 0.3,
+        "n": 120,
+        "skipped": 0,
+        "tip_hits": 1,
+        "tip_hit_rate": 0.0083,
+        "details_head": [
+          {
+            "stem": "2Z_USDT_SWAP_000530",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "2Z_USDT_SWAP_009884",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_000460",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_001460",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_001860",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_002160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_002860",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_003060",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_003160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.3249,
+            "n_boxes": 1
+          },
+          {
+            "stem": "AAVE_USDT_004060",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_005260",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_005360",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_006060",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_006160",
+            "ok": true,
+            "tip_hit": true,
+            "max_conf": 0.3564,
+            "n_boxes": 1
+          },
+          {
+            "stem": "AAVE_USDT_006660",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_007160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_007260",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_007460",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_007560",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_007660",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_008160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_008260",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_008760",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_009060",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_009160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_009260",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_009860",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_010160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_010460",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          },
+          {
+            "stem": "AAVE_USDT_011160",
+            "ok": true,
+            "tip_hit": false,
+            "max_conf": 0.0,
+            "n_boxes": 0
+          }
+        ],
+        "generated_at": "2026-07-22T16:50:33.190906+00:00"
+      },
+      "real_tip": {
+        "weights": "models/owner_v15_tipval.pt",
+        "conf": 0.3,
+        "tip_edge_bars": 2,
+        "window": 200,
+        "ma_protocol": "full-MA",
+        "preview_dir": "analysis/output/v13_real_tip_preview",
+        "gold_source": "owner_class if set else provisional_class (Owner-accepted prelabel)",
+        "n_sheet": 47,
+        "n_eval": 47,
+        "n_skipped": 0,
+        "skipped_head": [],
+        "gold_counts_eval": {
+          "tip-empty-ok": 33,
+          "tip-miss-dense": 6,
+          "tip-hit": 3,
+          "tip-noise": 5
+        },
+        "should_fire": {
+          "classes": [
+            "tip-hit",
+            "tip-miss-dense"
+          ],
+          "hit_raw": {
+            "n": 9,
+            "k": 2,
+            "rate": 0.2222
+          },
+          "hit_edge": {
+            "n": 9,
+            "k": 2,
+            "rate": 0.2222
+          },
+          "tipish_raw": {
+            "n": 9,
+            "k": 2,
+            "rate": 0.2222
+          },
+          "tipish_edge": {
+            "n": 9,
+            "k": 2,
+            "rate": 0.2222
+          },
+          "right_edge_raw": {
+            "n": 9,
+            "k": 2,
+            "rate": 0.2222
+          },
+          "right_edge_kept": {
+            "n": 9,
+            "k": 2,
+            "rate": 0.2222
+          }
+        },
+        "empty_ok": {
+          "classes": [
+            "tip-empty-ok"
+          ],
+          "false_fire_raw": {
+            "n": 33,
+            "k": 19,
+            "rate": 0.5758
+          },
+          "false_fire_edge": {
+            "n": 33,
+            "k": 19,
+            "rate": 0.5758
+          }
+        },
+        "noise": {
+          "classes": [
+            "tip-noise"
+          ],
+          "fire_raw": {
+            "n": 5,
+            "k": 1,
+            "rate": 0.2
+          },
+          "fire_edge": {
+            "n": 5,
+            "k": 1,
+            "rate": 0.2
+          }
+        },
+        "confusion_edge": {
+          "tp_should_fire": 2,
+          "fn_should_fire": 7,
+          "fp_empty": 19,
+          "tn_empty": 14,
+          "fp_noise_bucket": 1,
+          "note": "positive = A′ KEEP (bar_in_win >= window-tip_edge_bars)"
+        },
+        "by_gold_edge_hit": {
+          "tip-empty-ok": {
+            "n": 33,
+            "k": 19,
+            "rate": 0.5758
+          },
+          "tip-hit": {
+            "n": 3,
+            "k": 2,
+            "rate": 0.6667
+          },
+          "tip-miss-dense": {
+            "n": 6,
+            "k": 0,
+            "rate": 0.0
+          },
+          "tip-noise": {
+            "n": 5,
+            "k": 1,
+            "rate": 0.2
+          }
+        },
+        "by_gold_raw_hit": {
+          "tip-empty-ok": {
+            "n": 33,
+            "k": 19,
+            "rate": 0.5758
+          },
+          "tip-hit": {
+            "n": 3,
+            "k": 2,
+            "rate": 0.6667
+          },
+          "tip-miss-dense": {
+            "n": 6,
+            "k": 0,
+            "rate": 0.0
+          },
+          "tip-noise": {
+            "n": 5,
+            "k": 1,
+            "rate": 0.2
+          }
+        }
+      }
+    }
+  },
+  "summary": [
+    {
+      "tag": "v12",
+      "true_tip_full_ma": {
+        "tip_hit_rate": 0.0167,
+        "tip_hits": 2,
+        "n": 120
+      },
+      "true_tip_slice_legacy": 0.925,
+      "should_fire_hit_raw": {
+        "n": 9,
+        "k": 2,
+        "rate": 0.2222
+      },
+      "should_fire_hit_edge": {
+        "n": 9,
+        "k": 1,
+        "rate": 0.1111
+      },
+      "should_fire_tipish_edge": {
+        "n": 9,
+        "k": 1,
+        "rate": 0.1111
+      },
+      "empty_false_fire_raw": {
+        "n": 33,
+        "k": 6,
+        "rate": 0.1818
+      },
+      "empty_false_fire_edge": {
+        "n": 33,
+        "k": 0,
+        "rate": 0.0
+      },
+      "noise_fire_edge": {
+        "n": 5,
+        "k": 5,
+        "rate": 1.0
+      },
+      "confusion_edge": {
+        "tp_should_fire": 1,
+        "fn_should_fire": 8,
+        "fp_empty": 0,
+        "tn_empty": 33,
+        "fp_noise_bucket": 5,
+        "note": "positive = A′ KEEP (bar_in_win >= window-tip_edge_bars)"
+      },
+      "by_gold": {
+        "tip-empty-ok": {
+          "n": 33,
+          "raw": 6,
+          "edge": 0,
+          "tipish_raw": 0,
+          "tipish_edge": 0
+        },
+        "tip-miss-dense": {
+          "n": 6,
+          "raw": 1,
+          "edge": 0,
+          "tipish_raw": 0,
+          "tipish_edge": 0
+        },
+        "tip-hit": {
+          "n": 3,
+          "raw": 1,
+          "edge": 1,
+          "tipish_raw": 1,
+          "tipish_edge": 1
+        },
+        "tip-noise": {
+          "n": 5,
+          "raw": 5,
+          "edge": 5,
+          "tipish_raw": 5,
+          "tipish_edge": 5
+        }
+      }
+    },
+    {
+      "tag": "v14",
+      "true_tip_full_ma": {
+        "tip_hit_rate": 0.025,
+        "tip_hits": 3,
+        "n": 120
+      },
+      "true_tip_slice_legacy": 0.0333,
+      "should_fire_hit_raw": {
+        "n": 9,
+        "k": 3,
+        "rate": 0.3333
+      },
+      "should_fire_hit_edge": {
+        "n": 9,
+        "k": 3,
+        "rate": 0.3333
+      },
+      "should_fire_tipish_edge": {
+        "n": 9,
+        "k": 3,
+        "rate": 0.3333
+      },
+      "empty_false_fire_raw": {
+        "n": 33,
+        "k": 18,
+        "rate": 0.5455
+      },
+      "empty_false_fire_edge": {
+        "n": 33,
+        "k": 18,
+        "rate": 0.5455
+      },
+      "noise_fire_edge": {
+        "n": 5,
+        "k": 2,
+        "rate": 0.4
+      },
+      "confusion_edge": {
+        "tp_should_fire": 3,
+        "fn_should_fire": 6,
+        "fp_empty": 18,
+        "tn_empty": 15,
+        "fp_noise_bucket": 2,
+        "note": "positive = A′ KEEP (bar_in_win >= window-tip_edge_bars)"
+      },
+      "by_gold": {
+        "tip-empty-ok": {
+          "n": 33,
+          "raw": 18,
+          "edge": 18,
+          "tipish_raw": 18,
+          "tipish_edge": 18
+        },
+        "tip-miss-dense": {
+          "n": 6,
+          "raw": 1,
+          "edge": 1,
+          "tipish_raw": 1,
+          "tipish_edge": 1
+        },
+        "tip-hit": {
+          "n": 3,
+          "raw": 2,
+          "edge": 2,
+          "tipish_raw": 2,
+          "tipish_edge": 2
+        },
+        "tip-noise": {
+          "n": 5,
+          "raw": 2,
+          "edge": 2,
+          "tipish_raw": 2,
+          "tipish_edge": 2
+        }
+      }
+    },
+    {
+      "tag": "v15",
+      "true_tip_full_ma": {
+        "tip_hit_rate": 0.0083,
+        "tip_hits": 1,
+        "n": 120
+      },
+      "true_tip_slice_legacy": 0.0167,
+      "should_fire_hit_raw": {
+        "n": 9,
+        "k": 2,
+        "rate": 0.2222
+      },
+      "should_fire_hit_edge": {
+        "n": 9,
+        "k": 2,
+        "rate": 0.2222
+      },
+      "should_fire_tipish_edge": {
+        "n": 9,
+        "k": 2,
+        "rate": 0.2222
+      },
+      "empty_false_fire_raw": {
+        "n": 33,
+        "k": 19,
+        "rate": 0.5758
+      },
+      "empty_false_fire_edge": {
+        "n": 33,
+        "k": 19,
+        "rate": 0.5758
+      },
+      "noise_fire_edge": {
+        "n": 5,
+        "k": 1,
+        "rate": 0.2
+      },
+      "confusion_edge": {
+        "tp_should_fire": 2,
+        "fn_should_fire": 7,
+        "fp_empty": 19,
+        "tn_empty": 14,
+        "fp_noise_bucket": 1,
+        "note": "positive = A′ KEEP (bar_in_win >= window-tip_edge_bars)"
+      },
+      "by_gold": {
+        "tip-empty-ok": {
+          "n": 33,
+          "raw": 19,
+          "edge": 19,
+          "tipish_raw": 19,
+          "tipish_edge": 19
+        },
+        "tip-miss-dense": {
+          "n": 6,
+          "raw": 0,
+          "edge": 0,
+          "tipish_raw": 0,
+          "tipish_edge": 0
+        },
+        "tip-hit": {
+          "n": 3,
+          "raw": 2,
+          "edge": 2,
+          "tipish_raw": 2,
+          "tipish_edge": 2
+        },
+        "tip-noise": {
+          "n": 5,
+          "raw": 1,
+          "edge": 1,
+          "tipish_raw": 1,
+          "tipish_edge": 1
+        }
+      }
+    }
+  ]
+}

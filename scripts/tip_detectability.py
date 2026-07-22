@@ -132,7 +132,21 @@ def read_boxes(path: Path):
     return boxes
 
 
-def true_tip_metric(dataset: Path, split: str, weights: Path, conf: float, limit: int) -> dict:
+def true_tip_metric(
+    dataset: Path,
+    split: str,
+    weights: Path,
+    conf: float,
+    limit: int,
+    *,
+    full_ma: bool = False,
+) -> dict:
+    """Re-render tip window ending at GT right-edge bar; score right-edge hit.
+
+    full_ma=True: add_mas on the full series, then cut the tip window (matches
+    live / pad200 train). Default False keeps legacy slice-MA for back-compat
+    with published tip_hit numbers (v12-friendly, pad200-harsh).
+    """
     from src.detection.data import add_mas
     from src.detection.render import make_chart_transform, render_chart
     from src.judgment.yolo_candidates import load_yolo_model
@@ -149,7 +163,7 @@ def true_tip_metric(dataset: Path, split: str, weights: Path, conf: float, limit
         stems = stems[:limit]
 
     model = load_yolo_model(weights)
-    tmp = PROJECT / "data" / f"_tip_metric_{split}.png"
+    tmp = PROJECT / "data" / f"_tip_metric_{split}_{'fullma' if full_ma else 'slicema'}.png"
     hits = total = skip = 0
     details = []
     for stem in stems:
@@ -168,8 +182,11 @@ def true_tip_metric(dataset: Path, split: str, weights: Path, conf: float, limit
         if win_start is None:
             skip += 1
             continue
-        sub = add_mas(df.iloc[win_start : win_start + WINDOW].reset_index(drop=True))
-        tf_old = make_chart_transform(sub)
+        # Locate GT right edge on the ORIGINAL training window geometry.
+        # Training images used slice-MA at build time for v11/v12; keep that
+        # mapping so signal_global is stable across ma_mode for the tip cut.
+        sub_map = add_mas(df.iloc[win_start : win_start + WINDOW].reset_index(drop=True))
+        tf_old = make_chart_transform(sub_map)
         rights = []
         for xc, yc, w, h in boxes:
             x2 = (xc + w / 2) * tf_old.width
@@ -180,7 +197,11 @@ def true_tip_metric(dataset: Path, split: str, weights: Path, conf: float, limit
         if tip_start < 0 or signal_global >= n:
             skip += 1
             continue
-        tip_sub = add_mas(df.iloc[tip_start : signal_global + 1].reset_index(drop=True))
+        if full_ma:
+            enriched = add_mas(df)
+            tip_sub = enriched.iloc[tip_start : signal_global + 1].reset_index(drop=True)
+        else:
+            tip_sub = add_mas(df.iloc[tip_start : signal_global + 1].reset_index(drop=True))
         if len(tip_sub) != WINDOW:
             skip += 1
             continue
@@ -218,6 +239,7 @@ def true_tip_metric(dataset: Path, split: str, weights: Path, conf: float, limit
     rate = hits / total if total else 0.0
     return {
         "method": "true_tip_rerender",
+        "ma_mode": "full-MA" if full_ma else "slice-MA",
         "dataset": str(dataset),
         "split": split,
         "weights": str(weights),
@@ -275,6 +297,12 @@ def main() -> int:
     ap.add_argument("--conf", type=float, default=0.30)
     ap.add_argument("--limit", type=int, default=80)
     ap.add_argument("--true-tip", action="store_true")
+    ap.add_argument(
+        "--full-ma",
+        action="store_true",
+        help="Compute MAs on full series then cut tip window (live/pad200 protocol). "
+        "Default is legacy slice-MA.",
+    )
     ap.add_argument("--out", type=Path, default=PROJECT / "analysis" / "output" / "tip_detectability.json")
     args = ap.parse_args()
 
@@ -287,7 +315,14 @@ def main() -> int:
         return 2
 
     if args.true_tip:
-        summary = true_tip_metric(args.dataset, args.split, args.weights, args.conf, args.limit)
+        summary = true_tip_metric(
+            args.dataset,
+            args.split,
+            args.weights,
+            args.conf,
+            args.limit,
+            full_ma=args.full_ma,
+        )
     else:
         summary = proxy_metric(args.dataset, args.split, args.weights, args.conf, args.limit)
     summary["generated_at"] = datetime.now(timezone.utc).isoformat()
