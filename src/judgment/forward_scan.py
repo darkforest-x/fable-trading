@@ -89,7 +89,16 @@ def scan_forward_records(
     tracked_keys = open_keys(scan.existing_log)
     yolo_model = None
     if CANDIDATE_SOURCE == "yolo":
-        yolo_model = load_yolo_model(yolo_weights) if yolo_weights is not None else load_yolo_model()
+        try:
+            yolo_model = load_yolo_model(yolo_weights) if yolo_weights is not None else load_yolo_model()
+        except FileNotFoundError as exc:
+            # Owner doctrine 2026-07-23: pre-v16 detectors are deleted (they
+            # could only ever produce hindsight rows). Until a validated tip
+            # detector lands, the pulse idles honestly: klines stay fresh and
+            # open rows keep resolving, but NO candidate discovery happens.
+            print(f"forward_scan: detector=none ({exc}) — awaiting validated v16; "
+                  "no candidate discovery this pulse", flush=True)
+            yolo_model = None
 
     jobs: list[tuple[str, str, pd.DataFrame]] = []
     for source, symbol, frame in iter_series(bar="15m", min_bars=500):
@@ -121,15 +130,19 @@ def scan_forward_records(
         """Phase 1 (parallel-safe): indicators + YOLO/rules indices only."""
         source, symbol, frame = job
         enriched = add_indicators(frame)
-        signal_indices = set(
-            forward_candidate_indices(
-                enriched,
-                frame=frame,
-                yolo_model=yolo_model,
-                start_time=scan.start_time,
-                yolo_mode=yolo_mode,
+        if CANDIDATE_SOURCE == "yolo" and yolo_model is None:
+            # detector=none idle mode: no discovery, tracked rows still resolve
+            signal_indices: set[int] = set()
+        else:
+            signal_indices = set(
+                forward_candidate_indices(
+                    enriched,
+                    frame=frame,
+                    yolo_model=yolo_model,
+                    start_time=scan.start_time,
+                    yolo_mode=yolo_mode,
+                )
             )
-        )
         tracked_times = {key[2] for key in tracked_keys if key[0] == source and key[1] == symbol}
         if tracked_times:
             signal_times = enriched["open_time"].astype(str)

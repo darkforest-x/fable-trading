@@ -208,15 +208,17 @@ def scan_series_with_yolo(
         # 14/6 x predict cost: pulses went 6->25 min wall, the 15-min cadence
         # degraded to 25 min, and rows landed older than the 30-min freshness
         # gate — the dense schedule destroyed the very tip-latency it chased.
+        # Owner doctrine 2026-07-23: LIVE detection means the newest bars ONLY.
+        # The old stride walk-back windows (tip-50/-100/-150) could discover
+        # nothing but 12h+ old bars — hindsight rows by construction, every one
+        # of them freshness-rejected downstream. A path that can only produce
+        # after-the-fact signals must not exist. tip / tip-1 / tip-2 cover
+        # pulse-miss overlap; everything older is not a signal, it's history.
         starts_set: set[int] = set()
         for back in (0, 1, 2):
             s = last_start - back
             if s >= first_start:
                 starts_set.add(s)
-        s = last_start - stride
-        while s >= first_start and len(starts_set) < 6:
-            starts_set.add(s)
-            s -= stride
         starts = sorted(starts_set, reverse=True)
     else:
         starts = list(range(first_start, last_start + 1, stride))
