@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Local v14 pad200 YOLO train (MPS). Survives Cursor agent shell death.
+  Install via: bash scripts/v14_train_start.sh
+  Status: bash scripts/v14_train_status.sh
+  Label: com.fable.owner-v14-pad200-train
+  Does NOT promote owner_best / ACTIVE. KeepAlive=false (one-shot train).
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.fable.owner-v14-pad200-train</string>
+  <key>WorkingDirectory</key>
+  <string>/Users/zhangzc/fable-trading</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/zhangzc/fable-trading/scripts/train_owner_v14_pad200.sh</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PYTHONPATH</key>
+    <string>/Users/zhangzc/fable-trading</string>
+    <key>PYTHONUNBUFFERED</key>
+    <string>1</string>
+    <key>OMP_NUM_THREADS</key>
+    <string>1</string>
+    <key>MKL_NUM_THREADS</key>
+    <string>1</string>
+    <key>VECLIB_MAXIMUM_THREADS</key>
+    <string>1</string>
+    <key>NUMEXPR_NUM_THREADS</key>
+    <string>1</string>
+    <key>PYTORCH_ENABLE_MPS_FALLBACK</key>
+    <string>1</string>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>/Users/zhangzc/fable-trading/logs/owner_v14_pad200_train.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/zhangzc/fable-trading/logs/owner_v14_pad200_train.launchd.err.log</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <false/>
+  <key>ProcessType</key>
+  <string>Interactive</string>
+</dict>
+</plist>
