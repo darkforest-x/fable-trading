@@ -369,6 +369,16 @@ def process_pad200(
     if resolved is None:
         return None
     win_mode, win_start, stored_mad = resolved
+    # Guard: without MAD, resolve_win_start falls back to end_incl-first.
+    # v11 okx_* stems are start-indexed — blind end_incl remaps gold onto
+    # the wrong OHLC (~31% of v13 pad200 positives). Prefer skip over poison.
+    if stored_img is None and stem.startswith("okx_") and win_mode == "end_incl":
+        print(
+            f"SKIP blind end_incl on okx_ stem {stem}: "
+            "need MAD vs stored PNG (start vs end_incl mix)",
+            flush=True,
+        )
+        return None
     if (
         stored_img is not None
         and np.isfinite(stored_mad)
@@ -668,6 +678,13 @@ def main() -> int:
     n_skip = len(already_skip)
     n_bg = 0
     skip_fh = skip_log.open("a" if args.resume else "w", encoding="utf-8")
+    if not args.mad_gate:
+        print(
+            "WARNING: --no-mad-gate: blind end_incl fallback; "
+            "okx_* stems will be SKIPPED (not cut wrong). "
+            "Prefer default MAD-on for v11 mix.",
+            flush=True,
+        )
     print(
         f"bulk start resume={args.resume} mad_gate={args.mad_gate} "
         f"already_ok={n_ok} already_skip={n_skip}",

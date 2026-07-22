@@ -4,6 +4,9 @@
 
 ## ⚡ 当前真相（2026-07-22 晚）
 
+- **v13 失败根因含标签错窗**：pad200 bulk 关 MAD、盲用 `end_incl`，把 `okx_*`（实为 start）切错 →
+  ~31% 正样本框罩错 K 线；审计 `analysis/p_pad200_cut_audit.md`，对照
+  `analysis/output/v13_train_sample20_corrected/`。脚本 MAD 默认已开；**未**重建集、**未**重训（需 Owner 点头）。
 - **v13 pad200 已终局**：ep32 early stop（best=ep22，~20h）；`models/owner_v13_pad200.pt` 已落盘（= best.pt）。
   Owner 贴的 P/R/mAP≈0.11/0.05/0.027 = **ep22 官方 val**（val=未 pad 中段金标）——**勿用 val mAP 判 tip**。
 - **H-DET-1 发现级未过**：true_tip tip_hit **0.008**（v12=0.925）；tip-smoke **0/27**（=v12）。报告
