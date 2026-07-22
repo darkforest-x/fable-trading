@@ -23,17 +23,17 @@ OWNER_BEST_PT = PROJECT / "models" / "owner_best.pt"
 FORWARD_LOG_PATH = PROJECT / "data" / "forward_log.csv"
 FORWARD_DECISION_TRADES = 100
 V13_RESULTS_CSV = (
-    PROJECT / "runs" / "detect" / "runs" / "detect" / "owner_v13_pad200" / "results.csv"
+    PROJECT / "runs" / "detect" / "runs" / "detect" / "owner_v16_tipuni_cold" / "results.csv"
 )
-V13_TRAIN_LOG = PROJECT / "logs" / "owner_v13_pad200_train.log"
-V13_STABLE_PT = PROJECT / "models" / "owner_v13_pad200.pt"
+V13_TRAIN_LOG = PROJECT / "logs" / "owner_v16_tipuni_cold.log"
+V13_STABLE_PT = PROJECT / "models" / "owner_v16_tipuni_cold.pt"
 V13_MIDRUN_PT = (
     PROJECT
     / "runs"
     / "detect"
     / "runs"
     / "detect"
-    / "owner_v13_pad200"
+    / "owner_v16_tipuni_cold"
     / "weights"
     / "best.pt"
 )
@@ -116,7 +116,7 @@ def _v13_train() -> dict:
         progress = round(min(epoch / target, 1.0), 4)
     status = "done" if stable else ("alive" if alive else ("stale" if epoch else "idle"))
     return {
-        "name": "owner_v13_pad200",
+        "name": "owner_v16_tipuni_cold",
         "status": status,
         "alive": alive and not stable,
         "epoch": epoch,
@@ -132,7 +132,7 @@ def _v13_train() -> dict:
             else (
                 f"epoch {epoch}/{target}"
                 if epoch is not None
-                else "无 results.csv（未开训或路径变了）"
+                else "训练在 3060(Windows);本机镜像缺 → 看 ssh 日志"
             )
         ),
     }
