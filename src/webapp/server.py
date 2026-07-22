@@ -389,4 +389,14 @@ def ops_model_hub(request: Request) -> dict:
     return model_hub_payload()
 
 
+# Read-only debug viz artifacts (LWC hardneg / tip compare / overlay gallery).
+# Mounted before "/" so /debug-artifacts/* is reachable without SSH.
+_DEBUG_ARTIFACTS = Path(__file__).resolve().parents[2] / "analysis" / "output"
+if _DEBUG_ARTIFACTS.is_dir():
+    app.mount(
+        "/debug-artifacts",
+        StaticFiles(directory=_DEBUG_ARTIFACTS, html=True),
+        name="debug-artifacts",
+    )
+
 app.mount("/", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="static")

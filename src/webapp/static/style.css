@@ -83,6 +83,9 @@ body {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;
   min-width: 0;
 }
+@media (min-width: 1200px) {
+  .status-strip { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
 .more-btn { margin-top: 10px; width: 100%; }
 .warn-banner {
   color: #92400e;
@@ -973,6 +976,11 @@ body.hb-shell #explore-chart {
   height: min(520px, 58vh);
   width: 100%;
 }
+body.hb-shell #explore-overlay {
+  display: block;
+  pointer-events: auto;
+  cursor: crosshair;
+}
 body.hb-shell #explore-overlay[hidden] { display: none !important; }
 
 body.hb-shell .explore-stats.bt-metrics,
@@ -1260,6 +1268,39 @@ body.hb-shell .status-item {
   box-shadow: var(--shadow-sm);
   padding: 12px 14px;
   transition: border-color .15s;
+}
+.fwd-table-toolbar {
+  display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center;
+  margin: 0 0 10px;
+}
+.fwd-table-toolbar input[type="search"] {
+  min-width: 140px; max-width: 220px; padding: 6px 10px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--surface-2, var(--surface)); color: var(--text); font-size: 13px;
+}
+.tabulator-host {
+  border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  background: var(--surface);
+}
+.tabulator-host .tabulator {
+  font-size: 12.5px; background: transparent; border: none;
+}
+.tabulator-host .tabulator-row.clickable { cursor: pointer; }
+.tabulator-host .tabulator-row.row-stale { opacity: 0.72; }
+.tabulator-host .tabulator-row.tabulator-selected {
+  background: rgba(61, 156, 240, 0.12) !important;
+}
+body.hb-shell.theme-dark .tabulator-host .tabulator-header {
+  background: #15202b; color: var(--text-2); border-bottom-color: var(--border);
+}
+body.hb-shell.theme-dark .tabulator-host .tabulator-row {
+  background: #1a222c; color: var(--text); border-bottom-color: var(--border);
+}
+body.hb-shell.theme-dark .tabulator-host .tabulator-row:hover {
+  background: #222d3a !important;
+}
+a.sb-item {
+  display: flex; align-items: center; text-decoration: none; color: inherit;
 }
 body.hb-shell .status-item.good {
   border-color: rgba(5, 150, 105, 0.28);

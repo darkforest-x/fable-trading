@@ -571,7 +571,7 @@ async function loadExplore() {
       exploreState.focusId = null;
       clearExploreFocusLines();
       exploreChart?.timeScale().fitContent();
-      applyExploreMarkers();
+      drawExploreBoxes();
       highlightExploreRow(null);
     });
     $("#explore-to-signals")?.addEventListener("click", () => {
@@ -616,7 +616,7 @@ async function loadExplore() {
     $("#explore-show-boxes")?.addEventListener("change", (e) => {
       exploreState.showBoxes = e.target.checked;
       if (!e.target.checked) clearExploreFocusLines();
-      applyExploreMarkers();
+      drawExploreBoxes();
     });
     $("#explore-symbol")?.addEventListener("change", (e) => {
       if (e.target.value) {
@@ -653,7 +653,7 @@ function onExploreKeys(e) {
     exploreState.focusId = null;
     clearExploreFocusLines();
     exploreChart?.timeScale().fitContent();
-    applyExploreMarkers();
+    drawExploreBoxes();
     highlightExploreRow(null);
   }
 }
@@ -700,13 +700,30 @@ function ensureExploreChart() {
     priceLineVisible: false, lastValueVisible: false,
   });
   exploreChart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
-  // Markers follow the series natively; only re-apply focus chrome on range change.
-  const redraw = () => applyExploreMarkers();
+  // Markers + canvas dense boxes; redraw on pan/zoom (min box size at full zoom).
+  const redraw = () => drawExploreBoxes();
   exploreChart.timeScale().subscribeVisibleLogicalRangeChange(redraw);
   exploreChart.timeScale().subscribeSizeChange(redraw);
   window.addEventListener("resize", redraw);
   // TV-style OHLC strip (top-left over chart)
   wireOhlcLegend(exploreChart, exploreSeries, $("#explore-badge-ohlc"), { hideWhenEmpty: false });
+  const ov = $("#explore-overlay");
+  if (ov && !ov.dataset.wired) {
+    ov.dataset.wired = "1";
+    ov.addEventListener("click", (e) => {
+      const rect = ov.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      // Prefer smallest containing hit (tightest box).
+      let best = null;
+      for (const h of exploreHitRects) {
+        if (x >= h.x0 && x <= h.x1 && y >= h.y0 && y <= h.y1) {
+          if (!best || (h.x1 - h.x0) < (best.x1 - best.x0)) best = h;
+        }
+      }
+      if (best) focusExploreBox(best.id);
+    });
+  }
 }
 
 async function runExplore() {
@@ -747,9 +764,9 @@ async function runExplore() {
     showLastBars(exploreChart, 120, (d.candles || []).length);
     applyExploreVisibility();
     // setTimeout (not only rAF): layout may settle after a frame
-    requestAnimationFrame(() => applyExploreMarkers());
-    setTimeout(() => applyExploreMarkers(), 60);
-    setTimeout(() => applyExploreMarkers(), 200);
+    requestAnimationFrame(() => drawExploreBoxes());
+    setTimeout(() => drawExploreBoxes(), 60);
+    setTimeout(() => drawExploreBoxes(), 200);
     pushRecentSymbol(symbol);
     const st = d.stats || {};
     $("#explore-meta").innerHTML = `
@@ -824,26 +841,143 @@ function clearExploreFocusLines() {
   exploreFocusLines = [];
 }
 
-/** Hummingbot-style markers on candle series (no external canvas overlay). */
+/** Map unix/business time → x via LWC; fall back to logical index. */
+function exploreTimeToX(t) {
+  if (!exploreChart || !exploreSeries) return null;
+  let x = exploreSeries.timeToCoordinate(t);
+  if (x != null) return x;
+  const idx = exploreTimeIndex.has(t) ? exploreTimeIndex.get(t) : exploreTimes.findIndex((x) => x >= t);
+  if (idx < 0) return null;
+  try {
+    return exploreChart.timeScale().logicalToCoordinate(idx);
+  } catch (_) {
+    return null;
+  }
+}
+
+/** Hummingbot-style markers: start ▲ + tip-edge ◆ (right of dense window). */
 function applyExploreMarkers() {
   if (!exploreSeries) return;
   if (!exploreState.showBoxes || !exploreBoxes.length) {
     try { exploreSeries.setMarkers([]); } catch (_) {}
     return;
   }
-  const markers = exploreBoxes.map((b) => {
+  const markers = [];
+  for (const b of exploreBoxes) {
     const focused = exploreState.focusId === b.id;
-    return {
+    markers.push({
       time: b.t0,
       position: "belowBar",
       color: focused ? "#fbbf24" : "#1E90FF",
-      shape: focused ? "arrowUp" : "arrowUp",
+      shape: "arrowUp",
       text: focused ? `#${b.id}` : String(b.id),
-    };
-  });
-  // LWC requires markers sorted by time ascending
+    });
+    if (b.t1 && b.t1 !== b.t0) {
+      markers.push({
+        time: b.t1,
+        position: "aboveBar",
+        color: focused ? "#fbbf24" : "#f472b6",
+        shape: "circle",
+        text: focused ? "tip" : "",
+      });
+    }
+  }
   markers.sort((a, b) => (a.time < b.time ? -1 : a.time > b.time ? 1 : 0));
   try { exploreSeries.setMarkers(markers); } catch (_) {}
+}
+
+/**
+ * Canvas dense-box overlay synced to #explore-chart (LWC origin).
+ * Full-zoom: expand by half barSpacing + min w/h; hide labels when too narrow.
+ * See docs/learnings/chart-overlay-boxes-need-min-size-at-full-zoom.md
+ */
+function drawExploreBoxes() {
+  applyExploreMarkers();
+  const canvas = $("#explore-overlay");
+  const chartEl = $("#explore-chart");
+  if (!canvas || !chartEl || !exploreChart || !exploreSeries) return;
+  exploreHitRects = [];
+  if (!exploreState.showBoxes || !exploreBoxes.length) {
+    canvas.width = 0;
+    canvas.height = 0;
+    canvas.style.display = "none";
+    return;
+  }
+  canvas.style.display = "block";
+  const w = chartEl.clientWidth;
+  const h = chartEl.clientHeight;
+  if (w < 8 || h < 8) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.style.left = `${chartEl.offsetLeft}px`;
+  canvas.style.top = `${chartEl.offsetTop}px`;
+  canvas.style.width = `${w}px`;
+  canvas.style.height = `${h}px`;
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+
+  let barSpacing = 6;
+  try {
+    const opts = exploreChart.timeScale().options();
+    if (opts && opts.barSpacing) barSpacing = opts.barSpacing;
+  } catch (_) {}
+  const padX = Math.max(barSpacing * 0.5, 2);
+  const minW = Math.max(10, barSpacing * 2.5);
+  const minH = 14;
+  const showLabels = barSpacing >= 3.2;
+
+  for (const b of exploreBoxes) {
+    const x0raw = exploreTimeToX(b.t0);
+    const x1raw = exploreTimeToX(b.t1);
+    if (x0raw == null || x1raw == null) continue;
+    let yHi = exploreSeries.priceToCoordinate(b.hi);
+    let yLo = exploreSeries.priceToCoordinate(b.lo);
+    if (yHi == null || yLo == null) continue;
+    let x0 = Math.min(x0raw, x1raw) - padX;
+    let x1 = Math.max(x0raw, x1raw) + padX;
+    let y0 = Math.min(yHi, yLo);
+    let y1 = Math.max(yHi, yLo);
+    if (x1 - x0 < minW) {
+      const mid = (x0 + x1) / 2;
+      x0 = mid - minW / 2;
+      x1 = mid + minW / 2;
+    }
+    if (y1 - y0 < minH) {
+      const mid = (y0 + y1) / 2;
+      y0 = mid - minH / 2;
+      y1 = mid + minH / 2;
+    }
+    const focused = exploreState.focusId === b.id;
+    const bw = x1 - x0;
+    const bh = y1 - y0;
+    ctx.fillStyle = focused ? "rgba(251,191,36,0.22)" : "rgba(45,212,191,0.14)";
+    ctx.strokeStyle = focused ? "rgba(251,191,36,0.95)" : "rgba(45,212,191,0.75)";
+    ctx.lineWidth = focused ? 2 : (barSpacing < 2 ? 1.5 : 1);
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x0, y0, bw, bh, 3);
+    else ctx.rect(x0, y0, bw, bh);
+    ctx.fill();
+    ctx.stroke();
+    // Tip-edge hatch on the right ~20% of the box (visual cue for tip candidate).
+    const tipW = Math.max(4, bw * 0.2);
+    ctx.fillStyle = focused ? "rgba(251,191,36,0.28)" : "rgba(244,114,182,0.22)";
+    ctx.fillRect(x1 - tipW, y0, tipW, bh);
+
+    exploreHitRects.push({ id: b.id, x0, x1, y0, y1 });
+
+    if (showLabels || focused) {
+      const label = `#${b.id}`;
+      ctx.font = focused ? "bold 11px sans-serif" : "10px sans-serif";
+      const tw = ctx.measureText(label).width;
+      if (focused || tw + 6 < bw) {
+        ctx.fillStyle = focused ? "#fbbf24" : "rgba(45,212,191,0.95)";
+        ctx.fillText(label, x0 + 3, Math.max(11, y0 - 3));
+      }
+    }
+  }
 }
 
 function focusExploreBox(id) {
@@ -851,9 +985,7 @@ function focusExploreBox(id) {
   if (!b || !exploreChart || !exploreSeries) return;
   exploreState.focusId = id;
   highlightExploreRow(id);
-  applyExploreMarkers();
   clearExploreFocusLines();
-  // Focus band: hi/lo price lines (HB uses markers; we add range chrome when selected)
   try {
     exploreFocusLines.push(exploreSeries.createPriceLine({
       price: b.hi, color: "rgba(251,191,36,0.75)", lineWidth: 1, lineStyle: 2, title: `#${id} hi`,
@@ -870,11 +1002,7 @@ function focusExploreBox(id) {
   if (i0 < 0) i0 = 0;
   if (i1 < 0) i1 = exploreTimes.length - 1;
   exploreChart.timeScale().setVisibleLogicalRange({ from: Math.max(0, i0 - 2), to: i1 + 2 });
-}
-
-/** Keep name for callers that still invoke drawExploreBoxes after fit/toggle. */
-function drawExploreBoxes() {
-  applyExploreMarkers();
+  drawExploreBoxes();
 }
 
 /* ---------- generic horizontal bars ---------- */
@@ -950,9 +1078,15 @@ async function loadStatusStrip(force = false) {
     const od = d.owner_detector || {};
     const ja = d.judgment_active || {};
     const fw = d.forward || {};
+    const fr = d.freshness || {};
+    const tr = d.train || {};
+    const tip = d.tip_pulse || {};
     const ownerEl = $("#status-owner");
     const judEl = $("#status-judgment");
     const fwdEl = $("#status-forward");
+    const freshEl = $("#status-fresh");
+    const trainEl = $("#status-train");
+    const tipEl = $("#status-tip");
     if (ownerEl) {
       ownerEl.classList.remove("skeleton");
       ownerEl.classList.add("status-click");
@@ -998,10 +1132,54 @@ async function loadStatusStrip(force = false) {
         <span class="status-bar-mini"><span style="width:${prog}%"></span></span>
         <span class="status-sub" title="${escapeHtml(stall)}">open ${openN} · 事后 ${hs} · 日志 ${totalN}${stall ? " · " + escapeHtml(stall) : ""}</span>`;
     }
+    if (freshEl) {
+      freshEl.classList.remove("skeleton");
+      const g = fr.gate_min ?? 30;
+      freshEl.classList.add("good");
+      freshEl.title = fr.note || "三门同值";
+      freshEl.innerHTML = `<span class="status-k">新鲜度门</span>
+        <span class="status-v">≤ ${g} min</span>
+        <span class="status-sub">${escapeHtml(fr.note || "执行器 / TG / 看板")}</span>`;
+    }
+    if (trainEl) {
+      trainEl.classList.remove("skeleton");
+      trainEl.classList.add("status-click");
+      trainEl.dataset.href = "/debug_viz.html";
+      trainEl.title = "只读旁路 · 不杀训练 · 点开调试页";
+      const ep = tr.epoch;
+      const tgt = tr.epochs_target ?? 40;
+      const prog = tr.progress != null ? Math.round(100 * tr.progress) : null;
+      const alive = !!tr.alive;
+      const done = tr.status === "done" || tr.stable_pt;
+      trainEl.classList.toggle("good", done || alive);
+      trainEl.classList.toggle("warn", !done && !alive && ep != null);
+      const v = done
+        ? "已落盘"
+        : (ep != null ? `${ep}/${tgt}${prog != null ? ` · ${prog}%` : ""}` : "—");
+      const sub = done
+        ? "models/owner_v13_pad200.pt"
+        : (alive ? `ALIVE · ${escapeHtml(tr.note || "")}` : escapeHtml(tr.note || "idle"));
+      trainEl.innerHTML = `<span class="status-k">v13 训练</span>
+        <span class="status-v">${escapeHtml(String(v))}</span>
+        ${prog != null && !done ? `<span class="status-bar-mini"><span style="width:${prog}%"></span></span>` : ""}
+        <span class="status-sub">${sub}</span>`;
+    }
+    if (tipEl) {
+      tipEl.classList.remove("skeleton");
+      tipEl.classList.add("status-click");
+      tipEl.dataset.href = "/debug_viz.html";
+      tipEl.title = tip.note || "本机 tip_fire 旁路";
+      const tf = tip.tip_fire;
+      tipEl.classList.toggle("good", tf != null && Number(tf) > 0);
+      tipEl.classList.toggle("warn", tip.exists && (tf === 0 || tf === "0"));
+      tipEl.innerHTML = `<span class="status-k">tip_fire</span>
+        <span class="status-v">${tf != null ? escapeHtml(String(tf)) : "—"}</span>
+        <span class="status-sub">${escapeHtml(tip.note || "—")}</span>`;
+    }
     paintLiveTruth(od, ja, fw);
     if (force) toast("状态条已刷新", "ok");
   } catch (_) {
-    ["status-owner", "status-judgment", "status-forward"].forEach((id) => {
+    ["status-owner", "status-judgment", "status-forward", "status-fresh", "status-train", "status-tip"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) {
         el.classList.remove("skeleton");
@@ -1294,8 +1472,14 @@ $("#probe-chips")?.addEventListener("click", (e) => {
   $$("#probe-chips .chip-btn").forEach((b) => b.classList.toggle("active", b === btn));
   runProbe();
 });
-// Jump buttons (overview / status strip)
+// Jump buttons (overview / status strip) + external href chips
 document.addEventListener("click", (e) => {
+  const hrefEl = e.target.closest("[data-href]");
+  if (hrefEl && hrefEl.dataset.href) {
+    e.preventDefault();
+    location.href = hrefEl.dataset.href;
+    return;
+  }
   const el = e.target.closest("[data-jump]");
   if (!el) return;
   const name = el.dataset.jump;
@@ -1365,9 +1549,175 @@ async function loadEthMicro() {
 }
 
 let forwardChart, forwardSeries, forwardDdChart, forwardDdSeries;
+let forwardTabulator = null;
+let forwardRowsCache = [];
+let forwardFreshFilter = "";
+let forwardSymFilter = "";
+let forwardTableWired = false;
+
+function wireForwardTableControls() {
+  if (forwardTableWired) return;
+  forwardTableWired = true;
+  const seg = $("#forward-fresh-seg");
+  seg?.querySelectorAll("button").forEach((b) => {
+    b.addEventListener("click", () => {
+      seg.querySelectorAll("button").forEach((x) => x.classList.toggle("active", x === b));
+      forwardFreshFilter = b.dataset.fresh || "";
+      applyForwardTableFilters();
+    });
+  });
+  $("#forward-sym-filter")?.addEventListener("input", (e) => {
+    forwardSymFilter = String(e.target.value || "").trim().toUpperCase();
+    applyForwardTableFilters();
+  });
+}
+
+function applyForwardTableFilters() {
+  if (!forwardTabulator) return;
+  forwardTabulator.setFilter((row) => {
+    const d = row.getData();
+    if (forwardFreshFilter === "1" && !d._fresh) return false;
+    if (forwardFreshFilter === "0" && d._fresh) return false;
+    if (forwardSymFilter && !String(d.symbol || "").toUpperCase().includes(forwardSymFilter)) return false;
+    return true;
+  });
+}
+
+function buildForwardTabulatorRows(d) {
+  const freshMin = d.fresh_detect_min ?? 30;
+  return (d.rows || []).map((r) => {
+    const source = r.source || "okx";
+    const entry = r.entry_time || r.signal_time || "";
+    const overlay = {
+      source,
+      symbol: r.symbol || "",
+      signal_time: r.signal_time || "",
+      entry_time: r.entry_time || r.signal_time || "",
+      exit_time: r.exit_time || "",
+      entry_price: r.entry_price,
+      atr_pct: r.atr_pct,
+      outcome: r.outcome || "",
+      status: r.status || "",
+      realized_ret: r.realized_ret != null ? r.realized_ret : r.net_ret,
+      net_ret: r.net_ret,
+      dense_run_len: r.dense_run_len || 0,
+      tp_mult: 5,
+      sl_mult: 2,
+    };
+    const lagInfo = fmtLagMin(r.lag_min, freshMin);
+    const isFresh = r.fresh === true || lagInfo.fresh;
+    const symShort = String(r.symbol || "").replace(/_USDT_SWAP$/, "").replace(/_USDT$/, "");
+    return {
+      signal_time: r.signal_time,
+      detected_at: r.detected_at,
+      lag_min: r.lag_min,
+      lag_text: lagInfo.text,
+      lag_cls: lagInfo.cls,
+      symbol: r.symbol,
+      symbol_short: symShort,
+      status: r.status,
+      status_cn: STATUS_CN[r.status] || r.status || "",
+      maker_filled: !!r.maker_filled,
+      outcome: r.outcome || "",
+      outcome_cn: OUTCOME_CN[r.outcome || ""] || r.outcome || "—",
+      score: r.score,
+      net_ret: r.net_ret,
+      _fresh: isFresh,
+      _source: source,
+      _entry: entry,
+      _overlay: overlay,
+    };
+  });
+}
+
+function ensureForwardTabulator() {
+  const host = $("#forward-table");
+  if (!host || typeof Tabulator === "undefined") return null;
+  if (forwardTabulator) return forwardTabulator;
+  const dark = document.body.classList.contains("theme-dark");
+  host.classList.toggle("tabulator-theme-midnight", dark);
+  forwardTabulator = new Tabulator(host, {
+    data: [],
+    layout: "fitDataStretch",
+    height: "420px",
+    placeholder: "暂无前向信号 · 脉冲扫到 tip 新鲜成交后显示在此",
+    reactiveData: false,
+    selectableRows: 1,
+    columns: [
+      {
+        title: "信号", field: "signal_time", width: 148, sorter: "string",
+        formatter: (cell) => escapeHtml(fmtBjTime(cell.getValue())),
+      },
+      {
+        title: "检出", field: "detected_at", width: 148, sorter: "string",
+        formatter: (cell) => escapeHtml(fmtBjTime(cell.getValue())),
+      },
+      {
+        title: "延迟", field: "lag_min", width: 72, hozAlign: "right", sorter: "number",
+        formatter: (cell) => {
+          const row = cell.getRow().getData();
+          return `<span class="${escapeHtml(row.lag_cls || "")}">${escapeHtml(row.lag_text || "—")}</span>`;
+        },
+      },
+      {
+        title: "币种", field: "symbol_short", width: 88, sorter: "string",
+        formatter: (cell) => `<b>${escapeHtml(cell.getValue() || "")}</b>`,
+      },
+      { title: "状态", field: "status_cn", width: 72, sorter: "string" },
+      {
+        title: "Maker", field: "maker_filled", width: 72, hozAlign: "center",
+        formatter: (cell) => cell.getValue()
+          ? `<span class="chip passed">filled</span>`
+          : `<span class="chip">miss</span>`,
+      },
+      {
+        title: "结果", field: "outcome", width: 72, sorter: "string",
+        formatter: (cell) => {
+          const row = cell.getRow().getData();
+          return `<span class="outcome-${escapeHtml(row.outcome || "open")}">${escapeHtml(row.outcome_cn)}</span>`;
+        },
+      },
+      {
+        title: "分数", field: "score", width: 72, hozAlign: "right", sorter: "number",
+        formatter: (cell) => {
+          const v = cell.getValue();
+          return v == null || v === "" ? "—" : Number(v).toFixed(3);
+        },
+      },
+      {
+        title: "净收益", field: "net_ret", width: 84, hozAlign: "right", sorter: "number",
+        formatter: (cell) => {
+          const v = cell.getValue();
+          return `<span class="${cls(v)}">${fmtPct(v)}</span>`;
+        },
+      },
+      {
+        title: "新鲜", field: "_fresh", width: 64, hozAlign: "center",
+        formatter: (cell) => cell.getValue()
+          ? `<span class="chip passed">新鲜</span>`
+          : `<span class="chip warn">事后</span>`,
+      },
+    ],
+    initialSort: [{ column: "signal_time", dir: "desc" }],
+    rowFormatter: (row) => {
+      const el = row.getElement();
+      el.classList.add("clickable");
+      if (!row.getData()._fresh) el.classList.add("row-stale");
+      else el.classList.remove("row-stale");
+    },
+  });
+  forwardTabulator.on("rowClick", (_e, row) => {
+    const r = row.getData();
+    if (!r.symbol) return;
+    focusTrade(r._source || "okx", r.symbol, r._entry, r._overlay);
+  });
+  return forwardTabulator;
+}
+
 async function loadForward() {
   $("#view-forward").classList.add("loading");
   try {
+  wireForwardTableControls();
   const d = await apiGet("/api/forward", { cache: true });
   const m = d.metrics;
   const hEx = d.hindsight_excluded ?? 0;
@@ -1422,56 +1772,18 @@ async function loadForward() {
   } else {
     $("#forward-outcomes").innerHTML = `<div class="empty-state">暂无裁决样本 · 新鲜 maker 成交后显示分布</div>`;
   }
-  const tbody = $("#forward-table tbody");
-  tbody.innerHTML = d.rows.length ? d.rows.map((r) => {
-    const source = r.source || "okx";
-    const entry = r.entry_time || r.signal_time || "";
-    // Full overlay so K-line can draw TP/SL even when trade is not in backtest markers
-    const overlay = {
-      source,
-      symbol: r.symbol || "",
-      signal_time: r.signal_time || "",
-      entry_time: r.entry_time || r.signal_time || "",
-      exit_time: r.exit_time || "",
-      entry_price: r.entry_price,
-      atr_pct: r.atr_pct,
-      outcome: r.outcome || "",
-      status: r.status || "",
-      realized_ret: r.realized_ret != null ? r.realized_ret : r.net_ret,
-      net_ret: r.net_ret,
-      dense_run_len: r.dense_run_len || 0,
-      tp_mult: 5,
-      sl_mult: 2,
-    };
-    const ovAttr = escapeHtml(JSON.stringify(overlay));
-    const lagInfo = fmtLagMin(r.lag_min, d.fresh_detect_min ?? 20);
-    const isFresh = r.fresh === true || lagInfo.fresh;
-    const rowCls = isFresh ? "" : "row-stale";
-    const symShort = String(r.symbol || "").replace(/_USDT_SWAP$/, "").replace(/_USDT$/, "");
-    return `
-    <tr class="clickable ${rowCls}" data-source="${escapeHtml(source)}" data-symbol="${escapeHtml(r.symbol || "")}" data-entry="${escapeHtml(entry)}" data-overlay="${ovAttr}" title="点击查看 K 线">
-      <td class="td-time">${escapeHtml(fmtBjTime(r.signal_time))}</td>
-      <td class="td-time">${escapeHtml(fmtBjTime(r.detected_at))}</td>
-      <td class="num ${lagInfo.cls}" title="检出−信号">${escapeHtml(lagInfo.text)}</td>
-      <td><b>${escapeHtml(symShort)}</b></td>
-      <td>${escapeHtml(STATUS_CN[r.status] || r.status || "")}</td>
-      <td>${r.maker_filled ? "<span class=\"chip passed\">filled</span>" : "<span class=\"chip\">miss</span>"}</td>
-      <td class="outcome-${escapeHtml(r.outcome || "open")}">${OUTCOME_CN[r.outcome || ""] || escapeHtml(r.outcome || "") || "—"}</td>
-      <td class="num">${r.score === null || r.score === undefined ? "—" : Number(r.score).toFixed(3)}</td>
-      <td class="num"><span class="${cls(r.net_ret)}">${fmtPct(r.net_ret)}</span></td>
-    </tr>`;
-  }).join("") : `<tr class="no-click"><td colspan="9"><div class="empty-state">暂无前向信号 · 脉冲扫到 tip 新鲜成交后显示在此</div></td></tr>`;
-  if (tbody && !tbody.dataset.delegated) {
-    tbody.dataset.delegated = "1";
-    tbody.addEventListener("click", (e) => {
-      const tr = e.target.closest("tr[data-entry]");
-      if (!tr || !tr.dataset.symbol) return;
-      let overlay = null;
-      try {
-        overlay = tr.dataset.overlay ? JSON.parse(tr.dataset.overlay) : null;
-      } catch (_) { overlay = null; }
-      focusTrade(tr.dataset.source || "okx", tr.dataset.symbol, tr.dataset.entry, overlay);
-    });
+
+  forwardRowsCache = buildForwardTabulatorRows(d);
+  const table = ensureForwardTabulator();
+  if (table) {
+    table.replaceData(forwardRowsCache);
+    applyForwardTableFilters();
+  } else {
+    // Fallback if Tabulator failed to load — plain HTML table body
+    const host = $("#forward-table");
+    if (host) {
+      host.innerHTML = `<div class="empty-state">Tabulator 未加载；检查 vendor/tabulator.min.js</div>`;
+    }
   }
   } catch (err) {
     if (err?.name !== "AbortError") toast(`前向页：${err.message || err}`);

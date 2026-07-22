@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>调试可视化 · darkforest</title>
+<style>
+  :root {
+    --bg: #0f1419; --surface: #1a222c; --border: #2a3542;
+    --text: #e7ecf2; --muted: #8b9aab; --accent: #3d9cf0; --ok: #34d399;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font: 15px/1.5 "IBM Plex Sans", "Segoe UI", sans-serif;
+    background: var(--bg); color: var(--text);
+    min-height: 100vh; padding: 28px 24px 48px;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1 { font-size: 22px; font-weight: 650; margin: 0 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 22px; font-size: 13.5px; }
+  .grid {
+    display: grid; gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 16px 14px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .card.missing { opacity: .55; }
+  .card h2 { font-size: 15px; margin: 0; font-weight: 600; }
+  .card p { margin: 0; color: var(--muted); font-size: 12.5px; }
+  .badge {
+    display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px;
+    background: rgba(52,211,153,.12); color: var(--ok); width: fit-content;
+  }
+  .badge.off { background: rgba(139,154,171,.12); color: var(--muted); }
+  .top { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: baseline; }
+  .note {
+    margin-top: 28px; padding: 12px 14px; border-left: 3px solid var(--accent);
+    background: rgba(61,156,240,.08); color: var(--muted); font-size: 12.5px;
+  }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div>
+      <h1>调试可视化</h1>
+      <p class="sub">LWC hardneg / tip 对照 / 叠框画廊 · 只读 · 不抢 v13 · 不进脉冲</p>
+    </div>
+    <a href="/">← 回主看板</a>
+  </div>
+  <div class="grid" id="cards">
+    <div class="card"><p>加载中…</p></div>
+  </div>
+  <div class="note">
+    产物目录：<code>analysis/output/</code>（经看板 <code>/debug-artifacts/</code> 挂载）。
+    主 K 线仍用 Lightweight Charts；本页只链已生成的静态调试页。
+  </div>
+<script>
+async function main() {
+  const host = document.getElementById("cards");
+  let links = [];
+  try {
+    const d = await fetch("/api/status-strip").then((r) => r.json());
+    links = (d.debug_links || []).filter((x) => x.id !== "debug_hub");
+  } catch (_) {
+    links = [
+      { id: "hardneg_lwc_batch", name: "LWC hardneg 批量图层", url: "/debug-artifacts/wuzao_lwc_hardneg_batch/index.html", exists: true },
+      { id: "hardneg_tip_compare", name: "LWC tip 对照", url: "/debug-artifacts/wuzao_lwc_tip_compare/compare.html", exists: true },
+      { id: "hardneg_overlay_gallery", name: "叠框画廊", url: "/debug-artifacts/hardneg_overlay_gallery/index.html", exists: true },
+      { id: "explore", name: "密集探索", url: "/#explore", exists: true },
+    ];
+  }
+  const blurb = {
+    hardneg_lwc_batch: "CSV→OHLC→LWC 时间带，看中段簇 vs 右缘 tip",
+    hardneg_tip_compare: "发现级 3 窗对照页",
+    hardneg_overlay_gallery: "静态 PNG 叠框（matplotlib）",
+    explore: "主看板加深：markers + canvas 密集框",
+  };
+  host.innerHTML = links.map((l) => `
+    <a class="card ${l.exists ? "" : "missing"}" href="${l.url}">
+      <span class="badge ${l.exists ? "" : "off"}">${l.exists ? "可打开" : "缺失"}</span>
+      <h2>${l.name}</h2>
+      <p>${blurb[l.id] || l.url}</p>
+    </a>`).join("") || `<div class="card"><p>暂无链接</p></div>`;
+}
+main();
+</script>
+</body>
+</html>

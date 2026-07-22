@@ -1,13 +1,15 @@
 """Lightweight status strip for the dashboard header / overview.
 
 Surfaces owner-detector promotion, judgment ACTIVE (threshold + dataset),
-and forward decision progress. Safe when artifacts missing.
+forward decision progress, local v13 train sidecar (file mtime / results.csv
+only — never signals or kills the train process), and debug viz links.
 
 Visual scout (scout.html) was retired — multi-TF radar is dashboard #radar.
 """
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -20,6 +22,26 @@ OWNER_BEST_JSON = PROJECT / "models" / "owner_best.json"
 OWNER_BEST_PT = PROJECT / "models" / "owner_best.pt"
 FORWARD_LOG_PATH = PROJECT / "data" / "forward_log.csv"
 FORWARD_DECISION_TRADES = 100
+V13_RESULTS_CSV = (
+    PROJECT / "runs" / "detect" / "runs" / "detect" / "owner_v13_pad200" / "results.csv"
+)
+V13_TRAIN_LOG = PROJECT / "logs" / "owner_v13_pad200_train.log"
+V13_STABLE_PT = PROJECT / "models" / "owner_v13_pad200.pt"
+V13_MIDRUN_PT = (
+    PROJECT
+    / "runs"
+    / "detect"
+    / "runs"
+    / "detect"
+    / "owner_v13_pad200"
+    / "weights"
+    / "best.pt"
+)
+V13_EPOCHS_TARGET = 40
+# results.csv / log quieter than one epoch → treat as stale (not ALIVE).
+TRAIN_ALIVE_MAX_AGE_MIN = 45.0
+PULSE_LOG = PROJECT / "logs" / "forward_pulse.log"
+TIP_FIRE_RE = re.compile(r"tip_fire[=:\s]+(\d+)", re.IGNORECASE)
 
 
 def status_strip_payload() -> dict:
@@ -28,11 +50,163 @@ def status_strip_payload() -> dict:
         "owner_detector": _owner_detector(),
         "judgment_active": _judgment_active(),
         "forward": _forward_progress(),
+        "freshness": _freshness_gate(),
+        "train": _v13_train(),
+        "tip_pulse": _tip_pulse_sidecar(),
+        "debug_links": _debug_links(),
         "links": {
             "scout_mtf": "/#radar",
             "label_studio_hint": "http://127.0.0.1:8081",
+            "debug_viz": "/debug_viz.html",
         },
     }
+
+
+def _freshness_gate() -> dict:
+    """Three gates share this value (executor / TG / dashboard). Display only."""
+    return {
+        "gate_min": int(FRESH_DETECT_MIN),
+        "label": f"lag≤{int(FRESH_DETECT_MIN)}min",
+        "note": "三门同值：执行器 / TG / 看板",
+    }
+
+
+def _parse_results_epoch(path: Path) -> int | None:
+    """Last epoch index from ultralytics results.csv (col0). Read-only."""
+    try:
+        text = path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return None
+    last = None
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.lower().startswith("epoch"):
+            continue
+        head = line.split(",", 1)[0].strip()
+        try:
+            last = int(float(head))
+        except ValueError:
+            continue
+    return last
+
+
+def _age_min(path: Path) -> float | None:
+    if not path.is_file():
+        return None
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return None
+    return max((datetime.now(timezone.utc).timestamp() - mtime) / 60.0, 0.0)
+
+
+def _v13_train() -> dict:
+    """Local v13 pad200 progress from results.csv + log mtime. Never touches GPU."""
+    epoch = _parse_results_epoch(V13_RESULTS_CSV) if V13_RESULTS_CSV.is_file() else None
+    age_results = _age_min(V13_RESULTS_CSV)
+    age_log = _age_min(V13_TRAIN_LOG)
+    ages = [a for a in (age_results, age_log) if a is not None]
+    freshest = min(ages) if ages else None
+    alive = freshest is not None and freshest <= TRAIN_ALIVE_MAX_AGE_MIN
+    stable = V13_STABLE_PT.is_file()
+    midrun = V13_MIDRUN_PT.is_file()
+    target = V13_EPOCHS_TARGET
+    progress = None
+    if epoch is not None and target > 0:
+        progress = round(min(epoch / target, 1.0), 4)
+    status = "done" if stable else ("alive" if alive else ("stale" if epoch else "idle"))
+    return {
+        "name": "owner_v13_pad200",
+        "status": status,
+        "alive": alive and not stable,
+        "epoch": epoch,
+        "epochs_target": target,
+        "progress": progress,
+        "stable_pt": stable,
+        "midrun_pt": midrun,
+        "age_min": round(freshest, 1) if freshest is not None else None,
+        "results_path": relative_path(V13_RESULTS_CSV) if V13_RESULTS_CSV.is_file() else None,
+        "note": (
+            "stable 已落盘"
+            if stable
+            else (
+                f"epoch {epoch}/{target}"
+                if epoch is not None
+                else "无 results.csv（未开训或路径变了）"
+            )
+        ),
+    }
+
+
+def _tip_pulse_sidecar() -> dict:
+    """Best-effort tip_fire from local forward_pulse.log (often absent on Mac)."""
+    out: dict = {
+        "exists": PULSE_LOG.is_file(),
+        "tip_fire": None,
+        "age_min": _age_min(PULSE_LOG),
+        "note": None,
+    }
+    if not out["exists"]:
+        out["note"] = "本机无 forward_pulse.log（VPS 才有写者）"
+        return out
+    try:
+        # Tail ~64KiB — enough for last few pulses.
+        raw = PULSE_LOG.read_bytes()
+        chunk = raw[-65536:].decode("utf-8", errors="ignore")
+    except OSError as exc:
+        out["note"] = f"读取失败: {exc}"
+        return out
+    hits = TIP_FIRE_RE.findall(chunk)
+    if hits:
+        try:
+            out["tip_fire"] = int(hits[-1])
+        except ValueError:
+            out["tip_fire"] = None
+    out["note"] = (
+        f"最近 tip_fire={out['tip_fire']}"
+        if out["tip_fire"] is not None
+        else "日志里未见 tip_fire="
+    )
+    return out
+
+
+def _debug_links() -> list[dict]:
+    """Static debug viz pages (served under /debug-artifacts/ + /debug_viz.html)."""
+    catalog = (
+        (
+            "debug_hub",
+            "调试可视化入口",
+            "/debug_viz.html",
+            True,
+        ),
+        (
+            "hardneg_lwc_batch",
+            "LWC hardneg 批量图层",
+            "/debug-artifacts/wuzao_lwc_hardneg_batch/index.html",
+            (PROJECT / "analysis/output/wuzao_lwc_hardneg_batch/index.html").is_file(),
+        ),
+        (
+            "hardneg_tip_compare",
+            "LWC tip 对照（3 窗）",
+            "/debug-artifacts/wuzao_lwc_tip_compare/compare.html",
+            (PROJECT / "analysis/output/wuzao_lwc_tip_compare/compare.html").is_file(),
+        ),
+        (
+            "hardneg_overlay_gallery",
+            "hardneg 叠框画廊",
+            "/debug-artifacts/hardneg_overlay_gallery/index.html",
+            (PROJECT / "analysis/output/hardneg_overlay_gallery/index.html").is_file(),
+        ),
+        (
+            "explore",
+            "密集探索（主看板 LWC）",
+            "/#explore",
+            True,
+        ),
+    )
+    return [
+        {"id": i, "name": n, "url": u, "exists": bool(e)} for i, n, u, e in catalog
+    ]
 
 
 def _owner_detector() -> dict:
