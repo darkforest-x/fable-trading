@@ -4,11 +4,11 @@
 
 ## ⚡ 当前真相（2026-07-22 晚）
 
-- **v14 pad200 已重建（MAD-on）**：`datasets/dense_owner_v14_pad200` 正样本 **2635**（skip 1406，mainly
-  both_high）；v13 目录保留不动。报告 `analysis/p_v14_pad200_rebuild.md`；抽查
-  `analysis/output/v14_train_sample20/`。**未** Mac 开训、**未** promote——开训去 **Windows 3060**
-  （`zzc@192.168.1.5` → `C:/fable`）：`bash scripts/sync_v14_to_windows.sh`，交接
-  `analysis/p_v14_windows_train.md` + `scripts/train_v14_pad200_windows.ps1`。
+- **v14 pad200 已在 3060 开训（2026-07-22）**：数据集已 SSH 同步；WMI 起 `train_dense.py`
+  `--name owner_v14_pad200`（基座 `owner_v12_htip.pt`，epochs=40/patience=10/batch=16）；
+  日志 `C:\fable\logs\owner_v14_pad200.log`。主机现为 **`zzc@192.168.1.3`**（原 `.5` DHCP 漂移）。
+  **未** promote、**未**动 `owner_best`/`ACTIVE`、**未**耗 holdout。看进度：
+  `ssh zzc@192.168.1.3 "Get-Content C:\fable\logs\owner_v14_pad200.log -Tail 20"`。
 - **v13 失败根因含标签错窗**（关 MAD 盲 end_incl → okx 错窗）；审计 `analysis/p_pad200_cut_audit.md`。
   `models/owner_v13_pad200.pt` 仍在盘；H-DET-1 tip_hit **0.008** / tip-smoke **0/27**。主线仍 v12。
 - **前端可视化真落地**（不抢 MPS）：前向 Tabulator + 状态条 train/fresh/tip + LWC 密集框/调试入口 —

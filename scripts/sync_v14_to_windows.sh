@@ -7,7 +7,7 @@
 #   3060 = GPU only (C:/fable); wipe anytime
 #
 # Defaults (override with env — never put passwords in the repo):
-#   FABLE_3060_HOST=zzc@192.168.1.5
+#   FABLE_3060_HOST=zzc@192.168.1.3   # was .5; DHCP moved 2026-07-22
 #   FABLE_3060_REMOTE=C:/fable
 #
 # Usage (from repo root on Mac):
@@ -17,7 +17,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-HOST="${FABLE_3060_HOST:-zzc@192.168.1.5}"
+HOST="${FABLE_3060_HOST:-zzc@192.168.1.3}"
 REMOTE="${FABLE_3060_REMOTE:-C:/fable}"
 SSH=(ssh -o BatchMode=yes -o ConnectTimeout=15)
 SCP=(scp -o BatchMode=yes -q)
@@ -62,12 +62,10 @@ COPYFILE_DISABLE=1 tar cf "$TAR" --exclude='*.npy' --exclude='*.cache' --exclude
 echo "  pack: $(du -h "$TAR" | cut -f1)  base: $BASE"
 
 say "2) scp → $HOST:$REMOTE"
+# models/ may be missing on a bare C:/fable — create before first scp
+"${SSH[@]}" "$HOST" "New-Item -ItemType Directory -Force -Path '$REMOTE/models','$REMOTE/logs','$REMOTE/datasets' | Out-Null"
 "${SCP[@]}" "$TAR" "$HOST:$REMOTE/ds_v14.tar" || die "scp 数据集失败"
-"${SCP[@]}" "$BASE" "$HOST:$REMOTE/models/$(basename "$BASE")" || {
-  # models/ may be missing on a bare C:/fable — create then retry
-  "${SSH[@]}" "$HOST" "New-Item -ItemType Directory -Force -Path '$REMOTE/models' | Out-Null"
-  "${SCP[@]}" "$BASE" "$HOST:$REMOTE/models/$(basename "$BASE")" || die "scp 基座权重失败"
-}
+"${SCP[@]}" "$BASE" "$HOST:$REMOTE/models/$(basename "$BASE")" || die "scp 基座权重失败"
 rm -f "$TAR"
 
 say "3) remote unpack + count"
@@ -88,7 +86,7 @@ foreach (\$s in @('train','val')) {
 " | tr -d '\r'
 
 echo -e "\n\033[1;32m✅ synced. Next: start train on 3060 (see analysis/p_v14_windows_train.md)\033[0m"
-echo "  Mac one-liner after sync (WMI, SSH-safe):"
-echo "  ssh $HOST \"Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine='cmd.exe /c cd /d C:\\\\fable && .venv\\\\Scripts\\\\python.exe -m src.detection.train --data datasets/dense_owner_v14_pad200/data.yaml --model models/$(basename "$BASE") --epochs 40 --patience 10 --batch 16 --workers 4 --device 0 --cache false --name owner_v14_pad200 > logs\\\\owner_v14_pad200.log 2>&1'}\""
-echo "  (or on the box: .\\scripts\\train_v14_pad200_windows.ps1)"
+echo "  Mac one-liner after sync (WMI, SSH-safe; uses remote train_dense.py — box has no src/):"
+echo "  ssh $HOST \"New-Item -ItemType Directory -Force -Path C:\\\\fable\\\\logs | Out-Null; \\\$cmd='cmd.exe /c cd /d C:\\\\fable && C:\\\\fable\\\\.venv\\\\Scripts\\\\python.exe -u C:\\\\fable\\\\train_dense.py --name owner_v14_pad200 --model C:/fable/models/$(basename "$BASE") --dataset C:/fable/datasets/dense_owner_v14_pad200 --epochs 40 --patience 10 --batch 16 --cache false --workers 4 > C:\\\\fable\\\\logs\\\\owner_v14_pad200.log 2>&1'; Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine=\\\$cmd} | Out-Null; Write-Output started\""
+echo "  Watch: ssh $HOST \"Get-Content C:\\\\fable\\\\logs\\\\owner_v14_pad200.log -Tail 20\""
 echo "  NO promote from this script."

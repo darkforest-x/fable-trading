@@ -9,7 +9,7 @@
 
 | 项 | 默认值 | 覆盖 |
 |----|--------|------|
-| SSH | `zzc@192.168.1.5` | `FABLE_3060_HOST` |
+| SSH | `zzc@192.168.1.3` | `FABLE_3060_HOST`（原 `.5`，2026-07-22 DHCP 漂移） |
 | 远端根 | `C:/fable` | `FABLE_3060_REMOTE` |
 | 传数 | `tar` + `scp`（排除 `.npy` / `.cache` / `._*`） | 见 `scripts/sync_v14_to_windows.sh` |
 | 长训 | **WMI `Win32_Process.Create`**（防 SSH 断线杀进程） | 同 `train_owner_hts.sh` |
@@ -39,18 +39,20 @@ bash scripts/sync_v14_to_windows.sh
 
 **A. 推荐 — Mac 上 SSH + WMI（断 SSH 也不杀训）**
 
+> Windows 盒子是精简 GPU 环境（有 `train_dense.py`，**没有**完整 `src/`）。用远端 `train_dense.py`，不要 `-m src.detection.train`。
+
 ```bash
-HOST="${FABLE_3060_HOST:-zzc@192.168.1.5}"
-ssh "$HOST" "New-Item -ItemType Directory -Force -Path C:\fable\logs | Out-Null; Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine='cmd.exe /c cd /d C:\fable && .venv\Scripts\python.exe -m src.detection.train --data datasets/dense_owner_v14_pad200/data.yaml --model models/owner_v12_htip.pt --epochs 40 --patience 10 --batch 16 --workers 4 --device 0 --cache false --name owner_v14_pad200 > logs\owner_v14_pad200.log 2>&1'} | Out-Null; Write-Output started"
+HOST="${FABLE_3060_HOST:-zzc@192.168.1.3}"
+ssh "$HOST" "New-Item -ItemType Directory -Force -Path C:\fable\logs | Out-Null; \$cmd='cmd.exe /c cd /d C:\fable && C:\fable\.venv\Scripts\python.exe -u C:\fable\train_dense.py --name owner_v14_pad200 --model C:/fable/models/owner_v12_htip.pt --dataset C:/fable/datasets/dense_owner_v14_pad200 --epochs 40 --patience 10 --batch 16 --cache false --workers 4 > C:\fable\logs\owner_v14_pad200.log 2>&1'; Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine=\$cmd} | Out-Null; Write-Output started"
 ```
 
 看进度：
 
 ```bash
-ssh zzc@192.168.1.5 "Get-Content C:\fable\logs\owner_v14_pad200.log -Tail 20"
+ssh zzc@192.168.1.3 "Get-Content C:\fable\logs\owner_v14_pad200.log -Tail 20"
 ```
 
-**B. 人在 Windows 盒子上** — `.\scripts\train_v14_pad200_windows.ps1`（或 `.bat`）。
+**B. 人在 Windows 盒子上** — `python train_dense.py ...`（同上参数），或修好本地 `src/` 后再跑 `.ps1`。
 
 | 旋钮 | 建议 | 备注 |
 |------|------|------|
@@ -67,7 +69,7 @@ ssh zzc@192.168.1.5 "Get-Content C:\fable\logs\owner_v14_pad200.log -Tail 20"
 ultralytics 路径可能多一层 `runs/detect/`：
 
 ```bash
-HOST="${FABLE_3060_HOST:-zzc@192.168.1.5}"
+HOST="${FABLE_3060_HOST:-zzc@192.168.1.3}"
 REMOTE="${FABLE_3060_REMOTE:-C:/fable}"
 NAME=owner_v14_pad200
 mkdir -p "runs/detect/runs/detect/$NAME/weights" models
@@ -98,9 +100,9 @@ PYTHONPATH=. python scripts/diag_forward_detect_lag.py --from-log --tip-smoke \
 ## 4. Owner 同步清单（SSH 主路径）
 
 1. Mac：重建已完成（`pad200_summary.json` + `mad_gate: true`）— 见 §5  
-2. Windows：`git pull`（脚本/文档；大数据集不走 git）  
+2. Windows：远端是精简 `C:/fable`（`train_dense.py` + `.venv`），大数据集走 sync 脚本  
 3. Mac：`bash scripts/sync_v14_to_windows.sh`  
-4. 开训：§1A WMI 或 §1B `.ps1`  
+4. 开训：§1A WMI（`train_dense.py`）  
 5. Mac：§2 scp 取回 → §3 tip 验收  
 6. **promote 另一次点头**
 
@@ -117,8 +119,9 @@ U 盘 / 本机拖文件 **不是默认路径**。只有 `sync_v14_to_windows.sh 
 
 ## 6. 若连不上要 Owner 补什么
 
-默认已写在仓库里（`zzc@192.168.1.5` / `C:/fable`）。若机器换了，只需告诉 agent / 设环境变量：
+默认已写在仓库里（`zzc@192.168.1.3` / `C:/fable`）。若机器换了，只需告诉 agent / 设环境变量：
 
 - 新 `FABLE_3060_HOST`（`user@ip`）  
 - 新 `FABLE_3060_REMOTE`（Windows 仓库根，正斜杠如 `D:/fable`）  
 - 本机对该主机的 **SSH 密钥登录**（脚本用 `BatchMode=yes`，不读密码）
+- Windows：**开机 + 同一局域网 + OpenSSH Server 运行**；若 ping 不通先查 DHCP（本机曾从 `.5` 漂到 `.3`）
