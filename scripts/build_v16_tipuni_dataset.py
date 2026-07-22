@@ -134,7 +134,13 @@ def main() -> int:
                 bump(f"{split}_no_png")
                 continue
             if lbl.read_text().strip():
-                # positive: fresh pad200 render, copy through
+                # v14's VAL positives were never tip-aligned (that was v15's
+                # whole experiment) -- owner caught a mid-window val box in the
+                # sample gallery on 2026-07-23. Val positives come from v15
+                # tipval instead (below); only TRAIN positives copy from v14.
+                if split == "val":
+                    bump("val_pos_skipped_untipped")
+                    continue
                 shutil.copy2(png, out / "images" / split / png.name)
                 shutil.copy2(lbl, out / "labels" / split / lbl.name)
                 bump(f"{split}_pos")
@@ -151,6 +157,18 @@ def main() -> int:
             mads.append(mad)
             bump(f"{split}_neg_rerendered")
             n_neg += 1
+
+    # Val positives: v15 tipval's tip-aligned pad200 renders (803).
+    v15_val = PROJECT / "datasets" / "dense_owner_v15_tipval"
+    for lbl in sorted((v15_val / "labels" / "val").glob("*.txt")):
+        if not lbl.read_text().strip():
+            continue
+        png = v15_val / "images" / "val" / f"{lbl.stem}.png"
+        if not png.exists() or is_eval_stem(lbl.stem):
+            continue
+        shutil.copy2(png, out / "images" / "val" / png.name)
+        shutil.copy2(lbl, out / "labels" / "val" / lbl.name)
+        bump("val_pos")
 
     # Live-collected real tip empties -> train negatives. The preview PNGs
     # carry review overlays (tip line / rule / YOLO boxes) and must NEVER be
