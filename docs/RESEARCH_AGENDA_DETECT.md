@@ -12,7 +12,7 @@
 
 | # | 人话 | 状态 | 今晚？ |
 |---|---|---|---|
-| H-DET-1 | pad200「框后无后文」训出的检测器，比 v12 更能在盘口 tip 贴边开火 | 🔴 **发现级未过**（v13+v14） | v14 MAD-on tip-smoke **0/27**、tip_hit **0.033**；见 `p_v14_pad200_train.md` |
+| H-DET-1 | pad200「框后无后文」训出的检测器，比 v12 更能在盘口 tip 贴边开火 | 🔴 **发现级未过**（v13+v14） | 根因 `p_v14_failure_rootcause.md`；tip-smoke **0/27**、tip_hit **0.033** |
 | H-DET-2 | 把「有后文的中段簇」当硬负样本，能压住事后框 | 🟡 清单已备（v13 后再训） | 清单/预览已做；勿抢训 |
 | H-DET-3 | 验收只看右缘 N 根有没有框，不只看 mAP | 🟢 已作必报口径 | — |
 | H-DET-4 | MA 线宽/颜色/留白等渲染差会伤 tip | 🟡 线索有、消融未跑 | 协议已写；GPU 忙则不动 |
@@ -26,10 +26,10 @@
 
 | # | 假设（说人话） | 设计（单变量） | 判定 | 状态 |
 |---|---|---|---|---|
-| **H-DET-1** | **pad200**：把金标框右缘裁成窗末、左侧补满 200 根，正样本「无后文」→ 比 v12 提高 tip 贴边开火率 | v13：`dense_owner_v13_pad200`（MAD 关，后证实错窗）；**v14 复验**：`dense_owner_v14_pad200`（**MAD 开**）；基座 `owner_v12_htip`；对 `owner_best`(v12) | (a) true_tip tip_hit ≥ v12 且不崩 F1；(b) tip-smoke+tip_edge 开火 ≫ v12 的 0/27 | 🔴 **发现级未过（07-22）**：v13 tip_hit **0.008** / smoke **0/27**；**v14 MAD-on** tip_hit **0.033** / smoke **仍 0/27**（val mAP 0.155 仍不可当 tip 裁决）。标签错窗已修，pad200 协议本身未过线。`p_v13_pad200_train.md` · `p_v14_pad200_train.md` |
+| **H-DET-1** | **pad200**：把金标框右缘裁成窗末、左侧补满 200 根，正样本「无后文」→ 比 v12 提高 tip 贴边开火率 | v13：`dense_owner_v13_pad200`（MAD 关，后证实错窗）；**v14 复验**：`dense_owner_v14_pad200`（**MAD 开**）；基座 `owner_v12_htip`；对 `owner_best`(v12) | (a) true_tip tip_hit ≥ v12 且不崩 F1；(b) tip-smoke+tip_edge 开火 ≫ v12 的 0/27 | 🔴 **发现级未过（07-22）**：v13 tip_hit **0.008** / smoke **0/27**；**v14** tip_hit **0.033** / smoke **仍 0/27**。根因报告：`p_v14_failure_rootcause.md`（C 语义≻B val early-stop≻A MA 顺序；训图能开火、smoke 仍 0）。**勿再同构 pad200**。`p_v14_pad200_train.md` |
 | **H-DET-2** | **硬负样本**：有后文的中段密集簇（模型爱事后框的那种）标成负/背景，抑制「等后文再框」 | 在 v12/v13 数据上**只加** hard-neg 集（或空标中段窗），其它不变 | tip-smoke 开火率↑ **或** 中段框率↓（账本 tip_edge_rejected / lag 分布），且 tip 正召回不塌 | 🟡 **清单已备**（2892 候选，见 `analysis/output/hardneg_mid_cluster/` + `PROTOCOL_train_after_v13.md`）；**未开训**；pad200 空标背景 ≠ 本假设 |
 | **H-DET-3** | **右缘 N 根验收**：检测实验必报「窗末 N 根是否有框」，mAP 只作辅 | 评测：`tip_hit` / `bar_in_win ≥ 200−N`（现 N=2）；禁只用 mAP 宣称成功 | 与实盘 tip_fresh 同语义的发现级指标写入每份 p 报告 | 🟢 **已落地为口径**（v12 tip_hit、tip-smoke、tip_subset strict）；继续强制 |
-| **H-DET-4** | **渲染差异**：MA 线宽/颜色/y 留白/`MIN_REL_SPAN` 与训练不一致时 tip 掉点 | 极小消融：固定权重+同窗，只改 `render.py` 一两项，比 tip 窗 conf/贴边命中 | 同几何下 tip 开火率相对基线变化 > 噪声 | 🟡 **开放**；夜报/tip_subset 提示「全序列 MA 重渲 tip_hit≪ true_tip 0.925」。GPU 占满时只跑协议不抢训 |
+| **H-DET-4** | **渲染差异**：MA 线宽/颜色/y 留白/`MIN_REL_SPAN` 与训练不一致时 tip 掉点 | 极小消融：固定权重+同窗，只改 `render.py` 一两项，比 tip 窗 conf/贴边命中 | 同几何下 tip 开火率相对基线变化 > 噪声 | 🟡 **开放（证据加厚）**：v12 同切点 A=slice-MA tip **7/8** vs B=full-MA tip **0/8**（`p_v14_failure_rootcause.md` §2）。消融未跑；GPU 空闲再动 |
 | **H-DET-5** | **tip 窗 conf 单独阈值**（如 TIP_CONF=0.22）能抬 tip_fire | 同权重、同贴边门，只改 tip 窗 conf | tip-smoke fired 与 lag-walk tip_fire 相对 0.30 提升 | 🔴 **发现级证伪（07-21）**：0/27 vs 0/27，账本 tip_fire 1/32 不变；`analysis/p_tip_only_smoke.md` |
 | **H-DET-6** | **tip-only 调度**（只扫右缘窗）能抬 tip_fire | `FABLE_YOLO_MODE=tip` vs live | tip_fire / tip_fresh 提升 | 🔴 **发现级证伪（07-21）**：不抬出生率；可作 CPU 省窗，不作新鲜度解药；同报告 |
 | **H-DET-7** | **协议鸿沟**：离线 true_tip tip_hit 高 ≠ 盘口 tip 能开火 | 对照：v12 tip_hit 0.925 vs tip-smoke 0/27 + box-to-bar（KORU/EDEN） | 若 offline 高而 live≈0 → 训练分布/几何语义仍错位 | 🟢 **已证实**；`p_v12_htip_eval` + `p_tip_only_smoke` + `p_box_to_bar_lag`。驱动 H-DET-1 |
@@ -46,6 +46,7 @@
 | `analysis/output/diag_tip_smoke.json` | H-DET-5/6 | VPS v12：tip&live 均 **n_fired=0**（27 币） |
 | `analysis/p_v13_pad200_train.md` | H-DET-1、H-DET-3 | v13 终局；tip-smoke 0/27；**勿用** val mAP 冒充 tip 裁决 |
 | `analysis/p_v14_pad200_train.md` | H-DET-1、H-DET-3 | v14 MAD-on 复验；tip_hit 0.033 / tip-smoke 0/27；**勿再同构 pad200** |
+| `analysis/p_v14_failure_rootcause.md` | H-DET-1、H-DET-7 | 根因排序 C>B>A；v12 tip_hit≠smoke 协议差说清；下一步=真实 tip 金标 |
 
 ## 训完后最小对照（H-DET-1，发现级）
 
@@ -112,10 +113,10 @@ GPU 被 v13 占用时：**只写协议，不跑**。
 
 ## 优先队列（检测层）
 
-1. **H-DET-4 / EXT-5** — H-DET-1（v13+v14）tip≈0 后优先：极小渲染消融（GPU 空闲）  
-2. **H-DET-2** — 硬负中段簇（清单已备；开训需 owner 批）  
-3. **H-DET-EXT-1/2/4** — 几何审计已完成；**禁止**再训同构 pad200 当解药（v14 MAD-on 已复验）  
-4. **H-DET-EXT-6/7/8** — tip 起来后再排  
+1. **真实 tip 成败金标小样** — H-DET-1 根因 C（语义≠盘口 tip）；见 `p_v14_failure_rootcause.md` + `p_v13_real_tip_collect_plan.md`（扩采/开训需 owner）  
+2. **H-DET-4 / EXT-5** — 对齐 true_tip=full-MA（解释 v12 tip_hit≠smoke）；GPU 空闲极小消融  
+3. **H-DET-2** — 硬负中段簇（清单已备；开训需 owner 批）  
+4. **H-DET-EXT-1/2/4** — 几何审计已完成；**禁止**再训同构 pad200  
 5. H-DET-1/5/6/8 — 已结案，勿复读当主药  
 
 ## 报告指针

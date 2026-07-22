@@ -2,14 +2,17 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-07-22 晚）
+## ⚡ 当前真相（2026-07-22 夜）
 
-- **v14 pad200（MAD-on）已终局、发现级未过**：3060 ep26 early stop / best=ep16；
-  `models/owner_v14_pad200.pt` 已 scp。tip_hit **0.033**（vs v12 0.925 / v13 0.008）、
-  tip-smoke **0/27**=v12/v13。报告 `analysis/p_v14_pad200_train.md`。**未** promote /
-  **未**动 `owner_best`/`ACTIVE` / **未**耗 holdout。主线仍 v12。勿再同构 pad200。
-- **v13 失败根因含标签错窗**（关 MAD 盲 end_incl → okx 错窗）；审计 `analysis/p_pad200_cut_audit.md`。
-  v14 已 MAD-on 复验仍 tip≈0 → 不全是标签锅。H-DET-1 🔴。
+- **v14 tip 根因已写清（未过线）**：`analysis/p_v14_failure_rootcause.md`。
+  标签/渲染 MAD≈0 仍失败；训图上能贴右开火，但 tip_hit **0.033**、tip-smoke **0/27**。
+  主因排序：**C 语义≠盘口 tip** > **B 中段 val early-stop 忘 tip** > A（主要解释
+  true_tip↔live 鸿沟，不是 smoke 主因）。**未** promote；主线仍 v12；**勿再同构 pad200**。
+- **H-DET 状态**：H-DET-1 🔴（v13+v14）；H-DET-7 🟢（v12 tip_hit≠smoke）；下一步唯一建议=
+  真实 tip 成败金标小样（`p_v13_real_tip_collect_plan.md`），需 owner 点头。议程
+  `docs/RESEARCH_AGENDA_DETECT.md`。
+- **v14 终局数字**：3060 ep26 / best=ep16；`models/owner_v14_pad200.pt`；报告
+  `analysis/p_v14_pad200_train.md`。v13 错窗审计 `analysis/p_pad200_cut_audit.md`（已修仍挂）。
 - **前端可视化真落地**（不抢 MPS）：前向 Tabulator + 状态条 train/fresh/tip + LWC 密集框/调试入口 —
   见 **`analysis/p_frontend_viz_opt.md`**（预览 `uvicorn …:8642`）。
 - **夜间旁路（不抢 MPS）已落地**：LWC hardneg 批量 / 叠框画廊 / LS 小包 / Protections 规格 —
