@@ -6,6 +6,34 @@
 
 ---
 
+## 本机看板 :8642（launchd 常驻）
+
+**为何会拒连**：在 Cursor agent 后台 shell 里起的 `uvicorn` 会被会话收割（日志常见优雅 `Shutting down` + `exit_code: unknown`），不是业务 crash。详见 `docs/learnings/cursor-agent-shell-kills-background-servers.md`。
+
+**启动 / 重载**（user launchd，不抢 MPS，不影响 v13）：
+
+```bash
+bash scripts/webapp_start.sh
+```
+
+**状态检查**：
+
+```bash
+bash scripts/webapp_status.sh
+# 或
+lsof -nP -iTCP:8642 -sTCP:LISTEN
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8642/
+```
+
+- URL：http://127.0.0.1:8642/#explore
+- Label：`com.fable.local-webapp`
+- 日志：`logs/local_webapp.log` / `logs/local_webapp.err.log`
+- 停止：`launchctl bootout gui/$(id -u)/com.fable.local-webapp`
+
+勿在 Cursor agent 终端里裸跑长驻 uvicorn；要临时前台调试可开独立 Terminal.app。
+
+---
+
 ## nvitop（本机 GPU/MPS 旁路监视）
 
 macOS 无 NVIDIA 时，`nvitop` 对 CUDA 用处有限；Apple Silicon 仍可用系统监视 + 进程 RSS。
@@ -21,7 +49,7 @@ pgrep -lf 'src.detection.train|owner_v13'
 ps -p $(pgrep -f 'src.detection.train.*owner_v13' | head -1) -o pid,etime,%cpu,rss,command
 ```
 
-可选 alias（放 `~/.zshrc`，**不要**挂进 systemd/launchd）：
+可选 alias（放 `~/.zshrc`；GPU 监视别名不要挂 launchd——看板服务才用 launchd，见上文）：
 
 ```bash
 alias fable-gpu='pgrep -lf "src.detection.train|owner_v13"; ps -p $(pgrep -f "src.detection.train" | head -1) -o etime,rss,%mem 2>/dev/null'

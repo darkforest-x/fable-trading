@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Local dashboard only (127.0.0.1:8642). Does not use MPS / does not touch training.
+  Install via: bash scripts/webapp_start.sh
+  Label: com.fable.local-webapp
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.fable.local-webapp</string>
+  <key>WorkingDirectory</key>
+  <string>/Users/zhangzc/fable-trading</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/zhangzc/fable-trading/.venv/bin/uvicorn</string>
+    <string>src.webapp.server:app</string>
+    <string>--host</string>
+    <string>127.0.0.1</string>
+    <string>--port</string>
+    <string>8642</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PYTHONPATH</key>
+    <string>/Users/zhangzc/fable-trading</string>
+    <key>PYTHONUNBUFFERED</key>
+    <string>1</string>
+    <key>OMP_NUM_THREADS</key>
+    <string>1</string>
+    <key>MKL_NUM_THREADS</key>
+    <string>1</string>
+    <key>VECLIB_MAXIMUM_THREADS</key>
+    <string>1</string>
+    <key>OPENBLAS_NUM_THREADS</key>
+    <string>1</string>
+    <key>NUMEXPR_NUM_THREADS</key>
+    <string>1</string>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>/Users/zhangzc/fable-trading/logs/local_webapp.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/zhangzc/fable-trading/logs/local_webapp.err.log</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>ProcessType</key>
+  <string>Background</string>
+</dict>
+</plist>
