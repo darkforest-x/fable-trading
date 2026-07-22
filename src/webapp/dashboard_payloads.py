@@ -204,6 +204,59 @@ def backtest_compare_payload(cost: float = BASE_COST) -> dict:
     }
 
 
+def tip_replay_payload() -> dict:
+    """v16-era honest backtest: bar-by-bar tip replay (detector saw only past).
+
+    Replaces the discarded stage-3 hindsight backtest (PF 6.61 measured a
+    detector conditioned on the printed future). Reads the tip-replay JSON;
+    prefers the holdout verdict, falls back to the pre-holdout discovery run,
+    and reports a pending state while a run is in flight.
+    """
+    holdout = OUTPUT_DIR / "v16_holdout_verdict.json"
+    discovery = OUTPUT_DIR / "v16_discovery_preholdout.json"
+    src, kind = (holdout, "holdout") if holdout.exists() else (
+        (discovery, "discovery") if discovery.exists() else (None, None))
+    if src is None:
+        return {
+            "available": False,
+            "state": "pending",
+            "note": "v16 tip-replay 回测进行中（逐 bar 盘口视角，检测器只见过去）——完成后自动显示。",
+            "protocol": "tip_replay: 检测器只见 bar≤t · 次根开盘入场 · TP5/SL2/72bar · maker 成本 · A′ 贴边门 · MIN_GAP 去重",
+        }
+    data = json.loads(src.read_text())
+    s = data.get("summary", {})
+    pf = s.get("profit_factor")
+    net = s.get("total_net_units")
+    gate = bool(
+        (s.get("n_trades") or 0) >= 30
+        and pf is not None and pf >= 1.3
+        and net is not None and net > 0
+    )
+    return {
+        "available": True,
+        "state": "done",
+        "kind": kind,  # holdout = clean verdict; discovery = in-sample, optimistic
+        "clean": kind == "holdout",
+        "window": s.get("window"),
+        "weights": s.get("weights"),
+        "n_symbols": s.get("n_symbols"),
+        "n_trades": s.get("n_trades"),
+        "win_rate": s.get("win_rate"),
+        "profit_factor": pf,
+        "mean_net_per_trade": s.get("mean_net_per_trade"),
+        "total_net_units": net,
+        "fire_per_1k_bars": s.get("fire_per_1k_bars"),
+        "cost": s.get("cost"),
+        "gate_pass": gate,
+        "protocol": s.get("protocol"),
+        "note": (
+            "holdout 干净窗口（检测器/前向从未碰过）· 扣 maker 0.06%"
+            if kind == "holdout"
+            else "⚠️ pre-holdout 发现级：检测器训练数据在此窗内，数字偏乐观，仅作筛查"
+        ),
+    }
+
+
 def _live_active_judgment() -> dict:
     """Current models/ACTIVE freeze meta for honesty checks."""
     from src.webapp.model_hub import read_active_pointer

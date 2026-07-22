@@ -25,6 +25,7 @@ from src.webapp.dashboard_cache import DEFAULT_UNIVERSE
 from src.webapp.dashboard_payloads import (
     backtest_compare_payload,
     backtest_payload,
+    tip_replay_payload,
     chart_payload,
     overview_payload,
     symbols_payload,
@@ -136,6 +137,12 @@ def backtest(cost: float = BASE_COST, universe: str = DEFAULT_UNIVERSE) -> dict:
 def backtest_compare(cost: float = BASE_COST) -> dict:
     """ACTIVE regression vs shadow binary stage-3 backtest table."""
     return backtest_compare_payload(cost=cost)
+
+
+@app.get("/api/backtest/tip_replay")
+def backtest_tip_replay() -> dict:
+    """v16-era honest tip-replay verdict (replaces the hindsight stage-3 numbers)."""
+    return tip_replay_payload()
 
 
 @app.get("/api/trades")

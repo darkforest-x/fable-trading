@@ -399,9 +399,20 @@
     <div class="page-head">
       <div>
         <h1 class="page-title">回测</h1>
-        <p class="page-sub">主线判断 v11 池 · 检测 v12 · 验收窗看成绩 · 点成交行跳 K 线</p>
+        <p class="page-sub">v16 tip-replay 终审 · 逐 bar 盘口视角（检测器只见过去）· 让钱判，不让标签判</p>
       </div>
     </div>
+
+    <!-- v16 tip-replay verdict (the new truth) -->
+    <div class="panel" id="tip-replay-panel">
+      <h2>v16 盘口回测 <span class="unit" id="tr-sub">tip-replay · TP5/SL2 · maker 成本</span></h2>
+      <div id="tr-body" class="tile-row"><div class="tile"><span class="lbl">状态</span><b>加载中…</b></div></div>
+      <p class="note note-foot" id="tr-note"></p>
+    </div>
+
+    <details class="panel" id="bt-legacy">
+      <summary style="cursor:pointer;color:#f59e0b">⚠️ 旧回测（事后视角 · 已废弃方法学，仅存考古）— 点击展开</summary>
+      <p class="note">下方 v11 池 / PF 6.61 等数字来自旧的全历史扫描回测：候选是<b>事后</b>发现的，检测器看到了启动后文，因此系统性偏高。已被 v16 tip-replay 取代，不作决策依据。</p>
     <div class="controls toolbar">
       <div class="seg" id="cost-seg">
         <button data-cost="0.002">成本 0.2%</button>
@@ -502,6 +513,7 @@
       </div>
       <button type="button" id="trades-more" class="mini-btn more-btn" hidden>再显示更多</button>
     </div>
+    </details>
   </section>
 
   <!-- ============ 信号浏览 ============ -->

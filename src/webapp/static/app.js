@@ -1864,9 +1864,29 @@ function renderBacktestCompare(cmp) {
   }).join("");
 }
 
+function renderTipReplay(t) {
+  const body = $("#tr-body"); const note = $("#tr-note"); const sub = $("#tr-sub");
+  if (!body) return;
+  if (!t || t.available === false) {
+    body.innerHTML = `<div class="tile"><span class="lbl">状态</span><b>评测中</b><small>逐 bar 盘口回测进行中</small></div>`;
+    if (note) note.textContent = (t && t.note) || "";
+    return;
+  }
+  const passCls = t.gate_pass ? "pos" : "neg";
+  const kindTag = t.clean ? "holdout 干净窗口" : "pre-holdout 发现级（偏乐观）";
+  if (sub) sub.textContent = `${kindTag} · ${t.n_symbols || "?"} 币 · ${t.window || ""}`;
+  body.innerHTML = `
+    <div class="tile"><span class="lbl">交易笔数</span><b>${t.n_trades ?? "—"}</b><small>开火 ${t.fire_per_1k_bars ?? "—"}/千bar</small></div>
+    <div class="tile"><span class="lbl">净收益（累计单位）</span><b class="${cls(t.total_net_units)}">${t.total_net_units != null ? (100*t.total_net_units).toFixed(2)+"%" : "—"}</b><small>单笔均值 ${t.mean_net_per_trade != null ? (100*t.mean_net_per_trade).toFixed(3)+"%" : "—"}</small></div>
+    <div class="tile"><span class="lbl">盈亏比 PF</span><b class="${(t.profit_factor||0) >= 1.3 ? "pos":"neg"}">${fmtPF(t.profit_factor)}</b><small>验收线 1.3</small></div>
+    <div class="tile"><span class="lbl">胜率 / 闸门</span><b>${t.win_rate != null ? (100*t.win_rate).toFixed(1)+"%":"—"}</b><small class="${passCls}">${t.gate_pass ? "达标 ✓":"未达标 ✗"}</small></div>`;
+  if (note) note.textContent = (t.note || "") + " · " + (t.protocol || "");
+}
+
 async function loadBacktest() {
   $("#view-backtest").classList.add("loading");
   try {
+  apiGet("/api/backtest/tip_replay", { cache: false }).then(renderTipReplay).catch(() => {});
   const [d, rows, cmp] = await Promise.all([
     apiGet(apiUrl("/api/backtest", { cost: btState.cost }), { cache: true }),
     apiGet(apiUrl("/api/trades", { window: btState.window, cost: btState.cost }), { cache: true }),
