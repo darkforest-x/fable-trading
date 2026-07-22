@@ -31,6 +31,10 @@
 10. **不自动 promote**：models/ACTIVE 与 frozen 默认配置的切换需 owner 点头；
     forward_log 不清空（清账 = owner 决策）。
 11. **真金操作**（下单/撤单/kill 开关/改仓位/改 API key）只有 owner 亲手做或明确逐次授权。
+12. **检测只认盘口**（owner 2026-07-23）：live 扫描只扫 tip/tip-1/tip-2 窗；凡"只能产出
+    事后信号"的路径（回看窗、事后模型、非盘口分布数据集）一律不得存在。pre-v16 检测器
+    权重已三机清除（仅存 COCO yolo11 底座）；检测器晋升唯一门 = 真 tip 金标 + tip-smoke，
+    自家 val/mAP/旧 frozen-F1 永不作裁决。无验证过的检测器时管道诚实空转（detector=none）。
 
 ## 弱模型在本仓库最容易犯的错（每条都真实发生过或差点发生）
 
