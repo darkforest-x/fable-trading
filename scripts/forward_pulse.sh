@@ -42,24 +42,8 @@ echo "forward_track start $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 "$PY" scripts/forward_track.py
 echo "forward_log lines=$(wc -l < data/forward_log.csv 2>/dev/null || echo 0)"
 
-# Optional H-TIP v12 tip-only shadow (never writes mainline log; never promotes).
-# Enable on VPS with: FABLE_V12_SHADOW=1 and models/owner_v12_htip.pt present
-# (or data/v12_shadow.env written by scripts/enable_v12_shadow_vps.sh).
-if [ -f data/v12_shadow.env ]; then
-  # shellcheck disable=SC1091
-  set -a; . data/v12_shadow.env; set +a
-fi
-if [ "${FABLE_V12_SHADOW:-0}" = "1" ]; then
-  W="${FABLE_V12_WEIGHTS:-models/owner_v12_htip.pt}"
-  if [ -f "$W" ] || [ -f runs/detect/runs/detect/owner_v12_htip/weights/best.pt ]; then
-    echo "v12_shadow start $(date -u +%Y-%m-%dT%H:%M:%SZ) weights=$W"
-    "$PY" scripts/forward_track_v12_shadow.py --weights "$W" 2>&1 | tail -30 \
-      || echo "v12_shadow failed/skipped"
-    echo "v12_shadow lines=$(wc -l < data/forward_log_v12_shadow.csv 2>/dev/null || echo 0)"
-  else
-    echo "v12_shadow skipped: weights missing ($W)"
-  fi
-fi
+# (v12 shadow removed 2026-07-23 — pre-v16 detectors are deleted per iron
+# rule 12; no shadow may run a banned model.)
 
 # Immediately try to trade any fresh open rows — do not wait up to 30s for the
 # executor loop. Failures here must never fail the pulse unit.

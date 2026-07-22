@@ -14,10 +14,6 @@ PROJECT_DIR: Final = Path(__file__).resolve().parents[2]
 FORWARD_LOG_PATH: Final = PROJECT_DIR / "data" / "forward_log.csv"
 # H1 scaled shadow paper book — never mixed into mainline 100-trade gate.
 FORWARD_LOG_H1_SCALED_PATH: Final = PROJECT_DIR / "data" / "forward_log_h1_scaled.csv"
-# H-TIP v12 detector shadow (tip-window only) — never mainline 0/100.
-FORWARD_LOG_V12_SHADOW_PATH: Final = PROJECT_DIR / "data" / "forward_log_v12_shadow.csv"
-# Stable path for shadow weights (copy from runs/.../owner_v12_htip/weights/best.pt).
-DEFAULT_V12_WEIGHTS: Final = PROJECT_DIR / "models" / "owner_v12_htip.pt"
 # YOLO mainline cutover (owner 2026-07-15): new candidate source → new forward clock.
 # Pre-cutover rule-scan log archived as data/forward_log_rules_pre_yolo_20260715.csv
 # Owner 2026-07-18/19: clear pre-v11 mixed book and restart gate for clean retest.
