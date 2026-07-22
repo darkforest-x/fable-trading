@@ -66,16 +66,20 @@ datasets/dense_owner_v15_tipval/labels/train:
 存档 MAD mean 3.15 / p95 10.9;跳过 407 张全部有因:金属/稳定币无序列 241、
 漂移超阈弃用 127——见 `v16_skips.json`,不许回填硬猜)。
 
-### 两臂训练(Owner 质疑"为什么底座用 v12"的实验回应)
+### 训练:只冷启动,v12 不作底座(Owner 裁定,2026-07-23)
 
-| 臂 | 底座 | run 名 | 回答 |
-|---|---|---|---|
-| A 主臂 | `models/owner_best.pt`(v12,链式) | `owner_v16_tipuni_chain` | 数据集修复本身是否有效(与 v15 同底座干净对照) |
-| B 对照臂 | `yolo11n.pt`(coco 冷启动) | `owner_v16_tipuni_cold` | v12 的事后偏见是否遗传(冷启动能否学得更干净) |
+Owner 两次质疑后定案:v12 系全部在"乱打"分布上训出,其特征偏好事后形态,
+拿它当起点 = 让新模型先继承偏见再赌数据能洗掉——不赌。
 
-训练参数同 v15 配方(40 ep,patience 10,FINETUNE_OPT 自动生效;增强全关铁律 5);
-3060 走 `sync_v15_to_windows.sh` / `train_owner_v15_tipval.sh` 克隆改名(机械改 v16 与
-run 名,两个 .sh + .bat/.ps1)。
+| 底座 | run 名 | 说明 |
+|---|---|---|
+| `models/yolo11n.pt`(COCO 预训练,从未见过 K 线图) | `owner_v16_tipuni_cold` | 主跑 |
+| `models/yolo11s.pt`(更大,备选) | `owner_v16_tipuni_cold_s` | 仅当 n 过拟合/欠拟合再跑 |
+
+训练参数:40 ep,patience 10,增强全关(铁律 5);底座是 yolo11*.pt 时 train.py
+走标准配方(FINETUNE_OPT 只对链式微调生效,此处不适用)。3060 走
+`sync_v15_to_windows.sh` / `train_owner_v15_tipval.sh` 克隆改名(机械改 v16 与
+run 名,.sh + .bat/.ps1)。**旧模型(v12 含)只出现在验收对照表里,不出现在训练里。**
 
 ### 验收(两臂同表,val mAP 永不作数)
 
