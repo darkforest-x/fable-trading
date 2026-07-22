@@ -30,8 +30,9 @@
 |---|---|
 | `PROJECT_PLAN.md` | 07-07 三阶段路线图；顶注已标「阶段完成→实盘」 |
 | `docs/archive/*` | NEXT_STEPS / PROJECT_STATUS 等已并入 HANDOFF |
-| `docs/FORWARD_ACCELERATION_OPTIONS.md` | 07-10 加速 N 备忘；默认 stay |
-| `docs/H1_SCALED_FORWARD_SHADOW_PLAN.md` | H1 shadow 设计；已实现、非主线 |
+| `docs/archive/FORWARD_ACCELERATION_OPTIONS.md` | 07-10 加速 N 备忘（已移档） |
+| `docs/archive/H1_SCALED_FORWARD_SHADOW_PLAN.md` | H1 shadow 设计；已实现、非主线（已移档） |
+| `scripts/_archive_pretip/` | pre-v16 训练/评测/打包脚本（铁律 12 清除件，仅复现追溯） |
 | `docs/OWNER_LABELING_PLAYBOOK.md` | 打标流程；当前阻塞是 H-TIP 非堆轮次 |
 | `docs/P2_5_*` | Ops 台 Phase0–3 说明；已合主线 |
 | `docs/LABEL_REVIEW_TOOLS.md` | FO/LS 审查工具 |
