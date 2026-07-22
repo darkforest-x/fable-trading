@@ -4,6 +4,10 @@
 **入口**：[https://www.wuzao.com/topics/](https://www.wuzao.com/topics/)  
 **对照已读**：`HANDOFF.md`、`src/webapp/`、`analysis/p_github_optimize_candidates.md`、`analysis/p_yolo_external_sources.md`、`analysis/backlog_future_optimizations.md`、`docs/RESEARCH_AGENDA.md`、`src/webapp/static/DESIGN-REFERENCES.md`。
 
+> **Owner 再纠正（同日）**：不要只答前端/可视化。  
+> **前端之外的用途分层增量清单**（检测/标注/训监/判断/执行/数据/运维 + ★漏网）→  
+> **`analysis/p_wuzao_more_useful.md`**（本文件 §4 的 A/B/C 代号仍有效，人话版看那篇）。
+
 ---
 
 ## ⚠️ 口径变更（Owner 纠正 · 必读）
