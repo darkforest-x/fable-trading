@@ -45,6 +45,13 @@ echo "forward_log lines=$(wc -l < data/forward_log.csv 2>/dev/null || echo 0)"
 # (v12 shadow removed 2026-07-23 — pre-v16 detectors are deleted per iron
 # rule 12; no shadow may run a banned model.)
 
+# Real-tip data engine (v17 training distribution). Light side-step: no YOLO,
+# own budget, writes only data/real_tip_collect/. Never blocks the pulse.
+if [ "${FABLE_COLLECT_REAL_TIPS:-1}" = "1" ]; then
+  echo "real_tip_collect start $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  "$PY" scripts/collect_real_tips_pulse.py 2>&1 | tail -3 || echo "real_tip_collect skipped/failed"
+fi
+
 # Immediately try to trade any fresh open rows — do not wait up to 30s for the
 # executor loop. Failures here must never fail the pulse unit.
 echo "executor --once (post-pulse)"
