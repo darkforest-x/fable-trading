@@ -4,8 +4,8 @@
 
 ## ⚡ 当前真相（2026-07-22）
 
-- **v13 pad200 训练在跑**（本机 `owner_v13_pad200`；勿打断、勿顺手改生产）。
-  状态旁路：`bash scripts/v13_train_status.sh`；落盘后：`bash scripts/eval_v13_vs_v12_tip.sh`（**不** auto-promote）。
+- **v13 pad200 训练在跑**（15:33 快照：**ALIVE · epoch 25/40 ~56%**，已跑 ~16h；满 40 ≈ **再 ~10h**，patience=10 或更早停；**无** `models/owner_v13_pad200.pt`，有 mid-run `best.pt`）。
+  tip 对照 / H-DET-1 **未跑**（拒 mid-run，勿 `FORCE_MIDRUN`）。状态：`bash scripts/v13_train_status.sh`；落盘后：`bash scripts/eval_v13_vs_v12_tip.sh`（**不** auto-promote）。
 - **夜间旁路（不抢 MPS）已落地**：LWC hardneg 批量 / 叠框画廊 / LS 小包 / Protections 规格 —
   见 **`analysis/p_overnight_20260722.md`** + `analysis/p_wuzao_topics_scan.md` A 档「已做」。
 - 近期讨论过、现在不做的优化（检测 tip + 判断/执行/风控）统一记在
