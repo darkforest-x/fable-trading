@@ -3,16 +3,16 @@
 > **从属**：主议程 `docs/RESEARCH_AGENDA.md` 的 H-TIP 子簇。  
 > **成功标准（发现级）**：强制 tip 窗 + `TIP_EDGE_BARS=2` 后贴边开火率相对 v12 **明显 >0**；  
 > frozen-F1 不崩（回撤 ≤0.03 量级）。**确认级**仍只认 VPS 前向新鲜 100 笔。  
-> **纪律**：不耗 holdout、不自动 promote、不打断 `owner_v13_pad200` 训练。
+> **纪律**：不耗 holdout、不自动 promote；v13 已终局，勿再抢训该 run。
 
 ## 状态图例
 🟢 已验证（发现级） · 🔴 已证伪 · 🟡 排队中 · 🔵 进行中 · ⚪ 未开始
 
-## 人话总览（2026-07-22）
+## 人话总览（2026-07-22 晚）
 
 | # | 人话 | 状态 | 今晚？ |
 |---|---|---|---|
-| H-DET-1 | pad200「框后无后文」训出的 v13，比 v12 更能在盘口 tip 贴边开火 | 🔵/🟡 **等训完对照** | 等 checkpoint 终局，脚本已备 |
+| H-DET-1 | pad200「框后无后文」训出的 v13，比 v12 更能在盘口 tip 贴边开火 | 🔴 **发现级未过** | tip-smoke 0/27；true_tip 0.008；详见 `p_v13_pad200_train.md` |
 | H-DET-2 | 把「有后文的中段簇」当硬负样本，能压住事后框 | 🟡 清单已备（v13 后再训） | 清单/预览已做；勿抢训 |
 | H-DET-3 | 验收只看右缘 N 根有没有框，不只看 mAP | 🟢 已作必报口径 | — |
 | H-DET-4 | MA 线宽/颜色/留白等渲染差会伤 tip | 🟡 线索有、消融未跑 | 协议已写；GPU 忙则不动 |
@@ -26,7 +26,7 @@
 
 | # | 假设（说人话） | 设计（单变量） | 判定 | 状态 |
 |---|---|---|---|---|
-| **H-DET-1** | **pad200**：把金标框右缘裁成窗末、左侧补满 200 根，正样本「无后文」→ v13 比 v12 提高 tip 贴边开火率 | 数据：`dense_owner_v13_pad200`；基座 `owner_v12_htip`；训完对 `owner_best`(v12) | (a) `tip_detectability --true-tip` tip_hit ≥ v12 且不崩 F1；(b) **强制 tip-smoke + tip_edge** 开火率 ≫ v12 的 0/27 | 🔵 **v13 训练中**（07-22）；epoch1 已有 mid-run `best.pt`，**终局评测等训完**，命令见下 / `scripts/eval_v13_vs_v12_tip.sh` |
+| **H-DET-1** | **pad200**：把金标框右缘裁成窗末、左侧补满 200 根，正样本「无后文」→ v13 比 v12 提高 tip 贴边开火率 | 数据：`dense_owner_v13_pad200`；基座 `owner_v12_htip`；训完对 `owner_best`(v12) | (a) `tip_detectability --true-tip` tip_hit ≥ v12 且不崩 F1；(b) **强制 tip-smoke + tip_edge** 开火率 ≫ v12 的 0/27 | 🔴 **发现级未过（07-22）**：true_tip **0.008**/120 vs v12 0.925；tip-smoke **0/27**=v12；val mAP≈0.027 **不可**单独当失败证据（val 未 pad）。`analysis/p_v13_pad200_train.md` |
 | **H-DET-2** | **硬负样本**：有后文的中段密集簇（模型爱事后框的那种）标成负/背景，抑制「等后文再框」 | 在 v12/v13 数据上**只加** hard-neg 集（或空标中段窗），其它不变 | tip-smoke 开火率↑ **或** 中段框率↓（账本 tip_edge_rejected / lag 分布），且 tip 正召回不塌 | 🟡 **清单已备**（2892 候选，见 `analysis/output/hardneg_mid_cluster/` + `PROTOCOL_train_after_v13.md`）；**未开训**；pad200 空标背景 ≠ 本假设 |
 | **H-DET-3** | **右缘 N 根验收**：检测实验必报「窗末 N 根是否有框」，mAP 只作辅 | 评测：`tip_hit` / `bar_in_win ≥ 200−N`（现 N=2）；禁只用 mAP 宣称成功 | 与实盘 tip_fresh 同语义的发现级指标写入每份 p 报告 | 🟢 **已落地为口径**（v12 tip_hit、tip-smoke、tip_subset strict）；继续强制 |
 | **H-DET-4** | **渲染差异**：MA 线宽/颜色/y 留白/`MIN_REL_SPAN` 与训练不一致时 tip 掉点 | 极小消融：固定权重+同窗，只改 `render.py` 一两项，比 tip 窗 conf/贴边命中 | 同几何下 tip 开火率相对基线变化 > 噪声 | 🟡 **开放**；夜报/tip_subset 提示「全序列 MA 重渲 tip_hit≪ true_tip 0.925」。GPU 占满时只跑协议不抢训 |
@@ -44,6 +44,7 @@
 | `analysis/p_tip_subset_val.md` | H-DET-3、H-DET-7 | tip_strict 相对全量净折扣 **0.0465**；strict tip-hit ~3–4% |
 | `analysis/p_v12_htip_eval.md` | H-DET-3、H-DET-7 | v12 true_tip tip_hit **0.925** / F1 0.650；≠ live |
 | `analysis/output/diag_tip_smoke.json` | H-DET-5/6 | VPS v12：tip&live 均 **n_fired=0**（27 币） |
+| `analysis/p_v13_pad200_train.md` | H-DET-1、H-DET-3 | v13 终局；tip-smoke 0/27；**勿用** val mAP 冒充 tip 裁决 |
 
 ## 训完后最小对照（H-DET-1，发现级）
 
@@ -107,12 +108,11 @@ GPU 被 v13 占用时：**只写协议，不跑**。
 
 ## 优先队列（检测层）
 
-1. **H-DET-1** — v13 终局 vs v12 tip-smoke / true_tip（**仍唯一阻塞大结论**）  
-2. **H-DET-EXT-1/2/4** — 外源与 pad200 同向；离线审计已完成，不另开大训  
-3. **H-DET-4 / EXT-5** — 若 H-DET-1 仍 tip≈0，先极小渲染消融  
-4. **H-DET-2** — 硬负中段簇（清单已备；开训需 owner 批）  
-5. **H-DET-EXT-6/7/8** — tip 起来或 H-DET-1 失败后再排  
-6. H-DET-5/6/8 — 已结案，勿复读当主药  
+1. **H-DET-4 / EXT-5** — H-DET-1 tip≈0 后优先：极小渲染消融（GPU 空闲）  
+2. **H-DET-2** — 硬负中段簇（清单已备；开训需 owner 批）  
+3. **H-DET-EXT-1/2/4** — 几何审计已完成；勿把「再训一轮 pad200」当解药  
+4. **H-DET-EXT-6/7/8** — tip 起来后再排  
+5. H-DET-1/5/6/8 — 已结案，勿复读当主药  
 
 ## 报告指针
 

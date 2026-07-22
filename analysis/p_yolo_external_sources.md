@@ -18,7 +18,8 @@
 | 通用流式检测 | StreamYOLO、TSM online | **可迁移口径**：训推延迟匹配、只评因果窗；**勿整栈移植** |
 
 **今晚真正便宜且已做完的发现级动作**：对照文献窗长，统计本仓 GT 框宽 / 右缘分布（见 §4）。  
-**大结论仍阻塞在 H-DET-1（v13）**——外源点子与 pad200 **同向加强信心**，但不替代 tip-smoke。
+**H-DET-1（v13）已终局未过线**（tip-smoke 0/27、true_tip 0.008；见 `p_v13_pad200_train.md`）。  
+**强化警告**：v13 官方 val mAP≈0.027 **预期会烂**（val=未 pad 中段金标 vs train=pad200）——**禁止**用 val mAP 单独判 tip；也禁止用「val 烂」掩盖 tip-smoke 同烂的事实。
 
 ---
 
@@ -111,9 +112,9 @@
 
 | 何时 | 做什么 |
 |---|---|
-| **现在（GPU 被占）** | 外源文档入库；几何审计已完成；**不**开 EXT 大训 |
-| **v13 终局后** | `bash scripts/eval_v13_vs_v12_tip.sh`（H-DET-1）——**仍是唯一下一步** |
-| 若 tip-smoke 仍≈0 | H-DET-4 / EXT-5 渲染；再议 H-DET-2 硬负；EXT-7 改 `MAX_DENSE` 须 owner |
+| **现在** | H-DET-1 已评：tip-smoke 仍 0；**勿**再盯 val mAP |
+| **下一步** | H-DET-4 / EXT-5 渲染消融（GPU 空闲）；再议 H-DET-2 硬负（须 owner） |
+| EXT-7 改 `MAX_DENSE` | 须 owner；暂不排 |
 | tip_fire>0 后 | 再谈 EXT-6（框特征进 2b）、ONNX、FiftyOne 策展 |
 
 ---
@@ -124,6 +125,7 @@
 - ENIAC 全文部分站点 403；结论来自可抓取摘要/章节与 DOI 元数据，核心数字（MA→recall、禁 flip）已交叉核对。  
 - StreamYOLO / TSM 来自驾驶与视频；迁移的是**因果与评测哲学**，不是代码。  
 - v13 val=未 pad 是构建选择；若有人用 val mAP 宣称 tip 改善，属指标作弊。  
+  对称：**也不能**只用 val mAP 崩宣称 tip 失败——须 tip-smoke（07-22：两者都烂，分开记账）。  
 - 本报告不改变 ACTIVE / frozen / LIVE / 三门。
 
 ---
