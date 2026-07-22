@@ -53,6 +53,41 @@ datasets/dense_owner_v15_tipval/labels/train:
 
 ## 下一步(需 Owner 决策)
 
-1. 批准 v16 数据集重构(上述规格,builder 脚本 + 3060 训练)。
+1. 批准 v16 数据集重构(上述规格,builder 脚本 + 3060 训练)。**→ 已批(07-23),已构建。**
 2. 填 review_sheet(48 张)——分母硬化 + v16 种子。
 3. v15/v14/v13 权重归档不删(对照用),主线维持 v12 不变。
+
+---
+
+## v16 执行细则(Owner 已批,Grok 执行版,2026-07-23)
+
+**数据集已建**:`datasets/dense_owner_v16_tipuni`
+(train 2635 正 + 4295 重渲负 + 33 真实盘口空背景 = 6963;val 1509 正 + 1478 重渲负;
+存档 MAD mean 3.15 / p95 10.9;跳过 407 张全部有因:金属/稳定币无序列 241、
+漂移超阈弃用 127——见 `v16_skips.json`,不许回填硬猜)。
+
+### 两臂训练(Owner 质疑"为什么底座用 v12"的实验回应)
+
+| 臂 | 底座 | run 名 | 回答 |
+|---|---|---|---|
+| A 主臂 | `models/owner_best.pt`(v12,链式) | `owner_v16_tipuni_chain` | 数据集修复本身是否有效(与 v15 同底座干净对照) |
+| B 对照臂 | `yolo11n.pt`(coco 冷启动) | `owner_v16_tipuni_cold` | v12 的事后偏见是否遗传(冷启动能否学得更干净) |
+
+训练参数同 v15 配方(40 ep,patience 10,FINETUNE_OPT 自动生效;增强全关铁律 5);
+3060 走 `sync_v15_to_windows.sh` / `train_owner_v15_tipval.sh` 克隆改名(机械改 v16 与
+run 名,两个 .sh + .bat/.ps1)。
+
+### 验收(两臂同表,val mAP 永不作数)
+
+1. 真 tip 金标:`scripts/eval_v15_fair_tip.py --preview analysis/output/v13_real_tip_preview
+   --conf 0.30 --tip-edge-bars 2`,权重分别换两臂 best;
+2. tip-smoke:`scripts/eval_v15_vs_v12_tip.sh` 同族命令换权重;
+3. **晋升线(两条同时)**:应开火命中 ≫ v12 基线(1/9)**且**空背景 A′ 误火 ≈0
+   (v12 的 0/33 是及格线);tip-noise 桶只观察不计分;
+4. frozen-F1 附报(退化 >0.05 要解释),但不作否决唯一依据;
+5. Owner 填完 review_sheet 后必须用 owner_class 重跑一遍(分母硬化)。
+
+### 红线
+
+不自动 promote;两臂都不过线 → 不上、如实报;结果无论成败写
+`analysis/p_v16_tipuni_train.md`(含风险与诚实声明);主线维持 v12。
