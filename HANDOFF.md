@@ -4,6 +4,17 @@
 
 ## ⚡ 当前真相（2026-07-23 凌晨）
 
+- **数据集大清理（Owner 指令,07-23）**:旧式"非盘口分布"数据集全部隔离进
+  `datasets/_deprecated_pretip/`（dense_15m_full / dense_2025h2 / dense_2026h1 /
+  dense_owner_v11 / dense_owner_v12_htip / dense_swap_v1,共 11G,**任何训练禁用**;
+  保留原因=golden_pool 12567 框的窗口消歧存档,见该目录 README）。错窗废品
+  dense_owner_v13_pad200 已物理删除。存活:v14_pad200（v16 正样本源）、v15_tipval
+  （v16 val 正样本源）、**v16_tipuni（现役）**、label_live_tip_1000（盘口打标包）、
+  owner_eval_frozen（旧任务尺子,只作参考不作 tip 裁决）。
+- **v16 val 修正（Owner 目检抓出）**:v14 的 val 从未 tip 对齐,v16 曾整拷 →
+  1509 张中段 val 正样本已换成 v15 的 803 张 tip 对齐版;3060 已用正确 val 重启
+  `owner_v16_tipuni_cold`（yolo11n 冷启动,v12 永不作底座——Owner 裁定）。
+
 - **真实 tip 成败小样已开干（Owner 已点头）**：VPS 采集 →
   `analysis/output/v13_real_tip_preview/index.html`（tip+0 **48** 张预标：hit4 /
   miss-dense6 / noise5 / empty33）。报告 `analysis/p_real_tip_collect_started.md`。
