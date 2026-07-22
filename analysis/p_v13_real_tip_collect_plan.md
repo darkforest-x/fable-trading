@@ -1,8 +1,8 @@
-# v13 — 收集 live 真实 tip 成败图（计划，未执行）
+# v13 — 收集 live 真实 tip 成败图（计划）
 
-> **状态（2026-07-21 晚）**：tip-only 诊断已结（见 `analysis/p_tip_only_smoke.md`）—
-> tip_fire≈0，**不**永久 tip-only。进入小样采集：`scripts/collect_v13_tip_previews.py`
-> → `analysis/output/v13_real_tip_preview/`（带框预览，非训练集）。
+> **状态（2026-07-23）**：小样已开干 — 见 `analysis/p_real_tip_collect_started.md`。
+> 产物 `analysis/output/v13_real_tip_preview/`（`index.html` + 四类预标，**非**训练集）。
+> tip-only 诊断已结（`p_tip_only_smoke.md`）；**不**永久 tip-only；**不开训**直到 Owner 审完。
 
 ## 为何改方向
 

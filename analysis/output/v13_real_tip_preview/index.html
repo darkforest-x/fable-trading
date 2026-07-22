@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8"/>
+<title>真实 tip 成败预标小样</title>
+<style>
+body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 24px; background:#0b0f14; color:#e5e7eb; }
+h1 { font-size: 1.35rem; }
+.note { color:#9ca3af; max-width: 980px; line-height:1.55; }
+.filters button { margin: 4px 6px 12px 0; padding:6px 10px; border-radius:6px;
+  border:1px solid #374151; background:#111827; color:#e5e7eb; cursor:pointer; }
+.filters button.active { border-color:#67e8f9; color:#67e8f9; }
+.card { border:1px solid #1f2937; border-radius:10px; padding:16px; margin:18px 0; background:#111827; }
+.card h2 { margin:0 0 6px; font-size:1.05rem; }
+.cls { color:#67e8f9; }
+.stem code { color:#fbbf24; }
+.meta { color:#9ca3af; font-size:0.85rem; }
+img { width:100%; max-width:1100px; border-radius:6px; background:#000; }
+figcaption { font-size:0.8rem; color:#9ca3af; margin-top:4px; }
+.hidden { display:none; }
+</style>
+</head>
+<body>
+<h1>真实 tip 成败预标小样（非训练集）</h1>
+<p class="note">
+目录 <code>analysis/output/v13_real_tip_preview</code>。
+窗=200、右缘=盘口 tip、无后文；<b>不是</b> pad200 中段裁贴右。
+预标按「密集规则 ∩ tip_edge KEEP」自动打，<b>需 Owner 目视改判</b>后才可当金标。
+未开训、未 promote、未耗 holdout。权重 /opt/fable-trading/models/owner_best.pt ·
+conf=0.2 · tip_edge=2。
+<br/>tip+0 计数：tip-hit=4 · tip-miss-dense=6 · tip-noise=5 · tip-empty-ok=33
+</p>
+<div class="filters">
+  <button class="active" data-f="all">全部</button>
+  <button data-f="tip-hit">tip-hit</button><button data-f="tip-miss-dense">tip-miss-dense</button><button data-f="tip-noise">tip-noise</button><button data-f="tip-empty-ok">tip-empty-ok</button>
+</div>
+
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#01 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>YB_USDT_SWAP · 2026-07-18 21:00:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.012625057473530224 · log_label=1 outcome=tp</p>
+  <figure><img src="YB_USDT_SWAP_20260718_2100_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#02 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>MVLL_USDT_SWAP · 2026-07-19 02:45:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.009285835671588229 · log_label=1 outcome=tp</p>
+  <figure><img src="MVLL_USDT_SWAP_20260719_0245_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#03 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>KAITO_USDT_SWAP · 2026-07-19 03:00:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.011123546507910346 · log_label=1 outcome=tp</p>
+  <figure><img src="KAITO_USDT_SWAP_20260719_0300_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#04 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>RAM_USDT_SWAP · 2026-07-19 03:00:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.006070764330506614 · log_label=0 outcome=sl</p>
+  <figure><img src="RAM_USDT_SWAP_20260719_0300_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#05 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>KAITO_USDT_SWAP · 2026-07-19 03:15:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.010525933367746392 · log_label=1 outcome=tp</p>
+  <figure><img src="KAITO_USDT_SWAP_20260719_0315_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#06 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>KAITO_USDT_SWAP · 2026-07-19 03:30:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.010226911427522288 · log_label=1 outcome=tp</p>
+  <figure><img src="KAITO_USDT_SWAP_20260719_0330_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#07 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>KAITO_USDT_SWAP · 2026-07-19 04:00:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.010272341131195252 · log_label=1 outcome=tp</p>
+  <figure><img src="KAITO_USDT_SWAP_20260719_0400_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#08 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>MUU_USDT_SWAP · 2026-07-19 04:00:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.043303093453749775 · log_label=1 outcome=tp</p>
+  <figure><img src="MUU_USDT_SWAP_20260719_0400_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#09 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>OPG_USDT_SWAP · 2026-07-19 04:00:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.011939232338575835 · log_label=1 outcome=tp</p>
+  <figure><img src="OPG_USDT_SWAP_20260719_0400_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#10 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>EDEN_USDT_SWAP · 2026-07-19 04:30:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=1 kept=0 · spread=0.010751664266279153 · log_label=1 outcome=tp</p>
+  <figure><img src="EDEN_USDT_SWAP_20260719_0430_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#11 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>EDEN_USDT_SWAP · 2026-07-19 04:45:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=1 kept=0 · spread=0.010699473830472178 · log_label=1 outcome=tp</p>
+  <figure><img src="EDEN_USDT_SWAP_20260719_0445_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#12 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>HOME_USDT_SWAP · 2026-07-19 05:15:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.041164970017872 · log_label=1 outcome=tp</p>
+  <figure><img src="HOME_USDT_SWAP_20260719_0515_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#13 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>RECALL_USDT_SWAP · 2026-07-19 11:00:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.01209831403450764 · log_label=0 outcome=sl</p>
+  <figure><img src="RECALL_USDT_SWAP_20260719_1100_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#14 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>PARTI_USDT_SWAP · 2026-07-19 17:45:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.018295106149485128 · log_label=0 outcome=sl</p>
+  <figure><img src="PARTI_USDT_SWAP_20260719_1745_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#15 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>CAP_USDT_SWAP · 2026-07-20 05:00:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=1 kept=0 · spread=0.009552717818944503 · log_label=1 outcome=tp</p>
+  <figure><img src="CAP_USDT_SWAP_20260720_0500_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#16 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>XPL_USDT_SWAP · 2026-07-20 06:00:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.009214170594443053 · log_label=1 outcome=tp</p>
+  <figure><img src="XPL_USDT_SWAP_20260720_0600_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-miss-dense">
+  <h2>#17 · <span class="cls">tip-miss-dense</span></h2>
+  <p class="stem"><code>DOOD_USDT_SWAP · 2026-07-20 08:15:00+00:00</code></p>
+  <p class="why">tip 近端有密集，但无贴边 KEEP → 漏检候选</p>
+  <p class="meta">source=forward_log · tip_dense=True · raw=0 kept=0 · spread=0.003106146541524688 · log_label=1 outcome=tp</p>
+  <figure><img src="DOOD_USDT_SWAP_20260720_0815_tipplus0.png" alt="tip-miss-dense"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#18 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>RECALL_USDT_SWAP · 2026-07-20 08:30:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.012574510419131222 · log_label=1 outcome=tp</p>
+  <figure><img src="RECALL_USDT_SWAP_20260720_0830_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#19 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>BONK_USDT_SWAP · 2026-07-20 08:45:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.016167209246668892 · log_label=1 outcome=tp</p>
+  <figure><img src="BONK_USDT_SWAP_20260720_0845_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#20 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>UB_USDT_SWAP · 2026-07-20 09:30:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.00881281513398883 · log_label=1 outcome=tp</p>
+  <figure><img src="UB_USDT_SWAP_20260720_0930_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#21 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>LIGHT_USDT_SWAP · 2026-07-20 09:45:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=1 kept=0 · spread=0.008208449528981343 · log_label=1 outcome=tp</p>
+  <figure><img src="LIGHT_USDT_SWAP_20260720_0945_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#22 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>PEPE_USDT_SWAP · 2026-07-20 10:45:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=3 kept=0 · spread=0.006356954969469114 · log_label=0 outcome=sl</p>
+  <figure><img src="PEPE_USDT_SWAP_20260720_1045_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#23 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>SPX_USDT_SWAP · 2026-07-20 11:45:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.009350753050074023 · log_label=1 outcome=tp</p>
+  <figure><img src="SPX_USDT_SWAP_20260720_1145_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#24 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>PIEVERSE_USDT_SWAP · 2026-07-20 13:15:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.009731962768699247 · log_label=1 outcome=tp</p>
+  <figure><img src="PIEVERSE_USDT_SWAP_20260720_1315_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#25 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>KITE_USDT_SWAP · 2026-07-20 13:30:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.00918861473741781 · log_label=1 outcome=tp</p>
+  <figure><img src="KITE_USDT_SWAP_20260720_1330_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#26 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>SOON_USDT_SWAP · 2026-07-20 15:30:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=2 kept=0 · spread=0.009199460968475057 · log_label=1 outcome=tp</p>
+  <figure><img src="SOON_USDT_SWAP_20260720_1530_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#27 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>MMT_USDT_SWAP · 2026-07-20 16:15:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.00650690470526823 · log_label=0 outcome=sl</p>
+  <figure><img src="MMT_USDT_SWAP_20260720_1615_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#28 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>KORU_USDT_SWAP · 2026-07-21 03:45:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=0 kept=0 · spread=0.014827511814747977 · log_label=0 outcome=sl</p>
+  <figure><img src="KORU_USDT_SWAP_20260721_0345_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#29 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>ROBO_USDT_SWAP · 2026-07-21 03:45:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=2 kept=0 · spread=0.012150073387510773 · log_label=0 outcome=sl</p>
+  <figure><img src="ROBO_USDT_SWAP_20260721_0345_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-hit">
+  <h2>#30 · <span class="cls">tip-hit</span></h2>
+  <p class="stem"><code>KGEN_USDT_SWAP · 2026-07-21 05:30:00+00:00</code></p>
+  <p class="why">贴边 KEEP + tip 近端有密集规则段 → 候选正例</p>
+  <p class="meta">source=forward_log · tip_dense=True · raw=1 kept=1 · spread=0.0035239667874123488 · log_label=0 outcome=sl</p>
+  <figure><img src="KGEN_USDT_SWAP_20260721_0530_tipplus0.png" alt="tip-hit"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-noise">
+  <h2>#31 · <span class="cls">tip-noise</span></h2>
+  <p class="stem"><code>ONE_USDT_SWAP · 2026-07-21 14:15:00+00:00</code></p>
+  <p class="why">有贴边 KEEP，但 tip 近端无密集 → 误检候选</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=1 kept=1 · spread=0.024748738790914434 · log_label=0 outcome=sl</p>
+  <figure><img src="ONE_USDT_SWAP_20260721_1415_tipplus0.png" alt="tip-noise"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-noise">
+  <h2>#32 · <span class="cls">tip-noise</span></h2>
+  <p class="stem"><code>RAVE_USDT_SWAP · 2026-07-21 19:30:00+00:00</code></p>
+  <p class="why">有贴边 KEEP，但 tip 近端无密集 → 误检候选</p>
+  <p class="meta">source=forward_log · tip_dense=False · raw=2 kept=1 · spread=0.008705255257836145 · log_label=0 outcome=sl</p>
+  <figure><img src="RAVE_USDT_SWAP_20260721_1930_tipplus0.png" alt="tip-noise"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-miss-dense">
+  <h2>#33 · <span class="cls">tip-miss-dense</span></h2>
+  <p class="stem"><code>FIL_USDT · 2025-12-31 14:45:00+00:00</code></p>
+  <p class="why">tip 近端有密集，但无贴边 KEEP → 漏检候选</p>
+  <p class="meta">source=scout_preholdout · tip_dense=True · raw=1 kept=0 · spread=0.0008122829655169379 · log_label= outcome=</p>
+  <figure><img src="scout_FIL_USDT_20251231_1445_tipplus0.png" alt="tip-miss-dense"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-miss-dense">
+  <h2>#34 · <span class="cls">tip-miss-dense</span></h2>
+  <p class="stem"><code>HUMA_USDT_SWAP · 2025-09-20 17:45:00+00:00</code></p>
+  <p class="why">tip 近端有密集，但无贴边 KEEP → 漏检候选</p>
+  <p class="meta">source=scout_preholdout · tip_dense=True · raw=0 kept=0 · spread=0.00128765478256324 · log_label= outcome=</p>
+  <figure><img src="scout_HUMA_USDT_SWAP_20250920_1745_tipplus0.png" alt="tip-miss-dense"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-miss-dense">
+  <h2>#35 · <span class="cls">tip-miss-dense</span></h2>
+  <p class="stem"><code>AT_USDT_SWAP · 2025-11-20 11:45:00+00:00</code></p>
+  <p class="why">tip 近端有密集，但无贴边 KEEP → 漏检候选</p>
+  <p class="meta">source=scout_preholdout · tip_dense=True · raw=0 kept=0 · spread=0.001680977597872983 · log_label= outcome=</p>
+  <figure><img src="scout_AT_USDT_SWAP_20251120_1145_tipplus0.png" alt="tip-miss-dense"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-miss-dense">
+  <h2>#36 · <span class="cls">tip-miss-dense</span></h2>
+  <p class="stem"><code>SKY_USDT_SWAP · 2026-02-13 13:15:00+00:00</code></p>
+  <p class="why">tip 近端有密集，但无贴边 KEEP → 漏检候选</p>
+  <p class="meta">source=scout_preholdout · tip_dense=True · raw=0 kept=0 · spread=0.001805705035948152 · log_label= outcome=</p>
+  <figure><img src="scout_SKY_USDT_SWAP_20260213_1315_tipplus0.png" alt="tip-miss-dense"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-hit">
+  <h2>#37 · <span class="cls">tip-hit</span></h2>
+  <p class="stem"><code>APT_USDT · 2026-02-03 14:45:00+00:00</code></p>
+  <p class="why">贴边 KEEP + tip 近端有密集规则段 → 候选正例</p>
+  <p class="meta">source=scout_preholdout · tip_dense=True · raw=1 kept=1 · spread=0.0018071897540848337 · log_label= outcome=</p>
+  <figure><img src="scout_APT_USDT_20260203_1445_tipplus0.png" alt="tip-hit"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-hit">
+  <h2>#38 · <span class="cls">tip-hit</span></h2>
+  <p class="stem"><code>APT_USDT · 2026-02-03 14:45:00+00:00</code></p>
+  <p class="why">贴边 KEEP + tip 近端有密集规则段 → 候选正例</p>
+  <p class="meta">source=scout_preholdout · tip_dense=True · raw=1 kept=1 · spread=0.0018071897540848337 · log_label= outcome=</p>
+  <figure><img src="scout_APT_USDT_20260203_1445_tipplus0.png" alt="tip-hit"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-hit">
+  <h2>#39 · <span class="cls">tip-hit</span></h2>
+  <p class="stem"><code>ETH_USDT · 2025-11-19 14:30:00+00:00</code></p>
+  <p class="why">贴边 KEEP + tip 近端有密集规则段 → 候选正例</p>
+  <p class="meta">source=scout_preholdout · tip_dense=True · raw=1 kept=1 · spread=0.0018941866296789667 · log_label= outcome=</p>
+  <figure><img src="scout_ETH_USDT_20251119_1430_tipplus0.png" alt="tip-hit"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-miss-dense">
+  <h2>#40 · <span class="cls">tip-miss-dense</span></h2>
+  <p class="stem"><code>YFI_USDT_SWAP · 2025-08-27 19:45:00+00:00</code></p>
+  <p class="why">tip 近端有密集，但无贴边 KEEP → 漏检候选</p>
+  <p class="meta">source=scout_preholdout · tip_dense=True · raw=0 kept=0 · spread=0.001922948809567045 · log_label= outcome=</p>
+  <figure><img src="scout_YFI_USDT_SWAP_20250827_1945_tipplus0.png" alt="tip-miss-dense"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#41 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>AI_USDT_SWAP · 2026-05-02 13:45:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=scout_preholdout · tip_dense=False · raw=0 kept=0 · spread=0.1330128010529423 · log_label= outcome=</p>
+  <figure><img src="scout_AI_USDT_SWAP_20260502_1345_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-noise">
+  <h2>#42 · <span class="cls">tip-noise</span></h2>
+  <p class="stem"><code>BLEND_USDT_SWAP · 2026-05-01 11:45:00+00:00</code></p>
+  <p class="why">有贴边 KEEP，但 tip 近端无密集 → 误检候选</p>
+  <p class="meta">source=scout_preholdout · tip_dense=False · raw=2 kept=2 · spread=0.13156048461796566 · log_label= outcome=</p>
+  <figure><img src="scout_BLEND_USDT_SWAP_20260501_1145_tipplus0.png" alt="tip-noise"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-noise">
+  <h2>#43 · <span class="cls">tip-noise</span></h2>
+  <p class="stem"><code>AI_USDT_SWAP · 2026-05-01 13:45:00+00:00</code></p>
+  <p class="why">有贴边 KEEP，但 tip 近端无密集 → 误检候选</p>
+  <p class="meta">source=scout_preholdout · tip_dense=False · raw=2 kept=2 · spread=0.1313527080685033 · log_label= outcome=</p>
+  <figure><img src="scout_AI_USDT_SWAP_20260501_1345_tipplus0.png" alt="tip-noise"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-noise">
+  <h2>#44 · <span class="cls">tip-noise</span></h2>
+  <p class="stem"><code>PROS_USDT_SWAP · 2026-04-30 15:45:00+00:00</code></p>
+  <p class="why">有贴边 KEEP，但 tip 近端无密集 → 误检候选</p>
+  <p class="meta">source=scout_preholdout · tip_dense=False · raw=1 kept=1 · spread=0.06510612031138806 · log_label= outcome=</p>
+  <figure><img src="scout_PROS_USDT_SWAP_20260430_1545_tipplus0.png" alt="tip-noise"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#45 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>BLEND_USDT_SWAP · 2026-05-02 11:45:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=scout_preholdout · tip_dense=False · raw=0 kept=0 · spread=0.045078670207937654 · log_label= outcome=</p>
+  <figure><img src="scout_BLEND_USDT_SWAP_20260502_1145_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#46 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>PROS_USDT_SWAP · 2026-05-02 15:45:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=scout_preholdout · tip_dense=False · raw=0 kept=0 · spread=0.030589189319981145 · log_label= outcome=</p>
+  <figure><img src="scout_PROS_USDT_SWAP_20260502_1545_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#47 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>OPG_USDT_SWAP · 2026-05-01 10:45:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=scout_preholdout · tip_dense=False · raw=0 kept=0 · spread=0.030269476731807948 · log_label= outcome=</p>
+  <figure><img src="scout_OPG_USDT_SWAP_20260501_1045_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<div class="card" data-cls="tip-empty-ok">
+  <h2>#48 · <span class="cls">tip-empty-ok</span></h2>
+  <p class="stem"><code>OPG_USDT_SWAP · 2026-04-28 10:45:00+00:00</code></p>
+  <p class="why">无密集、无 KEEP → 背景对照</p>
+  <p class="meta">source=scout_preholdout · tip_dense=False · raw=0 kept=0 · spread=0.02670928537261606 · log_label= outcome=</p>
+  <figure><img src="scout_OPG_USDT_SWAP_20260428_1045_tipplus0.png" alt="tip-empty-ok"/>
+  <figcaption>红竖线=右缘 tip · 青框=密集规则(预标) · 绿=YOLO KEEP · 橙=YOLO DROP</figcaption></figure>
+</div>
+<script>
+const buttons=[...document.querySelectorAll('.filters button')];
+const cards=[...document.querySelectorAll('.card')];
+buttons.forEach(b=>b.addEventListener('click',()=>{
+  buttons.forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  const f=b.dataset.f;
+  cards.forEach(c=>{
+    c.classList.toggle('hidden', f!=='all' && c.dataset.cls!==f);
+  });
+}));
+</script>
+</body>
+</html>
