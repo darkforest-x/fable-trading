@@ -14,6 +14,13 @@
   语义不可分仍在,见 `analysis/p_v16_tipuni_train.md`。**不 promote**,空转继续。
   **主建议已升级:训练分布必须以真实盘口 tip 窗为主体**(owner 审 48 张 +
   扩采 + `label_live_tip_1000` 盘口打标),v17 = 真实盘口分布首训,等数据。
+- **v17 数据引擎已上线(2026-07-23)**:`scripts/collect_real_tips_pulse.py` 接入每轮
+  VPS 脉冲(旁路,无 YOLO,120s 预算,只写 `data/real_tip_collect/`)——每脉冲采
+  规则密集 tip 候选(owner 审:launch/hardneg,限 10/轮)+ 真实空背景负样本(免审,
+  8/轮),MIN_GAP 去重。`scripts/build_real_tip_review_pack.py` 把 manifest 变审阅
+  画廊 + review_sheet + LS 任务。**detector=none 期间照常采集**,为 v17 攒真实分布。
+  Owner 动作:(a) 填 `v13_real_tip_preview/review_sheet.csv`(48 张,已有);
+  (b) 数日后审 `real_tip_review/`(扩采批)。
 
 ## 当前真相（2026-07-23 凌晨）
 
