@@ -49,6 +49,30 @@ def test_label_candidate_hits_take_profit_first() -> None:
     assert outcome.realized_ret == pytest.approx(0.02)
 
 
+def test_label_candidate_signal_close_entry_uses_signal_close() -> None:
+    """Fill at signal close; path still from next bar. Only price differs."""
+    # signal close=100; next open=101 → next_open fill is 101, signal_close is 100
+    frame = _frame(
+        highs=[103.0, 103.0, 103.0],
+        lows=[100.5, 100.5, 100.5],
+        opens=[101.0, 101.0, 101.0],
+        closes=[101.0, 101.0, 101.0],
+    )
+    # override signal close (index 0)
+    frame.loc[0, "close"] = 100.0
+
+    next_o = label_candidate(frame, 0, tp_mult=2.0, sl_mult=1.0, horizon=3, entry="next_open")
+    close_o = label_candidate(frame, 0, tp_mult=2.0, sl_mult=1.0, horizon=3, entry="signal_close")
+    assert next_o is not None and close_o is not None
+    assert next_o.entry_price == pytest.approx(101.0)
+    assert close_o.entry_price == pytest.approx(100.0)
+    # TP at entry+2*atr: next_open → 103, signal_close → 102; both hit bar0 high=103
+    assert next_o.outcome == "tp"
+    assert close_o.outcome == "tp"
+    assert close_o.realized_ret == pytest.approx(0.02)
+    assert next_o.realized_ret == pytest.approx(2.0 / 101.0)
+
+
 def test_label_candidate_hits_stop_loss_first() -> None:
     outcome = label_candidate(
         _frame(highs=[101.0, 101.0, 101.0], lows=[98.5, 99.5, 99.5]),

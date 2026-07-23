@@ -1,7 +1,9 @@
 """Triple-barrier labeling for dense-MA candidates (long side).
 
 For each candidate confirmed at bar i (all rule inputs use data <= i):
-- entry price  = open of bar i+1 (next bar open, no lookahead);
+- entry price  = open of bar i+1 by default (`entry="next_open"`);
+  optional `entry="signal_close"` uses close of bar i (same-print fill);
+- path bars    = always start at bar i+1 (after the fill print);
 - upper barrier = entry + TP_ATR_MULT * ATR14(i);
 - lower barrier = entry - SL_ATR_MULT * ATR14(i);
 - timeout       = HORIZON_BARS bars after entry.
@@ -18,6 +20,7 @@ rule (barrier price or timeout close), for later backtesting.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -34,6 +37,9 @@ HORIZON_BARS = 72
 # barrier scale cannot cover trading costs no matter what the model says.
 ATR_PCT_MIN = 0.0015
 
+EntryMode = Literal["next_open", "signal_close"]
+ENTRY_MODES: tuple[str, ...] = ("next_open", "signal_close")
+
 
 @dataclass(frozen=True)
 class BarrierOutcome:
@@ -44,6 +50,26 @@ class BarrierOutcome:
     realized_ret: float  # exit_price / entry_price - 1
 
 
+def _resolve_entry_price(
+    frame: pd.DataFrame,
+    signal_i: int,
+    entry: EntryMode,
+) -> float | None:
+    """Fill price for a signal at `signal_i`. Path always starts at signal_i+1."""
+    if entry == "next_open":
+        entry_i = signal_i + 1
+        if entry_i >= len(frame):
+            return None
+        price = float(frame["open"].iloc[entry_i])
+    elif entry == "signal_close":
+        price = float(frame["close"].iloc[signal_i])
+    else:
+        raise ValueError(f"unknown entry mode {entry!r}; expected one of {ENTRY_MODES}")
+    if not np.isfinite(price) or price <= 0:
+        return None
+    return price
+
+
 def label_candidate(
     frame: pd.DataFrame,
     signal_i: int,
@@ -52,43 +78,48 @@ def label_candidate(
     sl_mult: float = SL_ATR_MULT,
     atr_pct_min: float = ATR_PCT_MIN,
     horizon: int = HORIZON_BARS,
+    entry: EntryMode = "next_open",
 ) -> BarrierOutcome | None:
     """Label one candidate at position `signal_i` of an indicator frame.
 
     Requires columns open/high/low/close and atr14. Returns None when there
     are not enough future bars for entry + full horizon, or when atr_pct at
     the signal bar is below `atr_pct_min` (barriers too narrow to trade).
+
+    `entry="next_open"` (default): fill at open of bar i+1.
+    `entry="signal_close"`: fill at close of bar i; barrier path still starts
+    at bar i+1 (nothing left to trade after the close print).
     """
-    entry_i = signal_i + 1
-    last_i = entry_i + horizon - 1
+    path_i = signal_i + 1
+    last_i = path_i + horizon - 1
     if last_i >= len(frame):
         return None
     atr = float(frame["atr14"].iloc[signal_i])
-    entry = float(frame["open"].iloc[entry_i])
-    if not np.isfinite(atr) or atr <= 0 or not np.isfinite(entry) or entry <= 0:
+    fill = _resolve_entry_price(frame, signal_i, entry)
+    if not np.isfinite(atr) or atr <= 0 or fill is None:
         return None
     atr_pct = float(frame["atr_pct"].iloc[signal_i])
     if atr_pct_min > 0 and (not np.isfinite(atr_pct) or atr_pct < atr_pct_min):
         return None
-    upper = entry + tp_mult * atr
-    lower = entry - sl_mult * atr
+    upper = fill + tp_mult * atr
+    lower = fill - sl_mult * atr
 
-    highs = frame["high"].to_numpy()[entry_i : last_i + 1]
-    lows = frame["low"].to_numpy()[entry_i : last_i + 1]
+    highs = frame["high"].to_numpy()[path_i : last_i + 1]
+    lows = frame["low"].to_numpy()[path_i : last_i + 1]
     hit_up = highs >= upper
     hit_dn = lows <= lower
     up_first = int(np.argmax(hit_up)) if hit_up.any() else horizon
     dn_first = int(np.argmax(hit_dn)) if hit_dn.any() else horizon
 
     if up_first < dn_first:
-        return BarrierOutcome(1, "tp", up_first + 1, entry, upper / entry - 1)
+        return BarrierOutcome(1, "tp", up_first + 1, fill, upper / fill - 1)
     if dn_first < up_first:
-        return BarrierOutcome(0, "sl", dn_first + 1, entry, lower / entry - 1)
+        return BarrierOutcome(0, "sl", dn_first + 1, fill, lower / fill - 1)
     if up_first == dn_first < horizon:
         # both barriers inside the same bar: order unknown, assume worst case
-        return BarrierOutcome(0, "sl_ambiguous", dn_first + 1, entry, lower / entry - 1)
+        return BarrierOutcome(0, "sl_ambiguous", dn_first + 1, fill, lower / fill - 1)
     timeout_close = float(frame["close"].iloc[last_i])
-    return BarrierOutcome(0, "timeout", horizon, entry, timeout_close / entry - 1)
+    return BarrierOutcome(0, "timeout", horizon, fill, timeout_close / fill - 1)
 
 
 def label_candidate_trailing(
@@ -98,6 +129,7 @@ def label_candidate_trailing(
     trail_mult: float,
     atr_pct_min: float = ATR_PCT_MIN,
     horizon: int = HORIZON_BARS,
+    entry: EntryMode = "next_open",
 ) -> BarrierOutcome | None:
     """Trend-following exit: no fixed TP, stop trails `trail_mult` x ATR14(i)
     below the running high (seeded at entry). Conservative intra-bar rule: the
@@ -107,48 +139,73 @@ def label_candidate_trailing(
 
     Label = 1 iff realized_ret > 0 (no barrier order to encode here).
     """
-    entry_i = signal_i + 1
-    last_i = entry_i + horizon - 1
-    if last_i >= len(frame):
+    ctx = _entry_context(frame, signal_i, horizon, atr_pct_min, entry=entry)
+    if ctx is None:
         return None
-    atr = float(frame["atr14"].iloc[signal_i])
-    entry = float(frame["open"].iloc[entry_i])
-    if not np.isfinite(atr) or atr <= 0 or not np.isfinite(entry) or entry <= 0:
-        return None
-    atr_pct = float(frame["atr_pct"].iloc[signal_i])
-    if atr_pct_min > 0 and (not np.isfinite(atr_pct) or atr_pct < atr_pct_min):
-        return None
-
-    highs = frame["high"].to_numpy()[entry_i : last_i + 1]
-    lows = frame["low"].to_numpy()[entry_i : last_i + 1]
-    opens = frame["open"].to_numpy()[entry_i : last_i + 1]
-    run_max = entry
+    fill, atr, highs, lows, opens, timeout_close = ctx
+    run_max = fill
     for j in range(horizon):
         stop = run_max - trail_mult * atr
         if lows[j] <= stop:
             exit_price = min(stop, float(opens[j]))
-            ret = exit_price / entry - 1
-            return BarrierOutcome(int(ret > 0), "trail", j + 1, entry, ret)
+            ret = exit_price / fill - 1
+            return BarrierOutcome(int(ret > 0), "trail", j + 1, fill, ret)
         run_max = max(run_max, float(highs[j]))
-    ret = float(frame["close"].iloc[last_i]) / entry - 1
-    return BarrierOutcome(int(ret > 0), "timeout", horizon, entry, ret)
+    ret = timeout_close / fill - 1
+    return BarrierOutcome(int(ret > 0), "timeout", horizon, fill, ret)
 
 
-def _entry_context(frame: pd.DataFrame, signal_i: int, horizon: int, atr_pct_min: float):
+def label_short_candidate_trailing(
+    frame: pd.DataFrame,
+    signal_i: int,
+    *,
+    trail_mult: float,
+    atr_pct_min: float = ATR_PCT_MIN,
+    horizon: int = HORIZON_BARS,
+    entry: EntryMode = "next_open",
+) -> BarrierOutcome | None:
+    """Short mirror of `label_candidate_trailing`: stop trails above running low."""
+    ctx = _entry_context(frame, signal_i, horizon, atr_pct_min, entry=entry)
+    if ctx is None:
+        return None
+    fill, atr, highs, lows, opens, timeout_close = ctx
+    run_min = fill
+    for j in range(horizon):
+        stop = run_min + trail_mult * atr
+        if highs[j] >= stop:
+            exit_price = max(stop, float(opens[j]))
+            if exit_price <= 0:
+                return None
+            ret = fill / exit_price - 1
+            return BarrierOutcome(int(ret > 0), "trail", j + 1, fill, ret)
+        run_min = min(run_min, float(lows[j]))
+    if timeout_close <= 0:
+        return None
+    ret = fill / timeout_close - 1
+    return BarrierOutcome(int(ret > 0), "timeout", horizon, fill, ret)
+
+
+def _entry_context(
+    frame: pd.DataFrame,
+    signal_i: int,
+    horizon: int,
+    atr_pct_min: float,
+    entry: EntryMode = "next_open",
+):
     """Shared guards for exit-variant labelers; None when the trade is untakeable."""
-    entry_i = signal_i + 1
-    last_i = entry_i + horizon - 1
+    path_i = signal_i + 1
+    last_i = path_i + horizon - 1
     if last_i >= len(frame):
         return None
     atr = float(frame["atr14"].iloc[signal_i])
-    entry = float(frame["open"].iloc[entry_i])
-    if not np.isfinite(atr) or atr <= 0 or not np.isfinite(entry) or entry <= 0:
+    fill = _resolve_entry_price(frame, signal_i, entry)
+    if not np.isfinite(atr) or atr <= 0 or fill is None:
         return None
     atr_pct = float(frame["atr_pct"].iloc[signal_i])
     if atr_pct_min > 0 and (not np.isfinite(atr_pct) or atr_pct < atr_pct_min):
         return None
-    sl = slice(entry_i, last_i + 1)
-    return (entry, atr, frame["high"].to_numpy()[sl], frame["low"].to_numpy()[sl],
+    sl = slice(path_i, last_i + 1)
+    return (fill, atr, frame["high"].to_numpy()[sl], frame["low"].to_numpy()[sl],
             frame["open"].to_numpy()[sl], float(frame["close"].iloc[last_i]))
 
 
@@ -160,13 +217,14 @@ def label_short_candidate(
     sl_mult: float = SL_ATR_MULT,
     atr_pct_min: float = ATR_PCT_MIN,
     horizon: int = HORIZON_BARS,
+    entry: EntryMode = "next_open",
 ) -> BarrierOutcome | None:
-    ctx = _entry_context(frame, signal_i, horizon, atr_pct_min)
+    ctx = _entry_context(frame, signal_i, horizon, atr_pct_min, entry=entry)
     if ctx is None:
         return None
-    entry, atr, highs, lows, _, timeout_close = ctx
-    lower = entry - tp_mult * atr
-    upper = entry + sl_mult * atr
+    fill, atr, highs, lows, _, timeout_close = ctx
+    lower = fill - tp_mult * atr
+    upper = fill + sl_mult * atr
     if lower <= 0:
         return None
     hit_dn = lows <= lower
@@ -175,12 +233,12 @@ def label_short_candidate(
     up_first = int(np.argmax(hit_up)) if hit_up.any() else horizon
 
     if dn_first < up_first:
-        return BarrierOutcome(1, "tp", dn_first + 1, entry, entry / lower - 1)
+        return BarrierOutcome(1, "tp", dn_first + 1, fill, fill / lower - 1)
     if up_first < dn_first:
-        return BarrierOutcome(0, "sl", up_first + 1, entry, entry / upper - 1)
+        return BarrierOutcome(0, "sl", up_first + 1, fill, fill / upper - 1)
     if dn_first == up_first < horizon:
-        return BarrierOutcome(0, "sl_ambiguous", up_first + 1, entry, entry / upper - 1)
-    return BarrierOutcome(0, "timeout", horizon, entry, entry / timeout_close - 1)
+        return BarrierOutcome(0, "sl_ambiguous", up_first + 1, fill, fill / upper - 1)
+    return BarrierOutcome(0, "timeout", horizon, fill, fill / timeout_close - 1)
 
 
 def label_candidate_scaled(
@@ -275,37 +333,176 @@ def label_candidate_ma_exit(
     ma_col: str = "ema21",
     atr_pct_min: float = ATR_PCT_MIN,
     horizon: int = HORIZON_BARS,
+    entry: EntryMode = "next_open",
 ) -> BarrierOutcome | None:
-    """H3 structure exit: leave when close drops below `ma_col` (default EMA21).
+    """Trend MA exit (long): leave when close drops below `ma_col` (default EMA21).
 
-    Entry / ATR floor / horizon match the TP5/SL2 mainline contract (next-bar
-    open entry, atr_pct_min gate, HORIZON_BARS timeout). There is no fixed
-    TP/SL barrier — the MA cross defines the pulse end. Label = 1 iff
-    realized_ret > 0 at exit.
+    Entry / ATR floor / horizon match the mainline contract. No fixed TP/SL —
+    the MA cross defines the pulse end. Label = 1 iff realized_ret > 0 at exit.
+    Callers that want a slower trend filter should pass ma_col='ema55'.
     """
-    entry_i = signal_i + 1
-    last_i = entry_i + horizon - 1
-    if last_i >= len(frame) or ma_col not in frame.columns:
+    ctx = _entry_context(frame, signal_i, horizon, atr_pct_min, entry=entry)
+    if ctx is None or ma_col not in frame.columns:
         return None
-    entry = float(frame["open"].iloc[entry_i])
-    atr = float(frame["atr14"].iloc[signal_i])
-    if not np.isfinite(entry) or entry <= 0 or not np.isfinite(atr) or atr <= 0:
-        return None
-    atr_pct = float(frame["atr_pct"].iloc[signal_i])
-    if atr_pct_min > 0 and (not np.isfinite(atr_pct) or atr_pct < atr_pct_min):
-        return None
-
-    closes = frame["close"].to_numpy()[entry_i : last_i + 1]
-    ma_values = frame[ma_col].to_numpy()[entry_i : last_i + 1]
+    fill, _, _, _, _, timeout_close = ctx
+    path_i = signal_i + 1
+    closes = frame["close"].to_numpy()[path_i : path_i + horizon]
+    ma_values = frame[ma_col].to_numpy()[path_i : path_i + horizon]
     for j in range(horizon):
         close = float(closes[j])
         ma_value = float(ma_values[j])
         if np.isfinite(close) and np.isfinite(ma_value) and close < ma_value:
-            ret = close / entry - 1
-            return BarrierOutcome(int(ret > 0), "ma_exit", j + 1, entry, ret)
-    timeout_close = float(frame["close"].iloc[last_i])
-    ret = timeout_close / entry - 1
-    return BarrierOutcome(int(ret > 0), "timeout", horizon, entry, ret)
+            ret = close / fill - 1
+            return BarrierOutcome(int(ret > 0), "ma_exit", j + 1, fill, ret)
+    ret = timeout_close / fill - 1
+    return BarrierOutcome(int(ret > 0), "timeout", horizon, fill, ret)
+
+
+def label_short_candidate_ma_exit(
+    frame: pd.DataFrame,
+    signal_i: int,
+    *,
+    ma_col: str = "ema21",
+    atr_pct_min: float = ATR_PCT_MIN,
+    horizon: int = HORIZON_BARS,
+    entry: EntryMode = "next_open",
+) -> BarrierOutcome | None:
+    """Trend MA exit (short): leave when close rises above `ma_col`."""
+    ctx = _entry_context(frame, signal_i, horizon, atr_pct_min, entry=entry)
+    if ctx is None or ma_col not in frame.columns:
+        return None
+    fill, _, _, _, _, timeout_close = ctx
+    if timeout_close <= 0:
+        return None
+    path_i = signal_i + 1
+    closes = frame["close"].to_numpy()[path_i : path_i + horizon]
+    ma_values = frame[ma_col].to_numpy()[path_i : path_i + horizon]
+    for j in range(horizon):
+        close = float(closes[j])
+        ma_value = float(ma_values[j])
+        if np.isfinite(close) and np.isfinite(ma_value) and close > ma_value:
+            if close <= 0:
+                return None
+            ret = fill / close - 1
+            return BarrierOutcome(int(ret > 0), "ma_exit", j + 1, fill, ret)
+    ret = fill / timeout_close - 1
+    return BarrierOutcome(int(ret > 0), "timeout", horizon, fill, ret)
+
+
+def label_candidate_structure_exit(
+    frame: pd.DataFrame,
+    signal_i: int,
+    *,
+    direction: int,
+    redense_fast_max: float = 0.0028,
+    atr_pct_min: float = ATR_PCT_MIN,
+    horizon: int = HORIZON_BARS,
+    entry: EntryMode = "next_open",
+) -> BarrierOutcome | None:
+    """Structure / re-dense exit for long (+1) or short (−1).
+
+    Exit at bar close when either:
+      - close returns to the opposite side of contemporaneous cluster_mid, or
+      - fast_spread re-contracts to ≤ `redense_fast_max` (dense again).
+    Timeout at horizon close. Label = 1 iff realized_ret > 0.
+    """
+    if direction == 0:
+        return None
+    need = {"cluster_max", "cluster_min", "fast_spread"}
+    if not need.issubset(frame.columns):
+        return None
+    ctx = _entry_context(frame, signal_i, horizon, atr_pct_min, entry=entry)
+    if ctx is None:
+        return None
+    fill, _, _, _, _, timeout_close = ctx
+    if timeout_close <= 0:
+        return None
+    path_i = signal_i + 1
+    closes = frame["close"].to_numpy(dtype=float)[path_i : path_i + horizon]
+    cmax = frame["cluster_max"].to_numpy(dtype=float)[path_i : path_i + horizon]
+    cmin = frame["cluster_min"].to_numpy(dtype=float)[path_i : path_i + horizon]
+    fast = frame["fast_spread"].to_numpy(dtype=float)[path_i : path_i + horizon]
+    for j in range(horizon):
+        close = float(closes[j])
+        mid = (float(cmax[j]) + float(cmin[j])) / 2.0
+        fs = float(fast[j])
+        if not np.isfinite(close) or close <= 0:
+            continue
+        mid_flip = (
+            np.isfinite(mid)
+            and mid > 0
+            and ((direction > 0 and close < mid) or (direction < 0 and close > mid))
+        )
+        redense = np.isfinite(fs) and fs <= redense_fast_max
+        if mid_flip or redense:
+            ret = (close / fill - 1) if direction > 0 else (fill / close - 1)
+            return BarrierOutcome(int(ret > 0), "structure", j + 1, fill, ret)
+    ret = (
+        (timeout_close / fill - 1) if direction > 0 else (fill / timeout_close - 1)
+    )
+    return BarrierOutcome(int(ret > 0), "timeout", horizon, fill, ret)
+
+
+def label_candidate_time_stop(
+    frame: pd.DataFrame,
+    signal_i: int,
+    *,
+    direction: int,
+    hold_bars: int,
+    atr_pct_min: float = ATR_PCT_MIN,
+    entry: EntryMode = "next_open",
+) -> BarrierOutcome | None:
+    """Force flat at the close of path bar `hold_bars` (1-based). No TP/SL."""
+    if direction == 0 or hold_bars < 1:
+        return None
+    ctx = _entry_context(frame, signal_i, hold_bars, atr_pct_min, entry=entry)
+    if ctx is None:
+        return None
+    fill, _, _, _, _, timeout_close = ctx
+    if timeout_close <= 0:
+        return None
+    ret = (timeout_close / fill - 1) if direction > 0 else (fill / timeout_close - 1)
+    return BarrierOutcome(int(ret > 0), "time_stop", hold_bars, fill, ret)
+
+
+def label_candidate_sl_only(
+    frame: pd.DataFrame,
+    signal_i: int,
+    *,
+    direction: int,
+    sl_mult: float = 2.0,
+    atr_pct_min: float = ATR_PCT_MIN,
+    horizon: int = HORIZON_BARS,
+    entry: EntryMode = "next_open",
+) -> BarrierOutcome | None:
+    """Classic trend: fixed SL only, no TP; timeout at horizon close."""
+    if direction == 0:
+        return None
+    ctx = _entry_context(frame, signal_i, horizon, atr_pct_min, entry=entry)
+    if ctx is None:
+        return None
+    fill, atr, highs, lows, opens, timeout_close = ctx
+    if timeout_close <= 0:
+        return None
+    if direction > 0:
+        stop = fill - sl_mult * atr
+        for j in range(horizon):
+            if lows[j] <= stop:
+                exit_price = min(stop, float(opens[j]))
+                ret = exit_price / fill - 1
+                return BarrierOutcome(int(ret > 0), "sl", j + 1, fill, ret)
+        ret = timeout_close / fill - 1
+        return BarrierOutcome(int(ret > 0), "timeout", horizon, fill, ret)
+    stop = fill + sl_mult * atr
+    for j in range(horizon):
+        if highs[j] >= stop:
+            exit_price = max(stop, float(opens[j]))
+            if exit_price <= 0:
+                return None
+            ret = fill / exit_price - 1
+            return BarrierOutcome(int(ret > 0), "sl", j + 1, fill, ret)
+    ret = fill / timeout_close - 1
+    return BarrierOutcome(int(ret > 0), "timeout", horizon, fill, ret)
 
 
 def label_candidate_time_decay(

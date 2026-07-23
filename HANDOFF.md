@@ -2,12 +2,64 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-07-23 深夜 — 研究收口:oracle≠tip,启动/择向皆未过1.3）
+## ⚡ 当前真相（2026-07-23 深夜 — holdout#7:A 因果空边趋势出证伪）
+
+- **holdout 第 7 次消耗完成（owner 批只测 A）**：**证伪**。`spread_expand` short +
+  `no_tp_sl2` / `trail4` 在 ≥05-04 窗 PF@maker **0.997 / 0.969**（train 1.415 / 1.359），
+  净约 0 / −0.53；扣 0.2% 更差。报告 `analysis/p_short_trend_holdout7.md`。
+  **未** promote / 开空 / 改 ACTIVE。
+- **A/B train 背景**（已归档）：空边趋势出曾月度过线；B oracle≫规则但事后。见
+  `p_short_trend_ab.md` / `p_trend_exit_base_rate.md`。
+- **实盘**:detector=none 诚实空转（纪律 12）；三门 30min / ACTIVE / 阈值 / TP·SL **未改**；
+  **holdout 记账 N=7**。
+- **v16 tip-replay 终审已完成且证伪**（holdout#6）:1206 笔 · 胜率 29% · PF 0.78 ·
+  净 −2.82；v11 判断反预测。报告 `analysis/p_v16_holdout_verdict.md`。
+- **多空人工闸门（流式）已就绪**：http://127.0.0.1:8765/gallery.html ；旁路攒 tip。
+- **出路(需 owner 决策)**:本挑战者收口；继续旁路攒真实 tip（v17）/ 换命题；
+  勿再为同一 A 规则烧 holdout。
+
+## ⚡ 当前真相（2026-07-23 深夜 — 空边趋势 A/B:月度过线；oracle≠规则）（历史）
+
+- **A/B 已跑（未碰 holdout）**：空边 `spread_expand`+趋势出 **月度口径稳健过线**
+  （no_tp **1.415** / trail4 **1.359** / trail3 **1.339** / ema55 **1.316**；月 top2
+  净利≈51–58%）；但**季度集中 + 2026-04 翻车**。B：owner short oracle PF6–17 ≫
+  规则，属事后确认态，**可部署仍认规则**。建议 holdout#7 只测 A 因果（不测 oracle）。
+  报告 `analysis/p_short_trend_ab.md`。
+- **Owner 已批趋势出场**（按趋势理解 / 改出场 / 目标=净收益·PF）。固定入场
+  `spread_expand_chg8`+next_open；**空边** `no_tp_sl2` PF@maker **1.415**、trail3
+  **1.339**、ema55 **1.316**（皆≥1.3）；多边全 <1.0。报告
+  `analysis/p_trend_exit_base_rate.md`。**未**碰 holdout / ACTIVE / 三门 / 开空。
+- **多空人工闸门（流式）已就绪**：打开 http://127.0.0.1:8765/gallery.html ，L/S/K 标；预览后台持续渲染（`stream_owner_side_pack.py`）。填完跑 `scripts/owner_side_feature_verdict.py`。
+- **实盘**:detector=none 诚实空转（纪律 12）；三门 30min / ACTIVE / 阈值 / TP·SL **未改**；
+  **holdout 记账 N=6**（本轮研究**未**再耗；**maker-on-holdout 未做**，仍属需 owner
+    另批的第 7 次选项）。
+- **v16 tip-replay 终审已完成且证伪**（holdout#6）:1206 笔 · 胜率 29% · PF 0.78 ·
+  净 −2.82；v11 判断反预测（过线 157 笔 PF 0.60；top5% PF 0.48）。未 promote。
+  报告 `analysis/p_v16_holdout_verdict.md`。
+- **Owner 标框手法裁决（未碰 holdout）**:oracle 选点 train PF **1.183**（相对 emergence
+  0.87 有增量），但可部署因果规则 PF **0.869≈emergence 无增量**——手感来自事后确认态，
+  **不是**盘口 tip 因果 alpha；勿赌 v17 tip 金标继承 1.18。
+  报告 `analysis/p_owner_label_feature_verdict.md`；
+  learning `owner-label-oracle-alpha-is-not-causal-tip-alpha.md`。
+- **启动入场分多空（未碰 holdout）**:上一轮混边 PF 是**测量呈现 bug**（已降权）；
+  分边后多边全 ≤**0.94**，空边最好 spread-short **1.245**，**皆未过 1.3**。
+  主报告 `analysis/p_launch_entry_long_short.md`（混池对照已降权链自
+  `p_launch_entry_base_rate.md`）；learnings
+  `long-short-must-be-split-in-base-rate-tables.md` /
+  `mechanical-launch-entry-lifts-pf-but-not-past-1.3.md`。
+- **因果择向结论（未碰 holdout）**:**择向未救出可交易边**——排列/突破/spread 最好仍
+  spread-short **1.245**；排列跳过 43% tip 也抬不过 1.3。报告
+  `analysis/p_direction_select_base_rate.md`；learning
+  `causal-direction-select-does-not-rescue-pf-past-1.3.md`。
+- **出路(需 owner 决策)**:holdout#7 测 A 因果空边趋势出（no_tp 或 trail4）？/
+  影子纸面？继续攒 tip（旁路）/ 多边另开。默认见 `p_short_trend_ab.md`。
+
+## ⚡ 当前真相（2026-07-23 深夜 — 研究收口:oracle≠tip,启动/择向皆未过1.3）（历史）
 
 - **多空人工闸门（流式）已就绪**：打开 http://127.0.0.1:8765/gallery.html ，L/S/K 标；预览后台持续渲染（`stream_owner_side_pack.py`）。填完跑 `scripts/owner_side_feature_verdict.py`。
 - **实盘**:detector=none 诚实空转（纪律 12）；三门 30min / ACTIVE / 阈值 / TP·SL **未改**；
   **holdout 记账 N=6**（本轮研究**未**再耗；**maker-on-holdout 未做**，仍属需 owner
-  另批的第 7 次选项）。
+    另批的第 7 次选项）。
 - **v16 tip-replay 终审已完成且证伪**（holdout#6）:1206 笔 · 胜率 29% · PF 0.78 ·
   净 −2.82；v11 判断反预测（过线 157 笔 PF 0.60；top5% PF 0.48）。未 promote。
   报告 `analysis/p_v16_holdout_verdict.md`。
@@ -55,8 +107,8 @@
 - **holdout 第 6 次**:当时预授权 + 条件闸门(pre-holdout ≥30 笔且 PF≥1.3…)后**已触发并完成**
   （终审负面，见上方「夜」节 / `p_v16_holdout_verdict.md`）。完整记账:
   ①07-08 2b ②07-15 回归 ③07-16 v8 ④07-17 v10 ⑤07-18 v11
-  **⑥07-23 v16 tip-replay 终审（已完成·证伪）**。**当前 N=6**；
-  maker-on-holdout **未做**。注:v16 训练数据全在 05-04 前,故当时 pre-holdout 偏乐观。
+  **⑥07-23 v16 tip-replay 终审（已完成·证伪）**。其后 **⑦07-23 A 因果空边趋势出
+  证伪**（见顶部；**当前 N=7**）。注:v16 训练数据全在 05-04 前,故当时 pre-holdout 偏乐观。
 
 ## ⚡ 当前真相（2026-07-23 白天 — 实盘检测教义落地）
 

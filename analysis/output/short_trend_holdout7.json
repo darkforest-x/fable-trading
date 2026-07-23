@@ -1,0 +1,248 @@
+{
+  "tag": "short_trend_holdout7",
+  "holdout_consumption_n": 7,
+  "holdout_note": "这是该配置第 7 次消耗 holdout（owner 批准：只测 A 因果空边 no_tp / trail4）",
+  "question": "On holdout (>=2026-05-04), does A causal spread_expand_chg8 short + pre-registered no_tp_sl2_h144 / trail4_atr_h144 clear PF@maker≥1.3?",
+  "verdict": "证伪",
+  "cleared_exits": [],
+  "discipline": {
+    "holdout_start": "2026-05-04 00:00:00+00:00",
+    "holdout_touched": true,
+    "eval_holdout": true,
+    "entry_rule": "spread_expand_chg8",
+    "entry_fill": "next_open",
+    "direction": "short_only",
+    "exits": [
+      "no_tp_sl2_h144",
+      "trail4_atr_h144"
+    ],
+    "costs": {
+      "swap_maker": 0.0006,
+      "legacy_p0": 0.002
+    },
+    "atr_pct_min": 0.0015,
+    "success_pf_maker": 1.3,
+    "scope_forbidden": [
+      "long",
+      "oracle/owner_side",
+      "new rules",
+      "param grid",
+      "promote",
+      "ACTIVE",
+      "live orders"
+    ],
+    "theme": "holdout#7 A causal short trend-exit confirmation"
+  },
+  "data": {
+    "n_symbols": 311,
+    "time_range": [
+      "2026-05-04 00:00:00+00:00",
+      "2026-07-22 03:45:00+00:00"
+    ],
+    "n_short_entry_fires": 2345,
+    "spread_chg8_thr": 0.00383
+  },
+  "a_short": {
+    "no_tp_sl2_h144": {
+      "maker_0.06pct": {
+        "n": 2243,
+        "win_rate": 0.1761,
+        "mean_gross": 0.00058,
+        "mean_net": -2e-05,
+        "sum_net": -0.05422,
+        "profit_factor": 0.997,
+        "mean_hold_bars": 47.48
+      },
+      "legacy_0.20pct": {
+        "n": 2243,
+        "win_rate": 0.1743,
+        "mean_gross": 0.00058,
+        "mean_net": -0.00142,
+        "sum_net": -3.19442,
+        "profit_factor": 0.855,
+        "mean_hold_bars": 47.48
+      },
+      "monthly_maker": {
+        "2026-05": {
+          "n": 813,
+          "win_rate": 0.1796,
+          "mean_gross": 0.00044,
+          "mean_net": -0.00016,
+          "sum_net": -0.13108,
+          "profit_factor": 0.981,
+          "mean_hold_bars": 50.81
+        },
+        "2026-06": {
+          "n": 942,
+          "win_rate": 0.1805,
+          "mean_gross": 0.00063,
+          "mean_net": 3e-05,
+          "sum_net": 0.02508,
+          "profit_factor": 1.003,
+          "mean_hold_bars": 44.91
+        },
+        "2026-07": {
+          "n": 488,
+          "win_rate": 0.1619,
+          "mean_gross": 0.00071,
+          "mean_net": 0.00011,
+          "sum_net": 0.05178,
+          "profit_factor": 1.013,
+          "mean_hold_bars": 46.89
+        }
+      },
+      "quarterly_maker": {
+        "2026Q2": {
+          "n": 1755,
+          "win_rate": 0.1801,
+          "mean_gross": 0.00054,
+          "mean_net": -6e-05,
+          "sum_net": -0.106,
+          "profit_factor": 0.993,
+          "mean_hold_bars": 47.64
+        },
+        "2026Q3": {
+          "n": 488,
+          "win_rate": 0.1619,
+          "mean_gross": 0.00071,
+          "mean_net": 0.00011,
+          "sum_net": 0.05178,
+          "profit_factor": 1.013,
+          "mean_hold_bars": 46.89
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 3,
+        "n_periods_pf_ge_1_3": 0,
+        "n_periods_sum_net_gt_0": 2,
+        "sum_net_total": -0.05422,
+        "top1_period": "2026-07",
+        "top1_share_of_sum_net": null,
+        "top2_share_of_sum_net": null,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 2,
+        "n_periods_pf_ge_1_3": 0,
+        "n_periods_sum_net_gt_0": 1,
+        "sum_net_total": -0.05422,
+        "top1_period": "2026Q3",
+        "top1_share_of_sum_net": null,
+        "top2_share_of_sum_net": null,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "exit_rule": "SL2 only, no TP; timeout 144"
+    },
+    "trail4_atr_h144": {
+      "maker_0.06pct": {
+        "n": 2243,
+        "win_rate": 0.3669,
+        "mean_gross": 0.00036,
+        "mean_net": -0.00024,
+        "sum_net": -0.52807,
+        "profit_factor": 0.969,
+        "mean_hold_bars": 32.47
+      },
+      "legacy_0.20pct": {
+        "n": 2243,
+        "win_rate": 0.3455,
+        "mean_gross": 0.00036,
+        "mean_net": -0.00164,
+        "sum_net": -3.66827,
+        "profit_factor": 0.805,
+        "mean_hold_bars": 32.47
+      },
+      "monthly_maker": {
+        "2026-05": {
+          "n": 813,
+          "win_rate": 0.3801,
+          "mean_gross": 0.00173,
+          "mean_net": 0.00113,
+          "sum_net": 0.91478,
+          "profit_factor": 1.163,
+          "mean_hold_bars": 35.55
+        },
+        "2026-06": {
+          "n": 942,
+          "win_rate": 0.3599,
+          "mean_gross": -0.00036,
+          "mean_net": -0.00096,
+          "sum_net": -0.90171,
+          "profit_factor": 0.886,
+          "mean_hold_bars": 30.27
+        },
+        "2026-07": {
+          "n": 488,
+          "win_rate": 0.3586,
+          "mean_gross": -0.00051,
+          "mean_net": -0.00111,
+          "sum_net": -0.54114,
+          "profit_factor": 0.832,
+          "mean_hold_bars": 31.59
+        }
+      },
+      "quarterly_maker": {
+        "2026Q2": {
+          "n": 1755,
+          "win_rate": 0.3692,
+          "mean_gross": 0.00061,
+          "mean_net": 1e-05,
+          "sum_net": 0.01307,
+          "profit_factor": 1.001,
+          "mean_hold_bars": 32.71
+        },
+        "2026Q3": {
+          "n": 488,
+          "win_rate": 0.3586,
+          "mean_gross": -0.00051,
+          "mean_net": -0.00111,
+          "sum_net": -0.54114,
+          "profit_factor": 0.832,
+          "mean_hold_bars": 31.59
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 3,
+        "n_periods_pf_ge_1_3": 0,
+        "n_periods_sum_net_gt_0": 1,
+        "sum_net_total": -0.52807,
+        "top1_period": "2026-05",
+        "top1_share_of_sum_net": null,
+        "top2_share_of_sum_net": null,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 2,
+        "n_periods_pf_ge_1_3": 0,
+        "n_periods_sum_net_gt_0": 1,
+        "sum_net_total": -0.52807,
+        "top1_period": "2026Q2",
+        "top1_share_of_sum_net": null,
+        "top2_share_of_sum_net": null,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "exit_rule": "ATR trailing 4×ATR14(signal); timeout 144"
+    }
+  },
+  "train_reference": {
+    "source": "analysis/p_short_trend_ab.md",
+    "no_tp_sl2_h144": {
+      "n": 6166,
+      "pf_maker": 1.415,
+      "pf_legacy": 1.222,
+      "sum_net_maker": 21.81,
+      "win_rate": 0.207
+    },
+    "trail4_atr_h144": {
+      "n": 6166,
+      "pf_maker": 1.359,
+      "pf_legacy": 1.141,
+      "sum_net_maker": 15.38,
+      "win_rate": 0.42
+    }
+  },
+  "comparable_to": [
+    "analysis/p_short_trend_ab.md",
+    "analysis/p_trend_exit_base_rate.md"
+  ]
+}
