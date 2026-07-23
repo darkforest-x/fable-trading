@@ -2,7 +2,29 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-07-23 夜 — v16 终审:证伪,不上线）
+## ⚡ 当前真相（2026-07-23 深夜 — 研究收口:oracle≠tip,启动分边仍薄）
+
+- **实盘**:detector=none 诚实空转（纪律 12）；三门 30min / ACTIVE / 阈值 / TP·SL **未改**；
+  **holdout 记账 N=6**（本轮研究**未**再耗；**maker-on-holdout 未做**，仍属需 owner
+  另批的第 7 次选项）。
+- **v16 tip-replay 终审已完成且证伪**（holdout#6）:1206 笔 · 胜率 29% · PF 0.78 ·
+  净 −2.82；v11 判断反预测（过线 157 笔 PF 0.60；top5% PF 0.48）。未 promote。
+  报告 `analysis/p_v16_holdout_verdict.md`。
+- **Owner 标框手法裁决（未碰 holdout）**:oracle 选点 train PF **1.183**（相对 emergence
+  0.87 有增量），但可部署因果规则 PF **0.869≈emergence 无增量**——手感来自事后确认态，
+  **不是**盘口 tip 因果 alpha；勿赌 v17 tip 金标继承 1.18。
+  报告 `analysis/p_owner_label_feature_verdict.md`；
+  learning `owner-label-oracle-alpha-is-not-causal-tip-alpha.md`。
+- **启动入场分多空（未碰 holdout）**:上一轮混边 PF 是**测量呈现 bug**（已降权）；
+  分边后多边全 ≤**0.94**，空边最好 spread-short **1.245**，**皆未过 1.3**。
+  主报告 `analysis/p_launch_entry_long_short.md`（混池对照已降权链自
+  `p_launch_entry_base_rate.md`）；learnings
+  `long-short-must-be-split-in-base-rate-tables.md` /
+  `mechanical-launch-entry-lifts-pf-but-not-past-1.3.md`。
+- **出路(需 owner 决策)**:继续攒真实 tip 分布（旁路，勿当救命主线）/
+  显式「确认散开」规则小实验 / 或收摊换命题。默认建议见上述两份报告的「下一步」。
+
+## 2026-07-23 夜 — v16 终审:证伪,不上线（历史）
 
 - **holdout 第 6 次消耗完成(owner 预授权)。v16 tip-replay 终审 = 决定性负面,未 promote。**
   窗口 05-04~07-16 · 15 币 · **1206 笔 · 胜率 29% · PF 0.78 · 净 -2.82**(纯检测,亏损)。
@@ -16,7 +38,7 @@
 - 回测搬 3060 GPU(~4h→~30min);loader 加编码容错(一个坏字节曾崩全run);前端回测页
   切 v16 tip-replay 数据源(旧 PF 6.61 折叠为"已废弃事后方法学")。
 
-## 2026-07-23 傍晚 — 回测终审授权（历史）
+## 2026-07-23 傍晚 — 回测终审授权（历史；⑥已完成）
 
 - **v16 判决反转(owner 目视 + 我逐图核实)**:金标"51.5% 误火"作废——那 33 张
   tip-empty-ok 是规则自动预标(非 owner 真值),v16 在 BONK/CAP/EDEN 右缘的框全在
@@ -25,11 +47,11 @@
 - **改用回测终审(owner 指令:让钱判,不让标签判)**。逐 bar 盘口 tip-replay
   回测器 `scripts/backtest_tip_replay.py`(检测器只见过去 / TP5·SL2 / maker 成本 /
   A′ 贴边门 / MIN_GAP)。小样(DOGE 单周)9 笔 PF 3.36 净 +5.6%,仅信号级不作数。
-- **holdout 第 6 次消耗:owner 已预授权(2026-07-23),条件闸门**:pre-holdout 发现级
-  (15 币 · 04-01..05-03,后台跑)须 **≥30 笔 且 PF≥1.3 且 扣 0.06% 净正** 才触发
-  holdout(≥05-04)回测;不达标则不消耗。完整记账:①07-08 2b ②07-15 回归 ③07-16 v8
-  ④07-17 v10 ⑤07-18 v11 **⑥(待触发)v16 tip-replay 终审**。
-  注:v16 训练数据全在 05-04 前,故 pre-holdout 偏乐观,holdout 才是干净终审。
+- **holdout 第 6 次**:当时预授权 + 条件闸门(pre-holdout ≥30 笔且 PF≥1.3…)后**已触发并完成**
+  （终审负面，见上方「夜」节 / `p_v16_holdout_verdict.md`）。完整记账:
+  ①07-08 2b ②07-15 回归 ③07-16 v8 ④07-17 v10 ⑤07-18 v11
+  **⑥07-23 v16 tip-replay 终审（已完成·证伪）**。**当前 N=6**；
+  maker-on-holdout **未做**。注:v16 训练数据全在 05-04 前,故当时 pre-holdout 偏乐观。
 
 ## ⚡ 当前真相（2026-07-23 白天 — 实盘检测教义落地）
 
