@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Owner 多空审阅 · long / short / skip</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --panel: #1a222c;
+    --text: #e7ecf1;
+    --muted: #8b9aab;
+    --long: #22c55e;
+    --short: #ef4444;
+    --skip: #64748b;
+    --accent: #38bdf8;
+    --border: #2a3544;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+  }
+  header {
+    display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center;
+    padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { font-size: 15px; margin: 0; font-weight: 600; letter-spacing: 0.02em; }
+  .stats { display: flex; flex-wrap: wrap; gap: 10px; font-size: 13px; color: var(--muted); }
+  .stats b { color: var(--text); font-weight: 600; }
+  .stats .long b { color: var(--long); }
+  .stats .short b { color: var(--short); }
+  .stats .skip b { color: var(--skip); }
+  .modes { display: flex; gap: 6px; margin-left: auto; }
+  .modes button, .nav button, .actions button {
+    border: 1px solid var(--border); background: #243040; color: var(--text);
+    border-radius: 6px; padding: 7px 12px; cursor: pointer; font-size: 13px;
+  }
+  .modes button.active { border-color: var(--accent); color: var(--accent); }
+  .modes button:hover, .nav button:hover { background: #2c3b4e; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px; display: grid; gap: 12px;
+  }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; }
+  .meta code { background: #0d1218; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+  .meta .tag {
+    font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .meta .tag.on-long { color: var(--long); border-color: var(--long); }
+  .meta .tag.on-short { color: var(--short); border-color: var(--short); }
+  .meta .tag.on-skip { color: var(--skip); border-color: var(--skip); }
+  .stage {
+    position: relative; background: #000; border-radius: 8px; overflow: hidden;
+    min-height: 280px; display: flex; align-items: center; justify-content: center;
+  }
+  .stage img { max-width: 100%; max-height: 68vh; display: block; }
+  .stage canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+  }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .actions .long { background: #14532d; border-color: var(--long); color: #bbf7d0; font-weight: 600; min-width: 110px; }
+  .actions .short { background: #7f1d1d; border-color: var(--short); color: #fecaca; font-weight: 600; min-width: 110px; }
+  .actions .skip { background: #334155; border-color: var(--skip); color: #cbd5e1; min-width: 100px; }
+  .actions button:active { transform: scale(0.98); }
+  .nav { display: flex; gap: 8px; justify-content: center; }
+  .hint { text-align: center; color: var(--muted); font-size: 12px; line-height: 1.5; }
+  .banner {
+    background: #422006; color: #fde68a; padding: 8px 12px; border-radius: 8px;
+    font-size: 13px; display: none;
+  }
+  .banner.show { display: block; }
+  .note-row { display: flex; gap: 8px; align-items: center; }
+  .note-row input {
+    flex: 1; background: #0d1218; border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px; padding: 8px 10px; font-size: 13px;
+  }
+  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  kbd {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: #0d1218; border: 1px solid var(--border); border-bottom-width: 2px;
+    border-radius: 4px; padding: 0 5px; font-size: 11px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Owner 多空审阅</h1>
+  <div class="stats" id="stats">加载中…</div>
+  <div class="modes">
+    <button type="button" id="mode-sample" class="active" title="快捷键 1">小样</button>
+    <button type="button" id="mode-full" title="快捷键 2">全量</button>
+    <button type="button" id="mode-unlabeled" title="快捷键 U">仅未标</button>
+    <button type="button" id="btn-export">导出 CSV</button>
+  </div>
+</header>
+<main>
+  <div class="banner" id="banner"></div>
+  <div class="card" id="card">
+    <div class="empty" id="boot">正在加载 items.json…</div>
+  </div>
+</main>
+<script>
+(() => {
+  const LS_KEY = "fable_owner_side_reviews_v1";
+  const VALID = new Set(["long", "short", "skip"]);
+
+  let items = [];
+  let reviews = {}; // box_id -> {owner_side, owner_note, ts}
+  let queue = [];
+  let idx = 0;
+  let mode = "sample"; // sample | full
+  let unlabeledOnly = true;
+  let serverOk = false;
+  let imgEl = null;
+
+  const $ = (id) => document.getElementById(id);
+
+  function loadLocal() {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return {};
+      const obj = JSON.parse(raw);
+      return obj && typeof obj === "object" ? obj : {};
+    } catch { return {}; }
+  }
+  function saveLocal() {
+    localStorage.setItem(LS_KEY, JSON.stringify(reviews));
+  }
+
+  function mergeReviews(a, b) {
+    const out = { ...a };
+    for (const [k, v] of Object.entries(b || {})) {
+      if (!v || !VALID.has(String(v.owner_side || "").toLowerCase())) continue;
+      const cur = out[k];
+      if (!cur || String(v.ts || "") >= String(cur.ts || "")) out[k] = v;
+    }
+    return out;
+  }
+
+  async function tryServerState() {
+    try {
+      const r = await fetch("/api/state", { cache: "no-store" });
+      if (!r.ok) return false;
+      const d = await r.json();
+      reviews = mergeReviews(reviews, d.reviews || {});
+      serverOk = true;
+      $("banner").classList.remove("show");
+      return true;
+    } catch {
+      serverOk = false;
+      $("banner").textContent =
+        "未连上审阅服务：标注只存在浏览器 localStorage。请运行 scripts/serve_owner_side_review.py 以便立刻写回 review_sheet.csv。仍可点「导出 CSV」带走进度。";
+      $("banner").classList.add("show");
+      return false;
+    }
+  }
+
+  async function persist(boxId, side, note) {
+    const rec = {
+      owner_side: side,
+      owner_note: note || "",
+      ts: new Date().toISOString(),
+    };
+    reviews[boxId] = rec;
+    saveLocal();
+    if (!serverOk) return;
+    try {
+      const r = await fetch("/api/label", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ box_id: boxId, owner_side: side, owner_note: note || "" }),
+      });
+      if (!r.ok) throw new Error("save failed");
+    } catch (e) {
+      serverOk = false;
+      $("banner").textContent = "写盘失败，已改用 localStorage。请检查 serve 脚本是否在跑。";
+      $("banner").classList.add("show");
+    }
+  }
+
+  function counts() {
+    let labeled = 0, long = 0, short = 0, skip = 0;
+    for (const it of items) {
+      const s = (reviews[it.box_id] || {}).owner_side || it.owner_side || "";
+      if (!VALID.has(s)) continue;
+      labeled++;
+      if (s === "long") long++;
+      else if (s === "short") short++;
+      else skip++;
+    }
+    return { labeled, long, short, skip, total: items.length };
+  }
+
+  let pollTimer = null;
+
+  async function refreshFromServer() {
+    try {
+      const r = await fetch("/api/items", { cache: "no-store" });
+      if (!r.ok) return;
+      const d = await r.json();
+      const incoming = d.items || [];
+      if (!incoming.length) return;
+      const byId = new Map(items.map((x) => [x.box_id, x]));
+      let changed = incoming.length !== items.length;
+      for (const it of incoming) {
+        const prev = byId.get(it.box_id);
+        if (!prev) {
+          changed = true;
+          continue;
+        }
+        if (
+          prev.preview_path !== it.preview_path ||
+          prev.preview_ready !== it.preview_ready ||
+          (it.owner_side && it.owner_side !== prev.owner_side)
+        ) {
+          changed = true;
+        }
+      }
+      // Merge server reviews lightly
+      await tryServerState();
+      if (changed || items.length === 0) {
+        const curId = current() && current().box_id;
+        items = incoming;
+        for (const it of items) {
+          const s = String(it.owner_side || "").toLowerCase();
+          if (VALID.has(s) && !reviews[it.box_id]) {
+            reviews[it.box_id] = {
+              owner_side: s,
+              owner_note: it.owner_note || "",
+              ts: "",
+            };
+          }
+        }
+        rebuildQueue();
+        if (curId) {
+          const j = queue.findIndex((x) => x.box_id === curId);
+          if (j >= 0) idx = j;
+        }
+        render();
+      } else {
+        updateStats();
+      }
+      const banner = $("banner");
+      const pending = d.n_preview_pending || 0;
+      const ready = d.n_preview_ready || 0;
+      const rs = d.render || {};
+      if (pending > 0 || rs.running) {
+        banner.textContent =
+          `流式渲染中：已出图 ${ready} · 等待预览 ${pending}` +
+          (rs.message ? ` · ${rs.message}` : "") +
+          " —— 有图就能标，未出图可按 N 跳过。";
+        banner.classList.add("show");
+      } else if (!serverOk) {
+        /* keep offline banner */
+      } else {
+        banner.classList.remove("show");
+      }
+    } catch {
+      /* ignore poll errors */
+    }
+  }
+
+  function rebuildQueue() {
+    let pool = items;
+    if (mode === "sample") pool = items.filter((x) => x.in_sample);
+    if (unlabeledOnly) {
+      pool = pool.filter((x) => {
+        const s = (reviews[x.box_id] || {}).owner_side || x.owner_side || "";
+        return !VALID.has(s);
+      });
+    }
+    // Prefer cards with preview ready; keep pending at end so L/S/K flow stays on ready imgs
+    const ready = [];
+    const pending = [];
+    for (const x of pool) {
+      const hasPrev = !!(x.preview_path || x.preview_ready);
+      (hasPrev ? ready : pending).push(x);
+    }
+    queue = ready.concat(pending);
+    if (idx >= queue.length) idx = Math.max(0, queue.length - 1);
+  }
+
+  function current() {
+    return queue[idx] || null;
+  }
+
+  function sideOf(it) {
+    if (!it) return "";
+    return ((reviews[it.box_id] || {}).owner_side || it.owner_side || "").toLowerCase();
+  }
+
+  function updateStats() {
+    const c = counts();
+    const remainSample = items.filter(
+      (x) => x.in_sample && !VALID.has(((reviews[x.box_id] || {}).owner_side || x.owner_side || ""))
+    ).length;
+    const remainAll = items.filter(
+      (x) => !VALID.has(((reviews[x.box_id] || {}).owner_side || x.owner_side || ""))
+    ).length;
+    $("stats").innerHTML =
+      `队列 <b>${queue.length ? idx + 1 : 0}</b>/${queue.length}` +
+      ` · 已标 <b>${c.labeled}</b>/${c.total}` +
+      ` · <span class="long">L <b>${c.long}</b></span>` +
+      ` · <span class="short">S <b>${c.short}</b></span>` +
+      ` · <span class="skip">K <b>${c.skip}</b></span>` +
+      ` · 小样剩 <b>${remainSample}</b> · 全量剩 <b>${remainAll}</b>`;
+  }
+
+  function imgSrc(it) {
+    if (it.preview_path) return it.preview_path;
+    // Serve maps /ds/<split>/<stem>.png
+    return `/ds/${it.split}/${encodeURIComponent(it.stem)}.png`;
+  }
+
+  function drawYoloOverlay(img, canvas, it) {
+    if (!img || !canvas || !it || !it.yolo) return;
+    const [xc, yc, bw, bh] = it.yolo;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = img.getBoundingClientRect();
+    const stage = img.parentElement.getBoundingClientRect();
+    canvas.width = Math.round(stage.width * dpr);
+    canvas.height = Math.round(stage.height * dpr);
+    canvas.style.width = stage.width + "px";
+    canvas.style.height = stage.height + "px";
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, stage.width, stage.height);
+    // Image may be letterboxed inside stage
+    const dispW = img.clientWidth;
+    const dispH = img.clientHeight;
+    const offX = (stage.width - dispW) / 2;
+    const offY = (stage.height - dispH) / 2;
+    const x1 = offX + (xc - bw / 2) * dispW;
+    const x2 = offX + (xc + bw / 2) * dispW;
+    const y1 = offY + (yc - bh / 2) * dispH;
+    const y2 = offY + (yc + bh / 2) * dispH;
+    ctx.strokeStyle = "#22c55e";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+  }
+
+  function render() {
+    updateStats();
+    const card = $("card");
+    const it = current();
+    if (!it) {
+      card.innerHTML = `<div class="empty">本队列已空。按 <kbd>2</kbd> 切全量，或关掉「仅未标」复查。</div>`;
+      return;
+    }
+    const side = sideOf(it);
+    const tagClass = side ? `on-${side}` : "";
+    const note = (reviews[it.box_id] || {}).owner_note || it.owner_note || "";
+    const hasPreview = !!(it.preview_path || it.preview_ready);
+    const stageHtml = hasPreview
+      ? `<img id="chart" alt="${esc(it.stem)}" src="${esc(imgSrc(it))}"/><canvas id="overlay"></canvas>`
+      : `<div class="empty" style="padding:80px 20px">渲染中… 预览尚未写出<br/><span style="font-size:12px">可按 <kbd>N</kbd> 跳到下一张已出图的卡</span></div>`;
+    card.innerHTML = `
+      <div class="meta">
+        <div><b>${esc(it.symbol)}</b></div>
+        <div>${esc(it.cut_time)}</div>
+        <div>宽 ${it.width_bars} bars · 图内框 ${it.box_index + 1}/${it.n_boxes_on_image}</div>
+        <div><code>${esc(it.box_id)}</code></div>
+        <span class="tag ${tagClass}">${side ? side : "未标"}</span>
+        ${it.in_sample ? '<span class="tag">小样</span>' : ""}
+        ${hasPreview ? "" : '<span class="tag">渲染中</span>'}
+        ${it.spread_chg8 !== "" && it.spread_chg8 != null ? `<span class="tag">spread_chg8=${esc(String(it.spread_chg8))}</span>` : ""}
+      </div>
+      <div class="stage" id="stage">${stageHtml}</div>
+      <div class="actions">
+        <button type="button" class="long" data-side="long" ${hasPreview ? "" : "disabled"}>Long <kbd>L</kbd></button>
+        <button type="button" class="short" data-side="short" ${hasPreview ? "" : "disabled"}>Short <kbd>S</kbd></button>
+        <button type="button" class="skip" data-side="skip">Skip <kbd>K</kbd></button>
+      </div>
+      <div class="note-row">
+        <input id="note" type="text" placeholder="可选备注 owner_note" value="${esc(note)}"/>
+      </div>
+      <div class="nav">
+        <button type="button" id="prev">← 上一张 <kbd>P</kbd></button>
+        <button type="button" id="next">下一张 <kbd>N</kbd> →</button>
+      </div>
+      <div class="hint">
+        按「触发当下」能判断的方向标；不要看框后走势。L=多 · S=空 · K/X=跳过 · 标完自动下一张。图会陆续出现。
+      </div>
+    `;
+    imgEl = $("chart");
+    const canvas = $("overlay");
+    if (imgEl && canvas) {
+      const onReady = () => drawYoloOverlay(imgEl, canvas, it);
+      if (imgEl.complete) onReady();
+      else imgEl.onload = onReady;
+      window.addEventListener("resize", onReady, { once: true });
+    }
+
+    card.querySelectorAll("[data-side]").forEach((btn) => {
+      btn.addEventListener("click", () => label(btn.getAttribute("data-side")));
+    });
+    $("prev").onclick = () => { idx = Math.max(0, idx - 1); render(); };
+    $("next").onclick = () => { idx = Math.min(queue.length - 1, idx + 1); render(); };
+  }
+
+  function esc(s) {
+    return String(s ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  async function label(side) {
+    const it = current();
+    if (!it || !VALID.has(side)) return;
+    // Don't allow L/S on cards still rendering (skip is ok to dismiss)
+    if ((side === "long" || side === "short") && !(it.preview_path || it.preview_ready)) {
+      return;
+    }
+    const note = ($("note") && $("note").value) || "";
+    await persist(it.box_id, side, note);
+    // Advance: if unlabeled-only filter, item leaves queue; else step forward.
+    const wasId = it.box_id;
+    rebuildQueue();
+    if (unlabeledOnly) {
+      // queue already dropped current; keep idx
+      if (idx >= queue.length) idx = Math.max(0, queue.length - 1);
+    } else {
+      // stay on next item after current
+      const j = queue.findIndex((x) => x.box_id === wasId);
+      idx = j >= 0 ? Math.min(j + 1, queue.length - 1) : idx;
+    }
+    render();
+  }
+
+  function exportCsv() {
+    const headers = [
+      "box_id","symbol","stem","cut_time","cut_global","width_bars",
+      "in_sample","owner_side","owner_note","spread_chg8","image_path","preview_path"
+    ];
+    const lines = [headers.join(",")];
+    for (const it of items) {
+      const r = reviews[it.box_id] || {};
+      const side = r.owner_side || it.owner_side || "";
+      const note = (r.owner_note || it.owner_note || "").replace(/"/g, '""');
+      const row = [
+        it.box_id, it.symbol, it.stem, it.cut_time, it.cut_global, it.width_bars,
+        it.in_sample, side, `"${note}"`, it.spread_chg8 ?? "",
+        it.image_path || "", it.preview_path || ""
+      ];
+      lines.push(row.join(","));
+    }
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "owner_side_review_export.csv";
+    a.click();
+  }
+
+  function setMode(m) {
+    mode = m;
+    $("mode-sample").classList.toggle("active", mode === "sample");
+    $("mode-full").classList.toggle("active", mode === "full");
+    idx = 0;
+    rebuildQueue();
+    render();
+  }
+
+  function toggleUnlabeled() {
+    unlabeledOnly = !unlabeledOnly;
+    $("mode-unlabeled").classList.toggle("active", unlabeledOnly);
+    idx = 0;
+    rebuildQueue();
+    render();
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+    const k = e.key.toLowerCase();
+    if (k === "l") { e.preventDefault(); label("long"); }
+    else if (k === "s") { e.preventDefault(); label("short"); }
+    else if (k === "k" || k === "x") { e.preventDefault(); label("skip"); }
+    else if (k === "n" || k === "arrowright") { e.preventDefault(); idx = Math.min(queue.length - 1, idx + 1); render(); }
+    else if (k === "p" || k === "arrowleft") { e.preventDefault(); idx = Math.max(0, idx - 1); render(); }
+    else if (k === "1") { e.preventDefault(); setMode("sample"); }
+    else if (k === "2") { e.preventDefault(); setMode("full"); }
+    else if (k === "u") { e.preventDefault(); toggleUnlabeled(); }
+  });
+
+  $("mode-sample").onclick = () => setMode("sample");
+  $("mode-full").onclick = () => setMode("full");
+  $("mode-unlabeled").onclick = () => toggleUnlabeled();
+  $("mode-unlabeled").classList.add("active");
+  $("btn-export").onclick = exportCsv;
+
+  async function boot() {
+    reviews = loadLocal();
+    await tryServerState();
+    // Prefer live API (streaming); fall back to static items.json
+    let loaded = false;
+    try {
+      const r = await fetch("/api/items", { cache: "no-store" });
+      if (r.ok) {
+        const d = await r.json();
+        items = d.items || [];
+        loaded = true;
+        serverOk = true;
+      }
+    } catch { /* fall through */ }
+    if (!loaded) {
+      const r = await fetch("items.json", { cache: "no-store" });
+      if (!r.ok) throw new Error("items.json missing — run build_owner_side_review_pack.py");
+      items = await r.json();
+    }
+    for (const it of items) {
+      const s = String(it.owner_side || "").toLowerCase();
+      if (VALID.has(s) && !reviews[it.box_id]) {
+        reviews[it.box_id] = { owner_side: s, owner_note: it.owner_note || "", ts: "" };
+      }
+    }
+    saveLocal();
+    rebuildQueue();
+    render();
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(refreshFromServer, 2500);
+  }
+  boot().catch((err) => {
+    $("card").innerHTML = `<div class="empty">加载失败：${esc(err.message || err)}</div>`;
+  });
+})();
+</script>
+</body>
+</html>
