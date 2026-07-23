@@ -1,0 +1,108 @@
+{
+  "tag": "base_rate_dense_full",
+  "window": "<2026-05-04 (holdout untouched)",
+  "n_symbols": 225,
+  "rule": "fast_spread<=0.0028 & full_spread<=0.0055, run>=5, no detector",
+  "exit": "TP5/SL2/72bar, maker cost 0.0006",
+  "dense": {
+    "n": 16262,
+    "win_rate": 0.2953,
+    "profit_factor": 0.874,
+    "mean_net": -0.00085,
+    "total_net": -13.833
+  },
+  "random_baseline": {
+    "n": 16335,
+    "win_rate": 0.2983,
+    "profit_factor": 0.864,
+    "mean_net": -0.00135,
+    "total_net": -22.0873
+  },
+  "dense_minus_random_mean_net": 0.0005,
+  "monthly_dense": {
+    "2025-06": {
+      "n": 826,
+      "win_rate": 0.3123,
+      "profit_factor": 0.882,
+      "mean_net": -0.00076,
+      "total_net": -0.6238
+    },
+    "2025-07": {
+      "n": 764,
+      "win_rate": 0.4123,
+      "profit_factor": 1.382,
+      "mean_net": 0.00252,
+      "total_net": 1.9242
+    },
+    "2025-08": {
+      "n": 1050,
+      "win_rate": 0.321,
+      "profit_factor": 0.925,
+      "mean_net": -0.00053,
+      "total_net": -0.5546
+    },
+    "2025-09": {
+      "n": 1745,
+      "win_rate": 0.3117,
+      "profit_factor": 1.025,
+      "mean_net": 0.00014,
+      "total_net": 0.2497
+    },
+    "2025-10": {
+      "n": 1129,
+      "win_rate": 0.3268,
+      "profit_factor": 0.921,
+      "mean_net": -0.00056,
+      "total_net": -0.6328
+    },
+    "2025-11": {
+      "n": 986,
+      "win_rate": 0.1856,
+      "profit_factor": 0.466,
+      "mean_net": -0.00499,
+      "total_net": -4.9249
+    },
+    "2025-12": {
+      "n": 1635,
+      "win_rate": 0.2349,
+      "profit_factor": 0.675,
+      "mean_net": -0.00225,
+      "total_net": -3.6762
+    },
+    "2026-01": {
+      "n": 1760,
+      "win_rate": 0.2074,
+      "profit_factor": 0.558,
+      "mean_net": -0.00326,
+      "total_net": -5.7324
+    },
+    "2026-02": {
+      "n": 1234,
+      "win_rate": 0.222,
+      "profit_factor": 0.588,
+      "mean_net": -0.00366,
+      "total_net": -4.521
+    },
+    "2026-03": {
+      "n": 2208,
+      "win_rate": 0.3415,
+      "profit_factor": 1.183,
+      "mean_net": 0.00116,
+      "total_net": 2.5689
+    },
+    "2026-04": {
+      "n": 2464,
+      "win_rate": 0.3531,
+      "profit_factor": 1.184,
+      "mean_net": 0.001,
+      "total_net": 2.4621
+    },
+    "2026-05": {
+      "n": 461,
+      "win_rate": 0.3232,
+      "profit_factor": 0.84,
+      "mean_net": -0.00081,
+      "total_net": -0.3721
+    }
+  }
+}
