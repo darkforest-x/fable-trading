@@ -1,0 +1,28 @@
+{
+  "config": "IT-10 regime side-select (BTC>SMA200->long, else short) + separate judgments",
+  "exit": "TP5/SL2",
+  "long_cands": 1829,
+  "short_cands": 2125,
+  "walk_forward": [
+    {
+      "test_window": "2026-01-06..2026-02-25",
+      "regime_selected": {
+        "n": 81,
+        "PF": 0.997,
+        "mean_bps": -0.2
+      },
+      "n_long_bull": 133,
+      "n_short_bear": 275
+    },
+    {
+      "test_window": "2026-02-25..2026-05-03",
+      "regime_selected": {
+        "n": 141,
+        "PF": 1.02,
+        "mean_bps": 1.3
+      },
+      "n_long_bull": 464,
+      "n_short_bear": 246
+    }
+  ]
+}
