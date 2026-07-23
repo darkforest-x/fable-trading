@@ -1,0 +1,36 @@
+E1/E2 entry_align_and_regime  n_owner_short=1361  n_symbols_cap=all  holdout=FORBIDDEN
+=== E1: fit rules on owner short vs neg ===
+  [fit] symbols with owner short: 30
+  [fit] symbols with owner short: 60
+  [fit] symbols with owner short: 90
+  [fit] symbols with owner short: 120
+  [fit] symbols with owner short: 150
+  [fit] symbols with owner short: 180
+  [fit] symbols with owner short: 210
+  fit pos=1284 neg=5136 auc=0.972 feats=116
+  R1_stump: order_score<=0
+  R2_and3: order_score<=0 ∧ close_vs_sma20<=-0.0101448 ∧ fast_spread_chg4>=0.00296547
+  R3_confirm: close_vs_sma20<=-0.0101448 ∧ order_score<=0 ∧ spread_chg8>=0.00395094 ∧ ret_8<=-0.0104045
+=== full-market scan ===
+  scanned 20 symbols …
+  scanned 40 symbols …
+  scanned 60 symbols …
+  scanned 80 symbols …
+  scanned 100 symbols …
+  scanned 120 symbols …
+  scanned 140 symbols …
+  scanned 160 symbols …
+  scanned 180 symbols …
+  scanned 200 symbols …
+  scanned 220 symbols …
+
+=== E1 headline (no_tp) ===
+  spread_expand_chg8: n=6166 PF@m=1.415 recall18=0.2523 J=0.0452 2026-04 PF=0.678
+  R1_stump: n=155803 PF@m=1.119 recall18=0.9977 J=0.0082 2026-04 PF=0.961
+  R2_and3: n=72604 PF@m=1.14 recall18=0.9494 J=0.0167 2026-04 PF=1.372
+  R3_confirm: n=66697 PF@m=1.141 recall18=0.9439 J=0.0181 2026-04 PF=1.377
+=== E2 headline ===
+  spread_no_gate: n=6166 (100%) PF@m=1.415 2026-04=0.678
+  spread_not_btc_up: n=6031 (98%) PF@m=1.438 2026-04=0.652
+  spread_atr_q34: n=3083 (50%) PF@m=1.607 2026-04=0.845
+wrote /Users/zhangzc/fable-trading/analysis/output/entry_align_and_regime.json  elapsed=112.8s

@@ -2,7 +2,20 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-07-23 深夜 — holdout#7:A 因果空边趋势出证伪）
+## ⚡ 当前真相（2026-07-23 深夜 — E1对齐抬召回边死；E2 atr门不修4月）
+
+- **E1/E2 发现级（未碰 holdout#8）**：E1 重写入场对齐 owner short → 召回 25%→94%
+  但 Jaccard 更差（0.045→0.018），因果 `no_tp` PF~**1.14**（相对 spread 1.415 倒退）；
+  E2 `not_btc_up` 空转，`atr_q34` 抬至 1.607 仍救不过 2026-04（0.845）。**不申请
+  holdout**。报告 `analysis/p_entry_align_and_regime.md`。
+- **holdout 第 7 次（归档）**：A 因果空边趋势出证伪（PF@maker 0.997/0.969）。
+  报告 `p_short_trend_holdout7.md`。**未** promote / 开空 / 改 ACTIVE。
+- **实盘**:detector=none 诚实空转（纪律 12）；三门 30min / ACTIVE / 阈值 / TP·SL **未改**；
+  **holdout 记账 N=7**。
+- **出路(需 owner 决策)**:E3 稀疏化 / 确认态∩tip 窗加硬阈；旁路 tip（v17）；
+  勿为 E1 宽规则或 E2 atr 门烧 holdout#8。
+
+## ⚡ 当前真相（2026-07-23 深夜 — holdout#7:A 因果空边趋势出证伪）（历史）
 
 - **holdout 第 7 次消耗完成（owner 批只测 A）**：**证伪**。`spread_expand` short +
   `no_tp_sl2` / `trail4` 在 ≥05-04 窗 PF@maker **0.997 / 0.969**（train 1.415 / 1.359），

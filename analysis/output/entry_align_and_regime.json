@@ -1,0 +1,320 @@
+{
+  "tag": "entry_align_and_regime",
+  "holdout": "FORBIDDEN \u2014 train open_time < 2026-05-04 only",
+  "n_symbols": 233,
+  "n_fit_symbols_with_owner": 212,
+  "time_range": {
+    "min": "2025-06-05 15:45:00+00:00",
+    "max": "2026-05-03 23:15:00+00:00"
+  },
+  "n_owner_short_train": 1361,
+  "fit": {
+    "n_pos": 1284,
+    "n_neg": 5136,
+    "auc_disclosure_only": 0.9725,
+    "top_gains": [
+      {
+        "feature": "order_score",
+        "gain": 6139.486737847328
+      },
+      {
+        "feature": "close_vs_sma20",
+        "gain": 4901.478292807937
+      },
+      {
+        "feature": "fast_spread_chg4",
+        "gain": 3363.055670052767
+      },
+      {
+        "feature": "gap_sma60_120",
+        "gain": 2399.5593785550445
+      },
+      {
+        "feature": "ema55_slope24",
+        "gain": 1669.165391676128
+      },
+      {
+        "feature": "down_order_score",
+        "gain": 1434.9388506412506
+      },
+      {
+        "feature": "gap_ema8_21",
+        "gain": 1427.3024134049192
+      },
+      {
+        "feature": "spread_chg8",
+        "gain": 1171.332259863615
+      },
+      {
+        "feature": "spread_expand_run",
+        "gain": 1165.2918662130833
+      },
+      {
+        "feature": "ema200_slope24",
+        "gain": 996.7458566948771
+      },
+      {
+        "feature": "close_vs_ema20",
+        "gain": 762.6615228652954
+      },
+      {
+        "feature": "spread_mean24",
+        "gain": 593.0874438285828
+      },
+      {
+        "feature": "fast_spread_chg16",
+        "gain": 578.2156561613083
+      },
+      {
+        "feature": "ret_96",
+        "gain": 492.27767634391785
+      },
+      {
+        "feature": "sma60_slope12",
+        "gain": 409.4025311470032
+      }
+    ],
+    "rules": {
+      "R1_stump": {
+        "text": "order_score<=0",
+        "clauses": [
+          {
+            "feature": "order_score",
+            "group": "ma_family",
+            "op": "<=",
+            "threshold": 0.0,
+            "gain": 0.6540109034267912,
+            "pos_median": null,
+            "neg_median": null
+          }
+        ],
+        "extra": {
+          "stump_metrics": {
+            "youden": 0.6540109034267912,
+            "tpr": 0.9883177570093458,
+            "fpr": 0.3343068535825545,
+            "precision": 0.4249832551908908
+          }
+        }
+      },
+      "R2_and3": {
+        "text": "order_score<=0 \u2227 close_vs_sma20<=-0.0101448 \u2227 fast_spread_chg4>=0.00296547",
+        "clauses": [
+          {
+            "feature": "order_score",
+            "group": "ma_family",
+            "op": "<=",
+            "threshold": 0.0,
+            "gain": 6139.486737847328,
+            "pos_median": 0.0,
+            "neg_median": 2.0
+          },
+          {
+            "feature": "close_vs_sma20",
+            "group": "ma_family",
+            "op": "<=",
+            "threshold": -0.010144788358462498,
+            "gain": 4901.478292807937,
+            "pos_median": -0.016212463152789902,
+            "neg_median": -0.00013020372740518704
+          },
+          {
+            "feature": "fast_spread_chg4",
+            "group": "dense_spread",
+            "op": ">=",
+            "threshold": 0.002965471347570107,
+            "gain": 3363.055670052767,
+            "pos_median": 0.00529083607010584,
+            "neg_median": -0.0003603159087942167
+          }
+        ],
+        "extra": {}
+      },
+      "R3_confirm": {
+        "text": "close_vs_sma20<=-0.0101448 \u2227 order_score<=0 \u2227 spread_chg8>=0.00395094 \u2227 ret_8<=-0.0104045",
+        "clauses": [
+          {
+            "feature": "close_vs_sma20",
+            "group": "ma_family",
+            "op": "<=",
+            "threshold": -0.010144788358462498,
+            "gain": 0.0,
+            "pos_median": -0.016212463152789902,
+            "neg_median": -0.00013020372740518704
+          },
+          {
+            "feature": "order_score",
+            "group": "ma_family",
+            "op": "<=",
+            "threshold": 0.0,
+            "gain": 0.0,
+            "pos_median": 0.0,
+            "neg_median": 2.0
+          },
+          {
+            "feature": "spread_chg8",
+            "group": "dense_spread",
+            "op": ">=",
+            "threshold": 0.003950936630709273,
+            "gain": 0.0,
+            "pos_median": 0.006747551933123975,
+            "neg_median": -0.0005469312848116952
+          },
+          {
+            "feature": "ret_8",
+            "group": "momentum_structure",
+            "op": "<=",
+            "threshold": -0.010404473318644608,
+            "gain": 0.0,
+            "pos_median": -0.01762080190911758,
+            "neg_median": -0.0003733542305766613
+          }
+        ],
+        "extra": {
+          "narrative": "already_falling + spread_expanding + order_bearish"
+        }
+      }
+    }
+  },
+  "E1_verdict": {
+    "question": "Do owner-fit causal short rules lift overlap vs spread_expand AND still show deployable causal PF@maker?",
+    "baseline_overlap_w18": {
+      "owner_recall": 0.2523,
+      "jaccard": 0.0452
+    },
+    "success_line_overlap": {
+      "owner_recall>=": 0.45,
+      "or_jaccard>=": 0.12
+    },
+    "success_line_pf": 1.3,
+    "best_e1": {
+      "panel": "E1",
+      "entry": "R3_confirm",
+      "exit": "no_tp_sl2_h144",
+      "n": 66697,
+      "pf_maker": 1.141,
+      "sum_net_maker": 134.27284,
+      "win_rate": 0.2147,
+      "pf_legacy": 1.04,
+      "owner_recall_w18": 0.9439,
+      "jaccard_w18": 0.0181,
+      "rule_precision_w18": 0.0224,
+      "n_owner_w18": 1284,
+      "n_rule_overlap_w18": 66865,
+      "pf_2026_04_maker": 1.377,
+      "n_2026_04": 5609,
+      "sum_net_2026_04": 28.39838,
+      "pass_pf_1_3": false,
+      "pass_overlap_line": true
+    },
+    "honesty": "Rules fitted on owner short moments \u2192 train overlap is optimistic; verdict requires causal full-scan PF, not recall alone.",
+    "overlap_lift": {
+      "delta_recall": 0.6916,
+      "delta_jaccard": -0.0271,
+      "overlap_pass": true
+    },
+    "causal_edge": {
+      "pf_maker_no_tp": 1.141,
+      "pf_2026_04": 1.377,
+      "pass_1_3": false,
+      "dead": false
+    },
+    "cn_flags": {
+      "raised_overlap": true,
+      "causal_edge_still_dead": true
+    }
+  },
+  "E2_verdict": {
+    "question": "Does a single regime gate on spread_expand short lift PF / fix 2026-04 without deleting the sample?",
+    "ungated": {
+      "panel": "E2",
+      "gate": "spread_no_gate",
+      "base_entry": "spread_expand_chg8",
+      "exit": "no_tp_sl2_h144",
+      "n": 6166,
+      "pf_maker": 1.415,
+      "sum_net_maker": 21.8096,
+      "win_rate": 0.2071,
+      "pf_legacy": 1.222,
+      "pf_2026_04_maker": 0.678,
+      "n_2026_04": 731,
+      "sum_net_2026_04": -1.89447,
+      "n_frac_of_ungated": 1.0,
+      "pass_pf_1_3": true
+    },
+    "gates": [
+      {
+        "panel": "E2",
+        "gate": "spread_not_btc_up",
+        "base_entry": "spread_expand_chg8",
+        "exit": "no_tp_sl2_h144",
+        "n": 6031,
+        "pf_maker": 1.438,
+        "sum_net_maker": 22.40079,
+        "win_rate": 0.2091,
+        "pf_legacy": 1.241,
+        "pf_2026_04_maker": 0.652,
+        "n_2026_04": 684,
+        "sum_net_2026_04": -1.92025,
+        "n_frac_of_ungated": 0.9781,
+        "pass_pf_1_3": true
+      },
+      {
+        "panel": "E2",
+        "gate": "spread_atr_q34",
+        "base_entry": "spread_expand_chg8",
+        "exit": "no_tp_sl2_h144",
+        "n": 3083,
+        "pf_maker": 1.607,
+        "sum_net_maker": 18.82842,
+        "win_rate": 0.252,
+        "pf_legacy": 1.424,
+        "pf_2026_04_maker": 0.845,
+        "n_2026_04": 261,
+        "sum_net_2026_04": -0.41076,
+        "n_frac_of_ungated": 0.5,
+        "pass_pf_1_3": true
+      }
+    ],
+    "kill_sample_line": "n_frac < 0.25 with only bad-month deleted \u2192 suspect",
+    "gate_flags": [
+      {
+        "gate": "spread_not_btc_up",
+        "delta_pf": 0.023,
+        "delta_2026_04": -0.026,
+        "n_frac": 0.9781,
+        "only_cuts_bad_month": false,
+        "kills_sample": false
+      },
+      {
+        "gate": "spread_atr_q34",
+        "delta_pf": 0.192,
+        "delta_2026_04": 0.167,
+        "n_frac": 0.5,
+        "only_cuts_bad_month": false,
+        "kills_sample": false
+      }
+    ]
+  },
+  "atr_gate_thresholds": {
+    "atr_med_of_spread_fires": 0.004945961301533555,
+    "atr_p75_of_spread_fires": 0.006127473473850654,
+    "note": "atr_q34 = atr_pct >= median of ungated spread short fires"
+  },
+  "elapsed_sec": 112.8,
+  "costs": {
+    "maker": 0.0006,
+    "legacy": 0.002
+  },
+  "exits": [
+    "baseline_tp5_sl2_h72",
+    "no_tp_sl2_h144",
+    "trail4_atr_h144"
+  ],
+  "overlap_windows": [
+    0,
+    8,
+    18,
+    48
+  ]
+}
