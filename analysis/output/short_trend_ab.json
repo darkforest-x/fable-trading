@@ -1,0 +1,6608 @@
+{
+  "tag": "short_trend_ab",
+  "question_a": "On fixed spread_expand_chg8 short (next_open), which trend exits keep train PF@maker≥1.3 without single-month concentration?",
+  "question_b": "Do owner_side=short oracle entries + same trend exits beat the causal spread_expand short rule under identical exits?",
+  "verdict_a": "A 稳健过线（PF≥1.3 且非少数月份独撑）",
+  "verdict_b": "B 手标 short+趋势出显著好于规则",
+  "holdout_suggestion": "值得申请 holdout#7 对照一次（仅建议，本脚本不跑）",
+  "a_cleared_short_exits": [
+    {
+      "exit": "no_tp_sl2_h144",
+      "pf_maker": 1.415,
+      "pf_legacy": 1.222,
+      "sum_net_maker": 21.8096,
+      "n": 6166,
+      "win_rate": 0.2071,
+      "mean_hold_bars": 52.56,
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 10,
+        "sum_net_total": 21.80961,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.317,
+        "top2_share_of_sum_net": 0.545,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "robust_pass": true
+    },
+    {
+      "exit": "trail3_atr_h144",
+      "pf_maker": 1.339,
+      "pf_legacy": 1.068,
+      "sum_net_maker": 11.26187,
+      "n": 6166,
+      "win_rate": 0.4118,
+      "mean_hold_bars": 19.63,
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 6,
+        "n_periods_sum_net_gt_0": 6,
+        "sum_net_total": 11.26186,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.385,
+        "top2_share_of_sum_net": 0.581,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "robust_pass": true
+    },
+    {
+      "exit": "trail4_atr_h144",
+      "pf_maker": 1.359,
+      "pf_legacy": 1.141,
+      "sum_net_maker": 15.37714,
+      "n": 6166,
+      "win_rate": 0.4199,
+      "mean_hold_bars": 33.91,
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 6,
+        "n_periods_sum_net_gt_0": 9,
+        "sum_net_total": 15.37715,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.295,
+        "top2_share_of_sum_net": 0.518,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "robust_pass": true
+    },
+    {
+      "exit": "ma_ema55_h144",
+      "pf_maker": 1.316,
+      "pf_legacy": 1.096,
+      "sum_net_maker": 13.17759,
+      "n": 6166,
+      "win_rate": 0.3393,
+      "mean_hold_bars": 35.03,
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 7,
+        "sum_net_total": 13.17759,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.3,
+        "top2_share_of_sum_net": 0.512,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "robust_pass": true
+    }
+  ],
+  "a_robust_pass_exits": [
+    {
+      "exit": "no_tp_sl2_h144",
+      "pf_maker": 1.415,
+      "pf_legacy": 1.222,
+      "sum_net_maker": 21.8096,
+      "n": 6166,
+      "win_rate": 0.2071,
+      "mean_hold_bars": 52.56,
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 10,
+        "sum_net_total": 21.80961,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.317,
+        "top2_share_of_sum_net": 0.545,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "robust_pass": true
+    },
+    {
+      "exit": "trail3_atr_h144",
+      "pf_maker": 1.339,
+      "pf_legacy": 1.068,
+      "sum_net_maker": 11.26187,
+      "n": 6166,
+      "win_rate": 0.4118,
+      "mean_hold_bars": 19.63,
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 6,
+        "n_periods_sum_net_gt_0": 6,
+        "sum_net_total": 11.26186,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.385,
+        "top2_share_of_sum_net": 0.581,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "robust_pass": true
+    },
+    {
+      "exit": "trail4_atr_h144",
+      "pf_maker": 1.359,
+      "pf_legacy": 1.141,
+      "sum_net_maker": 15.37714,
+      "n": 6166,
+      "win_rate": 0.4199,
+      "mean_hold_bars": 33.91,
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 6,
+        "n_periods_sum_net_gt_0": 9,
+        "sum_net_total": 15.37715,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.295,
+        "top2_share_of_sum_net": 0.518,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "robust_pass": true
+    },
+    {
+      "exit": "ma_ema55_h144",
+      "pf_maker": 1.316,
+      "pf_legacy": 1.096,
+      "sum_net_maker": 13.17759,
+      "n": 6166,
+      "win_rate": 0.3393,
+      "mean_hold_bars": 35.03,
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 7,
+        "sum_net_total": 13.17759,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.3,
+        "top2_share_of_sum_net": 0.512,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "robust_pass": true
+    }
+  ],
+  "b_compare_rows": [
+    {
+      "exit": "baseline_tp5_sl2_h72",
+      "oracle_n": 1283,
+      "oracle_pf_maker": 7.408,
+      "oracle_sum_net_maker": 29.4467,
+      "oracle_win_rate": 0.7599,
+      "oracle_mean_hold": 29.32,
+      "rule_n": 6202,
+      "rule_pf_maker": 1.245,
+      "rule_sum_net_maker": 10.47028,
+      "delta_oracle_minus_rule_pf": 6.163,
+      "oracle_pf_legacy": 6.494,
+      "rule_pf_legacy": 1.037
+    },
+    {
+      "exit": "no_tp_sl2_h144",
+      "oracle_n": 1282,
+      "oracle_pf_maker": 6.594,
+      "oracle_sum_net_maker": 46.55075,
+      "oracle_win_rate": 0.5382,
+      "oracle_mean_hold": 103.97,
+      "rule_n": 6166,
+      "rule_pf_maker": 1.415,
+      "rule_sum_net_maker": 21.8096,
+      "delta_oracle_minus_rule_pf": 5.179,
+      "oracle_pf_legacy": 5.891,
+      "rule_pf_legacy": 1.222
+    },
+    {
+      "exit": "trail2_atr_h144",
+      "oracle_n": 1282,
+      "oracle_pf_maker": 8.971,
+      "oracle_sum_net_maker": 20.47679,
+      "oracle_win_rate": 0.7254,
+      "oracle_mean_hold": 14.28,
+      "rule_n": 6166,
+      "rule_pf_maker": 1.287,
+      "rule_sum_net_maker": 6.84484,
+      "delta_oracle_minus_rule_pf": 7.684,
+      "oracle_pf_legacy": 7.035,
+      "rule_pf_legacy": 0.939
+    },
+    {
+      "exit": "trail3_atr_h144",
+      "oracle_n": 1282,
+      "oracle_pf_maker": 13.932,
+      "oracle_sum_net_maker": 32.78995,
+      "oracle_win_rate": 0.7785,
+      "oracle_mean_hold": 30.87,
+      "rule_n": 6166,
+      "rule_pf_maker": 1.339,
+      "rule_sum_net_maker": 11.26187,
+      "delta_oracle_minus_rule_pf": 12.593,
+      "oracle_pf_legacy": 11.468,
+      "rule_pf_legacy": 1.068
+    },
+    {
+      "exit": "trail4_atr_h144",
+      "oracle_n": 1282,
+      "oracle_pf_maker": 16.846,
+      "oracle_sum_net_maker": 43.62515,
+      "oracle_win_rate": 0.7886,
+      "oracle_mean_hold": 48.16,
+      "rule_n": 6166,
+      "rule_pf_maker": 1.359,
+      "rule_sum_net_maker": 15.37714,
+      "delta_oracle_minus_rule_pf": 15.487,
+      "oracle_pf_legacy": 14.266,
+      "rule_pf_legacy": 1.141
+    },
+    {
+      "exit": "ma_ema20_h144",
+      "oracle_n": 1282,
+      "oracle_pf_maker": 13.285,
+      "oracle_sum_net_maker": 33.37538,
+      "oracle_win_rate": 0.7426,
+      "oracle_mean_hold": 27.92,
+      "rule_n": 6166,
+      "rule_pf_maker": 1.298,
+      "rule_sum_net_maker": 9.30804,
+      "delta_oracle_minus_rule_pf": 11.987,
+      "oracle_pf_legacy": 10.838,
+      "rule_pf_legacy": 1.018
+    },
+    {
+      "exit": "ma_ema55_h144",
+      "oracle_n": 1282,
+      "oracle_pf_maker": 12.56,
+      "oracle_sum_net_maker": 41.07932,
+      "oracle_win_rate": 0.7566,
+      "oracle_mean_hold": 63.02,
+      "rule_n": 6166,
+      "rule_pf_maker": 1.316,
+      "rule_sum_net_maker": 13.17759,
+      "delta_oracle_minus_rule_pf": 11.244,
+      "oracle_pf_legacy": 10.79,
+      "rule_pf_legacy": 1.096
+    },
+    {
+      "exit": "time_stop_48",
+      "oracle_n": 1283,
+      "oracle_pf_maker": 15.441,
+      "oracle_sum_net_maker": 44.49211,
+      "oracle_win_rate": 0.8449,
+      "oracle_mean_hold": 48.0,
+      "rule_n": 6202,
+      "rule_pf_maker": 1.228,
+      "rule_sum_net_maker": 13.82718,
+      "delta_oracle_minus_rule_pf": 14.213,
+      "oracle_pf_legacy": 13.655,
+      "rule_pf_legacy": 1.079
+    },
+    {
+      "exit": "time_stop_96",
+      "oracle_n": 1283,
+      "oracle_pf_maker": 10.201,
+      "oracle_sum_net_maker": 52.75506,
+      "oracle_win_rate": 0.8044,
+      "oracle_mean_hold": 96.0,
+      "rule_n": 6170,
+      "rule_pf_maker": 1.244,
+      "rule_sum_net_maker": 21.80662,
+      "delta_oracle_minus_rule_pf": 8.957,
+      "oracle_pf_legacy": 9.357,
+      "rule_pf_legacy": 1.141
+    }
+  ],
+  "b_significant_exits": [
+    {
+      "exit": "baseline_tp5_sl2_h72",
+      "oracle_n": 1283,
+      "oracle_pf_maker": 7.408,
+      "oracle_sum_net_maker": 29.4467,
+      "oracle_win_rate": 0.7599,
+      "oracle_mean_hold": 29.32,
+      "rule_n": 6202,
+      "rule_pf_maker": 1.245,
+      "rule_sum_net_maker": 10.47028,
+      "delta_oracle_minus_rule_pf": 6.163,
+      "oracle_pf_legacy": 6.494,
+      "rule_pf_legacy": 1.037
+    },
+    {
+      "exit": "no_tp_sl2_h144",
+      "oracle_n": 1282,
+      "oracle_pf_maker": 6.594,
+      "oracle_sum_net_maker": 46.55075,
+      "oracle_win_rate": 0.5382,
+      "oracle_mean_hold": 103.97,
+      "rule_n": 6166,
+      "rule_pf_maker": 1.415,
+      "rule_sum_net_maker": 21.8096,
+      "delta_oracle_minus_rule_pf": 5.179,
+      "oracle_pf_legacy": 5.891,
+      "rule_pf_legacy": 1.222
+    },
+    {
+      "exit": "trail2_atr_h144",
+      "oracle_n": 1282,
+      "oracle_pf_maker": 8.971,
+      "oracle_sum_net_maker": 20.47679,
+      "oracle_win_rate": 0.7254,
+      "oracle_mean_hold": 14.28,
+      "rule_n": 6166,
+      "rule_pf_maker": 1.287,
+      "rule_sum_net_maker": 6.84484,
+      "delta_oracle_minus_rule_pf": 7.684,
+      "oracle_pf_legacy": 7.035,
+      "rule_pf_legacy": 0.939
+    },
+    {
+      "exit": "trail3_atr_h144",
+      "oracle_n": 1282,
+      "oracle_pf_maker": 13.932,
+      "oracle_sum_net_maker": 32.78995,
+      "oracle_win_rate": 0.7785,
+      "oracle_mean_hold": 30.87,
+      "rule_n": 6166,
+      "rule_pf_maker": 1.339,
+      "rule_sum_net_maker": 11.26187,
+      "delta_oracle_minus_rule_pf": 12.593,
+      "oracle_pf_legacy": 11.468,
+      "rule_pf_legacy": 1.068
+    },
+    {
+      "exit": "trail4_atr_h144",
+      "oracle_n": 1282,
+      "oracle_pf_maker": 16.846,
+      "oracle_sum_net_maker": 43.62515,
+      "oracle_win_rate": 0.7886,
+      "oracle_mean_hold": 48.16,
+      "rule_n": 6166,
+      "rule_pf_maker": 1.359,
+      "rule_sum_net_maker": 15.37714,
+      "delta_oracle_minus_rule_pf": 15.487,
+      "oracle_pf_legacy": 14.266,
+      "rule_pf_legacy": 1.141
+    },
+    {
+      "exit": "ma_ema20_h144",
+      "oracle_n": 1282,
+      "oracle_pf_maker": 13.285,
+      "oracle_sum_net_maker": 33.37538,
+      "oracle_win_rate": 0.7426,
+      "oracle_mean_hold": 27.92,
+      "rule_n": 6166,
+      "rule_pf_maker": 1.298,
+      "rule_sum_net_maker": 9.30804,
+      "delta_oracle_minus_rule_pf": 11.987,
+      "oracle_pf_legacy": 10.838,
+      "rule_pf_legacy": 1.018
+    },
+    {
+      "exit": "ma_ema55_h144",
+      "oracle_n": 1282,
+      "oracle_pf_maker": 12.56,
+      "oracle_sum_net_maker": 41.07932,
+      "oracle_win_rate": 0.7566,
+      "oracle_mean_hold": 63.02,
+      "rule_n": 6166,
+      "rule_pf_maker": 1.316,
+      "rule_sum_net_maker": 13.17759,
+      "delta_oracle_minus_rule_pf": 11.244,
+      "oracle_pf_legacy": 10.79,
+      "rule_pf_legacy": 1.096
+    },
+    {
+      "exit": "time_stop_48",
+      "oracle_n": 1283,
+      "oracle_pf_maker": 15.441,
+      "oracle_sum_net_maker": 44.49211,
+      "oracle_win_rate": 0.8449,
+      "oracle_mean_hold": 48.0,
+      "rule_n": 6202,
+      "rule_pf_maker": 1.228,
+      "rule_sum_net_maker": 13.82718,
+      "delta_oracle_minus_rule_pf": 14.213,
+      "oracle_pf_legacy": 13.655,
+      "rule_pf_legacy": 1.079
+    },
+    {
+      "exit": "time_stop_96",
+      "oracle_n": 1283,
+      "oracle_pf_maker": 10.201,
+      "oracle_sum_net_maker": 52.75506,
+      "oracle_win_rate": 0.8044,
+      "oracle_mean_hold": 96.0,
+      "rule_n": 6170,
+      "rule_pf_maker": 1.244,
+      "rule_sum_net_maker": 21.80662,
+      "delta_oracle_minus_rule_pf": 8.957,
+      "oracle_pf_legacy": 9.357,
+      "rule_pf_legacy": 1.141
+    }
+  ],
+  "discipline": {
+    "holdout_start": "2026-05-04 00:00:00+00:00",
+    "holdout_touched": false,
+    "entry_rule": "spread_expand_chg8",
+    "entry_fill": "next_open",
+    "entry_fill_note": "p_entry_timing_close_vs_next: close≈next for spread-short; keep next_open",
+    "costs": {
+      "swap_maker": 0.0006,
+      "legacy_p0": 0.002
+    },
+    "atr_pct_min": 0.0015,
+    "success_pf_maker": 1.3,
+    "fragile_rule": "top2 months share of sum_net > 0.6 OR <2 months with PF≥1.3",
+    "b_rule": "spread_expand_chg8 short fires (same as A)",
+    "oracle_sheet": "/Users/zhangzc/fable-trading/analysis/output/owner_side_review/review_sheet.csv",
+    "n_owner_short_labels_train": 1361,
+    "theme": "A robustness + B oracle vs rule; short focus"
+  },
+  "data": {
+    "n_symbols": 233,
+    "time_range": [
+      "2025-06-05 15:45:00+00:00",
+      "2026-05-03 23:30:00+00:00"
+    ],
+    "n_short_entry_fires": 6213,
+    "n_long_entry_fires": 5823,
+    "n_oracle_short_fires_deduped": 1284,
+    "spread_chg8_thr": 0.00383
+  },
+  "a_short": {
+    "baseline_tp5_sl2_h72": {
+      "maker_0.06pct": {
+        "n": 6202,
+        "win_rate": 0.3541,
+        "mean_gross": 0.00229,
+        "mean_net": 0.00169,
+        "sum_net": 10.47028,
+        "profit_factor": 1.245,
+        "mean_hold_bars": 21.52
+      },
+      "legacy_0.20pct": {
+        "n": 6202,
+        "win_rate": 0.3496,
+        "mean_gross": 0.00229,
+        "mean_net": 0.00029,
+        "sum_net": 1.78748,
+        "profit_factor": 1.037,
+        "mean_hold_bars": 21.52
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.2759,
+          "mean_gross": -6e-05,
+          "mean_net": -0.00066,
+          "sum_net": -0.17165,
+          "profit_factor": 0.909,
+          "mean_hold_bars": 16.78
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.4215,
+          "mean_gross": 0.00549,
+          "mean_net": 0.00489,
+          "sum_net": 1.27663,
+          "profit_factor": 1.685,
+          "mean_hold_bars": 23.83
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.5247,
+          "mean_gross": 0.00796,
+          "mean_net": 0.00736,
+          "sum_net": 2.83256,
+          "profit_factor": 2.313,
+          "mean_hold_bars": 19.46
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.2841,
+          "mean_gross": 6e-05,
+          "mean_net": -0.00054,
+          "sum_net": -0.32309,
+          "profit_factor": 0.918,
+          "mean_hold_bars": 21.93
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.3926,
+          "mean_gross": 0.0045,
+          "mean_net": 0.0039,
+          "sum_net": 1.57789,
+          "profit_factor": 1.568,
+          "mean_hold_bars": 26.46
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.3868,
+          "mean_gross": 0.00377,
+          "mean_net": 0.00317,
+          "sum_net": 1.58367,
+          "profit_factor": 1.418,
+          "mean_hold_bars": 23.29
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.3815,
+          "mean_gross": 0.00321,
+          "mean_net": 0.00261,
+          "sum_net": 2.0026,
+          "profit_factor": 1.413,
+          "mean_hold_bars": 21.05
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.3719,
+          "mean_gross": 0.00372,
+          "mean_net": 0.00312,
+          "sum_net": 2.3747,
+          "profit_factor": 1.481,
+          "mean_hold_bars": 21.23
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.3404,
+          "mean_gross": 0.00183,
+          "mean_net": 0.00123,
+          "sum_net": 0.75442,
+          "profit_factor": 1.154,
+          "mean_hold_bars": 18.98
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.3025,
+          "mean_gross": -0.00036,
+          "mean_net": -0.00096,
+          "sum_net": -0.81303,
+          "profit_factor": 0.874,
+          "mean_hold_bars": 19.54
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.3146,
+          "mean_gross": -6e-05,
+          "mean_net": -0.00066,
+          "sum_net": -0.48544,
+          "profit_factor": 0.899,
+          "mean_hold_bars": 23.39
+        },
+        "2026-05": {
+          "n": 75,
+          "win_rate": 0.2667,
+          "mean_gross": -0.00125,
+          "mean_net": -0.00185,
+          "sum_net": -0.139,
+          "profit_factor": 0.694,
+          "mean_hold_bars": 31.57
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.2759,
+          "mean_gross": -6e-05,
+          "mean_net": -0.00066,
+          "sum_net": -0.17165,
+          "profit_factor": 0.909,
+          "mean_hold_bars": 16.78
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.387,
+          "mean_gross": 0.00363,
+          "mean_net": 0.00303,
+          "sum_net": 3.7861,
+          "profit_factor": 1.476,
+          "mean_hold_bars": 21.56
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.3858,
+          "mean_gross": 0.00369,
+          "mean_net": 0.00309,
+          "sum_net": 5.16417,
+          "profit_factor": 1.453,
+          "mean_hold_bars": 23.03
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.3368,
+          "mean_gross": 0.00165,
+          "mean_net": 0.00105,
+          "sum_net": 2.3161,
+          "profit_factor": 1.142,
+          "mean_hold_bars": 19.97
+        },
+        "2026Q2": {
+          "n": 806,
+          "win_rate": 0.3102,
+          "mean_gross": -0.00017,
+          "mean_net": -0.00077,
+          "sum_net": -0.62444,
+          "profit_factor": 0.882,
+          "mean_hold_bars": 24.15
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 6,
+        "n_periods_sum_net_gt_0": 7,
+        "sum_net_total": 10.47026,
+        "top1_period": "2025-08",
+        "top1_share_of_sum_net": 0.271,
+        "top2_share_of_sum_net": 0.497,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 2,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": 10.47028,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.493,
+        "top2_share_of_sum_net": 0.855,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "fixed TP5/SL2, horizon 72 (mainline control)"
+    },
+    "no_tp_sl2_h144": {
+      "maker_0.06pct": {
+        "n": 6166,
+        "win_rate": 0.2071,
+        "mean_gross": 0.00414,
+        "mean_net": 0.00354,
+        "sum_net": 21.8096,
+        "profit_factor": 1.415,
+        "mean_hold_bars": 52.56
+      },
+      "legacy_0.20pct": {
+        "n": 6166,
+        "win_rate": 0.2065,
+        "mean_gross": 0.00414,
+        "mean_net": 0.00214,
+        "sum_net": 13.1772,
+        "profit_factor": 1.222,
+        "mean_hold_bars": 52.56
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.1762,
+          "mean_gross": 0.00159,
+          "mean_net": 0.00099,
+          "sum_net": 0.25817,
+          "profit_factor": 1.12,
+          "mean_hold_bars": 42.4
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.2644,
+          "mean_gross": 0.00618,
+          "mean_net": 0.00558,
+          "sum_net": 1.45644,
+          "profit_factor": 1.627,
+          "mean_hold_bars": 66.65
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.2364,
+          "mean_gross": 0.0023,
+          "mean_net": 0.0017,
+          "sum_net": 0.65385,
+          "profit_factor": 1.196,
+          "mean_hold_bars": 57.71
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.1561,
+          "mean_gross": 0.00232,
+          "mean_net": 0.00172,
+          "sum_net": 1.03611,
+          "profit_factor": 1.223,
+          "mean_hold_bars": 46.56
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.2173,
+          "mean_gross": 0.0057,
+          "mean_net": 0.0051,
+          "sum_net": 2.06691,
+          "profit_factor": 1.552,
+          "mean_hold_bars": 61.06
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.2545,
+          "mean_gross": 0.00813,
+          "mean_net": 0.00753,
+          "sum_net": 3.75826,
+          "profit_factor": 1.81,
+          "mean_hold_bars": 58.32
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.1927,
+          "mean_gross": 0.00145,
+          "mean_net": 0.00085,
+          "sum_net": 0.65098,
+          "profit_factor": 1.102,
+          "mean_hold_bars": 51.92
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.251,
+          "mean_gross": 0.00968,
+          "mean_net": 0.00908,
+          "sum_net": 6.90915,
+          "profit_factor": 2.161,
+          "mean_hold_bars": 56.52
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.2013,
+          "mean_gross": 0.00874,
+          "mean_net": 0.00814,
+          "sum_net": 4.97507,
+          "profit_factor": 1.841,
+          "mean_hold_bars": 46.62
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.2147,
+          "mean_gross": 0.00317,
+          "mean_net": 0.00257,
+          "sum_net": 2.16353,
+          "profit_factor": 1.297,
+          "mean_hold_bars": 49.55
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.1587,
+          "mean_gross": -0.00199,
+          "mean_net": -0.00259,
+          "sum_net": -1.89447,
+          "profit_factor": 0.678,
+          "mean_hold_bars": 50.3
+        },
+        "2026-05": {
+          "n": 39,
+          "win_rate": 0.0769,
+          "mean_gross": -0.00515,
+          "mean_net": -0.00575,
+          "sum_net": -0.22439,
+          "profit_factor": 0.342,
+          "mean_hold_bars": 41.28
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.1762,
+          "mean_gross": 0.00159,
+          "mean_net": 0.00099,
+          "sum_net": 0.25817,
+          "profit_factor": 1.12,
+          "mean_hold_bars": 42.4
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.2035,
+          "mean_gross": 0.00312,
+          "mean_net": 0.00252,
+          "sum_net": 3.14639,
+          "profit_factor": 1.305,
+          "mean_hold_bars": 54.2
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.2171,
+          "mean_gross": 0.00447,
+          "mean_net": 0.00387,
+          "sum_net": 6.47615,
+          "profit_factor": 1.438,
+          "mean_hold_bars": 56.04
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.2235,
+          "mean_gross": 0.00694,
+          "mean_net": 0.00634,
+          "sum_net": 14.04775,
+          "profit_factor": 1.734,
+          "mean_hold_bars": 51.14
+        },
+        "2026Q2": {
+          "n": 770,
+          "win_rate": 0.1545,
+          "mean_gross": -0.00215,
+          "mean_net": -0.00275,
+          "sum_net": -2.11886,
+          "profit_factor": 0.659,
+          "mean_hold_bars": 49.84
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 10,
+        "sum_net_total": 21.80961,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.317,
+        "top2_share_of_sum_net": 0.545,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 3,
+        "n_periods_sum_net_gt_0": 4,
+        "sum_net_total": 21.8096,
+        "top1_period": "2026Q1",
+        "top1_share_of_sum_net": 0.644,
+        "top2_share_of_sum_net": 0.941,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "SL2 only, no TP; timeout 144"
+    },
+    "trail2_atr_h144": {
+      "maker_0.06pct": {
+        "n": 6166,
+        "win_rate": 0.3943,
+        "mean_gross": 0.00171,
+        "mean_net": 0.00111,
+        "sum_net": 6.84484,
+        "profit_factor": 1.287,
+        "mean_hold_bars": 8.86
+      },
+      "legacy_0.20pct": {
+        "n": 6166,
+        "win_rate": 0.3469,
+        "mean_gross": 0.00171,
+        "mean_net": -0.00029,
+        "sum_net": -1.78756,
+        "profit_factor": 0.939,
+        "mean_hold_bars": 8.86
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.364,
+          "mean_gross": 0.00099,
+          "mean_net": 0.00039,
+          "sum_net": 0.10221,
+          "profit_factor": 1.105,
+          "mean_hold_bars": 7.66
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.4023,
+          "mean_gross": 0.00301,
+          "mean_net": 0.00241,
+          "sum_net": 0.62901,
+          "profit_factor": 1.554,
+          "mean_hold_bars": 10.65
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.5377,
+          "mean_gross": 0.0055,
+          "mean_net": 0.0049,
+          "sum_net": 1.8865,
+          "profit_factor": 2.583,
+          "mean_hold_bars": 8.86
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.3173,
+          "mean_gross": -0.00079,
+          "mean_net": -0.00139,
+          "sum_net": -0.83757,
+          "profit_factor": 0.635,
+          "mean_hold_bars": 10.2
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.5136,
+          "mean_gross": 0.00434,
+          "mean_net": 0.00374,
+          "sum_net": 1.5152,
+          "profit_factor": 2.14,
+          "mean_hold_bars": 8.65
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.4489,
+          "mean_gross": 0.00425,
+          "mean_net": 0.00365,
+          "sum_net": 1.82009,
+          "profit_factor": 1.957,
+          "mean_hold_bars": 8.94
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.4349,
+          "mean_gross": 0.00215,
+          "mean_net": 0.00155,
+          "sum_net": 1.19071,
+          "profit_factor": 1.476,
+          "mean_hold_bars": 8.52
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.3732,
+          "mean_gross": 0.00383,
+          "mean_net": 0.00323,
+          "sum_net": 2.45945,
+          "profit_factor": 1.854,
+          "mean_hold_bars": 8.37
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.3813,
+          "mean_gross": 0.00041,
+          "mean_net": -0.00019,
+          "sum_net": -0.11758,
+          "profit_factor": 0.957,
+          "mean_hold_bars": 8.47
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.344,
+          "mean_gross": -0.00061,
+          "mean_net": -0.00121,
+          "sum_net": -1.01732,
+          "profit_factor": 0.736,
+          "mean_hold_bars": 8.2
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.342,
+          "mean_gross": -0.00032,
+          "mean_net": -0.00092,
+          "sum_net": -0.67007,
+          "profit_factor": 0.766,
+          "mean_hold_bars": 9.37
+        },
+        "2026-05": {
+          "n": 39,
+          "win_rate": 0.2564,
+          "mean_gross": -0.00237,
+          "mean_net": -0.00297,
+          "sum_net": -0.1158,
+          "profit_factor": 0.284,
+          "mean_hold_bars": 11.79
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.364,
+          "mean_gross": 0.00099,
+          "mean_net": 0.00039,
+          "sum_net": 0.10221,
+          "profit_factor": 1.105,
+          "mean_hold_bars": 7.66
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.403,
+          "mean_gross": 0.00194,
+          "mean_net": 0.00134,
+          "sum_net": 1.67794,
+          "profit_factor": 1.363,
+          "mean_hold_bars": 9.88
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.4581,
+          "mean_gross": 0.00331,
+          "mean_net": 0.00271,
+          "sum_net": 4.52601,
+          "profit_factor": 1.789,
+          "mean_hold_bars": 8.68
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.3643,
+          "mean_gross": 0.0012,
+          "mean_net": 0.0006,
+          "sum_net": 1.32455,
+          "profit_factor": 1.14,
+          "mean_hold_bars": 8.34
+        },
+        "2026Q2": {
+          "n": 770,
+          "win_rate": 0.3377,
+          "mean_gross": -0.00042,
+          "mean_net": -0.00102,
+          "sum_net": -0.78587,
+          "profit_factor": 0.741,
+          "mean_hold_bars": 9.49
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 6,
+        "n_periods_sum_net_gt_0": 7,
+        "sum_net_total": 6.84483,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.359,
+        "top2_share_of_sum_net": 0.635,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 2,
+        "n_periods_sum_net_gt_0": 4,
+        "sum_net_total": 6.84484,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.661,
+        "top2_share_of_sum_net": 0.906,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "ATR trailing 2×ATR14(signal); timeout 144"
+    },
+    "trail3_atr_h144": {
+      "maker_0.06pct": {
+        "n": 6166,
+        "win_rate": 0.4118,
+        "mean_gross": 0.00243,
+        "mean_net": 0.00183,
+        "sum_net": 11.26187,
+        "profit_factor": 1.339,
+        "mean_hold_bars": 19.63
+      },
+      "legacy_0.20pct": {
+        "n": 6166,
+        "win_rate": 0.3763,
+        "mean_gross": 0.00243,
+        "mean_net": 0.00043,
+        "sum_net": 2.62947,
+        "profit_factor": 1.068,
+        "mean_hold_bars": 19.63
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.3755,
+          "mean_gross": -0.00059,
+          "mean_net": -0.00119,
+          "sum_net": -0.31126,
+          "profit_factor": 0.789,
+          "mean_hold_bars": 13.85
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.4406,
+          "mean_gross": 0.00531,
+          "mean_net": 0.00471,
+          "sum_net": 1.2293,
+          "profit_factor": 1.81,
+          "mean_hold_bars": 24.3
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.5558,
+          "mean_gross": 0.00594,
+          "mean_net": 0.00534,
+          "sum_net": 2.05415,
+          "profit_factor": 2.218,
+          "mean_hold_bars": 19.01
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.3355,
+          "mean_gross": -0.00021,
+          "mean_net": -0.00081,
+          "sum_net": -0.48956,
+          "profit_factor": 0.846,
+          "mean_hold_bars": 20.73
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.4568,
+          "mean_gross": 0.0034,
+          "mean_net": 0.0028,
+          "sum_net": 1.13269,
+          "profit_factor": 1.538,
+          "mean_hold_bars": 18.86
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.4649,
+          "mean_gross": 0.00501,
+          "mean_net": 0.00441,
+          "sum_net": 2.20227,
+          "profit_factor": 1.829,
+          "mean_hold_bars": 19.11
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.4466,
+          "mean_gross": 0.00285,
+          "mean_net": 0.00225,
+          "sum_net": 1.7252,
+          "profit_factor": 1.47,
+          "mean_hold_bars": 19.2
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.4231,
+          "mean_gross": 0.0063,
+          "mean_net": 0.0057,
+          "sum_net": 4.33849,
+          "profit_factor": 2.176,
+          "mean_hold_bars": 18.61
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.4059,
+          "mean_gross": 0.00029,
+          "mean_net": -0.00031,
+          "sum_net": -0.18782,
+          "profit_factor": 0.95,
+          "mean_hold_bars": 18.26
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.3642,
+          "mean_gross": 0.00048,
+          "mean_net": -0.00012,
+          "sum_net": -0.10525,
+          "profit_factor": 0.98,
+          "mean_hold_bars": 19.56
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.3598,
+          "mean_gross": 0.00037,
+          "mean_net": -0.00023,
+          "sum_net": -0.16451,
+          "profit_factor": 0.958,
+          "mean_hold_bars": 22.56
+        },
+        "2026-05": {
+          "n": 39,
+          "win_rate": 0.2564,
+          "mean_gross": -0.00355,
+          "mean_net": -0.00415,
+          "sum_net": -0.16184,
+          "profit_factor": 0.321,
+          "mean_hold_bars": 26.62
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.3755,
+          "mean_gross": -0.00059,
+          "mean_net": -0.00119,
+          "sum_net": -0.31126,
+          "profit_factor": 0.789,
+          "mean_hold_bars": 13.85
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.4255,
+          "mean_gross": 0.00284,
+          "mean_net": 0.00224,
+          "sum_net": 2.79389,
+          "profit_factor": 1.438,
+          "mean_hold_bars": 20.95
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.4545,
+          "mean_gross": 0.00363,
+          "mean_net": 0.00303,
+          "sum_net": 5.06016,
+          "profit_factor": 1.6,
+          "mean_hold_bars": 19.09
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.3959,
+          "mean_gross": 0.00243,
+          "mean_net": 0.00183,
+          "sum_net": 4.04542,
+          "profit_factor": 1.318,
+          "mean_hold_bars": 18.88
+        },
+        "2026Q2": {
+          "n": 770,
+          "win_rate": 0.3545,
+          "mean_gross": 0.00018,
+          "mean_net": -0.00042,
+          "sum_net": -0.32634,
+          "profit_factor": 0.922,
+          "mean_hold_bars": 22.76
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 6,
+        "n_periods_sum_net_gt_0": 6,
+        "sum_net_total": 11.26186,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.385,
+        "top2_share_of_sum_net": 0.581,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 3,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": 11.26187,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.449,
+        "top2_share_of_sum_net": 0.809,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "ATR trailing 3×ATR14(signal); timeout 144"
+    },
+    "trail4_atr_h144": {
+      "maker_0.06pct": {
+        "n": 6166,
+        "win_rate": 0.4199,
+        "mean_gross": 0.00309,
+        "mean_net": 0.00249,
+        "sum_net": 15.37714,
+        "profit_factor": 1.359,
+        "mean_hold_bars": 33.91
+      },
+      "legacy_0.20pct": {
+        "n": 6166,
+        "win_rate": 0.391,
+        "mean_gross": 0.00309,
+        "mean_net": 0.00109,
+        "sum_net": 6.74474,
+        "profit_factor": 1.141,
+        "mean_hold_bars": 33.91
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.2912,
+          "mean_gross": -0.00292,
+          "mean_net": -0.00352,
+          "sum_net": -0.91919,
+          "profit_factor": 0.57,
+          "mean_hold_bars": 21.13
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.4789,
+          "mean_gross": 0.00664,
+          "mean_net": 0.00604,
+          "sum_net": 1.57635,
+          "profit_factor": 1.776,
+          "mean_hold_bars": 42.56
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.5922,
+          "mean_gross": 0.00951,
+          "mean_net": 0.00891,
+          "sum_net": 3.42878,
+          "profit_factor": 2.812,
+          "mean_hold_bars": 35.17
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.392,
+          "mean_gross": 0.00381,
+          "mean_net": 0.00321,
+          "sum_net": 1.93401,
+          "profit_factor": 1.514,
+          "mean_hold_bars": 34.37
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.442,
+          "mean_gross": 0.00339,
+          "mean_net": 0.00279,
+          "sum_net": 1.13111,
+          "profit_factor": 1.404,
+          "mean_hold_bars": 34.94
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.4449,
+          "mean_gross": 0.00501,
+          "mean_net": 0.00441,
+          "sum_net": 2.20187,
+          "profit_factor": 1.636,
+          "mean_hold_bars": 32.89
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.444,
+          "mean_gross": 0.00187,
+          "mean_net": 0.00127,
+          "sum_net": 0.97451,
+          "profit_factor": 1.205,
+          "mean_hold_bars": 33.19
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.4192,
+          "mean_gross": 0.00656,
+          "mean_net": 0.00596,
+          "sum_net": 4.53223,
+          "profit_factor": 1.907,
+          "mean_hold_bars": 31.53
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.4206,
+          "mean_gross": 0.00081,
+          "mean_net": 0.00021,
+          "sum_net": 0.1268,
+          "profit_factor": 1.026,
+          "mean_hold_bars": 28.63
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.3938,
+          "mean_gross": 0.00162,
+          "mean_net": 0.00102,
+          "sum_net": 0.85844,
+          "profit_factor": 1.131,
+          "mean_hold_bars": 36.67
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.3625,
+          "mean_gross": 0.00033,
+          "mean_net": -0.00027,
+          "sum_net": -0.19605,
+          "profit_factor": 0.962,
+          "mean_hold_bars": 38.59
+        },
+        "2026-05": {
+          "n": 39,
+          "win_rate": 0.2308,
+          "mean_gross": -0.00637,
+          "mean_net": -0.00697,
+          "sum_net": -0.27171,
+          "profit_factor": 0.211,
+          "mean_hold_bars": 39.87
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.2912,
+          "mean_gross": -0.00292,
+          "mean_net": -0.00352,
+          "sum_net": -0.91919,
+          "profit_factor": 0.57,
+          "mean_hold_bars": 21.13
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.472,
+          "mean_gross": 0.00616,
+          "mean_net": 0.00556,
+          "sum_net": 6.93913,
+          "profit_factor": 1.903,
+          "mean_hold_bars": 36.33
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.4438,
+          "mean_gross": 0.00318,
+          "mean_net": 0.00258,
+          "sum_net": 4.30749,
+          "profit_factor": 1.391,
+          "mean_hold_bars": 33.52
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.4099,
+          "mean_gross": 0.00309,
+          "mean_net": 0.00249,
+          "sum_net": 5.51747,
+          "profit_factor": 1.336,
+          "mean_hold_bars": 32.69
+        },
+        "2026Q2": {
+          "n": 770,
+          "win_rate": 0.3558,
+          "mean_gross": -1e-05,
+          "mean_net": -0.00061,
+          "sum_net": -0.46776,
+          "profit_factor": 0.916,
+          "mean_hold_bars": 38.65
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 6,
+        "n_periods_sum_net_gt_0": 9,
+        "sum_net_total": 15.37715,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.295,
+        "top2_share_of_sum_net": 0.518,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 3,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": 15.37714,
+        "top1_period": "2025Q3",
+        "top1_share_of_sum_net": 0.451,
+        "top2_share_of_sum_net": 0.81,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "ATR trailing 4×ATR14(signal); timeout 144"
+    },
+    "ma_ema20_h144": {
+      "maker_0.06pct": {
+        "n": 6166,
+        "win_rate": 0.3566,
+        "mean_gross": 0.00211,
+        "mean_net": 0.00151,
+        "sum_net": 9.30804,
+        "profit_factor": 1.298,
+        "mean_hold_bars": 16.44
+      },
+      "legacy_0.20pct": {
+        "n": 6166,
+        "win_rate": 0.3248,
+        "mean_gross": 0.00211,
+        "mean_net": 0.00011,
+        "sum_net": 0.67564,
+        "profit_factor": 1.018,
+        "mean_hold_bars": 16.44
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.295,
+          "mean_gross": -0.00126,
+          "mean_net": -0.00186,
+          "sum_net": -0.48543,
+          "profit_factor": 0.678,
+          "mean_hold_bars": 13.89
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.3755,
+          "mean_gross": 0.00645,
+          "mean_net": 0.00585,
+          "sum_net": 1.52745,
+          "profit_factor": 2.169,
+          "mean_hold_bars": 19.2
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.4597,
+          "mean_gross": 0.00366,
+          "mean_net": 0.00306,
+          "sum_net": 1.17855,
+          "profit_factor": 1.541,
+          "mean_hold_bars": 18.09
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.299,
+          "mean_gross": 0.00092,
+          "mean_net": 0.00032,
+          "sum_net": 0.19527,
+          "profit_factor": 1.071,
+          "mean_hold_bars": 16.24
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.4568,
+          "mean_gross": 0.00756,
+          "mean_net": 0.00696,
+          "sum_net": 2.81793,
+          "profit_factor": 2.512,
+          "mean_hold_bars": 18.07
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.3948,
+          "mean_gross": 0.00435,
+          "mean_net": 0.00375,
+          "sum_net": 1.8714,
+          "profit_factor": 1.798,
+          "mean_hold_bars": 15.59
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.3581,
+          "mean_gross": 0.0013,
+          "mean_net": 0.0007,
+          "sum_net": 0.53851,
+          "profit_factor": 1.144,
+          "mean_hold_bars": 16.4
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.3666,
+          "mean_gross": 0.00375,
+          "mean_net": 0.00315,
+          "sum_net": 2.39529,
+          "profit_factor": 1.651,
+          "mean_hold_bars": 16.97
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.3388,
+          "mean_gross": -0.00103,
+          "mean_net": -0.00163,
+          "sum_net": -0.99815,
+          "profit_factor": 0.712,
+          "mean_hold_bars": 14.73
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.331,
+          "mean_gross": 0.00146,
+          "mean_net": 0.00086,
+          "sum_net": 0.72521,
+          "profit_factor": 1.155,
+          "mean_hold_bars": 16.17
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.3242,
+          "mean_gross": 0.00015,
+          "mean_net": -0.00045,
+          "sum_net": -0.32666,
+          "profit_factor": 0.907,
+          "mean_hold_bars": 16.64
+        },
+        "2026-05": {
+          "n": 39,
+          "win_rate": 0.2051,
+          "mean_gross": -0.00277,
+          "mean_net": -0.00337,
+          "sum_net": -0.13133,
+          "profit_factor": 0.274,
+          "mean_hold_bars": 14.69
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.295,
+          "mean_gross": -0.00126,
+          "mean_net": -0.00186,
+          "sum_net": -0.48543,
+          "profit_factor": 0.678,
+          "mean_hold_bars": 13.89
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.3646,
+          "mean_gross": 0.00292,
+          "mean_net": 0.00232,
+          "sum_net": 2.90127,
+          "profit_factor": 1.464,
+          "mean_hold_bars": 17.43
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.3929,
+          "mean_gross": 0.00373,
+          "mean_net": 0.00313,
+          "sum_net": 5.22784,
+          "profit_factor": 1.658,
+          "mean_hold_bars": 16.57
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.3454,
+          "mean_gross": 0.00156,
+          "mean_net": 0.00096,
+          "sum_net": 2.12235,
+          "profit_factor": 1.18,
+          "mean_hold_bars": 16.05
+        },
+        "2026Q2": {
+          "n": 770,
+          "win_rate": 0.3182,
+          "mean_gross": 1e-05,
+          "mean_net": -0.00059,
+          "sum_net": -0.45799,
+          "profit_factor": 0.875,
+          "mean_hold_bars": 16.55
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 8,
+        "sum_net_total": 9.30804,
+        "top1_period": "2025-10",
+        "top1_share_of_sum_net": 0.303,
+        "top2_share_of_sum_net": 0.56,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 2,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": 9.30804,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.562,
+        "top2_share_of_sum_net": 0.873,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "exit on close cross against ema20; timeout 144"
+    },
+    "ma_ema55_h144": {
+      "maker_0.06pct": {
+        "n": 6166,
+        "win_rate": 0.3393,
+        "mean_gross": 0.00274,
+        "mean_net": 0.00214,
+        "sum_net": 13.17759,
+        "profit_factor": 1.316,
+        "mean_hold_bars": 35.03
+      },
+      "legacy_0.20pct": {
+        "n": 6166,
+        "win_rate": 0.3128,
+        "mean_gross": 0.00274,
+        "mean_net": 0.00074,
+        "sum_net": 4.54519,
+        "profit_factor": 1.096,
+        "mean_hold_bars": 35.03
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.2261,
+          "mean_gross": -0.00131,
+          "mean_net": -0.00191,
+          "sum_net": -0.49979,
+          "profit_factor": 0.757,
+          "mean_hold_bars": 26.27
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.4521,
+          "mean_gross": 0.00988,
+          "mean_net": 0.00928,
+          "sum_net": 2.4232,
+          "profit_factor": 2.521,
+          "mean_hold_bars": 43.05
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.374,
+          "mean_gross": 0.00178,
+          "mean_net": 0.00118,
+          "sum_net": 0.45387,
+          "profit_factor": 1.149,
+          "mean_hold_bars": 33.64
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.3206,
+          "mean_gross": 0.00443,
+          "mean_net": 0.00383,
+          "sum_net": 2.30381,
+          "profit_factor": 1.659,
+          "mean_hold_bars": 36.77
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.4519,
+          "mean_gross": 0.00749,
+          "mean_net": 0.00689,
+          "sum_net": 2.78949,
+          "profit_factor": 2.266,
+          "mean_hold_bars": 37.33
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.3447,
+          "mean_gross": 0.0053,
+          "mean_net": 0.0047,
+          "sum_net": 2.34345,
+          "profit_factor": 1.693,
+          "mean_hold_bars": 34.54
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.3529,
+          "mean_gross": 0.00059,
+          "mean_net": -1e-05,
+          "sum_net": -0.00495,
+          "profit_factor": 0.999,
+          "mean_hold_bars": 35.77
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.3311,
+          "mean_gross": 0.0058,
+          "mean_net": 0.0052,
+          "sum_net": 3.95588,
+          "profit_factor": 1.79,
+          "mean_hold_bars": 36.73
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.2864,
+          "mean_gross": -0.00118,
+          "mean_net": -0.00178,
+          "sum_net": -1.08479,
+          "profit_factor": 0.785,
+          "mean_hold_bars": 28.42
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.3369,
+          "mean_gross": 0.00255,
+          "mean_net": 0.00195,
+          "sum_net": 1.64019,
+          "profit_factor": 1.27,
+          "mean_hold_bars": 37.88
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.3187,
+          "mean_gross": -0.00077,
+          "mean_net": -0.00137,
+          "sum_net": -1.00276,
+          "profit_factor": 0.781,
+          "mean_hold_bars": 33.62
+        },
+        "2026-05": {
+          "n": 39,
+          "win_rate": 0.2051,
+          "mean_gross": -0.00299,
+          "mean_net": -0.00359,
+          "sum_net": -0.14001,
+          "profit_factor": 0.44,
+          "mean_hold_bars": 30.13
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.2261,
+          "mean_gross": -0.00131,
+          "mean_net": -0.00191,
+          "sum_net": -0.49979,
+          "profit_factor": 0.757,
+          "mean_hold_bars": 26.27
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.3646,
+          "mean_gross": 0.00475,
+          "mean_net": 0.00415,
+          "sum_net": 5.18088,
+          "profit_factor": 1.637,
+          "mean_hold_bars": 37.12
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.3744,
+          "mean_gross": 0.00367,
+          "mean_net": 0.00307,
+          "sum_net": 5.12799,
+          "profit_factor": 1.484,
+          "mean_hold_bars": 35.78
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.321,
+          "mean_gross": 0.00264,
+          "mean_net": 0.00204,
+          "sum_net": 4.51128,
+          "profit_factor": 1.28,
+          "mean_hold_bars": 34.88
+        },
+        "2026Q2": {
+          "n": 770,
+          "win_rate": 0.313,
+          "mean_gross": -0.00088,
+          "mean_net": -0.00148,
+          "sum_net": -1.14277,
+          "profit_factor": 0.764,
+          "mean_hold_bars": 33.45
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 7,
+        "sum_net_total": 13.17759,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.3,
+        "top2_share_of_sum_net": 0.512,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 2,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": 13.17759,
+        "top1_period": "2025Q3",
+        "top1_share_of_sum_net": 0.393,
+        "top2_share_of_sum_net": 0.782,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "exit on close cross against ema55; timeout 144"
+    },
+    "time_stop_48": {
+      "maker_0.06pct": {
+        "n": 6202,
+        "win_rate": 0.5197,
+        "mean_gross": 0.00283,
+        "mean_net": 0.00223,
+        "sum_net": 13.82718,
+        "profit_factor": 1.228,
+        "mean_hold_bars": 48.0
+      },
+      "legacy_0.20pct": {
+        "n": 6202,
+        "win_rate": 0.4963,
+        "mean_gross": 0.00283,
+        "mean_net": 0.00083,
+        "sum_net": 5.14438,
+        "profit_factor": 1.079,
+        "mean_hold_bars": 48.0
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.4291,
+          "mean_gross": -0.00274,
+          "mean_net": -0.00334,
+          "sum_net": -0.87149,
+          "profit_factor": 0.721,
+          "mean_hold_bars": 48.0
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.5479,
+          "mean_gross": 0.0088,
+          "mean_net": 0.0082,
+          "sum_net": 2.14003,
+          "profit_factor": 1.806,
+          "mean_hold_bars": 48.0
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.6208,
+          "mean_gross": 0.00343,
+          "mean_net": 0.00283,
+          "sum_net": 1.08971,
+          "profit_factor": 1.229,
+          "mean_hold_bars": 48.0
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.4884,
+          "mean_gross": 0.00077,
+          "mean_net": 0.00017,
+          "sum_net": 0.1004,
+          "profit_factor": 1.018,
+          "mean_hold_bars": 48.0
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.5704,
+          "mean_gross": 0.00789,
+          "mean_net": 0.00729,
+          "sum_net": 2.95247,
+          "profit_factor": 1.707,
+          "mean_hold_bars": 48.0
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.5531,
+          "mean_gross": 0.00518,
+          "mean_net": 0.00458,
+          "sum_net": 2.28781,
+          "profit_factor": 1.437,
+          "mean_hold_bars": 48.0
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.5365,
+          "mean_gross": 0.00308,
+          "mean_net": 0.00248,
+          "sum_net": 1.90473,
+          "profit_factor": 1.285,
+          "mean_hold_bars": 48.0
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.5453,
+          "mean_gross": 0.0072,
+          "mean_net": 0.0066,
+          "sum_net": 5.02133,
+          "profit_factor": 1.975,
+          "mean_hold_bars": 48.0
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.5221,
+          "mean_gross": 0.00361,
+          "mean_net": 0.00301,
+          "sum_net": 1.83778,
+          "profit_factor": 1.34,
+          "mean_hold_bars": 48.0
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.484,
+          "mean_gross": 0.00069,
+          "mean_net": 9e-05,
+          "sum_net": 0.07493,
+          "profit_factor": 1.008,
+          "mean_hold_bars": 48.0
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.4692,
+          "mean_gross": -0.0025,
+          "mean_net": -0.0031,
+          "sum_net": -2.26835,
+          "profit_factor": 0.724,
+          "mean_hold_bars": 48.0
+        },
+        "2026-05": {
+          "n": 75,
+          "win_rate": 0.4133,
+          "mean_gross": -0.0053,
+          "mean_net": -0.0059,
+          "sum_net": -0.44217,
+          "profit_factor": 0.416,
+          "mean_hold_bars": 48.0
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.4291,
+          "mean_gross": -0.00274,
+          "mean_net": -0.00334,
+          "sum_net": -0.87149,
+          "profit_factor": 0.721,
+          "mean_hold_bars": 48.0
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.5417,
+          "mean_gross": 0.00327,
+          "mean_net": 0.00267,
+          "sum_net": 3.33014,
+          "profit_factor": 1.254,
+          "mean_hold_bars": 48.0
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.5496,
+          "mean_gross": 0.00487,
+          "mean_net": 0.00427,
+          "sum_net": 7.14501,
+          "profit_factor": 1.444,
+          "mean_hold_bars": 48.0
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.5156,
+          "mean_gross": 0.00373,
+          "mean_net": 0.00313,
+          "sum_net": 6.93404,
+          "profit_factor": 1.358,
+          "mean_hold_bars": 48.0
+        },
+        "2026Q2": {
+          "n": 806,
+          "win_rate": 0.464,
+          "mean_gross": -0.00276,
+          "mean_net": -0.00336,
+          "sum_net": -2.71052,
+          "profit_factor": 0.698,
+          "mean_hold_bars": 48.0
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 9,
+        "sum_net_total": 13.82718,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.363,
+        "top2_share_of_sum_net": 0.577,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 2,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": 13.82718,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.517,
+        "top2_share_of_sum_net": 1.018,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "force flat at close of path bar 48; no TP/SL"
+    },
+    "time_stop_96": {
+      "maker_0.06pct": {
+        "n": 6170,
+        "win_rate": 0.5212,
+        "mean_gross": 0.00413,
+        "mean_net": 0.00353,
+        "sum_net": 21.80662,
+        "profit_factor": 1.244,
+        "mean_hold_bars": 96.0
+      },
+      "legacy_0.20pct": {
+        "n": 6170,
+        "win_rate": 0.5049,
+        "mean_gross": 0.00413,
+        "mean_net": 0.00213,
+        "sum_net": 13.16862,
+        "profit_factor": 1.141,
+        "mean_hold_bars": 96.0
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.4598,
+          "mean_gross": -0.00373,
+          "mean_net": -0.00433,
+          "sum_net": -1.1305,
+          "profit_factor": 0.747,
+          "mean_hold_bars": 96.0
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.5096,
+          "mean_gross": 0.00448,
+          "mean_net": 0.00388,
+          "sum_net": 1.0115,
+          "profit_factor": 1.202,
+          "mean_hold_bars": 96.0
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.6545,
+          "mean_gross": 0.00947,
+          "mean_net": 0.00887,
+          "sum_net": 3.41524,
+          "profit_factor": 1.594,
+          "mean_hold_bars": 96.0
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.4452,
+          "mean_gross": 0.00221,
+          "mean_net": 0.00161,
+          "sum_net": 0.96982,
+          "profit_factor": 1.097,
+          "mean_hold_bars": 96.0
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.4765,
+          "mean_gross": -0.00154,
+          "mean_net": -0.00214,
+          "sum_net": -0.86806,
+          "profit_factor": 0.887,
+          "mean_hold_bars": 96.0
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.5431,
+          "mean_gross": 0.00876,
+          "mean_net": 0.00816,
+          "sum_net": 4.07273,
+          "profit_factor": 1.56,
+          "mean_hold_bars": 96.0
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.4766,
+          "mean_gross": -0.00196,
+          "mean_net": -0.00256,
+          "sum_net": -1.96841,
+          "profit_factor": 0.821,
+          "mean_hold_bars": 96.0
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.657,
+          "mean_gross": 0.01748,
+          "mean_net": 0.01688,
+          "sum_net": 12.84226,
+          "profit_factor": 3.137,
+          "mean_hold_bars": 96.0
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.6416,
+          "mean_gross": 0.01687,
+          "mean_net": 0.01627,
+          "sum_net": 9.94264,
+          "profit_factor": 2.691,
+          "mean_hold_bars": 96.0
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.4852,
+          "mean_gross": 0.00121,
+          "mean_net": 0.00061,
+          "sum_net": 0.51028,
+          "profit_factor": 1.04,
+          "mean_hold_bars": 96.0
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.4049,
+          "mean_gross": -0.00816,
+          "mean_net": -0.00876,
+          "sum_net": -6.40167,
+          "profit_factor": 0.505,
+          "mean_hold_bars": 96.0
+        },
+        "2026-05": {
+          "n": 43,
+          "win_rate": 0.3721,
+          "mean_gross": -0.0131,
+          "mean_net": -0.0137,
+          "sum_net": -0.58921,
+          "profit_factor": 0.285,
+          "mean_hold_bars": 96.0
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.4598,
+          "mean_gross": -0.00373,
+          "mean_net": -0.00433,
+          "sum_net": -1.1305,
+          "profit_factor": 0.747,
+          "mean_hold_bars": 96.0
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.5232,
+          "mean_gross": 0.00492,
+          "mean_net": 0.00432,
+          "sum_net": 5.39655,
+          "profit_factor": 1.26,
+          "mean_hold_bars": 96.0
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.4964,
+          "mean_gross": 0.00134,
+          "mean_net": 0.00074,
+          "sum_net": 1.23626,
+          "profit_factor": 1.048,
+          "mean_hold_bars": 96.0
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.5874,
+          "mean_gross": 0.01112,
+          "mean_net": 0.01052,
+          "sum_net": 23.29518,
+          "profit_factor": 1.947,
+          "mean_hold_bars": 96.0
+        },
+        "2026Q2": {
+          "n": 774,
+          "win_rate": 0.4031,
+          "mean_gross": -0.00843,
+          "mean_net": -0.00903,
+          "sum_net": -6.99087,
+          "profit_factor": 0.492,
+          "mean_hold_bars": 96.0
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 4,
+        "n_periods_sum_net_gt_0": 7,
+        "sum_net_total": 21.80662,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.589,
+        "top2_share_of_sum_net": 1.045,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 1,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": 21.80662,
+        "top1_period": "2026Q1",
+        "top1_share_of_sum_net": 1.068,
+        "top2_share_of_sum_net": 1.316,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "force flat at close of path bar 96; no TP/SL"
+    }
+  },
+  "a_long_control": {
+    "baseline_tp5_sl2_h72": {
+      "maker_0.06pct": {
+        "n": 5800,
+        "win_rate": 0.2995,
+        "mean_gross": -0.00023,
+        "mean_net": -0.00083,
+        "sum_net": -4.79607,
+        "profit_factor": 0.892,
+        "mean_hold_bars": 20.16
+      },
+      "legacy_0.20pct": {
+        "n": 5800,
+        "win_rate": 0.2971,
+        "mean_gross": -0.00023,
+        "mean_net": -0.00223,
+        "sum_net": -12.91607,
+        "profit_factor": 0.743,
+        "mean_hold_bars": 20.16
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 305,
+          "win_rate": 0.3148,
+          "mean_gross": 0.00016,
+          "mean_net": -0.00044,
+          "sum_net": -0.13375,
+          "profit_factor": 0.937,
+          "mean_hold_bars": 20.51
+        },
+        "2025-07": {
+          "n": 363,
+          "win_rate": 0.3306,
+          "mean_gross": 0.00038,
+          "mean_net": -0.00022,
+          "sum_net": -0.07964,
+          "profit_factor": 0.973,
+          "mean_hold_bars": 22.44
+        },
+        "2025-08": {
+          "n": 419,
+          "win_rate": 0.2482,
+          "mean_gross": -0.00267,
+          "mean_net": -0.00327,
+          "sum_net": -1.36869,
+          "profit_factor": 0.607,
+          "mean_hold_bars": 21.71
+        },
+        "2025-09": {
+          "n": 617,
+          "win_rate": 0.2917,
+          "mean_gross": -0.0001,
+          "mean_net": -0.0007,
+          "sum_net": -0.43397,
+          "profit_factor": 0.894,
+          "mean_hold_bars": 24.65
+        },
+        "2025-10": {
+          "n": 511,
+          "win_rate": 0.3288,
+          "mean_gross": 0.00083,
+          "mean_net": 0.00023,
+          "sum_net": 0.11803,
+          "profit_factor": 1.031,
+          "mean_hold_bars": 23.81
+        },
+        "2025-11": {
+          "n": 292,
+          "win_rate": 0.2021,
+          "mean_gross": -0.00433,
+          "mean_net": -0.00493,
+          "sum_net": -1.44053,
+          "profit_factor": 0.54,
+          "mean_hold_bars": 15.51
+        },
+        "2025-12": {
+          "n": 489,
+          "win_rate": 0.2761,
+          "mean_gross": -0.00071,
+          "mean_net": -0.00131,
+          "sum_net": -0.64105,
+          "profit_factor": 0.835,
+          "mean_hold_bars": 15.51
+        },
+        "2026-01": {
+          "n": 489,
+          "win_rate": 0.2229,
+          "mean_gross": -0.00303,
+          "mean_net": -0.00363,
+          "sum_net": -1.77364,
+          "profit_factor": 0.585,
+          "mean_hold_bars": 16.61
+        },
+        "2026-02": {
+          "n": 393,
+          "win_rate": 0.2824,
+          "mean_gross": -0.00124,
+          "mean_net": -0.00184,
+          "sum_net": -0.72182,
+          "profit_factor": 0.802,
+          "mean_hold_bars": 18.91
+        },
+        "2026-03": {
+          "n": 812,
+          "win_rate": 0.3399,
+          "mean_gross": 0.00138,
+          "mean_net": 0.00078,
+          "sum_net": 0.63627,
+          "profit_factor": 1.104,
+          "mean_hold_bars": 20.0
+        },
+        "2026-04": {
+          "n": 985,
+          "win_rate": 0.3492,
+          "mean_gross": 0.00175,
+          "mean_net": 0.00115,
+          "sum_net": 1.13196,
+          "profit_factor": 1.181,
+          "mean_hold_bars": 20.27
+        },
+        "2026-05": {
+          "n": 125,
+          "win_rate": 0.28,
+          "mean_gross": -0.00011,
+          "mean_net": -0.00071,
+          "sum_net": -0.08924,
+          "profit_factor": 0.882,
+          "mean_hold_bars": 17.44
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 305,
+          "win_rate": 0.3148,
+          "mean_gross": 0.00016,
+          "mean_net": -0.00044,
+          "sum_net": -0.13375,
+          "profit_factor": 0.937,
+          "mean_hold_bars": 20.51
+        },
+        "2025Q3": {
+          "n": 1399,
+          "win_rate": 0.2888,
+          "mean_gross": -0.00075,
+          "mean_net": -0.00135,
+          "sum_net": -1.88229,
+          "profit_factor": 0.821,
+          "mean_hold_bars": 23.2
+        },
+        "2025Q4": {
+          "n": 1292,
+          "win_rate": 0.2802,
+          "mean_gross": -0.00092,
+          "mean_net": -0.00152,
+          "sum_net": -1.96356,
+          "profit_factor": 0.819,
+          "mean_hold_bars": 18.79
+        },
+        "2026Q1": {
+          "n": 1694,
+          "win_rate": 0.2928,
+          "mean_gross": -0.0005,
+          "mean_net": -0.0011,
+          "sum_net": -1.85919,
+          "profit_factor": 0.867,
+          "mean_hold_bars": 18.77
+        },
+        "2026Q2": {
+          "n": 1110,
+          "win_rate": 0.3414,
+          "mean_gross": 0.00154,
+          "mean_net": 0.00094,
+          "sum_net": 1.04272,
+          "profit_factor": 1.149,
+          "mean_hold_bars": 19.95
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 0,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": -4.79607,
+        "top1_period": "2026-04",
+        "top1_share_of_sum_net": null,
+        "top2_share_of_sum_net": null,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 0,
+        "n_periods_sum_net_gt_0": 1,
+        "sum_net_total": -4.79607,
+        "top1_period": "2026Q2",
+        "top1_share_of_sum_net": null,
+        "top2_share_of_sum_net": null,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "exit_rule": "fixed TP5/SL2, horizon 72 (mainline control)"
+    },
+    "no_tp_sl2_h144": {
+      "maker_0.06pct": {
+        "n": 5748,
+        "win_rate": 0.1621,
+        "mean_gross": -7e-05,
+        "mean_net": -0.00067,
+        "sum_net": -3.86455,
+        "profit_factor": 0.927,
+        "mean_hold_bars": 45.67
+      },
+      "legacy_0.20pct": {
+        "n": 5748,
+        "win_rate": 0.1609,
+        "mean_gross": -7e-05,
+        "mean_net": -0.00207,
+        "sum_net": -11.91175,
+        "profit_factor": 0.8,
+        "mean_hold_bars": 45.67
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 305,
+          "win_rate": 0.1869,
+          "mean_gross": 0.003,
+          "mean_net": 0.0024,
+          "sum_net": 0.73194,
+          "profit_factor": 1.287,
+          "mean_hold_bars": 45.82
+        },
+        "2025-07": {
+          "n": 363,
+          "win_rate": 0.1956,
+          "mean_gross": 0.00366,
+          "mean_net": 0.00306,
+          "sum_net": 1.11082,
+          "profit_factor": 1.317,
+          "mean_hold_bars": 51.49
+        },
+        "2025-08": {
+          "n": 419,
+          "win_rate": 0.0979,
+          "mean_gross": -0.00238,
+          "mean_net": -0.00298,
+          "sum_net": -1.24843,
+          "profit_factor": 0.695,
+          "mean_hold_bars": 38.21
+        },
+        "2025-09": {
+          "n": 617,
+          "win_rate": 0.1848,
+          "mean_gross": 0.00041,
+          "mean_net": -0.00019,
+          "sum_net": -0.11782,
+          "profit_factor": 0.975,
+          "mean_hold_bars": 49.12
+        },
+        "2025-10": {
+          "n": 511,
+          "win_rate": 0.2094,
+          "mean_gross": 0.00138,
+          "mean_net": 0.00078,
+          "sum_net": 0.39993,
+          "profit_factor": 1.09,
+          "mean_hold_bars": 51.61
+        },
+        "2025-11": {
+          "n": 292,
+          "win_rate": 0.1267,
+          "mean_gross": -0.00552,
+          "mean_net": -0.00612,
+          "sum_net": -1.78734,
+          "profit_factor": 0.47,
+          "mean_hold_bars": 34.29
+        },
+        "2025-12": {
+          "n": 489,
+          "win_rate": 0.1063,
+          "mean_gross": -0.00444,
+          "mean_net": -0.00504,
+          "sum_net": -2.4661,
+          "profit_factor": 0.488,
+          "mean_hold_bars": 38.32
+        },
+        "2026-01": {
+          "n": 489,
+          "win_rate": 0.1002,
+          "mean_gross": -0.00408,
+          "mean_net": -0.00468,
+          "sum_net": -2.28762,
+          "profit_factor": 0.54,
+          "mean_hold_bars": 33.92
+        },
+        "2026-02": {
+          "n": 393,
+          "win_rate": 0.1679,
+          "mean_gross": 0.00059,
+          "mean_net": -1e-05,
+          "sum_net": -0.00341,
+          "profit_factor": 0.999,
+          "mean_hold_bars": 44.55
+        },
+        "2026-03": {
+          "n": 812,
+          "win_rate": 0.197,
+          "mean_gross": 0.00061,
+          "mean_net": 1e-05,
+          "sum_net": 0.00609,
+          "profit_factor": 1.001,
+          "mean_hold_bars": 51.76
+        },
+        "2026-04": {
+          "n": 985,
+          "win_rate": 0.1716,
+          "mean_gross": 0.00272,
+          "mean_net": 0.00212,
+          "sum_net": 2.08354,
+          "profit_factor": 1.261,
+          "mean_hold_bars": 50.26
+        },
+        "2026-05": {
+          "n": 73,
+          "win_rate": 0.1233,
+          "mean_gross": -0.00332,
+          "mean_net": -0.00392,
+          "sum_net": -0.28616,
+          "profit_factor": 0.521,
+          "mean_hold_bars": 37.99
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 305,
+          "win_rate": 0.1869,
+          "mean_gross": 0.003,
+          "mean_net": 0.0024,
+          "sum_net": 0.73194,
+          "profit_factor": 1.287,
+          "mean_hold_bars": 45.82
+        },
+        "2025Q3": {
+          "n": 1399,
+          "win_rate": 0.1615,
+          "mean_gross": 0.00042,
+          "mean_net": -0.00018,
+          "sum_net": -0.25542,
+          "profit_factor": 0.979,
+          "mean_hold_bars": 46.47
+        },
+        "2025Q4": {
+          "n": 1292,
+          "win_rate": 0.1517,
+          "mean_gross": -0.00238,
+          "mean_net": -0.00298,
+          "sum_net": -3.85351,
+          "profit_factor": 0.696,
+          "mean_hold_bars": 42.66
+        },
+        "2026Q1": {
+          "n": 1694,
+          "win_rate": 0.1623,
+          "mean_gross": -0.00075,
+          "mean_net": -0.00135,
+          "sum_net": -2.28494,
+          "profit_factor": 0.863,
+          "mean_hold_bars": 44.94
+        },
+        "2026Q2": {
+          "n": 1058,
+          "win_rate": 0.1682,
+          "mean_gross": 0.0023,
+          "mean_net": 0.0017,
+          "sum_net": 1.79738,
+          "profit_factor": 1.209,
+          "mean_hold_bars": 49.41
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 1,
+        "n_periods_sum_net_gt_0": 5,
+        "sum_net_total": -3.86456,
+        "top1_period": "2026-04",
+        "top1_share_of_sum_net": null,
+        "top2_share_of_sum_net": null,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 0,
+        "n_periods_sum_net_gt_0": 2,
+        "sum_net_total": -3.86455,
+        "top1_period": "2026Q2",
+        "top1_share_of_sum_net": null,
+        "top2_share_of_sum_net": null,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "exit_rule": "SL2 only, no TP; timeout 144"
+    },
+    "trail3_atr_h144": {
+      "maker_0.06pct": {
+        "n": 5748,
+        "win_rate": 0.3431,
+        "mean_gross": -0.00042,
+        "mean_net": -0.00102,
+        "sum_net": -5.86861,
+        "profit_factor": 0.839,
+        "mean_hold_bars": 18.54
+      },
+      "legacy_0.20pct": {
+        "n": 5748,
+        "win_rate": 0.3079,
+        "mean_gross": -0.00042,
+        "mean_net": -0.00242,
+        "sum_net": -13.91581,
+        "profit_factor": 0.667,
+        "mean_hold_bars": 18.54
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 305,
+          "win_rate": 0.3508,
+          "mean_gross": 0.00022,
+          "mean_net": -0.00038,
+          "sum_net": -0.11704,
+          "profit_factor": 0.931,
+          "mean_hold_bars": 19.97
+        },
+        "2025-07": {
+          "n": 363,
+          "win_rate": 0.3499,
+          "mean_gross": -0.00136,
+          "mean_net": -0.00196,
+          "sum_net": -0.71309,
+          "profit_factor": 0.701,
+          "mean_hold_bars": 18.5
+        },
+        "2025-08": {
+          "n": 419,
+          "win_rate": 0.3174,
+          "mean_gross": -0.00094,
+          "mean_net": -0.00154,
+          "sum_net": -0.64729,
+          "profit_factor": 0.743,
+          "mean_hold_bars": 19.04
+        },
+        "2025-09": {
+          "n": 617,
+          "win_rate": 0.3306,
+          "mean_gross": -0.00072,
+          "mean_net": -0.00132,
+          "sum_net": -0.81581,
+          "profit_factor": 0.762,
+          "mean_hold_bars": 23.61
+        },
+        "2025-10": {
+          "n": 511,
+          "win_rate": 0.3855,
+          "mean_gross": 0.00073,
+          "mean_net": 0.00013,
+          "sum_net": 0.06539,
+          "profit_factor": 1.022,
+          "mean_hold_bars": 24.27
+        },
+        "2025-11": {
+          "n": 292,
+          "win_rate": 0.2637,
+          "mean_gross": -0.00449,
+          "mean_net": -0.00509,
+          "sum_net": -1.4861,
+          "profit_factor": 0.454,
+          "mean_hold_bars": 16.14
+        },
+        "2025-12": {
+          "n": 489,
+          "win_rate": 0.3538,
+          "mean_gross": -0.00056,
+          "mean_net": -0.00116,
+          "sum_net": -0.56869,
+          "profit_factor": 0.818,
+          "mean_hold_bars": 14.31
+        },
+        "2026-01": {
+          "n": 489,
+          "win_rate": 0.2597,
+          "mean_gross": -0.00357,
+          "mean_net": -0.00417,
+          "sum_net": -2.03882,
+          "profit_factor": 0.482,
+          "mean_hold_bars": 14.58
+        },
+        "2026-02": {
+          "n": 393,
+          "win_rate": 0.3257,
+          "mean_gross": -0.00013,
+          "mean_net": -0.00073,
+          "sum_net": -0.28827,
+          "profit_factor": 0.911,
+          "mean_hold_bars": 20.78
+        },
+        "2026-03": {
+          "n": 812,
+          "win_rate": 0.3744,
+          "mean_gross": 0.00115,
+          "mean_net": 0.00055,
+          "sum_net": 0.44734,
+          "profit_factor": 1.092,
+          "mean_hold_bars": 17.89
+        },
+        "2026-04": {
+          "n": 985,
+          "win_rate": 0.3838,
+          "mean_gross": 0.00119,
+          "mean_net": 0.00059,
+          "sum_net": 0.58407,
+          "profit_factor": 1.116,
+          "mean_hold_bars": 16.51
+        },
+        "2026-05": {
+          "n": 73,
+          "win_rate": 0.2329,
+          "mean_gross": -0.00338,
+          "mean_net": -0.00398,
+          "sum_net": -0.2903,
+          "profit_factor": 0.37,
+          "mean_hold_bars": 13.99
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 305,
+          "win_rate": 0.3508,
+          "mean_gross": 0.00022,
+          "mean_net": -0.00038,
+          "sum_net": -0.11704,
+          "profit_factor": 0.931,
+          "mean_hold_bars": 19.97
+        },
+        "2025Q3": {
+          "n": 1399,
+          "win_rate": 0.3317,
+          "mean_gross": -0.00096,
+          "mean_net": -0.00156,
+          "sum_net": -2.17618,
+          "profit_factor": 0.739,
+          "mean_hold_bars": 20.92
+        },
+        "2025Q4": {
+          "n": 1292,
+          "win_rate": 0.346,
+          "mean_gross": -0.00094,
+          "mean_net": -0.00154,
+          "sum_net": -1.9894,
+          "profit_factor": 0.774,
+          "mean_hold_bars": 18.66
+        },
+        "2026Q1": {
+          "n": 1694,
+          "win_rate": 0.33,
+          "mean_gross": -0.00051,
+          "mean_net": -0.00111,
+          "sum_net": -1.87975,
+          "profit_factor": 0.844,
+          "mean_hold_bars": 17.61
+        },
+        "2026Q2": {
+          "n": 1058,
+          "win_rate": 0.3733,
+          "mean_gross": 0.00088,
+          "mean_net": 0.00028,
+          "sum_net": 0.29377,
+          "profit_factor": 1.054,
+          "mean_hold_bars": 16.33
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 0,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": -5.86861,
+        "top1_period": "2026-04",
+        "top1_share_of_sum_net": null,
+        "top2_share_of_sum_net": null,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 0,
+        "n_periods_sum_net_gt_0": 1,
+        "sum_net_total": -5.8686,
+        "top1_period": "2026Q2",
+        "top1_share_of_sum_net": null,
+        "top2_share_of_sum_net": null,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "exit_rule": "ATR trailing 3×ATR14(signal); timeout 144"
+    },
+    "ma_ema55_h144": {
+      "maker_0.06pct": {
+        "n": 5748,
+        "win_rate": 0.2864,
+        "mean_gross": 0.0004,
+        "mean_net": -0.0002,
+        "sum_net": -1.15799,
+        "profit_factor": 0.973,
+        "mean_hold_bars": 31.95
+      },
+      "legacy_0.20pct": {
+        "n": 5748,
+        "win_rate": 0.2625,
+        "mean_gross": 0.0004,
+        "mean_net": -0.0016,
+        "sum_net": -9.20519,
+        "profit_factor": 0.813,
+        "mean_hold_bars": 31.95
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 305,
+          "win_rate": 0.3016,
+          "mean_gross": -0.00033,
+          "mean_net": -0.00093,
+          "sum_net": -0.28504,
+          "profit_factor": 0.859,
+          "mean_hold_bars": 34.28
+        },
+        "2025-07": {
+          "n": 363,
+          "win_rate": 0.3113,
+          "mean_gross": 0.00136,
+          "mean_net": 0.00076,
+          "sum_net": 0.27669,
+          "profit_factor": 1.104,
+          "mean_hold_bars": 33.43
+        },
+        "2025-08": {
+          "n": 419,
+          "win_rate": 0.2434,
+          "mean_gross": -0.00229,
+          "mean_net": -0.00289,
+          "sum_net": -1.20889,
+          "profit_factor": 0.626,
+          "mean_hold_bars": 29.83
+        },
+        "2025-09": {
+          "n": 617,
+          "win_rate": 0.3096,
+          "mean_gross": -5e-05,
+          "mean_net": -0.00065,
+          "sum_net": -0.40289,
+          "profit_factor": 0.897,
+          "mean_hold_bars": 34.5
+        },
+        "2025-10": {
+          "n": 511,
+          "win_rate": 0.3444,
+          "mean_gross": 0.00175,
+          "mean_net": 0.00115,
+          "sum_net": 0.58826,
+          "profit_factor": 1.17,
+          "mean_hold_bars": 37.93
+        },
+        "2025-11": {
+          "n": 292,
+          "win_rate": 0.1986,
+          "mean_gross": -0.00426,
+          "mean_net": -0.00486,
+          "sum_net": -1.41821,
+          "profit_factor": 0.542,
+          "mean_hold_bars": 22.28
+        },
+        "2025-12": {
+          "n": 489,
+          "win_rate": 0.2802,
+          "mean_gross": -0.0016,
+          "mean_net": -0.0022,
+          "sum_net": -1.07655,
+          "profit_factor": 0.729,
+          "mean_hold_bars": 28.27
+        },
+        "2026-01": {
+          "n": 489,
+          "win_rate": 0.1881,
+          "mean_gross": -0.00346,
+          "mean_net": -0.00406,
+          "sum_net": -1.98736,
+          "profit_factor": 0.573,
+          "mean_hold_bars": 25.34
+        },
+        "2026-02": {
+          "n": 393,
+          "win_rate": 0.257,
+          "mean_gross": 0.00187,
+          "mean_net": 0.00127,
+          "sum_net": 0.50061,
+          "profit_factor": 1.147,
+          "mean_hold_bars": 30.48
+        },
+        "2026-03": {
+          "n": 812,
+          "win_rate": 0.3091,
+          "mean_gross": 0.00182,
+          "mean_net": 0.00122,
+          "sum_net": 0.99046,
+          "profit_factor": 1.162,
+          "mean_hold_bars": 33.06
+        },
+        "2026-04": {
+          "n": 985,
+          "win_rate": 0.3239,
+          "mean_gross": 0.00361,
+          "mean_net": 0.00301,
+          "sum_net": 2.96087,
+          "profit_factor": 1.461,
+          "mean_hold_bars": 34.74
+        },
+        "2026-05": {
+          "n": 73,
+          "win_rate": 0.1918,
+          "mean_gross": -0.00071,
+          "mean_net": -0.00131,
+          "sum_net": -0.09594,
+          "profit_factor": 0.796,
+          "mean_hold_bars": 29.1
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 305,
+          "win_rate": 0.3016,
+          "mean_gross": -0.00033,
+          "mean_net": -0.00093,
+          "sum_net": -0.28504,
+          "profit_factor": 0.859,
+          "mean_hold_bars": 34.28
+        },
+        "2025Q3": {
+          "n": 1399,
+          "win_rate": 0.2902,
+          "mean_gross": -0.00035,
+          "mean_net": -0.00095,
+          "sum_net": -1.33509,
+          "profit_factor": 0.864,
+          "mean_hold_bars": 32.82
+        },
+        "2025Q4": {
+          "n": 1292,
+          "win_rate": 0.2872,
+          "mean_gross": -0.00088,
+          "mean_net": -0.00148,
+          "sum_net": -1.9065,
+          "profit_factor": 0.819,
+          "mean_hold_bars": 30.74
+        },
+        "2026Q1": {
+          "n": 1694,
+          "win_rate": 0.2621,
+          "mean_gross": 0.00031,
+          "mean_net": -0.00029,
+          "sum_net": -0.49629,
+          "profit_factor": 0.965,
+          "mean_hold_bars": 30.23
+        },
+        "2026Q2": {
+          "n": 1058,
+          "win_rate": 0.3147,
+          "mean_gross": 0.00331,
+          "mean_net": 0.00271,
+          "sum_net": 2.86493,
+          "profit_factor": 1.416,
+          "mean_hold_bars": 34.35
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 1,
+        "n_periods_sum_net_gt_0": 5,
+        "sum_net_total": -1.15799,
+        "top1_period": "2026-04",
+        "top1_share_of_sum_net": null,
+        "top2_share_of_sum_net": null,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 1,
+        "n_periods_sum_net_gt_0": 1,
+        "sum_net_total": -1.15799,
+        "top1_period": "2026Q2",
+        "top1_share_of_sum_net": null,
+        "top2_share_of_sum_net": null,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "exit_rule": "exit on close cross against ema55; timeout 144"
+    }
+  },
+  "b_oracle": {
+    "baseline_tp5_sl2_h72": {
+      "maker_0.06pct": {
+        "n": 1283,
+        "win_rate": 0.7599,
+        "mean_gross": 0.02355,
+        "mean_net": 0.02295,
+        "sum_net": 29.4467,
+        "profit_factor": 7.408,
+        "mean_hold_bars": 29.32
+      },
+      "legacy_0.20pct": {
+        "n": 1283,
+        "win_rate": 0.7529,
+        "mean_gross": 0.02355,
+        "mean_net": 0.02155,
+        "sum_net": 27.6505,
+        "profit_factor": 6.494,
+        "mean_hold_bars": 29.32
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 71,
+          "win_rate": 0.7746,
+          "mean_gross": 0.02404,
+          "mean_net": 0.02344,
+          "sum_net": 1.66428,
+          "profit_factor": 8.112,
+          "mean_hold_bars": 30.0
+        },
+        "2025-07": {
+          "n": 97,
+          "win_rate": 0.8763,
+          "mean_gross": 0.03232,
+          "mean_net": 0.03172,
+          "sum_net": 3.07648,
+          "profit_factor": 15.01,
+          "mean_hold_bars": 31.07
+        },
+        "2025-08": {
+          "n": 150,
+          "win_rate": 0.7067,
+          "mean_gross": 0.01711,
+          "mean_net": 0.01651,
+          "sum_net": 2.47663,
+          "profit_factor": 5.391,
+          "mean_hold_bars": 26.47
+        },
+        "2025-09": {
+          "n": 148,
+          "win_rate": 0.8311,
+          "mean_gross": 0.02009,
+          "mean_net": 0.01949,
+          "sum_net": 2.88423,
+          "profit_factor": 11.245,
+          "mean_hold_bars": 31.4
+        },
+        "2025-10": {
+          "n": 149,
+          "win_rate": 0.745,
+          "mean_gross": 0.0303,
+          "mean_net": 0.0297,
+          "sum_net": 4.42604,
+          "profit_factor": 8.227,
+          "mean_hold_bars": 33.42
+        },
+        "2025-11": {
+          "n": 171,
+          "win_rate": 0.655,
+          "mean_gross": 0.02615,
+          "mean_net": 0.02555,
+          "sum_net": 4.36859,
+          "profit_factor": 5.083,
+          "mean_hold_bars": 28.48
+        },
+        "2025-12": {
+          "n": 77,
+          "win_rate": 0.7403,
+          "mean_gross": 0.0207,
+          "mean_net": 0.0201,
+          "sum_net": 1.54763,
+          "profit_factor": 9.139,
+          "mean_hold_bars": 28.84
+        },
+        "2026-01": {
+          "n": 117,
+          "win_rate": 0.7436,
+          "mean_gross": 0.01902,
+          "mean_net": 0.01842,
+          "sum_net": 2.15524,
+          "profit_factor": 4.748,
+          "mean_hold_bars": 29.62
+        },
+        "2026-02": {
+          "n": 91,
+          "win_rate": 0.7363,
+          "mean_gross": 0.02668,
+          "mean_net": 0.02608,
+          "sum_net": 2.37355,
+          "profit_factor": 7.359,
+          "mean_hold_bars": 21.98
+        },
+        "2026-03": {
+          "n": 95,
+          "win_rate": 0.8526,
+          "mean_gross": 0.02396,
+          "mean_net": 0.02336,
+          "sum_net": 2.21913,
+          "profit_factor": 13.532,
+          "mean_hold_bars": 25.28
+        },
+        "2026-04": {
+          "n": 113,
+          "win_rate": 0.7699,
+          "mean_gross": 0.01997,
+          "mean_net": 0.01937,
+          "sum_net": 2.18894,
+          "profit_factor": 8.332,
+          "mean_hold_bars": 34.33
+        },
+        "2026-05": {
+          "n": 4,
+          "win_rate": 1.0,
+          "mean_gross": 0.01709,
+          "mean_net": 0.01649,
+          "sum_net": 0.06597,
+          "profit_factor": null,
+          "mean_hold_bars": 10.0
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 71,
+          "win_rate": 0.7746,
+          "mean_gross": 0.02404,
+          "mean_net": 0.02344,
+          "sum_net": 1.66428,
+          "profit_factor": 8.112,
+          "mean_hold_bars": 30.0
+        },
+        "2025Q3": {
+          "n": 395,
+          "win_rate": 0.7949,
+          "mean_gross": 0.02196,
+          "mean_net": 0.02136,
+          "sum_net": 8.43733,
+          "profit_factor": 8.922,
+          "mean_hold_bars": 29.45
+        },
+        "2025Q4": {
+          "n": 397,
+          "win_rate": 0.7053,
+          "mean_gross": 0.02665,
+          "mean_net": 0.02605,
+          "sum_net": 10.34226,
+          "profit_factor": 6.523,
+          "mean_hold_bars": 30.4
+        },
+        "2026Q1": {
+          "n": 303,
+          "win_rate": 0.7756,
+          "mean_gross": 0.02287,
+          "mean_net": 0.02227,
+          "sum_net": 6.74792,
+          "profit_factor": 6.996,
+          "mean_hold_bars": 25.97
+        },
+        "2026Q2": {
+          "n": 117,
+          "win_rate": 0.7778,
+          "mean_gross": 0.01987,
+          "mean_net": 0.01927,
+          "sum_net": 2.25491,
+          "profit_factor": 8.553,
+          "mean_hold_bars": 33.5
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 11,
+        "n_periods_pf_ge_1_3": 11,
+        "n_periods_sum_net_gt_0": 11,
+        "sum_net_total": 29.38074,
+        "top1_period": "2025-10",
+        "top1_share_of_sum_net": 0.151,
+        "top2_share_of_sum_net": 0.299,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 5,
+        "sum_net_total": 29.4467,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.351,
+        "top2_share_of_sum_net": 0.638,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "fixed TP5/SL2, horizon 72 (mainline control)"
+    },
+    "no_tp_sl2_h144": {
+      "maker_0.06pct": {
+        "n": 1282,
+        "win_rate": 0.5382,
+        "mean_gross": 0.03691,
+        "mean_net": 0.03631,
+        "sum_net": 46.55075,
+        "profit_factor": 6.594,
+        "mean_hold_bars": 103.97
+      },
+      "legacy_0.20pct": {
+        "n": 1282,
+        "win_rate": 0.5374,
+        "mean_gross": 0.03691,
+        "mean_net": 0.03491,
+        "sum_net": 44.75595,
+        "profit_factor": 5.891,
+        "mean_hold_bars": 103.97
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 71,
+          "win_rate": 0.6761,
+          "mean_gross": 0.06045,
+          "mean_net": 0.05985,
+          "sum_net": 4.24933,
+          "profit_factor": 15.195,
+          "mean_hold_bars": 108.96
+        },
+        "2025-07": {
+          "n": 97,
+          "win_rate": 0.6907,
+          "mean_gross": 0.03966,
+          "mean_net": 0.03906,
+          "sum_net": 3.78843,
+          "profit_factor": 8.33,
+          "mean_hold_bars": 124.76
+        },
+        "2025-08": {
+          "n": 150,
+          "win_rate": 0.3733,
+          "mean_gross": 0.01327,
+          "mean_net": 0.01267,
+          "sum_net": 1.90046,
+          "profit_factor": 2.589,
+          "mean_hold_bars": 86.89
+        },
+        "2025-09": {
+          "n": 148,
+          "win_rate": 0.5541,
+          "mean_gross": 0.03273,
+          "mean_net": 0.03213,
+          "sum_net": 4.75525,
+          "profit_factor": 7.864,
+          "mean_hold_bars": 115.54
+        },
+        "2025-10": {
+          "n": 149,
+          "win_rate": 0.5436,
+          "mean_gross": 0.06559,
+          "mean_net": 0.06499,
+          "sum_net": 9.68359,
+          "profit_factor": 9.815,
+          "mean_hold_bars": 104.38
+        },
+        "2025-11": {
+          "n": 171,
+          "win_rate": 0.5497,
+          "mean_gross": 0.04488,
+          "mean_net": 0.04428,
+          "sum_net": 7.57172,
+          "profit_factor": 6.535,
+          "mean_hold_bars": 98.08
+        },
+        "2025-12": {
+          "n": 77,
+          "win_rate": 0.4805,
+          "mean_gross": 0.01792,
+          "mean_net": 0.01732,
+          "sum_net": 1.33358,
+          "profit_factor": 3.797,
+          "mean_hold_bars": 95.35
+        },
+        "2026-01": {
+          "n": 117,
+          "win_rate": 0.6068,
+          "mean_gross": 0.03395,
+          "mean_net": 0.03335,
+          "sum_net": 3.90209,
+          "profit_factor": 5.852,
+          "mean_hold_bars": 105.72
+        },
+        "2026-02": {
+          "n": 91,
+          "win_rate": 0.4835,
+          "mean_gross": 0.0483,
+          "mean_net": 0.0477,
+          "sum_net": 4.34091,
+          "profit_factor": 7.441,
+          "mean_hold_bars": 91.69
+        },
+        "2026-03": {
+          "n": 95,
+          "win_rate": 0.6211,
+          "mean_gross": 0.03721,
+          "mean_net": 0.03661,
+          "sum_net": 3.47765,
+          "profit_factor": 9.407,
+          "mean_hold_bars": 113.16
+        },
+        "2026-04": {
+          "n": 113,
+          "win_rate": 0.4336,
+          "mean_gross": 0.01405,
+          "mean_net": 0.01345,
+          "sum_net": 1.51934,
+          "profit_factor": 2.964,
+          "mean_hold_bars": 104.04
+        },
+        "2026-05": {
+          "n": 3,
+          "win_rate": 0.6667,
+          "mean_gross": 0.01006,
+          "mean_net": 0.00946,
+          "sum_net": 0.02839,
+          "profit_factor": 4.647,
+          "mean_hold_bars": 143.67
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 71,
+          "win_rate": 0.6761,
+          "mean_gross": 0.06045,
+          "mean_net": 0.05985,
+          "sum_net": 4.24933,
+          "profit_factor": 15.195,
+          "mean_hold_bars": 108.96
+        },
+        "2025Q3": {
+          "n": 395,
+          "win_rate": 0.519,
+          "mean_gross": 0.02704,
+          "mean_net": 0.02644,
+          "sum_net": 10.44414,
+          "profit_factor": 5.341,
+          "mean_hold_bars": 106.92
+        },
+        "2025Q4": {
+          "n": 397,
+          "win_rate": 0.534,
+          "mean_gross": 0.04742,
+          "mean_net": 0.04682,
+          "sum_net": 18.58889,
+          "profit_factor": 7.316,
+          "mean_hold_bars": 99.92
+        },
+        "2026Q1": {
+          "n": 303,
+          "win_rate": 0.5743,
+          "mean_gross": 0.03928,
+          "mean_net": 0.03868,
+          "sum_net": 11.72065,
+          "profit_factor": 7.195,
+          "mean_hold_bars": 103.84
+        },
+        "2026Q2": {
+          "n": 116,
+          "win_rate": 0.4397,
+          "mean_gross": 0.01394,
+          "mean_net": 0.01334,
+          "sum_net": 1.54773,
+          "profit_factor": 2.981,
+          "mean_hold_bars": 105.06
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 11,
+        "n_periods_pf_ge_1_3": 11,
+        "n_periods_sum_net_gt_0": 11,
+        "sum_net_total": 46.52235,
+        "top1_period": "2025-10",
+        "top1_share_of_sum_net": 0.208,
+        "top2_share_of_sum_net": 0.371,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 5,
+        "sum_net_total": 46.55074,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.399,
+        "top2_share_of_sum_net": 0.651,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "SL2 only, no TP; timeout 144"
+    },
+    "trail2_atr_h144": {
+      "maker_0.06pct": {
+        "n": 1282,
+        "win_rate": 0.7254,
+        "mean_gross": 0.01657,
+        "mean_net": 0.01597,
+        "sum_net": 20.47679,
+        "profit_factor": 8.971,
+        "mean_hold_bars": 14.28
+      },
+      "legacy_0.20pct": {
+        "n": 1282,
+        "win_rate": 0.6888,
+        "mean_gross": 0.01657,
+        "mean_net": 0.01457,
+        "sum_net": 18.68199,
+        "profit_factor": 7.035,
+        "mean_hold_bars": 14.28
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 71,
+          "win_rate": 0.8169,
+          "mean_gross": 0.01807,
+          "mean_net": 0.01747,
+          "sum_net": 1.24038,
+          "profit_factor": 12.623,
+          "mean_hold_bars": 19.18
+        },
+        "2025-07": {
+          "n": 97,
+          "win_rate": 0.8351,
+          "mean_gross": 0.02103,
+          "mean_net": 0.02043,
+          "sum_net": 1.98144,
+          "profit_factor": 20.425,
+          "mean_hold_bars": 18.96
+        },
+        "2025-08": {
+          "n": 150,
+          "win_rate": 0.7733,
+          "mean_gross": 0.01218,
+          "mean_net": 0.01158,
+          "sum_net": 1.73654,
+          "profit_factor": 11.004,
+          "mean_hold_bars": 10.95
+        },
+        "2025-09": {
+          "n": 148,
+          "win_rate": 0.6824,
+          "mean_gross": 0.00881,
+          "mean_net": 0.00821,
+          "sum_net": 1.21581,
+          "profit_factor": 6.07,
+          "mean_hold_bars": 13.42
+        },
+        "2025-10": {
+          "n": 149,
+          "win_rate": 0.7181,
+          "mean_gross": 0.02099,
+          "mean_net": 0.02039,
+          "sum_net": 3.03794,
+          "profit_factor": 7.784,
+          "mean_hold_bars": 14.35
+        },
+        "2025-11": {
+          "n": 171,
+          "win_rate": 0.6959,
+          "mean_gross": 0.02102,
+          "mean_net": 0.02042,
+          "sum_net": 3.49214,
+          "profit_factor": 9.452,
+          "mean_hold_bars": 12.78
+        },
+        "2025-12": {
+          "n": 77,
+          "win_rate": 0.7662,
+          "mean_gross": 0.0121,
+          "mean_net": 0.0115,
+          "sum_net": 0.88577,
+          "profit_factor": 9.944,
+          "mean_hold_bars": 10.91
+        },
+        "2026-01": {
+          "n": 117,
+          "win_rate": 0.6154,
+          "mean_gross": 0.01455,
+          "mean_net": 0.01395,
+          "sum_net": 1.63162,
+          "profit_factor": 4.477,
+          "mean_hold_bars": 17.36
+        },
+        "2026-02": {
+          "n": 91,
+          "win_rate": 0.7033,
+          "mean_gross": 0.02112,
+          "mean_net": 0.02052,
+          "sum_net": 1.86774,
+          "profit_factor": 12.544,
+          "mean_hold_bars": 12.8
+        },
+        "2026-03": {
+          "n": 95,
+          "win_rate": 0.7368,
+          "mean_gross": 0.0131,
+          "mean_net": 0.0125,
+          "sum_net": 1.1879,
+          "profit_factor": 7.455,
+          "mean_hold_bars": 13.58
+        },
+        "2026-04": {
+          "n": 113,
+          "win_rate": 0.708,
+          "mean_gross": 0.01989,
+          "mean_net": 0.01929,
+          "sum_net": 2.17987,
+          "profit_factor": 13.688,
+          "mean_hold_bars": 15.92
+        },
+        "2026-05": {
+          "n": 3,
+          "win_rate": 1.0,
+          "mean_gross": 0.00714,
+          "mean_net": 0.00654,
+          "sum_net": 0.01963,
+          "profit_factor": null,
+          "mean_hold_bars": 10.33
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 71,
+          "win_rate": 0.8169,
+          "mean_gross": 0.01807,
+          "mean_net": 0.01747,
+          "sum_net": 1.24038,
+          "profit_factor": 12.623,
+          "mean_hold_bars": 19.18
+        },
+        "2025Q3": {
+          "n": 395,
+          "win_rate": 0.7544,
+          "mean_gross": 0.01309,
+          "mean_net": 0.01249,
+          "sum_net": 4.9338,
+          "profit_factor": 10.573,
+          "mean_hold_bars": 13.84
+        },
+        "2025Q4": {
+          "n": 397,
+          "win_rate": 0.7179,
+          "mean_gross": 0.01928,
+          "mean_net": 0.01868,
+          "sum_net": 7.41585,
+          "profit_factor": 8.725,
+          "mean_hold_bars": 13.01
+        },
+        "2026Q1": {
+          "n": 303,
+          "win_rate": 0.6799,
+          "mean_gross": 0.01607,
+          "mean_net": 0.01547,
+          "sum_net": 4.68726,
+          "profit_factor": 6.751,
+          "mean_hold_bars": 14.81
+        },
+        "2026Q2": {
+          "n": 116,
+          "win_rate": 0.7155,
+          "mean_gross": 0.01956,
+          "mean_net": 0.01896,
+          "sum_net": 2.1995,
+          "profit_factor": 13.802,
+          "mean_hold_bars": 15.78
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 11,
+        "n_periods_pf_ge_1_3": 11,
+        "n_periods_sum_net_gt_0": 11,
+        "sum_net_total": 20.45715,
+        "top1_period": "2025-11",
+        "top1_share_of_sum_net": 0.171,
+        "top2_share_of_sum_net": 0.319,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 5,
+        "sum_net_total": 20.47679,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.362,
+        "top2_share_of_sum_net": 0.603,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "ATR trailing 2×ATR14(signal); timeout 144"
+    },
+    "trail3_atr_h144": {
+      "maker_0.06pct": {
+        "n": 1282,
+        "win_rate": 0.7785,
+        "mean_gross": 0.02618,
+        "mean_net": 0.02558,
+        "sum_net": 32.78995,
+        "profit_factor": 13.932,
+        "mean_hold_bars": 30.87
+      },
+      "legacy_0.20pct": {
+        "n": 1282,
+        "win_rate": 0.7449,
+        "mean_gross": 0.02618,
+        "mean_net": 0.02418,
+        "sum_net": 30.99515,
+        "profit_factor": 11.468,
+        "mean_hold_bars": 30.87
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 71,
+          "win_rate": 0.831,
+          "mean_gross": 0.02473,
+          "mean_net": 0.02413,
+          "sum_net": 1.71289,
+          "profit_factor": 20.871,
+          "mean_hold_bars": 33.86
+        },
+        "2025-07": {
+          "n": 97,
+          "win_rate": 0.8247,
+          "mean_gross": 0.02691,
+          "mean_net": 0.02631,
+          "sum_net": 2.55181,
+          "profit_factor": 27.052,
+          "mean_hold_bars": 36.96
+        },
+        "2025-08": {
+          "n": 150,
+          "win_rate": 0.7267,
+          "mean_gross": 0.01418,
+          "mean_net": 0.01358,
+          "sum_net": 2.03734,
+          "profit_factor": 8.672,
+          "mean_hold_bars": 20.2
+        },
+        "2025-09": {
+          "n": 148,
+          "win_rate": 0.7905,
+          "mean_gross": 0.01787,
+          "mean_net": 0.01727,
+          "sum_net": 2.55641,
+          "profit_factor": 12.41,
+          "mean_hold_bars": 31.36
+        },
+        "2025-10": {
+          "n": 149,
+          "win_rate": 0.7987,
+          "mean_gross": 0.04967,
+          "mean_net": 0.04907,
+          "sum_net": 7.31165,
+          "profit_factor": 22.235,
+          "mean_hold_bars": 33.32
+        },
+        "2025-11": {
+          "n": 171,
+          "win_rate": 0.7076,
+          "mean_gross": 0.0272,
+          "mean_net": 0.0266,
+          "sum_net": 4.54921,
+          "profit_factor": 10.635,
+          "mean_hold_bars": 27.2
+        },
+        "2025-12": {
+          "n": 77,
+          "win_rate": 0.7403,
+          "mean_gross": 0.01638,
+          "mean_net": 0.01578,
+          "sum_net": 1.21496,
+          "profit_factor": 10.459,
+          "mean_hold_bars": 29.79
+        },
+        "2026-01": {
+          "n": 117,
+          "win_rate": 0.7692,
+          "mean_gross": 0.02245,
+          "mean_net": 0.02185,
+          "sum_net": 2.55625,
+          "profit_factor": 6.006,
+          "mean_hold_bars": 34.61
+        },
+        "2026-02": {
+          "n": 91,
+          "win_rate": 0.7912,
+          "mean_gross": 0.03073,
+          "mean_net": 0.03013,
+          "sum_net": 2.74171,
+          "profit_factor": 18.15,
+          "mean_hold_bars": 26.97
+        },
+        "2026-03": {
+          "n": 95,
+          "win_rate": 0.8421,
+          "mean_gross": 0.0273,
+          "mean_net": 0.0267,
+          "sum_net": 2.53669,
+          "profit_factor": 21.76,
+          "mean_hold_bars": 34.83
+        },
+        "2026-04": {
+          "n": 113,
+          "win_rate": 0.8142,
+          "mean_gross": 0.02719,
+          "mean_net": 0.02659,
+          "sum_net": 3.00486,
+          "profit_factor": 25.352,
+          "mean_hold_bars": 36.77
+        },
+        "2026-05": {
+          "n": 3,
+          "win_rate": 0.6667,
+          "mean_gross": 0.00599,
+          "mean_net": 0.00539,
+          "sum_net": 0.01616,
+          "profit_factor": 19.263,
+          "mean_hold_bars": 12.0
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 71,
+          "win_rate": 0.831,
+          "mean_gross": 0.02473,
+          "mean_net": 0.02413,
+          "sum_net": 1.71289,
+          "profit_factor": 20.871,
+          "mean_hold_bars": 33.86
+        },
+        "2025Q3": {
+          "n": 395,
+          "win_rate": 0.7747,
+          "mean_gross": 0.01869,
+          "mean_net": 0.01809,
+          "sum_net": 7.14556,
+          "profit_factor": 13.162,
+          "mean_hold_bars": 28.5
+        },
+        "2025Q4": {
+          "n": 397,
+          "win_rate": 0.7481,
+          "mean_gross": 0.03354,
+          "mean_net": 0.03294,
+          "sum_net": 13.07582,
+          "profit_factor": 14.838,
+          "mean_hold_bars": 30.0
+        },
+        "2026Q1": {
+          "n": 303,
+          "win_rate": 0.7987,
+          "mean_gross": 0.02646,
+          "mean_net": 0.02586,
+          "sum_net": 7.83465,
+          "profit_factor": 10.884,
+          "mean_hold_bars": 32.38
+        },
+        "2026Q2": {
+          "n": 116,
+          "win_rate": 0.8103,
+          "mean_gross": 0.02664,
+          "mean_net": 0.02604,
+          "sum_net": 3.02102,
+          "profit_factor": 25.308,
+          "mean_hold_bars": 36.13
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 11,
+        "n_periods_pf_ge_1_3": 11,
+        "n_periods_sum_net_gt_0": 11,
+        "sum_net_total": 32.77378,
+        "top1_period": "2025-10",
+        "top1_share_of_sum_net": 0.223,
+        "top2_share_of_sum_net": 0.362,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 5,
+        "sum_net_total": 32.78994,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.399,
+        "top2_share_of_sum_net": 0.638,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "ATR trailing 3×ATR14(signal); timeout 144"
+    },
+    "trail4_atr_h144": {
+      "maker_0.06pct": {
+        "n": 1282,
+        "win_rate": 0.7886,
+        "mean_gross": 0.03463,
+        "mean_net": 0.03403,
+        "sum_net": 43.62515,
+        "profit_factor": 16.846,
+        "mean_hold_bars": 48.16
+      },
+      "legacy_0.20pct": {
+        "n": 1282,
+        "win_rate": 0.7676,
+        "mean_gross": 0.03463,
+        "mean_net": 0.03263,
+        "sum_net": 41.83035,
+        "profit_factor": 14.266,
+        "mean_hold_bars": 48.16
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 71,
+          "win_rate": 0.8169,
+          "mean_gross": 0.03532,
+          "mean_net": 0.03472,
+          "sum_net": 2.46483,
+          "profit_factor": 16.945,
+          "mean_hold_bars": 51.54
+        },
+        "2025-07": {
+          "n": 97,
+          "win_rate": 0.8454,
+          "mean_gross": 0.02666,
+          "mean_net": 0.02606,
+          "sum_net": 2.5275,
+          "profit_factor": 17.497,
+          "mean_hold_bars": 54.61
+        },
+        "2025-08": {
+          "n": 150,
+          "win_rate": 0.7467,
+          "mean_gross": 0.01635,
+          "mean_net": 0.01575,
+          "sum_net": 2.36276,
+          "profit_factor": 8.242,
+          "mean_hold_bars": 37.28
+        },
+        "2025-09": {
+          "n": 148,
+          "win_rate": 0.8378,
+          "mean_gross": 0.02847,
+          "mean_net": 0.02787,
+          "sum_net": 4.12505,
+          "profit_factor": 26.769,
+          "mean_hold_bars": 51.19
+        },
+        "2025-10": {
+          "n": 149,
+          "win_rate": 0.745,
+          "mean_gross": 0.08475,
+          "mean_net": 0.08415,
+          "sum_net": 12.53859,
+          "profit_factor": 35.84,
+          "mean_hold_bars": 49.72
+        },
+        "2025-11": {
+          "n": 171,
+          "win_rate": 0.7135,
+          "mean_gross": 0.03283,
+          "mean_net": 0.03223,
+          "sum_net": 5.51198,
+          "profit_factor": 9.6,
+          "mean_hold_bars": 43.32
+        },
+        "2025-12": {
+          "n": 77,
+          "win_rate": 0.7792,
+          "mean_gross": 0.01545,
+          "mean_net": 0.01485,
+          "sum_net": 1.14329,
+          "profit_factor": 7.613,
+          "mean_hold_bars": 47.91
+        },
+        "2026-01": {
+          "n": 117,
+          "win_rate": 0.8291,
+          "mean_gross": 0.03196,
+          "mean_net": 0.03136,
+          "sum_net": 3.66954,
+          "profit_factor": 12.255,
+          "mean_hold_bars": 51.74
+        },
+        "2026-02": {
+          "n": 91,
+          "win_rate": 0.7802,
+          "mean_gross": 0.03996,
+          "mean_net": 0.03936,
+          "sum_net": 3.58177,
+          "profit_factor": 22.479,
+          "mean_hold_bars": 41.93
+        },
+        "2026-03": {
+          "n": 95,
+          "win_rate": 0.8737,
+          "mean_gross": 0.03111,
+          "mean_net": 0.03051,
+          "sum_net": 2.8983,
+          "profit_factor": 33.245,
+          "mean_hold_bars": 53.22
+        },
+        "2026-04": {
+          "n": 113,
+          "win_rate": 0.7876,
+          "mean_gross": 0.02529,
+          "mean_net": 0.02469,
+          "sum_net": 2.79009,
+          "profit_factor": 14.952,
+          "mean_hold_bars": 54.29
+        },
+        "2026-05": {
+          "n": 3,
+          "win_rate": 0.6667,
+          "mean_gross": 0.00442,
+          "mean_net": 0.00382,
+          "sum_net": 0.01145,
+          "profit_factor": 5.353,
+          "mean_hold_bars": 16.0
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 71,
+          "win_rate": 0.8169,
+          "mean_gross": 0.03532,
+          "mean_net": 0.03472,
+          "sum_net": 2.46483,
+          "profit_factor": 16.945,
+          "mean_hold_bars": 51.54
+        },
+        "2025Q3": {
+          "n": 395,
+          "win_rate": 0.8051,
+          "mean_gross": 0.02342,
+          "mean_net": 0.02282,
+          "sum_net": 9.01531,
+          "profit_factor": 15.097,
+          "mean_hold_bars": 46.75
+        },
+        "2025Q4": {
+          "n": 397,
+          "win_rate": 0.738,
+          "mean_gross": 0.04895,
+          "mean_net": 0.04835,
+          "sum_net": 19.19387,
+          "profit_factor": 17.353,
+          "mean_hold_bars": 46.61
+        },
+        "2026Q1": {
+          "n": 303,
+          "win_rate": 0.8284,
+          "mean_gross": 0.0341,
+          "mean_net": 0.0335,
+          "sum_net": 10.14961,
+          "profit_factor": 18.419,
+          "mean_hold_bars": 49.26
+        },
+        "2026Q2": {
+          "n": 116,
+          "win_rate": 0.7845,
+          "mean_gross": 0.02475,
+          "mean_net": 0.02415,
+          "sum_net": 2.80154,
+          "profit_factor": 14.827,
+          "mean_hold_bars": 53.3
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 11,
+        "n_periods_pf_ge_1_3": 11,
+        "n_periods_sum_net_gt_0": 11,
+        "sum_net_total": 43.6137,
+        "top1_period": "2025-10",
+        "top1_share_of_sum_net": 0.287,
+        "top2_share_of_sum_net": 0.414,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 5,
+        "sum_net_total": 43.62516,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.44,
+        "top2_share_of_sum_net": 0.673,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "ATR trailing 4×ATR14(signal); timeout 144"
+    },
+    "ma_ema20_h144": {
+      "maker_0.06pct": {
+        "n": 1282,
+        "win_rate": 0.7426,
+        "mean_gross": 0.02663,
+        "mean_net": 0.02603,
+        "sum_net": 33.37538,
+        "profit_factor": 13.285,
+        "mean_hold_bars": 27.92
+      },
+      "legacy_0.20pct": {
+        "n": 1282,
+        "win_rate": 0.7114,
+        "mean_gross": 0.02663,
+        "mean_net": 0.02463,
+        "sum_net": 31.58058,
+        "profit_factor": 10.838,
+        "mean_hold_bars": 27.92
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 71,
+          "win_rate": 0.7606,
+          "mean_gross": 0.01748,
+          "mean_net": 0.01688,
+          "sum_net": 1.19875,
+          "profit_factor": 8.708,
+          "mean_hold_bars": 29.24
+        },
+        "2025-07": {
+          "n": 97,
+          "win_rate": 0.7938,
+          "mean_gross": 0.02884,
+          "mean_net": 0.02824,
+          "sum_net": 2.739,
+          "profit_factor": 19.093,
+          "mean_hold_bars": 34.35
+        },
+        "2025-08": {
+          "n": 150,
+          "win_rate": 0.7667,
+          "mean_gross": 0.0181,
+          "mean_net": 0.0175,
+          "sum_net": 2.62463,
+          "profit_factor": 9.212,
+          "mean_hold_bars": 27.29
+        },
+        "2025-09": {
+          "n": 148,
+          "win_rate": 0.75,
+          "mean_gross": 0.01885,
+          "mean_net": 0.01825,
+          "sum_net": 2.7005,
+          "profit_factor": 12.584,
+          "mean_hold_bars": 29.08
+        },
+        "2025-10": {
+          "n": 149,
+          "win_rate": 0.7248,
+          "mean_gross": 0.05665,
+          "mean_net": 0.05605,
+          "sum_net": 8.35172,
+          "profit_factor": 20.475,
+          "mean_hold_bars": 26.08
+        },
+        "2025-11": {
+          "n": 171,
+          "win_rate": 0.7485,
+          "mean_gross": 0.02575,
+          "mean_net": 0.02515,
+          "sum_net": 4.30136,
+          "profit_factor": 12.793,
+          "mean_hold_bars": 23.91
+        },
+        "2025-12": {
+          "n": 77,
+          "win_rate": 0.7143,
+          "mean_gross": 0.0153,
+          "mean_net": 0.0147,
+          "sum_net": 1.13206,
+          "profit_factor": 8.609,
+          "mean_hold_bars": 26.87
+        },
+        "2026-01": {
+          "n": 117,
+          "win_rate": 0.6838,
+          "mean_gross": 0.02707,
+          "mean_net": 0.02647,
+          "sum_net": 3.09691,
+          "profit_factor": 9.811,
+          "mean_hold_bars": 31.12
+        },
+        "2026-02": {
+          "n": 91,
+          "win_rate": 0.7033,
+          "mean_gross": 0.02431,
+          "mean_net": 0.02371,
+          "sum_net": 2.15759,
+          "profit_factor": 10.487,
+          "mean_hold_bars": 24.03
+        },
+        "2026-03": {
+          "n": 95,
+          "win_rate": 0.7789,
+          "mean_gross": 0.02906,
+          "mean_net": 0.02846,
+          "sum_net": 2.70324,
+          "profit_factor": 15.067,
+          "mean_hold_bars": 30.71
+        },
+        "2026-04": {
+          "n": 113,
+          "win_rate": 0.7345,
+          "mean_gross": 0.02146,
+          "mean_net": 0.02086,
+          "sum_net": 2.35685,
+          "profit_factor": 17.397,
+          "mean_hold_bars": 27.84
+        },
+        "2026-05": {
+          "n": 3,
+          "win_rate": 1.0,
+          "mean_gross": 0.00485,
+          "mean_net": 0.00425,
+          "sum_net": 0.01276,
+          "profit_factor": null,
+          "mean_hold_bars": 20.0
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 71,
+          "win_rate": 0.7606,
+          "mean_gross": 0.01748,
+          "mean_net": 0.01688,
+          "sum_net": 1.19875,
+          "profit_factor": 8.708,
+          "mean_hold_bars": 29.24
+        },
+        "2025Q3": {
+          "n": 395,
+          "win_rate": 0.7671,
+          "mean_gross": 0.02102,
+          "mean_net": 0.02042,
+          "sum_net": 8.06413,
+          "profit_factor": 12.453,
+          "mean_hold_bars": 29.69
+        },
+        "2025Q4": {
+          "n": 397,
+          "win_rate": 0.733,
+          "mean_gross": 0.03532,
+          "mean_net": 0.03472,
+          "sum_net": 13.78515,
+          "profit_factor": 15.628,
+          "mean_hold_bars": 25.3
+        },
+        "2026Q1": {
+          "n": 303,
+          "win_rate": 0.7195,
+          "mean_gross": 0.02686,
+          "mean_net": 0.02626,
+          "sum_net": 7.95774,
+          "profit_factor": 11.32,
+          "mean_hold_bars": 28.86
+        },
+        "2026Q2": {
+          "n": 116,
+          "win_rate": 0.7414,
+          "mean_gross": 0.02103,
+          "mean_net": 0.02043,
+          "sum_net": 2.36962,
+          "profit_factor": 17.485,
+          "mean_hold_bars": 27.64
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 11,
+        "n_periods_pf_ge_1_3": 11,
+        "n_periods_sum_net_gt_0": 11,
+        "sum_net_total": 33.36261,
+        "top1_period": "2025-10",
+        "top1_share_of_sum_net": 0.25,
+        "top2_share_of_sum_net": 0.379,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 5,
+        "sum_net_total": 33.37539,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.413,
+        "top2_share_of_sum_net": 0.655,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "exit on close cross against ema20; timeout 144"
+    },
+    "ma_ema55_h144": {
+      "maker_0.06pct": {
+        "n": 1282,
+        "win_rate": 0.7566,
+        "mean_gross": 0.03264,
+        "mean_net": 0.03204,
+        "sum_net": 41.07932,
+        "profit_factor": 12.56,
+        "mean_hold_bars": 63.02
+      },
+      "legacy_0.20pct": {
+        "n": 1282,
+        "win_rate": 0.7317,
+        "mean_gross": 0.03264,
+        "mean_net": 0.03064,
+        "sum_net": 39.28452,
+        "profit_factor": 10.79,
+        "mean_hold_bars": 63.02
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 71,
+          "win_rate": 0.7465,
+          "mean_gross": 0.03118,
+          "mean_net": 0.03058,
+          "sum_net": 2.17103,
+          "profit_factor": 15.801,
+          "mean_hold_bars": 65.82
+        },
+        "2025-07": {
+          "n": 97,
+          "win_rate": 0.8763,
+          "mean_gross": 0.03517,
+          "mean_net": 0.03457,
+          "sum_net": 3.35354,
+          "profit_factor": 23.855,
+          "mean_hold_bars": 69.07
+        },
+        "2025-08": {
+          "n": 150,
+          "win_rate": 0.7667,
+          "mean_gross": 0.01854,
+          "mean_net": 0.01794,
+          "sum_net": 2.69112,
+          "profit_factor": 6.216,
+          "mean_hold_bars": 54.57
+        },
+        "2025-09": {
+          "n": 148,
+          "win_rate": 0.8378,
+          "mean_gross": 0.0347,
+          "mean_net": 0.0341,
+          "sum_net": 5.04682,
+          "profit_factor": 30.767,
+          "mean_hold_bars": 73.36
+        },
+        "2025-10": {
+          "n": 149,
+          "win_rate": 0.7517,
+          "mean_gross": 0.0612,
+          "mean_net": 0.0606,
+          "sum_net": 9.02946,
+          "profit_factor": 20.81,
+          "mean_hold_bars": 62.54
+        },
+        "2025-11": {
+          "n": 171,
+          "win_rate": 0.6491,
+          "mean_gross": 0.03353,
+          "mean_net": 0.03293,
+          "sum_net": 5.6307,
+          "profit_factor": 9.08,
+          "mean_hold_bars": 57.72
+        },
+        "2025-12": {
+          "n": 77,
+          "win_rate": 0.6364,
+          "mean_gross": 0.01497,
+          "mean_net": 0.01437,
+          "sum_net": 1.10627,
+          "profit_factor": 5.686,
+          "mean_hold_bars": 55.62
+        },
+        "2026-01": {
+          "n": 117,
+          "win_rate": 0.7265,
+          "mean_gross": 0.02959,
+          "mean_net": 0.02899,
+          "sum_net": 3.39221,
+          "profit_factor": 8.169,
+          "mean_hold_bars": 63.68
+        },
+        "2026-02": {
+          "n": 91,
+          "win_rate": 0.6813,
+          "mean_gross": 0.03344,
+          "mean_net": 0.03284,
+          "sum_net": 2.98857,
+          "profit_factor": 11.637,
+          "mean_hold_bars": 55.99
+        },
+        "2026-03": {
+          "n": 95,
+          "win_rate": 0.8842,
+          "mean_gross": 0.037,
+          "mean_net": 0.0364,
+          "sum_net": 3.45838,
+          "profit_factor": 33.124,
+          "mean_hold_bars": 75.22
+        },
+        "2026-04": {
+          "n": 113,
+          "win_rate": 0.7699,
+          "mean_gross": 0.01976,
+          "mean_net": 0.01916,
+          "sum_net": 2.16507,
+          "profit_factor": 7.683,
+          "mean_hold_bars": 61.12
+        },
+        "2026-05": {
+          "n": 3,
+          "win_rate": 1.0,
+          "mean_gross": 0.01598,
+          "mean_net": 0.01538,
+          "sum_net": 0.04613,
+          "profit_factor": null,
+          "mean_hold_bars": 101.0
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 71,
+          "win_rate": 0.7465,
+          "mean_gross": 0.03118,
+          "mean_net": 0.03058,
+          "sum_net": 2.17103,
+          "profit_factor": 15.801,
+          "mean_hold_bars": 65.82
+        },
+        "2025Q3": {
+          "n": 395,
+          "win_rate": 0.8203,
+          "mean_gross": 0.02868,
+          "mean_net": 0.02808,
+          "sum_net": 11.09148,
+          "profit_factor": 14.327,
+          "mean_hold_bars": 65.17
+        },
+        "2025Q4": {
+          "n": 397,
+          "win_rate": 0.6851,
+          "mean_gross": 0.04031,
+          "mean_net": 0.03971,
+          "sum_net": 15.76644,
+          "profit_factor": 12.353,
+          "mean_hold_bars": 59.12
+        },
+        "2026Q1": {
+          "n": 303,
+          "win_rate": 0.7624,
+          "mean_gross": 0.03307,
+          "mean_net": 0.03247,
+          "sum_net": 9.83916,
+          "profit_factor": 12.417,
+          "mean_hold_bars": 64.99
+        },
+        "2026Q2": {
+          "n": 116,
+          "win_rate": 0.7759,
+          "mean_gross": 0.01966,
+          "mean_net": 0.01906,
+          "sum_net": 2.2112,
+          "profit_factor": 7.825,
+          "mean_hold_bars": 62.16
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 11,
+        "n_periods_pf_ge_1_3": 11,
+        "n_periods_sum_net_gt_0": 11,
+        "sum_net_total": 41.03317,
+        "top1_period": "2025-10",
+        "top1_share_of_sum_net": 0.22,
+        "top2_share_of_sum_net": 0.357,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 5,
+        "sum_net_total": 41.07931,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.384,
+        "top2_share_of_sum_net": 0.654,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "exit on close cross against ema55; timeout 144"
+    },
+    "time_stop_48": {
+      "maker_0.06pct": {
+        "n": 1283,
+        "win_rate": 0.8449,
+        "mean_gross": 0.03528,
+        "mean_net": 0.03468,
+        "sum_net": 44.49211,
+        "profit_factor": 15.441,
+        "mean_hold_bars": 48.0
+      },
+      "legacy_0.20pct": {
+        "n": 1283,
+        "win_rate": 0.8293,
+        "mean_gross": 0.03528,
+        "mean_net": 0.03328,
+        "sum_net": 42.69591,
+        "profit_factor": 13.655,
+        "mean_hold_bars": 48.0
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 71,
+          "win_rate": 0.831,
+          "mean_gross": 0.02315,
+          "mean_net": 0.02255,
+          "sum_net": 1.6007,
+          "profit_factor": 7.96,
+          "mean_hold_bars": 48.0
+        },
+        "2025-07": {
+          "n": 97,
+          "win_rate": 0.9278,
+          "mean_gross": 0.04423,
+          "mean_net": 0.04363,
+          "sum_net": 4.23218,
+          "profit_factor": 98.199,
+          "mean_hold_bars": 48.0
+        },
+        "2025-08": {
+          "n": 150,
+          "win_rate": 0.8333,
+          "mean_gross": 0.0253,
+          "mean_net": 0.0247,
+          "sum_net": 3.70497,
+          "profit_factor": 6.167,
+          "mean_hold_bars": 48.0
+        },
+        "2025-09": {
+          "n": 148,
+          "win_rate": 0.9122,
+          "mean_gross": 0.03022,
+          "mean_net": 0.02962,
+          "sum_net": 4.38431,
+          "profit_factor": 48.924,
+          "mean_hold_bars": 48.0
+        },
+        "2025-10": {
+          "n": 149,
+          "win_rate": 0.8523,
+          "mean_gross": 0.06692,
+          "mean_net": 0.06632,
+          "sum_net": 9.88164,
+          "profit_factor": 26.789,
+          "mean_hold_bars": 48.0
+        },
+        "2025-11": {
+          "n": 171,
+          "win_rate": 0.7778,
+          "mean_gross": 0.03197,
+          "mean_net": 0.03137,
+          "sum_net": 5.36415,
+          "profit_factor": 9.472,
+          "mean_hold_bars": 48.0
+        },
+        "2025-12": {
+          "n": 77,
+          "win_rate": 0.7922,
+          "mean_gross": 0.02142,
+          "mean_net": 0.02082,
+          "sum_net": 1.60326,
+          "profit_factor": 10.462,
+          "mean_hold_bars": 48.0
+        },
+        "2026-01": {
+          "n": 117,
+          "win_rate": 0.7863,
+          "mean_gross": 0.03556,
+          "mean_net": 0.03496,
+          "sum_net": 4.09065,
+          "profit_factor": 15.166,
+          "mean_hold_bars": 48.0
+        },
+        "2026-02": {
+          "n": 91,
+          "win_rate": 0.8132,
+          "mean_gross": 0.03655,
+          "mean_net": 0.03595,
+          "sum_net": 3.27155,
+          "profit_factor": 18.561,
+          "mean_hold_bars": 48.0
+        },
+        "2026-03": {
+          "n": 95,
+          "win_rate": 0.9263,
+          "mean_gross": 0.03339,
+          "mean_net": 0.03279,
+          "sum_net": 3.115,
+          "profit_factor": 82.874,
+          "mean_hold_bars": 48.0
+        },
+        "2026-04": {
+          "n": 113,
+          "win_rate": 0.8584,
+          "mean_gross": 0.02899,
+          "mean_net": 0.02839,
+          "sum_net": 3.20802,
+          "profit_factor": 11.716,
+          "mean_hold_bars": 48.0
+        },
+        "2026-05": {
+          "n": 4,
+          "win_rate": 0.75,
+          "mean_gross": 0.00952,
+          "mean_net": 0.00892,
+          "sum_net": 0.03567,
+          "profit_factor": 72.526,
+          "mean_hold_bars": 48.0
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 71,
+          "win_rate": 0.831,
+          "mean_gross": 0.02315,
+          "mean_net": 0.02255,
+          "sum_net": 1.6007,
+          "profit_factor": 7.96,
+          "mean_hold_bars": 48.0
+        },
+        "2025Q3": {
+          "n": 395,
+          "win_rate": 0.8861,
+          "mean_gross": 0.03179,
+          "mean_net": 0.03119,
+          "sum_net": 12.32146,
+          "profit_factor": 15.459,
+          "mean_hold_bars": 48.0
+        },
+        "2025Q4": {
+          "n": 397,
+          "win_rate": 0.8086,
+          "mean_gross": 0.04304,
+          "mean_net": 0.04244,
+          "sum_net": 16.84906,
+          "profit_factor": 15.209,
+          "mean_hold_bars": 48.0
+        },
+        "2026Q1": {
+          "n": 303,
+          "win_rate": 0.8383,
+          "mean_gross": 0.03518,
+          "mean_net": 0.03458,
+          "sum_net": 10.4772,
+          "profit_factor": 21.419,
+          "mean_hold_bars": 48.0
+        },
+        "2026Q2": {
+          "n": 117,
+          "win_rate": 0.8547,
+          "mean_gross": 0.02832,
+          "mean_net": 0.02772,
+          "sum_net": 3.24368,
+          "profit_factor": 11.817,
+          "mean_hold_bars": 48.0
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 11,
+        "n_periods_pf_ge_1_3": 11,
+        "n_periods_sum_net_gt_0": 11,
+        "sum_net_total": 44.45643,
+        "top1_period": "2025-10",
+        "top1_share_of_sum_net": 0.222,
+        "top2_share_of_sum_net": 0.343,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 5,
+        "sum_net_total": 44.4921,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.379,
+        "top2_share_of_sum_net": 0.656,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "force flat at close of path bar 48; no TP/SL"
+    },
+    "time_stop_96": {
+      "maker_0.06pct": {
+        "n": 1283,
+        "win_rate": 0.8044,
+        "mean_gross": 0.04172,
+        "mean_net": 0.04112,
+        "sum_net": 52.75506,
+        "profit_factor": 10.201,
+        "mean_hold_bars": 96.0
+      },
+      "legacy_0.20pct": {
+        "n": 1283,
+        "win_rate": 0.7896,
+        "mean_gross": 0.04172,
+        "mean_net": 0.03972,
+        "sum_net": 50.95886,
+        "profit_factor": 9.357,
+        "mean_hold_bars": 96.0
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 71,
+          "win_rate": 0.8873,
+          "mean_gross": 0.04496,
+          "mean_net": 0.04436,
+          "sum_net": 3.1493,
+          "profit_factor": 8.857,
+          "mean_hold_bars": 96.0
+        },
+        "2025-07": {
+          "n": 97,
+          "win_rate": 0.9381,
+          "mean_gross": 0.05144,
+          "mean_net": 0.05084,
+          "sum_net": 4.93137,
+          "profit_factor": 18.366,
+          "mean_hold_bars": 96.0
+        },
+        "2025-08": {
+          "n": 150,
+          "win_rate": 0.8067,
+          "mean_gross": 0.02727,
+          "mean_net": 0.02667,
+          "sum_net": 4.00028,
+          "profit_factor": 7.902,
+          "mean_hold_bars": 96.0
+        },
+        "2025-09": {
+          "n": 148,
+          "win_rate": 0.8243,
+          "mean_gross": 0.04417,
+          "mean_net": 0.04357,
+          "sum_net": 6.44905,
+          "profit_factor": 18.503,
+          "mean_hold_bars": 96.0
+        },
+        "2025-10": {
+          "n": 149,
+          "win_rate": 0.8121,
+          "mean_gross": 0.06794,
+          "mean_net": 0.06734,
+          "sum_net": 10.03439,
+          "profit_factor": 27.888,
+          "mean_hold_bars": 96.0
+        },
+        "2025-11": {
+          "n": 171,
+          "win_rate": 0.8187,
+          "mean_gross": 0.04883,
+          "mean_net": 0.04823,
+          "sum_net": 8.24728,
+          "profit_factor": 14.582,
+          "mean_hold_bars": 96.0
+        },
+        "2025-12": {
+          "n": 77,
+          "win_rate": 0.5974,
+          "mean_gross": 0.01088,
+          "mean_net": 0.01028,
+          "sum_net": 0.79179,
+          "profit_factor": 2.168,
+          "mean_hold_bars": 96.0
+        },
+        "2026-01": {
+          "n": 117,
+          "win_rate": 0.8205,
+          "mean_gross": 0.03885,
+          "mean_net": 0.03825,
+          "sum_net": 4.47502,
+          "profit_factor": 8.581,
+          "mean_hold_bars": 96.0
+        },
+        "2026-02": {
+          "n": 91,
+          "win_rate": 0.8462,
+          "mean_gross": 0.05861,
+          "mean_net": 0.05801,
+          "sum_net": 5.27869,
+          "profit_factor": 20.169,
+          "mean_hold_bars": 96.0
+        },
+        "2026-03": {
+          "n": 95,
+          "win_rate": 0.8421,
+          "mean_gross": 0.04297,
+          "mean_net": 0.04237,
+          "sum_net": 4.02477,
+          "profit_factor": 13.089,
+          "mean_hold_bars": 96.0
+        },
+        "2026-04": {
+          "n": 113,
+          "win_rate": 0.6372,
+          "mean_gross": 0.01208,
+          "mean_net": 0.01148,
+          "sum_net": 1.29677,
+          "profit_factor": 2.044,
+          "mean_hold_bars": 96.0
+        },
+        "2026-05": {
+          "n": 4,
+          "win_rate": 0.75,
+          "mean_gross": 0.01968,
+          "mean_net": 0.01908,
+          "sum_net": 0.07634,
+          "profit_factor": 55.142,
+          "mean_hold_bars": 96.0
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 71,
+          "win_rate": 0.8873,
+          "mean_gross": 0.04496,
+          "mean_net": 0.04436,
+          "sum_net": 3.1493,
+          "profit_factor": 8.857,
+          "mean_hold_bars": 96.0
+        },
+        "2025Q3": {
+          "n": 395,
+          "win_rate": 0.8456,
+          "mean_gross": 0.03954,
+          "mean_net": 0.03894,
+          "sum_net": 15.38071,
+          "profit_factor": 13.484,
+          "mean_hold_bars": 96.0
+        },
+        "2025Q4": {
+          "n": 397,
+          "win_rate": 0.7733,
+          "mean_gross": 0.04864,
+          "mean_net": 0.04804,
+          "sum_net": 19.07346,
+          "profit_factor": 12.502,
+          "mean_hold_bars": 96.0
+        },
+        "2026Q1": {
+          "n": 303,
+          "win_rate": 0.835,
+          "mean_gross": 0.04607,
+          "mean_net": 0.04547,
+          "sum_net": 13.77848,
+          "profit_factor": 12.495,
+          "mean_hold_bars": 96.0
+        },
+        "2026Q2": {
+          "n": 117,
+          "win_rate": 0.641,
+          "mean_gross": 0.01234,
+          "mean_net": 0.01174,
+          "sum_net": 1.37311,
+          "profit_factor": 2.104,
+          "mean_hold_bars": 96.0
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 11,
+        "n_periods_pf_ge_1_3": 11,
+        "n_periods_sum_net_gt_0": 11,
+        "sum_net_total": 52.67871,
+        "top1_period": "2025-10",
+        "top1_share_of_sum_net": 0.19,
+        "top2_share_of_sum_net": 0.347,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 5,
+        "sum_net_total": 52.75506,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.362,
+        "top2_share_of_sum_net": 0.653,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "force flat at close of path bar 96; no TP/SL"
+    }
+  },
+  "b_rule": {
+    "baseline_tp5_sl2_h72": {
+      "maker_0.06pct": {
+        "n": 6202,
+        "win_rate": 0.3541,
+        "mean_gross": 0.00229,
+        "mean_net": 0.00169,
+        "sum_net": 10.47028,
+        "profit_factor": 1.245,
+        "mean_hold_bars": 21.52
+      },
+      "legacy_0.20pct": {
+        "n": 6202,
+        "win_rate": 0.3496,
+        "mean_gross": 0.00229,
+        "mean_net": 0.00029,
+        "sum_net": 1.78748,
+        "profit_factor": 1.037,
+        "mean_hold_bars": 21.52
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.2759,
+          "mean_gross": -6e-05,
+          "mean_net": -0.00066,
+          "sum_net": -0.17165,
+          "profit_factor": 0.909,
+          "mean_hold_bars": 16.78
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.4215,
+          "mean_gross": 0.00549,
+          "mean_net": 0.00489,
+          "sum_net": 1.27663,
+          "profit_factor": 1.685,
+          "mean_hold_bars": 23.83
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.5247,
+          "mean_gross": 0.00796,
+          "mean_net": 0.00736,
+          "sum_net": 2.83256,
+          "profit_factor": 2.313,
+          "mean_hold_bars": 19.46
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.2841,
+          "mean_gross": 6e-05,
+          "mean_net": -0.00054,
+          "sum_net": -0.32309,
+          "profit_factor": 0.918,
+          "mean_hold_bars": 21.93
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.3926,
+          "mean_gross": 0.0045,
+          "mean_net": 0.0039,
+          "sum_net": 1.57789,
+          "profit_factor": 1.568,
+          "mean_hold_bars": 26.46
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.3868,
+          "mean_gross": 0.00377,
+          "mean_net": 0.00317,
+          "sum_net": 1.58367,
+          "profit_factor": 1.418,
+          "mean_hold_bars": 23.29
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.3815,
+          "mean_gross": 0.00321,
+          "mean_net": 0.00261,
+          "sum_net": 2.0026,
+          "profit_factor": 1.413,
+          "mean_hold_bars": 21.05
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.3719,
+          "mean_gross": 0.00372,
+          "mean_net": 0.00312,
+          "sum_net": 2.3747,
+          "profit_factor": 1.481,
+          "mean_hold_bars": 21.23
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.3404,
+          "mean_gross": 0.00183,
+          "mean_net": 0.00123,
+          "sum_net": 0.75442,
+          "profit_factor": 1.154,
+          "mean_hold_bars": 18.98
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.3025,
+          "mean_gross": -0.00036,
+          "mean_net": -0.00096,
+          "sum_net": -0.81303,
+          "profit_factor": 0.874,
+          "mean_hold_bars": 19.54
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.3146,
+          "mean_gross": -6e-05,
+          "mean_net": -0.00066,
+          "sum_net": -0.48544,
+          "profit_factor": 0.899,
+          "mean_hold_bars": 23.39
+        },
+        "2026-05": {
+          "n": 75,
+          "win_rate": 0.2667,
+          "mean_gross": -0.00125,
+          "mean_net": -0.00185,
+          "sum_net": -0.139,
+          "profit_factor": 0.694,
+          "mean_hold_bars": 31.57
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.2759,
+          "mean_gross": -6e-05,
+          "mean_net": -0.00066,
+          "sum_net": -0.17165,
+          "profit_factor": 0.909,
+          "mean_hold_bars": 16.78
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.387,
+          "mean_gross": 0.00363,
+          "mean_net": 0.00303,
+          "sum_net": 3.7861,
+          "profit_factor": 1.476,
+          "mean_hold_bars": 21.56
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.3858,
+          "mean_gross": 0.00369,
+          "mean_net": 0.00309,
+          "sum_net": 5.16417,
+          "profit_factor": 1.453,
+          "mean_hold_bars": 23.03
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.3368,
+          "mean_gross": 0.00165,
+          "mean_net": 0.00105,
+          "sum_net": 2.3161,
+          "profit_factor": 1.142,
+          "mean_hold_bars": 19.97
+        },
+        "2026Q2": {
+          "n": 806,
+          "win_rate": 0.3102,
+          "mean_gross": -0.00017,
+          "mean_net": -0.00077,
+          "sum_net": -0.62444,
+          "profit_factor": 0.882,
+          "mean_hold_bars": 24.15
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 6,
+        "n_periods_sum_net_gt_0": 7,
+        "sum_net_total": 10.47026,
+        "top1_period": "2025-08",
+        "top1_share_of_sum_net": 0.271,
+        "top2_share_of_sum_net": 0.497,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 2,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": 10.47028,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.493,
+        "top2_share_of_sum_net": 0.855,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "fixed TP5/SL2, horizon 72 (mainline control)"
+    },
+    "no_tp_sl2_h144": {
+      "maker_0.06pct": {
+        "n": 6166,
+        "win_rate": 0.2071,
+        "mean_gross": 0.00414,
+        "mean_net": 0.00354,
+        "sum_net": 21.8096,
+        "profit_factor": 1.415,
+        "mean_hold_bars": 52.56
+      },
+      "legacy_0.20pct": {
+        "n": 6166,
+        "win_rate": 0.2065,
+        "mean_gross": 0.00414,
+        "mean_net": 0.00214,
+        "sum_net": 13.1772,
+        "profit_factor": 1.222,
+        "mean_hold_bars": 52.56
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.1762,
+          "mean_gross": 0.00159,
+          "mean_net": 0.00099,
+          "sum_net": 0.25817,
+          "profit_factor": 1.12,
+          "mean_hold_bars": 42.4
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.2644,
+          "mean_gross": 0.00618,
+          "mean_net": 0.00558,
+          "sum_net": 1.45644,
+          "profit_factor": 1.627,
+          "mean_hold_bars": 66.65
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.2364,
+          "mean_gross": 0.0023,
+          "mean_net": 0.0017,
+          "sum_net": 0.65385,
+          "profit_factor": 1.196,
+          "mean_hold_bars": 57.71
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.1561,
+          "mean_gross": 0.00232,
+          "mean_net": 0.00172,
+          "sum_net": 1.03611,
+          "profit_factor": 1.223,
+          "mean_hold_bars": 46.56
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.2173,
+          "mean_gross": 0.0057,
+          "mean_net": 0.0051,
+          "sum_net": 2.06691,
+          "profit_factor": 1.552,
+          "mean_hold_bars": 61.06
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.2545,
+          "mean_gross": 0.00813,
+          "mean_net": 0.00753,
+          "sum_net": 3.75826,
+          "profit_factor": 1.81,
+          "mean_hold_bars": 58.32
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.1927,
+          "mean_gross": 0.00145,
+          "mean_net": 0.00085,
+          "sum_net": 0.65098,
+          "profit_factor": 1.102,
+          "mean_hold_bars": 51.92
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.251,
+          "mean_gross": 0.00968,
+          "mean_net": 0.00908,
+          "sum_net": 6.90915,
+          "profit_factor": 2.161,
+          "mean_hold_bars": 56.52
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.2013,
+          "mean_gross": 0.00874,
+          "mean_net": 0.00814,
+          "sum_net": 4.97507,
+          "profit_factor": 1.841,
+          "mean_hold_bars": 46.62
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.2147,
+          "mean_gross": 0.00317,
+          "mean_net": 0.00257,
+          "sum_net": 2.16353,
+          "profit_factor": 1.297,
+          "mean_hold_bars": 49.55
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.1587,
+          "mean_gross": -0.00199,
+          "mean_net": -0.00259,
+          "sum_net": -1.89447,
+          "profit_factor": 0.678,
+          "mean_hold_bars": 50.3
+        },
+        "2026-05": {
+          "n": 39,
+          "win_rate": 0.0769,
+          "mean_gross": -0.00515,
+          "mean_net": -0.00575,
+          "sum_net": -0.22439,
+          "profit_factor": 0.342,
+          "mean_hold_bars": 41.28
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.1762,
+          "mean_gross": 0.00159,
+          "mean_net": 0.00099,
+          "sum_net": 0.25817,
+          "profit_factor": 1.12,
+          "mean_hold_bars": 42.4
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.2035,
+          "mean_gross": 0.00312,
+          "mean_net": 0.00252,
+          "sum_net": 3.14639,
+          "profit_factor": 1.305,
+          "mean_hold_bars": 54.2
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.2171,
+          "mean_gross": 0.00447,
+          "mean_net": 0.00387,
+          "sum_net": 6.47615,
+          "profit_factor": 1.438,
+          "mean_hold_bars": 56.04
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.2235,
+          "mean_gross": 0.00694,
+          "mean_net": 0.00634,
+          "sum_net": 14.04775,
+          "profit_factor": 1.734,
+          "mean_hold_bars": 51.14
+        },
+        "2026Q2": {
+          "n": 770,
+          "win_rate": 0.1545,
+          "mean_gross": -0.00215,
+          "mean_net": -0.00275,
+          "sum_net": -2.11886,
+          "profit_factor": 0.659,
+          "mean_hold_bars": 49.84
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 10,
+        "sum_net_total": 21.80961,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.317,
+        "top2_share_of_sum_net": 0.545,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 3,
+        "n_periods_sum_net_gt_0": 4,
+        "sum_net_total": 21.8096,
+        "top1_period": "2026Q1",
+        "top1_share_of_sum_net": 0.644,
+        "top2_share_of_sum_net": 0.941,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "SL2 only, no TP; timeout 144"
+    },
+    "trail2_atr_h144": {
+      "maker_0.06pct": {
+        "n": 6166,
+        "win_rate": 0.3943,
+        "mean_gross": 0.00171,
+        "mean_net": 0.00111,
+        "sum_net": 6.84484,
+        "profit_factor": 1.287,
+        "mean_hold_bars": 8.86
+      },
+      "legacy_0.20pct": {
+        "n": 6166,
+        "win_rate": 0.3469,
+        "mean_gross": 0.00171,
+        "mean_net": -0.00029,
+        "sum_net": -1.78756,
+        "profit_factor": 0.939,
+        "mean_hold_bars": 8.86
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.364,
+          "mean_gross": 0.00099,
+          "mean_net": 0.00039,
+          "sum_net": 0.10221,
+          "profit_factor": 1.105,
+          "mean_hold_bars": 7.66
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.4023,
+          "mean_gross": 0.00301,
+          "mean_net": 0.00241,
+          "sum_net": 0.62901,
+          "profit_factor": 1.554,
+          "mean_hold_bars": 10.65
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.5377,
+          "mean_gross": 0.0055,
+          "mean_net": 0.0049,
+          "sum_net": 1.8865,
+          "profit_factor": 2.583,
+          "mean_hold_bars": 8.86
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.3173,
+          "mean_gross": -0.00079,
+          "mean_net": -0.00139,
+          "sum_net": -0.83757,
+          "profit_factor": 0.635,
+          "mean_hold_bars": 10.2
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.5136,
+          "mean_gross": 0.00434,
+          "mean_net": 0.00374,
+          "sum_net": 1.5152,
+          "profit_factor": 2.14,
+          "mean_hold_bars": 8.65
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.4489,
+          "mean_gross": 0.00425,
+          "mean_net": 0.00365,
+          "sum_net": 1.82009,
+          "profit_factor": 1.957,
+          "mean_hold_bars": 8.94
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.4349,
+          "mean_gross": 0.00215,
+          "mean_net": 0.00155,
+          "sum_net": 1.19071,
+          "profit_factor": 1.476,
+          "mean_hold_bars": 8.52
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.3732,
+          "mean_gross": 0.00383,
+          "mean_net": 0.00323,
+          "sum_net": 2.45945,
+          "profit_factor": 1.854,
+          "mean_hold_bars": 8.37
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.3813,
+          "mean_gross": 0.00041,
+          "mean_net": -0.00019,
+          "sum_net": -0.11758,
+          "profit_factor": 0.957,
+          "mean_hold_bars": 8.47
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.344,
+          "mean_gross": -0.00061,
+          "mean_net": -0.00121,
+          "sum_net": -1.01732,
+          "profit_factor": 0.736,
+          "mean_hold_bars": 8.2
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.342,
+          "mean_gross": -0.00032,
+          "mean_net": -0.00092,
+          "sum_net": -0.67007,
+          "profit_factor": 0.766,
+          "mean_hold_bars": 9.37
+        },
+        "2026-05": {
+          "n": 39,
+          "win_rate": 0.2564,
+          "mean_gross": -0.00237,
+          "mean_net": -0.00297,
+          "sum_net": -0.1158,
+          "profit_factor": 0.284,
+          "mean_hold_bars": 11.79
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.364,
+          "mean_gross": 0.00099,
+          "mean_net": 0.00039,
+          "sum_net": 0.10221,
+          "profit_factor": 1.105,
+          "mean_hold_bars": 7.66
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.403,
+          "mean_gross": 0.00194,
+          "mean_net": 0.00134,
+          "sum_net": 1.67794,
+          "profit_factor": 1.363,
+          "mean_hold_bars": 9.88
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.4581,
+          "mean_gross": 0.00331,
+          "mean_net": 0.00271,
+          "sum_net": 4.52601,
+          "profit_factor": 1.789,
+          "mean_hold_bars": 8.68
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.3643,
+          "mean_gross": 0.0012,
+          "mean_net": 0.0006,
+          "sum_net": 1.32455,
+          "profit_factor": 1.14,
+          "mean_hold_bars": 8.34
+        },
+        "2026Q2": {
+          "n": 770,
+          "win_rate": 0.3377,
+          "mean_gross": -0.00042,
+          "mean_net": -0.00102,
+          "sum_net": -0.78587,
+          "profit_factor": 0.741,
+          "mean_hold_bars": 9.49
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 6,
+        "n_periods_sum_net_gt_0": 7,
+        "sum_net_total": 6.84483,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.359,
+        "top2_share_of_sum_net": 0.635,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 2,
+        "n_periods_sum_net_gt_0": 4,
+        "sum_net_total": 6.84484,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.661,
+        "top2_share_of_sum_net": 0.906,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "ATR trailing 2×ATR14(signal); timeout 144"
+    },
+    "trail3_atr_h144": {
+      "maker_0.06pct": {
+        "n": 6166,
+        "win_rate": 0.4118,
+        "mean_gross": 0.00243,
+        "mean_net": 0.00183,
+        "sum_net": 11.26187,
+        "profit_factor": 1.339,
+        "mean_hold_bars": 19.63
+      },
+      "legacy_0.20pct": {
+        "n": 6166,
+        "win_rate": 0.3763,
+        "mean_gross": 0.00243,
+        "mean_net": 0.00043,
+        "sum_net": 2.62947,
+        "profit_factor": 1.068,
+        "mean_hold_bars": 19.63
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.3755,
+          "mean_gross": -0.00059,
+          "mean_net": -0.00119,
+          "sum_net": -0.31126,
+          "profit_factor": 0.789,
+          "mean_hold_bars": 13.85
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.4406,
+          "mean_gross": 0.00531,
+          "mean_net": 0.00471,
+          "sum_net": 1.2293,
+          "profit_factor": 1.81,
+          "mean_hold_bars": 24.3
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.5558,
+          "mean_gross": 0.00594,
+          "mean_net": 0.00534,
+          "sum_net": 2.05415,
+          "profit_factor": 2.218,
+          "mean_hold_bars": 19.01
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.3355,
+          "mean_gross": -0.00021,
+          "mean_net": -0.00081,
+          "sum_net": -0.48956,
+          "profit_factor": 0.846,
+          "mean_hold_bars": 20.73
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.4568,
+          "mean_gross": 0.0034,
+          "mean_net": 0.0028,
+          "sum_net": 1.13269,
+          "profit_factor": 1.538,
+          "mean_hold_bars": 18.86
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.4649,
+          "mean_gross": 0.00501,
+          "mean_net": 0.00441,
+          "sum_net": 2.20227,
+          "profit_factor": 1.829,
+          "mean_hold_bars": 19.11
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.4466,
+          "mean_gross": 0.00285,
+          "mean_net": 0.00225,
+          "sum_net": 1.7252,
+          "profit_factor": 1.47,
+          "mean_hold_bars": 19.2
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.4231,
+          "mean_gross": 0.0063,
+          "mean_net": 0.0057,
+          "sum_net": 4.33849,
+          "profit_factor": 2.176,
+          "mean_hold_bars": 18.61
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.4059,
+          "mean_gross": 0.00029,
+          "mean_net": -0.00031,
+          "sum_net": -0.18782,
+          "profit_factor": 0.95,
+          "mean_hold_bars": 18.26
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.3642,
+          "mean_gross": 0.00048,
+          "mean_net": -0.00012,
+          "sum_net": -0.10525,
+          "profit_factor": 0.98,
+          "mean_hold_bars": 19.56
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.3598,
+          "mean_gross": 0.00037,
+          "mean_net": -0.00023,
+          "sum_net": -0.16451,
+          "profit_factor": 0.958,
+          "mean_hold_bars": 22.56
+        },
+        "2026-05": {
+          "n": 39,
+          "win_rate": 0.2564,
+          "mean_gross": -0.00355,
+          "mean_net": -0.00415,
+          "sum_net": -0.16184,
+          "profit_factor": 0.321,
+          "mean_hold_bars": 26.62
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.3755,
+          "mean_gross": -0.00059,
+          "mean_net": -0.00119,
+          "sum_net": -0.31126,
+          "profit_factor": 0.789,
+          "mean_hold_bars": 13.85
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.4255,
+          "mean_gross": 0.00284,
+          "mean_net": 0.00224,
+          "sum_net": 2.79389,
+          "profit_factor": 1.438,
+          "mean_hold_bars": 20.95
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.4545,
+          "mean_gross": 0.00363,
+          "mean_net": 0.00303,
+          "sum_net": 5.06016,
+          "profit_factor": 1.6,
+          "mean_hold_bars": 19.09
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.3959,
+          "mean_gross": 0.00243,
+          "mean_net": 0.00183,
+          "sum_net": 4.04542,
+          "profit_factor": 1.318,
+          "mean_hold_bars": 18.88
+        },
+        "2026Q2": {
+          "n": 770,
+          "win_rate": 0.3545,
+          "mean_gross": 0.00018,
+          "mean_net": -0.00042,
+          "sum_net": -0.32634,
+          "profit_factor": 0.922,
+          "mean_hold_bars": 22.76
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 6,
+        "n_periods_sum_net_gt_0": 6,
+        "sum_net_total": 11.26186,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.385,
+        "top2_share_of_sum_net": 0.581,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 3,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": 11.26187,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.449,
+        "top2_share_of_sum_net": 0.809,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "ATR trailing 3×ATR14(signal); timeout 144"
+    },
+    "trail4_atr_h144": {
+      "maker_0.06pct": {
+        "n": 6166,
+        "win_rate": 0.4199,
+        "mean_gross": 0.00309,
+        "mean_net": 0.00249,
+        "sum_net": 15.37714,
+        "profit_factor": 1.359,
+        "mean_hold_bars": 33.91
+      },
+      "legacy_0.20pct": {
+        "n": 6166,
+        "win_rate": 0.391,
+        "mean_gross": 0.00309,
+        "mean_net": 0.00109,
+        "sum_net": 6.74474,
+        "profit_factor": 1.141,
+        "mean_hold_bars": 33.91
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.2912,
+          "mean_gross": -0.00292,
+          "mean_net": -0.00352,
+          "sum_net": -0.91919,
+          "profit_factor": 0.57,
+          "mean_hold_bars": 21.13
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.4789,
+          "mean_gross": 0.00664,
+          "mean_net": 0.00604,
+          "sum_net": 1.57635,
+          "profit_factor": 1.776,
+          "mean_hold_bars": 42.56
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.5922,
+          "mean_gross": 0.00951,
+          "mean_net": 0.00891,
+          "sum_net": 3.42878,
+          "profit_factor": 2.812,
+          "mean_hold_bars": 35.17
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.392,
+          "mean_gross": 0.00381,
+          "mean_net": 0.00321,
+          "sum_net": 1.93401,
+          "profit_factor": 1.514,
+          "mean_hold_bars": 34.37
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.442,
+          "mean_gross": 0.00339,
+          "mean_net": 0.00279,
+          "sum_net": 1.13111,
+          "profit_factor": 1.404,
+          "mean_hold_bars": 34.94
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.4449,
+          "mean_gross": 0.00501,
+          "mean_net": 0.00441,
+          "sum_net": 2.20187,
+          "profit_factor": 1.636,
+          "mean_hold_bars": 32.89
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.444,
+          "mean_gross": 0.00187,
+          "mean_net": 0.00127,
+          "sum_net": 0.97451,
+          "profit_factor": 1.205,
+          "mean_hold_bars": 33.19
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.4192,
+          "mean_gross": 0.00656,
+          "mean_net": 0.00596,
+          "sum_net": 4.53223,
+          "profit_factor": 1.907,
+          "mean_hold_bars": 31.53
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.4206,
+          "mean_gross": 0.00081,
+          "mean_net": 0.00021,
+          "sum_net": 0.1268,
+          "profit_factor": 1.026,
+          "mean_hold_bars": 28.63
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.3938,
+          "mean_gross": 0.00162,
+          "mean_net": 0.00102,
+          "sum_net": 0.85844,
+          "profit_factor": 1.131,
+          "mean_hold_bars": 36.67
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.3625,
+          "mean_gross": 0.00033,
+          "mean_net": -0.00027,
+          "sum_net": -0.19605,
+          "profit_factor": 0.962,
+          "mean_hold_bars": 38.59
+        },
+        "2026-05": {
+          "n": 39,
+          "win_rate": 0.2308,
+          "mean_gross": -0.00637,
+          "mean_net": -0.00697,
+          "sum_net": -0.27171,
+          "profit_factor": 0.211,
+          "mean_hold_bars": 39.87
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.2912,
+          "mean_gross": -0.00292,
+          "mean_net": -0.00352,
+          "sum_net": -0.91919,
+          "profit_factor": 0.57,
+          "mean_hold_bars": 21.13
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.472,
+          "mean_gross": 0.00616,
+          "mean_net": 0.00556,
+          "sum_net": 6.93913,
+          "profit_factor": 1.903,
+          "mean_hold_bars": 36.33
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.4438,
+          "mean_gross": 0.00318,
+          "mean_net": 0.00258,
+          "sum_net": 4.30749,
+          "profit_factor": 1.391,
+          "mean_hold_bars": 33.52
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.4099,
+          "mean_gross": 0.00309,
+          "mean_net": 0.00249,
+          "sum_net": 5.51747,
+          "profit_factor": 1.336,
+          "mean_hold_bars": 32.69
+        },
+        "2026Q2": {
+          "n": 770,
+          "win_rate": 0.3558,
+          "mean_gross": -1e-05,
+          "mean_net": -0.00061,
+          "sum_net": -0.46776,
+          "profit_factor": 0.916,
+          "mean_hold_bars": 38.65
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 6,
+        "n_periods_sum_net_gt_0": 9,
+        "sum_net_total": 15.37715,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.295,
+        "top2_share_of_sum_net": 0.518,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 3,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": 15.37714,
+        "top1_period": "2025Q3",
+        "top1_share_of_sum_net": 0.451,
+        "top2_share_of_sum_net": 0.81,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "ATR trailing 4×ATR14(signal); timeout 144"
+    },
+    "ma_ema20_h144": {
+      "maker_0.06pct": {
+        "n": 6166,
+        "win_rate": 0.3566,
+        "mean_gross": 0.00211,
+        "mean_net": 0.00151,
+        "sum_net": 9.30804,
+        "profit_factor": 1.298,
+        "mean_hold_bars": 16.44
+      },
+      "legacy_0.20pct": {
+        "n": 6166,
+        "win_rate": 0.3248,
+        "mean_gross": 0.00211,
+        "mean_net": 0.00011,
+        "sum_net": 0.67564,
+        "profit_factor": 1.018,
+        "mean_hold_bars": 16.44
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.295,
+          "mean_gross": -0.00126,
+          "mean_net": -0.00186,
+          "sum_net": -0.48543,
+          "profit_factor": 0.678,
+          "mean_hold_bars": 13.89
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.3755,
+          "mean_gross": 0.00645,
+          "mean_net": 0.00585,
+          "sum_net": 1.52745,
+          "profit_factor": 2.169,
+          "mean_hold_bars": 19.2
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.4597,
+          "mean_gross": 0.00366,
+          "mean_net": 0.00306,
+          "sum_net": 1.17855,
+          "profit_factor": 1.541,
+          "mean_hold_bars": 18.09
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.299,
+          "mean_gross": 0.00092,
+          "mean_net": 0.00032,
+          "sum_net": 0.19527,
+          "profit_factor": 1.071,
+          "mean_hold_bars": 16.24
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.4568,
+          "mean_gross": 0.00756,
+          "mean_net": 0.00696,
+          "sum_net": 2.81793,
+          "profit_factor": 2.512,
+          "mean_hold_bars": 18.07
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.3948,
+          "mean_gross": 0.00435,
+          "mean_net": 0.00375,
+          "sum_net": 1.8714,
+          "profit_factor": 1.798,
+          "mean_hold_bars": 15.59
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.3581,
+          "mean_gross": 0.0013,
+          "mean_net": 0.0007,
+          "sum_net": 0.53851,
+          "profit_factor": 1.144,
+          "mean_hold_bars": 16.4
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.3666,
+          "mean_gross": 0.00375,
+          "mean_net": 0.00315,
+          "sum_net": 2.39529,
+          "profit_factor": 1.651,
+          "mean_hold_bars": 16.97
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.3388,
+          "mean_gross": -0.00103,
+          "mean_net": -0.00163,
+          "sum_net": -0.99815,
+          "profit_factor": 0.712,
+          "mean_hold_bars": 14.73
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.331,
+          "mean_gross": 0.00146,
+          "mean_net": 0.00086,
+          "sum_net": 0.72521,
+          "profit_factor": 1.155,
+          "mean_hold_bars": 16.17
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.3242,
+          "mean_gross": 0.00015,
+          "mean_net": -0.00045,
+          "sum_net": -0.32666,
+          "profit_factor": 0.907,
+          "mean_hold_bars": 16.64
+        },
+        "2026-05": {
+          "n": 39,
+          "win_rate": 0.2051,
+          "mean_gross": -0.00277,
+          "mean_net": -0.00337,
+          "sum_net": -0.13133,
+          "profit_factor": 0.274,
+          "mean_hold_bars": 14.69
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.295,
+          "mean_gross": -0.00126,
+          "mean_net": -0.00186,
+          "sum_net": -0.48543,
+          "profit_factor": 0.678,
+          "mean_hold_bars": 13.89
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.3646,
+          "mean_gross": 0.00292,
+          "mean_net": 0.00232,
+          "sum_net": 2.90127,
+          "profit_factor": 1.464,
+          "mean_hold_bars": 17.43
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.3929,
+          "mean_gross": 0.00373,
+          "mean_net": 0.00313,
+          "sum_net": 5.22784,
+          "profit_factor": 1.658,
+          "mean_hold_bars": 16.57
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.3454,
+          "mean_gross": 0.00156,
+          "mean_net": 0.00096,
+          "sum_net": 2.12235,
+          "profit_factor": 1.18,
+          "mean_hold_bars": 16.05
+        },
+        "2026Q2": {
+          "n": 770,
+          "win_rate": 0.3182,
+          "mean_gross": 1e-05,
+          "mean_net": -0.00059,
+          "sum_net": -0.45799,
+          "profit_factor": 0.875,
+          "mean_hold_bars": 16.55
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 8,
+        "sum_net_total": 9.30804,
+        "top1_period": "2025-10",
+        "top1_share_of_sum_net": 0.303,
+        "top2_share_of_sum_net": 0.56,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 2,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": 9.30804,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.562,
+        "top2_share_of_sum_net": 0.873,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "exit on close cross against ema20; timeout 144"
+    },
+    "ma_ema55_h144": {
+      "maker_0.06pct": {
+        "n": 6166,
+        "win_rate": 0.3393,
+        "mean_gross": 0.00274,
+        "mean_net": 0.00214,
+        "sum_net": 13.17759,
+        "profit_factor": 1.316,
+        "mean_hold_bars": 35.03
+      },
+      "legacy_0.20pct": {
+        "n": 6166,
+        "win_rate": 0.3128,
+        "mean_gross": 0.00274,
+        "mean_net": 0.00074,
+        "sum_net": 4.54519,
+        "profit_factor": 1.096,
+        "mean_hold_bars": 35.03
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.2261,
+          "mean_gross": -0.00131,
+          "mean_net": -0.00191,
+          "sum_net": -0.49979,
+          "profit_factor": 0.757,
+          "mean_hold_bars": 26.27
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.4521,
+          "mean_gross": 0.00988,
+          "mean_net": 0.00928,
+          "sum_net": 2.4232,
+          "profit_factor": 2.521,
+          "mean_hold_bars": 43.05
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.374,
+          "mean_gross": 0.00178,
+          "mean_net": 0.00118,
+          "sum_net": 0.45387,
+          "profit_factor": 1.149,
+          "mean_hold_bars": 33.64
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.3206,
+          "mean_gross": 0.00443,
+          "mean_net": 0.00383,
+          "sum_net": 2.30381,
+          "profit_factor": 1.659,
+          "mean_hold_bars": 36.77
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.4519,
+          "mean_gross": 0.00749,
+          "mean_net": 0.00689,
+          "sum_net": 2.78949,
+          "profit_factor": 2.266,
+          "mean_hold_bars": 37.33
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.3447,
+          "mean_gross": 0.0053,
+          "mean_net": 0.0047,
+          "sum_net": 2.34345,
+          "profit_factor": 1.693,
+          "mean_hold_bars": 34.54
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.3529,
+          "mean_gross": 0.00059,
+          "mean_net": -1e-05,
+          "sum_net": -0.00495,
+          "profit_factor": 0.999,
+          "mean_hold_bars": 35.77
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.3311,
+          "mean_gross": 0.0058,
+          "mean_net": 0.0052,
+          "sum_net": 3.95588,
+          "profit_factor": 1.79,
+          "mean_hold_bars": 36.73
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.2864,
+          "mean_gross": -0.00118,
+          "mean_net": -0.00178,
+          "sum_net": -1.08479,
+          "profit_factor": 0.785,
+          "mean_hold_bars": 28.42
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.3369,
+          "mean_gross": 0.00255,
+          "mean_net": 0.00195,
+          "sum_net": 1.64019,
+          "profit_factor": 1.27,
+          "mean_hold_bars": 37.88
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.3187,
+          "mean_gross": -0.00077,
+          "mean_net": -0.00137,
+          "sum_net": -1.00276,
+          "profit_factor": 0.781,
+          "mean_hold_bars": 33.62
+        },
+        "2026-05": {
+          "n": 39,
+          "win_rate": 0.2051,
+          "mean_gross": -0.00299,
+          "mean_net": -0.00359,
+          "sum_net": -0.14001,
+          "profit_factor": 0.44,
+          "mean_hold_bars": 30.13
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.2261,
+          "mean_gross": -0.00131,
+          "mean_net": -0.00191,
+          "sum_net": -0.49979,
+          "profit_factor": 0.757,
+          "mean_hold_bars": 26.27
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.3646,
+          "mean_gross": 0.00475,
+          "mean_net": 0.00415,
+          "sum_net": 5.18088,
+          "profit_factor": 1.637,
+          "mean_hold_bars": 37.12
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.3744,
+          "mean_gross": 0.00367,
+          "mean_net": 0.00307,
+          "sum_net": 5.12799,
+          "profit_factor": 1.484,
+          "mean_hold_bars": 35.78
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.321,
+          "mean_gross": 0.00264,
+          "mean_net": 0.00204,
+          "sum_net": 4.51128,
+          "profit_factor": 1.28,
+          "mean_hold_bars": 34.88
+        },
+        "2026Q2": {
+          "n": 770,
+          "win_rate": 0.313,
+          "mean_gross": -0.00088,
+          "mean_net": -0.00148,
+          "sum_net": -1.14277,
+          "profit_factor": 0.764,
+          "mean_hold_bars": 33.45
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 7,
+        "sum_net_total": 13.17759,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.3,
+        "top2_share_of_sum_net": 0.512,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 2,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": 13.17759,
+        "top1_period": "2025Q3",
+        "top1_share_of_sum_net": 0.393,
+        "top2_share_of_sum_net": 0.782,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "exit on close cross against ema55; timeout 144"
+    },
+    "time_stop_48": {
+      "maker_0.06pct": {
+        "n": 6202,
+        "win_rate": 0.5197,
+        "mean_gross": 0.00283,
+        "mean_net": 0.00223,
+        "sum_net": 13.82718,
+        "profit_factor": 1.228,
+        "mean_hold_bars": 48.0
+      },
+      "legacy_0.20pct": {
+        "n": 6202,
+        "win_rate": 0.4963,
+        "mean_gross": 0.00283,
+        "mean_net": 0.00083,
+        "sum_net": 5.14438,
+        "profit_factor": 1.079,
+        "mean_hold_bars": 48.0
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.4291,
+          "mean_gross": -0.00274,
+          "mean_net": -0.00334,
+          "sum_net": -0.87149,
+          "profit_factor": 0.721,
+          "mean_hold_bars": 48.0
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.5479,
+          "mean_gross": 0.0088,
+          "mean_net": 0.0082,
+          "sum_net": 2.14003,
+          "profit_factor": 1.806,
+          "mean_hold_bars": 48.0
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.6208,
+          "mean_gross": 0.00343,
+          "mean_net": 0.00283,
+          "sum_net": 1.08971,
+          "profit_factor": 1.229,
+          "mean_hold_bars": 48.0
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.4884,
+          "mean_gross": 0.00077,
+          "mean_net": 0.00017,
+          "sum_net": 0.1004,
+          "profit_factor": 1.018,
+          "mean_hold_bars": 48.0
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.5704,
+          "mean_gross": 0.00789,
+          "mean_net": 0.00729,
+          "sum_net": 2.95247,
+          "profit_factor": 1.707,
+          "mean_hold_bars": 48.0
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.5531,
+          "mean_gross": 0.00518,
+          "mean_net": 0.00458,
+          "sum_net": 2.28781,
+          "profit_factor": 1.437,
+          "mean_hold_bars": 48.0
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.5365,
+          "mean_gross": 0.00308,
+          "mean_net": 0.00248,
+          "sum_net": 1.90473,
+          "profit_factor": 1.285,
+          "mean_hold_bars": 48.0
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.5453,
+          "mean_gross": 0.0072,
+          "mean_net": 0.0066,
+          "sum_net": 5.02133,
+          "profit_factor": 1.975,
+          "mean_hold_bars": 48.0
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.5221,
+          "mean_gross": 0.00361,
+          "mean_net": 0.00301,
+          "sum_net": 1.83778,
+          "profit_factor": 1.34,
+          "mean_hold_bars": 48.0
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.484,
+          "mean_gross": 0.00069,
+          "mean_net": 9e-05,
+          "sum_net": 0.07493,
+          "profit_factor": 1.008,
+          "mean_hold_bars": 48.0
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.4692,
+          "mean_gross": -0.0025,
+          "mean_net": -0.0031,
+          "sum_net": -2.26835,
+          "profit_factor": 0.724,
+          "mean_hold_bars": 48.0
+        },
+        "2026-05": {
+          "n": 75,
+          "win_rate": 0.4133,
+          "mean_gross": -0.0053,
+          "mean_net": -0.0059,
+          "sum_net": -0.44217,
+          "profit_factor": 0.416,
+          "mean_hold_bars": 48.0
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.4291,
+          "mean_gross": -0.00274,
+          "mean_net": -0.00334,
+          "sum_net": -0.87149,
+          "profit_factor": 0.721,
+          "mean_hold_bars": 48.0
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.5417,
+          "mean_gross": 0.00327,
+          "mean_net": 0.00267,
+          "sum_net": 3.33014,
+          "profit_factor": 1.254,
+          "mean_hold_bars": 48.0
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.5496,
+          "mean_gross": 0.00487,
+          "mean_net": 0.00427,
+          "sum_net": 7.14501,
+          "profit_factor": 1.444,
+          "mean_hold_bars": 48.0
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.5156,
+          "mean_gross": 0.00373,
+          "mean_net": 0.00313,
+          "sum_net": 6.93404,
+          "profit_factor": 1.358,
+          "mean_hold_bars": 48.0
+        },
+        "2026Q2": {
+          "n": 806,
+          "win_rate": 0.464,
+          "mean_gross": -0.00276,
+          "mean_net": -0.00336,
+          "sum_net": -2.71052,
+          "profit_factor": 0.698,
+          "mean_hold_bars": 48.0
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 5,
+        "n_periods_sum_net_gt_0": 9,
+        "sum_net_total": 13.82718,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.363,
+        "top2_share_of_sum_net": 0.577,
+        "fragile_if_top2_gt_0_6": false
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 2,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": 13.82718,
+        "top1_period": "2025Q4",
+        "top1_share_of_sum_net": 0.517,
+        "top2_share_of_sum_net": 1.018,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "force flat at close of path bar 48; no TP/SL"
+    },
+    "time_stop_96": {
+      "maker_0.06pct": {
+        "n": 6170,
+        "win_rate": 0.5212,
+        "mean_gross": 0.00413,
+        "mean_net": 0.00353,
+        "sum_net": 21.80662,
+        "profit_factor": 1.244,
+        "mean_hold_bars": 96.0
+      },
+      "legacy_0.20pct": {
+        "n": 6170,
+        "win_rate": 0.5049,
+        "mean_gross": 0.00413,
+        "mean_net": 0.00213,
+        "sum_net": 13.16862,
+        "profit_factor": 1.141,
+        "mean_hold_bars": 96.0
+      },
+      "monthly_maker": {
+        "2025-06": {
+          "n": 261,
+          "win_rate": 0.4598,
+          "mean_gross": -0.00373,
+          "mean_net": -0.00433,
+          "sum_net": -1.1305,
+          "profit_factor": 0.747,
+          "mean_hold_bars": 96.0
+        },
+        "2025-07": {
+          "n": 261,
+          "win_rate": 0.5096,
+          "mean_gross": 0.00448,
+          "mean_net": 0.00388,
+          "sum_net": 1.0115,
+          "profit_factor": 1.202,
+          "mean_hold_bars": 96.0
+        },
+        "2025-08": {
+          "n": 385,
+          "win_rate": 0.6545,
+          "mean_gross": 0.00947,
+          "mean_net": 0.00887,
+          "sum_net": 3.41524,
+          "profit_factor": 1.594,
+          "mean_hold_bars": 96.0
+        },
+        "2025-09": {
+          "n": 602,
+          "win_rate": 0.4452,
+          "mean_gross": 0.00221,
+          "mean_net": 0.00161,
+          "sum_net": 0.96982,
+          "profit_factor": 1.097,
+          "mean_hold_bars": 96.0
+        },
+        "2025-10": {
+          "n": 405,
+          "win_rate": 0.4765,
+          "mean_gross": -0.00154,
+          "mean_net": -0.00214,
+          "sum_net": -0.86806,
+          "profit_factor": 0.887,
+          "mean_hold_bars": 96.0
+        },
+        "2025-11": {
+          "n": 499,
+          "win_rate": 0.5431,
+          "mean_gross": 0.00876,
+          "mean_net": 0.00816,
+          "sum_net": 4.07273,
+          "profit_factor": 1.56,
+          "mean_hold_bars": 96.0
+        },
+        "2025-12": {
+          "n": 768,
+          "win_rate": 0.4766,
+          "mean_gross": -0.00196,
+          "mean_net": -0.00256,
+          "sum_net": -1.96841,
+          "profit_factor": 0.821,
+          "mean_hold_bars": 96.0
+        },
+        "2026-01": {
+          "n": 761,
+          "win_rate": 0.657,
+          "mean_gross": 0.01748,
+          "mean_net": 0.01688,
+          "sum_net": 12.84226,
+          "profit_factor": 3.137,
+          "mean_hold_bars": 96.0
+        },
+        "2026-02": {
+          "n": 611,
+          "win_rate": 0.6416,
+          "mean_gross": 0.01687,
+          "mean_net": 0.01627,
+          "sum_net": 9.94264,
+          "profit_factor": 2.691,
+          "mean_hold_bars": 96.0
+        },
+        "2026-03": {
+          "n": 843,
+          "win_rate": 0.4852,
+          "mean_gross": 0.00121,
+          "mean_net": 0.00061,
+          "sum_net": 0.51028,
+          "profit_factor": 1.04,
+          "mean_hold_bars": 96.0
+        },
+        "2026-04": {
+          "n": 731,
+          "win_rate": 0.4049,
+          "mean_gross": -0.00816,
+          "mean_net": -0.00876,
+          "sum_net": -6.40167,
+          "profit_factor": 0.505,
+          "mean_hold_bars": 96.0
+        },
+        "2026-05": {
+          "n": 43,
+          "win_rate": 0.3721,
+          "mean_gross": -0.0131,
+          "mean_net": -0.0137,
+          "sum_net": -0.58921,
+          "profit_factor": 0.285,
+          "mean_hold_bars": 96.0
+        }
+      },
+      "quarterly_maker": {
+        "2025Q2": {
+          "n": 261,
+          "win_rate": 0.4598,
+          "mean_gross": -0.00373,
+          "mean_net": -0.00433,
+          "sum_net": -1.1305,
+          "profit_factor": 0.747,
+          "mean_hold_bars": 96.0
+        },
+        "2025Q3": {
+          "n": 1248,
+          "win_rate": 0.5232,
+          "mean_gross": 0.00492,
+          "mean_net": 0.00432,
+          "sum_net": 5.39655,
+          "profit_factor": 1.26,
+          "mean_hold_bars": 96.0
+        },
+        "2025Q4": {
+          "n": 1672,
+          "win_rate": 0.4964,
+          "mean_gross": 0.00134,
+          "mean_net": 0.00074,
+          "sum_net": 1.23626,
+          "profit_factor": 1.048,
+          "mean_hold_bars": 96.0
+        },
+        "2026Q1": {
+          "n": 2215,
+          "win_rate": 0.5874,
+          "mean_gross": 0.01112,
+          "mean_net": 0.01052,
+          "sum_net": 23.29518,
+          "profit_factor": 1.947,
+          "mean_hold_bars": 96.0
+        },
+        "2026Q2": {
+          "n": 774,
+          "win_rate": 0.4031,
+          "mean_gross": -0.00843,
+          "mean_net": -0.00903,
+          "sum_net": -6.99087,
+          "profit_factor": 0.492,
+          "mean_hold_bars": 96.0
+        }
+      },
+      "concentration_monthly": {
+        "n_periods": 12,
+        "n_periods_pf_ge_1_3": 4,
+        "n_periods_sum_net_gt_0": 7,
+        "sum_net_total": 21.80662,
+        "top1_period": "2026-01",
+        "top1_share_of_sum_net": 0.589,
+        "top2_share_of_sum_net": 1.045,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "concentration_quarterly": {
+        "n_periods": 5,
+        "n_periods_pf_ge_1_3": 1,
+        "n_periods_sum_net_gt_0": 3,
+        "sum_net_total": 21.80662,
+        "top1_period": "2026Q1",
+        "top1_share_of_sum_net": 1.068,
+        "top2_share_of_sum_net": 1.316,
+        "fragile_if_top2_gt_0_6": true
+      },
+      "exit_rule": "force flat at close of path bar 96; no TP/SL"
+    }
+  },
+  "comparable_to": [
+    "analysis/p_trend_exit_base_rate.md",
+    "analysis/p_entry_timing_close_vs_next.md",
+    "analysis/p_owner_side_rich_features_verdict.md"
+  ]
+}

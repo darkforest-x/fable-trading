@@ -52,7 +52,9 @@ from src.judgment.candidates import (  # noqa: E402
 )
 from src.judgment.labeling import (  # noqa: E402
     ATR_PCT_MIN,
+    ENTRY_MODES,
     HORIZON_BARS,
+    EntryMode,
     label_candidate,
     label_short_candidate,
 )
@@ -113,11 +115,20 @@ def _dedup(fires: list[tuple[int, int]], gap: int = MIN_GAP_BARS) -> list[tuple[
     return out
 
 
-def _resolve_gross(frame: pd.DataFrame, signal_i: int, direction: int) -> float | None:
+def _resolve_gross(
+    frame: pd.DataFrame,
+    signal_i: int,
+    direction: int,
+    entry: EntryMode = "next_open",
+) -> float | None:
     if direction > 0:
-        out = label_candidate(frame, signal_i, tp_mult=TP_MULT, sl_mult=SL_MULT)
+        out = label_candidate(
+            frame, signal_i, tp_mult=TP_MULT, sl_mult=SL_MULT, entry=entry
+        )
     else:
-        out = label_short_candidate(frame, signal_i, tp_mult=TP_MULT, sl_mult=SL_MULT)
+        out = label_short_candidate(
+            frame, signal_i, tp_mult=TP_MULT, sl_mult=SL_MULT, entry=entry
+        )
     if out is None:
         return None
     return float(out.realized_ret)
@@ -290,7 +301,14 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--n-symbols", type=int, default=60, help="0 = all SWAP")
     ap.add_argument("--tag", default="direction_select_base_rate")
+    ap.add_argument(
+        "--entry",
+        choices=list(ENTRY_MODES),
+        default="next_open",
+        help="Fill convention: next_open (default) or signal_close; TP/SL unchanged",
+    )
     args = ap.parse_args()
+    entry: EntryMode = args.entry  # type: ignore[assignment]
 
     bags: dict[str, dict[str, list]] = {
         v: {"gross": [], "dir": []} for v in VARIANT_ORDER
@@ -318,7 +336,7 @@ def main() -> int:
         t = pd.to_datetime(enriched["open_time"], utc=True)
         for name, pairs in sigs.items():
             for i, d in pairs:
-                g = _resolve_gross(enriched, i, d)
+                g = _resolve_gross(enriched, i, d, entry=entry)
                 if g is None:
                     continue
                 bags[name]["gross"].append(g)
@@ -379,7 +397,7 @@ def main() -> int:
         "discipline": {
             "holdout_start": str(HOLDOUT_START),
             "holdout_touched": False,
-            "entry": "next_bar_open",
+            "entry": entry,
             "exit": f"TP{TP_MULT:g}/SL{SL_MULT:g}/{HORIZON_BARS}bar",
             "costs": {"swap_maker": FORWARD_COST, "legacy_p0": LEGACY_P0_ROUND_TRIP},
             "atr_pct_min": ATR_PCT_MIN,
@@ -420,7 +438,7 @@ def main() -> int:
 
     print(
         f"n_symbols={n_sym}  window=<{HOLDOUT_START.date()}  "
-        f"entry=next_open  TP5/SL2/72  verdict={verdict}"
+        f"entry={entry}  TP5/SL2/72  verdict={verdict}"
     )
     if best_side:
         print(f"best={best_side['variant']} {best_side['side']} PF@m={best_side['pf_maker']}")

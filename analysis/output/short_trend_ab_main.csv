@@ -1,0 +1,23 @@
+section,exit,n,win_rate_maker,sum_net_maker,mean_net_maker,pf_maker,pf_legacy_0.20,mean_hold_bars,top2_share_monthly,n_months_pf_ge_1_3,fragile_top2,exit_rule
+A_short,baseline_tp5_sl2_h72,6202,0.3541,10.47028,0.00169,1.245,1.037,21.52,0.497,6,False,"fixed TP5/SL2, horizon 72 (mainline control)"
+A_short,no_tp_sl2_h144,6166,0.2071,21.8096,0.00354,1.415,1.222,52.56,0.545,5,False,"SL2 only, no TP; timeout 144"
+A_short,trail2_atr_h144,6166,0.3943,6.84484,0.00111,1.287,0.939,8.86,0.635,6,True,ATR trailing 2×ATR14(signal); timeout 144
+A_short,trail3_atr_h144,6166,0.4118,11.26187,0.00183,1.339,1.068,19.63,0.581,6,False,ATR trailing 3×ATR14(signal); timeout 144
+A_short,trail4_atr_h144,6166,0.4199,15.37714,0.00249,1.359,1.141,33.91,0.518,6,False,ATR trailing 4×ATR14(signal); timeout 144
+A_short,ma_ema20_h144,6166,0.3566,9.30804,0.00151,1.298,1.018,16.44,0.56,5,False,exit on close cross against ema20; timeout 144
+A_short,ma_ema55_h144,6166,0.3393,13.17759,0.00214,1.316,1.096,35.03,0.512,5,False,exit on close cross against ema55; timeout 144
+A_short,time_stop_48,6202,0.5197,13.82718,0.00223,1.228,1.079,48.0,0.577,5,False,force flat at close of path bar 48; no TP/SL
+A_short,time_stop_96,6170,0.5212,21.80662,0.00353,1.244,1.141,96.0,1.045,4,True,force flat at close of path bar 96; no TP/SL
+A_long_control,baseline_tp5_sl2_h72,5800,0.2995,-4.79607,-0.00083,0.892,0.743,20.16,,,,"fixed TP5/SL2, horizon 72 (mainline control)"
+A_long_control,no_tp_sl2_h144,5748,0.1621,-3.86455,-0.00067,0.927,0.8,45.67,,,,"SL2 only, no TP; timeout 144"
+A_long_control,trail3_atr_h144,5748,0.3431,-5.86861,-0.00102,0.839,0.667,18.54,,,,ATR trailing 3×ATR14(signal); timeout 144
+A_long_control,ma_ema55_h144,5748,0.2864,-1.15799,-0.0002,0.973,0.813,31.95,,,,exit on close cross against ema55; timeout 144
+B_oracle_vs_rule,baseline_tp5_sl2_h72,1283,0.7599,29.4467,,7.408,6.494,29.32,,,,oracle_n=1283 rule_n=6202 rule_pf=1.245 Δpf=6.163
+B_oracle_vs_rule,no_tp_sl2_h144,1282,0.5382,46.55075,,6.594,5.891,103.97,,,,oracle_n=1282 rule_n=6166 rule_pf=1.415 Δpf=5.179
+B_oracle_vs_rule,trail2_atr_h144,1282,0.7254,20.47679,,8.971,7.035,14.28,,,,oracle_n=1282 rule_n=6166 rule_pf=1.287 Δpf=7.684
+B_oracle_vs_rule,trail3_atr_h144,1282,0.7785,32.78995,,13.932,11.468,30.87,,,,oracle_n=1282 rule_n=6166 rule_pf=1.339 Δpf=12.593
+B_oracle_vs_rule,trail4_atr_h144,1282,0.7886,43.62515,,16.846,14.266,48.16,,,,oracle_n=1282 rule_n=6166 rule_pf=1.359 Δpf=15.487
+B_oracle_vs_rule,ma_ema20_h144,1282,0.7426,33.37538,,13.285,10.838,27.92,,,,oracle_n=1282 rule_n=6166 rule_pf=1.298 Δpf=11.987
+B_oracle_vs_rule,ma_ema55_h144,1282,0.7566,41.07932,,12.56,10.79,63.02,,,,oracle_n=1282 rule_n=6166 rule_pf=1.316 Δpf=11.244
+B_oracle_vs_rule,time_stop_48,1283,0.8449,44.49211,,15.441,13.655,48.0,,,,oracle_n=1283 rule_n=6202 rule_pf=1.228 Δpf=14.213
+B_oracle_vs_rule,time_stop_96,1283,0.8044,52.75506,,10.201,9.357,96.0,,,,oracle_n=1283 rule_n=6170 rule_pf=1.244 Δpf=8.957

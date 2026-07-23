@@ -1,0 +1,11 @@
+variant,side,dir_rule,n_next_open,win_next_open,net_maker_next_open,pf_maker_next_open,pf_legacy_next_open,n_signal_close,win_signal_close,net_maker_signal_close,pf_maker_signal_close,pf_legacy_signal_close,delta_pf_maker_close_minus_next
+ctrl_fixed_long,long,fixed +1 at dense tip (run==5); no select,16145,0.2957,-0.00084,0.876,0.711,16145,0.2961,-0.00083,0.877,0.712,0.001
+ctrl_fixed_long,short,fixed +1 at dense tip (run==5); no select,0,,,,,0,,,,,
+ctrl_fixed_short,long,fixed -1 at dense tip (run==5); no select,0,,,,,0,,,,,
+ctrl_fixed_short,short,fixed -1 at dense tip (run==5); no select,16145,0.3269,0.00044,1.068,0.868,16145,0.326,0.00041,1.064,0.865,-0.004
+arrange_order_score,long,at tip: order_score>=3 and >down_order_score → +1; down_order_score>=3 and >order_score → -1; else skip,4807,0.2875,-0.00099,0.851,0.688,4807,0.2904,-0.00093,0.86,0.695,0.009
+arrange_order_score,short,at tip: order_score>=3 and >down_order_score → +1; down_order_score>=3 and >order_score → -1; else skip,4627,0.3292,0.00073,1.116,0.908,4627,0.3276,0.00071,1.112,0.905,-0.004
+range_break_n20,long,"after tip, first close>max(high[i-N:i]) → +1; close<min(low[i-N:i]) → -1; N=20; wait≤48",7286,0.308,-0.00038,0.943,0.767,7286,0.3096,-0.00031,0.953,0.776,0.01
+range_break_n20,short,"after tip, first close>max(high[i-N:i]) → +1; close<min(low[i-N:i]) → -1; N=20; wait≤48",7829,0.3251,0.00038,1.058,0.863,7829,0.3252,0.0004,1.062,0.866,0.004
+spread_expand_chg8,long,"after tip, first fast_spread[i]-fast_spread[i-8] >= thr; dir = +1 if close>=cluster_mid else -1",5800,0.2995,-0.00083,0.892,0.743,5800,0.3012,-0.00079,0.896,0.746,0.004
+spread_expand_chg8,short,"after tip, first fast_spread[i]-fast_spread[i-8] >= thr; dir = +1 if close>=cluster_mid else -1",6202,0.3541,0.00169,1.245,1.037,6202,0.3539,0.00169,1.244,1.037,-0.001

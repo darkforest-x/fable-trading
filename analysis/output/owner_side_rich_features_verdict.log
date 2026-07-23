@@ -1,0 +1,14 @@
+labeled long=1152 short=1361 skip=12 empty=0 sheet=/Users/zhangzc/fable-trading/analysis/output/owner_side_review/review_sheet.csv
+rich feature count=116
+[long] running n_boxes=1152 features=116 …
+[long] rule_PF_maker=0.938 pass>=1.3? False oracle_PF=5.62 elapsed=42.0s
+[short] running n_boxes=1361 features=116 …
+[short] rule_PF_maker=1.227 pass>=1.3? False oracle_PF=7.417 elapsed=19.5s
+[long_vs_short] disclosure …
+[long_vs_short] auc=0.9982 top=[{'feature': 'close_vs_ema55', 'gain': 1406.5, 'group': 'ma_family'}, {'feature': 'order_score', 'gain': 1243.38, 'group': 'ma_family'}, {'feature': 'gap_ema8_21', 'gain': 1121.13, 'group': 'ma_family'}]
+WROTE /Users/zhangzc/fable-trading/analysis/output/owner_side_rich_features_verdict.json
+MAIN TABLE:
+ side  n_boxes  n_features  lgbm_auc  oracle_n  oracle_pf_maker  rule_n  rule_pf_maker  narrow_pf_maker  delta_vs_narrow  pass_1.3
+ long     1152         116    0.9799      1090            5.620   53466          0.938            0.917            0.021     False
+short     1361         116    0.9721      1286            7.417   25718          1.227            1.127            0.100     False
+VERDICT: 扩特征后 long/short 两边因果规则均未过 PF@maker 1.3；扩特征仍未救出可部署边。

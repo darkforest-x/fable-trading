@@ -1,0 +1,22 @@
+exit,side,n,win_rate_maker,mean_net_maker,sum_net_maker,pf_maker,pf_legacy_0.20,mean_hold_bars,max_dd_sum_net_maker,exit_rule
+baseline_tp5_sl2_h72,long,5800,0.2995,-0.00083,-4.79607,0.892,0.743,20.16,-4.78407,"fixed TP5/SL2, horizon 72 (mainline control)"
+baseline_tp5_sl2_h72,short,6202,0.3541,0.00169,10.47028,1.245,1.037,21.52,-0.34973,"fixed TP5/SL2, horizon 72 (mainline control)"
+baseline_tp5_sl2_h72,both,12002,0.3277,0.00047,5.6742,1.065,0.887,20.87,-0.86168,"fixed TP5/SL2, horizon 72 (mainline control)"
+trail3_atr_h144,long,5748,0.3431,-0.00102,-5.86861,0.839,0.667,18.54,-5.85136,ATR trailing 3×ATR14(signal); no fixed TP; seed stop at entry±trail; timeout 144
+trail3_atr_h144,short,6166,0.4118,0.00183,11.26187,1.339,1.068,19.63,-0.33552,ATR trailing 3×ATR14(signal); no fixed TP; seed stop at entry±trail; timeout 144
+trail3_atr_h144,both,11914,0.3786,0.00045,5.39326,1.078,0.859,19.1,-0.98675,ATR trailing 3×ATR14(signal); no fixed TP; seed stop at entry±trail; timeout 144
+ma_ema55_h144,long,5748,0.2864,-0.0002,-1.15799,0.973,0.813,31.95,-2.8513,exit when close crosses against ema55; no fixed TP/SL; timeout 144
+ma_ema55_h144,short,6166,0.3393,0.00214,13.17759,1.316,1.096,35.03,-0.88867,exit when close crosses against ema55; no fixed TP/SL; timeout 144
+ma_ema55_h144,both,11914,0.3137,0.00101,12.0196,1.141,0.952,33.54,-1.23802,exit when close crosses against ema55; no fixed TP/SL; timeout 144
+structure_mid_redense_h144,long,5748,0.2747,-0.00089,-5.0973,0.859,0.689,20.74,-5.27477,exit at close when price flips to opposite side of cluster_mid OR fast_spread≤0.0028; timeout 144
+structure_mid_redense_h144,short,6166,0.3433,0.00161,9.91184,1.29,1.032,23.75,-0.60145,exit at close when price flips to opposite side of cluster_mid OR fast_spread≤0.0028; timeout 144
+structure_mid_redense_h144,both,11914,0.3102,0.0004,4.81454,1.068,0.856,22.3,-1.48856,exit at close when price flips to opposite side of cluster_mid OR fast_spread≤0.0028; timeout 144
+time_stop_48,long,5805,0.4429,-0.00225,-13.0509,0.817,0.722,48.0,-13.1606,force flat at close of path bar 48; no TP/SL
+time_stop_48,short,6202,0.5197,0.00223,13.82718,1.228,1.079,48.0,-1.01525,force flat at close of path bar 48; no TP/SL
+time_stop_48,both,12007,0.4826,6e-05,0.77628,1.006,0.886,48.0,-3.41561,force flat at close of path bar 48; no TP/SL
+time_stop_96,long,5797,0.4504,-0.00248,-14.37341,0.857,0.786,96.0,-14.45048,force flat at close of path bar 96; no TP/SL
+time_stop_96,short,6170,0.5212,0.00353,21.80662,1.244,1.141,96.0,-1.14324,force flat at close of path bar 96; no TP/SL
+time_stop_96,both,11967,0.4869,0.00062,7.43322,1.039,0.953,96.0,-2.64105,force flat at close of path bar 96; no TP/SL
+no_tp_sl2_h144,long,5748,0.1621,-0.00067,-3.86455,0.927,0.8,45.67,-4.04824,"SL2 only, no TP; timeout 144 (let winners run)"
+no_tp_sl2_h144,short,6166,0.2071,0.00354,21.8096,1.415,1.222,52.56,-0.82559,"SL2 only, no TP; timeout 144 (let winners run)"
+no_tp_sl2_h144,both,11914,0.1854,0.00151,17.94505,1.17,1.011,49.23,-1.39397,"SL2 only, no TP; timeout 144 (let winners run)"

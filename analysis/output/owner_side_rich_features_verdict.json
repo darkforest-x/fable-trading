@@ -1,0 +1,966 @@
+{
+  "tag": "owner_side_rich_features_verdict",
+  "sheet": "/Users/zhangzc/fable-trading/analysis/output/owner_side_review/review_sheet.csv",
+  "discipline": {
+    "holdout_start": "2026-05-04 00:00:00+00:00",
+    "holdout_touched": false,
+    "tp_sl_horizon": [
+      5.0,
+      2.0,
+      72
+    ],
+    "long_settlement": "label_candidate",
+    "short_settlement": "label_short_candidate",
+    "success_line": "per-side causal-rule PF@maker >= 1.3",
+    "costs": {
+      "swap_maker": 0.0006,
+      "legacy_p0": 0.002
+    },
+    "experiment_theme": "owner-approved rich factorization (single variable)"
+  },
+  "label_counts": {
+    "long": 1152,
+    "short": 1361,
+    "skip": 12,
+    "empty": 0
+  },
+  "n_features": 116,
+  "feature_list": [
+    "ma_spread_pct",
+    "full_spread",
+    "fast_slow_gap",
+    "full_ratio_min48",
+    "spread_mean8",
+    "spread_mean24",
+    "spread_chg8",
+    "spread_chg24",
+    "spread_pos96",
+    "dense_run_len",
+    "dense_frac48",
+    "ext_up",
+    "close_vs_ema55",
+    "close_vs_ema200",
+    "order_score",
+    "slow_slope_12",
+    "volume_ratio",
+    "volume_z",
+    "vol_ratio_mean8",
+    "atr_pct",
+    "atr_pct_ratio96",
+    "pre_range48",
+    "pre_range168",
+    "drawdown24",
+    "ret_4",
+    "ret_12",
+    "ret_24",
+    "ret_48",
+    "close_vs_sma20",
+    "close_vs_sma60",
+    "close_vs_sma120",
+    "close_vs_ema5",
+    "close_vs_ema10",
+    "close_vs_ema20",
+    "close_vs_ema60",
+    "close_vs_ema120",
+    "gap_ema8_21",
+    "gap_ema21_55",
+    "gap_ema55_200",
+    "gap_sma20_60",
+    "gap_sma60_120",
+    "ema8_slope8",
+    "ema21_slope12",
+    "ema55_slope24",
+    "ema200_slope24",
+    "sma60_slope12",
+    "cross_ema8_21",
+    "cross_ema21_55",
+    "cross_ema55_200",
+    "ma_entangle",
+    "ma_bandwidth",
+    "bb_width20",
+    "down_order_score",
+    "trend_order_score",
+    "fast_spread",
+    "fast_spread_chg4",
+    "fast_spread_chg16",
+    "full_spread_chg8",
+    "full_spread_chg24",
+    "fast_spread_rank96",
+    "full_spread_rank96",
+    "spread_expand_run",
+    "spread_contract_run",
+    "dense_run_len_fast",
+    "exit_dense_expand",
+    "ret_2",
+    "ret_8",
+    "ret_16",
+    "ret_64",
+    "ret_96",
+    "roc_12",
+    "roc_48",
+    "dist_high_24",
+    "dist_low_24",
+    "dist_high_48",
+    "dist_low_48",
+    "dist_high_96",
+    "dist_low_96",
+    "break_up_24",
+    "break_dn_24",
+    "break_up_48",
+    "break_dn_48",
+    "break_up_96",
+    "break_dn_96",
+    "range_pos_24",
+    "range_pos_48",
+    "range_pos_96",
+    "atr7_pct",
+    "atr28_pct",
+    "atr_ratio_7_28",
+    "rvol_24",
+    "rvol_96",
+    "rvol_ratio_24_96",
+    "body_ratio",
+    "wick_up_ratio",
+    "wick_dn_ratio",
+    "body_ratio_mean8",
+    "atr_chg24",
+    "vol_ratio_20",
+    "vol_ratio_96",
+    "vol_z_24",
+    "pv_corr_24",
+    "breakout_vol_ratio",
+    "up_vol_share_24",
+    "struct_hh",
+    "struct_hl",
+    "struct_lh",
+    "struct_ll",
+    "struct_bias",
+    "dist_prior_high_96",
+    "dist_prior_low_96",
+    "hour_sin",
+    "hour_cos",
+    "dow",
+    "dow_sin",
+    "dow_cos"
+  ],
+  "feature_groups": [
+    "dense_spread",
+    "ma_family",
+    "momentum_structure",
+    "structure",
+    "time",
+    "volatility",
+    "volume"
+  ],
+  "narrow_reference": {
+    "long_pf_maker": 0.917,
+    "short_pf_maker": 1.127,
+    "source": "analysis/p_owner_side_feature_verdict.md"
+  },
+  "main_table": [
+    {
+      "side": "long",
+      "n_boxes": 1152,
+      "n_features": 116,
+      "lgbm_auc": 0.9799,
+      "oracle_n": 1090,
+      "oracle_pf_maker": 5.62,
+      "rule_n": 53466,
+      "rule_pf_maker": 0.938,
+      "narrow_pf_maker": 0.917,
+      "delta_vs_narrow": 0.021,
+      "pass_1.3": false
+    },
+    {
+      "side": "short",
+      "n_boxes": 1361,
+      "n_features": 116,
+      "lgbm_auc": 0.9721,
+      "oracle_n": 1286,
+      "oracle_pf_maker": 7.417,
+      "rule_n": 25718,
+      "rule_pf_maker": 1.227,
+      "narrow_pf_maker": 1.127,
+      "delta_vs_narrow": 0.1,
+      "pass_1.3": false
+    }
+  ],
+  "by_side": {
+    "long": {
+      "side": "long",
+      "n_labeled_boxes": 1152,
+      "pos_feature_rows": 1152,
+      "random_neg": 3387,
+      "n_features": 116,
+      "lgbm_val_auc": 0.9799,
+      "feature_gain_top": [
+        {
+          "feature": "order_score",
+          "gain": 7594.03,
+          "group": "ma_family"
+        },
+        {
+          "feature": "close_vs_ema20",
+          "gain": 2475.02,
+          "group": "ma_family"
+        },
+        {
+          "feature": "fast_spread_chg4",
+          "gain": 2001.44,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "spread_chg8",
+          "gain": 1902.5,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "ext_up",
+          "gain": 1233.52,
+          "group": "ma_family"
+        },
+        {
+          "feature": "down_order_score",
+          "gain": 1220.65,
+          "group": "ma_family"
+        },
+        {
+          "feature": "gap_sma60_120",
+          "gain": 1164.56,
+          "group": "ma_family"
+        },
+        {
+          "feature": "fast_spread_chg16",
+          "gain": 1158.51,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "ema200_slope24",
+          "gain": 668.95,
+          "group": "ma_family"
+        },
+        {
+          "feature": "fast_slow_gap",
+          "gain": 307.83,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "spread_pos96",
+          "gain": 305.28,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "gap_sma20_60",
+          "gain": 280.7,
+          "group": "ma_family"
+        },
+        {
+          "feature": "close_vs_sma20",
+          "gain": 279.49,
+          "group": "ma_family"
+        },
+        {
+          "feature": "range_pos_48",
+          "gain": 275.23,
+          "group": "momentum_structure"
+        },
+        {
+          "feature": "gap_ema8_21",
+          "gain": 256.9,
+          "group": "ma_family"
+        },
+        {
+          "feature": "ema55_slope24",
+          "gain": 229.82,
+          "group": "ma_family"
+        },
+        {
+          "feature": "close_vs_ema5",
+          "gain": 213.09,
+          "group": "ma_family"
+        },
+        {
+          "feature": "slow_slope_12",
+          "gain": 210.24,
+          "group": "ma_family"
+        },
+        {
+          "feature": "ret_4",
+          "gain": 170.43,
+          "group": "momentum_structure"
+        },
+        {
+          "feature": "sma60_slope12",
+          "gain": 154.71,
+          "group": "ma_family"
+        }
+      ],
+      "feature_gain_by_group": {
+        "ma_family": 16648.05,
+        "dense_spread": 6280.18,
+        "momentum_structure": 1762.11,
+        "volatility": 394.82,
+        "volume": 197.68,
+        "time": 74.17,
+        "structure": 8.34
+      },
+      "box_geometry_disclosure_top": [
+        {
+          "feature": "box_height_pct",
+          "gain": 2521.69,
+          "group": "box_geometry"
+        },
+        {
+          "feature": "break_up_96",
+          "gain": 0.13,
+          "group": "momentum_structure"
+        },
+        {
+          "feature": "ma_spread_pct",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "full_spread",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "fast_slow_gap",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "full_ratio_min48",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "spread_mean8",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "spread_mean24",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "spread_chg8",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "spread_chg24",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "spread_pos96",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "dense_run_len",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "dense_frac48",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "ext_up",
+          "gain": 0.0,
+          "group": "ma_family"
+        },
+        {
+          "feature": "close_vs_ema55",
+          "gain": 0.0,
+          "group": "ma_family"
+        }
+      ],
+      "causal_rule": {
+        "logic": "AND",
+        "clauses": [
+          {
+            "feature": "order_score",
+            "group": "ma_family",
+            "op": ">=",
+            "threshold": 4.0,
+            "gain": 7594.032450595405,
+            "pos_median": 4.0,
+            "neg_median": 2.0
+          },
+          {
+            "feature": "close_vs_ema20",
+            "group": "ma_family",
+            "op": ">=",
+            "threshold": 0.008536206594658535,
+            "gain": 2475.020000078788,
+            "pos_median": 0.013610834886271128,
+            "neg_median": -0.0004969859057226689
+          },
+          {
+            "feature": "fast_spread_chg4",
+            "group": "dense_spread",
+            "op": ">=",
+            "threshold": 0.002815845388427724,
+            "gain": 2001.4437699250266,
+            "pos_median": 0.005157694147819379,
+            "neg_median": -0.0003422854646555329
+          },
+          {
+            "feature": "spread_chg8",
+            "group": "dense_spread",
+            "op": ">=",
+            "threshold": 0.0037720563899510695,
+            "gain": 1902.501791326329,
+            "pos_median": 0.006463360227513653,
+            "neg_median": -0.0004853434497700832
+          },
+          {
+            "feature": "ext_up",
+            "group": "ma_family",
+            "op": ">=",
+            "threshold": 0.004002828236158662,
+            "gain": 1233.524421946653,
+            "pos_median": 0.007360771198737792,
+            "neg_median": -0.0033949361817414703
+          }
+        ]
+      },
+      "owner_cut_oracle": {
+        "maker_0.06pct": {
+          "n": 1090,
+          "win_rate": 0.711,
+          "profit_factor": 5.62,
+          "mean_net": 0.02038,
+          "total_net": 22.209
+        },
+        "legacy_0.20pct": {
+          "n": 1090,
+          "win_rate": 0.7064,
+          "profit_factor": 4.941,
+          "mean_net": 0.01898,
+          "total_net": 20.683
+        },
+        "gross_pre_cost": {
+          "n": 1090,
+          "win_rate": 0.711,
+          "profit_factor": 5.951,
+          "mean_net": 0.02098,
+          "total_net": 22.863
+        }
+      },
+      "causal_rule_scan": {
+        "maker_0.06pct": {
+          "n": 53466,
+          "win_rate": 0.302,
+          "profit_factor": 0.938,
+          "mean_net": -0.00081,
+          "total_net": -43.0715
+        },
+        "legacy_0.20pct": {
+          "n": 53466,
+          "win_rate": 0.2995,
+          "profit_factor": 0.841,
+          "mean_net": -0.00221,
+          "total_net": -117.9239
+        },
+        "gross_pre_cost": {
+          "n": 53466,
+          "win_rate": 0.3028,
+          "profit_factor": 0.984,
+          "mean_net": -0.00021,
+          "total_net": -10.9919
+        },
+        "symbols_scanned": 236,
+        "raw_deduped_fires": 53566
+      },
+      "walkforward_score_filter": {
+        "deployable": false,
+        "reason": "分数阈值在已标样本 walk-forward 上挑选；未做全市场因果扫描，且正样本本身含确认态选点 —— 不可部署",
+        "by_quantile": {
+          "0.5": {
+            "threshold": 0.0003746009259400214,
+            "n": 383,
+            "pf_maker": 5.053
+          },
+          "0.6": {
+            "threshold": 0.0012618243058135727,
+            "n": 381,
+            "pf_maker": 5.054
+          },
+          "0.7": {
+            "threshold": 0.0472696904805577,
+            "n": 378,
+            "pf_maker": 4.945
+          },
+          "0.8": {
+            "threshold": 0.870699563076604,
+            "n": 315,
+            "pf_maker": 3.962
+          },
+          "0.9": {
+            "threshold": 0.9848671753182183,
+            "n": 171,
+            "pf_maker": 3.019
+          }
+        },
+        "best": {
+          "q": 0.6,
+          "pf_maker": 5.054,
+          "n": 381,
+          "threshold": 0.0012618243058135727
+        }
+      },
+      "success_line": {
+        "metric": "causal_rule_PF_maker",
+        "threshold": 1.3,
+        "value": 0.938,
+        "pass": false
+      },
+      "oracle_pf_maker": 5.62,
+      "delta_vs_narrow": 0.021,
+      "delta_vs_emergence": 0.064,
+      "elapsed_sec": 42.0
+    },
+    "short": {
+      "side": "short",
+      "n_labeled_boxes": 1361,
+      "pos_feature_rows": 1361,
+      "random_neg": 4005,
+      "n_features": 116,
+      "lgbm_val_auc": 0.9721,
+      "feature_gain_top": [
+        {
+          "feature": "close_vs_sma20",
+          "gain": 7961.03,
+          "group": "ma_family"
+        },
+        {
+          "feature": "order_score",
+          "gain": 5019.83,
+          "group": "ma_family"
+        },
+        {
+          "feature": "fast_spread_chg4",
+          "gain": 3783.21,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "spread_chg8",
+          "gain": 2260.98,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "gap_sma60_120",
+          "gain": 2014.14,
+          "group": "ma_family"
+        },
+        {
+          "feature": "ema55_slope24",
+          "gain": 1312.9,
+          "group": "ma_family"
+        },
+        {
+          "feature": "ema200_slope24",
+          "gain": 1073.99,
+          "group": "ma_family"
+        },
+        {
+          "feature": "gap_ema8_21",
+          "gain": 767.43,
+          "group": "ma_family"
+        },
+        {
+          "feature": "fast_spread_chg16",
+          "gain": 709.33,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "break_dn_48",
+          "gain": 551.59,
+          "group": "momentum_structure"
+        },
+        {
+          "feature": "spread_pos96",
+          "gain": 466.84,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "ret_96",
+          "gain": 413.53,
+          "group": "momentum_structure"
+        },
+        {
+          "feature": "dist_low_48",
+          "gain": 358.92,
+          "group": "momentum_structure"
+        },
+        {
+          "feature": "spread_mean24",
+          "gain": 341.38,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "down_order_score",
+          "gain": 339.34,
+          "group": "ma_family"
+        },
+        {
+          "feature": "ret_8",
+          "gain": 289.61,
+          "group": "momentum_structure"
+        },
+        {
+          "feature": "spread_expand_run",
+          "gain": 261.11,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "fast_slow_gap",
+          "gain": 242.44,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "full_spread_chg8",
+          "gain": 239.56,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "gap_ema21_55",
+          "gain": 228.19,
+          "group": "ma_family"
+        }
+      ],
+      "feature_gain_by_group": {
+        "ma_family": 20594.51,
+        "dense_spread": 9467.95,
+        "momentum_structure": 3465.47,
+        "volatility": 1772.0,
+        "volume": 872.45,
+        "time": 276.93,
+        "structure": 60.57
+      },
+      "box_geometry_disclosure_top": [
+        {
+          "feature": "box_height_pct",
+          "gain": 2964.28,
+          "group": "box_geometry"
+        },
+        {
+          "feature": "spread_expand_run",
+          "gain": 0.12,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "ma_spread_pct",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "full_spread",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "fast_slow_gap",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "full_ratio_min48",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "spread_mean8",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "spread_mean24",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "spread_chg8",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "spread_chg24",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "spread_pos96",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "dense_run_len",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "dense_frac48",
+          "gain": 0.0,
+          "group": "dense_spread"
+        },
+        {
+          "feature": "ext_up",
+          "gain": 0.0,
+          "group": "ma_family"
+        },
+        {
+          "feature": "close_vs_ema55",
+          "gain": 0.0,
+          "group": "ma_family"
+        }
+      ],
+      "causal_rule": {
+        "logic": "AND",
+        "clauses": [
+          {
+            "feature": "close_vs_sma20",
+            "group": "ma_family",
+            "op": "<=",
+            "threshold": -0.01018201477743741,
+            "gain": 7961.029265373945,
+            "pos_median": -0.016488759019619437,
+            "neg_median": -0.00027268389119927683
+          },
+          {
+            "feature": "order_score",
+            "group": "ma_family",
+            "op": "<=",
+            "threshold": 0.0,
+            "gain": 5019.827347924933,
+            "pos_median": 0.0,
+            "neg_median": 2.0
+          },
+          {
+            "feature": "fast_spread_chg4",
+            "group": "dense_spread",
+            "op": ">=",
+            "threshold": 0.0029676073396995087,
+            "gain": 3783.2062595756724,
+            "pos_median": 0.005370423349381805,
+            "neg_median": -0.00033911587777621204
+          },
+          {
+            "feature": "spread_chg8",
+            "group": "dense_spread",
+            "op": ">=",
+            "threshold": 0.003963337663330535,
+            "gain": 2260.9832555763423,
+            "pos_median": 0.006778992925409528,
+            "neg_median": -0.0005441911313108559
+          },
+          {
+            "feature": "gap_sma60_120",
+            "group": "ma_family",
+            "op": ">=",
+            "threshold": -0.001872805306281679,
+            "gain": 2014.1440923213959,
+            "pos_median": 0.0007247709233550936,
+            "neg_median": -0.0009999999999997858
+          }
+        ]
+      },
+      "owner_cut_oracle": {
+        "maker_0.06pct": {
+          "n": 1286,
+          "win_rate": 0.7605,
+          "profit_factor": 7.417,
+          "mean_net": 0.02293,
+          "total_net": 29.4916
+        },
+        "legacy_0.20pct": {
+          "n": 1286,
+          "win_rate": 0.7535,
+          "profit_factor": 6.502,
+          "mean_net": 0.02153,
+          "total_net": 27.6912
+        },
+        "gross_pre_cost": {
+          "n": 1286,
+          "win_rate": 0.7605,
+          "profit_factor": 7.861,
+          "mean_net": 0.02353,
+          "total_net": 30.2632
+        }
+      },
+      "causal_rule_scan": {
+        "maker_0.06pct": {
+          "n": 25718,
+          "win_rate": 0.3539,
+          "profit_factor": 1.227,
+          "mean_net": 0.00252,
+          "total_net": 64.9287
+        },
+        "legacy_0.20pct": {
+          "n": 25718,
+          "win_rate": 0.3499,
+          "profit_factor": 1.094,
+          "mean_net": 0.00112,
+          "total_net": 28.9235
+        },
+        "gross_pre_cost": {
+          "n": 25718,
+          "win_rate": 0.3552,
+          "profit_factor": 1.291,
+          "mean_net": 0.00312,
+          "total_net": 80.3595
+        },
+        "symbols_scanned": 236,
+        "raw_deduped_fires": 25752
+      },
+      "walkforward_score_filter": {
+        "deployable": false,
+        "reason": "分数阈值在已标样本 walk-forward 上挑选；未做全市场因果扫描，且正样本本身含确认态选点 —— 不可部署",
+        "by_quantile": {
+          "0.5": {
+            "threshold": 0.0009573943250911767,
+            "n": 457,
+            "pf_maker": 7.381
+          },
+          "0.6": {
+            "threshold": 0.002806013775454333,
+            "n": 453,
+            "pf_maker": 7.359
+          },
+          "0.7": {
+            "threshold": 0.039984567993202574,
+            "n": 440,
+            "pf_maker": 7.091
+          },
+          "0.8": {
+            "threshold": 0.7169553713142146,
+            "n": 370,
+            "pf_maker": 5.48
+          },
+          "0.9": {
+            "threshold": 0.9708291553203049,
+            "n": 196,
+            "pf_maker": 3.603
+          }
+        },
+        "best": {
+          "q": 0.5,
+          "pf_maker": 7.381,
+          "n": 457,
+          "threshold": 0.0009573943250911767
+        }
+      },
+      "success_line": {
+        "metric": "causal_rule_PF_maker",
+        "threshold": 1.3,
+        "value": 1.227,
+        "pass": false
+      },
+      "oracle_pf_maker": 7.417,
+      "delta_vs_narrow": 0.1,
+      "delta_vs_emergence": 0.353,
+      "elapsed_sec": 19.5
+    }
+  },
+  "long_vs_short_disclosure": {
+    "n": 2513,
+    "n_long": 1152,
+    "n_short": 1361,
+    "lgbm_val_auc": 0.9982,
+    "note": "long=1 vs short=0 among owner labels only; disclosure, not a rule",
+    "feature_gain_top": [
+      {
+        "feature": "close_vs_ema55",
+        "gain": 1406.5,
+        "group": "ma_family"
+      },
+      {
+        "feature": "order_score",
+        "gain": 1243.38,
+        "group": "ma_family"
+      },
+      {
+        "feature": "gap_ema8_21",
+        "gain": 1121.13,
+        "group": "ma_family"
+      },
+      {
+        "feature": "gap_sma60_120",
+        "gain": 0.21,
+        "group": "ma_family"
+      },
+      {
+        "feature": "drawdown24",
+        "gain": 0.09,
+        "group": "momentum_structure"
+      },
+      {
+        "feature": "spread_mean24",
+        "gain": 0.09,
+        "group": "dense_spread"
+      },
+      {
+        "feature": "dist_high_96",
+        "gain": 0.09,
+        "group": "momentum_structure"
+      },
+      {
+        "feature": "gap_sma20_60",
+        "gain": 0.0,
+        "group": "ma_family"
+      },
+      {
+        "feature": "ma_spread_pct",
+        "gain": 0.0,
+        "group": "dense_spread"
+      },
+      {
+        "feature": "ema200_slope24",
+        "gain": 0.0,
+        "group": "ma_family"
+      },
+      {
+        "feature": "ret_48",
+        "gain": 0.0,
+        "group": "momentum_structure"
+      },
+      {
+        "feature": "ret_96",
+        "gain": 0.0,
+        "group": "momentum_structure"
+      },
+      {
+        "feature": "atr_pct_ratio96",
+        "gain": 0.0,
+        "group": "volatility"
+      },
+      {
+        "feature": "spread_mean8",
+        "gain": 0.0,
+        "group": "dense_spread"
+      },
+      {
+        "feature": "full_spread",
+        "gain": 0.0,
+        "group": "dense_spread"
+      }
+    ]
+  },
+  "emergence_pf_maker_published": 0.874,
+  "verdict_zh": "扩特征后 long/short 两边因果规则均未过 PF@maker 1.3；扩特征仍未救出可部署边。",
+  "honesty_traps": [
+    "特征再多也可能复制不了事后选点；裁决只看因果规则 PF",
+    "LGBM AUC / gain 仅披露，不作交易信号",
+    "框几何只作披露，未进因果规则",
+    "walk-forward 分数阈值不可部署（已标样本内挑选）",
+    "未消耗 holdout；过 1.3 仍是发现级",
+    "owner 标 side 若看了框后走势，oracle 含 hindsight"
+  ]
+}

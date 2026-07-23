@@ -1,0 +1,360 @@
+{
+  "tag": "owner_side_feature_verdict",
+  "sheet": "analysis/output/owner_side_review/review_sheet.csv",
+  "discipline": {
+    "holdout_start": "2026-05-04 00:00:00+00:00",
+    "holdout_touched": false,
+    "tp_sl_horizon": [
+      5.0,
+      2.0,
+      72
+    ],
+    "long_settlement": "label_candidate",
+    "short_settlement": "label_short_candidate",
+    "success_line": "per-side causal-rule PF@maker >= 1.3",
+    "costs": {
+      "swap_maker": 0.0006,
+      "legacy_p0": 0.002
+    }
+  },
+  "label_counts": {
+    "long": 1152,
+    "short": 1361,
+    "skip": 12,
+    "empty": 0
+  },
+  "main_table": [
+    {
+      "side": "long",
+      "n_boxes": 1152,
+      "lgbm_auc": 0.9738,
+      "oracle_n": 1090,
+      "oracle_pf_maker": 5.62,
+      "rule_n": 51172,
+      "rule_pf_maker": 0.917,
+      "pass_1.3": false
+    },
+    {
+      "side": "short",
+      "n_boxes": 1361,
+      "lgbm_auc": 0.9679,
+      "oracle_n": 1286,
+      "oracle_pf_maker": 7.379,
+      "rule_n": 66101,
+      "rule_pf_maker": 1.127,
+      "pass_1.3": false
+    }
+  ],
+  "by_side": {
+    "long": {
+      "side": "long",
+      "n_labeled_boxes": 1152,
+      "pos_feature_rows": 1152,
+      "random_neg": 3387,
+      "hard_neg": 0,
+      "lgbm_val_auc": 0.9738,
+      "feature_gain_top": [
+        {
+          "feature": "order_score",
+          "gain": 9575.93
+        },
+        {
+          "feature": "spread_chg8",
+          "gain": 3808.08
+        },
+        {
+          "feature": "ext_up",
+          "gain": 3724.49
+        },
+        {
+          "feature": "slow_slope_12",
+          "gain": 992.66
+        },
+        {
+          "feature": "fast_slow_gap",
+          "gain": 772.11
+        },
+        {
+          "feature": "close_vs_ema55",
+          "gain": 727.94
+        },
+        {
+          "feature": "spread_pos96",
+          "gain": 532.5
+        },
+        {
+          "feature": "ret_12",
+          "gain": 416.71
+        },
+        {
+          "feature": "ret_4",
+          "gain": 360.11
+        },
+        {
+          "feature": "ret_24",
+          "gain": 300.33
+        },
+        {
+          "feature": "spread_mean24",
+          "gain": 299.81
+        },
+        {
+          "feature": "spread_chg24",
+          "gain": 263.63
+        }
+      ],
+      "causal_rule": {
+        "logic": "AND",
+        "clauses": [
+          {
+            "feature": "order_score",
+            "op": ">=",
+            "threshold": 4.0,
+            "gain": 9575.934528220561,
+            "pos_median": 4.0,
+            "neg_median": 2.0
+          },
+          {
+            "feature": "spread_chg8",
+            "op": ">=",
+            "threshold": 0.0037720563899510695,
+            "gain": 3808.0763746125767,
+            "pos_median": 0.006463360227513653,
+            "neg_median": -0.0004853434497700832
+          },
+          {
+            "feature": "ext_up",
+            "op": ">=",
+            "threshold": 0.004002828236158662,
+            "gain": 3724.4886424793704,
+            "pos_median": 0.007360771198737792,
+            "neg_median": -0.0033949361817414703
+          },
+          {
+            "feature": "slow_slope_12",
+            "op": ">=",
+            "threshold": -8.638515590056461e-05,
+            "gain": 992.6560596984054,
+            "pos_median": 0.0005684311217851734,
+            "neg_median": -0.0005851576782769374
+          }
+        ]
+      },
+      "owner_cut_oracle": {
+        "maker_0.06pct": {
+          "n": 1090,
+          "win_rate": 0.711,
+          "profit_factor": 5.62,
+          "mean_net": 0.02038,
+          "total_net": 22.209
+        },
+        "legacy_0.20pct": {
+          "n": 1090,
+          "win_rate": 0.7064,
+          "profit_factor": 4.941,
+          "mean_net": 0.01898,
+          "total_net": 20.683
+        },
+        "gross_pre_cost": {
+          "n": 1090,
+          "win_rate": 0.711,
+          "profit_factor": 5.951,
+          "mean_net": 0.02098,
+          "total_net": 22.863
+        }
+      },
+      "causal_rule_scan": {
+        "maker_0.06pct": {
+          "n": 51172,
+          "win_rate": 0.2981,
+          "profit_factor": 0.917,
+          "mean_net": -0.00107,
+          "total_net": -54.8842
+        },
+        "legacy_0.20pct": {
+          "n": 51172,
+          "win_rate": 0.2957,
+          "profit_factor": 0.823,
+          "mean_net": -0.00247,
+          "total_net": -126.525
+        },
+        "gross_pre_cost": {
+          "n": 51172,
+          "win_rate": 0.2987,
+          "profit_factor": 0.962,
+          "mean_net": -0.00047,
+          "total_net": -24.181
+        },
+        "symbols_scanned": 236,
+        "raw_deduped_fires": 51274
+      },
+      "success_line": {
+        "metric": "causal_rule_PF_maker",
+        "threshold": 1.3,
+        "value": 0.917,
+        "pass": false
+      },
+      "oracle_pf_maker": 5.62,
+      "delta_rule_vs_emergence": 0.043
+    },
+    "short": {
+      "side": "short",
+      "n_labeled_boxes": 1361,
+      "pos_feature_rows": 1361,
+      "random_neg": 4005,
+      "hard_neg": 0,
+      "lgbm_val_auc": 0.9679,
+      "feature_gain_top": [
+        {
+          "feature": "order_score",
+          "gain": 9902.76
+        },
+        {
+          "feature": "spread_chg8",
+          "gain": 6368.18
+        },
+        {
+          "feature": "ret_12",
+          "gain": 2809.16
+        },
+        {
+          "feature": "slow_slope_12",
+          "gain": 2175.29
+        },
+        {
+          "feature": "close_vs_ema55",
+          "gain": 1377.47
+        },
+        {
+          "feature": "spread_mean24",
+          "gain": 1141.94
+        },
+        {
+          "feature": "fast_slow_gap",
+          "gain": 1004.5
+        },
+        {
+          "feature": "spread_pos96",
+          "gain": 917.89
+        },
+        {
+          "feature": "spread_mean8",
+          "gain": 882.26
+        },
+        {
+          "feature": "drawdown24",
+          "gain": 704.46
+        },
+        {
+          "feature": "ret_24",
+          "gain": 700.1
+        },
+        {
+          "feature": "atr_pct",
+          "gain": 549.07
+        }
+      ],
+      "causal_rule": {
+        "logic": "AND",
+        "clauses": [
+          {
+            "feature": "order_score",
+            "op": "<=",
+            "threshold": 0.0,
+            "gain": 9902.763669610023,
+            "pos_median": 0.0,
+            "neg_median": 2.0
+          },
+          {
+            "feature": "spread_chg8",
+            "op": ">=",
+            "threshold": 0.003963337663330535,
+            "gain": 6368.184479616582,
+            "pos_median": 0.006778992925409528,
+            "neg_median": -0.0005076082296512777
+          },
+          {
+            "feature": "ret_12",
+            "op": "<=",
+            "threshold": -0.012218045112782017,
+            "gain": 2809.1568477749825,
+            "pos_median": -0.021517553793884536,
+            "neg_median": -0.0004573967590173478
+          },
+          {
+            "feature": "slow_slope_12",
+            "op": "<=",
+            "threshold": -0.00019488699478320548,
+            "gain": 2175.2855652570724,
+            "pos_median": -0.0008115553427295863,
+            "neg_median": -0.00044458576525086
+          }
+        ]
+      },
+      "owner_cut_oracle": {
+        "maker_0.06pct": {
+          "n": 1286,
+          "win_rate": 0.7597,
+          "profit_factor": 7.379,
+          "mean_net": 0.0229,
+          "total_net": 29.4501
+        },
+        "legacy_0.20pct": {
+          "n": 1286,
+          "win_rate": 0.7527,
+          "profit_factor": 6.47,
+          "mean_net": 0.0215,
+          "total_net": 27.6497
+        },
+        "gross_pre_cost": {
+          "n": 1286,
+          "win_rate": 0.7597,
+          "profit_factor": 7.82,
+          "mean_net": 0.0235,
+          "total_net": 30.2217
+        }
+      },
+      "causal_rule_scan": {
+        "maker_0.06pct": {
+          "n": 66101,
+          "win_rate": 0.3362,
+          "profit_factor": 1.127,
+          "mean_net": 0.00146,
+          "total_net": 96.3906
+        },
+        "legacy_0.20pct": {
+          "n": 66101,
+          "win_rate": 0.3322,
+          "profit_factor": 1.005,
+          "mean_net": 6e-05,
+          "total_net": 3.8492
+        },
+        "gross_pre_cost": {
+          "n": 66101,
+          "win_rate": 0.3372,
+          "profit_factor": 1.185,
+          "mean_net": 0.00206,
+          "total_net": 136.0512
+        },
+        "symbols_scanned": 236,
+        "raw_deduped_fires": 66162
+      },
+      "success_line": {
+        "metric": "causal_rule_PF_maker",
+        "threshold": 1.3,
+        "value": 1.127,
+        "pass": false
+      },
+      "oracle_pf_maker": 7.379,
+      "delta_rule_vs_emergence": 0.253
+    }
+  },
+  "emergence_pf_maker_published": 0.874,
+  "verdict_zh": "long/short 两边因果规则均未过 PF@maker 1.3；分边手法未给出可部署增量。",
+  "honesty_traps": [
+    "若标注时看了框后走势，side 标签带 hindsight；只信因果 base rate",
+    "LGBM AUC 仅披露，不作交易信号",
+    "未消耗 holdout；过 1.3 仍是发现级",
+    "skip 未进入任一边正样本"
+  ]
+}
