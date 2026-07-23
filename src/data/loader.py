@@ -77,8 +77,13 @@ def load_series(paths: list[Path]) -> pd.DataFrame:
     frames: list[pd.DataFrame] = []
     for path in paths:
         try:
-            frame = pd.read_csv(path)
-        except (OSError, pd.errors.EmptyDataError, pd.errors.ParserError):
+            # encoding_errors="replace": one stray non-UTF8 byte in a kline
+            # file must not sink a whole run (hit on Windows 2026-07-23). Data
+            # is numeric ASCII, so a replaced byte -> U+FFFD -> NaN via the
+            # to_numeric coerce below -> dropped. Broadened except as a backstop.
+            frame = pd.read_csv(path, encoding_errors="replace")
+        except (OSError, ValueError, UnicodeError,
+                pd.errors.EmptyDataError, pd.errors.ParserError):
             continue
         if not set(OHLCV_COLUMNS).issubset(frame.columns):
             continue
