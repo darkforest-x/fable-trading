@@ -1,0 +1,133 @@
+{
+  "owner_boxes": 4979,
+  "random_negs": 9859,
+  "R_owner_direct_SURVIVORSHIP_INFLATED": {
+    "n": 4979,
+    "win": 0.334,
+    "PF": 1.062,
+    "mean_net": 0.00062
+  },
+  "random_baseline": {
+    "n": 9859,
+    "win": 0.3018,
+    "PF": 0.914,
+    "mean_net": -0.00086
+  },
+  "note": "box geometry EXCLUDED from classifier (leak). Market features only.",
+  "single_split": {
+    "AUC_market_only": 0.8759,
+    "owner_like_random_top10": {
+      "n": 339,
+      "win": 0.3599,
+      "PF": 1.077,
+      "mean_net": 0.00068
+    },
+    "all_test_random": {
+      "n": 3395,
+      "win": 0.296,
+      "PF": 0.919,
+      "mean_net": -0.00077
+    }
+  },
+  "top_market_features_by_gain": [
+    {
+      "f": "spread_chg8",
+      "gain": 22086.5
+    },
+    {
+      "f": "spread_mean24",
+      "gain": 5948.5
+    },
+    {
+      "f": "fast_slow_gap",
+      "gain": 4786.7
+    },
+    {
+      "f": "spread_mean8",
+      "gain": 4093.1
+    },
+    {
+      "f": "spread_pos96",
+      "gain": 3585.2
+    },
+    {
+      "f": "pre_range48",
+      "gain": 3450.2
+    },
+    {
+      "f": "spread_chg24",
+      "gain": 3323.5
+    },
+    {
+      "f": "atr_pct",
+      "gain": 3141.7
+    },
+    {
+      "f": "ret_12",
+      "gain": 3101.9
+    },
+    {
+      "f": "atr_pct_ratio96",
+      "gain": 3005.8
+    },
+    {
+      "f": "ret_24",
+      "gain": 2885.6
+    },
+    {
+      "f": "slow_slope_12",
+      "gain": 2811.0
+    }
+  ],
+  "WALK_FORWARD_decisive": [
+    {
+      "test_start": "2025-11-13",
+      "AUC_market_only": 0.7853,
+      "owner_like_top10": {
+        "n": 162,
+        "win": 0.2654,
+        "PF": 0.792,
+        "mean_net": -0.00225
+      },
+      "all_test_random": {
+        "n": 1624,
+        "win": 0.2919,
+        "PF": 0.93,
+        "mean_net": -0.00073
+      }
+    },
+    {
+      "test_start": "2026-01-03",
+      "AUC_market_only": 0.8375,
+      "owner_like_top10": {
+        "n": 174,
+        "win": 0.3046,
+        "PF": 0.828,
+        "mean_net": -0.00182
+      },
+      "all_test_random": {
+        "n": 1743,
+        "win": 0.2679,
+        "PF": 0.803,
+        "mean_net": -0.00212
+      }
+    },
+    {
+      "test_start": "2026-02-24",
+      "AUC_market_only": 0.8978,
+      "owner_like_top10": {
+        "n": 224,
+        "win": 0.4107,
+        "PF": 1.67,
+        "mean_net": 0.00475
+      },
+      "all_test_random": {
+        "n": 2240,
+        "win": 0.3143,
+        "PF": 1.0,
+        "mean_net": 0.0
+      }
+    }
+  ],
+  "crude_rule_base_rate_reference": 0.874
+}
