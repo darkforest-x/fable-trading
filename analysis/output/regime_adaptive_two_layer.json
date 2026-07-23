@@ -1,0 +1,93 @@
+{
+  "config": "regime-adaptive dir + all-MA breakout + judgment",
+  "exit": "TP5/SL2",
+  "n": 2432,
+  "sides": {
+    "long": 1277,
+    "short": 1155,
+    "skip": 1582
+  },
+  "walk_forward": [
+    {
+      "test_start": "2025-12-30",
+      "raw": {
+        "n": 364,
+        "PF": 0.957,
+        "win": 0.313,
+        "mean_bps": -3.0
+      },
+      "judgment_top10": {
+        "n": 36,
+        "PF": 0.921,
+        "win": 0.333,
+        "mean_bps": -6.7
+      },
+      "judgment_top20": {
+        "n": 72,
+        "PF": 0.93,
+        "win": 0.347,
+        "mean_bps": -5.4
+      },
+      "judgment_top30": {
+        "n": 109,
+        "PF": 0.947,
+        "win": 0.321,
+        "mean_bps": -3.9
+      }
+    },
+    {
+      "test_start": "2026-02-13",
+      "raw": {
+        "n": 365,
+        "PF": 0.962,
+        "win": 0.321,
+        "mean_bps": -2.5
+      },
+      "judgment_top10": {
+        "n": 36,
+        "PF": 0.844,
+        "win": 0.306,
+        "mean_bps": -13.3
+      },
+      "judgment_top20": {
+        "n": 73,
+        "PF": 0.905,
+        "win": 0.329,
+        "mean_bps": -7.2
+      },
+      "judgment_top30": {
+        "n": 109,
+        "PF": 0.921,
+        "win": 0.33,
+        "mean_bps": -5.5
+      }
+    },
+    {
+      "test_start": "2026-03-21",
+      "raw": {
+        "n": 487,
+        "PF": 0.83,
+        "win": 0.302,
+        "mean_bps": -10.1
+      },
+      "judgment_top10": {
+        "n": 48,
+        "PF": 0.546,
+        "win": 0.25,
+        "mean_bps": -33.4
+      },
+      "judgment_top20": {
+        "n": 97,
+        "PF": 0.704,
+        "win": 0.299,
+        "mean_bps": -18.7
+      },
+      "judgment_top30": {
+        "n": 146,
+        "PF": 0.795,
+        "win": 0.308,
+        "mean_bps": -12.2
+      }
+    }
+  ]
+}

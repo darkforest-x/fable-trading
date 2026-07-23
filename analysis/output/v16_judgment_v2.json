@@ -1,0 +1,89 @@
+{
+  "exit": "TP3/SL1",
+  "v16_candidates": 4014,
+  "top_features": [
+    {
+      "f": "btc_atr_pct",
+      "gain": 1031.2
+    },
+    {
+      "f": "btc_ret96",
+      "gain": 916.2
+    },
+    {
+      "f": "btc_ret24",
+      "gain": 728.1
+    },
+    {
+      "f": "skew_120",
+      "gain": 714.2
+    },
+    {
+      "f": "minret_120",
+      "gain": 705.2
+    },
+    {
+      "f": "pos_120",
+      "gain": 702.7
+    },
+    {
+      "f": "ma_bundle_spread",
+      "gain": 684.8
+    },
+    {
+      "f": "volstd_60",
+      "gain": 652.9
+    },
+    {
+      "f": "rngz_5",
+      "gain": 652.8
+    },
+    {
+      "f": "skew_60",
+      "gain": 602.4
+    },
+    {
+      "f": "skew_3",
+      "gain": 602.3
+    },
+    {
+      "f": "maxret_60",
+      "gain": 587.5
+    }
+  ],
+  "walk_forward": [
+    {
+      "test_start": "2025-12-29",
+      "dir_AUC": 0.4743,
+      "traded_dir_PF": 1.321,
+      "traded_dir_bps": 11.2,
+      "conviction_PF": 1.33,
+      "conviction_n": 567,
+      "always_long_PF": 0.572,
+      "always_short_PF": 1.33,
+      "oracle_PF": 2.843
+    },
+    {
+      "test_start": "2026-02-16",
+      "dir_AUC": 0.5022,
+      "traded_dir_PF": 0.976,
+      "traded_dir_bps": -0.9,
+      "conviction_PF": 0.975,
+      "conviction_n": 591,
+      "always_long_PF": 0.863,
+      "always_short_PF": 0.961,
+      "oracle_PF": 2.867
+    },
+    {
+      "test_start": "2026-03-25",
+      "dir_AUC": 0.4756,
+      "traded_dir_PF": 0.769,
+      "traded_dir_bps": -8.0,
+      "conviction_PF": 0.775,
+      "conviction_n": 781,
+      "always_long_PF": 0.804,
+      "always_short_PF": 0.767,
+      "oracle_PF": 2.311
+    }
+  ]
+}
