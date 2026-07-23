@@ -53,10 +53,11 @@ from src.judgment.labeling import ATR_PCT_MIN, HORIZON_BARS  # noqa: E402
 from scripts.build_crop_pad200_dataset import (  # noqa: E402
     WINDOW, boxes_cut_and_spans, parse_stem, read_boxes, resolve_series, resolve_win_start,
 )
+from scripts.broad_features import add_broad_features  # noqa: E402
 
 V11 = PROJECT / "datasets" / "_deprecated_pretip" / "dense_owner_v11"
 HOLDOUT_START = pd.Timestamp("2026-05-04", tz="UTC")
-TP_MULT, SL_MULT = 5.0, 2.0
+TP_MULT, SL_MULT = 3.0, 1.0  # tight long exit (was 5,2)
 BOX_GEOM = ["box_w", "box_h", "box_cy"]
 FEATS = list(FEATURE_COLUMNS) + BOX_GEOM
 
@@ -92,9 +93,16 @@ def forward_net(enriched, i):
     return round(g - FORWARD_COST, 6)
 
 
-def feat_row(featured, i):
+BROAD_COLS: list[str] = []
+
+
+def feat_row(featured, broad, i):
     r = featured.iloc[i]
-    return {c: float(r[c]) for c in FEATURE_COLUMNS}
+    row = {c: float(r[c]) for c in FEATURE_COLUMNS}  # keep the 28 too
+    br = broad.iloc[i]
+    for c in BROAD_COLS:
+        row[c] = float(br[c]) if np.isfinite(br[c]) else 0.0
+    return row
 
 
 def pf(x):
@@ -147,9 +155,13 @@ def main() -> int:
             ema = add_mas(df)
             ind = add_indicators(df)
             feat = add_features(ind)
+            broad = add_broad_features(df)
+            global BROAD_COLS
+            if not BROAD_COLS:
+                BROAD_COLS = list(broad.columns)
             times = pd.to_datetime(df["open_time"], utc=True)
-            enr_cache[body] = (ema, ind, feat, times)
-        ema, ind, feat, times = enr_cache[body]
+            enr_cache[body] = (ema, ind, feat, broad, times)
+        ema, ind, feat, broad, times = enr_cache[body]
         n = len(df)
         png = V11 / "images" / ("train" if (V11 / "images/train" / f"{stem}.png").exists() else "val") / f"{stem}.png"
         stored = cv2.imread(str(png)) if png.exists() else None
@@ -176,7 +188,7 @@ def main() -> int:
         net = forward_net(ind, cut_global)
         if net is None:
             continue
-        row = feat_row(feat, cut_global)
+        row = feat_row(feat, broad, cut_global)
         # box geometry of the rightmost span
         b0, b1, _, _ = spans[0]
         xc, yc, w, h = boxes[0]
@@ -191,7 +203,7 @@ def main() -> int:
             nn = forward_net(ind, j)
             if nn is None:
                 continue
-            r2 = feat_row(feat, j)
+            r2 = feat_row(feat, broad, j)
             r2.update({"box_w": 0.0, "box_h": 0.0, "box_cy": 0.0})
             r2.update({"net": nn, "signal_time": str(times.iloc[j]), "symbol": body})
             neg.append(r2)
@@ -210,11 +222,11 @@ def main() -> int:
     # NO box geometry in the classifier: box_w>0 vs 0 trivially separates and
     # leaks (AUC 1.0, learns nothing). Force CAUSAL MARKET features only, so the
     # ranking of random bars is meaningful.
-    MFEAT = list(FEATURE_COLUMNS)
+    MFEAT = BROAD_COLS  # free-discovered broad factor bank, NOT the 28
     both = pd.concat([dp.assign(y=1), dn.assign(y=0)]).sort_values("signal_time").reset_index(drop=True)
     for c in MFEAT:
         both[c] = pd.to_numeric(both[c], errors="coerce").fillna(0.0)
-    both.to_csv(PROJECT / "data" / "owner_box_dataset.csv", index=False)
+    both.to_csv(PROJECT / "data" / "owner_box_dataset_broad.csv", index=False)
     from sklearn.metrics import roc_auc_score
 
     def train_eval(tr, te):
@@ -252,7 +264,7 @@ def main() -> int:
         "WALK_FORWARD_decisive": wf,
         "crude_rule_base_rate_reference": 0.874,
     }
-    (PROJECT / "analysis" / "output" / "owner_box_alpha.json").write_text(
+    (PROJECT / "analysis" / "output" / "owner_box_dir_tp3sl1.json").write_text(
         json.dumps(out, indent=2, ensure_ascii=False) + "\n")
     print(json.dumps(out, indent=2, ensure_ascii=False))
     return 0

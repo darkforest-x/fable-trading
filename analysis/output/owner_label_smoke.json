@@ -1,0 +1,196 @@
+{
+  "tag": "owner_label_smoke",
+  "src": "/Users/zhangzc/fable-trading/datasets/_deprecated_pretip/dense_owner_v11",
+  "discipline": {
+    "holdout_start": "2026-05-04 00:00:00+00:00",
+    "holdout_touched": false,
+    "tp_sl_horizon": [
+      5.0,
+      2.0,
+      72
+    ],
+    "costs_reported": {
+      "swap_maker": 0.0006,
+      "legacy_p0": 0.002
+    },
+    "primary_compare_cost": "swap_maker_vs_emergence_0.874"
+  },
+  "data": {
+    "cuts_extracted": 200,
+    "pos_feature_rows": 200,
+    "random_neg": 600,
+    "hard_neg": 0,
+    "symbols_labeled": 24,
+    "time_range_pos": [
+      "2025-06-09 12:45:00+00:00",
+      "2026-05-02 14:15:00+00:00"
+    ],
+    "skip_stats": {
+      "empty": 387,
+      "mad_fail": 191
+    },
+    "note_box_count": "v11 positives ~5831 boxes / ~5550 stems; v12_htip ~10k includes tip clones. This run uses v11 owner originals with MAD window resolve."
+  },
+  "lgbm_disclosure": {
+    "val_auc": 1.0,
+    "hardneg_in_sample_auc": null,
+    "feature_gain_top": [
+      {
+        "feature": "box_width_bars",
+        "gain": 436.78
+      },
+      {
+        "feature": "ma_spread_pct",
+        "gain": 0.0
+      },
+      {
+        "feature": "full_spread",
+        "gain": 0.0
+      },
+      {
+        "feature": "fast_slow_gap",
+        "gain": 0.0
+      },
+      {
+        "feature": "full_ratio_min48",
+        "gain": 0.0
+      },
+      {
+        "feature": "spread_mean8",
+        "gain": 0.0
+      },
+      {
+        "feature": "spread_mean24",
+        "gain": 0.0
+      },
+      {
+        "feature": "spread_chg8",
+        "gain": 0.0
+      },
+      {
+        "feature": "spread_chg24",
+        "gain": 0.0
+      },
+      {
+        "feature": "spread_pos96",
+        "gain": 0.0
+      },
+      {
+        "feature": "dense_run_len",
+        "gain": 0.0
+      },
+      {
+        "feature": "dense_frac48",
+        "gain": 0.0
+      },
+      {
+        "feature": "ext_up",
+        "gain": 0.0
+      },
+      {
+        "feature": "close_vs_ema55",
+        "gain": 0.0
+      },
+      {
+        "feature": "close_vs_ema200",
+        "gain": 0.0
+      },
+      {
+        "feature": "order_score",
+        "gain": 0.0
+      },
+      {
+        "feature": "slow_slope_12",
+        "gain": 0.0
+      },
+      {
+        "feature": "volume_ratio",
+        "gain": 0.0
+      },
+      {
+        "feature": "volume_z",
+        "gain": 0.0
+      },
+      {
+        "feature": "vol_ratio_mean8",
+        "gain": 0.0
+      }
+    ],
+    "warning": "AUC may be hindsight-inflated (box right edge labeled after seeing launch). Gain ranks technique cues; do NOT trade the booster."
+  },
+  "causal_rule": {
+    "logic": "AND",
+    "clauses": [
+      {
+        "feature": "ma_spread_pct",
+        "op": ">=",
+        "threshold": 0.007201846176737986,
+        "gain": 0.0,
+        "pos_median": 0.010118817579332418,
+        "neg_median": 0.007661783783629762
+      },
+      {
+        "feature": "full_spread",
+        "op": "<=",
+        "threshold": 0.018541328618996114,
+        "gain": 0.0,
+        "pos_median": 0.01250131915472528,
+        "neg_median": 0.01921058886554737
+      },
+      {
+        "feature": "fast_slow_gap",
+        "op": "<=",
+        "threshold": 0.008881274505737695,
+        "gain": 0.0,
+        "pos_median": 0.004625441019172413,
+        "neg_median": 0.012580214538860643
+      },
+      {
+        "feature": "full_ratio_min48",
+        "op": ">=",
+        "threshold": 1.3894550272078523,
+        "gain": 0.0,
+        "pos_median": 2.506017348594737,
+        "neg_median": 1.4719900659027552
+      }
+    ]
+  },
+  "rule_recall_on_owner_pos": 0.325,
+  "base_rate_train": {
+    "symbols_scanned": 30,
+    "raw_deduped_fires": 5791,
+    "swap_maker_0.06pct": {
+      "n": 5789,
+      "win_rate": 0.2852,
+      "profit_factor": 0.81,
+      "mean_net": -0.00185,
+      "total_net": -10.7005
+    },
+    "legacy_0.20pct": {
+      "n": 5789,
+      "win_rate": 0.2819,
+      "profit_factor": 0.697,
+      "mean_net": -0.00325,
+      "total_net": -18.8051
+    },
+    "gross_pre_cost": {
+      "n": 5789,
+      "win_rate": 0.2864,
+      "profit_factor": 0.866,
+      "mean_net": -0.00125,
+      "total_net": -7.2271
+    },
+    "emergence_pf_maker_published": 0.874,
+    "delta_pf_vs_emergence": -0.064
+  },
+  "verdict": {
+    "alpha_call": "worse_or_no_better",
+    "sentence_zh": "手法因果规则 train PF=0.81 低于 emergence 0.874（Δ=-0.064）：按可解释阈值落地后，手法子集未优于宽泛密集。"
+  },
+  "honesty_traps": [
+    "框右缘可能事后标 → 只信因果 base rate，不信 LGBM AUC",
+    "随机负样本不是差一点的密集 → gain 可能夸大可分性；见 hard-neg AUC",
+    "本轮未消耗 holdout；PF 为 train 段发现级，不作上线裁决",
+    "规则阈值来自正样本分位，非 holdout 校准；存在轻度自我拟合"
+  ]
+}

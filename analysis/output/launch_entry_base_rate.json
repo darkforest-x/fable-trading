@@ -1,0 +1,237 @@
+{
+  "tag": "launch_entry_base_rate",
+  "discipline": {
+    "holdout_start": "2026-05-04 00:00:00+00:00",
+    "holdout_touched": false,
+    "entry": "next_bar_open",
+    "exit": "TP5/SL2/72bar",
+    "costs": {
+      "swap_maker": 0.0006,
+      "legacy_p0": 0.002
+    },
+    "atr_pct_min": 0.0015,
+    "bundle": "judgment add_indicators only; dense gate = EMA8-55 fast / EMA8-55+144/200 full; same effective spreads as published base_rate_dense_offline after add_indicators overwrite",
+    "max_wait_bars_after_dense": 48,
+    "range_n": 20,
+    "vol_m": 20,
+    "vol_k": 1.5,
+    "spread_chg8_thr": 0.00383
+  },
+  "data": {
+    "n_symbols": 236,
+    "time_range": [
+      "2025-06-05 03:30:00+00:00",
+      "2026-05-03 05:45:00+00:00"
+    ],
+    "triggers": {
+      "emergence_always_long": 16145,
+      "emergence_mom24": 15891,
+      "range_break_n20": 15115,
+      "vol_break_n20_k1.5": 13772,
+      "spread_expand_chg8": 12002,
+      "ma_arrange_cross": 15941
+    }
+  },
+  "variants": {
+    "emergence_always_long": {
+      "maker_0.06pct": {
+        "n": 16145,
+        "win_rate": 0.2957,
+        "mean_gross": -0.00024,
+        "mean_net": -0.00084,
+        "profit_factor": 0.876,
+        "n_long": 16145,
+        "n_short": 0,
+        "long_frac": 1.0
+      },
+      "legacy_0.20pct": {
+        "n": 16145,
+        "win_rate": 0.2927,
+        "mean_gross": -0.00024,
+        "mean_net": -0.00224,
+        "profit_factor": 0.711,
+        "n_long": 16145,
+        "n_short": 0,
+        "long_frac": 1.0
+      },
+      "gross_pre_cost": {
+        "n": 16145,
+        "win_rate": 0.2962,
+        "mean_gross": -0.00024,
+        "mean_net": -0.00024,
+        "profit_factor": 0.962,
+        "n_long": 16145,
+        "n_short": 0,
+        "long_frac": 1.0
+      }
+    },
+    "emergence_mom24": {
+      "maker_0.06pct": {
+        "n": 15891,
+        "win_rate": 0.3107,
+        "mean_gross": 0.00039,
+        "mean_net": -0.00021,
+        "profit_factor": 0.968,
+        "n_long": 7693,
+        "n_short": 8198,
+        "long_frac": 0.4841
+      },
+      "legacy_0.20pct": {
+        "n": 15891,
+        "win_rate": 0.3067,
+        "mean_gross": 0.00039,
+        "mean_net": -0.00161,
+        "profit_factor": 0.787,
+        "n_long": 7693,
+        "n_short": 8198,
+        "long_frac": 0.4841
+      },
+      "gross_pre_cost": {
+        "n": 15891,
+        "win_rate": 0.3115,
+        "mean_gross": 0.00039,
+        "mean_net": 0.00039,
+        "profit_factor": 1.064,
+        "n_long": 7693,
+        "n_short": 8198,
+        "long_frac": 0.4841
+      }
+    },
+    "range_break_n20": {
+      "maker_0.06pct": {
+        "n": 15115,
+        "win_rate": 0.3168,
+        "mean_gross": 0.00061,
+        "mean_net": 1e-05,
+        "profit_factor": 1.002,
+        "n_long": 7286,
+        "n_short": 7829,
+        "long_frac": 0.482
+      },
+      "legacy_0.20pct": {
+        "n": 15115,
+        "win_rate": 0.3139,
+        "mean_gross": 0.00061,
+        "mean_net": -0.00139,
+        "profit_factor": 0.816,
+        "n_long": 7286,
+        "n_short": 7829,
+        "long_frac": 0.482
+      },
+      "gross_pre_cost": {
+        "n": 15115,
+        "win_rate": 0.3176,
+        "mean_gross": 0.00061,
+        "mean_net": 0.00061,
+        "profit_factor": 1.099,
+        "n_long": 7286,
+        "n_short": 7829,
+        "long_frac": 0.482
+      }
+    },
+    "vol_break_n20_k1.5": {
+      "maker_0.06pct": {
+        "n": 13772,
+        "win_rate": 0.3169,
+        "mean_gross": 0.00073,
+        "mean_net": 0.00013,
+        "profit_factor": 1.019,
+        "n_long": 6487,
+        "n_short": 7285,
+        "long_frac": 0.471
+      },
+      "legacy_0.20pct": {
+        "n": 13772,
+        "win_rate": 0.3143,
+        "mean_gross": 0.00073,
+        "mean_net": -0.00127,
+        "profit_factor": 0.834,
+        "n_long": 6487,
+        "n_short": 7285,
+        "long_frac": 0.471
+      },
+      "gross_pre_cost": {
+        "n": 13772,
+        "win_rate": 0.3177,
+        "mean_gross": 0.00073,
+        "mean_net": 0.00073,
+        "profit_factor": 1.115,
+        "n_long": 6487,
+        "n_short": 7285,
+        "long_frac": 0.471
+      }
+    },
+    "spread_expand_chg8": {
+      "maker_0.06pct": {
+        "n": 12002,
+        "win_rate": 0.3277,
+        "mean_gross": 0.00107,
+        "mean_net": 0.00047,
+        "profit_factor": 1.065,
+        "n_long": 5800,
+        "n_short": 6202,
+        "long_frac": 0.4833
+      },
+      "legacy_0.20pct": {
+        "n": 12002,
+        "win_rate": 0.3242,
+        "mean_gross": 0.00107,
+        "mean_net": -0.00093,
+        "profit_factor": 0.887,
+        "n_long": 5800,
+        "n_short": 6202,
+        "long_frac": 0.4833
+      },
+      "gross_pre_cost": {
+        "n": 12002,
+        "win_rate": 0.3284,
+        "mean_gross": 0.00107,
+        "mean_net": 0.00107,
+        "profit_factor": 1.156,
+        "n_long": 5800,
+        "n_short": 6202,
+        "long_frac": 0.4833
+      }
+    },
+    "ma_arrange_cross": {
+      "maker_0.06pct": {
+        "n": 15941,
+        "win_rate": 0.3068,
+        "mean_gross": 0.00013,
+        "mean_net": -0.00047,
+        "profit_factor": 0.93,
+        "n_long": 8227,
+        "n_short": 7714,
+        "long_frac": 0.5161
+      },
+      "legacy_0.20pct": {
+        "n": 15941,
+        "win_rate": 0.3037,
+        "mean_gross": 0.00013,
+        "mean_net": -0.00187,
+        "profit_factor": 0.759,
+        "n_long": 8227,
+        "n_short": 7714,
+        "long_frac": 0.5161
+      },
+      "gross_pre_cost": {
+        "n": 15941,
+        "win_rate": 0.308,
+        "mean_gross": 0.00013,
+        "mean_net": 0.00013,
+        "profit_factor": 1.02,
+        "n_long": 8227,
+        "n_short": 7714,
+        "long_frac": 0.5161
+      }
+    }
+  },
+  "published_refs": {
+    "emergence_pf_maker": 0.874,
+    "owner_box_oracle_pf_maker": 1.183,
+    "owner_box_oracle_pf_legacy": 1.039,
+    "direction_oracle_pf_tp3sl1": 2.683,
+    "note_direction_oracle": "2.68 is TP3/SL1 pick-better-side ceiling on emergence tips (trend_direction_test / directional_test); NOT TP5/SL2"
+  },
+  "leak_flags": []
+}
