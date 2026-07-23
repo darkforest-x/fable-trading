@@ -2,7 +2,21 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-07-23 傍晚 — 回测终审授权）
+## ⚡ 当前真相（2026-07-23 夜 — v16 终审:证伪,不上线）
+
+- **holdout 第 6 次消耗完成(owner 预授权)。v16 tip-replay 终审 = 决定性负面,未 promote。**
+  窗口 05-04~07-16 · 15 币 · **1206 笔 · 胜率 29% · PF 0.78 · 净 -2.82**(纯检测,亏损)。
+- **判断层反预测(最关键发现)**:v16 fire 过 v11 判断层的 157 笔 PF **0.60**(更差);
+  **判断分越高越亏**(top5% PF 0.48)。根因:v11 判断在"事后"候选上训练,拿到盘口
+  "启动前"候选上是反向选择器。**整套 v16检测+v11判断 被证伪,不可交易。**
+  报告 `analysis/p_v16_holdout_verdict.md`;learning `hindsight-trained-judgment-is-anti-predictive-at-the-tip.md`。
+- **出路(需 owner 决策)**:两层都用真实盘口数据重训(v17 检测器 + tip 时刻→tip 后真实
+  收益 重标定判断层),`collect_real_tips_pulse.py` 已每脉冲攒数据,owner 审 review_sheet 是闸门;
+  **或**正视"实时盘口下该形态可能本就无扣成本 alpha"这一诚实可能。实盘维持空转。
+- 回测搬 3060 GPU(~4h→~30min);loader 加编码容错(一个坏字节曾崩全run);前端回测页
+  切 v16 tip-replay 数据源(旧 PF 6.61 折叠为"已废弃事后方法学")。
+
+## 2026-07-23 傍晚 — 回测终审授权（历史）
 
 - **v16 判决反转(owner 目视 + 我逐图核实)**:金标"51.5% 误火"作废——那 33 张
   tip-empty-ok 是规则自动预标(非 owner 真值),v16 在 BONK/CAP/EDEN 右缘的框全在
