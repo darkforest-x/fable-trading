@@ -116,6 +116,10 @@
   let unlabeledOnly = true;
   let serverOk = false;
   let imgEl = null;
+  // Back-stack of box_ids left behind (label auto-advance / next). Lets「上一张」
+  // return to a just-labeled card even when unlabeledOnly dropped it from queue.
+  let navTrail = [];
+  let viewId = null; // when set, show this box even if not in filtered queue
 
   const $ = (id) => document.getElementById(id);
 
@@ -238,7 +242,14 @@
         rebuildQueue();
         if (curId) {
           const j = queue.findIndex((x) => x.box_id === curId);
-          if (j >= 0) idx = j;
+          if (j >= 0) {
+            idx = j;
+            viewId = null;
+          } else if (findItem(curId)) {
+            viewId = curId;
+          } else {
+            viewId = null;
+          }
         }
         render();
       } else {
@@ -284,8 +295,70 @@
     if (idx >= queue.length) idx = Math.max(0, queue.length - 1);
   }
 
+  function findItem(boxId) {
+    if (!boxId) return null;
+    return items.find((x) => x.box_id === boxId) || null;
+  }
+
   function current() {
+    if (viewId) {
+      const ov = findItem(viewId);
+      if (ov) return ov;
+      viewId = null;
+    }
     return queue[idx] || null;
+  }
+
+  function pushTrail(boxId) {
+    if (!boxId) return;
+    if (navTrail.length && navTrail[navTrail.length - 1] === boxId) return;
+    navTrail.push(boxId);
+    if (navTrail.length > 500) navTrail.shift();
+  }
+
+  function goPrev() {
+    if (!navTrail.length) {
+      if (viewId) {
+        viewId = null;
+        render();
+        return;
+      }
+      if (idx > 0) {
+        idx -= 1;
+        render();
+      }
+      return;
+    }
+    const prevId = navTrail.pop();
+    const j = queue.findIndex((x) => x.box_id === prevId);
+    if (j >= 0) {
+      viewId = null;
+      idx = j;
+    } else if (findItem(prevId)) {
+      // Labeled (or filtered-out) card still in items — show via override
+      viewId = prevId;
+    } else {
+      // Gone from pack; try older trail entry
+      goPrev();
+      return;
+    }
+    render();
+  }
+
+  function goNext() {
+    const cur = current();
+    if (viewId) {
+      // Leave override; resume filtered queue (idx already at the card we auto-advanced to)
+      if (cur) pushTrail(cur.box_id);
+      viewId = null;
+      if (idx >= queue.length) idx = Math.max(0, queue.length - 1);
+      render();
+      return;
+    }
+    if (idx >= queue.length - 1) return;
+    if (cur) pushTrail(cur.box_id);
+    idx += 1;
+    render();
   }
 
   function sideOf(it) {
@@ -302,7 +375,7 @@
       (x) => !VALID.has(((reviews[x.box_id] || {}).owner_side || x.owner_side || ""))
     ).length;
     $("stats").innerHTML =
-      `队列 <b>${queue.length ? idx + 1 : 0}</b>/${queue.length}` +
+      `队列 <b>${queue.length ? (viewId ? "复查" : idx + 1) : 0}</b>/${queue.length}` +
       ` · 已标 <b>${c.labeled}</b>/${c.total}` +
       ` · <span class="long">L <b>${c.long}</b></span>` +
       ` · <span class="short">S <b>${c.short}</b></span>` +
@@ -398,8 +471,8 @@
     card.querySelectorAll("[data-side]").forEach((btn) => {
       btn.addEventListener("click", () => label(btn.getAttribute("data-side")));
     });
-    $("prev").onclick = () => { idx = Math.max(0, idx - 1); render(); };
-    $("next").onclick = () => { idx = Math.min(queue.length - 1, idx + 1); render(); };
+    $("prev").onclick = () => goPrev();
+    $("next").onclick = () => goNext();
   }
 
   function esc(s) {
@@ -419,11 +492,13 @@
     }
     const note = ($("note") && $("note").value) || "";
     await persist(it.box_id, side, note);
-    // Advance: if unlabeled-only filter, item leaves queue; else step forward.
+    // Remember this card so「上一张」can return even if unlabeledOnly drops it.
+    pushTrail(it.box_id);
+    viewId = null;
     const wasId = it.box_id;
     rebuildQueue();
     if (unlabeledOnly) {
-      // queue already dropped current; keep idx
+      // queue already dropped current; keep idx (now points at former next)
       if (idx >= queue.length) idx = Math.max(0, queue.length - 1);
     } else {
       // stay on next item after current
@@ -462,6 +537,8 @@
     $("mode-sample").classList.toggle("active", mode === "sample");
     $("mode-full").classList.toggle("active", mode === "full");
     idx = 0;
+    viewId = null;
+    navTrail = [];
     rebuildQueue();
     render();
   }
@@ -470,6 +547,8 @@
     unlabeledOnly = !unlabeledOnly;
     $("mode-unlabeled").classList.toggle("active", unlabeledOnly);
     idx = 0;
+    viewId = null;
+    navTrail = [];
     rebuildQueue();
     render();
   }
@@ -480,8 +559,8 @@
     if (k === "l") { e.preventDefault(); label("long"); }
     else if (k === "s") { e.preventDefault(); label("short"); }
     else if (k === "k" || k === "x") { e.preventDefault(); label("skip"); }
-    else if (k === "n" || k === "arrowright") { e.preventDefault(); idx = Math.min(queue.length - 1, idx + 1); render(); }
-    else if (k === "p" || k === "arrowleft") { e.preventDefault(); idx = Math.max(0, idx - 1); render(); }
+    else if (k === "n" || k === "arrowright") { e.preventDefault(); goNext(); }
+    else if (k === "p" || k === "arrowleft") { e.preventDefault(); goPrev(); }
     else if (k === "1") { e.preventDefault(); setMode("sample"); }
     else if (k === "2") { e.preventDefault(); setMode("full"); }
     else if (k === "u") { e.preventDefault(); toggleUnlabeled(); }
