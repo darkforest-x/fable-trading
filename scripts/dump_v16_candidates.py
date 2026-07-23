@@ -43,6 +43,36 @@ from src.judgment.yolo_candidates import (  # noqa: E402
 HOLDOUT_START = pd.Timestamp("2026-05-04", tz="UTC")
 TP_MULT, SL_MULT = 5.0, 2.0
 PREDICT_BATCH = 16
+# v16 fires on dense clusters, so only run the (slow) detector on bars where the
+# geometry qualifies (fast_spread<=0.0028 & full_spread<=0.0055, run>=5). Scanning
+# every bar was ~15x slower for the same candidate set (2026-07-23).
+FAST_MAX, FULL_MAX, MIN_DENSE = 0.0028, 0.0055, 5
+
+
+def build_btc_regime() -> dict[str, dict]:
+    """BTC market-regime features by open_time (a NEW dimension: not derivable
+    from a symbol's own chart). Crypto launches often ride the BTC tape."""
+    from src.data.loader import list_series, load_series
+    try:
+        btc = load_series(list_series(bar="15m")[("okx", "BTC_USDT_SWAP")])
+    except Exception:
+        return {}
+    c = btc["close"].astype(float)
+    ema200 = c.ewm(span=200, adjust=False).mean()
+    ret24 = c.pct_change(24)
+    ret96 = c.pct_change(96)
+    tr = (btc["high"].astype(float) - btc["low"].astype(float)) / c
+    atr = tr.rolling(14).mean()
+    out = {}
+    times = pd.to_datetime(btc["open_time"], utc=True).astype(str)
+    for t, r24, r96, ab, av in zip(times, ret24, ret96, (c > ema200).astype(float), atr):
+        out[t] = {
+            "btc_ret24": float(r24) if np.isfinite(r24) else 0.0,
+            "btc_ret96": float(r96) if np.isfinite(r96) else 0.0,
+            "btc_above_ema200": float(ab),
+            "btc_atr_pct": float(av) if np.isfinite(av) else 0.0,
+        }
+    return out
 
 
 def forward_net(enriched, i):
@@ -76,12 +106,26 @@ def forward_net(enriched, i):
     return gross - FORWARD_COST
 
 
+def _rule_dense_bars(enriched_ma, lo, hi):
+    """Bars where a >=MIN_DENSE run of dense bars ends (causal candidate universe)."""
+    fast = pd.to_numeric(enriched_ma["fast_spread"], errors="coerce").to_numpy()
+    full = pd.to_numeric(enriched_ma["full_spread"], errors="coerce").to_numpy()
+    dense = (fast <= FAST_MAX) & (full <= FULL_MAX)
+    run = 0
+    out = []
+    for i in range(len(dense)):
+        run = run + 1 if dense[i] else 0
+        if run >= MIN_DENSE and lo <= i < hi:
+            out.append(i)
+    return out
+
+
 def v16_fire_bars(enriched_ma, model, device, lo, hi):
-    """Bars where v16 fires (A' edge) scanning tip windows lo..hi, MIN_GAP-deduped."""
+    """v16 fires (A' edge) among rule-dense tip bars only, MIN_GAP-deduped."""
     fires = []
     tmp = PROJECT / "data" / "_dumpcand_tmp.png"
     last_sig = -10**9
-    for t in range(lo, hi):
+    for t in _rule_dense_bars(enriched_ma, lo, hi):
         sub = enriched_ma.iloc[t - WINDOW + 1:t + 1].reset_index(drop=True)
         try:
             _, tf = render_chart(sub, out_path=tmp)
@@ -118,6 +162,8 @@ def main() -> int:
     if device is None:
         import torch
         device = "0" if torch.cuda.is_available() else "cpu"
+    btc_regime = build_btc_regime()
+    print(f"btc regime rows: {len(btc_regime)}", flush=True)
 
     pool = []
     for source, symbol, frame in iter_series(bar="15m", min_bars=WINDOW + 400):
@@ -147,8 +193,17 @@ def main() -> int:
             if net is None:
                 continue
             row = {c: float(feats.iloc[pos][c]) for c in FEATURE_COLUMNS}
+            sig_t = pd.Timestamp(pd.to_datetime(enriched["open_time"], utc=True).iloc[i])
+            # NEW dimensions (a): BTC regime + relative strength + time-of-day
+            btc = btc_regime.get(str(sig_t), {"btc_ret24": 0.0, "btc_ret96": 0.0,
+                                              "btc_above_ema200": 0.0, "btc_atr_pct": 0.0})
+            row.update(btc)
+            row["rel_str24"] = float(feats.iloc[pos]["ret_24"]) - btc["btc_ret24"]
+            row["rel_str48"] = float(feats.iloc[pos]["ret_48"]) - btc["btc_ret96"]
+            row["hour"] = float(sig_t.hour)
+            row["dow"] = float(sig_t.dayofweek)
             row["symbol"] = symbol
-            row["signal_time"] = str(pd.to_datetime(enriched["open_time"], utc=True).iloc[i])
+            row["signal_time"] = str(sig_t)
             row["net"] = round(float(net), 6)
             rows.append(row)
             n_ok += 1

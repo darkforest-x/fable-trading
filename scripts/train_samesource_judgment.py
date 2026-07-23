@@ -56,7 +56,15 @@ def main() -> int:
     args = ap.parse_args()
 
     df = pd.read_csv(PROJECT / args.data)
-    df = df.dropna(subset=FEATURES + ["net"]).sort_values("signal_time").reset_index(drop=True)
+    # use every numeric column except the label/metadata -> auto-includes any
+    # NEW features the dump added (btc regime, relative strength, time)
+    meta = {"net", "symbol", "signal_time"}
+    global FEATURES
+    FEATURES = [c for c in df.columns if c not in meta and pd.api.types.is_numeric_dtype(df[c])]
+    print(f"features ({len(FEATURES)}): {FEATURES}")
+    df = df.dropna(subset=["net"]).sort_values("signal_time").reset_index(drop=True)
+    for c in FEATURES:
+        df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0.0)
     n = len(df)
     cut = int(n * (1 - args.test_frac))
     train, test = df.iloc[:cut], df.iloc[cut:]
