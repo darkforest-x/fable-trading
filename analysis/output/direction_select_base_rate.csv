@@ -1,0 +1,16 @@
+variant,side,n,win_rate_maker,mean_net_maker,pf_maker,pf_legacy_0.20,dir_rule
+ctrl_fixed_long,long,16145,0.2957,-0.00084,0.876,0.711,fixed +1 at dense tip (run==5); no select
+ctrl_fixed_long,short,0,,,,,fixed +1 at dense tip (run==5); no select
+ctrl_fixed_long,both,16145,0.2957,-0.00084,0.876,0.711,fixed +1 at dense tip (run==5); no select
+ctrl_fixed_short,long,0,,,,,fixed -1 at dense tip (run==5); no select
+ctrl_fixed_short,short,16145,0.3269,0.00044,1.068,0.868,fixed -1 at dense tip (run==5); no select
+ctrl_fixed_short,both,16145,0.3269,0.00044,1.068,0.868,fixed -1 at dense tip (run==5); no select
+arrange_order_score,long,4807,0.2875,-0.00099,0.851,0.688,at tip: order_score>=3 and >down_order_score → +1; down_order_score>=3 and >order_score → -1; else skip
+arrange_order_score,short,4627,0.3292,0.00073,1.116,0.908,at tip: order_score>=3 and >down_order_score → +1; down_order_score>=3 and >order_score → -1; else skip
+arrange_order_score,both,9434,0.3079,-0.00015,0.978,0.793,at tip: order_score>=3 and >down_order_score → +1; down_order_score>=3 and >order_score → -1; else skip
+range_break_n20,long,7286,0.308,-0.00038,0.943,0.767,"after tip, first close>max(high[i-N:i]) → +1; close<min(low[i-N:i]) → -1; N=20; wait≤48"
+range_break_n20,short,7829,0.3251,0.00038,1.058,0.863,"after tip, first close>max(high[i-N:i]) → +1; close<min(low[i-N:i]) → -1; N=20; wait≤48"
+range_break_n20,both,15115,0.3168,1e-05,1.002,0.816,"after tip, first close>max(high[i-N:i]) → +1; close<min(low[i-N:i]) → -1; N=20; wait≤48"
+spread_expand_chg8,long,5800,0.2995,-0.00083,0.892,0.743,"after tip, first fast_spread[i]-fast_spread[i-8] >= thr; dir = +1 if close>=cluster_mid else -1"
+spread_expand_chg8,short,6202,0.3541,0.00169,1.245,1.037,"after tip, first fast_spread[i]-fast_spread[i-8] >= thr; dir = +1 if close>=cluster_mid else -1"
+spread_expand_chg8,both,12002,0.3277,0.00047,1.065,0.887,"after tip, first fast_spread[i]-fast_spread[i-8] >= thr; dir = +1 if close>=cluster_mid else -1"

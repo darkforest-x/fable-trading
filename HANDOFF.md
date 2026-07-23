@@ -2,8 +2,9 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-07-23 深夜 — 研究收口:oracle≠tip,启动分边仍薄）
+## ⚡ 当前真相（2026-07-23 深夜 — 研究收口:oracle≠tip,启动/择向皆未过1.3）
 
+- **多空人工闸门（流式）已就绪**：打开 http://127.0.0.1:8765/gallery.html ，L/S/K 标；预览后台持续渲染（`stream_owner_side_pack.py`）。填完跑 `scripts/owner_side_feature_verdict.py`。
 - **实盘**:detector=none 诚实空转（纪律 12）；三门 30min / ACTIVE / 阈值 / TP·SL **未改**；
   **holdout 记账 N=6**（本轮研究**未**再耗；**maker-on-holdout 未做**，仍属需 owner
   另批的第 7 次选项）。
@@ -21,8 +22,12 @@
   `p_launch_entry_base_rate.md`）；learnings
   `long-short-must-be-split-in-base-rate-tables.md` /
   `mechanical-launch-entry-lifts-pf-but-not-past-1.3.md`。
+- **因果择向结论（未碰 holdout）**:**择向未救出可交易边**——排列/突破/spread 最好仍
+  spread-short **1.245**；排列跳过 43% tip 也抬不过 1.3。报告
+  `analysis/p_direction_select_base_rate.md`；learning
+  `causal-direction-select-does-not-rescue-pf-past-1.3.md`。默认建议收口，不值得开影子。
 - **出路(需 owner 决策)**:继续攒真实 tip 分布（旁路，勿当救命主线）/
-  显式「确认散开」规则小实验 / 或收摊换命题。默认建议见上述两份报告的「下一步」。
+  或收摊换命题。默认建议见上述报告的「下一步」。
 
 ## 2026-07-23 夜 — v16 终审:证伪,不上线（历史）
 
