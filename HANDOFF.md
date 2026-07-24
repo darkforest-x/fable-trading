@@ -2,7 +2,63 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-07-24 上午 — Owner 批 §7-2；3060 大样本 dump 进行中）
+## ⚡ 当前真相（2026-07-24 12:52 — tip 集完成；训练已按 Owner 批准重启）
+
+### 刚发生
+- **Tip 短集已完成**：`datasets/dense_owner_side_short_tip/`（train 1037 / val 324；holdout **0**；`box_right_frac` p50≈0.997；时间切分干净）。
+- **Owner 早已批准开训**（「可以开始训练吧」）。此前 tip-rebuild 会话把并行开的 `owner_side_short_tip_v1` 当「旁路误启」杀掉并要求再看图——与 Owner 批准冲突；现已按批准**立即重启**。
+- **训练进行中（launchd `com.fable.owner_side_short_tip_v1b`，ppid=1）**：`owner_side_short_tip_v1b`（pid **32584**；见 `analysis/output/owner_side_short_tip_v1b_train.pid`；日志 `analysis/output/owner_side_short_tip_v1b_train.log`；`--data datasets/dense_owner_side_short_tip/data.yaml`；MPS；`--no-finetune`）。用 v1b 因 v1 名被多次竞态打断；`train.py` 本身 `exist_ok=True`。
+- **样本仍可看**：`analysis/output/owner_side_short_tip_sample30/`（非开训闸门；批准已在）。
+- **未** promote / **未**动 holdout / 坏集 `dense_owner_side_short` 不覆盖。
+
+### 下一步
+- 等 tip 训练落盘 → tip-smoke / 真 tip 金标诚实评估（研究口径；默认**不** promote）。
+- 判断层 short-only 骨架可并行准备；主链扫池须等 tip 权重。
+- 作战计划：`analysis/p_short_only_pipeline.md`；待办：`analysis/todo_short_only_pipeline.md`。
+
+### 仍禁止
+- promote / ACTIVE / 清 forward_log / holdout#8 / 真下单 / 改新鲜度三门 / 杀进行中 tip 训练（见 `analysis/output/ACTIVE_TIP_TRAIN.txt`）/ 杀 §7-2 dump。Long YOLO **未**开。
+
+---
+
+
+## ⚡ 当前真相（2026-07-24 12:40 — Owner 叫停 short v1 train）（历史）
+
+### 刚发生
+- **`owner_side_short_v1` 训练已按 Owner 指令杀掉**：原 pid **26613** + wrapper **26607**；停于 epoch≈7。**未** promote。
+- **叫停原因**：① 框非 tip（`box_right_frac` 中位 0.52；旧 pretip 窗）；② 非时间切分（val 99.4% 落在 train 窗内）。
+- Owner 随后选 **选项 1** → 见上节（已重建 tip 短集）。
+
+### 仍禁止
+- promote / ACTIVE / 清 forward_log / holdout#8 / 真下单 / 改新鲜度三门 / 杀 §7-2 dump。
+
+---
+
+## ⚡ 当前真相（2026-07-24 午后 — Owner 选定 short-only 全链路）（历史；v1 已叫停）
+
+### Owner 已批准 / 当时主线
+- **只做空完整链路**：① short YOLO 检测 → ② short-only 判断层 → ③ 回测/优化。作战计划：`analysis/p_short_only_pipeline.md`。
+- **检测**：本机 MPS 训 `owner_side_short_v1`（**已被 Owner 叫停**）；数据 `datasets/dense_owner_side_short/`（train 1004/1036，val 313/325）；日志 `analysis/output/owner_side_short_v1_train.log`；权重若有落盘 **未**晋升。
+- **判断层骨架已铺**（不依赖 best.pt）：`build_dataset --side short` → `data/judgment_dataset_v2_{mode}_short.csv`；YOLO 池路径 `yolo_candidate_source.py --side short` → `data/judgment_yolo_owner_side_short.csv`。
+- **原下一步闸门**（已废）：等 short train 结束 → tip-smoke… → **改为先重建 tip 对齐短金标**。
+- **仍禁止**：promote / ACTIVE 切换 / 清 forward_log / holdout#8 / 真下单 / 改新鲜度三门 / 杀 §7-2 dump。Long YOLO **未**开。
+- §7-2 3060 dump **并行不杀**。
+
+---
+
+## ⚡ 当前真相（2026-07-24 午间 — Owner 批双链路；先本机训 short YOLO）（历史）
+
+### Owner 已批准
+- **多空分模、双链路**；**先跑空**：本机训 `owner_side_short_v1`（不用 3060）。
+- 数据：`datasets/dense_owner_side_short/`（short 1361 框 → train 1004 图/1036 框，val 313/325）。
+- 开训：`python -m src.detection.train --data .../dense_owner_side_short/data.yaml --model models/yolo11n.pt --name owner_side_short_v1 --epochs 100 --patience 20 --device mps`（SAFE_AUG）。
+- 日志：`analysis/output/owner_side_short_v1_train.log` → `runs/detect/owner_side_short_v1/`。
+- **不** promote / 不 holdout#8 / 不改 ACTIVE。Long 模稍后。
+- §7-2 3060 dump **并行不杀**。
+
+---
+
+## ⚡ 当前真相（2026-07-24 上午 — Owner 批 §7-2；3060 大样本 dump 进行中）（历史）
 
 ### Owner 已批准
 - **§7-(2)**：用现有 `owner_v16_tipuni_cold.pt` 在 **3060** 扩宇宙重扫 v16 候选，复验方向墙是否小样本假象。
