@@ -1,0 +1,114 @@
+{
+  "holdout": "FORBIDDEN",
+  "source_sheet": "/Users/zhangzc/fable-trading/analysis/output/owner_side_review/review_sheet.csv",
+  "A_image_geometry": {
+    "n_labeled": 2513,
+    "box_right_frac": {
+      "n": 2513,
+      "median": 0.5075,
+      "p25": 0.2875,
+      "p75": 0.7075,
+      "mean": 0.4973,
+      "frac_ge_0.9": 0.0497,
+      "frac_ge_0.8": 0.1313
+    },
+    "width_bars": {
+      "n": 2513,
+      "median": 12.0,
+      "p25": 9.0,
+      "p75": 14.0,
+      "mean": 11.7521,
+      "frac_ge_0.9": 1.0,
+      "frac_ge_0.8": 1.0
+    },
+    "yolo_xc": {
+      "n": 2513,
+      "median": 0.4796,
+      "p25": 0.2634,
+      "p75": 0.6797,
+      "mean": 0.4708,
+      "frac_ge_0.9": 0.035,
+      "frac_ge_0.8": 0.1011
+    },
+    "note": "box_right_frac=(b1+0.5)/WINDOW on the STORED image; mid-window ≠ 'Owner meant confirmation'. cut = win_start+b1."
+  },
+  "B_C_market_at_cut": {
+    "n": 2513,
+    "skips": {
+      "no_series": 0,
+      "holdout": 0,
+      "oob": 0,
+      "bad_ind": 0
+    },
+    "dense_at_cut_rate": 0.0155,
+    "dense_in_prior_8_rate": 0.3227,
+    "trough_offset_bars": {
+      "n": 2513,
+      "median": 10.0,
+      "p25": 7.0,
+      "p75": 15.0,
+      "mean": 11.3136,
+      "frac_ge_0.9": 0.9992,
+      "frac_ge_0.8": 0.9992
+    },
+    "bars_to_expand": {
+      "n": 2504,
+      "median": 0.0,
+      "p25": 0.0,
+      "p75": 0.0,
+      "mean": 0.2129,
+      "frac_ge_0.9": 0.0679,
+      "frac_ge_0.8": 0.0679
+    },
+    "spread_chg8_at_cut": {
+      "n": 2513,
+      "median": 0.0066,
+      "p25": 0.0038,
+      "p75": 0.0116,
+      "mean": 0.0093,
+      "frac_ge_0.9": 0.0,
+      "frac_ge_0.8": 0.0
+    },
+    "spread_chg8_gt_0_rate": 0.9761,
+    "fast_at_cut": {
+      "n": 2513,
+      "median": 0.0106,
+      "p25": 0.0066,
+      "p75": 0.0166,
+      "mean": 0.0136,
+      "frac_ge_0.9": 0.0,
+      "frac_ge_0.8": 0.0
+    },
+    "full_at_cut": {
+      "n": 2513,
+      "median": 0.0138,
+      "p25": 0.009,
+      "p75": 0.0215,
+      "mean": 0.0178,
+      "frac_ge_0.9": 0.0,
+      "frac_ge_0.8": 0.0
+    },
+    "by_side": {
+      "long": {
+        "n": 1152,
+        "dense_at_cut_rate": 0.0174,
+        "spread_chg8_gt_0_rate": 0.9722,
+        "box_right_frac_median": 0.495
+      },
+      "short": {
+        "n": 1361,
+        "dense_at_cut_rate": 0.014,
+        "spread_chg8_gt_0_rate": 0.9794,
+        "box_right_frac_median": 0.5175
+      }
+    },
+    "mid_image_and_dense_at_cut": {
+      "n_mid": 891,
+      "dense_rate_among_mid": 0.0168,
+      "interpretation": "If high: Owner tip cut sits mid-PNG only because images aren't tip-cropped; market tip state still true. If low: cut is confirmatory even when mid-image."
+    }
+  },
+  "verdict": "MECHANICAL_TIP_GAP",
+  "blurb": "Under FAST/FULL defs, cuts look confirmatory (many already expanding). Does NOT license dismissing Owner's tip claim — means our tip proxy ≠ his eye, or labels mix tip+confirm. Mapping/threshold audit, not intent denial.",
+  "owner_claim_policy": "Respect 框=tip. Contradictory metrics → audit mapping/thresholds first."
+}

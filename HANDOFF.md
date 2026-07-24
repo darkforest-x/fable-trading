@@ -2,7 +2,91 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-07-23 深夜 — E1对齐抬召回边死；E2 atr门不修4月）
+## ⚡ 当前真相（2026-07-24 上午 — Owner 批 §7-2；3060 大样本 dump 进行中）
+
+### Owner 已批准
+- **§7-(2)**：用现有 `owner_v16_tipuni_cold.pt` 在 **3060** 扩宇宙重扫 v16 候选，复验方向墙是否小样本假象。
+  **不是**双检测器训练；**不是** holdout#8；**不** promote。
+- 3060 任务：WMI pid≈83452 · `logs/v16_dump_large.log` · 输出 `data/v16_candidates_large.csv`
+  （`--n-symbols 999 --end 2026-05-03`）。本地评估脚本已备：`scripts/it16_large_sample_direction_wall.py`。
+- dump 完成后：scp 回 Mac → 跑 IT-16 → 写 `analysis/p_it16_large_sample_direction_wall.md`。
+
+### 仍禁止
+- 像素双检测器训（IT-14 红灯）· holdout#8 · promote · 改 ACTIVE · 真下单
+
+### 待 dump/IT-16 出结果后再决策
+- 若方向墙仍在 → 回到 §7-(1) 告警-only / §7-(3) 换命题
+- 若墙被打破 → 预注册卡后再谈是否申请 #8（须另批）
+
+---
+
+## ⚡ 当前真相（2026-07-24 通宵收口 — IT-14 红灯；tip 映射已审；未达实盘门）（历史）
+
+### 待 Owner 醒来批准（已部分回应：选了 §7-2）
+
+1. **§7 产品岔路**：`(1) 接受检测/告警-only` / `(2) 3060 用现有 v16 大样本重扫方向墙`
+   / `(3) 换命题` / `(4) 批准「全市场密度谷 tip 扫描」单变量基线`？  
+   **默认建议：1 为主；若继续判断层则先做 4；2 作最后一钉。** → **Owner 2026-07-24 选 2**
+2. **不要**批「像素双检测器训」——IT-14 红灯（除非显式例外）。
+3. **不要** holdout#8 / promote / 改 ACTIVE / 真下单——清单未过线。
+
+### 通宵已完成
+
+- **IT-14 红灯**：冻结 COCO tip 窗 embed → VIS AUC≤0.507 / top_dir_PF≤1.096；
+  报告 `analysis/p_it14_visual_direction_precheck.md`。**未**上 3060 双模。
+- **tip 映射审计**：`box_right_frac≈0.5` **冤枉意图**（裁图坐标）；机械上 cut 处
+  dense 仅 1.55%、chg8>0 97.6%、偏谷底 ~10 bar。报告
+  `analysis/p_tip_mapping_owner_intent.md`。
+- **IT-15 tip remap**：Owner 子集上前移到谷底 raw PF 好看但**选择偏差不可部署**；
+  报告 `analysis/p_it15_tip_remap.md`。
+- **可上实盘清单**：`analysis/p_live_readiness_checklist.md` —— G0–G4/G6 仍红/黄；
+  **未**到「只差 Owner 点头」。
+- **learnings**：`box-right-frac-is-not-a-tip-intent-verdict` /
+  `owner-subset-tip-remap-is-not-deployable-edge` /
+  `frozen-visual-embed-red-means-no-dual-detector-train`。
+- 活文档已更：`analysis/p_judgment_layer_lab.md` §2/§3/§7。
+
+### 不变纪律
+
+- **训练默认 3060**（`FABLE_3060_HOST`≈`zzc@192.168.1.3`；本机不开训）。
+- **判断层 IT-00~15**：决策时刻**无可交易方向边**；判断层下一角色若继续 =
+  过滤/是否交易/仓位，**不**再赌选边。
+- **holdout N=7**；**未** promote / 开空 / 改 ACTIVE；detector=none；三门 30min；
+  `forward_log` 0 业务行。
+- **E1–E3 / 双检测器** 归档勿复活。
+
+### 明早一键（仅当 Owner 选 §7-2；非双模）
+
+```bash
+# 连通（3060 通宵探测过：空闲、C:/fable 在）
+FABLE_3060_HOST=zzc@192.168.1.3 bash scripts/sync_v16_to_windows.sh --check
+# 大样本重扫规格需 Owner 点头后再写具体 scan 命令；权重在 Mac/3060:
+#   models/owner_v16_tipuni_cold.pt （未晋升，仅研究用）
+```
+
+---
+
+## ⚡ 当前真相（2026-07-24 凌晨 — 判断层实验室定论；勿烧 #8）（历史）
+
+- **训练默认 3060**：YOLO 训练/微调/GPU 重训一律走局域网 Windows RTX 3060
+  （`FABLE_3060_HOST` 默认 `zzc@192.168.1.3`，IP 会漂；WMI 开训；Mac 只建数据+sync+验收，
+  **本机不开训**）。通道见 `scripts/sync_v16_to_windows.sh` + `v16_train_start.sh` /
+  `train_on_3060.sh`；笔记 `docs/learnings/yolo-train-ships-over-ssh-to-3060-not-usb.md`。
+- **判断层实验室 IT-00~IT-13 诚实定论**（未碰 holdout#8）：检测✓、动作真✓（oracle 2.68）、
+  多空互补✓，但**决策时刻无可交易方向边**——选点 / 方向 / regime（5 角）/ 入场续势+fade
+  全穷尽，落 ~1.0 或最近期塌。活文档 `analysis/p_judgment_layer_lab.md` §2/§7；
+  learning `docs/learnings/dense-cluster-has-no-causally-tradeable-direction-edge.md`。
+- **E1–E3 亦不解锁边**（归档，勿再申请 #8）：见下方历史节 / `p_entry_align_and_regime` /
+  `p_e3_sparse_and_two_stage` / `p_chain_failure_attribution`。
+- **holdout 记账 N=7**（#7 = A 空边趋势出证伪）。**未** promote / 开空 / 改 ACTIVE。
+- **实盘**:detector=none 诚实空转（纪律 12）；三门 30min / ACTIVE=v11 frozen 文本指针 /
+  阈值 / TP·SL **未改**；`forward_log` 仅表头（0 笔业务行）。
+- **Owner 声明（须尊重）**：他框的是 **tip**，不是确认态。现有指标
+  （`box_right_frac` 中位≈0.50）与之矛盾时，应**审计映射/阈值是否冤枉他**，勿否定意图。
+- **IT-14 当时进行中** → 后续通宵节已收口红灯。
+- **出路(需 owner 决策)**：见更新后的顶部通宵节 / `p_judgment_layer_lab.md` §7。
+
+## ⚡ 当前真相（2026-07-23 深夜 — E1对齐抬召回边死；E2 atr门不修4月）（历史）
 
 - **E1/E2 发现级（未碰 holdout#8）**：E1 重写入场对齐 owner short → 召回 25%→94%
   但 Jaccard 更差（0.045→0.018），因果 `no_tp` PF~**1.14**（相对 spread 1.415 倒退）；
@@ -12,8 +96,7 @@
   报告 `p_short_trend_holdout7.md`。**未** promote / 开空 / 改 ACTIVE。
 - **实盘**:detector=none 诚实空转（纪律 12）；三门 30min / ACTIVE / 阈值 / TP·SL **未改**；
   **holdout 记账 N=7**。
-- **出路(需 owner 决策)**:E3 稀疏化 / 确认态∩tip 窗加硬阈；旁路 tip（v17）；
-  勿为 E1 宽规则或 E2 atr 门烧 holdout#8。
+- **出路(历史，已被判断层定论覆盖)**：E3 稀疏化等 — **勿**再为 E1/E2/E3 烧 #8。
 
 ## ⚡ 当前真相（2026-07-23 深夜 — holdout#7:A 因果空边趋势出证伪）（历史）
 

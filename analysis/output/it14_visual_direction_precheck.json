@@ -1,0 +1,51 @@
+{
+  "n": 4012,
+  "up_rate": 0.482,
+  "visual_emb": [
+    {
+      "n": 601,
+      "AUC": 0.46,
+      "dir_acc": 0.496,
+      "top_dir_PF": 1.065,
+      "top_n": 60
+    },
+    {
+      "n": 602,
+      "AUC": 0.507,
+      "dir_acc": 0.517,
+      "top_dir_PF": 1.096,
+      "top_n": 60
+    },
+    {
+      "n": 803,
+      "AUC": 0.475,
+      "dir_acc": 0.483,
+      "top_dir_PF": 0.65,
+      "top_n": 80
+    }
+  ],
+  "tabular_130": [
+    {
+      "n": 601,
+      "AUC": 0.511,
+      "dir_acc": 0.532,
+      "top_dir_PF": 0.746,
+      "top_n": 60
+    },
+    {
+      "n": 602,
+      "AUC": 0.488,
+      "dir_acc": 0.502,
+      "top_dir_PF": 0.915,
+      "top_n": 60
+    },
+    {
+      "n": 803,
+      "AUC": 0.486,
+      "dir_acc": 0.486,
+      "top_dir_PF": 0.875,
+      "top_n": 80
+    }
+  ],
+  "verdict_gate": "visual AUC>0.55 held-out OR top_dir_PF>1.3 => greenlight 3060"
+}
