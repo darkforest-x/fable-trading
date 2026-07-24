@@ -2,7 +2,7 @@
 
 **日期**：2026-07-24  
 **Owner 指令**：先跑通只做空完整链路——① short YOLO 检测 → ② short-only 判断层 → ③ 回测/优化。  
-**状态**：**选项 1 数据集已重建**（tip 重裁+时间切分）；**未开训**（等 Owner 看 `owner_side_short_tip_sample30`）；v1 train aborted；判断层 short 骨架已铺；**未** promote / **未**动 holdout / **未**改 ACTIVE。
+**状态**：**选项 1 tip 集已训完**（`owner_side_short_tip_v1b`）；tip-smoke **19/27**（发现级过线）；**未** promote；下一闸 Owner「真实 K 线 ~1000 框排除训练集」；判断层 short 骨架已铺；**未**动 holdout / **未**改 ACTIVE。详见 `analysis/p_owner_side_short_tip_v1b.md`。
 
 ---
 
@@ -23,7 +23,8 @@
 | 时间切分 | `VAL_CUT=2026-02-01`；train_max **2026-01-31 15:30** < val_min **2026-02-01 10:30** |
 | 建集脚本 | `scripts/build_owner_side_short_yolo_tip.py` → `build_meta.json` |
 | 样本 | `analysis/output/owner_side_short_tip_sample30/`（绿框 + tip 红线） |
-| 训练 | **未启动** — 等 Owner 看图确认后再批开训 |
+| 训练 | **已完成** `owner_side_short_tip_v1b`（≈57 ep）；权重 `runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt` |
+| tip-smoke | **19/27** tip / **4/27** live（同口径；**不** promote；val mAP≈0.99 不作裁决） |
 
 复现建集：
 

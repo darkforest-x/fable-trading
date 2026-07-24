@@ -11,9 +11,11 @@ Barrier structure comes from src.judgment.labeling defaults
 threshold presets here without owner approval.
 
 Side path (2026-07-24 owner short-only pipeline):
-  --side short → scan_short_candidates + label_short_candidate (rule pool only;
-  YOLO short pool is scripts/yolo_candidate_source.py --side short after
-  owner_side_short_v1 weights exist). Holdout is never touched by this module.
+  --side short → scan_short_candidates + label_short_candidate + short-aligned
+  FEATURE_COLUMNS (ext_up←ext_down etc.; see features.align_short_feature_rows).
+  YOLO short pool: scripts/yolo_candidate_source.py --side short after tip
+  weights exist. Holdout is never touched by this module. Outputs always carry
+  a `side` column; short defaults never overwrite long v2 filenames.
 """
 from __future__ import annotations
 
@@ -26,7 +28,7 @@ import pandas as pd
 from src.data.bars import BAR_CHOICES, normalize_bar
 from src.data.loader import iter_series
 from src.judgment.candidates import add_indicators, scan_candidates, scan_short_candidates
-from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature_rows
+from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature_rows_for_side
 from src.judgment.labeling import HORIZON_BARS, label_candidate, label_short_candidate
 
 PROJECT_DIR = Path(__file__).resolve().parents[2]
@@ -62,7 +64,7 @@ def build(
         if not signal_indices:
             continue
         featured = add_features(enriched)
-        feature_rows = extract_feature_rows(featured, signal_indices)
+        feature_rows = extract_feature_rows_for_side(featured, signal_indices, side)
         for row_pos, signal_i in enumerate(signal_indices):
             outcome = label_fn(enriched, signal_i, horizon=horizon_bars)
             if outcome is None:

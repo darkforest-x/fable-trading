@@ -1,6 +1,9 @@
-"""Train and evaluate the judgment-layer LightGBM classifier.
+"""Train and evaluate the judgment-layer LightGBM model.
 
-Usage: python3 -m src.judgment.train [--eval-holdout]
+Usage:
+  python3 -m src.judgment.train --data PATH --tag TAG [--side long|short|auto]
+  python3 -m src.judgment.train --data PATH --tag TAG --objective regression
+  # Never pass --eval-holdout unless the owner explicitly authorizes a holdout burn.
 
 Split discipline (strict time-based, no shuffling):
 - HOLDOUT_START is frozen: samples with signal_time >= 2026-05-04 00:00 UTC
@@ -9,8 +12,20 @@ Split discipline (strict time-based, no shuffling):
 - The remaining samples are split by time into train (first 80%) and
   val (last 20%).
 
-Outputs metrics JSON to analysis/output/p2b_metrics.json and feature
-importance to analysis/output/p2b_feature_importance.csv.
+Objective (ACTIVE ≈ v11 mainline):
+- binary: classify label (TP vs not) — historical default / CLI default
+- regression: predict realized_ret; rank by score; entry gate = val score q90
+  (same philosophy as frozen_tp5_sl2_swap_yolo_v11_reg)
+
+Side discipline (2026-07-24 short-only):
+- Datasets with a `side` column must be homogeneous (no long/short mix).
+- `--side short` (or auto-detect from the column / tag containing "short")
+  asserts every row is short and refuses mixed pools.
+- Short tags should include `short` so outputs stay pool-tagged
+  (e.g. p2b_yolo_short_30_6m_reg).
+
+Outputs metrics JSON to analysis/output/{tag}_metrics.json and feature
+importance to analysis/output/{tag}_feature_importance.csv.
 """
 from __future__ import annotations
 
@@ -22,6 +37,7 @@ from pathlib import Path
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
+from scipy.stats import spearmanr
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import average_precision_score, precision_score, recall_score, roc_auc_score
 from sklearn.preprocessing import StandardScaler
@@ -36,6 +52,8 @@ OUTPUT_DIR = PROJECT_DIR / "analysis" / "output"
 HOLDOUT_START = pd.Timestamp("2026-05-04 00:00:00", tz="UTC")  # frozen, do not tune on >= this
 TRAIN_FRACTION = 0.8
 THRESHOLDS = (0.4, 0.5, 0.6, 0.7)
+# Align with frozen.DEFAULT_SCORE_QUANTILE (v11 ACTIVE entry gate).
+SCORE_QUANTILE = 0.9
 from src.costs import LEGACY_P0_ROUND_TRIP as ROUND_TRIP_COST  # reporting-only, see src/costs.py
 SEED = 42
 
@@ -58,6 +76,57 @@ DEFAULT_BAR = "15m"
 PURGE_WINDOW = purge_window(DEFAULT_HORIZON_BARS, DEFAULT_BAR)
 
 
+def resolve_side(data: pd.DataFrame, *, side_arg: str, tag: str) -> str:
+    """Resolve training side and refuse mixed long/short pools.
+
+    side_arg:
+      - long|short: assert column (if present) matches; fail on mix
+      - auto: prefer unique `side` column; else infer from tag containing 'short'
+    """
+    if side_arg not in ("long", "short", "auto"):
+        raise ValueError(f"side must be long|short|auto, got {side_arg!r}")
+    col_side: str | None = None
+    if "side" in data.columns:
+        sides = sorted({str(s).lower() for s in data["side"].dropna().unique()})
+        if not sides:
+            col_side = None
+        elif len(sides) > 1:
+            raise SystemExit(
+                f"mixed side values in dataset: {sides}; "
+                "judgment main tables must be long-only or short-only"
+            )
+        else:
+            col_side = sides[0]
+            if col_side not in ("long", "short"):
+                raise SystemExit(f"unknown side value {col_side!r}; expected long|short")
+
+    tag_implies_short = "short" in tag.lower()
+    if side_arg == "auto":
+        if col_side is not None:
+            resolved = col_side
+        elif tag_implies_short:
+            resolved = "short"
+        else:
+            resolved = "long"
+    else:
+        resolved = side_arg
+        if col_side is not None and col_side != resolved:
+            raise SystemExit(
+                f"--side {resolved} but dataset side column is {col_side!r}"
+            )
+
+    if resolved == "short" and not tag_implies_short:
+        raise SystemExit(
+            "short-only training requires --tag containing 'short' "
+            f"(got {tag!r}) so outputs stay pool-tagged"
+        )
+    if resolved == "long" and tag_implies_short and col_side == "long":
+        raise SystemExit(
+            f"tag {tag!r} implies short but dataset/side is long; refuse ambiguous run"
+        )
+    return resolved
+
+
 def load_splits(
     dataset_path: Path = DATASET_PATH, *, horizon_bars: int = DEFAULT_HORIZON_BARS, bar: str = DEFAULT_BAR
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -74,24 +143,35 @@ def load_splits(
     return train, val, holdout
 
 
-def evaluate(y_true: np.ndarray, y_prob: np.ndarray, returns: np.ndarray) -> dict:
+def evaluate(
+    y_true: np.ndarray,
+    y_score: np.ndarray,
+    returns: np.ndarray,
+    *,
+    objective: str = "binary",
+) -> dict:
+    """Rank/threshold metrics. Primary economic gate = top-decile net (0.2% RT).
+
+    For regression, y_score is predicted realized_ret; AUC/PR are secondary
+    rank diagnostics against the binary label, not the success criterion.
+    """
     out = {
         "n": int(len(y_true)),
         "positive_rate": round(float(np.mean(y_true)), 4),
-        "roc_auc": round(float(roc_auc_score(y_true, y_prob)), 4),
-        "pr_auc": round(float(average_precision_score(y_true, y_prob)), 4),
+        "roc_auc": round(float(roc_auc_score(y_true, y_score)), 4),
+        "pr_auc": round(float(average_precision_score(y_true, y_score)), 4),
         "thresholds": {},
     }
     for threshold in THRESHOLDS:
-        pred = (y_prob >= threshold).astype(int)
+        pred = (y_score >= threshold).astype(int)
         out["thresholds"][str(threshold)] = {
             "n_signals": int(pred.sum()),
             "precision": round(float(precision_score(y_true, pred, zero_division=0)), 4),
             "recall": round(float(recall_score(y_true, pred, zero_division=0)), 4),
         }
     # top-decile triple-barrier expected return net of round-trip cost
-    k = max(1, len(y_prob) // 10)
-    top_idx = np.argsort(y_prob)[-k:]
+    k = max(1, len(y_score) // 10)
+    top_idx = np.argsort(y_score)[-k:]
     out["top_decile"] = {
         "n": int(k),
         "mean_realized_ret": round(float(returns[top_idx].mean()), 5),
@@ -99,6 +179,21 @@ def evaluate(y_true: np.ndarray, y_prob: np.ndarray, returns: np.ndarray) -> dic
         "win_rate": round(float(y_true[top_idx].mean()), 4),
     }
     out["all_mean_net_ret"] = round(float(returns.mean() - ROUND_TRIP_COST), 5)
+    if objective == "regression":
+        rho = spearmanr(y_score, returns).statistic
+        out["spearman_score_vs_ret"] = None if rho is None or np.isnan(rho) else round(float(rho), 4)
+        thr = float(np.quantile(y_score, SCORE_QUANTILE))
+        q_mask = y_score >= thr
+        out["threshold_val_q90"] = round(thr, 8)
+        out["score_quantile"] = SCORE_QUANTILE
+        out["above_q90"] = {
+            "n": int(q_mask.sum()),
+            "mean_realized_ret": round(float(returns[q_mask].mean()), 5) if q_mask.any() else None,
+            "mean_net_ret": (
+                round(float(returns[q_mask].mean() - ROUND_TRIP_COST), 5) if q_mask.any() else None
+            ),
+            "win_rate": round(float(y_true[q_mask].mean()), 4) if q_mask.any() else None,
+        }
     return out
 
 
@@ -164,48 +259,128 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--eval-holdout", action="store_true", help="Evaluate the frozen holdout (run once).")
     parser.add_argument("--data", type=Path, default=DATASET_PATH, help="Dataset CSV from build_dataset.")
-    parser.add_argument("--tag", default="p2b", help="Output file prefix, e.g. p2b_v2_strict.")
+    parser.add_argument(
+        "--tag",
+        default="p2b",
+        help="Output file prefix; short-only runs must include 'short' (e.g. p2b_v2_strict_short).",
+    )
+    parser.add_argument(
+        "--side",
+        choices=("long", "short", "auto"),
+        default="auto",
+        help="Force side assertion. auto = unique side column, else tag containing 'short'.",
+    )
+    parser.add_argument(
+        "--objective",
+        choices=("binary", "regression"),
+        default="binary",
+        help="binary=label classifier (legacy CLI default); "
+        "regression=predict realized_ret (v11 ACTIVE philosophy).",
+    )
     parser.add_argument("--bar", choices=BAR_CHOICES, default=DEFAULT_BAR)
     parser.add_argument("--horizon-bars", type=int, default=DEFAULT_HORIZON_BARS)
+    parser.add_argument(
+        "--features-file",
+        type=Path,
+        default=None,
+        help="Optional text file of feature names (one per line; # comments ok). "
+        "Must be a non-empty subset of FEATURE_COLUMNS. Single-variable ablations only.",
+    )
     args = parser.parse_args()
 
+    feature_columns = list(FEATURE_COLUMNS)
+    if args.features_file is not None:
+        if not args.features_file.exists():
+            raise SystemExit(f"--features-file missing: {args.features_file}")
+        wanted: list[str] = []
+        for ln in args.features_file.read_text(encoding="utf-8").splitlines():
+            s = ln.strip()
+            if not s or s.startswith("#"):
+                continue
+            wanted.append(s)
+        unknown = [c for c in wanted if c not in FEATURE_COLUMNS]
+        if unknown:
+            raise SystemExit(f"--features-file has unknown columns: {unknown}")
+        if not wanted:
+            raise SystemExit("--features-file is empty")
+        # Preserve file order (importance rank) but de-dupe.
+        seen: set[str] = set()
+        feature_columns = []
+        for c in wanted:
+            if c not in seen:
+                seen.add(c)
+                feature_columns.append(c)
+
+    raw = pd.read_csv(args.data, parse_dates=["signal_time"])
+    side = resolve_side(raw, side_arg=args.side, tag=args.tag)
+
     train, val, holdout = load_splits(args.data, horizon_bars=args.horizon_bars, bar=args.bar)
-    model = train_model(train, val)
+    model = train_model(
+        train, val, feature_columns=feature_columns, objective=args.objective
+    )
     scaler, base = train_baseline(train)
 
-    val_prob = model.predict(val[FEATURE_COLUMNS], num_iteration=model.best_iteration)
+    val_score = model.predict(val[feature_columns], num_iteration=model.best_iteration)
     results = {
         "dataset": str(args.data),
+        "side": side,
+        "objective": args.objective,
+        "score_semantics": (
+            "predicted_realized_ret" if args.objective == "regression" else "class_probability"
+        ),
+        "feature_columns": feature_columns,
+        "n_features": len(feature_columns),
         "bar": args.bar,
         "horizon_bars": args.horizon_bars,
         "purge_window": str(purge_window(args.horizon_bars, args.bar)),
         "holdout_start": str(HOLDOUT_START),
+        "holdout_policy": "holdout excluded from training and threshold selection; not evaluated"
+        if not args.eval_holdout
+        else "holdout evaluated once (owner-authorized)",
         "splits": {
             "train": {"n": len(train), "range": [str(train["signal_time"].min()), str(train["signal_time"].max())]},
             "val": {"n": len(val), "range": [str(val["signal_time"].min()), str(val["signal_time"].max())]},
             "holdout": {"n": len(holdout), "range": [str(holdout["signal_time"].min()), str(holdout["signal_time"].max())]},
         },
         "best_iteration": model.best_iteration,
-        "val": evaluate(val["label"].to_numpy(), val_prob, val["realized_ret"].to_numpy()),
-        "val_permutation_p": permutation_pvalue(val["label"].to_numpy(), val_prob),
+        "val": evaluate(
+            val["label"].to_numpy(),
+            val_score,
+            val["realized_ret"].to_numpy(),
+            objective=args.objective,
+        ),
+        "val_permutation_p": permutation_pvalue(val["label"].to_numpy(), val_score),
         "val_baseline_ma_spread_logreg": evaluate(
-            val["label"].to_numpy(), baseline_prob(scaler, base, val), val["realized_ret"].to_numpy()
+            val["label"].to_numpy(),
+            baseline_prob(scaler, base, val),
+            val["realized_ret"].to_numpy(),
+            objective="binary",
         ),
     }
 
     importance = pd.DataFrame({
-        "feature": FEATURE_COLUMNS,
+        "feature": feature_columns,
         "gain": model.feature_importance(importance_type="gain"),
         "split": model.feature_importance(importance_type="split"),
     }).sort_values("gain", ascending=False).reset_index(drop=True)
     results["feature_importance_top10"] = importance.head(10)[["feature", "gain"]].to_dict("records")
 
     if args.eval_holdout:
-        hold_prob = model.predict(holdout[FEATURE_COLUMNS], num_iteration=model.best_iteration)
-        results["holdout"] = evaluate(holdout["label"].to_numpy(), hold_prob, holdout["realized_ret"].to_numpy())
-        results["holdout_permutation_p"] = permutation_pvalue(holdout["label"].to_numpy(), hold_prob)
+        hold_score = model.predict(holdout[feature_columns], num_iteration=model.best_iteration)
+        results["holdout"] = evaluate(
+            holdout["label"].to_numpy(),
+            hold_score,
+            holdout["realized_ret"].to_numpy(),
+            objective=args.objective,
+        )
+        results["holdout_permutation_p"] = permutation_pvalue(
+            holdout["label"].to_numpy(), hold_score
+        )
         results["holdout_baseline_ma_spread_logreg"] = evaluate(
-            holdout["label"].to_numpy(), baseline_prob(scaler, base, holdout), holdout["realized_ret"].to_numpy()
+            holdout["label"].to_numpy(),
+            baseline_prob(scaler, base, holdout),
+            holdout["realized_ret"].to_numpy(),
+            objective="binary",
         )
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

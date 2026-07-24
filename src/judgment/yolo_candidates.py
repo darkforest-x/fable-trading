@@ -159,6 +159,8 @@ def scan_series_with_yolo(
     tip_edge_bars: int = TIP_EDGE_BARS,
     tip_conf: float | None = None,
     right_bias: bool | None = None,
+    signal_time_lo: pd.Timestamp | None = None,
+    signal_time_hi: pd.Timestamp | None = None,
 ) -> list[int]:
     """Return sorted signal bar indices for one OHLCV frame (causal at each bar).
 
@@ -176,6 +178,11 @@ def scan_series_with_yolo(
 
     tip_conf: optional lower floor for the tip window only (else env TIP_CONF).
     right_bias: within min_gap keep rightmost signal (else env FABLE_YOLO_RIGHT_BIAS).
+
+    signal_time_lo / signal_time_hi (optional, hi exclusive): only emit signal
+    bars whose open_time is in ``[lo, hi)``. Warmup / rendering still use bars
+    before lo (full frame kept); only the slid-window schedule is clipped so
+    windows that cannot produce an in-range signal are skipped.
     """
     if model is None:
         model = load_yolo_model()
@@ -185,18 +192,52 @@ def scan_series_with_yolo(
         tip_conf = resolve_tip_conf()
     if right_bias is None:
         right_bias = resolve_right_bias(False)
+    # Optional signal-time gate → bar index bounds (inclusive lo, inclusive hi).
+    i_lo: int | None = None
+    i_hi: int | None = None
+    if signal_time_lo is not None or signal_time_hi is not None:
+        if "open_time" not in frame.columns:
+            return []
+        times = pd.to_datetime(frame["open_time"], utc=True)
+        mask = pd.Series(True, index=frame.index)
+        if signal_time_lo is not None:
+            lo = pd.Timestamp(signal_time_lo)
+            if lo.tzinfo is None:
+                lo = lo.tz_localize("UTC")
+            else:
+                lo = lo.tz_convert("UTC")
+            mask &= times >= lo
+        if signal_time_hi is not None:
+            hi = pd.Timestamp(signal_time_hi)
+            if hi.tzinfo is None:
+                hi = hi.tz_localize("UTC")
+            else:
+                hi = hi.tz_convert("UTC")
+            mask &= times < hi
+        idxs = np.flatnonzero(mask.to_numpy())
+        if len(idxs) == 0:
+            return []
+        i_lo = int(idxs[0])
+        i_hi = int(idxs[-1])
     enriched_ma = add_mas(frame)
     _TMP_DIR.mkdir(parents=True, exist_ok=True)
     # Unique path per call (thread id + pid) so parallel live scans never clobber.
     if tmp_png is None:
         tmp_png = _TMP_DIR / f"_yolo_cand_tmp_{os.getpid()}_{threading.get_ident()}.png"
     last_start = len(frame) - window
+    tip_last_start = last_start  # true series tip (for tip-window conf / tip mode)
     first_start = WARMUP_BARS
     if start_from_i is not None:
         first_start = max(first_start, int(start_from_i) - window + 1)
+    if i_lo is not None and i_hi is not None:
+        # Windows that can map a box onto [i_lo, i_hi]; pre-lo bars still render.
+        first_start = max(first_start, i_lo - window + 1)
+        last_start = min(last_start, i_hi)
+        if last_start < first_start:
+            return []
     if mode == "tip":
         # Tip-only: single rightmost window (right edge = last closed bar).
-        starts = [last_start] if last_start >= first_start else []
+        starts = [tip_last_start] if tip_last_start >= first_start else []
     elif mode == "live":
         # Live schedule (2026-07-20): pin the tip and two bars back, then
         # coarse stride for context — at most 6 windows. The 14-window
@@ -216,7 +257,7 @@ def scan_series_with_yolo(
         # pulse-miss overlap; everything older is not a signal, it's history.
         starts_set: set[int] = set()
         for back in (0, 1, 2):
-            s = last_start - back
+            s = tip_last_start - back
             if s >= first_start:
                 starts_set.add(s)
         starts = sorted(starts_set, reverse=True)
@@ -227,71 +268,93 @@ def scan_series_with_yolo(
     device = _resolve_predict_device()
     n_fail = 0
     last_err: str | None = None
-    # Render all windows first, then ONE batched predict per series: on CPU
-    # the per-call setup (source pipeline, backend checks) dominated with 6
-    # single-image calls under the global lock (2026-07-20 telemetry: discover
-    # ~500s/pulse ≈ all render+predict). Order of results matches input order.
-    rendered: list[tuple[int, object, Path]] = []
-    for k, start in enumerate(starts):
-        sub = enriched_ma.iloc[start : start + window]
-        win_png = tmp_png.with_name(f"{tmp_png.stem}_{k}.png")
-        try:
-            _, tf = render_chart(sub, out_path=win_png)
-        except Exception as exc:  # noqa: BLE001 — keep series alive; count failures
-            n_fail += 1
-            last_err = f"{type(exc).__name__}: {exc}"
-            continue
-        rendered.append((start, tf, win_png))
-    # Tip window may use a lower conf floor; batch predict at the minimum, then
-    # post-filter non-tip windows back up to `conf` via box confidence scores.
+    # Chunked render→predict→unlink: live/tip stay ≤6 windows (one chunk);
+    # full offline can be hundreds of windows — holding all PNGs + one giant
+    # batch predict OOM-killed Mac scans (2026-07-24 short tip_v1b pool build).
+    # Chunk size keeps CPU batching benefit without multi-GB RSS per series.
     predict_conf = conf
     if tip_conf is not None and tip_conf < conf:
         predict_conf = tip_conf
-    results = []
-    if rendered:
-        try:
-            # Serialize predict: ultralytics is not reliably thread-safe.
-            with _predict_lock:
-                results = model.predict(
-                    [str(p) for _, _, p in rendered],
-                    conf=predict_conf,
-                    verbose=False,
-                    device=device,
-                )
-        except Exception as exc:  # noqa: BLE001
-            n_fail += len(rendered)
-            last_err = f"{type(exc).__name__}: {exc}"
-            results = []
     tip_edge_rejected = 0
     apply_tip_edge = mode in ("live", "tip") and tip_edge_bars > 0
     min_bar_in_win = window - tip_edge_bars if apply_tip_edge else 0
     allow_pending_entry = mode in ("live", "tip")
-    for (start, tf, _), res in zip(rendered, results):
-        boxes = res.boxes
-        if boxes is None:
-            continue
-        is_tip_window = start == last_start
-        floor = tip_conf if (is_tip_window and tip_conf is not None) else conf
-        xywhn = boxes.xywhn.cpu().numpy()
-        confs = boxes.conf.cpu().numpy() if boxes.conf is not None else None
-        for bi, b in enumerate(xywhn):
-            if confs is not None and float(confs[bi]) < floor:
+    # Live/tip: one chunk. Full offline: small chunks — 16 still Jetsam'd
+    # 16GB Macs mid-series (2026-07-24 short tip_v1b pool; residual 16 PNGs/pid).
+    # Override with FABLE_YOLO_FULL_CHUNK (int >=1) if needed.
+    if mode in ("live", "tip"):
+        chunk_size = len(starts)
+    else:
+        raw_chunk = os.environ.get("FABLE_YOLO_FULL_CHUNK", "4").strip()
+        try:
+            chunk_size = int(raw_chunk)
+        except ValueError:
+            chunk_size = 4
+    chunk_size = max(1, int(chunk_size))
+    for chunk_i in range(0, len(starts), chunk_size):
+        chunk_starts = starts[chunk_i : chunk_i + chunk_size]
+        rendered: list[tuple[int, object, Path]] = []
+        for k, start in enumerate(chunk_starts):
+            sub = enriched_ma.iloc[start : start + window]
+            win_png = tmp_png.with_name(f"{tmp_png.stem}_{chunk_i + k}.png")
+            try:
+                _, tf = render_chart(sub, out_path=win_png)
+            except Exception as exc:  # noqa: BLE001 — keep series alive; count failures
+                n_fail += 1
+                last_err = f"{type(exc).__name__}: {exc}"
                 continue
-            cx, _, w, _ = map(float, b[:4])
-            bar_in_win = right_edge_to_bar(cx, w, tf, n_bars=window)
-            if apply_tip_edge and bar_in_win < min_bar_in_win:
-                tip_edge_rejected += 1
-                continue
-            signal_i = start + bar_in_win
-            if signal_i < WARMUP_BARS or signal_i >= len(frame):
-                continue
-            # Offline full builds need the entry bar for labels; live/tip must
-            # NOT wait — tip bar is the real-time path (entry backfills next pulse).
-            if not allow_pending_entry and signal_i + 1 >= len(frame):
-                continue
-            if start_from_i is not None and signal_i < start_from_i:
-                continue
-            chosen.append(int(signal_i))
+            rendered.append((start, tf, win_png))
+        results = []
+        if rendered:
+            try:
+                # Serialize predict: ultralytics is not reliably thread-safe.
+                with _predict_lock:
+                    results = model.predict(
+                        [str(p) for _, _, p in rendered],
+                        conf=predict_conf,
+                        verbose=False,
+                        device=device,
+                    )
+            except Exception as exc:  # noqa: BLE001
+                n_fail += len(rendered)
+                last_err = f"{type(exc).__name__}: {exc}"
+                results = []
+        for (start, tf, win_png), res in zip(rendered, results):
+            try:
+                boxes = res.boxes
+                if boxes is None:
+                    continue
+                is_tip_window = start == tip_last_start
+                floor = tip_conf if (is_tip_window and tip_conf is not None) else conf
+                xywhn = boxes.xywhn.cpu().numpy()
+                confs = boxes.conf.cpu().numpy() if boxes.conf is not None else None
+                for bi, b in enumerate(xywhn):
+                    if confs is not None and float(confs[bi]) < floor:
+                        continue
+                    cx, _, w, _ = map(float, b[:4])
+                    bar_in_win = right_edge_to_bar(cx, w, tf, n_bars=window)
+                    if apply_tip_edge and bar_in_win < min_bar_in_win:
+                        tip_edge_rejected += 1
+                        continue
+                    signal_i = start + bar_in_win
+                    if signal_i < WARMUP_BARS or signal_i >= len(frame):
+                        continue
+                    # Offline full builds need the entry bar for labels; live/tip must
+                    # NOT wait — tip bar is the real-time path (entry backfills next pulse).
+                    if not allow_pending_entry and signal_i + 1 >= len(frame):
+                        continue
+                    if start_from_i is not None and signal_i < start_from_i:
+                        continue
+                    if i_lo is not None and signal_i < i_lo:
+                        continue
+                    if i_hi is not None and signal_i > i_hi:
+                        continue
+                    chosen.append(int(signal_i))
+            finally:
+                try:
+                    win_png.unlink(missing_ok=True)
+                except OSError:
+                    pass
     if tip_edge_rejected:
         _bump_tip_edge_rejected(tip_edge_rejected)
     if n_fail and n_fail >= len(starts):

@@ -9,12 +9,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 from src.data.loader import iter_series
 from src.judgment.candidates import add_indicators, scan_short_candidates
-from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature_rows
+from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature_rows_for_side
 from src.judgment.labeling import label_short_candidate
 from src.judgment.train import baseline_prob, evaluate, load_splits, permutation_pvalue, train_baseline, train_model
 
@@ -23,23 +22,6 @@ OUT_DIR = PROJECT_DIR / "data" / "short_replication"
 OUT_JSON = PROJECT_DIR / "analysis" / "output" / "short_replication.json"
 COSTS = {"taker_010": 0.0010, "maker_006": 0.0006}
 CONFIG = {"name": "swap_short_tp5_sl2", "tp": 5.0, "sl": 2.0}
-
-
-def _as_short_features(
-    feature_rows: pd.DataFrame, featured: pd.DataFrame, signal_indices: list[int]
-) -> pd.DataFrame:
-    aligned = feature_rows.copy()
-    source = featured.iloc[signal_indices].reset_index(drop=True)
-    close = source["close"].replace(0, np.nan)
-    aligned["ext_up"] = source["ext_down"]
-    aligned["close_vs_ema55"] = source["ema55"] / close - 1
-    aligned["close_vs_ema200"] = source["ema200"] / close - 1
-    aligned["order_score"] = source["down_order_score"]
-    aligned["slow_slope_12"] = -source["slow_slope_12"]
-    aligned["drawdown24"] = source["runup24"]
-    for bars in (4, 12, 24, 48):
-        aligned[f"ret_{bars}"] = -source[f"ret_{bars}"]
-    return aligned.replace([np.inf, -np.inf], np.nan)
 
 
 def build() -> pd.DataFrame:
@@ -54,7 +36,7 @@ def build() -> pd.DataFrame:
         if not signal_indices:
             continue
         featured = add_features(enriched)
-        feature_rows = _as_short_features(extract_feature_rows(featured, signal_indices), featured, signal_indices)
+        feature_rows = extract_feature_rows_for_side(featured, signal_indices, "short")
         opens = enriched["open"].to_numpy()
         highs = enriched["high"].to_numpy()
         for row_pos, signal_i in enumerate(signal_indices):

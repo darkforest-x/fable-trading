@@ -1,21 +1,21 @@
-"""Triple-barrier labeling for dense-MA candidates (long side).
+"""Triple-barrier labeling for dense-MA candidates (long and short).
 
-For each candidate confirmed at bar i (all rule inputs use data <= i):
-- entry price  = open of bar i+1 by default (`entry="next_open"`);
-  optional `entry="signal_close"` uses close of bar i (same-print fill);
-- path bars    = always start at bar i+1 (after the fill print);
-- upper barrier = entry + TP_ATR_MULT * ATR14(i);
-- lower barrier = entry - SL_ATR_MULT * ATR14(i);
-- timeout       = HORIZON_BARS bars after entry.
+Long path (`label_candidate`):
+  For each candidate at bar i (rule inputs use data <= i):
+  - entry = open of i+1 (`entry="next_open"`) or close of i (`signal_close`);
+  - path starts at i+1; upper = entry + TP*ATR, lower = entry - SL*ATR;
+  - label 1 iff upper is touched first; SL/timeout/ambiguous → 0.
 
-Label = 1 if the upper barrier is touched first, 0 if the lower barrier is
-touched first or the position times out (owner-approved simple start).
+Short path (`label_short_candidate`):
+  Same entry/horizon/ATR floor contract, barriers mirrored: TP is the lower
+  barrier (price fall), SL is the upper barrier (rally against the short).
+  `realized_ret` is the short PnL (positive when price falls to TP).
+  Do not feed short candidates into `label_candidate` — that would score
+  long barrier wins and mix sides in the judgment table.
 
-Intra-bar ambiguity: if one bar touches both barriers we cannot know the order
-from OHLC alone; we conservatively count it as a stop-loss (label 0).
-
-`realized_ret` records the exit return actually achievable under this exit
-rule (barrier price or timeout close), for later backtesting.
+Variants (trailing / MA exit / structure) have long and short twins; changing
+TP/SL/cost presets requires owner approval. Intra-bar both-touch → SL
+(conservative). Holdout is never labeled here.
 """
 from __future__ import annotations
 

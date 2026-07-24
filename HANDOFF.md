@@ -2,22 +2,71 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-07-24 12:52 — tip 集完成；训练已按 Owner 批准重启）
+## ⚡ 当前真相（2026-07-24 16:40 — short 扩 30×6m；回归主线正；binary/top-K 支线关；不 promote）
+
+### 刚发生
+- **Owner 纠正（主线）**：short = **YOLO tip_v1b → 回归 LGBM（预测空头 realized_ret）→ 分位筛单**，对齐 v11。镜像=默认输入，不当「优化旋钮」。
+- **30×6m 扫完成**：`data/judgment_yolo_owner_side_short_30_6m.csv` n=**7519**；墙钟 **≈16 min**（launchd）；主路径镜像。
+- **回归** `p2b_yolo_short_30_6m_reg`：top-decile 净 **+0.371%**（n=150）/ Spearman **0.149** / val-q90=**0.00362**。报告 `analysis/p_short_judgment_reg_align_v11.md`。
+- **binary 支线收口**（同池；本会话交付）：镜像基线 AUC **0.518** / 净 **−0.181%** / p=**0.125**；单变量 top-K10 更差（净 −0.237%）。报告 `analysis/p_short_judgment_refactor_v2.md`。**停止 binary 特征优化**。
+- CLI：`--objective` + `--features-file`。**未** promote / **未**动 holdout / **未**改 TP/SL。
+
+### 下一步（需 Owner）
+- 同构**回归**下扩样本 / walkforward。障碍/holdout/promote 另批。勿再开 binary top-K。
+
+### 仍禁止
+- promote / ACTIVE / 清 forward_log / holdout#8 / 真下单 / 改新鲜度三门 / 杀 §7-2 dump。Long YOLO **未**开。
+
+---
+
+## ⚡ 当前真相（2026-07-24 16:20 — short 判断层重构 + feat_mirror 单变量；不 promote）（历史；叙事已废）
+
+### 刚发生（历史）
+- **结构性**：short 主路径统一方向特征镜像（`align_short_feature_rows`）；`train --side` 拒混边。
+- 曾把 feat_mirror 当单变量优化；**Owner 已纠正** → 见上节回归主链。
+
+### 仍禁止
+- promote / ACTIVE / 清 forward_log / holdout#8 / 真下单 / 改新鲜度三门 / 杀 §7-2 dump。Long YOLO **未**开。
+
+---
+
+## ⚡ 当前真相（2026-07-24 16:05 — SHORT ONLY 首表：5 币 × 6m tip_v1b；不 promote）（历史）
+
+### 刚发生
+- Owner：「后台已停；**不管 HV**；最快回测」→ **5 流动性币** BTC/ETH/SOL/DOGE/XRP × 信号窗 `[2025-11-04, 2026-05-04)`。
+- 扫池 `data/judgment_yolo_owner_side_short_5_6m.csv`（n=**1240**，pos≈0.296；墙钟≈**5.7 min**）→ train tag `p2b_yolo_owner_side_short_5_6m`（**无** holdout）。
+- **SHORT ONLY 首表**：val AUC **0.599**；top-decile 净 **+0.062%**（n=24）；置换 **p=0.009**。报告 `analysis/p_short_only_backtest_tip_v1b_5_6m.md`。
+- **诚实**：n 小；发现级刚过线；**未** promote / **未**动 holdout。tip_v1b tip-smoke 19/27 仍为检测辅证。
+
+### 下一步（需 Owner）
+- 同窗扩币 / 或停在本表转检测金标门——见报告「下一步」。
+
+### 仍禁止
+- promote / ACTIVE / 清 forward_log / holdout#8 / 真下单 / 改新鲜度三门 / 杀 §7-2 dump。Long YOLO **未**开。
+
+---
+
+## ⚡ 当前真相（2026-07-24 14:45 — tip_v1b 训完；tip-smoke 19/27；不 promote）（历史）
+
+### 刚发生
+- **`owner_side_short_tip_v1b` 训练结束**（≈57 ep early-stop；进程已死）。权重：`runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt`。
+- **tip-smoke**：**tip 19/27**、live **4/27**。报告 `analysis/p_owner_side_short_tip_v1b.md`。
+- **未** promote / **未**动 holdout。
+
+### 仍禁止
+- promote / ACTIVE / 清 forward_log / holdout#8 / 真下单 / 改新鲜度三门。
+
+---
+
+## ⚡ 当前真相（2026-07-24 12:52 — tip 集完成；训练已按 Owner 批准重启）（历史）
 
 ### 刚发生
 - **Tip 短集已完成**：`datasets/dense_owner_side_short_tip/`（train 1037 / val 324；holdout **0**；`box_right_frac` p50≈0.997；时间切分干净）。
-- **Owner 早已批准开训**（「可以开始训练吧」）。此前 tip-rebuild 会话把并行开的 `owner_side_short_tip_v1` 当「旁路误启」杀掉并要求再看图——与 Owner 批准冲突；现已按批准**立即重启**。
-- **训练进行中（launchd `com.fable.owner_side_short_tip_v1b`，ppid=1）**：`owner_side_short_tip_v1b`（pid **32584**；见 `analysis/output/owner_side_short_tip_v1b_train.pid`；日志 `analysis/output/owner_side_short_tip_v1b_train.log`；`--data datasets/dense_owner_side_short_tip/data.yaml`；MPS；`--no-finetune`）。用 v1b 因 v1 名被多次竞态打断；`train.py` 本身 `exist_ok=True`。
-- **样本仍可看**：`analysis/output/owner_side_short_tip_sample30/`（非开训闸门；批准已在）。
+- **Owner 早已批准开训**；`owner_side_short_tip_v1b` 经 launchd 开训（后已训完，见上节）。
 - **未** promote / **未**动 holdout / 坏集 `dense_owner_side_short` 不覆盖。
 
-### 下一步
-- 等 tip 训练落盘 → tip-smoke / 真 tip 金标诚实评估（研究口径；默认**不** promote）。
-- 判断层 short-only 骨架可并行准备；主链扫池须等 tip 权重。
-- 作战计划：`analysis/p_short_only_pipeline.md`；待办：`analysis/todo_short_only_pipeline.md`。
-
 ### 仍禁止
-- promote / ACTIVE / 清 forward_log / holdout#8 / 真下单 / 改新鲜度三门 / 杀进行中 tip 训练（见 `analysis/output/ACTIVE_TIP_TRAIN.txt`）/ 杀 §7-2 dump。Long YOLO **未**开。
+- promote / ACTIVE / 清 forward_log / holdout#8 / 真下单 / 改新鲜度三门 / 杀 §7-2 dump。Long YOLO **未**开。
 
 ---
 
