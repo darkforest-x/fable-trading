@@ -1,7 +1,8 @@
-ACTIVE_TRAIN=owner_side_short_tip_v1b
-pid=32584
-data=datasets/dense_owner_side_short_tip/data.yaml
-log=analysis/output/owner_side_short_tip_v1b_train.log
-reason=owner already approved tip train; tip_v1 was thrice killed by agent race; v1b is the live OWNER-APPROVED run
-WARN=Do NOT pkill -f tip_v1 (substring matches tip_v1b). Do NOT kill src.detection.train.
-at=2026-07-24 12:52:32 CST
+ACTIVE_TRAIN=none
+status=finished
+name=owner_side_short_tip_v1b
+weights=runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt
+tip_smoke=19/27 tip, 4/27 live (forward_log_vps_20260721)
+report=analysis/p_owner_side_short_tip_v1b.md
+promote=NO
+at=2026-07-24 14:45 CST

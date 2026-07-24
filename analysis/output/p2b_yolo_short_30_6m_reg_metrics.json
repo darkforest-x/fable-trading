@@ -1,0 +1,188 @@
+{
+  "dataset": "data/judgment_yolo_owner_side_short_30_6m.csv",
+  "side": "short",
+  "objective": "regression",
+  "score_semantics": "predicted_realized_ret",
+  "feature_columns": [
+    "ma_spread_pct",
+    "full_spread",
+    "fast_slow_gap",
+    "full_ratio_min48",
+    "spread_mean8",
+    "spread_mean24",
+    "spread_chg8",
+    "spread_chg24",
+    "spread_pos96",
+    "dense_run_len",
+    "dense_frac48",
+    "ext_up",
+    "close_vs_ema55",
+    "close_vs_ema200",
+    "order_score",
+    "slow_slope_12",
+    "volume_ratio",
+    "volume_z",
+    "vol_ratio_mean8",
+    "atr_pct",
+    "atr_pct_ratio96",
+    "pre_range48",
+    "pre_range168",
+    "drawdown24",
+    "ret_4",
+    "ret_12",
+    "ret_24",
+    "ret_48"
+  ],
+  "n_features": 28,
+  "bar": "15m",
+  "horizon_bars": 72,
+  "purge_window": "0 days 18:15:00",
+  "holdout_start": "2026-05-04 00:00:00+00:00",
+  "holdout_policy": "holdout excluded from training and threshold selection; not evaluated",
+  "splits": {
+    "train": {
+      "n": 5973,
+      "range": [
+        "2025-11-04 00:00:00+00:00",
+        "2026-03-26 04:30:00+00:00"
+      ]
+    },
+    "val": {
+      "n": 1500,
+      "range": [
+        "2026-03-27 05:30:00+00:00",
+        "2026-05-03 05:00:00+00:00"
+      ]
+    },
+    "holdout": {
+      "n": 0,
+      "range": [
+        "NaT",
+        "NaT"
+      ]
+    }
+  },
+  "best_iteration": 14,
+  "val": {
+    "n": 1500,
+    "positive_rate": 0.266,
+    "roc_auc": 0.5627,
+    "pr_auc": 0.304,
+    "thresholds": {
+      "0.4": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.5": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.6": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.7": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    },
+    "top_decile": {
+      "n": 150,
+      "mean_realized_ret": 0.00571,
+      "mean_net_ret": 0.00371,
+      "win_rate": 0.36
+    },
+    "all_mean_net_ret": -0.00133,
+    "spearman_score_vs_ret": 0.1489,
+    "threshold_val_q90": 0.00361708,
+    "score_quantile": 0.9,
+    "above_q90": {
+      "n": 150,
+      "mean_realized_ret": 0.00571,
+      "mean_net_ret": 0.00371,
+      "win_rate": 0.36
+    }
+  },
+  "val_permutation_p": 0.000999000999000999,
+  "val_baseline_ma_spread_logreg": {
+    "n": 1500,
+    "positive_rate": 0.266,
+    "roc_auc": 0.5031,
+    "pr_auc": 0.2647,
+    "thresholds": {
+      "0.4": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.5": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.6": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.7": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    },
+    "top_decile": {
+      "n": 150,
+      "mean_realized_ret": -0.0002,
+      "mean_net_ret": -0.0022,
+      "win_rate": 0.2667
+    },
+    "all_mean_net_ret": -0.00133
+  },
+  "feature_importance_top10": [
+    {
+      "feature": "atr_pct",
+      "gain": 0.7408914272673428
+    },
+    {
+      "feature": "ret_12",
+      "gain": 0.40009831078350544
+    },
+    {
+      "feature": "pre_range168",
+      "gain": 0.3700441285036504
+    },
+    {
+      "feature": "vol_ratio_mean8",
+      "gain": 0.2242862987332046
+    },
+    {
+      "feature": "close_vs_ema200",
+      "gain": 0.2049564030021429
+    },
+    {
+      "feature": "atr_pct_ratio96",
+      "gain": 0.19843403063714504
+    },
+    {
+      "feature": "ret_4",
+      "gain": 0.19807176291942596
+    },
+    {
+      "feature": "slow_slope_12",
+      "gain": 0.17752660065889359
+    },
+    {
+      "feature": "volume_z",
+      "gain": 0.1528253285214305
+    },
+    {
+      "feature": "drawdown24",
+      "gain": 0.1421227427199483
+    }
+  ]
+}

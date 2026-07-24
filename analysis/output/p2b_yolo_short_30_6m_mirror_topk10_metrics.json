@@ -1,0 +1,161 @@
+{
+  "dataset": "data/judgment_yolo_owner_side_short_30_6m.csv",
+  "side": "short",
+  "objective": "binary",
+  "score_semantics": "class_probability",
+  "feature_columns": [
+    "atr_pct",
+    "ret_4",
+    "volume_ratio",
+    "vol_ratio_mean8",
+    "spread_chg8",
+    "ret_48",
+    "fast_slow_gap",
+    "ma_spread_pct",
+    "pre_range168",
+    "spread_pos96"
+  ],
+  "n_features": 10,
+  "bar": "15m",
+  "horizon_bars": 72,
+  "purge_window": "0 days 18:15:00",
+  "holdout_start": "2026-05-04 00:00:00+00:00",
+  "holdout_policy": "holdout excluded from training and threshold selection; not evaluated",
+  "splits": {
+    "train": {
+      "n": 5973,
+      "range": [
+        "2025-11-04 00:00:00+00:00",
+        "2026-03-26 04:30:00+00:00"
+      ]
+    },
+    "val": {
+      "n": 1500,
+      "range": [
+        "2026-03-27 05:30:00+00:00",
+        "2026-05-03 05:00:00+00:00"
+      ]
+    },
+    "holdout": {
+      "n": 0,
+      "range": [
+        "NaT",
+        "NaT"
+      ]
+    }
+  },
+  "best_iteration": 1,
+  "val": {
+    "n": 1500,
+    "positive_rate": 0.266,
+    "roc_auc": 0.4996,
+    "pr_auc": 0.2614,
+    "thresholds": {
+      "0.4": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.5": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.6": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.7": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    },
+    "top_decile": {
+      "n": 150,
+      "mean_realized_ret": -0.00037,
+      "mean_net_ret": -0.00237,
+      "win_rate": 0.24
+    },
+    "all_mean_net_ret": -0.00133
+  },
+  "val_permutation_p": 0.5054945054945055,
+  "val_baseline_ma_spread_logreg": {
+    "n": 1500,
+    "positive_rate": 0.266,
+    "roc_auc": 0.5031,
+    "pr_auc": 0.2647,
+    "thresholds": {
+      "0.4": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.5": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.6": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.7": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    },
+    "top_decile": {
+      "n": 150,
+      "mean_realized_ret": -0.0002,
+      "mean_net_ret": -0.0022,
+      "win_rate": 0.2667
+    },
+    "all_mean_net_ret": -0.00133
+  },
+  "feature_importance_top10": [
+    {
+      "feature": "volume_ratio",
+      "gain": 79.21659851074219
+    },
+    {
+      "feature": "atr_pct",
+      "gain": 68.2830982208252
+    },
+    {
+      "feature": "ret_4",
+      "gain": 34.872798919677734
+    },
+    {
+      "feature": "spread_chg8",
+      "gain": 31.254899978637695
+    },
+    {
+      "feature": "fast_slow_gap",
+      "gain": 26.496999740600586
+    },
+    {
+      "feature": "pre_range168",
+      "gain": 17.07979965209961
+    },
+    {
+      "feature": "ma_spread_pct",
+      "gain": 13.976400375366211
+    },
+    {
+      "feature": "ret_48",
+      "gain": 13.325200080871582
+    },
+    {
+      "feature": "vol_ratio_mean8",
+      "gain": 0.0
+    },
+    {
+      "feature": "spread_pos96",
+      "gain": 0.0
+    }
+  ]
+}

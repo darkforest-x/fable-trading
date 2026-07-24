@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.fable.yolo_short_100_6m</string>
+  <key>WorkingDirectory</key>
+  <string>/Users/zhangzc/fable-trading</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>CHUNK_SERIES</key><string>1</string>
+    <key>OUT</key><string>data/judgment_yolo_owner_side_short_100_6m.csv</string>
+    <key>SYMBOLS_FILE</key><string>analysis/output/yolo_short_100_6m_symbols.txt</string>
+    <key>MONTHS</key><string>6</string>
+    <key>END_BEFORE</key><string>2026-05-04</string>
+    <key>LOG</key><string>analysis/output/yolo_owner_side_short_tip_v1b_100_6m_scan.log</string>
+    <key>PIDFILE</key><string>analysis/output/yolo_owner_side_short_tip_v1b_100_6m_scan.pid</string>
+    <key>WEIGHTS</key><string>runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt</string>
+    <key>OMP_NUM_THREADS</key><string>1</string>
+    <key>MKL_NUM_THREADS</key><string>1</string>
+    <key>VECLIB_MAXIMUM_THREADS</key><string>1</string>
+    <key>OPENBLAS_NUM_THREADS</key><string>1</string>
+    <key>MPLBACKEND</key><string>Agg</string>
+    <key>PYTHONUNBUFFERED</key><string>1</string>
+    <key>FABLE_YOLO_DEVICE</key><string>cpu</string>
+    <key>PYTHONPATH</key><string>/Users/zhangzc/fable-trading</string>
+    <key>PATH</key><string>/Users/zhangzc/fable-trading/.venv/bin:/usr/bin:/bin</string>
+  </dict>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/zhangzc/fable-trading/scripts/run_yolo_short_100_6m.sh</string>
+  </array>
+  <key>StandardOutPath</key>
+  <string>/Users/zhangzc/fable-trading/analysis/output/yolo_owner_side_short_tip_v1b_100_6m_scan.launchd.out</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/zhangzc/fable-trading/analysis/output/yolo_owner_side_short_tip_v1b_100_6m_scan.launchd.err</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <false/>
+</dict>
+</plist>

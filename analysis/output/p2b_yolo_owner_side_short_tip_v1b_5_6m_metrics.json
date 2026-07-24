@@ -1,0 +1,144 @@
+{
+  "dataset": "data/judgment_yolo_owner_side_short_5_6m.csv",
+  "bar": "15m",
+  "horizon_bars": 72,
+  "purge_window": "0 days 18:15:00",
+  "holdout_start": "2026-05-04 00:00:00+00:00",
+  "splits": {
+    "train": {
+      "n": 983,
+      "range": [
+        "2025-11-04 00:00:00+00:00",
+        "2026-03-26 17:00:00+00:00"
+      ]
+    },
+    "val": {
+      "n": 248,
+      "range": [
+        "2026-03-27 18:00:00+00:00",
+        "2026-05-03 05:00:00+00:00"
+      ]
+    },
+    "holdout": {
+      "n": 0,
+      "range": [
+        "NaT",
+        "NaT"
+      ]
+    }
+  },
+  "best_iteration": 5,
+  "val": {
+    "n": 248,
+    "positive_rate": 0.2581,
+    "roc_auc": 0.5993,
+    "pr_auc": 0.3485,
+    "thresholds": {
+      "0.4": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.5": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.6": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.7": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    },
+    "top_decile": {
+      "n": 24,
+      "mean_realized_ret": 0.00262,
+      "mean_net_ret": 0.00062,
+      "win_rate": 0.375
+    },
+    "all_mean_net_ret": -0.00141
+  },
+  "val_permutation_p": 0.008991008991008992,
+  "val_baseline_ma_spread_logreg": {
+    "n": 248,
+    "positive_rate": 0.2581,
+    "roc_auc": 0.5171,
+    "pr_auc": 0.283,
+    "thresholds": {
+      "0.4": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.5": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.6": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.7": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    },
+    "top_decile": {
+      "n": 24,
+      "mean_realized_ret": 0.00172,
+      "mean_net_ret": -0.00028,
+      "win_rate": 0.25
+    },
+    "all_mean_net_ret": -0.00141
+  },
+  "feature_importance_top10": [
+    {
+      "feature": "volume_ratio",
+      "gain": 97.55560946464539
+    },
+    {
+      "feature": "pre_range168",
+      "gain": 41.24783992767334
+    },
+    {
+      "feature": "atr_pct",
+      "gain": 38.49323081970215
+    },
+    {
+      "feature": "drawdown24",
+      "gain": 35.90971040725708
+    },
+    {
+      "feature": "ret_24",
+      "gain": 35.04040050506592
+    },
+    {
+      "feature": "ret_12",
+      "gain": 33.42173957824707
+    },
+    {
+      "feature": "atr_pct_ratio96",
+      "gain": 33.01154947280884
+    },
+    {
+      "feature": "volume_z",
+      "gain": 25.553100109100342
+    },
+    {
+      "feature": "vol_ratio_mean8",
+      "gain": 24.965980052947998
+    },
+    {
+      "feature": "ret_4",
+      "gain": 23.472130060195923
+    }
+  ]
+}
