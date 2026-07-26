@@ -1,0 +1,41 @@
+# Belt-and-suspenders for any code-indexing tool pointed at this repo.
+#
+# Why this file exists (verified against code-review-graph 2.3.7 source,
+# 2026-07-26): collect_all_files() prefers `git ls-files`, so gitignored
+# secrets are normally skipped -- BUT it silently falls back to a full
+# rglob("*") filesystem walk whenever git ls-files returns empty, and
+# get_all_tracked_files() returns [] on missing git, timeout, decode error,
+# AND on any non-zero git exit (returncode is never checked). Its default
+# ignore list (DEFAULT_IGNORE_PATTERNS) covers build/dependency dirs only --
+# it has NO secrets patterns. Today the keys happen to be safe because
+# .json/.env are not in EXTENSION_TO_LANGUAGE, i.e. protection rests on a
+# parser table that can change in any release. This file does not rely on it.
+#
+# This repo holds live OKX trading credentials (data/okx_*_keys.json) and an
+# executor that can place real orders. Keep these exclusions.
+
+# --- secrets / credentials (never index) ---
+data/**
+**/*.env
+.env*
+**/*key*.json
+**/*keys*.json
+**/*secret*
+**/*credential*
+*.pem
+label_studio_data/**
+
+# --- large / generated artifacts (no review value) ---
+analysis/output/**
+runs/**
+datasets/**
+models/**
+logs/**
+wandb/**
+
+# --- vendored / virtualenvs not already covered by defaults ---
+.venv*/**
+.venv_label_studio/**
+.venv-fo/**
+.venv-tools/**
+.claude/worktrees/**

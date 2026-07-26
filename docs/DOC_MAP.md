@@ -19,6 +19,7 @@
 | `docs/EXEC_PROTECTIONS_SPEC.md` | Freqtrade Protections→executor 规格（不引 GPL） |
 | `docs/ops/VPS_OBSERVABILITY_PENDING.md` | Kuma/Grafana 等 **待 Owner 批** |
 | `analysis/week_plan_*.md` | 当周执行计划 |
+| `analysis/INDEX.md` | **全部 analysis 报告的一行索引（动手前先搜这里）**；自动生成,重跑 `scripts/gen_analysis_index.py` |
 | `analysis/p*_report.md` | 单次实验记录（只增不改结论） |
 | `analysis/p_wuzao_topics_scan.md` | wuzao 全站可迁移清单（A/B/C/D） |
 | `analysis/backlog_future_optimizations.md` | tip 通后再拧的积木 |

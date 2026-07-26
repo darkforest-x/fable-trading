@@ -1,0 +1,269 @@
+# analysis/ 报告索引（自动生成,勿手改）
+
+共 **127** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+
+> **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
+> 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
+> 视觉方向预检。**结论列是原文摘录,不是我的转述;空 = 机器提不出,不是没结论——去读原文。**
+
+## 按日期倒序
+
+| 日期 | 报告 | 标题 | 结论(原文摘录) |
+|---|---|---|---|
+| 2026-07-25 | [`p_short_tip_v1b_detect1000_shortish.md`](p_short_tip_v1b_detect1000_shortish.md) | tip_v1b 1000 框 → 空头观感过滤包（S3 补丁，不 promote） |  |
+| 2026-07-24 | [`p_how_to_unlock_label_to_trade_chain.md`](p_how_to_unlock_label_to_trade_chain.md) | 如何打通「打标 → 特征/因子 → 可交易」— 2026-07-24 | 链路没断在「缺因子」或「缺出场旋钮」，断在「标签语义不可部署」+「用错裁判」+「regime 不迁移」。 |
+| 2026-07-24 | [`p_it14_visual_direction_precheck.md`](p_it14_visual_direction_precheck.md) | IT-14 · tip 窗图像素是否携带方向信号（冻结 COCO embed 预检） | 红灯。** 视觉 embed 三期 held-out AUC 均 ≤0.507、top-decile 方向 PF 均 ≤1.096， |
+| 2026-07-24 | [`p_it15_tip_remap.md`](p_it15_tip_remap.md) | IT-15 · tip remap（框右缘 → 局部密度谷）— 诊断有用，不可当部署边 | 诊断通过、部署否决。 |
+| 2026-07-24 | [`p_judgment_layer_lab.md`](p_judgment_layer_lab.md) | 判断层重构实验室(活文档,持续迭代)— 起于 2026-07-24 |  |
+| 2026-07-24 | [`p_live_readiness_checklist.md`](p_live_readiness_checklist.md) | 可上实盘检查清单（判断层重构 — 停在 Owner 点头门前） | 结论：距「只差 Owner 点头」仍差 G0–G4 / G6。** 诚实停点 = 告警/观察价值可保留； |
+| 2026-07-24 | [`p_owner_side_short_tip_v1b.md`](p_owner_side_short_tip_v1b.md) | owner_side_short_tip_v1b — tip-smoke 诚实评估（不 promote） | 项 \| 结果 \| |
+| 2026-07-24 | [`p_short_judgment_100_6m_reg.md`](p_short_judgment_100_6m_reg.md) | short 100×6m 回归单切（发现级，未 holdout / 未 promote） | 扩到 **n=25602**（接近 v11 候选量级哲学）后，单切 top-decile 净仍 **+0.471%**（n=510），略好于 30×6m 的 +0.371%；但 **Spearman 从 0.149 塌到 0.016**，置换 p 从 0.001 松到 **0.037**，va... |
+| 2026-07-24 | [`p_short_judgment_100_6m_reg_walkforward.md`](p_short_judgment_100_6m_reg_walkforward.md) | short 100×6m 回归 — 5-fold walkforward（发现级，未 holdout） |  |
+| 2026-07-24 | [`p_short_judgment_30_6m_reg_walkforward.md`](p_short_judgment_30_6m_reg_walkforward.md) | short 30×6m 回归 — 5-fold walkforward（发现级，未 holdout） |  |
+| 2026-07-24 | [`p_short_judgment_refactor_v1.md`](p_short_judgment_refactor_v1.md) | Short 判断层重构 v1：结构性 short-only 路径 + 特征方向镜像单变量实验 |  |
+| 2026-07-24 | [`p_short_judgment_refactor_v2.md`](p_short_judgment_refactor_v2.md) | Short 判断层重构 v2：扩币（30×6m）镜像基线 + top-K 单变量 |  |
+| 2026-07-24 | [`p_short_judgment_reg_align_v11.md`](p_short_judgment_reg_align_v11.md) | 纠偏：short 判断层对齐 v11 回归主链 | 是的，之前偏了。** short 试点曾落到 binary 小样本 + 把镜像当胜负实验；现已改回与 v11 同构的回归主链。本轮 30×6m 回归：val top-decile 净 **+0.371%**（n=150，扣 0.2%）、Spearman **0.149**、val-q90=**... |
+| 2026-07-24 | [`p_short_only_backtest_tip_v1b_5_6m.md`](p_short_only_backtest_tip_v1b_5_6m.md) | SHORT 回测：tip_v1b × 5 流动性币 × 6m（pre-holdout） | tip_v1b short YOLO 在 **5 币 × [2025-11-04, 2026-05-04)** 窗上训出 val AUC **0.599**、置换 **p≈0.009**、top-decile（n=24）扣 0.2% 后净收益 **+0.062%**——数字方向对，但 **va... |
+| 2026-07-24 | [`p_short_only_pipeline.md`](p_short_only_pipeline.md) | 只做空全链路作战计划（short-only pipeline） |  |
+| 2026-07-24 | [`p_short_tip_v1b_detect1000.md`](p_short_tip_v1b_detect1000.md) | tip_v1b 实际 K 线 ~1000 框包（S3，不 promote） |  |
+| 2026-07-24 | [`p_tip_mapping_owner_intent.md`](p_tip_mapping_owner_intent.md) | tip 映射审计：`box_right_frac≈0.5` 是否冤枉 Owner「框=tip」 | 两件事要分开： |
+| 2026-07-24 | [`project_management_plan_20260724.md`](project_management_plan_20260724.md) | fable-trading 项目管理计划（2026-07-24） |  |
+| 2026-07-24 | [`todo_short_only_pipeline.md`](todo_short_only_pipeline.md) | Short-only 链路待办 |  |
+| 2026-07-23 | [`p_base_rate_dense_verdict.md`](p_base_rate_dense_verdict.md) | 密集几何 base rate 终判:信号真实但边际,成本才是杀手 — 2026-07-23 |  |
+| 2026-07-23 | [`p_chain_failure_attribution.md`](p_chain_failure_attribution.md) | 密集链路失败归因 — 哪一层是主因 — 2026-07-23 | 层 \| 支持度 \| 是否已排除 \| 一句话 \| |
+| 2026-07-23 | [`p_direction_select_base_rate.md`](p_direction_select_base_rate.md) | 因果择向 base rate — 2026-07-23 | 变体 \| 边 \| n \| 胜率 \| 净@maker \| PF@maker \| PF@0.2% \| |
+| 2026-07-23 | [`p_e3_sparse_and_two_stage.md`](p_e3_sparse_and_two_stage.md) | E3 稀疏化 + 两段式确认 — 2026-07-23 | 实验 \| 裁决 \| |
+| 2026-07-23 | [`p_entry_align_and_regime.md`](p_entry_align_and_regime.md) | E1 入场对齐 owner short + E2 regime 门 — 2026-07-23 | 实验 \| 裁决 \| |
+| 2026-07-23 | [`p_entry_timing_close_vs_next.md`](p_entry_timing_close_vs_next.md) | 入场时机：signal_close vs next_open — 2026-07-23 | 变体 \| 边 \| n \| 胜率@n \| PF@maker next \| PF@maker close \| Δ(close−next) \| PF@0.2% next \| PF@0.2% close \| |
+| 2026-07-23 | [`p_latest_code_review_20260723.md`](p_latest_code_review_20260723.md) | 最新代码审查 — 2026-07-23 |  |
+| 2026-07-23 | [`p_launch_entry_base_rate.md`](p_launch_entry_base_rate.md) | 启动入场 vs 盘整中入场：因果 base rate 单变量对照 — 2026-07-23 | 回答 owner：「启动那一刻 + 跟随突破方向」相对「密集第 5 根（盘整中）」是否抬高 PF， |
+| 2026-07-23 | [`p_launch_entry_long_short.md`](p_launch_entry_long_short.md) | 启动入场：强制多空分边 base rate — 2026-07-23 | 回答 owner：「多空没区分好」——上一轮把跟向多空合成一行 PF；本轮强制分边后，启动 |
+| 2026-07-23 | [`p_owner_label_feature_verdict.md`](p_owner_label_feature_verdict.md) | Owner 标框手法 → 因果特征 → train base rate 裁决 — 2026-07-23 | 纪律**：纯离线，`<2026-05-04`（**未碰 holdout**）；TP5/SL2/72bar；成本同时报 |
+| 2026-07-23 | [`p_owner_side_feature_verdict.md`](p_owner_side_feature_verdict.md) | Owner 分边标框 → 因果特征 → train base rate 裁决 — 2026-07-23 | 纪律**：纯离线，`<2026-05-04`（**未碰 holdout**）；long→`label_candidate`、 |
+| 2026-07-23 | [`p_owner_side_rich_features_verdict.md`](p_owner_side_rich_features_verdict.md) | Owner 扩特征分边裁决 — 2026-07-23 | 纪律**：纯离线，`<2026-05-04`（**未碰 holdout**）；long→`label_candidate`、 |
+| 2026-07-23 | [`p_samesource_judgment_verdict.md`](p_samesource_judgment_verdict.md) | 同源判断层 + 新特征:walk-forward 证伪"稳健 edge" — 2026-07-23 夜 | "双均线密集启动"在实时盘口、扣成本、TP5/SL2 结构下,没有稳健可交易 edge。 |
+| 2026-07-23 | [`p_short_trend_ab.md`](p_short_trend_ab.md) | 空边趋势出场 A/B — 稳健性 + owner short 对照 — 2026-07-23 | A — 月度口径稳健过线，季度有集中张力。 |
+| 2026-07-23 | [`p_short_trend_holdout7.md`](p_short_trend_holdout7.md) | Holdout #7 — A 因果空边趋势出（no_tp / trail4）— 2026-07-23 | 证伪。** train 过线的两档趋势出场，在 holdout 上全部塌到 ~1.0： |
+| 2026-07-23 | [`p_tip_eval_fairness.md`](p_tip_eval_fairness.md) | tip 验收公平性审计 — tip-smoke / tip_hit 会不会冤假错案？ | 结论 \| 为何仍站 \| |
+| 2026-07-23 | [`p_trend_exit_base_rate.md`](p_trend_exit_base_rate.md) | 趋势出场 base rate — 2026-07-23 | 空边：趋势出场抬过 1.3。** 三套过线—— |
+| 2026-07-23 | [`p_v13_real_tip_collect_plan.md`](p_v13_real_tip_collect_plan.md) | v13 — 收集 live 真实 tip 成败图（计划） |  |
+| 2026-07-23 | [`p_v15_dataset_confound.md`](p_v15_dataset_confound.md) | v15 败因定论:正负样本来自两条渲染管线(风格捷径)— 2026-07-23 | v15(及 v14)训练集的**正样本全部是 `_pad200` 重渲图,负样本全部是旧式原图**—— |
+| 2026-07-23 | [`p_v15_revalidate_fair.md`](p_v15_revalidate_fair.md) | v15 发现级公平重验 — 2026-07-23 | 仍否决 promote v15。 |
+| 2026-07-23 | [`p_v15_tip_val.md`](p_v15_tip_val.md) | v15 tip-val（Hypothesis B）中期裁决 — 2026-07-23 | 纪律**：未 promote `owner_best` / ACTIVE / frozen；未评 holdout；未清 forward_log。 |
+| 2026-07-23 | [`p_v16_holdout_verdict.md`](p_v16_holdout_verdict.md) | v16 holdout 终审:纯检测亏损,判断层反预测 — 2026-07-23 |  |
+| 2026-07-23 | [`p_v16_tipuni_train.md`](p_v16_tipuni_train.md) | v16 tipuni(统一管线冷启动)训练与金标验收 — 2026-07-23 | 结论:不上线。** 主线维持 detector=none。 |
+| 2026-07-22 | [`backlog_future_optimizations.md`](backlog_future_optimizations.md) | 未来优化 backlog（现在不做） |  |
+| 2026-07-22 | [`p_frontend_viz_opt.md`](p_frontend_viz_opt.md) | 前端可视化优化 — 真落地 + 风格收敛 | 第一轮（`4b0c403`）把 Tabulator / 状态灯 / explore 框落地后，Owner 反馈 **整体风格变土**——不是功能错，是视觉像「AI 监控大屏」：6 格状态卡、midnight 表头、seg pill 滤镜、侧栏调试区喧宾夺主。 |
+| 2026-07-22 | [`p_overnight_20260722.md`](p_overnight_20260722.md) | 夜间工作纪要 — 2026-07-22 |  |
+| 2026-07-22 | [`p_pad200_cut_audit.md`](p_pad200_cut_audit.md) | pad200 切割审计 — Owner「框不对」— 2026-07-22 |  |
+| 2026-07-22 | [`p_pad200_regression_why.md`](p_pad200_regression_why.md) | 为什么「昨天修过 stem」v13 还是错窗 — 2026-07-22 |  |
+| 2026-07-22 | [`p_project_overview_20260722.md`](p_project_overview_20260722.md) | 项目总览（给 Owner）— 2026-07-22 夜 |  |
+| 2026-07-22 | [`p_real_tip_collect_started.md`](p_real_tip_collect_started.md) | 真实 tip 成败金标小样 — 已开干（2026-07-22 夜） | 本机 K 线停在 07-16，盖不住账本信号 → **在 VPS 上采集**后拉回本机。 |
+| 2026-07-22 | [`p_side_tools_landed.md`](p_side_tools_landed.md) | 本机旁路工具集落地 — 发现级收尾 |  |
+| 2026-07-22 | [`p_v13_pad200_train.md`](p_v13_pad200_train.md) | v13 pad200 终局 + H-DET-1 tip 对照 — 2026-07-22 | 权重 \| best ep \| P \| R \| mAP50 \| mAP50-95 \| |
+| 2026-07-22 | [`p_v13_why_bad_train.md`](p_v13_why_bad_train.md) | 为什么 v13 训这么差？训练集诊断 — 2026-07-22 |  |
+| 2026-07-22 | [`p_v14_failure_rootcause.md`](p_v14_failure_rootcause.md) | v14 tip 仍失败 — 根因分析（有证据）— 2026-07-22 | v14 不是「标签又坏了」**（MAD-on 抽检错窗≈0；存档 pad200 与 `process_pad200` 重渲 **MAD=0**）。 |
+| 2026-07-22 | [`p_v14_pad200_rebuild.md`](p_v14_pad200_rebuild.md) | v14 pad200 重建（MAD-on）— 2026-07-22 |  |
+| 2026-07-22 | [`p_v14_pad200_train.md`](p_v14_pad200_train.md) | v14 pad200（MAD-on）终局 + tip 对照 — 2026-07-22 |  |
+| 2026-07-22 | [`p_v14_sample30.md`](p_v14_sample30.md) | v14 pad200 抽检 30 张 + okx 错窗小样 — 2026-07-22 | 结论：可以放心 sync 去 Windows。** `mad_gate=true`；okx 错窗抽检 **0**；未见 v13 式残留错框。未 sync、未开训、未 promote。 |
+| 2026-07-22 | [`p_wuzao_a_tier_done.md`](p_wuzao_a_tier_done.md) | wuzao A 档落地短报（2026-07-22 夜） |  |
+| 2026-07-22 | [`p_wuzao_more_useful.md`](p_wuzao_more_useful.md) | 无噪 topics：前端之外还有哪些对本仓真正好用 | 昨夜 A 档把「能立刻落地」偏成了 **LWC/叠框/LS/规格**——对，但不够。 |
+| 2026-07-22 | [`p_wuzao_topics_scan.md`](p_wuzao_topics_scan.md) | 无噪（wuzao）全站 topics 扫描 — 对本仓可迁移性 | 结论 \| 内容 \| |
+| 2026-07-22 | [`p_yolo_dense_hypotheses.md`](p_yolo_dense_hypotheses.md) | YOLO 均线密集检测层假设簇（H-DET）— 发现级汇总 | 调度/阈值不是解药；几何训练分布才是。** tip-only 与 TIP_CONF 已证伪抬 tip_fire。 |
+| 2026-07-22 | [`p_yolo_external_sources.md`](p_yolo_external_sources.md) | 外源调研：YOLO「均线密集 / 盘口 tip」可迁移点子 | 外面**没有**「盘口 tip 均线密集」现成解药。公开物分成三类： |
+| 2026-07-22 | [`p_yolo_while_v13_trains.md`](p_yolo_while_v13_trains.md) | v13 训练期间可做项 — 短报告（2026-07-22） |  |
+| 2026-07-21 | [`night_report_20260721.md`](night_report_20260721.md) | 晨报 / 批次状态（2026-07-21） |  |
+| 2026-07-21 | [`p_box_to_bar_lag.md`](p_box_to_bar_lag.md) | 框→bar 滞后机制（EDEN / KORU）— 2026-07-21 | 根因是几何语义错位，不是映射 bug。 |
+| 2026-07-21 | [`p_chartscanai_review.md`](p_chartscanai_review.md) | ChartScanAI 详细评测 — 对 fable-trading 有什么用 | 对「盘口 tip 认不出」没有直接帮助。** ChartScanAI 和本仓撞上的是同一类坑：框往往标在形态**已经走完**之后，右缘/盘口几乎点不着火。社区 issue 明确写「只事后认」「实时信号滞后」——这正是本仓 tip 出生率≈0 的同构失败模式，不是解药。 |
+| 2026-07-21 | [`p_execution_slippage.md`](p_execution_slippage.md) | 执行折扣 / 滑点实测（2026-07-21） | 无法从当前台账可靠估计「成交价相对账本价」的 bp 滑点。 |
+| 2026-07-21 | [`p_github_optimize_candidates.md`](p_github_optimize_candidates.md) | GitHub 开源候选 — 对本仓真实痛点的第二轮筛选 | 何时 \| 值得做什么 \| 不值得做什么 \| |
+| 2026-07-21 | [`p_realtime_yolo_within_bar.md`](p_realtime_yolo_within_bar.md) | YOLO「bar 内实时推理」路线图 — 2026-07-21 | 真正卡 tip_fresh 的不是「推理引擎不够快」，而是「模型在无后文 tip 窗上贴边框出生率≈0」+「信号龄从 bar open_time 起算」的结构算术。 |
+| 2026-07-21 | [`p_tip_only_smoke.md`](p_tip_only_smoke.md) | tip-only 扫描冒烟诊断 — 2026-07-21 | 不要永久改主线为 tip-only。** tip 调度本身几乎不抬 tip_fire；根因仍是模型在 |
+| 2026-07-21 | [`p_tip_subset_val.md`](p_tip_subset_val.md) | p_tip_subset_val — tip 可检子集 vs 全量基线（严格 val 窗） | 实盘群体折扣系数（tip_strict 净收益 / 全量净收益，val，成本 0.3%）= 0.0465。 |
+| 2026-07-20 | [`p2a_v12_mainline_cutover.md`](p2a_v12_mainline_cutover.md) | 检测主线切 v12（owner 强制）— 2026-07-20 |  |
+| 2026-07-20 | [`p_exit_parity.md`](p_exit_parity.md) | P-EXIT-PARITY：回测 vs 前向出场逻辑等价性验证（2026-07-20） |  |
+| 2026-07-20 | [`p_v12_htip_eval.md`](p_v12_htip_eval.md) | H-TIP v12 评测（D1）— 2026-07-20 |  |
+| 2026-07-20 | [`p_v12_score_shift.md`](p_v12_score_shift.md) | 路 C：检测 v12 × 判断 v11 冻结 —— val 窗小段重扫分数漂移测量 | covariate shift 极小，过阈率几乎不变，top-decile 净收益仍强正、无统计显著塌陷。 |
+| 2026-07-20 | [`p_v12_shadow_start.md`](p_v12_shadow_start.md) | v12 影子启动记录 — 2026-07-20 |  |
+| 2026-07-20 | [`p_weight_centric_val.md`](p_weight_centric_val.md) | p_weight_centric — score→size 连续仓位 vs 二元 all-in（严格 val 窗离线回测） | 分位分档映射（q90-95/q95-99/q99+ → 1x/1.5x/2x）在 val 窗把净收益从 +141.0% 提到 |
+| 2026-07-20 | [`week_plan_20260720.md`](week_plan_20260720.md) | 一周执行计划(2026-07-20 → 07-27)— 交给 Grok 执行版 |  |
+| 2026-07-19 | [`h_tip_plan.md`](h_tip_plan.md) | H-TIP — tip-firing for live YOLO |  |
+| 2026-07-19 | [`p_forward_hindsight_20260719.md`](p_forward_hindsight_20260719.md) | 前向事后检出日结 — 2026-07-19 | 脉冲在 04:30–05:30 UTC（信号附近）**正常踩点**（`fable-forward.timer` 每 15m）。 |
+| 2026-07-18 | [`p3_v11_pool_cutover.md`](p3_v11_pool_cutover.md) | p3 — v11 池判断层切换 ACTIVE |  |
+| 2026-07-17 | [`p2a_hts_report.md`](p2a_hts_report.md) | H-TS — 检测层训练图时间切分实验 |  |
+| 2026-07-17 | [`p2b_judgment_audit.md`](p2b_judgment_audit.md) | p2b — 判断层全面体检 + 两个前沿改造实验(J-1/J-2) |  |
+| 2026-07-16 | [`p2a_lr_bug_audit.md`](p2a_lr_bug_audit.md) | p2a — 学习率 bug 审计与 v8 重训 | "干净尺子首次证实加数据有效: v6(4501)0.595 → v7(6501)0.625"** —— **撤回**。 |
+| 2026-07-16 | [`p3_v8_pool_cutover.md`](p3_v8_pool_cutover.md) | p3 — 干净池(v8_chain)判断层切换 ACTIVE |  |
+| 2026-07-15 | [`p15_h3_ma_exit.md`](p15_h3_ma_exit.md) | P1.5 H3：结构出场（收盘跌破 EMA21） |  |
+| 2026-07-15 | [`p15_h4_time_decay.md`](p15_h4_time_decay.md) | P1.5 H4：时间衰减紧缩出场 |  |
+| 2026-07-15 | [`p15_h5_vol_adaptive.md`](p15_h5_vol_adaptive.md) | P1.5 H5：波动率自适应障碍 |  |
+| 2026-07-15 | [`p2a_ab_leak_correction.md`](p2a_ab_leak_correction.md) | A/B 泄漏更正与干净检验（2026-07-15） |  |
+| 2026-07-15 | [`p2a_yolo_critical_path_ab.md`](p2a_yolo_critical_path_ab.md) | A/B: YOLO候选源 vs 规则候选源（SWAP，发现级 val-only） |  |
+| 2026-07-15 | [`p2a_yolo_mainline_cutover.md`](p2a_yolo_mainline_cutover.md) | YOLO 主线切换（owner 2026-07-15） |  |
+| 2026-07-15 | [`p2b_factor_ic_vol.md`](p2b_factor_ic_vol.md) | H14/H17/H18 成交量因子三连 IC 筛选（SWAP 池, train/val） | 结论**：三因子均 **不进入** 单变量增益验证队列。负结果保留：成交量方向假说在「密集启动候选池 + 72bar 前向收益」切片上尚未显现出可过线的线性秩相关。 |
+| 2026-07-15 | [`p2b_h11_tiered.md`](p2b_h11_tiered.md) | H11 市值/流动性分层模型（SWAP 24h 成交额中位数二分） |  |
+| 2026-07-15 | [`p2b_h13_btc_regime.md`](p2b_h13_btc_regime.md) | H13 BTC 大盘状态共享特征（SWAP 池, train/val） |  |
+| 2026-07-15 | [`p2b_h15_quality.md`](p2b_h15_quality.md) | H15 密集质量二阶特征 IC 筛选（SWAP 池, train/val） |  |
+| 2026-07-15 | [`p2b_h8_30m_grid.md`](p2b_h8_30m_grid.md) | H8 后续：30m 网格 TP{4,5,6}×horizon{48,60,72} |  |
+| 2026-07-15 | [`p2b_low_tf_backtest_report.md`](p2b_low_tf_backtest_report.md) | 低周期回测：1m / 2m / 3m / 5m vs 15m |  |
+| 2026-07-15 | [`p2b_ml_layer_opt_summary.md`](p2b_ml_layer_opt_summary.md) | ML 层可优化方向 — 实测扫描总结 | 方向 \| 结论 \| |
+| 2026-07-15 | [`p2b_ml_opt_rules_expanded_report.md`](p2b_ml_opt_rules_expanded_report.md) | ML 层优化扫描（YOLO 判断池，val-only） |  |
+| 2026-07-15 | [`p2b_ml_opt_swap_tp5_report.md`](p2b_ml_opt_swap_tp5_report.md) | ML 层优化扫描（YOLO 判断池，val-only） |  |
+| 2026-07-15 | [`p2b_ml_opt_yolo_report.md`](p2b_ml_opt_yolo_report.md) | ML 层优化扫描（YOLO 判断池，val-only） |  |
+| 2026-07-15 | [`p2b_yolo_reg_active_cutover.md`](p2b_yolo_reg_active_cutover.md) | 判断层切 ACTIVE：YOLO + 回归 realized_ret |  |
+| 2026-07-15 | [`p3_ml_opt_backtest_compare.md`](p3_ml_opt_backtest_compare.md) | 回测对照：二分类 vs 回归收益（YOLO 主线池） |  |
+| 2026-07-15 | [`p3_yolo_mainline_backtest.md`](p3_yolo_mainline_backtest.md) | YOLO 主线整体回测（切流后，2026-07-15） |  |
+| 2026-07-10 | [`p2a_bad_images_pack.md`](p2a_bad_images_pack.md) | P2-11 偏 B · 坏图清单（Round 1 → E2） |  |
+| 2026-07-10 | [`p2a_consistency_e21_vs_old_best.md`](p2a_consistency_e21_vs_old_best.md) | Consistency: E2.1 GT vs old yolo11s best.pt preds |  |
+| 2026-07-10 | [`p2a_e1_xpad_report.md`](p2a_e1_xpad_report.md) | P2-11 E1 — 收紧 `x_pad_px`（12 → 6） |  |
+| 2026-07-10 | [`p2a_e21_train_interim.md`](p2a_e21_train_interim.md) | YOLO E2.1 training interim (train EXITED) |  |
+| 2026-07-10 | [`p2a_e21_train_report.md`](p2a_e21_train_report.md) | P2a YOLO E2.1 formal retrain report |  |
+| 2026-07-10 | [`p2a_e2_max_dense_report.md`](p2a_e2_max_dense_report.md) | P2-11 E2 — 长段收核 `MAX_DENSE_BARS=24` |  |
+| 2026-07-09 | [`p15_h10_short_report.md`](p15_h10_short_report.md) | P1.5 R2：H10 做空侧镜像验证 |  |
+| 2026-07-09 | [`p15_h1_h2_exit_report.md`](p15_h1_h2_exit_report.md) | P1.5 R3：H1/H2 出场复合验证 |  |
+| 2026-07-09 | [`p15_h9_report.md`](p15_h9_report.md) | P1.5 R1'：H9 高层趋势过滤复测与推广 |  |
+| 2026-07-09 | [`p2_data_audit_report.md`](p2_data_audit_report.md) | P2-12 数据质量审计 |  |
+| 2026-07-09 | [`p2a_label_audit_round1.md`](p2a_label_audit_round1.md) | P2-11 YOLO Label Audit Round 1 |  |
+| 2026-07-09 | [`p2b_mtf_report.md`](p2b_mtf_report.md) | P1.5 R4：H7/H8 多时间框架池 |  |
+| 2026-07-08 | [`p2b_v2_report.md`](p2b_v2_report.md) | 阶段 2b-v2 报告：宽障碍 + 新数据 + 双池对比 | 阶段 2b 验收通过（2026-07-08 holdout 一次性评估，项目所有者批准）： |
+| 2026-07-08 | [`p2b_v3_barrier_sweep.md`](p2b_v3_barrier_sweep.md) | 2b-v3 探索：出场结构扫描（owner 2026-07-08 授意"试试止盈止损优化"） | 1. **TP5/SL2 是本轮最优出场**：唯一在 0.3% 成本下净收益明显为正的结构 |
+| 2026-07-08 | [`p3_backtest_report.md`](p3_backtest_report.md) | 阶段 3 报告：事件驱动回测（第一轮） | 阶段 3 验收未通过**：验收窗口（157 笔）在基准成本 0.3% 下净收益 +0.06%（勉强为正）、 |
+| 2026-07-07 | [`p0_alpha_report.md`](p0_alpha_report.md) | P0 报告：人工标签是否含 alpha？ | 人工标签在"收益端"没有 alpha，但在"风险端"有真实且显著的 alpha**： |
+| 2026-07-07 | [`p2a_detection_report.md`](p2a_detection_report.md) | P2a 报告：YOLO 检测双均线密集区域 | 检测层冒烟流水线已跑通：**val mAP50 = 0.835**（best.pt 官方评估），超过 0.8 冒烟验收线。 |
+| 2026-07-07 | [`p2b_judgment_report.md`](p2b_judgment_report.md) | 阶段 2b 报告：判断层（triple-barrier + LightGBM） | 判断层信号统计上真实存在（holdout AUC 0.59，置换检验 p=0.002，稳定优于单特征基线）， |
+| — | [`p2a_golden_round1.md`](p2a_golden_round1.md) | 金标准 Round-1：owner vs 规则 分歧报告 |  |
+| — | [`p2b_eth_micro_channel.md`](p2b_eth_micro_channel.md) | ETH Micro 通道（1/2/3/5m） |  |
+| — | [`p2b_factor_ic_report.md`](p2b_factor_ic_report.md) | H19 外部 alpha 因子 IC 筛选（SWAP池, train/val, 未碰holdout） |  |
+| — | [`p2b_ma206_comparison.md`](p2b_ma206_comparison.md) | P0-3 均线 20/60/120 对比实验（val only） | 1. **推荐：判断层主线暂时保持 8-55。** 理由是本项目成功标准看净收益， |
+| — | [`p_v14_windows_train.md`](p_v14_windows_train.md) | v14 pad200 → Windows（3060）训练交接 |  |
+| — | [`short_tf_side_channel.md`](short_tf_side_channel.md) | 短周期支线（1m / 5m） |  |
+
+## 按文件名(便于 grep)
+
+- [`backlog_future_optimizations.md`](backlog_future_optimizations.md) — 未来优化 backlog（现在不做）
+- [`h_tip_plan.md`](h_tip_plan.md) — H-TIP — tip-firing for live YOLO
+- [`night_report_20260721.md`](night_report_20260721.md) — 晨报 / 批次状态（2026-07-21）
+- [`p0_alpha_report.md`](p0_alpha_report.md) — P0 报告：人工标签是否含 alpha？
+- [`p15_h10_short_report.md`](p15_h10_short_report.md) — P1.5 R2：H10 做空侧镜像验证
+- [`p15_h1_h2_exit_report.md`](p15_h1_h2_exit_report.md) — P1.5 R3：H1/H2 出场复合验证
+- [`p15_h3_ma_exit.md`](p15_h3_ma_exit.md) — P1.5 H3：结构出场（收盘跌破 EMA21）
+- [`p15_h4_time_decay.md`](p15_h4_time_decay.md) — P1.5 H4：时间衰减紧缩出场
+- [`p15_h5_vol_adaptive.md`](p15_h5_vol_adaptive.md) — P1.5 H5：波动率自适应障碍
+- [`p15_h9_report.md`](p15_h9_report.md) — P1.5 R1'：H9 高层趋势过滤复测与推广
+- [`p2_data_audit_report.md`](p2_data_audit_report.md) — P2-12 数据质量审计
+- [`p2a_ab_leak_correction.md`](p2a_ab_leak_correction.md) — A/B 泄漏更正与干净检验（2026-07-15）
+- [`p2a_bad_images_pack.md`](p2a_bad_images_pack.md) — P2-11 偏 B · 坏图清单（Round 1 → E2）
+- [`p2a_consistency_e21_vs_old_best.md`](p2a_consistency_e21_vs_old_best.md) — Consistency: E2.1 GT vs old yolo11s best.pt preds
+- [`p2a_detection_report.md`](p2a_detection_report.md) — P2a 报告：YOLO 检测双均线密集区域
+- [`p2a_e1_xpad_report.md`](p2a_e1_xpad_report.md) — P2-11 E1 — 收紧 `x_pad_px`（12 → 6）
+- [`p2a_e21_train_interim.md`](p2a_e21_train_interim.md) — YOLO E2.1 training interim (train EXITED)
+- [`p2a_e21_train_report.md`](p2a_e21_train_report.md) — P2a YOLO E2.1 formal retrain report
+- [`p2a_e2_max_dense_report.md`](p2a_e2_max_dense_report.md) — P2-11 E2 — 长段收核 `MAX_DENSE_BARS=24`
+- [`p2a_golden_round1.md`](p2a_golden_round1.md) — 金标准 Round-1：owner vs 规则 分歧报告
+- [`p2a_hts_report.md`](p2a_hts_report.md) — H-TS — 检测层训练图时间切分实验
+- [`p2a_label_audit_round1.md`](p2a_label_audit_round1.md) — P2-11 YOLO Label Audit Round 1
+- [`p2a_lr_bug_audit.md`](p2a_lr_bug_audit.md) — p2a — 学习率 bug 审计与 v8 重训
+- [`p2a_v12_mainline_cutover.md`](p2a_v12_mainline_cutover.md) — 检测主线切 v12（owner 强制）— 2026-07-20
+- [`p2a_yolo_critical_path_ab.md`](p2a_yolo_critical_path_ab.md) — A/B: YOLO候选源 vs 规则候选源（SWAP，发现级 val-only）
+- [`p2a_yolo_mainline_cutover.md`](p2a_yolo_mainline_cutover.md) — YOLO 主线切换（owner 2026-07-15）
+- [`p2b_eth_micro_channel.md`](p2b_eth_micro_channel.md) — ETH Micro 通道（1/2/3/5m）
+- [`p2b_factor_ic_report.md`](p2b_factor_ic_report.md) — H19 外部 alpha 因子 IC 筛选（SWAP池, train/val, 未碰holdout）
+- [`p2b_factor_ic_vol.md`](p2b_factor_ic_vol.md) — H14/H17/H18 成交量因子三连 IC 筛选（SWAP 池, train/val）
+- [`p2b_h11_tiered.md`](p2b_h11_tiered.md) — H11 市值/流动性分层模型（SWAP 24h 成交额中位数二分）
+- [`p2b_h13_btc_regime.md`](p2b_h13_btc_regime.md) — H13 BTC 大盘状态共享特征（SWAP 池, train/val）
+- [`p2b_h15_quality.md`](p2b_h15_quality.md) — H15 密集质量二阶特征 IC 筛选（SWAP 池, train/val）
+- [`p2b_h8_30m_grid.md`](p2b_h8_30m_grid.md) — H8 后续：30m 网格 TP{4,5,6}×horizon{48,60,72}
+- [`p2b_judgment_audit.md`](p2b_judgment_audit.md) — p2b — 判断层全面体检 + 两个前沿改造实验(J-1/J-2)
+- [`p2b_judgment_report.md`](p2b_judgment_report.md) — 阶段 2b 报告：判断层（triple-barrier + LightGBM）
+- [`p2b_low_tf_backtest_report.md`](p2b_low_tf_backtest_report.md) — 低周期回测：1m / 2m / 3m / 5m vs 15m
+- [`p2b_ma206_comparison.md`](p2b_ma206_comparison.md) — P0-3 均线 20/60/120 对比实验（val only）
+- [`p2b_ml_layer_opt_summary.md`](p2b_ml_layer_opt_summary.md) — ML 层可优化方向 — 实测扫描总结
+- [`p2b_ml_opt_rules_expanded_report.md`](p2b_ml_opt_rules_expanded_report.md) — ML 层优化扫描（YOLO 判断池，val-only）
+- [`p2b_ml_opt_swap_tp5_report.md`](p2b_ml_opt_swap_tp5_report.md) — ML 层优化扫描（YOLO 判断池，val-only）
+- [`p2b_ml_opt_yolo_report.md`](p2b_ml_opt_yolo_report.md) — ML 层优化扫描（YOLO 判断池，val-only）
+- [`p2b_mtf_report.md`](p2b_mtf_report.md) — P1.5 R4：H7/H8 多时间框架池
+- [`p2b_v2_report.md`](p2b_v2_report.md) — 阶段 2b-v2 报告：宽障碍 + 新数据 + 双池对比
+- [`p2b_v3_barrier_sweep.md`](p2b_v3_barrier_sweep.md) — 2b-v3 探索：出场结构扫描（owner 2026-07-08 授意"试试止盈止损优化"）
+- [`p2b_yolo_reg_active_cutover.md`](p2b_yolo_reg_active_cutover.md) — 判断层切 ACTIVE：YOLO + 回归 realized_ret
+- [`p3_backtest_report.md`](p3_backtest_report.md) — 阶段 3 报告：事件驱动回测（第一轮）
+- [`p3_ml_opt_backtest_compare.md`](p3_ml_opt_backtest_compare.md) — 回测对照：二分类 vs 回归收益（YOLO 主线池）
+- [`p3_v11_pool_cutover.md`](p3_v11_pool_cutover.md) — p3 — v11 池判断层切换 ACTIVE
+- [`p3_v8_pool_cutover.md`](p3_v8_pool_cutover.md) — p3 — 干净池(v8_chain)判断层切换 ACTIVE
+- [`p3_yolo_mainline_backtest.md`](p3_yolo_mainline_backtest.md) — YOLO 主线整体回测（切流后，2026-07-15）
+- [`p_base_rate_dense_verdict.md`](p_base_rate_dense_verdict.md) — 密集几何 base rate 终判:信号真实但边际,成本才是杀手 — 2026-07-23
+- [`p_box_to_bar_lag.md`](p_box_to_bar_lag.md) — 框→bar 滞后机制（EDEN / KORU）— 2026-07-21
+- [`p_chain_failure_attribution.md`](p_chain_failure_attribution.md) — 密集链路失败归因 — 哪一层是主因 — 2026-07-23
+- [`p_chartscanai_review.md`](p_chartscanai_review.md) — ChartScanAI 详细评测 — 对 fable-trading 有什么用
+- [`p_direction_select_base_rate.md`](p_direction_select_base_rate.md) — 因果择向 base rate — 2026-07-23
+- [`p_e3_sparse_and_two_stage.md`](p_e3_sparse_and_two_stage.md) — E3 稀疏化 + 两段式确认 — 2026-07-23
+- [`p_entry_align_and_regime.md`](p_entry_align_and_regime.md) — E1 入场对齐 owner short + E2 regime 门 — 2026-07-23
+- [`p_entry_timing_close_vs_next.md`](p_entry_timing_close_vs_next.md) — 入场时机：signal_close vs next_open — 2026-07-23
+- [`p_execution_slippage.md`](p_execution_slippage.md) — 执行折扣 / 滑点实测（2026-07-21）
+- [`p_exit_parity.md`](p_exit_parity.md) — P-EXIT-PARITY：回测 vs 前向出场逻辑等价性验证（2026-07-20）
+- [`p_forward_hindsight_20260719.md`](p_forward_hindsight_20260719.md) — 前向事后检出日结 — 2026-07-19
+- [`p_frontend_viz_opt.md`](p_frontend_viz_opt.md) — 前端可视化优化 — 真落地 + 风格收敛
+- [`p_github_optimize_candidates.md`](p_github_optimize_candidates.md) — GitHub 开源候选 — 对本仓真实痛点的第二轮筛选
+- [`p_how_to_unlock_label_to_trade_chain.md`](p_how_to_unlock_label_to_trade_chain.md) — 如何打通「打标 → 特征/因子 → 可交易」— 2026-07-24
+- [`p_it14_visual_direction_precheck.md`](p_it14_visual_direction_precheck.md) — IT-14 · tip 窗图像素是否携带方向信号（冻结 COCO embed 预检）
+- [`p_it15_tip_remap.md`](p_it15_tip_remap.md) — IT-15 · tip remap（框右缘 → 局部密度谷）— 诊断有用，不可当部署边
+- [`p_judgment_layer_lab.md`](p_judgment_layer_lab.md) — 判断层重构实验室(活文档,持续迭代)— 起于 2026-07-24
+- [`p_latest_code_review_20260723.md`](p_latest_code_review_20260723.md) — 最新代码审查 — 2026-07-23
+- [`p_launch_entry_base_rate.md`](p_launch_entry_base_rate.md) — 启动入场 vs 盘整中入场：因果 base rate 单变量对照 — 2026-07-23
+- [`p_launch_entry_long_short.md`](p_launch_entry_long_short.md) — 启动入场：强制多空分边 base rate — 2026-07-23
+- [`p_live_readiness_checklist.md`](p_live_readiness_checklist.md) — 可上实盘检查清单（判断层重构 — 停在 Owner 点头门前）
+- [`p_overnight_20260722.md`](p_overnight_20260722.md) — 夜间工作纪要 — 2026-07-22
+- [`p_owner_label_feature_verdict.md`](p_owner_label_feature_verdict.md) — Owner 标框手法 → 因果特征 → train base rate 裁决 — 2026-07-23
+- [`p_owner_side_feature_verdict.md`](p_owner_side_feature_verdict.md) — Owner 分边标框 → 因果特征 → train base rate 裁决 — 2026-07-23
+- [`p_owner_side_rich_features_verdict.md`](p_owner_side_rich_features_verdict.md) — Owner 扩特征分边裁决 — 2026-07-23
+- [`p_owner_side_short_tip_v1b.md`](p_owner_side_short_tip_v1b.md) — owner_side_short_tip_v1b — tip-smoke 诚实评估（不 promote）
+- [`p_pad200_cut_audit.md`](p_pad200_cut_audit.md) — pad200 切割审计 — Owner「框不对」— 2026-07-22
+- [`p_pad200_regression_why.md`](p_pad200_regression_why.md) — 为什么「昨天修过 stem」v13 还是错窗 — 2026-07-22
+- [`p_project_overview_20260722.md`](p_project_overview_20260722.md) — 项目总览（给 Owner）— 2026-07-22 夜
+- [`p_real_tip_collect_started.md`](p_real_tip_collect_started.md) — 真实 tip 成败金标小样 — 已开干（2026-07-22 夜）
+- [`p_realtime_yolo_within_bar.md`](p_realtime_yolo_within_bar.md) — YOLO「bar 内实时推理」路线图 — 2026-07-21
+- [`p_samesource_judgment_verdict.md`](p_samesource_judgment_verdict.md) — 同源判断层 + 新特征:walk-forward 证伪"稳健 edge" — 2026-07-23 夜
+- [`p_short_judgment_100_6m_reg.md`](p_short_judgment_100_6m_reg.md) — short 100×6m 回归单切（发现级，未 holdout / 未 promote）
+- [`p_short_judgment_100_6m_reg_walkforward.md`](p_short_judgment_100_6m_reg_walkforward.md) — short 100×6m 回归 — 5-fold walkforward（发现级，未 holdout）
+- [`p_short_judgment_30_6m_reg_walkforward.md`](p_short_judgment_30_6m_reg_walkforward.md) — short 30×6m 回归 — 5-fold walkforward（发现级，未 holdout）
+- [`p_short_judgment_refactor_v1.md`](p_short_judgment_refactor_v1.md) — Short 判断层重构 v1：结构性 short-only 路径 + 特征方向镜像单变量实验
+- [`p_short_judgment_refactor_v2.md`](p_short_judgment_refactor_v2.md) — Short 判断层重构 v2：扩币（30×6m）镜像基线 + top-K 单变量
+- [`p_short_judgment_reg_align_v11.md`](p_short_judgment_reg_align_v11.md) — 纠偏：short 判断层对齐 v11 回归主链
+- [`p_short_only_backtest_tip_v1b_5_6m.md`](p_short_only_backtest_tip_v1b_5_6m.md) — SHORT 回测：tip_v1b × 5 流动性币 × 6m（pre-holdout）
+- [`p_short_only_pipeline.md`](p_short_only_pipeline.md) — 只做空全链路作战计划（short-only pipeline）
+- [`p_short_tip_v1b_detect1000.md`](p_short_tip_v1b_detect1000.md) — tip_v1b 实际 K 线 ~1000 框包（S3，不 promote）
+- [`p_short_tip_v1b_detect1000_shortish.md`](p_short_tip_v1b_detect1000_shortish.md) — tip_v1b 1000 框 → 空头观感过滤包（S3 补丁，不 promote）
+- [`p_short_trend_ab.md`](p_short_trend_ab.md) — 空边趋势出场 A/B — 稳健性 + owner short 对照 — 2026-07-23
+- [`p_short_trend_holdout7.md`](p_short_trend_holdout7.md) — Holdout #7 — A 因果空边趋势出（no_tp / trail4）— 2026-07-23
+- [`p_side_tools_landed.md`](p_side_tools_landed.md) — 本机旁路工具集落地 — 发现级收尾
+- [`p_tip_eval_fairness.md`](p_tip_eval_fairness.md) — tip 验收公平性审计 — tip-smoke / tip_hit 会不会冤假错案？
+- [`p_tip_mapping_owner_intent.md`](p_tip_mapping_owner_intent.md) — tip 映射审计：`box_right_frac≈0.5` 是否冤枉 Owner「框=tip」
+- [`p_tip_only_smoke.md`](p_tip_only_smoke.md) — tip-only 扫描冒烟诊断 — 2026-07-21
+- [`p_tip_subset_val.md`](p_tip_subset_val.md) — p_tip_subset_val — tip 可检子集 vs 全量基线（严格 val 窗）
+- [`p_trend_exit_base_rate.md`](p_trend_exit_base_rate.md) — 趋势出场 base rate — 2026-07-23
+- [`p_v12_htip_eval.md`](p_v12_htip_eval.md) — H-TIP v12 评测（D1）— 2026-07-20
+- [`p_v12_score_shift.md`](p_v12_score_shift.md) — 路 C：检测 v12 × 判断 v11 冻结 —— val 窗小段重扫分数漂移测量
+- [`p_v12_shadow_start.md`](p_v12_shadow_start.md) — v12 影子启动记录 — 2026-07-20
+- [`p_v13_pad200_train.md`](p_v13_pad200_train.md) — v13 pad200 终局 + H-DET-1 tip 对照 — 2026-07-22
+- [`p_v13_real_tip_collect_plan.md`](p_v13_real_tip_collect_plan.md) — v13 — 收集 live 真实 tip 成败图（计划）
+- [`p_v13_why_bad_train.md`](p_v13_why_bad_train.md) — 为什么 v13 训这么差？训练集诊断 — 2026-07-22
+- [`p_v14_failure_rootcause.md`](p_v14_failure_rootcause.md) — v14 tip 仍失败 — 根因分析（有证据）— 2026-07-22
+- [`p_v14_pad200_rebuild.md`](p_v14_pad200_rebuild.md) — v14 pad200 重建（MAD-on）— 2026-07-22
+- [`p_v14_pad200_train.md`](p_v14_pad200_train.md) — v14 pad200（MAD-on）终局 + tip 对照 — 2026-07-22
+- [`p_v14_sample30.md`](p_v14_sample30.md) — v14 pad200 抽检 30 张 + okx 错窗小样 — 2026-07-22
+- [`p_v14_windows_train.md`](p_v14_windows_train.md) — v14 pad200 → Windows（3060）训练交接
+- [`p_v15_dataset_confound.md`](p_v15_dataset_confound.md) — v15 败因定论:正负样本来自两条渲染管线(风格捷径)— 2026-07-23
+- [`p_v15_revalidate_fair.md`](p_v15_revalidate_fair.md) — v15 发现级公平重验 — 2026-07-23
+- [`p_v15_tip_val.md`](p_v15_tip_val.md) — v15 tip-val（Hypothesis B）中期裁决 — 2026-07-23
+- [`p_v16_holdout_verdict.md`](p_v16_holdout_verdict.md) — v16 holdout 终审:纯检测亏损,判断层反预测 — 2026-07-23
+- [`p_v16_tipuni_train.md`](p_v16_tipuni_train.md) — v16 tipuni(统一管线冷启动)训练与金标验收 — 2026-07-23
+- [`p_weight_centric_val.md`](p_weight_centric_val.md) — p_weight_centric — score→size 连续仓位 vs 二元 all-in（严格 val 窗离线回测）
+- [`p_wuzao_a_tier_done.md`](p_wuzao_a_tier_done.md) — wuzao A 档落地短报（2026-07-22 夜）
+- [`p_wuzao_more_useful.md`](p_wuzao_more_useful.md) — 无噪 topics：前端之外还有哪些对本仓真正好用
+- [`p_wuzao_topics_scan.md`](p_wuzao_topics_scan.md) — 无噪（wuzao）全站 topics 扫描 — 对本仓可迁移性
+- [`p_yolo_dense_hypotheses.md`](p_yolo_dense_hypotheses.md) — YOLO 均线密集检测层假设簇（H-DET）— 发现级汇总
+- [`p_yolo_external_sources.md`](p_yolo_external_sources.md) — 外源调研：YOLO「均线密集 / 盘口 tip」可迁移点子
+- [`p_yolo_while_v13_trains.md`](p_yolo_while_v13_trains.md) — v13 训练期间可做项 — 短报告（2026-07-22）
+- [`project_management_plan_20260724.md`](project_management_plan_20260724.md) — fable-trading 项目管理计划（2026-07-24）
+- [`short_tf_side_channel.md`](short_tf_side_channel.md) — 短周期支线（1m / 5m）
+- [`todo_short_only_pipeline.md`](todo_short_only_pipeline.md) — Short-only 链路待办
+- [`week_plan_20260720.md`](week_plan_20260720.md) — 一周执行计划(2026-07-20 → 07-27)— 交给 Grok 执行版
