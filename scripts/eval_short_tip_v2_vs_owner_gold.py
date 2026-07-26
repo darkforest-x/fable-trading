@@ -50,6 +50,7 @@ PACK = PROJECT / "analysis" / "output" / "owner_side_short_tip_v1b_detect1000"
 W_V1B = PROJECT / "runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt"
 W_V2 = PROJECT / "runs/detect/runs/detect/owner_side_short_tip_v2/weights/best.pt"
 W_V3 = PROJECT / "runs/detect/runs/detect/owner_side_short_tip_v3/weights/best.pt"
+W_V6 = PROJECT / "runs/detect/runs/detect/owner_short_star_v6/weights/best.pt"
 TIP_EDGE_BARS = 2
 
 
@@ -92,7 +93,7 @@ def main() -> int:
 
     tf = bar_tf()
     res: dict = {}
-    for tag, wp in (("v1b", W_V1B), ("v2", W_V2), ("v3", W_V3)):
+    for tag, wp in (("v1b", W_V1B), ("v3", W_V3), ("v6", W_V6)):
         if not wp.exists():
             print(f"missing weights: {wp}")
             return 2
@@ -110,7 +111,7 @@ def main() -> int:
         print(f"[{tag}] 在 owner 否掉的 228 个上开火: {d['fired']}/{d['n']} = {d['rate']*100:.1f}%"
               f"   (越低越好)")
 
-    v2k, v2d = res["v3"]["keep"]["rate"], res["v3"]["drop"]["rate"]
+    v2k, v2d = res["v6"]["keep"]["rate"], res["v6"]["drop"]["rate"]
     v1k, v1d = res["v1b"]["keep"]["rate"], res["v1b"]["drop"]["rate"]
     print(f"\n变化(v1b → v3): 保住真检出 {v1k*100:.1f}% → {v2k*100:.1f}% ；"
           f"误检复现 {v1d*100:.1f}% → {v2d*100:.1f}%")
