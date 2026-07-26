@@ -1,0 +1,142 @@
+{
+  "executor_route": {
+    "entry": "okx_client.place_market ordType=\"market\" -> TAKER",
+    "exits": "OCO tpOrdPx=\"-1\"/slOrdPx=\"-1\" -> market on trigger -> TAKER",
+    "conclusion": "全部腿 taker;SWAP_MAKER 0.0006 不可达,SWAP_TAKER 0.0010 是地板(不含滑点)"
+  },
+  "pool_n": 25602,
+  "gross_mean": 0.00269,
+  "gross_PF": 1.323,
+  "whole_pool_by_cost": [
+    {
+      "cost_name": "SWAP_MAKER 0.06% (executor 拿不到)",
+      "cost": 0.0006,
+      "net_mean": 0.00209,
+      "PF": 1.24
+    },
+    {
+      "cost_name": "SWAP_TAKER 0.10% (纯手续费,无滑点)",
+      "cost": 0.001,
+      "net_mean": 0.00169,
+      "PF": 1.188
+    },
+    {
+      "cost_name": "taker+0.05% 滑点 = 0.15%",
+      "cost": 0.0015,
+      "net_mean": 0.00119,
+      "PF": 1.128
+    },
+    {
+      "cost_name": "taker+0.10% 滑点 = 0.20%",
+      "cost": 0.002,
+      "net_mean": 0.00069,
+      "PF": 1.072
+    },
+    {
+      "cost_name": "LEGACY_P0 0.20% (仓库标注:不用于决策)",
+      "cost": 0.002,
+      "net_mean": 0.00069,
+      "PF": 1.072
+    }
+  ],
+  "atr_decile9_by_cost": [
+    {
+      "cost_name": "SWAP_MAKER 0.06% (executor 拿不到)",
+      "cost": 0.0006,
+      "net_mean": 0.00532,
+      "PF": 1.294
+    },
+    {
+      "cost_name": "SWAP_TAKER 0.10% (纯手续费,无滑点)",
+      "cost": 0.001,
+      "net_mean": 0.00492,
+      "PF": 1.269
+    },
+    {
+      "cost_name": "taker+0.05% 滑点 = 0.15%",
+      "cost": 0.0015,
+      "net_mean": 0.00442,
+      "PF": 1.237
+    },
+    {
+      "cost_name": "taker+0.10% 滑点 = 0.20%",
+      "cost": 0.002,
+      "net_mean": 0.00392,
+      "PF": 1.207
+    },
+    {
+      "cost_name": "LEGACY_P0 0.20% (仓库标注:不用于决策)",
+      "cost": 0.002,
+      "net_mean": 0.00392,
+      "PF": 1.207
+    }
+  ],
+  "walkforward_atr_high_topdecile": {
+    "SWAP_MAKER 0.06% (executor 拿不到)": {
+      "cost": 0.0006,
+      "folds": [
+        0.00294,
+        0.00211,
+        0.01835,
+        0.00586,
+        0.00486
+      ],
+      "mean": 0.00682,
+      "n_pos": 5,
+      "n_folds": 5
+    },
+    "SWAP_TAKER 0.10% (纯手续费,无滑点)": {
+      "cost": 0.001,
+      "folds": [
+        0.00254,
+        0.00171,
+        0.01795,
+        0.00546,
+        0.00446
+      ],
+      "mean": 0.00642,
+      "n_pos": 5,
+      "n_folds": 5
+    },
+    "taker+0.05% 滑点 = 0.15%": {
+      "cost": 0.0015,
+      "folds": [
+        0.00204,
+        0.00121,
+        0.01745,
+        0.00496,
+        0.00396
+      ],
+      "mean": 0.00592,
+      "n_pos": 5,
+      "n_folds": 5
+    },
+    "taker+0.10% 滑点 = 0.20%": {
+      "cost": 0.002,
+      "folds": [
+        0.00154,
+        0.00071,
+        0.01695,
+        0.00446,
+        0.00346
+      ],
+      "mean": 0.00542,
+      "n_pos": 5,
+      "n_folds": 5
+    },
+    "LEGACY_P0 0.20% (仓库标注:不用于决策)": {
+      "cost": 0.002,
+      "folds": [
+        0.00154,
+        0.00071,
+        0.01695,
+        0.00446,
+        0.00346
+      ],
+      "mean": 0.00542,
+      "n_pos": 5,
+      "n_folds": 5
+    }
+  },
+  "note": "成本假设是 owner 决策(CLAUDE.md);本脚本只测敏感度,不采纳任何数字。"
+}
