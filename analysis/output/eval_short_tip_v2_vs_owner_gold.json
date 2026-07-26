@@ -26,8 +26,20 @@
         "fired": 309,
         "rate": 0.9687
       }
+    },
+    "v3": {
+      "keep": {
+        "n": 71,
+        "fired": 7,
+        "rate": 0.0986
+      },
+      "drop": {
+        "n": 319,
+        "fired": 40,
+        "rate": 0.1254
+      }
     }
   },
-  "verdict": "v2 没有实质改善:仍复现 v1b 的多数误检",
+  "verdict": "v3 过于保守:真检出也丢了 → 不能只看误检下降",
   "caveat": "images were selected BY v1b; the drop-side number is 'how much of v1b's garbage v2 refuses', not v2's own precision, which needs a fresh owner-reviewed pack"
 }
