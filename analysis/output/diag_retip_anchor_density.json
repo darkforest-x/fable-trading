@@ -1,0 +1,60 @@
+{
+  "n": 1361,
+  "skips": {
+    "no_series": 0,
+    "oob": 0,
+    "holdout": 0,
+    "bad_ind": 0
+  },
+  "thresholds": {
+    "FAST_MAX": 0.0028,
+    "FULL_MAX": 0.0055,
+    "note": "owner decisions — measured against, not changed"
+  },
+  "dense_at_cut_baseline": 0.014,
+  "by_window": {
+    "8": {
+      "anchor_dense": 0.3255,
+      "any_dense_upper_bound": 0.3468,
+      "median_shift_bars": 7.0
+    },
+    "16": {
+      "anchor_dense": 0.3652,
+      "any_dense_upper_bound": 0.4034,
+      "median_shift_bars": 8.0
+    },
+    "24": {
+      "anchor_dense": 0.3674,
+      "any_dense_upper_bound": 0.4181,
+      "median_shift_bars": 10.0
+    },
+    "48": {
+      "anchor_dense": 0.3769,
+      "any_dense_upper_bound": 0.4629,
+      "median_shift_bars": 15.0
+    }
+  },
+  "trough_spread_percentiles": {
+    "50": {
+      "fast": 0.00118,
+      "full": 0.00696
+    },
+    "60": {
+      "fast": 0.00149,
+      "full": 0.00852
+    },
+    "70": {
+      "fast": 0.00191,
+      "full": 0.01047
+    },
+    "80": {
+      "fast": 0.00253,
+      "full": 0.01381
+    },
+    "90": {
+      "fast": 0.00353,
+      "full": 0.01938
+    }
+  },
+  "verdict": "重新锚定救不了:多数 owner 框附近根本没有机械意义上的密集 → 问题不在锚点,而在阈值/密集定义与 owner 的眼不一致(见分位表)"
+}
