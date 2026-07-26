@@ -102,7 +102,16 @@ def build_embeddings():
                 img, _ = render_chart(win)
             except Exception:
                 continue
-            bgr = img[:, :, ::-1].copy()  # RGB->BGR for cv2/yolo
+            # render_chart already returns the array in the layout cv2 expects
+            # (its own save is a bare cv2.imwrite, and CANDLE_RED=(69,54,242)
+            # is BGR), so feeding it straight through is correct. An earlier
+            # version swapped channels here on the false assumption that the
+            # output was RGB; that fed colour-permuted charts to the backbone.
+            # The permutation was identical for every image, so it could not
+            # manufacture the null result this script reported (AUC 0.46-0.507),
+            # but the numbers were produced on swapped inputs -- re-run before
+            # citing them as a bound on what a chart-tuned detector could see.
+            bgr = img.copy()
             # No device= kwarg: on Mac it has segfaulted intermittently with device="cpu".
             out = model.embed([bgr], verbose=False)
             embs.append(out[0].detach().cpu().numpy().astype(np.float32))

@@ -19,21 +19,24 @@ Design notes that matter for correctness:
 * Every keypress appends to reviews.jsonl AND rewrites review_sheet.csv
   atomically, so a crash or a closed laptop never loses labels, and re-running
   resumes exactly where you stopped.
-* Boxes are drawn in the browser from the YOLO label, so the chart PNGs stay
-  untouched originals.
-* Each card also renders a ZOOM of the last N bars ending at the tip. The pack
-  PNG puts 200 bars across 1280px, which leaves the box ~90px wide and jammed
-  against the right border -- at that scale you cannot see whether the six MAs
-  are actually converged, which is the entire question. The zoom makes the
-  bundle resolvable. Zooms render on demand and cache under _zoom/.
+* TRAINING stays tip-only per iron rule 12; the REVIEW view does not have to be
+  the training picture, and it should not be. Owner, 2026-07-26: you cannot tell
+  whether a box is correctly placed when it is jammed against the right border
+  with nothing after it. Measured on a real pack PNG: 200 bars across 1280px
+  leaves the box ~90px wide, below the resolution needed to see whether six MAs
+  are converged, with the left 85% irrelevant history.
+  So each card leads with a REVIEW render -- the box drawn where the detector
+  put it, plus the bars that came AFTER it, and a grey line marking the tip so
+  it is always clear what the detector could and could not see (keys Q/W/E/R for
+  0/30/60/120 forward bars). A tip-only zoom sits below for reading the MA
+  bundle closely (keys 1/2/3). Both render on demand and cache under _zoom/.
 
-What you are judging is the PATTERN AT THE TIP -- "are the six MAs really
-converged here" -- which is fully determined by bars at or before the tip, so a
-tip-only view is sufficient to answer it. You are NOT judging "did it launch
-afterwards": that needs future bars, it is what the judgment layer failed to
-predict anyway (lab IT-00..19), and letting it colour these labels is exactly
-how the earlier 2525-box round ended up with oracle PF 5.6-7.4 but causal rules
-stuck at 0.9-1.2.
+Seeing the aftermath is safe for THIS question and necessary for it: whether the
+MAs were converged is fixed by bars at or before the tip, and no later bar can
+change it -- the future only helps you see whether the box sits on the right
+spot. What must not happen is the question drifting into "did this trade pay".
+That is what spoiled the earlier 2525-box round, where labels made with the
+outcome visible produced oracle PF 5.6-7.4 while causal rules stayed at 0.9-1.2.
 
 Verdicts written to owner_keep:
   keep — 真的是盘口双均线密集(该检出)
@@ -69,6 +72,7 @@ DEFAULT_PACK = PROJECT / "analysis" / "output" / "owner_side_short_tip_v1b_detec
 SHUFFLE_SEED = 20260726
 VERDICTS = ("keep", "drop", "skip")
 ZOOM_BARS = (40, 60, 100)
+FWD_BARS = (0, 30, 60, 120)   # bars shown AFTER the tip in the review view
 
 _PACK: Path = DEFAULT_PACK
 _ROWS: list[dict] = []
@@ -88,6 +92,87 @@ def get_frame(symbol: str):
         _FRAMES.pop(next(iter(_FRAMES)))
     _FRAMES[symbol] = frame
     return frame
+
+
+def ctx_png(stem: str, back: int, fwd: int) -> bytes | None:
+    """Render the review view: box in place, plus the bars that came AFTER it.
+
+    Training stays tip-only (iron rule 12) -- this is the REVIEW view only.
+    Owner's point, 2026-07-26: you cannot tell whether a box is correctly placed
+    without seeing what surrounds it; the tip-only training PNG is the wrong
+    picture for that job. So the box is drawn where the detector put it, and a
+    vertical line marks the tip -- everything right of that line is future the
+    detector never saw. Judging box PLACEMENT with hindsight visible is fine;
+    the MA convergence it marks is fixed by bars at or before the tip and no
+    future bar can change it. Just do not let the aftermath turn the question
+    into "did it pay", which is what spoiled the 2525-box round.
+    """
+    cache = _PACK / "_zoom" / f"ctx_{stem}_{back}_{fwd}.png"
+    if cache.exists():
+        return cache.read_bytes()
+    row = _BY_STEM.get(stem)
+    if row is None:
+        return None
+    import cv2
+    import pandas as pd
+    from src.detection.render import make_chart_transform, render_chart
+    from src.judgment.yolo_candidates import WINDOW as SCAN_WINDOW
+    from src.judgment.yolo_candidates import right_edge_to_bar
+
+    label = load_label_box(_PACK, stem)
+    if label is None:
+        return None
+    try:
+        frame = get_frame(row["symbol"])
+        times = pd.to_datetime(frame["open_time"], utc=True)
+        tip = int(times.searchsorted(pd.Timestamp(row["tip_time"])))
+        if tip <= 0 or tip >= len(frame):
+            return None
+
+        # 1) Rebuild the transform of the window the detector actually saw
+        #    (SCAN_WINDOW bars ending at the tip) to turn the normalized box
+        #    back into absolute bar indices and a price range.
+        w0 = max(0, tip - SCAN_WINDOW + 1)
+        tf_scan = make_chart_transform(frame.iloc[w0:tip + 1])
+        cx, yc, bw, bh = label
+        r_bar = right_edge_to_bar(cx, bw, tf_scan, n_bars=tf_scan.n_bars)
+        l_bar = right_edge_to_bar(cx - bw, bw, tf_scan, n_bars=tf_scan.n_bars)
+        span = max(tf_scan.price_max - tf_scan.price_min, 1e-12)
+
+        def px_to_price(y_norm: float) -> float:
+            y = y_norm * tf_scan.height
+            return tf_scan.price_max - (y - tf_scan.top) / max(tf_scan.plot_h, 1) * span
+
+        p_hi = px_to_price(yc - bh / 2)
+        p_lo = px_to_price(yc + bh / 2)
+        abs_l, abs_r = w0 + l_bar, w0 + r_bar
+
+        # 2) Render the review window, which extends PAST the tip.
+        lo = max(0, tip - back + 1)
+        hi = min(len(frame) - 1, tip + fwd)
+        sub = frame.iloc[lo:hi + 1]
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        img, tf = render_chart(sub, out_path=None)
+        img = img.copy()
+
+        # 3) Draw the detection box and mark where the detector's view ended.
+        x0, x1 = tf.x_at(abs_l - lo), tf.x_at(abs_r - lo)
+        y0, y1 = tf.y_at(p_hi), tf.y_at(p_lo)
+        # render_chart's array is already in the layout cv2.imwrite expects
+        # (CANDLE_RED=(69,54,242) is BGR), so colours here are BGR and the
+        # array must be written WITHOUT a channel swap.
+        cv2.rectangle(img, (x0 - tf.candle_half_w, y0),
+                      (x1 + tf.candle_half_w, y1), (60, 60, 255), 2)
+        if fwd > 0 and hi > tip:
+            xt = tf.x_at(tip - lo)
+            cv2.line(img, (xt, tf.top), (xt, tf.top + tf.plot_h), (150, 150, 150), 1)
+            cv2.putText(img, "tip (detector saw up to here)", (xt + 6, tf.top + 18),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (120, 120, 120), 1, cv2.LINE_AA)
+        cv2.imwrite(str(cache), img)
+    except Exception as exc:  # noqa: BLE001 — a bad symbol must not kill review
+        print(f"  ctx failed {stem}: {type(exc).__name__}: {exc}")
+        return None
+    return cache.read_bytes() if cache.exists() else None
 
 
 def zoom_png(stem: str, n_bars: int) -> bytes | None:
@@ -206,6 +291,7 @@ def card(rows: list[dict], order: list[int], pack: Path, idx: int | None = None)
         "conf": r.get("max_conf", ""), "spread": r.get("tip_spread", ""),
         "image": f"/img/{r['stem']}.png", "box": load_label_box(pack, r["stem"]),
         "zoom": f"/zoom/{r['stem']}", "zoom_bars": list(ZOOM_BARS),
+        "ctx": f"/ctx/{r['stem']}",
         "current": r["owner_keep"], "stats": stats(rows),
     }
 
@@ -237,6 +323,20 @@ class Handler(SimpleHTTPRequestHandler):
                 self._send(200, img.read_bytes(), "image/png")
             else:
                 self._json(404, {"error": "not found"})
+        elif path.startswith("/ctx/"):
+            stem = Path(path[5:]).name
+            q = dict(p.split("=", 1) for p in urlparse(self.path).query.split("&") if "=" in p)
+            try:
+                back, fwd = int(q.get("back", 120)), int(q.get("fwd", 60))
+            except ValueError:
+                back, fwd = 120, 60
+            back = min(max(back, 40), 300)
+            fwd = fwd if fwd in FWD_BARS else 60
+            png = ctx_png(stem, back, fwd)
+            if png:
+                self._send(200, png, "image/png")
+            else:
+                self._json(404, {"error": "ctx unavailable"})
         elif path.startswith("/zoom/"):
             stem = Path(path[6:]).name
             try:
@@ -307,11 +407,12 @@ PAGE = r"""<!doctype html><meta charset=utf-8>
  <span class=muted id=counts></span>
  <span class=muted id=meta></span>
 </header>
-<div class=lbl>放大:tip 前 <b id=nbars>60</b> 根 —— <b>只看这里的六条均线收没收敛</b>
- （<kbd>1</kbd>40 <kbd>2</kbd>60 <kbd>3</kbd>100 根）</div>
-<div id=zwrap><img id=zoom></div>
-<div class=lbl>全景 200 根(红框=检测框,仅供定位)</div>
-<div id=wrap><img id=shot><div id=box hidden></div></div>
+<div class=lbl><b>评审图:框 + 框之后的走势</b>（灰竖线=tip,检测器只看到线左边）
+ —— 后续 <b id=nfwd>60</b> 根（<kbd>Q</kbd>0 <kbd>W</kbd>30 <kbd>E</kbd>60 <kbd>R</kbd>120）</div>
+<div id=zwrap><img id=ctx></div>
+<div class=lbl>tip 放大 <b id=nbars>60</b> 根(无未来,看均线收敛细节)
+ （<kbd>1</kbd>40 <kbd>2</kbd>60 <kbd>3</kbd>100）</div>
+<div id=wrap><img id=zoom></div>
 <div class=keys>
  <button onclick="mark('keep')">K 真密集(keep)</button>
  <button onclick="mark('drop')">D 误检(drop)</button>
@@ -320,10 +421,11 @@ PAGE = r"""<!doctype html><meta charset=utf-8>
    · <kbd>←</kbd> 撤销上一个</span>
  <div class=muted style="margin-top:8px" id=hint></div>
  <div class=warn style="margin-top:6px">判的是<b>此刻的形态</b>(均线有没有聚拢),
-   <b>不是</b>"后面涨没涨"——后者要看未来,会污染金标。</div>
+   <b>不是</b>"这单赚没赚"。看后续走势是为了确认<b>框的位置对不对</b>;
+   均线收没收敛由 tip 及之前决定,未来改不了它。</div>
 </div>
 <script>
-let cur=null, prev=[], nbars=60;
+let cur=null, prev=[], nbars=60, nfwd=60;
 async function load(){ render(await (await fetch('/api/card')).json()); }
 function render(c){
   if(c.done){ document.body.innerHTML='<div id=done>✅ 全部评完<br><br>'
@@ -344,14 +446,10 @@ function render(c){
      ? (w<=0.10 ? '区间已收窄到 ±'+(w*50).toFixed(1)+'%,够裁决了,可以随时停。'
                 : '再看一些,区间还宽(±'+(w*50).toFixed(1)+'%)。')
      : '前 20 个之后开始显示置信区间。';
+  document.getElementById('ctx').src=c.ctx+'?back=120&fwd='+nfwd;
+  document.getElementById('nfwd').textContent=nfwd;
   document.getElementById('zoom').src=c.zoom+'?n='+nbars;
   document.getElementById('nbars').textContent=nbars;
-  const img=document.getElementById('shot'), box=document.getElementById('box');
-  img.onload=()=>{ if(!c.box){box.hidden=true;return;}
-    const [xc,yc,bw,bh]=c.box, W=img.clientWidth, H=img.clientHeight;
-    box.style.left=((xc-bw/2)*W)+'px'; box.style.top=((yc-bh/2)*H)+'px';
-    box.style.width=(bw*W)+'px'; box.style.height=(bh*H)+'px'; box.hidden=false; };
-  img.src=c.image;
 }
 async function mark(v){
   if(!cur) return; const row=cur.row; prev.push(row);
@@ -369,9 +467,8 @@ addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if(k==='k')mark('keep'); else if(k==='d')mark('drop');
   else if(k==='s')mark('skip'); else if(e.key==='ArrowLeft')undo();
-  else if(k==='1'||k==='2'||k==='3'){
-    nbars=[40,60,100][+k-1]; if(cur)render(cur);
-  }
+  else if(k==='1'||k==='2'||k==='3'){ nbars=[40,60,100][+k-1]; if(cur)render(cur); }
+  else if('qwer'.includes(k)){ nfwd=[0,30,60,120]['qwer'.indexOf(k)]; if(cur)render(cur); }
 });
 load();
 </script>"""
