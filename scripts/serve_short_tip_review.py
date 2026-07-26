@@ -21,6 +21,19 @@ Design notes that matter for correctness:
   resumes exactly where you stopped.
 * Boxes are drawn in the browser from the YOLO label, so the chart PNGs stay
   untouched originals.
+* Each card also renders a ZOOM of the last N bars ending at the tip. The pack
+  PNG puts 200 bars across 1280px, which leaves the box ~90px wide and jammed
+  against the right border -- at that scale you cannot see whether the six MAs
+  are actually converged, which is the entire question. The zoom makes the
+  bundle resolvable. Zooms render on demand and cache under _zoom/.
+
+What you are judging is the PATTERN AT THE TIP -- "are the six MAs really
+converged here" -- which is fully determined by bars at or before the tip, so a
+tip-only view is sufficient to answer it. You are NOT judging "did it launch
+afterwards": that needs future bars, it is what the judgment layer failed to
+predict anyway (lab IT-00..19), and letting it colour these labels is exactly
+how the earlier 2525-box round ended up with oracle PF 5.6-7.4 but causal rules
+stuck at 0.9-1.2.
 
 Verdicts written to owner_keep:
   keep — 真的是盘口双均线密集(该检出)
@@ -42,19 +55,68 @@ import json
 import math
 import os
 import random
+import sys
 import tempfile
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import urlparse
 
 PROJECT = Path(__file__).resolve().parents[1]
+# Self-contained: zoom rendering imports src.*, so do not depend on PYTHONPATH
+# being set by whoever launches this.
+sys.path.insert(0, str(PROJECT))
 DEFAULT_PACK = PROJECT / "analysis" / "output" / "owner_side_short_tip_v1b_detect1000"
 SHUFFLE_SEED = 20260726
 VERDICTS = ("keep", "drop", "skip")
+ZOOM_BARS = (40, 60, 100)
 
 _PACK: Path = DEFAULT_PACK
 _ROWS: list[dict] = []
 _ORDER: list[int] = []
+_BY_STEM: dict[str, dict] = {}
+_FRAMES: dict[str, object] = {}  # small LRU of loaded+MA'd series
+
+
+def get_frame(symbol: str):
+    """Load one symbol's series with MAs, keeping a few in memory."""
+    if symbol in _FRAMES:
+        return _FRAMES[symbol]
+    from src.data.loader import list_series, load_series
+    from src.detection.data import add_mas
+    frame = add_mas(load_series(list_series(bar="15m")[("okx", symbol)]))
+    if len(_FRAMES) >= 8:
+        _FRAMES.pop(next(iter(_FRAMES)))
+    _FRAMES[symbol] = frame
+    return frame
+
+
+def zoom_png(stem: str, n_bars: int) -> bytes | None:
+    """Render (and cache) the last n_bars ending at this stem's tip bar.
+
+    The tip bar is located by TIME, not by the sheet's stored index, so a
+    re-fetched series with different length cannot silently shift the window.
+    """
+    cache = _PACK / "_zoom" / f"{stem}_{n_bars}.png"
+    if cache.exists():
+        return cache.read_bytes()
+    row = _BY_STEM.get(stem)
+    if row is None:
+        return None
+    import pandas as pd
+    from src.detection.render import render_chart
+    try:
+        frame = get_frame(row["symbol"])
+        times = pd.to_datetime(frame["open_time"], utc=True)
+        i = int(times.searchsorted(pd.Timestamp(row["tip_time"])))
+        if i <= 0 or i >= len(frame):
+            return None
+        lo = max(0, i - n_bars + 1)
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        render_chart(frame.iloc[lo:i + 1], out_path=cache)
+    except Exception as exc:  # noqa: BLE001 — a bad symbol must not kill review
+        print(f"  zoom failed {stem}: {type(exc).__name__}: {exc}")
+        return None
+    return cache.read_bytes() if cache.exists() else None
 
 
 def wilson(k: int, n: int) -> tuple[float, float, float]:
@@ -143,6 +205,7 @@ def card(rows: list[dict], order: list[int], pack: Path, idx: int | None = None)
         "symbol": r["symbol"], "tip_time": r.get("tip_time", ""),
         "conf": r.get("max_conf", ""), "spread": r.get("tip_spread", ""),
         "image": f"/img/{r['stem']}.png", "box": load_label_box(pack, r["stem"]),
+        "zoom": f"/zoom/{r['stem']}", "zoom_bars": list(ZOOM_BARS),
         "current": r["owner_keep"], "stats": stats(rows),
     }
 
@@ -174,6 +237,18 @@ class Handler(SimpleHTTPRequestHandler):
                 self._send(200, img.read_bytes(), "image/png")
             else:
                 self._json(404, {"error": "not found"})
+        elif path.startswith("/zoom/"):
+            stem = Path(path[6:]).name
+            try:
+                n = int(urlparse(self.path).query.split("n=")[-1])
+            except (ValueError, IndexError):
+                n = 60
+            n = n if n in ZOOM_BARS else 60
+            png = zoom_png(stem, n)
+            if png:
+                self._send(200, png, "image/png")
+            else:
+                self._json(404, {"error": "zoom unavailable"})
         else:
             self._json(404, {"error": "not found"})
 
@@ -213,7 +288,10 @@ PAGE = r"""<!doctype html><meta charset=utf-8>
         display:flex;gap:18px;align-items:center;flex-wrap:wrap;z-index:5}
  .big{font-size:19px;font-weight:600}
  .ci{color:#8bc34a} .muted{color:#888} .warn{color:#ffb74d}
- #wrap{position:relative;margin:12px auto;width:min(1280px,96vw)}
+ .lbl{padding:10px 14px 2px;color:#9e9e9e;font-size:13px;width:min(1280px,96vw);margin:0 auto}
+ #zwrap{margin:4px auto 0;width:min(1280px,96vw)}
+ #zoom{width:100%;display:block;border-radius:4px;background:#fff}
+ #wrap{position:relative;margin:4px auto 0;width:min(1280px,96vw);opacity:.85}
  #shot{width:100%;display:block;border-radius:4px}
  #box{position:absolute;border:2px solid #ff3b30;box-shadow:0 0 0 1px #000;pointer-events:none}
  .keys{padding:0 14px 20px;text-align:center}
@@ -229,6 +307,10 @@ PAGE = r"""<!doctype html><meta charset=utf-8>
  <span class=muted id=counts></span>
  <span class=muted id=meta></span>
 </header>
+<div class=lbl>放大:tip 前 <b id=nbars>60</b> 根 —— <b>只看这里的六条均线收没收敛</b>
+ （<kbd>1</kbd>40 <kbd>2</kbd>60 <kbd>3</kbd>100 根）</div>
+<div id=zwrap><img id=zoom></div>
+<div class=lbl>全景 200 根(红框=检测框,仅供定位)</div>
 <div id=wrap><img id=shot><div id=box hidden></div></div>
 <div class=keys>
  <button onclick="mark('keep')">K 真密集(keep)</button>
@@ -237,9 +319,11 @@ PAGE = r"""<!doctype html><meta charset=utf-8>
  <span class=muted style="margin-left:14px">快捷键 <kbd>K</kbd><kbd>D</kbd><kbd>S</kbd>
    · <kbd>←</kbd> 撤销上一个</span>
  <div class=muted style="margin-top:8px" id=hint></div>
+ <div class=warn style="margin-top:6px">判的是<b>此刻的形态</b>(均线有没有聚拢),
+   <b>不是</b>"后面涨没涨"——后者要看未来,会污染金标。</div>
 </div>
 <script>
-let cur=null, prev=[];
+let cur=null, prev=[], nbars=60;
 async function load(){ render(await (await fetch('/api/card')).json()); }
 function render(c){
   if(c.done){ document.body.innerHTML='<div id=done>✅ 全部评完<br><br>'
@@ -260,6 +344,8 @@ function render(c){
      ? (w<=0.10 ? '区间已收窄到 ±'+(w*50).toFixed(1)+'%,够裁决了,可以随时停。'
                 : '再看一些,区间还宽(±'+(w*50).toFixed(1)+'%)。')
      : '前 20 个之后开始显示置信区间。';
+  document.getElementById('zoom').src=c.zoom+'?n='+nbars;
+  document.getElementById('nbars').textContent=nbars;
   const img=document.getElementById('shot'), box=document.getElementById('box');
   img.onload=()=>{ if(!c.box){box.hidden=true;return;}
     const [xc,yc,bw,bh]=c.box, W=img.clientWidth, H=img.clientHeight;
@@ -283,13 +369,16 @@ addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if(k==='k')mark('keep'); else if(k==='d')mark('drop');
   else if(k==='s')mark('skip'); else if(e.key==='ArrowLeft')undo();
+  else if(k==='1'||k==='2'||k==='3'){
+    nbars=[40,60,100][+k-1]; if(cur)render(cur);
+  }
 });
 load();
 </script>"""
 
 
 def main() -> int:
-    global _PACK, _ROWS, _ORDER
+    global _PACK, _ROWS, _ORDER, _BY_STEM
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--pack", type=Path, default=DEFAULT_PACK)
     ap.add_argument("--port", type=int, default=8770)
@@ -300,6 +389,7 @@ def main() -> int:
         print(f"review_sheet.csv not found under {_PACK}")
         return 2
     _ROWS = load_rows(_PACK)
+    _BY_STEM = {r["stem"]: r for r in _ROWS}
     _ORDER = list(range(len(_ROWS)))
     random.Random(SHUFFLE_SEED).shuffle(_ORDER)
 
