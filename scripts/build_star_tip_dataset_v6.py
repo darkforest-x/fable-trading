@@ -71,12 +71,13 @@ GOLD_PACK = PROJECT / "analysis/output/owner_side_short_tip_v1b_detect1000"
 LS_GLOB = str(PROJECT / "output/label_studio/*.json")
 ARCHIVE_ROOTS = [PROJECT / "datasets/_deprecated_pretip/dense_owner_v11/images",
                  PROJECT / "datasets/_deprecated_pretip/dense_owner_v14_pad200/images"]
-OUT = PROJECT / "datasets/dense_owner_short_star_tip_v5"
+OUT = PROJECT / "datasets/dense_owner_short_star_tip_v6"
 
 HOLDOUT = pd.Timestamp("2026-05-04", tz="UTC")
 VAL_CUT = pd.Timestamp("2026-02-01", tz="UTC")
 FAST_MAX, FULL_MAX = 0.0045, 0.0088
 ANCHOR_LOOKBACK, PRIOR_LOOKBACK, WARMUP = 24, 48, 200
+BREAK_FORWARD = 24        # bars to search AFTER the trough for the break
 RET_BARS = 8                    # 「K线向下」 horizon
 DROP_ATR_MIN = 1.0              # the fall must be worth at least this many ATR
 NEG_RATIO = 1.5
@@ -157,17 +158,67 @@ class Series:
                            ind["close"].to_numpy(dtype=float),
                            pd.to_datetime(framed["open_time"], utc=True),
                            np.nanmin(ma, axis=0),
-                           ind["atr_pct"].to_numpy(dtype=float))
+                           ind["atr_pct"].to_numpy(dtype=float),
+                           np.nanmax(ma, axis=0))
         except Exception:  # noqa: BLE001
             self.c[sym] = None
         return self.c[sym]
 
 
 def symbol_of(stem: str, known: set[str]) -> str | None:
+    """Stem -> series key, across every naming convention the rounds used.
+
+    Label Studio stems come from several labelling rounds and carry three
+    shapes: `XRP_USDT_SWAP_012345`, the spot-era `SOL_USDT_013760`, and
+    `okx_GAS_USDT_SWAP_017960`. An earlier version only ever ADDED an `okx_`
+    prefix, never stripped one, so every okx_-prefixed stem failed to resolve
+    and 199 of 528 ⭐标杆 were silently dropped as "no_symbol" -- including
+    XRP, DOGE, GAS and OL, whose klines are all present. Owner caught it by
+    noticing the counts could not add up.
+    """
     raw = re.sub(r"_\d+$", "", stem)
-    for cand in (raw, raw + "_SWAP", "okx_" + raw):
+    bare = raw[4:] if raw.startswith("okx_") else raw
+    for cand in (raw, bare, bare + "_SWAP", "okx_" + bare, raw + "_SWAP"):
         if cand in known:
             return cand
+    return None
+
+
+def star_side(close, ma_min, ma_max, atrp, trough: int, n: int) -> tuple[int, int | None]:
+    """Which way did this ⭐标杆 cluster launch? Returns (side, bar).
+
+    The tag is direction-agnostic -- rendering the stars shows textbook LONG
+    launches beside the shorts, and of the 269 that also appear in the side
+    review the owner split them 188 short / 91 long. So a short detector has to
+    read the direction off each one rather than take the tag whole. Whichever
+    barrier is crossed first after the trough wins; the label may look forward,
+    only the tip window has to stay causal (iron rule 3).
+    """
+    for j in range(trough, min(trough + BREAK_FORWARD + 1, n)):
+        if j < RET_BARS or not np.isfinite(atrp[j]) or atrp[j] <= 0:
+            continue
+        move = (close[j] / close[j - RET_BARS] - 1) / atrp[j]
+        if np.isfinite(ma_min[j]) and close[j] < ma_min[j] and move < -DROP_ATR_MIN:
+            return -1, j
+        if np.isfinite(ma_max[j]) and close[j] > ma_max[j] and move > DROP_ATR_MIN:
+            return +1, j
+    return 0, None
+
+
+def find_break(close, ma_min, atrp, trough: int, n: int) -> int | None:
+    """First bar at/after the trough where the breakdown is confirmed.
+
+    v5 anchored ON the density trough and then demanded the break had already
+    happened -- self-contradictory, since the break comes AFTER the tightest
+    point. Measured on the owner's 1361 short boxes: 99.8% do break within 24
+    bars of the trough (median 2), but only 29.4% break exactly at it, which is
+    the whole reason v5 kept so few. Anchor on the break instead.
+    """
+    for j in range(trough, min(trough + BREAK_FORWARD + 1, n)):
+        if j < RET_BARS or not np.isfinite(ma_min[j]) or not np.isfinite(atrp[j]) or atrp[j] <= 0:
+            continue
+        if close[j] < ma_min[j] and (close[j] / close[j - RET_BARS] - 1) / atrp[j] < -DROP_ATR_MIN:
+            return j
     return None
 
 
@@ -225,16 +276,17 @@ def main() -> int:
     negs = {"train": 0, "val": 0}
     src_count = {"star": 0, "side": 0}
     skips = {"no_symbol": 0, "no_series": 0, "no_window": 0, "oob": 0,
-             "holdout": 0, "not_pattern": 0, "box": 0, "error": 0, "dup": 0}
+             "holdout": 0, "not_pattern": 0, "box": 0, "error": 0, "dup": 0,
+             "star_long": 0}
     seen: dict[str, int] = {}
     used: set[str] = set()
 
-    def emit_positive(sym: str, cut: int, width: int, tag: str) -> bool:
+    def emit_positive(sym: str, cut: int, width: int, tag: str, force: bool = False) -> bool:
         e = ser.get(sym)
         if e is None:
             skips["no_series"] += 1
             return False
-        framed, fast, full, close, times, ma_min, atrp = e
+        framed, fast, full, close, times, ma_min, atrp, ma_max = e
         if cut < WARMUP or cut >= len(framed):
             skips["oob"] += 1
             return False
@@ -243,13 +295,25 @@ def main() -> int:
         if not np.isfinite(seg).any():
             skips["oob"] += 1
             return False
-        anchor = lo + int(np.nanargmin(seg))
+        trough = lo + int(np.nanargmin(seg))
+        if force:
+            side, brk = star_side(close, ma_min, ma_max, atrp, trough, len(framed))
+            if side > 0:
+                skips["star_long"] = skips.get("star_long", 0) + 1
+                return False
+        else:
+            brk = find_break(close, ma_min, atrp, trough, len(framed))
+        # Owner's rule (2026-07-27): a ⭐标杆 short IS a positive. The mechanical
+        # test may pick the bar, never veto the example -- if the two disagree,
+        # the test is what is wrong. Un-starred rows still have to earn it.
+        if brk is None:
+            if not force:
+                skips["not_pattern"] += 1
+                return False
+            brk = trough
+        anchor = brk
         if times.iloc[anchor] >= HOLDOUT:
             skips["holdout"] += 1
-            return False
-        ok, _ = passes(fast, full, close, anchor, ma_min[anchor], atrp[anchor])
-        if not ok:
-            skips["not_pattern"] += 1
             return False
         start = anchor - WINDOW + 1
         if start < 0:
@@ -322,7 +386,7 @@ def main() -> int:
         tf_old = make_chart_transform(sub_old)
         _cut_local, spans = boxes_cut_and_spans(boxes, tf_old)
         for b0, b1, *_ in spans:
-            emit_positive(sym, win_start + b1, max(1, b1 - b0), "star")
+            emit_positive(sym, win_start + b1, max(1, b1 - b0), "star", force=True)
 
     print(f"positives from ⭐标杆: {src_count['star']}")
 
@@ -395,7 +459,7 @@ def main() -> int:
         e = ser.get(sym)
         if e is None:
             continue
-        framed, fast, full, close, times, ma_min, atrp = e
+        framed, fast, full, close, times, ma_min, atrp, ma_max = e
         hi = len(framed) - 1
         if hi <= WARMUP + WINDOW:
             continue
