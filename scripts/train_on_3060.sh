@@ -78,7 +78,12 @@ COPYFILE_DISABLE=1 tar cf "$TAR" --exclude='*.npy' --exclude='*.cache' --exclude
 echo "  包: $(du -h "$TAR" | cut -f1)"
 scp -o BatchMode=yes -q "$TAR" "$HOST:$REMOTE/ds.tar" || die "scp 数据集失败"
 scp -o BatchMode=yes -q "$BASE" "$HOST:$REMOTE/base.pt" || die "scp 基础权重失败"
-$SSH "$HOST" "cd $REMOTE; Remove-Item -Recurse -Force datasets/$(basename "$DATASET") -ErrorAction SilentlyContinue; tar xf ds.tar -C .; Remove-Item ds.tar" || die "远端解包失败"
+# The tar holds just "<basename>/..." (it was created with -C dirname), so it
+# MUST be extracted into datasets/, not into the repo root. Extracting with
+# "-C ." dropped the tree at C:/fable/<basename> while step 2 looks for it under
+# C:/fable/datasets/<basename>, and training died on a missing data.yaml
+# (2026-07-27, short_tip_v2).
+$SSH "$HOST" "cd $REMOTE; New-Item -ItemType Directory -Force datasets | Out-Null; Remove-Item -Recurse -Force datasets/$(basename "$DATASET") -ErrorAction SilentlyContinue; tar xf ds.tar -C datasets; Remove-Item ds.tar" || die "远端解包失败"
 rm -f "$TAR"
 
 say "2) 远程训练: $NAME (epochs=$EPOCHS patience=$PATIENCE)"
