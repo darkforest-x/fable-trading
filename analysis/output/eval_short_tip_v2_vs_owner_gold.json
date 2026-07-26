@@ -1,0 +1,33 @@
+{
+  "pack": "analysis/output/owner_side_short_tip_v1b_detect1000",
+  "conf": 0.3,
+  "tip_edge_bars": 2,
+  "results": {
+    "v1b": {
+      "keep": {
+        "n": 71,
+        "fired": 71,
+        "rate": 1.0
+      },
+      "drop": {
+        "n": 319,
+        "fired": 319,
+        "rate": 1.0
+      }
+    },
+    "v2": {
+      "keep": {
+        "n": 71,
+        "fired": 67,
+        "rate": 0.9437
+      },
+      "drop": {
+        "n": 319,
+        "fired": 309,
+        "rate": 0.9687
+      }
+    }
+  },
+  "verdict": "v2 没有实质改善:仍复现 v1b 的多数误检",
+  "caveat": "images were selected BY v1b; the drop-side number is 'how much of v1b's garbage v2 refuses', not v2's own precision, which needs a fresh owner-reviewed pack"
+}
