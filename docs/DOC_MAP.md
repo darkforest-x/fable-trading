@@ -9,7 +9,7 @@
 | 文件 | 角色 |
 |---|---|
 | `HANDOFF.md` | 当前真相、holdout 账本、进行中 |
-| `CLAUDE.md` / `AGENTS.md` | 铁律 + 实盘纪律（两文件保持同步） |
+| `CLAUDE.md` / `AGENTS.md` | 铁律 + 实盘纪律（两文件保持同步,由 pre-commit 钩子强制;新克隆需 `git config core.hooksPath scripts/hooks`） |
 | `README.md` | 动机/架构/怎么跑（不堆日报） |
 | `docs/ARCHITECTURE.md` | 现行系统图与模块地图 |
 | `docs/RESEARCH_AGENDA.md` | 假设状态表 + 优先队列（含 H-FE / H-TOOL） |

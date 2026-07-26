@@ -1,0 +1,59 @@
+#!/bin/sh
+# Block commits that leave CLAUDE.md and AGENTS.md out of sync.
+#
+# Why: CLAUDE.md is read by Claude Code, AGENTS.md by Codex. docs/DOC_MAP.md
+# says "两文件保持同步", but nothing enforced it -- a rule edited in one file
+# only would silently give the two agents different iron rules, and the failure
+# is invisible until an agent violates a discipline it never saw. Everything
+# else that carries across agents lives in-repo and is self-checking; this was
+# the last link resting on someone remembering.
+#
+# Compares the STAGED content (git show :FILE), so it judges what is actually
+# being committed, not the working tree. The first line is excluded: the two
+# files legitimately differ only in their "# CLAUDE.md" / "# AGENTS.md" title.
+#
+# Install (per clone -- hooks are not cloned):
+#   git config core.hooksPath scripts/hooks
+# Bypass once, if you truly mean to diverge:
+#   git commit --no-verify
+
+set -eu
+
+staged_or_head() {
+    # Prefer the index (what is being committed); fall back to HEAD.
+    git show ":$1" 2>/dev/null || git show "HEAD:$1" 2>/dev/null || true
+}
+
+a=$(staged_or_head CLAUDE.md)
+b=$(staged_or_head AGENTS.md)
+
+if [ -z "$a" ] || [ -z "$b" ]; then
+    echo "pre-commit: CLAUDE.md or AGENTS.md missing — skipping sync check." >&2
+    exit 0
+fi
+
+# Drop line 1 (the title) from each before comparing.
+a_body=$(printf '%s\n' "$a" | tail -n +2)
+b_body=$(printf '%s\n' "$b" | tail -n +2)
+
+if [ "$a_body" = "$b_body" ]; then
+    exit 0
+fi
+
+echo "" >&2
+echo "✗ 提交被拦下:CLAUDE.md 与 AGENTS.md 不同步" >&2
+echo "" >&2
+echo "  CLAUDE.md = Claude Code 读的铁律;AGENTS.md = Codex 读的同一份。" >&2
+echo "  只改一个,等于两个 agent 拿到不同的纪律。" >&2
+echo "" >&2
+echo "  差异(- CLAUDE.md / + AGENTS.md,已忽略首行标题):" >&2
+printf '%s\n' "$a_body" > "${TMPDIR:-/tmp}/.claudemd.$$"
+printf '%s\n' "$b_body" > "${TMPDIR:-/tmp}/.agentsmd.$$"
+diff -u "${TMPDIR:-/tmp}/.claudemd.$$" "${TMPDIR:-/tmp}/.agentsmd.$$" \
+    | tail -n +3 | head -40 | sed 's/^/    /' >&2
+rm -f "${TMPDIR:-/tmp}/.claudemd.$$" "${TMPDIR:-/tmp}/.agentsmd.$$"
+echo "" >&2
+echo "  修法:把改动同步到另一份(标题行保持各自不变),然后重新 git add。" >&2
+echo "  确实要让两者分叉:git commit --no-verify" >&2
+echo "" >&2
+exit 1
