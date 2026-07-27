@@ -153,6 +153,7 @@ def main() -> int:
     ap.add_argument("--start", default="2026-02-03")
     ap.add_argument("--end", default="2026-05-03")
     ap.add_argument("--n-symbols", type=int, default=25)
+    ap.add_argument("--symbols", nargs="*", help="explicit list; overrides the random sample")
     ap.add_argument("--tag", default="tip_replay_short")
     ap.add_argument("--device", default="cpu")
     ap.add_argument("--allow-holdout", action="store_true")
@@ -165,9 +166,15 @@ def main() -> int:
         return 2
 
     series = list_series(bar="15m")
-    syms = sorted({s for (_src, s) in series})
-    random.Random(20260727).shuffle(syms)
-    syms = syms[: args.n_symbols]
+    if args.symbols:
+        syms = [s for s in args.symbols if ("okx", s) in series]
+        missing = [s for s in args.symbols if ("okx", s) not in series]
+        if missing:
+            print(f"跳过(无数据): {missing}")
+    else:
+        syms = sorted({s for (_src, s) in series})
+        random.Random(20260727).shuffle(syms)
+        syms = syms[: args.n_symbols]
     model = load_yolo_model(args.weights)
     print(f"weights={args.weights}\n窗口 {start.date()} → {end.date()}  币 {len(syms)}")
 

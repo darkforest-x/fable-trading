@@ -1,0 +1,29 @@
+{
+  "pool": "judgment_yolo_short_v6.csv",
+  "weights": "best.pt",
+  "breakeven_win": 0.2857,
+  "rows": [
+    {
+      "conf": 0.3,
+      "n": 1748,
+      "win_rate": 0.2878,
+      "gross_PF": 1.26,
+      "net_taker": 0.00126
+    },
+    {
+      "conf": 0.4,
+      "n": 674,
+      "win_rate": 0.2938,
+      "gross_PF": 1.318,
+      "net_taker": 0.00181
+    },
+    {
+      "conf": 0.5,
+      "n": 45,
+      "win_rate": 0.3778,
+      "gross_PF": 2.011,
+      "net_taker": 0.00682
+    }
+  ],
+  "verdict": "高置信度有区分:conf>=0.5 胜率 37.8%"
+}
