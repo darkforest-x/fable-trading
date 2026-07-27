@@ -1,0 +1,41 @@
+{
+  "pool": "judgment_yolo_short_v6_wide.csv",
+  "n_candidates": 5802,
+  "body_min": 0.5,
+  "retest_wait": 12,
+  "results": [
+    {
+      "mode": "base",
+      "n": 5802,
+      "skipped": 0,
+      "win_tp": 0.2734,
+      "gross_pf": 1.141,
+      "net_taker": 0.00031
+    },
+    {
+      "mode": "body",
+      "n": 3116,
+      "skipped": 2686,
+      "win_tp": 0.2744,
+      "gross_pf": 1.177,
+      "net_taker": 0.00061
+    },
+    {
+      "mode": "retest",
+      "n": 4740,
+      "skipped": 1062,
+      "win_tp": 0.2605,
+      "gross_pf": 1.132,
+      "net_taker": 0.00022
+    },
+    {
+      "mode": "struct",
+      "n": 5802,
+      "skipped": 0,
+      "win_tp": 0.2442,
+      "gross_pf": 1.115,
+      "net_taker": -6e-05
+    }
+  ],
+  "verdict": "胜过基线的方案: 实体质量 >=50%(+0.061%)"
+}
