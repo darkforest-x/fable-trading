@@ -1,0 +1,94 @@
+{
+  "pool": "data/judgment_yolo_short_v6.csv",
+  "n": 1748,
+  "folds": [
+    {
+      "fold": 1,
+      "start": "2025-08-22",
+      "n_test": 349,
+      "best_iter": 54,
+      "raw_gross_PF": 1.809,
+      "raw_mean": 0.00608,
+      "top_gross_PF": 3.272,
+      "top_mean": 0.01408,
+      "top_n": 69,
+      "base_gross_PF": 1.239,
+      "top_win": 0.58
+    },
+    {
+      "fold": 2,
+      "start": "2025-11-04",
+      "n_test": 349,
+      "best_iter": 24,
+      "raw_gross_PF": 0.801,
+      "raw_mean": -0.00199,
+      "top_gross_PF": 0.399,
+      "top_mean": -0.01046,
+      "top_n": 69,
+      "base_gross_PF": 0.825,
+      "top_win": 0.174
+    },
+    {
+      "fold": 3,
+      "start": "2026-01-12",
+      "n_test": 349,
+      "best_iter": 1,
+      "raw_gross_PF": 1.145,
+      "raw_mean": 0.0014,
+      "top_gross_PF": 0.732,
+      "top_mean": -0.0033,
+      "top_n": 69,
+      "base_gross_PF": 1.072,
+      "top_win": 0.261
+    },
+    {
+      "fold": 4,
+      "start": "2026-03-08",
+      "n_test": 349,
+      "best_iter": 20,
+      "raw_gross_PF": 1.153,
+      "raw_mean": 0.00116,
+      "top_gross_PF": 0.955,
+      "top_mean": -0.00042,
+      "top_n": 69,
+      "base_gross_PF": 0.816,
+      "top_win": 0.29
+    }
+  ],
+  "by_cost": [
+    {
+      "cost_name": "maker 0.06% (拿不到)",
+      "cost": 0.0006,
+      "raw_net_mean": 0.00106,
+      "top_net_mean": -0.00062,
+      "top_folds_positive": 1,
+      "n_folds": 4
+    },
+    {
+      "cost_name": "taker 0.10% (真实地板)",
+      "cost": 0.001,
+      "raw_net_mean": 0.00066,
+      "top_net_mean": -0.00103,
+      "top_folds_positive": 1,
+      "n_folds": 4
+    },
+    {
+      "cost_name": "taker+滑点 0.15%",
+      "cost": 0.0015,
+      "raw_net_mean": 0.00016,
+      "top_net_mean": -0.00152,
+      "top_folds_positive": 1,
+      "n_folds": 4
+    },
+    {
+      "cost_name": "legacy 0.20%",
+      "cost": 0.002,
+      "raw_net_mean": -0.00034,
+      "top_net_mean": -0.00202,
+      "top_folds_positive": 1,
+      "n_folds": 4
+    }
+  ],
+  "top_frac": 0.2,
+  "note": "gross PF shown because net gains from diluting a fixed cost are not selection skill"
+}

@@ -41,9 +41,9 @@ from src.judgment.yolo_candidates import (  # noqa: E402
     right_edge_to_bar,
 )
 
-WEIGHTS = PROJECT / "runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt"
-VAL_IMAGES = PROJECT / "datasets/dense_owner_side_short_tip/images/val"
-VAL_LABELS = PROJECT / "datasets/dense_owner_side_short_tip/labels/val"
+WEIGHTS = PROJECT / "runs/detect/runs/detect/owner_short_star_v6/weights/best.pt"
+VAL_IMAGES = PROJECT / "datasets/dense_owner_short_star_tip_v6/images/val"
+VAL_LABELS = PROJECT / "datasets/dense_owner_short_star_tip_v6/labels/val"
 TIP_EDGE_BARS = 2
 
 
