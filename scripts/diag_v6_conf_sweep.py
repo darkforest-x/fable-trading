@@ -44,7 +44,9 @@ from src.judgment.yolo_candidates import (  # noqa: E402
     right_edge_to_bar,
 )
 
-POOL = PROJECT / "data" / "judgment_yolo_short_v6.csv"
+import os
+POOL = Path(os.environ.get("CONF_POOL",
+                          PROJECT / "data" / "judgment_yolo_short_v6.csv"))
 WEIGHTS = PROJECT / "runs/detect/runs/detect/owner_short_star_v6/weights/best.pt"
 SCAN_CONF = 0.05          # scan low so the whole confidence range is visible
 BATCH = 16
@@ -145,7 +147,7 @@ def main() -> int:
                if best and best["win_rate"] < BREAKEVEN + 0.03
                else f"高置信度有区分:conf>={best['conf']} 胜率 {best['win_rate']*100:.1f}%")
     print(f"\n判读: {verdict}")
-    (PROJECT / "analysis" / "output" / "diag_v6_conf_sweep.json").write_text(
+    (PROJECT / "analysis" / "output" / f'diag_v6_conf_sweep_{POOL.stem}.json').write_text(
         json.dumps({"pool": str(POOL.name), "weights": str(WEIGHTS.name),
                     "breakeven_win": round(BREAKEVEN, 4), "rows": rows,
                     "verdict": verdict}, indent=2, ensure_ascii=False) + "\n")
