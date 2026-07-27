@@ -1,0 +1,25 @@
+{
+  "prereg": "analysis/p_prereg_holdout9_midvol.md",
+  "consumption": 9,
+  "window": [
+    "2026-05-04 00:00:00+00:00",
+    "2026-07-16 23:00:00+00:00"
+  ],
+  "conf_hi": 0.5,
+  "band": [
+    0.00245,
+    0.00343
+  ],
+  "n_candidates": 1739,
+  "n_high_conf": 46,
+  "n_in_band": 10,
+  "wins": 4,
+  "win_rate": 0.4,
+  "ci": [
+    0.1682,
+    0.6873
+  ],
+  "breakeven": 0.2857,
+  "passed": false,
+  "verdict": "❌ 未通过:区间下沿 16.8% <= 盈亏平衡 28.6%。按预注册,该配置作废,不得换边界重试。"
+}
