@@ -51,7 +51,10 @@ from src.judgment.yolo_candidates import (  # noqa: E402
 )
 from scripts.build_crop_pad200_dataset import boxes_cut_and_spans, resolve_win_start  # noqa: E402
 from scripts.build_htip_dataset import resolve_series  # noqa: E402
-from scripts.build_star_tip_dataset_v6 import archive_index, load_star_boxes, symbol_of  # noqa: E402
+from scripts.build_star_tip_dataset_v6 import (  # noqa: E402
+    BREAK_FORWARD, DROP_ATR_MIN, RET_BARS, archive_index, load_star_boxes,
+    star_side, symbol_of,
+)
 
 WEIGHTS = PROJECT / "runs/detect/runs/detect/owner_short_star_v6/weights/best.pt"
 SCAN_CONF = 0.05
@@ -72,6 +75,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--limit", type=int, default=400)
     ap.add_argument("--render", type=int, default=8)
+    ap.add_argument("--short-only", action="store_true",
+                    help="只比对做空侧金标 — v6 是做空检测器,拿多头金标比它是错的")
     args = ap.parse_args()
 
     OUT.mkdir(parents=True, exist_ok=True)
@@ -113,6 +118,17 @@ def main() -> int:
         tip = ws + b1                       # owner box right edge = the tip
         if tip < WINDOW or tip >= len(framed):
             continue
+        if args.short_only:
+            from src.detection.data import ALL_MA_COLS
+            ma = np.vstack([framed[c].to_numpy(dtype=float)
+                            for c in ALL_MA_COLS if c in framed.columns])
+            ind_c = framed["close"].to_numpy(dtype=float)
+            from src.judgment.candidates import add_indicators
+            atrp = add_indicators(framed)["atr_pct"].to_numpy(dtype=float)
+            side, _b = star_side(ind_c, np.nanmin(ma, axis=0), np.nanmax(ma, axis=0),
+                                 atrp, tip, len(framed))
+            if side >= 0:               # long or undetermined: not this detector's job
+                continue
 
         sub = framed.iloc[tip - WINDOW + 1:tip + 1].reset_index(drop=True)
         try:
