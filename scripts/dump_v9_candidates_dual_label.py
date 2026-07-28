@@ -153,6 +153,8 @@ def main() -> int:
     ap.add_argument("--weights", required=True)
     ap.add_argument("--n-symbols", type=int, default=40)
     ap.add_argument("--end", default="2026-05-03")
+    ap.add_argument("--start", default=None,
+                    help="scan from this date. A full 11-month series is ~39k bars per\n                         symbol and every bar needs its own 200-bar render, so depth\n                         costs more wall time than symbol count does. Trading depth for\n                         breadth keeps the pool wider across market conditions.")
     ap.add_argument("--device", default=None)
     ap.add_argument("--conf", type=float, default=DEFAULT_CONF)
     ap.add_argument("--out", default="data/judgment_v9_dual.csv")
@@ -186,10 +188,14 @@ def main() -> int:
         frame = frame[times < end].reset_index(drop=True)
         if len(frame) < WINDOW + 200:
             continue
+        scan_lo = WINDOW
+        if args.start:
+            t2 = pd.to_datetime(frame["open_time"], utc=True)
+            scan_lo = max(WINDOW, int((t2 < pd.Timestamp(args.start, tz="UTC")).sum()))
         enriched = add_indicators(add_mas(frame))
         featured = add_features(enriched)
         ema = add_mas(frame)
-        fires = fire_bars(ema, model, device, WINDOW,
+        fires = fire_bars(ema, model, device, scan_lo,
                           len(frame) - HORIZON_BARS - 2, args.conf, tmp_dir)
         if not fires:
             print(f"[{k}/{len(chosen)}] {symbol}: fires=0 "

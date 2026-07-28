@@ -1,0 +1,55 @@
+{
+  "alpha": 0.01,
+  "power": 0.8,
+  "sigma": {
+    "barrier": 0.025310506437028365,
+    "hold": 0.048023695516019524,
+    "paired_diff": 0.0411166811820628
+  },
+  "effects_recent": {
+    "hold_net": 0.0004518012986132604,
+    "hold_minus_barrier": 0.00038457519185355573
+  },
+  "effects_pooled": {
+    "hold_net": 0.0026451332580729454,
+    "hold_minus_barrier": 0.0023330394794489275
+  },
+  "mde_grid": [
+    {
+      "n": 500,
+      "mde_one_sample_bp": 73.39,
+      "mde_paired_bp": 62.84
+    },
+    {
+      "n": 1000,
+      "mde_one_sample_bp": 51.9,
+      "mde_paired_bp": 44.43
+    },
+    {
+      "n": 1739,
+      "mde_one_sample_bp": 39.36,
+      "mde_paired_bp": 33.69
+    },
+    {
+      "n": 3000,
+      "mde_one_sample_bp": 29.96,
+      "mde_paired_bp": 25.65
+    },
+    {
+      "n": 5000,
+      "mde_one_sample_bp": 23.21,
+      "mde_paired_bp": 19.87
+    },
+    {
+      "n": 10000,
+      "mde_one_sample_bp": 16.41,
+      "mde_paired_bp": 14.05
+    },
+    {
+      "n": 20000,
+      "mde_one_sample_bp": 11.6,
+      "mde_paired_bp": 9.94
+    }
+  ],
+  "verdict": "n=1739 时,单样本只能分辨 ≥39.4bp 的效应,配对能分辨 ≥33.7bp。近期块里要证的是:裸池净 +4.5bp(不够)、去障碍的增量 +3.8bp(不够)。 两个都不够 → 现在做 holdout 是白消耗一次,要么等样本量到 131,950 笔,要么先找更大的效应(例如把判断层修好再验)。"
+}
