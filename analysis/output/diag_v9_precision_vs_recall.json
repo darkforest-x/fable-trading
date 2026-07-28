@@ -1,0 +1,91 @@
+{
+  "weights": "best.pt",
+  "n_gold": 241,
+  "n_fires": 1129,
+  "symbol_months": 0.684,
+  "owner_density": [
+    0.18,
+    0.36
+  ],
+  "auc_gold_vs_fires": 0.757450687091356,
+  "sweep": [
+    {
+      "conf": 0.01,
+      "recall": 0.9627,
+      "n_fire": 1129,
+      "density_per_symbol_month": 1649.6,
+      "x_owner": 4582.2
+    },
+    {
+      "conf": 0.05,
+      "recall": 0.8631,
+      "n_fire": 497,
+      "density_per_symbol_month": 726.18,
+      "x_owner": 2017.2
+    },
+    {
+      "conf": 0.1,
+      "recall": 0.7925,
+      "n_fire": 355,
+      "density_per_symbol_month": 518.7,
+      "x_owner": 1440.8
+    },
+    {
+      "conf": 0.2,
+      "recall": 0.5934,
+      "n_fire": 207,
+      "density_per_symbol_month": 302.45,
+      "x_owner": 840.1
+    },
+    {
+      "conf": 0.3,
+      "recall": 0.195,
+      "n_fire": 104,
+      "density_per_symbol_month": 151.96,
+      "x_owner": 422.1
+    },
+    {
+      "conf": 0.4,
+      "recall": 0.0,
+      "n_fire": 2,
+      "density_per_symbol_month": 2.92,
+      "x_owner": 8.1
+    },
+    {
+      "conf": 0.5,
+      "recall": 0.0,
+      "n_fire": 0,
+      "density_per_symbol_month": 0.0,
+      "x_owner": 0.0
+    },
+    {
+      "conf": 0.6,
+      "recall": 0.0,
+      "n_fire": 0,
+      "density_per_symbol_month": 0.0,
+      "x_owner": 0.0
+    },
+    {
+      "conf": 0.7,
+      "recall": 0.0,
+      "n_fire": 0,
+      "density_per_symbol_month": 0.0,
+      "x_owner": 0.0
+    },
+    {
+      "conf": 0.8,
+      "recall": 0.0,
+      "n_fire": 0,
+      "density_per_symbol_month": 0.0,
+      "x_owner": 0.0
+    },
+    {
+      "conf": 0.9,
+      "recall": 0.0,
+      "n_fire": 0,
+      "density_per_symbol_month": 0.0,
+      "x_owner": 0.0
+    }
+  ],
+  "verdict": "没有可用工作点。要把密度压到你的量级需门槛 ≥0.50,那时召回只剩 0.0%;区分度 AUC 0.757 说明 v9 给金标和给垃圾的置信度有差异但不够 —— 问题在训练集构造(负样本不足),调门槛救不了,必须重训。"
+}
