@@ -62,10 +62,7 @@ def overview_payload(universe: str = DEFAULT_UNIVERSE) -> dict:
         "universe": spec.key,
         "universe_label": spec.label,
         # Keep stages/coverage in payload for API consumers; overview UI no longer renders them.
-        "verdict": (
-            f"{spec.label} · 验收回测 PF {pf:.2f} @ {BASE_COST * 100:.1f}% · "
-            f"{base.get('n_trades', 0)} 笔"
-        ),
+        "verdict": _verdict_line(spec, base, pf),
         "stages": _stage_rows(spec, p0, p2a, p2b, hold, base),
         "tiles": _overview_tiles(spec, base, threshold),
         "coverage": _coverage_tiles(spec, n_files, n_rows, signals, threshold, all_trades, accept),
@@ -399,16 +396,61 @@ def _fmt_threshold(threshold: float) -> str:
     return f"{threshold:.3f}"
 
 
+def _honest_verdict() -> dict | None:
+    """The tip-replay holdout result, which superseded the PF 6.61 backtest.
+
+    The stage-3 backtest behind `base` was measured with the detector able to see
+    bars to the right of its own box, so its PF 6.61 / 77.1% win rate describes a
+    model conditioned on the printed future. Replaying tip-only put the same
+    chain at PF 0.784. The overview must lead with the number that survived,
+    because a headline of 6.61 under four green ticks reads as "accepted".
+    """
+    src = OUTPUT_DIR / "v16_holdout_verdict.json"
+    if not src.exists():
+        return None
+    try:
+        return json.loads(src.read_text()).get("summary")
+    except Exception:  # noqa: BLE001 -- a broken file must not blank the dashboard
+        return None
+
+
+def _verdict_line(spec: UniverseSpec, base: dict, pf: float) -> str:
+    honest = _honest_verdict()
+    if honest:
+        return (f"{spec.label} · tip-replay 终审 PF {honest.get('profit_factor', 0):.3f} · "
+                f"{honest.get('n_trades', 0)} 笔 · "
+                f"每笔净 {100 * honest.get('mean_net_per_trade', 0):+.3f}% "
+                f"（旧 PF {pf:.2f} 系前视回测，已作废）")
+    return (f"{spec.label} · ⚠️ 前视回测 PF {pf:.2f} @ {BASE_COST * 100:.1f}% · "
+            f"{base.get('n_trades', 0)} 笔 · 尚无 tip-replay 终审")
+
+
 def _overview_tiles(spec: UniverseSpec, base: dict, threshold: float) -> list[dict]:
     thr_sub = "val q90 · 回归 ACTIVE" if abs(threshold) < 0.2 else "val q90 · 二分类"
-    net = base.get("net_return_on_capital")
-    net_s = f"{100 * net:+.1f}%" if net is not None else "—"
+    honest = _honest_verdict()
+    if honest:
+        pf_tile = {
+            "label": "PF（tip-replay 终审）",
+            "value": "%.2f" % honest.get("profit_factor", 0),
+            "sub": f"{honest.get('n_trades', 0)} 笔 · {honest.get('window', '')} · 线 1.3",
+        }
+        perf_tile = {
+            "label": "每笔净 / 胜率",
+            "value": f"{100 * honest.get('mean_net_per_trade', 0):+.3f}%",
+            "sub": (f"胜率 {100 * honest.get('win_rate', 0):.1f}% · "
+                    f"旧回测 PF {base.get('profit_factor', 0):.2f} 系前视，已作废"),
+        }
+    else:
+        pf_tile = {"label": "验收 PF", "value": "%.2f" % base.get("profit_factor", 0),
+                   "sub": f"{BASE_COST * 100:.1f}% 成本 · 线 1.3 · ⚠️ 前视回测"}
+        net = base.get("net_return_on_capital")
+        perf_tile = {"label": "净收益 / 胜率",
+                     "value": f"{100 * net:+.1f}%" if net is not None else "—",
+                     "sub": f"胜率 {100 * base.get('win_rate', 0):.1f}% · ⚠️ 未经 tip-replay"}
     return [
         {"label": "宇宙", "value": spec.label, "sub": "主线 SWAP"},
-        {"label": "验收 PF", "value": "%.2f" % base.get("profit_factor", 0),
-         "sub": f"{BASE_COST * 100:.1f}% 成本 · 线 1.3"},
-        {"label": "净收益 / 胜率", "value": net_s,
-         "sub": f"胜率 {100 * base.get('win_rate', 0):.1f}% · {base.get('n_trades', 0)} 笔"},
+        pf_tile,
+        perf_tile,
         {"label": "阀门阈值", "value": _fmt_threshold(threshold), "sub": thr_sub},
     ]
 
@@ -437,6 +479,21 @@ def _fetched_coverage(spec: UniverseSpec) -> tuple[int, int]:
 
 
 def _acceptance(metrics: dict) -> dict[str, bool]:
+    """Acceptance ticks, judged on the tip-replay result when one exists.
+
+    Judging them on the look-ahead backtest printed four green ticks beside a PF
+    of 6.61, which is the single most misleading thing this dashboard could
+    show. The same four criteria against the honest replay fail, which is the
+    truth of the matter.
+    """
+    honest = _honest_verdict()
+    if honest:
+        return {
+            "net_positive": honest.get("total_net_units", 0) > 0,
+            "profit_factor_ge_1.3": honest.get("profit_factor", 0) >= 1.3,
+            "max_drawdown_le_20pct": False,      # not measured by the replay
+            "n_trades_ge_100": honest.get("n_trades", 0) >= 100,
+        }
     return {
         "net_positive": metrics.get("net_total_units", 0) > 0,
         "profit_factor_ge_1.3": metrics.get("profit_factor", 0) >= 1.3,
