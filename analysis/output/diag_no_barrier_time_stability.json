@@ -1,0 +1,84 @@
+{
+  "pool": "judgment_yolo_short_v6_wide.csv",
+  "pooled": {
+    "n": 5802,
+    "from": "2025-06-07",
+    "to": "2026-05-03",
+    "barrier_net": 0.000312,
+    "barrier_pf": 1.031,
+    "hold_net": 0.002645,
+    "hold_pf": 1.179,
+    "hold_wins": true
+  },
+  "halves": [
+    {
+      "label": "前后半 1/2",
+      "n": 2901,
+      "from": "2025-06-07",
+      "to": "2025-12-10",
+      "barrier_net": 0.00069,
+      "barrier_pf": 1.066,
+      "hold_net": 0.002707,
+      "hold_pf": 1.169,
+      "hold_wins": true
+    },
+    {
+      "label": "前后半 2/2",
+      "n": 2901,
+      "from": "2025-12-10",
+      "to": "2026-05-03",
+      "barrier_net": -6.5e-05,
+      "barrier_pf": 0.993,
+      "hold_net": 0.002583,
+      "hold_pf": 1.191,
+      "hold_wins": true
+    }
+  ],
+  "quarters": [
+    {
+      "label": "四分位 1/4",
+      "n": 1451,
+      "from": "2025-06-07",
+      "to": "2025-09-14",
+      "barrier_net": -0.000436,
+      "barrier_pf": 0.958,
+      "hold_net": -0.0024,
+      "hold_pf": 0.858,
+      "hold_wins": false
+    },
+    {
+      "label": "四分位 2/4",
+      "n": 1451,
+      "from": "2025-09-14",
+      "to": "2025-12-10",
+      "barrier_net": 0.001809,
+      "barrier_pf": 1.174,
+      "hold_net": 0.007837,
+      "hold_pf": 1.52,
+      "hold_wins": true
+    },
+    {
+      "label": "四分位 3/4",
+      "n": 1450,
+      "from": "2025-12-10",
+      "to": "2026-02-20",
+      "barrier_net": -0.000214,
+      "barrier_pf": 0.979,
+      "hold_net": 0.004591,
+      "hold_pf": 1.358,
+      "hold_wins": true
+    },
+    {
+      "label": "四分位 4/4",
+      "n": 1450,
+      "from": "2026-02-20",
+      "to": "2026-05-03",
+      "barrier_net": 8.8e-05,
+      "barrier_pf": 1.01,
+      "hold_net": 0.000553,
+      "hold_pf": 1.039,
+      "hold_wins": true
+    }
+  ],
+  "verdict": "纯持在 3/4 四分位胜出,1 段落败 → 大体稳定但非一致,落败段需单独看"
+}
