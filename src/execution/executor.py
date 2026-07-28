@@ -37,6 +37,7 @@ _NOTIFY_EVENTS = {
     "order_partial": "🟡 <b>开仓成功·括号失败</b>(需人工补止损!)",
     "order_failed": "🔴 <b>下单失败</b>",
     "skipped_invalid_barriers": "⚠️ <b>拒单</b>(止盈止损价不可用)",
+    "skipped_unsupported_side": "⚠️ <b>拒单</b>(执行器不支持该方向)",
     "timeout_close": "⏱ <b>超时平仓</b>(72bar 到期,按验证策略出场)",
     "timeout_close_failed": "🔴 <b>超时平仓失败</b>(需人工处理!)",
 }
@@ -121,6 +122,20 @@ def signal_size_mult(row: pd.Series) -> float:
     return min(max(mult, 0.0), TIER_SIZE_MULT_CAP)
 
 
+def signal_trade_side(row: pd.Series) -> str:
+    """Normalized strategy direction; missing legacy metadata means long.
+
+    The current execution and barrier implementation is long-only. Explicit
+    ``short`` or unknown values must remain visible so ``open_one`` can reject
+    them instead of silently converting them into a buy.
+    """
+    raw = row.get("side")
+    if raw is None or pd.isna(raw):
+        return "long"
+    side = str(raw).strip().lower()
+    return side or "long"
+
+
 def barriers(entry: float, atr_pct: float) -> tuple[float, float]:
     try:
         atr = abs(entry * float(atr_pct))
@@ -192,6 +207,7 @@ def open_one(
     sk = signal_key(row)
     symbol = str(row["symbol"])
     inst_id = to_okx_inst_id(symbol)
+    trade_side = signal_trade_side(row)
     atr_pct = float(row["atr_pct"]) if pd.notna(row.get("atr_pct")) else 0.01
     notional = float(notional_usdt if notional_usdt is not None else cfg.notional_usdt)
     event: dict[str, Any] = {
@@ -201,13 +217,21 @@ def open_one(
         "inst_id": inst_id,
         "score": row.get("score"),
         "threshold": row.get("threshold"),
-        "side": "buy",
+        "signal_side": trade_side,
+        "side": "buy" if trade_side == "long" else None,
         "tp_atr_mult": TP_ATR_MULT,
         "sl_atr_mult": SL_ATR_MULT,
         "td_mode": cfg.td_mode,
     }
     if sizing_meta:
         event["sizing"] = sizing_meta
+
+    if trade_side != "long":
+        event["event"] = "skipped_unsupported_side"
+        event["note"] = (
+            f"current executor is long-only; refused signal side={trade_side!r}"
+        )
+        return event
 
     if dry_run or client is None:
         # Estimate without keys when dry-run and no client

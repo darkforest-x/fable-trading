@@ -60,6 +60,7 @@ def _stub_artifact() -> types.SimpleNamespace:
 def _run_pulse(frame: pd.DataFrame, existing: pd.DataFrame, monkeypatch: pytest.MonkeyPatch, detected_at: str):
     tip_i = len(frame) - 1
     monkeypatch.setattr(fs, "CANDIDATE_SOURCE", "rules")
+    monkeypatch.setattr(fs, "RUNTIME_MODE", "research")
     monkeypatch.setattr(
         fs, "iter_series", lambda **kw: iter([("okx", "TESTCOIN_USDT_SWAP", frame)])
     )
@@ -122,6 +123,7 @@ def _run_pulse_tracked(frame, existing, monkeypatch, detected_at):
     """Pulse where the candidate comes from the tracked-open key injection."""
     signal_i = len(frame) - 2  # yesterday's tip, now one bar back
     monkeypatch.setattr(fs, "CANDIDATE_SOURCE", "rules")
+    monkeypatch.setattr(fs, "RUNTIME_MODE", "research")
     monkeypatch.setattr(
         fs, "iter_series", lambda **kw: iter([("okx", "TESTCOIN_USDT_SWAP", frame)])
     )

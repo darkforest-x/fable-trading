@@ -24,6 +24,7 @@ from src.judgment.forward_records import forward_key, open_keys
 from src.judgment.forward_types import (
     BAR,
     CANDIDATE_SOURCE,
+    RUNTIME_MODE,
     SCALED_SL_MULT,
     SCALED_TP1_MULT,
     SCALED_TRAIL_MULT,
@@ -33,6 +34,7 @@ from src.judgment.forward_types import (
     ForwardRecord,
     ForwardScanInput,
     ForwardScanResult,
+    validate_candidate_source,
 )
 from src.judgment.labeling import ATR_PCT_MIN, HORIZON_BARS
 from src.judgment.yolo_candidates import (
@@ -78,6 +80,7 @@ def scan_forward_records(
     books (e.g. v12 tip-only). Mainline callers leave defaults; unset
     `yolo_mode` resolves from env ``FABLE_YOLO_MODE`` (default live).
     """
+    candidate_source = validate_candidate_source(CANDIDATE_SOURCE, RUNTIME_MODE)
     resolve = exit_resolver or resolve_forward_exit
     if yolo_mode is None:
         yolo_mode = resolve_yolo_mode("live")
@@ -88,10 +91,10 @@ def scan_forward_records(
     threshold_signals_seen = 0
     tracked_keys = open_keys(scan.existing_log)
     yolo_model = None
-    if CANDIDATE_SOURCE == "yolo":
+    if candidate_source == "yolo":
         try:
             yolo_model = load_yolo_model(yolo_weights) if yolo_weights is not None else load_yolo_model()
-        except FileNotFoundError as exc:
+        except (FileNotFoundError, ImportError) as exc:
             # Owner doctrine 2026-07-23: pre-v16 detectors are deleted (they
             # could only ever produce hindsight rows). Until a validated tip
             # detector lands, the pulse idles honestly: klines stay fresh and
@@ -116,11 +119,11 @@ def scan_forward_records(
         # reject anyway.
         jobs.append((source, symbol, frame.tail(LIVE_TAIL_BARS).reset_index(drop=True)))
     scanned_series = len(jobs)
-    workers = _forward_workers() if CANDIDATE_SOURCE == "yolo" else 1
+    workers = _forward_workers() if candidate_source == "yolo" else 1
     wlabel = str(yolo_weights) if yolo_weights is not None else "owner_best"
     tip_conf_s = f"{tip_conf:.2f}" if tip_conf is not None else "off"
     print(
-        f"forward_scan: series={scanned_series} workers={workers} source={CANDIDATE_SOURCE} "
+        f"forward_scan: series={scanned_series} workers={workers} source={candidate_source} "
         f"yolo_mode={yolo_mode} tip_conf={tip_conf_s} weights={wlabel}",
         flush=True,
     )
@@ -130,7 +133,7 @@ def scan_forward_records(
         """Phase 1 (parallel-safe): indicators + YOLO/rules indices only."""
         source, symbol, frame = job
         enriched = add_indicators(frame)
-        if CANDIDATE_SOURCE == "yolo" and yolo_model is None:
+        if candidate_source == "yolo" and yolo_model is None:
             # detector=none idle mode: no discovery, tracked rows still resolve
             signal_indices: set[int] = set()
         else:
@@ -244,6 +247,7 @@ def scan_forward_records(
                     "dense_run_len": int(feature_row["dense_run_len"]),
                     "tier": tier,
                     "size_mult": size_mult,
+                    "side": "long",
                 }
             )
     print(
@@ -262,8 +266,9 @@ def forward_candidate_indices(
     start_time: pd.Timestamp | None = None,
     yolo_mode: str = "live",
 ) -> list[int]:
-    """Mainline candidate bars: YOLO by default, rules if CANDIDATE_SOURCE=rules."""
-    if CANDIDATE_SOURCE == "rules":
+    """Candidate bars under the validated production/research source contract."""
+    candidate_source = validate_candidate_source(CANDIDATE_SOURCE, RUNTIME_MODE)
+    if candidate_source == "rules":
         return _rule_candidate_indices(enriched)
     # YOLO path
     raw = frame if frame is not None else enriched

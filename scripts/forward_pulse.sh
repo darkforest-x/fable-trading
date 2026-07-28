@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Periodic forward-clock tick for mainline gate (data/forward_log.csv).
 #
-# Prefer YOLO candidates (mainline). If ultralytics/torch missing, fall back to
-# rules candidates so the clock still moves on lean VPS hosts.
+# Production candidate provenance is fail-closed: only the validated YOLO path
+# may discover new rows. Missing detector dependencies/weights mean
+# detector=none (zero discovery), never a silent switch to legacy rules.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p logs
@@ -14,13 +15,12 @@ PY="${PY:-.venv/bin/python}"
 [ -x "$PY" ] || PY=python3
 export PYTHONPATH=.
 
+export FABLE_RUNTIME_MODE=production
+export FABLE_CANDIDATE_SOURCE=yolo
 if ! "$PY" -c "import ultralytics" 2>/dev/null; then
-  echo "ultralytics missing → FABLE_CANDIDATE_SOURCE=rules"
-  export FABLE_CANDIDATE_SOURCE=rules
-else
-  export FABLE_CANDIDATE_SOURCE="${FABLE_CANDIDATE_SOURCE:-yolo}"
-  echo "candidate_source=$FABLE_CANDIDATE_SOURCE"
+  echo "ultralytics missing → detector=none (production discovery disabled)"
 fi
+echo "runtime_mode=$FABLE_RUNTIME_MODE candidate_source=$FABLE_CANDIDATE_SOURCE"
 
 # Optional tip-only mainline (default unchanged = live 6-window).
 #   FABLE_YOLO_MODE=tip          # pure tip window only
@@ -39,8 +39,14 @@ if [ "${SKIP_UPDATE_OKX:-0}" != "1" ]; then
 fi
 
 echo "forward_track start $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-"$PY" scripts/forward_track.py
-echo "forward_log lines=$(wc -l < data/forward_log.csv 2>/dev/null || echo 0)"
+forward_track_ok=0
+if "$PY" scripts/forward_track.py; then
+  forward_track_ok=1
+  echo "forward_log lines=$(wc -l < data/forward_log.csv 2>/dev/null || echo 0)"
+else
+  forward_track_status=$?
+  echo "forward_track failed status=$forward_track_status → executor blocked"
+fi
 
 # (v12 shadow removed 2026-07-23 — pre-v16 detectors are deleted per iron
 # rule 12; no shadow may run a banned model.)
@@ -52,9 +58,13 @@ if [ "${FABLE_COLLECT_REAL_TIPS:-1}" = "1" ]; then
   "$PY" scripts/collect_real_tips_pulse.py 2>&1 | tail -3 || echo "real_tip_collect skipped/failed"
 fi
 
-# Immediately try to trade any fresh open rows — do not wait up to 30s for the
-# executor loop. Failures here must never fail the pulse unit.
-echo "executor --once (post-pulse)"
-"$PY" -m src.execution --once 2>&1 | tail -5 || echo "executor once failed/skipped"
+# Immediately try to trade fresh open rows only after this pulse completed its
+# forward-log refresh. A failed refresh must not dispatch against stale state.
+if [ "$forward_track_ok" -eq 1 ]; then
+  echo "executor --once (post-pulse)"
+  "$PY" -m src.execution --once 2>&1 | tail -5 || echo "executor once failed/skipped"
+else
+  echo "executor --once skipped: forward_track did not complete"
+fi
 
 echo "=== done $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="

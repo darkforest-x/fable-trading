@@ -111,6 +111,14 @@ def _run_forward_tracking(
     os.environ.setdefault("MKL_NUM_THREADS", "1")
     os.environ.setdefault("VECLIB_MAXIMUM_THREADS", "1")
 
+    from src.judgment.forward_types import (
+        CANDIDATE_SOURCE,
+        RUNTIME_MODE,
+        validate_candidate_source,
+    )
+
+    candidate_source = validate_candidate_source(CANDIDATE_SOURCE, RUNTIME_MODE)
+
     normalized_start = normalize_start_time(start_time)
     artifact = latest_artifact(DEFAULT_FROZEN_CONFIG)
     if artifact is None:
@@ -118,13 +126,12 @@ def _run_forward_tracking(
     existing = read_forward_log(output_path)
     # Load YOLO *before* LightGBM booster when YOLO is the candidate source —
     # reverse order has hung on Apple Silicon mid-scan (0% CPU sleep).
-    from src.judgment.forward_types import CANDIDATE_SOURCE
     from src.judgment.yolo_candidates import load_yolo_model
 
-    if CANDIDATE_SOURCE == "yolo":
+    if candidate_source == "yolo":
         try:
             load_yolo_model(yolo_weights) if yolo_weights is not None else load_yolo_model()
-        except FileNotFoundError:
+        except (FileNotFoundError, ImportError):
             # detector=none idle mode (iron rule 12): scan_forward_records
             # logs it and skips discovery; the pulse itself must not crash.
             pass

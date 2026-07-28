@@ -151,6 +151,7 @@ class TestForwardScanStamping:
             predict=lambda rows, num_iteration=None: np.full(len(rows), 0.05)
         )
         monkeypatch.setattr(fs, "CANDIDATE_SOURCE", "rules")
+        monkeypatch.setattr(fs, "RUNTIME_MODE", "research")
         monkeypatch.setattr(
             fs, "iter_series", lambda **kw: iter([("okx", "TESTCOIN_USDT_SWAP", frame)])
         )

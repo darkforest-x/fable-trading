@@ -1,6 +1,7 @@
 """Typed forward-log records and run summaries."""
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final, TypedDict
@@ -21,10 +22,13 @@ FORWARD_LOG_H1_SCALED_PATH: Final = PROJECT_DIR / "data" / "forward_log_h1_scale
 # Use last *closed* bar open (not wall-clock "now") so live YOLO is not skipped
 # while the current 15m candle is still forming.
 FORWARD_START: Final = pd.Timestamp("2026-07-18 16:15:00", tz="UTC")
-# "yolo" = detector proposes bars; "rules" = expanded dense-MA scan (legacy).
-# Override with env FABLE_CANDIDATE_SOURCE=rules when VPS has no ultralytics/torch.
-import os as _os
-CANDIDATE_SOURCE: Final = _os.environ.get("FABLE_CANDIDATE_SOURCE", "yolo").strip().lower() or "yolo"
+# Candidate provenance is part of the runtime safety contract. Production may
+# only discover from the validated YOLO path; legacy rules remain available to
+# explicitly marked offline/research callers.
+RUNTIME_MODE: Final = os.environ.get("FABLE_RUNTIME_MODE", "production").strip().lower() or "production"
+CANDIDATE_SOURCE: Final = os.environ.get("FABLE_CANDIDATE_SOURCE", "yolo").strip().lower() or "yolo"
+VALID_RUNTIME_MODES: Final = frozenset({"production", "research"})
+VALID_CANDIDATE_SOURCES: Final = frozenset({"yolo", "rules"})
 BAR: Final = pd.Timedelta(minutes=15)
 TP_MULT: Final = 5.0
 SL_MULT: Final = 2.0
@@ -57,6 +61,9 @@ FORWARD_COLUMNS: Final = (
     # positional CSVs are unaffected; legacy rows read back as NaN → 1x.
     "tier",
     "size_mult",
+    # Direction contract. Legacy rows normalize to NaN and remain long-only;
+    # explicit non-long rows are rejected by the current executor.
+    "side",
 )
 OUTCOME_COLUMNS: Final = ("status", "outcome", "label", "exit_offset", "exit_time", "realized_ret")
 
@@ -86,6 +93,34 @@ class ForwardRecord(TypedDict):
     # score→size tier of the frozen val distribution (q90_q95/q95_q99/q99_plus)
     tier: str
     size_mult: float
+    side: str
+
+
+def validate_candidate_source(candidate_source: str, runtime_mode: str) -> str:
+    """Validate candidate provenance before any forward scan or model load.
+
+    Production accepts only ``yolo``. ``rules`` is intentionally retained for
+    reproducible offline/research diagnostics, which must opt in with
+    ``FABLE_RUNTIME_MODE=research``.
+    """
+    source = str(candidate_source).strip().lower()
+    mode = str(runtime_mode).strip().lower()
+    if mode not in VALID_RUNTIME_MODES:
+        raise ValueError(
+            f"invalid FABLE_RUNTIME_MODE={runtime_mode!r}; "
+            f"expected one of {sorted(VALID_RUNTIME_MODES)}"
+        )
+    if source not in VALID_CANDIDATE_SOURCES:
+        raise ValueError(
+            f"invalid FABLE_CANDIDATE_SOURCE={candidate_source!r}; "
+            f"expected one of {sorted(VALID_CANDIDATE_SOURCES)}"
+        )
+    if mode == "production" and source != "yolo":
+        raise RuntimeError(
+            "production forward tracking requires candidate_source=yolo; "
+            "legacy rules are research-only"
+        )
+    return source
 
 
 class ForwardSummaryJson(TypedDict):
