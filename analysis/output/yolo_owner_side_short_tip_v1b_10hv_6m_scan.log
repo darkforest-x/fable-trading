@@ -1,0 +1,70 @@
+==== clean_launch 2026-07-24T07:44:04Z ====
+[2026-07-24T07:44:04Z] driver start chunk=1 device=cpu weights=runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt out=data/judgment_yolo_owner_side_short_10hv_6m.csv symbols_file=analysis/output/yolo_short_10hv_6m_symbols.txt months=6 end_before=2026-05-04 start_time=none
+[2026-07-24T07:44:04Z] chunk=1 done=0/10
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[2025-11-04 00:00:00+00:00, 2026-05-04 00:00:00+00:00)
+  BEAT_USDT_SWAP: 235 YOLO候选 (short)
+  … progress 1/1
+{
+  "side": "short",
+  "weights": "/Users/zhangzc/fable-trading/runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt",
+  "series_this_chunk": 1,
+  "candidates_so_far": 235,
+  "symbols_so_far": 1,
+  "pos_rate": 0.1872,
+  "out": "data/judgment_yolo_owner_side_short_10hv_6m.csv",
+  "workers": 1,
+  "checkpoint": true,
+  "signal_time_lo": "2025-11-04 00:00:00+00:00",
+  "signal_time_hi": "2026-05-04 00:00:00+00:00",
+  "symbols_filter": [
+    "BEAT_USDT_SWAP",
+    "KAT_USDT_SWAP",
+    "LIGHT_USDT_SWAP",
+    "PIPPIN_USDT_SWAP",
+    "RAVE_USDT_SWAP",
+    "RIVER_USDT_SWAP",
+    "RLS_USDT_SWAP",
+    "SPACE_USDT_SWAP",
+    "TRUST_USDT_SWAP",
+    "TRUTH_USDT_SWAP"
+  ]
+}
+[2026-07-24T07:44:23Z] chunk=1 exit=0 done_after=1
+[2026-07-24T07:44:23Z] chunk=2 done=1/10
+resume: skip 1 done symbols (1 marked); remain 9
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[2025-11-04 00:00:00+00:00, 2026-05-04 00:00:00+00:00)
+  KAT_USDT_SWAP: 83 YOLO候选 (short)
+  … progress 1/1
+{
+  "side": "short",
+  "weights": "/Users/zhangzc/fable-trading/runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt",
+  "series_this_chunk": 1,
+  "candidates_so_far": 318,
+  "symbols_so_far": 2,
+  "pos_rate": 0.217,
+  "out": "data/judgment_yolo_owner_side_short_10hv_6m.csv",
+  "workers": 1,
+  "checkpoint": true,
+  "signal_time_lo": "2025-11-04 00:00:00+00:00",
+  "signal_time_hi": "2026-05-04 00:00:00+00:00",
+  "symbols_filter": [
+    "BEAT_USDT_SWAP",
+    "KAT_USDT_SWAP",
+    "LIGHT_USDT_SWAP",
+    "PIPPIN_USDT_SWAP",
+    "RAVE_USDT_SWAP",
+    "RIVER_USDT_SWAP",
+    "RLS_USDT_SWAP",
+    "SPACE_USDT_SWAP",
+    "TRUST_USDT_SWAP",
+    "TRUTH_USDT_SWAP"
+  ]
+}
+[2026-07-24T07:44:31Z] chunk=2 exit=0 done_after=2
+[2026-07-24T07:44:31Z] chunk=3 done=2/10
+resume: skip 2 done symbols (2 marked); remain 8
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[2025-11-04 00:00:00+00:00, 2026-05-04 00:00:00+00:00)
+[2026-07-24T07:54:13Z] driver start chunk=1 device=cpu weights=runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt out=data/judgment_yolo_owner_side_short_10hv_6m.csv symbols_file=analysis/output/yolo_short_10hv_6m_symbols.txt months=6 end_before=2026-05-04 start_time=none
+[2026-07-24T07:54:13Z] chunk=1 done=2/10
+resume: skip 2 done symbols (2 marked); remain 8
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[2025-11-04 00:00:00+00:00, 2026-05-04 00:00:00+00:00)

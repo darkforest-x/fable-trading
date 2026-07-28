@@ -2,6 +2,61 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-07-25 00:20 — S3 shortish 过滤包 432/1000；待 Owner 目视；不 promote）
+
+### 刚发生
+- Owner 要求 1000 框包只留“看起来像空头启动”。
+- 在 tip_v1b 原包上加启发式过滤：`NOT bull_stack AND ret12<=0 AND close<=ema60`。
+- **保留 432/1000**（183 币）→ `analysis/output/owner_side_short_tip_v1b_detect1000_shortish/`。
+- 报告：`analysis/p_short_tip_v1b_detect1000_shortish.md`。
+- **未** promote / **未**动 holdout / **未**改 ACTIVE。
+
+### 下一步（需 Owner）
+1. 审 `detect1000_shortish/index.html` + 填 `review_sheet.csv`。  
+2. 过严/过松再调规则阈值。  
+
+### 仍禁止
+- promote / ACTIVE / 清 forward_log / holdout#8 / 真下单 / 改新鲜度三门。
+
+---
+
+## ⚡ 当前真相（2026-07-24 23:53 — S3 tip_v1b 1000 框包完成；待 Owner 目视；不 promote）
+
+### 刚发生
+- Owner 批 **S3-1**：用 `owner_side_short_tip_v1b` 在真实 K 线出 ~1000 框，排除 short 金标训练集。
+- **完成**：`analysis/output/owner_side_short_tip_v1b_detect1000/` — labeled **1000** / tried 1176 / symbols **224** / train collisions **0** / right p50≈**0.997**。
+- 脚本：`scripts/dump_short_tip_detect_sample.py`；报告 `analysis/p_short_tip_v1b_detect1000.md`。
+- 前序 S2 仍有效：100×6m 回归 = 间歇弱边（净 +0.471%，ρ=0.016）→ **停扩币**。
+- **未** promote / **未**动 holdout / **未**改 ACTIVE / **未**接执行器。
+
+### 下一步（需 Owner）
+1. 目视 `index.html` + 填 `review_sheet.csv`（owner_keep/note）。  
+2. 根据 keep 率决定：仅辅证 / 建新金标 / 收摊。  
+3. 障碍/holdout#8/promote **另批**。
+
+### 仍禁止
+- promote / ACTIVE / 清 forward_log / holdout#8 / 真下单 / 改新鲜度三门 / 杀 §7-2 dump。Long YOLO **未**开。
+
+---
+
+## ⚡ 当前真相（2026-07-24 23:19 — short 100×6m 回归+walkforward 收口；S2=间歇弱边；不 promote）
+
+### 刚发生
+- **100×6m 扫池完成**：`data/judgment_yolo_owner_side_short_100_6m.csv` n=**25602** / 100 币 / pos≈0.284；complete 100/100（17:38）。
+- **回归** `p2b_yolo_short_100_6m_reg`（无 holdout）：top-decile 净 **+0.471%**（n=510）/ Spearman **0.016** / val-q90=**0.00347** / 置换 p=**0.037**。报告 `analysis/p_short_judgment_100_6m_reg.md`。
+- **walkforward** 5-fold：net_mean **+0.305%** / rho_mean **−0.010** / all_folds_net_positive=**false**。报告 `analysis/p_short_judgment_100_6m_reg_walkforward.md`。
+- **S2 裁决**：扩样后单切仍正，但排序塌陷、稳健级未过 → **停止继续扩币叙事**；默认转 **S3 检测金标/信号定义**（Owner 1000 目视）。**未** promote / **未**动 holdout / **未**改 TP/SL。
+
+### 下一步（需 Owner）
+1. 是否开 tip_v1b **1000 目视框**（排除训练集）——S3。  
+2. 是否换命题 / 收摊 short 判断层（默认：先 S3，不烧 holdout#8）。  
+3. 障碍/holdout/promote **另批**；勿再开 binary top-K。
+
+### 仍禁止
+- promote / ACTIVE / 清 forward_log / holdout#8 / 真下单 / 改新鲜度三门 / 杀 §7-2 dump。Long YOLO **未**开。
+
+---
+
 ## ⚡ 当前真相（2026-07-24 16:40 — short 扩 30×6m；回归主线正；binary/top-K 支线关；不 promote）
 
 ### 刚发生

@@ -1,0 +1,196 @@
+/Users/zhangzc/.matplotlib is not a writable directory
+Matplotlib created a temporary cache directory at /var/folders/fr/fq9wwmwx3xn63_cdk_v8nvt00000gn/T/matplotlib-04fxlq4n because there was an issue with the default path (/Users/zhangzc/.matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:330: RuntimeWarning: divide by zero encountered in matmul
+  grad[:n_features] = X.T @ grad_pointwise + l2_reg_strength * weights
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:330: RuntimeWarning: overflow encountered in matmul
+  grad[:n_features] = X.T @ grad_pointwise + l2_reg_strength * weights
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/sklearn/linear_model/_linear_loss.py:330: RuntimeWarning: invalid value encountered in matmul
+  grad[:n_features] = X.T @ grad_pointwise + l2_reg_strength * weights
+{
+  "dataset": "data/judgment_yolo_owner_side_short_100_6m.csv",
+  "side": "short",
+  "objective": "regression",
+  "score_semantics": "predicted_realized_ret",
+  "feature_columns": [
+    "ma_spread_pct",
+    "full_spread",
+    "fast_slow_gap",
+    "full_ratio_min48",
+    "spread_mean8",
+    "spread_mean24",
+    "spread_chg8",
+    "spread_chg24",
+    "spread_pos96",
+    "dense_run_len",
+    "dense_frac48",
+    "ext_up",
+    "close_vs_ema55",
+    "close_vs_ema200",
+    "order_score",
+    "slow_slope_12",
+    "volume_ratio",
+    "volume_z",
+    "vol_ratio_mean8",
+    "atr_pct",
+    "atr_pct_ratio96",
+    "pre_range48",
+    "pre_range168",
+    "drawdown24",
+    "ret_4",
+    "ret_12",
+    "ret_24",
+    "ret_48"
+  ],
+  "n_features": 28,
+  "bar": "15m",
+  "horizon_bars": 72,
+  "purge_window": "0 days 18:15:00",
+  "holdout_start": "2026-05-04 00:00:00+00:00",
+  "holdout_policy": "holdout excluded from training and threshold selection; not evaluated",
+  "splits": {
+    "train": {
+      "n": 20255,
+      "range": [
+        "2025-11-04 00:00:00+00:00",
+        "2026-03-25 03:30:00+00:00"
+      ]
+    },
+    "val": {
+      "n": 5107,
+      "range": [
+        "2026-03-26 04:30:00+00:00",
+        "2026-05-03 05:00:00+00:00"
+      ]
+    },
+    "holdout": {
+      "n": 0,
+      "range": [
+        "NaT",
+        "NaT"
+      ]
+    }
+  },
+  "best_iteration": 11,
+  "val": {
+    "n": 5107,
+    "positive_rate": 0.2651,
+    "roc_auc": 0.5157,
+    "pr_auc": 0.2844,
+    "thresholds": {
+      "0.4": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.5": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.6": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.7": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    },
+    "top_decile": {
+      "n": 510,
+      "mean_realized_ret": 0.00671,
+      "mean_net_ret": 0.00471,
+      "win_rate": 0.3451
+    },
+    "all_mean_net_ret": -0.00074,
+    "spearman_score_vs_ret": 0.0164,
+    "threshold_val_q90": 0.00347181,
+    "score_quantile": 0.9,
+    "above_q90": {
+      "n": 516,
+      "mean_realized_ret": 0.00682,
+      "mean_net_ret": 0.00482,
+      "win_rate": 0.3488
+    }
+  },
+  "val_permutation_p": 0.03696303696303696,
+  "val_baseline_ma_spread_logreg": {
+    "n": 5107,
+    "positive_rate": 0.2651,
+    "roc_auc": 0.5168,
+    "pr_auc": 0.2698,
+    "thresholds": {
+      "0.4": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.5": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.6": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.7": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    },
+    "top_decile": {
+      "n": 510,
+      "mean_realized_ret": -0.00029,
+      "mean_net_ret": -0.00229,
+      "win_rate": 0.2471
+    },
+    "all_mean_net_ret": -0.00074
+  },
+  "feature_importance_top10": [
+    {
+      "feature": "atr_pct",
+      "gain": 1.4956634920090437
+    },
+    {
+      "feature": "pre_range168",
+      "gain": 1.2464026920497417
+    },
+    {
+      "feature": "slow_slope_12",
+      "gain": 0.9701942950487137
+    },
+    {
+      "feature": "close_vs_ema200",
+      "gain": 0.9225844014436007
+    },
+    {
+      "feature": "pre_range48",
+      "gain": 0.6309208944439888
+    },
+    {
+      "feature": "spread_chg24",
+      "gain": 0.6077368967235088
+    },
+    {
+      "feature": "vol_ratio_mean8",
+      "gain": 0.5862495992332697
+    },
+    {
+      "feature": "ret_12",
+      "gain": 0.4800052996724844
+    },
+    {
+      "feature": "ext_up",
+      "gain": 0.3485424052923918
+    },
+    {
+      "feature": "atr_pct_ratio96",
+      "gain": 0.3464683014899492
+    }
+  ]
+}

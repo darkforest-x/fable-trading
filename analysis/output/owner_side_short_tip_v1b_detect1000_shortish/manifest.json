@@ -1,0 +1,23 @@
+{
+  "protocol": "short_tip_v1b_detect1000_shortish_filter",
+  "source_pack": "analysis/output/owner_side_short_tip_v1b_detect1000",
+  "weights": "runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt",
+  "rule": {
+    "bull_stack": "reject ema20>ema60>ema120",
+    "ret12": "<= 0",
+    "close_vs_ema60": "<= 0",
+    "calibration": "owner_side_review short vs long gold sample; short near below-MA weakness, long near above-MA strength"
+  },
+  "input_n": 1000,
+  "kept_n": 432,
+  "keep_rate": 0.432,
+  "symbols_kept": 183,
+  "reason_counts": {
+    "pass": 432,
+    "ret12_pos": 295,
+    "bull_stack": 229,
+    "above_ema60": 44
+  },
+  "promote": "NO",
+  "note": "Heuristic visual short-looking filter only; not a trade signal and not promote gate."
+}

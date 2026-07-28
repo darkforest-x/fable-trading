@@ -1,0 +1,203 @@
+==== launch 2026-07-24T07:57:08Z ====
+[2026-07-24T07:57:08Z] driver start chunk=1 device=cpu weights=runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt out=data/judgment_yolo_owner_side_short_5_6m.csv symbols_file=analysis/output/yolo_short_5_6m_symbols.txt months=6 end_before=2026-05-04 start_time=none
+[2026-07-24T07:57:08Z] chunk=1 done=0/5
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[2025-11-04 00:00:00+00:00, 2026-05-04 00:00:00+00:00)
+  BTC_USDT_SWAP: 224 YOLO候选 (short)
+  … progress 1/1
+{
+  "side": "short",
+  "weights": "/Users/zhangzc/fable-trading/runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt",
+  "series_this_chunk": 1,
+  "candidates_so_far": 224,
+  "symbols_so_far": 1,
+  "pos_rate": 0.308,
+  "out": "data/judgment_yolo_owner_side_short_5_6m.csv",
+  "workers": 1,
+  "checkpoint": true,
+  "signal_time_lo": "2025-11-04 00:00:00+00:00",
+  "signal_time_hi": "2026-05-04 00:00:00+00:00",
+  "symbols_filter": [
+    "BTC_USDT_SWAP",
+    "DOGE_USDT_SWAP",
+    "ETH_USDT_SWAP",
+    "SOL_USDT_SWAP",
+    "XRP_USDT_SWAP"
+  ]
+}
+[2026-07-24T07:57:28Z] chunk=1 exit=0 done_after=1
+[2026-07-24T07:57:28Z] chunk=2 done=1/5
+resume: skip 1 done symbols (1 marked); remain 4
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[2025-11-04 00:00:00+00:00, 2026-05-04 00:00:00+00:00)
+==== relaunch_resume 2026-07-24T08:00:54Z done=BTC_USDT_SWAP, ====
+[2026-07-24T08:00:54Z] driver start chunk=1 device=cpu weights=runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt out=data/judgment_yolo_owner_side_short_5_6m.csv symbols_file=analysis/output/yolo_short_5_6m_symbols.txt months=6 end_before=2026-05-04 start_time=none
+[2026-07-24T08:00:54Z] chunk=1 done=1/5
+resume: skip 1 done symbols (1 marked); remain 4
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[2025-11-04 00:00:00+00:00, 2026-05-04 00:00:00+00:00)
+  DOGE_USDT_SWAP: 259 YOLO候选 (short)
+  … progress 1/1
+{
+  "side": "short",
+  "weights": "/Users/zhangzc/fable-trading/runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt",
+  "series_this_chunk": 1,
+  "candidates_so_far": 483,
+  "symbols_so_far": 2,
+  "pos_rate": 0.3085,
+  "out": "data/judgment_yolo_owner_side_short_5_6m.csv",
+  "workers": 1,
+  "checkpoint": true,
+  "signal_time_lo": "2025-11-04 00:00:00+00:00",
+  "signal_time_hi": "2026-05-04 00:00:00+00:00",
+  "symbols_filter": [
+    "BTC_USDT_SWAP",
+    "DOGE_USDT_SWAP",
+    "ETH_USDT_SWAP",
+    "SOL_USDT_SWAP",
+    "XRP_USDT_SWAP"
+  ]
+}
+[2026-07-24T08:01:14Z] chunk=1 exit=0 done_after=2
+[2026-07-24T08:01:14Z] chunk=2 done=2/5
+resume: skip 2 done symbols (2 marked); remain 3
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[2025-11-04 00:00:00+00:00, 2026-05-04 00:00:00+00:00)
+  ETH_USDT_SWAP: 236 YOLO候选 (short)
+  … progress 1/1
+{
+  "side": "short",
+  "weights": "/Users/zhangzc/fable-trading/runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt",
+  "series_this_chunk": 1,
+  "candidates_so_far": 719,
+  "symbols_so_far": 3,
+  "pos_rate": 0.3046,
+  "out": "data/judgment_yolo_owner_side_short_5_6m.csv",
+  "workers": 1,
+  "checkpoint": true,
+  "signal_time_lo": "2025-11-04 00:00:00+00:00",
+  "signal_time_hi": "2026-05-04 00:00:00+00:00",
+  "symbols_filter": [
+    "BTC_USDT_SWAP",
+    "DOGE_USDT_SWAP",
+    "ETH_USDT_SWAP",
+    "SOL_USDT_SWAP",
+    "XRP_USDT_SWAP"
+  ]
+}
+[2026-07-24T08:01:35Z] chunk=2 exit=0 done_after=3
+[2026-07-24T08:01:35Z] chunk=3 done=3/5
+resume: skip 3 done symbols (3 marked); remain 2
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[2025-11-04 00:00:00+00:00, 2026-05-04 00:00:00+00:00)
+  SOL_USDT_SWAP: 263 YOLO候选 (short)
+  … progress 1/1
+{
+  "side": "short",
+  "weights": "/Users/zhangzc/fable-trading/runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt",
+  "series_this_chunk": 1,
+  "candidates_so_far": 982,
+  "symbols_so_far": 4,
+  "pos_rate": 0.2984,
+  "out": "data/judgment_yolo_owner_side_short_5_6m.csv",
+  "workers": 1,
+  "checkpoint": true,
+  "signal_time_lo": "2025-11-04 00:00:00+00:00",
+  "signal_time_hi": "2026-05-04 00:00:00+00:00",
+  "symbols_filter": [
+    "BTC_USDT_SWAP",
+    "DOGE_USDT_SWAP",
+    "ETH_USDT_SWAP",
+    "SOL_USDT_SWAP",
+    "XRP_USDT_SWAP"
+  ]
+}
+[2026-07-24T08:01:56Z] chunk=3 exit=0 done_after=4
+[2026-07-24T08:01:56Z] chunk=4 done=4/5
+resume: skip 4 done symbols (4 marked); remain 1
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[2025-11-04 00:00:00+00:00, 2026-05-04 00:00:00+00:00)
+==== launchd_resume 2026-07-24T08:02:06Z ====
+[2026-07-24T08:02:17Z] driver start chunk=1 device=cpu weights=runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt out=data/judgment_yolo_owner_side_short_5_6m.csv symbols_file=analysis/output/yolo_short_5_6m_symbols.txt months=6 end_before=2026-05-04 start_time=none
+[2026-07-24T08:02:17Z] chunk=1 done=4/5
+resume: skip 4 done symbols (4 marked); remain 1
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[2025-11-04 00:00:00+00:00, 2026-05-04 00:00:00+00:00)
+{
+  "side": "short",
+  "weights": "/Users/zhangzc/fable-trading/runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt",
+  "candidates": 1240,
+  "symbols": 5,
+  "pos_rate": 0.296,
+  "out": "data/judgment_yolo_owner_side_short_5_6m.csv",
+  "features": [
+    "ma_spread_pct",
+    "full_spread",
+    "fast_slow_gap",
+    "full_ratio_min48",
+    "spread_mean8",
+    "spread_mean24",
+    "spread_chg8",
+    "spread_chg24",
+    "spread_pos96",
+    "dense_run_len",
+    "dense_frac48",
+    "ext_up",
+    "close_vs_ema55",
+    "close_vs_ema200",
+    "order_score",
+    "slow_slope_12",
+    "volume_ratio",
+    "volume_z",
+    "vol_ratio_mean8",
+    "atr_pct",
+    "atr_pct_ratio96",
+    "pre_range48",
+    "pre_range168",
+    "drawdown24",
+    "ret_4",
+    "ret_12",
+    "ret_24",
+    "ret_48"
+  ],
+  "finalize": true,
+  "signal_time_lo": "2025-11-04 00:00:00+00:00",
+  "signal_time_hi": "2026-05-04 00:00:00+00:00"
+}
+[2026-07-24T08:02:49Z] driver done (manual finalize)
+==== finalize 2026-07-24T08:02:51Z ====
+{
+  "side": "short",
+  "weights": "/Users/zhangzc/fable-trading/runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt",
+  "candidates": 1240,
+  "symbols": 5,
+  "pos_rate": 0.296,
+  "out": "data/judgment_yolo_owner_side_short_5_6m.csv",
+  "features": [
+    "ma_spread_pct",
+    "full_spread",
+    "fast_slow_gap",
+    "full_ratio_min48",
+    "spread_mean8",
+    "spread_mean24",
+    "spread_chg8",
+    "spread_chg24",
+    "spread_pos96",
+    "dense_run_len",
+    "dense_frac48",
+    "ext_up",
+    "close_vs_ema55",
+    "close_vs_ema200",
+    "order_score",
+    "slow_slope_12",
+    "volume_ratio",
+    "volume_z",
+    "vol_ratio_mean8",
+    "atr_pct",
+    "atr_pct_ratio96",
+    "pre_range48",
+    "pre_range168",
+    "drawdown24",
+    "ret_4",
+    "ret_12",
+    "ret_24",
+    "ret_48"
+  ],
+  "finalize": true,
+  "signal_time_lo": "2025-11-04 00:00:00+00:00",
+  "signal_time_hi": "2026-05-04 00:00:00+00:00"
+}
+==== scan_wall_end 2026-07-24T08:02:51Z ====

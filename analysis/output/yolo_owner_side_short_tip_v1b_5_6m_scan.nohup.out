@@ -1,0 +1,13 @@
+[2026-07-24T07:57:08Z] driver start chunk=1 device=cpu weights=runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt out=data/judgment_yolo_owner_side_short_5_6m.csv symbols_file=analysis/output/yolo_short_5_6m_symbols.txt months=6 end_before=2026-05-04 start_time=none
+[2026-07-24T07:57:08Z] chunk=1 done=0/5
+[2026-07-24T07:57:28Z] chunk=1 exit=0 done_after=1
+[2026-07-24T07:57:28Z] chunk=2 done=1/5
+[2026-07-24T08:00:54Z] driver start chunk=1 device=cpu weights=runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt out=data/judgment_yolo_owner_side_short_5_6m.csv symbols_file=analysis/output/yolo_short_5_6m_symbols.txt months=6 end_before=2026-05-04 start_time=none
+[2026-07-24T08:00:54Z] chunk=1 done=1/5
+[2026-07-24T08:01:14Z] chunk=1 exit=0 done_after=2
+[2026-07-24T08:01:14Z] chunk=2 done=2/5
+[2026-07-24T08:01:35Z] chunk=2 exit=0 done_after=3
+[2026-07-24T08:01:35Z] chunk=3 done=3/5
+[2026-07-24T08:01:56Z] chunk=3 exit=0 done_after=4
+[2026-07-24T08:01:56Z] chunk=4 done=4/5
+scripts/run_yolo_short_pool_chunked.sh: line 119: 97918 Terminated: 15          $PY -u scripts/yolo_candidate_source.py --side short --weights "$WEIGHTS" --out "$OUT" --workers 1 --resume --chunk-series "$CHUNK_SERIES" "${EXTRA_ARGS_EXPAND[@]}" >> "$LOG" 2>&1

@@ -1,0 +1,53 @@
+exclude_datasets={'/Users/zhangzc/fable-trading/datasets/dense_owner_side_short_tip': 4083, '/Users/zhangzc/fable-trading/datasets/dense_owner_side_short': 3951} keys=1317 stems=2678
+scouting tip candidates across 401 SWAP series…
+  scout 50/401 pool=499 exclude_hits~0
+  scout 150/401 pool=1440 exclude_hits~0
+  scout 250/401 pool=2407 exclude_hits~0
+  scout 300/401 pool=2839 exclude_hits~0
+  scout 350/401 pool=3279 exclude_hits~0
+  scout 400/401 pool=3759 exclude_hits~0
+scout exclude_skips=0
+scout pool=3759 try_queue=3759 target=1000 weights=/Users/zhangzc/fable-trading/runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt
+  tried=48 labeled=41 no_tip=7 spread_skip=0 exclude=0 0.3 min
+  tried=96 labeled=81 no_tip=15 spread_skip=0 exclude=0 0.3 min
+  tried=144 labeled=116 no_tip=28 spread_skip=0 exclude=0 0.4 min
+  tried=192 labeled=159 no_tip=33 spread_skip=0 exclude=0 0.4 min
+  tried=240 labeled=196 no_tip=44 spread_skip=0 exclude=0 0.5 min
+  tried=288 labeled=239 no_tip=49 spread_skip=0 exclude=0 0.5 min
+  tried=336 labeled=280 no_tip=56 spread_skip=0 exclude=0 0.6 min
+  tried=384 labeled=318 no_tip=66 spread_skip=0 exclude=0 0.7 min
+  tried=432 labeled=359 no_tip=73 spread_skip=0 exclude=0 0.7 min
+  tried=480 labeled=400 no_tip=80 spread_skip=0 exclude=0 0.8 min
+  tried=528 labeled=438 no_tip=90 spread_skip=0 exclude=0 0.8 min
+  tried=576 labeled=482 no_tip=94 spread_skip=0 exclude=0 0.9 min
+  tried=624 labeled=525 no_tip=99 spread_skip=0 exclude=0 1.0 min
+  tried=672 labeled=568 no_tip=104 spread_skip=0 exclude=0 1.0 min
+  tried=720 labeled=610 no_tip=110 spread_skip=0 exclude=0 1.1 min
+  tried=768 labeled=651 no_tip=117 spread_skip=0 exclude=0 1.1 min
+  tried=816 labeled=693 no_tip=123 spread_skip=0 exclude=0 1.2 min
+  tried=864 labeled=737 no_tip=127 spread_skip=0 exclude=0 1.3 min
+  tried=912 labeled=778 no_tip=134 spread_skip=0 exclude=0 1.3 min
+  tried=960 labeled=822 no_tip=138 spread_skip=0 exclude=0 1.4 min
+  tried=1008 labeled=862 no_tip=146 spread_skip=0 exclude=0 1.4 min
+  tried=1056 labeled=901 no_tip=155 spread_skip=0 exclude=0 1.5 min
+  tried=1104 labeled=942 no_tip=162 spread_skip=0 exclude=0 1.6 min
+  tried=1152 labeled=982 no_tip=170 spread_skip=0 exclude=0 1.6 min
+  tried=1176 labeled=1000 no_tip=173 spread_skip=0 exclude=0 1.7 min
+{
+  "labeled": 1000,
+  "tried": 1176,
+  "no_tip_box": 173,
+  "skip_spread": 0,
+  "skip_exclude": 0,
+  "symbols": 224,
+  "box_right_norm": {
+    "n": 1116,
+    "min": 0.9920199625194073,
+    "p50": 0.9973159432411194,
+    "p10": 0.9965254357084632,
+    "mean": 0.9974296209802951
+  },
+  "collisions_with_train": [],
+  "promote": "NO"
+}
+wrote /Users/zhangzc/fable-trading/analysis/output/owner_side_short_tip_v1b_detect1000

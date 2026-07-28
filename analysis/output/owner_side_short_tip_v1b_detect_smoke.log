@@ -1,0 +1,32 @@
+exclude_datasets={'/Users/zhangzc/fable-trading/datasets/dense_owner_side_short_tip': 4083, '/Users/zhangzc/fable-trading/datasets/dense_owner_side_short': 3951} keys=1317 stems=2678
+scouting tip candidates across 401 SWAP series…
+  scout 50/401 pool=499 exclude_hits~0
+  scout 150/401 pool=1440 exclude_hits~0
+  scout 250/401 pool=2407 exclude_hits~0
+  scout 300/401 pool=2839 exclude_hits~0
+  scout 350/401 pool=3279 exclude_hits~0
+  scout 400/401 pool=3759 exclude_hits~0
+scout exclude_skips=0
+scout pool=3759 try_queue=3759 target=12 weights=/Users/zhangzc/fable-trading/runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt
+/Users/zhangzc/.matplotlib is not a writable directory
+Matplotlib created a temporary cache directory at /var/folders/fr/fq9wwmwx3xn63_cdk_v8nvt00000gn/T/matplotlib-6e0fuh3r because there was an issue with the default path (/Users/zhangzc/.matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Matplotlib is building the font cache; this may take a moment.
+  tried=18 labeled=12 no_tip=1 spread_skip=0 exclude=0 0.4 min
+{
+  "labeled": 12,
+  "tried": 18,
+  "no_tip_box": 1,
+  "skip_spread": 0,
+  "skip_exclude": 0,
+  "symbols": 12,
+  "box_right_norm": {
+    "n": 12,
+    "min": 0.9964989796280861,
+    "p50": 0.9975200649350882,
+    "p10": 0.9967200335115194,
+    "mean": 0.9975610704471668
+  },
+  "collisions_with_train": [],
+  "promote": "NO"
+}
+wrote /Users/zhangzc/fable-trading/analysis/output/owner_side_short_tip_v1b_detect_smoke

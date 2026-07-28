@@ -1,0 +1,65 @@
+resume_start=2026-07-24T07:35:30Z
+swap series to scan: 10  workers=1  side=short  resume=True
+  0G_USDT_SWAP: 425 YOLO候选 (short)
+chunk_loop_start=2026-07-24T07:38:30Z
+[15:38:30] chunk start done=1/10 wall=0s
+resume: skip 1 done symbols (1 marked); remain 9
+swap series to scan: 1  workers=1  side=short  resume=True
+  1INCH_USDT_SWAP: 583 YOLO候选 (short)
+  … progress 1/1
+{
+  "side": "short",
+  "weights": "/Users/zhangzc/fable-trading/runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt",
+  "series_this_chunk": 1,
+  "candidates_so_far": 1008,
+  "symbols_so_far": 2,
+  "pos_rate": 0.2808,
+  "out": "data/judgment_yolo_owner_side_short_10.csv",
+  "workers": 1,
+  "checkpoint": true
+}
+[15:40:59] chunk exit=0 done=2/10
+[15:40:59] chunk start done=2/10 wall=149s
+resume: skip 2 done symbols (2 marked); remain 8
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[None, None)
+killed_short10=2026-07-24T07:41:54Z
+[2026-07-24T07:42:10Z] 10coin driver start max=10 out=data/judgment_yolo_owner_side_short_10.csv
+[2026-07-24T07:42:10Z] 10coin driver start max=10 out=data/judgment_yolo_owner_side_short_10.csv
+[2026-07-24T07:42:10Z] chunk done=2/10 wall=0s
+[2026-07-24T07:42:10Z] chunk done=2/10 wall=0s
+resume: skip 2 done symbols (2 marked); remain 8
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[None, None)
+[2026-07-24T07:42:28Z] 10coin driver start max=10 out=data/judgment_yolo_owner_side_short_10.csv
+[2026-07-24T07:42:28Z] 10coin driver start max=10 out=data/judgment_yolo_owner_side_short_10.csv
+[2026-07-24T07:42:28Z] chunk done=2/10 wall=0s
+[2026-07-24T07:42:28Z] chunk done=2/10 wall=0s
+resume: skip 2 done symbols (2 marked); remain 8
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[None, None)
+scripts/run_yolo_short_10_chunked.sh: line 61: 94336 Killed: 9               $PY -u scripts/yolo_candidate_source.py --side short --weights "$WEIGHTS" --out "$OUT" --workers 1 --max-series "$MAX_SERIES" --resume --chunk-series 1 >> "$LOG" 2>&1
+[2026-07-24T07:42:47Z] chunk exit=137 done_after=2
+[2026-07-24T07:42:47Z] chunk exit=137 done_after=2
+[2026-07-24T07:42:47Z] STALL sleep 8
+[2026-07-24T07:42:47Z] STALL sleep 8
+[2026-07-24T07:43:16Z] 10coin driver start max=10 out=data/judgment_yolo_owner_side_short_10pilot.csv
+[2026-07-24T07:43:16Z] 10coin driver start max=10 out=data/judgment_yolo_owner_side_short_10pilot.csv
+[2026-07-24T07:43:16Z] chunk done=2/10 wall=0s
+[2026-07-24T07:43:16Z] chunk done=2/10 wall=0s
+resume: skip 2 done symbols (2 marked); remain 8
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[None, None)
+[2026-07-24T07:43:38Z] 10coin driver start max=10 out=data/judgment_yolo_owner_side_short_10pilot.csv
+[2026-07-24T07:43:38Z] 10coin driver start max=10 out=data/judgment_yolo_owner_side_short_10pilot.csv
+[2026-07-24T07:43:38Z] chunk done=2/10 wall=0s
+[2026-07-24T07:43:38Z] chunk done=2/10 wall=0s
+resume: skip 2 done symbols (2 marked); remain 8
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[None, None)
+scripts/run_yolo_short_10_chunked.sh: line 61: 95219 Killed: 9               $PY -u scripts/yolo_candidate_source.py --side short --weights "$WEIGHTS" --out "$OUT" --workers 1 --max-series "$MAX_SERIES" --resume --chunk-series 1 >> "$LOG" 2>&1
+[2026-07-24T07:43:55Z] chunk exit=137 done_after=2
+[2026-07-24T07:43:55Z] chunk exit=137 done_after=2
+[2026-07-24T07:43:55Z] STALL sleep 8
+[2026-07-24T07:43:55Z] STALL sleep 8
+[2026-07-24T07:45:00Z] 10coin driver start max=10 out=data/judgment_yolo_owner_side_short_10pilot.csv
+[2026-07-24T07:45:00Z] 10coin driver start max=10 out=data/judgment_yolo_owner_side_short_10pilot.csv
+[2026-07-24T07:45:00Z] chunk done=2/10 wall=0s
+[2026-07-24T07:45:00Z] chunk done=2/10 wall=0s
+resume: skip 2 done symbols (2 marked); remain 8
+swap series to scan: 1  workers=1  side=short  resume=True  signal_window=[None, None)

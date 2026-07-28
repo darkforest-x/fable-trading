@@ -1,0 +1,277 @@
+{
+  "protocol": "short_tip_v1b_detect_sample_s3",
+  "weights": "runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt",
+  "window": 200,
+  "tip_edge_bars": 2,
+  "conf": 0.3,
+  "max_tip_spread": 0.012,
+  "holdout_excluded_from": "2026-05-04",
+  "score_start": "2025-06-01",
+  "target": 12,
+  "labeled": 12,
+  "tried": 18,
+  "no_tip_box": 1,
+  "skip_spread": 0,
+  "skip_exclude": 0,
+  "exclude_key_n": 1317,
+  "exclude_datasets": {
+    "/Users/zhangzc/fable-trading/datasets/dense_owner_side_short_tip": 4083,
+    "/Users/zhangzc/fable-trading/datasets/dense_owner_side_short": 3951
+  },
+  "collisions_with_train": [],
+  "symbols": 12,
+  "symbol_top20": [
+    [
+      "XRP_USDT_SWAP",
+      1
+    ],
+    [
+      "OL_USDT_SWAP",
+      1
+    ],
+    [
+      "LUNA_USDT_SWAP",
+      1
+    ],
+    [
+      "API3_USDT_SWAP",
+      1
+    ],
+    [
+      "CRV_USDT_SWAP",
+      1
+    ],
+    [
+      "SUI_USDT_SWAP",
+      1
+    ],
+    [
+      "SSV_USDT_SWAP",
+      1
+    ],
+    [
+      "S_USDT_SWAP",
+      1
+    ],
+    [
+      "WCT_USDT_SWAP",
+      1
+    ],
+    [
+      "A_USDT_SWAP",
+      1
+    ],
+    [
+      "F_USDT_SWAP",
+      1
+    ],
+    [
+      "MUBARAK_USDT_SWAP",
+      1
+    ]
+  ],
+  "box_right_norm": {
+    "n": 12,
+    "min": 0.9964989796280861,
+    "p50": 0.9975200649350882,
+    "p10": 0.9967200335115194,
+    "mean": 0.9975610704471668
+  },
+  "out": "/Users/zhangzc/fable-trading/analysis/output/owner_side_short_tip_v1b_detect_smoke",
+  "promote": "NO",
+  "note": "Owner visual pack only. tip_v1b tip-edge boxes on real klines; train gold stems/indices excluded. Not a promote gate by itself.",
+  "meta_head": [
+    {
+      "stem": "XRP_USDT_SWAP_014579",
+      "symbol": "XRP_USDT_SWAP",
+      "tip_idx": 14579,
+      "tip_time": "2025-11-01 12:45:00+00:00",
+      "tip_spread": 0.001139,
+      "n_boxes": 1,
+      "max_conf": 0.5684,
+      "right_norms": [
+        0.9972
+      ],
+      "bars": [
+        199
+      ],
+      "csv": "okx_XRP_USDT_SWAP_15m_39269.csv"
+    },
+    {
+      "stem": "OL_USDT_SWAP_006059",
+      "symbol": "OL_USDT_SWAP",
+      "tip_idx": 6059,
+      "tip_time": "2025-12-31 13:00:00+00:00",
+      "tip_spread": 0.001486,
+      "n_boxes": 1,
+      "max_conf": 0.4057,
+      "right_norms": [
+        0.9974
+      ],
+      "bars": [
+        199
+      ],
+      "csv": "okx_OL_USDT_SWAP_15m_24988.csv"
+    },
+    {
+      "stem": "LUNA_USDT_SWAP_008199",
+      "symbol": "LUNA_USDT_SWAP",
+      "tip_idx": 8199,
+      "tip_time": "2025-08-28 02:00:00+00:00",
+      "tip_spread": 0.001637,
+      "n_boxes": 1,
+      "max_conf": 0.497,
+      "right_norms": [
+        0.9984
+      ],
+      "bars": [
+        199
+      ],
+      "csv": "okx_LUNA_USDT_SWAP_15m_39172.csv"
+    },
+    {
+      "stem": "API3_USDT_SWAP_018119",
+      "symbol": "API3_USDT_SWAP",
+      "tip_idx": 18119,
+      "tip_time": "2025-12-09 07:30:00+00:00",
+      "tip_spread": 0.001639,
+      "n_boxes": 1,
+      "max_conf": 0.3388,
+      "right_norms": [
+        0.997
+      ],
+      "bars": [
+        199
+      ],
+      "csv": "okx_API3_USDT_SWAP_15m_39181.csv"
+    },
+    {
+      "stem": "CRV_USDT_SWAP_009259",
+      "symbol": "CRV_USDT_SWAP",
+      "tip_idx": 9259,
+      "tip_time": "2025-09-07 01:45:00+00:00",
+      "tip_spread": 0.001699,
+      "n_boxes": 1,
+      "max_conf": 0.3983,
+      "right_norms": [
+        0.9965
+      ],
+      "bars": [
+        199
+      ],
+      "csv": "okx_CRV_USDT_SWAP_15m_39272.csv"
+    },
+    {
+      "stem": "SUI_USDT_SWAP_021259",
+      "symbol": "SUI_USDT_SWAP",
+      "tip_idx": 21259,
+      "tip_time": "2026-01-10 02:30:00+00:00",
+      "tip_spread": 0.001902,
+      "n_boxes": 1,
+      "max_conf": 0.5341,
+      "right_norms": [
+        0.9995
+      ],
+      "bars": [
+        199
+      ],
+      "csv": "okx_SUI_USDT_SWAP_15m_39270.csv"
+    },
+    {
+      "stem": "SSV_USDT_SWAP_027619",
+      "symbol": "SSV_USDT_SWAP",
+      "tip_idx": 27619,
+      "tip_time": "2026-03-18 10:15:00+00:00",
+      "tip_spread": 0.001917,
+      "n_boxes": 1,
+      "max_conf": 0.3876,
+      "right_norms": [
+        0.9977
+      ],
+      "bars": [
+        199
+      ],
+      "csv": "okx_SSV_USDT_SWAP_15m_39167.csv"
+    },
+    {
+      "stem": "S_USDT_SWAP_020239",
+      "symbol": "S_USDT_SWAP",
+      "tip_idx": 20239,
+      "tip_time": "2025-12-31 13:00:00+00:00",
+      "tip_spread": 0.001953,
+      "n_boxes": 1,
+      "max_conf": 0.5698,
+      "right_norms": [
+        0.9967
+      ],
+      "bars": [
+        199
+      ],
+      "csv": "okx_S_USDT_SWAP_15m_39168.csv"
+    },
+    {
+      "stem": "WCT_USDT_SWAP_027759",
+      "symbol": "WCT_USDT_SWAP",
+      "tip_idx": 27759,
+      "tip_time": "2026-03-19 21:30:00+00:00",
+      "tip_spread": 0.002027,
+      "n_boxes": 1,
+      "max_conf": 0.477,
+      "right_norms": [
+        0.9977
+      ],
+      "bars": [
+        199
+      ],
+      "csv": "okx_WCT_USDT_SWAP_15m_39166.csv"
+    },
+    {
+      "stem": "A_USDT_SWAP_025219",
+      "symbol": "A_USDT_SWAP",
+      "tip_idx": 25219,
+      "tip_time": "2026-02-21 06:00:00+00:00",
+      "tip_spread": 0.002042,
+      "n_boxes": 1,
+      "max_conf": 0.5494,
+      "right_norms": [
+        0.9979
+      ],
+      "bars": [
+        199
+      ],
+      "csv": "okx_A_USDT_SWAP_15m_39183.csv"
+    },
+    {
+      "stem": "F_USDT_SWAP_013559",
+      "symbol": "F_USDT_SWAP",
+      "tip_idx": 13559,
+      "tip_time": "2026-03-15 13:45:00+00:00",
+      "tip_spread": 0.002081,
+      "n_boxes": 1,
+      "max_conf": 0.4278,
+      "right_norms": [
+        0.997
+      ],
+      "bars": [
+        199
+      ],
+      "csv": "okx_F_USDT_SWAP_15m_25380.csv"
+    },
+    {
+      "stem": "MUBARAK_USDT_SWAP_014559",
+      "symbol": "MUBARAK_USDT_SWAP",
+      "tip_idx": 14559,
+      "tip_time": "2025-11-02 08:15:00+00:00",
+      "tip_spread": 0.002084,
+      "n_boxes": 1,
+      "max_conf": 0.5272,
+      "right_norms": [
+        0.9976
+      ],
+      "bars": [
+        199
+      ],
+      "csv": "okx_MUBARAK_USDT_SWAP_15m_39171.csv"
+    }
+  ]
+}
