@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.fable.short_tip_detect1000</string>
+  <key>WorkingDirectory</key>
+  <string>/Users/zhangzc/fable-trading</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>OMP_NUM_THREADS</key><string>1</string>
+    <key>MKL_NUM_THREADS</key><string>1</string>
+    <key>OPENBLAS_NUM_THREADS</key><string>1</string>
+    <key>VECLIB_MAXIMUM_THREADS</key><string>1</string>
+    <key>MPLBACKEND</key><string>Agg</string>
+    <key>MPLCONFIGDIR</key><string>/tmp/mpl-fable</string>
+    <key>PYTHONUNBUFFERED</key><string>1</string>
+    <key>FABLE_YOLO_DEVICE</key><string>cpu</string>
+    <key>PYTHONPATH</key><string>/Users/zhangzc/fable-trading</string>
+    <key>PATH</key><string>/Users/zhangzc/fable-trading/.venv/bin:/usr/bin:/bin</string>
+  </dict>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/zhangzc/fable-trading/.venv/bin/python</string>
+    <string>/Users/zhangzc/fable-trading/scripts/dump_short_tip_detect_sample.py</string>
+    <string>--count</string><string>1000</string>
+    <string>--preview</string><string>40</string>
+    <string>--device</string><string>cpu</string>
+    <string>--out</string><string>analysis/output/owner_side_short_tip_v1b_detect1000</string>
+  </array>
+  <key>StandardOutPath</key>
+  <string>/Users/zhangzc/fable-trading/analysis/output/owner_side_short_tip_v1b_detect1000.launchd.out</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/zhangzc/fable-trading/analysis/output/owner_side_short_tip_v1b_detect1000.launchd.err</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <false/>
+</dict>
+</plist>

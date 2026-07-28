@@ -56,9 +56,11 @@ from scripts.build_star_tip_dataset_v6 import (  # noqa: E402
     star_side, symbol_of,
 )
 
-WEIGHTS = PROJECT / "runs/detect/runs/detect/owner_short_star_v6/weights/best.pt"
+import os
+WEIGHTS = Path(os.environ.get("GOLD_W",
+    PROJECT / "runs/detect/runs/detect/owner_short_star_v6/weights/best.pt"))
 SCAN_CONF = 0.05
-OUT = PROJECT / "analysis" / "output" / "v6_vs_gold"
+OUT = PROJECT / "analysis" / "output" / f"gold_cmp_{Path(os.environ.get(chr(71)+chr(79)+chr(76)+chr(68)+chr(95)+chr(87), 'v6')).parts[-3] if os.environ.get('GOLD_W') else 'v6'}"
 
 
 def iou(a, b) -> float:
@@ -208,7 +210,7 @@ def main() -> int:
         diag = "位置和尺寸都对,但价格区间不同 → 框的是不同的价格带"
     print(f"\n判读: IoU 中位 {med_iou:.3f} — {diag}")
 
-    (PROJECT / "analysis" / "output" / "diag_v6_vs_gold_boxes.json").write_text(
+    (PROJECT / "analysis" / "output" / f'diag_gold_cmp_{OUT.name}.json').write_text(
         json.dumps({"n": len(d), "fired": len(fired),
                     "iou_p50": round(med_iou, 4),
                     "iou_ge_50pct": round(float((fired["iou"] >= 0.5).mean()), 4),

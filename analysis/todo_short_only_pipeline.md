@@ -9,7 +9,10 @@
 
 ## Owner 明确事项
 
-- [ ] **pending** — 做空模型训练好之后：用该模型在**实际 K 线数据**上跑检测，框出约 **1000** 张；**勿与既有训练集重复**（排除已用于 `dense_owner_side_short*` / owner short 金标的样本）。  
+- [x] **done（包已出，待 Owner 填表）** — tip_v1b 实际 K 线 **1000** 框包：
+  `analysis/output/owner_side_short_tip_v1b_detect1000/`（224 币；与 tip/pretip 金标 0 碰撞；right p50≈0.997）。
+  脚本 `scripts/dump_short_tip_detect_sample.py`；报告 `analysis/p_short_tip_v1b_detect1000.md`。
+  **下一步**：Owner 填 `review_sheet.csv` / 看 `index.html`；**未** promote。  
   **命令草稿（未跑；需 Owner 点头或另起会话）**：
 
   ```bash
@@ -46,7 +49,7 @@
 - [x] **done** — tip-smoke 诚实评估（**不** promote）：tip **19/27**、live 对照 **4/27**（同口径快照；历史 v12–v15 为 0/27）。报告 `analysis/p_owner_side_short_tip_v1b.md`；日志 `analysis/output/owner_side_short_tip_v1b_tip_smoke.log`；JSON `analysis/output/diag_tip_smoke_owner_side_short_tip_v1b.json`。  
   权重：`runs/detect/runs/detect/owner_side_short_tip_v1b/weights/best.pt`。  
   **诚实**：val mAP≈0.99 **不作**晋升裁决。
-- [ ] **pending** — 上节 Owner 1000 框（排除训练集）；**未**自动开跑。
+- [x] **done（导出） / pending（目视）** — 见顶部 Owner 明确事项；包在 `analysis/output/owner_side_short_tip_v1b_detect1000/`。
 
 ---
 
@@ -60,9 +63,15 @@
 - [x] **done** — **binary 扩币支线收口**（同 30×6m）：镜像基线 `p2b_yolo_short_30_6m_mirror` 净 **−0.181%** / p=0.125；top-K10 净 **−0.237%**。报告 `analysis/p_short_judgment_refactor_v2.md`。**关闭** binary 特征优化。
 - [x] **done** — **5 币 × 6m 首表**（历史 binary 发现级）：`…_5_6m` AUC0.599 / 净+0.062% / n=24；报告 `analysis/p_short_only_backtest_tip_v1b_5_6m.md`。**不再作为主叙事**。
 - [x] **done** — **方向特征镜像进主路径**（修债）：`align_short_feature_rows`；`train --side` 拒混边。feat_mirror 旁路实验**归档**，不当优化旋钮。
-- [ ] **in_progress** — 同构回归下扩样本（逼近 v11 ~2.6 万候选哲学）或补 walkforward；**不** promote。
-- [ ] **optional** — 全宇宙 YOLO short 扫；Owner 点头再开。
-- [ ] **pending** — 换障碍（trend/MA/trail）**需 Owner 批**；禁止默认 binary。
+- [x] **done** — **100×6m 扫池 + 回归单切 + walkforward**（2026-07-24 23:19）：
+  - 池 n=**25602**；`p2b_yolo_short_100_6m_reg` 净 **+0.471%**（n=510）/ Spearman **0.016** / p=**0.037**。
+  - walkforward net_mean **+0.305%** / rho_mean **−0.010** / 非全折正。
+  - 报告：`analysis/p_short_judgment_100_6m_reg.md` + `..._walkforward.md`。
+  - **S2 裁决**：间歇/弱边 → **停扩样叙事**；不 promote。
+- [x] **done（导出） / pending（目视）** — 1000 框包已导出；**Owner 目视填表**仍 pending。
+- [x] **done（shortish 过滤）** — `detect1000_shortish` 保留 432/1000；规则见 `analysis/p_short_tip_v1b_detect1000_shortish.md`；目视仍 pending。
+- [ ] **optional** — 全宇宙 YOLO short 扫；仅当 S3 后 Owner 点头再开（默认不作为救排序手段）。
+- [ ] **pending** — 换障碍（trend/MA/trail）**需 Owner 批**；禁止默认 binary；**不因本轮正净自动开扫**。
 
 ---
 
