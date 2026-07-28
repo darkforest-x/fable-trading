@@ -1,0 +1,34 @@
+{
+  "n_symbols": 2,
+  "n_bars": 1400,
+  "n_fires": 114,
+  "wall_min": 8.0,
+  "prefilters": {
+    "v16_dense": {
+      "keep_frac": 0.1614,
+      "recall": 0.3333,
+      "n_kept_fires": 38
+    },
+    "v9_dense": {
+      "keep_frac": 0.3886,
+      "recall": 0.6228,
+      "n_kept_fires": 71
+    },
+    "break": {
+      "keep_frac": 0.1829,
+      "recall": 0.5702,
+      "n_kept_fires": 65
+    },
+    "break_loose": {
+      "keep_frac": 0.3264,
+      "recall": 0.9123,
+      "n_kept_fires": 104
+    },
+    "v9_dense_or_break": {
+      "keep_frac": 0.5043,
+      "recall": 0.8509,
+      "n_kept_fires": 97
+    }
+  },
+  "verdict": "没有预筛能保住 ≥95% 候选 —— 必须全扫,否则候选池被静默改变"
+}
