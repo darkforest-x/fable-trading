@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>附录 C:经验笔记</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>附录 C:经验笔记</h1>
+<p><code>docs/learnings/</code> 共 124 篇。每篇提取标题、问题、通用规则。</p>
+<h3>3060 局域网 IP 会从 .5 漂走；ping 不通先扫同网段</h3>
+<p><code>3060-lan-ip-can-drift-from-dot5.md</code></p>
+<h3>ATR 等比障碍 + 固定成本 = 假的&quot;高波动 alpha&quot;;判据是毛 PF,不是净收益</h3>
+<p><code>atr-scaled-barriers-vs-fixed-cost-fake-an-edge.md</code></p>
+<h3>训中调试别往训练 .venv 塞 CV 工具</h3>
+<p><code>avoid-pip-into-busy-train-venv.md</code></p>
+<h3>后台标签页会暂停 ResizeObserver 和 rAF——图表初始化要能自愈</h3>
+<p><code>background-tab-rendering-suspension.md</code></p>
+<h3>框右缘映射的是启动 bar，不是 tip——几何对、语义错</h3>
+<p><code>box-right-edge-maps-launch-bar-not-tip.md</code></p>
+<h3>框右缘分数不能当「是不是 tip」的判决</h3>
+<p><code>box-right-frac-is-not-a-tip-intent-verdict.md</code></p>
+<h3>tip 上因果择向（排列/突破/散开）救不出 ≥1.3 的边</h3>
+<p><code>causal-direction-select-does-not-rescue-pf-past-1.3.md</code></p>
+<h3>链路失败主因是 regime + 入场错位，不是出场或打分</h3>
+<p><code>chain-failure-is-regime-plus-entry-mismatch.md</code></p>
+<h3>全图缩放下 canvas 密集框要有最小可视尺寸</h3>
+<p><code>chart-overlay-boxes-need-min-size-at-full-zoom.md</code></p>
+<h3>图表标注层不要驱动主 K 线缩放</h3>
+<p><code>chart-overlays-must-not-drive-candle-autoscale.md</code></p>
+<h3>CI gates should stay on lightweight contracts</h3>
+<p><code>ci-gates-should-stay-on-lightweight-contracts.md</code></p>
+<h3>切后文必须左补满 200，禁止短窗拉伸</h3>
+<p><code>crop-after-box-must-left-pad-to-200.md</code></p>
+<h3>跨宇宙复测要先路由成本口径</h3>
+<p><code>cross-universe-retests-need-cost-routing.md</code></p>
+<h3>Cursor agent shell 会杀后台 uvicorn</h3>
+<p><code>cursor-agent-shell-kills-background-servers.md</code></p>
+<h3>Dashboard Universe Switches Must Filter Before Scoring</h3>
+<p><code>dashboard-universe-switches-filter-before-scoring.md</code></p>
+<h3>看板可视化：加深 LWC，不要换主图库</h3>
+<p><code>dashboard-viz-deepen-lwc-not-replace.md</code></p>
+<h3>数据审计：偶发 tip 尖刺 ≠ 黑名单</h3>
+<p><code>data-audit-spikes-are-not-blacklist.md</code></p>
+<h3>双均线密集启动:动作真、方向不可交易 —— 三个结构性杠杆系统性穷尽</h3>
+<p><code>dense-cluster-has-no-causally-tradeable-direction-edge.md</code></p>
+<h3>检测器切流后的&quot;事后行&quot;多是补账，不能用 detected_at 评判新检测器</h3>
+<p><code>detector-cutover-verdicts-need-signal-time-not-detected-time.md</code></p>
+<h3>Detector lag was model-side; a conf number without box position proves nothing</h3>
+<p><code>detector-lag-is-model-side-check-box-position-not-just-conf.md</code></p>
+<h3>诊断实盘延迟要走实盘那条代码路径,离线统计会给出反向结论</h3>
+<p><code>diagnose-live-lag-on-the-live-code-path.md</code></p>
+<ul>
+<li><strong>问题</strong>:前向日志 lag 中位 542 分钟 / 门 30 分钟 → 100% 拒单。 我先后给出<strong>两个错误病因</strong>,都被后续测量推翻: 1. &quot;管道太慢&quot; → 实测全宇宙 344 币扫描 <strong>2.8 分钟</strong>,算力从来不是瓶颈; 2. &quot;v11 检测器把框画在 200 根窗口中部(中位 33 根)&quot; → 这个统计取自 <code>mode=&quot;full&quot;</code> 的离线扫描,而 live 走的是 <code>mode=&quot;live&quot;</code>,<strong>tip-edge 门 本来就把框卡在盘口</strong>。把 v11 放进 live 路径重测:框距盘口 p50=<strong>1 根</strong>, 和 v9 一模一样。</li>
+<li><strong>规则</strong>:任何&quot;实盘表现&quot;归因,必须在实盘那条 code path 上复现 (同 mode、同门控、同调度),并且把观测量拆成它混合的各个时间基准。 一个跨越数天的中位数,先看它在时间上是否稳定——尾部自愈的指标说明 病因已消失,继续修它是在修历史。</li>
+</ul>
+<h3>torch+lightgbm 同进程加载两份 libomp，OMP 多线程时启动即段错误</h3>
+<p><code>duplicate-libomp-segfault-needs-omp-threads-1.md</code></p>
+<h3>单笔 edge 与成本同数量级时，回测结论是成本假设的函数</h3>
+<p><code>edge-vs-cost-tolerance.md</code></p>
+<h3>入场 close vs next_open 几乎同 PF</h3>
+<p><code>entry-close-vs-next-open-almost-same-pf.md</code></p>
+<h3>执行器每条腿都是市价单 → maker 成本口径不可达;裁决成本必须按真实路由</h3>
+<p><code>executor-places-market-on-every-leg-so-maker-cost-is-unreachable.md</code></p>
+<h3>回测/前向出场等价性靠调用方显式传参维持，不靠共享常量</h3>
+<p><code>exit-parity-holds-only-via-explicit-call-args.md</code></p>
+<h3>Exit variants must match current universe costs</h3>
+<p><code>exit-variants-must-match-current-universe-costs.md</code></p>
+<h3>同池上 binary 扩币/top-K 死、回归仍可出边</h3>
+<p><code>expanding-liquid-universe-can-erase-few-coin-short-edge.md</code></p>
+<h3>外源 chart-YOLO 印证的是右缘锚定协议，不是公开权重</h3>
+<p><code>external-chart-yolo-validates-tip-anchor-not-weights.md</code></p>
+<h3>tip 公平验收要分母拆开 + full-MA，不能靠 slice tip_hit 翻案</h3>
+<p><code>fair-tip-eval-needs-split-denominator-and-full-ma.md</code></p>
+<h3>固定障碍在空边砍趋势；无 TP / 跟踪才过 1.3</h3>
+<p><code>fixed-tp-cuts-short-trend-edge.md</code></p>
+<h3>Forward logs need stable signal keys</h3>
+<p><code>forward-logs-need-stable-signal-keys.md</code></p>
+<h3>新鲜度阈值不是拍出来的,是从管道时序算出来的</h3>
+<p><code>freshness-gates-must-be-derived-from-pipeline-arithmetic.md</code></p>
+<ul>
+<li><strong>问题</strong>:实盘要&quot;实时检出&quot;,但三处新鲜度门(执行器/TG/裁决)被先后设成 55 → 20 分钟,两个值都错——55 放进了非 tip 的迟到检出,20 则结构性挡死一切。</li>
+<li><strong>规则</strong>:任何&quot;年龄/新鲜度/超时&quot;阈值,先列出它守门的事件链每一环的 最坏耗时,阈值必须 &gt; 链路最坏和,否则就是隐形 kill switch。改阈值的 PR 必须附这张预算表。</li>
+</ul>
+<h3>前端采用 Hummingbot Dashboard 壳 + 策略页节奏</h3>
+<p><code>frontend-hummingbot-shell-adopted.md</code></p>
+<h3>Frozen artifacts must own cache identity</h3>
+<p><code>frozen-artifacts-must-own-cache-identity.md</code></p>
+<h3>冻结视觉 embed 预检红灯则不要开双检测器训</h3>
+<p><code>frozen-visual-embed-red-means-no-dual-detector-train.md</code></p>
+<h3>full 模式的因果性靠检测器&quot;学会贴右边&quot;,不是靠代码门 —— 换个检测器就会静默漏未来</h3>
+<p><code>full-mode-causality-is-behavioral-not-structural.md</code></p>
+<h3>Funding Cost Reruns Need Input Snapshots</h3>
+<p><code>funding-cost-reruns-need-input-snapshot.md</code></p>
+<h3>过滤队列 + 标完出队时，「上一张」必须靠 visit trail</h3>
+<p><code>gallery-prev-needs-visit-trail-under-unlabeled-filter.md</code></p>
+<h3>Generated audit grids need fluid minmax</h3>
+<p><code>generated-audit-grids-need-fluid-minmax.md</code></p>
+<h3>GitHub chart-YOLO 搜不到 tip 几何解药</h3>
+<p><code>github-chart-yolo-rarely-solves-tip-geometry.md</code></p>
+<h3>金标准测的是&quot;你给的判据&quot;，不是你以为的概念</h3>
+<p><code>golden-set-measures-what-you-instruct.md</code></p>
+<h3>规划&quot;修复&quot;之前先读代码——你要修的东西可能已经存在</h3>
+<p><code>grep-before-planning-fixes.md</code></p>
+<h3>高 AUC 不能替代交易经济性验收</h3>
+<p><code>high-auc-can-still-lose-economics.md</code></p>
+<h3>事后训练的判断层，在盘口是反预测的（分越高越亏）</h3>
+<p><code>hindsight-trained-judgment-is-anti-predictive-at-the-tip.md</code></p>
+<h3>Holdout PF 塌到 ~1.0 不等于测量 bug</h3>
+<p><code>holdout-pf-collapse-is-not-automatically-a-measurement-bug.md</code></p>
+<h3>isotonic 校准做仓位映射会把排序分压成台阶，阈值附近的交易被静默弃单</h3>
+<p><code>isotonic-sizing-collapses-rank-scores-to-steps.md</code></p>
+<h3>打标包去重不能只靠 window stride</h3>
+<p><code>label-packs-need-base-coin-caps-not-only-window-stride.md</code></p>
+<h3>标签 pad 收紧 ≠ 解决「长密集段」</h3>
+<p><code>label-pad-is-not-segment-length.md</code></p>
+<h3>扩 short 宇宙可抬厚 top-n 净，却稀释排序（ρ 塌）</h3>
+<p><code>larger-short-universe-can-dilute-rank-while-keeping-thin-net.md</code></p>
+<h3>macOS venv 里先 import lightgbm 再跑 ultralytics predict 会段错误（exit 139）</h3>
+<p><code>lightgbm-import-before-ultralytics-predict-segfaults.md</code></p>
+<h3>Lightweight Charts in CSS grid needs min-width zero</h3>
+<p><code>lightweight-charts-grid-children-need-min-width-zero.md</code></p>
+<h3>长密集段要用收核，不是加 pad</h3>
+<p><code>long-dense-runs-need-core-trim.md</code></p>
+<h3>多空混池 PF 不是「方向规则错了」——是测量没分边</h3>
+<p><code>long-short-must-be-split-in-base-rate-tables.md</code></p>
+<h3>MAD-on 复验仍过不了 tip-smoke</h3>
+<p><code>mad-on-pad200-still-fails-tip-smoke.md</code></p>
+<h3>我从 smoke 计数推出的&quot;平移害了 tip 对齐&quot;,一测就崩;而且那两个计数本来就不该比</h3>
+<p><code>measure-placement-directly-instead-of-inferring-it-from-smoke-counts.md</code></p>
+<h3>机械「启动」入场抬 PF，但抬不过可交易线</h3>
+<p><code>mechanical-launch-entry-lifts-pf-but-not-past-1.3.md</code></p>
+<h3>中段金标右对齐 ≠ 可标的 tip 密集框</h3>
+<p><code>mid-gold-right-align-is-not-labelable-tip.md</code></p>
+<h3>参数扫到边界还在变好,就说明扫的不是那个参数</h3>
+<p><code>monotone-sweep-to-the-edge-needs-a-control-arm.md</code></p>
+<ul>
+<li><strong>问题</strong>:给 TP5×ATR/SL2×ATR 的止损加&quot;最小距离下限&quot;,净收益随下限单调上升—— 0.4% 时 +0.0314%,一路到 4.0% 时 +0.1336%,<strong>扫到扫描区间尽头都没有拐点</strong>。 第一版脚本的判读模板还写着&quot;TP率没塌 = 没砍长尾&quot;,直接把它报成了改进。</li>
+<li><strong>规则</strong>:任何单调到扫描边界的 sweep,<strong>先加对照组再解释</strong>,不要加宽区间。 对照组 = 把该参数推到 0 或 ∞ 的退化情形。如果对照组和&quot;最优参数&quot;结果接近, 那么这个参数从来不是在被优化,只是在被移除。 推论:判读文案不许用固定模板断言&quot;没砍长尾&quot;这类事实—— 必须由数据算出来(TP 率相对基线的比值),否则模板会替你撒谎。</li>
+</ul>
+<h3>多日无人值守要预留磁盘余量</h3>
+<p><code>multi-day-disk-headroom.md</code></p>
+<h3><code>nice -n 19</code> 不隔离 GPU —— 保护训练只能靠挂起或杀</h3>
+<p><code>nice-does-not-isolate-gpu-contention.md</code></p>
+<h3>Offline Watchers Need Log Markers</h3>
+<p><code>offline-watchers-need-log-markers.md</code></p>
+<h3>OKX 公共 API：403 是 WAF 挑 UA，慢是延迟不是限速</h3>
+<p><code>okx-fetch-waf-and-latency.md</code></p>
+<h3>OKX SWAP 成交额必须用 quote 口径，不能直接用 volCcy24h</h3>
+<p><code>okx-swap-volume-must-be-quote-not-base.md</code></p>
+<h3>Owner 对齐抬召回不抬 Jaccard，因果边仍死</h3>
+<p><code>owner-align-raises-recall-not-jaccard-edge-stays-dead.md</code></p>
+<h3>owner 眼中的&quot;密集&quot;与机械定义<strong>反相关</strong>——三个代理全部失败</h3>
+<p><code>owner-eye-is-anticorrelated-with-the-mechanical-dense-definition.md</code></p>
+<h3>Owner 标框的 oracle 增量不是盘口 tip 的因果 alpha</h3>
+<p><code>owner-label-oracle-alpha-is-not-causal-tip-alpha.md</code></p>
+<h3>按 owner 自己的定义把检测器做对了,回测仍然是硬币 —— 边不在形态里</h3>
+<p><code>owner-own-pattern-detected-correctly-still-has-no-edge.md</code></p>
+<h3>分边标框抬高的是 oracle，不是可部署因果规则</h3>
+<p><code>owner-side-split-does-not-unlock-deployable-rule.md</code></p>
+<h3>Owner 子集上的 tip 前移不是可部署边</h3>
+<p><code>owner-subset-tip-remap-is-not-deployable-edge.md</code></p>
+<h3>pad200 空标背景 ≠ 中段硬负样本</h3>
+<p><code>pad200-empty-bg-is-not-mid-hardneg.md</code></p>
+<h3>pad200 MAD bulk 在 16GB 上要 resume+watchdog</h3>
+<p><code>pad200-mad-bulk-needs-resume-watchdog-on-16gb.md</code></p>
+<h3>pad200 bulk 关 MAD 会把 okx_ start 窗切成 end_incl</h3>
+<p><code>pad200-mad-gate-off-corrupts-okx-start-stems.md</code></p>
+<h3>pad200「修过又复发」：preview 修好 ≠ bulk 默认安全</h3>
+<p><code>pad200-preview-fix-bulk-mad-off-regressed.md</code></p>
+<h3>pad200 训图能开火≠盘口 tip</h3>
+<p><code>pad200-train-fire-not-live-tip.md</code></p>
+<h3>pandas datetime64 的时间单位不可移植——epoch 换算别用 astype(int64)</h3>
+<p><code>pandas-datetime64-unit-portability.md</code></p>
+<h3>pandas rolling.skew 在「未来突变」测试下会数值漂移</h3>
+<p><code>pandas-rolling-skew-not-bitwise-causal.md</code></p>
+<h3>正负样本必须出自同一条渲染管线,否则模型学风格不学内容</h3>
+<p><code>pos-neg-must-share-one-render-pipeline.md</code></p>
+<ul>
+<li><strong>问题</strong>:v14/v15(pad200 系)自家 val mAP 0.72,但真实盘口 tip 上密集全漏 (0/6)、空背景乱开火(58%)——训练看似成功,部署行为完全错乱。</li>
+<li><strong>规则</strong>:构造检测/分类数据集时,正负样本必须经过<strong>逐字节相同的生成 管线</strong>,唯一允许的差异是标签本身;改造正样本(重渲/裁剪/对齐)时,负样本 必须做同样的改造。验收集要能捕获这种捷径:用与部署同管线的真实样本, 同时测&quot;应开火命中&quot;和&quot;应沉默误火&quot;两个方向。</li>
+</ul>
+<h3>预 holdout 短窗 + 少币 chunk resume 才能分钟级出 SHORT 首表</h3>
+<p><code>pre-holdout-short-window-few-symbols-beats-full-universe-scan.md</code></p>
+<h3>旧 pretip 窗上的框不能当 live tip 监督</h3>
+<p><code>pretip-window-boxes-are-not-live-tip-supervision.md</code></p>
+<h3>Python 默认参数在 def 时绑定——猴子补丁模块常量对已定义函数无效</h3>
+<p><code>python-default-args-bind-at-def.md</code></p>
+<h3>真实 tip 金标要 Owner 审，不能靠 pad200</h3>
+<p><code>real-tip-gold-needs-owner-review-not-pad200.md</code></p>
+<h3>「实时 YOLO」优先治 tip 出生率，不是换 TensorRT/DeepStream</h3>
+<p><code>realtime-yolo-needs-tip-birth-not-tensorrt.md</code></p>
+<h3>回归 realized_ret 比二分类 label 更贴 top-decile 净收益</h3>
+<p><code>regression-target-beats-binary-label-for-rank-pnl.md</code></p>
+<h3>视觉模型的标签语义必须在渲染层保持不变量</h3>
+<p><code>render-semantics-must-be-invariant.md</code></p>
+<h3>扩 OHLCV 因子救不出分边可部署因果规则</h3>
+<p><code>rich-ohlcv-features-do-not-rescue-side-causal-pf.md</code></p>
+<h3>SAHI Needs A Direct Baseline</h3>
+<p><code>sahi-needs-direct-baseline.md</code></p>
+<h3>样本量决定&quot;模型是否比单特征强&quot;——池子小就别怪模型</h3>
+<p><code>sample-size-gates-model-value.md</code></p>
+<h3>规则入池后，与门槛共线的因子 IC 会塌缩</h3>
+<p><code>selection-conditioned-ic-collapse.md</code></p>
+<h3>Shadow exit logs should share mainline entries, not a half-frozen booster</h3>
+<p><code>shadow-exits-reuse-mainline-entries.md</code></p>
+<h3>short 判断层必须回归同构，不能 binary 小样本拧镜像</h3>
+<p><code>short-judgment-must-match-v11-regression-not-binary-mirror.md</code></p>
+<h3>short 判断主路径必须做方向特征对齐，不能只换标签</h3>
+<p><code>short-judgment-needs-directional-feature-align-on-main-path.md</code></p>
+<h3>Short mirrors need directional feature semantics</h3>
+<p><code>short-mirrors-need-directional-feature-semantics.md</code></p>
+<h3>只做空链路：池文件名必须带 side，规则池与 YOLO 池分流</h3>
+<p><code>short-only-pipeline-keeps-pools-side-tagged.md</code></p>
+<h3>短检测器 18% 精度的根因:训练目标既&quot;晚了 10 根&quot;又&quot;用了过严的 full_spread&quot;</h3>
+<p><code>short-tip-dataset-target-was-late-and-too-strict.md</code></p>
+<h3>空边趋势出场：月度过线仍可能季度集中</h3>
+<p><code>short-trend-monthly-pass-can-still-be-quarter-concentrated.md</code></p>
+<h3>short YOLO 6m 扫用 resume+chunk，别绑 Cursor 会话</h3>
+<p><code>short-yolo-6m-resume-beats-cursor-kill.md</code></p>
+<h3>稀疏化能抬 4 月 train PF，靠的是脆弱搬家而不是边增量</h3>
+<p><code>sparsity-fixes-apr-by-relocating-fragility-not-edge.md</code></p>
+<h3>看板顶栏 15/100 与 forward 页 0/100 不一致：status-strip 不做新鲜度过滤</h3>
+<p><code>status-strip-decision-counter-skips-freshness-gate.md</code></p>
+<h3>dense_owner stem 数字是窗末 bar，不是窗起点</h3>
+<p><code>stem-index-is-window-end-not-start.md</code></p>
+<h3>结构出场（收盘破 EMA21）可在 val 上显著短持仓并抬 top 净</h3>
+<p><code>structure-exit-can-beat-fixed-barriers.md</code></p>
+<h3>仓位乘数上实盘时：减半槽预算，而不是提杠杆</h3>
+<p><code>tier-live-deploy-halves-slot-budget-not-leverage.md</code></p>
+<h3>仓位乘数上线前必须先算 max_mult×基础仓位的保证金 ≤ 权益，否则高档位=必拒单丢单</h3>
+<p><code>tier-multiplier-needs-margin-headroom-in-base-notional.md</code></p>
+<h3>多时间框架台架要先统一 bar 时钟</h3>
+<p><code>timeframe-generalization-needs-single-bar-clock.md</code></p>
+<h3>Timeframe sweeps must separate frequency from quality</h3>
+<p><code>timeframe-sweeps-must-separate-frequency-from-quality.md</code></p>
+<h3>tip 对齐短金标过 tip-smoke；pad200 长链未过</h3>
+<p><code>tip-aligned-short-beats-pad200-on-tip-smoke.md</code></p>
+<h3>tip 调度/阈值证伪后，下一刀必须是训练分布</h3>
+<p><code>tip-birth-needs-train-distribution-not-schedule.md</code></p>
+<h3>tip 窗像素（冻结 COCO embed）也不携带可交易方向边</h3>
+<p><code>tip-chart-pixels-do-not-carry-direction-edge.md</code></p>
+<h3>tip 崩盘先查几何审计再怪标签坏</h3>
+<p><code>tip-collapse-audit-labels-before-retrain.md</code></p>
+<h3>tip-only 调度救不了 tip 出生率——先采真实 tip 成败图</h3>
+<p><code>tip-only-scan-does-not-raise-tip-birth-rate.md</code></p>
+<h3>tip 重裁 + 时间切分才是 short 金标的最低可训条件</h3>
+<p><code>tip-recrop-plus-time-split-for-owner-short-gold.md</code></p>
+<h3>16GB 上 YOLO tip 重渲必须 batch=1 + 分片进程 + 每币落盘</h3>
+<p><code>tip-rerender-needs-batch1-chunked-checkpoint.md</code></p>
+<h3>盘口信号先入账后回填,而不是等字段齐了才入账</h3>
+<p><code>tip-rows-record-first-backfill-entry-later.md</code></p>
+<ul>
+<li><strong>问题</strong>:前向账本的行 schema 要求入场价/maker 判定,而这些字段来自信号 bar 的<strong>下一根</strong> bar——盘口信号天然缺字段,旧代码的选择是直接丢弃(<code>entry_i &gt;= len</code> → None),每笔实盘信号白白损失 15~22 分钟先机。</li>
+<li><strong>规则</strong>:流式系统里&quot;字段还没发生&quot;的行,先用已知值+带语义的代理+一个 天然未知字段作哨兵落盘,由幂等 merge 负责收敛到真值;不要为&quot;暂缺&quot;发明新 状态机。回填规则必须写明哪些字段永不覆盖(如 detected_at)。</li>
+</ul>
+<h3>Train 月度过线 ≠ holdout 可交易边</h3>
+<p><code>train-monthly-pf-does-not-imply-holdout-edge.md</code></p>
+<h3>ultralytics 的 optimizer=&#x27;auto&#x27; 会在 epoch 3 炸掉续训模型</h3>
+<p><code>ultralytics-auto-lr-destroys-finetune.md</code></p>
+<h3>打通标签到交易必须先冻结因果触发协议</h3>
+<p><code>unlock-chain-needs-causal-trigger-protocol-first.md</code></p>
+<h3>「能用」过滤器按整仓，不是 tip 唯一</h3>
+<p><code>useful-filter-is-whole-repo-not-tip-only.md</code></p>
+<h3>&quot;有信号没利润&quot;的病根在标签经济学，不在模型</h3>
+<p><code>v1-death-was-label-economics.md</code></p>
+<h3>v13 val mAP 崩 ≠ tip 裁决；tip-smoke 才是</h3>
+<p><code>v13-val-map-is-not-tip-verdict.md</code></p>
+<h3>Windows 3060 是精简 GPU 箱，开训用 train_dense.py 不是 src.detection.train</h3>
+<p><code>windows-3060-is-train-dense-not-full-repo.md</code></p>
+<h3>YOLO E2.1 训练中期 mAP 振荡</h3>
+<p><code>yolo-e21-train-instability.md</code></p>
+<h3>YOLO 重训走局域网 SSH 到 3060，不是 U 盘拷</h3>
+<p><code>yolo-train-ships-over-ssh-to-3060-not-usb.md</code></p>
+<h3>YOLO 训练加速：动 I/O 与 early-stop，不动 imgsz/增强</h3>
+<p><code>yolo-train-speed-without-accuracy-hit.md</code></p>
+<h3>YOLO epoch-end val 可在 ap_per_class 把 16GB 打爆</h3>
+<p><code>yolo-val-ap-per-class-oom-on-16gb.md</code></p>
+</body>
+</html>

@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>fable-trading 全程报告(2026-07-07 ~ 2026-07-28)</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>fable-trading 全程报告(2026-07-07 ~ 2026-07-28)</h1>
+<blockquote>21 天 · 411 次提交 · 131 篇分析报告 · 124 篇经验笔记 · 197 个结果文件 代码:<code>src/</code> 86 文件 14,911 行 + <code>scripts/</code> 168 文件 39,445 行 模型:YOLO 训练 13 轮 · 判断层 frozen 7 版 · holdout 已消耗 9 次  <strong>本报告的纪律</strong>:所有数字来自 <code>analysis/output/</code> 的结果文件与 <code>git log</code>, 不靠回忆。每个数字都能在附录 D 查到产生它的脚本。 <strong>失败与错误全部写入</strong>——包括我自己的误判。隐瞒失败等于污染实验日志。</blockquote>
+<p><strong>附录</strong>(机器生成,<code>analysis/history/</code>):</p>
+<p>A 提交时间线 · B 实验结果汇总 · C 经验笔记 · D 数字出处索引</p>
+<hr>
+<h1>第 1 章 · 一页纸真相</h1>
+<h2>现在的位置</h2>
+<table><thead><tr>
+<th>层</th>
+<th>状态</th>
+<th>关键数字</th>
+</tr></thead><tbody>
+<tr><td><strong>检测层 2a</strong></td><td>✅ <strong>做成了</strong></td><td>v9 对你的空头金标:召回 84.0%,IoU 中位 0.596,框宽比 1.00,右缘偏移 0 根</td></tr>
+<tr><td><strong>判断层 2b</strong></td><td>❌ <strong>当前这版是反的</strong></td><td>v11 顶十分位 -32.91bp(比全池还差),底档反而最好</td></tr>
+<tr><td><strong>执行层</strong></td><td>⚠️ 能跑但没成交</td><td>前向日志 35 行,0 笔业务成交</td></tr>
+<tr><td><strong>经济性</strong></td><td>⚠️ <strong>薄</strong></td><td>holdout 毛收益 11.7bp,成本 10bp,<strong>净 1.7bp</strong></td></tr>
+</tbody></table>
+<h2>一句话</h2>
+<p><strong>形态是真的能被识别的(v9 已证明),但&quot;识别得准&quot;和&quot;赚得到钱&quot;之间,横着三道墙:</strong></p>
+<p>1. <strong>成本吃掉 85% 的边</strong> —— 毛 11.7bp,手续费 10bp</p>
+<p>2. <strong>筛选层全部样本内有效、样本外失效</strong> —— 五类攻法无一幸免</p>
+<p>3. <strong>样本量根本不够证明任何小改进</strong> —— 5802 行只能分辨 24bp 以上的效应,</p>
+<p>   而所有可争取的改进都在 5bp 量级</p>
+<p>第 3 条是今天(2026-07-28)才算清楚的,<strong>它同时解释了前两条为什么一直解不掉</strong>。</p>
+<hr>
+<h1>第 2 章 · 架构:为什么是两层</h1>
+<h2>命题</h2>
+<p><strong>&quot;双均线密集启动&quot;</strong>:SMA/EMA 的 20/60/120 六条线收敛成一束(密集),</p>
+<p>然后价格向一侧突破(启动)。OKX 永续 15 分钟线,做空侧。</p>
+<h2>为什么不是一层</h2>
+<p>一个模型同时干两件事会两件都干不好:</p>
+<table><thead><tr>
+<th></th>
+<th>检测层 2a(YOLO)</th>
+<th>判断层 2b(LightGBM)</th>
+</tr></thead><tbody>
+<tr><td>回答</td><td><strong>&quot;这里像不像那个形态?&quot;</strong></td><td><strong>&quot;这一次会不会赚钱?&quot;</strong></td></tr>
+<tr><td>输入</td><td>200 根 K 线渲染成的图</td><td>信号那一刻的 28 个数字特征</td></tr>
+<tr><td>训练标签</td><td>owner 手画的框</td><td>三重障碍走完后的盈亏</td></tr>
+<tr><td>成功标准</td><td>与 owner 金标的 IoU / 召回</td><td>top-decile 扣成本后净收益为正</td></tr>
+</tbody></table>
+<p><strong>关键设计</strong>:检测层<strong>故意不管赚不赚钱</strong>,它只管&quot;像&quot;。因为&quot;像&quot;是可以被人标注的,</p>
+<p>而&quot;赚&quot;不是——你没法一眼看出一个形态未来 18 小时会不会跌。</p>
+<p>把两件事分开,每一层才有可验证的标准。</p>
+<h2>三重障碍标记</h2>
+<p>一笔做空开出后,三个条件谁先到算谁:</p>
+<pre><code>
+止盈 TP = 入场 − 5 × ATR14
+止损 SL = 入场 + 2 × ATR14
+超时      72 根(18 小时)按收盘价平
+入场      信号 bar 的下一根开盘价    ← 绝不用信号 bar 自己的收盘价
+</code></pre>
+<p><strong>为什么入场必须是下一根开盘</strong>:信号 bar 收盘的那一刻你才知道它被检测到,</p>
+<p>用那一刻的价格入场是不可能的。这条纪律看似小,却是本项目最大一次事故的病因(见第 6 章)。</p>
+<h2>成功标准(不是 AUC)</h2>
+<pre><code>
+top-decile 扣 0.2% 往返成本后净收益为正,且置换检验 p &lt; 0.01
+</code></pre>
+<p><strong>AUC 不是标准,只是参考量。</strong> v1 的教训:AUC 0.59 照样亏钱——</p>
+<p>因为 AUC 衡量排序能力,不衡量排在前面那些的收益够不够覆盖成本。</p>
+<hr>
+<h1>第 3 章 · 检测层:13 轮训练,6 个版本</h1>
+<h2>3.1 数据从哪来</h2>
+<p>不是我造的标签,是 <strong>owner 在 Label Studio 里手画的 ⭐标杆</strong>:</p>
+<p>985 个选择 → 归并成 <strong>528 个图窗 / 1008 个框</strong>。</p>
+<h2>3.2 一个被忽略了很久的问题:⭐标杆不分方向</h2>
+<p>⭐标杆是方向无关的。渲染出来看,里面<strong>约 2/3 是多头启动</strong>。</p>
+<p>早期版本拿全部 ⭐ 去评估空头检测器,等于让它跟多头样本比——<strong>召回被系统性低估</strong>。</p>
+<p>修法:逐个判方向。从框的低点往后找 24 根,谁先满足条件算谁:</p>
+<pre><code>
+# star_side():跌破均线束下轨 且 8 根跌幅 ≥ 1 ATR → 空头
+if close[j] &lt; ma_min[j] and (close[j]/close[j-8] - 1)/atrp[j] &lt; -1.0:
+    return -1, j
+</code></pre>
+<p>筛出 <strong>206 个空头金标</strong>。加上这个筛选,v6 的召回从 33.3% 变成 51.5%——</p>
+<p><strong>同一个模型,只是量对了对象。</strong></p>
+<h2>3.3 六个版本:框锚在哪</h2>
+<p>这是整条线的核心问题。检测框的<strong>右缘应该落在哪一根</strong>?</p>
+<table><thead><tr>
+<th>版本</th>
+<th>框怎么定</th>
+<th>召回</th>
+<th>IoU中位</th>
+<th>宽度比</th>
+<th>结论</th>
+</tr></thead><tbody>
+<tr><td>v6</td><td>抄 owner 原框的位置与宽度</td><td>51.5%</td><td>0.53</td><td>1.24</td><td>右缘对不齐,宽了 24%</td></tr>
+<tr><td><strong>v7s</strong></td><td>把密集阈值放宽到 expanded</td><td><strong>45.1%</strong></td><td><strong>0.261</strong></td><td><strong>2.00</strong></td><td>❌ <strong>大退步</strong></td></tr>
+<tr><td>v8</td><td>固定 10 根宽</td><td><strong>14.1%</strong></td><td>0.544</td><td>1.222</td><td>❌ 只学会一个形状</td></tr>
+<tr><td><strong>v9</strong></td><td><strong>右缘锚在跌破那根,宽度用 owner 自己的</strong></td><td><strong>84.0%</strong></td><td><strong>0.596</strong></td><td><strong>1.00</strong></td><td>✅ <strong>当前最佳</strong></td></tr>
+</tbody></table>
+<h3>v7 那次失败,病因是我的</h3>
+<p>我把密集判定阈值从 strict 改成 expanded(0.0045),<strong>改之前没有测量输出的框长什么样</strong>。</p>
+<p>结果框宽从 owner 的 1.24 倍变成 <strong>2.00 倍</strong>,IoU 从 0.532 塌到 0.261。</p>
+<p>owner 当时的原话:<strong>&quot;所以这么简单的任务你都会搞错呗?&quot;</strong></p>
+<p>病因不是阈值选错,是<strong>在一个很便宜的测量之前就动手</strong>。这条后来写进了 learnings。</p>
+<h3>v8:修对了宽度,修坏了泛化</h3>
+<p>v8 用固定 10 根,宽度比修到 1.222,IoU 到 0.544——<strong>但召回塌到 14.1%</strong>。</p>
+<p>把置信度门槛一路降到 0.01,召回也只有 16.3%。</p>
+<p>诊断脚本 <code>diag_v8_recall_vs_conf.py</code> 分离了两个假设:</p>
+<ul>
+<li><strong>THRESHOLD</strong>:模型还认得,只是不自信 → 降阈值召回应该回来</li>
+<li><strong>NARROW</strong>:固定宽度让它只学会一个精确形状 → 降阈值也没用</li>
+</ul>
+<p>结果是 <strong>NARROW</strong>。owner 的框宽度分布是 9~13 根,固定 10 根等于只教了一种。</p>
+<h3>v9:两个改动一起解决</h3>
+<pre><code>
+BOX_MIN, BOX_MAX = 5, 24        # 只做裁剪,宽度本身用 owner 自己的
+span = int(np.clip(width, BOX_MIN, BOX_MAX))
+box  = segment_to_bbox(sub, DenseSegment(start=t1-span+1, end=t1), tf)
+</code></pre>
+<ul>
+<li><strong>右缘锚在跌破那根</strong>(不是 owner 框的右缘)→ 右缘偏移 p10=p50=p90=<strong>0 根</strong></li>
+<li><strong>宽度沿用 owner 每个框自己的宽度</strong>(只做 5~24 的裁剪)→ 宽度比 <strong>1.00</strong></li>
+</ul>
+<p>最终:<strong>召回 84.0%(173/206),IoU 中位 0.596,IoU≥0.5 占 71.7%,右缘偏移 0</strong>。</p>
+<h3>一个差点毁掉整轮的 bug</h3>
+<p><code>symbol_of()</code> 解析文件名时<strong>只会加 <code>okx_</code> 前缀,不会去掉</strong>,导致 199 个金标被静默丢弃。</p>
+<p>发现它靠的是 owner 一句话:<strong>&quot;如果条数对不上 说明代码哪里有问题&quot;</strong>。</p>
+<p>修完后可解析的从 329 变成 <strong>506/528</strong>。</p>
+<p><strong>教训</strong>:数量对不上永远是 bug 信号,不是&quot;数据就是这样&quot;。</p>
+<h2>3.4 训练纪律(铁律 5)</h2>
+<pre><code>
+fliplr / flipud / mosaic / mixup / hsv  全部关闭
+</code></pre>
+<p>翻转会毁掉<strong>时间方向</strong>(K 线图从左到右是时间)和<strong>红绿语义</strong>(涨绿跌红)。</p>
+<p>这是旧项目 180 个版本失败的病因之一。</p>
+<p>外部调研曾建议 <code>fliplr: 0.5</code>、<code>mosaic: 1.0</code> —— <strong>已否决</strong>,会摧毁盘口对齐。</p>
+<h2>3.5 验收只认真 tip 金标(铁律 12)</h2>
+<p><strong>自家 val / mAP 永不作裁决。</strong> v13 的 val mAP50-95 高达 <strong>0.916</strong>,</p>
+<p>而它在真金标上的召回只有 <strong>14%</strong>。</p>
+<hr>
+<h1>第 4 章 · 判断层:7 版,以及今天发现的反选</h1>
+<h2>4.1 v1 的教训:AUC 不是钱</h2>
+<p>第一版 holdout AUC <strong>0.59</strong>、置换检验 p=0.002、稳定优于单特征基线——</p>
+<p><strong>统计上信号真实存在</strong>。然后扣成本一算:<strong>亏钱</strong>。</p>
+<p>这次之后成功标准才改成&quot;top-decile 扣成本后净收益为正&quot;。</p>
+<h2>4.2 同源问题:判断层必须吃自己检测器的候选</h2>
+<p>2026-07-23 记录的诊断:**v11 判断层是在 v11 自己的候选分布上训练的,</p>
+<p>拿去给 v16 的 tip 候选打分时会反选**。</p>
+<p>修法就是 <code>dump_v16_candidates.py</code>——用哪个检测器,就用哪个检测器的候选重训。</p>
+<h2>4.3 今天(07-28)复现了第三次</h2>
+<p>把 <code>models/ACTIVE</code> 指向的 v11 判断层拿到 v6 候选池(5802 条)上,按分数分十档:</p>
+<table><thead><tr>
+<th>十分位</th>
+<th>现行障碍净</th>
+<th>纯持72根净</th>
+</tr></thead><tbody>
+<tr><td>0(模型<strong>最不看好</strong>)</td><td>+0.0975%</td><td><strong>+0.6384%</strong></td></tr>
+<tr><td>1</td><td>+0.0996%</td><td>+0.5820%</td></tr>
+<tr><td>…</td><td>…</td><td>…</td></tr>
+<tr><td>9(模型<strong>最看好</strong>)</td><td><strong>-0.2979%</strong></td><td>-0.0074%</td></tr>
+<tr><td><strong>顶档 vs 全池</strong></td><td><strong>-32.91bp</strong></td><td><strong>-27.19bp</strong></td></tr>
+</tbody></table>
+<p><strong>它是反的。</strong> 而且这是第三次同一个病因。</p>
+<h2>4.4 扩样并没有救回排序</h2>
+<p><code>p_short_judgment_100_6m_reg</code>:样本扩到 <strong>25,602</strong> 条后,</p>
+<p>单切 top-decile 净收益仍为 <strong>+0.471%</strong>(n=510),略好于 30 币时的 +0.371%。</p>
+<p><strong>但 Spearman 从 0.149 塌到 0.016,置换 p 从 0.001 松到 0.037。</strong></p>
+<p>排序能力实际上消失了,只剩一个不稳的头部。</p>
+<hr>
+<h1>第 5 章 · 实盘:能跑,但一单没成</h1>
+<h2>5.1 部署形态</h2>
+<pre><code>
+VPS(103.214.174.58)     fable-forward.timer   每 15 分钟一轮
+   ├── update_okx           拉最新 K 线(VPS 是唯一写者,铁律 9)
+   ├── forward_track.py     扫描 → 记 forward_log.csv
+   ├── collect_real_tips    收集真 tip 金标
+   └── src.execution --once 执行器(纸面/实盘)
+Windows 3060(192.168.1.5)  YOLO 训练,比 Mac 快 7 倍
+Mac M4                      数据 / 评估 / 决策
+</code></pre>
+<h2>5.2 新鲜度三门(实盘纪律 7)</h2>
+<pre><code>
+执行器 max_signal_age_min = TG 过滤 = 看板 FRESH_DETECT_MIN = 30 分钟
+</code></pre>
+<p><strong>这个 30 不是拍脑袋,是从管道时序算出来的</strong>:</p>
+<table><thead><tr>
+<th>环节</th>
+<th>分钟</th>
+</tr></thead><tbody>
+<tr><td>K 线闭合(15m bar 开出后 15 分钟才完整)</td><td>15.0</td></tr>
+<tr><td>脉冲等待(周期 15min 的一半)</td><td>7.5</td></tr>
+<tr><td>全宇宙扫描(实测 344 币)</td><td>2.8</td></tr>
+<tr><td>余量</td><td>~5</td></tr>
+</tbody></table>
+<p>历史上这个门被先后设成 55 和 20:**55 放进了非 tip 的迟到检出,</p>
+<p>20 则结构性挡死一切**——而且&quot;静默饿死&quot;不报错,只是永远 0 单。</p>
+<h2>5.3 &quot;542 分钟延迟&quot;的完整误诊史</h2>
+<p>这是本项目最曲折的一次诊断,<strong>我连错两次</strong>:</p>
+<h3>错误判断一:&quot;管道太慢&quot;</h3>
+<p>实测:<strong>全宇宙 344 币扫描只要 2.8 分钟</strong>。算力从来不是瓶颈。</p>
+<p>外部调研反复推荐 TensorRT / C++ OMS / 共置,把 tick-to-trade 从 15ms 压到 4ms——</p>
+<p><strong>省 11 毫秒,对 3252 万毫秒的问题改善 0.00003%</strong>。优化错了延迟。</p>
+<h3>错误判断二:&quot;v11 把框画在窗口中部&quot;</h3>
+<p>我用<strong>离线全历史</strong>统计发现 v11 的框中位偏离盘口 33 根,当成了病因。</p>
+<p>但把 v11 放进<strong>同一条 live 路径</strong>重测:框距盘口 <strong>p50=1 根</strong>,和 v9 一模一样。</p>
+<p><strong>tip-edge 门只在 live 生效</strong>,拿 <code>mode=&quot;full&quot;</code> 的统计推 live 行为,</p>
+<p>等于在测一条根本没跑过的代码。</p>
+<h3>真正的原因</h3>
+<p>逐行看 <code>detected_at</code>:间隔是 <strong>45 分钟一档</strong>,且同一时刻批量出现多个币——</p>
+<p><strong>每轮只扫宇宙的一小片</strong>,一个币要隔几小时才被看一次。</p>
+<p>而且日志尾部(07-21)延迟已自行降到 17~78 分钟。</p>
+<p><strong>542 分钟是一段陈旧时期的统计,不是当前管道的属性。</strong></p>
+<h3>当前实测(2026-07-28)</h3>
+<pre><code>
+脉冲每 15 分钟一轮,每轮耗时 2.5 分钟
+全宇宙 344 币扫描 2.8 分钟
+v9 信号年龄:p10=30  p50=44  p90=60 分钟
+15 个开火中 6 个在 30 分钟门内 → 已推送 TG
+</code></pre>
+<p><strong>端到端 39.1 分钟</strong>,其中 15 分钟是 K 线闭合(不可压)、15 分钟是框龄</p>
+<p>(v9 中位落在 tip-1)。<code>--tip-only</code> 可压到 <strong>24.1 分钟,过门</strong>,代价是信号变少。</p>
+<h2>5.4 执行成本:三条腿全 taker</h2>
+<pre><code>
+入场   ordType = &quot;market&quot;                    # taker
+OCO    tpOrdPx = &quot;-1&quot;, slOrdPx = &quot;-1&quot;        # 触发即市价,两腿都 taker
+</code></pre>
+<p>OKX 永续 0.05%/边 → <strong>10bp 往返,且不含滑点</strong>。</p>
+<p>今天实测了改进空间(5802 候选):</p>
+<table><thead><tr>
+<th>方案</th>
+<th>成交率</th>
+<th>vs 现行</th>
+</tr></thead><tbody>
+<tr><td><strong>只把止盈腿改挂单</strong></td><td>100%</td><td><strong>+1.09bp,零漏单风险</strong></td></tr>
+<tr><td>入场挂 5bp / 等 1 根 + 止盈挂单</td><td>84.5%</td><td>+3.48bp</td></tr>
+</tbody></table>
+<p><strong>空单的止盈本来就是低于市价的限价买单</strong>,<code>tpOrdPx=&quot;-1&quot;</code> 是白白扔掉 maker 费率。</p>
+<p>⚠️ 诚实声明:扫描表里 <code>0bp</code> 那三行(+5.09bp)<strong>不可信</strong>,</p>
+<p>它假设&quot;限价挂在开盘价必然以 maker 成交&quot;。真实可用区间是 <strong>+2.3~3.5bp</strong>。</p>
+<h2>5.5 滑点从未被实测</h2>
+<p>执行器 ledger 缺 <code>avg_fill_px</code> 字段,<code>n_clean_fill_with_price_diff = 0</code>。</p>
+<p><strong>所有成本数字都不含滑点。</strong></p>
+<hr>
+<h1>第 6 章 · 被证伪的东西(本章最有价值)</h1>
+<h2>6.1 PF 6.61 —— 前视偏差</h2>
+<p><strong>曾有一个 PF 6.61 / 胜率 77.1% 的回测。</strong></p>
+<p>病因:检测窗口用 <code>mode=&quot;full&quot;</code>,框可落在 200 根窗口任意位置 →</p>
+<p><strong>框右边的 bar 是&quot;未来&quot;,却已经被渲染进检测器看的图里</strong>。</p>
+<p>堵住之后,<strong>同一条链路 PF 掉到 1.13,胜率 25.5%</strong>。</p>
+<p><strong>推论</strong>:外部文献里出现 PF 6.92 / 胜率 74% / CAGR 276% 一类数字,</p>
+<p>与我们已证伪的数字是同一量级,优先怀疑前视。</p>
+<h2>6.2 &quot;12.5% 胜率崩塌&quot; —— 我从 16 笔里读出来的</h2>
+<p>我从 <strong>n=16</strong> 笔交易(12.5% 胜率)得出&quot;策略崩塌&quot;的结论。</p>
+<p>owner 质疑:<strong>&quot;肯定哪里不对。你是怎么测试出来12.5% 含义是什么?&quot;</strong></p>
+<p>算 Wilson 区间:<strong>[3.5%, 36.0%]</strong> —— <strong>包含盈亏平衡点</strong>。这个样本量什么都证明不了。</p>
+<p><strong>此后所有小样本结论一律带 Wilson 区间。</strong></p>
+<h2>6.3 &quot;判断层反转&quot; —— 单路径 4 折的误读</h2>
+<p>我从单一路径的 4 折交叉验证得出&quot;判断层反转&quot;。</p>
+<p>用 <strong>CPCV(组合清除交叉验证)</strong> 跑 15 个切分:<strong>10/15 胜过裸池,中位 2 倍</strong>。</p>
+<p>结论撤回。CPCV 是外部调研里唯一真正有价值的建议。</p>
+<h2>6.4 盈亏平衡点算错了一整天</h2>
+<p>我全天用 <strong>2/7 = 28.6%</strong> 当盈亏平衡胜率,<strong>忽略了超时平仓</strong>。</p>
+<p>超时占 8.3% 的交易,平均 <strong>+1.38%</strong>。</p>
+<p>真实平衡点:<strong>毛 23.4% / taker 25.4%</strong>。</p>
+<p>这个错误把&quot;裸池确定亏钱&quot;翻转成了&quot;<strong>裸池是薄的正期望</strong>&quot;。</p>
+<h2>6.5 三个看图产生的假设,全部死亡</h2>
+<p>owner 要了 20 张 TradingView 风格的逐笔图。看图产生三个假设:</p>
+<p>1. 止损太紧 → ❌ 证伪</p>
+<p>2. 涨得多的死得快 → ❌ 证伪</p>
+<p>3. n=16 的崩塌 → ❌ 证伪(见 6.2)</p>
+<p><strong>根因</strong>:边只有 12~20bp 毛收益,而单笔波动是 ±140~360bp。</p>
+<p><strong>任何 20 笔的视图约 99% 是噪声。</strong></p>
+<h2>6.6 外部调研:15 条建议已全部做过或证伪</h2>
+<table><thead><tr>
+<th>建议</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>CV 变异系数(σ/μ)</td><td>❌ 无区分力,keep p50=0.185% vs drop 0.186%,p=0.35</td></tr>
+<tr><td>FFD 分数阶差分</td><td>⚠️ 技术成功(d=0.15 即平稳,保留 96.2% 相关性),但三个特征全不显著</td></tr>
+<tr><td>CPCV 清除+禁运</td><td>✅ <strong>有价值</strong>,推翻了一个我们自己的错误结论</td></tr>
+<tr><td>量能过滤 Vol&gt;1.5×MA20</td><td>✅ 精度 29.2% CI[19.9,40.5],唯一下沿超基础率的条件</td></tr>
+<tr><td>K 线实体质量 ≥50%</td><td>✅ 净值 +0.031% → +0.061%</td></tr>
+<tr><td>回踩均线束入场</td><td>❌ +0.022%,更差</td></tr>
+<tr><td>结构止损</td><td>❌ -0.006%,更差</td></tr>
+<tr><td>移动止损 / 均线反转出场</td><td>❌ -0.190% / -0.054%</td></tr>
+<tr><td>TensorRT / INT8 / P2 层 / NWD</td><td>❌ 优化错了延迟</td></tr>
+<tr><td>PPO-GRU 强化学习</td><td>❌ 样本 1748,PPO 需 10⁵~10⁶ 步;且没有边可供优化</td></tr>
+<tr><td><code>fliplr: 0.5</code> / <code>mosaic: 1.0</code></td><td>❌ <strong>会摧毁盘口对齐,违反铁律 5</strong></td></tr>
+</tbody></table>
+<h2>6.7 九次 holdout 消耗</h2>
+<p>holdout(≥2026-05-04)已消耗 <strong>9 次</strong>。第 9 次(中波动带 × 高置信)未通过。</p>
+<p><strong>今天算清楚了它为什么必然失败</strong>:见第 7 章。</p>
+<hr>
+<h1>第 7 章 · 2026-07-28 的三个新结论</h1>
+<h2>7.1 障碍在扣分 —— 但&quot;8.5 倍&quot;这个说法是我的错</h2>
+<p>训练池 5802 笔:</p>
+<table><thead><tr>
+<th>方案</th>
+<th>TP率</th>
+<th>超时率</th>
+<th>净@taker</th>
+</tr></thead><tbody>
+<tr><td>基线 TP5/SL2</td><td>27.3%</td><td>8.3%</td><td>+0.0312%</td></tr>
+<tr><td>只止盈无止损</td><td>41.3%</td><td>58.7%</td><td>+0.1711%</td></tr>
+<tr><td>只止损无止盈</td><td>0.0%</td><td>31.3%</td><td>+0.0756%</td></tr>
+<tr><td><strong>无障碍纯持 72 根</strong></td><td>0.0%</td><td>100%</td><td><strong>+0.2645%</strong></td></tr>
+</tbody></table>
+<p>我当时说&quot;8.5 倍&quot;。<strong>这个说法有问题:那是两个都接近零的数相除。</strong></p>
+<p>0.0312% 只有 3.1bp,乘 8.5 得到的还是小数。<strong>绝对差是 23bp,不是&quot;八倍收益&quot;。</strong></p>
+<h3>止损下限的单调陷阱</h3>
+<p>给止损加&quot;最小距离下限&quot;,净收益随下限<strong>单调上升到扫描边界</strong>(4.0% 时 +0.1336%)。</p>
+<p>第一版脚本的判读模板还写着&quot;TP率没塌 = 没砍长尾&quot;,直接报成了改进。</p>
+<p><strong>诊断的那一列是超时率</strong>:基线 8.3% → 下限 4.0% 时 <strong>69.6%</strong>。</p>
+<p>障碍推得越远触发得越少,&quot;最优下限&quot;其实是在逼近&quot;根本没有障碍&quot;。</p>
+<p><strong>通用规则</strong>:任何单调到扫描边界的 sweep,<strong>先加对照组,不要加宽区间</strong>。</p>
+<h3>完整网格扫完,中间地带不存在</h3>
+<p>SL {2,3,4,6,8,12,无} × TP {5,8,12,20,无} × 持仓 {72,144} = 70 个格子。</p>
+<p>看<strong>近期块</strong>(2026-02-20 起,1456 笔):</p>
+<pre><code>
+止损2x 止盈5x (现行)   全池 +0.0312%  |  近期 +0.0067%  PF 1.007
+止损4x 止盈5x          全池 +0.0987%  |  近期 -0.0933%  PF 0.934
+止损6x 止盈5x          全池 +0.1073%  |  近期 -0.1700%  PF 0.897
+止损8x 止盈20x         全池 +0.3942%  |  近期 -0.3365%  PF 0.838
+无止损 无止盈          全池 +0.2645%  |  近期 +0.0452%  PF 1.032  ← 唯一为正
+持仓144根:35 个格子近期全部为负
+</code></pre>
+<p><strong>70 个格子只有 1 个在近期为正。放宽止损全池越好看、近期越差——这是过拟合的形状。</strong></p>
+<p><strong>结论:出场不是问题所在。</strong> 不管怎么平仓,这批候选在最近三个月就是不赚钱。</p>
+<h3>时间稳定性</h3>
+<table><thead><tr>
+<th>区块</th>
+<th>现行障碍</th>
+<th>纯持72根</th>
+</tr></thead><tbody>
+<tr><td>前半 2025-06~12</td><td>+0.0690%</td><td>+0.2707%</td></tr>
+<tr><td>后半 2025-12~2026-05</td><td>-0.0065%</td><td>+0.2583%</td></tr>
+<tr><td>Q1 2025-06~09</td><td>-0.0436%</td><td><strong>-0.2400%</strong> ← 纯持大败</td></tr>
+<tr><td>Q2 2025-09~12</td><td>+0.1809%</td><td><strong>+0.7837%</strong> ← 8.5 倍主要来自这</td></tr>
+<tr><td>Q3 2025-12~02</td><td>-0.0214%</td><td>+0.4591%</td></tr>
+<tr><td><strong>Q4 2026-02~05</strong></td><td>+0.0088%</td><td><strong>+0.0553%</strong> ← 只剩 1/14</td></tr>
+</tbody></table>
+<p><strong>Q2→Q3→Q4 单调衰减 0.78% → 0.46% → 0.055%。</strong></p>
+<h3>尾部风险(可控)</h3>
+<table><thead><tr>
+<th>方案</th>
+<th>最差单笔</th>
+<th>&lt;-10%占比</th>
+<th>仓位2%复利</th>
+<th>最大回撤</th>
+</tr></thead><tbody>
+<tr><td>现行 TP5/SL2</td><td>-20.6%</td><td>0.09%</td><td>1.04x</td><td>10%</td></tr>
+<tr><td>无障碍持72根</td><td>-37.5%</td><td>1.72%</td><td>1.36x</td><td>13%</td></tr>
+</tbody></table>
+<p>72 根超时本身就是时间止损,<strong>风险并非无界</strong>。</p>
+<h2>7.2 判断层是反的(见 4.3)</h2>
+<h2>7.3 【最重要】样本量根本不够 —— 这解释了前面所有的&quot;样本外失效&quot;</h2>
+<p>功效计算(p&lt;0.01,功效 80%,方差取自训练池,<strong>不读 holdout</strong>):</p>
+<pre><code>
+每笔净收益标准差:现行障碍 2.531%   纯持 4.802%   两者之差 4.112%
+
+n=1739(holdout 候选数)能分辨的最小效应:
+   单样本 ≥39.4bp        配对 ≥33.7bp
+
+近期块里要证的效应:
+   裸池净收益   +4.5bp   ← 差 9 倍
+   去障碍的增量 +3.8bp   ← 差 9 倍
+</code></pre>
+<p><strong>要在 p&lt;0.01、功效 80% 下证明 +3.8bp,需要 133,495 笔配对样本。holdout 只有 1739 笔。</strong></p>
+<h3>这直接解释了 holdout #9 为什么失败</h3>
+<p><strong>它测的效应本来就在 holdout 的分辨能力之下。不是配置不行,是尺子不够精。</strong></p>
+<h3>更狠的一条</h3>
+<pre><code>
+判断层顶档要比全池高  5bp 才能证实 → 需要总候选 2,154,730 笔
+                    20bp          →          134,671 笔
+                    40bp          →           33,668 笔
+现在的候选池                       →            5,802 笔
+</code></pre>
+<p><strong>整个池子的毛收益才 11.7bp,却要求筛选层做出 40bp 的提升才能被证实。</strong></p>
+<p>**所以那个反复出现的&quot;样本内有效、样本外不复现&quot;,很大一部分其实是</p>
+<p>&quot;样本外没有足够的样本去复现&quot;。** 这是一个统计学问题,不全是过拟合问题。</p>
+<hr>
+<h1>第 8 章 · 卡点,以及优先级为什么之前排错了</h1>
+<h2>8.1 我今天排错的优先级</h2>
+<table><thead><tr>
+<th></th>
+<th>我早上说的</th>
+<th>实际</th>
+</tr></thead><tbody>
+<tr><td>去延迟</td><td>🔴 最优先、要大改</td><td>✅ 当前管道已健康,是陈旧统计</td></tr>
+<tr><td>优化成本</td><td>🔴 第二</td><td>✅ 有效但只值 +1~3.5bp</td></tr>
+<tr><td>波动率障碍</td><td>🟡</td><td>❌ <strong>出场根本不是问题</strong></td></tr>
+<tr><td>判断层</td><td>🟢 靠后</td><td>🔴 <strong>它是反的,而且被样本量卡死</strong></td></tr>
+</tbody></table>
+<p><strong>排错的原因是被池化数字误导</strong>——&quot;8.5 倍&quot;看起来像个大机会,近期块里只有 3.9bp。</p>
+<h2>8.2 真正的卡点(按重要性)</h2>
+<h3>卡点一:样本量(新发现,最硬)</h3>
+<p>现有 5802 行只能分辨 24bp 以上的效应,而所有可争取的改进都在 5bp 量级。</p>
+<p><strong>在样本量上去之前,任何筛选层的改进都无法被证明。</strong></p>
+<p>正在做:全宇宙 297 币 × 3 个月的候选池重建(3060,pid 91120,增量写盘)。</p>
+<p>实测速率 ~1.55 分钟 / 30 行 每币每月,预计产出 <strong>~31,000 行 / 约 27 小时</strong>,</p>
+<p>可分辨到 <strong>20bp</strong>。</p>
+<h3>卡点二:成本吃掉 85% 的边</h3>
+<p>毛 11.7bp,成本 10bp。<strong>降成本是唯一不需要新 alpha 的改进。</strong></p>
+<p>止盈腿改挂单值 +1.09bp 且零漏单风险。</p>
+<h3>卡点三:检测精度与&quot;赚钱&quot;的关系未被证明</h3>
+<p><strong>owner 的标注对交易结果的预测力只有 AUC 0.667。</strong></p>
+<p>v9 把&quot;复现人眼&quot;做到了 84%,<strong>这不等于它选出的形态更赚钱</strong>。</p>
+<p>这是一个还没被回答的根本问题:<strong>该继续复现人眼,还是转向直接用事后收益生成检测目标?</strong></p>
+<h3>卡点四:滑点从未实测</h3>
+<p>ledger 缺 <code>avg_fill_px</code>。所有成本数字都不含滑点。</p>
+<h2>8.3 下一步</h2>
+<table><thead><tr>
+<th>#</th>
+<th>事项</th>
+<th>状态</th>
+</tr></thead><tbody>
+<tr><td>1</td><td>候选池扩到 3 万行</td><td>🔄 <strong>进行中</strong>(3060)</td></tr>
+<tr><td>2</td><td>判断层在新池上重训,双标签</td><td>⏸ 等 1</td></tr>
+<tr><td>3</td><td>止盈腿改挂单(+1.09bp)</td><td>⏸ 待 owner</td></tr>
+<tr><td>4</td><td><strong>不要消耗 holdout #10</strong></td><td>✅ 已算清,现在做是白消耗</td></tr>
+<tr><td>5</td><td>ledger 加 <code>avg_fill_px</code> 实测滑点</td><td>⏸</td></tr>
+</tbody></table>
+<hr>
+<h1>第 9 章 · 风险与诚实声明</h1>
+<p>1. <strong>本报告第 7 章全部是训练池样本内。</strong> 本项目的一贯模式是样本内有效、样本外失效。</p>
+<p>   在 holdout 验证前不应被当成可交易的事实。</p>
+<p>2. <strong>我在本轮中有多次判断错误,已全部写入正文</strong>:</p>
+<ul>
+<li>延迟原因误判两次(§5.3)</li>
+<li>&quot;8.5 倍&quot;是误导性表述(§7.1)</li>
+<li>从 16 笔读出&quot;崩塌&quot;(§6.2)</li>
+<li>盈亏平衡点算错一整天(§6.4)</li>
+<li>v7 未测量就动手(§3.3)</li>
+<li>猜&quot;渲染是瓶颈&quot;,实际是推理占 96%</li>
+</ul>
+<p>3. <strong>v9 的 84% 召回不等于赚钱。</strong> owner 标注对结果的预测力仅 AUC 0.667。</p>
+<p>4. <strong>所有成本数字不含滑点。</strong></p>
+<p>5. <strong>holdout 已消耗 9 次。</strong> 每一次都是不可逆的信息泄漏。</p>
+<p>6. <strong>3m/5m 的检测结果是分布外的</strong>,v9 只在 15m 上训过,不构成任何验证。</p>
+<p>7. <strong>VPS 即将到期</strong>,forward_log.csv 与执行器 ledger 已抢救到本地</p>
+<p>   <code>vps_rescue/</code>(不入 git)。这些是仅存一份的真实交易记录。</p>
+<hr>
+<h1>附录</h1>
+<table><thead><tr>
+<th></th>
+<th>内容</th>
+<th>文件</th>
+</tr></thead><tbody>
+<tr><td>A</td><td>411 次提交时间线</td><td><code>analysis/history/APPENDIX_A_timeline.md</code></td></tr>
+<tr><td>B</td><td>197 个结果文件汇总</td><td><code>analysis/history/APPENDIX_B_results.md</code></td></tr>
+<tr><td>C</td><td>124 篇经验笔记</td><td><code>analysis/history/APPENDIX_C_learnings.md</code></td></tr>
+<tr><td>D</td><td>数字出处索引</td><td><code>analysis/history/APPENDIX_D_provenance.md</code></td></tr>
+</tbody></table>
+<p><strong>复现命令</strong></p>
+<pre><code>
+PYTHONPATH=. .venv/bin/python scripts/gen_project_history.py       # 重新生成附录
+PYTHONPATH=. .venv/bin/python scripts/diag_barrier_grid.py         # §7.1 网格
+PYTHONPATH=. .venv/bin/python scripts/diag_holdout_power.py        # §7.3 功效
+PYTHONPATH=. .venv/bin/python scripts/diag_judgment_under_new_exit.py  # §4.3 反选
+PYTHONPATH=. .venv/bin/python scripts/diag_v9_live_lag.py          # §5.3 延迟
+PYTHONPATH=. .venv/bin/python scripts/diag_maker_entry_fill.py     # §5.4 成本
+</code></pre>
+</body>
+</html>

@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>附录 A:提交时间线</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>附录 A:提交时间线</h1>
+<p>共 412 次提交,20 个活动日。由 <code>git log</code> 生成,非回忆。</p>
+<h2>按类型</h2>
+<table><thead><tr>
+<th>类型</th>
+<th>次数</th>
+</tr></thead><tbody>
+<tr><td>other ()</td><td>211</td></tr>
+<tr><td>docs (文档)</td><td>42</td></tr>
+<tr><td>feat (新功能)</td><td>26</td></tr>
+<tr><td>status ()</td><td>12</td></tr>
+<tr><td>fix (修复)</td><td>12</td></tr>
+<tr><td>diag (诊断)</td><td>8</td></tr>
+<tr><td>build (构建)</td><td>8</td></tr>
+<tr><td>HANDOFF ()</td><td>5</td></tr>
+<tr><td>detection ()</td><td>5</td></tr>
+<tr><td>judgment ()</td><td>5</td></tr>
+<tr><td>labels ()</td><td>5</td></tr>
+<tr><td>research ()</td><td>5</td></tr>
+<tr><td>dashboard ()</td><td>4</td></tr>
+<tr><td>measure (测量)</td><td>4</td></tr>
+<tr><td>ops ()</td><td>3</td></tr>
+<tr><td>execution ()</td><td>3</td></tr>
+<tr><td>v16 ()</td><td>3</td></tr>
+<tr><td>backtest ()</td><td>3</td></tr>
+<tr><td>train (训练)</td><td>2</td></tr>
+<tr><td>housekeeping ()</td><td>2</td></tr>
+<tr><td>tools ()</td><td>2</td></tr>
+<tr><td>Erratum ()</td><td>1</td></tr>
+<tr><td>README ()</td><td>1</td></tr>
+<tr><td>Docs ()</td><td>1</td></tr>
+<tr><td>Architecture ()</td><td>1</td></tr>
+<tr><td>Status ()</td><td>1</td></tr>
+<tr><td>webapp ()</td><td>1</td></tr>
+<tr><td>E3 ()</td><td>1</td></tr>
+<tr><td>Queue12 ()</td><td>1</td></tr>
+<tr><td>Queue13 ()</td><td>1</td></tr>
+<tr><td>Housekeeping ()</td><td>1</td></tr>
+<tr><td>Queue14 ()</td><td>1</td></tr>
+<tr><td>Queue15 ()</td><td>1</td></tr>
+<tr><td>queue15 ()</td><td>1</td></tr>
+<tr><td>Queue16 ()</td><td>1</td></tr>
+<tr><td>Task10 ()</td><td>1</td></tr>
+<tr><td>Task9 ()</td><td>1</td></tr>
+<tr><td>ls_auto_import ()</td><td>1</td></tr>
+<tr><td>forward ()</td><td>1</td></tr>
+<tr><td>3060 ()</td><td>1</td></tr>
+<tr><td>eth_micro ()</td><td>1</td></tr>
+<tr><td>scout ()</td><td>1</td></tr>
+<tr><td>handoff ()</td><td>1</td></tr>
+<tr><td>scout_mtf ()</td><td>1</td></tr>
+<tr><td>live (实盘)</td><td>1</td></tr>
+<tr><td>deploy (部署)</td><td>1</td></tr>
+<tr><td>plan ()</td><td>1</td></tr>
+<tr><td>test (测试)</td><td>1</td></tr>
+<tr><td>analysis ()</td><td>1</td></tr>
+<tr><td>doctrine ()</td><td>1</td></tr>
+<tr><td>cleanup ()</td><td>1</td></tr>
+<tr><td>loader ()</td><td>1</td></tr>
+<tr><td>evidence ()</td><td>1</td></tr>
+<tr><td>verdict ()</td><td>1</td></tr>
+<tr><td>learning ()</td><td>1</td></tr>
+<tr><td>audit ()</td><td>1</td></tr>
+<tr><td>tooling ()</td><td>1</td></tr>
+<tr><td>hooks ()</td><td>1</td></tr>
+<tr><td>S3 ()</td><td>1</td></tr>
+<tr><td>factors ()</td><td>1</td></tr>
+<tr><td>prereg (预注册)</td><td>1</td></tr>
+<tr><td>charts (图表)</td><td>1</td></tr>
+<tr><td>scan ()</td><td>1</td></tr>
+</tbody></table>
+<h2>按日</h2>
+<h3>2026-07-07 — 4 次提交</h3>
+<ul>
+<li><code>5c345be</code> <strong>other</strong> Add project skeleton and P0 alpha analysis of human launch labels</li>
+<li><code>1ddc00e</code> <strong>other</strong> Add judgment layer (2b): strict-rule candidates, triple-barrier labels, LightGBM training</li>
+<li><code>bbe78a5</code> <strong>other</strong> Add detection layer (2a): YOLO dense MA cluster pipeline.</li>
+<li><code>a53d5cc</code> <strong>other</strong> 2b-v2: wider barriers (TP4/SL2 ATR + atr floor), expanded pool preset, OKX history fetcher</li>
+</ul>
+<h3>2026-07-08 — 19 次提交</h3>
+<ul>
+<li><code>d22eb57</code> <strong>other</strong> Parallelize OKX fetcher: browser UA for WAF, symbol thread pool + global throttle</li>
+<li><code>e7a8389</code> <strong>other</strong> 2b-v2 results + handoff pack: expanded pool passes val acceptance</li>
+<li><code>925e7b2</code> <strong>Erratum</strong> purge/embargo was already implemented; retire HANDOFF step 1</li>
+<li><code>f0e9d6c</code> <strong>other</strong> 2b acceptance PASSED: one-shot holdout eval of expanded x v2 (owner-approved)</li>
+<li><code>34cd017</code> <strong>other</strong> Install extract-approach skill (owner-executed), drop pending-install copy</li>
+<li><code>fc82a00</code> <strong>other</strong> Stage 3 round 1: event-driven backtest -- acceptance NOT met (PF 1.01 @ 0.3%)</li>
+<li><code>4dec21b</code> <strong>other</strong> Full-stack dashboard: FastAPI backend + vanilla JS / Lightweight Charts frontend</li>
+<li><code>6a48226</code> <strong>README</strong> dashboard section</li>
+<li><code>64c5fdc</code> <strong>other</strong> Dashboard v2: pro-grade analytics views</li>
+<li><code>871e11e</code> <strong>other</strong> Add AGENTS.md mirror of CLAUDE.md for cross-tool agent compat</li>
+<li><code>36464ca</code> <strong>other</strong> v3 exit-structure sweep: TP5/SL2 wins on val (net +0.077%/trade @0.3% cost)</li>
+<li><code>2ced8a8</code> <strong>other</strong> Add one-command VPS deploy script for the dashboard</li>
+<li><code>1bfbb6e</code> <strong>other</strong> Allow VPS deploy ssh/rsync without permission prompts (owner-requested)</li>
+<li><code>41824bb</code> <strong>other</strong> v3 round 2: time hypothesis falsified, maker entries are the big lever</li>
+<li><code>660fce4</code> <strong>other</strong> Incremental OKX updater: forward-validation data feed (route D)</li>
+<li><code>1f9ecfa</code> <strong>other</strong> Signal browser: trade anatomy view + three portability bug fixes</li>
+<li><code>6a1adc8</code> <strong>HANDOFF</strong> pending queue snapshot (YOLO finishing, swap refetch, MA decision)</li>
+<li><code>bf496ef</code> <strong>other</strong> Offline relay pipeline: finish the pending queue without Claude</li>
+<li><code>53404e4</code> <strong>other</strong> Work order for tomorrow&#x27;s Codex session (owner out of Claude quota)</li>
+</ul>
+<h3>2026-07-09 — 39 次提交</h3>
+<ul>
+<li><code>7bdcf13</code> <strong>other</strong> Expand work order into a full prioritized engineering plan (P0-P3)</li>
+<li><code>ee19eb7</code> <strong>other</strong> Project management pack: frontend bug tickets, architecture doc, status/schedule/risks</li>
+<li><code>297f0b7</code> <strong>other</strong> Evolution engine: research agenda (15 hypotheses), MTF plan, frontend console roadmap</li>
+<li><code>10c19d4</code> <strong>other</strong> H9 discovery-tier PASS: 1h EMA144 alignment filter (+0.051%/trade maker-net)</li>
+<li><code>6337c44</code> <strong>other</strong> Offline queue #2: funding rates, multi-TF data, H1/H2 exit variants</li>
+<li><code>25e594e</code> <strong>other</strong> Agenda H16-H18: volume-price family (owner&#x27;s breakout-volume insight formalized)</li>
+<li><code>7d05bea</code> <strong>other</strong> Label-audit sample pack + YOLO iteration protocol (owner review loop)</li>
+<li><code>4fa6bbb</code> <strong>Docs</strong> standalone SVG diagrams (LightGBM 10-step pipeline, triple-barrier anatomy)</li>
+<li><code>020dbc7</code> <strong>Architecture</strong> document the known MA-set mismatch between 2a and 2b layers</li>
+<li><code>7cb0070</code> <strong>other</strong> Overnight results: H1 scaled exit is a discovery-tier standout; pipeline PYTHONPATH fix</li>
+<li><code>caad4b3</code> <strong>other</strong> Swap replication PASSES: mainline universe is now SWAP</li>
+<li><code>72f00cd</code> <strong>other</strong> Work order: Codex worktree workflow + morning results marked done</li>
+<li><code>6162672</code> <strong>other</strong> Session chronicle: the 07-07..09 sprint, distilled</li>
+<li><code>9ad27ab</code> <strong>other</strong> Offline queue #3: H1xH9 stack on SWAP, multi-TF first pass, data audit</li>
+<li><code>815de39</code> <strong>other</strong> Offline queue #4: v3 stack portfolio backtest on SWAP + auto-deploy to VPS</li>
+<li><code>246ea14</code> <strong>other</strong> Queue3 results: 30m timeframe is the richest cell yet; scaled exit holds on SWAP</li>
+<li><code>40f02c0</code> <strong>other</strong> Offline queue #5: tp5 reconciliation, frozen model artifacts, forward tracker</li>
+<li><code>eceb4d0</code> <strong>other</strong> Offline queue5: frozen artifacts, forward-log first pass, v3 sim outputs</li>
+<li><code>1fca9be</code> <strong>other</strong> Document swap replication in v3 report</li>
+<li><code>612cae8</code> <strong>other</strong> Compare MA 20-60-120 judgment pool</li>
+<li><code>3f5e647</code> <strong>other</strong> Record MA mainline decision</li>
+<li><code>6b70b7d</code> <strong>other</strong> Fix signal chart autoscale on focus</li>
+<li><code>de543f3</code> <strong>other</strong> Fix signal band autoscale</li>
+<li><code>a14dfff</code> <strong>other</strong> Deduplicate signal exit barrier lines</li>
+<li><code>141d305</code> <strong>other</strong> Record offline YOLO acceptance result</li>
+<li><code>42ca210</code> <strong>other</strong> Freeze tp5 sl2 swap model</li>
+<li><code>9adb6ab</code> <strong>other</strong> Add forward signal tracker</li>
+<li><code>8925f2f</code> <strong>other</strong> Add realized funding cost replay</li>
+<li><code>dc90d1d</code> <strong>other</strong> Add dashboard forward and universe views</li>
+<li><code>57f8fc2</code> <strong>other</strong> Generalize sweep bench for multi-timeframe research</li>
+<li><code>bf17651</code> <strong>other</strong> Evaluate H9 trend filter on maker simulations</li>
+<li><code>2ee3ab6</code> <strong>other</strong> Evaluate mirrored short-side candidates on swaps</li>
+<li><code>d663115</code> <strong>other</strong> Evaluate H1 H2 exit variants on swaps</li>
+<li><code>c22861b</code> <strong>other</strong> Evaluate multi-timeframe swap pools</li>
+<li><code>c21f6a9</code> <strong>other</strong> Add smoke tests and CI</li>
+<li><code>b6c662c</code> <strong>other</strong> Improve dashboard non-auth controls</li>
+<li><code>d5408ad</code> <strong>other</strong> Record dashboard auth decision</li>
+<li><code>f567166</code> <strong>other</strong> Generate YOLO label audit round one</li>
+<li><code>1b26e6d</code> <strong>other</strong> Record offline watcher marker lesson</li>
+</ul>
+<h3>2026-07-10 — 58 次提交</h3>
+<ul>
+<li><code>5a1cea1</code> <strong>other</strong> Record SAHI baseline lesson</li>
+<li><code>f605cb1</code> <strong>other</strong> Record offline pipeline YOLO eval and swap replication results</li>
+<li><code>10afbd5</code> <strong>other</strong> Add Telegram daily digest and notifier plumbing</li>
+<li><code>9abc848</code> <strong>other</strong> Complete P2-12 data audit and wire forward daily chain notes</li>
+<li><code>3a37c68</code> <strong>other</strong> Record YOLO label audit findings and offline task status</li>
+<li><code>ab12d70</code> <strong>other</strong> Apply owner confirmations for blacklist and label audit</li>
+<li><code>1c1344f</code> <strong>other</strong> Merge branch &#x27;codex/day1&#x27; into main</li>
+<li><code>9cf6369</code> <strong>other</strong> Note successful codex/day1 merge on main</li>
+<li><code>3d197b7</code> <strong>other</strong> Implement P2-11 E1 tighter x_pad and relabel dataset</li>
+<li><code>d2786d7</code> <strong>other</strong> Add E1 pad12-vs-pad6 overlay audit page</li>
+<li><code>5340fe6</code> <strong>other</strong> Implement P2-11 E2 max dense core-trim for long boxes</li>
+<li><code>0e57a77</code> <strong>other</strong> Add P2.5 ops console auth-first design draft</li>
+<li><code>803daba</code> <strong>other</strong> Record long dense run core-trim lesson</li>
+<li><code>b35a03b</code> <strong>other</strong> Implement P2.5 Phase 0+1 ops auth, experiment registry, and agenda</li>
+<li><code>7c935d7</code> <strong>other</strong> Tighten E2 core-trim MAX_DENSE_BARS from 24 to 12</li>
+<li><code>990fa67</code> <strong>other</strong> Add FiftyOne and Label Studio review tooling</li>
+<li><code>65cd94d</code> <strong>other</strong> Add overnight morning brief template and plan doc</li>
+<li><code>775d6fd</code> <strong>feat</strong> P2.5 Phase 2 hard-coded job runner</li>
+<li><code>6374c73</code> <strong>docs</strong> H1 forward shadow plan + acceleration options</li>
+<li><code>2c38273</code> <strong>other</strong> Merge P2.5 Phase 2 job runner into main</li>
+<li><code>5d9bee1</code> <strong>other</strong> Wire ready-to-run FiftyOne and Label Studio starters</li>
+<li><code>245ff1a</code> <strong>other</strong> Document multi-day autonomous charter and Phase2 completion notes</li>
+<li><code>8684836</code> <strong>feat</strong> P2.5 Phase 3 read-only data and model hubs</li>
+<li><code>d7ac593</code> <strong>other</strong> Add YOLO consistency_check and E2.1-vs-old-best baseline</li>
+<li><code>1bd871f</code> <strong>feat</strong> H1 scaled exit shadow forward logger</li>
+<li><code>cd326aa</code> <strong>feat</strong> P2.5 Phase 3 read-only data + model hubs</li>
+<li><code>a754c29</code> <strong>other</strong> Update multi-day status after Phase3 merge and consistency baseline</li>
+<li><code>76259a7</code> <strong>Status</strong> H1 shadow live, YOLO epoch2, multi-day pulse</li>
+<li><code>b87c4cd</code> <strong>other</strong> Merge Phase3 hub test hardening and README</li>
+<li><code>07081f8</code> <strong>other</strong> Record FINAL SWAP expansion results and post-expand data audit</li>
+<li><code>5825ebf</code> <strong>other</strong> Finalize SWAP universe expansion and offline summary reports</li>
+<li><code>015ddcf</code> <strong>other</strong> List post-expand SWAP blacklist candidates without applying BLOCKED</li>
+<li><code>52afca3</code> <strong>other</strong> Add interim YOLO E2.1 training curve while retrain continues</li>
+<li><code>f2ddc6f</code> <strong>other</strong> Add ACTIVE freeze pointer and YOLO E2.1 instability learning</li>
+<li><code>63f2a72</code> <strong>other</strong> Improve daily digest for dual forward books and E2.1 mAP</li>
+<li><code>1d8510c</code> <strong>other</strong> Arm post-train finalize watchdog and refresh E2.1 interim curve</li>
+<li><code>146f566</code> <strong>docs</strong> multi-day status, PROJECT/HANDOFF sync, FO hard note</li>
+<li><code>2ec48b5</code> <strong>docs</strong> NEXT_STEPS multi-day charter pointer and morning brief</li>
+<li><code>1c870e3</code> <strong>ops</strong> live part-file scan in data hub; force VPS executor off</li>
+<li><code>7b89132</code> <strong>status</strong> multi-day pulse after VPS executor pin and part resume</li>
+<li><code>0c3d0cb</code> <strong>webapp</strong> show live incomplete .part.csv on data hub tab</li>
+<li><code>88be09d</code> <strong>status</strong> ANIME/MANA fetch complete; E2.1 still training</li>
+<li><code>147dc67</code> <strong>ops</strong> multi_day_pulse heartbeat for unattended days</li>
+<li><code>61639a7</code> <strong>docs</strong> refresh E2.1 interim after ep18 val window</li>
+<li><code>a1476ae</code> <strong>ops</strong> finalize FO hardlist after E2.1; digest reports train alive</li>
+<li><code>c1f5be9</code> <strong>status</strong> 2h durable pulse — E2.1 ep19 train, forward dual-book OK</li>
+<li><code>e2c45d1</code> <strong>status</strong> hourly pulse — E2.1 ~ep22, dual forward stable</li>
+<li><code>a4f2b1e</code> <strong>status</strong> 2h durable — E2.1 new best ep25 mAP50=0.844, FO up</li>
+<li><code>83b1697</code> <strong>status</strong> hourly — E2.1 best ep29 mAP50=0.851, dual forward stable</li>
+<li><code>820a4df</code> <strong>status</strong> hourly — E2.1 best ep30 mAP50=0.855, train ~ep33</li>
+<li><code>c187c69</code> <strong>status</strong> 2h durable — E2.1 best ep30 mAP50=0.855, 33 epochs, pytest green</li>
+<li><code>376e8db</code> <strong>status</strong> hourly — E2.1 best ep30 mAP50=0.855, train ~ep37/40</li>
+<li><code>35eab75</code> <strong>status</strong> YOLO E2.1 train finished 40/40 best ep30 mAP50=0.855</li>
+<li><code>ce3c8e3</code> <strong>other</strong> Finalize YOLO E2.1 retrain report, consistency, FO hardlist</li>
+<li><code>82b783d</code> <strong>status</strong> E2.1 formal finalize complete — mAP50=0.85 FAIL gate 0.90</li>
+<li><code>0954f3c</code> <strong>docs</strong> E2.1 formal FAIL 0.90 recorded; 2h durable pulse</li>
+<li><code>45037e6</code> <strong>fix</strong> Label Studio login email must be valid (example.com)</li>
+<li><code>a5891aa</code> <strong>status</strong> hourly — E2.1 formal locked, dual forward stable, e21b side train</li>
+</ul>
+<h3>2026-07-12 — 4 次提交</h3>
+<ul>
+<li><code>a0e3049</code> <strong>other</strong> Pre-register forward verdict counting rule: crypto swaps only</li>
+<li><code>b37518c</code> <strong>other</strong> Deep-history accelerator: fetch 2021+ swaps, pre-registered one-shot frozen test</li>
+<li><code>13fd911</code> <strong>E3</strong> the boundary-contradiction experiment for the YOLO mainline (owner mandate)</li>
+<li><code>3171934</code> <strong>other</strong> Label Studio round-2 packs: 200 val + 120 train tasks (deduped vs round 1)</li>
+</ul>
+<h3>2026-07-13 — 23 次提交</h3>
+<ul>
+<li><code>ddc5af1</code> <strong>other</strong> E3 margin diagnosis result (gap 50.4pp)</li>
+<li><code>7b9e66c</code> <strong>other</strong> Golden set round 1: owner rejects 70% of rule boxes; rule family ceiling F1~0.45</li>
+<li><code>b86f9fc</code> <strong>other</strong> Round-2 golden: owner self-consistency F1 0.88; owner-taste detector v1 launched</li>
+<li><code>94e8907</code> <strong>other</strong> Owner-taste detector v1 result</li>
+<li><code>16e787c</code> <strong>other</strong> Round-3 ammo: 2973 labeling tasks in 6 chunks + base-recipe comparison queue</li>
+<li><code>09d87e5</code> <strong>other</strong> Deep-history one-shot test result (pre-registered)</li>
+<li><code>c2aa7ae</code> <strong>other</strong> Owner-detector base comparison (scratch vs pretrained vs E2.1)</li>
+<li><code>d0643f6</code> <strong>other</strong> Deep-history PASS logged; remote-labeling tunnel; v3 dual-base + swap round-4 queues</li>
+<li><code>b23629c</code> <strong>other</strong> Tunnel also on port 80 (firewall-friendly, no port number needed)</li>
+<li><code>574a309</code> <strong>other</strong> Round-4 swap packs rendered and auto-imported into Label Studio</li>
+<li><code>e43c1bf</code> <strong>other</strong> Round-4 swap packs rendered and auto-imported into Label Studio</li>
+<li><code>a378ead</code> <strong>other</strong> Auto-import pipeline: session+CSRF auth, cache-dir fix, idempotent projects</li>
+<li><code>fec793f</code> <strong>other</strong> Round-4 swap packs rendered and auto-imported into Label Studio</li>
+<li><code>ab14d65</code> <strong>Queue12</strong> v4 training on the full 2268-image golden pool (winner base auto-picked)</li>
+<li><code>a56cc8a</code> <strong>other</strong> Round-4 swap packs live in Label Studio (1313 tasks, images verified)</li>
+<li><code>5cced9f</code> <strong>Queue13</strong> 30m tp x horizon deep grid on CPU while GPU trains</li>
+<li><code>90d7527</code> <strong>other</strong> 30m deep grid (tp x horizon, val only)</li>
+<li><code>9bbf44d</code> <strong>Housekeeping</strong> commit three days of multi-agent work products</li>
+<li><code>79de68d</code> <strong>other</strong> 30m deep grid rerun: tp dimension actually varied this time</li>
+<li><code>4d804de</code> <strong>other</strong> Owner detector v3: dual-base comparison on 1268 golden images</li>
+<li><code>3ad774b</code> <strong>other</strong> Bug sweep fixes: stockish side-channel, config clobbering, stale dashboard, shared eval</li>
+<li><code>1c28a1a</code> <strong>other</strong> Fix dashboard 500: frozen-artifact loader was greedy and fail-hard</li>
+<li><code>b4bb2a7</code> <strong>other</strong> Owner detector v4 on 2268-image golden pool</li>
+</ul>
+<h3>2026-07-14 — 16 次提交</h3>
+<ul>
+<li><code>60fb648</code> <strong>Queue14</strong> v5 dual-base on the mixed-universe golden pool</li>
+<li><code>c6936e6</code> <strong>other</strong> Visual scout live loop + active-learning pack generator</li>
+<li><code>c64561b</code> <strong>other</strong> Enable fable-advisor plugin (architect-as-orchestrator, security-inspected)</li>
+<li><code>a1f46a3</code> <strong>other</strong> Automation chain snapshot before quota exhaustion</li>
+<li><code>0474c3f</code> <strong>other</strong> Scout fixes: sync gallery to VPS each scan; HIMS &amp; co join the stockish list</li>
+<li><code>70008f6</code> <strong>other</strong> Scout v2: leaderboard universe, 1-hour freshness gate, 10-min cadence</li>
+<li><code>85e071a</code> <strong>other</strong> Commit round-4 owner label exports; scout runtime output gitignored</li>
+<li><code>f3fc910</code> <strong>other</strong> Owner detector v5: 3581-image mixed-universe pool, dual-base</li>
+<li><code>47c48bf</code> <strong>other</strong> v5 winner promoted to owner_best; round-5 model-prelabeled packs live</li>
+<li><code>99d20ab</code> <strong>other</strong> Frozen eval set fixes the shifting-val confound; promote v4 (真最强)</li>
+<li><code>ebec296</code> <strong>other</strong> v5_from_v4 promoted: frozen-F1 0.663 (P0.758 R0.590) -- curve is climbing, not plateaued</li>
+<li><code>ba9af45</code> <strong>Queue15</strong> v6 dual-base training on 4501-image pool, eval-symbols excluded</li>
+<li><code>9b88f8a</code> <strong>queue15</strong> auto-restart scout after v6 training completes</li>
+<li><code>b1033d0</code> <strong>Queue16</strong> H19 factor IC screen (CPU-only, niced)</li>
+<li><code>0d78575</code> <strong>other</strong> H19 alpha factor library: 14 causal crypto-safe factors + IC screen</li>
+<li><code>d191578</code> <strong>other</strong> Dashboard shell rework (Codex/Grok) + round-5 label exports</li>
+</ul>
+<h3>2026-07-15 — 39 次提交</h3>
+<ul>
+<li><code>9145416</code> <strong>other</strong> H19 factor IC screen: 14 causal crypto-safe alpha factors vs dense-launch forward return</li>
+<li><code>62f34ab</code> <strong>other</strong> YOLO critical-path A/B: candidate-source converter + head-to-head runner, queued after v6</li>
+<li><code>1909f9b</code> <strong>other</strong> Automate judgment-layer feature-gain evidence (H19 -&gt; single-var screen)</li>
+<li><code>eb79236</code> <strong>other</strong> H19 factor IC screen done (2/14 alive, weak); Grok overnight task batch spec</li>
+<li><code>b42f1ee</code> <strong>other</strong> Grok runner: --prompt-file (fixes long-prompt shell mangling) + acceptEdits</li>
+<li><code>1bb323b</code> <strong>other</strong> Grok isolation: run in a separate git worktree (~/fable-trading-grok)</li>
+<li><code>fe50068</code> <strong>other</strong> Grok runner: per-task loop (single-turn mode completes one focused task each)</li>
+<li><code>21b9320</code> <strong>other</strong> Grok runner: --continue loop per task (single-turn budget was too small for multi-step tasks)</li>
+<li><code>9c52fff</code> <strong>other</strong> Harden queue17 gate: wait for v6 promotion, not just training end</li>
+<li><code>fa0d927</code> <strong>other</strong> Task4 H3: MA-exit (close&lt;EMA21) beats TP5 on val maker net</li>
+<li><code>1fb2293</code> <strong>Task10</strong> factor causality + scaled/breakeven path tests; RESULTS</li>
+<li><code>117f745</code> <strong>Task9</strong> dedupe tunnel scripts and owner F1 eval loops</li>
+<li><code>6188e46</code> <strong>other</strong> Task1 H14/H17/H18: volume factor trio IC screen (all dead)</li>
+<li><code>f546e5a</code> <strong>other</strong> Task2 H15: dense-quality second-order factors IC (all dead)</li>
+<li><code>0fda2af</code> <strong>other</strong> Owner detector v6: 4501-image pool (round5 labeled), frozen-eval promotion</li>
+<li><code>6d82b75</code> <strong>other</strong> Fix queue17 deadlock: v5 won promotion, not v6, so &#x27;wait for owner_v6&#x27; hung forever</li>
+<li><code>e2ed66d</code> <strong>other</strong> Correct promotion: v5&#x27;s 0.663 was leakage (43/47 eval symbols in its train)</li>
+<li><code>8425cd2</code> <strong>train</strong> speed knobs without hurting accuracy (workers/cache/plots/patience)</li>
+<li><code>fcc8fb5</code> <strong>docs</strong> note cold-start patience recipe in offline_pipeline</li>
+<li><code>f6c2361</code> <strong>other</strong> docs/learnings: YOLO speed knobs without accuracy hit</li>
+<li><code>a4e422f</code> <strong>other</strong> Round-6 LS pack: 50% SWAP hard + 50% scout/model-uncertain</li>
+<li><code>59cf652</code> <strong>other</strong> Round-6 expand: +1500 tasks (chunks 3-5), total 2000</li>
+<li><code>62f228c</code> <strong>other</strong> round6 pack: NMS prelabels so one dense region → one box</li>
+<li><code>bf9c4b0</code> <strong>ls_auto_import</strong> register all local-files roots in a pack</li>
+<li><code>c22d099</code> <strong>other</strong> A/B complete: YOLO vs rule candidate sources on SWAP val</li>
+<li><code>5f4b23d</code> <strong>other</strong> Mainline cutover: YOLO candidates + frozen_tp5_sl2_swap_yolo</li>
+<li><code>6a97581</code> <strong>other</strong> forward YOLO: skip series with no bars after FORWARD_START</li>
+<li><code>dc6a4e6</code> <strong>other</strong> forward YOLO: live mode only scans right-edge windows</li>
+<li><code>3a67373</code> <strong>other</strong> yolo live predict on CPU to avoid MPS hang in multi-series forward</li>
+<li><code>a126bde</code> <strong>other</strong> yolo scan: per-process temp PNG path</li>
+<li><code>79af5bc</code> <strong>forward</strong> load YOLO before LightGBM; pin OMP threads (fix MPS hang)</li>
+<li><code>4b249d8</code> <strong>docs</strong> YOLO mainline forward ops notes (OMP, venv)</li>
+<li><code>30b3c57</code> <strong>other</strong> Backtest YOLO mainline; refresh score cache path for deploy</li>
+<li><code>828bd62</code> <strong>other</strong> A/B verdict retracted: 88/101 val symbols were in the detector&#x27;s training set</li>
+<li><code>641a4eb</code> <strong>other</strong> Task5 H4: time-decay SL (flat vs TP5, discovery fail)</li>
+<li><code>f572619</code> <strong>other</strong> Task6 H5: vol-adaptive barriers slight edge vs fixed TP5</li>
+<li><code>c44b7d8</code> <strong>other</strong> Task7 H11: liquidity-tier models vs pooled (marginal stack edge)</li>
+<li><code>d0b90c3</code> <strong>other</strong> Task8 H8: 30m grid TP{4,5,6}x h{48,60,72} (h60 not stable best)</li>
+<li><code>019eaca</code> <strong>other</strong> docs/learnings: overnight batch insights (IC collapse, MA-exit, skew)</li>
+</ul>
+<h3>2026-07-16 — 20 次提交</h3>
+<ul>
+<li><code>417f8a4</code> <strong>other</strong> Decisive A/B: v7-holdout detector on 106 never-trained symbols, top-30% bucket</li>
+<li><code>574199f</code> <strong>detection</strong> fix optimizer=&#x27;auto&#x27; destroying every chain fine-tune</li>
+<li><code>604c059</code> <strong>detection</strong> learning curve to test whether more labels buy generalisation</li>
+<li><code>4c050dd</code> <strong>3060</strong> pull args.yaml/results.csv home and check the curve before the score</li>
+<li><code>5262a6b</code> <strong>detection</strong> one definition of the eval/val split, and a dataset builder that uses it</li>
+<li><code>50c8ea8</code> <strong>detection</strong> exemplar gate + materialized eval ruler (closes a real straddle leak)</li>
+<li><code>ab9bce7</code> <strong>eth_micro</strong> ETH-only 1/2/3/5m channel backtest + monitor + signal notify</li>
+<li><code>9c3aef4</code> <strong>judgment</strong> regression target (realized_ret) replaces binary as ACTIVE</li>
+<li><code>6a2b130</code> <strong>other</strong> forward + dashboard: YOLO mainline wiring, low-TF backtest, scout tweaks</li>
+<li><code>9ba1107</code> <strong>labels</strong> round6/7 exports, v8_chain prelabels for unstarted chunks, owner_best -&gt; v8_chain</li>
+<li><code>3d212e3</code> <strong>judgment</strong> refit regression on the clean v8_chain candidate pool (val-side win)</li>
+<li><code>301e543</code> <strong>scout</strong> signal-style photo alerts with judgment score (owner format request)</li>
+<li><code>d03090d</code> <strong>judgment</strong> cut ACTIVE over to the clean v8-pool regression (owner-approved)</li>
+<li><code>f23b552</code> <strong>handoff</strong> 2026-07-16 current-truth section; deploy ships the v8 pool csv</li>
+<li><code>0b124a4</code> <strong>labels</strong> dedup v8 prelabels for round7 chunk5-6 (142 duplicate boxes removed)</li>
+<li><code>1a2fddf</code> <strong>detection</strong> v9 partial-round results (Grok --force at 83%) -- the curve holds</li>
+<li><code>bcd7164</code> <strong>dashboard</strong> status strip shows judgment ACTIVE; vendored lightweight-charts (Grok)</li>
+<li><code>2a32ce0</code> <strong>housekeeping</strong> cost route table, explicit backtest artifact selection, one truth doc</li>
+<li><code>323d2cf</code> <strong>labels</strong> round8 generator -- fresh 2026-H1 windows, non-overlapping by construction</li>
+<li><code>4b7aec4</code> <strong>housekeeping</strong> root down to five canonical docs; README rewritten for reality</li>
+</ul>
+<h3>2026-07-17 — 5 次提交</h3>
+<ul>
+<li><code>a53f278</code> <strong>feat</strong> scout_mtf, live executor sizing, dashboard UX, round8 v2 packs</li>
+<li><code>87c2876</code> <strong>scout_mtf</strong> radar rank/UI refinements, v10 promotion record, volume-quote learning note</li>
+<li><code>3e80052</code> <strong>labels</strong> round9 generator -- 2025-H2 windows, triple-dedup, v10 prelabels</li>
+<li><code>861378b</code> <strong>other</strong> judgment audit + H-TS + v10 pool backtest: the gap lives between replay and live</li>
+<li><code>83a0787</code> <strong>execution</strong> NaN atr_pct produced tp=sl=0 brackets; refuse entry when barriers unusable</li>
+</ul>
+<h3>2026-07-18 — 6 次提交</h3>
+<ul>
+<li><code>9821aec</code> <strong>other</strong> mine grok/overnight branch: H13 BTC-regime experiment + batch RESULTS digest</li>
+<li><code>aff89b1</code> <strong>execution</strong> signal freshness gate, TG trade alerts, systemd single instance</li>
+<li><code>6fd34b6</code> <strong>dashboard</strong> nav slimmed to the core loop; v11 local training pipeline</li>
+<li><code>6dde333</code> <strong>other</strong> forward gate: single writer, 15-min pulse, YOLO source, snapshot ring</li>
+<li><code>9e487dc</code> <strong>other</strong> execution docs match reality; drop the VPS override that starved the live loop</li>
+<li><code>38212a2</code> <strong>judgment</strong> v11 pool config made real; default stays v8 until the artifact exists</li>
+</ul>
+<h3>2026-07-19 — 9 次提交</h3>
+<ul>
+<li><code>f10ee36</code> <strong>other</strong> Cut judgment mainline to v11 pool and harden forward live ops.</li>
+<li><code>33c65bb</code> <strong>other</strong> Fix live forward blank scan when FORWARD_START leads last bar.</li>
+<li><code>0b45ee8</code> <strong>other</strong> Simplify multi-TF radar UI to a clear, single-purpose console.</li>
+<li><code>5cf9a5f</code> <strong>other</strong> Harden live trading path for overnight unattended runs.</li>
+<li><code>8da871b</code> <strong>labels</strong> round10 packs (4x300, zero-repeat verified) + system diagrams</li>
+<li><code>0714095</code> <strong>other</strong> live ops: daily funnel digest, walk-forward in every freeze, version pin</li>
+<li><code>f38b985</code> <strong>execution</strong> enforce the validated 72-bar timeout exit on live positions</li>
+<li><code>e15bbb4</code> <strong>other</strong> forward gate: hindsight detections cannot buy the verdict; enforce per-symbol gap</li>
+<li><code>93972f2</code> <strong>other</strong> forward verdict: raise FRESH_DETECT_MIN 20-&gt;55 to match executor gate</li>
+</ul>
+<h3>2026-07-20 — 20 次提交</h3>
+<ul>
+<li><code>48d94db</code> <strong>feat</strong> H-TIP ops, short-tf side channel, and dashboard UI polish</li>
+<li><code>67d8733</code> <strong>live</strong> real-time tip detection — record signals on the pulse their bar closes</li>
+<li><code>1e483b5</code> <strong>docs</strong> HANDOFF tip-path truth block + two learnings (gate arithmetic, record-first backfill)</li>
+<li><code>6e78337</code> <strong>other</strong> live scan: 6-window schedule (tip+2 pinned + stride walk) — undo 14-window tip-dense</li>
+<li><code>e0c2ce8</code> <strong>other</strong> Rename project to darkforest-trading and revise sections</li>
+<li><code>19b45b2</code> <strong>deploy</strong> stop pushing Mac klines to VPS — VPS is the live single writer</li>
+<li><code>5a4f85f</code> <strong>other</strong> forward scan: phase wall-clock telemetry (discover vs phase2)</li>
+<li><code>45b9443</code> <strong>other</strong> live scan: slice each series to a 2000-bar tail — full-history pandas was the growth term</li>
+<li><code>f1adcfe</code> <strong>other</strong> live scan: one batched predict per series instead of 6 single-image calls</li>
+<li><code>2073d01</code> <strong>HANDOFF</strong> pulse performance numbers and shelved optimization levers</li>
+<li><code>626e88e</code> <strong>plan</strong> one-week execution plan for Grok (v12 eval -&gt; shadow -&gt; owner cutover decision)</li>
+<li><code>31d702e</code> <strong>dashboard</strong> chart UX iteration — MA display modes, trade focus card, symbol combo</li>
+<li><code>c292f55</code> <strong>docs</strong> refresh living docs for live + H-TIP phase (2026-07-20)</li>
+<li><code>2ad7261</code> <strong>feat</strong> v12 H-TIP eval pass + tip-only shadow path (no promote)</li>
+<li><code>1fad130</code> <strong>fix</strong> ship scripts to VPS for v12 shadow + source env file</li>
+<li><code>e197271</code> <strong>docs</strong> v12 shadow VPS start record</li>
+<li><code>770225e</code> <strong>feat</strong> owner-forced detector mainline cutover to v12 H-TIP</li>
+<li><code>1279c4e</code> <strong>docs</strong> keep owner_best pre-v12 JSON sidecar for rollback</li>
+<li><code>4544535</code> <strong>feat</strong> show v11 mainline backtest; replace stale v8 compare table</li>
+<li><code>672a430</code> <strong>fix</strong> v12 shadow summary payload is a JSON string not dict</li>
+</ul>
+<h3>2026-07-21 — 28 次提交</h3>
+<ul>
+<li><code>75a37a1</code> <strong>feat</strong> v12 pool frozen config + cutover script (no promote)</li>
+<li><code>ee07349</code> <strong>test</strong> exit parity suite for backtest vs executor semantics</li>
+<li><code>79a665e</code> <strong>feat</strong> weight-centric sizing backtest on val window</li>
+<li><code>b29b5be</code> <strong>feat</strong> v12 val-window rescan probe + score-shift compare tooling</li>
+<li><code>a455db2</code> <strong>docs</strong> learnings — libomp segfault, exit parity args, isotonic step collapse</li>
+<li><code>e290c70</code> <strong>fix</strong> exclude holdout rows from v11 baseline in valwin score comparison; add v12 score shift report</li>
+<li><code>f4cfbd1</code> <strong>feat</strong> one-shot single-symbol live probe CLI (check_symbol.py)</li>
+<li><code>20e2fb3</code> <strong>feat</strong> one-click symbol probe tab backed by check_symbol subprocess</li>
+<li><code>5059016</code> <strong>fix</strong> probe timeout 150s + UI wording from measured VPS runtime (~41s)</li>
+<li><code>df23352</code> <strong>fix</strong> tolerate pre-tiered-sizing frozen artifacts in check_symbol (VPS skew)</li>
+<li><code>6f52b49</code> <strong>feat</strong> tiered sizing ready locally; tip-subset offline probes</li>
+<li><code>542e62a</code> <strong>feat</strong> deploy tiered sizing with half-slot headroom</li>
+<li><code>d0b5cfb</code> <strong>feat</strong> live-truth panel, freshness lag badge, richer probe cards</li>
+<li><code>076babc</code> <strong>docs</strong> night report 2026-07-21 and execution slippage notes</li>
+<li><code>6e925fe</code> <strong>feat</strong> tip-subset rerender resume/checkpoint and progress CSV</li>
+<li><code>5a63bec</code> <strong>feat</strong> tip-subset val backtest with 0.0465 live discount</li>
+<li><code>d5f6416</code> <strong>docs</strong> diagnose box→bar lag as semantic, not geometric bug</li>
+<li><code>88d1f55</code> <strong>feat</strong> tip-edge gate keeps last N bars only (A′)</li>
+<li><code>b9a1c77</code> <strong>feat</strong> tip-only env switches + smoke diag (default stays live)</li>
+<li><code>9f81bd9</code> <strong>docs</strong> capture pad200 crop, stem-index, and mid-gold tip lessons</li>
+<li><code>44aca7c</code> <strong>feat</strong> pad200 crop-after-box build and v13 train pipeline</li>
+<li><code>bab7ea6</code> <strong>feat</strong> live tip auto-label and Label Studio 1000 pack</li>
+<li><code>6d02ccb</code> <strong>docs</strong> pad200 and tip-only crop preview artifacts</li>
+<li><code>d2b2286</code> <strong>feat</strong> pad200 build --resume and optional --mad-gate</li>
+<li><code>10f17fe</code> <strong>feat</strong> add v13 pad200 watchdog for resume loops</li>
+<li><code>2f687f7</code> <strong>docs</strong> map within-bar YOLO realtime path vs GitHub candidates</li>
+<li><code>294cbce</code> <strong>docs</strong> review ChartScanAI for tip-detection lessons</li>
+<li><code>3897ebe</code> <strong>docs</strong> shortlist GitHub repos by real fable pain points</li>
+</ul>
+<h3>2026-07-22 — 30 次提交</h3>
+<ul>
+<li><code>def0932</code> <strong>docs</strong> backlog future opts for detect + judgment layers</li>
+<li><code>90eca18</code> <strong>docs</strong> detail judgment backlog and open-source shortlist</li>
+<li><code>60ab8db</code> <strong>docs</strong> append judgment-layer GitHub building blocks to backlog</li>
+<li><code>a9f5d40</code> <strong>docs</strong> open H-DET tip hypothesis cluster and register known results</li>
+<li><code>707468d</code> <strong>docs</strong> add external YOLO sources and H-DET-EXT hypotheses</li>
+<li><code>132b6c4</code> <strong>docs</strong> inventory H-DET-2 hard-negs and harden tip-smoke eval while v13 trains</li>
+<li><code>5949cb6</code> <strong>docs</strong> scan wuzao topics and register H-FE/H-TOOL side hypotheses</li>
+<li><code>d885e00</code> <strong>docs</strong> widen wuzao scan from tip-only to whole-repo useful</li>
+<li><code>3c89a42</code> <strong>other</strong> Land wuzao A-tier debug tools overnight without touching v13/MPS.</li>
+<li><code>304e536</code> <strong>docs</strong> refresh HANDOFF with v13 pad200 mid-run snapshot.</li>
+<li><code>4b0c403</code> <strong>feat</strong> land visible dashboard viz (Tabulator, LWC boxes, status lamps)</li>
+<li><code>22125a3</code> <strong>fix</strong> keep local :8642 alive via user launchd</li>
+<li><code>d875438</code> <strong>fix</strong> quiet viz chrome after owner style feedback</li>
+<li><code>1005175</code> <strong>docs</strong> deepen wuzao topics beyond frontend by subsystem use</li>
+<li><code>7a35a33</code> <strong>other</strong> Land local side-tool venvs and discovery artifacts without touching v13/MPS.</li>
+<li><code>86c699e</code> <strong>docs</strong> record v13 pad200 finale and H-DET-1 tip miss</li>
+<li><code>c8b53d4</code> <strong>docs</strong> diagnose v13 trainset — labels OK, tip collapse real</li>
+<li><code>bdde170</code> <strong>fix</strong> pad200 MAD default — okx_ stems were cut on wrong window</li>
+<li><code>8227c82</code> <strong>docs</strong> record v13 pad200 wrong-window root cause in HANDOFF</li>
+<li><code>5de1797</code> <strong>docs</strong> explain why pad200 stem fix regressed on v13 bulk</li>
+<li><code>5494ab3</code> <strong>docs</strong> v14 pad200 MAD rebuild done + Windows train handoff</li>
+<li><code>872c1d4</code> <strong>fix</strong> v14 Windows train ships over SSH to 3060, not USB</li>
+<li><code>3d68767</code> <strong>fix</strong> point v14 .bat at SSH sync instead of manual copy</li>
+<li><code>aa192d8</code> <strong>docs</strong> v14 sample30 + okx wrong-window audit clears sync</li>
+<li><code>17cc277</code> <strong>fix</strong> point v14 3060 sync at live LAN IP and train_dense.py</li>
+<li><code>4a9c0f0</code> <strong>docs</strong> v14 MAD-on tip eval fails discovery bar</li>
+<li><code>f48aa10</code> <strong>docs</strong> v14 tip failure rootcause (C&gt;B&gt;A)</li>
+<li><code>d3c0309</code> <strong>other</strong> Add v14 pad200 launchd train wrappers so local MPS training survives agent shell death.</li>
+<li><code>5d888a4</code> <strong>other</strong> Add v15 tipval pipeline and OOM learning so tip-aligned val can train on 16GB without ap_per_class blowups.</li>
+<li><code>28fc844</code> <strong>docs</strong> add 2026-07-22 owner project overview</li>
+</ul>
+<h3>2026-07-23 — 41 次提交</h3>
+<ul>
+<li><code>14e4912</code> <strong>other</strong> Start real tip success/fail prelabel pack for Owner review.</li>
+<li><code>86fd4b7</code> <strong>other</strong> Revalidate v15 tip discovery with fair full-MA and real-tip denominators.</li>
+<li><code>9a47d0a</code> <strong>docs</strong> land v15 verdict + tip-eval fairness audit into HANDOFF/agenda/week-plan</li>
+<li><code>6cb0de0</code> <strong>analysis</strong> v15 failure root cause — pos/neg from two render pipelines (style shortcut)</li>
+<li><code>947c168</code> <strong>other</strong> v16 builder: fresh-render every image through one pipeline (owner-approved)</li>
+<li><code>d90a3b5</code> <strong>v16</strong> build complete (6963 train / 2987 val) + two-arm train runbook for Grok</li>
+<li><code>8b54d9e</code> <strong>v16</strong> owner ruling — cold start only, v12 never a training base</li>
+<li><code>bc10fb7</code> <strong>v16</strong> Windows 3060 sync + cold-start train launcher (owner: v12 never a base)</li>
+<li><code>034b821</code> <strong>other</strong> v16 fix: val positives must be tip-aligned — source from v15 tipval, not v14</li>
+<li><code>2049bb1</code> <strong>HANDOFF</strong> dataset quarantine (pre-tip style banned from training) + v16 val fix record</li>
+<li><code>3cd3d3d</code> <strong>doctrine</strong> live detection means the newest bars ONLY — purge hindsight paths</li>
+<li><code>e28c57a</code> <strong>docs</strong> live-tip doctrine as iron rule 12 (CLAUDE/AGENTS synced) + HANDOFF truth</li>
+<li><code>66fea9c</code> <strong>other</strong> purge v12 shadow path + guard mainline preload for detector=none idle</li>
+<li><code>363385e</code> <strong>cleanup</strong> archive pre-v16 scripts (35) + superseded docs; purge temp junk</li>
+<li><code>ba010d7</code> <strong>other</strong> honest tip-replay backtest harness + strip stale v12/v13 tiles</li>
+<li><code>c009360</code> <strong>other</strong> status strip: v16 epochs target 60 + test updated to new sidecar name</li>
+<li><code>d3f70f8</code> <strong>other</strong> v16 verdict: FAIL the golden gate — unified pipeline did not cure false fire</li>
+<li><code>0d79783</code> <strong>other</strong> v17 data engine: per-pulse real-tip collector + owner review pack builder</li>
+<li><code>e78ae20</code> <strong>HANDOFF</strong> v17 data engine online (per-pulse real-tip collection + review pack)</li>
+<li><code>832102b</code> <strong>HANDOFF</strong> v16 verdict reversed (auto-labels wrong, not the model); holdout #6 pre-authorized under discovery gate</li>
+<li><code>27232c3</code> <strong>dashboard</strong> lead backtest tab with v16 tip-replay verdict; fold old hindsight numbers into a deprecated collapsible</li>
+<li><code>47b0b4e</code> <strong>loader</strong> tolerate a stray non-UTF8 byte in a kline csv (encoding_errors=replace)</li>
+<li><code>c862202</code> <strong>evidence</strong> v16 empty-tip &#x27;false fire&#x27; gallery (verdict-reversing) + real-tip review pack output</li>
+<li><code>e6f9e02</code> <strong>other</strong> v16 VERDICT: falsified on clean holdout — detector-only loses, judgment is anti-predictive</li>
+<li><code>2b1e4d3</code> <strong>other</strong> base-rate test: dense geometry alpha with NO detector (pure rule) vs random baseline</li>
+<li><code>de3d40a</code> <strong>other</strong> base-rate verdict: dense geometry is real but marginal; cost is the killer, not detection</li>
+<li><code>3e7fda2</code> <strong>docs</strong> code review of recent tip/v16/v17 changes (2026-07-23)</li>
+<li><code>094e210</code> <strong>other</strong> same-source judgment: dump v16 candidates + train aligned LightGBM</li>
+<li><code>0e4863d</code> <strong>other</strong> same-source judgment (a+b): add BTC-regime/rel-strength/time features, scale to 100 sym</li>
+<li><code>7962fcf</code> <strong>verdict</strong> walk-forward falsifies the same-source-judgment &#x27;edge&#x27; as regime luck</li>
+<li><code>ed0b8b4</code> <strong>other</strong> owner-box alpha test: manual eye is consistent (AUC 0.8-0.9) but not causally predictive</li>
+<li><code>cfe92eb</code> <strong>other</strong> wrong-exit + two-layer tests: whisper of regime-dependent edge, never robustly tradeable</li>
+<li><code>711a9f5</code> <strong>other</strong> directional analysis: the move is real (oracle PF 2.68) but direction is a coin flip</li>
+<li><code>1afcafb</code> <strong>research</strong> owner-label oracle ≠ tip; launch entry fails 1.3 even when split by side</li>
+<li><code>cd78e79</code> <strong>docs</strong> absorb tonight&#x27;s research into HANDOFF truth; holdout N=6</li>
+<li><code>d1c87ac</code> <strong>tools</strong> stream owner long/short review pack without shipping preview JPGs</li>
+<li><code>88c0f81</code> <strong>research</strong> causal direction-select fails to rescue PF past 1.3</li>
+<li><code>39d4414</code> <strong>research</strong> holdout#7 falsifies A short trend-exit (PF≈1.0)</li>
+<li><code>20c5e4e</code> <strong>tools</strong> fix gallery Prev under unlabeled filter via visit trail</li>
+<li><code>4c1703b</code> <strong>research</strong> archive side/exit/entry-timing findings before E1–E3</li>
+<li><code>7b6b4bb</code> <strong>research</strong> attribute holdout collapse; E1–E3 do not unlock edge</li>
+</ul>
+<h3>2026-07-24 — 11 次提交</h3>
+<ul>
+<li><code>ea10311</code> <strong>other</strong> judgment-layer lab: v16+short-below-all-MA+short-quality judgment rescues period3 to 1.12</li>
+<li><code>3e6997c</code> <strong>other</strong> judgment lab IT-07/08: vol-regime gate and rolling retrain both fail to stabilize</li>
+<li><code>25819bf</code> <strong>other</strong> judgment lab IT-09: long and short are COMPLEMENTARY across regimes (owner was right)</li>
+<li><code>ba172da</code> <strong>other</strong> judgment lab IT-10/11: regime side-selection exhausted (5 angles, same wall)</li>
+<li><code>977ed48</code> <strong>other</strong> judgment lab IT-12/13: entry-timing lever also fails -&gt; honest verdict</li>
+<li><code>d7d3c34</code> <strong>learning</strong> dense-cluster launch has no causally-tradeable direction edge</li>
+<li><code>92bf084</code> <strong>other</strong> judgment lab IT-14: visual-gestalt direction pre-check fails (4th evidence line)</li>
+<li><code>f3d9dd3</code> <strong>other</strong> Commit tip-aligned short-only pipeline: builders, --side short judgment, docs.</li>
+<li><code>bd03992</code> <strong>other</strong> Align short judgment to v11 regression path (objective + feature mirror).</li>
+<li><code>6b0e871</code> <strong>other</strong> Record short 30x6m reg walkforward and 100-coin scan harness.</li>
+<li><code>147d042</code> <strong>other</strong> Add short-only project management plan with S0-S6 gates.</li>
+</ul>
+<h3>2026-07-26 — 7 次提交</h3>
+<ul>
+<li><code>d533f87</code> <strong>audit</strong> verify short detector v1b pool is causal; full-mode safety is behavioral</li>
+<li><code>db062e8</code> <strong>other</strong> IT-17/18: the short judgment&#x27;s edge is a fixed-cost artifact, not selection</li>
+<li><code>a5a4d2a</code> <strong>other</strong> IT-19: price the short chain at the executor&#x27;s real route; correct my IT-18 claim</li>
+<li><code>0ae6f5b</code> <strong>tooling</strong> repo-wide index guard and an analysis report index</li>
+<li><code>90e95a1</code> <strong>hooks</strong> enforce CLAUDE.md / AGENTS.md sync at commit time</li>
+<li><code>4a35e09</code> <strong>S3</strong> keyboard review server for the short tip_v1b 1000-box gold pack</li>
+<li><code>3005917</code> <strong>other</strong> S3 review: add a tip zoom, because the pack PNG is not judgeable</li>
+</ul>
+<h3>2026-07-27 — 23 次提交</h3>
+<ul>
+<li><code>e06b408</code> <strong>other</strong> S3 review: lead with a context render showing what came AFTER the box</li>
+<li><code>bb271f2</code> <strong>diag</strong> translate=0.02 does NOT cost tip placement — my hypothesis was wrong</li>
+<li><code>0d7e030</code> <strong>diag</strong> short tip dataset&#x27;s target is both 10 bars late and gated too strictly</li>
+<li><code>1a4b76f</code> <strong>build</strong> short tip dataset v2 with a corrected target (owner-approved)</li>
+<li><code>5e1a9c3</code> <strong>train</strong> launch short_tip_v2 on the 3060, and fix two things that blocked it</li>
+<li><code>c5e45b2</code> <strong>other</strong> diag+build: v1/v2 had zero negatives, so the detector only learned &quot;box the edge&quot;</li>
+<li><code>5f9a830</code> <strong>diag</strong> the owner&#x27;s eye is ANTI-correlated with our mechanical dense definition</li>
+<li><code>5e5e521</code> <strong>build</strong> v5 short tip set from the owner&#x27;s stated pattern and their ⭐标杆 tags</li>
+<li><code>8607029</code> <strong>build</strong> v6 fixes a stem-prefix bug and stops the filter vetoing the owner&#x27;s stars</li>
+<li><code>1b1d1ad</code> <strong>backtest</strong> honest tip-replay for the short side, priced at the executor&#x27;s route</li>
+<li><code>6b075b6</code> <strong>backtest</strong> v6 detects the owner&#x27;s own pattern well and still trades at a coin flip</li>
+<li><code>6fc883b</code> <strong>judgment</strong> the second layer on v6 selects WORSE than taking every candidate</li>
+<li><code>2828d57</code> <strong>diag</strong> v6&#x27;s confidence does separate — and my &quot;it collapsed&quot; read was unsound</li>
+<li><code>b49bba6</code> <strong>diag</strong> CV density fails as a third normalisation, but volume confirmation works</li>
+<li><code>a492812</code> <strong>factors</strong> fractional differencing works as advertised and separates nothing here</li>
+<li><code>4b64028</code> <strong>backtest</strong> CPCV overturns my &quot;the judgment layer inverts&quot; call</li>
+<li><code>b54fe18</code> <strong>diag</strong> the edge is not decaying — it lives in a mid-volatility band that is stable</li>
+<li><code>a403907</code> <strong>prereg</strong> holdout #9 — mid-volatility band x high confidence, frozen before running</li>
+<li><code>36e2250</code> <strong>other</strong> holdout #9: the frozen mid-volatility configuration does not pass</li>
+<li><code>2143ab2</code> <strong>charts</strong> per-trade renders, and three hypotheses they produced that all died</li>
+<li><code>7bc5999</code> <strong>diag</strong> half of stopped-out trades were once in profit, but cutting early is worse</li>
+<li><code>d2fbb65</code> <strong>build</strong> v7 attacks the three gaps the gold comparison actually measured</li>
+<li><code>d5e14e2</code> <strong>build</strong> v8 fixes box width to 10 bars, after measuring instead of guessing</li>
+</ul>
+<h3>2026-07-28 — 10 次提交</h3>
+<ul>
+<li><code>061c356</code> <strong>other</strong> diag+build: v8 learned one exact shape; v9 restores the owner&#x27;s own box widths</li>
+<li><code>2917611</code> <strong>diag</strong> of three untested ideas only the body-quality filter helps; open questions doc</li>
+<li><code>c4a0a79</code> <strong>build</strong> v9 is the best detector yet — the width detour cost two runs, the rest held</li>
+<li><code>fc18ddd</code> <strong>measure</strong> the barriers are the cost, not the exit tuning</li>
+<li><code>88b678b</code> <strong>measure</strong> the no-barrier edge is directionally stable but decaying</li>
+<li><code>8d17b00</code> <strong>build</strong> rebuild the judgment pool on v9, labelled for both exits at once</li>
+<li><code>f13b9c6</code> <strong>measure</strong> no cheap prefilter keeps v9&#x27;s candidates, so the rebuild scans every bar</li>
+<li><code>fdfe036</code> <strong>scan</strong> v9 over the last 20h of BTC/ETH at 15m, 5m and 3m, with trade charts</li>
+<li><code>a7e8e78</code> <strong>measure</strong> the exit isn&#x27;t the problem, and the holdout cannot resolve what is</li>
+<li><code>83963b0</code> <strong>build</strong> append per symbol, so a run that dies leaves a usable pool behind</li>
+</ul>
+</body>
+</html>

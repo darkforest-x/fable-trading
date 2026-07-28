@@ -118,7 +118,16 @@ def send_document(file_path: Path, caption: str = "") -> bool:
         return False
     token, chat_id = creds
     boundary = f"----fable{uuid.uuid4().hex}"
-    mime = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+    # mimetypes has no entry for .md, so a report went out as octet-stream with no
+    # charset and Telegram decoded the Chinese with whatever default it picked.
+    # Text needs its charset stated in the type or the viewer has to guess.
+    TEXT_EXT = {".md": "text/markdown", ".txt": "text/plain", ".csv": "text/csv",
+                ".json": "application/json", ".html": "text/html"}
+    ext = path.suffix.lower()
+    if ext in TEXT_EXT:
+        mime = f"{TEXT_EXT[ext]}; charset=utf-8"
+    else:
+        mime = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
     file_bytes = path.read_bytes()
 
     def part(name: str, value: bytes, filename: str | None = None,
