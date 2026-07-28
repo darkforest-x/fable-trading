@@ -1,0 +1,31 @@
+{
+  "pool": "judgment_yolo_owner_side_short_100_6m.csv",
+  "n_rows": 25602,
+  "sigma": 0.025129383544741823,
+  "mde_one_bp": 5.37,
+  "mde_top_decile_bp": 24.0,
+  "n_alpha_usable": 19,
+  "results": [
+    {
+      "n_splits": 15,
+      "lift_bp_median": -17.08,
+      "lift_bp_mean": -18.13,
+      "splits_positive": 1,
+      "top_net_median": 0.000242,
+      "auc_median": 0.4962,
+      "variant": "基础 28 特征",
+      "n_features": 28
+    },
+    {
+      "n_splits": 15,
+      "lift_bp_median": -13.91,
+      "lift_bp_mean": -11.24,
+      "splits_positive": 3,
+      "top_net_median": 0.000663,
+      "auc_median": 0.4918,
+      "variant": "基础 + alpha 19 个",
+      "n_features": 47
+    }
+  ],
+  "verdict": "最好的一版顶档提升 -13.9bp,仍低于分辨门槛 24.0bp → 无法判定;3/15 个切分为正可作为方向参考,但不构成结论"
+}

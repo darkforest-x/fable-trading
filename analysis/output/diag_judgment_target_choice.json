@@ -1,0 +1,146 @@
+{
+  "pool": "judgment_yolo_owner_side_short_100_6m.csv",
+  "n": 25602,
+  "n_features": 47,
+  "results": [
+    {
+      "variant": "分类器 · 学 label(现行)",
+      "target": "label",
+      "objective": "binary",
+      "n_splits": 15,
+      "lift_bp_median": -13.91,
+      "splits_positive": 3,
+      "top_net_median": 0.000663,
+      "pool_net_median": 0.001605,
+      "mde_bp": 41.58,
+      "resolvable": false,
+      "top_features": [
+        [
+          "atr_pct_ratio96",
+          3822.4
+        ],
+        [
+          "atr_pct",
+          3253.5
+        ],
+        [
+          "ret_48",
+          2842.8
+        ],
+        [
+          "af_rev5",
+          2699.4
+        ],
+        [
+          "af_vol_of_vol",
+          2610.3
+        ],
+        [
+          "af_close_to_high",
+          2566.7
+        ],
+        [
+          "pre_range168",
+          2517.0
+        ],
+        [
+          "ret_4",
+          2383.8
+        ]
+      ]
+    },
+    {
+      "variant": "回归器 · 学 净收益",
+      "target": "net",
+      "objective": "regression",
+      "n_splits": 15,
+      "lift_bp_median": 22.48,
+      "splits_positive": 11,
+      "top_net_median": 0.003247,
+      "pool_net_median": 0.001605,
+      "mde_bp": 41.58,
+      "resolvable": false,
+      "top_features": [
+        [
+          "atr_pct",
+          4.4
+        ],
+        [
+          "pre_range168",
+          2.4
+        ],
+        [
+          "af_vol_of_vol",
+          2.0
+        ],
+        [
+          "atr_pct_ratio96",
+          1.9
+        ],
+        [
+          "ret_12",
+          1.9
+        ],
+        [
+          "af_rev5",
+          1.8
+        ],
+        [
+          "pre_range48",
+          1.8
+        ],
+        [
+          "ret_4",
+          1.7
+        ]
+      ]
+    },
+    {
+      "variant": "回归器 · 学 净收益/ATR",
+      "target": "net_atr",
+      "objective": "regression",
+      "n_splits": 15,
+      "lift_bp_median": -5.52,
+      "splits_positive": 5,
+      "top_net_median": 0.000662,
+      "pool_net_median": 0.001605,
+      "mde_bp": 41.58,
+      "resolvable": false,
+      "top_features": [
+        [
+          "atr_pct_ratio96",
+          36113.6
+        ],
+        [
+          "ret_48",
+          26214.3
+        ],
+        [
+          "af_close_to_high",
+          25226.4
+        ],
+        [
+          "af_rev5",
+          24885.1
+        ],
+        [
+          "pre_range168",
+          24497.1
+        ],
+        [
+          "af_vol_of_vol",
+          24130.0
+        ],
+        [
+          "ret_12",
+          23780.7
+        ],
+        [
+          "atr_pct",
+          23740.7
+        ]
+      ]
+    }
+  ],
+  "verdict": "三种目标都没有产生可分辨的提升;最好的是 回归器 · 学 净收益 (+22.48bp,门槛 41.6bp,11/15 正)"
+}
