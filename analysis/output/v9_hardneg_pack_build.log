@@ -1,0 +1,36 @@
+① 定位 owner 金标(避免让你重判已认可的框)…
+   505 个金标 tip,覆盖 237 币
+
+② 扫 20 币 x 800 bar,收集 v9 的开火…
+   [1/20] VIRTUAL_USDT_SWAP    开火 27
+   [2/20] ICX_USDT_SWAP        开火 31
+   [3/20] ZAMA_USDT_SWAP       开火 28
+   [4/20] APE_USDT_SWAP        开火 28
+   [5/20] XLM_USDT_SWAP        开火 35
+   [6/20] ZIL_USDT_SWAP        开火 29
+   [7/20] ACH_USDT_SWAP        开火 22
+   [8/20] VANA_USDT_SWAP       开火 29
+   [10/20] NOT_USDT_SWAP        开火 27
+   [11/20] PENGU_USDT_SWAP      开火 29
+   [12/20] GPS_USDT_SWAP        开火 32
+   [14/20] BCH_USDT_SWAP        开火 30
+   [15/20] ATOM_USDT_SWAP       开火 34
+   [17/20] AEVO_USDT_SWAP       开火 29
+   [18/20] AI_USDT_SWAP         开火 9
+   [19/20] W_USDT_SWAP          开火 29
+   [20/20] LINEA_USDT_SWAP      开火 31
+
+   共 479 个开火(已排除金标附近)
+   conf [0.05,0.15) 有 226 个,取 75
+   conf [0.15,0.25) 有 98 个,取 75
+   conf [0.25,0.35) 有 103 个,取 75
+   conf [0.35,1.01) 有 52 个,取 52
+
+③ 渲染 277 张审阅图…
+
+审阅包已生成:/Users/zhangzc/fable-trading/analysis/output/v9_hardneg_pack
+  277 张   conf 中位 0.237
+
+开始审阅:
+  PYTHONPATH=. .venv/bin/python scripts/serve_short_tip_review.py --pack analysis/output/v9_hardneg_pack --port 8771
+  然后打开 http://127.0.0.1:8771/   K=是形态  D=不是  S=跳过
