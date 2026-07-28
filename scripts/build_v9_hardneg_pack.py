@@ -70,6 +70,11 @@ from scripts.build_star_tip_dataset_v9 import (  # noqa: E402
 WEIGHTS = PROJECT / "runs/detect/runs/detect/owner_short_star_v9/weights/best.pt"
 OUT = PROJECT / "analysis" / "output" / "v9_hardneg_pack"
 HOLDOUT = pd.Timestamp("2026-05-04", tz="UTC")
+# The builder splits train/val at VAL_CUT, so a pack mined from the bars just
+# before holdout lands entirely in val -- which is what happened: all 276 owner
+# reviewed rejections went to validation and the model trained on none of them.
+# Hard negatives have to come from the train side to teach anything.
+VAL_CUT = pd.Timestamp("2026-02-01", tz="UTC")
 FLOOR = 0.05
 BANDS = ((0.05, 0.15), (0.15, 0.25), (0.25, 0.35), (0.35, 1.01))
 GOLD_GUARD_BARS = 30          # a fire this close to a gold tip is not a new case
@@ -112,6 +117,8 @@ def main() -> int:
     ap.add_argument("--n-symbols", type=int, default=40)
     ap.add_argument("--bars", type=int, default=1500, help="bars scanned per symbol")
     ap.add_argument("--device", default="mps")
+    ap.add_argument("--before", default=None,
+                    help="only mine fires before this date (use VAL_CUT for train-side)")
     args = ap.parse_args()
 
     if not WEIGHTS.exists():
@@ -142,15 +149,22 @@ def main() -> int:
         except Exception:  # noqa: BLE001
             continue
         t_all = pd.to_datetime(fr["open_time"], utc=True)
-        fr = fr[t_all < HOLDOUT].reset_index(drop=True)     # iron rule 1
+        cutoff = pd.Timestamp(args.before, tz="UTC") if args.before else HOLDOUT
+        fr = fr[t_all < min(cutoff, HOLDOUT)].reset_index(drop=True)   # iron rule 1
         if len(fr) < WINDOW + 50:
             continue
         times = pd.to_datetime(fr["open_time"], utc=True)
-        lo = max(WINDOW, len(fr) - args.bars)
+        # Scanning the last N bars before the cutoff puts every negative inside one
+        # 10-day window, and the model then learns those ten days rather than the
+        # general "looks like it but is not". Each symbol starts at its own random
+        # offset so the pack spans the whole train period at the same GPU cost.
+        span = len(fr) - WINDOW - args.bars
+        base = WINDOW + (rng.randrange(span) if span > 0 else 0)
+        lo, hi_bar = base, min(len(fr), base + args.bars)
         g = gold.get(sym, [])
         last = -10 ** 9
         n_sym = 0
-        for t in range(lo, len(fr)):
+        for t in range(lo, hi_bar):
             try:
                 _, tform = render_chart(fr.iloc[t - WINDOW + 1:t + 1], out_path=tmp)
                 res = model.predict([str(tmp)], conf=FLOOR, verbose=False,

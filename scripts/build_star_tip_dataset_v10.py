@@ -58,7 +58,8 @@ from scripts.build_crop_pad200_dataset import boxes_cut_and_spans, resolve_win_s
 
 SHEET = PROJECT / "analysis/output/owner_side_review/review_sheet.csv"
 GOLD_PACK = PROJECT / "analysis/output/owner_side_short_tip_v1b_detect1000"
-V9_NEG_PACK = PROJECT / "analysis/output/v9_hardneg_pack"
+V9_NEG_PACK = PROJECT / "analysis/output/v9_hardneg_pack"          # owner-labelled, val side
+V9_NEG_TRAIN = PROJECT / "analysis/output/v9_hardneg_trainside"    # train side, unlabelled
 MAD_MAX = 0.5          # pixel match against the image the owner labelled
 LS_GLOB = str(PROJECT / "output/label_studio/*.json")
 ARCHIVE_ROOTS = [PROJECT / "datasets/_deprecated_pretip/dense_owner_v11/images",
@@ -499,11 +500,25 @@ def main() -> int:
     # v9's own rejected fires: the model's mistakes are the only honest source of
     # hard negatives, and the sampler below cannot produce them (it skips any bar
     # that resembles the pattern).
+    # Two packs, because the split is by time and one pack alone lands entirely on
+    # one side of it. The owner-reviewed pack was mined from the bars just before
+    # holdout, so all 276 of its rejections fall after VAL_CUT and the model would
+    # have trained on none of them -- that is exactly what the first v10 build did.
+    # The train-side pack is mined across 2025-06..2026-01 and is NOT owner
+    # reviewed; it is used as negatives on the measured precision of the detector
+    # that produced it, 0.4% with a 95% upper bound of 2.0%, so the label error
+    # here is bounded and small against 1388 easy negatives that teach nothing.
     n_v9 = 0
+    rows_neg = []
     vp = V9_NEG_PACK / "review_sheet.csv"
     if vp.exists() and not args.limit:
         v = pd.read_csv(vp)
-        v = v[v["owner_keep"].astype(str).str.strip() == "drop"]
+        rows_neg.append(v[v["owner_keep"].astype(str).str.strip() == "drop"])
+    tp = V9_NEG_TRAIN / "review_sheet.csv"
+    if tp.exists() and not args.limit:
+        rows_neg.append(pd.read_csv(tp))
+    v = pd.concat(rows_neg, ignore_index=True) if rows_neg else pd.DataFrame()
+    if len(v):
         for _, r in v.iterrows():
             sym = str(r["symbol"])
             e = ser.get(sym)

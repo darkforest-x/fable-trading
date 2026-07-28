@@ -6,10 +6,36 @@
       "runtimeExecutable": ".venv/bin/uvicorn",
       "runtimeArgs": [
         "src.webapp.server:app",
-        "--host", "127.0.0.1",
-        "--port", "8642"
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8642"
       ],
       "port": 8642
+    },
+    {
+      "name": "gallery",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8773",
+        "--directory",
+        "analysis/output/v9_control_gold_pack"
+      ],
+      "port": 8773
+    },
+    {
+      "name": "audit",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8774",
+        "--directory",
+        "analysis/output/v10_dataset_audit"
+      ],
+      "port": 8774
     }
   ]
 }

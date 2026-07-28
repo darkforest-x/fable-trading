@@ -1,0 +1,49 @@
+① 定位 owner 金标(避免让你重判已认可的框)…
+   505 个金标 tip,覆盖 237 币
+
+② 扫 40 币 x 420 bar,收集 v9 的开火…
+   [1/40] VIRTUAL_USDT_SWAP    开火 17
+   [2/40] ICX_USDT_SWAP        开火 18
+   [3/40] ZAMA_USDT_SWAP       开火 19
+   [4/40] APE_USDT_SWAP        开火 10
+   [5/40] XLM_USDT_SWAP        开火 13
+   [6/40] ZIL_USDT_SWAP        开火 18
+   [7/40] ACH_USDT_SWAP        开火 21
+   [8/40] VANA_USDT_SWAP       开火 12
+   [10/40] NOT_USDT_SWAP        开火 14
+   [11/40] PENGU_USDT_SWAP      开火 17
+   [12/40] GPS_USDT_SWAP        开火 18
+   [14/40] BCH_USDT_SWAP        开火 17
+   [15/40] ATOM_USDT_SWAP       开火 17
+   [17/40] AEVO_USDT_SWAP       开火 12
+   [19/40] W_USDT_SWAP          开火 20
+   [20/40] LINEA_USDT_SWAP      开火 20
+   [21/40] ATH_USDT_SWAP        开火 16
+   [23/40] ADA_USDT_SWAP        开火 15
+   [24/40] RECALL_USDT_SWAP     开火 17
+   [25/40] SOPH_USDT_SWAP       开火 18
+   [26/40] BREV_USDT_SWAP       开火 12
+   [28/40] LDO_USDT_SWAP        开火 15
+   [29/40] ARB_USDT_SWAP        开火 20
+   [30/40] WAL_USDT_SWAP        开火 19
+   [31/40] STX_USDT_SWAP        开火 18
+   [32/40] SIGN_USDT_SWAP       开火 17
+   [33/40] NEAR_USDT_SWAP       开火 15
+   [35/40] AXS_USDT_SWAP        开火 11
+   [38/40] DYDX_USDT_SWAP       开火 12
+   [40/40] AUCTION_USDT_SWAP    开火 10
+
+   共 478 个开火(已排除金标附近)
+   conf [0.05,0.15) 有 242 个,取 100
+   conf [0.15,0.25) 有 96 个,取 96
+   conf [0.25,0.35) 有 89 个,取 89
+   conf [0.35,1.01) 有 51 个,取 51
+
+③ 渲染 336 张审阅图…
+
+审阅包已生成:/Users/zhangzc/fable-trading/analysis/output/v9_hardneg_pack
+  336 张   conf 中位 0.219
+
+开始审阅:
+  PYTHONPATH=. .venv/bin/python scripts/serve_short_tip_review.py --pack analysis/output/v9_hardneg_pack --port 8771
+  然后打开 http://127.0.0.1:8771/   K=是形态  D=不是  S=跳过
