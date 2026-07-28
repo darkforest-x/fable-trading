@@ -101,6 +101,61 @@ def send_photo(image_path: Path, caption: str = "") -> bool:
         return False
 
 
+def send_document(file_path: Path, caption: str = "") -> bool:
+    """Send a local file as a document.
+
+    Reports and appendices run to tens of KB, well past sendMessage's 4096-char
+    ceiling, and splitting a markdown report across a dozen chat bubbles makes it
+    unreadable. sendDocument keeps it one openable file.
+    """
+    creds = _load()
+    if creds is None:
+        print("tg_notify: no config (data/tg_config.json) -- document not sent")
+        return False
+    path = Path(file_path)
+    if not path.exists():
+        print(f"tg_notify: document missing: {path}")
+        return False
+    token, chat_id = creds
+    boundary = f"----fable{uuid.uuid4().hex}"
+    mime = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+    file_bytes = path.read_bytes()
+
+    def part(name: str, value: bytes, filename: str | None = None,
+             content_type: str | None = None) -> bytes:
+        disposition = f'Content-Disposition: form-data; name="{name}"'
+        if filename:
+            disposition += f'; filename="{filename}"'
+        headers = [disposition.encode()]
+        if content_type:
+            headers.append(f"Content-Type: {content_type}".encode())
+        return b"\r\n".join([f"--{boundary}".encode(), *headers, b"", value, b""])
+
+    body = b"".join([
+        part("chat_id", str(chat_id).encode()),
+        part("caption", (caption or "")[:1024].encode("utf-8")),
+        part("parse_mode", b"HTML"),
+        part("document", file_bytes, filename=path.name, content_type=mime),
+        f"--{boundary}--\r\n".encode(),
+    ])
+    req = urllib.request.Request(
+        f"https://api.telegram.org/bot{token}/sendDocument",
+        data=body,
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            return json.loads(resp.read()).get("ok", False)
+    except urllib.error.HTTPError as exc:
+        detail = exc.read()[:300] if hasattr(exc, "read") else b""
+        print(f"tg_notify: sendDocument failed: {exc} {detail!r}")
+        return False
+    except Exception as exc:  # noqa: BLE001
+        print(f"tg_notify: sendDocument failed: {exc}")
+        return False
+
+
 if __name__ == "__main__":
     import sys
     ok = send(sys.argv[1] if len(sys.argv) > 1 else "fable-trading 通知链路测试 ✅")
