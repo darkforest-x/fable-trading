@@ -1,0 +1,66 @@
+{
+  "n_gold": 244,
+  "n_rand": 968,
+  "n_dense": 968,
+  "n_break": 968,
+  "results": [
+    {
+      "variant": "下限对照:金标 vs 随机 bar",
+      "n_train": 819,
+      "n_test": 393,
+      "pos_rate_test": 0.1578,
+      "auc": 0.9886,
+      "ci": [
+        0.9699,
+        1.0073
+      ],
+      "top_features": [
+        "af_boll_pos",
+        "spread_mean24",
+        "spread_chg8",
+        "order_score",
+        "af_vwap_dev",
+        "ret_12"
+      ]
+    },
+    {
+      "variant": "中间对照:金标 vs 机械密集 bar",
+      "n_train": 748,
+      "n_test": 464,
+      "pos_rate_test": 0.1336,
+      "auc": 0.9989,
+      "ci": [
+        0.9931,
+        1.0047
+      ],
+      "top_features": [
+        "ma_spread_pct",
+        "spread_chg8",
+        "full_spread",
+        "close_vs_ema55",
+        "spread_pos96",
+        "order_score"
+      ]
+    },
+    {
+      "variant": "真问题:金标 vs 同门 bar(密集+跌破)",
+      "n_train": 731,
+      "n_test": 481,
+      "pos_rate_test": 0.1289,
+      "auc": 0.9938,
+      "ci": [
+        0.9801,
+        1.0076
+      ],
+      "top_features": [
+        "ma_spread_pct",
+        "spread_chg8",
+        "full_spread",
+        "spread_pos96",
+        "af_ma_bandwidth_pct",
+        "spread_chg24"
+      ]
+    }
+  ],
+  "verdict": "AUC 0.994,CI [0.980, 1.008] —— 因果窗口里确实有可学信息,继续修检测器是对的方向"
+}

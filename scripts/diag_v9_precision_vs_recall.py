@@ -57,7 +57,8 @@ from scripts.build_star_tip_dataset_v9 import (  # noqa: E402
     archive_index, load_star_boxes, star_side, symbol_of,
 )
 
-WEIGHTS = PROJECT / "runs/detect/runs/detect/owner_short_star_v9/weights/best.pt"
+DEFAULT_WEIGHTS = PROJECT / "runs/detect/runs/detect/owner_short_star_v9/weights/best.pt"
+WEIGHTS = DEFAULT_WEIGHTS          # overridden by --weights
 FLOOR = 0.01                       # scan far below anything usable
 GRID = (0.01, 0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90)
 DENSITY_SYMBOLS = 12               # symbols used to measure fire density
@@ -171,6 +172,14 @@ def fire_confidences(model) -> tuple[list[float], int, int]:
 
 
 def main() -> int:
+    global WEIGHTS
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--weights", default=None)
+    ap.add_argument("--tag", default=None, help="suffix for the output json")
+    a = ap.parse_args()
+    if a.weights:
+        WEIGHTS = Path(a.weights)
     if not WEIGHTS.exists():
         print(f"权重缺失: {WEIGHTS}")
         return 2
@@ -234,7 +243,8 @@ def main() -> int:
     print(f"\n判读: {verdict}")
     print("注:门槛与 promote 属 owner 决策,本脚本只测不改。")
 
-    (PROJECT / "analysis" / "output" / "diag_v9_precision_vs_recall.json").write_text(
+    (PROJECT / "analysis" / "output" /
+     f"diag_precision_vs_recall_{a.tag or WEIGHTS.parent.parent.name}.json").write_text(
         json.dumps({"weights": WEIGHTS.name, "n_gold": len(gold),
                     "n_fires": len(fires), "symbol_months": round(months, 3),
                     "owner_density": OWNER_DENSITY, "auc_gold_vs_fires": auc,
