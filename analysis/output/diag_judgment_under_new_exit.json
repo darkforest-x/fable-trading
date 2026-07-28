@@ -1,0 +1,176 @@
+{
+  "pool": "judgment_yolo_short_v6_wide.csv",
+  "model": "frozen_tp5_sl2_swap_yolo_v11_reg_20260718.txt",
+  "n": 5802,
+  "pool_net": {
+    "barrier": 0.000312,
+    "hold": 0.002645
+  },
+  "deciles": [
+    {
+      "decile": 0,
+      "n": 582,
+      "barrier_net": 0.000975,
+      "barrier_win": 0.3436,
+      "barrier_ci": [
+        0.3062,
+        0.3831
+      ],
+      "hold_net": 0.006384,
+      "hold_win": 0.5241,
+      "hold_ci": [
+        0.4835,
+        0.5643
+      ]
+    },
+    {
+      "decile": 1,
+      "n": 579,
+      "barrier_net": 0.000996,
+      "barrier_win": 0.3351,
+      "barrier_ci": [
+        0.2978,
+        0.3745
+      ],
+      "hold_net": 0.00582,
+      "hold_win": 0.5527,
+      "hold_ci": [
+        0.512,
+        0.5927
+      ]
+    },
+    {
+      "decile": 2,
+      "n": 580,
+      "barrier_net": -0.000253,
+      "barrier_win": 0.3017,
+      "barrier_ci": [
+        0.2658,
+        0.3403
+      ],
+      "hold_net": 0.002011,
+      "hold_win": 0.4948,
+      "hold_ci": [
+        0.4543,
+        0.5354
+      ]
+    },
+    {
+      "decile": 3,
+      "n": 580,
+      "barrier_net": 0.00017,
+      "barrier_win": 0.3224,
+      "barrier_ci": [
+        0.2857,
+        0.3615
+      ],
+      "hold_net": 0.001241,
+      "hold_win": 0.4966,
+      "hold_ci": [
+        0.456,
+        0.5371
+      ]
+    },
+    {
+      "decile": 4,
+      "n": 580,
+      "barrier_net": 0.000827,
+      "barrier_win": 0.3483,
+      "barrier_ci": [
+        0.3106,
+        0.3879
+      ],
+      "hold_net": 0.003384,
+      "hold_win": 0.5431,
+      "hold_ci": [
+        0.5024,
+        0.5832
+      ]
+    },
+    {
+      "decile": 5,
+      "n": 580,
+      "barrier_net": 0.001206,
+      "barrier_win": 0.3603,
+      "barrier_ci": [
+        0.3223,
+        0.4002
+      ],
+      "hold_net": 0.001188,
+      "hold_win": 0.5224,
+      "hold_ci": [
+        0.4817,
+        0.5628
+      ]
+    },
+    {
+      "decile": 6,
+      "n": 581,
+      "barrier_net": 0.001651,
+      "barrier_win": 0.358,
+      "barrier_ci": [
+        0.3201,
+        0.3978
+      ],
+      "hold_net": 0.002547,
+      "hold_win": 0.5404,
+      "hold_ci": [
+        0.4998,
+        0.5806
+      ]
+    },
+    {
+      "decile": 7,
+      "n": 579,
+      "barrier_net": -0.000277,
+      "barrier_win": 0.3282,
+      "barrier_ci": [
+        0.2911,
+        0.3674
+      ],
+      "hold_net": 0.002564,
+      "hold_win": 0.532,
+      "hold_ci": [
+        0.4912,
+        0.5723
+      ]
+    },
+    {
+      "decile": 8,
+      "n": 580,
+      "barrier_net": 0.000807,
+      "barrier_win": 0.3466,
+      "barrier_ci": [
+        0.3089,
+        0.3862
+      ],
+      "hold_net": 0.001385,
+      "hold_win": 0.5052,
+      "hold_ci": [
+        0.4646,
+        0.5457
+      ]
+    },
+    {
+      "decile": 9,
+      "n": 581,
+      "barrier_net": -0.002979,
+      "barrier_win": 0.3236,
+      "barrier_ci": [
+        0.2868,
+        0.3627
+      ],
+      "hold_net": -7.4e-05,
+      "hold_win": 0.4768,
+      "hold_ci": [
+        0.4364,
+        0.5174
+      ]
+    }
+  ],
+  "top_lift_bp": {
+    "barrier": -32.91,
+    "hold": -27.19
+  },
+  "verdict": "判断层顶档在两种出场下都不优于全池(-32.91bp / -27.19bp)→ 该模型对本池没有选择力"
+}

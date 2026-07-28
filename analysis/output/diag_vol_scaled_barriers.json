@@ -1,0 +1,313 @@
+{
+  "pool": "judgment_yolo_short_v6_wide.csv",
+  "n": 5802,
+  "ewm_span": 32,
+  "low_atr_cut": 0.00499114482715142,
+  "results": [
+    {
+      "variant": "baseline ATR14 5:2",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.2734,
+        "timeout_share": 0.0834,
+        "gross_pf": 1.141,
+        "gross_bp": 13.12,
+        "net_taker": 0.000312
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.2734,
+        "timeout_share": 0.0333,
+        "gross_pf": 1.029,
+        "gross_bp": 1.55,
+        "net_taker": -0.000845
+      }
+    },
+    {
+      "variant": "sigma=ewm 5:2",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.309,
+        "timeout_share": 0.0181,
+        "gross_pf": 1.164,
+        "gross_bp": 10.78,
+        "net_taker": 7.8e-05
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.2872,
+        "timeout_share": 0.0034,
+        "gross_pf": 1.039,
+        "gross_bp": 1.48,
+        "net_taker": -0.000852
+      }
+    },
+    {
+      "variant": "sigma=parkinson 5:2",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.3116,
+        "timeout_share": 0.0148,
+        "gross_pf": 1.147,
+        "gross_bp": 9.46,
+        "net_taker": -5.4e-05
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.2906,
+        "timeout_share": 0.0052,
+        "gross_pf": 1.047,
+        "gross_bp": 1.69,
+        "net_taker": -0.000831
+      }
+    },
+    {
+      "variant": "sigma=yang_zhang 5:2",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.3145,
+        "timeout_share": 0.016,
+        "gross_pf": 1.164,
+        "gross_bp": 10.66,
+        "net_taker": 6.6e-05
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.2941,
+        "timeout_share": 0.0057,
+        "gross_pf": 1.086,
+        "gross_bp": 3.13,
+        "net_taker": -0.000687
+      }
+    },
+    {
+      "variant": "ATR14 + 止损下限 0.4%",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.2735,
+        "timeout_share": 0.0834,
+        "gross_pf": 1.142,
+        "gross_bp": 13.14,
+        "net_taker": 0.000314
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.274,
+        "timeout_share": 0.0333,
+        "gross_pf": 1.03,
+        "gross_bp": 1.61,
+        "net_taker": -0.000839
+      }
+    },
+    {
+      "variant": "ATR14 + 止损下限 0.6%",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.274,
+        "timeout_share": 0.0845,
+        "gross_pf": 1.143,
+        "gross_bp": 13.31,
+        "net_taker": 0.000331
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.2757,
+        "timeout_share": 0.0368,
+        "gross_pf": 1.04,
+        "gross_bp": 2.19,
+        "net_taker": -0.000781
+      }
+    },
+    {
+      "variant": "ATR14 + 止损下限 0.8%",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.2711,
+        "timeout_share": 0.0919,
+        "gross_pf": 1.145,
+        "gross_bp": 13.59,
+        "net_taker": 0.000359
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.2659,
+        "timeout_share": 0.0615,
+        "gross_pf": 1.054,
+        "gross_bp": 3.12,
+        "net_taker": -0.000688
+      }
+    },
+    {
+      "variant": "ATR14 + 止损下限 1.2%",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.2578,
+        "timeout_share": 0.1291,
+        "gross_pf": 1.17,
+        "gross_bp": 16.94,
+        "net_taker": 0.000694
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.2298,
+        "timeout_share": 0.1666,
+        "gross_pf": 1.176,
+        "gross_bp": 13.01,
+        "net_taker": 0.000301
+      }
+    },
+    {
+      "variant": "ATR14 + 止损下限 1.6%",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.213,
+        "timeout_share": 0.2151,
+        "gross_pf": 1.16,
+        "gross_bp": 17.37,
+        "net_taker": 0.000737
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.1493,
+        "timeout_share": 0.3234,
+        "gross_pf": 1.131,
+        "gross_bp": 11.56,
+        "net_taker": 0.000156
+      }
+    },
+    {
+      "variant": "ATR14 + 止损下限 2.0%",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.1608,
+        "timeout_share": 0.324,
+        "gross_pf": 1.151,
+        "gross_bp": 17.62,
+        "net_taker": 0.000762
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.0833,
+        "timeout_share": 0.4808,
+        "gross_pf": 1.133,
+        "gross_bp": 12.63,
+        "net_taker": 0.000263
+      }
+    },
+    {
+      "variant": "ATR14 + 止损下限 2.5%",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.1124,
+        "timeout_share": 0.4474,
+        "gross_pf": 1.144,
+        "gross_bp": 18.07,
+        "net_taker": 0.000807
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.0408,
+        "timeout_share": 0.6146,
+        "gross_pf": 1.097,
+        "gross_bp": 9.84,
+        "net_taker": -1.6e-05
+      }
+    },
+    {
+      "variant": "ATR14 + 止损下限 3.0%",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.0767,
+        "timeout_share": 0.5495,
+        "gross_pf": 1.142,
+        "gross_bp": 18.7,
+        "net_taker": 0.00087
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.0218,
+        "timeout_share": 0.7065,
+        "gross_pf": 1.094,
+        "gross_bp": 9.89,
+        "net_taker": -1.1e-05
+      }
+    },
+    {
+      "variant": "ATR14 + 止损下限 4.0%",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.0424,
+        "timeout_share": 0.6963,
+        "gross_pf": 1.168,
+        "gross_bp": 23.36,
+        "net_taker": 0.001336
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.0144,
+        "timeout_share": 0.834,
+        "gross_pf": 1.164,
+        "gross_bp": 17.2,
+        "net_taker": 0.00072
+      }
+    },
+    {
+      "variant": "对照: 无障碍纯持72根",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.0,
+        "timeout_share": 1.0,
+        "gross_pf": 1.255,
+        "gross_bp": 36.45,
+        "net_taker": 0.002645
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.0,
+        "timeout_share": 1.0,
+        "gross_pf": 1.263,
+        "gross_bp": 27.48,
+        "net_taker": 0.001748
+      }
+    },
+    {
+      "variant": "对照: 只止盈无止损",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.4135,
+        "timeout_share": 0.5865,
+        "gross_pf": 1.206,
+        "gross_bp": 27.11,
+        "net_taker": 0.001711
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.4871,
+        "timeout_share": 0.5129,
+        "gross_pf": 1.094,
+        "gross_bp": 8.64,
+        "net_taker": -0.000136
+      }
+    },
+    {
+      "variant": "对照: 只止损无止盈",
+      "all": {
+        "n": 5802,
+        "tp_share": 0.0,
+        "timeout_share": 0.3132,
+        "gross_pf": 1.179,
+        "gross_bp": 17.56,
+        "net_taker": 0.000756
+      },
+      "low_atr": {
+        "n": 1741,
+        "tp_share": 0.0,
+        "timeout_share": 0.2407,
+        "gross_pf": 1.095,
+        "gross_bp": 5.6,
+        "net_taker": -0.00044
+      }
+    }
+  ],
+  "verdict": "净最高:对照: 无障碍纯持72根,+0.2645% vs 基线 +0.0312%;但 TP率从 27.3% 塌到 0.0%,超时率 100.0% —— 障碍基本不再触发,这是换了策略而非改进出场,须与「无障碍纯持72根」对照读"
+}

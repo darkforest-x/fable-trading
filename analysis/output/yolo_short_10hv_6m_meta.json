@@ -1,0 +1,239 @@
+{
+  "pilot": "10hv_6m",
+  "packed_vars": [
+    "time_window_6m_pre_holdout",
+    "high_vol_symbol_select"
+  ],
+  "note": "Owner-approved packed pilot; NOT a change to default full-universe scan.",
+  "signal_time_lo": "2025-11-04 00:00:00+00:00",
+  "signal_time_hi": "2026-05-04 00:00:00+00:00",
+  "holdout_start": "2026-05-04T00:00:00+00:00",
+  "vol_metric": "std of daily close returns in window",
+  "vol_secondary": "median ATR% (15m, ewm14) in window — reported, not rank key",
+  "filters": {
+    "min_daily": 60,
+    "max_daily_std": 0.35,
+    "max_atr_pct_med": 0.15,
+    "min_bars_in_window": 500,
+    "exclude_stockish": true
+  },
+  "universe_scored": 251,
+  "universe_skipped": 93,
+  "top10": [
+    {
+      "symbol": "RAVE_USDT_SWAP",
+      "n_bars": 13408,
+      "n_days": 140,
+      "daily_ret_std": 0.322782,
+      "atr_pct_med": 0.012585,
+      "range_amp": 76.7464,
+      "t0": "2025-12-15 08:00:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "LIGHT_USDT_SWAP",
+      "n_bars": 13312,
+      "n_days": 139,
+      "daily_ret_std": 0.26944,
+      "atr_pct_med": 0.010969,
+      "range_amp": 19.9927,
+      "t0": "2025-12-16 08:00:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "TRUST_USDT_SWAP",
+      "n_bars": 17234,
+      "n_days": 180,
+      "daily_ret_std": 0.189853,
+      "atr_pct_med": 0.007105,
+      "range_amp": 5.1797,
+      "t0": "2025-11-05 11:30:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "PIPPIN_USDT_SWAP",
+      "n_bars": 14628,
+      "n_days": 153,
+      "daily_ret_std": 0.175091,
+      "atr_pct_med": 0.018602,
+      "range_amp": 2.7301,
+      "t0": "2025-12-02 15:00:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "RLS_USDT_SWAP",
+      "n_bars": 14627,
+      "n_days": 153,
+      "daily_ret_std": 0.161927,
+      "atr_pct_med": 0.008937,
+      "range_amp": 5.9793,
+      "t0": "2025-12-02 15:15:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "RIVER_USDT_SWAP",
+      "n_bars": 11012,
+      "n_days": 115,
+      "daily_ret_std": 0.16174,
+      "atr_pct_med": 0.022318,
+      "range_amp": 5.8707,
+      "t0": "2026-01-09 07:00:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "BEAT_USDT_SWAP",
+      "n_bars": 16543,
+      "n_days": 173,
+      "daily_ret_std": 0.15435,
+      "atr_pct_med": 0.018596,
+      "range_amp": 9.8115,
+      "t0": "2025-11-12 16:15:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "KAT_USDT_SWAP",
+      "n_bars": 6002,
+      "n_days": 63,
+      "daily_ret_std": 0.153595,
+      "atr_pct_med": 0.012281,
+      "range_amp": 1.9095,
+      "t0": "2026-03-02 11:30:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "SPACE_USDT_SWAP",
+      "n_bars": 9644,
+      "n_days": 101,
+      "daily_ret_std": 0.14513,
+      "atr_pct_med": 0.012499,
+      "range_amp": 2.67,
+      "t0": "2026-01-23 13:00:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "TRUTH_USDT_SWAP",
+      "n_bars": 15026,
+      "n_days": 157,
+      "daily_ret_std": 0.143378,
+      "atr_pct_med": 0.010028,
+      "range_amp": 1.6986,
+      "t0": "2025-11-28 11:30:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    }
+  ],
+  "top10_symbols": [
+    "RAVE_USDT_SWAP",
+    "LIGHT_USDT_SWAP",
+    "TRUST_USDT_SWAP",
+    "PIPPIN_USDT_SWAP",
+    "RLS_USDT_SWAP",
+    "RIVER_USDT_SWAP",
+    "BEAT_USDT_SWAP",
+    "KAT_USDT_SWAP",
+    "SPACE_USDT_SWAP",
+    "TRUTH_USDT_SWAP"
+  ],
+  "runner_ups": [
+    {
+      "symbol": "PIEVERSE_USDT_SWAP",
+      "n_bars": 16210,
+      "n_days": 169,
+      "daily_ret_std": 0.142075,
+      "atr_pct_med": 0.011486,
+      "range_amp": 2.7585,
+      "t0": "2025-11-16 03:30:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "H_USDT_SWAP",
+      "n_bars": 17376,
+      "n_days": 181,
+      "daily_ret_std": 0.138693,
+      "atr_pct_med": 0.012095,
+      "range_amp": 2.0696,
+      "t0": "2025-11-04 00:00:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "GIGGLE_USDT_SWAP",
+      "n_bars": 17376,
+      "n_days": 181,
+      "daily_ret_std": 0.136332,
+      "atr_pct_med": 0.009008,
+      "range_amp": 5.9204,
+      "t0": "2025-11-04 00:00:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "ORDI_USDT_SWAP",
+      "n_bars": 17376,
+      "n_days": 181,
+      "daily_ret_std": 0.134025,
+      "atr_pct_med": 0.00694,
+      "range_amp": 2.0921,
+      "t0": "2025-11-04 00:00:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "ENSO_USDT_SWAP",
+      "n_bars": 17376,
+      "n_days": 181,
+      "daily_ret_std": 0.129196,
+      "atr_pct_med": 0.007668,
+      "range_amp": 2.76,
+      "t0": "2025-11-04 00:00:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "MERL_USDT_SWAP",
+      "n_bars": 17376,
+      "n_days": 181,
+      "daily_ret_std": 0.128727,
+      "atr_pct_med": 0.009899,
+      "range_amp": 8.1091,
+      "t0": "2025-11-04 00:00:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "SOON_USDT_SWAP",
+      "n_bars": 17376,
+      "n_days": 181,
+      "daily_ret_std": 0.127977,
+      "atr_pct_med": 0.008385,
+      "range_amp": 22.6019,
+      "t0": "2025-11-04 00:00:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "ESP_USDT_SWAP",
+      "n_bars": 7904,
+      "n_days": 83,
+      "daily_ret_std": 0.123238,
+      "atr_pct_med": 0.006946,
+      "range_amp": 1.7202,
+      "t0": "2026-02-10 16:00:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "LAB_USDT_SWAP",
+      "n_bars": 17376,
+      "n_days": 181,
+      "daily_ret_std": 0.118289,
+      "atr_pct_med": 0.012054,
+      "range_amp": 21.9692,
+      "t0": "2025-11-04 00:00:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    },
+    {
+      "symbol": "TRIA_USDT_SWAP",
+      "n_bars": 8418,
+      "n_days": 88,
+      "daily_ret_std": 0.110347,
+      "atr_pct_med": 0.018255,
+      "range_amp": 1.4337,
+      "t0": "2026-02-05 07:30:00+00:00",
+      "t1": "2026-05-03 23:45:00+00:00"
+    }
+  ],
+  "symbols_file": "analysis/output/yolo_short_10hv_6m_symbols.txt"
+}

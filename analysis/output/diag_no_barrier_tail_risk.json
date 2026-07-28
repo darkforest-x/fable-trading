@@ -1,0 +1,140 @@
+{
+  "pool": "judgment_yolo_short_v6_wide.csv",
+  "n": 5802,
+  "horizon": 72,
+  "results": [
+    {
+      "variant": "现行 TP5/SL2",
+      "n": 5802,
+      "mean_net": 0.000312,
+      "pf": 1.031,
+      "worst": -0.2056,
+      "p01": -0.0402,
+      "p05": -0.0259,
+      "share_lt_-10pct": 0.0009,
+      "share_lt_-20pct": 0.0002,
+      "mae_p95": 0.0339,
+      "mae_worst": 0.3443,
+      "equity": [
+        {
+          "frac": 0.02,
+          "final": 1.0361,
+          "max_dd": 0.0962,
+          "ruined": false
+        },
+        {
+          "frac": 0.05,
+          "final": 1.0897,
+          "max_dd": 0.2238,
+          "ruined": false
+        },
+        {
+          "frac": 0.1,
+          "final": 1.1765,
+          "max_dd": 0.3985,
+          "ruined": false
+        }
+      ]
+    },
+    {
+      "variant": "只止盈无止损",
+      "n": 5802,
+      "mean_net": 0.001711,
+      "pf": 1.126,
+      "worst": -0.3751,
+      "p01": -0.1218,
+      "p05": -0.0637,
+      "share_lt_-10pct": 0.015,
+      "share_lt_-20pct": 0.0022,
+      "mae_p95": 0.0964,
+      "mae_worst": 0.8569,
+      "equity": [
+        {
+          "frac": 0.02,
+          "final": 1.2175,
+          "max_dd": 0.1067,
+          "ruined": false
+        },
+        {
+          "frac": 0.05,
+          "final": 1.625,
+          "max_dd": 0.2463,
+          "ruined": false
+        },
+        {
+          "frac": 0.1,
+          "final": 2.5838,
+          "max_dd": 0.4332,
+          "ruined": false
+        }
+      ]
+    },
+    {
+      "variant": "只止损无止盈",
+      "n": 5802,
+      "mean_net": 0.000756,
+      "pf": 1.072,
+      "worst": -0.2056,
+      "p01": -0.0403,
+      "p05": -0.026,
+      "share_lt_-10pct": 0.0009,
+      "share_lt_-20pct": 0.0002,
+      "mae_p95": 0.0345,
+      "mae_worst": 0.3443,
+      "equity": [
+        {
+          "frac": 0.02,
+          "final": 1.0902,
+          "max_dd": 0.116,
+          "ruined": false
+        },
+        {
+          "frac": 0.05,
+          "final": 1.2349,
+          "max_dd": 0.2657,
+          "ruined": false
+        },
+        {
+          "frac": 0.1,
+          "final": 1.4999,
+          "max_dd": 0.462,
+          "ruined": false
+        }
+      ]
+    },
+    {
+      "variant": "无障碍持72根",
+      "n": 5802,
+      "mean_net": 0.002645,
+      "pf": 1.179,
+      "worst": -0.3751,
+      "p01": -0.1259,
+      "p05": -0.0663,
+      "share_lt_-10pct": 0.0172,
+      "share_lt_-20pct": 0.0024,
+      "mae_p95": 0.1,
+      "mae_worst": 0.8569,
+      "equity": [
+        {
+          "frac": 0.02,
+          "final": 1.3556,
+          "max_dd": 0.1258,
+          "ruined": false
+        },
+        {
+          "frac": 0.05,
+          "final": 2.1183,
+          "max_dd": 0.2867,
+          "ruined": false
+        },
+        {
+          "frac": 0.1,
+          "final": 4.3398,
+          "max_dd": 0.4939,
+          "ruined": false
+        }
+      ]
+    }
+  ],
+  "verdict": "无障碍均值 +0.2645% 是现行的 8.5 倍,代价是最差单笔 -37.5%(现行 -20.6%)、1.72% 的单子亏超 10%。止损买的是尾部,不是收益。"
+}

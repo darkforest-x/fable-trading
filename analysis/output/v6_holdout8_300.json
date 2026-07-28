@@ -1,0 +1,42 @@
+{
+  "tag": "v6_holdout8_300",
+  "weights": "runs/detect/runs/detect/owner_short_star_v6/weights/best.pt",
+  "side": "short",
+  "window": [
+    "2026-06-01 00:00:00+00:00",
+    "2026-07-16 00:00:00+00:00"
+  ],
+  "n_symbols": 12,
+  "n_fired": 3320,
+  "n_trades": 793,
+  "barriers": "TP5.0/SL2.0/72bar",
+  "gross_mean": 0.00174,
+  "gross_PF": 1.288,
+  "win_rate": 0.3001,
+  "by_cost": [
+    {
+      "cost_name": "SWAP_MAKER 0.06% (executor 拿不到)",
+      "cost": 0.0006,
+      "net_mean": 0.00114,
+      "PF": 1.178
+    },
+    {
+      "cost_name": "SWAP_TAKER 0.10% (真实路由地板)",
+      "cost": 0.001,
+      "net_mean": 0.00074,
+      "PF": 1.111
+    },
+    {
+      "cost_name": "taker+0.05% 滑点 = 0.15%",
+      "cost": 0.0015,
+      "net_mean": 0.00024,
+      "PF": 1.035
+    },
+    {
+      "cost_name": "LEGACY 0.20% (标注:不用于决策)",
+      "cost": 0.002,
+      "net_mean": -0.00026,
+      "PF": 0.965
+    }
+  ]
+}

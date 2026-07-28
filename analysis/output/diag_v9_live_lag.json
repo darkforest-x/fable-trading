@@ -1,0 +1,36 @@
+{
+  "gate_min": 30.0,
+  "pulse_min": 15.0,
+  "universe": 220,
+  "models": {
+    "v11 (产生542分钟那个)": {
+      "n_fired": 2,
+      "n_symbols": 40,
+      "box_offset_bars": {
+        "p10": 0.2,
+        "p50": 1.0,
+        "p90": 1.8,
+        "max": 2
+      },
+      "box_age_min": 15.0,
+      "scan_full_min": 1.5,
+      "end_to_end_min": 39.0,
+      "passes_gate": false
+    },
+    "v9 (今天训的)": {
+      "n_fired": 10,
+      "n_symbols": 40,
+      "box_offset_bars": {
+        "p10": 0.0,
+        "p50": 1.0,
+        "p90": 1.0,
+        "max": 1
+      },
+      "box_age_min": 15.0,
+      "scan_full_min": 1.56,
+      "end_to_end_min": 39.1,
+      "passes_gate": false
+    }
+  },
+  "verdict": "v9 端到端 39.1 分钟,仍超 30 分钟门 → 换 v9 后 live 能产出可交易信号"
+}
