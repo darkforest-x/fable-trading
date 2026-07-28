@@ -55,12 +55,21 @@ def fetch_symbol(symbol: str) -> int:
 
 
 def main() -> int:
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__)
+    # the default list predates the judgment pools, so coverage sat at 38% of the
+    # 100 symbols they contain; --symbols lets a pool drive what gets fetched
+    ap.add_argument("--symbols", nargs="*", default=None)
+    ap.add_argument("--refetch", action="store_true",
+                    help="re-pull symbols that already have a file")
+    args = ap.parse_args()
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+    src_syms = args.symbols if args.symbols else DEFAULT_SYMBOLS
     swaps = sorted({s if s.endswith("_SWAP") else s.replace("_USDT", "_USDT_SWAP")
-                    for s in DEFAULT_SYMBOLS})
+                    for s in src_syms})
     total = 0
     for n, symbol in enumerate(swaps, 1):
-        if (OUT_DIR / f"{symbol}.csv").exists():
+        if (OUT_DIR / f"{symbol}.csv").exists() and not args.refetch:
             continue
         got = fetch_symbol(symbol)
         total += got
