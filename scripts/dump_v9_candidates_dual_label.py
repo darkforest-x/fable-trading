@@ -129,7 +129,8 @@ def fire_bars(ema, model, device, lo: int, hi: int, conf: float,
         if not paths:
             continue
         try:
-            res = model.predict(paths, conf=conf, verbose=False, device=device)
+            res = model.predict(paths, conf=conf, verbose=False, device=device,
+                                half=(device not in ("cpu", None)))
         except Exception:  # noqa: BLE001
             continue
         for (t, tf), r in zip(tfs, res):
@@ -203,6 +204,7 @@ def main() -> int:
             continue
         feats = extract_feature_rows(featured, fires)
         n_ok = 0
+        sym_rows = []
         for pos, i in enumerate(fires):
             lab = both_labels(enriched, i)
             if lab is None:
@@ -213,10 +215,14 @@ def main() -> int:
                         "signal_time": str(pd.to_datetime(
                             enriched["open_time"], utc=True).iloc[i])})
             row.update(lab)
-            rows.append(row)
+            rows.append(row); sym_rows.append(row)
             n_ok += 1
+        if sym_rows:
+            out = PROJECT / args.out
+            pd.DataFrame(sym_rows).to_csv(
+                out, mode="a", header=not out.exists(), index=False)
         print(f"[{k}/{len(chosen)}] {symbol}: fires={len(fires)} kept={n_ok} "
-              f"({(time.perf_counter()-t0)/60:.1f}min)", flush=True)
+              f"total={len(rows)} ({(time.perf_counter()-t0)/60:.1f}min)", flush=True)
 
     for p in tmp_dir.glob("*.png"):
         p.unlink(missing_ok=True)
@@ -224,8 +230,7 @@ def main() -> int:
         print("no rows produced")
         return 1
     out = PROJECT / args.out
-    df = pd.DataFrame(rows)
-    df.to_csv(out, index=False)
+    df = pd.read_csv(out) if out.exists() else pd.DataFrame(rows)
     print(f"\nwrote {len(df)} rows -> {out}   ({(time.perf_counter()-t0)/60:.1f} min)")
     print(f"  positive rate  barrier={df['label_barrier'].mean():.3f}  "
           f"hold={df['label_hold'].mean():.3f}")
