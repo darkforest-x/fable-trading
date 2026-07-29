@@ -54,6 +54,16 @@ SEED = 20260729
 
 
 def main() -> int:
+    import argparse
+    _ap = argparse.ArgumentParser(description=__doc__)
+    _ap.add_argument("--pool", default=None,
+                     help="candidate pool CSV; defaults to the tip_v1b 100x6m pool")
+    _ap.add_argument("--tag", default=None, help="suffix for the output json")
+    _a = _ap.parse_args()
+    global POOL
+    if _a.pool:
+        POOL = Path(_a.pool) if Path(_a.pool).is_absolute() else PROJECT / _a.pool
+
     import lightgbm as lgb
 
     d = pd.read_csv(POOL)
@@ -164,7 +174,8 @@ def main() -> int:
     print(f"\n判读: {verdict}")
     print("注:训练池内,CPCV,未碰 holdout;此脚本只解释差异来源,不产生新结论。")
 
-    (PROJECT / "analysis" / "output" / "diag_why_lift_jumped.json").write_text(
+    (PROJECT / "analysis" / "output" /
+     f"diag_why_lift_jumped{'_'+_a.tag if _a.tag else ''}.json").write_text(
         json.dumps({"pool": POOL.name, "n_total": len(d), "n_dropped": n_drop,
                     "grid": rows, "delta_target_bp": round(d_target, 2),
                     "delta_filter_bp": round(d_filter, 2), "verdict": verdict},

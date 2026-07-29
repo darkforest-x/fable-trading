@@ -149,6 +149,16 @@ def run_one(ind, ma_hi_all, i: int) -> dict[str, float] | None:
 
 
 def main() -> int:
+    import argparse
+    _ap = argparse.ArgumentParser(description=__doc__)
+    _ap.add_argument("--pool", default=None,
+                     help="candidate pool CSV; defaults to the tip_v1b 100x6m pool")
+    _ap.add_argument("--tag", default=None, help="suffix for the output json")
+    _a = _ap.parse_args()
+    global POOL
+    if _a.pool:
+        POOL = Path(_a.pool) if Path(_a.pool).is_absolute() else PROJECT / _a.pool
+
     d = pd.read_csv(POOL)
     d["t"] = pd.to_datetime(d["signal_time"], utc=True)
     d = d[d["t"] < HOLDOUT].reset_index(drop=True)
@@ -261,7 +271,8 @@ def main() -> int:
     print("注:基线与池中 realized_ret 有 0.026% 中位偏差(原因未查明),"
           "故只做九种之间横比,不与历史数字对照。")
 
-    (PROJECT / "analysis" / "output" / "diag_nine_exits_matched.json").write_text(
+    (PROJECT / "analysis" / "output" /
+     f"diag_nine_exits_matched{'_'+_a.tag if _a.tag else ''}.json").write_text(
         json.dumps({"pool": POOL.name, "n_candidates": len(R), "n_control": len(C),
                     "n_control_per": N_CONTROL, "atr_buckets": ATR_BUCKETS,
                     "results": rows, "verdict": verdict},
