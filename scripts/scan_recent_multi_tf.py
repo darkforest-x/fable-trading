@@ -1,9 +1,9 @@
-"""Run v9 over the last N hours of BTC/ETH at 15m, 5m and 3m, and chart each fire.
+"""Run the current detector over the last N hours of BTC/ETH at 15m, 5m and 3m, and chart each fire.
 
 The owner asked to see the current detector working on fresh data across three
 timeframes. Two things have to be said plainly rather than buried in the output.
 
-v9 IS A 15m MODEL. It was trained only on 15m renders of the owner's short gold
+IT IS A 15m MODEL. It was trained only on 15m renders of the owner's short gold
 tips, and every constant downstream of it is calibrated for that bar: the MA set
 (20/60/120), ATR14, the 5xATR/2xATR barriers and the 72-bar horizon. Running it
 on 5m and 3m is out-of-distribution inference. The 5m/3m panels are worth looking
@@ -55,8 +55,12 @@ from src.judgment.yolo_candidates import (  # noqa: E402
 from scripts.live_signal_tg import L, MA_STYLE  # noqa: E402  (font-aware labels)
 
 DATA_DIR = PROJECT / "analysis" / "output" / "btc_eth_scan"
-OUT_DIR = PROJECT / "analysis" / "output" / "btc_eth_signals"
+MODEL_TAG = "v10"
+OUT_DIR = PROJECT / "analysis" / "output" / "btc_eth_signals_v10"
+# v10 first: v9's precision on non-gold fires was 0.4% (owner reviewed 277,
+# rejected 276), so anything it draws is not evidence of anything.
 WEIGHT_CANDIDATES = (
+    PROJECT / "runs/detect/runs/detect/owner_short_star_v10/weights/best.pt",
     PROJECT / "runs/detect/runs/detect/owner_short_star_v9/weights/best.pt",
     PROJECT / "models" / "owner_short_star_v9.pt",
 )
@@ -139,7 +143,7 @@ def draw(ind, sym: str, tf: str, sig_i: int, box: tuple, conf: float,
         pad = (ye - ys) * 0.06
         ax.add_patch(Rectangle((xs, ys - pad), max(xe - xs, w), ye - ys + 2 * pad,
                                fill=False, edgecolor="#d32f2f", lw=2.2, zorder=6))
-        ax.text(xs, ye + pad, f" v9 conf {conf:.2f}", fontsize=9,
+        ax.text(xs, ye + pad, f" {MODEL_TAG} conf {conf:.2f}", fontsize=9,
                 color="#d32f2f", va="bottom")
 
     xsig = x[sig_i - lo_i]

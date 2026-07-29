@@ -36,6 +36,18 @@
         "analysis/output/v10_dataset_audit"
       ],
       "port": 8774
+    },
+    {
+      "name": "v10scan",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8775",
+        "--directory",
+        "analysis/output/v10_scan_report"
+      ],
+      "port": 8775
     }
   ]
 }

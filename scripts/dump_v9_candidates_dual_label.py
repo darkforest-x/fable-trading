@@ -64,6 +64,10 @@ from src.judgment.yolo_candidates import (  # noqa: E402
 
 HOLDOUT_START = pd.Timestamp("2026-05-04", tz="UTC")
 TP_MULT, SL_MULT = 5.0, 2.0
+TRAIL_ATR = 3.0          # chandelier distance above the running low
+BE_ARM_ATR = 1.5         # profit needed before the stop moves to entry
+SL_WIDE_ATR = 4.0        # the "is 2xATR simply too tight" arm
+PARTIAL_ATR = 2.0        # half off here, the rest rides the trend
 BATCH = 48
 
 
@@ -96,6 +100,73 @@ def both_labels(enriched, i: int) -> dict | None:
     else:
         g_bar, why = 1 - cl[-1] / entry, "TIMEOUT"
     g_hold = 1 - cl[-1] / entry
+
+    # This is a trend strategy, and the repo has tried these exits piecemeal
+    # across separate scripts and separate pools. Labelling all of them on the
+    # SAME candidates is the only way the comparison means anything -- earlier
+    # rounds compared an exit measured on one pool against another measured on a
+    # different one. Every variant below shares this entry and this horizon.
+    ma_hi = enriched["ma_max"].to_numpy()[ei:last + 1] if "ma_max" in enriched else None
+    ma_lo = enriched["ma_min"].to_numpy()[ei:last + 1] if "ma_min" in enriched else None
+
+    def first_true(mask) -> int | None:
+        idx = np.flatnonzero(mask)
+        return int(idx[0]) if len(idx) else None
+
+    # 1. trend: alive while price stays under the bundle, dead when it closes above
+    j = first_true(np.isfinite(ma_hi) & (cl > ma_hi)) if ma_hi is not None else None
+    g_trend, trend_bars = ((1 - cl[j] / entry, j) if j is not None
+                           else (g_hold, len(cl) - 1))
+
+    # 2. structural stop: the bundle's upper edge as a hard stop, no target
+    j = first_true(np.isfinite(ma_hi) & (hi >= ma_hi)) if ma_hi is not None else None
+    g_struct, struct_bars = ((1 - float(ma_hi[j]) / entry, j) if j is not None
+                             else (g_hold, len(cl) - 1))
+
+    # 3. chandelier trail: stop rides TRAIL_ATR above the running low
+    g_trail, trail_bars = g_hold, len(cl) - 1
+    run_lo = np.inf
+    for jj in range(len(cl)):
+        run_lo = min(run_lo, float(lo[jj]))
+        stop = run_lo + TRAIL_ATR * atr
+        if jj > 0 and hi[jj] >= stop:
+            g_trail, trail_bars = 1 - stop / entry, jj
+            break
+
+    # 4. breakeven-then-run: once BE_ATR of profit exists, stop moves to entry
+    g_be, be_bars = g_hold, len(cl) - 1
+    armed = False
+    for jj in range(len(cl)):
+        if not armed and lo[jj] <= entry - BE_ARM_ATR * atr:
+            armed = True
+        elif armed and hi[jj] >= entry:
+            g_be, be_bars = 0.0, jj
+            break
+
+    # 5. take-profit only, no stop -- isolates what the stop costs
+    j = first_true(lo <= entry - TP_MULT * atr)
+    g_tponly = (TP_MULT * atr / entry) if j is not None else g_hold
+    tponly_bars = j if j is not None else len(cl) - 1
+
+    # 6. wide stop, same target: is the 2xATR stop simply too tight
+    tp_w, sl_w = entry - TP_MULT * atr, entry + SL_WIDE_ATR * atr
+    up_w = first_true(lo <= tp_w)
+    dn_w = first_true(hi >= sl_w)
+    if up_w is not None and (dn_w is None or up_w < dn_w):
+        g_wide, wide_bars = 1 - tp_w / entry, up_w
+    elif dn_w is not None:
+        g_wide, wide_bars = 1 - sl_w / entry, dn_w
+    else:
+        g_wide, wide_bars = g_hold, len(cl) - 1
+
+    # 7. half off at 2xATR, remainder rides the trend exit
+    j = first_true(lo <= entry - PARTIAL_ATR * atr)
+    if j is None:
+        g_partial, partial_bars = g_trend, trend_bars
+    else:
+        g_partial = 0.5 * (PARTIAL_ATR * atr / entry) + 0.5 * g_trend
+        partial_bars = max(j, trend_bars)
+
     k = min(up, dn, len(cl) - 1)
     return {"entry_price": entry, "atr14": atr, "atr_pct": atr_pct,
             "outcome_barrier": why,
@@ -104,8 +175,29 @@ def both_labels(enriched, i: int) -> dict | None:
             "net_barrier_taker": g_bar - SWAP_TAKER,
             "net_hold_maker": g_hold - SWAP_MAKER,
             "net_hold_taker": g_hold - SWAP_TAKER,
+            **{f"gross_{k}": v for k, v in (
+                ("trend", g_trend), ("struct", g_struct), ("trail", g_trail),
+                ("be", g_be), ("tponly", g_tponly), ("wide", g_wide),
+                ("partial", g_partial))},
+            **{f"bars_{k}": v for k, v in (
+                ("trend", trend_bars), ("struct", struct_bars), ("trail", trail_bars),
+                ("be", be_bars), ("tponly", tponly_bars), ("wide", wide_bars),
+                ("partial", partial_bars))},
+            **{f"net_{k}_maker": v - SWAP_MAKER for k, v in (
+                ("trend", g_trend), ("struct", g_struct), ("trail", g_trail),
+                ("be", g_be), ("tponly", g_tponly), ("wide", g_wide),
+                ("partial", g_partial))},
+            **{f"net_{k}_taker": v - SWAP_TAKER for k, v in (
+                ("trend", g_trend), ("struct", g_struct), ("trail", g_trail),
+                ("be", g_be), ("tponly", g_tponly), ("wide", g_wide),
+                ("partial", g_partial))},
+            **{f"label_{k}": int(v - SWAP_MAKER > 0) for k, v in (
+                ("trend", g_trend), ("struct", g_struct), ("trail", g_trail),
+                ("be", g_be), ("tponly", g_tponly), ("wide", g_wide),
+                ("partial", g_partial))},
             "label_barrier": int(g_bar - SWAP_MAKER > 0),
             "label_hold": int(g_hold - SWAP_MAKER > 0),
+
             # what a real position would have had to sit through, either way
             "mae": float(np.max(hi[: k + 1]) / entry - 1)}
 
@@ -193,9 +285,14 @@ def main() -> int:
         if args.start:
             t2 = pd.to_datetime(frame["open_time"], utc=True)
             scan_lo = max(WINDOW, int((t2 < pd.Timestamp(args.start, tz="UTC")).sum()))
-        enriched = add_indicators(add_mas(frame))
-        featured = add_features(enriched)
         ema = add_mas(frame)
+        enriched = add_indicators(ema)
+        from src.detection.data import ALL_MA_COLS
+        _ma = np.vstack([ema[c].to_numpy(dtype=float)
+                         for c in ALL_MA_COLS if c in ema.columns])
+        enriched["ma_max"] = np.nanmax(_ma, axis=0)
+        enriched["ma_min"] = np.nanmin(_ma, axis=0)
+        featured = add_features(enriched)
         fires = fire_bars(ema, model, device, scan_lo,
                           len(frame) - HORIZON_BARS - 2, args.conf, tmp_dir)
         if not fires:
