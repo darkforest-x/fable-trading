@@ -1,0 +1,108 @@
+{
+  "generated_at": "2026-07-29T11:26:47.412729+00:00",
+  "holdout_consumed": false,
+  "population": {
+    "n_tasks": 200,
+    "candidate_min": "2026-03-14T06:39:00+00:00",
+    "future_end_max": "2026-05-01T23:54:00+00:00",
+    "anchors_scanned": 16368,
+    "raw_fire_rate_per_anchor": 0.012218963831867057,
+    "bars_per_raw_fire": 81.84
+  },
+  "breakdown_state_at_fire": {
+    "ret8_negative_n": 199,
+    "ret8_below_minus_1atr_n": 198,
+    "ret8_below_minus_2atr_n": 181,
+    "ret8_atr_median": -3.4624735782069296,
+    "below_all_six_mas_n": 196
+  },
+  "future_outcome_not_shape_precision": {
+    "future_3h_down_n": 85,
+    "future_3h_down_rate": 0.425,
+    "future_3h_return_median": 0.00106076065193755,
+    "conf_vs_future_3h_return_spearman": -0.058781969549238734,
+    "confidence_bins": [
+      {
+        "bin": "0.30-0.50",
+        "n": 58,
+        "future_3h_down_rate": 0.41379310344827586
+      },
+      {
+        "bin": "0.50-0.70",
+        "n": 71,
+        "future_3h_down_rate": 0.43661971830985913
+      },
+      {
+        "bin": ">=0.70",
+        "n": 71,
+        "future_3h_down_rate": 0.4225352112676056
+      }
+    ],
+    "confidence_fine_bins": [
+      {
+        "bin": "0.30-0.40",
+        "n": 32,
+        "future_3h_down_rate": 0.25
+      },
+      {
+        "bin": "0.40-0.50",
+        "n": 26,
+        "future_3h_down_rate": 0.6153846153846154
+      },
+      {
+        "bin": "0.50-0.60",
+        "n": 36,
+        "future_3h_down_rate": 0.4166666666666667
+      },
+      {
+        "bin": "0.60-0.70",
+        "n": 35,
+        "future_3h_down_rate": 0.45714285714285713
+      },
+      {
+        "bin": "0.70-0.80",
+        "n": 45,
+        "future_3h_down_rate": 0.4
+      },
+      {
+        "bin": "0.80-0.90",
+        "n": 26,
+        "future_3h_down_rate": 0.46153846153846156
+      }
+    ]
+  },
+  "temporal_repetition": {
+    "events_gap_gt_3m": 146,
+    "events_gap_gt_30m": 118,
+    "events_gap_gt_60m": 104,
+    "events_gap_gt_180m": 80
+  },
+  "clock_mismatch": {
+    "context_hours_training_15m": 50.0,
+    "context_hours_current_3m": 10.0,
+    "clock_compression_factor": 5.0,
+    "train_box_width_norm_median": 0.0625,
+    "train_box_width_bars_median": 12.4375,
+    "pred_box_width_norm_median": 0.0662714503705501,
+    "pred_box_width_bars_median": 13.18801862373947,
+    "pred_box_duration_minutes_on_3m": 39.564055871218414,
+    "same_bar_width_duration_minutes_on_15m": 197.82027935609204
+  },
+  "native_15m_open_scan": {
+    "conf": 0.3,
+    "n_fire": 79,
+    "total_bars": 24000,
+    "symbol_months_corrected": 8.212877792378448,
+    "fires_per_symbol_month_corrected": 9.619040000000002,
+    "owner_density_range": [
+      0.18,
+      0.36
+    ],
+    "note": "Corrected denominator; original density field is stale and 12x too high."
+  },
+  "caveats": [
+    "Owner's roughly 60% invalid estimate has not been recorded per task.",
+    "Three-hour direction is an outcome label, not a detector-shape validity label.",
+    "Confidence calibration against shape validity requires owner keep/drop labels."
+  ]
+}

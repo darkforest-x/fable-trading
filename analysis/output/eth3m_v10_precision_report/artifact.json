@@ -1,0 +1,329 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "ETH 3m v10 框精度诊断",
+    "description": "解释当前 v10 预标中约 60% 框不合理的原因，并给出原生 ETH 3m 提准路线。",
+    "generatedAt": "2026-07-29T11:30:00Z",
+    "cards": [
+      {
+        "id": "already_broken",
+        "description": "触发前 8 根 3m K 线的跌幅已超过 2 ATR；说明模型主要识别确认后的下破。",
+        "dataset": "summary",
+        "sourceId": "eth3m_diag",
+        "metrics": [
+          {
+            "label": "触发前已跌超 2 ATR",
+            "field": "already_broken_share",
+            "format": "percent"
+          }
+        ]
+      },
+      {
+        "id": "future_down",
+        "description": "未来 3 小时收跌只衡量结果，不等于框或形态精度。",
+        "dataset": "summary",
+        "sourceId": "eth3m_diag",
+        "metrics": [
+          {
+            "label": "未来 3h 收跌",
+            "field": "future_down_rate",
+            "format": "percent"
+          }
+        ]
+      },
+      {
+        "id": "dedup_events",
+        "description": "将相邻不超过 1 小时的触发视作同一段行情后，只剩 104 个事件。",
+        "dataset": "summary",
+        "sourceId": "eth3m_diag",
+        "metrics": [
+          {
+            "label": "1h 去重后事件",
+            "field": "events_1h",
+            "format": "number",
+            "unit": " / 200"
+          }
+        ]
+      },
+      {
+        "id": "clock_compression",
+        "description": "相同 200 根输入从 15m 的 50 小时压缩为 3m 的 10 小时。",
+        "dataset": "summary",
+        "sourceId": "eth3m_diag",
+        "metrics": [
+          {
+            "label": "墙钟尺度压缩",
+            "field": "clock_compression",
+            "format": "number",
+            "unit": "×"
+          }
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "conf_outcome",
+        "title": "置信度分箱与未来 3h 收跌率",
+        "subtitle": "200 个开发期原始触发；每箱 n=26–45。结果率不是框精度。",
+        "type": "bar",
+        "dataset": "conf_fine",
+        "sourceId": "eth3m_diag",
+        "encodings": {
+          "x": {
+            "field": "conf_bin",
+            "type": "ordinal",
+            "label": "v10 置信度"
+          },
+          "y": {
+            "field": "future_down_rate",
+            "type": "quantitative",
+            "label": "未来 3h 收跌率",
+            "format": "percent"
+          }
+        },
+        "yAxisTitle": "未来 3h 收跌率",
+        "valueFormat": "percent",
+        "layout": "full"
+      }
+    ],
+    "sources": [
+      {
+        "id": "eth3m_diag",
+        "label": "ETH 3m v10 预标质量诊断",
+        "path": "analysis/output/eth3m_v10_precision_report/source.sql",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "id": "eth3m-v10-prebox-quality-20260729",
+          "description": "从开发期诊断 JSON 中提取指标卡与置信度分箱；诊断 JSON 由 scripts/diag_eth3m_v10_prebox_quality.py 生成。",
+          "executed_at": "2026-07-29T11:22:28Z",
+          "tables_used": [
+            "datasets/eth_3m_v10_prebox200/manifest.csv",
+            "datasets/eth_3m_v10_prebox200/scan_checkpoint.json",
+            "data/kline_fetched/okx_ETH_USDT_SWAP_3m_57705.csv",
+            "datasets/dense_owner_short_star_tip_v10/labels"
+          ],
+          "filters": [
+            "All source and future-end timestamps are before 2026-05-04 00:00 UTC",
+            "200 v10 fires at confidence >= 0.30"
+          ],
+          "metric_definitions": [
+            "already_broken_share = fires with 8-bar return below -2 ATR / 200",
+            "future_down_rate = fires whose three-hour close return is below zero / 200",
+            "events_1h = chronological clusters separated by more than 60 minutes"
+          ]
+        }
+      },
+      {
+        "id": "v10_training",
+        "label": "v10 训练结果与数据集统计",
+        "path": "analysis/output/train_v10_results.csv",
+        "query": {
+          "engine": "local-files",
+          "description": "v10 训练曲线与训练池构造统计。",
+          "executed_at": "2026-07-29T02:00:00Z",
+          "tables_used": [
+            "analysis/output/train_v10_results.csv",
+            "analysis/output/build_v10_dataset.log",
+            "datasets/dense_owner_short_star_tip_v10/build_meta.json"
+          ]
+        }
+      },
+      {
+        "id": "v10_native_audit",
+        "label": "v10 原生 15m 开放扫描审计",
+        "path": "analysis/output/after_train.log",
+        "query": {
+          "engine": "local-files",
+          "description": "v10 在原生 15m 上的召回与自由开火扫描；密度分母按总 symbol-month 暴露量修正。",
+          "executed_at": "2026-07-29T02:18:00Z",
+          "tables_used": [
+            "analysis/output/after_train.log",
+            "analysis/output/diag_precision_vs_recall_v10.json",
+            "docs/learnings/fire-density-must-divide-by-total-symbol-month-exposure.md"
+          ]
+        }
+      },
+      {
+        "id": "target_code",
+        "label": "v10 正例锚定与 ETH 3m 构包代码",
+        "path": "scripts/build_star_tip_dataset_v10.py",
+        "query": {
+          "engine": "source-code",
+          "language": "python",
+          "description": "正例被重锚到确认 break，框右缘固定到窗口最后一根；ETH 构包遇到 200 个原始触发即停止。",
+          "tables_used": [
+            "scripts/build_star_tip_dataset_v10.py",
+            "scripts/build_eth_3m_v10_prebox200.py",
+            "src/detection/data.py"
+          ]
+        }
+      }
+    ],
+    "blocks": [
+      {
+        "id": "title",
+        "type": "markdown",
+        "body": "# ETH 3m v10 框精度诊断"
+      },
+      {
+        "id": "executive_summary",
+        "type": "markdown",
+        "body": "## Executive Summary\n\n- **主因不是 HTML 画错，而是模型目标错位。** v10 的训练正例被重锚到确认跌破，当前 200 张里 90.5% 在开火前 8 根 3m K 线已经跌超 2 ATR；它更像‘已经跌破检测器’，不是‘密集准备启动检测器’。\n- **15m 直接迁移到 3m 又把时间语义压缩了 5 倍。** 200 根上下文从 50 小时变成 10 小时；中位约 13 根的框从 3.3 小时变成约 40 分钟。\n- **调高置信度不是主药。** 置信度与未来 3h 收益的 Spearman 仅 -0.059；更关键的是，尚未记录逐张 shape valid/invalid，因此现在无法证明高 conf 的框更符合你的形态。\n- **最高杠杆动作是把这 200 张变成原生 ETH 3m 金标与困难负样本。** 框是否正确和未来 3h 是否下跌必须分开保存，再用完全相同的数据比较 COCO 冷启动与 v10 warm-start。"
+      },
+      {
+        "id": "headline_metrics",
+        "type": "metric-strip",
+        "cardIds": [
+          "already_broken",
+          "future_down",
+          "dedup_events",
+          "clock_compression"
+        ]
+      },
+      {
+        "id": "confirmed_break_target",
+        "type": "markdown",
+        "sourceId": "eth3m_diag",
+        "body": "## v10 主要框在‘已经跌破’，不是‘准备启动’\n\n200 次触发中，199 次在此前 8 根 3m K 线已经下跌，198 次跌超 1 ATR，181 次跌超 2 ATR；中位跌幅为 -3.46 ATR，196 次触发时价格已在六条均线下方。\n\n这与代码语义一致：训练时先向后找确认 break，再把图截到 break，并把框右缘固定为最后一根。标签允许使用未来确定结果并不违规，但这会把模型目标定义成‘确认态’；如果你要的是下破前或刚启动时的密集形态，目标本身就错了。"
+      },
+      {
+        "id": "clock_mismatch",
+        "type": "markdown",
+        "sourceId": "eth3m_diag",
+        "body": "## 15m→3m 让框和均线的墙钟含义缩短 5 倍\n\n同样是 200 根，v10 训练看到约 50 小时，ETH 3m 只看到 10 小时。MA20/60/120 从 5/15/30 小时变成 1/3/6 小时；预测框中位宽约 13.2 根，在训练口径里约 3.3 小时，直接搬到 3m 后只剩约 39.6 分钟。\n\n模型只看到归一化像素，不知道每根 K 线从 15 分钟变成了 3 分钟，因此即使框坐标转换完全正确，也会系统性地框得太短、太晚。"
+      },
+      {
+        "id": "validation_gap",
+        "type": "markdown",
+        "sourceId": "v10_training",
+        "body": "## 自家 val 很高，但它没有代表开放市场\n\nv10 在构造 val 上的最佳 mAP50 为 0.921，precision 为 0.879；训练池只有 3,305 张，其中正例 1,322、负例 1,983。这个 val 测的是‘能否复现同一构造流程’，不是逐 bar 开放扫描时的假阳性。\n\n因此高 mAP 与你看到约 40% 合理并不矛盾：真实部署的背景分母远大于被挑选出来的训练负样本。"
+      },
+      {
+        "id": "native_density",
+        "type": "markdown",
+        "sourceId": "v10_native_audit",
+        "body": "## v10 在原生 15m 上也没有可用精度工作点\n\n修正 symbol-month 分母后，conf=0.30 的自由开火约 9.62 条/币·月，而历史人工标注密度约 0.18–0.36。提高阈值会同时砍掉召回；既有扫描没有找到‘召回仍可用且密度接近人工’的工作点。\n\n所以 3m 上的问题不是只换一个 conf 就能解决。阈值曲线仍值得在你逐张标完后重算，但它只能是零训练基线。"
+      },
+      {
+        "id": "repetition_and_outcome",
+        "type": "markdown",
+        "sourceId": "eth3m_diag",
+        "body": "## 当前 200 张既有重复，也混入了结果判断\n\n200 张按 1 小时事件合并后只有 104 组，按 3 小时合并后只有 80 组；这批并非 200 份独立证据。未来 3 小时收跌只有 85/200（42.5%），但这个数字不能直接当‘框精度’：形态成立但后来反弹，检测层仍可能正确，只是判断层失败。\n\n下图六个置信度箱的未来收跌率没有随 conf 单调上升；0.40–0.50 箱的突高更像小样本波动。这只说明 conf 不能直接当结果概率，真正的框精度仍需逐张 shape 标签。"
+      },
+      {
+        "id": "conf_chart",
+        "type": "chart",
+        "chartId": "conf_outcome",
+        "layout": "full"
+      },
+      {
+        "id": "label_matrix",
+        "type": "markdown",
+        "body": "## 先把一个问题拆成两个标签\n\n| 形态/框 | 未来 3h | 正确用途 |\n|---|---|---|\n| valid | success | 检测正例 + 判断正例 |\n| valid | fail/rebound | 检测正例 + 判断负例 |\n| invalid | success | 检测困难负例；下跌只是巧合 |\n| invalid | fail/rebound | 检测困难负例 + 判断负例 |\n\n人工可以看未来确认语义，但最终 YOLO 训练图必须重新渲染为只到 signal time；未来 3h 只进入 outcome 字段，不能进入模型像素或因果特征。"
+      },
+      {
+        "id": "recommendation",
+        "type": "markdown",
+        "body": "## 推荐执行顺序\n\n1. **先标当前 200 张。** 保存 `shape=valid/invalid/uncertain`、改框/删框、`outcome`，并增加错误原因：不密集、已经跌太晚、框位置错、方向错、同趋势重复。按你约 40% 接受率估计，可得到约 80 个原生正例和 120 个高价值 hard negatives；精确数以实际标注为准。\n2. **先做零训练诊断。** 计算 owner-valid precision × conf、框修改量 × conf、去重事件密度；若 valid 率不随 conf 单调，立即停止靠阈值救 v10。\n3. **训练原生 ETH 3m pilot。** 相同数据、时间切分和超参下只比较初始化：A=COCO yolo11 底座，B=v10 warm-start。所有 HSV/flip/mosaic/mixup 全关；按事件去重，事件簇不得跨 train/val。\n4. **只给训练侧补困难负样本。** 在开发期逐 bar 扫 pilot，把高 conf 假阳送审；验证侧否决框只用于验收，不能回灌训练。\n5. **再补 v10 找不到的正例。** 单独建立不显示 v10 预框的 tip 校准包，来源可混合数值候选、未来发现候选的因果重渲染和分层背景，避免只学会 v10 已经会找的区域。\n6. **检测过门后再训判断层。** 判断层只在 shape-valid 事件中，用 signal time 及之前的数值特征预测未来 3h 连续净收益；检测框不准时不要用判断层掩盖。"
+      },
+      {
+        "id": "acceptance",
+        "type": "markdown",
+        "body": "## 新模型怎么验收\n\n在独立 accept 时间块逐 bar 扫描，并同时报告：独立事件级人工 precision、tip 金标 recall、改框 IoU/起点误差、原始开火数、去重事件数、ETH 每月事件密度、hard-negative 误火率、按月稳定性，以及 conf 与 valid 率是否单调。\n\n建议先把‘至少 100 个独立开火事件、precision 点估计 ≥70%、Wilson 下沿 ≥60%、recall ≥50%’作为讨论线，而不是直接冻结。最终 precision、recall 和每月开火预算必须由你确认；旧 15m 的 0.18–0.36 条/币·月不能机械搬到 ETH 3m。"
+      },
+      {
+        "id": "questions",
+        "type": "markdown",
+        "body": "## 需要你决定的三件事\n\n1. 是否把当前 200 张正式导入 Label Studio，按双标签与错误原因开始标。\n2. ETH 3m 你允许的月均独立事件数是多少；这决定 precision–recall 的真实工作点。\n3. 是否同意主基线从 COCO 底座训练，v10 仅保留为提议器和 warm-start 对照。"
+      },
+      {
+        "id": "caveats",
+        "type": "markdown",
+        "body": "## Caveats and assumptions\n\n- 你说的‘约 60% 不合理’尚未逐张记录，因此当前只能把约 40% 当人工估计，不能按 conf 或错误类型精确分解。\n- 42.5% 的未来 3h 收跌率是结果层证据，不是检测框 precision。\n- 本报告所有复算都先裁掉 `>=2026-05-04` 数据；未读取或消耗 holdout。\n- 审计另发现 v10 权重的 `hsv_s=0.05`、`hsv_v=0.05`，未满足项目 HSV 全关纪律；这是次要风险，不足以单独解释 60% 错框，但新基线必须修正。\n- 结论置信度：根因方向可用于行动；精确 precision 与阈值工作点需逐张标注后再定。"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-07-29T11:30:00Z",
+    "status": "ready",
+    "datasets": {
+      "summary": [
+        {
+          "already_broken_share": 0.905,
+          "future_down_rate": 0.425,
+          "events_1h": 104,
+          "clock_compression": 5.0
+        }
+      ],
+      "conf_fine": [
+        {
+          "conf_bin": "0.30–0.40",
+          "n": 32,
+          "future_down_rate": 0.25
+        },
+        {
+          "conf_bin": "0.40–0.50",
+          "n": 26,
+          "future_down_rate": 0.6153846154
+        },
+        {
+          "conf_bin": "0.50–0.60",
+          "n": 36,
+          "future_down_rate": 0.4166666667
+        },
+        {
+          "conf_bin": "0.60–0.70",
+          "n": 35,
+          "future_down_rate": 0.4571428571
+        },
+        {
+          "conf_bin": "0.70–0.80",
+          "n": 45,
+          "future_down_rate": 0.4
+        },
+        {
+          "conf_bin": "0.80–0.90",
+          "n": 26,
+          "future_down_rate": 0.4615384615
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "eth3m_diag",
+      "label": "ETH 3m v10 预标质量诊断",
+      "path": "analysis/output/eth3m_v10_precision_report/source.sql",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "id": "eth3m-v10-prebox-quality-20260729",
+        "description": "从开发期诊断 JSON 中提取报告快照；上游由本地 Python 诊断脚本生成。",
+        "executed_at": "2026-07-29T11:22:28Z",
+        "tables_used": [
+          "datasets/eth_3m_v10_prebox200/manifest.csv",
+          "data/kline_fetched/okx_ETH_USDT_SWAP_3m_57705.csv"
+        ]
+      }
+    },
+    {
+      "id": "v10_training",
+      "label": "v10 训练结果与数据集统计",
+      "path": "analysis/output/train_v10_results.csv"
+    },
+    {
+      "id": "v10_native_audit",
+      "label": "v10 原生 15m 开放扫描审计",
+      "path": "analysis/output/after_train.log"
+    },
+    {
+      "id": "target_code",
+      "label": "v10 正例锚定与 ETH 3m 构包代码",
+      "path": "scripts/build_star_tip_dataset_v10.py"
+    }
+  ]
+}
