@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ETH 做空 3m / 5m / 10m · 双视图标注与训练方案</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0f1113;--panel:#171a1e;--panel2:#1c2025;--line:#2b3138;
+  --text:#edf1f5;--muted:#94a0ab;--teal:#80cbc4;--green:#4caf78;
+  --red:#ef6262;--orange:#ffb454;--blue:#6aa9ff;--purple:#b49cff;
+  --shadow:0 18px 48px rgba(0,0,0,.24);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif}
+a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
+.page{max-width:1180px;margin:0 auto;padding:28px 24px 88px}
+.hero{position:relative;overflow:hidden;padding:42px 42px 36px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,#181d22 0%,#121517 58%,#17211f 100%);box-shadow:var(--shadow)}
+.hero:after{content:"";position:absolute;width:420px;height:420px;border-radius:50%;right:-210px;top:-230px;background:radial-gradient(circle,rgba(128,203,196,.19),rgba(128,203,196,0) 68%)}
+.eyebrow{color:var(--teal);font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase}
+h1{max-width:860px;margin:10px 0 12px;font-size:clamp(30px,4.7vw,54px);line-height:1.12;letter-spacing:-.03em}
+.lede{max-width:840px;margin:0;color:#c9d1d9;font-size:18px;line-height:1.7}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.tag{padding:5px 10px;border:1px solid #344047;border-radius:999px;color:#b8c2ca;background:#13171a;font-size:12px}
+.truth{margin:18px 0 0;padding:16px 18px;border-left:4px solid var(--orange);border-radius:8px;background:#211a13;color:#f3e1c8}.truth strong{color:#ffd39a}
+.nav{position:sticky;top:0;z-index:20;display:flex;gap:6px;overflow:auto;margin:18px 0 36px;padding:10px;border:1px solid var(--line);border-radius:12px;background:rgba(15,17,19,.92);backdrop-filter:blur(12px)}
+.nav a{flex:0 0 auto;padding:6px 10px;border-radius:7px;color:#aeb8c1;font-size:13px}.nav a:hover{background:#20252a;color:#fff;text-decoration:none}
+section{scroll-margin-top:76px;margin:0 0 54px}
+h2{margin:0 0 8px;font-size:25px;line-height:1.3;letter-spacing:-.015em}h3{margin:0 0 8px;font-size:17px}.sub{margin:0 0 20px;color:var(--muted)}
+.grid{display:grid;gap:14px}.grid.cols3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid.cols2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.cols4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{padding:20px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.card p:last-child{margin-bottom:0}
+.num{font-size:31px;font-weight:760;line-height:1.2;letter-spacing:-.03em}.label{margin-top:4px;color:var(--muted);font-size:13px}
+.ok{color:var(--green)}.warn{color:var(--orange)}.bad{color:var(--red)}.info{color:var(--blue)}
+.statement{padding:24px;border:1px solid #34534f;border-radius:14px;background:linear-gradient(125deg,#14201f,#171b1e)}
+.statement .big{font-size:23px;line-height:1.5;font-weight:720}.statement .big em{font-style:normal;color:var(--teal)}
+.dual{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin-top:18px}
+.view{position:relative;min-height:330px;padding:18px;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.view h3{display:flex;align-items:center;gap:8px}.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;background:#253038;color:#c9d1d9}
+.chart{position:relative;height:190px;margin:16px 0 12px;border:1px solid #303740;border-radius:8px;overflow:hidden;background:repeating-linear-gradient(0deg,transparent 0,transparent 37px,rgba(255,255,255,.055) 38px),linear-gradient(180deg,#15191d,#101316)}
+.chart:before{content:"";position:absolute;left:0;right:0;top:48%;height:2px;background:linear-gradient(90deg,transparent,#ff824d 18%,#59a5ff 48%,#80cbc4 72%,transparent);opacity:.7;transform:rotate(-2deg)}
+.future{position:absolute;right:0;top:0;bottom:0;width:30%;background:repeating-linear-gradient(135deg,rgba(239,98,98,.09) 0,rgba(239,98,98,.09) 8px,rgba(239,98,98,.025) 8px,rgba(239,98,98,.025) 16px)}
+.cut{position:absolute;left:70%;top:0;bottom:0;border-left:2px dashed var(--orange)}.cut:after{content:"模型截止线";position:absolute;top:7px;left:7px;color:#ffd099;font-size:11px;white-space:nowrap}
+.boxmark{position:absolute;left:51%;top:54px;width:18%;height:63px;border:2px solid var(--red);background:rgba(239,98,98,.08);border-radius:3px}.boxmark:after{content:"人工最终框";position:absolute;left:4px;top:3px;color:#ffaaaa;font-size:11px}
+.bars i{position:absolute;bottom:30px;width:7px;background:#36b89f;border-radius:1px}.bars i:before{content:"";position:absolute;left:3px;top:-10px;width:1px;height:calc(100% + 20px);background:#808b94}.bars i:nth-child(3n){background:#ef6262}
+.view.model .chart{height:190px}.view.model .future,.view.model .cut{display:none}.view.model .boxmark{left:76%;width:22%}.view.model .boxmark:after{content:"重算后的训练框"}.view-note{color:#abb5be;font-size:13px}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:stretch;margin-top:20px}.node{position:relative;padding:16px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:126px}.node:not(:last-child):after{content:"→";position:absolute;right:-12px;top:45%;z-index:2;width:20px;text-align:center;color:var(--teal);font-size:20px;font-weight:700}.node b{display:block;margin-bottom:5px}.node small{color:var(--muted);line-height:1.55}
+table{width:100%;border-collapse:collapse;margin:15px 0 0;font-size:13.5px}th,td{padding:10px 11px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}th{color:#b8c2ca;background:#15191d;font-weight:650}td:first-child{font-weight:650;color:#dce3e8}.center{text-align:center}
+.matrix td:not(:first-child),.matrix th:not(:first-child){text-align:center}.yes{color:var(--green);font-weight:700}.no{color:var(--red);font-weight:700}.labelonly{color:var(--orange);font-weight:700}
+.phase{display:grid;grid-template-columns:84px 1fr;gap:18px;padding:21px 0;border-top:1px solid var(--line)}.phase:last-child{border-bottom:1px solid var(--line)}.phase-id{color:var(--teal);font:700 12px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em}.phase h3{font-size:19px}.phase ul{margin:8px 0 0;padding-left:20px;color:#c3ccd3}.phase li{margin:4px 0}
+.decision{padding:20px;border:1px solid #664e2e;border-radius:12px;background:#211a12}.decision h3{color:#ffd19a}.decision ol{margin:10px 0 0;padding-left:21px}.decision li{margin:8px 0}.recommend{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:#24463c;color:#9be3c3;font-size:11px}
+.contract{font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;padding:18px;border:1px solid var(--line);border-radius:10px;background:#101316;color:#b8c2ca;overflow:auto}.contract .human{color:var(--orange)}.contract .machine{color:var(--teal)}
+.check{list-style:none;padding:0;margin:12px 0 0}.check li{position:relative;padding:8px 8px 8px 31px;border-bottom:1px solid #252b31}.check li:before{content:"✓";position:absolute;left:8px;color:var(--green);font-weight:800}
+.gate{border-left:3px solid var(--blue)}.risk{border-left:3px solid var(--red)}
+.bar{height:9px;border-radius:999px;background:#242b31;overflow:hidden;margin-top:10px}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:inherit}
+.footer{margin-top:65px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}.footer strong{color:#cdd5db}
+.print{float:right;padding:7px 11px;border:1px solid #394149;border-radius:8px;background:#171b1f;color:#dbe3e8;cursor:pointer}.print:hover{background:#22282d}
+details{margin-top:12px;border:1px solid var(--line);border-radius:10px;background:#14181b}summary{cursor:pointer;padding:12px 14px;color:#cfd7dd;font-weight:650}details>div{padding:0 14px 14px;color:#b4bec6}
+@media(max-width:900px){.grid.cols4,.grid.cols3{grid-template-columns:repeat(2,1fr)}.dual,.grid.cols2{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.node:not(:last-child):after{content:"↓";right:auto;left:50%;top:auto;bottom:-20px}.hero{padding:30px 24px}.nav{top:0}}
+@media(max-width:560px){.page{padding:14px 12px 60px}.grid.cols4,.grid.cols3{grid-template-columns:1fr}.phase{grid-template-columns:1fr;gap:5px}.hero{border-radius:12px}h1{font-size:31px}.chart{height:160px}.print{display:none}}
+@media print{body{background:#fff;color:#17191b}.page{max-width:none;padding:0}.hero,.card,.statement,.view,.node,.decision,details{background:#fff;color:#17191b;box-shadow:none}.nav,.print{display:none}.sub,.label,.view-note,.node small,.footer{color:#56606a}section{break-inside:avoid}.hero{border-color:#bbb}.chart{filter:grayscale(1)}}
+</style>
+</head>
+<body>
+<main class="page">
+  <header class="hero">
+    <button class="print" onclick="window.print()">打印 / 导出 PDF</button>
+    <div class="eyebrow">Fable Trading · Architecture Reset · 2026-07-29</div>
+    <h1>ETH 做空 3m / 5m / 10m<br>双视图标注与训练方案</h1>
+    <p class="lede">人工可以看未来来确认“这是不是想要的密集启动”；v10、检测训练和判断层特征永远只能看到信号截止时刻。两者不再共用一张图片，而是通过事件时间与绝对价格坐标连接。</p>
+    <div class="tags"><span class="tag">SHORT ONLY</span><span class="tag">3 个周期分别建模</span><span class="tag">Human future-visible</span><span class="tag">Model causal-only</span><span class="tag">Holdout 隔离</span></div>
+    <div class="truth"><strong>当前裁决：</strong>刚生成的 2000 张 causal-tip 图先不要人工标。它们可保留为模型侧候选快照，但不是合格的人工验真界面；下一版必须生成含未来的独立 review 图。</div>
+  </header>
+
+  <nav class="nav" aria-label="章节导航">
+    <a href="#truth">一页纸结论</a><a href="#views">双视图</a><a href="#labels">标签语义</a><a href="#pipeline">完整流程</a><a href="#contract">数据契约</a><a href="#models">模型方案</a><a href="#gates">验收门</a><a href="#decisions">待决定</a>
+  </nav>
+
+  <section id="truth">
+    <h2>一页纸结论</h2>
+    <p class="sub">这次修正不是“允许泄漏”，而是把<strong>未来只放在标签生产过程</strong>中。</p>
+    <div class="statement"><div class="big">人工利用未来<strong>定义标签</strong>；模型利用当时可见信息<strong>学习标签</strong>。<br><em>标签允许看未来，输入绝不允许看未来。</em></div></div>
+    <div class="grid cols4" style="margin-top:14px">
+      <div class="card"><div class="num warn">3</div><div class="label">同一事件的物理资产：proposal-tip、human-review、train-tip</div></div>
+      <div class="card"><div class="num info">3</div><div class="label">3m / 5m / 10m 分开建检测器和判断层基线</div></div>
+      <div class="card"><div class="num ok">0</div><div class="label">训练图中允许出现的未来 bar 数</div></div>
+      <div class="card"><div class="num bad">2000</div><div class="label">不会直接让你一次性标完；先小批验证目标可学习性</div></div>
+    </div>
+  </section>
+
+  <section id="views">
+    <h2>核心设计：人工图和模型图不是同一个文件</h2>
+    <p class="sub">人工看的是“完整事件”；模型看的是“当时现场”。旧模型也属于模型，不能在含未来图上跑。</p>
+    <div class="dual">
+      <article class="view">
+        <h3>Human review.png <span class="pill">人工专用 · 含未来</span></h3>
+        <div class="chart" aria-label="人工可见完整事件示意图">
+          <div class="future"></div><div class="cut"></div><div class="boxmark"></div>
+          <div class="bars">
+            <i style="left:5%;height:36px"></i><i style="left:10%;height:55px"></i><i style="left:15%;height:48px"></i><i style="left:20%;height:72px"></i><i style="left:27%;height:61px"></i><i style="left:34%;height:84px"></i><i style="left:41%;height:68px"></i><i style="left:48%;height:79px"></i><i style="left:55%;height:70px"></i><i style="left:62%;height:64px"></i><i style="left:68%;height:58px"></i><i style="left:74%;height:88px"></i><i style="left:80%;height:46px"></i><i style="left:86%;height:28px"></i><i style="left:92%;height:18px"></i>
+          </div>
+        </div>
+        <div class="view-note"><b class="warn">用途：</b>让你观察密集段之后有没有出现你认可的空头启动，并调整/删除预框。虚线只是初始提议时刻；最终正例框的右缘定义真实信号截止时刻。</div>
+      </article>
+      <article class="view model">
+        <h3>Train tip.png <span class="pill">模型专用 · 无未来</span></h3>
+        <div class="chart" aria-label="模型因果训练图示意图">
+          <div class="boxmark"></div>
+          <div class="bars">
+            <i style="left:5%;height:36px"></i><i style="left:12%;height:55px"></i><i style="left:19%;height:48px"></i><i style="left:26%;height:72px"></i><i style="left:33%;height:61px"></i><i style="left:40%;height:84px"></i><i style="left:47%;height:68px"></i><i style="left:54%;height:79px"></i><i style="left:61%;height:70px"></i><i style="left:68%;height:64px"></i><i style="left:75%;height:58px"></i><i style="left:82%;height:52px"></i><i style="left:89%;height:45px"></i><i style="left:96%;height:38px"></i>
+          </div>
+        </div>
+        <div class="view-note"><b class="ok">生成方式：</b>不是裁掉 review.png 的右半边，而是从原始 K 线按最终截止时刻重画 200 根，重新计算均线、价格缩放和 YOLO 框坐标。</div>
+      </article>
+    </div>
+
+    <table class="matrix" aria-label="未来信息可见性矩阵">
+      <thead><tr><th>使用者 / 资产</th><th>历史 K 线</th><th>信号 bar</th><th>未来 K 线</th><th>未来收益标签</th></tr></thead>
+      <tbody>
+        <tr><td>人工 Label Studio</td><td class="yes">可见</td><td class="yes">可见</td><td class="yes">可见</td><td>只看图，不显示机器分数</td></tr>
+        <tr><td>v10 / 自动预框</td><td class="yes">可见</td><td class="yes">可见</td><td class="no">禁止</td><td class="no">禁止</td></tr>
+        <tr><td>YOLO 检测训练</td><td class="yes">可见</td><td class="yes">可见</td><td class="no">禁止</td><td class="no">不需要</td></tr>
+        <tr><td>LightGBM 特征</td><td class="yes">可见</td><td class="yes">可见</td><td class="no">禁止</td><td class="labelonly">只作为 y</td></tr>
+        <tr><td>回测 / 标签计算</td><td class="yes">可见</td><td class="yes">可见</td><td class="labelonly">仅算结果</td><td class="labelonly">允许</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="labels">
+    <h2>标注语义必须拆成两问</h2>
+    <p class="sub">否则“形态像不像”和“后来赚没赚钱”会再次被塞进同一个标签，检测层会被迫学习一个可能根本不可从盘口预测的结果。</p>
+    <div class="grid cols2">
+      <div class="card">
+        <h3>问题 A · 形态标签（给检测层）</h3>
+        <table><tbody>
+          <tr><td>shape_short_start</td><td>这是你认可的空头密集启动；画/调整框</td></tr>
+          <tr><td>shape_no</td><td>不是目标形态；删除预框</td></tr>
+          <tr><td>uncertain</td><td>看完未来仍不确定；不当负样本</td></tr>
+          <tr><td>bad_data</td><td>缺 K、异常针或渲染问题</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h3>问题 B · 后续结果（给判断层/审计）</h3>
+        <table><tbody>
+          <tr><td>clean_drop</td><td>启动后出现清晰、可交易的下跌</td></tr>
+          <tr><td>weak_or_late</td><td>方向对，但太弱或太晚</td></tr>
+          <tr><td>failed</td><td>假启动、反抽或先触发风险</td></tr>
+          <tr><td>visual_uncertain</td><td>肉眼不能稳定裁决</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div class="card risk" style="margin-top:14px"><b class="bad">最重要的风险：</b>如果规定“只有后来大跌的密集才算形态正例”，YOLO 实际学的是<strong>未来成功事件</strong>。这不是天然错误，但必须先通过 tip-only 可学习性实验；若因果图无法区分，继续堆标签只会得到事后识别器。</div>
+  </section>
+
+  <section id="pipeline">
+    <h2>完整流水线</h2>
+    <p class="sub">每一步只接受前一步的结构化事件，不靠人工记忆，也不靠“训练时别看右边”的口头约定。</p>
+    <div class="flow">
+      <div class="node"><b>① 候选发现</b><small>v10 causal-tip、因果数值规则、未来结果发现、分层随机背景。来源对你隐藏。</small></div>
+      <div class="node"><b>② 双视图生成</b><small>同一 event_id 生成 proposal_tip.png 和含未来 review.png；预框由前者映射到后者。</small></div>
+      <div class="node"><b>③ 人工验真</b><small>你看未来，回答形态与结果两问；最终框落到时间和绝对价格坐标。</small></div>
+      <div class="node"><b>④ 因果重渲染</b><small>按最终框右缘重画 train_tip.png；未来区域从物理文件中消失。</small></div>
+      <div class="node"><b>⑤ 分层训练</b><small>YOLO 学形态；LightGBM 用 as-of 特征学经济结果；时间切分、匹配对照。</small></div>
+    </div>
+
+    <div style="margin-top:30px">
+      <div class="phase"><div class="phase-id">PHASE 0</div><div><h3>先冻结定义，不先重画 2000 张</h3><ul><li>确认未来观察窗的绝对时长；不同周期用相同墙钟时间，不用相同 bar 数。</li><li>确认“形态正例”和“结果好坏”是否按两问保存。</li><li>确认判断层 TP / SL / 超时与成本；这些参数仍需 owner 明确批准。</li></ul></div></div>
+      <div class="phase"><div class="phase-id">PHASE 1</div><div><h3>补齐原生近两年微周期数据</h3><ul><li>目标开发区间：<code>[2024-05-04, 2026-05-04)</code>，3m 与 5m 用原生 OKX 数据；10m 只由两根完整、UTC 对齐的 5m 聚合。</li><li>由 VPS 拉取并作为唯一写者；本机只同步读取，不在本机另造一份历史。</li><li>任何 review 图都必须满足 <code>future_end &lt; 2026-05-04</code>，不能为了看未来跨入 holdout。</li></ul></div></div>
+      <div class="phase"><div class="phase-id">PHASE 2</div><div><h3>先做 240 张校准包（每周期 80）</h3><ul><li>候选源目标比例：v10 ≤30%、因果数值 25%、未来跌幅发现 20%、分层随机背景 ≥25%；v10 不足时不放宽 exact-tip 条件。</li><li>v10 候选内部 50% 显示预框、50% 隐藏；另放入 10% 盲重复任务，测你自己的标注一致性。</li><li>你先标这 240 张，分析各来源正例率、预框锚定偏差、框宽/右缘分布和重复一致率。</li></ul></div></div>
+      <div class="phase"><div class="phase-id">GATE A</div><div><h3>先回答“盘口是否可学习”，再扩标</h3><ul><li>把 240 张的正例重渲染为 tip-only，做一次小模型时间外验证。</li><li>同时用相同时间块、相同波动桶的随机背景测精度和开火密度。</li><li>若模型只能在含未来 review 图上表现好，而 tip-only 无法定位，就停止扩大标签；这说明目标仍是事后语义。</li></ul></div></div>
+      <div class="phase"><div class="phase-id">PHASE 3</div><div><h3>通过 Gate A 后分批扩到 2000</h3><ul><li>建议节奏：240 → 840 → 2000；每批后检查形态定义是否漂移。</li><li>当前 2000 张 causal-tip 图不删除，可作为候选/模型侧快照；靠近 holdout、没有足够未来窗口的事件需替换。</li><li>最终生成 3 套独立数据：human_review、detector_causal、judgment_asof。</li></ul></div></div>
+      <div class="phase"><div class="phase-id">PHASE 4</div><div><h3>三周期分别训练，不先混模</h3><ul><li><code>eth_short_3m_det_v1</code>、<code>eth_short_5m_det_v1</code>、<code>eth_short_10m_det_v1</code> 分开训练与报表。</li><li>先用 COCO yolo11 底座做基线；v10 初始化只能作为单变量 A/B，不能因为它会画框就默认更好。</li><li>YOLO 增强继续全关：flip、mosaic、mixup、HSV 均不允许。</li></ul></div></div>
+      <div class="phase"><div class="phase-id">PHASE 5</div><div><h3>每个检测器配自己的判断层</h3><ul><li>判断层候选必须来自对应周期的检测器，不能拿 3m 判断层给 10m 候选打分。</li><li>特征全部 as-of cutoff；未来只生成 realized return / barrier outcome。</li><li>方向性结果必须带同一 ETH、同时间块、同波动桶的匹配随机做空对照。</li></ul></div></div>
+      <div class="phase"><div class="phase-id">PHASE 6</div><div><h3>冻结后才申请最终验收</h3><ul><li>开发与 accept 全通过后，列出完整配置并向 owner 申请一次 holdout 消耗；未批准不读。</li><li>任何模型不自动 promote，不改 ACTIVE，不接实盘。</li><li>最终确认仍靠新鲜前向裁决；三个周期分别报告，不能用合计样本掩盖某个周期失败。</li></ul></div></div>
+    </div>
+  </section>
+
+  <section id="contract">
+    <h2>事件与文件契约</h2>
+    <p class="sub">坐标转换是整个方案的防火墙。人工框不能以“review.png 上的百分比”直接进入训练。</p>
+    <div class="contract">
+event_id/
+├── <span class="machine">proposal_tip.png</span>    # v10 输入；200 bars；end = proposal_ts
+├── <span class="human">human_review.png</span>    # 人工输入；历史 + proposal + future
+├── annotation.json     # shape / outcome / 框的时间与绝对价格
+└── <span class="machine">train_tip.png</span>       # 标后重画；200 bars；end = final_cutoff_ts
+
+canonical_event.csv
+  event_id, symbol, timeframe
+  proposal_ts, review_start_ts, review_end_ts
+  shape_decision, outcome_decision
+  box_start_ts, box_end_ts, price_low, price_high
+  final_cutoff_ts, candidate_source_hidden
+  prebox_visible, labeler_revision, split_time
+    </div>
+    <div class="grid cols2" style="margin-top:14px">
+      <div class="card">
+        <h3>坐标转换</h3>
+        <ol>
+          <li>利用 review 图的 bar 时间表，把框的 x 百分比还原为 bar 起止时间。</li>
+          <li>利用该图渲染时保存的 y 轴上下界，把框 y 百分比还原为绝对价格。</li>
+          <li>令正例的 <code>final_cutoff_ts = box_end_ts</code>；负例沿用 proposal_ts。</li>
+          <li>从原始 K 线重新计算截至 cutoff 的均线并重画 200 根。</li>
+          <li>用新图的时间/价格尺度重新计算 YOLO normalized bbox。</li>
+        </ol>
+      </div>
+      <div class="card gate">
+        <h3>机器验收断言</h3>
+        <ul class="check">
+          <li><code>max(train_bar_time) == final_cutoff_ts</code></li>
+          <li><code>max(feature_source_time) &lt;= final_cutoff_ts</code></li>
+          <li><code>review_end_ts &lt; holdout_start</code></li>
+          <li>框时间映射误差为 0 bar；价格映射 round-trip ≤1 px</li>
+          <li>所有重叠事件按 UTC 时间同侧切分，切点周围做 purge</li>
+          <li>任务数 = 事件数 = 图片数 = 标签记录数</li>
+        </ul>
+      </div>
+    </div>
+    <details><summary>为什么不能直接裁掉 review.png 的右半边？</summary><div>未来大跌或反抽会改变整张图的 y 轴范围；直接裁像素后，K 线高度、均线位置和人工框 y 坐标仍携带未来缩放信息。重新从原始 K 线渲染，才能保证模型看到的是当时真实会生成的画面。</div></details>
+  </section>
+
+  <section id="models">
+    <h2>针对 ETH 做得更准：三套短周期专模</h2>
+    <p class="sub">先把周期差异当成真实差异，不让一个共享模型掩盖问题；共享模型只能作为后续单变量实验。</p>
+    <table>
+      <thead><tr><th>层</th><th>3m</th><th>5m</th><th>10m</th><th>共同纪律</th></tr></thead>
+      <tbody>
+        <tr><td>检测器</td><td>eth_short_3m_det</td><td>eth_short_5m_det</td><td>eth_short_10m_det</td><td>200 bars、tip-only、short-only</td></tr>
+        <tr><td>判断层</td><td>eth_short_3m_judge</td><td>eth_short_5m_judge</td><td>eth_short_10m_judge</td><td>只吃本检测器候选；as-of 特征</td></tr>
+        <tr><td>时间覆盖</td><td>10 小时可见史</td><td>16.7 小时可见史</td><td>33.3 小时可见史</td><td>同为 200 bars，但语义不强行假设一致</td></tr>
+        <tr><td>评估</td><td>单独报告</td><td>单独报告</td><td>单独报告</td><td>时间切分、匹配随机对照、扣成本</td></tr>
+      </tbody>
+    </table>
+    <div class="grid cols3" style="margin-top:14px">
+      <div class="card"><h3>检测层只回答</h3><p>“截止现在，这里是否已经出现你定义的 ETH 空头密集启动？”</p></div>
+      <div class="card"><h3>判断层只回答</h3><p>“这次候选的幅度/收益分布是否足够覆盖成本？”不再只预测胜率。</p></div>
+      <div class="card"><h3>v10 的正确位置</h3><p>候选提议器和可选初始化对照。它是 15m OOD 且密度未过，不能定义标签全集。</p></div>
+    </div>
+  </section>
+
+  <section id="gates">
+    <h2>验收门：每层回答不同问题</h2>
+    <p class="sub">mAP、AUC 和回测收益都保留，但任何一个都不能单独宣布成功。</p>
+    <div class="grid cols3">
+      <div class="card">
+        <h3>Gate A · 标签可学习性</h3>
+        <ul class="check"><li>tip-only 时间外样本可区分</li><li>对匹配随机背景有真实增益</li><li>预框显示/隐藏不改变标签语义</li><li>盲重复标注一致</li></ul>
+      </div>
+      <div class="card">
+        <h3>Gate B · 检测器</h3>
+        <ul class="check"><li>真 tip owner 金标召回/精度</li><li>ETH 每月开火密度</li><li>框右缘 = 0 bar 偏移</li><li>自家 val/mAP 只作诊断</li></ul>
+      </div>
+      <div class="card">
+        <h3>Gate C · 判断层</h3>
+        <ul class="check"><li>top-decile 扣 0.2% 后为正</li><li>置换检验 p&lt;0.01</li><li>匹配随机对照后仍有增量</li><li>walk-forward 各折稳定</li></ul>
+      </div>
+    </div>
+    <div class="card risk" style="margin-top:14px"><b>诚实边界：</b>人工看未来能提高“你想要的形态”定义质量，但不能保证盘口存在足够可学习的先验信号。这个方案的第一目标不是承诺更高精度，而是用 Gate A 尽早、低成本地回答这个前提到底成立不成立。</div>
+  </section>
+
+  <section id="decisions">
+    <h2>Owner 决策状态</h2>
+    <p class="sub">2026-07-29 已确认前两项；经济标签仍保持冻结，等检测层通过 Gate A 后再决定。</p>
+    <div class="decision">
+      <h3>决策 1 · 人工未来观察窗</h3>
+      <ol>
+        <li><b>已确认：固定未来 3 小时</b>：3m=60 bars、5m=36 bars、10m=18 bars。<span class="recommend">OWNER CONFIRMED</span></li>
+        <li>未来 6 小时：看得更完整，但更容易把慢趋势也当成启动。</li>
+        <li>按“看到结果为止”动态长度：选择偏差大，不推荐。</li>
+      </ol>
+    </div>
+    <div class="decision" style="margin-top:12px">
+      <h3>决策 2 · YOLO 正例定义</h3>
+      <ol>
+        <li><b>已确认：形态像就算正例，结果另记</b>：保持检测层/判断层职责分离。<span class="recommend">OWNER CONFIRMED</span></li>
+        <li>只有后来成功下跌才算正例：更贴近你主观“想要的”，但必须承认这是 outcome-conditioned target，并先过 Gate A。</li>
+      </ol>
+    </div>
+    <div class="decision" style="margin-top:12px">
+      <h3>决策 3 · 判断层经济标签</h3>
+      <ol>
+        <li>确认每个周期的 TP / SL / 超时窗口是否共用。</li>
+        <li>确认 0.2% 往返成本是否继续沿用。</li>
+        <li>未确认前只做形态标注与视觉 outcome，不训练最终判断层，不碰 holdout。</li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <h2>当前 2000 张怎么处理</h2>
+    <div class="grid cols3">
+      <div class="card"><div class="num ok">保留</div><div class="label">不删除；作为 proposal-tip / causal 快照和坐标审计素材。</div></div>
+      <div class="card"><div class="num bad">停标</div><div class="label">不要在当前 Label Studio 项目上继续人工验真，因为没有未来区域。</div></div>
+      <div class="card"><div class="num warn">重配</div><div class="label">确认未来窗后，为仍有足够开发期未来数据的 event 生成 review 图；近 holdout 事件替换。</div></div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <strong>结论：</strong>这条路线把“人靠未来定义目标”和“模型只能从盘口识别目标”同时保留下来，并用物理文件隔离、坐标重算和时间断言防止两者串线。报告不授权 holdout、阈值、障碍、promote、ACTIVE 或实盘改动。
+  </footer>
+</main>
+</body>
+</html>

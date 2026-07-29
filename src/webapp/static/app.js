@@ -1897,6 +1897,24 @@ async function loadBacktest() {
   const w = d[btState.window];
   renderBacktestCompare(cmp);
 
+  // These tiles are the look-ahead backtest. The overview was switched to the
+  // tip-replay verdict; this page was not, and PF 6.61 with no caveat reads as a
+  // result. Banner first, before any number on the page.
+  (function () {
+    const host = $("#view-backtest");
+    if (!host || !d.lookahead_warning) return;
+    let el = document.getElementById("bt-lookahead-warn");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "bt-lookahead-warn";
+      el.style.cssText =
+        "background:#3a2418;border-left:4px solid #ff9800;color:#ffd8a8;" +
+        "padding:12px 14px;border-radius:8px;margin:0 0 14px;font-size:14px;line-height:1.6";
+      host.insertBefore(el, host.firstChild);
+    }
+    el.textContent = d.lookahead_warning;
+  })();
+
   // regression scores are not probabilities — stretch the filter slider to score range
   const slider = $("#score-threshold");
   if (slider && d.score_range) {

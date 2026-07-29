@@ -69,6 +69,7 @@ BE_ARM_ATR = 1.5         # profit needed before the stop moves to entry
 SL_WIDE_ATR = 4.0        # the "is 2xATR simply too tight" arm
 PARTIAL_ATR = 2.0        # half off here, the rest rides the trend
 BATCH = 48
+RENDER_WORKERS = 6       # cv2 drops the GIL, so rendering overlaps
 
 
 def both_labels(enriched, i: int) -> dict | None:
@@ -208,16 +209,28 @@ def fire_bars(ema, model, device, lo: int, hi: int, conf: float,
     fires: list[int] = []
     last_sig = -10 ** 9
     idx = list(range(lo, hi))
+    # Rendering is the bottleneck, not inference: on the 3060 the GPU sampled 0%
+    # across five consecutive reads at 40-50W while one CPU core drew charts.
+    # cv2 releases the GIL, so threads actually overlap here.
+    from concurrent.futures import ThreadPoolExecutor
+
+    def render_one(k_t):
+        k, t = k_t
+        p = tmp_dir / f"w{k}.png"
+        try:
+            _, tf = render_chart(ema.iloc[t - WINDOW + 1:t + 1], out_path=p)
+        except Exception:  # noqa: BLE001
+            return None
+        return str(p), t, tf
+
+    pool_x = ThreadPoolExecutor(max_workers=RENDER_WORKERS)
     for s in range(0, len(idx), BATCH):
         chunk = idx[s:s + BATCH]
         paths, tfs = [], []
-        for k, t in enumerate(chunk):
-            p = tmp_dir / f"w{k}.png"
-            try:
-                _, tf = render_chart(ema.iloc[t - WINDOW + 1:t + 1], out_path=p)
-            except Exception:  # noqa: BLE001
+        for r in pool_x.map(render_one, list(enumerate(chunk))):
+            if r is None:
                 continue
-            paths.append(str(p)); tfs.append((t, tf))
+            paths.append(r[0]); tfs.append((r[1], r[2]))
         if not paths:
             continue
         try:
@@ -251,6 +264,8 @@ def main() -> int:
     ap.add_argument("--device", default=None)
     ap.add_argument("--conf", type=float, default=DEFAULT_CONF)
     ap.add_argument("--out", default="data/judgment_v9_dual.csv")
+    ap.add_argument("--no-resume", action="store_true",
+                    help="ignore rows already in --out and rebuild from scratch")
     args = ap.parse_args()
     end = min(pd.Timestamp(args.end, tz="UTC") + pd.Timedelta(days=1), HOLDOUT_START)
 
@@ -272,6 +287,22 @@ def main() -> int:
         pool.append((symbol, frame))
     random.seed(20260728)
     chosen = random.sample(pool, min(args.n_symbols, len(pool)))
+
+    # Resume: the CSV is appended per symbol, so a stopped run has usable rows and
+    # the symbols already in it must not be redone. Without this, restarting to
+    # apply a speedup would redo everything the run had already paid for.
+    out_path = PROJECT / args.out
+    done: set[str] = set()
+    if out_path.exists() and not args.no_resume:
+        try:
+            done = set(pd.read_csv(out_path, usecols=["symbol"])["symbol"].unique())
+        except Exception:  # noqa: BLE001
+            done = set()
+    if done:
+        before = len(chosen)
+        chosen = [(s, f) for s, f in chosen if s not in done]
+        print(f"resume: {len(done)} symbols already in {out_path.name}, "
+              f"{before - len(chosen)} skipped", flush=True)
     print(f"universe={len(pool)} chosen={len(chosen)}", flush=True)
 
     rows = []
@@ -321,6 +352,10 @@ def main() -> int:
         print(f"[{k}/{len(chosen)}] {symbol}: fires={len(fires)} kept={n_ok} "
               f"total={len(rows)} ({(time.perf_counter()-t0)/60:.1f}min)", flush=True)
 
+    try:
+        pool_x.shutdown(wait=False)
+    except Exception:  # noqa: BLE001
+        pass
     for p in tmp_dir.glob("*.png"):
         p.unlink(missing_ok=True)
     if not rows:

@@ -1,0 +1,100 @@
+{
+  "pool": "judgment_yolo_owner_side_short_100_6m.csv",
+  "n_candidates": 25602,
+  "n_control": 76806,
+  "n_control_per": 3,
+  "atr_buckets": 5,
+  "results": [
+    {
+      "exit": "barrier",
+      "n": 25602,
+      "cand_net": 0.001081,
+      "ctrl_net": 1.7e-05,
+      "excess": 0.001063,
+      "t": 6.11,
+      "win": 0.3633,
+      "pf": 1.118
+    },
+    {
+      "exit": "hold",
+      "n": 25602,
+      "cand_net": 0.002273,
+      "ctrl_net": 0.000475,
+      "excess": 0.001798,
+      "t": 5.31,
+      "win": 0.5526,
+      "pf": 1.162
+    },
+    {
+      "exit": "trend",
+      "n": 25602,
+      "cand_net": -0.000184,
+      "ctrl_net": -0.001124,
+      "excess": 0.00094,
+      "t": 4.65,
+      "win": 0.3117,
+      "pf": 0.979
+    },
+    {
+      "exit": "struct",
+      "n": 25602,
+      "cand_net": 0.001245,
+      "ctrl_net": 0.000934,
+      "excess": 0.000311,
+      "t": 1.69,
+      "win": 0.389,
+      "pf": 1.179
+    },
+    {
+      "exit": "trail",
+      "n": 25602,
+      "cand_net": 0.000154,
+      "ctrl_net": -0.001314,
+      "excess": 0.001469,
+      "t": 9.4,
+      "win": 0.397,
+      "pf": 1.022
+    },
+    {
+      "exit": "be",
+      "n": 25602,
+      "cand_net": 0.001116,
+      "ctrl_net": -0.000323,
+      "excess": 0.001439,
+      "t": 5.7,
+      "win": 0.2199,
+      "pf": 1.157
+    },
+    {
+      "exit": "tponly",
+      "n": 25602,
+      "cand_net": 0.002398,
+      "ctrl_net": 0.000589,
+      "excess": 0.001809,
+      "t": 5.99,
+      "win": 0.6112,
+      "pf": 1.186
+    },
+    {
+      "exit": "wide",
+      "n": 25602,
+      "cand_net": 0.001775,
+      "ctrl_net": 0.000448,
+      "excess": 0.001327,
+      "t": 6.05,
+      "win": 0.5152,
+      "pf": 1.152
+    },
+    {
+      "exit": "partial",
+      "n": 25602,
+      "cand_net": 0.002908,
+      "ctrl_net": 0.002116,
+      "excess": 0.000792,
+      "t": 5.79,
+      "win": 0.5956,
+      "pf": 1.664
+    }
+  ],
+  "verdict": "最优 tponly:因果超额 +18.09bp(t=+5.99),现行 barrier +10.63bp(t=+6.11)。超过 taker 成本且 t>2.58 的有 6 种:barrier、hold、trail、be、tponly、wide"
+}

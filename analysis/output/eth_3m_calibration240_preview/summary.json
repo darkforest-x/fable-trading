@@ -1,0 +1,32 @@
+{
+  "symbol": "ETH_USDT_SWAP",
+  "timeframe": "3m",
+  "tasks": 240,
+  "unique_events": 216,
+  "blind_repeats": 24,
+  "future_hours_human_only": 3,
+  "model_window_bars": 200,
+  "source_counts_unique": {
+    "v10": 65,
+    "downside": 43,
+    "random": 54,
+    "numeric": 54
+  },
+  "candidate_inventory": {
+    "numeric": 363,
+    "downside": 800,
+    "random": 24456,
+    "v10": 96
+  },
+  "visible_v10_preboxes_unique": 33,
+  "data_start": "2026-03-13 12:15:00+00:00",
+  "latest_safe_tip": "2026-05-03 20:57:00+00:00",
+  "max_future_end": "2026-05-03T23:45:00+00:00",
+  "holdout_start": "2026-05-04T00:00:00+00:00",
+  "holdout_consumed": false,
+  "label_contract": {
+    "shape": "valid / invalid / uncertain + box; detector target",
+    "outcome": "strong_drop / weak_drop / fail / rebound; stored separately"
+  },
+  "status": "preview only; not imported to Label Studio"
+}

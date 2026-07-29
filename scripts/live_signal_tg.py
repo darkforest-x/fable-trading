@@ -62,12 +62,23 @@ from src.judgment.yolo_candidates import (  # noqa: E402
 
 # training layout on the Mac/3060, deployed flat under models/ on the VPS
 WEIGHT_CANDIDATES = (
+    PROJECT / "runs/detect/runs/detect/owner_short_star_v10/weights/best.pt",
+    PROJECT / "models" / "owner_short_star_v10.pt",
     PROJECT / "runs/detect/runs/detect/owner_short_star_v9/weights/best.pt",
     PROJECT / "models" / "owner_short_star_v9.pt",
 )
-OUT_DIR = PROJECT / "analysis" / "output" / "live_signals_v9"
+OUT_DIR = PROJECT / "analysis" / "output" / "live_signals_v10"
 LOG_CSV = OUT_DIR / "paper_signals.csv"
 TP_MULT, SL_MULT, HORIZON = 5.0, 2.0, 72
+# Paper exit: take profit at 5xATR, NO STOP, out at the horizon. Measured on
+# 25,602 candidates against matched random shorts (same symbol, month and ATR
+# bucket), the causal excess of nine exits ranked:
+#   tponly +18.09bp (t=5.99) · hold +17.98 · trail +14.69 · be +14.39
+#   wide   +13.27          · barrier(TP5/SL2, production) +10.63 · trend +9.40
+# Dropping the stop is worth +7.5bp against a 10bp round trip. The stop is the
+# expensive part, not the target. Train-pool in-sample; the paper log is what
+# tests it forward, which is the point of running it.
+USE_STOP = False
 FRESH_GATE_MIN = 30.0            # live discipline 7 -- owner-set, checked not changed
 MA_STYLE = {"sma20": "#2196f3", "ema20": "#ff9800", "sma60": "#00bcd4",
             "ema60": "#8bc34a", "sma120": "#9c27b0", "ema120": "#e91e63"}
@@ -137,7 +148,8 @@ def draw(ind, sym: str, sig_i: int, box: tuple, conf: float,
 
     atr = float(ind["atr14"].iloc[sig_i])
     entry = float(ind["close"].iloc[sig_i])          # projection: next open ~ last close
-    tp, sl = entry - TP_MULT * atr, entry + SL_MULT * atr
+    tp = entry - TP_MULT * atr
+    sl = entry + SL_MULT * atr if USE_STOP else None
 
     fig, (ax, axv) = plt.subplots(
         2, 1, figsize=(16, 10), dpi=110, sharex=True,
@@ -171,15 +183,18 @@ def draw(ind, sym: str, sig_i: int, box: tuple, conf: float,
 
     xsig = x[sig_i - lo]
     ax.axvline(xsig, color="#455a64", ls="--", lw=1.3, zorder=5)
-    for px, col, lab, ls in ((entry, "#1976d2", L("入场(预估=信号收盘)", "Entry (est. = signal close)"), "-"),
-                             (tp, "#2e7d32", f"{L('止盈', 'TP')} {TP_MULT:g}xATR", "--"),
-                             (sl, "#c62828", f"{L('止损', 'SL')} {SL_MULT:g}xATR", "--")):
+    levels = [(entry, "#1976d2", L("入场(预估=信号收盘)", "Entry (est. = signal close)"), "-"),
+              (tp, "#2e7d32", f"{L('止盈', 'TP')} {TP_MULT:g}xATR", "--")]
+    if sl is not None:
+        levels.append((sl, "#c62828", f"{L('止损', 'SL')} {SL_MULT:g}xATR", "--"))
+    for px, col, lab, ls in levels:
         ax.hlines(px, xsig, x[-1], color=col, lw=1.5, ls=ls, zorder=5)
         ax.text(x[-1], px, f"  {lab} {px:.6g}", va="center", fontsize=9, color=col)
     ax.plot([xsig], [entry], marker="v", ms=14, color="#1976d2", zorder=7)
     # the TP sits 5*ATR below entry and autoscale ignores hlines, so widen the
     # view or the take-profit level is drawn outside the axes and never seen
-    ylo, yhi = min(float(np.nanmin(l)), tp), max(float(np.nanmax(h)), sl)
+    ylo = min(float(np.nanmin(l)), tp)
+    yhi = max(float(np.nanmax(h)), sl if sl is not None else float(np.nanmax(h)))
     pad = (yhi - ylo) * 0.06
     ax.set_ylim(ylo - pad, yhi + pad)
 
@@ -192,10 +207,11 @@ def draw(ind, sym: str, sig_i: int, box: tuple, conf: float,
     axv.grid(alpha=0.15)
 
     t_sig = pd.to_datetime(ind["open_time"].iloc[sig_i], utc=True)
-    rr = (entry - tp) / (sl - entry) if sl > entry else float("nan")
+    rr = (entry - tp) / (sl - entry) if (sl and sl > entry) else float("nan")
     fresh = L("新鲜", "FRESH") if age_min <= FRESH_GATE_MIN else L("超门", "STALE")
     ax.set_title(
-        f"{sym}  {L('做空信号', 'SHORT signal')}   conf {conf:.2f}   R:R {rr:.1f}:1   "
+        f"{sym}  {L('做空信号', 'SHORT signal')}   conf {conf:.2f}   "
+        f"{L('无止损·超时', 'no stop, timeout') if sl is None else f'R:R {rr:.1f}:1'}   "
         f"ATR {atr/entry*100:.2f}%\n"
         f"{L('信号bar', 'signal bar')} {t_sig:%m-%d %H:%M} UTC   "
         f"{L('距今', 'age')} {age_min:.0f} min "
@@ -211,6 +227,7 @@ def draw(ind, sym: str, sig_i: int, box: tuple, conf: float,
     fig.savefig(out_path)
     plt.close(fig)
     return {"entry": entry, "tp": tp, "sl": sl, "atr": atr, "rr": rr,
+            "horizon_bars": HORIZON, "use_stop": USE_STOP,
             "signal_time": str(t_sig)}
 
 

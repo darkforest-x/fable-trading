@@ -1,0 +1,43 @@
+<!doctype html><meta charset="utf-8"><title>判断层新配置回测</title><style>
+body{background:#0f1113;color:#e9e9e9;font:15px/1.7 -apple-system,"PingFang SC",sans-serif;margin:0;padding:20px;max-width:1100px}
+h1{font-size:20px;margin:0 0 4px} h2{font-size:16px;margin:30px 0 10px;border-bottom:1px solid #272c31;padding-bottom:6px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:10px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #2a3037;padding:7px 10px;text-align:right;white-space:nowrap}
+th{background:#171c21} td:first-child,th:first-child{text-align:left}
+.warn{background:#3a2418;border-left:4px solid #ff9800;padding:14px 16px;border-radius:8px;margin:14px 0}
+.ok{background:#16241a;border-left:4px solid #4caf50;padding:14px 16px;border-radius:8px;margin:14px 0}
+.c{color:#8b949e;font-size:13.5px} code{background:#1c2229;padding:2px 5px;border-radius:4px}</style>
+<h1>判断层新配置回测 · 回归目标 + 只止盈无止损</h1>
+<p class="c">池 25,602 笔 · 特征 47 个 · CPCV 15 切分 · 训练池内 · 未碰 holdout</p>
+
+<div class="warn"><b>⚠️ 先看这条:这个结果我还不敢当结论用</b><br>
+同一个池子,今天早些时候用二分类目标测,顶档提升是 <b>−17bp</b>;现在 <b>+206~+245bp</b>,差 10 倍。<br>
+追查下来差异来自两处:①目标由二分类改回归(符合「边在幅度不在胜率」的判断);
+②我加了「必须走满 72 根」的样本过滤 —— <b>第②条为什么会让提升翻 7 倍,我没查清</b>。<br>
+在查清之前,下面的数字只能当线索,不能当结论。</div>
+
+<h2>四种组合(每笔基点)</h2>
+<table><tr><th>组合</th><th>全池净</th><th>顶档净</th><th>相对全池</th><th>为正折数</th></tr>
+<tr><td><b>分类器 + 现行障碍(生产)</b></td><td>+10.44</td><td><b>+227.71</b></td><td>+216.37</td><td>15/15</td></tr><tr><td><b>分类器 + 只止盈</b></td><td>+23.71</td><td><b>+247.97</b></td><td>+225.41</td><td>15/15</td></tr><tr><td><b>回归器 + 现行障碍</b></td><td>+10.44</td><td><b>+217.58</b></td><td>+207.88</td><td>15/15</td></tr><tr><td><b>回归器 + 只止盈(新配置)</b></td><td>+23.71</td><td><b>+266.48</b></td><td>+241.18</td><td>15/15</td></tr></table>
+<p class="c">往返成本 taker 10bp / maker 6bp</p>
+
+<h2>十分位净收益(bp,左=模型最不看好,右=最看好)</h2>
+<table><tr><th>组合</th><th>D1</th><th>D2</th><th>D3</th><th>D4</th><th>D5</th><th>D6</th><th>D7</th><th>D8</th><th>D9</th><th>D10</th></tr><tr><td>分类器 + 现行障碍(生产)</td><td>-127</td><td>-56</td><td>-35</td><td>-22</td><td>-10</td><td>+2</td><td>+15</td><td>+41</td><td>+75</td><td>+225</td></tr><tr><td>分类器 + 只止盈</td><td>-253</td><td>-104</td><td>-54</td><td>-7</td><td>+20</td><td>+57</td><td>+83</td><td>+105</td><td>+144</td><td>+249</td></tr><tr><td>回归器 + 现行障碍</td><td>-125</td><td>-54</td><td>-33</td><td>-14</td><td>-4</td><td>+4</td><td>+17</td><td>+32</td><td>+69</td><td>+216</td></tr><tr><td>回归器 + 只止盈(新配置)</td><td>-256</td><td>-87</td><td>-35</td><td>-7</td><td>+20</td><td>+44</td><td>+56</td><td>+94</td><td>+143</td><td>+268</td></tr></table>
+
+<h2>已经排除的几种「假信号」解释</h2>
+<div class="ok">
+<b>置换检验</b> 打乱目标重训:真实 +245bp,打乱后 −0.28 / −2.23 / +6.27bp<br>
+<b>ATR 匹配对照</b> 顶档 +270bp,同波动桶的非顶档 <b>−40bp</b> —— 不是「只选了高波动」<br>
+<b>禁运加到 7 天</b> +247bp,14/14 折为正 —— 不是标签窗口重叠<br>
+<b>收益口径</b> 表里 realized_ret 与我重算的相关 0.997,两者都给 +206~+220bp
+</div>
+
+<h2>其他必须知道的</h2>
+<ul>
+<li><b>候选来自旧检测器</b>,不是 v10。v10 的候选池还在跑(3060),约 2~3 小时。</li>
+<li><b>全部训练池样本内。</b>本项目的一贯模式是样本外掉一半以上。</li>
+<li><b>「只止盈无止损」不是每单都赢</b>:胜率 61.1%,亏损单中位 −2.21%,最差 −83.92%,
+持仓期间最大浮亏 189.58%。72 根(17.8 小时)超时封顶是它可控的唯一原因,
+必须小仓位、不加杠杆、靠分散。</li>
+</ul>
+</html>

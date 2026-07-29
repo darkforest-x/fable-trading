@@ -59,6 +59,15 @@
 ```
 → `docs/learnings/pool-internal-metrics-cannot-see-beta.md`
 
+### Holdout 记账补充（2026-07-29）
+- Owner 在对话中明确要求用 v10 跑 2026-07-18～07-27 每日绝对涨跌幅 Top20，并继续要求整理规律；该窗口全部在 `2026-05-04` 之后，补记为全局 **holdout 第 10 次消耗**（此前 N=9）。
+- 十日池按完整日结果事后选币，没有预注册匹配对照，只能作检测行为与标签语义审查，**不是正式验收，不能用于调参/promote**。本次二次汇总只读同一批已生成 CSV，不另记第 11 次。
+- 结论与 HTML：`analysis/output/v10_daily_movers_10d_patterns/report.html`。
+- Owner 随后又明确要求用 v10 在 ETH 3m 最近三个月预打标并生成 HTML，登记为全局 **holdout 第 11 次消耗**。本次只等距审查 2,000/43,621 个 causal-tip 锚点，v10 命中 47 个；未来 3 小时只出现在人工图，且 v10(15m)→3m 属 OOD。不得据此调阈值、验收、promote 或改 live。报告：`analysis/p_eth_3m_v10_prelabels_3m.md`；HTML：`analysis/output/eth_3m_v10_prelabels_3m/index.html`。
+- ETH 微周期标注口径已由 Owner 明确冻结：人工 review 固定看未来 **3 小时**（3m=60 bars）；检测层的“形态是否成立/框坐标”与判断层的“后续结果/幅度”**分开保存**。下一步先做 ETH 3m 的 240 张开发期双视图校准包并过 Gate A；判断层 TP/SL/超时/成本暂未另批。
+- ETH 3m 校准包预览已生成：**240 任务 = 216 独立事件 + 24 盲重复**；独立源配额 v10/numeric/downside/random = 65/54/43/54；33 个 v10 事件显示预框。HTML `analysis/output/eth_3m_calibration240_preview/index.html`，报告 `analysis/p_eth_3m_calibration240_preview.md`。全包及未来 3h 均 `< 2026-05-04`，**未耗 holdout、未导入 Label Studio**；等待 Owner 手机确认后再导入。
+- 上述混合 240 HTML 被 Owner 明确否决为“不是要看的预标图”，仅留审计，**不得导入**。按修正口径已重做 `datasets/eth_3m_v10_prebox200/`：200/200 均为 v10 conf≥0.30 真框，全部显示红框，全部 exact-tip；白底单图、右侧 future+3h，无入场/TP/SL/成交量/背景填充。HTML `v10_prebox200_mobile.html`，报告 `analysis/p_eth_3m_v10_prebox200.md`；LS 任务已准备但仍未导入，待 Owner 确认。
+
 ### 下一步（需 Owner 决策）
 1. **v10 验收**:已挂自动任务,训练结束即出「conf 0.30 下的召回 + 开火密度」。
    验收门是**密度接近 0.18~0.36**,不是 mAP,不是召回单项。
@@ -67,7 +76,7 @@
 3. 若 v10 密度仍压不下来 → 检测线的前提被证伪,应停止调检测器。
 
 ### 仍禁止
-- promote / 改 ACTIVE / 清 forward_log / 动 holdout(已耗 9 次)/ 真下单 / 改新鲜度三门。
+- promote / 改 ACTIVE / 清 forward_log / 动 holdout(已耗 11 次)/ 真下单 / 改新鲜度三门。
 
 ---
 

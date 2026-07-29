@@ -1,0 +1,357 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "v10 十日扫描：真正能带走的规律",
+    "description": "对既有 10 日 Top20 扫描的二次汇总，区分可复用信号与事后选币偏差。",
+    "generatedAt": "2026-07-29T06:30:00Z",
+    "cards": [
+      {
+        "id": "sample_card",
+        "description": "经济结果只统计已平仓信号；同币同日重复信号并不独立。",
+        "dataset": "headline",
+        "sourceId": "derived_analysis",
+        "metrics": [
+          {"label": "已平仓信号", "field": "closed_signals", "format": "number"},
+          {"label": "独立币日", "field": "symbol_days", "format": "number"}
+        ]
+      },
+      {
+        "id": "positive_card",
+        "description": "每笔毛收益扣 20bp 项目成本后的正收益比例。",
+        "dataset": "headline",
+        "sourceId": "derived_analysis",
+        "metrics": [
+          {"label": "净正收益率", "field": "positive_rate", "format": "percent"}
+        ]
+      },
+      {
+        "id": "mean_card",
+        "description": "这是全天 Top20 事后选币池中的单信号均值，不是可交易组合收益。",
+        "dataset": "headline",
+        "sourceId": "derived_analysis",
+        "metrics": [
+          {"label": "平均净收益", "field": "mean_net_bps", "format": "number"},
+          {"label": "剔除前五大赢家", "field": "trimmed_mean_bps", "format": "number"}
+        ]
+      },
+      {
+        "id": "confidence_card",
+        "description": "v10 置信度与扣 20bp 后净收益的 Spearman 排名相关。",
+        "dataset": "headline",
+        "sourceId": "derived_analysis",
+        "metrics": [
+          {"label": "置信度-收益相关", "field": "conf_spearman", "format": "number", "signed": true},
+          {"label": "仅每币日首次信号", "field": "first_conf_spearman", "format": "number", "signed": true}
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "confidence_chart",
+        "title": "首次信号按 v10 置信度分桶",
+        "subtitle": "106 个已平仓币日首次信号；柱为扣 20bp 后平均净收益，单位 bp",
+        "showDescription": true,
+        "intent": "comparison",
+        "question": "v10 置信度能否单调排序后续收益？",
+        "rationale": "五个有序置信度分桶适合用横向柱比较，并保留样本数和正收益率用于审计。",
+        "comparisonContext": {"grain": "每币日首次信号", "unit": "bp", "denominator": "已平仓首次信号"},
+        "type": "horizontalBar",
+        "dataset": "confidence_first",
+        "sourceId": "derived_analysis",
+        "encodings": {
+          "x": {"field": "confidence_bucket", "type": "ordinal", "label": "v10 置信度"},
+          "y": {"field": "mean_net_bps", "type": "quantitative", "label": "平均净收益", "unit": "bp"},
+          "tooltip": [
+            {"field": "n", "type": "quantitative", "label": "信号数"},
+            {"field": "median_net_bps", "type": "quantitative", "label": "中位净收益", "unit": "bp"},
+            {"field": "positive_rate", "type": "quantitative", "label": "净正收益率", "format": "percent"}
+          ]
+        },
+        "valueFormat": "number",
+        "unit": "bp",
+        "layout": "full",
+        "labels": {"values": "all"},
+        "palette": {"kind": "sequential", "name": "blue"},
+        "referenceLines": [{"axis": "y", "value": 0, "label": "盈亏平衡", "color": "neutral", "lineStyle": "dashed"}],
+        "settings": {"sort": "custom", "showValues": true},
+        "surface": {"surface": "card", "viewMode": "both"}
+      },
+      {
+        "id": "hour_chart",
+        "title": "每币日首次信号按 UTC 时段",
+        "subtitle": "106 个已平仓币日首次信号；18–23 UTC 仅 2 条，不宜解读",
+        "showDescription": true,
+        "intent": "comparison",
+        "question": "一天中哪个时段的首次信号在事后 Top20 池中表现更好？",
+        "rationale": "四个离散时段使用横向柱；样本数与正收益率保留在明细中。",
+        "comparisonContext": {"grain": "每币日首次信号", "unit": "bp", "denominator": "已平仓首次信号"},
+        "type": "horizontalBar",
+        "dataset": "hour_first",
+        "sourceId": "derived_analysis",
+        "encodings": {
+          "x": {"field": "hour_bucket", "type": "ordinal", "label": "信号时段"},
+          "y": {"field": "mean_net_bps", "type": "quantitative", "label": "平均净收益", "unit": "bp"},
+          "tooltip": [
+            {"field": "n", "type": "quantitative", "label": "信号数"},
+            {"field": "median_net_bps", "type": "quantitative", "label": "中位净收益", "unit": "bp"},
+            {"field": "positive_rate", "type": "quantitative", "label": "净正收益率", "format": "percent"}
+          ]
+        },
+        "valueFormat": "number",
+        "unit": "bp",
+        "layout": "full",
+        "labels": {"values": "all"},
+        "palette": {"kind": "sequential", "name": "orange"},
+        "referenceLines": [{"axis": "y", "value": 0, "label": "盈亏平衡", "color": "neutral", "lineStyle": "dashed"}],
+        "settings": {"sort": "custom", "showValues": true},
+        "surface": {"surface": "card", "viewMode": "both"}
+      },
+      {
+        "id": "daily_chart",
+        "title": "每日已平仓信号平均净收益",
+        "subtitle": "2026-07-18 至 07-27；扣 20bp，日均值不代表可叠加组合收益",
+        "showDescription": true,
+        "intent": "trend",
+        "question": "事后 Top20 池中的表现是否只来自单日？",
+        "rationale": "十个完整日达到最小时间点数量；离散日均值用柱图比折线更诚实。",
+        "comparisonContext": {"grain": "UTC 日", "unit": "bp", "denominator": "当日已平仓信号"},
+        "type": "bar",
+        "dataset": "daily",
+        "sourceId": "derived_analysis",
+        "encodings": {
+          "x": {"field": "day", "type": "ordinal", "label": "UTC 日期"},
+          "y": {"field": "mean_net_bps", "type": "quantitative", "label": "平均净收益", "unit": "bp"},
+          "tooltip": [
+            {"field": "closed", "type": "quantitative", "label": "已平仓信号"},
+            {"field": "positive_rate", "type": "quantitative", "label": "净正收益率", "format": "percent"},
+            {"field": "down_day_signal_share", "type": "quantitative", "label": "收跌币信号占比", "format": "percent"}
+          ]
+        },
+        "valueFormat": "number",
+        "unit": "bp",
+        "layout": "full",
+        "labels": {"values": "auto"},
+        "palette": {"kind": "diverging", "name": "blue-orange", "midpoint": 0},
+        "referenceLines": [{"axis": "y", "value": 0, "label": "盈亏平衡", "color": "neutral", "lineStyle": "dashed"}],
+        "settings": {"sort": "custom", "showValues": true},
+        "surface": {"surface": "card", "viewMode": "both"}
+      }
+    ],
+    "tables": [
+      {
+        "id": "direction_table",
+        "title": "按全天最终方向拆分",
+        "subtitle": "覆盖率分母为每天事后绝对涨跌幅 Top20；首次信号仅保留每币日最早一条",
+        "dataset": "direction",
+        "sourceId": "derived_analysis",
+        "density": "spacious",
+        "columns": [
+          {"field": "direction", "label": "全天方向", "type": "text"},
+          {"field": "ranked_symbol_days", "label": "Top20 币日", "format": "number"},
+          {"field": "signaled_symbol_days", "label": "开火币日", "format": "number"},
+          {"field": "coverage_rate", "label": "开火覆盖率", "format": "percent"},
+          {"field": "first_signal_n", "label": "已平仓首次信号", "format": "number"},
+          {"field": "first_mean_net_bps", "label": "首次平均净收益(bp)", "format": "number", "movement": true},
+          {"field": "first_positive_rate", "label": "首次净正收益率", "format": "percent"}
+        ]
+      },
+      {
+        "id": "repeat_table",
+        "title": "同币同日重复开火",
+        "subtitle": "按该币日总开火次数分组；经济统计只含已平仓信号",
+        "dataset": "repeats",
+        "sourceId": "derived_analysis",
+        "density": "spacious",
+        "columns": [
+          {"field": "repeat_bucket", "label": "开火次数", "type": "text"},
+          {"field": "symbol_days", "label": "币日", "format": "number"},
+          {"field": "closed_signals", "label": "已平仓信号", "format": "number"},
+          {"field": "mean_net_bps", "label": "平均净收益(bp)", "format": "number", "movement": true},
+          {"field": "positive_rate", "label": "净正收益率", "format": "percent"}
+        ]
+      },
+      {
+        "id": "outcome_table",
+        "title": "退出结果构成",
+        "subtitle": "217 条已平仓信号；TP=5×ATR、SL=2×ATR、超时=72 根 15m bar",
+        "dataset": "outcomes",
+        "sourceId": "derived_analysis",
+        "density": "spacious",
+        "columns": [
+          {"field": "outcome", "label": "结果", "type": "text"},
+          {"field": "n", "label": "信号数", "format": "number"},
+          {"field": "share", "label": "占比", "format": "percent"},
+          {"field": "mean_net_bps", "label": "平均净收益(bp)", "format": "number", "movement": true},
+          {"field": "median_held_bars", "label": "持有中位 bars", "format": "number"}
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "derived_analysis",
+        "label": "v10 十日扫描二次汇总",
+        "path": "analysis/output/v10_daily_movers_10d_patterns/prepare_report_facts.sql",
+        "query": {
+          "language": "sqlite",
+          "sql": "-- Material source query for the v10 ten-day pattern report.\n-- `signals_raw` is the existing signals.csv loaded into an in-memory SQLite DB.\nSELECT\n    day,\n    CAST(rank AS INTEGER) AS rank,\n    symbol,\n    CAST(daily_return AS REAL) AS daily_return,\n    signal_time,\n    CAST(conf AS REAL) AS conf,\n    status,\n    outcome,\n    CAST(gross AS REAL) AS gross,\n    CAST(net_taker AS REAL) AS net_taker,\n    CAST(held_bars AS REAL) AS held_bars,\n    CAST(gross AS REAL) - 0.002 AS net_project\nFROM signals_raw;",
+          "description": "该 SQL 由汇总脚本在内存 SQLite 中实际执行，生成信号事实表；脚本再按币日、方向、置信度、时段和重复次数汇总。不读取 K 线、不重新推理。",
+          "executed_at": "2026-07-29T06:30:00Z",
+          "tables_used": [
+            "analysis/output/v10_daily_movers_10d_report/signals.csv",
+            "analysis/output/v10_daily_movers_10d_report/daily_rankings.csv"
+          ],
+          "filters": ["经济统计仅 status=closed", "日期 2026-07-18 至 2026-07-27", "每天事后绝对涨跌幅 Top20"],
+          "metric_definitions": [
+            "项目净收益 = gross - 0.002（20bp）",
+            "首次信号 = 每个 symbol-day 中 signal_time 最早的已平仓信号",
+            "全天方向 = 当日第一根开盘到最后一根收盘的涨跌方向",
+            "开火覆盖率 = 有至少一条信号的 Top20 币日 / 该方向 Top20 币日"
+          ]
+        }
+      }
+    ],
+    "blocks": [
+      {"id": "title", "type": "markdown", "body": "# v10 十日扫描：真正能带走的规律"},
+      {
+        "id": "executive_summary",
+        "type": "markdown",
+        "sourceId": "derived_analysis",
+        "body": "## Executive Summary\n\n- **最强规律是方向识别，不是收益排序。** v10 覆盖了 97 个最终收跌 Top20 币日中的 85 个（87.6%），但只覆盖 103 个最终收涨币日中的 22 个（21.4%）。它确实偏向空头行情。\n- **v10 置信度几乎不含经济排序信息。** 217 条已平仓信号的置信度与扣 20bp 后净收益 Spearman 相关为 -0.004；每币日只留首次信号后仍为 -0.012。不能把 conf 当判断层。\n- **221 条不是 221 个独立机会。** 它们只来自 107 个开火币日；重复开火集中在同一段持续下跌里。新 ETH 标签必须把首次启动、趋势延续和重复开火拆开。\n- **表面收益很高，但不是因果回测。** 每天 Top20 是全天结束后才知道的；“平均净收益 +170bp”首先反映事后挑中了大波动、尤其大跌币，不能证明实盘选币能力。"
+      },
+      {"id": "headline_metrics", "type": "metric-strip", "cardIds": ["sample_card", "positive_card", "mean_card", "confidence_card"]},
+      {
+        "id": "definitions",
+        "type": "markdown",
+        "sourceId": "derived_analysis",
+        "body": "## 先把口径钉死\n\n分析对象是 2026 年 7 月 18–27 日的 200 个币日：每天用完整日的绝对涨跌幅选 Top20，再用 v10 在当日 15m K 线上做 causal-tip 推理。共有 221 条信号，其中 217 条已平仓、4 条仍运行。\n\n本报告把每笔毛收益扣 **20bp 项目成本**；原画廊的 `net@taker` 只扣 10bp。两者都未加入资金费、真实滑点或重叠持仓资本约束。"
+      },
+      {
+        "id": "direction_finding",
+        "type": "markdown",
+        "sourceId": "derived_analysis",
+        "body": "## v10 会追踪最终收跌币，但这仍是事后证据\n\n**方向差异非常大。** 最终收跌币的开火覆盖率是 87.6%，最终收涨币只有 21.4%。每币日只留首次信号后，收跌组平均净收益 +195bp、净正收益率 58.3%；收涨组则是 -75bp、13.6%。\n\n这说明 v10 的视觉目标与空头行情有一致性，但不能证明它能在不知道日终结果时选中这些币。下一轮必须改为固定 ETH 全时段或信号时点可得的宇宙，而不是日终 Top20。"
+      },
+      {"id": "direction_evidence", "type": "table", "tableId": "direction_table"},
+      {
+        "id": "confidence_finding",
+        "type": "markdown",
+        "sourceId": "derived_analysis",
+        "body": "## 置信度没有单调规律，不能兼任判断层\n\n如果 conf 真能代表交易质量，分桶收益应大体随置信度上升。实际完全不单调：首次信号的 0.60–0.70 桶最好，0.70+ 反而回落，0.50–0.60 接近失效；整体排名相关接近 0。\n\n**含义：**检测层只负责“像不像”，利润排序仍需独立判断层；提高 conf 门槛只能改变开火量，不能据此期待收益变好。"
+      },
+      {"id": "confidence_evidence", "type": "chart", "chartId": "confidence_chart"},
+      {
+        "id": "hour_finding",
+        "type": "markdown",
+        "sourceId": "derived_analysis",
+        "body": "## 午后确认优于凌晨猜底，但更像趋势阶段差异\n\n每币日首次信号中，00–05 UTC 的中位净收益为 -140bp、净正收益率 38.5%；12–17 UTC 的中位净收益为 +366bp、净正收益率 72.2%。即使只看最终收跌币，06–17 UTC 仍明显强于两端时段。\n\n**更合理的解释不是简单的时段 alpha，**而是凌晨信号更像提前猜方向，午后信号更多发生在下跌已经形成后的确认/延续阶段。ETH 标注应新增 `first_start` 与 `continuation`，否则模型会把后半段重复追跌当成大量独立正例。"
+      },
+      {"id": "hour_evidence", "type": "chart", "chartId": "hour_chart"},
+      {
+        "id": "repeat_finding",
+        "type": "markdown",
+        "sourceId": "derived_analysis",
+        "body": "## 重复开火是状态持续，不是样本量翻倍\n\n107 个开火币日中，只有 37 个只开一次；70 个开了两次或更多。单次开火币日的净正收益率只有 37.8%，而 3+ 次组为 65.1%。这更像“强趋势既容易赚钱，也让检测器不断重复开火”。\n\n**含义：**训练和验收必须先按 event cluster 去重。实盘侧也应把同一趋势内重复框视为状态更新或再入场候选，而不是把每一框当独立发现。"
+      },
+      {"id": "repeat_evidence", "type": "table", "tableId": "repeat_table"},
+      {
+        "id": "robustness_finding",
+        "type": "markdown",
+        "sourceId": "derived_analysis",
+        "body": "## 高收益不只靠五笔，但主要仍靠事后选中大跌币\n\n剔除前五大赢家后，平均净收益从 +170bp 降到 +136bp，仍为正；十天里有九天的单信号平均值为正，说明结果不是单个离群点独撑。退出构成是 TP 94、SL 85、TIMEOUT 38。\n\n但这种“稳”只存在于日终极端波动池内。没有全宇宙因果选币、没有同时间/波动桶随机对照，也没有重叠仓位资本约束，因此不能把它换算成策略 PF 或实盘收益率。"
+      },
+      {"id": "daily_evidence", "type": "chart", "chartId": "daily_chart"},
+      {"id": "outcome_evidence", "type": "table", "tableId": "outcome_table"},
+      {
+        "id": "recommendations",
+        "type": "markdown",
+        "body": "## 对 ETH 3m / 5m / 10m 新方案的直接调整\n\n1. **人工 review 图允许看未来，但要额外标阶段：**`first_start`、`continuation`、`failed`。正例框的右缘仍定义模型截止时刻。\n2. **v10 conf 只保留为检测元数据，**不作为利润标签，也不直接决定判断层门槛。\n3. **同一波下跌先聚类再切分：**一个 event cluster 内的重复框必须全部落在同一时间切分侧，避免泄漏和虚增 n。\n4. **先做固定 ETH 的因果基线：**扫描所有可用 bar，不再按日终涨跌选币；与同时间块、同波动桶的随机做空比较。\n5. **把时段规律当待验证假设：**预注册比较凌晨首次信号与 06–17 UTC 确认信号，不能直接把当前结果写成过滤规则。"
+      },
+      {
+        "id": "further_questions",
+        "type": "markdown",
+        "body": "## Further Questions\n\n- ETH 微周期的人工未来观察窗到底是 3 小时还是 6 小时？时段/阶段标签依赖这个定义。\n- `continuation` 是否允许独立开仓，还是只给已有仓位加一个“趋势仍有效”的状态？\n- 3m / 5m / 10m 的 TP、SL、超时是否共用绝对时间，还是按各自 bars 定义？这些属于 owner 决策。"
+      },
+      {
+        "id": "caveats",
+        "type": "markdown",
+        "sourceId": "derived_analysis",
+        "body": "## Caveats and Assumptions\n\n- **Critical：日终 Top20 选择使用未来信息。**本报告只适合发现候选规律，不适合证明交易边。\n- **High：信号非独立。**221 条信号只有 107 个币日，且交易窗口重叠；不能累加成组合收益。\n- **High：没有匹配随机对照。**无法区分 v10 增量与极端下跌池自身的 short beta。\n- **Medium：经济口径不完整。**本报告扣 20bp，但没有资金费、真实滑点和并发资本占用。\n- **Medium：退出参数属于旧 15m 口径。**5×ATR / 2×ATR / 72 bars 不能直接移植到 ETH 3m / 5m / 10m。\n- 4 条 RUNNING 已从经济统计剔除；数据本身无关键字段缺失、无重复 signal key，10 天每天均有完整 20 个排名币日。\n- **Holdout 记账：**原始十日扫描由 Owner 明确要求，日期均在 2026-05-04 之后，补记为全局第 10 次消耗；本次只读同一批输出，不另记第 11 次。该结果不得用于调参或 promote。\n- 这是对既有输出的二次汇总，不重新运行模型、不新增读取 K 线。"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-07-29T06:30:00Z",
+    "status": "ready",
+    "datasets": {
+      "headline": [
+        {"closed_signals": 217, "symbol_days": 107, "positive_rate": 0.5944700461, "mean_net_bps": 170.3714082, "trimmed_mean_bps": 136.3291859, "conf_spearman": -0.0043452322, "first_conf_spearman": -0.0115726629}
+      ],
+      "direction": [
+        {"direction": "全天收跌", "ranked_symbol_days": 97, "signaled_symbol_days": 85, "coverage_rate": 0.8762886598, "first_signal_n": 84, "first_mean_net_bps": 195.4296158, "first_positive_rate": 0.5833333333},
+        {"direction": "全天收涨", "ranked_symbol_days": 103, "signaled_symbol_days": 22, "coverage_rate": 0.2135922330, "first_signal_n": 22, "first_mean_net_bps": -75.4442824, "first_positive_rate": 0.1363636364}
+      ],
+      "confidence_first": [
+        {"confidence_bucket": "0.30–0.40", "n": 26, "mean_net_bps": 143.7591308, "median_net_bps": -129.9021786, "positive_rate": 0.3846153846, "tp_rate": 0.2307692308, "sl_rate": 0.6153846154},
+        {"confidence_bucket": "0.40–0.50", "n": 20, "mean_net_bps": 167.1298418, "median_net_bps": 199.6837446, "positive_rate": 0.55, "tp_rate": 0.5, "sl_rate": 0.4},
+        {"confidence_bucket": "0.50–0.60", "n": 19, "mean_net_bps": 18.4805689, "median_net_bps": -121.7658763, "positive_rate": 0.4736842105, "tp_rate": 0.3684210526, "sl_rate": 0.5263157895},
+        {"confidence_bucket": "0.60–0.70", "n": 20, "mean_net_bps": 255.1682918, "median_net_bps": 202.3778498, "positive_rate": 0.55, "tp_rate": 0.4, "sl_rate": 0.4},
+        {"confidence_bucket": "0.70+", "n": 21, "mean_net_bps": 105.7848873, "median_net_bps": 197.7316487, "positive_rate": 0.5238095238, "tp_rate": 0.4761904762, "sl_rate": 0.4761904762}
+      ],
+      "hour_first": [
+        {"hour_bucket": "00–05 UTC", "n": 65, "mean_net_bps": 26.2282417, "median_net_bps": -139.7534172, "positive_rate": 0.3846153846, "tp_rate": 0.3230769231, "sl_rate": 0.6},
+        {"hour_bucket": "06–11 UTC", "n": 21, "mean_net_bps": 262.3452401, "median_net_bps": 238.8400731, "positive_rate": 0.6190476190, "tp_rate": 0.4761904762, "sl_rate": 0.3333333333},
+        {"hour_bucket": "12–17 UTC", "n": 18, "mean_net_bps": 381.3962157, "median_net_bps": 366.2246162, "positive_rate": 0.7222222222, "tp_rate": 0.5555555556, "sl_rate": 0.2777777778},
+        {"hour_bucket": "18–23 UTC", "n": 2, "mean_net_bps": 338.5479392, "median_net_bps": 338.5479392, "positive_rate": 0.5, "tp_rate": 0.0, "sl_rate": 0.5}
+      ],
+      "repeats": [
+        {"repeat_bucket": "1 次", "symbol_days": 37, "closed_signals": 37, "mean_net_bps": 114.5381771, "positive_rate": 0.3783783784},
+        {"repeat_bucket": "2 次", "symbol_days": 37, "closed_signals": 71, "mean_net_bps": 182.8012174, "positive_rate": 0.6197183099},
+        {"repeat_bucket": "3+ 次", "symbol_days": 33, "closed_signals": 109, "mean_net_bps": 181.2274915, "positive_rate": 0.6513761468}
+      ],
+      "daily": [
+        {"day": "07-18", "signals": 19, "closed": 19, "mean_net_bps": 63.7031202, "median_net_bps": 39.5238095, "positive_rate": 0.6315789474, "down_day_signal_share": 0.7894736842},
+        {"day": "07-19", "signals": 21, "closed": 21, "mean_net_bps": 176.3802991, "median_net_bps": 165.6376085, "positive_rate": 0.5238095238, "down_day_signal_share": 0.7142857143},
+        {"day": "07-20", "signals": 16, "closed": 16, "mean_net_bps": 301.0905753, "median_net_bps": 239.0091548, "positive_rate": 0.6875, "down_day_signal_share": 1.0},
+        {"day": "07-21", "signals": 3, "closed": 3, "mean_net_bps": 80.2847545, "median_net_bps": -314.9965351, "positive_rate": 0.3333333333, "down_day_signal_share": 0.0},
+        {"day": "07-22", "signals": 34, "closed": 34, "mean_net_bps": -37.9467125, "median_net_bps": -120.9084082, "positive_rate": 0.3823529412, "down_day_signal_share": 0.8823529412},
+        {"day": "07-23", "signals": 30, "closed": 30, "mean_net_bps": 140.1752951, "median_net_bps": 294.3949855, "positive_rate": 0.6666666667, "down_day_signal_share": 0.9333333333},
+        {"day": "07-24", "signals": 37, "closed": 37, "mean_net_bps": 214.8521143, "median_net_bps": 333.7525957, "positive_rate": 0.6486486486, "down_day_signal_share": 0.9459459459},
+        {"day": "07-25", "signals": 11, "closed": 11, "mean_net_bps": 251.2522170, "median_net_bps": -85.0478848, "positive_rate": 0.4545454545, "down_day_signal_share": 0.8181818182},
+        {"day": "07-26", "signals": 7, "closed": 7, "mean_net_bps": 230.0449804, "median_net_bps": -84.6082962, "positive_rate": 0.4285714286, "down_day_signal_share": 0.4285714286},
+        {"day": "07-27", "signals": 43, "closed": 39, "mean_net_bps": 301.5194469, "median_net_bps": 318.9851905, "positive_rate": 0.7435897436, "down_day_signal_share": 0.9743589744}
+      ],
+      "outcomes": [
+        {"outcome": "TP", "n": 94, "share": 0.4331797235, "mean_net_bps": 495.8902987, "median_held_bars": 18},
+        {"outcome": "SL", "n": 85, "share": 0.3917050691, "mean_net_bps": -266.3234407, "median_held_bars": 7},
+        {"outcome": "TIMEOUT", "n": 38, "share": 0.1751152074, "mean_net_bps": 341.9578934, "median_held_bars": 71}
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "derived_analysis",
+      "label": "v10 十日扫描二次汇总",
+      "path": "analysis/output/v10_daily_movers_10d_patterns/prepare_report_facts.sql",
+      "query": {
+        "language": "sqlite",
+        "sql": "-- Material source query for the v10 ten-day pattern report.\n-- `signals_raw` is the existing signals.csv loaded into an in-memory SQLite DB.\nSELECT\n    day,\n    CAST(rank AS INTEGER) AS rank,\n    symbol,\n    CAST(daily_return AS REAL) AS daily_return,\n    signal_time,\n    CAST(conf AS REAL) AS conf,\n    status,\n    outcome,\n    CAST(gross AS REAL) AS gross,\n    CAST(net_taker AS REAL) AS net_taker,\n    CAST(held_bars AS REAL) AS held_bars,\n    CAST(gross AS REAL) - 0.002 AS net_project\nFROM signals_raw;",
+        "description": "该 SQL 由汇总脚本在内存 SQLite 中实际执行，生成信号事实表；脚本再按币日、方向、置信度、时段和重复次数汇总。不读取 K 线、不重新推理。",
+        "executed_at": "2026-07-29T06:30:00Z",
+        "tables_used": [
+          "analysis/output/v10_daily_movers_10d_report/signals.csv",
+          "analysis/output/v10_daily_movers_10d_report/daily_rankings.csv"
+        ],
+        "filters": ["经济统计仅 status=closed", "日期 2026-07-18 至 2026-07-27", "每天事后绝对涨跌幅 Top20"],
+        "metric_definitions": [
+          "项目净收益 = gross - 0.002（20bp）",
+          "首次信号 = 每个 symbol-day 中 signal_time 最早的已平仓信号",
+          "全天方向 = 当日第一根开盘到最后一根收盘的涨跌方向",
+          "开火覆盖率 = 有至少一条信号的 Top20 币日 / 该方向 Top20 币日"
+        ]
+      }
+    }
+  ]
+}

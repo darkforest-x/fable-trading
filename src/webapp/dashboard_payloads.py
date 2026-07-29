@@ -73,16 +73,35 @@ def overview_payload(universe: str = DEFAULT_UNIVERSE) -> dict:
 
 
 def backtest_payload(cost: float = BASE_COST, universe: str = DEFAULT_UNIVERSE) -> dict:
+    """Stage-3 backtest tables. These are LOOK-AHEAD numbers and say so.
+
+    The overview was switched to the tip-replay verdict but this page was not, so
+    it still headlines PF 6.61 / +245.81% / 77.10% win from a detector that could
+    see bars to the right of its own box. Replaying tip-only put the same chain at
+    PF 0.784 and -0.234% per trade. The tables stay -- deleting them loses the
+    record of what was measured -- but every payload now carries the warning and
+    the honest figure beside it, because a page of green numbers with no caveat is
+    read as a result no matter what the surrounding docs say.
+    """
     spec = universe_spec(universe)
     all_trades = trades(spec.key)
     signals, threshold = scored_signals(spec.key)
     accept_t = all_trades[all_trades["entry_time"] >= ACCEPT_START]
     score_min = float(signals["score"].min()) if not signals.empty else 0.0
     score_max = float(signals["score"].max()) if not signals.empty else 1.0
+    honest = _honest_verdict()
     out: dict = {
         "cost": cost,
         "universe": spec.key,
         "universe_label": spec.label,
+        "lookahead_warning": (
+            "⚠️ 本页为前视回测(检测器能看到框右侧的 bar),已作废。"
+            + (f"同一条链路 tip-replay 终审:PF {honest.get('profit_factor', 0):.3f}、"
+               f"每笔净 {100*honest.get('mean_net_per_trade', 0):+.3f}%、"
+               f"胜率 {100*honest.get('win_rate', 0):.1f}%({honest.get('n_trades', 0)} 笔,"
+               f"{honest.get('window', '')})。" if honest else "")
+            + "保留本表仅为记录当时测了什么,不作为任何决策依据。"),
+        "honest_verdict": honest,
         "score_threshold": threshold,
         "score_semantics": "predicted_realized_ret" if abs(threshold) < 0.2 else "class_probability",
         "score_range": {"min": score_min, "max": score_max},
