@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "experiment_id": "eth3m_short_pilot_v2_cls_diag_20260730",
+  "recorded_at": "2026-07-30T01:00:00+08:00",
+  "task": "ETH-USDT-SWAP 3m current right-edge T short_start/no_start image classification",
+  "owner_authorization": {
+    "diagnostic_training": true,
+    "concurrent_3060_run": true,
+    "owner_exact_words": "直接去3060跑吧",
+    "existing_remote_pid": 93656,
+    "existing_job_must_not_be_killed_or_waited": true,
+    "scope": "one diagnostic v2 classification fit under this frozen recipe"
+  },
+  "source": {
+    "dataset": "datasets/eth_3m_short_pilot_v2",
+    "prepared_dataset": "datasets/eth_3m_short_pilot_v2_cls_letterbox960",
+    "manifest_sha256": "c077cf75594c5f7d4f7ffd576e45cba42df99d6c885a418745bed4494b5473d0",
+    "validation_receipt": "analysis/output/eth3m_short_pilot_v2_dataset/validation.json",
+    "validation_sha256": "8076c7f07a8c79317be3d73a71e07781e7493293c86aff83a4fe72799881c078",
+    "train_images": 95,
+    "val_images": 42,
+    "weak_or_review_training_images": 0,
+    "continuous_smoke_training_images": 0
+  },
+  "training": {
+    "run_name": "eth3m_short_pilot_v2_cls_diag_20260730",
+    "model": "yolo11n-cls.pt",
+    "model_sha256": "c62d41bf9625777760018bf914d2e6cd472420ccd01706d97a61cb6c82502bd7",
+    "pretrained": true,
+    "imgsz": 960,
+    "batch": 4,
+    "epochs": 100,
+    "patience": 20,
+    "seed": 42,
+    "deterministic": true,
+    "device": 0,
+    "workers": 4,
+    "cache": false,
+    "optimizer": "AdamW",
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "warmup_epochs": 0.5,
+    "augmentations": {
+      "fliplr": 0.0,
+      "flipud": 0.0,
+      "hsv_h": 0.0,
+      "hsv_s": 0.0,
+      "hsv_v": 0.0,
+      "scale": 0.0,
+      "translate": 0.0,
+      "erasing": 0.0,
+      "auto_augment": null
+    },
+    "input_transform": "physical 960x960 white letterbox plus deterministic full-frame tensor transform; no crop"
+  },
+  "acceptance_gates": {
+    "probability_threshold": 0.5,
+    "threshold_sweep": false,
+    "val_short_start_true_positives_min": 6,
+    "val_short_start_total": 8,
+    "val_no_start_false_positives_max": 2,
+    "val_no_start_total": 34,
+    "continuous_smoke_raw_fires_per_day_max": 3.0,
+    "continuous_smoke_event_merge_bars": 18,
+    "continuous_smoke_events_per_day_max": 1.0,
+    "owner_review_events": 30,
+    "owner_review_yes_rate_min": 0.6
+  },
+  "failure_policy": {
+    "oom": "fail once, record the nonzero exit, do not auto-retry with a changed batch",
+    "gate_failure": "stop; do not scan thresholds or promote",
+    "existing_gpu_job": "run concurrently as authorized; never kill or wait for PID 93656"
+  },
+  "prohibitions": {
+    "holdout_read": true,
+    "threshold_tuning": true,
+    "weak_label_training": true,
+    "smoke_as_negative_training": true,
+    "promote": true,
+    "write_active": true,
+    "forward_log_mutation": true,
+    "real_trading_change": true
+  },
+  "status": "owner_authorized_diagnostic_training_only"
+}

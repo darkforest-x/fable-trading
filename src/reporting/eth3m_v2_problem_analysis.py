@@ -1,0 +1,1013 @@
+"""Build the source-backed ETH 3m v2 failure-analysis report artifact.
+
+Inputs are limited to the pre-holdout diagnostic summary and the frozen
+pre-registration.  The module does not load market data, holdout rows, model
+weights, or prediction images.  Dataset rebuild numbers in the report are
+explicit proposals, not silently activated thresholds.
+"""
+from __future__ import annotations
+
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+
+PROJECT = Path(__file__).resolve().parents[2]
+SUMMARY_PATH = (
+    PROJECT
+    / "analysis/output/eth3m_short_pilot_v2_cls_diag_20260730/summary.json"
+)
+PREREG_PATH = PROJECT / "analysis/eth3m_short_pilot_v2_cls_prereg.json"
+OUTPUT_DIR = PROJECT / "analysis/output/eth3m_v2_problem_analysis_20260730"
+QUALITY_AUDIT_PATH = OUTPUT_DIR / "dataset_quality_audit.json"
+
+
+def _read_json(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _generated_at() -> str:
+    return (
+        datetime.now(timezone.utc)
+        .replace(microsecond=0)
+        .isoformat()
+        .replace("+00:00", "Z")
+    )
+
+
+def _assert_evidence_contract(
+    summary: dict[str, Any], prereg: dict[str, Any]
+) -> None:
+    """Fail if the frozen evidence no longer matches the audited incident."""
+    val = summary["metrics"]["val"]
+    train = summary["metrics"]["train"]
+    majority = summary["majority_baseline"]
+    gates = summary["gates"]
+    prepared = summary["prepared_meta"]
+    prereg_gates = prereg["acceptance_gates"]
+
+    expected = {
+        "status": summary["status"] == "failed_gates",
+        "threshold": float(gates["threshold"]) == 0.5,
+        "train_confusion": (train["tp"], train["fp"], train["tn"], train["fn"])
+        == (22, 0, 73, 0),
+        "val_confusion": (val["tp"], val["fp"], val["tn"], val["fn"])
+        == (0, 0, 34, 8),
+        "majority_match": abs(float(val["accuracy"]) - float(majority["accuracy"]))
+        < 1e-12,
+        "prepared_total": int(prepared["total"]) == 137,
+        "positive_events": sum(
+            int(prepared["counts"][split]["positive_events"])
+            for split in ("train", "val")
+        )
+        == 29,
+        "prereg_threshold": float(prereg_gates["probability_threshold"]) == 0.5,
+        "prereg_tp": int(prereg_gates["val_short_start_true_positives_min"]) == 6,
+        "prereg_fp": int(prereg_gates["val_no_start_false_positives_max"]) == 2,
+        "scope_holdout": summary["scope_guard"]["holdout_read"] is False,
+    }
+    failed = [name for name, passed in expected.items() if not passed]
+    if failed:
+        raise ValueError(f"diagnostic evidence contract changed: {failed}")
+
+
+def _sources() -> list[dict[str, Any]]:
+    return [
+        {
+            "id": "training_summary",
+            "label": "V2 分类诊断机器结果",
+            "path": "analysis/output/eth3m_short_pilot_v2_cls_diag_20260730/summary.json",
+            "query": {
+                "engine": "repository-artifact",
+                "language": "json",
+                "description": "固定 p=0.50 的 train/val 混淆矩阵、概率摘要、基线、门槛和运行证据。",
+                "sql": "SELECT status, metrics, gates, majority_baseline, prepared_meta, scope_guard FROM read_json_auto('analysis/output/eth3m_short_pilot_v2_cls_diag_20260730/summary.json');",
+                "tables_used": [
+                    "analysis/output/eth3m_short_pilot_v2_cls_diag_20260730/summary.json"
+                ],
+                "filters": [
+                    "train and chronological val only",
+                    "fixed probability threshold 0.50",
+                    "holdout, smoke and weak/review rows excluded",
+                ],
+                "metric_definitions": [
+                    "recall = TP / (TP + FN)",
+                    "balanced accuracy = (recall + specificity) / 2",
+                    "majority baseline = always predict no_start",
+                ],
+            },
+        },
+        {
+            "id": "training_prereg",
+            "label": "V2 分类诊断预注册",
+            "path": "analysis/eth3m_short_pilot_v2_cls_prereg.json",
+            "query": {
+                "engine": "repository-artifact",
+                "language": "json",
+                "description": "训练前冻结的阈值、TP/FP 验收门、fail-fast 策略和禁止事项。",
+                "sql": "SELECT acceptance_gates, failure_policy, prohibitions FROM read_json_auto('analysis/eth3m_short_pilot_v2_cls_prereg.json');",
+                "tables_used": ["analysis/eth3m_short_pilot_v2_cls_prereg.json"],
+                "filters": ["no threshold sweep", "no holdout read", "no promote"],
+                "metric_definitions": [
+                    "static gate = TP >= 6 of 8 and FP <= 2 of 34 at p=0.50"
+                ],
+            },
+        },
+        {
+            "id": "dataset_audit",
+            "label": "V2 数据集结构审计",
+            "path": "analysis/p_eth_3m_short_pilot_v2_dataset.md",
+            "query": {
+                "engine": "repository-report",
+                "language": "markdown",
+                "description": "记录 30 个正图、107 个 owner-no、29 个独立正事件、来源偏差与事件级切分。",
+                "sql": "SELECT split, target, event_id, positive_event_id, sample_kind, label_provenance, anchor_time, input_start_time, label_end_time FROM read_csv_auto('datasets/eth_3m_short_pilot_v2/manifest.csv', header=true);",
+                "tables_used": ["analysis/p_eth_3m_short_pilot_v2_dataset.md"],
+                "filters": ["pre-holdout only", "weak labels excluded"],
+                "metric_definitions": [
+                    "independent positive event = overlapping 3h review intervals merged"
+                ],
+            },
+        },
+        {
+            "id": "timing_calibration",
+            "label": "30 张提前入场校准包",
+            "path": "analysis/p_eth_3m_entry_timing_calibration30.md",
+            "query": {
+                "engine": "repository-report",
+                "language": "markdown",
+                "description": "说明正例锚点由 v10 owner-yes 池内的机械规则提前 6–42 分钟提出，且原本只应作为校准候选。",
+                "sql": "SELECT source_task_id, entry_candidate_time, original_v10_time, lead_bars, lead_minutes, proposal_rule FROM read_csv_auto('datasets/eth_3m_entry_timing_calibration30/manifest.csv', header=true);",
+                "tables_used": ["analysis/p_eth_3m_entry_timing_calibration30.md"],
+                "filters": ["30 calibration candidates", "fixed 3h human future view"],
+                "metric_definitions": [
+                    "proposal anchor = first closed 3m bar below all six MAs inside the owner-confirmed v10 box"
+                ],
+            },
+        },
+        {
+            "id": "diagnostic_report",
+            "label": "V2 分类诊断文字报告",
+            "path": "analysis/p_eth3m_short_pilot_v2_cls_diag_20260730.md",
+            "query": {
+                "engine": "repository-report",
+                "language": "markdown",
+                "description": "训练配方、3060 运行回执、固定门结果、基线与诚实声明。",
+                "sql": "SELECT experiment_id, training, metrics, gates, baseline_first_below_all, majority_baseline, scope_guard FROM read_json_auto('analysis/output/eth3m_short_pilot_v2_cls_diag_20260730/summary.json');",
+                "tables_used": ["analysis/p_eth3m_short_pilot_v2_cls_diag_20260730.md"],
+                "filters": ["diagnostic pilot only"],
+                "metric_definitions": ["all reported metrics use the frozen p=0.50 gate"],
+            },
+        },
+        {
+            "id": "semantic_quality_audit",
+            "label": "V2 标签来源与时间依赖块审计",
+            "path": "analysis/output/eth3m_v2_problem_analysis_20260730/dataset_quality_audit.json",
+            "query": {
+                "engine": "repository-artifact",
+                "language": "json",
+                "description": "按完整 [T-199,T+60] 暴露区间计算依赖块，并量化 provenance 与 first-below 锚点规则对类别的构造捷径。",
+                "sql": "SELECT dependency_window, event_concentration, provenance_confounding, anchor_rule_confounding, quality_verdict FROM read_json_auto('analysis/output/eth3m_v2_problem_analysis_20260730/dataset_quality_audit.json');",
+                "tables_used": [
+                    "datasets/eth_3m_short_pilot_v2/manifest.csv",
+                    "analysis/output/eth3m_v10_label_timing/task_timing_metrics.csv",
+                    "analysis/output/eth3m_v2_problem_analysis_20260730/dataset_quality_audit.json",
+                ],
+                "filters": [
+                    "only source_task_id values present in the pre-holdout manifest",
+                    "all used anchors and timing rows before 2026-05-04",
+                ],
+                "metric_definitions": [
+                    "dependency block = connected component of overlapping [input_start_time,label_end_time] intervals",
+                    "anchor shortcut = anchor_time equals first-below-all-six-MAs time",
+                ],
+            },
+        },
+    ]
+
+
+def build_artifact(
+    summary: dict[str, Any],
+    prereg: dict[str, Any],
+    quality_audit: dict[str, Any],
+    *,
+    generated_at: str | None = None,
+) -> dict[str, Any]:
+    """Return the portable report artifact after validating frozen evidence."""
+    _assert_evidence_contract(summary, prereg)
+    dependency = quality_audit["dependency_window"]["counts"]
+    provenance_shortcut = quality_audit["provenance_confounding"][
+        "source_only_shortcut"
+    ]
+    anchor_shortcut = quality_audit["anchor_rule_confounding"]["shortcut"]
+    expected_quality = {
+        "status": quality_audit["status"] == "failed_semantic_quality",
+        "holdout": quality_audit["scope"]["holdout_read"] is False,
+        "all_blocks": dependency["all"] == {"images": 137, "blocks": 32},
+        "positive_blocks": dependency["all_positive"]
+        == {"images": 30, "blocks": 23},
+        "val_positive_blocks": dependency["val_positive"]
+        == {"images": 8, "blocks": 5},
+        "provenance_shortcut": provenance_shortcut["accuracy"] == 1.0,
+        "anchor_shortcut": (anchor_shortcut["tp"], anchor_shortcut["fp"], anchor_shortcut["tn"], anchor_shortcut["fn"])
+        == (30, 1, 106, 0),
+    }
+    failed_quality = [name for name, passed in expected_quality.items() if not passed]
+    if failed_quality:
+        raise ValueError(f"dataset quality evidence contract changed: {failed_quality}")
+    generated = generated_at or _generated_at()
+    train = summary["metrics"]["train"]
+    val = summary["metrics"]["val"]
+    prepared = summary["prepared_meta"]
+    gates = summary["gates"]
+    threshold = float(gates["threshold"])
+    positive_events = sum(
+        int(prepared["counts"][split]["positive_events"])
+        for split in ("train", "val")
+    )
+
+    headline = [
+        {
+            "training_images": int(prepared["counts"]["train"]["total"]),
+            "validation_images": int(prepared["counts"]["val"]["total"]),
+            "independent_positive_events": positive_events,
+            "positive_dependency_blocks": int(dependency["all_positive"]["blocks"]),
+            "validation_positive_blocks": int(dependency["val_positive"]["blocks"]),
+            "anchor_shortcut_accuracy": float(anchor_shortcut["accuracy"]),
+            "validation_recall": float(val["recall"]),
+            "validation_accuracy": float(val["accuracy"]),
+            "majority_accuracy": float(summary["majority_baseline"]["accuracy"]),
+            "holdout_rows_read": 0,
+        }
+    ]
+    probability_rows: list[dict[str, Any]] = []
+    for split_name, split_metrics in (("train", train), ("val", val)):
+        for class_name, class_label in (
+            ("no_start", "不是"),
+            ("short_start", "是"),
+        ):
+            stats = split_metrics["p_short_by_true_class"][class_name]
+            count = (
+                int(split_metrics["negatives"])
+                if class_name == "no_start"
+                else int(split_metrics["positives"])
+            )
+            probability_rows.append(
+                {
+                    "cohort": f"{split_name} · {class_label}",
+                    "split": split_name,
+                    "true_class": class_name,
+                    "true_class_cn": class_label,
+                    "sample_count": count,
+                    "mean_p_short": float(stats["mean"]),
+                    "min_p_short": float(stats["min"]),
+                    "max_p_short": float(stats["max"]),
+                    "std_p_short": float(stats["std"]),
+                    "decision_threshold": threshold,
+                }
+            )
+
+    split_rows = [
+        {
+            "split": split,
+            "images": int(prepared["counts"][split]["total"]),
+            "short_start": int(prepared["counts"][split]["short_start"]),
+            "no_start": int(prepared["counts"][split]["no_start"]),
+            "positive_events": int(prepared["counts"][split]["positive_events"]),
+            "tp": int(summary["metrics"][split]["tp"]),
+            "fp": int(summary["metrics"][split]["fp"]),
+            "tn": int(summary["metrics"][split]["tn"]),
+            "fn": int(summary["metrics"][split]["fn"]),
+            "recall": float(summary["metrics"][split]["recall"]),
+            "balanced_accuracy": float(
+                summary["metrics"][split]["balanced_accuracy"]
+            ),
+        }
+        for split in ("train", "val")
+    ]
+    dependency_rows = [
+        {
+            "scope": label,
+            "images": int(dependency[key]["images"]),
+            "dependency_blocks": int(dependency[key]["blocks"]),
+            "images_per_block": float(dependency[key]["images"])
+            / int(dependency[key]["blocks"]),
+            "definition": "connected component of overlapping [T-199,T+60] intervals",
+        }
+        for key, label in (
+            ("all", "全部"),
+            ("train", "train 全部"),
+            ("val", "val 全部"),
+            ("all_positive", "全部正例"),
+            ("train_positive", "train 正例"),
+            ("val_positive", "val 正例"),
+        )
+    ]
+    construction_shortcuts = [
+        {
+            "shortcut": "标签来源 provenance",
+            "model_feature": "否",
+            "tp": int(provenance_shortcut["tp"]),
+            "fp": int(provenance_shortcut["fp"]),
+            "tn": int(provenance_shortcut["tn"]),
+            "fn": int(provenance_shortcut["fn"]),
+            "accuracy": float(provenance_shortcut["accuracy"]),
+            "meaning": "证明正负类来自两套纯净来源；不是部署特征",
+        },
+        {
+            "shortcut": "anchor 恰为六 MA 首次下破",
+            "model_feature": "原框上下文依赖，不能部署",
+            "tp": int(anchor_shortcut["tp"]),
+            "fp": int(anchor_shortcut["fp"]),
+            "tn": int(anchor_shortcut["tn"]),
+            "fn": int(anchor_shortcut["fn"]),
+            "accuracy": float(anchor_shortcut["accuracy"]),
+            "meaning": "证明 target 与锚点生成规则近乎绑定；不是未来泄漏",
+        },
+    ]
+
+    root_causes = [
+        {
+            "priority": 1,
+            "status": "已证实",
+            "severity": "致命",
+            "finding": "正负类回答了两个不同的人工问题，provenance 100% 决定类别",
+            "evidence": "正例是 owner-yes 形态内另提橙色 T 后整批确认“来得及”；负例是 Project 53 对原红框形态判“不是”。仅看 label_provenance 即 TP30/FP0/TN107/FN0。",
+            "impact": "训练目标不是统一的 open_short_now 决策边界；缺少同源的早/正好/太晚、形态对/错交叉样本。",
+            "action": "所有候选统一逐行回答 current-T“现在是否做空”；每个来源桶必须同时出现 yes 和 no。",
+        },
+        {
+            "priority": 2,
+            "status": "已证实",
+            "severity": "致命",
+            "finding": "锚点生成规则近乎一一决定标签",
+            "evidence": "30/30 正例被移动到六 MA 首次下破，107/107 负例保留原 v10 tip；用“anchor 是否等于首次下破”可得 TP30/FP1/TN106/FN0，准确率 99.27%。",
+            "impact": "标签与样本如何被生成严重混杂；模型容易学到锚点年龄/阶段差异，而不是通用做空启动。",
+            "action": "同一旧事件成对标 earlier 与 original tip；first-below 只作 candidate metadata，绝不能自动给 target。",
+        },
+        {
+            "priority": 3,
+            "status": "已证实",
+            "severity": "高",
+            "finding": "有效独立样本数被图片数和标签事件数高估",
+            "evidence": "按完整 [T-199,T+60] 暴露区间，137 张只有 32 个依赖块；30 正图只有 23 块，val 8 正图只有 5 块。18 个 event 同时含正负，单 event 最多 6 张。",
+            "impact": "val 对少数几个时间片极度敏感；图片重复贡献还会让某些行情块获得更高训练权重。",
+            "action": "按完整暴露区间分组、切分和等权；同时报告图片数与依赖块数，val 按正/负依赖块设门。",
+        },
+        {
+            "priority": 4,
+            "status": "已证实",
+            "severity": "高",
+            "finding": "小样本时间外过拟合并退化为全不报",
+            "evidence": "train TP22/FP0/TN73/FN0；val TP0/FP0/TN34/FN8。train 正例均值 99.39%，val 正负均值仅 4.56%/4.29%。",
+            "impact": "模型记住训练期/来源特征，没有得到稳定的时间外类别分离。",
+            "action": "先扩跨时间/状态的统一标签；使用至少 3 个 walk-forward 折与多数类、简单规则同表。",
+        },
+        {
+            "priority": 5,
+            "status": "已证实",
+            "severity": "高",
+            "finding": "checkpoint 选优指标与真实验收门不一致",
+            "evidence": "训练器按 (top1+top5)/2 保存 epoch 1；二分类 top5 恒为 1，top1 80.95% 又与永远判 no_start 相同；真实门要求 TP≥6 且 FP≤2。",
+            "impact": "训练器把“不发信号”当成最佳 checkpoint，早停也围绕错误目标。",
+            "action": "逐 epoch 保存固定 p=0.50 混淆矩阵；先按 TP/FP 门选 checkpoint，再以 balanced metric 破同分。",
+        },
+        {
+            "priority": 6,
+            "status": "已证实",
+            "severity": "高",
+            "finding": "缺少连续盘口中的代表性负例与关键边界样本",
+            "evidence": "现有负例全部来自 v10 候选池；缺少形态对但太早/太晚、首次下破却失败、普通随机 tip 和局部很像的 hard negative。",
+            "impact": "即使静态 val 通过，也无法估计真实基准开火率或识别最接近决策边界的误报。",
+            "action": "从连续 pre-holdout 时间轴分层采样，并对旧 yes/no 事件成对生成 earlier/original 锚点逐张复核。",
+        },
+        {
+            "priority": 7,
+            "status": "待单变量验证",
+            "severity": "中",
+            "finding": "warmup bias 学习率可能过大",
+            "evidence": "配置 lr0=0.0001，但 epoch 1 记录 lr/pg2=0.077023，约为 lr0 的 770 倍。",
+            "impact": "可能让极小不平衡样本在首轮迅速偏向多数类；当前不能据此宣称因果。",
+            "action": "仅在新数据通过 Gate A 后，单独比较 warmup_bias_lr=0；不与阈值、采样、loss 同时改。",
+        },
+        {
+            "priority": 8,
+            "status": "待单变量验证",
+            "severity": "中",
+            "finding": "200-bar 全图可能稀释最右端决策信息",
+            "evidence": "任务只判断当前 T，但模型输入主要面积是历史上下文；没有做 context+右缘 ROI 对照。",
+            "impact": "小样本下模型可能优先学习全局风格，而不是最后 24–48 根的启动结构。",
+            "action": "数据门通过后，保持标签与切分不变，单独对比全图与 context+右缘 ROI 双视图。",
+        },
+    ]
+
+    label_contract = [
+        {
+            "field": "唯一人工问题",
+            "current_v2": "批量确认 timing 正例；负例来自另一批 owner-no",
+            "rebuilt_contract": "在橙色 T 点，现在是不是应该做空入场？只选“是/不是”",
+            "storage": "owner_entry_yes: 1/0",
+        },
+        {
+            "field": "人工可见图",
+            "current_v2": "正例校准图看未来 3h；负例来自旧审核流程",
+            "rebuilt_contract": "统一：左侧因果 200 bars + 右侧固定未来 60 bars/3h",
+            "storage": "review_image；永不进入训练",
+        },
+        {
+            "field": "模型输入图",
+            "current_v2": "200 bars causal 全图",
+            "rebuilt_contract": "同一 anchor 物理截止 T；无未来像素、未来线或 outcome 文字",
+            "storage": "causal_image；唯一训练图",
+        },
+        {
+            "field": "未来结果",
+            "current_v2": "未作为分类训练标签",
+            "rebuilt_contract": "MFE/MAE、到达时间、3h return 自动计算，不增加人工按钮",
+            "storage": "future_* 数值列；与人工 action label 分开",
+        },
+        {
+            "field": "v10 框/置信度",
+            "current_v2": "参与正负来源选择",
+            "rebuilt_contract": "只保留为 candidate_source 元数据，不能直接决定 target",
+            "storage": "candidate_source / v10_conf / anchor_rule",
+        },
+        {
+            "field": "事件身份",
+            "current_v2": "标签 horizon 口径称 29 个正事件；完整暴露区间只有 23 正依赖块",
+            "rebuilt_contract": "所有样本均有 dependency_block_id；[T-199,T+60] 重叠即同块并等权",
+            "storage": "dependency_block_id / event_id / source_group / duplicate_group",
+        },
+    ]
+
+    sampling_plan = [
+        {
+            "phase": "D0 · 口径校准",
+            "unique_anchors": "240（另加 10% 盲重复）",
+            "task_mix": "60 个旧 owner-yes 事件×earlier/original=120；40 个旧 owner-no×original/near-miss=80；40 个非 v10 连续 tip",
+            "positive_goal": "不预造标签；观察自然 yes 率",
+            "duplicate_audit": "10% 盲重复",
+            "gate": "重复一致率建议≥90%；source-only AUC/BA<0.60；来源桶都出现正/负；图片有效率100%",
+            "decision": "若口径不稳定，先改说明和样例，不扩集、不训练",
+        },
+        {
+            "phase": "D1 · 可学习性集",
+            "unique_anchors": "≥600",
+            "task_mix": "按月×波动×趋势×候选来源分层；补足普通 tip 与“像但太晚”难负例",
+            "positive_goal": "建议≥100 个正依赖块、≥250 个负依赖块；不足则定向补采但仍由 owner 二选一",
+            "duplicate_audit": "5% 盲重复",
+            "gate": "walk-forward 各 val 有≥25 个正依赖块；依赖块等权；source-only AUC/BA<0.60",
+            "decision": "只做 1 次诊断训练；固定 p=0.50 门失败则回数据，不扫阈值",
+        },
+        {
+            "phase": "D2 · 扩展训练集",
+            "unique_anchors": "2,000",
+            "task_mix": "在 D1 通过后按欠覆盖状态补齐；hard-negative 不超过总量 20%",
+            "positive_goal": "建议≥800 总依赖块，其中≥250 yes、≥500 no；静态 val ≥60 yes/240 no 块",
+            "duplicate_audit": "5% 盲重复",
+            "gate": "覆盖建议 12–24 个月；冻结 train/val/accept 与≥260-bar embargo；至少 3 个 walk-forward 折",
+            "decision": "D1 未通过时禁止用堆到 2,000 张掩盖目标错误",
+        },
+    ]
+
+    source_buckets = [
+        {
+            "bucket": "连续盘口随机 tip",
+            "proposed_share": "25–30%",
+            "definition": "在 pre-holdout 连续 ETH 3m 时间轴按月/时段/波动/趋势分层随机抽 T",
+            "purpose": "估计真实基准分布与普通 no_start；避免只在 v10 候选世界里训练",
+            "guardrail": "不能把未标 smoke 自动当负例",
+        },
+        {
+            "bucket": "v10 当前-tip 候选",
+            "proposed_share": "20–25%",
+            "definition": "覆盖不同 v10 conf、框宽度、走势阶段；仍只问当前 T 是/不是",
+            "purpose": "保留现有形态搜索能力，同时让同一来源同时产生正负",
+            "guardrail": "v10 是否出框不能决定 target",
+        },
+        {
+            "bucket": "因果规则候选",
+            "proposed_share": "25%",
+            "definition": "六 MA 首次下破、均线压缩、局部破位等仅用于提候选；包含规则成立和未成立对照",
+            "purpose": "提高正例发现效率，并能与简单规则做公平基线",
+            "guardrail": "规则值只存元数据，不自动贴正",
+        },
+        {
+            "bucket": "困难负例",
+            "proposed_share": "15–20%",
+            "definition": "形态相似但已走完、反弹、震荡假破、方向相反，以及上一版模型固定门 FP",
+            "purpose": "直接训练“为什么看起来像但现在不能进”",
+            "guardrail": "模型挖掘样本仍需 owner 二选一；单轮不超过 20%",
+        },
+        {
+            "bucket": "边界/一致性复核",
+            "proposed_share": "5–10%",
+            "definition": "盲重复、相邻 T-1/T/T+1 但分别独立判断、低质量自动拦截样本",
+            "purpose": "测标签稳定性和真实信号寿命，而不是用几何规则替代人工",
+            "guardrail": "相邻时点绝不自动继承同一标签",
+        },
+    ]
+
+    quality_gates = [
+        {
+            "order": 1,
+            "layer": "文件/因果",
+            "check": "T 后像素、未来列、哈希重复、损坏图、anchor 对齐",
+            "pass_rule": "0 泄漏；0 冲突；图片/manifest 100% 对应",
+            "on_fail": "阻断构建",
+            "owner_decision": "不需要",
+        },
+        {
+            "order": 2,
+            "layer": "标签一致性",
+            "check": "盲重复 yes/no 一致率与时间漂移",
+            "pass_rule": "建议 D0 ≥90%；逐月报告，不只报总数；冲突样本重审",
+            "on_fail": "重写口径与正反样例，再做小批复核",
+            "owner_decision": "确认建议门",
+        },
+        {
+            "order": 3,
+            "layer": "来源混杂",
+            "check": "candidate_source、anchor_rule 单字段能否近乎决定 target",
+            "pass_rule": "每个主要来源桶同时含正/负；source-only AUC 或 balanced accuracy 建议<0.60",
+            "on_fail": "补采交叉样本，不训练",
+            "owner_decision": "不需要",
+        },
+        {
+            "order": 4,
+            "layer": "时间依赖块与权重",
+            "check": "按完整 [T-199,T+60] 合并依赖块；检查多图事件权重",
+            "pass_rule": "D1 建议≥100 yes/250 no 块；正式集≥250 yes/500 no；每块总权重相同",
+            "on_fail": "继续采标或降同块图片权重，不用重复图片扩数",
+            "owner_decision": "确认建议门",
+        },
+        {
+            "order": 5,
+            "layer": "时间切分",
+            "check": "依赖块级顺序切分、输入+未来 purge、各 val 正负块数",
+            "pass_rule": "embargo ≥260 bars；禁止随机切分；D1 各 val 建议≥25 正块，正式 val≥60 正/240 负块",
+            "on_fail": "重新分配时间段或补数据",
+            "owner_decision": "不需要",
+        },
+        {
+            "order": 6,
+            "layer": "静态模型门",
+            "check": "固定 p=0.50 的 TP/FP，与多数类及简单规则同表",
+            "pass_rule": "沿用已冻结 TP≥6/8、FP≤2/34 的比例口径；新样本数按比例预注册",
+            "on_fail": "fail-fast；不扫阈值、不跑 smoke",
+            "owner_decision": "若改阈值/门，必须先批准",
+        },
+        {
+            "order": 7,
+            "layer": "连续盘口与经济性",
+            "check": "raw/merged fires、owner 复核、收益与匹配随机对照",
+            "pass_rule": "静态门过后才运行；成本/障碍/holdout 均维持 owner 决策纪律",
+            "on_fail": "不 promote、不写 ACTIVE",
+            "owner_decision": "涉及阈值、障碍、成本、holdout 必须批准",
+        },
+    ]
+
+    execution_plan = [
+        {
+            "order": 1,
+            "stage": "冻结失败样本与问题合同",
+            "work": "保留当前 137 张、manifest、predictions 和 best SHA；标记 diagnostic-only，不再作为正式金标扩写。",
+            "deliverable": "failure snapshot + schema v3 draft",
+            "stop_condition": "证据哈希或数量不一致",
+        },
+        {
+            "order": 2,
+            "stage": "生成 D0 任务",
+            "work": "只读 pre-holdout ETH 3m；生成 240 个唯一 T：旧 yes 60 事件成对 120、旧 no 40 事件成对 80、非 v10 连续 tip 40。",
+            "deliverable": "D0 manifest、移动预览、Label Studio 单问题项目",
+            "stop_condition": "任何未来像素进入 causal 图",
+        },
+        {
+            "order": 3,
+            "stage": "Owner 二选一标注",
+            "work": "界面只显示“是/不是”；未来 3h 只供判断。MFE/MAE/延迟后台自动保存，不增加按钮。",
+            "deliverable": "owner_entry_yes + blind duplicate audit",
+            "stop_condition": "一致率或说明理解未过 Gate A",
+        },
+        {
+            "order": 4,
+            "stage": "D1 扩集与数据审计",
+            "work": "补到≥600 独立 anchors，重点补跨月、跨波动、跨趋势的正例与 hard negatives，并按完整暴露块等权。",
+            "deliverable": "source×label×regime 分布、source-only baseline、依赖块 time split、validation receipt",
+            "stop_condition": "来源基线 AUC/BA≥0.60，或正/负依赖块不足",
+        },
+        {
+            "order": 5,
+            "stage": "一次诊断训练",
+            "work": "固定数据、p=0.50 与配方；逐 epoch 记录 TP/FP，按真实门选 checkpoint。",
+            "deliverable": "train/val 混淆矩阵、概率分布、简单规则和多数类基线",
+            "stop_condition": "静态门失败即结束",
+        },
+        {
+            "order": 6,
+            "stage": "单变量模型实验",
+            "work": "仅在 D1 通过后依次测试 warmup_bias_lr、class balance、context+ROI；每次只改一个变量。",
+            "deliverable": "同表对照与失败记录",
+            "stop_condition": "任一实验出现泄漏或反常好结果先查 bug",
+        },
+        {
+            "order": 7,
+            "stage": "扩到 2,000 与最终验收",
+            "work": "只按欠覆盖状态扩集；先开发期 walk-forward 和连续 tip-smoke，再由 owner 决定是否消耗 holdout。",
+            "deliverable": "正式候选报告；仍不自动 promote",
+            "stop_condition": "未获 holdout/ACTIVE 明确授权",
+        },
+    ]
+
+    decisions = [
+        {
+            "decision": "是否接受 D0→D1→D2 分阶段，而不是马上堆 2,000 张",
+            "recommendation": "接受；先用 240 张验证标注口径，再扩 600 和 2,000",
+            "why": "当前失败首先是目标/来源问题，不是文件数量问题",
+            "required_before": "开始新数据集构建",
+        },
+        {
+            "decision": "是否确认人工界面永远只保留 current-T“是/不是”",
+            "recommendation": "确认；未来 outcome 全后台计算、分字段保存",
+            "why": "减少标注负担，同时物理隔离人工未来信息与模型输入",
+            "required_before": "生成 Label Studio 配置",
+        },
+        {
+            "decision": "是否采用建议的盲重复一致率与独立正事件下限",
+            "recommendation": "D0 一致率≥90%；D1 ≥100 yes/250 no 依赖块；正式集≥250 yes/500 no 块",
+            "why": "让“数据够不够”由完整输入+标签暴露块和一致性回答，而不是图片张数",
+            "required_before": "冻结 D0/D1 数据门",
+        },
+        {
+            "decision": "是否保持 p=0.50 与既有 TP/FP 比例门",
+            "recommendation": "当前保持；如要改必须在新训练前单独批准并预注册",
+            "why": "避免用失败结果反推阈值",
+            "required_before": "下一次训练",
+        },
+    ]
+
+    sources = _sources()
+    manifest_sources = [
+        {"id": item["id"], "label": item["label"], "path": item["path"]}
+        for item in sources
+    ]
+    return {
+        "surface": "report",
+        "manifest": {
+            "version": 1,
+            "surface": "report",
+            "title": "ETH 3m V2 训练失败：问题分析与数据集重建方案",
+            "description": "区分已证实根因与待验证风险，并给出 current-T 单问题双视图数据合同、分阶段采标和训练验收计划。",
+            "generatedAt": generated,
+            "cards": [
+                {
+                    "id": "val_recall",
+                    "description": "固定 p=0.50 下，val 8 个 short_start 被全部漏掉。",
+                    "dataset": "headline",
+                    "sourceId": "training_summary",
+                    "metrics": [
+                        {"label": "Val 正类召回", "field": "validation_recall", "format": "percent"}
+                    ],
+                },
+                {
+                    "id": "majority_accuracy",
+                    "description": "模型 val accuracy 与永远判 no_start 完全相同。",
+                    "dataset": "headline",
+                    "sourceId": "training_summary",
+                    "metrics": [
+                        {"label": "Val / 多数类准确率", "field": "validation_accuracy", "format": "percent"},
+                        {"label": "多数类基线", "field": "majority_accuracy", "format": "percent"},
+                    ],
+                },
+                {
+                    "id": "positive_events",
+                    "description": "29 是旧标签-horizon 事件数；按完整输入+标签区间只剩 23 个正依赖块，val 仅 5 块。",
+                    "dataset": "headline",
+                    "sourceId": "semantic_quality_audit",
+                    "metrics": [
+                        {"label": "旧口径正事件", "field": "independent_positive_events", "format": "number"},
+                        {"label": "正依赖块", "field": "positive_dependency_blocks", "format": "number"},
+                        {"label": "Val 正依赖块", "field": "validation_positive_blocks", "format": "number"},
+                    ],
+                },
+                {
+                    "id": "holdout_read",
+                    "description": "本次诊断与本报告没有读取 holdout。",
+                    "dataset": "headline",
+                    "sourceId": "training_summary",
+                    "metrics": [
+                        {"label": "本轮 holdout 读取", "field": "holdout_rows_read", "format": "number"}
+                    ],
+                },
+            ],
+            "charts": [
+                {
+                    "id": "probability_collapse",
+                    "title": "Train 与 Val 的平均 short_start 概率",
+                    "subtitle": "train 正负几乎完全分离；val 两类均塌到约 4.3%–4.6%，且都低于固定 50% 门槛。",
+                    "type": "bar",
+                    "dataset": "probabilities",
+                    "sourceId": "training_summary",
+                    "valueFormat": "percent",
+                    "encodings": {
+                        "x": {"field": "cohort", "type": "nominal", "label": "Split · 真值"},
+                        "y": {"field": "mean_p_short", "type": "quantitative", "label": "平均 p(short_start)"},
+                        "color": {"field": "split", "type": "nominal", "label": "Split"},
+                        "tooltip": [
+                            {"field": "sample_count", "type": "quantitative", "label": "样本数"},
+                            {"field": "min_p_short", "type": "quantitative", "label": "最小概率", "format": "percent"},
+                            {"field": "max_p_short", "type": "quantitative", "label": "最大概率", "format": "percent"},
+                            {"field": "decision_threshold", "type": "quantitative", "label": "固定门槛", "format": "percent"},
+                        ],
+                    },
+                }
+            ],
+            "tables": [
+                {
+                    "id": "split_results",
+                    "title": "固定 p=0.50 的时间切分结果",
+                    "subtitle": "train 完美、val 全负；accuracy 不能单独解释。",
+                    "dataset": "split_results",
+                    "sourceId": "training_summary",
+                    "defaultSort": {"field": "split", "direction": "asc"},
+                    "columns": [
+                        {"field": "split", "label": "Split", "type": "text"},
+                        {"field": "images", "label": "图片", "format": "number"},
+                        {"field": "short_start", "label": "是", "format": "number"},
+                        {"field": "no_start", "label": "不是", "format": "number"},
+                        {"field": "positive_events", "label": "独立正事件", "format": "number"},
+                        {"field": "tp", "label": "TP", "format": "number"},
+                        {"field": "fp", "label": "FP", "format": "number"},
+                        {"field": "tn", "label": "TN", "format": "number"},
+                        {"field": "fn", "label": "FN", "format": "number"},
+                        {"field": "recall", "label": "Recall", "format": "percent"},
+                        {"field": "balanced_accuracy", "label": "Balanced Acc", "format": "percent"},
+                    ],
+                },
+                {
+                    "id": "dependency_blocks",
+                    "title": "图片数不等于独立时间块",
+                    "subtitle": "按完整模型输入 200 bars + 人工标签未来 60 bars 的重叠区间合并。",
+                    "dataset": "dependency_blocks",
+                    "sourceId": "semantic_quality_audit",
+                    "defaultSort": {"field": "dependency_blocks", "direction": "desc"},
+                    "columns": [
+                        {"field": "scope", "label": "范围", "type": "text"},
+                        {"field": "images", "label": "图片", "format": "number"},
+                        {"field": "dependency_blocks", "label": "依赖块", "format": "number"},
+                        {"field": "images_per_block", "label": "图/块", "format": "number"},
+                        {"field": "definition", "label": "定义", "type": "text"},
+                    ],
+                },
+                {
+                    "id": "construction_shortcuts",
+                    "title": "仅用构造元数据即可近乎完美区分类别",
+                    "subtitle": "这些不是部署特征；它们证明数据生成合同与 target 混杂。",
+                    "dataset": "construction_shortcuts",
+                    "sourceId": "semantic_quality_audit",
+                    "defaultSort": {"field": "accuracy", "direction": "desc"},
+                    "columns": [
+                        {"field": "shortcut", "label": "构造捷径", "type": "text"},
+                        {"field": "model_feature", "label": "模型可用？", "type": "text"},
+                        {"field": "tp", "label": "TP", "format": "number"},
+                        {"field": "fp", "label": "FP", "format": "number"},
+                        {"field": "tn", "label": "TN", "format": "number"},
+                        {"field": "fn", "label": "FN", "format": "number"},
+                        {"field": "accuracy", "label": "准确率", "format": "percent"},
+                        {"field": "meaning", "label": "说明", "type": "text"},
+                    ],
+                },
+                {
+                    "id": "root_causes",
+                    "title": "问题定位：已证实与待验证分开",
+                    "subtitle": "优先修目标、来源与选优逻辑；学习率和 ROI 只保留为后续单变量假设。",
+                    "dataset": "root_causes",
+                    "sourceId": "semantic_quality_audit",
+                    "defaultSort": {"field": "priority", "direction": "asc"},
+                    "columns": [
+                        {"field": "priority", "label": "优先级", "format": "number"},
+                        {"field": "status", "label": "证据状态", "type": "text"},
+                        {"field": "severity", "label": "严重度", "type": "text"},
+                        {"field": "finding", "label": "问题", "type": "text"},
+                        {"field": "evidence", "label": "证据", "type": "text"},
+                        {"field": "impact", "label": "影响", "type": "text"},
+                        {"field": "action", "label": "处理", "type": "text"},
+                    ],
+                },
+                {
+                    "id": "label_contract",
+                    "title": "重建后的标签与文件合同",
+                    "subtitle": "人工可以看未来；模型输入必须物理截止 T，两者通过 anchor_id 关联但分文件保存。",
+                    "dataset": "label_contract",
+                    "sourceId": "dataset_audit",
+                    "defaultSort": {"field": "field", "direction": "asc"},
+                    "columns": [
+                        {"field": "field", "label": "字段/对象", "type": "text"},
+                        {"field": "current_v2", "label": "当前 V2", "type": "text"},
+                        {"field": "rebuilt_contract", "label": "重建口径", "type": "text"},
+                        {"field": "storage", "label": "保存位置", "type": "text"},
+                    ],
+                },
+                {
+                    "id": "sampling_plan",
+                    "title": "分阶段数据集规模",
+                    "subtitle": "先证明标签稳定和可学习，再扩到 2,000 个独立锚点。",
+                    "dataset": "sampling_plan",
+                    "sourceId": "dataset_audit",
+                    "defaultSort": {"field": "phase", "direction": "asc"},
+                    "columns": [
+                        {"field": "phase", "label": "阶段", "type": "text"},
+                        {"field": "unique_anchors", "label": "唯一锚点", "type": "text"},
+                        {"field": "task_mix", "label": "采样构成", "type": "text"},
+                        {"field": "positive_goal", "label": "正例目标", "type": "text"},
+                        {"field": "duplicate_audit", "label": "盲重复", "type": "text"},
+                        {"field": "gate", "label": "进入下一阶段的门", "type": "text"},
+                        {"field": "decision", "label": "失败处理", "type": "text"},
+                    ],
+                },
+                {
+                    "id": "source_buckets",
+                    "title": "候选来源与困难负例配额",
+                    "subtitle": "配额是构建建议，不是 target；所有样本仍由 owner 回答同一个 current-T 问题。",
+                    "dataset": "source_buckets",
+                    "sourceId": "dataset_audit",
+                    "defaultSort": {"field": "bucket", "direction": "asc"},
+                    "columns": [
+                        {"field": "bucket", "label": "来源桶", "type": "text"},
+                        {"field": "proposed_share", "label": "建议占比", "type": "text"},
+                        {"field": "definition", "label": "如何取样", "type": "text"},
+                        {"field": "purpose", "label": "解决什么", "type": "text"},
+                        {"field": "guardrail", "label": "禁止事项", "type": "text"},
+                    ],
+                },
+                {
+                    "id": "quality_gates",
+                    "title": "数据、训练与连续盘口七层验收门",
+                    "subtitle": "结构检查只回答“文件没坏”；标签、独立事件、时间泛化和连续密度必须分层验收。",
+                    "dataset": "quality_gates",
+                    "sourceId": "training_prereg",
+                    "defaultSort": {"field": "order", "direction": "asc"},
+                    "columns": [
+                        {"field": "order", "label": "顺序", "format": "number"},
+                        {"field": "layer", "label": "层", "type": "text"},
+                        {"field": "check", "label": "检查", "type": "text"},
+                        {"field": "pass_rule", "label": "通过口径", "type": "text"},
+                        {"field": "on_fail", "label": "失败动作", "type": "text"},
+                        {"field": "owner_decision", "label": "Owner 决策", "type": "text"},
+                    ],
+                },
+                {
+                    "id": "execution_plan",
+                    "title": "实施顺序与停止条件",
+                    "subtitle": "每一步有产物和 fail-fast；不通过就停在当前层。",
+                    "dataset": "execution_plan",
+                    "sourceId": "training_prereg",
+                    "defaultSort": {"field": "order", "direction": "asc"},
+                    "columns": [
+                        {"field": "order", "label": "顺序", "format": "number"},
+                        {"field": "stage", "label": "阶段", "type": "text"},
+                        {"field": "work", "label": "工作", "type": "text"},
+                        {"field": "deliverable", "label": "产物", "type": "text"},
+                        {"field": "stop_condition", "label": "停止条件", "type": "text"},
+                    ],
+                },
+                {
+                    "id": "decisions",
+                    "title": "需要 Owner 确认的四项决策",
+                    "subtitle": "均在实际重建/训练前确认；本报告没有擅自修改阈值、障碍或成本。",
+                    "dataset": "decisions",
+                    "sourceId": "training_prereg",
+                    "defaultSort": {"field": "decision", "direction": "asc"},
+                    "columns": [
+                        {"field": "decision", "label": "决策", "type": "text"},
+                        {"field": "recommendation", "label": "建议", "type": "text"},
+                        {"field": "why", "label": "原因", "type": "text"},
+                        {"field": "required_before", "label": "最晚确认时间", "type": "text"},
+                    ],
+                },
+            ],
+            "sources": manifest_sources,
+            "blocks": [
+                {
+                    "id": "title",
+                    "type": "markdown",
+                    "body": "# ETH 3m V2 训练失败：问题分析与数据集重建方案",
+                },
+                {
+                    "id": "answer_first",
+                    "type": "markdown",
+                    "sourceId": "training_summary",
+                    "body": "## 结论先说\n\n**训练确实完成了，失败不是 3060、文件格式、类别映射或 holdout 泄漏，而是当前数据合同不足以支持跨时间的 current-T 判断。** 模型把 95 张 train 全部分对，却在后续 42 张 val 上全部判成 `no_start`；所谓 80.95% 准确率恰好等于永远判“不是”的多数类基线。\n\n最主要的三件事已经证实：**正负样本回答了两个不同人工问题、锚点生成规则以 99.27% 准确率近乎决定标签、30 张正图按完整暴露区间只剩 23 个依赖块（val 仅 5 块）。** 训练器又用 top1 而不是真实 TP/FP 门选择 checkpoint。因此现在不应增加 epoch、降低阈值或直接堆 2,000 张；应先把同一个 current-T“是/不是”问题做成统一、可审计的数据集。",
+                },
+                {
+                    "id": "metrics",
+                    "type": "metric-strip",
+                    "cardIds": ["val_recall", "majority_accuracy", "positive_events", "holdout_read"],
+                },
+                {"id": "split_results_block", "type": "table", "tableId": "split_results"},
+                {"id": "dependency_blocks_block", "type": "table", "tableId": "dependency_blocks"},
+                {"id": "construction_shortcuts_block", "type": "table", "tableId": "construction_shortcuts"},
+                {"id": "probability_block", "type": "chart", "chartId": "probability_collapse"},
+                {
+                    "id": "probability_read",
+                    "type": "markdown",
+                    "body": "图中 train 的真负平均概率约 1.06%，真正平均约 99.39%；到 val 后两类都只有约 4.3%–4.6%。这不是简单的阈值偏一点，而是模型在后续时间段失去了类别分离。Val 最大概率也只有 43.68%，所以本轮按预注册 fail-fast 停止是正确的；事后降阈值只会污染验收。",
+                },
+                {
+                    "id": "apology_scope",
+                    "type": "markdown",
+                    "body": "## 之前判断错在哪里\n\n我之前把“数据集通过结构校验”说成了“训练数据集没有问题”，这个表述是错误的。结构校验只证明图片、哈希、因果窗、事件切分和标签文件彼此一致；它**没有证明标签问题对称、来源不混杂、独立事件足够，或模型能跨时间学习**。本次结果把这一缺口明确暴露出来。",
+                },
+                {"id": "root_causes_block", "type": "table", "tableId": "root_causes"},
+                {
+                    "id": "not_causes",
+                    "type": "markdown",
+                    "sourceId": "diagnostic_report",
+                    "body": "## 目前没有证据支持的甩锅方向\n\n- 3060 正常完成 21 epochs，exit code 0，best.pt 本地/远端 SHA 一致；不是 GPU 没训练。\n- 类别目录、图片哈希、因果 200 bars、时间 purge 与 class mapping 已通过验证；不是文件被读反。\n- 本轮 `holdout_read=false`；没有用 holdout 调参。\n- warmup bias 和右缘 ROI 都只是风险假设，必须等数据 Gate A 通过后分别做单变量实验，不能冒充已证实根因。",
+                },
+                {
+                    "id": "dataset_design",
+                    "type": "markdown",
+                    "body": "## 数据集重建的核心：一个人工问题，两种物理图\n\nOwner 永远只回答一句：**“在橙色 T 点，现在是不是应该做空入场？”** 只选“是/不是”，不增加形态、结果、原因等按钮。人工图可以看固定未来 3 小时，因为人工需要用未来判断 T 是否及时；模型图必须物理截止 T。两个文件用同一个 `anchor_id` 关联，但未来图和 `future_*` 字段永不进入模型输入。",
+                },
+                {"id": "label_contract_block", "type": "table", "tableId": "label_contract"},
+                {
+                    "id": "box_problem",
+                    "type": "markdown",
+                    "sourceId": "timing_calibration",
+                    "body": "## 这也解决“框太大、框完行情已走完”\n\n重建集不再把 v10 的大框当最终目标，也不要求 owner 修框。v10 框只负责提出候选；真正训练标签落在**当前最右端 T**。旧 30 个正例的 T 是由机械规则相对原 v10 提前 6–42 分钟后整批确认得到，仍然带有来源偏差，保留作诊断证据但不能直接复制扩充。",
+                },
+                {"id": "sampling_block", "type": "table", "tableId": "sampling_plan"},
+                {"id": "source_buckets_block", "type": "table", "tableId": "source_buckets"},
+                {
+                    "id": "split_method",
+                    "type": "markdown",
+                    "body": "## 切分与有效样本数\n\n计数单位必须是**完整暴露时间依赖块**，不是渲染图片数，也不只是 60-bar 标签 horizon 事件。任何 `[T-199,T+60]` 区间互相重叠的样本都归入同一块；train/val/accept 只按块和时间顺序切分，边界至少保留 260 bars embargo，每个块训练总权重相同。当前 137 张仅 32 块，val 42 张仅 7 块、其中正例 5 块。禁止随机切分，也禁止同一块的 T-1/T/T+1 跨 split。",
+                },
+                {"id": "quality_gates_block", "type": "table", "tableId": "quality_gates"},
+                {
+                    "id": "training_changes",
+                    "type": "markdown",
+                    "sourceId": "training_prereg",
+                    "body": "## 数据过门后再改训练\n\n1. 每个 epoch 导出固定 `p=0.50` 的 TP/FP/TN/FN；checkpoint 先满足 TP/FP gate，再用 balanced accuracy/AP 破同分。二分类 top5 恒为 1，不得参与选优。\n2. 同表保留多数类常数预测、六 MA 简单因果规则和非视觉数值基线；图像模型必须证明增量。\n3. class-balanced sampler/loss、`warmup_bias_lr=0`、context+右缘 ROI 依次做单变量实验，不能打包。\n4. 静态门失败立即停止，不扫阈值、不跑连续 smoke；通过后才测 raw/merged fire 密度与 owner 事件精度。\n5. 经济性、TP/SL 障碍、0.2% 成本和最终 holdout 仍是后续独立实验；本报告没有修改它们。",
+                },
+                {"id": "execution_block", "type": "table", "tableId": "execution_plan"},
+                {
+                    "id": "do_not_do",
+                    "type": "markdown",
+                    "body": "## 现在明确不做\n\n- 不把现有 137 张复制、平移或相邻 T 自动继承标签来凑数。\n- 不把连续 smoke 未触发位置自动标成负例。\n- 不降低 0.50 阈值来救本轮结果，也不增加 epoch 重跑同一坏合同。\n- 不读 holdout、不 promote、不写 `models/ACTIVE`、不改实盘执行。\n- 不同时改采样、loss、warmup 和输入结构；每次实验只改一个变量。",
+                },
+                {"id": "decisions_block", "type": "table", "tableId": "decisions"},
+                {
+                    "id": "limitations",
+                    "type": "markdown",
+                    "body": "## 限制与诚实声明\n\n- provenance 100% 与 anchor-rule 99.27% 是**构造元数据审计**，不是模型可直接读取的部署特征，也不是未来泄漏；它们证明标签生成合同不对称。\n- warmup bias 与 ROI 稀释尚未做对照，报告只把它们列为待验证风险。\n- D0/D1/D2 的规模、一致率、source-only <0.60 和依赖块下限都是建议，实际执行前应由 owner 冻结；它们不是已经生效的阈值。\n- 本报告只使用 pre-holdout train/val 诊断证据，未读取 holdout，也没有宣称经济性或可实盘性。",
+                },
+                {
+                    "id": "repro",
+                    "type": "markdown",
+                    "body": "## 复现\n\n1. 运行 `PYTHONPATH=. .venv/bin/python scripts/audit_eth3m_v2_quality.py` 生成语义质量审计。\n2. 运行 `PYTHONPATH=. .venv/bin/python scripts/build_eth3m_v2_problem_analysis_report.py` 生成 canonical artifact。\n3. 使用仓库记录的 portable artifact builder 命令把 `artifact.json` 打包为同目录 `report.html`。",
+                },
+            ],
+        },
+        "snapshot": {
+            "version": 1,
+            "generatedAt": generated,
+            "status": "ready",
+            "datasets": {
+                "headline": headline,
+                "probabilities": probability_rows,
+                "split_results": split_rows,
+                "dependency_blocks": dependency_rows,
+                "construction_shortcuts": construction_shortcuts,
+                "root_causes": root_causes,
+                "label_contract": label_contract,
+                "sampling_plan": sampling_plan,
+                "source_buckets": source_buckets,
+                "quality_gates": quality_gates,
+                "execution_plan": execution_plan,
+                "decisions": decisions,
+            },
+        },
+        "sources": sources,
+        "package_info": {
+            "originUrl": "artifact://eth3m-v2-problem-analysis-20260730",
+            "controls": {"edit": False, "refresh": False},
+        },
+    }
+
+
+def build_from_files(
+    summary_path: Path = SUMMARY_PATH,
+    prereg_path: Path = PREREG_PATH,
+    quality_audit_path: Path = QUALITY_AUDIT_PATH,
+    *,
+    generated_at: str | None = None,
+) -> dict[str, Any]:
+    return build_artifact(
+        _read_json(summary_path),
+        _read_json(prereg_path),
+        _read_json(quality_audit_path),
+        generated_at=generated_at,
+    )

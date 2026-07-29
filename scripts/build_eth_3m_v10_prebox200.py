@@ -252,37 +252,41 @@ def scan_v10(
 
 def label_config() -> str:
     return """<View>
-  <Header value="ETH 3m · v10 预标：形态与结果分开保存"/>
-  <Header value="A · 模型因果图（红框可移动/删除；框右缘应到最后三根）"/>
-  <Image name="causal" value="$causal_image" zoom="true" zoomControl="true"/>
-  <RectangleLabels name="box" toName="causal" strokeWidth="2">
-    <Label value="short_start" background="#d32f2f" hotkey="s"/>
-  </RectangleLabels>
-  <Choices name="shape" toName="causal" choice="single" required="true">
-    <Choice value="valid" hotkey="1"/>
-    <Choice value="invalid" hotkey="2"/>
-    <Choice value="uncertain" hotkey="3"/>
-    <Choice value="bad_data" hotkey="4"/>
+  <View style="display:none">
+    <Image name="causal" value="$causal_image"/>
+    <RectangleLabels name="box" toName="causal">
+      <Label value="short_start" background="#d32f2f"/>
+    </RectangleLabels>
+    <Choices name="shape" toName="causal" choice="single">
+      <Choice value="valid"/>
+      <Choice value="invalid"/>
+      <Choice value="uncertain"/>
+      <Choice value="bad_data"/>
+    </Choices>
+    <Choices name="error_reason" toName="causal" choice="multiple">
+      <Choice value="not_dense"/>
+      <Choice value="too_late"/>
+      <Choice value="wrong_box"/>
+      <Choice value="wrong_direction"/>
+      <Choice value="repeated_trend"/>
+      <Choice value="other"/>
+    </Choices>
+    <Choices name="outcome" toName="review" choice="single">
+      <Choice value="strong_drop"/>
+      <Choice value="weak_drop"/>
+      <Choice value="fail"/>
+      <Choice value="rebound"/>
+      <Choice value="outcome_uncertain"/>
+    </Choices>
+    <TextArea name="note" toName="causal"/>
+  </View>
+  <Header value="ETH 3m · 这个红框是不是你要的做空形态？"/>
+  <Choices name="is_target" toName="review" choice="single" required="true" showInline="true">
+    <Choice value="是" hotkey="1"/>
+    <Choice value="不是" hotkey="2"/>
   </Choices>
-  <Header value="若框不合理，请选择原因（可多选）；形态成立但框位置不准时，选 wrong_box 并直接改框。"/>
-  <Choices name="error_reason" toName="causal" choice="multiple" showInline="true">
-    <Choice value="not_dense"/>
-    <Choice value="too_late"/>
-    <Choice value="wrong_box"/>
-    <Choice value="wrong_direction"/>
-    <Choice value="repeated_trend"/>
-    <Choice value="other"/>
-  </Choices>
-  <Header value="B · 人工未来图（固定未来3小时；不进入检测器训练）"/>
+  <Header value="竖虚线左侧是模型当时可见范围，右侧是固定未来 3 小时；未来只供你判断。"/>
   <Image name="review" value="$review_image" zoom="true" zoomControl="true"/>
-  <Choices name="outcome" toName="review" choice="single" required="true">
-    <Choice value="strong_drop" hotkey="q"/>
-    <Choice value="weak_drop" hotkey="w"/>
-    <Choice value="fail" hotkey="e"/>
-    <Choice value="rebound" hotkey="r"/>
-    <Choice value="outcome_uncertain" hotkey="t"/>
-  </Choices>
-  <TextArea name="note" toName="causal" placeholder="可选备注；不要把未来涨跌写成框对错" rows="2"/>
 </View>
 """
 

@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "status": "failed_semantic_quality",
+  "scope": {
+    "holdout_start": "2026-05-04T00:00:00+00:00",
+    "holdout_read": false,
+    "market_bars_read": false,
+    "model_weights_read": false,
+    "inputs": [
+      "datasets/eth_3m_short_pilot_v2/manifest.csv",
+      "analysis/output/eth3m_v10_label_timing/task_timing_metrics.csv"
+    ]
+  },
+  "dependency_window": {
+    "definition": "[input_start_time, label_end_time] = [T-199 bars, T+60 bars]",
+    "bars": 260,
+    "counts": {
+      "all": {
+        "images": 137,
+        "blocks": 32
+      },
+      "train": {
+        "images": 95,
+        "blocks": 25
+      },
+      "val": {
+        "images": 42,
+        "blocks": 7
+      },
+      "all_positive": {
+        "images": 30,
+        "blocks": 23
+      },
+      "train_positive": {
+        "images": 22,
+        "blocks": 18
+      },
+      "val_positive": {
+        "images": 8,
+        "blocks": 5
+      }
+    }
+  },
+  "event_concentration": {
+    "global_event_count": 71,
+    "mixed_target_events": 18,
+    "max_images_per_event": 6
+  },
+  "provenance_confounding": {
+    "counts": [
+      {
+        "label_provenance": "label_studio_project_53_owner_no",
+        "target": 0,
+        "rows": 107
+      },
+      {
+        "label_provenance": "owner_batch_chat_confirmed_current_T",
+        "target": 1,
+        "rows": 30
+      }
+    ],
+    "source_only_shortcut": {
+      "tp": 30,
+      "fp": 0,
+      "tn": 107,
+      "fn": 0,
+      "correct": 137,
+      "n": 137,
+      "accuracy": 1.0
+    },
+    "interpretation": "label provenance perfectly identifies the target; provenance is not a model feature, but proves asymmetric label construction"
+  },
+  "anchor_rule_confounding": {
+    "rule": "predict short_start when anchor_time equals first-below-all-six-MAs time",
+    "shortcut": {
+      "tp": 30,
+      "fp": 1,
+      "tn": 106,
+      "fn": 0,
+      "correct": 136,
+      "n": 137,
+      "accuracy": 0.9927007299270073
+    },
+    "negative_lag_bars": {
+      "finite": 106,
+      "missing": 1,
+      "equals_0": 1,
+      "less_or_equal_1": 4,
+      "greater_or_equal_2": 102,
+      "greater_or_equal_6": 83,
+      "median": 11.0
+    },
+    "interpretation": "construction metadata nearly identifies the target; this is anchor-generation confounding, not future leakage and not a deployable baseline"
+  },
+  "quality_verdict": {
+    "structural_validation": "passed",
+    "semantic_learnability": "failed",
+    "formal_gold": false,
+    "promotion_eligible": false,
+    "primary_failures": [
+      "positive and negative labels answer different review questions",
+      "provenance is perfectly pure by class",
+      "anchor generation rule nearly determines the class",
+      "effective dependency blocks are much fewer than images or label-horizon events"
+    ]
+  }
+}

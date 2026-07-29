@@ -2,6 +2,111 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-07-30 — ETH 3m short pilot v2 诊断训练完成；静态门失败）
+
+### 一句话
+**v1 因 99.74% 连续盘口恒开火而隔离；v2 改成“当前 tip 是/不是”的图像分类。
+137 张数据完成一次 3060 诊断训练，但固定 0.50 门下 val 为 TP=0 / FP=0 / TN=34 / FN=8，
+模型退化为全判 `no_start`，静态第一门即失败。后续语义审计又确认标签问题/来源不统一，且
+锚点构造规则可 99.27% 推断类别；它不是 formal gold，禁止进入 smoke、promote 或 ACTIVE。**
+
+### 2026-07-30 诊断训练结论
+- Owner 明确授权“直接去3060跑吧”，并确认可与 PID 93656 的 v10 wide dump 并跑；原任务全程未停。
+- 输入为 137 张 train/val 的 960×960 白底等比例补边副本；右端 T 完整保留；weak 150、smoke 7,089
+  和 holdout 均未进训练。YOLO11n-cls、batch 4、seed 42、所有时序/颜色/裁剪增强关闭。
+- RTX 3060 训练 21 epoch 早停，best=epoch 1，exit=0；远端/本地 best SHA256 均为
+  `3ce89b668096e79eb00ae0ee8b4913024f91f46356626d22cbe11d3a98c30056`。
+- 固定阈值 0.50：train 95 张 TP22/FP0/TN73/FN0；val 42 张 TP0/FP0/TN34/FN8。
+  val top1 80.95% 恰等于多数类 34/42，balanced accuracy 50%，**FAIL** 预注册 TP≥6/8。
+- 简单因果规则“当前 T 首次跌破六条 MA”在同一 val 为 TP5/FP0/TN34/FN3，明显胜过图像模型；
+  因此本轮不是“多训几轮”问题，而是小样本/来源混杂/时间外泛化失败。
+- 按 fail-fast 纪律，连续 smoke 与 30 事件 owner 复核未运行；阈值不下调、不扫描，不读取 holdout。
+
+### 2026-07-30 失败根因复盘（数据结构 PASS ≠ 可学习性 PASS）
+- 正例与负例不是同一个人工问题：30 个正例是 owner-yes 形态内另提橙色 T 后整批确认“来得及”；
+  107 个负例是 Project 53 对原红框形态判“不是”。`label_provenance` 对 target 纯度为 100%。
+- 正例 30/30 被重锚到六 MA 首次下破，负例 107/107 保留原 v10 tip；仅用构造元数据
+  `anchor_time == first_below_time` 即 TP30/FP1/TN106/FN0（99.27%）。这是锚点/来源混杂，
+  **不是未来泄漏，也不是可部署基线**。
+- 原报告的 29 个正事件只按 box/未来标签区间归并。按模型完整暴露区间 `[T-199,T+60]`，
+  137 张仅 32 个时间依赖块；30 正图仅 23 块，val 8 正图仅 5 块。跨 split 378-bar embargo
+  仍然通过、无泄漏，但有效验证量远小于图片数。
+- Ultralytics 用 `(top1+top5)/2` 选 best；二分类 top5 恒为 1，top1 又等于多数类基线，故 epoch 1
+  被保存为“best”并不代表业务 TP/FP 最优。下一版必须逐 epoch 按固定门保存混淆矩阵。
+- 详细 HTML：`analysis/output/eth3m_v2_problem_analysis_20260730/report.html`；机器审计：
+  `analysis/output/eth3m_v2_problem_analysis_20260730/dataset_quality_audit.json`。
+
+### 为什么不再画固定右缘检测框
+- Project 53 的 107 张 owner-no 中，69 张历史窗口含已知 owner-yes 形态；它们是“当前 tip 不是”，
+  不是“整张图没有对象”。继续写 YOLO 整图空标签会产生矛盾监督并强化右缘位置捷径。
+- Owner 已明确只需要回答“是不是”；v2a 因此用 200 根 causal 图做 image-level
+  `short_start / no_start`，不再把框宽当训练目标。
+
+### 标签语义纠错（必须保留）
+- v2 初稿错误地把生产扫描 `tip/tip-1/tip-2` 的**检测定位容差**解释成信号寿命，自动生成
+  T/T+1/T+2 正、T+3 负，共 265 张。反方复核发现后，该版已隔离，**禁止训练**。
+- 当前 v2a 只有 owner 实际确认过的时点进 train/val：固定 30 图的当前 T 正例，以及
+  Label Studio Project 53 的 107 个 owner-no 当前 tip 负例。
+- T-1/T+1/T+2/T+3/原 v10 共 150 条全部 target 为空，只进 `weak_or_review_manifest.csv`；
+  只有逐时点复核或 owner 明确批准寿命规则后才可单变量加入。
+
+### 数据与隔离
+| 项目 | 结果 |
+|---|---:|
+| train/val 图片 | 137（30 是 / 107 不是） |
+| 独立正事件 | 29（train 21 / val 8） |
+| 完整暴露正依赖块 | 23（train 18 / val 5） |
+| 全部完整暴露依赖块 | 32（train 25 / val 7） |
+| train / val 图片 | 95 / 42 |
+| 全局事件组 | 71 |
+| 实际锚点 embargo | 378 bars（硬门 200+60=260） |
+| 无标签待复核 | 150 |
+| 连续 dev smoke | 7,089 bars（未标注，绝不自动转负例） |
+
+- 30 张 timing 校准是 owner 在对话中的整批确认“看过了都来的急”，不冒充逐行 Label Studio
+  金标；回执绑定固定 manifest、移动 HTML、30 张 review 图和 30 张 causal 图 SHA256。
+- 30 张正图按重叠 3h 标签区间有 29 个事件，但按完整输入+标签区间只有 23 个依赖块；
+  当前旧口径名称“独立正事件”不得再用于宣称统计独立性。
+- 独立验证：标签白名单、图片/哈希、receipt、事件切分、因果窗、holdout 边界全通过；
+  18 个相关测试通过。
+
+### 产物
+- 数据：`datasets/eth_3m_short_pilot_v2/`
+- 构建器：`scripts/build_eth3m_short_pilot_dataset_v2.py`
+- 独立验证：`scripts/validate_eth3m_short_pilot_dataset_v2.py`
+- 验证回执：`analysis/output/eth3m_short_pilot_v2_dataset/validation.json`
+- owner 回执：`datasets/eth_3m_short_pilot_v2/owner_confirmation_receipt.json`
+- 审计报告：`analysis/p_eth_3m_short_pilot_v2_dataset.md`
+- 可携带 HTML：`analysis/output/eth3m_short_pilot_v2_dataset/report.html`
+- 训练预注册：`analysis/eth3m_short_pilot_v2_cls_prereg.json`
+- 全图训练副本：`datasets/eth_3m_short_pilot_v2_cls_letterbox960/`
+- 本地权重：`runs/classify/eth3m_short_pilot_v2_cls_diag_20260730/weights/best.pt`
+- 远端日志：`C:/fable/logs/eth3m_short_pilot_v2_cls_diag_20260730.log`
+- 本地原始远端证据：`analysis/output/eth3m_short_pilot_v2_cls_diag_20260730/remote_train.log`、
+  `remote_exit_code.txt`、`remote_best.pt`（exit=0；日志 SHA256 `b8e6487b…`；远端/本地权重一致）
+- 诊断训练报告：`analysis/p_eth3m_short_pilot_v2_cls_diag_20260730.md`
+- 问题分析与重建方案：`analysis/output/eth3m_v2_problem_analysis_20260730/report.html`
+
+### 状态与下一步
+- `diagnostic_pilot_only=true`；`pilot_training_eligible=false`；`formal_gold_dataset=false`；
+  `promotion_eligible=false`。
+- 一次诊断训练已完成并失败；未调阈值、未跑 smoke、未 promote、未改 ACTIVE。
+- 推荐下一步是先做统一 current-T 二选一 D0：240 个唯一 T（旧 yes 事件 earlier/original 成对
+  120、旧 no 事件 original/near-miss 成对 80、非 v10 连续 tip 40）+10% 盲重复；一致率、
+  source-only 基线和完整依赖块通过 Gate A 后，才扩 600 和 2,000。不能把下调阈值或挑
+  checkpoint 当修复。
+- 维护计划要求的结构拆分已完成；18 个数据测试、冻结 manifest/receipt 及 287 张图逐一哈希等价。
+
+### Holdout 事故登记
+- 并行审计助手误读了 `data/kline_fetched/ETH_USDT_SWAP_1m.part.csv` 的表头及 3 行
+  2026-07-15 数据，发现后立即停止；未用于统计、选样、阈值或模型结果。
+- 按“看一眼就是消耗”纪律，保守登记为全局 **holdout 第 12 次误耗**。v2a 构建本身只读严格
+  pre-holdout 前缀；独立验证只读冻结产物。
+
+### 仍禁止
+- 265 张语义错误版；v1 权重进入 v2 / judgment / ACTIVE；自动 promote；清 forward_log；
+  未经 owner 再读 holdout；真下单；改新鲜度三门。
+
 ## ⚡ 当前真相（2026-07-29 03:30 — 检测线的前提未被证实；v10 训练中；不 promote）
 
 ### 一句话

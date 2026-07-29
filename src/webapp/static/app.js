@@ -1260,7 +1260,7 @@ async function loadOverview() {
     const n = d.next ? `<span class="banner-next">${escapeHtml(d.next)}</span>` : "";
     $("#verdict-banner").innerHTML = `<span class="banner-k">回测验收</span><b>${v}</b>${n}`;
     const tile = (t) =>
-      `<div class="tile"><span class="lbl">${escapeHtml(t.label)}</span><b>${escapeHtml(String(t.value))}</b><small>${escapeHtml(t.sub || "")}</small></div>`;
+      `<div class="tile"><span class="tile-code">EVIDENCE</span><span class="lbl">${escapeHtml(t.label)}</span><b>${escapeHtml(String(t.value))}</b><small>${escapeHtml(t.sub || "")}</small></div>`;
     const tiles = d.tiles || [];
     $("#tiles").innerHTML = tiles.length
       ? tiles.map(tile).join("")
@@ -1282,8 +1282,8 @@ async function loadOverview() {
       if (!sparkChart) {
         sparkChart = makeChart(sparkEl, { timeScale: { visible: true, borderColor: "#e5e7eb" } });
         sparkSeries = sparkChart.addAreaSeries({
-          lineColor: "#2563eb", lineWidth: 2, priceFormat: pctFormat,
-          topColor: "rgba(37,99,235,0.22)", bottomColor: "rgba(37,99,235,0.02)",
+          lineColor: "#68e78e", lineWidth: 2, priceFormat: pctFormat,
+          topColor: "rgba(104,231,142,0.24)", bottomColor: "rgba(104,231,142,0.015)",
         });
       }
       sparkSeries.setData(d.sparkline);
@@ -3505,31 +3505,37 @@ $("#models-refresh")?.addEventListener("click", () => loadModelHub());
 
 /* ---------- theme ---------- */
 function initTheme() {
-  // Default light (same as scout_mtf). Optional dark via toggle.
-  const saved = localStorage.getItem("fable_theme") === "dark" ? "dark" : "light";
-  applyTheme(saved);
+  const saved = localStorage.getItem("fable_clauseos_theme");
+  applyTheme(saved === "dark" ? "dark" : "light");
   $("#theme-toggle")?.addEventListener("click", () => {
     const next = document.body.classList.contains("theme-dark") ? "light" : "dark";
-    localStorage.setItem("fable_theme", next);
+    localStorage.setItem("fable_clauseos_theme", next);
     location.reload();
   });
 }
 function applyTheme(mode) {
+  document.documentElement.classList.toggle("theme-dark", mode === "dark");
+  document.documentElement.classList.toggle("theme-light", mode !== "dark");
   document.body.classList.toggle("theme-dark", mode === "dark");
-  document.body.classList.remove("theme-light");
+  document.body.classList.toggle("theme-light", mode !== "dark");
   const btn = $("#theme-toggle");
-  if (btn) btn.textContent = mode === "dark" ? "浅色" : "深色";
+  if (btn) {
+    btn.textContent = mode === "dark" ? "切到白色" : "切到深色";
+    btn.disabled = false;
+    btn.removeAttribute("aria-disabled");
+    btn.setAttribute("aria-label", mode === "dark" ? "切换到白色主题" : "切换到深色主题");
+  }
   if (mode === "dark") {
-    CHART_LAYOUT.layout.background.color = "#141a22";
-    CHART_LAYOUT.layout.textColor = "#8b98a8";
-    CHART_LAYOUT.grid.vertLines.color = "#1e2630";
-    CHART_LAYOUT.grid.horzLines.color = "#1e2630";
-    CHART_LAYOUT.timeScale.borderColor = "#2a3441";
-    CHART_LAYOUT.rightPriceScale.borderColor = "#2a3441";
-    CHART_LAYOUT.crosshair.vertLine.color = "rgba(96,165,250,0.4)";
-    CHART_LAYOUT.crosshair.vertLine.labelBackgroundColor = "#3b82f6";
-    CHART_LAYOUT.crosshair.horzLine.color = "rgba(139,152,168,0.35)";
-    CHART_LAYOUT.crosshair.horzLine.labelBackgroundColor = "#64748b";
+    CHART_LAYOUT.layout.background.color = "#080b09";
+    CHART_LAYOUT.layout.textColor = "#79857f";
+    CHART_LAYOUT.grid.vertLines.color = "#141a16";
+    CHART_LAYOUT.grid.horzLines.color = "#141a16";
+    CHART_LAYOUT.timeScale.borderColor = "#202822";
+    CHART_LAYOUT.rightPriceScale.borderColor = "#202822";
+    CHART_LAYOUT.crosshair.vertLine.color = "rgba(104,231,142,0.38)";
+    CHART_LAYOUT.crosshair.vertLine.labelBackgroundColor = "#287a48";
+    CHART_LAYOUT.crosshair.horzLine.color = "rgba(150,163,156,0.3)";
+    CHART_LAYOUT.crosshair.horzLine.labelBackgroundColor = "#445149";
   } else {
     CHART_LAYOUT.layout.background.color = "#ffffff";
     CHART_LAYOUT.layout.textColor = "#6b7280";
@@ -3537,8 +3543,8 @@ function applyTheme(mode) {
     CHART_LAYOUT.grid.horzLines.color = "#eef1f6";
     CHART_LAYOUT.timeScale.borderColor = "#e5e7eb";
     CHART_LAYOUT.rightPriceScale.borderColor = "#e5e7eb";
-    CHART_LAYOUT.crosshair.vertLine.color = "rgba(37,99,235,0.35)";
-    CHART_LAYOUT.crosshair.vertLine.labelBackgroundColor = "#2563eb";
+    CHART_LAYOUT.crosshair.vertLine.color = "rgba(40,140,78,0.35)";
+    CHART_LAYOUT.crosshair.vertLine.labelBackgroundColor = "#2f9e59";
     CHART_LAYOUT.crosshair.horzLine.color = "rgba(107,114,128,0.35)";
     CHART_LAYOUT.crosshair.horzLine.labelBackgroundColor = "#6b7280";
   }

@@ -8,14 +8,15 @@
 <link rel="stylesheet" href="style.css?v=20260722quiet">
 <link rel="stylesheet" href="scout_mtf.css?v=20260719embed">
 <link rel="stylesheet" href="vendor/tabulator.min.css">
+<link rel="stylesheet" href="clauseos.css?v=20260729clauseos-light">
 <script defer src="vendor/lightweight-charts.standalone.production.js"></script>
 <script defer src="vendor/tabulator.min.js"></script>
 <script defer src="format_helpers.js?v=20260720sym"></script>
 <script defer src="scout_mtf_app.js?v=20260719embed"></script>
-<script defer src="app.js?v=20260722quiet"></script>
+<script defer src="app.js?v=20260729clauseos-light"></script>
 </head>
-<body class="hb-shell">
-<button type="button" class="nav-burger" id="nav-burger" aria-label="打开导航" aria-controls="sidebar" aria-expanded="false">☰</button>
+<body class="hb-shell theme-light">
+<button type="button" class="nav-burger" id="nav-burger" aria-label="打开导航" aria-controls="sidebar" aria-expanded="false">菜单</button>
 <div class="nav-backdrop" id="nav-backdrop" hidden></div>
 <aside class="sidebar" id="sidebar" aria-label="主导航">
   <div class="sb-brand">
@@ -24,7 +25,7 @@
         <h1>darkforest</h1>
         <p>实盘 · 前向 · 回测</p>
       </div>
-      <button type="button" class="nav-close mini-btn" id="nav-close" aria-label="关闭导航">✕</button>
+      <button type="button" class="nav-close mini-btn" id="nav-close" aria-label="关闭导航">关闭</button>
     </div>
   </div>
   <nav class="sb-nav" aria-label="日常">
@@ -41,7 +42,7 @@
   </nav>
   <div class="sb-foot">
     <div class="sb-foot-row">
-      <button type="button" class="mini-btn theme-toggle" id="theme-toggle" title="切换浅色/深色">深色</button>
+      <button type="button" class="mini-btn theme-toggle" id="theme-toggle" title="切换浅色/深色">切到深色</button>
       <button type="button" class="mini-btn status-refresh" id="status-refresh" title="刷新状态（r）">刷新</button>
     </div>
     <a class="sb-debug-link" href="/debug_viz.html">调试产物</a>
@@ -169,14 +170,41 @@
 
   <!-- ============ 总览（默认落地页） ============ -->
   <section id="view-overview" class="view">
-    <div class="page-head">
+    <div class="page-head overview-head">
       <div>
-        <h1 class="page-title">总览</h1>
-        <p class="page-sub">先看实盘裁决进度 · 回测只是历史验收参考 · 终审 = 前向 100 笔新鲜</p>
+        <div class="page-eyebrow">LIVE EVIDENCE WORKSPACE</div>
+        <h1 class="page-title">交易证据总览</h1>
+        <p class="page-sub">先看实盘裁决进度 · 回测只作历史参考 · 终审 = 前向 100 笔新鲜成交</p>
       </div>
       <div class="page-head-actions">
         <button type="button" class="mini-btn" data-jump="forward">前向</button>
         <button type="button" class="primary-btn" data-jump="probe">盘口检测</button>
+      </div>
+    </div>
+    <div class="overview-stage" aria-label="实时证据空间视图">
+      <div class="stage-toolbar">
+        <div class="stage-context">
+          <span class="stage-context-k">窗口</span>
+          <strong>15m · SWAP</strong>
+        </div>
+        <div class="stage-context stage-context-right">
+          <span class="stage-context-k">裁决模式</span>
+          <strong>fresh-only</strong>
+        </div>
+      </div>
+      <button type="button" class="stage-hub" data-jump="signals" aria-label="打开信号工作台">
+        <span class="stage-hub-k">MAINLINE</span>
+        <strong>15M</strong>
+        <span>信号工作台</span>
+      </button>
+      <div id="tiles" class="tile-row evidence-deck" aria-live="polite">
+        <div class="tile evidence-loading"><span class="tile-code">EVIDENCE</span><span class="lbl">载入证据</span><b>—</b><small>正在读取主线</small></div>
+        <div class="tile evidence-loading"><span class="tile-code">EVIDENCE</span><span class="lbl">载入裁决</span><b>—</b><small>正在读取前向</small></div>
+        <div class="tile evidence-loading"><span class="tile-code">EVIDENCE</span><span class="lbl">载入收益</span><b>—</b><small>正在读取验收</small></div>
+        <div class="tile evidence-loading"><span class="tile-code">EVIDENCE</span><span class="lbl">载入阈值</span><b>—</b><small>正在读取模型</small></div>
+      </div>
+      <div class="stage-footnote">
+        <span>检测</span><span>判断</span><span>成交</span><span>裁决</span>
       </div>
     </div>
     <div id="live-truth" class="live-truth" aria-live="polite">
@@ -197,7 +225,6 @@
       </div>
     </div>
     <div id="verdict-banner" class="banner banner-verdict" role="status"></div>
-    <div id="tiles" class="tile-row"></div>
     <div class="two-col">
       <div class="panel panel-chart">
         <h2>验收净值 <span class="unit">回测参考 · 0.3% 成本 · 北京时间</span></h2>

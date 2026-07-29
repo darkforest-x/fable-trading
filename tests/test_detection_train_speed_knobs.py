@@ -13,6 +13,8 @@ def test_defaults_are_speed_oriented() -> None:
     assert SAFE_AUG["mosaic"] == 0.0
     assert SAFE_AUG["mixup"] == 0.0
     assert SAFE_AUG["hsv_h"] == 0.0
+    assert SAFE_AUG["hsv_s"] == 0.0
+    assert SAFE_AUG["hsv_v"] == 0.0
 
 
 def test_parse_cache() -> None:
