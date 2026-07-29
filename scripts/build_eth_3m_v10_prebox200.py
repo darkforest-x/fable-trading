@@ -264,6 +264,15 @@ def label_config() -> str:
     <Choice value="uncertain" hotkey="3"/>
     <Choice value="bad_data" hotkey="4"/>
   </Choices>
+  <Header value="若框不合理，请选择原因（可多选）；形态成立但框位置不准时，选 wrong_box 并直接改框。"/>
+  <Choices name="error_reason" toName="causal" choice="multiple" showInline="true">
+    <Choice value="not_dense"/>
+    <Choice value="too_late"/>
+    <Choice value="wrong_box"/>
+    <Choice value="wrong_direction"/>
+    <Choice value="repeated_trend"/>
+    <Choice value="other"/>
+  </Choices>
   <Header value="B · 人工未来图（固定未来3小时；不进入检测器训练）"/>
   <Image name="review" value="$review_image" zoom="true" zoomControl="true"/>
   <Choices name="outcome" toName="review" choice="single" required="true">
@@ -273,7 +282,7 @@ def label_config() -> str:
     <Choice value="rebound" hotkey="r"/>
     <Choice value="outcome_uncertain" hotkey="t"/>
   </Choices>
-  <TextArea name="note" toName="causal" placeholder="可选备注" rows="2"/>
+  <TextArea name="note" toName="causal" placeholder="可选备注；不要把未来涨跌写成框对错" rows="2"/>
 </View>
 """
 

@@ -9,6 +9,29 @@ PROJECT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_DIR / "scripts"))
 from export_owner_labels import BASE, load_creds
 
+
+def local_file_roots(tasks: list[dict]) -> list[str]:
+    """Return first path components from every local-files URL in task data.
+
+    A dual-view task can use keys such as ``causal_image`` and
+    ``review_image`` instead of the legacy single ``image`` key.  Looking only
+    at ``data.image`` silently wires the wrong storage and leaves both views as
+    404s even though the tasks themselves import successfully.
+    """
+    roots: list[str] = []
+    for task in tasks:
+        for value in (task.get("data") or {}).values():
+            if not isinstance(value, str):
+                continue
+            query = urllib.parse.parse_qs(urllib.parse.urlparse(value).query)
+            paths = query.get("d", [])
+            if not paths:
+                continue
+            root = urllib.parse.unquote(paths[0]).lstrip("/").split("/", 1)[0]
+            if root and root not in roots:
+                roots.append(root)
+    return roots
+
 def session():
     jar = http.cookiejar.CookieJar()
     op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
@@ -42,17 +65,13 @@ def main() -> int:
     else:
         proj = api(tok, "POST", "/api/projects", {"title": title, "label_config": config})
         pid = proj["id"]
-    import re as _re, urllib.error
+    import urllib.error
     tasks = json.loads(Path(tasks_file).read_text())
     # Register EVERY local-files root used by tasks (mixed packs e.g. dense_swap + round6_scout).
     # Only wiring the first task's root leaves the rest as "issue loading URL from $image".
-    subdirs = []
-    for t in tasks:
-        m = _re.search(r"d=([^/]+)/", (t.get("data") or {}).get("image") or "")
-        if m and m.group(1) not in subdirs:
-            subdirs.append(m.group(1))
+    subdirs = local_file_roots(tasks)
     if not subdirs:
-        subdirs = ["dense_15m_full"]
+        raise SystemExit("no /data/local-files/?d=... paths found in task data")
     for subdir in subdirs:
         try:
             api(tok, "POST", "/api/storages/localfiles", {
