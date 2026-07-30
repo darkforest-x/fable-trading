@@ -1,0 +1,22 @@
+{
+  "dataset": "/Users/zhangzc/fable-trading/datasets/dense_15m_full",
+  "weights": "/Users/zhangzc/fable-trading/runs/detect/runs/detect/dense_15m_full_s_e21b_hsv0/weights/best.pt",
+  "weights_sha256": "f9618b357a0bd8022c5dd1022482b785ac75899e317c7ed65bb061d26f4c6a65",
+  "holdout_used": false,
+  "official_map": false,
+  "images": 10,
+  "seed": 20260709,
+  "confidence": 0.3,
+  "direct_imgsz": 960,
+  "direct_nms_iou": 0.7,
+  "match_iou": 0.5,
+  "slice_width": 640,
+  "slice_height": 371,
+  "overlap_ratio": 0.2,
+  "perform_standard_pred": true,
+  "sahi_postprocess": {
+    "type": "GREEDYNMM",
+    "metric": "IOS",
+    "threshold": 0.5
+  }
+}

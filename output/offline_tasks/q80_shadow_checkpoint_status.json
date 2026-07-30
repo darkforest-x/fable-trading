@@ -1,0 +1,56 @@
+{
+  "status": "ready",
+  "holdout_used": false,
+  "mainline_changed": false,
+  "start_time": "2026-07-10 10:30:00+00:00",
+  "latest_bar_time": "2026-07-11 13:00:00+00:00",
+  "elapsed_hours": 26.5,
+  "minimum_hours": 24.0,
+  "round_trip_cost": 0.002,
+  "funnel": {
+    "candidates_after_start": 268,
+    "finite_scores": 268,
+    "q90_signals": 62,
+    "q80_signals": 99,
+    "q80_incremental_signals": 37,
+    "q90_actionable_signals": 51,
+    "q80_actionable_signals": 86,
+    "q80_non_actionable_signals": 13,
+    "q90_pass_rate": 0.23134328358208955,
+    "q80_pass_rate": 0.3694029850746269
+  },
+  "ledger": {
+    "total_rows": 86,
+    "closed_rows": 57,
+    "open_rows": 29,
+    "finite_scores": 86,
+    "duplicate_rows": 0
+  },
+  "closed_economics": {
+    "q90_score_range": {
+      "trades": 35,
+      "tp": 13,
+      "sl": 21,
+      "gross_mean_per_trade": 0.0015263520124741208,
+      "net_mean_per_trade": -0.0004736479875258796,
+      "profit_factor": 0.895681702068138
+    },
+    "q80_only": {
+      "trades": 22,
+      "tp": 7,
+      "sl": 13,
+      "gross_mean_per_trade": 0.0017153466428941786,
+      "net_mean_per_trade": -0.00028465335710582126,
+      "profit_factor": 0.9441814752895079
+    },
+    "all_q80": {
+      "trades": 57,
+      "tp": 20,
+      "sl": 34,
+      "gross_mean_per_trade": 0.0015992973084257222,
+      "net_mean_per_trade": -0.00040070269157427843,
+      "profit_factor": 0.9157523362768493
+    }
+  },
+  "warning": "This short forward diagnostic is not a profitability or threshold-selection result."
+}
