@@ -10,7 +10,7 @@ Static assets are mounted last so API routes stay reachable.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import FastAPI, Query, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
@@ -81,7 +81,9 @@ class ScoutMtfRunBody(BaseModel):
     top: int = Field(default=12, ge=3, le=40)
     min_vol: float = Field(default=5_000_000.0, ge=0)
     include_loss: bool = True
-    max_symbols: int | None = Field(default=None, ge=1, le=80)
+    # Optional[...] (not PEP 604 "| None"): pydantic evaluates field annotations
+    # at class creation, and this repo still runs on Python 3.9 locally.
+    max_symbols: Optional[int] = Field(default=None, ge=1, le=80)
 
     model_config = {"extra": "forbid"}
 
@@ -204,7 +206,7 @@ def scout_mtf_latest_route() -> dict:
 
 
 @app.post("/api/scout-mtf/run")
-def scout_mtf_run_route(body: ScoutMtfRunBody | None = None) -> dict:
+def scout_mtf_run_route(body: Optional[ScoutMtfRunBody] = None) -> dict:
     """Run one multi-TF rank scan (blocking, 30–90s). Not mainline / not orders."""
     b = body or ScoutMtfRunBody()
     return scout_mtf_run(
