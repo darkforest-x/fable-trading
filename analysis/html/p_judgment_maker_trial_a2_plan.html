@@ -85,9 +85,10 @@ li { margin: .25rem 0; }
 </code></pre>
 <p><strong>文件新增（不破坏主路径）</strong></p>
 <ul>
-<li><code>src/judgment/forward_types.py</code>：增加 <code>FORWARD_LOG_MAKER_TRIAL_PATH</code> 常量（additive）。</li>
-<li><code>scripts/forward_maker_trial.py</code>：独立脉冲，复用 <code>scan_forward_records</code> + 回归打分，取 q90，写 trial 文件。</li>
-<li>可选：<code>src/execution/maker_trial_loop.py</code>（极简），或复用 executor 逻辑但读 trial 文件 + 走 maker 下单路径。</li>
+<li><code>src/judgment/forward_types.py</code>：增加 <code>FORWARD_LOG_MAKER_TRIAL_PATH</code> 常量（additive）。<strong>已落地。</strong></li>
+<li><code>src/judgment/forward.py</code>：<code>run_forward_tracking_maker_trial</code>（类比 H1 shadow；拒绝写主 log / H1 log）。<strong>已落地。</strong></li>
+<li><code>scripts/forward_maker_trial.py</code>：独立脉冲入口；<code>FABLE_MAKER_TRIAL=1</code> + kill 文件；写 trial 文件并戳 <code>trial_bucket=maker_entry</code>。<strong>已落地（ledger only，不真下单）。</strong></li>
+<li>可选：<code>src/execution/maker_trial_loop.py</code>（极简），或复用 executor 逻辑但读 trial 文件 + 走 maker 下单路径。<strong>未做；需 owner 逐次授权真金。</strong></li>
 </ul>
 <p><strong>关键列复用</strong></p>
 <ul>
