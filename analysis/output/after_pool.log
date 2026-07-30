@@ -2286,3 +2286,19 @@ Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF
   [15500/18379] 已写 15443   130.6min   剩余约 0.4h
   [16000/18379] 已写 15878   135.0min   剩余约 0.3h
   [16500/18379] 已写 16374   139.5min   剩余约 0.3h
+  [17000/18379] 已写 16878   144.3min   剩余约 0.2h
+  [17500/18379] 已写 17373   148.1min   剩余约 0.1h
+  [18000/18379] 已写 17877   151.8min   剩余约 0.1h
+
+写入 18255 行 -> /Users/zhangzc/fable-trading/data/kronos_feats_v10.csv   用时 2.57 小时
+  丢弃发散预测 91 条 = 0.5%(|涨跌| > 60% 视为采样失败)
+  列: ['kr_ret_end', 'kr_ret_min', 'kr_ret_max', 'kr_frac_below', 'kr_slope', 'kr_path_vol']
+    kr_ret_end       中位 +0.00092  缺失 0.0%
+    kr_ret_min       中位 -0.00918  缺失 0.0%
+    kr_ret_max       中位 +0.00946  缺失 0.0%
+    kr_frac_below    中位 +0.41667  缺失 0.0%
+    kr_slope         中位 +0.00005  缺失 0.0%
+    kr_path_vol      中位 +0.00290  缺失 0.0%
+
+注:仅生成特征,不训练、不采纳。判据:顶档提升 > +17.82bp、置换 p<0.01、带匹配随机对照。
+=== 全部完成 07-30 04:39 ===

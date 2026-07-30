@@ -1,0 +1,39 @@
+{
+  "pool": "judgment_v10_wide.csv",
+  "n": 18255,
+  "ret_col": "net_barrier_taker",
+  "bar_lift_bp": 17.76,
+  "arms": [
+    {
+      "arm": "BASE 28+19",
+      "n_folds": 15,
+      "lift_bp": 23.49,
+      "folds_pos": 14,
+      "ctrl_bp": -19.24,
+      "vs_ctrl_bp": 42.73
+    },
+    {
+      "arm": "+Kronos 6",
+      "n_folds": 15,
+      "lift_bp": 35.61,
+      "folds_pos": 14,
+      "ctrl_bp": -11.33,
+      "vs_ctrl_bp": 46.94
+    },
+    {
+      "arm": "仅 Kronos 6",
+      "n_folds": 15,
+      "lift_bp": -9.92,
+      "folds_pos": 0,
+      "ctrl_bp": 0.11,
+      "vs_ctrl_bp": -10.03
+    }
+  ],
+  "paired_diff_bp": 2.42,
+  "paired_t": 1.127,
+  "paired_folds_pos": 8,
+  "paired_n": 15,
+  "p_perm": 0.03333,
+  "passed": false,
+  "verdict": "未通过事先判据。+Kronos 顶档提升 +35.61bp (门槛 >+17.76bp ✓)、置换 p=0.0333(门槛 <0.01 ✗)、超 ATR 对照 +46.94bp(✓);配对比 BASE +2.42bp(t=+1.13)"
+}

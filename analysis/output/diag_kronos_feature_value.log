@@ -1,0 +1,19 @@
+池 18379 行,并上 Kronos 后 18255 行(丢 124 = 0.7%)
+Kronos 特征 6: ['kr_ret_end', 'kr_ret_min', 'kr_ret_max', 'kr_frac_below', 'kr_slope', 'kr_path_vol']
+目标 net_barrier_taker   池均值 -6.75bp
+
+计算 alpha 因子…
+BASE 47 特征   +KR 53
+
+方案                   顶档提升      正折数      ATR对照        超对照
+BASE 28+19        +23.49bp    14/15     -19.24bp    +42.73bp
++Kronos 6         +35.61bp    14/15     -11.33bp    +46.94bp
+仅 Kronos 6         -9.92bp     0/15      +0.11bp    -10.03bp
+
+配对(+Kronos − BASE,同折):平均差 +2.42bp   t=+1.13   8/15 折为正
+
+置换检验(30 次,打乱目标重训 +Kronos)…
+  真实 +35.61bp   打乱中位 +0.50bp   p90 +18.11bp   p=0.0333
+
+判读: 未通过事先判据。+Kronos 顶档提升 +35.61bp (门槛 >+17.76bp ✓)、置换 p=0.0333(门槛 <0.01 ✗)、超 ATR 对照 +46.94bp(✓);配对比 BASE +2.42bp(t=+1.13)
+注:训练池内,CPCV,未碰 holdout,不 promote;判据在生成特征之前就已写死。
