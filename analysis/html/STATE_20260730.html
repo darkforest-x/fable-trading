@@ -56,9 +56,11 @@ li { margin: .25rem 0; }
 </tr></thead><tbody>
 <tr><td><strong>检测层 2a</strong></td><td>❌ <strong>比随机做空还差</strong></td><td>候选池均值 <strong>-6.41bp</strong>,匹配随机 -0.39bp → 因果 <strong>-6.02bp</strong></td></tr>
 <tr><td><strong>出场规则</strong></td><td>❌ <strong>九种全部无效</strong></td><td>最好的&quot;趋势出场&quot;+3.20bp 但 t=1.07;现行 TP5/SL2 <strong>-6.02bp 且显著为负</strong></td></tr>
-<tr><td><strong>判断层挑单</strong></td><td>✅ <strong>唯一有效的环节</strong></td><td>顶十分位提升 <strong>+17.76bp</strong>,<strong>15/15 折全为正</strong></td></tr>
-<tr><td>整体</td><td>⚠️ 只有一条链为正</td><td>检测器开火 + 判断层挑前 10% = <strong>+11.35bp</strong>(已扣 10bp 成本)</td></tr>
+<tr><td><strong>判断层挑单</strong></td><td>✅ <strong>唯一有效的环节</strong></td><td>顶十分位提升 <strong>+17.76 ~ +23.49bp</strong>,<strong>14~15/15 折为正</strong></td></tr>
+<tr><td>整体</td><td>⚠️ 只有一条链为正</td><td>检测器开火 + 判断层挑前 10% = <strong>+11.35 ~ +16.7bp</strong>(已扣 10bp 成本)</td></tr>
 </tbody></table>
+<p><strong>顶档不是「挑了高波动」</strong>:ATR 匹配对照(同币 × 同月 × 同 ATR 桶、同数量、非顶档)</p>
+<p>是 <strong>-19.24bp</strong>,顶档超对照 <strong>+42.73bp</strong>。这是三天里最干净的一个正结果。</p>
 <h2>唯一在两个独立候选池上都站住的结论</h2>
 <pre><code>
 老池(tip_v1b,25,602 笔)  顶档提升 +17.82bp
@@ -141,6 +143,37 @@ ATR 五分档   胜率 36.2~37.7%(持平)   每笔净收益差 5 倍
 <p>67.3% 在画框时 72 根持仓已全部可见。**</p>
 <p><strong>边界</strong>:这测的是表格特征,YOLO 看像素,不完全等价;不证明金标是前视的,</p>
 <p>只证明<strong>这些特征定位不到</strong>。</p>
+<h2>Kronos 基础模型:测过,不采纳(2026-07-30)</h2>
+<p><code>shiyu-coder/Kronos</code>,AAAI 2026,MIT,45 交易所 / 120 亿根 K 线预训练。</p>
+<p><strong>判据在生成特征之前就写死了</strong>,所以看到数字之后不能放宽。</p>
+<pre><code>
+方案            顶档提升   正折数   ATR对照    超对照
+BASE 28+19     +23.49bp  14/15   -19.24bp  +42.73bp
++Kronos 6      +35.61bp  14/15   -11.33bp  +46.94bp
+仅 Kronos 6     -9.92bp   0/15    +0.11bp  -10.03bp
+
+配对(同折,+Kronos − BASE)  +2.42bp   t=1.13   8/15 折为正
+置换检验  真实 +35.61bp,打乱中位 +0.50bp,p=0.0333
+</code></pre>
+<table><thead><tr>
+<th>判据</th>
+<th>门槛</th>
+<th>实际</th>
+<th></th>
+</tr></thead><tbody>
+<tr><td>顶档提升</td><td>&gt; +17.76bp</td><td>+35.61bp</td><td>✓</td></tr>
+<tr><td><strong>置换检验</strong></td><td><strong>p &lt; 0.01</strong></td><td><strong>p = 0.0333</strong></td><td>✗</td></tr>
+<tr><td>超 ATR 对照</td><td>&gt; 0</td><td>+46.94bp</td><td>✓</td></tr>
+</tbody></table>
+<p><strong>两条过一条不过 → 不采纳。</strong></p>
+<p><strong>配对检验说得更直白</strong>:两方案单看差 12bp(35.61 vs 23.49),<strong>同折配对后只剩 2.42bp</strong></p>
+<p>——大部分是折间波动。8/15 折为正基本等于抛硬币。</p>
+<p><strong>最有信息量的是「仅 Kronos」那行:0/15 折为正。</strong> 它的价格预测对这批候选的盈亏</p>
+<p>没有可用信息。与论文 RankIC 高 93% 不矛盾 —— **RankIC 是排序相关性,不是</p>
+<p>「扣成本后赚钱」**,本项目 v1 栽的就是这个坑(AUC 0.59 照样亏钱)。</p>
+<p><strong>成本已付、产物留存</strong>:<code>data/kronos_feats_v10.csv</code>(18,255 行 6 特征,2.57 小时,</p>
+<p>发散丢弃 0.5%)+ <code>scripts/build_kronos_features.py</code> + <code>scripts/diag_kronos_feature_value.py</code>。</p>
+<p><strong>换候选池可直接复用,不必重做工程。</strong></p>
 <h2>其他</h2>
 <ul>
 <li><strong>实盘延迟</strong>:542 分钟是<strong>陈旧统计</strong>。当前脉冲 15 分钟一轮 × 2.5 分钟,全宇宙扫描 2.8 分钟。</li>
@@ -202,11 +235,15 @@ v10 池实际 18,379 行 → 只够分辨约 45bp
 <hr>
 <h1>5. 接下来该做什么(按优先级)</h1>
 <h2>【第一优先】剖开顶十分位:它为什么赚钱</h2>
-<p><strong>这是三天里唯一稳的信号,却从未被解释。</strong></p>
+<p><strong>这是三天里唯一稳的信号,却从未被解释。而 Kronos 那轮又给它加了一层证据。</strong></p>
 <pre><code>
-顶十分位 +11.35bp(绝对,已扣成本),其余 90% 亏
-两个不重合的候选池上提升都是 +17.8bp
+顶十分位绝对水平       +11.35 ~ +16.7bp(已扣成本),其余 90% 亏
+两个不重合的候选池      +17.82bp / +17.76bp(Jaccard 只有 8.6%)
+ATR 匹配对照           -19.24bp   ← 顶档不是「挑了高波动」
+顶档超对照             +42.73bp
+正折数                 14~15 / 15
 </code></pre>
+<p><strong>四个独立角度都指向同一件事,而没有人知道它挑中的是什么。</strong></p>
 <p>做法:比较顶档 10% 与其余 90% 在 47 个特征上的分布差异,</p>
 <p>带匹配对照(同币 × 同月 × 同 ATR 桶)。</p>
 <p><strong>如果差异清晰 → 那就是真正的信号定义,可能比 owner 手画金标更值得当训练目标。</strong></p>
@@ -219,16 +256,10 @@ v10 池实际 18,379 行 → 只够分辨约 45bp
 <li><strong>标得出来且与旧标注一致</strong> → 信息在盘口,继续修检测器有意义</li>
 <li><strong>标得出来但位置对不上</strong> → 先解决标注一致性</li>
 </ul>
-<h2>【第三优先】Kronos 特征(已就位,可直接跑)</h2>
-<p><code>data/kronos_feats_v10.csv</code> 已生成(18,379 行,6 个特征),</p>
-<p>成本 5.5 小时已付。<strong>下一步只需把它加进判断层测。</strong></p>
-<p><strong>判据(已写死,不许事后改)</strong>:</p>
-<pre><code>
-顶档提升 &gt; +17.76bp(v10 现有最好)
-置换检验 p &lt; 0.01
-带匹配随机对照
-</code></pre>
-<p><strong>天花板</strong>:检测器因果贡献 -6.02bp。<strong>再好的表征也造不出候选里没有的 alpha。</strong></p>
+<h2>【第三优先】滑点实测</h2>
+<p>执行器 ledger 缺 <code>avg_fill_px</code>,<code>n_clean_fill_with_price_diff = 0</code>,</p>
+<p><strong>所有成本数字都不含滑点</strong>。而边和摩擦已经同量级(检测器 -6.02bp vs 成本 10bp),</p>
+<p>滑点可能是决定性的那一项。做法:执行器落账时记录 <code>avg_fill_px</code>,与下单价对比。</p>
 <h2>【不要做】</h2>
 <ul>
 <li><strong>不要再调出场规则</strong> —— 九种全试过,v10 上没有一种覆盖 10bp 成本,且排名依赖候选</li>
