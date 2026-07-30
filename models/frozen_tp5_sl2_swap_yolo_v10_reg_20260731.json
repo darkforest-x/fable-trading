@@ -1,0 +1,111 @@
+{
+  "artifact_version": 1,
+  "config": "tp5_sl2_swap_yolo_v10_reg",
+  "objective": "regression",
+  "created_at": "2026-07-30T16:27:35.036588+00:00",
+  "model_path": "models/frozen_tp5_sl2_swap_yolo_v10_reg_20260731.txt",
+  "dataset_path": "data/judgment_yolo_swap_v10.csv",
+  "dataset_sha256": "9bca68023d5afd8687753cd42ca17865b3080077474bfc216a350ac3d22b5a94",
+  "dataset_size_bytes": 12188986,
+  "threshold_val_q90": -0.0004397139085409754,
+  "score_quantile": 0.9,
+  "feature_columns": [
+    "ma_spread_pct",
+    "full_spread",
+    "fast_slow_gap",
+    "full_ratio_min48",
+    "spread_mean8",
+    "spread_mean24",
+    "spread_chg8",
+    "spread_chg24",
+    "spread_pos96",
+    "dense_run_len",
+    "dense_frac48",
+    "ext_up",
+    "close_vs_ema55",
+    "close_vs_ema200",
+    "order_score",
+    "slow_slope_12",
+    "volume_ratio",
+    "volume_z",
+    "vol_ratio_mean8",
+    "atr_pct",
+    "atr_pct_ratio96",
+    "pre_range48",
+    "pre_range168",
+    "drawdown24",
+    "ret_4",
+    "ret_12",
+    "ret_24",
+    "ret_48"
+  ],
+  "best_iteration": 1,
+  "splits": {
+    "train": {
+      "n": 14656,
+      "range": [
+        "2026-02-01 01:00:00+00:00",
+        "2026-04-13 08:45:00+00:00"
+      ]
+    },
+    "val": {
+      "n": 3676,
+      "range": [
+        "2026-04-14 03:15:00+00:00",
+        "2026-05-03 05:15:00+00:00"
+      ]
+    }
+  },
+  "holdout_policy": "holdout excluded from training and threshold selection; not evaluated",
+  "score_semantics": "predicted_realized_ret",
+  "walkforward": {
+    "folds": [
+      {
+        "val_start": "2026-03-06",
+        "n_val": 2206,
+        "spearman": -0.0175,
+        "top_decile_net_maker": -0.00744,
+        "top_decile_win": 0.264
+      },
+      {
+        "val_start": "2026-03-18",
+        "n_val": 2205,
+        "spearman": 0.0948,
+        "top_decile_net_maker": 0.00396,
+        "top_decile_win": 0.559
+      },
+      {
+        "val_start": "2026-03-30",
+        "n_val": 2206,
+        "spearman": 0.159,
+        "top_decile_net_maker": 0.00156,
+        "top_decile_win": 0.377
+      },
+      {
+        "val_start": "2026-04-10",
+        "n_val": 2205,
+        "spearman": -0.0422,
+        "top_decile_net_maker": 0.01413,
+        "top_decile_win": 0.514
+      },
+      {
+        "val_start": "2026-04-22",
+        "n_val": 2206,
+        "spearman": 0.0209,
+        "top_decile_net_maker": -0.00627,
+        "top_decile_win": 0.486
+      }
+    ],
+    "rho_mean": 0.043,
+    "rho_min": -0.0422,
+    "net_min": -0.00744,
+    "all_folds_net_positive": false
+  },
+  "promote_mode": "owner_directed_with_L1_v10",
+  "owner_decision": "L2 用 v10 池回归（2026-07-31），与 L1 short_star_v10 对齐",
+  "previous_active": "models/frozen_tp5_sl2_swap_yolo_v11_reg_20260718.txt",
+  "target_column": "net_barrier_taker (as realized_ret)",
+  "source_pool": "data/judgment_v10_wide.csv -> data/judgment_yolo_swap_v10.csv",
+  "holdout": "not consumed; pool ends 2026-05-03",
+  "note": "Owner cutover. Walkforward not all-net-positive (rho_mean=0.043). Rollback: models/ACTIVE_PREV or --yolo-v11-pool freeze. Not a tip-smoke claim for detector quality."
+}

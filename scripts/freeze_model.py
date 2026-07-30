@@ -30,6 +30,7 @@ from src.judgment.frozen import (
     rules_legacy_config,
     train_frozen_artifact,
     yolo_v8_pool_config,
+    yolo_v10_pool_config,
     yolo_v11_pool_config,
     yolo_v12_pool_config,
 )
@@ -57,10 +58,17 @@ def parse_args() -> argparse.Namespace:
              "(judgment_yolo_swap_v8.csv; rollback / compare)",
     )
     parser.add_argument(
+        "--yolo-v10-pool",
+        action="store_true",
+        help="freeze regression on the v10 short_star candidate pool "
+             "(judgment_yolo_swap_v10.csv from judgment_v10_wide; "
+             "mainline after 2026-07-31 owner cutover with L1 v10)",
+    )
+    parser.add_argument(
         "--yolo-v11-pool",
         action="store_true",
         help="freeze regression on the v11_chain candidate pool "
-             "(judgment_yolo_swap_v11.csv; mainline after 2026-07-18 cutover)",
+             "(judgment_yolo_swap_v11.csv; rollback after v10 cutover)",
     )
     parser.add_argument(
         "--yolo-v12-pool",
@@ -137,12 +145,12 @@ def main() -> int:
     args = parse_args()
     pool_flags = (
         args.legacy_rules, args.binary_yolo, args.yolo_v8_pool,
-        args.yolo_v11_pool, args.yolo_v12_pool,
+        args.yolo_v10_pool, args.yolo_v11_pool, args.yolo_v12_pool,
     )
     if sum(pool_flags) > 1:
         raise SystemExit(
             "choose at most one of --legacy-rules / --binary-yolo / "
-            "--yolo-v8-pool / --yolo-v11-pool / --yolo-v12-pool"
+            "--yolo-v8-pool / --yolo-v10-pool / --yolo-v11-pool / --yolo-v12-pool"
         )
     if args.legacy_rules:
         config = rules_legacy_config()
@@ -152,6 +160,9 @@ def main() -> int:
         candidate_source = "yolo"
     elif args.yolo_v8_pool:
         config = yolo_v8_pool_config()
+        candidate_source = "yolo"
+    elif args.yolo_v10_pool:
+        config = yolo_v10_pool_config()
         candidate_source = "yolo"
     elif args.yolo_v11_pool:
         config = yolo_v11_pool_config()

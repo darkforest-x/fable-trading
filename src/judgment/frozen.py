@@ -31,11 +31,12 @@ DEFAULT_SCORE_QUANTILE: Final = 0.90
 # Band edges live in the artifact sidecar ("sizing_tiers"); multipliers are a
 # fixed owner decision, not a tunable.
 TIER_MULTIPLIERS: Final = {"q90_q95": 1.0, "q95_q99": 1.5, "q99_plus": 2.0}
-# Mainline 2026-07-18+: v11_chain pool (owner-authorized full cutover).
-# Accept-window compare vs v8 = holdout consumption #4.
-DEFAULT_CONFIG_NAME: Final = "tp5_sl2_swap_yolo_v11_reg"
-V11_POOL_CONFIG_NAME: Final = DEFAULT_CONFIG_NAME
-# v12 pool artifact name only — DEFAULT stays v11 until owner promotes.
+# Mainline 2026-07-31+: v10 detector candidate pool (owner-directed with L1 v10).
+# Previous mainline was v11_chain (2026-07-18). Rollback: yolo_v11_pool_config.
+DEFAULT_CONFIG_NAME: Final = "tp5_sl2_swap_yolo_v10_reg"
+V10_POOL_CONFIG_NAME: Final = DEFAULT_CONFIG_NAME
+V11_POOL_CONFIG_NAME: Final = "tp5_sl2_swap_yolo_v11_reg"
+# v12 pool artifact name only — never default until owner promotes.
 V12_POOL_CONFIG_NAME: Final = "tp5_sl2_swap_yolo_v12_reg"
 V8_POOL_CONFIG_NAME: Final = "tp5_sl2_swap_yolo_v8_reg"
 # 2026-07-15 mainline (old pool, pre-lr-fix detector); rollback only.
@@ -140,11 +141,15 @@ class FrozenArtifactError(RuntimeError):
 
 
 def default_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
-    """Mainline: regression on the v11_chain candidate pool (2026-07-18 cutover)."""
+    """Mainline: regression on the v10 short_star candidate pool (2026-07-31).
+
+    Dataset is built from judgment_v10_wide (net_barrier_taker as realized_ret).
+    Pairs with L1 owner_short_star_v10 interim discovery weight.
+    """
     return FrozenConfig(
         name=DEFAULT_CONFIG_NAME,
         project_dir=project_dir,
-        dataset_path=project_dir / "data" / "judgment_yolo_swap_v11.csv",
+        dataset_path=project_dir / "data" / "judgment_yolo_swap_v10.csv",
         models_dir=project_dir / "models",
         score_quantile=DEFAULT_SCORE_QUANTILE,
         horizon_bars=DEFAULT_HORIZON_BARS,
@@ -152,7 +157,20 @@ def default_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
     )
 
 
-yolo_v11_pool_config = default_config
+yolo_v10_pool_config = default_config
+
+
+def yolo_v11_pool_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
+    """2026-07-18 mainline (v11_chain pool). Rollback after 2026-07-31 v10 cutover."""
+    return FrozenConfig(
+        name=V11_POOL_CONFIG_NAME,
+        project_dir=project_dir,
+        dataset_path=project_dir / "data" / "judgment_yolo_swap_v11.csv",
+        models_dir=project_dir / "models",
+        score_quantile=DEFAULT_SCORE_QUANTILE,
+        horizon_bars=DEFAULT_HORIZON_BARS,
+        objective="regression",
+    )
 
 
 def yolo_v12_pool_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:

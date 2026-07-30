@@ -14,8 +14,8 @@ Pipeline pieces reused (no re-implementation):
               mode). Weights: FABLE_YOLO_WEIGHTS → owner_best.pt →
               owner_short_star_v10.pt → owner_v16_tipuni_cold.pt (first hit).
               Mainline may still be detector=none when owner_best is absent.
-  - score:    src.judgment.frozen.latest_artifact(default_config()) (v11
-              freeze, threshold_val_q90) + sizing_tiers.tier_for_score
+  - score:    src.judgment.frozen.latest_artifact(default_config()) (v10
+              freeze after 2026-07-31; threshold_val_q90) + sizing_tiers
   - fresh:    ExecutorConfig.max_signal_age_min (30min gate, same value as
               TG filter and dashboard FRESH_DETECT_MIN)
 
@@ -215,7 +215,10 @@ def _score_candidates(frame: pd.DataFrame, indices: list[int]):
 
     artifact = latest_artifact(default_config())
     if artifact is None:
-        raise RuntimeError("找不到 ACTIVE 冻结 artifact (frozen_tp5_sl2_swap_yolo_v11_reg_*)")
+        raise RuntimeError(
+            "找不到主线冻结 artifact (frozen_tp5_sl2_swap_yolo_v10_reg_*); "
+            "run: PYTHONPATH=. python3 scripts/freeze_model.py --yolo-v10-pool --write-active"
+        )
     enriched = add_indicators(frame)
     scores: list[float] = []
     feature_rows = pd.DataFrame()
