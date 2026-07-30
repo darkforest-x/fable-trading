@@ -1,0 +1,1006 @@
+{
+  "data_yaml": "/Users/zhangzc/fable-trading-codex/output/offline_tasks/dense_15m_full_data.yaml",
+  "dataset": "/Users/zhangzc/fable-trading-codex/datasets/dense_15m_full",
+  "weights": "/Users/zhangzc/fable-trading-codex/runs/detect/runs/detect/dense_15m_full_s/weights/best.pt",
+  "steps": [
+    {
+      "name": "fiftyone_import_probe",
+      "result": {
+        "ok": true,
+        "dataset_name": "fable_dense_15m_full_probe",
+        "samples": 1255,
+        "persistent": false
+      }
+    },
+    {
+      "name": "direct_yolo_sample_eval",
+      "result": {
+        "ok": true,
+        "weights": "/Users/zhangzc/fable-trading-codex/runs/detect/runs/detect/dense_15m_full_s/weights/best.pt",
+        "sample_size": 80,
+        "gt_boxes": 97,
+        "pred_boxes": 106,
+        "matched_iou50": 77,
+        "recall_like_iou50": 0.7938,
+        "pred_per_gt": 1.0928,
+        "per_image": [
+          {
+            "image": "TIA_USDT_016460.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "OKB_USDT_016660.png",
+            "gt": 1,
+            "pred": 1,
+            "matched_iou50": 1
+          },
+          {
+            "image": "PI_USDT_014960.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "APE_USDT_015960.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "PEPE_USDT_014860.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "LINK_USDT_014360.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "BNB_USDT_016460.png",
+            "gt": 1,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "DOT_USDT_017060.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "ALLO_USDT_014360.png",
+            "gt": 1,
+            "pred": 3,
+            "matched_iou50": 1
+          },
+          {
+            "image": "CHZ_USDT_016860.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "OP_USDT_016460.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "DOGE_USDT_014860.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "BNB_USDT_014560.png",
+            "gt": 1,
+            "pred": 1,
+            "matched_iou50": 1
+          },
+          {
+            "image": "TRUMP_USDT_015260.png",
+            "gt": 1,
+            "pred": 1,
+            "matched_iou50": 1
+          },
+          {
+            "image": "JTO_USDT_014360.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "XRP_USDT_016960.png",
+            "gt": 2,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "CFX_USDT_015960.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "PI_USDT_016860.png",
+            "gt": 3,
+            "pred": 3,
+            "matched_iou50": 3
+          },
+          {
+            "image": "PI_USDT_015960.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "XRP_USDT_015760.png",
+            "gt": 4,
+            "pred": 5,
+            "matched_iou50": 4
+          },
+          {
+            "image": "IP_USDT_017460.png",
+            "gt": 1,
+            "pred": 1,
+            "matched_iou50": 1
+          },
+          {
+            "image": "UNI_USDT_015860.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "WLFI_USDT_015860.png",
+            "gt": 4,
+            "pred": 4,
+            "matched_iou50": 4
+          },
+          {
+            "image": "ETH_USDT_017060.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "PI_USDT_015760.png",
+            "gt": 4,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "TRX_USDT_016960.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "AAVE_USDT_014860.png",
+            "gt": 3,
+            "pred": 3,
+            "matched_iou50": 3
+          },
+          {
+            "image": "LIT_USDT_013360.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "XPL_USDT_014460.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "XPL_USDT_016460.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "NEAR_USDT_017360.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "CRV_USDT_015960.png",
+            "gt": 4,
+            "pred": 5,
+            "matched_iou50": 4
+          },
+          {
+            "image": "SOL_USDT_016960.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "OKB_USDT_015260.png",
+            "gt": 2,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "CFX_USDT_014660.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "AVAX_USDT_014860.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "TRUMP_USDT_017160.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "ETH_USDT_015360.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "ADA_USDT_015360.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "AVAX_USDT_016860.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "CHZ_USDT_016260.png",
+            "gt": 0,
+            "pred": 2,
+            "matched_iou50": 0
+          },
+          {
+            "image": "SPACE_USDT_013060.png",
+            "gt": 1,
+            "pred": 3,
+            "matched_iou50": 1
+          },
+          {
+            "image": "CFX_USDT_015560.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "SPACE_USDT_011860.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "LIT_USDT_012260.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "CHZ_USDT_015460.png",
+            "gt": 1,
+            "pred": 1,
+            "matched_iou50": 1
+          },
+          {
+            "image": "SOL_USDT_014460.png",
+            "gt": 2,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "OP_USDT_015660.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "ETH_USDT_016160.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "XAUT_USDT_015260.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "NIGHT_USDT_016560.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "BTC_USDT_016660.png",
+            "gt": 1,
+            "pred": 1,
+            "matched_iou50": 1
+          },
+          {
+            "image": "OKB_USDT_015360.png",
+            "gt": 1,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "LTC_USDT_017360.png",
+            "gt": 3,
+            "pred": 3,
+            "matched_iou50": 3
+          },
+          {
+            "image": "XRP_USDT_014560.png",
+            "gt": 3,
+            "pred": 3,
+            "matched_iou50": 3
+          },
+          {
+            "image": "XRP_USDT_016860.png",
+            "gt": 1,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "BNB_USDT_014360.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "APE_USDT_014860.png",
+            "gt": 1,
+            "pred": 2,
+            "matched_iou50": 1
+          },
+          {
+            "image": "AVAX_USDT_017060.png",
+            "gt": 3,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "LTC_USDT_017460.png",
+            "gt": 5,
+            "pred": 5,
+            "matched_iou50": 5
+          },
+          {
+            "image": "WLFI_USDT_017360.png",
+            "gt": 1,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "SUI_USDT_017160.png",
+            "gt": 2,
+            "pred": 1,
+            "matched_iou50": 1
+          },
+          {
+            "image": "TRUMP_USDT_017460.png",
+            "gt": 1,
+            "pred": 1,
+            "matched_iou50": 1
+          },
+          {
+            "image": "BTC_USDT_015660.png",
+            "gt": 2,
+            "pred": 4,
+            "matched_iou50": 2
+          },
+          {
+            "image": "DOGE_USDT_014160.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "WLFI_USDT_015360.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "JTO_USDT_014260.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "AAVE_USDT_017360.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "NIGHT_USDT_015460.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "ONDO_USDT_017260.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "BNB_USDT_016860.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "SUI_USDT_015660.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "ASTER_USDT_014460.png",
+            "gt": 5,
+            "pred": 5,
+            "matched_iou50": 5
+          },
+          {
+            "image": "ETH_USDT_016660.png",
+            "gt": 2,
+            "pred": 1,
+            "matched_iou50": 1
+          },
+          {
+            "image": "ASTER_USDT_014760.png",
+            "gt": 2,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "LINK_USDT_015660.png",
+            "gt": 1,
+            "pred": 1,
+            "matched_iou50": 1
+          },
+          {
+            "image": "XLM_USDT_015260.png",
+            "gt": 1,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "NEAR_USDT_017160.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "BCH_USDT_016460.png",
+            "gt": 0,
+            "pred": 2,
+            "matched_iou50": 0
+          },
+          {
+            "image": "LTC_USDT_016960.png",
+            "gt": 4,
+            "pred": 4,
+            "matched_iou50": 4
+          }
+        ]
+      }
+    },
+    {
+      "name": "sahi_sliced_sample_eval",
+      "result": {
+        "ok": true,
+        "weights": "/Users/zhangzc/fable-trading-codex/runs/detect/runs/detect/dense_15m_full_s/weights/best.pt",
+        "sample_size": 80,
+        "gt_boxes": 97,
+        "pred_boxes": 178,
+        "matched_iou50": 75,
+        "recall_like_iou50": 0.7732,
+        "pred_per_gt": 1.8351,
+        "per_image": [
+          {
+            "image": "TIA_USDT_016460.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "OKB_USDT_016660.png",
+            "gt": 1,
+            "pred": 2,
+            "matched_iou50": 1
+          },
+          {
+            "image": "PI_USDT_014960.png",
+            "gt": 2,
+            "pred": 4,
+            "matched_iou50": 2
+          },
+          {
+            "image": "APE_USDT_015960.png",
+            "gt": 0,
+            "pred": 2,
+            "matched_iou50": 0
+          },
+          {
+            "image": "PEPE_USDT_014860.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "LINK_USDT_014360.png",
+            "gt": 0,
+            "pred": 2,
+            "matched_iou50": 0
+          },
+          {
+            "image": "BNB_USDT_016460.png",
+            "gt": 1,
+            "pred": 2,
+            "matched_iou50": 0
+          },
+          {
+            "image": "DOT_USDT_017060.png",
+            "gt": 2,
+            "pred": 4,
+            "matched_iou50": 2
+          },
+          {
+            "image": "ALLO_USDT_014360.png",
+            "gt": 1,
+            "pred": 2,
+            "matched_iou50": 0
+          },
+          {
+            "image": "CHZ_USDT_016860.png",
+            "gt": 0,
+            "pred": 3,
+            "matched_iou50": 0
+          },
+          {
+            "image": "OP_USDT_016460.png",
+            "gt": 0,
+            "pred": 2,
+            "matched_iou50": 0
+          },
+          {
+            "image": "DOGE_USDT_014860.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "BNB_USDT_014560.png",
+            "gt": 1,
+            "pred": 1,
+            "matched_iou50": 1
+          },
+          {
+            "image": "TRUMP_USDT_015260.png",
+            "gt": 1,
+            "pred": 3,
+            "matched_iou50": 1
+          },
+          {
+            "image": "JTO_USDT_014360.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "XRP_USDT_016960.png",
+            "gt": 2,
+            "pred": 3,
+            "matched_iou50": 0
+          },
+          {
+            "image": "CFX_USDT_015960.png",
+            "gt": 2,
+            "pred": 3,
+            "matched_iou50": 2
+          },
+          {
+            "image": "PI_USDT_016860.png",
+            "gt": 3,
+            "pred": 5,
+            "matched_iou50": 3
+          },
+          {
+            "image": "PI_USDT_015960.png",
+            "gt": 2,
+            "pred": 4,
+            "matched_iou50": 2
+          },
+          {
+            "image": "XRP_USDT_015760.png",
+            "gt": 4,
+            "pred": 5,
+            "matched_iou50": 4
+          },
+          {
+            "image": "IP_USDT_017460.png",
+            "gt": 1,
+            "pred": 1,
+            "matched_iou50": 1
+          },
+          {
+            "image": "UNI_USDT_015860.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "WLFI_USDT_015860.png",
+            "gt": 4,
+            "pred": 4,
+            "matched_iou50": 4
+          },
+          {
+            "image": "ETH_USDT_017060.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "PI_USDT_015760.png",
+            "gt": 4,
+            "pred": 4,
+            "matched_iou50": 0
+          },
+          {
+            "image": "TRX_USDT_016960.png",
+            "gt": 2,
+            "pred": 3,
+            "matched_iou50": 2
+          },
+          {
+            "image": "AAVE_USDT_014860.png",
+            "gt": 3,
+            "pred": 4,
+            "matched_iou50": 3
+          },
+          {
+            "image": "LIT_USDT_013360.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "XPL_USDT_014460.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "XPL_USDT_016460.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "NEAR_USDT_017360.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "CRV_USDT_015960.png",
+            "gt": 4,
+            "pred": 7,
+            "matched_iou50": 4
+          },
+          {
+            "image": "SOL_USDT_016960.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "OKB_USDT_015260.png",
+            "gt": 2,
+            "pred": 3,
+            "matched_iou50": 0
+          },
+          {
+            "image": "CFX_USDT_014660.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "AVAX_USDT_014860.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "TRUMP_USDT_017160.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "ETH_USDT_015360.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "ADA_USDT_015360.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "AVAX_USDT_016860.png",
+            "gt": 0,
+            "pred": 3,
+            "matched_iou50": 0
+          },
+          {
+            "image": "CHZ_USDT_016260.png",
+            "gt": 0,
+            "pred": 2,
+            "matched_iou50": 0
+          },
+          {
+            "image": "SPACE_USDT_013060.png",
+            "gt": 1,
+            "pred": 5,
+            "matched_iou50": 0
+          },
+          {
+            "image": "CFX_USDT_015560.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "SPACE_USDT_011860.png",
+            "gt": 0,
+            "pred": 3,
+            "matched_iou50": 0
+          },
+          {
+            "image": "LIT_USDT_012260.png",
+            "gt": 0,
+            "pred": 2,
+            "matched_iou50": 0
+          },
+          {
+            "image": "CHZ_USDT_015460.png",
+            "gt": 1,
+            "pred": 2,
+            "matched_iou50": 1
+          },
+          {
+            "image": "SOL_USDT_014460.png",
+            "gt": 2,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "OP_USDT_015660.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "ETH_USDT_016160.png",
+            "gt": 0,
+            "pred": 2,
+            "matched_iou50": 0
+          },
+          {
+            "image": "XAUT_USDT_015260.png",
+            "gt": 2,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "NIGHT_USDT_016560.png",
+            "gt": 0,
+            "pred": 2,
+            "matched_iou50": 0
+          },
+          {
+            "image": "BTC_USDT_016660.png",
+            "gt": 1,
+            "pred": 3,
+            "matched_iou50": 1
+          },
+          {
+            "image": "OKB_USDT_015360.png",
+            "gt": 1,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "LTC_USDT_017360.png",
+            "gt": 3,
+            "pred": 4,
+            "matched_iou50": 3
+          },
+          {
+            "image": "XRP_USDT_014560.png",
+            "gt": 3,
+            "pred": 3,
+            "matched_iou50": 3
+          },
+          {
+            "image": "XRP_USDT_016860.png",
+            "gt": 1,
+            "pred": 2,
+            "matched_iou50": 0
+          },
+          {
+            "image": "BNB_USDT_014360.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "APE_USDT_014860.png",
+            "gt": 1,
+            "pred": 4,
+            "matched_iou50": 1
+          },
+          {
+            "image": "AVAX_USDT_017060.png",
+            "gt": 3,
+            "pred": 2,
+            "matched_iou50": 2
+          },
+          {
+            "image": "LTC_USDT_017460.png",
+            "gt": 5,
+            "pred": 5,
+            "matched_iou50": 5
+          },
+          {
+            "image": "WLFI_USDT_017360.png",
+            "gt": 1,
+            "pred": 3,
+            "matched_iou50": 0
+          },
+          {
+            "image": "SUI_USDT_017160.png",
+            "gt": 2,
+            "pred": 1,
+            "matched_iou50": 1
+          },
+          {
+            "image": "TRUMP_USDT_017460.png",
+            "gt": 1,
+            "pred": 3,
+            "matched_iou50": 1
+          },
+          {
+            "image": "BTC_USDT_015660.png",
+            "gt": 2,
+            "pred": 5,
+            "matched_iou50": 2
+          },
+          {
+            "image": "DOGE_USDT_014160.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "WLFI_USDT_015360.png",
+            "gt": 0,
+            "pred": 2,
+            "matched_iou50": 0
+          },
+          {
+            "image": "JTO_USDT_014260.png",
+            "gt": 0,
+            "pred": 2,
+            "matched_iou50": 0
+          },
+          {
+            "image": "AAVE_USDT_017360.png",
+            "gt": 0,
+            "pred": 2,
+            "matched_iou50": 0
+          },
+          {
+            "image": "NIGHT_USDT_015460.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "ONDO_USDT_017260.png",
+            "gt": 0,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "BNB_USDT_016860.png",
+            "gt": 2,
+            "pred": 3,
+            "matched_iou50": 2
+          },
+          {
+            "image": "SUI_USDT_015660.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "ASTER_USDT_014460.png",
+            "gt": 5,
+            "pred": 7,
+            "matched_iou50": 5
+          },
+          {
+            "image": "ETH_USDT_016660.png",
+            "gt": 2,
+            "pred": 1,
+            "matched_iou50": 1
+          },
+          {
+            "image": "ASTER_USDT_014760.png",
+            "gt": 2,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "LINK_USDT_015660.png",
+            "gt": 1,
+            "pred": 1,
+            "matched_iou50": 1
+          },
+          {
+            "image": "XLM_USDT_015260.png",
+            "gt": 1,
+            "pred": 0,
+            "matched_iou50": 0
+          },
+          {
+            "image": "NEAR_USDT_017160.png",
+            "gt": 0,
+            "pred": 1,
+            "matched_iou50": 0
+          },
+          {
+            "image": "BCH_USDT_016460.png",
+            "gt": 0,
+            "pred": 3,
+            "matched_iou50": 0
+          },
+          {
+            "image": "LTC_USDT_016960.png",
+            "gt": 4,
+            "pred": 5,
+            "matched_iou50": 4
+          }
+        ]
+      }
+    }
+  ]
+}
