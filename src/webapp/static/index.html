@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>darkforest-trading</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=20260730final4">
-<link rel="stylesheet" href="scout_mtf.css?v=20260719embed">
+<link rel="stylesheet" href="style.css?v=20260730sig2">
+<link rel="stylesheet" href="scout_mtf.css?v=20260730radar1">
 <link rel="stylesheet" href="vendor/tabulator.min.css">
-<link rel="stylesheet" href="clauseos.css?v=20260729clauseos-light">
+<link rel="stylesheet" href="clauseos.css?v=20260731arch1">
 <script defer src="vendor/lightweight-charts.standalone.production.js"></script>
 <script defer src="vendor/tabulator.min.js"></script>
 <script defer src="format_helpers.js?v=20260720sym"></script>
-<script defer src="scout_mtf_app.js?v=20260730final4"></script>
-<script defer src="app.js?v=20260730final4"></script>
+<script defer src="chart_theme.js?v=20260731kline1"></script>
+<script defer src="scout_mtf_app.js?v=20260731kline1"></script>
+<script defer src="app.js?v=20260731arch1"></script>
 </head>
 <body class="hb-shell theme-light">
 <button type="button" class="nav-burger" id="nav-burger" aria-label="打开导航" aria-controls="sidebar" aria-expanded="false">菜单</button>
@@ -36,8 +37,7 @@
     <button type="button" class="sb-item" data-view="backtest"><span class="sb-label">回测</span></button>
     <div class="sb-section-label">工具</div>
     <button type="button" class="sb-item sb-item-muted" data-view="probe"><span class="sb-label">盘口检测</span></button>
-    <button type="button" class="sb-item sb-item-muted" data-view="labeling"><span class="sb-label">打标</span></button>
-    <button type="button" class="sb-item sb-item-muted" data-view="shorttf"><span class="sb-label">短周期</span></button>
+    <button type="button" class="sb-item sb-item-muted" data-view="shorttf"><span class="sb-label">ETH 3m</span></button>
     <button type="button" class="sb-item sb-item-muted" data-view="radar"><span class="sb-label">雷达</span></button>
   </nav>
   <div class="sb-foot">
@@ -210,20 +210,75 @@
   <section id="view-overview" class="view">
     <div class="page-head overview-head">
       <div>
-        <div class="page-eyebrow">LIVE EVIDENCE WORKSPACE</div>
-        <h1 class="page-title">交易证据总览</h1>
-        <p class="page-sub">先看实盘裁决进度 · 回测只作历史参考 · 终审 = 前向 100 笔新鲜成交</p>
+        <div class="page-eyebrow">ARCHITECTURE · LIVE EVIDENCE</div>
+        <h1 class="page-title">系统总览</h1>
+        <p class="page-sub">两层模型 + 执行层 · 写清每一层当前版本 · 终审 = 前向 100 笔新鲜成交</p>
       </div>
       <div class="page-head-actions">
         <button type="button" class="mini-btn" data-jump="forward">前向</button>
+        <button type="button" class="mini-btn" data-jump="signals">信号</button>
         <button type="button" class="primary-btn" data-jump="probe">盘口检测</button>
       </div>
     </div>
+
+    <!-- Architecture stack (ClauseOS spatial cards) -->
+    <div class="arch-board" id="arch-board" aria-label="当前架构与模型版本">
+      <div class="arch-board-head">
+        <div>
+          <div class="arch-kicker">PIPELINE</div>
+          <h2 class="arch-title">两层架构 · 检测 → 判断 → 执行</h2>
+          <p class="arch-lede" id="arch-lede">YOLO 形态检测 + LightGBM 打分 + 前向/纸面执行。不自动 promote。</p>
+        </div>
+        <div class="arch-meta" id="arch-meta">
+          <span class="arch-pill">15m · SWAP</span>
+          <span class="arch-pill">tip-only</span>
+          <span class="arch-pill">TP5 / SL2</span>
+          <span class="arch-pill">fresh ≤30m</span>
+        </div>
+      </div>
+      <div class="arch-flow" id="arch-flow" aria-live="polite">
+        <!-- filled by loadOverview / paintArchitecture -->
+        <div class="arch-card skeleton">
+          <span class="arch-layer">L1</span>
+          <span class="arch-name">检测层</span>
+          <b class="arch-ver">…</b>
+          <small class="arch-sub">加载中</small>
+        </div>
+        <div class="arch-arrow" aria-hidden="true">→</div>
+        <div class="arch-card skeleton">
+          <span class="arch-layer">L2</span>
+          <span class="arch-name">判断层</span>
+          <b class="arch-ver">…</b>
+          <small class="arch-sub">加载中</small>
+        </div>
+        <div class="arch-arrow" aria-hidden="true">→</div>
+        <div class="arch-card skeleton">
+          <span class="arch-layer">L3</span>
+          <span class="arch-name">执行层</span>
+          <b class="arch-ver">…</b>
+          <small class="arch-sub">加载中</small>
+        </div>
+        <div class="arch-arrow" aria-hidden="true">→</div>
+        <div class="arch-card skeleton">
+          <span class="arch-layer">裁决</span>
+          <span class="arch-name">前向终审</span>
+          <b class="arch-ver">…</b>
+          <small class="arch-sub">加载中</small>
+        </div>
+      </div>
+      <div class="arch-legend" id="arch-legend">
+        <span><i class="dot ok"></i>在线 / ACTIVE</span>
+        <span><i class="dot warn"></i>纸面 / 旁路</span>
+        <span><i class="dot off"></i>未挂 / 空转</span>
+        <span class="arch-legend-note">主线确认只认前向新鲜 100 笔 · 自家 val/mAP 不作裁决</span>
+      </div>
+    </div>
+
     <div class="overview-stage" aria-label="实时证据空间视图">
       <div class="stage-toolbar">
         <div class="stage-context">
-          <span class="stage-context-k">窗口</span>
-          <strong>15m · SWAP</strong>
+          <span class="stage-context-k">证据</span>
+          <strong id="stage-context-left">tip-replay · 前向</strong>
         </div>
         <div class="stage-context stage-context-right">
           <span class="stage-context-k">裁决模式</span>
@@ -242,9 +297,10 @@
         <div class="tile evidence-loading"><span class="tile-code">EVIDENCE</span><span class="lbl">载入阈值</span><b>—</b><small>正在读取模型</small></div>
       </div>
       <div class="stage-footnote">
-        <span>检测</span><span>判断</span><span>成交</span><span>裁决</span>
+        <span>L1 检测</span><span>L2 判断</span><span>L3 执行</span><span>终审</span>
       </div>
     </div>
+
     <div id="live-truth" class="live-truth" aria-live="polite">
       <div class="live-truth-main">
         <div class="live-truth-k">实盘裁决</div>
@@ -265,26 +321,48 @@
     </div>
     <div id="verdict-banner" class="banner banner-verdict" role="status"></div>
 
-    <!-- v10 纸面模拟信号（只读展示，不写账本） -->
-    <div class="panel" id="live-paper-panel" style="margin:8px 0 12px">
+    <!-- Layer detail table -->
+    <div class="panel arch-detail-panel" id="arch-detail-panel">
       <div class="panel-head-row">
-        <h2 style="margin:0">v10 纸面模拟信号 <span class="unit">只读 · 不写 forward · 不下单</span></h2>
+        <h2 style="margin:0">各层版本明细 <span class="unit">只读 · 来自 models/ACTIVE + status-strip</span></h2>
+      </div>
+      <div class="table-wrap">
+        <table class="arch-table" id="arch-table">
+          <thead>
+            <tr>
+              <th>层</th>
+              <th>职责</th>
+              <th>当前版本 / 指针</th>
+              <th>状态</th>
+              <th>备注</th>
+            </tr>
+          </thead>
+          <tbody id="arch-tbody">
+            <tr><td colspan="5" class="note">加载中…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note note-foot" id="arch-foot">
+        铁律：不自动 promote · holdout 需 owner 批准 · 检测只认盘口 tip · 三门新鲜度同值 30min
+      </p>
+    </div>
+
+    <!-- v10 纸面模拟信号（只读展示，不写账本） -->
+    <div class="panel" id="live-paper-panel">
+      <div class="panel-head-row">
+        <h2 style="margin:0">L1 旁路 · v10 纸面模拟 <span class="unit">只读 · 不写 forward · 不下单</span></h2>
         <button type="button" class="mini-btn" id="live-paper-refresh">刷新</button>
       </div>
       <div id="live-paper-body" class="note" style="min-height:28px">加载中…</div>
       <p class="note note-foot" style="margin-top:4px">出信号即推 TG+Bark；点击图打开大图。命令：<code>python3 scripts/live_signal_tg.py --tip-only --send</code></p>
     </div>
 
-    <div class="two-col">
-      <div class="panel panel-chart">
-        <h2>验收净值 <span class="unit">回测参考 · 0.3% 成本 · 北京时间</span></h2>
-        <div id="spark-chart" class="chart short"></div>
-      </div>
-      <div class="panel">
-        <h2>验收清单 <span class="unit">回测 holdout，非实盘</span></h2>
-        <ul id="acceptance" class="check-list"></ul>
-        <p class="note note-foot">明细 → <b>回测</b> · 实盘新鲜成交 → <b>前向</b></p>
-      </div>
+    <!-- tip-replay 诚实摘要（无前视净值图；历史 PF6.x 曲线已下线） -->
+    <div class="panel" id="overview-honest-panel">
+      <h2>回测终审（tip-replay） <span class="unit">盘口视角 · 非前视 · 非实盘</span></h2>
+      <div id="overview-honest-tiles" class="tile-row"></div>
+      <ul id="acceptance" class="check-list" style="margin-top:10px"></ul>
+      <p class="note note-foot">前视回测净值图（旧 PF≈6 / +245%）已移除。明细 → <b>回测</b> · 实盘新鲜 → <b>前向</b></p>
     </div>
   </section>
 
@@ -294,29 +372,31 @@
       <header class="top">
         <div class="top-left">
           <h1 class="radar-title">多周期雷达</h1>
-          <p class="panel-sub" style="margin-top:4px">支线观察 · 不写前向账本 · 不接下单</p>
+          <p class="panel-sub" style="margin-top:4px" id="radar-sub">
+            规则多 TF · 非 YOLO/判断层 · 不写 forward · 不接下单
+          </p>
         </div>
         <div class="top-actions">
-          <button type="button" class="btn" id="btn-refresh" title="重新拉取结果">刷新</button>
-          <button type="button" class="btn primary" id="btn-run">扫描</button>
+          <button type="button" class="btn" id="btn-refresh" title="重新拉取已有结果">刷新显示</button>
+          <button type="button" class="btn primary" id="btn-run" title="实时拉 OKX 重扫（约 1–3 分钟）">重新扫描</button>
         </div>
       </header>
 
       <section class="def-card">
-        <p class="def-title">这是什么</p>
-        <p class="def-body">
-          从主流币 + 成交额前列 + 涨跌榜里挑币，在 <b>1m / 3m / 5m / 15m / 30m</b>
-          上看「均线是否密集、是否站上慢线」。多周期越齐 → 分数越高 →
-          分档 <b>A 强 / B 中 / C 弱</b>。
+        <p class="def-title">方法（当前）</p>
+        <p class="def-body" id="radar-method">
+          池子 = <b>主流钉选 + 24h 额前 + 涨/跌幅榜</b>；在
+          <b>1m / 3m / 5m / 15m / 30m</b> 上用 <b>expanded 密集规则 + 站上 EMA55</b>
+          投票合成 A/B/C。不是 v10/v11 检测或判断模型。
         </p>
         <ul class="def-list">
-          <li>与主线 v11 闸门独立；点币名看 K 线，点周期点切换该周期图</li>
+          <li id="radar-method-note">点「重新扫描」拉最新盘口；榜单时间见下方状态条</li>
         </ul>
       </section>
 
       <section class="status" id="status">
         <div class="st">
-          <span class="st-l">状态</span>
+          <span class="st-l">扫描时刻</span>
           <strong id="st-run">—</strong>
           <span class="st-s" id="st-time"></span>
         </div>
@@ -325,7 +405,7 @@
         <div class="st c"><span class="st-l">C 弱</span><strong id="st-c">0</strong></div>
       </section>
 
-      <p class="hint" id="hint">点「扫描」更新榜单（约 1 分钟）。</p>
+      <p class="hint" id="hint">点「重新扫描」更新榜单（拉 OKX，约 1–3 分钟）。</p>
 
       <section class="panel chart-panel" id="chart-card" hidden>
         <div class="panel-head">
@@ -476,86 +556,25 @@
     <div class="page-head">
       <div>
         <h1 class="page-title">回测</h1>
-        <p class="page-sub">v16 tip-replay 终审 · 逐 bar 盘口视角（检测器只见过去）· 让钱判，不让标签判</p>
+        <p class="page-sub">仅 tip-replay 终审 · 逐 bar 盘口视角（检测器只见过去）· 旧前视回测已归档下线</p>
       </div>
     </div>
 
-    <!-- v16 tip-replay verdict (the new truth) -->
     <div class="panel" id="tip-replay-panel">
       <h2>v16 盘口回测 <span class="unit" id="tr-sub">tip-replay · TP5/SL2 · maker 成本</span></h2>
       <div id="tr-body" class="tile-row"><div class="tile"><span class="lbl">状态</span><b>加载中…</b></div></div>
       <p class="note note-foot" id="tr-note"></p>
     </div>
 
-    <details class="panel" id="bt-legacy">
-      <summary style="cursor:pointer;color:#f59e0b">⚠️ 旧回测（事后视角 · 已废弃方法学，仅存考古）— 点击展开</summary>
-      <p class="note">下方 v11 池 / PF 6.61 等数字来自旧的全历史扫描回测：候选是<b>事后</b>发现的，检测器看到了启动后文，因此系统性偏高。已被 v16 tip-replay 取代，不作决策依据。</p>
-    <div class="controls toolbar">
-      <div class="seg" id="cost-seg">
-        <button data-cost="0.002">成本 0.2%</button>
-        <button data-cost="0.003" class="active">成本 0.3%</button>
-        <button data-cost="0.004">成本 0.4%</button>
-      </div>
-      <div class="seg" id="window-seg">
-        <button data-window="accept" class="active">验收窗口</button>
-        <button data-window="full">全期对照</button>
-      </div>
-      <span class="note">验收窗 holdout 已记账消耗；上方磁贴/曲线为 ACTIVE 动态回测。</span>
-    </div>
-    <div id="bt-tiles" class="tile-row"></div>
-
-    <div class="panel" id="bt-compare-panel">
-      <h2>判断层对照 <span class="unit">预计算表 · 当前主线</span></h2>
-      <p class="note warn-banner" id="bt-compare-note" hidden></p>
-      <div class="table-wrap">
-        <table id="bt-compare-table">
-          <thead>
-            <tr>
-              <th>角色</th>
-              <th>目标</th>
-              <th class="num">阈值</th>
-              <th class="num">合格</th>
-              <th class="num">验收笔数</th>
-              <th class="num">验收净/资金</th>
-              <th class="num">验收 PF</th>
-              <th class="num">验收胜率</th>
-              <th class="num">全期笔数</th>
-              <th class="num">全期净/资金</th>
-              <th class="num">全期 PF</th>
-              <th>≥100 笔</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-
     <div class="panel">
-      <h2>净值与回撤 <span class="unit">（净收益 % 对账户资金，出场时点记账）</span></h2>
+      <h2>净值与回撤 <span class="unit">tip-replay 逐笔累计净收益 %（入场时点记账）</span></h2>
       <div id="equity-chart" class="chart"></div>
       <div id="dd-chart" class="chart mini"></div>
     </div>
 
-    <div class="two-col">
-      <div class="panel">
-        <h2>分数十分位 → 平均净收益 <span class="unit">（候选全集，模型排序能力）</span></h2>
-        <div id="decile-bars" class="hbar-wrap"></div>
-      </div>
-      <div class="panel">
-        <h2>PF ↔ 成本曲线 <span class="unit">（验收窗口，虚线 = 验收线 1.3）</span></h2>
-        <div id="pf-chart" class="chart short"></div>
-      </div>
-    </div>
-
-    <div class="two-col">
-      <div class="panel">
-        <h2>月度净收益 <span class="unit">（% 对资金）</span></h2>
-        <div id="monthly-bars" class="hbar-wrap"></div>
-      </div>
-      <div class="panel">
-        <h2>分币种盈亏 <span class="unit">（净收益 %·名义，前后各 8）</span></h2>
-        <div id="symbol-bars" class="hbar-wrap two-col-inner"></div>
-      </div>
+    <div class="panel">
+      <h2>月度净收益 <span class="unit">tip-replay · % 累计</span></h2>
+      <div id="monthly-bars" class="hbar-wrap"></div>
     </div>
 
     <div class="panel">
@@ -568,12 +587,8 @@
           <button data-outcome="sl">止损</button>
           <button data-outcome="timeout">超时</button>
         </div>
-        <label class="slider-control" for="score-threshold">
-          <span>展示分数 ≥ <b id="score-threshold-label">0.000</b></span>
-          <input id="score-threshold" type="range" min="0" max="1" step="0.01" value="0">
-        </label>
-        <span class="note" id="threshold-note">只过滤下方成交明细，不改变净值/PF。</span>
-        <span class="note">点击任意行 → 跳到该笔交易的 K 线位置</span>
+        <span class="note" id="threshold-note">来源：v16 tip-replay holdout 逐笔；旧前视明细已删除。</span>
+        <span class="note">点击行 → 跳转信号页 K 线</span>
       </div>
       <div class="table-wrap">
         <table id="trades-table">
@@ -590,7 +605,6 @@
       </div>
       <button type="button" id="trades-more" class="mini-btn more-btn" hidden>再显示更多</button>
     </div>
-    </details>
   </section>
 
   <!-- ============ 信号浏览 ============ -->
@@ -598,7 +612,7 @@
     <div class="page-head">
       <div>
         <h1 class="page-title">信号</h1>
-        <p class="page-sub">K 线复盘 · 成交 / 合格未成交 · 时间轴北京时间</p>
+        <p class="page-sub">K 线复盘 · 仅 tip-replay 成交标记 · 旧前视 scored_signals 已下线 · 北京时间</p>
       </div>
     </div>
     <div class="controls toolbar">
@@ -621,9 +635,9 @@
         <button type="button" data-tf="240">4H</button>
       </div>
       <div class="seg" id="bars-seg">
-        <button data-bars="1500" class="active">15 天</button>
+        <button data-bars="1500">15 天</button>
         <button data-bars="3000">1 个月</button>
-        <button data-bars="9000">3 个月</button>
+        <button data-bars="9000" class="active">3 个月</button>
         <button data-bars="40000">全部</button>
       </div>
       <div class="seg" id="ma-seg" title="均线显示">
@@ -638,12 +652,11 @@
     <div class="signals-layout">
       <div class="panel grow panel-chart">
         <div class="legend compact-legend" id="signals-legend">
-          <span data-leg="ma"><i class="dot" style="background:#f97316"></i>EMA 20/60/120</span>
-          <span><i class="dot" style="background:#2563eb"></i>入场</span>
-          <span><i class="dot" style="background:#059669"></i>TP</span>
-          <span><i class="dot" style="background:#d97706"></i>SL</span>
-          <span><i class="dot" style="background:rgba(37,99,235,0.25)"></i>密集窗</span>
-          <span class="note">点侧栏成交聚焦 · 滚轮缩放</span>
+          <span data-leg="ma"><i class="dot" style="background:#f97316"></i>EMA</span>
+          <span><i class="dot" style="background:#2563eb"></i>▼入场(空)</span>
+          <span><i class="dot" style="background:#059669"></i>止盈 5×ATR</span>
+          <span><i class="dot" style="background:#dc2626"></i>止损 2×ATR</span>
+          <span class="note">Claude 短图风格 · 点侧栏聚焦</span>
         </div>
         <div class="chart-host chart-host-signals">
           <div class="ohlc-legend ohlc-legend-slim" id="kline-ohlc" aria-live="polite">—</div>
@@ -656,13 +669,13 @@
           <div id="trade-focus-body" class="trade-focus-body"></div>
         </div>
         <div class="side-section">
-          <h2>本币种成交 <span class="unit" id="side-count"></span></h2>
+          <h2>tip-replay 成交 <span class="unit" id="side-count"></span></h2>
           <div class="table-wrap side-table">
             <table id="symbol-trades"><tbody></tbody></table>
           </div>
         </div>
         <div class="side-section">
-          <h2>合格未成交 <span class="unit" id="missed-count"></span></h2>
+          <h2>说明 <span class="unit" id="missed-count"></span></h2>
           <div class="table-wrap side-table missed-table">
             <table id="symbol-missed"><tbody></tbody></table>
           </div>
@@ -782,10 +795,10 @@
   <section id="view-probe" class="view hidden" hidden aria-hidden="true">
     <div class="page-head">
       <h1 class="page-title">盘口检测</h1>
-      <p class="page-sub">单币即时 · 拉最新K线 → v12 YOLO tip → v11 判断 → 30min 新鲜度 · 只读不下单</p>
+      <p class="page-sub">即时 tip / 历史 full 扫描 · YOLO + 判断 · 只读不下单 · 历史默认 1 年并出 HTML 报告</p>
     </div>
     <div class="panel">
-      <h2>一键检测 <span class="unit">子进程 · 单飞 · 本机约 10–60s · VPS 约 40–90s</span></h2>
+      <h2>一键检测 <span class="unit">子进程 · 单飞 · 即时约 10–60s · 历史约 2–10 分钟</span></h2>
       <div class="probe-chips" id="probe-chips" aria-label="常用币种">
         <button type="button" class="chip-btn" data-sym="BTC">BTC</button>
         <button type="button" class="chip-btn" data-sym="ETH">ETH</button>
@@ -796,62 +809,50 @@
       </div>
       <div class="controls probe-controls">
         <input id="probe-symbol" placeholder="BTC / eth / MOODENG_USDT_SWAP" autocomplete="off" spellcheck="false">
-        <button type="button" class="primary-btn" id="probe-run">▶ 检测</button>
-        <span class="note" id="probe-meta">点币种或输入后回车</span>
+        <button type="button" class="primary-btn" id="probe-run">▶ 即时检测</button>
+        <label class="fwd-quiet-label" for="probe-days">历史天数
+          <input id="probe-days" type="number" min="7" max="800" value="365" style="width:4.5rem" title="默认 365 天">
+        </label>
+        <button type="button" class="mini-btn" id="probe-history-run" title="full 扫描本地一年 K 线并生成 HTML">📜 历史检测</button>
+        <span class="note" id="probe-meta">点币种或输入后回车=即时；历史扫描会出报告</span>
       </div>
       <div id="probe-cards" class="probe-cards" hidden></div>
+      <div id="probe-history-link" class="note" hidden style="margin:8px 0"></div>
       <pre id="probe-result" class="ops-pre probe-pre">（尚未检测）</pre>
-      <p class="note">不写 forward_log、不下单；K 线只进内存，与 VPS 主线脉冲互不影响。</p>
+      <p class="note">不写 forward_log、不下单；历史报告写在 <code>analysis/output/probe_history/</code>（debug-artifacts 可开）。</p>
     </div>
   </section>
 
-  <!-- ============ 短周期支线 1m/5m ============ -->
+  <!-- ============ ETH 3m short pilot (两日工作) ============ -->
   <section id="view-shorttf" class="view hidden" hidden aria-hidden="true">
     <div class="page-head">
-      <h1 class="page-title">短周期</h1>
-      <p class="page-sub">1m / 5m 规则 tip · 主流币 · 不写 forward_log · 不接主线 executor</p>
+      <div>
+        <h1 class="page-title">ETH 3m pilot</h1>
+        <p class="page-sub" id="shorttf-sub">ETH 3 分钟做空 · 与 15m 主线隔离 · 未 promote</p>
+      </div>
     </div>
     <div id="shorttf-tiles" class="tile-row"></div>
     <div class="panel">
       <h2>说明</h2>
       <p class="note" id="shorttf-note"></p>
-      <p class="note" style="margin-top:8px">
-        复现：
-        <code>PYTHONPATH=. python3 scripts/short_tf_scan.py --once</code>
-        · 循环
-        <code>--loop --interval 60</code>
-        · TG 需
-        <code>--notify</code>
-      </p>
+      <ul class="note" id="shorttf-discipline" style="margin:8px 0 0 1.2em"></ul>
     </div>
     <div class="two-col">
-      <div class="panel">
-        <h2>最近扫描</h2>
-        <pre id="shorttf-status" class="ops-pre" style="max-height:240px;overflow:auto"></pre>
+      <div class="panel" id="shorttf-v1-panel">
+        <h2>v1 检测 pilot <span class="unit" id="shorttf-v1-verdict"></span></h2>
+        <div id="shorttf-v1-body" class="note">加载中…</div>
+        <div id="shorttf-v1-links" class="note" style="margin-top:8px"></div>
       </div>
-      <div class="panel">
-        <h2>最近信号 <span class="unit" id="shorttf-sig-count"></span></h2>
-        <div class="table-wrap">
-          <table id="shorttf-sig-table">
-            <thead>
-              <tr>
-                <th>信号（北京）</th>
-                <th>币</th>
-                <th>bar</th>
-                <th class="num">延迟</th>
-                <th class="num">分数</th>
-                <th class="num">价格</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
+      <div class="panel" id="shorttf-v2-panel">
+        <h2>v2 tip 分类诊断 <span class="unit" id="shorttf-v2-verdict"></span></h2>
+        <div id="shorttf-v2-body" class="note">加载中…</div>
+        <div id="shorttf-v2-links" class="note" style="margin-top:8px"></div>
       </div>
     </div>
     <div class="panel">
-      <h2>ETH 微周期（旧通道）</h2>
-      <p class="note">ETH 单币 1/2/3/5m + LGB 模型产物见
-        <button type="button" class="mini-btn" id="shorttf-to-ethmicro">打开 ETH 微周期</button>
+      <h2>旧通道（可选）</h2>
+      <p class="note">通用 1m/5m 多币规则 / ETH 1–5m LGB 旧产物仍在仓库，不在本页默认展示。
+        <button type="button" class="mini-btn" id="shorttf-to-ethmicro">打开 ETH 微周期（旧）</button>
       </p>
     </div>
   </section>

@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field
 from src.backtest.run import BASE_COST
 from src.webapp.agenda_payloads import agenda_payload
 from src.webapp.auth import verify_ops_request
-from src.webapp.check_symbol_api import check_symbol_payload
+from src.webapp.check_symbol_api import check_symbol_payload, probe_history_payload
 from src.webapp.dashboard_cache import DEFAULT_UNIVERSE
 from src.webapp.dashboard_payloads import (
     backtest_compare_payload,
@@ -53,7 +53,7 @@ from src.webapp.scout_mtf_payloads import (
     scout_mtf_status,
 )
 from src.eth_micro.payloads import eth_micro_payload
-from src.short_tf.payloads import short_tf_payload
+from src.webapp.eth3m_pilot_payloads import eth3m_pilot_payload
 from src.webapp.live_paper import live_paper_payload, live_paper_status_line
 
 app = FastAPI(title="fable-trading dashboard")
@@ -73,6 +73,16 @@ class CheckSymbolBody(BaseModel):
 
     symbol: str = Field(..., min_length=1, max_length=32)
     mode: str = Field(default="live", pattern="^(live|tip)$")
+
+    model_config = {"extra": "forbid"}
+
+
+class ProbeHistoryBody(BaseModel):
+    """Historical full-scan probe → HTML report (read-only)."""
+
+    symbol: str = Field(..., min_length=1, max_length=32)
+    days: int = Field(default=365, ge=7, le=800)
+    conf: float = Field(default=0.30, ge=0.05, le=0.95)
 
     model_config = {"extra": "forbid"}
 
@@ -190,6 +200,16 @@ def check_symbol_route(body: CheckSymbolBody) -> dict:
     return check_symbol_payload(body.symbol.strip(), mode=body.mode)
 
 
+@app.post("/api/probe-history")
+def probe_history_route(body: ProbeHistoryBody) -> dict:
+    """历史盘口检测：默认近 365 天 full 扫描 + 判断打分，生成 HTML 报告。"""
+    return probe_history_payload(
+        body.symbol.strip(),
+        days=int(body.days),
+        conf=float(body.conf),
+    )
+
+
 @app.get("/api/eth-micro")
 def eth_micro() -> dict:
     """ETH-only 1/2/3/5m channel: backtest table + monitor status + recent signals."""
@@ -198,8 +218,12 @@ def eth_micro() -> dict:
 
 @app.get("/api/short-tf")
 def short_tf() -> dict:
-    """Multi-symbol 1m/5m tip rules channel (isolated from 15m forward_log)."""
-    return short_tf_payload()
+    """#shorttf page: ETH 3m short-start pilot (v1 detect + v2 cls diag).
+
+    Replaces the older multi-symbol 1m/5m short_tf channel on this route.
+    Legacy ``short_tf_payload`` remains available from ``src.short_tf.payloads``.
+    """
+    return eth3m_pilot_payload()
 
 
 @app.get("/api/live-paper")

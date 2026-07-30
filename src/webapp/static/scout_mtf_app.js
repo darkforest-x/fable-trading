@@ -28,15 +28,21 @@ const state = {
 };
 
 const TF_ORDER = ["1m", "3m", "5m", "15m", "30m"];
-const OUTCOME_CN = { tp: "止盈", sl: "止损", timeout: "超时", sl_ambiguous: "止损*" };
-const MA_COLORS = {
-  sma20: "rgba(156,163,175,0.9)",
-  ema20: "rgba(55,65,81,0.95)",
-  sma60: "rgba(96,165,250,0.85)",
-  ema60: "rgba(37,99,235,0.9)",
-  sma120: "rgba(192,132,252,0.8)",
-  ema120: "rgba(124,58,237,0.9)",
+const _C = globalThis.FableChart || null;
+const OUTCOME_CN = (_C && _C.OUTCOME_CN) || {
+  tp: "止盈", sl: "止损", timeout: "超时", sl_ambiguous: "止损*",
 };
+// Prefer shared TG/YOLO MA palette; fall back to local map for standalone
+const MA_COLORS = (_C && _C.MA_STYLE)
+  ? Object.fromEntries(Object.entries(_C.MA_STYLE).map(([k, v]) => [k, v.color]))
+  : {
+    sma20: "rgba(156,163,175,0.9)",
+    ema20: "rgba(55,65,81,0.95)",
+    sma60: "rgba(96,165,250,0.85)",
+    ema60: "rgba(37,99,235,0.9)",
+    sma120: "rgba(192,132,252,0.8)",
+    ema120: "rgba(124,58,237,0.9)",
+  };
 
 function hint(msg, kind = "") {
   const el = $("#hint");
@@ -150,6 +156,7 @@ function pctLabel(ret) {
 }
 
 function fmtPx(v) {
+  if (_C && _C.fmtPx) return _C.fmtPx(v);
   const n = Number(v);
   if (!Number.isFinite(n)) return "—";
   const a = Math.abs(n);
@@ -205,44 +212,51 @@ function ensureChart() {
     state.chart.applyOptions({ width: host.clientWidth, height: host.clientHeight });
     return state.chart;
   }
-  state.chart = LightweightCharts.createChart(host, {
-    autoSize: true,
-    layout: {
-      background: { type: "solid", color: "#fafbfc" },
-      textColor: "#6b7280",
-      fontSize: 12,
-    },
-    grid: {
-      vertLines: { color: "#eef0f4" },
-      horzLines: { color: "#eef0f4" },
-    },
-    rightPriceScale: {
-      borderColor: "#e5e7eb",
-      scaleMargins: { top: 0.08, bottom: 0.08 },
-    },
-    timeScale: {
-      borderColor: "#e5e7eb",
-      timeVisible: true,
-      secondsVisible: false,
-      rightOffset: 6,
-      barSpacing: 7,
-      minBarSpacing: 2,
-    },
-    crosshair: {
-      mode: 1, // Magnet
-      vertLine: { color: "rgba(107,114,128,0.45)", width: 1, style: 2, labelBackgroundColor: "#6b7280" },
-      horzLine: { color: "rgba(107,114,128,0.45)", width: 1, style: 2, labelBackgroundColor: "#6b7280" },
-    },
-    handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
-    handleScale: { axisPressedMouseMove: { time: true, price: true }, mouseWheel: true, pinch: true },
-  });
-  state.series = state.chart.addCandlestickSeries({
-    upColor: "#26a69a",
-    downColor: "#ef5350",
-    borderVisible: false,
-    wickUpColor: "#26a69a",
-    wickDownColor: "#ef5350",
-  });
+  if (_C && _C.makeChart) {
+    state.chart = _C.makeChart(host, {
+      rightPriceScale: { scaleMargins: { top: 0.08, bottom: 0.14 } },
+    });
+    state.series = state.chart.addCandlestickSeries(_C.candlestickOptions());
+  } else {
+    state.chart = LightweightCharts.createChart(host, {
+      autoSize: true,
+      layout: {
+        background: { type: "solid", color: "#ffffff" },
+        textColor: "#6b7280",
+        fontSize: 12,
+      },
+      grid: {
+        vertLines: { color: "#eef1f6" },
+        horzLines: { color: "#eef1f6" },
+      },
+      rightPriceScale: {
+        borderColor: "#e5e7eb",
+        scaleMargins: { top: 0.08, bottom: 0.14 },
+      },
+      timeScale: {
+        borderColor: "#e5e7eb",
+        timeVisible: true,
+        secondsVisible: false,
+        rightOffset: 10,
+        barSpacing: 8,
+        minBarSpacing: 2,
+      },
+      crosshair: {
+        mode: 1,
+        vertLine: { color: "rgba(37,99,235,0.35)", width: 1, style: 2, labelBackgroundColor: "#2563eb" },
+        horzLine: { color: "rgba(107,114,128,0.35)", width: 1, style: 2, labelBackgroundColor: "#6b7280" },
+      },
+      handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
+      handleScale: { axisPressedMouseMove: { time: true, price: true }, mouseWheel: true, pinch: true },
+    });
+    state.series = state.chart.addCandlestickSeries({
+      upColor: "#059669",
+      downColor: "#dc2626",
+      borderVisible: false,
+      wickUpColor: "#059669",
+      wickDownColor: "#dc2626",
+    });
+  }
   if (!state.ohlcWired) {
     state.ohlcWired = true;
     state.chart.subscribeCrosshairMove((param) => {
@@ -269,14 +283,21 @@ function ensureChart() {
 
 function clearChartOverlays() {
   if (!state.series) return;
-  state.priceLines.forEach((l) => {
-    try { state.series.removePriceLine(l); } catch (_) { /* ignore */ }
-  });
-  state.priceLines = [];
-  state.levelSeries.forEach((s) => {
-    try { state.chart.removeSeries(s); } catch (_) { /* ignore */ }
-  });
-  state.levelSeries = [];
+  const store = { priceLines: state.priceLines, levelSeries: state.levelSeries };
+  if (_C && _C.clearTradeLevels) {
+    _C.clearTradeLevels(store, state.series, state.chart);
+    state.priceLines = store.priceLines || [];
+    state.levelSeries = store.levelSeries || [];
+  } else {
+    state.priceLines.forEach((l) => {
+      try { state.series.removePriceLine(l); } catch (_) { /* ignore */ }
+    });
+    state.priceLines = [];
+    state.levelSeries.forEach((s) => {
+      try { state.chart.removeSeries(s); } catch (_) { /* ignore */ }
+    });
+    state.levelSeries = [];
+  }
   state.maSeries.forEach((s) => {
     try { state.chart.removeSeries(s); } catch (_) { /* ignore */ }
   });
@@ -286,26 +307,32 @@ function clearChartOverlays() {
 
 function addLevelLine(price, color, title, t0, t1, style = 0) {
   if (price == null || !Number.isFinite(Number(price)) || !state.series) return;
+  const store = { priceLines: state.priceLines, levelSeries: state.levelSeries };
+  // Axis: short title only (LWC paints price) — Claude style
+  const axisTitle = title || "";
+  if (_C && _C.addTradeLevel) {
+    _C.addTradeLevel(store, state.series, state.chart, price, color, axisTitle, t0, t1, style);
+    state.priceLines = store.priceLines;
+    state.levelSeries = store.levelSeries;
+    return;
+  }
   const p = Number(price);
-  const axisTitle = title ? `${title} ${fmtPx(p)}` : fmtPx(p);
   state.priceLines.push(state.series.createPriceLine({
     price: p,
     color,
     lineWidth: 1,
-    lineStyle: style, // 0 solid, 2 dashed, 3 dotted
+    lineStyle: style,
     axisLabelVisible: true,
     title: axisTitle,
   }));
-  // Horizontal segment over trade window (TV order line feel)
   if (t0 != null && t1 != null && t1 >= t0) {
     const seg = state.chart.addLineSeries({
       color,
-      lineWidth: 2,
+      lineWidth: style === 0 ? 2 : 1,
       lineStyle: style,
       priceLineVisible: false,
       lastValueVisible: false,
       crosshairMarkerVisible: false,
-      autoscaleInfoProvider: () => null,
     });
     seg.setData([
       { time: t0, value: p },
@@ -316,6 +343,10 @@ function addLevelLine(price, color, title, t0, t1, style = 0) {
 }
 
 function zoomAround(times, t0, t1, pad = 40) {
+  if (_C && _C.zoomAround) {
+    _C.zoomAround(state.chart, times, t0, t1, pad);
+    return;
+  }
   if (!state.chart || !times.length) return;
   let i0 = times.findIndex((t) => t >= t0);
   let i1 = times.findIndex((t) => t >= t1);
@@ -407,19 +438,25 @@ async function openTradeChart(opts) {
       `<span class="${cls}">${up ? "+" : ""}${chgPct.toFixed(2)}%</span>`;
   }
 
-  // Display MAs
-  for (const [key, color] of Object.entries(MA_COLORS)) {
-    const pts = data.mas?.[key];
-    if (!pts || !pts.length) continue;
-    const s = state.chart.addLineSeries({
-      color,
-      lineWidth: key.startsWith("ema") ? 2 : 1,
-      priceLineVisible: false,
-      lastValueVisible: false,
-      crosshairMarkerVisible: false,
-    });
-    s.setData(pts);
-    state.maSeries.push(s);
+  // Display MAs — shared TG/YOLO palette
+  if (_C && _C.addMaSeries && data.mas) {
+    _C.addMaSeries(state.chart, data, state.maSeries);
+  } else {
+    for (const [key, color] of Object.entries(MA_COLORS)) {
+      const pts = data.mas?.[key];
+      if (!pts || !pts.length) continue;
+      const st = (_C && _C.MA_STYLE && _C.MA_STYLE[key]) || {};
+      const s = state.chart.addLineSeries({
+        color: st.color || color,
+        lineWidth: st.lineWidth || (key.startsWith("ema") ? 1.2 : 1),
+        lineStyle: st.lineStyle || 0,
+        priceLineVisible: false,
+        lastValueVisible: false,
+        crosshairMarkerVisible: false,
+      });
+      s.setData(pts);
+      state.maSeries.push(s);
+    }
   }
 
   const lastT = times[times.length - 1];
@@ -434,89 +471,74 @@ async function openTradeChart(opts) {
   const tp = opts.tp != null ? Number(opts.tp) : null;
   const sl = opts.sl != null ? Number(opts.sl) : null;
   const mark = opts.mark != null ? Number(opts.mark) : null;
+  // side: prefer explicit; else infer from TP/SL geometry (mainline short)
+  let side = opts.side || null;
+  if (!side && entry != null && tp != null && sl != null) {
+    side = (tp < entry && sl > entry) ? "short" : "long";
+  }
+  if (!side) side = "long"; // radar paper/default historical long-style
 
-  // USD labels (open pos: live upl; closed: estimate from ret * notional or % only)
+  // Axis titles: Claude short tags (no price wall)
   let entryTitle = "入场";
-  let exitTitle = "出场";
-  let tpTitle = "TP";
-  let slTitle = "SL";
+  let tpTitle = "止盈 5xATR";
+  let slTitle = "止损 2xATR";
   if (opts.openPos) {
-    entryTitle = moneyLabel(opts.upl, "入场");
-    if (mark != null && entry != null) {
+    if (opts.upl != null) entryTitle = moneyLabel(opts.upl, "持仓");
+    else if (mark != null && entry != null) {
       const d = mark - entry;
       const sign = d >= 0 ? "+" : "";
       entryTitle = `入场 ${sign}${((d / entry) * 100).toFixed(2)}%`;
-      if (opts.upl != null) entryTitle = moneyLabel(opts.upl, "持仓");
     }
-  } else if (opts.ret != null) {
-    exitTitle = `出场 ${outcomeLabel(opts.outcome)} ${pctLabel(opts.ret)}`;
-    entryTitle = "入场";
-  }
-  if (tp != null && entry != null) {
-    const tpRet = tp / entry - 1;
-    tpTitle = `TP ${pctLabel(tpRet)}`;
-    if (opts.notional != null) tpTitle = moneyLabel(opts.notional * tpRet, "TP");
-  }
-  if (sl != null && entry != null) {
-    const slRet = sl / entry - 1;
-    slTitle = `SL ${pctLabel(slRet)}`;
-    if (opts.notional != null) slTitle = moneyLabel(opts.notional * slRet, "SL");
   }
 
-  if (tp != null) addLevelLine(tp, "#26a69a", tpTitle, tEntry, tExit, 2);
-  if (sl != null) addLevelLine(sl, "#ff9800", slTitle, tEntry, tExit, 2);
-  if (entry != null) addLevelLine(entry, "#2962ff", entryTitle, tEntry, tExit, 0);
-  if (exitPx != null && !opts.openPos) {
-    addLevelLine(exitPx, "#7b61ff", exitTitle, tEntry, tExit, 0);
+  const store = { priceLines: state.priceLines, levelSeries: state.levelSeries };
+  if (entry != null && _C && _C.paintTradeOverlay) {
+    _C.paintTradeOverlay(
+      { chart: state.chart, series: state.series, store },
+      {
+        entry,
+        exit: exitPx,
+        tp,
+        sl,
+        mark,
+        tEntry,
+        tExit,
+        side,
+        outcome: opts.outcome || "",
+        ret: opts.ret != null ? Number(opts.ret) : null,
+        openPos: !!opts.openPos,
+        tpMult: 5,
+        slMult: 2,
+        entryTitle,
+        tpTitle,
+        slTitle,
+        drawPath: true,
+        setMarkers: true,
+      }
+    );
+    state.priceLines = store.priceLines;
+    state.levelSeries = store.levelSeries;
+  } else {
+    // Fallback (no shared theme)
+    const T = (_C && _C.TRADE) || { tp: "#059669", sl: "#dc2626", entry: "#2563eb", mark: "#9ca3af" };
+    if (sl != null) addLevelLine(sl, T.sl, slTitle, tEntry, tExit, 2);
+    if (entry != null) addLevelLine(entry, T.entry, entryTitle, tEntry, tExit, 0);
+    if (tp != null) addLevelLine(tp, T.tp, tpTitle, tEntry, tExit, 2);
+    if (mark != null) addLevelLine(mark, T.mark, opts.openPos ? "标记价" : "最新", tEntry, lastT, 3);
+    const markers = (_C && _C.buildTradeMarkers)
+      ? _C.buildTradeMarkers({
+        tEntry, tExit, entry, exitPrice: exitPx, side, outcome: opts.outcome,
+        openPos: !!opts.openPos,
+      })
+      : [];
+    if (markers.length) state.series.setMarkers(markers);
   }
-  if (mark != null) {
-    addLevelLine(mark, "#9ca3af", opts.openPos ? "标记价" : "最新", tEntry, lastT, 3);
-  }
-
-  // Path entry → exit (or mark)
-  const pathEnd = opts.openPos ? (mark ?? entry) : exitPx;
-  if (entry != null && pathEnd != null) {
-    const path = state.chart.addLineSeries({
-      color: (opts.ret != null && opts.ret < 0) || (opts.upl != null && opts.upl < 0) ? "#ef5350" : "#26a69a",
-      lineWidth: 2,
-      priceLineVisible: false,
-      lastValueVisible: false,
-      crosshairMarkerVisible: false,
-      autoscaleInfoProvider: () => null,
-    });
-    path.setData([
-      { time: tEntry, value: entry },
-      { time: tExit, value: pathEnd },
-    ]);
-    state.levelSeries.push(path);
-  }
-
-  const markers = [];
-  if (entry != null) {
-    markers.push({
-      time: tEntry,
-      position: "belowBar",
-      shape: "arrowUp",
-      color: "#2962ff",
-      text: "入",
-      size: 2,
-    });
-  }
-  if (exitPx != null && !opts.openPos) {
-    markers.push({
-      time: tExit,
-      position: "aboveBar",
-      shape: "arrowDown",
-      color: opts.ret != null && opts.ret >= 0 ? "#26a69a" : "#ef5350",
-      text: outcomeLabel(opts.outcome).slice(0, 2),
-      size: 2,
-    });
-  }
-  state.series.setMarkers(markers.sort((a, b) => a.time - b.time));
 
   // Default zoom: if trade window, focus it; else last ~100 bars (TV-like)
   if (opts.entry != null || opts.exit != null || opts.openPos) {
     zoomAround(times, tEntry, tExit, 40);
+  } else if (_C && _C.showLastBars) {
+    _C.showLastBars(state.chart, 100, times.length);
   } else {
     const n = Math.min(100, times.length);
     const from = Math.max(0, times.length - n);
@@ -556,15 +578,37 @@ function renderStats(d) {
   $("#st-c").textContent = sum.C ?? 0;
   const run = $("#st-run");
   const box = run?.closest(".st");
+  const method = d.method || {};
+  const sub = document.getElementById("radar-sub");
+  if (sub && method.label) {
+    sub.textContent = `${method.label} · 不写 forward · 不接下单`;
+  }
+  const mnote = document.getElementById("radar-method-note");
+  if (mnote) {
+    const pb = d.pool_breakdown || {};
+    const age = d.scan_age_min;
+    const ageTxt =
+      age == null ? "" : age < 60 ? `扫描龄 ${Math.round(age)} 分钟` : `扫描龄 ${(age / 60).toFixed(1)} 小时${d.scan_stale ? " · 建议重扫" : ""}`;
+    const poolTxt = pb.major != null
+      ? `池 ${d.pool_size || "—"}：主流${pb.major || 0} · 额前${pb.volume || 0} · 涨${pb.gain || 0} · 跌${pb.loss || 0}`
+      : (method.pool || "");
+    mnote.textContent = [poolTxt, ageTxt, method.note || ""].filter(Boolean).join(" · ");
+  }
   if (st.running) {
     run.textContent = "扫描中";
     box?.classList.add("running");
-    $("#st-time").textContent = "约 30–90 秒";
+    $("#st-time").textContent = "约 1–3 分钟";
   } else {
-    run.textContent = d.available ? "就绪" : "未扫";
-    box?.classList.remove("running");
     const t = d.generated_at || st.latest_mtime || "";
-    $("#st-time").textContent = t ? fmtBjTime(t) + " 北京" : "点「扫描」";
+    run.textContent = t ? fmtBjTime(t) : d.available ? "就绪" : "未扫";
+    box?.classList.remove("running");
+    if (d.scan_stale) {
+      $("#st-time").textContent = "数据偏旧 · 点重新扫描";
+    } else {
+      $("#st-time").textContent = d.available
+        ? `A${sum.A || 0}/B${sum.B || 0}/C${sum.C || 0} · 规则多TF`
+        : "点「重新扫描」";
+    }
   }
 }
 
@@ -754,28 +798,33 @@ function renderPositions(pos) {
 }
 
 async function openPositionChart(p) {
-  // Estimate TP/SL for display using strategy default TP5/SL2 on ~ATR-less: use 5%/2% of entry as soft guide
-  // Prefer pure entry+mark when no ATR; user sees live P&L like TV.
+  // Estimate TP/SL for display using strategy default TP5/SL2 (soft guide, not exchange orders).
   const entry = p.avg_px != null ? Number(p.avg_px) : null;
   const mark = p.mark_px != null ? Number(p.mark_px) : null;
-  // Soft visual barriers (not exchange orders): ± strategy-ish levels from entry
+  const side = p.pos_side === "short" || p.pos_side === "s" ? "short" : "long";
   let tp = null;
   let sl = null;
   if (entry != null) {
-    // Use ~ATR proxy: 1% of price as "1 ATR" for display only when live ATR unavailable
+    // ~ATR proxy: 1% of price as "1 ATR" when live ATR unavailable
     const atrProxy = entry * 0.01;
-    tp = entry + 5 * atrProxy;
-    sl = entry - 2 * atrProxy;
+    if (side === "short") {
+      tp = entry - 5 * atrProxy;
+      sl = entry + 2 * atrProxy;
+    } else {
+      tp = entry + 5 * atrProxy;
+      sl = entry - 2 * atrProxy;
+    }
   }
   await openTradeChart({
     instId: p.inst_id,
     bar: "15m",
     title: `${shortSym(p.inst_id || p.symbol)} 持仓`,
-    sub: "实盘只读 · 蓝=入场 绿=参考TP 橙=参考SL 灰=标记价",
+    sub: "实盘只读 · 蓝=入场 绿=止盈 红=止损 灰=标记价",
     entry,
     mark,
     tp,
     sl,
+    side,
     entryTime: p.created_time,
     openPos: true,
     upl: p.upl != null ? Number(p.upl) : null,
@@ -785,21 +834,30 @@ async function openPositionChart(p) {
 
 async function openPaperTradeChart(symRow, trade) {
   const inst = symRow.inst_id || String(symRow.symbol || "").replace(/_/g, "-");
+  // Infer side from barrier geometry when available
+  let side = trade.side || null;
+  const e = trade.entry_px != null ? Number(trade.entry_px) : null;
+  const tp = trade.tp_px != null ? Number(trade.tp_px) : null;
+  const sl = trade.sl_px != null ? Number(trade.sl_px) : null;
+  if (!side && e != null && tp != null && sl != null) {
+    side = (tp < e && sl > e) ? "short" : "long";
+  }
   await openTradeChart({
     instId: inst,
     bar: "15m",
     title: `${shortSym(symRow.symbol)} 模拟 #`,
-    sub: "纸面回放 · 入场 / 出场 / TP5·SL2",
+    sub: "纸面回放 · Claude 叠层 · TP5/SL2",
     entry: trade.entry_px,
     exit: trade.exit_px,
     tp: trade.tp_px,
     sl: trade.sl_px,
+    side: side || "long",
     entryTime: trade.entry_time || trade.signal_time,
     exitTime: trade.exit_time,
     ret: trade.net_ret != null ? trade.net_ret : trade.gross_ret,
     outcome: trade.outcome,
     openPos: false,
-    notional: 100, // paper unit notional for USD-style axis labels
+    notional: 100,
   });
 }
 
@@ -838,7 +896,7 @@ function setBusy(busy, label) {
   });
   if (label) $("#btn-run").textContent = label;
   if (!busy) {
-    $("#btn-run").textContent = "扫描";
+    $("#btn-run").textContent = "重新扫描";
     if ($("#btn-paper")) $("#btn-paper").textContent = "跑模拟";
   }
 }

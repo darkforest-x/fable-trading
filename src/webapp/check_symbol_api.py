@@ -22,10 +22,13 @@ from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[2]
 SCRIPT = PROJECT / "scripts" / "check_symbol.py"
+HISTORY_SCRIPT = PROJECT / "scripts" / "probe_history.py"
 # Local Mac run is ~6s; measured VPS CPU run is ~41s and the forward pulse
 # can contend for cores every 15 min. 150s keeps headroom without letting a
 # hung child pin the single-flight lock forever.
 TIMEOUT_S = 150
+# Full-year stride YOLO can take several minutes on CPU.
+HISTORY_TIMEOUT_S = 900
 
 _busy = threading.Lock()
 
@@ -64,7 +67,18 @@ def check_symbol_payload(symbol: str, mode: str = "live") -> dict:
             return {"ok": False, "detail": f"检测超时（>{TIMEOUT_S}s），子进程已终止；请稍后重试"}
         lines = [ln for ln in (proc.stdout or "").strip().splitlines() if ln.strip()]
         if proc.returncode != 0 or not lines:
-            tail = (proc.stderr or proc.stdout or "").strip()[-400:]
+            tail = (proc.stderr or proc.stdout or "").strip()[-600:]
+            # Surface the common missing-weights case in plain Chinese.
+            if "YOLO weights missing" in tail or "owner_best.pt" in tail:
+                return {
+                    "ok": False,
+                    "detail": (
+                        "检测权重缺失：models/owner_best.pt 不存在（主线已清）。"
+                        "请确认 models/owner_short_star_v10.pt 存在，或设置 "
+                        "FABLE_YOLO_WEIGHTS=路径 后重试。原始错误："
+                        f"{tail[-200:]}"
+                    ),
+                }
             return {"ok": False, "detail": f"检测进程失败 (exit {proc.returncode})：{tail}"}
         try:
             # Last line is the JSON contract; earlier lines may be pipeline
@@ -72,6 +86,65 @@ def check_symbol_payload(symbol: str, mode: str = "live") -> dict:
             result = json.loads(lines[-1])
         except json.JSONDecodeError:
             return {"ok": False, "detail": f"输出解析失败：{lines[-1][:200]}"}
+        return {"ok": True, "result": result}
+    finally:
+        _busy.release()
+
+
+def probe_history_payload(symbol: str, days: int = 365, conf: float = 0.30) -> dict:
+    """Historical full-scan probe → HTML report under analysis/output/probe_history/.
+
+    Shares the single-flight lock with the live probe so two YOLO jobs never
+    stack. Timeout is longer (HISTORY_TIMEOUT_S) for year-scale stride scans.
+    """
+    if not _busy.acquire(blocking=False):
+        return {
+            "ok": False,
+            "busy": True,
+            "detail": "已有检测在跑，请等结束后再试（历史扫描可能需数分钟）",
+        }
+    try:
+        days = max(7, min(800, int(days)))
+        conf = float(conf)
+        env = {
+            **os.environ,
+            "OMP_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "PYTHONPATH": str(PROJECT),
+        }
+        try:
+            proc = subprocess.run(
+                [
+                    _python(),
+                    str(HISTORY_SCRIPT),
+                    symbol,
+                    "--days",
+                    str(days),
+                    "--conf",
+                    str(conf),
+                    "--json",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=HISTORY_TIMEOUT_S,
+                env=env,
+                cwd=str(PROJECT),
+            )
+        except subprocess.TimeoutExpired:
+            return {
+                "ok": False,
+                "detail": f"历史检测超时（>{HISTORY_TIMEOUT_S}s）。可减小 days 后重试。",
+            }
+        lines = [ln for ln in (proc.stdout or "").strip().splitlines() if ln.strip()]
+        if proc.returncode != 0 or not lines:
+            tail = (proc.stderr or proc.stdout or "").strip()[-600:]
+            return {"ok": False, "detail": f"历史检测失败 (exit {proc.returncode})：{tail}"}
+        try:
+            result = json.loads(lines[-1])
+        except json.JSONDecodeError:
+            return {"ok": False, "detail": f"输出解析失败：{lines[-1][:200]}"}
+        if result.get("error"):
+            return {"ok": False, "detail": str(result["error"]), "result": result}
         return {"ok": True, "result": result}
     finally:
         _busy.release()

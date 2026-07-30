@@ -26,13 +26,13 @@ HUB_CANDIDATES = (
 DEFAULT_SITES: list[dict[str, str]] = [
     {
         "name": "Label Studio（主入口 HTTPS）",
-        "url": "https://103.214.174.58:8081",
+        "url": "https://206.237.14.112:8081",
         "role": "primary",
         "note": "nginx → 本机/隧道后端；日常打标点这里",
     },
     {
         "name": "Label Studio（反向隧道 :18081）",
-        "url": "http://103.214.174.58:18081",
+        "url": "http://206.237.14.112:18081",
         "role": "tunnel",
         "note": "Mac 上 docker LS + bash scripts/tunnel_labelstudio.sh",
     },
@@ -114,7 +114,7 @@ def _default_maintain() -> list[dict[str, str]]:
         },
         {
             "title": "远程打标隧道",
-            "body": "export VPS_HOST=root@103.214.174.58 VPS_PORT=18081 && bash scripts/tunnel_labelstudio.sh",
+            "body": "export VPS_HOST=root@206.237.14.112 VPS_PORT=18081 && bash scripts/tunnel_labelstudio.sh",
         },
         {
             "title": "新任务包",

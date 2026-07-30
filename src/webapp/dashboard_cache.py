@@ -79,39 +79,61 @@ def universe_spec(universe: str = DEFAULT_UNIVERSE) -> UniverseSpec:
 
 
 def scored_signals(universe: str = DEFAULT_UNIVERSE) -> tuple[pd.DataFrame, float]:
+    """Load the *retired* look-ahead score cache if present; never rebuild it.
+
+    Owner 2026-07-30: stage-3 look-ahead scores (PF≈6.x era) were archived.
+    Dashboard signal markers now come from tip-replay. Rebuilding from the
+    judgment dataset would resurrect the discarded methodology, so a missing
+    cache returns an empty frame + ACTIVE threshold only.
+    """
     spec = universe_spec(universe)
     if spec.key not in _signals:
-        if not spec.dataset_path.exists():
-            raise HTTPException(503, f"dataset missing: {spec.dataset_path.relative_to(PROJECT_DIR)}")
         cache_path, meta_path = _score_cache_paths(spec)
         artifact = _artifact_for_spec(spec)
-        rebuild = True
+        empty = pd.DataFrame(columns=CACHE_COLUMNS)
+        thr = float(artifact.threshold) if artifact is not None else 0.0
         if cache_path.exists() and meta_path.exists():
-            meta = json.loads(meta_path.read_text(encoding="utf-8"))
-            cached = pd.read_csv(cache_path, parse_dates=["signal_time", "entry_time", "exit_time"])
-            if set(CACHE_COLUMNS) <= set(cached.columns) and _cache_matches_universe(meta, spec, artifact):
-                _signals[spec.key] = cached
-                _thresholds[spec.key] = float(meta["threshold"])
-                rebuild = False
-        if rebuild:
-            print(f"scoring {spec.key} signals (first boot, ~10s)...", flush=True)
-            signals, threshold = _build_signals_for_spec(spec)
-            cache_path.parent.mkdir(parents=True, exist_ok=True)
-            signals[CACHE_COLUMNS].to_csv(cache_path, index=False)
-            meta_path.write_text(
-                json.dumps(_score_cache_metadata(spec, threshold, _artifact_for_spec(spec)), ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-            _signals[spec.key], _thresholds[spec.key] = signals[CACHE_COLUMNS], threshold
+            try:
+                meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                cached = pd.read_csv(cache_path, parse_dates=["signal_time", "entry_time", "exit_time"])
+                if set(CACHE_COLUMNS) <= set(cached.columns) and _cache_matches_universe(meta, spec, artifact):
+                    _signals[spec.key] = cached
+                    _thresholds[spec.key] = float(meta["threshold"])
+                    return _signals[spec.key], float(_thresholds[spec.key])
+            except Exception as exc:  # noqa: BLE001
+                print(f"scored_signals: ignore corrupt cache ({exc})", flush=True)
+        print(
+            f"scored_signals: look-ahead cache absent for {spec.key} "
+            f"(archived under analysis/archive/backtest_legacy_*) — empty",
+            flush=True,
+        )
+        _signals[spec.key] = empty
+        _thresholds[spec.key] = thr
     return _signals[spec.key], float(_thresholds[spec.key])
 
 
 def trades(universe: str = DEFAULT_UNIVERSE) -> pd.DataFrame:
+    """Look-ahead portfolio sim over scored_signals (now empty by default)."""
     spec = universe_spec(universe)
     if spec.key not in _trades:
         signals, threshold = scored_signals(spec.key)
-        _trades[spec.key] = simulate(signals, threshold)
+        if signals.empty:
+            _trades[spec.key] = pd.DataFrame(
+                columns=[
+                    "source", "symbol", "entry_time", "exit_time",
+                    "score", "outcome", "gross_ret",
+                ]
+            )
+        else:
+            _trades[spec.key] = simulate(signals, threshold)
     return _trades[spec.key]
+
+
+def clear_runtime_caches() -> None:
+    """Drop in-process score/trade caches (e.g. after archiving files)."""
+    _signals.clear()
+    _thresholds.clear()
+    _trades.clear()
 
 
 def relative_path(path: Path) -> str:

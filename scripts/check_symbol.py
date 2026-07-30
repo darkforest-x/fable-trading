@@ -11,7 +11,9 @@ Pipeline pieces reused (no re-implementation):
   - klines:   src.data.loader (local merged history) + src.data.fetch_okx's
               throttled `_request` for the in-memory incremental tail
   - detect:   src.judgment.yolo_candidates.scan_series_with_yolo (live/tip
-              mode, models/owner_best.pt) -- the exact mainline entry point
+              mode). Weights: FABLE_YOLO_WEIGHTS → owner_best.pt →
+              owner_short_star_v10.pt → owner_v16_tipuni_cold.pt (first hit).
+              Mainline may still be detector=none when owner_best is absent.
   - score:    src.judgment.frozen.latest_artifact(default_config()) (v11
               freeze, threshold_val_q90) + sizing_tiers.tier_for_score
   - fresh:    ExecutorConfig.max_signal_age_min (30min gate, same value as
@@ -78,6 +80,35 @@ BAR_MIN = 15
 TAIL_BARS = 2000
 # Same 30min value as TG filter and dashboard FRESH_DETECT_MIN (三门同值).
 FRESH_GATE_MIN = float(ExecutorConfig().max_signal_age_min)
+
+# Probe weight resolution (dashboard / local one-shot). Does NOT auto-create
+# models/owner_best.pt (no silent promote). Prefer paper v10 when mainline
+# pointer is absent (owner doctrine: pre-v16 mainline weights cleared).
+_PROBE_WEIGHT_CANDIDATES = (
+    PROJECT / "models" / "owner_best.pt",
+    PROJECT / "models" / "owner_short_star_v10.pt",
+    PROJECT / "models" / "owner_v16_tipuni_cold.pt",
+)
+
+
+def resolve_probe_weights() -> Path:
+    """First existing weights path for the one-shot probe."""
+    env = (os.environ.get("FABLE_YOLO_WEIGHTS") or "").strip()
+    if env:
+        p = Path(env).expanduser()
+        if not p.is_absolute():
+            p = PROJECT / p
+        if p.exists():
+            return p
+        raise FileNotFoundError(f"FABLE_YOLO_WEIGHTS set but missing: {p}")
+    for cand in _PROBE_WEIGHT_CANDIDATES:
+        if cand.exists():
+            return cand
+    tried = ", ".join(str(c.relative_to(PROJECT)) for c in _PROBE_WEIGHT_CANDIDATES)
+    raise FileNotFoundError(
+        f"YOLO weights missing for probe (tried {tried}). "
+        "Place models/owner_short_star_v10.pt or set FABLE_YOLO_WEIGHTS."
+    )
 
 
 def normalize_symbol(raw: str) -> str:
@@ -268,10 +299,11 @@ def run_check(symbol: str, mode: str) -> dict:
     result["data_stale"] = bool(data_age_min > BAR_MIN)
     result["stockish"] = is_stockish(symbol)
 
-    # --- detect: mainline entry point + display-only confidence pass ---
+    # --- detect: mainline scan entry + display-only confidence pass ---
     from src.judgment.yolo_candidates import scan_series_with_yolo
 
-    model = load_yolo_model()
+    weights = resolve_probe_weights()
+    model = load_yolo_model(weights)
     with tempfile.TemporaryDirectory(prefix="check_symbol_") as td:
         tmpdir = Path(td)
         indices = scan_series_with_yolo(frame, model, mode=mode, tmp_png=tmpdir / "win.png")
@@ -279,7 +311,15 @@ def run_check(symbol: str, mode: str) -> dict:
 
     # --- score + freshness (lightgbm only from here on) ---
     artifact, enriched, feature_rows, scores = _score_candidates(frame, indices)
-    result["detector"] = "models/owner_best.pt"
+    try:
+        result["detector"] = str(weights.relative_to(PROJECT))
+    except ValueError:
+        result["detector"] = str(weights)
+    if weights.name != "owner_best.pt":
+        result["detector_note"] = (
+            "owner_best.pt 不存在（主线 detector=none）；探针回退到 "
+            f"{result['detector']}（纸面/诊断用，非 promote）"
+        )
     result["artifact"] = artifact.relative_model_path
     result["threshold"] = float(artifact.threshold)
     result["fresh_gate_min"] = FRESH_GATE_MIN

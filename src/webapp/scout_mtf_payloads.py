@@ -67,6 +67,31 @@ def scout_mtf_latest() -> dict[str, Any]:
     data["status"] = status
     # Flatten for table UI
     data["rows"] = _table_rows(data.get("results") or [])
+    # Method / model honesty for the dashboard (not YOLO; rules only).
+    data["method"] = {
+        "engine": "rule_dense_mtf",
+        "label": "多周期规则雷达（非 YOLO / 非判断层）",
+        "timeframes": data.get("timeframes") or ["1m", "3m", "5m", "15m", "30m"],
+        "pool": "主流钉选 + 24h 额前 + 涨跌幅榜",
+        "grades": "A/B/C = 多 TF 密集+站上慢线 合成分，研究用非下单",
+        "judgment_model": None,
+        "detector_model": None,
+        "note": (
+            "与 15m 主线 v11/v10 隔离；不写 forward_log、不接 executor。"
+            "刷新榜单会实时拉 OKX 行情重算。"
+        ),
+    }
+    # Age of the scan for the UI freshness chip
+    try:
+        gen = data.get("generated_at")
+        if gen:
+            gen_ts = datetime.fromisoformat(str(gen).replace("Z", "+00:00"))
+            age_min = (datetime.now(timezone.utc) - gen_ts).total_seconds() / 60.0
+            data["scan_age_min"] = round(age_min, 1)
+            data["scan_stale"] = age_min > 60.0
+    except Exception:  # noqa: BLE001
+        data["scan_age_min"] = None
+        data["scan_stale"] = True
     return data
 
 

@@ -1,0 +1,61 @@
+{
+  "kind": "probe_history",
+  "symbol": "ETH_USDT_SWAP",
+  "days": 30,
+  "generated_at": "2026-07-30 15:53:30.552142+00:00",
+  "error": null,
+  "signals": [
+    {
+      "i": 1,
+      "signal_i": 1693,
+      "signal_time": "2026-07-13 03:30:00+00:00",
+      "entry_price": 1778.59,
+      "score": -0.009293,
+      "passed": false,
+      "atr_pct": 0.00629,
+      "atr_ok": true,
+      "eligible": false,
+      "status": "closed",
+      "outcome": "sl",
+      "realized_ret": -0.012583,
+      "exit_time": "2026-07-13 18:00:00+00:00"
+    },
+    {
+      "i": 2,
+      "signal_i": 2693,
+      "signal_time": "2026-07-23 13:30:00+00:00",
+      "entry_price": 1906.83,
+      "score": -0.008016,
+      "passed": false,
+      "atr_pct": 0.00331,
+      "atr_ok": true,
+      "eligible": false,
+      "status": "closed",
+      "outcome": "sl",
+      "realized_ret": -0.006621,
+      "exit_time": "2026-07-23 15:00:00+00:00"
+    }
+  ],
+  "report_html": null,
+  "report_json": null,
+  "local_bars": 40715,
+  "frame_bars": 3374,
+  "window_bars": 2881,
+  "window_start": "2026-06-30 15:30:00+00:00",
+  "window_end": "2026-07-30 15:30:00+00:00",
+  "fetch_warning": "",
+  "approx_days": 35.1,
+  "detector": "models/owner_short_star_v10.pt",
+  "artifact": "models/frozen_tp5_sl2_swap_yolo_v11_reg_20260718.txt",
+  "threshold": 0.02022141847381547,
+  "conf": 0.3,
+  "n_raw_fires": 2,
+  "n_eligible": 0,
+  "n_passed_score": 0,
+  "closed_n": 2,
+  "closed_mean_ret": -0.009602,
+  "closed_win_rate": 0.0,
+  "closed_outcomes": {
+    "sl": 2
+  }
+}

@@ -9,14 +9,18 @@ const fmtPct = _F.fmtPct
   : (x, digits = 2) => (x === null || x === undefined || Number.isNaN(Number(x)) ? "—" : (100 * x).toFixed(digits) + "%");
 const fmtPF = _F.fmtPF || ((x) => (x === null || x === undefined || Number.isNaN(Number(x)) ? "—" : Number(x).toFixed(2)));
 const cls = (x) => (x > 0 ? "pos" : x < 0 ? "neg" : "");
-const OUTCOME_CN = { tp: "止盈", sl: "止损", timeout: "超时", sl_ambiguous: "止损*", "": "未结束" };
-const OUTCOME_COLOR = { tp: "#199e70", sl: "#e66767", timeout: "#c98500", sl_ambiguous: "#e66767" };
+const OUTCOME_CN = (globalThis.FableChart && globalThis.FableChart.OUTCOME_CN) || {
+  tp: "止盈", sl: "止损", timeout: "超时", sl_ambiguous: "止损*", "": "未结束",
+};
+const OUTCOME_COLOR = (globalThis.FableChart && globalThis.FableChart.OUTCOME_COLOR) || {
+  tp: "#059669", sl: "#dc2626", timeout: "#c98500", sl_ambiguous: "#dc2626",
+};
 const STATUS_CN = { open: "持有中", closed: "已结束" };
 const appState = { universe: "swap", view: "overview" };
 /** views loaded for current universe — skip refetch when tabbing back (TTL, not forever) */
 const viewLoadedAt = new Map(); // view -> timestamp
 /* keyboard 1–n: daily loop first, then tools */
-const VIEW_ORDER = ["overview", "forward", "signals", "backtest", "probe", "labeling", "shorttf", "radar"];
+const VIEW_ORDER = ["overview", "forward", "signals", "backtest", "probe", "shorttf", "radar"];
 const chartTickMarkBj = _F.chartTickMarkBj || function chartTickMarkBj(time) {
   if (time == null) return "";
   if (typeof time === "object" && time.year != null) {
@@ -26,39 +30,32 @@ const chartTickMarkBj = _F.chartTickMarkBj || function chartTickMarkBj(time) {
   return s.length >= 16 ? s.slice(5, 16) : s;
 };
 
-const CHART_LAYOUT = {
-  layout: { background: { type: "solid", color: "#ffffff" }, textColor: "#6b7280", fontSize: 12 },
-  grid: { vertLines: { color: "#eef1f6" }, horzLines: { color: "#eef1f6" } },
-  localization: {
-    locale: "zh-CN",
-    timeFormatter: (t) => fmtChartTime(t),
-  },
-  timeScale: {
-    borderColor: "#e5e7eb",
-    timeVisible: true,
-    secondsVisible: false,
-    rightOffset: 10,
-    barSpacing: 8,
-    minBarSpacing: 2,
-    tickMarkFormatter: chartTickMarkBj,
-  },
-  rightPriceScale: {
-    borderColor: "#e5e7eb",
-    scaleMargins: { top: 0.1, bottom: 0.14 },
-    entireTextOnly: false,
-  },
-  crosshair: {
-    mode: 1,
-    vertLine: { color: "rgba(37,99,235,0.35)", width: 1, style: 2, labelBackgroundColor: "#2563eb" },
-    horzLine: { color: "rgba(107,114,128,0.35)", width: 1, style: 2, labelBackgroundColor: "#6b7280" },
-  },
-  handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
-  handleScale: { axisPressedMouseMove: { time: true, price: true }, mouseWheel: true, pinch: true },
-};
+/* Shared K-line theme (chart_theme.js) — Claude short paper-chart contract */
+const _C = globalThis.FableChart || null;
+const CHART_LAYOUT = _C
+  ? _C.chartLayout()
+  : {
+    layout: { background: { type: "solid", color: "#ffffff" }, textColor: "#6b7280", fontSize: 12 },
+    grid: { vertLines: { color: "#eef1f6" }, horzLines: { color: "#eef1f6" } },
+    localization: { locale: "zh-CN", timeFormatter: (t) => fmtChartTime(t) },
+    timeScale: {
+      borderColor: "#e5e7eb", timeVisible: true, secondsVisible: false,
+      rightOffset: 10, barSpacing: 8, minBarSpacing: 2, tickMarkFormatter: chartTickMarkBj,
+    },
+    rightPriceScale: { borderColor: "#e5e7eb", scaleMargins: { top: 0.1, bottom: 0.14 }, entireTextOnly: false },
+    crosshair: {
+      mode: 1,
+      vertLine: { color: "rgba(37,99,235,0.35)", width: 1, style: 2, labelBackgroundColor: "#2563eb" },
+      horzLine: { color: "rgba(107,114,128,0.35)", width: 1, style: 2, labelBackgroundColor: "#6b7280" },
+    },
+    handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
+    handleScale: { axisPressedMouseMove: { time: true, price: true }, mouseWheel: true, pinch: true },
+  };
 const pctFormat = { type: "custom", formatter: (v) => v.toFixed(2) + "%" };
 
 /* ---------- Lightweight Charts TV-ish helpers (free tier) ---------- */
 function fmtPx(v, digits) {
+  if (_C && _C.fmtPx) return _C.fmtPx(v, digits);
   const n = Number(v);
   if (!Number.isFinite(n)) return "—";
   if (digits != null) return n.toFixed(digits);
@@ -285,6 +282,14 @@ function makeChart(el, opts = {}) {
     toast("图表库未加载，请刷新页面");
     throw new Error("LightweightCharts missing");
   }
+  if (_C && _C.makeChart) {
+    try {
+      return _C.makeChart(el, opts);
+    } catch (err) {
+      toast(err.message || "图表创建失败");
+      throw err;
+    }
+  }
   // deep-merge crosshair so callers can override pieces without wiping Magnet mode
   const base = {
     ...CHART_LAYOUT,
@@ -432,8 +437,8 @@ let exploreTimes = [];
 let exploreTimeIndex = new Map(); // time -> bar index for logical coords
 
 // SMA/EMA 20·60·120 — same palette as TG/YOLO notify charts (display only).
-const CHART_MA_ORDER = ["sma120", "sma60", "sma20", "ema120", "ema60", "ema20"];
-const CHART_MA_STYLE = {
+const CHART_MA_ORDER = (_C && _C.MA_ORDER) || ["sma120", "sma60", "sma20", "ema120", "ema60", "ema20"];
+const CHART_MA_STYLE = (_C && _C.MA_STYLE) || {
   sma20: { color: "#3d8fd1", lineStyle: 0, lineWidth: 1.2 },
   sma60: { color: "#5cb8b0", lineStyle: 0, lineWidth: 1.1 },
   sma120: { color: "#8a8aaa", lineStyle: 0, lineWidth: 1.0 },
@@ -447,6 +452,10 @@ function chartMaMap(payload) {
 }
 
 function addChartMaSeries(chart, payload, sink) {
+  if (_C && _C.addMaSeries) {
+    _C.addMaSeries(chart, payload, sink);
+    return;
+  }
   const lines = chartMaMap(payload);
   for (const name of CHART_MA_ORDER) {
     const data = lines[name];
@@ -693,15 +702,18 @@ function ensureExploreChart() {
   const el = $("#explore-chart");
   if (!el) return;
   exploreChart = makeChart(el);
-  exploreSeries = exploreChart.addCandlestickSeries({
-    upColor: "#2ECC71", downColor: "#E74C3C", borderVisible: false,
-    wickUpColor: "#2ECC71", wickDownColor: "#E74C3C",
-  });
+  exploreSeries = exploreChart.addCandlestickSeries(
+    (_C && _C.candlestickOptions()) || {
+      upColor: "#059669", downColor: "#dc2626", borderVisible: false,
+      wickUpColor: "#059669", wickDownColor: "#dc2626",
+    }
+  );
   exploreVol = exploreChart.addHistogramSeries({
     priceScaleId: "vol", priceFormat: { type: "volume" },
     priceLineVisible: false, lastValueVisible: false,
   });
-  exploreChart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+  exploreChart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.72, bottom: 0 } });
+  exploreChart.priceScale("right").applyOptions({ scaleMargins: { top: 0.08, bottom: 0.22 } });
   // Markers + canvas dense boxes; redraw on pan/zoom (min box size at full zoom).
   const redraw = () => drawExploreBoxes();
   exploreChart.timeScale().subscribeVisibleLogicalRangeChange(redraw);
@@ -753,10 +765,12 @@ async function runExplore() {
     exploreTimes = (d.candles || []).map((c) => c.time);
     exploreTimeIndex = new Map(exploreTimes.map((t, i) => [t, i]));
     exploreSeries.setData(d.candles);
-    exploreVol.setData(d.candles.map((c) => ({
-      time: c.time, value: c.volume,
-      color: c.close >= c.open ? "rgba(46,204,113,0.28)" : "rgba(231,76,60,0.28)",
-    })));
+    exploreVol.setData(d.candles.map((c) =>
+      (_C && _C.volPoint(c)) || {
+        time: c.time, value: c.volume,
+        color: c.close >= c.open ? "rgba(5,150,105,0.40)" : "rgba(220,38,38,0.35)",
+      }
+    ));
     addChartMaSeries(exploreChart, d, exploreEmas);
     exploreBoxes = d.dense_boxes || [];
     exploreState.lastCandles = d.candles;
@@ -1026,7 +1040,7 @@ function renderHBars(el, rows) {
 }
 
 /* ---------- status strip (owner detector / judgment / forward) ---------- */
-function paintLiveTruth(od, ja, fw) {
+function paintLiveTruth(od, ja, fw, paperLive) {
   const n = fw.decision_trades ?? 0;
   const target = fw.decision_target ?? 100;
   const prog = Math.round(100 * (fw.progress || 0));
@@ -1055,10 +1069,10 @@ function paintLiveTruth(od, ja, fw) {
   // v10 paper live (sim) line
   const paperEl = $("#live-paper");
   if (paperEl) {
-    const pl = (d && d.paper_live) || {};
+    const pl = paperLive || {};
     if (pl && pl.available) {
-      paperEl.textContent = `${pl.n_fresh||0}新/${pl.n_fired||0}总`;
-      paperEl.title = pl.scanned_at ? `最近扫描 ${String(pl.scanned_at).slice(0,16)} UTC` : "";
+      paperEl.textContent = `${pl.n_fresh || 0}新/${pl.n_fired || 0}总`;
+      paperEl.title = pl.scanned_at ? `最近扫描 ${String(pl.scanned_at).slice(0, 16)} UTC` : "";
     } else {
       paperEl.textContent = "无";
       paperEl.title = "尚未跑 live_signal_tg.py --send";
@@ -1151,46 +1165,53 @@ function normalizeStatusStrip() {
 
 function ensurePaperChip() { return document.getElementById("status-paper"); }
 
+function fillPaperStatusChip(paperEl, pl) {
+  if (!paperEl) return;
+  paperEl.classList.remove("skeleton");
+  if (pl && pl.available) {
+    paperEl.classList.add("status-click");
+    paperEl.dataset.jump = "overview";
+    paperEl.title = "点此查看总览上的 v10 纸面信号";
+    const nf = pl.n_fresh || 0;
+    const nt = pl.n_fired || 0;
+    paperEl.innerHTML = `<span class="status-k">v10纸面</span>
+      <span class="status-v">${nf}新/${nt}总</span>
+      <span class="status-sub">门${pl.gate_min || 30}m</span>`;
+    paperEl.classList.toggle("good", nf > 0);
+    paperEl.classList.toggle("warn", nf === 0 && nt > 0);
+  } else {
+    paperEl.innerHTML = `<span class="status-k">v10纸面</span><span class="status-v">无</span><span class="status-sub">未扫描</span>`;
+  }
+}
+
 async function loadStatusStrip(force = false) {
   if (force) {
     for (const [k] of [..._jsonCache.keys()]) {
-      if (k.includes("/api/status-strip")) _jsonCache.delete(k);
+      if (k.includes("/api/status-strip") || k.includes("/api/live-paper")) _jsonCache.delete(k);
     }
   }
   // Always ensure exactly 4 chips exist in the strip, on every page and every refresh.
   if (typeof ensureFourChips === "function") ensureFourChips();
-  let d = {};
   try {
-    d = await apiGet("/api/status-strip", { cache: !force, quiet: true });
-  } catch (_) { d = {}; }
-  // After API (or failure), guarantee the 4th chip DOM node exists before we touch it.
-  if (typeof ensureFourChips === "function") ensureFourChips();
-  const od = d.owner_detector || {};
-  const ja = d.judgment_active || {};
-  const fw = d.forward || {};
-  const fr = d.freshness || {};
-  const tr = d.train || {};
-  const tip = d.tip_pulse || {};
-  const ownerEl = $("#status-owner");
-  const judEl = $("#status-judgment");
-  const fwdEl = $("#status-forward");
-  let paperEl = ensurePaperChip();
-  const metaEl = $("#status-meta");
-  // Always try to populate v10 paper chip from its own endpoint, so the 4th chip appears even if status-strip payload is from an old server build.
-  try {
-    const pp = await apiGet("/api/live-paper", { cache: false, quiet: true });
-    if (paperEl && pp) {
-      paperEl.classList.remove("skeleton");
-      if (pp.available) {
-        const nf = pp.n_fresh || 0, nt = pp.n_fired || 0;
-        paperEl.innerHTML = `<span class="status-k">v10纸面</span><span class="status-v">${nf}新/${nt}总</span><span class="status-sub">门${pp.gate_min||30}m</span>`;
-        paperEl.classList.add("status-click");
-        paperEl.dataset.jump = "overview";
-      } else {
-        paperEl.innerHTML = `<span class="status-k">v10纸面</span><span class="status-v">无</span><span class="status-sub">未扫描</span>`;
-      }
+    let d = {};
+    try {
+      d = await apiGet("/api/status-strip", { cache: !force, quiet: true });
+    } catch (_) {
+      d = {};
     }
-  } catch (_) { /* non-fatal */ }
+    if (typeof ensureFourChips === "function") ensureFourChips();
+    const od = d.owner_detector || {};
+    const ja = d.judgment_active || {};
+    const fw = d.forward || {};
+    const fr = d.freshness || {};
+    const tr = d.train || {};
+    const tip = d.tip_pulse || {};
+    const ownerEl = $("#status-owner");
+    const judEl = $("#status-judgment");
+    const fwdEl = $("#status-forward");
+    const paperEl = ensurePaperChip();
+    const metaEl = $("#status-meta");
+
     if (ownerEl) {
       ownerEl.classList.remove("skeleton");
       ownerEl.classList.add("status-click");
@@ -1236,31 +1257,15 @@ async function loadStatusStrip(force = false) {
         <span class="status-bar-mini"><span style="width:${prog}%"></span></span>
         <span class="status-sub" title="${escapeHtml(stall)}">open ${openN} · 事后 ${hs} · 日志 ${totalN}${stall ? " · " + escapeHtml(stall) : ""}</span>`;
     }
-    // v10 paper live chip (always ensure 4th chip on every page / view)
-    function fillPaperChip(pl) {
-      if (!paperEl) return;
-      paperEl.classList.remove("skeleton");
-      if (pl && pl.available) {
-        paperEl.classList.add("status-click");
-        paperEl.dataset.jump = "overview";
-        paperEl.title = "点此查看总览上的 v10 纸面信号";
-        const nf = pl.n_fresh || 0;
-        const nt = pl.n_fired || 0;
-        paperEl.innerHTML = `<span class="status-k">v10纸面</span>
-          <span class="status-v">${nf}新/${nt}总</span>
-          <span class="status-sub">门${pl.gate_min||30}m</span>`;
-        paperEl.classList.toggle("good", nf > 0);
-        paperEl.classList.toggle("warn", nf === 0 && nt > 0);
-      } else {
-        paperEl.innerHTML = `<span class="status-k">v10纸面</span><span class="status-v">无</span><span class="status-sub">未扫描</span>`;
-      }
-    }
+
+    // Prefer dedicated endpoint so chip works even if status-strip is stale.
     let pl = (d && d.paper_live) || null;
-    if (paperEl) fillPaperChip(pl);
-    // If the status-strip payload is from an older server without paper_live, fetch it separately so the 4th chip still appears on forward/signals etc.
-    if ((!pl || !pl.available) && paperEl) {
-      apiGet("/api/live-paper", { cache: false, quiet: true }).then((pp) => { fillPaperChip(pp); }).catch(()=>{});
-    }
+    try {
+      const pp = await apiGet("/api/live-paper", { cache: false, quiet: true });
+      if (pp && pp.available) pl = pp;
+    } catch (_) { /* non-fatal */ }
+    fillPaperStatusChip(paperEl, pl);
+
     if (metaEl) {
       const g = fr.gate_min ?? fw.fresh_detect_min ?? 30;
       const ep = tr.epoch;
@@ -1272,8 +1277,7 @@ async function loadStatusStrip(force = false) {
       else if (ep != null) trainTxt = `v13 ${ep}/${tgt}${alive ? "" : " · idle"}`;
       const tf = tip.tip_fire;
       const tipTxt = tf != null ? `tip ${tf}` : "tip —";
-      const pl = (d && d.paper_live) || {};
-      const paperTxt = pl && pl.available ? `v10纸面 ${pl.n_fresh||0}新/${pl.n_fired||0}总` : "v10纸面 无";
+      const paperTxt = pl && pl.available ? `v10纸面 ${pl.n_fresh || 0}新/${pl.n_fired || 0}总` : "v10纸面 无";
       metaEl.innerHTML = [
         `lag≤${g}m`,
         trainTxt,
@@ -1283,11 +1287,10 @@ async function loadStatusStrip(force = false) {
       ].join(`<span class="sep">·</span>`);
       metaEl.title = [fr.note, tr.note, tip.note, (pl && pl.label) || ""].filter(Boolean).join(" · ");
     }
-    paintLiveTruth(od, ja, fw);
+    paintLiveTruth(od, ja, fw, pl);
     if (force) toast("状态条已刷新", "ok");
   } catch (_) {
     if (typeof ensureFourChips === "function") ensureFourChips();
-    // Best-effort fill even on total failure so we never show only 3 chips
     const o = document.getElementById("status-owner");
     if (o) { o.classList.remove("skeleton"); o.innerHTML = '<span class="status-k">检测器</span><span class="status-v">暂不可用</span>'; }
     const j = document.getElementById("status-judgment");
@@ -1298,12 +1301,8 @@ async function loadStatusStrip(force = false) {
     if (p) {
       p.classList.remove("skeleton");
       p.innerHTML = '<span class="status-k">v10纸面</span><span class="status-v">—</span><span class="status-sub">见总览</span>';
-      // try one more async fetch for the paper data only
       apiGet("/api/live-paper", { cache: false, quiet: true }).then((pp) => {
-        if (pp && pp.available && p && p.isConnected) {
-          const nf = pp.n_fresh || 0, nt = pp.n_fired || 0;
-          p.innerHTML = `<span class="status-k">v10纸面</span><span class="status-v">${nf}新/${nt}总</span><span class="status-sub">门${pp.gate_min||30}m</span>`;
-        }
+        fillPaperStatusChip(p, pp);
       }).catch(() => {});
     }
     const metaEl = $("#status-meta");
@@ -1394,17 +1393,238 @@ async function loadLabelingHub() {
 }
 $("#label-refresh")?.addEventListener("click", () => loadLabelingHub());
 
-/* ---------- overview (live truth + backtest reference) ---------- */
+/* ---------- overview (architecture + live truth + tip-replay) ---------- */
 let sparkChart = null, sparkSeries = null;
+/** last status-strip snapshot for architecture paint */
+let _lastStatusStrip = null;
+
+/**
+ * Build architecture cards + detail table from status-strip + overview.
+ * Two-layer model (YOLO detect + LightGBM judge) + execution + verdict.
+ */
+function paintArchitecture(strip, overview, paper) {
+  const od = (strip && strip.owner_detector) || {};
+  const ja = (strip && strip.judgment_active) || {};
+  const fw = (strip && strip.forward) || {};
+  const fr = (strip && strip.freshness) || {};
+  const tr = (strip && strip.train) || {};
+  const pl = paper || (strip && strip.paper_live) || {};
+
+  // --- L1 detector ---
+  const detLiveOk = !!od.exists;
+  const detName = detLiveOk
+    ? String(od.source_run || "owner_best").replace(/^owner_/, "")
+    : "none";
+  const detState = detLiveOk ? "ok" : (pl.available ? "warn" : "off");
+  const detBadge = detLiveOk ? "ACTIVE" : (pl.available ? "纸面" : "空转");
+  const detVer = detLiveOk ? detName : (pl.available ? "v10 纸面" : "detector=none");
+  const detSub = detLiveOk
+    ? `F1 ${od.frozen_eval_f1 != null ? Number(od.frozen_eval_f1).toFixed(3) : "—"} · tip-only`
+    : (pl.available
+      ? `纸面 ${pl.n_fresh || 0}新/${pl.n_fired || 0}总 · conf ${Number(pl.conf || 0.3).toFixed(2)} · 不写账`
+      : (od.note || "models/owner_best 未挂 · 管道诚实空转"));
+
+  // --- L2 judgment ---
+  const judOk = !!ja.exists;
+  const art = String(ja.artifact_id || "");
+  // Prefer human tag: v11_reg from frozen_…_yolo_v11_reg_…
+  let judTag = "—";
+  const mV = art.match(/v(\d+)(?:_reg)?/i);
+  if (mV) judTag = `v${mV[1]}${/reg/i.test(art) ? " reg" : ""}`;
+  else if (art) judTag = art.replace(/^frozen_/, "").slice(0, 22);
+  const thr = ja.threshold_val_q90 != null ? Number(ja.threshold_val_q90).toFixed(4) : "—";
+  const obj = ja.objective || ( /reg/i.test(art) ? "regression" : "—");
+  const judVer = judOk ? judTag : "未挂 ACTIVE";
+  const judSub = judOk
+    ? `阈值 ${thr} · ${obj} · ${ja.dataset_name || "—"}`
+    : (ja.note || "models/ACTIVE 未设置");
+  const judState = judOk ? "ok" : "off";
+  const judBadge = judOk ? "ACTIVE" : "OFF";
+
+  // --- L3 execution ---
+  const gate = fr.gate_min ?? fw.fresh_detect_min ?? 30;
+  const n = fw.decision_trades ?? 0;
+  const target = fw.decision_target ?? 100;
+  const execVer = pl.available ? "纸面 + 前向" : "前向日志";
+  const execSub = `新鲜门 ${gate}min · 日志 ${fw.total_rows ?? 0} · 事后剔 ${fw.hindsight_excluded ?? 0} · 不自动 promote`;
+  const execState = (fw.exists || pl.available) ? (n > 0 ? "ok" : "warn") : "off";
+  const execBadge = n > 0 ? "采集中" : "待命";
+
+  // --- Verdict ---
+  const pfTile = (overview?.tiles || []).find((t) => /PF/i.test(String(t.label || "")));
+  const pfStr = pfTile ? String(pfTile.value) : "—";
+  const verdVer = `${n} / ${target}`;
+  const verdSub = `tip-replay PF ${pfStr} · 确认只认前向新鲜`;
+  const verdState = n >= target ? "ok" : (n > 0 ? "warn" : "off");
+  const verdBadge = n >= target ? "满额" : "进行中";
+
+  const lede = $("#arch-lede");
+  if (lede) {
+    lede.textContent = [
+      "L1 YOLO 形态检测 → L2 LightGBM 打分 → L3 执行/记账 → 前向 100 笔终审。",
+      detLiveOk ? `检测实盘 ${detName}` : "检测实盘未挂（纸面 v10 旁路）",
+      judOk ? `判断 ACTIVE ${judTag}` : "判断未挂",
+    ].join(" · ");
+  }
+  const meta = $("#arch-meta");
+  if (meta) {
+    meta.innerHTML = [
+      `<span class="arch-pill">15m · SWAP</span>`,
+      `<span class="arch-pill">tip-only</span>`,
+      `<span class="arch-pill">TP5 / SL2</span>`,
+      `<span class="arch-pill">fresh ≤${gate}m</span>`,
+      judOk ? `<span class="arch-pill">阈 ${thr}</span>` : "",
+    ].filter(Boolean).join("");
+  }
+
+  const card = (o) => `
+    <div class="arch-card state-${o.state}${o.jump ? " clickable" : ""}"
+         ${o.jump ? `data-jump="${escapeHtml(o.jump)}" role="button" tabindex="0"` : ""}
+         title="${escapeHtml(o.title || "")}">
+      <span class="arch-badge ${o.state}">${escapeHtml(o.badge)}</span>
+      <span class="arch-layer">${escapeHtml(o.layer)}</span>
+      <span class="arch-name">${escapeHtml(o.name)}</span>
+      <b class="arch-ver">${escapeHtml(o.ver)}</b>
+      <small class="arch-sub">${escapeHtml(o.sub)}</small>
+    </div>`;
+
+  const flow = $("#arch-flow");
+  if (flow) {
+    flow.innerHTML = [
+      card({
+        layer: "L1 · 2a", name: "检测层 YOLO", ver: detVer, sub: detSub,
+        state: detState, badge: detBadge, jump: "probe",
+        title: od.weights_path || od.note || "检测层",
+      }),
+      `<div class="arch-arrow" aria-hidden="true">→</div>`,
+      card({
+        layer: "L2 · 2b", name: "判断层 LightGBM", ver: judVer, sub: judSub,
+        state: judState, badge: judBadge, jump: "signals",
+        title: ja.artifact_id || "判断层 ACTIVE",
+      }),
+      `<div class="arch-arrow" aria-hidden="true">→</div>`,
+      card({
+        layer: "L3", name: "执行层", ver: execVer, sub: execSub,
+        state: execState, badge: execBadge, jump: "forward",
+        title: "forward_log · paper live · 无自动下单",
+      }),
+      `<div class="arch-arrow" aria-hidden="true">→</div>`,
+      card({
+        layer: "裁决", name: "前向终审", ver: verdVer, sub: verdSub,
+        state: verdState, badge: verdBadge, jump: "forward",
+        title: "确认级只认前向新鲜 100 笔",
+      }),
+    ].join("");
+    // clickable cards
+    flow.querySelectorAll(".arch-card.clickable").forEach((el) => {
+      el.addEventListener("click", () => {
+        const j = el.dataset.jump;
+        if (j) showView(j);
+      });
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          const j = el.dataset.jump;
+          if (j) showView(j);
+        }
+      });
+    });
+  }
+
+  // detail table
+  const tbody = $("#arch-tbody");
+  if (tbody) {
+    const tag = (state, text) => `<span class="tag ${state}">${escapeHtml(text)}</span>`;
+    const rows = [
+      {
+        layer: "L1 检测",
+        role: "YOLO 盘口 tip 形态 · 只扫 tip/tip-1/tip-2",
+        ver: detLiveOk
+          ? `${detName}${od.frozen_eval_f1 != null ? ` · F1 ${Number(od.frozen_eval_f1).toFixed(3)}` : ""}`
+          : "未挂 owner_best（detector=none）",
+        status: detLiveOk ? tag("ok", "实盘在线") : tag("warn", pl.available ? "仅纸面 v10" : "空转"),
+        note: detLiveOk
+          ? (od.eval_set || od.note || "晋升门 = 真 tip 金标 + tip-smoke")
+          : (pl.available
+            ? `旁路：scripts/live_signal_tg.py · ${pl.n_fresh || 0}/${pl.n_fired || 0} 新鲜 · 不写 forward`
+            : (od.note || "无验证检测器时管道诚实空转；v16 tipuni 权重未 promote")),
+      },
+      {
+        layer: "L2 判断",
+        role: "LightGBM 排序 / 阀门 · TP5/SL2 障碍",
+        ver: judOk
+          ? `${art || judTag} · 阈 ${thr}`
+          : "—",
+        status: judOk ? tag("ok", "ACTIVE") : tag("off", "未挂"),
+        note: judOk
+          ? `${obj} · ${ja.dataset_name || ja.dataset_path || "—"} · ${String(ja.created_at || "").slice(0, 10)}`
+          : "models/ACTIVE 指针不存在",
+      },
+      {
+        layer: "L3 执行",
+        role: "前向记账 · 纸面模拟 ·（真金需 owner）",
+        ver: `forward_log · 门 ${gate}min`,
+        status: tag(execState === "ok" ? "ok" : "warn", execBadge),
+        note: `裁决样本 ${n}/${target} · closed ${fw.closed_rows ?? 0} · 事后剔 ${fw.hindsight_excluded ?? 0} · 不自动 promote`,
+      },
+      {
+        layer: "旁路 / 研究",
+        role: "不进主线裁决",
+        ver: [
+          pl.available ? "v10 纸面扫描" : null,
+          tr.name || tr.stable_pt ? (tr.name || "train artifact") : null,
+          "多周期雷达（规则，非 YOLO/LGB）",
+        ].filter(Boolean).join(" · ") || "—",
+        status: tag("warn", "非主线"),
+        note: "纸面/雷达/研究权重不得自动写入 forward 或 promote ACTIVE",
+      },
+    ];
+    tbody.innerHTML = rows.map((r) => `
+      <tr>
+        <td><b>${escapeHtml(r.layer)}</b></td>
+        <td>${escapeHtml(r.role)}</td>
+        <td class="mono">${escapeHtml(r.ver)}</td>
+        <td>${r.status}</td>
+        <td>${escapeHtml(r.note)}</td>
+      </tr>`).join("");
+  }
+
+  const foot = $("#arch-foot");
+  if (foot) {
+    foot.textContent = [
+      "铁律：不自动 promote · holdout 需 owner 批准 · 检测只认盘口 tip",
+      `三门新鲜度同值 ${gate}min`,
+      "确认级只认前向新鲜 100 笔",
+    ].join(" · ");
+  }
+}
+
 async function loadOverview() {
   $("#view-overview")?.classList.add("loading");
+  let strip = null;
+  let paper = null;
   try {
     // Refresh strip so live-truth panel matches current forward clock.
     await loadStatusStrip(false);
-    const d = await apiGet(apiUrl("/api/overview"), { cache: true });
-    const v = escapeHtml(d.verdict || "暂无摘要");
+    try {
+      strip = await apiGet("/api/status-strip", { cache: false, quiet: true });
+      _lastStatusStrip = strip;
+    } catch (_) {
+      strip = _lastStatusStrip;
+    }
+    try {
+      paper = await apiGet("/api/live-paper", { cache: false, quiet: true });
+    } catch (_) { /* optional */ }
+
+    const d = await apiGet(apiUrl("/api/overview"), { cache: false });
+    paintArchitecture(strip || {}, d, paper);
+
+    // Strip legacy look-ahead parenthetical so the banner never re-sells PF 6.x.
+    let verdictRaw = String(d.verdict || "暂无摘要");
+    verdictRaw = verdictRaw.replace(/（旧[^）]*）/g, "").replace(/\(旧[^)]*\)/g, "").trim();
+    const v = escapeHtml(verdictRaw);
     const n = d.next ? `<span class="banner-next">${escapeHtml(d.next)}</span>` : "";
-    $("#verdict-banner").innerHTML = `<span class="banner-k">回测验收</span><b>${v}</b>${n}`;
+    $("#verdict-banner").innerHTML = `<span class="banner-k">回测终审</span><b>${v}</b>${n}`;
     const tile = (t) =>
       `<div class="tile"><span class="tile-code">EVIDENCE</span><span class="lbl">${escapeHtml(t.label)}</span><b>${escapeHtml(String(t.value))}</b><small>${escapeHtml(t.sub || "")}</small></div>`;
     const tiles = d.tiles || [];
@@ -1414,7 +1634,7 @@ async function loadOverview() {
     const names = {
       net_positive: "扣费后净收益为正",
       "profit_factor_ge_1.3": "盈亏比 PF ≥ 1.3",
-      max_drawdown_le_20pct: "最大回撤 ≤ 20%",
+      max_drawdown_le_20pct: "最大回撤 ≤ 20%（tip-replay 未测）",
       n_trades_ge_100: "交易数 ≥ 100 笔",
     };
     const acc = Object.entries(d.acceptance || {});
@@ -1422,20 +1642,23 @@ async function loadOverview() {
       ? acc.map(([k, ok]) =>
           `<li class="${ok ? "ok" : "fail"}"><span class="check-mark" aria-hidden="true">${ok ? "✓" : "○"}</span>${names[k] || k}</li>`
         ).join("")
-      : `<li class="fail"><span class="check-mark" aria-hidden="true">○</span>暂无验收数据</li>`;
-    const sparkEl = $("#spark-chart");
-    if (sparkEl && Array.isArray(d.sparkline) && d.sparkline.length) {
-      if (!sparkChart) {
-        sparkChart = makeChart(sparkEl, { timeScale: { visible: true, borderColor: "#e5e7eb" } });
-        sparkSeries = sparkChart.addAreaSeries({
-          lineColor: "#68e78e", lineWidth: 2, priceFormat: pctFormat,
-          topColor: "rgba(104,231,142,0.24)", bottomColor: "rgba(104,231,142,0.015)",
-        });
-      }
-      sparkSeries.setData(d.sparkline);
-      sparkChart.timeScale().fitContent();
-    } else if (sparkEl && !(d.sparkline && d.sparkline.length)) {
-      /* leave chart host empty; parent shows panel chrome */
+      : `<li class="fail"><span class="check-mark" aria-hidden="true">○</span>暂无 tip-replay 验收数据</li>`;
+    // Honest tip-replay tiles only — never paint look-ahead equity (+245% era).
+    const honestHost = $("#overview-honest-tiles");
+    if (honestHost) {
+      const honest = (d.tiles || []).filter((t) =>
+        /tip-replay|PF|每笔净|胜率/i.test(String(t.label || "") + String(t.sub || ""))
+      );
+      const show = honest.length ? honest : (d.tiles || []).slice(1, 3);
+      honestHost.innerHTML = show.length
+        ? show.map(tile).join("")
+        : `<div class="note">见上方磁贴 · 明细在「回测」页</div>`;
+    }
+    // Destroy any leftover spark chart from older builds still in memory.
+    if (typeof sparkChart !== "undefined" && sparkChart) {
+      try { sparkChart.remove(); } catch (_) { /* ignore */ }
+      sparkChart = null;
+      sparkSeries = null;
     }
   } catch (err) {
     if (err?.name !== "AbortError") {
@@ -1483,43 +1706,92 @@ $("#live-paper-refresh")?.addEventListener("click", async () => {
   try { await loadLivePaperOverview(); } catch(_) {}
 });
 
+function _fmtNum(x, digits = 3) {
+  if (x == null || x === "" || Number.isNaN(Number(x))) return "—";
+  return Number(x).toFixed(digits);
+}
+function _linkList(links) {
+  if (!links) return "";
+  const items = [];
+  for (const [k, v] of Object.entries(links)) {
+    if (!v) continue;
+    const s = String(v);
+    // Only HTTP-mounted paths become clickable; *_path are repo-relative notes.
+    if (s.startsWith("/debug-artifacts/") || s.startsWith("http")) {
+      items.push(`<a href="${escapeHtml(s)}" target="_blank" rel="noopener">${escapeHtml(k)}</a>`);
+    } else {
+      items.push(`<code title="仓库路径">${escapeHtml(k)}: ${escapeHtml(s)}</code>`);
+    }
+  }
+  return items.length ? items.join(" · ") : "—";
+}
+
 async function loadShortTf() {
   const view = $("#view-shorttf");
   view?.classList.add("loading");
   try {
     const d = await apiGet("/api/short-tf", { cache: false });
-    $("#shorttf-note").textContent = d.note || "";
-    const st = d.status || {};
-    const by = st.by_bar || {};
-    $("#shorttf-tiles").innerHTML = `
-      <div class="tile"><span class="lbl">通道</span><b>short_tf</b><small>规则 tip · 隔离主线</small></div>
-      <div class="tile"><span class="lbl">币种</span><b>${(d.symbols || []).length}</b><small>${(d.bars || []).join(" / ")}</small></div>
-      <div class="tile"><span class="lbl">最近扫描新信号</span><b>${st.new_signals ?? "—"}</b><small>1m ${by["1m"]?.new ?? "—"} · 5m ${by["5m"]?.new ?? "—"}</small></div>
-      <div class="tile"><span class="lbl">日志条数</span><b>${d.n_log_total ?? 0}</b><small>data/short_tf/</small></div>`;
-    $("#shorttf-status").textContent = st && Object.keys(st).length
-      ? JSON.stringify(st, null, 2)
-      : "尚未扫描。运行：PYTHONPATH=. python3 scripts/short_tf_scan.py --once";
-    const rows = d.recent_signals || [];
-    $("#shorttf-sig-count").textContent = `（${rows.length}）`;
-    const tbody = $("#shorttf-sig-table tbody");
-    if (tbody) {
-      tbody.innerHTML = rows.length
-        ? rows.map((r) => {
-            const lag = r.lag_min != null ? Number(r.lag_min) : null;
-            const lagS = lag == null ? "—" : (lag < 60 ? `${Math.round(lag)}m` : `${(lag / 60).toFixed(1)}h`);
-            return `<tr class="no-click">
-              <td>${escapeHtml(fmtBjTime(r.signal_time))}</td>
-              <td>${escapeHtml(String(r.symbol || "").replace("_USDT_SWAP", ""))}</td>
-              <td>${escapeHtml(r.bar || "")}</td>
-              <td class="num">${lagS}</td>
-              <td class="num">${r.score != null ? Number(r.score).toFixed(3) : "—"}</td>
-              <td class="num">${r.entry_price != null ? Number(r.entry_price).toPrecision(6) : "—"}</td>
-            </tr>`;
-          }).join("")
-        : `<tr class="no-click"><td colspan="6" class="empty-state">暂无信号</td></tr>`;
+    if ($("#shorttf-sub")) $("#shorttf-sub").textContent = d.subtitle || "";
+    if ($("#shorttf-note")) $("#shorttf-note").textContent = d.note || "";
+    const disc = $("#shorttf-discipline");
+    if (disc) {
+      disc.innerHTML = (d.discipline || []).map((x) => `<li>${escapeHtml(x)}</li>`).join("");
     }
+    const v1 = d.v1 || {};
+    const v2 = d.v2 || {};
+    const oos = v1.strict_oos || {};
+    const val = v2.val || {};
+    const gates = v2.gates || {};
+    $("#shorttf-tiles").innerHTML = `
+      <div class="tile"><span class="lbl">标的</span><b>ETH 3m</b><small>做空 short-start pilot</small></div>
+      <div class="tile ${String(v1.verdict || "").includes("FAIL") ? "warn" : ""}"><span class="lbl">v1 检测</span><b>${escapeHtml(v1.verdict || "—")}</b><small>OOS 开火率 ${escapeHtml(oos.raw_fire_rate_pct || "—")}</small></div>
+      <div class="tile ${String(v2.verdict || "").includes("FAIL") ? "warn" : ""}"><span class="lbl">v2 分类</span><b>${escapeHtml(v2.verdict || "—")}</b><small>val TP ${val.tp ?? "—"} / FP ${val.fp ?? "—"}</small></div>
+      <div class="tile"><span class="lbl">纪律</span><b>未 promote</b><small>holdout 未动 · 不写 forward</small></div>`;
+
+    if ($("#shorttf-v1-verdict")) $("#shorttf-v1-verdict").textContent = v1.verdict || "";
+    if ($("#shorttf-v1-body")) {
+      if (!v1.available) {
+        $("#shorttf-v1-body").textContent = "无 v1 回测产物";
+      } else {
+        $("#shorttf-v1-body").innerHTML = `
+          <div class="tf-row"><span>结论</span><b class="neg">${escapeHtml(v1.verdict || "—")}</b></div>
+          <div class="tf-row"><span>训练图</span><b>${v1.training_images ?? "—"}</b></div>
+          <div class="tf-row"><span>OOS 窗</span><b class="mono" style="font-size:12px">${escapeHtml(oos.window || "—")}</b></div>
+          <div class="tf-row"><span>eligible bars</span><b>${oos.eligible_bars ?? "—"}</b></div>
+          <div class="tf-row"><span>raw 开火 / 率</span><b>${oos.raw_fires ?? "—"} · ${escapeHtml(oos.raw_fire_rate_pct || "—")}</b></div>
+          <div class="tf-row"><span>去重信号</span><b>${oos.dedup_signals ?? "—"}</b></div>
+          <div class="tf-row"><span>净均值 @20bp</span><b class="neg">${escapeHtml(oos.net_mean_20bp_pct || "—")}</b></div>
+          <div class="tf-row"><span>胜率 / PF</span><b>${escapeHtml(oos.net_win_rate_pct || "—")} · ${_fmtNum(oos.net_pf, 3)}</b></div>
+          <div class="tf-row"><span>配对超额 t</span><b>${_fmtNum(oos.paired_excess_t, 2)}</b></div>
+          <div class="tf-row"><span>协议</span><b>次根开盘 · 持有 60×3m · 成本 20bp · MIN_GAP 18</b></div>
+          <p class="note" style="margin-top:8px">v1 在严格 OOS 上几乎每根 bar 都开火（99.7%），无法当稀疏事件策略。</p>`;
+      }
+    }
+    if ($("#shorttf-v1-links")) $("#shorttf-v1-links").innerHTML = "链接：" + _linkList(v1.links);
+
+    if ($("#shorttf-v2-verdict")) $("#shorttf-v2-verdict").textContent = v2.verdict || "";
+    if ($("#shorttf-v2-body")) {
+      if (!v2.available) {
+        $("#shorttf-v2-body").textContent = "无 v2 诊断产物";
+      } else {
+        const tr = v2.train || {};
+        const bl = v2.baseline_first_below || {};
+        $("#shorttf-v2-body").innerHTML = `
+          <div class="tf-row"><span>结论</span><b class="neg">${escapeHtml(v2.verdict || "—")}</b></div>
+          <div class="tf-row"><span>阈值政策</span><b>${escapeHtml(v2.threshold_policy || "p=0.50 固定")}</b></div>
+          <div class="tf-row"><span>train @0.50</span><b>TP${tr.tp ?? "—"}/FP${tr.fp ?? "—"}/TN${tr.tn ?? "—"}/FN${tr.fn ?? "—"}</b></div>
+          <div class="tf-row"><span>val @0.50</span><b class="neg">TP${val.tp ?? "—"}/FP${val.fp ?? "—"}/TN${val.tn ?? "—"}/FN${val.fn ?? "—"}</b></div>
+          <div class="tf-row"><span>val balanced acc</span><b>${_fmtNum(val.balanced_accuracy, 2)}</b></div>
+          <div class="tf-row"><span>val ROC AUC</span><b>${_fmtNum(val.roc_auc, 3)}</b></div>
+          <div class="tf-row"><span>预注册门</span><b class="neg">TP≥${gates.tp_min ?? 6} 实际 ${gates.actual_tp ?? "—"} · ${gates.passed ? "PASS" : "FAIL"}</b></div>
+          <div class="tf-row"><span>因果规则基线</span><b>首次跌破六 MA · TP${bl.tp ?? "—"}/FP${bl.fp ?? "—"}/FN${bl.fn ?? "—"}</b></div>
+          <div class="tf-row"><span>weights</span><b class="mono" style="font-size:11px">${escapeHtml(v2.weights_sha256 || "—")}</b></div>
+          <p class="note" style="margin-top:8px">val 全判 no_start（TP=0）；top1≈多数类。规则基线明显好于图像模型。fail-fast 未跑 smoke/promote。</p>`;
+      }
+    }
+    if ($("#shorttf-v2-links")) $("#shorttf-v2-links").innerHTML = "链接：" + _linkList(v2.links);
   } catch (err) {
-    if (err?.name !== "AbortError") toast(`短周期：${err.message || err}`);
+    if (err?.name !== "AbortError") toast(`ETH 3m：${err.message || err}`);
   } finally {
     view?.classList.remove("loading");
   }
@@ -1576,12 +1848,16 @@ async function runProbe() {
   const out = $("#probe-result");
   const cards = $("#probe-cards");
   const btn = $("#probe-run");
+  const histBtn = $("#probe-history-run");
+  const link = $("#probe-history-link");
   if (!symbol) { toast("请输入币种，如 BTC 或 MOODENG_USDT_SWAP"); return; }
   probeRunning = true;
   if (btn) { btn.disabled = true; btn.textContent = "检测中…"; }
-  if (meta) meta.textContent = "拉最新K线 + YOLO + 判断打分…";
+  if (histBtn) histBtn.disabled = true;
+  if (meta) meta.textContent = "拉最新K线 + YOLO tip + 判断打分…";
   if (out) out.textContent = "…";
   if (cards) { cards.hidden = true; cards.innerHTML = ""; }
+  if (link) { link.hidden = true; link.innerHTML = ""; }
   try {
     const res = await fetch("/api/check-symbol", {
       method: "POST",
@@ -1604,11 +1880,15 @@ async function runProbe() {
     if (out) out.textContent = r.text || JSON.stringify(r, null, 2);
     renderProbeCards(r);
     if (meta) {
+      const detNote = r.detector_note ? ` · ${r.detector_note}` : "";
       if (r.error) meta.textContent = r.error;
-      else if (!(r.signals || []).length) meta.textContent = `${r.symbol || symbol}：当前盘口无信号`;
-      else {
+      else if (!(r.signals || []).length) {
+        meta.textContent = `${r.symbol || symbol}：当前盘口无信号 · 检测器 ${r.detector || "—"}${detNote}`;
+      } else {
         const tradeable = (r.signals || []).filter((s) => s.tradeable).length;
-        meta.textContent = `${r.symbol || symbol}：检出 ${(r.signals || []).length} 个 · 可开单 ${tradeable}`;
+        meta.textContent =
+          `${r.symbol || symbol}：检出 ${(r.signals || []).length} 个 · 可开单 ${tradeable}`
+          + ` · ${r.detector || ""}${detNote}`;
       }
     }
   } catch (err) {
@@ -1617,10 +1897,101 @@ async function runProbe() {
     toast(`盘口检测失败：${err.message || err}`);
   } finally {
     probeRunning = false;
-    if (btn) { btn.disabled = false; btn.textContent = "▶ 检测"; }
+    if (btn) { btn.disabled = false; btn.textContent = "▶ 即时检测"; }
+    if (histBtn) histBtn.disabled = false;
+  }
+}
+
+async function runProbeHistory() {
+  if (probeRunning) return;
+  const symbol = ($("#probe-symbol")?.value || "").trim();
+  const days = Math.max(7, Math.min(800, Number($("#probe-days")?.value || 365)));
+  const meta = $("#probe-meta");
+  const out = $("#probe-result");
+  const cards = $("#probe-cards");
+  const btn = $("#probe-run");
+  const histBtn = $("#probe-history-run");
+  const link = $("#probe-history-link");
+  if (!symbol) { toast("请输入币种，如 ETH"); return; }
+  probeRunning = true;
+  if (btn) btn.disabled = true;
+  if (histBtn) { histBtn.disabled = true; histBtn.textContent = "历史扫描中…"; }
+  if (meta) meta.textContent = `历史检测 ${days} 天 · full 扫描 + 判断（可能 2–10 分钟）…`;
+  if (out) out.textContent = "历史扫描进行中，请勿关闭页面…";
+  if (cards) { cards.hidden = true; cards.innerHTML = ""; }
+  if (link) { link.hidden = true; link.innerHTML = ""; }
+  try {
+    const res = await fetch("/api/probe-history", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ symbol, days, conf: 0.30 }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data) throw new Error(`HTTP ${res.status}`);
+    if (!data.ok) {
+      if (meta) meta.textContent = data.detail || "历史检测失败";
+      if (out) out.textContent = data.detail || "（失败）";
+      if (cards) {
+        cards.hidden = false;
+        cards.innerHTML = `<div class="probe-card bad"><div class="probe-card-k">失败</div><div class="probe-card-v">${escapeHtml(data.detail || "失败")}</div></div>`;
+      }
+      if (!data.busy) toast(data.detail || "历史检测失败");
+      return;
+    }
+    const r = data.result || {};
+    const nFire = r.n_raw_fires ?? (r.signals || []).length;
+    const nEl = r.n_eligible ?? 0;
+    const nClosed = r.closed_n ?? 0;
+    if (meta) {
+      meta.textContent =
+        `${r.symbol || symbol} · ${r.days || days} 天 · 开火 ${nFire} · 合格 ${nEl} · 已平仓 ${nClosed}`
+        + (r.detector ? ` · ${r.detector}` : "");
+    }
+    if (cards) {
+      cards.hidden = false;
+      const mean = r.closed_mean_ret != null ? `${(100 * Number(r.closed_mean_ret)).toFixed(2)}%` : "—";
+      const wr = r.closed_win_rate != null ? `${(100 * Number(r.closed_win_rate)).toFixed(1)}%` : "—";
+      cards.innerHTML = `
+        <div class="probe-card good"><div class="probe-card-k">YOLO 开火</div><div class="probe-card-v">${nFire}</div>
+          <div class="probe-card-s">${escapeHtml(String(r.window_start || "").slice(0, 16))} → ${escapeHtml(String(r.window_end || "").slice(0, 16))}</div></div>
+        <div class="probe-card"><div class="probe-card-k">合格(分+ATR)</div><div class="probe-card-v">${nEl}</div>
+          <div class="probe-card-s">过阈 ${r.n_passed_score ?? "—"} · 阈值 ${r.threshold ?? "—"}</div></div>
+        <div class="probe-card"><div class="probe-card-k">纸面平仓</div><div class="probe-card-v">${nClosed}</div>
+          <div class="probe-card-s">均收益 ${mean} · 胜率 ${wr}</div></div>
+        <div class="probe-card"><div class="probe-card-k">检测器</div><div class="probe-card-v" style="font-size:13px">${escapeHtml(String(r.detector || "—").split("/").pop() || "—")}</div>
+          <div class="probe-card-s">full 扫描 · 非即时 tip</div></div>`;
+    }
+    const url = r.report_url || "";
+    if (link && url) {
+      link.hidden = false;
+      link.innerHTML =
+        `HTML 报告：<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(url)}</a>`
+        + (r.report_html ? ` · <code>${escapeHtml(r.report_html)}</code>` : "");
+    }
+    if (out) {
+      const head = [
+        `=== 历史检测 ${r.symbol || symbol} · ${r.days || days} 天 ===`,
+        `窗口: ${r.window_start || "—"} → ${r.window_end || "—"}`,
+        `开火 ${nFire} · 过阈 ${r.n_passed_score ?? "—"} · 合格 ${nEl} · 平仓 ${nClosed}`,
+        r.report_url ? `报告: ${r.report_url}` : "",
+        "（明细见 HTML 表）",
+      ].filter(Boolean);
+      out.textContent = head.join("\n");
+    }
+    if (url) toast(`历史报告已生成 · 开火 ${nFire}`);
+    else toast(`历史检测完成 · 开火 ${nFire}`);
+  } catch (err) {
+    if (meta) meta.textContent = "";
+    if (out) out.textContent = "（请求失败）";
+    toast(`历史检测失败：${err.message || err}`);
+  } finally {
+    probeRunning = false;
+    if (btn) { btn.disabled = false; btn.textContent = "▶ 即时检测"; }
+    if (histBtn) { histBtn.disabled = false; histBtn.textContent = "📜 历史检测"; }
   }
 }
 $("#probe-run")?.addEventListener("click", runProbe);
+$("#probe-history-run")?.addEventListener("click", runProbeHistory);
 $("#probe-symbol")?.addEventListener("keydown", (e) => { if (e.key === "Enter") runProbe(); });
 $("#probe-chips")?.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-sym]");
@@ -1950,31 +2321,25 @@ async function loadForward() {
   }
 }
 
-/* ---------- backtest ---------- */
-const btState = { cost: 0.003, window: "accept", outcome: "", filter: "", scoreMin: 0, sort: "entry_time", dir: -1 };
-let equityChart, equitySeries, ddChart, ddSeries, pfChart, pfSeries, pfLine;
+/* ---------- backtest (tip-replay only; look-ahead legacy archived) ---------- */
+const btState = { outcome: "", filter: "", sort: "entry_time", dir: -1 };
+let equityChart, equitySeries, ddChart, ddSeries;
 let tradeRows = [];
 const TRADES_PAGE = 120;
 let tradesShow = TRADES_PAGE;
 
 function segWire(id, state, key, parse, cb) {
-  $(id).querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
-    $(id).querySelectorAll("button").forEach((x) => x.classList.toggle("active", x === b));
+  const host = $(id);
+  if (!host) return;
+  host.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+    host.querySelectorAll("button").forEach((x) => x.classList.toggle("active", x === b));
     state[key] = parse(b.dataset[key]);
     cb();
   }));
 }
-segWire("#cost-seg", btState, "cost", Number, loadBacktest);
-segWire("#window-seg", btState, "window", String, loadBacktest);
 segWire("#outcome-seg", btState, "outcome", String, () => { tradesShow = TRADES_PAGE; renderTrades(); });
-$("#trade-filter").addEventListener("input", (e) => {
+$("#trade-filter")?.addEventListener("input", (e) => {
   btState.filter = e.target.value.toUpperCase();
-  tradesShow = TRADES_PAGE;
-  renderTrades();
-});
-$("#score-threshold").addEventListener("input", (e) => {
-  btState.scoreMin = Number(e.target.value);
-  $("#score-threshold-label").textContent = btState.scoreMin.toFixed(3);
   tradesShow = TRADES_PAGE;
   renderTrades();
 });
@@ -1988,191 +2353,70 @@ document.querySelectorAll("#trades-table th.sortable").forEach((th) =>
     renderTrades();
   }));
 
-function renderBacktestCompare(cmp) {
-  const panel = $("#bt-compare-panel");
-  const note = $("#bt-compare-note");
-  const tbody = $("#bt-compare-table tbody");
-  const titleUnit = panel?.querySelector("h2 .unit");
-  if (!panel || !tbody) return;
-  if (!cmp || !cmp.available) {
-    panel.hidden = true;
-    return;
-  }
-  panel.hidden = false;
-  panel.classList.toggle("stale-panel", !!cmp.stale);
-  if (titleUnit) {
-    titleUnit.textContent = cmp.stale ? "预计算表 · 已过期" : "预计算表 · 当前主线";
-  }
-  if (note) {
-    note.hidden = false;
-    note.classList.toggle("warn-banner", !!cmp.stale);
-    note.classList.toggle("note", !cmp.stale);
-    if (cmp.stale) {
-      const live = cmp.live_active || {};
-      const liveBits = [
-        live.artifact_id ? `当前 ACTIVE=${live.artifact_id}` : null,
-        live.threshold_val_q90 != null ? `阈值=${Number(live.threshold_val_q90).toFixed(4)}` : null,
-        live.dataset_name ? `池=${live.dataset_name}` : null,
-      ].filter(Boolean).join(" · ");
-      note.innerHTML = `<b>对照表已过期</b> — 以下数字不是当前主线。${liveBits ? `<br><span class="status-sub">${escapeHtml(liveBits)}</span>` : ""}`
-        + (cmp.stale_reasons || []).map((r) => `<br>· ${escapeHtml(r)}`).join("")
-        + `<br>请以总览/动态回测（本页上方磁贴）为准。`;
-    } else {
-      const det = [
-        cmp.detector_mainline ? `检测主线=${cmp.detector_mainline}` : null,
-        cmp.generated_at ? `表生成 ${String(cmp.generated_at).slice(0, 19)}` : null,
-      ].filter(Boolean).join(" · ");
-      note.innerHTML = escapeHtml(cmp.note || "ACTIVE=当前判断冻结；SHADOW=历史对照。验收窗已消耗。")
-        + (det ? `<br><span class="status-sub">${escapeHtml(det)}</span>` : "");
-    }
-  }
-  tbody.innerHTML = (cmp.rows || []).map((r) => {
-    const a = r.accept || {};
-    const f = r.full || {};
-    const ok100 = (r.acceptance_check || {}).n_trades_ge_100;
-    const thr = r.threshold == null ? "—" : (Math.abs(r.threshold) < 0.05 ? Number(r.threshold).toFixed(4) : Number(r.threshold).toFixed(3));
-    const roleLabel = cmp.stale && r.role === "ACTIVE" ? "旧ACTIVE" : r.role;
-    const roleChip = r.role === "ACTIVE" ? (cmp.stale ? "chip warn" : "chip passed") : r.role === "SHADOW" ? "chip done" : "chip";
-    return `<tr class="${cmp.stale ? "row-stale" : ""}">
-      <td><span class="${roleChip}">${escapeHtml(roleLabel)}</span> ${escapeHtml(r.label || r.key)}</td>
-      <td>${escapeHtml(r.objective || "—")}</td>
-      <td class="num">${thr}</td>
-      <td class="num">${r.n_eligible ?? "—"}</td>
-      <td class="num"><b>${a.n_trades ?? "—"}</b></td>
-      <td class="num ${cls(a.net_return_on_capital)}">${fmtPct(a.net_return_on_capital)}</td>
-      <td class="num ${a.profit_factor >= 1.3 ? "pos" : "neg"}">${fmtPF(a.profit_factor)}</td>
-      <td class="num">${fmtPct(a.win_rate)}</td>
-      <td class="num">${f.n_trades ?? "—"}</td>
-      <td class="num ${cls(f.net_return_on_capital)}">${fmtPct(f.net_return_on_capital)}</td>
-      <td class="num">${fmtPF(f.profit_factor)}</td>
-      <td class="${ok100 ? "pos" : "neg"}">${ok100 ? "✓" : "✗"}</td>
-    </tr>`;
-  }).join("");
-}
-
 function renderTipReplay(t) {
   const body = $("#tr-body"); const note = $("#tr-note"); const sub = $("#tr-sub");
   if (!body) return;
   if (!t || t.available === false) {
-    body.innerHTML = `<div class="tile"><span class="lbl">状态</span><b>评测中</b><small>逐 bar 盘口回测进行中</small></div>`;
-    if (note) note.textContent = (t && t.note) || "";
+    body.innerHTML = `<div class="tile"><span class="lbl">状态</span><b>暂无</b><small>尚无 tip-replay 终审</small></div>`;
+    if (note) note.textContent = (t && t.note) || "历史前视回测已归档，不再展示。";
     return;
   }
   const passCls = t.gate_pass ? "pos" : "neg";
   const kindTag = t.clean ? "holdout 干净窗口" : "pre-holdout 发现级（偏乐观）";
+  const oc = t.outcomes || {};
+  const ocTxt = ["tp", "sl", "timeout"].map((k) => `${OUTCOME_CN[k] || k} ${oc[k] || 0}`).join(" · ");
   if (sub) sub.textContent = `${kindTag} · ${t.n_symbols || "?"} 币 · ${t.window || ""}`;
   body.innerHTML = `
-    <div class="tile"><span class="lbl">交易笔数</span><b>${t.n_trades ?? "—"}</b><small>开火 ${t.fire_per_1k_bars ?? "—"}/千bar</small></div>
-    <div class="tile"><span class="lbl">净收益（累计单位）</span><b class="${cls(t.total_net_units)}">${t.total_net_units != null ? (100*t.total_net_units).toFixed(2)+"%" : "—"}</b><small>单笔均值 ${t.mean_net_per_trade != null ? (100*t.mean_net_per_trade).toFixed(3)+"%" : "—"}</small></div>
-    <div class="tile"><span class="lbl">盈亏比 PF</span><b class="${(t.profit_factor||0) >= 1.3 ? "pos":"neg"}">${fmtPF(t.profit_factor)}</b><small>验收线 1.3</small></div>
-    <div class="tile"><span class="lbl">胜率 / 闸门</span><b>${t.win_rate != null ? (100*t.win_rate).toFixed(1)+"%":"—"}</b><small class="${passCls}">${t.gate_pass ? "达标 ✓":"未达标 ✗"}</small></div>`;
-  if (note) note.textContent = (t.note || "") + " · " + (t.protocol || "");
+    <div class="tile"><span class="lbl">交易笔数</span><b>${t.n_trades ?? "—"}</b><small>开火 ${t.fire_per_1k_bars != null ? Number(t.fire_per_1k_bars).toFixed(1) : "—"}/千bar</small></div>
+    <div class="tile"><span class="lbl">累计净收益</span><b class="${cls(t.total_net_units)}">${t.total_net_units != null ? (100 * t.total_net_units).toFixed(2) + "%" : "—"}</b><small>单笔均值 ${t.mean_net_per_trade != null ? (100 * t.mean_net_per_trade).toFixed(3) + "%" : "—"}</small></div>
+    <div class="tile"><span class="lbl">盈亏比 PF</span><b class="${(t.profit_factor || 0) >= 1.3 ? "pos" : "neg"}">${fmtPF(t.profit_factor)}</b><small>验收线 1.3</small></div>
+    <div class="tile"><span class="lbl">胜率 / 闸门</span><b>${t.win_rate != null ? (100 * t.win_rate).toFixed(1) + "%" : "—"}</b><small class="${passCls}">${t.gate_pass ? "达标 ✓" : "未达标 ✗"} · ${escapeHtml(ocTxt)}</small></div>`;
+  if (note) {
+    note.textContent = [
+      t.note || "",
+      t.protocol || "",
+      t.weights ? `权重 ${t.weights}` : "",
+      t.source_file ? `源 ${t.source_file}` : "",
+      "旧前视回测（PF≈6.6）已归档下线",
+    ].filter(Boolean).join(" · ");
+  }
 }
 
 async function loadBacktest() {
-  $("#view-backtest").classList.add("loading");
+  $("#view-backtest")?.classList.add("loading");
   try {
-  apiGet("/api/backtest/tip_replay", { cache: false }).then(renderTipReplay).catch(() => {});
-  const [d, rows, cmp] = await Promise.all([
-    apiGet(apiUrl("/api/backtest", { cost: btState.cost }), { cache: true }),
-    apiGet(apiUrl("/api/trades", { window: btState.window, cost: btState.cost }), { cache: true }),
-    apiGet(`/api/backtest/compare?cost=${btState.cost}`, { cache: true }).catch(() => ({ available: false })),
-  ]);
-  tradeRows = rows;
-  tradesShow = TRADES_PAGE;
-  const w = d[btState.window];
-  renderBacktestCompare(cmp);
+    const t = await apiGet("/api/backtest/tip_replay", { cache: false });
+    renderTipReplay(t);
+    tradeRows = (t && t.available && Array.isArray(t.trades)) ? t.trades : [];
+    tradesShow = TRADES_PAGE;
 
-  // These tiles are the look-ahead backtest. The overview was switched to the
-  // tip-replay verdict; this page was not, and PF 6.61 with no caveat reads as a
-  // result. Banner first, before any number on the page.
-  (function () {
-    const host = $("#view-backtest");
-    if (!host || !d.lookahead_warning) return;
-    let el = document.getElementById("bt-lookahead-warn");
-    if (!el) {
-      el = document.createElement("div");
-      el.id = "bt-lookahead-warn";
-      el.style.cssText =
-        "background:#3a2418;border-left:4px solid #ff9800;color:#ffd8a8;" +
-        "padding:12px 14px;border-radius:8px;margin:0 0 14px;font-size:14px;line-height:1.6";
-      host.insertBefore(el, host.firstChild);
+    if (!equityChart && $("#equity-chart")) {
+      equityChart = makeChart($("#equity-chart"));
+      equitySeries = equityChart.addAreaSeries({
+        lineColor: "#3987e5", lineWidth: 2, priceFormat: pctFormat,
+        topColor: "rgba(57,135,229,0.25)", bottomColor: "rgba(57,135,229,0.02)",
+      });
+      ddChart = makeChart($("#dd-chart"), { timeScale: { visible: false } });
+      ddSeries = ddChart.addAreaSeries({
+        lineColor: "#e66767", lineWidth: 1, priceFormat: pctFormat,
+        topColor: "rgba(230,103,103,0.02)", bottomColor: "rgba(230,103,103,0.3)",
+        invertFilledArea: true,
+      });
     }
-    el.textContent = d.lookahead_warning;
-  })();
-
-  // regression scores are not probabilities — stretch the filter slider to score range
-  const slider = $("#score-threshold");
-  if (slider && d.score_range) {
-    const lo = Number(d.score_range.min);
-    const hi = Number(d.score_range.max);
-    if (Number.isFinite(lo) && Number.isFinite(hi) && hi > lo) {
-      const step = Math.max((hi - lo) / 200, 1e-5);
-      slider.min = String(lo);
-      slider.max = String(hi);
-      slider.step = String(step);
-      if (btState.scoreMin < lo || btState.scoreMin > hi) {
-        btState.scoreMin = lo;
-        slider.value = String(lo);
-        $("#score-threshold-label").textContent = lo.toFixed(4);
-      }
+    if (equitySeries) {
+      equitySeries.setData(t?.equity || []);
+      equityChart?.timeScale().fitContent();
     }
-  }
-  const thrNote = d.score_semantics === "predicted_realized_ret"
-    ? `ACTIVE 回归 · 阈值 ${d.score_threshold != null ? Number(d.score_threshold).toFixed(4) : "—"}（预测收益 q90）`
-    : null;
-  if (thrNote && $("#threshold-note")) {
-    $("#threshold-note").textContent = thrNote + "；滑块只过滤明细。";
-  }
-
-  $("#bt-tiles").innerHTML = `
-    <div class="tile"><span class="lbl">交易笔数</span><b>${w.n_trades}</b><small>${escapeHtml(d.universe_label)} · ${btState.window === "accept" ? "验收窗口" : "全期"}</small></div>
-    <div class="tile"><span class="lbl">净收益（对资金）</span><b class="${cls(w.net_return_on_capital)}">${fmtPct(w.net_return_on_capital)}</b><small>单笔均值 ${fmtPct(w.mean_net_per_trade, 3)}</small></div>
-    <div class="tile"><span class="lbl">盈亏比 PF</span><b class="${w.profit_factor >= 1.3 ? "pos" : "neg"}">${fmtPF(w.profit_factor)}</b><small>验收线 1.3</small></div>
-    <div class="tile"><span class="lbl">最大回撤 / 胜率</span><b>${fmtPct(w.max_drawdown_pct)}</b><small>胜率 ${fmtPct(w.win_rate)}</small></div>`;
-
-  if (!equityChart) {
-    equityChart = makeChart($("#equity-chart"));
-    equitySeries = equityChart.addAreaSeries({
-      lineColor: "#3987e5", lineWidth: 2, priceFormat: pctFormat,
-      topColor: "rgba(57,135,229,0.25)", bottomColor: "rgba(57,135,229,0.02)",
-    });
-    ddChart = makeChart($("#dd-chart"), { timeScale: { visible: false } });
-    ddSeries = ddChart.addAreaSeries({
-      lineColor: "#e66767", lineWidth: 1, priceFormat: pctFormat,
-      topColor: "rgba(230,103,103,0.02)", bottomColor: "rgba(230,103,103,0.3)",
-      invertFilledArea: true,
-    });
-  }
-  equitySeries.setData(w.equity); equityChart.timeScale().fitContent();
-  ddSeries.setData(w.drawdown); ddChart.timeScale().fitContent();
-
-  renderHBars($("#decile-bars"), w.decile.map((r) => ({
-    label: `D${r.decile}${r.decile === 10 ? "（最高分）" : ""}`,
-    value: r.mean_net, text: r.mean_net.toFixed(2) + "%",
-  })).reverse());
-
-  if (!pfChart) {
-    pfChart = makeChart($("#pf-chart"), { timeScale: { visible: false } });
-    pfSeries = pfChart.addLineSeries({
-      color: "#3987e5", lineWidth: 2,
-      priceFormat: { type: "custom", formatter: (v) => v.toFixed(2) },
-    });
-    pfLine = pfSeries.createPriceLine({ price: 1.3, color: "#9aa0a8", lineStyle: 2, title: "验收线" });
-  }
-  // x 轴借用 time 槽位表示成本（0.10% -> 0.50%），仅作形状展示
-  pfSeries.setData(d.pf_curve.map((p, i) => ({ time: 1700000000 + i * 86400, value: p.pf })));
-  pfChart.timeScale().fitContent();
-
-  renderHBars($("#monthly-bars"), w.monthly.map((r) => ({
-    label: r.month, value: r.value, text: r.value.toFixed(2) + "%",
-  })));
-  const sym = [...w.per_symbol.best, ...w.per_symbol.worst.slice().reverse()];
-  renderHBars($("#symbol-bars"), sym.map((r) => ({
-    label: r.symbol.replace("_USDT_SWAP", "").replace("_USDT", ""), value: r.net, text: `${r.net.toFixed(1)}%·${r.n}笔`,
-  })));
-
-  renderTrades();
+    if (ddSeries) {
+      ddSeries.setData(t?.drawdown || []);
+      ddChart?.timeScale().fitContent();
+    }
+    if ($("#monthly-bars")) {
+      renderHBars($("#monthly-bars"), (t?.monthly || []).map((r) => ({
+        label: r.month, value: r.value, text: Number(r.value).toFixed(2) + "%",
+      })));
+    }
+    renderTrades();
   } catch (err) {
     if (err?.name !== "AbortError") toast(`回测页：${err.message || err}`);
   } finally {
@@ -2182,9 +2426,8 @@ async function loadBacktest() {
 
 function filteredTradeRows() {
   let rows = tradeRows;
-  if (btState.outcome) rows = rows.filter((r) => r.outcome.startsWith(btState.outcome));
-  if (btState.filter) rows = rows.filter((r) => r.symbol.includes(btState.filter));
-  if (btState.scoreMin > 0) rows = rows.filter((r) => r.score >= btState.scoreMin);
+  if (btState.outcome) rows = rows.filter((r) => String(r.outcome || "").startsWith(btState.outcome));
+  if (btState.filter) rows = rows.filter((r) => String(r.symbol || "").includes(btState.filter));
   return rows.slice().sort((a, b) => {
     const va = a[btState.sort], vb = b[btState.sort];
     return (va < vb ? -1 : va > vb ? 1 : 0) * btState.dir;
@@ -2192,28 +2435,22 @@ function filteredTradeRows() {
 }
 
 function renderTrades() {
-  const beforeScoreFilter = (() => {
-    let r = tradeRows;
-    if (btState.outcome) r = r.filter((x) => x.outcome.startsWith(btState.outcome));
-    if (btState.filter) r = r.filter((x) => x.symbol.includes(btState.filter));
-    return r.length;
-  })();
   const rows = filteredTradeRows();
-  $("#trades-count").textContent =
-    btState.scoreMin > 0 ? `（${rows.length}/${beforeScoreFilter} 笔）` : `（${rows.length} 笔）`;
-  $("#threshold-note").textContent =
-    btState.scoreMin > 0 ? "只过滤下方成交明细，不改变净值/PF 或验收结论。" : "只过滤下方成交明细，不改变净值/PF。";
+  if ($("#trades-count")) $("#trades-count").textContent = `（${rows.length} 笔 · tip-replay）`;
   const tbody = $("#trades-table tbody");
+  if (!tbody) return;
   const shown = rows.slice(0, tradesShow);
-  tbody.innerHTML = shown.map((r, i) => `
-    <tr data-i="${i}" data-source="${escapeHtml(r.source)}" data-symbol="${escapeHtml(r.symbol)}" data-entry="${escapeHtml(r.entry_time)}">
+  tbody.innerHTML = shown.map((r, i) => {
+    const scoreTxt = r.score == null || Number.isNaN(Number(r.score)) ? "—" : Number(r.score).toFixed(3);
+    return `<tr data-i="${i}" data-source="${escapeHtml(r.source || "okx")}" data-symbol="${escapeHtml(r.symbol)}" data-entry="${escapeHtml(r.entry_time)}">
       <td>${escapeHtml(fmtBjTime(r.entry_time))}</td>
       <td>${escapeHtml(r.symbol)}</td>
-      <td class="num">${r.score.toFixed(3)}</td>
-      <td class="outcome-${escapeHtml(r.outcome)}">${OUTCOME_CN[r.outcome] || escapeHtml(r.outcome)}</td>
+      <td class="num">${scoreTxt}</td>
+      <td class="outcome-${escapeHtml(r.outcome || "")}">${OUTCOME_CN[r.outcome] || escapeHtml(r.outcome || "—")}</td>
       <td class="num"><span class="${cls(r.gross_ret)}">${fmtPct(r.gross_ret)}</span></td>
       <td class="num"><span class="${cls(r.net_ret)}">${fmtPct(r.net_ret)}</span></td>
-    </tr>`).join("");
+    </tr>`;
+  }).join("");
   const more = $("#trades-more");
   if (more) {
     const left = rows.length - shown.length;
@@ -2237,7 +2474,7 @@ $("#trades-more")?.addEventListener("click", () => {
 
 /* ---------- signals browser ---------- */
 let symbolsLoaded = false, klineChart, klineSeries, volumeSeries, emaSeries = [];
-let bandSeries, pathSeries, barrier = { tp: 4, sl: 2 };
+let bandSeries, pathSeries, barrier = { tp: 5, sl: 2 }; // tip-replay short TP5/SL2
 /** Horizontal TV-style order segments (entry / TP / SL) for focused trade */
 let tradeLevelSeries = [];
 let currentKey = "", currentMarkers = [], currentTimes = [], priceLines = [], chartReq = 0;
@@ -2251,7 +2488,8 @@ let sigLastFocusEntry = null;
 /** When set, paint entry/exit/TP/SL from this trade (forward log) after chart loads */
 let pendingTradeOverlay = null;
 /** maMode: off | ema | sma | all — default EMA only (cleaner chart). */
-const sigState = { bars: 1500, maMode: "ema", tfMin: 15 };
+/* Default 9000 bars (~3 months) so tip-replay holdout window (May–Jul) is on chart. */
+const sigState = { bars: 9000, maMode: "ema", tfMin: 15 };
 
 function setTradeFocusCard(html) {
   const card = $("#trade-focus-card");
@@ -2287,9 +2525,41 @@ function parseTimeToUnix(entryTimeStr) {
   return Number.isFinite(ms) ? Math.floor(ms / 1000) : null;
 }
 
+/** Short TP/SL from entry (Claude paper-chart convention). */
+function shortBarrierPrices(entry, atrAbs, atrPct, tpM, slM, precomputed) {
+  if (_C && _C.shortBarrierPrices) {
+    return _C.shortBarrierPrices(entry, atrAbs, atrPct, tpM, slM, precomputed);
+  }
+  if (precomputed?.tp_price != null && precomputed?.sl_price != null) {
+    return { tp: Number(precomputed.tp_price), sl: Number(precomputed.sl_price) };
+  }
+  const a = Number.isFinite(atrAbs) && atrAbs > 0
+    ? atrAbs
+    : (Number.isFinite(atrPct) && atrPct > 0 ? entry * atrPct : null);
+  if (a == null) return { tp: null, sl: null };
+  return { tp: entry - tpM * a, sl: entry + slM * a };
+}
+
+function shortExitFromRet(entry, ret) {
+  if (_C && _C.shortExitFromRet) return _C.shortExitFromRet(entry, ret);
+  if (!Number.isFinite(entry) || !Number.isFinite(ret)) return null;
+  // short ret ≈ (entry - exit) / entry
+  return entry * (1 - ret);
+}
+
+/** Shared store for createPriceLine + segment series (FableChart clear/add). */
+function _tradeStore() {
+  return { priceLines, levelSeries: tradeLevelSeries };
+}
+function _syncTradeStore(store) {
+  priceLines = store.priceLines || [];
+  tradeLevelSeries = store.levelSeries || [];
+}
+
 /**
- * Draw entry / TP / SL / exit from an explicit trade record (forward log etc.).
- * Does not require the trade to be in backtest markers.
+ * Draw entry / TP / SL / exit — Claude short-chart style (via FableChart).
+ * tip-replay mainline is SHORT: TP below entry (green), SL above (red),
+ * blue arrowDown + "入场 … 空" at entry.
  * @param {object} ov
  */
 function paintTradeOverlay(ov) {
@@ -2298,18 +2568,22 @@ function paintTradeOverlay(ov) {
   if (!Number.isFinite(entry) || entry <= 0) return false;
 
   const tf = sigState.tfMin || 15;
-  const atr = Number(ov.atr_pct);
-  // Forward mainline is TP5/SL2; fall back to chart barrier if missing
+  const atrPct = Number(ov.atr_pct);
+  const atrAbs = Number(ov.atr);
   const tpM = Number(ov.tp_mult ?? barrier.tp ?? 5);
   const slM = Number(ov.sl_mult ?? barrier.sl ?? 2);
-  const atrOk = Number.isFinite(atr) && atr > 0;
-  const tpPx = atrOk ? entry * (1 + tpM * atr) : null;
-  const slPx = atrOk ? entry * (1 - slM * atr) : null;
+  const side = ov.side || "short";
+  const { tp: tpPx, sl: slPx } = shortBarrierPrices(entry, atrAbs, atrPct, tpM, slM, ov);
+  const atrDisp = Number.isFinite(atrPct) && atrPct > 0
+    ? atrPct
+    : (Number.isFinite(atrAbs) && atrAbs > 0 && entry > 0 ? atrAbs / entry : null);
 
-  let t0 = parseTimeToUnix(ov.entry_time) || parseTimeToUnix(ov.signal_time) || sigLastFocusEntry;
+  let tSig = parseTimeToUnix(ov.signal_time) || parseTimeToUnix(ov.time);
+  let t0 = parseTimeToUnix(ov.entry_time) || tSig || sigLastFocusEntry;
   let t1 = parseTimeToUnix(ov.exit_time);
   const openPos = !t1 || ov.status === "open" || (!ov.outcome && ov.status !== "closed");
   if (!t1 && currentTimes.length) t1 = currentTimes[currentTimes.length - 1];
+  if (tSig != null) tSig = snapTimeToTf(tSig, tf);
   if (t0 != null) t0 = snapTimeToTf(t0, tf);
   if (t1 != null) t1 = snapTimeToTf(t1, tf);
   if (t0 == null) return false;
@@ -2318,67 +2592,64 @@ function paintTradeOverlay(ov) {
   const ret = ov.realized_ret != null ? Number(ov.realized_ret)
     : (ov.net_ret != null ? Number(ov.net_ret)
       : (ov.ret != null ? Number(ov.ret) : null));
-  const exitPrice = Number.isFinite(ret) ? entry * (1 + ret)
-    : (openPos ? null : entry);
+  const exitPrice = ov.exit_price != null && Number.isFinite(Number(ov.exit_price))
+    ? Number(ov.exit_price)
+    : (Number.isFinite(ret) ? shortExitFromRet(entry, ret) : null);
   const outcome = ov.outcome || (openPos ? "" : "");
-  const outcomeColor = OUTCOME_COLOR[outcome] || (openPos ? "#2962ff" : "#9aa0a8");
 
-  _clearTradeLevels();
-  klineChart.priceScale("right").applyOptions({ autoScale: true });
-
-  // One narrative: short axis tags only (details go to focus card / symbol-info)
-  if (tpPx != null) _addTradeLevel(tpPx, "#059669", "TP", t0, t1, 2);
-  if (slPx != null) _addTradeLevel(slPx, "#d97706", "SL", t0, t1, 2);
-  _addTradeLevel(entry, "#2563eb", "入", t0, t1, 0);
-  if (exitPrice != null && !openPos) {
-    _addTradeLevel(exitPrice, outcomeColor, "出", t0, t1, 0);
-  }
-
-  // path entry → exit (or last bar for open)
+  const store = _tradeStore();
   const pathEnd = openPos
     ? (currentTimes.length ? candlesCloseAt(t1) ?? entry : entry)
     : (exitPrice ?? entry);
-  pathSeries.applyOptions({
-    color: outcomeColor,
-    lineWidth: 2,
-  });
-  pathSeries.setData([
-    { time: t0, value: entry },
-    { time: t1, value: pathEnd },
-  ]);
 
-  // Markers: entry/exit arrows only — no long Chinese on chart
-  const extra = [
-    {
-      time: t0,
-      position: "belowBar",
-      shape: "arrowUp",
-      color: "#2563eb",
-      text: "",
-      size: 2,
-    },
-  ];
-  if (!openPos && exitPrice != null) {
-    extra.push({
-      time: t1,
-      position: "aboveBar",
-      shape: "arrowDown",
-      color: outcomeColor,
-      text: "",
-      size: 2,
-    });
+  if (_C && _C.paintTradeOverlay) {
+    _C.paintTradeOverlay(
+      { chart: klineChart, series: klineSeries, store, pathSeries },
+      {
+        entry,
+        exit: exitPrice,
+        tp: tpPx,
+        sl: slPx,
+        mark: openPos ? pathEnd : null,
+        tEntry: t0,
+        tExit: t1,
+        tSignal: tSig,
+        side,
+        outcome,
+        ret,
+        openPos,
+        tpMult: tpM,
+        slMult: slM,
+      }
+    );
+    _syncTradeStore(store);
+  } else {
+    // Fallback without chart_theme.js
+    _clearTradeLevels();
+    if (slPx != null) _addTradeLevel(slPx, "#dc2626", `止损 ${slM}xATR`, tSig != null ? tSig : t0, t1, 2);
+    _addTradeLevel(entry, "#2563eb", "入场", t0, t1, 0);
+    if (tpPx != null) _addTradeLevel(tpPx, "#059669", `止盈 ${tpM}xATR`, tSig != null ? tSig : t0, t1, 2);
+    try {
+      klineSeries.setMarkers([{
+        time: t0, position: "aboveBar", shape: "arrowDown", color: "#2563eb",
+        text: `入场 ${fmtPx(entry)} 空`, size: 2,
+      }]);
+    } catch (_) { /* ignore */ }
   }
-  try {
-    klineSeries.setMarkers(extra);
-  } catch (_) { /* ignore */ }
 
-  let i0 = currentTimes.findIndex((t) => t >= t0);
-  let i1 = currentTimes.findIndex((t) => t >= t1);
-  if (i0 < 0) i0 = currentTimes.length - 1;
-  if (i1 < 0) i1 = currentTimes.length - 1;
-  const pad = Math.max(32, Math.floor((i1 - i0) * 1.2) || 32);
-  lastFocusRange = { from: Math.max(0, i0 - pad), to: i1 + pad };
-  setTimeout(() => klineChart.timeScale().setVisibleLogicalRange(lastFocusRange), 60);
+  const z = _C && _C.zoomAround
+    ? _C.zoomAround(klineChart, currentTimes, tSig != null ? tSig : t0, t1, Math.max(40, 40))
+    : null;
+  if (z) lastFocusRange = z;
+  else {
+    let i0 = currentTimes.findIndex((t) => t >= (tSig != null ? tSig : t0));
+    let i1 = currentTimes.findIndex((t) => t >= t1);
+    if (i0 < 0) i0 = currentTimes.length - 1;
+    if (i1 < 0) i1 = currentTimes.length - 1;
+    const pad = Math.max(40, Math.floor((i1 - i0) * 1.4) || 40);
+    lastFocusRange = { from: Math.max(0, i0 - pad), to: i1 + pad };
+    setTimeout(() => klineChart.timeScale().setVisibleLogicalRange(lastFocusRange), 60);
+  }
 
   const retPctStr = Number.isFinite(ret) ? `${ret >= 0 ? "+" : ""}${(100 * ret).toFixed(2)}%` : "—";
   const info = $("#symbol-info");
@@ -2387,16 +2658,20 @@ function paintTradeOverlay(ov) {
       openPos ? "持仓中" : "已平",
       outcome ? (OUTCOME_CN[outcome] || outcome) : null,
       Number.isFinite(ret) ? retPctStr : null,
+      "做空 tip-replay",
     ].filter(Boolean).join(" · ");
   }
   setTradeFocusCard(`
-    <div class="tf-row"><span>来源</span><b>${escapeHtml(openPos ? "前向持仓" : "前向成交")}</b></div>
-    <div class="tf-row"><span>入场</span><b>${fmtPx(entry)}</b></div>
-    ${atrOk ? `<div class="tf-row"><span>ATR</span><b>${(100 * atr).toFixed(3)}%</b></div>` : ""}
-    ${tpPx != null ? `<div class="tf-row"><span>TP / SL</span><b>${fmtPx(tpPx)} / ${fmtPx(slPx)}</b></div>` : ""}
     <div class="tf-row"><span>结果</span><b class="${cls(ret)}">${escapeHtml(OUTCOME_CN[outcome] || (openPos ? "持有" : "—"))} ${retPctStr}</b></div>
+    <div class="tf-row"><span>方向</span><b>做空 · TP${tpM}/SL${slM}</b></div>
+    <div class="tf-row"><span>入场</span><b>${fmtPx(entry)}</b></div>
+    <div class="tf-row"><span>出场</span><b>${exitPrice != null ? fmtPx(exitPrice) : "—"}</b></div>
+    <div class="tf-row"><span>止盈 / 止损</span><b>${tpPx != null ? fmtPx(tpPx) : "—"} / ${slPx != null ? fmtPx(slPx) : "—"}</b></div>
+    ${atrDisp != null ? `<div class="tf-row"><span>ATR%</span><b>${(100 * atrDisp).toFixed(3)}%</b></div>` : ""}
+    <div class="tf-row"><span>来源</span><b>${escapeHtml(openPos ? "前向持仓" : "tip-replay")}</b></div>
     <div class="tf-row"><span>时间</span><b class="mono">${escapeHtml(fmtBjTime(ov.entry_time || ov.signal_time))}</b></div>
   `);
+  window.__lastTradeOverlay = ov;
   return true;
 }
 
@@ -2476,10 +2751,12 @@ function ensureKlineChart() {
     topColor: "rgba(37,99,235,0.10)", bottomColor: "rgba(37,99,235,0.10)",
   });
   klineChart.priceScale("band").applyOptions({ visible: false, scaleMargins: { top: 0, bottom: 0 } });
-  klineSeries = klineChart.addCandlestickSeries({
-    upColor: "#059669", downColor: "#dc2626", borderVisible: false,
-    wickUpColor: "#059669", wickDownColor: "#dc2626",
-  });
+  klineSeries = klineChart.addCandlestickSeries(
+    (_C && _C.candlestickOptions()) || {
+      upColor: "#059669", downColor: "#dc2626", borderVisible: false,
+      wickUpColor: "#059669", wickDownColor: "#dc2626",
+    }
+  );
   volumeSeries = klineChart.addHistogramSeries({
     priceScaleId: "vol", priceFormat: { type: "volume" },
     priceLineVisible: false, lastValueVisible: false,
@@ -2489,7 +2766,7 @@ function ensureKlineChart() {
   klineChart.priceScale("right").applyOptions({ scaleMargins: { top: 0.08, bottom: 0.22 } });
   // entry->exit path segment of the focused trade
   pathSeries = klineChart.addLineSeries({
-    lineWidth: 2, priceLineVisible: false, lastValueVisible: false,
+    lineWidth: 1, lineStyle: 2, priceLineVisible: false, lastValueVisible: false,
     crosshairMarkerVisible: false, autoscaleInfoProvider: () => null,
   });
   wireOhlcLegend(klineChart, klineSeries, $("#kline-ohlc"), {
@@ -2516,35 +2793,39 @@ function applySignalChartData(d, focusEntry = null) {
 
   currentTimes = candles.map((c) => c.time);
   klineSeries.setData(candles);
-  volumeSeries.setData(candles.map((c) => ({
-    time: c.time,
-    value: c.volume,
-    color: c.close >= c.open ? "rgba(5,150,105,0.40)" : "rgba(220,38,38,0.35)",
-  })));
+  volumeSeries.setData(candles.map((c) =>
+    (_C && _C.volPoint(c)) || {
+      time: c.time,
+      value: c.volume,
+      color: c.close >= c.open ? "rgba(5,150,105,0.40)" : "rgba(220,38,38,0.35)",
+    }
+  ));
 
-  // MAs: default EMA only; mode off|ema|sma|all
+  // MAs: default EMA only; mode off|ema|sma|all — TG/YOLO palette via CHART_MA_STYLE
   const maMode = sigState.maMode || "ema";
   const maDefs = [];
   if (maMode === "sma" || maMode === "all") {
     maDefs.push(
-      { key: "sma20", span: 20, color: "rgba(59,130,246,0.90)", w: 1 },
-      { key: "sma60", span: 60, color: "rgba(59,130,246,0.65)", w: 1 },
-      { key: "sma120", span: 120, color: "rgba(59,130,246,0.40)", w: 1 },
+      { key: "sma20", span: 20 },
+      { key: "sma60", span: 60 },
+      { key: "sma120", span: 120 },
     );
   }
   if (maMode === "ema" || maMode === "all") {
     maDefs.push(
-      { key: "ema20", span: 20, color: "rgba(249,115,22,0.95)", w: 2 },
-      { key: "ema60", span: 60, color: "rgba(249,115,22,0.70)", w: 1 },
-      { key: "ema120", span: 120, color: "rgba(249,115,22,0.45)", w: 1 },
+      { key: "ema20", span: 20 },
+      { key: "ema60", span: 60 },
+      { key: "ema120", span: 120 },
     );
   }
   for (const m of maDefs) {
     const pts = m.key.startsWith("ema") ? emaSeriesFrom(candles, m.span) : smaSeries(candles, m.span);
     if (!pts.length) continue;
+    const st = CHART_MA_STYLE[m.key] || { color: "#666", lineWidth: 1, lineStyle: 0 };
     const s = klineChart.addLineSeries({
-      color: m.color,
-      lineWidth: m.w,
+      color: st.color,
+      lineWidth: st.lineWidth,
+      lineStyle: st.lineStyle || 0,
       priceLineVisible: false,
       lastValueVisible: false,
       crosshairMarkerVisible: false,
@@ -2554,38 +2835,28 @@ function applySignalChartData(d, focusEntry = null) {
   }
 
   currentMarkers = d.markers || [];
-  // Overview markers: traded = small arrows, no % text (focus paints details)
-  const markerList = [];
-  for (const m of currentMarkers) {
-    if (!m.eligible && !m.traded) continue;
-    const t = snapTimeToTf(m.time, tf);
-    markerList.push({
-      time: t,
-      position: "belowBar",
-      shape: m.traded ? "arrowUp" : "circle",
-      color: m.traded ? (OUTCOME_COLOR[m.outcome] || "#64748b") : "rgba(100,116,139,0.55)",
-      text: "",
-      size: m.traded ? 1 : 0,
-    });
-    if (m.traded && m.exit_time) {
-      markerList.push({
-        time: snapTimeToTf(m.exit_time, tf),
-        position: "aboveBar",
-        shape: "square",
-        color: OUTCOME_COLOR[m.outcome] || "#64748b",
-        size: 0,
-      });
-    }
-  }
-  // de-dupe same time markers (aggregation can collide)
-  const seen = new Set();
-  const deduped = [];
-  for (const mk of markerList.sort((a, b) => a.time - b.time || (a.position === "belowBar" ? -1 : 1))) {
-    const k = `${mk.time}|${mk.position}|${mk.shape}`;
-    if (seen.has(k)) continue;
-    seen.add(k);
-    deduped.push(mk);
-  }
+  // Overview: shared short markers (blue ↓)
+  const deduped = (_C && _C.overviewTradeMarkers)
+    ? _C.overviewTradeMarkers(currentMarkers, {
+      side: d.side || "short",
+      snapTime: (t) => snapTimeToTf(t, tf),
+    })
+    : (() => {
+      const markerList = [];
+      for (const m of currentMarkers) {
+        if (!m.eligible && !m.traded) continue;
+        if (!m.traded) continue;
+        markerList.push({
+          time: snapTimeToTf(m.time, tf),
+          position: "aboveBar",
+          shape: "arrowDown",
+          color: "#2563eb",
+          text: "",
+          size: 1,
+        });
+      }
+      return markerList;
+    })();
   klineSeries.setMarkers(deduped);
 
   // Default zoom: last ~120 bars of current TF (TV-like), unless focusing a trade
@@ -2769,7 +3040,10 @@ async function loadChart(key, focusEntry = null) {
   }
   $("#view-signals").classList.remove("loading");
   if (reqId !== chartReq) return;
-  barrier = { tp: d.tp_mult, sl: d.sl_mult };
+  barrier = {
+    tp: d.tp_mult != null ? Number(d.tp_mult) : 5,
+    sl: d.sl_mult != null ? Number(d.sl_mult) : 2,
+  };
   currentThreshold = d.threshold;
   sigRawPayload = d;
   sigLastFocusEntry = focusEntry;
@@ -2791,47 +3065,34 @@ async function loadChart(key, focusEntry = null) {
     if (!focusEntry) setTradeFocusCard(null);
   }
 
-  const n = d.markers.length, el = d.markers.filter((m) => m.eligible).length,
-    tr = d.markers.filter((m) => m.traded).length;
+  const n = d.markers.length;
+  const tr = d.markers.filter((m) => m.traded).length;
   const tfLabel = sigState.tfMin >= 240 ? "4H" : sigState.tfMin >= 60 ? "1H" : "15m";
+  const srcNote = d.marker_source === "tip_replay" ? "tip-replay" : (d.marker_source || "—");
   if (!$("#symbol-info")?.textContent?.includes("前向")) {
     $("#symbol-info").textContent =
-      `${symbol} · ${tfLabel}：候选 ${n}，合格（≥${d.threshold}）${el}，成交 ${tr}`;
+      `${symbol} · ${tfLabel} · ${srcNote}：成交 ${tr}${n !== tr ? ` / 标记 ${n}` : ""}`;
   }
 
   const traded = d.markers.filter((m) => m.traded).sort((a, b) => b.time - a.time);
-  const missed = d.markers.filter((m) => m.eligible && !m.traded).sort((a, b) => b.time - a.time);
   $("#side-count").textContent = `（${traded.length} 笔）`;
   $("#symbol-trades").innerHTML = "<tbody>" + (traded.length ? traded.map((m) => `
     <tr data-entry-ts="${m.entry_time}">
       <td>${escapeHtml(fmtBjTime(m.time))}</td>
       <td class="outcome-${m.outcome}">${OUTCOME_CN[m.outcome] || m.outcome}</td>
       <td class="num"><span class="${cls(m.ret)}">${fmtPct(m.ret, 1)}</span></td>
-    </tr>`).join("") : `<tr class="no-click"><td colspan="3" class="empty-state">暂无成交</td></tr>`) + "</tbody>";
+    </tr>`).join("") : `<tr class="no-click"><td colspan="3" class="empty-state">本币种无 tip-replay 成交</td></tr>`) + "</tbody>";
   $("#symbol-trades").querySelectorAll("tr[data-entry-ts]").forEach((row) =>
     row.addEventListener("click", () => {
       $("#symbol-trades").querySelectorAll("tr").forEach((x) => x.classList.toggle("focused", x === row));
       focusMarker(Number(row.dataset.entryTs));
     }));
-  $("#missed-count").textContent = `（${missed.length} 条）`;
-  $("#symbol-missed").innerHTML = "<tbody>" + (missed.length ? missed.slice(0, 80).map((m) => `
-    <tr tabindex="0" data-entry-ts="${m.entry_time}">
-      <td>${escapeHtml(fmtBjTime(m.time))}</td>
-      <td class="num">${Number(m.score).toFixed(3)}</td>
-      <td class="num">${m.dense_len}根</td>
-    </tr>`).join("") : `<tr class="no-click"><td colspan="3" class="empty-state">暂无合格未成交</td></tr>`) + "</tbody>";
-  $("#symbol-missed").querySelectorAll("tr[data-entry-ts]").forEach((row, i) => {
-    const marker = missed[i];
-    row.addEventListener("click", () => {
-      $("#symbol-missed").querySelectorAll("tr").forEach((x) => x.classList.toggle("focused", x === row));
-      focusMarker(Number(row.dataset.entryTs));
-    });
-    row.addEventListener("mouseenter", (e) => showSignalTooltip(e, marker));
-    row.addEventListener("mousemove", (e) => positionSignalTooltip(e));
-    row.addEventListener("mouseleave", hideSignalTooltip);
-    row.addEventListener("focus", (e) => showSignalTooltip(e, marker));
-    row.addEventListener("blur", hideSignalTooltip);
-  });
+  // Look-ahead "eligible missed" retired with scored_signals.
+  $("#missed-count").textContent = "";
+  $("#symbol-missed").innerHTML =
+    `<tbody><tr class="no-click"><td colspan="3" class="empty-state">`
+    + `仅 tip-replay 成交标记<br><span class="note">${escapeHtml(d.marker_note || "旧前视候选/合格未成交已下线")}</span>`
+    + `</td></tr></tbody>`;
 
   // default: focus the most recent trade — but not if a forward-log overlay is active
   if (!window.__lastTradeOverlay) {
@@ -2881,56 +3142,53 @@ function hideSignalTooltip() {
 }
 
 function _clearTradeLevels() {
-  priceLines.forEach((l) => {
-    try { klineSeries.removePriceLine(l); } catch (_) { /* ignore */ }
-  });
-  priceLines = [];
-  tradeLevelSeries.forEach((s) => {
-    try { klineChart.removeSeries(s); } catch (_) { /* ignore */ }
-  });
-  tradeLevelSeries = [];
+  const store = _tradeStore();
+  if (_C && _C.clearTradeLevels) {
+    _C.clearTradeLevels(store, klineSeries, klineChart);
+    _syncTradeStore(store);
+  } else {
+    priceLines.forEach((l) => {
+      try { klineSeries.removePriceLine(l); } catch (_) { /* ignore */ }
+    });
+    priceLines = [];
+    tradeLevelSeries.forEach((s) => {
+      try { klineChart.removeSeries(s); } catch (_) { /* ignore */ }
+    });
+    tradeLevelSeries = [];
+  }
   if (pathSeries) pathSeries.setData([]);
 }
 
 function _addTradeLevel(price, color, title, t0, t1, lineStyle = 0) {
+  const store = _tradeStore();
+  if (_C && _C.addTradeLevel) {
+    _C.addTradeLevel(store, klineSeries, klineChart, price, color, title, t0, t1, lineStyle);
+    _syncTradeStore(store);
+    return;
+  }
   if (price == null || !Number.isFinite(Number(price))) return;
   const p = Number(price);
-  // Short axis tag only (price is on the scale); avoid "止盈 +4.74% 0.086…" walls
-  const axisTitle = title || "";
   priceLines.push(klineSeries.createPriceLine({
-    price: p,
-    color,
-    lineWidth: 1,
-    lineStyle,
-    axisLabelVisible: true,
-    title: axisTitle,
+    price: p, color, lineWidth: 1, lineStyle,
+    axisLabelVisible: true, title: title || "",
   }));
-  // Segment only spans the trade window (not full chart width feel)
   if (t0 != null && t1 != null && t1 >= t0 && klineChart) {
     const seg = klineChart.addLineSeries({
-      color,
-      lineWidth: 2,
-      lineStyle,
-      priceLineVisible: false,
-      lastValueVisible: false,
-      crosshairMarkerVisible: false,
-      autoscaleInfoProvider: () => null,
+      color, lineWidth: lineStyle === 0 ? 2 : 1, lineStyle,
+      priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
     });
-    seg.setData([
-      { time: t0, value: p },
-      { time: t1, value: p },
-    ]);
+    seg.setData([{ time: t0, value: p }, { time: t1, value: p }]);
     tradeLevelSeries.push(seg);
   }
 }
 
 function focusMarker(entryTs) {
   const ts = Number(entryTs);
+  sigLastFocusEntry = ts;
   const m = currentMarkers.find((x) => Number(x.entry_time) === ts || Number(x.time) === ts);
   if (!m) {
     // Forward/open rows may not be in backtest marker list — still zoom to time
     if (Number.isFinite(ts) && currentTimes.length && klineChart) {
-      sigLastFocusEntry = ts;
       let i0 = currentTimes.findIndex((t) => t >= ts);
       if (i0 < 0) i0 = currentTimes.length - 1;
       lastFocusRange = { from: i0 - 80, to: i0 + 80 };
@@ -2938,104 +3196,33 @@ function focusMarker(entryTs) {
     }
     return;
   }
-  sigLastFocusEntry = ts;
-  window.__lastTradeOverlay = null;
-  _clearTradeLevels();
-  klineChart.priceScale("right").applyOptions({ autoScale: true });
-  const tf = sigState.tfMin || 15;
-  const entry = m.entry_price;
-  const exitPrice = entry * (1 + m.ret);
-  const outcomeColor = OUTCOME_COLOR[m.outcome] || "#9aa0a8";
-  const tpPx = entry * (1 + barrier.tp * m.atr_pct);
-  const slPx = entry * (1 - barrier.sl * m.atr_pct);
-  const t0 = snapTimeToTf(m.entry_time || m.time, tf);
-  const t1 = snapTimeToTf(m.exit_time || m.time, tf);
-  const retPct = (100 * m.ret).toFixed(2);
-  const retSign = m.ret >= 0 ? "+" : "";
-  // Clean levels: short tags only
-  _addTradeLevel(tpPx, "#059669", "TP", t0, t1, 2);
-  _addTradeLevel(slPx, "#d97706", "SL", t0, t1, 2);
-  _addTradeLevel(entry, "#2563eb", "入", t0, t1, 0);
-  _addTradeLevel(exitPrice, outcomeColor, "出", t0, t1, 0);
-  // dense-MA window band
-  const denseStart = snapTimeToTf(m.time - Math.max(m.dense_len, 1) * 900, tf);
-  const denseEnd = snapTimeToTf(m.time, tf);
-  bandSeries.setData([
-    { time: denseStart, value: 1 },
-    { time: denseEnd, value: 1 },
-  ]);
-  pathSeries.applyOptions({ color: outcomeColor, lineWidth: 2 });
-  pathSeries.setData([
-    { time: t0, value: entry },
-    { time: t1, value: exitPrice },
-  ]);
-  // Focus-only markers (others dim / no text clutter)
-  const baseMarkers = [];
-  for (const x of currentMarkers) {
-    if (!x.eligible && !x.traded) continue;
-    const isFocus = Number(x.entry_time) === ts || Number(x.time) === ts;
-    if (!x.traded) {
-      if (!isFocus) continue; // hide non-focus eligible dots when focused
-      continue;
-    }
-    if (!isFocus) {
-      // dim other trades
-      baseMarkers.push({
-        time: snapTimeToTf(x.time, tf),
-        position: "belowBar",
-        shape: "arrowUp",
-        color: "rgba(148,163,184,0.45)",
-        text: "",
-        size: 0,
-      });
-      continue;
-    }
-    baseMarkers.push({
-      time: snapTimeToTf(x.time, tf),
-      position: "belowBar",
-      shape: "arrowUp",
-      color: "#2563eb",
-      text: "",
-      size: 2,
-    });
-    baseMarkers.push({
-      time: snapTimeToTf(x.exit_time, tf),
-      position: "aboveBar",
-      shape: "arrowDown",
-      color: outcomeColor,
-      text: "",
-      size: 2,
-    });
-  }
-  const seen = new Set();
-  const deduped = [];
-  for (const mk of baseMarkers.sort((a, b) => a.time - b.time)) {
-    const k = `${mk.time}|${mk.position}|${mk.shape}`;
-    if (seen.has(k)) continue;
-    seen.add(k);
-    deduped.push(mk);
-  }
-  klineSeries.setMarkers(deduped);
-  let i0 = currentTimes.findIndex((t) => t >= t0);
-  let i1 = currentTimes.findIndex((t) => t >= t1);
-  if (i0 < 0) i0 = currentTimes.length - 1;
-  if (i1 < 0) i1 = currentTimes.length - 1;
-  const pad = Math.max(24, Math.floor((i1 - i0) * 0.8) || 24);
-  lastFocusRange = { from: i0 - pad, to: i1 + pad };
-  setTimeout(() => klineChart.timeScale().setVisibleLogicalRange(lastFocusRange), 60);
-
-  setTradeFocusCard(`
-    <div class="tf-row"><span>结果</span><b class="${cls(m.ret)}">${escapeHtml(OUTCOME_CN[m.outcome] || m.outcome || "—")} ${retSign}${retPct}%</b></div>
-    <div class="tf-row"><span>入场</span><b>${fmtPx(entry)}</b></div>
-    <div class="tf-row"><span>出场</span><b>${fmtPx(exitPrice)}</b></div>
-    <div class="tf-row"><span>TP / SL</span><b>${fmtPx(tpPx)} / ${fmtPx(slPx)}</b></div>
-    <div class="tf-row"><span>分数</span><b>${m.score != null ? Number(m.score).toFixed(4) : "—"}</b></div>
-    <div class="tf-row"><span>密集</span><b>${m.dense_len != null ? m.dense_len + " 根" : "—"}</b></div>
-    <div class="tf-row"><span>时间</span><b class="mono">${escapeHtml(fmtBjTime(m.time))}</b></div>
-  `);
-  const info = $("#symbol-info");
-  if (info) {
-    info.textContent = `${OUTCOME_CN[m.outcome] || ""} ${retSign}${retPct}% · 分数 ${m.score != null ? Number(m.score).toFixed(3) : "—"}`;
+  // Single path: Claude short overlay (no second card rewrite / no long-geometry leftover)
+  const ov = {
+    entry_price: m.entry_price,
+    exit_price: m.exit_price,
+    atr: m.atr,
+    atr_pct: m.atr_pct,
+    tp_price: m.tp_price,
+    sl_price: m.sl_price,
+    tp_mult: m.tp_mult ?? barrier.tp ?? 5,
+    sl_mult: m.sl_mult ?? barrier.sl ?? 2,
+    signal_time: m.time,
+    entry_time: m.entry_time || m.time,
+    exit_time: m.exit_time,
+    outcome: m.outcome,
+    ret: m.ret,
+    realized_ret: m.ret,
+    status: "closed",
+    side: m.side || "short",
+  };
+  const painted = paintTradeOverlay(ov);
+  if (!painted) {
+    const tf = sigState.tfMin || 15;
+    const t0 = snapTimeToTf(m.entry_time || m.time, tf);
+    let i0 = currentTimes.findIndex((t) => t >= t0);
+    if (i0 < 0) i0 = currentTimes.length - 1;
+    lastFocusRange = { from: i0 - 80, to: i0 + 80 };
+    setTimeout(() => klineChart.timeScale().setVisibleLogicalRange(lastFocusRange), 60);
   }
 }
 
