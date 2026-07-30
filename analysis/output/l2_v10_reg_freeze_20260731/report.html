@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L2 v10 回归冻结 · 回测分析报告</title>
+<style>
+  :root {
+    --bg: #f4f7f5;
+    --card: #ffffff;
+    --text: #152019;
+    --muted: #6a756d;
+    --border: rgba(47, 158, 89, 0.16);
+    --accent: #278f50;
+    --accent-soft: rgba(47, 158, 89, 0.08);
+    --warn: #a76f18;
+    --warn-bg: #fff8eb;
+    --neg: #c23b3b;
+    --pos: #1f8a4c;
+    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font: 15px/1.55 system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(900px 360px at 8% -10%, rgba(47, 158, 89, 0.12), transparent 55%),
+      radial-gradient(700px 280px at 100% 0%, rgba(47, 158, 89, 0.06), transparent 50%),
+      var(--bg);
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 28px 18px 64px; }
+  .eyebrow {
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  h1 { font-size: 1.65rem; letter-spacing: -0.03em; margin: 0 0 8px; font-weight: 650; }
+  .lede { color: var(--muted); margin: 0 0 18px; max-width: 70ch; }
+  .banner {
+    border: 1px solid rgba(167, 111, 24, 0.28);
+    background: var(--warn-bg);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin: 0 0 20px;
+    color: #6b4e12;
+    font-size: 13.5px;
+  }
+  .banner strong { color: #8a5a10; }
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin: 0 0 22px;
+  }
+  .tile {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 14px;
+    box-shadow: 0 8px 24px rgba(35, 72, 45, 0.05);
+  }
+  .tile span { display: block; color: var(--muted); font-size: 11px; letter-spacing: 0.04em; }
+  .tile b {
+    display: block;
+    margin-top: 4px;
+    font-family: var(--mono);
+    font-size: 1.05rem;
+    font-weight: 600;
+    word-break: break-word;
+  }
+  .tile b.pos { color: var(--pos); }
+  .tile b.neg { color: var(--neg); }
+  .tile b.warn { color: var(--warn); }
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 16px 18px 18px;
+    margin: 0 0 16px;
+    box-shadow: 0 10px 28px rgba(35, 72, 45, 0.045);
+  }
+  .panel h2 {
+    margin: 0 0 10px;
+    font-size: 1rem;
+    font-weight: 650;
+  }
+  .panel h2 .unit {
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 12px;
+    margin-left: 6px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th, td {
+    border-bottom: 1px solid #eef2ef;
+    padding: 8px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: #f7faf8;
+  }
+  .num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); font-size: 12.5px; }
+  .mono { font-family: var(--mono); font-size: 12px; }
+  .pos { color: var(--pos); }
+  .neg { color: var(--neg); }
+  .muted { color: var(--muted); }
+  ul { margin: 6px 0 0 1.1rem; padding: 0; }
+  li { margin: 4px 0; }
+  code, .path {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--accent-soft);
+    color: #1d5c35;
+    padding: 1px 6px;
+    border-radius: 6px;
+  }
+  pre {
+    margin: 0;
+    padding: 12px 14px;
+    overflow: auto;
+    background: #0f1612;
+    color: #d7ebe0;
+    border-radius: 12px;
+    font: 12px/1.5 var(--mono);
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 760px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    h1 { font-size: 1.35rem; }
+  }
+  .foot {
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+  a { color: var(--accent); }
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--accent);
+    background: var(--accent-soft);
+    margin-right: 4px;
+  }
+  .tag.warn { color: var(--warn); border-color: rgba(167,111,24,.3); background: #fff8eb; }
+  .tag.neg { color: var(--neg); border-color: rgba(194,59,59,.25); background: #fff1f1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">FABLE · JUDGMENT FREEZE REPORT</div>
+  <h1>L2 v10 池回归冻结 · 回测分析</h1>
+  <p class="lede">
+    Owner 2026-07-31 切主线：L1 = <code>owner_short_star_v10</code>，L2 = v10 候选池 LightGBM 回归。
+    本页是冻结交付的回测/稳健性报告（pre-holdout）。
+  </p>
+
+  <div class="banner">
+    <strong>诚实声明：</strong>
+    5 折 walkforward <strong>并非全为正</strong>；
+    <code>best_iteration=1</code>（早停异常风险）；
+    阀 thr≈−0.00044，val <strong>过门率 ~91%</strong>（门几乎失效，请看 top-decile 而非「过 thr」）。
+    未读 holdout。看板 tip-replay（PF 0.784）是 <strong>v16 检测权重</strong> 的旧 holdout 跑批，不是本冻结的 L1+L2 组合。
+  </div>
+
+  <div class="tiles">
+    <div class="tile"><span>ACTIVE 模型</span><b>v10_reg_20260731</b></div>
+    <div class="tile"><span>目标列</span><b>net_barrier_taker</b></div>
+    <div class="tile"><span>阀 thr (q90)</span><b class="warn">−0.00044</b></div>
+    <div class="tile"><span>val 顶 10% 净 maker</span><b class="pos">+16.0 bp</b></div>
+    <div class="tile"><span>val 过 thr 净 maker</span><b class="neg">−17.6 bp</b></div>
+    <div class="tile"><span>walkforward 全正</span><b class="neg">否</b></div>
+    <div class="tile"><span>holdout</span><b>未消耗</b></div>
+    <div class="tile"><span>PREV 回滚</span><b>v11_reg_20260718</b></div>
+  </div>
+
+  <div class="panel">
+    <h2>架构对齐 <span class="unit">当前主线</span></h2>
+    <table>
+      <thead><tr><th>层</th><th>版本</th><th>状态</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>L1 检测</strong></td>
+          <td class="mono">owner_short_star_v10</td>
+          <td><span class="tag warn">临时</span></td>
+          <td class="muted">owner_best → v10 软链；非 tip-smoke 金标</td>
+        </tr>
+        <tr>
+          <td><strong>L2 判断</strong></td>
+          <td class="mono">frozen_tp5_sl2_swap_yolo_v10_reg_20260731</td>
+          <td><span class="tag">ACTIVE</span></td>
+          <td class="muted">回归 · 池 judgment_yolo_swap_v10</td>
+        </tr>
+        <tr>
+          <td><strong>L2 回滚</strong></td>
+          <td class="mono">frozen_…_v11_reg_20260718</td>
+          <td><span class="tag">PREV</span></td>
+          <td class="muted">ACTIVE_PREV / SHADOW_V11_REG</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>数据 <span class="unit">pre-holdout only</span></h2>
+    <div class="tiles" style="margin:0">
+      <div class="tile"><span>源池</span><b>judgment_v10_wide.csv</b></div>
+      <div class="tile"><span>冻结表</span><b>judgment_yolo_swap_v10.csv</b></div>
+      <div class="tile"><span>样本数</span><b>18,379</b></div>
+      <div class="tile"><span>时间 UTC</span><b>2026-02-01 → 05-03</b></div>
+      <div class="tile"><span>train / val</span><b>14,656 / 3,676</b></div>
+      <div class="tile"><span>池均值（源）</span><b class="neg">−6.4 bp</b></div>
+    </div>
+    <p class="muted" style="margin:12px 0 0;font-size:13px">
+      映射：<code>realized_ret = net_barrier_taker</code>，<code>label = label_barrier</code>。
+      全部行 &lt; holdout 起点 2026-05-04。
+    </p>
+  </div>
+
+  <div class="panel">
+    <h2>单切 train / val <span class="unit">冻结模型打分</span></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>切分</th>
+          <th class="num">n</th>
+          <th class="num">Spearman</th>
+          <th class="num">池均值 bp</th>
+          <th class="num">顶10% 毛 bp</th>
+          <th class="num">顶10% 净 maker bp</th>
+          <th class="num">顶胜率</th>
+          <th class="num">过 thr %</th>
+          <th class="num">过 thr 净 maker bp</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>train</td>
+          <td class="num">14656</td>
+          <td class="num">0.228</td>
+          <td class="num neg">−4.5</td>
+          <td class="num pos">+103.9</td>
+          <td class="num pos">+97.9</td>
+          <td class="num">46.4%</td>
+          <td class="num">88.5%</td>
+          <td class="num">+0.1</td>
+        </tr>
+        <tr>
+          <td><strong>val</strong></td>
+          <td class="num"><strong>3676</strong></td>
+          <td class="num"><strong>0.047</strong></td>
+          <td class="num neg"><strong>−12.9</strong></td>
+          <td class="num pos"><strong>+22.0</strong></td>
+          <td class="num pos"><strong>+16.0</strong></td>
+          <td class="num"><strong>43.9%</strong></td>
+          <td class="num warn"><strong>91.2%</strong></td>
+          <td class="num neg"><strong>−17.6</strong></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="muted" style="margin:10px 0 0;font-size:13px">
+      成本报告：maker 往返 0.06%、taker 0.10% 从 realized 再扣一层展示；
+      训练目标本身已是 wide 池的 net_barrier_taker。
+      <strong>有用信号在 top-decile，不在「score≥q90」。</strong>
+    </p>
+  </div>
+
+  <div class="panel">
+    <h2>五折 walkforward <span class="unit">expanding · purge · 无 holdout</span></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>折</th>
+          <th>val 起点</th>
+          <th class="num">n_val</th>
+          <th class="num">Spearman</th>
+          <th class="num">顶10% 净 maker</th>
+          <th class="num">胜率</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>2026-03-06</td><td class="num">2206</td><td class="num neg">−0.018</td><td class="num neg">−74.4 bp</td><td class="num">26.4%</td></tr>
+        <tr><td>2</td><td>2026-03-18</td><td class="num">2205</td><td class="num pos">+0.095</td><td class="num pos">+39.6 bp</td><td class="num">55.9%</td></tr>
+        <tr><td>3</td><td>2026-03-30</td><td class="num">2206</td><td class="num pos">+0.159</td><td class="num pos">+15.6 bp</td><td class="num">37.7%</td></tr>
+        <tr><td>4</td><td>2026-04-10</td><td class="num">2205</td><td class="num neg">−0.042</td><td class="num pos">+141.3 bp</td><td class="num">51.4%</td></tr>
+        <tr><td>5</td><td>2026-04-22</td><td class="num">2206</td><td class="num">+0.021</td><td class="num neg">−62.7 bp</td><td class="num">48.6%</td></tr>
+      </tbody>
+    </table>
+    <div class="tiles" style="margin-top:12px;margin-bottom:0">
+      <div class="tile"><span>rho_mean</span><b>0.043</b></div>
+      <div class="tile"><span>rho_min</span><b class="neg">−0.042</b></div>
+      <div class="tile"><span>net_min</span><b class="neg">−74.4 bp</b></div>
+      <div class="tile"><span>all folds net+</span><b class="neg">false</b></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <h2>与 v11 ACTIVE 对照</h2>
+      <table>
+        <thead><tr><th>项</th><th>v11 reg</th><th>v10 reg（现）</th></tr></thead>
+        <tbody>
+          <tr><td>池</td><td class="mono">yolo_swap_v11</td><td class="mono">yolo_swap_v10</td></tr>
+          <tr><td>thr q90</td><td class="num">0.0202</td><td class="num warn">−0.00044</td></tr>
+          <tr><td>过门语义</td><td>较稀缺（设计）</td><td class="neg">~90% 极宽</td></tr>
+          <tr><td>本报告 val 顶净</td><td class="muted">未本轮重算</td><td class="pos">+16.0 bp</td></tr>
+          <tr><td>walkforward 全正</td><td class="muted">—</td><td class="neg">否</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h2>看板 tip-replay（另一条线）</h2>
+      <p class="muted" style="margin:0 0 10px;font-size:13px">
+        盘口检测终审，<strong>不是</strong>本 L2 冻结的 holdout 回测。
+      </p>
+      <table>
+        <tbody>
+          <tr><td>入口</td><td><a href="http://127.0.0.1:8642/#backtest">#backtest</a></td></tr>
+          <tr><td>权重（历史跑批）</td><td class="mono">owner_v16_tipuni_cold.pt</td></tr>
+          <tr><td>窗</td><td class="mono">2026-05-04 → 07-16</td></tr>
+          <tr><td>笔数</td><td class="num">1206</td></tr>
+          <tr><td>PF</td><td class="num neg">0.784</td></tr>
+          <tr><td>每笔净</td><td class="num neg">−0.234%</td></tr>
+          <tr><td>胜率</td><td class="num">29.4%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>复现命令</h2>
+<pre>PYTHONPATH=. python3 scripts/build_judgment_yolo_swap_v10.py
+PYTHONPATH=. python3 scripts/freeze_model.py --yolo-v10-pool --write-active --date 20260731
+
+# 回滚 L2 → v11
+echo 'models/frozen_tp5_sl2_swap_yolo_v11_reg_20260718.txt' > models/ACTIVE</pre>
+  </div>
+
+  <div class="panel">
+    <h2>风险与下一步</h2>
+    <ul>
+      <li><strong>walkforward 不全为正</strong> → 不能声称稳定 alpha 已过门。</li>
+      <li><strong>best_iteration=1</strong> → 过拟合 / 早停异常风险；train 顶档夸张。</li>
+      <li><strong>q90 门过宽</strong> → 与 v11「稀缺阀门」语义不一致；生产若要稀缺需另定分位（owner 批）。</li>
+      <li>tip-replay 仍是 v16 权重旧跑批；用现 L1+L2 重跑 holdout 需 owner 明确批准。</li>
+    </ul>
+    <p class="muted" style="margin:10px 0 0;font-size:13px">
+      选项：A 接受做纸面/探针 · B 单变量改门（q95/top10%）· C 重训再 freeze · D 回滚 v11 · E tip-replay 重跑（耗 holdout）
+    </p>
+  </div>
+
+  <div class="panel">
+    <h2>相关文档</h2>
+    <ul>
+      <li>Markdown 同内容：<code>analysis/p_l2_v10_reg_freeze_20260731.md</code></li>
+      <li>元数据：<code>models/frozen_tp5_sl2_swap_yolo_v10_reg_20260731.json</code></li>
+      <li>v10 池研究：<code>analysis/p_judgment_topdecile_profile_v10.md</code> 等</li>
+      <li>当晚对账：<code>analysis/evening_checklist_20260730.md</code></li>
+    </ul>
+  </div>
+
+  <p class="foot">
+    生成：2026-07-31 · fable-trading · 只读分析页 · 不写 forward_log · 不下单 · 不 promote 检测金标<br>
+    打开方式：浏览器打开本文件，或
+    <code>open analysis/output/l2_v10_reg_freeze_20260731/report.html</code>
+  </p>
+</div>
+</body>
+</html>
