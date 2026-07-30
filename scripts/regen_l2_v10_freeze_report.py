@@ -285,11 +285,14 @@ holdout 留置集未读。看板 tip-replay PF（盈亏比）0.784 是 v16 旧 h
 all_folds_net_positive 五折顶档都盈利=<strong class="neg">{wf.get('all_folds_net_positive')} 否</strong></p>
 </div>
 <div class="panel"><h2>死命令 dead one-liner</h2>
-<pre># 仅重出 HTML+图（不重训）
+<pre># 仅重出 HTML+指标图（不重渲 200 交易图）
 cd /Users/zhangzc/fable-trading && PYTHONPATH=. python3 scripts/regen_l2_v10_freeze_report.py && open analysis/output/l2_v10_reg_freeze_20260731/report.html
 
-# 全链路：建表 + 冻结写 ACTIVE + 报告
-cd /Users/zhangzc/fable-trading && PYTHONPATH=. python3 scripts/build_judgment_yolo_swap_v10.py && PYTHONPATH=. python3 scripts/freeze_model.py --yolo-v10-pool --write-active --date 20260731 && PYTHONPATH=. python3 scripts/regen_l2_v10_freeze_report.py && open analysis/output/l2_v10_reg_freeze_20260731/report.html
+# 重渲 200 张交易样图 + 报告
+cd /Users/zhangzc/fable-trading && PYTHONPATH=. python3 scripts/build_l2_v10_freeze_sample_gallery.py && PYTHONPATH=. python3 scripts/regen_l2_v10_freeze_report.py && open analysis/output/l2_v10_reg_freeze_20260731/report.html
+
+# 全链路：建表 + 冻结写 ACTIVE + 200 样图 + 报告
+cd /Users/zhangzc/fable-trading && PYTHONPATH=. python3 scripts/build_judgment_yolo_swap_v10.py && PYTHONPATH=. python3 scripts/freeze_model.py --yolo-v10-pool --write-active --date 20260731 && PYTHONPATH=. python3 scripts/build_l2_v10_freeze_sample_gallery.py && PYTHONPATH=. python3 scripts/regen_l2_v10_freeze_report.py && open analysis/output/l2_v10_reg_freeze_20260731/report.html
 
 # 回滚 L2 → v11
 echo 'models/frozen_tp5_sl2_swap_yolo_v11_reg_20260718.txt' > models/ACTIVE</pre>
@@ -304,6 +307,63 @@ echo 'models/frozen_tp5_sl2_swap_yolo_v11_reg_20260718.txt' > models/ACTIVE</pre
 <p class="foot">生成自 scripts/regen_l2_v10_freeze_report.py · 路径 analysis/output/l2_v10_reg_freeze_20260731/report.html</p>
 </div></body></html>
 """
+    # Inject trade-sample gallery if samples_manifest.json exists (from
+    # scripts/build_l2_v10_freeze_sample_gallery.py).
+    man_path = OUT / "samples_manifest.json"
+    if man_path.is_file():
+        try:
+            man = json.loads(man_path.read_text(encoding="utf-8"))
+            cards = man.get("cards") or []
+            gal_cards = []
+            for c in cards:
+                cls = "pos" if float(c.get("ret_pct") or 0) > 0 else (
+                    "neg" if float(c.get("ret_pct") or 0) < 0 else ""
+                )
+                thr_s = "过 thr ✓" if c.get("passed") else "未过 thr"
+                gal_cards.append(
+                    "<figure class=\"sample-card\">"
+                    f"<img src=\"{c.get('file')}\" alt=\"{c.get('symbol')} {c.get('signal_time')}\" loading=\"lazy\">"
+                    "<figcaption>"
+                    f"<b>#{c.get('i')}</b> <span class=\"mono\">{c.get('symbol')}</span><br>"
+                    f"{str(c.get('signal_time') or '')[:16]} UTC · {c.get('split')}<br>"
+                    f"<span class=\"tag\">{c.get('band')}</span><br>"
+                    f"score 分数 <span class=\"mono\">{c.get('score')}</span> · {thr_s}<br>"
+                    f"realized 实现收益 <span class=\"{cls}\">{float(c.get('ret_pct') or 0):+.2f}%</span>"
+                    f" · label={c.get('label')}"
+                    "</figcaption></figure>"
+                )
+            gallery = (
+                "<div class=\"panel\">"
+                f"<h2>抽样 {len(cards)} 张交易图 sample trade charts "
+                "<span class=\"unit\">因果窗 200 根 · 与训练同渲染</span></h2>"
+                "<p class=\"muted\">抽样：val 上 100 顶十分位 + 50 底十分位 + 50 中间；"
+                "每张 = 信号 bar 及之前 200 根 15m + SMA/EMA 20/60/120。"
+                "图目录 <code>samples/</code> · 清单 <code>samples_manifest.json</code>。"
+                "重生样图："
+                "<code>PYTHONPATH=. python3 scripts/build_l2_v10_freeze_sample_gallery.py</code>"
+                "</p>"
+                f"<div class=\"sample-grid\">{''.join(gal_cards)}</div></div>"
+            )
+            css_extra = (
+                ".sample-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));"
+                "gap:12px;margin-top:12px}"
+                ".sample-card{margin:0;border:1px solid var(--border);border-radius:12px;"
+                "overflow:hidden;background:#fff}"
+                ".sample-card img{width:100%;height:auto;display:block;background:#f8faf9}"
+                ".sample-card figcaption{padding:8px 10px;font-size:12px;line-height:1.45;color:#334}"
+                ".sample-card .tag{display:inline-block;font-size:10px;padding:1px 6px;"
+                "border-radius:999px;background:var(--accent-soft);color:var(--accent);margin:2px 0}"
+            )
+            if "</style>" in html:
+                html = html.replace("</style>", css_extra + "\n</style>", 1)
+            if '<p class="foot">' in html:
+                html = html.replace('<p class="foot">', gallery + "\n<p class=\"foot\">", 1)
+            else:
+                html = html.replace("</div></body>", gallery + "\n</div></body>", 1)
+            print(f"gallery injected n={len(cards)}")
+        except Exception as exc:  # noqa: BLE001
+            print(f"gallery skip: {exc}")
+
     (OUT / "report.html").write_text(html, encoding="utf-8")
     print(f"wrote {OUT / 'report.html'}")
     print(f"train/val n = {tr['n']} / {va['n']}")
