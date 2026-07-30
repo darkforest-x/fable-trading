@@ -35,7 +35,7 @@
 | 13 | 总览小图 **历史前视数据别再显示** | ✅ | 验收净值 +245% 类前视图下线/标注废弃 | `#overview` 无旧 PF6 曲线 |
 | 14 | Grok Build **插件 / 对话历史难翻** | ℹ️ | 说明过 resume/history 能力；非仓内功能 | 产品能力，非 fable 代码 |
 | 15 | **盘口检测 · 历史一年 → HTML 报告** | ✅ | `scripts/probe_history.py` + `/api/probe-history` + 前端入口 | `#probe`「历史检测」；`analysis/output/probe_history/` |
-| 16 | **为什么 WINDOW=200？如何提高检出准确度？** | ℹ️ | 写过因果窗/延迟预算说明；**未改训练窗**（改窗=新实验，需单变量+owner） | 对话结论；铁律 4 |
+| 16 | **为什么 WINDOW=200？如何提高检出准确度？** | ✅ | **2026-07-31 补报告**（当晚只口头、清单标 ℹ️ 无文档 = 缺口） | `analysis/p_window_200_rationale.md` |
 | 17 | **信号图叠层丑且不准，对齐 Claude** | ✅ | 做空：蓝↓ + `入场…空` + 绿止盈下 / 红止损上；后端 short TP/SL | `#signals` 点侧栏成交；硬刷新 |
 | 18 | **前端所有 K 线统一优化** | ✅ | `chart_theme.js`（FableChart）统一 signals / explore / radar | 三页 K 线同色同叠层 |
 | 19 | **`#overview` 写清架构·层·版本 · ClauseOS 好看** | ✅ | 架构板 L1→L2→L3→裁决 + 明细表 + 实时 ACTIVE | `#overview`；`paintArchitecture` |
@@ -144,7 +144,8 @@
    - 打开 `#radar` →「重新扫描」（拉 OKX，1–3 min）  
 
 7. **WINDOW=200 改窗实验**  
-   - 未开；若要做必须单变量 + 报告，且不碰 holdout  
+   - 结论文档：`analysis/p_window_200_rationale.md`（默认保持 200；pad200 已证伪；改窗须 tip-smoke 单变量 + owner 批）  
+   - **未改代码** `WINDOW=200`  
 
 ---
 
@@ -162,6 +163,8 @@ scripts/probe_history.py              # 历史盘口 HTML
 docs/run_v10_paper_live.md            # 纸面操作说明
 analysis/arch_overview_20260730.md    # 架构与研究结论（认知）
 analysis/evening_checklist_20260730.md # 本文
+analysis/p_window_200_rationale.md    # 为何 200 根 K + 如何提准
+analysis/p_l2_v10_reg_freeze_20260731.md / output/l2_v10_reg_freeze_20260731/report.html
 ```
 
 ---
