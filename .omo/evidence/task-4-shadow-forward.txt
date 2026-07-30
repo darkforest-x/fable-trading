@@ -1,0 +1,49 @@
+# Task 4 — Prospective champion-challenger shadow tracking
+Date: 2026-07-10 ~13:23 local
+Branch: codex/grok-2day
+
+## What shipped
+- src/judgment/shadow_registry.py — predeclared books:
+  champion tp5_sl2_long_swap (supported),
+  h1_scaled_25_t3 (supported),
+  h8_30m_h48 (unsupported — no frozen 30m artifact),
+  h10_short_tp5_sl2 (unsupported — no frozen short model).
+  promotes_active always false.
+- src/judgment/shadow_compare.py — compact multi-book comparison (prospective label).
+- scripts/forward_track_shadows.py — run supported books / --compare-only.
+- scripts/daily_digest.py — --dry-run + registry comparison board.
+- tests/test_shadow_forward_registry.py
+
+## Commands
+```
+PYTHONPATH=. python3 -m pytest tests/test_shadow_forward_registry.py tests/test_forward_tracking.py tests/test_h1_scaled_shadow.py -q
+# 18 passed
+
+PYTHONPATH=. python3 scripts/forward_track_shadows.py --compare-only
+PYTHONPATH=. python3 scripts/daily_digest.py --dry-run
+# telegram SKIPPED
+
+# Dual live scans (supported only)
+PYTHONPATH=. python3 scripts/forward_track_shadows.py   # run1: new=0 closed_updates=0; n=9 / n=8
+PYTHONPATH=. python3 scripts/forward_track_shadows.py   # run2: new=0 closed_updates=0; sha unchanged
+```
+
+## Idempotency
+- (source,symbol,signal_time) dups: 0 on both logs
+- log shas stable across second full run:
+  forward_log.csv 3eff47e9087495ad65da7c48be41467300a71287
+  forward_log_h1_scaled.csv 9e03085be16b976bdf7dc30f69575f1e7527bdf6
+
+## ACTIVE unchanged
+models/ACTIVE = models/frozen_tp5_sl2_swap_20260709.txt
+
+## Prospective counts (NOT profitability proof)
+- champion: 9 rows (7 closed / 2 open); short forward observation
+- H1 shadow: 8 rows (7 closed / 1 open)
+- H8/H10: unsupported (honest refusal; not approximated)
+
+## Guardrails held
+- No holdout read
+- No threshold/TP-SL/ACTIVE mutation
+- No Telegram send in dry-run
+- Future profit unproven; sample ≪100 adjudication gate

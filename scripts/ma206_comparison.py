@@ -1,11 +1,4 @@
-"""Compare the validated 8-55 judgment layer with a 20/60/120 MA candidate pool.
-
-The baseline dataset is the already generated SWAP TP5/SL2 file from
-scripts/swap_replication.py. The new arm is additive: build 20/60/120 SWAP
-candidates, label them with TP5/SL2 h72, then evaluate through the same
-LightGBM train/val functions used by src.judgment.train. Holdout is loaded by
-load_splits for bookkeeping but never evaluated.
-"""
+"""Rebuild and validate the canonical SMA/EMA 20/60/120 SWAP candidate pool."""
 from __future__ import annotations
 
 import json
@@ -33,9 +26,8 @@ from src.judgment.train import (
 )
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
-BASE_DATASET = PROJECT_DIR / "data" / "swap_replication" / "swap_tp5_sl2.csv"
 OUT_DATASET = PROJECT_DIR / "data" / "ma206" / "swap_tp5_sl2_ma206.csv"
-OUT_JSON = PROJECT_DIR / "analysis" / "output" / "p2b_ma206_comparison.json"
+OUT_JSON = PROJECT_DIR / "analysis" / "output" / "p2b_ma206_validation.json"
 MAKER_COST = 0.0006
 MIN_BARS = 500
 
@@ -130,16 +122,11 @@ def evaluate_dataset(name: str, dataset_path: Path) -> dict:
 
 
 def main() -> int:
-    if not BASE_DATASET.exists():
-        raise FileNotFoundError(f"missing baseline dataset: {BASE_DATASET}")
     OUT_DATASET.parent.mkdir(parents=True, exist_ok=True)
     OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     v206 = build_v206_dataset()
     v206.to_csv(OUT_DATASET, index=False)
-    results = [
-        evaluate_dataset("ema8_55_swap_tp5_sl2", BASE_DATASET),
-        evaluate_dataset("sma_ema_20_60_120_swap_tp5_sl2", OUT_DATASET),
-    ]
+    results = [evaluate_dataset("sma_ema_20_60_120_swap_tp5_sl2", OUT_DATASET)]
     payload = {
         "discipline": "val-only; holdout loaded for counts only and not evaluated",
         "label": "TP5/SL2 h72",

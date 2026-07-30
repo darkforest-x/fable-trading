@@ -26,6 +26,19 @@ A quiet trading command center for daily evidence checks. The signature is restr
 - Status colors represent evidence states, never decoration.
 - New colors must first be added here and should map to a semantic status or data encoding role.
 
+### Moving-Average Encoding
+
+| Series | Color | Role |
+|---|---|---|
+| SMA20 | #c47220 | Fast simple average |
+| EMA20 | #2460f0 | Fast exponential average |
+| SMA60 | #2f927c | Medium simple average |
+| EMA60 | #3ca0fa | Medium exponential average |
+| SMA120 | #8c6e6e | Slow simple anchor |
+| EMA120 | #9646c8 | Slow exponential anchor |
+
+These six colors are reserved for chart data encoding and do not imply status.
+
 ## 3. Typography
 
 ### Scale

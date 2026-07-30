@@ -39,6 +39,7 @@ from src.webapp.jobs.store import get_store
 from src.webapp.jobs.whitelist import JobValidationError, list_job_types
 from src.webapp.model_hub import model_hub_payload
 from src.webapp.ops_flags import executor_enabled, ops_status_payload
+from src.webapp.pipeline_status import pipeline_status_payload
 from src.webapp.status_strip import status_strip_payload
 from src.webapp.labeling_hub import labeling_hub_payload
 from src.webapp.explore_payloads import explore_catalog, explore_chart_payload
@@ -105,6 +106,12 @@ def overview(universe: str = DEFAULT_UNIVERSE) -> dict:
 def status_strip() -> dict:
     """Owner detector + forward progress + scout freshness for the top strip."""
     return status_strip_payload()
+
+
+@app.get("/api/pipeline")
+def public_pipeline() -> dict:
+    """Public coarse pipeline snapshot; redacted and strictly read-only."""
+    return pipeline_status_payload()
 
 
 @app.get("/api/labeling-hub")
@@ -242,6 +249,13 @@ def scout_mtf_chart_route(inst_id: str, bar: str = "15m", limit: int = 300) -> d
 
 
 # ---------- P2.5 Phase 0+1: ops (read-only) ----------
+
+
+@app.get("/api/ops/pipeline")
+def ops_pipeline(request: Request) -> dict:
+    """Redacted end-to-end pipeline stages. Read-only; no job writes."""
+    verify_ops_request(request)
+    return pipeline_status_payload()
 
 
 @app.get("/api/ops/status")

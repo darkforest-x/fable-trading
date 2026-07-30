@@ -1,0 +1,1139 @@
+{
+  "ledger": "/Users/zhangzc/fable-trading-grok-2day/data/forward_log_ma206.csv",
+  "model_path": "models/frozen_tp5_sl2_swap_ma206_20260710.txt",
+  "threshold": 0.34093332021594785,
+  "total_rows": 57,
+  "explained_rows": 57,
+  "missing_rows": 0,
+  "current_candidate_rows": 55,
+  "stale_candidate_rows": 2,
+  "score_match_rows": 57,
+  "mean_abs_contribution_top10": [
+    {
+      "feature": "pre_range48",
+      "mean_abs_contribution": 0.13996399298501971
+    },
+    {
+      "feature": "pre_range168",
+      "mean_abs_contribution": 0.11375493087840903
+    },
+    {
+      "feature": "ext_up",
+      "mean_abs_contribution": 0.11039021988440018
+    },
+    {
+      "feature": "drawdown24",
+      "mean_abs_contribution": 0.04729124573172801
+    },
+    {
+      "feature": "spread_pos96",
+      "mean_abs_contribution": 0.04660306161152456
+    },
+    {
+      "feature": "ret_48",
+      "mean_abs_contribution": 0.04570143313060796
+    },
+    {
+      "feature": "slow_slope_12",
+      "mean_abs_contribution": 0.037442563735942486
+    },
+    {
+      "feature": "close_vs_ema60",
+      "mean_abs_contribution": 0.035129614343705526
+    },
+    {
+      "feature": "atr_pct_ratio96",
+      "mean_abs_contribution": 0.02694229799179849
+    },
+    {
+      "feature": "fast_slow_gap",
+      "mean_abs_contribution": 0.022832725607275103
+    }
+  ],
+  "signals": [
+    {
+      "source": "okx",
+      "symbol": "1INCH_USDT_SWAP",
+      "signal_time": "2026-07-11 10:30:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3661092393957328,
+      "recomputed_score": 0.3661092393957328,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.24625474020587992
+      },
+      "top_negative": {
+        "feature": "pre_range168",
+        "contribution": -0.0495599261981196
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "ACH_USDT_SWAP",
+      "signal_time": "2026-07-11 11:45:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.3774145368469573,
+      "recomputed_score": 0.3774145368469573,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.17568687348148268
+      },
+      "top_negative": {
+        "feature": "ret_24",
+        "contribution": -0.04146875438563803
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "ADA_USDT_SWAP",
+      "signal_time": "2026-07-11 11:45:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.357230049261448,
+      "recomputed_score": 0.357230049261448,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.1274579075307263
+      },
+      "top_negative": {
+        "feature": "ret_48",
+        "contribution": -0.05594641451208256
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "ANTHROPIC_USDT_SWAP",
+      "signal_time": "2026-07-10 23:45:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3643516168818938,
+      "recomputed_score": 0.3643516168818938,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.14458886907145918
+      },
+      "top_negative": {
+        "feature": "close_vs_ema60",
+        "contribution": -0.06557629958136726
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "ANTHROPIC_USDT_SWAP",
+      "signal_time": "2026-07-11 04:30:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3552093355847887,
+      "recomputed_score": 0.3552093355847887,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.15260797621110173
+      },
+      "top_negative": {
+        "feature": "close_vs_ema60",
+        "contribution": -0.06763185879199163
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "ASTER_USDT_SWAP",
+      "signal_time": "2026-07-10 15:30:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.4377965195367084,
+      "recomputed_score": 0.4377965195367084,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.24480099521129103
+      },
+      "top_negative": {
+        "feature": "ret_48",
+        "contribution": -0.027532559137095267
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "AXS_USDT_SWAP",
+      "signal_time": "2026-07-10 22:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3589124555991093,
+      "recomputed_score": 0.3589124555991093,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.15122132522080634
+      },
+      "top_negative": {
+        "feature": "slow_slope_12",
+        "contribution": -0.042530290449770476
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "AXS_USDT_SWAP",
+      "signal_time": "2026-07-11 03:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3614982453348014,
+      "recomputed_score": 0.3614982453348014,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.18266135065732017
+      },
+      "top_negative": {
+        "feature": "ret_48",
+        "contribution": -0.04793750570537844
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "BAT_USDT_SWAP",
+      "signal_time": "2026-07-11 00:15:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.34817417186425104,
+      "recomputed_score": 0.34817417186425104,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "ext_up",
+        "contribution": 0.10243807238403638
+      },
+      "top_negative": {
+        "feature": "pre_range168",
+        "contribution": -0.030457767299665022
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "BAT_USDT_SWAP",
+      "signal_time": "2026-07-11 13:15:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.40171921950633027,
+      "recomputed_score": 0.40171921950633027,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.21957435978388182
+      },
+      "top_negative": {
+        "feature": "full_ratio_min48",
+        "contribution": -0.018346209485497502
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "BNB_USDT_SWAP",
+      "signal_time": "2026-07-10 16:30:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.4150632704146837,
+      "recomputed_score": 0.4150632704146837,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.1541395645677711
+      },
+      "top_negative": {
+        "feature": "slow_slope_12",
+        "contribution": -0.04704871474871883
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "BNB_USDT_SWAP",
+      "signal_time": "2026-07-10 21:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3961283105133648,
+      "recomputed_score": 0.3961283105133648,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.1757246975960775
+      },
+      "top_negative": {
+        "feature": "atr_pct_ratio96",
+        "contribution": -0.03275777972728187
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "BTC_USDT_SWAP",
+      "signal_time": "2026-07-10 22:15:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.36875714556687916,
+      "recomputed_score": 0.36875714556687916,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.10854416435929266
+      },
+      "top_negative": {
+        "feature": "atr_pct_ratio96",
+        "contribution": -0.020660764155549596
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "BTC_USDT_SWAP",
+      "signal_time": "2026-07-11 02:45:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.38162798177229795,
+      "recomputed_score": 0.38162798177229795,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.16396729209214567
+      },
+      "top_negative": {
+        "feature": "spread_pos96",
+        "contribution": -0.029776808659417047
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "CFX_USDT_SWAP",
+      "signal_time": "2026-07-11 02:30:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.4119925716405225,
+      "recomputed_score": 0.4119925716405225,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.267605845895602
+      },
+      "top_negative": {
+        "feature": "ret_48",
+        "contribution": -0.042693506608722696
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "CORE_USDT_SWAP",
+      "signal_time": "2026-07-11 09:45:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.35558135671142765,
+      "recomputed_score": 0.35558135671142765,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.17470239182507097
+      },
+      "top_negative": {
+        "feature": "close_vs_ema60",
+        "contribution": -0.06073893885556938
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "DOGE_USDT_SWAP",
+      "signal_time": "2026-07-11 12:45:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.389263346978967,
+      "recomputed_score": 0.389263346978967,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.19774271833030152
+      },
+      "top_negative": {
+        "feature": "fast_slow_gap",
+        "contribution": -0.013051939626679604
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "ENS_USDT_SWAP",
+      "signal_time": "2026-07-11 12:30:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.3654706011022536,
+      "recomputed_score": 0.3654706011022536,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.1381196264932398
+      },
+      "top_negative": {
+        "feature": "atr_pct_ratio96",
+        "contribution": -0.017578059542677875
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "ETC_USDT_SWAP",
+      "signal_time": "2026-07-11 04:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3767618961756662,
+      "recomputed_score": 0.3767618961756662,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.20902250632929267
+      },
+      "top_negative": {
+        "feature": "spread_pos96",
+        "contribution": -0.05230304394355995
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "ETHW_USDT_SWAP",
+      "signal_time": "2026-07-10 15:15:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.35631148901219284,
+      "recomputed_score": 0.35631148901219284,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.14584494956182942
+      },
+      "top_negative": {
+        "feature": "ret_48",
+        "contribution": -0.05841164356450698
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "ETH_USDT_SWAP",
+      "signal_time": "2026-07-11 09:15:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.4099359078178865,
+      "recomputed_score": 0.4099359078178865,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.28068035157506094
+      },
+      "top_negative": {
+        "feature": "pre_range168",
+        "contribution": -0.04129744988915207
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "GALA_USDT_SWAP",
+      "signal_time": "2026-07-11 04:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.34178346003518995,
+      "recomputed_score": 0.34178346003518995,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.15654857309601253
+      },
+      "top_negative": {
+        "feature": "drawdown24",
+        "contribution": -0.07917674477899425
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "GAS_USDT_SWAP",
+      "signal_time": "2026-07-11 07:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3690122166515481,
+      "recomputed_score": 0.3690122166515481,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.19602407802710628
+      },
+      "top_negative": {
+        "feature": "spread_pos96",
+        "contribution": -0.043304999539580606
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "GAS_USDT_SWAP",
+      "signal_time": "2026-07-11 11:30:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.42652991995421324,
+      "recomputed_score": 0.42652991995421324,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.22974896955371452
+      },
+      "top_negative": {
+        "feature": "fast_slow_gap",
+        "contribution": -0.017409611487521303
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "GMT_USDT_SWAP",
+      "signal_time": "2026-07-10 22:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3443144061438626,
+      "recomputed_score": 0.3443144061438626,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.12623864293595086
+      },
+      "top_negative": {
+        "feature": "slow_slope_12",
+        "contribution": -0.04322421944442206
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "GMT_USDT_SWAP",
+      "signal_time": "2026-07-11 02:45:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3443524072490493,
+      "recomputed_score": 0.3443524072490493,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.1409514759521954
+      },
+      "top_negative": {
+        "feature": "ret_48",
+        "contribution": -0.07627590920251212
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "ICX_USDT_SWAP",
+      "signal_time": "2026-07-11 12:00:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.37914186360114427,
+      "recomputed_score": 0.37914186360114427,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.23136485197313816
+      },
+      "top_negative": {
+        "feature": "ret_48",
+        "contribution": -0.05581993871250778
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "LQTY_USDT_SWAP",
+      "signal_time": "2026-07-11 12:30:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.3522604831333049,
+      "recomputed_score": 0.3522604831333049,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.14931235238358606
+      },
+      "top_negative": {
+        "feature": "slow_slope_12",
+        "contribution": -0.04455669307350079
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "LTC_USDT_SWAP",
+      "signal_time": "2026-07-10 16:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.4380686183067818,
+      "recomputed_score": 0.4380686183067818,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.15639446686227584
+      },
+      "top_negative": {
+        "feature": "vol_ratio_mean8",
+        "contribution": -0.03067493202887895
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "LTC_USDT_SWAP",
+      "signal_time": "2026-07-10 21:00:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.3566277774008077,
+      "recomputed_score": 0.3566277774008077,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.1133833441499961
+      },
+      "top_negative": {
+        "feature": "atr_pct_ratio96",
+        "contribution": -0.06967992667960458
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "LTC_USDT_SWAP",
+      "signal_time": "2026-07-11 01:30:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.3514554477460902,
+      "recomputed_score": 0.3514554477460902,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.12545295055703695
+      },
+      "top_negative": {
+        "feature": "atr_pct_ratio96",
+        "contribution": -0.020096390493309094
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "LTC_USDT_SWAP",
+      "signal_time": "2026-07-11 06:00:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.3845455776671161,
+      "recomputed_score": 0.3845455776671161,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.19845293868408995
+      },
+      "top_negative": {
+        "feature": "ret_48",
+        "contribution": -0.07447571896534183
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "ME_USDT_SWAP",
+      "signal_time": "2026-07-11 00:30:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.35856012687014016,
+      "recomputed_score": 0.35856012687014016,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.2543519861578462
+      },
+      "top_negative": {
+        "feature": "pre_range168",
+        "contribution": -0.0662624045729014
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "MOODENG_USDT_SWAP",
+      "signal_time": "2026-07-10 23:30:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3566675275492379,
+      "recomputed_score": 0.3566675275492379,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.16599917208927925
+      },
+      "top_negative": {
+        "feature": "pre_range48",
+        "contribution": -0.05045036061383105
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "MOODENG_USDT_SWAP",
+      "signal_time": "2026-07-11 13:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3828347350636634,
+      "recomputed_score": 0.3828347350636634,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.16951093880736767
+      },
+      "top_negative": {
+        "feature": "slow_slope_12",
+        "contribution": -0.03623564805987578
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "NEO_USDT_SWAP",
+      "signal_time": "2026-07-10 18:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3713812509397428,
+      "recomputed_score": 0.3713812509397428,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.19067710996478615
+      },
+      "top_negative": {
+        "feature": "spread_pos96",
+        "contribution": -0.03621725491709979
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "NEO_USDT_SWAP",
+      "signal_time": "2026-07-10 22:45:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3675720330820032,
+      "recomputed_score": 0.3675720330820032,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.16036968400146384
+      },
+      "top_negative": {
+        "feature": "ma_spread_pct",
+        "contribution": -0.0377772049817005
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "NEO_USDT_SWAP",
+      "signal_time": "2026-07-11 04:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.4196881295936036,
+      "recomputed_score": 0.4196881295936036,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.23152837145365365
+      },
+      "top_negative": {
+        "feature": "spread_chg8",
+        "contribution": -0.014340759678946498
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "OKB_USDT_SWAP",
+      "signal_time": "2026-07-10 15:30:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.40010286322753524,
+      "recomputed_score": 0.40010286322753524,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.1793492704546943
+      },
+      "top_negative": {
+        "feature": "atr_pct_ratio96",
+        "contribution": -0.033688749747545814
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "OKB_USDT_SWAP",
+      "signal_time": "2026-07-11 05:15:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3572842869236848,
+      "recomputed_score": 0.3572842869236848,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.2000719520816824
+      },
+      "top_negative": {
+        "feature": "spread_pos96",
+        "contribution": -0.06322019009765488
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "ONT_USDT_SWAP",
+      "signal_time": "2026-07-10 13:00:00+00:00",
+      "status": "closed",
+      "current_candidate": false,
+      "ledger_score": 0.3495851784997449,
+      "recomputed_score": 0.3495851784997449,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "ext_up",
+        "contribution": 0.11107808360123861
+      },
+      "top_negative": {
+        "feature": "pre_range168",
+        "contribution": -0.03520381352205478
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "ORDER_USDT_SWAP",
+      "signal_time": "2026-07-11 13:30:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.35401132272952046,
+      "recomputed_score": 0.35401132272952046,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.15250036651407803
+      },
+      "top_negative": {
+        "feature": "ret_24",
+        "contribution": -0.036965502527018926
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "PLUME_USDT_SWAP",
+      "signal_time": "2026-07-10 16:45:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.36726631507391383,
+      "recomputed_score": 0.36726631507391383,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.22956967121043623
+      },
+      "top_negative": {
+        "feature": "pre_range168",
+        "contribution": -0.04144224405683161
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "SAND_USDT_SWAP",
+      "signal_time": "2026-07-10 21:45:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.3667432640318004,
+      "recomputed_score": 0.3667432640318004,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.13396075797550025
+      },
+      "top_negative": {
+        "feature": "slow_slope_12",
+        "contribution": -0.05099739075513718
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "SHIB_USDT_SWAP",
+      "signal_time": "2026-07-10 19:30:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.4294556874736031,
+      "recomputed_score": 0.4294556874736031,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.20435927247248956
+      },
+      "top_negative": {
+        "feature": "drawdown24",
+        "contribution": -0.033224763231815016
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "SIGN_USDT_SWAP",
+      "signal_time": "2026-07-11 04:15:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.35036897624718477,
+      "recomputed_score": 0.35036897624718477,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "ext_up",
+        "contribution": 0.12019302158597696
+      },
+      "top_negative": {
+        "feature": "ret_48",
+        "contribution": -0.04750046549024196
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "SIGN_USDT_SWAP",
+      "signal_time": "2026-07-11 09:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.38141258052198235,
+      "recomputed_score": 0.38141258052198235,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.14727737852188358
+      },
+      "top_negative": {
+        "feature": "dense_frac48",
+        "contribution": -0.008838747818324178
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "SOPH_USDT_SWAP",
+      "signal_time": "2026-07-10 23:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3717709845096679,
+      "recomputed_score": 0.3717709845096679,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.12503832773313747
+      },
+      "top_negative": {
+        "feature": "slow_slope_12",
+        "contribution": -0.03486847528238725
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "TSLA_USDT_SWAP",
+      "signal_time": "2026-07-10 11:15:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3965400166510848,
+      "recomputed_score": 0.3965400166510848,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "ext_up",
+        "contribution": 0.12949849364173022
+      },
+      "top_negative": {
+        "feature": "full_spread",
+        "contribution": -0.01436762250113731
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "TSLA_USDT_SWAP",
+      "signal_time": "2026-07-10 11:30:00+00:00",
+      "status": "closed",
+      "current_candidate": false,
+      "ledger_score": 0.3856134807083949,
+      "recomputed_score": 0.3856134807083949,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "ext_up",
+        "contribution": 0.1269250124930937
+      },
+      "top_negative": {
+        "feature": "ret_12",
+        "contribution": -0.015885751916834195
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "UMA_USDT_SWAP",
+      "signal_time": "2026-07-10 11:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.37469867017958486,
+      "recomputed_score": 0.37469867017958486,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range168",
+        "contribution": 0.16729885189296145
+      },
+      "top_negative": {
+        "feature": "dense_frac48",
+        "contribution": -0.016960558475468766
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "UMA_USDT_SWAP",
+      "signal_time": "2026-07-11 11:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.398299685890551,
+      "recomputed_score": 0.398299685890551,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.24630305383576867
+      },
+      "top_negative": {
+        "feature": "atr_pct_ratio96",
+        "contribution": -0.04271447261483011
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "WDC_USDT_SWAP",
+      "signal_time": "2026-07-11 07:00:00+00:00",
+      "status": "open",
+      "current_candidate": true,
+      "ledger_score": 0.3708572142242865,
+      "recomputed_score": 0.3708572142242865,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.22356845765994773
+      },
+      "top_negative": {
+        "feature": "pre_range168",
+        "contribution": -0.04615586587145549
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "WOO_USDT_SWAP",
+      "signal_time": "2026-07-11 06:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.38283143192491254,
+      "recomputed_score": 0.38283143192491254,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.15431772675916205
+      },
+      "top_negative": {
+        "feature": "fast_slow_gap",
+        "contribution": -0.013107606410740926
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "YGG_USDT_SWAP",
+      "signal_time": "2026-07-11 09:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.35943789085271854,
+      "recomputed_score": 0.35943789085271854,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.21819301117845105
+      },
+      "top_negative": {
+        "feature": "ret_48",
+        "contribution": -0.10431072012579348
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "ZEN_USDT_SWAP",
+      "signal_time": "2026-07-11 03:30:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.3465925856126562,
+      "recomputed_score": 0.3465925856126562,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.10857459327246166
+      },
+      "top_negative": {
+        "feature": "slow_slope_12",
+        "contribution": -0.04758165292441466
+      }
+    },
+    {
+      "source": "okx",
+      "symbol": "ZEN_USDT_SWAP",
+      "signal_time": "2026-07-11 08:00:00+00:00",
+      "status": "closed",
+      "current_candidate": true,
+      "ledger_score": 0.35127084357288985,
+      "recomputed_score": 0.35127084357288985,
+      "score_matches": true,
+      "expected_value": -1.0775279909119702,
+      "top_positive": {
+        "feature": "pre_range48",
+        "contribution": 0.16295935796411867
+      },
+      "top_negative": {
+        "feature": "spread_mean8",
+        "contribution": -0.031789728362991924
+      }
+    }
+  ],
+  "warning": "Read-only diagnostic; does not validate profitability or authorize threshold changes."
+}

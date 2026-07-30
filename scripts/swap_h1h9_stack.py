@@ -1,5 +1,5 @@
 """Stack test on the SWAP mainline: do the two discovery-tier winners (H1
-scaled exit, H9 1h-EMA144 trend filter) survive and combine on the swap
+scaled exit, H9 1h-EMA120 trend filter) survive and combine on the swap
 universe? Val only; discovery tier.
 
 Cells reported: {tp5, scaled} x {no filter, above_ma filter} -> top-bucket
@@ -8,21 +8,19 @@ maker-net, win rate, n. Run offline via offline_queue3.sh.
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_DIR / "scripts"))
-from h9_trend_filter import add_flags  # noqa: E402  (reuse the lookahead-safe 1h flags)
 
 from src.data.loader import iter_series  # noqa: E402
 from src.judgment.candidates import add_indicators, scan_candidates  # noqa: E402
 from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature_rows  # noqa: E402
 from src.judgment.labeling import label_candidate, label_candidate_scaled  # noqa: E402
 from src.judgment.train import load_splits, train_model  # noqa: E402
+from src.judgment.trend_filter import add_h9_flags  # noqa: E402
 
 OUT = PROJECT_DIR / "analysis" / "output" / "swap_h1h9_stack.json"
 SWEEP_DIR = PROJECT_DIR / "data" / "sweep_swap_stack"
@@ -78,7 +76,7 @@ def main() -> int:
         val = val.copy()
         val["score"] = model.predict(val[FEATURE_COLUMNS], num_iteration=model.best_iteration)
         thr = float(np.quantile(val["score"], 0.90))
-        val = add_flags(val)
+        val = add_h9_flags(val)
         top = val[(val["score"] >= thr) & val["h1_ok"]]
         results[name] = {
             "n_pool": int(len(df)), "threshold": round(thr, 4),

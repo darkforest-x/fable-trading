@@ -10,8 +10,8 @@ usable. We map each signal to the last completed 1h bar via searchsorted
 on (T + 1h) <= (s + 15m).
 
 Trend flags on completed 1h data only:
-  up_slope : 1h EMA55 slope over 12 bars > 0
-  above_ma : 1h close > 1h EMA144
+  up_slope : 1h EMA60 slope over 12 bars > 0
+  above_ma : 1h close > 1h EMA120
 
 Evaluation (val only, TP5/SL2 h72 dataset from the round-2 sweep): fixed
 threshold = val q90 of model scores (as in stage 3); compare top-bucket

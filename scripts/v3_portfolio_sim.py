@@ -1,7 +1,7 @@
 """v3 stack portfolio backtest on the SWAP mainline (val window only).
 
 Grid: {tp5_sl2, scaled_25_t3} x {all signals, maker-filled only}
-      x {no filter, 1h-EMA144 filter} at costs {0.16%, 0.06%}.
+      x {no filter, 1h-EMA120 filter} at costs {0.16%, 0.06%}.
 Reuses the stage-3 simulator (per-symbol lock, 10-slot cap, val-q90
 threshold fixed ex ante). Discovery tier: acceptance window untouched,
 forward data remains the judge.
@@ -11,7 +11,6 @@ Also renders src/webapp/static/v3_backtest.html for the dashboard.
 from __future__ import annotations
 
 import json
-import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -19,8 +18,6 @@ import numpy as np
 import pandas as pd
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_DIR / "scripts"))
-from h9_trend_filter import add_flags  # noqa: E402
 
 from src.backtest.run import BAR, simulate, window_metrics  # noqa: E402
 from src.data.loader import iter_series  # noqa: E402
@@ -28,6 +25,7 @@ from src.judgment.candidates import add_indicators, scan_candidates  # noqa: E40
 from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature_rows  # noqa: E402
 from src.judgment.labeling import label_candidate, label_candidate_scaled  # noqa: E402
 from src.judgment.train import load_splits, train_model  # noqa: E402
+from src.judgment.trend_filter import add_h9_flags  # noqa: E402
 
 OUT_JSON = PROJECT_DIR / "analysis" / "output" / "v3_portfolio_sim.json"
 OUT_HTML = PROJECT_DIR / "src" / "webapp" / "static" / "v3_backtest.html"
@@ -80,7 +78,7 @@ def main() -> int:
         val = val.copy()
         val["score"] = model.predict(val[FEATURE_COLUMNS], num_iteration=model.best_iteration)
         thr = float(np.quantile(val["score"], 0.90))
-        val = add_flags(val)
+        val = add_h9_flags(val)
         val["entry_time"] = val["signal_time"] + BAR
         val["exit_time"] = val["entry_time"] + val["exit_offset"] * BAR
         val = val.sort_values(["entry_time", "score"], ascending=[True, False])
@@ -123,7 +121,7 @@ th{{color:#9aa0a8;font-weight:400}} .num{{text-align:right;font-family:ui-monosp
 <h1>v3 优化叠加后的组合回测（SWAP 主线 · val 窗口）</h1>
 <p>生成于 {datetime.now():%Y-%m-%d %H:%M}。历史参照：v2 现货 taker 验收窗口 PF <b>1.01</b>；
 v3 现货 maker val PF <b>1.27</b>。本表为发现级（val 已多轮使用），最终裁决以 8 月初前向数据为准。
-variant 说明：raw=全部信号按该成本；maker=仅 maker 可成交单；maker+h9=再叠加 1h EMA144 顺势过滤。
+variant 说明：raw=全部信号按该成本；maker=仅 maker 可成交单；maker+h9=再叠加 1h EMA120 顺势过滤。
 成本：maker016=0.16% 往返（保守）；swap006=0.06% 往返（合约 maker）。PF≥1.3 标绿。</p>
 <table><thead><tr><th>出场结构</th><th>执行变体</th><th>成本</th><th>笔数</th>
 <th>净收益(对资金)</th><th>PF</th><th>maxDD</th><th>胜率</th></tr></thead>

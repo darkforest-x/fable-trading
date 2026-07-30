@@ -13,7 +13,7 @@ from src.judgment.train import load_splits, train_model
 
 P = Path("data")
 POOLS = {
-    "replication": P / "swap_replication" / "swap_tp5_sl2.csv",
+    "replication": P / "ma206" / "swap_tp5_sl2_ma206.csv",
     "stack": P / "sweep_swap_stack" / "tp5_sl2.csv",
     "portfolio": P / "sweep_v3_portfolio" / "tp5_sl2.csv",
 }

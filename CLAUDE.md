@@ -9,7 +9,8 @@
 
 1. **holdout 纪律**：holdout（≥2026-05-04）只在最终验收时评估，每次动用必须先获得项目
    所有者在对话中的明确批准，并在报告里记录"这是该配置第 N 次消耗 holdout"。
-   训练/调参/特征选择的任何环节不得读取 holdout；`train.py` 不加 `--eval-holdout` 即安全。
+   训练/调参/特征选择的任何环节不得读取 holdout；看板、缓存与图表同样不得给未授权配置
+   评分 holdout。`train.py` 不加 `--eval-holdout` 只是训练命令安全，不代表其他读取路径安全。
 2. **时间切分**：所有评估按时间切分，禁止随机切分，禁止跨切点的样本进入训练。
 3. **无前视**：特征只能使用信号 bar 及之前的数据；只有标签允许看未来。
    新增特征必须在 docstring 写明用到的列与窗口。
@@ -42,7 +43,7 @@
   且置换检验 p<0.01；v1 的教训就是 AUC 0.59 照样亏钱。AUC 只是参考量。
 - **在 holdout 上"看一眼"** → 看一眼就是消耗一次，见铁律 1。
 - **重跑 build_dataset 覆盖别的池的数据集** → 输出文件名必须带池名
-  （`judgment_dataset_v2_strict.csv` / `..._expanded.csv`），tag 必须带池名。
+  （`data/ma206/judgment_dataset_strict.csv` / `..._expanded.csv`），tag 必须带池名。
 - **顺手调 strict/expanded 阈值预设** → 阈值是项目所有者决策，改动需批准。
 - **只汇报好消息** → 报告必须含"风险与诚实声明"节；隐瞒失败的实验记录等于污染实验日志。
 - **默认拉全部币种重新 fetch** → 先检查 `data/kline_fetched/` 已有 `okx_*_15m_*.csv`，

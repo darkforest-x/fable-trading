@@ -826,13 +826,30 @@ round6 新标后只换检测权重再重扫；回滚规则：`CANDIDATE_SOURCE=r
 
 ## 当前状态一句话
 
-**07-09 追加：合约复制性检验通过**（TP5/SL2 纯 SWAP 池 AUC 0.560/p=0.001，top-decile 净@maker +0.225%/笔，判定标准全过）——**主线宇宙即日起为 SWAP**；H1 分批止盈为 v3 出场头号挑战者（AUC 0.608/胜率 65%）。前向验证与后续实验一律用合约配置。YOLO11s 离线验收 mAP50 0.8569，低于正式线 0.90，检测层正式验收未达成，标记为非关键路径并暂停。P1-5 已完成：`models/frozen_tp5_sl2_swap_20260709.txt/.json` 入库，看板信号路径加载冻结模型并按 model_path/dataset_sha256 失效旧缓存。P1-8 已完成：看板新增前向验证 tab、现货/合约切换、动态总览与分宇宙 score cache，localhost 与 VPS 真浏览器验收通过。P1.5 R0~R4 已完成：H9/H10 有线索但不切主线；H1 scaled 是最强发现级候选；5m 机会扩张证伪，30m 是低频高质量新线索。P2-9 已完成：补齐冒烟测试并新增 GitHub Actions。P2-10 已完成：移动端、合格未成交 tooltip、只读分数滑块；owner 拍板暂不加访问控制。
+**07-10 最新 owner 裁决（覆盖 07-09 均线决定）**：检测层、判断层及未来运行路径统一为
+**SMA20/60/120 + EMA20/60/120**。新 ACTIVE 为
+`models/frozen_tp5_sl2_swap_ma206_20260710.txt`，阈值 0.340933，数据 SHA256
+`8df081a1...`；新前向账本从 `2026-07-10 10:30 UTC` 起独立累计。
+迁移报告见 `analysis/p2b_ma206_mainline_migration.md`。全量 MA206 val AUC 0.5702/p=0.001；
+0.3% 组合 PF 0.636；maker 0.06% PF 1.072，1h EMA120 过滤后 PF 1.154，
+**尚未达到盈利验收线**。
+看板迁移验收时发现并修复全量评分越界；**这是 MA206 配置第 1 次意外消耗 holdout**，
+未经 owner 批准，结果隔离作废。当前 API/缓存只允许 `pre_holdout_only`，终审仍只认新前向。
+
+**07-09 历史记录**：合约复制性检验通过，旧 `frozen_tp5_sl2_swap_20260709`
+曾作为冻结工件；该工件和当时的 H1 PF 2.825 均属于 8-55 历史证据，现已由
+`frozen_tp5_sl2_swap_ma206_20260710` 与独立 MA206 前向账本替代，不得再作为运行入口。
 
 **2b 验收通过（holdout 已消耗）→ 阶段 3 第一轮未通过（PF 1.01@0.3%）→
 owner 已委托"按推荐直接执行" → 出场结构扫描完成：TP5/SL2 为 v3 候选标签**
 （val 净@0.3% +0.077%/笔 vs 基线 +0.001%，p=0.001，见 `analysis/p2b_v3_barrier_sweep.md`）。
-进行中：P2-11 偏 B；E1 pad 后 **E2 `MAX_DENSE_BARS=24` 长段收核** 已 relabel（PAXG 74→24 bar），
-待 owner 看 `/label_audit_e2_compare.html` 后决定是否重训。
+**07-11 最新验收**：P2-11 E2.1b HSV0 自然完成，official mAP50 `0.8505`、固定
+conf=0.30 一致率 `51.27%`，均未过门；固定 SAHI 全 val 使匹配 `665→625`、预测框
+`1629→2753`、延迟 `11.27×`，拒绝接入。独立因果 long/short/no_trade YOLO 分类器
+准确率 `34.78%`，固定 0.20% 成本后净 `-0.15236%/笔`、PF `0.7472`，同样拒绝接入。
+q80 只诊断影子继续运行；截至 `19:45 UTC`，358 个 SWAP 同窗漏斗为
+`67 候选 → q90 10 可执行 / q80 16 可执行`。这证明扫描和评分都压缩信号，但放宽到
+q80 只增加 6 个可执行信号，不能替代前向盈利验证。
 **07-10 追加（Grok）**：`codex/day1` 已合并进 `main`（`1c1344f`）并 push；owner 确认
 P2-11 打标 findings + P2-12 黑名单写入 BLOCKED。  
 **07-10 追加（Grok 接手）**：P2-12 数据审计完成（见 `analysis/p2_data_audit_report.md`）；
@@ -847,7 +864,7 @@ FO :5151 / Label Studio :8081 本机评审就绪；前向主线 + H1 双账本 d
 公网/VPS 上 ops 前须设 `OPS_AUTH_MODE=token` + `OPS_API_TOKEN`；**禁止** VPS `ENABLE_JOB_EXECUTOR=1`。
 纪律红线：holdout 与验收窗口均已消耗，v3 的确认性验证只能用前向新数据；
 val 已被多次选型使用，其数字只用于排序不用于宣称绩效。
-fable 拍板：主线 **SWAP** · **EMA 8-55** · 冻结 **TP5/SL2** · YOLO **非关键** · H1 **挑战者/影子**。
+fable 拍板：主线 **SWAP** · **SMA/EMA 20/60/120** · 冻结 **TP5/SL2** · YOLO **非关键** · H1 **挑战者/影子**。
 
 **07-20 追加（Grok，Claude 额度见底）**：主线前向诚实摘要见
 `analysis/forward_mainline_status_20260720.md`——`data/forward_log.csv` 仅表头；
@@ -909,17 +926,18 @@ HORIZON_BARS=72 精确对应）。v2 报告中的全部指标本来就是泄漏�
    拉完后跑冻结流水线复制性检验——expanded 池 + TP5/SL2 标签在 SWAP 序列上
    build+train（val only），合约成本：maker 0.02%/taker 0.05% + 资金费近似 0.01%/8h。
    owner 已确认实盘目标是合约。
-3. **均线定义已裁决（2026-07-09）**：P0-3 已在合约数据上正面对比
+3. **均线定义旧裁决（2026-07-09，已被 07-10 owner 推翻）**：P0-3 曾在合约数据上正面对比
    SMA/EMA 20/60/120 与现行 EMA 8/13/21/34/55+144/200。20/60/120 的 AUC 更高
-   但 top-decile 净收益显著弱于 8-55；owner 已拍板 **主线继续 8-55**。
+   但 top-decile 净收益显著弱于 8-55；当时曾保留 8-55。当前及未来只用六线 MA206。
 4. **冻结模型工件已完成**：当前生效工件为
-   `models/frozen_tp5_sl2_swap_20260709.txt/.json`，阈值 val q90=0.3747093215963419，
-   best_iteration=18，数据 SHA256=`818304cffcdb410612780e9d42dcdf7f8488c97e0044f93c1406ed2cb4856180`。
+   `models/frozen_tp5_sl2_swap_ma206_20260710.txt/.json`，阈值 val q90=0.3409333202，
+   best_iteration=32，数据 SHA256=`8df081a1374c0edb1ef8a869cc4825830ecb2f07fd00209306c44dcc272040d1`。
 5. 前向跟踪脚本已完成：`scripts/forward_track.py` 默认从
-   `2026-07-08 00:00 UTC` 起扫描 OKX SWAP，加载冻结模型打分，阈值以上写入
-   `data/forward_log.csv`，并按 `(source, symbol, signal_time)` 幂等补记已知出场。
-   **07-10 冒烟**：正式窗口 `new_signals=2`、`total_rows=2`（均为 closed）。
-6. 前向验证窗口从 2026-07-08 起积累；每日定时任务
+   `2026-07-10 10:30 UTC` 起扫描 OKX SWAP，加载 MA206 冻结模型打分，阈值以上写入
+   `data/forward_log_ma206.csv`，并按 `(source, symbol, signal_time)` 幂等补记已知出场。
+   **07-10 全量重建**：358 个 SWAP、19,666 个已标签候选；前向扫描见 21,086 个历史
+   候选，正式窗口 `new_signals=0`、`total_rows=0`。
+6. MA206 前向验证窗口从 2026-07-10 10:30 UTC 起积累；每日定时任务
    `~/.claude/scheduled-tasks/daily-okx-data-update` **已包含**
    `update_okx` + `forward_track` + `daily_digest`（2026-07-10 核实，无需再等点头）。
    ~3-4 周后用冻结 TP5/SL2+maker 配置做最终 PF 裁决。
@@ -932,7 +950,7 @@ HORIZON_BARS=72 精确对应）。v2 报告中的全部指标本来就是泄漏�
 8. 看板完善一批已完成：`/api/overview`、`/api/backtest`、`/api/trades`、
    `/api/symbols`、`/api/chart` 均支持 `universe=swap|spot`；分数缓存写入
    `data/scored_signals_<universe>.csv/.json`，spot 训练/打分前会过滤混入的
-   `_SWAP` 行。新增 `/api/forward` 和前向验证 tab，当前 `data/forward_log.csv`
+   `_SWAP` 行。新增 `/api/forward` 和前向验证 tab，当前 `data/forward_log_ma206.csv`
    只有表头，因此页面显示 0/100、PF/胜率为空。VPS 已同步部署。
 9. H10 做空侧已完成：新增空头候选扫描、空头 barrier 标签和
    `scripts/short_replication.py`。SWAP short TP5/SL2 val AUC 0.6174、p=0.001、

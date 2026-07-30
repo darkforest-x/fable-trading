@@ -1,0 +1,9 @@
+Direction classifier preflight
+- dataset: datasets/ma206_direction_causal_v1
+- manifest rows: 29420
+- image size: 640x640 square
+- model: yolo11n-cls.pt
+- train: imgsz320 epochs20 batch32 patience8 seed42 device=mps
+- augment: flip/hsv/mosaic/mixup/copy_paste/translate/scale/erasing/auto_augment all zero/off
+- tests: 14 passed for builder/causal/config preflight; 22 passed combined direction suite
+- E2.1b PID 37441: naturally exited before direction start

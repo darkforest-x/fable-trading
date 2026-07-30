@@ -23,8 +23,8 @@ Mainline **frozen TP5/SL2 SWAP** + dual forward books healthy; **YOLO E2.1 still
 | `fable_overnight_status` | heartbeat md |
 
 ## Metrics snapshot
-- forward_log.csv ≈ 10 lines (incl header)
-- forward_log_h1_scaled.csv ≈ 9 lines
+- `forward_log_ma206.csv` 当前 0/100
+- `forward_log_h1_scaled_ma206.csv` 当前 0 行
 - E2.1 results.csv: 17 epochs logged; peak mAP50 **0.8203**
 - pytest: **113 passed** (2026-07-10 cycle)
 - disk: reclaimed pip/docker/go-build; free ~17GB (was 97%)
@@ -35,4 +35,4 @@ Mainline **frozen TP5/SL2 SWAP** + dual forward books healthy; **YOLO E2.1 still
 3. Commit + push report; no conf/IoU loosen
 
 ## fable 拍板
-SWAP · EMA 8-55 · TP5/SL2 freeze · YOLO non-critical · H1 shadow only
+SWAP · SMA/EMA20/60/120 · TP5/SL2 freeze · YOLO non-critical · H1 shadow only

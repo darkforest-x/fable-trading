@@ -1,0 +1,36 @@
+{
+  "funnel": {
+    "start_time": "2026-07-10 10:30:00+00:00",
+    "scanned_series": 358,
+    "series_with_forward_bars": 358,
+    "latest_bar_time": "2026-07-11 13:00:00+00:00",
+    "q90_threshold": 0.34093332021594785,
+    "q80_threshold": 0.3098941865808003,
+    "score_summary": {
+      "candidates_after_start": 268,
+      "finite_scores": 268,
+      "q90_signals": 62,
+      "q80_signals": 99,
+      "q80_incremental_signals": 37,
+      "q90_actionable_signals": 51,
+      "q80_actionable_signals": 86,
+      "q80_non_actionable_signals": 13,
+      "q90_pass_rate": 0.23134328358208955,
+      "q80_pass_rate": 0.3694029850746269
+    }
+  },
+  "q80_shadow": {
+    "model_path": "models/frozen_tp5_sl2_swap_ma206_20260710.txt",
+    "threshold": 0.3098941865808003,
+    "start_time": "2026-07-10 10:30:00+00:00",
+    "scanned_series": 358,
+    "candidates_seen": 22677,
+    "threshold_signals_seen": 86,
+    "new_signals": 8,
+    "closed_updates": 7,
+    "total_rows": 86,
+    "open_rows": 29,
+    "closed_rows": 57,
+    "output": "/Users/zhangzc/fable-trading-grok-2day/data/forward_log_ma206_q80_shadow.csv"
+  }
+}

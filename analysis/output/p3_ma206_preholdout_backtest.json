@@ -1,0 +1,90 @@
+{
+  "dataset": "data/ma206/swap_tp5_sl2_ma206.csv",
+  "score_threshold_val_q90": 0.34093,
+  "n_candidates": 15260,
+  "n_eligible": 1301,
+  "config": {
+    "max_concurrent": 10,
+    "base_cost_round_trip": 0.003,
+    "validation_window_start": "2026-03-21 20:00:00+00:00",
+    "score_scope": "signal_time < 2026-05-04 00:00:00+00:00; holdout not scored"
+  },
+  "cost_sweep_validation_window": {
+    "0.002": {
+      "n_trades": 282,
+      "net_total_units": -0.2973,
+      "net_return_on_capital": -0.0297,
+      "mean_net_per_trade": -0.00105,
+      "win_rate": 0.3511,
+      "profit_factor": 0.789,
+      "max_drawdown_pct": 0.0337,
+      "outcome_counts": {
+        "sl": 180,
+        "tp": 93,
+        "timeout": 9
+      }
+    },
+    "0.003": {
+      "n_trades": 282,
+      "net_total_units": -0.5793,
+      "net_return_on_capital": -0.0579,
+      "mean_net_per_trade": -0.00205,
+      "win_rate": 0.3511,
+      "profit_factor": 0.636,
+      "max_drawdown_pct": 0.0615,
+      "outcome_counts": {
+        "sl": 180,
+        "tp": 93,
+        "timeout": 9
+      }
+    },
+    "0.004": {
+      "n_trades": 282,
+      "net_total_units": -0.8613,
+      "net_return_on_capital": -0.0861,
+      "mean_net_per_trade": -0.00305,
+      "win_rate": 0.3475,
+      "profit_factor": 0.515,
+      "max_drawdown_pct": 0.0894,
+      "outcome_counts": {
+        "sl": 180,
+        "tp": 93,
+        "timeout": 9
+      }
+    }
+  },
+  "insample_pre_window_base_cost": {
+    "n_trades": 820,
+    "net_total_units": 2.8316,
+    "net_return_on_capital": 0.2832,
+    "mean_net_per_trade": 0.00345,
+    "win_rate": 0.5622,
+    "profit_factor": 1.911,
+    "max_drawdown_pct": 0.0129,
+    "outcome_counts": {
+      "tp": 448,
+      "sl": 351,
+      "timeout": 21
+    }
+  },
+  "full_period_base_cost": {
+    "n_trades": 1102,
+    "net_total_units": 2.2524,
+    "net_return_on_capital": 0.2252,
+    "mean_net_per_trade": 0.00204,
+    "win_rate": 0.5082,
+    "profit_factor": 1.479,
+    "max_drawdown_pct": 0.054,
+    "outcome_counts": {
+      "tp": 541,
+      "sl": 531,
+      "timeout": 30
+    }
+  },
+  "discovery_check_base_cost": {
+    "net_positive": false,
+    "profit_factor_ge_1.3": false,
+    "max_drawdown_le_20pct": true,
+    "n_trades_ge_100": true
+  }
+}

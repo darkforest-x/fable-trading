@@ -1,0 +1,94 @@
+# Task 2 — End-to-end health baseline
+Date: 2026-07-10 (local ~13:01)
+Branch: codex/grok-2day
+Commit policy: N (no defect fix; no tracked product change)
+
+## Commands run
+```
+screen -ls
+pgrep -fl forward_track   # none active before run
+find data/kline_fetched -name 'okx_*_USDT_SWAP_15m_*.csv' | counts
+ln -s /Users/zhangzc/fable-trading/data data   # worktree lacked data/; matched codex layout
+PYTHONPATH=. python3 scripts/forward_track.py   # run 1
+PYTHONPATH=. python3 scripts/forward_track.py   # run 2 idempotency
+# daily_digest: imported modules only; Telegram send SKIPPED
+```
+
+## Active screens (Detached)
+- fable_overnight_status
+- fable_multi_day_pulse
+- fable_yolo_e21b_hsv0   (E2.1b train observe-only; epoch 1 in progress — NOT final)
+- fable_audit_server_8643
+- fable_grok_2day
+- yolo_v179_review_8766
+
+## SWAP 15m / incomplete parts
+- Complete okx_*_USDT_SWAP_15m_*.csv: **401**
+- `*.part.csv` count: **0**
+- Incomplete `.part.csv` reasons: **N/A** (none present)
+
+## Market data freshness
+- Newest file: okx_MANA_USDT_SWAP_15m_38399.csv
+- File mtime (UTC): 2026-07-09T22:11:51Z (~6.8h age at digest time)
+- Last bar open_time in that file: **2026-07-09 16:45:00+00:00**
+- Digest freshness line: "401 个合约序列，最新写入 6.8 小时前" (alert_flag=False; threshold 26h)
+
+## Frozen model fingerprint (ACTIVE unchanged)
+- models/ACTIVE: `models/frozen_tp5_sl2_swap_20260709.txt`
+- config: tp5_sl2_swap
+- model_path: models/frozen_tp5_sl2_swap_20260709.txt
+- model SHA256: 937c68ef2bf08f9b1635cd5b06e9029ad2b52ab1bbdcdfa0cdfb70c633d76254
+- dataset_sha256: 818304cffcdb410612780e9d42dcdf7f8488c97e0044f93c1406ed2cb4856180
+- threshold_val_q90: 0.3747093215963419
+- holdout_policy: holdout excluded from training and threshold selection; not evaluated
+- Matches /Users/zhangzc/fable-trading/models copy; no ACTIVE mutation this todo.
+
+## Main forward log (data/forward_log.csv) — SHORT FORWARD OBSERVATION
+Label: prospective forward paper book since 2026-07-08; NOT historical backtest; NOT profitability proof.
+- rows: 9 (closed 7, open 2)
+- dup keys (source,symbol,signal_time): **0**
+- signal_time range: 2026-07-08 09:15 → 2026-07-09 12:30 UTC
+- open: NEO 11:45, ICX 12:00 (2026-07-09)
+- closed realized_ret sum (gross, pre digest fee adj): ~0.01907
+- model_path on all rows: models/frozen_tp5_sl2_swap_20260709.txt
+
+### Forward run once (no prior process) + idempotency
+Run 1 JSON summary:
+```
+scanned_series=358 candidates_seen=31766 threshold_signals_seen=8
+new_signals=0 closed_updates=0 total_rows=9 open_rows=2 closed_rows=7
+```
+Run 2: identical counts; file sha256 prefix d3cc3db558cf9413 unchanged; dups=0.
+
+## H1 shadow log (data/forward_log_h1_scaled.csv) — SHORT FORWARD OBSERVATION
+- rows: 8 (closed 7, open 1 AT_USDT_SWAP)
+- dup keys: 0
+- signal_time same window as main; not re-run this todo (mainline script only per plan)
+
+## Non-sending digest (Telegram skipped)
+```
+📊 fable-trading 日报 07-10 13:01
+数据更新：401 个合约序列，最新写入 6.8 小时前
+主线 TP5/SL2：今日+0，累计 9（开仓中 2）｜已平净 +1.49% 胜率 43% 裁决 7/100
+影子 H1 scaled：今日+0，累计 8（开仓中 1）｜已平净 +1.29% 胜率 71% 裁决 7/100
+系统：无异常
+看板：http://103.214.174.58:8642
+telegram_send: SKIPPED
+alert_flag: False
+```
+Note: digest "已平净" applies its own 0.0006 fee adjustment; sample n≪100 — do not treat as final performance.
+
+## E2.1b (observe only)
+- screen fable_yolo_e21b_hsv0 alive; log shows epoch 1/40 training under dense_15m_full_s_e21b_hsv0
+- Partial epoch metrics are NOT final results; Todo 7 waits for process exit
+
+## Guardrails check
+- No judgment holdout read
+- No threshold/TP-SL/ACTIVE change
+- No Telegram send
+- No train start/stop/duplicate
+- No finalize script
+- Worktree local `data` symlink only (untracked), same target as fable-trading-codex
+
+## Result
+PASS — health baseline recorded; forward idempotent; ACTIVE/fingerprint stable.

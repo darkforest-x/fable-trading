@@ -1,0 +1,42 @@
+Todo 3 — pre-holdout strategy stability audit
+Date: 2026-07-10
+
+Commands:
+  PYTHONPATH=. python3 -m pytest tests/test_strategy_stability_preholdout.py -q
+  PYTHONPATH=. python3 -m scripts.strategy_stability_preholdout --n-folds 4 --write-report
+
+Tests: 6 passed (re-verified 2026-07-10 before commit)
+
+Artifacts (tracked; committed):
+  scripts/strategy_stability_preholdout.py
+  tests/test_strategy_stability_preholdout.py
+  analysis/strategy_stability_preholdout.md
+  analysis/output/strategy_stability_preholdout.json
+  docs/learnings/preholdout-walkforward-filters-before-train.md
+
+Commit: 21664b7 Add pre-holdout strategy stability audit
+Push: origin/codex/grok-2day (15f62f3..21664b7)
+Post-push worktree: only ?? .omo/ and ?? data (symlink)
+
+Guardrails:
+  - HOLDOUT_START=2026-05-04 never scored; load filters signal_time < holdout-purge; assert aborts on leak
+  - No parameter/threshold/TP-SL/cost search; maker cost fixed 0.06%; train-only q90
+  - No ACTIVE/frozen candidate change
+  - Results labeled historical_candidate_evidence_preholdout_only
+
+Candidates (4 chronological folds; 3 expanding test folds each):
+  tp5_sl2_long_swap: n_pre=7547; top net@maker mean 0.00044 (2/3 folds +); port PF mean 0.96 / 370 trades
+  h1_scaled_25_t3: n_pre=7547; top net@maker mean 0.00014 (1/3 +); port PF mean 1.057 / 386
+  h8_30m_h48: n_pre=1818; top net@maker mean 0.00316 (3/3 +); port PF mean 1.872 / 75
+  h10_short_tp5_sl2: n_pre=7222; top net@maker mean 0.00346 (3/3 +); port PF mean 1.63 / 404
+
+Honesty:
+  - Historical candidate evidence only; not final profitability; future return unproven
+  - Funding coverage sparse before ~2026-03; uncovered != zero funding
+  - Champion TP5/SL2 fold-1 weak (PF 0.58); later folds recover — stability not uniform
+  - H8/H10 stronger on folds but remain challengers; no promotion
+
+Note: This slot spent on unfinished commit hygiene for completed Todo 3
+(uncommitted product files vs status). No new todo started.
+
+E2.1b: observe-only (not this todo)

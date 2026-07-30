@@ -6,6 +6,8 @@ frozen-model scoring so dashboards and forward tracking do not retrain.
 """
 from __future__ import annotations
 
+import csv
+
 import hashlib
 import json
 import re
@@ -351,6 +353,37 @@ def cache_matches_artifact(
         and metadata.get("dataset_path") == artifact.relative_dataset_path
         and metadata.get("dataset_sha256") == artifact.dataset_sha256
     )
+
+
+
+def read_dataset_before(
+    path: Path,
+    *,
+    end_before: pd.Timestamp | None = None,
+) -> pd.DataFrame:
+    """Read a chronological dataset up to, but never including, a cutoff.
+
+    Used by shadow / q80 tooling so research paths can slice pre-holdout rows
+    without loading the full CSV when the tail is holdout-only.
+    """
+    from src.judgment.train import HOLDOUT_START
+
+    cutoff = HOLDOUT_START if end_before is None else end_before
+    safe_rows = 0
+    previous_time: pd.Timestamp | None = None
+    with path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        if "signal_time" not in (reader.fieldnames or []):
+            raise FrozenArtifactError(path, "dataset has no signal_time column")
+        for row in reader:
+            signal_time = pd.Timestamp(row["signal_time"])
+            if previous_time is not None and signal_time < previous_time:
+                raise FrozenArtifactError(path, "dataset must be sorted by signal_time")
+            previous_time = signal_time
+            if signal_time >= cutoff:
+                break
+            safe_rows += 1
+    return pd.read_csv(path, nrows=safe_rows, parse_dates=["signal_time"])
 
 
 def file_sha256(path: Path) -> str:
