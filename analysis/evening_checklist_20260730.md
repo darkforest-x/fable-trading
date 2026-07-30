@@ -41,6 +41,25 @@
 | 19 | **`#overview` 写清架构·层·版本 · ClauseOS 好看** | ✅ | 架构板 L1→L2→L3→裁决 + 明细表 + 实时 ACTIVE | `#overview`；`paintArchitecture` |
 | 20 | **整理文档，确保每项处理好** | ✅ | 即本文 | `analysis/evening_checklist_20260730.md` |
 
+### 2026-07-31 凌晨补记（你选「1 验收 + 3 提交」）
+
+| 动作 | 结果 |
+|------|------|
+| API/资源自检 | ✅ 见下「自检快照」 |
+| git commit | ✅ `ff78b62` — 看板/图表/架构/probe/归档；**未 push** |
+| 未纳入 commit | 纸面 PNG、`.pi/`、VPN 文档、`.claude/settings`、label_studio hub |
+
+**自检快照（本机 8642）**
+
+- 资源：`app.js?v=20260731arch1` · `chart_theme.js?v=20260731kline1` · `arch-board` 存在
+- L1：`owner_best` 不存在 → 实盘检测空转（诚实）
+- L2：ACTIVE `frozen_…yolo_v11_reg_20260718` · 阈 ≈0.0202
+- L3：前向 1/100 · 事后剔 26 · 纸面 7 新/7 总
+- BABY tip-replay：`side=short` · `tp < entry < sl` 成立
+- JS：`node --check` 通过
+
+**仍请你浏览器硬刷新一眼**（自动化验不了像素叠层）：`#overview` · `#signals` · 任意 K 线。
+
 ---
 
 ## 二、按主题深挖（避免「以为做了其实半截」）
