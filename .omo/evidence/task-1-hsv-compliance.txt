@@ -1,0 +1,41 @@
+# Task 1 — Port HSV-zero compliance fix
+# UTC: 2026-07-10 (slot: first Grok 2day wake)
+# Branch: codex/grok-2day
+# Source commit inspected: 46fadeceb6d8605bd03ed5b0f386fcfd61616883
+
+## Scope
+Ported from 46fadec without blind cherry-pick:
+- src/detection/train.py: hsv_s/hsv_v 0.05 -> 0.0
+- tests/test_detection_train_config.py (new)
+- docs/learnings/yolo-training-args-need-runtime-audit.md (new)
+- analysis/p2a_detection_report.md honest correction only
+Did NOT rewrite HANDOFF/NEXT_STEPS/PROJECT_STATUS from 46fadec (avoid E2/E2.1 doc conflict).
+Did NOT start training; did NOT run scripts/_yolo_e21_finalize.sh.
+
+## Commands
+cd /Users/zhangzc/fable-trading-grok-2day
+rg -n 'hsv_[hsv]=0.0' src/detection/train.py
+# hsv_h=0.0, hsv_s=0.0, hsv_v=0.0
+
+PYTHONPATH=/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages:. \
+  python3 -m pytest tests/test_detection_train_config.py -q
+# 1 passed, 14 warnings in 6.21s
+
+git diff --check
+# clean
+
+## SAFE_AUG seven forbidden keys (via pytest assertion)
+fliplr, flipud, mosaic, mixup, hsv_h, hsv_s, hsv_v -> all 0.0
+
+## QA: E2.1b already-running launch (observe only)
+Log: /Users/zhangzc/fable-trading-codex/output/offline_tasks/yolo_e21b_hsv0_20260710.log
+Launch dict line:
+  {'fliplr': 0.0, 'flipud': 0.0, 'mosaic': 0.0, 'mixup': 0.0, 'hsv_h': 0.0, 'hsv_s': 0.0, 'hsv_v': 0.0}
+E2.1b train start Fri Jul 10 12:31:13 CST 2026
+Ultralytics trainer line includes: hsv_h=0.0, hsv_s=0.0, hsv_v=0.0, fliplr=0.0, flipud=0.0, mosaic=0.0, mixup=0.0
+args.yaml: /Users/zhangzc/fable-trading/runs/detect/runs/detect/dense_15m_full_s_e21b_hsv0/args.yaml
+  hsv_h/s/v: 0.0; flipud/fliplr: 0.0; mosaic: 0.0; mixup: 0.0
+
+## Result
+PASS. Baseline now enforces zero HSV; historical smoke/full/E2.1 metrics retained as diagnostic only.
+No new train started. E2.1b external job left running (observe-only).
