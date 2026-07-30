@@ -1,0 +1,905 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "ETH 3m 专用做空模型：开发期回测",
+    "description": "严格 OOS 与训练像素零重叠间隙回放的因果验收。",
+    "generatedAt": "2026-07-29T15:01:16.997418+00:00",
+    "cards": [
+      {
+        "id": "strict_fire",
+        "description": "训练结束后严格 OOS 中，产生 tip 框的 eligible bars 占比。",
+        "dataset": "scope_summary",
+        "sourceId": "bt_source",
+        "filter": {
+          "scope_id": "strict_oos"
+        },
+        "metrics": [
+          {
+            "label": "严格 OOS 原始开火率",
+            "field": "raw_fire_rate",
+            "format": "percent"
+          }
+        ]
+      },
+      {
+        "id": "strict_density",
+        "description": "18 根最小间隔后，每个有效 24 小时的信号数。",
+        "dataset": "scope_summary",
+        "sourceId": "bt_source",
+        "filter": {
+          "scope_id": "strict_oos"
+        },
+        "metrics": [
+          {
+            "label": "去重信号/有效日",
+            "field": "signals_per_day",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "strict_net",
+        "description": "下一根 open 入场、3h close 出场并扣 20bp 的平均做空收益。",
+        "dataset": "scope_summary",
+        "sourceId": "bt_source",
+        "filter": {
+          "scope_id": "strict_oos"
+        },
+        "metrics": [
+          {
+            "label": "模型净收益均值（bp）",
+            "field": "model_net_bp",
+            "format": "number",
+            "signed": true
+          }
+        ]
+      },
+      {
+        "id": "strict_excess",
+        "description": "模型信号相对同 run、同 ATR 桶随机做空的信号加权差。",
+        "dataset": "scope_summary",
+        "sourceId": "bt_source",
+        "filter": {
+          "scope_id": "strict_oos"
+        },
+        "metrics": [
+          {
+            "label": "匹配超额（bp）",
+            "field": "excess_bp",
+            "format": "number",
+            "signed": true
+          }
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "fire_density",
+        "title": "原始开火率",
+        "subtitle": "严格 OOS 与训练像素零重叠的间隙回放。",
+        "type": "bar",
+        "dataset": "scope_summary",
+        "sourceId": "bt_source",
+        "valueFormat": "percent",
+        "encodings": {
+          "x": {
+            "field": "scope",
+            "type": "nominal",
+            "label": "回放范围"
+          },
+          "y": {
+            "field": "raw_fire_rate",
+            "type": "quantitative",
+            "label": "开火率",
+            "format": "percent"
+          },
+          "tooltip": [
+            {
+              "field": "eligible_bars",
+              "type": "quantitative",
+              "label": "有效 bars"
+            },
+            {
+              "field": "raw_fires",
+              "type": "quantitative",
+              "label": "原始开火"
+            },
+            {
+              "field": "dedup_signals",
+              "type": "quantitative",
+              "label": "去重信号"
+            }
+          ]
+        }
+      },
+      {
+        "id": "economics",
+        "title": "3h 做空净收益对照",
+        "subtitle": "均扣固定 20bp；随机对照匹配同 run 与 ATR 五分位。",
+        "type": "bar",
+        "dataset": "economics",
+        "sourceId": "economics_source",
+        "valueFormat": "number",
+        "unit": "bp",
+        "encodings": {
+          "x": {
+            "field": "scope",
+            "type": "nominal",
+            "label": "回放范围"
+          },
+          "y": {
+            "field": "net_bp",
+            "type": "quantitative",
+            "label": "平均净收益",
+            "unit": "bp"
+          },
+          "color": {
+            "field": "series",
+            "type": "nominal",
+            "label": "样本"
+          },
+          "tooltip": [
+            {
+              "field": "dedup_signals",
+              "type": "quantitative",
+              "label": "模型信号数"
+            },
+            {
+              "field": "excess_bp",
+              "type": "quantitative",
+              "label": "匹配超额",
+              "unit": "bp"
+            }
+          ]
+        }
+      },
+      {
+        "id": "daily_fire",
+        "title": "每日原始开火率",
+        "subtitle": "只统计与训练图片像素零重叠的 eligible bars。",
+        "type": "line",
+        "dataset": "daily",
+        "sourceId": "daily_source",
+        "valueFormat": "percent",
+        "encodings": {
+          "x": {
+            "field": "date",
+            "type": "temporal",
+            "label": "UTC 日期"
+          },
+          "y": {
+            "field": "raw_fire_rate",
+            "type": "quantitative",
+            "label": "开火率",
+            "format": "percent"
+          },
+          "tooltip": [
+            {
+              "field": "eligible_bars",
+              "type": "quantitative",
+              "label": "有效 bars"
+            },
+            {
+              "field": "gap_replay_signals",
+              "type": "quantitative",
+              "label": "去重信号"
+            }
+          ]
+        }
+      }
+    ],
+    "tables": [
+      {
+        "id": "scope_table",
+        "title": "回放结果明细",
+        "subtitle": "严格 OOS 为主结果；间隙回放只作辅助诊断。",
+        "dataset": "scope_summary",
+        "sourceId": "bt_source",
+        "defaultSort": {
+          "field": "raw_fire_rate",
+          "direction": "desc"
+        },
+        "layout": "full",
+        "columns": [
+          {
+            "field": "scope",
+            "label": "范围",
+            "type": "text"
+          },
+          {
+            "field": "eligible_bars",
+            "label": "有效 bars",
+            "format": "number"
+          },
+          {
+            "field": "raw_fire_rate",
+            "label": "开火率",
+            "format": "percent"
+          },
+          {
+            "field": "dedup_signals",
+            "label": "去重信号",
+            "format": "number"
+          },
+          {
+            "field": "signals_per_day",
+            "label": "信号/日",
+            "format": "number"
+          },
+          {
+            "field": "model_net_bp",
+            "label": "模型净均值(bp)",
+            "format": "number",
+            "movement": true
+          },
+          {
+            "field": "control_net_bp",
+            "label": "随机净均值(bp)",
+            "format": "number",
+            "movement": true
+          },
+          {
+            "field": "excess_bp",
+            "label": "匹配超额(bp)",
+            "format": "number",
+            "movement": true
+          },
+          {
+            "field": "net_win_rate",
+            "label": "净胜率",
+            "format": "percent"
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "bt_source",
+        "label": "ETH 3m causal replay summary",
+        "path": "analysis/output/eth3m_short_pilot_v1_backtest/summary.json",
+        "query": {
+          "engine": "duckdb",
+          "language": "sql",
+          "executed_at": "2026-07-29T15:01:16Z",
+          "filters": [
+            "ETH_USDT_SWAP 3m only",
+            "open_time < 2026-05-04T00:00:00Z",
+            "200-bar replay window has zero overlap with every train/val image",
+            "conf=0.30, tip-edge=2 bars, min-gap=18 bars"
+          ],
+          "metric_definitions": [
+            "raw_fire_rate = eligible decision bars with any tip-edge box / eligible decision bars",
+            "net_ret_3h = 1 - close[t+60] / open[t+1] - 0.002",
+            "paired_excess = model signal net return - mean matched-control net return"
+          ],
+          "sql": "WITH replay_summary AS (\n  SELECT replay.strict_oos AS strict_oos,\n         replay.gap_replay AS gap_replay\n  FROM read_json_auto('analysis/output/eth3m_short_pilot_v1_backtest/summary.json')\n), scope_summary AS (\n  SELECT '严格 OOS' AS scope, 'strict_oos' AS scope_id,\n         strict_oos.eligible_bars AS eligible_bars,\n         strict_oos.eligible_bar_days AS eligible_bar_days,\n         strict_oos.raw_fires AS raw_fires,\n         strict_oos.raw_fire_rate AS raw_fire_rate,\n         strict_oos.raw_fires_per_day AS raw_fires_per_day,\n         strict_oos.dedup_signals AS dedup_signals,\n         strict_oos.dedup_signals_per_day AS signals_per_day,\n         strict_oos.gross_mean * 10000 AS model_gross_bp,\n         strict_oos.net_mean_at_20bp * 10000 AS model_net_bp,\n         strict_oos.matched_control_net_mean_at_20bp * 10000 AS control_net_bp,\n         strict_oos.paired_excess_mean * 10000 AS excess_bp,\n         strict_oos.net_win_rate_at_20bp AS net_win_rate,\n         strict_oos.net_profit_factor_at_20bp AS net_pf,\n         strict_oos.block_signflip_p_one_sided AS block_p,\n         strict_oos.matched_signal_coverage AS matched_coverage\n  FROM replay_summary\n  UNION ALL\n  SELECT '间隙回放', 'gap_replay', gap_replay.eligible_bars,\n         gap_replay.eligible_bar_days, gap_replay.raw_fires,\n         gap_replay.raw_fire_rate, gap_replay.raw_fires_per_day,\n         gap_replay.dedup_signals, gap_replay.dedup_signals_per_day,\n         gap_replay.gross_mean * 10000, gap_replay.net_mean_at_20bp * 10000,\n         gap_replay.matched_control_net_mean_at_20bp * 10000,\n         gap_replay.paired_excess_mean * 10000,\n         gap_replay.net_win_rate_at_20bp,\n         gap_replay.net_profit_factor_at_20bp,\n         gap_replay.block_signflip_p_one_sided,\n         gap_replay.matched_signal_coverage\n  FROM replay_summary\n)\nSELECT * FROM scope_summary ORDER BY scope_id;",
+          "description": "Builds strict-OOS and zero-pixel-overlap replay metrics from the audited replay summary.",
+          "tables_used": [
+            "analysis/output/eth3m_short_pilot_v1_backtest/summary.json"
+          ]
+        }
+      },
+      {
+        "id": "economics_source",
+        "label": "ETH 3m model versus matched-control economics",
+        "path": "analysis/output/eth3m_short_pilot_v1_backtest/summary.json",
+        "query": {
+          "engine": "duckdb",
+          "language": "sql",
+          "executed_at": "2026-07-29T15:01:16Z",
+          "filters": [
+            "ETH_USDT_SWAP 3m only",
+            "open_time < 2026-05-04T00:00:00Z",
+            "200-bar replay window has zero overlap with every train/val image",
+            "conf=0.30, tip-edge=2 bars, min-gap=18 bars"
+          ],
+          "metric_definitions": [
+            "raw_fire_rate = eligible decision bars with any tip-edge box / eligible decision bars",
+            "net_ret_3h = 1 - close[t+60] / open[t+1] - 0.002",
+            "paired_excess = model signal net return - mean matched-control net return"
+          ],
+          "sql": "WITH replay_summary AS (\n  SELECT replay.strict_oos AS strict_oos,\n         replay.gap_replay AS gap_replay\n  FROM read_json_auto('analysis/output/eth3m_short_pilot_v1_backtest/summary.json')\n), scope_summary AS (\n  SELECT '严格 OOS' AS scope, 'strict_oos' AS scope_id,\n         strict_oos.eligible_bars AS eligible_bars,\n         strict_oos.eligible_bar_days AS eligible_bar_days,\n         strict_oos.raw_fires AS raw_fires,\n         strict_oos.raw_fire_rate AS raw_fire_rate,\n         strict_oos.raw_fires_per_day AS raw_fires_per_day,\n         strict_oos.dedup_signals AS dedup_signals,\n         strict_oos.dedup_signals_per_day AS signals_per_day,\n         strict_oos.gross_mean * 10000 AS model_gross_bp,\n         strict_oos.net_mean_at_20bp * 10000 AS model_net_bp,\n         strict_oos.matched_control_net_mean_at_20bp * 10000 AS control_net_bp,\n         strict_oos.paired_excess_mean * 10000 AS excess_bp,\n         strict_oos.net_win_rate_at_20bp AS net_win_rate,\n         strict_oos.net_profit_factor_at_20bp AS net_pf,\n         strict_oos.block_signflip_p_one_sided AS block_p,\n         strict_oos.matched_signal_coverage AS matched_coverage\n  FROM replay_summary\n  UNION ALL\n  SELECT '间隙回放', 'gap_replay', gap_replay.eligible_bars,\n         gap_replay.eligible_bar_days, gap_replay.raw_fires,\n         gap_replay.raw_fire_rate, gap_replay.raw_fires_per_day,\n         gap_replay.dedup_signals, gap_replay.dedup_signals_per_day,\n         gap_replay.gross_mean * 10000, gap_replay.net_mean_at_20bp * 10000,\n         gap_replay.matched_control_net_mean_at_20bp * 10000,\n         gap_replay.paired_excess_mean * 10000,\n         gap_replay.net_win_rate_at_20bp,\n         gap_replay.net_profit_factor_at_20bp,\n         gap_replay.block_signflip_p_one_sided,\n         gap_replay.matched_signal_coverage\n  FROM replay_summary\n)\nSELECT scope_summary.*,\n       series,\n       CASE WHEN series = '模型信号' THEN model_net_bp ELSE control_net_bp END AS net_bp\nFROM scope_summary\nCROSS JOIN (VALUES ('模型信号'), ('匹配随机')) AS comparison(series)\nORDER BY scope_id, series;",
+          "description": "Expands each replay scope into model and exact run/ATR matched-control return rows.",
+          "tables_used": [
+            "analysis/output/eth3m_short_pilot_v1_backtest/summary.json"
+          ]
+        }
+      },
+      {
+        "id": "daily_source",
+        "label": "ETH 3m daily replay density",
+        "path": "analysis/output/eth3m_short_pilot_v1_backtest/daily.csv",
+        "query": {
+          "engine": "duckdb",
+          "language": "sql",
+          "sql": "SELECT * FROM read_csv_auto('analysis/output/eth3m_short_pilot_v1_backtest/daily.csv', header=true) ORDER BY date;",
+          "description": "Loads the audited daily density rollup produced by the causal replay.",
+          "executed_at": "2026-07-29T15:01:16Z",
+          "filters": [
+            "ETH_USDT_SWAP 3m only",
+            "zero train/val pixel overlap",
+            "open_time < 2026-05-04T00:00:00Z"
+          ],
+          "metric_definitions": [
+            "raw_fire_rate = raw_fires / eligible_bars for each UTC date"
+          ],
+          "tables_used": [
+            "analysis/output/eth3m_short_pilot_v1_backtest/daily.csv"
+          ]
+        }
+      }
+    ],
+    "blocks": [
+      {
+        "id": "title",
+        "type": "markdown",
+        "body": "# ETH 3m 专用做空模型：开发期回测"
+      },
+      {
+        "id": "executive",
+        "type": "markdown",
+        "sourceId": "bt_source",
+        "body": "## Executive Summary\n\n- **本轮不通过。** 严格 OOS 在 772/774 根盘口开火，原始开火率 **99.74%**。\n- **去重并没有创造选择力。** 18 根去重后仍有 43 笔、26.67 笔/有效日。\n- **经济结果同样失败。** 扣 20bp 后模型平均 **-31.97bp**，匹配随机为 **-31.17bp**，模型超额 **-0.80bp**。\n- **下一步不是调 conf。** 应停止 v1，先重做带连续硬负例的 v2 数据集并预留新的严格 OOS。"
+      },
+      {
+        "id": "metrics",
+        "type": "metric-strip",
+        "cardIds": [
+          "strict_fire",
+          "strict_density",
+          "strict_net",
+          "strict_excess"
+        ]
+      },
+      {
+        "id": "density_finding",
+        "type": "markdown",
+        "sourceId": "bt_source",
+        "body": "## 检测层没有形成稀疏事件\n\n严格 OOS 每 480 根/有效日约有 479 根开火。18 根间隔只是在机械限流，不能把近似恒真的检测结果变成事件选择。"
+      },
+      {
+        "id": "density_chart",
+        "type": "chart",
+        "chartId": "fire_density"
+      },
+      {
+        "id": "economics_finding",
+        "type": "markdown",
+        "sourceId": "economics_source",
+        "body": "## 收益没有超过匹配随机做空\n\n严格 OOS 模型比随机差 0.80bp；间隙回放差 4.43bp。任何绝对涨跌都不能归因给模型。"
+      },
+      {
+        "id": "economics_chart",
+        "type": "chart",
+        "chartId": "economics"
+      },
+      {
+        "id": "scope_table_block",
+        "type": "table",
+        "tableId": "scope_table",
+        "layout": "full"
+      },
+      {
+        "id": "daily_finding",
+        "type": "markdown",
+        "sourceId": "daily_source",
+        "body": "## 过密不是单日偶发\n\n多数 eligible 日期的开火率接近 100%；少数较低日期也仍不足以形成可用的稀疏事件流。"
+      },
+      {
+        "id": "daily_chart",
+        "type": "chart",
+        "chartId": "daily_fire"
+      },
+      {
+        "id": "next_steps",
+        "type": "markdown",
+        "body": "## 建议下一步\n\n1. **停止 v1，不进入判断层或 holdout。**\n2. **先封存新的连续严格 OOS。** v2 训练、选图和 early stopping 都不得读取。\n3. **重做序列数据集。** 每事件只保留一个正时点，并加入同事件前后连续窗口的‘未形成/已经太晚’硬负例；模糊区不训练。\n4. **训练前由 owner 明确密度门。** 不在看到回放后倒推 conf。"
+      },
+      {
+        "id": "questions",
+        "type": "markdown",
+        "body": "## 仍需回答的问题\n\n- owner 接受的原始开火/日和去重事件/日上限是多少？\n- ‘已经太晚’窗口是否直接作为负例，还是单独做 timing 类别？\n- v2 需要补多少跨行情背景负例，才能在训练前锁定新的 OOS？"
+      },
+      {
+        "id": "caveats",
+        "type": "markdown",
+        "sourceId": "bt_source",
+        "body": "## 口径、限制与诚实声明\n\n- 严格 OOS 只有 774 根、43 个去重信号和 2 个 run×UTC-day 块；足以判定密度失败，不足以精确估计收益。\n- 3h 结果重叠，逐信号 t 值偏乐观；报告使用更保守的块符号置换作参考。\n- 间隙回放只保证训练像素零重叠，不能替代严格时序 OOS。\n- 本轮未读取 holdout、未调阈值、未改成本/障碍、未 promote。"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-07-29T15:01:16.997418+00:00",
+    "status": "ready",
+    "datasets": {
+      "scope_summary": [
+        {
+          "scope": "严格 OOS",
+          "scope_id": "strict_oos",
+          "eligible_bars": 774,
+          "eligible_bar_days": 1.6125,
+          "raw_fires": 772,
+          "raw_fire_rate": 0.9974160206718347,
+          "raw_fires_per_day": 478.7596899224806,
+          "dedup_signals": 43,
+          "signals_per_day": 26.666666666666664,
+          "model_gross_bp": -11.974831026465466,
+          "model_net_bp": -31.974831026465473,
+          "control_net_bp": -31.17238383096131,
+          "excess_bp": -0.8024471955041643,
+          "net_win_rate": 0.11627906976744186,
+          "net_pf": 0.15661680805106287,
+          "block_p": 0.6,
+          "matched_coverage": 1.0
+        },
+        {
+          "scope": "间隙回放",
+          "scope_id": "gap_replay",
+          "eligible_bars": 5398,
+          "eligible_bar_days": 11.2458,
+          "raw_fires": 5071,
+          "raw_fire_rate": 0.939422008151167,
+          "raw_fires_per_day": 450.9225639125602,
+          "dedup_signals": 304,
+          "signals_per_day": 27.032234160800297,
+          "model_gross_bp": -25.145094256501228,
+          "model_net_bp": -45.14509425650124,
+          "control_net_bp": -40.7133033329943,
+          "excess_bp": -4.431790923506921,
+          "net_win_rate": 0.15460526315789475,
+          "net_pf": 0.07489649446022438,
+          "block_p": 0.7728445431091379,
+          "matched_coverage": 1.0
+        }
+      ],
+      "economics": [
+        {
+          "scope": "严格 OOS",
+          "scope_id": "strict_oos",
+          "eligible_bars": 774,
+          "eligible_bar_days": 1.6125,
+          "raw_fires": 772,
+          "raw_fire_rate": 0.9974160206718347,
+          "raw_fires_per_day": 478.7596899224806,
+          "dedup_signals": 43,
+          "signals_per_day": 26.666666666666664,
+          "model_gross_bp": -11.974831026465466,
+          "model_net_bp": -31.974831026465473,
+          "control_net_bp": -31.17238383096131,
+          "excess_bp": -0.8024471955041643,
+          "net_win_rate": 0.11627906976744186,
+          "net_pf": 0.15661680805106287,
+          "block_p": 0.6,
+          "matched_coverage": 1.0,
+          "series": "模型信号",
+          "net_bp": -31.974831026465473
+        },
+        {
+          "scope": "严格 OOS",
+          "scope_id": "strict_oos",
+          "eligible_bars": 774,
+          "eligible_bar_days": 1.6125,
+          "raw_fires": 772,
+          "raw_fire_rate": 0.9974160206718347,
+          "raw_fires_per_day": 478.7596899224806,
+          "dedup_signals": 43,
+          "signals_per_day": 26.666666666666664,
+          "model_gross_bp": -11.974831026465466,
+          "model_net_bp": -31.974831026465473,
+          "control_net_bp": -31.17238383096131,
+          "excess_bp": -0.8024471955041643,
+          "net_win_rate": 0.11627906976744186,
+          "net_pf": 0.15661680805106287,
+          "block_p": 0.6,
+          "matched_coverage": 1.0,
+          "series": "匹配随机",
+          "net_bp": -31.17238383096131
+        },
+        {
+          "scope": "间隙回放",
+          "scope_id": "gap_replay",
+          "eligible_bars": 5398,
+          "eligible_bar_days": 11.2458,
+          "raw_fires": 5071,
+          "raw_fire_rate": 0.939422008151167,
+          "raw_fires_per_day": 450.9225639125602,
+          "dedup_signals": 304,
+          "signals_per_day": 27.032234160800297,
+          "model_gross_bp": -25.145094256501228,
+          "model_net_bp": -45.14509425650124,
+          "control_net_bp": -40.7133033329943,
+          "excess_bp": -4.431790923506921,
+          "net_win_rate": 0.15460526315789475,
+          "net_pf": 0.07489649446022438,
+          "block_p": 0.7728445431091379,
+          "matched_coverage": 1.0,
+          "series": "模型信号",
+          "net_bp": -45.14509425650124
+        },
+        {
+          "scope": "间隙回放",
+          "scope_id": "gap_replay",
+          "eligible_bars": 5398,
+          "eligible_bar_days": 11.2458,
+          "raw_fires": 5071,
+          "raw_fire_rate": 0.939422008151167,
+          "raw_fires_per_day": 450.9225639125602,
+          "dedup_signals": 304,
+          "signals_per_day": 27.032234160800297,
+          "model_gross_bp": -25.145094256501228,
+          "model_net_bp": -45.14509425650124,
+          "control_net_bp": -40.7133033329943,
+          "excess_bp": -4.431790923506921,
+          "net_win_rate": 0.15460526315789475,
+          "net_pf": 0.07489649446022438,
+          "block_p": 0.7728445431091379,
+          "matched_coverage": 1.0,
+          "series": "匹配随机",
+          "net_bp": -40.7133033329943
+        }
+      ],
+      "daily": [
+        {
+          "date": "2026-03-14",
+          "eligible_bars": 147,
+          "raw_fires": 143,
+          "raw_fire_rate": 0.9727891156,
+          "gap_replay_signals": 9,
+          "gap_replay_mean_net": -0.004917108,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-03-15",
+          "eligible_bars": 56,
+          "raw_fires": 54,
+          "raw_fire_rate": 0.9642857143,
+          "gap_replay_signals": 3,
+          "gap_replay_mean_net": -0.0086554188,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-03-20",
+          "eligible_bars": 78,
+          "raw_fires": 69,
+          "raw_fire_rate": 0.8846153846,
+          "gap_replay_signals": 5,
+          "gap_replay_mean_net": -0.0054679148,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-03-21",
+          "eligible_bars": 268,
+          "raw_fires": 265,
+          "raw_fire_rate": 0.9888059701,
+          "gap_replay_signals": 15,
+          "gap_replay_mean_net": -0.0022919517,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-03-23",
+          "eligible_bars": 139,
+          "raw_fires": 130,
+          "raw_fire_rate": 0.9352517986,
+          "gap_replay_signals": 8,
+          "gap_replay_mean_net": -0.0012137344,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-03-24",
+          "eligible_bars": 64,
+          "raw_fires": 60,
+          "raw_fire_rate": 0.9375,
+          "gap_replay_signals": 4,
+          "gap_replay_mean_net": -0.0001141299,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-03-27",
+          "eligible_bars": 66,
+          "raw_fires": 66,
+          "raw_fire_rate": 1.0,
+          "gap_replay_signals": 4,
+          "gap_replay_mean_net": -0.0045748711,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-03-28",
+          "eligible_bars": 224,
+          "raw_fires": 222,
+          "raw_fire_rate": 0.9910714286,
+          "gap_replay_signals": 12,
+          "gap_replay_mean_net": -0.0029169698,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-03-31",
+          "eligible_bars": 92,
+          "raw_fires": 91,
+          "raw_fire_rate": 0.9891304348,
+          "gap_replay_signals": 6,
+          "gap_replay_mean_net": -0.0020228171,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-01",
+          "eligible_bars": 162,
+          "raw_fires": 123,
+          "raw_fire_rate": 0.7592592593,
+          "gap_replay_signals": 8,
+          "gap_replay_mean_net": -0.0088005796,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-03",
+          "eligible_bars": 17,
+          "raw_fires": 17,
+          "raw_fire_rate": 1.0,
+          "gap_replay_signals": 1,
+          "gap_replay_mean_net": -0.0016585816,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-04",
+          "eligible_bars": 404,
+          "raw_fires": 403,
+          "raw_fire_rate": 0.9975247525,
+          "gap_replay_signals": 23,
+          "gap_replay_mean_net": -0.0033416193,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-08",
+          "eligible_bars": 66,
+          "raw_fires": 42,
+          "raw_fire_rate": 0.6363636364,
+          "gap_replay_signals": 4,
+          "gap_replay_mean_net": -0.0051140582,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-10",
+          "eligible_bars": 305,
+          "raw_fires": 239,
+          "raw_fire_rate": 0.7836065574,
+          "gap_replay_signals": 17,
+          "gap_replay_mean_net": -0.0062998504,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-11",
+          "eligible_bars": 321,
+          "raw_fires": 321,
+          "raw_fire_rate": 1.0,
+          "gap_replay_signals": 18,
+          "gap_replay_mean_net": -0.0045544675,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-13",
+          "eligible_bars": 314,
+          "raw_fires": 206,
+          "raw_fire_rate": 0.6560509554,
+          "gap_replay_signals": 16,
+          "gap_replay_mean_net": -0.0184129642,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-14",
+          "eligible_bars": 94,
+          "raw_fires": 86,
+          "raw_fire_rate": 0.914893617,
+          "gap_replay_signals": 5,
+          "gap_replay_mean_net": -0.0027497023,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-15",
+          "eligible_bars": 114,
+          "raw_fires": 90,
+          "raw_fire_rate": 0.7894736842,
+          "gap_replay_signals": 7,
+          "gap_replay_mean_net": -0.006076477,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-21",
+          "eligible_bars": 29,
+          "raw_fires": 29,
+          "raw_fire_rate": 1.0,
+          "gap_replay_signals": 2,
+          "gap_replay_mean_net": 0.0025892835,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-24",
+          "eligible_bars": 208,
+          "raw_fires": 205,
+          "raw_fire_rate": 0.9855769231,
+          "gap_replay_signals": 12,
+          "gap_replay_mean_net": -0.002035835,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-25",
+          "eligible_bars": 480,
+          "raw_fires": 474,
+          "raw_fire_rate": 0.9875,
+          "gap_replay_signals": 27,
+          "gap_replay_mean_net": -0.0019065003,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-26",
+          "eligible_bars": 379,
+          "raw_fires": 374,
+          "raw_fire_rate": 0.9868073879,
+          "gap_replay_signals": 21,
+          "gap_replay_mean_net": -0.0050187422,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-28",
+          "eligible_bars": 145,
+          "raw_fires": 142,
+          "raw_fire_rate": 0.9793103448,
+          "gap_replay_signals": 9,
+          "gap_replay_mean_net": -0.0023084991,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-29",
+          "eligible_bars": 41,
+          "raw_fires": 41,
+          "raw_fire_rate": 1.0,
+          "gap_replay_signals": 2,
+          "gap_replay_mean_net": -0.0163392834,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-04-30",
+          "eligible_bars": 210,
+          "raw_fires": 206,
+          "raw_fire_rate": 0.980952381,
+          "gap_replay_signals": 12,
+          "gap_replay_mean_net": -0.002102366,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-05-01",
+          "eligible_bars": 201,
+          "raw_fires": 201,
+          "raw_fire_rate": 1.0,
+          "gap_replay_signals": 11,
+          "gap_replay_mean_net": -0.0057476139,
+          "strict_oos_signals": 0,
+          "strict_oos_mean_net": null
+        },
+        {
+          "date": "2026-05-02",
+          "eligible_bars": 354,
+          "raw_fires": 352,
+          "raw_fire_rate": 0.9943502825,
+          "gap_replay_signals": 20,
+          "gap_replay_mean_net": -0.002033057,
+          "strict_oos_signals": 20,
+          "strict_oos_mean_net": -0.002033057
+        },
+        {
+          "date": "2026-05-03",
+          "eligible_bars": 420,
+          "raw_fires": 420,
+          "raw_fire_rate": 1.0,
+          "gap_replay_signals": 23,
+          "gap_replay_mean_net": -0.0042100275,
+          "strict_oos_signals": 23,
+          "strict_oos_mean_net": -0.0042100275
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "bt_source",
+      "label": "ETH 3m causal replay summary",
+      "path": "analysis/output/eth3m_short_pilot_v1_backtest/summary.json",
+      "query": {
+        "engine": "duckdb",
+        "language": "sql",
+        "executed_at": "2026-07-29T15:01:16Z",
+        "filters": [
+          "ETH_USDT_SWAP 3m only",
+          "open_time < 2026-05-04T00:00:00Z",
+          "200-bar replay window has zero overlap with every train/val image",
+          "conf=0.30, tip-edge=2 bars, min-gap=18 bars"
+        ],
+        "metric_definitions": [
+          "raw_fire_rate = eligible decision bars with any tip-edge box / eligible decision bars",
+          "net_ret_3h = 1 - close[t+60] / open[t+1] - 0.002",
+          "paired_excess = model signal net return - mean matched-control net return"
+        ],
+        "sql": "WITH replay_summary AS (\n  SELECT replay.strict_oos AS strict_oos,\n         replay.gap_replay AS gap_replay\n  FROM read_json_auto('analysis/output/eth3m_short_pilot_v1_backtest/summary.json')\n), scope_summary AS (\n  SELECT '严格 OOS' AS scope, 'strict_oos' AS scope_id,\n         strict_oos.eligible_bars AS eligible_bars,\n         strict_oos.eligible_bar_days AS eligible_bar_days,\n         strict_oos.raw_fires AS raw_fires,\n         strict_oos.raw_fire_rate AS raw_fire_rate,\n         strict_oos.raw_fires_per_day AS raw_fires_per_day,\n         strict_oos.dedup_signals AS dedup_signals,\n         strict_oos.dedup_signals_per_day AS signals_per_day,\n         strict_oos.gross_mean * 10000 AS model_gross_bp,\n         strict_oos.net_mean_at_20bp * 10000 AS model_net_bp,\n         strict_oos.matched_control_net_mean_at_20bp * 10000 AS control_net_bp,\n         strict_oos.paired_excess_mean * 10000 AS excess_bp,\n         strict_oos.net_win_rate_at_20bp AS net_win_rate,\n         strict_oos.net_profit_factor_at_20bp AS net_pf,\n         strict_oos.block_signflip_p_one_sided AS block_p,\n         strict_oos.matched_signal_coverage AS matched_coverage\n  FROM replay_summary\n  UNION ALL\n  SELECT '间隙回放', 'gap_replay', gap_replay.eligible_bars,\n         gap_replay.eligible_bar_days, gap_replay.raw_fires,\n         gap_replay.raw_fire_rate, gap_replay.raw_fires_per_day,\n         gap_replay.dedup_signals, gap_replay.dedup_signals_per_day,\n         gap_replay.gross_mean * 10000, gap_replay.net_mean_at_20bp * 10000,\n         gap_replay.matched_control_net_mean_at_20bp * 10000,\n         gap_replay.paired_excess_mean * 10000,\n         gap_replay.net_win_rate_at_20bp,\n         gap_replay.net_profit_factor_at_20bp,\n         gap_replay.block_signflip_p_one_sided,\n         gap_replay.matched_signal_coverage\n  FROM replay_summary\n)\nSELECT * FROM scope_summary ORDER BY scope_id;",
+        "description": "Builds strict-OOS and zero-pixel-overlap replay metrics from the audited replay summary.",
+        "tables_used": [
+          "analysis/output/eth3m_short_pilot_v1_backtest/summary.json"
+        ]
+      }
+    },
+    {
+      "id": "economics_source",
+      "label": "ETH 3m model versus matched-control economics",
+      "path": "analysis/output/eth3m_short_pilot_v1_backtest/summary.json",
+      "query": {
+        "engine": "duckdb",
+        "language": "sql",
+        "executed_at": "2026-07-29T15:01:16Z",
+        "filters": [
+          "ETH_USDT_SWAP 3m only",
+          "open_time < 2026-05-04T00:00:00Z",
+          "200-bar replay window has zero overlap with every train/val image",
+          "conf=0.30, tip-edge=2 bars, min-gap=18 bars"
+        ],
+        "metric_definitions": [
+          "raw_fire_rate = eligible decision bars with any tip-edge box / eligible decision bars",
+          "net_ret_3h = 1 - close[t+60] / open[t+1] - 0.002",
+          "paired_excess = model signal net return - mean matched-control net return"
+        ],
+        "sql": "WITH replay_summary AS (\n  SELECT replay.strict_oos AS strict_oos,\n         replay.gap_replay AS gap_replay\n  FROM read_json_auto('analysis/output/eth3m_short_pilot_v1_backtest/summary.json')\n), scope_summary AS (\n  SELECT '严格 OOS' AS scope, 'strict_oos' AS scope_id,\n         strict_oos.eligible_bars AS eligible_bars,\n         strict_oos.eligible_bar_days AS eligible_bar_days,\n         strict_oos.raw_fires AS raw_fires,\n         strict_oos.raw_fire_rate AS raw_fire_rate,\n         strict_oos.raw_fires_per_day AS raw_fires_per_day,\n         strict_oos.dedup_signals AS dedup_signals,\n         strict_oos.dedup_signals_per_day AS signals_per_day,\n         strict_oos.gross_mean * 10000 AS model_gross_bp,\n         strict_oos.net_mean_at_20bp * 10000 AS model_net_bp,\n         strict_oos.matched_control_net_mean_at_20bp * 10000 AS control_net_bp,\n         strict_oos.paired_excess_mean * 10000 AS excess_bp,\n         strict_oos.net_win_rate_at_20bp AS net_win_rate,\n         strict_oos.net_profit_factor_at_20bp AS net_pf,\n         strict_oos.block_signflip_p_one_sided AS block_p,\n         strict_oos.matched_signal_coverage AS matched_coverage\n  FROM replay_summary\n  UNION ALL\n  SELECT '间隙回放', 'gap_replay', gap_replay.eligible_bars,\n         gap_replay.eligible_bar_days, gap_replay.raw_fires,\n         gap_replay.raw_fire_rate, gap_replay.raw_fires_per_day,\n         gap_replay.dedup_signals, gap_replay.dedup_signals_per_day,\n         gap_replay.gross_mean * 10000, gap_replay.net_mean_at_20bp * 10000,\n         gap_replay.matched_control_net_mean_at_20bp * 10000,\n         gap_replay.paired_excess_mean * 10000,\n         gap_replay.net_win_rate_at_20bp,\n         gap_replay.net_profit_factor_at_20bp,\n         gap_replay.block_signflip_p_one_sided,\n         gap_replay.matched_signal_coverage\n  FROM replay_summary\n)\nSELECT scope_summary.*,\n       series,\n       CASE WHEN series = '模型信号' THEN model_net_bp ELSE control_net_bp END AS net_bp\nFROM scope_summary\nCROSS JOIN (VALUES ('模型信号'), ('匹配随机')) AS comparison(series)\nORDER BY scope_id, series;",
+        "description": "Expands each replay scope into model and exact run/ATR matched-control return rows.",
+        "tables_used": [
+          "analysis/output/eth3m_short_pilot_v1_backtest/summary.json"
+        ]
+      }
+    },
+    {
+      "id": "daily_source",
+      "label": "ETH 3m daily replay density",
+      "path": "analysis/output/eth3m_short_pilot_v1_backtest/daily.csv",
+      "query": {
+        "engine": "duckdb",
+        "language": "sql",
+        "sql": "SELECT * FROM read_csv_auto('analysis/output/eth3m_short_pilot_v1_backtest/daily.csv', header=true) ORDER BY date;",
+        "description": "Loads the audited daily density rollup produced by the causal replay.",
+        "executed_at": "2026-07-29T15:01:16Z",
+        "filters": [
+          "ETH_USDT_SWAP 3m only",
+          "zero train/val pixel overlap",
+          "open_time < 2026-05-04T00:00:00Z"
+        ],
+        "metric_definitions": [
+          "raw_fire_rate = raw_fires / eligible_bars for each UTC date"
+        ],
+        "tables_used": [
+          "analysis/output/eth3m_short_pilot_v1_backtest/daily.csv"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,168 @@
+{
+  "project_id": 53,
+  "holdout_start_utc": "2026-05-04T00:00:00+00:00",
+  "holdout_consumed": false,
+  "task_count": 200,
+  "task_time_start": "2026-03-14T06:39:00+00:00",
+  "task_time_end": "2026-05-01T20:54:00+00:00",
+  "owner_yes_count": 93,
+  "owner_no_count": 107,
+  "owner_yes_rate_pct": 46.5,
+  "one_hour_separated_event_count": 104,
+  "all_tasks": {
+    "n": 200,
+    "box_bars_median": 13.0,
+    "box_elapsed_min_median": 36.0,
+    "box_elapsed_min_p75": 39.0,
+    "consumed_atr_median": 4.308,
+    "consumed_atr_p75": 5.205,
+    "remaining_drop_atr_median": 2.879,
+    "future_return_3h_median_pct": 0.106,
+    "share_consumed_gt_0_5atr_pct": 99.5,
+    "share_consumed_gt_1atr_pct": 99.0,
+    "share_consumed_gt_2atr_pct": 98.5,
+    "share_consumed_exceeds_remaining_pct": 62.0,
+    "share_tip_below_all_mas_pct": 98.0
+  },
+  "owner_yes": {
+    "n": 93,
+    "box_bars_median": 13.0,
+    "box_elapsed_min_median": 36.0,
+    "box_elapsed_min_p75": 39.0,
+    "consumed_atr_median": 4.471,
+    "consumed_atr_p75": 5.416,
+    "remaining_drop_atr_median": 5.279,
+    "future_return_3h_median_pct": -0.481,
+    "share_consumed_gt_0_5atr_pct": 100.0,
+    "share_consumed_gt_1atr_pct": 100.0,
+    "share_consumed_gt_2atr_pct": 100.0,
+    "share_consumed_exceeds_remaining_pct": 44.09,
+    "share_tip_below_all_mas_pct": 100.0
+  },
+  "owner_no": {
+    "n": 107,
+    "box_bars_median": 13.0,
+    "box_elapsed_min_median": 36.0,
+    "box_elapsed_min_p75": 39.0,
+    "consumed_atr_median": 4.166,
+    "consumed_atr_p75": 4.954,
+    "remaining_drop_atr_median": 1.554,
+    "future_return_3h_median_pct": 0.48,
+    "share_consumed_gt_0_5atr_pct": 99.07,
+    "share_consumed_gt_1atr_pct": 98.13,
+    "share_consumed_gt_2atr_pct": 97.2,
+    "share_consumed_exceeds_remaining_pct": 77.57,
+    "share_tip_below_all_mas_pct": 96.26
+  },
+  "owner_yes_timing_proxy": {
+    "remaining_not_less_than_consumed": {
+      "n": 52,
+      "share_of_owner_yes_pct": 55.91,
+      "consumed_atr_median": 4.375,
+      "remaining_drop_atr_median": 8.173,
+      "future_3h_close_down_rate_pct": 86.54,
+      "future_rebound_pct_median": 0.264
+    },
+    "consumed_exceeds_remaining": {
+      "n": 41,
+      "share_of_owner_yes_pct": 44.09,
+      "consumed_atr_median": 4.794,
+      "remaining_drop_atr_median": 2.723,
+      "future_3h_close_down_rate_pct": 41.46,
+      "future_rebound_pct_median": 0.623
+    }
+  },
+  "relationships": {
+    "box_elapsed_vs_consumed_atr_spearman": 0.007690839281160019,
+    "v10_confidence_vs_owner_yes_spearman": 0.17424088561686704
+  },
+  "consumed_buckets": [
+    {
+      "consumed_bucket": "≤0.5 ATR",
+      "task_count": 1,
+      "owner_yes_count": 0,
+      "owner_yes_rate_pct": 0.0,
+      "median_box_elapsed_min": 36.0,
+      "median_remaining_drop_atr": 4.721
+    },
+    {
+      "consumed_bucket": "0.5–1 ATR",
+      "task_count": 1,
+      "owner_yes_count": 0,
+      "owner_yes_rate_pct": 0.0,
+      "median_box_elapsed_min": 30.0,
+      "median_remaining_drop_atr": 3.993
+    },
+    {
+      "consumed_bucket": "1–2 ATR",
+      "task_count": 1,
+      "owner_yes_count": 0,
+      "owner_yes_rate_pct": 0.0,
+      "median_box_elapsed_min": 30.0,
+      "median_remaining_drop_atr": 3.092
+    },
+    {
+      "consumed_bucket": "2–3 ATR",
+      "task_count": 18,
+      "owner_yes_count": 5,
+      "owner_yes_rate_pct": 27.78,
+      "median_box_elapsed_min": 36.0,
+      "median_remaining_drop_atr": 2.444
+    },
+    {
+      "consumed_bucket": ">3 ATR",
+      "task_count": 179,
+      "owner_yes_count": 88,
+      "owner_yes_rate_pct": 49.16,
+      "median_box_elapsed_min": 36.0,
+      "median_remaining_drop_atr": 2.971
+    }
+  ],
+  "confidence_buckets": [
+    {
+      "confidence_bucket": "0.30–0.40",
+      "task_count": 32,
+      "owner_yes_count": 8,
+      "owner_yes_rate_pct": 25.0,
+      "median_consumed_atr": 4.043
+    },
+    {
+      "confidence_bucket": "0.40–0.50",
+      "task_count": 26,
+      "owner_yes_count": 13,
+      "owner_yes_rate_pct": 50.0,
+      "median_consumed_atr": 4.345
+    },
+    {
+      "confidence_bucket": "0.50–0.65",
+      "task_count": 48,
+      "owner_yes_count": 21,
+      "owner_yes_rate_pct": 43.75,
+      "median_consumed_atr": 4.249
+    },
+    {
+      "confidence_bucket": "≥0.65",
+      "task_count": 94,
+      "owner_yes_count": 51,
+      "owner_yes_rate_pct": 54.26,
+      "median_consumed_atr": 4.546
+    }
+  ],
+  "data_quality": {
+    "unique_task_ids": 200,
+    "all_box_right_edges_match_manifest": true,
+    "box_right_edge_counts": {
+      "199": 200
+    },
+    "max_outcome_recompute_abs_error": 9.84455572616838e-17,
+    "max_future_end_utc": "2026-05-01T23:54:00+00:00",
+    "missing_required_values": 0
+  },
+  "definitions": {
+    "owner_yes": "Owner answered 是 to whether the red box is the desired short shape; this is not an entry-timing approval.",
+    "box_elapsed_min": "Elapsed time from the mapped first box bar to the mapped last box bar; (bar_count - 1) × 3 minutes.",
+    "consumed_atr": "Positive decline from the highest close inside the box through the signal close, divided by causal ATR14 at the signal.",
+    "remaining_drop_atr": "Maximum additional decline during the fixed future 3h window, measured from the signal close and divided by causal ATR14.",
+    "late_thresholds": "0.5/1/2 ATR cuts are sensitivity checks only, not accepted owner thresholds."
+  }
+}

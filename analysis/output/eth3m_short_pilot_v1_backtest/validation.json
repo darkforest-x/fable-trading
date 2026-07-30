@@ -1,0 +1,49 @@
+{
+  "status": "pass",
+  "checks": {
+    "holdout_physically_absent": true,
+    "manifest_pre_holdout": true,
+    "eligible_expected_counts": true,
+    "scan_one_to_one": true,
+    "scan_no_errors": true,
+    "mapped_boxes_are_decision_tip": true,
+    "zero_training_pixel_overlap": true,
+    "strict_after_last_anchor": true,
+    "raw_counts": true,
+    "signal_unique": true,
+    "dedup_gap_at_least_18": true,
+    "all_3h_returns_recomputed": true,
+    "controls_exact_cell": true,
+    "matched_signal_coverage_100pct": true,
+    "summary_strict_oos_counts": true,
+    "summary_strict_oos_means": true,
+    "summary_gap_replay_counts": true,
+    "summary_gap_replay_means": true
+  },
+  "failed": [],
+  "recomputed": {
+    "strict_oos": {
+      "eligible_bars": 774,
+      "raw_fires": 772,
+      "dedup_signals": 43,
+      "raw_fire_rate": 0.9974160206718347,
+      "net_mean_at_20bp": -0.0031974831026465047,
+      "matched_control_net_mean_at_20bp": -0.0031172383830960905,
+      "paired_excess_mean": -8.024471955042379e-05
+    },
+    "gap_replay": {
+      "eligible_bars": 5398,
+      "raw_fires": 5071,
+      "dedup_signals": 304,
+      "raw_fire_rate": 0.939422008151167,
+      "net_mean_at_20bp": -0.004514509425650087,
+      "matched_control_net_mean_at_20bp": -0.004071330333299391,
+      "paired_excess_mean": -0.00044317909235069093
+    }
+  },
+  "caveats": [
+    "strict OOS has only 774 bars / 43 dedup signals / two run-day blocks",
+    "3h outcomes overlap, so signal-level t statistics are optimistic",
+    "gap replay is pixel-disjoint but interleaved with the training calendar"
+  ]
+}

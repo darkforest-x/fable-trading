@@ -1,0 +1,102 @@
+{
+  "scenario": "ETH3m v2a structural refactor launch-gate equivalence",
+  "invocations": [
+    ".venv/bin/python -m py_compile scripts/build_eth3m_short_pilot_dataset_v2.py scripts/validate_eth3m_short_pilot_dataset_v2.py scripts/build_eth3m_short_pilot_v2_dataset_report.py src/detection/eth3m_v2_evidence.py src/detection/eth3m_v2_events.py src/detection/eth3m_v2_render.py src/detection/eth3m_v2_validation.py src/reporting/eth3m_v2_report_data.py src/reporting/eth3m_v2_report_narrative.py",
+    "PYTHONPATH=. .venv/bin/pytest -q tests/test_build_eth3m_short_pilot_dataset_v2.py tests/test_build_eth3m_short_pilot_dataset.py tests/test_build_eth3m_entry_timing_calibration30.py tests/test_analyze_eth3m_v10_yes_no_labels.py",
+    "PYTHONPATH=. .venv/bin/python scripts/validate_eth3m_short_pilot_dataset_v2.py",
+    "MPLCONFIGDIR=/private/tmp/mpl-eth3m-v2-refactor PYTHONPATH=. .venv/bin/python scripts/build_eth3m_short_pilot_dataset_v2.py --out /private/tmp/eth_3m_short_pilot_v2_refactor_check",
+    "PYTHONPATH=. .venv/bin/python scripts/validate_eth3m_short_pilot_dataset_v2.py --dataset /private/tmp/eth_3m_short_pilot_v2_refactor_check --out /private/tmp/eth_3m_short_pilot_v2_refactor_validation.json",
+    "PYTHONPATH=. .venv/bin/python scripts/build_eth3m_short_pilot_v2_dataset_report.py"
+  ],
+  "observables": {
+    "py_compile_passed": true,
+    "related_tests": {
+      "passed": 18,
+      "failed": 0
+    },
+    "existing_validation_status": "passed",
+    "rebuilt_validation_status": "passed",
+    "manifest_rows": 137,
+    "manifest_target_counts": {
+      "0": 107,
+      "1": 30
+    },
+    "manifest_sample_kind_counts": {
+      "owner_no_tip_negative": 107,
+      "confirmed_current_tip": 30
+    },
+    "positive_events": 29,
+    "weak_rows": 150,
+    "weak_target_values": [
+      ""
+    ],
+    "weak_event_id_values": [
+      ""
+    ],
+    "weak_kind_counts": {
+      "review_original_v10_time": 30,
+      "review_tip_offset_+1": 30,
+      "review_tip_offset_+2": 30,
+      "review_tip_offset_+3": 30,
+      "review_tip_offset_-1": 30
+    },
+    "anchor_embargo_bars": 378,
+    "holdout_read": false,
+    "model_trained": false,
+    "report_cli_passed": true
+  },
+  "hash_equivalence": {
+    "files": {
+      "manifest.csv": {
+        "frozen_sha256": "c077cf75594c5f7d4f7ffd576e45cba42df99d6c885a418745bed4494b5473d0",
+        "rebuilt_sha256": "c077cf75594c5f7d4f7ffd576e45cba42df99d6c885a418745bed4494b5473d0",
+        "match": true
+      },
+      "event_manifest.csv": {
+        "frozen_sha256": "a951895398ea846a8ed6cb075b3540c516edb41d3c2bc345e02bb303dbd375da",
+        "rebuilt_sha256": "a951895398ea846a8ed6cb075b3540c516edb41d3c2bc345e02bb303dbd375da",
+        "match": true
+      },
+      "smoke_manifest.csv": {
+        "frozen_sha256": "529237e657925f21fbb5cd4ffd17660e1b8b36359f3a6c3fa3a51dfc20bf6068",
+        "rebuilt_sha256": "529237e657925f21fbb5cd4ffd17660e1b8b36359f3a6c3fa3a51dfc20bf6068",
+        "match": true
+      },
+      "weak_or_review_manifest.csv": {
+        "frozen_sha256": "230eaf9d5abd1e403b85238e4b537fa60a78abc18ade047f64f532223a5a1f67",
+        "rebuilt_sha256": "230eaf9d5abd1e403b85238e4b537fa60a78abc18ade047f64f532223a5a1f67",
+        "match": true
+      },
+      "owner_confirmation_receipt.json": {
+        "frozen_sha256": "f13537617b052184feb0e9ad193d2f3a5e4f1c51f2c8215a3e661c07262aea5f",
+        "rebuilt_sha256": "f13537617b052184feb0e9ad193d2f3a5e4f1c51f2c8215a3e661c07262aea5f",
+        "match": true
+      },
+      "classes.json": {
+        "frozen_sha256": "7af92213571efdd2dc64598d24531b771e77c4e61596b6e411eb26d792b616bd",
+        "rebuilt_sha256": "7af92213571efdd2dc64598d24531b771e77c4e61596b6e411eb26d792b616bd",
+        "match": true
+      },
+      "README.md": {
+        "frozen_sha256": "192c8f2950a3e974da81ffc66d0800cee3ec07f33f88d9b58d8d8b4de2d1e922",
+        "rebuilt_sha256": "192c8f2950a3e974da81ffc66d0800cee3ec07f33f88d9b58d8d8b4de2d1e922",
+        "match": true
+      }
+    },
+    "labeled_image_count_checked": 137,
+    "weak_image_count_checked": 150,
+    "image_mismatch_count": 0,
+    "image_mismatches": [],
+    "all_required_hashes_match": true
+  },
+  "artifacts": {
+    "existing_dataset": "/Users/zhangzc/fable-trading/datasets/eth_3m_short_pilot_v2",
+    "rebuilt_dataset": "/private/tmp/eth_3m_short_pilot_v2_refactor_check",
+    "existing_validation": "/Users/zhangzc/fable-trading/analysis/output/eth3m_short_pilot_v2_dataset/validation.json",
+    "rebuilt_validation": "/private/tmp/eth_3m_short_pilot_v2_refactor_validation.json",
+    "evidence": "/Users/zhangzc/fable-trading/analysis/output/eth3m_short_pilot_v2_dataset/refactor_v2a_evidence.json",
+    "report_artifact": "analysis/output/eth3m_short_pilot_v2_dataset/artifact.json",
+    "report_markdown": "analysis/p_eth_3m_short_pilot_v2_dataset.md",
+    "learning": "docs/learnings/frozen-refactors-need-artifact-equivalence-not-test-only.md"
+  }
+}

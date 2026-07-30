@@ -1,0 +1,853 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "ETH 3m short-start pilot v2 数据集审计",
+    "description": "只保留 owner 明确确认的当前-tip标签；相邻规则候选退出训练。",
+    "generatedAt": "2026-07-29T16:56:36Z",
+    "cards": [
+      {
+        "id": "training_images",
+        "description": "train + val 中有明确 owner 证据的图片总数。",
+        "dataset": "headline",
+        "sourceId": "v2_build",
+        "metrics": [
+          {
+            "label": "训练图片",
+            "field": "training_images",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "positive_events",
+        "description": "正例按重叠 3h 区间归并后的独立事件数；不是图片数。",
+        "dataset": "headline",
+        "sourceId": "v2_build",
+        "metrics": [
+          {
+            "label": "独立正事件",
+            "field": "positive_events",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "manual_negatives",
+        "description": "Project 53 中 owner 明确判不是的当前-tip样本。",
+        "dataset": "headline",
+        "sourceId": "v2_build",
+        "metrics": [
+          {
+            "label": "人工负例",
+            "field": "manual_negatives",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "embargo",
+        "description": "train 最后锚点至 val 第一锚点；硬门覆盖 200-bar 输入 + 60-bar人工未来窗。",
+        "dataset": "headline",
+        "sourceId": "v2_build",
+        "metrics": [
+          {
+            "label": "时间隔离",
+            "field": "embargo_bars",
+            "format": "number",
+            "unit": " bars"
+          }
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "label_evidence_chart",
+        "title": "明确标签与被隔离候选的数量",
+        "subtitle": "只有 owner 明确证据进入 train/val；150 条相邻/原时点保持无标签",
+        "showDescription": true,
+        "intent": "comparison",
+        "question": "本轮有多少样本拥有训练标签，多少候选因证据不足被隔离？",
+        "rationale": "三类数量并列能直接显示正例有效样本稀少，以及语义复核实际移出了多少规则标签。",
+        "comparisonContext": {
+          "grain": "渲染后的 causal-tip 图片",
+          "unit": "张",
+          "denominator": "本轮训练与待复核图片"
+        },
+        "type": "horizontalBar",
+        "dataset": "labels",
+        "sourceId": "v2_build",
+        "encodings": {
+          "x": {
+            "field": "label",
+            "type": "ordinal",
+            "label": "证据角色"
+          },
+          "y": {
+            "field": "images",
+            "type": "quantitative",
+            "label": "图片数"
+          },
+          "tooltip": [
+            {
+              "field": "evidence",
+              "type": "nominal",
+              "label": "证据"
+            },
+            {
+              "field": "training",
+              "type": "nominal",
+              "label": "进入训练"
+            },
+            {
+              "field": "independent_events",
+              "type": "quantitative",
+              "label": "事件数"
+            }
+          ]
+        },
+        "valueFormat": "number",
+        "unit": "张",
+        "layout": "full",
+        "labels": {
+          "values": "all"
+        },
+        "palette": {
+          "kind": "categorical",
+          "name": "category10"
+        },
+        "settings": {
+          "sort": "custom",
+          "showValues": true
+        },
+        "surface": {
+          "surface": "card",
+          "viewMode": "both"
+        }
+      }
+    ],
+    "tables": [
+      {
+        "id": "split_table",
+        "title": "事件级时间切分",
+        "subtitle": "图片数不是独立样本数；正事件始终留在同一 split。",
+        "dataset": "split",
+        "sourceId": "v2_build",
+        "density": "spacious",
+        "columns": [
+          {
+            "field": "split",
+            "label": "Split",
+            "type": "text"
+          },
+          {
+            "field": "images",
+            "label": "图片",
+            "format": "number"
+          },
+          {
+            "field": "short_start",
+            "label": "是",
+            "format": "number"
+          },
+          {
+            "field": "no_start",
+            "label": "不是",
+            "format": "number"
+          },
+          {
+            "field": "positive_events",
+            "label": "独立正事件",
+            "format": "number"
+          },
+          {
+            "field": "global_events",
+            "label": "全局事件组",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "label_table",
+        "title": "标签证据白名单",
+        "subtitle": "只有前两行进入 train/val；规则候选没有 target。",
+        "dataset": "labels",
+        "sourceId": "v2_build",
+        "density": "spacious",
+        "columns": [
+          {
+            "field": "label",
+            "label": "标签",
+            "type": "text"
+          },
+          {
+            "field": "images",
+            "label": "候选数",
+            "format": "number"
+          },
+          {
+            "field": "independent_events",
+            "label": "事件数",
+            "format": "number"
+          },
+          {
+            "field": "evidence",
+            "label": "证据",
+            "type": "text"
+          },
+          {
+            "field": "training",
+            "label": "进训练",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "id": "contract_table",
+        "title": "v1 → v2：这是目标重置，不是调参",
+        "subtitle": "v2 尚未训练，因此不能比较模型精度或收益。",
+        "dataset": "contract",
+        "sourceId": "v1_v2_contract",
+        "density": "spacious",
+        "columns": [
+          {
+            "field": "dimension",
+            "label": "维度",
+            "type": "text"
+          },
+          {
+            "field": "v1",
+            "label": "v1",
+            "type": "text"
+          },
+          {
+            "field": "v2",
+            "label": "v2",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "id": "validation_table",
+        "title": "独立验证器检查",
+        "subtitle": "这些门证明构建与隔离正确，不证明模型可盈利。",
+        "dataset": "checks",
+        "sourceId": "v2_validation",
+        "density": "compact",
+        "columns": [
+          {
+            "field": "check",
+            "label": "检查项",
+            "type": "text"
+          },
+          {
+            "field": "result",
+            "label": "结果",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "v2_build",
+        "label": "ETH 3m v2 构建元数据与 manifest",
+        "path": "datasets/eth_3m_short_pilot_v2/build_meta.json",
+        "query": {
+          "engine": "artifact",
+          "language": "json/csv",
+          "description": "由冻结的 owner 证据构建当前 causal tip 二分类图片，并记录事件、切分与标签来源。",
+          "sql": "WITH train_labels AS (\n  SELECT split, class_name, target, event_id, positive_event_id, sample_kind\n  FROM read_csv_auto('datasets/eth_3m_short_pilot_v2/manifest.csv', header=true)\n), weak AS (\n  SELECT COUNT(*) AS weak_rows\n  FROM read_csv_auto('datasets/eth_3m_short_pilot_v2/weak_or_review_manifest.csv', header=true)\n)\nSELECT split, class_name, COUNT(*) AS images, COUNT(DISTINCT event_id) AS global_events,\n       COUNT(DISTINCT CASE WHEN target = 1 THEN positive_event_id END) AS positive_events,\n       (SELECT weak_rows FROM weak) AS weak_rows\nFROM train_labels\nGROUP BY split, class_name\nORDER BY split, class_name;",
+          "tables_used": [
+            "datasets/eth_3m_short_pilot_v2/build_meta.json",
+            "datasets/eth_3m_short_pilot_v2/manifest.csv",
+            "datasets/eth_3m_short_pilot_v2/event_manifest.csv",
+            "datasets/eth_3m_short_pilot_v2/weak_or_review_manifest.csv"
+          ],
+          "filters": [
+            "manifest.csv contains only confirmed_current_tip and owner_no_tip_negative",
+            "weak_or_review rows have blank target and are excluded from train/val"
+          ],
+          "metric_definitions": [
+            "training images = all rows in manifest.csv",
+            "independent positive events = distinct nonblank positive_event_id among target=1",
+            "manual negatives = rows whose sample_kind is owner_no_tip_negative",
+            "embargo bars comes from build_meta.split_audit and is independently recomputed by validation"
+          ]
+        }
+      },
+      {
+        "id": "v2_validation",
+        "label": "独立数据集验证回执",
+        "path": "analysis/output/eth3m_short_pilot_v2_dataset/validation.json",
+        "query": {
+          "engine": "source-code",
+          "language": "python",
+          "description": "独立检查文件、标签白名单、哈希、因果窗、事件切分、embargo、receipt 与 holdout 边界。",
+          "sql": "SELECT * FROM read_json_auto('analysis/output/eth3m_short_pilot_v2_dataset/validation.json');",
+          "tables_used": [
+            "scripts/validate_eth3m_short_pilot_dataset_v2.py",
+            "analysis/output/eth3m_short_pilot_v2_dataset/validation.json"
+          ],
+          "filters": [
+            "validation.status = 'passed' before report generation"
+          ],
+          "metric_definitions": [
+            "boolean checks must be true; error-count checks must equal zero"
+          ]
+        }
+      },
+      {
+        "id": "owner_receipt",
+        "label": "30 张时机图批量确认回执",
+        "path": "datasets/eth_3m_short_pilot_v2/owner_confirmation_receipt.json",
+        "query": {
+          "engine": "artifact",
+          "language": "json",
+          "description": "绑定固定 calibration manifest、移动端 HTML、30 张 review/causal 图片 SHA256 与 owner 原话；明确不是逐行 Label Studio 标注。",
+          "sql": "SELECT confirmation_scope, not_row_level_label_studio, owner_exact_words, confirmed_current_tip_image_count\nFROM read_json_auto('datasets/eth_3m_short_pilot_v2/owner_confirmation_receipt.json');",
+          "tables_used": [
+            "datasets/eth_3m_short_pilot_v2/owner_confirmation_receipt.json"
+          ],
+          "filters": [
+            "confirmed_current_tip_image_count = 30",
+            "all referenced SHA256 values revalidated"
+          ],
+          "metric_definitions": [
+            "owner evidence is one batch chat confirmation bound to the fixed 30-image pack"
+          ]
+        }
+      },
+      {
+        "id": "v1_backtest",
+        "label": "ETH 3m pilot v1 因果回放失败结果",
+        "path": "analysis/output/eth3m_short_pilot_v1_backtest/summary.json",
+        "query": {
+          "engine": "artifact",
+          "language": "json",
+          "description": "v1 严格 OOS 连续回放，用于说明为何必须重置标签目标；不是 v2 性能结果。",
+          "sql": "SELECT replay.strict_oos.eligible_bars AS eligible_bars,\n       replay.strict_oos.raw_fires AS raw_fires,\n       replay.strict_oos.raw_fire_rate AS raw_fire_rate\nFROM read_json_auto('analysis/output/eth3m_short_pilot_v1_backtest/summary.json');",
+          "tables_used": [
+            "analysis/output/eth3m_short_pilot_v1_backtest/summary.json"
+          ],
+          "filters": [
+            "strict_oos only"
+          ],
+          "metric_definitions": [
+            "raw fire rate = raw fires / eligible causal replay bars"
+          ]
+        }
+      },
+      {
+        "id": "v1_v2_contract",
+        "label": "v1 回放与 v2 数据合同对照",
+        "path": "analysis/p_eth_3m_short_pilot_v2_dataset.md",
+        "query": {
+          "engine": "duckdb",
+          "language": "sql",
+          "description": "把 v1 严格 OOS 行为与 v2 的标签、切分和 smoke 元数据放到同一审计行；文本维度由该证据解释。",
+          "sql": "WITH v1 AS (\n  SELECT replay.strict_oos.raw_fire_rate AS v1_raw_fire_rate\n  FROM read_json_auto('analysis/output/eth3m_short_pilot_v1_backtest/summary.json')\n), v2 AS (\n  SELECT totals.total AS v2_images, totals.independent_positive_events AS v2_positive_events,\n         totals.sealed_smoke_bars AS v2_smoke_bars, split_audit.anchor_embargo_bars AS v2_embargo_bars\n  FROM read_json_auto('datasets/eth_3m_short_pilot_v2/build_meta.json')\n)\nSELECT * FROM v1 CROSS JOIN v2;",
+          "tables_used": [
+            "analysis/output/eth3m_short_pilot_v1_backtest/summary.json",
+            "datasets/eth_3m_short_pilot_v2/build_meta.json"
+          ],
+          "filters": [
+            "v1 strict_oos only",
+            "v2 current frozen build"
+          ],
+          "metric_definitions": [
+            "v1 and v2 are contract comparisons, not model-performance comparisons"
+          ]
+        }
+      }
+    ],
+    "blocks": [
+      {
+        "id": "title",
+        "type": "markdown",
+        "body": "# ETH 3m short-start pilot v2 数据集审计"
+      },
+      {
+        "id": "technical_summary",
+        "type": "markdown",
+        "body": "## Executive Summary\n\n**v2 数据集已按保守口径重构，但只定位为诊断 pilot。** 训练问题从‘画一个固定右缘框’改成‘当前因果图的最后一根是否是可接受的 ETH 3m 做空启动’。train/val 只允许两类明确证据：你批量确认来得及的固定 30 个当前 T，以及 Project 53 中你判‘不是’的 107 个当前 tip。相邻时点不再由程序猜标签。"
+      },
+      {
+        "id": "headline",
+        "type": "metric-strip",
+        "cardIds": [
+          "training_images",
+          "positive_events",
+          "manual_negatives",
+          "embargo"
+        ]
+      },
+      {
+        "id": "why_reset",
+        "type": "markdown",
+        "sourceId": "v1_backtest",
+        "body": "## Key finding: v1 的高静态 mAP 没有转成事件选择\n\nv1 在严格 OOS 的 774 根连续盘口中开火 772 次，raw fire rate 为 99.74%。这证明固定右缘检测框和离散静态验证没有约束模型在连续盘口中稀疏开火。v2 因而重置监督目标，而不是继续调 conf。"
+      },
+      {
+        "id": "contract_block",
+        "type": "table",
+        "tableId": "contract_table"
+      },
+      {
+        "id": "label_scope",
+        "type": "markdown",
+        "sourceId": "owner_receipt",
+        "body": "## Scope and label definition\n\n`short_start` 只表示：在 200 根全部已收盘的 causal 图上，当前最右端 T 是你认可且‘来得及’的做空启动时点。30 张证据来自固定校准包的批量确认，原话为“看过了都来的急”；回执绑定了 HTML、manifest 与每张图 SHA256，但它仍不是 30 条逐行 Label Studio 标注。`no_start` 来自 Project 53 的 owner-no 当前 tip。"
+      },
+      {
+        "id": "label_table_block",
+        "type": "table",
+        "tableId": "label_table"
+      },
+      {
+        "id": "label_chart_block",
+        "type": "chart",
+        "chartId": "label_evidence_chart",
+        "layout": "full"
+      },
+      {
+        "id": "semantic_correction",
+        "type": "markdown",
+        "body": "## 已纠正的语义错误\n\n生产扫描允许查看 tip/tip-1/tip-2，是检测框离盘口的定位容差，不是信号寿命。初稿曾错误地把 T+1/T+2 自动标正、T+3 自动标负；反方复核后已全部移出 train/val。现在 T-1/T+1/T+2/T+3/原 v10 只存在于 `weak_or_review_manifest.csv`，没有 target。"
+      },
+      {
+        "id": "split_block",
+        "type": "table",
+        "tableId": "split_table"
+      },
+      {
+        "id": "method",
+        "type": "markdown",
+        "sourceId": "v2_build",
+        "body": "## Method\n\n每张图只渲染决策 T 及以前 200 根 ETH 3m K 线与六条均线；不载入 future outcome 列。train/val 按重叠人工未来区间合并为事件组并顺序切分。实际锚点 embargo 为 378 bars，高于 200 根输入 + 60 根人工未来窗所需的 260 bars。另封存 7,089 根连续开发期盘口，只允许训练后测开火行为，绝不自动转成负例。"
+      },
+      {
+        "id": "validation_block",
+        "type": "table",
+        "tableId": "validation_table"
+      },
+      {
+        "id": "external_reports",
+        "type": "markdown",
+        "body": "## 对你提供的两份研究报告怎么用\n\n本轮采用其中可直接审计的工程建议：图像统一、因果裁切、时间方向增强禁用、事件级时间切分。没有采用 ARIMA 合成、旋转框、改损失函数或报告中的高收益/高准确率数字，因为它们不能修复当前最核心的标签证据问题，且文中的 `[cite]` 还不是本仓库可复核的实验材料。"
+      },
+      {
+        "id": "metrics_na",
+        "type": "markdown",
+        "body": "## Performance metrics: not yet applicable\n\n本轮没有训练模型，所以 val AUC、事件精度、raw-fire/day、top-decile 净收益、置换 p 值和匹配随机对照均为 N/A。把数据集完整性检查当成模型验收会再次产生循环论证。"
+      },
+      {
+        "id": "limitations",
+        "type": "markdown",
+        "sourceId": "v2_build",
+        "body": "## Limitations and robustness\n\n- 真正有效样本量是 29 个独立正事件，不是图片总数；只够做诊断性可学习性实验。\n- 正例均由 v10 owner-yes 池中的‘第一次收盘跌破六条 MA’提案产生，负例来自 v10 owner-no；模型可能学习来源/规则捷径。\n- 普通连续盘口没有人工 true-tip 标签；封存 smoke 只能测开火密度，不能自动当训练负例。\n- 数据集不是 formal gold，不能 promote，不能据此触碰 holdout 或 ACTIVE。"
+      },
+      {
+        "id": "incident",
+        "type": "markdown",
+        "body": "## Holdout incident\n\n本次 v2 构建只读取严格 pre-holdout 前缀。并行审计期间曾有助手误读另一个 1m 文件的表头与 3 行 2026-07-15 数据；这些行未用于任何统计或样本，但按‘看一眼就是消耗’已在 HANDOFF 保守登记为全局 holdout 第 12 次误耗。"
+      },
+      {
+        "id": "next",
+        "type": "markdown",
+        "body": "## Recommended next steps\n\n1. 先由 owner 决定是否启动**诊断性 classification pilot**；这不是正式模型训练授权。\n2. 开训前冻结三个不从结果倒推的门：连续盘口 raw-fire 密度、事件级人工精度、T 时点来得及率。\n3. 若 pilot 显示可学习，再单独扩充普通 true-tip 负例和‘形态对但已经太晚’负例；相邻时点必须逐图二选一或另获寿命规则授权。\n4. holdout 继续封存；训练、early stopping 和 smoke 诊断都只用开发期。"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-07-29T16:56:36Z",
+    "status": "ready",
+    "datasets": {
+      "headline": [
+        {
+          "training_images": 137,
+          "positive_events": 29,
+          "manual_negatives": 107,
+          "embargo_bars": 378
+        }
+      ],
+      "split": [
+        {
+          "split": "train",
+          "images": 95,
+          "short_start": 22,
+          "no_start": 73,
+          "global_events": 53,
+          "positive_events": 21
+        },
+        {
+          "split": "val",
+          "images": 42,
+          "short_start": 8,
+          "no_start": 34,
+          "global_events": 18,
+          "positive_events": 8
+        }
+      ],
+      "labels": [
+        {
+          "label": "short_start",
+          "images": 30,
+          "independent_events": 29,
+          "evidence": "固定 30 图的 owner 批量确认；当前 tip",
+          "training": "是（诊断 pilot）"
+        },
+        {
+          "label": "no_start",
+          "images": 107,
+          "independent_events": 60,
+          "evidence": "Label Studio Project 53 owner-no；当前 tip",
+          "training": "是（诊断 pilot）"
+        },
+        {
+          "label": "未定",
+          "images": 150,
+          "independent_events": 29,
+          "evidence": "T-1/T+1/T+2/T+3/原 v10；没有逐时点人工结论",
+          "training": "否；仅待复核"
+        }
+      ],
+      "contract": [
+        {
+          "dimension": "训练问题",
+          "v1": "在整图中检测固定右缘框",
+          "v2": "判断当前 causal tip 是/不是 short_start"
+        },
+        {
+          "dimension": "正例证据",
+          "v1": "框几何 + owner 形态判断",
+          "v2": "owner 看过固定 30 张未来辅助图后批量确认当前 T 来得及"
+        },
+        {
+          "dimension": "相邻时点",
+          "v1": "未建模",
+          "v2": "全部无标签待复核；不从扫描门推导寿命"
+        },
+        {
+          "dimension": "训练/验证隔离",
+          "v1": "锚点分开但曾有 22-bar 输入重叠",
+          "v2": "事件成组；378-bar embargo（要求≥260）"
+        },
+        {
+          "dimension": "连续盘口",
+          "v1": "严格 OOS raw fire 99.74%",
+          "v2": "预封存 7,089 bars，无标签，只允许训练后测密度"
+        }
+      ],
+      "checks": [
+        {
+          "check": "manifest_rows",
+          "result": "137"
+        },
+        {
+          "check": "file_error_count",
+          "result": "PASS"
+        },
+        {
+          "check": "all_images_1280x742",
+          "result": "PASS"
+        },
+        {
+          "check": "class_target_mismatches",
+          "result": "PASS"
+        },
+        {
+          "check": "class_path_mismatches",
+          "result": "PASS"
+        },
+        {
+          "check": "duplicate_sample_ids",
+          "result": "PASS"
+        },
+        {
+          "check": "duplicate_image_sha_groups",
+          "result": "PASS"
+        },
+        {
+          "check": "positive_negative_anchor_conflicts",
+          "result": "PASS"
+        },
+        {
+          "check": "sample_kind_set_allowed",
+          "result": "PASS"
+        },
+        {
+          "check": "positive_sample_kind_current_tip_only",
+          "result": "PASS"
+        },
+        {
+          "check": "positive_rows",
+          "result": "30"
+        },
+        {
+          "check": "positive_rows_is_30",
+          "result": "PASS"
+        },
+        {
+          "check": "independent_positive_events",
+          "result": "29"
+        },
+        {
+          "check": "independent_positive_events_is_29",
+          "result": "PASS"
+        },
+        {
+          "check": "owner_no_tip_negative_rows",
+          "result": "107"
+        },
+        {
+          "check": "owner_no_tip_negative_rows_is_107",
+          "result": "PASS"
+        },
+        {
+          "check": "all_positive_tip_offsets_are_zero",
+          "result": "PASS"
+        },
+        {
+          "check": "cross_split_events",
+          "result": "PASS"
+        },
+        {
+          "check": "cross_split_positive_events",
+          "result": "PASS"
+        },
+        {
+          "check": "first_val_input_after_last_train_label",
+          "result": "PASS"
+        },
+        {
+          "check": "anchor_embargo_bars",
+          "result": "378"
+        },
+        {
+          "check": "anchor_embargo_at_least_260",
+          "result": "PASS"
+        },
+        {
+          "check": "all_input_ranges_are_200_bars",
+          "result": "PASS"
+        },
+        {
+          "check": "all_inputs_end_at_anchor",
+          "result": "PASS"
+        },
+        {
+          "check": "all_label_ends_pre_holdout",
+          "result": "PASS"
+        },
+        {
+          "check": "smoke_rows",
+          "result": "7089"
+        },
+        {
+          "check": "smoke_is_contiguous_3m",
+          "result": "PASS"
+        },
+        {
+          "check": "smoke_starts_at_first_val_anchor",
+          "result": "PASS"
+        },
+        {
+          "check": "smoke_future_ends_pre_holdout",
+          "result": "PASS"
+        },
+        {
+          "check": "weak_rows",
+          "result": "150"
+        },
+        {
+          "check": "weak_rows_is_150",
+          "result": "PASS"
+        },
+        {
+          "check": "weak_targets_blank",
+          "result": "PASS"
+        },
+        {
+          "check": "weak_event_ids_blank",
+          "result": "PASS"
+        },
+        {
+          "check": "weak_images_outside_class_dirs",
+          "result": "PASS"
+        },
+        {
+          "check": "weak_file_error_count",
+          "result": "PASS"
+        },
+        {
+          "check": "all_weak_images_1280x742",
+          "result": "PASS"
+        },
+        {
+          "check": "weak_input_ranges_are_200_bars",
+          "result": "PASS"
+        },
+        {
+          "check": "weak_contains_required_review_kinds",
+          "result": "PASS"
+        },
+        {
+          "check": "weak_kind_counts_exactly_30_each",
+          "result": "PASS"
+        },
+        {
+          "check": "receipt_hashes_valid",
+          "result": "PASS"
+        },
+        {
+          "check": "receipt_task_ids_are_1_through_30",
+          "result": "PASS"
+        },
+        {
+          "check": "receipt_source_task_ids_unique",
+          "result": "PASS"
+        },
+        {
+          "check": "positive_rows_match_receipt_causal_assets",
+          "result": "PASS"
+        },
+        {
+          "check": "receipt_asset_error_count",
+          "result": "PASS"
+        },
+        {
+          "check": "meta_diagnostic_flags_valid",
+          "result": "PASS"
+        },
+        {
+          "check": "meta_omits_lifetime_label_keys",
+          "result": "PASS"
+        },
+        {
+          "check": "meta_total_matches",
+          "result": "PASS"
+        },
+        {
+          "check": "event_manifest_count_matches",
+          "result": "PASS"
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "v2_build",
+      "label": "ETH 3m v2 构建元数据与 manifest",
+      "path": "datasets/eth_3m_short_pilot_v2/build_meta.json",
+      "query": {
+        "engine": "artifact",
+        "language": "json/csv",
+        "description": "由冻结的 owner 证据构建当前 causal tip 二分类图片，并记录事件、切分与标签来源。",
+        "sql": "WITH train_labels AS (\n  SELECT split, class_name, target, event_id, positive_event_id, sample_kind\n  FROM read_csv_auto('datasets/eth_3m_short_pilot_v2/manifest.csv', header=true)\n), weak AS (\n  SELECT COUNT(*) AS weak_rows\n  FROM read_csv_auto('datasets/eth_3m_short_pilot_v2/weak_or_review_manifest.csv', header=true)\n)\nSELECT split, class_name, COUNT(*) AS images, COUNT(DISTINCT event_id) AS global_events,\n       COUNT(DISTINCT CASE WHEN target = 1 THEN positive_event_id END) AS positive_events,\n       (SELECT weak_rows FROM weak) AS weak_rows\nFROM train_labels\nGROUP BY split, class_name\nORDER BY split, class_name;",
+        "tables_used": [
+          "datasets/eth_3m_short_pilot_v2/build_meta.json",
+          "datasets/eth_3m_short_pilot_v2/manifest.csv",
+          "datasets/eth_3m_short_pilot_v2/event_manifest.csv",
+          "datasets/eth_3m_short_pilot_v2/weak_or_review_manifest.csv"
+        ],
+        "filters": [
+          "manifest.csv contains only confirmed_current_tip and owner_no_tip_negative",
+          "weak_or_review rows have blank target and are excluded from train/val"
+        ],
+        "metric_definitions": [
+          "training images = all rows in manifest.csv",
+          "independent positive events = distinct nonblank positive_event_id among target=1",
+          "manual negatives = rows whose sample_kind is owner_no_tip_negative",
+          "embargo bars comes from build_meta.split_audit and is independently recomputed by validation"
+        ]
+      }
+    },
+    {
+      "id": "v2_validation",
+      "label": "独立数据集验证回执",
+      "path": "analysis/output/eth3m_short_pilot_v2_dataset/validation.json",
+      "query": {
+        "engine": "source-code",
+        "language": "python",
+        "description": "独立检查文件、标签白名单、哈希、因果窗、事件切分、embargo、receipt 与 holdout 边界。",
+        "sql": "SELECT * FROM read_json_auto('analysis/output/eth3m_short_pilot_v2_dataset/validation.json');",
+        "tables_used": [
+          "scripts/validate_eth3m_short_pilot_dataset_v2.py",
+          "analysis/output/eth3m_short_pilot_v2_dataset/validation.json"
+        ],
+        "filters": [
+          "validation.status = 'passed' before report generation"
+        ],
+        "metric_definitions": [
+          "boolean checks must be true; error-count checks must equal zero"
+        ]
+      }
+    },
+    {
+      "id": "owner_receipt",
+      "label": "30 张时机图批量确认回执",
+      "path": "datasets/eth_3m_short_pilot_v2/owner_confirmation_receipt.json",
+      "query": {
+        "engine": "artifact",
+        "language": "json",
+        "description": "绑定固定 calibration manifest、移动端 HTML、30 张 review/causal 图片 SHA256 与 owner 原话；明确不是逐行 Label Studio 标注。",
+        "sql": "SELECT confirmation_scope, not_row_level_label_studio, owner_exact_words, confirmed_current_tip_image_count\nFROM read_json_auto('datasets/eth_3m_short_pilot_v2/owner_confirmation_receipt.json');",
+        "tables_used": [
+          "datasets/eth_3m_short_pilot_v2/owner_confirmation_receipt.json"
+        ],
+        "filters": [
+          "confirmed_current_tip_image_count = 30",
+          "all referenced SHA256 values revalidated"
+        ],
+        "metric_definitions": [
+          "owner evidence is one batch chat confirmation bound to the fixed 30-image pack"
+        ]
+      }
+    },
+    {
+      "id": "v1_backtest",
+      "label": "ETH 3m pilot v1 因果回放失败结果",
+      "path": "analysis/output/eth3m_short_pilot_v1_backtest/summary.json",
+      "query": {
+        "engine": "artifact",
+        "language": "json",
+        "description": "v1 严格 OOS 连续回放，用于说明为何必须重置标签目标；不是 v2 性能结果。",
+        "sql": "SELECT replay.strict_oos.eligible_bars AS eligible_bars,\n       replay.strict_oos.raw_fires AS raw_fires,\n       replay.strict_oos.raw_fire_rate AS raw_fire_rate\nFROM read_json_auto('analysis/output/eth3m_short_pilot_v1_backtest/summary.json');",
+        "tables_used": [
+          "analysis/output/eth3m_short_pilot_v1_backtest/summary.json"
+        ],
+        "filters": [
+          "strict_oos only"
+        ],
+        "metric_definitions": [
+          "raw fire rate = raw fires / eligible causal replay bars"
+        ]
+      }
+    },
+    {
+      "id": "v1_v2_contract",
+      "label": "v1 回放与 v2 数据合同对照",
+      "path": "analysis/p_eth_3m_short_pilot_v2_dataset.md",
+      "query": {
+        "engine": "duckdb",
+        "language": "sql",
+        "description": "把 v1 严格 OOS 行为与 v2 的标签、切分和 smoke 元数据放到同一审计行；文本维度由该证据解释。",
+        "sql": "WITH v1 AS (\n  SELECT replay.strict_oos.raw_fire_rate AS v1_raw_fire_rate\n  FROM read_json_auto('analysis/output/eth3m_short_pilot_v1_backtest/summary.json')\n), v2 AS (\n  SELECT totals.total AS v2_images, totals.independent_positive_events AS v2_positive_events,\n         totals.sealed_smoke_bars AS v2_smoke_bars, split_audit.anchor_embargo_bars AS v2_embargo_bars\n  FROM read_json_auto('datasets/eth_3m_short_pilot_v2/build_meta.json')\n)\nSELECT * FROM v1 CROSS JOIN v2;",
+        "tables_used": [
+          "analysis/output/eth3m_short_pilot_v1_backtest/summary.json",
+          "datasets/eth_3m_short_pilot_v2/build_meta.json"
+        ],
+        "filters": [
+          "v1 strict_oos only",
+          "v2 current frozen build"
+        ],
+        "metric_definitions": [
+          "v1 and v2 are contract comparisons, not model-performance comparisons"
+        ]
+      }
+    }
+  ]
+}

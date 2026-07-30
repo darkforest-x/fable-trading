@@ -1,0 +1,44 @@
+{
+  "audience": "product stakeholders",
+  "delivery_mode": "html",
+  "chart_map": [
+    {
+      "section": "红框正确，不等于红框右缘可以入场",
+      "question": "93 张形态成立样本如何按时序代理与 3h 收盘结果分布？",
+      "family": "comparison",
+      "type": "horizontalBar",
+      "fields": [
+        "segment",
+        "task_count"
+      ],
+      "palette": "single-root orange",
+      "claim": "时序代理将形态正例拆成性质明显不同的两组。"
+    },
+    {
+      "section": "只调置信度解决不了迟到",
+      "question": "v10 conf 能否单调排序 owner shape precision？",
+      "family": "comparison",
+      "type": "bar",
+      "fields": [
+        "confidence_bucket",
+        "owner_yes_rate"
+      ],
+      "palette": "single-root blue",
+      "claim": "置信度只能弱过滤，不是入场时机分数。"
+    }
+  ],
+  "validation": {
+    "unique_task_ids": 200,
+    "all_box_right_edges_match_manifest": true,
+    "box_right_edge_counts": {
+      "199": 200
+    },
+    "max_outcome_recompute_abs_error": 9.84455572616838e-17,
+    "max_future_end_utc": "2026-05-01T23:54:00+00:00",
+    "missing_required_values": 0
+  },
+  "omissions": [
+    "No task is declared human-confirmed late because the current UI never asked that question.",
+    "No economic PnL or barrier test is reported because barrier/cost settings require owner approval and are outside this diagnosis."
+  ]
+}

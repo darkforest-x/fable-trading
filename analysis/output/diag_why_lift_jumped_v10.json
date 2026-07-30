@@ -1,0 +1,58 @@
+{
+  "pool": "judgment_v10_wide.csv",
+  "n_total": 18379,
+  "n_dropped": 0,
+  "grid": [
+    {
+      "sample": "全部",
+      "target": "二分类·CSV的label",
+      "lift_bp": 17.76,
+      "pos": 15,
+      "folds": 15,
+      "n_rows": 18379
+    },
+    {
+      "sample": "全部",
+      "target": "二分类·净>0",
+      "lift_bp": 14.72,
+      "pos": 15,
+      "folds": 15,
+      "n_rows": 18379
+    },
+    {
+      "sample": "全部",
+      "target": "回归·净收益",
+      "lift_bp": 17.23,
+      "pos": 15,
+      "folds": 15,
+      "n_rows": 18379
+    },
+    {
+      "sample": "仅走满72根",
+      "target": "二分类·CSV的label",
+      "lift_bp": 17.76,
+      "pos": 15,
+      "folds": 15,
+      "n_rows": 18379
+    },
+    {
+      "sample": "仅走满72根",
+      "target": "二分类·净>0",
+      "lift_bp": 14.72,
+      "pos": 15,
+      "folds": 15,
+      "n_rows": 18379
+    },
+    {
+      "sample": "仅走满72根",
+      "target": "回归·净收益",
+      "lift_bp": 17.23,
+      "pos": 15,
+      "folds": 15,
+      "n_rows": 18379
+    }
+  ],
+  "delta_target_bp": -0.53,
+  "delta_filter_bp": 0.0,
+  "verdict": "主因是【换目标】(-0.53bp vs 过滤 +0.00bp),与「边在幅度不在胜率」一致;过滤只是次要因素。"
+}

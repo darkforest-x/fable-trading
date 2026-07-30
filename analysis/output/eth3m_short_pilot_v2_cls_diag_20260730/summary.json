@@ -1,0 +1,203 @@
+{
+  "status": "failed_gates",
+  "experiment_id": "eth3m_short_pilot_v2_cls_diag_20260730",
+  "threshold_policy": "fixed p=0.50 only; no sweep",
+  "dataset": "/Users/zhangzc/fable-trading/datasets/eth_3m_short_pilot_v2_cls_letterbox960",
+  "run_dir": "/Users/zhangzc/fable-trading/runs/classify/eth3m_short_pilot_v2_cls_diag_20260730",
+  "weights_sha256": "3ce89b668096e79eb00ae0ee8b4913024f91f46356626d22cbe11d3a98c30056",
+  "reported_remote_weights_sha256": "3ce89b668096e79eb00ae0ee8b4913024f91f46356626d22cbe11d3a98c30056",
+  "remote_local_weights_sha_match": true,
+  "remote_training_evidence": {
+    "log_path": "/Users/zhangzc/fable-trading/analysis/output/eth3m_short_pilot_v2_cls_diag_20260730/remote_train.log",
+    "log_sha256": "b8e6487b27a11e4dac060fffa787c1335326820f8b6397c0928da02d1437d86b",
+    "log_bytes": 40679,
+    "exit_receipt_path": "/Users/zhangzc/fable-trading/analysis/output/eth3m_short_pilot_v2_cls_diag_20260730/remote_exit_code.txt",
+    "exit_receipt_sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "exit_code": 0,
+    "remote_best_path": "/Users/zhangzc/fable-trading/analysis/output/eth3m_short_pilot_v2_cls_diag_20260730/remote_best.pt",
+    "remote_best_sha256": "3ce89b668096e79eb00ae0ee8b4913024f91f46356626d22cbe11d3a98c30056",
+    "remote_best_bytes": 3184268,
+    "local_best_sha256": "3ce89b668096e79eb00ae0ee8b4913024f91f46356626d22cbe11d3a98c30056",
+    "remote_local_best_match": true,
+    "completion_markers_verified": [
+      "\"status\": \"preflight_passed\"",
+      "NVIDIA GeForce RTX 3060",
+      "Best results observed at epoch 1",
+      "[launcher] exit_code=0"
+    ]
+  },
+  "prepared_manifest_sha256": "5cb687315bec0ee512cbf5a9ed9f8a8b86fa2cf1d2bf4cddb99ebd9f0df5a106",
+  "prepared_build_meta_sha256": "3eadb58575a1a0c23fc4c8110c9fbda4d448fa510ba9e79602a6f9c993897a61",
+  "training": {
+    "epochs_recorded": 21,
+    "configured_epochs": 100,
+    "patience": 20,
+    "early_stop_after_epochs": 21,
+    "best_epoch_by_first_max_top1": 1,
+    "best_top1": 0.80952,
+    "best_top1_count": 34,
+    "val_n_for_top1_count": 42,
+    "last_epoch": 21,
+    "first_epoch_lr_pg2": 0.077023,
+    "warmup_bias_lr_pg2_note": "0.077023 is recorded in results.csv; treating warmup bias as a hypothesis only"
+  },
+  "metrics": {
+    "train": {
+      "n": 95,
+      "positives": 22,
+      "negatives": 73,
+      "threshold": 0.5,
+      "tp": 22,
+      "fp": 0,
+      "tn": 73,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "specificity": 1.0,
+      "balanced_accuracy": 1.0,
+      "accuracy": 1.0,
+      "roc_auc": 1.0,
+      "average_precision": 0.9999999999999998,
+      "p_short_summary": {
+        "min": 0.0013942881487309933,
+        "p25": 0.005675480235368013,
+        "p50": 0.010605010204017162,
+        "p75": 0.04356792010366917,
+        "max": 0.9999909400939941,
+        "mean": 0.238285169678152,
+        "std": 0.4149234218727342
+      },
+      "p_short_by_true_class": {
+        "no_start": {
+          "min": 0.0013942881487309933,
+          "p25": 0.0046070939861238,
+          "p50": 0.008388505317270756,
+          "p75": 0.013827436603605747,
+          "max": 0.049910370260477066,
+          "mean": 0.010560556080460241,
+          "std": 0.009257162601184917
+        },
+        "short_start": {
+          "min": 0.9608599543571472,
+          "p25": 0.992986723780632,
+          "p50": 0.9971804618835449,
+          "p75": 0.9987765550613403,
+          "max": 0.9999909400939941,
+          "mean": 0.9939168420704928,
+          "std": 0.009215164733078053
+        }
+      }
+    },
+    "val": {
+      "n": 42,
+      "positives": 8,
+      "negatives": 34,
+      "threshold": 0.5,
+      "tp": 0,
+      "fp": 0,
+      "tn": 34,
+      "fn": 8,
+      "precision": 0.0,
+      "recall": 0.0,
+      "specificity": 1.0,
+      "balanced_accuracy": 0.5,
+      "accuracy": 0.8095238095238095,
+      "roc_auc": 0.6286764705882353,
+      "average_precision": 0.308974358974359,
+      "p_short_summary": {
+        "min": 0.0018813235219568014,
+        "p25": 0.009321333607658744,
+        "p50": 0.019808456301689148,
+        "p75": 0.03743958193808794,
+        "max": 0.4367903769016266,
+        "mean": 0.043401743667865436,
+        "std": 0.07428454535800273
+      },
+      "p_short_by_true_class": {
+        "no_start": {
+          "min": 0.0018813235219568014,
+          "p25": 0.008817930473014712,
+          "p50": 0.01764051429927349,
+          "p75": 0.03510440047830343,
+          "max": 0.4367903769016266,
+          "mean": 0.04289169328095501,
+          "std": 0.08081106762289092
+        },
+        "short_start": {
+          "min": 0.0032912222668528557,
+          "p25": 0.01154633960686624,
+          "p50": 0.048577435314655304,
+          "p75": 0.06461700424551964,
+          "max": 0.11058773845434189,
+          "mean": 0.04556945781223476,
+          "std": 0.03479066574447404
+        }
+      }
+    }
+  },
+  "gates": {
+    "threshold": 0.5,
+    "tp_min": 6,
+    "fp_max": 2,
+    "actual_tp": 0,
+    "actual_fp": 0,
+    "passed": false,
+    "policy": "if failed, stop; do not run smoke, owner review, promote, or ACTIVE switch"
+  },
+  "baseline_first_below_all": {
+    "name": "pre_holdout_first_below_all_safe_prefix",
+    "threshold": "strict fixed rule, no ML probability",
+    "tp": 5,
+    "fp": 0,
+    "tn": 34,
+    "fn": 3,
+    "source": "safe pre-holdout strict-prefix baseline supplied for this diagnostic; not recomputed here"
+  },
+  "majority_baseline": {
+    "split": "val",
+    "rule": "always predict no_start",
+    "correct": 34,
+    "n": 42,
+    "accuracy": 0.8095238095238095,
+    "note": "matches the training top1 count, so top1 alone adds no information"
+  },
+  "scope_guard": {
+    "read_splits": [
+      "train",
+      "val"
+    ],
+    "forbidden_parts_rejected": [
+      "continuous_smoke",
+      "holdout",
+      "smoke",
+      "weak_or_review"
+    ],
+    "holdout_read": false,
+    "weak_or_review_read": false,
+    "smoke_read": false,
+    "economics": "N/A for current-tip image classification; no return labels evaluated",
+    "random_controls": "N/A here; compare only fixed first-below-all baseline"
+  },
+  "prepared_meta": {
+    "total": 137,
+    "counts": {
+      "train": {
+        "total": 95,
+        "short_start": 22,
+        "no_start": 73,
+        "global_events": 53,
+        "positive_events": 21
+      },
+      "val": {
+        "total": 42,
+        "short_start": 8,
+        "no_start": 34,
+        "global_events": 18,
+        "positive_events": 8
+      }
+    },
+    "diagnostic_pilot_only": true,
+    "promotion_eligible": false,
+    "active_eligible": false
+  }
+}

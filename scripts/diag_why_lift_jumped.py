@@ -59,7 +59,9 @@ def main() -> int:
     _ap.add_argument("--pool", default=None,
                      help="candidate pool CSV; defaults to the tip_v1b 100x6m pool")
     _ap.add_argument("--tag", default=None, help="suffix for the output json")
-    _a = _ap.parse_args()
+    _ap.add_argument("--exit", default="barrier",
+                     help="which exit's return to use when the pool has one column per exit")
+    args = _a = _ap.parse_args()
     global POOL
     if _a.pool:
         POOL = Path(_a.pool) if Path(_a.pool).is_absolute() else PROJECT / _a.pool
@@ -93,8 +95,23 @@ def main() -> int:
             bars_avail.append((idx, avail))
     d["complete"] = pd.Series(dict(complete))
     d["bars_avail"] = pd.Series(dict(bars_avail))
-    d["net"] = d["realized_ret"].astype(float) - SWAP_TAKER
+    # Column names differ by pool generation. The tip_v1b pools store a single
+    # realized_ret; the v10 dumper writes one net_* column per exit rule, so the
+    # baseline exit has to be named rather than assumed -- assuming it is what
+    # made this script die on the v10 pool after the rebuild finished.
+    if "realized_ret" in d.columns:
+        d["net"] = d["realized_ret"].astype(float) - SWAP_TAKER
+    elif f"net_{args.exit}_taker" in d.columns:
+        d["net"] = d[f"net_{args.exit}_taker"].astype(float)
+    elif f"gross_{args.exit}" in d.columns:
+        d["net"] = d[f"gross_{args.exit}"].astype(float) - SWAP_TAKER
+    else:
+        print(f"池里既没有 realized_ret 也没有 net_{args.exit}_taker;"
+              f"可用列: {[c for c in d.columns if c.startswith(('net_','gross_'))][:8]}")
+        return 2
     d["label_bin"] = (d["net"] > 0).astype(int)
+    if "label" not in d.columns and f"label_{args.exit}" in d.columns:
+        d["label"] = d[f"label_{args.exit}"]
 
     n_drop = int((~d["complete"]).sum())
     print(f"   总 {len(d)}   过滤会丢掉 {n_drop} 行 = {100*n_drop/len(d):.1f}%\n")
