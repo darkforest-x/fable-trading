@@ -36,6 +36,11 @@
     事后信号"的路径（回看窗、事后模型、非盘口分布数据集）一律不得存在。pre-v16 检测器
     权重已三机清除（仅存 COCO yolo11 底座）；检测器晋升唯一门 = 真 tip 金标 + tip-smoke，
     自家 val/mAP/旧 frozen-F1 永不作裁决。无验证过的检测器时管道诚实空转（detector=none）。
+13. **单分支纪律**（owner 2026-07-30）：**只有 `main`，不开新分支、不建 worktree。**
+    直接在 main 上提交、`git push origin HEAD:main`。**每次提交前先 `git branch --show-current`
+    确认自己在 main**——曾有并行会话把 HEAD 切到别的分支，后续 6 个提交落在那里，
+    只因用的是显式 `HEAD:main` 才没丢。需要隔离环境（并行 agent / 跨模型实现）时，
+    先问 owner；owner 点头才开，且用完当轮就删。
 
 ## 弱模型在本仓库最容易犯的错（每条都真实发生过或差点发生）
 
@@ -56,6 +61,7 @@
 - **改一道新鲜度门忘了另两道** → 三门必须同值，见实盘纪律 7。
 - **往脉冲里塞实验扫描** → 超 15min 节拍 = 结构性挡 tip；见实盘纪律 8。
 - **自动 promote / 清 forward_log** → 禁止；owner 点头。
+- **开新分支 / 建 worktree** → 禁止；见铁律 13。提交前先确认 `git branch --show-current` 是 main。
 
 ## 质量标准（可检查，不是形容词）
 
