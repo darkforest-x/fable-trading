@@ -2,13 +2,13 @@
   "sites": [
     {
       "name": "Label Studio（主入口 HTTPS）",
-      "url": "https://103.214.174.58:8081",
+      "url": "https://206.237.14.112:8081",
       "role": "primary",
       "note": "日常远程打标主入口（nginx SSL）"
     },
     {
       "name": "Label Studio（反向隧道 :18081）",
-      "url": "http://103.214.174.58:18081",
+      "url": "http://206.237.14.112:18081",
       "role": "tunnel",
       "note": "Mac 本机 LS 开着时：bash scripts/tunnel_labelstudio.sh"
     },
@@ -31,7 +31,7 @@
     },
     {
       "title": "远程隧道",
-      "body": "export VPS_HOST=root@103.214.174.58 VPS_PORT=18081 && bash scripts/tunnel_labelstudio.sh"
+      "body": "export VPS_HOST=root@206.237.14.112 VPS_PORT=18081 && bash scripts/tunnel_labelstudio.sh"
     },
     {
       "title": "新一轮任务包",

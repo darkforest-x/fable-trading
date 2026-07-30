@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>历史盘口检测 · SOL_USDT_SWAP</title>
+<style>
+body { font: 15px/1.6 -apple-system, "PingFang SC", system-ui, sans-serif;
+  max-width: 960px; margin: 0 auto; padding: 1.5rem 1rem 3rem; color: #111; }
+h1 { font-size: 1.4rem; margin: 0 0 .4rem; }
+.sub { color: #666; margin-bottom: 1.2rem; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 8px; margin: 1rem 0; }
+.tile { border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px 12px; background: #fafafa; }
+.tile b { display: block; font-size: 1.15rem; margin-top: 2px; }
+.tile span { color: #6b7280; font-size: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { border-bottom: 1px solid #eee; padding: 6px 8px; text-align: left; }
+th { background: #f3f4f6; position: sticky; top: 0; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.mono { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+.pos { color: #059669; } .neg { color: #dc2626; }
+.empty { color: #9ca3af; text-align: center; }
+.note { color: #6b7280; font-size: 13px; margin-top: 1rem; }
+.warn { background: #fff7ed; border-left: 3px solid #f59e0b; padding: 8px 10px; margin: 8px 0; }
+</style></head><body>
+<h1>历史盘口检测 · SOL_USDT_SWAP</h1>
+<p class="sub">近 365 天 · YOLO full 扫描 + 判断层打分 · 只读报告 · 生成于 2026-07-30 16:34:47.476739+00:00</p>
+
+
+<div class="tiles">
+  <div class="tile"><span>窗口</span><b>2025-07-30 16:15 → 2026-07-30 16:15</b></div>
+  <div class="tile"><span>YOLO 开火</span><b>34</b></div>
+  <div class="tile"><span>过阈值</span><b>32</b></div>
+  <div class="tile"><span>合格(分+ATR)</span><b>32</b></div>
+  <div class="tile"><span>已平仓笔数</span><b>34</b></div>
+  <div class="tile"><span>平仓均收益</span><b>+0.33%</b></div>
+  <div class="tile"><span>平仓胜率</span><b>44.1%</b></div>
+  <div class="tile"><span>阈值</span><b>-0.0004397139085409754</b></div>
+</div>
+<p class="note">检测器: models/owner_best.pt · 判断: models/frozen_tp5_sl2_swap_yolo_v10_reg_20260731.txt · 结果分布: sl 17 · timeout 8 · tp 9</p>
+<p class="note">障碍: TP5/SL2/72bar（纸面回放，非实盘）；合格 = score≥阈值 且 atr_pct 过下限。</p>
+<table>
+  <thead><tr>
+    <th>#</th><th>信号时间 (UTC)</th><th class="num">入场价≈</th><th class="num">score</th>
+    <th>过阈</th><th>合格</th><th>结果</th><th class="num">实现收益</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>1</td><td class='mono'>2025-08-29 08:45:00+00:00</td><td class='num'>206.8</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-1.88%</td></tr><tr><td>2</td><td class='mono'>2025-09-04 14:45:00+00:00</td><td class='num'>205.27</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-1.11%</td></tr><tr><td>3</td><td class='mono'>2025-09-05 15:45:00+00:00</td><td class='num'>203.46</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>timeout</td><td class='num neg'>-0.41%</td></tr><tr><td>4</td><td class='mono'>2025-09-07 17:45:00+00:00</td><td class='num'>201.9</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>tp</td><td class='num pos'>+1.72%</td></tr><tr><td>5</td><td class='mono'>2025-09-19 04:45:00+00:00</td><td class='num'>244.88</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-0.87%</td></tr><tr><td>6</td><td class='mono'>2025-10-17 07:45:00+00:00</td><td class='num'>177.72</td><td class='num'>-0.000752</td><td>·</td><td>·</td><td>sl</td><td class='num neg'>-1.75%</td></tr><tr><td>7</td><td class='mono'>2025-10-22 00:15:00+00:00</td><td class='num'>184.7</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-1.66%</td></tr><tr><td>8</td><td class='mono'>2025-10-24 14:45:00+00:00</td><td class='num'>190.09</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>timeout</td><td class='num pos'>+2.46%</td></tr><tr><td>9</td><td class='mono'>2025-10-28 06:15:00+00:00</td><td class='num'>198.9</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>tp</td><td class='num pos'>+2.49%</td></tr><tr><td>10</td><td class='mono'>2025-10-29 19:45:00+00:00</td><td class='num'>192.63</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-2.29%</td></tr><tr><td>11</td><td class='mono'>2025-11-16 12:45:00+00:00</td><td class='num'>139.96</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-1.11%</td></tr><tr><td>12</td><td class='mono'>2025-11-17 13:45:00+00:00</td><td class='num'>138.0</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>tp</td><td class='num pos'>+3.34%</td></tr><tr><td>13</td><td class='mono'>2025-11-19 15:45:00+00:00</td><td class='num'>134.5</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-1.68%</td></tr><tr><td>14</td><td class='mono'>2025-11-20 16:45:00+00:00</td><td class='num'>132.53</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-2.32%</td></tr><tr><td>15</td><td class='mono'>2025-11-24 08:15:00+00:00</td><td class='num'>129.88</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>tp</td><td class='num pos'>+3.60%</td></tr><tr><td>16</td><td class='mono'>2025-11-26 10:15:00+00:00</td><td class='num'>136.96</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-1.02%</td></tr><tr><td>17</td><td class='mono'>2025-12-15 16:45:00+00:00</td><td class='num'>126.38</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-1.98%</td></tr><tr><td>18</td><td class='mono'>2025-12-17 18:45:00+00:00</td><td class='num'>122.01</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>timeout</td><td class='num pos'>+1.52%</td></tr><tr><td>19</td><td class='mono'>2025-12-18 19:45:00+00:00</td><td class='num'>117.47</td><td class='num'>-0.000823</td><td>·</td><td>·</td><td>tp</td><td class='num pos'>+6.04%</td></tr><tr><td>20</td><td class='mono'>2025-12-26 15:15:00+00:00</td><td class='num'>121.24</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>timeout</td><td class='num pos'>+1.44%</td></tr><tr><td>21</td><td class='mono'>2025-12-31 20:15:00+00:00</td><td class='num'>124.29</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>timeout</td><td class='num pos'>+0.12%</td></tr><tr><td>22</td><td class='mono'>2026-01-19 01:45:00+00:00</td><td class='num'>133.73</td><td class='num'>0.001054</td><td>✓</td><td>✓</td><td>timeout</td><td class='num pos'>+0.47%</td></tr><tr><td>23</td><td class='mono'>2026-03-12 03:45:00+00:00</td><td class='num'>84.94</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>tp</td><td class='num pos'>+2.24%</td></tr><tr><td>24</td><td class='mono'>2026-03-22 01:15:00+00:00</td><td class='num'>87.33</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>timeout</td><td class='num neg'>-0.85%</td></tr><tr><td>25</td><td class='mono'>2026-03-26 05:15:00+00:00</td><td class='num'>90.0</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-0.77%</td></tr><tr><td>26</td><td class='mono'>2026-03-31 10:15:00+00:00</td><td class='num'>80.71</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>tp</td><td class='num pos'>+3.11%</td></tr><tr><td>27</td><td class='mono'>2026-04-29 14:15:00+00:00</td><td class='num'>83.89</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-0.73%</td></tr><tr><td>28</td><td class='mono'>2026-05-15 05:15:00+00:00</td><td class='num'>91.31</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-0.75%</td></tr><tr><td>29</td><td class='mono'>2026-05-26 16:15:00+00:00</td><td class='num'>84.25</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-1.13%</td></tr><tr><td>30</td><td class='mono'>2026-06-12 20:45:00+00:00</td><td class='num'>66.64</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>timeout</td><td class='num pos'>+2.40%</td></tr><tr><td>31</td><td class='mono'>2026-06-27 23:15:00+00:00</td><td class='num'>70.43</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>tp</td><td class='num pos'>+2.40%</td></tr><tr><td>32</td><td class='mono'>2026-07-12 00:45:00+00:00</td><td class='num'>76.05</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>tp</td><td class='num pos'>+2.03%</td></tr><tr><td>33</td><td class='mono'>2026-07-16 17:15:00+00:00</td><td class='num'>75.83</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-0.95%</td></tr><tr><td>34</td><td class='mono'>2026-07-27 15:45:00+00:00</td><td class='num'>75.22</td><td class='num'>-0.00044</td><td>✓</td><td>✓</td><td>sl</td><td class='num neg'>-1.05%</td></tr>
+  </tbody>
+</table>
+<p class="note">免责：本地历史探针，不写 forward_log、不下单、不 promote。与 VPS 主线互不影响。</p>
+</body></html>

@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
 """Regenerate analysis/output/l2_v10_reg_freeze_20260731/report.html (charts + CN glossary).
 
-死命令（仓库根目录执行）:
+死命令（仓库根；含 Claude 出入场 K 线样本图）::
+
+  cd /Users/zhangzc/fable-trading && \\
+  PYTHONPATH=. python3 scripts/build_l2_v10_freeze_sample_gallery.py && \\
+  PYTHONPATH=. python3 scripts/regen_l2_v10_freeze_report.py && \\
+  open analysis/output/l2_v10_reg_freeze_20260731/report.html
+
+仅重刷 HTML（不重画样本，假定 samples/ 已是 Claude 叠层）::
+
   cd /Users/zhangzc/fable-trading && PYTHONPATH=. python3 scripts/regen_l2_v10_freeze_report.py && open analysis/output/l2_v10_reg_freeze_20260731/report.html
 
-全链路（重建数据集 + 重训冻结 + 报告，会改 ACTIVE）:
-  cd /Users/zhangzc/fable-trading && PYTHONPATH=. python3 scripts/build_judgment_yolo_swap_v10.py && PYTHONPATH=. python3 scripts/freeze_model.py --yolo-v10-pool --write-active --date 20260731 && PYTHONPATH=. python3 scripts/regen_l2_v10_freeze_report.py && open analysis/output/l2_v10_reg_freeze_20260731/report.html
+全链路（重建数据集 + 重训冻结 + Claude 样本图 + 报告，会改 ACTIVE）::
+
+  cd /Users/zhangzc/fable-trading && PYTHONPATH=. python3 scripts/build_judgment_yolo_swap_v10.py && PYTHONPATH=. python3 scripts/freeze_model.py --yolo-v10-pool --write-active --date 20260731 && PYTHONPATH=. python3 scripts/build_l2_v10_freeze_sample_gallery.py && PYTHONPATH=. python3 scripts/regen_l2_v10_freeze_report.py && open analysis/output/l2_v10_reg_freeze_20260731/report.html
 """
 from __future__ import annotations
 
@@ -285,13 +294,16 @@ holdout 留置集未读。看板 tip-replay PF（盈亏比）0.784 是 v16 旧 h
 all_folds_net_positive 五折顶档都盈利=<strong class="neg">{wf.get('all_folds_net_positive')} 否</strong></p>
 </div>
 <div class="panel"><h2>死命令 dead one-liner</h2>
-<pre># 仅重出 HTML+指标图（不重渲 200 交易图）
+<pre># ★ 标准死命令：Claude 出入场 K 线（ENTRY/TP/SL/exit）200 样图 + 报告
+cd /Users/zhangzc/fable-trading && \\
+PYTHONPATH=. python3 scripts/build_l2_v10_freeze_sample_gallery.py && \\
+PYTHONPATH=. python3 scripts/regen_l2_v10_freeze_report.py && \\
+open analysis/output/l2_v10_reg_freeze_20260731/report.html
+
+# 仅重出 HTML+指标图（不重渲样图；假定 samples/ 已是 Claude 叠层）
 cd /Users/zhangzc/fable-trading && PYTHONPATH=. python3 scripts/regen_l2_v10_freeze_report.py && open analysis/output/l2_v10_reg_freeze_20260731/report.html
 
-# 重渲 200 张交易样图 + 报告
-cd /Users/zhangzc/fable-trading && PYTHONPATH=. python3 scripts/build_l2_v10_freeze_sample_gallery.py && PYTHONPATH=. python3 scripts/regen_l2_v10_freeze_report.py && open analysis/output/l2_v10_reg_freeze_20260731/report.html
-
-# 全链路：建表 + 冻结写 ACTIVE + 200 样图 + 报告
+# 全链路：建表 + 冻结写 ACTIVE + Claude 样图 + 报告
 cd /Users/zhangzc/fable-trading && PYTHONPATH=. python3 scripts/build_judgment_yolo_swap_v10.py && PYTHONPATH=. python3 scripts/freeze_model.py --yolo-v10-pool --write-active --date 20260731 && PYTHONPATH=. python3 scripts/build_l2_v10_freeze_sample_gallery.py && PYTHONPATH=. python3 scripts/regen_l2_v10_freeze_report.py && open analysis/output/l2_v10_reg_freeze_20260731/report.html
 
 # 回滚 L2 → v11
@@ -320,26 +332,39 @@ echo 'models/frozen_tp5_sl2_swap_yolo_v11_reg_20260718.txt' > models/ACTIVE</pre
                     "neg" if float(c.get("ret_pct") or 0) < 0 else ""
                 )
                 thr_s = "过 thr ✓" if c.get("passed") else "未过 thr"
+                entry_s = c.get("entry")
+                exit_s = c.get("exit")
+                outcome_s = c.get("outcome") or "—"
+                overlay_note = (
+                    f"入 {entry_s} · 出 {exit_s} · {outcome_s}"
+                    if entry_s is not None
+                    else "（无出入场叠层？请重跑 sample_gallery）"
+                )
                 gal_cards.append(
                     "<figure class=\"sample-card\">"
                     f"<img src=\"{c.get('file')}\" alt=\"{c.get('symbol')} {c.get('signal_time')}\" loading=\"lazy\">"
                     "<figcaption>"
-                    f"<b>#{c.get('i')}</b> <span class=\"mono\">{c.get('symbol')}</span><br>"
+                    f"<b>#{c.get('i')}</b> <span class=\"mono\">{c.get('symbol')}</span>"
+                    f" · SHORT<br>"
                     f"{str(c.get('signal_time') or '')[:16]} UTC · {c.get('split')}<br>"
                     f"<span class=\"tag\">{c.get('band')}</span><br>"
                     f"score 分数 <span class=\"mono\">{c.get('score')}</span> · {thr_s}<br>"
                     f"realized 实现收益 <span class=\"{cls}\">{float(c.get('ret_pct') or 0):+.2f}%</span>"
-                    f" · label={c.get('label')}"
+                    f" · label={c.get('label')}<br>"
+                    f"<span class=\"muted\">{overlay_note}</span>"
                     "</figcaption></figure>"
                 )
+            ov = man.get("overlay") or "claude notify_signal ENTRY/TP/SL/exit"
             gallery = (
                 "<div class=\"panel\">"
                 f"<h2>抽样 {len(cards)} 张交易图 sample trade charts "
-                "<span class=\"unit\">因果窗 200 根 · 与训练同渲染</span></h2>"
-                "<p class=\"muted\">抽样：val 上 100 顶十分位 + 50 底十分位 + 50 中间；"
-                "每张 = 信号 bar 及之前 200 根 15m + SMA/EMA 20/60/120。"
+                "<span class=\"unit\">Claude K 线 · 出入场叠层 · 窗 200</span></h2>"
+                "<p class=\"muted\">抽样：val 上 100 顶十分位 + 50 底十分位 + 50 中间。"
+                "渲染 = <code>notify_signal</code> 同款深色 K 线（SMA/EMA 20/60/120）+ "
+                "<strong>SHORT ENTRY 紫虚线+▼ / TP 5×ATR 绿虚线 / SL 2×ATR 红虚线 / 出场路径+圆点</strong>。"
+                f" overlay={ov}。"
                 "图目录 <code>samples/</code> · 清单 <code>samples_manifest.json</code>。"
-                "重生样图："
+                "重生（死命令一步）："
                 "<code>PYTHONPATH=. python3 scripts/build_l2_v10_freeze_sample_gallery.py</code>"
                 "</p>"
                 f"<div class=\"sample-grid\">{''.join(gal_cards)}</div></div>"
