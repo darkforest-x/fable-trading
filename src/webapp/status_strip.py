@@ -21,6 +21,7 @@ from src.webapp.live_paper import live_paper_payload, live_paper_status_line
 PROJECT = Path(__file__).resolve().parents[2]
 OWNER_BEST_JSON = PROJECT / "models" / "owner_best.json"
 OWNER_BEST_PT = PROJECT / "models" / "owner_best.pt"
+V10_PT = PROJECT / "models" / "owner_short_star_v10.pt"
 FORWARD_LOG_PATH = PROJECT / "data" / "forward_log.csv"
 FORWARD_DECISION_TRADES = 100
 V13_RESULTS_CSV = (
@@ -230,34 +231,73 @@ def _debug_links() -> list[dict]:
 
 
 def _owner_detector() -> dict:
+    """L1 detector pointer for the status strip / overview architecture board.
+
+    Owner 2026-07-31: when formal owner_best is absent but paper v10 weights
+    exist, report v10 as the active discovery weight (not tip-smoke gold).
+    """
     out: dict = {
-        "exists": OWNER_BEST_JSON.exists() or OWNER_BEST_PT.exists(),
+        "exists": False,
         "json_path": relative_path(OWNER_BEST_JSON) if OWNER_BEST_JSON.exists() else None,
-        "weights_path": relative_path(OWNER_BEST_PT) if OWNER_BEST_PT.exists() else None,
+        "weights_path": None,
         "source_run": None,
         "frozen_eval_f1": None,
         "precision": None,
         "recall": None,
         "eval_set": None,
         "note": None,
+        "label": None,
+        "interim": False,
     }
-    if not OWNER_BEST_JSON.exists():
-        out["note"] = "models/owner_best.json 不存在"
-        return out
+    # Resolve which .pt the live path would load (same order as yolo_candidates).
     try:
-        data = json.loads(OWNER_BEST_JSON.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        out["note"] = f"读取失败: {exc}"
+        from src.judgment.yolo_candidates import default_weights_label, resolve_default_weights
+
+        wpath = resolve_default_weights()
+        out["weights_path"] = relative_path(wpath)
+        out["label"] = default_weights_label(wpath)
+        out["exists"] = True
+    except Exception:  # noqa: BLE001
+        out["exists"] = False
+        out["note"] = "无可用检测权重（owner_best / v10 / v16 均缺）"
         return out
-    metrics = data.get("metrics") or {}
-    out["source_run"] = data.get("source_run")
-    out["frozen_eval_f1"] = _num(data.get("frozen_eval_f1") or metrics.get("f1"))
-    out["precision"] = _num(metrics.get("p"))
-    out["recall"] = _num(metrics.get("r"))
-    out["eval_set"] = data.get("eval_set")
-    out["mtime"] = datetime.fromtimestamp(
-        OWNER_BEST_JSON.stat().st_mtime, tz=timezone.utc
-    ).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    if OWNER_BEST_JSON.exists():
+        try:
+            data = json.loads(OWNER_BEST_JSON.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            out["note"] = f"读取 owner_best.json 失败: {exc}"
+            return out
+        metrics = data.get("metrics") or {}
+        out["source_run"] = data.get("source_run") or out.get("label")
+        out["frozen_eval_f1"] = _num(data.get("frozen_eval_f1") or metrics.get("f1"))
+        out["precision"] = _num(metrics.get("p"))
+        out["recall"] = _num(metrics.get("r"))
+        out["eval_set"] = data.get("eval_set")
+        out["interim"] = bool(data.get("promote_mode") == "owner_directed_interim"
+                              or data.get("interim"))
+        out["note"] = data.get("note") or data.get("owner_decision")
+        out["mtime"] = datetime.fromtimestamp(
+            OWNER_BEST_JSON.stat().st_mtime, tz=timezone.utc
+        ).strftime("%Y-%m-%dT%H:%M:%SZ")
+        if out["label"] and "v10" in str(out["label"]) and not out["source_run"]:
+            out["source_run"] = out["label"]
+        return out
+
+    # No JSON pointer: honest fallback metadata when weights resolve to v10/v16.
+    label = out.get("label") or ""
+    out["source_run"] = label
+    out["interim"] = True
+    if "v10" in label:
+        out["note"] = (
+            "owner_best 未挂；L1 回退 owner_short_star_v10（owner 2026-07-31）"
+            "· 非 tip-smoke 金标晋升 · 判断层仍 v11 ACTIVE"
+        )
+        out["eval_set"] = "paper / live discovery interim"
+    elif "v16" in label:
+        out["note"] = "owner_best 未挂；回退 v16 tipuni cold（未 tip-smoke 晋升）"
+    else:
+        out["note"] = f"使用 {label}（无 owner_best.json）"
     return out
 
 

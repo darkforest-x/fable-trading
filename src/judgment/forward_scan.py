@@ -95,11 +95,11 @@ def scan_forward_records(
         try:
             yolo_model = load_yolo_model(yolo_weights) if yolo_weights is not None else load_yolo_model()
         except (FileNotFoundError, ImportError) as exc:
-            # Owner doctrine 2026-07-23: pre-v16 detectors are deleted (they
-            # could only ever produce hindsight rows). Until a validated tip
-            # detector lands, the pulse idles honestly: klines stay fresh and
-            # open rows keep resolving, but NO candidate discovery happens.
-            print(f"forward_scan: detector=none ({exc}) — awaiting validated v16; "
+            # No usable weights on disk (owner_best / v10 / v16 all missing).
+            # Idle discovery; open rows still resolve. Owner 2026-07-31: when
+            # owner_short_star_v10.pt exists, resolve_default_weights uses it
+            # so this branch is only true if even v10 is gone.
+            print(f"forward_scan: detector=none ({exc}) — no weights; "
                   "no candidate discovery this pulse", flush=True)
             yolo_model = None
 
@@ -120,7 +120,15 @@ def scan_forward_records(
         jobs.append((source, symbol, frame.tail(LIVE_TAIL_BARS).reset_index(drop=True)))
     scanned_series = len(jobs)
     workers = _forward_workers() if candidate_source == "yolo" else 1
-    wlabel = str(yolo_weights) if yolo_weights is not None else "owner_best"
+    if yolo_weights is not None:
+        wlabel = str(yolo_weights)
+    else:
+        try:
+            from src.judgment.yolo_candidates import default_weights_label, resolve_default_weights
+
+            wlabel = default_weights_label(resolve_default_weights())
+        except Exception:  # noqa: BLE001
+            wlabel = "none"
     tip_conf_s = f"{tip_conf:.2f}" if tip_conf is not None else "off"
     print(
         f"forward_scan: series={scanned_series} workers={workers} source={candidate_source} "

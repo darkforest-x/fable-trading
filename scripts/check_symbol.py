@@ -81,34 +81,11 @@ TAIL_BARS = 2000
 # Same 30min value as TG filter and dashboard FRESH_DETECT_MIN (三门同值).
 FRESH_GATE_MIN = float(ExecutorConfig().max_signal_age_min)
 
-# Probe weight resolution (dashboard / local one-shot). Does NOT auto-create
-# models/owner_best.pt (no silent promote). Prefer paper v10 when mainline
-# pointer is absent (owner doctrine: pre-v16 mainline weights cleared).
-_PROBE_WEIGHT_CANDIDATES = (
-    PROJECT / "models" / "owner_best.pt",
-    PROJECT / "models" / "owner_short_star_v10.pt",
-    PROJECT / "models" / "owner_v16_tipuni_cold.pt",
-)
-
-
 def resolve_probe_weights() -> Path:
-    """First existing weights path for the one-shot probe."""
-    env = (os.environ.get("FABLE_YOLO_WEIGHTS") or "").strip()
-    if env:
-        p = Path(env).expanduser()
-        if not p.is_absolute():
-            p = PROJECT / p
-        if p.exists():
-            return p
-        raise FileNotFoundError(f"FABLE_YOLO_WEIGHTS set but missing: {p}")
-    for cand in _PROBE_WEIGHT_CANDIDATES:
-        if cand.exists():
-            return cand
-    tried = ", ".join(str(c.relative_to(PROJECT)) for c in _PROBE_WEIGHT_CANDIDATES)
-    raise FileNotFoundError(
-        f"YOLO weights missing for probe (tried {tried}). "
-        "Place models/owner_short_star_v10.pt or set FABLE_YOLO_WEIGHTS."
-    )
+    """Same order as live mainline (env → owner_best → short_star_v10 → v16)."""
+    from src.judgment.yolo_candidates import resolve_default_weights
+
+    return resolve_default_weights()
 
 
 def normalize_symbol(raw: str) -> str:

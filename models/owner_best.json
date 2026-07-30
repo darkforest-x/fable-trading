@@ -1,0 +1,19 @@
+{
+  "source_run": "owner_short_star_v10",
+  "promoted_at": "2026-07-31T00:30:00+00:00",
+  "promote_mode": "owner_directed_interim",
+  "owner_decision": "L1 用 v10（2026-07-31）：owner 明确要求检测层接 short_star_v10，结束 detector=none 空转",
+  "weights_file": "models/owner_short_star_v10.pt",
+  "weights_symlink": "models/owner_best.pt -> owner_short_star_v10.pt",
+  "interim": true,
+  "frozen_eval_f1": null,
+  "metrics": {
+    "conf": 0.3,
+    "note": "no frozen-eval re-score at this cutover"
+  },
+  "eval_set": "not re-scored; interim discovery for paper+live tip scan",
+  "previous": "detector=none after pre-v16 weight purge (2026-07-23 doctrine)",
+  "judgment_unchanged": "models/frozen_tp5_sl2_swap_yolo_v11_reg_20260718 + judgment_yolo_swap_v11.csv",
+  "holdout": "not consumed",
+  "note": "Interim L1 only. Formal detector graduation still requires true tip gold + tip-smoke. Research still says v10 discovery pool is net-negative before judgment; this restores scan path consistency with paper live."
+}

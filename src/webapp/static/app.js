@@ -1055,7 +1055,12 @@ function paintLiveTruth(od, ja, fw, paperLive) {
     else noteEl.textContent = `还差 ${fw.decision_remaining ?? target - n} 笔新鲜 maker 成交 · lag≤${fw.fresh_detect_min ?? 30}min`;
   }
   const det = $("#live-det");
-  if (det) det.textContent = od.source_run || (od.exists ? "已加载" : "缺失");
+  if (det) {
+    const lab = od.label || od.source_run;
+    det.textContent = lab
+      ? String(lab).replace(/^owner_/, "").replace(/_star/, "")
+      : (od.exists ? "已加载" : "缺失");
+  }
   const jud = $("#live-jud");
   if (jud) {
     const thr = ja.threshold_val_q90 != null ? Number(ja.threshold_val_q90).toFixed(4) : "—";
@@ -1216,15 +1221,21 @@ async function loadStatusStrip(force = false) {
       ownerEl.classList.remove("skeleton");
       ownerEl.classList.add("status-click");
       ownerEl.dataset.jump = "probe";
-      ownerEl.title = "点此打开盘口检测";
-      const f1 = od.frozen_eval_f1 != null ? Number(od.frozen_eval_f1).toFixed(3) : "—";
-      const run = od.source_run || "—";
-      const shortRun = String(run).replace(/^owner_/, "");
-      ownerEl.classList.toggle("good", (od.frozen_eval_f1 || 0) >= 0.6);
-      ownerEl.classList.toggle("warn", !od.exists || ((od.frozen_eval_f1 || 0) > 0 && od.frozen_eval_f1 < 0.6));
+      ownerEl.title = od.note || "点此打开盘口检测";
+      const f1 = od.frozen_eval_f1 != null ? Number(od.frozen_eval_f1).toFixed(3) : null;
+      const run = od.label || od.source_run || "—";
+      const shortRun = String(run).replace(/^owner_/, "").replace(/_star/, "");
+      const interim = !!od.interim || /v10|short_star/i.test(String(run));
+      ownerEl.classList.toggle("good", !!od.exists && !interim && (od.frozen_eval_f1 || 0) >= 0.6);
+      ownerEl.classList.toggle("warn", !od.exists || interim);
+      const sub = !od.exists
+        ? "空转"
+        : (interim
+          ? (f1 ? `F1 ${f1} · 临时 L1` : "临时 L1 · tip 扫描")
+          : (f1 ? `F1 ${f1} · 冻结评测` : "主线检测"));
       ownerEl.innerHTML = `<span class="status-k">检测器</span>
         <span class="status-v">${escapeHtml(shortRun)}</span>
-        <span class="status-sub">F1 ${f1} · 冻结评测</span>`;
+        <span class="status-sub">${escapeHtml(sub)}</span>`;
     }
     if (judEl) {
       judEl.classList.remove("skeleton");
@@ -1410,19 +1421,25 @@ function paintArchitecture(strip, overview, paper) {
   const tr = (strip && strip.train) || {};
   const pl = paper || (strip && strip.paper_live) || {};
 
-  // --- L1 detector ---
+  // --- L1 detector (owner 2026-07-31: short_star_v10 interim) ---
   const detLiveOk = !!od.exists;
+  const detInterim = !!od.interim || /v10|short_star/i.test(String(od.label || od.source_run || ""));
   const detName = detLiveOk
-    ? String(od.source_run || "owner_best").replace(/^owner_/, "")
+    ? String(od.label || od.source_run || "owner_best")
+        .replace(/^owner_/, "")
+        .replace(/_star/, "")
     : "none";
-  const detState = detLiveOk ? "ok" : (pl.available ? "warn" : "off");
-  const detBadge = detLiveOk ? "ACTIVE" : (pl.available ? "纸面" : "空转");
+  const detState = detLiveOk ? (detInterim ? "warn" : "ok") : (pl.available ? "warn" : "off");
+  const detBadge = !detLiveOk ? (pl.available ? "纸面" : "空转")
+    : (detInterim ? "v10 临时" : "ACTIVE");
   const detVer = detLiveOk ? detName : (pl.available ? "v10 纸面" : "detector=none");
   const detSub = detLiveOk
-    ? `F1 ${od.frozen_eval_f1 != null ? Number(od.frozen_eval_f1).toFixed(3) : "—"} · tip-only`
+    ? (detInterim
+      ? `tip 扫描 · conf 0.30 · 非 tip-smoke 金标 · ${od.note ? "见明细" : "判断仍 v11"}`
+      : `F1 ${od.frozen_eval_f1 != null ? Number(od.frozen_eval_f1).toFixed(3) : "—"} · tip-only`)
     : (pl.available
       ? `纸面 ${pl.n_fresh || 0}新/${pl.n_fired || 0}总 · conf ${Number(pl.conf || 0.3).toFixed(2)} · 不写账`
-      : (od.note || "models/owner_best 未挂 · 管道诚实空转"));
+      : (od.note || "无检测权重 · 管道空转"));
 
   // --- L2 judgment ---
   const judOk = !!ja.exists;
@@ -1540,14 +1557,16 @@ function paintArchitecture(strip, overview, paper) {
         layer: "L1 检测",
         role: "YOLO 盘口 tip 形态 · 只扫 tip/tip-1/tip-2",
         ver: detLiveOk
-          ? `${detName}${od.frozen_eval_f1 != null ? ` · F1 ${Number(od.frozen_eval_f1).toFixed(3)}` : ""}`
-          : "未挂 owner_best（detector=none）",
-        status: detLiveOk ? tag("ok", "实盘在线") : tag("warn", pl.available ? "仅纸面 v10" : "空转"),
+          ? `${detName}${od.weights_path ? ` · ${od.weights_path}` : ""}`
+          : "未挂权重（detector=none）",
+        status: detLiveOk
+          ? tag(detInterim ? "warn" : "ok", detInterim ? "v10 临时" : "实盘在线")
+          : tag("warn", pl.available ? "仅纸面 v10" : "空转"),
         note: detLiveOk
-          ? (od.eval_set || od.note || "晋升门 = 真 tip 金标 + tip-smoke")
+          ? (od.note || od.eval_set || "晋升门 = 真 tip 金标 + tip-smoke")
           : (pl.available
             ? `旁路：scripts/live_signal_tg.py · ${pl.n_fresh || 0}/${pl.n_fired || 0} 新鲜 · 不写 forward`
-            : (od.note || "无验证检测器时管道诚实空转；v16 tipuni 权重未 promote")),
+            : (od.note || "无可用权重")),
       },
       {
         layer: "L2 判断",

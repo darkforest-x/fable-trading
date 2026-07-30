@@ -27,6 +27,54 @@ WINDOW = 200
 STRIDE = 50
 DEFAULT_CONF = 0.30
 DEFAULT_WEIGHTS = PROJECT_DIR / "models" / "owner_best.pt"
+# Owner 2026-07-31: L1 interim discovery weight when owner_best pointer is
+# absent. Not a tip-smoke gold promote — paper + live scan share short_star_v10.
+V10_PAPER_WEIGHTS = PROJECT_DIR / "models" / "owner_short_star_v10.pt"
+V16_TIPUNI_WEIGHTS = PROJECT_DIR / "models" / "owner_v16_tipuni_cold.pt"
+
+
+def resolve_default_weights() -> Path:
+    """Mainline detector weights: env → owner_best.pt → short_star_v10 → v16 cold.
+
+    Owner directed 2026-07-31: do not idle at detector=none while v10 paper
+    weights exist. Formal tip-gold graduation still requires tip-smoke + owner
+    promote; this only restores a usable discovery weight for scan/probe/paper.
+    """
+    env = (os.environ.get("FABLE_YOLO_WEIGHTS") or "").strip()
+    if env:
+        p = Path(env).expanduser()
+        if not p.is_absolute():
+            p = PROJECT_DIR / p
+        if p.is_file():
+            return p
+        raise FileNotFoundError(f"FABLE_YOLO_WEIGHTS missing: {p}")
+    for cand in (DEFAULT_WEIGHTS, V10_PAPER_WEIGHTS, V16_TIPUNI_WEIGHTS):
+        if cand.is_file():
+            return cand
+    raise FileNotFoundError(
+        "YOLO weights missing: tried owner_best.pt, "
+        "owner_short_star_v10.pt, owner_v16_tipuni_cold.pt "
+        "(or set FABLE_YOLO_WEIGHTS)"
+    )
+
+
+def default_weights_label(path: Path | None = None) -> str:
+    """Short label for logs / dashboard (v10 / owner_best / basename)."""
+    try:
+        p = path if path is not None else resolve_default_weights()
+    except FileNotFoundError:
+        return "none"
+    try:
+        resolved = p.resolve().name
+    except OSError:
+        resolved = p.name
+    if "short_star_v10" in p.name or "short_star_v10" in resolved:
+        return "owner_short_star_v10"
+    if "v16_tipuni" in p.name or "v16_tipuni" in resolved:
+        return "owner_v16_tipuni_cold"
+    if p.name == "owner_best.pt":
+        return "owner_best"
+    return p.name
 # A′ tip-edge gate (owner-approved 2026-07-21): only accept boxes whose
 # mapped signal bar sits in the last N bars of the scan window.
 # Source: analysis/p_box_to_bar_lag.md — KORU right_norm≈97.5% still mapped
@@ -135,7 +183,10 @@ def right_edge_to_bar(cx: float, w: float, tf, *, n_bars: int) -> int:
 
 def load_yolo_model(weights: str | Path | None = None):
     """Lazy-load and cache YOLO weights (heavy import kept local)."""
-    path = str(Path(weights) if weights is not None else DEFAULT_WEIGHTS)
+    if weights is not None:
+        path = str(Path(weights))
+    else:
+        path = str(resolve_default_weights())
     if path not in _model_cache:
         from ultralytics import YOLO
 
