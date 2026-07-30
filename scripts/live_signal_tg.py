@@ -1,33 +1,22 @@
-"""Live paper signals from the v9 detector, pushed to Telegram with a chart.
+"""Live paper signals from the v10 detector, pushed to Telegram + Bark with a chart.
 
-The previous live run produced zero tradeable rows: the forward log's lag was a
-median 490 minutes against a 30-minute freshness gate, so everything was rejected.
-Two separate causes, now both measured rather than assumed:
+PAPER / SIM ONLY. Sends notifications (TG + Bark) and writes paper logs under
+analysis/output/live_signals_v10/; places **no** orders, does **not** touch
+models/ACTIVE, does **not** append forward_log.csv (see live disciplines 9-11).
 
-  COVERAGE  the 2026-07-18..21 pulses were ~45 minutes apart and did not sweep the
-            whole universe each pass, so a symbol waited hours to be looked at.
-            The pulse now runs every 15 minutes and finishes in 2.5, and a full
-            220-symbol sweep costs 1.6 minutes -- coverage is affordable.
-  BOX AGE   a fire at tip-1 is by construction 15 minutes old before anything
-            else happens. v9 lands p50=1 bar off the tip, so --tip-only trades
-            candidate count for 15 minutes of freshness.
+Detection is restricted to tip / tip-1 / tip-2 windows (live discipline 12).
+Use --tip-only for strict tip-only fires (age ~0). Freshness gate is derived
+from pipeline arithmetic and kept in sync with executor / dashboard (30 min).
 
-Everything here reports the age it actually achieved, so the gate is checked
-against a measurement instead of a hope.
+Chart shows projected entry/TP/SL off the signal bar close. No real exits.
 
-The chart is the trade-chart layout the owner asked to keep, with the additions
-they asked for: a volume panel, the MA bundle shaded so the compression is
-visible, the barrier levels drawn from the projected entry, and freshness stated
-on the figure. A live signal has no exit yet, so entry/TP/SL are projections off
-the last close and labelled as such.
+Exit policy for v10 paper: USE_STOP=True (TP5 / SL2). Per v10 measurement,
+"TP only, no stop" was -4.64 bp excess; stop-inclusive is the documented default.
 
-PAPER ONLY. This sends notifications and writes a log; it places no orders, does
-not touch models/ACTIVE, and does not write forward_log.csv (live discipline 9,
-10, 11). Cost and barrier constants are read, never changed.
-
-Usage:
-  PYTHONPATH=. .venv/bin/python scripts/live_signal_tg.py --dry-run
-  PYTHONPATH=. .venv/bin/python scripts/live_signal_tg.py --tip-only --send
+Usage (local/VPS):
+  PYTHONPATH=. python3 scripts/live_signal_tg.py --dry-run
+  PYTHONPATH=. python3 scripts/live_signal_tg.py --tip-only --send
+  # cron/launchd every 15min on VPS (no --n-symbols to sweep full universe)
 """
 from __future__ import annotations
 
@@ -62,23 +51,20 @@ from src.judgment.yolo_candidates import (  # noqa: E402
 
 # training layout on the Mac/3060, deployed flat under models/ on the VPS
 WEIGHT_CANDIDATES = (
-    PROJECT / "runs/detect/runs/detect/owner_short_star_v10/weights/best.pt",
+    # v10 primary (owner short star v10)
     PROJECT / "models" / "owner_short_star_v10.pt",
-    PROJECT / "runs/detect/runs/detect/owner_short_star_v9/weights/best.pt",
+    PROJECT / "runs/detect/runs/detect/owner_short_star_v10/weights/best.pt",
+    # fallback v9 (explicitly not promoted)
     PROJECT / "models" / "owner_short_star_v9.pt",
+    PROJECT / "runs/detect/runs/detect/owner_short_star_v9/weights/best.pt",
 )
 OUT_DIR = PROJECT / "analysis" / "output" / "live_signals_v10"
 LOG_CSV = OUT_DIR / "paper_signals.csv"
 TP_MULT, SL_MULT, HORIZON = 5.0, 2.0, 72
-# Paper exit: take profit at 5xATR, NO STOP, out at the horizon. Measured on
-# 25,602 candidates against matched random shorts (same symbol, month and ATR
-# bucket), the causal excess of nine exits ranked:
-#   tponly +18.09bp (t=5.99) · hold +17.98 · trail +14.69 · be +14.39
-#   wide   +13.27          · barrier(TP5/SL2, production) +10.63 · trend +9.40
-# Dropping the stop is worth +7.5bp against a 10bp round trip. The stop is the
-# expensive part, not the target. Train-pool in-sample; the paper log is what
-# tests it forward, which is the point of running it.
-USE_STOP = False
+# Paper exit for v10: TP 5xATR / SL 2xATR (USE_STOP=True).
+# HANDOFF 2026-07-30: on v10 pool, "TP only, no stop" was -4.64 bp excess.
+# Keep stop-inclusive to match production TP5/SL2 and documented v10 measurement.
+USE_STOP = True
 FRESH_GATE_MIN = 30.0            # live discipline 7 -- owner-set, checked not changed
 MA_STYLE = {"sma20": "#2196f3", "ema20": "#ff9800", "sma60": "#00bcd4",
             "ema60": "#8bc34a", "sma120": "#9c27b0", "ema120": "#e91e63"}
@@ -178,7 +164,7 @@ def draw(ind, sym: str, sig_i: int, box: tuple, conf: float,
         pad = (ye - ys) * 0.06
         ax.add_patch(Rectangle((xs, ys - pad), max(xe - xs, w), ye - ys + 2 * pad,
                                fill=False, edgecolor="#d32f2f", lw=2.2, zorder=6))
-        ax.text(xs, ye + pad, f" v9 {L('检测', 'detect')} conf {conf:.2f}", fontsize=9,
+        ax.text(xs, ye + pad, f" v10 {L('检测', 'detect')} conf {conf:.2f}", fontsize=9,
                 color="#d32f2f", va="bottom")
 
     xsig = x[sig_i - lo]
@@ -300,17 +286,26 @@ def main() -> int:
         print(f"纸面记录 -> {LOG_CSV}")
 
     if args.send and not args.dry_run:
-        sent = 0
+        sent_tg = 0
+        sent_bark = 0
         for h in fresh[: args.max_send]:
-            cap = (f"<b>{h['symbol']}</b> 做空信号 (v9 纸面盘)\n"
+            # TG caption (HTML)
+            cap = (f"<b>{h['symbol']}</b> 做空信号 (v10 纸面盘)\n"
                    f"conf {h['conf']:.2f} · R:R {h['rr']:.1f}:1 · "
                    f"ATR {h['atr']/h['entry']*100:.2f}%\n"
                    f"入场≈{h['entry']:.6g} · TP {h['tp']:.6g} · SL {h['sl']:.6g}\n"
                    f"信号 {h['signal_time'][:16]} UTC · 距今 {h['age_min']:.0f} 分钟\n"
                    f"<i>纸面信号,未下单</i>")
             if notify.send_photo(Path(h["png"]), cap):
-                sent += 1
-        print(f"已推送 {sent}/{len(fresh[:args.max_send])} 条到 TG")
+                sent_tg += 1
+            # Bark (plain title + body)
+            btitle = f"{h['symbol']} 做空 v10"
+            bbody = (f"conf {h['conf']:.2f}  ATR {h['atr']/h['entry']*100:.2f}%\n"
+                     f"入场 {h['entry']:.6g}  TP {h['tp']:.6g}  SL {h['sl']:.6g}\n"
+                     f"距今 {h['age_min']:.0f}min  {h['signal_time'][:16]} UTC")
+            if notify.bark_send(btitle, bbody, group="fable-live", level="timeSensitive"):
+                sent_bark += 1
+        print(f"已推送 TG {sent_tg}/{len(fresh[:args.max_send])}  Bark {sent_bark}/{len(fresh[:args.max_send])}")
     elif args.send:
         print("--dry-run 与 --send 同时给出:只渲染,不推送")
 

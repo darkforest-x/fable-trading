@@ -220,7 +220,7 @@ def notify_scout_hit(h: dict, raw, *, weights_name: str) -> bool:
         }
         caption = format_signal_caption(record) + (
             f"\n右缘约{h['age_min']}分钟前 · 数据延迟{h['data_lag_min']}m · {weights_name}"
-            f"\n图库: http://103.214.174.58:8642/scout.html"
+            f"\n图库: http://206.237.14.112:8642/scout.html"
         )
         chart = render_signal_chart(record, frame=raw)
         if chart is not None and send_photo(chart, caption=caption):
@@ -340,7 +340,7 @@ def main() -> int:
                 for h in hits[3:10]
             ]
             send("👁 本轮另有 " + str(len(hits) - 3) + " 个右缘密集:\n" + "\n".join(extra)
-                 + "\n图库: http://103.214.174.58:8642/scout.html")
+                 + "\n图库: http://206.237.14.112:8642/scout.html")
     STATE.write_text(json.dumps(state, ensure_ascii=False))
 
     pngs = sorted(SCOUT_DIR.glob("*.png"), key=lambda p: -p.stat().st_mtime)[:40]

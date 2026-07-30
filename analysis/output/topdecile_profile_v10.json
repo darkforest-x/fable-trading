@@ -1,0 +1,54 @@
+{
+  "pool": "judgment_v10_wide.csv",
+  "n_preholdout": 18379,
+  "n_val": 3676,
+  "ret_col": "net_barrier_taker",
+  "pool_mean_bp": -12.85,
+  "top_n": 367,
+  "top_mean_bp": 15.41,
+  "lift_vs_pool_bp": 28.26,
+  "ctrl_mean_bp": -23.28,
+  "lift_vs_ctrl_bp": 38.69,
+  "top_ks_features": [
+    {
+      "feat": "atr_pct",
+      "delta": 0.008228451050483981,
+      "ks": 0.4738311746594829
+    },
+    {
+      "feat": "pre_range48",
+      "delta": 0.057772474129997135,
+      "ks": 0.45837831428282044
+    },
+    {
+      "feat": "spread_mean24",
+      "delta": 0.00857502399478216,
+      "ks": 0.4408256567218625
+    },
+    {
+      "feat": "af_vol_of_vol",
+      "delta": 0.002620490400702001,
+      "ks": 0.44050368782027055
+    },
+    {
+      "feat": "full_spread",
+      "delta": 0.019598578543108147,
+      "ks": 0.43496022325373046
+    },
+    {
+      "feat": "drawdown24",
+      "delta": 0.039844946583418625,
+      "ks": 0.426715843093273
+    },
+    {
+      "feat": "af_ma_bandwidth_pct",
+      "delta": 0.014572027284705361,
+      "ks": 0.41503438314958047
+    },
+    {
+      "feat": "af_vwap_dev",
+      "delta": -0.014224658900735637,
+      "ks": 0.4012415977233258
+    }
+  ]
+}

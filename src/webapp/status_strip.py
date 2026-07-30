@@ -16,6 +16,7 @@ from pathlib import Path
 from src.webapp.dashboard_cache import relative_path
 from src.webapp.forward_payloads import FRESH_DETECT_MIN
 from src.webapp.model_hub import read_active_pointer
+from src.webapp.live_paper import live_paper_payload, live_paper_status_line
 
 PROJECT = Path(__file__).resolve().parents[2]
 OWNER_BEST_JSON = PROJECT / "models" / "owner_best.json"
@@ -53,12 +54,31 @@ def status_strip_payload() -> dict:
         "freshness": _freshness_gate(),
         "train": _v13_train(),
         "tip_pulse": _tip_pulse_sidecar(),
+        "paper_live": _paper_live(),
         "debug_links": _debug_links(),
         "links": {
             "scout_mtf": "/#radar",
             "label_studio_hint": "http://127.0.0.1:8081",
             "debug_viz": "/debug_viz.html",
         },
+    }
+
+
+def _paper_live() -> dict:
+    """One-line status for v10 simulated live (paper) signals. Read-only."""
+    try:
+        p = live_paper_payload()
+    except Exception:
+        p = {"available": False}
+    if not p.get("available"):
+        return {"available": False, "label": "v10纸面: 未扫描", "n_fresh": 0, "n_fired": 0}
+    return {
+        "available": True,
+        "label": f"v10纸面 {p.get('n_fresh',0)}新/{p.get('n_fired',0)}总",
+        "n_fresh": int(p.get("n_fresh", 0)),
+        "n_fired": int(p.get("n_fired", 0)),
+        "scanned_at": p.get("scanned_at"),
+        "gate_min": p.get("gate_min"),
     }
 
 

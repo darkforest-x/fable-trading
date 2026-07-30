@@ -165,7 +165,83 @@ def send_document(file_path: Path, caption: str = "") -> bool:
         return False
 
 
+BARK_CONFIG_PATH = Path(__file__).resolve().parents[1] / "data" / "bark_config.json"
+
+
+def _load_bark() -> str | None:
+    """Load Bark device key from data/bark_config.json or BARK_KEY env.
+
+    bark_config.json example (gitignored):
+        {"key": "xxxxxxxxxxxx"}
+    """
+    if BARK_CONFIG_PATH.exists():
+        try:
+            cfg = json.loads(BARK_CONFIG_PATH.read_text())
+            k = cfg.get("key") or cfg.get("device_key")
+            if k:
+                return str(k).strip()
+        except Exception:  # noqa: BLE001
+            pass
+    k = os.environ.get("BARK_KEY")
+    if k:
+        return k.strip()
+    return None
+
+
+def bark_send(title: str, body: str = "", *, group: str = "fable", level: str = "active",
+              sound: str = "", icon: str = "", url: str = "", image: str = "") -> bool:
+    """Push to Bark (iOS). Returns True on HTTP 200 from server.
+
+    Uses https://api.day.app/<key>/<title>/<body> or JSON /push when extra fields needed.
+    Falls back to env/key config; missing config -> no-op + print.
+    """
+    key = _load_bark()
+    if not key:
+        print("bark_notify: no key (data/bark_config.json or BARK_KEY) -- message not sent")
+        return False
+    title = (title or "fable")[:256]
+    body = (body or "")[:4000]
+    # Build payload. Prefer JSON /push to carry group/level/sound/url/image.
+    data = {
+        "title": title,
+        "body": body,
+        "group": group,
+        "level": level or "active",
+    }
+    if sound:
+        data["sound"] = sound
+    if icon:
+        data["icon"] = icon
+    if url:
+        data["url"] = url
+    if image:
+        data["image"] = image
+    body_bytes = json.dumps(data, ensure_ascii=False).encode("utf-8")
+    req = urllib.request.Request(
+        f"https://api.day.app/{key}/push",
+        data=body_bytes,
+        headers={"Content-Type": "application/json; charset=utf-8"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            raw = resp.read()
+            try:
+                j = json.loads(raw)
+                return bool(j.get("code") == 200 or j.get("success") is True)
+            except Exception:
+                return resp.status == 200
+    except urllib.error.HTTPError as exc:
+        detail = exc.read()[:300] if hasattr(exc, "read") else b""
+        print(f"bark_notify: push failed: {exc} {detail!r}")
+        return False
+    except Exception as exc:  # noqa: BLE001
+        print(f"bark_notify: push failed: {exc}")
+        return False
+
+
 if __name__ == "__main__":
     import sys
     ok = send(sys.argv[1] if len(sys.argv) > 1 else "fable-trading 通知链路测试 ✅")
+    bark_send("测试", "Bark 链路就绪 ✅")
     raise SystemExit(0 if ok else 1)

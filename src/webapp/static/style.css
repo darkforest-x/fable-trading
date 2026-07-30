@@ -79,9 +79,29 @@ body {
   padding-bottom: 8px;
 }
 .status-refresh { align-self: center; min-height: 40px; }
-.status-strip {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;
+.status-strip,
+body .status-strip,
+body.hb-shell .status-strip {
+  display: grid !important;
+  /* 强制 4 个 chip：检测器 / 判断 / 前向 / v10纸面 */
+  grid-template-columns: repeat(4, minmax(120px, 1fr)) !important;
+  gap: 8px;
   min-width: 0;
+}
+@media (max-width: 1024px) {
+  .status-strip,
+  body .status-strip,
+  body.hb-shell .status-strip { grid-template-columns: repeat(4, minmax(120px, 1fr)) !important; }
+}
+@media (max-width: 900px) {
+  .status-strip,
+  body .status-strip,
+  body.hb-shell .status-strip { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 520px) {
+  .status-strip,
+  body .status-strip,
+  body.hb-shell .status-strip { grid-template-columns: 1fr !important; }
 }
 /* Sidecar facts (train / tip / gate) — Grafana-like muted meta, not more cards. */
 .status-meta {

@@ -124,7 +124,7 @@ def main() -> int:
     fresh, alert = data_freshness()
     msg = (f"📊 <b>fable-trading 日报</b> {datetime.now():%m-%d %H:%M}\n"
            f"{fresh}\n{forward_board()}\n{system_health()}\n"
-           f"看板：http://103.214.174.58:8642")
+           f"看板：http://206.237.14.112:8642")
     if alert:
         msg = "‼️ 有异常需要处理\n" + msg
     ok = send(msg)

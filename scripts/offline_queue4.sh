@@ -15,6 +15,6 @@ PYTHONPATH=. python3 scripts/v3_portfolio_sim.py
 
 echo "--- [2/2] deploy dashboard (incl. v3_backtest.html) to VPS"
 bash scripts/deploy_vps.sh
-curl -s -o /dev/null -w "vps v3 page http:%{http_code}\n" http://103.214.174.58:8642/v3_backtest.html
+curl -s -o /dev/null -w "vps v3 page http:%{http_code}\n" http://206.237.14.112:8642/v3_backtest.html
 
 echo "=== queue4 done $(date) ==="

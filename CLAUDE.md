@@ -65,7 +65,16 @@
 
 ## 质量标准（可检查，不是形容词）
 
-每轮实验的交付物是 `analysis/pXX_report.md`，必须包含：
+每轮实验的交付物是 `analysis/pXX_report.md` （源文件，用于 git 历史与复现）。
+
+**必须步骤** (铁律，无例外)：
+1. 完成 md 报告后，立即转换为 HTML：
+   ```bash
+   python3 scripts/md_to_html.py analysis/pXX_xxx.md --out-dir analysis/html
+   ```
+2. **交付给 owner 的是 HTML** (`analysis/html/pXX_xxx.html`)，浏览器直接打开。
+
+md 源文件必须包含：
 
 - [ ] 复现命令（从零跑通的完整命令序列）
 - [ ] 数据统计（候选数 / 正类率 / 时间范围 / val 样本数）

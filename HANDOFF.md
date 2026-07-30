@@ -44,9 +44,9 @@ ATR 匹配对照 -19.24bp → 顶档超对照 +42.73bp   ← 不是「挑了高�
    回答「你的形态只看盘口时你自己认不认得出」
 3. **滑点实测** —— ledger 缺 `avg_fill_px`,所有成本数字不含滑点,而边和摩擦已同量级
 
-### 必须回滚的一处
-`scripts/live_signal_tg.py` 的 `USE_STOP=False` 是按老池结论改的,
-**v10 上「只止盈无止损」是 -4.64bp,要改回去。**
+### 必须回滚的一处（已完成 2026-07-30）
+`scripts/live_signal_tg.py` 的 `USE_STOP` 已改回 **True**（TP5/SL2）。
+v10 上「只止盈无止损」是 -4.64bp；纸面路径与生产障碍一致。
 
 ### 仍禁止
 promote / 改 ACTIVE / 清 forward_log / 动 holdout(已耗 9 次)/ 真下单 / 改新鲜度三门。
@@ -694,10 +694,10 @@ TP5/SL2；**未** clear forward_log。forward_log 已有 `tier`/`size_mult` 列�
 **回滚**（止血 → 恢复 1x 满槽，去掉乘数）：
 ```bash
 # 1) 立刻停新开仓
-ssh root@103.214.174.58 'touch /opt/fable-trading/data/executor_KILL'
+ssh root@206.237.14.112 'touch /opt/fable-trading/data/executor_KILL'
 # 2) 回退 executor 头寸公式：把 unit_notional 段改回 notional=base*size_mult
 #    或 git checkout <pre-headroom> -- src/execution/executor.py 后 rsync + restart
-ssh root@103.214.174.58 'systemctl restart fable-executor'
+ssh root@206.237.14.112 'systemctl restart fable-executor'
 # 3) 恢复开仓：rm data/executor_KILL
 ```
 完整撤 tier：sidecar 删 `sizing_tiers` + forward 停打标（需另一次 owner 批准）。

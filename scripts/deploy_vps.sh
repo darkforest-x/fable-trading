@@ -2,7 +2,7 @@
 # 一键把看板部署/更新到 VPS（需已配置 SSH 密钥）
 # 用法: bash scripts/deploy_vps.sh
 set -euo pipefail
-VPS=root@103.214.174.58
+VPS="${VPS:-root@206.237.14.112}"
 DIR=/opt/fable-trading
 cd "$(dirname "$0")/.."
 
@@ -63,4 +63,4 @@ done
 systemctl status fable-dashboard --no-pager
 journalctl -u fable-dashboard -n 80 --no-pager
 exit 1"
-echo "done -> http://103.214.174.58:8642"
+echo "done -> http://206.237.14.112:8642"

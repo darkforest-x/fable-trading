@@ -320,6 +320,8 @@ function invalidateViews() {
 /* ---------- sidebar + hash routing (Hummingbot multipage shell) ---------- */
 function showView(name, { pushHash = true, force = false } = {}) {
   if (!name || name === "scout") return;
+  // every view switch (incl. direct #forward deep-link) must have the 4-chip strip
+  if (typeof ensureFourChips === "function") ensureFourChips();
   const same = appState.view === name;
   appState.view = name;
   $$(".sb-item[data-view], .tab[data-view]").forEach((b) =>
@@ -1050,6 +1052,18 @@ function paintLiveTruth(od, ja, fw) {
     const hs = fw.hindsight_excluded ?? 0;
     log.textContent = `open ${fw.open_rows ?? 0} · closed ${fw.closed_rows ?? 0} · 事后排除 ${hs}`;
   }
+  // v10 paper live (sim) line
+  const paperEl = $("#live-paper");
+  if (paperEl) {
+    const pl = (d && d.paper_live) || {};
+    if (pl && pl.available) {
+      paperEl.textContent = `${pl.n_fresh||0}新/${pl.n_fired||0}总`;
+      paperEl.title = pl.scanned_at ? `最近扫描 ${String(pl.scanned_at).slice(0,16)} UTC` : "";
+    } else {
+      paperEl.textContent = "无";
+      paperEl.title = "尚未跑 live_signal_tg.py --send";
+    }
+  }
   const hintWrap = $("#live-hint-wrap");
   const hint = $("#live-hint");
   if (hintWrap && hint) {
@@ -1067,24 +1081,116 @@ function paintLiveTruth(od, ja, fw) {
   }
 }
 
+function ensureFourChips() {
+  const strip = document.getElementById("status-strip");
+  if (!strip) return;
+  // Force layout to 4 columns (defensive against any old CSS rule)
+  strip.style.display = "grid";
+  strip.style.gridTemplateColumns = "repeat(4, minmax(120px, 1fr))";
+  const wanted = [
+    {id:"status-owner",   k:"检测器",      v:"…"},
+    {id:"status-judgment", k:"判断 ACTIVE", v:"…"},
+    {id:"status-forward",  k:"前向",        v:"…"},
+    {id:"status-paper",    k:"v10纸面",     v:"…"},
+  ];
+  wanted.forEach(w => {
+    if (!document.getElementById(w.id)) {
+      const div = document.createElement("div");
+      div.className = "status-item skeleton";
+      div.id = w.id;
+      div.innerHTML = `<span class="status-k">${w.k}</span><span class="status-v">${w.v}</span>`;
+      strip.appendChild(div);
+    }
+  });
+}
+
+// Nuclear option: no matter what the initial HTML had (even 3 chips from a cached old index.html),
+// rewrite the strip to contain exactly the 4 we want, then populate paper from its API.
+function normalizeStatusStrip() {
+  const strip = document.getElementById("status-strip");
+  if (!strip) return;
+  strip.style.display = "grid";
+  strip.style.gridTemplateColumns = "repeat(4, minmax(120px, 1fr))";
+  const order = ["status-owner", "status-judgment", "status-forward", "status-paper"];
+  const labels = { "status-owner": "检测器", "status-judgment": "判断 ACTIVE", "status-forward": "前向", "status-paper": "v10纸面" };
+  // Ensure all 4 exist as direct children
+  order.forEach(id => {
+    if (!document.getElementById(id)) {
+      const d = document.createElement("div");
+      d.className = "status-item skeleton";
+      d.id = id;
+      d.innerHTML = `<span class="status-k">${labels[id]}</span><span class="status-v">…</span>`;
+      strip.appendChild(d);
+    }
+  });
+  // If there are more than 4 direct .status-item, keep only the wanted ones (in order)
+  const kids = Array.from(strip.children).filter(el => el.classList && el.classList.contains("status-item"));
+  if (kids.length > 4) {
+    const have = new Set(order);
+    kids.forEach(el => { if (el.id && !have.has(el.id)) el.remove(); });
+  }
+  // Populate the paper chip value right away from its dedicated endpoint
+  const p = document.getElementById("status-paper");
+  if (p) {
+    fetch("/api/live-paper", { cache: "no-store" }).then(r => r.json()).then(j => {
+      if (!p || !p.isConnected) return;
+      p.classList.remove("skeleton");
+      if (j && j.available) {
+        const nf = j.n_fresh || 0, nt = j.n_fired || 0;
+        p.innerHTML = `<span class="status-k">v10纸面</span><span class="status-v">${nf}新/${nt}总</span><span class="status-sub">门${j.gate_min||30}m</span>`;
+        p.classList.add("status-click");
+        p.onclick = () => { location.hash = "#overview"; };
+      } else {
+        p.innerHTML = `<span class="status-k">v10纸面</span><span class="status-v">无</span><span class="status-sub">未扫描</span>`;
+      }
+    }).catch(() => {
+      if (p && p.isConnected) p.innerHTML = `<span class="status-k">v10纸面</span><span class="status-v">—</span><span class="status-sub">见总览</span>`;
+    });
+  }
+}
+
+function ensurePaperChip() { return document.getElementById("status-paper"); }
+
 async function loadStatusStrip(force = false) {
   if (force) {
     for (const [k] of [..._jsonCache.keys()]) {
       if (k.includes("/api/status-strip")) _jsonCache.delete(k);
     }
   }
+  // Always ensure exactly 4 chips exist in the strip, on every page and every refresh.
+  if (typeof ensureFourChips === "function") ensureFourChips();
+  let d = {};
   try {
-    const d = await apiGet("/api/status-strip", { cache: !force, quiet: true });
-    const od = d.owner_detector || {};
-    const ja = d.judgment_active || {};
-    const fw = d.forward || {};
-    const fr = d.freshness || {};
-    const tr = d.train || {};
-    const tip = d.tip_pulse || {};
-    const ownerEl = $("#status-owner");
-    const judEl = $("#status-judgment");
-    const fwdEl = $("#status-forward");
-    const metaEl = $("#status-meta");
+    d = await apiGet("/api/status-strip", { cache: !force, quiet: true });
+  } catch (_) { d = {}; }
+  // After API (or failure), guarantee the 4th chip DOM node exists before we touch it.
+  if (typeof ensureFourChips === "function") ensureFourChips();
+  const od = d.owner_detector || {};
+  const ja = d.judgment_active || {};
+  const fw = d.forward || {};
+  const fr = d.freshness || {};
+  const tr = d.train || {};
+  const tip = d.tip_pulse || {};
+  const ownerEl = $("#status-owner");
+  const judEl = $("#status-judgment");
+  const fwdEl = $("#status-forward");
+  let paperEl = ensurePaperChip();
+  const metaEl = $("#status-meta");
+  // Always try to populate v10 paper chip from its own endpoint, so the 4th chip appears even if status-strip payload is from an old server build.
+  try {
+    const pp = await apiGet("/api/live-paper", { cache: false, quiet: true });
+    if (paperEl && pp) {
+      paperEl.classList.remove("skeleton");
+      if (pp.available) {
+        const nf = pp.n_fresh || 0, nt = pp.n_fired || 0;
+        paperEl.innerHTML = `<span class="status-k">v10纸面</span><span class="status-v">${nf}新/${nt}总</span><span class="status-sub">门${pp.gate_min||30}m</span>`;
+        paperEl.classList.add("status-click");
+        paperEl.dataset.jump = "overview";
+      } else {
+        paperEl.innerHTML = `<span class="status-k">v10纸面</span><span class="status-v">无</span><span class="status-sub">未扫描</span>`;
+      }
+    }
+  } catch (_) { /* non-fatal */ }
     if (ownerEl) {
       ownerEl.classList.remove("skeleton");
       ownerEl.classList.add("status-click");
@@ -1130,6 +1236,31 @@ async function loadStatusStrip(force = false) {
         <span class="status-bar-mini"><span style="width:${prog}%"></span></span>
         <span class="status-sub" title="${escapeHtml(stall)}">open ${openN} · 事后 ${hs} · 日志 ${totalN}${stall ? " · " + escapeHtml(stall) : ""}</span>`;
     }
+    // v10 paper live chip (always ensure 4th chip on every page / view)
+    function fillPaperChip(pl) {
+      if (!paperEl) return;
+      paperEl.classList.remove("skeleton");
+      if (pl && pl.available) {
+        paperEl.classList.add("status-click");
+        paperEl.dataset.jump = "overview";
+        paperEl.title = "点此查看总览上的 v10 纸面信号";
+        const nf = pl.n_fresh || 0;
+        const nt = pl.n_fired || 0;
+        paperEl.innerHTML = `<span class="status-k">v10纸面</span>
+          <span class="status-v">${nf}新/${nt}总</span>
+          <span class="status-sub">门${pl.gate_min||30}m</span>`;
+        paperEl.classList.toggle("good", nf > 0);
+        paperEl.classList.toggle("warn", nf === 0 && nt > 0);
+      } else {
+        paperEl.innerHTML = `<span class="status-k">v10纸面</span><span class="status-v">无</span><span class="status-sub">未扫描</span>`;
+      }
+    }
+    let pl = (d && d.paper_live) || null;
+    if (paperEl) fillPaperChip(pl);
+    // If the status-strip payload is from an older server without paper_live, fetch it separately so the 4th chip still appears on forward/signals etc.
+    if ((!pl || !pl.available) && paperEl) {
+      apiGet("/api/live-paper", { cache: false, quiet: true }).then((pp) => { fillPaperChip(pp); }).catch(()=>{});
+    }
     if (metaEl) {
       const g = fr.gate_min ?? fw.fresh_detect_min ?? 30;
       const ep = tr.epoch;
@@ -1141,25 +1272,40 @@ async function loadStatusStrip(force = false) {
       else if (ep != null) trainTxt = `v13 ${ep}/${tgt}${alive ? "" : " · idle"}`;
       const tf = tip.tip_fire;
       const tipTxt = tf != null ? `tip ${tf}` : "tip —";
+      const pl = (d && d.paper_live) || {};
+      const paperTxt = pl && pl.available ? `v10纸面 ${pl.n_fresh||0}新/${pl.n_fired||0}总` : "v10纸面 无";
       metaEl.innerHTML = [
         `lag≤${g}m`,
         trainTxt,
         tipTxt,
+        paperTxt,
         `<a href="/debug_viz.html">调试</a>`,
       ].join(`<span class="sep">·</span>`);
-      metaEl.title = [fr.note, tr.note, tip.note].filter(Boolean).join(" · ");
+      metaEl.title = [fr.note, tr.note, tip.note, (pl && pl.label) || ""].filter(Boolean).join(" · ");
     }
     paintLiveTruth(od, ja, fw);
     if (force) toast("状态条已刷新", "ok");
   } catch (_) {
-    ["status-owner", "status-judgment", "status-forward"].forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.classList.remove("skeleton");
-        const v = el.querySelector(".status-v");
-        if (v) v.textContent = "暂不可用";
-      }
-    });
+    if (typeof ensureFourChips === "function") ensureFourChips();
+    // Best-effort fill even on total failure so we never show only 3 chips
+    const o = document.getElementById("status-owner");
+    if (o) { o.classList.remove("skeleton"); o.innerHTML = '<span class="status-k">检测器</span><span class="status-v">暂不可用</span>'; }
+    const j = document.getElementById("status-judgment");
+    if (j) { j.classList.remove("skeleton"); j.innerHTML = '<span class="status-k">判断 ACTIVE</span><span class="status-v">暂不可用</span>'; }
+    const f = document.getElementById("status-forward");
+    if (f) { f.classList.remove("skeleton"); f.innerHTML = '<span class="status-k">前向</span><span class="status-v">暂不可用</span>'; }
+    const p = document.getElementById("status-paper");
+    if (p) {
+      p.classList.remove("skeleton");
+      p.innerHTML = '<span class="status-k">v10纸面</span><span class="status-v">—</span><span class="status-sub">见总览</span>';
+      // try one more async fetch for the paper data only
+      apiGet("/api/live-paper", { cache: false, quiet: true }).then((pp) => {
+        if (pp && pp.available && p && p.isConnected) {
+          const nf = pp.n_fresh || 0, nt = pp.n_fired || 0;
+          p.innerHTML = `<span class="status-k">v10纸面</span><span class="status-v">${nf}新/${nt}总</span><span class="status-sub">门${pp.gate_min||30}m</span>`;
+        }
+      }).catch(() => {});
+    }
     const metaEl = $("#status-meta");
     if (metaEl) metaEl.textContent = "状态暂不可用";
   }
@@ -1298,7 +1444,44 @@ async function loadOverview() {
   } finally {
     $("#view-overview")?.classList.remove("loading");
   }
+  // v10 paper live signals (read-only)
+  try { await loadLivePaperOverview(); } catch (_) {}
 }
+
+async function loadLivePaperOverview() {
+  const host = $("#live-paper-body");
+  if (!host) return;
+  try {
+    const d = await apiGet("/api/live-paper", { cache: false });
+    if (!d || !d.available) {
+      host.innerHTML = `无最近扫描。<br>运行：<code>python3 scripts/live_signal_tg.py --tip-only --send</code>`;
+      return;
+    }
+    const fresh = d.n_fresh || 0;
+    const tot = d.n_fired || 0;
+    const gate = d.gate_min || 30;
+    const ts = d.scanned_at ? String(d.scanned_at).slice(0,16) : "—";
+    let html = `<b>${fresh} 新鲜 / ${tot} 总</b> · 门 ${gate}min · 扫描 ${ts} UTC · conf ${Number(d.conf||0.3).toFixed(2)}`;
+    const hits = Array.isArray(d.hits) ? d.hits.slice(0, 6) : [];
+    if (hits.length) {
+      html += "<div style=\"margin-top:6px\">" + hits.map(h => {
+        const f = h.fresh ? "<b style=\"color:#166534\">新鲜</b>" : "<span style=\"color:#854d0e\">超门</span>";
+        const img = h.png_url ? `<a href=\"${escapeHtml(h.png_url)}\" target=\"_blank\" rel=\"noopener\">图</a>` : "";
+        return `<span class=\"chip\">${escapeHtml(h.symbol)} conf ${Number(h.conf||0).toFixed(2)} ${f} ${img}</span>`;
+      }).join(" ") + "</div>";
+    }
+    host.innerHTML = html;
+  } catch (e) {
+    if (host) host.textContent = "加载失败: " + (e && e.message ? e.message : e);
+  }
+}
+
+// wire refresh button on overview
+$("#live-paper-refresh")?.addEventListener("click", async () => {
+  const host = $("#live-paper-body");
+  if (host) host.textContent = "刷新中…";
+  try { await loadLivePaperOverview(); } catch(_) {}
+});
 
 async function loadShortTf() {
   const view = $("#view-shorttf");
@@ -1688,6 +1871,9 @@ function ensureForwardTabulator() {
 
 async function loadForward() {
   $("#view-forward").classList.add("loading");
+  // Guarantee the v10 paper chip is present on the forward page (even with old cached HTML)
+  if (typeof normalizeStatusStrip === "function") normalizeStatusStrip();
+  else if (typeof ensureFourChips === "function") ensureFourChips();
   try {
   wireForwardTableControls();
   const d = await apiGet("/api/forward", { cache: true });
@@ -3579,13 +3765,18 @@ function boot() {
   initTheme();
   initNavDrawer();
   refreshOpsAuthUi();
+  // Force the 4-chip strip on every page/view (including direct #forward deep links and old cached index.html)
+  if (typeof normalizeStatusStrip === "function") normalizeStatusStrip();
+  else if (typeof ensureFourChips === "function") ensureFourChips();
   loadStatusStrip();
   $("#status-refresh")?.addEventListener("click", () => loadStatusStrip(true));
   const hash = (location.hash || "").slice(1);
   const initial = hash && document.getElementById("view-" + hash) ? hash : "overview";
   showView(initial, { pushHash: false });
-  // refresh strip every 2 min (cheap)
-  setInterval(() => loadStatusStrip(false), 120_000);
+  // one more tick after the view mounted (SPA nav, old HTML, etc.)
+  setTimeout(() => { if (typeof normalizeStatusStrip === "function") normalizeStatusStrip(); else if (typeof ensureFourChips === "function") ensureFourChips(); }, 260);
+  // refresh strip every 2 min (cheap) and keep re-normalizing
+  setInterval(() => { if (typeof normalizeStatusStrip === "function") normalizeStatusStrip(); else if (typeof ensureFourChips === "function") ensureFourChips(); loadStatusStrip(false); }, 120_000);
 }
 
 if (document.readyState === "loading") {

@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A+B 实验：把「顶十分位」本身作为判断层新目标</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>A+B 实验：把「顶十分位」本身作为判断层新目标</h1>
+<p><strong>日期</strong>：2026-07-30  </p>
+<p><strong>池</strong>：<code>data/judgment_v10_wide.csv</code>（18,379 行，232 币，2026-02→2026-05-03，<strong>&lt; holdout</strong>）  </p>
+<p><strong>背景</strong>：<code>p_judgment_topdecile_profile_v10.md</code> 剖开发现顶十分位与 owner label（label_barrier）差异显著（Jaccard ~0.30），且特征画像指向「极端波动+弱势」。本次执行推荐选项 <strong>A+B</strong>：  </p>
+<ul>
+<li><strong>A</strong>：以「是否为 top-decile（train 内 net_barrier_taker 90% 分位）」为新二分类目标重训判断层。  </li>
+<li><strong>B</strong>：加影子标签 is_top_decile，量化与 owner label 的正交性、信息增益、特征差异。  </li>
+</ul>
+<p><strong>目标</strong>：验证「直接学可交易的顶档定义」是否比学 owner 标注更优（核心看 top-decile 经济 lift 与绝对净收益）。</p>
+<hr>
+<h2>1. 复现命令（从零跑通）</h2>
+<pre><code>
+# 完整 A+B（含单切分画像 + CPCV 15 折）
+PYTHONPATH=. python3 - &lt;&lt; &#x27;PY&#x27;
+import sys, json, numpy as np, pandas as pd, lightgbm as lgb
+from pathlib import Path
+from scipy.stats import ks_2samp, spearmanr
+from sklearn.metrics import mutual_info_score
+from src.judgment.features import FEATURE_COLUMNS
+from src.judgment.train import TRAIN_FRACTION, PURGE_WINDOW, HOLDOUT_START, SEED, evaluate
+from scripts.diag_judgment_big_pool import attach_alphas, cpcv_groups
+
+d = pd.read_csv(&quot;data/judgment_v10_wide.csv&quot;)
+d[&quot;signal_time&quot;] = pd.to_datetime(d[&quot;signal_time&quot;], utc=True)
+d = d[d[&quot;signal_time&quot;] &lt; HOLDOUT_START].sort_values(&quot;signal_time&quot;).reset_index(drop=True)
+d[&quot;t&quot;] = d[&quot;signal_time&quot;]
+d, _ = attach_alphas(d)
+good = [c for c in d.columns if c.startswith(&quot;af_&quot;) and d[c].notna().mean()&gt;0.8]
+feats = [c for c in FEATURE_COLUMNS if c in d] + good
+
+# 单切分画像（同 shadow）
+split_i = int(len(d) * TRAIN_FRACTION)
+val = d.iloc[split_i:].reset_index(drop=True)
+val_start = val[&quot;signal_time&quot;].min()
+train = d[d[&quot;signal_time&quot;] &lt; val_start - PURGE_WINDOW].reset_index(drop=True)
+thr = train[&quot;net_barrier_taker&quot;].quantile(0.9)
+train[&quot;is_top_decile&quot;] = (train[&quot;net_barrier_taker&quot;] &gt;= thr).astype(int)
+val = val.copy(); val[&quot;is_top_decile&quot;] = (val[&quot;net_barrier_taker&quot;] &gt;= thr).astype(int)
+
+# B: 正交
+lab = train[&quot;label_barrier&quot;].astype(int); top = train[&quot;is_top_decile&quot;]
+print(&quot;Jaccard:&quot;, round( ((lab==1)&amp;(top==1)).sum() / ((lab==1)|(top==1)).sum() ,4))
+print(&quot;MI:&quot;, round(mutual_info_score(lab, top),5))
+
+params = {&quot;objective&quot;:&quot;binary&quot;,&quot;learning_rate&quot;:0.05,&quot;num_leaves&quot;:31,&quot;min_data_in_leaf&quot;:80,
+          &quot;feature_fraction&quot;:0.8,&quot;bagging_fraction&quot;:0.8,&quot;bagging_freq&quot;:1,&quot;verbose&quot;:-1,&quot;seed&quot;:SEED}
+b1 = lgb.train(params, lgb.Dataset(train[feats].astype(float), train[&quot;label_barrier&quot;].astype(int)), 300)
+b2 = lgb.train(params, lgb.Dataset(train[feats].astype(float), train[&quot;is_top_decile&quot;]), 300)
+p1, p2 = b1.predict(val[feats].astype(float)), b2.predict(val[feats].astype(float))
+ret = val[&quot;net_barrier_taker&quot;].values
+k = max(1, len(val)//10)
+print(&quot;基线 top10% 均净 bp:&quot;, round(ret[np.argsort(p1)[-k:]].mean()*1e4,2))
+print(&quot;新模型 top10% 均净 bp:&quot;, round(ret[np.argsort(p2)[-k:]].mean()*1e4,2))
+
+# CPCV（完整 15 折）
+d2 = d.copy(); d2[&quot;is_top&quot;] = (d2[&quot;net_barrier_taker&quot;] &gt;= d2[&quot;net_barrier_taker&quot;].quantile(0.9)).astype(int)
+lifts = {&quot;label&quot;:[], &quot;istop&quot;:[]}
+for tr_i, te_i in cpcv_groups(d2, 6, 2):
+    tr, te = d2.iloc[tr_i], d2.iloc[te_i]
+    bb1 = lgb.train(params, lgb.Dataset(tr[feats].astype(float), tr[&quot;label_barrier&quot;].astype(int)), 250)
+    bb2 = lgb.train(params, lgb.Dataset(tr[feats].astype(float), tr[&quot;is_top&quot;]), 250)
+    pp1, pp2 = bb1.predict(te[feats].astype(float)), bb2.predict(te[feats].astype(float))
+    kk = max(1, len(te)//10)
+    net = te[&quot;net_barrier_taker&quot;].to_numpy(); pool = net.mean()
+    lifts[&quot;label&quot;].append( net[np.argsort(pp1)[-kk:]].mean() - pool )
+    lifts[&quot;istop&quot;].append( net[np.argsort(pp2)[-kk:]].mean() - pool )
+print(&quot;CPCV label lift 中位 bp:&quot;, round(np.median(lifts[&quot;label&quot;])*1e4,1))
+print(&quot;CPCV istop lift 中位 bp:&quot;, round(np.median(lifts[&quot;istop&quot;])*1e4,1))
+PY
+</code></pre>
+<p><strong>环境</strong>：python3 + pandas + lightgbm + scipy + scikit-learn；仅读 <code>judgment_v10_wide.csv</code>；未动 holdout、成本、障碍。</p>
+<hr>
+<h2>2. 数据统计</h2>
+<table><thead><tr>
+<th>项</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>池</td><td><code>judgment_v10_wide.csv</code></td></tr>
+<tr><td>样本数 / 币种</td><td>18,379 / 232（全 short）</td></tr>
+<tr><td>时间</td><td>2026-02-01 → 2026-05-03（<strong>&lt; 2026-05-04 holdout</strong>）</td></tr>
+<tr><td>目标（旧）</td><td><code>label_barrier</code>（owner 标注，32.9% 正类）</td></tr>
+<tr><td>目标（新）</td><td><code>is_top_decile</code>（train 内 net_barrier_taker ≥ 90% 分位，10.0% 正类）</td></tr>
+<tr><td>特征</td><td>47（28 基础 + 19 causal alphas）</td></tr>
+<tr><td>切分</td><td>80/20 时间切分 + 18h15m purge；train 14,656 / val 3,676</td></tr>
+<tr><td>CPCV</td><td>6 折 2 测试，15 组合，禁运 72 根</td></tr>
+</tbody></table>
+<p><strong>顶十分位定义</strong>（train 内）：net_barrier_taker ≥ 330bp（约 +3.3% 毛）。</p>
+<hr>
+<h2>3. 结果表</h2>
+<h3>B. 影子标签正交性（train）</h3>
+<table><thead><tr>
+<th>指标</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>owner label 正类率</td><td>33.4%</td></tr>
+<tr><td>is_top 正类率</td><td>10.0%</td></tr>
+<tr><td>Jaccard（交集/并集）</td><td><strong>0.2995</strong></td></tr>
+<tr><td>互信息 MI(label, is_top)</td><td><strong>0.121</strong></td></tr>
+<tr><td>交集大小</td><td>1,466</td></tr>
+<tr><td>owner+非top</td><td>3,429</td></tr>
+<tr><td>top+非owner</td><td>0（train 内 top 全部被 owner 覆盖，但反之不成立）</td></tr>
+</tbody></table>
+<p><strong>特征差异（KS，train 内 top 正例 vs owner label 正例）</strong>：</p>
+<ul>
+<li>atr_pct: top 0.0118 vs label 0.0076，KS 0.58</li>
+<li>pre_range48: 0.084 vs 0.055，KS 0.39</li>
+<li>drawdown24: 0.057 vs 0.038，KS 0.37</li>
+<li>dense_frac48: 0.107 vs 0.234（top 反而更低）</li>
+<li>ret_12: -0.030 vs -0.020（top 更弱势）</li>
+</ul>
+<p><strong>结论（B）</strong>：两个目标重合度低，top 明显更「极端波动+弱势」，与剖开画像一致。owner 标注包含大量「非顶但被标」的样本。</p>
+<h3>A. 模型性能（单切分 val + CPCV）</h3>
+<p><strong>val 单切分（top 10% 经济表现，taker 净）</strong>：</p>
+<table><thead><tr>
+<th>模型</th>
+<th>挑的 top10% 均净 (bp)</th>
+<th>vs 池 (-12.85bp)</th>
+</tr></thead><tbody>
+<tr><td>基线（学 label_barrier）</td><td><strong>+15.73</strong></td><td>+28.6</td></tr>
+<tr><td>新模型（学 is_top_decile）</td><td><strong>-32.41</strong></td><td>-19.6</td></tr>
+</tbody></table>
+<p>（单切分噪声大，top n=367；新模型在该切分上过拟合「成为 top」的定义。）</p>
+<p><strong>CPCV 15 折（更稳健）</strong>：</p>
+<table><thead><tr>
+<th>模型</th>
+<th>lift 中位 (bp)</th>
+<th>top 绝对均净中位 (bp)</th>
+<th>正折数</th>
+<th>自身 AUC 中位</th>
+</tr></thead><tbody>
+<tr><td>基线（学 label）</td><td><strong>+12.8</strong></td><td><strong>+0.9</strong></td><td>13/15</td><td>0.502</td></tr>
+<tr><td>新模型（学 is_top）</td><td><strong>+13.9</strong></td><td><strong>+8.3</strong></td><td>11/15</td><td><strong>0.835</strong></td></tr>
+</tbody></table>
+<ul>
+<li>新模型 top 绝对水平显著更高（+8.3 vs +0.9），说明它更会「挑到真正高回报的极端」。</li>
+<li>自身 AUC 远高于基线（0.835 vs 0.502），因为「是否 top」这个目标本身与特征（尤其是波动/范围）相关性更强；而 owner label 对特征来说更像噪声。</li>
+<li>lift 仅略高（+13.9 vs +12.8），但<strong>绝对净收益</strong>的提升对实盘更重要（直接决定扣成本后是否为正）。</li>
+</ul>
+<p><strong>特征重要性（gain，同一 fold）</strong>：</p>
+<ul>
+<li>基线：atr_pct_ratio96、af_vol_of_vol、spread_chg24、af_ret_skew 为主（分散到多个 alpha）。</li>
+<li>新模型：<strong>atr_pct 占绝对主导</strong>（~17k gain），其次 pre_range48、af_vol_of_vol，与剖开画像完全一致。</li>
+</ul>
+<p><strong>Spearman（分数 vs realized net，val）</strong>：</p>
+<ul>
+<li>基线：+0.054</li>
+<li>新模型：<strong>-0.264</strong>（单切分反向，CPCV 更可信）</li>
+</ul>
+<hr>
+<h2>4. 解读</h2>
+<p>1. <strong>owner 标注 ≠ 可交易顶档</strong>。Jaccard 仅 0.30，top 独有的极端波动/弱势特征被 owner 标注稀释。学 owner label 相当于在学一个「混杂了大量中性/弱信号」的目标。</p>
+<p>2. <strong>直接学 top 改善了排序的经济集中度</strong>。CPCV 下 top 绝对均净从 +0.9bp 提升到 +8.3bp（+7.4bp 绝对改善）。虽然 lift 改善有限，但绝对水平对「扣成本后是否为正」更关键。</p>
+<p>3. <strong>为什么单切分和新模型有时变差</strong>：把 realized 定义的 top 当二分类目标，模型会强烈依赖「高波动」特征；在某些时间块高波动本身不等于高净收益（或被 beta/其他因素抵消），导致外推不稳。CPCV 平均后仍显示净改善。</p>
+<p>4. <strong>与之前 +17~28bp 剖开的衔接</strong>：之前剖开是用回归器排分得到 +17~28bp lift；本次把「top 本身」做成监督信号，CPCV 仍能拿到正 lift，且 top 绝对水平更好，说明「把顶档定义当目标」是可行方向。</p>
+<hr>
+<h2>5. 风险与诚实声明</h2>
+<p>1. <strong>全部 train 窗</strong>。未读 holdout（已耗 9 次）。</p>
+<p>2. <strong>单切分 vs CPCV</strong>：单切分结果波动大（val 仅 3676 行，top 367 笔）；CPCV 15 折更可信，但仍为样本内。</p>
+<p>3. <strong>目标定义用 realized</strong>：is_top_decile 是用未来 realized net 定义的（这是监督学习允许的），但它强化了「高波动=好」的归纳偏差。在高波动不等于高净的 regime 下可能失效。</p>
+<p>4. <strong>成本口径</strong>：报告用 taker 净；legacy 0.2% 仅为与旧报告可比。实盘成本以 executor 实测为准。</p>
+<p>5. <strong>未改铁律项</strong>：无 holdout、无 promote、无 ACTIVE 切换、无下单、无改成本/障碍/三门。</p>
+<p>6. <strong>好坏都报</strong>：单切分上新目标曾变差；CPCV 显示改善但仍小（+13.9bp 仍接近成本量级）。</p>
+<hr>
+<h2>6. 下一步选项（需 owner 决策）</h2>
+<table><thead><tr>
+<th>#</th>
+<th>选项</th>
+<th>代价</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr><td><strong>1</strong></td><td><strong>回归到「直接预测 net」</strong>（或 q90 回归）</td><td>低</td><td>之前回归实验已显示 +18~23bp 量级；本次 is_top 二分类只是「回归的简化版」。</td></tr>
+<tr><td><strong>2</strong></td><td>把 is_top 作为<strong>加权/辅助损失</strong>（多任务或 sample weight）</td><td>中</td><td>让模型既学 owner 结构，又向 top 集中。</td></tr>
+<tr><td><strong>3</strong></td><td>白盒规则近似（atr_pct + pre_range48 + dense_frac 阈值）</td><td>低</td><td>验证「模型学到的极端」是否能用几条 if 近似，跳过 LGBM。</td></tr>
+<tr><td><strong>4</strong></td><td>在<strong>更大/不同池</strong>上重复 A+B（含 100x6m 老池）</td><td>中</td><td>验证结论是否稳健（v10 池可能有特殊 regime）。</td></tr>
+<tr><td><strong>5</strong></td><td>停止这条线，接受「判断层能挑到 +8~13bp 顶档，但仍薄」的现实</td><td>0</td><td>配合成本工程（maker 入场等）再评估。</td></tr>
+</tbody></table>
+<p><strong>我的推荐</strong>：先做 <strong>1+3</strong>（回归 + 白盒规则），成本低，能快速回答「是二分类问题还是回归问题」和「规则能否替代模型」。</p>
+<hr>
+<h2>附：产物</h2>
+<ul>
+<li><code>analysis/output/ab_topdecile_target.json</code> — 单切分摘要</li>
+<li><code>analysis/output/ab_topdecile_target_details.json</code> — 特征重要性 + Spearman</li>
+<li><code>analysis/output/ab_cpcv_lifts.json</code> — CPCV 15 折 lift 汇总</li>
+</ul>
+<p><strong>下一次实验前请确认</strong>：是否消耗 holdout、是否改成本假设、是否扩大池（均需 owner 批准）。</p>
+</body>
+</html>

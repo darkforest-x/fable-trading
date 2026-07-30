@@ -22,7 +22,7 @@ while true; do
   # Push gallery to VPS (best-effort, non-blocking timeout)
   rsync -az --timeout=20 \
     src/webapp/static/scout.html src/webapp/static/scout \
-    root@103.214.174.58:/opt/fable-trading/src/webapp/static/ 2>/dev/null || true
+    root@206.237.14.112:/opt/fable-trading/src/webapp/static/ 2>/dev/null || true
   # Cold path: full kline tip update occasionally (for other jobs / cache)
   if [ $((n % UPDATE_EVERY)) -eq 0 ]; then
     echo "--- cold update_okx $(date) ---"

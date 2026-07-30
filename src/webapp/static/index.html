@@ -5,15 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>darkforest-trading</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="style.css?v=20260722quiet">
+<link rel="stylesheet" href="style.css?v=20260730final4">
 <link rel="stylesheet" href="scout_mtf.css?v=20260719embed">
 <link rel="stylesheet" href="vendor/tabulator.min.css">
 <link rel="stylesheet" href="clauseos.css?v=20260729clauseos-light">
 <script defer src="vendor/lightweight-charts.standalone.production.js"></script>
 <script defer src="vendor/tabulator.min.js"></script>
 <script defer src="format_helpers.js?v=20260720sym"></script>
-<script defer src="scout_mtf_app.js?v=20260719embed"></script>
-<script defer src="app.js?v=20260729clauseos-light"></script>
+<script defer src="scout_mtf_app.js?v=20260730final4"></script>
+<script defer src="app.js?v=20260730final4"></script>
 </head>
 <body class="hb-shell theme-light">
 <button type="button" class="nav-burger" id="nav-burger" aria-label="打开导航" aria-controls="sidebar" aria-expanded="false">菜单</button>
@@ -51,12 +51,50 @@
 
 <div class="app-main">
   <div class="status-bar" id="status-bar">
-    <div id="status-strip" class="status-strip" aria-live="polite">
+    <div id="status-strip" class="status-strip" aria-live="polite" style="display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:8px">
       <div class="status-item skeleton" id="status-owner"><span class="status-k">检测器</span><span class="status-v">…</span></div>
       <div class="status-item skeleton" id="status-judgment"><span class="status-k">判断 ACTIVE</span><span class="status-v">…</span></div>
       <div class="status-item skeleton" id="status-forward"><span class="status-k">前向</span><span class="status-v">…</span></div>
+      <div class="status-item skeleton" id="status-paper"><span class="status-k">v10纸面</span><span class="status-v">…</span></div>
     </div>
-    <p id="status-meta" class="status-meta" aria-live="polite"></p>
+<script>(function(){
+  // Force 4 chips even if some old cached HTML tried to render only 3.
+  var s = document.getElementById("status-strip");
+  if (s) {
+    s.style.display = "grid";
+    s.style.gridTemplateColumns = "repeat(4,minmax(120px,1fr))";
+    s.style.gap = "8px";
+    var need = ["status-owner","status-judgment","status-forward","status-paper"];
+    var have = Array.prototype.map.call(s.children, function(c){return c.id;}).filter(Boolean);
+    if (have.length !== 4) {
+      s.innerHTML =
+        '<div class="status-item skeleton" id="status-owner"><span class="status-k">检测器</span><span class="status-v">…</span></div>' +
+        '<div class="status-item skeleton" id="status-judgment"><span class="status-k">判断 ACTIVE</span><span class="status-v">…</span></div>' +
+        '<div class="status-item skeleton" id="status-forward"><span class="status-k">前向</span><span class="status-v">…</span></div>' +
+        '<div class="status-item skeleton" id="status-paper"><span class="status-k">v10纸面</span><span class="status-v">…</span></div>';
+    }
+  }
+  // Populate the paper chip from its own endpoint (so it shows on every page incl. #forward)
+  var p = document.getElementById("status-paper");
+  if (p) {
+    p.innerHTML = '<span class="status-k">v10纸面</span><span class="status-v">加载…</span>';
+    fetch("/api/live-paper",{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
+      if (!p || !p.isConnected) return;
+      p.classList.remove("skeleton");
+      if (j && j.available) {
+        var nf = j.n_fresh || 0, nt = j.n_fired || 0;
+        p.innerHTML = '<span class="status-k">v10纸面</span><span class="status-v">'+nf+'新/'+nt+'总</span><span class="status-sub">门'+(j.gate_min||30)+'m</span>';
+        p.classList.add("status-click");
+        p.onclick = function(){ location.hash = "#overview"; };
+      } else {
+        p.innerHTML = '<span class="status-k">v10纸面</span><span class="status-v">无</span><span class="status-sub">未扫描</span>';
+      }
+    }).catch(function(){
+      if (p && p.isConnected) p.innerHTML = '<span class="status-k">v10纸面</span><span class="status-v">—</span><span class="status-sub">见总览</span>';
+    });
+  }
+})();</script>
+<p id="status-meta" class="status-meta" aria-live="polite"></p>
   </div>
 
   <div id="toast-host" class="toast-host" aria-live="assertive"></div>
@@ -218,6 +256,7 @@
         <div class="live-chip"><span class="live-chip-k">检测</span><span class="live-chip-v" id="live-det">—</span></div>
         <div class="live-chip"><span class="live-chip-k">判断</span><span class="live-chip-v" id="live-jud">—</span></div>
         <div class="live-chip"><span class="live-chip-k">日志</span><span class="live-chip-v" id="live-log">—</span></div>
+        <div class="live-chip"><span class="live-chip-k">v10纸面</span><span class="live-chip-v" id="live-paper">—</span></div>
         <div class="live-chip warn-soft" id="live-hint-wrap" hidden>
           <span class="live-chip-k">提示</span>
           <span class="live-chip-v" id="live-hint">—</span>
@@ -225,6 +264,17 @@
       </div>
     </div>
     <div id="verdict-banner" class="banner banner-verdict" role="status"></div>
+
+    <!-- v10 纸面模拟信号（只读展示，不写账本） -->
+    <div class="panel" id="live-paper-panel" style="margin:8px 0 12px">
+      <div class="panel-head-row">
+        <h2 style="margin:0">v10 纸面模拟信号 <span class="unit">只读 · 不写 forward · 不下单</span></h2>
+        <button type="button" class="mini-btn" id="live-paper-refresh">刷新</button>
+      </div>
+      <div id="live-paper-body" class="note" style="min-height:28px">加载中…</div>
+      <p class="note note-foot" style="margin-top:4px">出信号即推 TG+Bark；点击图打开大图。命令：<code>python3 scripts/live_signal_tg.py --tip-only --send</code></p>
+    </div>
+
     <div class="two-col">
       <div class="panel panel-chart">
         <h2>验收净值 <span class="unit">回测参考 · 0.3% 成本 · 北京时间</span></h2>

@@ -27,5 +27,5 @@ git add output/label_studio/tasks_round4_swap_chunk*.json scripts/ls_auto_import
 git commit -qm "Round-4 swap packs rendered and auto-imported into Label Studio" && git push -q && echo pushed
 PYTHONPATH=. python3 -c "
 from src.notify import send
-send('📦✅ round-4 合约弹药已就绪并自动导入 Label Studio：round4_swap_chunk1-3（各~500张，含⭐标杆选项）。打开 http://103.214.174.58:8080 直接开标。')" || true
+send('📦✅ round-4 合约弹药已就绪并自动导入 Label Studio：round4_swap_chunk1-3（各~500张，含⭐标杆选项）。打开 http://206.237.14.112:8080 直接开标。')" || true
 echo "=== queue11b done $(date) ==="

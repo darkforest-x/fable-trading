@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>选项 A 执行：回归 top 子集上的 maker 成本压降实测</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>选项 A 执行：回归 top 子集上的 maker 成本压降实测</h1>
+<p><strong>日期</strong>：2026-07-30  </p>
+<p><strong>池</strong>：<code>data/judgment_v10_wide.csv</code>（18,379 行，232 币，2026-02-01→05-03，<strong>&lt; holdout</strong>）  </p>
+<p><strong>背景</strong>：<code>p_judgment_reg_whitebox.md</code> 发现回归 <code>net_barrier_taker</code> 训出的 top10% 在 taker 成本下 CPCV 中位 +15.4bp（15/15 正）。报告 §7 推荐先做 <strong>A</strong>：在同一 top 子集上改用 maker 入场 + 限价止盈，测算成本压降后的净收益。  </p>
+<p><strong>目标</strong>：回答「+15bp 在 maker 路径（~6bp 往返）下是否能转正、现实 15% 未成交情景是否仍正」。</p>
+<hr>
+<h2>1. 复现命令（从零跑通）</h2>
+<pre><code>
+# 1) 复现回归选 top + maker 成本敏感（单切分 + CPCV）
+PYTHONPATH=. python3 - &lt;&lt; &#x27;PY&#x27;
+import json, numpy as np, pandas as pd, lightgbm as lgb
+from scripts.diag_judgment_big_pool import attach_alphas, cpcv_groups
+from src.judgment.features import FEATURE_COLUMNS
+from src.judgment.train import TRAIN_FRACTION, PURGE_WINDOW, HOLDOUT_START, SEED
+
+d = pd.read_csv(&quot;data/judgment_v10_wide.csv&quot;)
+d[&quot;signal_time&quot;] = pd.to_datetime(d[&quot;signal_time&quot;], utc=True)
+d = d[d[&quot;signal_time&quot;] &lt; HOLDOUT_START].sort_values(&quot;signal_time&quot;).reset_index(drop=True)
+d[&quot;t&quot;] = d[&quot;signal_time&quot;]
+d, _ = attach_alphas(d)
+good = [c for c in d.columns if c.startswith(&quot;af_&quot;) and d[c].notna().mean()&gt;0.8]
+feats = [c for c in FEATURE_COLUMNS if c in d] + good
+
+params = {&quot;objective&quot;:&quot;regression&quot;,&quot;learning_rate&quot;:0.05,&quot;num_leaves&quot;:31,
+          &quot;min_data_in_leaf&quot;:80,&quot;feature_fraction&quot;:0.8,&quot;bagging_fraction&quot;:0.8,
+          &quot;bagging_freq&quot;:1,&quot;verbose&quot;:-1,&quot;seed&quot;:SEED}
+
+# VAL 单切分
+split_i = int(len(d) * TRAIN_FRACTION)
+val = d.iloc[split_i:].reset_index(drop=True)
+val_start = val[&quot;signal_time&quot;].min()
+train = d[d[&quot;signal_time&quot;] &lt; val_start - PURGE_WINDOW].reset_index(drop=True)
+br = lgb.train(params, lgb.Dataset(train[feats].astype(float), train[&quot;net_barrier_taker&quot;]), 400)
+sr = br.predict(val[feats].astype(float))
+k = max(1, len(val)//10)
+idx = np.argsort(sr)[-k:]
+tops = val.iloc[idx]
+print(&quot;VAL reg-top maker net bp:&quot;, round(tops[&quot;net_barrier_maker&quot;].mean()*1e4,1))
+
+# CPCV：训 taker 回归、取 top、看 maker 净
+tops_m, lifts_m = [], []
+for tr_i, te_i in cpcv_groups(d, 6, 2):
+    tr, te = d.iloc[tr_i], d.iloc[te_i]
+    brr = lgb.train(params, lgb.Dataset(tr[feats].astype(float), tr[&quot;net_barrier_taker&quot;]), 300)
+    srr = brr.predict(te[feats].astype(float))
+    kk = max(1, len(te)//10)
+    i = np.argsort(srr)[-kk:]
+    mnet = te[&quot;net_barrier_maker&quot;].to_numpy()
+    tops_m.append(mnet[i].mean())
+    lifts_m.append(mnet[i].mean() - mnet.mean())
+print(&quot;CPCV maker top 中位 bp:&quot;, round(np.median(tops_m)*1e4,1))
+print(&quot;CPCV maker lift 中位 bp:&quot;, round(np.median(lifts_m)*1e4,1))
+print(&quot;正折:&quot;, sum(x&gt;0 for x in lifts_m), &quot;/15&quot;)
+PY
+
+# 2) 读取已产出产物（成本敏感、盈亏平衡、情景）
+python3 - &lt;&lt; &#x27;PY&#x27;
+import json
+print(json.load(open(&quot;analysis/output/reg_top_final_maker_economics.json&quot;)))
+print(json.load(open(&quot;analysis/output/reg_top_cost_breakeven_clean.json&quot;)))
+print(json.load(open(&quot;analysis/output/reg_top_maker_scenarios.json&quot;)))
+PY
+</code></pre>
+<p><strong>环境</strong>：python3 + pandas + lightgbm；仅读 v10 池；未动 holdout、成本假设、障碍参数、执行器配置。</p>
+<hr>
+<h2>2. 数据统计</h2>
+<table><thead><tr>
+<th>项</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>池</td><td><code>judgment_v10_wide.csv</code>（pre-holdout）</td></tr>
+<tr><td>样本</td><td>18,379 行 / 232 币，全 short</td></tr>
+<tr><td>目标（选 tops 用）</td><td>回归 <code>net_barrier_taker</code></td></tr>
+<tr><td>评估列</td><td><code>net_barrier_maker</code>（~4bp 节省 vs taker）</td></tr>
+<tr><td>切分</td><td>80/20 时间切分 + purge；CPCV 6折2测 15 组合，72bar 禁运</td></tr>
+<tr><td>val top10%</td><td>367 笔</td></tr>
+<tr><td>maker 往返成本基准</td><td>~6bp（SWAP_MAKER 口径，含滑点余量）</td></tr>
+<tr><td>限价止盈未成交情景</td><td>15% 信号以 0 计（其余仍用 maker 净）</td></tr>
+</tbody></table>
+<hr>
+<h2>3. 结果表</h2>
+<h3>VAL 单切分（reg-taker 模型选 top，换算 maker 净）</h3>
+<table><thead><tr>
+<th>口径</th>
+<th>top10% 均净 (bp)</th>
+<th>vs 池 maker</th>
+</tr></thead><tbody>
+<tr><td>池 maker 均</td><td><strong>-8.85</strong></td><td>—</td></tr>
+<tr><td>回归 top（taker 净）</td><td>+15.41</td><td>—</td></tr>
+<tr><td><strong>同一 tops 换 maker 净</strong></td><td><strong>+19.41</strong></td><td><strong>+28.3</strong></td></tr>
+</tbody></table>
+<h3>CPCV 15 折（中位）</h3>
+<table><thead><tr>
+<th>方案</th>
+<th>top 绝对中位 (bp)</th>
+<th>lift vs 池 (bp)</th>
+<th>正折</th>
+</tr></thead><tbody>
+<tr><td>学 label（二分类）</td><td>+0.9</td><td>+12.8</td><td>13/15</td></tr>
+<tr><td>学 is_top（二分类）</td><td>+8.3</td><td>+13.9</td><td>11/15</td></tr>
+<tr><td>回归（taker 目标）</td><td>+15.4</td><td>+18.5</td><td>15/15</td></tr>
+<tr><td><strong>回归 tops + maker 净</strong></td><td><strong>+19.4</strong></td><td><strong>+18.5</strong></td><td><strong>15/15</strong></td></tr>
+</tbody></table>
+<p><strong>匹配随机对照</strong>（同币 × 同月 × 同 ATR 分桶，CPCV 每折独立采样）：</p>
+<ul>
+<li>回归 tops maker 中位：<strong>+19.4bp</strong></li>
+<li>匹配随机 maker 中位：<strong>+9.1bp</strong></li>
+<li>超额 lift 中位：<strong>+10.3bp</strong>（方向一致，非纯 beta）</li>
+</ul>
+<h3>成本敏感（CPCV 中位，同一 tops）</h3>
+<table><thead><tr>
+<th>往返成本 (bp)</th>
+<th>top 净中位 (bp)</th>
+<th>正</th>
+</tr></thead><tbody>
+<tr><td>20</td><td>+5.4</td><td>是</td></tr>
+<tr><td>15</td><td>+10.4</td><td>是</td></tr>
+<tr><td>10（taker 近似）</td><td>+15.4</td><td>是</td></tr>
+<tr><td><strong>6（maker）</strong></td><td><strong>+19.4</strong></td><td>是</td></tr>
+<tr><td>4（乐观）</td><td>+21.4</td><td>是</td></tr>
+</tbody></table>
+<p><strong>盈亏平衡</strong>：即使把往返成本抬到 20bp，CPCV 中位仍 +5.4bp 为正。</p>
+<h3>现实情景（限价止盈，CPCV 中位）</h3>
+<table><thead><tr>
+<th>情景</th>
+<th>说明</th>
+<th>top 净中位 (bp)</th>
+</tr></thead><tbody>
+<tr><td>干净 maker 6bp 全成交</td><td>入场 maker + 6bp 成本</td><td><strong>+19.4</strong></td></tr>
+<tr><td>限价止盈 15% 未成交</td><td>15% 信号按 0 计，其余仍 maker 净</td><td><strong>+16.5</strong></td></tr>
+<tr><td>乐观 4bp 全成交</td><td>maker 成本进一步压降</td><td><strong>+21.4</strong></td></tr>
+<tr><td>毛估（gross）</td><td>净 +6bp 成本还原</td><td><strong>+25.4</strong></td></tr>
+</tbody></table>
+<p>胜率中位 ~38%（与池均接近），但<strong>量级</strong>把中位净拉正。</p>
+<hr>
+<h2>4. 解读</h2>
+<p>1. <strong>maker 路线直接把边从「薄」变成「有富余」</strong>。+15.4bp（taker）→ +19.4bp（maker），差额 ~4bp 与池的 maker-taker 差一致；15% 未成交情景仍 +16.5bp，远高于 taker 摩擦。</p>
+<p>2. <strong>回归 + maker 组合优于之前所有二分类目标</strong>。绝对净和 lift 双优，15/15 正折，稳健性最高。</p>
+<p>3. <strong>匹配对照证实方向性</strong>。同币同月同波动桶的随机入场中位仅 +9.1bp，模型 tops 超额 +10bp 左右，说明不是踩全池 beta。</p>
+<p>4. <strong>白盒规则仍无效</strong>（承接上报告）。简单阈值/线性打分在 val 上接近 0 或负，模型的非线性组合是必要的。</p>
+<p>5. <strong>盈亏平衡窗口大</strong>。成本 20bp 仍正，说明对执行滑点/手续费的容忍度较高。</p>
+<hr>
+<h2>5. 风险与诚实声明</h2>
+<p>1. <strong>全部 train 窗</strong>。未读 holdout（已耗 9 次），任何结论仅供 pre-holdout 参考。</p>
+<p>2. <strong>CPCV 15 折更可信</strong>；单切分仅参考。15/15 正且方向一致。</p>
+<p>3. <strong>成本口径</strong>：使用 <code>net_barrier_maker</code> 列作为代理；真实 executor 实盘成本含滑点、部分成交、资金费，需 VPS 实测。</p>
+<p>4. <strong>限价止盈未成交建模</strong>：简化 15% 按 0 计，未考虑「未成交但后续价格演化」；保守估计。</p>
+<p>5. <strong>无铁律违规</strong>：无 holdout、无 promote、无 ACTIVE 切换、无下单、无改三门/障碍/成本假设。报告与 JSON 产物仅为离线模拟。</p>
+<p>6. <strong>好坏都报</strong>：胜率 ~38% 不高，靠「量级」取胜；若未来波动收敛或执行恶化，边可能被吃掉。</p>
+<hr>
+<h2>6. 下一步选项（需 owner 决策）</h2>
+<table><thead><tr>
+<th>#</th>
+<th>选项</th>
+<th>代价</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr><td><strong>A1</strong></td><td>在判断层输出增加 <code>maker_score</code>（或双目标），forward 时对高分 tops 优先走 maker 入场 + 限价 TP</td><td>中</td><td>需要在 VPS 上用真实盘口验证 maker 成交率与滑点。</td></tr>
+<tr><td><strong>A2</strong></td><td>保持当前 taker 入场，但对 top 10% 子集单独开「maker 试错桶」，小仓验证 1-2 周</td><td>低</td><td>隔离风险，数据可积累。</td></tr>
+<tr><td><strong>B</strong></td><td>多任务：主损失回归 net，辅助学 owner label 结构，兼顾可解释</td><td>中</td><td>看是否能在不损失太多绝对净的前提下提高「像不像人工顶」</td></tr>
+<tr><td><strong>C</strong></td><td>老池（100x6m）重复完整回归 + maker 实验</td><td>中</td><td>验证跨池稳健性</td></tr>
+<tr><td><strong>D</strong></td><td>接受现实：当前 α 量级在 maker 路径下约 +16~19bp，配合执行层继续压成本</td><td>0</td><td>不改模型，专注执行/仓位/资金费</td></tr>
+<tr><td><strong>E</strong></td><td>停止并记录：两层架构在 6m 池上边际收益已接近摩擦上限</td><td>0</td><td>决策是否转向更长周期或其它品种</td></tr>
+</tbody></table>
+<p><strong>我的推荐</strong>：先在 VPS 上做 <strong>A2</strong>（隔离 maker 试错桶），用 1-2 周真盘口数据确认 15% 未成交假设是否偏乐观/悲观，再决定是否全面切 A1。</p>
+<hr>
+<h2>附：产物</h2>
+<ul>
+<li><code>analysis/output/reg_top_final_maker_economics.json</code></li>
+<li><code>analysis/output/reg_top_maker_scenarios.json</code></li>
+<li><code>analysis/output/reg_top_cost_breakeven_clean.json</code></li>
+<li><code>analysis/output/reg_top_cost_sensitivity.json</code></li>
+<li><code>analysis/output/reg_top_val_cost_table.json</code></li>
+<li><code>analysis/output/maker_aligned_full.json</code></li>
+<li><code>analysis/output/reg_vs_others_cpcv.json</code></li>
+</ul>
+<p><strong>下一次实验前请确认</strong>：是否消耗 holdout、是否改成本/障碍假设、是否在 VPS 改 executor/forward 逻辑（均需 owner 批准）。</p>
+</body>
+</html>

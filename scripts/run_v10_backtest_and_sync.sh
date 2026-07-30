@@ -9,7 +9,7 @@ LOG=logs/yolo_rescan_v10.log
 OUT=data/judgment_yolo_swap_v10.csv
 TAG=p3_yolo_v10_reg
 WORKERS="${WORKERS:-5}"
-VPS="${VPS:-root@103.214.174.58}"
+VPS="${VPS:-root@206.237.14.112}"
 DIR="${DIR:-/opt/fable-trading}"
 
 mkdir -p logs analysis/output data

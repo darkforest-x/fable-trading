@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A2 实施计划：隔离 maker 试错桶（VPS 小仓验证）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>A2 实施计划：隔离 maker 试错桶（VPS 小仓验证）</h1>
+<p><strong>日期</strong>：2026-07-30  </p>
+<p><strong>背景</strong>：选项 A 离线模拟完成（回归 net 选 top + maker 成本），CPCV 中位 +19.4bp（15/15 正），15% 未成交情景仍 +16.5bp。按用户选择，下一动作是 <strong>A2</strong>：在 VPS 上用隔离的 maker 试错桶小仓验证，不改动主 forward_log / executor 主路径。</p>
+<p><strong>铁律红线（本次严格遵守）</strong></p>
+<ul>
+<li>仅读主线 YOLO + 判断模型；<strong>不写</strong> 主 <code>forward_log.csv</code>。</li>
+<li>试错桶使用<strong>独立文件</strong> <code>data/forward_log_maker_trial.csv</code>（类比 <code>forward_log_h1_scaled.csv</code>）。</li>
+<li><strong>不</strong> promote、不切 ACTIVE、不清 forward_log、不改三门（max_signal_age_min / TG / 看板）。</li>
+<li>真金操作（下单/改仓/改 API）仅在 owner 逐次明确授权下进行。</li>
+<li>成本/障碍假设不变；本轮只改「入场方式 + 止盈方式」为 maker + 限价 TP。</li>
+<li>全部实验在 pre-holdout 逻辑与模型上验证，VPS 验证使用<strong>已验证的模型版本</strong>。</li>
+</ul>
+<hr>
+<h2>1. 目标与成功标准</h2>
+<ul>
+<li><strong>目标</strong>：在真实盘口下，确认「回归 top 子集 + maker 入场 + 限价 TP」是否能在 15% 未成交假设附近把净收益做到 +10bp 以上（含滑点、部分成交、资金费）。</li>
+<li><strong>成功标准</strong>（owner 事前定义，建议）：</li>
+<li>连续 ≥50 笔试错样本，或累计 ≥7 天。</li>
+<li>maker 入场真实成交率 ≥70%（否则边被未成交吃掉）。</li>
+<li>15% 未成交情景下的中位净 ≥ +8~10bp（保守）。</li>
+<li>无连续 5 笔大亏（executor 已有 max_consecutive_losses 保护）。</li>
+<li><strong>失败即止</strong>：成交率过低、滑点远超 4bp、或连续回撤超阈值，立即停止该桶。</li>
+</ul>
+<hr>
+<h2>2. 隔离架构（最小改动）</h2>
+<pre><code>
+主路径（不变）
+  YOLO detect → judgment frozen → forward_log.csv → executor（market 入场 + OCO -1）
+
+隔离试错桶（新增）
+  同一 YOLO + 同一判断回归模型（或其 q90 阈值）
+        ↓ 仅对 top 10% 写
+  data/forward_log_maker_trial.csv   （独立文件，带 trial 标记）
+        ↓ 独立进程/脚本读
+  maker_trial_executor（或带开关的 executor）
+        ↓ 仅该桶
+  限价入场（resting sell）+ 限价 TP；SL 仍 taker（必须）
+        ↓ 小仓
+  notional_usdt 极低（建议 5~10U/笔，或 equity 的极小比例）
+</code></pre>
+<p><strong>文件新增（不破坏主路径）</strong></p>
+<ul>
+<li><code>src/judgment/forward_types.py</code>：增加 <code>FORWARD_LOG_MAKER_TRIAL_PATH</code> 常量（additive）。</li>
+<li><code>scripts/forward_maker_trial.py</code>：独立脉冲，复用 <code>scan_forward_records</code> + 回归打分，取 q90，写 trial 文件。</li>
+<li>可选：<code>src/execution/maker_trial_loop.py</code>（极简），或复用 executor 逻辑但读 trial 文件 + 走 maker 下单路径。</li>
+</ul>
+<p><strong>关键列复用</strong></p>
+<ul>
+<li>复用现有 forward 列；新增 <code>trial_bucket</code> 列（值为 <code>&quot;maker_entry&quot;</code>）便于下游区分。</li>
+<li><code>maker_filled</code> 仍保留（记录是否以 maker 成交）。</li>
+</ul>
+<hr>
+<h2>3. 运行命令（VPS 侧）</h2>
+<pre><code>
+# 0) 前置：确认已在 main，确认模型版本（owner 批准的回归模型或当前 frozen 的等价物）
+git branch --show-current   # 必须输出 main
+git status --porcelain      # 干净或仅新增文件
+
+# 1) 启动隔离的 maker 试错 forward 脉冲（写独立文件）
+# 建议用 systemd/launchd 模板，日志落 logs/forward_maker_trial.log
+FABLE_MAKER_TRIAL=1 \
+FABLE_CANDIDATE_SOURCE=yolo \
+python3 scripts/forward_maker_trial.py \
+  --model artifacts/.../your_reg_model.txt \
+  --threshold-q 0.90 \
+  --out data/forward_log_maker_trial.csv
+
+# 2) 启动隔离的 maker 试错执行器（小仓、独立进程）
+# 选项 A：最小实现（推荐先手写一个 50 行循环）
+python3 -m src.execution.maker_trial_loop \
+  --forward-log data/forward_log_maker_trial.csv \
+  --notional-usdt 8 \
+  --max-concurrent 1 \
+  --maker-entry-offset-bp 2 \     # resting sell 偏离量，实测后调
+  --limit-tp \                     # 限价止盈
+  --kill data/executor_KILL_MAKER_TRIAL
+
+# 选项 B：若复用 executor，新增开关（owner 批准后小补丁）
+#   EXECUTOR_READ_LOG=data/forward_log_maker_trial.csv \
+#   EXECUTOR_MAKER_ENTRY=1 \
+#   EXECUTOR_NOTIONAL_USDT=8 \
+#   python3 -m src.execution.executor --trial
+</code></pre>
+<p><strong>安全开关</strong></p>
+<ul>
+<li>独立 kill 文件：<code>data/executor_KILL_MAKER_TRIAL</code>（存在即停该桶）。</li>
+<li>独立最大并发与 notional。</li>
+<li>建议在 TG 增加「MAKER_TRIAL」前缀，便于过滤。</li>
+</ul>
+<hr>
+<h2>4. 模型与阈值</h2>
+<ul>
+<li>离线验证用的是「回归 net_barrier_taker → 取 val 内 q90」选 tops。</li>
+<li>实盘需要一个<strong>已冻结的回归模型</strong>（或当前 frozen 的等价物）。</li>
+<li>若当前 frozen 是二分类（v11_reg 可能是分类/回归混用），需先把回归模型冻结并记录 SHA256。</li>
+<li>阈值：建议先用训练窗 90% 分位固定值，或 val 窗固定值；<strong>不</strong>在 forward 期间动态重算。</li>
+</ul>
+<hr>
+<h2>5. 风险与缓解</h2>
+<table><thead><tr>
+<th>风险</th>
+<th>缓解</th>
+</tr></thead><tbody>
+<tr><td>maker 入场成交率过低（&lt;50%）</td><td>实测 offset（0~5bp），未成交按 0 计；超过 3 天仍低则停</td></tr>
+<tr><td>滑点/排队吃掉 4bp 节省</td><td>记录每笔实际成交价 vs 期望；超阈值停</td></tr>
+<tr><td>试错桶误触主路径</td><td>严格分离文件 + 独立进程 + 独立 kill</td></tr>
+<tr><td>连续亏</td><td>executor 已有 max_consecutive_losses；试错桶可设更严（3~4）</td></tr>
+<tr><td>资金费/持仓时间</td><td>仍用 72bar 超时；可提前 trail 离场</td></tr>
+<tr><td>代码侵入主路径</td><td>本计划只新增文件与独立脚本；主 executor/forward 不改或仅加极小开关（owner 逐行审批）</td></tr>
+</tbody></table>
+<hr>
+<h2>6. 度量与看板（建议）</h2>
+<ul>
+<li>每脉冲落地 <code>logs/maker_trial_*.jsonl</code>（每笔：score、offset、filled、realized_maker、cost_proxy）。</li>
+<li>每日汇总：成交率、平均 maker 节省 bp、15% 未成交情景下的中位净、胜率、最大回撤。</li>
+<li>与主 forward_log 隔离统计，避免污染 100 笔 gate。</li>
+</ul>
+<hr>
+<h2>7. 回滚与停止条件</h2>
+<ul>
+<li>任意时刻 <code>touch data/executor_KILL_MAKER_TRIAL</code> 立即停止试错桶下单。</li>
+<li>删除/重命名 trial forward 文件不影响主路径。</li>
+<li>若 owner 决定放弃，删除 trial 相关脚本与常量即可（git revert 1~2 文件）。</li>
+</ul>
+<hr>
+<h2>8. 交付物（本次已完成）</h2>
+<ul>
+<li><code>analysis/p_judgment_maker_cost_on_regtop.md</code> + HTML（选项 A 结果）。</li>
+<li><code>analysis/p_judgment_maker_trial_a2_plan.md</code> + HTML（本计划）。</li>
+<li><code>docs/learnings/regression-on-net-plus-maker-route-concentrates-alpha-better-than-binary-labels.md</code>（已追加）。</li>
+</ul>
+<p><strong>待 owner 批准后才可上 VPS 的最小补丁</strong></p>
+<p>1. <code>src/judgment/forward_types.py</code> 加 <code>FORWARD_LOG_MAKER_TRIAL_PATH</code>。</p>
+<p>2. <code>scripts/forward_maker_trial.py</code>（独立 writer）。</p>
+<p>3. 可选的 <code>src/execution/maker_trial_loop.py</code> 或对 executor 的极小开关（需逐行 review）。</p>
+<hr>
+<h2>9. 下一步（需 owner 明确回复）</h2>
+<ul>
+<li>[ ] 批准 A2 隔离方案（是/否 + 备注）。</li>
+<li>[ ] 指定/冻结用于试错的回归模型路径与阈值（或确认用当前 frozen 等价物）。</li>
+<li>[ ] 指定试错 notional（建议 5~10U/笔）与最大并发（1）。</li>
+<li>[ ] 指定 maker 入场 offset 初始值（建议 0~3bp 开始实测）。</li>
+<li>[ ] 确认 VPS 上是否需要同步本计划中的新增文件（通过 <code>git pull</code> 或 patch）。</li>
+<li>[ ] 确认是否需要为 trial 桶单独开 TG 频道或 tag 过滤。</li>
+</ul>
+<p><strong>铁律确认</strong>：本次操作不消耗 holdout、不改主 forward、不 promote、不自动切换配置。所有真金操作需 owner 逐次授权。</p>
+</body>
+</html>

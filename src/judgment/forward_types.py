@@ -15,6 +15,9 @@ PROJECT_DIR: Final = Path(__file__).resolve().parents[2]
 FORWARD_LOG_PATH: Final = PROJECT_DIR / "data" / "forward_log.csv"
 # H1 scaled shadow paper book — never mixed into mainline 100-trade gate.
 FORWARD_LOG_H1_SCALED_PATH: Final = PROJECT_DIR / "data" / "forward_log_h1_scaled.csv"
+# A2 maker-entry trial bucket — isolated ledger; never mixed into mainline.
+# Written only by scripts/forward_maker_trial.py (requires FABLE_MAKER_TRIAL=1).
+FORWARD_LOG_MAKER_TRIAL_PATH: Final = PROJECT_DIR / "data" / "forward_log_maker_trial.csv"
 # YOLO mainline cutover (owner 2026-07-15): new candidate source → new forward clock.
 # Pre-cutover rule-scan log archived as data/forward_log_rules_pre_yolo_20260715.csv
 # Owner 2026-07-18/19: clear pre-v11 mixed book and restart gate for clean retest.

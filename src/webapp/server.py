@@ -54,6 +54,7 @@ from src.webapp.scout_mtf_payloads import (
 )
 from src.eth_micro.payloads import eth_micro_payload
 from src.short_tf.payloads import short_tf_payload
+from src.webapp.live_paper import live_paper_payload, live_paper_status_line
 
 app = FastAPI(title="fable-trading dashboard")
 
@@ -93,7 +94,10 @@ class ScoutMtfRunBody(BaseModel):
 async def no_cache_static(request, call_next):
     response = await call_next(request)
     if not request.url.path.startswith("/api"):
-        response.headers["Cache-Control"] = "no-cache"
+        # Strong no-cache for the shell HTML/JS/CSS so a hard refresh is not required after updates
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
     return response
 
 
@@ -196,6 +200,12 @@ def eth_micro() -> dict:
 def short_tf() -> dict:
     """Multi-symbol 1m/5m tip rules channel (isolated from 15m forward_log)."""
     return short_tf_payload()
+
+
+@app.get("/api/live-paper")
+def live_paper() -> dict:
+    """v10 纸面模拟信号（只读）。不写 forward_log、不 promote、不下单。"""
+    return live_paper_payload()
 
 
 # ---------- scout_mtf side branch (rank + multi-TF radar) ----------

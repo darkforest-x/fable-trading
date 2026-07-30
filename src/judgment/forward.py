@@ -27,6 +27,7 @@ from src.judgment.forward_scan import (
 )
 from src.judgment.forward_types import (
     FORWARD_LOG_H1_SCALED_PATH,
+    FORWARD_LOG_MAKER_TRIAL_PATH,
     FORWARD_LOG_PATH,
     FORWARD_START,
     ForwardRecord,
@@ -38,6 +39,7 @@ from src.judgment.frozen import DEFAULT_FROZEN_CONFIG, latest_artifact
 
 __all__ = (
     "FORWARD_LOG_H1_SCALED_PATH",
+    "FORWARD_LOG_MAKER_TRIAL_PATH",
     "FORWARD_LOG_PATH",
     "FORWARD_START",
     "ForwardRecord",
@@ -50,6 +52,7 @@ __all__ = (
     "resolve_forward_exit_scaled",
     "run_forward_tracking",
     "run_forward_tracking_h1_shadow",
+    "run_forward_tracking_maker_trial",
     "summary_to_json",
 )
 
@@ -93,6 +96,42 @@ def run_forward_tracking_h1_shadow(
         output_path=output_path,
         start_time=start_time,
         exit_resolver=resolve_forward_exit_scaled,
+    )
+
+
+def run_forward_tracking_maker_trial(
+    output_path: Path = FORWARD_LOG_MAKER_TRIAL_PATH,
+    start_time: pd.Timestamp = FORWARD_START,
+    *,
+    yolo_weights: Path | None = None,
+) -> ForwardRunSummary:
+    """Isolated A2 maker-entry trial pulse (signal ledger only).
+
+    Reuses the mainline frozen model + val-q90 + TP5/SL2 exit resolver for
+    *paper* outcome tracking. Writes **only** to the trial log path.
+
+    Safety:
+    - Refuses mainline `forward_log.csv` and the H1 scaled path.
+    - Does **not** place orders; maker entry / limit TP is a separate
+      owner-authorized executor that reads this ledger.
+    - Caller (`scripts/forward_maker_trial.py`) must set FABLE_MAKER_TRIAL=1
+      and respect the independent kill file.
+    """
+    resolved = Path(output_path).resolve()
+    protected = {
+        Path(FORWARD_LOG_PATH).resolve(),
+        Path(FORWARD_LOG_H1_SCALED_PATH).resolve(),
+    }
+    if resolved in protected:
+        raise ValueError(
+            "maker trial must not write to mainline or H1 shadow logs; "
+            f"use {FORWARD_LOG_MAKER_TRIAL_PATH} (or another isolated path)"
+        )
+    return _run_forward_tracking(
+        output_path=output_path,
+        start_time=start_time,
+        exit_resolver=resolve_forward_exit,
+        yolo_weights=yolo_weights,
     )
 
 

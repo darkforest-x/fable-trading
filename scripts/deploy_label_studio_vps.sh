@@ -6,8 +6,8 @@
 # Architecture (TLS gate):
 #   - Label Studio binds 127.0.0.1:8082 only (not public)
 #   - nginx terminates TLS on 0.0.0.0:8081 and proxies to loopback
-#   - Self-signed cert with IP SAN 103.214.174.58 (browser warning expected)
-#   - LABEL_STUDIO_HOST / CSRF origin = https://103.214.174.58:8081
+#   - Self-signed cert with IP SAN 206.237.14.112 (browser warning expected)
+#   - LABEL_STUDIO_HOST / CSRF origin = https://206.237.14.112:8081
 #
 # Usage (from repo root):
 #   bash scripts/deploy_label_studio_vps.sh
@@ -16,13 +16,13 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-VPS="${VPS_HOST:-root@103.214.174.58}"
+VPS="${VPS_HOST:-root@206.237.14.112}"
 REMOTE_DIR=/opt/fable-label-studio
 REMOTE_ENV=/etc/fable-label-studio.env
 # Public TLS port (nginx); app listens on loopback only
 PUBLIC_PORT=8081
 LS_PORT=8082
-PUBLIC_URL="https://103.214.174.58:${PUBLIC_PORT}"
+PUBLIC_URL="https://206.237.14.112:${PUBLIC_PORT}"
 # Django validates email domains; avoid .local
 USER_EMAIL="${LABEL_STUDIO_USERNAME:-fable-review@example.com}"
 
@@ -102,7 +102,7 @@ umask 077
   echo
   echo
   echo "## TLS / browser note"
-  echo "Certificate is **self-signed** with IP SAN 103.214.174.58."
+  echo "Certificate is **self-signed** with IP SAN 206.237.14.112."
   echo "Browsers will show a certificate warning — expected. Proceed only if you"
   echo "intentionally trust this VPS endpoint for labeling review."
   echo "Label Studio itself binds 127.0.0.1:${LS_PORT}; only nginx TLS on ${PUBLIC_PORT} is public."
@@ -189,8 +189,8 @@ if [ ! -f /etc/ssl/fable/label-studio.crt ] || [ ! -f /etc/ssl/fable/label-studi
   openssl req -x509 -nodes -newkey rsa:2048 -days 825 \
     -keyout /etc/ssl/fable/label-studio.key \
     -out /etc/ssl/fable/label-studio.crt \
-    -subj '/CN=103.214.174.58/O=fable-label-studio/C=US' \
-    -addext 'subjectAltName=IP:103.214.174.58'
+    -subj '/CN=206.237.14.112/O=fable-label-studio/C=US' \
+    -addext 'subjectAltName=IP:206.237.14.112'
 fi
 chmod 600 /etc/ssl/fable/label-studio.key
 chmod 644 /etc/ssl/fable/label-studio.crt

@@ -112,7 +112,7 @@ def main() -> int:
     url = _val(text, "URL").rstrip("/")
     email = _val(text, "Email")
     password = _val(text, "Password")
-    print(f"AUTH_PARSE_OK host_ok={('103.214.174.58' in url)} email_has_at={'@' in email}")
+    print(f"AUTH_PARSE_OK host_ok={('206.237.14.112' in url)} email_has_at={'@' in email}")
 
     s = _session(url, email, password)
     print("AUTH_OK")

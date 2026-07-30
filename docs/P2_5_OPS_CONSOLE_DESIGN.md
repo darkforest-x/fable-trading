@@ -27,7 +27,7 @@
 ### 0.3 部署角色
 
 ```
-MacBook（训练机 / 可执行）              VPS 103.214.174.58（公网只读 + 可选鉴权）
+MacBook（训练机 / 可执行）              VPS 206.237.14.112（公网只读 + 可选鉴权）
 ├─ ENABLE_JOB_EXECUTOR=1（默认关，需显式开）  ├─ ENABLE_JOB_EXECUTOR=0（强制默认关）
 ├─ 白名单 job runner + SSE 日志              ├─ 实验注册表 / 议程 / 数据热力 / 模型列表（只读）
 ├─ 端口开发用 8643（避 8642）                ├─ systemd fable-dashboard :8642

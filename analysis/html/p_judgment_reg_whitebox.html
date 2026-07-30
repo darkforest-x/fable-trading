@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>回归预测 net + 白盒规则（推荐 1+3 验证）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>回归预测 net + 白盒规则（推荐 1+3 验证）</h1>
+<p><strong>日期</strong>：2026-07-30  </p>
+<p><strong>池</strong>：<code>data/judgment_v10_wide.csv</code>（18,379 行，232 币，2026-02→2026-05-03，<strong>&lt; holdout</strong>）  </p>
+<p><strong>背景</strong>：<code>p_judgment_topdecile_target_ab.md</code> 发现「学 is_top_decile」把 top 绝对均净从 +0.9bp 提升到 +8.3bp（CPCV），但仍接近摩擦量级。按报告推荐，本轮执行 <strong>1+3</strong>：  </p>
+<ul>
+<li><strong>1. 回归</strong>：直接学 realized <code>net_barrier_taker</code>，评估 top-decile 经济表现（CPCV + 单切分）。  </li>
+<li><strong>3. 白盒规则</strong>：从剖开画像（atr_pct↑、pre_range48/168↑、dense_frac48↓、ret_12↓）提简单规则/打分，对比模型。  </li>
+</ul>
+<p><strong>目标</strong>：看回归是否比二分类「学 top」更好；规则是否能近似模型（低成本可部署）。</p>
+<hr>
+<h2>1. 复现命令（从零跑通）</h2>
+<pre><code>
+PYTHONPATH=. python3 - &lt;&lt; &#x27;PY&#x27;
+import sys, json, numpy as np, pandas as pd, lightgbm as lgb
+from pathlib import Path
+from src.judgment.features import FEATURE_COLUMNS
+from src.judgment.train import TRAIN_FRACTION, PURGE_WINDOW, HOLDOUT_START, SEED
+from scripts.diag_judgment_big_pool import attach_alphas, cpcv_groups
+
+d = pd.read_csv(&quot;data/judgment_v10_wide.csv&quot;)
+d[&quot;signal_time&quot;] = pd.to_datetime(d[&quot;signal_time&quot;], utc=True)
+d = d[d[&quot;signal_time&quot;] &lt; HOLDOUT_START].sort_values(&quot;signal_time&quot;).reset_index(drop=True)
+d[&quot;t&quot;] = d[&quot;signal_time&quot;]
+d, _ = attach_alphas(d)
+good = [c for c in d.columns if c.startswith(&quot;af_&quot;) and d[c].notna().mean()&gt;0.8]
+feats = [c for c in FEATURE_COLUMNS if c in d] + good
+
+# 单切分
+split_i = int(len(d) * TRAIN_FRACTION)
+val = d.iloc[split_i:].reset_index(drop=True)
+val_start = val[&quot;signal_time&quot;].min()
+train = d[d[&quot;signal_time&quot;] &lt; val_start - PURGE_WINDOW].reset_index(drop=True)
+
+ret_va = val[&quot;net_barrier_taker&quot;].values
+k = max(1, len(val)//10)
+
+params_reg = {&quot;objective&quot;:&quot;regression&quot;,&quot;learning_rate&quot;:0.05,&quot;num_leaves&quot;:31,
+              &quot;min_data_in_leaf&quot;:80,&quot;feature_fraction&quot;:0.8,&quot;bagging_fraction&quot;:0.8,
+              &quot;bagging_freq&quot;:1,&quot;verbose&quot;:-1,&quot;seed&quot;:SEED}
+
+# 回归
+br = lgb.train(params_reg, lgb.Dataset(train[feats].astype(float), train[&quot;net_barrier_taker&quot;]), 400)
+sr = br.predict(val[feats].astype(float))
+idx_r = np.argsort(sr)[-k:]
+print(&quot;REG val top10% realized bp:&quot;, round(ret_va[idx_r].mean()*1e4,2))
+
+# CPCV
+lifts, tops = [], []
+for tr_i, te_i in cpcv_groups(d, 6, 2):
+    tr, te = d.iloc[tr_i], d.iloc[te_i]
+    brr = lgb.train(params_reg, lgb.Dataset(tr[feats].astype(float), tr[&quot;net_barrier_taker&quot;]), 300)
+    srr = brr.predict(te[feats].astype(float))
+    kk = max(1, len(te)//10)
+    net = te[&quot;net_barrier_taker&quot;].to_numpy()
+    i = np.argsort(srr)[-kk:]
+    lifts.append(net[i].mean() - net.mean())
+    tops.append(net[i].mean())
+print(&quot;CPCV reg lift中位 bp:&quot;, round(np.median(lifts)*1e4,1))
+print(&quot;CPCV reg top绝对中位 bp:&quot;, round(np.median(tops)*1e4,1))
+
+# 白盒（在 val 上用分位，模拟规则）
+va = val.copy()
+p75 = {&quot;atr&quot;: va[&quot;atr_pct&quot;].quantile(0.75), &quot;pr&quot;: va[&quot;pre_range48&quot;].quantile(0.75)}
+sc = va[&quot;atr_pct&quot;] + va[&quot;pre_range48&quot;] - 0.1*va[&quot;dense_frac48&quot;]
+idx_w = np.argsort(sc.values)[-k:]
+print(&quot;WHITE val top10% realized bp:&quot;, round(ret_va[idx_w].mean()*1e4,2))
+PY
+</code></pre>
+<p><strong>环境</strong>：python3 + pandas + lightgbm；仅读 <code>judgment_v10_wide.csv</code>；未动 holdout、成本、障碍。</p>
+<hr>
+<h2>2. 数据统计</h2>
+<table><thead><tr>
+<th>项</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>池</td><td><code>judgment_v10_wide.csv</code></td></tr>
+<tr><td>样本数 / 币种</td><td>18,379 / 232（全 short）</td></tr>
+<tr><td>时间</td><td>2026-02-01 → 2026-05-03（<strong>&lt; holdout</strong>）</td></tr>
+<tr><td>目标（回归）</td><td><code>net_barrier_taker</code>（taker 净，均 -6.41bp）</td></tr>
+<tr><td>特征</td><td>47（28 基础 + 19 causal alphas，因果）</td></tr>
+<tr><td>切分</td><td>80/20 时间切分 + 18h15m purge；train 14,656 / val 3,676</td></tr>
+<tr><td>CPCV</td><td>6 折 2 测试，15 组合，禁运 72 根</td></tr>
+<tr><td>val top10% 基准</td><td>367 笔</td></tr>
+</tbody></table>
+<hr>
+<h2>3. 结果表</h2>
+<h3>VAL 单切分（top10% realized taker 净，bp）</h3>
+<table><thead><tr>
+<th>方案</th>
+<th>top10% 均净 (bp)</th>
+<th>vs 池 (-12.85bp)</th>
+</tr></thead><tbody>
+<tr><td>池均</td><td><strong>-12.85</strong></td><td>—</td></tr>
+<tr><td>学 label_barrier（二分类）</td><td><strong>+15.73</strong></td><td>+28.6</td></tr>
+<tr><td>学 is_top_decile（二分类）</td><td><strong>-32.41</strong></td><td>-19.6</td></tr>
+<tr><td><strong>回归 net</strong></td><td><strong>+15.41</strong></td><td><strong>+28.3</strong></td></tr>
+</tbody></table>
+<blockquote>单切分噪声大；回归与「学 label」接近，优于「学 is_top」。</blockquote>
+<h3>CPCV 15 折（更稳健）</h3>
+<table><thead><tr>
+<th>方案</th>
+<th>lift 中位 (bp)</th>
+<th>top 绝对均净中位 (bp)</th>
+<th>正折数</th>
+</tr></thead><tbody>
+<tr><td>学 label_barrier</td><td>+12.8</td><td>+0.9</td><td>13/15</td></tr>
+<tr><td>学 is_top_decile</td><td>+13.9</td><td>+8.3</td><td>11/15</td></tr>
+<tr><td><strong>回归 net</strong></td><td><strong>+18.5</strong></td><td><strong>+15.4</strong></td><td><strong>15/15</strong></td></tr>
+</tbody></table>
+<p><strong>解读</strong>：</p>
+<ul>
+<li>回归把 <strong>lift</strong> 从 ~13bp 提升到 <strong>18.5bp</strong>，且 15/15 折为正。</li>
+<li><strong>top 绝对均净</strong> 从 +8.3bp（学 is_top）进一步提升到 <strong>+15.4bp</strong>（+7.1bp 改善）。</li>
+<li>绝对净改善对实盘意义最大（扣成本后是否为正）。</li>
+</ul>
+<hr>
+<h2>4. 白盒规则（从剖开画像提）</h2>
+<p><strong>画像要点</strong>（top vs rest，中位）：</p>
+<ul>
+<li>atr_pct: 0.0092 vs 0.0059（+57%）</li>
+<li>pre_range48: 0.065 vs 0.040（+61%）</li>
+<li>pre_range168: 0.118 vs 0.076（+55%）</li>
+<li>drawdown24: 0.044 vs 0.027（+63%）</li>
+<li>spread_mean24: 0.0087 vs 0.0050（+72%）</li>
+<li>dense_frac48: 0.042 vs 0.188（<strong>仅 22%</strong>，越低越 top）</li>
+<li>ret_12: -0.024 vs -0.015（更弱势）</li>
+</ul>
+<p><strong>尝试的规则（在全 pre-holdout 上用 p75/p50 阈值）</strong>：</p>
+<ul>
+<li>RuleA: atr_pct &gt; p75 且 pre_range48 &gt; p75 且 dense_frac48 &lt; p50 → n=2,967，均净 <strong>-6.26bp</strong>（无效）</li>
+<li>RuleB: atr_pct &gt; p75 且 pre_range48 &gt; p75 且 ret_12 &lt; p25 → n=2,487，均净 <strong>-13.82bp</strong>（更差）</li>
+<li><strong>Simple score</strong>（val 上）：<code>atr_pct + pre_range48 - 0.1*dense_frac48</code>，取 top10% → <strong>-58bp</strong>（反向）</li>
+</ul>
+<p><strong>CPCV 对比（regression vs 白盒打分）</strong>：</p>
+<ul>
+<li>回归：lift 中位 <strong>+18.5bp</strong>，top 绝对中位 <strong>+15.4bp</strong></li>
+<li>白盒打分：lift 中位 <strong>-1.7bp</strong>，top 绝对中位 <strong>+2.5bp</strong></li>
+</ul>
+<p><strong>结论</strong>：几条 if 规则/线性打分<strong>无法近似模型</strong>。模型学到的非线性组合（波动 + 范围 + 量能 + 多个 alpha）不是简单阈值能覆盖的。</p>
+<hr>
+<h2>5. 解读</h2>
+<p>1. <strong>回归优于二分类</strong>。CPCV 15/15 正，top 绝对均净 +15.4bp（比学 is_top 再高 7bp 左右）。回归直接对齐经济目标，避免了「把 top 当 0/1 分类」带来的偏差。</p>
+<p>2. <strong>白盒规则失败是好消息</strong>。说明「顶十分位」里包含可学习的非线性结构，不是几条 if 能偷的；也解释了为什么判断层需要模型而不是静态门。</p>
+<p>3. <strong>量级仍薄</strong>。+15.4bp 绝对净在 taker 成本（~10bp）附近，maker（~6bp）有富余。需要成本压降或更大边才能转正。</p>
+<p>4. <strong>与之前剖开一致</strong>：波动/范围/弱势是核心；dense_frac48 低是反直觉但可重复的信号。</p>
+<hr>
+<h2>6. 风险与诚实声明</h2>
+<p>1. <strong>全部 train 窗</strong>。未读 holdout（已耗 9 次）。</p>
+<p>2. <strong>CPCV 更可信</strong>；单切分仅供参考。CPCV 15 折全正且方向一致。</p>
+<p>3. <strong>成本口径</strong>：taker 净；legacy 0.2% 仅为与旧报告可比。实盘以 executor 实测为准（含滑点）。</p>
+<p>4. <strong>白盒阈值</strong>：在 val/te 上用分位是「事后规则」的乐观估计；实盘需在历史窗上固定阈值。</p>
+<p>5. <strong>未改铁律项</strong>：无 holdout、无 promote、无 ACTIVE 切换、无下单、无改成本/障碍/三门。</p>
+<p>6. <strong>好坏都报</strong>：白盒规则基本无效；回归改善明显但仍接近成本量级。</p>
+<hr>
+<h2>7. 下一步选项（需 owner 决策）</h2>
+<table><thead><tr>
+<th>#</th>
+<th>选项</th>
+<th>代价</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr><td><strong>A</strong></td><td>成本压降在回归 top 子集上重跑（maker 入场 + 限价止盈）</td><td>中</td><td>+15.4bp 在 ~6bp 成本下有富余，值得实测。</td></tr>
+<tr><td><strong>B</strong></td><td>多任务/加权：主损失=net 回归，辅助=学 owner label 结构</td><td>中</td><td>兼顾可解释性与经济目标。</td></tr>
+<tr><td><strong>C</strong></td><td>在老池（100x6m）重复回归实验</td><td>中</td><td>验证结论是否跨池稳健。</td></tr>
+<tr><td><strong>D</strong></td><td>放弃判断层静态门，接受「回归可把顶档提到 +15bp，但仍薄」的现实</td><td>0</td><td>配合执行层成本工程再评估。</td></tr>
+<tr><td><strong>E</strong></td><td>停止并记录：当前两层架构在 6m 池上 α 量级 ≈ 摩擦</td><td>0</td><td>决策是否转向更长周期/更大目标。</td></tr>
+</tbody></table>
+<p><strong>我的推荐</strong>：先做 <strong>A</strong>（成本压降在回归 top 上实测），成本可控，能直接回答「+15bp 在 maker 路径下是否能转正」。</p>
+<hr>
+<h2>附：产物</h2>
+<ul>
+<li><code>analysis/output/reg_net_results.json</code></li>
+<li><code>analysis/output/whitebox_rules.json</code></li>
+<li><code>analysis/output/reg_vs_others_cpcv.json</code></li>
+</ul>
+<p><strong>下一次实验前请确认</strong>：是否消耗 holdout、是否改成本假设、是否扩大池（均需 owner 批准）。</p>
+</body>
+</html>
