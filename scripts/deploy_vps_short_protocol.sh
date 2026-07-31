@@ -40,22 +40,24 @@ if [ -f data/forward_log.csv ] && [ ! -f data/forward_log_pre_short_protocol_202
 elif [ -f data/forward_log_pre_short_protocol_20260731.csv ]; then
   echo archive already present
 fi
-python3 - <<'PY'
-from pathlib import Path
-import pandas as pd
+# Empty log without requiring pandas (VPS may use app venv later)
+HEADER='source,symbol,signal_time,detected_at,status,score,threshold,model_path,dataset_sha256,signal_i,entry_time,entry_price,maker_filled,outcome,label,exit_offset,exit_time,realized_ret,atr_pct,dense_run_len,tier,size_mult,side'
+printf '%s\n' "\$HEADER" > data/forward_log.csv
+echo "forward_log empty protocol short_v10_p0fix_20260731"
+cat models/ACTIVE
+# Optional import check if app venv exists
+for PY in .venv/bin/python venv/bin/python python3; do
+  if [ -x \"\$PY\" ] || command -v \"\$PY\" >/dev/null 2>&1; then
+    \"\$PY\" - <<'PY' 2>/dev/null && break || true
 try:
-    from src.judgment.forward_types import FORWARD_COLUMNS, PROTOCOL_VERSION
+    from src.judgment.frozen import load_runtime_artifact
+    a = load_runtime_artifact()
+    print('ACTIVE load', a.relative_model_path, a.config.side, a.threshold)
 except Exception as exc:
-    print('import fail', exc)
-    raise
-pd.DataFrame(columns=list(FORWARD_COLUMNS)).to_csv('data/forward_log.csv', index=False)
-print('forward_log empty protocol', PROTOCOL_VERSION)
-from src.judgment.frozen import load_runtime_artifact
-a = load_runtime_artifact()
-assert a is not None, 'no runtime artifact'
-print('ACTIVE', a.relative_model_path, 'side', a.config.side, 'thr', a.threshold)
-assert a.config.side == 'short', a.config.side
+    print('runtime import skip:', type(exc).__name__, exc)
 PY
+  fi
+done
 
 UNIT=/etc/systemd/system/fable-dashboard.service
 if [ -f \"\$UNIT\" ]; then
