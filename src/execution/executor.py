@@ -29,7 +29,12 @@ from src.execution.symbols import round_price, size_for_notional, to_okx_inst_id
 
 
 def signal_key(row: pd.Series) -> str:
-    return f"{row.get('source','okx')}|{row.get('symbol')}|{row.get('signal_time')}|{row.get('score')}"
+    """Idempotency key for one signal event.
+
+    Intentionally **excludes score**: re-scoring the same signal_time must not
+    open a second position (H17 / GPT review 2026-07-31).
+    """
+    return f"{row.get('source','okx')}|{row.get('symbol')}|{row.get('signal_time')}"
 
 
 _NOTIFY_EVENTS = {
@@ -125,9 +130,10 @@ def signal_size_mult(row: pd.Series) -> float:
 def signal_trade_side(row: pd.Series) -> str:
     """Normalized strategy direction; missing legacy metadata means long.
 
-    The current execution and barrier implementation is long-only. Explicit
-    ``short`` or unknown values must remain visible so ``open_one`` can reject
-    them instead of silently converting them into a buy.
+    The current execution implementation is long-only. Explicit ``short``
+    (mainline v10 ledger after P0 side fix) must remain visible so ``open_one``
+    rejects it — never silently convert a short model signal into a buy.
+    Short market execution needs a separate owner-approved path.
     """
     raw = row.get("side")
     if raw is None or pd.isna(raw):

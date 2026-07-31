@@ -94,10 +94,13 @@ def both_labels(enriched, i: int) -> dict | None:
     tp, sl = entry - TP_MULT * atr, entry + SL_MULT * atr
     up = int(np.argmax(lo <= tp)) if (lo <= tp).any() else len(cl)
     dn = int(np.argmax(hi >= sl)) if (hi >= sl).any() else len(cl)
+    # Same-bar both-touch → SL conservative (align label_short_candidate), not TIMEOUT.
     if up < dn:
         g_bar, why = 1 - tp / entry, "TP"
     elif dn < up:
         g_bar, why = 1 - sl / entry, "SL"
+    elif up == dn < len(cl):
+        g_bar, why = 1 - sl / entry, "SL_AMBIGUOUS"
     else:
         g_bar, why = 1 - cl[-1] / entry, "TIMEOUT"
     g_hold = 1 - cl[-1] / entry

@@ -82,6 +82,7 @@ class TestSidecarLoading:
             score_quantile=0.9,
             horizon_bars=72,
             objective="binary",
+            side="long",
         )
 
     def test_sidecar_without_tiers_loads_as_none(self, tmp_path: Path) -> None:

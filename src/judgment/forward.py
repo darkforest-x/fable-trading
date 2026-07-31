@@ -35,7 +35,7 @@ from src.judgment.forward_types import (
     ForwardScanInput,
     ForwardSummaryJson,
 )
-from src.judgment.frozen import DEFAULT_FROZEN_CONFIG, latest_artifact
+from src.judgment.frozen import load_runtime_artifact
 
 __all__ = (
     "FORWARD_LOG_H1_SCALED_PATH",
@@ -61,13 +61,17 @@ def run_forward_tracking(
     output_path: Path = FORWARD_LOG_PATH,
     start_time: pd.Timestamp = FORWARD_START,
 ) -> ForwardRunSummary:
-    """Mainline forward pulse. Scan mode from env FABLE_YOLO_MODE (default live)."""
+    """Mainline forward pulse. Scan mode from env FABLE_YOLO_MODE (default live).
+
+    Exit geometry is **side-aware** inside ``scan_forward_records`` (short v10 →
+    ``resolve_forward_exit_short``). Do not force long ``resolve_forward_exit`` here.
+    """
     from src.judgment.yolo_candidates import resolve_yolo_mode
 
     return _run_forward_tracking(
         output_path=output_path,
         start_time=start_time,
-        exit_resolver=resolve_forward_exit,
+        exit_resolver=None,
         yolo_mode=resolve_yolo_mode("live"),
     )
 
@@ -130,7 +134,7 @@ def run_forward_tracking_maker_trial(
     return _run_forward_tracking(
         output_path=output_path,
         start_time=start_time,
-        exit_resolver=resolve_forward_exit,
+        exit_resolver=None,  # mainline side-aware (same as run_forward_tracking)
         yolo_weights=yolo_weights,
     )
 
@@ -139,7 +143,7 @@ def _run_forward_tracking(
     *,
     output_path: Path,
     start_time: pd.Timestamp,
-    exit_resolver: ExitResolver,
+    exit_resolver: ExitResolver | None,
     yolo_weights: Path | None = None,
     yolo_mode: str = "live",
 ) -> ForwardRunSummary:
@@ -159,9 +163,12 @@ def _run_forward_tracking(
     candidate_source = validate_candidate_source(CANDIDATE_SOURCE, RUNTIME_MODE)
 
     normalized_start = normalize_start_time(start_time)
-    artifact = latest_artifact(DEFAULT_FROZEN_CONFIG)
+    # Prefer models/ACTIVE pointer (owner-visible); fall back to latest default_config.
+    artifact = load_runtime_artifact()
     if artifact is None:
-        raise FileNotFoundError("missing frozen artifact; run scripts/freeze_model.py first")
+        raise FileNotFoundError(
+            "missing frozen artifact; set models/ACTIVE or run scripts/freeze_model.py"
+        )
     existing = read_forward_log(output_path)
     # Load YOLO *before* LightGBM booster when YOLO is the candidate source —
     # reverse order has hung on Apple Silicon mid-scan (0% CPU sleep).

@@ -149,11 +149,15 @@ def evaluate(
     returns: np.ndarray,
     *,
     objective: str = "binary",
+    returns_are_net: bool = False,
 ) -> dict:
-    """Rank/threshold metrics. Primary economic gate = top-decile net (0.2% RT).
+    """Rank/threshold metrics. Primary economic gate = top-decile net.
 
     For regression, y_score is predicted realized_ret; AUC/PR are secondary
     rank diagnostics against the binary label, not the success criterion.
+
+    If ``returns_are_net`` (target already net of fees, e.g. net_barrier_taker),
+    do not subtract ROUND_TRIP_COST again.
     """
     out = {
         "n": int(len(y_true)),
@@ -169,16 +173,22 @@ def evaluate(
             "precision": round(float(precision_score(y_true, pred, zero_division=0)), 4),
             "recall": round(float(recall_score(y_true, pred, zero_division=0)), 4),
         }
-    # top-decile triple-barrier expected return net of round-trip cost
+    # top-decile economic metrics. When `returns` is already a net column
+    # (e.g. v10 target_column = net_barrier_taker), do **not** subtract cost
+    # again — that double-counted RT fees (H10 / GPT review 2026-07-31).
+    # Opt in via returns_are_net=True from train_model for regression nets.
+    cost = 0.0 if returns_are_net else float(ROUND_TRIP_COST)
     k = max(1, len(y_score) // 10)
     top_idx = np.argsort(y_score)[-k:]
     out["top_decile"] = {
         "n": int(k),
         "mean_realized_ret": round(float(returns[top_idx].mean()), 5),
-        "mean_net_ret": round(float(returns[top_idx].mean() - ROUND_TRIP_COST), 5),
+        "mean_net_ret": round(float(returns[top_idx].mean() - cost), 5),
         "win_rate": round(float(y_true[top_idx].mean()), 4),
+        "returns_are_net": bool(returns_are_net),
+        "cost_subtracted": cost,
     }
-    out["all_mean_net_ret"] = round(float(returns.mean() - ROUND_TRIP_COST), 5)
+    out["all_mean_net_ret"] = round(float(returns.mean() - cost), 5)
     if objective == "regression":
         rho = spearmanr(y_score, returns).statistic
         out["spearman_score_vs_ret"] = None if rho is None or np.isnan(rho) else round(float(rho), 4)
@@ -188,9 +198,10 @@ def evaluate(
         out["score_quantile"] = SCORE_QUANTILE
         out["above_q90"] = {
             "n": int(q_mask.sum()),
+            "pass_rate": round(float(q_mask.mean()), 4),
             "mean_realized_ret": round(float(returns[q_mask].mean()), 5) if q_mask.any() else None,
             "mean_net_ret": (
-                round(float(returns[q_mask].mean() - ROUND_TRIP_COST), 5) if q_mask.any() else None
+                round(float(returns[q_mask].mean() - cost), 5) if q_mask.any() else None
             ),
             "win_rate": round(float(y_true[q_mask].mean()), 4) if q_mask.any() else None,
         }
@@ -321,6 +332,13 @@ def main() -> int:
     scaler, base = train_baseline(train)
 
     val_score = model.predict(val[feature_columns], num_iteration=model.best_iteration)
+    # Auto-detect: realized_ret already equals net_barrier_taker → no second cost cut.
+    returns_are_net = False
+    if "net_barrier_taker" in val.columns and "realized_ret" in val.columns:
+        a = val["realized_ret"].to_numpy(dtype=float)
+        b = val["net_barrier_taker"].to_numpy(dtype=float)
+        m = np.isfinite(a) & np.isfinite(b)
+        returns_are_net = bool(m.any() and np.allclose(a[m], b[m], rtol=0, atol=1e-12))
     results = {
         "dataset": str(args.data),
         "side": side,
@@ -328,6 +346,7 @@ def main() -> int:
         "score_semantics": (
             "predicted_realized_ret" if args.objective == "regression" else "class_probability"
         ),
+        "returns_are_net": returns_are_net,
         "feature_columns": feature_columns,
         "n_features": len(feature_columns),
         "bar": args.bar,
@@ -348,6 +367,7 @@ def main() -> int:
             val_score,
             val["realized_ret"].to_numpy(),
             objective=args.objective,
+            returns_are_net=returns_are_net,
         ),
         "val_permutation_p": permutation_pvalue(val["label"].to_numpy(), val_score),
         "val_baseline_ma_spread_logreg": evaluate(
@@ -355,6 +375,7 @@ def main() -> int:
             baseline_prob(scaler, base, val),
             val["realized_ret"].to_numpy(),
             objective="binary",
+            returns_are_net=returns_are_net,
         ),
     }
 
@@ -372,6 +393,7 @@ def main() -> int:
             hold_score,
             holdout["realized_ret"].to_numpy(),
             objective=args.objective,
+            returns_are_net=returns_are_net,
         )
         results["holdout_permutation_p"] = permutation_pvalue(
             holdout["label"].to_numpy(), hold_score
@@ -381,6 +403,7 @@ def main() -> int:
             baseline_prob(scaler, base, holdout),
             holdout["realized_ret"].to_numpy(),
             objective="binary",
+            returns_are_net=returns_are_net,
         )
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

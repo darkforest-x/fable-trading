@@ -22,9 +22,15 @@ FORWARD_LOG_MAKER_TRIAL_PATH: Final = PROJECT_DIR / "data" / "forward_log_maker_
 # Pre-cutover rule-scan log archived as data/forward_log_rules_pre_yolo_20260715.csv
 # Owner 2026-07-18/19: clear pre-v11 mixed book and restart gate for clean retest.
 # Archived: data/forward_log_pre_v11_retest_20260719.csv (VPS + local).
+# Owner 2026-07-31: short-protocol reset (side-aware scan + ACTIVE authority).
+# Archived polluted long-geometry book:
+#   data/forward_log_pre_short_protocol_20260731.csv
+# Protocol tag for dashboards/docs (not a CSV column yet):
+#   protocol_version = short_v10_p0fix_20260731
 # Use last *closed* bar open (not wall-clock "now") so live YOLO is not skipped
 # while the current 15m candle is still forming.
-FORWARD_START: Final = pd.Timestamp("2026-07-18 16:15:00", tz="UTC")
+FORWARD_START: Final = pd.Timestamp("2026-07-31 00:00:00", tz="UTC")
+PROTOCOL_VERSION: Final = "short_v10_p0fix_20260731"
 # Candidate provenance is part of the runtime safety contract. Production may
 # only discover from the validated YOLO path; legacy rules remain available to
 # explicitly marked offline/research callers.

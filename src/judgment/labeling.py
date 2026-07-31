@@ -9,9 +9,10 @@ Long path (`label_candidate`):
 Short path (`label_short_candidate`):
   Same entry/horizon/ATR floor contract, barriers mirrored: TP is the lower
   barrier (price fall), SL is the upper barrier (rally against the short).
-  `realized_ret` is the short PnL (positive when price falls to TP).
-  Do not feed short candidates into `label_candidate` — that would score
-  long barrier wins and mix sides in the judgment table.
+  `realized_ret` is short conventional PnL ``1 - exit/entry`` (positive when
+  price falls to TP) — same as dump/v10 wide `net_barrier_*` builders and
+  `resolve_forward_exit_short`. Do not feed short candidates into
+  `label_candidate` — that would score long barrier wins and mix sides.
 
 Variants (trailing / MA exit / structure) have long and short twins; changing
 TP/SL/cost presets requires owner approval. Intra-bar both-touch → SL
@@ -232,13 +233,15 @@ def label_short_candidate(
     dn_first = int(np.argmax(hit_dn)) if hit_dn.any() else horizon
     up_first = int(np.argmax(hit_up)) if hit_up.any() else horizon
 
+    # Canonical short PnL (2026-07-31): 1 - exit/entry — matches dump/v10 wide
+    # net_barrier_* and resolve_forward_exit_short. (Was entry/exit - 1.)
     if dn_first < up_first:
-        return BarrierOutcome(1, "tp", dn_first + 1, fill, fill / lower - 1)
+        return BarrierOutcome(1, "tp", dn_first + 1, fill, 1.0 - lower / fill)
     if up_first < dn_first:
-        return BarrierOutcome(0, "sl", up_first + 1, fill, fill / upper - 1)
+        return BarrierOutcome(0, "sl", up_first + 1, fill, 1.0 - upper / fill)
     if dn_first == up_first < horizon:
-        return BarrierOutcome(0, "sl_ambiguous", up_first + 1, fill, fill / upper - 1)
-    return BarrierOutcome(0, "timeout", horizon, fill, fill / timeout_close - 1)
+        return BarrierOutcome(0, "sl_ambiguous", up_first + 1, fill, 1.0 - upper / fill)
+    return BarrierOutcome(0, "timeout", horizon, fill, 1.0 - timeout_close / fill)
 
 
 def label_candidate_scaled(

@@ -25,7 +25,8 @@ def test_short_label_hits_lower_target_first() -> None:
     assert outcome.label == 1
     assert outcome.outcome == "tp"
     assert outcome.exit_offset == 2
-    assert outcome.realized_ret == pytest.approx(100.0 / 95.0 - 1)
+    # Canonical short PnL: 1 - exit/entry (TP at 95)
+    assert outcome.realized_ret == pytest.approx(1.0 - 95.0 / 100.0)
 
 
 def test_short_label_stop_and_ambiguous_are_conservative() -> None:
@@ -48,11 +49,11 @@ def test_short_label_stop_and_ambiguous_are_conservative() -> None:
     assert stop is not None
     assert stop.label == 0
     assert stop.outcome == "sl"
-    assert stop.realized_ret == pytest.approx(100.0 / 102.0 - 1)
+    assert stop.realized_ret == pytest.approx(1.0 - 102.0 / 100.0)
     assert ambiguous is not None
     assert ambiguous.label == 0
     assert ambiguous.outcome == "sl_ambiguous"
-    assert ambiguous.realized_ret == pytest.approx(100.0 / 102.0 - 1)
+    assert ambiguous.realized_ret == pytest.approx(1.0 - 102.0 / 100.0)
 
 
 def test_short_mask_uses_down_order_and_down_extension_not_long_order() -> None:

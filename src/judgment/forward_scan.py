@@ -1,8 +1,14 @@
 """SWAP candidate scanning and partial barrier outcome resolution.
 
-Mainline (2026-07-15+): YOLO detector proposes candidates; LightGBM freeze
-scores them; exits stay fixed TP5/SL2 (`resolve_forward_exit`). H1 shadow
-reuses the same candidate/score path with scaled exits.
+Mainline (2026-07-31+ short_star v10): YOLO proposes candidates; LightGBM freeze
+scores them; exits are side-aware TP5/SL2.
+  - long  → resolve_forward_exit (upper TP / lower SL)
+  - short → resolve_forward_exit_short (lower TP / upper SL; PnL = 1 - exit/entry)
+H1 shadow reuses the same candidate/score path with scaled exits (long geometry).
+
+P0 fix 2026-07-31: never hardcode side=long when the frozen config is short;
+features use extract_feature_rows_for_side. Executor remains long-only and will
+skip_unsupported_side on short until short execution is owner-enabled.
 """
 from __future__ import annotations
 
@@ -19,7 +25,11 @@ import pandas as pd
 from src.data.loader import iter_series
 from src.data.universe import is_stockish
 from src.judgment.candidates import MIN_GAP_BARS, WARMUP_BARS, add_indicators, strict_mask
-from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature_rows
+from src.judgment.features import (
+    FEATURE_COLUMNS,
+    add_features,
+    extract_feature_rows_for_side,
+)
 from src.judgment.forward_records import forward_key, open_keys
 from src.judgment.forward_types import (
     BAR,
@@ -73,15 +83,18 @@ def scan_forward_records(
 ) -> ForwardScanResult:
     """Scan SWAP series for threshold signals and resolve exits.
 
-    `exit_resolver` defaults to mainline TP5/SL2. Pass
-    `resolve_forward_exit_scaled` for the H1 shadow paper book.
+    `exit_resolver` defaults to side-aware TP5/SL2 (long or short from artifact).
+    Pass `resolve_forward_exit_scaled` for the H1 shadow paper book (long geometry).
 
     `yolo_weights` / `yolo_mode` override the mainline detector for shadow
     books (e.g. v12 tip-only). Mainline callers leave defaults; unset
     `yolo_mode` resolves from env ``FABLE_YOLO_MODE`` (default live).
     """
     candidate_source = validate_candidate_source(CANDIDATE_SOURCE, RUNTIME_MODE)
-    resolve = exit_resolver or resolve_forward_exit
+    trade_side = _artifact_trade_side(scan.artifact)
+    resolve = exit_resolver or (
+        resolve_forward_exit_short if trade_side == "short" else resolve_forward_exit
+    )
     if yolo_mode is None:
         yolo_mode = resolve_yolo_mode("live")
     tip_conf = resolve_tip_conf()
@@ -185,7 +198,9 @@ def scan_forward_records(
         if not ordered_indices:
             continue
         featured = add_features(enriched)
-        feature_rows = extract_feature_rows(featured, ordered_indices)
+        feature_rows = extract_feature_rows_for_side(
+            featured, ordered_indices, trade_side
+        )
         scores = scan.booster.predict(
             feature_rows[FEATURE_COLUMNS], num_iteration=scan.artifact.best_iteration
         )
@@ -219,9 +234,12 @@ def scan_forward_records(
             else:
                 entry_time = str(pd.Timestamp(enriched["open_time"].iloc[entry_i]))
                 entry_price = float(enriched["open"].iloc[entry_i])
-                maker_filled = bool(
-                    float(enriched["low"].iloc[entry_i]) < float(enriched["open"].iloc[entry_i])
-                )
+                # Long: dipped below open → possible buy fill; short: spiked above open.
+                o = float(enriched["open"].iloc[entry_i])
+                if trade_side == "short":
+                    maker_filled = bool(float(enriched["high"].iloc[entry_i]) > o)
+                else:
+                    maker_filled = bool(float(enriched["low"].iloc[entry_i]) < o)
             # Tiered sizing (owner 2026-07-20): tier is stamped at detection
             # time from the artifact sidecar; artifacts without sizing_tiers
             # (shadow books, stubs) log the legacy 1x.
@@ -255,7 +273,7 @@ def scan_forward_records(
                     "dense_run_len": int(feature_row["dense_run_len"]),
                     "tier": tier,
                     "size_mult": size_mult,
-                    "side": "long",
+                    "side": trade_side,
                 }
             )
     print(
@@ -325,7 +343,22 @@ def _rule_candidate_indices(enriched: pd.DataFrame) -> list[int]:
     return sorted(selected)
 
 
+def _artifact_trade_side(artifact: object) -> str:
+    """Resolve long|short from frozen artifact config (default long for stubs)."""
+    cfg = getattr(artifact, "config", None)
+    side = getattr(cfg, "side", None) if cfg is not None else None
+    if side is None:
+        side = getattr(artifact, "side", None)
+    if side is None:
+        return "long"
+    side_s = str(side).strip().lower()
+    if side_s not in {"long", "short"}:
+        return "long"
+    return side_s
+
+
 def resolve_forward_exit(enriched: pd.DataFrame, signal_i: int) -> ForwardExit | None:
+    """Long TP5/SL2 partial-horizon resolver (upper=TP, lower=SL)."""
     entry_i = signal_i + 1
     atr = float(enriched["atr14"].iloc[signal_i])
     atr_pct = float(enriched["atr_pct"].iloc[signal_i])
@@ -368,6 +401,74 @@ def resolve_forward_exit(enriched: pd.DataFrame, signal_i: int) -> ForwardExit |
         realized_ret = float(enriched["close"].iloc[last_i]) / entry - 1
         return ForwardExit(
             "closed", "timeout", 0, HORIZON_BARS, _exit_time(entry_time, HORIZON_BARS), realized_ret
+        )
+    return ForwardExit("open", "", -1, 0, "", float("nan"))
+
+
+def resolve_forward_exit_short(enriched: pd.DataFrame, signal_i: int) -> ForwardExit | None:
+    """Short TP5/SL2 partial-horizon resolver.
+
+    Geometry mirrors label_short_candidate / dump short pools:
+      TP = entry - TP_MULT*ATR (price fall), SL = entry + SL_MULT*ATR (rally).
+    realized_ret uses short conventional PnL ``1 - exit/entry`` (matches
+    net_barrier_* builders on the v10 wide/short pools; positive when price falls).
+    Intra-bar both-touch → SL (conservative), same as long path.
+    """
+    entry_i = signal_i + 1
+    atr = float(enriched["atr14"].iloc[signal_i])
+    atr_pct = float(enriched["atr_pct"].iloc[signal_i])
+    if not np.isfinite(atr) or atr <= 0:
+        return None
+    if not np.isfinite(atr_pct) or atr_pct < ATR_PCT_MIN:
+        return None
+    if entry_i >= len(enriched):
+        return ForwardExit("open", "", -1, 0, "", float("nan"))
+    entry = float(enriched["open"].iloc[entry_i])
+    if not np.isfinite(entry) or entry <= 0:
+        return None
+    last_i = entry_i + HORIZON_BARS - 1
+    available_last_i = min(last_i, len(enriched) - 1)
+    highs = enriched["high"].to_numpy()[entry_i : available_last_i + 1]
+    lows = enriched["low"].to_numpy()[entry_i : available_last_i + 1]
+    # short: TP below, SL above
+    tp = entry - TP_MULT * atr
+    sl = entry + SL_MULT * atr
+    if tp <= 0:
+        return None
+    hit_tp = lows <= tp
+    hit_sl = highs >= sl
+    tp_first = int(np.argmax(hit_tp)) if hit_tp.any() else len(highs)
+    sl_first = int(np.argmax(hit_sl)) if hit_sl.any() else len(highs)
+    entry_time = pd.Timestamp(enriched["open_time"].iloc[entry_i])
+    if tp_first < sl_first:
+        exit_offset = tp_first + 1
+        return ForwardExit(
+            "closed", "tp", 1, exit_offset, _exit_time(entry_time, exit_offset), 1.0 - tp / entry
+        )
+    if sl_first < tp_first:
+        exit_offset = sl_first + 1
+        return ForwardExit(
+            "closed", "sl", 0, exit_offset, _exit_time(entry_time, exit_offset), 1.0 - sl / entry
+        )
+    if tp_first == sl_first < len(highs):
+        exit_offset = sl_first + 1
+        return ForwardExit(
+            "closed",
+            "sl_ambiguous",
+            0,
+            exit_offset,
+            _exit_time(entry_time, exit_offset),
+            1.0 - sl / entry,
+        )
+    if available_last_i >= last_i:
+        exit_px = float(enriched["close"].iloc[last_i])
+        return ForwardExit(
+            "closed",
+            "timeout",
+            0,
+            HORIZON_BARS,
+            _exit_time(entry_time, HORIZON_BARS),
+            1.0 - exit_px / entry,
         )
     return ForwardExit("open", "", -1, 0, "", float("nan"))
 

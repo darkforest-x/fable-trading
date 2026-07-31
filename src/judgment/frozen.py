@@ -58,7 +58,7 @@ class ScoreCacheMetadata(TypedDict, total=False):
 class FrozenConfig:
     __slots__ = (
         "name", "project_dir", "dataset_path", "models_dir",
-        "score_quantile", "horizon_bars", "objective",
+        "score_quantile", "horizon_bars", "objective", "side",
     )
 
     name: str
@@ -68,6 +68,9 @@ class FrozenConfig:
     score_quantile: float
     horizon_bars: int
     objective: str  # binary | regression
+    # Trade direction for forward exit geometry + feature alignment + ledger side.
+    # Mainline v10 short_star pool is short (2026-07-31); legacy long configs stay long.
+    side: str
 
 
 @dataclass(frozen=True)
@@ -154,6 +157,7 @@ def default_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
         score_quantile=DEFAULT_SCORE_QUANTILE,
         horizon_bars=DEFAULT_HORIZON_BARS,
         objective="regression",
+        side="short",
     )
 
 
@@ -170,6 +174,7 @@ def yolo_v11_pool_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
         score_quantile=DEFAULT_SCORE_QUANTILE,
         horizon_bars=DEFAULT_HORIZON_BARS,
         objective="regression",
+        side="long",  # historical long barrier ledger; do not mix with short v10
     )
 
 
@@ -183,6 +188,7 @@ def yolo_v12_pool_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
         score_quantile=DEFAULT_SCORE_QUANTILE,
         horizon_bars=DEFAULT_HORIZON_BARS,
         objective="regression",
+        side="short",
     )
 
 
@@ -196,6 +202,7 @@ def yolo_v8_pool_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
         score_quantile=DEFAULT_SCORE_QUANTILE,
         horizon_bars=DEFAULT_HORIZON_BARS,
         objective="regression",
+        side="long",
     )
 
 
@@ -209,6 +216,7 @@ def yolo_old_pool_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
         score_quantile=DEFAULT_SCORE_QUANTILE,
         horizon_bars=DEFAULT_HORIZON_BARS,
         objective="regression",
+        side="long",
     )
 
 
@@ -222,6 +230,7 @@ def binary_yolo_shadow_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
         score_quantile=DEFAULT_SCORE_QUANTILE,
         horizon_bars=DEFAULT_HORIZON_BARS,
         objective="binary",
+        side="long",
     )
 
 
@@ -235,6 +244,7 @@ def rules_legacy_config(project_dir: Path = PROJECT_DIR) -> FrozenConfig:
         score_quantile=DEFAULT_SCORE_QUANTILE,
         horizon_bars=DEFAULT_HORIZON_BARS,
         objective="binary",
+        side="long",
     )
 
 
@@ -254,6 +264,76 @@ def latest_artifact(config: FrozenConfig = DEFAULT_FROZEN_CONFIG) -> FrozenArtif
         except FrozenArtifactError as exc:
             print(f"frozen: skipping {path.name}: {exc}")
     return None
+
+
+def config_for_name(config_name: str, project_dir: Path = PROJECT_DIR) -> FrozenConfig:
+    """Map freeze meta ``config`` field / artifact stem to a FrozenConfig."""
+    name = str(config_name or "").strip()
+    table = {
+        DEFAULT_CONFIG_NAME: default_config,
+        V10_POOL_CONFIG_NAME: default_config,
+        V11_POOL_CONFIG_NAME: yolo_v11_pool_config,
+        V12_POOL_CONFIG_NAME: yolo_v12_pool_config,
+        V8_POOL_CONFIG_NAME: yolo_v8_pool_config,
+        OLD_POOL_CONFIG_NAME: yolo_old_pool_config,
+        BINARY_YOLO_CONFIG_NAME: binary_yolo_shadow_config,
+        LEGACY_RULES_CONFIG_NAME: rules_legacy_config,
+    }
+    factory = table.get(name)
+    if factory is None:
+        # Best-effort: treat unknown as default mainline (short v10).
+        print(f"frozen: unknown config name {name!r}; using default_config()")
+        return default_config(project_dir)
+    return factory(project_dir)
+
+
+def load_runtime_artifact(project_dir: Path = PROJECT_DIR) -> FrozenArtifact | None:
+    """Load the owner-facing ACTIVE freeze, else latest default_config artifact.
+
+    ``models/ACTIVE`` may contain a relative path to ``.txt`` or ``.json``
+    (e.g. ``models/frozen_…_20260731.txt``). Runtime **must** honor this pointer
+    so dashboard ACTIVE and forward pulse cannot diverge silently.
+    """
+    active_path = project_dir / "models" / "ACTIVE"
+    if active_path.is_file():
+        raw = active_path.read_text(encoding="utf-8").strip()
+        if raw:
+            rel = Path(raw)
+            candidate = rel if rel.is_absolute() else (project_dir / rel)
+            if candidate.suffix == ".txt":
+                meta_path = candidate.with_suffix(".json")
+            elif candidate.suffix == ".json":
+                meta_path = candidate
+            else:
+                stem = candidate.name
+                if stem.endswith(".txt") or stem.endswith(".json"):
+                    stem = Path(stem).stem
+                meta_path = project_dir / "models" / f"{stem}.json"
+            if meta_path.is_file():
+                try:
+                    meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                    cfg_name = str(meta.get("config") or DEFAULT_CONFIG_NAME)
+                    config = config_for_name(cfg_name, project_dir)
+                    art = load_artifact(config, meta_path)
+                    print(
+                        f"frozen: runtime ACTIVE → {meta_path.name} "
+                        f"(config={cfg_name} side={config.side})",
+                        flush=True,
+                    )
+                    return art
+                except (OSError, json.JSONDecodeError, FrozenArtifactError) as exc:
+                    print(f"frozen: ACTIVE pointer unusable ({exc}); falling back")
+            else:
+                print(f"frozen: ACTIVE points to missing {meta_path}; falling back")
+    # Fallback: newest valid default_config freeze
+    art = latest_artifact(default_config(project_dir))
+    if art is not None:
+        print(
+            f"frozen: runtime fallback latest default → {art.metadata_path.name} "
+            f"(side={art.config.side})",
+            flush=True,
+        )
+    return art
 
 
 def load_artifact(config: FrozenConfig, metadata_path: Path) -> FrozenArtifact:

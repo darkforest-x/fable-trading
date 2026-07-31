@@ -162,8 +162,8 @@ def _judgment_score(raw: "pd.DataFrame") -> tuple[float | None, float | None]:
     try:
         if "art" not in _JUDGMENT_CACHE:
             import lightgbm as lgb
-            from src.judgment.frozen import default_config, latest_artifact
-            art = latest_artifact(default_config())
+            from src.judgment.frozen import load_runtime_artifact
+            art = load_runtime_artifact()
             if art is None:
                 _JUDGMENT_CACHE["art"] = None
                 return None, None
