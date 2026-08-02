@@ -1,0 +1,160 @@
+{
+  "pool": "judgment_v10_wide.csv",
+  "n": 18379,
+  "top_q": 0.9,
+  "folds": [
+    {
+      "fold": 1,
+      "n_test": 6126,
+      "n_sel": 613,
+      "frac": 0.1001,
+      "n_unique": 6126,
+      "n_at_threshold": 0,
+      "top_bp": 57.32,
+      "pool_bp": 16.73
+    },
+    {
+      "fold": 2,
+      "n_test": 6126,
+      "n_sel": 613,
+      "frac": 0.1001,
+      "n_unique": 6126,
+      "n_at_threshold": 0,
+      "top_bp": 74.12,
+      "pool_bp": -24.58
+    },
+    {
+      "fold": 3,
+      "n_test": 6126,
+      "n_sel": 613,
+      "frac": 0.1001,
+      "n_unique": 6126,
+      "n_at_threshold": 0,
+      "top_bp": 119.27,
+      "pool_bp": 8.68
+    },
+    {
+      "fold": 4,
+      "n_test": 6126,
+      "n_sel": 613,
+      "frac": 0.1001,
+      "n_unique": 6126,
+      "n_at_threshold": 0,
+      "top_bp": 87.57,
+      "pool_bp": -4.45
+    },
+    {
+      "fold": 5,
+      "n_test": 6127,
+      "n_sel": 613,
+      "frac": 0.1,
+      "n_unique": 6127,
+      "n_at_threshold": 0,
+      "top_bp": 85.87,
+      "pool_bp": 1.04
+    },
+    {
+      "fold": 6,
+      "n_test": 6126,
+      "n_sel": 613,
+      "frac": 0.1001,
+      "n_unique": 6126,
+      "n_at_threshold": 0,
+      "top_bp": -22.66,
+      "pool_bp": -16.18
+    },
+    {
+      "fold": 7,
+      "n_test": 6126,
+      "n_sel": 613,
+      "frac": 0.1001,
+      "n_unique": 6126,
+      "n_at_threshold": 0,
+      "top_bp": 40.38,
+      "pool_bp": 17.09
+    },
+    {
+      "fold": 8,
+      "n_test": 6126,
+      "n_sel": 613,
+      "frac": 0.1001,
+      "n_unique": 6126,
+      "n_at_threshold": 0,
+      "top_bp": 19.86,
+      "pool_bp": 3.96
+    },
+    {
+      "fold": 9,
+      "n_test": 6127,
+      "n_sel": 613,
+      "frac": 0.1,
+      "n_unique": 6127,
+      "n_at_threshold": 0,
+      "top_bp": 32.01,
+      "pool_bp": 9.45
+    },
+    {
+      "fold": 10,
+      "n_test": 6126,
+      "n_sel": 613,
+      "frac": 0.1001,
+      "n_unique": 6126,
+      "n_at_threshold": 0,
+      "top_bp": -14.65,
+      "pool_bp": -24.23
+    },
+    {
+      "fold": 11,
+      "n_test": 6126,
+      "n_sel": 613,
+      "frac": 0.1001,
+      "n_unique": 6126,
+      "n_at_threshold": 0,
+      "top_bp": -33.32,
+      "pool_bp": -37.36
+    },
+    {
+      "fold": 12,
+      "n_test": 6127,
+      "n_sel": 613,
+      "frac": 0.1,
+      "n_unique": 6127,
+      "n_at_threshold": 0,
+      "top_bp": -15.9,
+      "pool_bp": -31.87
+    },
+    {
+      "fold": 13,
+      "n_test": 6126,
+      "n_sel": 613,
+      "frac": 0.1001,
+      "n_unique": 6126,
+      "n_at_threshold": 0,
+      "top_bp": -5.1,
+      "pool_bp": -4.09
+    },
+    {
+      "fold": 14,
+      "n_test": 6127,
+      "n_sel": 613,
+      "frac": 0.1,
+      "n_unique": 6127,
+      "n_at_threshold": 0,
+      "top_bp": 23.31,
+      "pool_bp": 1.4
+    },
+    {
+      "fold": 15,
+      "n_test": 6127,
+      "n_sel": 613,
+      "frac": 0.1,
+      "n_unique": 6127,
+      "n_at_threshold": 0,
+      "top_bp": 13.38,
+      "pool_bp": -11.73
+    }
+  ],
+  "frac_median": 0.1001,
+  "unique_frac_median": 1.0,
+  "verdict": "选中占比 中位 10.0%(区间 10.0~10.0%)。分值唯一率 中位 100.0%。**确实是十分位**,不存在 ties 把大半个池放进来的情况;该文档说的 91.2% 是生产固定门(分类器饱和输出)的问题,与本诊断的每折分位数选择不是同一机制。"
+}
