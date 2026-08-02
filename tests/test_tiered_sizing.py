@@ -259,8 +259,12 @@ class TestExecutorSizing:
 
     def _write_forward_log(self, path: Path, size_mult: float | None) -> None:
         now = pd.Timestamp.now(tz="UTC")
+        # side is stated rather than inherited: these cases are about tier
+        # multipliers on a LONG signal, and since 2026-08-03 a row with no side is
+        # refused instead of assumed long (executor P0-02). Leaving it out would
+        # make the sizing assertions depend on a default that no longer exists.
         row = {
-            "source": "okx", "symbol": "BTC_USDT_SWAP",
+            "source": "okx", "symbol": "BTC_USDT_SWAP", "side": "long",
             "signal_time": str(now - pd.Timedelta(minutes=5)),
             "detected_at": str(now), "status": "open", "score": 0.05,
             "threshold": Q90, "model_path": "m", "dataset_sha256": "s",

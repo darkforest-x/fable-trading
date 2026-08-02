@@ -119,6 +119,7 @@ class FrozenArtifact:
         "dataset_size_bytes",
         "best_iteration",
         "sizing_tiers",
+        "feature_semantics",
     )
 
     config: FrozenConfig
@@ -134,6 +135,11 @@ class FrozenArtifact:
     best_iteration: int
     # None when the sidecar predates tiered sizing → everything trades 1x.
     sizing_tiers: SizingTiers | None
+    # Which coordinate system the model was TRAINED in. Distinct from trade side:
+    # a short artifact can hold either, and serving the wrong one negates six
+    # directional features. Absent → legacy_unaligned, which is the truthful
+    # reading of every artifact frozen before the field existed.
+    feature_semantics: str
 
 
 class FrozenArtifactError(RuntimeError):
@@ -359,7 +365,35 @@ def load_artifact(config: FrozenConfig, metadata_path: Path) -> FrozenArtifact:
         dataset_size_bytes=int(metadata["dataset_size_bytes"]),
         best_iteration=int(metadata["best_iteration"]),
         sizing_tiers=sizing_tiers,
+        feature_semantics=_load_feature_semantics(metadata_path, metadata),
     )
+
+
+FEATURE_SEMANTICS = ("legacy_unaligned", "side_aligned_v1")
+
+
+def _load_feature_semantics(metadata_path: Path, metadata: Mapping) -> str:
+    """Which extractor produced this model's training features.
+
+    Defaulting to legacy_unaligned is not a guess. Every artifact frozen before
+    this field existed was trained on plain extract_feature_rows(), verified on
+    2026-08-03 by recomputing the v10 pool both ways: 14 of 14 rows matched the
+    plain extractor exactly and the aligned one on none. Defaulting the other way
+    would silently feed a short model six negated features.
+
+    An unknown value raises rather than falling back, because the whole point of
+    the field is that guessing here is what broke serving.
+    """
+    raw = metadata.get("feature_semantics")
+    if raw is None:
+        return "legacy_unaligned"
+    value = str(raw).strip()
+    if value not in FEATURE_SEMANTICS:
+        raise FrozenArtifactError(
+            metadata_path,
+            f"unknown feature_semantics {value!r}; expected one of {FEATURE_SEMANTICS}",
+        )
+    return value
 
 
 def _load_sizing_tiers(metadata_path: Path, metadata: Mapping) -> SizingTiers | None:

@@ -127,19 +127,29 @@ def signal_size_mult(row: pd.Series) -> float:
     return min(max(mult, 0.0), TIER_SIZE_MULT_CAP)
 
 
+MISSING_SIDE = "missing"
+
+
 def signal_trade_side(row: pd.Series) -> str:
-    """Normalized strategy direction; missing legacy metadata means long.
+    """Normalized strategy direction. A missing side is NOT long.
 
     The current execution implementation is long-only. Explicit ``short``
     (mainline v10 ledger after P0 side fix) must remain visible so ``open_one``
     rejects it — never silently convert a short model signal into a buy.
     Short market execution needs a separate owner-approved path.
+
+    P0 fix 2026-08-03: absent/blank/NaN side used to resolve to "long", which is
+    the one default that can turn an unlabelled row into a real buy. The mainline
+    is short, so the row most likely to arrive without a side is a short one. It
+    now resolves to ``missing`` and open_one refuses it, per the takeover plan's
+    P0-02. Legacy analysis that genuinely wants the old reading must ask for it
+    explicitly rather than inherit it from the production path.
     """
     raw = row.get("side")
     if raw is None or pd.isna(raw):
-        return "long"
+        return MISSING_SIDE
     side = str(raw).strip().lower()
-    return side or "long"
+    return side or MISSING_SIDE
 
 
 def barriers(entry: float, atr_pct: float) -> tuple[float, float]:

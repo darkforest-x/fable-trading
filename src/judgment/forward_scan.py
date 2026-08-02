@@ -6,9 +6,20 @@ scores them; exits are side-aware TP5/SL2.
   - short → resolve_forward_exit_short (lower TP / upper SL; PnL = 1 - exit/entry)
 H1 shadow reuses the same candidate/score path with scaled exits (long geometry).
 
-P0 fix 2026-07-31: never hardcode side=long when the frozen config is short;
-features use extract_feature_rows_for_side. Executor remains long-only and will
-skip_unsupported_side on short until short execution is owner-enabled.
+P0 fix 2026-07-31: never hardcode side=long when the frozen config is short.
+Executor remains long-only and will skip_unsupported_side on short until short
+execution is owner-enabled.
+
+P0 fix 2026-08-03: trade side and feature semantics are two different facts and
+were briefly collapsed into one. Side decides the barrier geometry -- that part
+was right. Which extractor to call is not a property of the trade; it is a
+property of the coordinate system the model was TRAINED in, and it must come from
+the artifact. Choosing the extractor by side served the short v10 model six
+negated features (align_short_feature_rows flips ext_up, close_vs_ema55,
+close_vs_ema200, order_score, slow_slope_12 and ret_*), while that model's own
+training pool holds unaligned values -- confirmed by recomputing 14 rows both
+ways, exact on plain, zero matches on aligned. See
+analysis/p0_baseline_audit_20260803.md.
 """
 from __future__ import annotations
 
@@ -28,6 +39,7 @@ from src.judgment.candidates import MIN_GAP_BARS, WARMUP_BARS, add_indicators, s
 from src.judgment.features import (
     FEATURE_COLUMNS,
     add_features,
+    extract_feature_rows,
     extract_feature_rows_for_side,
 )
 from src.judgment.forward_records import forward_key, open_keys
@@ -198,8 +210,8 @@ def scan_forward_records(
         if not ordered_indices:
             continue
         featured = add_features(enriched)
-        feature_rows = extract_feature_rows_for_side(
-            featured, ordered_indices, trade_side
+        feature_rows = _extract_rows_for_artifact(
+            featured, ordered_indices, scan.artifact, trade_side
         )
         scores = scan.booster.predict(
             feature_rows[FEATURE_COLUMNS], num_iteration=scan.artifact.best_iteration
@@ -341,6 +353,32 @@ def _rule_candidate_indices(enriched: pd.DataFrame) -> list[int]:
         if all(abs(signal_i - previous) >= MIN_GAP_BARS for previous in selected):
             selected.append(int(signal_i))
     return sorted(selected)
+
+
+def _artifact_feature_semantics(artifact: object) -> str:
+    """Which extractor this artifact was trained with. Never inferred from side.
+
+    Absent → legacy_unaligned, matching frozen.py's default and the measured
+    reality of every pre-2026-08-03 artifact.
+    """
+    value = getattr(artifact, "feature_semantics", None)
+    return "legacy_unaligned" if value is None else str(value)
+
+
+def _extract_rows_for_artifact(
+    featured: pd.DataFrame,
+    signal_indices: list[int],
+    artifact: object,
+    trade_side: str,
+) -> pd.DataFrame:
+    """Feature rows in the coordinate system the model was trained in.
+
+    trade_side is accepted but deliberately does NOT select the extractor -- it is
+    passed only so a side_aligned_v1 artifact knows which direction to align to.
+    """
+    if _artifact_feature_semantics(artifact) == "side_aligned_v1":
+        return extract_feature_rows_for_side(featured, signal_indices, trade_side)
+    return extract_feature_rows(featured, signal_indices)
 
 
 def _artifact_trade_side(artifact: object) -> str:
