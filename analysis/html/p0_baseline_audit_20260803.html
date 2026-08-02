@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P0.0 基线审计 —— 仓库现状 vs Grok Build 接管计划</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P0.0 基线审计 —— 仓库现状 vs Grok Build 接管计划</h1>
+<p><strong>日期</strong>:2026-08-03</p>
+<p><strong>依据</strong>:Notion《Fable Trading｜Grok Build 接管计划(2026-07-31)》00/02/04/05 页</p>
+<p><strong>动作性质</strong>:只读审计。未碰 holdout、未改 ACTIVE、未 promote、未 deploy、未下单、未清 forward_log。</p>
+<p>计划书 00 页要求接管方&quot;先给可核验的基线事实,不许只回已了解&quot;。本文是那份基线,</p>
+<p>并逐条核对计划书列出的 P0-01…P0-08 风险在<strong>全量仓库</strong>里是否仍然成立 ——</p>
+<p>计划书写在 07-31 的 lite 快照上,自己也声明不得假设快照等于线上。**结论是快照确实已过时,</p>
+<p>而过时的方向不是&quot;问题变少了&quot;。**</p>
+<hr>
+<h2>一、最重要的发现:live 路径上存在 train/serve 特征错配</h2>
+<p><strong>计划书 P0-03 明文禁止的那件事,已经发生了。</strong> 原文:</p>
+<blockquote>不能只修改 forward 为 short-aligned 后继续加载旧 v10 模型,否则会制造新的 train/serve 分布错配。</blockquote>
+<p>端到端实测,四步都可复现:</p>
+<pre><code>
+1. load_runtime_artifact()
+   → frozen_tp5_sl2_swap_yolo_v10_reg_20260731.json   (side=short)
+2. _artifact_trade_side(artifact) → &quot;short&quot;
+3. forward_scan.py:201 → extract_feature_rows_for_side(..., &quot;short&quot;)
+   → align_short_feature_rows() 重写 10 列,其中 6 列取负
+4. 该模型的训练集 data/judgment_yolo_swap_v10.csv 的特征
+   = 未对齐的 extract_feature_rows()
+</code></pre>
+<p>第 4 步不是推断,是逐值比对。取 14 行,两种提取各算一遍,与池中存值比:</p>
+<pre><code>
+                     池中存值      plain 提取     short 对齐
+ext_up             -0.027392     -0.027392      +0.016265
+close_vs_ema55     -0.026739     -0.026739      +0.027473
+close_vs_ema200    -0.059420     -0.059420      +0.063174
+order_score        +1.000000     +1.000000      +3.000000
+slow_slope_12      -0.004687     -0.004687      +0.004687
+ret_24             -0.031411     -0.031411      +0.031411
+
+14 行 → 更像 plain 的 14 行,更像 short 对齐的 0 行(且为逐位精确相等)
+</code></pre>
+<p><strong>模型学的是 <code>slow_slope_12 = -0.0047</code> 这类输入,现在被喂进 <code>+0.0047</code>。</strong></p>
+<p>六个方向性特征的符号全反,<code>order_score</code> 走的是另一套取值。这不是分布漂移,是坐标系倒置。</p>
+<p><strong>病因是好意</strong>:commit <code>32e556b</code>(fix: short protocol P0 — side-aware forward)</p>
+<p>按计划书 P0-01 把 forward 从硬编码 <code>side=&quot;long&quot;</code> 改成了 side-aware,这一步本身正确;</p>
+<p>但 <code>models/ACTIVE</code> 仍指着用 legacy 语义训练的 v10。计划书早就写明这两步必须同时做,</p>
+<p>或者干脆把旧模型标成 execution-ineligible —— <strong>修了推理端而没动模型端,正是它警告的那半步。</strong></p>
+<h3>为什么这没有变成真金损失</h3>
+<p><code>src/execution/executor.py:235</code> 对非 long 一律拒单:</p>
+<pre><code>
+if trade_side != &quot;long&quot;:
+    ... &quot;current executor is long-only; refused signal side=...&quot;
+</code></pre>
+<p>所以 short 信号到不了下单。<strong>计划书验收矩阵 A-02/A-07(short 不得产生 buy)在当前代码上成立。</strong></p>
+<p>受污染的是 paper / forward 记账的分数,不是仓位。</p>
+<hr>
+<h2>二、六项基线事实(计划书 00 页第 4 节要求的格式)</h2>
+<p><strong>1. 分支与工作树</strong></p>
+<pre><code>
+分支 main   工作树 0 项改动   与远程 落后 0 · 领先 0
+其他分支 0 个   worktree 0 个
+</code></pre>
+<p>满足验收矩阵 I-07(全部提交在 main,无新 branch/worktree)。</p>
+<p><strong>2. models/ACTIVE 与 artifact 哈希</strong></p>
+<pre><code>
+ACTIVE = models/frozen_tp5_sl2_swap_yolo_v10_reg_20260731.txt
+  .txt   sha256 4ab5ab98af492e4b…
+  .json  sha256 31170d758678d1ab…
+  created_at 2026-07-30T16:27:35Z   28 特征
+  threshold_val_q90 = -0.0004397139085409754
+  holdout_policy: excluded from training and threshold selection; not evaluated
+
+检测器 models/owner_short_star_v10.pt  sha256 86d969c830189b2d…
+  注:models/owner_best.pt 的 sha256 与之完全相同 —— 同一份权重两个名字
+</code></pre>
+<p><strong>dataset_sha256 与实际文件一致</strong> (<code>9bca6802…</code>),artifact 身份没有漂移。</p>
+<p><strong>3. 关键数据文件</strong></p>
+<pre><code>
+data/judgment_v10_wide.csv        22M   18,379 行   有
+data/judgment_yolo_swap_v10.csv   12M   18,379 行   有
+data/kronos_feats_v10.csv        2.8M   18,255 行   有
+data/forward_log.csv             4.0K        0 行   ← 只有表头
+</code></pre>
+<p><strong>forward_log 是空的。</strong> 计划书 D-06 说&quot;P0 不清 forward log,旧记录保留并标记 legacy&quot;,</p>
+<p>但这里已经没有旧记录可标 —— 仅存的 35 行在 <code>vps_rescue/</code>(VPS 退租时抢救下来的)。</p>
+<p><strong>这与计划书的前提不符,需要 Owner 知道。</strong></p>
+<p><strong>4. VPS 证据</strong></p>
+<p>VPS 已到期不再续费,服务证据只能从仓库判断,取不到 live service/ledger。</p>
+<p>计划书&quot;技术停止条件&quot;第 5 条(forward/executor service 实际代码不在快照中)在这里</p>
+<p>表现为服务本身已不存在。</p>
+<p><strong>5. 计划书引用的 <code>docs/grok_build/</code> 在仓库里不存在</strong></p>
+<p>00 页要求先读 <code>docs/grok_build/00_MASTER_PROJECT_PLAN.md</code> 等 5 个文件,<strong>仓库里没有这个目录</strong>。</p>
+<p>这些内容目前只存在于 Notion。若要按计划执行,需先把它们落盘。</p>
+<p><strong>6. 测试基线</strong></p>
+<pre><code>
+排除 tests/test_eth3m_v2_classification.py:  328 passed, 2 skipped, 9.2s
+包含它:                                       无限挂起,整套卡在 21%
+</code></pre>
+<p>挂起的是 <code>test_full_frame_transform_is_deterministic_and_uncropped</code>,由 <code>f8c7178</code> 引入。</p>
+<p><strong>一个挂起的测试会让&quot;跑全套&quot;变成不可执行的验收动作</strong>,应在 P0 前修掉。</p>
+<hr>
+<h2>三、P0-01…P0-08 逐条现状</h2>
+<table><thead><tr>
+<th>计划书条目</th>
+<th>lite 快照说</th>
+<th>全量仓库实测</th>
+</tr></thead><tbody>
+<tr><td><strong>P0-01</strong> short artifact 写成 long</td><td>存在</td><td><strong>已修</strong>(<code>32e556b</code>);side/barrier/feature 都跟 artifact 走</td></tr>
+<tr><td><strong>P0-02</strong> 缺失 side 默认 long</td><td>存在</td><td><strong>仍在</strong>:<code>executor.py:142</code> <code>return side or &quot;long&quot;</code></td></tr>
+<tr><td><strong>P0-03</strong> feature semantics 分叉</td><td>风险</td><td><strong>已实际发生</strong>,见第一节</td></tr>
+<tr><td><strong>P0-04</strong> barrier/return 分叉</td><td>存在</td><td>未验(labeling.py 默认 TP4 vs forward TP5 未逐一核对)</td></tr>
+<tr><td><strong>P0-05</strong> signal/decision/fill 混一体</td><td>存在</td><td>未验</td></tr>
+<tr><td><strong>P0-06</strong> artifact 非单一权威</td><td>存在</td><td><strong>仍在</strong>:<code>frozen.py:258</code> 仍 glob+sorted,332 行仍有 &quot;runtime fallback latest default&quot;</td></tr>
+<tr><td><strong>P0-07</strong> tip age 缺全局断言</td><td>存在</td><td>未验</td></tr>
+<tr><td><strong>P0-08</strong> signal_key 含 score</td><td>存在</td><td><strong>已修</strong>:<code>executor.py:31</code> docstring 明写 &quot;Intentionally excludes score&quot;</td></tr>
+</tbody></table>
+<p><strong>三条已修、两条仍在、一条已恶化成实际故障、三条未验。</strong></p>
+<p>另注:<code>_artifact_trade_side()</code> 在拿不到 side 时 <code>return &quot;long&quot;</code> —— 与 P0-02 同一类 fail-open,</p>
+<p>计划书没单列,但属于同一条&quot;缺失即默认 long&quot;的病。</p>
+<hr>
+<h2>四、与我 07-30 结论的交叉核对</h2>
+<p>计划书 00 页称&quot;当前 q90 阈值并不等于运行时 top-decile;固定门在 val 放行约 91.2%&quot;。</p>
+<p>这条若同样适用于我 07-30 报的顶档提升,那些数就得重新解释。<strong>实测否定了这种波及</strong>:</p>
+<pre><code>
+15 折,每折选中 613/6126 = 10.0%,分值唯一率 100%,边界并列 0 个
+</code></pre>
+<p>生产是<strong>固定阈值 + 可能饱和的分类器输出</strong>,我的诊断是<strong>每折分位数 + 连续回归输出</strong>,</p>
+<p>不是同一机制。计划书那条对 live 路径依然成立且严重,只是够不到研究侧的数字。</p>
+<p>脚本:<code>scripts/diag_topdecile_is_really_a_decile.py</code>,commit <code>5d5c120</code>。</p>
+<hr>
+<h2>五、复现命令</h2>
+<pre><code>
+# 特征语义比对(第一节的 14 行逐值比对)
+PYTHONPATH=. .venv/bin/python -c &quot;
+from src.judgment.frozen import load_runtime_artifact
+from src.judgment.forward_scan import _artifact_trade_side
+a = load_runtime_artifact(); print(a.metadata_path.name, _artifact_trade_side(a))&quot;
+
+# 顶档是不是真十分位
+PYTHONPATH=. .venv/bin/python scripts/diag_topdecile_is_really_a_decile.py
+
+# 测试基线
+.venv/bin/python -m pytest tests/ -q --deselect tests/test_eth3m_v2_classification.py
+</code></pre>
+<hr>
+<h2>六、风险与诚实声明</h2>
+<ul>
+<li>本文只做只读审计,<strong>未修任何代码</strong>。第一节的错配尚未修复,现在仍在。</li>
+<li><strong>未消耗 holdout</strong>(计数仍为 9),未改 ACTIVE,未 promote,未 deploy,未下单,未动 forward_log。</li>
+<li>P0-04/05/07 标为&quot;未验&quot;就是没验,不是验过没问题。</li>
+<li>特征比对取 14 行、覆盖少数币种。逐位精确相等的证据很强,但不等于全池 18,379 行都已核对。</li>
+<li>我不是计划书的作者,对其中经济假设(return convention、成本路由)不做评价,那些是 Owner 门。</li>
+</ul>
+<hr>
+<h2>七、需要 Owner 决策的事项</h2>
+<p>1. <strong>第一节的错配怎么修</strong>:两条路 —— (a) 把 ACTIVE 标成 execution-ineligible / 回退到</p>
+<p>   legacy 语义提取,(b) 按计划书 P1/P2 用 side-aligned 特征重建数据并重训。</p>
+<p>   <strong>(a) 是止血,(b) 是计划书的正路。P0 阶段不许重训,所以现在只能选 (a)。</strong></p>
+<p>2. <strong>forward_log 已空</strong>,与计划书&quot;保留旧记录标 legacy&quot;的前提不符;<code>vps_rescue/</code> 的 35 行是否并回。</p>
+<p>3. <strong>是否把 Notion 的 7 页落盘成 <code>docs/grok_build/</code></strong>,让计划书的必读顺序在仓库里成立。</p>
+<p>4. 挂起的测试是否在 P0 之前修(它让&quot;全套测试通过&quot;这个验收项当前无法执行)。</p>
+</body>
+</html>
