@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>一周执行计划（2026-08-03 → 08-09）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>一周执行计划（2026-08-03 → 08-09）</h1>
+<blockquote>基线：<code>analysis/p0_baseline_audit_20260803.md</code>（今晨只读审计）+ 本文第 1 节的现场复核。 <strong>本文所有数字是今天在本机跑出来的，不是引用历史报告。</strong> 每条都附复现命令。 未消耗 holdout（计数仍为 <strong>9</strong>），未改 ACTIVE，未 promote，未下单，未动 forward_log。</blockquote>
+<hr>
+<h2>0. 一句话</h2>
+<p><strong>本周不做新研究。</strong> 三天研究给出的唯一稳定正结果（判断层挑顶十分位）<strong>从来没有真正接到 live</strong>——</p>
+<p>接到 live 的那个模型是一棵<strong>只有 1 棵树</strong>的退化模型，84% 的候选拿到同一个分数，</p>
+<p>它的&quot;q90 门&quot;实际放行 <strong>91%</strong>。与此同时，唯一能产生新鲜裁决的机器<strong>一行代码都没在跑</strong>。</p>
+<p>本周的任务是把这两件事接回去，让&quot;前向 100 笔新鲜裁决&quot;——项目自己定的唯一确认级标准——</p>
+<p>重新变成一件<strong>物理上可能发生的事</strong>。它现在不是。</p>
+<hr>
+<h2>1. 现场复核（今天跑的）</h2>
+<h3>1.1 最重要的一条：接到 live 的 L2 无法表达&quot;顶十分位&quot;</h3>
+<pre><code>
+$ PYTHONPATH=. python3 scripts/diag_active_artifact_resolution.py
+
+artifact          frozen_tp5_sl2_swap_yolo_v10_reg_20260731.json
+  best_iteration  1
+  trees in file   1                      ← 一棵树
+  features        28
+  pool            data/judgment_yolo_swap_v10.csv  n=18379
+
+distinct scores   15 for 18379 candidates
+  modal score     -0.00043971  covering 15427 rows (83.9%)     ← 84% 候选同分
+  threshold       -0.00043971   &lt;-- equals the modal score     ← 门正好落在并列块上
+
+gate pass rate    pool 89.0%   val 91.1%
+  a decile gate would pass 10.0%
+
+verdict: this artifact CANNOT express a top decile on its own pool.
+</code></pre>
+<p><strong>这不是&quot;阈值调松了&quot;，是模型没有分辨率。</strong> <code>best_iteration = 1</code>：LightGBM 在近噪声目标上</p>
+<p>早停，而近噪声目标的 val RMSE 恰恰由&quot;常数预测器&quot;最小化——所以第 1 轮被选成 best，</p>
+<p>存进文件的就是一棵树、15 个可能取值。q90 阈值是 val 分数的 90 分位，</p>
+<p>当 84% 的行共享同一个分数时，这个分位数就落在那个并列块上，<code>score &gt;= threshold</code> 于是放行整块。</p>
+<p><strong>这和 ETH 3m 分类器的死法是同一种</strong>（<code>(top1+top5)/2</code> 选 best、epoch 1 被存成 best，</p>
+<p>见 HANDOFF 07-30 节）。同一个病在两个不同的框架上各犯了一次：<strong>选择指标不是业务指标。</strong></p>
+<p><strong>接到 live 的东西，和报告里 +19.4bp 的东西，不是同一个模型：</strong></p>
+<table><thead><tr>
+<th></th>
+<th>研究模型（<code>p_judgment_maker_cost_on_regtop.md</code>）</th>
+<th><code>models/ACTIVE</code> 的 frozen artifact</th>
+</tr></thead><tbody>
+<tr><td>树</td><td>400 轮</td><td><strong>1 棵</strong></td></tr>
+<tr><td>特征</td><td><strong>47</strong>（28 基础 + 19 alpha）</td><td><strong>28</strong>（0 个 alpha）</td></tr>
+<tr><td>选顶档</td><td>每折分位数，分值 100% 唯一</td><td>固定阈值，落在 84% 并列块里</td></tr>
+<tr><td>验证</td><td>CPCV 15 折，15/15 正</td><td>单点冻结</td></tr>
+</tbody></table>
+<p>07-31 owner 批准的是&quot;L2 切到 v10 池回归&quot;（<code>642e37b</code>）。<strong>批准的意图没有被这个 artifact 实现。</strong></p>
+<h3>1.2 生产什么都没在跑</h3>
+<pre><code>
+$ ssh root@206.237.14.112 …
+
+代码 /opt/fable-trading        有（rsync 过，非 git checkout）
+models/ACTIVE                  有，指向 v10 reg
+python3                        3.11.2
+pandas / lightgbm              ModuleNotFoundError      ← 没装
+systemd service (fable*)       0 个
+systemd timer / cron           0 个
+data/kline_fetched             0 个文件                  ← 没有 K 线
+data/forward_log.csv           0 行（仅表头）
+硬件                            4 核 / 5G 内存 / 34G 可用
+</code></pre>
+<p>老看板 VPS（<code>103.214.174.58:8642</code>）已到期不再续费。新节点有代码有权重，<strong>但没有运行时</strong>。</p>
+<p><strong>前向时钟 0/100，且结构上不可能走。</strong></p>
+<h3>1.3 修复前后的样本无法区分</h3>
+<p><code>PROTOCOL_VERSION</code> 仍是 <code>short_v10_p0fix_20260731</code>，而今天 00:20 的特征语义修复（<code>61b4dc3</code>）</p>
+<p>改变了 live 打分的坐标系却没有新版本号；且 <code>forward_types.py:28</code> 自己写着</p>
+<p>&quot;not a CSV column yet&quot;——<strong>协议版本不是 forward_log 的列</strong>。</p>
+<p>下一次协议再变，两批样本会在同一个文件里混在一起，事后分不开。</p>
+<h3>1.4 &quot;全套测试通过&quot;当前不可执行</h3>
+<p><code>tests/test_eth3m_v2_classification.py::test_full_frame_transform_is_deterministic_and_uncropped</code></p>
+<p>无限挂起（<code>f8c7178</code> 引入）。排除它 342 passed / 2 skipped。</p>
+<p><strong>一个挂起的测试让&quot;跑全套&quot;这个验收动作没法做</strong>——而它正是 P0 验收矩阵的一项。</p>
+<h3>1.5 顺手证伪一条：P0-04（收益口径分叉）在这两个池之间不成立</h3>
+<pre><code>
+data/judgment_yolo_swap_v10.csv 的 realized_ret
+vs data/judgment_v10_wide.csv 的 net_barrier_taker
+  匹配 18,379 行 / 逐位精确相等 18,379 行 / corr = 1.0
+  两边均值都是 -6.41bp
+</code></pre>
+<p>收益口径没有分叉。<strong>P0-05 / P0-07 仍未验，P0-06（frozen.py:260 glob+sorted 回退）仍在。</strong></p>
+<hr>
+<h2>2. 本周排序</h2>
+<blockquote>排序原则：<strong>先让验收动作可执行，再让被验收的东西正确，最后才让它跑起来。</strong> 反过来做（先开机器）会用 100 笔新鲜样本去测一个 84% 放行率的门——把唯一的确认额度烧掉。</blockquote>
+<h3>D1 周一 · 让验收动作可执行（半天，纯代码，无决策）</h3>
+<p>1. 修挂起测试，恢复&quot;全套测试通过&quot;这个动作。</p>
+<p>2. <code>protocol_version</code> 落成 forward_log 的<strong>列</strong>，值随语义修复更新（建议 <code>short_v10_semfix_20260803</code>）；</p>
+<p>   同时把 artifact sha256 逐行写入——协议变更后事后必须能分开两批样本。</p>
+<p>3. 关掉 P0-06 的回退：<code>frozen.py:260</code> 的 <code>glob+sorted</code> 与 335 行的 <code>runtime fallback latest default</code></p>
+<p>   改成<strong>没有 ACTIVE 就报错</strong>。（今天的教训就是&quot;猜&quot;造成的。）</p>
+<p>4. 交付：<code>analysis/p0_1_protocol_hardening_20260803.md</code> + HTML。</p>
+<h3>D1 下午 · Owner 的 20 分钟（只有你能做，且挡着后面所有事）</h3>
+<p><code>datasets/label_live_tip_1000/</code> —— 1000 张右缘=盘口、无后文的图，<strong>1000/1000 标签仍为空</strong>。</p>
+<ul>
+<li><strong>标不出来</strong> → 检测线在追一个不存在的目标，本周之后应停，力气全放判断层</li>
+<li><strong>标得出来且与旧标注一致</strong> → 修检测器有意义</li>
+<li><strong>标得出来但位置对不上</strong> → 先解决标注一致性</li>
+</ul>
+<p>这个答案会决定 8 月剩下三周的形状。<strong>它已经挂了 4 天。</strong></p>
+<h3>D2 周二–周三 · 把研究模型真正冻结进 ACTIVE（本周核心）</h3>
+<p>先解一个叉，再动手：</p>
+<pre><code>
+用即将冻结的那套特征 + 目标，跑 CPCV 15 折，看 +15.4bp(taker) / +19.4bp(maker) 是否复现
+  ├─ 28 基础特征就能复现 → 400 轮重训 + 重冻结，无需新服务端代码
+  └─ 必须要那 19 个 alpha → live 特征提取器必须新增 alpha 库
+      （attach_alphas 是逐币因果回看的，可服务；但要进 15min 脉冲预算）
+</code></pre>
+<p><strong>必须的护栏</strong>（这轮就是被它们缺席坑的）：</p>
+<ul>
+<li>冻结前打印分值唯一率与门放行率，<strong>放行率 ≠ 10% ± 2% 就不许冻结</strong></li>
+<li><code>best_iteration = 1</code> 直接判定为失败产物，不许进 ACTIVE</li>
+<li>早停指标换成业务指标（顶档净收益），不用 RMSE</li>
+<li>全程只用 pre-holdout（v10 池到 2026-05-03 为止，天然安全）；<strong>holdout 计数保持 9</strong></li>
+</ul>
+<p><strong>切 ACTIVE 需要 owner 点头（铁律 10）。</strong> 我做到&quot;候选 artifact + 证据表&quot;为止。</p>
+<h3>D4 周四 · VPS 变成真的运行主机</h3>
+<p>venv + 依赖（含 CPU torch/ultralytics）→ K 线 bootstrap → 脉冲 timer → 看板。</p>
+<p><code>ENABLE_JOB_EXECUTOR=0</code>，<strong>ledger-only，不下单</strong>。</p>
+<p>验收：一次完整脉冲 &lt;15min（铁律 8），三门同值 30min（铁律 7），detector/artifact 哈希与本机一致。</p>
+<p><strong>4 核 / 5G 跑 232 币的 YOLO 推理是本周最大的未知数。</strong> 若超 15min，</p>
+<p>按 HANDOFF 的性能杠杆减币种数（这是配置，不是纪律），而不是加脉冲间隔。</p>
+<h3>D5 周五 · 时钟开走 + maker 路线里不需要真金的那一半</h3>
+<ul>
+<li>新协议版本下开始积累前向样本；24h 健康核对（脉冲耗时 / tip 新鲜度 / 检出密度 / 分值分布不再并列）</li>
+<li>maker 路线的可测部分：用真实后续 bar 做<strong>挂单被动成交模拟</strong>，测&quot;限价入场成交率是否 ≥70%&quot;——</li>
+</ul>
+<p>  这是 A2 计划里唯一不需要真金就能回答的问题，而它决定 +19.4bp 是否会被未成交吃掉</p>
+<hr>
+<h2>3. 明确不做</h2>
+<ul>
+<li>❌ <strong>不消耗 holdout #10</strong> —— 功效算过，n=1739 只能分辨 ≥39.4bp，要证的是 4~18bp</li>
+<li>❌ <strong>不调出场规则</strong> —— 九种试过，v10 上没有一种覆盖 10bp 成本</li>
+<li>❌ <strong>不真金下单</strong>（含 maker 试错桶）—— 铁律 11，owner 亲手</li>
+<li>❌ <strong>不 promote 检测器</strong> —— 铁律 12，唯一门是真 tip 金标 + tip-smoke</li>
+<li>❌ <strong>不改新鲜度三门 / 不清 forward_log / 不开新分支</strong></li>
+<li>❌ <strong>不为了让门通过而改阈值</strong> —— 这轮的病是模型没分辨率，改阈值只会把病藏起来</li>
+</ul>
+<hr>
+<h2>4. 需要 Owner 决策</h2>
+<p>1. <strong>ACTIVE 怎么处理（最急）</strong>：现在指着一棵树。三选一——</p>
+<p>   (a) 立即标成 execution-ineligible，等 D2 的候选 artifact；</p>
+<p>   (b) 保持现状但<strong>不准开时钟</strong>（等于本周不产生任何新鲜样本）；</p>
+<p>   (c) 等 D2 结果一起决定。</p>
+<p>   <strong>我建议 (a)</strong>：它现在就在 live 路径上，而它做不到它被批准时要它做的事。</p>
+<p>2. <strong>D2 若发现必须要 19 个 alpha 特征</strong>：live 提取器加 alpha 库要占脉冲预算，是否批准？</p>
+<p>3. <strong><code>vps_rescue/</code> 里的 35 行旧 forward 记录</strong>是否并回并标 legacy（P0 计划书假设有旧记录可标，实际已空）。</p>
+<p>4. <strong>是否把 Notion 的 Grok Build 接管计划 7 页落盘成 <code>docs/grok_build/</code></strong>——</p>
+<p>   现在计划书的&quot;必读顺序&quot;在仓库里不成立。</p>
+<p>5. <strong>VPS 预算</strong>：4 核 5G 是否够，还是本周要换机器（D4 的结果会给答案）。</p>
+<hr>
+<h2>5. 风险与诚实声明</h2>
+<ul>
+<li><strong>我没有复现出研究报告的正结果。</strong> 用冻结 artifact 的 28 特征 + 单次时间切分，</li>
+</ul>
+<p>  val 顶档是 <strong>-35.0bp</strong>，池均值 -12.9bp（研究报告是 CPCV 15 折中位 +15.4bp taker）。</p>
+<p>  <strong>这不构成证伪</strong>——特征集不同（28 vs 47）、折协议不同（单切分 vs CPCV 15 折）。</p>
+<p>  但它意味着：<strong>接到 live 的那套配置，从来没有被证明是产出正结果的那套配置。</strong></p>
+<p>  D2 的第一件事就是解这个叉；如果解不开，本周的结论会比现在难看得多。</p>
+<ul>
+<li>1.1 的诊断只读 artifact 自己的池（全部 pre-holdout），未训练、未写入、未碰 holdout。</li>
+<li>P0-05 / P0-07 标&quot;未验&quot;就是没验。P0-06 已定位未修（D1）。</li>
+<li>VPS 复核是只读 ssh（hostname / systemctl list / ls / ps），未部署、未启服务、未改配置。</li>
+<li>本计划假设 v10 检测器继续当候选源，而它的因果贡献是 <strong>-6.02bp</strong>（比随机做空还差）。</li>
+</ul>
+<p>  <strong>整条链为正只靠 L2 挑顶档</strong>——这正是 1.1 说它现在做不到的那件事。</p>
+<p>  换句话说：<strong>如果 D2 解不开那个叉，本周之后需要重新讨论的不是参数，是这条链还成不成立。</strong></p>
+<hr>
+<h2>6. 复现命令</h2>
+<pre><code>
+# 1.1 ACTIVE artifact 分辨率诊断
+PYTHONPATH=. python3 scripts/diag_active_artifact_resolution.py
+
+# 1.2 VPS 现状（只读）
+ssh root@206.237.14.112 &#x27;cd /opt/fable-trading &amp;&amp; cat models/ACTIVE &amp;&amp; wc -l data/forward_log.csv &amp;&amp;
+  python3 -c &quot;import pandas&quot; ; systemctl list-timers --no-pager | grep -i fable ; nproc; free -g&#x27;
+
+# 1.4 测试基线
+.venv/bin/python -m pytest tests/ -q --deselect tests/test_eth3m_v2_classification.py
+
+# 1.5 收益口径是否分叉
+PYTHONPATH=. python3 -c &quot;
+import pandas as pd
+sw=pd.read_csv(&#x27;data/judgment_yolo_swap_v10.csv&#x27;); wi=pd.read_csv(&#x27;data/judgment_v10_wide.csv&#x27;)
+k=[&#x27;symbol&#x27;,&#x27;signal_time&#x27;]
+m=sw[k+[&#x27;realized_ret&#x27;]].merge(wi[k+[&#x27;net_barrier_taker&#x27;]],on=k)
+print(len(m), m[&#x27;realized_ret&#x27;].corr(m[&#x27;net_barrier_taker&#x27;]))&quot;
+</code></pre>
+</body>
+</html>
