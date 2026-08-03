@@ -5,6 +5,10 @@ the live pulse schedule (tip, tip-1, tip-2 windows).  Box mapping, per-pulse
 minimum-gap selection, and the final whole-series age gate call the same pure
 functions as live discovery.  The module does not score LightGBM, train, read
 holdout rows, or touch runtime state.
+
+The immutable L2 rebuild is proposal-led: it replays only exact causal windows
+already named by the frozen L1 proposal ledger.  It never expands that ledger
+into a fresh scan of historical negative windows.
 """
 from __future__ import annotations
 
@@ -254,6 +258,86 @@ def select_live_parity_observations(
         "pulse_raw_signal_count": pulse_raw_signals,
         "pulse_after_min_gap_count": pulse_gap_signals,
         "pulse_after_global_age_count": pulse_age_signals,
+        "unique_candidate_count": len(observations),
+        "global_tip_age_distribution": dict(
+            sorted(Counter(item.global_tip_age_bars for item in observations).items())
+        ),
+    }
+
+
+def select_proposal_led_observations(
+    detections: Iterable[LocalBoxDetection],
+    *,
+    proposal_indices: Sequence[int],
+    max_global_tip_age_bars: int = 2,
+    min_gap: int = MIN_GAP_BARS,
+) -> tuple[list[CandidateObservation], dict[str, Any]]:
+    """Remap each frozen proposal's exact causal window independently.
+
+    ``proposal_indices`` are window tips from the frozen L1 ledger.  Only a
+    detection whose ``window_end_i`` equals that proposal tip may account for
+    the proposal.  The live mapping/min-gap/global-age operator then picks at
+    most one representative from that exact window.  Neighboring historical
+    windows are deliberately absent because discovering new windows is L1
+    mining, outside the P1 L2 rebuild boundary.
+    """
+    proposals = sorted({int(value) for value in proposal_indices})
+    by_end: dict[int, list[LocalBoxDetection]] = defaultdict(list)
+    for detection in detections:
+        by_end[int(detection.window_end_i)].append(detection)
+
+    selected_by_signal: dict[int, CandidateObservation] = {}
+    totals: Counter[str] = Counter()
+    missing: list[int] = []
+    duplicate_signals = 0
+    for proposal_i in proposals:
+        observations, stats = select_live_parity_observations(
+            by_end.get(proposal_i, []),
+            pulse_latest_indices=[proposal_i],
+            max_global_tip_age_bars=max_global_tip_age_bars,
+            min_gap=min_gap,
+        )
+        totals.update(
+            {
+                "pulse_raw_signal_count": int(stats["pulse_raw_signal_count"]),
+                "pulse_after_min_gap_count": int(stats["pulse_after_min_gap_count"]),
+                "pulse_after_global_age_count": int(stats["pulse_after_global_age_count"]),
+            }
+        )
+        if not observations:
+            missing.append(proposal_i)
+            continue
+        if len(observations) != 1:
+            raise ValueError(
+                f"proposal {proposal_i} produced {len(observations)} selected observations"
+            )
+        observation = observations[0]
+        previous = selected_by_signal.get(observation.mapped_signal_i)
+        if previous is not None:
+            duplicate_signals += 1
+            selected_by_signal[observation.mapped_signal_i] = min(
+                (previous, observation),
+                key=lambda item: (
+                    item.latest_closed_i,
+                    -item.box_confidence,
+                    item.window_end_i,
+                    item.box_x_center,
+                    item.box_y_center,
+                ),
+            )
+        else:
+            selected_by_signal[observation.mapped_signal_i] = observation
+
+    observations = [selected_by_signal[key] for key in sorted(selected_by_signal)]
+    return observations, {
+        "source_proposal_count": len(proposals),
+        "source_proposals_with_candidate": len(proposals) - len(missing),
+        "source_proposals_without_candidate": len(missing),
+        "source_proposal_missing_indices": missing,
+        "duplicate_mapped_signal_count": duplicate_signals,
+        "pulse_raw_signal_count": totals["pulse_raw_signal_count"],
+        "pulse_after_min_gap_count": totals["pulse_after_min_gap_count"],
+        "pulse_after_global_age_count": totals["pulse_after_global_age_count"],
         "unique_candidate_count": len(observations),
         "global_tip_age_distribution": dict(
             sorted(Counter(item.global_tip_age_bars for item in observations).items())

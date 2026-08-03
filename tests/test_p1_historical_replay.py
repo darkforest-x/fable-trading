@@ -1,6 +1,10 @@
 from __future__ import annotations
 
-from src.judgment.p1_build import LocalBoxDetection, select_live_parity_observations
+from src.judgment.p1_build import (
+    LocalBoxDetection,
+    select_live_parity_observations,
+    select_proposal_led_observations,
+)
 
 
 def _box(*, signal_i: int, window_end_i: int, confidence: float = 0.5) -> LocalBoxDetection:
@@ -68,3 +72,28 @@ def test_replay_uses_confidence_only_for_representative_evidence():
     assert len(observations) == 1
     assert observations[0].mapped_signal_i == 499
     assert observations[0].box_confidence == 0.9
+
+
+def test_proposal_led_replay_uses_only_exact_frozen_windows():
+    detections = [
+        _box(signal_i=498, window_end_i=498, confidence=0.99),
+        _box(signal_i=499, window_end_i=500, confidence=0.80),
+        _box(signal_i=500, window_end_i=500, confidence=0.70),
+    ]
+    observations, stats = select_proposal_led_observations(
+        detections,
+        proposal_indices=[500],
+        min_gap=18,
+    )
+    assert [item.mapped_signal_i for item in observations] == [499]
+    assert stats["source_proposal_count"] == 1
+    assert stats["source_proposals_with_candidate"] == 1
+    assert stats["source_proposals_without_candidate"] == 0
+
+
+def test_proposal_led_replay_accounts_for_detector_empty_proposal():
+    observations, stats = select_proposal_led_observations([], proposal_indices=[500, 518])
+    assert observations == []
+    assert stats["source_proposal_count"] == 2
+    assert stats["source_proposals_without_candidate"] == 2
+    assert stats["source_proposal_missing_indices"] == [500, 518]

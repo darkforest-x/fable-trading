@@ -6,6 +6,8 @@ Stages are deliberately gated: ``fixture`` writes synthetic canonical evidence;
 allowed only when both machine-readable gates pass.  The full stage checkpoints
 complete per-symbol shards under ``data/p1/_staging`` and atomically publishes a
 content-addressed CSV plus manifest after all 344 live-universe symbols finish.
+It replays only exact causal windows from the frozen L1 proposal ledger; it does
+not mine historical negative windows or create new L1 proposals.
 
 No command imports a trainer, reads an ACTIVE model, creates an active bundle,
 deploys, notifies, or calls an exchange client.
@@ -51,6 +53,7 @@ from src.judgment.features import (  # noqa: E402
 from src.judgment.p1_build import (  # noqa: E402
     detect_historical_windows,
     normalized_boxes,
+    select_proposal_led_observations,
     select_live_parity_observations,
 )
 from src.judgment.p1_dataset import (  # noqa: E402
@@ -622,6 +625,9 @@ def _full_spec(environment: dict[str, Any], raw: dict[str, Any], args: argparse.
         "schema_sha256": schema_sha256(),
         "source_commit": git("rev-parse", "HEAD"),
         "raw_prefix_sha256": raw["combined_preholdout_prefix_sha256"],
+        "candidate_source_mode": "frozen_l1_proposal_exact_window_replay",
+        "proposal_ledger_sha256": raw["proposals"]["sha256"],
+        "proposal_ledger_row_count": raw["proposals"]["row_count"],
         "detector_sha256": environment["detector"]["sha256"],
         "universe_symbols": raw["research_symbols"],
         "signal_start": SIGNAL_START.isoformat(),
@@ -635,6 +641,49 @@ def _full_spec(environment: dict[str, Any], raw: dict[str, Any], args: argparse.
     }
 
 
+def _load_proposal_ledger(
+    raw: dict[str, Any],
+) -> tuple[pd.DataFrame, dict[str, Any]]:
+    spec = raw["proposals"]
+    path = PROJECT / spec["path"]
+    if file_sha256(path) != spec["sha256"]:
+        raise P1DatasetContractError("frozen proposal ledger bytes changed after P1.0")
+    proposals = pd.read_csv(path, usecols=["source", "symbol", "side", "signal_time"])
+    if len(proposals) != int(spec["row_count"]):
+        raise P1DatasetContractError("frozen proposal ledger row count changed after P1.0")
+    proposals["signal_time"] = pd.to_datetime(proposals["signal_time"], utc=True, errors="raise")
+    if proposals[["source", "symbol", "signal_time"]].duplicated().any():
+        raise P1DatasetContractError("frozen proposal ledger contains duplicate proposal keys")
+    if set(proposals["source"].astype(str)) != {"okx"}:
+        raise P1DatasetContractError("proposal ledger source is not exactly okx")
+    if set(proposals["side"].astype(str)) != {"short"}:
+        raise P1DatasetContractError("proposal ledger side is not exactly short")
+    if (proposals["signal_time"] < SIGNAL_START).any():
+        raise P1DatasetContractError("proposal ledger precedes the frozen P1 signal start")
+    holdout_rows = int((proposals["signal_time"] >= HOLDOUT_CUTOFF).sum())
+    if holdout_rows:
+        raise P1DatasetContractError("proposal ledger contains holdout rows")
+    proposal_symbols = set(proposals["symbol"].astype(str))
+    universe_symbols = set(raw["research_symbols"])
+    outside = sorted(proposal_symbols - universe_symbols)
+    if outside:
+        raise P1DatasetContractError(f"proposal symbols outside frozen universe: {outside[:5]}")
+    proposals = proposals.sort_values(["source", "symbol", "signal_time"], kind="stable")
+    gaps = proposals.groupby(["source", "symbol"])["signal_time"].diff()
+    if (gaps.dropna() < pd.Timedelta(minutes=15 * 18)).any():
+        raise P1DatasetContractError("proposal ledger violates its frozen 18-bar min-gap")
+    return proposals, {
+        "path": spec["path"],
+        "sha256": spec["sha256"],
+        "row_count": len(proposals),
+        "symbol_count": len(proposal_symbols),
+        "holdout_rows": 0,
+        "first_signal_time": proposals["signal_time"].min().isoformat(),
+        "last_signal_time": proposals["signal_time"].max().isoformat(),
+        "role": "frozen_l1_proposal_exact_window_replay",
+    }
+
+
 def _write_symbol_shard(
     *,
     item: dict[str, Any],
@@ -645,6 +694,7 @@ def _write_symbol_shard(
     detector_path: str,
     detector_sha: str,
     spec_hash: str,
+    proposal_times: list[pd.Timestamp],
 ) -> dict[str, Any]:
     symbol = item["symbol"]
     shard = staging / f"{symbol}.csv"
@@ -659,27 +709,34 @@ def _write_symbol_shard(
             return {**meta, "resumed": True}
         raise P1DatasetContractError(f"stale or corrupt shard exists for {symbol}")
 
-    frame, load_stats = _load_real_frame(item)
-    times = pd.to_datetime(frame["open_time"], utc=True)
-    eligible = np.flatnonzero((times >= SIGNAL_START).to_numpy())
-    if len(eligible):
-        first_pulse = max(WINDOW - 1, int(eligible[0]))
-        pulse_indices = list(range(first_pulse, len(frame)))
-        window_ends = list(range(max(WINDOW - 1, first_pulse - 2), len(frame)))
+    if proposal_times:
+        frame, load_stats = _load_real_frame(item)
+        time_to_i = {timestamp: index for index, timestamp in enumerate(frame["open_time"])}
+        missing_times = [timestamp for timestamp in proposal_times if timestamp not in time_to_i]
+        if missing_times:
+            raise P1DatasetContractError(
+                f"{symbol}: {len(missing_times)} frozen proposal times missing from raw prefix"
+            )
+        proposal_indices = [int(time_to_i[timestamp]) for timestamp in proposal_times]
+        if any(index < WINDOW - 1 for index in proposal_indices):
+            raise P1DatasetContractError(f"{symbol}: proposal cannot provide a {WINDOW}-bar window")
+        signal_i_lo = int(
+            pd.to_datetime(frame["open_time"], utc=True).searchsorted(SIGNAL_START, side="left")
+        )
         local, detection_stats = detect_historical_windows(
             frame=frame,
             source=item["source"],
             symbol=symbol,
             model=model,
-            window_end_indices=window_ends,
+            window_end_indices=proposal_indices,
             device=args.device,
             batch_size=args.batch_size,
             render_workers=args.render_workers,
-            signal_i_lo=int(eligible[0]),
+            signal_i_lo=signal_i_lo,
         )
-        observations, selection_stats = select_live_parity_observations(
+        observations, selection_stats = select_proposal_led_observations(
             local,
-            pulse_latest_indices=pulse_indices,
+            proposal_indices=proposal_indices,
         )
         rows, rejects = _rows_for_observations(
             frame=frame,
@@ -689,6 +746,15 @@ def _write_symbol_shard(
             detector_sha256=detector_sha,
         )
     else:
+        proposal_indices = []
+        load_stats = {
+            "preholdout_rows_materialized": 0,
+            "post_cutoff_ohlcv_rows_materialized": 0,
+            "boundary_timestamp_checked": False,
+            "first_open_time": None,
+            "last_open_time": None,
+            "not_read_reason": "no_frozen_l1_proposals_for_symbol",
+        }
         detection_stats = {
             "windows_scheduled": 0,
             "windows_rendered": 0,
@@ -697,6 +763,11 @@ def _write_symbol_shard(
             "mapping_rejections": {},
         }
         selection_stats = {
+            "source_proposal_count": 0,
+            "source_proposals_with_candidate": 0,
+            "source_proposals_without_candidate": 0,
+            "source_proposal_missing_indices": [],
+            "duplicate_mapped_signal_count": 0,
             "pulse_raw_signal_count": 0,
             "pulse_after_min_gap_count": 0,
             "pulse_after_global_age_count": 0,
@@ -713,6 +784,7 @@ def _write_symbol_shard(
         "shard_path": str(shard.relative_to(PROJECT)),
         "shard_sha256": shard_sha,
         "row_count": len(rows),
+        "source_proposal_count": len(proposal_times),
         "load": load_stats,
         "detection": detection_stats,
         "selection": selection_stats,
@@ -778,6 +850,15 @@ def _audit_dataset(frame: pd.DataFrame, symbol_meta: list[dict[str, Any]]) -> di
         }
     group_sizes = frame.groupby("event_group_id", dropna=False).size()
     flags = frame["data_quality_flags"].fillna("").astype(str)
+    row_rejection_count = int(
+        sum(sum(Counter(item["row_rejections"]).values()) for item in symbol_meta)
+    )
+    source_without_candidate = int(
+        sum(item["selection"]["source_proposals_without_candidate"] for item in symbol_meta)
+    )
+    duplicate_mapped = int(
+        sum(item["selection"]["duplicate_mapped_signal_count"] for item in symbol_meta)
+    )
     audit = {
         "accepted": True,
         "row_count": len(frame),
@@ -826,6 +907,16 @@ def _audit_dataset(frame: pd.DataFrame, symbol_meta: list[dict[str, Any]]) -> di
             sum(item["load"]["post_cutoff_ohlcv_rows_materialized"] for item in symbol_meta)
         ),
         "completed_universe_symbols": len(symbol_meta),
+        "source_proposal_count": int(sum(item["source_proposal_count"] for item in symbol_meta)),
+        "source_proposals_with_candidate": int(
+            sum(item["selection"]["source_proposals_with_candidate"] for item in symbol_meta)
+        ),
+        "source_proposals_without_candidate": source_without_candidate,
+        "duplicate_mapped_signal_count": duplicate_mapped,
+        "row_rejection_count": row_rejection_count,
+        "end_to_end_accounted_proposal_count": (
+            len(frame) + row_rejection_count + source_without_candidate + duplicate_mapped
+        ),
         "rendered_windows": int(sum(item["detection"]["windows_rendered"] for item in symbol_meta)),
         "predicted_boxes": int(sum(item["detection"]["predicted_boxes"] for item in symbol_meta)),
         "row_rejections": dict(
@@ -865,9 +956,17 @@ def _audit_dataset(frame: pd.DataFrame, symbol_meta: list[dict[str, Any]]) -> di
             audit["data_quality_flagged_rows"] == 0,
             audit["post_cutoff_ohlcv_rows_materialized"] == 0,
             audit["completed_universe_symbols"] == 344,
+            audit["source_proposal_count"] == 18_379,
+            audit["source_proposals_with_candidate"]
+            + audit["source_proposals_without_candidate"]
+            == audit["source_proposal_count"],
+            audit["end_to_end_accounted_proposal_count"] == audit["source_proposal_count"],
             audit["timeframe_values"] == ["15m"],
             audit["side_values"] == ["short"],
-            not any(item["missing_rate"] > 0 or item["inf_count"] > 0 for item in feature_audit.values()),
+            not any(
+                item["missing_rate"] > 0 or item["inf_count"] > 0
+                for item in feature_audit.values()
+            ),
         ]
     )
     return audit
@@ -898,19 +997,15 @@ def run_full(args: argparse.Namespace) -> dict[str, Any]:
     staging = DATA_ROOT / "_staging" / build_id
     staging.mkdir(parents=True, exist_ok=True)
     write_json(staging / "build_spec.json", {"build_id": build_id, "spec_hash": spec_hash, **spec})
+    proposals, proposal_stats = _load_proposal_ledger(raw)
+    proposals_by_symbol = {
+        str(symbol): list(group["signal_time"])
+        for symbol, group in proposals.groupby("symbol", sort=False)
+    }
     model = load_yolo_model(weights)
-    if args.partition_count < 1:
-        raise P1DatasetContractError("partition_count must be positive")
-    if not (0 <= args.partition_index < args.partition_count):
-        raise P1DatasetContractError("partition_index must be in [0, partition_count)")
-    selected_inputs = [
-        item
-        for item_index, item in enumerate(raw["raw_inputs"])
-        if item_index % args.partition_count == args.partition_index
-    ]
     symbol_meta = []
     started = time.monotonic()
-    for index, item in enumerate(selected_inputs, 1):
+    for index, item in enumerate(raw["raw_inputs"], 1):
         before = time.monotonic()
         meta = _write_symbol_shard(
             item=item,
@@ -921,42 +1016,18 @@ def run_full(args: argparse.Namespace) -> dict[str, Any]:
             detector_path=detector_path,
             detector_sha=detector_sha,
             spec_hash=spec_hash,
+            proposal_times=proposals_by_symbol.get(item["symbol"], []),
         )
         symbol_meta.append(meta)
         print(
-            f"[{index}/{len(selected_inputs)} p{args.partition_index}/{args.partition_count}] "
+            f"[{index}/{len(raw['raw_inputs'])}] "
             f"{item['symbol']}: rows={meta['row_count']} "
+            f"proposals={meta['source_proposal_count']} "
             f"windows={meta['detection']['windows_rendered']} resumed={meta['resumed']} "
             f"wall={time.monotonic()-before:.1f}s total={(time.monotonic()-started)/60:.1f}m",
             flush=True,
         )
 
-    if args.partition_count > 1:
-        checkpoint = {
-            "stage": "p1_full_partition_checkpoint",
-            "verdict": "checkpointed",
-            "generated_at": utc_now(),
-            "git_commit": git("rev-parse", "HEAD"),
-            "build_id": build_id,
-            "spec_hash": spec_hash,
-            "partition_index": args.partition_index,
-            "partition_count": args.partition_count,
-            "completed_symbols": len(symbol_meta),
-            "expected_symbols": len(selected_inputs),
-            "row_count": int(sum(item["row_count"] for item in symbol_meta)),
-            "elapsed_seconds": time.monotonic() - started,
-            "holdout_rows_read": 0,
-            "post_cutoff_ohlcv_rows_materialized": int(
-                sum(item["load"]["post_cutoff_ohlcv_rows_materialized"] for item in symbol_meta)
-            ),
-        }
-        write_json(staging / f"partition_{args.partition_index}_of_{args.partition_count}.json", checkpoint)
-        print(json.dumps(checkpoint, ensure_ascii=False, indent=2))
-        return checkpoint
-
-    # A single-partition invocation is the only finalizer. It revalidates and
-    # resumes every symbol shard, including shards written by earlier disjoint
-    # partition workers, before assembling the immutable dataset.
     rows = assign_event_groups(_read_shard_rows(symbol_meta))
     assembly_a = staging / "assembled_a.csv"
     assembly_b = staging / "assembled_b.csv"
@@ -1028,6 +1099,7 @@ def run_full(args: argparse.Namespace) -> dict[str, Any]:
             "combined_preholdout_prefix_sha256": raw["combined_preholdout_prefix_sha256"],
             "universe_symbol_count": len(raw["research_symbols"]),
             "universe_symbols": raw["research_symbols"],
+            "candidate_source": proposal_stats,
             "source_commit": spec["source_commit"],
             "source_hashes": {path: file_sha256(PROJECT / path) for path in source_paths},
         },
@@ -1103,8 +1175,6 @@ def parse_args() -> argparse.Namespace:
         target.add_argument("--render-workers", type=int, default=4)
     dry.add_argument("--dry-symbols", type=int, default=2)
     dry.add_argument("--dry-proposals", type=int, default=4)
-    full.add_argument("--partition-count", type=int, default=1)
-    full.add_argument("--partition-index", type=int, default=0)
     return parser.parse_args()
 
 
@@ -1116,7 +1186,7 @@ def main() -> int:
         audit = run_dry(args)
     else:
         audit = run_full(args)
-    return 0 if audit.get("verdict") in {"accepted", "checkpointed"} else 1
+    return 0 if audit.get("verdict") == "accepted" else 1
 
 
 if __name__ == "__main__":
