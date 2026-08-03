@@ -26,15 +26,32 @@ from src.execution.config import (
 from src.execution import ledger as led
 from src.execution.okx_client import OkxDemoClient, OkxDemoError
 from src.execution.symbols import round_price, size_for_notional, to_okx_inst_id
+from src.judgment.forward_types import LEGACY_PROTOCOL
 
 
 def signal_key(row: pd.Series) -> str:
     """Idempotency key for one signal event.
 
-    Intentionally **excludes score**: re-scoring the same signal_time must not
-    open a second position (H17 / GPT review 2026-07-31).
+    Intentionally **excludes score and model hash**: re-scoring one protocol
+    event must not open a second position. Side and protocol stay in the key so
+    a legacy long row can never absorb a repaired short event (P0 B-01..B-04).
     """
-    return f"{row.get('source','okx')}|{row.get('symbol')}|{row.get('signal_time')}"
+    side = signal_trade_side(row)
+    raw_protocol = row.get("protocol_version")
+    protocol = (
+        LEGACY_PROTOCOL
+        if raw_protocol is None or pd.isna(raw_protocol) or not str(raw_protocol).strip()
+        else str(raw_protocol).strip()
+    )
+    return "|".join(
+        (
+            str(row.get("source", "okx")),
+            str(row.get("symbol")),
+            str(row.get("signal_time")),
+            side,
+            protocol,
+        )
+    )
 
 
 _NOTIFY_EVENTS = {

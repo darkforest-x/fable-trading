@@ -5,10 +5,18 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from unittest.mock import Mock
 
 from src.execution import ledger
 from src.execution.config import ExecutorConfig
-from src.execution.executor import MISSING_SIDE, run_once, signal_trade_side
+from src.execution.executor import (
+    MISSING_SIDE,
+    open_one,
+    run_once,
+    signal_key,
+    signal_trade_side,
+)
+from src.judgment.forward_types import LEGACY_PROTOCOL
 
 
 @pytest.mark.parametrize(
@@ -33,6 +41,51 @@ def test_absent_side_is_not_long(raw) -> None:
     Takeover plan P0-02 / acceptance A-03.
     """
     assert signal_trade_side(pd.Series({"side": raw})) == MISSING_SIDE
+
+
+def test_signal_key_is_stable_under_rescoring_and_model_change() -> None:
+    base = {
+        "source": "okx",
+        "symbol": "ETH_USDT_SWAP",
+        "signal_time": "2026-05-03T03:00:00+00:00",
+        "side": "short",
+        "protocol_version": "short_v1",
+    }
+    first = pd.Series({**base, "score": 0.1, "model_sha256": "aaa"})
+    rescored = pd.Series({**base, "score": 0.9, "model_sha256": "bbb"})
+
+    assert signal_key(first) == signal_key(rescored)
+    assert signal_key(first).split("|") == [
+        "okx", "ETH_USDT_SWAP", "2026-05-03T03:00:00+00:00", "short", "short_v1"
+    ]
+
+
+def test_signal_key_separates_side_and_protocol() -> None:
+    base = pd.Series(
+        {
+            "source": "okx",
+            "symbol": "ETH_USDT_SWAP",
+            "signal_time": "2026-05-03T03:00:00+00:00",
+            "side": "short",
+            "protocol_version": "short_v1",
+        }
+    )
+
+    assert signal_key(base) != signal_key(pd.Series({**base.to_dict(), "side": "long"}))
+    assert signal_key(base) != signal_key(
+        pd.Series({**base.to_dict(), "protocol_version": "short_v2"})
+    )
+    legacy = signal_key(
+        pd.Series(
+            {
+                "source": "okx",
+                "symbol": "ETH_USDT_SWAP",
+                "signal_time": "2026-05-03T03:00:00+00:00",
+                "side": "short",
+            }
+        )
+    )
+    assert legacy.endswith(f"|short|{LEGACY_PROTOCOL}")
 
 
 def _write_signal(path: Path, *, side: str) -> None:
@@ -84,3 +137,27 @@ def test_run_once_rejects_non_long_without_retry_spam(tmp_path: Path, side: str)
     assert second["opened"] == 0
     assert second["skipped"] == 0
     assert len(ledger.load_all(ledger_path)) == 1
+
+
+@pytest.mark.parametrize("side", ["short", "unknown", None, float("nan"), ""])
+def test_rejected_side_never_calls_trading_client(side) -> None:
+    client = Mock()
+    row = pd.Series(
+        {
+            "source": "okx",
+            "symbol": "BTC_USDT_SWAP",
+            "signal_time": "2026-05-03T03:00:00+00:00",
+            "protocol_version": "short_v1",
+            "side": side,
+            "score": 0.9,
+            "threshold": 0.5,
+            "entry_price": 100.0,
+            "atr_pct": 0.01,
+        }
+    )
+
+    event = open_one(client, ExecutorConfig(), row, dry_run=False)
+
+    assert event["event"] == "skipped_unsupported_side"
+    assert event["side"] is None
+    assert client.mock_calls == []
