@@ -26,7 +26,7 @@ python3 -c "print(round(0.002 * 5 / (4 + 1), 6))"   # -> 0.002
 # 3) 修复后重训(3060,约 1h;Mac 上约 6h)
 bash scripts/train_on_3060.sh --check
 ssh zzc@192.168.1.5 '...python -u train_dense.py --name owner_v8_chain \
-  --model base/owner_v7_chain.pt --dataset C:/yoyo/datasets/dense_owner_v7 \
+  --model base/owner_v7_chain.pt --dataset C:/fable/datasets/dense_owner_v7 \
   --epochs 40 --patience 10 --cache false --workers 4'
 
 # 4) 干净尺子评估 + 提升
