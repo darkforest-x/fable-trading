@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>小周期 YOLO → 冻结 L2 因果桥准备报告 — 2026-08-04</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>小周期 YOLO → 冻结 L2 因果桥准备报告 — 2026-08-04</h1>
+<h2>一句话结论</h2>
+<p>可以把 1m/2m/3m/5m 完整窗口 YOLO 的候选送入历史 v11 LightGBM，再把通过候选路由到下一 15m/30m 边界做<strong>研究测试</strong>；但旧 PF6.61 不能继承。旧结果来自 YOLO + 回归判断层整链，而且 full-window 框时间曾被回填成更早的信号时间。新桥只认整个小周期窗口闭合后的 <code>available_at</code>，明确把历史 v11 标成 <code>long / legacy_unaligned / paper_only / execution_eligible=false</code>。</p>
+<p>本轮只完成代码、安全门、合成测试和真实模型机械烟测。没有安全的小周期 pre-holdout 快照，所以没有训练、候选池、收益或 PF 结论。</p>
+<h2>历史事实复核</h2>
+<table><thead><tr>
+<th>版本/链路</th>
+<th>当时记录</th>
+<th>后续核验</th>
+<th>当前裁决</th>
+</tr></thead><tbody>
+<tr><td>v11 YOLO + v11 regression</td><td>accept 703 笔，PF 6.61，胜率 77.1%</td><td>full-window 前视被堵后同链 PF 1.13、胜率 25.5%</td><td>PF6.61 作历史故障证据，不作先验</td></tr>
+<tr><td>v16 causal tip YOLO</td><td>纯检测 PF 0.78</td><td>+ v11 L2 PF 0.60；top5% PF 0.48</td><td>实时化旧链已被证伪</td></tr>
+<tr><td>ETH 3m pilot</td><td>val mAP 可观</td><td>OOS 开火率 99.74%，相对匹配随机 -0.80bp</td><td>拒绝</td></tr>
+</tbody></table>
+<p>原 <code>owner_v11_chain.pt</code> 已无法在当前项目、迁移目录及 Git 历史找到，因此不能真实复现当时 detector。当前可用的 <code>eth3m_short_pilot_v1_mac_cold.pt</code> 仅用于验证推理机械路径，不代表“找回 v11”。</p>
+<h2>冻结 L2 明确身份</h2>
+<ul>
+<li>配置：<code>tp5_sl2_swap_yolo_v11_reg</code></li>
+<li>模型：<code>models/frozen_tp5_sl2_swap_yolo_v11_reg_20260718.txt</code></li>
+<li>模型 SHA-256：<code>4d617a08cd7311cc5d6156d0053e7b85ff2aa1658076b96424ebb736c4c25a41</code></li>
+<li>metadata SHA-256：<code>5ef0bf837a292ee0302077be390f98ee10484d990bc46b12e453c3617c244cb2</code></li>
+<li>objective：<code>regression</code></li>
+<li>side：<code>long</code></li>
+<li>feature schema：<code>judgment_28_v1</code>，28 项</li>
+<li>feature semantics：metadata 无字段，按既有冻结加载契约诚实解析为 <code>legacy_unaligned</code></li>
+<li>best iteration：61</li>
+<li>threshold：<code>0.02022141847381547</code></li>
+<li>score semantics：<code>predicted_realized_ret</code></li>
+<li>threshold operator：<code>&gt;=</code></li>
+</ul>
+<p>桥本身不负责选择或加载 metadata；调用者必须显式传入已经构造的 <code>FrozenArtifact</code>。本轮真实烟测由外部脚本用既有 <code>load_artifact(yolo_v11_pool_config(...), exact_metadata_path)</code> 构造 v11 artifact，再由桥按 artifact 的精确模型路径加载并核对模型 SHA。桥不读取 <code>models/ACTIVE</code>，不使用 default/latest fallback，也不读取 artifact 的历史 dataset。metadata 文件 SHA 是报告侧核验事实，当前桥不会再次验证或写入评分输出；因此 artifact 构造仍是必须受控的上游边界。</p>
+<h2>因果时间契约</h2>
+<pre><code>
+小周期完整窗口闭合
+        │ available_at（唯一事实时间）
+        ▼
+schema-v2 detection candidate
+        │ 只取 open_time+15m &lt;= available_at 的连续 15m bars
+        ▼
+最新已闭合 15m 特征行 + 冻结 v11 L2
+        │
+        ├─ next_15m_open：严格晚于 available_at
+        └─ next_30m_open：严格晚于 available_at
+</code></pre>
+<p><code>box_start_time/box_end_time/xywhn</code> 只描述图中对象，不能改变 <code>available_at</code>。例如 3m 候选在 <code>14:57Z</code> 才可用时，L2 最晚只能使用 <code>14:30–14:45Z</code> 的 15m bar，下一 15m/30m 路由边界均为 <code>15:00Z</code>。</p>
+<p>30m 只是路由边界；v11 是 15m 特征模型，不能把输入直接换成 30m bar。</p>
+<h2>跨项目边界</h2>
+<ul>
+<li><code>yolo-xx</code> 只生成/审计 schema-v2 detection manifest；不包含 LightGBM、收益、回测或交易逻辑。</li>
+<li><code>yoyo-trading/yoyo/layers/l2_judgment/candidate_bridge.py</code> 只做候选适配与冻结 L2 研究评分；不发现 ACTIVE、不加载行情、不训练、不导入执行层。</li>
+<li>数据、模型、报告和 learnings 留在 <code>fable-trading</code>。</li>
+</ul>
+<p>候选 ID 绑定 detector weights、dataset manifest、source、image 及 detection 内容的 SHA-256。15m bars 必须携带 source/symbol/timeframe/snapshot SHA；币种或来源不一致立即拒绝。评分输出明确 <code>research_only=true</code>、<code>paper_only=true</code>、<code>execution_eligible=false</code>。</p>
+<h2>真实冻结模型烟测</h2>
+<p>本轮使用真实 v11 metadata/LightGBM 文件和纯合成、连续的 15m OHLCV；没有读取任何历史行情或 artifact dataset。模型由 <code>load_verified_booster(explicit_model_path)</code> 在同一次操作中执行加载前 stat/hash、明确路径加载和加载后 stat/hash；裸 fake、同字节不同路径、加载中漂移及 artifact 路径/hash 不一致均被独立复核拒绝。真实仓输出：</p>
+<ul>
+<li><code>model_config_name=tp5_sl2_swap_yolo_v11_reg</code></li>
+<li><code>model_side=long</code></li>
+<li><code>feature_semantics=legacy_unaligned</code></li>
+<li><code>feature_bar_open_time=2026-04-27T14:30:00Z</code></li>
+<li><code>feature_bar_closed_at=2026-04-27T14:45:00Z</code></li>
+<li><code>next_15m_open=next_30m_open=2026-04-27T15:00:00Z</code></li>
+<li><code>threshold=0.02022141847381547</code></li>
+<li><code>score=0.011242893075204857</code>，<code>passed=false</code></li>
+<li><code>execution_eligible=false</code></li>
+</ul>
+<p>合成 bars 的 score 只证明真实模型可被显式加载并按因果时间打分，不能解释为模型效果。</p>
+<p>真实 YOLO 权重烟测与真实 v11 L2 烟测是两条独立的机械验证：前者沿用了旧 pilot 数据集，其 <code>predictions.json</code> 为 schema v1，不含 dataset/source/availability 的 schema-v2 身份链；后者使用手工构造的 candidate mapping 和合成 bars。因此本轮<strong>没有</strong>完成“真实权重 → schema-v2 → L2”的端到端验收，不能把两个 smoke 拼成一条已验证实链。</p>
+<h2>测试矩阵</h2>
+<p>合并后需记录以下最终计数：</p>
+<table><thead><tr>
+<th>测试</th>
+<th>目的</th>
+<th>状态</th>
+</tr></thead><tbody>
+<tr><td>yolo-xx full pytest</td><td>数据/manifest/predict/train gate</td><td><strong>38 passed</strong></td></tr>
+<tr><td>yoyo bridge + layer boundary</td><td>时间、身份、层间契约</td><td><strong>74 passed</strong></td></tr>
+<tr><td>yoyo full pytest</td><td>回归保护</td><td><strong>164 passed</strong></td></tr>
+<tr><td>real YOLO weight smoke</td><td>真实 Ultralytics result/path/原始框</td><td><strong>passed；1 detection</strong></td></tr>
+<tr><td>real frozen v11 smoke</td><td>verified loader、因果特征、研究输出</td><td><strong>passed；机械范围独立验收 accepted</strong></td></tr>
+</tbody></table>
+<h2>复现命令</h2>
+<p>本机统一使用 <code>fable-trading/.venv</code> 中已经锁定的依赖；命令不读取行情、holdout 或 artifact dataset，也不会训练：</p>
+<pre><code>
+cd /Users/zhangzc/yolo-xx
+PYTHONDONTWRITEBYTECODE=1 /Users/zhangzc/fable-trading/.venv/bin/python \
+  -m pytest -q -p no:cacheprovider
+
+cd /Users/zhangzc/yoyo-trading
+PYTHONDONTWRITEBYTECODE=1 /Users/zhangzc/fable-trading/.venv/bin/python \
+  -m pytest -q -p no:cacheprovider \
+  tests/test_candidate_bridge.py tests/test_layer_boundaries.py
+PYTHONDONTWRITEBYTECODE=1 /Users/zhangzc/fable-trading/.venv/bin/python \
+  -m pytest -q -p no:cacheprovider
+
+cd /Users/zhangzc/fable-trading
+.venv/bin/python scripts/md_to_html.py \
+  analysis/p_mtf_yolo_l2_bridge_prep_20260804.md --out-dir analysis/html
+</code></pre>
+<p>真实 YOLO 权重机械烟测的完整命令保存在 <code>yolo-xx/reports/multitimeframe_detector_prep_20260804.md</code>。真实 v11 L2 烟测所用输入为测试内生成的合成连续 15m OHLCV；上述 yoyo 测试覆盖相同因果时间、verified-loader、模型身份及禁止执行契约。报告中的真实模型数值是本轮额外机械运行证据，不是经济指标。</p>
+<p>机器可读独立复核 receipt：<code>analysis/output/p_mtf_yolo_l2_bridge_independent_acceptance_20260804.json</code>。其中 <code>accepted</code> 只覆盖代码机械契约，不覆盖真实权重端到端链、数据可用性、模型效果或全主机过程审计。</p>
+<h2>实现提交</h2>
+<ul>
+<li><code>yolo-xx</code>：<code>97ad14ee46000cf0cba03785e1316b3ef91d3865</code>（多周期数据集、不可变 source manifest、强审计与推理身份链）</li>
+<li><code>yoyo-trading</code>：<code>c6393a013562d057c742645f7151e2c15ba722ff</code>（schema-v2 候选到冻结 v11 L2 的因果桥）</li>
+</ul>
+<p>报告提交因内容寻址无法在自身正文内记录自身 hash；最终交付时另行列出。以上两个实现提交均在 <code>main</code>，均未 push。</p>
+<h2>指标与对照</h2>
+<p>本轮是准备与安全审计，不是模型实验，因此以下项目均为 N/A：新候选数、正类率、val AUC/mAP、置换检验、top-decile 毛/净收益、胜率、PF、匹配随机对照。旧 PF 与 pilot 数字只用于历史故障复核，不是本配置结果。</p>
+<p>首个经济实验必须在安全的 5m pre-holdout snapshot 上进行，并带同币 × 同时间块 × 同波动桶匹配随机入场对照；之后才按 3m→2m→1m 单变量推进。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>旧 v11 L2 在事后候选时点训练；改成真实 <code>available_at</code> 后存在必然的分布迁移。能跑不等于有效。</li>
+<li>v11 模型方向是 <code>long</code>，当前 yoyo 主线是 <code>short</code>；本桥输出不得被当作 short 信号。</li>
+<li>完整窗口滚动时，同一历史框可能跨窗口重复出现；正式扫描前需要 first-seen/dedupe。</li>
+<li>当前单候选计算会重复算特征与模型 hash；大规模运行前需要按 symbol 批量化，但这不是小样本机械验收阻断。</li>
+<li>bars snapshot SHA 由可信数据提供者声明；真实实验仍依赖不可变数据流程。</li>
+<li>metadata SHA 当前由报告/调用侧核验，bridge 只绑定 artifact 中的模型路径与模型 SHA；正式批量入口必须继续使用受控 artifact factory。</li>
+<li>按本轮执行记录：未读 holdout、未训练、未调阈值、未创建/修改 active bundle、未改 ACTIVE、未部署、未下单、未 push。可见工作区没有新增权重/run/ACTIVE 变更作为旁证，但这不是对整台主机历史行为的完备审计。</li>
+</ul>
+<h2>下一步与停止点</h2>
+<p>1. 外部准备物理 pre-holdout 5m snapshot + manifest；禁止读取现有混合 CSV 后截断。</p>
+<p>2. fixture → 5m 小样本 dry build/audit → full build，单周期单模型，自动 dense-rule labels，不要求人工盘口打标。</p>
+<p>3. 先做 5m detector 的稀疏性、位置泛化及匹配随机增量；不过门即停止。</p>
+<p>4. 通过后才把 schema-v2 候选送入本桥，重新做 pre-holdout 的 15m/30m 路由比较。</p>
+<p>在安全快照到位前，本轮到代码与机械验收即停止，不制造收益数字。</p>
+</body>
+</html>

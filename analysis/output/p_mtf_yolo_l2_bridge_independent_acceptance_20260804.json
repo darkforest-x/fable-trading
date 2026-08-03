@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "review_type": "independent_mechanical_acceptance",
+  "as_of": "2026-08-04",
+  "conclusion": "accepted",
+  "scope": "mechanical_code_contract_only",
+  "independence": "read_only_subagents_no_file_edits",
+  "implementation_commits": {
+    "yolo_xx": "97ad14ee46000cf0cba03785e1316b3ef91d3865",
+    "yoyo_trading": "c6393a013562d057c742645f7151e2c15ba722ff"
+  },
+  "tests_reproduced": {
+    "yolo_xx": "38 passed",
+    "bridge_and_layer_boundaries": "74 passed",
+    "yoyo_full": "164 passed"
+  },
+  "verified": {
+    "source_and_dataset_gates_fail_closed": true,
+    "candidate_available_at_is_only_fact_time": true,
+    "verified_booster_rejects_path_hash_or_load_drift": true,
+    "active_discovery_absent": true,
+    "execution_eligible_is_false": true,
+    "real_v11_model_hash_matches_report": true,
+    "real_v11_synthetic_bars_smoke_reproduced": true
+  },
+  "not_accepted": [
+    "real_weight_schema_v2_to_l2_end_to_end",
+    "economic_performance",
+    "safe_source_data_availability",
+    "metadata_sha_validation_inside_candidate_bridge",
+    "complete_host_process_audit"
+  ],
+  "non_blocking_risks": [
+    "overlapping full windows still require first-seen dedupe",
+    "single-candidate scoring repeats feature computation and model hashing",
+    "bars snapshot sha256 remains a trusted producer assertion",
+    "legacy v11 distribution shift at causal available_at remains unmeasured",
+    "1m and 2m rendering may be subpixel at 1280px"
+  ],
+  "report_corrections_after_review": [
+    "corrected dense baseline to dense_owner_short_star_tip_v10 with 3305 samples",
+    "clarified caller-owned artifact and absent metadata-sha bridge validation",
+    "clarified that real YOLO and real L2 smokes were not end-to-end",
+    "corrected reproduction interpreter path",
+    "separated pre-parse stat/hash checks from post-parse row/time checks"
+  ]
+}

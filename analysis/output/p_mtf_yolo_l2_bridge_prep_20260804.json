@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "report_type": "mtf_yolo_frozen_l2_bridge_preparation",
+  "as_of": "2026-08-04",
+  "decision": "code_ready_pending_safe_preholdout_data",
+  "historical_truth": {
+    "pf_6_61_was_yolo_plus_regression": true,
+    "pf_6_61_is_reusable_prior": false,
+    "full_window_backfill_blocked_pf": 1.13,
+    "v16_pure_pf": 0.78,
+    "v16_plus_v11_l2_pf": 0.60,
+    "v16_top5_v11_pf": 0.48,
+    "owner_v11_chain_weight_found": false
+  },
+  "frozen_l2": {
+    "config": "tp5_sl2_swap_yolo_v11_reg",
+    "model_path": "/Users/zhangzc/fable-trading/models/frozen_tp5_sl2_swap_yolo_v11_reg_20260718.txt",
+    "model_sha256": "4d617a08cd7311cc5d6156d0053e7b85ff2aa1658076b96424ebb736c4c25a41",
+    "metadata_sha256": "5ef0bf837a292ee0302077be390f98ee10484d990bc46b12e453c3617c244cb2",
+    "objective": "regression",
+    "side": "long",
+    "feature_schema": "judgment_28_v1",
+    "feature_count": 28,
+    "feature_semantics": "legacy_unaligned",
+    "best_iteration": 61,
+    "threshold": 0.02022141847381547,
+    "threshold_operator": ">=",
+    "score_semantics": "predicted_realized_ret",
+    "artifact_selection_owner": "caller",
+    "bridge_validates_metadata_sha256": false,
+    "bridge_outputs_metadata_sha256": false
+  },
+  "causal_contract": {
+    "fact_time_field": "available_at",
+    "box_time_can_backdate": false,
+    "feature_bar_rule": "open_time + 15m <= available_at",
+    "latest_closed_bar_must_be_adjacent": true,
+    "bars_identity_required": ["source", "symbol", "timeframe", "snapshot_sha256"],
+    "routing": ["next_15m_open", "next_30m_open"],
+    "direct_30m_features": false
+  },
+  "machine_safety": {
+    "research_only": true,
+    "paper_only": true,
+    "execution_eligible": false,
+    "active_discovery": false,
+    "artifact_dataset_read": false,
+    "training": false
+  },
+  "real_frozen_model_smoke": {
+    "status": "passed",
+    "input_market_data": "synthetic_only",
+    "verified_loader": true,
+    "model_hashes_match": true,
+    "available_at": "2026-04-27T14:57:00Z",
+    "feature_bar_open_time": "2026-04-27T14:30:00Z",
+    "feature_bar_closed_at": "2026-04-27T14:45:00Z",
+    "next_15m_open": "2026-04-27T15:00:00Z",
+    "next_30m_open": "2026-04-27T15:00:00Z",
+    "score": 0.011242893075204857,
+    "threshold": 0.02022141847381547,
+    "passed": false,
+    "execution_eligible": false
+  },
+  "end_to_end_real_weight_bridge": {
+    "status": "not_run",
+    "yolo_smoke_prediction_schema_version": 1,
+    "schema_v2_identity_chain_present_in_real_weight_smoke": false,
+    "reason": "real YOLO and real frozen L2 were separate mechanical smokes"
+  },
+  "independent_acceptance": {
+    "conclusion": "accepted",
+    "scope": "mechanical_code_contract_only",
+    "blocking_count": 0,
+    "receipt": "analysis/output/p_mtf_yolo_l2_bridge_independent_acceptance_20260804.json",
+    "does_not_accept": [
+      "real_weight_schema_v2_to_l2_end_to_end",
+      "economic_performance",
+      "safe_source_data_availability",
+      "complete_host_process_audit"
+    ]
+  },
+  "tests": {
+    "status": "passed",
+    "yolo_xx": "38 passed",
+    "bridge_and_layer_boundaries": "74 passed",
+    "yoyo_full": "164 passed",
+    "py_compile": "passed"
+  },
+  "commits": [
+    {
+      "repository": "/Users/zhangzc/yolo-xx",
+      "branch": "main",
+      "commit": "97ad14ee46000cf0cba03785e1316b3ef91d3865",
+      "pushed": false
+    },
+    {
+      "repository": "/Users/zhangzc/yoyo-trading",
+      "branch": "main",
+      "commit": "c6393a013562d057c742645f7151e2c15ba722ff",
+      "pushed": false
+    }
+  ],
+  "blocker": {
+    "code": "missing_attested_physical_preholdout_small_timeframe_snapshot",
+    "holdout_start": "2026-05-04T00:00:00Z"
+  },
+  "prohibitions_observed": {
+    "holdout_read": false,
+    "training": false,
+    "threshold_tuning": false,
+    "active_modified": false,
+    "deployment": false,
+    "orders": false,
+    "push": false,
+    "evidence_scope": "execution_attestation_plus_visible_workspace_evidence_not_complete_host_audit"
+  }
+}
