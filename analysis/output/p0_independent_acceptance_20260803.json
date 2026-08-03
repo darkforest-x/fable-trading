@@ -1,0 +1,262 @@
+{
+  "audit_version": "p0_independent_acceptance_20260803",
+  "generated_at": "2026-08-03T01:24:29.719831+00:00",
+  "verdict": "accepted",
+  "p1_entry_allowed": true,
+  "scope": {
+    "base": "4333fa722b6a98fdaa8a36f37f1d468d43956b5f",
+    "target": "fba6a65eab37022ffed7f6b1c729e5bbd0e40894",
+    "commit_count": 9,
+    "independent_of_previous_completion_summary": true
+  },
+  "environment": {
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "python": "/Users/zhangzc/fable-trading/.venv/bin/python",
+    "python_version": "Python 3.9.6",
+    "pythonpath": "."
+  },
+  "repository": {
+    "branch": "main",
+    "head": "fba6a65eab37022ffed7f6b1c729e5bbd0e40894",
+    "origin_main": "fba6a65eab37022ffed7f6b1c729e5bbd0e40894",
+    "expected_commits": [
+      "95ebfb0a931d1f3070701be5ee1068b6d343dd8b",
+      "cd9ca5a11a2d1b2cdb1508f033c5cd2b7375f210",
+      "8cd2a569d0199977f631180d9de58d3d90200120",
+      "892964c1933d077ac930d6c3e7845b380e632305",
+      "1cb669c3dfc4d14977e9dd761a9f4848c074fb1e",
+      "ee98ebd6794f3c658cc407971827090558d35d65",
+      "8e90390d119476ba397a04ab31d95a23d50b16ac",
+      "969dda71f5eb090c44c439f255496be0985b7531",
+      "fba6a65eab37022ffed7f6b1c729e5bbd0e40894"
+    ],
+    "actual_commits": [
+      "95ebfb0a931d1f3070701be5ee1068b6d343dd8b",
+      "cd9ca5a11a2d1b2cdb1508f033c5cd2b7375f210",
+      "8cd2a569d0199977f631180d9de58d3d90200120",
+      "892964c1933d077ac930d6c3e7845b380e632305",
+      "1cb669c3dfc4d14977e9dd761a9f4848c074fb1e",
+      "ee98ebd6794f3c658cc407971827090558d35d65",
+      "8e90390d119476ba397a04ab31d95a23d50b16ac",
+      "969dda71f5eb090c44c439f255496be0985b7531",
+      "fba6a65eab37022ffed7f6b1c729e5bbd0e40894"
+    ],
+    "changed_path_count": 60,
+    "changed_paths": [
+      "HANDOFF.md",
+      "analysis/INDEX.md",
+      "analysis/html/p0_runtime_parity_audit_20260803.html",
+      "analysis/html/p0_safety_protocol_repair_20260803.html",
+      "analysis/output/p0_return_semantics_20260803.json",
+      "analysis/output/p0_runtime_parity_audit_20260803.json",
+      "analysis/output/p0_safety_baseline_20260803/artifact_hashes.json",
+      "analysis/output/p0_safety_baseline_20260803/evidence_boundary.md",
+      "analysis/output/p0_safety_baseline_20260803/repo_state.txt",
+      "analysis/output/p0_safety_baseline_20260803/selected_tests.txt",
+      "analysis/p0_runtime_parity_audit_20260803.md",
+      "analysis/p0_safety_protocol_repair_20260803.md",
+      "docs/DOC_MAP.md",
+      "docs/learnings/a-local-tip-edge-is-not-a-global-freshness-proof.md",
+      "docs/learnings/a-price-after-the-signal-is-not-a-fill-unless-it-is-after-the-decision.md",
+      "docs/learnings/a-research-result-cannot-be-assigned-to-a-different-runtime-artifact.md",
+      "docs/learnings/an-optional-bundle-loader-is-not-a-production-authority.md",
+      "docs/learnings/barrier-outcomes-need-one-explicit-contract.md",
+      "docs/learnings/execution-signal-identity-needs-side-and-protocol.md",
+      "docs/learnings/net-route-conversion-must-restore-gross-before-recosting.md",
+      "docs/learnings/provenance-must-be-injected-once-not-rediscovered-mid-scan.md",
+      "docs/learnings/trade-side-does-not-identify-model-feature-semantics.md",
+      "docs/protocol_repair/ACCEPTANCE_MATRIX.md",
+      "docs/protocol_repair/DECISIONS_AND_STOP_GATES.md",
+      "docs/protocol_repair/P0_SAFETY_SPEC.md",
+      "docs/protocol_repair/README.md",
+      "models/active_bundle.example.json",
+      "scripts/audit_l2_v10_return_semantics_20260803.py",
+      "scripts/audit_p0_runtime_parity_20260803.py",
+      "src/costs.py",
+      "src/execution/executor.py",
+      "src/execution/ledger.py",
+      "src/judgment/execution_timeline.py",
+      "src/judgment/features.py",
+      "src/judgment/forward.py",
+      "src/judgment/forward_records.py",
+      "src/judgment/forward_scan.py",
+      "src/judgment/forward_threshold_shadow.py",
+      "src/judgment/forward_types.py",
+      "src/judgment/labeling.py",
+      "src/judgment/outcomes.py",
+      "src/judgment/protocol.py",
+      "src/judgment/yolo_candidates.py",
+      "src/webapp/data_hub.py",
+      "src/webapp/forward_payloads.py",
+      "src/webapp/status_strip.py",
+      "tests/fixtures/feature_semantics_snapshot.json",
+      "tests/test_active_bundle_protocol.py",
+      "tests/test_canonical_outcomes.py",
+      "tests/test_dashboard_server.py",
+      "tests/test_execution_timeline.py",
+      "tests/test_executor_side_guard.py",
+      "tests/test_forward_feature_semantics.py",
+      "tests/test_forward_provenance.py",
+      "tests/test_forward_runtime_policy.py",
+      "tests/test_global_tip_age_gate.py",
+      "tests/test_ops_data_model_hub.py",
+      "tests/test_return_cost_contract.py",
+      "tests/test_tiered_sizing.py",
+      "tests/test_tip_realtime_path.py"
+    ],
+    "forbidden_paths": [],
+    "deleted_paths": [],
+    "modified_historical_reports": [],
+    "dirty_paths_during_acceptance_generation": [
+      "docs/learnings/reproducible-test-results-must-name-the-project-interpreter.md",
+      "scripts/audit_p0_independent_acceptance_20260803.py"
+    ],
+    "training_calls_added": [],
+    "order_calls_added": []
+  },
+  "protected_artifacts": {
+    "models/ACTIVE": {
+      "baseline_sha256": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+      "current_sha256": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+      "unchanged": true
+    },
+    "data/forward_log.csv": {
+      "baseline_sha256": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb",
+      "current_sha256": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb",
+      "unchanged": true
+    },
+    "data/executor_ledger.jsonl": {
+      "baseline_sha256": "de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39",
+      "current_sha256": "de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39",
+      "unchanged": true
+    }
+  },
+  "preholdout_evidence": {
+    "path": "data/judgment_yolo_swap_v10.csv",
+    "sha256": "9bca68023d5afd8687753cd42ca17865b3080077474bfc216a350ac3d22b5a94",
+    "row_count": 18379,
+    "max_signal_time": "2026-05-03T05:15:00+00:00",
+    "cutoff": "2026-05-04T00:00:00+00:00",
+    "holdout_rows_read": 0,
+    "sidecar_sha256": "9bca68023d5afd8687753cd42ca17865b3080077474bfc216a350ac3d22b5a94",
+    "hash_matches_sidecar": true
+  },
+  "p0_machine_audits": {
+    "runtime_parity_json": "analysis/output/p0_runtime_parity_audit_20260803.json",
+    "runtime_json_code_head": "969dda71f5eb090c44c439f255496be0985b7531",
+    "return_json": "analysis/output/p0_return_semantics_20260803.json",
+    "return_dataset_max_signal_time": "2026-05-03 05:15:00+00:00"
+  },
+  "tests": {
+    "focused": {
+      "command": "PYTHONPATH=. /Users/zhangzc/fable-trading/.venv/bin/python -m pytest -q -rs tests/test_executor_side_guard.py tests/test_active_bundle_protocol.py tests/test_forward_provenance.py tests/test_forward_feature_semantics.py tests/test_canonical_outcomes.py tests/test_return_cost_contract.py tests/test_execution_timeline.py tests/test_global_tip_age_gate.py",
+      "python": "/Users/zhangzc/fable-trading/.venv/bin/python",
+      "returncode": 0,
+      "passed": 133,
+      "skipped": 0,
+      "skip_reasons": [],
+      "tail": ".venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:64\n  /Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:64: PyparsingDeprecationWarning: 'oneOf' deprecated - use 'one_of'\n    prop = Group((name + Suppress(\"=\") + comma_separated(value)) | oneOf(_CONSTANTS))\n\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85\n  /Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85: PyparsingDeprecationWarning: 'parseString' deprecated - use 'parse_string'\n    parse = parser.parseString(pattern)\n\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89\n  /Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89: PyparsingDeprecationWarning: 'resetCache' deprecated - use 'reset_cache'\n    parser.resetCache()\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n133 passed, 13 warnings in 3.16s"
+    },
+    "complete": {
+      "command": "PYTHONPATH=. /Users/zhangzc/fable-trading/.venv/bin/python -m pytest -q -rs tests",
+      "python": "/Users/zhangzc/fable-trading/.venv/bin/python",
+      "returncode": 0,
+      "passed": 473,
+      "skipped": 2,
+      "skip_reasons": [
+        "SKIPPED [1] tests/test_factor_causality.py:44: pandas rolling.skew float-state artefact under future mutation",
+        "SKIPPED [1] tests/test_factor_causality.py:39: rolling rank apply is slow/fragile; IC screen already gates it"
+      ],
+      "tail": ".venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85\n  /Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85: PyparsingDeprecationWarning: 'parseString' deprecated - use 'parse_string'\n    parse = parser.parseString(pattern)\n\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89\n.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89\n  /Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89: PyparsingDeprecationWarning: 'resetCache' deprecated - use 'reset_cache'\n    parser.resetCache()\n\n.venv/lib/python3.9/site-packages/matplotlib/_mathtext.py:45\n  /Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/matplotlib/_mathtext.py:45: PyparsingDeprecationWarning: 'enablePackrat' deprecated - use 'enable_packrat'\n    ParserElement.enablePackrat()\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nSKIPPED [1] tests/test_factor_causality.py:44: pandas rolling.skew float-state artefact under future mutation\nSKIPPED [1] tests/test_factor_causality.py:39: rolling rank apply is slow/fragile; IC screen already gates it\n473 passed, 2 skipped, 14 warnings in 5.74s"
+    }
+  },
+  "invariants": {
+    "short_missing_nan_unknown_protocol_mismatch_rejected_before_client": {
+      "accepted": true,
+      "evidence": [
+        "tests/test_executor_side_guard.py::test_rejected_side_never_calls_trading_client",
+        "tests/test_executor_side_guard.py::test_long_row_under_short_protocol_cannot_reach_buy_client"
+      ]
+    },
+    "production_exact_bundle_hash_no_latest_fallback": {
+      "accepted": true,
+      "evidence": [
+        "tests/test_active_bundle_protocol.py::test_corrupt_bundle_does_not_fall_back",
+        "tests/test_active_bundle_protocol.py::test_forward_production_stops_before_reading_log_when_bundle_is_absent"
+      ]
+    },
+    "signal_decision_request_fill_separated_no_fill_no_actual_pnl": {
+      "accepted": true,
+      "evidence": [
+        "tests/test_execution_timeline.py::test_f01_and_f04_paper_fill_is_first_open_strictly_after_decision",
+        "tests/test_execution_timeline.py::test_f03_candidate_without_fill_is_not_an_actual_closed_trade"
+      ]
+    },
+    "whole_series_tip_age_at_most_two": {
+      "accepted": true,
+      "evidence": [
+        "tests/test_global_tip_age_gate.py::test_g01_forward_final_gate_rejects_back2_local_bar198_mapping",
+        "tests/test_global_tip_age_gate.py::test_g02_global_tip_age_zero_one_two_are_accepted"
+      ]
+    },
+    "research_lift_not_attributed_to_active": {
+      "accepted": true,
+      "evidence": [
+        "analysis/output/p0_runtime_parity_audit_20260803.json"
+      ]
+    },
+    "abnormal_q90_recorded_not_retuned": {
+      "accepted": true,
+      "evidence": [
+        "analysis/output/p0_return_semantics_20260803.json",
+        "tests/test_active_bundle_protocol.py::test_abnormal_selector_can_be_audited_but_never_execution_eligible"
+      ]
+    },
+    "gross_taker_maker_no_implicit_double_deduction": {
+      "accepted": true,
+      "evidence": [
+        "tests/test_return_cost_contract.py::test_taker_to_maker_restores_gross_before_applying_maker",
+        "tests/test_return_cost_contract.py::test_deduct_api_refuses_already_net_input"
+      ]
+    }
+  },
+  "checks": {
+    "commit_chain_exact": true,
+    "nine_commits": true,
+    "branch_main": true,
+    "p0_target_equals_origin_main": true,
+    "p0_target_equals_pre_acceptance_head": true,
+    "worktree_has_only_acceptance_artifacts": true,
+    "no_forbidden_path_changes": true,
+    "no_deleted_paths": true,
+    "no_historical_report_rewrites": true,
+    "no_training_call_added": true,
+    "no_order_call_added": true,
+    "active_pointer_same_at_endpoints": true,
+    "active_bundle_absent_at_endpoints_and_now": true,
+    "protected_hashes_unchanged": true,
+    "frozen_dataset_hash_matches": true,
+    "cutoff_after_dataset_max": true,
+    "runtime_parity_rejected": true,
+    "runtime_did_not_claim_active_bundle": true,
+    "runtime_safety_flags_clean": true,
+    "return_audit_is_preholdout": true,
+    "selector_was_recorded_abnormal": true,
+    "reports_exist_and_have_direct_verdicts": true,
+    "handoff_is_fail_closed": true,
+    "focused_tests_pass": true,
+    "complete_tests_pass_without_deselect": true,
+    "tests_preserved_protected_files": true
+  },
+  "safety": {
+    "holdout_rows_read": 0,
+    "trained": false,
+    "threshold_changed": false,
+    "active_changed": false,
+    "active_bundle_created": false,
+    "forward_log_changed": false,
+    "ledger_changed": false,
+    "deployed": false,
+    "order_triggered": false
+  }
+}

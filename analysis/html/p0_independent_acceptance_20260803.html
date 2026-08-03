@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P0 独立验收报告（2026-08-03）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P0 独立验收报告（2026-08-03）</h1>
+<h2>直接裁决</h2>
+<p><strong><code>p0_independent_acceptance = accepted</code>，允许进入 P1-DATA。</strong></p>
+<p>本裁决由重新检查 <code>4333fa7..fba6a65</code> 的九个提交、当前源码、测试、P0 报告、机器 JSON、HANDOFF 和受保护文件得出，不引用上一轮完成摘要作为证明。当前仍无 <code>models/active_bundle.json</code>，生产继续 fail-closed。</p>
+<p>机器可读结论：<code>analysis/output/p0_independent_acceptance_20260803.json</code>。</p>
+<h2>Commit 独立复核</h2>
+<table><thead><tr>
+<th>顺序</th>
+<th>commit</th>
+<th>目的</th>
+<th>写入范围裁决</th>
+</tr></thead><tbody>
+<tr><td>1</td><td><code>95ebfb0</code></td><td>P0.0 基线证据</td><td>只新增 <code>analysis/output/p0_safety_baseline_*</code></td></tr>
+<tr><td>2</td><td><code>cd9ca5a</code></td><td>side/protocol signal identity 与 executor 拒绝</td><td>execution、tests、learning</td></tr>
+<tr><td>3</td><td><code>8cd2a56</code></td><td>exact bundle + hash、production 不 fallback</td><td>protocol/executor/forward、example、tests、learning</td></tr>
+<tr><td>4</td><td><code>892964c</code></td><td>单一 protocol provenance 传播</td><td>forward/executor、tests、learning</td></tr>
+<tr><td>5</td><td><code>1cb669c</code></td><td>feature semantics 显式选择</td><td>features/forward、fixture、tests、learning</td></tr>
+<tr><td>6</td><td><code>ee98ebd</code></td><td>canonical barrier/return/cost</td><td>judgment/cost、audit、tests、learning</td></tr>
+<tr><td>7</td><td><code>8e90390</code></td><td>signal/decision/request/fill 拆分</td><td>forward/executor/web、tests、learning</td></tr>
+<tr><td>8</td><td><code>969dda7</code></td><td>global tip age 与 selector safety</td><td>candidate/protocol、example、tests、learning</td></tr>
+<tr><td>9</td><td><code>fba6a65</code></td><td>P0 报告、JSON、HANDOFF 与验收矩阵</td><td>docs/analysis/audit/test</td></tr>
+</tbody></table>
+<p>机器审计确认九个 commit 的 parent chain 完整、共 60 个变更路径，且：</p>
+<ul>
+<li>无 <code>data/</code>、模型权重、<code>models/ACTIVE</code>、<code>models/active_bundle.json</code>、密钥或部署路径变更；</li>
+<li>无删除文件、无覆盖旧 analysis 实验报告；</li>
+<li>P0 新增 executable diff 中无训练调用、无新增下单/撤单调用；</li>
+<li><code>main</code>、P0 target 和当时 <code>origin/main</code> 都是 <code>fba6a65</code>；生成 acceptance 文件前 worktree clean，生成时只有本 acceptance 脚本与 learning 属于允许的新增路径。</li>
+</ul>
+<h2>保护对象与 cutoff</h2>
+<table><thead><tr>
+<th>对象</th>
+<th>P0.0 SHA256</th>
+<th>当前 SHA256</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td><code>models/ACTIVE</code></td><td><code>899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef</code></td><td>同左</td><td>unchanged</td></tr>
+<tr><td><code>data/forward_log.csv</code></td><td><code>6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb</code></td><td>同左</td><td>unchanged</td></tr>
+<tr><td><code>data/executor_ledger.jsonl</code></td><td><code>de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39</code></td><td>同左</td><td>unchanged</td></tr>
+</tbody></table>
+<p><code>models/active_bundle.json</code> 在基线 commit、P0 target 和当前工作树均不存在。</p>
+<p>独立流式读取冻结 P0 数据集的 <code>signal_time</code> 列：18,379 行，SHA <code>9bca6802…a94</code> 与 sidecar 一致，最大时间 <code>2026-05-03T05:15:00Z</code>，cutoff 为 <code>2026-05-04T00:00:00Z</code>，读取到的 holdout 行数为 0。</p>
+<h2>安全不变量复核</h2>
+<table><thead><tr>
+<th>不变量</th>
+<th>独立结论</th>
+<th>主要证据</th>
+</tr></thead><tbody>
+<tr><td>short/missing/NaN/unknown/protocol mismatch 在 client 前拒绝</td><td>accepted</td><td>executor guard tests，mock client 0 调用</td></tr>
+<tr><td>production 只接受 exact bundle + hash，无 latest fallback</td><td>accepted</td><td>corrupt/absent/hash/early-fail tests</td></tr>
+<tr><td>bundle 不存在时 fail-closed</td><td>accepted</td><td>forward 在读取 log 前抛 <code>BundleError</code></td></tr>
+<tr><td>signal/decision/request/fill 分离；无 fill 无 actual PnL</td><td>accepted</td><td>execution timeline 与 actual-closed tests</td></tr>
+<tr><td>whole-series global tip age <code>&lt;=2</code></td><td>accepted</td><td>tip/tip-1/tip-2 接受、tip-3 拒绝 tests</td></tr>
+<tr><td>47-feature 研究结果未归给 28-feature ACTIVE</td><td>accepted</td><td>parity JSON 仍为 <code>REJECTED</code></td></tr>
+<tr><td>q90 异常只记录/阻断，未偷调 selector</td><td>accepted</td><td>pass 91.13%、equal 86.16%、ACTIVE hash 不变</td></tr>
+<tr><td>gross/taker/maker 不隐式二次扣费</td><td>accepted</td><td>gross bridge 与 already-net refusal tests</td></tr>
+</tbody></table>
+<h2>测试与环境边界</h2>
+<p>仓库虚拟环境：Python 3.9.6，torch 2.8.0，torchvision 0.23.0，ultralytics 8.4.89，LightGBM 4.6.0，pandas 2.3.3，numpy 2.0.2。</p>
+<pre><code>
+P0 聚焦矩阵：133 passed
+完整 tests/：473 passed, 2 skipped, 0 failed, 0 deselected
+</code></pre>
+<p>两项 skip 都来自 <code>tests/test_factor_causality.py</code>：rolling skew 的 pandas 浮点状态伪差、rolling rank 慢/脆弱用例；它们不是 15m YOLO candidate、28-feature extractor、canonical label 或 cost path。上一轮 system Python 缺 <code>torchvision</code> 的结果只能描述错误解释器的环境边界；仓库 <code>.venv</code> 已无需 deselect 完整通过。</p>
+<p>测试前后 ACTIVE、forward log、ledger 哈希均一致。</p>
+<h2>报告与 HANDOFF 一致性</h2>
+<ul>
+<li>P0 报告明确写“本地安全验收通过，但策略不可执行”；</li>
+<li>runtime parity JSON/报告明确拒绝研究 lift 转移；</li>
+<li>return audit 最大数据时间严格早于 cutoff；</li>
+<li>HANDOFF 顶部保留 Owner gate、无 active bundle、不得自动进入 P1/P2 的原始结论；</li>
+<li>MD 与 HTML 均存在且非空。</li>
+</ul>
+<h2>研究指标适用性</h2>
+<p>本轮是安全验收，不是策略实验；没有训练、阈值搜索或新收益配置，因此 val AUC、置换 p、top-decile 收益、胜率、单特征与随机对照均为 <strong>N/A</strong>。P0 JSON 中的旧 v10 数字只用于身份与语义核对。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>Git、哈希和 ledger 不变可以证明没有持久化下单证据，无法从本地仓库证明外部世界绝对没有人工操作；本轮没有访问 VPS、账户或密钥。</li>
+<li>P0 acceptance 只授权 P1 数据重建，不授权训练、selector、ACTIVE、active bundle、部署或下单。</li>
+<li>P1 full build 仍必须先证明 detector、universe 与原始 candle 输入的唯一权威来源，并先通过 fixture/dry-run。</li>
+</ul>
+<h2>复现命令</h2>
+<pre><code>
+PYTHONPATH=. .venv/bin/python scripts/audit_p0_independent_acceptance_20260803.py
+python3 scripts/md_to_html.py analysis/p0_independent_acceptance_20260803.md --out-dir analysis/html
+python3 scripts/gen_analysis_index.py
+</code></pre>
+<h2>安全声明</h2>
+<p>独立验收阶段未训练、未调 threshold、未读取 cutoff 起的 holdout、未修改 <code>models/ACTIVE</code>、未创建 active bundle、未修改主 forward log/ledger、未部署、未访问交易 client 或下单。</p>
+</body>
+</html>

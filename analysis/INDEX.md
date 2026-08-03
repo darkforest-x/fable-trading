@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **177** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **178** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -11,6 +11,7 @@
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
 | 2026-08-03 | [`p0_baseline_audit_20260803.md`](p0_baseline_audit_20260803.md) | P0.0 基线审计 —— 仓库现状 vs Grok Build 接管计划 | 计划书 00 页称"当前 q90 阈值并不等于运行时 top-decile;固定门在 val 放行约 91.2%"。 |
+| 2026-08-03 | [`p0_independent_acceptance_20260803.md`](p0_independent_acceptance_20260803.md) | P0 独立验收报告（2026-08-03） | `p0_independent_acceptance = accepted`，允许进入 P1-DATA。 |
 | 2026-08-03 | [`p0_runtime_parity_audit_20260803.md`](p0_runtime_parity_audit_20260803.md) | P0 Runtime Parity 审计（2026-08-03） | REJECTED：当前 `models/ACTIVE` 不是 2026-07-30 研究优胜配置，研究结论不得转移。 |
 | 2026-08-03 | [`p0_safety_protocol_repair_20260803.md`](p0_safety_protocol_repair_20260803.md) | P0-SAFETY short 协议修复报告（2026-08-03） | P0-SAFETY 本地验收通过；当前策略仍不可执行。 |
 | 2026-08-03 | [`week_plan_20260803.md`](week_plan_20260803.md) | 一周执行计划（2026-08-03 → 08-09） |  |
@@ -208,6 +209,7 @@
 - [`oss_architecture_benchmark.md`](oss_architecture_benchmark.md) — 开源架构基准与隔离试点
 - [`p0_alpha_report.md`](p0_alpha_report.md) — P0 报告：人工标签是否含 alpha？
 - [`p0_baseline_audit_20260803.md`](p0_baseline_audit_20260803.md) — P0.0 基线审计 —— 仓库现状 vs Grok Build 接管计划
+- [`p0_independent_acceptance_20260803.md`](p0_independent_acceptance_20260803.md) — P0 独立验收报告（2026-08-03）
 - [`p0_runtime_parity_audit_20260803.md`](p0_runtime_parity_audit_20260803.md) — P0 Runtime Parity 审计（2026-08-03）
 - [`p0_safety_protocol_repair_20260803.md`](p0_safety_protocol_repair_20260803.md) — P0-SAFETY short 协议修复报告（2026-08-03）
 - [`p15_h10_short_report.md`](p15_h10_short_report.md) — P1.5 R2：H10 做空侧镜像验证
