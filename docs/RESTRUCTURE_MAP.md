@@ -15,7 +15,7 @@ owner 2026-08-03 决定重构为四层,项目更名 **yoyo**。
 | L1 检测 | `yoyo/layers/l1_detection/` | 未开始 |
 | L2 判断 | `yoyo/layers/l2_judgment/` | 未开始 |
 | L3 回测 | `yoyo/layers/l3_backtest/` | 未开始 |
-| L4 执行 | `yoyo/layers/l4_execution/` | 未开始 |
+| L4 执行 | `yoyo/layers/l4_execution/` | **已迁** |
 | 数据 | `yoyo/data/` | 未开始 |
 | 看板 | `tools/dashboard/` | 未开始 |
 
@@ -29,6 +29,11 @@ owner 2026-08-03 决定重构为四层,项目更名 **yoyo**。
 | `src/judgment/protocol.py` | `yoyo/contracts/protocol.py` | 迁移时内联了 `file_sha256`,不再向 judgment 层借 |
 | `src/judgment/outcomes.py` | `yoyo/contracts/outcomes.py` | |
 | `src/costs.py` | `yoyo/contracts/costs.py` | |
+| `src/judgment/forward_records.py` | `yoyo/contracts/forward_log.py` | **分层暴露出来的**:forward log 是 L2 写、L4 读的账本,属于契约而非任一层 |
+| `src/judgment/forward_types.py` 的 schema 部分 | `yoyo/contracts/forward_log.py` | 列定义 / LEGACY 标记 / ForwardRecord / MergeResult;L2 私有的 ForwardScanInput 等留在原处 |
+| `src/execution/*.py` (5 个 + `__main__`) | `yoyo/layers/l4_execution/` | 只依赖 contracts,零跨层 import |
+| `src/notify.py` | `yoyo/notify.py` | L2/L4 共用工具,不是层 |
+| `src/timefmt.py` | `yoyo/timefmt.py` | 同上 |
 
 ## 计划中的对应(尚未执行,写在这里是为了让人能预判)
 
@@ -42,7 +47,6 @@ owner 2026-08-03 决定重构为四层,项目更名 **yoyo**。
 | `src/judgment/train.py` | `yoyo/layers/l2_judgment/train.py` |
 | `src/judgment/forward*.py` | 拆分:候选发现 → L1,打分 → L2,结果解算 → contracts/outcomes |
 | `src/backtest/run.py` | `yoyo/layers/l3_backtest/run.py` |
-| `src/execution/*.py` | `yoyo/layers/l4_execution/` |
 | `src/data/*.py` | `yoyo/data/` |
 | `src/webapp/` | `tools/dashboard/` —— 观察工具,不是交易层 |
 | `src/scout_mtf` `src/eth_micro` `src/short_tf` `src/factors` | `archive/sidequests/` —— 支线,均两周以上未动 |

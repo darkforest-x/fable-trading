@@ -10,9 +10,9 @@ import argparse
 import sys
 from pathlib import Path
 
-from src.execution.config import DEFAULT_CONFIG_PATH, ExecutorConfig
-from src.execution.executor import run_loop, run_once
-from src.execution.okx_client import KEYS_PATH, OkxDemoClient, OkxDemoError
+from yoyo.layers.l4_execution.config import DEFAULT_CONFIG_PATH, ExecutorConfig
+from yoyo.layers.l4_execution.executor import run_loop, run_once
+from yoyo.layers.l4_execution.okx_client import KEYS_PATH, OkxDemoClient, OkxDemoError
 
 
 def write_examples() -> None:
@@ -66,7 +66,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.once or args.dry_run:
         summary = run_once(cfg, dry_run=args.dry_run)
-        from src.execution.executor import json_dumps
+        from yoyo.layers.l4_execution.executor import json_dumps
 
         print(json_dumps(summary))
         return 0
