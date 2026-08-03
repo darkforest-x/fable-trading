@@ -45,6 +45,22 @@ def _artifact() -> types.SimpleNamespace:
         model_path="models/stub.txt",
         best_iteration=1,
         sizing_tiers=None,
+        feature_semantics="legacy_unaligned",
+    )
+
+
+def _protocol() -> types.SimpleNamespace:
+    return types.SimpleNamespace(
+        protocol_version="short_test_v1",
+        strategy_id="dense_start_short_15m",
+        side="short",
+        feature_semantics="legacy_unaligned",
+        threshold=0.5,
+        execution_eligible=False,
+        detector_path=Path("models/det.pt"),
+        model_sha256="model-sha",
+        detector_sha256="detector-sha",
+        passes_threshold=lambda score: score >= 0.5,
     )
 
 
@@ -60,6 +76,7 @@ def _scan_input(frame: pd.DataFrame, existing: pd.DataFrame | None = None) -> Fo
         detected_at="2026-07-07T18:30:00+00:00",
         start_time=pd.Timestamp("2026-07-01", tz="UTC"),
         existing_log=existing if existing is not None else pd.DataFrame(),
+        protocol=_protocol(),
     )
 
 
@@ -94,6 +111,47 @@ def test_research_scan_retains_rules_capability(monkeypatch: pytest.MonkeyPatch)
 
     assert result.records == []
     assert result.scanned_series == 0
+
+
+def test_protocol_side_cannot_disagree_with_artifact(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    scan = _scan_input(_frame())
+    scan.artifact.side = "long"
+    monkeypatch.setattr(
+        fs,
+        "iter_series",
+        lambda **kwargs: pytest.fail("mismatch must fail before series are read"),
+    )
+
+    with pytest.raises(RuntimeError, match="does not match protocol side"):
+        fs.scan_forward_records(scan)
+
+
+def test_detection_and_decision_times_are_recorded_at_their_own_steps(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    frame = _frame()
+    monkeypatch.setattr(fs, "CANDIDATE_SOURCE", "rules")
+    monkeypatch.setattr(fs, "RUNTIME_MODE", "research")
+    monkeypatch.setattr(
+        fs, "iter_series", lambda **kwargs: iter([("okx", "TEST_USDT_SWAP", frame)])
+    )
+    monkeypatch.setattr(
+        fs, "forward_candidate_indices", lambda enriched, **kwargs: [len(frame) - 2]
+    )
+    clock = iter(["candidate-finished", "decision-finished"])
+    monkeypatch.setattr(fs, "_utc_now_iso", lambda: next(clock))
+
+    result = fs.scan_forward_records(
+        _scan_input(frame),
+        exit_resolver=lambda enriched, i: ForwardExit("open", "", -1, 0, "", np.nan),
+    )
+
+    assert len(result.records) == 1
+    assert result.records[0]["detected_at"] == "candidate-finished"
+    assert result.records[0]["decision_at"] == "decision-finished"
+    assert result.records[0]["detected_at"] != result.records[0]["decision_at"]
 
 
 def test_missing_detector_discovers_nothing(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -150,7 +208,9 @@ def test_missing_detector_still_resolves_tracked_open_row(
 
     assert len(result.records) == 1
     assert result.records[0]["signal_time"] == signal_time
-    assert result.records[0]["side"] == "long"
+    assert result.records[0]["side"] == "short"
+    assert result.records[0]["protocol_version"] == "short_test_v1"
+    assert result.records[0]["model_sha256"] == "model-sha"
 
 
 def test_forward_pulse_has_static_fail_closed_gate() -> None:

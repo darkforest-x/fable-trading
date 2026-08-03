@@ -36,7 +36,7 @@ def _row(**over) -> dict:
     row = {
         "source": "okx", "symbol": "BTC_USDT_SWAP", "signal_time": str(T),
         "detected_at": str(T), "status": "open", "score": 0.1, "threshold": 0.0,
-        "model_path": "m", "dataset_sha256": "s", "signal_i": 5,
+        "model_path": "m", "dataset_sha256": "dataset-sha", "signal_i": 5,
         "entry_time": str(T), "entry_price": 100.0, "maker_filled": True,
         "outcome": "", "label": -1, "exit_offset": 0, "exit_time": "",
         "realized_ret": 0.0, "atr_pct": 0.01, "dense_run_len": 8,
@@ -44,6 +44,7 @@ def _row(**over) -> dict:
         "protocol_version": "short_v11", "strategy_id": "dense_start_short_15m",
         "feature_semantics": "side_aligned_v1", "decision_at": str(T),
         "execution_eligible": True,
+        "model_sha256": "model-sha", "detector_sha256": "detector-sha",
     }
     row.update(over)
     return row
@@ -137,7 +138,7 @@ def test_eligible_survives_a_csv_round_trip(tmp_path: Path) -> None:
 def test_a_log_predating_provenance_reads_back_marked_not_crashed(tmp_path: Path) -> None:
     old = _row()
     for column in ("protocol_version", "strategy_id", "feature_semantics",
-                   "decision_at", "execution_eligible"):
+                   "decision_at", "execution_eligible", "model_sha256", "detector_sha256"):
         old.pop(column)
     path = tmp_path / "forward_log.csv"
     pd.DataFrame([old]).to_csv(path, index=False)
@@ -155,7 +156,7 @@ def test_legacy_rows_do_not_enter_a_new_protocols_count(tmp_path: Path) -> None:
     """H-02 stated as the number it protects: the repaired book's 100 trades."""
     old = _row(symbol="OLD_USDT_SWAP")
     for column in ("protocol_version", "strategy_id", "feature_semantics",
-                   "decision_at", "execution_eligible"):
+                   "decision_at", "execution_eligible", "model_sha256", "detector_sha256"):
         old.pop(column)
     path = tmp_path / "forward_log.csv"
     pd.DataFrame([old, _row(symbol="NEW_USDT_SWAP")]).to_csv(path, index=False)

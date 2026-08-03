@@ -194,6 +194,7 @@ def _run_forward_tracking(
             detected_at=datetime.now(timezone.utc).isoformat(),
             start_time=normalized_start,
             existing_log=existing,
+            protocol=bundle,
         ),
         exit_resolver=exit_resolver,
         yolo_weights=yolo_weights if yolo_weights is not None else bundle.detector_path,

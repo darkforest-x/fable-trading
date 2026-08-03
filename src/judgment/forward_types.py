@@ -4,12 +4,15 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Final, TypedDict
+from typing import TYPE_CHECKING, Final, TypedDict
 
 import lightgbm as lgb
 import pandas as pd
 
 from src.judgment.frozen import FrozenArtifact
+
+if TYPE_CHECKING:
+    from src.judgment.protocol import StrategyProtocol
 
 PROJECT_DIR: Final = Path(__file__).resolve().parents[2]
 FORWARD_LOG_PATH: Final = PROJECT_DIR / "data" / "forward_log.csv"
@@ -79,6 +82,9 @@ FORWARD_COLUMNS: Final = (
     "feature_semantics",
     "decision_at",
     "execution_eligible",
+    # Immutable artifact identity. Appended for CSV compatibility.
+    "model_sha256",
+    "detector_sha256",
 )
 OUTCOME_COLUMNS: Final = ("status", "outcome", "label", "exit_offset", "exit_time", "realized_ret")
 
@@ -123,6 +129,8 @@ class ForwardRecord(TypedDict):
     feature_semantics: str
     decision_at: str
     execution_eligible: bool
+    model_sha256: str
+    detector_sha256: str
 
 
 def validate_candidate_source(candidate_source: str, runtime_mode: str) -> str:
@@ -181,13 +189,16 @@ class ForwardExit:
 
 @dataclass(frozen=True)
 class ForwardScanInput:
-    __slots__ = ("artifact", "booster", "detected_at", "start_time", "existing_log")
+    __slots__ = (
+        "artifact", "booster", "detected_at", "start_time", "existing_log", "protocol"
+    )
 
     artifact: FrozenArtifact
     booster: lgb.Booster
     detected_at: str
     start_time: pd.Timestamp
     existing_log: pd.DataFrame
+    protocol: StrategyProtocol | None
 
 
 @dataclass(frozen=True)

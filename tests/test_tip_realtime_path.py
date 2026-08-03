@@ -72,6 +72,7 @@ def _run_pulse(frame: pd.DataFrame, existing: pd.DataFrame, monkeypatch: pytest.
             detected_at=detected_at,
             start_time=pd.Timestamp("2026-07-01", tz="UTC"),
             existing_log=existing,
+            protocol=None,
         )
     )
     return scan
@@ -114,7 +115,7 @@ def test_tip_signal_recorded_same_pulse_and_backfilled_next(
     merged_b = merge_forward_log(persisted, scan_b.records)
     assert merged_b.new_signals == 0
     row = merged_b.frame.iloc[0]
-    assert row["detected_at"] == "pulse-A"  # first-seen wins (lag accounting)
+    assert row["detected_at"] == rec["detected_at"]  # first-seen wins (lag accounting)
     assert row["entry_price"] == pytest.approx(float(frame_t1["open"].iloc[650]))
     assert not pd.isna(row["maker_filled"])
 
@@ -135,5 +136,6 @@ def _run_pulse_tracked(frame, existing, monkeypatch, detected_at):
             detected_at=detected_at,
             start_time=pd.Timestamp("2026-07-01", tz="UTC"),
             existing_log=existing,
+            protocol=None,
         )
     )

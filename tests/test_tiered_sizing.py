@@ -166,6 +166,7 @@ class TestForwardScanStamping:
                 detected_at="2026-07-20T00:00:00+00:00",
                 start_time=pd.Timestamp("2026-07-01", tz="UTC"),
                 existing_log=pd.DataFrame(),
+                protocol=None,
             )
         )
         return result.records
@@ -267,7 +268,7 @@ class TestExecutorSizing:
             "source": "okx", "symbol": "BTC_USDT_SWAP", "side": "long",
             "signal_time": str(now - pd.Timedelta(minutes=5)),
             "detected_at": str(now), "status": "open", "score": 0.05,
-            "threshold": Q90, "model_path": "m", "dataset_sha256": "s",
+            "threshold": Q90, "model_path": "m", "dataset_sha256": "dataset-sha",
             "signal_i": 1, "entry_time": str(now), "entry_price": 100.0,
             "maker_filled": True, "outcome": "", "label": -1,
             "exit_offset": 0, "exit_time": "", "realized_ret": "",
@@ -276,6 +277,8 @@ class TestExecutorSizing:
             "strategy_id": "legacy_long_test",
             "feature_semantics": "side_aligned_v1",
             "execution_eligible": True,
+            "model_sha256": "model-sha",
+            "detector_sha256": "detector-sha",
         }
         if size_mult is not None:
             row["tier"] = "q99_plus"
@@ -304,6 +307,9 @@ class TestExecutorSizing:
             threshold=Q90,
             side="long",
             execution_eligible=True,
+            model_sha256="model-sha",
+            detector_sha256="detector-sha",
+            dataset_sha256="dataset-sha",
             passes_threshold=lambda score: score >= Q90,
             accepts_row_side=lambda raw: str(raw).strip().lower() == "long",
         )

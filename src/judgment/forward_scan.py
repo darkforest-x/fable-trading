@@ -44,7 +44,6 @@ from src.judgment.features import (
     extract_feature_rows_for_side,
 )
 from src.judgment.forward_records import forward_key, open_keys
-from src.judgment.protocol import load_active_bundle
 from src.judgment.forward_types import (
     BAR,
     CANDIDATE_SOURCE,
@@ -76,6 +75,10 @@ ExitResolver = Callable[[pd.DataFrame, int], Optional[ForwardExit]]
 LIVE_TAIL_BARS = 2000
 
 
+def _utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
 def _forward_workers() -> int:
     """Series-level parallelism for live YOLO. Override with FABLE_FORWARD_WORKERS."""
     raw = os.environ.get("FABLE_FORWARD_WORKERS", "").strip()
@@ -105,7 +108,22 @@ def scan_forward_records(
     `yolo_mode` resolves from env ``FABLE_YOLO_MODE`` (default live).
     """
     candidate_source = validate_candidate_source(CANDIDATE_SOURCE, RUNTIME_MODE)
-    trade_side = _artifact_trade_side(scan.artifact)
+    protocol = scan.protocol
+    if RUNTIME_MODE == "production" and protocol is None:
+        raise RuntimeError("production forward scan requires a verified strategy protocol")
+    trade_side = protocol.side if protocol is not None else _artifact_trade_side(scan.artifact)
+    if protocol is not None:
+        artifact_side = _declared_artifact_side(scan.artifact)
+        if artifact_side is not None and artifact_side != protocol.side:
+            raise RuntimeError(
+                f"artifact side={artifact_side!r} does not match protocol side={protocol.side!r}"
+            )
+        artifact_semantics = _artifact_feature_semantics(scan.artifact)
+        if artifact_semantics != protocol.feature_semantics:
+            raise RuntimeError(
+                "artifact feature semantics does not match verified protocol: "
+                f"{artifact_semantics!r} != {protocol.feature_semantics!r}"
+            )
     resolve = exit_resolver or (
         resolve_forward_exit_short if trade_side == "short" else resolve_forward_exit
     )
@@ -117,20 +135,27 @@ def scan_forward_records(
     candidates_seen = 0
     threshold_signals_seen = 0
     tracked_keys = open_keys(scan.existing_log)
-    # Provenance for every row this scan writes. With no bundle placed the run is
-    # still honest about what produced it: the artifact's own identity, and NOT
-    # execution eligible -- eligibility is a claim only a verified bundle may make.
-    _bundle = load_active_bundle()
+    # Provenance comes from the protocol object passed by the production loader;
+    # never rediscover a global bundle mid-scan. Explicit research scans without
+    # a protocol remain observable but execution-ineligible.
     protocol_version = (
-        _bundle.protocol_version if _bundle is not None
+        protocol.protocol_version if protocol is not None
         else f"artifact:{Path(scan.artifact.relative_model_path).stem}"
     )
-    strategy_id = _bundle.strategy_id if _bundle is not None else "unbundled"
-    execution_eligible = bool(_bundle.execution_eligible) if _bundle is not None else False
+    strategy_id = protocol.strategy_id if protocol is not None else "unbundled_research"
+    execution_eligible = bool(protocol.execution_eligible) if protocol is not None else False
+    model_sha256 = protocol.model_sha256 if protocol is not None else ""
+    detector_sha256 = protocol.detector_sha256 if protocol is not None else ""
+    row_threshold = protocol.threshold if protocol is not None else scan.artifact.threshold
     yolo_model = None
     if candidate_source == "yolo":
         try:
-            yolo_model = load_yolo_model(yolo_weights) if yolo_weights is not None else load_yolo_model()
+            exact_weights = (
+                yolo_weights
+                if yolo_weights is not None
+                else (protocol.detector_path if protocol is not None else None)
+            )
+            yolo_model = load_yolo_model(exact_weights) if exact_weights is not None else load_yolo_model()
         except (FileNotFoundError, ImportError) as exc:
             # No usable weights on disk (owner_best / v10 / v16 all missing).
             # Idle discovery; open rows still resolve. Owner 2026-07-31: when
@@ -174,7 +199,9 @@ def scan_forward_records(
     )
     reset_tip_edge_rejected()
 
-    def _discover(job: tuple[str, str, pd.DataFrame]) -> tuple[str, str, pd.DataFrame, pd.DataFrame, list[int]]:
+    def _discover(
+        job: tuple[str, str, pd.DataFrame]
+    ) -> tuple[str, str, pd.DataFrame, pd.DataFrame, list[int], str]:
         """Phase 1 (parallel-safe): indicators + YOLO/rules indices only."""
         source, symbol, frame = job
         enriched = add_indicators(frame)
@@ -197,10 +224,10 @@ def scan_forward_records(
             signal_indices.update(
                 int(idx) for idx in signal_times[signal_times.isin(tracked_times)].index
             )
-        return source, symbol, frame, enriched, sorted(signal_indices)
+        return source, symbol, frame, enriched, sorted(signal_indices), _utc_now_iso()
 
     t_discover = time.monotonic()
-    discovered: list[tuple[str, str, pd.DataFrame, pd.DataFrame, list[int]]] = []
+    discovered: list[tuple[str, str, pd.DataFrame, pd.DataFrame, list[int], str]] = []
     if workers <= 1:
         discovered = [_discover(job) for job in jobs]
     else:
@@ -218,7 +245,7 @@ def scan_forward_records(
     )
 
     # Phase 2 (sequential): LightGBM predict + barrier resolve (not thread-safe).
-    for source, symbol, frame, enriched, ordered_indices in discovered:
+    for source, symbol, frame, enriched, ordered_indices, candidate_detected_at in discovered:
         if not ordered_indices:
             continue
         featured = add_features(enriched)
@@ -236,7 +263,12 @@ def scan_forward_records(
             if not tracked_open and signal_time < scan.start_time:
                 continue
             score = float(scores[row_pos])
-            if not tracked_open and score < scan.artifact.threshold:
+            passes_threshold = (
+                protocol.passes_threshold(score)
+                if protocol is not None
+                else score >= scan.artifact.threshold
+            )
+            if not tracked_open and not passes_threshold:
                 continue
             exit_state = resolve(enriched, signal_i)
             if exit_state is None:
@@ -269,7 +301,7 @@ def scan_forward_records(
             # (shadow books, stubs) log the legacy 1x.
             tiers = getattr(scan.artifact, "sizing_tiers", None)
             if tiers is not None:
-                tier, size_mult = tiers.tier_for_score(score, scan.artifact.threshold)
+                tier, size_mult = tiers.tier_for_score(score, row_threshold)
             else:
                 tier, size_mult = "", 1.0
             records.append(
@@ -278,10 +310,10 @@ def scan_forward_records(
                     "symbol": symbol,
                     "is_stockish": is_stockish(symbol),
                     "signal_time": str(signal_time),
-                    "detected_at": scan.detected_at,
+                    "detected_at": candidate_detected_at,
                     "status": exit_state.status,
                     "score": score,
-                    "threshold": scan.artifact.threshold,
+                    "threshold": row_threshold,
                     "model_path": scan.artifact.relative_model_path,
                     "dataset_sha256": scan.artifact.dataset_sha256,
                     "signal_i": int(signal_i),
@@ -300,13 +332,19 @@ def scan_forward_records(
                     "side": trade_side,
                     "protocol_version": protocol_version,
                     "strategy_id": strategy_id,
-                    "feature_semantics": _artifact_feature_semantics(scan.artifact),
+                    "feature_semantics": (
+                        protocol.feature_semantics
+                        if protocol is not None
+                        else _artifact_feature_semantics(scan.artifact)
+                    ),
                     # Stamped per candidate, not per batch: a scan covering 344
                     # symbols finishes them minutes apart, and sharing the scan's
                     # start time would claim decisions that had not happened yet
                     # (acceptance F-05).
-                    "decision_at": datetime.now(timezone.utc).isoformat(),
+                    "decision_at": _utc_now_iso(),
                     "execution_eligible": execution_eligible,
+                    "model_sha256": model_sha256,
+                    "detector_sha256": detector_sha256,
                 }
             )
     print(
@@ -414,6 +452,16 @@ def _artifact_trade_side(artifact: object) -> str:
     if side_s not in {"long", "short"}:
         return "long"
     return side_s
+
+
+def _declared_artifact_side(artifact: object) -> str | None:
+    """Return an explicitly declared artifact side, without a legacy default."""
+    cfg = getattr(artifact, "config", None)
+    side = getattr(cfg, "side", None) if cfg is not None else getattr(artifact, "side", None)
+    if side is None:
+        return None
+    value = str(side).strip().lower()
+    return value if value in {"long", "short"} else None
 
 
 def resolve_forward_exit(enriched: pd.DataFrame, signal_i: int) -> ForwardExit | None:

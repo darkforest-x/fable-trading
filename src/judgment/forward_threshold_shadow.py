@@ -218,6 +218,7 @@ def run_q80_shadow(
             detected_at=datetime.now(timezone.utc).isoformat(),
             start_time=pd.Timestamp(start_time).tz_convert("UTC"),
             existing_log=existing,
+            protocol=None,
         )
     )
     merged = merge_forward_log(existing, scan.records)

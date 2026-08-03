@@ -121,6 +121,9 @@ def load_actionable_signals(
         ("protocol_version", protocol.protocol_version),
         ("strategy_id", protocol.strategy_id),
         ("feature_semantics", protocol.feature_semantics),
+        ("model_sha256", protocol.model_sha256),
+        ("detector_sha256", protocol.detector_sha256),
+        ("dataset_sha256", protocol.dataset_sha256),
     ):
         df = df[df[column].astype(str) == str(expected)]
     if "status" in df.columns:

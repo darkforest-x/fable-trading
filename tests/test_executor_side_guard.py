@@ -52,6 +52,9 @@ def _protocol(*, side: str = "short", eligible: bool = True):
         threshold=0.5,
         side=side,
         execution_eligible=eligible,
+        model_sha256="model-sha",
+        detector_sha256="detector-sha",
+        dataset_sha256="dataset-sha",
         passes_threshold=lambda score: score >= 0.5,
         accepts_row_side=lambda raw: (
             raw is not None and not pd.isna(raw) and str(raw).strip().lower() == side
@@ -123,6 +126,9 @@ def _write_signal(path: Path, *, side: str, eligible: bool = True) -> None:
                 "strategy_id": "dense_start_short_15m",
                 "feature_semantics": "side_aligned_v1",
                 "execution_eligible": eligible,
+                "model_sha256": "model-sha",
+                "detector_sha256": "detector-sha",
+                "dataset_sha256": "dataset-sha",
             }
         ]
     ).to_csv(path, index=False)
