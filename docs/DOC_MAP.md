@@ -17,6 +17,7 @@
 | `docs/DENSE_CLUSTER_DEFINITION.md` | 形态视觉定义（标杆） |
 | `docs/LOCAL_DEBUG_TOOLS.md` | 本机 nvitop/netron/LWC·叠框命令（不抢 MPS） |
 | `docs/EXEC_PROTECTIONS_SPEC.md` | Freqtrade Protections→executor 规格（不引 GPL） |
+| `docs/protocol_repair/` | short 协议修复计划 P0–P5(落盘自 Notion,含与仓库实况的对账) |
 | `docs/ops/VPS_OBSERVABILITY_PENDING.md` | Kuma/Grafana 等 **待 Owner 批** |
 | `analysis/week_plan_*.md` | 当周执行计划 |
 | `analysis/INDEX.md` | **全部 analysis 报告的一行索引（动手前先搜这里）**；自动生成,重跑 `scripts/gen_analysis_index.py` |
