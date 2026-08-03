@@ -1,0 +1,226 @@
+{
+  "active_modified": false,
+  "conf": 0.3,
+  "dataset_paths": [
+    "data/p1/dry_run/p1_real_dry_a.csv",
+    "data/p1/dry_run/p1_real_dry_b.csv"
+  ],
+  "dataset_sha256": "b43c9a25e5de3464582706b7e9595043a8c6728233efc421f1f16bc4cb40ff33",
+  "deployed": false,
+  "detector_path": "models/owner_short_star_v10.pt",
+  "detector_sha256": "86d969c830189b2d1048dca24e10bacc27341e75643cf4f7a912e5a8d5542ad9",
+  "deterministic_bytes": true,
+  "device": "cpu",
+  "elapsed_seconds": 5.12273125,
+  "first_build": {
+    "symbols": [
+      {
+        "detection": {
+          "locally_accepted_boxes": 4,
+          "mapping_rejections": {},
+          "predicted_boxes": 4,
+          "windows_rendered": 12,
+          "windows_scheduled": 12
+        },
+        "load": {
+          "boundary_timestamp_checked": true,
+          "first_open_time": "2025-09-22 10:30:00+00:00",
+          "last_open_time": "2026-05-03 23:45:00+00:00",
+          "post_cutoff_ohlcv_rows_materialized": 0,
+          "preholdout_rows_materialized": 21462
+        },
+        "proposal_indices": [
+          12832,
+          12895,
+          12967,
+          13026
+        ],
+        "row_count": 4,
+        "row_rejections": {},
+        "selection": {
+          "global_tip_age_distribution": {
+            "0": 4
+          },
+          "pulse_after_global_age_count": 4,
+          "pulse_after_min_gap_count": 4,
+          "pulse_raw_signal_count": 4,
+          "unique_candidate_count": 4
+        },
+        "source": "okx",
+        "symbol": "0G_USDT_SWAP"
+      },
+      {
+        "detection": {
+          "locally_accepted_boxes": 4,
+          "mapping_rejections": {},
+          "predicted_boxes": 4,
+          "windows_rendered": 12,
+          "windows_scheduled": 12
+        },
+        "load": {
+          "boundary_timestamp_checked": true,
+          "first_open_time": "2025-06-03 13:15:00+00:00",
+          "last_open_time": "2026-05-03 23:45:00+00:00",
+          "post_cutoff_ohlcv_rows_materialized": 0,
+          "preholdout_rows_materialized": 32107
+        },
+        "proposal_indices": [
+          23537,
+          23618,
+          23651,
+          23720
+        ],
+        "row_count": 4,
+        "row_rejections": {},
+        "selection": {
+          "global_tip_age_distribution": {
+            "0": 4
+          },
+          "pulse_after_global_age_count": 4,
+          "pulse_after_min_gap_count": 4,
+          "pulse_raw_signal_count": 4,
+          "unique_candidate_count": 4
+        },
+        "source": "okx",
+        "symbol": "1INCH_USDT_SWAP"
+      }
+    ]
+  },
+  "generated_at": "2026-08-03T01:55:47.048454+00:00",
+  "git_commit": "86776c2de4e1fe1ed517ce349ae8f2626a40a0ba",
+  "holdout_rows_read": 0,
+  "native_threads": {
+    "opencv_threads": 1,
+    "torch_threads": 1
+  },
+  "ordered": false,
+  "plan": [
+    {
+      "proposal_times": [
+        "2026-02-03 02:30:00+00:00",
+        "2026-02-03 18:15:00+00:00",
+        "2026-02-04 12:15:00+00:00",
+        "2026-02-05 03:00:00+00:00"
+      ],
+      "source": "okx",
+      "symbol": "0G_USDT_SWAP"
+    },
+    {
+      "proposal_times": [
+        "2026-02-03 17:30:00+00:00",
+        "2026-02-04 13:45:00+00:00",
+        "2026-02-04 22:00:00+00:00",
+        "2026-02-05 15:15:00+00:00"
+      ],
+      "source": "okx",
+      "symbol": "1INCH_USDT_SWAP"
+    }
+  ],
+  "post_cutoff_ohlcv_rows_materialized": 0,
+  "protocol_version": "p1_short_l2_preholdout_v1",
+  "repeat_build": {
+    "symbols": [
+      {
+        "detection": {
+          "locally_accepted_boxes": 4,
+          "mapping_rejections": {},
+          "predicted_boxes": 4,
+          "windows_rendered": 12,
+          "windows_scheduled": 12
+        },
+        "load": {
+          "boundary_timestamp_checked": true,
+          "first_open_time": "2025-09-22 10:30:00+00:00",
+          "last_open_time": "2026-05-03 23:45:00+00:00",
+          "post_cutoff_ohlcv_rows_materialized": 0,
+          "preholdout_rows_materialized": 21462
+        },
+        "proposal_indices": [
+          12832,
+          12895,
+          12967,
+          13026
+        ],
+        "row_count": 4,
+        "row_rejections": {},
+        "selection": {
+          "global_tip_age_distribution": {
+            "0": 4
+          },
+          "pulse_after_global_age_count": 4,
+          "pulse_after_min_gap_count": 4,
+          "pulse_raw_signal_count": 4,
+          "unique_candidate_count": 4
+        },
+        "source": "okx",
+        "symbol": "0G_USDT_SWAP"
+      },
+      {
+        "detection": {
+          "locally_accepted_boxes": 4,
+          "mapping_rejections": {},
+          "predicted_boxes": 4,
+          "windows_rendered": 12,
+          "windows_scheduled": 12
+        },
+        "load": {
+          "boundary_timestamp_checked": true,
+          "first_open_time": "2025-06-03 13:15:00+00:00",
+          "last_open_time": "2026-05-03 23:45:00+00:00",
+          "post_cutoff_ohlcv_rows_materialized": 0,
+          "preholdout_rows_materialized": 32107
+        },
+        "proposal_indices": [
+          23537,
+          23618,
+          23651,
+          23720
+        ],
+        "row_count": 4,
+        "row_rejections": {},
+        "selection": {
+          "global_tip_age_distribution": {
+            "0": 4
+          },
+          "pulse_after_global_age_count": 4,
+          "pulse_after_min_gap_count": 4,
+          "pulse_raw_signal_count": 4,
+          "unique_candidate_count": 4
+        },
+        "source": "okx",
+        "symbol": "1INCH_USDT_SWAP"
+      }
+    ]
+  },
+  "repeat_sha256": "b43c9a25e5de3464582706b7e9595043a8c6728233efc421f1f16bc4cb40ff33",
+  "row_count": 8,
+  "stage": "p1_real_dry_run",
+  "threshold_changed": false,
+  "trained": false,
+  "transport_parity": {
+    "accepted": true,
+    "array_boxes": [
+      {
+        "class_id": 0,
+        "confidence": 0.5833029747009277,
+        "h": 0.09762930870056152,
+        "w": 0.04268770292401314,
+        "x": 0.9770349264144897,
+        "y": 0.7010902166366577
+      }
+    ],
+    "max_abs_delta": 0.0,
+    "png_boxes": [
+      {
+        "class_id": 0,
+        "confidence": 0.5833029747009277,
+        "h": 0.09762930870056152,
+        "w": 0.04268770292401314,
+        "x": 0.9770349264144897,
+        "y": 0.7010902166366577
+      }
+    ],
+    "same_count": true
+  },
+  "verdict": "accepted"
+}

@@ -1,0 +1,82 @@
+{
+  "active_modified": false,
+  "cost_identity_all": true,
+  "cutoff": {
+    "boundary_timestamp_checked": true,
+    "first_open_time": "2026-05-03 23:45:00+00:00",
+    "last_open_time": "2026-05-03 23:45:00+00:00",
+    "post_cutoff_ohlcv_rows_materialized": 0,
+    "preholdout_rows_materialized": 1
+  },
+  "dataset_paths": [
+    "data/p1/fixtures/p1_fixture_a.csv",
+    "data/p1/fixtures/p1_fixture_b.csv"
+  ],
+  "dataset_sha256": "57ef921b81a17dafc6d4f6e594f855be855611f066715c6e5c193633ac312454",
+  "deployed": false,
+  "deterministic_bytes": true,
+  "feature_parity": {
+    "column_order_equal": true,
+    "feature_source_max_i": 320,
+    "future_feature_rows_read": 0,
+    "short_ret_12_is_negative_long": true
+  },
+  "generated_at": "2026-08-03T01:55:34.524735+00:00",
+  "holdout_rows_read": 0,
+  "mapping": [
+    {
+      "accepted": true,
+      "case": "tip",
+      "expected_accepted": true,
+      "expected_age": 0,
+      "global_tip_age_bars": 0,
+      "mapped_signal_i": 500,
+      "parity": true,
+      "rejection_reason": ""
+    },
+    {
+      "accepted": true,
+      "case": "tip_1",
+      "expected_accepted": true,
+      "expected_age": 1,
+      "global_tip_age_bars": 1,
+      "mapped_signal_i": 499,
+      "parity": true,
+      "rejection_reason": ""
+    },
+    {
+      "accepted": true,
+      "case": "tip_2",
+      "expected_accepted": true,
+      "expected_age": 2,
+      "global_tip_age_bars": 2,
+      "mapped_signal_i": 498,
+      "parity": true,
+      "rejection_reason": ""
+    },
+    {
+      "accepted": false,
+      "case": "tip_3",
+      "expected_accepted": false,
+      "expected_age": 3,
+      "global_tip_age_bars": 3,
+      "mapped_signal_i": 497,
+      "parity": true,
+      "rejection_reason": "global_tip_age"
+    }
+  ],
+  "ordered": false,
+  "outcomes": {
+    "sl": 1,
+    "sl_ambiguous": 1,
+    "timeout": 1,
+    "tp": 1
+  },
+  "protocol_version": "p1_short_l2_preholdout_v1",
+  "repeat_sha256": "57ef921b81a17dafc6d4f6e594f855be855611f066715c6e5c193633ac312454",
+  "row_count": 4,
+  "stage": "p1_fixture",
+  "threshold_changed": false,
+  "trained": false,
+  "verdict": "accepted"
+}
