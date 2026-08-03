@@ -899,9 +899,18 @@ def run_full(args: argparse.Namespace) -> dict[str, Any]:
     staging.mkdir(parents=True, exist_ok=True)
     write_json(staging / "build_spec.json", {"build_id": build_id, "spec_hash": spec_hash, **spec})
     model = load_yolo_model(weights)
+    if args.partition_count < 1:
+        raise P1DatasetContractError("partition_count must be positive")
+    if not (0 <= args.partition_index < args.partition_count):
+        raise P1DatasetContractError("partition_index must be in [0, partition_count)")
+    selected_inputs = [
+        item
+        for item_index, item in enumerate(raw["raw_inputs"])
+        if item_index % args.partition_count == args.partition_index
+    ]
     symbol_meta = []
     started = time.monotonic()
-    for index, item in enumerate(raw["raw_inputs"], 1):
+    for index, item in enumerate(selected_inputs, 1):
         before = time.monotonic()
         meta = _write_symbol_shard(
             item=item,
@@ -915,12 +924,39 @@ def run_full(args: argparse.Namespace) -> dict[str, Any]:
         )
         symbol_meta.append(meta)
         print(
-            f"[{index}/344] {item['symbol']}: rows={meta['row_count']} "
+            f"[{index}/{len(selected_inputs)} p{args.partition_index}/{args.partition_count}] "
+            f"{item['symbol']}: rows={meta['row_count']} "
             f"windows={meta['detection']['windows_rendered']} resumed={meta['resumed']} "
             f"wall={time.monotonic()-before:.1f}s total={(time.monotonic()-started)/60:.1f}m",
             flush=True,
         )
 
+    if args.partition_count > 1:
+        checkpoint = {
+            "stage": "p1_full_partition_checkpoint",
+            "verdict": "checkpointed",
+            "generated_at": utc_now(),
+            "git_commit": git("rev-parse", "HEAD"),
+            "build_id": build_id,
+            "spec_hash": spec_hash,
+            "partition_index": args.partition_index,
+            "partition_count": args.partition_count,
+            "completed_symbols": len(symbol_meta),
+            "expected_symbols": len(selected_inputs),
+            "row_count": int(sum(item["row_count"] for item in symbol_meta)),
+            "elapsed_seconds": time.monotonic() - started,
+            "holdout_rows_read": 0,
+            "post_cutoff_ohlcv_rows_materialized": int(
+                sum(item["load"]["post_cutoff_ohlcv_rows_materialized"] for item in symbol_meta)
+            ),
+        }
+        write_json(staging / f"partition_{args.partition_index}_of_{args.partition_count}.json", checkpoint)
+        print(json.dumps(checkpoint, ensure_ascii=False, indent=2))
+        return checkpoint
+
+    # A single-partition invocation is the only finalizer. It revalidates and
+    # resumes every symbol shard, including shards written by earlier disjoint
+    # partition workers, before assembling the immutable dataset.
     rows = assign_event_groups(_read_shard_rows(symbol_meta))
     assembly_a = staging / "assembled_a.csv"
     assembly_b = staging / "assembled_b.csv"
@@ -1067,6 +1103,8 @@ def parse_args() -> argparse.Namespace:
         target.add_argument("--render-workers", type=int, default=4)
     dry.add_argument("--dry-symbols", type=int, default=2)
     dry.add_argument("--dry-proposals", type=int, default=4)
+    full.add_argument("--partition-count", type=int, default=1)
+    full.add_argument("--partition-index", type=int, default=0)
     return parser.parse_args()
 
 
@@ -1078,7 +1116,7 @@ def main() -> int:
         audit = run_dry(args)
     else:
         audit = run_full(args)
-    return 0 if audit.get("verdict") == "accepted" else 1
+    return 0 if audit.get("verdict") in {"accepted", "checkpointed"} else 1
 
 
 if __name__ == "__main__":
