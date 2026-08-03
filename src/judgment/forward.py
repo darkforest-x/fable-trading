@@ -36,6 +36,7 @@ from src.judgment.forward_types import (
     ForwardSummaryJson,
 )
 from src.judgment.frozen import load_runtime_artifact
+from src.judgment.protocol import BundleError, load_active_bundle
 
 __all__ = (
     "FORWARD_LOG_H1_SCALED_PATH",
@@ -163,11 +164,31 @@ def _run_forward_tracking(
     candidate_source = validate_candidate_source(CANDIDATE_SOURCE, RUNTIME_MODE)
 
     normalized_start = normalize_start_time(start_time)
+    # An explicit bundle wins when the owner has placed one. Its absence is not a
+    # cue to search -- discovery is the defect (plan D-07 / acceptance C-06) -- so
+    # missing simply leaves the documented ACTIVE path in place, while a bundle
+    # that exists and fails verification raises rather than degrading.
+    bundle = load_active_bundle()
+    if bundle is not None:
+        print(
+            f"forward: active bundle → {bundle.protocol_version} "
+            f"side={bundle.side} semantics={bundle.feature_semantics} "
+            f"execution_eligible={bundle.execution_eligible}",
+            flush=True,
+        )
     # Prefer models/ACTIVE pointer (owner-visible); fall back to latest default_config.
     artifact = load_runtime_artifact()
     if artifact is None:
         raise FileNotFoundError(
             "missing frozen artifact; set models/ACTIVE or run scripts/freeze_model.py"
+        )
+    if bundle is not None and bundle.model_path.resolve() != artifact.model_path.resolve():
+        # Acceptance C-07: one authority. Disagreement is refused, not reconciled
+        # by preferring whichever was found first.
+        raise BundleError(
+            bundle.path,
+            f"bundle names {bundle.model_path.name} but the runtime artifact "
+            f"resolved to {artifact.model_path.name}; refusing to guess which is live",
         )
     existing = read_forward_log(output_path)
     # Load YOLO *before* LightGBM booster when YOLO is the candidate source —

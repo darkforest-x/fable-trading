@@ -17,8 +17,8 @@
 | A-02 | Must | short row 进 long-only executor | `skipped_unsupported_side`;client 0 调用 | ✅ |
 | A-03 | Must | missing/NaN/empty side | production 拒绝,**不默认 long** | ✅ `61b4dc3` |
 | A-04 | Must | unknown side | 拒绝且只记一次 ledger | ✅ |
-| A-05 | Must | strategy side 与 row side 不一致 | protocol mismatch,拒绝 | ❌ 无 protocol 对象 |
-| A-06 | Must | current legacy v10 bundle | `execution_eligible == false` | ❌ 无 bundle |
+| A-05 | Must | strategy side 与 row side 不一致 | protocol mismatch,拒绝 | ⚠ `accepts_row_side()` 已实现并测试,**尚未接进 executor** |
+| A-06 | Must | current legacy v10 bundle | `execution_eligible == false` | ✅ `a34f87d+` 示例 bundle 已落盘并被测试锁定 |
 | A-07 | Must | short signal | 不得出现 market buy 调用 | ✅ |
 
 ## 2. Signal identity 与幂等
@@ -35,15 +35,15 @@
 
 | ID | 级 | 场景 | 必须断言 | 状态 |
 |---|---|---|---|---|
-| C-01 | Must | 完整合法 fixture bundle | 成功加载 | ❌ |
-| C-02 | Must | model SHA 被篡改 | 加载失败 | ❌ |
-| C-03 | Must | dataset SHA 被篡改 | 加载失败 | ❌ |
-| C-04 | Must | detector SHA 被篡改 | 加载失败 | ❌ |
-| C-05 | Must | 缺 side / entry / return / cost | 加载失败 | ❌ |
-| C-06 | Must | latest JSON 损坏 | production **不回退**旧 artifact | ❌ 仍会回退 |
-| C-07 | Must | `models/ACTIVE` 与 bundle 不一致 | 只认预定单一权威 | ❌ |
-| C-08 | Must | `execution_eligible=false` | executor / actionable loader 拒绝 | ❌ |
-| C-09 | Should | mutable dataset 路径内容改变 | provenance health 报错 | ⚠ |
+| C-01 | Must | 完整合法 fixture bundle | 成功加载 | ✅ |
+| C-02 | Must | model SHA 被篡改 | 加载失败 | ✅ |
+| C-03 | Must | dataset SHA 被篡改 | 加载失败 | ✅ |
+| C-04 | Must | detector SHA 被篡改 | 加载失败 | ✅ |
+| C-05 | Must | 缺 side / entry / return / cost | 加载失败 | ✅ 全部 30 个必填字段逐个验过 |
+| C-06 | Must | latest JSON 损坏 | production **不回退**旧 artifact | ✅ bundle 路径不回退;`latest_artifact()` 仍供 research/看板 |
+| C-07 | Must | `models/ACTIVE` 与 bundle 不一致 | 只认预定单一权威 | ✅ `forward.py` 不一致即 `BundleError` |
+| C-08 | Must | `execution_eligible=false` | executor / actionable loader 拒绝 | ⚠ legacy 语义 + eligible 组合已在加载期禁死;**executor 侧未接线** |
+| C-09 | Should | mutable dataset 路径内容改变 | provenance health 报错 | ✅ 内容变即 hash 不符,加载失败 |
 
 ## 4. Feature semantics
 
@@ -52,7 +52,7 @@
 | D-01 | Must | short + `side_aligned_v1` | 调 side-aware extractor | ✅ `61b4dc3` |
 | D-02 | Must | legacy v10 | 明确 `legacy_unaligned`,不得默认冒充 aligned | ✅ `61b4dc3` |
 | D-03 | Must | execution eligible short | semantics 必须是已批准的 side-aligned schema | ❌ 无 bundle |
-| D-04 | Must | 缺 feature semantics | bundle 加载失败 | ⚠ 缺失读作 legacy,未知值才报错 |
+| D-04 | Must | 缺 feature semantics | bundle 加载失败 | ✅ bundle 缺该字段即失败(FrozenArtifact 侧仍读作 legacy) |
 | D-05 | Should | offline/live 同一 frame/index | 28 维 vector 逐列一致 | ✅ 已用 14 行验证 |
 | D-06 | Should | feature as-of | 变动 signal bar 后未来 rows 不影响 vector | ⚠ 未测 |
 
@@ -145,9 +145,14 @@ Owner 下一决策;HTML 已生成。
 ## 落盘时汇总
 
 ```
-Must 项  ✅ 已过 14   ❌ 未达 24   ⚠ 未测/部分 13
+Must 项  ✅ 已过 23   ❌ 未达 15   ⚠ 未测/部分 13     (P0.2 落地后)
+上一轮   ✅ 14        ❌ 24        ⚠ 13
 ```
 
-**九组里第 9 组(治理)全绿,第 1、4 组基本绿,第 3、6、8 组基本全红** ——
-后三组都依赖同一件未做的事:**P0.2 的精确 bundle 机制**。
-在它落地前,C 组(artifact 身份)、F 组(时间/fill)、H 组(forward log 隔离)无法开始。
+**P0.2 已落地**(`src/judgment/protocol.py` + 37 个测试),C 组从基本全红转为 7 绿 1 部分。
+
+仍全红的是 **F 组(时间/fill)与 H 组(forward log 隔离)** —— 它们不依赖 bundle,
+依赖 P0.6(signal/decision/fill 时间拆分)与 P0.3 的 provenance 字段,都还没做。
+
+**两处诚实标注**:C-08 与 A-05 的机制已实现且有测试,但**尚未接进 executor** ——
+bundle 能拒绝一个自相矛盾的声明,却还不能在下单前拦住一条 execution-ineligible 的行。

@@ -145,13 +145,16 @@ P1 重建数据、P2 重训后才产生 `side_aligned_v1` 可执行候选 bundle
 |---|---|
 | P0.0 基线审计 | **已做** → [`analysis/p0_baseline_audit_20260803.md`](../../analysis/p0_baseline_audit_20260803.md) |
 | P0.1 执行层 fail-closed | **部分**:缺失 side 已不再默认 long(`61b4dc3`);`signal_key` 已不含 score,但尚未含 side/protocol_version |
-| P0.2 协议对象与 bundle loader | **未做** —— `frozen.py` 仍 glob+sorted |
+| P0.2 协议对象与 bundle loader | **已做** —— `src/judgment/protocol.py`,37 个测试;`frozen.py` 的 glob 保留给 research/看板,生产入口不再靠它 |
 | P0.3 forward side 传播 | **已做**(`32e556b`);provenance 字段未加 |
 | P0.4 feature semantics 合同 | **已做**(`61b4dc3`):`feature_semantics` 进 artifact,缺失读作 `legacy_unaligned`,未知值报错 |
 | P0.5 canonical barrier | **未做** |
 | P0.6 时间拆分 | **未做** |
 | P0.7 全局 tip age | **未做** |
 
-**注意 P0.4 先于 P0.2 完成,顺序与规格不符。** 原因是 P0-03 已经在 live 路径上成为实际故障
-(短模型被喂 6 个符号翻转的特征),止血优先于按序推进。代价是 `feature_semantics` 目前挂在
-FrozenArtifact 上而非 bundle 上,P0.2 落地时需要迁移。
+**P0.4 先于 P0.2 完成,顺序与规格不符。** 原因是 P0-03 已在 live 路径上成为实际故障
+(短模型被喂 6 个符号翻转的特征),止血优先于按序推进。
+
+**该欠账现在只还了一半**:`feature_semantics` 同时存在于两处 —— `FrozenArtifact`(缺失读作
+`legacy_unaligned`)与 bundle(缺失即加载失败)。bundle 是更严的那个,但只在 owner 放置
+`models/active_bundle.json` 后才生效。两者合一要等 P0.3 把 provenance 字段并进 forward row。
