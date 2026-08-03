@@ -156,8 +156,14 @@ class TestForwardScanStamping:
         monkeypatch.setattr(
             fs, "iter_series", lambda **kw: iter([("okx", "TESTCOIN_USDT_SWAP", frame)])
         )
+        # Discovery moved into yoyo.layers.l1_detection.scan on 2026-08-03 and
+        # that module holds its own reference, so patch it there -- patching
+        # forward_scan's wrapper would leave the real scan running and this test
+        # would pass on an empty result for the wrong reason.
+        from yoyo.layers.l1_detection import scan as _l1
+
         monkeypatch.setattr(
-            fs, "forward_candidate_indices", lambda enriched, **kw: [len(frame) - 2]
+            _l1, "candidate_indices", lambda enriched, **kw: [len(frame) - 2]
         )
         result = fs.scan_forward_records(
             ForwardScanInput(

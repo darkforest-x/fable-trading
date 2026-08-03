@@ -62,7 +62,8 @@ def _run_pulse(frame: pd.DataFrame, existing: pd.DataFrame, monkeypatch: pytest.
     monkeypatch.setattr(
         fs, "iter_series", lambda **kw: iter([("okx", "TESTCOIN_USDT_SWAP", frame)])
     )
-    monkeypatch.setattr(fs, "forward_candidate_indices", lambda enriched, **kw: [tip_i])
+    from yoyo.layers.l1_detection import scan as _l1
+    monkeypatch.setattr(_l1, "candidate_indices", lambda enriched, **kw: [tip_i])
     scan = fs.scan_forward_records(
         ForwardScanInput(
             artifact=_stub_artifact(),
@@ -137,7 +138,8 @@ def _run_pulse_tracked(frame, existing, monkeypatch, detected_at):
     monkeypatch.setattr(
         fs, "iter_series", lambda **kw: iter([("okx", "TESTCOIN_USDT_SWAP", frame)])
     )
-    monkeypatch.setattr(fs, "forward_candidate_indices", lambda enriched, **kw: [signal_i])
+    from yoyo.layers.l1_detection import scan as _l1
+    monkeypatch.setattr(_l1, "candidate_indices", lambda enriched, **kw: [signal_i])
     return fs.scan_forward_records(
         ForwardScanInput(
             artifact=_stub_artifact(),

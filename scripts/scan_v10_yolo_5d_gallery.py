@@ -56,6 +56,9 @@ WEIGHTS = PROJECT / "models" / "owner_short_star_v10.pt"
 OUT = PROJECT / "analysis" / "output" / "v10_yolo_5d_gallery"
 TIP_EDGE = 2  # tip / tip-1 / tip-2
 MIN_GAP_BARS = 18  # same-symbol de-dupe (~4.5h)
+# Review chart: context before signal + path after signal (not used for detection)
+LOOKBACK_BARS = 120   # ~1.25d before
+LOOKAHEAD_BARS = 96   # ~1d after (or whatever history has)
 
 
 def _device() -> str:
@@ -171,57 +174,95 @@ def draw_box_chart(
     *,
     symbol: str,
     out_path: Path,
+    lookback: int = LOOKBACK_BARS,
+    lookahead: int = LOOKAHEAD_BARS,
 ) -> None:
-    """Render WINDOW ending at signal (or window_end) with YOLO box overlay."""
-    sig_i = hit["signal_i"]
-    # show context: 40 bars before signal through a bit after if available
-    i0 = max(0, sig_i - 80)
-    i1 = min(len(fr) - 1, sig_i + 40)
-    # need MA cols
+    """Global review chart: history before signal + path after, with YOLO box.
+
+    Detection stays causal (box from tip window). This view is for human review
+    only and intentionally shows bars after signal_i.
+    """
+    sig_i = int(hit["signal_i"])
     if "sma20" not in fr.columns:
         fr = add_mas(fr)
-    win = fr.iloc[i0 : i1 + 1].copy()
-    img, tf = render_chart(win, out_path=None)
-    # map signal bar to local index
-    loc = sig_i - i0
-    # approximate box from original window geometry into this wider view:
-    # draw rectangle spanning bar0..bar1 relative to a 200-win ending at signal
-    # reconstruct: training-style tip window end = signal if tip-aligned
-    # Use conf label + vertical band at signal
-    x = tf.x_at(loc)
-    # box width: use hit bar span if we know window relation
-    # Prefer drawing from normalized coords on a re-render of exact WINDOW at signal
-    # Re-render the exact WINDOW used at detection time (box xywhn is in that frame)
-    end_i = int(hit.get("window_end_i", sig_i))
-    end_i = min(max(end_i, WINDOW - 1), len(fr) - 1)
-    start_i = end_i - WINDOW + 1
-    exact = fr.iloc[start_i : end_i + 1]
-    img, tf = render_chart(exact, out_path=None)
-    # pixel box from xywhn
-    cx, cy, bw, bh = hit["cx"], hit["cy"], hit["bw"], hit["bh"]
-    x1 = int((cx - bw / 2) * tf.width)
-    x2 = int((cx + bw / 2) * tf.width)
-    y1 = int((cy - bh / 2) * tf.height)
-    y2 = int((cy + bh / 2) * tf.height)
-    x1, x2 = max(0, x1), min(tf.width - 1, x2)
-    y1, y2 = max(0, y1), min(tf.height - 1, y2)
+
+    i0 = max(0, sig_i - lookback)
+    i1 = min(len(fr) - 1, sig_i + lookahead)
+    view = fr.iloc[i0 : i1 + 1].copy()
+    img, tf = render_chart(view, out_path=None)
+    n_local = len(view)
+    loc_sig = sig_i - i0
+
+    # Absolute bar span of the detector box (from tip window geometry)
+    win_end = int(hit.get("window_end_i", sig_i))
+    win_start = int(hit.get("window_start_i", win_end - WINDOW + 1))
+    abs_b0 = win_start + int(hit.get("bar0", WINDOW - 1 - TIP_EDGE))
+    abs_b1 = win_start + int(hit.get("bar1", WINDOW - 1))
+    abs_b0 = max(0, min(abs_b0, len(fr) - 1))
+    abs_b1 = max(abs_b0, min(abs_b1, len(fr) - 1))
+    loc0 = max(0, abs_b0 - i0)
+    loc1 = min(n_local - 1, abs_b1 - i0)
+
+    # Price bounds of the boxed segment for y mapping
+    hi = float(fr["high"].iloc[abs_b0 : abs_b1 + 1].max())
+    lo = float(fr["low"].iloc[abs_b0 : abs_b1 + 1].min())
+    # Prefer original normalized box y if present (scale into this chart)
+    if all(k in hit for k in ("cy", "bh")):
+        # map using view price range via tf — use segment hi/lo as primary
+        pass
+    y1 = tf.y_at(hi)
+    y2 = tf.y_at(lo)
+    x1 = tf.x_at(loc0)
+    x2 = tf.x_at(loc1)
+    if x2 < x1:
+        x1, x2 = x2, x1
+    # minimum box width ~ half a candle
+    if x2 - x1 < 6:
+        x2 = x1 + 6
     color = (0, 180, 255)  # BGR orange
-    cv2.rectangle(img, (x1, y1), (x2, y2), color, 2, cv2.LINE_AA)
-    # signal vertical
-    b1 = hit["bar1"]
-    xs = tf.x_at(min(max(b1, 0), WINDOW - 1))
-    cv2.line(img, (xs, 0), (xs, tf.height - 1), (200, 200, 200), 1, cv2.LINE_AA)
+    cv2.rectangle(img, (x1, min(y1, y2)), (x2, max(y1, y2)), color, 2, cv2.LINE_AA)
+
+    # Signal bar vertical (where the trade is dated)
+    xs = tf.x_at(min(max(loc_sig, 0), n_local - 1))
+    cv2.line(img, (xs, 0), (xs, img.shape[0] - 1), (220, 220, 220), 1, cv2.LINE_AA)
+    # Shade post-signal region lightly so "after" is obvious
+    if loc_sig < n_local - 1:
+        x_after = tf.x_at(min(loc_sig + 1, n_local - 1))
+        x_end = tf.x_at(n_local - 1)
+        overlay = img.copy()
+        cv2.rectangle(
+            overlay,
+            (x_after, 0),
+            (x_end, img.shape[0] - 1),
+            (40, 40, 20),
+            -1,
+        )
+        cv2.addWeighted(overlay, 0.18, img, 0.82, 0, img)
+
+    # Labels
+    st = pd.Timestamp(fr["open_time"].iloc[sig_i])
+    after_n = i1 - sig_i
+    before_n = sig_i - i0
     label = f"v10 conf={hit['conf']:.3f}"
     cv2.putText(
-        img, label, (x1, max(16, y1 - 6)),
+        img, label, (x1, max(18, min(y1, y2) - 6)),
         cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 2, cv2.LINE_AA,
     )
-    st = pd.Timestamp(fr["open_time"].iloc[sig_i])
-    title = f"{symbol}  {st}  bar={sig_i}"
+    title = f"{symbol}  signal={st}  |  -{before_n} bars  |  +{after_n} bars after"
     cv2.putText(
         img, title, (8, 22),
-        cv2.FONT_HERSHEY_SIMPLEX, 0.55, (230, 230, 230), 1, cv2.LINE_AA,
+        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (230, 230, 230), 1, cv2.LINE_AA,
     )
+    cv2.putText(
+        img, "signal", (xs + 4, 40),
+        cv2.FONT_HERSHEY_SIMPLEX, 0.45, (220, 220, 220), 1, cv2.LINE_AA,
+    )
+    if after_n > 0:
+        cv2.putText(
+            img, "after signal", (min(xs + 12, img.shape[1] - 120), 58),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.45, (180, 200, 120), 1, cv2.LINE_AA,
+        )
+
     out_path.parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(out_path), img)
 
@@ -231,27 +272,35 @@ def write_html(cards: list[dict], out_html: Path, *, days: int, conf: float) -> 
         "<!DOCTYPE html><html><head><meta charset='utf-8'/>",
         f"<title>v10 YOLO last {days}d signals</title>",
         "<style>",
-        "body{font-family:system-ui,sans-serif;background:#0e1116;color:#e6edf3;margin:24px}",
-        "h1{font-size:1.25rem} .meta{color:#8b949e;margin-bottom:16px}",
-        ".grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}",
-        ".card{border:1px solid #30363d;border-radius:10px;overflow:hidden;background:#161b22}",
-        ".card img{width:100%;display:block;background:#000}",
-        ".card .cap{padding:8px 10px;font-size:12px;line-height:1.4}",
-        ".tag{display:inline-block;background:#1f6feb33;color:#58a6ff;padding:1px 6px;border-radius:999px;font-size:11px}",
+        "body{font-family:system-ui,sans-serif;background:#0e1116;color:#e6edf3;margin:20px 24px 48px}",
+        "h1{font-size:1.35rem;margin:0 0 8px}",
+        ".meta{color:#8b949e;margin:0 0 20px;font-size:14px;line-height:1.5}",
+        ".grid{display:flex;flex-direction:column;gap:28px;max-width:1400px;margin:0 auto}",
+        ".card{border:1px solid #30363d;border-radius:12px;overflow:hidden;background:#161b22;"
+        "box-shadow:0 8px 24px rgba(0,0,0,.35)}",
+        ".card img{width:100%;max-height:none;height:auto;display:block;background:#000;"
+        "image-rendering:auto}",
+        ".card .cap{padding:12px 16px;font-size:14px;line-height:1.5}",
+        ".tag{display:inline-block;background:#1f6feb33;color:#58a6ff;padding:2px 8px;"
+        "border-radius:999px;font-size:12px;margin-left:6px}",
+        "a.open{color:#58a6ff;font-size:13px;margin-left:12px}",
         "</style></head><body>",
         f"<h1>YOLO v10 · OKX USDT-SWAP 15m · last {days} days</h1>",
         f"<p class='meta'>weights=<code>owner_short_star_v10.pt</code> · conf≥{conf} · "
         f"tip-edge≤{TIP_EDGE} · min_gap={MIN_GAP_BARS} bars · "
-        f"<b>{len(cards)}</b> signals · L2 judgment <b>not</b> used</p>",
+        f"<b>{len(cards)}</b> signals · L2 judgment <b>not</b> used<br>"
+        "大图单列展示；点「原图」可全尺寸打开 PNG。</p>",
         "<div class='grid'>",
     ]
     for c in cards:
         parts.append(
             "<figure class='card'>"
-            f"<img src='{html.escape(c['rel_img'])}' loading='lazy'/>"
+            f"<a href='{html.escape(c['rel_img'])}' target='_blank' rel='noopener'>"
+            f"<img src='{html.escape(c['rel_img'])}' loading='lazy'/></a>"
             "<figcaption class='cap'>"
             f"<b>{html.escape(c['symbol'])}</b> "
-            f"<span class='tag'>conf {c['conf']:.3f}</span><br>"
+            f"<span class='tag'>conf {c['conf']:.3f}</span>"
+            f"<a class='open' href='{html.escape(c['rel_img'])}' target='_blank'>原图</a><br>"
             f"{html.escape(c['signal_time'])} UTC · signal_i={c['signal_i']}"
             "</figcaption></figure>"
         )
@@ -287,7 +336,11 @@ def main() -> int:
     print(f"device={device} weights={args.weights} conf={args.conf} days={args.days}", flush=True)
     model = load_yolo_model(args.weights)
 
-    groups = list_series(bar="15m")
+    # Prefer this repo's kline tree (loader default may point at yoyo-trading).
+    kline_dir = PROJECT / "data" / "kline_fetched"
+    if not kline_dir.is_dir():
+        raise SystemExit(f"missing kline dir {kline_dir}")
+    groups = list_series(kline_dir, bar="15m")
     series = []
     for (src, sym), paths in groups.items():
         if src != "okx" or not str(sym).endswith("_USDT_SWAP"):
@@ -298,7 +351,7 @@ def main() -> int:
     series.sort(key=lambda x: x[0])
     if args.n_symbols > 0:
         series = series[: args.n_symbols]
-    print(f"symbols={len(series)}", flush=True)
+    print(f"symbols={len(series)} kline_dir={kline_dir}", flush=True)
 
     # global time window from latest available bar across a sample
     now_candidates = []
@@ -311,6 +364,11 @@ def main() -> int:
     t_hi = max(now_candidates)
     t_lo = t_hi - pd.Timedelta(days=args.days)
     print(f"time window UTC {t_lo} .. {t_hi}", flush=True)
+    print(
+        f"chart view: -{LOOKBACK_BARS} bars before signal, "
+        f"+{LOOKAHEAD_BARS} bars after (review path)",
+        flush=True,
+    )
 
     cards: list[dict] = []
     tmp = out_dir / "_tmp_win.png"
@@ -357,6 +415,10 @@ def main() -> int:
                 f"elapsed={time.time()-t0:.0f}s",
                 flush=True,
             )
+        # incremental HTML so browser can open before full run finishes
+        if i % 10 == 0 or hits:
+            preview = sorted(cards, key=lambda c: c["signal_time"], reverse=True)
+            write_html(preview, out_dir / "index.html", days=args.days, conf=args.conf)
 
     cards.sort(key=lambda c: c["signal_time"], reverse=True)
     (out_dir / "manifest.json").write_text(

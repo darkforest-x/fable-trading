@@ -11,6 +11,7 @@ import pandas as pd
 import pytest
 
 import src.judgment.forward_scan as fs
+from yoyo.layers.l1_detection import scan as _l1
 from src.judgment.forward_types import (
     ForwardExit,
     ForwardScanInput,
@@ -138,9 +139,13 @@ def test_detection_and_decision_times_are_recorded_at_their_own_steps(
         fs, "iter_series", lambda **kwargs: iter([("okx", "TEST_USDT_SWAP", frame)])
     )
     monkeypatch.setattr(
-        fs, "forward_candidate_indices", lambda enriched, **kwargs: [len(frame) - 2]
+        _l1, "candidate_indices", lambda enriched, **kwargs: [len(frame) - 2]
     )
+    # Two clocks, in two layers, which is the point: detection happens in L1 and
+    # the decision in L2, minutes apart across a 344-symbol scan. They share one
+    # iterator here so the ordering assertion still means something.
     clock = iter(["candidate-finished", "decision-finished"])
+    monkeypatch.setattr(_l1, "_utc_now_iso", lambda: next(clock))
     monkeypatch.setattr(fs, "_utc_now_iso", lambda: next(clock))
 
     result = fs.scan_forward_records(

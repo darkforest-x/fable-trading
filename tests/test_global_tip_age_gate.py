@@ -46,8 +46,14 @@ def test_g01_forward_final_gate_rejects_back2_local_bar198_mapping(monkeypatch) 
     # to global tip-3. It passes the local 2-bar edge but must fail globally.
     tip = len(frame) - 1
     global_tip_minus_three = tip - 3
+    # Patch where the scan actually happens. Discovery moved into
+    # yoyo.layers.l1_detection.scan on 2026-08-03, and that module holds its own
+    # reference -- patching forward_scan's name would leave the real detector in
+    # place and pass for the wrong reason.
+    from yoyo.layers.l1_detection import scan as l1_scan
+
     monkeypatch.setattr(
-        fs, "scan_series_with_yolo", lambda *args, **kwargs: [global_tip_minus_three]
+        l1_scan, "scan_series_with_yolo", lambda *args, **kwargs: [global_tip_minus_three]
     )
     reset_global_tip_age_rejected()
     assert fs.forward_candidate_indices(

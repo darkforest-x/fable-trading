@@ -61,6 +61,12 @@ from src.judgment.forward_types import (
     validate_candidate_source,
 )
 from src.judgment.labeling import ATR_PCT_MIN, HORIZON_BARS
+from yoyo.layers.l1_detection.scan import (
+    DiscoveredSeries,
+    candidate_indices as _l1_candidate_indices,
+    discover as _l1_discover,
+    rule_candidate_indices as _rule_candidate_indices,
+)
 from src.judgment.yolo_candidates import (
     enforce_global_tip_age,
     get_global_tip_age_rejected,
@@ -209,56 +215,26 @@ def scan_forward_records(
     reset_tip_edge_rejected()
     reset_global_tip_age_rejected()
 
-    def _discover(
-        job: tuple[str, str, pd.DataFrame]
-    ) -> tuple[str, str, pd.DataFrame, pd.DataFrame, list[int], str]:
-        """Phase 1 (parallel-safe): indicators + YOLO/rules indices only."""
-        source, symbol, frame = job
-        enriched = add_indicators(frame)
-        if candidate_source == "yolo" and yolo_model is None:
-            # detector=none idle mode: no discovery, tracked rows still resolve
-            signal_indices: set[int] = set()
-        else:
-            signal_indices = set(
-                forward_candidate_indices(
-                    enriched,
-                    frame=frame,
-                    yolo_model=yolo_model,
-                    start_time=scan.start_time,
-                    yolo_mode=yolo_mode,
-                    max_tip_age_bars=(
-                        getattr(protocol, "max_tip_age_bars", 2)
-                        if protocol is not None else 2
-                    ),
-                )
-            )
-        tracked_times = {key[2] for key in tracked_keys if key[0] == source and key[1] == symbol}
-        if tracked_times:
-            signal_times = enriched["open_time"].astype(str)
-            signal_indices.update(
-                int(idx) for idx in signal_times[signal_times.isin(tracked_times)].index
-            )
-        return source, symbol, frame, enriched, sorted(signal_indices), _utc_now_iso()
-
-    t_discover = time.monotonic()
-    discovered: list[tuple[str, str, pd.DataFrame, pd.DataFrame, list[int], str]] = []
-    if workers <= 1:
-        discovered = [_discover(job) for job in jobs]
-    else:
-        with ThreadPoolExecutor(max_workers=workers) as pool:
-            futs = [pool.submit(_discover, job) for job in jobs]
-            for fut in as_completed(futs):
-                discovered.append(fut.result())
-    t_phase2 = time.monotonic()
-    tip_edge_n = get_tip_edge_rejected()
-    global_age_n = get_global_tip_age_rejected()
-    print(
-        f"forward_scan: discover_wall={t_phase2 - t_discover:.0f}s "
-        f"(indicators+render+predict, {workers} workers) "
-        f"tip_edge_rejected={tip_edge_n} global_tip_age_rejected={global_age_n}",
-        flush=True,
+    # Phase 1 lives in L1 now, thread pool and clock included. Only the boundary
+    # moved: the concurrency that was measured against the 15-minute pulse budget
+    # is the same code, and discover_wall is still printed from the same two reads.
+    discovered_series = _l1_discover(
+        jobs,
+        candidate_source=candidate_source,
+        yolo_model=yolo_model,
+        start_time=scan.start_time,
+        yolo_mode=yolo_mode,
+        max_tip_age_bars=(
+            getattr(protocol, "max_tip_age_bars", 2) if protocol is not None else 2
+        ),
+        tracked_keys=tracked_keys,
+        workers=workers,
     )
-
+    discovered = [
+        (d.source, d.symbol, d.frame, d.enriched, d.signal_indices, d.detected_at)
+        for d in discovered_series
+    ]
+    t_phase2 = time.monotonic()
     # Phase 2 (sequential): LightGBM predict + barrier resolve (not thread-safe).
     for source, symbol, frame, enriched, ordered_indices, candidate_detected_at in discovered:
         if not ordered_indices:
@@ -410,71 +386,8 @@ def scan_forward_records(
     return ForwardScanResult(records, scanned_series, candidates_seen, threshold_signals_seen)
 
 
-def forward_candidate_indices(
-    enriched: pd.DataFrame,
-    *,
-    frame: pd.DataFrame | None = None,
-    yolo_model=None,
-    start_time: pd.Timestamp | None = None,
-    yolo_mode: str = "live",
-    max_tip_age_bars: int = 2,
-) -> list[int]:
-    """Candidate bars under the validated production/research source contract."""
-    candidate_source = validate_candidate_source(CANDIDATE_SOURCE, RUNTIME_MODE)
-    if candidate_source == "rules":
-        return _rule_candidate_indices(enriched)
-    # YOLO path
-    raw = frame if frame is not None else enriched
-    start_from_i = None
-    if start_time is not None and "open_time" in raw.columns:
-        times = pd.to_datetime(raw["open_time"], utc=True)
-        st = pd.Timestamp(start_time)
-        if st.tzinfo is None:
-            st = st.tz_localize("UTC")
-        else:
-            st = st.tz_convert("UTC")
-        hits = np.flatnonzero(times >= st)
-        if len(hits) == 0:
-            # FORWARD_START often sits *inside* the still-open 15m bar (e.g. start
-            # 16:30 while last *closed* open_time is 16:15). Returning [] here
-            # blanked the whole live gate after the 2026-07-19 retest clock reset
-            # (candidates_seen=0 on 344 series). Still scan the tip; the score
-            # stage already drops signal_time < start_time for new rows.
-            start_from_i = max(0, len(raw) - 10)
-        else:
-            start_from_i = max(0, int(hits[0]) - 5)
-    mode = yolo_mode if yolo_mode in ("live", "tip", "full") else "live"
-    indices = scan_series_with_yolo(
-        raw,
-        yolo_model,
-        start_from_i=start_from_i,
-        mode=mode,
-        tip_conf=resolve_tip_conf(),
-    )
-    if mode in ("live", "tip"):
-        return enforce_global_tip_age(
-            indices,
-            latest_closed_i=len(raw) - 1,
-            max_age_bars=max_tip_age_bars,
-        )
-    return indices
 
 
-def _rule_candidate_indices(enriched: pd.DataFrame) -> list[int]:
-    if len(enriched) < WARMUP_BARS + 2:
-        return []
-    mask = strict_mask(enriched, mode="expanded").fillna(False)
-    idx = np.flatnonzero(mask.to_numpy())
-    # live fallback path: the tip bar is a valid signal (entry backfills next pulse)
-    idx = idx[(idx >= WARMUP_BARS) & (idx < len(enriched))]
-    if len(idx) == 0:
-        return []
-    scores = enriched["shape_score"].to_numpy()
-    selected: list[int] = []
-    for signal_i in sorted(idx, key=lambda item: scores[item], reverse=True):
-        if all(abs(signal_i - previous) >= MIN_GAP_BARS for previous in selected):
-            selected.append(int(signal_i))
-    return sorted(selected)
 
 
 def _artifact_feature_semantics(artifact: object) -> str:
@@ -723,3 +636,31 @@ def resolve_forward_exit_scaled(
 def _exit_time(entry_time: pd.Timestamp, exit_offset: int) -> str:
     return str(entry_time + exit_offset * BAR)
     reset_global_tip_age_rejected,
+
+
+def forward_candidate_indices(
+    enriched: pd.DataFrame,
+    *,
+    frame: pd.DataFrame | None = None,
+    yolo_model=None,
+    start_time: pd.Timestamp | None = None,
+    yolo_mode: str = "live",
+    max_tip_age_bars: int = 2,
+) -> list[int]:
+    """Candidate bars under the validated production/research source contract.
+
+    Thin wrapper over yoyo.layers.l1_detection.scan.candidate_indices. The
+    provenance check stays on this side because validating production-vs-research
+    is a property of assembling a pulse, not of detection; L1 takes the answer as
+    an argument rather than consulting the environment itself.
+    """
+    source = validate_candidate_source(CANDIDATE_SOURCE, RUNTIME_MODE)
+    return _l1_candidate_indices(
+        enriched,
+        candidate_source=source,
+        frame=frame,
+        yolo_model=yolo_model,
+        start_time=start_time,
+        yolo_mode=yolo_mode,
+        max_tip_age_bars=max_tip_age_bars,
+    )
