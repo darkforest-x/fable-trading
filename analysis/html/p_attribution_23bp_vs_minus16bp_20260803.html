@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>归因:+23.49bp 与 -15.91bp 的 44bp 差从哪来</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>归因:+23.49bp 与 -15.91bp 的 44bp 差从哪来</h1>
+<p><strong>日期</strong>:2026-08-03</p>
+<p><strong>预注册</strong>:<a href="prereg_attribution_20260803.md"><code>analysis/prereg_attribution_20260803.md</code></a>,</p>
+<p>提交于 <code>41a788d</code>,<strong>早于任何数字存在</strong>。判据未在事后调整。</p>
+<p><strong>执行边界</strong>:pre-holdout 双方;<strong>未读 holdout(计数仍为 9)</strong>;未 promote、未改 ACTIVE、</p>
+<p>未建 active_bundle、未改生产阈值或成本常数、未部署、未下单。训练的是一次性研究模型,</p>
+<p>不落盘为 artifact。<strong>本文不改变 P2 的 rejected 结论。</strong></p>
+<hr>
+<h2>结论(一句话)</h2>
+<p><strong>那 44bp 差的最大来源是切分方案,不是数据、不是特征语义。</strong></p>
+<p>15 折 CPCV 换成 5 折 walkforward,顶档绝对收益掉 <strong>-21.93bp</strong>,符号也在这一步翻转。</p>
+<p>其次是我多用的 19 个 alpha 因子(<strong>-17.08bp</strong>)。</p>
+<p><strong>P1 重建的数据本身反而略好(+5.80bp)。</strong></p>
+<p>预注册的判据是&quot;四级之和覆盖总差 ≥80%&quot;。实际 <strong>残差 -0.00bp,覆盖 100%</strong>。</p>
+<hr>
+<h2>复现命令</h2>
+<pre><code>
+PYTHONPATH=. .venv/bin/python scripts/diag_attribution_23bp_vs_minus16bp.py
+</code></pre>
+<p>确定性:我的配置 <code>seed=20260730</code>,P2 配置 <code>seed=42</code>,均写在脚本常量里。</p>
+<p><strong>本报告的数字是我亲手重跑产出的</strong>(见下节&quot;来源&quot;),与先前一份产物逐字节相同。</p>
+<h2>数据统计</h2>
+<table><thead><tr>
+<th></th>
+<th>v10 池</th>
+<th>P1 immutable 池</th>
+</tr></thead><tbody>
+<tr><td>文件</td><td><code>data/judgment_v10_wide.csv</code></td><td><code>data/p1/p1_short_l2_preholdout_aade2a334448d644.csv</code></td></tr>
+<tr><td>行 / 币</td><td>18,379 / 232</td><td>18,103 / 230</td></tr>
+<tr><td>时间</td><td>2026-02-01 → 2026-05-03</td><td>同</td></tr>
+<tr><td>特征语义</td><td><code>legacy_unaligned</code></td><td><code>side_aligned_v1</code></td></tr>
+<tr><td>目标</td><td><code>net_barrier_taker</code></td><td><code>net_ret_swap_taker</code></td></tr>
+<tr><td>成本</td><td>均已含 10bp taker</td><td>同</td></tr>
+</tbody></table>
+<p>两侧目标口径一致(都已扣 10bp taker),因此 S0b→S1 的比较是干净的。</p>
+<hr>
+<h2>结果表(单变量阶梯)</h2>
+<table><thead><tr>
+<th>级</th>
+<th>隔离的变量</th>
+<th>顶档提升</th>
+<th><strong>顶档绝对</strong></th>
+<th>折</th>
+<th>中位轮数</th>
+</tr></thead><tbody>
+<tr><td>S0</td><td>— 我 07-30 的配置</td><td>+22.56bp</td><td><strong>+30.76bp</strong></td><td>15</td><td>250</td></tr>
+<tr><td>S0b</td><td>alpha 因子(19 个)</td><td>+13.16bp</td><td>+13.68bp</td><td>15</td><td>250</td></tr>
+<tr><td>S1</td><td>数据 + 特征语义</td><td>+20.83bp</td><td>+19.48bp</td><td>15</td><td>250</td></tr>
+<tr><td>S2</td><td><strong>切分方案</strong></td><td>+8.85bp</td><td><strong>-2.45bp</strong></td><td>5</td><td>250</td></tr>
+<tr><td>S3</td><td>成本口径 +5bp</td><td>+8.85bp</td><td>-7.45bp</td><td>5</td><td>250</td></tr>
+<tr><td>S4</td><td>模型配置 + 早停</td><td>+0.71bp</td><td><strong>-13.48bp</strong></td><td>5</td><td><strong>2</strong></td></tr>
+</tbody></table>
+<h3>逐级增量(按绝对值排序)</h3>
+<table><thead><tr>
+<th>变量</th>
+<th>增量</th>
+<th>解读</th>
+</tr></thead><tbody>
+<tr><td><strong>切分方案</strong></td><td><strong>-21.93bp</strong></td><td><strong>主因,且符号在此翻转</strong></td></tr>
+<tr><td><strong>alpha 因子(19 个)</strong></td><td><strong>-17.08bp</strong></td><td>我用了 47 特征,P1 池只有 28</td></tr>
+<tr><td>模型配置 + 早停</td><td>-6.03bp</td><td>P2 的模型停在第 2 轮</td></tr>
+<tr><td>成本口径 +5bp</td><td>-5.00bp</td><td>算术:加 5bp 成本就少 5bp</td></tr>
+<tr><td>数据 + 特征语义</td><td><strong>+5.80bp</strong></td><td><strong>P1 的数据反而略好</strong></td></tr>
+</tbody></table>
+<pre><code>
+S0→S4 总差 -44.24bp   四级之和 -44.24bp   残差 -0.00bp
+本阶梯 S4 顶档绝对 -13.48bp  ·  P2 报告的逐折 exact-top -15.91bp
+</code></pre>
+<hr>
+<h2>解读</h2>
+<h3>主因:CPCV 高估了 22bp</h3>
+<p>15 折 CPCV(6 选 2,带 purge/embargo)在测试块的<strong>两侧</strong>取训练样本。</p>
+<p>这是 de Prado 的标准做法,purge 也确实挡住了标签窗泄漏 —— 但它挡不住<strong>制度泄漏</strong>:</p>
+<p>模型见过测试块之后的市场状态。</p>
+<p><strong>实盘只有过去。</strong> walkforward 只用测试块之前的数据训练,是唯一与实盘同构的切法。</p>
+<p>所以这 -21.93bp 不是&quot;哪一方算错了&quot;,而是 <strong>CPCV 的乐观程度在这个问题上的实测值</strong>。</p>
+<p>我 07-30 那个 +23.49bp 没有算错,它回答的是&quot;如果模型能看到未来制度,顶档值多少&quot; ——</p>
+<p>那不是一个可交易的问题。</p>
+<h3>次因:19 个 alpha 因子值 17bp,但它们不在 P1 池里</h3>
+<p>去掉 alpha,顶档绝对从 +30.76 掉到 +13.68。这些因子确实携带信息,</p>
+<p><strong>但 P1 immutable dataset 只有 28 个 schema 特征</strong>,所以 P2 从一开始就没有它们。</p>
+<p>这不是 P2 做错了 —— 是数据合同里没写。</p>
+<p><strong>这条是可行动的</strong>:若 alpha 因子经得起 walkforward 检验,把它们并入 P1 schema 是有据可依的提案。</p>
+<p>但<strong>本报告不构成那个提案</strong>,它需要单独的预注册(见&quot;下一步&quot;)。</p>
+<h3>数据本身没问题,甚至更好</h3>
+<p><code>+5.80bp</code> 说明 P1 的重建(side_aligned_v1 语义 + immutable 合同)<strong>没有损害信号</strong>。</p>
+<p>我原先的假设是&quot;我的数算在了 legacy 语义上所以虚高&quot;,<strong>这个假设被否定了</strong>。</p>
+<h3>成本那 5bp 是算术</h3>
+<p>加 5bp 滑点压力线,顶档绝对少 5.00bp。<strong>这一级不含任何发现</strong>,列出来是为了让它不混进别的解释。</p>
+<h3>模型配置只值 6bp</h3>
+<p>P2 的模型退化(1~2 棵树、15 个不同分值)看着触目,但在<strong>已经用 walkforward 且加了成本</strong>之后,</p>
+<p>它只再拿走 6.03bp。<strong>换句话说:即使模型不退化,P2 也过不了门。</strong></p>
+<hr>
+<h2>与上一版本对照</h2>
+<table><thead><tr>
+<th>结论</th>
+<th>07-30 我的说法</th>
+<th>本报告</th>
+</tr></thead><tbody>
+<tr><td>+23.49bp 的成因</td><td>未解释</td><td><strong>切分 -21.93 + alpha -17.08 为主</strong></td></tr>
+<tr><td>&quot;我的数算在 legacy 池所以虚高&quot;</td><td>我 08-03 的猜测</td><td><strong>否定</strong> —— 数据换成 P1 反而 +5.80bp</td></tr>
+<tr><td>顶档是不是真十分位</td><td>已实测:每折 613/6126 = 10.0%,唯一率 100%</td><td>不变</td></tr>
+<tr><td>P2 rejected</td><td>—</td><td><strong>不变</strong>,本报告不触碰该结论</td></tr>
+</tbody></table>
+<hr>
+<h2>风险与诚实声明</h2>
+<ul>
+<li><strong>来源</strong>:先前存在一份同名产物,出现在脚本写完 98 秒后,而我那次启动被 owner 拒绝,</li>
+</ul>
+<p>  <strong>我无法确定是哪个进程产生的</strong>。因此我自己重跑一遍,只报自己产出的数;</p>
+<p>  两份在确定性种子下<strong>逐字节相同</strong>,来源问题不影响结论 —— 但这件事本身如实记在这里。</p>
+<ul>
+<li><strong>没有匹配随机对照组</strong>。本文是对既有差值的分解,不是方向性策略结果;</li>
+</ul>
+<p>  CLAUDE.md 要求对照的是后者。<strong>不得把本文任何一级当作&quot;某配置能赚钱&quot;的证据。</strong></p>
+<ul>
+<li><strong>S4 (-13.48bp) 与 P2 报告 (-15.91bp) 差 2.43bp。</strong> 预注册已声明:P2 的 exact-top 对边界并列</li>
+</ul>
+<p>  用等权 fractional weight,我用硬 <code>&gt;= quantile</code>,该差异随&quot;模型配置&quot;一级一起进来,</p>
+<p>  <strong>无法单独隔离</strong>。所以归因只能说&quot;模型配置 + 并列处理&quot;合计 -6.03bp。</p>
+<ul>
+<li><strong>两个池不是同一批候选</strong>(18,379 vs 18,103)。差集本身未分析。</li>
+<li><strong>alpha 因子那 17bp 是在 CPCV 下测的</strong>(S0→S0b 两级都是 15 折)。</li>
+</ul>
+<p>  它在 walkforward 下值多少,本实验<strong>没有测</strong>。不得据此认为并入 alpha 就能救 P2。</p>
+<ul>
+<li>单变量阶梯的增量依赖顺序。换个顺序,交互项会重新分配。**&quot;覆盖 100%&quot;是这一条路径上的,</li>
+</ul>
+<p>  不代表各因素正交。**</p>
+<hr>
+<h2>下一步选项</h2>
+<p>1. <strong>【需 owner 决策 + 新预注册】alpha 因子在 walkforward 下值多少。</strong></p>
+<p>   本报告只证明它们在 CPCV 下值 17bp。若在 walkforward 下仍显著,</p>
+<p>   才谈得上&quot;把 alpha 并入 P1 schema&quot;的提案。</p>
+<p>2. <strong>【建议】以后研究侧默认用 walkforward,CPCV 只作为上界参考。</strong></p>
+<p>   本次实测的乐观幅度是 21.93bp,而本项目全部可争取的改进都在 5~20bp 量级 ——</p>
+<p>   <strong>CPCV 的偏差比要找的效应还大。</strong></p>
+<p>3. <strong>【不做】不要据此重开 P2。</strong> 四级里没有一级指向&quot;P2 执行有误&quot;;</p>
+<p>   最大的两级(切分、alpha)说明的是我那个数为什么偏高,不是 P2 为什么偏低。</p>
+</body>
+</html>
