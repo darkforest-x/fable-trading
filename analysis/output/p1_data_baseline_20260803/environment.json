@@ -1,0 +1,51 @@
+{
+  "branch": "main",
+  "detector": {
+    "configured_path": "models/owner_best.pt",
+    "label": "owner_short_star_v10",
+    "resolved_path": "models/owner_short_star_v10.pt",
+    "sha256": "86d969c830189b2d1048dca24e10bacc27341e75643cf4f7a912e5a8d5542ad9",
+    "symlink_target": "owner_short_star_v10.pt"
+  },
+  "generated_at": "2026-08-03T01:35:17.158190+00:00",
+  "git_commit": "524e09284b7ce5a16ec06fb7401024ce2d6c422f",
+  "holdout_cutoff": "2026-05-04T00:00:00+00:00",
+  "origin_main": "fba6a65eab37022ffed7f6b1c729e5bbd0e40894",
+  "os": "macOS-26.5.2-arm64-arm-64bit",
+  "packages": {
+    "lightgbm": "4.6.0",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "torch": "2.8.0",
+    "torchvision": "0.23.0",
+    "ultralytics": "8.4.89"
+  },
+  "python_executable": "/Users/zhangzc/fable-trading/.venv/bin/python",
+  "python_version": "3.9.6 (default, Dec  2 2025, 07:27:58) \n[Clang 17.0.0 (clang-1700.6.3.2)]",
+  "safety": {
+    "active_bundle_created": false,
+    "deployed": false,
+    "order_triggered": false,
+    "post_cutoff_ohlcv_rows_materialized": 0,
+    "threshold_changed": false,
+    "trained": false
+  },
+  "snapshot_version": "p1_data_baseline_20260803",
+  "universe": {
+    "authority_evidence": {
+      "handoff_statement": "owner_eval_frozen is an old-task ruler, reference only, not a tip decision",
+      "legacy_ledger_fallback_eval_count": 47,
+      "legacy_ledger_intersection_with_fallback_eval": 0,
+      "legacy_ledger_intersection_with_materialized_eval": 27,
+      "legacy_ledger_role": "audit reference only; not universe authority",
+      "runtime_source": "src/judgment/forward_scan.py::scan_forward_records"
+    },
+    "conflicting_authorities": [],
+    "frozen_eval_excluded_count": 0,
+    "live_rule": "list_series(15m) + source=okx + *_USDT_SWAP + !is_stockish",
+    "live_symbol_count": 344,
+    "old_task_eval_ruler_symbol_count": 33,
+    "research_rule": "same 344-symbol universe as scan_forward_records; owner_eval is not a live gate",
+    "research_symbol_count": 344
+  }
+}
