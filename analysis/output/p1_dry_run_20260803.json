@@ -5,13 +5,13 @@
     "data/p1/dry_run/p1_real_dry_a.csv",
     "data/p1/dry_run/p1_real_dry_b.csv"
   ],
-  "dataset_sha256": "b43c9a25e5de3464582706b7e9595043a8c6728233efc421f1f16bc4cb40ff33",
+  "dataset_sha256": "807f01a8e631a0a5b4f303762c7f9a435aa05fdde90f5b6ca251921b2209b71e",
   "deployed": false,
   "detector_path": "models/owner_short_star_v10.pt",
   "detector_sha256": "86d969c830189b2d1048dca24e10bacc27341e75643cf4f7a912e5a8d5542ad9",
   "deterministic_bytes": true,
-  "device": "cpu",
-  "elapsed_seconds": 5.12273125,
+  "device": "mps",
+  "elapsed_seconds": 4.097429917,
   "first_build": {
     "symbols": [
       {
@@ -86,8 +86,8 @@
       }
     ]
   },
-  "generated_at": "2026-08-03T01:55:47.048454+00:00",
-  "git_commit": "86776c2de4e1fe1ed517ce349ae8f2626a40a0ba",
+  "generated_at": "2026-08-03T02:16:48.830426+00:00",
+  "git_commit": "6b1438a9d2265566ffd8e98a3770ddf085f57699",
   "holdout_rows_read": 0,
   "native_threads": {
     "opencv_threads": 1,
@@ -192,7 +192,7 @@
       }
     ]
   },
-  "repeat_sha256": "b43c9a25e5de3464582706b7e9595043a8c6728233efc421f1f16bc4cb40ff33",
+  "repeat_sha256": "807f01a8e631a0a5b4f303762c7f9a435aa05fdde90f5b6ca251921b2209b71e",
   "row_count": 8,
   "stage": "p1_real_dry_run",
   "threshold_changed": false,
@@ -202,7 +202,7 @@
     "array_boxes": [
       {
         "class_id": 0,
-        "confidence": 0.5833029747009277,
+        "confidence": 0.583302915096283,
         "h": 0.09762930870056152,
         "w": 0.04268770292401314,
         "x": 0.9770349264144897,
@@ -213,7 +213,7 @@
     "png_boxes": [
       {
         "class_id": 0,
-        "confidence": 0.5833029747009277,
+        "confidence": 0.583302915096283,
         "h": 0.09762930870056152,
         "w": 0.04268770292401314,
         "x": 0.9770349264144897,
