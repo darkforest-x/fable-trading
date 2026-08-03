@@ -62,8 +62,11 @@ from src.judgment.forward_types import (
 )
 from src.judgment.labeling import ATR_PCT_MIN, HORIZON_BARS
 from src.judgment.yolo_candidates import (
+    enforce_global_tip_age,
+    get_global_tip_age_rejected,
     get_tip_edge_rejected,
     load_yolo_model,
+    reset_global_tip_age_rejected,
     reset_tip_edge_rejected,
     resolve_tip_conf,
     resolve_yolo_mode,
@@ -204,6 +207,7 @@ def scan_forward_records(
         flush=True,
     )
     reset_tip_edge_rejected()
+    reset_global_tip_age_rejected()
 
     def _discover(
         job: tuple[str, str, pd.DataFrame]
@@ -222,6 +226,10 @@ def scan_forward_records(
                     yolo_model=yolo_model,
                     start_time=scan.start_time,
                     yolo_mode=yolo_mode,
+                    max_tip_age_bars=(
+                        getattr(protocol, "max_tip_age_bars", 2)
+                        if protocol is not None else 2
+                    ),
                 )
             )
         tracked_times = {key[2] for key in tracked_keys if key[0] == source and key[1] == symbol}
@@ -243,10 +251,11 @@ def scan_forward_records(
                 discovered.append(fut.result())
     t_phase2 = time.monotonic()
     tip_edge_n = get_tip_edge_rejected()
+    global_age_n = get_global_tip_age_rejected()
     print(
         f"forward_scan: discover_wall={t_phase2 - t_discover:.0f}s "
         f"(indicators+render+predict, {workers} workers) "
-        f"tip_edge_rejected={tip_edge_n}",
+        f"tip_edge_rejected={tip_edge_n} global_tip_age_rejected={global_age_n}",
         flush=True,
     )
 
@@ -408,6 +417,7 @@ def forward_candidate_indices(
     yolo_model=None,
     start_time: pd.Timestamp | None = None,
     yolo_mode: str = "live",
+    max_tip_age_bars: int = 2,
 ) -> list[int]:
     """Candidate bars under the validated production/research source contract."""
     candidate_source = validate_candidate_source(CANDIDATE_SOURCE, RUNTIME_MODE)
@@ -434,13 +444,20 @@ def forward_candidate_indices(
         else:
             start_from_i = max(0, int(hits[0]) - 5)
     mode = yolo_mode if yolo_mode in ("live", "tip", "full") else "live"
-    return scan_series_with_yolo(
+    indices = scan_series_with_yolo(
         raw,
         yolo_model,
         start_from_i=start_from_i,
         mode=mode,
         tip_conf=resolve_tip_conf(),
     )
+    if mode in ("live", "tip"):
+        return enforce_global_tip_age(
+            indices,
+            latest_closed_i=len(raw) - 1,
+            max_age_bars=max_tip_age_bars,
+        )
+    return indices
 
 
 def _rule_candidate_indices(enriched: pd.DataFrame) -> list[int]:
@@ -705,3 +722,4 @@ def resolve_forward_exit_scaled(
 
 def _exit_time(entry_time: pd.Timestamp, exit_offset: int) -> str:
     return str(entry_time + exit_offset * BAR)
+    reset_global_tip_age_rejected,

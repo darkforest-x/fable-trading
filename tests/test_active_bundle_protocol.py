@@ -65,6 +65,10 @@ def _bundle_dict(tmp_path: Path, **overrides) -> dict:
         "threshold": -0.00044,
         "threshold_operator": ">=",
         "tie_policy": "legacy_large_tie_mass",
+        "calibration_quantile": 0.9,
+        "calibration_pass_rate": 0.9113407669295621,
+        "threshold_equal_rate": 0.8615719336415556,
+        "selector_status": "abnormal_tie_mass_audit_only",
         "research_entry_mode": "next_bar_open",
         "live_entry_mode": "none_until_p1",
         "tp_atr_mult": 5.0,
@@ -266,10 +270,45 @@ def test_aligned_bundle_may_be_execution_eligible(tmp_path: Path) -> None:
     """The rule is about semantics, not a blanket ban -- otherwise P2 could never ship."""
     p = load_bundle(
         _write(tmp_path, execution_eligible=True, paper_only=False,
-               feature_semantics="side_aligned_v1"),
+               feature_semantics="side_aligned_v1", selector_status="calibrated",
+               calibration_pass_rate=0.1, threshold_equal_rate=0.0),
         project_dir=tmp_path,
     )
     assert p.execution_eligible is True
+
+
+def test_abnormal_selector_can_be_audited_but_never_execution_eligible(tmp_path: Path) -> None:
+    with pytest.raises(BundleError, match="selector_status=calibrated"):
+        load_bundle(
+            _write(
+                tmp_path,
+                execution_eligible=True,
+                paper_only=False,
+                feature_semantics="side_aligned_v1",
+            ),
+            project_dir=tmp_path,
+        )
+
+
+def test_eligible_selector_rate_must_match_declared_quantile(tmp_path: Path) -> None:
+    with pytest.raises(BundleError, match="abnormal pass/equality rates"):
+        load_bundle(
+            _write(
+                tmp_path,
+                execution_eligible=True,
+                paper_only=False,
+                feature_semantics="side_aligned_v1",
+                selector_status="calibrated",
+                calibration_pass_rate=0.5,
+                threshold_equal_rate=0.0,
+            ),
+            project_dir=tmp_path,
+        )
+
+
+def test_production_bundle_tip_age_may_not_exceed_two(tmp_path: Path) -> None:
+    with pytest.raises(BundleError, match="may not exceed 2"):
+        load_bundle(_write(tmp_path, max_tip_age_bars=3), project_dir=tmp_path)
 
 
 def test_target_cost_flag_must_match_target_semantics(tmp_path: Path) -> None:

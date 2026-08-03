@@ -128,6 +128,7 @@ _predict_lock = threading.Lock()
 _predict_device: str | None = None
 _tip_edge_lock = threading.Lock()
 _tip_edge_rejected_total = 0
+_global_tip_age_rejected_total = 0
 
 
 def reset_tip_edge_rejected() -> None:
@@ -137,10 +138,23 @@ def reset_tip_edge_rejected() -> None:
         _tip_edge_rejected_total = 0
 
 
+def reset_global_tip_age_rejected() -> None:
+    """Zero final whole-series age rejects before one forward pulse."""
+    global _global_tip_age_rejected_total
+    with _tip_edge_lock:
+        _global_tip_age_rejected_total = 0
+
+
 def get_tip_edge_rejected() -> int:
     """Boxes dropped by the A′ tip-edge gate since last reset."""
     with _tip_edge_lock:
         return _tip_edge_rejected_total
+
+
+def get_global_tip_age_rejected() -> int:
+    """Candidates locally valid but too old relative to the global closed tip."""
+    with _tip_edge_lock:
+        return _global_tip_age_rejected_total
 
 
 def _bump_tip_edge_rejected(n: int = 1) -> None:
@@ -149,6 +163,31 @@ def _bump_tip_edge_rejected(n: int = 1) -> None:
         return
     with _tip_edge_lock:
         _tip_edge_rejected_total += n
+
+
+def enforce_global_tip_age(
+    indices: list[int], *, latest_closed_i: int, max_age_bars: int
+) -> list[int]:
+    """Final live assertion after every local box-to-bar mapping and dedupe.
+
+    A box on local bar 198 can map to global tip-3 when its scan window starts
+    two bars behind the tip. The local A-prime edge gate therefore cannot prove
+    global freshness. This function is the final authority for live/tip output.
+    """
+    global _global_tip_age_rejected_total
+    latest = int(latest_closed_i)
+    cap = int(max_age_bars)
+    if latest < 0:
+        return []
+    if cap < 0:
+        raise ValueError("max_age_bars must be non-negative")
+    accepted = sorted({int(i) for i in indices if 0 <= int(i) <= latest})
+    kept = [i for i in accepted if latest - i <= cap]
+    rejected = len(accepted) - len(kept)
+    if rejected:
+        with _tip_edge_lock:
+            _global_tip_age_rejected_total += rejected
+    return kept
 
 
 def _resolve_predict_device() -> str:

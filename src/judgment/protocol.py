@@ -53,6 +53,10 @@ SAME_BAR_POLICIES = ("conservative_sl",)
 CANDIDATE_SOURCES = ("yolo",)
 TARGET_SEMANTICS = ("gross", "net_taker", "net_maker")
 REPORTING_ROUTES = ("gross", "taker", "maker")
+SELECTOR_STATUSES = ("calibrated", "abnormal_tie_mass_audit_only")
+MAX_PRODUCTION_TIP_AGE_BARS = 2
+MAX_SELECTOR_PASS_RATE_DEVIATION = 0.02
+MAX_THRESHOLD_EQUAL_RATE = 0.02
 
 # Every one is required. Absent is an error, not a default: see module docstring.
 REQUIRED_FIELDS = (
@@ -61,6 +65,8 @@ REQUIRED_FIELDS = (
     "feature_schema", "feature_semantics", "model_objective",
     "model_num_iteration", "score_semantics",
     "threshold", "threshold_operator", "tie_policy",
+    "calibration_quantile", "calibration_pass_rate", "threshold_equal_rate",
+    "selector_status",
     "research_entry_mode", "live_entry_mode",
     "tp_atr_mult", "sl_atr_mult", "horizon_bars", "same_bar_policy", "gap_policy",
     "return_convention", "cost_route", "target_ret_column", "target_semantics",
@@ -109,6 +115,10 @@ class StrategyProtocol:
     threshold: float
     threshold_operator: str
     tie_policy: str
+    calibration_quantile: float
+    calibration_pass_rate: float
+    threshold_equal_rate: float
+    selector_status: str
     research_entry_mode: str
     live_entry_mode: str
     tp_atr_mult: float
@@ -196,6 +206,7 @@ def load_bundle(path: Path, project_dir: Path = PROJECT_DIR) -> StrategyProtocol
     return_convention = _enum(raw, path, "return_convention", RETURN_CONVENTIONS)
     target_semantics = _enum(raw, path, "target_semantics", TARGET_SEMANTICS)
     reporting_route = _enum(raw, path, "reporting_route", REPORTING_ROUTES)
+    selector_status = _enum(raw, path, "selector_status", SELECTOR_STATUSES)
     _enum(raw, path, "candidate_source", CANDIDATE_SOURCES)
 
     for field in ("execution_eligible", "paper_only", "target_cost_included"):
@@ -232,19 +243,50 @@ def load_bundle(path: Path, project_dir: Path = PROJECT_DIR) -> StrategyProtocol
             "max_tip_age_bars": int(raw["max_tip_age_bars"]),
             "horizon_bars": int(raw["horizon_bars"]),
             "model_num_iteration": int(raw["model_num_iteration"]),
+            "calibration_quantile": float(raw["calibration_quantile"]),
+            "calibration_pass_rate": float(raw["calibration_pass_rate"]),
+            "threshold_equal_rate": float(raw["threshold_equal_rate"]),
             "threshold": float(raw["threshold"]),
             "tp_atr_mult": float(raw["tp_atr_mult"]),
             "sl_atr_mult": float(raw["sl_atr_mult"]),
         }
     except (TypeError, ValueError) as exc:
         raise BundleError(path, f"non-numeric field: {exc}") from exc
-    if any(not math.isfinite(numbers[field]) for field in ("threshold", "tp_atr_mult", "sl_atr_mult")):
-        raise BundleError(path, "threshold and barrier multipliers must be finite")
+    finite_fields = (
+        "threshold", "tp_atr_mult", "sl_atr_mult", "calibration_quantile",
+        "calibration_pass_rate", "threshold_equal_rate",
+    )
+    if any(not math.isfinite(numbers[field]) for field in finite_fields):
+        raise BundleError(path, "threshold, selector rates, and barrier multipliers must be finite")
     for field in ("bundle_version", "window_bars", "horizon_bars", "model_num_iteration"):
         if numbers[field] <= 0:
             raise BundleError(path, f"{field} must be positive")
     if numbers["max_tip_age_bars"] < 0:
         raise BundleError(path, "max_tip_age_bars must be non-negative")
+    if numbers["max_tip_age_bars"] > MAX_PRODUCTION_TIP_AGE_BARS:
+        raise BundleError(
+            path,
+            f"max_tip_age_bars may not exceed {MAX_PRODUCTION_TIP_AGE_BARS} in a production bundle",
+        )
+    quantile = numbers["calibration_quantile"]
+    pass_rate = numbers["calibration_pass_rate"]
+    equal_rate = numbers["threshold_equal_rate"]
+    if not 0.0 < quantile < 1.0:
+        raise BundleError(path, "calibration_quantile must be between zero and one")
+    if not 0.0 <= pass_rate <= 1.0 or not 0.0 <= equal_rate <= 1.0:
+        raise BundleError(path, "selector rates must be between zero and one")
+    expected_pass_rate = 1.0 - quantile
+    selector_abnormal = (
+        abs(pass_rate - expected_pass_rate) > MAX_SELECTOR_PASS_RATE_DEVIATION
+        or equal_rate > MAX_THRESHOLD_EQUAL_RATE
+    )
+    if eligible and selector_status != "calibrated":
+        raise BundleError(path, "execution_eligible bundle requires selector_status=calibrated")
+    if eligible and selector_abnormal:
+        raise BundleError(
+            path,
+            "execution_eligible selector has abnormal pass/equality rates; recalibrate in P2",
+        )
 
     for field in REQUIRED_FIELDS:
         if isinstance(raw[field], str) and not raw[field].strip():
@@ -280,6 +322,7 @@ def load_bundle(path: Path, project_dir: Path = PROJECT_DIR) -> StrategyProtocol
         score_semantics=str(raw["score_semantics"]),
         threshold_operator=operator,
         tie_policy=str(raw["tie_policy"]),
+        selector_status=selector_status,
         research_entry_mode=str(raw["research_entry_mode"]),
         live_entry_mode=str(raw["live_entry_mode"]),
         same_bar_policy=str(raw["same_bar_policy"]),
