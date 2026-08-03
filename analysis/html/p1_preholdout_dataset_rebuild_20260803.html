@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P1-DATA：pre-holdout immutable short L2 dataset 重建验收</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P1-DATA：pre-holdout immutable short L2 dataset 重建验收</h1>
+<p><strong>日期</strong>：2026-08-03  </p>
+<p><strong>执行边界</strong>：P1.0 → P1.7；完成后停止，不进入 P2  </p>
+<p><strong>机器裁决</strong>：<code>analysis/output/p1_preholdout_dataset_rebuild_20260803.json</code></p>
+<h2>直接裁决</h2>
+<p><strong>P1-DATA = accepted。</strong> 已从冻结的 pre-holdout L1 proposal ledger 重建一份</p>
+<p>research-only、content-addressed、fail-closed 的 short L2 dataset：</p>
+<ul>
+<li>dataset：<code>data/p1/p1_short_l2_preholdout_aade2a334448d644.csv</code></li>
+<li>SHA256：<code>aade2a334448d6443e71fb0d3dbbfcf450390875ce60e1f800f6dbe9c855e93a</code></li>
+<li>行数：18,103；币种：230；signal 时间：2026-02-01 01:00 → 2026-05-03 05:15 UTC</li>
+<li>manifest：<code>data/p1/p1_short_l2_preholdout_aade2a334448d644.manifest.json</code></li>
+<li>manifest SHA256：<code>53b8a07612dae667a184da38bf8e0a694aaae15a5fd240d5b13238da3e13d682</code></li>
+<li>tracked manifest 副本：<code>analysis/output/p1_dataset_manifest_20260803.json</code></li>
+<li><code>training_eligible=true</code> 只表示该数据产物通过 P1 数据门，<strong>不是训练授权</strong>。</li>
+</ul>
+<p>本轮未训练、未调 threshold、未读取 holdout OHLC、未创建 active bundle、未修改</p>
+<p><code>models/ACTIVE</code>、未部署、未访问交易 client、未下单。按总指令，P1.7 后立即停止。</p>
+<h2>P0 独立门</h2>
+<p>进入 P1 前独立复核了 <code>4333fa7..fba6a65</code> 中实际九个 P0 commits、源码 diff、报告、</p>
+<p>机器 JSON、HANDOFF、完整 <code>tests/</code> 和保护对象，不使用上一轮摘要替代证据。</p>
+<table><thead><tr>
+<th>门</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td><code>p0_independent_acceptance</code></td><td><code>accepted</code></td></tr>
+<tr><td><code>p1_entry_allowed</code></td><td><code>true</code></td></tr>
+<tr><td>P0 聚焦测试</td><td>133 passed</td></tr>
+<tr><td>当时完整项目测试</td><td>473 passed / 2 skipped / 0 failed / 0 deselected</td></tr>
+<tr><td>P0 九 commit parent chain</td><td>完整</td></tr>
+<tr><td>ACTIVE / forward log / ledger</td><td>P0.0 与验收时 SHA 不变</td></tr>
+<tr><td>active bundle</td><td>不存在，production fail-closed</td></tr>
+</tbody></table>
+<p>P0 机器结论 SHA256：</p>
+<p><code>90d402eafee0deb6a6937d33dd0035fec2c13728953795faee32ee25f31600e7</code>。</p>
+<h2>P1.0 → P1.7 执行矩阵</h2>
+<table><thead><tr>
+<th>阶段</th>
+<th>实际交付</th>
+<th>机器门</th>
+</tr></thead><tbody>
+<tr><td>P1.0</td><td>环境、detector、344 币 universe、344 份 raw prefix、proposal ledger、保护对象快照</td><td>accepted</td></tr>
+<tr><td>P1.1</td><td>固定 dataset schema、28-feature schema、protocol、manifest 与 fail-closed loader</td><td>accepted</td></tr>
+<tr><td>P1.2</td><td>共用 live box→signal mapper；next-open、TP5/SL2/72、same-bar SL、linear short、canonical taker cost</td><td>accepted</td></tr>
+<tr><td>P1.3</td><td>synthetic fixture；两个真实币小样本双重 replay；array↔PNG transport parity</td><td>accepted</td></tr>
+<tr><td>P1.4</td><td>18,379 个冻结 proposal exact-window full replay；344 universe 全部记账</td><td>accepted</td></tr>
+<tr><td>P1.5</td><td>schema、时间、feature、label、cost、event overlap、拒绝与数量守恒审计</td><td>accepted</td></tr>
+<tr><td>P1.6</td><td>content-addressed manifest + explicit-path loader 复读</td><td>accepted</td></tr>
+<tr><td>P1.7</td><td>MD、HTML、JSON、manifest、hash、tests、HANDOFF、commit list；停止</td><td>accepted</td></tr>
+</tbody></table>
+<h2>冻结输入与唯一权威</h2>
+<table><thead><tr>
+<th>输入</th>
+<th>事实</th>
+</tr></thead><tbody>
+<tr><td>detector</td><td><code>models/owner_short_star_v10.pt</code></td></tr>
+<tr><td>detector SHA256</td><td><code>86d969c830189b2d1048dca24e10bacc27341e75643cf4f7a912e5a8d5542ad9</code></td></tr>
+<tr><td>threshold</td><td>固定 <code>conf=0.30</code>，未扫描、未修改</td></tr>
+<tr><td>live universe</td><td>344 个 OKX 15m non-stockish <code>*_USDT_SWAP</code></td></tr>
+<tr><td>raw pre-holdout prefix</td><td>344 份；combined SHA <code>6bcc35c10b630bc0d3d97ebea9a9ec29ca9a58314c46c59b10307fb088e2eb3e</code></td></tr>
+<tr><td>L1 proposal source</td><td><code>data/judgment_v10_wide.csv</code></td></tr>
+<tr><td>proposal SHA256</td><td><code>d672f8da37dbb09d9dde7fbf66da31e548f7dc37ba8601920ab1d23802050c4a</code></td></tr>
+<tr><td>proposal coverage</td><td>18,379 行 / 232 币 / 0 holdout 行；key 无重复；同币间隔至少 18 bars</td></tr>
+<tr><td>cutoff</td><td><code>2026-05-04T00:00:00Z</code>，严格 <code>&lt; cutoff</code></td></tr>
+</tbody></table>
+<p>这里有两个不能混用的集合：344 币是<strong>允许的 current live universe</strong>；18,379 条 / 232</p>
+<p>币是<strong>冻结的 L1 proposal source</strong>。P1 是 L2 重建，只消费后者的 exact causal windows；</p>
+<p>不会为另外 112 个零 proposal 币重扫历史负窗口并发明新 L1 candidate。</p>
+<h2>Dataset schema 与协议</h2>
+<p>manifest 固定完整列顺序及 schema SHA</p>
+<p><code>9dd279337baba1d0cf3873c270004f59765335f5d3c992b10f98f824a4183fd0</code>。核心协议为：</p>
+<ul>
+<li><code>source=okx</code>、<code>timeframe=15m</code>、<code>side=short</code>；</li>
+<li>box 右缘经 live 共用 pure mapper 落到信号 bar，local tip-edge=2，最终 global tip age ≤2；</li>
+<li>28 个 <code>judgment_28_v1</code> 特征按 <code>side_aligned_v1</code> 固定顺序，在 mapped signal bar 截止；</li>
+<li>research entry 为下一根 bar open；</li>
+<li>signal-bar ATR14，short TP=5×ATR、SL=2×ATR、horizon=72 bars；</li>
+<li>同 bar 同时触及 TP/SL 时保守记 SL；</li>
+<li><code>gross_ret = 1 - exit/entry</code>；禁止 inverse short return；</li>
+<li>仅保留 <code>gross_ret</code>、<code>fee_swap_taker</code>、<code>net_ret_swap_taker</code> 三个成本字段；</li>
+</ul>
+<p>  canonical taker 往返成本 0.001 只扣一次。</p>
+<h2>Fixture 与真实 dry-run</h2>
+<h3>Fixture</h3>
+<p>4 条 synthetic path 覆盖 TP、SL、timeout、same-bar <code>sl_ambiguous</code>；tip、tip-1、tip-2</p>
+<p>接受且 tip-3 拒绝；28 feature 顺序与 short 方向变换通过；cutoff boundary 的 OHLC 未转换；</p>
+<p>两次 CSV SHA 同为：</p>
+<p><code>57ef921b81a17dafc6d4f6e594f855be855611f066715c6e5c193633ac312454</code>。</p>
+<h3>真实 dry-run</h3>
+<p>在 <code>0G_USDT_SWAP</code>、<code>1INCH_USDT_SWAP</code> 各取 4 个真实 proposal，重复完整 replay：</p>
+<table><thead><tr>
+<th>项</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>两次行数</td><td>8 / 8</td></tr>
+<tr><td>两次 SHA</td><td><code>807f01a8e631a0a5b4f303762c7f9a435aa05fdde90f5b6ca251921b2209b71e</code></td></tr>
+<tr><td>array↔PNG box count/coords/conf</td><td>完全相等，max delta=0</td></tr>
+<tr><td>device</td><td>MPS；torch/opencv native threads 固定为 1</td></tr>
+<tr><td>post-cutoff OHLC materialized</td><td>0</td></tr>
+<tr><td>holdout rows read</td><td>0</td></tr>
+</tbody></table>
+<h2>Full build 数据统计</h2>
+<table><thead><tr>
+<th>项</th>
+<th>冻结 proposal ledger</th>
+<th>P1 immutable dataset</th>
+<th>解释</th>
+</tr></thead><tbody>
+<tr><td>行数</td><td>18,379</td><td>18,103</td><td>274 无 current selected box + 2 canonical outcome reject</td></tr>
+<tr><td>有 proposal / 有最终行的币</td><td>232</td><td>230</td><td><code>AI</code>、<code>USAR</code> 各一条 proposal，最终无行</td></tr>
+<tr><td>current universe 记账</td><td>344</td><td>344</td><td>112 个零 proposal 币不读 K 线，但写零 shard</td></tr>
+<tr><td>时间范围</td><td>02-01 01:00 → 05-03 05:15</td><td>相同</td><td>全部 <code>&lt; 2026-05-04</code></td></tr>
+<tr><td>detector windows</td><td>18,379</td><td>18,379</td><td>每个 source proposal 只重放 exact window</td></tr>
+<tr><td>dataset bytes</td><td>—</td><td>26,014,740</td><td>content-addressed CSV，<code>data/</code> 不入 git</td></tr>
+</tbody></table>
+<p>端到端守恒：</p>
+<pre><code>
+18,103 dataset rows
++ 274 source proposals without selected candidate
++   2 canonical row rejects
++   0 duplicate mapped signals
+= 18,379 frozen source proposals
+</code></pre>
+<p>两条 row reject 都是 <code>outcome_contract:short TP price must remain positive</code>，没有放宽障碍、</p>
+<p>ATR floor 或价格规则。检测映射层另外累计记录 1 个 <code>local_tip_edge</code> box reject、19 个</p>
+<p><code>series_bounds</code> box reject；它们是 box 级诊断，不能与 274 个 proposal 级缺口直接相加。</p>
+<p>274/18,379（1.49%）proposal 在当前冻结 MPS 环境没有产生 selected candidate，18,105</p>
+<p>（98.51%）产生；这些差异没有用调低 threshold、换 detector 或补扫邻窗掩盖。manifest</p>
+<p>固定当前环境与输入，跨设备全量逐框等价性没有被夸大。</p>
+<h2>标签、收益与数据质量</h2>
+<table><thead><tr>
+<th>指标</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td><code>label_tp_before_sl=1</code></td><td>4,533 / 18,103 = 25.04%</td></tr>
+<tr><td>exit TP / SL / same-bar SL / timeout</td><td>4,533 / 11,850 / 2 / 1,718</td></tr>
+<tr><td>gross mean</td><td>+4.08 bp</td></tr>
+<tr><td>taker-net mean</td><td>-5.92 bp</td></tr>
+<tr><td>taker-net &gt; 0</td><td>5,923 / 18,103 = 32.72%</td></tr>
+<tr><td>detector confidence min / median / max</td><td>0.300024 / 0.515101 / 0.949991</td></tr>
+<tr><td>global tip age 0 / 1 / 2</td><td>18,101 / 2 / 0</td></tr>
+<tr><td>event groups</td><td>15,604；4,700 rows 位于重叠组</td></tr>
+<tr><td>28 features missing / inf / constant</td><td>0 / 0 / 0</td></tr>
+<tr><td>duplicate candidate / event id</td><td>0 / 0</td></tr>
+<tr><td>feature after signal / source index after signal</td><td>0 / 0</td></tr>
+<tr><td>entry not after signal</td><td>0</td></tr>
+<tr><td>cost identity failures</td><td>0</td></tr>
+<tr><td>data-quality flagged rows</td><td>0</td></tr>
+<tr><td>holdout signal / post-cutoff OHLC materialized</td><td>0 / 0</td></tr>
+</tbody></table>
+<p>这些是 dataset 描述统计，不是策略成功宣称。负的全池 taker-net 均值也再次说明 P1 只完成</p>
+<p>数据层；没有 selector 或经济验收，不得据此训练、promote 或进入生产。</p>
+<h2>Immutable 与 fail-closed consumer</h2>
+<p>full assembly 对同一排序结果写两次，两个 dataset SHA 完全相同。最终路径包含内容哈希；</p>
+<p>manifest 固定 dataset SHA/size/row count、完整列顺序、feature schema、协议、detector、raw</p>
+<p>prefix、proposal source、source commit/hash、fixture/dry hashes 和安全声明。</p>
+<p><code>load_immutable_dataset(manifest_path)</code> 必须显式给 manifest，没有 <code>latest</code> fallback；它会在</p>
+<p>返回 DataFrame 前校验 manifest eligibility、dataset bytes、schema、protocol、row count 与</p>
+<p>cutoff。独立复读结果为 18,103 行、dataset SHA 与 manifest SHA 均匹配。</p>
+<h2>测试</h2>
+<pre><code>
+P1/candidate/cutoff/cost 相关测试：29 passed
+完整项目 tests/：488 passed, 2 skipped, 0 failed, 0 deselected
+</code></pre>
+<p>两项 skip 与 P0 相同，均为 <code>tests/test_factor_causality.py</code> 中已注明的 pandas rolling</p>
+<p>伪差/慢脆弱用例。另一次从 repository root 直接执行 <code>pytest -q</code> 在收集 vendored</p>
+<p><code>external/Kronos</code> 时出现 2 个可选依赖错误：缺 <code>qlib</code>、上游相对 <code>model</code> 导入不可解析。</p>
+<p>没有安装依赖或 deselect 来美化结果；项目规范测试入口 <code>pytest -q tests</code> 全部通过。</p>
+<p>机器测试结果：<code>analysis/output/p1_test_results_20260803.json</code>。</p>
+<h2>范围偏差与修正记录</h2>
+<p>full 初次实现曾把“full build”解释成扫描 344 币的全部历史窗口，首个 CPU shard 8,834</p>
+<p>windows 耗时 726.3 秒；随后两个 MPS partition 各完成一个 shard。复核 P1.0 输入角色后确认</p>
+<p>这是 L1 proposal mining，不是 L2 rebuild，立即中止，没有发布 dataset 或 manifest。</p>
+<p>三个不可消费 staging 目录仍保留为审计证据：</p>
+<ul>
+<li><code>data/p1/_staging/p1_20260803_335fbebc9ddcb6cb</code></li>
+<li><code>data/p1/_staging/p1_20260803_d94d98d1c7a0df25</code></li>
+<li>正式 accepted：<code>data/p1/_staging/p1_20260803_bdfb72ffafec973b</code></li>
+</ul>
+<p>修正后的 full 只跑 18,379 个 proposal windows，809.4 秒完成。对应 learning：</p>
+<p><code>docs/learnings/l2-rebuilds-must-not-expand-into-l1-proposal-mining.md</code>。</p>
+<p>另一个已解决的非平凡问题是 macOS/arm64 native thread 初始化和 Ultralytics 单元素 list</p>
+<p>source 的 SIGSEGV；修复只固定执行调度/输入 wrapper，未改模型、图片、threshold 或协议，</p>
+<p>并由双跑哈希与 array↔PNG parity 约束。对应 learning：</p>
+<p><code>docs/learnings/native-thread-pools-must-be-frozen-before-detector-data-libraries.md</code>。</p>
+<h2>研究指标适用性</h2>
+<p>P1 没有训练、val split、threshold selection 或策略比较，因此项目常规报告中的 val AUC、</p>
+<p>置换检验 p、top-decile 毛/净收益、单特征 baseline 和匹配随机对照全部为 <strong>N/A</strong>。本报告</p>
+<p>只给 dataset 全池描述统计；不能把它解释为模型或交易策略验收。</p>
+<h2>保护对象</h2>
+<table><thead><tr>
+<th>对象</th>
+<th>P1.0 SHA256</th>
+<th>P1 full 后 SHA256</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td><code>models/ACTIVE</code></td><td><code>899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef</code></td><td>同左</td><td>unchanged</td></tr>
+<tr><td><code>data/forward_log.csv</code></td><td><code>6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb</code></td><td>同左</td><td>unchanged</td></tr>
+<tr><td><code>data/executor_ledger.jsonl</code></td><td><code>de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39</code></td><td>同左</td><td>unchanged</td></tr>
+</tbody></table>
+<p><code>models/active_bundle.json</code> 始终不存在；没有创建 active bundle。</p>
+<h2>Commit 列表</h2>
+<table><thead><tr>
+<th>commit</th>
+<th>内容</th>
+</tr></thead><tbody>
+<tr><td><code>524e092</code></td><td>独立接受 P0 safety gate</td></tr>
+<tr><td><code>9d511d4</code></td><td>冻结 P1 数据输入、detector、universe 与保护对象</td></tr>
+<tr><td><code>4edba4d</code></td><td>immutable short dataset contract / schema / loader</td></tr>
+<tr><td><code>a222380</code></td><td>共用 live box→signal pure mapper</td></tr>
+<tr><td><code>dfd71e2</code></td><td>区分 detector eval ruler 与 live universe authority</td></tr>
+<tr><td><code>86776c2</code></td><td>fixture/dry/full gated replay 基础实现</td></tr>
+<tr><td><code>9023d3a</code></td><td>接受 fixture 与真实 dry-run</td></tr>
+<tr><td><code>6b1438a</code></td><td>初版 per-symbol checkpoint（随后范围修正）</td></tr>
+<tr><td><code>e593e24</code></td><td>接受 deterministic MPS dry-run</td></tr>
+<tr><td><code>8caa4f7</code></td><td>修正 L2/L1 边界，full 改为 proposal-led exact-window replay</td></tr>
+<tr><td><code>decc98e</code></td><td>在修正提交上重新接受 fixture/dry-run</td></tr>
+<tr><td><code>5aaf239</code></td><td>提交 full JSON、manifest 副本、hash 与测试结果</td></tr>
+</tbody></table>
+<h2>从零复现</h2>
+<p>精确复现 canonical dataset bytes 需要源码 commit</p>
+<p><code>decc98ef818503b4c28f3fe020c521e989e96766</code>、P1.0 manifest 中相同的本地 raw prefix 和同一</p>
+<p>MPS/package 环境；dataset 的 <code>build_id</code> 有意绑定 source commit。</p>
+<pre><code>
+# P1.0：只做输入与保护对象快照
+PYTHONPATH=. .venv/bin/python scripts/snapshot_p1_data_inputs_20260803.py
+
+# P1.3：必须先通过 fixture 和真实双跑 dry-run
+PYTHONPATH=. .venv/bin/python scripts/build_p1_preholdout_dataset_20260803.py fixture
+PYTHONPATH=. .venv/bin/python scripts/build_p1_preholdout_dataset_20260803.py \
+  dry-run --device mps --batch-size 8 --render-workers 4
+
+# P1.4–P1.6：proposal-led full、audit、manifest、loader
+PYTHONPATH=. .venv/bin/python scripts/build_p1_preholdout_dataset_20260803.py \
+  full --device mps --batch-size 16 --render-workers 10
+PYTHONPATH=. .venv/bin/pytest -q tests
+shasum -a 256 -c analysis/output/p1_dataset_hashes_20260803.sha256
+
+# P1.7 报告
+python3 scripts/md_to_html.py analysis/p1_preholdout_dataset_rebuild_20260803.md \
+  --out-dir analysis/html
+PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py
+</code></pre>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>274 个 source proposal 在当前 MPS environment 没有 selected candidate；这是显式、可审计</li>
+</ul>
+<p>  的重放差异，不冒充 100% 跨设备复现。fixture/dry-run 证明样本 transport parity，未做</p>
+<p>  CUDA 与 MPS 的 18,379-window 全量逐框对照。</p>
+<ul>
+<li>两个 near-cutoff/极端价格候选因 canonical short TP 必须为正而拒绝；没有改 TP/SL/ATR。</li>
+<li><code>data/</code> 按仓库纪律不进 git；CSV 由 content hash、tracked manifest 副本和 SHA 文件交付。</li>
+<li>Git 哈希和本地 ledger 不变能证明本轮没有持久化本地运行状态，不能证明外部世界没有他人</li>
+</ul>
+<p>  人工操作；本轮没有访问 VPS、账户或密钥。</p>
+<ul>
+<li><code>training_eligible=true</code> 不是 P2 授权。P1 已完成，必须停在这里。</li>
+</ul>
+<h2>最终安全声明</h2>
+<p>未训练；未调 threshold；未读取或评分 holdout；未创建 active bundle；未修改 ACTIVE；</p>
+<p>未部署；未通知；未下单。<strong>P1.7 完成后停止。</strong></p>
+</body>
+</html>

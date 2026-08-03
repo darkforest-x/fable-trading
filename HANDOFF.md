@@ -2,6 +2,40 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-03 — P1-DATA 已完成，必须停止）
+
+**直接裁决：P1 pre-holdout immutable short L2 dataset 重建通过；不得自动进入 P2。**
+前置 `p0_independent_acceptance=accepted`；P1.0–P1.7 的 input snapshot、schema、canonical
+路径、fixture、真实 dry-run、proposal-led full build、机器审计、fail-closed loader、报告均完成。
+
+- canonical dataset：`data/p1/p1_short_l2_preholdout_aade2a334448d644.csv`
+  - SHA256 `aade2a334448d6443e71fb0d3dbbfcf450390875ce60e1f800f6dbe9c855e93a`
+  - 18,103 行 / 230 币 / 2026-02-01 01:00 → 2026-05-03 05:15 UTC
+- manifest：`analysis/output/p1_dataset_manifest_20260803.json`
+  - SHA256 `53b8a07612dae667a184da38bf8e0a694aaae15a5fd240d5b13238da3e13d682`
+  - `training_eligible=true` 只表示 P1 数据门通过，不是训练授权。
+- 冻结 source proposal 18,379 条全部数量守恒：18,103 dataset rows + 274 无 selected
+  candidate + 2 canonical outcome reject；0 holdout signal、0 post-cutoff OHLC materialized。
+- full replay 只消费冻结 L1 proposal 的 exact causal windows；344 current live universe 全记账，
+  112 个零 proposal 币不读 K 线，不做历史负窗 L1 mining。
+- fixture/dry-run accepted；full machine verdict accepted；fail-closed loader 复读 18,103 行；
+  完整 `tests/` 为 488 passed、2 skipped、0 failed、0 deselected。
+- P1.0 与 full 后 `models/ACTIVE`、`data/forward_log.csv`、
+  `data/executor_ledger.jsonl` SHA 均不变；`models/active_bundle.json` 不存在。
+- 未训练、未调 threshold、未读 holdout OHLC、未建 active bundle、未改 ACTIVE、未部署、未下单。
+
+交付物：
+
+- `analysis/html/p1_preholdout_dataset_rebuild_20260803.html`
+- `analysis/p1_preholdout_dataset_rebuild_20260803.md`
+- `analysis/output/p1_preholdout_dataset_rebuild_20260803.json`
+- `analysis/output/p1_dataset_manifest_20260803.json`
+- `analysis/output/p1_dataset_hashes_20260803.sha256`
+- `analysis/output/p1_test_results_20260803.json`
+
+**停止点：P1.7。** 下一步无论是训练、threshold/selector、P2、active bundle、ACTIVE、部署或
+下单，都需要 owner 新指令；当前不得继续。
+
 ## ⚡ 当前真相（2026-08-03 — P0-SAFETY 已完成，必须停在 Owner gate）
 
 **直接裁决：P0 本地安全验收通过，但当前策略不可执行。** `models/active_bundle.json`

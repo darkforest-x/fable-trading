@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **178** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **179** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -14,6 +14,7 @@
 | 2026-08-03 | [`p0_independent_acceptance_20260803.md`](p0_independent_acceptance_20260803.md) | P0 独立验收报告（2026-08-03） | `p0_independent_acceptance = accepted`，允许进入 P1-DATA。 |
 | 2026-08-03 | [`p0_runtime_parity_audit_20260803.md`](p0_runtime_parity_audit_20260803.md) | P0 Runtime Parity 审计（2026-08-03） | REJECTED：当前 `models/ACTIVE` 不是 2026-07-30 研究优胜配置，研究结论不得转移。 |
 | 2026-08-03 | [`p0_safety_protocol_repair_20260803.md`](p0_safety_protocol_repair_20260803.md) | P0-SAFETY short 协议修复报告（2026-08-03） | P0-SAFETY 本地验收通过；当前策略仍不可执行。 |
+| 2026-08-03 | [`p1_preholdout_dataset_rebuild_20260803.md`](p1_preholdout_dataset_rebuild_20260803.md) | P1-DATA：pre-holdout immutable short L2 dataset 重建验收 | P1-DATA = accepted。** 已从冻结的 pre-holdout L1 proposal ledger 重建一份 |
 | 2026-08-03 | [`week_plan_20260803.md`](week_plan_20260803.md) | 一周执行计划（2026-08-03 → 08-09） |  |
 | 2026-07-31 | [`p_gpt_architecture_review_20260731.md`](p_gpt_architecture_review_20260731.md) | fable-trading 架构与方法学审阅（2026-07-31） |  |
 | 2026-07-31 | [`p_l2_v10_reg_freeze_20260731.md`](p_l2_v10_reg_freeze_20260731.md) | L2 切 v10 池回归 · 冻结与回测分析报告（2026-07-31） |  |
@@ -218,6 +219,7 @@
 - [`p15_h4_time_decay.md`](p15_h4_time_decay.md) — P1.5 H4：时间衰减紧缩出场
 - [`p15_h5_vol_adaptive.md`](p15_h5_vol_adaptive.md) — P1.5 H5：波动率自适应障碍
 - [`p15_h9_report.md`](p15_h9_report.md) — P1.5 R1'：H9 高层趋势过滤复测与推广
+- [`p1_preholdout_dataset_rebuild_20260803.md`](p1_preholdout_dataset_rebuild_20260803.md) — P1-DATA：pre-holdout immutable short L2 dataset 重建验收
 - [`p25_daily_workflow_acceptance_20260710.md`](p25_daily_workflow_acceptance_20260710.md) — MA206 每日安全链验收（2026-07-10）
 - [`p25_local_acceptance_20260710.md`](p25_local_acceptance_20260710.md) — P2.5 本地验收（2026-07-10）
 - [`p25_vps_acceptance_20260710.md`](p25_vps_acceptance_20260710.md) — P2.5 VPS 公网验收（2026-07-10）
