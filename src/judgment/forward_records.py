@@ -6,7 +6,19 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src.judgment.forward_types import FORWARD_COLUMNS, OUTCOME_COLUMNS, ForwardRecord, MergeResult
+from src.judgment.forward_types import (
+    FORWARD_COLUMNS,
+    LEGACY_PROTOCOL,
+    LEGACY_SEMANTICS,
+    LEGACY_STRATEGY,
+    OUTCOME_COLUMNS,
+    ForwardRecord,
+    MergeResult,
+)
+
+# side is part of the key, so it needs its own marker for rows that predate it
+LEGACY_SIDE = "legacy_unknown_side"
+ForwardKey = tuple[str, str, str, str, str]
 
 
 def read_forward_log(path: Path) -> pd.DataFrame:
@@ -36,7 +48,10 @@ def merge_forward_log(existing: pd.DataFrame, new_records: list[ForwardRecord]) 
     new_signals = 0
     closed_updates = 0
     for record in new_records:
-        key = forward_key(record["source"], record["symbol"], pd.Timestamp(record["signal_time"]))
+        key = forward_key(
+            record["source"], record["symbol"], pd.Timestamp(record["signal_time"]),
+            record.get("side"), record.get("protocol_version"),
+        )
         previous = rows.get(key)
         if previous is None:
             rows[key] = record
@@ -69,23 +84,93 @@ def merge_forward_log(existing: pd.DataFrame, new_records: list[ForwardRecord]) 
 
 
 def normalize_log(frame: pd.DataFrame) -> pd.DataFrame:
+    """Read any vintage of the log without crashing, and without lying about it.
+
+    A row from before provenance existed gets LEGACY_* markers rather than the
+    current protocol's values. Inheriting today's protocol_version would silently
+    fold old long-resolver rows into the repaired short book, which is the exact
+    contamination acceptance H-01/H-02 forbids.
+    """
     out = frame.copy()
     for column in FORWARD_COLUMNS:
         if column not in out.columns:
             out[column] = np.nan
+    for column, marker in (
+        ("protocol_version", LEGACY_PROTOCOL),
+        ("strategy_id", LEGACY_STRATEGY),
+        ("feature_semantics", LEGACY_SEMANTICS),
+    ):
+        out[column] = out[column].fillna(marker).replace("", marker)
+    # Absent eligibility is not eligibility. Built from a truth test rather than
+    # fillna+astype: an object column of NaN downcasts with a FutureWarning, and
+    # more to the point the string "False" read back from CSV is truthy under
+    # astype(bool) -- which would flip an ineligible row into an actionable one.
+    out["execution_eligible"] = [
+        str(v).strip().lower() in ("true", "1", "1.0") for v in out["execution_eligible"]
+    ]
     return out[list(FORWARD_COLUMNS)]
 
 
-def open_keys(frame: pd.DataFrame) -> set[tuple[str, str, str]]:
+def rows_for_protocol(frame: pd.DataFrame, protocol_version: str) -> pd.DataFrame:
+    """One protocol's rows only. Summaries must never span two (H-01/H-02)."""
+    if frame.empty:
+        return frame
+    return normalize_log(frame).pipe(
+        lambda f: f[f["protocol_version"].astype(str) == str(protocol_version)]
+    )
+
+
+def actionable_rows(frame: pd.DataFrame) -> pd.DataFrame:
+    """Rows an executor may act on: execution-eligible only (H-03).
+
+    Scored-but-ineligible rows stay visible in the log on purpose -- they are
+    evidence -- but they are not an order queue.
+    """
+    if frame.empty:
+        return frame
+    out = normalize_log(frame)
+    return out[out["execution_eligible"]]
+
+
+def open_keys(frame: pd.DataFrame) -> set[ForwardKey]:
     if frame.empty:
         return set()
     active = frame[frame["status"] != "closed"]
     return {row_key(record) for record in active.to_dict("records")}
 
 
-def row_key(record) -> tuple[str, str, str]:
-    return forward_key(str(record["source"]), str(record["symbol"]), pd.Timestamp(record["signal_time"]))
+def row_key(record) -> ForwardKey:
+    return forward_key(
+        str(record["source"]),
+        str(record["symbol"]),
+        pd.Timestamp(record["signal_time"]),
+        record.get("side"),
+        record.get("protocol_version"),
+    )
 
 
-def forward_key(source: str, symbol: str, signal_time: pd.Timestamp) -> tuple[str, str, str]:
-    return source, symbol, str(signal_time)
+def forward_key(
+    source: str,
+    symbol: str,
+    signal_time: pd.Timestamp,
+    side: object = None,
+    protocol_version: object = None,
+) -> ForwardKey:
+    """Identity of one signal event, including which contract produced it.
+
+    side and protocol_version are part of the key (acceptance B-03/B-04): the same
+    bar under two protocols is two events, and merging them would let a legacy
+    long-resolver row absorb the outcome of a repaired short one. Both default to
+    their LEGACY_* marker rather than to a live value, so an old row keeps its own
+    identity instead of being adopted by whatever is running now.
+    """
+    side_s = LEGACY_SIDE if side is None or _blank(side) else str(side).strip().lower()
+    proto_s = LEGACY_PROTOCOL if protocol_version is None or _blank(protocol_version) \
+        else str(protocol_version).strip()
+    return source, symbol, str(signal_time), side_s, proto_s
+
+
+def _blank(value: object) -> bool:
+    if isinstance(value, float) and np.isnan(value):
+        return True
+    return str(value).strip() == "" or str(value).lower() == "nan"

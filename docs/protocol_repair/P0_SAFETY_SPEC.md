@@ -146,7 +146,7 @@ P1 重建数据、P2 重训后才产生 `side_aligned_v1` 可执行候选 bundle
 | P0.0 基线审计 | **已做** → [`analysis/p0_baseline_audit_20260803.md`](../../analysis/p0_baseline_audit_20260803.md) |
 | P0.1 执行层 fail-closed | **部分**:缺失 side 已不再默认 long(`61b4dc3`);`signal_key` 已不含 score,但尚未含 side/protocol_version |
 | P0.2 协议对象与 bundle loader | **已做** —— `src/judgment/protocol.py`,37 个测试;`frozen.py` 的 glob 保留给 research/看板,生产入口不再靠它 |
-| P0.3 forward side 传播 | **已做**(`32e556b`);provenance 字段未加 |
+| P0.3 forward side 传播 | **已做** —— side(`32e556b`)+ provenance 五字段与逐候选 `decision_at`(P0.3,17 个测试) |
 | P0.4 feature semantics 合同 | **已做**(`61b4dc3`):`feature_semantics` 进 artifact,缺失读作 `legacy_unaligned`,未知值报错 |
 | P0.5 canonical barrier | **未做** |
 | P0.6 时间拆分 | **未做** |

@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import os
 import time
+from datetime import datetime, timezone
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -43,6 +44,7 @@ from src.judgment.features import (
     extract_feature_rows_for_side,
 )
 from src.judgment.forward_records import forward_key, open_keys
+from src.judgment.protocol import load_active_bundle
 from src.judgment.forward_types import (
     BAR,
     CANDIDATE_SOURCE,
@@ -115,6 +117,16 @@ def scan_forward_records(
     candidates_seen = 0
     threshold_signals_seen = 0
     tracked_keys = open_keys(scan.existing_log)
+    # Provenance for every row this scan writes. With no bundle placed the run is
+    # still honest about what produced it: the artifact's own identity, and NOT
+    # execution eligible -- eligibility is a claim only a verified bundle may make.
+    _bundle = load_active_bundle()
+    protocol_version = (
+        _bundle.protocol_version if _bundle is not None
+        else f"artifact:{Path(scan.artifact.relative_model_path).stem}"
+    )
+    strategy_id = _bundle.strategy_id if _bundle is not None else "unbundled"
+    execution_eligible = bool(_bundle.execution_eligible) if _bundle is not None else False
     yolo_model = None
     if candidate_source == "yolo":
         try:
@@ -219,7 +231,7 @@ def scan_forward_records(
         candidates_seen += len(ordered_indices)
         for row_pos, signal_i in enumerate(ordered_indices):
             signal_time = pd.Timestamp(enriched["open_time"].iloc[signal_i])
-            key = forward_key(source, symbol, signal_time)
+            key = forward_key(source, symbol, signal_time, trade_side, protocol_version)
             tracked_open = key in tracked_keys
             if not tracked_open and signal_time < scan.start_time:
                 continue
@@ -286,6 +298,15 @@ def scan_forward_records(
                     "tier": tier,
                     "size_mult": size_mult,
                     "side": trade_side,
+                    "protocol_version": protocol_version,
+                    "strategy_id": strategy_id,
+                    "feature_semantics": _artifact_feature_semantics(scan.artifact),
+                    # Stamped per candidate, not per batch: a scan covering 344
+                    # symbols finishes them minutes apart, and sharing the scan's
+                    # start time would claim decisions that had not happened yet
+                    # (acceptance F-05).
+                    "decision_at": datetime.now(timezone.utc).isoformat(),
+                    "execution_eligible": execution_eligible,
                 }
             )
     print(

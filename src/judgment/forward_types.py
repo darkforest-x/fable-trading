@@ -73,8 +73,21 @@ FORWARD_COLUMNS: Final = (
     # Direction contract. Legacy rows normalize to NaN and remain long-only;
     # explicit non-long rows are rejected by the current executor.
     "side",
+    # Appended, never reordered: an old CSV must keep reading back correctly.
+    "protocol_version",
+    "strategy_id",
+    "feature_semantics",
+    "decision_at",
+    "execution_eligible",
 )
 OUTCOME_COLUMNS: Final = ("status", "outcome", "label", "exit_offset", "exit_time", "realized_ret")
+
+# Rows written before provenance existed. Not a placeholder to be filled in later:
+# it is the honest name for "produced under a protocol nobody recorded", and it
+# keeps those rows out of any new protocol's 100-trade clock (acceptance H-01/H-02).
+LEGACY_PROTOCOL: Final = "legacy_pre_20260803"
+LEGACY_STRATEGY: Final = "legacy_unknown"
+LEGACY_SEMANTICS: Final = "legacy_unaligned"
 
 
 class ForwardRecord(TypedDict):
@@ -103,6 +116,13 @@ class ForwardRecord(TypedDict):
     tier: str
     size_mult: float
     side: str
+    # Provenance (P0.3). Which contract produced this row, and when the decision
+    # was actually made -- not when the batch that contained it started.
+    protocol_version: str
+    strategy_id: str
+    feature_semantics: str
+    decision_at: str
+    execution_eligible: bool
 
 
 def validate_candidate_source(candidate_source: str, runtime_mode: str) -> str:

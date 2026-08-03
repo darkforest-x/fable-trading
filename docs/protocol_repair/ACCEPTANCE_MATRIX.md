@@ -27,9 +27,9 @@
 |---|---|---|---|---|
 | B-01 | Must | 同 source/symbol/time/side/protocol,score 改变 | signal key 不变 | ✅ |
 | B-02 | Must | model hash 改变但同 protocol event | 不重复下单;变更作为审计字段 | ⚠ 未测 |
-| B-03 | Must | side 不同 | key 不同 | ❌ key 尚未含 side |
-| B-04 | Must | protocol version 不同 | key 不同,账本不混 | ❌ key 尚未含 protocol |
-| B-05 | Must | open row 后续 outcome 更新 | 保留首次 detected/decision/model identity | ⚠ 未测 |
+| B-03 | Must | side 不同 | key 不同 | ✅ P0.3 |
+| B-04 | Must | protocol version 不同 | key 不同,账本不混 | ✅ P0.3 |
+| B-05 | Must | open row 后续 outcome 更新 | 保留首次 detected/decision/model identity | ⚠ 跨协议不串已测,同协议回填未测 |
 
 ## 3. Active bundle 与 artifact 身份
 
@@ -83,7 +83,7 @@
 | F-02 | Must | decision 前已触 TP,decision 后未触 | 不得记为 live TP | ❌ |
 | F-03 | Must | 无 fill | actual realized_ret 为空 / 不存在 | ❌ |
 | F-04 | Must | paper next-open-after-decision | 选 decision 后第一根未来 open | ❌ |
-| F-05 | Must | batch 扫多 symbol | 每候选有自身 `decision_at`,不共用 scan start | ❌ |
+| F-05 | Must | batch 扫多 symbol | 每候选有自身 `decision_at`,不共用 scan start | ✅ 逐候选 `datetime.now()` |
 | F-06 | Must | old row | 标 legacy,不进新 protocol 100 笔 | ❌ |
 | F-07 | Should | actual broker fill | `fill_at`/`fill_px` 来自 ledger,不来自 signal proxy | ❌ |
 
@@ -100,11 +100,11 @@
 
 | ID | 级 | 场景 | 必须断言 | 状态 |
 |---|---|---|---|---|
-| H-01 | Must | 两个 protocol_version | summary 不混算 | ❌ |
-| H-02 | Must | legacy long resolver row | 不计入 repaired short 100 笔 | ❌ |
-| H-03 | Must | execution-ineligible row | 不进 actionable set | ❌ |
+| H-01 | Must | 两个 protocol_version | summary 不混算 | ✅ `rows_for_protocol()` |
+| H-02 | Must | legacy long resolver row | 不计入 repaired short 100 笔 | ✅ 旧行落 `legacy_pre_20260803` |
+| H-03 | Must | execution-ineligible row | 不进 actionable set | ✅ `actionable_rows()`,executor 侧接线仍缺 |
 | H-04 | Must | candidate/scored 但未 fill | 可观察,但不计 closed trade | ⚠ |
-| H-05 | Must | old schema 读入 | 不崩溃;明确 legacy status | ⚠ |
+| H-05 | Must | old schema 读入 | 不崩溃;明确 legacy status | ✅ |
 | H-06 | Must | P0 tests | 不写真实 `data/forward_log.csv` | ✅ |
 
 ## 9. Holdout 与治理
@@ -145,14 +145,15 @@ Owner 下一决策;HTML 已生成。
 ## 落盘时汇总
 
 ```
-Must 项  ✅ 已过 23   ❌ 未达 15   ⚠ 未测/部分 13     (P0.2 落地后)
-上一轮   ✅ 14        ❌ 24        ⚠ 13
+Must 项  ✅ 已过 29   ❌ 未达  9   ⚠ 未测/部分 13     (P0.3 落地后)
+P0.2 后  ✅ 23        ❌ 15        ⚠ 13
+首轮     ✅ 14        ❌ 24        ⚠ 13
 ```
 
-**P0.2 已落地**(`src/judgment/protocol.py` + 37 个测试),C 组从基本全红转为 7 绿 1 部分。
+**P0.2 + P0.3 已落地**。C 组 7 绿,H 组从全红转为 5 绿 1 待测,B 组补齐 identity。
 
-仍全红的是 **F 组(时间/fill)与 H 组(forward log 隔离)** —— 它们不依赖 bundle,
-依赖 P0.6(signal/decision/fill 时间拆分)与 P0.3 的 provenance 字段,都还没做。
+仍全红的是 **E 组(canonical barrier)与 F 组(时间/fill)** —— 等 P0.5 与 P0.6。
+G 组(全局 tip age)等 P0.7。
 
 **两处诚实标注**:C-08 与 A-05 的机制已实现且有测试,但**尚未接进 executor** ——
 bundle 能拒绝一个自相矛盾的声明,却还不能在下单前拦住一条 execution-ineligible 的行。
