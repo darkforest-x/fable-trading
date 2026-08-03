@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import os
 import threading
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -220,6 +221,88 @@ def right_edge_to_bar(cx: float, w: float, tf, *, n_bars: int) -> int:
     return int(min(max(idx, 0), tf.n_bars - 1))
 
 
+@dataclass(frozen=True)
+class BoxSignalMapping:
+    """Pure, auditable result of mapping one detector box to a series bar."""
+
+    accepted: bool
+    rejection_reason: str
+    window_start_i: int
+    window_end_i: int
+    bar_in_window: int
+    mapped_signal_i: int
+    latest_closed_i: int
+    global_tip_age_bars: int
+
+
+def map_box_to_signal(
+    *,
+    cx: float,
+    w: float,
+    tf: Any,
+    window_start_i: int,
+    n_bars: int,
+    frame_length: int,
+    latest_closed_i: int,
+    tip_edge_bars: int = TIP_EDGE_BARS,
+    apply_tip_edge: bool = True,
+    max_global_tip_age_bars: int | None = None,
+    allow_pending_entry: bool = True,
+    warmup_bars: int = WARMUP_BARS,
+    start_from_i: int | None = None,
+    signal_i_lo: int | None = None,
+    signal_i_hi: int | None = None,
+) -> BoxSignalMapping:
+    """Map a normalized box right edge to one global signal index.
+
+    This is the single box→bar authority for both live discovery and P1
+    offline replay.  It uses only detector geometry plus explicit positional
+    bounds; no candle after ``mapped_signal_i`` is inspected.  ``latest_closed_i``
+    is the whole-series tip for the pulse, not the local window end.
+    """
+    start = int(window_start_i)
+    count = int(n_bars)
+    latest = int(latest_closed_i)
+    window_end = start + count - 1
+    bar_in_window = right_edge_to_bar(float(cx), float(w), tf, n_bars=count)
+    signal_i = start + bar_in_window
+    age = latest - signal_i
+
+    reason = ""
+    edge = max(0, int(tip_edge_bars))
+    if apply_tip_edge and edge > 0 and bar_in_window < count - edge:
+        reason = "local_tip_edge"
+    elif signal_i < int(warmup_bars) or signal_i >= int(frame_length):
+        reason = "series_bounds"
+    elif not allow_pending_entry and signal_i + 1 >= int(frame_length):
+        reason = "missing_entry_bar"
+    elif start_from_i is not None and signal_i < int(start_from_i):
+        reason = "before_start"
+    elif signal_i_lo is not None and signal_i < int(signal_i_lo):
+        reason = "before_signal_lo"
+    elif signal_i_hi is not None and signal_i > int(signal_i_hi):
+        reason = "after_signal_hi"
+    elif age < 0:
+        reason = "after_latest_closed"
+    elif max_global_tip_age_bars is not None:
+        cap = int(max_global_tip_age_bars)
+        if cap < 0:
+            raise ValueError("max_global_tip_age_bars must be non-negative")
+        if age > cap:
+            reason = "global_tip_age"
+
+    return BoxSignalMapping(
+        accepted=not reason,
+        rejection_reason=reason,
+        window_start_i=start,
+        window_end_i=window_end,
+        bar_in_window=bar_in_window,
+        mapped_signal_i=signal_i,
+        latest_closed_i=latest,
+        global_tip_age_bars=age,
+    )
+
+
 def load_yolo_model(weights: str | Path | None = None):
     """Lazy-load and cache YOLO weights (heavy import kept local)."""
     if weights is not None:
@@ -251,6 +334,7 @@ def scan_series_with_yolo(
     right_bias: bool | None = None,
     signal_time_lo: pd.Timestamp | None = None,
     signal_time_hi: pd.Timestamp | None = None,
+    max_global_tip_age_bars: int | None = None,
 ) -> list[int]:
     """Return sorted signal bar indices for one OHLCV frame (causal at each bar).
 
@@ -367,7 +451,6 @@ def scan_series_with_yolo(
         predict_conf = tip_conf
     tip_edge_rejected = 0
     apply_tip_edge = mode in ("live", "tip") and tip_edge_bars > 0
-    min_bar_in_win = window - tip_edge_bars if apply_tip_edge else 0
     allow_pending_entry = mode in ("live", "tip")
     # Live/tip: one chunk. Full offline: small chunks — 16 still Jetsam'd
     # 16GB Macs mid-series (2026-07-24 short tip_v1b pool; residual 16 PNGs/pid).
@@ -422,24 +505,27 @@ def scan_series_with_yolo(
                     if confs is not None and float(confs[bi]) < floor:
                         continue
                     cx, _, w, _ = map(float, b[:4])
-                    bar_in_win = right_edge_to_bar(cx, w, tf, n_bars=window)
-                    if apply_tip_edge and bar_in_win < min_bar_in_win:
+                    mapping = map_box_to_signal(
+                        cx=cx,
+                        w=w,
+                        tf=tf,
+                        window_start_i=start,
+                        n_bars=window,
+                        frame_length=len(frame),
+                        latest_closed_i=len(frame) - 1,
+                        tip_edge_bars=tip_edge_bars,
+                        apply_tip_edge=apply_tip_edge,
+                        max_global_tip_age_bars=max_global_tip_age_bars,
+                        allow_pending_entry=allow_pending_entry,
+                        start_from_i=start_from_i,
+                        signal_i_lo=i_lo,
+                        signal_i_hi=i_hi,
+                    )
+                    if mapping.rejection_reason == "local_tip_edge":
                         tip_edge_rejected += 1
+                    if not mapping.accepted:
                         continue
-                    signal_i = start + bar_in_win
-                    if signal_i < WARMUP_BARS or signal_i >= len(frame):
-                        continue
-                    # Offline full builds need the entry bar for labels; live/tip must
-                    # NOT wait — tip bar is the real-time path (entry backfills next pulse).
-                    if not allow_pending_entry and signal_i + 1 >= len(frame):
-                        continue
-                    if start_from_i is not None and signal_i < start_from_i:
-                        continue
-                    if i_lo is not None and signal_i < i_lo:
-                        continue
-                    if i_hi is not None and signal_i > i_hi:
-                        continue
-                    chosen.append(int(signal_i))
+                    chosen.append(mapping.mapped_signal_i)
             finally:
                 try:
                     win_png.unlink(missing_ok=True)

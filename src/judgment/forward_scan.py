@@ -450,6 +450,7 @@ def forward_candidate_indices(
         start_from_i=start_from_i,
         mode=mode,
         tip_conf=resolve_tip_conf(),
+        max_global_tip_age_bars=max_tip_age_bars if mode in ("live", "tip") else None,
     )
     if mode in ("live", "tip"):
         return enforce_global_tip_age(
