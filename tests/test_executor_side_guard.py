@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
 import pandas as pd
 import pytest
@@ -41,6 +42,21 @@ def test_absent_side_is_not_long(raw) -> None:
     Takeover plan P0-02 / acceptance A-03.
     """
     assert signal_trade_side(pd.Series({"side": raw})) == MISSING_SIDE
+
+
+def _protocol(*, side: str = "short", eligible: bool = True):
+    return SimpleNamespace(
+        protocol_version="short_v1" if side == "short" else "long_test_v1",
+        strategy_id="dense_start_short_15m" if side == "short" else "legacy_long_test",
+        feature_semantics="side_aligned_v1",
+        threshold=0.5,
+        side=side,
+        execution_eligible=eligible,
+        passes_threshold=lambda score: score >= 0.5,
+        accepts_row_side=lambda raw: (
+            raw is not None and not pd.isna(raw) and str(raw).strip().lower() == side
+        ),
+    )
 
 
 def test_signal_key_is_stable_under_rescoring_and_model_change() -> None:
@@ -88,7 +104,7 @@ def test_signal_key_separates_side_and_protocol() -> None:
     assert legacy.endswith(f"|short|{LEGACY_PROTOCOL}")
 
 
-def _write_signal(path: Path, *, side: str) -> None:
+def _write_signal(path: Path, *, side: str, eligible: bool = True) -> None:
     now = pd.Timestamp.now(tz="UTC")
     pd.DataFrame(
         [
@@ -103,13 +119,26 @@ def _write_signal(path: Path, *, side: str) -> None:
                 "entry_price": 100.0,
                 "atr_pct": 0.01,
                 "side": side,
+                "protocol_version": "short_v1",
+                "strategy_id": "dense_start_short_15m",
+                "feature_semantics": "side_aligned_v1",
+                "execution_eligible": eligible,
             }
         ]
     ).to_csv(path, index=False)
 
 
-@pytest.mark.parametrize("side", ["short", "unknown", ""])
-def test_run_once_rejects_non_long_without_retry_spam(tmp_path: Path, side: str) -> None:
+@pytest.mark.parametrize(
+    ("side", "expected_event"),
+    [
+        ("short", "skipped_unsupported_side"),
+        ("unknown", "skipped_protocol_mismatch"),
+        ("", "skipped_protocol_mismatch"),
+    ],
+)
+def test_run_once_rejects_non_long_without_retry_spam(
+    tmp_path: Path, side: str, expected_event: str
+) -> None:
     forward_log = tmp_path / "forward_log.csv"
     ledger_path = tmp_path / "ledger.jsonl"
     _write_signal(forward_log, side=side)
@@ -121,19 +150,19 @@ def test_run_once_rejects_non_long_without_retry_spam(tmp_path: Path, side: str)
         notional_usdt=10.0,
     )
 
-    first = run_once(cfg, dry_run=True)
+    first = run_once(cfg, dry_run=True, protocol=_protocol())
 
     assert first["opened"] == 0
     assert first["skipped"] == 1
     events = ledger.load_all(ledger_path)
     assert len(events) == 1
-    assert events[0]["event"] == "skipped_unsupported_side"
+    assert events[0]["event"] == expected_event
     # normalized, not raw: an empty CSV field reads back as NaN and must land on
     # MISSING_SIDE so the ledger says why it was refused rather than showing blank
     assert events[0]["signal_side"] == (side or MISSING_SIDE)
     assert events[0]["side"] is None
 
-    second = run_once(cfg, dry_run=True)
+    second = run_once(cfg, dry_run=True, protocol=_protocol())
     assert second["opened"] == 0
     assert second["skipped"] == 0
     assert len(ledger.load_all(ledger_path)) == 1
@@ -156,8 +185,43 @@ def test_rejected_side_never_calls_trading_client(side) -> None:
         }
     )
 
-    event = open_one(client, ExecutorConfig(), row, dry_run=False)
+    event = open_one(client, ExecutorConfig(), row, dry_run=False, protocol=_protocol())
 
-    assert event["event"] == "skipped_unsupported_side"
+    expected = "skipped_unsupported_side" if side == "short" else "skipped_protocol_mismatch"
+    assert event["event"] == expected
     assert event["side"] is None
     assert client.mock_calls == []
+
+
+def test_long_row_under_short_protocol_cannot_reach_buy_client() -> None:
+    client = Mock()
+    row = pd.Series(
+        {
+            "source": "okx",
+            "symbol": "BTC_USDT_SWAP",
+            "signal_time": "2026-05-03T03:00:00+00:00",
+            "protocol_version": "short_v1",
+            "side": "long",
+            "score": 0.9,
+            "threshold": 0.5,
+            "entry_price": 100.0,
+            "atr_pct": 0.01,
+        }
+    )
+
+    event = open_one(client, ExecutorConfig(), row, dry_run=False, protocol=_protocol())
+
+    assert event["event"] == "skipped_protocol_mismatch"
+    assert event["side"] is None
+    assert client.mock_calls == []
+
+
+def test_execution_ineligible_row_never_enters_order_queue(tmp_path: Path) -> None:
+    forward_log = tmp_path / "forward_log.csv"
+    _write_signal(forward_log, side="short", eligible=False)
+    cfg = ExecutorConfig(forward_log=str(forward_log))
+
+    summary = run_once(cfg, dry_run=True, protocol=_protocol())
+
+    assert summary["opened"] == 0
+    assert summary["note"] == "no actionable rows in forward_log"

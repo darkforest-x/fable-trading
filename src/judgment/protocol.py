@@ -24,9 +24,9 @@ together and both have already been assumed at some point:
   is paper must not be reachable by the order path
 
 This module does NOT activate anything. Presence of models/active_bundle.json is
-the owner's switch; absence leaves the existing runtime path untouched. Iron rule
-10 and the takeover plan's D-07/O-03 both put that decision with the owner, and a
-loader that promotes itself is the thing they forbid.
+the owner's switch. Production calls ``require_active_bundle`` and refuses to run
+when the file is absent; research/audit callers may use ``load_active_bundle`` to
+observe that absence. Refusing is not promotion and does not touch models/ACTIVE.
 
 Takeover plan: docs/protocol_repair/P0_SAFETY_SPEC.md section 3, acceptance
 C-01..C-08 and A-05/A-06.
@@ -34,6 +34,7 @@ C-01..C-08 and A-05/A-06.
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
@@ -43,6 +44,8 @@ ACTIVE_BUNDLE = PROJECT_DIR / "models" / "active_bundle.json"
 
 SIDES = ("long", "short")
 FEATURE_SEMANTICS = ("legacy_unaligned", "side_aligned_v1")
+FEATURE_SCHEMAS = ("judgment_28_v1",)
+MODEL_OBJECTIVES = ("regression", "binary")
 THRESHOLD_OPERATORS = (">", ">=")
 SAME_BAR_POLICIES = ("conservative_sl",)
 CANDIDATE_SOURCES = ("yolo",)
@@ -51,7 +54,8 @@ CANDIDATE_SOURCES = ("yolo",)
 REQUIRED_FIELDS = (
     "bundle_version", "protocol_version", "strategy_id", "side", "timeframe",
     "window_bars", "candidate_source", "max_tip_age_bars",
-    "feature_schema", "feature_semantics", "score_semantics",
+    "feature_schema", "feature_semantics", "model_objective",
+    "model_num_iteration", "score_semantics",
     "threshold", "threshold_operator", "tie_policy",
     "research_entry_mode", "live_entry_mode",
     "tp_atr_mult", "sl_atr_mult", "horizon_bars", "same_bar_policy",
@@ -94,6 +98,8 @@ class StrategyProtocol:
     max_tip_age_bars: int
     feature_schema: str
     feature_semantics: str
+    model_objective: str
+    model_num_iteration: int
     score_semantics: str
     threshold: float
     threshold_operator: str
@@ -172,6 +178,8 @@ def load_bundle(path: Path, project_dir: Path = PROJECT_DIR) -> StrategyProtocol
     _require(raw, path)
     side = _enum(raw, path, "side", SIDES)
     semantics = _enum(raw, path, "feature_semantics", FEATURE_SEMANTICS)
+    feature_schema = _enum(raw, path, "feature_schema", FEATURE_SCHEMAS)
+    model_objective = _enum(raw, path, "model_objective", MODEL_OBJECTIVES)
     operator = _enum(raw, path, "threshold_operator", THRESHOLD_OPERATORS)
     _enum(raw, path, "same_bar_policy", SAME_BAR_POLICIES)
     _enum(raw, path, "candidate_source", CANDIDATE_SOURCES)
@@ -198,12 +206,24 @@ def load_bundle(path: Path, project_dir: Path = PROJECT_DIR) -> StrategyProtocol
             "window_bars": int(raw["window_bars"]),
             "max_tip_age_bars": int(raw["max_tip_age_bars"]),
             "horizon_bars": int(raw["horizon_bars"]),
+            "model_num_iteration": int(raw["model_num_iteration"]),
             "threshold": float(raw["threshold"]),
             "tp_atr_mult": float(raw["tp_atr_mult"]),
             "sl_atr_mult": float(raw["sl_atr_mult"]),
         }
     except (TypeError, ValueError) as exc:
         raise BundleError(path, f"non-numeric field: {exc}") from exc
+    if any(not math.isfinite(numbers[field]) for field in ("threshold", "tp_atr_mult", "sl_atr_mult")):
+        raise BundleError(path, "threshold and barrier multipliers must be finite")
+    for field in ("bundle_version", "window_bars", "horizon_bars", "model_num_iteration"):
+        if numbers[field] <= 0:
+            raise BundleError(path, f"{field} must be positive")
+    if numbers["max_tip_age_bars"] < 0:
+        raise BundleError(path, "max_tip_age_bars must be non-negative")
+
+    for field in REQUIRED_FIELDS:
+        if isinstance(raw[field], str) and not raw[field].strip():
+            raise BundleError(path, f"{field} must not be blank")
 
     from src.judgment.frozen import file_sha256  # local: avoids an import cycle
 
@@ -229,8 +249,9 @@ def load_bundle(path: Path, project_dir: Path = PROJECT_DIR) -> StrategyProtocol
         side=side,
         timeframe=str(raw["timeframe"]),
         candidate_source=str(raw["candidate_source"]),
-        feature_schema=str(raw["feature_schema"]),
+        feature_schema=feature_schema,
         feature_semantics=semantics,
+        model_objective=model_objective,
         score_semantics=str(raw["score_semantics"]),
         threshold_operator=operator,
         tie_policy=str(raw["tie_policy"]),
@@ -252,14 +273,63 @@ def load_bundle(path: Path, project_dir: Path = PROJECT_DIR) -> StrategyProtocol
 
 
 def load_active_bundle(project_dir: Path = PROJECT_DIR) -> StrategyProtocol | None:
-    """The production entry point. Returns None only when no bundle is configured.
+    """Read the exact configured bundle, or report that none is configured.
 
-    None means "the owner has not switched this on", and the caller keeps its
-    existing behaviour. A bundle that exists but does not verify raises -- there
-    is no third outcome where production quietly runs something else, which is
-    exactly what latest_artifact() does today and acceptance C-06 forbids.
+    Audit/research code may need to distinguish absence from corruption. Production
+    must call :func:`require_active_bundle`, because absence is not authority to
+    discover a model elsewhere.
     """
     bundle = project_dir / "models" / "active_bundle.json"
     if not bundle.exists():
         return None
     return load_bundle(bundle, project_dir=project_dir)
+
+
+def require_active_bundle(project_dir: Path = PROJECT_DIR) -> StrategyProtocol:
+    """Production authority: exactly one verified bundle, otherwise fail closed."""
+    protocol = load_active_bundle(project_dir=project_dir)
+    if protocol is None:
+        bundle = project_dir / "models" / "active_bundle.json"
+        raise BundleError(
+            bundle,
+            "production requires an explicit active bundle; models/ACTIVE and "
+            "latest-artifact discovery are research/legacy authorities only",
+        )
+    return protocol
+
+
+def runtime_artifact(protocol: StrategyProtocol):
+    """Adapt a verified bundle to the existing scorer without reading a sidecar.
+
+    The adapter deliberately takes threshold, side, dataset, feature semantics and
+    inference iteration from the bundle itself. Loading the old JSON sidecar here
+    would create a second authority and reintroduce C-07 through the back door.
+    """
+    from src.judgment.features import FEATURE_COLUMNS
+    from src.judgment.frozen import FrozenArtifact, FrozenConfig
+
+    config = FrozenConfig(
+        name=protocol.protocol_version,
+        project_dir=protocol.path.parent.parent,
+        dataset_path=protocol.dataset_path,
+        models_dir=protocol.model_path.parent,
+        score_quantile=0.0,
+        horizon_bars=protocol.horizon_bars,
+        objective=protocol.model_objective,
+        side=protocol.side,
+    )
+    return FrozenArtifact(
+        config=config,
+        model_path=protocol.model_path,
+        metadata_path=protocol.path,
+        dataset_path=protocol.dataset_path,
+        relative_model_path=str(protocol.model_path),
+        relative_dataset_path=str(protocol.dataset_path),
+        threshold=protocol.threshold,
+        feature_columns=tuple(FEATURE_COLUMNS),
+        dataset_sha256=protocol.dataset_sha256,
+        dataset_size_bytes=protocol.dataset_path.stat().st_size,
+        best_iteration=protocol.model_num_iteration,
+        sizing_tiers=None,
+        feature_semantics=protocol.feature_semantics,
+    )

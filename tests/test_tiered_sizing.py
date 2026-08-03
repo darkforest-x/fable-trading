@@ -272,6 +272,10 @@ class TestExecutorSizing:
             "maker_filled": True, "outcome": "", "label": -1,
             "exit_offset": 0, "exit_time": "", "realized_ret": "",
             "atr_pct": 0.01, "dense_run_len": 8,
+            "protocol_version": "legacy_long_test_v1",
+            "strategy_id": "legacy_long_test",
+            "feature_semantics": "side_aligned_v1",
+            "execution_eligible": True,
         }
         if size_mult is not None:
             row["tier"] = "q99_plus"
@@ -289,6 +293,21 @@ class TestExecutorSizing:
         base.update(kwargs)
         return ExecutorConfig(**base)
 
+    @staticmethod
+    def _protocol():
+        import types
+
+        return types.SimpleNamespace(
+            protocol_version="legacy_long_test_v1",
+            strategy_id="legacy_long_test",
+            feature_semantics="side_aligned_v1",
+            threshold=Q90,
+            side="long",
+            execution_eligible=True,
+            passes_threshold=lambda score: score >= Q90,
+            accepts_row_side=lambda raw: str(raw).strip().lower() == "long",
+        )
+
     @pytest.mark.parametrize(
         ("size_mult", "expected_notional"),
         [
@@ -304,7 +323,7 @@ class TestExecutorSizing:
         log = tmp_path / "forward_log.csv"
         self._write_forward_log(log, size_mult=size_mult)
         cfg = self._config(tmp_path, log)
-        summary = run_once(cfg, dry_run=True)
+        summary = run_once(cfg, dry_run=True, protocol=self._protocol())
         assert summary["opened"] == 1
         sizing = summary["last_sizing"]
         assert sizing["size_mult"] == size_mult
@@ -317,7 +336,7 @@ class TestExecutorSizing:
         log = tmp_path / "forward_log.csv"
         self._write_forward_log(log, size_mult=2.0)
         cfg = self._config(tmp_path, log)
-        summary = run_once(cfg, dry_run=True)
+        summary = run_once(cfg, dry_run=True, protocol=self._protocol())
         assert summary["opened"] == 1
         sizing = summary["last_sizing"]
         assert sizing["size_mult"] == 2.0
@@ -331,7 +350,7 @@ class TestExecutorSizing:
         log = tmp_path / "forward_log.csv"
         self._write_forward_log(log, size_mult=None)
         cfg = self._config(tmp_path, log)
-        summary = run_once(cfg, dry_run=True)
+        summary = run_once(cfg, dry_run=True, protocol=self._protocol())
         assert summary["opened"] == 1
         assert summary["last_sizing"]["size_mult"] == 1.0
         # Legacy mult=1x still uses unit sizing so max tier can fit later.

@@ -17,6 +17,7 @@ import json
 from pathlib import Path
 
 import pytest
+import pandas as pd
 
 from src.judgment.frozen import file_sha256
 from src.judgment.protocol import (
@@ -24,6 +25,8 @@ from src.judgment.protocol import (
     REQUIRED_FIELDS,
     load_active_bundle,
     load_bundle,
+    require_active_bundle,
+    runtime_artifact,
 )
 
 
@@ -56,6 +59,8 @@ def _bundle_dict(tmp_path: Path, **overrides) -> dict:
         "max_tip_age_bars": 2,
         "feature_schema": "judgment_28_v1",
         "feature_semantics": "legacy_unaligned",
+        "model_objective": "regression",
+        "model_num_iteration": 1,
         "score_semantics": "predicted_net_barrier_taker",
         "threshold": -0.00044,
         "threshold_operator": ">=",
@@ -159,13 +164,40 @@ def test_corrupt_bundle_does_not_fall_back(tmp_path: Path) -> None:
         load_active_bundle(project_dir=tmp_path)
 
 
-def test_absent_bundle_is_none_not_a_guess(tmp_path: Path) -> None:
+def test_absent_bundle_is_none_for_audit_but_refused_by_production(tmp_path: Path) -> None:
     """No bundle means the owner has not switched this on -- not "pick something".
 
-    The distinction matters: None lets the caller keep its documented behaviour,
-    whereas a loader that searched would be reintroducing the defect.
+    The optional reader exposes absence to audit code. The production reader must
+    not translate it into permission to use models/ACTIVE or glob for a model.
     """
     assert load_active_bundle(project_dir=tmp_path) is None
+    with pytest.raises(BundleError, match="requires an explicit active bundle"):
+        require_active_bundle(project_dir=tmp_path)
+
+
+def test_forward_production_stops_before_reading_log_when_bundle_is_absent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import src.judgment.forward as forward
+
+    missing = tmp_path / "models" / "active_bundle.json"
+    monkeypatch.setattr(
+        forward,
+        "require_active_bundle",
+        lambda: (_ for _ in ()).throw(BundleError(missing, "missing exact bundle")),
+    )
+    monkeypatch.setattr(
+        forward,
+        "read_forward_log",
+        lambda path: pytest.fail("forward log must not be read after bundle refusal"),
+    )
+
+    with pytest.raises(BundleError, match="missing exact bundle"):
+        forward._run_forward_tracking(
+            output_path=tmp_path / "forward.csv",
+            start_time=pd.Timestamp("2026-05-03", tz="UTC"),
+            exit_resolver=None,
+        )
 
 
 def test_missing_artefact_file_fails_rather_than_degrading(tmp_path: Path) -> None:
@@ -173,6 +205,33 @@ def test_missing_artefact_file_fails_rather_than_degrading(tmp_path: Path) -> No
     (tmp_path / "models" / "det.pt").unlink()
     with pytest.raises(BundleError, match="detector_path does not exist"):
         load_bundle(path, project_dir=tmp_path)
+
+
+def test_runtime_artifact_is_derived_only_from_bundle(tmp_path: Path) -> None:
+    protocol = load_bundle(_write(tmp_path), project_dir=tmp_path)
+    artifact = runtime_artifact(protocol)
+
+    assert artifact.model_path == protocol.model_path
+    assert artifact.dataset_path == protocol.dataset_path
+    assert artifact.threshold == protocol.threshold
+    assert artifact.best_iteration == protocol.model_num_iteration
+    assert artifact.config.side == protocol.side
+    assert artifact.feature_semantics == protocol.feature_semantics
+    assert artifact.metadata_path == protocol.path
+
+
+@pytest.mark.parametrize(
+    ("field", "bad", "message"),
+    [
+        ("model_num_iteration", 0, "must be positive"),
+        ("threshold", float("nan"), "must be finite"),
+        ("feature_schema", "unknown_28", "not in"),
+        ("model_objective", "ranking", "not in"),
+    ],
+)
+def test_runtime_semantics_are_not_defaulted(tmp_path: Path, field: str, bad, message: str) -> None:
+    with pytest.raises(BundleError, match=message):
+        load_bundle(_write(tmp_path, **{field: bad}), project_dir=tmp_path)
 
 
 # ── C-08 / A-06 / D-03 ────────────────────────────────────────────────────────
@@ -263,3 +322,5 @@ def test_example_is_not_wired_up_as_the_active_bundle() -> None:
     project = Path(__file__).resolve().parents[1]
     assert not (project / "models" / "active_bundle.json").exists()
     assert load_active_bundle(project_dir=project) is None
+    with pytest.raises(BundleError, match="requires an explicit active bundle"):
+        require_active_bundle(project_dir=project)

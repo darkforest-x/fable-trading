@@ -26,7 +26,9 @@ from src.execution.config import (
 from src.execution import ledger as led
 from src.execution.okx_client import OkxDemoClient, OkxDemoError
 from src.execution.symbols import round_price, size_for_notional, to_okx_inst_id
+from src.judgment.forward_records import actionable_rows, read_forward_log
 from src.judgment.forward_types import LEGACY_PROTOCOL
+from src.judgment.protocol import StrategyProtocol, require_active_bundle
 
 
 def signal_key(row: pd.Series) -> str:
@@ -97,17 +99,43 @@ def _resolve(path_str: str) -> Path:
     return Path(__file__).resolve().parents[2] / p
 
 
-def load_actionable_signals(cfg: ExecutorConfig) -> pd.DataFrame:
+def load_actionable_signals(
+    cfg: ExecutorConfig,
+    protocol: StrategyProtocol,
+) -> pd.DataFrame:
+    """Return rows from exactly one execution-eligible protocol.
+
+    Side mismatch is intentionally left for ``open_one`` so the refusal is
+    recorded once in the ledger. All other provenance mismatches disappear from
+    the order queue before a client exists.
+    """
     path = _resolve(cfg.forward_log)
     if not path.exists():
         return pd.DataFrame()
-    df = pd.read_csv(path)
+    if not protocol.execution_eligible:
+        return pd.DataFrame()
+    df = actionable_rows(read_forward_log(path))
     if df.empty:
         return df
+    for column, expected in (
+        ("protocol_version", protocol.protocol_version),
+        ("strategy_id", protocol.strategy_id),
+        ("feature_semantics", protocol.feature_semantics),
+    ):
+        df = df[df[column].astype(str) == str(expected)]
     if "status" in df.columns:
         df = df[df["status"].astype(str).isin(cfg.open_statuses)]
-    if cfg.require_score_ge_threshold and "score" in df.columns and "threshold" in df.columns:
-        df = df[pd.to_numeric(df["score"], errors="coerce") >= pd.to_numeric(df["threshold"], errors="coerce")]
+    if cfg.require_score_ge_threshold:
+        score = pd.to_numeric(df["score"], errors="coerce")
+        row_threshold = pd.to_numeric(df["threshold"], errors="coerce")
+        # CSV decimal round-trips may move a float by one ULP. Permit only that
+        # representation noise, not a semantically different gate.
+        threshold_tolerance = max(1e-15, abs(float(protocol.threshold)) * 1e-12)
+        exact_threshold = (row_threshold - float(protocol.threshold)).abs() <= threshold_tolerance
+        passes = score.map(
+            lambda value: protocol.passes_threshold(float(value)) if pd.notna(value) else False
+        )
+        df = df[exact_threshold & passes]
     # Freshness gate: a signal stays status=open until its barrier resolves (up
     # to 18h), but the EDGE is the launch moment -- entering hours late is a
     # different, untested trade. Only rows younger than max_signal_age_min may
@@ -235,6 +263,7 @@ def open_one(
     dry_run: bool,
     notional_usdt: float | None = None,
     sizing_meta: dict[str, Any] | None = None,
+    protocol: StrategyProtocol | None = None,
 ) -> dict[str, Any]:
     """Place one long paper trade (+ OCO). Returns ledger event dict."""
     sk = signal_key(row)
@@ -251,7 +280,9 @@ def open_one(
         "score": row.get("score"),
         "threshold": row.get("threshold"),
         "signal_side": trade_side,
-        "side": "buy" if trade_side == "long" else None,
+        # Populated only after protocol + side guards. A rejected row must not
+        # even be represented as an intended buy in the audit event.
+        "side": None,
         "tp_atr_mult": TP_ATR_MULT,
         "sl_atr_mult": SL_ATR_MULT,
         "td_mode": cfg.td_mode,
@@ -259,12 +290,29 @@ def open_one(
     if sizing_meta:
         event["sizing"] = sizing_meta
 
+    if protocol is None:
+        event["event"] = "skipped_protocol_mismatch"
+        event["note"] = "missing verified strategy protocol"
+        return event
+    if not protocol.execution_eligible:
+        event["event"] = "skipped_ineligible_protocol"
+        event["note"] = f"protocol {protocol.protocol_version!r} is execution-ineligible"
+        return event
+    if not protocol.accepts_row_side(row.get("side")):
+        event["event"] = "skipped_protocol_mismatch"
+        event["note"] = (
+            f"row side={trade_side!r} does not match protocol side={protocol.side!r}"
+        )
+        return event
+
     if trade_side != "long":
         event["event"] = "skipped_unsupported_side"
         event["note"] = (
             f"current executor is long-only; refused signal side={trade_side!r}"
         )
         return event
+
+    event["side"] = "buy"
 
     if dry_run or client is None:
         # Estimate without keys when dry-run and no client
@@ -436,8 +484,17 @@ def enforce_timeout_exits(client, cfg: ExecutorConfig, ledger_path: Path) -> int
     return closed
 
 
-def run_once(cfg: ExecutorConfig, *, dry_run: bool = False) -> dict[str, Any]:
+def run_once(
+    cfg: ExecutorConfig,
+    *,
+    dry_run: bool = False,
+    protocol: StrategyProtocol | None = None,
+) -> dict[str, Any]:
     """Single poll cycle. Returns summary counters."""
+    # Resolve the exact contract before any trading client can be constructed.
+    # Tests for legacy mechanics may inject a fully explicit fixture protocol;
+    # the production CLI never does and therefore requires active_bundle.json.
+    protocol = protocol if protocol is not None else require_active_bundle()
     ledger_path = _resolve(cfg.ledger)
     summary: dict[str, Any] = {
         "ts": datetime.now(timezone.utc).isoformat(),
@@ -471,7 +528,7 @@ def run_once(cfg: ExecutorConfig, *, dry_run: bool = False) -> dict[str, Any]:
         return summary
 
     taken = led.signal_keys_already_taken(ledger_path)
-    signals = load_actionable_signals(cfg)
+    signals = load_actionable_signals(cfg, protocol)
     if signals.empty:
         summary["note"] = "no actionable rows in forward_log"
         return summary
@@ -533,7 +590,7 @@ def run_once(cfg: ExecutorConfig, *, dry_run: bool = False) -> dict[str, Any]:
             summary["last_sizing"] = sizing
             ev = open_one(
                 client, cfg, row, dry_run=dry_run,
-                notional_usdt=notional, sizing_meta=sizing,
+                notional_usdt=notional, sizing_meta=sizing, protocol=protocol,
             )
             led.append(ledger_path, ev)
             _notify_event(ev)

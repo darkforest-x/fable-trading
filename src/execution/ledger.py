@@ -46,6 +46,8 @@ def signal_keys_already_taken(path: Path) -> set[str]:
             "skipped",
             "skipped_invalid_barriers",
             "skipped_unsupported_side",
+            "skipped_protocol_mismatch",
+            "skipped_ineligible_protocol",
             "dry_run",
         }:
             k = row.get("signal_key")
