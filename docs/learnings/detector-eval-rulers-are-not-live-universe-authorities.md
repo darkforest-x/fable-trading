@@ -1,0 +1,6 @@
+# Detector eval rulers are not live universe authorities
+
+- **Problem**: The legacy v10 candidate builder excluded `is_eval_symbol`, while the current live scanner does not. Treating that old detector-evaluation split as P1's universe would silently remove 33 currently live symbols and would still fail to reproduce the old pool: 27 legacy proposal symbols are members of today's materialized eval ruler.
+- **Effective path**: Resolve the authoritative universe from the actual consumer (`scan_forward_records`: OKX + 15m + `*_USDT_SWAP` + `!is_stockish`) and audit historical builders separately. The legacy pool has zero overlap with the 47-symbol SHA1 fallback set, proving it was built where the materialized eval manifest was absent. That fingerprint explains the old pool without granting the old task ruler authority over live discovery.
+- **General rule**: A split used to protect detector evaluation is not automatically a market universe. Freeze a dataset universe from the runtime consumer that the dataset must match, record other split rulers as provenance, and stop only when two sources claim the same responsibility with incompatible values.
+- **Involved**: `src/judgment/forward_scan.py`, `src/detection/owner_eval.py`, `scripts/dump_v9_candidates_dual_label.py`, `scripts/snapshot_p1_data_inputs_20260803.py`, `analysis/output/p1_data_baseline_20260803/`.
