@@ -175,3 +175,11 @@ def resolve_barrier_outcome(
         exit_time,
         gross_return(entry, float(exit_price), return_convention),
     )
+
+
+# Barrier parameters. Owner decisions -- CLAUDE.md forbids code changing them, and
+# they live here rather than in labeling.py because L1's tip gate, L2's labels and
+# L3's replay must all read the same numbers or they are measuring different
+# strategies. Moved from src/judgment/labeling.py on 2026-08-03.
+HORIZON_BARS = 72
+ATR_PCT_MIN = 0.0015

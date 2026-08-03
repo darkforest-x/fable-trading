@@ -35,10 +35,9 @@ from src.judgment.outcomes import OutcomeContractError, resolve_barrier_outcome
 # analysis/p2b_judgment_report.md.
 TP_ATR_MULT = 4.0
 SL_ATR_MULT = 2.0
-HORIZON_BARS = 72
+from yoyo.contracts.outcomes import ATR_PCT_MIN, HORIZON_BARS  # noqa: F401
 # Candidates whose atr_pct is below this floor are skipped entirely: their
 # barrier scale cannot cover trading costs no matter what the model says.
-ATR_PCT_MIN = 0.0015
 
 EntryMode = Literal["next_open", "signal_close"]
 ENTRY_MODES: tuple[str, ...] = ("next_open", "signal_close")
