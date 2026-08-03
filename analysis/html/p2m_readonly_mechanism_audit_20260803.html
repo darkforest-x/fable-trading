@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P2-M：ATR 尺度与形态关联的只读机制审计</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P2-M：ATR 尺度与形态关联的只读机制审计</h1>
+<p><strong>日期</strong>：2026-08-03</p>
+<p><strong>执行边界</strong>：唯一数据源为 P1 immutable dataset；P2-R 产物只用于冻结五折与既有 20 个</p>
+<p>稳定特征集合。不训练、不拟合、不选 feature、不调 threshold、不读 holdout、不修改 ACTIVE、</p>
+<p>不创建 active bundle、不部署、不访问交易 client、不下单；P2-M 完成后停止。</p>
+<p><strong>机器结果</strong>：<code>analysis/output/p2m_mechanism_audit_20260803.json</code></p>
+<h2>技术摘要：大部分 raw return IC 含 ATR 尺度成分，但仍有小幅稳健残余</h2>
+<p><strong>P2-M 已完成并停止；P2 仍为 REJECTED。</strong> 预注册机制审计得到的是混合结论：</p>
+<ul>
+<li>P1 的 TP / SL gross return 在 ATR 单位上中位数精确为 <strong>+5.000 / -2.000</strong>，确认 raw</li>
+</ul>
+<p>  return target 同时编码了胜负与 ATR 决定的盈亏幅度；</p>
+<ul>
+<li>P2-R 冻结的 20 个稳定 feature 中，<strong>14/20（70%）</strong>在 TP 标签、ATR-normalized gross、</li>
+</ul>
+<p>  折内 ATR 五分位 net IC 三条控制线上均衰减到 raw net IC 的一半以内；机械尺度成分占多数，</p>
+<p>  但未达到预注册的 75% <code>global_mechanical_dominance</code> 门；</p>
+<ul>
+<li><strong>8/20</strong> feature 在三条控制线上仍满足至少 4/5 折同号且 <code>abs(median rho)&gt;=0.03</code>；</li>
+</ul>
+<p>  <code>global_scale_robust_signal=true</code>。其中 3 个既衰减超过一半又保持稳定，说明“主要受尺度影响”</p>
+<p>  与“仍有较小残余”不是互斥结论；</p>
+<ul>
+<li>scale-robust 只表示粗粒度尺度控制后仍有关联，不等于形态因果 edge，更不等于经济</li>
+</ul>
+<p>  top-decile 可盈利。P2-M 已查看全部控制结果，不能据此挑 feature 在相同 P1 上重新验收。</p>
+<p>因此不支持立即废弃所有 L2 信息，也不支持直接训练。诚实裁决是：**ATR/barrier 机械结构解释</p>
+<p>了大部分 raw IC；少量残余值得记录，但证据等级只能是 exploratory。**</p>
+<h2>障碍机制被精确复原：TP=+5 ATR、SL=-2 ATR</h2>
+<p>定义：</p>
+<ul>
+<li><code>atr_return_scale = atr_at_signal / entry_price_research</code>；</li>
+<li><code>atr_normalized_gross = gross_ret / atr_return_scale</code>；</li>
+<li>使用 gross 而不是 net，是因为固定 taker fee 不随 ATR 比例缩放。</li>
+</ul>
+<table><thead><tr>
+<th>exit</th>
+<th>rows</th>
+<th>ATR-normalized gross median</th>
+<th>q10 → q90</th>
+<th>预注册检查</th>
+</tr></thead><tbody>
+<tr><td>TP</td><td>3,594</td><td><strong>+5.0000</strong></td><td>+5.0000 → +5.0000</td><td>PASS：距 +5 ≤0.25</td></tr>
+<tr><td>SL / ambiguous SL</td><td>9,721</td><td><strong>-2.0000</strong></td><td>-2.0000 → -2.0000</td><td>PASS：距 -2 ≤0.25</td></tr>
+<tr><td>timeout</td><td>1,480</td><td>+1.4566</td><td>-0.4063 → +3.3480</td><td>非固定障碍，不设门</td></tr>
+</tbody></table>
+<p>这证明 raw return 的绝对幅度必然随 ATR 放大。某 feature 只要与 ATR / range 同向，即使完全</p>
+<p>不改变 TP 概率，也可能产生 return IC；因此 P2-R 的 raw IC 不能直接解释成形态 edge。</p>
+<h2>14/20 关联明显衰减，正式全局门仍为 FALSE</h2>
+<p>机械尺度 feature 的固定定义：该 feature 已属于 P2-R frozen stable set，且以下三个中位</p>
+<p>Spearman 的绝对值都不超过 raw net-taker median IC 的 50%：</p>
+<p>1. feature vs TP-before-SL；</p>
+<p>2. feature vs ATR-normalized gross；</p>
+<p>3. feature vs fold-local ATR quintile 内的 net-taker。</p>
+<table><thead><tr>
+<th>分类</th>
+<th>数量</th>
+<th>feature</th>
+</tr></thead><tbody>
+<tr><td>mechanical only</td><td>11</td><td><code>close_vs_ema55</code>, <code>ext_up</code>, <code>ret_12</code>, <code>spread_mean24</code>, <code>ret_24</code>, <code>spread_mean8</code>, <code>ret_4</code>, <code>drawdown24</code>, <code>ret_48</code>, <code>spread_chg8</code>, <code>dense_run_len</code></td></tr>
+<tr><td>mechanical + scale-robust</td><td>3</td><td><code>pre_range48</code>, <code>full_spread</code>, <code>ma_spread_pct</code></td></tr>
+<tr><td>scale-robust only</td><td>5</td><td><code>atr_pct</code>, <code>pre_range168</code>, <code>fast_slow_gap</code>, <code>close_vs_ema200</code>, <code>dense_frac48</code></td></tr>
+<tr><td>mixed</td><td>1</td><td><code>atr_pct_ratio96</code></td></tr>
+</tbody></table>
+<p>mechanical flag 合计 14/20=70%。这是多数且说明 P2-R 的大 IC 普遍被 ATR/barrier 结构放大；</p>
+<p>但预注册全局线是 75%，所以机器结论必须保留</p>
+<p><code>global_mechanical_dominance=false</code>，不能事后把门降到 70%。</p>
+<h2>8 个 feature 在三条尺度控制后仍稳定，但效应已明显变小</h2>
+<p>下表只展开预注册规则判为 scale-robust 的 8 个 feature。<code>ATR rho</code> 是 feature 与 <code>atr_pct</code></p>
+<p>的五折中位相关，用来显示尺度耦合；它不是第四个成功门。</p>
+<table><thead><tr>
+<th>feature</th>
+<th>raw net rho</th>
+<th>TP-label rho</th>
+<th>ATR-normalized rho</th>
+<th>within-ATR net rho</th>
+<th>ATR rho</th>
+<th>分类</th>
+</tr></thead><tbody>
+<tr><td><code>atr_pct</code></td><td>-0.3002</td><td>-0.1374</td><td>-0.0900</td><td>-0.3124</td><td>+1.0000</td><td>robust only</td></tr>
+<tr><td><code>pre_range168</code></td><td>-0.2632</td><td>-0.0728</td><td>-0.0526</td><td>-0.1659</td><td>+0.7713</td><td>robust only</td></tr>
+<tr><td><code>pre_range48</code></td><td>-0.2558</td><td>-0.0919</td><td>-0.0518</td><td>-0.1106</td><td>+0.8430</td><td>mechanical + robust</td></tr>
+<tr><td><code>full_spread</code></td><td>-0.2107</td><td>-0.0872</td><td>-0.0512</td><td>-0.0853</td><td>+0.5648</td><td>mechanical + robust</td></tr>
+<tr><td><code>ma_spread_pct</code></td><td>-0.1971</td><td>-0.0597</td><td>-0.0365</td><td>-0.0613</td><td>+0.5589</td><td>mechanical + robust</td></tr>
+<tr><td><code>fast_slow_gap</code></td><td>-0.1522</td><td>-0.0812</td><td>-0.0589</td><td>-0.0784</td><td>+0.3954</td><td>robust only</td></tr>
+<tr><td><code>close_vs_ema200</code></td><td>-0.1464</td><td>-0.0766</td><td>-0.0482</td><td>-0.0392</td><td>+0.2527</td><td>robust only</td></tr>
+<tr><td><code>dense_frac48</code></td><td>+0.2177</td><td>+0.0400</td><td>+0.0379</td><td>+0.1145</td><td>-0.5441</td><td>robust only</td></tr>
+</tbody></table>
+<p>最重要的限制是：这不是 feature shortlist。<code>atr_pct</code> 在自己的 quintile 内仍是连续值，所以</p>
+<p><code>within-ATR rho</code> 不能完全去除 ATR；其他 range/spread feature 也与 ATR 高度相关。8 个残余中</p>
+<p>TP / normalized rho 多数只有 0.03–0.09，方向稳定但经济幅度未知。</p>
+<h2>五折 outcome 换挡在 ATR 单位下仍存在</h2>
+<table><thead><tr>
+<th>fold</th>
+<th>rows</th>
+<th>median ATR scale</th>
+<th>TP rate</th>
+<th>gross mean</th>
+<th>net mean</th>
+<th>ATR-normalized gross mean</th>
+<th>timeout median ATR</th>
+</tr></thead><tbody>
+<tr><td>1</td><td>2,937</td><td>0.6743%</td><td>33.03%</td><td>+35.47bp</td><td>+25.47bp</td><td>+0.633</td><td>+2.084</td></tr>
+<tr><td>2</td><td>2,918</td><td>0.6656%</td><td>13.50%</td><td>-49.32bp</td><td>-59.32bp</td><td>-0.666</td><td>+1.360</td></tr>
+<tr><td>3</td><td>2,996</td><td>0.5231%</td><td>30.07%</td><td>+18.24bp</td><td>+8.24bp</td><td>+0.408</td><td>+1.776</td></tr>
+<tr><td>4</td><td>2,944</td><td>0.5355%</td><td>20.41%</td><td>-13.95bp</td><td>-23.95bp</td><td>-0.200</td><td>+1.346</td></tr>
+<tr><td>5</td><td>3,000</td><td>0.5467%</td><td>24.27%</td><td>+7.09bp</td><td>-2.91bp</td><td>+0.049</td><td>+1.189</td></tr>
+</tbody></table>
+<p>fold 2 即使换成 ATR-normalized gross 仍最差，说明上一轮观察到的 regime shift 不只是不同</p>
+<p>fold ATR 水平造成；TP base rate 与 timeout outcome 同样在变。P2-M 是描述性审计，不把这种</p>
+<p>时间共变声称为单一市场因果。</p>
+<h2>与 P2-R 同表：raw IC 被拆成尺度成分与残余</h2>
+<table><thead><tr>
+<th>项</th>
+<th>P2-R</th>
+<th>P2-M 新信息</th>
+<th>裁决</th>
+</tr></thead><tbody>
+<tr><td>raw net-return stable features</td><td>20/28</td><td>固定输入，不重选</td><td>关联结构存在</td></tr>
+<tr><td>mechanical attenuation</td><td>未测</td><td><strong>14/20</strong></td><td>多数 raw IC 含强尺度成分</td></tr>
+<tr><td>scale-robust controls all pass</td><td>未测</td><td><strong>8/20</strong></td><td>有小幅稳定残余，仍是 exploratory</td></tr>
+<tr><td>exact TP / SL barrier scale</td><td>未测</td><td><strong>+5 / -2 ATR</strong></td><td>target 幅度机械结构确认</td></tr>
+<tr><td>global mechanical ≥75%</td><td>未测</td><td><strong>FALSE（70%）</strong></td><td>不降低预注册门</td></tr>
+<tr><td>any scale-robust feature</td><td>未测</td><td><strong>TRUE（8）</strong></td><td>不选择 feature、不训练</td></tr>
+</tbody></table>
+<p>P2 的经济失败仍是控制结论：test-row 加权 AUC 0.5117；fold-local exact top-decile gross</p>
+<p>-0.91bp、taker-net -10.91bp、pressure-net -15.91bp、TP-before-SL 22.51%；single-feature</p>
+<p>fixed baseline -22.67bp；matched candidate lift +0.74bp、exact p=0.4836。P2-M 没有新模型、</p>
+<p>新 score 或新 matched selection，因此没有新的 AUC / top-decile / permutation 数字，也不能</p>
+<p>用机制关联覆盖这些失败经济门。</p>
+<h2>数据、方法与安全边界</h2>
+<table><thead><tr>
+<th>项</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>dataset SHA256</td><td><code>aade2a334448d6443e71fb0d3dbbfcf450390875ce60e1f800f6dbe9c855e93a</code></td></tr>
+<tr><td>rows / symbols</td><td>18,103 / 230</td></tr>
+<tr><td>signal range</td><td>2026-02-01 01:00 → 2026-05-03 05:15 UTC</td></tr>
+<tr><td>max label interval end</td><td>2026-05-03 22:45 UTC</td></tr>
+<tr><td>holdout signal / interval rows</td><td>0 / 0</td></tr>
+<tr><td>derived target missing / non-finite / non-positive scale</td><td>0 / 0 / 0</td></tr>
+<tr><td>fold test rows</td><td>2,937 / 2,918 / 2,996 / 2,944 / 3,000</td></tr>
+<tr><td>training / fitting calls</td><td>0</td></tr>
+</tbody></table>
+<p>方法固定为：每个 frozen test fold 分别计算 Spearman；ATR 桶使用 outcome-blind fold-local</p>
+<p><code>atr_pct</code> qcut 五分位；桶内 rho 以桶 rows 加权；stable 需要五折均 finite、至少 4/5 同号、</p>
+<p>中位绝对值≥0.03。没有 p-value 多重扫描、没有模型拟合、没有 threshold 或 feature selection。</p>
+<p>报告不画趋势图：只有五个预注册折，且 20×4 机制结果需要精确查值；表格和机器 CSV 比连线</p>
+<p>更不容易暗示连续趋势或突出事后最优 feature。</p>
+<h2>风险、限制与诚实声明</h2>
+<ul>
+<li><code>atr_normalized_gross</code> 只移除 payout magnitude，不移除 ATR 对 TP 概率或 timeout path 的影响；</li>
+<li>ATR quintile 是粗控制，桶内仍保留连续 ATR；<code>atr_pct</code> 自身的 within-bucket rho 尤其不能</li>
+</ul>
+<p>  解释为已排除波动；</p>
+<ul>
+<li>多个 feature 与 ATR 高度共线，Spearman 不是独立贡献或因果效应；</li>
+<li>8 个 scale-robust feature 是对已查看 P1 的全表审计，不是可直接进入模型的 shortlist；</li>
+<li>P2-M 没有逐行 score，不能产生新的 selector、top-decile 或匹配对照；</li>
+<li>funding 仍未建模；holdout 消耗 0；没有训练、调 threshold、ACTIVE/bundle、部署或订单。</li>
+</ul>
+<h2>下一步与未解决问题</h2>
+<p><strong>本轮动作：无；立即停止。</strong> P2 remains rejected，<code>training_allowed=false</code>，</p>
+<p><code>threshold_change_supported=false</code>。</p>
+<p>若 Owner 将来另行授权，下一轮只能先选择一个明确问题，而不是打包搜索：</p>
+<ul>
+<li>target 机制路线：预注册只比较 TP label 或 ATR-normalized target 是否比 raw return 更合理；</li>
+<li>形态机制路线：预注册一个 feature family 的 within-volatility 解释，不做 28-feature 扫描；</li>
+<li>确认路线：不再用已查看的 P1 宣称 confirmation，等待预注册后的新鲜前向样本。</li>
+</ul>
+<p>以上都不是本轮授权；本轮不自动进入任何一项。</p>
+<h2>测试与产物</h2>
+<ul>
+<li>P2-M 专项：7 passed；</li>
+<li>完整 <code>tests/</code>：513 passed、2 skipped、14 warnings、0 failed；</li>
+<li>AST 静态门确认无 estimator <code>.fit</code> / <code>train_regressor</code> / training call；</li>
+<li>ACTIVE / forward log / ledger hash 不变；active bundle 不存在。</li>
+</ul>
+<table><thead><tr>
+<th>artifact</th>
+<th>SHA256</th>
+</tr></thead><tbody>
+<tr><td>prereg JSON</td><td><code>5173f168a45161cea8587d0eb32792bfd263a2cfb4f730160b823bda7353691e</code></td></tr>
+<tr><td>mechanism audit JSON</td><td><code>ce39a3867645ee0fcd3fe62866200919347b192c0476c48827d4e2ec069881aa</code></td></tr>
+<tr><td>feature mechanism CSV</td><td><code>7ad203377e25a9f002cba5c482c19d658b94720cf8f0a2afe69f70f2faf55e88</code></td></tr>
+<tr><td>fold target CSV</td><td><code>a664e4095188414d46257fa9555ededb15dc4fc77584bde5a25649335a7642bc</code></td></tr>
+</tbody></table>
+<p>机器测试：<code>analysis/output/p2m_test_results_20260803.json</code>；完整 hash 清单：</p>
+<p><code>analysis/output/p2m_hashes_20260803.sha256</code>。</p>
+<h2>Commit 列表</h2>
+<table><thead><tr>
+<th>commit</th>
+<th>内容</th>
+</tr></thead><tbody>
+<tr><td><code>e8ba9a9</code></td><td>P2-M 只读机制预注册与固定判定门</td></tr>
+<tr><td><code>ad3788b</code></td><td>ATR target decomposition、五折尺度控制、机器 JSON/CSV 与专项测试</td></tr>
+</tbody></table>
+<p>报告、HTML、full tests、learnings 与 HANDOFF 的关闭提交在本报告之后形成，最终列表以 git log</p>
+<p>与交付回复为准。</p>
+<h2>从零复现</h2>
+<pre><code>
+PYTHONPATH=. PYTHONPYCACHEPREFIX=/private/tmp/p2m-pycache \
+  MPLCONFIGDIR=/private/tmp/p2m-mpl \
+  .venv/bin/python scripts/audit_p2m_mechanism_20260803.py
+
+PYTHONPATH=. PYTHONPYCACHEPREFIX=/private/tmp/p2m-pycache \
+  MPLCONFIGDIR=/private/tmp/p2m-mpl \
+  .venv/bin/pytest -q tests/test_p2m_mechanism_audit.py
+
+PYTHONPATH=. PYTHONPYCACHEPREFIX=/private/tmp/p2m-pycache \
+  MPLCONFIGDIR=/private/tmp/p2m-mpl \
+  .venv/bin/pytest -q tests
+
+python3 scripts/md_to_html.py analysis/p2m_readonly_mechanism_audit_20260803.md \
+  --out-dir analysis/html
+</code></pre>
+<h2>停止点</h2>
+<p><strong>P2-M 已完成，立即停止。</strong> 不选择 feature、不训练、不调 threshold、不读 holdout、不修改</p>
+<p>ACTIVE、不创建 active bundle、不部署、不下单。任何后续 target/feature/forward 方案都需要</p>
+<p>Owner 新指令与单独预注册。</p>
+</body>
+</html>

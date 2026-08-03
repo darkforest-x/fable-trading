@@ -2,6 +2,40 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-03 — P2-M 只读机制审计已完成，必须停止）
+
+**直接裁决：raw return IC 大部分含 ATR/barrier 尺度成分，但有小幅 scale-robust 残余；
+P2 仍为 REJECTED，禁止据此选 feature 或训练。** P2-M 唯一数据源是 P1 immutable dataset。
+
+- TP / SL gross return 在 ATR 单位上精确为 **+5 / -2**，确认 raw return 同时编码 outcome
+  probability 与 ATR-scaled payout magnitude。
+- P2-R frozen stable 20 features 中，14/20（70%）在 TP label、ATR-normalized gross、折内
+  ATR quintile net IC 三条控制线上都衰减到 raw IC 的 50% 内；但未达到预注册 75% 全局门，
+  所以 `global_mechanical_dominance=false`。
+- 8/20 在三条控制线上仍满足 4/5 折同号且 abs median rho≥0.03，
+  `global_scale_robust_signal=true`；其中 3 个同时 mechanical+robust。scale-robust 只是残余关联，
+  不等于因果、经济 edge 或 feature shortlist。
+- 五折 rows 2,937 / 2,918 / 2,996 / 2,944 / 3,000；P1 18,103 rows / 230 symbols；
+  max signal 2026-05-03 05:15 UTC，max label end 2026-05-03 22:45 UTC，0 holdout。
+- P2-M 专项 7 passed；完整 tests 513 passed / 2 skipped / 14 warnings / 0 failed。
+- 未训练、未拟合、未选 feature、未调 threshold、未读 holdout、未改 ACTIVE、未部署、未下单；
+  ACTIVE / forward log / ledger hash 不变，active bundle 不存在。
+
+交付物：
+
+- `analysis/html/p2m_readonly_mechanism_audit_20260803.html`
+- `analysis/p2m_readonly_mechanism_audit_20260803.md`
+- `analysis/output/p2m_mechanism_prereg_20260803.json`
+- `analysis/output/p2m_mechanism_audit_20260803.json`
+- `analysis/output/p2m_feature_mechanism_20260803.csv`
+- `analysis/output/p2m_fold_target_mechanism_20260803.csv`
+- `analysis/output/p2m_test_results_20260803.json`
+- `analysis/output/p2m_hashes_20260803.sha256`
+
+**停止点：P2-M。** `training_allowed=false`、`threshold_change_supported=false`。未来若 Owner
+另行授权，只能先选一个单变量问题（target mechanism / one feature family / fresh-forward），
+不得把相同 P1 的自适应结果包装成独立 confirmation。
+
 ## ⚡ 当前真相（2026-08-03 — P2-R 只读根因审计已完成，必须停止）
 
 **直接裁决：P2 仍为 REJECTED；失败不是只改 q90 可以修复。** P2-R 只读取 P1 immutable
