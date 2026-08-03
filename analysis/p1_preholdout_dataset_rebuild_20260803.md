@@ -234,6 +234,7 @@ P1 没有训练、val split、threshold selection 或策略比较，因此项目
 | `8caa4f7` | 修正 L2/L1 边界，full 改为 proposal-led exact-window replay |
 | `decc98e` | 在修正提交上重新接受 fixture/dry-run |
 | `5aaf239` | 提交 full JSON、manifest 副本、hash 与测试结果 |
+| `6a5116a` | 提交最终 MD/HTML、HANDOFF 与报告索引 |
 
 ## 从零复现
 
