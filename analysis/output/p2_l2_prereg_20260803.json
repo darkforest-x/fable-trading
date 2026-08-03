@@ -1,0 +1,150 @@
+{
+  "preregistration_version": "p2_l2_v1",
+  "created_at": "2026-08-03T00:00:00+00:00",
+  "status": "awaiting_owner_decision",
+  "scope": "P2-L2 research-only training and pre-holdout validation",
+  "dataset": {
+    "manifest_path": "data/p1/p1_short_l2_preholdout_aade2a334448d644.manifest.json",
+    "manifest_sha256": "53b8a07612dae667a184da38bf8e0a694aaae15a5fd240d5b13238da3e13d682",
+    "path": "data/p1/p1_short_l2_preholdout_aade2a334448d644.csv",
+    "sha256": "aade2a334448d6443e71fb0d3dbbfcf450390875ce60e1f800f6dbe9c855e93a",
+    "protocol_version": "p1_short_l2_preholdout_v1",
+    "feature_schema": "judgment_28_v1",
+    "feature_semantics": "side_aligned_v1"
+  },
+  "safety": {
+    "holdout_cutoff": "2026-05-04T00:00:00+00:00",
+    "allowed_data_paths": [
+      "data/p1/p1_short_l2_preholdout_aade2a334448d644.csv"
+    ],
+    "forbidden": [
+      "read_or_score_holdout",
+      "modify_models_ACTIVE",
+      "create_models_active_bundle_json",
+      "deploy_or_restart_service",
+      "call_trading_client_or_place_order"
+    ],
+    "research_only": true,
+    "promotion_eligible": false
+  },
+  "split": {
+    "method": "chronological fixed UTC boundaries with complete label-interval and event-group purge",
+    "boundary_selection": "signal-time row counts only; no feature, label, return, or score used",
+    "early_stop_start": "2026-03-27T00:00:00+00:00",
+    "calibration_start": "2026-04-14T00:00:00+00:00",
+    "train_rule": "signal_time < early_stop_start and interval_end < early_stop_start",
+    "early_stop_rule": "early_stop_start <= signal_time < calibration_start and interval_end < calibration_start",
+    "calibration_rule": "calibration_start <= signal_time and interval_end < holdout_cutoff",
+    "cross_segment_event_group_rule": "purge the complete event_group_id from every segment",
+    "walkforward": {
+      "test_folds": 5,
+      "mode": "expanding chronological",
+      "outer_boundaries_utc": [
+        "2026-02-15T13:00:00+00:00",
+        "2026-03-01T17:15:00+00:00",
+        "2026-03-17T13:15:00+00:00",
+        "2026-04-01T17:45:00+00:00",
+        "2026-04-18T08:30:00+00:00"
+      ],
+      "inner_split": "within prior data, first 70% train, next 15% early-stop, last 15% calibration by time; interval/event purge at both boundaries",
+      "outer_test_rule": "all event groups whose full label interval is inside the outer test window",
+      "future_rows_in_training": 0
+    }
+  },
+  "model": {
+    "family": "LightGBM",
+    "objective": "regression",
+    "target_column": "net_ret_swap_taker",
+    "target_semantics": "net_taker_already_includes_0.001_round_trip",
+    "feature_columns": "manifest_exact_28_in_order",
+    "single_model_only": true,
+    "hyperparameter_search": false,
+    "parameters": {
+      "learning_rate": 0.05,
+      "num_leaves": 15,
+      "min_child_samples": 30,
+      "feature_fraction": 0.8,
+      "bagging_fraction": 0.8,
+      "bagging_freq": 1,
+      "lambda_l2": 1.0,
+      "seed": 42,
+      "deterministic": true,
+      "force_col_wise": true,
+      "num_boost_round": 600,
+      "early_stopping_rounds": 50
+    },
+    "early_stop_metric": "early-stop segment exact top-decile mean net_ret_swap_taker; maximize; no cost is deducted again",
+    "single_feature_baseline": "ordinary least-squares regression on ma_spread_pct only",
+    "health_failures": {
+      "best_iteration_le": 1,
+      "calibration_distinct_scores_lt": 100,
+      "calibration_pass_rate_outside": [0.08, 0.12],
+      "calibration_threshold_equal_rate_gt": 0.02
+    }
+  },
+  "selector": {
+    "calibration_quantile": 0.9,
+    "target_fraction": 0.1,
+    "threshold_operator": ">=",
+    "threshold_rule": "q90 boundary midpoint when separable; otherwise the full equality block passes",
+    "tie_policy": "never slice equal scores by row order, candidate id, or outcome",
+    "exact_top_decile": "report separately; if the boundary is tied, mark exact-k result unavailable rather than slice",
+    "fixed_gate": "calibrate once on calibration segment, then apply the same numeric threshold and >= operator",
+    "calibration_selected_floor": 300,
+    "walkforward_each_test_selected_floor": 100
+  },
+  "economics": {
+    "training_return": "net_ret_swap_taker",
+    "p1_fee_round_trip": 0.001,
+    "additional_slippage_round_trip": null,
+    "funding_adjustment": null,
+    "actual_cost_pressure_total": null,
+    "double_cost_forbidden": true,
+    "primary_statistic": "fixed-gate mean selected net return after approved pressure cost",
+    "matched_control": "one-to-one without replacement from nonselected P1 candidates; same symbol x UTC week x fold-local atr_pct quintile; exclude shared event_group_id; deterministic seed 42",
+    "matched_lift": "selected mean pressure-net minus matched-control mean pressure-net",
+    "block_permutation": "one-sided exact sign-flip of matched-pair lift by UTC week block; statistic is economic lift, never AUC",
+    "permutation_alpha": 0.01
+  },
+  "success_gates": {
+    "health_all_pass": true,
+    "calibration_selected_n_gte": 300,
+    "walkforward_each_test_selected_n_gte": 100,
+    "walkforward_positive_fixed_gate_folds_gte": 4,
+    "walkforward_test_folds": 5,
+    "aggregate_fixed_gate_pressure_net_mean_gt": 0.0,
+    "matched_lift_gt": 0.0,
+    "economic_block_permutation_p_lt": 0.01,
+    "offline_runtime_set_identity": true,
+    "arbitrary_tie_slicing": false
+  },
+  "reported_not_gated": [
+    "ROC_AUC_against_label_tp_before_sl",
+    "PR_AUC",
+    "Spearman_score_vs_net_return",
+    "exact_top_decile_when_boundary_separable",
+    "gross_and_net_taker_views",
+    "win_rate",
+    "single_feature_baseline",
+    "feature_importance"
+  ],
+  "owner_decisions": {
+    "actual_cost_pressure_line": {
+      "status": "required",
+      "recommended": "total round-trip 0.0015: P1 net_ret_swap_taker minus fixed 0.0005 slippage; funding not modeled because P1-only scope contains no funding",
+      "evidence": "P1 includes 0.001 taker only; historical clean fill pairs for measured slippage = 0",
+      "accepted_value": null
+    },
+    "fixed_runtime_gate": {
+      "status": "required",
+      "recommended": "calibration q90; >=; midpoint if separable; whole tie block otherwise; pass 8%-12%; equal rate <=2%; no tie slicing",
+      "accepted_value": null
+    }
+  },
+  "execution_state": {
+    "audit_completed": false,
+    "training_started": false,
+    "validation_started": false,
+    "stop_reason": "owner decisions unresolved"
+  }
+}

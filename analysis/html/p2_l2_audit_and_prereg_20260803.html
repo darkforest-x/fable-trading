@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P2-L2 只读审计与预注册（训练前 Owner 门）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P2-L2 只读审计与预注册（训练前 Owner 门）</h1>
+<p><strong>日期</strong>：2026-08-03</p>
+<p><strong>当前阶段</strong>：P2.0 只读审计完成；P2.1 预注册草案完成；<strong>尚未训练</strong></p>
+<p><strong>机器审计</strong>：<code>analysis/output/p2_l2_audit_20260803.json</code></p>
+<p><strong>机器预注册</strong>：<code>analysis/output/p2_l2_prereg_20260803.json</code></p>
+<h2>直接结论</h2>
+<p>P1 immutable dataset 的 P2 输入门通过，但训练仍停在两个 Owner 决策上：</p>
+<p>1. 实际成本压力线；</p>
+<p>2. 固定 runtime selector gate。</p>
+<p>08 页没有定义 P2；同一接管计划 01 页只给出 P2-L2 的验收原则，05 页明确要求在 P2</p>
+<p>前由 Owner 批准实际成本压力线，并审查固定 runtime gate。当前指令授权进入 P2，但没有</p>
+<p>给出滑点 / funding 数值或 operator。因此，本轮先完成可复核审计和完整预注册草案，不把</p>
+<p>推荐值冒充 Owner 决策；<code>status=awaiting_owner_decision</code> 时训练命令必须拒绝执行。</p>
+<h2>P2.0 输入事实</h2>
+<table><thead><tr>
+<th>项</th>
+<th>审计结果</th>
+</tr></thead><tbody>
+<tr><td>dataset</td><td><code>data/p1/p1_short_l2_preholdout_aade2a334448d644.csv</code></td></tr>
+<tr><td>dataset SHA256</td><td><code>aade2a334448d6443e71fb0d3dbbfcf450390875ce60e1f800f6dbe9c855e93a</code></td></tr>
+<tr><td>manifest SHA256</td><td><code>53b8a07612dae667a184da38bf8e0a694aaae15a5fd240d5b13238da3e13d682</code></td></tr>
+<tr><td>行 / 币 / event group</td><td>18,103 / 230 / 15,604</td></tr>
+<tr><td>signal 时间</td><td>2026-02-01 01:00 → 2026-05-03 05:15 UTC</td></tr>
+<tr><td>最大 label interval end</td><td>2026-05-03 22:45 UTC</td></tr>
+<tr><td>holdout signal / interval</td><td>0 / 0</td></tr>
+<tr><td>28 features missing / inf</td><td>0 / 0</td></tr>
+<tr><td>label TP 正类</td><td>4,533 / 18,103 = 25.04%</td></tr>
+<tr><td>gross / taker-net 全池均值</td><td>+4.08bp / -5.92bp</td></tr>
+<tr><td>成本恒等式</td><td><code>net = gross - 0.001</code>，最大误差 &lt; 3e-16</td></tr>
+</tbody></table>
+<p>本审计只读取 manifest 指定的 P1 CSV 作为研究数据。没有读取 raw candle、funding、其他</p>
+<p>dataset 或 holdout；没有训练、打分或在真实分数上校准 threshold。</p>
+<h2>时间三段与依赖 purge</h2>
+<p>边界只按 <code>signal_time</code> 的数量分布预先固定，没有用 feature、label、return 或 score：</p>
+<table><thead><tr>
+<th>段</th>
+<th>UTC 规则</th>
+<th>rows</th>
+<th>event groups</th>
+</tr></thead><tbody>
+<tr><td>train</td><td>signal &lt; 2026-03-27；label end 也必须早于边界</td><td>10,940</td><td>9,403</td></tr>
+<tr><td>early-stop val</td><td>03-27 ≤ signal &lt; 04-14；label end 早于 04-14</td><td>3,498</td><td>3,013</td></tr>
+<tr><td>calibration</td><td>signal ≥ 04-14；label end 严格早于 holdout</td><td>3,623</td><td>3,156</td></tr>
+<tr><td>purge</td><td>interval 穿越边界，且其完整 event group 一并删除</td><td>42</td><td>32</td></tr>
+</tbody></table>
+<p>实现按完整 <code>[interval_start, interval_end]</code> 和 <code>event_group_id</code> purge；一个连接分量只要跨段，</p>
+<p>就在所有段删除，不能靠固定 72-bar row purge 掩盖依赖。最终跨段 event group 数为 0。</p>
+<h2>P2.1 预注册草案</h2>
+<ul>
+<li>唯一模型：LightGBM regression，target=<code>net_ret_swap_taker</code>，28 特征严格取 manifest 顺序；</li>
+<li>不做参数扫描；固定现有主线参数，最多 600 轮、patience 50；</li>
+<li>early-stop 指标是 early-stop 段的 exact top-decile mean net，不再让 RMSE 常数预测器决定业务模型；</li>
+<li>单特征基线是只用 <code>ma_spread_pct</code> 的普通最小二乘回归；</li>
+<li>5 个 expanding chronological walkforward test folds；每折内部重新做 train / early-stop /</li>
+</ul>
+<p>  calibration，并按 interval / event group purge；</p>
+<ul>
+<li>selector 固定 q90、operator <code>&gt;=</code>。边界可分时用两侧分数中点；边界并列时整块通过；</li>
+</ul>
+<p>  禁止按行号、ID 或 outcome 切并列；</p>
+<ul>
+<li>exact top-decile 与 fixed threshold 分开报告。并列导致无法 exact-k 时明确标 unavailable；</li>
+<li>匹配对照只从同一 P1 candidate pool 的未选行抽取：同币 × UTC 周 × 折内 ATR quintile，</li>
+</ul>
+<p>  不放回且排除共享 event group；它衡量 L2 选择增量，不冒充“检测器 vs 市场随机入场”；</p>
+<ul>
+<li>经济置换统计量是匹配 lift，按 UTC 周做 exact block sign-flip；AUC 只作参考；</li>
+<li>成功线：健康门全过、每折 selected≥100、至少 4/5 折 fixed-gate pressure-net&gt;0、聚合</li>
+</ul>
+<p>  pressure-net&gt;0、matched lift&gt;0 且经济 block permutation <code>p&lt;0.01</code>。</p>
+<h2>必须由 Owner 明确的两项</h2>
+<h3>1. 实际成本压力线</h3>
+<p>可核验事实：P1 只有 swap taker 往返 <strong>0.10%</strong>；没有滑点列、没有 funding 列。历史执行</p>
+<p>审计的 clean fill/mark 配对数是 <strong>0</strong>，不能声称“实测滑点”。</p>
+<p>推荐固定为：<strong>总往返 0.15%</strong>，即在 P1 <code>net_ret_swap_taker</code> 上再减固定 0.05% 滑点；因</p>
+<p>“只使用 P1 dataset”的本轮边界，funding 不建模并在结论中标为缺口。这是仓库已有 short</p>
+<p>成本敏感性档，不是从本轮结果反推。若 Owner 不接受，应给出一个明确总成本或额外滑点数值；</p>
+<p>不能在训练后再选。</p>
+<h3>2. 固定 runtime gate</h3>
+<p>推荐固定为：calibration q90、<code>score &gt;= threshold</code>；边界可分时 threshold 取上下分数中点；</p>
+<p>边界并列时整块通过。健康门为 calibration pass rate 8%–12%、threshold equality≤2%、</p>
+<p>distinct scores≥100、best iteration&gt;1；任一失败即 P2 rejected，不换 operator、不切 ties。</p>
+<p>Owner 必须明确接受或给出替代值，机器预注册才会改成 <code>accepted</code>。<strong>在此之前不训练。</strong></p>
+<h2>安全边界</h2>
+<ul>
+<li>holdout：未读；</li>
+<li><code>models/ACTIVE</code>：未改；</li>
+<li><code>models/active_bundle.json</code>：仍不存在；</li>
+<li>deploy / restart：未执行；</li>
+<li>交易 client / 下单：未访问；</li>
+<li>当前只完成 P2.0 与 P2.1 草案，P2 尚未完成。</li>
+</ul>
+<h2>测试</h2>
+<ul>
+<li>fixture / P1 contract 聚焦测试：9 passed；</li>
+<li>完整 <code>tests/</code>：492 passed、2 skipped、0 failed；</li>
+<li>py_compile 通过；</li>
+<li>测试后 ACTIVE / forward log / ledger SHA 与 P1 结束时完全相同，active bundle 仍不存在。</li>
+</ul>
+<p>机器结果：<code>analysis/output/p2_prereg_test_results_20260803.json</code>。</p>
+<h2>复现</h2>
+<pre><code>
+PYTHONPATH=. .venv/bin/python scripts/audit_p2_prereg_20260803.py
+PYTHONPATH=. .venv/bin/pytest -q tests/test_p2_protocol.py tests/test_p1_dataset_contract.py
+python3 scripts/md_to_html.py analysis/p2_l2_audit_and_prereg_20260803.md --out-dir analysis/html
+</code></pre>
+</body>
+</html>

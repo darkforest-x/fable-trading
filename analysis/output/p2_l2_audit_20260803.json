@@ -1,0 +1,121 @@
+{
+  "audit_version": "p2_l2_readonly_audit_v1",
+  "generated_at": "2026-08-03T03:52:04.498951+00:00",
+  "verdict": "accepted",
+  "p2_training_allowed": false,
+  "p2_training_blocker": "owner must approve exact actual-cost pressure line and fixed runtime gate",
+  "dataset": {
+    "manifest_path": "data/p1/p1_short_l2_preholdout_aade2a334448d644.manifest.json",
+    "manifest_sha256": "53b8a07612dae667a184da38bf8e0a694aaae15a5fd240d5b13238da3e13d682",
+    "path": "data/p1/p1_short_l2_preholdout_aade2a334448d644.csv",
+    "sha256": "aade2a334448d6443e71fb0d3dbbfcf450390875ce60e1f800f6dbe9c855e93a",
+    "rows": 18103,
+    "columns": 75,
+    "symbols": 230,
+    "event_groups": 15604,
+    "candidate_duplicates": 0,
+    "signal_start": "2026-02-01 01:00:00+00:00",
+    "signal_end": "2026-05-03 05:15:00+00:00",
+    "max_interval_end": "2026-05-03 22:45:00+00:00",
+    "holdout_signal_rows": 0,
+    "holdout_interval_rows": 0,
+    "feature_missing_cells": 0,
+    "feature_infinite_cells": 0,
+    "label_positive_rows": 4533,
+    "label_positive_rate": 0.25040048610727506,
+    "gross_mean": 0.0004080750635800574,
+    "net_taker_mean": -0.0005919249364199449,
+    "fee_values": [
+      0.001
+    ],
+    "cost_identity_max_abs_error": 2.999987411267391e-16
+  },
+  "split": {
+    "selection_basis": "fixed UTC boundaries derived from signal_time counts only; outcomes/features unused",
+    "early_stop_start": "2026-03-27T00:00:00+00:00",
+    "calibration_start": "2026-04-14T00:00:00+00:00",
+    "train": {
+      "rows": 10940,
+      "event_groups": 9403,
+      "symbols": 220,
+      "signal_start": "2026-02-01 01:00:00+00:00",
+      "signal_end": "2026-03-26 20:45:00+00:00",
+      "max_interval_end": "2026-03-26 23:15:00+00:00"
+    },
+    "early_stop": {
+      "rows": 3498,
+      "event_groups": 3013,
+      "symbols": 225,
+      "signal_start": "2026-03-27 00:15:00+00:00",
+      "signal_end": "2026-04-13 21:15:00+00:00",
+      "max_interval_end": "2026-04-13 22:30:00+00:00"
+    },
+    "calibration": {
+      "rows": 3623,
+      "event_groups": 3156,
+      "symbols": 230,
+      "signal_start": "2026-04-14 00:15:00+00:00",
+      "signal_end": "2026-05-03 05:15:00+00:00",
+      "max_interval_end": "2026-05-03 22:45:00+00:00"
+    },
+    "purged_rows": 42,
+    "purged_event_groups": 32,
+    "cross_segment_event_groups": 0
+  },
+  "preregistration": {
+    "path": "analysis/output/p2_l2_prereg_20260803.json",
+    "sha256": "b4cbae6628cefff370233dcad62451a0ff684bcdcac996b6f19340d8cdfda9bc",
+    "status": "awaiting_owner_decision",
+    "unresolved_owner_decisions": {
+      "actual_cost_pressure_line": {
+        "status": "required",
+        "recommended": "total round-trip 0.0015: P1 net_ret_swap_taker minus fixed 0.0005 slippage; funding not modeled because P1-only scope contains no funding",
+        "evidence": "P1 includes 0.001 taker only; historical clean fill pairs for measured slippage = 0",
+        "accepted_value": null
+      },
+      "fixed_runtime_gate": {
+        "status": "required",
+        "recommended": "calibration q90; >=; midpoint if separable; whole tie block otherwise; pass 8%-12%; equal rate <=2%; no tie slicing",
+        "accepted_value": null
+      }
+    }
+  },
+  "cost_facts": {
+    "p1_contains_swap_taker_round_trip": 0.001,
+    "p1_contains_slippage": false,
+    "p1_contains_funding": false,
+    "clean_historical_fill_pairs_for_slippage": 0,
+    "evidence_report": "analysis/p_execution_slippage.md",
+    "evidence_report_sha256": "67675b254b1a1694ebc80e5fce089edfda5c4109f8fe6542ea91e0518ab15884"
+  },
+  "protected": {
+    "models/ACTIVE": {
+      "exists": true,
+      "sha256": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef"
+    },
+    "data/forward_log.csv": {
+      "exists": true,
+      "sha256": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb"
+    },
+    "data/executor_ledger.jsonl": {
+      "exists": true,
+      "sha256": "de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39"
+    },
+    "models/active_bundle.json": {
+      "exists": false,
+      "sha256": null
+    }
+  },
+  "safety": {
+    "data_sources_used": [
+      "data/p1/p1_short_l2_preholdout_aade2a334448d644.csv"
+    ],
+    "holdout_read": false,
+    "trained": false,
+    "real_threshold_calibrated": false,
+    "active_modified": false,
+    "active_bundle_created": false,
+    "deployed": false,
+    "ordered": false
+  }
+}
