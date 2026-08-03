@@ -85,8 +85,42 @@ FORWARD_COLUMNS: Final = (
     # Immutable artifact identity. Appended for CSV compatibility.
     "model_sha256",
     "detector_sha256",
+    # P0.6 causal execution timeline. These are appended for old CSV readers.
+    # The historical entry_* fields above are legacy compatibility only; new
+    # protocol rows never put a signal-close proxy or research next-open there.
+    "candidate_detected_at",
+    "signal_closed_at",
+    "entry_mode",
+    "entry_status",
+    "entry_requested_at",
+    "fill_source",
+    "fill_at",
+    "fill_px",
+    "reference_px",
+    # Research outcome is explicitly separate from actual broker/paper PnL.
+    "research_status",
+    "research_outcome",
+    "research_label",
+    "research_exit_offset",
+    "research_exit_time",
+    "research_gross_ret",
+    "actual_outcome",
+    "actual_exit_at",
+    "actual_exit_px",
+    "actual_realized_ret",
+    "actual_return_semantics",
+    "return_convention",
+    "target_ret_column",
+    "target_semantics",
+    "target_cost_included",
+    "reporting_route",
 )
-OUTCOME_COLUMNS: Final = ("status", "outcome", "label", "exit_offset", "exit_time", "realized_ret")
+OUTCOME_COLUMNS: Final = (
+    "status", "outcome", "label", "exit_offset", "exit_time", "realized_ret",
+    "research_status", "research_outcome", "research_label",
+    "research_exit_offset", "research_exit_time", "research_gross_ret",
+    "actual_outcome", "actual_exit_at", "actual_exit_px", "actual_realized_ret",
+)
 
 # Rows written before provenance existed. Not a placeholder to be filled in later:
 # it is the honest name for "produced under a protocol nobody recorded", and it
@@ -131,6 +165,31 @@ class ForwardRecord(TypedDict):
     execution_eligible: bool
     model_sha256: str
     detector_sha256: str
+    candidate_detected_at: str
+    signal_closed_at: str
+    entry_mode: str
+    entry_status: str
+    entry_requested_at: str
+    fill_source: str
+    fill_at: str
+    fill_px: float
+    reference_px: float
+    research_status: str
+    research_outcome: str
+    research_label: int
+    research_exit_offset: int
+    research_exit_time: str
+    research_gross_ret: float
+    actual_outcome: str
+    actual_exit_at: str
+    actual_exit_px: float
+    actual_realized_ret: float
+    actual_return_semantics: str
+    return_convention: str
+    target_ret_column: str
+    target_semantics: str
+    target_cost_included: bool
+    reporting_route: str
 
 
 def validate_candidate_source(candidate_source: str, runtime_mode: str) -> str:

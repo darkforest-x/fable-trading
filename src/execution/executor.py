@@ -289,6 +289,15 @@ def open_one(
         "tp_atr_mult": TP_ATR_MULT,
         "sl_atr_mult": SL_ATR_MULT,
         "td_mode": cfg.td_mode,
+        "signal_time": row.get("signal_time"),
+        "candidate_detected_at": row.get("candidate_detected_at", row.get("detected_at")),
+        "decision_at": row.get("decision_at"),
+        "entry_requested_at": None,
+        # Order acceptance is not fill evidence. A separate broker-ledger
+        # reconciliation must populate these fields from actual fills.
+        "fill_source": None,
+        "fill_at": None,
+        "fill_px": None,
     }
     if sizing_meta:
         event["sizing"] = sizing_meta
@@ -374,6 +383,7 @@ def open_one(
     event["pos_side"] = pos_side
 
     cl_id = f"f{abs(hash(sk)) % 10**10}"
+    event["entry_requested_at"] = datetime.now(timezone.utc).isoformat()
     order = client.place_market(
         inst_id, "buy", sz, td_mode=cfg.td_mode, cl_ord_id=cl_id, pos_side=pos_side
     )

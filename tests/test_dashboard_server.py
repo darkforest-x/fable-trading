@@ -65,3 +65,4 @@ def test_forward_payload_rounds_numeric_rows_without_datetime_warning(
     assert not any("round has no effect" in message for message in messages)
     assert payload["rows"][0]["score"] == 0.12346
     assert payload["rows"][0]["entry_price"] == 123.45679
+    assert payload["decision_trades"] == 0

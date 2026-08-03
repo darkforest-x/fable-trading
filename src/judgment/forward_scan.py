@@ -284,32 +284,17 @@ def scan_forward_records(
             )
             if not tracked_open and not passes_threshold:
                 continue
+            # Decision exists only after this candidate's score and threshold
+            # comparison have completed. No earlier next-open may become a fill.
+            decision_at = _utc_now_iso()
             exit_state = resolve(enriched, signal_i)
             if exit_state is None:
                 continue
             threshold_signals_seen += 1
-            entry_i = signal_i + 1
             feature_row = feature_rows.iloc[row_pos]
-            # Tip signal: entry bar hasn't printed. entry_time is known (next
-            # bar open = signal bar close time); entry_price uses the signal
-            # bar close as a PROXY so TG/executor have a sane number, and
-            # maker_filled stays empty as the "entry pending backfill" sentinel
-            # -- merge_forward_log overwrites all three with the true next-bar
-            # values on the following pulse.
-            tip_pending = entry_i >= len(enriched)
-            if tip_pending:
-                entry_time = str(signal_time + pd.Timedelta(minutes=15))
-                entry_price = float(enriched["close"].iloc[signal_i])
-                maker_filled = None
-            else:
-                entry_time = str(pd.Timestamp(enriched["open_time"].iloc[entry_i]))
-                entry_price = float(enriched["open"].iloc[entry_i])
-                # Long: dipped below open → possible buy fill; short: spiked above open.
-                o = float(enriched["open"].iloc[entry_i])
-                if trade_side == "short":
-                    maker_filled = bool(float(enriched["high"].iloc[entry_i]) > o)
-                else:
-                    maker_filled = bool(float(enriched["low"].iloc[entry_i]) < o)
+            # Research convention may still resolve next-bar-open, but those
+            # prices/outcomes are never written as actual entry/fill/PnL.
+            reference_px = float(enriched["close"].iloc[signal_i])
             # Tiered sizing (owner 2026-07-20): tier is stamped at detection
             # time from the artifact sidecar; artifacts without sizing_tiers
             # (shadow books, stubs) log the legacy 1x.
@@ -331,14 +316,14 @@ def scan_forward_records(
                     "model_path": scan.artifact.relative_model_path,
                     "dataset_sha256": scan.artifact.dataset_sha256,
                     "signal_i": int(signal_i),
-                    "entry_time": entry_time,
-                    "entry_price": entry_price,
-                    "maker_filled": maker_filled,
+                    "entry_time": "",
+                    "entry_price": float("nan"),
+                    "maker_filled": None,
                     "outcome": exit_state.outcome,
                     "label": exit_state.label,
                     "exit_offset": exit_state.exit_offset,
                     "exit_time": exit_state.exit_time,
-                    "realized_ret": exit_state.realized_ret,
+                    "realized_ret": float("nan"),
                     "atr_pct": float(feature_row["atr_pct"]),
                     "dense_run_len": int(feature_row["dense_run_len"]),
                     "tier": tier,
@@ -355,10 +340,57 @@ def scan_forward_records(
                     # symbols finishes them minutes apart, and sharing the scan's
                     # start time would claim decisions that had not happened yet
                     # (acceptance F-05).
-                    "decision_at": _utc_now_iso(),
+                    "decision_at": decision_at,
                     "execution_eligible": execution_eligible,
                     "model_sha256": model_sha256,
                     "detector_sha256": detector_sha256,
+                    "candidate_detected_at": candidate_detected_at,
+                    "signal_closed_at": str(signal_time + BAR),
+                    "entry_mode": (
+                        getattr(protocol, "live_entry_mode", "protocol_unspecified")
+                        if protocol is not None else "research_only"
+                    ),
+                    "entry_status": "not_requested",
+                    "entry_requested_at": "",
+                    "fill_source": "",
+                    "fill_at": "",
+                    "fill_px": float("nan"),
+                    "reference_px": reference_px,
+                    "research_status": exit_state.status,
+                    "research_outcome": exit_state.outcome,
+                    "research_label": exit_state.label,
+                    "research_exit_offset": exit_state.exit_offset,
+                    "research_exit_time": exit_state.exit_time,
+                    "research_gross_ret": exit_state.realized_ret,
+                    "actual_outcome": "",
+                    "actual_exit_at": "",
+                    "actual_exit_px": float("nan"),
+                    "actual_realized_ret": float("nan"),
+                    "actual_return_semantics": "",
+                    "return_convention": (
+                        getattr(
+                            protocol,
+                            "return_convention",
+                            "linear_short" if trade_side == "short" else "linear_long",
+                        ) if protocol is not None
+                        else ("linear_short" if trade_side == "short" else "linear_long")
+                    ),
+                    "target_ret_column": (
+                        getattr(protocol, "target_ret_column", "")
+                        if protocol is not None else ""
+                    ),
+                    "target_semantics": (
+                        getattr(protocol, "target_semantics", "gross")
+                        if protocol is not None else "gross"
+                    ),
+                    "target_cost_included": (
+                        getattr(protocol, "target_cost_included", False)
+                        if protocol is not None else False
+                    ),
+                    "reporting_route": (
+                        getattr(protocol, "reporting_route", "gross")
+                        if protocol is not None else "gross"
+                    ),
                 }
             )
     print(

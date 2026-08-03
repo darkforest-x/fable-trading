@@ -61,17 +61,23 @@ def merge_forward_log(existing: pd.DataFrame, new_records: list[ForwardRecord]) 
             continue
         merged = dict(previous)
         changed = False
-        # Entry backfill (2026-07-20 real-time tip path): a row recorded at the
+        # Legacy-only entry backfill (2026-07-20 real-time tip path): a row recorded at the
         # tip carries a PROXY entry (signal-bar close) and empty maker_filled.
         # Once the true entry bar has printed, overwrite entry fields with the
         # real next-bar values. detected_at stays first-seen (lag accounting).
-        if _entry_pending(previous) and not _entry_pending(record):
+        if (
+            str(previous.get("protocol_version")) == LEGACY_PROTOCOL
+            and _entry_pending(previous)
+            and not _entry_pending(record)
+        ):
             for column in ("entry_time", "entry_price", "maker_filled"):
                 merged[column] = record[column]
             changed = True
         if record["status"] == "closed":
             for column in OUTCOME_COLUMNS:
-                merged[column] = record[column]
+                # Old-schema compatibility: legacy updates do not carry the
+                # appended P0.6 research/actual columns.
+                merged[column] = record.get(column, merged.get(column, np.nan))
             closed_updates += 1
             changed = True
         if changed:
@@ -130,6 +136,20 @@ def actionable_rows(frame: pd.DataFrame) -> pd.DataFrame:
         return frame
     out = normalize_log(frame)
     return out[out["execution_eligible"]]
+
+
+def actual_closed_rows(frame: pd.DataFrame) -> pd.DataFrame:
+    """Only causally filled, closed trades; legacy proxies never qualify."""
+    if frame.empty:
+        return frame
+    out = normalize_log(frame)
+    filled = out["entry_status"].astype(str).isin({"paper_filled", "broker_filled"})
+    closed = out["status"].astype(str) == "closed"
+    pnl = pd.to_numeric(out["actual_realized_ret"], errors="coerce").notna()
+    semantics = out["actual_return_semantics"].astype(str).isin(
+        {"gross", "net_taker", "net_maker"}
+    )
+    return out[filled & closed & pnl & semantics]
 
 
 def open_keys(frame: pd.DataFrame) -> set[ForwardKey]:

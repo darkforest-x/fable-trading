@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
+import pandas as pd
 import pytest
 from fastapi import HTTPException
 
@@ -87,12 +88,37 @@ def test_forward_log_health_from_path(tmp_path: Path) -> None:
     health = data_hub.forward_log_health(log)
     assert health["exists"] is True
     assert health["total_rows"] == 2
-    assert health["closed_rows"] == 1
-    assert health["open_rows"] == 1
-    assert health["decision_trades"] == 1
+    # Legacy maker_filled/realized_ret is not causal fill evidence after P0.6.
+    assert health["closed_rows"] == 0
+    assert health["open_rows"] == 2
+    assert health["decision_trades"] == 0
     assert health["decision_target"] == 100
-    assert health["decision_remaining"] == 99
+    assert health["decision_remaining"] == 100
     assert health["latest_detected_at"] is not None
+
+
+def test_forward_log_health_counts_only_explicit_actual_fill_and_pnl(tmp_path: Path) -> None:
+    log = tmp_path / "forward_log.csv"
+    pd.DataFrame(
+        [
+            {
+                "source": "okx",
+                "symbol": "BTC_USDT_SWAP",
+                "signal_time": "2026-08-01T03:00:00+00:00",
+                "detected_at": "2026-08-01T03:18:00+00:00",
+                "status": "closed",
+                "entry_status": "paper_filled",
+                "fill_at": "2026-08-01T03:30:00+00:00",
+                "fill_px": 100.0,
+                "actual_realized_ret": 0.01,
+                "actual_return_semantics": "gross",
+            }
+        ]
+    ).to_csv(log, index=False)
+    health = data_hub.forward_log_health(log)
+    assert health["closed_rows"] == 1
+    assert health["decision_trades"] == 1
+    assert health["decision_remaining"] == 99
 
 
 def test_forward_log_health_missing(tmp_path: Path) -> None:

@@ -1,11 +1,9 @@
-"""End-to-end guard for the 2026-07-20 real-time tip path.
+"""End-to-end guard for causal tip recording without a fabricated fill.
 
-A signal on the NEWEST closed bar must produce a forward-log row on the same
-pulse (status=open, proxy entry, maker_filled empty), and the next pulse must
-backfill the true entry fields without touching detected_at. Before this path
-existed the scan dropped tip signals entirely, costing 15-22 min of edge on
-every live trade (and 20-min freshness gates made trading structurally
-impossible).
+A signal on the newest closed bar is observable on the same pulse, but its
+signal-close reference and historical next-open never become actual entry/fill
+evidence. A later pulse may update the explicitly research-only outcome while
+actual entry and PnL stay empty.
 """
 from __future__ import annotations
 
@@ -78,7 +76,7 @@ def _run_pulse(frame: pd.DataFrame, existing: pd.DataFrame, monkeypatch: pytest.
     return scan
 
 
-def test_tip_signal_recorded_same_pulse_and_backfilled_next(
+def test_tip_signal_recorded_same_pulse_without_fill_or_next_open_backfill(
     monkeypatch: pytest.MonkeyPatch, tmp_path
 ) -> None:
     frame_t0 = _synthetic_frame(650)
@@ -89,35 +87,46 @@ def test_tip_signal_recorded_same_pulse_and_backfilled_next(
     assert len(scan_a.records) == 1
     rec = scan_a.records[0]
     assert rec["status"] == "open"
-    assert rec["maker_filled"] is None  # entry pending sentinel
+    assert rec["maker_filled"] is None
     sig_time = pd.Timestamp(rec["signal_time"])
-    assert pd.Timestamp(rec["entry_time"]) == sig_time + pd.Timedelta(minutes=15)
-    # proxy entry = signal bar close
+    assert rec["entry_time"] == ""
+    assert np.isnan(rec["entry_price"])
+    assert rec["entry_status"] == "not_requested"
+    assert rec["fill_at"] == ""
+    assert np.isnan(rec["fill_px"])
+    assert np.isnan(rec["realized_ret"])
+    assert np.isnan(rec["actual_realized_ret"])
+    assert pd.Timestamp(rec["signal_closed_at"]) == sig_time + pd.Timedelta(minutes=15)
+    # The signal close is observable only under its honest name.
     enriched_tip = float(frame_t0["close"].iloc[-1])
-    assert rec["entry_price"] == pytest.approx(enriched_tip)
+    assert rec["reference_px"] == pytest.approx(enriched_tip)
 
     merged_a = merge_forward_log(empty, scan_a.records)
     assert merged_a.new_signals == 1
 
-    # CSV round-trip must preserve the pending sentinel (NaN, not False).
+    # CSV round-trip preserves "no fill" rather than manufacturing False/zero.
     log_path = tmp_path / "forward_log.csv"
     merged_a.frame.to_csv(log_path, index=False)
     persisted = read_forward_log(log_path)
     assert pd.isna(persisted.iloc[0]["maker_filled"])
 
-    # Pulse B: one more bar printed; tracked key re-resolves with real entry.
+    # Pulse B: one more bar printed; the historical next-open is still not a fill.
     frame_t1 = _synthetic_frame(651)  # same seed -> same first 650 bars + 1
     scan_b = _run_pulse_tracked(frame_t1, persisted, monkeypatch, "pulse-B")
     assert len(scan_b.records) == 1
     rec_b = scan_b.records[0]
-    assert rec_b["maker_filled"] is not None
+    assert rec_b["entry_status"] == "not_requested"
+    assert np.isnan(rec_b["entry_price"])
+    assert np.isnan(rec_b["fill_px"])
+    assert np.isnan(rec_b["actual_realized_ret"])
 
     merged_b = merge_forward_log(persisted, scan_b.records)
     assert merged_b.new_signals == 0
     row = merged_b.frame.iloc[0]
     assert row["detected_at"] == rec["detected_at"]  # first-seen wins (lag accounting)
-    assert row["entry_price"] == pytest.approx(float(frame_t1["open"].iloc[650]))
-    assert not pd.isna(row["maker_filled"])
+    assert pd.isna(row["entry_price"])
+    assert pd.isna(row["fill_px"])
+    assert pd.isna(row["actual_realized_ret"])
 
 
 def _run_pulse_tracked(frame, existing, monkeypatch, detected_at):

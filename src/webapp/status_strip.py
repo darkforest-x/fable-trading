@@ -17,6 +17,7 @@ from src.webapp.dashboard_cache import relative_path
 from src.webapp.forward_payloads import FRESH_DETECT_MIN
 from src.webapp.model_hub import read_active_pointer
 from src.webapp.live_paper import live_paper_payload, live_paper_status_line
+from src.judgment.forward_records import actual_closed_rows
 
 PROJECT = Path(__file__).resolve().parents[2]
 OWNER_BEST_JSON = PROJECT / "models" / "owner_best.json"
@@ -349,7 +350,7 @@ def _judgment_active() -> dict:
 
 
 def _forward_progress() -> dict:
-    """Decision counter must match /api/forward: closed + maker_filled + lag≤30m.
+    """Decision counter matches /api/forward: actual filled close + lag≤30m.
 
     See docs/learnings/status-strip-decision-counter-skips-freshness-gate.md —
     counting maker-filled closed without the freshness gate made the strip
@@ -382,16 +383,11 @@ def _forward_progress() -> dict:
         out["stall_reason"] = "forward_log 为空：前向扫描未跑或日志被清空"
         return out
     out["total_rows"] = int(len(frame))
-    closed = frame
-    open_rows = frame
-    if "status" in frame.columns:
-        closed = frame[frame["status"] == "closed"]
-        open_rows = frame[frame["status"] == "open"]
+    closed = actual_closed_rows(frame)
+    open_rows = frame.drop(index=closed.index, errors="ignore")
     out["closed_rows"] = int(len(closed))
     out["open_rows"] = int(len(open_rows))
     decision = closed
-    if "maker_filled" in closed.columns:
-        decision = closed[closed["maker_filled"].fillna(False).astype(bool)]
     hindsight_n = 0
     # Same freshness gate as forward_payloads (tip-tradable only).
     if "detected_at" in decision.columns and "signal_time" in decision.columns and not decision.empty:
@@ -413,10 +409,10 @@ def _forward_progress() -> dict:
         )
     elif n == 0 and out["open_rows"] > 0:
         out["stall_reason"] = (
-            f"有 {out['open_rows']} 笔 open，等待关闭（闸门只计新鲜 maker closed）"
+            f"有 {out['open_rows']} 笔未形成 actual fill+close，不进裁决"
         )
     elif n == 0 and out["closed_rows"] > 0:
-        out["stall_reason"] = "有 closed 行但未过 maker+新鲜度门"
+        out["stall_reason"] = "有 actual closed 行但未过新鲜度门"
     return out
 
 

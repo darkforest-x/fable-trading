@@ -13,7 +13,8 @@ from src.backtest.run import MAX_CONCURRENT
 from src.judgment.forward_types import FORWARD_COLUMNS, FORWARD_LOG_PATH
 from src.webapp.dashboard_cache import relative_path
 
-from src.costs import FORWARD_COST  # mainline swap-maker route
+from src.costs import FORWARD_COST, convert_return
+from src.judgment.forward_records import actual_closed_rows
 FORWARD_DECISION_TRADES = 100
 
 
@@ -28,8 +29,8 @@ FRESH_DETECT_MIN = 30.0
 
 def forward_payload(cost: float = FORWARD_COST) -> dict:
     frame = _read_forward_log()
-    closed = frame[(frame["status"] == "closed") & frame["realized_ret"].notna()].copy()
-    decision = closed[closed["maker_filled"].fillna(False)].copy()
+    closed = actual_closed_rows(frame).copy()
+    decision = closed.copy()
     # Hindsight exclusion (2026-07-19): the live detector often recognises a
     # signal only HOURS after its bar, once the launch has printed -- KAITO
     # 03:00 was detected 07:17, EDEN 04:30 at 14:17, and all such rows closed
@@ -44,13 +45,34 @@ def forward_payload(cost: float = FORWARD_COST) -> dict:
         decision = decision[lag_min <= FRESH_DETECT_MIN]
     else:
         hindsight = decision.iloc[0:0]
-    decision["net_ret"] = decision["realized_ret"] - cost
+    if not decision.empty:
+        decision["net_ret"] = [
+            convert_return(
+                value,
+                source_semantics=str(semantics),
+                target_semantics="net_maker",
+            )
+            for value, semantics in zip(
+                pd.to_numeric(decision["actual_realized_ret"], errors="coerce"),
+                decision["actual_return_semantics"],
+            )
+        ]
     equity, drawdown = _forward_equity(decision)
     decision_count = int(len(decision))
     hindsight_count = int(len(hindsight))
     rows = frame.sort_values("signal_time", ascending=False).head(200).copy()
     if not rows.empty:
-        rows["net_ret"] = rows["realized_ret"] - cost
+        rows["net_ret"] = np.nan
+        actual_mask = rows["actual_realized_ret"].notna() & rows[
+            "actual_return_semantics"
+        ].astype(str).isin({"gross", "net_taker", "net_maker"})
+        rows.loc[actual_mask, "net_ret"] = [
+            convert_return(value, source_semantics=str(semantics), target_semantics="net_maker")
+            for value, semantics in zip(
+                rows.loc[actual_mask, "actual_realized_ret"],
+                rows.loc[actual_mask, "actual_return_semantics"],
+            )
+        ]
         # Detection lag (minutes): how late the live scan recognized the bar.
         # Fresh ⇔ lag <= FRESH_DETECT_MIN; larger = hindsight (not tradeable live).
         det = pd.to_datetime(rows["detected_at"], errors="coerce", utc=True)
@@ -58,9 +80,14 @@ def forward_payload(cost: float = FORWARD_COST) -> dict:
         lag = (det - sig).dt.total_seconds() / 60.0
         rows["lag_min"] = lag.round(1)
         rows["fresh"] = lag.notna() & (lag <= FRESH_DETECT_MIN)
-        for column in ("score", "threshold", "entry_price", "realized_ret", "atr_pct", "net_ret"):
+        for column in (
+            "score", "threshold", "entry_price", "realized_ret", "actual_realized_ret",
+            "reference_px", "fill_px", "atr_pct", "net_ret",
+        ):
             rows[column] = rows[column].round(5)
-        for column in ("signal_time", "detected_at", "entry_time", "exit_time"):
+        for column in (
+            "signal_time", "detected_at", "entry_time", "exit_time", "decision_at", "fill_at",
+        ):
             rows[column] = rows[column].astype(str).replace("NaT", "")
     return {
         "cost": cost,
@@ -114,9 +141,14 @@ def _read_forward_log() -> pd.DataFrame:
         if column not in frame.columns:
             frame[column] = np.nan
     frame = frame[list(FORWARD_COLUMNS)]
-    for column in ("signal_time", "detected_at", "entry_time", "exit_time"):
+    for column in (
+        "signal_time", "detected_at", "entry_time", "exit_time", "decision_at", "fill_at",
+    ):
         frame[column] = pd.to_datetime(frame[column], utc=True, errors="coerce")
-    for column in ("score", "threshold", "entry_price", "realized_ret", "atr_pct"):
+    for column in (
+        "score", "threshold", "entry_price", "realized_ret", "actual_realized_ret",
+        "reference_px", "fill_px", "atr_pct",
+    ):
         frame[column] = pd.to_numeric(frame[column], errors="coerce")
     frame["maker_filled"] = frame["maker_filled"].fillna(False).astype(bool)
     return frame

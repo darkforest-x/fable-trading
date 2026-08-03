@@ -12,6 +12,7 @@ from typing import Any
 from src.data.bars import BAR_CHOICES, normalize_bar
 from src.data.loader import BLOCKED_BASES, CACHE_DIR, CACHE_PATTERN, FETCHED_DIR
 from src.judgment.forward_types import FORWARD_LOG_PATH
+from src.judgment.forward_records import actual_closed_rows
 from src.webapp.forward_payloads import FORWARD_COST, FORWARD_DECISION_TRADES, forward_payload
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -261,15 +262,10 @@ def _forward_health_from_path(path: Path, *, cost: float) -> dict[str, Any]:
             "cost": cost,
         }
     total = int(len(frame))
-    status = frame["status"] if "status" in frame.columns else None
-    closed = int((status == "closed").sum()) if status is not None else 0
-    open_rows = total - closed if status is not None else 0
-    decision = 0
-    if "maker_filled" in frame.columns and status is not None:
-        mf = frame["maker_filled"]
-        # truthy strings/bools
-        filled = mf.astype(str).str.lower().isin({"true", "1", "yes"}) | (mf == True)  # noqa: E712
-        decision = int(((status == "closed") & filled & frame["realized_ret"].notna()).sum()) if "realized_ret" in frame.columns else int(((status == "closed") & filled).sum())
+    actual_closed = actual_closed_rows(frame)
+    closed = int(len(actual_closed))
+    open_rows = total - closed
+    decision = closed
     latest = None
     if "detected_at" in frame.columns and not frame.empty:
         latest = str(frame["detected_at"].dropna().astype(str).iloc[-1]) if frame["detected_at"].notna().any() else None
