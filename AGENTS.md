@@ -42,6 +42,13 @@
     只因用的是显式 `HEAD:main` 才没丢。需要隔离环境（并行 agent / 跨模型实现）时，
     先问 owner；owner 点头才开，且用完当轮就删。
 
+14. **层间契约**（owner 2026-08-03 重构）：`yoyo/layers/` 的四层**禁止互相 import**，
+    只能经 `yoyo/contracts/`（protocol / outcomes / costs / schema）和 `yoyo/data/`。
+    由 `tests/test_layer_boundaries.py` 用 AST 强制，不是口头约定。
+    病因：2026-08-03 的 side/feature-semantics 故障横跨 forward_scan + frozen + executor
+    三个文件——L2 的事实（模型用什么坐标系训的）被 L1 的事实（这单做多还是做空）决定了，
+    而代码里没有任何东西反对。**旧 `src/` 是转发壳，迁移期并存；新代码一律写进 `yoyo/`。**
+
 ## 弱模型在本仓库最容易犯的错（每条都真实发生过或差点发生）
 
 - **把 AUC 当成功标准** → 本项目成功标准是 top-decile 扣 0.2% 往返成本后的净收益为正
@@ -61,6 +68,9 @@
 - **改一道新鲜度门忘了另两道** → 三门必须同值，见实盘纪律 7。
 - **往脉冲里塞实验扫描** → 超 15min 节拍 = 结构性挡 tip；见实盘纪律 8。
 - **自动 promote / 清 forward_log** → 禁止；owner 点头。
+- **改历史报告里的路径** → 禁止。`analysis/` 207 份与 `docs/learnings/` 234 条记录的是
+  「当时发生了什么」，路径就是当时的真实路径。重构只改活文档，旧文档靠 `docs/RESTRUCTURE_MAP.md`
+  查新旧对应。2026-08-03 一次改名正则把历史报告里真实跑过的命令改了，已回退。
 - **开新分支 / 建 worktree** → 禁止；见铁律 13。提交前先确认 `git branch --show-current` 是 main。
 
 ## 质量标准（可检查，不是形容词）
