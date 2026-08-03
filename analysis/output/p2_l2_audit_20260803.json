@@ -1,9 +1,9 @@
 {
   "audit_version": "p2_l2_readonly_audit_v1",
-  "generated_at": "2026-08-03T03:52:04.498951+00:00",
+  "generated_at": "2026-08-03T06:28:29.155438+00:00",
   "verdict": "accepted",
-  "p2_training_allowed": false,
-  "p2_training_blocker": "owner must approve exact actual-cost pressure line and fixed runtime gate",
+  "p2_training_allowed": true,
+  "p2_training_blocker": null,
   "dataset": {
     "manifest_path": "data/p1/p1_short_l2_preholdout_aade2a334448d644.manifest.json",
     "manifest_sha256": "53b8a07612dae667a184da38bf8e0a694aaae15a5fd240d5b13238da3e13d682",
@@ -64,19 +64,34 @@
   },
   "preregistration": {
     "path": "analysis/output/p2_l2_prereg_20260803.json",
-    "sha256": "b4cbae6628cefff370233dcad62451a0ff684bcdcac996b6f19340d8cdfda9bc",
-    "status": "awaiting_owner_decision",
+    "sha256": "38e4c474323bc03f269168db6a030575ce94ffbd4e69652403d54539da7a72b6",
+    "status": "accepted",
     "unresolved_owner_decisions": {
       "actual_cost_pressure_line": {
-        "status": "required",
+        "status": "accepted",
         "recommended": "total round-trip 0.0015: P1 net_ret_swap_taker minus fixed 0.0005 slippage; funding not modeled because P1-only scope contains no funding",
         "evidence": "P1 includes 0.001 taker only; historical clean fill pairs for measured slippage = 0",
-        "accepted_value": null
+        "accepted_value": {
+          "total_round_trip": 0.0015,
+          "additional_slippage_round_trip": 0.0005,
+          "funding": "not_modeled_p1_only"
+        }
       },
       "fixed_runtime_gate": {
-        "status": "required",
+        "status": "accepted",
         "recommended": "calibration q90; >=; midpoint if separable; whole tie block otherwise; pass 8%-12%; equal rate <=2%; no tie slicing",
-        "accepted_value": null
+        "accepted_value": {
+          "calibration_quantile": 0.9,
+          "threshold_operator": ">=",
+          "separable_boundary": "midpoint",
+          "tied_boundary": "whole_equality_block",
+          "pass_rate_range": [
+            0.08,
+            0.12
+          ],
+          "max_threshold_equal_rate": 0.02,
+          "arbitrary_tie_slicing": false
+        }
       }
     }
   },

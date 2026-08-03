@@ -2,11 +2,11 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-03 — P2.0 审计通过，P2.1 等 Owner 两项确认）
+## ⚡ 当前真相（2026-08-03 — P2.0 审计通过，P2.1 Owner 门已批准）
 
 **P2 尚未训练。** 只读审计重新加载了唯一 P1 immutable dataset，并完成时间三段、完整
-label interval / event-group purge 与机器预注册草案；训练门当前为
-`p2_training_allowed=false`。
+label interval / event-group purge。Owner 已以“批准”确认成本压力线和 fixed gate，机器
+预注册当前为 `status=accepted`、`p2_training_allowed=true`。
 
 - dataset SHA `aade2a334448d6443e71fb0d3dbbfcf450390875ce60e1f800f6dbe9c855e93a`；
   18,103 行 / 230 币 / 15,604 event groups；holdout signal / interval 均为 0。
@@ -17,9 +17,9 @@ label interval / event-group purge 与机器预注册草案；训练门当前为
 - 预注册推荐：LightGBM regression、target=`net_ret_swap_taker`、28 frozen features、无参数
   扫描、5-fold expanding walkforward、matched candidate control、UTC-week economic block
   permutation；AUC 不作成功裁判。
-- 尚待 Owner 明确两项：①实际成本压力线（推荐总 RT 0.15%，即 P1 taker-net 再减 5bp；
-  P1-only 范围不含 funding）；②固定 gate（推荐 calibration q90、`>=`、可分边界取中点、
-  并列整块通过、pass 8%–12%、equal≤2%、不切 ties）。
+- Owner 已批准：①实际成本总 RT 0.15%，即 P1 taker-net 再减 5bp，P1-only 范围不含
+  funding；②固定 gate 为 calibration q90、`>=`、可分边界取中点、并列整块通过、pass
+  8%–12%、equal≤2%、不切 ties。
 - 未训练、未在真实分数上校准 threshold、未读 holdout、未改 ACTIVE、未建 active bundle、
   未部署、未访问交易 client、未下单。
 
@@ -31,8 +31,8 @@ label interval / event-group purge 与机器预注册草案；训练门当前为
 - `analysis/output/p2_l2_prereg_20260803.json`
 - `analysis/output/p2_prereg_test_results_20260803.json`（492 passed / 2 skipped）
 
-**下一动作**：只有 Owner 对上述两个具体推荐回复接受（或给出替代精确值），才能把机器
-预注册改成 `accepted` 并启动 P2 训练；否则继续停止。
+**下一动作**：先跑 fixture 与小样本 dry-run，二者通过后才执行 full P2 训练验证；仍禁止
+holdout、ACTIVE、active bundle、部署与订单。
 
 ## ⚡ 当前真相（2026-08-03 — P1-DATA 已完成，必须停止）
 

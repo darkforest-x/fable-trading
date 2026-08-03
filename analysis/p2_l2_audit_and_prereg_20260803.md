@@ -2,7 +2,7 @@
 
 **日期**：2026-08-03
 
-**当前阶段**：P2.0 只读审计完成；P2.1 预注册草案完成；**尚未训练**
+**当前阶段**：P2.0 只读审计完成；P2.1 预注册已获 Owner 批准并冻结；**尚未训练**
 
 **机器审计**：`analysis/output/p2_l2_audit_20260803.json`
 
@@ -10,15 +10,14 @@
 
 ## 直接结论
 
-P1 immutable dataset 的 P2 输入门通过，但训练仍停在两个 Owner 决策上：
-
-1. 实际成本压力线；
-2. 固定 runtime selector gate。
+P1 immutable dataset 的 P2 输入门通过。Owner 在对话中以“批准”确认了上一条消息列明的
+两个具体推荐值；机器预注册现为 `status=accepted`，可以进入 fixture / dry-run，再进入
+full training。记录批准时尚未训练或在真实分数上校准 threshold。
 
 08 页没有定义 P2；同一接管计划 01 页只给出 P2-L2 的验收原则，05 页明确要求在 P2
 前由 Owner 批准实际成本压力线，并审查固定 runtime gate。当前指令授权进入 P2，但没有
-给出滑点 / funding 数值或 operator。因此，本轮先完成可复核审计和完整预注册草案，不把
-推荐值冒充 Owner 决策；`status=awaiting_owner_decision` 时训练命令必须拒绝执行。
+给出滑点 / funding 数值或 operator。因此先完成可复核审计和完整预注册草案；随后 Owner
+明确批准推荐值，才把机器门切换为 accepted。
 
 ## P2.0 输入事实
 
@@ -70,25 +69,26 @@ dataset 或 holdout；没有训练、打分或在真实分数上校准 threshold
 - 成功线：健康门全过、每折 selected≥100、至少 4/5 折 fixed-gate pressure-net>0、聚合
   pressure-net>0、matched lift>0 且经济 block permutation `p<0.01`。
 
-## 必须由 Owner 明确的两项
+## Owner 已批准的两项
 
 ### 1. 实际成本压力线
 
 可核验事实：P1 只有 swap taker 往返 **0.10%**；没有滑点列、没有 funding 列。历史执行
 审计的 clean fill/mark 配对数是 **0**，不能声称“实测滑点”。
 
-推荐固定为：**总往返 0.15%**，即在 P1 `net_ret_swap_taker` 上再减固定 0.05% 滑点；因
+批准固定为：**总往返 0.15%**，即在 P1 `net_ret_swap_taker` 上再减固定 0.05% 滑点；因
 “只使用 P1 dataset”的本轮边界，funding 不建模并在结论中标为缺口。这是仓库已有 short
 成本敏感性档，不是从本轮结果反推。若 Owner 不接受，应给出一个明确总成本或额外滑点数值；
 不能在训练后再选。
 
 ### 2. 固定 runtime gate
 
-推荐固定为：calibration q90、`score >= threshold`；边界可分时 threshold 取上下分数中点；
+批准固定为：calibration q90、`score >= threshold`；边界可分时 threshold 取上下分数中点；
 边界并列时整块通过。健康门为 calibration pass rate 8%–12%、threshold equality≤2%、
 distinct scores≥100、best iteration>1；任一失败即 P2 rejected，不换 operator、不切 ties。
 
-Owner 必须明确接受或给出替代值，机器预注册才会改成 `accepted`。**在此之前不训练。**
+Owner 原话“批准”与上下文已写入机器预注册。该批准只覆盖 P2 成本压力线和 fixed gate，
+不授权 holdout、ACTIVE、active bundle、部署或下单。
 
 ## 安全边界
 

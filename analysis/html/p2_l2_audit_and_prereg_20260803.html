@@ -45,17 +45,17 @@ li { margin: .25rem 0; }
 <body>
 <h1>P2-L2 只读审计与预注册（训练前 Owner 门）</h1>
 <p><strong>日期</strong>：2026-08-03</p>
-<p><strong>当前阶段</strong>：P2.0 只读审计完成；P2.1 预注册草案完成；<strong>尚未训练</strong></p>
+<p><strong>当前阶段</strong>：P2.0 只读审计完成；P2.1 预注册已获 Owner 批准并冻结；<strong>尚未训练</strong></p>
 <p><strong>机器审计</strong>：<code>analysis/output/p2_l2_audit_20260803.json</code></p>
 <p><strong>机器预注册</strong>：<code>analysis/output/p2_l2_prereg_20260803.json</code></p>
 <h2>直接结论</h2>
-<p>P1 immutable dataset 的 P2 输入门通过，但训练仍停在两个 Owner 决策上：</p>
-<p>1. 实际成本压力线；</p>
-<p>2. 固定 runtime selector gate。</p>
+<p>P1 immutable dataset 的 P2 输入门通过。Owner 在对话中以“批准”确认了上一条消息列明的</p>
+<p>两个具体推荐值；机器预注册现为 <code>status=accepted</code>，可以进入 fixture / dry-run，再进入</p>
+<p>full training。记录批准时尚未训练或在真实分数上校准 threshold。</p>
 <p>08 页没有定义 P2；同一接管计划 01 页只给出 P2-L2 的验收原则，05 页明确要求在 P2</p>
 <p>前由 Owner 批准实际成本压力线，并审查固定 runtime gate。当前指令授权进入 P2，但没有</p>
-<p>给出滑点 / funding 数值或 operator。因此，本轮先完成可复核审计和完整预注册草案，不把</p>
-<p>推荐值冒充 Owner 决策；<code>status=awaiting_owner_decision</code> 时训练命令必须拒绝执行。</p>
+<p>给出滑点 / funding 数值或 operator。因此先完成可复核审计和完整预注册草案；随后 Owner</p>
+<p>明确批准推荐值，才把机器门切换为 accepted。</p>
 <h2>P2.0 输入事实</h2>
 <table><thead><tr>
 <th>项</th>
@@ -113,19 +113,20 @@ li { margin: .25rem 0; }
 <li>成功线：健康门全过、每折 selected≥100、至少 4/5 折 fixed-gate pressure-net&gt;0、聚合</li>
 </ul>
 <p>  pressure-net&gt;0、matched lift&gt;0 且经济 block permutation <code>p&lt;0.01</code>。</p>
-<h2>必须由 Owner 明确的两项</h2>
+<h2>Owner 已批准的两项</h2>
 <h3>1. 实际成本压力线</h3>
 <p>可核验事实：P1 只有 swap taker 往返 <strong>0.10%</strong>；没有滑点列、没有 funding 列。历史执行</p>
 <p>审计的 clean fill/mark 配对数是 <strong>0</strong>，不能声称“实测滑点”。</p>
-<p>推荐固定为：<strong>总往返 0.15%</strong>，即在 P1 <code>net_ret_swap_taker</code> 上再减固定 0.05% 滑点；因</p>
+<p>批准固定为：<strong>总往返 0.15%</strong>，即在 P1 <code>net_ret_swap_taker</code> 上再减固定 0.05% 滑点；因</p>
 <p>“只使用 P1 dataset”的本轮边界，funding 不建模并在结论中标为缺口。这是仓库已有 short</p>
 <p>成本敏感性档，不是从本轮结果反推。若 Owner 不接受，应给出一个明确总成本或额外滑点数值；</p>
 <p>不能在训练后再选。</p>
 <h3>2. 固定 runtime gate</h3>
-<p>推荐固定为：calibration q90、<code>score &gt;= threshold</code>；边界可分时 threshold 取上下分数中点；</p>
+<p>批准固定为：calibration q90、<code>score &gt;= threshold</code>；边界可分时 threshold 取上下分数中点；</p>
 <p>边界并列时整块通过。健康门为 calibration pass rate 8%–12%、threshold equality≤2%、</p>
 <p>distinct scores≥100、best iteration&gt;1；任一失败即 P2 rejected，不换 operator、不切 ties。</p>
-<p>Owner 必须明确接受或给出替代值，机器预注册才会改成 <code>accepted</code>。<strong>在此之前不训练。</strong></p>
+<p>Owner 原话“批准”与上下文已写入机器预注册。该批准只覆盖 P2 成本压力线和 fixed gate，</p>
+<p>不授权 holdout、ACTIVE、active bundle、部署或下单。</p>
 <h2>安全边界</h2>
 <ul>
 <li>holdout：未读；</li>

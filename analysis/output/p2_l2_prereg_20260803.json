@@ -1,7 +1,7 @@
 {
   "preregistration_version": "p2_l2_v1",
   "created_at": "2026-08-03T00:00:00+00:00",
-  "status": "awaiting_owner_decision",
+  "status": "accepted",
   "scope": "P2-L2 research-only training and pre-holdout validation",
   "dataset": {
     "manifest_path": "data/p1/p1_short_l2_preholdout_aade2a334448d644.manifest.json",
@@ -96,9 +96,9 @@
   "economics": {
     "training_return": "net_ret_swap_taker",
     "p1_fee_round_trip": 0.001,
-    "additional_slippage_round_trip": null,
-    "funding_adjustment": null,
-    "actual_cost_pressure_total": null,
+    "additional_slippage_round_trip": 0.0005,
+    "funding_adjustment": "not_modeled_p1_only",
+    "actual_cost_pressure_total": 0.0015,
     "double_cost_forbidden": true,
     "primary_statistic": "fixed-gate mean selected net return after approved pressure cost",
     "matched_control": "one-to-one without replacement from nonselected P1 candidates; same symbol x UTC week x fold-local atr_pct quintile; exclude shared event_group_id; deterministic seed 42",
@@ -130,21 +130,41 @@
   ],
   "owner_decisions": {
     "actual_cost_pressure_line": {
-      "status": "required",
+      "status": "accepted",
       "recommended": "total round-trip 0.0015: P1 net_ret_swap_taker minus fixed 0.0005 slippage; funding not modeled because P1-only scope contains no funding",
       "evidence": "P1 includes 0.001 taker only; historical clean fill pairs for measured slippage = 0",
-      "accepted_value": null
+      "accepted_value": {
+        "total_round_trip": 0.0015,
+        "additional_slippage_round_trip": 0.0005,
+        "funding": "not_modeled_p1_only"
+      }
     },
     "fixed_runtime_gate": {
-      "status": "required",
+      "status": "accepted",
       "recommended": "calibration q90; >=; midpoint if separable; whole tie block otherwise; pass 8%-12%; equal rate <=2%; no tie slicing",
-      "accepted_value": null
+      "accepted_value": {
+        "calibration_quantile": 0.9,
+        "threshold_operator": ">=",
+        "separable_boundary": "midpoint",
+        "tied_boundary": "whole_equality_block",
+        "pass_rate_range": [0.08, 0.12],
+        "max_threshold_equal_rate": 0.02,
+        "arbitrary_tie_slicing": false
+      }
     }
   },
+  "owner_approval": {
+    "recorded_at": "2026-08-03T03:54:00+00:00",
+    "exact_words": "批准",
+    "context": "approval of the two concrete recommended values in the immediately preceding assistant message",
+    "approved_cost_pressure_line": true,
+    "approved_fixed_runtime_gate": true,
+    "does_not_authorize_holdout_active_deploy_or_orders": true
+  },
   "execution_state": {
-    "audit_completed": false,
+    "audit_completed": true,
     "training_started": false,
     "validation_started": false,
-    "stop_reason": "owner decisions unresolved"
+    "stop_reason": null
   }
 }

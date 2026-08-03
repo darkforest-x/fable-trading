@@ -94,6 +94,11 @@ def build_audit() -> dict[str, Any]:
         data[column] = pd.to_datetime(data[column], utc=True, errors="raise")
     split = prepare_three_way_split(data)
     prereg = _load_prereg(PREREG)
+    decisions = prereg["owner_decisions"]
+    training_allowed = prereg["status"] == "accepted" and all(
+        decision.get("status") == "accepted" and decision.get("accepted_value") is not None
+        for decision in decisions.values()
+    )
     feature_values = data[list(FEATURE_COLUMNS)].to_numpy(dtype=float)
     protected = {
         name: {
@@ -114,8 +119,10 @@ def build_audit() -> dict[str, Any]:
         "audit_version": "p2_l2_readonly_audit_v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "verdict": "accepted",
-        "p2_training_allowed": False,
-        "p2_training_blocker": "owner must approve exact actual-cost pressure line and fixed runtime gate",
+        "p2_training_allowed": training_allowed,
+        "p2_training_blocker": None if training_allowed else (
+            "owner must approve exact actual-cost pressure line and fixed runtime gate"
+        ),
         "dataset": {
             "manifest_path": _relative(P1_MANIFEST),
             "manifest_sha256": manifest_sha,
