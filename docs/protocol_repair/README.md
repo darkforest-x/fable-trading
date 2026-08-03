@@ -18,8 +18,9 @@
 | `ACCEPTANCE_MATRIX.md` | 04 | A/B/C/D/E/F/G/H/I 九组验收断言 |
 | `DECISIONS_AND_STOP_GATES.md` | 05 | D-01…D-10 已冻结决定、O-01…O-05 待 Owner、停止条件 |
 
-**未落盘**:01(总体项目规划)、03(实施操作手册)、06(三层架构调研)——
-这三页当时未读取。需要时从 Notion 补。
+**未单独落盘**:01(总体项目规划)、03(实施操作手册)、06(三层架构调研)。03 已在
+2026-08-03 P0 执行时从 Notion 阅读并遵循；其核验命令、提交纪律和固定交付物已体现在
+`analysis/p0_safety_protocol_repair_20260803.md`，不复制一份可能漂移的全文。
 
 ## 计划的核心判断(原文)
 
@@ -45,10 +46,10 @@
 | P0-01 short 写成 long | 存在 | 已修(`32e556b`) | — |
 | P0-02 缺失 side 默认 long | 存在 | 曾仍在 | **已修** `61b4dc3` |
 | P0-03 feature semantics 分叉 | 风险 | **已成实际故障** | **已修** `61b4dc3` |
-| P0-04 barrier/return 分叉 | 存在 | 未验 | 待办 |
-| P0-05 signal/decision/fill 混一体 | 存在 | 未验 | 待办 |
-| P0-06 artifact 非单一权威 | 存在 | 仍在(`frozen.py` 仍 glob+sorted) | 待办 |
-| P0-07 tip age 缺全局断言 | 存在 | 未验 | 待办 |
+| P0-04 barrier/return 分叉 | 存在 | **已修** canonical resolver + 显式 cost route | `ee98ebd` |
+| P0-05 signal/decision/fill 混一体 | 存在 | **已修** causal fill timeline | `8e90390` |
+| P0-06 artifact 非单一权威 | 存在 | **已修生产入口** exact bundle；research glob 保留 | `8cd2a56` |
+| P0-07 tip age 缺全局断言 | 存在 | **已修** global age≤2 | `969dda7` |
 | P0-08 signal_key 含 score | 存在 | 已修 | — |
 
 **P0-03 曾是真实运行中的故障**:`32e556b` 按计划把 forward 改成 side-aware(正确),
@@ -60,6 +61,12 @@
 
 - `data/forward_log.csv` 只有表头,0 行 —— 无旧记录可标 legacy;仅存 35 行在 `vps_rescue/`。
 - VPS 已到期不续,取不到 live service / ledger 证据。
+
+## P0 最终状态（2026-08-03）
+
+P0.0→P0.7 已完成并停在 Owner gate。当前没有 active bundle，legacy v10 明确 audit-only；
+完整验收与 parity 裁决见 `analysis/p0_safety_protocol_repair_20260803.md` 和
+`analysis/p0_runtime_parity_audit_20260803.md`。
 
 ## 与本仓库既有纪律的关系
 

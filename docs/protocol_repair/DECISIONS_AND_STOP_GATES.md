@@ -97,3 +97,12 @@ P0 报告完成后再依次决定:
 - **D-05 已满足**:holdout 消耗计数仍为 9,本轮未动。
 - **D-06 注意**:`data/forward_log.csv` 已是空文件(仅表头),与"保留旧记录"的前提不符。
 - **停止门"创建 branch / worktree"** 与本仓库铁律 13 一致,本轮全部提交在 main。
+
+## P0 完成更新（2026-08-03）
+
+- D-03 已满足：v10 example bundle 为 legacy/audit-only，`execution_eligible=false`；未激活。
+- D-07 已满足：production 只认 exact bundle + model/dataset/detector SHA；无 bundle 即拒绝。
+- D-08 已满足：paper fill 严格晚于 decision；无 fill 无 actual PnL。
+- D-09 已满足：最终 whole-series tip age 最大 2 bars。
+- D-10 已满足：canonical resolver 同 bar 双触发保守记 SL。
+- P0 已停在 Owner gate；O-01～O-05 均未代替 Owner 决策。

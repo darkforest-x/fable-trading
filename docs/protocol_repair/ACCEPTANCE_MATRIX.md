@@ -17,7 +17,7 @@
 | A-02 | Must | short row 进 long-only executor | `skipped_unsupported_side`;client 0 调用 | ✅ |
 | A-03 | Must | missing/NaN/empty side | production 拒绝,**不默认 long** | ✅ `61b4dc3` |
 | A-04 | Must | unknown side | 拒绝且只记一次 ledger | ✅ |
-| A-05 | Must | strategy side 与 row side 不一致 | protocol mismatch,拒绝 | ⚠ `accepts_row_side()` 已实现并测试,**尚未接进 executor** |
+| A-05 | Must | strategy side 与 row side 不一致 | protocol mismatch,拒绝 | ✅ executor 前置拒绝，client 0 调用 |
 | A-06 | Must | current legacy v10 bundle | `execution_eligible == false` | ✅ `a34f87d+` 示例 bundle 已落盘并被测试锁定 |
 | A-07 | Must | short signal | 不得出现 market buy 调用 | ✅ |
 
@@ -26,10 +26,10 @@
 | ID | 级 | 场景 | 必须断言 | 状态 |
 |---|---|---|---|---|
 | B-01 | Must | 同 source/symbol/time/side/protocol,score 改变 | signal key 不变 | ✅ |
-| B-02 | Must | model hash 改变但同 protocol event | 不重复下单;变更作为审计字段 | ⚠ 未测 |
+| B-02 | Must | model hash 改变但同 protocol event | 不重复下单;变更作为审计字段 | ✅ signal key 排除 model hash |
 | B-03 | Must | side 不同 | key 不同 | ✅ P0.3 |
 | B-04 | Must | protocol version 不同 | key 不同,账本不混 | ✅ P0.3 |
-| B-05 | Must | open row 后续 outcome 更新 | 保留首次 detected/decision/model identity | ⚠ 跨协议不串已测,同协议回填未测 |
+| B-05 | Must | open row 后续 outcome 更新 | 保留首次 detected/decision/model identity | ✅ 同协议 outcome 更新保留首次身份 |
 
 ## 3. Active bundle 与 artifact 身份
 
@@ -42,7 +42,7 @@
 | C-05 | Must | 缺 side / entry / return / cost | 加载失败 | ✅ 全部 30 个必填字段逐个验过 |
 | C-06 | Must | latest JSON 损坏 | production **不回退**旧 artifact | ✅ bundle 路径不回退;`latest_artifact()` 仍供 research/看板 |
 | C-07 | Must | `models/ACTIVE` 与 bundle 不一致 | 只认预定单一权威 | ✅ `forward.py` 不一致即 `BundleError` |
-| C-08 | Must | `execution_eligible=false` | executor / actionable loader 拒绝 | ⚠ legacy 语义 + eligible 组合已在加载期禁死;**executor 侧未接线** |
+| C-08 | Must | `execution_eligible=false` | executor / actionable loader 拒绝 | ✅ loader、actionable filter、executor 三层拒绝 |
 | C-09 | Should | mutable dataset 路径内容改变 | provenance health 报错 | ✅ 内容变即 hash 不符,加载失败 |
 
 ## 4. Feature semantics
@@ -51,10 +51,10 @@
 |---|---|---|---|---|
 | D-01 | Must | short + `side_aligned_v1` | 调 side-aware extractor | ✅ `61b4dc3` |
 | D-02 | Must | legacy v10 | 明确 `legacy_unaligned`,不得默认冒充 aligned | ✅ `61b4dc3` |
-| D-03 | Must | execution eligible short | semantics 必须是已批准的 side-aligned schema | ❌ 无 bundle |
+| D-03 | Must | execution eligible short | semantics 必须是已批准的 side-aligned schema | ✅ loader 拒绝 legacy+eligible；当前无 active bundle |
 | D-04 | Must | 缺 feature semantics | bundle 加载失败 | ✅ bundle 缺该字段即失败(FrozenArtifact 侧仍读作 legacy) |
 | D-05 | Should | offline/live 同一 frame/index | 28 维 vector 逐列一致 | ✅ 已用 14 行验证 |
-| D-06 | Should | feature as-of | 变动 signal bar 后未来 rows 不影响 vector | ⚠ 未测 |
+| D-06 | Should | feature as-of | 变动 signal bar 后未来 rows 不影响 vector | ✅ snapshot + future-row mutation test |
 
 ## 5. Canonical short barrier
 
@@ -62,16 +62,16 @@
 
 | ID | 级 | 路径 | 预期 | 状态 |
 |---|---|---|---|---|
-| E-01 | Must | low 先到 95 | short TP | ⚠ |
-| E-02 | Must | high 先到 102 | short SL | ⚠ |
-| E-03 | Must | 同 bar low≤95 且 high≥102 | 保守 SL / `sl_ambiguous` | ⚠ |
-| E-04 | Must | 72 bars 无触发 | timeout,按冻结 return convention | ⚠ |
-| E-05 | Must | 只有 partial bars 无触发 | forward status open;不生成 full label | ⚠ |
-| E-06 | Must | exact touch | `<=` / `>=` 一致命中 | ⚠ |
-| E-07 | Must | gap 过 barrier | fill 规则显式且三路径一致 | ⚠ |
-| E-08 | Must | 非正价格 / NaN ATR | 拒绝 | ⚠ |
-| E-09 | Must | label vs forward closed case | outcome/offset/exit/return 一致 | ⚠ |
-| E-10 | Must | TP/SL 参数来源 | 从 protocol 显式传入,不依赖 TP4 默认 | ❌ |
+| E-01 | Must | low 先到 95 | short TP | ✅ |
+| E-02 | Must | high 先到 102 | short SL | ✅ |
+| E-03 | Must | 同 bar low≤95 且 high≥102 | 保守 SL / `sl_ambiguous` | ✅ |
+| E-04 | Must | 72 bars 无触发 | timeout,按冻结 return convention | ✅ |
+| E-05 | Must | 只有 partial bars 无触发 | forward status open;不生成 full label | ✅ |
+| E-06 | Must | exact touch | `<=` / `>=` 一致命中 | ✅ |
+| E-07 | Must | gap 过 barrier | fill 规则显式且三路径一致 | ✅ `barrier_price` 显式理想化 |
+| E-08 | Must | 非正价格 / NaN ATR | 拒绝 | ✅ |
+| E-09 | Must | label vs forward closed case | outcome/offset/exit/return 一致 | ✅ |
+| E-10 | Must | TP/SL 参数来源 | 从 protocol 显式传入,不依赖 TP4 默认 | ✅ |
 
 > P0 允许 return convention 仍处 Owner gate,但**不允许同一个 bundle 内存在两种公式**。
 
@@ -79,22 +79,22 @@
 
 | ID | 级 | 场景 | 必须断言 | 状态 |
 |---|---|---|---|---|
-| F-01 | Must | signal bar 03:00–03:15,decision 03:20 | 03:15 next-open 不得成为 live actual fill | ❌ |
-| F-02 | Must | decision 前已触 TP,decision 后未触 | 不得记为 live TP | ❌ |
-| F-03 | Must | 无 fill | actual realized_ret 为空 / 不存在 | ❌ |
-| F-04 | Must | paper next-open-after-decision | 选 decision 后第一根未来 open | ❌ |
+| F-01 | Must | signal bar 03:00–03:15,decision 03:20 | 03:15 next-open 不得成为 live actual fill | ✅ |
+| F-02 | Must | decision 前已触 TP,decision 后未触 | 不得记为 live TP | ✅ |
+| F-03 | Must | 无 fill | actual realized_ret 为空 / 不存在 | ✅ |
+| F-04 | Must | paper next-open-after-decision | 选 decision 后第一根未来 open | ✅ |
 | F-05 | Must | batch 扫多 symbol | 每候选有自身 `decision_at`,不共用 scan start | ✅ 逐候选 `datetime.now()` |
-| F-06 | Must | old row | 标 legacy,不进新 protocol 100 笔 | ❌ |
-| F-07 | Should | actual broker fill | `fill_at`/`fill_px` 来自 ledger,不来自 signal proxy | ❌ |
+| F-06 | Must | old row | 标 legacy,不进新 protocol 100 笔 | ✅ |
+| F-07 | Should | actual broker fill | `fill_at`/`fill_px` 来自 ledger,不来自 signal proxy | ✅ 协议/适配器测试；无真实 broker 样本 |
 
 ## 7. Tip-only
 
 | ID | 级 | 场景 | 必须断言 | 状态 |
 |---|---|---|---|---|
-| G-01 | Must | live start back=2 + box bar198 | 全局 tip-3 被拒绝 | ⚠ 未测 |
-| G-02 | Must | global tip age 0/1/2 | 可通过 | ⚠ |
-| G-03 | Must | local edge 合法但 global age>2 | 被最终 gate 拒绝 | ❌ |
-| G-04 | Should | rejected counter | 区分 local edge reject 与 global age reject | ❌ |
+| G-01 | Must | live start back=2 + box bar198 | 全局 tip-3 被拒绝 | ✅ |
+| G-02 | Must | global tip age 0/1/2 | 可通过 | ✅ |
+| G-03 | Must | local edge 合法但 global age>2 | 被最终 gate 拒绝 | ✅ |
+| G-04 | Should | rejected counter | 区分 local edge reject 与 global age reject | ✅ |
 
 ## 8. Forward log 隔离
 
@@ -103,7 +103,7 @@
 | H-01 | Must | 两个 protocol_version | summary 不混算 | ✅ `rows_for_protocol()` |
 | H-02 | Must | legacy long resolver row | 不计入 repaired short 100 笔 | ✅ 旧行落 `legacy_pre_20260803` |
 | H-03 | Must | execution-ineligible row | 不进 actionable set | ✅ `actionable_rows()`,executor 侧接线仍缺 |
-| H-04 | Must | candidate/scored 但未 fill | 可观察,但不计 closed trade | ⚠ |
+| H-04 | Must | candidate/scored 但未 fill | 可观察,但不计 closed trade | ✅ actual_closed_rows + 看板三入口 |
 | H-05 | Must | old schema 读入 | 不崩溃;明确 legacy status | ✅ |
 | H-06 | Must | P0 tests | 不写真实 `data/forward_log.csv` | ✅ |
 
@@ -144,16 +144,6 @@ Owner 下一决策;HTML 已生成。
 
 ## 落盘时汇总
 
-```
-Must 项  ✅ 已过 29   ❌ 未达  9   ⚠ 未测/部分 13     (P0.3 落地后)
-P0.2 后  ✅ 23        ❌ 15        ⚠ 13
-首轮     ✅ 14        ❌ 24        ⚠ 13
-```
-
-**P0.2 + P0.3 已落地**。C 组 7 绿,H 组从全红转为 5 绿 1 待测,B 组补齐 identity。
-
-仍全红的是 **E 组(canonical barrier)与 F 组(时间/fill)** —— 等 P0.5 与 P0.6。
-G 组(全局 tip age)等 P0.7。
-
-**两处诚实标注**:C-08 与 A-05 的机制已实现且有测试,但**尚未接进 executor** ——
-bundle 能拒绝一个自相矛盾的声明,却还不能在下单前拦住一条 execution-ineligible 的行。
+P0.0→P0.7 的 Must 项已全部由本地代码/fixture 测试覆盖；F-07 为 Should，协议测试通过但
+无 VPS/broker 实样本。全量当前环境可运行集合为 472 passed、2 skipped、1 deselected、0 failed。
+当前无 active bundle，故“通过”含义是生产 fail-closed，不是策略可执行或收益已确认。

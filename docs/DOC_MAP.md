@@ -1,4 +1,4 @@
-# 文档地图（2026-07-22）
+# 文档地图（2026-08-03）
 
 **唯一实时状态**：仓库根目录 [`HANDOFF.md`](../HANDOFF.md) 顶部。  
 **本周执行**：[`analysis/week_plan_20260720.md`](../analysis/week_plan_20260720.md)。  
@@ -22,6 +22,8 @@
 | `analysis/week_plan_*.md` | 当周执行计划 |
 | `analysis/INDEX.md` | **全部 analysis 报告的一行索引（动手前先搜这里）**；自动生成,重跑 `scripts/gen_analysis_index.py` |
 | `analysis/p*_report.md` | 单次实验记录（只增不改结论） |
+| `analysis/p0_safety_protocol_repair_20260803.md` | P0-SAFETY 最终验收、测试、安全边界与 Owner gate |
+| `analysis/p0_runtime_parity_audit_20260803.md` | ACTIVE vs 47-feature 研究参考的 runtime parity 裁决 |
 | `analysis/p_wuzao_topics_scan.md` | wuzao 全站可迁移清单（A/B/C/D） |
 | `analysis/backlog_future_optimizations.md` | tip 通后再拧的积木 |
 | `docs/learnings/*` | 事故/反直觉（只增） |

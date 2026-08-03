@@ -2,6 +2,36 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-03 — P0-SAFETY 已完成，必须停在 Owner gate）
+
+**直接裁决：P0 本地安全验收通过，但当前策略不可执行。** `models/active_bundle.json`
+不存在；example bundle 只描述 v10 的 `legacy_unaligned + abnormal tie mass + paper_only +
+execution_eligible=false`，所以 production 会 fail-closed。v10 是 **legacy / audit-only**，
+不是 paper/live active bundle。
+
+- H1–H7 均在完整仓库中确认并完成 P0 隔离/修复：short→buy、ACTIVE/研究配置错认、q90
+  大并列、return/cost 双扣、latest fallback、decision/fill 倒置、global tip-3。
+- runtime parity **REJECTED**：ACTIVE 是 28 特征、1 棵树、固定门 pass 91.13%；历史研究参考
+  是 47 特征、每折 250 轮、折内十分位。研究 `+23.49bp` 不得归给 ACTIVE。
+- canonical outcome 已统一；TP5/SL2/72 只做显式化，没有改经济参数。无 fill 时 actual PnL
+  为空；paper 只取 decision 后第一根 future open；broker fill 只认 ledger。
+- 最终 global tip age `<=2`，局部 edge/global age reject 分开计数。
+- 全量安全测试：472 passed、2 skipped、1 deselected、0 failed；deselect 原因是本机没有可选
+  `torchvision`。原始全量结果保留为 472 passed、2 skipped、1 dependency failure。
+- P0 前后 `models/ACTIVE`、`data/forward_log.csv`、`data/executor_ledger.jsonl` SHA 均未变。
+- 未训练、未碰 holdout、未 deploy、未 promote、未清账、未下任何真实或 demo 订单。
+
+交付物：
+
+- `analysis/html/p0_safety_protocol_repair_20260803.html`
+- `analysis/html/p0_runtime_parity_audit_20260803.html`
+- `analysis/output/p0_runtime_parity_audit_20260803.json`
+- `analysis/output/p0_safety_baseline_20260803/`
+
+**下一步必须由 Owner 明确授权。** 优先决策：short return convention → P1 pre-holdout
+immutable dataset rebuild → P2 成本/selector gate → active bundle cutover。不得自动进入 P1、
+激活 bundle、归档 forward log、实现/启用 short executor 或恢复部署。
+
 ## ⚡ 当前真相（2026-07-30 — 认知颠倒：判断层是唯一有效环节，检测层在拖后腿）
 
 > **完整交接文档:`analysis/STATE_20260730.md`** —— 三天工作、误判记录、下一步优先级都在那里。

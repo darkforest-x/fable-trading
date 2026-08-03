@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P0 Runtime Parity 审计（2026-08-03）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P0 Runtime Parity 审计（2026-08-03）</h1>
+<h2>直接裁决</h2>
+<p><strong>REJECTED：当前 <code>models/ACTIVE</code> 不是 2026-07-30 研究优胜配置，研究结论不得转移。</strong></p>
+<p>ACTIVE 是 28 特征、<code>best_iteration=1</code>、固定 q90 阈值的冻结 v10；研究参考是同一 wide 池起源上经 Kronos join 后的 18,255 行、47 特征、每折固定 250 轮的 CPCV arm。后者没有冻结为一个可部署模型，因此没有可绑定的 model SHA。共同的 regression 目标不能抵消 feature schema、训练轮数、selector 和模型身份的不一致。</p>
+<p>机器可读证据：<code>analysis/output/p0_runtime_parity_audit_20260803.json</code>。</p>
+<h2>证据边界</h2>
+<ul>
+<li>仓库：<code>main</code>，代码审计 HEAD <code>969dda71f5eb090c44c439f255496be0985b7531</code>。</li>
+<li><code>models/active_bundle.json</code> 不存在；未激活示例 bundle。</li>
+<li>未解析或评分 <code>signal_time &gt;= 2026-05-04</code>；P0 收益审计使用的数据最大时间为 <code>2026-05-03 05:15:00+00:00</code>。</li>
+<li>本报告只读取 sidecar、既有 pre-holdout 审计 JSON、源码配置和文件 SHA；没有训练、调参或新收益实验。</li>
+<li>VPS 已退租，本地无远端 service、ledger reconciliation、kill switch、账户、仓位或订单状态证据。</li>
+</ul>
+<h2>Parity matrix</h2>
+<table><thead><tr>
+<th>维度</th>
+<th>当前 ACTIVE v10</th>
+<th>研究参考 BASE 28+19</th>
+<th>是否同构</th>
+</tr></thead><tbody>
+<tr><td>candidate pool</td><td>wide → freeze copy，18,379 行</td><td>wide + Kronos join，18,255 行</td><td><strong>否</strong>，同源但行集不同</td></tr>
+<tr><td>side</td><td>short</td><td>short</td><td>是</td></tr>
+<tr><td>objective</td><td>regression</td><td>regression</td><td>是</td></tr>
+<tr><td>target</td><td><code>net_barrier_taker</code>（sidecar 写作 realized_ret）</td><td><code>net_barrier_taker</code></td><td>是，名称需规范化</td></tr>
+<tr><td>feature count</td><td>28</td><td>47（28 + 19 causal alpha）</td><td><strong>否</strong></td></tr>
+<tr><td>feature semantics</td><td><code>legacy_unaligned</code></td><td>legacy base + research alpha schema</td><td><strong>否</strong></td></tr>
+<tr><td>rounds / early stopping</td><td><code>best_iteration=1</code></td><td>每折固定 250 轮，无 early-stop metric</td><td><strong>否</strong></td></tr>
+<tr><td>selector</td><td>固定阈值、<code>&gt;=</code>、pass 91.13%、equal 86.16%</td><td>每折 q90，约 10%，边界 tie 0</td><td><strong>否</strong></td></tr>
+<tr><td>return/cost</td><td>target 已是 net taker；旧报告路由曾含糊</td><td>直接评估 net taker</td><td>仅 target 同</td></tr>
+<tr><td>model identity</td><td>SHA <code>4ab5ab98af492e4b29a97be5b590990a9f3bdea3493955d5b6db400b5a541871</code></td><td>无单一冻结模型</td><td><strong>否</strong></td></tr>
+<tr><td>execution status</td><td>legacy / audit-only</td><td>research-only arm</td><td>都不可执行</td></tr>
+</tbody></table>
+<p>研究参考的历史结果为顶档提升 <code>+23.49bp</code>、14/15 折为正；这是既有 <code>analysis/output/diag_kronos_feature_value.json</code> 的历史证据，不是本轮重跑结果，也不能归属于 ACTIVE。</p>
+<h2>H1–H7 核验</h2>
+<table><thead><tr>
+<th>假说</th>
+<th>完整仓库基线</th>
+<th>P0 处置</th>
+<th>可核验证据</th>
+</tr></thead><tbody>
+<tr><td>H1 short 静默写 long</td><td><strong>confirmed</strong></td><td>fail-closed；side/protocol 进 identity，short/missing/unknown/mismatch client 0 调用</td><td><code>test_executor_side_guard.py</code></td></tr>
+<tr><td>H2 ACTIVE 不是研究优胜模型</td><td><strong>confirmed</strong></td><td>parity rejected；不 promote、不转移收益结论</td><td>本报告与 JSON matrix</td></tr>
+<tr><td>H3 q90 名称不等于实际十分位</td><td><strong>confirmed</strong></td><td>协议记录 operator/tie/pass/equal；异常 selector 不可 execution eligible</td><td>pass 0.9113408，equal 0.8615719</td></tr>
+<tr><td>H4 收益/成本语义混用</td><td><strong>confirmed</strong></td><td>显式 gross/net taker/net maker；换路先还原 gross；拒绝双扣</td><td><code>p0_return_semantics_20260803.json</code></td></tr>
+<tr><td>H5 生产 artifact 无单一权威</td><td><strong>confirmed</strong></td><td>production 只认 exact bundle + 三哈希；无 bundle 即拒绝，不 latest fallback</td><td><code>src/judgment/protocol.py</code></td></tr>
+<tr><td>H6 signal/decision/request/fill 混一</td><td><strong>confirmed</strong></td><td>actual fill 只能来自 decision 后 paper open 或 broker ledger；无 fill 无 actual PnL</td><td><code>test_execution_timeline.py</code></td></tr>
+<tr><td>H7 局部窗口可映射全局 tip-3</td><td><strong>confirmed</strong></td><td>最终全局 age <code>&lt;=2</code>；局部/global reject 分开计数</td><td><code>test_global_tip_age_gate.py</code></td></tr>
+</tbody></table>
+<h2>收益与成本重算表</h2>
+<p>冻结 v10 val 仅作 pre-holdout 语义审计，<code>n=3,677</code>。没有改阈值、成本或 return convention。</p>
+<table><thead><tr>
+<th>集合</th>
+<th>gross</th>
+<th>net taker（已含 10bp）</th>
+<th>正确 net maker</th>
+<th>历史错误：net taker 再减 6bp</th>
+</tr></thead><tbody>
+<tr><td><code>score &gt;= threshold</code></td><td>-1.5554bp</td><td>-11.5554bp</td><td>-7.5554bp</td><td>-17.5554bp</td></tr>
+<tr><td>top 367</td><td>+58.6178bp</td><td>+48.6178bp</td><td>+52.6178bp</td><td>+42.6178bp</td></tr>
+</tbody></table>
+<p>唯一合法的 taker→maker 路由是：</p>
+<pre><code>
+gross = net_taker + 10bp
+net_maker = gross - 6bp
+          = net_taker + 10bp - 6bp
+</code></pre>
+<p>历史 <code>net_taker - 6bp</code> 被标为 superseded-for-return-cost-route-only；旧脚本保留，不改写历史结果。</p>
+<h2>Artifact 与保护对象</h2>
+<table><thead><tr>
+<th>对象</th>
+<th>SHA256 / 状态</th>
+</tr></thead><tbody>
+<tr><td><code>models/ACTIVE</code></td><td><code>899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef</code>，与 P0.0 相同</td></tr>
+<tr><td>active model</td><td><code>4ab5ab98af492e4b29a97be5b590990a9f3bdea3493955d5b6db400b5a541871</code></td></tr>
+<tr><td>active sidecar</td><td><code>31170d758678d1ab950b65d62b380b5319170bc29259e2441319fa86f69ead68</code></td></tr>
+<tr><td>detector</td><td><code>86d969c830189b2d1048dca24e10bacc27341e75643cf4f7a912e5a8d5542ad9</code></td></tr>
+<tr><td>freeze dataset</td><td><code>9bca68023d5afd8687753cd42ca17865b3080077474bfc216a350ac3d22b5a94</code></td></tr>
+<tr><td><code>data/forward_log.csv</code></td><td><code>6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb</code>，与 P0.0 相同</td></tr>
+<tr><td><code>data/executor_ledger.jsonl</code></td><td><code>de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39</code>，与 P0.0 相同</td></tr>
+</tbody></table>
+<h2>复现命令</h2>
+<pre><code>
+PYTHONPATH=. python3 scripts/audit_l2_v10_return_semantics_20260803.py
+PYTHONPATH=. python3 scripts/audit_p0_runtime_parity_20260803.py
+PYTHONPATH=. python3 -m pytest -q \
+  tests/test_active_bundle_protocol.py \
+  tests/test_return_cost_contract.py \
+  tests/test_execution_timeline.py \
+  tests/test_global_tip_age_gate.py
+</code></pre>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>parity rejected 不等于 ACTIVE 收益为负；它只证明不能把另一配置的历史 lift 归给 ACTIVE。</li>
+<li>研究参考没有部署模型 SHA，所以不可能仅靠当前仓库把它升级成 exact bundle。</li>
+<li>当前 v10 walkforward 并非全折净收益为正，且 selector 大规模并列；它只能是 audit evidence。</li>
+<li>没有 VPS 或 broker fill 样本，P0 只验证因果记录协议，不证明真实成交质量、滑点、资金费或 short executor 正确性。</li>
+<li>本轮没有新增 AUC、置换 p 或匹配随机对照实验；这些指标对 P0 safety parity 不适用。表中历史研究数字只作身份对比。</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,173 @@
+{
+  "audit_version": "p0_runtime_parity_audit_20260803",
+  "generated_at": "2026-08-03T01:04:16.859834+00:00",
+  "repo": {
+    "branch": "main",
+    "head": "969dda71f5eb090c44c439f255496be0985b7531",
+    "origin_main": "4333fa722b6a98fdaa8a36f37f1d468d43956b5f",
+    "active_bundle_exists": false
+  },
+  "holdout": {
+    "read": false,
+    "boundary": "2026-05-04T00:00:00Z",
+    "audited_dataset_max_signal_time": "2026-05-03 05:15:00+00:00"
+  },
+  "active_runtime": {
+    "identity": "models/ACTIVE legacy v10 runtime artifact",
+    "active_pointer": "models/frozen_tp5_sl2_swap_yolo_v10_reg_20260731.txt",
+    "model_sha256": "4ab5ab98af492e4b29a97be5b590990a9f3bdea3493955d5b6db400b5a541871",
+    "sidecar_sha256": "31170d758678d1ab950b65d62b380b5319170bc29259e2441319fa86f69ead68",
+    "detector_sha256": "86d969c830189b2d1048dca24e10bacc27341e75643cf4f7a912e5a8d5542ad9",
+    "dataset_path": "data/judgment_yolo_swap_v10.csv",
+    "dataset_sha256": "9bca68023d5afd8687753cd42ca17865b3080077474bfc216a350ac3d22b5a94",
+    "source_pool": "data/judgment_v10_wide.csv -> data/judgment_yolo_swap_v10.csv",
+    "side": "short",
+    "objective": "regression",
+    "target": "net_barrier_taker (as realized_ret)",
+    "feature_count": 28,
+    "feature_semantics": "legacy_unaligned",
+    "best_iteration": 1,
+    "selector": {
+      "quantile_name": "q90",
+      "threshold": -0.0004397139085409754,
+      "operator": ">=",
+      "tie_policy": "legacy_large_tie_mass",
+      "calibration_pass_rate": 0.9113407669295621,
+      "threshold_equal_rate": 0.8615719336415556
+    },
+    "target_semantics": "net_taker",
+    "reporting_route": "taker",
+    "execution_status": "legacy_audit_only",
+    "walkforward_all_folds_net_positive": false
+  },
+  "research_reference": {
+    "identity": "2026-07-30 BASE 28+19 research arm",
+    "evidence": "analysis/output/diag_kronos_feature_value.json",
+    "candidate_pool": "judgment_v10_wide.csv",
+    "rows_after_preholdout_kronos_join": 18255,
+    "side": "short",
+    "objective": "regression",
+    "target": "net_barrier_taker",
+    "feature_count": 47,
+    "feature_semantics": "legacy_unaligned research features",
+    "boost_rounds_per_fold": 250,
+    "early_stopping_metric": null,
+    "selector": {
+      "mode": "per-fold exact score q90 comparison",
+      "operator": ">=",
+      "observed_selected_fraction": "approximately 10%; boundary tie count audited as zero"
+    },
+    "reporting_route": "net_taker",
+    "model_sha256": null,
+    "model_sha_reason": "CPCV refits were not frozen as one deployable artifact",
+    "headline_lift_bp": 23.49,
+    "folds_positive": 14,
+    "n_folds": 15
+  },
+  "parity": {
+    "candidate_pool": {
+      "active": "data/judgment_v10_wide.csv -> data/judgment_yolo_swap_v10.csv",
+      "research": "judgment_v10_wide.csv",
+      "match": false,
+      "note": "common wide-pool origin, but active freeze has 18,379 rows and research used 18,255 joined rows"
+    },
+    "objective": {
+      "active": "regression",
+      "research": "regression",
+      "match": true
+    },
+    "target": {
+      "active": "net_barrier_taker (as realized_ret)",
+      "research": "net_barrier_taker",
+      "match": true
+    },
+    "feature_count": {
+      "active": 28,
+      "research": 47,
+      "match": false
+    },
+    "feature_semantics": {
+      "active": "legacy_unaligned",
+      "research": "legacy_unaligned research features",
+      "match": false
+    },
+    "boosting": {
+      "active": "best_iteration=1 from frozen model",
+      "research": "250 fixed rounds per CPCV fold",
+      "match": false
+    },
+    "selector": {
+      "active": "fixed q90 threshold with >=; pass 91.13%; equal 86.16%",
+      "research": "per-fold q90; approximately 10%; zero boundary ties",
+      "match": false
+    },
+    "return_cost_route": {
+      "active": "target net_barrier_taker; report route was historically ambiguous",
+      "research": "net_barrier_taker evaluated directly",
+      "match": "target_only"
+    },
+    "model_identity": {
+      "active": "4ab5ab98af492e4b29a97be5b590990a9f3bdea3493955d5b6db400b5a541871",
+      "research": null,
+      "match": false,
+      "reason": "CPCV refits were not frozen as one deployable artifact"
+    }
+  },
+  "parity_verdict": "REJECTED: the ACTIVE 28-feature one-tree fixed-threshold artifact is not the 47-feature 250-round CPCV research arm; its lift may not be transferred.",
+  "hypotheses": {
+    "H1": {
+      "baseline": "confirmed",
+      "p0": "repaired_fail_closed"
+    },
+    "H2": {
+      "baseline": "confirmed",
+      "p0": "isolated_not_promoted"
+    },
+    "H3": {
+      "baseline": "confirmed",
+      "p0": "audited_and_execution_ineligible"
+    },
+    "H4": {
+      "baseline": "confirmed",
+      "p0": "canonical_route_repaired"
+    },
+    "H5": {
+      "baseline": "confirmed",
+      "p0": "exact_bundle_required; none activated"
+    },
+    "H6": {
+      "baseline": "confirmed",
+      "p0": "causal_fill_timeline_repaired"
+    },
+    "H7": {
+      "baseline": "confirmed",
+      "p0": "global_age_gate_repaired"
+    }
+  },
+  "protected_artifacts": {
+    "models/ACTIVE": {
+      "baseline_sha256": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+      "current_sha256": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+      "unchanged": true
+    },
+    "data/forward_log.csv": {
+      "baseline_sha256": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb",
+      "current_sha256": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb",
+      "unchanged": true
+    },
+    "data/executor_ledger.jsonl": {
+      "baseline_sha256": "de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39",
+      "current_sha256": "de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39",
+      "unchanged": true
+    }
+  },
+  "safety": {
+    "trained": false,
+    "holdout_read": false,
+    "active_changed": false,
+    "forward_log_changed": false,
+    "ledger_changed": false,
+    "deployed": false,
+    "order_triggered": false
+  }
+}

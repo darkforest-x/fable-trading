@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P0-SAFETY short 协议修复报告（2026-08-03）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P0-SAFETY short 协议修复报告（2026-08-03）</h1>
+<h2>直接裁决</h2>
+<p><strong>P0-SAFETY 本地验收通过；当前策略仍不可执行。</strong></p>
+<ul>
+<li><code>models/active_bundle.json</code> 不存在，production 会在任何数据加载或交易 client 之前 fail-closed。</li>
+<li><code>models/active_bundle.example.json</code> 只诚实描述 v10：<code>legacy_unaligned</code>、selector tie mass 异常、<code>live_entry_mode=none_until_p1</code>、<code>execution_eligible=false</code>、<code>paper_only=true</code>。</li>
+<li>v10 的实际状态是 <strong>legacy / audit-only</strong>，不是 execution-eligible paper/live bundle。</li>
+<li>P0 成功标准是错误协议无法下单，不是收益变好；P1/P2 未获授权且未开始。</li>
+</ul>
+<h2>P0.0 基线事实</h2>
+<p>基线 HEAD <code>4333fa722b6a98fdaa8a36f37f1d468d43956b5f</code>，分支 <code>main</code>，当时 worktree clean 且与 <code>origin/main</code> 一致。基线产物位于 <code>analysis/output/p0_safety_baseline_20260803/</code>。</p>
+<table><thead><tr>
+<th>项目</th>
+<th>基线事实</th>
+</tr></thead><tbody>
+<tr><td>ACTIVE</td><td><code>models/frozen_tp5_sl2_swap_yolo_v10_reg_20260731.txt</code></td></tr>
+<tr><td>ACTIVE pointer SHA</td><td><code>899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef</code></td></tr>
+<tr><td>model SHA</td><td><code>4ab5ab98af492e4b29a97be5b590990a9f3bdea3493955d5b6db400b5a541871</code></td></tr>
+<tr><td>sidecar SHA</td><td><code>31170d758678d1ab950b65d62b380b5319170bc29259e2441319fa86f69ead68</code></td></tr>
+<tr><td>detector SHA</td><td><code>86d969c830189b2d1048dca24e10bacc27341e75643cf4f7a912e5a8d5542ad9</code></td></tr>
+<tr><td>freeze dataset SHA</td><td><code>9bca68023d5afd8687753cd42ca17865b3080077474bfc216a350ac3d22b5a94</code></td></tr>
+<tr><td>wide pool SHA</td><td><code>d672f8da37dbb09d9dde7fbf66da31e548f7dc37ba8601920ab1d23802050c4a</code></td></tr>
+<tr><td>forward log</td><td>存在，SHA <code>6035eb…34bb</code>；P0 前后未变</td></tr>
+<tr><td>executor ledger</td><td>存在，SHA <code>de85b3…fe39</code>；P0 前后未变</td></tr>
+<tr><td>exact active bundle</td><td>不存在；example 未激活</td></tr>
+<tr><td>VPS</td><td>已退租；没有远端运行态证据</td></tr>
+<tr><td>基线聚焦测试</td><td>61 passed</td></tr>
+</tbody></table>
+<p>P0.0 只对 data 文件采集存在性、大小和整文件 SHA；没有解析行、评分、作图或生成 holdout 指标。</p>
+<h2>P0.0→P0.7 实施结果</h2>
+<table><thead><tr>
+<th>阶段</th>
+<th>结果</th>
+<th>关键不变量</th>
+<th>commit</th>
+</tr></thead><tbody>
+<tr><td>P0.0</td><td>完成基线快照</td><td>先取证再改代码</td><td><code>95ebfb0</code></td></tr>
+<tr><td>P0.1</td><td>executor fail-closed</td><td>key=`source</td><td>symbol</td><td>signal_time</td><td>side</td><td>protocol`;不含 score/model</td><td><code>cd9ca5a</code></td></tr>
+<tr><td>P0.2</td><td>exact bundle</td><td>必填字段 + model/dataset/detector SHA；production 不 fallback</td><td><code>8cd2a56</code></td></tr>
+<tr><td>P0.3</td><td>forward provenance</td><td>side/protocol/semantics/decision/hash 逐行传播；旧行独立</td><td><code>892964c</code></td></tr>
+<tr><td>P0.4</td><td>feature contract</td><td>extractor 由 <code>feature_semantics</code> 选择；28 维快照与 as-of</td><td><code>1cb669c</code></td></tr>
+<tr><td>P0.5</td><td>canonical outcome/cost</td><td>label/forward 共用 resolver；TP5/SL2/72 显式；成本只扣一次</td><td><code>ee98ebd</code></td></tr>
+<tr><td>P0.6</td><td>causal fill timeline</td><td>next-open 仅 research；无 fill 无 actual PnL</td><td><code>8e90390</code></td></tr>
+<tr><td>P0.7</td><td>tip/selector gates</td><td>全局 tip age≤2；异常 selector 不可执行</td><td><code>969dda7</code></td></tr>
+</tbody></table>
+<p>基线已有三个部分实现提交 <code>a34f87d</code>、<code>e6e1063</code>、<code>4333fa7</code>；本轮没有删除它们，而是在基线后按 P0.0→P0.7 顺序补齐并验证。</p>
+<h2>H1–H7 证据与处置</h2>
+<table><thead><tr>
+<th>假说</th>
+<th>基线判定</th>
+<th>P0 最终状态</th>
+</tr></thead><tbody>
+<tr><td>H1 short→long/buy</td><td>confirmed</td><td>repaired：short/missing/NaN/unknown/mismatch 均拒绝，mock client 0 调用</td></tr>
+<tr><td>H2 ACTIVE ≠ research winner</td><td>confirmed</td><td>isolated：parity rejected，不转移 47-feature 历史收益，不 promote</td></tr>
+<tr><td>H3 q90 实际放行异常</td><td>confirmed</td><td>audited：pass 91.13%、equal 86.16%；v10 audit-only；eligible abnormal bundle 加载失败</td></tr>
+<tr><td>H4 return/cost 混用</td><td>confirmed</td><td>repaired：gross↔net route 唯一，双扣 API/测试拒绝</td></tr>
+<tr><td>H5 无单一 artifact 权威</td><td>confirmed</td><td>repaired：production 只认 exact bundle；当前因 bundle 缺失而诚实停机</td></tr>
+<tr><td>H6 时间点混一</td><td>confirmed</td><td>repaired：signal/detection/decision/request/fill 分开；fill 后才有 actual outcome</td></tr>
+<tr><td>H7 global tip-3 漏洞</td><td>confirmed</td><td>repaired：所有局部候选最终按 whole-series tip age 再过滤</td></tr>
+</tbody></table>
+<p>详表见 <code>analysis/p0_runtime_parity_audit_20260803.md</code> 与对应 JSON。</p>
+<h2>Active bundle schema 与 fail-closed</h2>
+<p>协议对象显式承载以下类别，任一必填字段缺失即 <code>BundleError</code>：</p>
+<ul>
+<li>identity：<code>protocol_version</code>、<code>strategy_id</code>、side、timeframe、candidate source、tip age；</li>
+<li>features：schema、semantics、objective、iteration、score semantics；</li>
+<li>selector：threshold、operator、tie policy、calibration quantile/pass/equal、selector status；</li>
+<li>entry/outcome：research/live entry mode、TP/SL/horizon、same-bar、gap、return convention；</li>
+<li>return/cost：target column/semantics/cost included、reporting route；</li>
+<li>artifacts：detector/model/dataset path + SHA256；</li>
+<li>authority：<code>execution_eligible</code>、<code>paper_only</code>。</li>
+</ul>
+<p>额外不变量：</p>
+<ul>
+<li><code>legacy_unaligned</code> 永远不能 execution eligible；</li>
+<li><code>paper_only &amp;&amp; execution_eligible</code> 非法；</li>
+<li>abnormal selector 永远不能 execution eligible；</li>
+<li>short 不允许 <code>linear_long</code>；gross 与 <code>target_cost_included=true</code> 冲突；</li>
+<li>production bundle 的 <code>max_tip_age_bars</code> 不得大于 2；</li>
+<li>bundle absence、JSON 损坏、hash mismatch、语义矛盾均拒绝，不读取 <code>models/ACTIVE</code> 或 latest artifact 兜底。</li>
+</ul>
+<h2>Canonical barrier / return / cost</h2>
+<p>labeling 与 fixed forward 共用 <code>src/judgment/outcomes.py</code>。协议显式传入 side、entry、ATR、TP5、SL2、72 bars、same-bar conservative SL、gap barrier-price idealization 和 return convention。</p>
+<p>边界测试覆盖 short TP、SL、同 bar 双触发、timeout、partial open、exact touch、gap、非法价格/ATR、label-forward closed parity。P0 没有替 Owner 选择新的 return convention，只把 legacy v10 的 <code>linear_short = 1 - exit/entry</code> 如实写入 audit-only example。</p>
+<p>成本审计确认冻结 target <code>net_barrier_taker</code> 已含 taker 成本。正确 maker 换路是 <code>net_taker + taker_cost - maker_cost</code>；历史 <code>net_taker - maker_cost</code> 是双扣。完整重算表见 runtime parity 报告和 <code>analysis/output/p0_return_semantics_20260803.json</code>。</p>
+<h2>Signal / Decision / Fill</h2>
+<p>新 forward schema 区分 <code>signal_time</code>、<code>signal_closed_at</code>、<code>candidate_detected_at</code>、<code>decision_at</code>、<code>entry_requested_at</code>、<code>fill_at</code>、<code>fill_px</code> 和 <code>reference_px</code>。</p>
+<ul>
+<li>signal close 只能写 <code>reference_px</code>；不能写 entry/fill；</li>
+<li>research next-open outcome 写在 <code>research_*</code>；<code>realized_ret</code> 与 <code>actual_realized_ret</code> 在无 fill 时为空；</li>
+<li>paper fill 是严格晚于 decision 的第一根 future open；</li>
+<li>broker fill 必须由 ledger 显式提供 <code>fill_source=broker_ledger</code>、<code>fill_at</code>、<code>fill_px</code>；</li>
+<li>mid-bar broker fill 不使用包含该 fill 的不完整 OHLC high/low，避免纳入 fill 前极值；</li>
+<li>看板、data hub、status strip 只计显式 <code>paper_filled|broker_filled</code> 且 actual PnL 完整的行。</li>
+</ul>
+<h2>测试结果</h2>
+<h3>聚焦测试</h3>
+<p>阶段内聚焦结果依次为：P0.1 <code>19 passed</code>，P0.2 <code>116 passed</code>，P0.3 <code>119 passed</code>，P0.4 <code>67 passed</code>，P0.5 <code>102 passed</code>，P0.6 <code>159 passed</code>，P0.7 selector/tip <code>99 passed</code>。最终关键矩阵复核 <code>133 passed</code>。</p>
+<h3>全量安全测试</h3>
+<pre><code>
+PYTHONPATH=. python3 -m pytest -q tests
+→ 472 passed, 2 skipped, 1 failed
+</code></pre>
+<p>唯一失败：<code>tests/test_eth3m_v2_classification.py::test_full_frame_transform_is_deterministic_and_uncropped</code>，本机未安装可选重型依赖 <code>torchvision</code>，报 <code>ModuleNotFoundError</code>；不是 P0 assertion failure。</p>
+<p>当前环境可运行集合：</p>
+<pre><code>
+PYTHONPATH=. python3 -m pytest -q tests \
+  --deselect tests/test_eth3m_v2_classification.py::test_full_frame_transform_is_deterministic_and_uncropped
+→ 472 passed, 2 skipped, 1 deselected, 0 failed
+</code></pre>
+<p>测试没有写真实 <code>data/forward_log.csv</code>，没有调用真实或 demo 交易 client。</p>
+<h2>数据统计与研究指标适用性</h2>
+<p>P0 是 safety/correctness 迁移，不是 ML 实验；没有训练、特征选择、threshold sweep 或新策略评分。因此 AGENTS.md 的 val AUC、置换 p、top-decile 净收益、胜率、单特征和匹配随机对照在本轮均 <strong>N/A</strong>，不能伪造为 P0 成绩。</p>
+<p>唯一解析的数据审计是冻结 v10 pre-holdout val：<code>n=3,677</code>，最大 <code>signal_time=2026-05-03 05:15 UTC</code>。它只验证 threshold tie/pass rate 与 return/cost 路由，不用于选择配置。历史研究 parity 数字在另一报告中明确标为既有证据。</p>
+<h2>Learnings</h2>
+<ul>
+<li><code>execution-signal-identity-needs-side-and-protocol.md</code></li>
+<li><code>an-optional-bundle-loader-is-not-a-production-authority.md</code></li>
+<li><code>provenance-must-be-injected-once-not-rediscovered-mid-scan.md</code></li>
+<li><code>trade-side-does-not-identify-model-feature-semantics.md</code></li>
+<li><code>barrier-outcomes-need-one-explicit-contract.md</code></li>
+<li><code>net-route-conversion-must-restore-gross-before-recosting.md</code></li>
+<li><code>a-price-after-the-signal-is-not-a-fill-unless-it-is-after-the-decision.md</code></li>
+<li><code>a-local-tip-edge-is-not-a-global-freshness-proof.md</code></li>
+<li><code>a-research-result-cannot-be-assigned-to-a-different-runtime-artifact.md</code></li>
+</ul>
+<p>H3 的 tie-mass 根因已由既有 <code>a-loose-gate-can-be-a-model-with-no-resolution.md</code> 覆盖，本轮没有复制同主题 learning。</p>
+<h2>复现命令</h2>
+<pre><code>
+PYTHONPATH=. python3 scripts/audit_l2_v10_return_semantics_20260803.py
+PYTHONPATH=. python3 scripts/audit_p0_runtime_parity_20260803.py
+PYTHONPATH=. python3 -m pytest -q \
+  tests/test_executor_side_guard.py \
+  tests/test_active_bundle_protocol.py \
+  tests/test_forward_provenance.py \
+  tests/test_forward_feature_semantics.py \
+  tests/test_canonical_outcomes.py \
+  tests/test_return_cost_contract.py \
+  tests/test_execution_timeline.py \
+  tests/test_global_tip_age_gate.py
+PYTHONPATH=. python3 -m pytest -q tests \
+  --deselect tests/test_eth3m_v2_classification.py::test_full_frame_transform_is_deterministic_and_uncropped
+python3 scripts/md_to_html.py analysis/p0_safety_protocol_repair_20260803.md --out-dir analysis/html
+python3 scripts/md_to_html.py analysis/p0_runtime_parity_audit_20260803.md --out-dir analysis/html
+</code></pre>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>P0 证明的是 fail-closed，不证明 short 策略盈利、可部署或可实盘。</li>
+<li>当前没有 active bundle，因此 production forward 不能运行；这是安全结果，不是运营完成。</li>
+<li>v10 是一棵树、selector 大规模并列、walkforward 非全正、feature semantics legacy，不能在 P0 被洗成 deployable baseline。</li>
+<li>没有 VPS 与 broker reconciliation，F-07 的代码协议已实现和测试，但真实 fill 证据仍为 0。</li>
+<li><code>gap_policy=barrier_price</code> 是旧经济假设的显式化，不等于证明跳空可按障碍价成交。</li>
+<li>未安装 <code>torchvision</code> 的旧测试仍不能在本机运行；没有为了 P0 安装重型依赖。</li>
+<li>不修改旧历史报告；仅用新版本化审计标明 return/cost 路由的 superseded 范围。</li>
+</ul>
+<h2>仍未做事项与 Owner 决策</h2>
+<p>P0 完成后必须停止。以下全部未做：</p>
+<p>1. 确认 short return convention（O-01）；P1 重建前建议线性 USDT 永续 <code>1-exit/entry</code>，须 Owner 明确批准。</p>
+<p>2. 批准 P1 只用 pre-holdout 重建 immutable、<code>side_aligned_v1</code>、可部署的 28-feature baseline。</p>
+<p>3. 批准 P2 的真实成本/滑点/资金费压力线与 selector calibration 方案；P0 未改阈值或成本。</p>
+<p>4. 决定是否以及何时生成并激活新的 <code>models/active_bundle.json</code>；不得自动 promote。</p>
+<p>5. 决定旧 forward evidence 的归档/0-of-100 重启；P0 未清账或迁移。</p>
+<p>6. short executor 必须另立规格、demo shadow 与逐次授权；P0 未实现或启用 short 下单。</p>
+<p>7. 如需恢复 VPS/paper，另行批准部署与运行时核验；P0 没有部署。</p>
+<h2>安全声明</h2>
+<p>本轮 <strong>未训练、未读取或评分 holdout、未修改 <code>models/ACTIVE</code>、未 promote、未部署或重启 VPS、未清空/覆盖/迁移 <code>data/forward_log.csv</code>、未修改 executor ledger、未访问 API key、未触发真实或 demo 订单</strong>。</p>
+</body>
+</html>

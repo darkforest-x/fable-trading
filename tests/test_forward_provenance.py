@@ -177,6 +177,35 @@ def test_decision_at_is_a_column_distinct_from_detected_at() -> None:
     assert "detected_at" in frame.columns
 
 
+def test_outcome_update_preserves_first_decision_and_artifact_identity() -> None:
+    existing = pd.DataFrame(
+        [
+            _row(
+                status="open",
+                detected_at="first-detected",
+                decision_at="first-decision",
+                model_sha256="first-model",
+                detector_sha256="first-detector",
+            )
+        ]
+    )
+    closing = _row(
+        status="closed",
+        outcome="tp",
+        label=1,
+        realized_ret=0.05,
+        detected_at="later-detected",
+        decision_at="later-decision",
+        model_sha256="later-model",
+        detector_sha256="later-detector",
+    )
+    row = merge_forward_log(existing, [closing]).frame.iloc[0]
+    assert row["detected_at"] == "first-detected"
+    assert row["decision_at"] == "first-decision"
+    assert row["model_sha256"] == "first-model"
+    assert row["detector_sha256"] == "first-detector"
+
+
 def test_normalize_is_idempotent() -> None:
     """Reading a normalized log again must not re-mark or drop anything."""
     once = normalize_log(pd.DataFrame([_row()]))
