@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-08-03T02:50:25Z",
+  "loader_check": {
+    "command": "PYTHONPATH=. .venv/bin/python -c 'load_immutable_dataset(manifest)'",
+    "dataset_sha256": "aade2a334448d6443e71fb0d3dbbfcf450390875ce60e1f800f6dbe9c855e93a",
+    "manifest_sha256": "53b8a07612dae667a184da38bf8e0a694aaae15a5fd240d5b13238da3e13d682",
+    "row_count": 18103,
+    "training_eligible": true,
+    "verdict": "accepted"
+  },
+  "project_suite": {
+    "command": "PYTHONPATH=. .venv/bin/pytest -q tests",
+    "deselected": 0,
+    "failed": 0,
+    "passed": 488,
+    "skipped": 2,
+    "verdict": "accepted",
+    "warnings": 14,
+    "wall_seconds": 5.98
+  },
+  "relevant_suite": {
+    "command": "PYTHONPATH=. .venv/bin/pytest -q tests/test_p1_historical_replay.py tests/test_p1_dataset_contract.py tests/test_p1_candidate_mapping.py tests/test_tip_edge_filter.py tests/test_global_tip_age_gate.py",
+    "failed": 0,
+    "passed": 29,
+    "verdict": "accepted",
+    "wall_seconds": 1.38
+  },
+  "repository_root_discovery": {
+    "command": "PYTHONPATH=. .venv/bin/pytest -q",
+    "collection_errors": 2,
+    "details": [
+      "external/Kronos/finetune/qlib_test.py requires optional qlib",
+      "external/Kronos/tests/test_kronos_regression.py imports an unresolved upstream model module"
+    ],
+    "interpretation": "External vendored optional tests are outside the project tests/ suite; no dependency was installed and no test was deselected."
+  }
+}
