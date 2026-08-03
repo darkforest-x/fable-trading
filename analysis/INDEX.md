@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **180** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **181** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -16,6 +16,7 @@
 | 2026-08-03 | [`p0_safety_protocol_repair_20260803.md`](p0_safety_protocol_repair_20260803.md) | P0-SAFETY short 协议修复报告（2026-08-03） | P0-SAFETY 本地验收通过；当前策略仍不可执行。 |
 | 2026-08-03 | [`p1_preholdout_dataset_rebuild_20260803.md`](p1_preholdout_dataset_rebuild_20260803.md) | P1-DATA：pre-holdout immutable short L2 dataset 重建验收 | P1-DATA = accepted。** 已从冻结的 pre-holdout L1 proposal ledger 重建一份 |
 | 2026-08-03 | [`p2_l2_audit_and_prereg_20260803.md`](p2_l2_audit_and_prereg_20260803.md) | P2-L2 只读审计与预注册（训练前 Owner 门） | P1 immutable dataset 的 P2 输入门通过。Owner 在对话中以“批准”确认了上一条消息列明的 |
+| 2026-08-03 | [`p2_l2_preholdout_validation_20260803.md`](p2_l2_preholdout_validation_20260803.md) | P2-L2：immutable P1 dataset 训练与 pre-holdout 验收 | P2-L2 = REJECTED。** 训练与验证流程完整执行，但模型没有形成可部署的固定门： |
 | 2026-08-03 | [`week_plan_20260803.md`](week_plan_20260803.md) | 一周执行计划（2026-08-03 → 08-09） |  |
 | 2026-07-31 | [`p_gpt_architecture_review_20260731.md`](p_gpt_architecture_review_20260731.md) | fable-trading 架构与方法学审阅（2026-07-31） |  |
 | 2026-07-31 | [`p_l2_v10_reg_freeze_20260731.md`](p_l2_v10_reg_freeze_20260731.md) | L2 切 v10 池回归 · 冻结与回测分析报告（2026-07-31） |  |
@@ -226,6 +227,7 @@
 - [`p25_vps_acceptance_20260710.md`](p25_vps_acceptance_20260710.md) — P2.5 VPS 公网验收（2026-07-10）
 - [`p2_data_audit_report.md`](p2_data_audit_report.md) — P2-12 数据质量审计
 - [`p2_l2_audit_and_prereg_20260803.md`](p2_l2_audit_and_prereg_20260803.md) — P2-L2 只读审计与预注册（训练前 Owner 门）
+- [`p2_l2_preholdout_validation_20260803.md`](p2_l2_preholdout_validation_20260803.md) — P2-L2：immutable P1 dataset 训练与 pre-holdout 验收
 - [`p2a_ab_leak_correction.md`](p2a_ab_leak_correction.md) — A/B 泄漏更正与干净检验（2026-07-15）
 - [`p2a_bad_images_pack.md`](p2a_bad_images_pack.md) — P2-11 偏 B · 坏图清单（Round 1 → E2）
 - [`p2a_causal_direction_dataset_report.md`](p2a_causal_direction_dataset_report.md) — P2a 因果方向分类数据集验收

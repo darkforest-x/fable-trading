@@ -1,0 +1,36 @@
+{
+  "executed_at": "2026-08-03T06:44:00Z",
+  "phase": "P2.7 final verification",
+  "focused": {
+    "command": "PYTHONPATH=. MPLCONFIGDIR=/private/tmp/fable-mpl-p2 .venv/bin/pytest -q tests/test_p2_protocol.py tests/test_p2_l2.py tests/test_p1_dataset_contract.py",
+    "passed": 16,
+    "failed": 0
+  },
+  "full_tests": {
+    "command": "PYTHONPATH=. MPLCONFIGDIR=/private/tmp/fable-mpl-p2 .venv/bin/pytest -q tests",
+    "passed": 499,
+    "skipped": 2,
+    "failed": 0,
+    "warnings": 14,
+    "elapsed_seconds": 6.21
+  },
+  "independent_artifact_audit": {
+    "path": "analysis/output/p2_l2_independent_audit_20260803.json",
+    "artifact_integrity_verdict": "accepted",
+    "strategy_verdict": "rejected"
+  },
+  "protected_after_tests": {
+    "models/ACTIVE": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+    "data/forward_log.csv": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb",
+    "data/executor_ledger.jsonl": "de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39",
+    "models/active_bundle.json_exists": false
+  },
+  "safety": {
+    "holdout_read": false,
+    "active_modified": false,
+    "active_bundle_created": false,
+    "deployed": false,
+    "trading_client_accessed": false,
+    "ordered": false
+  }
+}

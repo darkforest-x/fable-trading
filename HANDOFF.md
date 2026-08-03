@@ -2,6 +2,38 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-03 — P2-L2 已完成且 REJECTED，必须停止）
+
+**直接裁决：P2-L2 训练/验证流程完成，策略门失败。** 只使用 P1 immutable dataset；
+artifact integrity audit accepted，但 strategy verdict 是 **rejected**。
+
+- 主模型 best_iteration=1、1 tree、15 distinct scores；calibration q90 `>=` 实际 pass
+  85.51%，threshold equality 81.23%，模型/selector health 全失败。
+- 5-fold fixed runtime gate 只有 1/5 折 pressure-net>0；聚合 4,723 selected、pass 31.92%、
+  pressure-net **-39.33bp**、PF 0.641。单特征 baseline 为 -22.67bp，反而少亏 16.66bp。
+- 逐折 exact-top 也只有 1/5 为正；按 fold top-n 正确加权后为 **-15.91bp**。
+- matched candidate control 1,051 pairs / coverage 22.25%；lift +0.74bp，UTC-week exact
+  block permutation `p=0.4836`，未过 0.01。
+- 初版曾错误 pooling 不同 fold 模型 raw scores 得到 +9.04bp；独立审计发现后未重训，改为
+  foldwise aggregation，结论 -15.91bp；该纠错不影响 fixed gate 或最终 rejected。
+- full tests 499 passed / 2 skipped；独立产物审计 17/17 true。
+- ACTIVE / forward log / ledger SHA 不变；active bundle 不存在；未读 holdout、未部署、未访问
+  trading client、未下单。
+
+交付物：
+
+- `analysis/html/p2_l2_preholdout_validation_20260803.html`
+- `analysis/p2_l2_preholdout_validation_20260803.md`
+- `analysis/output/p2_l2_results_20260803.json`
+- `analysis/output/p2_l2_independent_audit_20260803.json`
+- `analysis/output/p2_l2_selector_manifest_20260803.json`（research-only / execution=false）
+- `analysis/output/p2_l2_dataset_binding_20260803.json`
+- `analysis/output/p2_l2_hashes_20260803.sha256`
+- `analysis/output/p2_l2_test_results_20260803.json`
+
+**停止点：P2.7。** 不进入 P3，不改模型/threshold/cost，不读 holdout，不做 ACTIVE/bundle、
+deploy 或 order。后续任何动作需要 Owner 新指令与新预注册。
+
 ## ⚡ 当前真相（2026-08-03 — P2.0 审计通过，P2.1 Owner 门已批准）
 
 **P2 尚未训练。** 只读审计重新加载了唯一 P1 immutable dataset，并完成时间三段、完整

@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P2-L2：immutable P1 dataset 训练与 pre-holdout 验收</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P2-L2：immutable P1 dataset 训练与 pre-holdout 验收</h1>
+<p><strong>日期</strong>：2026-08-03</p>
+<p><strong>执行边界</strong>：只使用 P1 immutable dataset；不读 holdout、不修改 ACTIVE、不创建 active</p>
+<p>bundle、不部署、不访问交易 client、不下单；P2 完成后停止。</p>
+<p><strong>机器结果</strong>：<code>analysis/output/p2_l2_results_20260803.json</code></p>
+<p><strong>独立产物审计</strong>：<code>analysis/output/p2_l2_independent_audit_20260803.json</code></p>
+<h2>直接裁决</h2>
+<p><strong>P2-L2 = REJECTED。</strong> 训练与验证流程完整执行，但模型没有形成可部署的固定门：</p>
+<ul>
+<li>主模型再次退化成 <strong>best_iteration=1 / 1 棵树 / 15 个 distinct scores</strong>；</li>
+<li>calibration q90 落在覆盖 81.23% 样本的并列分数上，<code>&gt;=</code> 实际放行 <strong>85.51%</strong>，远离</li>
+</ul>
+<p>  预注册的 8%–12%；</p>
+<ul>
+<li>5-fold fixed runtime gate 只有 <strong>1/5</strong> 折 pressure-net 为正，聚合 <strong>-39.33bp/trade</strong>；</li>
+<li>matched candidate control lift 仅 <strong>+0.74bp</strong>，UTC-week exact block permutation</li>
+</ul>
+<p>  <code>p=0.4836</code>，未过 <code>p&lt;0.01</code>；</p>
+<ul>
+<li>所有经济成功门和模型健康门按预注册判定，未换 threshold operator、未切并列、未调成本、</li>
+</ul>
+<p>  未补跑模型。</p>
+<p>artifact integrity 独立审计为 <strong>accepted</strong>，意思是 REJECTED 结论、hash、模型、逐折聚合、</p>
+<p>matched permutation 与安全边界均能复算一致；不是策略 accepted。</p>
+<h2>规范、Owner 决策与预注册</h2>
+<p>08 页止于 P1；同一接管计划 01 页规定 P2-L2 的时间三段、event purge、fixed gate、5-fold</p>
+<p>walkforward、matched random control 与经济 block permutation，05 页要求 Owner 批准实际</p>
+<p>成本压力线和 runtime gate。</p>
+<p>训练前已单独提交机器预注册。Owner 在对话中回复“批准”，对应：</p>
+<ul>
+<li>总往返成本 <strong>0.15%</strong>：P1 <code>net_ret_swap_taker</code> 已含 0.10% taker，评估只再减 0.05%</li>
+</ul>
+<p>  slippage，禁止重复扣 0.15%；</p>
+<ul>
+<li>funding：因本轮只允许 P1 dataset，固定为 <code>not_modeled_p1_only</code>，不暗填 0 为“实测”；</li>
+<li>selector：calibration q90、<code>score &gt;= threshold</code>；边界可分时取上下分数中点，边界并列时</li>
+</ul>
+<p>  整块通过；pass 8%–12%、threshold equality≤2%、distinct scores≥100；不切 ties；</p>
+<ul>
+<li>单一 LightGBM regression、28 个 manifest features、target=<code>net_ret_swap_taker</code>、无参数</li>
+</ul>
+<p>  搜索；单特征基线只用 <code>ma_spread_pct</code>。</p>
+<p>预注册 SHA256：</p>
+<p><code>38e4c474323bc03f269168db6a030575ce94ffbd4e69652403d54539da7a72b6</code>。</p>
+<h2>P1 dataset 与时间切分</h2>
+<table><thead><tr>
+<th>项</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>dataset SHA256</td><td><code>aade2a334448d6443e71fb0d3dbbfcf450390875ce60e1f800f6dbe9c855e93a</code></td></tr>
+<tr><td>rows / symbols / event groups</td><td>18,103 / 230 / 15,604</td></tr>
+<tr><td>signal range</td><td>2026-02-01 01:00 → 2026-05-03 05:15 UTC</td></tr>
+<tr><td>max label interval end</td><td>2026-05-03 22:45 UTC</td></tr>
+<tr><td>holdout signal / interval rows</td><td>0 / 0</td></tr>
+<tr><td>feature missing / inf</td><td>0 / 0</td></tr>
+<tr><td>label positive</td><td>4,533 / 18,103 = 25.04%</td></tr>
+<tr><td>full-pool gross / taker-net</td><td>+4.08bp / -5.92bp</td></tr>
+</tbody></table>
+<p>主三段只按 UTC 时间边界选择，完整 label interval 与 <code>event_group_id</code> purge：</p>
+<table><thead><tr>
+<th>segment</th>
+<th>rows</th>
+<th>event groups</th>
+<th>signal range</th>
+</tr></thead><tbody>
+<tr><td>train</td><td>10,940</td><td>9,403</td><td>02-01 01:00 → 03-26 20:45</td></tr>
+<tr><td>early-stop</td><td>3,498</td><td>3,013</td><td>03-27 00:15 → 04-13 21:15</td></tr>
+<tr><td>calibration</td><td>3,623</td><td>3,156</td><td>04-14 00:15 → 05-03 05:15</td></tr>
+<tr><td>purged</td><td>42</td><td>32</td><td>interval 触边及完整连接分量</td></tr>
+</tbody></table>
+<p>最终跨段 event group=0。fixture 曾发现“桥接行删除、同组邻居仍留在下一段/outer test”的</p>
+<p>漏洞；修复后 tainted group 会向完整组件和所有嵌套分区传播。</p>
+<h2>Fixture 与小样本 dry-run</h2>
+<p>fixture 在不读真实 dataset、不训练的条件下验证：</p>
+<ul>
+<li>可分 q90 精确放行 10%；</li>
+<li>大并列整块通过，20% pass / 20% equality 会触发 health fail；</li>
+<li>exact top-decile 对边界并列使用等权 fractional weight，不按 ID/行序切样本；</li>
+<li>8 个 UTC-week 全正 block 的 exact sign-flip 为 256 种、<code>p=1/256</code>；</li>
+<li>保护对象前后 hash 不变。</li>
+</ul>
+<p>P1 小样本 dry-run 使用 1,500 / 600 / 600 行，结构门 accepted：28 轮、596 distinct scores、</p>
+<p>q90 pass=10%、runtime/offline set identity=true。其 pressure-net 为负，只作为管道 smoke，</p>
+<p>没有用于更改预注册。</p>
+<h2>主模型与 calibration</h2>
+<table><thead><tr>
+<th>指标</th>
+<th>P2 LightGBM</th>
+<th>单特征 OLS baseline</th>
+</tr></thead><tbody>
+<tr><td>best iteration / trees</td><td><strong>1 / 1</strong></td><td>N/A</td></tr>
+<tr><td>distinct calibration scores</td><td><strong>15</strong></td><td>3,623</td></tr>
+<tr><td>calibration AUC</td><td>0.4756</td><td>0.4745</td></tr>
+<tr><td>q90 target / actual selected</td><td>362 / <strong>3,098</strong></td><td>362 / 362</td></tr>
+<tr><td>calibration pass rate</td><td><strong>85.51%</strong></td><td>9.99%</td></tr>
+<tr><td>threshold equality rate</td><td><strong>81.23%</strong></td><td>0%</td></tr>
+<tr><td>exact-top pressure-net</td><td><strong>-31.92bp</strong></td><td>-23.81bp</td></tr>
+<tr><td>fixed-gate pressure-net</td><td><strong>-19.74bp</strong></td><td>-23.81bp</td></tr>
+</tbody></table>
+<p>主模型健康门四项全部失败：best iteration≤1、pass rate 超界、equality 超界、distinct</p>
+<p>scores&lt;100。它复现了旧模型“一棵树 + q90 落在大并列块”的病，不是合格的 runtime</p>
+<p>selector。研究模型保存在 <code>analysis/output/</code> 仅为审计证据；selector manifest 明确</p>
+<p><code>execution_eligible=false</code>、<code>promotion_eligible=false</code>。</p>
+<p>与 P0 复核的 legacy v10 同表只比较 selector 病征，不转移收益结论：</p>
+<table><thead><tr>
+<th>selector</th>
+<th>feature semantics</th>
+<th>best iter</th>
+<th>distinct scores</th>
+<th>fixed-gate pass</th>
+</tr></thead><tbody>
+<tr><td>legacy v10 audit-only</td><td><code>legacy_unaligned</code></td><td>1</td><td>15</td><td>91.13%</td></tr>
+<tr><td>P2 immutable P1 main</td><td><code>side_aligned_v1</code></td><td>1</td><td>15</td><td>85.51%</td></tr>
+</tbody></table>
+<p>P1 重建修正了数据与特征语义，却没有自动修复模型分辨率；历史 47-feature / fixed-round</p>
+<p>研究收益不是本 P2 配置，不能拿来覆盖这次失败。</p>
+<h2>5-fold expanding walkforward</h2>
+<p>每折使用此前数据的 70% train / 15% early-stop / 15% calibration，并对 train、early-stop、</p>
+<p>calibration、test 做完整 interval / event-group purge。threshold 只看该折 calibration scores。</p>
+<table><thead><tr>
+<th>fold</th>
+<th>best iter</th>
+<th>cal pass</th>
+<th>test selected / pass</th>
+<th>AUC</th>
+<th>exact-top pressure</th>
+<th>fixed-gate pressure</th>
+<th>fixed PF</th>
+<th>health</th>
+</tr></thead><tbody>
+<tr><td>1</td><td>21</td><td>9.80%</td><td>158 / 5.38%</td><td>0.5760</td><td>+34.27bp</td><td><strong>+33.61bp</strong></td><td>1.292</td><td>PASS</td></tr>
+<tr><td>2</td><td><strong>1</strong></td><td><strong>33.57%</strong></td><td>1,501 / 51.44%</td><td>0.5011</td><td>-78.68bp</td><td><strong>-69.26bp</strong></td><td>0.433</td><td>FAIL</td></tr>
+<tr><td>3</td><td>47</td><td>9.95%</td><td>155 / 5.17%</td><td>0.5042</td><td>-9.28bp</td><td><strong>-5.33bp</strong></td><td>0.963</td><td>PASS</td></tr>
+<tr><td>4</td><td><strong>1</strong></td><td><strong>92.08%</strong></td><td>2,607 / 88.55%</td><td>0.4893</td><td>-19.89bp</td><td><strong>-32.28bp</strong></td><td>0.659</td><td>FAIL</td></tr>
+<tr><td>5</td><td>38</td><td>10.12%</td><td>302 / 10.07%</td><td>0.4887</td><td>-6.77bp</td><td><strong>-7.05bp</strong></td><td>0.954</td><td>PASS</td></tr>
+</tbody></table>
+<p>逐折 exact-top 也只有 1/5 为正；按各折 effective top-n 加权后的 pressure-net 为</p>
+<p><strong>-15.91bp</strong>。fixed gate 合并的是各折 calibration 后的布尔决策集合：</p>
+<table><thead><tr>
+<th>aggregate</th>
+<th>P2 fixed gate</th>
+<th>单特征 fixed gate</th>
+</tr></thead><tbody>
+<tr><td>selected</td><td>4,723</td><td>1,671</td></tr>
+<tr><td>pass rate</td><td>31.92%</td><td>11.29%</td></tr>
+<tr><td>gross mean</td><td>-24.33bp</td><td>-7.67bp</td></tr>
+<tr><td>taker-net mean</td><td>-34.33bp</td><td>-17.67bp</td></tr>
+<tr><td>pressure-net mean</td><td><strong>-39.33bp</strong></td><td><strong>-22.67bp</strong></td></tr>
+<tr><td>pressure PF</td><td>0.641</td><td>0.873</td></tr>
+<tr><td>TP-before-SL rate</td><td>18.84%</td><td>19.27%</td></tr>
+</tbody></table>
+<p>P2 多特征 fixed gate 比单特征基线还差约 16.66bp/trade。按 test rows 加权的逐折 rank</p>
+<p>参考指标为 AUC 0.5117、PR-AUC 0.2454、Spearman 0.0552；它们不覆盖经济失败。</p>
+<h2>匹配对照与经济置换</h2>
+<p>对照只来自同一个 P1 candidate pool 的未选行：同 symbol × 同 UTC week × 折内 ATR</p>
+<p>quintile、不放回、排除 selected event groups。它衡量 L2 selector 增量，不能解释为</p>
+<p>“detector vs 市场随机入场”。</p>
+<table><thead><tr>
+<th>项</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>fixed-gate selected</td><td>4,723</td></tr>
+<tr><td>matched pairs</td><td>1,051</td></tr>
+<tr><td>match coverage</td><td>22.25%</td></tr>
+<tr><td>matched selected pressure-net</td><td>-44.27bp</td></tr>
+<tr><td>matched control pressure-net</td><td>-45.02bp</td></tr>
+<tr><td>lift</td><td><strong>+0.74bp</strong></td></tr>
+<tr><td>UTC-week blocks</td><td>12</td></tr>
+<tr><td>exact sign-flip permutations</td><td>4,096</td></tr>
+<tr><td>economic block permutation p</td><td><strong>0.4836</strong></td></tr>
+</tbody></table>
+<p>lift 数值略正，但远小于噪声，且两边绝对收益都很差。置换统计量是 matched economic lift，</p>
+<p>不是 AUC；因此未过 <code>p&lt;0.01</code>。</p>
+<h2>预注册成功门</h2>
+<table><thead><tr>
+<th>gate</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>主模型与 selector health 全过</td><td><strong>FAIL</strong></td></tr>
+<tr><td>main calibration selected ≥300</td><td>PASS（3,098，但来自异常并列）</td></tr>
+<tr><td>5 个 walkforward health 全过</td><td><strong>FAIL</strong>（3/5）</td></tr>
+<tr><td>fixed-gate 正收益折 ≥4/5</td><td><strong>FAIL</strong>（1/5）</td></tr>
+<tr><td>aggregate fixed-gate pressure-net &gt;0</td><td><strong>FAIL</strong>（-39.33bp）</td></tr>
+<tr><td>matched lift &gt;0</td><td>PASS（+0.74bp）</td></tr>
+<tr><td>economic block permutation p&lt;0.01</td><td><strong>FAIL</strong>（0.4836）</td></tr>
+<tr><td>offline/runtime set identity</td><td>PASS</td></tr>
+<tr><td>无 arbitrary tie slicing</td><td>PASS</td></tr>
+</tbody></table>
+<p>只有 4/9 门通过，且核心模型健康、时间稳定性、绝对经济收益、置换显著性全部失败，故</p>
+<p>P2-L2 必须 REJECTED。</p>
+<h2>聚合纠错记录</h2>
+<p>full 训练结束后的独立审计发现，初版报告代码把 5 个不同 fold 模型的 raw scores 拼起来做</p>
+<p>全局 top-decile，错误得到 +9.04bp。不同模型的 score 尺度不可直接比较；已在<strong>不重训</strong>、</p>
+<p>不改任何逐折结果或成功门的条件下，改为逐折计算后按 effective top-n 加权，正确值为</p>
+<p><strong>-15.91bp</strong>。机器 JSON 保留旧值和 correction 原因；最终 REJECTED 未改变。</p>
+<p>对应 learning：</p>
+<p><code>docs/learnings/walkforward-model-scores-must-not-be-pooled-across-folds.md</code>。</p>
+<h2>产物与 hash</h2>
+<table><thead><tr>
+<th>artifact</th>
+<th>SHA256</th>
+</tr></thead><tbody>
+<tr><td>results JSON</td><td><code>5bfbd4f4953554fb25a12503cf1b711b14236f330bca458a78f14aa5e298f6da</code></td></tr>
+<tr><td>research model</td><td><code>2dc1d6e34f3c60e5f9da6e6c5e79cd5a1d986ff528216ad9115193d4f5115ddf</code></td></tr>
+<tr><td>selector manifest</td><td><code>32ac1688460a52afeb3d30114394966bcf979109d16766a5030b3e0da205df1c</code></td></tr>
+<tr><td>dataset binding</td><td><code>cf22add35a895ab14e449465fcd17bac09bb41123c101f666792f3eda5f197ab</code></td></tr>
+<tr><td>matched pairs</td><td><code>fd55f8a2fea2738b7a8c204eb88e651d8979a83d1d8c1e7213ab27f385e22709</code></td></tr>
+<tr><td>independent audit</td><td><code>12ad393cf3ec1fb5480980fa529f79fcf0039cf60af8ce483533809b2e6653f3</code></td></tr>
+</tbody></table>
+<p>完整文件清单和 hash 另见 <code>analysis/output/p2_l2_hashes_20260803.sha256</code>。</p>
+<h2>测试</h2>
+<ul>
+<li>P2/P1 聚焦测试：16 passed；</li>
+<li>完整 <code>tests/</code>：499 passed、2 skipped、0 failed；</li>
+<li>独立 artifact audit：17/17 checks true；</li>
+<li>py_compile 通过；</li>
+<li>ACTIVE / forward log / ledger hash 与 P2.0 完全相同；active bundle 始终不存在。</li>
+</ul>
+<p>机器结果：<code>analysis/output/p2_l2_test_results_20260803.json</code>。</p>
+<h2>Commit 列表</h2>
+<table><thead><tr>
+<th>commit</th>
+<th>内容</th>
+</tr></thead><tbody>
+<tr><td><code>80e6388</code></td><td>P2.0 只读审计与 awaiting-owner 机器预注册</td></tr>
+<tr><td><code>cbcebbd</code></td><td>冻结 Owner 批准的 0.15% cost 与 q90 fixed gate</td></tr>
+<tr><td><code>c2f774f</code></td><td>P2 split / model / selector / control / permutation、fixture 与 dry-run</td></tr>
+<tr><td><code>009685f</code></td><td>full REJECTED 结果、研究模型、selector、matched pairs、独立审计与聚合纠错</td></tr>
+</tbody></table>
+<p>P2.7 报告 / HTML / tests / HANDOFF 关闭提交在本报告提交后形成，最终 hash 以 git log 与交付</p>
+<p>回复为准。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>本轮只有约三个月 pre-holdout，不能替代 holdout 或前向新鲜样本；holdout 消耗为 0；</li>
+<li>funding 按 Owner 批准未建模，0.15% 只是 taker+固定 slippage pressure line，不是 all-in</li>
+</ul>
+<p>  实盘成本实测；</p>
+<ul>
+<li>matched coverage 22.25%，且是 candidate-pool 内部对照，不能衡量 L1 detector 对市场</li>
+</ul>
+<p>  随机入场的增量；</p>
+<ul>
+<li>主模型、fold 2、fold 4 都出现 best iteration=1，说明 ranking 能力在时间上不稳定；</li>
+<li>研究 model/selector 文件是失败审计证据，禁止进入 ACTIVE / active bundle / deploy；</li>
+<li>没有隐藏 dry-run 负结果、主模型退化、失败折或聚合纠错；</li>
+<li>本轮没有尝试新特征、固定轮数、换 early-stop metric、换 threshold operator 或降低成本。</li>
+</ul>
+<p>  这些都属于新实验，P2 完成后不得自动继续。</p>
+<h2>从零复现</h2>
+<pre><code>
+# 预注册与只读审计
+PYTHONPATH=. .venv/bin/python scripts/audit_p2_prereg_20260803.py
+
+# 顺序门：fixture → 小样本 dry-run → 唯一 full
+PYTHONPATH=. MPLCONFIGDIR=/private/tmp/fable-mpl-p2 \
+  .venv/bin/python scripts/run_p2_l2_20260803.py fixture
+PYTHONPATH=. MPLCONFIGDIR=/private/tmp/fable-mpl-p2 \
+  .venv/bin/python scripts/run_p2_l2_20260803.py dry-run
+PYTHONPATH=. MPLCONFIGDIR=/private/tmp/fable-mpl-p2 \
+  .venv/bin/python scripts/run_p2_l2_20260803.py full
+
+# full 后只修正跨模型 score 聚合；不重训
+PYTHONPATH=. MPLCONFIGDIR=/private/tmp/fable-mpl-p2 \
+  .venv/bin/python scripts/run_p2_l2_20260803.py finalize
+
+# 独立产物复核与测试
+PYTHONPATH=. MPLCONFIGDIR=/private/tmp/fable-mpl-p2 \
+  .venv/bin/python scripts/audit_p2_l2_results_20260803.py
+PYTHONPATH=. MPLCONFIGDIR=/private/tmp/fable-mpl-p2 .venv/bin/pytest -q tests
+
+# HTML
+python3 scripts/md_to_html.py analysis/p2_l2_preholdout_validation_20260803.md \
+  --out-dir analysis/html
+</code></pre>
+<h2>停止点</h2>
+<p><strong>P2 已完成并 REJECTED，立即停止。</strong> 不进入 P3，不读 holdout，不修改 ACTIVE，不创建 active</p>
+<p>bundle，不部署，不下单。任何后续模型改法或数据扩展都需要 Owner 新指令与新预注册。</p>
+</body>
+</html>
