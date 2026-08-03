@@ -1,0 +1,48 @@
+{
+  "audit_version": "p2_l2_independent_artifact_audit_v1",
+  "generated_at": "2026-08-03T06:43:02.134521+00:00",
+  "artifact_integrity_verdict": "accepted",
+  "strategy_verdict": "rejected",
+  "checks": {
+    "results_verdict_recomputes": true,
+    "preregistration_accepted_and_exact": true,
+    "dataset_binding_exact": true,
+    "selector_is_research_only": true,
+    "selector_verdict_matches": true,
+    "model_hash_matches": true,
+    "model_is_one_tree_as_reported": true,
+    "fold_count_is_five": true,
+    "foldwise_rank_aggregation_matches": true,
+    "foldwise_exact_top_aggregation_matches": true,
+    "aggregation_correction_did_not_retrain": true,
+    "matched_pairs_hash_matches": true,
+    "matched_lift_recomputes": true,
+    "matched_permutation_recomputes": true,
+    "protected_hashes_unchanged": true,
+    "active_bundle_absent": true,
+    "safety_flags_all_false": true
+  },
+  "recomputed": {
+    "expected_strategy_verdict": "rejected",
+    "main_model_trees": 1,
+    "walkforward_positive_fixed_gate_folds": 1,
+    "aggregate_fixed_gate_pressure_net": -0.00393299149575735,
+    "matched_lift": 7.410623660668989e-05,
+    "matched_permutation_p": 0.483642578125
+  },
+  "artifact_hashes": {
+    "results": "5bfbd4f4953554fb25a12503cf1b711b14236f330bca458a78f14aa5e298f6da",
+    "preregistration": "38e4c474323bc03f269168db6a030575ce94ffbd4e69652403d54539da7a72b6",
+    "selector_manifest": "32ac1688460a52afeb3d30114394966bcf979109d16766a5030b3e0da205df1c",
+    "dataset_binding": "cf22add35a895ab14e449465fcd17bac09bb41123c101f666792f3eda5f197ab",
+    "model": "2dc1d6e34f3c60e5f9da6e6c5e79cd5a1d986ff528216ad9115193d4f5115ddf",
+    "matched_pairs": "fd55f8a2fea2738b7a8c204eb88e651d8979a83d1d8c1e7213ab27f385e22709"
+  },
+  "safety": {
+    "holdout_read": false,
+    "trained": false,
+    "active_modified": false,
+    "deployed": false,
+    "ordered": false
+  }
+}

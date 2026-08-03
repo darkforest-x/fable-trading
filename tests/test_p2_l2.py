@@ -12,6 +12,10 @@ from src.judgment.p2_l2 import (
     matched_candidate_pairs,
     prepare_walkforward_fold,
 )
+from scripts.run_p2_l2_20260803 import (
+    _weighted_exact_top_aggregate,
+    _weighted_rank_aggregate,
+)
 
 
 def _economic_frame(n: int) -> pd.DataFrame:
@@ -146,3 +150,36 @@ def test_walkforward_fold_has_no_event_or_interval_leak() -> None:
     assert "shared" not in set().union(*groups)
     assert pd.to_datetime(fold.calibration.interval_end, utc=True).max() < fold.test_start
     assert pd.to_datetime(fold.test.interval_end, utc=True).max() < fold.test_end
+
+
+def test_fold_aggregation_never_pools_raw_scores_from_different_models() -> None:
+    folds = []
+    for fold, rows, auc, pressure in ((1, 100, 0.60, 0.01), (2, 300, 0.40, -0.01)):
+        rank = {
+            "roc_auc": auc,
+            "pr_auc": auc / 2,
+            "spearman_score_vs_net_taker": auc - 0.5,
+        }
+        exact = {
+            "n": rows // 10,
+            "effective_n": float(rows // 10),
+            "mean_gross_ret": pressure + 0.0015,
+            "mean_net_taker": pressure + 0.0005,
+            "mean_pressure_net": pressure,
+            "pressure_profit_factor": 1.0,
+            "win_rate_tp_before_sl": 0.5,
+        }
+        folds.append(
+            {
+                "fold": fold,
+                "segments": {"test": {"rows": rows}},
+                "test": {"rank": rank, "exact_top_decile": exact},
+                "single_feature_baseline": {"test": {"rank": rank}},
+            }
+        )
+    rank = _weighted_rank_aggregate(folds, baseline=False)
+    exact = _weighted_exact_top_aggregate(folds)
+    assert rank["roc_auc"] == pytest.approx(0.45)
+    assert exact["mean_pressure_net"] == pytest.approx(-0.005)
+    assert exact["positive_folds"] == 1
+    assert "raw scores are not pooled" in exact["aggregation"]

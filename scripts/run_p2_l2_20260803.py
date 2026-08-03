@@ -156,6 +156,61 @@ def _selector_view(gate: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in gate.items() if key != "health_checks"}
 
 
+def _weighted_rank_aggregate(fold_results: list[dict[str, Any]], *, baseline: bool) -> dict[str, Any]:
+    rows = np.asarray([fold["segments"]["test"]["rows"] for fold in fold_results], dtype=float)
+    ranks = [
+        fold["single_feature_baseline"]["test"]["rank"]
+        if baseline
+        else fold["test"]["rank"]
+        for fold in fold_results
+    ]
+    keys = ("roc_auc", "pr_auc", "spearman_score_vs_net_taker")
+    return {
+        "aggregation": "test-row-weighted mean of per-fold rank metrics; raw scores are not pooled across models",
+        "fold_values": [{"fold": fold["fold"], **rank} for fold, rank in zip(fold_results, ranks)],
+        **{
+            key: float(np.average([rank[key] for rank in ranks], weights=rows))
+            for key in keys
+        },
+    }
+
+
+def _weighted_exact_top_aggregate(fold_results: list[dict[str, Any]]) -> dict[str, Any]:
+    metrics = [fold["test"]["exact_top_decile"] for fold in fold_results]
+    weights = np.asarray([metric["effective_n"] for metric in metrics], dtype=float)
+    total_test = sum(fold["segments"]["test"]["rows"] for fold in fold_results)
+    keys = (
+        "mean_gross_ret",
+        "mean_net_taker",
+        "mean_pressure_net",
+        "win_rate_tp_before_sl",
+    )
+    return {
+        "aggregation": "effective-top-decile-n weighted mean of per-fold diagnostics; raw scores are not pooled across models",
+        "n": int(sum(metric["n"] for metric in metrics)),
+        "effective_n": float(weights.sum()),
+        "pass_rate": float(weights.sum() / total_test),
+        **{
+            key: float(np.average([metric[key] for metric in metrics], weights=weights))
+            for key in keys
+        },
+        "pressure_profit_factor": None,
+        "pressure_profit_factor_note": "not reconstructable from fold summaries; per-fold PFs remain authoritative",
+        "approved_total_cost": ACTUAL_COST_PRESSURE_TOTAL,
+        "additional_slippage_deducted": ADDITIONAL_SLIPPAGE_ROUND_TRIP,
+        "positive_folds": int(sum(metric["mean_pressure_net"] > 0 for metric in metrics)),
+        "fold_values": [
+            {
+                "fold": fold["fold"],
+                "n": metric["n"],
+                "mean_pressure_net": metric["mean_pressure_net"],
+                "pressure_profit_factor": metric["pressure_profit_factor"],
+            }
+            for fold, metric in zip(fold_results, metrics)
+        ],
+    }
+
+
 def run_fixture() -> dict[str, Any]:
     before = _protected_hashes()
     scores = np.arange(200, dtype=float)
@@ -417,14 +472,12 @@ def run_full() -> dict[str, Any]:
     combined_baseline_scores = np.concatenate(baseline_scores)
     combined_baseline_mask = np.concatenate(baseline_masks)
     aggregate_metrics = {
-        "rank": rank_metrics(combined, combined_scores),
-        "exact_top_decile": economic_metrics(
-            combined, combined_scores, exact_top_fraction=True
-        ),
+        "rank": _weighted_rank_aggregate(fold_results, baseline=False),
+        "exact_top_decile": _weighted_exact_top_aggregate(fold_results),
         "fixed_gate": economic_metrics(combined, combined_scores, selected_mask=combined_mask),
     }
     aggregate_baseline = {
-        "rank": rank_metrics(combined, combined_baseline_scores),
+        "rank": _weighted_rank_aggregate(fold_results, baseline=True),
         "fixed_gate": economic_metrics(
             combined,
             combined_baseline_scores,
@@ -609,16 +662,53 @@ def run_full() -> dict[str, Any]:
     return payload
 
 
+def finalize_existing_results() -> dict[str, Any]:
+    """Correct fold aggregation from already-frozen full-run summaries; no retraining."""
+    _assert_context()
+    before = _protected_hashes()
+    payload = _json(RESULTS)
+    if payload.get("result_version") != "p2_l2_preholdout_validation_v1":
+        raise P2ProtocolError("unexpected P2 results version")
+    fold_results = payload["walkforward"]["folds"]
+    old_rank = payload["walkforward"]["aggregate"]["rank"]
+    old_exact = payload["walkforward"]["aggregate"]["exact_top_decile"]
+    payload["walkforward"]["aggregate"]["rank"] = _weighted_rank_aggregate(
+        fold_results, baseline=False
+    )
+    payload["walkforward"]["aggregate"]["exact_top_decile"] = (
+        _weighted_exact_top_aggregate(fold_results)
+    )
+    payload["walkforward"]["single_feature_baseline_aggregate"]["rank"] = (
+        _weighted_rank_aggregate(fold_results, baseline=True)
+    )
+    payload["aggregation_correction"] = {
+        "corrected_at": _now(),
+        "training_rerun": False,
+        "reason": "raw scores from different fold models are not comparable and must not be pooled for rank/top-decile",
+        "old_invalid_pooled_rank": old_rank,
+        "old_invalid_pooled_exact_top_decile": old_exact,
+        "affected_success_gates": [],
+        "verdict_unchanged": payload["verdict"],
+    }
+    after = _protected_hashes()
+    if before != after:
+        raise P2ProtocolError("a protected artifact changed during result finalization")
+    _write_json(RESULTS, payload)
+    return payload
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("phase", choices=("fixture", "dry-run", "full"))
+    parser.add_argument("phase", choices=("fixture", "dry-run", "full", "finalize"))
     args = parser.parse_args()
     if args.phase == "fixture":
         payload = run_fixture()
     elif args.phase == "dry-run":
         payload = run_dry_run()
-    else:
+    elif args.phase == "full":
         payload = run_full()
+    else:
+        payload = finalize_existing_results()
     print(json.dumps(payload, ensure_ascii=False, indent=2))
     return 0
 

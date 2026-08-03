@@ -1,0 +1,1522 @@
+{
+  "result_version": "p2_l2_preholdout_validation_v1",
+  "generated_at": "2026-08-03T06:40:03.589297+00:00",
+  "verdict": "rejected",
+  "evidence_class": "preholdout_research_only_not_deployment_or_holdout_proof",
+  "dataset_binding": {
+    "binding_version": "p2_dataset_binding_v1",
+    "dataset_path": "data/p1/p1_short_l2_preholdout_aade2a334448d644.csv",
+    "dataset_sha256": "aade2a334448d6443e71fb0d3dbbfcf450390875ce60e1f800f6dbe9c855e93a",
+    "p1_manifest_path": "data/p1/p1_short_l2_preholdout_aade2a334448d644.manifest.json",
+    "p1_manifest_sha256": "53b8a07612dae667a184da38bf8e0a694aaae15a5fd240d5b13238da3e13d682",
+    "p2_preregistration_path": "analysis/output/p2_l2_prereg_20260803.json",
+    "p2_preregistration_sha256": "38e4c474323bc03f269168db6a030575ce94ffbd4e69652403d54539da7a72b6",
+    "feature_schema": "judgment_28_v1",
+    "feature_semantics": "side_aligned_v1",
+    "row_count": 18103,
+    "holdout_rows": 0,
+    "data_sources_used": [
+      "data/p1/p1_short_l2_preholdout_aade2a334448d644.csv"
+    ]
+  },
+  "preregistration": {
+    "path": "analysis/output/p2_l2_prereg_20260803.json",
+    "sha256": "38e4c474323bc03f269168db6a030575ce94ffbd4e69652403d54539da7a72b6",
+    "owner_approval": {
+      "recorded_at": "2026-08-03T03:54:00+00:00",
+      "exact_words": "批准",
+      "context": "approval of the two concrete recommended values in the immediately preceding assistant message",
+      "approved_cost_pressure_line": true,
+      "approved_fixed_runtime_gate": true,
+      "does_not_authorize_holdout_active_deploy_or_orders": true
+    }
+  },
+  "cost": {
+    "p1_taker_round_trip": 0.001,
+    "additional_slippage_round_trip": 0.0005,
+    "actual_cost_pressure_total": 0.0015,
+    "funding": "not_modeled_p1_only",
+    "double_cost_applied": false
+  },
+  "main": {
+    "segments": {
+      "train": {
+        "rows": 10940,
+        "event_groups": 9403,
+        "symbols": 220,
+        "signal_start": "2026-02-01 01:00:00+00:00",
+        "signal_end": "2026-03-26 20:45:00+00:00",
+        "max_interval_end": "2026-03-26 23:15:00+00:00"
+      },
+      "early_stop": {
+        "rows": 3498,
+        "event_groups": 3013,
+        "symbols": 225,
+        "signal_start": "2026-03-27 00:15:00+00:00",
+        "signal_end": "2026-04-13 21:15:00+00:00",
+        "max_interval_end": "2026-04-13 22:30:00+00:00"
+      },
+      "calibration": {
+        "rows": 3623,
+        "event_groups": 3156,
+        "symbols": 230,
+        "signal_start": "2026-04-14 00:15:00+00:00",
+        "signal_end": "2026-05-03 05:15:00+00:00",
+        "max_interval_end": "2026-05-03 22:45:00+00:00"
+      },
+      "purged_rows": 42
+    },
+    "model_path": "analysis/output/p2_l2_model_20260803.txt",
+    "model_sha256": "2dc1d6e34f3c60e5f9da6e6c5e79cd5a1d986ff528216ad9115193d4f5115ddf",
+    "model_health": {
+      "best_iteration": 1,
+      "tree_count": 1,
+      "tree_leaf_count_min": 15,
+      "tree_leaf_count_total": 15,
+      "distinct_scores": 15,
+      "checks": {
+        "best_iteration_gt_1": false,
+        "pass_rate_within_8_12pct": false,
+        "threshold_equal_rate_le_2pct": false,
+        "distinct_scores_ge_100": false
+      },
+      "accepted": false
+    },
+    "selector": {
+      "calibration_quantile": 0.9,
+      "threshold": -0.00031796570204650694,
+      "threshold_operator": ">=",
+      "tie_policy": "never_slice_equal_scores; whole equality block follows >=",
+      "n": 3623,
+      "target_selected_n": 362,
+      "actual_selected_n": 3098,
+      "actual_pass_rate": 0.85509246480817,
+      "threshold_equal_n": 2943,
+      "threshold_equal_rate": 0.8123102401324869,
+      "distinct_score_count": 15,
+      "boundary_separable": false,
+      "exact_top_decile_available_without_tie_slice": false,
+      "health_accepted": false
+    },
+    "calibration": {
+      "rank": {
+        "roc_auc": 0.4756387073919208,
+        "pr_auc": 0.22361267189410663,
+        "spearman_score_vs_net_taker": 0.016352324837382054
+      },
+      "exact_top_decile": {
+        "n": 362,
+        "effective_n": 362.0,
+        "pass_rate": 0.09991719569417609,
+        "mean_gross_ret": -0.0016924950416297053,
+        "mean_net_taker": -0.0026924950416297097,
+        "mean_pressure_net": -0.00319249504162971,
+        "pressure_profit_factor": 0.8251060317562888,
+        "win_rate_tp_before_sl": 0.18562353219456973,
+        "approved_total_cost": 0.0015,
+        "additional_slippage_deducted": 0.0005,
+        "selection": {
+          "mode": "exact_top_decile_fractional_ties",
+          "target_n": 362,
+          "boundary": -0.00031796570204650694,
+          "n_strictly_above": 155,
+          "n_equal_boundary": 2943,
+          "equality_weight": 0.07033639143730887,
+          "boundary_tied": true
+        }
+      },
+      "fixed_gate": {
+        "n": 3098,
+        "effective_n": 3098.0,
+        "pass_rate": 0.85509246480817,
+        "mean_gross_ret": -0.0004744896165764776,
+        "mean_net_taker": -0.0014744896165764811,
+        "mean_pressure_net": -0.0019744896165764816,
+        "pressure_profit_factor": 0.7973214908922225,
+        "win_rate_tp_before_sl": 0.22304712717882505,
+        "approved_total_cost": 0.0015,
+        "additional_slippage_deducted": 0.0005,
+        "selection": {
+          "mode": "fixed_runtime_gate"
+        }
+      },
+      "fixed_gate_threshold": -0.00031796570204650694,
+      "fixed_gate_operator": ">=",
+      "score_distinct_count": 15
+    },
+    "single_feature_baseline": {
+      "selector": {
+        "calibration_quantile": 0.9,
+        "threshold": 2.1036561122647038e-05,
+        "threshold_operator": ">=",
+        "tie_policy": "never_slice_equal_scores; whole equality block follows >=",
+        "n": 3623,
+        "target_selected_n": 362,
+        "actual_selected_n": 362,
+        "actual_pass_rate": 0.09991719569417609,
+        "threshold_equal_n": 0,
+        "threshold_equal_rate": 0.0,
+        "distinct_score_count": 3623,
+        "boundary_separable": true,
+        "exact_top_decile_available_without_tie_slice": true,
+        "health_accepted": true
+      },
+      "calibration": {
+        "rank": {
+          "roc_auc": 0.4744585830081005,
+          "pr_auc": 0.20932576892613397,
+          "spearman_score_vs_net_taker": -0.21298748751049973
+        },
+        "exact_top_decile": {
+          "n": 362,
+          "effective_n": 362.0,
+          "pass_rate": 0.09991719569417609,
+          "mean_gross_ret": -0.0008805826015495965,
+          "mean_net_taker": -0.0018805826015495985,
+          "mean_pressure_net": -0.0023805826015495975,
+          "pressure_profit_factor": 0.8958110179358992,
+          "win_rate_tp_before_sl": 0.1574585635359116,
+          "approved_total_cost": 0.0015,
+          "additional_slippage_deducted": 0.0005,
+          "selection": {
+            "mode": "exact_top_decile_fractional_ties",
+            "target_n": 362,
+            "boundary": 2.116186809341563e-05,
+            "n_strictly_above": 361,
+            "n_equal_boundary": 1,
+            "equality_weight": 1.0,
+            "boundary_tied": false
+          }
+        },
+        "fixed_gate": {
+          "n": 362,
+          "effective_n": 362.0,
+          "pass_rate": 0.09991719569417609,
+          "mean_gross_ret": -0.0008805826015495965,
+          "mean_net_taker": -0.0018805826015495985,
+          "mean_pressure_net": -0.0023805826015495975,
+          "pressure_profit_factor": 0.8958110179358992,
+          "win_rate_tp_before_sl": 0.1574585635359116,
+          "approved_total_cost": 0.0015,
+          "additional_slippage_deducted": 0.0005,
+          "selection": {
+            "mode": "fixed_runtime_gate"
+          }
+        },
+        "fixed_gate_threshold": 2.1036561122647038e-05,
+        "fixed_gate_operator": ">=",
+        "score_distinct_count": 3623
+      }
+    },
+    "feature_importance_path": "analysis/output/p2_l2_feature_importance_20260803.csv",
+    "feature_importance_sha256": "0e4fa24d446382172b905517894857df9a5ea64f2eea4f6beb2843f37e3586bd",
+    "feature_importance_top10": [
+      {
+        "feature": "pre_range168",
+        "gain": 0.15081379748880863,
+        "split": 2
+      },
+      {
+        "feature": "ext_up",
+        "gain": 0.14523909986019135,
+        "split": 3
+      },
+      {
+        "feature": "drawdown24",
+        "gain": 0.12062660232186317,
+        "split": 2
+      },
+      {
+        "feature": "ma_spread_pct",
+        "gain": 0.09245029836893082,
+        "split": 1
+      },
+      {
+        "feature": "pre_range48",
+        "gain": 0.051251597702503204,
+        "split": 2
+      },
+      {
+        "feature": "spread_mean24",
+        "gain": 0.0500607006251812,
+        "split": 1
+      },
+      {
+        "feature": "ret_12",
+        "gain": 0.030365100130438805,
+        "split": 1
+      },
+      {
+        "feature": "ret_4",
+        "gain": 0.01977439969778061,
+        "split": 1
+      },
+      {
+        "feature": "full_spread",
+        "gain": 0.019074400886893272,
+        "split": 1
+      },
+      {
+        "feature": "atr_pct",
+        "gain": 0.0,
+        "split": 0
+      }
+    ]
+  },
+  "walkforward": {
+    "test_folds": 5,
+    "positive_fixed_gate_folds": 1,
+    "folds": [
+      {
+        "fold": 1,
+        "boundaries": {
+          "early_stop_start": "2026-02-10T03:30:00+00:00",
+          "calibration_start": "2026-02-12T16:15:00+00:00",
+          "test_start": "2026-02-15T13:00:00+00:00",
+          "test_end": "2026-03-01T17:15:00+00:00"
+        },
+        "segments": {
+          "train": {
+            "rows": 2019,
+            "event_groups": 1775,
+            "symbols": 213,
+            "signal_start": "2026-02-01 01:00:00+00:00",
+            "signal_end": "2026-02-10 01:15:00+00:00",
+            "max_interval_end": "2026-02-10 03:15:00+00:00"
+          },
+          "early_stop": {
+            "rows": 406,
+            "event_groups": 335,
+            "symbols": 187,
+            "signal_start": "2026-02-10 03:30:00+00:00",
+            "signal_end": "2026-02-12 13:15:00+00:00",
+            "max_interval_end": "2026-02-12 16:00:00+00:00"
+          },
+          "calibration": {
+            "rows": 296,
+            "event_groups": 280,
+            "symbols": 175,
+            "signal_start": "2026-02-12 16:15:00+00:00",
+            "signal_end": "2026-02-15 11:15:00+00:00",
+            "max_interval_end": "2026-02-15 12:15:00+00:00"
+          },
+          "test": {
+            "rows": 2937,
+            "event_groups": 2425,
+            "symbols": 217,
+            "signal_start": "2026-02-15 13:00:00+00:00",
+            "signal_end": "2026-03-01 16:00:00+00:00",
+            "max_interval_end": "2026-03-01 17:00:00+00:00"
+          },
+          "purged_rows": 357
+        },
+        "model_health": {
+          "best_iteration": 21,
+          "tree_count": 21,
+          "tree_leaf_count_min": 15,
+          "tree_leaf_count_total": 315,
+          "distinct_scores": 294,
+          "checks": {
+            "best_iteration_gt_1": true,
+            "pass_rate_within_8_12pct": true,
+            "threshold_equal_rate_le_2pct": true,
+            "distinct_scores_ge_100": true
+          },
+          "accepted": true
+        },
+        "selector": {
+          "calibration_quantile": 0.9,
+          "threshold": 0.0065084675205575385,
+          "threshold_operator": ">=",
+          "tie_policy": "never_slice_equal_scores; whole equality block follows >=",
+          "n": 296,
+          "target_selected_n": 29,
+          "actual_selected_n": 29,
+          "actual_pass_rate": 0.09797297297297297,
+          "threshold_equal_n": 0,
+          "threshold_equal_rate": 0.0,
+          "distinct_score_count": 294,
+          "boundary_separable": true,
+          "exact_top_decile_available_without_tie_slice": true,
+          "health_accepted": true
+        },
+        "test": {
+          "rank": {
+            "roc_auc": 0.5759650207810314,
+            "pr_auc": 0.3615918899557739,
+            "spearman_score_vs_net_taker": 0.1808427803665782
+          },
+          "exact_top_decile": {
+            "n": 293,
+            "effective_n": 293.0,
+            "pass_rate": 0.09976166155941436,
+            "mean_gross_ret": 0.004927252138299982,
+            "mean_net_taker": 0.00392725213829998,
+            "mean_pressure_net": 0.00342725213829998,
+            "pressure_profit_factor": 1.3434606159249773,
+            "win_rate_tp_before_sl": 0.36177474402730375,
+            "approved_total_cost": 0.0015,
+            "additional_slippage_deducted": 0.0005,
+            "selection": {
+              "mode": "exact_top_decile_fractional_ties",
+              "target_n": 293,
+              "boundary": 0.005406001302664791,
+              "n_strictly_above": 292,
+              "n_equal_boundary": 1,
+              "equality_weight": 1.0,
+              "boundary_tied": false
+            }
+          },
+          "fixed_gate": {
+            "n": 158,
+            "effective_n": 158.0,
+            "pass_rate": 0.05379639087504256,
+            "mean_gross_ret": 0.00486062331798046,
+            "mean_net_taker": 0.0038606233179804598,
+            "mean_pressure_net": 0.0033606233179804598,
+            "pressure_profit_factor": 1.292080042211491,
+            "win_rate_tp_before_sl": 0.3291139240506329,
+            "approved_total_cost": 0.0015,
+            "additional_slippage_deducted": 0.0005,
+            "selection": {
+              "mode": "fixed_runtime_gate"
+            }
+          },
+          "fixed_gate_threshold": 0.0065084675205575385,
+          "fixed_gate_operator": ">=",
+          "score_distinct_count": 2699
+        },
+        "matched_control": {
+          "selected_n": 158,
+          "pairs": 112,
+          "coverage": 0.7088607594936709,
+          "selected_pressure_net": 0.005526252155770484,
+          "control_pressure_net": -0.00024828400311898937,
+          "lift": 0.005774536158889473
+        },
+        "single_feature_baseline": {
+          "selector": {
+            "calibration_quantile": 0.9,
+            "threshold": 0.0025446796905239655,
+            "threshold_operator": ">=",
+            "tie_policy": "never_slice_equal_scores; whole equality block follows >=",
+            "n": 296,
+            "target_selected_n": 29,
+            "actual_selected_n": 29,
+            "actual_pass_rate": 0.09797297297297297,
+            "threshold_equal_n": 0,
+            "threshold_equal_rate": 0.0,
+            "distinct_score_count": 296,
+            "boundary_separable": true,
+            "exact_top_decile_available_without_tie_slice": true,
+            "health_accepted": true
+          },
+          "test": {
+            "rank": {
+              "roc_auc": 0.43176536564657053,
+              "pr_auc": 0.27939105887328364,
+              "spearman_score_vs_net_taker": -0.20537290685219964
+            },
+            "exact_top_decile": {
+              "n": 293,
+              "effective_n": 293.0,
+              "pass_rate": 0.09976166155941436,
+              "mean_gross_ret": -0.0033385667698275666,
+              "mean_net_taker": -0.004338566769827568,
+              "mean_pressure_net": -0.004838566769827569,
+              "pressure_profit_factor": 0.7334627732763814,
+              "win_rate_tp_before_sl": 0.16382252559726962,
+              "approved_total_cost": 0.0015,
+              "additional_slippage_deducted": 0.0005,
+              "selection": {
+                "mode": "exact_top_decile_fractional_ties",
+                "target_n": 293,
+                "boundary": 0.004726130615853533,
+                "n_strictly_above": 292,
+                "n_equal_boundary": 1,
+                "equality_weight": 1.0,
+                "boundary_tied": false
+              }
+            },
+            "fixed_gate": {
+              "n": 458,
+              "effective_n": 458.0,
+              "pass_rate": 0.15594143684031325,
+              "mean_gross_ret": -0.0020324358647854637,
+              "mean_net_taker": -0.0030324358647854646,
+              "mean_pressure_net": -0.003532435864785465,
+              "pressure_profit_factor": 0.7852689415727803,
+              "win_rate_tp_before_sl": 0.1965065502183406,
+              "approved_total_cost": 0.0015,
+              "additional_slippage_deducted": 0.0005,
+              "selection": {
+                "mode": "fixed_runtime_gate"
+              }
+            },
+            "fixed_gate_threshold": 0.0025446796905239655,
+            "fixed_gate_operator": ">=",
+            "score_distinct_count": 2937
+          }
+        },
+        "health_checks": {
+          "model_and_selector_health": true,
+          "test_selected_floor_100": true,
+          "runtime_set_identity": true
+        },
+        "health_accepted": true
+      },
+      {
+        "fold": 2,
+        "boundaries": {
+          "early_stop_start": "2026-02-21T15:45:00+00:00",
+          "calibration_start": "2026-02-25T23:30:00+00:00",
+          "test_start": "2026-03-01T17:15:00+00:00",
+          "test_end": "2026-03-17T13:15:00+00:00"
+        },
+        "segments": {
+          "train": {
+            "rows": 4181,
+            "event_groups": 3635,
+            "symbols": 216,
+            "signal_start": "2026-02-01 01:00:00+00:00",
+            "signal_end": "2026-02-21 13:30:00+00:00",
+            "max_interval_end": "2026-02-21 14:45:00+00:00"
+          },
+          "early_stop": {
+            "rows": 873,
+            "event_groups": 722,
+            "symbols": 214,
+            "signal_start": "2026-02-21 15:45:00+00:00",
+            "signal_end": "2026-02-25 18:00:00+00:00",
+            "max_interval_end": "2026-02-25 21:45:00+00:00"
+          },
+          "calibration": {
+            "rows": 861,
+            "event_groups": 664,
+            "symbols": 216,
+            "signal_start": "2026-02-25 23:30:00+00:00",
+            "signal_end": "2026-03-01 16:00:00+00:00",
+            "max_interval_end": "2026-03-01 17:00:00+00:00"
+          },
+          "test": {
+            "rows": 2918,
+            "event_groups": 2560,
+            "symbols": 220,
+            "signal_start": "2026-03-01 17:15:00+00:00",
+            "signal_end": "2026-03-17 09:45:00+00:00",
+            "max_interval_end": "2026-03-17 12:45:00+00:00"
+          },
+          "purged_rows": 212
+        },
+        "model_health": {
+          "best_iteration": 1,
+          "tree_count": 1,
+          "tree_leaf_count_min": 15,
+          "tree_leaf_count_total": 15,
+          "distinct_scores": 15,
+          "checks": {
+            "best_iteration_gt_1": false,
+            "pass_rate_within_8_12pct": false,
+            "threshold_equal_rate_le_2pct": false,
+            "distinct_scores_ge_100": false
+          },
+          "accepted": false
+        },
+        "selector": {
+          "calibration_quantile": 0.9,
+          "threshold": 0.0004036243141344476,
+          "threshold_operator": ">=",
+          "tie_policy": "never_slice_equal_scores; whole equality block follows >=",
+          "n": 861,
+          "target_selected_n": 86,
+          "actual_selected_n": 289,
+          "actual_pass_rate": 0.3356562137049942,
+          "threshold_equal_n": 255,
+          "threshold_equal_rate": 0.2961672473867596,
+          "distinct_score_count": 15,
+          "boundary_separable": false,
+          "exact_top_decile_available_without_tie_slice": false,
+          "health_accepted": false
+        },
+        "test": {
+          "rank": {
+            "roc_auc": 0.5010679205515377,
+            "pr_auc": 0.1346812794325457,
+            "spearman_score_vs_net_taker": 0.015261697090334867
+          },
+          "exact_top_decile": {
+            "n": 291,
+            "effective_n": 290.99999999999994,
+            "pass_rate": 0.09972583961617544,
+            "mean_gross_ret": -0.006367741955803676,
+            "mean_net_taker": -0.00736774195580368,
+            "mean_pressure_net": -0.00786774195580368,
+            "pressure_profit_factor": 0.49390679878700455,
+            "win_rate_tp_before_sl": 0.1260240776074229,
+            "approved_total_cost": 0.0015,
+            "additional_slippage_deducted": 0.0005,
+            "selection": {
+              "mode": "exact_top_decile_fractional_ties",
+              "target_n": 291,
+              "boundary": 0.0004036243141344476,
+              "n_strictly_above": 134,
+              "n_equal_boundary": 1367,
+              "equality_weight": 0.11485003657644477,
+              "boundary_tied": true
+            }
+          },
+          "fixed_gate": {
+            "n": 1501,
+            "effective_n": 1501.0,
+            "pass_rate": 0.5143934201507883,
+            "mean_gross_ret": -0.005425676752208113,
+            "mean_net_taker": -0.0064256767522081135,
+            "mean_pressure_net": -0.006925676752208114,
+            "pressure_profit_factor": 0.43256776771216926,
+            "win_rate_tp_before_sl": 0.13057961359093936,
+            "approved_total_cost": 0.0015,
+            "additional_slippage_deducted": 0.0005,
+            "selection": {
+              "mode": "fixed_runtime_gate"
+            }
+          },
+          "fixed_gate_threshold": 0.0004036243141344476,
+          "fixed_gate_operator": ">=",
+          "score_distinct_count": 15
+        },
+        "matched_control": {
+          "selected_n": 1501,
+          "pairs": 483,
+          "coverage": 0.3217854763491006,
+          "selected_pressure_net": -0.006758184075064692,
+          "control_pressure_net": -0.007358441979293475,
+          "lift": 0.0006002579042287814
+        },
+        "single_feature_baseline": {
+          "selector": {
+            "calibration_quantile": 0.9,
+            "threshold": 0.004270626127702026,
+            "threshold_operator": ">=",
+            "tie_policy": "never_slice_equal_scores; whole equality block follows >=",
+            "n": 861,
+            "target_selected_n": 86,
+            "actual_selected_n": 86,
+            "actual_pass_rate": 0.09988385598141696,
+            "threshold_equal_n": 0,
+            "threshold_equal_rate": 0.0,
+            "distinct_score_count": 861,
+            "boundary_separable": true,
+            "exact_top_decile_available_without_tie_slice": true,
+            "health_accepted": true
+          },
+          "test": {
+            "rank": {
+              "roc_auc": 0.4946744752910134,
+              "pr_auc": 0.1312233598458096,
+              "spearman_score_vs_net_taker": -0.19708806148730265
+            },
+            "exact_top_decile": {
+              "n": 291,
+              "effective_n": 291.0,
+              "pass_rate": 0.09972583961617547,
+              "mean_gross_ret": -0.00827979919170663,
+              "mean_net_taker": -0.009279799191706638,
+              "mean_pressure_net": -0.009779799191706637,
+              "pressure_profit_factor": 0.52717079435709,
+              "win_rate_tp_before_sl": 0.1134020618556701,
+              "approved_total_cost": 0.0015,
+              "additional_slippage_deducted": 0.0005,
+              "selection": {
+                "mode": "exact_top_decile_fractional_ties",
+                "target_n": 291,
+                "boundary": 0.0019888417600505285,
+                "n_strictly_above": 290,
+                "n_equal_boundary": 1,
+                "equality_weight": 1.0,
+                "boundary_tied": false
+              }
+            },
+            "fixed_gate": {
+              "n": 114,
+              "effective_n": 114.0,
+              "pass_rate": 0.03906785469499657,
+              "mean_gross_ret": -0.01220603741004902,
+              "mean_net_taker": -0.013206037410049032,
+              "mean_pressure_net": -0.013706037410049032,
+              "pressure_profit_factor": 0.5215958186560905,
+              "win_rate_tp_before_sl": 0.12280701754385964,
+              "approved_total_cost": 0.0015,
+              "additional_slippage_deducted": 0.0005,
+              "selection": {
+                "mode": "fixed_runtime_gate"
+              }
+            },
+            "fixed_gate_threshold": 0.004270626127702026,
+            "fixed_gate_operator": ">=",
+            "score_distinct_count": 2918
+          }
+        },
+        "health_checks": {
+          "model_and_selector_health": false,
+          "test_selected_floor_100": true,
+          "runtime_set_identity": true
+        },
+        "health_accepted": false
+      },
+      {
+        "fold": 3,
+        "boundaries": {
+          "early_stop_start": "2026-03-02T23:30:00+00:00",
+          "calibration_start": "2026-03-09T22:45:00+00:00",
+          "test_start": "2026-03-17T13:15:00+00:00",
+          "test_end": "2026-04-01T17:45:00+00:00"
+        },
+        "segments": {
+          "train": {
+            "rows": 6316,
+            "event_groups": 5377,
+            "symbols": 217,
+            "signal_start": "2026-02-01 01:00:00+00:00",
+            "signal_end": "2026-03-02 19:15:00+00:00",
+            "max_interval_end": "2026-03-02 20:45:00+00:00"
+          },
+          "early_stop": {
+            "rows": 1317,
+            "event_groups": 1153,
+            "symbols": 218,
+            "signal_start": "2026-03-02 23:30:00+00:00",
+            "signal_end": "2026-03-09 20:15:00+00:00",
+            "max_interval_end": "2026-03-09 22:15:00+00:00"
+          },
+          "calibration": {
+            "rows": 1246,
+            "event_groups": 1074,
+            "symbols": 219,
+            "signal_start": "2026-03-09 22:45:00+00:00",
+            "signal_end": "2026-03-17 09:45:00+00:00",
+            "max_interval_end": "2026-03-17 12:45:00+00:00"
+          },
+          "test": {
+            "rows": 2996,
+            "event_groups": 2638,
+            "symbols": 221,
+            "signal_start": "2026-03-17 13:15:00+00:00",
+            "signal_end": "2026-04-01 16:15:00+00:00",
+            "max_interval_end": "2026-04-01 17:15:00+00:00"
+          },
+          "purged_rows": 193
+        },
+        "model_health": {
+          "best_iteration": 47,
+          "tree_count": 47,
+          "tree_leaf_count_min": 15,
+          "tree_leaf_count_total": 705,
+          "distinct_scores": 1115,
+          "checks": {
+            "best_iteration_gt_1": true,
+            "pass_rate_within_8_12pct": true,
+            "threshold_equal_rate_le_2pct": true,
+            "distinct_scores_ge_100": true
+          },
+          "accepted": true
+        },
+        "selector": {
+          "calibration_quantile": 0.9,
+          "threshold": 0.007181621905406357,
+          "threshold_operator": ">=",
+          "tie_policy": "never_slice_equal_scores; whole equality block follows >=",
+          "n": 1246,
+          "target_selected_n": 124,
+          "actual_selected_n": 124,
+          "actual_pass_rate": 0.09951845906902086,
+          "threshold_equal_n": 0,
+          "threshold_equal_rate": 0.0,
+          "distinct_score_count": 1115,
+          "boundary_separable": true,
+          "exact_top_decile_available_without_tie_slice": true,
+          "health_accepted": true
+        },
+        "test": {
+          "rank": {
+            "roc_auc": 0.5041783327461664,
+            "pr_auc": 0.29150661059651983,
+            "spearman_score_vs_net_taker": 0.03280104551969016
+          },
+          "exact_top_decile": {
+            "n": 299,
+            "effective_n": 299.0,
+            "pass_rate": 0.09979973297730307,
+            "mean_gross_ret": 0.0005719850178718419,
+            "mean_net_taker": -0.0004280149821281612,
+            "mean_pressure_net": -0.0009280149821281618,
+            "pressure_profit_factor": 0.9225115327108921,
+            "win_rate_tp_before_sl": 0.24414715719063546,
+            "approved_total_cost": 0.0015,
+            "additional_slippage_deducted": 0.0005,
+            "selection": {
+              "mode": "exact_top_decile_fractional_ties",
+              "target_n": 299,
+              "boundary": 0.005823571215252206,
+              "n_strictly_above": 298,
+              "n_equal_boundary": 1,
+              "equality_weight": 1.0,
+              "boundary_tied": false
+            }
+          },
+          "fixed_gate": {
+            "n": 155,
+            "effective_n": 155.0,
+            "pass_rate": 0.051735647530040056,
+            "mean_gross_ret": 0.0009666171786123845,
+            "mean_net_taker": -3.3382821387614276e-05,
+            "mean_pressure_net": -0.0005333828213876144,
+            "pressure_profit_factor": 0.9631723119118183,
+            "win_rate_tp_before_sl": 0.23225806451612904,
+            "approved_total_cost": 0.0015,
+            "additional_slippage_deducted": 0.0005,
+            "selection": {
+              "mode": "fixed_runtime_gate"
+            }
+          },
+          "fixed_gate_threshold": 0.007181621905406357,
+          "fixed_gate_operator": ">=",
+          "score_distinct_count": 2554
+        },
+        "matched_control": {
+          "selected_n": 155,
+          "pairs": 102,
+          "coverage": 0.6580645161290323,
+          "selected_pressure_net": 0.0004698226418302381,
+          "control_pressure_net": -0.0006449318703790233,
+          "lift": 0.0011147545122092602
+        },
+        "single_feature_baseline": {
+          "selector": {
+            "calibration_quantile": 0.9,
+            "threshold": 0.0011201061506708188,
+            "threshold_operator": ">=",
+            "tie_policy": "never_slice_equal_scores; whole equality block follows >=",
+            "n": 1246,
+            "target_selected_n": 124,
+            "actual_selected_n": 124,
+            "actual_pass_rate": 0.09951845906902086,
+            "threshold_equal_n": 0,
+            "threshold_equal_rate": 0.0,
+            "distinct_score_count": 1246,
+            "boundary_separable": true,
+            "exact_top_decile_available_without_tie_slice": true,
+            "health_accepted": true
+          },
+          "test": {
+            "rank": {
+              "roc_auc": 0.4624005679184359,
+              "pr_auc": 0.2775044321637407,
+              "spearman_score_vs_net_taker": -0.1175640710441703
+            },
+            "exact_top_decile": {
+              "n": 299,
+              "effective_n": 299.0,
+              "pass_rate": 0.09979973297730307,
+              "mean_gross_ret": 0.0017102958316668987,
+              "mean_net_taker": 0.0007102958316669001,
+              "mean_pressure_net": 0.00021029583166689986,
+              "pressure_profit_factor": 1.0132163974244486,
+              "win_rate_tp_before_sl": 0.23745819397993312,
+              "approved_total_cost": 0.0015,
+              "additional_slippage_deducted": 0.0005,
+              "selection": {
+                "mode": "exact_top_decile_fractional_ties",
+                "target_n": 299,
+                "boundary": 0.0014233638397614812,
+                "n_strictly_above": 298,
+                "n_equal_boundary": 1,
+                "equality_weight": 1.0,
+                "boundary_tied": false
+              }
+            },
+            "fixed_gate": {
+              "n": 458,
+              "effective_n": 458.0,
+              "pass_rate": 0.15287049399198932,
+              "mean_gross_ret": 0.0040767868012848985,
+              "mean_net_taker": 0.003076786801284902,
+              "mean_pressure_net": 0.0025767868012849006,
+              "pressure_profit_factor": 1.1923227972616834,
+              "win_rate_tp_before_sl": 0.27510917030567683,
+              "approved_total_cost": 0.0015,
+              "additional_slippage_deducted": 0.0005,
+              "selection": {
+                "mode": "fixed_runtime_gate"
+              }
+            },
+            "fixed_gate_threshold": 0.0011201061506708188,
+            "fixed_gate_operator": ">=",
+            "score_distinct_count": 2996
+          }
+        },
+        "health_checks": {
+          "model_and_selector_health": true,
+          "test_selected_floor_100": true,
+          "runtime_set_identity": true
+        },
+        "health_accepted": true
+      },
+      {
+        "fold": 4,
+        "boundaries": {
+          "early_stop_start": "2026-03-13T21:45:00+00:00",
+          "calibration_start": "2026-03-24T01:00:00+00:00",
+          "test_start": "2026-04-01T17:45:00+00:00",
+          "test_end": "2026-04-18T08:30:00+00:00"
+        },
+        "segments": {
+          "train": {
+            "rows": 8370,
+            "event_groups": 7168,
+            "symbols": 220,
+            "signal_start": "2026-02-01 01:00:00+00:00",
+            "signal_end": "2026-03-13 19:30:00+00:00",
+            "max_interval_end": "2026-03-13 21:15:00+00:00"
+          },
+          "early_stop": {
+            "rows": 1745,
+            "event_groups": 1562,
+            "symbols": 220,
+            "signal_start": "2026-03-13 21:45:00+00:00",
+            "signal_end": "2026-03-23 23:15:00+00:00",
+            "max_interval_end": "2026-03-24 00:30:00+00:00"
+          },
+          "calibration": {
+            "rows": 1794,
+            "event_groups": 1546,
+            "symbols": 221,
+            "signal_start": "2026-03-24 01:00:00+00:00",
+            "signal_end": "2026-04-01 16:15:00+00:00",
+            "max_interval_end": "2026-04-01 17:15:00+00:00"
+          },
+          "test": {
+            "rows": 2944,
+            "event_groups": 2553,
+            "symbols": 227,
+            "signal_start": "2026-04-01 17:45:00+00:00",
+            "signal_end": "2026-04-18 05:30:00+00:00",
+            "max_interval_end": "2026-04-18 08:15:00+00:00"
+          },
+          "purged_rows": 221
+        },
+        "model_health": {
+          "best_iteration": 1,
+          "tree_count": 1,
+          "tree_leaf_count_min": 15,
+          "tree_leaf_count_total": 15,
+          "distinct_scores": 15,
+          "checks": {
+            "best_iteration_gt_1": false,
+            "pass_rate_within_8_12pct": false,
+            "threshold_equal_rate_le_2pct": false,
+            "distinct_scores_ge_100": false
+          },
+          "accepted": false
+        },
+        "selector": {
+          "calibration_quantile": 0.9,
+          "threshold": -0.0006288080399837379,
+          "threshold_operator": ">=",
+          "tie_policy": "never_slice_equal_scores; whole equality block follows >=",
+          "n": 1794,
+          "target_selected_n": 179,
+          "actual_selected_n": 1652,
+          "actual_pass_rate": 0.9208472686733556,
+          "threshold_equal_n": 1595,
+          "threshold_equal_rate": 0.8890746934225195,
+          "distinct_score_count": 15,
+          "boundary_separable": false,
+          "exact_top_decile_available_without_tie_slice": false,
+          "health_accepted": false
+        },
+        "test": {
+          "rank": {
+            "roc_auc": 0.489336310303712,
+            "pr_auc": 0.20307698118142067,
+            "spearman_score_vs_net_taker": 0.016652839193564892
+          },
+          "exact_top_decile": {
+            "n": 294,
+            "effective_n": 294.0,
+            "pass_rate": 0.09986413043478261,
+            "mean_gross_ret": -0.0004887541717152661,
+            "mean_net_taker": -0.0014887541717152671,
+            "mean_pressure_net": -0.0019887541717152663,
+            "pressure_profit_factor": 0.8589307401824614,
+            "win_rate_tp_before_sl": 0.15707400369054503,
+            "approved_total_cost": 0.0015,
+            "additional_slippage_deducted": 0.0005,
+            "selection": {
+              "mode": "exact_top_decile_fractional_ties",
+              "target_n": 294,
+              "boundary": -0.0006288080399837379,
+              "n_strictly_above": 137,
+              "n_equal_boundary": 2470,
+              "equality_weight": 0.06356275303643724,
+              "boundary_tied": true
+            }
+          },
+          "fixed_gate": {
+            "n": 2607,
+            "effective_n": 2607.0,
+            "pass_rate": 0.8855298913043478,
+            "mean_gross_ret": -0.001728012206173686,
+            "mean_net_taker": -0.002728012206173688,
+            "mean_pressure_net": -0.0032280122061736885,
+            "pressure_profit_factor": 0.6592786383670421,
+            "win_rate_tp_before_sl": 0.20521672420406598,
+            "approved_total_cost": 0.0015,
+            "additional_slippage_deducted": 0.0005,
+            "selection": {
+              "mode": "fixed_runtime_gate"
+            }
+          },
+          "fixed_gate_threshold": -0.0006288080399837379,
+          "fixed_gate_operator": ">=",
+          "score_distinct_count": 15
+        },
+        "matched_control": {
+          "selected_n": 2607,
+          "pairs": 157,
+          "coverage": 0.06022247794399693,
+          "selected_pressure_net": -0.004415482884359069,
+          "control_pressure_net": -0.004059815809744551,
+          "lift": -0.00035566707461451595
+        },
+        "single_feature_baseline": {
+          "selector": {
+            "calibration_quantile": 0.9,
+            "threshold": -0.00013485892523271582,
+            "threshold_operator": ">=",
+            "tie_policy": "never_slice_equal_scores; whole equality block follows >=",
+            "n": 1794,
+            "target_selected_n": 179,
+            "actual_selected_n": 179,
+            "actual_pass_rate": 0.09977703455964325,
+            "threshold_equal_n": 0,
+            "threshold_equal_rate": 0.0,
+            "distinct_score_count": 1794,
+            "boundary_separable": true,
+            "exact_top_decile_available_without_tie_slice": true,
+            "health_accepted": true
+          },
+          "test": {
+            "rank": {
+              "roc_auc": 0.4324859051957081,
+              "pr_auc": 0.1766962322767632,
+              "spearman_score_vs_net_taker": -0.20713771697301903
+            },
+            "exact_top_decile": {
+              "n": 294,
+              "effective_n": 294.0,
+              "pass_rate": 0.09986413043478261,
+              "mean_gross_ret": -0.00014016599623133233,
+              "mean_net_taker": -0.0011401659962313308,
+              "mean_pressure_net": -0.0016401659962313317,
+              "pressure_profit_factor": 0.9119183887549782,
+              "win_rate_tp_before_sl": 0.1326530612244898,
+              "approved_total_cost": 0.0015,
+              "additional_slippage_deducted": 0.0005,
+              "selection": {
+                "mode": "exact_top_decile_fractional_ties",
+                "target_n": 294,
+                "boundary": -5.6786933724667756e-05,
+                "n_strictly_above": 293,
+                "n_equal_boundary": 1,
+                "equality_weight": 1.0,
+                "boundary_tied": false
+              }
+            },
+            "fixed_gate": {
+              "n": 325,
+              "effective_n": 325.0,
+              "pass_rate": 0.11039402173913043,
+              "mean_gross_ret": -0.0003057510749284229,
+              "mean_net_taker": -0.0013057510749284224,
+              "mean_pressure_net": -0.0018057510749284224,
+              "pressure_profit_factor": 0.900028735408915,
+              "win_rate_tp_before_sl": 0.12923076923076923,
+              "approved_total_cost": 0.0015,
+              "additional_slippage_deducted": 0.0005,
+              "selection": {
+                "mode": "fixed_runtime_gate"
+              }
+            },
+            "fixed_gate_threshold": -0.00013485892523271582,
+            "fixed_gate_operator": ">=",
+            "score_distinct_count": 2944
+          }
+        },
+        "health_checks": {
+          "model_and_selector_health": false,
+          "test_selected_floor_100": true,
+          "runtime_set_identity": true
+        },
+        "health_accepted": false
+      },
+      {
+        "fold": 5,
+        "boundaries": {
+          "early_stop_start": "2026-03-25T14:00:00+00:00",
+          "calibration_start": "2026-04-05T06:00:00+00:00",
+          "test_start": "2026-04-18T08:30:00+00:00",
+          "test_end": "2026-05-04T00:00:00+00:00"
+        },
+        "segments": {
+          "train": {
+            "rows": 10526,
+            "event_groups": 9066,
+            "symbols": 220,
+            "signal_start": "2026-02-01 01:00:00+00:00",
+            "signal_end": "2026-03-25 10:00:00+00:00",
+            "max_interval_end": "2026-03-25 13:15:00+00:00"
+          },
+          "early_stop": {
+            "rows": 2112,
+            "event_groups": 1818,
+            "symbols": 222,
+            "signal_start": "2026-03-25 14:00:00+00:00",
+            "signal_end": "2026-04-05 05:00:00+00:00",
+            "max_interval_end": "2026-04-05 05:45:00+00:00"
+          },
+          "calibration": {
+            "rows": 2214,
+            "event_groups": 1935,
+            "symbols": 227,
+            "signal_start": "2026-04-05 06:00:00+00:00",
+            "signal_end": "2026-04-18 05:30:00+00:00",
+            "max_interval_end": "2026-04-18 08:15:00+00:00"
+          },
+          "test": {
+            "rows": 3000,
+            "event_groups": 2620,
+            "symbols": 230,
+            "signal_start": "2026-04-18 08:30:00+00:00",
+            "signal_end": "2026-05-03 05:15:00+00:00",
+            "max_interval_end": "2026-05-03 22:45:00+00:00"
+          },
+          "purged_rows": 251
+        },
+        "model_health": {
+          "best_iteration": 38,
+          "tree_count": 38,
+          "tree_leaf_count_min": 15,
+          "tree_leaf_count_total": 570,
+          "distinct_scores": 964,
+          "checks": {
+            "best_iteration_gt_1": true,
+            "pass_rate_within_8_12pct": true,
+            "threshold_equal_rate_le_2pct": true,
+            "distinct_scores_ge_100": true
+          },
+          "accepted": true
+        },
+        "selector": {
+          "calibration_quantile": 0.9,
+          "threshold": 0.0002918768617171701,
+          "threshold_operator": ">=",
+          "tie_policy": "never_slice_equal_scores; whole equality block follows >=",
+          "n": 2214,
+          "target_selected_n": 221,
+          "actual_selected_n": 224,
+          "actual_pass_rate": 0.1011743450767841,
+          "threshold_equal_n": 4,
+          "threshold_equal_rate": 0.0018066847335140017,
+          "distinct_score_count": 964,
+          "boundary_separable": false,
+          "exact_top_decile_available_without_tie_slice": false,
+          "health_accepted": true
+        },
+        "test": {
+          "rank": {
+            "roc_auc": 0.488702950878347,
+            "pr_auc": 0.23465714408998428,
+            "spearman_score_vs_net_taker": 0.031236853390570855
+          },
+          "exact_top_decile": {
+            "n": 300,
+            "effective_n": 300.0,
+            "pass_rate": 0.1,
+            "mean_gross_ret": 0.0008228546562393836,
+            "mean_net_taker": -0.00017714534376061833,
+            "mean_pressure_net": -0.0006771453437606199,
+            "pressure_profit_factor": 0.9562701272685944,
+            "win_rate_tp_before_sl": 0.2353333333333333,
+            "approved_total_cost": 0.0015,
+            "additional_slippage_deducted": 0.0005,
+            "selection": {
+              "mode": "exact_top_decile_fractional_ties",
+              "target_n": 300,
+              "boundary": 0.0002918768617171701,
+              "n_strictly_above": 297,
+              "n_equal_boundary": 5,
+              "equality_weight": 0.6,
+              "boundary_tied": true
+            }
+          },
+          "fixed_gate": {
+            "n": 302,
+            "effective_n": 302.0,
+            "pass_rate": 0.10066666666666667,
+            "mean_gross_ret": 0.0007948531297065758,
+            "mean_net_taker": -0.0002051468702934266,
+            "mean_pressure_net": -0.000705146870293428,
+            "pressure_profit_factor": 0.9543857547755668,
+            "win_rate_tp_before_sl": 0.23509933774834438,
+            "approved_total_cost": 0.0015,
+            "additional_slippage_deducted": 0.0005,
+            "selection": {
+              "mode": "fixed_runtime_gate"
+            }
+          },
+          "fixed_gate_threshold": 0.0002918768617171701,
+          "fixed_gate_operator": ">=",
+          "score_distinct_count": 1246
+        },
+        "matched_control": {
+          "selected_n": 302,
+          "pairs": 197,
+          "coverage": 0.652317880794702,
+          "selected_pressure_net": -0.006917045467574578,
+          "control_pressure_net": -0.002263988653384945,
+          "lift": -0.004653056814189633
+        },
+        "single_feature_baseline": {
+          "selector": {
+            "calibration_quantile": 0.9,
+            "threshold": -0.0004456143265625745,
+            "threshold_operator": ">=",
+            "tie_policy": "never_slice_equal_scores; whole equality block follows >=",
+            "n": 2214,
+            "target_selected_n": 221,
+            "actual_selected_n": 221,
+            "actual_pass_rate": 0.0998193315266486,
+            "threshold_equal_n": 0,
+            "threshold_equal_rate": 0.0,
+            "distinct_score_count": 2214,
+            "boundary_separable": true,
+            "exact_top_decile_available_without_tie_slice": true,
+            "health_accepted": true
+          },
+          "test": {
+            "rank": {
+              "roc_auc": 0.47644883725429504,
+              "pr_auc": 0.2204117687092999,
+              "spearman_score_vs_net_taker": -0.1951797034644115
+            },
+            "exact_top_decile": {
+              "n": 300,
+              "effective_n": 300.0,
+              "pass_rate": 0.1,
+              "mean_gross_ret": -0.002723454624214057,
+              "mean_net_taker": -0.003723454624214063,
+              "mean_pressure_net": -0.00422345462421406,
+              "pressure_profit_factor": 0.8153567839268612,
+              "win_rate_tp_before_sl": 0.15666666666666668,
+              "approved_total_cost": 0.0015,
+              "additional_slippage_deducted": 0.0005,
+              "selection": {
+                "mode": "exact_top_decile_fractional_ties",
+                "target_n": 300,
+                "boundary": -0.00042357425515004705,
+                "n_strictly_above": 299,
+                "n_equal_boundary": 1,
+                "equality_weight": 1.0,
+                "boundary_tied": false
+              }
+            },
+            "fixed_gate": {
+              "n": 316,
+              "effective_n": 316.0,
+              "pass_rate": 0.10533333333333333,
+              "mean_gross_ret": -0.0022998440339414045,
+              "mean_net_taker": -0.003299844033941408,
+              "mean_pressure_net": -0.0037998440339414067,
+              "pressure_profit_factor": 0.8297515247753762,
+              "win_rate_tp_before_sl": 0.15822784810126583,
+              "approved_total_cost": 0.0015,
+              "additional_slippage_deducted": 0.0005,
+              "selection": {
+                "mode": "fixed_runtime_gate"
+              }
+            },
+            "fixed_gate_threshold": -0.0004456143265625745,
+            "fixed_gate_operator": ">=",
+            "score_distinct_count": 3000
+          }
+        },
+        "health_checks": {
+          "model_and_selector_health": true,
+          "test_selected_floor_100": true,
+          "runtime_set_identity": true
+        },
+        "health_accepted": true
+      }
+    ],
+    "aggregate": {
+      "rank": {
+        "aggregation": "test-row-weighted mean of per-fold rank metrics; raw scores are not pooled across models",
+        "fold_values": [
+          {
+            "fold": 1,
+            "roc_auc": 0.5759650207810314,
+            "pr_auc": 0.3615918899557739,
+            "spearman_score_vs_net_taker": 0.1808427803665782
+          },
+          {
+            "fold": 2,
+            "roc_auc": 0.5010679205515377,
+            "pr_auc": 0.1346812794325457,
+            "spearman_score_vs_net_taker": 0.015261697090334867
+          },
+          {
+            "fold": 3,
+            "roc_auc": 0.5041783327461664,
+            "pr_auc": 0.29150661059651983,
+            "spearman_score_vs_net_taker": 0.03280104551969016
+          },
+          {
+            "fold": 4,
+            "roc_auc": 0.489336310303712,
+            "pr_auc": 0.20307698118142067,
+            "spearman_score_vs_net_taker": 0.016652839193564892
+          },
+          {
+            "fold": 5,
+            "roc_auc": 0.488702950878347,
+            "pr_auc": 0.23465714408998428,
+            "spearman_score_vs_net_taker": 0.031236853390570855
+          }
+        ],
+        "roc_auc": 0.5117241428374424,
+        "pr_auc": 0.24536527370054106,
+        "spearman_score_vs_net_taker": 0.05519954911664729
+      },
+      "exact_top_decile": {
+        "aggregation": "effective-top-decile-n weighted mean of per-fold diagnostics; raw scores are not pooled across models",
+        "n": 1477,
+        "effective_n": 1477.0,
+        "pass_rate": 0.09983102399459277,
+        "mean_gross_ret": -9.149752328081735e-05,
+        "mean_net_taker": -0.0010914975232808198,
+        "mean_pressure_net": -0.00159149752328082,
+        "win_rate_tp_before_sl": 0.22508650214541662,
+        "pressure_profit_factor": null,
+        "pressure_profit_factor_note": "not reconstructable from fold summaries; per-fold PFs remain authoritative",
+        "approved_total_cost": 0.0015,
+        "additional_slippage_deducted": 0.0005,
+        "positive_folds": 1,
+        "fold_values": [
+          {
+            "fold": 1,
+            "n": 293,
+            "mean_pressure_net": 0.00342725213829998,
+            "pressure_profit_factor": 1.3434606159249773
+          },
+          {
+            "fold": 2,
+            "n": 291,
+            "mean_pressure_net": -0.00786774195580368,
+            "pressure_profit_factor": 0.49390679878700455
+          },
+          {
+            "fold": 3,
+            "n": 299,
+            "mean_pressure_net": -0.0009280149821281618,
+            "pressure_profit_factor": 0.9225115327108921
+          },
+          {
+            "fold": 4,
+            "n": 294,
+            "mean_pressure_net": -0.0019887541717152663,
+            "pressure_profit_factor": 0.8589307401824614
+          },
+          {
+            "fold": 5,
+            "n": 300,
+            "mean_pressure_net": -0.0006771453437606199,
+            "pressure_profit_factor": 0.9562701272685944
+          }
+        ]
+      },
+      "fixed_gate": {
+        "n": 4723,
+        "effective_n": 4723.0,
+        "pass_rate": 0.319229469415343,
+        "mean_gross_ret": -0.002432991495757349,
+        "mean_net_taker": -0.003432991495757351,
+        "mean_pressure_net": -0.00393299149575735,
+        "pressure_profit_factor": 0.6410556305415447,
+        "win_rate_tp_before_sl": 0.1884395511327546,
+        "approved_total_cost": 0.0015,
+        "additional_slippage_deducted": 0.0005,
+        "selection": {
+          "mode": "fixed_runtime_gate"
+        }
+      }
+    },
+    "single_feature_baseline_aggregate": {
+      "rank": {
+        "aggregation": "test-row-weighted mean of per-fold rank metrics; raw scores are not pooled across models",
+        "fold_values": [
+          {
+            "fold": 1,
+            "roc_auc": 0.43176536564657053,
+            "pr_auc": 0.27939105887328364,
+            "spearman_score_vs_net_taker": -0.20537290685219964
+          },
+          {
+            "fold": 2,
+            "roc_auc": 0.4946744752910134,
+            "pr_auc": 0.1312233598458096,
+            "spearman_score_vs_net_taker": -0.19708806148730265
+          },
+          {
+            "fold": 3,
+            "roc_auc": 0.4624005679184359,
+            "pr_auc": 0.2775044321637407,
+            "spearman_score_vs_net_taker": -0.1175640710441703
+          },
+          {
+            "fold": 4,
+            "roc_auc": 0.4324859051957081,
+            "pr_auc": 0.1766962322767632,
+            "spearman_score_vs_net_taker": -0.20713771697301903
+          },
+          {
+            "fold": 5,
+            "roc_auc": 0.47644883725429504,
+            "pr_auc": 0.2204117687092999,
+            "spearman_score_vs_net_taker": -0.1951797034644115
+          }
+        ],
+        "roc_auc": 0.4595804066201986,
+        "pr_auc": 0.21739192947983535,
+        "spearman_score_vs_net_taker": -0.1842418179692461
+      },
+      "fixed_gate": {
+        "n": 1671,
+        "effective_n": 1671.0,
+        "pass_rate": 0.11294356201419399,
+        "mean_gross_ret": -0.0007667835726547388,
+        "mean_net_taker": -0.001766783572654739,
+        "mean_pressure_net": -0.0022667835726547392,
+        "pressure_profit_factor": 0.8731485149896475,
+        "win_rate_tp_before_sl": 0.19269898264512267,
+        "approved_total_cost": 0.0015,
+        "additional_slippage_deducted": 0.0005,
+        "selection": {
+          "mode": "fixed_runtime_gate"
+        }
+      }
+    },
+    "matched_control": {
+      "selected_n": 4723,
+      "pairs": 1051,
+      "coverage": 0.22252805420283717,
+      "selected_pressure_net": -0.004427430568315732,
+      "control_pressure_net": -0.00450153680492242,
+      "lift": 7.410623660668925e-05,
+      "permutation": {
+        "status": "ok",
+        "n_pairs": 1051,
+        "n_blocks": 12,
+        "blocks": [
+          "2026-W07",
+          "2026-W08",
+          "2026-W09",
+          "2026-W10",
+          "2026-W11",
+          "2026-W12",
+          "2026-W13",
+          "2026-W14",
+          "2026-W15",
+          "2026-W16",
+          "2026-W17",
+          "2026-W18"
+        ],
+        "observed_lift": 7.410623660668925e-05,
+        "permutations": 4096,
+        "hits_ge_observed": 1981,
+        "p_value": 0.483642578125
+      },
+      "pairs_path": "analysis/output/p2_l2_matched_pairs_20260803.csv",
+      "pairs_sha256": "fd55f8a2fea2738b7a8c204eb88e651d8979a83d1d8c1e7213ab27f385e22709"
+    }
+  },
+  "success_gates": {
+    "main_model_and_selector_health": false,
+    "calibration_selected_n_gte_300": true,
+    "all_five_walkforward_health_gates": false,
+    "walkforward_positive_fixed_gate_folds_gte_4": false,
+    "aggregate_fixed_gate_pressure_net_mean_gt_0": false,
+    "matched_lift_gt_0": true,
+    "economic_block_permutation_p_lt_0_01": false,
+    "offline_runtime_set_identity": true,
+    "no_arbitrary_tie_slicing": true
+  },
+  "selector_manifest_path": "analysis/output/p2_l2_selector_manifest_20260803.json",
+  "selector_manifest_sha256": "32ac1688460a52afeb3d30114394966bcf979109d16766a5030b3e0da205df1c",
+  "protected_before": {
+    "models/ACTIVE": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+    "data/forward_log.csv": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb",
+    "data/executor_ledger.jsonl": "de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39",
+    "models/active_bundle.json": null
+  },
+  "protected_after": {
+    "models/ACTIVE": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+    "data/forward_log.csv": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb",
+    "data/executor_ledger.jsonl": "de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39",
+    "models/active_bundle.json": null
+  },
+  "protected_unchanged": true,
+  "safety": {
+    "data_sources_used": [
+      "data/p1/p1_short_l2_preholdout_aade2a334448d644.csv"
+    ],
+    "holdout_read": false,
+    "active_modified": false,
+    "active_bundle_created": false,
+    "deployed": false,
+    "trading_client_accessed": false,
+    "ordered": false
+  },
+  "aggregation_correction": {
+    "corrected_at": "2026-08-03T06:42:04.421582+00:00",
+    "training_rerun": false,
+    "reason": "raw scores from different fold models are not comparable and must not be pooled for rank/top-decile",
+    "old_invalid_pooled_rank": {
+      "roc_auc": 0.5158651070436165,
+      "pr_auc": 0.26227999910203315,
+      "spearman_score_vs_net_taker": 0.04939422736099742
+    },
+    "old_invalid_pooled_exact_top_decile": {
+      "n": 1479,
+      "effective_n": 1479.0,
+      "pass_rate": 0.09996620479891856,
+      "mean_gross_ret": 0.0024041325187218877,
+      "mean_net_taker": 0.0014041325187218866,
+      "mean_pressure_net": 0.0009041325187218862,
+      "pressure_profit_factor": 1.0895651452347928,
+      "win_rate_tp_before_sl": 0.30561189993238674,
+      "approved_total_cost": 0.0015,
+      "additional_slippage_deducted": 0.0005,
+      "selection": {
+        "mode": "exact_top_decile_fractional_ties",
+        "target_n": 1479,
+        "boundary": 0.0033300160480550047,
+        "n_strictly_above": 1478,
+        "n_equal_boundary": 1,
+        "equality_weight": 1.0,
+        "boundary_tied": false
+      }
+    },
+    "affected_success_gates": [],
+    "verdict_unchanged": "rejected"
+  }
+}
