@@ -1,0 +1,69 @@
+{
+  "preregistration_version": "p2r_readonly_root_cause_v1",
+  "status": "accepted",
+  "accepted_at": "2026-08-03T00:00:00+08:00",
+  "owner_authorization": "允许推送 origin/main；执行 P2-R 只读根因审计，只使用 P1 immutable dataset，不训练、不读 holdout、不修改 ACTIVE、不部署、不下单，完成后停止。",
+  "question": "Why did the pre-registered P2 L2 validation fail, and does the evidence support a threshold-only fix or a new training experiment?",
+  "scope": {
+    "dataset_path": "data/p1/p1_short_l2_preholdout_aade2a334448d644.csv",
+    "dataset_sha256": "aade2a334448d6443e71fb0d3dbbfcf450390875ce60e1f800f6dbe9c855e93a",
+    "dataset_manifest_path": "data/p1/p1_short_l2_preholdout_aade2a334448d644.manifest.json",
+    "dataset_manifest_sha256": "53b8a07612dae667a184da38bf8e0a694aaae15a5fd240d5b13238da3e13d682",
+    "p2_results_path": "analysis/output/p2_l2_results_20260803.json",
+    "p2_results_sha256": "5bfbd4f4953554fb25a12503cf1b711b14236f330bca458a78f14aa5e298f6da",
+    "p2_feature_importance_path": "analysis/output/p2_l2_feature_importance_20260803.csv",
+    "p2_feature_importance_sha256": "0e4fa24d446382172b905517894857df9a5ea64f2eea4f6beb2843f37e3586bd",
+    "p2_matched_pairs_path": "analysis/output/p2_l2_matched_pairs_20260803.csv",
+    "p2_matched_pairs_sha256": "fd55f8a2fea2738b7a8c204eb88e651d8979a83d1d8c1e7213ab27f385e22709",
+    "holdout_cutoff": "2026-05-04T00:00:00Z",
+    "allowed_reads": [
+      "the exact P1 immutable CSV and manifest above",
+      "the exact P2 result, feature-importance, and matched-pair artifacts above",
+      "repository code and pre-holdout protocol metadata"
+    ],
+    "allowed_writes": [
+      "analysis/output/p2r_*",
+      "analysis/p2r_*",
+      "analysis/html/p2r_*",
+      "tests/test_p2r_*",
+      "scripts/audit_p2r_*",
+      "docs/learnings/*",
+      "HANDOFF.md"
+    ]
+  },
+  "forbidden": {
+    "training_or_fitting": true,
+    "threshold_tuning": true,
+    "feature_selection_for_modeling": true,
+    "holdout_read": true,
+    "active_or_active_bundle_write": true,
+    "deployment": true,
+    "trading_client_access": true,
+    "orders": true
+  },
+  "fixed_diagnostics": {
+    "folds": "reuse the five pre-registered P2 walk-forward test folds without outcome-dependent boundary changes",
+    "target": "net_ret_swap_taker",
+    "pressure_net": "net_ret_swap_taker - 0.0005 additional slippage; P1 already contains 0.001 taker round trip",
+    "feature_association": "Spearman rho per immutable 28-feature column and per P2 test fold",
+    "feature_stability_rule": "finite rho with the same non-zero sign in at least 4/5 test folds and absolute median rho >= 0.03",
+    "label_regime_shift_rule": "max-minus-min fold TP-before-SL rate >= 0.10 or all-row pressure-net mean range >= 0.005",
+    "model_collapse_rule": "best_iteration <= 1 or calibration distinct_scores < 100 in at least 2/5 folds",
+    "calibration_transport_rule": "fixed-gate test pass rate falls outside 0.08..0.12 in at least 3/5 folds",
+    "threshold_exoneration_rule": "fold-local exact top-decile pressure-net is <= 0 in at least 4/5 folds",
+    "matched_control_rule": "P2 matched-control lift is not significant when exact UTC-week sign-flip p >= 0.01",
+    "missingness_rule": "report every feature with non-finite or missing values; do not impute"
+  },
+  "decision_rules": {
+    "threshold_only_fix_supported": "false when threshold_exoneration_rule is met",
+    "single_variable_training_followup_supported": "only if at least one feature meets feature_stability_rule and evidence is not solely from the collapsed full-model importance",
+    "otherwise": "stop after P2-R and do not preregister or run another training phase"
+  },
+  "protected_baseline": {
+    "models/ACTIVE": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+    "data/forward_log.csv": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb",
+    "data/executor_ledger.jsonl": "de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39",
+    "models/active_bundle.json": null
+  },
+  "evidence_class": "descriptive_and_diagnostic_preholdout_only; no causal claim; no deployment or holdout proof"
+}
