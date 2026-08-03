@@ -28,6 +28,18 @@ THRESHOLD_OPERATOR = ">="
 MAX_PASS_RATE_DEVIATION = 0.02
 MAX_THRESHOLD_EQUAL_RATE = 0.02
 MIN_DISTINCT_SCORES = 100
+ADDITIONAL_SLIPPAGE_ROUND_TRIP = 0.0005
+ACTUAL_COST_PRESSURE_TOTAL = 0.0015
+WALKFORWARD_BOUNDARIES = tuple(
+    pd.Timestamp(value)
+    for value in (
+        "2026-02-15T13:00:00Z",
+        "2026-03-01T17:15:00Z",
+        "2026-03-17T13:15:00Z",
+        "2026-04-01T17:45:00Z",
+        "2026-04-18T08:30:00Z",
+    )
+)
 
 
 class P2ProtocolError(ValueError):
@@ -54,13 +66,7 @@ def _as_utc(frame: pd.DataFrame, column: str) -> pd.Series:
     return values
 
 
-def prepare_three_way_split(frame: pd.DataFrame) -> ThreeWaySplit:
-    """Create the pre-registered split and purge all cross-boundary intervals.
-
-    Columns used: ``signal_time``, ``interval_start``, ``interval_end``, and
-    ``event_group_id``.  No outcome or feature value participates in choosing a
-    boundary or assigning a row.
-    """
+def _validated_frame(frame: pd.DataFrame) -> pd.DataFrame:
     data = frame.copy()
     for column in ("signal_time", "interval_start", "interval_end"):
         data[column] = _as_utc(data, column)
@@ -76,26 +82,20 @@ def prepare_three_way_split(frame: pd.DataFrame) -> ThreeWaySplit:
         raise P2ProtocolError("holdout signal reached P2")
     if (data["interval_end"] >= HOLDOUT_CUTOFF).any():
         raise P2ProtocolError("label interval reached holdout")
+    return data
 
-    train_mask = (
-        (data["signal_time"] < EARLY_STOP_START)
-        & (data["interval_end"] < EARLY_STOP_START)
-    )
-    early_mask = (
-        (data["signal_time"] >= EARLY_STOP_START)
-        & (data["signal_time"] < CALIBRATION_START)
-        & (data["interval_end"] < CALIBRATION_START)
-    )
-    calibration_mask = data["signal_time"] >= CALIBRATION_START
 
-    masks = (train_mask, early_mask, calibration_mask)
-    assigned = train_mask | early_mask | calibration_mask
-    # A row whose label interval crosses a boundary taints its complete
-    # connected component.  Without this propagation, a neighbour from the
-    # same event could survive on the other side even though the crossing row
-    # itself was removed.
+def _purged_parts(
+    data: pd.DataFrame,
+    masks: tuple[pd.Series, ...],
+    *,
+    eligible: pd.Series,
+) -> tuple[list[pd.DataFrame], pd.DataFrame]:
+    assigned = pd.Series(False, index=data.index)
+    for mask in masks:
+        assigned |= mask
     boundary_groups = set(
-        data.loc[~assigned, "event_group_id"].astype(str)
+        data.loc[eligible & ~assigned, "event_group_id"].astype(str)
     )
     if boundary_groups:
         boundary_group_mask = data["event_group_id"].astype(str).isin(boundary_groups)
@@ -103,36 +103,84 @@ def prepare_three_way_split(frame: pd.DataFrame) -> ThreeWaySplit:
         masks = tuple(mask & ~boundary_group_mask for mask in masks)
     parts = [data.loc[mask].copy() for mask in masks]
     group_sets = [set(part["event_group_id"].astype(str)) for part in parts]
-    shared = (group_sets[0] & group_sets[1]) | (group_sets[0] & group_sets[2]) | (
-        group_sets[1] & group_sets[2]
-    )
+    shared: set[str] = set()
+    for left in range(len(group_sets)):
+        for right in range(left + 1, len(group_sets)):
+            shared |= group_sets[left] & group_sets[right]
     if shared:
-        # Purge the complete connected component instead of choosing which side
-        # keeps it.  That preserves the dependency contract without using labels.
         shared_mask = data["event_group_id"].astype(str).isin(shared)
         assigned &= ~shared_mask
         parts = [data.loc[mask & ~shared_mask].copy() for mask in masks]
-
-    train, early, calibration = (
+    ordered = [
         part.sort_values(["signal_time", "event_group_id"]).reset_index(drop=True)
         for part in parts
-    )
-    purged = data.loc[~assigned].sort_values(
+    ]
+    final_sets = [set(part["event_group_id"].astype(str)) for part in ordered]
+    for left in range(len(final_sets)):
+        for right in range(left + 1, len(final_sets)):
+            if final_sets[left] & final_sets[right]:
+                raise P2ProtocolError("event group survived in multiple segments")
+    purged = data.loc[eligible & ~assigned].sort_values(
         ["signal_time", "event_group_id"]
     ).reset_index(drop=True)
-    final_group_sets = [
-        set(part["event_group_id"].astype(str))
-        for part in (train, early, calibration)
-    ]
-    if (
-        final_group_sets[0] & final_group_sets[1]
-        or final_group_sets[0] & final_group_sets[2]
-        or final_group_sets[1] & final_group_sets[2]
-    ):
-        raise P2ProtocolError("event group survived in multiple segments")
-    if any(part.empty for part in (train, early, calibration)):
+    return ordered, purged
+
+
+def prepare_split_at_boundaries(
+    frame: pd.DataFrame,
+    *,
+    early_stop_start: pd.Timestamp,
+    calibration_start: pd.Timestamp,
+    final_cutoff: pd.Timestamp,
+) -> ThreeWaySplit:
+    """Create train/early/cal segments at explicit outcome-independent times."""
+    data = _validated_frame(frame)
+    early_stop_start = pd.Timestamp(early_stop_start).tz_convert("UTC")
+    calibration_start = pd.Timestamp(calibration_start).tz_convert("UTC")
+    final_cutoff = pd.Timestamp(final_cutoff).tz_convert("UTC")
+    if not early_stop_start < calibration_start < final_cutoff <= HOLDOUT_CUTOFF:
+        raise P2ProtocolError("split boundaries must be increasing and pre-holdout")
+    eligible = data["signal_time"] < final_cutoff
+    train_mask = (
+        eligible
+        & (data["signal_time"] < early_stop_start)
+        & (data["interval_end"] < early_stop_start)
+    )
+    early_mask = (
+        eligible
+        & (data["signal_time"] >= early_stop_start)
+        & (data["signal_time"] < calibration_start)
+        & (data["interval_end"] < calibration_start)
+    )
+    calibration_mask = (
+        eligible
+        & (data["signal_time"] >= calibration_start)
+        & (data["interval_end"] < final_cutoff)
+    )
+    parts, purged = _purged_parts(
+        data,
+        (train_mask, early_mask, calibration_mask),
+        eligible=eligible,
+    )
+    train, early, calibration = parts
+    if any(part.empty for part in parts):
         raise P2ProtocolError("a pre-registered split segment is empty")
     return ThreeWaySplit(train, early, calibration, purged)
+
+
+def prepare_three_way_split(frame: pd.DataFrame) -> ThreeWaySplit:
+    """Create the pre-registered main split and purge boundary dependencies.
+
+    Columns used: ``signal_time``, ``interval_start``, ``interval_end``, and
+    ``event_group_id``.  No outcome or feature value participates in choosing a
+    boundary or assigning a row.
+    """
+    return prepare_split_at_boundaries(
+        frame,
+        early_stop_start=EARLY_STOP_START,
+        calibration_start=CALIBRATION_START,
+        final_cutoff=HOLDOUT_CUTOFF,
+    )
 
 
 def apply_runtime_gate(scores: np.ndarray, *, threshold: float) -> np.ndarray:

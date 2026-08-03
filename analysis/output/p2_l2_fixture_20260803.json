@@ -1,0 +1,87 @@
+{
+  "phase": "P2 fixture",
+  "generated_at": "2026-08-03T06:38:50.766704+00:00",
+  "prereg_sha256": "38e4c474323bc03f269168db6a030575ce94ffbd4e69652403d54539da7a72b6",
+  "checks": {
+    "separable_q90_selects_exact_10pct": true,
+    "separable_gate_health": true,
+    "fractional_tie_weight_is_equal": true,
+    "tied_runtime_gate_never_slices": true,
+    "tied_runtime_gate_fails_pass_health": true,
+    "economic_block_permutation_exact": true,
+    "economic_block_permutation_p_lt_001": true,
+    "protected_unchanged": true
+  },
+  "selector_fixture": {
+    "calibration_quantile": 0.9,
+    "threshold": 179.5,
+    "threshold_operator": ">=",
+    "tie_policy": "never_slice_equal_scores; whole equality block follows >=",
+    "n": 200,
+    "target_selected_n": 20,
+    "actual_selected_n": 20,
+    "actual_pass_rate": 0.1,
+    "threshold_equal_n": 0,
+    "threshold_equal_rate": 0.0,
+    "distinct_score_count": 200,
+    "boundary_separable": true,
+    "exact_top_decile_available_without_tie_slice": true,
+    "health_accepted": true
+  },
+  "tied_selector_fixture": {
+    "calibration_quantile": 0.9,
+    "threshold": 1.0,
+    "threshold_operator": ">=",
+    "tie_policy": "never_slice_equal_scores; whole equality block follows >=",
+    "n": 200,
+    "target_selected_n": 20,
+    "actual_selected_n": 40,
+    "actual_pass_rate": 0.2,
+    "threshold_equal_n": 40,
+    "threshold_equal_rate": 0.2,
+    "distinct_score_count": 2,
+    "boundary_separable": false,
+    "exact_top_decile_available_without_tie_slice": false,
+    "health_accepted": false
+  },
+  "permutation_fixture": {
+    "status": "ok",
+    "n_pairs": 8,
+    "n_blocks": 8,
+    "blocks": [
+      "2026-W01",
+      "2026-W02",
+      "2026-W03",
+      "2026-W04",
+      "2026-W05",
+      "2026-W06",
+      "2026-W07",
+      "2026-W08"
+    ],
+    "observed_lift": 0.01,
+    "permutations": 256,
+    "hits_ge_observed": 1,
+    "p_value": 0.00390625
+  },
+  "protected_before": {
+    "models/ACTIVE": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+    "data/forward_log.csv": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb",
+    "data/executor_ledger.jsonl": "de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39",
+    "models/active_bundle.json": null
+  },
+  "protected_after": {
+    "models/ACTIVE": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+    "data/forward_log.csv": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb",
+    "data/executor_ledger.jsonl": "de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39",
+    "models/active_bundle.json": null
+  },
+  "accepted": true,
+  "safety": {
+    "real_dataset_read": false,
+    "trained": false,
+    "holdout_read": false,
+    "active_modified": false,
+    "deployed": false,
+    "ordered": false
+  }
+}
