@@ -1,0 +1,14 @@
+Command:
+PYTHONPATH=. python3 -m pytest -q tests/test_executor_side_guard.py tests/test_forward_runtime_policy.py tests/test_forward_tracking.py tests/test_tip_realtime_path.py tests/test_tip_edge_filter.py tests/test_exit_parity.py tests/test_short_side.py tests/test_frozen_model.py tests/test_funding_costs.py
+
+Result:
+.............................................................            [100%]
+61 passed, 13 warnings in 9.10s
+
+Warnings:
+- 13 third-party matplotlib/pyparsing deprecation warnings.
+- No test failures.
+
+Interpretation:
+This is the pre-repair P0.0 baseline at HEAD 4333fa7. Passing legacy-contract
+tests does not establish that the P0 safety matrix passes.
