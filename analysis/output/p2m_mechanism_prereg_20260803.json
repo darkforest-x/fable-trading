@@ -1,0 +1,76 @@
+{
+  "preregistration_version": "p2m_readonly_mechanism_audit_v1",
+  "status": "accepted",
+  "accepted_at": "2026-08-03T00:00:00+08:00",
+  "owner_authorization": "执行 P2-M 只读机制审计，只使用 P1 immutable dataset，不训练、不读 holdout、不修改 ACTIVE、不部署、不下单，完成后停止。",
+  "question": "Are the stable P2-R feature/return associations mainly mechanical consequences of ATR-scaled barriers and volatility, or do they retain outcome association after scale controls?",
+  "scope": {
+    "dataset_path": "data/p1/p1_short_l2_preholdout_aade2a334448d644.csv",
+    "dataset_sha256": "aade2a334448d6443e71fb0d3dbbfcf450390875ce60e1f800f6dbe9c855e93a",
+    "dataset_manifest_path": "data/p1/p1_short_l2_preholdout_aade2a334448d644.manifest.json",
+    "dataset_manifest_sha256": "53b8a07612dae667a184da38bf8e0a694aaae15a5fd240d5b13238da3e13d682",
+    "p2r_audit_path": "analysis/output/p2r_root_cause_audit_20260803.json",
+    "p2r_audit_sha256": "dec35ff2bf3a7600d13edd9f614892a3b5bed5e5d8a402d73242a7aca4d94def",
+    "p2r_feature_ic_path": "analysis/output/p2r_feature_ic_20260803.csv",
+    "p2r_feature_ic_sha256": "3cb8346329dc60d5ec3418720f3f0a703164e7374106599f41705b11920d3f2d",
+    "holdout_cutoff": "2026-05-04T00:00:00Z",
+    "allowed_data_source": "the exact P1 immutable CSV above",
+    "prior_artifacts_role": "frozen metadata only: reuse P2-R folds and the preregistered stable-feature set; no new market or outcome data",
+    "allowed_writes": [
+      "analysis/output/p2m_*",
+      "analysis/p2m_*",
+      "analysis/html/p2m_*",
+      "scripts/audit_p2m_*",
+      "tests/test_p2m_*",
+      "docs/learnings/*",
+      "HANDOFF.md"
+    ]
+  },
+  "forbidden": {
+    "training_or_fitting": true,
+    "threshold_tuning": true,
+    "model_or_feature_selection": true,
+    "holdout_read": true,
+    "active_or_active_bundle_write": true,
+    "deployment": true,
+    "trading_client_access": true,
+    "orders": true
+  },
+  "fixed_population": {
+    "folds": "the same five dependency-purged P2 test folds reconstructed without model code",
+    "features": "all immutable judgment_28_v1 columns",
+    "primary_feature_subset": "the 20 P2-R features already frozen as stable_by_preregistered_rule=true; P2-M does not add or remove features based on new outcomes"
+  },
+  "fixed_derived_targets": {
+    "net_taker": "net_ret_swap_taker",
+    "tp_label": "label_tp_before_sl",
+    "atr_return_scale": "atr_at_signal / entry_price_research",
+    "atr_normalized_gross": "gross_ret / atr_return_scale",
+    "why_gross_is_normalized": "fixed taker fees are not proportional to ATR; gross return isolates the barrier/outcome scale before constant fees"
+  },
+  "fixed_diagnostics": {
+    "association": "Spearman rho within each frozen test fold",
+    "within_atr_association": "within each fold, form outcome-blind atr_pct quintiles with duplicate-safe qcut; compute feature/net_taker Spearman per valid bucket and take the row-count-weighted mean",
+    "barrier_scale_check": "median atr_normalized_gross for tp must be within 0.25 of +5 ATR and for sl plus sl_ambiguous within 0.25 of -2 ATR",
+    "stable_association_rule": "finite rho with the same non-zero sign in at least 4/5 folds and absolute median rho >= 0.03",
+    "mechanical_scale_dominant_feature": "for a frozen P2-R-stable feature, abs median rho for tp_label, atr_normalized_gross, and within-ATR net_taker are each <= 50% of abs median net_taker rho",
+    "scale_robust_feature": "tp_label, atr_normalized_gross, and within-ATR net_taker each meet stable_association_rule",
+    "mixed_feature": "a frozen P2-R-stable feature that meets neither fixed classification",
+    "global_mechanical_dominance": "barrier_scale_check passes and at least 75% of frozen P2-R-stable features are mechanical_scale_dominant_feature",
+    "global_scale_robust_signal": "at least one frozen P2-R-stable feature is scale_robust_feature",
+    "missingness_rule": "report every missing, non-finite, non-positive atr_return_scale, invalid quintile, or non-finite derived target; do not impute"
+  },
+  "decision_rules": {
+    "if_global_mechanical_dominance_only": "stop the current return target/objective route; do not train",
+    "if_global_scale_robust_signal": "record that an exploratory single-variable mechanism exists, but do not choose a feature or train; same-P1 follow-up cannot be confirmatory",
+    "if_mixed": "report uncertainty and stop; do not resolve by threshold or model search",
+    "always": "P2 remains rejected; P2-M cannot authorize holdout, ACTIVE, deployment, or orders"
+  },
+  "protected_baseline": {
+    "models/ACTIVE": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+    "data/forward_log.csv": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb",
+    "data/executor_ledger.jsonl": "de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39",
+    "models/active_bundle.json": null
+  },
+  "evidence_class": "exploratory_descriptive_mechanism_audit_on_already_inspected_preholdout_data; no causal or confirmatory claim"
+}
