@@ -1,0 +1,103 @@
+{
+  "rungs": [
+    {
+      "rung": "S0",
+      "isolates": "— 我 07-30 的配置",
+      "n_folds": 15,
+      "lift_bp": 22.56,
+      "top_abs_bp": 30.76,
+      "median_best_iteration": 250,
+      "mean_selected": 613
+    },
+    {
+      "rung": "S0b",
+      "isolates": "alpha 因子(19 个)",
+      "n_folds": 15,
+      "lift_bp": 13.16,
+      "top_abs_bp": 13.68,
+      "median_best_iteration": 250,
+      "mean_selected": 613
+    },
+    {
+      "rung": "S1",
+      "isolates": "数据 + 特征语义",
+      "n_folds": 15,
+      "lift_bp": 20.83,
+      "top_abs_bp": 19.48,
+      "median_best_iteration": 250,
+      "mean_selected": 604
+    },
+    {
+      "rung": "S2",
+      "isolates": "切分方案",
+      "n_folds": 5,
+      "lift_bp": 8.85,
+      "top_abs_bp": -2.45,
+      "median_best_iteration": 250,
+      "mean_selected": 302
+    },
+    {
+      "rung": "S3",
+      "isolates": "成本口径 +5bp",
+      "n_folds": 5,
+      "lift_bp": 8.85,
+      "top_abs_bp": -7.45,
+      "median_best_iteration": 250,
+      "mean_selected": 302
+    },
+    {
+      "rung": "S4",
+      "isolates": "模型配置 + 早停",
+      "n_folds": 5,
+      "lift_bp": 0.71,
+      "top_abs_bp": -13.48,
+      "median_best_iteration": 2,
+      "mean_selected": 1677
+    }
+  ],
+  "deltas": [
+    {
+      "from": "S0",
+      "to": "S0b",
+      "isolates": "alpha 因子(19 个)",
+      "delta_top_abs_bp": -17.08
+    },
+    {
+      "from": "S0b",
+      "to": "S1",
+      "isolates": "数据 + 特征语义",
+      "delta_top_abs_bp": 5.8
+    },
+    {
+      "from": "S1",
+      "to": "S2",
+      "isolates": "切分方案",
+      "delta_top_abs_bp": -21.93
+    },
+    {
+      "from": "S2",
+      "to": "S3",
+      "isolates": "成本口径 +5bp",
+      "delta_top_abs_bp": -5.0
+    },
+    {
+      "from": "S3",
+      "to": "S4",
+      "isolates": "模型配置 + 早停",
+      "delta_top_abs_bp": -6.03
+    }
+  ],
+  "total_bp": -44.24,
+  "covered_bp": -44.24,
+  "residual_bp": -0.0,
+  "p2_reported_bp": -15.91,
+  "biggest": {
+    "from": "S1",
+    "to": "S2",
+    "isolates": "切分方案",
+    "delta_top_abs_bp": -21.93
+  },
+  "sign_flips": [
+    "切分方案"
+  ]
+}

@@ -43,7 +43,7 @@ bash scripts/sync_v14_to_windows.sh
 
 ```bash
 HOST="${FABLE_3060_HOST:-zzc@192.168.1.3}"
-ssh "$HOST" "New-Item -ItemType Directory -Force -Path C:\fable\logs | Out-Null; \$cmd='cmd.exe /c cd /d C:\fable && C:\fable\.venv\Scripts\python.exe -u C:\fable\train_dense.py --name owner_v14_pad200 --model C:/fable/models/owner_v12_htip.pt --dataset C:/fable/datasets/dense_owner_v14_pad200 --epochs 40 --patience 10 --batch 16 --cache false --workers 4 > C:\fable\logs\owner_v14_pad200.log 2>&1'; Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine=\$cmd} | Out-Null; Write-Output started"
+ssh "$HOST" "New-Item -ItemType Directory -Force -Path C:\fable\logs | Out-Null; \$cmd='cmd.exe /c cd /d C:\fable && C:\fable\.venv\Scripts\python.exe -u C:\fable\train_dense.py --name owner_v14_pad200 --model C:/fable/models/owner_v12_htip.pt --dataset C:/yoyo/datasets/dense_owner_v14_pad200 --epochs 40 --patience 10 --batch 16 --cache false --workers 4 > C:\fable\logs\owner_v14_pad200.log 2>&1'; Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine=\$cmd} | Out-Null; Write-Output started"
 ```
 
 看进度：

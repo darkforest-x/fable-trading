@@ -11,7 +11,7 @@
 | 项目 | 状态 |
 |---|---|
 | 数据集 | `datasets/eth_3m_short_pilot_v1` |
-| 远端数据 | `C:/fable/datasets/eth_3m_short_pilot_v1` |
+| 远端数据 | `C:/yoyo/datasets/eth_3m_short_pilot_v1` |
 | 训练名 | `eth3m_short_pilot_v1_mac_cold` |
 | Mac 训练进程 | PID 70152 已正常结束，MPS / Apple M4 |
 | 3060 队列 | PID 96316 已精确取消；v10 扫描 PID 93656 保留 |

@@ -21,7 +21,7 @@ src/ 里 80 个模块(74%)在四条链之外
 ## 结构
 
 ```
-fable/
+yoyo/
   contracts/       跨层契约。层与层只经这里对话
     protocol.py      StrategyProtocol + bundle 校验(谁在跑)
     outcomes.py      canonical barrier / return(结果怎么算)
@@ -58,5 +58,5 @@ archive/           支线包与一次性诊断脚本
 | l3_backtest | 未开始 |
 | l4_execution | 未开始 |
 
-迁移期间 `src/` 下的模块改为**转发到 `fable/`** 的薄壳,所以现有 scripts 与 499 个测试
+迁移期间 `src/` 下的模块改为**转发到 `yoyo/`** 的薄壳,所以现有 scripts 与 499 个测试
 不需要同步改动;等调用方全部切过去再删壳。

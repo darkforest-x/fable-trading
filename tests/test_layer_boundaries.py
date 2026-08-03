@@ -20,10 +20,10 @@ from pathlib import Path
 
 import pytest
 
-FABLE = Path(__file__).resolve().parents[1] / "fable"
-LAYERS = FABLE / "layers"
-# What a layer is allowed to reach for. Anything else in fable.* is a violation.
-ALLOWED_PREFIXES = ("fable.contracts", "fable.data")
+YOYO = Path(__file__).resolve().parents[1] / "yoyo"
+LAYERS = YOYO / "layers"
+# What a layer is allowed to reach for. Anything else in yoyo.* is a violation.
+ALLOWED_PREFIXES = ("yoyo.contracts", "yoyo.data")
 
 
 def _layer_modules() -> list[tuple[str, Path]]:
@@ -36,7 +36,7 @@ def _layer_modules() -> list[tuple[str, Path]]:
     return out
 
 
-def _fable_imports(path: Path) -> list[str]:
+def _yoyo_imports(path: Path) -> list[str]:
     try:
         tree = ast.parse(path.read_text(encoding="utf-8"))
     except (OSError, SyntaxError):  # pragma: no cover - a broken file fails elsewhere
@@ -44,10 +44,10 @@ def _fable_imports(path: Path) -> list[str]:
     found: list[str] = []
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom) and node.module:
-            if node.module.startswith("fable."):
+            if node.module.startswith("yoyo."):
                 found.append(node.module)
         elif isinstance(node, ast.Import):
-            found += [a.name for a in node.names if a.name.startswith("fable.")]
+            found += [a.name for a in node.names if a.name.startswith("yoyo.")]
     return found
 
 
@@ -60,27 +60,27 @@ def test_a_layer_does_not_import_another_layer(layer: str, path: Path) -> None:
     if layer == "<none yet>":
         pytest.skip("no layer modules migrated yet")
     offenders = []
-    for module in _fable_imports(path):
-        if module.startswith(f"fable.layers.{layer}"):
+    for module in _yoyo_imports(path):
+        if module.startswith(f"yoyo.layers.{layer}"):
             continue  # its own layer is fine
         if module.startswith(ALLOWED_PREFIXES):
             continue
-        if module.startswith("fable.layers."):
+        if module.startswith("yoyo.layers."):
             offenders.append(module)
     assert not offenders, (
-        f"{path.relative_to(FABLE.parent)} reaches into another layer: {offenders}. "
-        "Route it through fable.contracts instead -- that is the whole point of the split."
+        f"{path.relative_to(YOYO.parent)} reaches into another layer: {offenders}. "
+        "Route it through yoyo.contracts instead -- that is the whole point of the split."
     )
 
 
 def test_contracts_depend_on_no_layer() -> None:
     """A contract that imports a layer is not a contract, it is a back door."""
-    contracts = FABLE / "contracts"
+    contracts = YOYO / "contracts"
     if not contracts.exists():
         pytest.skip("contracts not created yet")
     offenders = {
-        str(p.relative_to(FABLE.parent)): [
-            m for m in _fable_imports(p) if m.startswith("fable.layers")
+        str(p.relative_to(YOYO.parent)): [
+            m for m in _yoyo_imports(p) if m.startswith("yoyo.layers")
         ]
         for p in contracts.rglob("*.py")
     }
@@ -95,5 +95,5 @@ def test_the_rule_is_actually_testable(tmp_path: Path) -> None:
     nothing at all.
     """
     bad = tmp_path / "bad.py"
-    bad.write_text("from fable.layers.l4_execution import executor\n", encoding="utf-8")
-    assert _fable_imports(bad) == ["fable.layers.l4_execution"]
+    bad.write_text("from yoyo.layers.l4_execution import executor\n", encoding="utf-8")
+    assert _yoyo_imports(bad) == ["yoyo.layers.l4_execution"]

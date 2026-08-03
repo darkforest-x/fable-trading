@@ -40,9 +40,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
-from fable.contracts.outcomes import GAP_POLICIES, RETURN_CONVENTIONS
+from yoyo.contracts.outcomes import GAP_POLICIES, RETURN_CONVENTIONS
 
-PROJECT_DIR = Path(__file__).resolve().parents[2]  # fable/contracts/x.py -> repo root
+PROJECT_DIR = Path(__file__).resolve().parents[2]  # yoyo/contracts/x.py -> repo root
 ACTIVE_BUNDLE = PROJECT_DIR / "models" / "active_bundle.json"
 
 SIDES = ("long", "short")

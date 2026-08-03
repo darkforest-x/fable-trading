@@ -235,7 +235,7 @@ pre{{margin:0;padding:12px 14px;overflow:auto;background:#0f1612;color:#d7ebe0;b
 .tag.warn{{color:var(--warn);border-color:rgba(167,111,24,.3);background:#fff8eb}}.foot{{margin-top:22px;color:var(--muted);font-size:12.5px}}ul{{margin:6px 0 0 1.1rem}}
 </style></head><body>
 <div class="wrap">
-<div class="eyebrow">FABLE · 判断层冻结报告 JUDGMENT FREEZE</div>
+<div class="eyebrow">YOYO · 判断层冻结报告 JUDGMENT FREEZE</div>
 <h1>L2 v10 池回归冻结 · 回测分析</h1>
 <p class="lede">
   L1 检测 = <code>owner_short_star_v10</code>；L2 判断 = v10 池 LightGBM <strong>回归 regression</strong>（预测实现收益）。
