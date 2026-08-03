@@ -71,8 +71,13 @@ def _bundle_dict(tmp_path: Path, **overrides) -> dict:
         "sl_atr_mult": 2.0,
         "horizon_bars": 72,
         "same_bar_policy": "conservative_sl",
-        "return_convention": "legacy_linear_short_from_wide_pool",
+        "gap_policy": "barrier_price",
+        "return_convention": "linear_short",
         "cost_route": "swap_taker_in_target",
+        "target_ret_column": "net_barrier_taker",
+        "target_semantics": "net_taker",
+        "target_cost_included": True,
+        "reporting_route": "taker",
         "detector_path": "models/det.pt",
         "detector_sha256": file_sha256(f["detector"]),
         "model_path": "models/m.txt",
@@ -121,7 +126,8 @@ def test_hash_is_checked_against_content_not_just_presence(tmp_path: Path) -> No
 # ── C-05 ──────────────────────────────────────────────────────────────────────
 @pytest.mark.parametrize(
     "field", ["side", "return_convention", "cost_route", "research_entry_mode",
-              "live_entry_mode", "feature_semantics", "threshold_operator"]
+              "live_entry_mode", "feature_semantics", "threshold_operator",
+              "target_ret_column", "target_semantics", "reporting_route"]
 )
 def test_missing_required_field_fails(tmp_path: Path, field: str) -> None:
     d = _bundle_dict(tmp_path)
@@ -147,7 +153,9 @@ def test_every_declared_required_field_is_actually_enforced(tmp_path: Path) -> N
     ("field", "bad"),
     [("side", "sideways"), ("feature_semantics", "aligned_v2"),
      ("threshold_operator", "=="), ("same_bar_policy", "favourable"),
-     ("candidate_source", "handmade")],
+     ("candidate_source", "handmade"), ("gap_policy", "open_price"),
+     ("return_convention", "guess"), ("target_semantics", "net"),
+     ("reporting_route", "best_available")],
 )
 def test_unknown_enum_value_fails(tmp_path: Path, field: str, bad: str) -> None:
     with pytest.raises(BundleError, match="not in"):
@@ -262,6 +270,19 @@ def test_aligned_bundle_may_be_execution_eligible(tmp_path: Path) -> None:
         project_dir=tmp_path,
     )
     assert p.execution_eligible is True
+
+
+def test_target_cost_flag_must_match_target_semantics(tmp_path: Path) -> None:
+    with pytest.raises(BundleError, match="contradicts target_semantics"):
+        load_bundle(
+            _write(tmp_path, target_semantics="net_taker", target_cost_included=False),
+            project_dir=tmp_path,
+        )
+
+
+def test_side_and_return_convention_must_agree(tmp_path: Path) -> None:
+    with pytest.raises(BundleError, match="short side requires"):
+        load_bundle(_write(tmp_path, return_convention="linear_long"), project_dir=tmp_path)
 
 
 @pytest.mark.parametrize("value", ["true", 1, "yes"])

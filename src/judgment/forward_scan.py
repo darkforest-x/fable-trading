@@ -43,6 +43,8 @@ from src.judgment.features import (
     extract_feature_rows_for_semantics,
 )
 from src.judgment.forward_records import forward_key, open_keys
+from src.judgment.outcomes import OutcomeContractError, resolve_barrier_outcome
+from src.judgment.protocol import StrategyProtocol
 from src.judgment.forward_types import (
     BAR,
     CANDIDATE_SOURCE,
@@ -123,9 +125,14 @@ def scan_forward_records(
                 "artifact feature semantics does not match verified protocol: "
                 f"{artifact_semantics!r} != {protocol.feature_semantics!r}"
             )
-    resolve = exit_resolver or (
-        resolve_forward_exit_short if trade_side == "short" else resolve_forward_exit
-    )
+    if exit_resolver is not None:
+        resolve = exit_resolver
+    elif protocol is not None:
+        resolve = lambda frame, index: resolve_forward_exit_for_protocol(  # noqa: E731
+            frame, index, protocol
+        )
+    else:
+        resolve = resolve_forward_exit_short if trade_side == "short" else resolve_forward_exit
     if yolo_mode is None:
         yolo_mode = resolve_yolo_mode("live")
     tip_conf = resolve_tip_conf()
@@ -476,50 +483,17 @@ def _declared_artifact_side(artifact: object) -> str | None:
 
 def resolve_forward_exit(enriched: pd.DataFrame, signal_i: int) -> ForwardExit | None:
     """Long TP5/SL2 partial-horizon resolver (upper=TP, lower=SL)."""
-    entry_i = signal_i + 1
-    atr = float(enriched["atr14"].iloc[signal_i])
-    atr_pct = float(enriched["atr_pct"].iloc[signal_i])
-    if not np.isfinite(atr) or atr <= 0:
-        return None
-    if not np.isfinite(atr_pct) or atr_pct < ATR_PCT_MIN:
-        return None
-    if entry_i >= len(enriched):
-        # Tip signal (2026-07-20 real-time path): the signal bar IS the newest
-        # closed bar, so the entry bar has not printed yet. Record it as open
-        # with pending entry fields (backfilled next pulse) instead of dropping
-        # it -- dropping cost 15-22 min of edge on every live signal.
-        return ForwardExit("open", "", -1, 0, "", float("nan"))
-    entry = float(enriched["open"].iloc[entry_i])
-    if not np.isfinite(entry) or entry <= 0:
-        return None
-    last_i = entry_i + HORIZON_BARS - 1
-    available_last_i = min(last_i, len(enriched) - 1)
-    highs = enriched["high"].to_numpy()[entry_i : available_last_i + 1]
-    lows = enriched["low"].to_numpy()[entry_i : available_last_i + 1]
-    upper = entry + TP_MULT * atr
-    lower = entry - SL_MULT * atr
-    hit_up = highs >= upper
-    hit_dn = lows <= lower
-    up_first = int(np.argmax(hit_up)) if hit_up.any() else len(highs)
-    dn_first = int(np.argmax(hit_dn)) if hit_dn.any() else len(highs)
-    entry_time = pd.Timestamp(enriched["open_time"].iloc[entry_i])
-    if up_first < dn_first:
-        exit_offset = up_first + 1
-        return ForwardExit("closed", "tp", 1, exit_offset, _exit_time(entry_time, exit_offset), upper / entry - 1)
-    if dn_first < up_first:
-        exit_offset = dn_first + 1
-        return ForwardExit("closed", "sl", 0, exit_offset, _exit_time(entry_time, exit_offset), lower / entry - 1)
-    if up_first == dn_first < len(highs):
-        exit_offset = dn_first + 1
-        return ForwardExit(
-            "closed", "sl_ambiguous", 0, exit_offset, _exit_time(entry_time, exit_offset), lower / entry - 1
-        )
-    if available_last_i >= last_i:
-        realized_ret = float(enriched["close"].iloc[last_i]) / entry - 1
-        return ForwardExit(
-            "closed", "timeout", 0, HORIZON_BARS, _exit_time(entry_time, HORIZON_BARS), realized_ret
-        )
-    return ForwardExit("open", "", -1, 0, "", float("nan"))
+    return _resolve_fixed_forward(
+        enriched,
+        signal_i,
+        side="long",
+        tp_mult=TP_MULT,
+        sl_mult=SL_MULT,
+        horizon=HORIZON_BARS,
+        same_bar_policy="conservative_sl",
+        gap_policy="barrier_price",
+        return_convention="linear_long",
+    )
 
 
 def resolve_forward_exit_short(enriched: pd.DataFrame, signal_i: int) -> ForwardExit | None:
@@ -531,9 +505,56 @@ def resolve_forward_exit_short(enriched: pd.DataFrame, signal_i: int) -> Forward
     net_barrier_* builders on the v10 wide/short pools; positive when price falls).
     Intra-bar both-touch → SL (conservative), same as long path.
     """
+    return _resolve_fixed_forward(
+        enriched,
+        signal_i,
+        side="short",
+        tp_mult=TP_MULT,
+        sl_mult=SL_MULT,
+        horizon=HORIZON_BARS,
+        same_bar_policy="conservative_sl",
+        gap_policy="barrier_price",
+        return_convention="linear_short",
+    )
+
+
+def resolve_forward_exit_for_protocol(
+    enriched: pd.DataFrame,
+    signal_i: int,
+    protocol: StrategyProtocol,
+) -> ForwardExit | None:
+    """Production adapter: every economic input comes from the verified bundle."""
+    return _resolve_fixed_forward(
+        enriched,
+        signal_i,
+        side=protocol.side,
+        tp_mult=protocol.tp_atr_mult,
+        sl_mult=protocol.sl_atr_mult,
+        horizon=protocol.horizon_bars,
+        same_bar_policy=protocol.same_bar_policy,
+        gap_policy=protocol.gap_policy,
+        return_convention=protocol.return_convention,
+    )
+
+
+def _resolve_fixed_forward(
+    enriched: pd.DataFrame,
+    signal_i: int,
+    *,
+    side: str,
+    tp_mult: float,
+    sl_mult: float,
+    horizon: int,
+    same_bar_policy: str,
+    gap_policy: str,
+    return_convention: str,
+) -> ForwardExit | None:
     entry_i = signal_i + 1
-    atr = float(enriched["atr14"].iloc[signal_i])
-    atr_pct = float(enriched["atr_pct"].iloc[signal_i])
+    try:
+        atr = float(enriched["atr14"].iloc[signal_i])
+        atr_pct = float(enriched["atr_pct"].iloc[signal_i])
+    except (IndexError, TypeError, ValueError):
+        return None
     if not np.isfinite(atr) or atr <= 0:
         return None
     if not np.isfinite(atr_pct) or atr_pct < ATR_PCT_MIN:
@@ -541,53 +562,34 @@ def resolve_forward_exit_short(enriched: pd.DataFrame, signal_i: int) -> Forward
     if entry_i >= len(enriched):
         return ForwardExit("open", "", -1, 0, "", float("nan"))
     entry = float(enriched["open"].iloc[entry_i])
-    if not np.isfinite(entry) or entry <= 0:
+    try:
+        resolved = resolve_barrier_outcome(
+            enriched,
+            side=side,
+            entry_i=entry_i,
+            entry_price=entry,
+            atr=atr,
+            tp_atr_mult=tp_mult,
+            sl_atr_mult=sl_mult,
+            horizon_bars=horizon,
+            same_bar_policy=same_bar_policy,
+            gap_policy=gap_policy,
+            return_convention=return_convention,
+            allow_partial=True,
+        )
+    except OutcomeContractError:
         return None
-    last_i = entry_i + HORIZON_BARS - 1
-    available_last_i = min(last_i, len(enriched) - 1)
-    highs = enriched["high"].to_numpy()[entry_i : available_last_i + 1]
-    lows = enriched["low"].to_numpy()[entry_i : available_last_i + 1]
-    # short: TP below, SL above
-    tp = entry - TP_MULT * atr
-    sl = entry + SL_MULT * atr
-    if tp <= 0:
-        return None
-    hit_tp = lows <= tp
-    hit_sl = highs >= sl
-    tp_first = int(np.argmax(hit_tp)) if hit_tp.any() else len(highs)
-    sl_first = int(np.argmax(hit_sl)) if hit_sl.any() else len(highs)
-    entry_time = pd.Timestamp(enriched["open_time"].iloc[entry_i])
-    if tp_first < sl_first:
-        exit_offset = tp_first + 1
-        return ForwardExit(
-            "closed", "tp", 1, exit_offset, _exit_time(entry_time, exit_offset), 1.0 - tp / entry
-        )
-    if sl_first < tp_first:
-        exit_offset = sl_first + 1
-        return ForwardExit(
-            "closed", "sl", 0, exit_offset, _exit_time(entry_time, exit_offset), 1.0 - sl / entry
-        )
-    if tp_first == sl_first < len(highs):
-        exit_offset = sl_first + 1
-        return ForwardExit(
-            "closed",
-            "sl_ambiguous",
-            0,
-            exit_offset,
-            _exit_time(entry_time, exit_offset),
-            1.0 - sl / entry,
-        )
-    if available_last_i >= last_i:
-        exit_px = float(enriched["close"].iloc[last_i])
-        return ForwardExit(
-            "closed",
-            "timeout",
-            0,
-            HORIZON_BARS,
-            _exit_time(entry_time, HORIZON_BARS),
-            1.0 - exit_px / entry,
-        )
-    return ForwardExit("open", "", -1, 0, "", float("nan"))
+    if resolved.status == "open":
+        return ForwardExit("open", "", -1, 0, "", float("nan"))
+    assert resolved.label is not None and resolved.gross_ret is not None
+    return ForwardExit(
+        "closed",
+        resolved.outcome,
+        resolved.label,
+        resolved.exit_offset,
+        str(resolved.exit_time or ""),
+        resolved.gross_ret,
+    )
 
 
 def resolve_forward_exit_scaled(

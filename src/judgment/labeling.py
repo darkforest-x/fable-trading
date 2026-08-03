@@ -26,6 +26,8 @@ from typing import Literal
 import numpy as np
 import pandas as pd
 
+from src.judgment.outcomes import OutcomeContractError, resolve_barrier_outcome
+
 # v2 barriers (owner decision 2026-07-07): wider barriers so the median gross
 # TP (~4 x atr_pct ~= 1.1%) clears the 0.2% round-trip cost by >5x. The v1
 # barriers (TP 2xATR / SL 1xATR) produced labels dominated by micro noise
@@ -48,7 +50,7 @@ class BarrierOutcome:
     outcome: str        # "tp" | "sl" | "timeout" | "sl_ambiguous"
     exit_offset: int    # bars after entry bar when exit happened (1-based)
     entry_price: float
-    realized_ret: float  # exit_price / entry_price - 1
+    realized_ret: float  # gross return under the explicit side convention
 
 
 def _resolve_entry_price(
@@ -91,36 +93,17 @@ def label_candidate(
     `entry="signal_close"`: fill at close of bar i; barrier path still starts
     at bar i+1 (nothing left to trade after the close print).
     """
-    path_i = signal_i + 1
-    last_i = path_i + horizon - 1
-    if last_i >= len(frame):
-        return None
-    atr = float(frame["atr14"].iloc[signal_i])
-    fill = _resolve_entry_price(frame, signal_i, entry)
-    if not np.isfinite(atr) or atr <= 0 or fill is None:
-        return None
-    atr_pct = float(frame["atr_pct"].iloc[signal_i])
-    if atr_pct_min > 0 and (not np.isfinite(atr_pct) or atr_pct < atr_pct_min):
-        return None
-    upper = fill + tp_mult * atr
-    lower = fill - sl_mult * atr
-
-    highs = frame["high"].to_numpy()[path_i : last_i + 1]
-    lows = frame["low"].to_numpy()[path_i : last_i + 1]
-    hit_up = highs >= upper
-    hit_dn = lows <= lower
-    up_first = int(np.argmax(hit_up)) if hit_up.any() else horizon
-    dn_first = int(np.argmax(hit_dn)) if hit_dn.any() else horizon
-
-    if up_first < dn_first:
-        return BarrierOutcome(1, "tp", up_first + 1, fill, upper / fill - 1)
-    if dn_first < up_first:
-        return BarrierOutcome(0, "sl", dn_first + 1, fill, lower / fill - 1)
-    if up_first == dn_first < horizon:
-        # both barriers inside the same bar: order unknown, assume worst case
-        return BarrierOutcome(0, "sl_ambiguous", dn_first + 1, fill, lower / fill - 1)
-    timeout_close = float(frame["close"].iloc[last_i])
-    return BarrierOutcome(0, "timeout", horizon, fill, timeout_close / fill - 1)
+    return _label_fixed_barrier(
+        frame,
+        signal_i,
+        side="long",
+        tp_mult=tp_mult,
+        sl_mult=sl_mult,
+        atr_pct_min=atr_pct_min,
+        horizon=horizon,
+        entry=entry,
+        return_convention="linear_long",
+    )
 
 
 def label_candidate_trailing(
@@ -220,28 +203,76 @@ def label_short_candidate(
     horizon: int = HORIZON_BARS,
     entry: EntryMode = "next_open",
 ) -> BarrierOutcome | None:
-    ctx = _entry_context(frame, signal_i, horizon, atr_pct_min, entry=entry)
-    if ctx is None:
-        return None
-    fill, atr, highs, lows, _, timeout_close = ctx
-    lower = fill - tp_mult * atr
-    upper = fill + sl_mult * atr
-    if lower <= 0:
-        return None
-    hit_dn = lows <= lower
-    hit_up = highs >= upper
-    dn_first = int(np.argmax(hit_dn)) if hit_dn.any() else horizon
-    up_first = int(np.argmax(hit_up)) if hit_up.any() else horizon
+    return _label_fixed_barrier(
+        frame,
+        signal_i,
+        side="short",
+        tp_mult=tp_mult,
+        sl_mult=sl_mult,
+        atr_pct_min=atr_pct_min,
+        horizon=horizon,
+        entry=entry,
+        return_convention="linear_short",
+    )
 
-    # Canonical short PnL (2026-07-31): 1 - exit/entry — matches dump/v10 wide
-    # net_barrier_* and resolve_forward_exit_short. (Was entry/exit - 1.)
-    if dn_first < up_first:
-        return BarrierOutcome(1, "tp", dn_first + 1, fill, 1.0 - lower / fill)
-    if up_first < dn_first:
-        return BarrierOutcome(0, "sl", up_first + 1, fill, 1.0 - upper / fill)
-    if dn_first == up_first < horizon:
-        return BarrierOutcome(0, "sl_ambiguous", up_first + 1, fill, 1.0 - upper / fill)
-    return BarrierOutcome(0, "timeout", horizon, fill, 1.0 - timeout_close / fill)
+
+def _label_fixed_barrier(
+    frame: pd.DataFrame,
+    signal_i: int,
+    *,
+    side: str,
+    tp_mult: float,
+    sl_mult: float,
+    atr_pct_min: float,
+    horizon: int,
+    entry: EntryMode,
+    return_convention: str,
+) -> BarrierOutcome | None:
+    """Full-horizon adapter over the canonical resolver.
+
+    Reads signal-bar ``atr14``/``atr_pct``, the declared entry price, and exactly
+    ``horizon`` OHLC rows starting at ``signal_i + 1``. Dataset labeling refuses
+    partial horizons; forward uses the same resolver with partials enabled.
+    """
+    path_i = signal_i + 1
+    if path_i + int(horizon) > len(frame):
+        return None
+    try:
+        atr = float(frame["atr14"].iloc[signal_i])
+        atr_pct = float(frame["atr_pct"].iloc[signal_i])
+    except (IndexError, TypeError, ValueError):
+        return None
+    fill = _resolve_entry_price(frame, signal_i, entry)
+    if fill is None or not np.isfinite(atr) or atr <= 0:
+        return None
+    if atr_pct_min > 0 and (not np.isfinite(atr_pct) or atr_pct < atr_pct_min):
+        return None
+    try:
+        resolved = resolve_barrier_outcome(
+            frame,
+            side=side,
+            entry_i=path_i,
+            entry_price=fill,
+            atr=atr,
+            tp_atr_mult=tp_mult,
+            sl_atr_mult=sl_mult,
+            horizon_bars=horizon,
+            same_bar_policy="conservative_sl",
+            gap_policy="barrier_price",
+            return_convention=return_convention,
+            allow_partial=False,
+        )
+    except OutcomeContractError:
+        return None
+    if resolved.status != "closed" or resolved.gross_ret is None or resolved.label is None:
+        return None
+    return BarrierOutcome(
+        resolved.label,
+        resolved.outcome,
+        resolved.exit_offset,
+        resolved.entry_price,
+        resolved.gross_ret,
+    )
 
 
 def label_candidate_scaled(

@@ -39,6 +39,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
+from src.judgment.outcomes import GAP_POLICIES, RETURN_CONVENTIONS
+
 PROJECT_DIR = Path(__file__).resolve().parents[2]
 ACTIVE_BUNDLE = PROJECT_DIR / "models" / "active_bundle.json"
 
@@ -49,6 +51,8 @@ MODEL_OBJECTIVES = ("regression", "binary")
 THRESHOLD_OPERATORS = (">", ">=")
 SAME_BAR_POLICIES = ("conservative_sl",)
 CANDIDATE_SOURCES = ("yolo",)
+TARGET_SEMANTICS = ("gross", "net_taker", "net_maker")
+REPORTING_ROUTES = ("gross", "taker", "maker")
 
 # Every one is required. Absent is an error, not a default: see module docstring.
 REQUIRED_FIELDS = (
@@ -58,8 +62,9 @@ REQUIRED_FIELDS = (
     "model_num_iteration", "score_semantics",
     "threshold", "threshold_operator", "tie_policy",
     "research_entry_mode", "live_entry_mode",
-    "tp_atr_mult", "sl_atr_mult", "horizon_bars", "same_bar_policy",
-    "return_convention", "cost_route",
+    "tp_atr_mult", "sl_atr_mult", "horizon_bars", "same_bar_policy", "gap_policy",
+    "return_convention", "cost_route", "target_ret_column", "target_semantics",
+    "target_cost_included", "reporting_route",
     "detector_path", "detector_sha256",
     "model_path", "model_sha256",
     "dataset_path", "dataset_sha256",
@@ -110,8 +115,13 @@ class StrategyProtocol:
     sl_atr_mult: float
     horizon_bars: int
     same_bar_policy: str
+    gap_policy: str
     return_convention: str
     cost_route: str
+    target_ret_column: str
+    target_semantics: str
+    target_cost_included: bool
+    reporting_route: str
     detector_path: Path
     detector_sha256: str
     model_path: Path
@@ -182,13 +192,18 @@ def load_bundle(path: Path, project_dir: Path = PROJECT_DIR) -> StrategyProtocol
     model_objective = _enum(raw, path, "model_objective", MODEL_OBJECTIVES)
     operator = _enum(raw, path, "threshold_operator", THRESHOLD_OPERATORS)
     _enum(raw, path, "same_bar_policy", SAME_BAR_POLICIES)
+    gap_policy = _enum(raw, path, "gap_policy", GAP_POLICIES)
+    return_convention = _enum(raw, path, "return_convention", RETURN_CONVENTIONS)
+    target_semantics = _enum(raw, path, "target_semantics", TARGET_SEMANTICS)
+    reporting_route = _enum(raw, path, "reporting_route", REPORTING_ROUTES)
     _enum(raw, path, "candidate_source", CANDIDATE_SOURCES)
 
-    for field in ("execution_eligible", "paper_only"):
+    for field in ("execution_eligible", "paper_only", "target_cost_included"):
         if not isinstance(raw[field], bool):
             raise BundleError(path, f"{field} must be a JSON boolean, got {raw[field]!r}")
     eligible = bool(raw["execution_eligible"])
     paper_only = bool(raw["paper_only"])
+    target_cost_included = bool(raw["target_cost_included"])
 
     if eligible and semantics == "legacy_unaligned":
         raise BundleError(
@@ -199,6 +214,16 @@ def load_bundle(path: Path, project_dir: Path = PROJECT_DIR) -> StrategyProtocol
         )
     if eligible and paper_only:
         raise BundleError(path, "execution_eligible and paper_only cannot both be true")
+    if target_cost_included != (target_semantics != "gross"):
+        raise BundleError(
+            path,
+            "target_cost_included contradicts target_semantics; gross excludes cost, "
+            "net_taker/net_maker include it",
+        )
+    if side == "long" and return_convention != "linear_long":
+        raise BundleError(path, "long side requires return_convention=linear_long")
+    if side == "short" and return_convention == "linear_long":
+        raise BundleError(path, "short side requires an explicit short return convention")
 
     try:
         numbers = {
@@ -258,8 +283,13 @@ def load_bundle(path: Path, project_dir: Path = PROJECT_DIR) -> StrategyProtocol
         research_entry_mode=str(raw["research_entry_mode"]),
         live_entry_mode=str(raw["live_entry_mode"]),
         same_bar_policy=str(raw["same_bar_policy"]),
-        return_convention=str(raw["return_convention"]),
+        gap_policy=gap_policy,
+        return_convention=return_convention,
         cost_route=str(raw["cost_route"]),
+        target_ret_column=str(raw["target_ret_column"]),
+        target_semantics=target_semantics,
+        target_cost_included=target_cost_included,
+        reporting_route=reporting_route,
         detector_path=resolved["detector_path"],
         detector_sha256=str(raw["detector_sha256"]).strip().lower(),
         model_path=resolved["model_path"],

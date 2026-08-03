@@ -1,0 +1,39 @@
+{
+  "audit_version": "p0_return_semantics_20260803",
+  "holdout_read": false,
+  "dataset_path": "data/judgment_yolo_swap_v10.csv",
+  "dataset_max_signal_time": "2026-05-03 05:15:00+00:00",
+  "val_n": 3677,
+  "target_ret_column": "net_barrier_taker",
+  "target_semantics": "net_taker",
+  "target_cost_included": true,
+  "return_convention": "linear_short",
+  "costs": {
+    "swap_taker_round_trip": 0.001,
+    "swap_maker_round_trip": 0.0006
+  },
+  "threshold": -0.0004397139085409754,
+  "threshold_operator": ">=",
+  "tie_policy": "legacy_large_tie_mass",
+  "calibration_pass_rate": 0.9113407669295621,
+  "threshold_equal_rate": 0.8615719336415556,
+  "top_decile_n": 367,
+  "route_means": {
+    "pass_gross": -0.00015553786936969163,
+    "pass_net_taker": -0.0011555378693696924,
+    "pass_net_maker_correct": -0.0007555378693696924,
+    "pass_net_maker_historical_wrong_double_deduction": -0.001755537869369693,
+    "top_gross": 0.005861782554270819,
+    "top_net_taker": 0.0048617825542708205,
+    "top_net_maker_correct": 0.005261782554270819,
+    "top_net_maker_historical_wrong_double_deduction": 0.0042617825542708215
+  },
+  "historical_script": "scripts/regen_l2_v10_freeze_report.py",
+  "historical_script_status": "superseded_for_return_cost_route_only",
+  "formula": {
+    "gross_to_taker": "gross - SWAP_TAKER",
+    "gross_to_maker": "gross - SWAP_MAKER",
+    "taker_to_maker": "net_taker + SWAP_TAKER - SWAP_MAKER",
+    "forbidden": "net_taker - SWAP_MAKER"
+  }
+}
