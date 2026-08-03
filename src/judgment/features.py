@@ -151,3 +151,30 @@ def extract_feature_rows_for_side(
     if side == "short":
         return align_short_feature_rows(rows, featured, signal_indices)
     return rows
+
+
+def extract_feature_rows_for_semantics(
+    featured: pd.DataFrame,
+    signal_indices: list[int],
+    *,
+    feature_semantics: str,
+    side: str,
+) -> pd.DataFrame:
+    """Extract one declared model coordinate system, with no implicit default.
+
+    Inputs are the 28 ``FEATURE_COLUMNS`` already computed causally by
+    :func:`add_features` plus, for ``side_aligned_v1`` short rows, the same-bar
+    indicator columns documented by :func:`align_short_feature_rows`. No row
+    after any requested signal index is read. ``legacy_unaligned`` preserves the
+    historical column values; ``side_aligned_v1`` applies the declared trade-side
+    transform. Unknown semantics fail rather than guessing.
+    """
+    semantics = str(feature_semantics).strip()
+    if semantics == "legacy_unaligned":
+        return extract_feature_rows(featured, signal_indices)
+    if semantics == "side_aligned_v1":
+        return extract_feature_rows_for_side(featured, signal_indices, side)
+    raise ValueError(
+        f"unknown feature_semantics={feature_semantics!r}; "
+        "expected legacy_unaligned|side_aligned_v1"
+    )

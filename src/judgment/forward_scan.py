@@ -40,8 +40,7 @@ from src.judgment.candidates import MIN_GAP_BARS, WARMUP_BARS, add_indicators, s
 from src.judgment.features import (
     FEATURE_COLUMNS,
     add_features,
-    extract_feature_rows,
-    extract_feature_rows_for_side,
+    extract_feature_rows_for_semantics,
 )
 from src.judgment.forward_records import forward_key, open_keys
 from src.judgment.forward_types import (
@@ -249,8 +248,16 @@ def scan_forward_records(
         if not ordered_indices:
             continue
         featured = add_features(enriched)
-        feature_rows = _extract_rows_for_artifact(
-            featured, ordered_indices, scan.artifact, trade_side
+        feature_semantics = (
+            protocol.feature_semantics
+            if protocol is not None
+            else _artifact_feature_semantics(scan.artifact)
+        )
+        feature_rows = extract_feature_rows_for_semantics(
+            featured,
+            ordered_indices,
+            feature_semantics=feature_semantics,
+            side=trade_side,
         )
         scores = scan.booster.predict(
             feature_rows[FEATURE_COLUMNS], num_iteration=scan.artifact.best_iteration
@@ -435,9 +442,12 @@ def _extract_rows_for_artifact(
     trade_side is accepted but deliberately does NOT select the extractor -- it is
     passed only so a side_aligned_v1 artifact knows which direction to align to.
     """
-    if _artifact_feature_semantics(artifact) == "side_aligned_v1":
-        return extract_feature_rows_for_side(featured, signal_indices, trade_side)
-    return extract_feature_rows(featured, signal_indices)
+    return extract_feature_rows_for_semantics(
+        featured,
+        signal_indices,
+        feature_semantics=_artifact_feature_semantics(artifact),
+        side=trade_side,
+    )
 
 
 def _artifact_trade_side(artifact: object) -> str:

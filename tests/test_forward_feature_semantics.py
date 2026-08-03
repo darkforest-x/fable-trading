@@ -12,14 +12,20 @@ See analysis/p0_baseline_audit_20260803.md.
 """
 from __future__ import annotations
 
+import hashlib
+import json
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
 
 from src.judgment.features import (
+    FEATURE_COLUMNS,
     add_features,
     extract_feature_rows,
     extract_feature_rows_for_side,
+    extract_feature_rows_for_semantics,
 )
 from src.judgment.forward_scan import (
     _artifact_feature_semantics,
@@ -103,3 +109,49 @@ def test_side_does_not_leak_into_extractor_choice(featured: pd.DataFrame) -> Non
     as_long = _extract_rows_for_artifact(featured, idx, _Artifact(), "long")
     as_short = _extract_rows_for_artifact(featured, idx, _Artifact(), "short")
     pd.testing.assert_frame_equal(as_long, as_short)
+
+
+def test_semantics_api_rejects_unknown_coordinate_system(featured: pd.DataFrame) -> None:
+    with pytest.raises(ValueError, match="unknown feature_semantics"):
+        extract_feature_rows_for_semantics(
+            featured, [300], feature_semantics="guess_from_side", side="short"
+        )
+
+
+def test_feature_vector_is_asof_signal_bar(featured: pd.DataFrame) -> None:
+    """D-06: changing future rows cannot alter a vector at the signal bar."""
+    signal_i = 300
+    original = featured.copy()
+    changed = featured.copy()
+    changed.loc[signal_i + 1 :, ["close", "high", "low", "volume"]] *= 1000.0
+
+    for semantics in ("legacy_unaligned", "side_aligned_v1"):
+        before = extract_feature_rows_for_semantics(
+            original, [signal_i], feature_semantics=semantics, side="short"
+        )
+        after = extract_feature_rows_for_semantics(
+            changed, [signal_i], feature_semantics=semantics, side="short"
+        )
+        pd.testing.assert_frame_equal(before, after)
+        assert list(before.columns) == FEATURE_COLUMNS
+
+
+def test_semantics_have_a_deterministic_28_column_snapshot(featured: pd.DataFrame) -> None:
+    snapshot_path = Path(__file__).parent / "fixtures" / "feature_semantics_snapshot.json"
+    expected = json.loads(snapshot_path.read_text(encoding="utf-8"))
+
+    for semantics in ("legacy_unaligned", "side_aligned_v1"):
+        frame = extract_feature_rows_for_semantics(
+            featured, [300, 305], feature_semantics=semantics, side="short"
+        )
+        rows = [
+            [None if pd.isna(value) else round(float(value), 12) for value in row]
+            for row in frame.to_numpy()
+        ]
+        payload = json.dumps(
+            {"columns": list(frame.columns), "rows": rows},
+            separators=(",", ":"),
+            sort_keys=True,
+        )
+        assert len(frame.columns) == 28
+        assert hashlib.sha256(payload.encode()).hexdigest() == expected[semantics]
