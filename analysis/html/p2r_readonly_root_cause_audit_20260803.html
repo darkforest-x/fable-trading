@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P2-R：P1 immutable 上的只读根因审计</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P2-R：P1 immutable 上的只读根因审计</h1>
+<p><strong>日期</strong>：2026-08-03</p>
+<p><strong>执行边界</strong>：只使用 P1 immutable dataset 与已冻结的 P2 产物；不训练、不拟合、不调</p>
+<p>threshold、不读 holdout、不修改 ACTIVE、不创建 active bundle、不部署、不访问交易 client、</p>
+<p>不下单；P2-R 完成后停止。</p>
+<p><strong>机器结果</strong>：<code>analysis/output/p2r_root_cause_audit_20260803.json</code></p>
+<h2>技术摘要：P2 的主因不是 q90，而是没有证明可泛化排序增益</h2>
+<p><strong>P2-R 已完成并停止；P2 的 REJECTED 裁决不变。</strong> 独立只读复算支持以下诊断：</p>
+<ul>
+<li>fold-local exact top-decile 在 <strong>4/5</strong> 折为负，加权 pressure-net 为 <strong>-15.91bp</strong>；同一</li>
+</ul>
+<p>  五折整池为 <strong>-15.33bp</strong>，排序相对整池反而 <strong>-0.59bp</strong>。因此只改 q90 / pass rate</p>
+<p>  不能修复排序；</p>
+<ul>
+<li>1,051 个同币 × 同 UTC week × 同 ATR 桶匹配对照独立复算 lift 仅 <strong>+0.74bp</strong>，exact</li>
+</ul>
+<p>  sign-flip <code>p=0.4836</code>，没有通过 <code>p&lt;0.01</code>；</p>
+<ul>
+<li>outcome base 明显换挡：五折 TP-before-SL 从 13.50% 到 33.03%，整池 pressure-net 从</li>
+</ul>
+<p>  -64.32bp 到 +20.47bp；同时 fold 2 / 4 退化到 best iteration=1、15 个分数，fixed gate</p>
+<p>  在 4/5 折传输到 8%–12% 之外；</p>
+<ul>
+<li>28 个冻结特征无 missing / non-finite；20 个特征满足预注册的跨折 Spearman 稳定规则。</li>
+</ul>
+<p>  这说明数据并非“完全没有关联结构”，但 P2 的多特征回归没有把它转成独立经济排序增益；</p>
+<p>  本审计已看过全部特征与五折 outcome，后续从中挑特征再跑同一 P1 <strong>只能算探索</strong>，不能</p>
+<p>  重新宣称独立确认。</p>
+<p>结论的证据等级是 pre-holdout 描述性/诊断性，不是单一根因的因果证明，也不是 holdout、</p>
+<p>上线或实盘证明。</p>
+<h2>五折分解：市场/标签基线、排序增益与 gate 传输必须分开</h2>
+<p>P2-R 没有重新预测。它按原时间边界、label interval 和 event-group 规则独立重建五个 test</p>
+<p>fold，再从 P1 outcome 复算整池基线；P2 exact-top 与 fixed-gate 数字来自 SHA 冻结的 P2</p>
+<p>机器结果。<code>exact lift vs pool</code> 是同折 exact-top pressure 减整池 pressure。</p>
+<table><thead><tr>
+<th>fold</th>
+<th>rows</th>
+<th>TP rate</th>
+<th>整池 pressure</th>
+<th>exact-top pressure</th>
+<th>exact lift vs pool</th>
+<th>fixed pass</th>
+<th>iter / distinct</th>
+</tr></thead><tbody>
+<tr><td>1</td><td>2,937</td><td>33.03%</td><td>+20.47bp</td><td>+34.27bp</td><td>+13.80bp</td><td>5.38%</td><td>21 / 294</td></tr>
+<tr><td>2</td><td>2,918</td><td>13.50%</td><td>-64.32bp</td><td>-78.68bp</td><td>-14.36bp</td><td>51.44%</td><td><strong>1 / 15</strong></td></tr>
+<tr><td>3</td><td>2,996</td><td>30.07%</td><td>+3.24bp</td><td>-9.28bp</td><td>-12.52bp</td><td>5.17%</td><td>47 / 1,115</td></tr>
+<tr><td>4</td><td>2,944</td><td>20.41%</td><td>-28.95bp</td><td>-19.89bp</td><td>+9.06bp</td><td>88.55%</td><td><strong>1 / 15</strong></td></tr>
+<tr><td>5</td><td>3,000</td><td>24.27%</td><td>-7.91bp</td><td>-6.77bp</td><td>+1.14bp</td><td>10.07%</td><td>38 / 964</td></tr>
+<tr><td>aggregate</td><td>14,795</td><td>—</td><td><strong>-15.33bp</strong></td><td><strong>-15.91bp</strong></td><td><strong>-0.59bp</strong></td><td>—</td><td>—</td></tr>
+</tbody></table>
+<p>这张表同时排除了两个过度简化的解释：</p>
+<ul>
+<li><strong>不是只怪整池 beta。</strong> 整池确实有巨大换挡，但 exact-top 相对整池没有正的聚合增益，</li>
+</ul>
+<p>  fold 2 / 3 还明显选得更差；</p>
+<ul>
+<li><strong>不是只怪固定门。</strong> fold 2 / 4 的 tie mass 和 pass 漂移会放大 fixed-gate 亏损，但固定门</li>
+</ul>
+<p>  无关的 exact-top 已经 4/5 折为负。</p>
+<p>P2 的 test-row 加权参考 rank 指标仍为 AUC 0.5117、PR-AUC 0.2454、Spearman 0.0552；它们</p>
+<p>接近随机排序，不覆盖经济失败。</p>
+<h2>与 P2 原结果同表：新增的是“相对整池增益”定责</h2>
+<table><thead><tr>
+<th>指标</th>
+<th>P2 冻结结果</th>
+<th>P2-R 独立复核 / 新分解</th>
+<th>解释</th>
+</tr></thead><tbody>
+<tr><td>fold-local exact-top gross</td><td>-0.91bp</td><td>hash 与逐折 n 对齐</td><td>成本前已略负</td></tr>
+<tr><td>fold-local exact-top taker-net</td><td>-10.91bp</td><td>hash 与逐折 n 对齐</td><td>P1 已含 10bp taker</td></tr>
+<tr><td>fold-local exact-top pressure-net</td><td><strong>-15.91bp</strong></td><td><strong>-15.91bp</strong></td><td>再减批准的 5bp slippage</td></tr>
+<tr><td>exact-top TP-before-SL</td><td>22.51%</td><td>hash 对齐</td><td>仅 1/5 折 pressure 为正</td></tr>
+<tr><td>同期整池 pressure-net</td><td>未单列</td><td><strong>-15.33bp</strong></td><td>P2-R 直接从 P1 复算</td></tr>
+<tr><td>exact-top 相对整池</td><td>未单列</td><td><strong>-0.59bp</strong></td><td>排序未提供聚合 edge</td></tr>
+<tr><td>fixed-gate pressure-net / PF</td><td>-39.33bp / 0.641</td><td>hash 对齐</td><td>tie 与 gate transport 放大失败</td></tr>
+<tr><td>单特征 fixed baseline</td><td>-22.67bp / 0.873</td><td>hash 对齐</td><td>少亏，但仍为负</td></tr>
+<tr><td>matched lift / p</td><td>+0.74bp / 0.4836</td><td><strong>+0.74bp / 0.4836</strong></td><td>CSV 独立重算 4,096 种符号翻转</td></tr>
+</tbody></table>
+<h2>匹配对照：selector 的微小 lift 与噪声不可分</h2>
+<p>P2-R 重新读取冻结 matched-pair CSV，而不是引用上一轮摘要；它验证 selected/control IDs</p>
+<p>均存在于 P1、两侧 ID 不重复、无 self-pair、pressure delta 与 taker-net delta 相等，并独立</p>
+<p>枚举 12 个 UTC-week blocks 的 4,096 种符号翻转。</p>
+<table><thead><tr>
+<th>项</th>
+<th>独立复算</th>
+</tr></thead><tbody>
+<tr><td>matched pairs / blocks</td><td>1,051 / 12</td></tr>
+<tr><td>selected pressure-net</td><td>-44.27bp</td></tr>
+<tr><td>control pressure-net</td><td>-45.02bp</td></tr>
+<tr><td>lift</td><td><strong>+0.74bp</strong></td></tr>
+<tr><td>hits ≥ observed / permutations</td><td>1,981 / 4,096</td></tr>
+<tr><td>one-sided exact p</td><td><strong>0.483642578125</strong></td></tr>
+</tbody></table>
+<p>lift 的点估计略正，但离预注册 <code>p&lt;0.01</code> 很远；不能用“至少比对照好一点”替代显著性门。</p>
+<p>匹配覆盖仍只有 22.25%，所以它是 selector 增量诊断，不是 L1 detector 对市场随机入场的证明。</p>
+<h2>28 特征审计：关联结构存在，但已被事后查看</h2>
+<p>固定规则为：五个 test folds 中至少 4 折同号，且 <code>abs(median Spearman) &gt;= 0.03</code>。20/28</p>
+<p>特征通过；下表列绝对中位相关最大的 8 个，完整 28×fold 表在机器 CSV。</p>
+<table><thead><tr>
+<th>feature</th>
+<th>median test Spearman</th>
+<th>min → max</th>
+<th>同号折</th>
+</tr></thead><tbody>
+<tr><td><code>atr_pct</code></td><td>-0.300</td><td>-0.516 → -0.273</td><td>5/5</td></tr>
+<tr><td><code>pre_range168</code></td><td>-0.263</td><td>-0.374 → -0.213</td><td>5/5</td></tr>
+<tr><td><code>pre_range48</code></td><td>-0.256</td><td>-0.378 → -0.242</td><td>5/5</td></tr>
+<tr><td><code>close_vs_ema55</code></td><td>-0.243</td><td>-0.313 → -0.139</td><td>5/5</td></tr>
+<tr><td><code>ext_up</code></td><td>-0.234</td><td>-0.341 → -0.130</td><td>5/5</td></tr>
+<tr><td><code>ret_12</code></td><td>-0.218</td><td>-0.334 → -0.127</td><td>5/5</td></tr>
+<tr><td><code>dense_frac48</code></td><td>+0.218</td><td>+0.124 → +0.269</td><td>5/5</td></tr>
+<tr><td><code>full_spread</code></td><td>-0.211</td><td>-0.265 → -0.152</td><td>5/5</td></tr>
+</tbody></table>
+<p>这些是单变量秩关联，不是因果贡献，也不保证 top-decile 扣成本为正。尤其 ATR、range、return</p>
+<p>类特征可能部分反映 ATR 障碍下 outcome 幅度，而不是可执行的独立形态 edge。主模型只有</p>
+<p>一棵树时的 feature importance 也不能作为因果证据。</p>
+<p>更关键的是确认纪律：P2-R 已同时查看 28 个特征和五折 outcome。若现在按本表选最强特征，</p>
+<p>再在相同 P1 上训练/验收，就发生 outcome-driven feature selection；结果只能标为 exploratory，</p>
+<p>不能重新打开 P2 acceptance。</p>
+<h2>数据、口径与安全边界</h2>
+<table><thead><tr>
+<th>项</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>P1 dataset SHA256</td><td><code>aade2a334448d6443e71fb0d3dbbfcf450390875ce60e1f800f6dbe9c855e93a</code></td></tr>
+<tr><td>P1 manifest SHA256</td><td><code>53b8a07612dae667a184da38bf8e0a694aaae15a5fd240d5b13238da3e13d682</code></td></tr>
+<tr><td>P2 result SHA256</td><td><code>5bfbd4f4953554fb25a12503cf1b711b14236f330bca458a78f14aa5e298f6da</code></td></tr>
+<tr><td>rows / symbols</td><td>18,103 / 230</td></tr>
+<tr><td>signal range</td><td>2026-02-01 01:00 → 2026-05-03 05:15 UTC</td></tr>
+<tr><td>max label interval end</td><td>2026-05-03 22:45 UTC</td></tr>
+<tr><td>holdout signal / interval rows</td><td>0 / 0</td></tr>
+<tr><td>feature missing / non-finite</td><td>0 / 0</td></tr>
+<tr><td>training / fitting calls</td><td>0</td></tr>
+</tbody></table>
+<p><code>pressure_net = net_ret_swap_taker - 0.0005</code>；P1 target 已含 0.10% taker 往返，本审计只再减</p>
+<p>Owner 批准的 0.05% slippage，没有重复扣 0.15%。funding 仍为 P1-only 未建模。</p>
+<p>P2-R 预注册 SHA256：</p>
+<p><code>084a83296897ca282ef664ff4a8493b83a8f2e8b1512cb1d11d787bd4dc82c6a</code>。</p>
+<h2>方法与可核验性</h2>
+<p>1. 在执行前提交 P2-R JSON 预注册，冻结输入 hash、假设、阈值无关定责规则和禁止项；</p>
+<p>2. 审计脚本不导入 P2 训练入口，自行按固定时间分位与 event-component purge 重建五折；五折</p>
+<p>   test rows 精确复现为 2,937 / 2,918 / 2,996 / 2,944 / 3,000；</p>
+<p>3. 从 immutable P1 outcome 复算每折整池经济、TP/SL/timeout mix 与 28 feature Spearman；</p>
+<p>4. 从冻结 P2 JSON 读取 fold-local model / selector / exact-top 结果，并用 hash 防止事后替换；</p>
+<p>5. 从 matched-pair CSV 独立复算配对完整性、lift 与 exact UTC-week sign-flip p；</p>
+<p>6. 前后比较 ACTIVE、forward log、executor ledger 和 active bundle；hash 完全不变。</p>
+<p>本报告没有画趋势图：只有五个预注册折，折级数字用审计表能完整呈现；画连线容易暗示不存在的</p>
+<p>连续趋势。28 特征的完整值保存在 CSV，避免用选择性图形突出事后最优特征。</p>
+<h2>预注册诊断门结果</h2>
+<table><thead><tr>
+<th>diagnostic rule</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>exact-top pressure ≤0 至少 4/5 折</td><td><strong>TRUE（4/5）</strong></td></tr>
+<tr><td>collapse 至少 2/5 折</td><td><strong>TRUE（2/5）</strong></td></tr>
+<tr><td>fixed pass 脱离 8%–12% 至少 3/5 折</td><td><strong>TRUE（4/5）</strong></td></tr>
+<tr><td>TP rate range≥10pp 或 pool pressure range≥50bp</td><td><strong>TRUE（19.52pp / 84.79bp）</strong></td></tr>
+<tr><td>matched p≥0.01</td><td><strong>TRUE（0.4836）</strong></td></tr>
+<tr><td>至少一个稳定 feature</td><td><strong>TRUE（20/28）</strong></td></tr>
+<tr><td>feature missing / non-finite=0</td><td><strong>TRUE</strong></td></tr>
+</tbody></table>
+<p>由预注册 decision rule 得出：<code>threshold_only_fix_supported=false</code>；</p>
+<p><code>single_variable_training_followup_supported=true</code> 仅表示未来可以另立 <strong>探索性</strong> 预注册，</p>
+<p>不是本轮训练授权，也不是确认级证据。</p>
+<h2>风险、限制与诚实声明</h2>
+<ul>
+<li>P2-R 没有保存的逐行 fold predictions，因此无法从 P1 独立重建 exact-top 成员；它通过固定</li>
+</ul>
+<p>  P2 results hash、独立复现 fold rows、整池 outcome 与 matched pairs 来定责；</p>
+<ul>
+<li>只有约三个月 pre-holdout，且五折共享 expanding history，不应把五折当五个完全独立市场；</li>
+<li>base-rate / pressure 换挡是描述性现象，不能单独证明某个市场 regime 导致模型失败；</li>
+<li>20 个稳定 IC 经全特征扫描得到，存在多重查看与 ATR-scaled outcome 的机械关联风险；</li>
+<li>matched coverage 22.25%，只能约束可匹配子集；</li>
+<li>funding 未建模；0.15% pressure line 不是 all-in 实盘成本实测；</li>
+<li>holdout 消耗为 <strong>0</strong>；没有训练、调 threshold、promote、ACTIVE/bundle、部署或订单。</li>
+</ul>
+<h2>下一步选项与未解决问题</h2>
+<p><strong>本轮动作：无；立即停止。</strong> 证据不支持调 q90、读 holdout或上线。</p>
+<p>若 Owner 将来另行授权，只有两个诚实选项：</p>
+<ul>
+<li>停止当前 L2 target / objective 路线，保留 P2 rejected；</li>
+<li>另做单变量、单假设的 <strong>exploratory</strong> 预注册，先解释 IC 是否只是 ATR/障碍幅度的机械关系。</li>
+</ul>
+<p>  因为 P1 五折已经被 P2-R 全面查看，该实验不能用相同 P1 重新获得确认级 acceptance；真正</p>
+<p>  确认需要预注册后未参与选择的新鲜前向样本。</p>
+<p>未解决且本轮不继续的问题：稳定 IC 来自形态信息还是 barrier scaling；回归 objective 与</p>
+<p>TP-before-SL / pressure economics 是否错配；为什么 fold 2 / 4 的 early-stop 退化为一棵树。</p>
+<h2>机器产物与 hash</h2>
+<table><thead><tr>
+<th>artifact</th>
+<th>SHA256</th>
+</tr></thead><tbody>
+<tr><td>prereg JSON</td><td><code>084a83296897ca282ef664ff4a8493b83a8f2e8b1512cb1d11d787bd4dc82c6a</code></td></tr>
+<tr><td>root-cause audit JSON</td><td><code>dec35ff2bf3a7600d13edd9f614892a3b5bed5e5d8a402d73242a7aca4d94def</code></td></tr>
+<tr><td>feature IC CSV</td><td><code>3cb8346329dc60d5ec3418720f3f0a703164e7374106599f41705b11920d3f2d</code></td></tr>
+<tr><td>fold diagnostics CSV</td><td><code>1fea1206dd5411885654353e9f4360cfec07835eca8e123f45bbae2e2c136748</code></td></tr>
+</tbody></table>
+<p>完整清单另见 <code>analysis/output/p2r_hashes_20260803.sha256</code>。</p>
+<h2>测试</h2>
+<ul>
+<li>P2-R 专项：7 passed；</li>
+<li>完整 <code>tests/</code>：506 passed、2 skipped、14 warnings、0 failed；</li>
+<li>静态 AST 检查确认审计代码没有 estimator <code>.fit</code>、<code>train_regressor</code> 或训练调用；</li>
+<li>ACTIVE / forward log / ledger hash 不变；active bundle 不存在。</li>
+</ul>
+<p>机器结果：<code>analysis/output/p2r_test_results_20260803.json</code>。</p>
+<h2>Commit 列表</h2>
+<table><thead><tr>
+<th>commit</th>
+<th>内容</th>
+</tr></thead><tbody>
+<tr><td><code>ef2b495</code></td><td>固化 P2-R 只读预注册、安全边界与固定诊断规则</td></tr>
+<tr><td><code>5793d6a</code></td><td>只读折重建、根因审计、机器 JSON/CSV 与 7 个专项测试</td></tr>
+</tbody></table>
+<p>报告、HTML、full tests、learnings 与 HANDOFF 的关闭提交在本报告之后形成，最终列表以 git log</p>
+<p>与交付回复为准。</p>
+<h2>从零复现</h2>
+<pre><code>
+# 输入 hash、只读五折重建、整池/IC/matched 根因审计；无训练入口
+PYTHONPATH=. PYTHONPYCACHEPREFIX=/private/tmp/p2r-pycache \
+  MPLCONFIGDIR=/private/tmp/p2r-mpl \
+  .venv/bin/python scripts/audit_p2r_root_causes_20260803.py
+
+# 专项与完整测试
+PYTHONPATH=. PYTHONPYCACHEPREFIX=/private/tmp/p2r-pycache \
+  MPLCONFIGDIR=/private/tmp/p2r-mpl \
+  .venv/bin/pytest -q tests/test_p2r_root_cause_audit.py
+PYTHONPATH=. PYTHONPYCACHEPREFIX=/private/tmp/p2r-pycache \
+  MPLCONFIGDIR=/private/tmp/p2r-mpl \
+  .venv/bin/pytest -q tests
+
+# 仓库规定的 HTML 交付
+python3 scripts/md_to_html.py analysis/p2r_readonly_root_cause_audit_20260803.md \
+  --out-dir analysis/html
+</code></pre>
+<h2>停止点</h2>
+<p><strong>P2-R 已完成，P2 仍为 REJECTED，立即停止。</strong> 不训练、不调 threshold、不读 holdout、</p>
+<p>不修改 ACTIVE、不创建 active bundle、不部署、不下单。任何后续探索都需要 Owner 新指令与</p>
+<p>单独预注册，且不得把相同 P1 上的自适应结果声称为独立确认。</p>
+</body>
+</html>

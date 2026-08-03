@@ -1,0 +1,41 @@
+{
+  "test_result_version": "p2r_test_results_v1",
+  "generated_at": "2026-08-03T17:40:00+08:00",
+  "focused": {
+    "command": "PYTHONPATH=. PYTHONPYCACHEPREFIX=/private/tmp/p2r-pycache MPLCONFIGDIR=/private/tmp/p2r-mpl .venv/bin/pytest -q tests/test_p2r_root_cause_audit.py",
+    "passed": 7,
+    "skipped": 0,
+    "failed": 0,
+    "warnings": 13,
+    "duration_seconds": 2.65
+  },
+  "full": {
+    "command": "PYTHONPATH=. PYTHONPYCACHEPREFIX=/private/tmp/p2r-pycache MPLCONFIGDIR=/private/tmp/p2r-mpl .venv/bin/pytest -q tests",
+    "passed": 506,
+    "skipped": 2,
+    "failed": 0,
+    "warnings": 14,
+    "duration_seconds": 15.95
+  },
+  "static_checks": {
+    "py_compile": "passed_with_PYTHONPYCACHEPREFIX",
+    "audit_ast_has_no_estimator_fit_or_training_call": true,
+    "git_diff_check": "passed"
+  },
+  "protected_after_tests": {
+    "models/ACTIVE": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+    "data/forward_log.csv": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb",
+    "data/executor_ledger.jsonl": "de85b3dded80717a1bc0399411c6fc59c2f11842095aac2e105b0d128941fe39",
+    "models/active_bundle.json": null
+  },
+  "safety": {
+    "training_or_fitting_calls": 0,
+    "holdout_read": false,
+    "active_modified": false,
+    "active_bundle_created": false,
+    "deployed": false,
+    "trading_client_accessed": false,
+    "ordered": false
+  },
+  "accepted": true
+}

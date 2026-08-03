@@ -2,6 +2,41 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-03 — P2-R 只读根因审计已完成，必须停止）
+
+**直接裁决：P2 仍为 REJECTED；失败不是只改 q90 可以修复。** P2-R 只读取 P1 immutable
+dataset 与 hash 冻结的 P2 产物，未训练、未读 holdout、未改 ACTIVE、未部署、未下单。
+
+- 独立重建五个 test folds，rows 精确复现 2,937 / 2,918 / 2,996 / 2,944 / 3,000；P1
+  18,103 行，max signal 2026-05-03 05:15 UTC，max label end 2026-05-03 22:45 UTC，0 holdout。
+- fold-local exact-top 4/5 折 pressure-net≤0；加权 **-15.91bp**。同期整池 **-15.33bp**，
+  exact-top 相对整池 **-0.59bp**，所以 ranking 没有证明增量，调 fixed threshold 不能救。
+- matched control 从冻结 CSV 独立复算：1,051 pairs、12 UTC-week blocks、lift +0.74bp、
+  exact sign-flip `p=0.4836`；pair ID / delta 完整性全过。
+- outcome regime 明显漂移：TP-before-SL 五折 range 19.52pp，整池 pressure range 84.79bp；
+  fold 2 / 4 都 collapse 到 best_iteration=1 / 15 distinct scores，fixed pass 有 4/5 折脱离
+  8%–12%。这些是 contributor，不单独构成因果证明。
+- 28 features 无 missing / inf；20 个满足预注册的跨折 Spearman 稳定规则。但 P2-R 已查看
+  全部 feature × outcome；今后从中挑 feature 在相同 P1 重跑只能标 exploratory，不能重新
+  作为独立 P2 acceptance。
+- P2-R 专项 7 passed；完整 tests 506 passed / 2 skipped / 14 warnings / 0 failed。
+- ACTIVE / forward log / ledger SHA 不变；active bundle 不存在；holdout 消耗 0。
+
+交付物：
+
+- `analysis/html/p2r_readonly_root_cause_audit_20260803.html`
+- `analysis/p2r_readonly_root_cause_audit_20260803.md`
+- `analysis/output/p2r_root_cause_prereg_20260803.json`
+- `analysis/output/p2r_root_cause_audit_20260803.json`
+- `analysis/output/p2r_feature_ic_20260803.csv`
+- `analysis/output/p2r_fold_diagnostics_20260803.csv`
+- `analysis/output/p2r_test_results_20260803.json`
+- `analysis/output/p2r_hashes_20260803.sha256`
+
+**停止点：P2-R。** 不调 threshold、不继续训练、不读 holdout、不创建/修改 ACTIVE bundle、
+不部署、不下单。未来若 Owner 另行授权，只能先立新的单变量 exploratory 预注册；相同 P1
+不能再提供独立确认，确认需要预注册后未参与选择的新鲜前向样本。
+
 ## ⚡ 当前真相（2026-08-03 — P2-L2 已完成且 REJECTED，必须停止）
 
 **直接裁决：P2-L2 训练/验证流程完成，策略门失败。** 只使用 P1 immutable dataset；
