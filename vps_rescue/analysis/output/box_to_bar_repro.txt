@@ -1,0 +1,89 @@
+=== GEOMETRY ROUND-TRIP ===
+tf: width=1280 height=742 left=12 plot_w=1256 n_bars=200 margin=12
+IMG=1280x742 aspect=1.7251 (NOT square)
+roundtrip exact matches: 200/200
+candle_half_w=2 px; bar spacing≈6.31 px
+formula: right_px=(cx+w/2)*tf.width; idx=round((right_px-tf.left)/tf.plot_w*(n_bars-1)); clamp
+x_at(i)=left + i/(n_bars-1)*plot_w  → inverse of above when right_px=x_at(i)
+
+weights=models/owner_best.pt device=cpu conf=0.3
+
+======== KORU@detect_tip ======== 
+frame_len=2574 tip_i=2573 tip=2026-07-21 04:30:00+00:00 log_signal=2026-07-21 03:45:00+00:00 log_lag=62.4m
+log_signal_i_in_frame=2570 offset_from_tip=3 bars = 45min
+
+-- mode=tip starts=[2374] n_boxes=1 --
+  right_norm=0.9747 (97.5%) bar_in_win=196/199 sig_i=2570 offset=  3b/  45m conf=0.501 filter=KEEP sig_t=2026-07-21 03:45:00+00:00 win0=2374 <<LOG_SIGNAL
+  KEEP count=1; tip_edge(bar>=195) keep=1; mid(bar<180) keep=0
+
+-- mode=live starts=[2374, 2373, 2372, 2324, 2274, 2224] n_boxes=1 --
+  right_norm=0.9747 (97.5%) bar_in_win=196/199 sig_i=2570 offset=  3b/  45m conf=0.501 filter=KEEP sig_t=2026-07-21 03:45:00+00:00 win0=2374 <<LOG_SIGNAL
+  KEEP count=1; tip_edge(bar>=195) keep=1; mid(bar<180) keep=0
+
+======== KORU@signal_tip ======== 
+frame_len=2571 tip_i=2570 tip=2026-07-21 03:45:00+00:00 log_signal=2026-07-21 03:45:00+00:00 log_lag=62.4m
+log_signal_i_in_frame=2570 offset_from_tip=0 bars = 0min
+
+-- mode=tip starts=[2371] n_boxes=0 --
+  (no boxes)
+
+-- mode=live starts=[2371, 2370, 2369, 2321, 2271, 2221] n_boxes=0 --
+  (no boxes)
+
+======== KORU@signal+1 ======== 
+frame_len=2572 tip_i=2571 tip=2026-07-21 04:00:00+00:00 log_signal=2026-07-21 03:45:00+00:00 log_lag=62.4m
+log_signal_i_in_frame=2570 offset_from_tip=1 bars = 15min
+
+-- mode=tip starts=[2372] n_boxes=0 --
+  (no boxes)
+
+-- mode=live starts=[2372, 2371, 2370, 2322, 2272, 2222] n_boxes=0 --
+  (no boxes)
+
+======== EDEN@first_hit_approx ======== 
+frame_len=28040 tip_i=28039 tip=2026-07-19 13:15:00+00:00 log_signal=2026-07-19 04:45:00+00:00 log_lag=527.5m
+log_signal_i_in_frame=28005 offset_from_tip=34 bars = 510min
+
+-- mode=tip starts=[27840] n_boxes=2 --
+  right_norm=0.8167 (81.7%) bar_in_win=164/199 sig_i=28004 offset= 35b/ 525m conf=0.491 filter=KEEP sig_t=2026-07-19 04:30:00+00:00 win0=27840
+  right_norm=0.3498 (35.0%) bar_in_win= 69/199 sig_i=27909 offset=130b/1950m conf=0.449 filter=KEEP sig_t=2026-07-18 04:45:00+00:00 win0=27840
+  KEEP count=2; tip_edge(bar>=195) keep=0; mid(bar<180) keep=2
+
+-- mode=live starts=[27840, 27839, 27838, 27790, 27740, 27690] n_boxes=8 --
+  right_norm=0.8246 (82.5%) bar_in_win=165/199 sig_i=28004 offset= 35b/ 525m conf=0.495 filter=KEEP sig_t=2026-07-19 04:30:00+00:00 win0=27839
+  right_norm=0.8167 (81.7%) bar_in_win=164/199 sig_i=28004 offset= 35b/ 525m conf=0.491 filter=KEEP sig_t=2026-07-19 04:30:00+00:00 win0=27840
+  right_norm=0.8437 (84.4%) bar_in_win=169/199 sig_i=27909 offset=130b/1950m conf=0.776 filter=KEEP sig_t=2026-07-18 04:45:00+00:00 win0=27740
+  right_norm=0.3586 (35.9%) bar_in_win= 71/199 sig_i=27909 offset=130b/1950m conf=0.575 filter=KEEP sig_t=2026-07-18 04:45:00+00:00 win0=27838
+  right_norm=0.3547 (35.5%) bar_in_win= 70/199 sig_i=27909 offset=130b/1950m conf=0.530 filter=KEEP sig_t=2026-07-18 04:45:00+00:00 win0=27839
+  right_norm=0.3498 (35.0%) bar_in_win= 69/199 sig_i=27909 offset=130b/1950m conf=0.449 filter=KEEP sig_t=2026-07-18 04:45:00+00:00 win0=27840
+  right_norm=0.5967 (59.7%) bar_in_win=119/199 sig_i=27909 offset=130b/1950m conf=0.419 filter=KEEP sig_t=2026-07-18 04:45:00+00:00 win0=27790
+  right_norm=0.3020 (30.2%) bar_in_win= 59/199 sig_i=27749 offset=290b/4350m conf=0.304 filter=KEEP sig_t=2026-07-16 12:45:00+00:00 win0=27690
+  KEEP count=8; tip_edge(bar>=195) keep=0; mid(bar<180) keep=8
+
+======== EDEN@signal_tip ======== 
+frame_len=28006 tip_i=28005 tip=2026-07-19 04:45:00+00:00 log_signal=2026-07-19 04:45:00+00:00 log_lag=527.5m
+log_signal_i_in_frame=28005 offset_from_tip=0 bars = 0min
+
+-- mode=tip starts=[27806] n_boxes=1 --
+  right_norm=0.5180 (51.8%) bar_in_win=103/199 sig_i=27909 offset= 96b/1440m conf=0.413 filter=KEEP sig_t=2026-07-18 04:45:00+00:00 win0=27806
+  KEEP count=1; tip_edge(bar>=195) keep=0; mid(bar<180) keep=1
+
+-- mode=live starts=[27806, 27805, 27804, 27756, 27706, 27656] n_boxes=5 --
+  right_norm=0.7640 (76.4%) bar_in_win=153/199 sig_i=27909 offset= 96b/1440m conf=0.692 filter=KEEP sig_t=2026-07-18 04:45:00+00:00 win0=27756
+  right_norm=0.5270 (52.7%) bar_in_win=105/199 sig_i=27909 offset= 96b/1440m conf=0.447 filter=KEEP sig_t=2026-07-18 04:45:00+00:00 win0=27804
+  right_norm=0.5227 (52.3%) bar_in_win=104/199 sig_i=27909 offset= 96b/1440m conf=0.446 filter=KEEP sig_t=2026-07-18 04:45:00+00:00 win0=27805
+  right_norm=0.5180 (51.8%) bar_in_win=103/199 sig_i=27909 offset= 96b/1440m conf=0.413 filter=KEEP sig_t=2026-07-18 04:45:00+00:00 win0=27806
+  right_norm=0.4690 (46.9%) bar_in_win= 93/199 sig_i=27749 offset=256b/3840m conf=0.407 filter=KEEP sig_t=2026-07-16 12:45:00+00:00 win0=27656
+  KEEP count=5; tip_edge(bar>=195) keep=0; mid(bar<180) keep=5
+
+=== SCORES (after YOLO; lightgbm import now) ===
+KORU@detect_tip mode=tip thr=0.02022141847381547
+  sig_i=2570 t=2026-07-21 03:45:00+00:00 offset=3b/45m score=0.03232899729606996 pass=True
+EDEN@first_hit_approx mode=tip thr=0.02022141847381547
+  sig_i=27909 t=2026-07-18 04:45:00+00:00 offset=130b/1950m score=-0.010178893630525728 pass=False
+  sig_i=28004 t=2026-07-19 04:30:00+00:00 offset=35b/525m score=0.024714763865171185 pass=True
+
+=== TIP MODE FILTER SEMANTICS ===
+mode!=live: drop if signal_i+1 >= len(frame)  → tip bar itself NEVER kept in tip/full
+mode=live: tip bar allowed (entry backfill next pulse)
+Therefore tip-mode can still emit mid-window old bars (lag>>30) as long as signal_i <= tip-1

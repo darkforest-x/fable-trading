@@ -1,0 +1,95 @@
+{
+  "dataset": "data/judgment_yolo_swap_v11.csv",
+  "score_threshold_val_q90": 0.02022,
+  "n_candidates": 26653,
+  "n_eligible": 3681,
+  "config": {
+    "max_concurrent": 10,
+    "base_cost_round_trip": 0.003,
+    "accept_window_start": "2026-05-04 00:00:00+00:00",
+    "accept_window_disclaimer": "window consumed once by 2b holdout eval (2026-07-08)"
+  },
+  "cost_sweep_accept_window": {
+    "0.002": {
+      "n_trades": 703,
+      "net_total_units": 25.2842,
+      "net_return_on_capital": 2.5284,
+      "mean_net_per_trade": 0.03597,
+      "win_rate": 0.7738,
+      "profit_factor": 6.985,
+      "max_drawdown_pct": 0.0074,
+      "outcome_counts": {
+        "tp": 491,
+        "sl": 138,
+        "timeout": 73,
+        "sl_ambiguous": 1
+      }
+    },
+    "0.003": {
+      "n_trades": 703,
+      "net_total_units": 24.5812,
+      "net_return_on_capital": 2.4581,
+      "mean_net_per_trade": 0.03497,
+      "win_rate": 0.771,
+      "profit_factor": 6.605,
+      "max_drawdown_pct": 0.0076,
+      "outcome_counts": {
+        "tp": 491,
+        "sl": 138,
+        "timeout": 73,
+        "sl_ambiguous": 1
+      }
+    },
+    "0.004": {
+      "n_trades": 703,
+      "net_total_units": 23.8782,
+      "net_return_on_capital": 2.3878,
+      "mean_net_per_trade": 0.03397,
+      "win_rate": 0.7696,
+      "profit_factor": 6.252,
+      "max_drawdown_pct": 0.0078,
+      "outcome_counts": {
+        "tp": 491,
+        "sl": 138,
+        "timeout": 73,
+        "sl_ambiguous": 1
+      }
+    }
+  },
+  "insample_pre_window_base_cost": {
+    "n_trades": 2169,
+    "net_total_units": 80.6749,
+    "net_return_on_capital": 8.0675,
+    "mean_net_per_trade": 0.03719,
+    "win_rate": 0.8004,
+    "profit_factor": 7.493,
+    "max_drawdown_pct": 0.01,
+    "outcome_counts": {
+      "tp": 1560,
+      "sl": 372,
+      "timeout": 235,
+      "sl_ambiguous": 2
+    }
+  },
+  "full_period_base_cost": {
+    "n_trades": 2872,
+    "net_total_units": 105.2561,
+    "net_return_on_capital": 10.5256,
+    "mean_net_per_trade": 0.03665,
+    "win_rate": 0.7932,
+    "profit_factor": 7.262,
+    "max_drawdown_pct": 0.01,
+    "outcome_counts": {
+      "tp": 2051,
+      "sl": 510,
+      "timeout": 308,
+      "sl_ambiguous": 3
+    }
+  },
+  "acceptance_check_base_cost": {
+    "net_positive": true,
+    "profit_factor_ge_1.3": true,
+    "max_drawdown_le_20pct": true,
+    "n_trades_ge_100": true
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "max_concurrent": 1,
+  "notional_usdt": 12.0,
+  "leverage": 3,
+  "sizing_mode": "equity_times_leverage",
+  "min_notional_usdt": 5.0,
+  "max_consecutive_losses": 5,
+  "max_signal_age_min": 30,
+  "poll_seconds": 30,
+  "bracket_retries": 2,
+  "bracket_retry_sleep_sec": 1.5,
+  "td_mode": "cross",
+  "kill_switch_file": "data/executor_KILL",
+  "forward_log": "data/forward_log.csv",
+  "ledger": "data/executor_ledger.jsonl",
+  "open_statuses": ["open", "pending"],
+  "require_score_ge_threshold": true
+}

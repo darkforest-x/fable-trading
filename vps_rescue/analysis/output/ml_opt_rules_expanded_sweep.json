@@ -1,0 +1,676 @@
+{
+  "dataset": "data/judgment_dataset_v2_expanded.csv",
+  "tag": "ml_opt_rules_expanded",
+  "cost_round_trip": 0.002,
+  "holdout_policy": "holdout loaded for size only; NEVER evaluated or used for tuning",
+  "splits": {
+    "train_n": 6367,
+    "val_n": 1598,
+    "holdout_n": 2214,
+    "train_range": [
+      "2025-06-04 16:15:00+00:00",
+      "2026-03-24 22:45:00+00:00"
+    ],
+    "val_range": [
+      "2026-03-25 17:15:00+00:00",
+      "2026-05-03 03:30:00+00:00"
+    ],
+    "pos_rate_train": 0.3405,
+    "pos_rate_val": 0.4262
+  },
+  "primary_metric": "val top-decile mean_net_ret after 0.2% RT cost",
+  "baseline_top_net": 0.00101,
+  "best_variant": "reg_realized_ret",
+  "best_top_net": 0.00306,
+  "delta_vs_baseline": 0.00205,
+  "variants": [
+    {
+      "variant": "baseline",
+      "note": "Current LGB_PARAMS binary classifier",
+      "best_iteration": 19,
+      "val": {
+        "n": 1598,
+        "positive_rate": 0.4262,
+        "roc_auc": 0.5647,
+        "pr_auc": 0.4715,
+        "thresholds": {
+          "0.4": {
+            "n_signals": 359,
+            "precision": 0.4568,
+            "recall": 0.2408
+          },
+          "0.5": {
+            "n_signals": 8,
+            "precision": 0.375,
+            "recall": 0.0044
+          },
+          "0.6": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.7": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        },
+        "top_decile": {
+          "n": 159,
+          "mean_realized_ret": 0.00301,
+          "mean_net_ret": 0.00101,
+          "win_rate": 0.5094
+        },
+        "all_mean_net_ret": 0.00036
+      },
+      "val_permutation_p": 0.000999000999000999,
+      "val_q90_gate": {
+        "threshold": 0.424381,
+        "n": 160,
+        "mean_gross": 0.00304,
+        "mean_net_0p2": 0.00104,
+        "win_rate": 0.5125
+      },
+      "extra": {
+        "params": {
+          "objective": "binary",
+          "learning_rate": 0.05,
+          "num_leaves": 15,
+          "min_child_samples": 30,
+          "feature_fraction": 0.8,
+          "bagging_fraction": 0.8,
+          "bagging_freq": 1,
+          "lambda_l2": 1.0,
+          "seed": 42,
+          "verbosity": -1
+        }
+      }
+    },
+    {
+      "variant": "strong_reg",
+      "note": "num_leaves=7, min_child=50, l2=5, feat_frac=0.7",
+      "best_iteration": 64,
+      "val": {
+        "n": 1598,
+        "positive_rate": 0.4262,
+        "roc_auc": 0.5721,
+        "pr_auc": 0.4792,
+        "thresholds": {
+          "0.4": {
+            "n_signals": 450,
+            "precision": 0.4844,
+            "recall": 0.3201
+          },
+          "0.5": {
+            "n_signals": 45,
+            "precision": 0.5111,
+            "recall": 0.0338
+          },
+          "0.6": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.7": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        },
+        "top_decile": {
+          "n": 159,
+          "mean_realized_ret": 0.00274,
+          "mean_net_ret": 0.00074,
+          "win_rate": 0.4969
+        },
+        "all_mean_net_ret": 0.00036
+      },
+      "val_permutation_p": 0.000999000999000999,
+      "val_q90_gate": {
+        "threshold": 0.460286,
+        "n": 160,
+        "mean_gross": 0.0028,
+        "mean_net_0p2": 0.0008,
+        "win_rate": 0.5
+      },
+      "extra": {
+        "params": {
+          "objective": "binary",
+          "learning_rate": 0.05,
+          "num_leaves": 7,
+          "min_child_samples": 50,
+          "feature_fraction": 0.7,
+          "bagging_fraction": 0.8,
+          "bagging_freq": 1,
+          "lambda_l2": 5.0,
+          "seed": 42,
+          "verbosity": -1
+        }
+      }
+    },
+    {
+      "variant": "deeper",
+      "note": "num_leaves=31, min_child=20, lr=0.03",
+      "best_iteration": 32,
+      "val": {
+        "n": 1598,
+        "positive_rate": 0.4262,
+        "roc_auc": 0.5606,
+        "pr_auc": 0.4652,
+        "thresholds": {
+          "0.4": {
+            "n_signals": 333,
+            "precision": 0.4835,
+            "recall": 0.2364
+          },
+          "0.5": {
+            "n_signals": 6,
+            "precision": 0.3333,
+            "recall": 0.0029
+          },
+          "0.6": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.7": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        },
+        "top_decile": {
+          "n": 159,
+          "mean_realized_ret": 0.00303,
+          "mean_net_ret": 0.00103,
+          "win_rate": 0.5031
+        },
+        "all_mean_net_ret": 0.00036
+      },
+      "val_permutation_p": 0.000999000999000999,
+      "val_q90_gate": {
+        "threshold": 0.428078,
+        "n": 160,
+        "mean_gross": 0.00308,
+        "mean_net_0p2": 0.00108,
+        "win_rate": 0.5062
+      },
+      "extra": {
+        "params": {
+          "objective": "binary",
+          "learning_rate": 0.03,
+          "num_leaves": 31,
+          "min_child_samples": 20,
+          "feature_fraction": 0.8,
+          "bagging_fraction": 0.8,
+          "bagging_freq": 1,
+          "lambda_l2": 1.0,
+          "seed": 42,
+          "verbosity": -1
+        }
+      }
+    },
+    {
+      "variant": "scale_pos_weight",
+      "note": "balance class frequency via scale_pos_weight",
+      "best_iteration": 13,
+      "val": {
+        "n": 1598,
+        "positive_rate": 0.4262,
+        "roc_auc": 0.5609,
+        "pr_auc": 0.4637,
+        "thresholds": {
+          "0.4": {
+            "n_signals": 1095,
+            "precision": 0.4557,
+            "recall": 0.7327
+          },
+          "0.5": {
+            "n_signals": 3,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.6": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.7": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        },
+        "top_decile": {
+          "n": 159,
+          "mean_realized_ret": 0.00222,
+          "mean_net_ret": 0.00022,
+          "win_rate": 0.4717
+        },
+        "all_mean_net_ret": 0.00036
+      },
+      "val_permutation_p": 0.000999000999000999,
+      "val_q90_gate": {
+        "threshold": 0.479635,
+        "n": 160,
+        "mean_gross": 0.00218,
+        "mean_net_0p2": 0.00018,
+        "win_rate": 0.4688
+      },
+      "extra": {
+        "scale_pos_weight": 1.936808118081181
+      }
+    },
+    {
+      "variant": "recency_weight_60d",
+      "note": "exp decay sample weight half-life 60d",
+      "best_iteration": 15,
+      "val": {
+        "n": 1598,
+        "positive_rate": 0.4262,
+        "roc_auc": 0.5535,
+        "pr_auc": 0.4679,
+        "thresholds": {
+          "0.4": {
+            "n_signals": 176,
+            "precision": 0.4716,
+            "recall": 0.1219
+          },
+          "0.5": {
+            "n_signals": 2,
+            "precision": 1.0,
+            "recall": 0.0029
+          },
+          "0.6": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.7": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        },
+        "top_decile": {
+          "n": 159,
+          "mean_realized_ret": 0.00242,
+          "mean_net_ret": 0.00042,
+          "win_rate": 0.4717
+        },
+        "all_mean_net_ret": 0.00036
+      },
+      "val_permutation_p": 0.000999000999000999,
+      "val_q90_gate": {
+        "threshold": 0.403098,
+        "n": 160,
+        "mean_gross": 0.00237,
+        "mean_net_0p2": 0.00037,
+        "win_rate": 0.4688
+      },
+      "extra": {
+        "half_life_days": 60,
+        "w_min": 0.11087781904760516,
+        "w_max": 3.2827159321782218
+      }
+    },
+    {
+      "variant": "abs_ret_weight",
+      "note": "sample weight ∝ floor+|realized_ret|",
+      "best_iteration": 17,
+      "val": {
+        "n": 1598,
+        "positive_rate": 0.4262,
+        "roc_auc": 0.5596,
+        "pr_auc": 0.4653,
+        "thresholds": {
+          "0.4": {
+            "n_signals": 1351,
+            "precision": 0.4449,
+            "recall": 0.8825
+          },
+          "0.5": {
+            "n_signals": 692,
+            "precision": 0.4682,
+            "recall": 0.4758
+          },
+          "0.6": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.7": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        },
+        "top_decile": {
+          "n": 159,
+          "mean_realized_ret": 0.00298,
+          "mean_net_ret": 0.00098,
+          "win_rate": 0.4969
+        },
+        "all_mean_net_ret": 0.00036
+      },
+      "val_permutation_p": 0.000999000999000999,
+      "val_q90_gate": {
+        "threshold": 0.544065,
+        "n": 160,
+        "mean_gross": 0.00293,
+        "mean_net_0p2": 0.00093,
+        "win_rate": 0.4938
+      },
+      "extra": {
+        "w_min": 0.17824217580129162,
+        "w_max": 3.5968134035143686
+      }
+    },
+    {
+      "variant": "reg_realized_ret",
+      "note": "predict realized_ret; rank by predicted return",
+      "best_iteration": 70,
+      "val": {
+        "n": 1598,
+        "positive_rate": 0.4262,
+        "roc_auc": 0.5669,
+        "pr_auc": 0.4769,
+        "thresholds": {
+          "0.4": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.5": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.6": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.7": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        },
+        "top_decile": {
+          "n": 159,
+          "mean_realized_ret": 0.00506,
+          "mean_net_ret": 0.00306,
+          "win_rate": 0.5157
+        },
+        "all_mean_net_ret": 0.00036
+      },
+      "val_permutation_p": 0.000999000999000999,
+      "val_q90_gate": {
+        "threshold": 0.002463,
+        "n": 160,
+        "mean_gross": 0.00518,
+        "mean_net_0p2": 0.00318,
+        "win_rate": 0.5188
+      },
+      "extra": {
+        "objective": "regression",
+        "target": "realized_ret"
+      }
+    },
+    {
+      "variant": "seed_ensemble_3",
+      "note": "average 3 seeds {42,7,2026}",
+      "best_iteration": 28,
+      "val": {
+        "n": 1598,
+        "positive_rate": 0.4262,
+        "roc_auc": 0.5664,
+        "pr_auc": 0.4751,
+        "thresholds": {
+          "0.4": {
+            "n_signals": 344,
+            "precision": 0.4826,
+            "recall": 0.2438
+          },
+          "0.5": {
+            "n_signals": 17,
+            "precision": 0.4706,
+            "recall": 0.0117
+          },
+          "0.6": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.7": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        },
+        "top_decile": {
+          "n": 159,
+          "mean_realized_ret": 0.00271,
+          "mean_net_ret": 0.00071,
+          "win_rate": 0.4906
+        },
+        "all_mean_net_ret": 0.00036
+      },
+      "val_permutation_p": 0.000999000999000999,
+      "val_q90_gate": {
+        "threshold": 0.431828,
+        "n": 160,
+        "mean_gross": 0.00277,
+        "mean_net_0p2": 0.00077,
+        "win_rate": 0.4938
+      },
+      "extra": {
+        "seeds": [
+          42,
+          7,
+          2026
+        ],
+        "iters": [
+          22,
+          42,
+          20
+        ]
+      }
+    },
+    {
+      "variant": "top15_features",
+      "note": "retrain on top-15 gain features from baseline",
+      "best_iteration": 33,
+      "val": {
+        "n": 1598,
+        "positive_rate": 0.4262,
+        "roc_auc": 0.5652,
+        "pr_auc": 0.4681,
+        "thresholds": {
+          "0.4": {
+            "n_signals": 424,
+            "precision": 0.4929,
+            "recall": 0.3069
+          },
+          "0.5": {
+            "n_signals": 29,
+            "precision": 0.4828,
+            "recall": 0.0206
+          },
+          "0.6": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.7": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        },
+        "top_decile": {
+          "n": 159,
+          "mean_realized_ret": 0.00223,
+          "mean_net_ret": 0.00023,
+          "win_rate": 0.4654
+        },
+        "all_mean_net_ret": 0.00036
+      },
+      "val_permutation_p": 0.000999000999000999,
+      "val_q90_gate": {
+        "threshold": 0.444986,
+        "n": 160,
+        "mean_gross": 0.00216,
+        "mean_net_0p2": 0.00016,
+        "win_rate": 0.4625
+      },
+      "extra": {
+        "n_features": 15,
+        "features": [
+          "close_vs_ema200",
+          "ext_up",
+          "atr_pct",
+          "drawdown24",
+          "spread_chg24",
+          "slow_slope_12",
+          "fast_slow_gap",
+          "spread_mean24",
+          "atr_pct_ratio96",
+          "ret_4",
+          "volume_ratio",
+          "vol_ratio_mean8",
+          "ma_spread_pct",
+          "close_vs_ema55",
+          "pre_range48"
+        ]
+      }
+    },
+    {
+      "variant": "slow_lr_0p02",
+      "note": "lr=0.02, rounds=1200, es=80",
+      "best_iteration": 73,
+      "val": {
+        "n": 1598,
+        "positive_rate": 0.4262,
+        "roc_auc": 0.5596,
+        "pr_auc": 0.469,
+        "thresholds": {
+          "0.4": {
+            "n_signals": 394,
+            "precision": 0.4772,
+            "recall": 0.2761
+          },
+          "0.5": {
+            "n_signals": 12,
+            "precision": 0.5,
+            "recall": 0.0088
+          },
+          "0.6": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.7": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        },
+        "top_decile": {
+          "n": 159,
+          "mean_realized_ret": 0.00267,
+          "mean_net_ret": 0.00067,
+          "win_rate": 0.4969
+        },
+        "all_mean_net_ret": 0.00036
+      },
+      "val_permutation_p": 0.000999000999000999,
+      "val_q90_gate": {
+        "threshold": 0.43718,
+        "n": 160,
+        "mean_gross": 0.00271,
+        "mean_net_0p2": 0.00071,
+        "win_rate": 0.5
+      },
+      "extra": {
+        "params": {
+          "objective": "binary",
+          "learning_rate": 0.02,
+          "num_leaves": 15,
+          "min_child_samples": 30,
+          "feature_fraction": 0.8,
+          "bagging_fraction": 0.8,
+          "bagging_freq": 1,
+          "lambda_l2": 1.0,
+          "seed": 42,
+          "verbosity": -1
+        }
+      }
+    },
+    {
+      "variant": "baseline_logreg_ma_spread",
+      "note": "single-feature logistic baseline",
+      "best_iteration": null,
+      "val": {
+        "n": 1598,
+        "positive_rate": 0.4262,
+        "roc_auc": 0.4619,
+        "pr_auc": 0.3938,
+        "thresholds": {
+          "0.4": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.5": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.6": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "0.7": {
+            "n_signals": 0,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        },
+        "top_decile": {
+          "n": 159,
+          "mean_realized_ret": 4e-05,
+          "mean_net_ret": -0.00196,
+          "win_rate": 0.3208
+        },
+        "all_mean_net_ret": 0.00036
+      },
+      "val_permutation_p": 0.995004995004995,
+      "val_q90_gate": {
+        "threshold": 0.344849,
+        "n": 160,
+        "mean_gross": -3e-05,
+        "mean_net_0p2": -0.00203,
+        "win_rate": 0.3187
+      },
+      "extra": {
+        "model": "logreg_ma_spread_pct"
+      }
+    }
+  ],
+  "ranking": [
+    "reg_realized_ret",
+    "deeper",
+    "baseline",
+    "abs_ret_weight",
+    "strong_reg",
+    "seed_ensemble_3",
+    "slow_lr_0p02",
+    "recency_weight_60d",
+    "top15_features",
+    "scale_pos_weight",
+    "baseline_logreg_ma_spread"
+  ]
+}

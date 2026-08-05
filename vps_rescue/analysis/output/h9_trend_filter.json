@@ -1,0 +1,36 @@
+{
+  "dataset": "/Users/zhangzc/fable-trading/data/sweep_v3/judgment_v3_tp5_sl2_h72.csv",
+  "threshold_q90": 0.39735,
+  "flag_coverage": 1.0,
+  "top_bucket": {
+    "no_filter": {
+      "n": 160,
+      "mean_net_maker": 0.00152,
+      "win_rate": 0.4813
+    },
+    "up_slope_only": {
+      "n": 80,
+      "mean_net_maker": 0.00162,
+      "win_rate": 0.5
+    },
+    "above_ma_only": {
+      "n": 82,
+      "mean_net_maker": 0.00203,
+      "win_rate": 0.5122
+    },
+    "both": {
+      "n": 61,
+      "mean_net_maker": 0.00155,
+      "win_rate": 0.5082
+    },
+    "against_trend": {
+      "n": 59,
+      "mean_net_maker": 0.00072,
+      "win_rate": 0.4407
+    }
+  },
+  "all_val_pass_rate": {
+    "up_slope": 0.2766,
+    "above_ma": 0.3586
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "dataset": "data/ma206/swap_tp5_sl2_ma206.csv",
+  "bar": "15m",
+  "horizon_bars": 72,
+  "purge_window": "0 days 18:15:00",
+  "holdout_start": "2026-05-04 00:00:00+00:00",
+  "splits": {
+    "train": {
+      "n": 12032,
+      "range": [
+        "2025-06-04 15:00:00+00:00",
+        "2026-03-21 01:30:00+00:00"
+      ]
+    },
+    "val": {
+      "n": 3030,
+      "range": [
+        "2026-03-21 20:00:00+00:00",
+        "2026-05-03 05:30:00+00:00"
+      ]
+    },
+    "holdout": {
+      "n": 4406,
+      "range": [
+        "2026-05-04 00:45:00+00:00",
+        "2026-07-08 21:00:00+00:00"
+      ]
+    }
+  },
+  "best_iteration": 32,
+  "val": {
+    "n": 3030,
+    "positive_rate": 0.2776,
+    "roc_auc": 0.5702,
+    "pr_auc": 0.3205,
+    "thresholds": {
+      "0.4": {
+        "n_signals": 52,
+        "precision": 0.3846,
+        "recall": 0.0238
+      },
+      "0.5": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.6": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.7": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    },
+    "top_decile": {
+      "n": 303,
+      "mean_realized_ret": 0.00079,
+      "mean_net_ret": -0.00121,
+      "win_rate": 0.3267
+    },
+    "all_mean_net_ret": -0.00149
+  },
+  "val_permutation_p": 0.000999000999000999,
+  "val_baseline_ma_spread_logreg": {
+    "n": 3030,
+    "positive_rate": 0.2776,
+    "roc_auc": 0.5085,
+    "pr_auc": 0.2947,
+    "thresholds": {
+      "0.4": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.5": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.6": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "0.7": {
+        "n_signals": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    },
+    "top_decile": {
+      "n": 303,
+      "mean_realized_ret": 0.00234,
+      "mean_net_ret": 0.00034,
+      "win_rate": 0.3432
+    },
+    "all_mean_net_ret": -0.00149
+  },
+  "feature_importance_top10": [
+    {
+      "feature": "ext_up",
+      "gain": 954.8679747581482
+    },
+    {
+      "feature": "pre_range48",
+      "gain": 606.4411907196045
+    },
+    {
+      "feature": "pre_range168",
+      "gain": 553.8937892913818
+    },
+    {
+      "feature": "atr_pct_ratio96",
+      "gain": 533.0075798034668
+    },
+    {
+      "feature": "ma_spread_pct",
+      "gain": 322.7921314239502
+    },
+    {
+      "feature": "close_vs_ema60",
+      "gain": 282.58841133117676
+    },
+    {
+      "feature": "ret_48",
+      "gain": 266.6408052444458
+    },
+    {
+      "feature": "spread_pos96",
+      "gain": 262.58015060424805
+    },
+    {
+      "feature": "drawdown24",
+      "gain": 261.1913814544678
+    },
+    {
+      "feature": "full_spread",
+      "gain": 256.6460590362549
+    }
+  ]
+}

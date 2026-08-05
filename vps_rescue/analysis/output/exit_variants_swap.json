@@ -1,0 +1,159 @@
+[
+  {
+    "config": "tp5_sl2_base",
+    "dataset": "/Users/zhangzc/fable-trading-codex/data/sweep_exits_swap/tp5_sl2_base.csv",
+    "n": 9312,
+    "n_train": 6027,
+    "n_val": 1510,
+    "positive_rate_val": 0.3212,
+    "val_auc": 0.5601,
+    "perm_p": 0.001,
+    "top_gross": 0.00086,
+    "top_net_taker_010": -0.00014,
+    "top_net_maker_006": 0.00026,
+    "top_win_rate": 0.3245,
+    "top_maker_fill_rate": 0.848,
+    "top_net_maker_filled_only": 1e-05,
+    "threshold_val_q90": 0.38741,
+    "portfolio_maker": {
+      "n_trades": 123,
+      "net_total_units": -0.0187,
+      "net_return_on_capital": -0.0019,
+      "mean_net_per_trade": -0.00015,
+      "win_rate": 0.3333,
+      "profit_factor": 0.964,
+      "max_drawdown_pct": 0.0156,
+      "outcome_counts": {
+        "sl": 80,
+        "tp": 36,
+        "timeout": 7
+      }
+    },
+    "portfolio_taker": {
+      "n_trades": 144,
+      "net_total_units": -0.0465,
+      "net_return_on_capital": -0.0046,
+      "mean_net_per_trade": -0.00032,
+      "win_rate": 0.3472,
+      "profit_factor": 0.927,
+      "max_drawdown_pct": 0.0194,
+      "outcome_counts": {
+        "sl": 91,
+        "tp": 45,
+        "timeout": 8
+      }
+    },
+    "mean_exit_bars": 22.1,
+    "outcomes": {
+      "sl": 914,
+      "tp": 485,
+      "timeout": 111
+    }
+  },
+  {
+    "config": "scaled_25_t3",
+    "dataset": "/Users/zhangzc/fable-trading-codex/data/sweep_exits_swap/scaled_25_t3.csv",
+    "n": 9312,
+    "n_train": 6027,
+    "n_val": 1510,
+    "positive_rate_val": 0.5305,
+    "val_auc": 0.6106,
+    "perm_p": 0.001,
+    "top_gross": 0.00386,
+    "top_net_taker_010": 0.00286,
+    "top_net_maker_006": 0.00326,
+    "top_win_rate": 0.7285,
+    "top_maker_fill_rate": 0.861,
+    "top_net_maker_filled_only": 0.0034,
+    "threshold_val_q90": 0.60779,
+    "portfolio_maker": {
+      "n_trades": 125,
+      "net_total_units": 0.4149,
+      "net_return_on_capital": 0.0415,
+      "mean_net_per_trade": 0.00332,
+      "win_rate": 0.712,
+      "profit_factor": 2.825,
+      "max_drawdown_pct": 0.0029,
+      "outcome_counts": {
+        "scaled": 85,
+        "sl": 36,
+        "scaled_timeout": 3,
+        "timeout": 1
+      }
+    },
+    "portfolio_taker": {
+      "n_trades": 144,
+      "net_total_units": 0.421,
+      "net_return_on_capital": 0.0421,
+      "mean_net_per_trade": 0.00292,
+      "win_rate": 0.7292,
+      "profit_factor": 2.583,
+      "max_drawdown_pct": 0.0031,
+      "outcome_counts": {
+        "scaled": 101,
+        "sl": 39,
+        "scaled_timeout": 3,
+        "timeout": 1
+      }
+    },
+    "mean_exit_bars": 19.0,
+    "outcomes": {
+      "scaled": 758,
+      "sl": 700,
+      "scaled_timeout": 29,
+      "timeout": 23
+    }
+  },
+  {
+    "config": "breakeven_15",
+    "dataset": "/Users/zhangzc/fable-trading-codex/data/sweep_exits_swap/breakeven_15.csv",
+    "n": 9312,
+    "n_train": 6027,
+    "n_val": 1510,
+    "positive_rate_val": 0.2245,
+    "val_auc": 0.5172,
+    "perm_p": 0.1738,
+    "top_gross": 0.00156,
+    "top_net_taker_010": 0.00056,
+    "top_net_maker_006": 0.00096,
+    "top_win_rate": 0.2185,
+    "top_maker_fill_rate": 0.907,
+    "top_net_maker_filled_only": 0.00046,
+    "threshold_val_q90": 0.22392,
+    "portfolio_maker": {
+      "n_trades": 137,
+      "net_total_units": 0.0577,
+      "net_return_on_capital": 0.0058,
+      "mean_net_per_trade": 0.00042,
+      "win_rate": 0.1971,
+      "profit_factor": 1.157,
+      "max_drawdown_pct": 0.008,
+      "outcome_counts": {
+        "be": 62,
+        "sl": 48,
+        "tp": 27
+      }
+    },
+    "portfolio_taker": {
+      "n_trades": 151,
+      "net_total_units": 0.0778,
+      "net_return_on_capital": 0.0078,
+      "mean_net_per_trade": 0.00052,
+      "win_rate": 0.2185,
+      "profit_factor": 1.18,
+      "max_drawdown_pct": 0.0092,
+      "outcome_counts": {
+        "be": 68,
+        "sl": 50,
+        "tp": 33
+      }
+    },
+    "mean_exit_bars": 13.9,
+    "outcomes": {
+      "be": 608,
+      "sl": 562,
+      "tp": 320,
+      "timeout": 20
+    }
+  }
+]

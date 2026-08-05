@@ -1,0 +1,87 @@
+{
+  "run": "owner_hts_chain",
+  "hypothesis": "H-TS",
+  "cutoff": "2026-05-04 exclusive (window end)",
+  "dataset": {
+    "hypothesis": "H-TS",
+    "src": "/Users/zhangzc/fable-trading/datasets/dense_owner_v9",
+    "dst": "/Users/zhangzc/fable-trading/datasets/dense_owner_hts",
+    "cutoff_exclusive_utc": "2026-05-04 00:00:00+00:00",
+    "window": 200,
+    "stats": {
+      "train_kept": 5743,
+      "train_post_cutoff": 715,
+      "train_unresolved": 213,
+      "val_kept": 2076,
+      "val_unresolved": 164,
+      "val_post_cutoff": 253
+    },
+    "n_kept": 7819,
+    "n_dropped": 1345,
+    "drop_reasons": {
+      "post_cutoff": 968,
+      "unresolved": 377
+    }
+  },
+  "weights": "runs/detect/runs/detect/owner_hts_chain/weights/best.pt",
+  "promoted": false,
+  "note": "experiment only — owner_best not auto-switched",
+  "frozen_eval": {
+    "conf": 0.3,
+    "f1": 0.658,
+    "p": 0.665,
+    "r": 0.651,
+    "tp": 149,
+    "fp": 75,
+    "fn": 80
+  },
+  "frozen_sweep": [
+    {
+      "conf": 0.15,
+      "f1": 0.605,
+      "p": 0.485,
+      "r": 0.803,
+      "tp": 184,
+      "fp": 195,
+      "fn": 45
+    },
+    {
+      "conf": 0.2,
+      "f1": 0.642,
+      "p": 0.554,
+      "r": 0.764,
+      "tp": 175,
+      "fp": 141,
+      "fn": 54
+    },
+    {
+      "conf": 0.3,
+      "f1": 0.658,
+      "p": 0.665,
+      "r": 0.651,
+      "tp": 149,
+      "fp": 75,
+      "fn": 80
+    },
+    {
+      "conf": 0.4,
+      "f1": 0.619,
+      "p": 0.747,
+      "r": 0.528,
+      "tp": 121,
+      "fp": 41,
+      "fn": 108
+    }
+  ],
+  "curve": {
+    "epochs": 15,
+    "best_epoch": 5,
+    "best_map50": 0.5193,
+    "healthy": true
+  },
+  "baseline_owner_best": {
+    "source_run": "owner_v10_chain",
+    "frozen_eval_f1": 0.645
+  },
+  "f1_delta_vs_best": 0.013
+}

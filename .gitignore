@@ -5,6 +5,10 @@
 datasets/
 runs/
 *.pt
+# 2026-08-05 owner: 自训权重入库。v11 检测器的教训——权重只在三台机器上存在，
+# 07-23 一道清除指令就永久没了，git 里连找回的余地都没有。COCO 底座
+# (yolo11*.pt) 仍然忽略：那是 ultralytics 的公开文件，随时能下回来。
+!models/owner_*.pt
 
 # Python
 __pycache__/
@@ -49,8 +53,11 @@ src/webapp/static/scout.html
 output/label_studio/*.bak_pre_v5_refresh
 
 # rescued from the VPS before it lapsed; forward_log and the executor ledger are
-# real trading records that only ever existed there (live discipline 9)
-vps_rescue/
+# real trading records that only ever existed there (live discipline 9).
+# 2026-08-05 owner: these now enter git — they are irreplaceable and the local
+# copy is the only one left. Audited first: the only long hex strings in the
+# reports are SHA256 ledger hashes, and executor_config.json holds sizing
+# parameters, no credentials. Keys stay ignored under "# secrets" above.
 
 # fetched OHLCV for the movers scan: re-fetchable from OKX, and data/ never enters git
 analysis/output/movers_3d_data/

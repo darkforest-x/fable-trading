@@ -1,0 +1,613 @@
+{
+  "discipline": "val-only, no holdout; majors-limited 15m baseline; rules expanded TP5/SL2",
+  "horizon_policy": "wall-clock match 15m*72 ≈ 18h",
+  "costs": {
+    "base_portfolio": 0.003,
+    "top_decile_rt": 0.002
+  },
+  "max_concurrent": 10,
+  "coverage": [
+    {
+      "bar": "1m",
+      "horizon_bars": 1080,
+      "series_scanned": 0,
+      "series_with_candidates": 0,
+      "n_candidates": 0,
+      "symbols": [],
+      "wall_clock_hours": 18.0
+    },
+    {
+      "bar": "2m",
+      "horizon_bars": 540,
+      "series_scanned": 18,
+      "series_with_candidates": 18,
+      "n_candidates": 6767,
+      "symbols": [
+        "AAVE_USDT_SWAP",
+        "ADA_USDT_SWAP",
+        "ATOM_USDT_SWAP",
+        "AVAX_USDT_SWAP",
+        "BCH_USDT_SWAP",
+        "BNB_USDT_SWAP",
+        "BTC_USDT_SWAP",
+        "DOGE_USDT_SWAP",
+        "DOT_USDT_SWAP",
+        "ETH_USDT_SWAP",
+        "FIL_USDT_SWAP",
+        "LINK_USDT_SWAP",
+        "LTC_USDT_SWAP",
+        "NEAR_USDT_SWAP",
+        "SOL_USDT_SWAP",
+        "SUI_USDT_SWAP",
+        "UNI_USDT_SWAP",
+        "XRP_USDT_SWAP"
+      ],
+      "wall_clock_hours": 18.0
+    },
+    {
+      "bar": "3m",
+      "horizon_bars": 360,
+      "series_scanned": 2,
+      "series_with_candidates": 2,
+      "n_candidates": 456,
+      "symbols": [
+        "BTC_USDT_SWAP",
+        "ETH_USDT_SWAP"
+      ],
+      "wall_clock_hours": 18.0
+    },
+    {
+      "bar": "5m",
+      "horizon_bars": 216,
+      "series_scanned": 90,
+      "series_with_candidates": 67,
+      "n_candidates": 7127,
+      "symbols": [
+        "ACT_USDT_SWAP",
+        "ADA_USDT_SWAP",
+        "AERO_USDT_SWAP",
+        "AI_USDT_SWAP",
+        "ALLO_USDT_SWAP",
+        "ANIME_USDT_SWAP",
+        "ARB_USDT_SWAP",
+        "ATH_USDT_SWAP",
+        "AT_USDT_SWAP",
+        "AVAX_USDT_SWAP",
+        "A_USDT_SWAP",
+        "BASED_USDT_SWAP",
+        "BEAT_USDT_SWAP",
+        "BICO_USDT_SWAP",
+        "BNB_USDT_SWAP",
+        "BOME_USDT_SWAP",
+        "BONK_USDT_SWAP",
+        "BTC_USDT_SWAP",
+        "CAP_USDT_SWAP",
+        "CHIP_USDT_SWAP",
+        "CHZ_USDT_SWAP",
+        "DOGE_USDT_SWAP",
+        "DOOD_USDT_SWAP",
+        "DOT_USDT_SWAP",
+        "EIGEN_USDT_SWAP",
+        "ENA_USDT_SWAP",
+        "ETHFI_USDT_SWAP",
+        "ETHW_USDT_SWAP",
+        "ETH_USDT_SWAP",
+        "FLOKI_USDT_SWAP",
+        "FOGO_USDT_SWAP",
+        "F_USDT_SWAP",
+        "GALA_USDT_SWAP",
+        "GMT_USDT_SWAP",
+        "GPS_USDT_SWAP",
+        "HBAR_USDT_SWAP",
+        "HMSTR_USDT_SWAP",
+        "H_USDT_SWAP",
+        "IMX_USDT_SWAP",
+        "IOST_USDT_SWAP",
+        "JTO_USDT_SWAP",
+        "KAT_USDT_SWAP",
+        "LAB_USDT_SWAP",
+        "LINEA_USDT_SWAP",
+        "LINK_USDT_SWAP",
+        "LTC_USDT_SWAP",
+        "MEGA_USDT_SWAP",
+        "MEME_USDT_SWAP",
+        "MET_USDT_SWAP",
+        "MEW_USDT_SWAP",
+        "MINA_USDT_SWAP",
+        "MUBARAK_USDT_SWAP",
+        "MUU_USDT_SWAP",
+        "NEIRO_USDT_SWAP",
+        "NOT_USDT_SWAP",
+        "OFC_USDT_SWAP",
+        "OP_USDT_SWAP",
+        "O_USDT_SWAP",
+        "PENGU_USDT_SWAP",
+        "PEOPLE_USDT_SWAP",
+        "PEPE_USDT_SWAP",
+        "PIPPIN_USDT_SWAP",
+        "PUMP_USDT_SWAP",
+        "RAVE_USDT_SWAP",
+        "RESOLV_USDT_SWAP",
+        "RLS_USDT_SWAP",
+        "RSR_USDT_SWAP",
+        "SAHARA_USDT_SWAP",
+        "SATS_USDT_SWAP",
+        "SENT_USDT_SWAP",
+        "SHIB_USDT_SWAP",
+        "SLX_USDT_SWAP",
+        "SOL_USDT_SWAP",
+        "SPACE_USDT_SWAP",
+        "TRIA_USDT_SWAP",
+        "TRX_USDT_SWAP",
+        "TURBO_USDT_SWAP",
+        "UB_USDT_SWAP",
+        "UP_USDT_SWAP",
+        "WLD_USDT_SWAP",
+        "WLFI_USDT_SWAP",
+        "W_USDT_SWAP",
+        "XLM_USDT_SWAP",
+        "XPL_USDT_SWAP",
+        "XRP_USDT_SWAP",
+        "ZETA_USDT_SWAP",
+        "ZIL_USDT_SWAP",
+        "ZKP_USDT_SWAP",
+        "ZK_USDT_SWAP",
+        "ZRX_USDT_SWAP"
+      ],
+      "wall_clock_hours": 18.0
+    },
+    {
+      "bar": "15m",
+      "horizon_bars": 72,
+      "series_scanned": 18,
+      "series_with_candidates": 18,
+      "n_candidates": 3851,
+      "symbols": [
+        "AAVE_USDT_SWAP",
+        "ADA_USDT_SWAP",
+        "ARB_USDT_SWAP",
+        "ATOM_USDT_SWAP",
+        "AVAX_USDT_SWAP",
+        "BCH_USDT_SWAP",
+        "BNB_USDT_SWAP",
+        "BTC_USDT_SWAP",
+        "DOGE_USDT_SWAP",
+        "ETH_USDT_SWAP",
+        "FIL_USDT_SWAP",
+        "LINK_USDT_SWAP",
+        "LTC_USDT_SWAP",
+        "NEAR_USDT_SWAP",
+        "OP_USDT_SWAP",
+        "SOL_USDT_SWAP",
+        "TRX_USDT_SWAP",
+        "XRP_USDT_SWAP"
+      ],
+      "wall_clock_hours": 18.0
+    }
+  ],
+  "results": [
+    {
+      "bar": "1m",
+      "horizon_bars": 1080,
+      "status": "no_data",
+      "n_candidates": 0,
+      "n_val": 0
+    },
+    {
+      "status": "ok",
+      "objective": "binary",
+      "dataset": "/Users/zhangzc/fable-trading/data/low_tf_bt/pool_2m_h540.csv",
+      "n_candidates": 6767,
+      "n_train": 1798,
+      "n_val": 455,
+      "val_range": [
+        "2026-04-19 03:18:00+00:00",
+        "2026-05-02 22:08:00+00:00"
+      ],
+      "pos_rate_val": 0.2945,
+      "best_iteration": 23,
+      "threshold_val_q90": 0.44241107540481023,
+      "val_auc": 0.5853,
+      "perm_p": 0.004,
+      "top_decile": {
+        "n": 45,
+        "mean_realized_ret": 0.00141,
+        "mean_net_ret": -0.00059,
+        "win_rate": 0.4
+      },
+      "top_net_0p2": -0.00059,
+      "portfolio": {
+        "n_eligible": 501,
+        "accept": {
+          "0.002": {
+            "n_trades": 304,
+            "net_total_units": -0.2659,
+            "net_return_on_capital": -0.0266,
+            "mean_net_per_trade": -0.00087,
+            "win_rate": 0.3487,
+            "profit_factor": 0.803,
+            "max_drawdown_pct": 0.0399,
+            "outcome_counts": {
+              "sl": 198,
+              "tp": 106
+            }
+          },
+          "0.003": {
+            "n_trades": 304,
+            "net_total_units": -0.5699,
+            "net_return_on_capital": -0.057,
+            "mean_net_per_trade": -0.00187,
+            "win_rate": 0.3487,
+            "profit_factor": 0.631,
+            "max_drawdown_pct": 0.0653,
+            "outcome_counts": {
+              "sl": 198,
+              "tp": 106
+            }
+          },
+          "0.004": {
+            "n_trades": 304,
+            "net_total_units": -0.8739,
+            "net_return_on_capital": -0.0874,
+            "mean_net_per_trade": -0.00287,
+            "win_rate": 0.3487,
+            "profit_factor": 0.499,
+            "max_drawdown_pct": 0.0907,
+            "outcome_counts": {
+              "sl": 198,
+              "tp": 106
+            }
+          }
+        },
+        "full": {
+          "n_trades": 482,
+          "net_total_units": 0.1458,
+          "net_return_on_capital": 0.0146,
+          "mean_net_per_trade": 0.0003,
+          "win_rate": 0.5124,
+          "profit_factor": 1.081,
+          "max_drawdown_pct": 0.0682,
+          "outcome_counts": {
+            "tp": 247,
+            "sl": 235
+          }
+        },
+        "insample_pre": {
+          "n_trades": 178,
+          "net_total_units": 0.7157,
+          "net_return_on_capital": 0.0716,
+          "mean_net_per_trade": 0.00402,
+          "win_rate": 0.7921,
+          "profit_factor": 3.914,
+          "max_drawdown_pct": 0.0077,
+          "outcome_counts": {
+            "tp": 141,
+            "sl": 37
+          }
+        },
+        "accept_checks_0p3": {
+          "net_positive": false,
+          "pf_ge_1_3": false,
+          "n_ge_100": true
+        }
+      },
+      "bar": "2m",
+      "horizon_bars": 540,
+      "wall_clock_hours": 18.0
+    },
+    {
+      "status": "ok",
+      "objective": "binary",
+      "dataset": "/Users/zhangzc/fable-trading/data/low_tf_bt/pool_3m_h360.csv",
+      "n_candidates": 456,
+      "n_train": 168,
+      "n_val": 43,
+      "val_range": [
+        "2026-04-17 20:15:00+00:00",
+        "2026-05-01 16:06:00+00:00"
+      ],
+      "pos_rate_val": 0.2791,
+      "best_iteration": 75,
+      "threshold_val_q90": 0.6019949093561081,
+      "val_auc": 0.7823,
+      "perm_p": 0.002,
+      "top_decile": {
+        "n": 4,
+        "mean_realized_ret": 0.00241,
+        "mean_net_ret": 0.00041,
+        "win_rate": 0.5
+      },
+      "top_net_0p2": 0.00041,
+      "portfolio": {
+        "n_eligible": 31,
+        "accept": {
+          "0.002": {
+            "n_trades": 11,
+            "net_total_units": -0.0282,
+            "net_return_on_capital": -0.0028,
+            "mean_net_per_trade": -0.00257,
+            "win_rate": 0.2727,
+            "profit_factor": 0.432,
+            "max_drawdown_pct": 0.0044,
+            "outcome_counts": {
+              "sl": 8,
+              "tp": 3
+            }
+          },
+          "0.003": {
+            "n_trades": 11,
+            "net_total_units": -0.0392,
+            "net_return_on_capital": -0.0039,
+            "mean_net_per_trade": -0.00357,
+            "win_rate": 0.2727,
+            "profit_factor": 0.32,
+            "max_drawdown_pct": 0.0051,
+            "outcome_counts": {
+              "sl": 8,
+              "tp": 3
+            }
+          },
+          "0.004": {
+            "n_trades": 11,
+            "net_total_units": -0.0502,
+            "net_return_on_capital": -0.005,
+            "mean_net_per_trade": -0.00457,
+            "win_rate": 0.2727,
+            "profit_factor": 0.236,
+            "max_drawdown_pct": 0.0058,
+            "outcome_counts": {
+              "sl": 8,
+              "tp": 3
+            }
+          }
+        },
+        "full": {
+          "n_trades": 30,
+          "net_total_units": 0.0572,
+          "net_return_on_capital": 0.0057,
+          "mean_net_per_trade": 0.00191,
+          "win_rate": 0.6667,
+          "profit_factor": 1.795,
+          "max_drawdown_pct": 0.0056,
+          "outcome_counts": {
+            "tp": 20,
+            "sl": 10
+          }
+        },
+        "insample_pre": {
+          "n_trades": 19,
+          "net_total_units": 0.0964,
+          "net_return_on_capital": 0.0096,
+          "mean_net_per_trade": 0.00508,
+          "win_rate": 0.8947,
+          "profit_factor": 7.817,
+          "max_drawdown_pct": 0.0008,
+          "outcome_counts": {
+            "tp": 17,
+            "sl": 2
+          }
+        },
+        "accept_checks_0p3": {
+          "net_positive": false,
+          "pf_ge_1_3": false,
+          "n_ge_100": false
+        }
+      },
+      "bar": "3m",
+      "horizon_bars": 360,
+      "wall_clock_hours": 18.0
+    },
+    {
+      "status": "ok",
+      "objective": "binary",
+      "dataset": "/Users/zhangzc/fable-trading/data/low_tf_bt/pool_5m_h216.csv",
+      "n_candidates": 7127,
+      "n_train": 3804,
+      "n_val": 957,
+      "val_range": [
+        "2026-04-02 20:15:00+00:00",
+        "2026-05-03 05:05:00+00:00"
+      ],
+      "pos_rate_val": 0.3438,
+      "best_iteration": 11,
+      "threshold_val_q90": 0.32736091206229234,
+      "val_auc": 0.5666,
+      "perm_p": 0.002,
+      "top_decile": {
+        "n": 95,
+        "mean_realized_ret": -4e-05,
+        "mean_net_ret": -0.00204,
+        "win_rate": 0.2632
+      },
+      "top_net_0p2": -0.00204,
+      "portfolio": {
+        "n_eligible": 576,
+        "accept": {
+          "0.002": {
+            "n_trades": 180,
+            "net_total_units": -0.0838,
+            "net_return_on_capital": -0.0084,
+            "mean_net_per_trade": -0.00047,
+            "win_rate": 0.3889,
+            "profit_factor": 0.875,
+            "max_drawdown_pct": 0.0185,
+            "outcome_counts": {
+              "sl": 110,
+              "tp": 70
+            }
+          },
+          "0.003": {
+            "n_trades": 180,
+            "net_total_units": -0.2638,
+            "net_return_on_capital": -0.0264,
+            "mean_net_per_trade": -0.00147,
+            "win_rate": 0.3889,
+            "profit_factor": 0.662,
+            "max_drawdown_pct": 0.0296,
+            "outcome_counts": {
+              "sl": 110,
+              "tp": 70
+            }
+          },
+          "0.004": {
+            "n_trades": 180,
+            "net_total_units": -0.4438,
+            "net_return_on_capital": -0.0444,
+            "mean_net_per_trade": -0.00247,
+            "win_rate": 0.3889,
+            "profit_factor": 0.501,
+            "max_drawdown_pct": 0.0469,
+            "outcome_counts": {
+              "sl": 110,
+              "tp": 70
+            }
+          }
+        },
+        "full": {
+          "n_trades": 555,
+          "net_total_units": 0.3525,
+          "net_return_on_capital": 0.0352,
+          "mean_net_per_trade": 0.00064,
+          "win_rate": 0.5243,
+          "profit_factor": 1.19,
+          "max_drawdown_pct": 0.0506,
+          "outcome_counts": {
+            "tp": 289,
+            "sl": 264,
+            "timeout": 2
+          }
+        },
+        "insample_pre": {
+          "n_trades": 375,
+          "net_total_units": 0.6162,
+          "net_return_on_capital": 0.0616,
+          "mean_net_per_trade": 0.00164,
+          "win_rate": 0.5893,
+          "profit_factor": 1.573,
+          "max_drawdown_pct": 0.0283,
+          "outcome_counts": {
+            "tp": 219,
+            "sl": 154,
+            "timeout": 2
+          }
+        },
+        "accept_checks_0p3": {
+          "net_positive": false,
+          "pf_ge_1_3": false,
+          "n_ge_100": true
+        }
+      },
+      "bar": "5m",
+      "horizon_bars": 216,
+      "wall_clock_hours": 18.0
+    },
+    {
+      "status": "ok",
+      "objective": "binary",
+      "dataset": "/Users/zhangzc/fable-trading/data/low_tf_bt/pool_15m_h72.csv",
+      "n_candidates": 3851,
+      "n_train": 2446,
+      "n_val": 615,
+      "val_range": [
+        "2026-03-12 19:00:00+00:00",
+        "2026-05-03 01:15:00+00:00"
+      ],
+      "pos_rate_val": 0.348,
+      "best_iteration": 9,
+      "threshold_val_q90": 0.3277587713193872,
+      "val_auc": 0.569,
+      "perm_p": 0.002,
+      "top_decile": {
+        "n": 61,
+        "mean_realized_ret": 0.00125,
+        "mean_net_ret": -0.00075,
+        "win_rate": 0.377
+      },
+      "top_net_0p2": -0.00075,
+      "portfolio": {
+        "n_eligible": 326,
+        "accept": {
+          "0.002": {
+            "n_trades": 45,
+            "net_total_units": -0.0464,
+            "net_return_on_capital": -0.0046,
+            "mean_net_per_trade": -0.00103,
+            "win_rate": 0.3556,
+            "profit_factor": 0.766,
+            "max_drawdown_pct": 0.0124,
+            "outcome_counts": {
+              "sl": 28,
+              "tp": 13,
+              "timeout": 4
+            }
+          },
+          "0.003": {
+            "n_trades": 45,
+            "net_total_units": -0.0914,
+            "net_return_on_capital": -0.0091,
+            "mean_net_per_trade": -0.00203,
+            "win_rate": 0.3556,
+            "profit_factor": 0.599,
+            "max_drawdown_pct": 0.015,
+            "outcome_counts": {
+              "sl": 28,
+              "tp": 13,
+              "timeout": 4
+            }
+          },
+          "0.004": {
+            "n_trades": 45,
+            "net_total_units": -0.1364,
+            "net_return_on_capital": -0.0136,
+            "mean_net_per_trade": -0.00303,
+            "win_rate": 0.3333,
+            "profit_factor": 0.469,
+            "max_drawdown_pct": 0.0179,
+            "outcome_counts": {
+              "sl": 28,
+              "tp": 13,
+              "timeout": 4
+            }
+          }
+        },
+        "full": {
+          "n_trades": 310,
+          "net_total_units": 1.0442,
+          "net_return_on_capital": 0.1044,
+          "mean_net_per_trade": 0.00337,
+          "win_rate": 0.629,
+          "profit_factor": 2.155,
+          "max_drawdown_pct": 0.0221,
+          "outcome_counts": {
+            "tp": 186,
+            "sl": 111,
+            "timeout": 13
+          }
+        },
+        "insample_pre": {
+          "n_trades": 265,
+          "net_total_units": 1.1356,
+          "net_return_on_capital": 0.1136,
+          "mean_net_per_trade": 0.00429,
+          "win_rate": 0.6755,
+          "profit_factor": 2.679,
+          "max_drawdown_pct": 0.0134,
+          "outcome_counts": {
+            "tp": 173,
+            "sl": 83,
+            "timeout": 9
+          }
+        },
+        "accept_checks_0p3": {
+          "net_positive": false,
+          "pf_ge_1_3": false,
+          "n_ge_100": false
+        }
+      },
+      "bar": "15m",
+      "horizon_bars": 72,
+      "wall_clock_hours": 18.0
+    }
+  ],
+  "interpretation": "按 val top 净@0.2% 最优：**3m** (+0.00041)。 - 2m vs 15m majors：top 净 Δ=+0.00016，验收笔数 304 vs 45。 - 3m vs 15m majors：top 净 Δ=+0.00116，验收笔数 11 vs 45。 - 5m vs 15m majors：top 净 Δ=-0.00129，验收笔数 180 vs 45。 5m top 净未过 0.2% 成本线，与历史 H7 证伪一致。 2m 有数据但币种少、事件密、噪声大；若 top 净/组合 PF 不稳，不宜替代 15m 主线。"
+}

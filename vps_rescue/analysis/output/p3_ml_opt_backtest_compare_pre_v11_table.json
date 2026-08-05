@@ -1,0 +1,187 @@
+{
+  "dataset": "data/judgment_yolo_swap_v8.csv",
+  "generated_note": "ACTIVE=v8 池回归 (frozen_tp5_sl2_swap_yolo_v8_reg_20260716)；SHADOW=旧池二分类 (frozen_tp5_sl2_swap_yolo_20260715)。同阶段 3 模拟器；验收窗 ≥2026-05-04 为已披露消耗窗。",
+  "generated_at": "2026-07-16T14:30:53.420731+00:00",
+  "active": "v8_reg",
+  "shadow": "binary_yolo",
+  "variants": {
+    "v8_reg": {
+      "variant": "ACTIVE · v8 池回归",
+      "objective": "regression",
+      "model_path": "models/frozen_tp5_sl2_swap_yolo_v8_reg_20260716.txt",
+      "dataset": "data/judgment_yolo_swap_v8.csv",
+      "score_threshold_val_q90": 0.02171,
+      "n_candidates": 17573,
+      "n_eligible": 2281,
+      "cost_sweep_accept_window": {
+        "0.002": {
+          "n_trades": 428,
+          "net_total_units": 15.9134,
+          "net_return_on_capital": 1.5913,
+          "mean_net_per_trade": 0.03718,
+          "win_rate": 0.7991,
+          "profit_factor": 7.931,
+          "max_drawdown_pct": 0.0068,
+          "outcome_counts": {
+            "tp": 310,
+            "sl": 76,
+            "timeout": 41,
+            "sl_ambiguous": 1
+          }
+        },
+        "0.003": {
+          "n_trades": 428,
+          "net_total_units": 15.4854,
+          "net_return_on_capital": 1.5485,
+          "mean_net_per_trade": 0.03618,
+          "win_rate": 0.7967,
+          "profit_factor": 7.501,
+          "max_drawdown_pct": 0.007,
+          "outcome_counts": {
+            "tp": 310,
+            "sl": 76,
+            "timeout": 41,
+            "sl_ambiguous": 1
+          }
+        },
+        "0.004": {
+          "n_trades": 428,
+          "net_total_units": 15.0574,
+          "net_return_on_capital": 1.5057,
+          "mean_net_per_trade": 0.03518,
+          "win_rate": 0.7944,
+          "profit_factor": 7.098,
+          "max_drawdown_pct": 0.0072,
+          "outcome_counts": {
+            "tp": 310,
+            "sl": 76,
+            "timeout": 41,
+            "sl_ambiguous": 1
+          }
+        }
+      },
+      "insample_pre_window_base_cost": {
+        "n_trades": 1528,
+        "net_total_units": 59.7732,
+        "net_return_on_capital": 5.9773,
+        "mean_net_per_trade": 0.03912,
+        "win_rate": 0.822,
+        "profit_factor": 9.413,
+        "max_drawdown_pct": 0.0081,
+        "outcome_counts": {
+          "tp": 1150,
+          "sl": 226,
+          "timeout": 152
+        }
+      },
+      "full_period_base_cost": {
+        "n_trades": 1956,
+        "net_total_units": 75.2586,
+        "net_return_on_capital": 7.5259,
+        "mean_net_per_trade": 0.03848,
+        "win_rate": 0.8165,
+        "profit_factor": 8.933,
+        "max_drawdown_pct": 0.0081,
+        "outcome_counts": {
+          "tp": 1460,
+          "sl": 302,
+          "timeout": 193,
+          "sl_ambiguous": 1
+        }
+      },
+      "acceptance_check_base_cost": {
+        "net_positive": true,
+        "profit_factor_ge_1.3": true,
+        "max_drawdown_le_20pct": true,
+        "n_trades_ge_100": true
+      }
+    },
+    "binary_yolo": {
+      "variant": "SHADOW · 旧池二分类",
+      "objective": "binary",
+      "model_path": "models/frozen_tp5_sl2_swap_yolo_20260715.txt",
+      "dataset": "data/judgment_yolo_swap.csv",
+      "score_threshold_val_q90": 0.7108667076145195,
+      "n_candidates": 2385,
+      "n_eligible": 272,
+      "cost_sweep_accept_window": {
+        "0.002": {
+          "n_trades": 49,
+          "net_total_units": 1.0768,
+          "net_return_on_capital": 0.1077,
+          "mean_net_per_trade": 0.02198,
+          "win_rate": 0.8163,
+          "profit_factor": 8.665,
+          "max_drawdown_pct": 0.0042,
+          "outcome_counts": {
+            "tp": 39,
+            "sl": 9,
+            "timeout": 1
+          }
+        },
+        "0.003": {
+          "n_trades": 49,
+          "net_total_units": 1.0278,
+          "net_return_on_capital": 0.1028,
+          "mean_net_per_trade": 0.02098,
+          "win_rate": 0.8163,
+          "profit_factor": 7.876,
+          "max_drawdown_pct": 0.0043,
+          "outcome_counts": {
+            "tp": 39,
+            "sl": 9,
+            "timeout": 1
+          }
+        },
+        "0.004": {
+          "n_trades": 49,
+          "net_total_units": 0.9788,
+          "net_return_on_capital": 0.0979,
+          "mean_net_per_trade": 0.01998,
+          "win_rate": 0.7959,
+          "profit_factor": 7.17,
+          "max_drawdown_pct": 0.0044,
+          "outcome_counts": {
+            "tp": 39,
+            "sl": 9,
+            "timeout": 1
+          }
+        }
+      },
+      "insample_pre_window_base_cost": {
+        "n_trades": 223,
+        "net_total_units": 6.9137,
+        "net_return_on_capital": 0.6914,
+        "mean_net_per_trade": 0.031,
+        "win_rate": 0.9686,
+        "profit_factor": 98.887,
+        "max_drawdown_pct": 0.0015,
+        "outcome_counts": {
+          "tp": 215,
+          "sl": 6,
+          "timeout": 2
+        }
+      },
+      "full_period_base_cost": {
+        "n_trades": 272,
+        "net_total_units": 7.9415,
+        "net_return_on_capital": 0.7942,
+        "mean_net_per_trade": 0.0292,
+        "win_rate": 0.9412,
+        "profit_factor": 37.08,
+        "max_drawdown_pct": 0.0026,
+        "outcome_counts": {
+          "tp": 254,
+          "sl": 15,
+          "timeout": 3
+        }
+      },
+      "acceptance_check_base_cost": {
+        "net_positive": true,
+        "profit_factor_ge_1.3": true,
+        "max_drawdown_le_20pct": true,
+        "n_trades_ge_100": false
+      }
+    }
+  }
+}

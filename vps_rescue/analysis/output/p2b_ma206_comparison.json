@@ -1,0 +1,168 @@
+{
+  "discipline": "val-only; holdout loaded for counts only and not evaluated",
+  "label": "TP5/SL2 h72",
+  "universe": "OKX USDT_SWAP 15m",
+  "v206_series_scanned": 116,
+  "results": [
+    {
+      "name": "ema8_55_swap_tp5_sl2",
+      "dataset": "/Users/zhangzc/fable-trading-codex/data/swap_replication/swap_tp5_sl2.csv",
+      "n_candidates": 8828,
+      "splits": {
+        "train": {
+          "n": 5708,
+          "range": [
+            "2025-06-05 05:15:00+00:00",
+            "2026-03-15 22:30:00+00:00"
+          ]
+        },
+        "val": {
+          "n": 1429,
+          "range": [
+            "2026-03-16 17:00:00+00:00",
+            "2026-05-03 01:15:00+00:00"
+          ]
+        },
+        "holdout": {
+          "n": 1631,
+          "range": [
+            "2026-05-04 01:00:00+00:00",
+            "2026-07-07 19:45:00+00:00"
+          ]
+        }
+      },
+      "positive_rate": 0.291,
+      "val_auc": 0.5604,
+      "perm_p": 0.001,
+      "top_gross": 0.00285,
+      "top_net_020": 0.00085,
+      "top_net_maker_006": 0.00224,
+      "maker_fill_rate": 0.866,
+      "top_win_rate": 0.4155,
+      "baseline_ma_spread_auc": 0.4833,
+      "baseline_ma_spread_net_020": -0.00091,
+      "feature_importance_top10": [
+        {
+          "feature": "drawdown24",
+          "gain": 604.4708232879639
+        },
+        {
+          "feature": "close_vs_ema200",
+          "gain": 527.7340288162231
+        },
+        {
+          "feature": "atr_pct",
+          "gain": 277.01051807403564
+        },
+        {
+          "feature": "atr_pct_ratio96",
+          "gain": 257.4778513908386
+        },
+        {
+          "feature": "ext_up",
+          "gain": 255.0399694442749
+        },
+        {
+          "feature": "slow_slope_12",
+          "gain": 216.46053886413574
+        },
+        {
+          "feature": "ret_4",
+          "gain": 215.7127285003662
+        },
+        {
+          "feature": "full_spread",
+          "gain": 159.3567409515381
+        },
+        {
+          "feature": "volume_ratio",
+          "gain": 151.81718969345093
+        },
+        {
+          "feature": "spread_chg24",
+          "gain": 142.09793949127197
+        }
+      ]
+    },
+    {
+      "name": "sma_ema_20_60_120_swap_tp5_sl2",
+      "dataset": "/Users/zhangzc/fable-trading-codex/data/ma206/swap_tp5_sl2_ma206.csv",
+      "n_candidates": 6114,
+      "splits": {
+        "train": {
+          "n": 3910,
+          "range": [
+            "2025-06-04 15:00:00+00:00",
+            "2026-03-16 22:00:00+00:00"
+          ]
+        },
+        "val": {
+          "n": 985,
+          "range": [
+            "2026-03-18 02:30:00+00:00",
+            "2026-05-03 02:45:00+00:00"
+          ]
+        },
+        "holdout": {
+          "n": 1162,
+          "range": [
+            "2026-05-04 00:45:00+00:00",
+            "2026-07-08 00:00:00+00:00"
+          ]
+        }
+      },
+      "positive_rate": 0.2669,
+      "val_auc": 0.6255,
+      "perm_p": 0.001,
+      "top_gross": 0.00093,
+      "top_net_020": -0.00107,
+      "top_net_maker_006": 0.00024,
+      "maker_fill_rate": 0.816,
+      "top_win_rate": 0.3673,
+      "baseline_ma_spread_auc": 0.524,
+      "baseline_ma_spread_net_020": -0.0001,
+      "feature_importance_top10": [
+        {
+          "feature": "ext_up",
+          "gain": 702.9136018753052
+        },
+        {
+          "feature": "atr_pct",
+          "gain": 606.0593683719635
+        },
+        {
+          "feature": "atr_pct_ratio96",
+          "gain": 536.9688012599945
+        },
+        {
+          "feature": "pre_range48",
+          "gain": 535.7867803573608
+        },
+        {
+          "feature": "vol_ratio_mean8",
+          "gain": 534.9227197170258
+        },
+        {
+          "feature": "close_vs_ema200",
+          "gain": 534.1911814212799
+        },
+        {
+          "feature": "pre_range168",
+          "gain": 504.2170100212097
+        },
+        {
+          "feature": "close_vs_ema55",
+          "gain": 439.30646657943726
+        },
+        {
+          "feature": "ma_spread_pct",
+          "gain": 434.8035001754761
+        },
+        {
+          "feature": "ret_48",
+          "gain": 405.566570520401
+        }
+      ]
+    }
+  ]
+}

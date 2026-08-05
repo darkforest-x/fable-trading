@@ -1,0 +1,66 @@
+{
+  "n_pool": 23683,
+  "n_usable": 23683,
+  "n_symbols": 256,
+  "ic": [
+    {
+      "factor": "btc_ema55_slope",
+      "n": 23683,
+      "ic": 0.0187,
+      "ir": -0.192,
+      "n_months": 12,
+      "sign_stable": false,
+      "class": "dead"
+    },
+    {
+      "factor": "btc_atr_pctile",
+      "n": 23683,
+      "ic": 0.0436,
+      "ir": 0.058,
+      "n_months": 12,
+      "sign_stable": false,
+      "class": "reversed"
+    }
+  ],
+  "gains": [
+    {
+      "featureset": "baseline_28",
+      "auc": 0.5515,
+      "top_gross": 0.00198,
+      "top_net_maker_006": 0.00138,
+      "top_win_rate": 0.3723,
+      "p": 0.001,
+      "n_val": 4705
+    },
+    {
+      "featureset": "+btc_ema55_slope",
+      "auc": 0.5665,
+      "top_gross": 0.00239,
+      "top_net_maker_006": 0.00179,
+      "top_win_rate": 0.3872,
+      "p": 0.001,
+      "n_val": 4705,
+      "gain_net_maker": 0.00041
+    },
+    {
+      "featureset": "+btc_atr_pctile",
+      "auc": 0.5485,
+      "top_gross": 0.00209,
+      "top_net_maker_006": 0.00149,
+      "top_win_rate": 0.3766,
+      "p": 0.001,
+      "n_val": 4705,
+      "gain_net_maker": 0.00011
+    },
+    {
+      "featureset": "+both_btc",
+      "auc": 0.5599,
+      "top_gross": 0.00241,
+      "top_net_maker_006": 0.00181,
+      "top_win_rate": 0.3894,
+      "p": 0.001,
+      "n_val": 4705,
+      "gain_net_maker": 0.00043
+    }
+  ]
+}
