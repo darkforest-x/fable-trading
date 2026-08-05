@@ -1,0 +1,211 @@
+<!DOCTYPE html><html><head><meta charset='utf-8'/>
+<title>v10 YOLO last 5d · manifest 22</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#0e1116;color:#e6edf3;margin:20px 24px 48px}
+h1{font-size:1.35rem;margin:0 0 8px}
+.meta{color:#8b949e;margin:0 0 12px;font-size:14px;line-height:1.5}
+.filter-dock{position:sticky;top:0;z-index:5;background:#0e1116f2;padding:10px 0 12px;backdrop-filter:blur(6px);border-bottom:1px solid #30363d;margin:0 0 18px}
+.frow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0}
+.flabel{min-width:4.5rem;color:#8b949e;font-size:12px;font-weight:600}
+.frow button{border:1px solid #30363d;background:#21262d;color:#e6edf3;border-radius:999px;padding:5px 11px;font-size:12.5px;cursor:pointer}
+.frow button:hover{border-color:#58a6ff}
+.frow button.active{background:#1f6feb;border-color:#1f6feb;color:#fff}
+.frow button .n{opacity:.85;margin-left:4px;font-variant-numeric:tabular-nums}
+.sec{margin:28px 0 10px;font-size:1.05rem;color:#c9d1d9;border-bottom:1px solid #30363d;padding-bottom:6px}
+.sec .n{color:#8b949e;font-weight:400;font-size:0.9rem}
+.sec.hidden,.grid.hidden{display:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 16px;max-width:1800px;margin:0 auto}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}}
+.card{border:1px solid #30363d;border-radius:12px;overflow:hidden;background:#161b22;box-shadow:0 8px 24px rgba(0,0,0,.35);margin:0}
+.card.hidden{display:none}
+.card img{width:100%;max-height:none;height:auto;display:block;background:#000;image-rendering:auto}
+.card .cap{padding:10px 12px;font-size:13px;line-height:1.45}
+.tag{display:inline-block;background:#1f6feb33;color:#58a6ff;padding:2px 8px;border-radius:999px;font-size:12px;margin:0 4px 0 0}
+.tag.mom{background:#3fb95033;color:#3fb950}
+.tag.vol{background:#d2992233;color:#d29922}
+a.open{color:#58a6ff;font-size:13px;margin-left:8px}
+#count{color:#58a6ff}
+</style></head><body>
+<h1>YOLO v12_htip · OKX USDT-SWAP 15m · last 5 days</h1>
+<p class='meta'>weights=<code>runs/detect/runs/detect/owner_v12_htip/weights/best.pt</code> · scan conf≥0.3 · tip-edge≤2 · min_gap=18 bars · <b>manifest only: <span id='count'>22</span> / 22</b> · L2 <b>not</b> used<br>筛选三维可叠加（AND）：<b>conf</b> · <b>动能 ret_16（约4h）</b> · <b>成交量 volume/mean20</b>（与 candidates_v206 同定义，仅审图）。「分组」切换 section 轴。点「原图」全尺寸。</p>
+<div class='filter-dock'>
+<div class='frow' id='group-by'>
+<span class='flabel'>分组</span>
+<button type='button' class='active' data-group='conf'>按 conf</button>
+<button type='button' data-group='mom'>按 动能</button>
+<button type='button' data-group='vol'>按 成交量</button>
+</div>
+<div class='frow' id='filt-conf'>
+<span class='flabel'>conf</span>
+<button type='button' class='active' data-dim='conf' data-val='all'>全部<span class='n'>22</span></button>
+<button type='button' data-dim='conf' data-val='0.70–0.79'>0.70–0.79<span class='n'>1</span></button>
+<button type='button' data-dim='conf' data-val='0.60–0.69'>0.60–0.69<span class='n'>1</span></button>
+<button type='button' data-dim='conf' data-val='0.50–0.59'>0.50–0.59<span class='n'>4</span></button>
+<button type='button' data-dim='conf' data-val='0.30–0.49'>0.30–0.49<span class='n'>16</span></button>
+</div>
+<div class='frow' id='filt-mom'><span class='flabel'>动能</span>
+<button type='button' class='active' data-dim='mom' data-val='all'>全部<span class='n'>22</span></button>
+<button type='button' data-dim='mom' data-val='强涨≥+2%'>强涨≥+2%<span class='n'>0</span></button>
+<button type='button' data-dim='mom' data-val='弱涨+0.5~2%'>弱涨+0.5~2%<span class='n'>0</span></button>
+<button type='button' data-dim='mom' data-val='横盘±0.5%'>横盘±0.5%<span class='n'>0</span></button>
+<button type='button' data-dim='mom' data-val='弱跌-2~-0.5%'>弱跌-2~-0.5%<span class='n'>0</span></button>
+<button type='button' data-dim='mom' data-val='强跌≤-2%'>强跌≤-2%<span class='n'>0</span></button>
+<button type='button' data-dim='mom' data-val='other'>未知<span class='n'>22</span></button>
+</div>
+<div class='frow' id='filt-vol'><span class='flabel'>成交量</span>
+<button type='button' class='active' data-dim='vol' data-val='all'>全部<span class='n'>22</span></button>
+<button type='button' data-dim='vol' data-val='放量≥2.0x'>放量≥2.0x<span class='n'>0</span></button>
+<button type='button' data-dim='vol' data-val='偏放1.2~2x'>偏放1.2~2x<span class='n'>0</span></button>
+<button type='button' data-dim='vol' data-val='常态0.8~1.2x'>常态0.8~1.2x<span class='n'>0</span></button>
+<button type='button' data-dim='vol' data-val='缩量&lt;0.8x'>缩量&lt;0.8x<span class='n'>0</span></button>
+<button type='button' data-dim='vol' data-val='other'>未知<span class='n'>22</span></button>
+</div></div>
+<h2 class='sec' data-sec-axis='conf' data-sec-val='0.70–0.79'>conf 0.70–0.79 <span class='n'>(1)</span></h2>
+<div class='grid' data-sec-axis='conf' data-sec-val='0.70–0.79'>
+<figure class='card' data-conf='0.70–0.79' data-mom='other' data-vol='other' data-conf-v='0.7920'><a href='images/ASTS_USDT_SWAP_20260802_0030_c0.79.png' target='_blank' rel='noopener'><img src='images/ASTS_USDT_SWAP_20260802_0030_c0.79.png' loading='lazy'/></a><figcaption class='cap'><b>ASTS_USDT_SWAP</b> <span class='tag'>conf 0.792</span><a class='open' href='images/ASTS_USDT_SWAP_20260802_0030_c0.79.png' target='_blank'>原图</a><br>2026-08-02 00:30:00+00:00 UTC · signal_i=5813</figcaption></figure>
+</div>
+<h2 class='sec' data-sec-axis='conf' data-sec-val='0.60–0.69'>conf 0.60–0.69 <span class='n'>(1)</span></h2>
+<div class='grid' data-sec-axis='conf' data-sec-val='0.60–0.69'>
+<figure class='card' data-conf='0.60–0.69' data-mom='other' data-vol='other' data-conf-v='0.6773'><a href='images/ASTS_USDT_SWAP_20260803_1015_c0.68.png' target='_blank' rel='noopener'><img src='images/ASTS_USDT_SWAP_20260803_1015_c0.68.png' loading='lazy'/></a><figcaption class='cap'><b>ASTS_USDT_SWAP</b> <span class='tag'>conf 0.677</span><a class='open' href='images/ASTS_USDT_SWAP_20260803_1015_c0.68.png' target='_blank'>原图</a><br>2026-08-03 10:15:00+00:00 UTC · signal_i=5948</figcaption></figure>
+</div>
+<h2 class='sec' data-sec-axis='conf' data-sec-val='0.50–0.59'>conf 0.50–0.59 <span class='n'>(4)</span></h2>
+<div class='grid' data-sec-axis='conf' data-sec-val='0.50–0.59'>
+<figure class='card' data-conf='0.50–0.59' data-mom='other' data-vol='other' data-conf-v='0.5891'><a href='images/ACT_USDT_SWAP_20260801_1800_c0.59.png' target='_blank' rel='noopener'><img src='images/ACT_USDT_SWAP_20260801_1800_c0.59.png' loading='lazy'/></a><figcaption class='cap'><b>ACT_USDT_SWAP</b> <span class='tag'>conf 0.589</span><a class='open' href='images/ACT_USDT_SWAP_20260801_1800_c0.59.png' target='_blank'>原图</a><br>2026-08-01 18:00:00+00:00 UTC · signal_i=40723</figcaption></figure>
+<figure class='card' data-conf='0.50–0.59' data-mom='other' data-vol='other' data-conf-v='0.5314'><a href='images/AEVO_USDT_SWAP_20260802_0200_c0.53.png' target='_blank' rel='noopener'><img src='images/AEVO_USDT_SWAP_20260802_0200_c0.53.png' loading='lazy'/></a><figcaption class='cap'><b>AEVO_USDT_SWAP</b> <span class='tag'>conf 0.531</span><a class='open' href='images/AEVO_USDT_SWAP_20260802_0200_c0.53.png' target='_blank'>原图</a><br>2026-08-02 02:00:00+00:00 UTC · signal_i=40754</figcaption></figure>
+<figure class='card' data-conf='0.50–0.59' data-mom='other' data-vol='other' data-conf-v='0.5124'><a href='images/2Z_USDT_SWAP_20260801_1330_c0.51.png' target='_blank' rel='noopener'><img src='images/2Z_USDT_SWAP_20260801_1330_c0.51.png' loading='lazy'/></a><figcaption class='cap'><b>2Z_USDT_SWAP</b> <span class='tag'>conf 0.512</span><a class='open' href='images/2Z_USDT_SWAP_20260801_1330_c0.51.png' target='_blank'>原图</a><br>2026-08-01 13:30:00+00:00 UTC · signal_i=29090</figcaption></figure>
+<figure class='card' data-conf='0.50–0.59' data-mom='other' data-vol='other' data-conf-v='0.5099'><a href='images/AAVE_USDT_SWAP_20260803_1315_c0.51.png' target='_blank' rel='noopener'><img src='images/AAVE_USDT_SWAP_20260803_1315_c0.51.png' loading='lazy'/></a><figcaption class='cap'><b>AAVE_USDT_SWAP</b> <span class='tag'>conf 0.510</span><a class='open' href='images/AAVE_USDT_SWAP_20260803_1315_c0.51.png' target='_blank'>原图</a><br>2026-08-03 13:15:00+00:00 UTC · signal_i=40986</figcaption></figure>
+</div>
+<h2 class='sec' data-sec-axis='conf' data-sec-val='0.30–0.49'>conf 0.30–0.49 <span class='n'>(16)</span></h2>
+<div class='grid' data-sec-axis='conf' data-sec-val='0.30–0.49'>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4932'><a href='images/APE_USDT_SWAP_20260801_0030_c0.49.png' target='_blank' rel='noopener'><img src='images/APE_USDT_SWAP_20260801_0030_c0.49.png' loading='lazy'/></a><figcaption class='cap'><b>APE_USDT_SWAP</b> <span class='tag'>conf 0.493</span><a class='open' href='images/APE_USDT_SWAP_20260801_0030_c0.49.png' target='_blank'>原图</a><br>2026-08-01 00:30:00+00:00 UTC · signal_i=40743</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4834'><a href='images/ANTHROPIC_USDT_SWAP_20260801_1900_c0.48.png' target='_blank' rel='noopener'><img src='images/ANTHROPIC_USDT_SWAP_20260801_1900_c0.48.png' loading='lazy'/></a><figcaption class='cap'><b>ANTHROPIC_USDT_SWAP</b> <span class='tag'>conf 0.483</span><a class='open' href='images/ANTHROPIC_USDT_SWAP_20260801_1900_c0.48.png' target='_blank'>原图</a><br>2026-08-01 19:00:00+00:00 UTC · signal_i=8294</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4684'><a href='images/ANTHROPIC_USDT_SWAP_20260801_1030_c0.47.png' target='_blank' rel='noopener'><img src='images/ANTHROPIC_USDT_SWAP_20260801_1030_c0.47.png' loading='lazy'/></a><figcaption class='cap'><b>ANTHROPIC_USDT_SWAP</b> <span class='tag'>conf 0.468</span><a class='open' href='images/ANTHROPIC_USDT_SWAP_20260801_1030_c0.47.png' target='_blank'>原图</a><br>2026-08-01 10:30:00+00:00 UTC · signal_i=8260</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4421'><a href='images/ASTER_USDT_SWAP_20260803_2300_c0.44.png' target='_blank' rel='noopener'><img src='images/ASTER_USDT_SWAP_20260803_2300_c0.44.png' loading='lazy'/></a><figcaption class='cap'><b>ASTER_USDT_SWAP</b> <span class='tag'>conf 0.442</span><a class='open' href='images/ASTER_USDT_SWAP_20260803_2300_c0.44.png' target='_blank'>原图</a><br>2026-08-03 23:00:00+00:00 UTC · signal_i=30312</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4388'><a href='images/ARM_USDT_SWAP_20260802_0300_c0.44.png' target='_blank' rel='noopener'><img src='images/ARM_USDT_SWAP_20260802_0300_c0.44.png' loading='lazy'/></a><figcaption class='cap'><b>ARM_USDT_SWAP</b> <span class='tag'>conf 0.439</span><a class='open' href='images/ARM_USDT_SWAP_20260802_0300_c0.44.png' target='_blank'>原图</a><br>2026-08-02 03:00:00+00:00 UTC · signal_i=9107</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4240'><a href='images/AR_USDT_SWAP_20260803_1000_c0.42.png' target='_blank' rel='noopener'><img src='images/AR_USDT_SWAP_20260803_1000_c0.42.png' loading='lazy'/></a><figcaption class='cap'><b>AR_USDT_SWAP</b> <span class='tag'>conf 0.424</span><a class='open' href='images/AR_USDT_SWAP_20260803_1000_c0.42.png' target='_blank'>原图</a><br>2026-08-03 10:00:00+00:00 UTC · signal_i=40881</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4138'><a href='images/ALGO_USDT_SWAP_20260802_0430_c0.41.png' target='_blank' rel='noopener'><img src='images/ALGO_USDT_SWAP_20260802_0430_c0.41.png' loading='lazy'/></a><figcaption class='cap'><b>ALGO_USDT_SWAP</b> <span class='tag'>conf 0.414</span><a class='open' href='images/ALGO_USDT_SWAP_20260802_0430_c0.41.png' target='_blank'>原图</a><br>2026-08-02 04:30:00+00:00 UTC · signal_i=40764</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4138'><a href='images/A_USDT_SWAP_20260805_1100_c0.41.png' target='_blank' rel='noopener'><img src='images/A_USDT_SWAP_20260805_1100_c0.41.png' loading='lazy'/></a><figcaption class='cap'><b>A_USDT_SWAP</b> <span class='tag'>conf 0.414</span><a class='open' href='images/A_USDT_SWAP_20260805_1100_c0.41.png' target='_blank'>原图</a><br>2026-08-05 11:00:00+00:00 UTC · signal_i=41079</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4119'><a href='images/ANTHROPIC_USDT_SWAP_20260803_1600_c0.41.png' target='_blank' rel='noopener'><img src='images/ANTHROPIC_USDT_SWAP_20260803_1600_c0.41.png' loading='lazy'/></a><figcaption class='cap'><b>ANTHROPIC_USDT_SWAP</b> <span class='tag'>conf 0.412</span><a class='open' href='images/ANTHROPIC_USDT_SWAP_20260803_1600_c0.41.png' target='_blank'>原图</a><br>2026-08-03 16:00:00+00:00 UTC · signal_i=8474</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3894'><a href='images/AXTI_USDT_SWAP_20260802_2300_c0.39.png' target='_blank' rel='noopener'><img src='images/AXTI_USDT_SWAP_20260802_2300_c0.39.png' loading='lazy'/></a><figcaption class='cap'><b>AXTI_USDT_SWAP</b> <span class='tag'>conf 0.389</span><a class='open' href='images/AXTI_USDT_SWAP_20260802_2300_c0.39.png' target='_blank'>原图</a><br>2026-08-02 23:00:00+00:00 UTC · signal_i=4566</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3859'><a href='images/AT_USDT_SWAP_20260805_0130_c0.39.png' target='_blank' rel='noopener'><img src='images/AT_USDT_SWAP_20260805_0130_c0.39.png' loading='lazy'/></a><figcaption class='cap'><b>AT_USDT_SWAP</b> <span class='tag'>conf 0.386</span><a class='open' href='images/AT_USDT_SWAP_20260805_0130_c0.39.png' target='_blank'>原图</a><br>2026-08-05 01:30:00+00:00 UTC · signal_i=26750</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3746'><a href='images/ADA_USDT_SWAP_20260731_1500_c0.37.png' target='_blank' rel='noopener'><img src='images/ADA_USDT_SWAP_20260731_1500_c0.37.png' loading='lazy'/></a><figcaption class='cap'><b>ADA_USDT_SWAP</b> <span class='tag'>conf 0.375</span><a class='open' href='images/ADA_USDT_SWAP_20260731_1500_c0.37.png' target='_blank'>原图</a><br>2026-07-31 15:00:00+00:00 UTC · signal_i=40705</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3480'><a href='images/AZTEC_USDT_SWAP_20260801_1800_c0.35.png' target='_blank' rel='noopener'><img src='images/AZTEC_USDT_SWAP_20260801_1800_c0.35.png' loading='lazy'/></a><figcaption class='cap'><b>AZTEC_USDT_SWAP</b> <span class='tag'>conf 0.348</span><a class='open' href='images/AZTEC_USDT_SWAP_20260801_1800_c0.35.png' target='_blank'>原图</a><br>2026-08-01 18:00:00+00:00 UTC · signal_i=16446</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3478'><a href='images/BAND_USDT_SWAP_20260805_0500_c0.35.png' target='_blank' rel='noopener'><img src='images/BAND_USDT_SWAP_20260805_0500_c0.35.png' loading='lazy'/></a><figcaption class='cap'><b>BAND_USDT_SWAP</b> <span class='tag'>conf 0.348</span><a class='open' href='images/BAND_USDT_SWAP_20260805_0500_c0.35.png' target='_blank'>原图</a><br>2026-08-05 05:00:00+00:00 UTC · signal_i=41051</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3443'><a href='images/ALLO_USDT_SWAP_20260805_0400_c0.34.png' target='_blank' rel='noopener'><img src='images/ALLO_USDT_SWAP_20260805_0400_c0.34.png' loading='lazy'/></a><figcaption class='cap'><b>ALLO_USDT_SWAP</b> <span class='tag'>conf 0.344</span><a class='open' href='images/ALLO_USDT_SWAP_20260805_0400_c0.34.png' target='_blank'>原图</a><br>2026-08-05 04:00:00+00:00 UTC · signal_i=25581</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3226'><a href='images/0G_USDT_SWAP_20260805_0630_c0.32.png' target='_blank' rel='noopener'><img src='images/0G_USDT_SWAP_20260805_0630_c0.32.png' loading='lazy'/></a><figcaption class='cap'><b>0G_USDT_SWAP</b> <span class='tag'>conf 0.323</span><a class='open' href='images/0G_USDT_SWAP_20260805_0630_c0.32.png' target='_blank'>原图</a><br>2026-08-05 06:30:00+00:00 UTC · signal_i=30416</figcaption></figure>
+</div>
+<h2 class='sec hidden' data-sec-axis='mom' data-sec-val='other'>动能 未知 <span class='n'>(22)</span></h2>
+<div class='grid hidden' data-sec-axis='mom' data-sec-val='other'>
+<figure class='card' data-conf='0.70–0.79' data-mom='other' data-vol='other' data-conf-v='0.7920'><a href='images/ASTS_USDT_SWAP_20260802_0030_c0.79.png' target='_blank' rel='noopener'><img src='images/ASTS_USDT_SWAP_20260802_0030_c0.79.png' loading='lazy'/></a><figcaption class='cap'><b>ASTS_USDT_SWAP</b> <span class='tag'>conf 0.792</span><a class='open' href='images/ASTS_USDT_SWAP_20260802_0030_c0.79.png' target='_blank'>原图</a><br>2026-08-02 00:30:00+00:00 UTC · signal_i=5813</figcaption></figure>
+<figure class='card' data-conf='0.60–0.69' data-mom='other' data-vol='other' data-conf-v='0.6773'><a href='images/ASTS_USDT_SWAP_20260803_1015_c0.68.png' target='_blank' rel='noopener'><img src='images/ASTS_USDT_SWAP_20260803_1015_c0.68.png' loading='lazy'/></a><figcaption class='cap'><b>ASTS_USDT_SWAP</b> <span class='tag'>conf 0.677</span><a class='open' href='images/ASTS_USDT_SWAP_20260803_1015_c0.68.png' target='_blank'>原图</a><br>2026-08-03 10:15:00+00:00 UTC · signal_i=5948</figcaption></figure>
+<figure class='card' data-conf='0.50–0.59' data-mom='other' data-vol='other' data-conf-v='0.5891'><a href='images/ACT_USDT_SWAP_20260801_1800_c0.59.png' target='_blank' rel='noopener'><img src='images/ACT_USDT_SWAP_20260801_1800_c0.59.png' loading='lazy'/></a><figcaption class='cap'><b>ACT_USDT_SWAP</b> <span class='tag'>conf 0.589</span><a class='open' href='images/ACT_USDT_SWAP_20260801_1800_c0.59.png' target='_blank'>原图</a><br>2026-08-01 18:00:00+00:00 UTC · signal_i=40723</figcaption></figure>
+<figure class='card' data-conf='0.50–0.59' data-mom='other' data-vol='other' data-conf-v='0.5314'><a href='images/AEVO_USDT_SWAP_20260802_0200_c0.53.png' target='_blank' rel='noopener'><img src='images/AEVO_USDT_SWAP_20260802_0200_c0.53.png' loading='lazy'/></a><figcaption class='cap'><b>AEVO_USDT_SWAP</b> <span class='tag'>conf 0.531</span><a class='open' href='images/AEVO_USDT_SWAP_20260802_0200_c0.53.png' target='_blank'>原图</a><br>2026-08-02 02:00:00+00:00 UTC · signal_i=40754</figcaption></figure>
+<figure class='card' data-conf='0.50–0.59' data-mom='other' data-vol='other' data-conf-v='0.5124'><a href='images/2Z_USDT_SWAP_20260801_1330_c0.51.png' target='_blank' rel='noopener'><img src='images/2Z_USDT_SWAP_20260801_1330_c0.51.png' loading='lazy'/></a><figcaption class='cap'><b>2Z_USDT_SWAP</b> <span class='tag'>conf 0.512</span><a class='open' href='images/2Z_USDT_SWAP_20260801_1330_c0.51.png' target='_blank'>原图</a><br>2026-08-01 13:30:00+00:00 UTC · signal_i=29090</figcaption></figure>
+<figure class='card' data-conf='0.50–0.59' data-mom='other' data-vol='other' data-conf-v='0.5099'><a href='images/AAVE_USDT_SWAP_20260803_1315_c0.51.png' target='_blank' rel='noopener'><img src='images/AAVE_USDT_SWAP_20260803_1315_c0.51.png' loading='lazy'/></a><figcaption class='cap'><b>AAVE_USDT_SWAP</b> <span class='tag'>conf 0.510</span><a class='open' href='images/AAVE_USDT_SWAP_20260803_1315_c0.51.png' target='_blank'>原图</a><br>2026-08-03 13:15:00+00:00 UTC · signal_i=40986</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4932'><a href='images/APE_USDT_SWAP_20260801_0030_c0.49.png' target='_blank' rel='noopener'><img src='images/APE_USDT_SWAP_20260801_0030_c0.49.png' loading='lazy'/></a><figcaption class='cap'><b>APE_USDT_SWAP</b> <span class='tag'>conf 0.493</span><a class='open' href='images/APE_USDT_SWAP_20260801_0030_c0.49.png' target='_blank'>原图</a><br>2026-08-01 00:30:00+00:00 UTC · signal_i=40743</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4834'><a href='images/ANTHROPIC_USDT_SWAP_20260801_1900_c0.48.png' target='_blank' rel='noopener'><img src='images/ANTHROPIC_USDT_SWAP_20260801_1900_c0.48.png' loading='lazy'/></a><figcaption class='cap'><b>ANTHROPIC_USDT_SWAP</b> <span class='tag'>conf 0.483</span><a class='open' href='images/ANTHROPIC_USDT_SWAP_20260801_1900_c0.48.png' target='_blank'>原图</a><br>2026-08-01 19:00:00+00:00 UTC · signal_i=8294</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4684'><a href='images/ANTHROPIC_USDT_SWAP_20260801_1030_c0.47.png' target='_blank' rel='noopener'><img src='images/ANTHROPIC_USDT_SWAP_20260801_1030_c0.47.png' loading='lazy'/></a><figcaption class='cap'><b>ANTHROPIC_USDT_SWAP</b> <span class='tag'>conf 0.468</span><a class='open' href='images/ANTHROPIC_USDT_SWAP_20260801_1030_c0.47.png' target='_blank'>原图</a><br>2026-08-01 10:30:00+00:00 UTC · signal_i=8260</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4421'><a href='images/ASTER_USDT_SWAP_20260803_2300_c0.44.png' target='_blank' rel='noopener'><img src='images/ASTER_USDT_SWAP_20260803_2300_c0.44.png' loading='lazy'/></a><figcaption class='cap'><b>ASTER_USDT_SWAP</b> <span class='tag'>conf 0.442</span><a class='open' href='images/ASTER_USDT_SWAP_20260803_2300_c0.44.png' target='_blank'>原图</a><br>2026-08-03 23:00:00+00:00 UTC · signal_i=30312</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4388'><a href='images/ARM_USDT_SWAP_20260802_0300_c0.44.png' target='_blank' rel='noopener'><img src='images/ARM_USDT_SWAP_20260802_0300_c0.44.png' loading='lazy'/></a><figcaption class='cap'><b>ARM_USDT_SWAP</b> <span class='tag'>conf 0.439</span><a class='open' href='images/ARM_USDT_SWAP_20260802_0300_c0.44.png' target='_blank'>原图</a><br>2026-08-02 03:00:00+00:00 UTC · signal_i=9107</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4240'><a href='images/AR_USDT_SWAP_20260803_1000_c0.42.png' target='_blank' rel='noopener'><img src='images/AR_USDT_SWAP_20260803_1000_c0.42.png' loading='lazy'/></a><figcaption class='cap'><b>AR_USDT_SWAP</b> <span class='tag'>conf 0.424</span><a class='open' href='images/AR_USDT_SWAP_20260803_1000_c0.42.png' target='_blank'>原图</a><br>2026-08-03 10:00:00+00:00 UTC · signal_i=40881</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4138'><a href='images/ALGO_USDT_SWAP_20260802_0430_c0.41.png' target='_blank' rel='noopener'><img src='images/ALGO_USDT_SWAP_20260802_0430_c0.41.png' loading='lazy'/></a><figcaption class='cap'><b>ALGO_USDT_SWAP</b> <span class='tag'>conf 0.414</span><a class='open' href='images/ALGO_USDT_SWAP_20260802_0430_c0.41.png' target='_blank'>原图</a><br>2026-08-02 04:30:00+00:00 UTC · signal_i=40764</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4138'><a href='images/A_USDT_SWAP_20260805_1100_c0.41.png' target='_blank' rel='noopener'><img src='images/A_USDT_SWAP_20260805_1100_c0.41.png' loading='lazy'/></a><figcaption class='cap'><b>A_USDT_SWAP</b> <span class='tag'>conf 0.414</span><a class='open' href='images/A_USDT_SWAP_20260805_1100_c0.41.png' target='_blank'>原图</a><br>2026-08-05 11:00:00+00:00 UTC · signal_i=41079</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4119'><a href='images/ANTHROPIC_USDT_SWAP_20260803_1600_c0.41.png' target='_blank' rel='noopener'><img src='images/ANTHROPIC_USDT_SWAP_20260803_1600_c0.41.png' loading='lazy'/></a><figcaption class='cap'><b>ANTHROPIC_USDT_SWAP</b> <span class='tag'>conf 0.412</span><a class='open' href='images/ANTHROPIC_USDT_SWAP_20260803_1600_c0.41.png' target='_blank'>原图</a><br>2026-08-03 16:00:00+00:00 UTC · signal_i=8474</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3894'><a href='images/AXTI_USDT_SWAP_20260802_2300_c0.39.png' target='_blank' rel='noopener'><img src='images/AXTI_USDT_SWAP_20260802_2300_c0.39.png' loading='lazy'/></a><figcaption class='cap'><b>AXTI_USDT_SWAP</b> <span class='tag'>conf 0.389</span><a class='open' href='images/AXTI_USDT_SWAP_20260802_2300_c0.39.png' target='_blank'>原图</a><br>2026-08-02 23:00:00+00:00 UTC · signal_i=4566</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3859'><a href='images/AT_USDT_SWAP_20260805_0130_c0.39.png' target='_blank' rel='noopener'><img src='images/AT_USDT_SWAP_20260805_0130_c0.39.png' loading='lazy'/></a><figcaption class='cap'><b>AT_USDT_SWAP</b> <span class='tag'>conf 0.386</span><a class='open' href='images/AT_USDT_SWAP_20260805_0130_c0.39.png' target='_blank'>原图</a><br>2026-08-05 01:30:00+00:00 UTC · signal_i=26750</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3746'><a href='images/ADA_USDT_SWAP_20260731_1500_c0.37.png' target='_blank' rel='noopener'><img src='images/ADA_USDT_SWAP_20260731_1500_c0.37.png' loading='lazy'/></a><figcaption class='cap'><b>ADA_USDT_SWAP</b> <span class='tag'>conf 0.375</span><a class='open' href='images/ADA_USDT_SWAP_20260731_1500_c0.37.png' target='_blank'>原图</a><br>2026-07-31 15:00:00+00:00 UTC · signal_i=40705</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3480'><a href='images/AZTEC_USDT_SWAP_20260801_1800_c0.35.png' target='_blank' rel='noopener'><img src='images/AZTEC_USDT_SWAP_20260801_1800_c0.35.png' loading='lazy'/></a><figcaption class='cap'><b>AZTEC_USDT_SWAP</b> <span class='tag'>conf 0.348</span><a class='open' href='images/AZTEC_USDT_SWAP_20260801_1800_c0.35.png' target='_blank'>原图</a><br>2026-08-01 18:00:00+00:00 UTC · signal_i=16446</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3478'><a href='images/BAND_USDT_SWAP_20260805_0500_c0.35.png' target='_blank' rel='noopener'><img src='images/BAND_USDT_SWAP_20260805_0500_c0.35.png' loading='lazy'/></a><figcaption class='cap'><b>BAND_USDT_SWAP</b> <span class='tag'>conf 0.348</span><a class='open' href='images/BAND_USDT_SWAP_20260805_0500_c0.35.png' target='_blank'>原图</a><br>2026-08-05 05:00:00+00:00 UTC · signal_i=41051</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3443'><a href='images/ALLO_USDT_SWAP_20260805_0400_c0.34.png' target='_blank' rel='noopener'><img src='images/ALLO_USDT_SWAP_20260805_0400_c0.34.png' loading='lazy'/></a><figcaption class='cap'><b>ALLO_USDT_SWAP</b> <span class='tag'>conf 0.344</span><a class='open' href='images/ALLO_USDT_SWAP_20260805_0400_c0.34.png' target='_blank'>原图</a><br>2026-08-05 04:00:00+00:00 UTC · signal_i=25581</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3226'><a href='images/0G_USDT_SWAP_20260805_0630_c0.32.png' target='_blank' rel='noopener'><img src='images/0G_USDT_SWAP_20260805_0630_c0.32.png' loading='lazy'/></a><figcaption class='cap'><b>0G_USDT_SWAP</b> <span class='tag'>conf 0.323</span><a class='open' href='images/0G_USDT_SWAP_20260805_0630_c0.32.png' target='_blank'>原图</a><br>2026-08-05 06:30:00+00:00 UTC · signal_i=30416</figcaption></figure>
+</div>
+<h2 class='sec hidden' data-sec-axis='vol' data-sec-val='other'>成交量 未知 <span class='n'>(22)</span></h2>
+<div class='grid hidden' data-sec-axis='vol' data-sec-val='other'>
+<figure class='card' data-conf='0.70–0.79' data-mom='other' data-vol='other' data-conf-v='0.7920'><a href='images/ASTS_USDT_SWAP_20260802_0030_c0.79.png' target='_blank' rel='noopener'><img src='images/ASTS_USDT_SWAP_20260802_0030_c0.79.png' loading='lazy'/></a><figcaption class='cap'><b>ASTS_USDT_SWAP</b> <span class='tag'>conf 0.792</span><a class='open' href='images/ASTS_USDT_SWAP_20260802_0030_c0.79.png' target='_blank'>原图</a><br>2026-08-02 00:30:00+00:00 UTC · signal_i=5813</figcaption></figure>
+<figure class='card' data-conf='0.60–0.69' data-mom='other' data-vol='other' data-conf-v='0.6773'><a href='images/ASTS_USDT_SWAP_20260803_1015_c0.68.png' target='_blank' rel='noopener'><img src='images/ASTS_USDT_SWAP_20260803_1015_c0.68.png' loading='lazy'/></a><figcaption class='cap'><b>ASTS_USDT_SWAP</b> <span class='tag'>conf 0.677</span><a class='open' href='images/ASTS_USDT_SWAP_20260803_1015_c0.68.png' target='_blank'>原图</a><br>2026-08-03 10:15:00+00:00 UTC · signal_i=5948</figcaption></figure>
+<figure class='card' data-conf='0.50–0.59' data-mom='other' data-vol='other' data-conf-v='0.5891'><a href='images/ACT_USDT_SWAP_20260801_1800_c0.59.png' target='_blank' rel='noopener'><img src='images/ACT_USDT_SWAP_20260801_1800_c0.59.png' loading='lazy'/></a><figcaption class='cap'><b>ACT_USDT_SWAP</b> <span class='tag'>conf 0.589</span><a class='open' href='images/ACT_USDT_SWAP_20260801_1800_c0.59.png' target='_blank'>原图</a><br>2026-08-01 18:00:00+00:00 UTC · signal_i=40723</figcaption></figure>
+<figure class='card' data-conf='0.50–0.59' data-mom='other' data-vol='other' data-conf-v='0.5314'><a href='images/AEVO_USDT_SWAP_20260802_0200_c0.53.png' target='_blank' rel='noopener'><img src='images/AEVO_USDT_SWAP_20260802_0200_c0.53.png' loading='lazy'/></a><figcaption class='cap'><b>AEVO_USDT_SWAP</b> <span class='tag'>conf 0.531</span><a class='open' href='images/AEVO_USDT_SWAP_20260802_0200_c0.53.png' target='_blank'>原图</a><br>2026-08-02 02:00:00+00:00 UTC · signal_i=40754</figcaption></figure>
+<figure class='card' data-conf='0.50–0.59' data-mom='other' data-vol='other' data-conf-v='0.5124'><a href='images/2Z_USDT_SWAP_20260801_1330_c0.51.png' target='_blank' rel='noopener'><img src='images/2Z_USDT_SWAP_20260801_1330_c0.51.png' loading='lazy'/></a><figcaption class='cap'><b>2Z_USDT_SWAP</b> <span class='tag'>conf 0.512</span><a class='open' href='images/2Z_USDT_SWAP_20260801_1330_c0.51.png' target='_blank'>原图</a><br>2026-08-01 13:30:00+00:00 UTC · signal_i=29090</figcaption></figure>
+<figure class='card' data-conf='0.50–0.59' data-mom='other' data-vol='other' data-conf-v='0.5099'><a href='images/AAVE_USDT_SWAP_20260803_1315_c0.51.png' target='_blank' rel='noopener'><img src='images/AAVE_USDT_SWAP_20260803_1315_c0.51.png' loading='lazy'/></a><figcaption class='cap'><b>AAVE_USDT_SWAP</b> <span class='tag'>conf 0.510</span><a class='open' href='images/AAVE_USDT_SWAP_20260803_1315_c0.51.png' target='_blank'>原图</a><br>2026-08-03 13:15:00+00:00 UTC · signal_i=40986</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4932'><a href='images/APE_USDT_SWAP_20260801_0030_c0.49.png' target='_blank' rel='noopener'><img src='images/APE_USDT_SWAP_20260801_0030_c0.49.png' loading='lazy'/></a><figcaption class='cap'><b>APE_USDT_SWAP</b> <span class='tag'>conf 0.493</span><a class='open' href='images/APE_USDT_SWAP_20260801_0030_c0.49.png' target='_blank'>原图</a><br>2026-08-01 00:30:00+00:00 UTC · signal_i=40743</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4834'><a href='images/ANTHROPIC_USDT_SWAP_20260801_1900_c0.48.png' target='_blank' rel='noopener'><img src='images/ANTHROPIC_USDT_SWAP_20260801_1900_c0.48.png' loading='lazy'/></a><figcaption class='cap'><b>ANTHROPIC_USDT_SWAP</b> <span class='tag'>conf 0.483</span><a class='open' href='images/ANTHROPIC_USDT_SWAP_20260801_1900_c0.48.png' target='_blank'>原图</a><br>2026-08-01 19:00:00+00:00 UTC · signal_i=8294</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4684'><a href='images/ANTHROPIC_USDT_SWAP_20260801_1030_c0.47.png' target='_blank' rel='noopener'><img src='images/ANTHROPIC_USDT_SWAP_20260801_1030_c0.47.png' loading='lazy'/></a><figcaption class='cap'><b>ANTHROPIC_USDT_SWAP</b> <span class='tag'>conf 0.468</span><a class='open' href='images/ANTHROPIC_USDT_SWAP_20260801_1030_c0.47.png' target='_blank'>原图</a><br>2026-08-01 10:30:00+00:00 UTC · signal_i=8260</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4421'><a href='images/ASTER_USDT_SWAP_20260803_2300_c0.44.png' target='_blank' rel='noopener'><img src='images/ASTER_USDT_SWAP_20260803_2300_c0.44.png' loading='lazy'/></a><figcaption class='cap'><b>ASTER_USDT_SWAP</b> <span class='tag'>conf 0.442</span><a class='open' href='images/ASTER_USDT_SWAP_20260803_2300_c0.44.png' target='_blank'>原图</a><br>2026-08-03 23:00:00+00:00 UTC · signal_i=30312</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4388'><a href='images/ARM_USDT_SWAP_20260802_0300_c0.44.png' target='_blank' rel='noopener'><img src='images/ARM_USDT_SWAP_20260802_0300_c0.44.png' loading='lazy'/></a><figcaption class='cap'><b>ARM_USDT_SWAP</b> <span class='tag'>conf 0.439</span><a class='open' href='images/ARM_USDT_SWAP_20260802_0300_c0.44.png' target='_blank'>原图</a><br>2026-08-02 03:00:00+00:00 UTC · signal_i=9107</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4240'><a href='images/AR_USDT_SWAP_20260803_1000_c0.42.png' target='_blank' rel='noopener'><img src='images/AR_USDT_SWAP_20260803_1000_c0.42.png' loading='lazy'/></a><figcaption class='cap'><b>AR_USDT_SWAP</b> <span class='tag'>conf 0.424</span><a class='open' href='images/AR_USDT_SWAP_20260803_1000_c0.42.png' target='_blank'>原图</a><br>2026-08-03 10:00:00+00:00 UTC · signal_i=40881</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4138'><a href='images/ALGO_USDT_SWAP_20260802_0430_c0.41.png' target='_blank' rel='noopener'><img src='images/ALGO_USDT_SWAP_20260802_0430_c0.41.png' loading='lazy'/></a><figcaption class='cap'><b>ALGO_USDT_SWAP</b> <span class='tag'>conf 0.414</span><a class='open' href='images/ALGO_USDT_SWAP_20260802_0430_c0.41.png' target='_blank'>原图</a><br>2026-08-02 04:30:00+00:00 UTC · signal_i=40764</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4138'><a href='images/A_USDT_SWAP_20260805_1100_c0.41.png' target='_blank' rel='noopener'><img src='images/A_USDT_SWAP_20260805_1100_c0.41.png' loading='lazy'/></a><figcaption class='cap'><b>A_USDT_SWAP</b> <span class='tag'>conf 0.414</span><a class='open' href='images/A_USDT_SWAP_20260805_1100_c0.41.png' target='_blank'>原图</a><br>2026-08-05 11:00:00+00:00 UTC · signal_i=41079</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.4119'><a href='images/ANTHROPIC_USDT_SWAP_20260803_1600_c0.41.png' target='_blank' rel='noopener'><img src='images/ANTHROPIC_USDT_SWAP_20260803_1600_c0.41.png' loading='lazy'/></a><figcaption class='cap'><b>ANTHROPIC_USDT_SWAP</b> <span class='tag'>conf 0.412</span><a class='open' href='images/ANTHROPIC_USDT_SWAP_20260803_1600_c0.41.png' target='_blank'>原图</a><br>2026-08-03 16:00:00+00:00 UTC · signal_i=8474</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3894'><a href='images/AXTI_USDT_SWAP_20260802_2300_c0.39.png' target='_blank' rel='noopener'><img src='images/AXTI_USDT_SWAP_20260802_2300_c0.39.png' loading='lazy'/></a><figcaption class='cap'><b>AXTI_USDT_SWAP</b> <span class='tag'>conf 0.389</span><a class='open' href='images/AXTI_USDT_SWAP_20260802_2300_c0.39.png' target='_blank'>原图</a><br>2026-08-02 23:00:00+00:00 UTC · signal_i=4566</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3859'><a href='images/AT_USDT_SWAP_20260805_0130_c0.39.png' target='_blank' rel='noopener'><img src='images/AT_USDT_SWAP_20260805_0130_c0.39.png' loading='lazy'/></a><figcaption class='cap'><b>AT_USDT_SWAP</b> <span class='tag'>conf 0.386</span><a class='open' href='images/AT_USDT_SWAP_20260805_0130_c0.39.png' target='_blank'>原图</a><br>2026-08-05 01:30:00+00:00 UTC · signal_i=26750</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3746'><a href='images/ADA_USDT_SWAP_20260731_1500_c0.37.png' target='_blank' rel='noopener'><img src='images/ADA_USDT_SWAP_20260731_1500_c0.37.png' loading='lazy'/></a><figcaption class='cap'><b>ADA_USDT_SWAP</b> <span class='tag'>conf 0.375</span><a class='open' href='images/ADA_USDT_SWAP_20260731_1500_c0.37.png' target='_blank'>原图</a><br>2026-07-31 15:00:00+00:00 UTC · signal_i=40705</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3480'><a href='images/AZTEC_USDT_SWAP_20260801_1800_c0.35.png' target='_blank' rel='noopener'><img src='images/AZTEC_USDT_SWAP_20260801_1800_c0.35.png' loading='lazy'/></a><figcaption class='cap'><b>AZTEC_USDT_SWAP</b> <span class='tag'>conf 0.348</span><a class='open' href='images/AZTEC_USDT_SWAP_20260801_1800_c0.35.png' target='_blank'>原图</a><br>2026-08-01 18:00:00+00:00 UTC · signal_i=16446</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3478'><a href='images/BAND_USDT_SWAP_20260805_0500_c0.35.png' target='_blank' rel='noopener'><img src='images/BAND_USDT_SWAP_20260805_0500_c0.35.png' loading='lazy'/></a><figcaption class='cap'><b>BAND_USDT_SWAP</b> <span class='tag'>conf 0.348</span><a class='open' href='images/BAND_USDT_SWAP_20260805_0500_c0.35.png' target='_blank'>原图</a><br>2026-08-05 05:00:00+00:00 UTC · signal_i=41051</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3443'><a href='images/ALLO_USDT_SWAP_20260805_0400_c0.34.png' target='_blank' rel='noopener'><img src='images/ALLO_USDT_SWAP_20260805_0400_c0.34.png' loading='lazy'/></a><figcaption class='cap'><b>ALLO_USDT_SWAP</b> <span class='tag'>conf 0.344</span><a class='open' href='images/ALLO_USDT_SWAP_20260805_0400_c0.34.png' target='_blank'>原图</a><br>2026-08-05 04:00:00+00:00 UTC · signal_i=25581</figcaption></figure>
+<figure class='card' data-conf='0.30–0.49' data-mom='other' data-vol='other' data-conf-v='0.3226'><a href='images/0G_USDT_SWAP_20260805_0630_c0.32.png' target='_blank' rel='noopener'><img src='images/0G_USDT_SWAP_20260805_0630_c0.32.png' loading='lazy'/></a><figcaption class='cap'><b>0G_USDT_SWAP</b> <span class='tag'>conf 0.323</span><a class='open' href='images/0G_USDT_SWAP_20260805_0630_c0.32.png' target='_blank'>原图</a><br>2026-08-05 06:30:00+00:00 UTC · signal_i=30416</figcaption></figure>
+</div>
+
+<script>
+(function(){
+  const state = { conf: 'all', mom: 'all', vol: 'all', group: 'conf' };
+  const countEl = document.getElementById('count');
+  const total = 22;
+
+  function matchCard(el){
+    const okC = state.conf === 'all' || el.dataset.conf === state.conf;
+    const okM = state.mom === 'all' || el.dataset.mom === state.mom;
+    const okV = state.vol === 'all' || el.dataset.vol === state.vol;
+    return okC && okM && okV;
+  }
+
+  function apply(){
+    // which section axis is visible
+    document.querySelectorAll('[data-sec-axis]').forEach(node => {
+      const onAxis = node.getAttribute('data-sec-axis') === state.group;
+      node.classList.toggle('hidden', !onAxis);
+    });
+    // cards: only those under active axis, and matching filters
+    let shown = 0;
+    document.querySelectorAll('.grid[data-sec-axis]').forEach(grid => {
+      const onAxis = grid.getAttribute('data-sec-axis') === state.group;
+      if (!onAxis) return;
+      let any = false;
+      grid.querySelectorAll('.card').forEach(el => {
+        const ok = matchCard(el);
+        el.classList.toggle('hidden', !ok);
+        if (ok) { shown++; any = true; }
+      });
+      const secVal = grid.getAttribute('data-sec-val');
+      const sec = document.querySelector(
+        'h2.sec[data-sec-axis="'+state.group+'"][data-sec-val="'+CSS.escape(secVal)+'"]'
+      );
+      if (sec) sec.classList.toggle('hidden', !any);
+      grid.classList.toggle('hidden', !any);
+    });
+    if (countEl) countEl.textContent = shown;
+  }
+
+  document.querySelectorAll('.frow button[data-dim]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dim = btn.dataset.dim;
+      const val = btn.dataset.val;
+      state[dim] = val;
+      document.querySelectorAll('.frow button[data-dim="'+dim+'"]').forEach(b => {
+        b.classList.toggle('active', b.dataset.val === val);
+      });
+      apply();
+    });
+  });
+  document.querySelectorAll('#group-by button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.group = btn.dataset.group;
+      document.querySelectorAll('#group-by button').forEach(b => {
+        b.classList.toggle('active', b.dataset.group === state.group);
+      });
+      apply();
+    });
+  });
+  apply();
+})();
+</script>
+</body></html>
