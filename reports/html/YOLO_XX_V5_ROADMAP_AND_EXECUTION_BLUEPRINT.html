@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YOLO-XX V5 Roadmap &amp; Execution Blueprint</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>YOLO-XX V5 Roadmap &amp; Execution Blueprint</h1>
+<p><strong>版本</strong>：V5 · <strong>日期</strong>：2026-08-05 · <strong>上游</strong>：V4 架构调整文档 + <code>PHASE0_EXPERIMENT_POSTMORTEM.md</code></p>
+<p><strong>适用仓库</strong>：<code>darkforest-x/yolo-xx</code>（视觉）· <code>darkforest-x/fable-trading</code>（判断）· <code>darkforest-x/darkforest-one</code>（执行）</p>
+<hr>
+<h2>0. 这份文档与 V4 的关系</h2>
+<p>V4 定了<strong>方向</strong>（三层拆分、v10 重定位为 Pattern Teacher、停止 tip 裁剪）。</p>
+<p>V5 把方向变成<strong>可执行、可验收、可失败</strong>的蓝图：每个 Phase 有输入、输出、</p>
+<p>数据格式、验收门、<strong>以及失败退出条件</strong>。</p>
+<p>最后一项是这个项目最缺的东西。历史上多次出现「某阶段结论是否定的，但工作继续沿着</p>
+<p>原方向推进」——v12→v16 五次修复即是（详见 Postmortem 阶段 G）。V5 的每个 Phase</p>
+<p>都必须能判死。</p>
+<p><strong>命名</strong>：系统整体称 <strong>Pattern Intelligence System (PIS)</strong>，不再称「YOLO 模型」。</p>
+<p>YOLO 只是 Layer 1 的当前实现。</p>
+<hr>
+<h2>1. Phase 0 结论：不可推翻的约束</h2>
+<p>以下六条来自 Phase 0，<strong>作为 V5 的公理，任何 Phase 不得与之冲突</strong>。</p>
+<p>如需推翻，必须提交新证据并由 owner 批准。</p>
+<table><thead><tr>
+<th>#</th>
+<th>约束</th>
+<th>证据</th>
+</tr></thead><tbody>
+<tr><td><strong>C1</strong></td><td><strong>owner 的判别力是真实的。</strong> 模型能学会人工视觉形态。</td><td>1313 手标框 val 期做空 PF 8.98 / 胜率 79%，同语境随机只赢 32%；v10 在 ETH 3m 上 owner 认可 93/200</td></tr>
+<tr><td><strong>C2</strong></td><td><strong>owner_v10_chain 不是实时交易触发器。</strong></td><td>tip 复现率 10%，完整上下文 62%（2026-08-05 实验，n=100/34 币）</td></tr>
+<tr><td><strong>C3</strong></td><td><strong>FULL context 检测能力显著高于 TIP context，且 confidence 不随之下降。</strong> 失效模式是「要么认出、要么完全看不见」。</td><td>conf 0.449→0.497 全程平稳；框/图 0.22→0.73</td></tr>
+<tr><td><strong>C4</strong></td><td><strong>TIP 裁剪 / H-TIP 重训不能解决监督目标错位。</strong></td><td>v12_htip 专为此训，tip 9% vs 未修复 v10 的 10%；归一化后反而更低（12.5% vs 16.1%）；v13/v14/v15/v16 四次失败</td></tr>
+<tr><td><strong>C5</strong></td><td><strong>检测、质量、交易必须拆分。</strong> 混训导致标签污染与反预测。</td><td>07-23 判断层在盘口 top5% PF 0.48（反预测）</td></tr>
+<tr><td><strong>C6</strong></td><td><strong>净 edge ≈ 成本。</strong> 检测器自身 +9.0bp，往返成本 10bp；池内 +16.9bp 中 +7.2bp 是做空 beta。</td><td>07-28 匹配对照组终判</td></tr>
+</tbody></table>
+<p><strong>第一原则（建议写入三仓 README）</strong>：</p>
+<blockquote>被证伪的不是模型能不能学会 owner 的眼睛，而是把这只眼睛直接接到盘口上下单。</blockquote>
+<hr>
+<h2>2. Pattern Intelligence System 总架构</h2>
+<pre><code>
+                          人工交易经验
+                                |
+                                v
+                    ┌───────────────────────┐
+          Layer 1   │  owner_v10_chain      │
+                    │  Pattern Teacher      │
+                    └───────────┬───────────┘
+                                |
+                                v
+                    ┌───────────────────────┐
+          Layer 1.5 │   Pattern Library     │  ← 资产沉淀层（V5 新增）
+                    └───────────┬───────────┘
+                                |
+                +---------------+---------------+
+                |                               |
+                v                               v
+     ┌──────────────────┐            ┌────────────────────┐
+ L2  │ Pattern Quality  │        L3  │  Formation Model   │
+     │ 这个形态有多经典  │            │  未来会不会形成    │
+     └────────┬─────────┘            └─────────┬──────────┘
+              |                                |
+              |                      ┌─────────v──────────┐
+              |                  L4  │   Launch Model     │
+              |                      │  形成后会不会启动  │
+              |                      └─────────┬──────────┘
+              +---------------+----------------+
+                              |
+                              v
+                   ┌──────────────────────┐
+               L5  │  Trade Decision      │   fable-trading
+                   │  quality × formation │
+                   │  × launch → score    │
+                   └──────────┬───────────┘
+                              |
+                              v
+               ┌──────────────────────────┐
+           L6  │       Execution          │   darkforest-one
+               └──────────────────────────┘
+</code></pre>
+<p><strong>为什么 Formation 与 Launch 必须分开</strong>（采纳 GPT-5.6 建议并给出证据支撑）：</p>
+<ul>
+<li>合成一个「未来是否启动」的标签，等于把交易结果重新注入视觉任务 → 触犯 C5。</li>
+<li>合成一个「未来是否形成形态」的标签，则永远不知道形成之后值不值得做 → 触犯 C6。</li>
+<li>分开后两者可独立验收：Formation 用形态学裁判（人工/teacher），Launch 用价格裁判。</li>
+</ul>
+<p>  <strong>只有 Launch 允许接触收益类信息，且它的输出不得回流到 Layer 1/1.5/2/3。</strong></p>
+<hr>
+<h2>3. Pattern Library 规格（Layer 1.5）</h2>
+<h3>3.1 为什么必须有</h3>
+<p>当前最大的资产不是权重，而是「模型认为哪些东西像 owner 的眼睛」。</p>
+<p>权重会过期、会被删（v11 即为教训），Library 不会。</p>
+<h3>3.2 数据格式</h3>
+<pre><code>
+{
+  &quot;pattern_id&quot;: &quot;dense_00001&quot;,
+  &quot;source&quot;: &quot;golden_pool | v10_prediction | owner_review&quot;,
+  &quot;symbol&quot;: &quot;ARM_USDT_SWAP&quot;,
+  &quot;timeframe&quot;: &quot;15m&quot;,
+  &quot;signal_time&quot;: &quot;2026-08-02T03:00:00+00:00&quot;,
+  &quot;image_path&quot;: &quot;datasets/.../ARM_USDT_SWAP_009107.png&quot;,
+  &quot;window&quot;: {&quot;bars&quot;: 200, &quot;start_i&quot;: 8908, &quot;end_i&quot;: 9107},
+  &quot;bbox_xywhn&quot;: [0.956, 0.62, 0.07, 0.18],
+  &quot;confidence&quot;: 0.439,
+
+  &quot;human_label&quot;: &quot;A|B|C|null&quot;,       // 人工质量分级，未审为 null
+  &quot;human_reviewed_at&quot;: null,
+
+  &quot;ma_structure&quot;: {&quot;spread_atr&quot;: 0.31, &quot;slope_20&quot;: -0.002, &quot;duration_bars&quot;: 9},
+  &quot;embedding&quot;: null,                 // Phase 1 暂不填，Phase 2 需要时补
+  &quot;teacher_version&quot;: &quot;owner_v10_chain&quot;,
+  &quot;teacher_sha256&quot;: &quot;&lt;权重指纹&gt;&quot;
+}
+</code></pre>
+<h3>3.3 种子池（已在手）</h3>
+<table><thead><tr>
+<th>来源</th>
+<th>数量</th>
+<th>位置</th>
+</tr></thead><tbody>
+<tr><td>golden_pool</td><td>12567 stem / 6229 框 / 6630 纯背景</td><td><code>data/golden_pool.json</code></td></tr>
+<tr><td>frozen-eval 尺子</td><td>47 币 / 464 图</td><td><code>datasets/owner_eval_frozen</code></td></tr>
+<tr><td>⭐ exemplar 基准</td><td>176 张</td><td><code>data/benchmark_exemplars.json</code></td></tr>
+<tr><td>v10 在 ETH 3m 的 owner 审</td><td>200 张（93 为「是」）</td><td><code>analysis/p_eth_3m_v10_owner_labels_timing.md</code></td></tr>
+<tr><td>yolo-xx owner 手标</td><td>1313 框</td><td>yolo-xx 仓</td></tr>
+<tr><td>2026-08-05 ablation 样本</td><td>100 样本 × 6 arm</td><td><code>reports/*_future_dependency_curve.json</code></td></tr>
+</tbody></table>
+<hr>
+<h2>4. 各 Phase 规格</h2>
+<h3>Phase 0 — 实验复盘 ✅ 已完成</h3>
+<p>产出：<code>reports/PHASE0_EXPERIMENT_POSTMORTEM.md</code> / <code>.html</code></p>
+<hr>
+<h3>Phase 1 — Pattern Teacher Research</h3>
+<p><strong>唯一目标</strong>：搞清楚 owner_v10_chain 到底学到了什么，并把它的能力边界冻结成文档。</p>
+<p><strong>不训练任何模型。</strong></p>
+<h4>Task 1.1 — 资产清单</h4>
+<p>输出：<code>reports/pattern_teacher_asset_inventory.md</code></p>
+<p>必含：权重路径与 <strong>SHA256</strong>、训练配置（<code>model/data/epochs/imgsz/lr0/augment</code> 全量）、</p>
+<p>训练数据集来源与规模、标签来源与标注协议、render 配置、window 配置、</p>
+<p>frozen-eval 定义、已知污染（如泄漏、lr bug 影响范围）。</p>
+<p><strong>已知起点</strong>：<code>models/owner_v10_chain.pt</code>（18.3MB，2026-07-17 02:30，取自 3060）；</p>
+<p><code>model: base_v9.pt</code> / <code>data: dense_owner_v9</code> / imgsz 960 / lr0 1e-4；</p>
+<p>同源备份 61 个权重在 <code>models/archive_3060/</code>。</p>
+<h4>Task 1.2 — Pattern Library v1（候选版）</h4>
+<p>输出：<code>reports/pattern_library_candidate.json</code>（格式见 §3.2）</p>
+<p>规则：<strong>不修改任何原始数据</strong>；</p>
+<p>未经人工审的 <code>human_label</code> 必须为 <code>null</code>，<strong>不得用规则自动预标充数</strong></p>
+<p>（2026-07-23 教训：自动标签被当成金标，导致 v16 被误判为 51.5% 误火）。</p>
+<h4>Task 1.3 — Teacher 解剖（B/C 分离实验）</h4>
+<p><strong>这是 Phase 1 的核心，它决定 Phase 3/4 的标签定义。</strong></p>
+<p>假设：owner_v10_chain 的检出依赖信号右侧信息（C2/C3 已证），</p>
+<p>但依赖的究竟是 <strong>形态的后半段</strong>（pattern structure）还是 <strong>启动确认</strong>（launch confirmation）？</p>
+<p>三类样本（按信号后 20 bar 的实际走势分层，<strong>分层规则必须在跑之前预注册</strong>）：</p>
+<table><thead><tr>
+<th>类</th>
+<th>定义</th>
+<th>若 teacher 能检出，说明</th>
+</tr></thead><tbody>
+<tr><td>A</td><td>形态完整 + <strong>未启动</strong>（后 20 bar 未突破）</td><td>它识别 pattern structure</td></tr>
+<tr><td>B</td><td>形态完整 + <strong>已启动</strong></td><td>—</td></tr>
+<tr><td>C</td><td>无经典密集，仅后续走势漂亮</td><td>它识别的是走势不是形态（最坏情况）</td></tr>
+</tbody></table>
+<p>裁决规则（预注册）：</p>
+<ul>
+<li>A 类检出率 ≥ B 类检出率的 70% → <strong>pattern structure 主导</strong></li>
+<li>A 类检出率 &lt; B 类的 40% → <strong>launch confirmation 主导</strong></li>
+<li>中间区间 → 混合，需扩样本或引入人工审</li>
+</ul>
+<p>输出：<code>reports/pattern_teacher_analysis.md</code></p>
+<p><strong>复用而非重造</strong>：「启动」的定义已在 <code>p_launch_entry_base_rate.md</code> /</p>
+<p><code>p_launch_entry_long_short.md</code> 中使用过，直接沿用，不要新造一个。</p>
+<h4>Phase 1 验收门</h4>
+<ul>
+<li>[ ] 三份报告齐备，<code>pattern_library_candidate.json</code> 可被程序读取且 schema 校验通过</li>
+<li>[ ] Task 1.3 的分层规则在跑之前落盘（预注册文件带时间戳）</li>
+<li>[ ] 未训练、未改权重/标签/数据集/阈值、未消耗 holdout</li>
+</ul>
+<h4>Phase 1 失败退出条件</h4>
+<p>若 Task 1.3 判定为 <strong>C 类主导</strong>（teacher 主要识别的是后续走势而非形态），</p>
+<p>则 C1 被削弱，<strong>Pattern Library 的种子有效性存疑</strong>，必须停下并重新审视标注协议，</p>
+<p><strong>不得进入 Phase 2</strong>。</p>
+<hr>
+<h3>Phase 2 — Pattern Quality Model</h3>
+<p><strong>目标</strong>：给形态打质量分（「这个形态有多接近经典人工形态」），<strong>不是打赚钱分</strong>。</p>
+<ul>
+<li>输入：YOLO embedding、bbox 几何、confidence、MA spread / slope、duration、</li>
+</ul>
+<p>  volatility、trend</p>
+<ul>
+<li>输出：<code>quality_score ∈ [0,1]</code></li>
+<li>标签来源：<strong>人工分级 A/B/C</strong>（Pattern Library 的 <code>human_label</code>），<strong>禁止使用盈亏</strong></li>
+<li>依据：Phase 0 阶段 A 的 P0 结论——人工标签在<strong>风险端</strong>有真实显著 alpha、</li>
+</ul>
+<p>  收益端没有。这是项目第一天就拿到、但 30 天未被采纳的信号。</p>
+<p><strong>验收门</strong>：与人工分级的一致性（Cohen&#x27;s κ 或分级准确率），在**从未参与训练的</p>
+<p>币种<strong>上评估。</strong>不看 PF、不看收益。**</p>
+<p><strong>失败退出</strong>：若 quality_score 与人工分级一致性不显著优于随机，</p>
+<p>说明「经典程度」不可从当前特征学习，须回 Phase 1 补标注协议。</p>
+<hr>
+<h3>Phase 3 — Formation Model</h3>
+<p><strong>目标</strong>：提前发现——当前状态是否将在未来形成经典形态。</p>
+<ul>
+<li>输入：<strong>前置窗口</strong>（完整形态 T0–T100 之前的 T0-T30 / T0-T50 / T0-T70）</li>
+<li>输出：<code>formation_probability</code></li>
+<li>标签：<strong>未来 N 根内是否形成经典形态</strong>（形态学裁判，非价格裁判）</li>
+</ul>
+<p><strong>已证伪的做法（禁止重试）</strong>：把完整形态图直接裁到右侧（v13/v14/v15/v16，见 C4）。</p>
+<p><strong>基线（已知）</strong>：2026-08-05 ablation 的 <code>future=0</code> 复现率</p>
+<p><strong>9–10% 就是不做任何改造直接上盘口的天花板</strong>。Formation Model 必须显著高于它才有意义。</p>
+<p><strong>验收门（必含，历史教训）</strong>：</p>
+<ul>
+<li>[ ] 严格时间切分，禁止随机切分</li>
+<li>[ ] 正负样本<strong>必须来自同一条渲染管线</strong></li>
+</ul>
+<p>      → <code>pos-neg-must-share-one-render-pipeline</code>（v15 死因：风格捷径）</p>
+<hr>
+<h3>Phase 4 — Launch Model</h3>
+<p><strong>目标</strong>：形态形成之后，是否会启动。</p>
+<ul>
+<li>输出：<code>launch_probability</code></li>
+<li><strong>这是唯一允许接触价格/收益类信息的视觉侧模型。</strong></li>
+<li><strong>硬约束</strong>：其输出<strong>不得回流</strong>到 Layer 1 / 1.5 / 2 / 3 的任何训练或标注环节。</li>
+</ul>
+<p>  违反即触犯 C5。</p>
+<p><strong>验收门</strong>：必须带<strong>匹配随机对照组</strong>（同币 × 同时间块 × 同波动桶），</p>
+<p>只报置换检验不够——它验排序，抓不到整池踩在 beta 上</p>
+<p>（07-28 教训：+16.9bp 中 +7.2bp 是做空 beta）。</p>
+<hr>
+<h3>Phase 5 — Trade Decision（fable-trading）</h3>
+<pre><code>
+trade_score = f(quality_score, formation_probability, launch_probability)
+</code></pre>
+<p><strong>验收门（沿用现有铁律，不放宽）</strong>：</p>
+<ul>
+<li>top-decile 扣 0.2% 往返成本后净收益为正，且置换检验 p &lt; 0.01</li>
+<li>匹配随机对照组</li>
+<li>确认级只认<strong>前向新鲜样本</strong>（不是 val、不是 accept 回测）</li>
+<li>holdout 消耗需 owner 逐次批准并记账（<strong>当前已消耗 7 次</strong>）</li>
+</ul>
+<hr>
+<h3>Phase 6 — Execution（darkforest-one）</h3>
+<p>沿用现有实盘纪律 7–11：新鲜度三门同值、脉冲预算 &lt;15min、VPS 唯一写者、</p>
+<p>不自动 promote、真金操作只有 owner 亲手做。</p>
+<hr>
+<h2>5. 跨 Phase 铁律（从 240 条 learnings 提炼，违反即返工）</h2>
+<p>1. <strong>不用 val mAP / 自家 frozen-F1 作裁决</strong>（纪律 12）。它们量的是有后文的分布。</p>
+<p>2. <strong>每张方向性结果表必须带匹配随机对照组</strong>（07-28）。</p>
+<p>3. <strong>正负样本同一条渲染管线</strong>（v15）。</p>
+<p>4. <strong>人工标注不得用规则自动预标充数</strong>（v16 误判）。</p>
+<p>5. <strong>holdout 每次消耗需 owner 批准 + 报告记账</strong>。</p>
+<p>6. <strong>一次实验只改一个变量</strong>；多变量打包需 owner 批准。</p>
+<p>7. <strong>训练产物立刻异地备份</strong>（v11 永久丢失的教训：</p>
+<p>   <code>weights-live-only-where-they-were-trained</code>）。</p>
+<p>8. <strong>清除/迁移类操作的记录不等于事实，须逐机核查</strong></p>
+<p>   （<code>purge-records-are-claims-not-facts</code>）。</p>
+<hr>
+<h2>6. Agent 工作规则</h2>
+<p>1. 不改变任务定义；不自行升级 Phase。</p>
+<p>2. 不让检测器承担交易任务；不用收益污染视觉标签。</p>
+<p>3. 实验必须<strong>先写假设与预注册</strong>，再跑。</p>
+<p>4. 修改必须说明原因与验证方式。</p>
+<p>5. <strong>仓库边界</strong>：Phase 1–4 在 <code>yolo-xx</code> 产出；</p>
+<p>   <strong><code>fable-trading</code> 与 <code>darkforest-one</code> 在 Phase 1–4 期间为只读</strong></p>
+<p>   —— 可以读取其数据、渲染代码、历史报告，<strong>不得修改其代码或产物</strong>。</p>
+<p>6. 报告口径（yolo-xx CLAUDE.md）：**给数字，不下判决；数字不许粉饰；</p>
+<p>   样本内外分开报；小样本标注笔数。**</p>
+<p>7. 每个非平凡问题解决后写 <code>docs/learnings/</code> 笔记。</p>
+<hr>
+<h2>7. 当前资产登记（2026-08-05 实测）</h2>
+<table><thead><tr>
+<th>类别</th>
+<th>数量</th>
+<th>位置</th>
+</tr></thead><tbody>
+<tr><td>自训权重</td><td>61</td><td><code>fable-trading/models/archive_3060/</code>（1.1G，v7→v16 全系）</td></tr>
+<tr><td>训练配置/曲线</td><td>25 套</td><td>同上（args.yaml + results.csv）</td></tr>
+<tr><td>Pattern Teacher</td><td>1</td><td><code>models/owner_v10_chain.pt</code>（18.3MB）</td></tr>
+<tr><td>golden_pool</td><td>12567 stem / 6229 框</td><td><code>data/golden_pool.json</code></td></tr>
+<tr><td>frozen-eval</td><td>47 币 / 464 图</td><td><code>datasets/owner_eval_frozen</code></td></tr>
+<tr><td>⭐ 基准</td><td>176 张</td><td><code>data/benchmark_exemplars.json</code></td></tr>
+<tr><td>历史报告</td><td>187</td><td><code>analysis/</code></td></tr>
+<tr><td>learnings</td><td>242</td><td><code>docs/learnings/</code></td></tr>
+<tr><td><strong>永久丢失</strong></td><td><strong>owner_v11_chain</strong></td><td>唯一不可恢复的模型</td></tr>
+</tbody></table>
+<hr>
+<h2>8. 与 GPT-5.6 建议的差异（供 owner 对照）</h2>
+<p>本蓝图采纳了 GPT-5.6 的：三层拆分、Pattern Library 中间层、Formation/Launch 分离、</p>
+<p>Phase 1 先解剖 teacher、PIS 命名。以下四处基于本仓实测证据做了调整：</p>
+<table><thead><tr>
+<th>#</th>
+<th>GPT 建议</th>
+<th>V5 调整</th>
+<th>依据</th>
+</tr></thead><tbody>
+<tr><td>1</td><td>Phase 编号两处不一致（Launch 分别列为 Phase 4 / 无）</td><td>统一为 0–6，Launch = Phase 4</td><td>—</td></tr>
+<tr><td>2</td><td>「不要修改 fable-trading」</td><td>细化为<strong>只读</strong>：可读数据/渲染/报告，不可写</td><td>Pattern Library 必须复用 <code>render_chart</code> 与 K 线，否则渲染语义漂移</td></tr>
+</tbody></table>
+<p>另补充 GPT 未涉及的：每个 Phase 的<strong>失败退出条件</strong>、跨 Phase 铁律 8 条、</p>
+<p>holdout 预算现状（已用 7 次）。</p>
+<p><strong>Owner 决定（2026-08-05）</strong>：曾提议为 Library 增加 <code>visible_future_bars</code> 必填字段、</p>
+<p>为 Phase 3 增加 fire rate 强制验收项；owner 决定两项均按 GPT 原案执行，不加入。</p>
+<p>本文档已按该决定移除相关条目。</p>
+</body>
+</html>

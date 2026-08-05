@@ -1,0 +1,6249 @@
+{
+  "weights": "/Users/zhangzc/fable-trading/runs/detect/runs/detect/owner_v12_htip/weights/best.pt",
+  "tag": "v12_htip",
+  "conf": 0.3,
+  "iou": 0.7,
+  "window": 200,
+  "match_tolerance_bars": 2,
+  "n_samples": 100,
+  "n_symbols": 34,
+  "curve": [
+    {
+      "future_bars": 0,
+      "is_full_arm": false,
+      "n_evaluated": 100,
+      "n_matched": 9,
+      "match_rate": 0.09,
+      "mean_conf_matched": 0.4898,
+      "median_conf_matched": 0.4006,
+      "mean_boxes_per_image": 0.29
+    },
+    {
+      "future_bars": 5,
+      "is_full_arm": false,
+      "n_evaluated": 100,
+      "n_matched": 19,
+      "match_rate": 0.19,
+      "mean_conf_matched": 0.4569,
+      "median_conf_matched": 0.3991,
+      "mean_boxes_per_image": 0.41
+    },
+    {
+      "future_bars": 10,
+      "is_full_arm": false,
+      "n_evaluated": 100,
+      "n_matched": 23,
+      "match_rate": 0.23,
+      "mean_conf_matched": 0.5403,
+      "median_conf_matched": 0.5474,
+      "mean_boxes_per_image": 0.46
+    },
+    {
+      "future_bars": 20,
+      "is_full_arm": false,
+      "n_evaluated": 100,
+      "n_matched": 41,
+      "match_rate": 0.41,
+      "mean_conf_matched": 0.5457,
+      "median_conf_matched": 0.5328,
+      "mean_boxes_per_image": 0.6
+    },
+    {
+      "future_bars": 40,
+      "is_full_arm": false,
+      "n_evaluated": 100,
+      "n_matched": 51,
+      "match_rate": 0.51,
+      "mean_conf_matched": 0.5542,
+      "median_conf_matched": 0.5283,
+      "mean_boxes_per_image": 0.73
+    },
+    {
+      "future_bars": 99,
+      "is_full_arm": true,
+      "n_evaluated": 100,
+      "n_matched": 72,
+      "match_rate": 0.72,
+      "mean_conf_matched": 0.5359,
+      "median_conf_matched": 0.496,
+      "mean_boxes_per_image": 0.88
+    }
+  ],
+  "per_sample": [
+    {
+      "sample_id": "sample_000",
+      "symbol": "0G_USDT_SWAP",
+      "signal_i": 27340,
+      "signal_time": "2026-07-04 05:30:00+00:00",
+      "discovery_conf": 0.7765,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.8203,
+          "bbox_xywhn": [
+            0.8518,
+            0.5537,
+            0.0687,
+            0.082
+          ],
+          "max_conf_any_box": 0.8203
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.8338,
+          "bbox_xywhn": [
+            0.7522,
+            0.5797,
+            0.0668,
+            0.0866
+          ],
+          "max_conf_any_box": 0.8338
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3812,
+          "bbox_xywhn": [
+            0.4688,
+            0.31,
+            0.0633,
+            0.1463
+          ],
+          "max_conf_any_box": 0.3812
+        }
+      }
+    },
+    {
+      "sample_id": "sample_001",
+      "symbol": "0G_USDT_SWAP",
+      "signal_i": 27683,
+      "signal_time": "2026-07-07 19:15:00+00:00",
+      "discovery_conf": 0.5338,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5327,
+          "bbox_xywhn": [
+            0.465,
+            0.2479,
+            0.0718,
+            0.1077
+          ],
+          "max_conf_any_box": 0.5327
+        }
+      }
+    },
+    {
+      "sample_id": "sample_002",
+      "symbol": "0G_USDT_SWAP",
+      "signal_i": 28079,
+      "signal_time": "2026-07-11 22:15:00+00:00",
+      "discovery_conf": 0.5736,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3105,
+          "bbox_xywhn": [
+            0.9514,
+            0.4477,
+            0.0415,
+            0.1004
+          ],
+          "max_conf_any_box": 0.3105
+        },
+        "10": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.3757,
+          "bbox_xywhn": [
+            0.9281,
+            0.4096,
+            0.0425,
+            0.1
+          ],
+          "max_conf_any_box": 0.3757
+        },
+        "20": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.3738,
+          "bbox_xywhn": [
+            0.8582,
+            0.3914,
+            0.0684,
+            0.0896
+          ],
+          "max_conf_any_box": 0.3738
+        },
+        "40": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.4075,
+          "bbox_xywhn": [
+            0.7595,
+            0.3919,
+            0.0687,
+            0.09
+          ],
+          "max_conf_any_box": 0.4075
+        },
+        "99": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.5497,
+          "bbox_xywhn": [
+            0.4906,
+            0.3417,
+            0.0453,
+            0.088
+          ],
+          "max_conf_any_box": 0.5497
+        }
+      }
+    },
+    {
+      "sample_id": "sample_003",
+      "symbol": "1INCH_USDT_SWAP",
+      "signal_i": 38683,
+      "signal_time": "2026-07-11 12:00:00+00:00",
+      "discovery_conf": 0.6524,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6139,
+          "bbox_xywhn": [
+            0.8587,
+            0.5378,
+            0.0698,
+            0.1165
+          ],
+          "max_conf_any_box": 0.6139
+        },
+        "40": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.6606,
+          "bbox_xywhn": [
+            0.7563,
+            0.6864,
+            0.067,
+            0.0769
+          ],
+          "max_conf_any_box": 0.6606
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6403,
+          "bbox_xywhn": [
+            0.4687,
+            0.7892,
+            0.0667,
+            0.1016
+          ],
+          "max_conf_any_box": 0.6403
+        }
+      }
+    },
+    {
+      "sample_id": "sample_004",
+      "symbol": "1INCH_USDT_SWAP",
+      "signal_i": 38948,
+      "signal_time": "2026-07-14 06:15:00+00:00",
+      "discovery_conf": 0.5981,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5212,
+          "bbox_xywhn": [
+            0.7572,
+            0.7196,
+            0.0692,
+            0.138
+          ],
+          "max_conf_any_box": 0.5212
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6176,
+          "bbox_xywhn": [
+            0.4675,
+            0.7171,
+            0.0699,
+            0.1395
+          ],
+          "max_conf_any_box": 0.6176
+        }
+      }
+    },
+    {
+      "sample_id": "sample_005",
+      "symbol": "1INCH_USDT_SWAP",
+      "signal_i": 39153,
+      "signal_time": "2026-07-16 09:30:00+00:00",
+      "discovery_conf": 0.4076,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_006",
+      "symbol": "2Z_USDT_SWAP",
+      "signal_i": 26410,
+      "signal_time": "2026-07-04 15:30:00+00:00",
+      "discovery_conf": 0.3601,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.4576,
+          "bbox_xywhn": [
+            0.7562,
+            0.7184,
+            0.071,
+            0.1393
+          ],
+          "max_conf_any_box": 0.4576
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4561,
+          "bbox_xywhn": [
+            0.4715,
+            0.7944,
+            0.0622,
+            0.1207
+          ],
+          "max_conf_any_box": 0.4561
+        }
+      }
+    },
+    {
+      "sample_id": "sample_007",
+      "symbol": "2Z_USDT_SWAP",
+      "signal_i": 26607,
+      "signal_time": "2026-07-06 16:45:00+00:00",
+      "discovery_conf": 0.5912,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.3653,
+          "bbox_xywhn": [
+            0.7594,
+            0.6625,
+            0.0646,
+            0.1383
+          ],
+          "max_conf_any_box": 0.3653
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4909,
+          "bbox_xywhn": [
+            0.4619,
+            0.6973,
+            0.0789,
+            0.1407
+          ],
+          "max_conf_any_box": 0.4909
+        }
+      }
+    },
+    {
+      "sample_id": "sample_008",
+      "symbol": "2Z_USDT_SWAP",
+      "signal_i": 27288,
+      "signal_time": "2026-07-13 19:00:00+00:00",
+      "discovery_conf": 0.303,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3565,
+          "bbox_xywhn": [
+            0.7647,
+            0.5149,
+            0.0624,
+            0.1197
+          ],
+          "max_conf_any_box": 0.3565
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_009",
+      "symbol": "AAVE_USDT_SWAP",
+      "signal_i": 38111,
+      "signal_time": "2026-07-04 14:30:00+00:00",
+      "discovery_conf": 0.375,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.5908
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.6463
+        },
+        "10": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.3501,
+          "bbox_xywhn": [
+            0.9163,
+            0.5168,
+            0.06,
+            0.1097
+          ],
+          "max_conf_any_box": 0.719
+        },
+        "20": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.4162,
+          "bbox_xywhn": [
+            0.8661,
+            0.5181,
+            0.0611,
+            0.1104
+          ],
+          "max_conf_any_box": 0.6241
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.6834
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6695,
+          "bbox_xywhn": [
+            0.4821,
+            0.6312,
+            0.0466,
+            0.124
+          ],
+          "max_conf_any_box": 0.6695
+        }
+      }
+    },
+    {
+      "sample_id": "sample_010",
+      "symbol": "AAVE_USDT_SWAP",
+      "signal_i": 38273,
+      "signal_time": "2026-07-06 07:00:00+00:00",
+      "discovery_conf": 0.3228,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.433
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_011",
+      "symbol": "AAVE_USDT_SWAP",
+      "signal_i": 38399,
+      "signal_time": "2026-07-07 14:30:00+00:00",
+      "discovery_conf": 0.4245,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3099
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3518
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3566
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3746
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_012",
+      "symbol": "ACH_USDT_SWAP",
+      "signal_i": 38171,
+      "signal_time": "2026-07-06 04:00:00+00:00",
+      "discovery_conf": 0.5566,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3488,
+          "bbox_xywhn": [
+            0.9391,
+            0.571,
+            0.054,
+            0.1647
+          ],
+          "max_conf_any_box": 0.3488
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3998,
+          "bbox_xywhn": [
+            0.8633,
+            0.5053,
+            0.0588,
+            0.1368
+          ],
+          "max_conf_any_box": 0.3998
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5118,
+          "bbox_xywhn": [
+            0.7636,
+            0.5012,
+            0.0605,
+            0.1388
+          ],
+          "max_conf_any_box": 0.5118
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6005,
+          "bbox_xywhn": [
+            0.4724,
+            0.5147,
+            0.0642,
+            0.1208
+          ],
+          "max_conf_any_box": 0.6005
+        }
+      }
+    },
+    {
+      "sample_id": "sample_013",
+      "symbol": "ACH_USDT_SWAP",
+      "signal_i": 38525,
+      "signal_time": "2026-07-09 20:30:00+00:00",
+      "discovery_conf": 0.4518,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4812,
+          "bbox_xywhn": [
+            0.7615,
+            0.641,
+            0.0654,
+            0.1429
+          ],
+          "max_conf_any_box": 0.4812
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4786,
+          "bbox_xywhn": [
+            0.4698,
+            0.6782,
+            0.0644,
+            0.144
+          ],
+          "max_conf_any_box": 0.4786
+        }
+      }
+    },
+    {
+      "sample_id": "sample_014",
+      "symbol": "ACH_USDT_SWAP",
+      "signal_i": 38686,
+      "signal_time": "2026-07-11 12:45:00+00:00",
+      "discovery_conf": 0.4251,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.4785
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.4657
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3846
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_015",
+      "symbol": "ACT_USDT_SWAP",
+      "signal_i": 37988,
+      "signal_time": "2026-07-04 06:15:00+00:00",
+      "discovery_conf": 0.5028,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3875,
+          "bbox_xywhn": [
+            0.8723,
+            0.7639,
+            0.0374,
+            0.0665
+          ],
+          "max_conf_any_box": 0.3875
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4255,
+          "bbox_xywhn": [
+            0.7746,
+            0.7649,
+            0.0361,
+            0.0672
+          ],
+          "max_conf_any_box": 0.4255
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4985,
+          "bbox_xywhn": [
+            0.4848,
+            0.7641,
+            0.0351,
+            0.0665
+          ],
+          "max_conf_any_box": 0.4985
+        }
+      }
+    },
+    {
+      "sample_id": "sample_016",
+      "symbol": "ACT_USDT_SWAP",
+      "signal_i": 38263,
+      "signal_time": "2026-07-07 03:00:00+00:00",
+      "discovery_conf": 0.5475,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.5475,
+          "bbox_xywhn": [
+            0.4688,
+            0.2259,
+            0.0636,
+            0.0863
+          ],
+          "max_conf_any_box": 0.5475
+        }
+      }
+    },
+    {
+      "sample_id": "sample_017",
+      "symbol": "ACT_USDT_SWAP",
+      "signal_i": 38521,
+      "signal_time": "2026-07-09 19:30:00+00:00",
+      "discovery_conf": 0.6117,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.7531,
+          "bbox_xywhn": [
+            0.9561,
+            0.3759,
+            0.0589,
+            0.0894
+          ],
+          "max_conf_any_box": 0.7531
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.8376,
+          "bbox_xywhn": [
+            0.9322,
+            0.3763,
+            0.0597,
+            0.0879
+          ],
+          "max_conf_any_box": 0.8376
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.8829,
+          "bbox_xywhn": [
+            0.9077,
+            0.3756,
+            0.0604,
+            0.0888
+          ],
+          "max_conf_any_box": 0.8829
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.8371,
+          "bbox_xywhn": [
+            0.8585,
+            0.3749,
+            0.0614,
+            0.0905
+          ],
+          "max_conf_any_box": 0.8371
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6096,
+          "bbox_xywhn": [
+            0.7594,
+            0.3881,
+            0.0591,
+            0.091
+          ],
+          "max_conf_any_box": 0.6096
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6438,
+          "bbox_xywhn": [
+            0.4713,
+            0.764,
+            0.0607,
+            0.0724
+          ],
+          "max_conf_any_box": 0.6438
+        }
+      }
+    },
+    {
+      "sample_id": "sample_018",
+      "symbol": "ACU_USDT_SWAP",
+      "signal_i": 15765,
+      "signal_time": "2026-07-06 12:15:00+00:00",
+      "discovery_conf": 0.7061,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.5909,
+          "bbox_xywhn": [
+            0.7542,
+            0.7885,
+            0.076,
+            0.1491
+          ],
+          "max_conf_any_box": 0.5909
+        },
+        "99": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.7296,
+          "bbox_xywhn": [
+            0.4633,
+            0.7763,
+            0.0731,
+            0.1415
+          ],
+          "max_conf_any_box": 0.7296
+        }
+      }
+    },
+    {
+      "sample_id": "sample_019",
+      "symbol": "ACU_USDT_SWAP",
+      "signal_i": 15863,
+      "signal_time": "2026-07-07 12:45:00+00:00",
+      "discovery_conf": 0.3353,
+      "arms": {
+        "0": {
+          "n_boxes": 2,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.8057
+        },
+        "5": {
+          "n_boxes": 3,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.7465
+        },
+        "10": {
+          "n_boxes": 2,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.7944
+        },
+        "20": {
+          "n_boxes": 2,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.7754
+        },
+        "40": {
+          "n_boxes": 2,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.7643
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.417
+        }
+      }
+    },
+    {
+      "sample_id": "sample_020",
+      "symbol": "ACU_USDT_SWAP",
+      "signal_i": 16056,
+      "signal_time": "2026-07-09 13:00:00+00:00",
+      "discovery_conf": 0.383,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4423,
+          "bbox_xywhn": [
+            0.9142,
+            0.787,
+            0.0454,
+            0.1454
+          ],
+          "max_conf_any_box": 0.4423
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5394,
+          "bbox_xywhn": [
+            0.8652,
+            0.7868,
+            0.0467,
+            0.1481
+          ],
+          "max_conf_any_box": 0.5394
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_021",
+      "symbol": "ADA_USDT_SWAP",
+      "signal_i": 38112,
+      "signal_time": "2026-07-04 14:45:00+00:00",
+      "discovery_conf": 0.3203,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_022",
+      "symbol": "ADA_USDT_SWAP",
+      "signal_i": 38264,
+      "signal_time": "2026-07-06 04:45:00+00:00",
+      "discovery_conf": 0.4983,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3554
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3807
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3716
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3899
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4268,
+          "bbox_xywhn": [
+            0.7742,
+            0.4335,
+            0.0533,
+            0.0835
+          ],
+          "max_conf_any_box": 0.4268
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4022,
+          "bbox_xywhn": [
+            0.4753,
+            0.339,
+            0.0482,
+            0.1302
+          ],
+          "max_conf_any_box": 0.4022
+        }
+      }
+    },
+    {
+      "sample_id": "sample_023",
+      "symbol": "ADA_USDT_SWAP",
+      "signal_i": 38761,
+      "signal_time": "2026-07-11 09:00:00+00:00",
+      "discovery_conf": 0.5495,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5495,
+          "bbox_xywhn": [
+            0.469,
+            0.5991,
+            0.0688,
+            0.0829
+          ],
+          "max_conf_any_box": 0.5495
+        }
+      }
+    },
+    {
+      "sample_id": "sample_024",
+      "symbol": "AERO_USDT_SWAP",
+      "signal_i": 35487,
+      "signal_time": "2026-07-07 22:00:00+00:00",
+      "discovery_conf": 0.3865,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3822,
+          "bbox_xywhn": [
+            0.4765,
+            0.3097,
+            0.057,
+            0.1357
+          ],
+          "max_conf_any_box": 0.3822
+        }
+      }
+    },
+    {
+      "sample_id": "sample_025",
+      "symbol": "AERO_USDT_SWAP",
+      "signal_i": 35793,
+      "signal_time": "2026-07-11 02:30:00+00:00",
+      "discovery_conf": 0.3023,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_026",
+      "symbol": "AERO_USDT_SWAP",
+      "signal_i": 36118,
+      "signal_time": "2026-07-14 11:45:00+00:00",
+      "discovery_conf": 0.755,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3596,
+          "bbox_xywhn": [
+            0.9346,
+            0.7032,
+            0.0644,
+            0.1407
+          ],
+          "max_conf_any_box": 0.3596
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5837,
+          "bbox_xywhn": [
+            0.9103,
+            0.7023,
+            0.063,
+            0.1425
+          ],
+          "max_conf_any_box": 0.5837
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6173,
+          "bbox_xywhn": [
+            0.8628,
+            0.6942,
+            0.066,
+            0.1454
+          ],
+          "max_conf_any_box": 0.6173
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6864,
+          "bbox_xywhn": [
+            0.7622,
+            0.6865,
+            0.0641,
+            0.1491
+          ],
+          "max_conf_any_box": 0.6864
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6963,
+          "bbox_xywhn": [
+            0.4702,
+            0.6793,
+            0.0637,
+            0.144
+          ],
+          "max_conf_any_box": 0.6963
+        }
+      }
+    },
+    {
+      "sample_id": "sample_027",
+      "symbol": "AEVO_USDT_SWAP",
+      "signal_i": 38054,
+      "signal_time": "2026-07-04 23:00:00+00:00",
+      "discovery_conf": 0.6849,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4351,
+          "bbox_xywhn": [
+            0.8645,
+            0.4133,
+            0.058,
+            0.0842
+          ],
+          "max_conf_any_box": 0.4351
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6487,
+          "bbox_xywhn": [
+            0.7656,
+            0.4139,
+            0.0583,
+            0.0847
+          ],
+          "max_conf_any_box": 0.6487
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6849,
+          "bbox_xywhn": [
+            0.4746,
+            0.4033,
+            0.0578,
+            0.0842
+          ],
+          "max_conf_any_box": 0.6849
+        }
+      }
+    },
+    {
+      "sample_id": "sample_028",
+      "symbol": "AEVO_USDT_SWAP",
+      "signal_i": 38326,
+      "signal_time": "2026-07-07 19:00:00+00:00",
+      "discovery_conf": 0.3112,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3112,
+          "bbox_xywhn": [
+            0.4769,
+            0.3532,
+            0.0469,
+            0.1072
+          ],
+          "max_conf_any_box": 0.3112
+        }
+      }
+    },
+    {
+      "sample_id": "sample_029",
+      "symbol": "AEVO_USDT_SWAP",
+      "signal_i": 38442,
+      "signal_time": "2026-07-09 00:00:00+00:00",
+      "discovery_conf": 0.3053,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3464
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3128
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3173
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3152
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3848
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3113,
+          "bbox_xywhn": [
+            0.4734,
+            0.5896,
+            0.0578,
+            0.1526
+          ],
+          "max_conf_any_box": 0.3113
+        }
+      }
+    },
+    {
+      "sample_id": "sample_030",
+      "symbol": "AGLD_USDT_SWAP",
+      "signal_i": 38296,
+      "signal_time": "2026-07-07 11:30:00+00:00",
+      "discovery_conf": 0.354,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.7392,
+          "bbox_xywhn": [
+            0.7648,
+            0.7917,
+            0.0673,
+            0.1462
+          ],
+          "max_conf_any_box": 0.7392
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3979,
+          "bbox_xywhn": [
+            0.4731,
+            0.8544,
+            0.0603,
+            0.0984
+          ],
+          "max_conf_any_box": 0.3979
+        }
+      }
+    },
+    {
+      "sample_id": "sample_031",
+      "symbol": "AGLD_USDT_SWAP",
+      "signal_i": 38614,
+      "signal_time": "2026-07-10 19:00:00+00:00",
+      "discovery_conf": 0.7555,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5283,
+          "bbox_xywhn": [
+            0.7653,
+            0.6968,
+            0.0591,
+            0.1177
+          ],
+          "max_conf_any_box": 0.5283
+        },
+        "99": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.7555,
+          "bbox_xywhn": [
+            0.4735,
+            0.7836,
+            0.0619,
+            0.1201
+          ],
+          "max_conf_any_box": 0.7555
+        }
+      }
+    },
+    {
+      "sample_id": "sample_032",
+      "symbol": "AGLD_USDT_SWAP",
+      "signal_i": 38757,
+      "signal_time": "2026-07-12 06:45:00+00:00",
+      "discovery_conf": 0.7115,
+      "arms": {
+        "0": {
+          "n_boxes": 2,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.8252
+        },
+        "5": {
+          "n_boxes": 2,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.8611
+        },
+        "10": {
+          "n_boxes": 2,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.851
+        },
+        "20": {
+          "n_boxes": 2,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.4919
+        },
+        "40": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.6843,
+          "bbox_xywhn": [
+            0.7591,
+            0.7518,
+            0.0588,
+            0.122
+          ],
+          "max_conf_any_box": 0.6843
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6566,
+          "bbox_xywhn": [
+            0.4695,
+            0.785,
+            0.0642,
+            0.1345
+          ],
+          "max_conf_any_box": 0.6566
+        }
+      }
+    },
+    {
+      "sample_id": "sample_033",
+      "symbol": "AIXBT_USDT_SWAP",
+      "signal_i": 38472,
+      "signal_time": "2026-07-09 07:30:00+00:00",
+      "discovery_conf": 0.7725,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3501,
+          "bbox_xywhn": [
+            0.9359,
+            0.646,
+            0.0707,
+            0.121
+          ],
+          "max_conf_any_box": 0.3501
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6526,
+          "bbox_xywhn": [
+            0.9105,
+            0.6463,
+            0.07,
+            0.1218
+          ],
+          "max_conf_any_box": 0.6526
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.8015,
+          "bbox_xywhn": [
+            0.4702,
+            0.6832,
+            0.0665,
+            0.1024
+          ],
+          "max_conf_any_box": 0.8015
+        }
+      }
+    },
+    {
+      "sample_id": "sample_034",
+      "symbol": "AIXBT_USDT_SWAP",
+      "signal_i": 38613,
+      "signal_time": "2026-07-10 18:45:00+00:00",
+      "discovery_conf": 0.45,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.6006
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.6326
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.6637
+        },
+        "20": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.5507,
+          "bbox_xywhn": [
+            0.8682,
+            0.5231,
+            0.0435,
+            0.1033
+          ],
+          "max_conf_any_box": 0.8428
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3488,
+          "bbox_xywhn": [
+            0.7651,
+            0.6325,
+            0.0559,
+            0.0884
+          ],
+          "max_conf_any_box": 0.3488
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5954,
+          "bbox_xywhn": [
+            0.4802,
+            0.7097,
+            0.0431,
+            0.0926
+          ],
+          "max_conf_any_box": 0.5954
+        }
+      }
+    },
+    {
+      "sample_id": "sample_035",
+      "symbol": "AIXBT_USDT_SWAP",
+      "signal_i": 38977,
+      "signal_time": "2026-07-14 13:45:00+00:00",
+      "discovery_conf": 0.4413,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3849,
+          "bbox_xywhn": [
+            0.4678,
+            0.7281,
+            0.0643,
+            0.1473
+          ],
+          "max_conf_any_box": 0.3849
+        }
+      }
+    },
+    {
+      "sample_id": "sample_036",
+      "symbol": "AI_USDT_SWAP",
+      "signal_i": 6496,
+      "signal_time": "2026-07-06 04:00:00+00:00",
+      "discovery_conf": 0.3521,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4299,
+          "bbox_xywhn": [
+            0.9176,
+            0.6061,
+            0.0472,
+            0.1104
+          ],
+          "max_conf_any_box": 0.4299
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.306,
+          "bbox_xywhn": [
+            0.8692,
+            0.614,
+            0.0435,
+            0.1051
+          ],
+          "max_conf_any_box": 0.306
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5287,
+          "bbox_xywhn": [
+            0.4798,
+            0.5788,
+            0.0498,
+            0.1067
+          ],
+          "max_conf_any_box": 0.5287
+        }
+      }
+    },
+    {
+      "sample_id": "sample_037",
+      "symbol": "AI_USDT_SWAP",
+      "signal_i": 6884,
+      "signal_time": "2026-07-10 05:00:00+00:00",
+      "discovery_conf": 0.5704,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4688,
+          "bbox_xywhn": [
+            0.7592,
+            0.6962,
+            0.0593,
+            0.1455
+          ],
+          "max_conf_any_box": 0.4688
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5704,
+          "bbox_xywhn": [
+            0.4714,
+            0.7575,
+            0.0598,
+            0.1357
+          ],
+          "max_conf_any_box": 0.5704
+        }
+      }
+    },
+    {
+      "sample_id": "sample_038",
+      "symbol": "AI_USDT_SWAP",
+      "signal_i": 7155,
+      "signal_time": "2026-07-13 00:45:00+00:00",
+      "discovery_conf": 0.6514,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.598,
+          "bbox_xywhn": [
+            0.9097,
+            0.3909,
+            0.0647,
+            0.0625
+          ],
+          "max_conf_any_box": 0.598
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6531,
+          "bbox_xywhn": [
+            0.8594,
+            0.2993,
+            0.0639,
+            0.0618
+          ],
+          "max_conf_any_box": 0.6531
+        },
+        "40": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.5525,
+          "bbox_xywhn": [
+            0.7597,
+            0.2558,
+            0.0648,
+            0.0648
+          ],
+          "max_conf_any_box": 0.5525
+        },
+        "99": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.4936,
+          "bbox_xywhn": [
+            0.4696,
+            0.2417,
+            0.063,
+            0.0647
+          ],
+          "max_conf_any_box": 0.4936
+        }
+      }
+    },
+    {
+      "sample_id": "sample_039",
+      "symbol": "ALGO_USDT_SWAP",
+      "signal_i": 38024,
+      "signal_time": "2026-07-04 15:30:00+00:00",
+      "discovery_conf": 0.312,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_040",
+      "symbol": "ALGO_USDT_SWAP",
+      "signal_i": 38172,
+      "signal_time": "2026-07-06 04:30:00+00:00",
+      "discovery_conf": 0.4111,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3034,
+          "bbox_xywhn": [
+            0.772,
+            0.3884,
+            0.0509,
+            0.1214
+          ],
+          "max_conf_any_box": 0.3034
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3296,
+          "bbox_xywhn": [
+            0.4797,
+            0.2642,
+            0.0487,
+            0.1241
+          ],
+          "max_conf_any_box": 0.3296
+        }
+      }
+    },
+    {
+      "sample_id": "sample_041",
+      "symbol": "ALGO_USDT_SWAP",
+      "signal_i": 38569,
+      "signal_time": "2026-07-10 07:45:00+00:00",
+      "discovery_conf": 0.3089,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3598,
+          "bbox_xywhn": [
+            0.8702,
+            0.5863,
+            0.0463,
+            0.0883
+          ],
+          "max_conf_any_box": 0.3598
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3034,
+          "bbox_xywhn": [
+            0.4807,
+            0.5889,
+            0.0476,
+            0.0943
+          ],
+          "max_conf_any_box": 0.3034
+        }
+      }
+    },
+    {
+      "sample_id": "sample_042",
+      "symbol": "ALLO_USDT_SWAP",
+      "signal_i": 22752,
+      "signal_time": "2026-07-06 16:45:00+00:00",
+      "discovery_conf": 0.342,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3578,
+          "bbox_xywhn": [
+            0.7673,
+            0.7631,
+            0.0445,
+            0.1048
+          ],
+          "max_conf_any_box": 0.3578
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3158,
+          "bbox_xywhn": [
+            0.4752,
+            0.7782,
+            0.0491,
+            0.1042
+          ],
+          "max_conf_any_box": 0.3158
+        }
+      }
+    },
+    {
+      "sample_id": "sample_043",
+      "symbol": "ALLO_USDT_SWAP",
+      "signal_i": 23038,
+      "signal_time": "2026-07-09 16:15:00+00:00",
+      "discovery_conf": 0.3064,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3029
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3012
+        }
+      }
+    },
+    {
+      "sample_id": "sample_044",
+      "symbol": "ALLO_USDT_SWAP",
+      "signal_i": 23614,
+      "signal_time": "2026-07-15 16:15:00+00:00",
+      "discovery_conf": 0.3873,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3916,
+          "bbox_xywhn": [
+            0.9526,
+            0.8521,
+            0.0671,
+            0.0931
+          ],
+          "max_conf_any_box": 0.3916
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3589,
+          "bbox_xywhn": [
+            0.9279,
+            0.8526,
+            0.0647,
+            0.0918
+          ],
+          "max_conf_any_box": 0.3589
+        },
+        "10": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.5763,
+          "bbox_xywhn": [
+            0.9022,
+            0.8525,
+            0.066,
+            0.0927
+          ],
+          "max_conf_any_box": 0.5763
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4549,
+          "bbox_xywhn": [
+            0.8537,
+            0.8484,
+            0.0662,
+            0.0967
+          ],
+          "max_conf_any_box": 0.4549
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5637,
+          "bbox_xywhn": [
+            0.7565,
+            0.8182,
+            0.0643,
+            0.1277
+          ],
+          "max_conf_any_box": 0.5637
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.518,
+          "bbox_xywhn": [
+            0.4736,
+            0.6909,
+            0.0683,
+            0.1609
+          ],
+          "max_conf_any_box": 0.518
+        }
+      }
+    },
+    {
+      "sample_id": "sample_045",
+      "symbol": "ANIME_USDT_SWAP",
+      "signal_i": 37964,
+      "signal_time": "2026-07-05 01:45:00+00:00",
+      "discovery_conf": 0.8107,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3167
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.5005
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3929,
+          "bbox_xywhn": [
+            0.8649,
+            0.5268,
+            0.0645,
+            0.0962
+          ],
+          "max_conf_any_box": 0.3929
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4864,
+          "bbox_xywhn": [
+            0.7669,
+            0.541,
+            0.0614,
+            0.0932
+          ],
+          "max_conf_any_box": 0.4864
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.7656,
+          "bbox_xywhn": [
+            0.4835,
+            0.3938,
+            0.0408,
+            0.1161
+          ],
+          "max_conf_any_box": 0.7656
+        }
+      }
+    },
+    {
+      "sample_id": "sample_046",
+      "symbol": "ANIME_USDT_SWAP",
+      "signal_i": 38578,
+      "signal_time": "2026-07-11 11:15:00+00:00",
+      "discovery_conf": 0.493,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5472,
+          "bbox_xywhn": [
+            0.8624,
+            0.459,
+            0.055,
+            0.1226
+          ],
+          "max_conf_any_box": 0.5472
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6084,
+          "bbox_xywhn": [
+            0.7627,
+            0.5096,
+            0.0629,
+            0.1302
+          ],
+          "max_conf_any_box": 0.6084
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4786,
+          "bbox_xywhn": [
+            0.474,
+            0.6805,
+            0.0612,
+            0.1286
+          ],
+          "max_conf_any_box": 0.4786
+        }
+      }
+    },
+    {
+      "sample_id": "sample_047",
+      "symbol": "ANIME_USDT_SWAP",
+      "signal_i": 38703,
+      "signal_time": "2026-07-12 18:30:00+00:00",
+      "discovery_conf": 0.3584,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.6413
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.5521
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.5766
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.645
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.4726
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3803,
+          "bbox_xywhn": [
+            0.4695,
+            0.3668,
+            0.066,
+            0.0776
+          ],
+          "max_conf_any_box": 0.3803
+        }
+      }
+    },
+    {
+      "sample_id": "sample_048",
+      "symbol": "ANTHROPIC_USDT_SWAP",
+      "signal_i": 5558,
+      "signal_time": "2026-07-04 07:00:00+00:00",
+      "discovery_conf": 0.3364,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3429,
+          "bbox_xywhn": [
+            0.9621,
+            0.8886,
+            0.0717,
+            0.1005
+          ],
+          "max_conf_any_box": 0.3429
+        },
+        "5": {
+          "n_boxes": 2,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3195
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_049",
+      "symbol": "ANTHROPIC_USDT_SWAP",
+      "signal_i": 5898,
+      "signal_time": "2026-07-07 20:00:00+00:00",
+      "discovery_conf": 0.3134,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.4992
+        }
+      }
+    },
+    {
+      "sample_id": "sample_050",
+      "symbol": "ANTHROPIC_USDT_SWAP",
+      "signal_i": 6099,
+      "signal_time": "2026-07-09 22:15:00+00:00",
+      "discovery_conf": 0.481,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6468,
+          "bbox_xywhn": [
+            0.9611,
+            0.4784,
+            0.0665,
+            0.0557
+          ],
+          "max_conf_any_box": 0.6468
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6952,
+          "bbox_xywhn": [
+            0.8631,
+            0.4776,
+            0.0646,
+            0.056
+          ],
+          "max_conf_any_box": 0.6952
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.7248,
+          "bbox_xywhn": [
+            0.7639,
+            0.4782,
+            0.065,
+            0.0559
+          ],
+          "max_conf_any_box": 0.7248
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5667,
+          "bbox_xywhn": [
+            0.4715,
+            0.5564,
+            0.065,
+            0.0586
+          ],
+          "max_conf_any_box": 0.5667
+        }
+      }
+    },
+    {
+      "sample_id": "sample_051",
+      "symbol": "APE_USDT_SWAP",
+      "signal_i": 38392,
+      "signal_time": "2026-07-07 12:45:00+00:00",
+      "discovery_conf": 0.3611,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4632,
+          "bbox_xywhn": [
+            0.4786,
+            0.7664,
+            0.0574,
+            0.1347
+          ],
+          "max_conf_any_box": 0.4632
+        }
+      }
+    },
+    {
+      "sample_id": "sample_052",
+      "symbol": "APE_USDT_SWAP",
+      "signal_i": 39273,
+      "signal_time": "2026-07-16 17:00:00+00:00",
+      "discovery_conf": 0.4837,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_053",
+      "symbol": "APE_USDT_SWAP",
+      "signal_i": 39599,
+      "signal_time": "2026-07-20 02:30:00+00:00",
+      "discovery_conf": 0.4358,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_054",
+      "symbol": "API3_USDT_SWAP",
+      "signal_i": 38064,
+      "signal_time": "2026-07-05 01:45:00+00:00",
+      "discovery_conf": 0.3861,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_055",
+      "symbol": "API3_USDT_SWAP",
+      "signal_i": 38218,
+      "signal_time": "2026-07-06 16:15:00+00:00",
+      "discovery_conf": 0.3004,
+      "arms": {
+        "0": {
+          "n_boxes": 2,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.5881
+        },
+        "5": {
+          "n_boxes": 3,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.4107
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.5109
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.5366
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_056",
+      "symbol": "API3_USDT_SWAP",
+      "signal_i": 38511,
+      "signal_time": "2026-07-09 17:30:00+00:00",
+      "discovery_conf": 0.3317,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_057",
+      "symbol": "APR_USDT_SWAP",
+      "signal_i": 24849,
+      "signal_time": "2026-07-10 02:15:00+00:00",
+      "discovery_conf": 0.6557,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.5403,
+          "bbox_xywhn": [
+            0.4684,
+            0.7957,
+            0.0678,
+            0.0794
+          ],
+          "max_conf_any_box": 0.6015
+        }
+      }
+    },
+    {
+      "sample_id": "sample_058",
+      "symbol": "APR_USDT_SWAP",
+      "signal_i": 24905,
+      "signal_time": "2026-07-10 16:15:00+00:00",
+      "discovery_conf": 0.6818,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5733,
+          "bbox_xywhn": [
+            0.8736,
+            0.7781,
+            0.0425,
+            0.0757
+          ],
+          "max_conf_any_box": 0.5733
+        },
+        "40": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.5934,
+          "bbox_xywhn": [
+            0.7766,
+            0.7794,
+            0.0419,
+            0.0665
+          ],
+          "max_conf_any_box": 0.5934
+        },
+        "99": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.6429,
+          "bbox_xywhn": [
+            0.4842,
+            0.8444,
+            0.0389,
+            0.0627
+          ],
+          "max_conf_any_box": 0.6429
+        }
+      }
+    },
+    {
+      "sample_id": "sample_059",
+      "symbol": "APR_USDT_SWAP",
+      "signal_i": 25102,
+      "signal_time": "2026-07-12 17:30:00+00:00",
+      "discovery_conf": 0.9374,
+      "arms": {
+        "0": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.6766,
+          "bbox_xywhn": [
+            0.9586,
+            0.4436,
+            0.0627,
+            0.0986
+          ],
+          "max_conf_any_box": 0.6766
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.8491,
+          "bbox_xywhn": [
+            0.9336,
+            0.4882,
+            0.0614,
+            0.0935
+          ],
+          "max_conf_any_box": 0.8491
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.8465,
+          "bbox_xywhn": [
+            0.9082,
+            0.5359,
+            0.0637,
+            0.0873
+          ],
+          "max_conf_any_box": 0.8465
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.9152,
+          "bbox_xywhn": [
+            0.8585,
+            0.5577,
+            0.0645,
+            0.093
+          ],
+          "max_conf_any_box": 0.9152
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.9047,
+          "bbox_xywhn": [
+            0.7611,
+            0.6177,
+            0.0649,
+            0.0956
+          ],
+          "max_conf_any_box": 0.9047
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.9465,
+          "bbox_xywhn": [
+            0.4697,
+            0.6269,
+            0.0634,
+            0.094
+          ],
+          "max_conf_any_box": 0.9465
+        }
+      }
+    },
+    {
+      "sample_id": "sample_060",
+      "symbol": "APT_USDT_SWAP",
+      "signal_i": 38154,
+      "signal_time": "2026-07-05 01:15:00+00:00",
+      "discovery_conf": 0.3104,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4694,
+          "bbox_xywhn": [
+            0.4794,
+            0.4685,
+            0.0498,
+            0.1571
+          ],
+          "max_conf_any_box": 0.4694
+        }
+      }
+    },
+    {
+      "sample_id": "sample_061",
+      "symbol": "APT_USDT_SWAP",
+      "signal_i": 38445,
+      "signal_time": "2026-07-08 02:00:00+00:00",
+      "discovery_conf": 0.3758,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.5236,
+          "bbox_xywhn": [
+            0.4753,
+            0.3352,
+            0.0606,
+            0.1607
+          ],
+          "max_conf_any_box": 0.5236
+        }
+      }
+    },
+    {
+      "sample_id": "sample_062",
+      "symbol": "APT_USDT_SWAP",
+      "signal_i": 38765,
+      "signal_time": "2026-07-11 10:00:00+00:00",
+      "discovery_conf": 0.5487,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3306,
+          "bbox_xywhn": [
+            0.9641,
+            0.4515,
+            0.0606,
+            0.0926
+          ],
+          "max_conf_any_box": 0.3306
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3473,
+          "bbox_xywhn": [
+            0.9133,
+            0.4568,
+            0.0549,
+            0.0944
+          ],
+          "max_conf_any_box": 0.3473
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4364,
+          "bbox_xywhn": [
+            0.8613,
+            0.5816,
+            0.0593,
+            0.0883
+          ],
+          "max_conf_any_box": 0.4364
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5535,
+          "bbox_xywhn": [
+            0.7618,
+            0.582,
+            0.0606,
+            0.0854
+          ],
+          "max_conf_any_box": 0.5535
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4507,
+          "bbox_xywhn": [
+            0.4697,
+            0.582,
+            0.0625,
+            0.0855
+          ],
+          "max_conf_any_box": 0.4507
+        }
+      }
+    },
+    {
+      "sample_id": "sample_063",
+      "symbol": "ARB_USDT_SWAP",
+      "signal_i": 38157,
+      "signal_time": "2026-07-05 02:00:00+00:00",
+      "discovery_conf": 0.5049,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.4676
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3583
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3497
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3302,
+          "bbox_xywhn": [
+            0.7754,
+            0.3761,
+            0.0348,
+            0.1229
+          ],
+          "max_conf_any_box": 0.3302
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4906,
+          "bbox_xywhn": [
+            0.4842,
+            0.3751,
+            0.0341,
+            0.1258
+          ],
+          "max_conf_any_box": 0.4906
+        }
+      }
+    },
+    {
+      "sample_id": "sample_064",
+      "symbol": "ARB_USDT_SWAP",
+      "signal_i": 38539,
+      "signal_time": "2026-07-09 01:30:00+00:00",
+      "discovery_conf": 0.6936,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6736,
+          "bbox_xywhn": [
+            0.8582,
+            0.8141,
+            0.0696,
+            0.0814
+          ],
+          "max_conf_any_box": 0.6736
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.785,
+          "bbox_xywhn": [
+            0.7607,
+            0.8219,
+            0.0689,
+            0.0819
+          ],
+          "max_conf_any_box": 0.785
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.8295,
+          "bbox_xywhn": [
+            0.4757,
+            0.8472,
+            0.0668,
+            0.066
+          ],
+          "max_conf_any_box": 0.8295
+        }
+      }
+    },
+    {
+      "sample_id": "sample_065",
+      "symbol": "ARB_USDT_SWAP",
+      "signal_i": 38780,
+      "signal_time": "2026-07-11 13:45:00+00:00",
+      "discovery_conf": 0.4006,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3861,
+          "bbox_xywhn": [
+            0.9411,
+            0.3659,
+            0.0652,
+            0.0964
+          ],
+          "max_conf_any_box": 0.3861
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.516,
+          "bbox_xywhn": [
+            0.9143,
+            0.4063,
+            0.0629,
+            0.0855
+          ],
+          "max_conf_any_box": 0.516
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.7182,
+          "bbox_xywhn": [
+            0.8658,
+            0.4201,
+            0.0622,
+            0.0937
+          ],
+          "max_conf_any_box": 0.7182
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4945,
+          "bbox_xywhn": [
+            0.7689,
+            0.4832,
+            0.0604,
+            0.1122
+          ],
+          "max_conf_any_box": 0.4945
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4612,
+          "bbox_xywhn": [
+            0.4783,
+            0.7684,
+            0.0519,
+            0.126
+          ],
+          "max_conf_any_box": 0.4612
+        }
+      }
+    },
+    {
+      "sample_id": "sample_066",
+      "symbol": "ARKM_USDT_SWAP",
+      "signal_i": 38172,
+      "signal_time": "2026-07-06 04:45:00+00:00",
+      "discovery_conf": 0.363,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_067",
+      "symbol": "ARKM_USDT_SWAP",
+      "signal_i": 38262,
+      "signal_time": "2026-07-07 03:15:00+00:00",
+      "discovery_conf": 0.3526,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3116,
+          "bbox_xywhn": [
+            0.4794,
+            0.2902,
+            0.0426,
+            0.1263
+          ],
+          "max_conf_any_box": 0.3116
+        }
+      }
+    },
+    {
+      "sample_id": "sample_068",
+      "symbol": "ARKM_USDT_SWAP",
+      "signal_i": 38548,
+      "signal_time": "2026-07-10 02:45:00+00:00",
+      "discovery_conf": 0.3102,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_069",
+      "symbol": "ARM_USDT_SWAP",
+      "signal_i": 6589,
+      "signal_time": "2026-07-06 21:30:00+00:00",
+      "discovery_conf": 0.4709,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.585
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.629
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.4695
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3279,
+          "bbox_xywhn": [
+            0.8664,
+            0.4916,
+            0.0411,
+            0.1104
+          ],
+          "max_conf_any_box": 0.3279
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4857,
+          "bbox_xywhn": [
+            0.4765,
+            0.3341,
+            0.051,
+            0.0874
+          ],
+          "max_conf_any_box": 0.4857
+        }
+      }
+    },
+    {
+      "sample_id": "sample_070",
+      "symbol": "ARM_USDT_SWAP",
+      "signal_i": 7181,
+      "signal_time": "2026-07-13 01:30:00+00:00",
+      "discovery_conf": 0.6222,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4787,
+          "bbox_xywhn": [
+            0.9504,
+            0.4136,
+            0.0656,
+            0.1054
+          ],
+          "max_conf_any_box": 0.4787
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4558,
+          "bbox_xywhn": [
+            0.9257,
+            0.376,
+            0.0652,
+            0.097
+          ],
+          "max_conf_any_box": 0.4558
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.7106,
+          "bbox_xywhn": [
+            0.9012,
+            0.3,
+            0.0651,
+            0.0929
+          ],
+          "max_conf_any_box": 0.7106
+        },
+        "20": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.6442,
+          "bbox_xywhn": [
+            0.852,
+            0.2751,
+            0.0653,
+            0.0922
+          ],
+          "max_conf_any_box": 0.6442
+        },
+        "40": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.6861,
+          "bbox_xywhn": [
+            0.7535,
+            0.248,
+            0.0649,
+            0.0753
+          ],
+          "max_conf_any_box": 0.6861
+        },
+        "99": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.4192,
+          "bbox_xywhn": [
+            0.4824,
+            0.1628,
+            0.0374,
+            0.0749
+          ],
+          "max_conf_any_box": 0.4192
+        }
+      }
+    },
+    {
+      "sample_id": "sample_071",
+      "symbol": "ARM_USDT_SWAP",
+      "signal_i": 7330,
+      "signal_time": "2026-07-14 14:45:00+00:00",
+      "discovery_conf": 0.3548,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.3086
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3683,
+          "bbox_xywhn": [
+            0.4813,
+            0.358,
+            0.0365,
+            0.1239
+          ],
+          "max_conf_any_box": 0.3683
+        }
+      }
+    },
+    {
+      "sample_id": "sample_072",
+      "symbol": "ARX_USDT_SWAP",
+      "signal_i": 1226,
+      "signal_time": "2026-07-05 07:00:00+00:00",
+      "discovery_conf": 0.5094,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4516,
+          "bbox_xywhn": [
+            0.7732,
+            0.7351,
+            0.0403,
+            0.0653
+          ],
+          "max_conf_any_box": 0.4516
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_073",
+      "symbol": "ARX_USDT_SWAP",
+      "signal_i": 1456,
+      "signal_time": "2026-07-07 16:30:00+00:00",
+      "discovery_conf": 0.8752,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3991,
+          "bbox_xywhn": [
+            0.94,
+            0.6505,
+            0.0464,
+            0.1077
+          ],
+          "max_conf_any_box": 0.3991
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.7064,
+          "bbox_xywhn": [
+            0.9158,
+            0.5336,
+            0.0562,
+            0.0954
+          ],
+          "max_conf_any_box": 0.7064
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.7343,
+          "bbox_xywhn": [
+            0.8669,
+            0.5344,
+            0.0558,
+            0.0949
+          ],
+          "max_conf_any_box": 0.7343
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6929,
+          "bbox_xywhn": [
+            0.7687,
+            0.4003,
+            0.0668,
+            0.0879
+          ],
+          "max_conf_any_box": 0.6929
+        },
+        "99": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.7956,
+          "bbox_xywhn": [
+            0.478,
+            0.1965,
+            0.057,
+            0.098
+          ],
+          "max_conf_any_box": 0.7956
+        }
+      }
+    },
+    {
+      "sample_id": "sample_074",
+      "symbol": "ARX_USDT_SWAP",
+      "signal_i": 2362,
+      "signal_time": "2026-07-17 03:00:00+00:00",
+      "discovery_conf": 0.5238,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 2,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.376
+        },
+        "40": {
+          "n_boxes": 3,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.4679
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_075",
+      "symbol": "AR_USDT_SWAP",
+      "signal_i": 38009,
+      "signal_time": "2026-07-04 12:00:00+00:00",
+      "discovery_conf": 0.7429,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3437,
+          "bbox_xywhn": [
+            0.8646,
+            0.7246,
+            0.0493,
+            0.1301
+          ],
+          "max_conf_any_box": 0.3437
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.7289,
+          "bbox_xywhn": [
+            0.7669,
+            0.7281,
+            0.0535,
+            0.1259
+          ],
+          "max_conf_any_box": 0.7289
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.8177,
+          "bbox_xywhn": [
+            0.4751,
+            0.729,
+            0.0545,
+            0.1288
+          ],
+          "max_conf_any_box": 0.8177
+        }
+      }
+    },
+    {
+      "sample_id": "sample_076",
+      "symbol": "AR_USDT_SWAP",
+      "signal_i": 38464,
+      "signal_time": "2026-07-09 05:45:00+00:00",
+      "discovery_conf": 0.3392,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_077",
+      "symbol": "AR_USDT_SWAP",
+      "signal_i": 38727,
+      "signal_time": "2026-07-11 23:30:00+00:00",
+      "discovery_conf": 0.321,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3585,
+          "bbox_xywhn": [
+            0.9333,
+            0.4242,
+            0.0615,
+            0.0945
+          ],
+          "max_conf_any_box": 0.3585
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.354,
+          "bbox_xywhn": [
+            0.9103,
+            0.4237,
+            0.0589,
+            0.0932
+          ],
+          "max_conf_any_box": 0.354
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4513,
+          "bbox_xywhn": [
+            0.8607,
+            0.4238,
+            0.0592,
+            0.0947
+          ],
+          "max_conf_any_box": 0.4513
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3745,
+          "bbox_xywhn": [
+            0.7618,
+            0.4241,
+            0.0591,
+            0.0938
+          ],
+          "max_conf_any_box": 0.3745
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3342,
+          "bbox_xywhn": [
+            0.4707,
+            0.3659,
+            0.0597,
+            0.0941
+          ],
+          "max_conf_any_box": 0.3342
+        }
+      }
+    },
+    {
+      "sample_id": "sample_078",
+      "symbol": "ASTER_USDT_SWAP",
+      "signal_i": 27440,
+      "signal_time": "2026-07-05 01:00:00+00:00",
+      "discovery_conf": 0.5805,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.6934
+        },
+        "5": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.3993,
+          "bbox_xywhn": [
+            0.9414,
+            0.4572,
+            0.0467,
+            0.1029
+          ],
+          "max_conf_any_box": 0.6651
+        },
+        "10": {
+          "n_boxes": 3,
+          "matched": true,
+          "conf": 0.5474,
+          "bbox_xywhn": [
+            0.9175,
+            0.4575,
+            0.0458,
+            0.1016
+          ],
+          "max_conf_any_box": 0.6718
+        },
+        "20": {
+          "n_boxes": 3,
+          "matched": true,
+          "conf": 0.6086,
+          "bbox_xywhn": [
+            0.8681,
+            0.4583,
+            0.0448,
+            0.0983
+          ],
+          "max_conf_any_box": 0.6086
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6866,
+          "bbox_xywhn": [
+            0.7657,
+            0.4646,
+            0.0477,
+            0.1041
+          ],
+          "max_conf_any_box": 0.6866
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5805,
+          "bbox_xywhn": [
+            0.4777,
+            0.4566,
+            0.05,
+            0.1065
+          ],
+          "max_conf_any_box": 0.5805
+        }
+      }
+    },
+    {
+      "sample_id": "sample_079",
+      "symbol": "ASTER_USDT_SWAP",
+      "signal_i": 27684,
+      "signal_time": "2026-07-07 14:00:00+00:00",
+      "discovery_conf": 0.5413,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4006,
+          "bbox_xywhn": [
+            0.975,
+            0.5316,
+            0.0341,
+            0.076
+          ],
+          "max_conf_any_box": 0.4006
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4826,
+          "bbox_xywhn": [
+            0.4854,
+            0.2794,
+            0.0337,
+            0.0743
+          ],
+          "max_conf_any_box": 0.4826
+        }
+      }
+    },
+    {
+      "sample_id": "sample_080",
+      "symbol": "ASTER_USDT_SWAP",
+      "signal_i": 27923,
+      "signal_time": "2026-07-10 01:45:00+00:00",
+      "discovery_conf": 0.3825,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4006,
+          "bbox_xywhn": [
+            0.7735,
+            0.5197,
+            0.0539,
+            0.0831
+          ],
+          "max_conf_any_box": 0.4006
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4015,
+          "bbox_xywhn": [
+            0.4853,
+            0.5579,
+            0.0388,
+            0.0766
+          ],
+          "max_conf_any_box": 0.4015
+        }
+      }
+    },
+    {
+      "sample_id": "sample_081",
+      "symbol": "ASTS_USDT_SWAP",
+      "signal_i": 3030,
+      "signal_time": "2026-07-04 00:45:00+00:00",
+      "discovery_conf": 0.5769,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5864,
+          "bbox_xywhn": [
+            0.9324,
+            0.5544,
+            0.0698,
+            0.1
+          ],
+          "max_conf_any_box": 0.5864
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5995,
+          "bbox_xywhn": [
+            0.9069,
+            0.555,
+            0.0677,
+            0.0946
+          ],
+          "max_conf_any_box": 0.5995
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5328,
+          "bbox_xywhn": [
+            0.8571,
+            0.5539,
+            0.0674,
+            0.1017
+          ],
+          "max_conf_any_box": 0.5328
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5485,
+          "bbox_xywhn": [
+            0.7582,
+            0.5537,
+            0.0681,
+            0.102
+          ],
+          "max_conf_any_box": 0.5485
+        },
+        "99": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.5979,
+          "bbox_xywhn": [
+            0.4755,
+            0.5697,
+            0.0536,
+            0.121
+          ],
+          "max_conf_any_box": 0.5979
+        }
+      }
+    },
+    {
+      "sample_id": "sample_082",
+      "symbol": "ASTS_USDT_SWAP",
+      "signal_i": 3137,
+      "signal_time": "2026-07-05 03:30:00+00:00",
+      "discovery_conf": 0.4214,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.592
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.5254
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.6833
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.6201
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.6505
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4047,
+          "bbox_xywhn": [
+            0.4844,
+            0.3869,
+            0.0351,
+            0.099
+          ],
+          "max_conf_any_box": 0.4047
+        }
+      }
+    },
+    {
+      "sample_id": "sample_083",
+      "symbol": "ASTS_USDT_SWAP",
+      "signal_i": 3276,
+      "signal_time": "2026-07-06 14:15:00+00:00",
+      "discovery_conf": 0.3945,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4735,
+          "bbox_xywhn": [
+            0.8703,
+            0.3079,
+            0.0359,
+            0.0791
+          ],
+          "max_conf_any_box": 0.4735
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4746,
+          "bbox_xywhn": [
+            0.7722,
+            0.286,
+            0.0386,
+            0.0724
+          ],
+          "max_conf_any_box": 0.4746
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4538,
+          "bbox_xywhn": [
+            0.4805,
+            0.2134,
+            0.0415,
+            0.0738
+          ],
+          "max_conf_any_box": 0.4538
+        }
+      }
+    },
+    {
+      "sample_id": "sample_084",
+      "symbol": "ATH_USDT_SWAP",
+      "signal_i": 38069,
+      "signal_time": "2026-07-05 03:00:00+00:00",
+      "discovery_conf": 0.5877,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4897,
+          "bbox_xywhn": [
+            0.871,
+            0.4988,
+            0.0365,
+            0.102
+          ],
+          "max_conf_any_box": 0.4897
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6354,
+          "bbox_xywhn": [
+            0.7728,
+            0.4259,
+            0.0439,
+            0.0937
+          ],
+          "max_conf_any_box": 0.6354
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5877,
+          "bbox_xywhn": [
+            0.4816,
+            0.3864,
+            0.0432,
+            0.0998
+          ],
+          "max_conf_any_box": 0.5877
+        }
+      }
+    },
+    {
+      "sample_id": "sample_085",
+      "symbol": "ATH_USDT_SWAP",
+      "signal_i": 38327,
+      "signal_time": "2026-07-07 19:30:00+00:00",
+      "discovery_conf": 0.3097,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_086",
+      "symbol": "ATH_USDT_SWAP",
+      "signal_i": 38575,
+      "signal_time": "2026-07-10 09:30:00+00:00",
+      "discovery_conf": 0.4969,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.319,
+          "bbox_xywhn": [
+            0.941,
+            0.4828,
+            0.0374,
+            0.0981
+          ],
+          "max_conf_any_box": 0.319
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4745,
+          "bbox_xywhn": [
+            0.8706,
+            0.5047,
+            0.0379,
+            0.1057
+          ],
+          "max_conf_any_box": 0.4745
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3385,
+          "bbox_xywhn": [
+            0.7686,
+            0.5298,
+            0.0395,
+            0.0934
+          ],
+          "max_conf_any_box": 0.3385
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4766,
+          "bbox_xywhn": [
+            0.4816,
+            0.6904,
+            0.0455,
+            0.1083
+          ],
+          "max_conf_any_box": 0.4766
+        }
+      }
+    },
+    {
+      "sample_id": "sample_087",
+      "symbol": "ATOM_USDT_SWAP",
+      "signal_i": 38153,
+      "signal_time": "2026-07-05 01:00:00+00:00",
+      "discovery_conf": 0.877,
+      "arms": {
+        "0": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3873,
+          "bbox_xywhn": [
+            0.9715,
+            0.3594,
+            0.0404,
+            0.0903
+          ],
+          "max_conf_any_box": 0.3873
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5947,
+          "bbox_xywhn": [
+            0.9458,
+            0.3637,
+            0.0363,
+            0.083
+          ],
+          "max_conf_any_box": 0.5947
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.8066,
+          "bbox_xywhn": [
+            0.9217,
+            0.3732,
+            0.0372,
+            0.0832
+          ],
+          "max_conf_any_box": 0.8066
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.8589,
+          "bbox_xywhn": [
+            0.8721,
+            0.3784,
+            0.0366,
+            0.0831
+          ],
+          "max_conf_any_box": 0.8589
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.9207,
+          "bbox_xywhn": [
+            0.7746,
+            0.3278,
+            0.0368,
+            0.078
+          ],
+          "max_conf_any_box": 0.9207
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.9169,
+          "bbox_xywhn": [
+            0.4846,
+            0.328,
+            0.036,
+            0.0779
+          ],
+          "max_conf_any_box": 0.9169
+        }
+      }
+    },
+    {
+      "sample_id": "sample_088",
+      "symbol": "ATOM_USDT_SWAP",
+      "signal_i": 38427,
+      "signal_time": "2026-07-07 21:30:00+00:00",
+      "discovery_conf": 0.3519,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_089",
+      "symbol": "ATOM_USDT_SWAP",
+      "signal_i": 38667,
+      "signal_time": "2026-07-10 09:30:00+00:00",
+      "discovery_conf": 0.3392,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_090",
+      "symbol": "AT_USDT_SWAP",
+      "signal_i": 24205,
+      "signal_time": "2026-07-09 13:15:00+00:00",
+      "discovery_conf": 0.7611,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3207,
+          "bbox_xywhn": [
+            0.9102,
+            0.5324,
+            0.0585,
+            0.0935
+          ],
+          "max_conf_any_box": 0.3207
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.7847,
+          "bbox_xywhn": [
+            0.858,
+            0.7298,
+            0.0657,
+            0.0679
+          ],
+          "max_conf_any_box": 0.7847
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.818,
+          "bbox_xywhn": [
+            0.7592,
+            0.7392,
+            0.0636,
+            0.0645
+          ],
+          "max_conf_any_box": 0.818
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.7611,
+          "bbox_xywhn": [
+            0.47,
+            0.7417,
+            0.0632,
+            0.0667
+          ],
+          "max_conf_any_box": 0.7611
+        }
+      }
+    },
+    {
+      "sample_id": "sample_091",
+      "symbol": "AT_USDT_SWAP",
+      "signal_i": 24730,
+      "signal_time": "2026-07-15 00:30:00+00:00",
+      "discovery_conf": 0.4692,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4444,
+          "bbox_xywhn": [
+            0.937,
+            0.4536,
+            0.064,
+            0.1152
+          ],
+          "max_conf_any_box": 0.4444
+        },
+        "10": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.4749,
+          "bbox_xywhn": [
+            0.9113,
+            0.454,
+            0.0646,
+            0.1151
+          ],
+          "max_conf_any_box": 0.4749
+        },
+        "20": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.5523,
+          "bbox_xywhn": [
+            0.8781,
+            0.4527,
+            0.0334,
+            0.0941
+          ],
+          "max_conf_any_box": 0.5523
+        },
+        "40": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.5224,
+          "bbox_xywhn": [
+            0.7788,
+            0.4526,
+            0.0339,
+            0.0939
+          ],
+          "max_conf_any_box": 0.5224
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4174,
+          "bbox_xywhn": [
+            0.4875,
+            0.4522,
+            0.0343,
+            0.0925
+          ],
+          "max_conf_any_box": 0.4174
+        }
+      }
+    },
+    {
+      "sample_id": "sample_092",
+      "symbol": "AT_USDT_SWAP",
+      "signal_i": 25351,
+      "signal_time": "2026-07-21 11:45:00+00:00",
+      "discovery_conf": 0.5543,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3565,
+          "bbox_xywhn": [
+            0.9302,
+            0.4177,
+            0.0668,
+            0.093
+          ],
+          "max_conf_any_box": 0.3565
+        },
+        "10": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.4273,
+          "bbox_xywhn": [
+            0.9057,
+            0.417,
+            0.0655,
+            0.0909
+          ],
+          "max_conf_any_box": 0.4273
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5226,
+          "bbox_xywhn": [
+            0.8573,
+            0.4177,
+            0.065,
+            0.0899
+          ],
+          "max_conf_any_box": 0.5226
+        },
+        "40": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.4276,
+          "bbox_xywhn": [
+            0.7619,
+            0.4198,
+            0.0611,
+            0.0936
+          ],
+          "max_conf_any_box": 0.4276
+        },
+        "99": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.4895,
+          "bbox_xywhn": [
+            0.4726,
+            0.3809,
+            0.0612,
+            0.102
+          ],
+          "max_conf_any_box": 0.4895
+        }
+      }
+    },
+    {
+      "sample_id": "sample_093",
+      "symbol": "AUCTION_USDT_SWAP",
+      "signal_i": 38058,
+      "signal_time": "2026-07-05 00:30:00+00:00",
+      "discovery_conf": 0.6226,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.4087
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3541,
+          "bbox_xywhn": [
+            0.8651,
+            0.3887,
+            0.0463,
+            0.1083
+          ],
+          "max_conf_any_box": 0.3541
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4895,
+          "bbox_xywhn": [
+            0.4765,
+            0.4038,
+            0.0497,
+            0.1098
+          ],
+          "max_conf_any_box": 0.4895
+        }
+      }
+    },
+    {
+      "sample_id": "sample_094",
+      "symbol": "AUCTION_USDT_SWAP",
+      "signal_i": 38459,
+      "signal_time": "2026-07-09 04:45:00+00:00",
+      "discovery_conf": 0.4803,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4137,
+          "bbox_xywhn": [
+            0.9359,
+            0.7299,
+            0.0545,
+            0.0694
+          ],
+          "max_conf_any_box": 0.4137
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3007,
+          "bbox_xywhn": [
+            0.9107,
+            0.7281,
+            0.0547,
+            0.0678
+          ],
+          "max_conf_any_box": 0.3007
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4205,
+          "bbox_xywhn": [
+            0.8612,
+            0.7291,
+            0.0554,
+            0.0688
+          ],
+          "max_conf_any_box": 0.4205
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.547,
+          "bbox_xywhn": [
+            0.4713,
+            0.7817,
+            0.0625,
+            0.0763
+          ],
+          "max_conf_any_box": 0.547
+        }
+      }
+    },
+    {
+      "sample_id": "sample_095",
+      "symbol": "AUCTION_USDT_SWAP",
+      "signal_i": 38919,
+      "signal_time": "2026-07-13 23:45:00+00:00",
+      "discovery_conf": 0.429,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    },
+    {
+      "sample_id": "sample_096",
+      "symbol": "AVAX_USDT_SWAP",
+      "signal_i": 38559,
+      "signal_time": "2026-07-09 06:30:00+00:00",
+      "discovery_conf": 0.4404,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3525,
+          "bbox_xywhn": [
+            0.7597,
+            0.6358,
+            0.0648,
+            0.1495
+          ],
+          "max_conf_any_box": 0.3525
+        },
+        "99": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.4904,
+          "bbox_xywhn": [
+            0.4724,
+            0.6297,
+            0.0617,
+            0.1461
+          ],
+          "max_conf_any_box": 0.4904
+        }
+      }
+    },
+    {
+      "sample_id": "sample_097",
+      "symbol": "AVAX_USDT_SWAP",
+      "signal_i": 38819,
+      "signal_time": "2026-07-11 23:30:00+00:00",
+      "discovery_conf": 0.7997,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5538,
+          "bbox_xywhn": [
+            0.944,
+            0.2726,
+            0.0369,
+            0.1005
+          ],
+          "max_conf_any_box": 0.5538
+        },
+        "10": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.5774,
+          "bbox_xywhn": [
+            0.9204,
+            0.2765,
+            0.0342,
+            0.0989
+          ],
+          "max_conf_any_box": 0.5774
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.6737,
+          "bbox_xywhn": [
+            0.872,
+            0.2751,
+            0.0352,
+            0.0963
+          ],
+          "max_conf_any_box": 0.6737
+        },
+        "40": {
+          "n_boxes": 2,
+          "matched": true,
+          "conf": 0.8196,
+          "bbox_xywhn": [
+            0.7765,
+            0.2002,
+            0.0344,
+            0.0861
+          ],
+          "max_conf_any_box": 0.8196
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.7974,
+          "bbox_xywhn": [
+            0.4838,
+            0.1655,
+            0.0354,
+            0.0888
+          ],
+          "max_conf_any_box": 0.7974
+        }
+      }
+    },
+    {
+      "sample_id": "sample_098",
+      "symbol": "AVAX_USDT_SWAP",
+      "signal_i": 39069,
+      "signal_time": "2026-07-14 14:00:00+00:00",
+      "discovery_conf": 0.306,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.4089,
+          "bbox_xywhn": [
+            0.8609,
+            0.5702,
+            0.0514,
+            0.1303
+          ],
+          "max_conf_any_box": 0.4089
+        },
+        "40": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.3736,
+          "bbox_xywhn": [
+            0.7622,
+            0.6128,
+            0.0547,
+            0.1299
+          ],
+          "max_conf_any_box": 0.3736
+        },
+        "99": {
+          "n_boxes": 1,
+          "matched": true,
+          "conf": 0.322,
+          "bbox_xywhn": [
+            0.4725,
+            0.6237,
+            0.0524,
+            0.1255
+          ],
+          "max_conf_any_box": 0.322
+        }
+      }
+    },
+    {
+      "sample_id": "sample_099",
+      "symbol": "AVNT_USDT_SWAP",
+      "signal_i": 27400,
+      "signal_time": "2026-07-05 01:30:00+00:00",
+      "discovery_conf": 0.5025,
+      "arms": {
+        "0": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "5": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "10": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "20": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "40": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        },
+        "99": {
+          "n_boxes": 0,
+          "matched": false,
+          "conf": null,
+          "bbox_xywhn": null,
+          "max_conf_any_box": 0.0
+        }
+      }
+    }
+  ]
+}

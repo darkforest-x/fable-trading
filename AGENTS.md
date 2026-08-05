@@ -33,8 +33,14 @@
     forward_log 不清空（清账 = owner 决策）。
 11. **真金操作**（下单/撤单/kill 开关/改仓位/改 API key）只有 owner 亲手做或明确逐次授权。
 12. **检测只认盘口**（owner 2026-07-23）：live 扫描只扫 tip/tip-1/tip-2 窗；凡"只能产出
-    事后信号"的路径（回看窗、事后模型、非盘口分布数据集）一律不得存在。pre-v16 检测器
-    权重已三机清除（仅存 COCO yolo11 底座）；检测器晋升唯一门 = 真 tip 金标 + tip-smoke，
+    事后信号"的路径（回看窗、事后模型、非盘口分布数据集）一律不得存在。~~pre-v16 检测器
+    权重已三机清除（仅存 COCO yolo11 底座）~~ **事实更正 2026-08-05：只清除了两机。
+    Mac 与 VPS 已删，Windows 3060（`C:\fable`）上 59 个权重完好，含 v8_chain / v9 四版 /
+    v10_chain / v14 / v15 / v16 / short_star 全系。唯 v11、v12、v13 不在 3060——那三版是
+    Mac 上 MPS 训的；v12/v13 的 Mac 副本尚存，v11 两头皆空，是唯一真正不可恢复的模型。
+    这条纪律的意图（不用事后模型跑实盘）不变，但"权重已不存在"不能再当前提，
+    见 `docs/learnings/purge-records-are-claims-not-facts.md`。**
+    检测器晋升唯一门 = 真 tip 金标 + tip-smoke，
     自家 val/mAP/旧 frozen-F1 永不作裁决。无验证过的检测器时管道诚实空转（detector=none）。
 13. **单分支纪律**（owner 2026-07-30）：**只有 `main`，不开新分支、不建 worktree。**
     直接在 main 上提交、`git push origin HEAD:main`。**每次提交前先 `git branch --show-current`
