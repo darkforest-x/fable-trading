@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P1 — Local Signal V2 Stage B 冷启动（owner_lsv2_stageb_cold）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P1 — Local Signal V2 Stage B 冷启动（owner_lsv2_stageb_cold）</h1>
+<p><strong>日期</strong>：2026-08-07  </p>
+<p><strong>授权</strong>：owner 全文生效（P0 绿 → 自动 P1）  </p>
+<p><strong>范围</strong>：Stage B 数据集上 60 epoch 冷启动；<strong>未</strong> promote ACTIVE / owner_best；<strong>未</strong>真下单；<strong>未</strong>消耗 V2 holdout。</p>
+<hr>
+<h2>0. 一句话结论</h2>
+<p>P0 通过后的 <strong>P1 冷启动完成</strong>。  </p>
+<p>best.pt 在 <strong>时间切分 val</strong>（358 正 / 358 空负，2026-03-20→05-03，无 holdout）上：</p>
+<table><thead><tr>
+<th>指标</th>
+<th>best.pt（fitness）</th>
+<th>峰值 mAP50 的 epoch</th>
+</tr></thead><tbody>
+<tr><td>epoch</td><td><strong>49</strong></td><td>34</td></tr>
+<tr><td>Precision</td><td><strong>0.654</strong></td><td>0.678</td></tr>
+<tr><td>Recall</td><td><strong>0.816</strong></td><td>0.925</td></tr>
+<tr><td>mAP50</td><td><strong>0.771</strong></td><td>0.778</td></tr>
+<tr><td>mAP50-95</td><td><strong>0.572</strong></td><td>0.542</td></tr>
+</tbody></table>
+<p><strong>mAP 不作验收主指标</strong>（规范 §18.8）。本轮证明的是：  </p>
+<p>在 <strong>因果 Stage B 数据 + 时间切分</strong> 上，YOLO 可以学到非平凡的 val 检测表现；  </p>
+<p><strong>尚未</strong>证明 tip 净收益 / event precision / 相对 legacy 200-K 的交易级优势。</p>
+<hr>
+<h2>1. 数据与训练配置</h2>
+<table><thead><tr>
+<th>项</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>数据集</td><td><code>datasets/local_signal_v2_stageb</code></td></tr>
+<tr><td>协议</td><td>Mode C + Stage B（<code>visible_end==decision</code>，future_bars=0）</td></tr>
+<tr><td>train</td><td>2030 pos + 2030 empty_bg</td></tr>
+<tr><td>val</td><td>358 pos + 358 empty_bg</td></tr>
+<tr><td>时间</td><td>train ≤2026-03-18；val 2026-03-20→2026-05-03；holdout ≥05-04 剔除</td></tr>
+<tr><td>模型</td><td>yolo11s cold，<code>owner_lsv2_stageb_cold</code></td></tr>
+<tr><td>epochs / patience / batch</td><td>60 / 15 / 8</td></tr>
+<tr><td>imgsz</td><td>960</td></tr>
+<tr><td>增强</td><td>fliplr/flipud/mosaic/mixup=0；<code>hsv_s/v=0.05</code>（继承 train_dense，铁律 5 严格讲仍违规）</td></tr>
+<tr><td>设备</td><td>RTX 3060 · 1.315 h</td></tr>
+<tr><td>权重</td><td><code>analysis/output/lsv2_stageb/owner_lsv2_stageb_cold/weights/best.pt</code></td></tr>
+<tr><td>sha256 前缀</td><td><code>de80173ed05962d70bb19ae5…</code></td></tr>
+<tr><td>results</td><td><code>…/results.csv</code></td></tr>
+</tbody></table>
+<hr>
+<h2>2. 与 Stage A / 旧基线对照（诚实口径）</h2>
+<table><thead><tr>
+<th>模型</th>
+<th>val 定义</th>
+<th>mAP50</th>
+<th>备注</th>
+</tr></thead><tbody>
+<tr><td>Stage A w20 cold</td><td>symbol-hash，95% 含未来 K，含 holdout 泄漏</td><td>0.281</td><td><strong>不可与 Stage B 直接比</strong></td></tr>
+<tr><td>Stage A hardneg-c1</td><td>同上 + hardneg val</td><td>0.238</td><td>val 分母不同</td></tr>
+<tr><td><strong>Stage B cold（本轮）</strong></td><td>时间切分、0 未来 K、0 holdout</td><td><strong>0.771</strong></td><td>任务更难（因果），指标却更高 → 值得继续，<strong>不是</strong>实盘证明</td></tr>
+<tr><td>Legacy owner_v10 200-K</td><td>旧 pad200 分布</td><td>—</td><td>本轮未重跑 A 臂（算力优先 Stage B）</td></tr>
+</tbody></table>
+<p>规范 §15 完整矩阵（A/B1/B2/C1/C2/C3）<strong>未做完</strong>——只完成了 <strong>C 向（Stage B causal cold）</strong> 一臂。</p>
+<hr>
+<h2>3. 复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+# 数据（若尚未构建）
+PYTHONPATH=.:../yoyo-trading .venv/bin/python scripts/build_local_signal_v2_stageb.py --limit 0
+.venv/bin/python scripts/audit_local_signal_v2.py --dataset datasets/local_signal_v2_stageb
+
+# 训练（3060）
+export FABLE_3060_HOST=zzc@192.168.1.4
+# 稳定路径：SSH 常驻（WMI .cmd 曾失败）
+ssh zzc@192.168.1.4 &quot;C:\\fable\\.venv\\Scripts\\python.exe -u C:\\fable\\train_dense.py \
+  --name owner_lsv2_stageb_cold --model C:/fable/models/yolo11s_w20.pt \
+  --dataset C:/fable/datasets/local_signal_v2_stageb --epochs 60 --patience 15 --batch 8 \
+  --cache false --workers 2&quot;
+
+# 拉权重
+scp zzc@192.168.1.4:C:/Users/zzc/runs/detect/runs/detect/owner_lsv2_stageb_cold/weights/best.pt \
+  analysis/output/lsv2_stageb/owner_lsv2_stageb_cold/weights/best.pt
+</code></pre>
+<hr>
+<h2>4. 风险与诚实声明</h2>
+<p>1. <strong>val mAP ≠ tip edge</strong>。Stage A 的教训：F1 0.40 与 tip smoke PF 0.27 可并存。  </p>
+<p>2. Stage B 框在右侧（tip-aligned），位置随机 Stage A 预训练（C1）未做。  </p>
+<p>3. Anchor 仍来自 pad200 中心，不是真 tip 金标。  </p>
+<p>4. 完整 P1 矩阵与 event-level / FP-per-1000 / matched control <strong>未交付</strong>——下一步必须补。  </p>
+<p>5. ACTIVE / owner_best / main forward_log <strong>未动</strong>。  </p>
+<p>6. V2 holdout 预算 1 次 <strong>未消耗</strong>。</p>
+<hr>
+<h2>5. P2 门（授权：C 明显优于 baseline 才进）</h2>
+<p>当前状态：<strong>不足以自动进 P2 hardneg 全量</strong>。</p>
+<p>理由：相对 baseline 的 <strong>event / tip / 匹配对照</strong> 数字尚未产出；仅 val mAP 不能触发「明显优于」。</p>
+<p><strong>下一步（授权内自动继续）</strong>：</p>
+<p>1. Stage B tip smoke + preholdout tip 回放（同障碍同成本 + matched control）  </p>
+<p>2. 若 tip 净收益与对照显著优于 Stage A / 随机 → 再开 P2 hardneg  </p>
+<p>3. P3 paper scaffold 已存在；权重就绪后可挂 shadow paper log（不 promote）</p>
+<hr>
+<h2>6. 决策 JSON</h2>
+<p>见 <code>reports/ACCEPTANCE_DECISION.json</code>（phase=P1，decision=<code>needs_more_data</code> 于交易级门）。</p>
+</body>
+</html>

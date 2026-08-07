@@ -1,36 +1,49 @@
 {
-  "phase": "P0",
-  "candidate": "local_signal_v2_stageb",
-  "decision": "accepted",
-  "baseline": "A_legacy_200k_owner_v10_chain + stage_a_w20_midbox",
+  "phase": "P1",
+  "candidate": "owner_lsv2_stageb_cold",
+  "decision": "needs_more_data",
+  "baseline": "stage_a_w20_midbox + legacy_200k_owner_v10",
+  "p0_pass": true,
+  "p1_train_complete": true,
   "gates": {
     "causal_leakage": "pass",
     "split_integrity": "pass",
     "holdout_clean": "pass",
     "manifest_conserved": "pass",
-    "box_end_le_decision": "pass",
-    "labels_in_bounds": "pass",
-    "event_precision_vs_baseline": "not_applicable_until_p1",
-    "fp_per_1000_vs_baseline": "not_applicable_until_p1",
-    "recall_floor": "not_applicable_until_p1"
+    "val_map50_nontrivial": "pass",
+    "event_precision_vs_baseline": "pending_tip_eval",
+    "fp_per_1000_vs_baseline": "pending_tip_eval",
+    "recall_floor": "pending_tip_eval",
+    "p2_auto_enter": "blocked_until_tip_superiority"
   },
-  "p0_pass": true,
-  "audit_path": "analysis/output/p0_local_signal_v2_stageb_audit.json",
-  "dataset": {
-    "path": "datasets/local_signal_v2_stageb",
-    "train_pos": 2030,
-    "val_pos": 358,
-    "train_neg": 2030,
-    "val_neg": 358,
-    "time_train": "2025-06-05 → 2026-03-18",
-    "time_val": "2026-03-20 → 2026-05-03",
-    "holdout_start": "2026-05-04"
+  "metrics": {
+    "best_fit_epoch": 49,
+    "precision": 0.654,
+    "recall": 0.816,
+    "mAP50": 0.771,
+    "mAP50_95": 0.572,
+    "peak_mAP50": 0.778,
+    "peak_mAP50_epoch": 34,
+    "train_hours": 1.315
   },
-  "next": "P1 cold train owner_lsv2_stageb_cold on 3060",
+  "artifacts": {
+    "weights": "analysis/output/lsv2_stageb/owner_lsv2_stageb_cold/weights/best.pt",
+    "sha256_prefix": "de80173ed05962d70bb19ae5",
+    "results_csv": "analysis/output/lsv2_stageb/owner_lsv2_stageb_cold/results.csv",
+    "report": "analysis/p1_local_signal_v2_stageb_cold_report.md",
+    "report_html": "analysis/html/p1_local_signal_v2_stageb_cold_report.html"
+  },
   "forbid_still": [
     "promote_ACTIVE",
     "promote_owner_best",
-    "live_orders"
+    "live_orders",
+    "clear_forward_log"
   ],
-  "updated_at": "2026-08-07T05:57:44.153808+00:00"
+  "holdout_v2_final_budget_remaining": 1,
+  "notes": [
+    "P1 cold train done on causal Stage-B data; val mAP nontrivial",
+    "mAP is not acceptance; need tip/event/matched-control before P2",
+    "Full P1 matrix A/B/C not complete — only Stage-B cold arm"
+  ],
+  "updated_at": "2026-08-07T07:25:09.944669+00:00"
 }
