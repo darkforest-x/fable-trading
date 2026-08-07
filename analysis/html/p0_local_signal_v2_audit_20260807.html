@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P0 — 局部信号 V2 交接规范：旧管线审计、基线冻结与因果门测量</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P0 — 局部信号 V2 交接规范：旧管线审计、基线冻结与因果门测量</h1>
+<p><strong>日期</strong>：2026-08-07 · <strong>上游</strong>：<code>YOLO局部信号检测重构_Claude开发交接规范_V1.md</code>（owner 2026-08-07）</p>
+<p><strong>范围</strong>：只读审计 + 新增审计脚本与测试。<strong>未训练、未读 holdout、未改 ACTIVE、未部署、未下单。</strong></p>
+<p><strong>HEAD</strong>：<code>0595dd2798f332dd3ad1698d749af68bf43f165c</code>（main）</p>
+<hr>
+<h2>0. 一句话结论</h2>
+<p>规范描述的 V2 管线<strong>不是从零开始——它今天凌晨已经在本仓库跑通了一轮</strong></p>
+<p>（<code>scripts/build_w20_midbox_dataset.py</code>，docstring 记的就是 &quot;Owner protocol (2026-08-07)&quot;，</p>
+<p>产出 <code>datasets/dense_owner_w20_midbox</code> 2635 正样本 + 训练权重 + tip 回测）。</p>
+<p>但把规范 §12.1 的机器不变量真正跑一遍，<strong>当前数据集 P0 不通过：7 道门只过 3 道</strong>。</p>
+<p>失败的三道不是&quot;还没做&quot;，而是三件互相独立的事同时成立：</p>
+<p>1. <strong>95.3% 的训练图能看到 decision bar 之后的真实 K</strong>，中位 9 根、最多 25 根 —— 按规范</p>
+<p>   §3.3 这属于&quot;生产训练图出现 decision_bar 之后的真实 K&quot;，直接判 P0 失败。它是合法的</p>
+<p>   <strong>Stage A</strong>，但目前没有 Stage B，也没有任何东西阻止把 Stage A 的 val 数字当成实盘结论。</p>
+<p>2. <strong>split 按 symbol 哈希切，不按时间切</strong>。同一事件不跨集合（这条过了），但 train 与 val</p>
+<p>   的时间范围重叠 <strong>397.3 天</strong>，规范 §7.2 要求的时间前后切分完全不存在。</p>
+<p>3. <strong>246 张正样本（9.34%）取自 holdout 期（≥2026-05-04）</strong>，其中 209 张在 train。</p>
+<p>   按铁律 1，这是训练集直接吃进 holdout。</p>
+<p>另有一条<strong>待 owner 裁决的实时事项</strong>：一条 holdout 回测已经排队，会在当前 pre-holdout</p>
+<p>回测结束时<strong>自动</strong>启动（见 §8）。</p>
+<hr>
+<h2>1. Task 1 — 旧管线映射（LEGACY_PIPELINE_MAP）</h2>
+<p>2026-08-03 的四层拆分把 L1 迁到了兄弟仓库 <code>~/yoyo-trading</code>，本仓库通过</p>
+<p><code>PYTHONPATH=.:../yoyo-trading</code> 引用。规范 §10 建议的 <code>src/local_signal_v2/</code> 目录<strong>不应新建</strong>——</p>
+<p>对应组件已经存在，见铁律 14 与规范 §10 末句&quot;优先复用，不要复制&quot;。</p>
+<table><thead><tr>
+<th>规范里的组件</th>
+<th>实际位置</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr><td>K 线数据入口</td><td><code>yoyo/data/loader.py</code>（<code>list_series</code> / <code>load_series</code>）+ <code>data/kline_cache</code>（只读软链）、<code>data/kline_fetched</code></td><td>15m bar</td></tr>
+<tr><td>均线计算</td><td><code>yoyo/layers/l1_detection/data.py: add_mas</code></td><td>SMA/EMA 20/60/120 六条</td></tr>
+<tr><td>图像渲染</td><td><code>yoyo/layers/l1_detection/render.py: render_chart</code></td><td>1280×742 固定；无网格/坐标/文字/信号 overlay；<code>MIN_REL_SPAN=0.06</code> 纵向下限</td></tr>
+<tr><td>像素↔bar 映射</td><td>同上 <code>make_chart_transform</code> / <code>ChartTransform.x_at</code> / <code>y_at</code></td><td>规范 §17&quot;价格到像素映射可验证&quot;已具备</td></tr>
+<tr><td>旧 200 根标签源</td><td><code>datasets/dense_owner_v14_pad200</code>（<code>*_pad200</code> stem）+ <code>data/golden_pool.json</code></td><td>owner 手标框</td></tr>
+<tr><td>旧框→bar 还原</td><td><code>scripts/build_w20_midbox_dataset.py: resolve_pad_window</code></td><td>重渲染 MAD ≤ 5.0 对齐 stored PNG</td></tr>
+<tr><td>split 规则</td><td><code>src/detection/owner_eval.py: split_of</code></td><td><strong>sha1(symbol) % VAL_MOD</strong>，非时间切分</td></tr>
+<tr><td>冻结评估尺</td><td><code>src/detection/owner_eval.py: is_eval_symbol</code> + manifest</td><td>eval 币种在 w20 构建时被 <code>Skip(&quot;eval_symbol&quot;)</code> 排除</td></tr>
+<tr><td>候选生成 / 扫描</td><td><code>yoyo/layers/l1_detection/candidates.py</code>、<code>scan.py</code></td><td>实盘只扫 tip/tip-1/tip-2（铁律 12）</td></tr>
+<tr><td>YOLO 训练入口</td><td><code>scripts/train_w20_midbox_on_3060.sh</code> → 3060 上的 <code>C:\fable\train_dense.py</code></td><td>训练一律走 3060</td></tr>
+<tr><td>前向 / paper</td><td><code>yoyo/layers/l4_execution/</code>、<code>data/forward_log.csv</code>（VPS 唯一写者）</td><td>铁律 9</td></tr>
+<tr><td>层间契约测试</td><td><code>~/yoyo-trading/tests/test_layer_boundaries.py</code>（AST 强制）</td><td>铁律 14</td></tr>
+</tbody></table>
+<hr>
+<h2>2. Task 2 — 基线冻结</h2>
+<table><thead><tr>
+<th>项</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>commit</td><td><code>0595dd2798f332dd3ad1698d749af68bf43f165c</code>（w20 相关脚本尚未提交，见 §9）</td></tr>
+<tr><td>旧 200-K 基线权重</td><td><code>models/owner_v10_chain.pt</code> · sha256 <code>b9a84b5f…cbc7d953</code></td></tr>
+<tr><td>w20 cycle-0 权重</td><td><code>analysis/output/w20_overnight/cycle_0_owner_w20_midbox_cold/weights/best.pt</code> · sha256 <code>7ad42cf0…0dbf9fe2</code></td></tr>
+<tr><td>w20 hardneg-c1 权重</td><td><code>analysis/output/w20_overnight/cycle_hardneg_c1/weights/best.pt</code> · sha256 <code>e2e8933e…8f989d18</code></td></tr>
+<tr><td>正样本 manifest</td><td><code>datasets/dense_owner_w20_midbox/w20_manifest.json</code> · sha256 <code>efabb41b…caeefa9841b007</code></td></tr>
+<tr><td>空背景 manifest</td><td><code>…/w20_neg_manifest.json</code> · sha256 <code>a7f27bcf…3c00c285ae5e</code></td></tr>
+<tr><td>训练配置</td><td><code>epochs=40 patience=12 batch=8 imgsz=960 optimizer=AdamW lr0=1e-4 model=yolo11s</code></td></tr>
+<tr><td>增强</td><td><code>fliplr=0 flipud=0 mosaic=0 mixup=0 degrees=0 erasing=0</code>，但 <strong><code>hsv_s=0.05 hsv_v=0.05</code> 非零</strong></td></tr>
+</tbody></table>
+<p><strong>指标现状（同表对照）</strong>：</p>
+<table><thead><tr>
+<th>模型</th>
+<th>数据</th>
+<th>val 组成</th>
+<th>mAP50</th>
+<th>最佳 conf</th>
+<th>F1</th>
+<th>P</th>
+<th>R</th>
+<th>纯负误火</th>
+</tr></thead><tbody>
+<tr><td>w20 cycle-0</td><td>w20_midbox（pos+empty_bg）</td><td>405 正 + 405 负</td><td>0.2812（ep50/60）</td><td>0.15</td><td>0.403</td><td>0.355</td><td>0.467</td><td>0.126</td></tr>
+<tr><td>w20 hardneg-c1</td><td>+ 2300 hard negative</td><td>405 正 + 405 空 + 553 hardneg</td><td>0.2377（early-stop ep18/40，best ep6）</td><td>未评</td><td>—</td><td>0.247</td><td>0.383</td><td>未评</td></tr>
+</tbody></table>
+<blockquote><strong>这两行的 mAP 不可直接比较</strong>：hardneg-c1 的 val 集换了（多了 553 张 hard negative）， 分母不同。规范 §18.8&quot;只汇报 mAP&quot;正是此处的陷阱。</blockquote>
+<p><strong>唯一的因果级证据</strong>（tip replay，<code>analysis/output/w20_smoke2.json</code>）：</p>
+<table><thead><tr>
+<th>口径</th>
+<th>n</th>
+<th>胜率</th>
+<th>PF</th>
+<th>净 bp</th>
+<th>匹配对照 lift</th>
+<th>置换 p</th>
+</tr></thead><tbody>
+<tr><td>w20 cycle-0 tip smoke（3 币 / 2026-04-15…04-25）</td><td><strong>11</strong></td><td>0.182</td><td>0.266</td><td><strong>−155.0</strong></td><td><strong>−241.4 ± 126.3</strong></td><td>0.509</td></tr>
+</tbody></table>
+<p>n=11，什么都证不了；但它是目前唯一在盘口口径下的测量，<strong>方向为负</strong>。</p>
+<p>val F1 0.403 的 &quot;PASS&quot; 与它不矛盾——两者根本不是同一个任务（见 §6）。</p>
+<hr>
+<h2>3. Task 3 / 4 — event schema 与 causal sampler：已有的部分与真实缺口</h2>
+<p>规范的时间语义（§3.1）与现有 manifest 字段可以<strong>一一对上</strong>，不需要新造 schema：</p>
+<table><thead><tr>
+<th>规范字段</th>
+<th>现有 manifest 字段</th>
+<th>状态</th>
+</tr></thead><tbody>
+<tr><td><code>anchor_bar</code></td><td><code>mid_global</code>（旧框横向中心）</td><td>✅ 已有</td></tr>
+<tr><td><code>confirm_delay</code></td><td><code>half</code> ∈ {2,3}（框对称，右边界 = anchor+half）</td><td>⚠️ 语义等价，但规范 §2.2 要求左 2 右 <code>confirm_delay</code>；现为对称，且 half=3 超出规范 <code>confirm_delays: [1,2]</code></td></tr>
+<tr><td><code>decision_bar</code></td><td><code>small_bars[1]</code> = <code>mid_global + half</code></td><td>✅ 可导出</td></tr>
+<tr><td><code>visible_end_bar</code></td><td><code>win_start + win_len − 1</code></td><td>✅ 可导出</td></tr>
+<tr><td><code>box_start/end_bar</code></td><td><code>small_bars</code></td><td>✅ 已有</td></tr>
+<tr><td><code>window_start/end_bar</code></td><td><code>win_start</code> / <code>win_len</code></td><td>✅ 已有</td></tr>
+<tr><td><code>anchor_x_ratio</code></td><td><code>box_pos_frac</code></td><td>✅ 已有</td></tr>
+<tr><td><code>event_id</code></td><td><strong>缺</strong>（<code>stem</code> 事实上唯一：2635 stem / 2635 行，每事件 1 crop）</td><td>⚠️ 缺显式字段，但当前无多 crop，故未产生泄漏</td></tr>
+<tr><td><code>config_hash</code> / <code>image_sha256</code> / <code>renderer_version</code></td><td><strong>缺</strong></td><td>❌ 规范 §12 要求</td></tr>
+<tr><td><code>window_end_timestamp</code>（负样本）</td><td><strong>缺</strong>（负样本 manifest 只有 <code>win_start</code>/<code>win_len</code>，无时间戳）</td><td>❌ 负样本无法做 holdout 审计</td></tr>
+<tr><td>hard negative 的 manifest 行</td><td><strong>完全缺失</strong>（2300 张图 0 行）</td><td>❌ 见 §5.5</td></tr>
+</tbody></table>
+<p><strong>本轮新增（P0 交付物）</strong>：</p>
+<ul>
+<li><code>scripts/audit_w20_midbox_causality.py</code> —— 把规范 §12.1 的不变量做成可跑的门。</li>
+<li><code>tests/test_w20_midbox_causality.py</code> —— <strong>27 passed</strong>。因果算术用合成样本钉死</li>
+</ul>
+<p>  （<code>visible_end ≤ decision</code> 的边界：window 结束在 decision 当根算 causal，晚一根就不算），</p>
+<p>  再对盘上真实 manifest 断言结构门。规范 §14&quot;causal guard 有自动测试&quot;这条现在成立。</p>
+<hr>
+<h2>4. P0 七道门（机器可审计，<code>analysis/output/p0_w20_causal_audit.json</code>）</h2>
+<table><thead><tr>
+<th>#</th>
+<th>门（规范 §12.1 / §16.1）</th>
+<th>结果</th>
+<th>数值</th>
+</tr></thead><tbody>
+<tr><td>1</td><td><code>visible_end_bar ≤ decision_bar</code></td><td>❌ <strong>FAIL</strong></td><td>2512/2635 违反（95.33%）</td></tr>
+<tr><td>2</td><td><code>box_end_bar ≤ decision_bar</code></td><td>✅ PASS</td><td>0 违反（框右边界恒等于 decision）</td></tr>
+<tr><td>3</td><td>同 event 不跨 split</td><td>✅ PASS</td><td>0 跨集合；每事件 1 crop；symbol 重叠 0</td></tr>
+<tr><td>4</td><td>时间切分</td><td>❌ <strong>FAIL</strong></td><td>sha1(symbol) 哈希切；train/val 时间重叠 397.3 天；purge/embargo = 0 bar</td></tr>
+<tr><td>5</td><td>训练集不含 holdout</td><td>❌ <strong>FAIL</strong></td><td>246 张 ≥2026-05-04（train 209 / val 37），最晚 2026-07-10</td></tr>
+<tr><td>6</td><td>label 不越界</td><td>✅ PASS</td><td>0/7570</td></tr>
+<tr><td>7</td><td>manifest 与图片守恒</td><td>❌ <strong>FAIL</strong></td><td>7570 张图 vs 5270 manifest 行，<strong>2300 张 hard negative 无来源记录</strong></td></tr>
+</tbody></table>
+<p><strong><code>p0_pass = False</code>。</strong> 按规范 §14&quot;P0 失败时停止，不训练模型&quot;，<strong>不应在此数据集上继续全量训练</strong>。</p>
+<hr>
+<h2>5. 逐条证据</h2>
+<h3>5.1 因果性 —— 这批数据是 Stage A，不是 Stage B</h3>
+<p>未来可见 K（= <code>visible_end_bar − decision_bar</code>）分布：</p>
+<table><thead><tr>
+<th>p0</th>
+<th>p25</th>
+<th>中位</th>
+<th>p75</th>
+<th>max</th>
+<th>均值</th>
+<th>&gt;0 占比</th>
+<th>≥5 根占比</th>
+</tr></thead><tbody>
+<tr><td>0</td><td>5</td><td><strong>9</strong></td><td>14</td><td>25</td><td>9.71</td><td><strong>95.33%</strong></td><td>76.09%</td></tr>
+</tbody></table>
+<p>成因在构建脚本本身：窗口起点只要求小框<strong>完整落在窗内</strong></p>
+<p>（<code>build_w20_midbox_dataset.py:245-250</code>，<code>w0_lo = s1 − win_len + 1</code>），</p>
+<p>没有 <code>window_end ≤ decision</code> 这一条。这正是规范 §2.4 的 Stage A 定义，本身合法；</p>
+<p>问题是<strong>目前只有 Stage A，且它的 val 指标被当作了验收依据</strong>（<code>MORNING_README.md</code> 的 &quot;PASS&quot;）。</p>
+<p>左侧上下文中位 9 根 —— 一张 24 根的图里，信号前 9 根、信号后 9 根，</p>
+<p><strong>信号后可见的历史和信号前一样多</strong>。</p>
+<h3>5.2 位置随机化 —— 这条做对了</h3>
+<table><thead><tr>
+<th>桶</th>
+<th>实际占比</th>
+<th>规范 §5.2 Stage A 目标</th>
+</tr></thead><tbody>
+<tr><td>左中 [0, 0.35)</td><td>31.5%</td><td>20%</td></tr>
+<tr><td>中 [0.35, 0.55)</td><td>25.6%</td><td>35%</td></tr>
+<tr><td>中右 [0.55, 0.75)</td><td>23.7%</td><td>30%</td></tr>
+<tr><td>右 [0.75, 1]</td><td>19.1%</td><td>15%</td></tr>
+</tbody></table>
+<p><code>box_pos_frac</code> p10=0.16 / 中位 0.50 / p90=0.82，窗口长度 20–30 各 224–265 张近似均匀。</p>
+<p>位置确实由 <code>crop_start_bar</code> 重采样得到（重渲染真实窗口），<strong>不是</strong>规范 §2.3 禁止的图片平移。</p>
+<p>规范 §5.3 要求的两项 shortcut 诊断（内容遮挡测试、分桶 precision）<strong>尚未做</strong>。</p>
+<h3>5.3 split —— 按币切，不按时间切</h3>
+<p><code>split_of</code> = <code>sha1(normalized symbol) % VAL_MOD</code>。好处：147 train 币 / 32 val 币零重叠，</p>
+<p>同事件不可能跨集合（门 3 因此通过）。坏处：</p>
+<ul>
+<li>train 时间范围 2025-06-05 → 2026-07-10；val 2025-06-08 → 2026-07-10；<strong>重叠 397.3 天</strong>。</li>
+<li>加密货币横截面高度共动，同一段行情同时出现在两侧，val 指标必然偏乐观。</li>
+<li>purge/embargo = 0 bar（规范 §7.3 要求 ≥ 最大窗口 + 均线回看，此处应 ≥ 30 + 120 = 150 bar）。</li>
+</ul>
+<h3>5.4 holdout —— 训练集吃进了 246 张</h3>
+<p>铁律 1 的 holdout 边界是 <strong>2026-05-04</strong>（<code>scripts/diag_barrier_grid.py:50</code> 等 6 处脚本里都是这个常量）。</p>
+<p>w20 正样本最晚 <code>end_time</code> 是 <strong>2026-07-10 18:30 UTC</strong>，超界 246 张（9.34%），train 侧 209 张。</p>
+<p>需要说明的是：<strong>这是继承来的，不是 w20 新引入的。</strong> 源头是</p>
+<p><code>datasets/dense_owner_v14_pad200</code> 的 owner 手标框本身覆盖到 2026-07；</p>
+<p>HANDOFF.md:1010 早就登记过这个隐患——</p>
+<blockquote>&quot;检测层训练无时间切分（~2.5% 标注图落在 accept 窗口内）是结构性弱点；v10 应登记&#x27;检测层训练图截止 2026-05-04&#x27;实验&quot;</blockquote>
+<p>那个实验一直没做。w20 把比例从 ~2.5% 放大到 <strong>9.34%</strong>。</p>
+<h3>5.5 manifest 守恒 —— 2300 张 hard negative 没有来源记录</h3>
+<p><code>add_w20_hardneg_pack.py</code> 写图和空标签，但只写了一个汇总 json，没写 manifest 行：</p>
+<table><thead><tr>
+<th>split</th>
+<th>images</th>
+<th>pos</th>
+<th>empty_bg</th>
+<th>hardneg</th>
+<th>manifest 行</th>
+</tr></thead><tbody>
+<tr><td>train</td><td>6207</td><td>2230</td><td>2230</td><td>1747</td><td>4460</td></tr>
+<tr><td>val</td><td>1363</td><td>405</td><td>405</td><td>553</td><td>810</td></tr>
+</tbody></table>
+<p>其中 <code>hardneg_weak</code> 那 800 张来自 5d gallery 的弱触发（conf ∈ [0.15, 0.30)），</p>
+<p>脚本自己的 docstring 写明是 <strong>&quot;Heuristic FP; not owner-labeled&quot;</strong> ——</p>
+<p>规范 §6.3 允许&quot;旧模型高置信度误报&quot;作为 hard negative，但这批是<strong>低</strong>置信度触发，</p>
+<p>且没有人工确认它们真的不是信号。把它们钉成负类，等于用模型自己的犹豫训练模型。</p>
+<hr>
+<h2>6. 与既有测量的对照（这一节决定 V2 值不值得做）</h2>
+<p>规范 §1.2 的问题定义（全局图噪音大、框太大、位置偏差、事后信息泄漏）与本仓库</p>
+<p>2026-08-05 已经量出来的数字<strong>高度一致</strong>，而且那批数字比规范假设的更严重：</p>
+<p><strong>（a）未来上下文依赖曲线</strong>（<code>reports/future_dependency_report_20260805.md</code>，同一批 100 信号、同渲染、同 conf/iou，唯一变量是信号右侧留多少根 K）：</p>
+<table><thead><tr>
+<th>右侧未来 K</th>
+<th>v10_chain 复现率</th>
+<th>v12_htip 复现率</th>
+</tr></thead><tbody>
+<tr><td>0（盘口）</td><td>10%</td><td>9%</td></tr>
+<tr><td>20</td><td>39%</td><td>41%</td></tr>
+<tr><td>99</td><td>62%</td><td>72%</td></tr>
+</tbody></table>
+<p>conf 全程稳在 0.45–0.55 —— 失效模式不是&quot;犹豫&quot;，是<strong>看不见</strong>。</p>
+<p><strong>（b）监督目标本身就不是盘口对象</strong>：499 个 ⭐标杆里只有 <strong>2 个</strong>画在盘口，中位可见未来 <strong>97 根</strong></p>
+<p>（<code>docs/learnings/zero-live-edge-labels-means-the-target-is-unverified.md</code>）。</p>
+<p><strong>（c）H-TIP 重训不能修</strong>：v12 专为盘口触发重训，tip 9% vs 未修复 v10 的 10%；</p>
+<p>归一化后反而更低（12.5% vs 16.1%）。v13/v14/v15/v16 四次失败（V5 蓝图约束 C4）。</p>
+<p><strong>这三条合起来说明什么</strong>：w20 的中位 9 根未来上下文，落在上面那条曲线的</p>
+<p>10%→39% 区间的左半段。**规范的核心假设（缩小到 20–30 根 + 位置随机化能解决问题）</p>
+<p>在 Stage A 上是没被这些证据否定的，但 Stage B 才是它要证明的东西，而 Stage B 目前不存在。**</p>
+<p>现有 w20 val F1 0.403 与 tip smoke PF 0.266 之间的落差，与上表 39% vs 10% 的落差是同一个现象。</p>
+<hr>
+<h2>7. 规范与仓库铁律的冲突（需 owner 裁决）</h2>
+<table><thead><tr>
+<th>#</th>
+<th>冲突</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr><td>C-1</td><td>规范 §2.4 Stage A（位置 0.20–0.85 随机、允许未来 K） <strong>vs</strong> 铁律 12&quot;凡只能产出事后信号的路径……非盘口分布数据集一律不得存在&quot;</td><td>字面冲突。w20 数据集就是这样的数据集，且已建成。规范用&quot;Stage A 只能作表征预训练、不得宣称实时效果&quot;来约束它——<strong>如果 owner 采纳规范，铁律 12 需要显式修订为&quot;Stage A 允许存在，但晋升唯一门仍是真 tip 金标 + tip-smoke&quot;</strong>，否则两份文件互相否定，下一个会话必然踩坑</td></tr>
+<tr><td>C-2</td><td>规范 §10 建议新建 <code>src/local_signal_v2/</code> <strong>vs</strong> 铁律 14&quot;新代码一律写进 <code>yoyo/</code>；旧 <code>src/</code> 是转发壳&quot;</td><td>建议不新建目录，缺口以脚本 + <code>yoyo/layers/l1_detection/</code> 内的采样器补齐</td></tr>
+<tr><td>C-3</td><td>规范 §19 要求 <code>reports/P0_AUDIT.md</code> <strong>vs</strong> CLAUDE.md 质量标准要求 <code>analysis/pXX_report.md</code> + <code>analysis/html/</code></td><td>本报告按仓库规范落在 <code>analysis/</code>；规范的文件名映射记在这里</td></tr>
+<tr><td>C-4</td><td>铁律 5&quot;hsv 全关&quot; <strong>vs</strong> 3060 <code>train_dense.py</code> 实际 <code>hsv_s=0.05 hsv_v=0.05</code></td><td>继承自旧训练器，非 w20 引入。红绿 K 线语义靠色相，<code>hsv_h=0</code> 保住了要害，但严格讲违反铁律 5</td></tr>
+<tr><td>C-5</td><td>铁律 1 holdout 记账 <strong>vs</strong> 已排队的 holdout 回测</td><td>见 §8</td></tr>
+</tbody></table>
+<hr>
+<h2>8. 正在跑 / 刚结束的作业（截至 2026-08-07 12:45 CST）</h2>
+<table><thead><tr>
+<th>作业</th>
+<th>状态</th>
+</tr></thead><tbody>
+<tr><td><code>backtest_w20_midbox_tip.py --start 2026-03-01 --end 2026-05-03</code>（PID 99115）</td><td><strong>运行中</strong>，92/311 币，已 3364 笔。按当前速率还需约 10 小时</td></tr>
+<tr><td>⚠️ <code>backtest_w20_midbox_tip.py --start 2026-05-04 --end 2026-07-01 --allow-holdout --holdout-n 1</code>（PID 99116 守候）</td><td><strong>已排队，会在上一条结束时自动启动</strong>。这是一次 holdout 消耗</td></tr>
+<tr><td><code>scan_w20_midbox_5d_gallery.py</code></td><td>已完成，<code>analysis/output/w20_midbox_5d_gallery/index.html</code></td></tr>
+<tr><td>3060 <code>owner_w20_midbox_hardneg_c1</code></td><td><strong>已结束</strong>：patience=12 触发早停，ep18/40，best≈ep6，末次 val P 0.247 / R 0.383 / mAP50 0.238</td></tr>
+<tr><td><code>overnight_w20_midbox.py</code> 轮询器</td><td><strong>已死</strong>（Mac 上 0 进程，log 停在 08:03）。cycle_hardneg_c1 的本地 results.csv 是 12:35 的快照</td></tr>
+</tbody></table>
+<blockquote><strong>关于那条 holdout 回测</strong>：它是今天 08:22 由 owner 或上一会话挂上的，命令里带了 <code>--holdout-n 1</code>，说明当时就打算按&quot;该配置第 1 次消耗&quot;记账。本会话<strong>没有动它</strong>（既没杀也没催）。 按铁律 1，它需要 owner 在对话里明确批准 + 报告里记录第 N 次消耗。请裁决：<strong>放行还是掐掉。</strong> 参考：HANDOFF.md:416 记录全局 holdout 消耗此前已到 N=10。</blockquote>
+<hr>
+<h2>9. 风险与诚实声明</h2>
+<p>1. <strong>本报告没有做规范 §15 的 P1 对照实验</strong>，因为 P0 未通过，规范 §14 与 §18.10 都禁止在此之前全量训练。</p>
+<p>   所以&quot;20–30 根局部窗是否优于 200 根&quot;这个问题，本报告<strong>没有回答，也不该在这里回答</strong>。</p>
+<p>2. <strong>门 1（因果性）的判定依赖一个映射假设</strong>：把 <code>half</code> 当作 <code>confirm_delay</code>。</p>
+<p>   如果 owner 的本意是&quot;框对称、decision 另算&quot;，那 decision_bar 应另立字段，</p>
+<p>   未来 K 的数量会变，但<strong>不会变成 0</strong>——窗口右端中位比框右端晚 9 根，这是构建规则的直接后果。</p>
+<p>3. <strong>hardneg-c1 的 P/R 与 cycle-0 不可比</strong>（val 集不同）。§2 表里已标注，不要跨行读。</p>
+<p>4. <strong>tip smoke 只有 11 笔</strong>。它不构成&quot;w20 失败&quot;的证据，只构成&quot;w20 尚未被证明&quot;的证据。</p>
+<p>   正在跑的 311 币 pre-holdout 回测才有裁决力。</p>
+<p>5. <strong>246 张 holdout 样本已经进过训练</strong>（cycle-0 与 hardneg-c1 都用了这份数据）。</p>
+<p>   这意味着这两个权重在 ≥2026-05-04 区间上的任何评估都<strong>不是干净的样本外</strong>——</p>
+<p>   包括 §8 里排队的那条 holdout 回测。这一点必须在放行前想清楚。</p>
+<p>6. w20 相关的 9 个脚本 + 数据集 + 权重目前<strong>全部未提交</strong>（<code>git status</code> 未跟踪）。</p>
+<p>   本报告引用的 sha256 是当下磁盘状态，未入版本库。</p>
+<p>7. 本会话未训练、未读 holdout、未改 ACTIVE/frozen、未部署、未下单、未 promote、未清 forward_log。</p>
+<hr>
+<h2>10. 下一步选项（★ = 需要 owner 决策）</h2>
+<p><strong>★ D-0：那条排队的 holdout 回测，放行还是掐掉。</strong></p>
+<p>建议<strong>掐掉</strong>——理由见 §9.5：训练集已含 246 张 holdout 样本，这次消耗买不到干净的样本外结论。</p>
+<p>掐掉的命令：<code>kill 99116</code>（只杀守候进程，不影响正在跑的 pre-holdout 回测）。</p>
+<p><strong>★ D-1：铁律 12 与规范 Stage A 的关系（C-1）。</strong> 二选一：</p>
+<p>(a) 采纳规范，把铁律 12 修订为&quot;允许 Stage A 存在但不得作为晋升依据&quot;；</p>
+<p>(b) 维持铁律 12，则 w20 现有数据集必须整体重建为纯 Stage B。</p>
+<p><strong>建议 (a)</strong> —— Stage A 的表征价值有 §6 的证据支持，禁止它等于禁止唯一还没被证伪的方向。</p>
+<p><strong>★ D-2：holdout 边界是否强制施加到检测层训练图。</strong></p>
+<p>HANDOFF.md:1010 登记过这个实验但从未执行。建议把 <code>end_time &lt; 2026-05-04</code> 做成构建期硬过滤</p>
+<p>（代价：正样本 2635 → 2389，−9.3%）。</p>
+<p><strong>D-3（不需决策，P0 补齐项，按优先级）</strong>：</p>
+<p>1. 给 <code>build_w20_midbox_dataset.py</code> 加 <code>--causal</code> 模式：<code>w0_hi = min(s0, decision − win_len + 1)</code>，</p>
+<p>   产出 Stage B 数据集；同一批 event、同一 seed，与 Stage A 并存不覆盖。</p>
+<p>2. split 改时间切分 + purge ≥150 bar；保留 symbol 分组以免同事件跨集合。</p>
+<p>3. <code>add_w20_hardneg_pack.py</code> 补写 manifest 行（含 <code>window_end_timestamp</code>、<code>hard_negative_type</code>）。</p>
+<p>4. 负样本 manifest 补 <code>end_time</code>，使 holdout 审计能覆盖全量。</p>
+<p>5. manifest 补 <code>event_id</code> / <code>config_hash</code> / <code>image_sha256</code> / <code>renderer_version</code>。</p>
+<p>6. 规范 §5.3 的两项 shortcut 诊断（内容遮挡、分桶 precision）。</p>
+<p>7. 把 <code>audit_w20_midbox_causality.py</code> 挂进构建脚本收尾，让数据集不通过门就不落盘。</p>
+<p><strong>P1（P0 通过后才开）</strong>：规范 §15 的 A/B1/B2/C1/C2/C3 六臂矩阵，统一 event 集与时间切分，</p>
+<p>主指标 event precision / FP per 1000 bars，<strong>不看 mAP</strong>。</p>
+<hr>
+<h2>11. 复现命令</h2>
+<pre><code>
+# 1. 因果 / split / holdout / 守恒 审计（只读，约 20 秒）
+cd /Users/zhangzc/fable-trading
+.venv/bin/python scripts/audit_w20_midbox_causality.py \
+    --out analysis/output/p0_w20_causal_audit.json
+
+# 2. 因果 guard 单元测试（27 passed）
+.venv/bin/python -m pytest tests/test_w20_midbox_causality.py -q
+
+# 3. 本报告转 HTML（交付给 owner 的是 HTML）
+PYTHONPATH=. .venv/bin/python scripts/md_to_html.py \
+    analysis/p0_local_signal_v2_audit_20260807.md --out-dir analysis/html
+</code></pre>
+<p>数据集与权重的重建命令（<strong>本轮未执行，仅登记</strong>）：</p>
+<pre><code>
+PYTHONPATH=.:../yoyo-trading .venv/bin/python scripts/build_w20_midbox_dataset.py --limit 0
+PYTHONPATH=.:../yoyo-trading .venv/bin/python scripts/add_w20_midbox_negatives.py --ratio 1.0
+PYTHONPATH=.:../yoyo-trading .venv/bin/python scripts/add_w20_hardneg_pack.py --n-dense 1500 --n-weak 800
+bash scripts/train_w20_midbox_on_3060.sh --name owner_w20_midbox_cold --epochs 40 --patience 12
+</code></pre>
+<hr>
+<p><strong>P0 结论：不通过（3/7 门通过，4 门失败）。按规范 §14 停在此处，等待 owner 对 D-0 / D-1 / D-2 的裁决。</strong></p>
+</body>
+</html>

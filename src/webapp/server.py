@@ -194,6 +194,26 @@ def forward(cost: float = FORWARD_COST) -> dict:
     return forward_payload(cost)
 
 
+@app.get("/api/forward/w20-shadow")
+def forward_w20_shadow() -> dict:
+    """Read-only w20 midbox hardneg shadow book (option B). Never execution-eligible."""
+    import json
+    from pathlib import Path
+
+    path = Path(__file__).resolve().parents[2] / "analysis" / "output" / "w20_shadow_status.json"
+    if not path.exists():
+        return {
+            "shadow": True,
+            "execution_eligible": False,
+            "ready": False,
+            "message": "no pulse yet — run scripts/forward_shadow_w20_midbox.py --once",
+        }
+    data = json.loads(path.read_text())
+    data["ready"] = True
+    data["status_html"] = "analysis/output/w20_shadow_status.html"
+    return data
+
+
 @app.post("/api/check-symbol")
 def check_symbol_route(body: CheckSymbolBody) -> dict:
     """单币一键盘口检测：子进程跑 scripts/check_symbol.py（只读，5–60s，单飞）。"""

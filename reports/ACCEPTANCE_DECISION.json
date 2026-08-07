@@ -1,0 +1,27 @@
+{
+  "phase": "P0",
+  "candidate": "local_signal_v2_stageb_pending",
+  "decision": "in_progress",
+  "baseline": "A_legacy_200k_owner_v10_chain + stage_a_w20_midbox",
+  "owner_authorization": {
+    "granted_at": "2026-08-07",
+    "scope": "P0→P1 auto if hard gates green; P2 if C beats baseline; P3 paper/forward scaffold only",
+    "forbid": ["promote_ACTIVE", "promote_owner_best", "live_orders", "clear_forward_log", "extra_holdout_without_count"],
+    "allow": ["main_commit_push", "train_3060", "w20_sidepath_reports"],
+    "holdout_v2_final_budget": 1
+  },
+  "gates": {
+    "causal_leakage": "pending",
+    "split_integrity": "pending",
+    "holdout_clean": "pending",
+    "manifest_conserved": "pending",
+    "event_precision_vs_baseline": "not_applicable_until_p1",
+    "fp_per_1000_vs_baseline": "not_applicable_until_p1",
+    "recall_floor": "not_applicable_until_p1"
+  },
+  "notes": [
+    "Stage A dense_owner_w20_midbox failed P0 (7 gates, 3 pass) — see analysis/p0_local_signal_v2_audit_20260807.md",
+    "Rebuilding Stage B causal dataset under datasets/local_signal_v2_stageb without overwriting Stage A"
+  ],
+  "updated_at": "2026-08-07T00:00:00+00:00"
+}

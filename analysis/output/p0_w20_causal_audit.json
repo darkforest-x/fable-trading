@@ -1,0 +1,153 @@
+{
+  "generated_at": "2026-08-07T04:41:55.087977+00:00",
+  "dataset": "/Users/zhangzc/fable-trading/datasets/dense_owner_w20_midbox",
+  "causality": {
+    "n_positive": 2635,
+    "future_bars": {
+      "p0": 0.0,
+      "p25": 5.0,
+      "p50": 9.0,
+      "p75": 14.0,
+      "p100": 25.0,
+      "mean": 9.708159392789375
+    },
+    "n_causal": 123,
+    "n_future_gt0": 2512,
+    "frac_future_gt0": 0.953321,
+    "frac_future_ge5": 0.760911,
+    "left_context_bars": {
+      "p0": 0.0,
+      "p25": 4.0,
+      "p50": 9.0,
+      "p75": 14.0,
+      "p100": 25.0,
+      "mean": 9.371537001897533
+    },
+    "box_end_le_decision": true,
+    "confirm_delay_hist": {
+      "2": 1379,
+      "3": 1256
+    },
+    "verdict": "stage_a_only"
+  },
+  "position": {
+    "box_pos_frac": {
+      "p0": 0.06896551724137931,
+      "p10": 0.16,
+      "p50": 0.5,
+      "p90": 0.8214285714285714,
+      "p100": 0.9310344827586207,
+      "mean": 0.49425869984975507
+    },
+    "bucket_share": {
+      "left_mid": 0.3154,
+      "mid": 0.2562,
+      "mid_right": 0.2372,
+      "right": 0.1913
+    },
+    "win_len_hist": {
+      "20": 261,
+      "21": 228,
+      "22": 233,
+      "23": 227,
+      "24": 224,
+      "25": 242,
+      "26": 237,
+      "27": 248,
+      "28": 231,
+      "29": 265,
+      "30": 239
+    }
+  },
+  "split": {
+    "strategy_in_code": "sha1(symbol) % VAL_MOD  (src/detection/owner_eval.py:split_of)",
+    "is_time_split": false,
+    "n_events_crossing_split": 0,
+    "symbol_overlap_train_val": 0,
+    "n_symbols": {
+      "train": 147,
+      "val": 32
+    },
+    "crops_per_event_max": 1,
+    "time_range": {
+      "train": {
+        "n": 2230,
+        "min": "2025-06-05 17:15:00+00:00",
+        "max": "2026-07-10 15:30:00+00:00"
+      },
+      "val": {
+        "n": 405,
+        "min": "2025-06-08 07:30:00+00:00",
+        "max": "2026-07-10 18:30:00+00:00"
+      }
+    },
+    "train_val_time_overlap_days": 397.3,
+    "negatives_have_timestamps": false,
+    "purge_embargo_bars": 0
+  },
+  "holdout": {
+    "boundary": "2026-05-04 00:00:00+00:00",
+    "n_positive_in_holdout": 246,
+    "frac_positive_in_holdout": 0.093359,
+    "by_split": {
+      "train": 209,
+      "val": 37
+    },
+    "max_end_time": "2026-07-10 18:30:00+00:00",
+    "examples": [
+      "okx_0G_USDT_SWAP_026360_pad200",
+      "okx_0G_USDT_SWAP_026460_pad200",
+      "okx_AAVE_USDT_SWAP_032760_pad200",
+      "okx_AERO_USDT_SWAP_031460_pad200",
+      "okx_AERO_USDT_SWAP_032360_pad200"
+    ],
+    "clean": false
+  },
+  "conservation": {
+    "counts": {
+      "train": {
+        "images": 6207,
+        "labels": 6207
+      },
+      "val": {
+        "images": 1363,
+        "labels": 1363
+      }
+    },
+    "n_manifest_rows": 5270,
+    "n_image_files": 7570,
+    "n_unmanifested_images": 2300,
+    "unmanifested": {
+      "train": {
+        "n": 1747,
+        "examples": [
+          "0G_USDT_SWAP_001264_w24_hardneg_dense",
+          "0G_USDT_SWAP_002461_w24_hardneg_dense",
+          "0G_USDT_SWAP_003208_w24_hardneg_dense"
+        ]
+      },
+      "val": {
+        "n": 553,
+        "examples": [
+          "1INCH_USDT_SWAP_006131_w24_hardneg_dense",
+          "1INCH_USDT_SWAP_006703_w24_hardneg_dense",
+          "1INCH_USDT_SWAP_011420_w24_hardneg_dense"
+        ]
+      }
+    },
+    "n_image_label_mismatch": 0,
+    "n_labels_out_of_bounds": 0,
+    "labels_out_of_bounds_examples": [],
+    "conserved": false
+  },
+  "gates": {
+    "causal_dataset (visible_end <= decision)": false,
+    "box_end <= decision": true,
+    "no_event_crosses_split": true,
+    "time_based_split": false,
+    "no_holdout_in_training": false,
+    "labels_in_bounds": true,
+    "manifest_conserved": false
+  },
+  "p0_pass": false
+}
