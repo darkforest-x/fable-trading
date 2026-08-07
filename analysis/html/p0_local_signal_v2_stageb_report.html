@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P0 — Local Signal V2 Stage B：因果数据集重建与硬门槛通过</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P0 — Local Signal V2 Stage B：因果数据集重建与硬门槛通过</h1>
+<p><strong>日期</strong>：2026-08-07  </p>
+<p><strong>授权</strong>：owner 全文生效（P0 自检绿 → 自动 P1）  </p>
+<p><strong>HEAD（工程提交）</strong>：<code>bed5e64</code>  </p>
+<p><strong>范围</strong>：新建 Stage B 数据集 + 审计；<strong>未</strong> promote ACTIVE / owner_best；<strong>未</strong>真下单。</p>
+<hr>
+<h2>0. 一句话结论</h2>
+<p>Stage A（<code>dense_owner_w20_midbox</code>）P0 <strong>失败</strong>（7 门过 3）。  </p>
+<p>按授权重建 <strong>Stage B</strong>（<code>datasets/local_signal_v2_stageb</code>）后 <strong>七道硬门槛全绿，<code>p0_pass=True</code></strong>，进入 P1 冷启动训练（3060，<code>owner_lsv2_stageb_cold</code>）。</p>
+<hr>
+<h2>1. Stage B 协议</h2>
+<table><thead><tr>
+<th>项</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>Mode</td><td>C（<code>confirm_delay ∈ {1,2}</code>）</td></tr>
+<tr><td>Stage</td><td>B（<code>visible_end == decision</code>，未来 K = 0）</td></tr>
+<tr><td>Box</td><td><code>[anchor−2, decision]</code></td></tr>
+<tr><td>Window</td><td>20–30 根，右端钉在 decision</td></tr>
+<tr><td>Split</td><td>时间序；最后 15% → val；train 与 val 之间 purge 150 bar</td></tr>
+<tr><td>Holdout</td><td>丢弃 <code>end_time ≥ 2026-05-04</code></td></tr>
+<tr><td>Negatives</td><td>empty_bg 1:1，带 timestamp，同一 split</td></tr>
+<tr><td>来源 event</td><td>Stage A <code>w20_manifest</code> 的 <code>mid_global</code>（不重做 pad MAD）</td></tr>
+</tbody></table>
+<hr>
+<h2>2. 数据统计</h2>
+<table><thead><tr>
+<th>split</th>
+<th>pos</th>
+<th>empty_bg</th>
+<th>时间范围 (end_time)</th>
+</tr></thead><tbody>
+<tr><td>train</td><td>2030</td><td>2030</td><td>2025-06-05 → 2026-03-18</td></tr>
+<tr><td>val</td><td>358</td><td>358</td><td>2026-03-20 → 2026-05-03</td></tr>
+<tr><td><strong>合计</strong></td><td><strong>2388</strong></td><td><strong>2388</strong></td><td>holdout 前</td></tr>
+</tbody></table>
+<ul>
+<li>跳过 holdout 源事件 246（与 Stage A 泄漏数一致，现已剔除）  </li>
+<li>purge zone 1  </li>
+<li>manifest 行 = 图片数 = <strong>4776</strong>（守恒）</li>
+</ul>
+<hr>
+<h2>3. P0 七道门</h2>
+<table><thead><tr>
+<th>门</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>visible_end ≤ decision（全样本 future_bars=0）</td><td>✅</td></tr>
+<tr><td>box_end ≤ decision</td><td>✅</td></tr>
+<tr><td>event 不跨 split</td><td>✅</td></tr>
+<tr><td>时间切分（train max &lt; val min，gap ≈1.7d）</td><td>✅</td></tr>
+<tr><td>训练集无 holdout</td><td>✅</td></tr>
+<tr><td>label 不越界</td><td>✅</td></tr>
+<tr><td>manifest 守恒</td><td>✅</td></tr>
+</tbody></table>
+<p><strong><code>p0_pass = True</code></strong> · 审计：<code>analysis/output/p0_local_signal_v2_stageb_audit.json</code>  </p>
+<p><strong>决策</strong>：<code>reports/ACCEPTANCE_DECISION.json</code> → <code>decision=accepted</code></p>
+<hr>
+<h2>4. 与 Stage A 对照</h2>
+<table><thead><tr>
+<th></th>
+<th>Stage A w20</th>
+<th>Stage B lsv2</th>
+</tr></thead><tbody>
+<tr><td>未来 K 中位</td><td>9</td><td><strong>0</strong></td></tr>
+<tr><td>split</td><td>symbol hash</td><td><strong>时间 + purge</strong></td></tr>
+<tr><td>holdout 进训练</td><td>246 张</td><td><strong>0</strong></td></tr>
+<tr><td>hardneg 无 manifest</td><td>2300</td><td>本阶段无 hardneg（P2）</td></tr>
+<tr><td>P0</td><td>FAIL</td><td><strong>PASS</strong></td></tr>
+</tbody></table>
+<hr>
+<h2>5. 复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+PYTHONPATH=.:../yoyo-trading .venv/bin/python scripts/build_local_signal_v2_stageb.py --limit 0
+.venv/bin/python scripts/audit_local_signal_v2.py \
+  --dataset datasets/local_signal_v2_stageb \
+  --out analysis/output/p0_local_signal_v2_stageb_audit.json
+.venv/bin/python -m pytest tests/test_local_signal_v2_stageb.py tests/test_w20_midbox_causality.py -q
+export FABLE_3060_HOST=zzc@192.168.1.4
+bash scripts/train_local_signal_v2_stageb_on_3060.sh
+</code></pre>
+<hr>
+<h2>6. 风险与诚实声明</h2>
+<p>1. Stage B 位置分布集中在右侧（tip-aligned），<strong>不是</strong> Stage A 的宽位置随机；规范 Stage A 预训练仍可选（P1 矩阵 C1）。  </p>
+<p>2. Anchor 仍来自 pad200 框中心，<strong>不是</strong>新人工 tip 金标；P1 只能验证「因果局部窗是否可学」，不能直接宣称盘口 edge。  </p>
+<p>3. 训练尚未出结果；mAP <strong>不作</strong>验收主指标（规范 §18.8）。  </p>
+<p>4. ACTIVE / owner_best / main forward_log <strong>未动</strong>。  </p>
+<p>5. V2 holdout 预算 1 次留给最终验收，尚未消耗。</p>
+<hr>
+<h2>7. 下一步（授权内自动）</h2>
+<p>1. P1：<code>owner_lsv2_stageb_cold</code> 训完 → event 级 / tip 回放对照 Stage A  </p>
+<p>2. 若 C 明显优于 baseline → 尽量 P2 hardneg  </p>
+<p>3. P3：仅 paper scaffold（已有 <code>scripts/forward_paper_local_signal_v2_scaffold.py</code>）  </p>
+<p>4. <strong>禁止</strong> promote</p>
+</body>
+</html>

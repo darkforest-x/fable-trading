@@ -1,0 +1,139 @@
+{
+  "generated_at": "2026-08-07T05:57:33.726218+00:00",
+  "dataset": "datasets/local_signal_v2_stageb",
+  "summary_protocol": "local_signal_v2_stageb_mode_c_20260807",
+  "causality": {
+    "n_positive": 2388,
+    "future_bars": {
+      "p0": 0.0,
+      "p25": 0.0,
+      "p50": 0.0,
+      "p75": 0.0,
+      "p100": 0.0,
+      "mean": 0.0
+    },
+    "n_causal": 2388,
+    "n_future_gt0": 0,
+    "frac_future_gt0": 0.0,
+    "frac_future_ge5": 0.0,
+    "left_context_bars": {
+      "p0": 15.0,
+      "p25": 18.0,
+      "p50": 21.0,
+      "p75": 23.0,
+      "p100": 26.0,
+      "mean": 20.646984924623116
+    },
+    "box_end_le_decision": true,
+    "confirm_delay_hist": {
+      "1": 1185,
+      "2": 1203
+    },
+    "verdict": "causal"
+  },
+  "position": {
+    "box_pos_frac": {
+      "p0": 0.8947368421052632,
+      "p10": 0.9047619047619048,
+      "p50": 0.9285714285714286,
+      "p90": 0.9444444444444444,
+      "p100": 0.9482758620689655,
+      "mean": 0.9262128185043988
+    },
+    "bucket_share": {
+      "right": 1.0
+    },
+    "win_len_hist": {
+      "20": 186,
+      "21": 200,
+      "22": 202,
+      "23": 232,
+      "24": 212,
+      "25": 239,
+      "26": 231,
+      "27": 221,
+      "28": 202,
+      "29": 222,
+      "30": 241
+    }
+  },
+  "split": {
+    "strategy_in_code": "time-ordered events end_time < holdout; last 15% → val; train ends ≥150 bars before first val; purge zone dropped",
+    "is_time_split": true,
+    "n_events_crossing_split": 0,
+    "symbol_overlap_train_val": 142,
+    "n_symbols": {
+      "train": 163,
+      "val": 154
+    },
+    "crops_per_event_max": 1,
+    "time_range": {
+      "train": {
+        "n": 2030,
+        "min": "2025-06-05 14:45:00+00:00",
+        "max": "2026-03-18 12:45:00+00:00"
+      },
+      "val": {
+        "n": 358,
+        "min": "2026-03-20 06:00:00+00:00",
+        "max": "2026-05-03 10:45:00+00:00"
+      }
+    },
+    "train_val_time_overlap_days": 0.0,
+    "negatives_have_timestamps": false,
+    "purge_embargo_bars": 150,
+    "train_max_before_val_min": true,
+    "purge_gap_days": 1.719,
+    "declared_time_split": true,
+    "n_unique_event_id": 2388
+  },
+  "holdout": {
+    "boundary": "2026-05-04 00:00:00+00:00",
+    "n_positive_in_holdout": 0,
+    "frac_positive_in_holdout": 0.0,
+    "by_split": {},
+    "max_end_time": "2026-05-03 10:45:00+00:00",
+    "examples": [],
+    "clean": true,
+    "n_negative_in_holdout": 0
+  },
+  "conservation": {
+    "counts": {
+      "train": {
+        "images": 4060,
+        "labels": 4060
+      },
+      "val": {
+        "images": 716,
+        "labels": 716
+      }
+    },
+    "n_manifest_rows": 4776,
+    "n_image_files": 4776,
+    "n_unmanifested_images": 0,
+    "unmanifested": {
+      "train": {
+        "n": 0,
+        "examples": []
+      },
+      "val": {
+        "n": 0,
+        "examples": []
+      }
+    },
+    "n_image_label_mismatch": 0,
+    "n_labels_out_of_bounds": 0,
+    "labels_out_of_bounds_examples": [],
+    "conserved": true
+  },
+  "gates": {
+    "causal_dataset (visible_end <= decision)": true,
+    "box_end <= decision": true,
+    "no_event_crosses_split": true,
+    "time_based_split": true,
+    "no_holdout_in_training": true,
+    "labels_in_bounds": true,
+    "manifest_conserved": true
+  },
+  "p0_pass": true
+}
