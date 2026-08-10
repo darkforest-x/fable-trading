@@ -24,6 +24,13 @@
 > 盲重复/source-only/依赖块 Gate，再扩 600 与 2,000。详见
 > `analysis/output/eth3m_v2_problem_analysis_20260730/report.html`。
 
+> **Owner 授权恢复 Local Signal V2 Stage A（2026-08-11）**：owner 明确允许恢复交接文档的
+> 离线形态预训练。该授权是一次有记录的课程式训练恢复：Stage A 允许在历史、pre-holdout
+> 窗口中看到 decision 后的真实 K，以改变 `crop_start_bar` 并打散形态位置；它只能学习表征，
+> `production_eligible=false`，不得直接回测、promote、部署或写 forward。最终生产裁决仍只认
+> 严格因果 Stage B + 真 tip。此前仅加右侧空白的 `causal_blank_w30_v3` 被 owner 目视否决，
+> 因为框相对真实 K 线内容仍固定在最右端。
+
 # 项目路线图（三阶段）
 
 原则：每阶段有明确验收标准，不通过不进入下一阶段；单变量实验纪律；极简实现。

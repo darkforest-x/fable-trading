@@ -2,6 +2,24 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-11 — Owner 授权恢复真正的 Stage A 随机裁剪）
+
+**直接裁决：`causal_blank_w30_v3` 只改变画布 X，框相对真实 K 线内容仍贴在最后几根，
+Owner 已目视否决。该数据即使九道旧 P0 为绿也不得训练。Owner 随后明确授权恢复交接文档
+Stage A 离线预训练：必须改变原始连续 K 线的 `crop_start_bar`，让框在真实 K 线序列中落入
+左/中/右不同位置。**
+
+- 授权范围：历史 pre-holdout Stage A 形态表征预训练；允许窗口包含 decision 后真实 K。
+- 禁止范围：不得把 Stage A 指标当实盘结论，不得直接进入 tip-smoke/forward/ACTIVE/部署。
+- 最终裁决：仍只认严格因果 Stage B + 真 tip；Stage A 权重只能作为 Stage B 初始化。
+- 旧 `dense_owner_w20_midbox` 虽是真随机裁剪，但按币种哈希切分、含 246 条 holdout、
+  2,300 个 unmanifested 图，故只能作为失败证据，不能恢复训练。
+- 新版冻结目标：W20–30、Mode C delay 1/2、box=`anchor-2..decision`、anchor X 四桶目标
+  20%/35%/30%/15%，一 event 一 crop、时间切分 + 150 bars purge、完整窗口早于 holdout。
+
+当前停止点：先提交新版 builder/auditor，再生成 24 张左/中/右真实 K 线预览；可视化和 P0
+通过前不上传、不训练。
+
 ## ⚡ 当前真相（2026-08-11 — Owner 发现 B2/P2 固定最右位置 shortcut；P2 训练已停）
 
 **直接裁决：三张 200 样本审计图不是显示问题。B2 固定 30 根因果窗的正框中心只落在

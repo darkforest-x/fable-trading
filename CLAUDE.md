@@ -42,6 +42,13 @@
     见 `docs/learnings/purge-records-are-claims-not-facts.md`。**
     检测器晋升唯一门 = 真 tip 金标 + tip-smoke，
     自家 val/mAP/旧 frozen-F1 永不作裁决。无验证过的检测器时管道诚实空转（detector=none）。
+
+    **Stage A 窄例外（owner 2026-08-11 明确授权）**：允许按
+    `YOLO局部信号检测重构_Claude开发交接规范_V1.md` 恢复离线 Local-pattern pretrain，
+    从原始连续 K 线改变 `crop_start_bar`，让历史信号出现在真实 K 线序列的不同位置。
+    该数据必须明确标记 `stage_a_only / production_eligible=false`，整张窗口严格早于 holdout，
+    不得进入 tip-smoke、forward、ACTIVE 或部署；最终候选仍必须经过严格因果 Stage B 与真 tip
+    验收。右侧加空白但框仍贴真实 K 线末端，不算完成 Stage A 位置随机化。
 13. **单分支纪律**（owner 2026-07-30）：**只有 `main`，不开新分支、不建 worktree。**
     直接在 main 上提交、`git push origin HEAD:main`。**每次提交前先 `git branch --show-current`
     确认自己在 main**——曾有并行会话把 HEAD 切到别的分支，后续 6 个提交落在那里，

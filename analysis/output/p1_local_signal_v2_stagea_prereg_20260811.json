@@ -1,0 +1,75 @@
+{
+  "phase": "P1_stage_a_local_pattern_pretrain",
+  "owner_authorized_at": "2026-08-11",
+  "authorization": "恢复交接文档里的 Stage A 离线预训练",
+  "objective": "learn the local signal morphology without a fixed position relative to real candle content",
+  "source_events": "datasets/dense_owner_w20_midbox/w20_manifest.json",
+  "geometry": {
+    "window_len": [20, 30],
+    "confirm_delay": [1, 2],
+    "box_start": "anchor - 2",
+    "box_end": "decision",
+    "decision": "anchor + confirm_delay",
+    "crop_rule": "sample a real anchor offset, then re-render the corresponding contiguous raw market window",
+    "right_blank_slots": 0
+  },
+  "position_distribution": {
+    "coordinate": "anchor_offset / (window_len - 1) over real candles",
+    "support": [0.2, 0.85],
+    "buckets": {
+      "left_mid_020_035": 0.2,
+      "mid_035_055": 0.35,
+      "mid_right_055_075": 0.3,
+      "right_075_085": 0.15
+    },
+    "maximum_absolute_share_deviation": 0.05,
+    "minimum_real_bars_after_decision": 1
+  },
+  "dataset": {
+    "seed": 20260807,
+    "positive_crops_per_event": 1,
+    "easy_negative_ratio": 1.0,
+    "split": "time_ordered_85_15",
+    "purge_bars": 150,
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "full_window_must_end_before_holdout": true,
+    "output": "datasets/local_signal_v2_stagea_randomcrop_v1"
+  },
+  "training": {
+    "role": "offline_representation_pretrain_only",
+    "cold_start": "models/yolo11s.pt",
+    "epochs": 60,
+    "patience": 15,
+    "batch": 8,
+    "seed": 0,
+    "augmentations_disabled": [
+      "fliplr",
+      "flipud",
+      "mosaic",
+      "mixup",
+      "hsv_h",
+      "hsv_s",
+      "hsv_v"
+    ]
+  },
+  "acceptance_before_training": {
+    "all_four_position_buckets_present": true,
+    "position_share_deviation_lte": 0.05,
+    "all_positive_boxes_have_real_bars_to_the_right": true,
+    "event_cross_split": 0,
+    "holdout_rows": 0,
+    "labels_out_of_bounds": 0,
+    "manifest_conserved": true,
+    "same_seed_manifest_reproducible": true
+  },
+  "production_eligible": false,
+  "holdout_read": false,
+  "forbidden": [
+    "use Stage A metrics as live acceptance",
+    "promote Stage A weights",
+    "deploy Stage A renderer",
+    "write Stage A detections to forward",
+    "read holdout",
+    "overwrite prior datasets"
+  ]
+}
