@@ -1,0 +1,1614 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "Local Signal V2 B2：pre-holdout 短向候选池经济回放",
+    "description": "最新 B2 权重在冻结 short-L2 候选池上的因果经济回放；不读取 holdout。",
+    "generatedAt": "2026-08-10T17:07:16.250146+00:00",
+    "cards": [
+      {
+        "id": "selected_n",
+        "description": "B2 edge3 开火并按同币 18 bars 去重后的短向候选数。",
+        "dataset": "headline",
+        "sourceId": "replay_source",
+        "metrics": [
+          {
+            "label": "B2 去重信号",
+            "field": "selected_n",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "net10",
+        "description": "冻结 gross return 扣 10bp swap taker 往返成本后的逐笔均值。",
+        "dataset": "headline",
+        "sourceId": "replay_source",
+        "metrics": [
+          {
+            "label": "10bp 后均值",
+            "field": "net10_bp",
+            "format": "number",
+            "unit": " bp",
+            "signed": true
+          },
+          {
+            "label": "较未过滤池",
+            "field": "net10_vs_pool_bp",
+            "format": "number",
+            "unit": " bp",
+            "signed": true
+          }
+        ]
+      },
+      {
+        "id": "pf10",
+        "description": "10bp 成本下，正收益总和除以负收益绝对总和。",
+        "dataset": "headline",
+        "sourceId": "replay_source",
+        "metrics": [
+          {
+            "label": "10bp 后 PF",
+            "field": "pf10",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "matched_excess",
+        "description": "同币×同月×ATR 桶匹配随机对照的平均超额；p 为 7 周块精确双侧符号翻转。",
+        "dataset": "headline",
+        "sourceId": "matched_source",
+        "metrics": [
+          {
+            "label": "匹配超额",
+            "field": "matched_excess_bp",
+            "format": "number",
+            "unit": " bp",
+            "signed": true
+          },
+          {
+            "label": "周块 p",
+            "field": "matched_p",
+            "format": "number"
+          }
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "cost_chart",
+        "title": "未过滤池与 B2 筛选后的平均净收益",
+        "subtitle": "edge2 与 edge3 在本轮完全相同；10bp 与20bp均为固定成本口径。",
+        "type": "bar",
+        "dataset": "economics",
+        "sourceId": "replay_source",
+        "valueFormat": "number",
+        "unit": "bp",
+        "encodings": {
+          "x": {
+            "field": "scope",
+            "type": "nominal",
+            "label": "范围"
+          },
+          "y": {
+            "field": "net_bp",
+            "type": "quantitative",
+            "label": "平均净收益",
+            "unit": "bp"
+          },
+          "color": {
+            "field": "cost_scenario",
+            "type": "nominal",
+            "label": "成本"
+          },
+          "tooltip": [
+            {
+              "field": "n",
+              "type": "quantitative",
+              "label": "样本"
+            },
+            {
+              "field": "gross_bp",
+              "type": "quantitative",
+              "label": "毛收益",
+              "unit": "bp"
+            },
+            {
+              "field": "pf20",
+              "type": "quantitative",
+              "label": "20bp PF"
+            }
+          ]
+        },
+        "palette": {
+          "kind": "categorical",
+          "name": "category10"
+        }
+      },
+      {
+        "id": "monthly_chart",
+        "title": "B2 edge3 的月度平均净收益（20bp）",
+        "subtitle": "2026-05 只含 5 月 1–3 日，不能与完整月份等权比较。",
+        "type": "bar",
+        "dataset": "monthly",
+        "sourceId": "replay_source",
+        "valueFormat": "number",
+        "unit": "bp",
+        "encodings": {
+          "x": {
+            "field": "month",
+            "type": "ordinal",
+            "label": "UTC 月"
+          },
+          "y": {
+            "field": "net20_bp",
+            "type": "quantitative",
+            "label": "平均净收益",
+            "unit": "bp"
+          },
+          "tooltip": [
+            {
+              "field": "n",
+              "type": "quantitative",
+              "label": "信号"
+            },
+            {
+              "field": "pf20",
+              "type": "quantitative",
+              "label": "PF"
+            },
+            {
+              "field": "win20",
+              "type": "quantitative",
+              "label": "净胜率",
+              "format": "percent"
+            }
+          ]
+        }
+      },
+      {
+        "id": "confidence_chart",
+        "title": "B2 置信度四分位的平均净收益（20bp）",
+        "subtitle": "仅作排序诊断；结果非单调，禁止据此事后调 conf。",
+        "type": "bar",
+        "dataset": "confidence",
+        "sourceId": "replay_source",
+        "valueFormat": "number",
+        "unit": "bp",
+        "encodings": {
+          "x": {
+            "field": "quartile",
+            "type": "ordinal",
+            "label": "B2 confidence 四分位"
+          },
+          "y": {
+            "field": "net20_bp",
+            "type": "quantitative",
+            "label": "平均净收益",
+            "unit": "bp"
+          },
+          "tooltip": [
+            {
+              "field": "conf_min",
+              "type": "quantitative",
+              "label": "最低 conf"
+            },
+            {
+              "field": "conf_max",
+              "type": "quantitative",
+              "label": "最高 conf"
+            },
+            {
+              "field": "n",
+              "type": "quantitative",
+              "label": "样本"
+            },
+            {
+              "field": "pf20",
+              "type": "quantitative",
+              "label": "PF"
+            }
+          ]
+        }
+      }
+    ],
+    "tables": [
+      {
+        "id": "scope_table",
+        "title": "回放口径明细",
+        "subtitle": "最高10%是探索性诊断，不是冻结交易门。",
+        "dataset": "scope",
+        "sourceId": "replay_source",
+        "defaultSort": {
+          "field": "scope_order",
+          "direction": "asc"
+        },
+        "layout": "full",
+        "columns": [
+          {
+            "field": "scope_order",
+            "label": "#",
+            "format": "number"
+          },
+          {
+            "field": "scope",
+            "label": "范围",
+            "type": "text"
+          },
+          {
+            "field": "n",
+            "label": "笔数",
+            "format": "number"
+          },
+          {
+            "field": "symbols",
+            "label": "币种",
+            "format": "number"
+          },
+          {
+            "field": "gross_bp",
+            "label": "毛均值(bp)",
+            "format": "number",
+            "movement": true
+          },
+          {
+            "field": "net10_bp",
+            "label": "10bp净均值",
+            "format": "number",
+            "movement": true
+          },
+          {
+            "field": "pf10",
+            "label": "10bp PF",
+            "format": "number"
+          },
+          {
+            "field": "net20_bp",
+            "label": "20bp净均值",
+            "format": "number",
+            "movement": true
+          },
+          {
+            "field": "pf20",
+            "label": "20bp PF",
+            "format": "number"
+          },
+          {
+            "field": "win20",
+            "label": "20bp胜率",
+            "format": "percent"
+          },
+          {
+            "field": "max_drawdown20_units",
+            "label": "单位和最大回撤",
+            "format": "number",
+            "movement": true
+          }
+        ]
+      },
+      {
+        "id": "matched_table",
+        "title": "匹配随机对照",
+        "subtitle": "p<0.01 才满足项目确认门；本轮两个范围均未达到。",
+        "dataset": "matched",
+        "sourceId": "matched_source",
+        "defaultSort": {
+          "field": "selected_n",
+          "direction": "desc"
+        },
+        "layout": "full",
+        "columns": [
+          {
+            "field": "scope",
+            "label": "范围",
+            "type": "text"
+          },
+          {
+            "field": "selected_n",
+            "label": "信号",
+            "format": "number"
+          },
+          {
+            "field": "matched_n",
+            "label": "已匹配",
+            "format": "number"
+          },
+          {
+            "field": "coverage",
+            "label": "覆盖率",
+            "format": "percent"
+          },
+          {
+            "field": "selected_net20_bp",
+            "label": "模型20bp净均值",
+            "format": "number",
+            "movement": true
+          },
+          {
+            "field": "control_net20_bp",
+            "label": "随机20bp净均值",
+            "format": "number",
+            "movement": true
+          },
+          {
+            "field": "excess_bp",
+            "label": "超额(bp)",
+            "format": "number",
+            "movement": true
+          },
+          {
+            "field": "p_value",
+            "label": "周块p",
+            "format": "number"
+          },
+          {
+            "field": "week_blocks",
+            "label": "周块",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "monthly_table",
+        "title": "月度拆分",
+        "subtitle": "所有月份 20bp 后均为负。",
+        "dataset": "monthly",
+        "sourceId": "replay_source",
+        "defaultSort": {
+          "field": "month",
+          "direction": "asc"
+        },
+        "columns": [
+          {
+            "field": "month",
+            "label": "UTC月",
+            "type": "text"
+          },
+          {
+            "field": "n",
+            "label": "笔数",
+            "format": "number"
+          },
+          {
+            "field": "gross_bp",
+            "label": "毛均值(bp)",
+            "format": "number",
+            "movement": true
+          },
+          {
+            "field": "net10_bp",
+            "label": "10bp净均值",
+            "format": "number",
+            "movement": true
+          },
+          {
+            "field": "net20_bp",
+            "label": "20bp净均值",
+            "format": "number",
+            "movement": true
+          },
+          {
+            "field": "pf20",
+            "label": "20bp PF",
+            "format": "number"
+          },
+          {
+            "field": "win20",
+            "label": "20bp胜率",
+            "format": "percent"
+          }
+        ]
+      },
+      {
+        "id": "confidence_table",
+        "title": "置信度分层",
+        "subtitle": "Q4 接近盈亏平衡但四分位不单调；最高10%另见回放明细与匹配表。",
+        "dataset": "confidence",
+        "sourceId": "replay_source",
+        "defaultSort": {
+          "field": "quartile",
+          "direction": "asc"
+        },
+        "columns": [
+          {
+            "field": "quartile",
+            "label": "分位",
+            "type": "text"
+          },
+          {
+            "field": "conf_min",
+            "label": "conf min",
+            "format": "number"
+          },
+          {
+            "field": "conf_max",
+            "label": "conf max",
+            "format": "number"
+          },
+          {
+            "field": "n",
+            "label": "笔数",
+            "format": "number"
+          },
+          {
+            "field": "gross_bp",
+            "label": "毛均值(bp)",
+            "format": "number",
+            "movement": true
+          },
+          {
+            "field": "net10_bp",
+            "label": "10bp净均值",
+            "format": "number",
+            "movement": true
+          },
+          {
+            "field": "net20_bp",
+            "label": "20bp净均值",
+            "format": "number",
+            "movement": true
+          },
+          {
+            "field": "pf20",
+            "label": "20bp PF",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "outcome_table",
+        "title": "出场原因",
+        "subtitle": "冻结 TP5/SL2/72-bar 标签，不重新定义障碍。",
+        "dataset": "outcomes",
+        "sourceId": "replay_source",
+        "defaultSort": {
+          "field": "n",
+          "direction": "desc"
+        },
+        "columns": [
+          {
+            "field": "exit_reason",
+            "label": "原因",
+            "type": "text"
+          },
+          {
+            "field": "n",
+            "label": "笔数",
+            "format": "number"
+          },
+          {
+            "field": "share",
+            "label": "占比",
+            "format": "percent"
+          }
+        ]
+      },
+      {
+        "id": "protocol_table",
+        "title": "协议与安全审计",
+        "subtitle": "用于界定这份回放能回答什么、不能回答什么。",
+        "dataset": "protocol",
+        "sourceId": "replay_source",
+        "defaultSort": {
+          "field": "item",
+          "direction": "asc"
+        },
+        "columns": [
+          {
+            "field": "item",
+            "label": "项目",
+            "type": "text"
+          },
+          {
+            "field": "value",
+            "label": "冻结口径",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "replay_source",
+        "label": "B2 pre-holdout short-L2 candidate-pool replay",
+        "path": "analysis/output/p1_b2_short_l2_backtest_20260811_selected.csv",
+        "query": {
+          "engine": "duckdb",
+          "language": "sql",
+          "executed_at": "2026-08-10T17:07:16.250146+00:00",
+          "description": "Loads causal B2-selected rows and recomputes fixed-cost economic metrics.",
+          "tables_used": [
+            "analysis/output/p1_b2_short_l2_backtest_20260811_selected.csv",
+            "analysis/output/p1_b2_short_l2_backtest_20260811.json"
+          ],
+          "filters": [
+            "short side only from the frozen L2 pre-holdout candidate pool",
+            "2026-03-20T06:00:00Z <= signal_time < 2026-05-04T00:00:00Z",
+            "outcome interval ends before 2026-05-04T00:00:00Z",
+            "same-symbol +/-72 bars around every B2 validation endpoint excluded",
+            "B2 fixed window=30, conf=0.35, primary tip edge=3 bars",
+            "same-symbol causal dedup min gap=18 bars"
+          ],
+          "metric_definitions": [
+            "net10 = frozen gross return - 0.001 swap taker round-trip cost",
+            "net20 = frozen gross return - 0.002 conservative report round-trip cost",
+            "profit factor = sum positive net returns / absolute sum negative net returns",
+            "unit-sum max drawdown is drawdown of time-ordered unit-return cumulative sum, not portfolio equity",
+            "confidence top decile uses the 90th percentile of B2 confidence as an exploratory diagnostic, not a frozen trade gate"
+          ],
+          "sql": "SELECT *, gross_ret - 0.002 AS net20 FROM read_csv_auto('analysis/output/p1_b2_short_l2_backtest_20260811_selected.csv', header=true) ORDER BY signal_time, candidate_id;"
+        }
+      },
+      {
+        "id": "matched_source",
+        "label": "Same-symbol/month/ATR-quintile matched controls",
+        "path": "analysis/output/p1_b2_short_l2_backtest_20260811_matched.csv",
+        "query": {
+          "engine": "duckdb",
+          "language": "sql",
+          "executed_at": "2026-08-10T17:07:16.250146+00:00",
+          "description": "Loads frozen-pool matched controls and computes selected-minus-control excess.",
+          "tables_used": [
+            "analysis/output/p1_b2_short_l2_backtest_20260811_matched.csv"
+          ],
+          "filters": [
+            "up to 8 controls per selected row",
+            "same symbol, UTC month, and ATR quintile when at least 3 controls exist",
+            "fallback to same symbol and UTC month",
+            "same candidate_id and event_group_id excluded"
+          ],
+          "metric_definitions": [
+            "excess = selected net20 - mean matched-control net20",
+            "p-value = exact two-sided sign-flip over 7 UTC-week blocks"
+          ],
+          "sql": "SELECT * FROM read_csv_auto('analysis/output/p1_b2_short_l2_backtest_20260811_matched.csv', header=true) ORDER BY signal_time, candidate_id;"
+        }
+      }
+    ],
+    "blocks": [
+      {
+        "id": "title",
+        "type": "markdown",
+        "body": "# Local Signal V2 B2：pre-holdout 短向候选池经济回放"
+      },
+      {
+        "id": "executive",
+        "type": "markdown",
+        "sourceId": "replay_source",
+        "body": "## Executive Summary\n\n- **B2 单独不能作为交易策略。** 去重后 3,880 笔，10bp 后均值 **-9.19bp**、PF **0.893**；20bp 后 **-19.19bp**、PF **0.793**。\n- **没有改善未过滤池。** 10bp 后 B2 比未过滤短向候选池低 **-0.78bp/笔**。\n- **匹配超额未获统计支持。** 同币×同月×ATR 桶对照为 **+2.18bp**，但 7 周块精确 p=**0.891**。\n- **最高置信度 10% 仅是线索。** 388 笔在 20bp 后 **+23.25bp**、PF **1.182**，但匹配检验 p=**0.453**，不能据此调 conf 或宣称盈利。\n- **项目含义：** B2 可继续扮演 L1 候选生成器，但经济选择必须由独立、时间切分的 P2 判断层证明；B2 本身不得部署交易。"
+      },
+      {
+        "id": "metrics",
+        "type": "metric-strip",
+        "cardIds": [
+          "selected_n",
+          "net10",
+          "pf10",
+          "matched_excess"
+        ]
+      },
+      {
+        "id": "economics_finding",
+        "type": "markdown",
+        "sourceId": "replay_source",
+        "body": "## 整体经济结果为负\n\nB2 的原始开火率为 49.78%，而冻结候选池本身已满足 18-bar 间隔，因此 3,880 个原始开火全部保留。edge2 与 edge3 输出完全相同。固定 10bp 和 20bp 两种成本下，B2 都没有超过未过滤池。"
+      },
+      {
+        "id": "cost_chart_block",
+        "type": "chart",
+        "chartId": "cost_chart"
+      },
+      {
+        "id": "scope_table_block",
+        "type": "table",
+        "tableId": "scope_table",
+        "layout": "full"
+      },
+      {
+        "id": "control_finding",
+        "type": "markdown",
+        "sourceId": "matched_source",
+        "body": "## 匹配随机对照不支持稳定超额\n\n全部 B2 信号的对照覆盖率为 94.48%。平均超额虽然为正，但周块 p=0.891，说明符号与幅度跨周不稳定。最高置信度 10% 的匹配超额更高，但 p=0.453，仍不满足 p<0.01 的确认门。"
+      },
+      {
+        "id": "matched_table_block",
+        "type": "table",
+        "tableId": "matched_table",
+        "layout": "full"
+      },
+      {
+        "id": "time_finding",
+        "type": "markdown",
+        "sourceId": "replay_source",
+        "body": "## 负收益不是单月口径造成\n\n3 月、4 月及 5 月 1–3 日在 20bp 后均为负。5 月仅 255 笔且不是完整月份，只能作为尾段压力信号。单位和最大回撤用于同口径比较，不代表真实资金曲线或可同时执行的组合。"
+      },
+      {
+        "id": "monthly_chart_block",
+        "type": "chart",
+        "chartId": "monthly_chart"
+      },
+      {
+        "id": "monthly_table_block",
+        "type": "table",
+        "tableId": "monthly_table"
+      },
+      {
+        "id": "confidence_finding",
+        "type": "markdown",
+        "sourceId": "replay_source",
+        "body": "## 置信度含有弱排序线索，但不允许事后调门\n\n四分位结果并不单调：Q2 好于 Q1、Q3最差、Q4最好。最高10%在本池为正，但阈值 0.4488 是看到经济标签后的分层诊断，不是预注册交易阈值；后续若利用，只能作为 P2 输入或在新的独立时间块上冻结验证。"
+      },
+      {
+        "id": "confidence_chart_block",
+        "type": "chart",
+        "chartId": "confidence_chart"
+      },
+      {
+        "id": "confidence_table_block",
+        "type": "table",
+        "tableId": "confidence_table"
+      },
+      {
+        "id": "outcome_table_block",
+        "type": "table",
+        "tableId": "outcome_table"
+      },
+      {
+        "id": "methodology",
+        "type": "markdown",
+        "sourceId": "replay_source",
+        "body": "## 方法、基线与复现范围\n\n主基线是同一冻结短向候选池未经过 B2 筛选的结果；方向性归因使用同币×同月×ATR 五分位随机对照。B2 是固定阈值检测器，不产生 LightGBM AUC；本轮 val AUC 与单特征基线均不适用。项目要求的 top-decile 指标在这里按 detector confidence 诊断，不能替代未来 P2 排序分数。"
+      },
+      {
+        "id": "protocol_table_block",
+        "type": "table",
+        "tableId": "protocol_table",
+        "layout": "full"
+      },
+      {
+        "id": "files",
+        "type": "markdown",
+        "body": "## 可核对的数据文件\n\n- 全部 7,795 个已推理候选：`analysis/output/p1_b2_short_l2_backtest_20260811_rows.csv`\n- B2 edge3 去重后的 3,880 笔：`analysis/output/p1_b2_short_l2_backtest_20260811_selected.csv`\n- 3,666 笔匹配随机对照：`analysis/output/p1_b2_short_l2_backtest_20260811_matched.csv`\n- 日度与币种汇总：`analysis/output/p1_b2_short_l2_backtest_report_20260811/daily.csv`、`symbol.csv`"
+      },
+      {
+        "id": "caveats",
+        "type": "markdown",
+        "sourceId": "replay_source",
+        "body": "## 风险与诚实声明\n\n- 这是 B2 × 冻结 short-L2 候选池回放，不是全市场逐 bar 扫描，也不是 B2+LightGBM 端到端回测。\n- B2 权重与 conf=0.35 在 P1 验证集上选择；本轮额外排除同币全部 val 端点前后 72 bars，去掉直接事件/结果窗重叠，但剩余区间仍属于开发期而非最终确认集。\n- 置信度最高10%与四分位是事后诊断，禁止把 0.4488 自动写回阈值。\n- 冻结收益标签之间可能有时间重叠；周块符号翻转比逐笔独立检验更保守，但只有 7 个周块。\n- 未读取 holdout，未修改成本/障碍/新鲜度门，未 promote、未部署、未下单。"
+      },
+      {
+        "id": "next_steps",
+        "type": "markdown",
+        "body": "## 建议下一步\n\n1. 保留 B2 作为 L1 候选生成器，不将其单独晋升为交易策略。\n2. P2 判断层按时间切分训练，只使用信号 bar 及之前的特征，把 B2 confidence 作为一个候选特征而非直接阈值。\n3. P2 的冻结裁决仍以 top-decile 20bp 后净收益>0、匹配随机对照和 p<0.01 为门；不读取 holdout。\n4. 如果 owner 要把最高10%作为独立策略假设，必须先冻结阈值与新时间块，再验证，不能复用本回放作为确认。"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-08-10T17:07:16.250146+00:00",
+    "status": "ready",
+    "datasets": {
+      "headline": [
+        {
+          "selected_n": 3880,
+          "net10_bp": -9.18698561385853,
+          "net10_vs_pool_bp": -0.784216069169533,
+          "pf10": 0.8929837601194694,
+          "matched_excess_bp": 2.1819846990104206,
+          "matched_p": 0.890625
+        }
+      ],
+      "scope": [
+        {
+          "scope_order": 1,
+          "scope": "未过滤短向候选池",
+          "n": 7795,
+          "symbols": 230,
+          "gross_bp": 1.5972304553110168,
+          "net10_bp": -8.402769544688997,
+          "net20_bp": -18.402769544688987,
+          "win20": 0.32033354714560613,
+          "pf10": 0.9099200403588319,
+          "pf20": 0.816100722742122,
+          "max_drawdown20_units": -15.409246406833901
+        },
+        {
+          "scope_order": 2,
+          "scope": "B2 edge3 去重",
+          "n": 3880,
+          "symbols": 229,
+          "gross_bp": 0.8130143861414845,
+          "net10_bp": -9.18698561385853,
+          "net20_bp": -19.18698561385852,
+          "win20": 0.31623711340206184,
+          "pf10": 0.8929837601194694,
+          "pf20": 0.7929640599377573,
+          "max_drawdown20_units": -7.461006284490987
+        },
+        {
+          "scope_order": 3,
+          "scope": "B2 edge2 敏感性",
+          "n": 3880,
+          "symbols": 229,
+          "gross_bp": 0.8130143861414845,
+          "net10_bp": -9.18698561385853,
+          "net20_bp": -19.18698561385852,
+          "win20": 0.31623711340206184,
+          "pf10": 0.8929837601194694,
+          "pf20": 0.7929640599377573,
+          "max_drawdown20_units": -7.461006284490987
+        },
+        {
+          "scope_order": 4,
+          "scope": "B2 置信度最高10%（诊断）",
+          "n": 388,
+          "symbols": 178,
+          "gross_bp": 43.24629106610364,
+          "net10_bp": 33.24629106610362,
+          "net20_bp": 23.246291066103634,
+          "win20": 0.3634020618556701,
+          "pf10": 1.2737931890008234,
+          "pf20": 1.1819617523057646,
+          "max_drawdown20_units": -0.7948754628158811
+        }
+      ],
+      "economics": [
+        {
+          "scope_order": 1,
+          "scope": "未过滤短向候选池",
+          "n": 7795,
+          "symbols": 230,
+          "gross_bp": 1.5972304553110168,
+          "net10_bp": -8.402769544688997,
+          "net20_bp": -18.402769544688987,
+          "win20": 0.32033354714560613,
+          "pf10": 0.9099200403588319,
+          "pf20": 0.816100722742122,
+          "max_drawdown20_units": -15.409246406833901,
+          "cost_scenario": "10bp",
+          "net_bp": -8.402769544688997
+        },
+        {
+          "scope_order": 2,
+          "scope": "B2 edge3 去重",
+          "n": 3880,
+          "symbols": 229,
+          "gross_bp": 0.8130143861414845,
+          "net10_bp": -9.18698561385853,
+          "net20_bp": -19.18698561385852,
+          "win20": 0.31623711340206184,
+          "pf10": 0.8929837601194694,
+          "pf20": 0.7929640599377573,
+          "max_drawdown20_units": -7.461006284490987,
+          "cost_scenario": "10bp",
+          "net_bp": -9.18698561385853
+        },
+        {
+          "scope_order": 3,
+          "scope": "B2 edge2 敏感性",
+          "n": 3880,
+          "symbols": 229,
+          "gross_bp": 0.8130143861414845,
+          "net10_bp": -9.18698561385853,
+          "net20_bp": -19.18698561385852,
+          "win20": 0.31623711340206184,
+          "pf10": 0.8929837601194694,
+          "pf20": 0.7929640599377573,
+          "max_drawdown20_units": -7.461006284490987,
+          "cost_scenario": "10bp",
+          "net_bp": -9.18698561385853
+        },
+        {
+          "scope_order": 1,
+          "scope": "未过滤短向候选池",
+          "n": 7795,
+          "symbols": 230,
+          "gross_bp": 1.5972304553110168,
+          "net10_bp": -8.402769544688997,
+          "net20_bp": -18.402769544688987,
+          "win20": 0.32033354714560613,
+          "pf10": 0.9099200403588319,
+          "pf20": 0.816100722742122,
+          "max_drawdown20_units": -15.409246406833901,
+          "cost_scenario": "20bp",
+          "net_bp": -18.402769544688987
+        },
+        {
+          "scope_order": 2,
+          "scope": "B2 edge3 去重",
+          "n": 3880,
+          "symbols": 229,
+          "gross_bp": 0.8130143861414845,
+          "net10_bp": -9.18698561385853,
+          "net20_bp": -19.18698561385852,
+          "win20": 0.31623711340206184,
+          "pf10": 0.8929837601194694,
+          "pf20": 0.7929640599377573,
+          "max_drawdown20_units": -7.461006284490987,
+          "cost_scenario": "20bp",
+          "net_bp": -19.18698561385852
+        },
+        {
+          "scope_order": 3,
+          "scope": "B2 edge2 敏感性",
+          "n": 3880,
+          "symbols": 229,
+          "gross_bp": 0.8130143861414845,
+          "net10_bp": -9.18698561385853,
+          "net20_bp": -19.18698561385852,
+          "win20": 0.31623711340206184,
+          "pf10": 0.8929837601194694,
+          "pf20": 0.7929640599377573,
+          "max_drawdown20_units": -7.461006284490987,
+          "cost_scenario": "20bp",
+          "net_bp": -19.18698561385852
+        }
+      ],
+      "matched": [
+        {
+          "scope": "B2 全部 edge3",
+          "selected_n": 3880,
+          "matched_n": 3666,
+          "coverage": 0.9448453608247422,
+          "selected_net20_bp": -17.46417858856047,
+          "control_net20_bp": -19.646163287570882,
+          "excess_bp": 2.1819846990104206,
+          "p_value": 0.890625,
+          "week_blocks": 7
+        },
+        {
+          "scope": "B2 置信度最高10%（诊断）",
+          "selected_n": 388,
+          "matched_n": 377,
+          "coverage": 0.9716494845360825,
+          "selected_net20_bp": 24.934143015313047,
+          "control_net20_bp": -17.303950156728472,
+          "excess_bp": 42.23809317204169,
+          "p_value": 0.453125,
+          "week_blocks": 7
+        }
+      ],
+      "monthly": [
+        {
+          "month": "2026-03",
+          "n": 1125,
+          "gross_bp": -1.8363568385335465,
+          "net10_bp": -11.836356838533558,
+          "net20_bp": -21.836356838533543,
+          "win20": 0.33244444444444443,
+          "pf20": 0.7525607676012283
+        },
+        {
+          "month": "2026-04",
+          "n": 2500,
+          "gross_bp": 5.1790933468988145,
+          "net10_bp": -4.8209066531012015,
+          "net20_bp": -14.82090665310119,
+          "win20": 0.3208,
+          "pf20": 0.8453228627128125
+        },
+        {
+          "month": "2026-05",
+          "n": 255,
+          "gross_bp": -30.303278845756214,
+          "net10_bp": -40.30327884575623,
+          "net20_bp": -50.3032788457562,
+          "win20": 0.2,
+          "pf20": 0.38185356697771244
+        }
+      ],
+      "confidence": [
+        {
+          "quartile": "Q1",
+          "conf_min": 0.3501144051551819,
+          "conf_max": 0.38099804520606995,
+          "n": 970,
+          "gross_bp": -4.701461787062092,
+          "net10_bp": -14.70146178706209,
+          "net20_bp": -24.701461787062097,
+          "win20": 0.311340206185567,
+          "pf20": 0.7313947601897249
+        },
+        {
+          "quartile": "Q2",
+          "conf_min": 0.38100096583366394,
+          "conf_max": 0.4010133743286133,
+          "n": 970,
+          "gross_bp": 5.992719850855658,
+          "net10_bp": -4.007280149144381,
+          "net20_bp": -14.007280149144345,
+          "win20": 0.3288659793814433,
+          "pf20": 0.8260617392305606
+        },
+        {
+          "quartile": "Q3",
+          "conf_min": 0.40106281638145447,
+          "conf_max": 0.42330870032310486,
+          "n": 970,
+          "gross_bp": -14.343718897432899,
+          "net10_bp": -24.343718897432908,
+          "net20_bp": -34.3437188974329,
+          "win20": 0.2907216494845361,
+          "pf20": 0.6110639207388083
+        },
+        {
+          "quartile": "Q4",
+          "conf_min": 0.42331624031066895,
+          "conf_max": 0.552696168422699,
+          "n": 970,
+          "gross_bp": 16.30451837820528,
+          "net10_bp": 6.304518378205252,
+          "net20_bp": -3.6954816217947197,
+          "win20": 0.334020618556701,
+          "pf20": 0.9663756138431459
+        }
+      ],
+      "outcomes": [
+        {
+          "exit_reason": "sl",
+          "n": 2548,
+          "share": 0.656701030927835
+        },
+        {
+          "exit_reason": "tp",
+          "n": 945,
+          "share": 0.24355670103092783
+        },
+        {
+          "exit_reason": "timeout",
+          "n": 385,
+          "share": 0.09922680412371133
+        },
+        {
+          "exit_reason": "sl_ambiguous",
+          "n": 2,
+          "share": 0.0005154639175257732
+        }
+      ],
+      "protocol": [
+        {
+          "item": "回放范围",
+          "value": "冻结 short-L2 候选池；不是全市场扫描"
+        },
+        {
+          "item": "输入窗口",
+          "value": "mapped_signal_i 及之前 30 根 K 线"
+        },
+        {
+          "item": "B2 门",
+          "value": "conf=0.35；tip/tip-1/tip-2（edge3）"
+        },
+        {
+          "item": "去重",
+          "value": "同币因果最小间隔 18 bars"
+        },
+        {
+          "item": "验证隔离",
+          "value": "排除同币所有 B2 val 端点 +/-72 bars"
+        },
+        {
+          "item": "方向",
+          "value": "short，由冻结 L2 pool 提供；YOLO 本身不判方向"
+        },
+        {
+          "item": "入场",
+          "value": "下一根 open"
+        },
+        {
+          "item": "出场",
+          "value": "TP5 ATR / SL2 ATR / 最长72 bars；同 bar 保守判 SL"
+        },
+        {
+          "item": "成本",
+          "value": "10bp swap taker；20bp 保守报告敏感性"
+        },
+        {
+          "item": "holdout",
+          "value": "未读取；max outcome end=2026-05-03 22:45 UTC"
+        }
+      ],
+      "daily": [
+        {
+          "utc_date": "2026-03-20",
+          "n": 68,
+          "mean_gross_bp": -69.21950448491347,
+          "mean_net10_bp": -79.21950448491363,
+          "mean_net20_bp": -89.21950448491349,
+          "win_rate_net20": 0.14705882352941177,
+          "profit_factor_net20": 0.18902659796640336,
+          "total_net20_units": -0.6066926304974116,
+          "cumulative_net20_units": -0.6066926304974116,
+          "drawdown_net20_units": -0.6066926304974116
+        },
+        {
+          "utc_date": "2026-03-21",
+          "n": 154,
+          "mean_gross_bp": 20.017360547200198,
+          "mean_net10_bp": 10.017360547200296,
+          "mean_net20_bp": 0.017360547200200187,
+          "win_rate_net20": 0.44155844155844154,
+          "profit_factor_net20": 1.0002907180043217,
+          "total_net20_units": 0.0002673524268830829,
+          "cumulative_net20_units": -0.6064252780705286,
+          "drawdown_net20_units": -0.6064252780705286
+        },
+        {
+          "utc_date": "2026-03-22",
+          "n": 93,
+          "mean_gross_bp": -44.421557092495355,
+          "mean_net10_bp": -54.421557092495426,
+          "mean_net20_bp": -64.42155709249536,
+          "win_rate_net20": 0.24731182795698925,
+          "profit_factor_net20": 0.5088194525572468,
+          "total_net20_units": -0.5991204809602069,
+          "cumulative_net20_units": -1.2055457590307355,
+          "drawdown_net20_units": -1.2055457590307355
+        },
+        {
+          "utc_date": "2026-03-23",
+          "n": 52,
+          "mean_gross_bp": -71.3247246164509,
+          "mean_net10_bp": -81.32472461645095,
+          "mean_net20_bp": -91.3247246164509,
+          "win_rate_net20": 0.1346153846153846,
+          "profit_factor_net20": 0.2795049745857957,
+          "total_net20_units": -0.47488856800554463,
+          "cumulative_net20_units": -1.68043432703628,
+          "drawdown_net20_units": -1.68043432703628
+        },
+        {
+          "utc_date": "2026-03-24",
+          "n": 107,
+          "mean_gross_bp": -64.96816082003903,
+          "mean_net10_bp": -74.96816082003915,
+          "mean_net20_bp": -84.96816082003905,
+          "win_rate_net20": 0.1308411214953271,
+          "profit_factor_net20": 0.2746768506418197,
+          "total_net20_units": -0.9091593207744179,
+          "cumulative_net20_units": -2.589593647810698,
+          "drawdown_net20_units": -2.589593647810698
+        },
+        {
+          "utc_date": "2026-03-25",
+          "n": 98,
+          "mean_gross_bp": -7.406692160049828,
+          "mean_net10_bp": -17.406692160049815,
+          "mean_net20_bp": -27.406692160049833,
+          "win_rate_net20": 0.24489795918367346,
+          "profit_factor_net20": 0.6618662758831959,
+          "total_net20_units": -0.26858558316848835,
+          "cumulative_net20_units": -2.8581792309791862,
+          "drawdown_net20_units": -2.8581792309791862
+        },
+        {
+          "utc_date": "2026-03-26",
+          "n": 104,
+          "mean_gross_bp": 151.38170189683834,
+          "mean_net10_bp": 141.3817018968383,
+          "mean_net20_bp": 131.38170189683834,
+          "win_rate_net20": 0.8076923076923077,
+          "profit_factor_net20": 5.510987745620427,
+          "total_net20_units": 1.3663696997271186,
+          "cumulative_net20_units": -1.4918095312520676,
+          "drawdown_net20_units": -1.4918095312520676
+        },
+        {
+          "utc_date": "2026-03-27",
+          "n": 65,
+          "mean_gross_bp": 174.8079882635612,
+          "mean_net10_bp": 164.8079882635613,
+          "mean_net20_bp": 154.80798826356124,
+          "win_rate_net20": 0.7384615384615385,
+          "profit_factor_net20": 4.938983763271319,
+          "total_net20_units": 1.006251923713148,
+          "cumulative_net20_units": -0.48555760753891963,
+          "drawdown_net20_units": -0.48555760753891963
+        },
+        {
+          "utc_date": "2026-03-28",
+          "n": 61,
+          "mean_gross_bp": 25.83245832919227,
+          "mean_net10_bp": 15.832458329192196,
+          "mean_net20_bp": 5.832458329192274,
+          "win_rate_net20": 0.4918032786885246,
+          "profit_factor_net20": 1.0840683642160815,
+          "total_net20_units": 0.035577995808072874,
+          "cumulative_net20_units": -0.4499796117308468,
+          "drawdown_net20_units": -0.4499796117308468
+        },
+        {
+          "utc_date": "2026-03-29",
+          "n": 111,
+          "mean_gross_bp": -11.763888253824064,
+          "mean_net10_bp": -21.763888253824017,
+          "mean_net20_bp": -31.76388825382406,
+          "win_rate_net20": 0.35135135135135137,
+          "profit_factor_net20": 0.6701917044530299,
+          "total_net20_units": -0.35257915961744707,
+          "cumulative_net20_units": -0.8025587713482938,
+          "drawdown_net20_units": -0.8025587713482938
+        },
+        {
+          "utc_date": "2026-03-30",
+          "n": 88,
+          "mean_gross_bp": -36.91429891534957,
+          "mean_net10_bp": -46.914298915349654,
+          "mean_net20_bp": -56.914298915349576,
+          "win_rate_net20": 0.18181818181818182,
+          "profit_factor_net20": 0.4322291423489791,
+          "total_net20_units": -0.5008458304550762,
+          "cumulative_net20_units": -1.30340460180337,
+          "drawdown_net20_units": -1.30340460180337
+        },
+        {
+          "utc_date": "2026-03-31",
+          "n": 124,
+          "mean_gross_bp": -72.99883407513339,
+          "mean_net10_bp": -82.99883407513339,
+          "mean_net20_bp": -92.99883407513336,
+          "win_rate_net20": 0.08870967741935484,
+          "profit_factor_net20": 0.17685424624886845,
+          "total_net20_units": -1.1531855425316537,
+          "cumulative_net20_units": -2.4565901443350238,
+          "drawdown_net20_units": -2.4565901443350238
+        },
+        {
+          "utc_date": "2026-04-01",
+          "n": 104,
+          "mean_gross_bp": 5.799248126115108,
+          "mean_net10_bp": -4.200751873884946,
+          "mean_net20_bp": -14.200751873884897,
+          "win_rate_net20": 0.3173076923076923,
+          "profit_factor_net20": 0.8343084851949271,
+          "total_net20_units": -0.14768781948840293,
+          "cumulative_net20_units": -2.6042779638234266,
+          "drawdown_net20_units": -2.6042779638234266
+        },
+        {
+          "utc_date": "2026-04-02",
+          "n": 77,
+          "mean_gross_bp": 102.3649712876357,
+          "mean_net10_bp": 92.3649712876358,
+          "mean_net20_bp": 82.3649712876357,
+          "win_rate_net20": 0.6103896103896104,
+          "profit_factor_net20": 2.252817562416734,
+          "total_net20_units": 0.6342102789147949,
+          "cumulative_net20_units": -1.9700676849086318,
+          "drawdown_net20_units": -1.9700676849086318
+        },
+        {
+          "utc_date": "2026-04-03",
+          "n": 43,
+          "mean_gross_bp": 21.076992382555684,
+          "mean_net10_bp": 11.076992382555643,
+          "mean_net20_bp": 1.0769923825556902,
+          "win_rate_net20": 0.18604651162790697,
+          "profit_factor_net20": 1.0097528635546447,
+          "total_net20_units": 0.004631067244989468,
+          "cumulative_net20_units": -1.9654366176636424,
+          "drawdown_net20_units": -1.9654366176636424
+        },
+        {
+          "utc_date": "2026-04-04",
+          "n": 72,
+          "mean_gross_bp": -21.28819206548739,
+          "mean_net10_bp": -31.28819206548735,
+          "mean_net20_bp": -41.28819206548739,
+          "win_rate_net20": 0.2361111111111111,
+          "profit_factor_net20": 0.4749815195411166,
+          "total_net20_units": -0.2972749828715092,
+          "cumulative_net20_units": -2.2627116005351517,
+          "drawdown_net20_units": -2.2627116005351517
+        },
+        {
+          "utc_date": "2026-04-05",
+          "n": 123,
+          "mean_gross_bp": 27.496273054230745,
+          "mean_net10_bp": 17.496273054230734,
+          "mean_net20_bp": 7.496273054230748,
+          "win_rate_net20": 0.5284552845528455,
+          "profit_factor_net20": 1.1307708647852264,
+          "total_net20_units": 0.0922041585670382,
+          "cumulative_net20_units": -2.1705074419681134,
+          "drawdown_net20_units": -2.1705074419681134
+        },
+        {
+          "utc_date": "2026-04-06",
+          "n": 74,
+          "mean_gross_bp": 104.10697378764286,
+          "mean_net10_bp": 94.10697378764273,
+          "mean_net20_bp": 84.10697378764289,
+          "win_rate_net20": 0.5405405405405406,
+          "profit_factor_net20": 2.406715393087906,
+          "total_net20_units": 0.6223916060285574,
+          "cumulative_net20_units": -1.548115835939556,
+          "drawdown_net20_units": -1.548115835939556
+        },
+        {
+          "utc_date": "2026-04-07",
+          "n": 43,
+          "mean_gross_bp": -67.14845122441035,
+          "mean_net10_bp": -77.14845122441045,
+          "mean_net20_bp": -87.14845122441035,
+          "win_rate_net20": 0.20930232558139536,
+          "profit_factor_net20": 0.34601625322463325,
+          "total_net20_units": -0.3747383402649645,
+          "cumulative_net20_units": -1.9228541762045204,
+          "drawdown_net20_units": -1.9228541762045204
+        },
+        {
+          "utc_date": "2026-04-08",
+          "n": 73,
+          "mean_gross_bp": 0.15982821476809808,
+          "mean_net10_bp": -9.840171785231833,
+          "mean_net20_bp": -19.8401717852319,
+          "win_rate_net20": 0.2876712328767123,
+          "profit_factor_net20": 0.7926959824319262,
+          "total_net20_units": -0.14483325403219288,
+          "cumulative_net20_units": -2.067687430236713,
+          "drawdown_net20_units": -2.067687430236713
+        },
+        {
+          "utc_date": "2026-04-09",
+          "n": 50,
+          "mean_gross_bp": -18.519250914550447,
+          "mean_net10_bp": -28.519250914550526,
+          "mean_net20_bp": -38.51925091455043,
+          "win_rate_net20": 0.2,
+          "profit_factor_net20": 0.6601970086077591,
+          "total_net20_units": -0.19259625457275217,
+          "cumulative_net20_units": -2.2602836848094654,
+          "drawdown_net20_units": -2.2602836848094654
+        },
+        {
+          "utc_date": "2026-04-10",
+          "n": 112,
+          "mean_gross_bp": -49.09297710722029,
+          "mean_net10_bp": -59.092977107220385,
+          "mean_net20_bp": -69.09297710722029,
+          "win_rate_net20": 0.125,
+          "profit_factor_net20": 0.30982678969327365,
+          "total_net20_units": -0.7738413436008673,
+          "cumulative_net20_units": -3.0341250284103327,
+          "drawdown_net20_units": -3.0341250284103327
+        },
+        {
+          "utc_date": "2026-04-11",
+          "n": 147,
+          "mean_gross_bp": -34.26129642587218,
+          "mean_net10_bp": -44.26129642587216,
+          "mean_net20_bp": -54.26129642587218,
+          "win_rate_net20": 0.22448979591836735,
+          "profit_factor_net20": 0.40874702497686793,
+          "total_net20_units": -0.797641057460321,
+          "cumulative_net20_units": -3.8317660858706537,
+          "drawdown_net20_units": -3.8317660858706537
+        },
+        {
+          "utc_date": "2026-04-12",
+          "n": 129,
+          "mean_gross_bp": 59.729917146554435,
+          "mean_net10_bp": 49.72991714655445,
+          "mean_net20_bp": 39.72991714655442,
+          "win_rate_net20": 0.5503875968992248,
+          "profit_factor_net20": 1.6333194229223582,
+          "total_net20_units": 0.512515931190552,
+          "cumulative_net20_units": -3.319250154680102,
+          "drawdown_net20_units": -3.319250154680102
+        },
+        {
+          "utc_date": "2026-04-13",
+          "n": 38,
+          "mean_gross_bp": -3.84177668548456,
+          "mean_net10_bp": -13.841776685484419,
+          "mean_net20_bp": -23.84177668548456,
+          "win_rate_net20": 0.23684210526315788,
+          "profit_factor_net20": 0.8096570370559424,
+          "total_net20_units": -0.09059875140484133,
+          "cumulative_net20_units": -3.4098489060849433,
+          "drawdown_net20_units": -3.4098489060849433
+        },
+        {
+          "utc_date": "2026-04-14",
+          "n": 96,
+          "mean_gross_bp": -61.28948936658104,
+          "mean_net10_bp": -71.28948936658111,
+          "mean_net20_bp": -81.28948936658104,
+          "win_rate_net20": 0.15625,
+          "profit_factor_net20": 0.30953459333729405,
+          "total_net20_units": -0.7803790979191779,
+          "cumulative_net20_units": -4.190228004004121,
+          "drawdown_net20_units": -4.190228004004121
+        },
+        {
+          "utc_date": "2026-04-15",
+          "n": 38,
+          "mean_gross_bp": -63.27575847599056,
+          "mean_net10_bp": -73.2757584759906,
+          "mean_net20_bp": -83.27575847599057,
+          "win_rate_net20": 0.13157894736842105,
+          "profit_factor_net20": 0.4579429256840521,
+          "total_net20_units": -0.3164478822087642,
+          "cumulative_net20_units": -4.506675886212885,
+          "drawdown_net20_units": -4.506675886212885
+        },
+        {
+          "utc_date": "2026-04-16",
+          "n": 39,
+          "mean_gross_bp": -0.8716003795127614,
+          "mean_net10_bp": -10.87160037951285,
+          "mean_net20_bp": -20.87160037951277,
+          "win_rate_net20": 0.20512820512820512,
+          "profit_factor_net20": 0.8498440565488496,
+          "total_net20_units": -0.0813992414800998,
+          "cumulative_net20_units": -4.588075127692985,
+          "drawdown_net20_units": -4.588075127692985
+        },
+        {
+          "utc_date": "2026-04-17",
+          "n": 43,
+          "mean_gross_bp": -70.68178868203293,
+          "mean_net10_bp": -80.68178868203307,
+          "mean_net20_bp": -90.68178868203296,
+          "win_rate_net20": 0.23255813953488372,
+          "profit_factor_net20": 0.4851324876582221,
+          "total_net20_units": -0.3899316913327417,
+          "cumulative_net20_units": -4.978006819025727,
+          "drawdown_net20_units": -4.978006819025727
+        },
+        {
+          "utc_date": "2026-04-18",
+          "n": 121,
+          "mean_gross_bp": 237.1303863870671,
+          "mean_net10_bp": 227.1303863870671,
+          "mean_net20_bp": 217.13038638706706,
+          "win_rate_net20": 0.6694214876033058,
+          "profit_factor_net20": 4.601012899057309,
+          "total_net20_units": 2.6272776752835116,
+          "cumulative_net20_units": -2.3507291437422153,
+          "drawdown_net20_units": -2.3507291437422153
+        },
+        {
+          "utc_date": "2026-04-19",
+          "n": 69,
+          "mean_gross_bp": 4.754452090599077,
+          "mean_net10_bp": -5.245547909400908,
+          "mean_net20_bp": -15.245547909400916,
+          "win_rate_net20": 0.2608695652173913,
+          "profit_factor_net20": 0.8690938852652496,
+          "total_net20_units": -0.10519428057486632,
+          "cumulative_net20_units": -2.4559234243170818,
+          "drawdown_net20_units": -2.4559234243170818
+        },
+        {
+          "utc_date": "2026-04-20",
+          "n": 25,
+          "mean_gross_bp": -75.89167615304751,
+          "mean_net10_bp": -85.89167615304744,
+          "mean_net20_bp": -95.89167615304753,
+          "win_rate_net20": 0.16,
+          "profit_factor_net20": 0.22688993819097783,
+          "total_net20_units": -0.2397291903826188,
+          "cumulative_net20_units": -2.6956526146997004,
+          "drawdown_net20_units": -2.6956526146997004
+        },
+        {
+          "utc_date": "2026-04-21",
+          "n": 180,
+          "mean_gross_bp": -88.80808336958293,
+          "mean_net10_bp": -98.80808336958304,
+          "mean_net20_bp": -108.80808336958295,
+          "win_rate_net20": 0.044444444444444446,
+          "profit_factor_net20": 0.11776753965679326,
+          "total_net20_units": -1.9585455006524932,
+          "cumulative_net20_units": -4.654198115352194,
+          "drawdown_net20_units": -4.654198115352194
+        },
+        {
+          "utc_date": "2026-04-22",
+          "n": 88,
+          "mean_gross_bp": 119.14438795427141,
+          "mean_net10_bp": 109.1443879542715,
+          "mean_net20_bp": 99.14438795427141,
+          "win_rate_net20": 0.6818181818181818,
+          "profit_factor_net20": 3.423771554455732,
+          "total_net20_units": 0.8724706139975884,
+          "cumulative_net20_units": -3.781727501354605,
+          "drawdown_net20_units": -3.781727501354605
+        },
+        {
+          "utc_date": "2026-04-23",
+          "n": 74,
+          "mean_gross_bp": -108.71431094570455,
+          "mean_net10_bp": -118.71431094570441,
+          "mean_net20_bp": -128.71431094570457,
+          "win_rate_net20": 0.16216216216216217,
+          "profit_factor_net20": 0.17306738003317104,
+          "total_net20_units": -0.9524859009982137,
+          "cumulative_net20_units": -4.734213402352819,
+          "drawdown_net20_units": -4.734213402352819
+        },
+        {
+          "utc_date": "2026-04-24",
+          "n": 105,
+          "mean_gross_bp": -30.071582933805804,
+          "mean_net10_bp": -40.0715829338059,
+          "mean_net20_bp": -50.071582933805814,
+          "win_rate_net20": 0.19047619047619047,
+          "profit_factor_net20": 0.47270398489415866,
+          "total_net20_units": -0.5257516208049611,
+          "cumulative_net20_units": -5.25996502315778,
+          "drawdown_net20_units": -5.25996502315778
+        },
+        {
+          "utc_date": "2026-04-25",
+          "n": 107,
+          "mean_gross_bp": 2.078732478762448,
+          "mean_net10_bp": -7.921267521237593,
+          "mean_net20_bp": -17.92126752123755,
+          "win_rate_net20": 0.27102803738317754,
+          "profit_factor_net20": 0.7859324167471914,
+          "total_net20_units": -0.19175756247724177,
+          "cumulative_net20_units": -5.4517225856350215,
+          "drawdown_net20_units": -5.4517225856350215
+        },
+        {
+          "utc_date": "2026-04-26",
+          "n": 58,
+          "mean_gross_bp": -94.56272884030766,
+          "mean_net10_bp": -104.56272884030766,
+          "mean_net20_bp": -114.56272884030764,
+          "win_rate_net20": 0.06896551724137931,
+          "profit_factor_net20": 0.1414842904530961,
+          "total_net20_units": -0.6644638272737843,
+          "cumulative_net20_units": -6.116186412908806,
+          "drawdown_net20_units": -6.116186412908806
+        },
+        {
+          "utc_date": "2026-04-27",
+          "n": 115,
+          "mean_gross_bp": 38.972552202439196,
+          "mean_net10_bp": 28.972552202439278,
+          "mean_net20_bp": 18.972552202439207,
+          "win_rate_net20": 0.4782608695652174,
+          "profit_factor_net20": 1.196260926550138,
+          "total_net20_units": 0.21818435032805086,
+          "cumulative_net20_units": -5.898002062580755,
+          "drawdown_net20_units": -5.898002062580755
+        },
+        {
+          "utc_date": "2026-04-28",
+          "n": 70,
+          "mean_gross_bp": -46.38054982874141,
+          "mean_net10_bp": -56.380549828741394,
+          "mean_net20_bp": -66.38054982874141,
+          "win_rate_net20": 0.21428571428571427,
+          "profit_factor_net20": 0.37352865262078366,
+          "total_net20_units": -0.4646638488011898,
+          "cumulative_net20_units": -6.362665911381945,
+          "drawdown_net20_units": -6.362665911381945
+        },
+        {
+          "utc_date": "2026-04-29",
+          "n": 127,
+          "mean_gross_bp": 93.99946320966109,
+          "mean_net10_bp": 83.99946320966113,
+          "mean_net20_bp": 73.99946320966107,
+          "win_rate_net20": 0.5669291338582677,
+          "profit_factor_net20": 2.1865052312015014,
+          "total_net20_units": 0.9397931827626956,
+          "cumulative_net20_units": -5.422872728619249,
+          "drawdown_net20_units": -5.422872728619249
+        },
+        {
+          "utc_date": "2026-04-30",
+          "n": 60,
+          "mean_gross_bp": -103.15734649851203,
+          "mean_net10_bp": -113.15734649851207,
+          "mean_net20_bp": -123.15734649851203,
+          "win_rate_net20": 0.15,
+          "profit_factor_net20": 0.15418397595444047,
+          "total_net20_units": -0.7389440789910722,
+          "cumulative_net20_units": -6.161816807610322,
+          "drawdown_net20_units": -6.161816807610322
+        },
+        {
+          "utc_date": "2026-05-01",
+          "n": 106,
+          "mean_gross_bp": -47.29478762981209,
+          "mean_net10_bp": -57.29478762981202,
+          "mean_net20_bp": -67.29478762981209,
+          "win_rate_net20": 0.16037735849056603,
+          "profit_factor_net20": 0.21533371080107566,
+          "total_net20_units": -0.7133247488760082,
+          "cumulative_net20_units": -6.87514155648633,
+          "drawdown_net20_units": -6.87514155648633
+        },
+        {
+          "utc_date": "2026-05-02",
+          "n": 78,
+          "mean_gross_bp": -37.53326882853688,
+          "mean_net10_bp": -47.53326882853688,
+          "mean_net20_bp": -57.533268828536876,
+          "win_rate_net20": 0.14102564102564102,
+          "profit_factor_net20": 0.35969438313611385,
+          "total_net20_units": -0.4487594968625876,
+          "cumulative_net20_units": -7.3239010533489175,
+          "drawdown_net20_units": -7.3239010533489175
+        },
+        {
+          "utc_date": "2026-05-03",
+          "n": 71,
+          "mean_gross_bp": 3.0071317143397898,
+          "mean_net10_bp": -6.99286828566038,
+          "mean_net20_bp": -16.992868285660208,
+          "win_rate_net20": 0.323943661971831,
+          "profit_factor_net20": 0.7406486471740787,
+          "total_net20_units": -0.12064936482818747,
+          "cumulative_net20_units": -7.444550418177105,
+          "drawdown_net20_units": -7.444550418177105
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "replay_source",
+      "label": "B2 pre-holdout short-L2 candidate-pool replay",
+      "path": "analysis/output/p1_b2_short_l2_backtest_20260811_selected.csv",
+      "query": {
+        "engine": "duckdb",
+        "language": "sql",
+        "executed_at": "2026-08-10T17:07:16.250146+00:00",
+        "description": "Loads causal B2-selected rows and recomputes fixed-cost economic metrics.",
+        "tables_used": [
+          "analysis/output/p1_b2_short_l2_backtest_20260811_selected.csv",
+          "analysis/output/p1_b2_short_l2_backtest_20260811.json"
+        ],
+        "filters": [
+          "short side only from the frozen L2 pre-holdout candidate pool",
+          "2026-03-20T06:00:00Z <= signal_time < 2026-05-04T00:00:00Z",
+          "outcome interval ends before 2026-05-04T00:00:00Z",
+          "same-symbol +/-72 bars around every B2 validation endpoint excluded",
+          "B2 fixed window=30, conf=0.35, primary tip edge=3 bars",
+          "same-symbol causal dedup min gap=18 bars"
+        ],
+        "metric_definitions": [
+          "net10 = frozen gross return - 0.001 swap taker round-trip cost",
+          "net20 = frozen gross return - 0.002 conservative report round-trip cost",
+          "profit factor = sum positive net returns / absolute sum negative net returns",
+          "unit-sum max drawdown is drawdown of time-ordered unit-return cumulative sum, not portfolio equity",
+          "confidence top decile uses the 90th percentile of B2 confidence as an exploratory diagnostic, not a frozen trade gate"
+        ],
+        "sql": "SELECT *, gross_ret - 0.002 AS net20 FROM read_csv_auto('analysis/output/p1_b2_short_l2_backtest_20260811_selected.csv', header=true) ORDER BY signal_time, candidate_id;"
+      }
+    },
+    {
+      "id": "matched_source",
+      "label": "Same-symbol/month/ATR-quintile matched controls",
+      "path": "analysis/output/p1_b2_short_l2_backtest_20260811_matched.csv",
+      "query": {
+        "engine": "duckdb",
+        "language": "sql",
+        "executed_at": "2026-08-10T17:07:16.250146+00:00",
+        "description": "Loads frozen-pool matched controls and computes selected-minus-control excess.",
+        "tables_used": [
+          "analysis/output/p1_b2_short_l2_backtest_20260811_matched.csv"
+        ],
+        "filters": [
+          "up to 8 controls per selected row",
+          "same symbol, UTC month, and ATR quintile when at least 3 controls exist",
+          "fallback to same symbol and UTC month",
+          "same candidate_id and event_group_id excluded"
+        ],
+        "metric_definitions": [
+          "excess = selected net20 - mean matched-control net20",
+          "p-value = exact two-sided sign-flip over 7 UTC-week blocks"
+        ],
+        "sql": "SELECT * FROM read_csv_auto('analysis/output/p1_b2_short_l2_backtest_20260811_matched.csv', header=true) ORDER BY signal_time, candidate_id;"
+      }
+    }
+  ]
+}

@@ -2,6 +2,34 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-11 — B2 经济回放完成：只可做 L1 候选生成，不可单独交易）
+
+**直接裁决：最新 B2 检测器通过了 P1 事件门，但在冻结 short-L2 候选池上没有整体经济
+选择力；不得把 P1 detection PASS 解释为策略 PASS。**
+
+- 数据范围 2026-03-20 06:15 → 2026-05-03 05:15 UTC；最晚 outcome end
+  2026-05-03 22:45 UTC；holdout 读取 0。
+- 原始 8,553 行先排除同币所有 B2 validation 端点前后 72 bars，共排除 758，最终回放
+  7,795 行 / 230 币；B2 fixed-30 @ conf=0.35、tip/tip-1/tip-2。
+- B2 开火并 18-bar 因果去重后 3,880 笔：10bp 后均值 **-9.19bp**、PF **0.893**；
+  20bp 后 **-19.19bp**、PF **0.793**。未过滤池 10bp 后 -8.40bp，B2 反而低 0.78bp/笔。
+- 同币×同月×ATR 桶匹配 3,666 笔，超额 +2.18bp，但 7 UTC-week exact sign-flip
+  `p=0.890625`，不显著。
+- detector confidence 最高 10%（388 笔）20bp 后 +23.25bp、PF 1.182；这是事后分层诊断，
+  匹配对照 p=0.453125，不满足 p<0.01，禁止据此自动调 conf 或晋升。
+- edge2 与 edge3 本轮完全相同。未改成本/障碍/新鲜度，未 promote、未部署、未下单。
+
+交付物：
+
+- `analysis/html/p1_b2_short_l2_backtest_20260811.html`
+- `analysis/p1_b2_short_l2_backtest_20260811.md`
+- `analysis/output/p1_b2_short_l2_backtest_20260811.json`
+- `analysis/output/p1_b2_short_l2_backtest_20260811_{rows,selected,matched}.csv`
+- `analysis/output/p1_b2_short_l2_backtest_report_20260811/{daily,symbol}.csv`
+
+**下一方向：判断层，不再围绕 B2 conf 做经济拟合。** B2 只作为 L1 候选生成器；若 owner
+授权继续，P2 必须严格时间切分，并把 B2 confidence 仅作为一个候选特征。B2 本身不可部署。
+
 ## ⚡ 当前真相（2026-08-11 — Local Signal V2 P1 历史发现级通过，B2 胜出）
 
 **直接裁决：30 根固定因果窗 B2 通过冻结事件门并成为 P1 候选；只接受历史发现，不具备生产资格。**
