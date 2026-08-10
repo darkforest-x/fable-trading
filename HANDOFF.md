@@ -24,9 +24,14 @@ train 4,040、val 716。24 张独立预览按四个真实 K 线位置桶各 6 �
 0 holdout、0 跨 split、4,756 image/label/manifest 守恒，十道 Stage A P0 门全绿。
 同 seed 二次重建正/负 manifest SHA 分别稳定为 `ae4675a6…e89` / `0fdced5c…3f0`。
 
-当前停止点：数据与视觉门已通过，可按预注册配方启动 **Stage A 离线预训练**；训练结果仍须
-标记 `production_eligible=false`，不得 promote/forward/ACTIVE/部署。训练完成后只可作为严格
-因果 Stage B 的初始化权重。
+Owner 于 2026-08-11 06:33 CST 明确授权上传并开训；3060 `zzc@192.168.1.4` 已核验空闲，
+`owner_lsv2_stagea_randomcrop_v1_cold` 已通过 WMI 启动（launch pid 35164，ret=0）。远端重新
+扫描 train 4,040 / val 716、0 corrupt，已进入 `Starting training for 60 epochs`。实际参数为
+YOLO11s、imgsz 960、batch 8、seed 0、epochs 60、patience 15；flip/mosaic/mixup/HSV 全为 0。
+
+当前停止点：监控 **Stage A 离线预训练**并在结束后取回独立权重与结果；训练结果仍须标记
+`production_eligible=false`，不得 promote/forward/ACTIVE/部署。该权重只可作为严格因果
+Stage B 的初始化。
 
 ## ⚡ 当前真相（2026-08-11 — Owner 发现 B2/P2 固定最右位置 shortcut；P2 训练已停）
 

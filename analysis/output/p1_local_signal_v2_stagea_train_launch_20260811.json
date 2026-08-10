@@ -1,0 +1,71 @@
+{
+  "launched_at_utc": "2026-08-10T22:34:03Z",
+  "launched_at_cst": "2026-08-11 06:34:03 CST",
+  "status": "running_epoch_2_verified",
+  "run_name": "owner_lsv2_stagea_randomcrop_v1_cold",
+  "role": "stage_a_offline_representation_pretrain_only",
+  "production_eligible": false,
+  "remote": {
+    "host": "zzc@192.168.1.4",
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "launch_method": "detached WMI",
+    "launch_pid": 35164,
+    "launch_return_code": 0,
+    "run_directory": "C:/fable/runs/detect/owner_lsv2_stagea_randomcrop_v1_cold"
+  },
+  "dataset": {
+    "local_path": "datasets/local_signal_v2_stagea_randomcrop_v1",
+    "remote_path": "C:/fable/datasets/local_signal_v2_stagea_randomcrop_v1",
+    "train_images": 4040,
+    "val_images": 716,
+    "train_backgrounds": 2020,
+    "val_backgrounds": 358,
+    "remote_scan_corrupt": 0,
+    "p0_audit": "analysis/output/p0_local_signal_v2_stagea_audit.json",
+    "p0_pass": true,
+    "holdout_read": false
+  },
+  "recipe": {
+    "model": "models/yolo11s.pt",
+    "epochs": 60,
+    "patience": 15,
+    "batch": 8,
+    "seed": 0,
+    "imgsz": 960,
+    "workers": 2,
+    "cache": false,
+    "optimizer": "AdamW auto cold-start lr=0.002",
+    "fliplr": 0.0,
+    "flipud": 0.0,
+    "mosaic": 0.0,
+    "mixup": 0.0,
+    "hsv_h": 0.0,
+    "hsv_s": 0.0,
+    "hsv_v": 0.0
+  },
+  "runtime_versions": {
+    "torch": "2.8.0",
+    "ultralytics": "8.4.89",
+    "numpy": "2.0.2"
+  },
+  "launch_verification": {
+    "first_epoch_completed": true,
+    "first_epoch_val_images": 716,
+    "first_epoch_val_instances": 358,
+    "first_epoch_precision": 0.0353,
+    "first_epoch_recall": 0.813,
+    "first_epoch_map50": 0.0494,
+    "first_epoch_map50_95": 0.0206,
+    "best_checkpoint_exists": true,
+    "best_checkpoint_bytes": 76007713,
+    "next_epoch_observed": 2,
+    "interpretation": "Startup evidence only; Stage A metrics are not production acceptance."
+  },
+  "forbidden": [
+    "promote Stage A weights",
+    "deploy Stage A weights",
+    "write Stage A detections to forward",
+    "change ACTIVE",
+    "read holdout"
+  ]
+}
