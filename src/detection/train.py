@@ -26,7 +26,16 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+
+def repository_root(script_path: Path) -> Path:
+    """Resolve the repo root for source-tree and copied remote trainers."""
+    parent = script_path.parent
+    if parent.name == "detection" and parent.parent.name == "src":
+        return parent.parent.parent
+    return parent
+
+
+REPO_ROOT = repository_root(Path(__file__).resolve())
 RUNS_PROJECT = (REPO_ROOT / "runs" / "detect").resolve()
 
 # Chart images have a fixed meaning per axis and per color: never flip,
