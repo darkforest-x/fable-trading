@@ -8,7 +8,10 @@ sampler with a different frozen seed. A candidate becomes a hard negative only
 when the frozen B2 detector produces a box at conf >= 0.35. Future outcomes are
 never read. Train/val windows remain inside their original time blocks.
 
-Round 1 copies the complete B2 P1 dataset and only adds mined hard negatives.
+Round 1 copies the complete B2 P1 dataset and only adds mined *train-block*
+hard negatives. Mined val-block negatives are copied to a separate evaluation
+bank and are never exposed through ``data.yaml``; this prevents early stopping
+or best-epoch selection from adapting to the held-out hard-negative ruler.
 Training is intentionally outside this script and must cold-start from the same
 ``yolo11s.pt`` recipe as P1 B2 to keep hard negatives as the sole experiment
 variable.
@@ -193,6 +196,18 @@ def select_hard_negatives(
     return sorted(selected, key=lambda row: (row["split"], row["symbol"], int(row["win_start"])))
 
 
+def split_hard_negative_banks(selected: list[dict]) -> tuple[list[dict], list[dict]]:
+    """Separate gradient-visible train negatives from evaluation-only val negatives."""
+    train_rows = [row for row in selected if row["split"] == "train"]
+    heldout_rows = [row for row in selected if row["split"] == "val"]
+    unknown = sorted({str(row["split"]) for row in selected} - {"train", "val"})
+    if unknown:
+        raise ValueError(f"unknown hard-negative splits: {unknown}")
+    if not train_rows or not heldout_rows:
+        raise ValueError("hard-negative mining must produce both train and held-out val rows")
+    return train_rows, heldout_rows
+
+
 def _rewrite_base_manifest_row(row: dict, out: Path) -> dict:
     updated = dict(row)
     split = str(row["split"])
@@ -215,7 +230,7 @@ def _rewrite_w20_row(row: dict, out: Path) -> dict:
 def assemble_dataset(
     base: Path, candidate_root: Path, out: Path, predictions_path: Path
 ) -> dict:
-    """Copy P1 B2 and append mined train/val hard negatives."""
+    """Copy P1 B2, append train hard negatives, and freeze a val eval bank."""
     if out.exists():
         raise FileExistsError(f"refusing to overwrite existing dataset: {out}")
     candidates = read_jsonl(candidate_root / "candidate_neg_manifest.jsonl")
@@ -225,6 +240,7 @@ def assemble_dataset(
     selected = select_hard_negatives(candidates, payload["predictions"], MINE_THRESHOLD)
     if not selected:
         raise ValueError("no hard negatives mined")
+    train_selected, heldout_selected = split_hard_negative_banks(selected)
     shutil.copytree(base, out)
 
     base_manifest = read_jsonl(base / "manifest.jsonl")
@@ -232,7 +248,7 @@ def assemble_dataset(
     positives = [_rewrite_w20_row(row, out) for row in read_json(base / "w20_manifest.json")]
     negatives = [_rewrite_w20_row(row, out) for row in read_json(base / "w20_neg_manifest.json")]
     hard_bank: list[dict] = []
-    for row in selected:
+    for row in train_selected:
         split = str(row["split"])
         target_stem = f"{row['stem']}_p2hnr1"
         image_target = out / "images" / split / f"{target_stem}.png"
@@ -286,8 +302,36 @@ def assemble_dataset(
         p2_manifest.append(manifest_row)
         hard_bank.append({**negative_row, "image_path": manifest_row["image_path"], "label_path": manifest_row["label_path"]})
 
+    heldout_bank: list[dict] = []
+    heldout_image_dir = out / "evaluation" / "heldout_hard_negative" / "images"
+    heldout_label_dir = out / "evaluation" / "heldout_hard_negative" / "labels"
+    heldout_image_dir.mkdir(parents=True)
+    heldout_label_dir.mkdir(parents=True)
+    for row in heldout_selected:
+        target_stem = f"{row['stem']}_p2hnr1_eval"
+        image_target = heldout_image_dir / f"{target_stem}.png"
+        label_target = heldout_label_dir / f"{target_stem}.txt"
+        shutil.copy2(Path(row["out_img"]), image_target)
+        label_target.write_text("")
+        end_time = pd.Timestamp(row["end_time"])
+        if end_time >= HOLDOUT_START:
+            raise ValueError("held-out hard negative touches holdout")
+        heldout_bank.append(
+            {
+                **row,
+                "stem": target_stem,
+                "sample_type": "heldout_hard_negative",
+                "image_path": str(image_target.relative_to(PROJECT)),
+                "label_path": str(label_target.relative_to(PROJECT)),
+                "image_sha256": sha256_file(image_target),
+                "label_sha256": sha256_file(label_target),
+                "selection_visibility": "evaluation_only_not_in_data_yaml",
+            }
+        )
+
     write_jsonl(out / "manifest.jsonl", p2_manifest)
     write_jsonl(out / "hard_negative_bank.jsonl", hard_bank)
+    write_jsonl(out / "heldout_hard_negative_bank.jsonl", heldout_bank)
     (out / "w20_manifest.json").write_text(json.dumps(positives, ensure_ascii=False, indent=2) + "\n")
     (out / "w20_neg_manifest.json").write_text(json.dumps(negatives, ensure_ascii=False, indent=2) + "\n")
     base_summary = read_json(base / "stageb_summary.json")
@@ -297,7 +341,8 @@ def assemble_dataset(
         "train_easy_negative": sum(row["split"] == "train" for row in negatives if row.get("kind") == "empty_bg"),
         "val_easy_negative": sum(row["split"] == "val" for row in negatives if row.get("kind") == "empty_bg"),
         "train_hard_negative": sum(row["split"] == "train" for row in hard_bank),
-        "val_hard_negative": sum(row["split"] == "val" for row in hard_bank),
+        "val_hard_negative_in_training_dataset": 0,
+        "heldout_val_hard_negative": len(heldout_bank),
     }
     summary = {
         **base_summary,
@@ -315,12 +360,14 @@ def assemble_dataset(
             "train": counts["train_positive"],
             "val": counts["val_positive"],
             "train_neg": counts["train_easy_negative"] + counts["train_hard_negative"],
-            "val_neg": counts["val_easy_negative"] + counts["val_hard_negative"],
+            "val_neg": counts["val_easy_negative"],
         },
         "n_pos_manifest": len(positives),
         "n_neg_manifest": len(negatives),
         "negative_to_positive_ratio": len(negatives) / len(positives),
         "hard_negative_share_of_negatives": len(hard_bank) / len(negatives),
+        "heldout_hard_negative_bank": "evaluation/heldout_hard_negative",
+        "heldout_used_for_early_stopping": False,
         "future_outcome_used": False,
         "holdout_read": False,
     }

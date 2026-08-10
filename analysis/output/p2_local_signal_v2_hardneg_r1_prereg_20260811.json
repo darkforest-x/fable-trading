@@ -21,7 +21,8 @@
   },
   "round1_dataset": {
     "base_rows": "all P1 B2 positives and easy negatives unchanged",
-    "addition": "all unseen candidate negatives fired by B2 at conf=0.35",
+    "addition": "all unseen train-block candidate negatives fired by B2 at conf=0.35",
+    "heldout_bank": "val-block fired negatives are copied to an evaluation-only bank and excluded from data.yaml, early stopping, and best-epoch selection",
     "hard_negative_label": "empty YOLO label; never derived from future profit/loss",
     "output": "datasets/local_signal_v2_p2_hardneg_r1"
   },
@@ -55,5 +56,10 @@
     "start_P3_judgment",
     "promote_or_deploy"
   ],
+  "prereg_amendment_before_results": {
+    "created_at": "2026-08-11T02:16:00+08:00",
+    "reason": "the original assembler exposed val-mined hard negatives to early stopping; separate them before the mining output is complete so the declared held-out evaluation remains independent",
+    "result_metrics_seen_before_amendment": false
+  },
   "holdout_read": false
 }

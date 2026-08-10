@@ -6,6 +6,7 @@ import pytest
 from scripts.build_local_signal_v2_p2_hardneg import (
     hard_negative_event_id,
     select_hard_negatives,
+    split_hard_negative_banks,
 )
 
 
@@ -43,3 +44,23 @@ def test_duplicate_candidate_stem_is_rejected():
     rows = [_candidate("a", "train", 100), _candidate("a", "train", 101)]
     with pytest.raises(ValueError, match="duplicate candidate stem"):
         select_hard_negatives(rows, {"a": [{"confidence": 0.9}]}, 0.35)
+
+
+def test_split_hard_negative_banks_keeps_val_evaluation_only():
+    train, heldout = split_hard_negative_banks(
+        [_candidate("a", "train", 100), _candidate("b", "val", 200)]
+    )
+    assert [row["stem"] for row in train] == ["a"]
+    assert [row["stem"] for row in heldout] == ["b"]
+
+
+def test_split_hard_negative_banks_rejects_unknown_split():
+    with pytest.raises(ValueError, match="unknown hard-negative splits"):
+        split_hard_negative_banks(
+            [_candidate("a", "train", 100), _candidate("b", "test", 200)]
+        )
+
+
+def test_split_hard_negative_banks_requires_both_cohorts():
+    with pytest.raises(ValueError, match="both train and held-out val"):
+        split_hard_negative_banks([_candidate("a", "train", 100)])
