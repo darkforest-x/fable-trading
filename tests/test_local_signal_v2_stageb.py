@@ -182,6 +182,9 @@ def test_3060_wrapper_ships_repository_safe_trainer_and_uses_strict_dataset():
     assert "PipelineReader" in generic
     assert "Set-Content -Path C:/fable/run_" not in generic
     assert "CommandLine='$REMOTE_CMD'" in generic
+    assert 'RUNS="$REMOTE/runs/detect/runs/detect"' in generic
+    assert "$HOST:$RUNS/$NAME/weights/best.pt" in generic
+    assert "--status --host $HOST --name $NAME" in generic
     assert "local_signal_v2_stageb_strictneg_v2" in stageb
     assert "local_signal_v2_stageb_strictneg_v2" in p0_gate
     assert "bash scripts/train_local_signal_v2_stageb_on_3060.sh" not in p0_gate

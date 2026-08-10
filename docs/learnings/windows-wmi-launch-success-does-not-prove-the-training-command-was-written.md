@@ -23,6 +23,7 @@ PowerShell 的自动变量 `$input` 是管道枚举器，不是已经拼好的�
 2. 限制 run name 只能包含字母、数字、点、下划线和连字符，避免命令注入与引用破坏。
 3. 数据解包后，在远端副本中把 `data.yaml` 的 `path:` 重写为 `C:/fable/datasets/<dataset>`；本地 YAML 保持不变。
 4. 除了检查 `ret=0`，启动后必须再次核验：Python 进程存在、日志存在且已进入 dataset scan / epoch。
+5. 不要根据 `project=` 参数猜 Ultralytics 产物目录。本机设置可能再套一层 `runs/detect`；启动后递归定位一次 `results.csv`，并让 status/fetch 共用同一个冻结的 `RUNS` 路径。
 
 ## 可复用原则
 

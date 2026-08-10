@@ -16,6 +16,7 @@ cd "$(dirname "$0")/.."
 HOST="${FABLE_3060_HOST:-}"
 REMOTE="C:/fable"
 RPY="$REMOTE/.venv/Scripts/python.exe"
+RUNS="$REMOTE/runs/detect/runs/detect"
 DATASET="datasets/dense_owner_w20_midbox"
 BASE="models/yolo11s.pt"
 NAME="owner_w20_midbox_cold"
@@ -55,7 +56,7 @@ if [[ "$MODE" == "status" ]]; then
   say "status $NAME on $HOST"
   "${SSH[@]}" "$HOST" "Get-Process python* -ErrorAction SilentlyContinue | Select-Object Id,CPU,WorkingSet | Format-Table | Out-String -Width 200" | tr -d '\r'
   "${SSH[@]}" "$HOST" "if (Test-Path C:/fable/logs/$NAME.log) { Get-Content C:/fable/logs/$NAME.log -Tail 40 } else { 'no log yet' }" | tr -d '\r'
-  "${SSH[@]}" "$HOST" "\$p='C:/fable/runs/detect/$NAME/weights/best.pt'; if (Test-Path \$p) { Get-Item \$p | Select-Object FullName,Length,LastWriteTime } else { 'no best.pt yet' }" | tr -d '\r'
+  "${SSH[@]}" "$HOST" "\$p='$RUNS/$NAME/weights/best.pt'; if (Test-Path \$p) { Get-Item \$p | Select-Object FullName,Length,LastWriteTime } else { 'no best.pt yet' }" | tr -d '\r'
   exit 0
 fi
 
@@ -112,7 +113,7 @@ printf '%s\n' "$LAUNCH_OUT"
 [[ "$LAUNCH_OUT" == *"ret=0"* ]] || die "remote WMI launch failed"
 
 echo "  started name=$NAME epochs=$EPOCHS batch=$BATCH"
-echo "  watch:  bash scripts/train_w20_midbox_on_3060.sh --status --host $HOST"
+echo "  watch:  bash scripts/train_w20_midbox_on_3060.sh --status --host $HOST --name $NAME"
 echo "  log:    ssh $HOST \"Get-Content C:\\\\fable\\\\logs\\\\$NAME.log -Tail 40\""
 echo "  fetch later:"
-echo "    scp $HOST:C:/fable/runs/detect/$NAME/weights/best.pt analysis/output/lsv2_stageb/$NAME/weights/best.pt"
+echo "    scp $HOST:$RUNS/$NAME/weights/best.pt analysis/output/lsv2_stageb/$NAME/weights/best.pt"
