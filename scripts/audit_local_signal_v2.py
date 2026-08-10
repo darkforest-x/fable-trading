@@ -36,6 +36,79 @@ from scripts.audit_w20_midbox_causality import (
 DEFAULT_DS = PROJECT / "datasets" / "local_signal_v2_stageb_strictneg_v2"
 
 
+def audit_blank_layout(
+    pos_rows: list[dict], neg_rows: list[dict], summary: dict | None
+) -> dict:
+    """Audit the opt-in Stage-B canvas layout without treating blanks as bars."""
+    declared = None if not summary else summary.get("right_blank_range")
+    target = None if not summary else summary.get("target_box_position_range")
+    if declared is None:
+        return {"applicable": False, "pass": True}
+    if not isinstance(declared, list) or len(declared) != 2:
+        return {"applicable": True, "pass": False, "reason": "invalid declaration"}
+    blank_lo, blank_hi = (int(value) for value in declared)
+    expected_support = set(range(blank_lo, blank_hi + 1))
+    pos_support = {int(row["right_blank_slots"]) for row in pos_rows}
+    neg_support = {int(row["right_blank_slots"]) for row in neg_rows}
+    positions = [float(row["box_pos_frac"]) for row in pos_rows]
+    target_lo, target_hi = (
+        (float(target[0]), float(target[1]))
+        if isinstance(target, list) and len(target) == 2
+        else (float("nan"), float("nan"))
+    )
+    edges = [target_lo + (target_hi - target_lo) * i / 4 for i in range(5)]
+    bucket_counts = [0, 0, 0, 0]
+    for position in positions:
+        for index in range(4):
+            is_last = index == 3
+            if edges[index] <= position < edges[index + 1] or (
+                is_last and position == edges[index + 1]
+            ):
+                bucket_counts[index] += 1
+                break
+    position_in_range = bool(
+        positions
+        and target_lo <= min(positions)
+        and max(positions) <= target_hi
+    )
+    support_matches = bool(
+        pos_support == expected_support and neg_support == expected_support
+    )
+    canvas_contract = bool(
+        pos_rows
+        and neg_rows
+        and all(
+            int(row["canvas_slots"])
+            == int(row["win_len"]) + int(row["right_blank_slots"])
+            for row in pos_rows + neg_rows
+        )
+        and all(int(row.get("future_bars", 0)) == 0 for row in pos_rows)
+        and summary.get("blank_slots_are_market_bars") is False
+    )
+    occupied_buckets = sum(count > 0 for count in bucket_counts)
+    result = {
+        "applicable": True,
+        "declared_blank_range": [blank_lo, blank_hi],
+        "target_box_position_range": [target_lo, target_hi],
+        "positive_blank_support": sorted(pos_support),
+        "negative_blank_support": sorted(neg_support),
+        "support_matches_declared_range": support_matches,
+        "box_position_min": min(positions) if positions else None,
+        "box_position_max": max(positions) if positions else None,
+        "position_in_target_range": position_in_range,
+        "position_bucket_counts": bucket_counts,
+        "occupied_position_buckets": occupied_buckets,
+        "canvas_slots_are_layout_only": canvas_contract,
+    }
+    result["pass"] = bool(
+        support_matches
+        and position_in_range
+        and occupied_buckets == 4
+        and canvas_contract
+    )
+    return result
+
+
 def _time_frame(rows: list[dict], *, sample_type: str) -> pd.DataFrame:
     """Return start/end timestamps for split auditing.
 
@@ -201,6 +274,7 @@ def run_audit(dataset: Path) -> dict:
         "summary_protocol": None if not summary else summary.get("protocol"),
         "causality": causality,
         "position": audit_position(pos_rows),
+        "blank_layout": audit_blank_layout(pos_rows, neg_rows, summary),
         "split": split,
         "holdout": holdout,
         "traceability": traceability,
@@ -220,6 +294,10 @@ def run_audit(dataset: Path) -> dict:
             result["traceability"]["all_samples_traceable_to_market_bar"]
         ),
     }
+    if result["blank_layout"]["applicable"]:
+        result["gates"]["causal_position_diversity"] = bool(
+            result["blank_layout"]["pass"]
+        )
     result["p0_pass"] = all(result["gates"].values())
     return result
 

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from scripts.audit_local_signal_v2 import refine_split_audit
+from scripts.audit_local_signal_v2 import audit_blank_layout, refine_split_audit
 from scripts.audit_w20_midbox_causality import (
     box_inside_decision,
     decision_bar,
@@ -66,6 +66,39 @@ def test_blank_slot_sampling_is_seeded_and_inclusive():
     assert a == b
     assert min(a) == 0
     assert max(a) == 12
+
+
+def test_blank_layout_audit_requires_full_shared_support_and_four_buckets():
+    positions = [0.66, 0.73, 0.81, 0.89]
+    positives = [
+        {
+            "right_blank_slots": blank,
+            "canvas_slots": 30 + blank,
+            "win_len": 30,
+            "future_bars": 0,
+            "box_pos_frac": positions[blank % 4],
+        }
+        for blank in range(13)
+    ]
+    negatives = [
+        {
+            "right_blank_slots": blank,
+            "canvas_slots": 30 + blank,
+            "win_len": 30,
+        }
+        for blank in range(13)
+    ]
+    summary = {
+        "right_blank_range": [0, 12],
+        "target_box_position_range": [0.65, 0.95],
+        "blank_slots_are_market_bars": False,
+    }
+    result = audit_blank_layout(positives, negatives, summary)
+    assert result["pass"]
+    assert result["occupied_position_buckets"] == 4
+
+    negatives.pop()
+    assert not audit_blank_layout(positives, negatives, summary)["pass"]
 
 
 def test_event_id_stable():
