@@ -17,8 +17,16 @@ Stage A 离线预训练：必须改变原始连续 K 线的 `crop_start_bar`，�
 - 新版冻结目标：W20–30、Mode C delay 1/2、box=`anchor-2..decision`、anchor X 四桶目标
   20%/35%/30%/15%，一 event 一 crop、时间切分 + 150 bars purge、完整窗口早于 holdout。
 
-当前停止点：先提交新版 builder/auditor，再生成 24 张左/中/右真实 K 线预览；可视化和 P0
-通过前不上传、不训练。
+新版 `local_signal_v2_stagea_randomcrop_v1` 已完成：2,378 正例 + 2,378 easy negatives；
+train 4,040、val 716。24 张独立预览按四个真实 K 线位置桶各 6 张，anchor X 为
+20%–85%，每个正框右侧仍有 1–22 根真实 K；不是右边加白。正例实际位置占比
+20.14% / 35.79% / 29.31% / 14.76%，最大偏差 0.79pp。时间切分 + 150 bars purge、
+0 holdout、0 跨 split、4,756 image/label/manifest 守恒，十道 Stage A P0 门全绿。
+同 seed 二次重建正/负 manifest SHA 分别稳定为 `ae4675a6…e89` / `0fdced5c…3f0`。
+
+当前停止点：数据与视觉门已通过，可按预注册配方启动 **Stage A 离线预训练**；训练结果仍须
+标记 `production_eligible=false`，不得 promote/forward/ACTIVE/部署。训练完成后只可作为严格
+因果 Stage B 的初始化权重。
 
 ## ⚡ 当前真相（2026-08-11 — Owner 发现 B2/P2 固定最右位置 shortcut；P2 训练已停）
 
