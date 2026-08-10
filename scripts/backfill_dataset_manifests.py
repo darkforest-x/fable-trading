@@ -153,7 +153,20 @@ def _split_of_stem(ds: Path, stem: str) -> str | None:
 
 
 def reconstruct_hardneg_rows(ds: Path) -> list[dict]:
-    """Rebuild the manifest add_w20_hardneg_pack.py never wrote, from disk."""
+    """Hard-negative rows: real manifest if present, else rebuilt from disk.
+
+    ``add_w20_hardneg_pack.py`` now writes ``w20_hardneg_manifest.json`` (fixed
+    2026-08-10). Datasets built before that fix have no such file, so their rows
+    are recovered from the stems on disk and tagged
+    ``manifest_source=reconstructed_from_disk_20260810`` — that tag means "these
+    files exist and hash to this", NOT "a rebuild reproduces them".
+    """
+    real = _load_json(ds / "w20_hardneg_manifest.json")
+    if real:
+        for r in real:
+            r.setdefault("manifest_source", "builder")
+        return real
+
     rows: list[dict] = []
     for split in ("train", "val"):
         d = ds / "images" / split
@@ -318,7 +331,9 @@ def emit_rows(ds: Path, created_at: str) -> Iterator[dict]:
                 "config_hash": hn_cfg,
                 "hard_negative_type": r.get("kind"),
                 "weak_conf": r.get("weak_conf"),
-                "manifest_source": "reconstructed_from_disk_20260810",
+                "manifest_source": r.get(
+                    "manifest_source", "reconstructed_from_disk_20260810"
+                ),
             }
         )
         yield row

@@ -41,6 +41,7 @@ from scripts.add_w20_midbox_negatives import (  # noqa: E402
     forbidden_intervals,
     overlaps_forbidden,
 )
+from scripts.build_local_signal_v2_stageb import sha256_file  # noqa: E402
 from scripts.build_w20_midbox_dataset import (  # noqa: E402
     WIN_MAX,
     WIN_MIN,
@@ -91,6 +92,30 @@ def main() -> int:
         return split_of(f"{sym}_0")
 
     made = {"dense_train": 0, "dense_val": 0, "weak_train": 0, "weak_val": 0}
+    # 2026-08-10: this script used to write only the counts in
+    # w20_hardneg_summary.json, so its 2300 samples were the one third of
+    # dense_owner_w20_midbox that no manifest could account for and had to be
+    # reverse-engineered from filenames. Record rows as we go instead. Rows are
+    # appended on the resume path too (out_img already exists) -- a manifest that
+    # empties itself on a re-run is worse than no manifest.
+    hardneg_manifest: list[dict] = []
+
+    def record(stem, sym, split, w0, win_len, kind, end_time, out_img, *, conf=None):
+        hardneg_manifest.append(
+            {
+                "stem": stem,
+                "symbol": sym,
+                "split": split,
+                "win_start": int(w0),
+                "win_len": int(win_len),
+                "kind": kind,
+                "weak_conf": conf,
+                "end_time": str(end_time),
+                "out_img": str(out_img),
+                "image_sha256": sha256_file(out_img) if out_img.exists() else None,
+                "renderer_version": "yoyo.l1_detection.render.render_chart",
+            }
+        )
     preview_n = 0
     if args.preview:
         args.preview_dir.mkdir(parents=True, exist_ok=True)
@@ -141,8 +166,10 @@ def main() -> int:
             stem = f"{sym}_{w0:06d}_w{w}_hardneg_dense"
             out_img = ds / "images" / split / f"{stem}.png"
             out_lbl = ds / "labels" / split / f"{stem}.txt"
+            end_time = win.iloc[-1].get("open_time", win.index[-1])
             if out_img.exists():
                 made[f"dense_{split}"] += 1
+                record(stem, sym, split, w0, w, "hardneg_dense", end_time, out_img)
                 break
             img, _ = render_chart(win, out_path=None)
             out_img.parent.mkdir(parents=True, exist_ok=True)
@@ -150,6 +177,7 @@ def main() -> int:
             cv2.imwrite(str(out_img), img)
             out_lbl.write_text("")
             made[f"dense_{split}"] += 1
+            record(stem, sym, split, w0, w, "hardneg_dense", end_time, out_img)
             fails = 0
             if args.preview and preview_n < args.preview:
                 vis = img.copy()
@@ -225,7 +253,9 @@ def main() -> int:
         stem = f"{sym}_{w0:06d}_w{w}_hardneg_weak_c{conf:.3f}"
         out_img = ds / "images" / split / f"{stem}.png"
         out_lbl = ds / "labels" / split / f"{stem}.txt"
+        end_time = win.iloc[-1].get("open_time", win.index[-1])
         if out_img.exists():
+            record(stem, sym, split, w0, w, "hardneg_weak", end_time, out_img, conf=conf)
             continue
         img, _ = render_chart(win, out_path=None)
         out_img.parent.mkdir(parents=True, exist_ok=True)
@@ -233,6 +263,7 @@ def main() -> int:
         cv2.imwrite(str(out_img), img)
         out_lbl.write_text("")
         made[f"weak_{split}"] += 1
+        record(stem, sym, split, w0, w, "hardneg_weak", end_time, out_img, conf=conf)
         if args.preview and preview_n < args.preview + 4:
             vis = img.copy()
             cv2.putText(
@@ -275,8 +306,12 @@ def main() -> int:
         "train": count_split("train"),
         "val": count_split("val"),
         "note": "empty labels; same render as positives; does not retrain automatically",
+        "n_hardneg_manifest": len(hardneg_manifest),
     }
     (ds / "w20_hardneg_summary.json").write_text(json.dumps(summary, indent=2))
+    (ds / "w20_hardneg_manifest.json").write_text(
+        json.dumps(hardneg_manifest, indent=2)
+    )
     print(json.dumps(summary, indent=2))
     return 0
 
