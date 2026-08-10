@@ -1,0 +1,59 @@
+{
+  "phase": "P2_hard_negative_mining_round1",
+  "created_at": "2026-08-11T02:45:00+08:00",
+  "objective": "reduce B2 false fires by adding model-mined negative windows while holding geometry, training recipe, threshold, and event ruler fixed",
+  "baseline": {
+    "dataset": "datasets/local_signal_v2_p1_b2_w30",
+    "weights": "analysis/output/p1_local_signal_v2/training/B2/weights/best.pt",
+    "window_bars": 30,
+    "threshold": 0.35,
+    "training_seed": 0,
+    "cold_start": "models/yolo11s.pt"
+  },
+  "candidate_bank": {
+    "source": "strict-time empty-background sampler used by P1",
+    "seed": 20260811,
+    "negative_candidates_per_positive": 6.0,
+    "exclude_existing_p1_negative_stems": true,
+    "mine_rule": "any B2 box with confidence >= 0.35",
+    "future_outcome_used": false,
+    "train_val_isolation": "candidate full windows must remain in their original frozen time block"
+  },
+  "round1_dataset": {
+    "base_rows": "all P1 B2 positives and easy negatives unchanged",
+    "addition": "all unseen candidate negatives fired by B2 at conf=0.35",
+    "hard_negative_label": "empty YOLO label; never derived from future profit/loss",
+    "output": "datasets/local_signal_v2_p2_hardneg_r1"
+  },
+  "training": {
+    "model": "models/yolo11s.pt",
+    "epochs": 60,
+    "patience": 15,
+    "batch": 8,
+    "seed": 0,
+    "augmentations": "same disabled flip/mosaic/mixup/hsv recipe as P1 B2"
+  },
+  "evaluation": {
+    "selected_threshold": 0.35,
+    "threshold_changed": false,
+    "common_p1_event_ruler": true,
+    "held_out_mined_hard_negatives": true,
+    "proposal_pool_replay": "same 7795-row frozen v10 proposal ledger",
+    "existing_absolute_gates": {
+      "event_precision_min": 0.5,
+      "event_recall_min": 0.5,
+      "fp_per_1000_max": 250.0
+    },
+    "density_acceptance_gate": "not_frozen_by_owner; report deltas only and do not promote"
+  },
+  "forbidden": [
+    "read_holdout",
+    "change_confidence_threshold",
+    "change_window_or_box_geometry",
+    "warm_start_from_B2",
+    "use_future_profit_as_negative_label",
+    "start_P3_judgment",
+    "promote_or_deploy"
+  ],
+  "holdout_read": false
+}
