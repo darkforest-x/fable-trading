@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>w20 shadow · 75 closed / 2 open</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 72rem; margin: 0 auto; padding: 1.2rem 1rem 3rem;
+  font: 15px/1.55 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  color:#1a1a1a; background:#f4f6f8; }
+.box { background:#fff; border:1px solid #e3e8ee; border-radius:12px; padding:1rem 1.1rem 1.4rem; }
+h1 { font-size:1.45rem; margin:0 0 .35rem; border-bottom:3px solid #1976d2; padding-bottom:.35rem; }
+.sub { color:#666; font-size:.9rem; margin-bottom:1rem; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr)); gap:.55rem; margin:0 0 1rem; }
+.card { background:#f8fafc; border:1px solid #e3e8ee; border-radius:10px; padding:.55rem .7rem; }
+.card .k { font-size:.72rem; color:#666; } .card .v { font-size:1.1rem; font-weight:700; }
+.badge { display:inline-block; padding:.12rem .45rem; border-radius:999px; font-size:.78rem; font-weight:600; background:#eef3f9; color:#174ea6; }
+table { border-collapse:collapse; width:100%; font-size:.86rem; display:block; overflow-x:auto; }
+th,td { border:1px solid #d0d7de; padding:.32rem .45rem; white-space:nowrap; text-align:left; }
+th { background:#f2f5f8; position:sticky; top:0; }
+tr.win td.num { color:#1b7f3a; font-weight:600; }
+tr.loss td.num { color:#b42318; font-weight:600; }
+tr:nth-child(even) td { background:#fafbfc; }
+.muted { color:#888; }
+h2 { font-size:1.1rem; margin:1.3rem 0 .5rem; }
+code { background:#f2f5f8; padding:.1em .3em; border-radius:4px; font-size:.85em; }
+@media (prefers-color-scheme: dark) {
+  body { color:#e6e6e6; background:#0f1215; }
+  .box { background:#171b20; border-color:#30363d; }
+  .card, th, code { background:#1c2128; border-color:#30363d; }
+  th,td { border-color:#30363d; }
+  tr:nth-child(even) td { background:#191d21; }
+  .sub,.card .k,.muted { color:#a0a8b0; }
+}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>w20 midbox hardneg · shadow 账本</h1>
+<p class="sub">生成 2026-08-10 09:50 UTC ·
+<span class="badge">execution_eligible=false</span>
+<span class="badge">不写主线 forward_log</span>
+<span class="badge">未满 100</span>
+</p>
+<div class="cards">
+  <div class="card"><div class="k">closed</div><div class="v">75 / 100</div></div>
+  <div class="card"><div class="k">open</div><div class="v">2</div></div>
+  <div class="card"><div class="k">胜率</div><div class="v">36.0%</div></div>
+  <div class="card"><div class="k">mean net bp*</div><div class="v">9.2</div></div>
+  <div class="card"><div class="k">PF*</div><div class="v">1.071</div></div>
+  <div class="card"><div class="k">outcomes</div><div class="v" style="font-size:.85rem">{&#x27;sl&#x27;: 45, &#x27;tp&#x27;: 16, &#x27;timeout&#x27;: 14}</div></div>
+</div>
+<p class="sub">* 由 <code>realized_ret</code> 汇总；与 status JSON 口径可能略有差。源：
+<code>data/forward_log_w20_midbox_shadow.csv</code> · conf≥0.30 · strategy
+<code>w20_midbox_hardneg_shadow</code></p>
+
+<h2>Open（2）</h2>
+<table>
+<thead><tr><th>#</th><th>symbol</th><th>side</th><th>signal_time</th><th>entry_time</th><th>entry_px</th><th>score</th><th>outcome</th><th>bp</th><th>status</th><th>eligible</th></tr></thead>
+<tbody>
+<tr class=''><td>1</td><td>AI_USDT_SWAP</td><td>long</td><td>2026-08-05 09:45:00+00:00</td><td>2026-08-05 10:00:00+00:00</td><td>0.021190</td><td>0.575</td><td>—</td><td class='num'>—</td><td>open</td><td class='muted'>False</td></tr>
+<tr class=''><td>2</td><td>MMT_USDT_SWAP</td><td>long</td><td>2026-08-05 06:15:00+00:00</td><td>2026-08-05 06:30:00+00:00</td><td>0.145600</td><td>0.432</td><td>—</td><td class='num'>—</td><td>open</td><td class='muted'>False</td></tr>
+</tbody>
+</table>
+
+<h2>Closed（75）· 新→旧</h2>
+<table>
+<thead><tr><th>#</th><th>symbol</th><th>side</th><th>signal_time</th><th>entry_time</th><th>entry_px</th><th>score</th><th>outcome</th><th>bp</th><th>status</th><th>eligible</th></tr></thead>
+<tbody>
+<tr class='win'><td>1</td><td>CAP_USDT_SWAP</td><td>long</td><td>2026-08-05 06:45:00+00:00</td><td>2026-08-05 07:00:00+00:00</td><td>0.026940</td><td>0.373</td><td>tp</td><td class='num'>935.9</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>2</td><td>KAITO_USDT_SWAP</td><td>long</td><td>2026-08-05 05:30:00+00:00</td><td>2026-08-05 05:45:00+00:00</td><td>0.940500</td><td>0.362</td><td>sl</td><td class='num'>-185.5</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>3</td><td>APR_USDT_SWAP</td><td>long</td><td>2026-08-05 05:15:00+00:00</td><td>2026-08-05 05:30:00+00:00</td><td>0.205000</td><td>0.510</td><td>sl</td><td class='num'>-336.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>4</td><td>LIGHT_USDT_SWAP</td><td>long</td><td>2026-08-05 04:30:00+00:00</td><td>2026-08-05 04:45:00+00:00</td><td>0.141400</td><td>0.327</td><td>sl</td><td class='num'>-216.2</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>5</td><td>MUBARAK_USDT_SWAP</td><td>long</td><td>2026-08-04 16:30:00+00:00</td><td>2026-08-04 16:45:00+00:00</td><td>0.013118</td><td>0.320</td><td>tp</td><td class='num'>486.0</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>6</td><td>IREN_USDT_SWAP</td><td>long</td><td>2026-08-04 13:30:00+00:00</td><td>2026-08-04 13:45:00+00:00</td><td>40.910000</td><td>0.459</td><td>timeout</td><td class='num'>63.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>7</td><td>BZ_USDT_SWAP</td><td>long</td><td>2026-08-04 12:00:00+00:00</td><td>2026-08-04 12:15:00+00:00</td><td>81.990000</td><td>0.357</td><td>sl</td><td class='num'>-194.3</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>8</td><td>USO_USDT_SWAP</td><td>long</td><td>2026-08-04 11:45:00+00:00</td><td>2026-08-04 12:00:00+00:00</td><td>117.500000</td><td>0.427</td><td>sl</td><td class='num'>-156.7</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>9</td><td>LQTY_USDT_SWAP</td><td>long</td><td>2026-08-04 11:00:00+00:00</td><td>2026-08-04 11:15:00+00:00</td><td>0.184300</td><td>0.401</td><td>sl</td><td class='num'>-145.0</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>10</td><td>OFC_USDT_SWAP</td><td>long</td><td>2026-08-04 10:00:00+00:00</td><td>2026-08-04 10:15:00+00:00</td><td>0.010574</td><td>0.406</td><td>sl</td><td class='num'>-182.5</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>11</td><td>ZORA_USDT_SWAP</td><td>long</td><td>2026-08-04 08:00:00+00:00</td><td>2026-08-04 08:15:00+00:00</td><td>0.005550</td><td>0.330</td><td>tp</td><td class='num'>194.3</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>12</td><td>BICO_USDT_SWAP</td><td>long</td><td>2026-08-04 08:00:00+00:00</td><td>2026-08-04 08:15:00+00:00</td><td>0.018230</td><td>0.393</td><td>sl</td><td class='num'>-579.9</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>13</td><td>SOON_USDT_SWAP</td><td>long</td><td>2026-08-04 06:45:00+00:00</td><td>2026-08-04 07:00:00+00:00</td><td>0.219000</td><td>0.406</td><td>tp</td><td class='num'>425.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>14</td><td>RECALL_USDT_SWAP</td><td>long</td><td>2026-08-04 06:30:00+00:00</td><td>2026-08-04 06:45:00+00:00</td><td>0.039930</td><td>0.361</td><td>sl</td><td class='num'>-212.5</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>15</td><td>MUU_USDT_SWAP</td><td>long</td><td>2026-08-04 05:45:00+00:00</td><td>2026-08-04 06:00:00+00:00</td><td>24.620000</td><td>0.393</td><td>tp</td><td class='num'>689.0</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>16</td><td>BLEND_USDT_SWAP</td><td>long</td><td>2026-08-04 02:15:00+00:00</td><td>2026-08-04 02:30:00+00:00</td><td>0.065720</td><td>0.404</td><td>sl</td><td class='num'>-123.3</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>17</td><td>MINIMAX_USDT_SWAP</td><td>long</td><td>2026-08-04 01:45:00+00:00</td><td>2026-08-04 02:00:00+00:00</td><td>29.380000</td><td>0.302</td><td>timeout</td><td class='num'>313.1</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>18</td><td>CFX_USDT_SWAP</td><td>long</td><td>2026-08-04 00:30:00+00:00</td><td>2026-08-04 00:45:00+00:00</td><td>0.039040</td><td>0.388</td><td>sl</td><td class='num'>-132.8</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>19</td><td>DATA_USDT_SWAP</td><td>long</td><td>2026-08-04 00:30:00+00:00</td><td>2026-08-04 00:45:00+00:00</td><td>0.221700</td><td>0.353</td><td>sl</td><td class='num'>-159.8</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>20</td><td>SOFTBANK_USDT_SWAP</td><td>long</td><td>2026-08-04 00:00:00+00:00</td><td>2026-08-04 00:15:00+00:00</td><td>34.750000</td><td>0.320</td><td>sl</td><td class='num'>-194.9</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>21</td><td>AT_USDT_SWAP</td><td>long</td><td>2026-08-03 21:30:00+00:00</td><td>2026-08-03 21:45:00+00:00</td><td>0.134100</td><td>0.315</td><td>timeout</td><td class='num'>141.7</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>22</td><td>PUMP_USDT_SWAP</td><td>long</td><td>2026-08-03 17:15:00+00:00</td><td>2026-08-03 17:30:00+00:00</td><td>0.002173</td><td>0.528</td><td>sl</td><td class='num'>-240.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>23</td><td>WLD_USDT_SWAP</td><td>long</td><td>2026-08-03 15:15:00+00:00</td><td>2026-08-03 15:30:00+00:00</td><td>0.322300</td><td>0.338</td><td>sl</td><td class='num'>-168.0</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>24</td><td>BOT_USDT_SWAP</td><td>long</td><td>2026-08-03 14:15:00+00:00</td><td>2026-08-03 14:30:00+00:00</td><td>27.250000</td><td>0.300</td><td>sl</td><td class='num'>-254.3</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>25</td><td>ZETA_USDT_SWAP</td><td>long</td><td>2026-08-03 14:00:00+00:00</td><td>2026-08-03 14:15:00+00:00</td><td>0.029290</td><td>0.354</td><td>sl</td><td class='num'>-134.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>26</td><td>INFQ_USDT_SWAP</td><td>long</td><td>2026-08-03 14:00:00+00:00</td><td>2026-08-03 14:15:00+00:00</td><td>10.330000</td><td>0.311</td><td>tp</td><td class='num'>640.0</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>27</td><td>CRWV_USDT_SWAP</td><td>long</td><td>2026-08-03 13:45:00+00:00</td><td>2026-08-03 14:00:00+00:00</td><td>80.590000</td><td>0.469</td><td>tp</td><td class='num'>793.3</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>28</td><td>UP_USDT_SWAP</td><td>long</td><td>2026-08-03 13:15:00+00:00</td><td>2026-08-03 13:30:00+00:00</td><td>0.332000</td><td>0.404</td><td>tp</td><td class='num'>238.8</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>29</td><td>RAM_USDT_SWAP</td><td>long</td><td>2026-08-03 08:30:00+00:00</td><td>2026-08-03 08:45:00+00:00</td><td>10.440000</td><td>0.503</td><td>sl</td><td class='num'>-261.4</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>30</td><td>WOO_USDT_SWAP</td><td>long</td><td>2026-08-03 06:00:00+00:00</td><td>2026-08-03 06:15:00+00:00</td><td>0.011600</td><td>0.391</td><td>timeout</td><td class='num'>-103.4</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>31</td><td>RLS_USDT_SWAP</td><td>long</td><td>2026-08-03 03:30:00+00:00</td><td>2026-08-03 03:45:00+00:00</td><td>0.001721</td><td>0.366</td><td>sl</td><td class='num'>-156.1</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>32</td><td>S_USDT_SWAP</td><td>long</td><td>2026-08-03 02:45:00+00:00</td><td>2026-08-03 03:00:00+00:00</td><td>0.022080</td><td>0.403</td><td>sl</td><td class='num'>-110.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>33</td><td>RESOLV_USDT_SWAP</td><td>long</td><td>2026-08-03 02:45:00+00:00</td><td>2026-08-03 03:00:00+00:00</td><td>0.015640</td><td>0.530</td><td>timeout</td><td class='num'>262.1</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>34</td><td>GIGGLE_USDT_SWAP</td><td>long</td><td>2026-08-03 01:30:00+00:00</td><td>2026-08-03 01:45:00+00:00</td><td>39.620000</td><td>0.370</td><td>tp</td><td class='num'>1094.3</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>35</td><td>STRK_USDT_SWAP</td><td>long</td><td>2026-08-02 22:15:00+00:00</td><td>2026-08-02 22:30:00+00:00</td><td>0.025160</td><td>0.341</td><td>tp</td><td class='num'>217.2</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>36</td><td>ZRO_USDT_SWAP</td><td>long</td><td>2026-08-02 16:15:00+00:00</td><td>2026-08-02 16:30:00+00:00</td><td>0.737200</td><td>0.303</td><td>sl</td><td class='num'>-141.1</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>37</td><td>PROS_USDT_SWAP</td><td>long</td><td>2026-08-02 15:30:00+00:00</td><td>2026-08-02 15:45:00+00:00</td><td>0.433400</td><td>0.374</td><td>sl</td><td class='num'>-191.8</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>38</td><td>KAITO_USDT_SWAP</td><td>long</td><td>2026-08-02 14:15:00+00:00</td><td>2026-08-02 14:30:00+00:00</td><td>1.080000</td><td>0.422</td><td>sl</td><td class='num'>-422.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>39</td><td>NES_USDT_SWAP</td><td>long</td><td>2026-08-02 13:00:00+00:00</td><td>2026-08-02 13:15:00+00:00</td><td>0.213300</td><td>0.302</td><td>sl</td><td class='num'>-92.4</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>40</td><td>TTMI_USDT_SWAP</td><td>long</td><td>2026-08-02 12:00:00+00:00</td><td>2026-08-02 12:15:00+00:00</td><td>112.070000</td><td>0.469</td><td>tp</td><td class='num'>573.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>41</td><td>ONDO_USDT_SWAP</td><td>long</td><td>2026-08-02 04:00:00+00:00</td><td>2026-08-02 04:15:00+00:00</td><td>0.392300</td><td>0.343</td><td>sl</td><td class='num'>-134.7</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>42</td><td>TIA_USDT_SWAP</td><td>long</td><td>2026-08-02 03:15:00+00:00</td><td>2026-08-02 03:30:00+00:00</td><td>0.328600</td><td>0.367</td><td>timeout</td><td class='num'>85.2</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>43</td><td>USELESS_USDT_SWAP</td><td>long</td><td>2026-08-02 03:00:00+00:00</td><td>2026-08-02 03:15:00+00:00</td><td>0.051520</td><td>0.483</td><td>sl</td><td class='num'>-236.0</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>44</td><td>LIT_USDT_SWAP</td><td>long</td><td>2026-08-02 03:00:00+00:00</td><td>2026-08-02 03:15:00+00:00</td><td>2.094900</td><td>0.564</td><td>sl</td><td class='num'>-182.3</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>45</td><td>AXTI_USDT_SWAP</td><td>long</td><td>2026-08-02 02:15:00+00:00</td><td>2026-08-02 02:30:00+00:00</td><td>62.280000</td><td>0.461</td><td>sl</td><td class='num'>-208.7</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>46</td><td>RAM_USDT_SWAP</td><td>long</td><td>2026-08-02 02:15:00+00:00</td><td>2026-08-02 02:30:00+00:00</td><td>10.710000</td><td>0.316</td><td>timeout</td><td class='num'>140.1</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>47</td><td>YFI_USDT_SWAP</td><td>long</td><td>2026-08-02 02:00:00+00:00</td><td>2026-08-02 02:15:00+00:00</td><td>2098.000000</td><td>0.424</td><td>tp</td><td class='num'>229.8</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>48</td><td>MEW_USDT_SWAP</td><td>long</td><td>2026-08-02 02:00:00+00:00</td><td>2026-08-02 02:15:00+00:00</td><td>0.000341</td><td>0.405</td><td>timeout</td><td class='num'>8.8</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>49</td><td>BEAT_USDT_SWAP</td><td>long</td><td>2026-08-02 01:30:00+00:00</td><td>2026-08-02 01:45:00+00:00</td><td>4.149300</td><td>0.428</td><td>sl</td><td class='num'>-678.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>50</td><td>ARX_USDT_SWAP</td><td>long</td><td>2026-08-02 01:00:00+00:00</td><td>2026-08-02 01:15:00+00:00</td><td>0.159800</td><td>0.318</td><td>sl</td><td class='num'>-208.3</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>51</td><td>LIGHT_USDT_SWAP</td><td>long</td><td>2026-08-02 00:45:00+00:00</td><td>2026-08-02 01:00:00+00:00</td><td>0.151000</td><td>0.391</td><td>sl</td><td class='num'>-234.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>52</td><td>RLS_USDT_SWAP</td><td>long</td><td>2026-08-01 23:00:00+00:00</td><td>2026-08-01 23:15:00+00:00</td><td>0.001710</td><td>0.500</td><td>sl</td><td class='num'>-140.4</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>53</td><td>ALLO_USDT_SWAP</td><td>long</td><td>2026-08-01 18:45:00+00:00</td><td>2026-08-01 19:00:00+00:00</td><td>0.275670</td><td>0.376</td><td>sl</td><td class='num'>-173.1</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>54</td><td>DOOD_USDT_SWAP</td><td>long</td><td>2026-08-01 17:45:00+00:00</td><td>2026-08-01 18:00:00+00:00</td><td>0.001279</td><td>0.315</td><td>sl</td><td class='num'>-118.4</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>55</td><td>OSCR_USDT_SWAP</td><td>long</td><td>2026-08-01 16:00:00+00:00</td><td>2026-08-01 16:15:00+00:00</td><td>31.810000</td><td>0.461</td><td>sl</td><td class='num'>-113.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>56</td><td>TSEM_USDT_SWAP</td><td>long</td><td>2026-08-01 14:15:00+00:00</td><td>2026-08-01 14:30:00+00:00</td><td>223.490000</td><td>0.331</td><td>sl</td><td class='num'>-89.4</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>57</td><td>KGEN_USDT_SWAP</td><td>long</td><td>2026-08-01 14:00:00+00:00</td><td>2026-08-01 14:15:00+00:00</td><td>0.182900</td><td>0.398</td><td>timeout</td><td class='num'>-60.1</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>58</td><td>NES_USDT_SWAP</td><td>long</td><td>2026-08-01 12:30:00+00:00</td><td>2026-08-01 12:45:00+00:00</td><td>0.214000</td><td>0.384</td><td>sl</td><td class='num'>-158.2</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>59</td><td>KAITO_USDT_SWAP</td><td>long</td><td>2026-08-01 12:30:00+00:00</td><td>2026-08-01 12:45:00+00:00</td><td>1.108800</td><td>0.338</td><td>tp</td><td class='num'>607.5</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>60</td><td>ENSO_USDT_SWAP</td><td>long</td><td>2026-08-01 11:00:00+00:00</td><td>2026-08-01 11:15:00+00:00</td><td>0.862800</td><td>0.410</td><td>timeout</td><td class='num'>382.5</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>61</td><td>CAP_USDT_SWAP</td><td>long</td><td>2026-08-01 10:30:00+00:00</td><td>2026-08-01 10:45:00+00:00</td><td>0.035460</td><td>0.461</td><td>sl</td><td class='num'>-456.4</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>62</td><td>TRUTH_USDT_SWAP</td><td>long</td><td>2026-08-01 09:30:00+00:00</td><td>2026-08-01 09:45:00+00:00</td><td>0.012274</td><td>0.488</td><td>timeout</td><td class='num'>98.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>63</td><td>RE_USDT_SWAP</td><td>long</td><td>2026-08-01 09:15:00+00:00</td><td>2026-08-01 09:30:00+00:00</td><td>0.450280</td><td>0.316</td><td>sl</td><td class='num'>-161.9</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>64</td><td>ENA_USDT_SWAP</td><td>long</td><td>2026-08-01 07:45:00+00:00</td><td>2026-08-01 08:00:00+00:00</td><td>0.081090</td><td>0.347</td><td>sl</td><td class='num'>-80.9</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>65</td><td>ZAMA_USDT_SWAP</td><td>long</td><td>2026-08-01 02:15:00+00:00</td><td>2026-08-01 02:30:00+00:00</td><td>0.054770</td><td>0.450</td><td>sl</td><td class='num'>-271.3</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>66</td><td>BEAT_USDT_SWAP</td><td>long</td><td>2026-08-01 01:30:00+00:00</td><td>2026-08-01 01:45:00+00:00</td><td>4.347800</td><td>0.377</td><td>tp</td><td class='num'>922.5</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>67</td><td>SOFTBANK_USDT_SWAP</td><td>long</td><td>2026-07-31 20:45:00+00:00</td><td>2026-07-31 21:00:00+00:00</td><td>31.460000</td><td>0.500</td><td>sl</td><td class='num'>-137.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>68</td><td>FLOW_USDT_SWAP</td><td>long</td><td>2026-07-31 17:00:00+00:00</td><td>2026-07-31 17:15:00+00:00</td><td>0.028020</td><td>0.365</td><td>tp</td><td class='num'>369.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>69</td><td>MEW_USDT_SWAP</td><td>long</td><td>2026-07-31 16:45:00+00:00</td><td>2026-07-31 17:00:00+00:00</td><td>0.000334</td><td>0.337</td><td>sl</td><td class='num'>-120.3</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>70</td><td>BNB_USDT_SWAP</td><td>long</td><td>2026-07-31 15:15:00+00:00</td><td>2026-07-31 15:30:00+00:00</td><td>584.300000</td><td>0.307</td><td>timeout</td><td class='num'>8.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>71</td><td>RESOLV_USDT_SWAP</td><td>long</td><td>2026-07-31 15:15:00+00:00</td><td>2026-07-31 15:30:00+00:00</td><td>0.015690</td><td>0.450</td><td>timeout</td><td class='num'>140.2</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>72</td><td>QCOM_USDT_SWAP</td><td>long</td><td>2026-07-31 14:15:00+00:00</td><td>2026-07-31 14:30:00+00:00</td><td>149.140000</td><td>0.383</td><td>timeout</td><td class='num'>-122.0</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>73</td><td>KAITO_USDT_SWAP</td><td>long</td><td>2026-07-31 12:30:00+00:00</td><td>2026-07-31 12:45:00+00:00</td><td>1.082000</td><td>0.385</td><td>sl</td><td class='num'>-274.4</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='win'><td>74</td><td>UP_USDT_SWAP</td><td>long</td><td>2026-07-31 06:45:00+00:00</td><td>2026-07-31 07:00:00+00:00</td><td>0.315200</td><td>0.339</td><td>tp</td><td class='num'>362.6</td><td>closed</td><td class='muted'>False</td></tr>
+<tr class='loss'><td>75</td><td>LRC_USDT_SWAP</td><td>long</td><td>2026-07-13 06:00:00+00:00</td><td>2026-07-13 06:15:00+00:00</td><td>0.011380</td><td>0.450</td><td>sl</td><td class='num'>-274.9</td><td>closed</td><td class='muted'>False</td></tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

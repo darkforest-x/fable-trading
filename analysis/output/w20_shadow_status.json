@@ -1,0 +1,39 @@
+{
+  "updated_at": "2026-08-07T09:22:45.548803+00:00",
+  "shadow": true,
+  "execution_eligible": false,
+  "active_untouched": true,
+  "owner_best_untouched": true,
+  "mainline_forward_log_untouched": true,
+  "weights": "/Users/zhangzc/fable-trading/analysis/output/w20_overnight/cycle_hardneg_c1/weights/best.pt",
+  "conf": 0.3,
+  "window": 24,
+  "log_path": "/Users/zhangzc/fable-trading/data/forward_log_w20_midbox_shadow.csv",
+  "pulse": {
+    "new_signals": 77,
+    "closed_updates": 0,
+    "series": 311
+  },
+  "book": {
+    "n_rows": 77,
+    "n_open": 2,
+    "n_closed": 75,
+    "closed_toward_100": 75,
+    "mean_net_bp": 3.22,
+    "win_rate": 0.36,
+    "profit_factor": 1.024,
+    "outcomes": {
+      "sl": 45,
+      "tp": 16,
+      "timeout": 14
+    }
+  },
+  "gate": {
+    "target_closed": 100,
+    "closed": 75,
+    "remaining": 25,
+    "ready_for_verdict": false
+  },
+  "protocol": "w20_midbox_shadow_detector_only_20260807",
+  "strategy_id": "w20_midbox_hardneg_shadow"
+}

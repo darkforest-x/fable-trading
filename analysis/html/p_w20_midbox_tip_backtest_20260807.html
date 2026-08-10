@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>w20 midbox tip 回测裁决 — 2026-08-07</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>w20 midbox tip 回测裁决 — 2026-08-07</h1>
+<blockquote>Owner 2026-08-07 明确批准：ATR 障碍 TP/SL + 全市场 tip 扫描 + matched control 置换 + <strong>holdout</strong>。</blockquote>
+<h2>一句话</h2>
+<p>见下方 pre-holdout / holdout 表；检测器权重为 cold yolo11s 训在 <code>dense_owner_w20_midbox</code> 的 best.pt。</p>
+<h2>协议（固定）</h2>
+<ul>
+<li>权重：<code>/Users/zhangzc/fable-trading/analysis/output/w20_overnight/cycle_0_owner_w20_midbox_cold/weights/best.pt</code></li>
+<li>Tip 窗：W=24 右对齐 tip；全历史算 MA 后切片渲染</li>
+<li>conf≥0.15；框右缘落在 tip/tip-1（TIP_EDGE=2）</li>
+<li>同币 MIN_GAP=18 bar 去重</li>
+<li>入场：信号 bar 的下一根 open</li>
+<li>障碍：TP=5×ATR14 / SL=2×ATR14 / 72 bar 超时；同 bar 双触 → SL</li>
+<li>成本：maker 往返 FORWARD_COST</li>
+<li>tip-stride=2（每隔一根 tip 扫描，诚实声明：非每一根，速度折中）</li>
+<li>matched control：同币 × UTC 月 × atr_pct 五分位随机入场，同障碍同成本</li>
+<li>置换：UTC-week 整周 sign-flip，n=2000，双侧 p</li>
+</ul>
+<p>tip_replay W=24 conf&gt;=0.15 edge&gt;=22; entry t+1 open; TP5.0/SL2.0/H72; cost=0.0006; MIN_GAP=18; matched control symbol×month×atr_q; week sign-flip perm n=2000</p>
+<h2>Holdout 消耗登记</h2>
+<ul>
+<li><strong>配置名</strong>：<code>w20_midbox_tip_replay_W24_c0.15</code></li>
+<li><strong>这是该配置第 1 次消耗 holdout</strong>（Owner 2026-08-07 对话明确批准执行 holdout）</li>
+<li>holdout 起点：≥2026-05-04 UTC</li>
+<li>未改 ACTIVE / 未下单 / 未改障碍默认</li>
+</ul>
+<h2>Pre-holdout（训练侧外推窗）</h2>
+<table><thead><tr>
+<th>指标</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>区间</td><td>2026-03-01..2026-05-03</td></tr>
+<tr><td>币种数</td><td>311</td></tr>
+<tr><td>扫描 tip 数</td><td>687544</td></tr>
+<tr><td>原始开火</td><td>19557 (28.445 /1k bars)</td></tr>
+<tr><td>入账成交</td><td><strong>10713</strong></td></tr>
+<tr><td>胜率</td><td>0.3255</td></tr>
+<tr><td>利润因子 PF</td><td>1.006</td></tr>
+<tr><td>毛均收益</td><td>+6.6 bp</td></tr>
+<tr><td>净均收益（扣 maker RT）</td><td><strong>+0.6 bp</strong></td></tr>
+<tr><td>合计净收益（单位仓）</td><td>0.62746</td></tr>
+<tr><td>结局分布</td><td><code>{&#x27;sl&#x27;: 6972, &#x27;tp&#x27;: 2800, &#x27;timeout&#x27;: 941}</code></td></tr>
+<tr><td>matched 对数</td><td>10713</td></tr>
+<tr><td>matched lift</td><td><strong>+4.9 bp</strong> (se +2.6)</td></tr>
+<tr><td>UTC-week 置换 p</td><td><strong>0.5202</strong></td></tr>
+<tr><td>成本</td><td>0.0006</td></tr>
+<tr><td>holdout</td><td>pre-holdout only</td></tr>
+</tbody></table>
+<h2>Holdout（第 1 次消耗）</h2>
+<table><thead><tr>
+<th>指标</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>区间</td><td>2026-05-04..2026-07-01</td></tr>
+<tr><td>币种数</td><td>311</td></tr>
+<tr><td>扫描 tip 数</td><td>747227</td></tr>
+<tr><td>原始开火</td><td>21839 (29.227 /1k bars)</td></tr>
+<tr><td>入账成交</td><td><strong>12141</strong></td></tr>
+<tr><td>胜率</td><td>0.2973</td></tr>
+<tr><td>利润因子 PF</td><td>0.836</td></tr>
+<tr><td>毛均收益</td><td>-12.6 bp</td></tr>
+<tr><td>净均收益（扣 maker RT）</td><td><strong>-18.6 bp</strong></td></tr>
+<tr><td>合计净收益（单位仓）</td><td>-22.57943</td></tr>
+<tr><td>结局分布</td><td><code>{&#x27;sl&#x27;: 8282, &#x27;tp&#x27;: 2818, &#x27;timeout&#x27;: 1041}</code></td></tr>
+<tr><td>matched 对数</td><td>12141</td></tr>
+<tr><td>matched lift</td><td><strong>+2.6 bp</strong> (se +2.6)</td></tr>
+<tr><td>UTC-week 置换 p</td><td><strong>0.7806</strong></td></tr>
+<tr><td>成本</td><td>0.0006</td></tr>
+<tr><td>holdout</td><td>w20_midbox tip-replay config holdout consumption #1; owner approved 2026-08-07 chat</td></tr>
+</tbody></table>
+<h2>解读</h2>
+<ul>
+<li><strong>Pre-holdout</strong>：n=10713，净 +0.6 bp/笔，matched lift +4.9 bp，perm p=0.5202</li>
+<li><strong>Holdout</strong>：n=12141，净 -18.6 bp/笔，matched lift +2.6 bp，perm p=0.7806 → <strong>净亏</strong>；检测器 tip 入场未证明成本后 edge</li>
+</ul>
+<h2>风险与诚实声明</h2>
+<p>1. tip-stride=2：不是每一根 tip 都扫，可能漏掉半个相位上的信号；密度与收益都可能有偏。</p>
+<p>2. W=24 是训练窗 20–30 的中位折中；若最优推理窗不同，本结果不可直接外推。</p>
+<p>3. matched control 用月×波动桶，不是完整共时市场组合回测。</p>
+<p>4. holdout 已消耗 1 次；同配置再读 holdout 必须重新获批并记第 N 次。</p>
+<p>5. 未 promote、未部署、未真下单。</p>
+<h2>复现</h2>
+<pre><code>
+PYTHONPATH=.:../yoyo-trading .venv/bin/python scripts/backtest_w20_midbox_tip.py \
+  --weights analysis/output/w20_overnight/cycle_0_owner_w20_midbox_cold/weights/best.pt \
+  --start 2026-03-01 --end 2026-05-03 --tip-stride 2 --tag w20_tip_preholdout --device mps
+
+PYTHONPATH=.:../yoyo-trading .venv/bin/python scripts/backtest_w20_midbox_tip.py \
+  --weights analysis/output/w20_overnight/cycle_0_owner_w20_midbox_cold/weights/best.pt \
+  --start 2026-05-04 --end 2026-07-01 --tip-stride 2 \
+  --allow-holdout --holdout-n 1 --tag w20_tip_holdout --device mps
+</code></pre>
+<h2>产物</h2>
+<ul>
+<li><code>analysis/output/w20_tip_preholdout.json</code> / <code>_trades.csv</code> / <code>_matched.csv</code></li>
+<li><code>analysis/output/w20_tip_holdout.json</code> / <code>_trades.csv</code> / <code>_matched.csv</code></li>
+<li>本报告 + HTML</li>
+</ul>
+<p>生成于 {datetime.now(timezone.utc).isoformat()}</p>
+</body>
+</html>

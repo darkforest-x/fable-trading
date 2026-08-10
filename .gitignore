@@ -9,6 +9,8 @@ runs/
 # 07-23 一道清除指令就永久没了，git 里连找回的余地都没有。COCO 底座
 # (yolo11*.pt) 仍然忽略：那是 ultralytics 的公开文件，随时能下回来。
 !models/owner_*.pt
+# 2026-08-10: analysis 路径下的自训 best/last 也入库（w20 / lsv2 StageB）
+!analysis/output/**/weights/*.pt
 
 # Python
 __pycache__/

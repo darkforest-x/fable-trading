@@ -1,0 +1,67 @@
+{
+  "summary": {
+    "n_trades": 11,
+    "win_rate": 0.1818,
+    "profit_factor": 0.266,
+    "mean_gross_bp": -149.01,
+    "mean_net_bp": -155.01,
+    "total_net_units": -0.17051,
+    "outcomes": {
+      "sl": 8,
+      "tp": 2,
+      "timeout": 1
+    },
+    "matched_n": 11,
+    "matched_lift_bp": -241.41,
+    "matched_lift_se_bp": 126.31,
+    "perm_p": 0.5087,
+    "ctrl_meta": {
+      "n_pairs": 11,
+      "n_miss": 0,
+      "edges": [
+        -Infinity,
+        Infinity
+      ]
+    },
+    "tag": "w20_smoke2",
+    "weights": "/Users/zhangzc/fable-trading/analysis/output/w20_overnight/cycle_0_owner_w20_midbox_cold/weights/best.pt",
+    "window_bars": 24,
+    "conf": 0.15,
+    "tip_stride": 4,
+    "tip_edge_bars": 2,
+    "protocol": "tip_replay W=24 conf>=0.15 edge>=22; entry t+1 open; TP5.0/SL2.0/H72; cost=0.0006; MIN_GAP=18; matched control symbol×month×atr_q; week sign-flip perm n=2000",
+    "range": "2026-04-15..2026-04-25",
+    "n_symbols": 3,
+    "bars_scanned": 530,
+    "fired_raw": 19,
+    "fire_per_1k_bars": 35.849,
+    "cost": 0.0006,
+    "holdout_touched": false,
+    "holdout_consumption_n": 0,
+    "holdout_note": "pre-holdout only",
+    "generated_at": "2026-08-07T00:22:26.920489+00:00",
+    "by_segment": {
+      "preholdout": {
+        "n_trades": 11,
+        "win_rate": 0.1818,
+        "profit_factor": 0.266,
+        "mean_gross_bp": -149.01,
+        "mean_net_bp": -155.01,
+        "total_net_units": -0.17051,
+        "outcomes": {
+          "sl": 8,
+          "tp": 2,
+          "timeout": 1
+        },
+        "matched_n": 11,
+        "matched_lift_bp": -241.41,
+        "matched_lift_se_bp": 126.31,
+        "perm_p": 0.5177,
+        "ctrl_meta": {
+          "n_pairs": 11
+        }
+      }
+    }
+  },
+  "trades_n": 11
+}

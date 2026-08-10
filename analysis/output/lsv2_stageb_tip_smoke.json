@@ -1,0 +1,71 @@
+{
+  "summary": {
+    "n_trades": 10730,
+    "win_rate": 0.346,
+    "profit_factor": 1.116,
+    "mean_gross_bp": 16.05,
+    "mean_net_bp": 10.05,
+    "total_net_units": 10.78362,
+    "outcomes": {
+      "sl": 6827,
+      "tp": 3140,
+      "timeout": 763
+    },
+    "matched_n": 10730,
+    "matched_lift_bp": 5.4,
+    "matched_lift_se_bp": 2.8,
+    "perm_p": 0.6142,
+    "ctrl_meta": {
+      "n_pairs": 10730,
+      "n_miss": 0,
+      "edges": [
+        -Infinity,
+        0.00347250550981014,
+        0.004524651640153164,
+        0.005732978994040904,
+        0.008025363076745052,
+        Infinity
+      ]
+    },
+    "tag": "lsv2_stageb_tip_smoke",
+    "weights": "/Users/zhangzc/fable-trading/analysis/output/lsv2_stageb/owner_lsv2_stageb_cold/weights/best.pt",
+    "window_bars": 24,
+    "conf": 0.3,
+    "tip_stride": 2,
+    "tip_edge_bars": 2,
+    "protocol": "tip_replay W=24 conf>=0.3 edge>=22; entry t+1 open; TP5.0/SL2.0/H72; cost=0.0006; MIN_GAP=18; matched control symbol×month×atr_q; week sign-flip perm n=2000",
+    "range": "2026-04-01..2026-04-25",
+    "n_symbols": 311,
+    "bars_scanned": 271899,
+    "fired_raw": 52405,
+    "fire_per_1k_bars": 192.737,
+    "cost": 0.0006,
+    "holdout_touched": false,
+    "holdout_consumption_n": 0,
+    "holdout_note": "pre-holdout only",
+    "generated_at": "2026-08-07T12:51:38.390721+00:00",
+    "by_segment": {
+      "preholdout": {
+        "n_trades": 10730,
+        "win_rate": 0.346,
+        "profit_factor": 1.116,
+        "mean_gross_bp": 16.05,
+        "mean_net_bp": 10.05,
+        "total_net_units": 10.78362,
+        "outcomes": {
+          "sl": 6827,
+          "tp": 3140,
+          "timeout": 763
+        },
+        "matched_n": 10730,
+        "matched_lift_bp": 5.4,
+        "matched_lift_se_bp": 2.8,
+        "perm_p": 0.6132,
+        "ctrl_meta": {
+          "n_pairs": 10730
+        }
+      }
+    }
+  },
+  "trades_n": 10730
+}

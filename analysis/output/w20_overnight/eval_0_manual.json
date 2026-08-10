@@ -1,0 +1,91 @@
+{
+  "weights": "/Users/zhangzc/fable-trading/analysis/output/w20_overnight/cycle_0_owner_w20_midbox_cold/weights/best.pt",
+  "curve": {
+    "ok": true,
+    "n_epochs": 60,
+    "best_epoch": 50,
+    "peak_map50": 0.2812,
+    "last_map50": 0.2355,
+    "collapse_frac": 0.0
+  },
+  "detector": {
+    "best": {
+      "conf": 0.15,
+      "f1": 0.403,
+      "p": 0.3546,
+      "r": 0.4667,
+      "tp": 189,
+      "fp": 344,
+      "fn": 216,
+      "neg_fp_rate": 0.1259,
+      "n_pos": 405,
+      "n_neg": 405
+    },
+    "sweep": [
+      {
+        "conf": 0.15,
+        "f1": 0.403,
+        "p": 0.3546,
+        "r": 0.4667,
+        "tp": 189,
+        "fp": 344,
+        "fn": 216,
+        "neg_fp_rate": 0.1259,
+        "n_pos": 405,
+        "n_neg": 405
+      },
+      {
+        "conf": 0.25,
+        "f1": 0.2632,
+        "p": 0.5512,
+        "r": 0.1728,
+        "tp": 70,
+        "fp": 57,
+        "fn": 335,
+        "neg_fp_rate": 0.0346,
+        "n_pos": 405,
+        "n_neg": 405
+      },
+      {
+        "conf": 0.35,
+        "f1": 0.1306,
+        "p": 0.7436,
+        "r": 0.0716,
+        "tp": 29,
+        "fp": 10,
+        "fn": 376,
+        "neg_fp_rate": 0.0074,
+        "n_pos": 405,
+        "n_neg": 405
+      },
+      {
+        "conf": 0.45,
+        "f1": 0.0337,
+        "p": 0.7,
+        "r": 0.0173,
+        "tp": 7,
+        "fp": 3,
+        "fn": 398,
+        "neg_fp_rate": 0.0,
+        "n_pos": 405,
+        "n_neg": 405
+      }
+    ]
+  },
+  "econ": {
+    "ok": true,
+    "n_hit": 237,
+    "hit_mean_ret_12bar": 0.00454,
+    "ctrl_mean_ret_12bar": 0.00031,
+    "lift": 0.00423,
+    "horizon_bars": 12,
+    "cost": 0.0015,
+    "conf": 0.15
+  },
+  "action": "PASS",
+  "reason": "f1=0.403_neg_fp=0.126",
+  "gates": {
+    "MIN_VAL_F1": 0.28,
+    "MAX_NEG_FP_RATE": 0.2
+  }
+}

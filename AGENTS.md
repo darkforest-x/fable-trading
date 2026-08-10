@@ -71,6 +71,9 @@
   检测器自己只值 +9.0bp 而往返成本 10bp。见 `docs/learnings/pool-internal-metrics-cannot-see-beta.md`。
 - **拿人工标注当天然可学习的目标** → 先量「标注时可见多少未来」：499 个 ⭐标杆里
   只有 2 个画在盘口，中位可见 97 根。见 `docs/learnings/zero-live-edge-labels-means-the-target-is-unverified.md`。
+- **把窗口缩短当成因果化** → 决定看得见多少未来的是**窗口右端落在哪根**，不是窗口有多长。
+  w20_midbox 从 200 根缩到 20–30 根，95.3% 的样本窗口右端仍晚于 decision bar（中位 9 根未来 K）。
+  见 `docs/learnings/window-length-does-not-control-future-visibility.md`。
 - **改一道新鲜度门忘了另两道** → 三门必须同值，见实盘纪律 7。
 - **往脉冲里塞实验扫描** → 超 15min 节拍 = 结构性挡 tip；见实盘纪律 8。
 - **自动 promote / 清 forward_log** → 禁止；owner 点头。

@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-08-06T16:57:05.348688+00:00",
+  "protocol": "mid_bar_pm_2_3_random_window_20_30",
+  "src": "/Users/zhangzc/fable-trading/datasets/dense_owner_v14_pad200",
+  "out": "/Users/zhangzc/fable-trading/datasets/dense_owner_w20_midbox",
+  "seed": 20260807,
+  "augs": 1,
+  "counts": {
+    "train": 2230,
+    "val": 405
+  },
+  "skip_reasons": {},
+  "n_manifest": 2635,
+  "win_min": 20,
+  "win_max": 30,
+  "half_choices": [
+    2,
+    3
+  ],
+  "split_rule": "sha1('w20_midbox_v1|'+symbol) % 5 == 0 \u2192 val (salted; pad200 symbols are global-train-only)",
+  "moved": {
+    "train_stay": 2230,
+    "to_val": 405
+  }
+}

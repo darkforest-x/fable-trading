@@ -1,0 +1,219 @@
+{
+  "val_composition": {
+    "pos": 405,
+    "empty_bg": 405,
+    "hardneg": 553
+  },
+  "cold": {
+    "tag": "cold_v1",
+    "weights": "/Users/zhangzc/fable-trading/analysis/output/w20_overnight/cycle_0_owner_w20_midbox_cold/weights/best.pt",
+    "sweep": [
+      {
+        "conf": 0.15,
+        "f1": 0.2955,
+        "p": 0.2162,
+        "r": 0.4667,
+        "tp": 189,
+        "fp": 685,
+        "fn": 216,
+        "neg_fp_rate": 0.3706,
+        "empty_fp_rate": 0.1259,
+        "hard_fp_rate": 0.5497
+      },
+      {
+        "conf": 0.2,
+        "f1": 0.2693,
+        "p": 0.267,
+        "r": 0.2716,
+        "tp": 110,
+        "fp": 302,
+        "fn": 295,
+        "neg_fp_rate": 0.1973,
+        "empty_fp_rate": 0.0716,
+        "hard_fp_rate": 0.2893
+      },
+      {
+        "conf": 0.25,
+        "f1": 0.2381,
+        "p": 0.3825,
+        "r": 0.1728,
+        "tp": 70,
+        "fp": 113,
+        "fn": 335,
+        "neg_fp_rate": 0.0731,
+        "empty_fp_rate": 0.0346,
+        "hard_fp_rate": 0.1013
+      },
+      {
+        "conf": 0.3,
+        "f1": 0.1891,
+        "p": 0.6338,
+        "r": 0.1111,
+        "tp": 45,
+        "fp": 26,
+        "fn": 360,
+        "neg_fp_rate": 0.0104,
+        "empty_fp_rate": 0.0148,
+        "hard_fp_rate": 0.0072
+      },
+      {
+        "conf": 0.35,
+        "f1": 0.13,
+        "p": 0.7073,
+        "r": 0.0716,
+        "tp": 29,
+        "fp": 12,
+        "fn": 376,
+        "neg_fp_rate": 0.0052,
+        "empty_fp_rate": 0.0074,
+        "hard_fp_rate": 0.0036
+      },
+      {
+        "conf": 0.45,
+        "f1": 0.0337,
+        "p": 0.7,
+        "r": 0.0173,
+        "tp": 7,
+        "fp": 3,
+        "fn": 398,
+        "neg_fp_rate": 0.0,
+        "empty_fp_rate": 0.0,
+        "hard_fp_rate": 0.0
+      }
+    ],
+    "n_pos": 405,
+    "n_neg": 958,
+    "n_empty": 405,
+    "n_hard": 553
+  },
+  "hardneg_c1": {
+    "tag": "hardneg_c1",
+    "weights": "/Users/zhangzc/fable-trading/analysis/output/w20_overnight/cycle_hardneg_c1/weights/best.pt",
+    "sweep": [
+      {
+        "conf": 0.15,
+        "f1": 0.4087,
+        "p": 0.3405,
+        "r": 0.5111,
+        "tp": 207,
+        "fp": 401,
+        "fn": 198,
+        "neg_fp_rate": 0.118,
+        "empty_fp_rate": 0.1235,
+        "hard_fp_rate": 0.1139
+      },
+      {
+        "conf": 0.2,
+        "f1": 0.4178,
+        "p": 0.4432,
+        "r": 0.3951,
+        "tp": 160,
+        "fp": 201,
+        "fn": 245,
+        "neg_fp_rate": 0.0616,
+        "empty_fp_rate": 0.0815,
+        "hard_fp_rate": 0.047
+      },
+      {
+        "conf": 0.25,
+        "f1": 0.3302,
+        "p": 0.4622,
+        "r": 0.2568,
+        "tp": 104,
+        "fp": 121,
+        "fn": 301,
+        "neg_fp_rate": 0.0386,
+        "empty_fp_rate": 0.0543,
+        "hard_fp_rate": 0.0271
+      },
+      {
+        "conf": 0.3,
+        "f1": 0.303,
+        "p": 0.5449,
+        "r": 0.2099,
+        "tp": 85,
+        "fp": 71,
+        "fn": 320,
+        "neg_fp_rate": 0.0251,
+        "empty_fp_rate": 0.0395,
+        "hard_fp_rate": 0.0145
+      },
+      {
+        "conf": 0.35,
+        "f1": 0.2423,
+        "p": 0.5478,
+        "r": 0.1556,
+        "tp": 63,
+        "fp": 52,
+        "fn": 342,
+        "neg_fp_rate": 0.0198,
+        "empty_fp_rate": 0.0321,
+        "hard_fp_rate": 0.0108
+      },
+      {
+        "conf": 0.45,
+        "f1": 0.1429,
+        "p": 0.7442,
+        "r": 0.079,
+        "tp": 32,
+        "fp": 11,
+        "fn": 373,
+        "neg_fp_rate": 0.0052,
+        "empty_fp_rate": 0.0074,
+        "hard_fp_rate": 0.0036
+      }
+    ],
+    "n_pos": 405,
+    "n_neg": 958,
+    "n_empty": 405,
+    "n_hard": 553
+  },
+  "pick_cold": {
+    "conf": 0.25,
+    "f1": 0.2381,
+    "p": 0.3825,
+    "r": 0.1728,
+    "tp": 70,
+    "fp": 113,
+    "fn": 335,
+    "neg_fp_rate": 0.0731,
+    "empty_fp_rate": 0.0346,
+    "hard_fp_rate": 0.1013
+  },
+  "pick_hardneg": {
+    "conf": 0.25,
+    "f1": 0.3302,
+    "p": 0.4622,
+    "r": 0.2568,
+    "tp": 104,
+    "fp": 121,
+    "fn": 301,
+    "neg_fp_rate": 0.0386,
+    "empty_fp_rate": 0.0543,
+    "hard_fp_rate": 0.0271
+  },
+  "pick_cold_loose": {
+    "conf": 0.2,
+    "f1": 0.2693,
+    "p": 0.267,
+    "r": 0.2716,
+    "tp": 110,
+    "fp": 302,
+    "fn": 295,
+    "neg_fp_rate": 0.1973,
+    "empty_fp_rate": 0.0716,
+    "hard_fp_rate": 0.2893
+  },
+  "pick_hardneg_loose": {
+    "conf": 0.2,
+    "f1": 0.4178,
+    "p": 0.4432,
+    "r": 0.3951,
+    "tp": 160,
+    "fp": 201,
+    "fn": 245,
+    "neg_fp_rate": 0.0616,
+    "empty_fp_rate": 0.0815,
+    "hard_fp_rate": 0.047
+  }
+}
