@@ -64,6 +64,7 @@ CONFIRM_DELAYS = (1, 2)
 BOX_LEFT = 2  # anchor - 2
 RENDERER_VERSION = "yoyo.l1_detection.render.render_chart"
 PROTOCOL = "local_signal_v2_stageb_mode_c_20260807"
+STRICT_NEG_PROTOCOL = "local_signal_v2_stageb_mode_c_strictneg_v2_20260810"
 DEFAULT_SRC_MANIFEST = PROJECT / "datasets" / "dense_owner_w20_midbox" / "w20_manifest.json"
 DEFAULT_OUT = PROJECT / "datasets" / "local_signal_v2_stageb"
 VAL_FRAC = 0.15
@@ -88,6 +89,10 @@ class PosSample:
     small_local: tuple[int, int]
     box_pos_frac: float
     stored_mad: float
+    start_time: str
+    anchor_time: str
+    decision_time: str
+    visible_end_time: str
     end_time: str
     out_img: str
     out_lbl: str
@@ -180,6 +185,7 @@ def render_positive(
     out_lbl: Path,
     rng: np.random.Generator,
     draw_box: bool = False,
+    protocol: str = PROTOCOL,
 ) -> PosSample:
     symbol = src["symbol"]
     anchor = int(src["mid_global"])
@@ -231,10 +237,14 @@ def render_positive(
         cv2.imwrite(str(out_img), img)
     out_lbl.write_text(f"0 {yolo[0]:.6f} {yolo[1]:.6f} {yolo[2]:.6f} {yolo[3]:.6f}\n")
 
+    start_ts = win_df.iloc[0].get("open_time", win_df.index[0])
+    anchor_ts = enriched.iloc[anchor].get("open_time", enriched.index[anchor])
     ts = win_df.iloc[-1].get("open_time", win_df.index[-1])
+    start_t = pd.to_datetime(start_ts, utc=True, errors="coerce")
+    anchor_t = pd.to_datetime(anchor_ts, utc=True, errors="coerce")
     t = pd.to_datetime(ts, utc=True, errors="coerce")
-    if pd.isna(t):
-        raise Skip("bad_time", str(ts))
+    if pd.isna(start_t) or pd.isna(anchor_t) or pd.isna(t):
+        raise Skip("bad_time", f"start={start_ts} anchor={anchor_ts} end={ts}")
     if t >= HOLDOUT_START:
         # Remove just-written files so holdout never lands on disk.
         out_img.unlink(missing_ok=True)
@@ -245,7 +255,7 @@ def render_positive(
     assert fut == 0, f"causal invariant broken fut={fut}"
     box_pos = float((loc0 + loc1) / 2 / max(win_len - 1, 1))
     cfg = config_hash_of(
-        protocol=PROTOCOL,
+        protocol=protocol,
         win_len=win_len,
         confirm_delay=confirm_delay,
         box_left=BOX_LEFT,
@@ -270,6 +280,10 @@ def render_positive(
         small_local=(loc0, loc1),
         box_pos_frac=box_pos,
         stored_mad=float(src.get("stored_mad", 0.0)),
+        start_time=str(start_t),
+        anchor_time=str(anchor_t),
+        decision_time=str(t),
+        visible_end_time=str(t),
         end_time=str(t),
         out_img=str(out_img),
         out_lbl=str(out_lbl),
@@ -310,12 +324,15 @@ def add_negatives(
     *,
     ratio: float = 1.0,
     seed: int = 20260807,
+    time_bounds: dict[str, pd.Timestamp] | None = None,
+    protocol: str = PROTOCOL,
 ) -> list[dict]:
     by_sym_split: dict[tuple[str, str], list[dict]] = defaultdict(list)
     for r in pos_rows:
         by_sym_split[(r["symbol"], r["split"])].append(r)
 
     neg_rows: list[dict] = []
+    recorded_stems: set[str] = set()
     for (symbol, split), rows in sorted(by_sym_split.items()):
         target = max(1, int(round(len(rows) * ratio)))
         df = resolve_series(symbol)
@@ -339,16 +356,53 @@ def add_negatives(
             if overlaps(w0, w1, forb):
                 continue
             win_df = enriched.iloc[w0 : w0 + win_len].reset_index(drop=True)
+            start_ts = win_df.iloc[0].get("open_time", win_df.index[0])
             ts = win_df.iloc[-1].get("open_time", win_df.index[-1])
+            start_t = pd.to_datetime(start_ts, utc=True, errors="coerce")
             t = pd.to_datetime(ts, utc=True, errors="coerce")
-            if pd.isna(t) or t >= HOLDOUT_START:
+            if pd.isna(start_t) or pd.isna(t) or t >= HOLDOUT_START:
                 continue
-            # Match time-split of positives roughly: val negs only if end in val time band
-            # (enforced by using same split key as the positives of this symbol).
+            if time_bounds is not None and not negative_window_allowed(
+                split,
+                start_time=start_t,
+                end_time=t,
+                bounds=time_bounds,
+            ):
+                continue
+            # V2 additionally constrains the full window to frozen time bounds.
+            # The legacy path keeps its historical split-label-only behavior.
             out_stem = f"{symbol}_{w0:06d}_w{win_len}_neg"
             out_img = dst / "images" / split / f"{out_stem}.png"
             out_lbl = dst / "labels" / split / f"{out_stem}.txt"
+            if time_bounds is not None and out_stem in recorded_stems:
+                continue
             if out_img.exists():
+                if time_bounds is not None:
+                    if not out_lbl.exists():
+                        raise RuntimeError(f"existing negative image has no label: {out_img}")
+                    neg_rows.append(
+                        {
+                            "stem": out_stem,
+                            "symbol": symbol,
+                            "split": split,
+                            "win_start": w0,
+                            "win_len": win_len,
+                            "start_time": str(start_t),
+                            "end_time": str(t),
+                            "kind": "empty_bg",
+                            "out_img": str(out_img),
+                            "out_lbl": str(out_lbl),
+                            "image_sha256": sha256_file(out_img),
+                            "config_hash": config_hash_of(
+                                protocol=protocol,
+                                kind="empty_bg",
+                                negative_split="strict_time",
+                            ),
+                            "renderer_version": RENDERER_VERSION,
+                            "stage": "B",
+                        }
+                    )
+                    recorded_stems.add(out_stem)
                 got += 1
                 continue
             img, _tf = render_chart(win_df, out_path=None)
@@ -363,18 +417,87 @@ def add_negatives(
                     "split": split,
                     "win_start": w0,
                     "win_len": win_len,
+                    "start_time": str(start_t),
                     "end_time": str(t),
                     "kind": "empty_bg",
                     "out_img": str(out_img),
                     "out_lbl": str(out_lbl),
                     "image_sha256": sha256_file(out_img),
-                    "config_hash": config_hash_of(protocol=PROTOCOL, kind="empty_bg"),
+                    "config_hash": (
+                        config_hash_of(
+                            protocol=protocol,
+                            kind="empty_bg",
+                            negative_split="strict_time",
+                        )
+                        if time_bounds is not None
+                        else config_hash_of(protocol=protocol, kind="empty_bg")
+                    ),
                     "renderer_version": RENDERER_VERSION,
                     "stage": "B",
                 }
             )
+            if time_bounds is not None:
+                recorded_stems.add(out_stem)
             got += 1
     return neg_rows
+
+
+def derive_negative_time_bounds(pos_rows: list[dict]) -> dict[str, pd.Timestamp]:
+    """Freeze negative sampling to the actual positive train/val time blocks.
+
+    Inputs are Stage-B positive manifest rows.  The train block ends at the
+    latest train decision timestamp.  Validation negative windows must start no
+    earlier than the first validation decision and end no later than the last
+    validation decision.  This deliberately leaves the positive purge gap empty
+    instead of assigning a future-period background window to train.
+    """
+    frame = pd.DataFrame(
+        {
+            "split": [r.get("split") for r in pos_rows],
+            "end_time": pd.to_datetime(
+                [r.get("end_time") for r in pos_rows], utc=True, errors="coerce"
+            ),
+        }
+    ).dropna()
+    train = frame.loc[frame["split"] == "train", "end_time"]
+    val = frame.loc[frame["split"] == "val", "end_time"]
+    if train.empty or val.empty:
+        raise ValueError("strict negative split requires non-empty train and val positives")
+    train_end = train.max()
+    val_start = val.min()
+    val_end = val.max()
+    if train_end >= val_start:
+        raise ValueError(f"positive time split overlaps: train_end={train_end} val_start={val_start}")
+    gap_bars = (val_start - train_end).total_seconds() / (BAR_MINUTES * 60)
+    if gap_bars < PURGE_BARS:
+        raise ValueError(
+            f"positive purge gap too small: {gap_bars:.1f} bars < {PURGE_BARS}"
+        )
+    return {
+        "train_end_max": train_end,
+        "val_start_min": val_start,
+        "val_end_max": val_end,
+    }
+
+
+def negative_window_allowed(
+    split: str,
+    *,
+    start_time: pd.Timestamp,
+    end_time: pd.Timestamp,
+    bounds: dict[str, pd.Timestamp],
+) -> bool:
+    """Return whether a negative window is wholly inside its frozen time block."""
+    if start_time > end_time or end_time >= HOLDOUT_START:
+        return False
+    if split == "train":
+        return bool(end_time <= bounds["train_end_max"])
+    if split == "val":
+        return bool(
+            start_time >= bounds["val_start_min"]
+            and end_time <= bounds["val_end_max"]
+        )
+    return False
 
 
 def write_yaml(dst: Path) -> None:
@@ -386,21 +509,54 @@ def write_yaml(dst: Path) -> None:
     )
 
 
-def run_preview(src_manifest: Path, n: int, out_dir: Path, seed: int) -> None:
+def select_diverse_preview_events(
+    events: list[dict], splits: dict[str, str], *, n: int, seed: int
+) -> list[dict]:
+    """Choose a deterministic preview with symbol diversity before repeats."""
+    candidates = [
+        e for e in events if splits.get(e.get("stem")) in {"train", "val"}
+    ]
+    candidates.sort(
+        key=lambda e: stable_seed(seed, "preview", e.get("symbol"), e.get("stem"))
+    )
+    first_per_symbol: list[dict] = []
+    repeats: list[dict] = []
+    seen: set[str] = set()
+    for event in candidates:
+        symbol = str(event.get("symbol"))
+        if symbol in seen:
+            repeats.append(event)
+        else:
+            seen.add(symbol)
+            first_per_symbol.append(event)
+    return (first_per_symbol + repeats)[:n]
+
+
+def run_preview(
+    src_manifest: Path,
+    n: int,
+    out_dir: Path,
+    seed: int,
+    *,
+    protocol: str = PROTOCOL,
+) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     events = load_source_events(src_manifest)
     splits = assign_time_splits(events)
     results = []
-    for e in events:
-        if e["stem"] not in splits or splits[e["stem"]] == "drop":
-            continue
-        if len(results) >= n:
-            break
+    for e in select_diverse_preview_events(events, splits, n=n, seed=seed):
         local = np.random.default_rng(stable_seed(seed, e["stem"]))
         out_img = out_dir / f"{e['stem']}_stageb.png"
         out_lbl = out_dir / f"{e['stem']}_stageb.txt"
         try:
-            res = render_positive(e, out_img=out_img, out_lbl=out_lbl, rng=local, draw_box=True)
+            res = render_positive(
+                e,
+                out_img=out_img,
+                out_lbl=out_lbl,
+                rng=local,
+                draw_box=True,
+                protocol=protocol,
+            )
         except Skip as ex:
             print(f"skip {e['stem']}: {ex.reason} {ex.detail}")
             continue
@@ -418,6 +574,8 @@ def run_full(
     seed: int,
     limit: int,
     neg_ratio: float,
+    strict_negative_time_split: bool = False,
+    protocol: str = PROTOCOL,
 ) -> dict:
     events = load_source_events(src_manifest)
     splits = assign_time_splits(events)
@@ -444,7 +602,13 @@ def run_full(
         out_img = dst / "images" / split / f"{out_stem}.png"
         out_lbl = dst / "labels" / split / f"{out_stem}.txt"
         try:
-            res = render_positive(e, out_img=out_img, out_lbl=out_lbl, rng=local)
+            res = render_positive(
+                e,
+                out_img=out_img,
+                out_lbl=out_lbl,
+                rng=local,
+                protocol=protocol,
+            )
         except Skip as ex:
             skip_reasons[ex.reason] += 1
             continue
@@ -459,7 +623,15 @@ def run_full(
             print(f"... pos {n_done} skips={dict(skip_reasons)}")
 
     print(f"positives done: {len(pos_rows)}; adding negatives ratio={neg_ratio}")
-    neg_rows = add_negatives(pos_rows, dst, ratio=neg_ratio, seed=seed)
+    time_bounds = derive_negative_time_bounds(pos_rows) if strict_negative_time_split else None
+    neg_rows = add_negatives(
+        pos_rows,
+        dst,
+        ratio=neg_ratio,
+        seed=seed,
+        time_bounds=time_bounds,
+        protocol=protocol,
+    )
 
     write_yaml(dst)
     counts = {
@@ -477,7 +649,7 @@ def run_full(
 
     summary = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "protocol": PROTOCOL,
+        "protocol": protocol,
         "src_manifest": str(src_manifest),
         "out": str(dst),
         "seed": seed,
@@ -495,6 +667,10 @@ def run_full(
             f"train ends ≥{PURGE_BARS} bars before first val; purge zone dropped"
         ),
         "is_time_split": True,
+        "strict_negative_time_split": strict_negative_time_split,
+        "negative_time_bounds": (
+            None if time_bounds is None else {k: str(v) for k, v in time_bounds.items()}
+        ),
         "counts": counts,
         "skip_reasons": dict(skip_reasons),
         "n_pos_manifest": len(pos_rows),

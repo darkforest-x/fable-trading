@@ -2,7 +2,8 @@
 # Cold-start train dense_owner_w20_midbox on LAN RTX 3060 (detached WMI).
 #
 # New geometry (W=20-30, mid±2/3 boxes) → COLD START from yolo11s.pt.
-# train_dense.py auto-disables FINETUNE_OPT for yolo11*.pt bases.
+# The repository-owned trainer is copied on every run so the augmentation
+# policy is auditable and cannot drift from an untracked 3060 script.
 #
 # Usage:
 #   export FABLE_3060_HOST=zzc@192.168.1.X   # current 3060 IP
@@ -53,7 +54,7 @@ if [[ "$MODE" == "status" ]]; then
   say "status $NAME on $HOST"
   "${SSH[@]}" "$HOST" "Get-Process python* -ErrorAction SilentlyContinue | Select-Object Id,CPU,WorkingSet | Format-Table | Out-String -Width 200" | tr -d '\r'
   "${SSH[@]}" "$HOST" "if (Test-Path C:/fable/logs/$NAME.log) { Get-Content C:/fable/logs/$NAME.log -Tail 40 } else { 'no log yet' }" | tr -d '\r'
-  "${SSH[@]}" "$HOST" "\$p='C:/fable/runs/detect/runs/detect/$NAME/weights/best.pt'; if (Test-Path \$p) { Get-Item \$p | Select-Object FullName,Length,LastWriteTime } else { 'no best.pt yet' }" | tr -d '\r'
+  "${SSH[@]}" "$HOST" "\$p='C:/fable/runs/detect/$NAME/weights/best.pt'; if (Test-Path \$p) { Get-Item \$p | Select-Object FullName,Length,LastWriteTime } else { 'no best.pt yet' }" | tr -d '\r'
   exit 0
 fi
 
@@ -67,8 +68,7 @@ echo "  3060: $REMOTE_V"
 CUDA_OK=$("${SSH[@]}" "$HOST" "$RPY -c \"import torch;print(torch.cuda.is_available())\"" | tr -d '\r')
 [[ "$CUDA_OK" == "True" ]] || die "CUDA not available on remote"
 "${SSH[@]}" "$HOST" "$RPY -c \"import torch;print(torch.cuda.get_device_name(0))\"" | tr -d '\r'
-"${SSH[@]}" "$HOST" "Test-Path C:/fable/train_dense.py" | tr -d '\r' | grep -qi true \
-  || die "missing C:/fable/train_dense.py"
+[[ -f src/detection/train.py ]] || die "missing repository trainer: src/detection/train.py"
 
 if [[ "$MODE" == "check" ]]; then
   echo "✅ check ok"
@@ -92,6 +92,8 @@ COPYFILE_DISABLE=1 tar cf "$TAR" --exclude='*.npy' --exclude='*.cache' --exclude
 echo "  tar $(du -h "$TAR" | cut -f1)"
 "${SCP[@]}" "$TAR" "$HOST:$REMOTE/ds_w20.tar" || die "scp dataset failed"
 "${SCP[@]}" "$BASE" "$HOST:$REMOTE/base_w20.pt" || die "scp base failed"
+"${SCP[@]}" src/detection/train.py "$HOST:$REMOTE/train_safe.py" \
+  || die "scp repository trainer failed"
 rm -f "$TAR"
 BN=$(basename "$DATASET")
 "${SSH[@]}" "$HOST" "cd $REMOTE; New-Item -ItemType Directory -Force datasets,logs,models | Out-Null; Remove-Item -Recurse -Force datasets/$BN -ErrorAction SilentlyContinue; tar xf ds_w20.tar -C datasets; Remove-Item ds_w20.tar; Copy-Item base_w20.pt models/yolo11s_w20.pt -Force" \
@@ -102,7 +104,7 @@ say "2) start detached WMI train: $NAME"
 CMD_BODY=$(cat <<EOF
 @echo off
 cd /d C:\\fable
-C:\\fable\\.venv\\Scripts\\python.exe -u C:\\fable\\train_dense.py --name $NAME --model C:/fable/models/yolo11s_w20.pt --dataset C:/fable/datasets/$BN --epochs $EPOCHS --patience $PATIENCE --batch $BATCH --cache false --workers $WORKERS > C:\\fable\\logs\\$NAME.log 2>&1
+C:\\fable\\.venv\\Scripts\\python.exe -u C:\\fable\\train_safe.py --name $NAME --model C:/fable/models/yolo11s_w20.pt --data C:/fable/datasets/$BN/data.yaml --epochs $EPOCHS --patience $PATIENCE --batch $BATCH --cache false --workers $WORKERS > C:\\fable\\logs\\$NAME.log 2>&1
 EOF
 )
 # write cmd via stdin to avoid quoting hell
@@ -112,4 +114,4 @@ echo "  started name=$NAME epochs=$EPOCHS batch=$BATCH"
 echo "  watch:  bash scripts/train_w20_midbox_on_3060.sh --status --host $HOST"
 echo "  log:    ssh $HOST \"Get-Content C:\\\\fable\\\\logs\\\\$NAME.log -Tail 40\""
 echo "  fetch later:"
-echo "    scp $HOST:C:/fable/runs/detect/runs/detect/$NAME/weights/best.pt runs/detect/runs/detect/$NAME/weights/best.pt"
+echo "    scp $HOST:C:/fable/runs/detect/$NAME/weights/best.pt analysis/output/lsv2_stageb/$NAME/weights/best.pt"

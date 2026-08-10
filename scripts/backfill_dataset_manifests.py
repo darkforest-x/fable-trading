@@ -14,9 +14,11 @@ Commit 4b5f48b landed ``datasets/*/*.json`` manifests but left ~800MB of
   have **no manifest at all**; ``add_w20_hardneg_pack.py`` only wrote the
   counts in ``w20_hardneg_summary.json``.
 
-``local_signal_v2_stageb`` was already built correctly and carries the full
-field set; this script only adds ``label_sha256`` there and re-emits it in the
-common format so both datasets audit the same way.
+``local_signal_v2_stageb`` carries build-time hashes but later failed the
+negative-window time audit.  Its corrected successor
+``local_signal_v2_stageb_strictneg_v2`` records explicit start timestamps.
+This script re-emits both in the common format; it does not upgrade V1's
+acceptance status.
 
 What it does
 ------------
@@ -56,11 +58,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
+import pandas as pd
+
 PROJECT = Path(__file__).resolve().parents[1]
 
 DEFAULT_DATASETS = (
     PROJECT / "datasets" / "dense_owner_w20_midbox",
     PROJECT / "datasets" / "local_signal_v2_stageb",
+    PROJECT / "datasets" / "local_signal_v2_stageb_strictneg_v2",
 )
 
 # 15m is the only bar the w20/lsv2 builders load (build_w20_midbox_dataset.py
@@ -245,6 +250,16 @@ def emit_rows(ds: Path, created_at: str) -> Iterator[dict]:
             "created_at": created_at,
         }
 
+    def window_start_time(row: dict) -> str | None:
+        explicit = row.get("start_time")
+        if explicit:
+            return explicit
+        end = pd.to_datetime(row.get("end_time"), utc=True, errors="coerce")
+        win_len = row.get("win_len")
+        if pd.isna(end) or win_len is None:
+            return None
+        return str(end - pd.Timedelta(minutes=(int(win_len) - 1) * 15))
+
     # ---- positives -------------------------------------------------------
     for r in pos_manifest:
         stem = r.get("out_stem") or r.get("stem")
@@ -264,6 +279,10 @@ def emit_rows(ds: Path, created_at: str) -> Iterator[dict]:
                 "anchor_x_ratio": r.get("box_pos_frac"),
                 "box_start_bar": (r.get("small_bars") or [None, None])[0],
                 "box_end_bar": (r.get("small_bars") or [None, None])[1],
+                "anchor_timestamp": r.get("anchor_time"),
+                "decision_timestamp": r.get("decision_time") or r.get("end_time"),
+                "visible_end_timestamp": r.get("visible_end_time") or r.get("end_time"),
+                "window_start_timestamp": window_start_time(r),
                 "window_end_timestamp": r.get("end_time"),
                 "confirm_delay": r.get("confirm_delay"),
                 "decision_bar_index": r.get("decision_bar"),
@@ -293,6 +312,10 @@ def emit_rows(ds: Path, created_at: str) -> Iterator[dict]:
                 "anchor_x_ratio": None,
                 "box_start_bar": None,
                 "box_end_bar": None,
+                "anchor_timestamp": None,
+                "decision_timestamp": None,
+                "visible_end_timestamp": r.get("end_time"),
+                "window_start_timestamp": window_start_time(r),
                 "window_end_timestamp": r.get("end_time"),
                 "confirm_delay": None,
                 "decision_bar_index": None,
@@ -321,6 +344,10 @@ def emit_rows(ds: Path, created_at: str) -> Iterator[dict]:
                 "anchor_x_ratio": None,
                 "box_start_bar": None,
                 "box_end_bar": None,
+                "anchor_timestamp": None,
+                "decision_timestamp": None,
+                "visible_end_timestamp": None,
+                "window_start_timestamp": None,
                 "window_end_timestamp": None,
                 "confirm_delay": None,
                 "decision_bar_index": None,
@@ -341,7 +368,9 @@ def emit_rows(ds: Path, created_at: str) -> Iterator[dict]:
 
 REQUIRED_SPEC12 = (
     "sample_id event_id sample_type hard_negative_type symbol timeframe "
-    "anchor_bar_index confirm_delay decision_bar_index window_len "
+    "anchor_timestamp anchor_bar_index confirm_delay decision_timestamp "
+    "decision_bar_index visible_end_timestamp window_start_timestamp "
+    "window_end_timestamp window_len "
     "anchor_x_ratio box_start_bar box_end_bar box_xyxy_px split "
     "source_dataset_version source_label_id renderer_version config_hash "
     "image_sha256 label_sha256 created_at"

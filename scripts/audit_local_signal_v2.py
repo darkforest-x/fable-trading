@@ -1,22 +1,28 @@
 #!/usr/bin/env python3
 """P0 hard-gate audit for local_signal_v2 Stage-B datasets.
 
-Extends the w20 causality arithmetic with true time-split detection and
-Stage-B summary awareness. Read-only.
+Extends the w20 causality arithmetic with full positive/negative window
+time-split detection and Stage-B summary awareness. Read-only; exits nonzero
+when any P0 gate fails.
 
 Usage:
   .venv/bin/python scripts/audit_local_signal_v2.py \
-      --dataset datasets/local_signal_v2_stageb \
-      --out analysis/output/p0_local_signal_v2_stageb_audit.json
+      --dataset datasets/local_signal_v2_stageb_strictneg_v2 \
+      --out analysis/output/p0_local_signal_v2_stageb_strictneg_v2_audit.json
 """
 from __future__ import annotations
 
 import argparse
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
+
+PROJECT = Path(__file__).resolve().parents[1]
+if str(PROJECT) not in sys.path:
+    sys.path.insert(0, str(PROJECT))
 
 from scripts.audit_w20_midbox_causality import (
     HOLDOUT_START,
@@ -27,26 +33,101 @@ from scripts.audit_w20_midbox_causality import (
     audit_split,
 )
 
-PROJECT = Path(__file__).resolve().parents[1]
-DEFAULT_DS = PROJECT / "datasets" / "local_signal_v2_stageb"
+DEFAULT_DS = PROJECT / "datasets" / "local_signal_v2_stageb_strictneg_v2"
 
 
-def refine_split_audit(pos_rows: list[dict], summary: dict | None) -> dict:
+def _time_frame(rows: list[dict], *, sample_type: str) -> pd.DataFrame:
+    """Return start/end timestamps for split auditing.
+
+    Stage-B V1 manifests did not persist ``start_time``.  For those rows the
+    start is reconstructed from the 15-minute ``end_time`` and ``win_len``.
+    """
+    if not rows:
+        return pd.DataFrame(columns=["sample_type", "split", "start", "end"])
+    end = pd.to_datetime([r.get("end_time") for r in rows], utc=True, errors="coerce")
+    explicit_start = pd.to_datetime(
+        [r.get("start_time") for r in rows], utc=True, errors="coerce"
+    )
+    derived_start = end - pd.to_timedelta(
+        [max(int(r.get("win_len") or 1) - 1, 0) * 15 for r in rows], unit="m"
+    )
+    start = explicit_start.where(~explicit_start.isna(), derived_start)
+    return pd.DataFrame(
+        {
+            "sample_type": sample_type,
+            "split": [r.get("split") for r in rows],
+            "start": start,
+            "end": end,
+        }
+    ).dropna(subset=["start", "end"])
+
+
+def refine_split_audit(
+    pos_rows: list[dict], neg_rows: list[dict], summary: dict | None
+) -> dict:
     base = audit_split(pos_rows, [])
-    times = pd.to_datetime([r["end_time"] for r in pos_rows], utc=True, errors="coerce")
-    frame = pd.DataFrame({"t": times, "split": [r["split"] for r in pos_rows]}).dropna()
-    tr = frame.loc[frame["split"] == "train", "t"]
-    va = frame.loc[frame["split"] == "val", "t"]
+    pos_frame = _time_frame(pos_rows, sample_type="positive")
+    neg_frame = _time_frame(neg_rows, sample_type="negative")
+    frame = pd.concat([pos_frame, neg_frame], ignore_index=True)
+    tr = frame.loc[frame["split"] == "train", "end"]
+    va_start = frame.loc[frame["split"] == "val", "start"]
     is_time = False
     gap_days = None
-    if len(tr) and len(va):
-        # Time split if all train times strictly before all val times.
-        is_time = bool(tr.max() < va.min())
+    if len(tr) and len(va_start):
+        # Strict window split: the latest train bar precedes the first real bar
+        # visible in any validation image, not merely its decision/end bar.
+        is_time = bool(tr.max() < va_start.min())
         if is_time:
-            gap_days = (va.min() - tr.max()).total_seconds() / 86400
+            gap_days = (va_start.min() - tr.max()).total_seconds() / 86400
     base["is_time_split"] = is_time
-    base["train_max_before_val_min"] = is_time
+    base["train_max_before_val_window_start"] = is_time
     base["purge_gap_days"] = None if gap_days is None else round(gap_days, 3)
+    base["all_sample_time_range"] = {}
+    for split in ("train", "val"):
+        part = frame.loc[frame["split"] == split]
+        if not part.empty:
+            base["all_sample_time_range"][split] = {
+                "n": int(len(part)),
+                "start_min": str(part["start"].min()),
+                "end_max": str(part["end"].max()),
+            }
+
+    # Negative windows must be contained in the same frozen blocks as the
+    # positive events.  A split label inherited from a symbol is not enough.
+    p_tr = pos_frame.loc[pos_frame["split"] == "train", "end"]
+    p_va_start = pos_frame.loc[pos_frame["split"] == "val", "end"]
+    p_va_end = pos_frame.loc[pos_frame["split"] == "val", "end"]
+    n_tr = neg_frame.loc[neg_frame["split"] == "train"]
+    n_va = neg_frame.loc[neg_frame["split"] == "val"]
+    bad_train = 0
+    bad_val_before = 0
+    bad_val_after = 0
+    if len(p_tr) and len(n_tr):
+        bad_train = int((n_tr["end"] > p_tr.max()).sum())
+    if len(p_va_start) and len(n_va):
+        bad_val_before = int((n_va["start"] < p_va_start.min()).sum())
+        bad_val_after = int((n_va["end"] > p_va_end.max()).sum())
+    base["negative_time_split"] = {
+        "n_negative": int(len(neg_frame)),
+        "n_train_after_train_end": bad_train,
+        "n_val_before_val_start": bad_val_before,
+        "n_val_after_val_end": bad_val_after,
+        "pass": bool(
+            len(neg_frame) == len(neg_rows)
+            and bad_train == 0
+            and bad_val_before == 0
+            and bad_val_after == 0
+        ),
+    }
+    base["negatives_have_end_timestamps"] = bool(
+        neg_rows and all(r.get("end_time") is not None for r in neg_rows)
+    )
+    base["negatives_have_start_timestamps"] = bool(
+        neg_rows and all(r.get("start_time") is not None for r in neg_rows)
+    )
+    # Keep the legacy key honest as well; audit_split() received no negatives
+    # because this stricter audit needs full window start/end timestamps.
+    base["negatives_have_timestamps"] = base["negatives_have_end_timestamps"]
     if summary:
         base["strategy_in_code"] = summary.get("split_rule", base["strategy_in_code"])
         base["purge_embargo_bars"] = int(summary.get("purge_bars", 0) or 0)
@@ -85,7 +166,7 @@ def run_audit(dataset: Path) -> dict:
         causality["n_future_gt0"] = 0
         causality["frac_future_gt0"] = 0.0
 
-    split = refine_split_audit(pos_rows, summary)
+    split = refine_split_audit(pos_rows, neg_rows, summary)
     holdout = audit_holdout(pos_rows)
     # Also check negatives for holdout
     if neg_rows and "end_time" in neg_rows[0]:
@@ -95,6 +176,24 @@ def run_audit(dataset: Path) -> dict:
         holdout["clean"] = holdout["clean"] and n_hit == 0
 
     conservation = audit_conservation(dataset, pos_rows, neg_rows)
+    trace_rows = pos_rows + neg_rows
+    traceability = {
+        "n_samples": len(trace_rows),
+        "n_with_symbol": sum(bool(r.get("symbol")) for r in trace_rows),
+        "n_with_window_start_bar": sum(r.get("win_start") is not None for r in trace_rows),
+        "n_with_window_len": sum(r.get("win_len") is not None for r in trace_rows),
+        "n_with_window_end_timestamp": sum(r.get("end_time") is not None for r in trace_rows),
+    }
+    traceability["all_samples_traceable_to_market_bar"] = bool(
+        trace_rows
+        and all(
+            r.get("symbol")
+            and r.get("win_start") is not None
+            and r.get("win_len") is not None
+            and r.get("end_time") is not None
+            for r in trace_rows
+        )
+    )
 
     result = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -104,6 +203,7 @@ def run_audit(dataset: Path) -> dict:
         "position": audit_position(pos_rows),
         "split": split,
         "holdout": holdout,
+        "traceability": traceability,
         "conservation": conservation,
     }
     result["gates"] = {
@@ -111,21 +211,30 @@ def run_audit(dataset: Path) -> dict:
         and result["causality"]["frac_future_gt0"] == 0.0,
         "box_end <= decision": result["causality"]["box_end_le_decision"],
         "no_event_crosses_split": result["split"]["n_events_crossing_split"] == 0,
-        "time_based_split": bool(result["split"]["is_time_split"]),
+        "time_based_split": bool(result["split"]["is_time_split"])
+        and bool(result["split"]["negative_time_split"]["pass"]),
         "no_holdout_in_training": bool(result["holdout"]["clean"]),
         "labels_in_bounds": result["conservation"]["n_labels_out_of_bounds"] == 0,
         "manifest_conserved": bool(result["conservation"]["conserved"]),
+        "market_bar_traceability": bool(
+            result["traceability"]["all_samples_traceable_to_market_bar"]
+        ),
     }
     result["p0_pass"] = all(result["gates"].values())
     return result
 
 
-def main() -> None:
+def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--dataset", default=str(DEFAULT_DS))
     ap.add_argument(
         "--out",
-        default=str(PROJECT / "analysis" / "output" / "p0_local_signal_v2_stageb_audit.json"),
+        default=str(
+            PROJECT
+            / "analysis"
+            / "output"
+            / "p0_local_signal_v2_stageb_strictneg_v2_audit.json"
+        ),
     )
     args = ap.parse_args()
     result = run_audit(Path(args.dataset))
@@ -135,7 +244,8 @@ def main() -> None:
     print(json.dumps(result["gates"], ensure_ascii=False, indent=2))
     print(f"p0_pass = {result['p0_pass']}")
     print(f"wrote {out}")
+    return 0 if result["p0_pass"] else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -125,7 +125,12 @@ def test_hardneg_weak_regex():
 
 
 @pytest.mark.parametrize(
-    "ds", ["dense_owner_w20_midbox", "local_signal_v2_stageb"]
+    "ds",
+    [
+        "dense_owner_w20_midbox",
+        "local_signal_v2_stageb",
+        "local_signal_v2_stageb_strictneg_v2",
+    ],
 )
 def test_shipped_audit_invariants_hold(ds):
     """Every §12.1 invariant recorded in manifest_audit.json must be green."""
@@ -136,3 +141,18 @@ def test_shipped_audit_invariants_hold(ds):
     failed = [k for k, v in rep["invariants"].items() if not v]
     assert not failed, f"{ds}: failing invariants {failed}"
     assert rep["counts"]["manifest_rows"] == rep["counts"]["disk_images"]
+
+
+def test_spec12_timestamp_fields_are_required():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("_backfill", BACKFILL)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert {
+        "anchor_timestamp",
+        "decision_timestamp",
+        "visible_end_timestamp",
+        "window_start_timestamp",
+        "window_end_timestamp",
+    } <= set(mod.REQUIRED_SPEC12)
