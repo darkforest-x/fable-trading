@@ -10,6 +10,9 @@ Owner 观察正确：三张大图中的信号框全靠右不是拼图显示问�
 刚启动的 3060 P2 训练已停止，且远端不存在 `best.pt`、`last.pt`、`results.csv`。P2 没有
 形成有效实验结果或可用权重；旧 B2/P2 产物保留为失败证据，不覆盖、不 promote。
 
+修复 builder 入库后，独立数据集 `local_signal_v2_p1_causal_blank_w30_v3` 已全量重建并通过
+九道 P0 硬门；当前停止在“可训练、未训练”，没有新的模型结论。
+
 ## 关于“600 张人工审计”的口径纠正
 
 此前“600 张可视化已人工审计”的说法不准确。实际产物是 **3 张 montage 大图**，每张嵌入
@@ -71,6 +74,12 @@ negative 共享同一空白范围；后续 hard-negative 候选与推理也必�
 358 easy negatives，另有 419 个 evaluation-only hard negatives。但由于位置门失败，这套
 P2 数据不得继续训练。
 
+新位置臂共 4,776 样本：train 2,030 正 + 2,030 负，val 358 正 + 358 负。框中心范围
+0.658537–0.948276，四个等宽位置桶分别 732 / 625 / 572 / 459；正负样本均覆盖 0–12
+全部空白槽。九道 P0 门全部通过，且同 seed 第二次重建后正例 manifest SHA 保持
+`f82a49100949b7b10425cd6c822830083fc758f77a94db275cfd2213d6fb43a1`，负例 manifest SHA
+保持 `8357528442c9e0c8e1d63a2fb2b4497f1cb96d51462bea7b4c5a0af008a594c8`。
+
 ## 复现命令
 
 ```bash
@@ -99,7 +108,7 @@ PYTHONPATH=.:../yoyo-trading .venv/bin/python \
 
 ## 下一步
 
-1. 提交 V2 renderer、builder、测试和预注册；
-2. 重建独立位置臂并生成位置分布与 3×200 montage；
-3. P0 数据门全绿后再决定是否启动 3060 单变量训练；
+1. V2 renderer、builder、测试和预注册：已完成；
+2. 独立位置臂全量重建与 P0：已完成，九门全绿；
+3. 下一步仅启动 3060 位置单变量训练，不加入 hard negatives、不改阈值；
 4. 通过冻结事件尺与连续密度回放后，重做 P2 hard-negative mining。

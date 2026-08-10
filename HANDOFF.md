@@ -18,9 +18,13 @@
 - 旧 renderer 像素合同不改；新增 opt-in Local-Signal V2 renderer，0 空白时必须逐像素等同旧版。
 - 未读 holdout、未改阈值/成本/障碍/ACTIVE，未 promote、未部署、未下单。
 
-下一步：先提交 builder，再重建独立 `local_signal_v2_p1_causal_blank_w30_v3`，审计位置分桶、
-正负布局同分布、`future_bars=0` 和 split 守恒；全部通过后才允许训练该位置单变量臂，
-之后再从其冻结权重重新做 P2 hard-negative mining。
+独立 `local_signal_v2_p1_causal_blank_w30_v3` 已在 builder 提交后全量重建：2,388 正例 +
+2,388 easy negatives；九道 P0 门全绿。框中心 0.6585–0.9483，四桶 732/625/572/459，
+正负均覆盖 0–12 全部空白槽；0 future、0 holdout、0 跨 split、0 越界、4,776 文件守恒。
+同 seed 二次重建后正/负 manifest SHA 分别稳定为 `f82a4910…43a1` / `83575284…94c8`。
+
+下一步：该数据臂已具备训练前提，但尚未启动训练。需保持旧阈值、seed、训练配方和事件尺，
+只评估位置布局这一个变量；通过后再从其冻结权重重新做 P2 hard-negative mining。
 
 ## ⚡ 当前真相（2026-08-11 — B2 候选密度失败；3,880 不是订单）
 
