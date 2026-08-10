@@ -24,6 +24,7 @@ EPOCHS=80
 PATIENCE=20
 BATCH=8
 WORKERS=2
+SEED=0
 MODE="run"
 
 SSH=(ssh -o BatchMode=yes -o ConnectTimeout=15)
@@ -42,6 +43,7 @@ while [[ $# -gt 0 ]]; do
     --epochs) EPOCHS="$2"; shift 2 ;;
     --patience) PATIENCE="$2"; shift 2 ;;
     --batch) BATCH="$2"; shift 2 ;;
+    --seed) SEED="$2"; shift 2 ;;
     --host) HOST="$2"; shift 2 ;;
     -h|--help)
       sed -n '2,14p' "$0"; exit 0 ;;
@@ -107,12 +109,12 @@ say "2) start detached WMI train: $NAME"
 # Launch the complete command through WMI.  Do not pipe a multiline body into
 # PowerShell's automatic ``$input`` enumerator: Set-Content serializes that
 # object as ``PipelineReader...`` instead of writing the command text.
-REMOTE_CMD="cmd.exe /c \"cd /d C:\\fable && C:\\fable\\.venv\\Scripts\\python.exe -u C:\\fable\\train_safe.py --name $NAME --model C:/fable/models/yolo11s_w20.pt --data C:/fable/datasets/$BN/data.yaml --epochs $EPOCHS --patience $PATIENCE --batch $BATCH --cache false --workers $WORKERS > C:\\fable\\logs\\$NAME.log 2>&1\""
+REMOTE_CMD="cmd.exe /c \"cd /d C:\\fable && C:\\fable\\.venv\\Scripts\\python.exe -u C:\\fable\\train_safe.py --name $NAME --model C:/fable/models/yolo11s_w20.pt --data C:/fable/datasets/$BN/data.yaml --epochs $EPOCHS --patience $PATIENCE --batch $BATCH --seed $SEED --cache false --workers $WORKERS > C:\\fable\\logs\\$NAME.log 2>&1\""
 LAUNCH_OUT=$("${SSH[@]}" "$HOST" "\$r = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine='$REMOTE_CMD'}; Write-Output ('pid=' + \$r.ProcessId + ' ret=' + \$r.ReturnValue)")
 printf '%s\n' "$LAUNCH_OUT"
 [[ "$LAUNCH_OUT" == *"ret=0"* ]] || die "remote WMI launch failed"
 
-echo "  started name=$NAME epochs=$EPOCHS batch=$BATCH"
+echo "  started name=$NAME epochs=$EPOCHS batch=$BATCH seed=$SEED"
 echo "  watch:  bash scripts/train_w20_midbox_on_3060.sh --status --host $HOST --name $NAME"
 echo "  log:    ssh $HOST \"Get-Content C:\\\\fable\\\\logs\\\\$NAME.log -Tail 40\""
 echo "  fetch later:"

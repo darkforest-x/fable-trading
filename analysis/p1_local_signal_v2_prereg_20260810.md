@@ -19,7 +19,9 @@
 | B2 | 30 | fixed、`visible_end=decision` | yolo11s 冷启动 | `datasets/local_signal_v2_p1_b2_w30` |
 | C3 | 20–30 | causal-right-range、`visible_end=decision` | yolo11s 冷启动 | `datasets/local_signal_v2_stageb_strictneg_v2` |
 
-所有新训练臂固定 seed=20260807、confirm delay={1,2}、小框左扩 2 根、easy negative 1:1、60 epochs、patience=15、batch=8、imgsz=960，全部 HSV/flip/mosaic/mixup 关闭。B1/B2 之间只改变窗口长度；C3 用同一构建逻辑的 20–30 根范围。
+所有新训练臂固定 dataset seed=20260807、training seed=0、confirm delay={1,2}、小框左扩 2 根、easy negative 1:1、60 epochs、patience=15、batch=8、imgsz=960，全部 HSV/flip/mosaic/mixup 关闭。B1/B2 之间只改变窗口长度；C3 用同一构建逻辑的 20–30 根范围。
+
+> 2026-08-10 执行勘误：最初把单一 `seed=20260807` 写成了同时约束数据构建和训练；实际仓库 trainer 在 C3/B1/B2 均使用 Ultralytics 默认 training seed=0，数据构建 seed 才是 20260807。该差异在 B2 结果产生前由 `args.yaml` 发现；三臂训练 seed 一致，没有做 seed 搜索，也不改变任何已运行权重。trainer 与 3060 wrapper 现已显式接受、传递并记录 training seed，避免今后再次依赖隐式默认值。
 
 规范里的 C1/C2 Stage-A future pretrain 不进入本轮：仓库铁律 12 禁止新增事后可见数据路径；P1 先用 C3 直接检验是否不需要 Stage A。Hard negative 按规范留到 P2，不与 P1 窗口变量打包。
 

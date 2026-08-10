@@ -103,6 +103,12 @@ def main() -> None:
     parser.add_argument("--imgsz", type=int, default=960)
     parser.add_argument("--batch", type=int, default=8)
     parser.add_argument(
+        "--seed",
+        type=int,
+        default=0,
+        help="Ultralytics training seed (default 0; always recorded in args.yaml)",
+    )
+    parser.add_argument(
         "--patience",
         type=int,
         default=10,
@@ -157,6 +163,7 @@ def main() -> None:
         epochs=args.epochs,
         imgsz=args.imgsz,
         batch=args.batch,
+        seed=args.seed,
         patience=args.patience,
         device=device,
         workers=args.workers,
