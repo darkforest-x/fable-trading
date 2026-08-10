@@ -18,6 +18,7 @@ from scripts.build_local_signal_v2_stageb import (
     derive_negative_time_bounds,
     event_id_of,
     negative_window_allowed,
+    sample_right_blank_slots,
     select_diverse_preview_events,
 )
 
@@ -40,6 +41,33 @@ def test_box_never_past_decision_mode_c():
     assert s0 == anchor - 2
 
 
+def test_fixed_w30_blank_slots_cover_handoff_stage_b_position_range():
+    win_len = 30
+    decision_local = win_len - 1
+    observed = []
+    for delay in (1, 2):
+        box_left_local = decision_local - delay - BOX_LEFT
+        box_center_local = (box_left_local + decision_local) / 2
+        for blank_slots in range(13):
+            observed.append(box_center_local / (win_len + blank_slots - 1))
+    assert min(observed) >= 0.65
+    assert max(observed) <= 0.95
+    assert min(observed) < 0.67
+    assert max(observed) > 0.94
+
+
+def test_blank_slot_sampling_is_seeded_and_inclusive():
+    import numpy as np
+
+    first = np.random.default_rng(17)
+    second = np.random.default_rng(17)
+    a = [sample_right_blank_slots(first, (0, 12)) for _ in range(100)]
+    b = [sample_right_blank_slots(second, (0, 12)) for _ in range(100)]
+    assert a == b
+    assert min(a) == 0
+    assert max(a) == 12
+
+
 def test_event_id_stable():
     a = event_id_of("ETH_USDT_SWAP", 123, "ETH_USDT_SWAP_0001_pad200")
     b = event_id_of("ETH_USDT_SWAP", 123, "ETH_USDT_SWAP_0001_pad200")
@@ -57,6 +85,17 @@ def test_fixed_window_cli_is_available_without_changing_default_protocol():
     assert '"--fixed-window-len"' in strict_builder
     assert "STRICT_NEG_PROTOCOL" in strict_builder
     assert 'f"{STRICT_NEG_PROTOCOL}_w{args.fixed_window_len}"' in strict_builder
+
+
+def test_position_only_builder_freezes_every_other_b2_variable():
+    project = Path(__file__).resolve().parents[1]
+    builder = (
+        project / "scripts" / "build_local_signal_v2_causal_blank_v3.py"
+    ).read_text()
+    assert "FIXED_WINDOW_LEN = 30" in builder
+    assert "RIGHT_BLANK_RANGE = (0, 12)" in builder
+    assert "strict_negative_time_split=True" in builder
+    assert "TARGET_BOX_POSITION_RANGE" in builder
 
 
 def _pos(split: str, end: str, stem: str) -> dict:
@@ -182,7 +221,7 @@ def test_3060_wrapper_ships_repository_safe_trainer_and_uses_strict_dataset():
     assert "PipelineReader" in generic
     assert "Set-Content -Path C:/fable/run_" not in generic
     assert "CommandLine='$REMOTE_CMD'" in generic
-    assert 'RUNS="$REMOTE/runs/detect/runs/detect"' in generic
+    assert 'RUNS="$REMOTE/runs/detect"' in generic
     assert "$HOST:$RUNS/$NAME/weights/best.pt" in generic
     assert "--status --host $HOST --name $NAME" in generic
     assert "--seed $SEED" in generic

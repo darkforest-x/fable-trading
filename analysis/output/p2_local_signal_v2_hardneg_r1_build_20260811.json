@@ -38,16 +38,31 @@
     "time_split": true,
     "manifest_conserved": true,
     "labels_in_bounds": true,
-    "hard_negative_montage_reviewed": 200,
-    "heldout_hard_negative_montage_reviewed": 200,
-    "visual_risk": "some mined windows are morphologically close to legacy positives; round-1 may suppress recall and must not promote unless the frozen event ruler remains green"
+    "visual_audit_files": 3,
+    "tiles_per_montage": 200,
+    "total_tiles_rendered": 600,
+    "manual_tile_level_review_complete": false,
+    "visual_risk": "owner audit found all positive boxes at the far right; the fixed-w30 labels occupy only x=0.931034 or 0.948276, creating a position shortcut",
+    "position_diversity_pass": false,
+    "box_center_ratios": [
+      0.9310344827586207,
+      0.9482758620689655
+    ],
+    "handoff_stage_b_065_095_requirement_met": false
   },
   "training": {
-    "status": "awaiting_explicit_remote_dataset_transfer_authorization",
+    "status": "aborted_before_epoch_1_due_position_shortcut",
     "local_mps_probe": "interrupted before epoch 1 at step 65/791; no checkpoint and no experiment result",
     "local_mps_reason": "throughput degraded from about 1.4 to 4.6 seconds per step, projecting more than 20 hours to the P1-like early-stop horizon",
     "requested_remote": "zzc@192.168.1.4:C:/fable",
-    "remote_dataset_bytes_approx": 571000000
+    "remote_dataset_bytes_approx": 571000000,
+    "remote_dataset_uploaded": true,
+    "remote_training_started": true,
+    "remote_training_stopped": true,
+    "remote_best_checkpoint_exists": false,
+    "remote_last_checkpoint_exists": false,
+    "remote_results_csv_exists": false,
+    "next": "run a separate position-only causal blank-slot P1 arm before rebuilding hard negatives"
   },
   "future_outcome_used": false,
   "holdout_read": false,

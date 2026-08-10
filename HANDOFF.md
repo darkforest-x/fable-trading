@@ -2,6 +2,26 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-11 — Owner 发现 B2/P2 固定最右位置 shortcut；P2 训练已停）
+
+**直接裁决：三张 200 样本审计图不是显示问题。B2 固定 30 根因果窗的正框中心只落在
+0.931034 / 0.948276 两个 X 比例，100% 集中于最右带，未满足交接规范 Stage-B 65%–95%
+且不得固定 95% 的要求。现有 P2 hard-negative 路线建立在错误几何上，已作废，不能继续训练。**
+
+- Owner 在 600 样本 montage 中直接指出“信号框怎么全是在最右边”；代码审计确认
+  `visible_end=decision`、固定 `W=30`、`confirm_delay=1/2` 必然只产生上述两个位置。
+- Windows 3060 的 P2 训练已精确停止；远端 `best.pt`、`last.pt`、`results.csv` 均不存在，
+  因而没有可误用权重。远端数据保留，未删除其他任务或文件。
+- 不能把位置修复塞进冻结 P2：那会同时改变布局与 hard negatives，违反单变量纪律。
+- 已预注册独立位置臂：固定 B2 的 30 根可见 K、事件、split、seed、标签和 easy negatives，
+  唯一变量为右侧 0–12 个纯空白画布槽位；不追加未来 K，目标框中心覆盖 65%–95%。
+- 旧 renderer 像素合同不改；新增 opt-in Local-Signal V2 renderer，0 空白时必须逐像素等同旧版。
+- 未读 holdout、未改阈值/成本/障碍/ACTIVE，未 promote、未部署、未下单。
+
+下一步：先提交 builder，再重建独立 `local_signal_v2_p1_causal_blank_w30_v3`，审计位置分桶、
+正负布局同分布、`future_bars=0` 和 split 守恒；全部通过后才允许训练该位置单变量臂，
+之后再从其冻结权重重新做 P2 hard-negative mining。
+
 ## ⚡ 当前真相（2026-08-11 — B2 候选密度失败；3,880 不是订单）
 
 **直接裁决：上一版把 3,880 写成“交易/开单”是口径错误；它们是 B2 在 v10 预筛

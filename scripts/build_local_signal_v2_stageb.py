@@ -12,7 +12,8 @@ Protocol (spec V1 Mode C + Stage B):
   - Small box: ``[anchor - 2, decision]`` (box never past decision).
   - Window ends at decision: ``win_start = decision - win_len + 1`` →
     ``visible_end == decision`` (zero future bars).
-  - ``win_len ∈ {20..30}`` varies right-side position without future fill.
+  - ``win_len ∈ {20..30}`` only moves the box across a narrow far-right band;
+    it does not satisfy the handoff's 65%–95% position-diversity target.
   - Drop any sample with ``end_time >= 2026-05-04`` (holdout iron rule).
   - Time split on event time + purge gap (default 150 bars × 15m).
   - ``event_id`` = sha1(symbol|anchor_bar|source stem); one crop per event.
@@ -46,7 +47,12 @@ for p in (PROJECT, _YOYO):
         sys.path.insert(0, str(p))
 
 from yoyo.layers.l1_detection.data import add_mas  # noqa: E402
-from yoyo.layers.l1_detection.render import make_chart_transform, render_chart  # noqa: E402
+from yoyo.layers.l1_detection.local_v2_render import render_causal_chart  # noqa: E402
+from yoyo.layers.l1_detection.render import (  # noqa: E402
+    ChartTransform,
+    make_chart_transform,
+    render_chart,
+)
 
 from scripts.build_w20_midbox_dataset import (  # noqa: E402
     WIN_MAX,
@@ -63,6 +69,7 @@ BAR_MINUTES = 15
 CONFIRM_DELAYS = (1, 2)
 BOX_LEFT = 2  # anchor - 2
 RENDERER_VERSION = "yoyo.l1_detection.render.render_chart"
+BLANK_RENDERER_VERSION = "yoyo.l1_detection.local_v2_render.render_causal_chart"
 PROTOCOL = "local_signal_v2_stageb_mode_c_20260807"
 STRICT_NEG_PROTOCOL = "local_signal_v2_stageb_mode_c_strictneg_v2_20260810"
 DEFAULT_SRC_MANIFEST = PROJECT / "datasets" / "dense_owner_w20_midbox" / "w20_manifest.json"
@@ -70,6 +77,8 @@ DEFAULT_OUT = PROJECT / "datasets" / "local_signal_v2_stageb"
 VAL_FRAC = 0.15
 NEG_MARGIN = 15
 NEG_MAX_TRIES = 80
+STAGE_B_POSITION_MIN = 0.65
+STAGE_B_POSITION_MAX = 0.95
 
 
 @dataclass
@@ -103,6 +112,8 @@ class PosSample:
     mode: str
     future_bars: int
     source_stem: str
+    right_blank_slots: int = 0
+    canvas_slots: int = 0
 
 
 class Skip(Exception):
@@ -128,6 +139,47 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: f.read(1 << 20), b""):
             h.update(chunk)
     return h.hexdigest()
+
+
+def validate_right_blank_range(value: tuple[int, int] | None) -> None:
+    """Validate the inclusive blank-slot range without changing legacy mode."""
+    if value is None:
+        return
+    lo, hi = value
+    if lo < 0 or hi < lo:
+        raise ValueError(f"invalid right blank range: {value}")
+
+
+def sample_right_blank_slots(
+    rng: np.random.Generator, value: tuple[int, int] | None
+) -> int:
+    """Sample deterministic layout-only padding; ``None`` preserves V1 pixels."""
+    validate_right_blank_range(value)
+    if value is None:
+        return 0
+    lo, hi = value
+    return int(rng.integers(lo, hi + 1))
+
+
+def render_for_protocol(
+    frame: pd.DataFrame,
+    *,
+    right_blank_slots: int,
+    blank_layout_enabled: bool,
+) -> tuple[np.ndarray, ChartTransform]:
+    """Route Local-Signal V2 to its opt-in renderer, leaving V1 untouched."""
+    if blank_layout_enabled:
+        return render_causal_chart(frame, right_blank_slots=right_blank_slots)
+    return render_chart(frame, out_path=None)
+
+
+def serialize_positive(sample: PosSample, *, blank_layout_enabled: bool) -> dict:
+    """Keep legacy manifests byte-compatible when the new layout is disabled."""
+    row = asdict(sample)
+    if not blank_layout_enabled:
+        row.pop("right_blank_slots")
+        row.pop("canvas_slots")
+    return row
 
 
 def load_source_events(manifest_path: Path) -> list[dict]:
@@ -187,6 +239,8 @@ def render_positive(
     draw_box: bool = False,
     protocol: str = PROTOCOL,
     fixed_window_len: int | None = None,
+    right_blank_range: tuple[int, int] | None = None,
+    target_box_position_range: tuple[float, float] | None = None,
 ) -> PosSample:
     symbol = src["symbol"]
     anchor = int(src["mid_global"])
@@ -220,9 +274,15 @@ def render_positive(
     if len(win_df) != win_len:
         raise Skip("short_win", source_stem)
 
-    img, tf = render_chart(win_df, out_path=None)
     loc0 = s0 - win_start
     loc1 = s1 - win_start
+    right_blank_slots = sample_right_blank_slots(rng, right_blank_range)
+    blank_layout_enabled = right_blank_range is not None
+    img, tf = render_for_protocol(
+        win_df,
+        right_blank_slots=right_blank_slots,
+        blank_layout_enabled=blank_layout_enabled,
+    )
     yolo = yolo_box_from_bars(tf, win_df, loc0, loc1)
     if yolo is None:
         raise Skip("empty_yolo", source_stem)
@@ -257,15 +317,31 @@ def render_positive(
 
     fut = (win_start + win_len - 1) - decision
     assert fut == 0, f"causal invariant broken fut={fut}"
-    box_pos = float((loc0 + loc1) / 2 / max(win_len - 1, 1))
-    cfg = config_hash_of(
-        protocol=protocol,
-        win_len=win_len,
-        confirm_delay=confirm_delay,
-        box_left=BOX_LEFT,
-        stage="B",
-        mode="C",
-    )
+    box_pos = float((loc0 + loc1) / 2 / max(tf.n_bars - 1, 1))
+    if target_box_position_range is not None:
+        position_lo, position_hi = target_box_position_range
+        if not position_lo <= box_pos <= position_hi:
+            out_img.unlink(missing_ok=True)
+            out_lbl.unlink(missing_ok=True)
+            raise Skip(
+                "box_position_oob",
+                f"box_pos={box_pos:.6f} target={target_box_position_range} ",
+            )
+    cfg_args: dict[str, object] = {
+        "protocol": protocol,
+        "win_len": win_len,
+        "confirm_delay": confirm_delay,
+        "box_left": BOX_LEFT,
+        "stage": "B",
+        "mode": "C",
+    }
+    if blank_layout_enabled:
+        cfg_args.update(
+            right_blank_slots=right_blank_slots,
+            target_box_position_range=target_box_position_range,
+            renderer=BLANK_RENDERER_VERSION,
+        )
+    cfg = config_hash_of(**cfg_args)
     img_hash = sha256_file(out_img)
     eid = event_id_of(symbol, anchor, source_stem)
     return PosSample(
@@ -293,11 +369,13 @@ def render_positive(
         out_lbl=str(out_lbl),
         config_hash=cfg,
         image_sha256=img_hash,
-        renderer_version=RENDERER_VERSION,
+        renderer_version=(BLANK_RENDERER_VERSION if blank_layout_enabled else RENDERER_VERSION),
         stage="B",
         mode="C",
         future_bars=0,
         source_stem=source_stem,
+        right_blank_slots=right_blank_slots,
+        canvas_slots=tf.n_bars,
     )
 
 
@@ -331,6 +409,7 @@ def add_negatives(
     time_bounds: dict[str, pd.Timestamp] | None = None,
     protocol: str = PROTOCOL,
     fixed_window_len: int | None = None,
+    right_blank_range: tuple[int, int] | None = None,
 ) -> list[dict]:
     by_sym_split: dict[tuple[str, str], list[dict]] = defaultdict(list)
     for r in pos_rows:
@@ -375,11 +454,34 @@ def add_negatives(
                 bounds=time_bounds,
             ):
                 continue
+            right_blank_slots = sample_right_blank_slots(rng, right_blank_range)
+            blank_layout_enabled = right_blank_range is not None
             # V2 additionally constrains the full window to frozen time bounds.
             # The legacy path keeps its historical split-label-only behavior.
             out_stem = f"{symbol}_{w0:06d}_w{win_len}_neg"
+            if blank_layout_enabled:
+                out_stem += f"_rb{right_blank_slots:02d}"
             out_img = dst / "images" / split / f"{out_stem}.png"
             out_lbl = dst / "labels" / split / f"{out_stem}.txt"
+            config_args: dict[str, object] = {
+                "protocol": protocol,
+                "kind": "empty_bg",
+            }
+            if time_bounds is not None:
+                config_args["negative_split"] = "strict_time"
+            layout_fields: dict[str, object] = {}
+            renderer_version = RENDERER_VERSION
+            if blank_layout_enabled:
+                config_args.update(
+                    right_blank_slots=right_blank_slots,
+                    renderer=BLANK_RENDERER_VERSION,
+                )
+                layout_fields = {
+                    "right_blank_slots": right_blank_slots,
+                    "canvas_slots": win_len + right_blank_slots,
+                }
+                renderer_version = BLANK_RENDERER_VERSION
+            config_hash = config_hash_of(**config_args)
             if time_bounds is not None and out_stem in recorded_stems:
                 continue
             if out_img.exists():
@@ -399,19 +501,20 @@ def add_negatives(
                             "out_img": str(out_img),
                             "out_lbl": str(out_lbl),
                             "image_sha256": sha256_file(out_img),
-                            "config_hash": config_hash_of(
-                                protocol=protocol,
-                                kind="empty_bg",
-                                negative_split="strict_time",
-                            ),
-                            "renderer_version": RENDERER_VERSION,
+                            "config_hash": config_hash,
+                            "renderer_version": renderer_version,
                             "stage": "B",
+                            **layout_fields,
                         }
                     )
                     recorded_stems.add(out_stem)
                 got += 1
                 continue
-            img, _tf = render_chart(win_df, out_path=None)
+            img, _tf = render_for_protocol(
+                win_df,
+                right_blank_slots=right_blank_slots,
+                blank_layout_enabled=blank_layout_enabled,
+            )
             out_img.parent.mkdir(parents=True, exist_ok=True)
             out_lbl.parent.mkdir(parents=True, exist_ok=True)
             cv2.imwrite(str(out_img), img)
@@ -429,17 +532,10 @@ def add_negatives(
                     "out_img": str(out_img),
                     "out_lbl": str(out_lbl),
                     "image_sha256": sha256_file(out_img),
-                    "config_hash": (
-                        config_hash_of(
-                            protocol=protocol,
-                            kind="empty_bg",
-                            negative_split="strict_time",
-                        )
-                        if time_bounds is not None
-                        else config_hash_of(protocol=protocol, kind="empty_bg")
-                    ),
-                    "renderer_version": RENDERER_VERSION,
+                    "config_hash": config_hash,
+                    "renderer_version": renderer_version,
                     "stage": "B",
+                    **layout_fields,
                 }
             )
             if time_bounds is not None:
@@ -546,6 +642,8 @@ def run_preview(
     *,
     protocol: str = PROTOCOL,
     fixed_window_len: int | None = None,
+    right_blank_range: tuple[int, int] | None = None,
+    target_box_position_range: tuple[float, float] | None = None,
 ) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     events = load_source_events(src_manifest)
@@ -564,12 +662,16 @@ def run_preview(
                 draw_box=True,
                 protocol=protocol,
                 fixed_window_len=fixed_window_len,
+                right_blank_range=right_blank_range,
+                target_box_position_range=target_box_position_range,
             )
         except Skip as ex:
             print(f"skip {e['stem']}: {ex.reason} {ex.detail}")
             continue
         res.split = splits[e["stem"]]
-        results.append(asdict(res))
+        results.append(
+            serialize_positive(res, blank_layout_enabled=right_blank_range is not None)
+        )
         print(json.dumps(results[-1], ensure_ascii=False))
     (out_dir / "preview_summary.json").write_text(json.dumps(results, indent=2))
     print(f"preview → {out_dir} n={len(results)}")
@@ -585,7 +687,10 @@ def run_full(
     strict_negative_time_split: bool = False,
     protocol: str = PROTOCOL,
     fixed_window_len: int | None = None,
+    right_blank_range: tuple[int, int] | None = None,
+    target_box_position_range: tuple[float, float] | None = None,
 ) -> dict:
+    validate_right_blank_range(right_blank_range)
     events = load_source_events(src_manifest)
     splits = assign_time_splits(events)
     for sub in ("images/train", "images/val", "labels/train", "labels/val"):
@@ -618,12 +723,16 @@ def run_full(
                 rng=local,
                 protocol=protocol,
                 fixed_window_len=fixed_window_len,
+                right_blank_range=right_blank_range,
+                target_box_position_range=target_box_position_range,
             )
         except Skip as ex:
             skip_reasons[ex.reason] += 1
             continue
         res.split = split
-        d = asdict(res)
+        d = serialize_positive(
+            res, blank_layout_enabled=right_blank_range is not None
+        )
         # audit expects small_bars as list
         d["small_bars"] = list(res.small_bars)
         d["small_local"] = list(res.small_local)
@@ -642,6 +751,7 @@ def run_full(
         time_bounds=time_bounds,
         protocol=protocol,
         fixed_window_len=fixed_window_len,
+        right_blank_range=right_blank_range,
     )
 
     write_yaml(dst)
@@ -691,8 +801,20 @@ def run_full(
             "train": _range(pos_rows, "train"),
             "val": _range(pos_rows, "val"),
         },
-        "renderer_version": RENDERER_VERSION,
+        "renderer_version": (
+            BLANK_RENDERER_VERSION if right_blank_range is not None else RENDERER_VERSION
+        ),
     }
+    if right_blank_range is not None:
+        summary.update(
+            right_blank_range=list(right_blank_range),
+            target_box_position_range=(
+                None
+                if target_box_position_range is None
+                else list(target_box_position_range)
+            ),
+            blank_slots_are_market_bars=False,
+        )
     (dst / "w20_manifest.json").write_text(json.dumps(pos_rows, indent=2))
     (dst / "w20_neg_manifest.json").write_text(json.dumps(neg_rows, indent=2))
     (dst / "w20_summary.json").write_text(json.dumps(summary, indent=2))

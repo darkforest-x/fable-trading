@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>P2 Local Signal V2 可视化审计 · 600 样本</title>
+  <style>
+    :root { color-scheme: light; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    body { margin: 0; background: #f4f6f8; color: #18202a; }
+    header { position: sticky; top: 0; z-index: 2; padding: 16px 24px; background: rgba(255,255,255,.96); border-bottom: 1px solid #d9dee5; }
+    h1 { margin: 0 0 8px; font-size: 22px; }
+    nav { display: flex; gap: 10px; flex-wrap: wrap; }
+    nav a { padding: 7px 12px; border-radius: 7px; background: #e8eef7; color: #1454a3; text-decoration: none; font-weight: 600; }
+    main { max-width: 1800px; margin: 0 auto; padding: 24px; }
+    section { margin: 0 0 32px; padding: 18px; background: white; border: 1px solid #dfe3e8; border-radius: 12px; box-shadow: 0 3px 12px rgba(22,33,50,.06); }
+    h2 { margin: 0 0 4px; font-size: 19px; }
+    p { margin: 5px 0 14px; color: #56606d; }
+    img { display: block; width: 100%; height: auto; border: 1px solid #e1e5ea; background: white; }
+    .green { color: #079447; } .red { color: #d83333; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>P2 Local Signal V2 可视化审计：3 张 montage × 每张 200 个样本 = 600</h1>
+    <nav>
+      <a href="#positive">正例 200</a>
+      <a href="#train-hard">训练 Hard Negative 200</a>
+      <a href="#heldout-hard">独立 Hard Negative 200</a>
+      <a href="#distribution">分布审计</a>
+    </nav>
+  </header>
+  <main>
+    <section id="positive">
+      <h2 class="green">正例 montage · 200 个样本</h2>
+      <p>每个小格是一张独立 30-bar 图；绿框是训练标签。</p>
+      <img src="../output/p2_local_signal_v2_visual_audit_20260811/positive_montage_200.png" alt="200 positive samples">
+    </section>
+    <section id="train-hard">
+      <h2 class="red">训练 Hard Negative montage · 200 个样本</h2>
+      <p>每个小格是一张独立负样本；红框是旧 B2 模型在 conf=0.35 时的误报位置。</p>
+      <img src="../output/p2_local_signal_v2_visual_audit_20260811/train_hard_negative_montage_200.png" alt="200 training hard negatives">
+    </section>
+    <section id="heldout-hard">
+      <h2 class="red">独立 Hard Negative montage · 200 个样本</h2>
+      <p>来自后续 val 时间块，不进入训练、early stopping 或 best checkpoint 选择。</p>
+      <img src="../output/p2_local_signal_v2_visual_audit_20260811/heldout_hard_negative_montage_200.png" alt="200 held-out hard negatives">
+    </section>
+    <section id="distribution">
+      <h2>几何与样本分布</h2>
+      <img src="../output/p2_local_signal_v2_visual_audit_20260811/geometry_and_counts.png" alt="geometry and sample distributions">
+    </section>
+  </main>
+</body>
+</html>
