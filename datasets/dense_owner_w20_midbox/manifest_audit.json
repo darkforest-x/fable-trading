@@ -1,0 +1,55 @@
+{
+  "dataset": "dense_owner_w20_midbox",
+  "generated_at": "2026-08-10T11:41:03.029361+00:00",
+  "counts": {
+    "manifest_rows": 7570,
+    "disk_images": 7570,
+    "disk_labels": 7570,
+    "by_sample_type": {
+      "positive": 2635,
+      "easy_negative": 2635,
+      "hard_negative": 2300
+    }
+  },
+  "invariants": {
+    "manifest_matches_images": true,
+    "images_match_labels": true,
+    "no_duplicate_sample_id": true,
+    "no_event_crosses_split": true,
+    "all_rows_have_image": true,
+    "all_rows_have_label": true,
+    "all_rows_hashed": true
+  },
+  "gaps": {
+    "images_without_manifest_row": [],
+    "n_images_without_manifest_row": 0,
+    "manifest_rows_without_image": [],
+    "n_manifest_rows_without_image": 0,
+    "duplicate_sample_ids": [],
+    "events_crossing_split": []
+  },
+  "null_counts_by_spec12_field": {
+    "sample_id": 0,
+    "event_id": 4935,
+    "sample_type": 0,
+    "hard_negative_type": 2635,
+    "symbol": 0,
+    "timeframe": 0,
+    "anchor_bar_index": 4935,
+    "confirm_delay": 7570,
+    "decision_bar_index": 7570,
+    "window_len": 0,
+    "anchor_x_ratio": 4935,
+    "box_start_bar": 4935,
+    "box_end_bar": 4935,
+    "box_xyxy_px": 4935,
+    "split": 0,
+    "source_dataset_version": 0,
+    "source_label_id": 4935,
+    "renderer_version": 0,
+    "config_hash": 0,
+    "image_sha256": 0,
+    "label_sha256": 0,
+    "created_at": 0
+  }
+}

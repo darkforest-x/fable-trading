@@ -11,7 +11,9 @@ Protocol:
   - weights: hardneg_c1 best.pt (override with --weights)
   - long TP5/SL2/H72 on ATR14 at signal bar; entry = next open
   - score = YOLO conf; no L2 judgment (w20 has no trained L2)
-  - ledger: data/forward_log_w20_midbox_shadow.csv
+  - ledger: analysis/output/forward_log_w20_midbox_shadow.csv
+    (moved out of data/ on 2026-08-10: 铁律 6 says data/ never enters git, and
+    this shadow ledger is an experiment artifact that must stay reviewable.)
 
 Target: accumulate 100 closed trades for prospective detector gate.
 
@@ -66,7 +68,7 @@ from src.detection.owner_eval import is_eval_symbol  # noqa: E402
 from src.judgment.candidates import MIN_GAP_BARS  # noqa: E402
 from src.judgment.labeling import HORIZON_BARS  # noqa: E402
 
-SHADOW_LOG = PROJECT / "data" / "forward_log_w20_midbox_shadow.csv"
+SHADOW_LOG = PROJECT / "analysis" / "output" / "forward_log_w20_midbox_shadow.csv"
 STATUS_JSON = PROJECT / "analysis" / "output" / "w20_shadow_status.json"
 DEFAULT_WEIGHTS = (
     PROJECT / "analysis/output/w20_overnight/cycle_hardneg_c1/weights/best.pt"

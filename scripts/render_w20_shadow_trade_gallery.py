@@ -38,7 +38,7 @@ LOOKBACK = 100
 LOOKAHEAD = 100
 WINDOW = 24
 TIP_EDGE = 2
-DEFAULT_LOG = PROJECT / "data" / "forward_log_w20_midbox_shadow.csv"
+DEFAULT_LOG = PROJECT / "analysis" / "output" / "forward_log_w20_midbox_shadow.csv"
 DEFAULT_OUT = PROJECT / "analysis" / "output" / "w20_shadow_trade_gallery"
 
 

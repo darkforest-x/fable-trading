@@ -74,6 +74,13 @@
 - **把窗口缩短当成因果化** → 决定看得见多少未来的是**窗口右端落在哪根**，不是窗口有多长。
   w20_midbox 从 200 根缩到 20–30 根，95.3% 的样本窗口右端仍晚于 decision bar（中位 9 根未来 K）。
   见 `docs/learnings/window-length-does-not-control-future-visibility.md`。
+- **哈希对上就宣布数据集可复现** → 数据集有多个自由度：像素内容、split 落点、样本集合。
+  w20_midbox 重建时 2635/2635 图片逐字节一致，**但 405 个样本的 split 落点全错**。
+  见 `docs/learnings/reproducibility-is-per-axis-not-a-boolean.md`。
+- **默认「代码没变所以结果没变」** → 先比时间戳：产物 `generated_at` 早于
+  `git log --diff-filter=A` 的 builder 首次入库时间 = 跑出它的代码不在 git 里，
+  一切复现声明未经验证。**先提交 builder，再跑构建。**
+  见 `docs/learnings/artifacts-built-before-their-builder-landed.md`。
 - **改一道新鲜度门忘了另两道** → 三门必须同值，见实盘纪律 7。
 - **往脉冲里塞实验扫描** → 超 15min 节拍 = 结构性挡 tip；见实盘纪律 8。
 - **自动 promote / 清 forward_log** → 禁止；owner 点头。
