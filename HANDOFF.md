@@ -2,6 +2,34 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-11 — Local Signal V2 P1 历史发现级通过，B2 胜出）
+
+**直接裁决：30 根固定因果窗 B2 通过冻结事件门并成为 P1 候选；只接受历史发现，不具备生产资格。**
+
+- 统一尺 715 endpoints（358 正事件 + 357 easy negatives），最大时间 2026-05-03 10:45 UTC；
+  holdout 消耗 0。
+- 冻结绝对门：Event Precision≥0.50、Recall≥0.50、FP/1000≤250。A 旧模型最大 Recall
+  仅 0.0754，无法建立同 Recall 相对门；绝对门在候选结果前冻结。
+- B2 fixed-30 @ conf=0.35：P=0.8193、R=0.7346、F1=0.7747、FP/1000=81.12、
+  duplicates/event=0.0076，PASS / selected。
+- C3 range-20–30 @ conf=0.45：P=0.7471、R=0.7095、F1=0.7278、FP/1000=120.28，PASS。
+- B1 fixed-24 没有合格工作点：best-F1 @ 0.10 时 P=0.3543、R=0.9916、FP/1000=904.90，FAIL。
+- dataset seed=20260807；三臂实际 training seed=0。字段歧义已勘误，trainer/3060 wrapper
+  现在显式传递 seed；没有 seed sweep。
+- 568 tests passed / 2 skipped。未读 holdout、未改 ACTIVE、未 promote、未部署、未下单。
+
+交付物：
+
+- `analysis/html/p1_local_signal_v2_report_20260811.html`
+- `analysis/p1_local_signal_v2_report_20260811.md`
+- `reports/P1_EXPERIMENT_REPORT.md`
+- `reports/ACCEPTANCE_DECISION.json`
+- `analysis/output/p1_local_signal_v2/comparison.json`
+- `analysis/output/p1_local_signal_v2/training/B2/weights/best.pt`
+
+**停止点：P1。** 下一步由 owner 决定是否以 B2 30 根窗为固定基线，只增加 hard-negative
+mining 这一变量进入 P2；禁止自动 promote、读 holdout、部署或下单。
+
 ## ⚡ 当前真相（2026-08-10 — Local Signal V2 P0 修复通过，停在 owner gate）
 
 **直接裁决：旧 Stage-B V1 的 P0 全绿是误报；strict-negative V2 已修复并通过 P0。**

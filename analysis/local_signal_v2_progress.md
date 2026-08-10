@@ -1,36 +1,38 @@
 # Local Signal V2 — 进度一页纸
 
-**更新**：2026-08-10 13:34 UTC
+**更新**：2026-08-11 00:32 CST
 
 ## 当前裁决
 
-P0 数据修复已通过；P1 被重置，等待 owner 决策。旧 Stage-B 数据的负样本没有真正按时间切分，旧权重也使用过非零 HSV，因此不能作为修复后 V2 候选。
+P1 历史发现级对照已完成，B2 30 根固定因果窗胜出；生产级仍未验收。
 
-| 阶段 | 状态 | 产物 |
+| 阶段/实验 | 状态 | 核心结果 |
 |---|---|---|
-| V1 Stage B | ❌ P0 FAIL | train 越界 negatives 317；val 过早 negatives 296 |
-| strict-negative V2 | ✅ P0 8/8 PASS | `datasets/local_signal_v2_stageb_strictneg_v2` |
-| Builder Git 锚点 | ✅ | `471f854`；数据在提交后重建 |
-| P0 报告 | ✅ | `analysis/html/p0_local_signal_v2_stageb_strictneg_v2_report.html` |
-| 24-event preview | ✅ 24 个不同币种 | `analysis/output/local_signal_v2_stageb_strictneg_v2_preview/` |
-| 旧 P1 cold 权重 | ❌ invalidated | 绑定 V1 数据 + hsv_s/v=0.05；禁止冒充 V2 |
-| 新 P1 | ⏸ 未训练 | 需 owner 批准并先冻结 A/B/C 对照与 event gates |
-| P2 / P3 | ⛔ 不进入 | P1 未完成 |
+| P0 strict-negative V2 | ✅ 8/8 PASS | 2,388 positive + 2,388 easy negative；时间切分与守恒通过 |
+| A legacy 200 | ❌ FAIL | max Recall 7.54%，FP/1000=1,239.16 |
+| B1 fixed 24 | ❌ FAIL | 无合格工作点；best-F1 点 FP/1000=904.90 |
+| B2 fixed 30 | ✅ PASS / selected | conf=.35；P 81.93%、R 73.46%、F1 77.47%、FP/1000 81.12 |
+| C3 range 20–30 | ✅ PASS | conf=.45；P 74.71%、R 70.95%、F1 72.78%、FP/1000 120.28 |
+| P1 machine decision | ✅ historical accepted | `production_eligible=false`；holdout 消耗 0 |
+| P2 | ⏸ owner gate | 推荐只增加 hard-negative mining，固定 B2 其余条件 |
+
+## 当前项目方向
+
+L1 YOLO 从旧 200 根全局图转向 30 根严格因果局部图与小结构框，只负责候选发现；L2
+LightGBM/规则层继续负责交易判断。当前结果只证明历史发现可行，不证明经济 edge 或实盘精度。
 
 ## 禁止
 
-- 自动进入 P1 / P2
-- 复用旧权重作为 strict-negative V2 结果
-- promote ACTIVE / owner_best
-- 真下单、清 forward_log、未批准读取 holdout
+- 自动 promote B2 / ACTIVE 或部署
+- 未批准读取 holdout
+- 把 P1 历史 precision 当成 forward/生产 precision
+- 同时改变窗口、hard negatives、seed 或事件尺
+- 真下单、改仓、清 forward_log
 
-## 机器裁决
-
-`reports/ACCEPTANCE_DECISION.json` → phase=P0、decision=accepted、`p1_train_complete=false`。
+## 交付入口
 
 ```bash
-open analysis/html/p0_local_signal_v2_stageb_strictneg_v2_report.html
+open analysis/html/p1_local_signal_v2_report_20260811.html
 cat reports/ACCEPTANCE_DECISION.json
-.venv/bin/python scripts/audit_local_signal_v2.py \
-  --dataset datasets/local_signal_v2_stageb_strictneg_v2
+cat analysis/output/p1_local_signal_v2/comparison.json
 ```

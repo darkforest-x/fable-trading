@@ -52,6 +52,22 @@ def summarize_arm(result: dict, gate: dict) -> dict:
     }
 
 
+def select_candidate(arms: list[dict]) -> dict | None:
+    """Choose the quietest passing arm at its frozen gate operating point."""
+    passing = [arm for arm in arms if arm["discovery_gate_pass"]]
+    if not passing:
+        return None
+    return min(
+        passing,
+        key=lambda arm: (
+            arm["gate_operating_point"]["fp_per_1000_bars"],
+            -arm["gate_operating_point"]["event_precision"],
+            -arm["gate_operating_point"]["event_recall"],
+            arm["arm"],
+        ),
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--results-dir", type=Path, default=DEFAULT_RESULTS)
@@ -68,12 +84,18 @@ def main() -> int:
             missing.append(arm)
             continue
         arms.append(summarize_arm(json.loads(path.read_text()), gate))
+    selected = select_candidate(arms)
     result = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "gate": gate,
         "arms": arms,
         "missing_arms": missing,
         "matrix_complete": not missing,
+        "selected_candidate": selected["arm"] if selected and not missing else None,
+        "historical_discovery_decision": (
+            "accepted" if selected and not missing else "needs_more_data" if missing else "rejected"
+        ),
+        "production_eligible": False,
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=2))

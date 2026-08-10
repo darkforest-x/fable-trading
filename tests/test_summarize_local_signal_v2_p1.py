@@ -1,5 +1,5 @@
 """Tests for the frozen P1 discovery-gate selector."""
-from scripts.summarize_local_signal_v2_p1 import select_gate_point
+from scripts.summarize_local_signal_v2_p1 import select_candidate, select_gate_point
 
 
 GATE = {
@@ -34,3 +34,25 @@ def test_gate_selects_lowest_fp_then_higher_precision():
         row(0.4, 0.75, 0.55, 80),
     ]
     assert select_gate_point(rows, GATE)["threshold"] == 0.4
+
+
+def test_candidate_selector_uses_quietest_passing_arm():
+    arms = [
+        {"arm": "B1", "discovery_gate_pass": False, "gate_operating_point": None},
+        {
+            "arm": "B2",
+            "discovery_gate_pass": True,
+            "gate_operating_point": row(0.35, 0.82, 0.73, 81),
+        },
+        {
+            "arm": "C3",
+            "discovery_gate_pass": True,
+            "gate_operating_point": row(0.45, 0.75, 0.71, 120),
+        },
+    ]
+    assert select_candidate(arms)["arm"] == "B2"
+
+
+def test_candidate_selector_rejects_when_nothing_passes():
+    arms = [{"arm": "B1", "discovery_gate_pass": False, "gate_operating_point": None}]
+    assert select_candidate(arms) is None
