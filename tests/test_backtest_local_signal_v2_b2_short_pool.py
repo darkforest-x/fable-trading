@@ -3,6 +3,7 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
+from scripts.audit_local_signal_v2_b2_density import evaluation_density
 from scripts.backtest_local_signal_v2_b2_short_pool import (
     build_matched_controls,
     causal_gap_dedup,
@@ -81,3 +82,23 @@ def test_matched_control_records_month_fallback():
     assert len(matched) == 1
     assert bool(matched.iloc[0]["fallback_same_symbol_month"])
     assert meta["n_month_fallback_attempts"] == 1
+
+
+def test_density_audit_counts_endpoints_not_boxes():
+    rows = [
+        {"eval_id": "p1", "sample_type": "positive"},
+        {"eval_id": "p2", "sample_type": "positive"},
+        {"eval_id": "n1", "sample_type": "easy_negative"},
+        {"eval_id": "n2", "sample_type": "easy_negative"},
+    ]
+    predictions = {
+        "p1": [{"confidence": 0.4}, {"confidence": 0.39}],
+        "p2": [],
+        "n1": [{"confidence": 0.5}, {"confidence": 0.45}],
+        "n2": [{"confidence": 0.2}],
+    }
+    out = evaluation_density({"predictions": predictions}, rows, 0.35)
+    assert out["positive_endpoints_with_any_box"] == 1
+    assert out["easy_negative_endpoints_with_any_box"] == 1
+    assert out["easy_negative_endpoint_fire_rate"] == 0.5
+    assert out["all_endpoint_fire_rate"] == 0.5

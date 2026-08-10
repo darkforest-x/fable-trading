@@ -1,0 +1,132 @@
+{
+  "generated_at": "2026-08-10T17:32:02.020834+00:00",
+  "weights": "analysis/output/p1_local_signal_v2/training/B2/weights/best.pt",
+  "selected_threshold": 0.35,
+  "decision": {
+    "p1_localization_hypothesis": "historical_discovery_pass_unchanged",
+    "b2_operating_density": "failed_on_enriched_proposal_pool",
+    "continuous_market_density": "not_measured",
+    "executable_order_count": "not_available_without_P3_judgment_and_execution",
+    "next_phase": "P2_hard_negative_mining_and_continuous_density_replay",
+    "p3_judgment": "blocked_until_L1_density_is_credible"
+  },
+  "grain_reconciliation": {
+    "p1_event_ruler": {
+      "rows": 715,
+      "description": "balanced positive-event/easy-negative endpoints; not continuous market exposure"
+    },
+    "proposal_pool": {
+      "rows": 7795,
+      "symbols": 230,
+      "description": "v10 proposal-led short-L2 rows; already prefiltered and 18-bar spaced",
+      "source_path": "data/judgment_v10_wide.csv",
+      "source_role": "frozen_l1_proposal_exact_window_replay"
+    },
+    "continuous_market_windows": {
+      "measured": false,
+      "reason": "the replay never scanned every symbol x every causal tip endpoint"
+    }
+  },
+  "selected_threshold_evidence": {
+    "validation": {
+      "positive_endpoints": 358,
+      "easy_negative_endpoints": 357,
+      "positive_endpoints_with_any_box": 263,
+      "easy_negative_endpoints_with_any_box": 56,
+      "easy_negative_endpoint_fire_rate": 0.1568627450980392,
+      "all_endpoints_with_any_box": 319,
+      "all_endpoint_fire_rate": 0.4461538461538462
+    },
+    "proposal_pool": {
+      "fires": 3880,
+      "fire_rate": 0.49775497113534317,
+      "fires_per_calendar_span_day": 88.26540284360189,
+      "median_fires_per_active_utc_day": 78.0,
+      "p90_fires_per_active_utc_day": 125.80000000000001,
+      "max_fires_per_active_utc_day": 180
+    },
+    "proposal_pool_fires": 3880,
+    "proposal_pool_unique_event_groups": 3715,
+    "event_group_dedup_reduction": 0.04252577319587625
+  },
+  "threshold_sensitivity_diagnostic_only": [
+    {
+      "threshold": 0.35,
+      "validation_recall": 0.7346368715083799,
+      "validation_precision": 0.8193146417445483,
+      "validation_easy_negative_fire_rate": 0.1568627450980392,
+      "proposal_pool_fires": 3880,
+      "proposal_pool_fire_rate": 0.49775497113534317,
+      "proposal_pool_fires_per_calendar_span_day": 88.26540284360189
+    },
+    {
+      "threshold": 0.4,
+      "validation_recall": 0.4329608938547486,
+      "validation_precision": 0.8757062146892656,
+      "validation_easy_negative_fire_rate": 0.06162464985994398,
+      "proposal_pool_fires": 1995,
+      "proposal_pool_fire_rate": 0.25593329057087877,
+      "proposal_pool_fires_per_calendar_span_day": 45.38388625592417
+    },
+    {
+      "threshold": 0.45,
+      "validation_recall": 0.06983240223463687,
+      "validation_precision": 0.8928571428571429,
+      "validation_easy_negative_fire_rate": 0.008403361344537815,
+      "proposal_pool_fires": 367,
+      "proposal_pool_fire_rate": 0.04708146247594612,
+      "proposal_pool_fires_per_calendar_span_day": 8.348815165876777
+    },
+    {
+      "threshold": 0.5,
+      "validation_recall": 0.0223463687150838,
+      "validation_precision": 1.0,
+      "validation_easy_negative_fire_rate": 0.0,
+      "proposal_pool_fires": 107,
+      "proposal_pool_fire_rate": 0.01372674791533034,
+      "proposal_pool_fires_per_calendar_span_day": 2.434123222748815
+    }
+  ],
+  "implementation_checks": {
+    "candidate_id_unique": true,
+    "minimum_same_symbol_gap_bars": 18,
+    "minimum_gap_expected": 18,
+    "edge2_edge3_disagreements": 0,
+    "box_count_distribution": {
+      "0": 3915,
+      "1": 3860,
+      "2": 19,
+      "3": 1
+    },
+    "transport_parity": {
+      "samples": 8,
+      "box_count_mismatches": 0,
+      "max_abs_box_or_conf_delta": 0.0,
+      "accepted": true
+    }
+  },
+  "root_cause": {
+    "verified": [
+      "conf=0.35 fires on 15.69% of easy-negative validation endpoints",
+      "conf=0.35 fires on 49.78% of an already-prefiltered v10 proposal pool",
+      "candidate IDs are unique and source proposals already enforce an 18-bar gap",
+      "all B2 pool boxes are already inside both edge2 and edge3 gates",
+      "raising confidence enough to reduce density collapses validation recall"
+    ],
+    "rejected": [
+      "duplicate candidate rows",
+      "missing same-symbol 18-bar dedup",
+      "tip-edge mapping inflation",
+      "array-versus-PNG model-input transport mismatch"
+    ],
+    "likely": "balanced 1:1 easy-negative P1 selection did not represent hard-negative or continuous-market base rates",
+    "confidence": "high"
+  },
+  "safety": {
+    "holdout_read": false,
+    "threshold_changed": false,
+    "model_promoted": false,
+    "deployed": false,
+    "orders_sent": false
+  }
+}

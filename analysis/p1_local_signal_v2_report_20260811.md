@@ -3,10 +3,12 @@
 **日期**：2026-08-11
 
 **阶段**：P1 历史发现级对照
-**直接裁决**：`B2_local_fixed_w30_causal` 通过冻结绝对门并成为本轮候选；P1 局部化假设成立。该结论不等于生产晋升，holdout/独立 forward 未运行，`production_eligible=false`。
+**直接裁决（已按后续密度审计修正）**：`B2_local_fixed_w30_causal` 只证明 P1 局部化历史发现假设；当前 operating density 失败。它不得 promote，P3 判断层在 P2 hard-negative mining 与连续 causal-tip 密度回放通过前阻断。holdout/独立 forward 未运行，`production_eligible=false`。
 
 ## 1. 结论先行
 
+- **2026-08-11 后续密度审计纠正**：此前把 proposal-pool 的 3,880 个 L1 fire rows 写成“交易/开单”是错误的，它们不是订单；但 B2 也确实放得过宽。conf=0.35 命中 56/357 easy-negative endpoints（15.69%），并命中已预筛 v10 proposal pool 的 3,880/7,795 行（49.78%，88.27 fires/ledger-day）。连续市场与可执行订单数尚未测量。
+- 高计数不是候选重复、edge 映射或数组/PNG 推理差异；把 conf 抬到0.45虽降到8.35 fires/日，但正例召回从73.46%塌到6.98%，不能靠阈值修。
 - B2（30 根固定因果窗）在 conf=0.35 达到 Event Precision 81.93%、Recall 73.46%、F1 77.47%、FP/1000 bars 81.12，三道冻结门全部通过。
 - C3（20–30 根 causal-right-range）也通过；其低误报工作点为 Precision 74.71%、Recall 70.95%、F1 72.78%、FP/1000=120.28。
 - B2 相对 C3：Precision +7.23pp、Recall +2.51pp、F1 +4.69pp、FP/1000 降 32.56%、重复检测率降 95.05%。因此机器选择 B2。
@@ -85,11 +87,11 @@ C3 的纯 best-F1 点在 conf=0.40：Precision 67.95%、Recall 83.52%、F1 74.94
 
 ## 8. 归因与项目方向
 
-当前证据支持的方向是：保留“两层架构”，但 L1 YOLO 从 200 根全局图转向 30 根严格因果局部图与小结构框；L1 只做候选发现，L2 LightGBM/规则层继续承担交易判断。
+当前证据只支持继续验证“两层架构”的局部输入方向：L1 YOLO 从200根全局图转向30根严格因果局部图与小结构框。但当前B2 operating density失败，不能直接把候选送入P3 LightGBM/规则判断层。
 
 B1 的失败说明“更短”不是越短越好。24 根窗让模型出现明显置信度断层：低阈值几乎全报，高一档阈值又丢掉大部分事件。30 根窗在同一数据和配方下形成了更宽的可用工作区；C3 的范围窗可行，但重复框和 FP 高于 B2。本轮只证明当前历史样本上的行为差异，不声称 30 是所有市场/周期的普遍最优值。
 
-P1 已满足进入 P2 设计讨论的必要条件：C3 相对旧模型显著降低误报且不崩召回，B2 更进一步。但 P2 不自动启动；下一轮若 owner 批准，应只增加 hard-negative mining 这一变量，保持 B2 30 根窗、事件尺和训练配方不变。
+下一轮是交接规范中的P2 hard-negative mining：只增加难负例，保持B2 30根窗、事件尺和训练配方不变；同时在独立的非holdout时间块执行连续causal-tip endpoint密度回放。P2密度与事件门通过后才允许进入P3判断层。
 
 ## 9. 经济指标与对照组适用性
 
@@ -109,7 +111,7 @@ P1 已满足进入 P2 设计讨论的必要条件：C3 相对旧模型显著降�
 - 本轮共同尺来自既有历史标签，不是独立未见 forward；所以只能做发现级选择，不能 promote。
 - 阈值在同一 pre-holdout validation 曲线上裁决，没有独立 confirmation；生产结论仍为 needs_more_data。
 - 只跑了一个 training seed；虽然三臂公平一致，但尚未验证 seed 稳定性。
-- 当前只有 easy negatives；B2 在 hard negatives、不同 regime 和新鲜前向上的误报率未知。
+- 当前只有 easy negatives；后续密度审计已显示其中15.69% endpoint会触发，而已预筛proposal pool触发率49.78%，所以当前B2密度按失败处理。hard negatives、连续市场和新鲜前向仍未验证。
 - A 的旧训练几何与当前同 decision 小 anchor 任务不对齐，因此 A 的失败主要说明 legacy 权重不适合新任务；不能把 93.45% FP 降幅外推为线上提升。
 - B2 优于 C3 可能同时包含上下文长度、位置分布和置信度校准效应；本轮不作更强因果外推。
 - 未读取 holdout，未改 ACTIVE，未部署，未下单。
@@ -184,6 +186,7 @@ done
 
 ## 13. 下一步选项（需 owner 决策）
 
-- 推荐：进入 P2 单变量 hard-negative mining，基线固定为 B2 30 根窗；不改窗口、seed、阈值网格或事件尺。
+- 推荐：进入 P2 单变量 hard-negative mining，基线固定为 B2 30 根窗；不改窗口、seed、阈值网格或事件尺，并增加独立时间块的连续causal-tip密度回放。
+- P3 LightGBM/规则判断层在P2密度与事件门通过前阻断。
 - 可选：先做 B2 多 seed 稳定性复核，再进入 hard negatives；代价是额外训练时间，但不消耗 holdout。
 - 当前禁止：直接 promote B2、读取 holdout、改 ACTIVE、部署或下单。

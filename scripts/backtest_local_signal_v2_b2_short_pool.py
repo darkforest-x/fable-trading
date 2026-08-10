@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Replay the frozen Local Signal V2 B2 detector on the immutable short-L2 pool.
+"""Replay frozen Local Signal V2 B2 outcomes on an immutable proposal pool.
 
-This is a pre-holdout, candidate-pool economic replay, not a market-wide scan
-and not a production backtest.  It answers whether B2's fixed-30 local visual
-filter improves the already-frozen short candidate pool under the existing
-next-open, TP5/SL2/72-bar outcomes.
+This is a counterfactual outcome replay for L1 fire rows, not an order backtest,
+market-wide scan, or production simulation. It asks what the frozen labels look
+like if every B2 fire in an already-prefiltered v10 short-L2 proposal ledger is
+treated as short. It cannot estimate continuous-market fires or executable
+orders because P2 density, P3 judgment, and execution are outside its grain.
 
 Inputs and causal semantics:
   - L2 rows: ``data/p1/p1_short_l2_preholdout_aade2a334448d644.csv``.
@@ -446,7 +447,10 @@ def main() -> int:
     summary = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "scope": "preholdout_short_l2_candidate_pool_replay",
-        "decision_use": "economic feasibility of B2 as a visual filter before P2; not production",
+        "decision_use": "counterfactual outcome diagnostic for L1 fire rows; not orders, continuous-market density, or production",
+        "row_semantics": "l1_fire_candidate_outcome_counterfactual_not_orders",
+        "continuous_market_scan": False,
+        "executable_orders": None,
         "dataset": str(args.dataset.relative_to(PROJECT)),
         "weights": str(args.weights.relative_to(PROJECT)),
         "weights_sha256": __import__("hashlib").sha256(args.weights.read_bytes()).hexdigest(),

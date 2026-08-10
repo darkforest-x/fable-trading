@@ -3,80 +3,92 @@
   "manifest": {
     "version": 1,
     "surface": "report",
-    "title": "Local Signal V2 B2：pre-holdout 短向候选池经济回放",
-    "description": "最新 B2 权重在冻结 short-L2 候选池上的因果经济回放；不读取 holdout。",
+    "title": "Local Signal V2 B2：候选密度与收益诊断",
+    "description": "纠正L1 fire与订单口径，并诊断B2在验证尺和预筛proposal pool上的过度触发；不读取holdout。",
     "generatedAt": "2026-08-10T17:07:16.250146+00:00",
     "cards": [
       {
-        "id": "selected_n",
-        "description": "B2 edge3 开火并按同币 18 bars 去重后的短向候选数。",
+        "id": "pool_fire_rate",
+        "description": "conf=0.35 在已经预筛的 v10 proposal pool 中仍然产生 B2 box 的行占比。",
         "dataset": "headline",
-        "sourceId": "replay_source",
+        "sourceId": "density_source",
         "metrics": [
           {
-            "label": "B2 去重信号",
-            "field": "selected_n",
+            "label": "proposal pool 命中率",
+            "field": "pool_fire_rate",
+            "format": "percent"
+          }
+        ]
+      },
+      {
+        "id": "fires_per_day",
+        "description": "3,880 个 L1 fire rows 除以 proposal ledger 的完整日历跨度；不是生产订单/日。",
+        "dataset": "headline",
+        "sourceId": "density_source",
+        "metrics": [
+          {
+            "label": "proposal ledger L1 fires/日",
+            "field": "fires_per_day",
             "format": "number"
           }
         ]
       },
       {
-        "id": "net10",
-        "description": "冻结 gross return 扣 10bp swap taker 往返成本后的逐笔均值。",
+        "id": "easy_negative_rate",
+        "description": "P1 平衡验证尺中，357 个 easy-negative endpoints 里有任意 B2 box 的比例。",
         "dataset": "headline",
-        "sourceId": "replay_source",
+        "sourceId": "density_source",
         "metrics": [
           {
-            "label": "10bp 后均值",
-            "field": "net10_bp",
-            "format": "number",
-            "unit": " bp",
-            "signed": true
-          },
-          {
-            "label": "较未过滤池",
-            "field": "net10_vs_pool_bp",
-            "format": "number",
-            "unit": " bp",
-            "signed": true
+            "label": "easy-negative 命中率",
+            "field": "easy_negative_rate",
+            "format": "percent"
           }
         ]
       },
       {
-        "id": "pf10",
-        "description": "10bp 成本下，正收益总和除以负收益绝对总和。",
+        "id": "validation_recall",
+        "description": "原 P1 选择点的正例 endpoint 召回；提高 conf 虽能降密度，但会迅速破坏该召回。",
         "dataset": "headline",
-        "sourceId": "replay_source",
+        "sourceId": "density_source",
         "metrics": [
           {
-            "label": "10bp 后 PF",
-            "field": "pf10",
-            "format": "number"
-          }
-        ]
-      },
-      {
-        "id": "matched_excess",
-        "description": "同币×同月×ATR 桶匹配随机对照的平均超额；p 为 7 周块精确双侧符号翻转。",
-        "dataset": "headline",
-        "sourceId": "matched_source",
-        "metrics": [
-          {
-            "label": "匹配超额",
-            "field": "matched_excess_bp",
-            "format": "number",
-            "unit": " bp",
-            "signed": true
-          },
-          {
-            "label": "周块 p",
-            "field": "matched_p",
-            "format": "number"
+            "label": "conf=0.35 正例召回",
+            "field": "validation_recall",
+            "format": "percent"
           }
         ]
       }
     ],
     "charts": [
+      {
+        "id": "density_stage_chart",
+        "title": "预筛候选池中的 B2 命中数量",
+        "subtitle": "3,880 是 L1 fire rows；去重为 outcome event group 只减少 4.25%，两者都不是订单。",
+        "type": "bar",
+        "dataset": "density_stages",
+        "sourceId": "density_source",
+        "valueFormat": "number",
+        "encodings": {
+          "x": {
+            "field": "stage",
+            "type": "nominal",
+            "label": "数据粒度"
+          },
+          "y": {
+            "field": "n",
+            "type": "quantitative",
+            "label": "数量"
+          },
+          "tooltip": [
+            {
+              "field": "n",
+              "type": "quantitative",
+              "label": "数量"
+            }
+          ]
+        }
+      },
       {
         "id": "cost_chart",
         "title": "未过滤池与 B2 筛选后的平均净收益",
@@ -152,7 +164,7 @@
             {
               "field": "n",
               "type": "quantitative",
-              "label": "信号"
+              "label": "候选行"
             },
             {
               "field": "pf20",
@@ -216,9 +228,82 @@
     ],
     "tables": [
       {
+        "id": "grain_table",
+        "title": "数量口径：L1 fire 不等于订单",
+        "subtitle": "连续市场触发量与可执行订单数在本轮都没有被计算。",
+        "dataset": "grain",
+        "sourceId": "density_source",
+        "defaultSort": {
+          "field": "grain_order",
+          "direction": "asc"
+        },
+        "layout": "full",
+        "columns": [
+          {
+            "field": "grain_order",
+            "label": "#",
+            "format": "number"
+          },
+          {
+            "field": "grain",
+            "label": "口径",
+            "type": "text"
+          },
+          {
+            "field": "count",
+            "label": "数量",
+            "type": "text"
+          },
+          {
+            "field": "meaning",
+            "label": "含义",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "id": "threshold_table",
+        "title": "阈值敏感性（只诊断，不改阈值）",
+        "subtitle": "依靠抬 conf 压密度会同时摧毁正例召回，不能替代 hard-negative mining。",
+        "dataset": "threshold_density",
+        "sourceId": "density_source",
+        "defaultSort": {
+          "field": "threshold",
+          "direction": "asc"
+        },
+        "layout": "full",
+        "columns": [
+          {
+            "field": "threshold",
+            "label": "conf",
+            "type": "text"
+          },
+          {
+            "field": "recall",
+            "label": "正例召回",
+            "format": "percent"
+          },
+          {
+            "field": "easy_negative_fire_rate",
+            "label": "easy-neg命中率",
+            "format": "percent"
+          },
+          {
+            "field": "proposal_fires",
+            "label": "proposal fires",
+            "format": "number"
+          },
+          {
+            "field": "fires_per_day",
+            "label": "fires/日",
+            "format": "number"
+          }
+        ]
+      },
+      {
         "id": "scope_table",
         "title": "回放口径明细",
-        "subtitle": "最高10%是探索性诊断，不是冻结交易门。",
+        "subtitle": "最高10%是探索性诊断，不是冻结候选门或订单门。",
         "dataset": "scope",
         "sourceId": "replay_source",
         "defaultSort": {
@@ -239,7 +324,7 @@
           },
           {
             "field": "n",
-            "label": "笔数",
+            "label": "候选行",
             "format": "number"
           },
           {
@@ -307,7 +392,7 @@
           },
           {
             "field": "selected_n",
-            "label": "信号",
+            "label": "L1 fire rows",
             "format": "number"
           },
           {
@@ -368,7 +453,7 @@
           },
           {
             "field": "n",
-            "label": "笔数",
+            "label": "候选行",
             "format": "number"
           },
           {
@@ -429,7 +514,7 @@
           },
           {
             "field": "n",
-            "label": "笔数",
+            "label": "候选行",
             "format": "number"
           },
           {
@@ -475,7 +560,7 @@
           },
           {
             "field": "n",
-            "label": "笔数",
+            "label": "候选行",
             "format": "number"
           },
           {
@@ -510,6 +595,35 @@
       }
     ],
     "sources": [
+      {
+        "id": "density_source",
+        "label": "B2 endpoint and proposal-pool density audit",
+        "path": "analysis/output/p1_b2_density_diagnostic_20260811.json",
+        "query": {
+          "engine": "duckdb",
+          "language": "sql",
+          "executed_at": "2026-08-10T17:32:02.020834+00:00",
+          "description": "Reconciles balanced validation endpoints with the frozen v10 proposal-led pool and checks threshold sensitivity and implementation parity.",
+          "tables_used": [
+            "analysis/output/p1_local_signal_v2/B2_event_eval.json",
+            "analysis/output/local_signal_v2_p1_eval/B2/manifest.jsonl",
+            "analysis/output/p1_b2_short_l2_backtest_20260811_rows.csv",
+            "analysis/output/p1_dataset_manifest_20260803.json"
+          ],
+          "filters": [
+            "selected threshold remains conf=0.35",
+            "candidate outcomes end before 2026-05-04T00:00:00Z",
+            "no continuous market scan and no executable order simulation"
+          ],
+          "metric_definitions": [
+            "easy-negative fire rate = easy-negative endpoints with any box / easy-negative endpoints",
+            "proposal-pool fire rate = rows with a B2 edge3 fire / eligible v10 proposal rows",
+            "fires/day = proposal-pool fires / full calendar span between first and last proposal",
+            "threshold ladder is diagnostic only and does not change the selected threshold"
+          ],
+          "sql": "SELECT selected_threshold_evidence.proposal_pool.fire_rate AS pool_fire_rate, selected_threshold_evidence.proposal_pool.fires_per_calendar_span_day AS fires_per_day, selected_threshold_evidence.validation.easy_negative_endpoint_fire_rate AS easy_negative_rate, threshold_sensitivity_diagnostic_only[1].validation_recall AS validation_recall FROM read_json_auto('analysis/output/p1_b2_density_diagnostic_20260811.json');"
+        }
+      },
       {
         "id": "replay_source",
         "label": "B2 pre-holdout short-L2 candidate-pool replay",
@@ -571,29 +685,45 @@
       {
         "id": "title",
         "type": "markdown",
-        "body": "# Local Signal V2 B2：pre-holdout 短向候选池经济回放"
+        "body": "# Local Signal V2 B2：候选密度与收益诊断"
       },
       {
         "id": "executive",
         "type": "markdown",
-        "sourceId": "replay_source",
-        "body": "## Executive Summary\n\n- **B2 单独不能作为交易策略。** 去重后 3,880 笔，10bp 后均值 **-9.19bp**、PF **0.893**；20bp 后 **-19.19bp**、PF **0.793**。\n- **没有改善未过滤池。** 10bp 后 B2 比未过滤短向候选池低 **-0.78bp/笔**。\n- **匹配超额未获统计支持。** 同币×同月×ATR 桶对照为 **+2.18bp**，但 7 周块精确 p=**0.891**。\n- **最高置信度 10% 仅是线索。** 388 笔在 20bp 后 **+23.25bp**、PF **1.182**，但匹配检验 p=**0.453**，不能据此调 conf 或宣称盈利。\n- **项目含义：** B2 可继续扮演 L1 候选生成器，但经济选择必须由独立、时间切分的 P2 判断层证明；B2 本身不得部署交易。"
+        "body": "## Executive Summary\n\n- **撤回上一版把 3,880 写成“交易/开单”的表述。** 它们是 B2 在 v10 预筛 proposal ledger 上的 L1 fire rows，不是订单；连续市场触发量和可执行订单数都未计算。\n- **但模型密度确实不合格。** conf=0.35 命中 3,880/7,795 个预筛候选（**49.78%**），折合 proposal ledger **88.27 fires/日**；P1 easy negatives 也命中 56/357（**15.69%**）。\n- **不是重复计数或推理路径 bug。** candidate_id 唯一，同币最小间隔18根，edge2=edge3，数组/PNG 8 个样本的框数与数值完全一致。\n- **不能靠抬阈值修。** conf=0.45 虽降至 8.35 fires/日，但验证召回同时从73.46%降至6.98%。\n- **项目方向纠正：** B2 停在密度失败；下一步按交接规范进入 P2 hard-negative mining + 连续因果盘口密度回放。P3 判断层在 L1 密度可信前阻断。"
       },
       {
         "id": "metrics",
         "type": "metric-strip",
         "cardIds": [
-          "selected_n",
-          "net10",
-          "pf10",
-          "matched_excess"
+          "pool_fire_rate",
+          "fires_per_day",
+          "easy_negative_rate",
+          "validation_recall"
         ]
+      },
+      {
+        "id": "grain_table_block",
+        "type": "table",
+        "tableId": "grain_table",
+        "layout": "full"
+      },
+      {
+        "id": "density_stage_chart_block",
+        "type": "chart",
+        "chartId": "density_stage_chart"
+      },
+      {
+        "id": "threshold_table_block",
+        "type": "table",
+        "tableId": "threshold_table",
+        "layout": "full"
       },
       {
         "id": "economics_finding",
         "type": "markdown",
         "sourceId": "replay_source",
-        "body": "## 整体经济结果为负\n\nB2 的原始开火率为 49.78%，而冻结候选池本身已满足 18-bar 间隔，因此 3,880 个原始开火全部保留。edge2 与 edge3 输出完全相同。固定 10bp 和 20bp 两种成本下，B2 都没有超过未过滤池。"
+        "body": "## 反事实收益诊断同样为负\n\n以下经济表只是回答“如果把每个 L1 fire row 都强行视作 short 会怎样”，不是订单回测。固定10bp和20bp两种成本下，B2候选结果都没有超过未过滤proposal pool。"
       },
       {
         "id": "cost_chart_block",
@@ -610,7 +740,7 @@
         "id": "control_finding",
         "type": "markdown",
         "sourceId": "matched_source",
-        "body": "## 匹配随机对照不支持稳定超额\n\n全部 B2 信号的对照覆盖率为 94.48%。平均超额虽然为正，但周块 p=0.891，说明符号与幅度跨周不稳定。最高置信度 10% 的匹配超额更高，但 p=0.453，仍不满足 p<0.01 的确认门。"
+        "body": "## 匹配随机候选不支持稳定超额\n\n全部 B2 fire rows 的对照覆盖率为94.48%。平均超额虽然为正，但周块p=0.891，说明符号与幅度跨周不稳定。最高置信度10%的匹配超额更高，但p=0.453，仍不满足p<0.01的确认门。"
       },
       {
         "id": "matched_table_block",
@@ -622,7 +752,7 @@
         "id": "time_finding",
         "type": "markdown",
         "sourceId": "replay_source",
-        "body": "## 负收益不是单月口径造成\n\n3 月、4 月及 5 月 1–3 日在 20bp 后均为负。5 月仅 255 笔且不是完整月份，只能作为尾段压力信号。单位和最大回撤用于同口径比较，不代表真实资金曲线或可同时执行的组合。"
+        "body": "## 负收益不是单月口径造成\n\n3月、4月及5月1–3日在20bp后均为负。5月仅255个候选行且不是完整月份，只能作为尾段压力证据。单位和最大回撤用于同口径比较，不代表真实资金曲线或可同时执行的组合。"
       },
       {
         "id": "monthly_chart_block",
@@ -638,7 +768,7 @@
         "id": "confidence_finding",
         "type": "markdown",
         "sourceId": "replay_source",
-        "body": "## 置信度含有弱排序线索，但不允许事后调门\n\n四分位结果并不单调：Q2 好于 Q1、Q3最差、Q4最好。最高10%在本池为正，但阈值 0.4488 是看到经济标签后的分层诊断，不是预注册交易阈值；后续若利用，只能作为 P2 输入或在新的独立时间块上冻结验证。"
+        "body": "## 置信度含有弱排序线索，但不允许事后调门\n\n四分位结果并不单调：Q2好于Q1、Q3最差、Q4最好。最高10%在本池为正，但阈值0.4488是看到经济标签后的分层诊断，不是预注册检测阈值或订单门；后续若利用，只能在新的独立时间块上冻结验证。"
       },
       {
         "id": "confidence_chart_block",
@@ -659,7 +789,7 @@
         "id": "methodology",
         "type": "markdown",
         "sourceId": "replay_source",
-        "body": "## 方法、基线与复现范围\n\n主基线是同一冻结短向候选池未经过 B2 筛选的结果；方向性归因使用同币×同月×ATR 五分位随机对照。B2 是固定阈值检测器，不产生 LightGBM AUC；本轮 val AUC 与单特征基线均不适用。项目要求的 top-decile 指标在这里按 detector confidence 诊断，不能替代未来 P2 排序分数。"
+        "body": "## 方法、基线与复现范围\n\n主基线是同一冻结短向候选池未经过B2筛选的结果；方向性归因使用同币×同月×ATR五分位随机对照。B2是固定阈值检测器，不产生LightGBM AUC；本轮val AUC与单特征基线均不适用。项目要求的top-decile指标在这里按detector confidence诊断，不能替代未来P3判断层排序分数。"
       },
       {
         "id": "protocol_table_block",
@@ -670,18 +800,17 @@
       {
         "id": "files",
         "type": "markdown",
-        "body": "## 可核对的数据文件\n\n- 全部 7,795 个已推理候选：`analysis/output/p1_b2_short_l2_backtest_20260811_rows.csv`\n- B2 edge3 去重后的 3,880 笔：`analysis/output/p1_b2_short_l2_backtest_20260811_selected.csv`\n- 3,666 笔匹配随机对照：`analysis/output/p1_b2_short_l2_backtest_20260811_matched.csv`\n- 日度与币种汇总：`analysis/output/p1_b2_short_l2_backtest_report_20260811/daily.csv`、`symbol.csv`"
+        "body": "## 可核对的数据文件\n\n- 密度审计：`analysis/output/p1_b2_density_diagnostic_20260811.json`\n- 全部7,795个已推理proposal rows：`analysis/output/p1_b2_short_l2_backtest_20260811_rows.csv`\n- B2 edge3的3,880个L1 fire rows：`analysis/output/p1_b2_short_l2_backtest_20260811_selected.csv`\n- 3,666个匹配候选结果：`analysis/output/p1_b2_short_l2_backtest_20260811_matched.csv`"
       },
       {
         "id": "caveats",
         "type": "markdown",
-        "sourceId": "replay_source",
-        "body": "## 风险与诚实声明\n\n- 这是 B2 × 冻结 short-L2 候选池回放，不是全市场逐 bar 扫描，也不是 B2+LightGBM 端到端回测。\n- B2 权重与 conf=0.35 在 P1 验证集上选择；本轮额外排除同币全部 val 端点前后 72 bars，去掉直接事件/结果窗重叠，但剩余区间仍属于开发期而非最终确认集。\n- 置信度最高10%与四分位是事后诊断，禁止把 0.4488 自动写回阈值。\n- 冻结收益标签之间可能有时间重叠；周块符号翻转比逐笔独立检验更保守，但只有 7 个周块。\n- 未读取 holdout，未修改成本/障碍/新鲜度门，未 promote、未部署、未下单。"
+        "body": "## 风险与诚实声明\n\n- 本轮没有逐币×逐盘口endpoint连续扫描，因此88.27 fires/日只描述v10 proposal ledger，不能外推成全市场订单/日。\n- 该proposal pool已经预筛且同币间隔至少18根；它不是自然市场基准，但在这个富集池上命中近半已足以判定当前B2密度不可接受。\n- B2权重与conf=0.35来自P1开发期选择；阈值梯度仅用于定位问题，未修改阈值。\n- 收益标签之间可能时间重叠，且把每个fire都当short只是反事实诊断。\n- 未读取holdout，未修改成本/障碍/新鲜度门，未promote、未部署、未下单。"
       },
       {
         "id": "next_steps",
         "type": "markdown",
-        "body": "## 建议下一步\n\n1. 保留 B2 作为 L1 候选生成器，不将其单独晋升为交易策略。\n2. P2 判断层按时间切分训练，只使用信号 bar 及之前的特征，把 B2 confidence 作为一个候选特征而非直接阈值。\n3. P2 的冻结裁决仍以 top-decile 20bp 后净收益>0、匹配随机对照和 p<0.01 为门；不读取 holdout。\n4. 如果 owner 要把最高10%作为独立策略假设，必须先冻结阈值与新时间块，再验证，不能复用本回放作为确认。"
+        "body": "## 建议下一步\n\n1. 当前B2按密度失败处理，不promote，不进入P3判断/执行。\n2. 按交接规范执行P2 hard-negative mining：固定B2 30根窗口与当前事件尺，只把难负例作为单变量加入。\n3. 在不读holdout的独立时间块上增加连续因果tip endpoint密度回放，先冻结并验证L1 fires/day、event precision与去重规则。\n4. 只有P2密度与事件门通过后，才进入P3 LightGBM/规则判断层；不得用提高conf代替重训。"
       }
     ]
   },
@@ -692,12 +821,10 @@
     "datasets": {
       "headline": [
         {
-          "selected_n": 3880,
-          "net10_bp": -9.18698561385853,
-          "net10_vs_pool_bp": -0.784216069169533,
-          "pf10": 0.8929837601194694,
-          "matched_excess_bp": 2.1819846990104206,
-          "matched_p": 0.890625
+          "pool_fire_rate": 0.49775497113534317,
+          "fires_per_day": 88.26540284360189,
+          "easy_negative_rate": 0.1568627450980392,
+          "validation_recall": 0.7346368715083799
         }
       ],
       "scope": [
@@ -1007,6 +1134,85 @@
         {
           "item": "holdout",
           "value": "未读取；max outcome end=2026-05-03 22:45 UTC"
+        }
+      ],
+      "density_stages": [
+        {
+          "stage_order": 1,
+          "stage": "v10 预筛 proposal rows",
+          "n": 7795
+        },
+        {
+          "stage_order": 2,
+          "stage": "B2 L1 fire rows",
+          "n": 3880
+        },
+        {
+          "stage_order": 3,
+          "stage": "唯一 outcome event groups",
+          "n": 3715
+        }
+      ],
+      "threshold_density": [
+        {
+          "threshold": "0.35",
+          "recall": 0.7346368715083799,
+          "easy_negative_fire_rate": 0.1568627450980392,
+          "proposal_fires": 3880,
+          "fires_per_day": 88.26540284360189
+        },
+        {
+          "threshold": "0.40",
+          "recall": 0.4329608938547486,
+          "easy_negative_fire_rate": 0.06162464985994398,
+          "proposal_fires": 1995,
+          "fires_per_day": 45.38388625592417
+        },
+        {
+          "threshold": "0.45",
+          "recall": 0.06983240223463687,
+          "easy_negative_fire_rate": 0.008403361344537815,
+          "proposal_fires": 367,
+          "fires_per_day": 8.348815165876777
+        },
+        {
+          "threshold": "0.50",
+          "recall": 0.0223463687150838,
+          "easy_negative_fire_rate": 0.0,
+          "proposal_fires": 107,
+          "fires_per_day": 2.434123222748815
+        }
+      ],
+      "grain": [
+        {
+          "grain_order": 1,
+          "grain": "P1 平衡 endpoint 尺",
+          "count": "715",
+          "meaning": "358 正例 + 357 easy negatives；抽样验证，不是连续市场"
+        },
+        {
+          "grain_order": 2,
+          "grain": "v10 预筛 proposal rows",
+          "count": "7,795",
+          "meaning": "230 币、已预筛且同币至少间隔18根"
+        },
+        {
+          "grain_order": 3,
+          "grain": "B2 L1 fire rows",
+          "count": "3,880",
+          "meaning": "YOLO候选命中，不是订单"
+        },
+        {
+          "grain_order": 4,
+          "grain": "连续市场 L1 fires",
+          "count": "未测",
+          "meaning": "本轮未逐币×逐盘口 endpoint 扫描"
+        },
+        {
+          "grain_order": 5,
+          "grain": "可执行订单",
+          "count": "未计算",
+          "meaning": "P2 密度未过，P3 判断与执行被阻断"
         }
       ],
       "daily": [
@@ -1554,6 +1760,35 @@
     }
   },
   "sources": [
+    {
+      "id": "density_source",
+      "label": "B2 endpoint and proposal-pool density audit",
+      "path": "analysis/output/p1_b2_density_diagnostic_20260811.json",
+      "query": {
+        "engine": "duckdb",
+        "language": "sql",
+        "executed_at": "2026-08-10T17:32:02.020834+00:00",
+        "description": "Reconciles balanced validation endpoints with the frozen v10 proposal-led pool and checks threshold sensitivity and implementation parity.",
+        "tables_used": [
+          "analysis/output/p1_local_signal_v2/B2_event_eval.json",
+          "analysis/output/local_signal_v2_p1_eval/B2/manifest.jsonl",
+          "analysis/output/p1_b2_short_l2_backtest_20260811_rows.csv",
+          "analysis/output/p1_dataset_manifest_20260803.json"
+        ],
+        "filters": [
+          "selected threshold remains conf=0.35",
+          "candidate outcomes end before 2026-05-04T00:00:00Z",
+          "no continuous market scan and no executable order simulation"
+        ],
+        "metric_definitions": [
+          "easy-negative fire rate = easy-negative endpoints with any box / easy-negative endpoints",
+          "proposal-pool fire rate = rows with a B2 edge3 fire / eligible v10 proposal rows",
+          "fires/day = proposal-pool fires / full calendar span between first and last proposal",
+          "threshold ladder is diagnostic only and does not change the selected threshold"
+        ],
+        "sql": "SELECT selected_threshold_evidence.proposal_pool.fire_rate AS pool_fire_rate, selected_threshold_evidence.proposal_pool.fires_per_calendar_span_day AS fires_per_day, selected_threshold_evidence.validation.easy_negative_endpoint_fire_rate AS easy_negative_rate, threshold_sensitivity_diagnostic_only[1].validation_recall AS validation_recall FROM read_json_auto('analysis/output/p1_b2_density_diagnostic_20260811.json');"
+      }
+    },
     {
       "id": "replay_source",
       "label": "B2 pre-holdout short-L2 candidate-pool replay",

@@ -2,33 +2,38 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-11 — B2 经济回放完成：只可做 L1 候选生成，不可单独交易）
+## ⚡ 当前真相（2026-08-11 — B2 候选密度失败；3,880 不是订单）
 
-**直接裁决：最新 B2 检测器通过了 P1 事件门，但在冻结 short-L2 候选池上没有整体经济
-选择力；不得把 P1 detection PASS 解释为策略 PASS。**
+**直接裁决：上一版把 3,880 写成“交易/开单”是口径错误；它们是 B2 在 v10 预筛
+proposal ledger 上的 L1 fire rows，不是订单。但密度复核也证实当前 B2 确实放得过宽，
+因此停在 P2 hard-negative mining，P3 判断层不得提前启动。**
 
-- 数据范围 2026-03-20 06:15 → 2026-05-03 05:15 UTC；最晚 outcome end
-  2026-05-03 22:45 UTC；holdout 读取 0。
-- 原始 8,553 行先排除同币所有 B2 validation 端点前后 72 bars，共排除 758，最终回放
-  7,795 行 / 230 币；B2 fixed-30 @ conf=0.35、tip/tip-1/tip-2。
-- B2 开火并 18-bar 因果去重后 3,880 笔：10bp 后均值 **-9.19bp**、PF **0.893**；
-  20bp 后 **-19.19bp**、PF **0.793**。未过滤池 10bp 后 -8.40bp，B2 反而低 0.78bp/笔。
-- 同币×同月×ATR 桶匹配 3,666 笔，超额 +2.18bp，但 7 UTC-week exact sign-flip
-  `p=0.890625`，不显著。
-- detector confidence 最高 10%（388 笔）20bp 后 +23.25bp、PF 1.182；这是事后分层诊断，
-  匹配对照 p=0.453125，不满足 p<0.01，禁止据此自动调 conf 或晋升。
-- edge2 与 edge3 本轮完全相同。未改成本/障碍/新鲜度，未 promote、未部署、未下单。
+- P1 统一尺是 715 个平衡抽样 endpoints（358 正例 + 357 easy negatives），不是连续市场暴露。
+  conf=0.35 在 easy negatives 上命中 56/357 = **15.69%**。
+- v10 short-L2 pool 是已经预筛且同币至少间隔 18 bars 的 proposal ledger，不是订单流。
+  B2 命中 3,880/7,795 = **49.78%**，按 ledger 跨度为 **88.27 L1 fires/日**。
+- 3,880 个 fire rows 只去重成 3,715 个 outcome event groups，减少 4.25%；candidate_id 唯一，
+  同币最小间隔 18 bars，edge2=edge3，数组/PNG 8 样本推理完全一致。高计数不是重复、edge
+  或图像传输 bug。
+- 不能靠抬 conf 修：0.45 时密度降到 8.35 fires/日，但验证召回从 73.46% 塌到 6.98%。
+- 连续市场逐币×逐盘口 endpoint 尚未扫描，真实 L1 fires/日与可执行订单数均未知；禁止把
+  88.27 或 3,880 外推为生产订单。
+- 把每个 fire row 强行当 short 的反事实收益仍为负：10bp 后 -9.19bp、PF 0.893；匹配
+  超额 +2.18bp 但 p=0.890625。该结果不是订单回测。
+- 未读 holdout、未改阈值/成本/障碍/新鲜度，未 promote、未部署、未下单。
 
 交付物：
 
 - `analysis/html/p1_b2_short_l2_backtest_20260811.html`
 - `analysis/p1_b2_short_l2_backtest_20260811.md`
 - `analysis/output/p1_b2_short_l2_backtest_20260811.json`
+- `analysis/output/p1_b2_density_diagnostic_20260811.json`
 - `analysis/output/p1_b2_short_l2_backtest_20260811_{rows,selected,matched}.csv`
 - `analysis/output/p1_b2_short_l2_backtest_report_20260811/{daily,symbol}.csv`
 
-**下一方向：判断层，不再围绕 B2 conf 做经济拟合。** B2 只作为 L1 候选生成器；若 owner
-授权继续，P2 必须严格时间切分，并把 B2 confidence 仅作为一个候选特征。B2 本身不可部署。
+**下一方向：按交接规范做 P2 hard-negative mining + 连续因果 tip 密度回放。** 固定 B2
+30 根窗口、事件尺和训练配方，只增加难负例；先冻结并验证 L1 密度门、event 匹配和去重规则。
+只有 P2 密度与事件门通过后才进入 P3 LightGBM/规则判断层。禁止用提高 conf 代替重训。
 
 ## ⚡ 当前真相（2026-08-11 — Local Signal V2 P1 历史发现级通过，B2 胜出）
 

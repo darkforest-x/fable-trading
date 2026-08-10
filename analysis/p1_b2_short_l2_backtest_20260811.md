@@ -1,15 +1,35 @@
-# Local Signal V2 B2：pre-holdout 短向候选池经济回放
+# Local Signal V2 B2：候选密度与收益诊断
 
 生成时间：2026-08-10T17:07:16.250146+00:00
-结论等级：开发期经济可行性诊断，不是最终确认，不是生产回测。
+结论等级：开发期密度与反事实收益诊断，不是生产回测。
 
 ## Executive Summary
 
-- **B2 单独不能作为交易策略。** 去重后 3,880 笔，10bp 后均值 -9.19bp、PF 0.893；20bp 后 -19.19bp、PF 0.793。
-- **没有改善未过滤池。** 10bp 后 B2 比未过滤短向候选池低 -0.78bp/笔。
-- **匹配超额未获统计支持。** 同币×同月×ATR 桶对照超额 +2.18bp，7 周块精确双侧 p=0.891。
-- **最高置信度 10% 是线索，不是门。** 388 笔在 20bp 后 +23.25bp、PF 1.182，但匹配 p=0.453，不满足 p<0.01。
-- **项目方向不变。** B2 只做 L1 候选生成；是否可交易必须由独立时间切分的 P2 判断层证明。
+- **口径纠正：上一版把3,880写成“交易/开单”是错误的。** 它们是B2在v10预筛proposal ledger上的L1 fire rows，不是订单。连续市场L1触发量与可执行订单数均未计算。
+- **但B2检测密度本身确实过高。** conf=0.35命中3,880/7,795个预筛候选（49.78%），折合proposal ledger 88.27 fires/日；P1 easy negatives也命中56/357（15.69%）。
+- **不是重复、edge或图像传输bug。** candidate_id唯一，同币最小间隔18根，edge2=edge3；8个样本的数组与PNG推理框数/数值完全一致。
+- **提高阈值不能解决。** conf=0.45虽把proposal ledger密度降到8.35 fires/日，但正例召回从73.46%塌到6.98%。
+- **阶段纠正：B2当前密度失败。** 下一步是交接规范中的P2 hard-negative mining + 连续因果盘口密度回放；P3 LightGBM/规则判断层在L1密度可信前阻断。
+
+## 数量口径与密度
+
+| 粒度 | 数量 | 含义 |
+|---|---:|---|
+| P1平衡endpoint尺 | 715 | 358正例 + 357 easy negatives；抽样验证，不是连续市场 |
+| v10预筛proposal rows | 7,795 | 230币、已预筛且同币至少间隔18根 |
+| B2 L1 fire rows | 3,880 | YOLO候选命中，不是订单 |
+| 唯一outcome event groups | 3,715 | 事件组去重只减少4.25% |
+| 连续市场L1 fires | 未测 | 未逐币×逐盘口endpoint扫描 |
+| 可执行订单 | 未计算 | P2密度未过，P3判断与执行被阻断 |
+
+| conf | 正例召回 | easy-neg命中率 | proposal fires | fires/日 |
+|---:|---:|---:|---:|---:|
+| 0.35 | 73.46% | 15.69% | 3,880 | 88.27 |
+| 0.40 | 43.30% | 6.16% | 1,995 | 45.38 |
+| 0.45 | 6.98% | 0.84% | 367 | 8.35 |
+| 0.50 | 2.23% | 0.00% | 107 | 2.43 |
+
+阈值梯度只用于定位问题，未修改冻结阈值。把密度压到个位数/日时召回只剩约7%，所以应通过hard negatives改变模型区分力。
 
 ## 数据与协议
 
@@ -28,20 +48,22 @@
 | 入场 / 出场 | next open / TP5 ATR、SL2 ATR、最长72 bars |
 | 成本 | 10bp swap taker；20bp 保守报告敏感性 |
 
-## 主要结果
+## 反事实收益结果
 
-| 范围 | n | 毛均值bp | 10bp净均值 | 10bp PF | 20bp净均值 | 20bp PF | 20bp胜率 | 单位和最大回撤(20bp) |
+以下结果只是假设“把每个L1 fire row都强行当作short候选”的结果诊断，不是订单回测。
+
+| 范围 | 候选行 | 毛均值bp | 10bp净均值 | 10bp PF | 20bp净均值 | 20bp PF | 20bp胜率 | 单位和最大回撤(20bp) |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | 未过滤池 | 7,795 | 1.60 | -8.40 | 0.910 | -18.40 | 0.816 | 32.03% | -15.409 |
 | B2 edge3 去重 | 3,880 | 0.81 | -9.19 | 0.893 | -19.19 | 0.793 | 31.62% | -7.461 |
 | B2 edge2 敏感性 | 3,880 | 0.81 | -9.19 | 0.893 | -19.19 | 0.793 | 31.62% | -7.461 |
 | conf 最高10%（诊断） | 388 | 43.25 | 33.25 | 1.274 | 23.25 | 1.182 | 36.34% | -0.795 |
 
-> 最大回撤是按时间排序的“每笔单位收益累加”回撤，不是仓位化资金曲线。候选结果可能重叠，不能解释为可同时执行组合。
+> 最大回撤是按时间排序的“每候选单位收益累加”回撤，不是仓位化资金曲线。候选结果可能重叠，不能解释为可同时执行组合。
 
 ## 匹配随机对照
 
-| 范围 | 信号 | 已匹配 | 覆盖率 | 模型20bp净均值 | 随机20bp净均值 | 超额bp | 周块p | 周块 |
+| 范围 | L1 fire rows | 已匹配 | 覆盖率 | 模型20bp净均值 | 随机20bp净均值 | 超额bp | 周块p | 周块 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | B2 全部 edge3 | 3,880 | 3,666 | 94.48% | -17.46 | -19.65 | 2.18 | 0.891 | 7 |
 | conf 最高10%（诊断） | 388 | 377 | 97.16% | 24.93 | -17.30 | 42.24 | 0.453 | 7 |
@@ -75,20 +97,22 @@
 | top-decile 毛 / 10bp净 / 20bp净 | 43.25 / 33.25 / 23.25 bp（仅 detector confidence 诊断） |
 | top-decile 20bp胜率 / PF | 36.34% / 1.182 |
 | top-decile 匹配随机超额 / p | +42.24bp / 0.453，不满足 p<0.01 |
-| 单特征基线 | N/A：P2 尚未训练；主基线为未过滤冻结短向候选池 |
+| 单特征基线 | N/A：P3判断层尚未训练；主基线为未过滤冻结短向候选池 |
 
 ## 结果解读
 
-1. B2 在全部固定阈值开火上没有经济选择力：比未过滤池还低 -0.78bp/笔。
-2. Q4 与最高10%显示 B2 confidence 可能携带排序信息，但四分位不单调、跨周不稳定，证据不足以单独交易。
-3. 正确方向是让 P2 在独立时间切分上判断 B2 候选，而不是围绕本回放继续调 YOLO conf。
+1. 当前首要失败是L1密度：B2在已预筛proposal pool仍命中49.78%，且easy-negative endpoint命中率15.69%。
+2. 若把每个fire强行当short，其10bp净均值为-9.19bp，且比未过滤池低-0.78bp/候选；收益诊断也不支持推进。
+3. confidence高分段只是事后线索，四分位不单调且跨周不稳定，不能据此抬conf或进入P3。
+4. 正确方向是P2 hard-negative mining先修L1区分力，并在独立时间块跑连续tip密度；不是直接训练判断层。
 
 ## 数据文件
 
 - `analysis/output/p1_b2_short_l2_backtest_20260811.json`：完整汇总与协议。
+- `analysis/output/p1_b2_density_diagnostic_20260811.json`：密度、阈值梯度与实现排错证据。
 - `analysis/output/p1_b2_short_l2_backtest_20260811_rows.csv`：7,795 个逐候选 B2 预测。
-- `analysis/output/p1_b2_short_l2_backtest_20260811_selected.csv`：3,880 笔主结果。
-- `analysis/output/p1_b2_short_l2_backtest_20260811_matched.csv`：3,666 笔匹配对照。
+- `analysis/output/p1_b2_short_l2_backtest_20260811_selected.csv`：3,880 个 L1 fire rows。
+- `analysis/output/p1_b2_short_l2_backtest_20260811_matched.csv`：3,666 个匹配候选结果。
 - `analysis/output/p1_b2_short_l2_backtest_report_20260811/daily.csv`：日度汇总。
 - `analysis/output/p1_b2_short_l2_backtest_report_20260811/symbol.csv`：币种汇总。
 
@@ -103,6 +127,10 @@ MPLCONFIGDIR=/tmp/mplconfig PYTHONPYCACHEPREFIX=/tmp/fable_pycache \
   PYTHONPATH=.:../yoyo-trading .venv/bin/python -u \
   scripts/backtest_local_signal_v2_b2_short_pool.py --device mps --batch 12
 
+PYTHONPYCACHEPREFIX=/tmp/fable_pycache PYTHONPATH=.:../yoyo-trading \
+  .venv/bin/python scripts/audit_local_signal_v2_b2_density.py \
+  --device mps --transport-samples 8
+
 PYTHONPATH=.:../yoyo-trading .venv/bin/python \
   scripts/build_p1_b2_short_l2_backtest_report.py
 
@@ -112,14 +140,16 @@ python3 scripts/md_to_html.py \
 
 ## 风险与诚实声明
 
-- 本轮是 B2 × 冻结 short-L2 候选池回放，不是全市场逐 bar 扫描，也不是 B2+LightGBM 端到端回测。
+- 本轮未跑连续市场扫描，88.27 fires/日只描述v10 proposal ledger，不能外推为订单/日。
+- proposal pool本身已经预筛；但在这个富集池仍命中近半，已足以判定当前B2密度不可接受。
 - B2 权重和 conf=0.35 来自 P1 开发期选择；已额外排除同币所有 val 端点前后72 bars，但剩余数据仍不是最终确认集。
 - 置信度四分位和最高10%是事后诊断，禁止自动修改阈值。
-- outcome 可能时间重叠；周块检验只有7块，统计功效有限。
+- outcome可能时间重叠；把每个fire当short只是反事实诊断，周块检验只有7块。
 - 未读取 holdout，未修改成本/障碍/新鲜度门，未 promote、未部署、未下单。
 
-## 下一步选项
+## 下一步
 
-1. **建议：进入 P2 开发，但不晋升 B2 为交易策略。** P2 必须严格时间切分，并把 B2 confidence 仅作为一个候选特征。
-2. 若要单独验证“最高10%”假设，需 owner 先冻结阈值与新时间块；不能复用本回放作确认。
-3. 不建议继续围绕 B2 conf 调参；当前证据最需要的是判断层选择力，而不是再做检测层经济拟合。
+1. 当前B2按密度失败处理：不promote，不进入P3判断/执行。
+2. 按交接规范执行P2 hard-negative mining：固定B2 30根窗口、当前事件尺与训练配方，只新增难负例。
+3. 在不读holdout的独立时间块做连续因果tip endpoint密度回放；先冻结L1密度门、event匹配与去重口径。
+4. 只有P2密度和事件门通过，才进入P3 LightGBM/规则判断层。禁止用提高conf代替重训。

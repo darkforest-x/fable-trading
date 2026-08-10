@@ -3,6 +3,7 @@
   "candidate": "B2_local_fixed_w30_causal",
   "decision": "accepted",
   "decision_scope": "historical_discovery_only",
+  "b2_operating_decision": "failed_on_enriched_proposal_pool_density",
   "production_eligible": false,
   "baseline": "A_legacy_owner_v10_chain_200bar",
   "matrix_complete": true,
@@ -17,6 +18,11 @@
     "absolute_event_precision_min_0_50": "pass_0.819315",
     "absolute_event_recall_min_0_50": "pass_0.734637",
     "absolute_fp_per_1000_max_250": "pass_81.118881",
+    "easy_negative_endpoint_fire_rate": "fail_0.156863_density_audit",
+    "enriched_proposal_pool_fire_rate": "fail_0.497755_density_audit",
+    "continuous_market_density": "not_run",
+    "p2_hard_negative_mining": "required",
+    "p3_judgment": "blocked_until_l1_density_is_credible",
     "independent_forward": "not_run",
     "production_promotion": "blocked"
   },
@@ -45,6 +51,7 @@
     "candidate_weights": "analysis/output/p1_local_signal_v2/training/B2/weights/best.pt",
     "candidate_training_summary": "analysis/output/p1_local_signal_v2/training/B2/summary.json",
     "candidate_event_eval": "analysis/output/p1_local_signal_v2/B2_event_eval.json",
+    "post_p1_density_audit": "analysis/output/p1_b2_density_diagnostic_20260811.json",
     "report": "analysis/p1_local_signal_v2_report_20260811.md",
     "report_html": "analysis/html/p1_local_signal_v2_report_20260811.html"
   },
@@ -63,7 +70,11 @@
     "C3 also passed; P1 therefore supports local causal detection without future Stage-A pretraining",
     "C1/C2 future pretraining remained disabled by repository rule 12; hard negatives remain a separate P2 variable",
     "dataset_seed=20260807 and actual training_seed=0 for B1/B2/C3; no seed sweep",
-    "Acceptance is historical discovery only; independent forward/holdout confirmation is not run"
+    "Acceptance is historical discovery only; independent forward/holdout confirmation is not run",
+    "Post-P1 density audit: 3,880 means L1 fire rows on a prefiltered proposal ledger, not orders",
+    "B2 density failed: 56/357 easy-negative endpoints and 3,880/7,795 enriched proposal rows fired at conf 0.35",
+    "Raising conf is not a fix: conf 0.45 reduces proposal density but collapses validation recall to 0.069832",
+    "Next phase is P2 hard-negative mining plus continuous causal-tip density replay; P3 judgment remains blocked"
   ],
-  "updated_at": "2026-08-11T00:32:37+08:00"
+  "updated_at": "2026-08-11T02:15:00+08:00"
 }
