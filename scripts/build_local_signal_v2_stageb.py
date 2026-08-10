@@ -186,6 +186,7 @@ def render_positive(
     rng: np.random.Generator,
     draw_box: bool = False,
     protocol: str = PROTOCOL,
+    fixed_window_len: int | None = None,
 ) -> PosSample:
     symbol = src["symbol"]
     anchor = int(src["mid_global"])
@@ -203,7 +204,10 @@ def render_positive(
     if s0 < 0 or s1 >= n:
         raise Skip("small_oob", f"anchor={anchor} delay={confirm_delay} n={n}")
 
-    win_len = int(rng.integers(WIN_MIN, WIN_MAX + 1))
+    # Always consume the same draw so fixed-window P1 arms preserve every
+    # other seeded choice (notably confirm_delay) from the range-window arm.
+    sampled_win_len = int(rng.integers(WIN_MIN, WIN_MAX + 1))
+    win_len = sampled_win_len if fixed_window_len is None else fixed_window_len
     # Stage B causal: window ends exactly on decision bar.
     win_start = decision - win_len + 1
     if win_start < 0:
@@ -326,6 +330,7 @@ def add_negatives(
     seed: int = 20260807,
     time_bounds: dict[str, pd.Timestamp] | None = None,
     protocol: str = PROTOCOL,
+    fixed_window_len: int | None = None,
 ) -> list[dict]:
     by_sym_split: dict[tuple[str, str], list[dict]] = defaultdict(list)
     for r in pos_rows:
@@ -346,7 +351,8 @@ def add_negatives(
         while got < target and attempt < target * NEG_MAX_TRIES:
             attempt += 1
             rng = np.random.default_rng(stable_seed(seed, "neg", symbol, split, attempt))
-            win_len = int(rng.integers(WIN_MIN, WIN_MAX + 1))
+            sampled_win_len = int(rng.integers(WIN_MIN, WIN_MAX + 1))
+            win_len = sampled_win_len if fixed_window_len is None else fixed_window_len
             if n < win_len + 50:
                 break
             # Prefer windows fully before holdout.
@@ -539,6 +545,7 @@ def run_preview(
     seed: int,
     *,
     protocol: str = PROTOCOL,
+    fixed_window_len: int | None = None,
 ) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     events = load_source_events(src_manifest)
@@ -556,6 +563,7 @@ def run_preview(
                 rng=local,
                 draw_box=True,
                 protocol=protocol,
+                fixed_window_len=fixed_window_len,
             )
         except Skip as ex:
             print(f"skip {e['stem']}: {ex.reason} {ex.detail}")
@@ -576,6 +584,7 @@ def run_full(
     neg_ratio: float,
     strict_negative_time_split: bool = False,
     protocol: str = PROTOCOL,
+    fixed_window_len: int | None = None,
 ) -> dict:
     events = load_source_events(src_manifest)
     splits = assign_time_splits(events)
@@ -608,6 +617,7 @@ def run_full(
                 out_lbl=out_lbl,
                 rng=local,
                 protocol=protocol,
+                fixed_window_len=fixed_window_len,
             )
         except Skip as ex:
             skip_reasons[ex.reason] += 1
@@ -631,6 +641,7 @@ def run_full(
         seed=seed,
         time_bounds=time_bounds,
         protocol=protocol,
+        fixed_window_len=fixed_window_len,
     )
 
     write_yaml(dst)
@@ -657,8 +668,9 @@ def run_full(
         "mode": "C",
         "confirm_delays": list(CONFIRM_DELAYS),
         "box_left": BOX_LEFT,
-        "win_min": WIN_MIN,
-        "win_max": WIN_MAX,
+        "win_min": WIN_MIN if fixed_window_len is None else fixed_window_len,
+        "win_max": WIN_MAX if fixed_window_len is None else fixed_window_len,
+        "fixed_window_len": fixed_window_len,
         "holdout_start": str(HOLDOUT_START),
         "purge_bars": PURGE_BARS,
         "val_frac": VAL_FRAC,
@@ -702,13 +714,20 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=20260807)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--neg-ratio", type=float, default=1.0)
+    ap.add_argument("--fixed-window-len", type=int, choices=range(WIN_MIN, WIN_MAX + 1))
     args = ap.parse_args()
 
     if not args.src_manifest.exists():
         print(f"missing source manifest: {args.src_manifest}", file=sys.stderr)
         return 2
     if args.preview > 0:
-        run_preview(args.src_manifest, args.preview, args.preview_dir, args.seed)
+        run_preview(
+            args.src_manifest,
+            args.preview,
+            args.preview_dir,
+            args.seed,
+            fixed_window_len=args.fixed_window_len,
+        )
         return 0
     run_full(
         args.src_manifest,
@@ -716,6 +735,7 @@ def main() -> int:
         seed=args.seed,
         limit=args.limit,
         neg_ratio=args.neg_ratio,
+        fixed_window_len=args.fixed_window_len,
     )
     return 0
 

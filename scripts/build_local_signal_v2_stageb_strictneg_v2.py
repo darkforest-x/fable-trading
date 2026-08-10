@@ -15,6 +15,8 @@ from scripts.build_local_signal_v2_stageb import (
     DEFAULT_SRC_MANIFEST,
     PROJECT,
     STRICT_NEG_PROTOCOL,
+    WIN_MAX,
+    WIN_MIN,
     run_preview,
     run_full,
 )
@@ -29,6 +31,7 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=20260807)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--neg-ratio", type=float, default=1.0)
+    ap.add_argument("--fixed-window-len", type=int, choices=range(WIN_MIN, WIN_MAX + 1))
     ap.add_argument("--preview", type=int, default=0)
     ap.add_argument(
         "--preview-dir",
@@ -39,6 +42,11 @@ def main() -> int:
         / "local_signal_v2_stageb_strictneg_v2_preview",
     )
     args = ap.parse_args()
+    protocol = (
+        STRICT_NEG_PROTOCOL
+        if args.fixed_window_len is None
+        else f"{STRICT_NEG_PROTOCOL}_w{args.fixed_window_len}"
+    )
     if not args.src_manifest.exists():
         ap.error(f"missing source manifest: {args.src_manifest}")
     if args.preview > 0:
@@ -47,7 +55,8 @@ def main() -> int:
             args.preview,
             args.preview_dir,
             args.seed,
-            protocol=STRICT_NEG_PROTOCOL,
+            protocol=protocol,
+            fixed_window_len=args.fixed_window_len,
         )
         return 0
     run_full(
@@ -57,7 +66,8 @@ def main() -> int:
         limit=args.limit,
         neg_ratio=args.neg_ratio,
         strict_negative_time_split=True,
-        protocol=STRICT_NEG_PROTOCOL,
+        protocol=protocol,
+        fixed_window_len=args.fixed_window_len,
     )
     return 0
 

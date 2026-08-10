@@ -49,6 +49,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -n "$HOST" ]] || die "set FABLE_3060_HOST=zzc@<ip> (3060 IP drifts; do not guess)"
+[[ "$NAME" =~ ^[A-Za-z0-9_.-]+$ ]] || die "unsafe run name: $NAME"
 
 if [[ "$MODE" == "status" ]]; then
   say "status $NAME on $HOST"
@@ -98,17 +99,17 @@ rm -f "$TAR"
 BN=$(basename "$DATASET")
 "${SSH[@]}" "$HOST" "cd $REMOTE; New-Item -ItemType Directory -Force datasets,logs,models | Out-Null; Remove-Item -Recurse -Force datasets/$BN -ErrorAction SilentlyContinue; tar xf ds_w20.tar -C datasets; Remove-Item ds_w20.tar; Copy-Item base_w20.pt models/yolo11s_w20.pt -Force" \
   || die "remote extract failed"
+"${SSH[@]}" "$HOST" "\$p='$REMOTE/datasets/$BN/data.yaml'; (Get-Content \$p) -replace '^path:.*$', 'path: $REMOTE/datasets/$BN' | Set-Content -Path \$p -Encoding ASCII" \
+  || die "remote data.yaml rewrite failed"
 
 say "2) start detached WMI train: $NAME"
-# Detached .cmd so SSH disconnect cannot kill training (see eth3m pilot).
-CMD_BODY=$(cat <<EOF
-@echo off
-cd /d C:\\fable
-C:\\fable\\.venv\\Scripts\\python.exe -u C:\\fable\\train_safe.py --name $NAME --model C:/fable/models/yolo11s_w20.pt --data C:/fable/datasets/$BN/data.yaml --epochs $EPOCHS --patience $PATIENCE --batch $BATCH --cache false --workers $WORKERS > C:\\fable\\logs\\$NAME.log 2>&1
-EOF
-)
-# write cmd via stdin to avoid quoting hell
-printf '%s\n' "$CMD_BODY" | "${SSH[@]}" "$HOST" "Set-Content -Path C:/fable/run_$NAME.cmd -Encoding ASCII -Value \$input; \$r = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine='cmd.exe /c C:\\fable\\run_$NAME.cmd'}; Write-Output ('pid=' + \$r.ProcessId + ' ret=' + \$r.ReturnValue)"
+# Launch the complete command through WMI.  Do not pipe a multiline body into
+# PowerShell's automatic ``$input`` enumerator: Set-Content serializes that
+# object as ``PipelineReader...`` instead of writing the command text.
+REMOTE_CMD="cmd.exe /c \"cd /d C:\\fable && C:\\fable\\.venv\\Scripts\\python.exe -u C:\\fable\\train_safe.py --name $NAME --model C:/fable/models/yolo11s_w20.pt --data C:/fable/datasets/$BN/data.yaml --epochs $EPOCHS --patience $PATIENCE --batch $BATCH --cache false --workers $WORKERS > C:\\fable\\logs\\$NAME.log 2>&1\""
+LAUNCH_OUT=$("${SSH[@]}" "$HOST" "\$r = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine='$REMOTE_CMD'}; Write-Output ('pid=' + \$r.ProcessId + ' ret=' + \$r.ReturnValue)")
+printf '%s\n' "$LAUNCH_OUT"
+[[ "$LAUNCH_OUT" == *"ret=0"* ]] || die "remote WMI launch failed"
 
 echo "  started name=$NAME epochs=$EPOCHS batch=$BATCH"
 echo "  watch:  bash scripts/train_w20_midbox_on_3060.sh --status --host $HOST"

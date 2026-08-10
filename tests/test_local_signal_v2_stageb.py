@@ -49,6 +49,16 @@ def test_event_id_stable():
     assert len(a) == 16
 
 
+def test_fixed_window_cli_is_available_without_changing_default_protocol():
+    project = Path(__file__).resolve().parents[1]
+    strict_builder = (
+        project / "scripts" / "build_local_signal_v2_stageb_strictneg_v2.py"
+    ).read_text()
+    assert '"--fixed-window-len"' in strict_builder
+    assert "STRICT_NEG_PROTOCOL" in strict_builder
+    assert 'f"{STRICT_NEG_PROTOCOL}_w{args.fixed_window_len}"' in strict_builder
+
+
 def _pos(split: str, end: str, stem: str) -> dict:
     return {
         "split": split,
@@ -168,6 +178,10 @@ def test_3060_wrapper_ships_repository_safe_trainer_and_uses_strict_dataset():
     assert "src/detection/train.py" in generic
     assert "train_safe.py" in generic
     assert "train_dense.py" not in generic
+    assert "-replace '^path:.*$'" in generic
+    assert "PipelineReader" in generic
+    assert "Set-Content -Path C:/fable/run_" not in generic
+    assert "CommandLine='$REMOTE_CMD'" in generic
     assert "local_signal_v2_stageb_strictneg_v2" in stageb
     assert "local_signal_v2_stageb_strictneg_v2" in p0_gate
     assert "bash scripts/train_local_signal_v2_stageb_on_3060.sh" not in p0_gate

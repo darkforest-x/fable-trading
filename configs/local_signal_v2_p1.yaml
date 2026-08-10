@@ -1,0 +1,97 @@
+project: local_signal_v2
+phase: P1
+preregistered_at: "2026-08-10T00:00:00+08:00"
+seed: 20260807
+timeframe: 15m
+source_event_manifest: datasets/dense_owner_w20_midbox/w20_manifest.json
+holdout_start_exclusive: "2026-05-04T00:00:00Z"
+holdout_access: forbidden
+
+common:
+  signal_mode: confirmed
+  confirm_delays: [1, 2]
+  box_left_bars: 2
+  future_bars: 0
+  negative_ratio: 1.0
+  negative_kind: easy_empty_background
+  split: time_ordered_85_15
+  purge_bars: 150
+  model: models/yolo11s.pt
+  epochs: 60
+  patience: 15
+  batch: 8
+  imgsz: 960
+  augmentation:
+    fliplr: 0.0
+    flipud: 0.0
+    mosaic: 0.0
+    mixup: 0.0
+    hsv_h: 0.0
+    hsv_s: 0.0
+    hsv_v: 0.0
+
+arms:
+  A:
+    role: frozen_evaluation_baseline
+    window: 200
+    weights: models/owner_v10_chain.pt
+    retrain: false
+  B1:
+    role: local_fixed
+    window: 24
+    dataset: datasets/local_signal_v2_p1_b1_w24
+    run_name: p1_b1_causal_w24_cold
+  B2:
+    role: local_fixed
+    window: 30
+    dataset: datasets/local_signal_v2_p1_b2_w30
+    run_name: p1_b2_causal_w30_cold
+  C3:
+    role: local_causal_right_range
+    window_min: 20
+    window_max: 30
+    dataset: datasets/local_signal_v2_stageb_strictneg_v2
+    run_name: p1_c3_causal_range20_30_cold
+
+evaluation:
+  source: common_preholdout_time_validation_events
+  matching_tolerance_bars: 2
+  dedup: one_true_positive_per_event_extra_boxes_are_duplicates
+  threshold_grid: [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95]
+  primary:
+    baseline_recall_target: "min(0.70, A_max_recall); must be >= 0.50"
+    event_precision_gain_abs: 0.05
+    fp_per_1000_ratio_max: 0.80
+    candidate_recall_floor: "baseline_recall_target"
+    fallback_if_A_max_recall_below_0_50:
+      event_recall_min: 0.50
+      event_precision_min: 0.50
+      fp_per_1000_max: 250.0
+  diagnostics:
+    - event_recall
+    - event_f1
+    - duplicate_detections_per_event
+    - detection_latency_bars
+    - box_precision
+    - box_recall
+    - mAP50
+    - mAP50_95
+
+scope:
+  train_new_tip_labels: false
+  read_existing_holdout: false
+  promote_active: false
+  deploy: false
+  hard_negative_mining: deferred_to_P2
+  stage_a_future_pretraining: disabled_by_repository_rule_12
+
+baseline_freeze:
+  measured_before_candidate_results: true
+  weights: models/owner_v10_chain.pt
+  n_endpoints: 715
+  n_positive_events: 358
+  max_recall_on_frozen_grid: 0.075419
+  threshold_at_max_recall: 0.05
+  event_precision_at_max_recall: 0.029573
+  fp_per_1000_at_max_recall: 1239.161
+  status: nonviable_for_shared_recall_gate

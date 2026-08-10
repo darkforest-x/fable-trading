@@ -58,6 +58,8 @@ scripts/.label_studio.env
 # tip 预览大图（报告/HTML/JSON 可入库；PNG 不入库）
 analysis/output/v13_real_tip_preview/*.png
 analysis/output/v13_real_tip_preview/_tmp/
+# P1 公共事件评估图可由 manifest + 原始 K 线重建；manifest/JSON 证据入库。
+analysis/output/local_signal_v2_p1_eval/*/images/*.png
 
 # owner 多空审阅：预览 JPG / 流式日志不入库（sheet/JSON/HTML 可入库）
 analysis/output/owner_side_review/previews/
