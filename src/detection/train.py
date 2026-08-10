@@ -26,6 +26,9 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+RUNS_PROJECT = (REPO_ROOT / "runs" / "detect").resolve()
+
 # Chart images have a fixed meaning per axis and per color: never flip,
 # never mosaic/mix, keep colors intact, allow only tiny geometric jitter.
 SAFE_AUG = dict(
@@ -168,7 +171,10 @@ def main() -> None:
         device=device,
         workers=args.workers,
         cache=cache,
-        project="runs/detect",
+        # Ultralytics resolves a relative ``project`` against its persistent
+        # global runs_dir, which may point at an unrelated checkout. Keep every
+        # run inside this repository regardless of user-level settings.
+        project=str(RUNS_PROJECT),
         name=args.name,
         exist_ok=True,
         plots=args.plots,

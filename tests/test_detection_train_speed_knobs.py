@@ -3,7 +3,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from src.detection.train import DEFAULT_CACHE, DEFAULT_WORKERS, SAFE_AUG, _parse_cache
+from src.detection.train import (
+    DEFAULT_CACHE,
+    DEFAULT_WORKERS,
+    REPO_ROOT,
+    RUNS_PROJECT,
+    SAFE_AUG,
+    _parse_cache,
+)
 
 
 def test_defaults_are_speed_oriented() -> None:
@@ -25,6 +32,11 @@ def test_parse_cache() -> None:
     assert _parse_cache("disk") == "disk"
     assert _parse_cache("true") == "disk"
     assert _parse_cache("ram") == "ram"
+
+
+def test_runs_project_is_absolute_and_repository_owned() -> None:
+    assert RUNS_PROJECT.is_absolute()
+    assert RUNS_PROJECT == REPO_ROOT / "runs" / "detect"
 
 
 def test_training_seed_is_explicitly_forwarded() -> None:
