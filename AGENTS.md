@@ -88,6 +88,12 @@
   「当时发生了什么」，路径就是当时的真实路径。重构只改活文档，旧文档靠 `docs/RESTRUCTURE_MAP.md`
   查新旧对应。2026-08-03 一次改名正则把历史报告里真实跑过的命令改了，已回退。
 - **开新分支 / 建 worktree** → 禁止；见铁律 13。提交前先确认 `git branch --show-current` 是 main。
+- **用 `git status --short` 验收 .gitignore 改动** → 它把未跟踪目录折叠成一行，
+  9 万个文件缩成 14 行，泄漏根本看不见。一律用 `-uall` 展开，再加
+  `git add --dry-run -A <dir> | wc -l` 看真实会 stage 多少。
+  另：目录级排除（`datasets/`）之下所有 `!` 否定规则都是死的，git 不会下降进去；
+  忽略规则按体积/扩展名写，别按目录名写。见
+  `docs/learnings/directory-level-gitignore-kills-every-negation-below-it.md`。
 
 ## 质量标准（可检查，不是形容词）
 

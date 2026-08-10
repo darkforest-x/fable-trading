@@ -1,8 +1,29 @@
 # 数据目录：只放软链接或临时提取数据，不入库（仅仓库根目录，勿匹配 src/data）
 /data/
 
-# 检测层数据集与训练产物（图片/权重不入库）
-datasets/
+# 检测层数据集与训练产物（样本/权重不入库，元数据入库）
+# 2026-08-10: 这里原本是目录级的 `datasets/`。git 不会下降进被排除的目录，
+# 所以 `!datasets/*/manifest.jsonl` 这类否定规则永远不生效——manifest / summary /
+# audit 每次都只能靠 `git add -f` 才进得来（4b5f48b、aa352a0 两次提交就是这么进的，
+# 极容易漏）。现在改成按「体积」而不是按「目录」排除，双保险：
+#   1) 样本子树按目录挡（git 直接跳过整棵子树，status 不必走 9.5 万个文件）
+#   2) 样本扩展名再挡一次，新数据集换个目录布局也照样进不来
+# 于是 datasets/*/ 下的 *.json / *.jsonl / *.yaml / *.csv / *.md 默认可以 git add。
+datasets/**/images/
+datasets/**/labels/
+datasets/**/*_images/
+datasets/*/train/
+datasets/*/val/
+datasets/*/weak_or_review/
+datasets/**/*.png
+datasets/**/*.jpg
+datasets/**/*.jpeg
+datasets/**/*.npy
+datasets/**/*.txt
+datasets/**/*.cache
+!datasets/**/README*.txt
+# 手机审阅渲染：base64 内嵌大图，单文件 10MB+
+datasets/**/*_mobile.html
 runs/
 *.pt
 # 2026-08-05 owner: 自训权重入库。v11 检测器的教训——权重只在三台机器上存在，
@@ -65,7 +86,9 @@ output/label_studio/*.bak_pre_v5_refresh
 analysis/output/movers_3d_data/
 analysis/output/movers_3d/*.png
 data/altdata/
-datasets/dense_owner_short_star_tip_v10/
+# 2026-08-10: 原 `datasets/dense_owner_short_star_tip_v10/` 目录级排除已删除——
+# 它的体积全在 images/ + labels/（各 3306 个文件），上面的规则已经挡住；
+# 留着只会让这个数据集的 build_meta.json / data.yaml 继续需要 `git add -f`。
 analysis/output/v9_control_gold_pack/
 analysis/output/v9_hardneg_pack/images/
 analysis/output/btc_eth_20h/
