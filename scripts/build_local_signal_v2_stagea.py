@@ -631,7 +631,7 @@ def main() -> int:
             seed=args.seed,
             per_bucket=args.preview_per_bucket,
         )
-        print(json.dumps({"preview": args.preview_dir, "n": summary["n"]}))
+        print(json.dumps({"preview": str(args.preview_dir), "n": summary["n"]}))
         return 0
     run_full(
         args.src_manifest,

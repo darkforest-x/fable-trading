@@ -1,7 +1,11 @@
 """Contract tests for the owner-authorized Stage-A real-candle random crops."""
 from __future__ import annotations
 
+import json
+import sys
+
 import numpy as np
+import scripts.build_local_signal_v2_stagea as stagea
 
 from scripts.audit_local_signal_v2_stagea import audit_real_candle_position
 from scripts.build_local_signal_v2_stagea import (
@@ -78,3 +82,28 @@ def test_position_audit_rejects_blank_only_or_content_edge_layout() -> None:
     assert not result["pass"]
     assert not result["all_boxes_have_real_bars_to_right"]
     assert not result["right_blank_slots_all_zero"]
+
+
+def test_preview_cli_serializes_path_as_json_string(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    source_manifest = tmp_path / "source.json"
+    source_manifest.write_text("[]")
+    preview_dir = tmp_path / "preview"
+    monkeypatch.setattr(stagea, "run_preview", lambda *_args, **_kwargs: {"n": 24})
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "build_local_signal_v2_stagea.py",
+            "--src-manifest",
+            str(source_manifest),
+            "--preview",
+            "--preview-dir",
+            str(preview_dir),
+        ],
+    )
+
+    assert stagea.main() == 0
+    payload = json.loads(capsys.readouterr().out.strip())
+    assert payload == {"preview": str(preview_dir), "n": 24}
