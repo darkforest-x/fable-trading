@@ -168,7 +168,7 @@ def refine_split_audit(
     # Negative windows must be contained in the same frozen blocks as the
     # positive events.  A split label inherited from a symbol is not enough.
     p_tr = pos_frame.loc[pos_frame["split"] == "train", "end"]
-    p_va_start = pos_frame.loc[pos_frame["split"] == "val", "end"]
+    p_va_start = pos_frame.loc[pos_frame["split"] == "val", "start"]
     p_va_end = pos_frame.loc[pos_frame["split"] == "val", "end"]
     n_tr = neg_frame.loc[neg_frame["split"] == "train"]
     n_va = neg_frame.loc[neg_frame["split"] == "val"]

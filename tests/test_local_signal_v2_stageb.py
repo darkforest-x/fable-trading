@@ -229,6 +229,37 @@ def test_split_audit_accepts_strict_negative_blocks():
     assert result["negatives_have_timestamps"]
 
 
+def test_split_audit_uses_first_visible_val_bar_not_first_val_end():
+    pos = [
+        {
+            **_pos("train", "2026-03-01T06:00:00Z", "tr"),
+            "start_time": "2026-03-01T00:00:00Z",
+        },
+        {
+            **_pos("val", "2026-03-03T06:00:00Z", "va0"),
+            "start_time": "2026-03-03T00:00:00Z",
+        },
+        {
+            **_pos("val", "2026-03-04T06:00:00Z", "va1"),
+            "start_time": "2026-03-04T00:00:00Z",
+        },
+    ]
+    neg = [
+        _neg(
+            "val",
+            "2026-03-03T02:00:00Z",
+            "2026-03-03T08:00:00Z",
+            "nva_inside_visible_val_block",
+        )
+    ]
+
+    result = refine_split_audit(pos, neg, {"purge_bars": 150, "is_time_split": True})
+
+    assert result["is_time_split"]
+    assert result["negative_time_split"]["n_val_before_val_start"] == 0
+    assert result["negative_time_split"]["pass"]
+
+
 def test_preview_selection_prefers_distinct_symbols_and_is_deterministic():
     events = [
         {"stem": "a1", "symbol": "A"},
