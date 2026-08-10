@@ -1,0 +1,30 @@
+{
+  "source_dataset": "/Users/zhangzc/fable-trading/datasets/local_signal_v2_stageb_strictneg_v2",
+  "holdout_start_exclusive": "2026-05-04 00:00:00+00:00",
+  "source_counts": {
+    "positive": 358,
+    "easy_negative": 357
+  },
+  "arms": {
+    "A": {
+      "n": 715,
+      "window": 200,
+      "max_end": "2026-05-03 10:45:00+00:00"
+    },
+    "B1": {
+      "n": 715,
+      "window": 24,
+      "max_end": "2026-05-03 10:45:00+00:00"
+    },
+    "B2": {
+      "n": 715,
+      "window": 30,
+      "max_end": "2026-05-03 10:45:00+00:00"
+    },
+    "C3": {
+      "n": 715,
+      "window": "source_20_30",
+      "max_end": "2026-05-03 10:45:00+00:00"
+    }
+  }
+}

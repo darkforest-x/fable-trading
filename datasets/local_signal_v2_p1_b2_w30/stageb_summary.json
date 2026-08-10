@@ -1,0 +1,53 @@
+{
+  "generated_at": "2026-08-10T14:12:36.080226+00:00",
+  "protocol": "local_signal_v2_stageb_mode_c_strictneg_v2_20260810_w30",
+  "src_manifest": "/Users/zhangzc/fable-trading/datasets/dense_owner_w20_midbox/w20_manifest.json",
+  "out": "datasets/local_signal_v2_p1_b2_w30",
+  "seed": 20260807,
+  "stage": "B",
+  "mode": "C",
+  "confirm_delays": [
+    1,
+    2
+  ],
+  "box_left": 2,
+  "win_min": 30,
+  "win_max": 30,
+  "fixed_window_len": 30,
+  "holdout_start": "2026-05-04 00:00:00+00:00",
+  "purge_bars": 150,
+  "val_frac": 0.15,
+  "split_rule": "time-ordered events end_time < holdout; last 15% \u2192 val; train ends \u2265150 bars before first val; purge zone dropped",
+  "is_time_split": true,
+  "strict_negative_time_split": true,
+  "negative_time_bounds": {
+    "train_end_max": "2026-03-18 12:45:00+00:00",
+    "val_start_min": "2026-03-20 06:00:00+00:00",
+    "val_end_max": "2026-05-03 10:45:00+00:00"
+  },
+  "counts": {
+    "train": 2030,
+    "val": 358,
+    "train_neg": 2030,
+    "val_neg": 358
+  },
+  "skip_reasons": {
+    "purge_zone": 1,
+    "holdout_or_no_time": 246
+  },
+  "n_pos_manifest": 2388,
+  "n_neg_manifest": 2388,
+  "time_range": {
+    "train": {
+      "n": 2030,
+      "min": "2025-06-05 14:45:00+00:00",
+      "max": "2026-03-18 12:45:00+00:00"
+    },
+    "val": {
+      "n": 358,
+      "min": "2026-03-20 06:00:00+00:00",
+      "max": "2026-05-03 10:45:00+00:00"
+    }
+  },
+  "renderer_version": "yoyo.l1_detection.render.render_chart"
+}

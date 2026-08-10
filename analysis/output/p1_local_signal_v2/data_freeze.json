@@ -1,0 +1,34 @@
+{
+  "builder_head": "cbc5519e63bce8482500c559a5d70bb0a22e71fc",
+  "built_after_builder_commit": true,
+  "holdout_read": false,
+  "datasets": {
+    "B1": {
+      "path": "datasets/local_signal_v2_p1_b1_w24",
+      "window": 24,
+      "positive_manifest_sha256": "9c898d4b0c8ba6fd090a643f032514d1aa38ba04e93f4d82e716bfa79ae05350",
+      "negative_manifest_sha256": "24a8bfd6459208c4c9d6546eab75522fa0c75f660a89e0f2c760a63257e21794",
+      "p0_gates": "8/8 pass"
+    },
+    "B2": {
+      "path": "datasets/local_signal_v2_p1_b2_w30",
+      "window": 30,
+      "positive_manifest_sha256": "d976d945a1f7a1437fb2fffee9c2730d9d58f598b1057812cab9c8bd5bbb338b",
+      "negative_manifest_sha256": "fc03c2b8a441143e9426896cee812b4dcb6283ffe5acf21706531b23ea631eb0",
+      "p0_gates": "8/8 pass"
+    }
+  },
+  "common_eval": {
+    "n_endpoints": 715,
+    "n_positive_events": 358,
+    "n_easy_negative_endpoints": 357,
+    "max_timestamp": "2026-05-03 10:45:00+00:00",
+    "manifest_sha256": {
+      "A": "3e478c6f197d79d1bd1f7542b18891b786fcd54c68e555af50ed758cd491b25b",
+      "B1": "bfe5135a775cb09db7efe9f87583ae1480b81d333066e6f0817f39b35dc9640f",
+      "B2": "623ddb47e8440125f5250d08211286883902161665be30a82835daf95c3cbef4",
+      "C3": "9c2dae3c4cdb2f1dc3f7011e218a20b77b033a0d742bdfe76fee9f42f4aee84f"
+    }
+  },
+  "baseline_eval_sha256": "d168bd86d195c2fde8121f6b9c158795f0ddabb951a5897563e3032cd76845dd"
+}

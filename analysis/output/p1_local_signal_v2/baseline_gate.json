@@ -1,0 +1,24 @@
+{
+  "frozen_at": "2026-08-10T22:10:00+08:00",
+  "measured_before_candidate_results": true,
+  "baseline_arm": "A",
+  "weights": "models/owner_v10_chain.pt",
+  "eval_artifact": "analysis/output/p1_local_signal_v2/A_event_eval.json",
+  "n_endpoints": 715,
+  "n_positive_events": 358,
+  "threshold_grid_max_recall": {
+    "threshold": 0.05,
+    "event_recall": 0.07541899441340782,
+    "event_precision": 0.029572836801752464,
+    "fp_per_1000_bars": 1239.1608391608392,
+    "tp_events": 27,
+    "false_positive_boxes": 886
+  },
+  "baseline_status": "nonviable_for_shared_recall_gate",
+  "candidate_discovery_gate": {
+    "event_recall_min": 0.5,
+    "event_precision_min": 0.5,
+    "fp_per_1000_bars_max": 250.0
+  },
+  "production_implication": "none; historical P1 discovery only"
+}
