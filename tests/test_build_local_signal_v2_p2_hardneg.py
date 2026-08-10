@@ -30,6 +30,7 @@ def test_selects_candidate_if_any_box_reaches_frozen_threshold():
     assert [row["stem"] for row in selected] == ["a"]
     assert selected[0]["mining_box_count"] == 1
     assert selected[0]["mining_max_confidence"] == pytest.approx(0.35)
+    assert selected[0]["mining_boxes"] == [{"confidence": 0.35}]
     assert selected[0]["hard_negative_type"] == "b2_false_positive_conf035"
 
 

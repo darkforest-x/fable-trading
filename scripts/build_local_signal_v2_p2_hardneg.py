@@ -191,6 +191,7 @@ def select_hard_negatives(
                 "hard_negative_event_id": hard_negative_event_id(row),
                 "mining_max_confidence": max(float(box["confidence"]) for box in boxes),
                 "mining_box_count": len(boxes),
+                "mining_boxes": boxes,
             }
         )
     return sorted(selected, key=lambda row: (row["split"], row["symbol"], int(row["win_start"])))
