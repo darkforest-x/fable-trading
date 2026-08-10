@@ -12,10 +12,11 @@
 | Legacy 200-bar labels | `datasets/dense_owner_v14_pad200` + `data/golden_pool.json` | owner boxes |
 | Box→bar recover | `scripts/build_w20_midbox_dataset.py:resolve_pad_window` | MAD ≤ 5.0 vs stored PNG |
 | Stage A mid-box | `scripts/build_w20_midbox_dataset.py` → `datasets/dense_owner_w20_midbox` | **P0 FAIL** (future bars, hash split, holdout leak) |
-| Stage B causal | `scripts/build_local_signal_v2_stageb.py` → `datasets/local_signal_v2_stageb` | Mode C, tip-aligned, time split |
+| Stage B V1 | `scripts/build_local_signal_v2_stageb.py` → `datasets/local_signal_v2_stageb` | **P0 FAIL**：negative windows 跨时间块 |
+| Stage B strict-negative V2 | `scripts/build_local_signal_v2_stageb_strictneg_v2.py` → `datasets/local_signal_v2_stageb_strictneg_v2` | Mode C；全样本严格时间切分；P0 PASS |
 | Legacy symbol split | `src/detection/owner_eval.py:split_of` | sha1(symbol) — **not** used for Stage B |
 | Live tip scan | `yoyo/layers/l1_detection/scan.py` / candidates | tip / tip-1 / tip-2 only (rule 12) |
-| YOLO train | `scripts/train_w20_midbox_on_3060.sh` → 3060 `C:\fable\train_dense.py` | no auto-promote |
+| YOLO train | `scripts/train_w20_midbox_on_3060.sh` → 下发本仓 `src/detection/train.py` | 禁止远端 trainer 漂移；flip/mosaic/mixup/HSV 全关；no auto-promote |
 | L2 judgment | `models/frozen_*.json` + ACTIVE symlink | L2 freeze; L1 = owner_best |
 | Forward / paper | `yoyo/layers/l4_execution/` + VPS `data/forward_log.csv` | VPS sole writer |
 | Layer boundary tests | `~/yoyo-trading/tests/test_layer_boundaries.py` | AST enforced |

@@ -1,32 +1,36 @@
 # Local Signal V2 — 进度一页纸
 
-**更新**：2026-08-07 07:25 UTC · **授权**：owner 全文生效
+**更新**：2026-08-10 13:34 UTC
 
-## 禁止（即使全权）
+## 当前裁决
 
-- promote ACTIVE / owner_best · 真下单 · 清 forward_log · 未记账额外 holdout
-
-## 当前状态
+P0 数据修复已通过；P1 被重置，等待 owner 决策。旧 Stage-B 数据的负样本没有真正按时间切分，旧权重也使用过非零 HSV，因此不能作为修复后 V2 候选。
 
 | 阶段 | 状态 | 产物 |
 |---|---|---|
-| P0 Stage B | ✅ 七道门全绿 | `datasets/local_signal_v2_stageb` |
-| P0 报告 | ✅ | `analysis/html/p0_local_signal_v2_stageb_report.html` |
-| P1 冷启动 60ep | ✅ **完成** 1.315h | best mAP50=0.771 / mAP50-95=0.572 |
-| P1 报告 | ✅ | `analysis/html/p1_local_signal_v2_stageb_cold_report.html` |
-| 权重 | ✅ 已拉回 | `analysis/output/lsv2_stageb/owner_lsv2_stageb_cold/weights/best.pt` |
-| tip/event 验收 | 🔄 下一步 | 交易级门未过 → **不自动 P2** |
-| P3 paper 脚手架 | ✅ | `scripts/forward_paper_local_signal_v2_scaffold.py` |
-| w20 旁路 | 🔄 | preholdout / shadow / gallery |
+| V1 Stage B | ❌ P0 FAIL | train 越界 negatives 317；val 过早 negatives 296 |
+| strict-negative V2 | ✅ P0 8/8 PASS | `datasets/local_signal_v2_stageb_strictneg_v2` |
+| Builder Git 锚点 | ✅ | `471f854`；数据在提交后重建 |
+| P0 报告 | ✅ | `analysis/html/p0_local_signal_v2_stageb_strictneg_v2_report.html` |
+| 24-event preview | ✅ 24 个不同币种 | `analysis/output/local_signal_v2_stageb_strictneg_v2_preview/` |
+| 旧 P1 cold 权重 | ❌ invalidated | 绑定 V1 数据 + hsv_s/v=0.05；禁止冒充 V2 |
+| 新 P1 | ⏸ 未训练 | 需 owner 批准并先冻结 A/B/C 对照与 event gates |
+| P2 / P3 | ⛔ 不进入 | P1 未完成 |
 
-## 决策
+## 禁止
 
-`reports/ACCEPTANCE_DECISION.json` → phase=P1 · **needs_more_data**（等 tip 对照）
+- 自动进入 P1 / P2
+- 复用旧权重作为 strict-negative V2 结果
+- promote ACTIVE / owner_best
+- 真下单、清 forward_log、未批准读取 holdout
 
-## 命令
+## 机器裁决
+
+`reports/ACCEPTANCE_DECISION.json` → phase=P0、decision=accepted、`p1_train_complete=false`。
 
 ```bash
-open analysis/html/p1_local_signal_v2_stageb_cold_report.html
+open analysis/html/p0_local_signal_v2_stageb_strictneg_v2_report.html
 cat reports/ACCEPTANCE_DECISION.json
-ls -la analysis/output/lsv2_stageb/owner_lsv2_stageb_cold/weights/best.pt
+.venv/bin/python scripts/audit_local_signal_v2.py \
+  --dataset datasets/local_signal_v2_stageb_strictneg_v2
 ```

@@ -2,6 +2,33 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-10 — Local Signal V2 P0 修复通过，停在 owner gate）
+
+**直接裁决：旧 Stage-B V1 的 P0 全绿是误报；strict-negative V2 已修复并通过 P0。**
+
+- V1 positives 按时间切分，但 negatives 只继承 split 名称、候选来自全段历史：317 条 train
+  negatives 晚于 train 截止，296 条 val negatives 早于 val 起点。
+- 原 auditor 只审 positives，现已改为检查每个正/负窗口完整 `[start, end]`；V1 命令返回 1，
+  strict-negative V2 八道门全绿。
+- 新数据集 2,388 positive + 2,388 easy negative；train 4,060、val 716；0 holdout、0 event
+  跨 split、0 label 越界、4,776 image/label/manifest 守恒、100% market-bar 可追溯。
+- 同 seed 原地全量重跑两次，positive manifest SHA `6814b86c…b047`、negative manifest SHA
+  `2cdcf889…13ba` 均逐字节不变；24-event preview 覆盖 24 个不同 symbol。
+- Builder/auditor 已先提交为 `471f854`，数据随后从该 HEAD 全量重建，满足“builder 先入 Git”纪律。
+- 旧 `owner_lsv2_stageb_cold` 绑定 V1 且训练时 HSV 非零，已 invalidated；不得作为新 V2 候选。
+- 未来 3060 训练入口会下发仓库内 `src/detection/train.py`，不再调用远端未跟踪 trainer；
+  flip/mosaic/mixup/HSV 全关。
+- 未训练、未读 holdout、未改 ACTIVE、未部署、未下单。
+
+交付物：
+
+- `analysis/html/p0_local_signal_v2_stageb_strictneg_v2_report.html`
+- `analysis/output/p0_local_signal_v2_stageb_strictneg_v2_audit.json`
+- `datasets/local_signal_v2_stageb_strictneg_v2/manifest.jsonl`
+- `reports/ACCEPTANCE_DECISION.json`
+
+**停止点：P0。** 按交接规范 §14 等 owner 决定是否启动 P1 A/B/C 对照；不自动训练。
+
 ## ⚡ 当前真相（2026-08-03 — P2-M 只读机制审计已完成，必须停止）
 
 **直接裁决：raw return IC 大部分含 ATR/barrier 尺度成分，但有小幅 scale-robust 残余；
