@@ -54,9 +54,14 @@ li { margin: .25rem 0; }
 </ul>
 <p>  未来走势对照。共331×3=993张PNG；未来数据不在训练图、标签或候选训练manifest中。</p>
 <ul>
-<li>审核页V2只保留“对 / 框偏 / 不对”三项主裁决，快捷键为<code>1 / 2 / 3</code>，分类后自动跳到下一张，</li>
+<li>审核页V3只保留“对 / 框偏 / 不对”三项主裁决，快捷键为<code>1 / 2 / 3</code>，分类后自动跳到下一张，</li>
 </ul>
 <p>  <code>Z</code>撤销。默认331张全部未确认，只有Owner导出的裁决才能改变语义；本轮没有自动预选任何一张。</p>
+<ul>
+<li>V2未来对照图误用了YOLO训练渲染器的6%最小纵轴跨度：291/331张（87.92%）真实图幅不足6%，</li>
+</ul>
+<p>  实际波幅中位数仅2.99%，因此被视觉压平。V3为审核图单独使用真实高低点+均线自动缩放，取消</p>
+<p>  训练下限，并在图头和卡片元数据中显示每张实际波幅。</p>
 <ul>
 <li>本审核包只是为331个剩余触发建立错误分类和校准依据，<strong>不是第三训练臂数据集</strong>。331个事件只来自</li>
 </ul>
@@ -92,7 +97,8 @@ li { margin: .25rem 0; }
 <tr><td>不对（快捷键3）</td><td>当时可见形态就不是目标</td><td>仅为hard-negative候选；仍需数据去重和时间切分</td></tr>
 </tbody></table>
 <p>页面右侧未来最多48根只帮助人工判断“后续是否真的启动/是否只是震荡”，不能反过来把“后来跌了”</p>
-<p>自动等价为真目标。训练输入只允许使用左侧对应的原始因果文件；审核页中带橙框的左图也是单独副本，</p>
+<p>自动等价为真目标。右图按本图OHLC和六条均线的真实极值独立自动缩放，图头<code>AUTO-Y</code>显示未加边距前</p>
+<p>的真实跨度。训练输入仍只允许使用左侧对应的原始因果文件；审核页中带橙框的左图也是单独副本，</p>
 <p>避免框线像素污染训练输入。</p>
 <p>“延续/重复”已从Owner主按钮删除：它属于相邻事件和去重规则诊断，不应与单张图片的形态/框裁决</p>
 <p>混在同一操作层。后续由事件时间和核心重叠关系先自动聚类，再对必要的歧义组单独复核。</p>
@@ -108,6 +114,8 @@ li { margin: .25rem 0; }
 <tr><td>总PNG</td><td>993</td></tr>
 <tr><td>完整48根未来</td><td>328</td></tr>
 <tr><td>仅47根未来</td><td>3</td></tr>
+<tr><td>未来真实波幅p10 / median / p90</td><td>1.50% / 2.99% / 6.75%</td></tr>
+<tr><td>未来审核纵轴</td><td>真实OHLC+MA极值自动缩放，无6%训练下限</td></tr>
 <tr><td>最大物理读取时间</td><td>2026-05-03 23:45 UTC</td></tr>
 <tr><td>holdout开始</td><td>2026-05-04 00:00 UTC</td></tr>
 <tr><td>holdout materialized rows</td><td>0</td></tr>
@@ -122,11 +130,11 @@ li { margin: .25rem 0; }
 <li>实际浏览器加载331张卡片，首尾C001–C331均存在；页面无console error或warning。</li>
 <li>实测连续按<code>1 / 2 / 3</code>依次把C001/C002/C003标成对/框偏/不对，并自动移动当前卡；按<code>Z</code></li>
 </ul>
-<p>  后C003恢复未确认。JSON导出包含V2 protocol、源事件SHA、331个完整decision和正确计数。</p>
+<p>  后C003恢复未确认。JSON导出包含V3 protocol、源事件SHA、331个完整decision和正确计数。</p>
 <ul>
 <li>验收后已清除浏览器测试选择并刷新，交付页恢复<code>pending=331</code>。</li>
-<li>V1/V2的331行三类图片SHA逐行一致，只改变审核交互，没有改变任何样本像素。</li>
-<li>全量测试：<code>640 passed, 2 skipped</code>。</li>
+<li>V2→V3的331张原始因果图和331张带框因果副本SHA逐行一致；仅331张未来审核图发生变化。</li>
+<li>全量测试：<code>641 passed, 2 skipped</code>。</li>
 </ul>
 <h2>必报指标状态</h2>
 <ul>
@@ -149,7 +157,9 @@ li { margin: .25rem 0; }
 <p>  覆盖和新增时间块触发密度趋稳为停止条件，不以机械凑数宣布足够。</p>
 <ul>
 <li>当前第二臂权重仍是密度失败，禁止promote；本审核页不会自动发起训练。</li>
+<li>V3每张未来图独立自动缩放，因此不能用不同卡片中K线的视觉高度直接比较绝对波动；应读取卡片和</li>
 </ul>
+<p>  图头显示的真实波幅百分比。该缩放只服务人工辨形态，不进入模型输入。</p>
 <h2>复现命令</h2>
 <pre><code>
 # 物理截断的审核未来快照；最大时间仍早于holdout
@@ -172,11 +182,11 @@ python3 scripts/md_to_html.py \
 <li>Owner审核入口：<code>analysis/html/p2_owner_short_gold_center_hardneg_canary_review331_20260811.html</code></li>
 <li>冻结清单：</li>
 </ul>
-<p>  <code>analysis/output/owner_short_gold_center_hardneg_canary_review331_v2/review_manifest.jsonl</code></p>
+<p>  <code>analysis/output/owner_short_gold_center_hardneg_canary_review331_v3/review_manifest.jsonl</code></p>
 <ul>
 <li>机器审计摘要：</li>
 </ul>
-<p>  <code>analysis/output/owner_short_gold_center_hardneg_canary_review331_v2/summary.json</code></p>
+<p>  <code>analysis/output/owner_short_gold_center_hardneg_canary_review331_v3/summary.json</code></p>
 <p>Owner先用<code>1 / 2 / 3</code>逐张完成三项裁决并复制页面底部JSON。收到裁决后，先统计真目标precision、</p>
 <p>框偏率和明确负例率；延续重复率由相邻事件关系另行计算，再据此设计跨多个未使用pre-holdout时间块</p>
 <p>的补挖策略。第三训练臂的正式数据构建和开训是下一次单独动作，不能由本审核页自动触发。</p>

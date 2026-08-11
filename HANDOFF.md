@@ -101,6 +101,11 @@ Owner原始金标坐标时重新凭感觉画框。新血缘必须是`原始⭐�
   不够直接承担第三臂全部hard negatives；Owner裁决后还要从多个未使用pre-holdout块补挖。审核入口：
   `analysis/html/p2_owner_short_gold_center_hardneg_canary_review331_20260811.html`；报告：
   `analysis/html/p2_owner_short_gold_center_hardneg_canary_review331_report_20260811.html`。
+- Owner随后发现未来对照K线普遍视觉过平；根因不是行情或数据，而是V2复用了训练renderer的6%
+  最小纵轴跨度。291/331张（87.92%）实际图幅不足6%，实际波幅p10/median/p90=
+  1.50%/2.99%/6.75%。审核V3已改为每图按真实OHLC+六均线极值自动缩放，图头和卡片显示真实
+  波幅；331张未来图已重渲染。V2→V3的331张原始因果图和331张带框因果图SHA逐行不变，只有
+  未来审核图变化；仍0 holdout、0 labels、0 training-eligible，审核入口路径不变。
 - Owner随后明确要求用刚训练权重回放最近2天并发TG，登记为该配置第1次消耗holdout。一次性OKX
   快照覆盖214/215个训练分布币种，W12–19逐bar扫描328,704窗，71,204条原始命中去重为2,500
   个事件，即60.845 events/1000 bar endpoints、1,250 events/day、5.84 events/币/天；211/214

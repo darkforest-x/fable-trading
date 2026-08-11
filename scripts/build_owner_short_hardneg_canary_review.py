@@ -30,8 +30,19 @@ for module_path in (ROOT, YOYO_REPO):
     if str(module_path) not in sys.path:
         sys.path.insert(0, str(module_path))
 
-from yoyo.layers.l1_detection.data import add_mas  # noqa: E402
-from yoyo.layers.l1_detection.render import render_chart  # noqa: E402
+from yoyo.layers.l1_detection.data import ALL_MA_COLS, add_mas  # noqa: E402
+from yoyo.layers.l1_detection.render import (  # noqa: E402
+    BG,
+    CANDLE_GREEN,
+    CANDLE_RED,
+    IMG_HEIGHT,
+    IMG_WIDTH,
+    MA_COLORS,
+    MARGIN,
+    WICK,
+    ChartTransform,
+    render_chart,
+)
 
 from scripts.backtest_owner_short_gold_center_recent import (  # noqa: E402
     HOLDOUT_START,
@@ -43,7 +54,7 @@ from scripts.backtest_owner_short_gold_center_recent import (  # noqa: E402
 from scripts.build_w20_midbox_dataset import yolo_box_from_bars  # noqa: E402
 
 
-PROTOCOL = "owner_short_hardneg_canary_review331_v2_20260811"
+PROTOCOL = "owner_short_hardneg_canary_review331_v3_20260811"
 DEFAULT_EVENTS = (
     ROOT
     / "analysis/output/owner_short_gold_center_preholdout_canary_20260503_v1"
@@ -57,7 +68,7 @@ DEFAULT_SNAPSHOT = (
 DEFAULT_SNAPSHOT_SUMMARY = DEFAULT_SNAPSHOT.parent / "fetch_summary.json"
 DEFAULT_OUT = (
     ROOT
-    / "analysis/output/owner_short_gold_center_hardneg_canary_review331_v2"
+    / "analysis/output/owner_short_gold_center_hardneg_canary_review331_v3"
 )
 DEFAULT_HTML = (
     ROOT
@@ -67,6 +78,9 @@ FUTURE_BARS = 48
 ORANGE = (20, 145, 225)
 PURPLE = (244, 238, 255)
 BOUNDARY = (180, 90, 120)
+REVIEW_TOP = 50
+REVIEW_PRICE_PAD = 0.06
+REVIEW_RENDERER = "human_actual_ohlc_ma_autoscale_no_training_floor_v1"
 
 
 def utc(value: object) -> pd.Timestamp:
@@ -122,6 +136,108 @@ def write_image(path: Path, image: np.ndarray) -> None:
         raise OSError(path)
 
 
+def make_human_review_transform(
+    frame: pd.DataFrame,
+    *,
+    width: int = IMG_WIDTH,
+    height: int = IMG_HEIGHT,
+) -> tuple[ChartTransform, float]:
+    """Build an actual-range scale for future-only human review.
+
+    Columns used: low/high plus the precomputed SMA/EMA 20/60/120 values for
+    the supplied review window. Unlike the frozen YOLO renderer, this function
+    deliberately has no 6% relative-span floor; it must never render training
+    inputs because its sole purpose is to make modest future moves legible.
+    """
+    frame = frame.reset_index(drop=True)
+    series = [frame["low"], frame["high"]]
+    series.extend(frame[column] for column in ALL_MA_COLS if column in frame)
+    values = pd.concat(series).dropna()
+    if values.empty:
+        raise ValueError("human review frame has no price values")
+    actual_low = float(values.min())
+    actual_high = float(values.max())
+    midpoint = (actual_high + actual_low) / 2
+    actual_span = actual_high - actual_low
+    safe_span = max(actual_span, abs(midpoint) * 1e-6, 1e-12)
+    actual_span_pct = actual_span / max(abs(midpoint), 1e-12) * 100
+    price_min = actual_low - safe_span * REVIEW_PRICE_PAD
+    price_max = actual_high + safe_span * REVIEW_PRICE_PAD
+    plot_width = width - 2 * MARGIN
+    plot_height = height - REVIEW_TOP - MARGIN
+    candle_half_width = max(1, int(plot_width / max(len(frame), 1) * 0.34))
+    return (
+        ChartTransform(
+            n_bars=len(frame),
+            width=width,
+            height=height,
+            left=MARGIN,
+            top=REVIEW_TOP,
+            plot_w=plot_width,
+            plot_h=plot_height,
+            price_min=price_min,
+            price_max=price_max,
+            candle_half_w=candle_half_width,
+        ),
+        actual_span_pct,
+    )
+
+
+def render_human_review_chart(
+    frame: pd.DataFrame,
+    *,
+    width: int = IMG_WIDTH,
+    height: int = IMG_HEIGHT,
+) -> tuple[np.ndarray, ChartTransform, float]:
+    """Render review-only future context with its real visible price span."""
+    frame = frame.reset_index(drop=True)
+    transform, actual_span_pct = make_human_review_transform(
+        frame, width=width, height=height
+    )
+    image = np.full((height, width, 3), BG, dtype=np.uint8)
+    for index, row in frame.iterrows():
+        x = transform.x_at(index)
+        high_y = transform.y_at(row["high"])
+        low_y = transform.y_at(row["low"])
+        open_y = transform.y_at(row["open"])
+        close_y = transform.y_at(row["close"])
+        color = (
+            CANDLE_GREEN
+            if float(row["close"]) >= float(row["open"])
+            else CANDLE_RED
+        )
+        cv2.line(image, (x, high_y), (x, low_y), WICK, 1, cv2.LINE_AA)
+        body_top, body_bottom = min(open_y, close_y), max(open_y, close_y)
+        if body_bottom - body_top < 2:
+            body_bottom = body_top + 2
+        cv2.rectangle(
+            image,
+            (x - transform.candle_half_w, body_top),
+            (x + transform.candle_half_w, body_bottom),
+            color,
+            -1,
+            cv2.LINE_AA,
+        )
+    for column in ALL_MA_COLS:
+        if column not in frame:
+            continue
+        points = [
+            (transform.x_at(index), transform.y_at(float(value)))
+            for index, value in enumerate(frame[column])
+            if pd.notna(value)
+        ]
+        if len(points) >= 2:
+            cv2.polylines(
+                image,
+                [np.asarray(points, dtype=np.int32)],
+                False,
+                MA_COLORS[column],
+                1,
+                cv2.LINE_AA,
+            )
+    return image, transform, actual_span_pct
+
+
 def render_event(
     event: dict[str, Any],
     frame: pd.DataFrame,
@@ -161,7 +277,7 @@ def render_event(
     future_bars = future_bar_count(event["decision_time"], available_end)
     future_end = min(len(enriched) - 1, decision + future_bars)
     review = enriched.iloc[window_start : future_end + 1].reset_index(drop=True)
-    review_image, transform = render_chart(review, out_path=None)
+    review_image, transform, actual_span_pct = render_human_review_chart(review)
     decision_local = decision - window_start
     core_start_local = core_start - window_start
     core_end_local = core_end - window_start
@@ -212,7 +328,7 @@ def render_event(
     )
     cv2.putText(
         review_image,
-        f"{review_id} | LEFT=CAUSAL | RIGHT=FUTURE {future_bars} BARS REVIEW ONLY",
+        f"{review_id} | AUTO-Y {actual_span_pct:.2f}% | FUTURE {future_bars} BARS REVIEW ONLY",
         (10, 29),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.58,
@@ -234,6 +350,8 @@ def render_event(
             "future_review_path": str(future_path.relative_to(ROOT)),
             "future_review_sha256": sha256_file(future_path),
             "future_review_bars": future_bars,
+            "future_review_actual_span_pct": actual_span_pct,
+            "future_review_renderer": REVIEW_RENDERER,
             "future_review_end_time": utc(review["open_time"].iloc[-1]).isoformat(),
             "future_review_only": True,
             "future_data_in_causal_input": False,
@@ -260,7 +378,7 @@ def card(row: dict[str, Any], output_html: Path) -> str:
     return f"""
     <article class="card" id="card-{review_id}" data-id="{review_id}" data-choice="pending">
       <div class="head"><b>{review_id} · {symbol}</b><span class="chip">未确认</span></div>
-      <div class="meta">event {event_id} · 决策 {decision:%m-%d %H:%M} CST · W{int(row['window_len'])} · 核心{int(row['predicted_core_bars'])}根 · 延迟{int(row['decision_delay_bars'])}根 · first {float(row['conf']):.3f} · peak {float(row['event_conf_max']):.3f} · raw {int(row['raw_detection_count'])}</div>
+      <div class="meta">event {event_id} · 决策 {decision:%m-%d %H:%M} CST · W{int(row['window_len'])} · 核心{int(row['predicted_core_bars'])}根 · 延迟{int(row['decision_delay_bars'])}根 · 对照真实波幅 {float(row['future_review_actual_span_pct']):.2f}% · first {float(row['conf']):.3f} · peak {float(row['event_conf_max']):.3f} · raw {int(row['raw_detection_count'])}</div>
       <div class="pair">
         <button type="button" onclick="zoom('{review_id}','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="{causal}" alt="{review_id} causal"></button>
         <button type="button" onclick="zoom('{review_id}','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="{future}" alt="{review_id} future"></button>
@@ -280,7 +398,7 @@ def render_html(rows: list[dict[str, Any]], source: Path, output_html: Path) -> 
     source_hash = sha256_file(source)
     return f"""<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>331事件语义审核</title>
 <style>:root{{--bg:#f3f6f8;--ink:#17232d;--muted:#60717f;--green:#198754;--orange:#d98700;--red:#d33;--blue:#1769aa}}*{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}}header{{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #d8e0e6;padding:14px 20px;box-shadow:0 2px 10px #0001}}h1{{margin:0 0 6px;font-size:24px}}header p{{margin:4px 0;color:#435664}}.bar{{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}}.bar button,.bar select{{padding:7px 11px;border:1px solid #b9c5ce;border-radius:8px;background:#fff;cursor:pointer}}.bar .copy{{background:var(--blue);color:#fff;border-color:var(--blue)}}#stats{{margin-left:auto;font-weight:800}}main{{max-width:1500px;margin:auto;padding:16px}}.notice{{background:#fff7df;border:1px solid #ebcb75;border-radius:10px;padding:11px 14px;margin-bottom:14px}}.hotkeys{{font-weight:800;color:#7c4f00}}.grid{{display:grid;grid-template-columns:1fr;gap:16px}}.card{{scroll-margin-top:138px;background:#fff;border:3px solid transparent;border-radius:11px;overflow:hidden;box-shadow:0 2px 10px #0001}}.card.current{{outline:4px solid var(--blue);outline-offset:2px}}.card[data-choice="target"]{{border-color:var(--green)}}.card[data-choice="rebox"]{{border-color:var(--orange)}}.card[data-choice="hard_negative"]{{border-color:var(--red)}}.head{{display:flex;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #e3e8ec}}.chip{{background:#edf1f4;border-radius:999px;padding:3px 8px;font-size:13px}}.meta{{padding:7px 12px;color:var(--muted);font-size:13px}}.pair{{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#dce3e8}}.pair button{{padding:0;border:0;background:#fff;cursor:zoom-in}}.pair span{{display:block;padding:6px 10px;text-align:left;font-weight:800;color:#344b5b;background:#edf3f6}}.pair img{{display:block;width:100%;height:auto}}.choices{{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:10px 12px}}.choices button{{padding:11px 5px;border:1px solid #c3cdd5;border-radius:8px;background:#fff;cursor:pointer;font-size:16px}}.choices button.active{{color:#fff;font-weight:800}}.choices [data-value="target"].active{{background:var(--green)}}.choices [data-value="rebox"].active{{background:var(--orange)}}.choices [data-value="hard_negative"].active{{background:var(--red)}}.hidden{{display:none}}textarea{{width:100%;min-height:150px;margin-top:16px}}dialog{{width:min(96vw,1500px);border:0;border-radius:10px}}dialog img{{width:100%}}@media(max-width:900px){{header{{position:static}}.card{{scroll-margin-top:10px}}.pair{{grid-template-columns:1fr}}#stats{{width:100%;margin:0}}}}</style></head>
-<body><header><h1>Owner-short · 331个剩余事件逐张审核</h1><p>左图只含模型首次触发时可见的因果输入；右图紫色区域是人工审核未来，绝不进入训练图片或标签。</p><p class="hotkeys">快捷键：1=对 · 2=框偏 · 3=不对 · Z=撤销；分类后自动跳到下一张。</p><div class="bar"><select id="filter" onchange="applyFilter()"><option value="all">全部</option><option value="pending">未确认</option><option value="target">对</option><option value="rebox">框偏</option><option value="hard_negative">不对</option></select><button onclick="clearAll()">清空选择</button><button class="copy" onclick="copyResults()">复制审核JSON</button><span id="stats"></span></div></header>
+<body><header><h1>Owner-short · 331个剩余事件逐张审核</h1><p>左图保持模型因果输入；右图按每张真实价差独立自动缩放，图头显示波幅，不再套用训练图6%下限。</p><p class="hotkeys">快捷键：1=对 · 2=框偏 · 3=不对 · Z=撤销；分类后自动跳到下一张。</p><div class="bar"><select id="filter" onchange="applyFilter()"><option value="all">全部</option><option value="pending">未确认</option><option value="target">对</option><option value="rebox">框偏</option><option value="hard_negative">不对</option></select><button onclick="clearAll()">清空选择</button><button class="copy" onclick="copyResults()">复制审核JSON</button><span id="stats"></span></div></header>
 <main><div class="notice"><b>只判断三件事：</b>形态和框都正确按1；形态正确但框偏按2；不是目标形态按3。默认331张全部未确认，审核结果只存在本机浏览器，仍不会自动开训。</div><section class="grid">{cards}</section><textarea id="export" readonly placeholder="点击复制审核JSON"></textarea></main>
 <dialog id="zoom"><button onclick="document.getElementById('zoom').close()">关闭</button><img id="zoom-img" alt="zoom"></dialog>
 <script>
@@ -410,6 +528,12 @@ def build(
             "p90": float(np.quantile([float(row["event_conf_max"]) for row in rows], 0.90)),
         },
         "future_bars": dict(sorted(Counter(int(row["future_review_bars"]) for row in rows).items())),
+        "future_review_renderer": REVIEW_RENDERER,
+        "future_review_actual_span_pct": {
+            "p10": float(np.quantile([float(row["future_review_actual_span_pct"]) for row in rows], 0.10)),
+            "median": float(np.median([float(row["future_review_actual_span_pct"]) for row in rows])),
+            "p90": float(np.quantile([float(row["future_review_actual_span_pct"]) for row in rows], 0.90)),
+        },
         "max_future_time": max(row["future_review_end_time"] for row in rows),
         "snapshot_max_materialized_time": snapshot_summary["max_materialized_time"],
         "holdout_rows_materialized": 0,
@@ -424,6 +548,9 @@ def build(
             ),
             "future_strictly_preholdout": all(utc(row["future_review_end_time"]) < HOLDOUT_START for row in rows),
             "causal_has_no_future": all(not row["future_data_in_causal_input"] for row in rows),
+            "future_uses_human_actual_autoscale": all(
+                row["future_review_renderer"] == REVIEW_RENDERER for row in rows
+            ),
             "nothing_training_eligible": all(not row["training_eligible"] for row in rows),
             "no_label_directory": not (output / "labels").exists(),
         },
