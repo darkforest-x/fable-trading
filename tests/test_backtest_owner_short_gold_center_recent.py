@@ -8,6 +8,7 @@ from scripts.backtest_owner_short_gold_center_recent import (
     deduplicate_detections,
     historical_target_index,
     paired_closed_metrics,
+    parser,
     shard_paths,
 )
 
@@ -97,3 +98,31 @@ def test_historical_target_index_refuses_holdout() -> None:
         assert "touches holdout" in str(exc)
     else:
         raise AssertionError("holdout target must be rejected")
+
+
+def test_train_hardneg_scope_is_explicit_for_snapshot_and_scan() -> None:
+    historical = parser().parse_args(
+        [
+            "historical",
+            "--out-dir",
+            "/tmp/example",
+            "--end",
+            "2026-03-01T00:00:00Z",
+            "--evaluation-scope",
+            "train_hardneg_mining",
+        ]
+    )
+    scan = parser().parse_args(
+        [
+            "scan",
+            "--snapshot-dir",
+            "/tmp/example",
+            "--out-dir",
+            "/tmp/output",
+            "--evaluation-scope",
+            "train_hardneg_mining",
+        ]
+    )
+
+    assert historical.evaluation_scope == "train_hardneg_mining"
+    assert scan.evaluation_scope == "train_hardneg_mining"

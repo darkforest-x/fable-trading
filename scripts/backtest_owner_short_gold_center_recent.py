@@ -89,6 +89,11 @@ MAX_TG_PHOTOS = 25
 OWNER_ETH_TARGET_START = pd.Timestamp("2026-08-10T11:30:00Z")  # 19:30 CST
 OWNER_ETH_TARGET_END = pd.Timestamp("2026-08-10T12:45:00Z")  # 20:45 CST
 HOLDOUT_START = pd.Timestamp("2026-05-04T00:00:00Z")
+EVALUATION_SCOPES = (
+    "holdout",
+    "preholdout_postval_canary",
+    "train_hardneg_mining",
+)
 
 
 def stable_int(*parts: object) -> int:
@@ -341,7 +346,7 @@ def build_historical_snapshot(args: argparse.Namespace) -> int:
     )
     summary = {
         "protocol": PROTOCOL,
-        "evaluation_scope": "preholdout_postval_canary",
+        "evaluation_scope": args.evaluation_scope,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "manifest": str(manifest),
         "manifest_sha256": sha256_file(manifest),
@@ -1284,6 +1289,11 @@ def parser() -> argparse.ArgumentParser:
     historical.add_argument("--end", required=True)
     historical.add_argument("--context-bars", type=int, default=420)
     historical.add_argument("--max-symbols", type=int, default=0)
+    historical.add_argument(
+        "--evaluation-scope",
+        choices=EVALUATION_SCOPES,
+        default="preholdout_postval_canary",
+    )
 
     scan = commands.add_parser("scan")
     scan.add_argument("--snapshot-dir", type=Path, required=True)
@@ -1302,7 +1312,7 @@ def parser() -> argparse.ArgumentParser:
     scan.add_argument("--shard-count", type=int, default=1)
     scan.add_argument(
         "--evaluation-scope",
-        choices=("holdout", "preholdout_postval_canary"),
+        choices=EVALUATION_SCOPES,
         default="holdout",
     )
 

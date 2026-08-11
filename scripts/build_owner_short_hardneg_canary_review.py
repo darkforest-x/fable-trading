@@ -375,10 +375,12 @@ def card(row: dict[str, Any], output_html: Path) -> str:
     causal = html.escape(relative_image(row["causal_review_path"], output_html), quote=True)
     future = html.escape(relative_image(row["future_review_path"], output_html), quote=True)
     decision = utc(row["decision_time"]).tz_convert("Asia/Shanghai")
+    review_context = html.escape(str(row.get("review_context", "")), quote=True)
+    context_text = f" · {review_context}" if review_context else ""
     return f"""
     <article class="card" id="card-{review_id}" data-id="{review_id}" data-choice="pending">
       <div class="head"><b>{review_id} · {symbol}</b><span class="chip">未确认</span></div>
-      <div class="meta">event {event_id} · 决策 {decision:%m-%d %H:%M} CST · W{int(row['window_len'])} · 核心{int(row['predicted_core_bars'])}根 · 延迟{int(row['decision_delay_bars'])}根 · 对照真实波幅 {float(row['future_review_actual_span_pct']):.2f}% · first {float(row['conf']):.3f} · peak {float(row['event_conf_max']):.3f} · raw {int(row['raw_detection_count'])}</div>
+      <div class="meta">event {event_id} · 决策 {decision:%m-%d %H:%M} CST · W{int(row['window_len'])} · 核心{int(row['predicted_core_bars'])}根 · 延迟{int(row['decision_delay_bars'])}根 · 对照真实波幅 {float(row['future_review_actual_span_pct']):.2f}% · first {float(row['conf']):.3f} · peak {float(row['event_conf_max']):.3f} · raw {int(row['raw_detection_count'])}{context_text}</div>
       <div class="pair">
         <button type="button" onclick="zoom('{review_id}','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="{causal}" alt="{review_id} causal"></button>
         <button type="button" onclick="zoom('{review_id}','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="{future}" alt="{review_id} future"></button>
@@ -391,15 +393,29 @@ def card(row: dict[str, Any], output_html: Path) -> str:
     </article>"""
 
 
-def render_html(rows: list[dict[str, Any]], source: Path, output_html: Path) -> str:
+def render_html(
+    rows: list[dict[str, Any]],
+    source: Path,
+    output_html: Path,
+    *,
+    protocol: str = PROTOCOL,
+    title: str = "331事件语义审核",
+    heading: str = "Owner-short · 331个剩余事件逐张审核",
+    description: str = "左图保持模型因果输入；右图按每张真实价差独立自动缩放，图头显示波幅，不再套用训练图6%下限。",
+    notice: str = "形态和框都正确按1；形态正确但框偏按2；不是目标形态按3。默认331张全部未确认，审核结果只存在本机浏览器，仍不会自动开训。",
+) -> str:
     ids = [str(row["review_id"]) for row in rows]
     js_ids = json.dumps(ids, ensure_ascii=False).replace("</", "<\\/")
     cards = "\n".join(card(row, output_html) for row in rows)
     source_hash = sha256_file(source)
-    return f"""<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>331事件语义审核</title>
+    safe_title = html.escape(title)
+    safe_heading = html.escape(heading)
+    safe_description = html.escape(description)
+    safe_notice = html.escape(notice)
+    return f"""<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>{safe_title}</title>
 <style>:root{{--bg:#f3f6f8;--ink:#17232d;--muted:#60717f;--green:#198754;--orange:#d98700;--red:#d33;--blue:#1769aa}}*{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}}header{{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #d8e0e6;padding:14px 20px;box-shadow:0 2px 10px #0001}}h1{{margin:0 0 6px;font-size:24px}}header p{{margin:4px 0;color:#435664}}.bar{{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}}.bar button,.bar select{{padding:7px 11px;border:1px solid #b9c5ce;border-radius:8px;background:#fff;cursor:pointer}}.bar .copy{{background:var(--blue);color:#fff;border-color:var(--blue)}}#stats{{margin-left:auto;font-weight:800}}main{{max-width:1500px;margin:auto;padding:16px}}.notice{{background:#fff7df;border:1px solid #ebcb75;border-radius:10px;padding:11px 14px;margin-bottom:14px}}.hotkeys{{font-weight:800;color:#7c4f00}}.grid{{display:grid;grid-template-columns:1fr;gap:16px}}.card{{scroll-margin-top:138px;background:#fff;border:3px solid transparent;border-radius:11px;overflow:hidden;box-shadow:0 2px 10px #0001}}.card.current{{outline:4px solid var(--blue);outline-offset:2px}}.card[data-choice="target"]{{border-color:var(--green)}}.card[data-choice="rebox"]{{border-color:var(--orange)}}.card[data-choice="hard_negative"]{{border-color:var(--red)}}.head{{display:flex;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #e3e8ec}}.chip{{background:#edf1f4;border-radius:999px;padding:3px 8px;font-size:13px}}.meta{{padding:7px 12px;color:var(--muted);font-size:13px}}.pair{{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#dce3e8}}.pair button{{padding:0;border:0;background:#fff;cursor:zoom-in}}.pair span{{display:block;padding:6px 10px;text-align:left;font-weight:800;color:#344b5b;background:#edf3f6}}.pair img{{display:block;width:100%;height:auto}}.choices{{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:10px 12px}}.choices button{{padding:11px 5px;border:1px solid #c3cdd5;border-radius:8px;background:#fff;cursor:pointer;font-size:16px}}.choices button.active{{color:#fff;font-weight:800}}.choices [data-value="target"].active{{background:var(--green)}}.choices [data-value="rebox"].active{{background:var(--orange)}}.choices [data-value="hard_negative"].active{{background:var(--red)}}.hidden{{display:none}}textarea{{width:100%;min-height:150px;margin-top:16px}}dialog{{width:min(96vw,1500px);border:0;border-radius:10px}}dialog img{{width:100%}}@media(max-width:900px){{header{{position:static}}.card{{scroll-margin-top:10px}}.pair{{grid-template-columns:1fr}}#stats{{width:100%;margin:0}}}}</style></head>
-<body><header><h1>Owner-short · 331个剩余事件逐张审核</h1><p>左图保持模型因果输入；右图按每张真实价差独立自动缩放，图头显示波幅，不再套用训练图6%下限。</p><p class="hotkeys">快捷键：1=对 · 2=框偏 · 3=不对 · Z=撤销；分类后自动跳到下一张。</p><div class="bar"><select id="filter" onchange="applyFilter()"><option value="all">全部</option><option value="pending">未确认</option><option value="target">对</option><option value="rebox">框偏</option><option value="hard_negative">不对</option></select><button onclick="clearAll()">清空选择</button><button class="copy" onclick="copyResults()">复制审核JSON</button><span id="stats"></span></div></header>
-<main><div class="notice"><b>只判断三件事：</b>形态和框都正确按1；形态正确但框偏按2；不是目标形态按3。默认331张全部未确认，审核结果只存在本机浏览器，仍不会自动开训。</div><section class="grid">{cards}</section><textarea id="export" readonly placeholder="点击复制审核JSON"></textarea></main>
+<body><header><h1>{safe_heading}</h1><p>{safe_description}</p><p class="hotkeys">快捷键：1=对 · 2=框偏 · 3=不对 · Z=撤销；分类后自动跳到下一张。</p><div class="bar"><select id="filter" onchange="applyFilter()"><option value="all">全部</option><option value="pending">未确认</option><option value="target">对</option><option value="rebox">框偏</option><option value="hard_negative">不对</option></select><button onclick="clearAll()">清空选择</button><button class="copy" onclick="copyResults()">复制审核JSON</button><span id="stats"></span></div></header>
+<main><div class="notice"><b>只判断三件事：</b>{safe_notice}</div><section class="grid">{cards}</section><textarea id="export" readonly placeholder="点击复制审核JSON"></textarea></main>
 <dialog id="zoom"><button onclick="document.getElementById('zoom').close()">关闭</button><img id="zoom-img" alt="zoom"></dialog>
 <script>
 const IDS={js_ids};
@@ -462,7 +478,7 @@ function clearAll(){{
   if(!confirm('清空全部选择？'))return;
   d={{}};history=[];save();IDS.forEach(paint);stats();document.getElementById('filter').value='all';applyFilter(false);setCurrent(IDS[0],true);
 }}
-function payload(){{return{{protocol:"{PROTOCOL}",source_sha256:"{source_hash}",total:IDS.length,counts:counts(),decisions:Object.fromEntries(IDS.map(id=>[id,d[id]||'pending']))}}}}
+function payload(){{return{{protocol:"{protocol}",source_sha256:"{source_hash}",total:IDS.length,counts:counts(),decisions:Object.fromEntries(IDS.map(id=>[id,d[id]||'pending']))}}}}
 async function copyResults(){{
   const t=JSON.stringify(payload(),null,2),b=document.getElementById('export');b.value=t;b.select();
   try{{await navigator.clipboard.writeText(t)}}catch(_e){{document.execCommand('copy')}}
