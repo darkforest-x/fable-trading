@@ -1,0 +1,160 @@
+{
+  "generated_at": "2026-08-11T12:40:03.635107+00:00",
+  "protocol": "owner_short_train_hardneg_review200_v1_20260811",
+  "reference_manifest": "analysis/output/owner_short_gold_center_hardneg_canary_review331_v3/owner_review_labeled_manifest.jsonl",
+  "reference_manifest_sha256": "2760d7744b92c5569068ba8824044f3b3a1c4e59d4a8e11c5f42dfc0cc1789d4",
+  "reference_counts": {
+    "rebox": 11,
+    "target": 66,
+    "hard_negative": 254
+  },
+  "weights_sha256": "029f80a52b5beda2e32f6bb5a188a39fd7f74fe0a3fef4dffa79ae620384f537",
+  "train_end": "2026-03-13T18:30:00+00:00",
+  "blocks": {
+    "B01_20250715": {
+      "events": 81,
+      "symbols": 154,
+      "bar_endpoints": 7392,
+      "window_exposures": 59136,
+      "raw_detections": 1257,
+      "scan_end": "2025-07-15T12:00:00+00:00",
+      "audit_end": "2025-07-16T00:00:00+00:00",
+      "weights_sha256": "029f80a52b5beda2e32f6bb5a188a39fd7f74fe0a3fef4dffa79ae620384f537",
+      "scan_summary_sha256": "b043a835b5160e97d58607039d7f3012896761fe7cb7f0870b0b8182671a3b69",
+      "events_sha256": "65021ab8241e21e19a4eaeb96fbee29a810f0fa64e86e3d7a7e24d1c1823977e",
+      "audit_snapshot_summary_sha256": "c63d5c74962ec9783f009cf36a2907f0f4b82dc240116e89a58c359a7242db35"
+    },
+    "B02_20250915": {
+      "events": 277,
+      "symbols": 160,
+      "bar_endpoints": 7680,
+      "window_exposures": 61440,
+      "raw_detections": 7919,
+      "scan_end": "2025-09-15T12:00:00+00:00",
+      "audit_end": "2025-09-16T00:00:00+00:00",
+      "weights_sha256": "029f80a52b5beda2e32f6bb5a188a39fd7f74fe0a3fef4dffa79ae620384f537",
+      "scan_summary_sha256": "ad43c2d233070c8839e56146bb791a22bfc79f066da47d6d5bdddf3244f76c11",
+      "events_sha256": "dcba21737dfc65cb02d9249b850122b285d818ad68d54d834578962302b5b333",
+      "audit_snapshot_summary_sha256": "8468f534b3e705e32df84766e359c968fdbc81bfd9b71660b297837f77774d98"
+    },
+    "B03_20251115": {
+      "events": 259,
+      "symbols": 188,
+      "bar_endpoints": 9024,
+      "window_exposures": 72192,
+      "raw_detections": 4188,
+      "scan_end": "2025-11-15T12:00:00+00:00",
+      "audit_end": "2025-11-16T00:00:00+00:00",
+      "weights_sha256": "029f80a52b5beda2e32f6bb5a188a39fd7f74fe0a3fef4dffa79ae620384f537",
+      "scan_summary_sha256": "fb7e3a4c9a76dcc86a0b3cde9da1654b3b5551da958ed1cf59620f45a13e1097",
+      "events_sha256": "0c370af9896090eb23e1c8a3a7dc47f75bd313354e296021f588f3dab938e207",
+      "audit_snapshot_summary_sha256": "59f9251b1032c8cf4e284e165baf2c942e635bc7397320f233c121c6aaa58004"
+    },
+    "B04_20260115": {
+      "events": 274,
+      "symbols": 204,
+      "bar_endpoints": 9792,
+      "window_exposures": 78336,
+      "raw_detections": 6129,
+      "scan_end": "2026-01-15T12:00:00+00:00",
+      "audit_end": "2026-01-16T00:00:00+00:00",
+      "weights_sha256": "029f80a52b5beda2e32f6bb5a188a39fd7f74fe0a3fef4dffa79ae620384f537",
+      "scan_summary_sha256": "79e2443e9d606e8e50f7926300491ecf9bafa2725e5a5bad55c2947fdac4f3d7",
+      "events_sha256": "8a502308478e484503a00d40d643922259d1ecc6067868747716140870753923",
+      "audit_snapshot_summary_sha256": "8190f0f1d65e63e683dfaac646028412bcb2aa1e9a7bdec26772097e55849463"
+    },
+    "B05_20260301": {
+      "events": 62,
+      "symbols": 210,
+      "bar_endpoints": 10080,
+      "window_exposures": 80640,
+      "raw_detections": 1218,
+      "scan_end": "2026-03-01T12:00:00+00:00",
+      "audit_end": "2026-03-02T00:00:00+00:00",
+      "weights_sha256": "029f80a52b5beda2e32f6bb5a188a39fd7f74fe0a3fef4dffa79ae620384f537",
+      "scan_summary_sha256": "b9947b2ea6a8eb4c83e9d1fdf504d6e8f673451cfeb97ff25ecdc7e7e28317f2",
+      "events_sha256": "3264b290d29715604655eb2abc3a311e5f4a7ec08395bb974b86e7c8eb0cbb62",
+      "audit_snapshot_summary_sha256": "57ff91459b0a3d8b39b6fbf2bcc4f8dd7f0cba6506e21e7fc2dafa4d9366b48d"
+    }
+  },
+  "scan_totals": {
+    "symbol_blocks": 916,
+    "bar_endpoints": 43968,
+    "window_exposures": 351744,
+    "raw_detections": 20711,
+    "deduplicated_events": 953
+  },
+  "candidate_pool": 917,
+  "candidate_skips": {
+    "touches_owner_box_guard": 36
+  },
+  "selected_review": 200,
+  "selected_by_block": {
+    "B02_20250915": 40,
+    "B04_20260115": 40,
+    "B03_20251115": 40,
+    "B05_20260301": 40,
+    "B01_20250715": 40
+  },
+  "selected_symbols": 123,
+  "affinity": {
+    "p10": 0.714097596357907,
+    "median": 2.615644417737413,
+    "p90": 6.699824371790464
+  },
+  "selected_distributions": {
+    "window_len": {
+      "12": 44,
+      "13": 21,
+      "14": 13,
+      "15": 28,
+      "16": 3,
+      "17": 18,
+      "18": 32,
+      "19": 41
+    },
+    "predicted_core_bars": {
+      "4": 41,
+      "5": 20,
+      "6": 15,
+      "7": 106,
+      "8": 13,
+      "9": 5
+    },
+    "decision_delay_bars": {
+      "2": 6,
+      "3": 100,
+      "4": 33,
+      "5": 53,
+      "6": 6,
+      "7": 1,
+      "9": 1
+    },
+    "future_review_bars": {
+      "48": 200
+    }
+  },
+  "future_used_for_selection": false,
+  "holdout_read": false,
+  "owner_decisions_preselected": 0,
+  "training_eligible": 0,
+  "labels_created": 0,
+  "html": "analysis/html/p2_owner_short_train_hardneg_review200_20260811.html",
+  "candidate_pool_sha256": "d14372defa7377d03700b38f283e46398bc12b0f384740ba23e0e517656c0cb1",
+  "selected_candidates_sha256": "8d123d806adbb0ab5ee8a932f4d853792cfc292ac5aa1cc7748476ef487759ab",
+  "review_manifest_sha256": "1929e9e1c542750a2cb7631ad088d3f87d98a1c33e95b14e724eb264a1bba406",
+  "html_sha256": "7bdc96f3d9fb0d72301e17afff03119c6537867877acd8851dbee89c08e110a8",
+  "quality_gates": {
+    "exactly_200_unique_events": true,
+    "exactly_40_per_block": true,
+    "all_decisions_within_train": true,
+    "all_future_context_within_train": true,
+    "no_owner_box_overlap": true,
+    "selection_is_causal": true,
+    "nothing_training_eligible": true,
+    "no_label_directory": true,
+    "strictly_preholdout": true,
+    "all_three_images_exist": true,
+    "all_full_48_future": true
+  }
+}

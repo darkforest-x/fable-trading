@@ -4,6 +4,18 @@
 
 ## ⚡ 当前真相（2026-08-11 — Owner 二次收紧：两条边界线 + 3–5 根确认）
 
+**最新进展（2026-08-11 晚）：第三臂训练前的 train-time 难负例审核集已经就绪，下一动作是
+Owner 审核 200 张，不是直接训练。** 使用当前 hard-negative R1 best 在冻结 train 末端之前的
+5 个独立 12h 时间块扫描：916 symbol-block、43,968 endpoints、351,744 个 W12–19 因果窗，
+20,711 条 raw 检测去重为 953 事件；剔除 36 个触碰任一 Owner 框 ±12 bars 的事件后，安全池
+917。按每块 40 个固定抽出 200 事件、123 symbols。排序只用 decision 前 OHLC/六均线/预测框，
+此前 Owner 已审的 254 负例 + 77 语义正例仅作形态距离参考；未来 48 根在选样完成后才单独
+渲染。600/600 图片存在，200/200 未来图完整，0 holdout、0 labels、0 training-eligible。
+审核页：`analysis/html/p2_owner_short_train_hardneg_review200_20260811.html`；报告：
+`analysis/html/p2_owner_short_train_hardneg_review200_report_20260811.html`。Owner 完成 1/2/3 裁决
+并导出 JSON 后，先统计真负例数量与覆盖；不足则继续扫未使用 train 块，足够才构建保持正例、
+easy negative、冻结 val 和训练配方不变的第三臂。**尚未授权下一次训练。**
+
 **Owner最新纠正覆盖本节后文“Codex逐图寻找启动边界并重画61个橙框”的下一步：不得在已有
 Owner原始金标坐标时重新凭感觉画框。新血缘必须是`原始⭐手框 ∩ Owner亲自确认short`，外层只
 重裁十几根短窗，内层橙框从原手框正中心机械截取。61张Codex橙框保留为失败对照，不再作为待

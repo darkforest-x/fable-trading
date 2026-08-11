@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>P2 训练区间难负例候选 200 张 Owner 审核报告</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P2 训练区间难负例候选 200 张 Owner 审核报告</h1>
+<h2>Technical Summary</h2>
+<p>已完成第三训练臂之前的<strong>训练区间难负例候选审核集</strong>，但尚未把任何样本写进训练集，也没有启动训练。</p>
+<ul>
+<li>在冻结 train 末端之前选取 5 个互相分离的 12 小时时间块，覆盖 916 个 symbol-block、43,968 个 bar endpoint 和 351,744 个 W12–19 因果窗口。</li>
+<li>当前 hard-negative R1 权重产生 20,711 条原始检测，按 5 bars 事件规则去重为 953 个事件。</li>
+<li>先剔除 36 个碰到任何 Owner 框 ±12 bars 保护区的事件，得到 917 个安全候选。</li>
+<li>每个时间块固定抽 40 个，共 200 个事件、123 个币；没有使用未来走势参与候选排序。</li>
+<li>每个事件生成 3 张物理分离图片：原始因果输入、带橙框因果审核图、未来 48 根人工对照图；600/600 文件存在，200/200 对照均为完整 48 根。</li>
+<li>当前 200 个事件全部为 <code>unreviewed</code>、<code>training_eligible=false</code>、<code>production_eligible=false</code>，没有标签目录。</li>
+<li>未读取 holdout，未修改阈值、验证集、训练配方、ACTIVE 或生产配置。</li>
+</ul>
+<p>Owner 审核入口：<code>analysis/html/p2_owner_short_train_hardneg_review200_20260811.html</code>。</p>
+<h2>五个训练块覆盖了不同触发密度</h2>
+<p>所有块的因果扫描结束时间和人工对照结束时间都早于冻结 train 末端 <code>2026-03-13 18:30 UTC</code>。</p>
+<table><thead><tr>
+<th>训练块</th>
+<th>扫描结束 UTC</th>
+<th>币种数</th>
+<th>endpoints</th>
+<th>W12–19 exposures</th>
+<th>原始命中</th>
+<th>去重事件</th>
+<th>events / 1000 endpoints</th>
+</tr></thead><tbody>
+<tr><td>B01</td><td>2025-07-15 12:00</td><td>154</td><td>7,392</td><td>59,136</td><td>1,257</td><td>81</td><td>10.958</td></tr>
+<tr><td>B02</td><td>2025-09-15 12:00</td><td>160</td><td>7,680</td><td>61,440</td><td>7,919</td><td>277</td><td>36.068</td></tr>
+<tr><td>B03</td><td>2025-11-15 12:00</td><td>188</td><td>9,024</td><td>72,192</td><td>4,188</td><td>259</td><td>28.701</td></tr>
+<tr><td>B04</td><td>2026-01-15 12:00</td><td>204</td><td>9,792</td><td>78,336</td><td>6,129</td><td>274</td><td>27.982</td></tr>
+<tr><td>B05</td><td>2026-03-01 12:00</td><td>210</td><td>10,080</td><td>80,640</td><td>1,218</td><td>62</td><td>6.151</td></tr>
+<tr><td><strong>合计</strong></td><td>—</td><td><strong>916 symbol-block</strong></td><td><strong>43,968</strong></td><td><strong>351,744</strong></td><td><strong>20,711</strong></td><td><strong>953</strong></td><td><strong>21.675</strong></td></tr>
+</tbody></table>
+<p>五块的触发密度相差约 5.9 倍，说明模型错误不是单一时间块现象，也说明不能只拿原先 12 小时的 254 个 Owner 负例直接代替训练分布。固定每块 40 个是为了避免 B02/B04 的高密度期淹没低密度期，不代表每块真实错误率相等。</p>
+<h2>254 个已审误报只定义参考空间</h2>
+<p>此前 post-val、pre-holdout 的 331 个 Owner 裁决中有 254 个 <code>hard_negative</code>、66 个 <code>target</code>、11 个 <code>rebox</code>。本轮只把它们用作<strong>形态距离参考</strong>：</p>
+<ol>
+<li>对每个事件只读取 decision bar 及之前的 OHLC、SMA/EMA 20/60/120，以及模型当时预测的框几何。</li>
+<li>把不同长度的 W12–19 输入插值到 19 个时间点并标准化。</li>
+<li>计算到 254 个 Owner 负例和 77 个语义正例的 7 近邻距离，以“离负例近、离正例远”的 affinity 排序。</li>
+<li>排序完成后才加载未来 48 根，未来只渲染进右侧人工对照图。</li>
+</ol>
+<p>200 张候选的 affinity p10 / median / p90 为 0.714 / 2.616 / 6.700。它只是“值得优先审核”的排序分，不是真值、置信度或收益分。</p>
+<h2>200 张审核集保持了位置与延迟分布</h2>
+<table><thead><tr>
+<th>维度</th>
+<th>分布</th>
+<th>解读</th>
+</tr></thead><tbody>
+<tr><td>输入窗 W</td><td>12:44，13:21，14:13，15:28，16:3，17:18，18:32，19:41</td><td>未把输入长度固定成单一模板</td></tr>
+<tr><td>预测核心</td><td>4:41，5:20，6:15，7:106，8:13，9:5</td><td>182/200（91%）落在 Owner 目标 4–7 根内；仍保留 18 个越界错误供审核</td></tr>
+<tr><td>首次确认延迟</td><td>2:6，3:100，4:33，5:53，6:6，7:1，9:1</td><td>186/200（93%）落在 3–5 根；仍保留过早/过晚错误</td></tr>
+<tr><td>未来人工对照</td><td>48:200</td><td>只用于 Owner 判断，不进入选择或训练输入</td></tr>
+</tbody></table>
+<p>这一步没有把“核心 4–7 根、延迟 3–5 根”硬编码为候选准入门；越界候选仍能进入审核，因此 Owner 可以判断模型的几何偏差，而不是只看到被规则预先修饰过的样本。</p>
+<h2>质量门全部通过</h2>
+<table><thead><tr>
+<th>检查项</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>200 个唯一事件，且每块恰好 40 个</td><td>PASS</td></tr>
+<tr><td>200 个 decision time 全在冻结 train 内</td><td>PASS</td></tr>
+<tr><td>200 个未来审核终点全在冻结 train 内</td><td>PASS</td></tr>
+<tr><td>0 个候选碰到 Owner 框 ±12 bars</td><td>PASS</td></tr>
+<tr><td>选择过程 0 future bars</td><td>PASS</td></tr>
+<tr><td>600 张图片全部存在</td><td>PASS</td></tr>
+<tr><td>200 张未来图全部包含 48 根</td><td>PASS</td></tr>
+<tr><td>0 labels / 0 training-eligible / 0 production-eligible</td><td>PASS</td></tr>
+<tr><td>holdout 读取</td><td><strong>0</strong></td></tr>
+</tbody></table>
+<p>关键血缘：</p>
+<ul>
+<li>权重 SHA256：<code>029f80a52b5beda2e32f6bb5a188a39fd7f74fe0a3fef4dffa79ae620384f537</code></li>
+<li>331 Owner 裁决参考 SHA256：<code>2760d7744b92c5569068ba8824044f3b3a1c4e59d4a8e11c5f42dfc0cc1789d4</code></li>
+<li>安全候选池 SHA256：<code>d14372defa7377d03700b38f283e46398bc12b0f384740ba23e0e517656c0cb1</code></li>
+<li>200 张选择结果 SHA256：<code>8d123d806adbb0ab5ee8a932f4d853792cfc292ac5aa1cc7748476ef487759ab</code></li>
+<li>审核 manifest SHA256：<code>1929e9e1c542750a2cb7631ad088d3f87d98a1c33e95b14e724eb264a1bba406</code></li>
+<li>HTML SHA256：<code>7bdc96f3d9fb0d72301e17afff03119c6537867877acd8851dbee89c08e110a8</code></li>
+</ul>
+<h2>与上一阶段同表对照</h2>
+<table><thead><tr>
+<th>阶段</th>
+<th>时间区间</th>
+<th>扫描事件</th>
+<th>Owner 已审</th>
+<th>语义正例</th>
+<th>框偏</th>
+<th>明确负例</th>
+<th>可回流训练</th>
+</tr></thead><tbody>
+<tr><td>post-val canary V3</td><td>2026-05-03 00:00–12:00 UTC</td><td>331</td><td>331</td><td>66</td><td>11</td><td>254</td><td>0；晚于冻结 val，只作参考</td></tr>
+<tr><td>本轮 train review200</td><td>5 个冻结 train 块</td><td>953</td><td>0</td><td>待审</td><td>待审</td><td>待审</td><td>0；Owner 确认后才决定</td></tr>
+</tbody></table>
+<p>本轮解决的是“从哪里找时间合法的同类错误”，不是已经解决模型 precision。只有 Owner 审完，才能知道 200 张里有多少是真 hard negative。</p>
+<h2>必报模型与交易指标状态</h2>
+<p>本轮没有训练新模型，也没有收益标签，因此下列指标均<strong>不适用</strong>，不能拿旧模型数值冒充本轮结果：</p>
+<table><thead><tr>
+<th>指标</th>
+<th>本轮结果</th>
+<th>原因</th>
+</tr></thead><tbody>
+<tr><td>val AUC</td><td>N/A</td><td>YOLO 候选审核集，不是 L2 排序模型评估</td></tr>
+<tr><td>置换检验 p</td><td>N/A</td><td>没有收益排序实验</td></tr>
+<tr><td>top-decile 毛/净收益</td><td>N/A</td><td>没有读取未来收益标签</td></tr>
+<tr><td>胜率</td><td>N/A</td><td>没有交易回测</td></tr>
+<tr><td>单特征基线</td><td>N/A</td><td>本轮只构建人工审核池</td></tr>
+<tr><td>匹配随机对照组</td><td>N/A</td><td>本轮不作方向性收益结论</td></tr>
+</tbody></table>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>affinity 使用了 331 事件的 Owner 裁决来设计候选排序，因此这 331 事件以后不能再充当第三臂的独立最终验证集。</li>
+<li>200 张只是校准规模，未必能提供第三臂所需的全部 hard negative。若 Owner 确认的真负例不足，需要继续扫更多未使用的冻结 train 时间块，不能用未审候选凑数。</li>
+<li>当前已有的 1,370 个模型排序背景负例没有被自动宣布为真负例；本轮也没有覆盖或删除它们。</li>
+<li>本页不能证明 recall、event precision 或交易收益改善。任何训练后的结论仍需独立时间块验证，并遵守 holdout 授权纪律。</li>
+<li>本轮没有改 conf=0.25、NMS IoU=0.7、W12–19、5-bars 去重规则，符合单变量纪律。</li>
+</ul>
+<h2>下一步</h2>
+<p>Owner 在 HTML 里逐张按：<code>1=形态和框都对</code>、<code>2=形态像但框偏</code>、<code>3=不是目标形态</code>，完成后导出 JSON。</p>
+<p>导入裁决后只做两件事：</p>
+<ol>
+<li>统计时间合法的真 hard negative 数量、币种覆盖和 W 桶覆盖；不足则追加新的冻结 train 时间块。</li>
+<li>若数量和覆盖足够，构建第三训练臂，保持 1,143 正例、1,143 easy negative、冻结 val 和全部训练配方不变，只替换/补充 hard-negative 部分。</li>
+</ol>
+<p><strong>训练仍需 Owner 另行明确授权。</strong> 本报告完成不等于授权启动 3060、promote 或部署。</p>
+<h2>复现命令</h2>
+<p>以下命令只使用冻结 train 范围；<code>historical</code> 的 420 bars 用于因果扫描，468 bars 用于额外 48 根人工审核对照。</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+export PYTHONPATH=.:/Users/zhangzc/yoyo-trading
+
+blocks=(B01_20250715 B02_20250915 B03_20251115 B04_20260115 B05_20260301)
+scan_ends=(2025-07-15T12:00:00Z 2025-09-15T12:00:00Z 2025-11-15T12:00:00Z 2026-01-15T12:00:00Z 2026-03-01T12:00:00Z)
+audit_ends=(2025-07-16T00:00:00Z 2025-09-16T00:00:00Z 2025-11-16T00:00:00Z 2026-01-16T00:00:00Z 2026-03-02T00:00:00Z)
+
+for i in 1 2 3 4 5; do
+  block=${blocks[$i]}
+  scan_end=${scan_ends[$i]}
+  audit_end=${audit_ends[$i]}
+
+  .venv/bin/python scripts/backtest_owner_short_gold_center_recent.py historical \
+    --out-dir analysis/output/owner_short_train_hardneg_blocks_v1/$block/scan_snapshot \
+    --end $scan_end --context-bars 420 --evaluation-scope train_hardneg_mining
+  .venv/bin/python scripts/backtest_owner_short_gold_center_recent.py historical \
+    --out-dir analysis/output/owner_short_train_hardneg_blocks_v1/$block/audit_snapshot \
+    --end $audit_end --context-bars 468 --evaluation-scope train_hardneg_mining
+
+  # 可把 mps 换成 CUDA device 0 或 cpu；输出统计和事件应相同。
+  .venv/bin/python scripts/backtest_owner_short_gold_center_recent.py scan \
+    --snapshot-dir analysis/output/owner_short_train_hardneg_blocks_v1/$block/scan_snapshot/kline_snapshot \
+    --out-dir analysis/output/owner_short_train_hardneg_blocks_v1/$block/merged \
+    --weights analysis/output/lsv2_stageb/owner_lsv2_short_gold_center_hardneg_r1_ft/weights/best.pt \
+    --hours 12 --window-min 12 --window-max 19 --conf 0.25 --iou 0.7 \
+    --imgsz 960 --device mps --batch 32 --evaluation-scope train_hardneg_mining
+done
+
+# 构建候选、三联图、审核页和机器审计摘要：
+.venv/bin/python scripts/build_owner_short_train_hardneg_review.py
+
+# 验证：
+.venv/bin/python -m pytest tests/test_build_owner_short_train_hardneg_review.py -q
+python3 scripts/md_to_html.py \
+  analysis/p2_owner_short_train_hardneg_review200_20260811.md \
+  --out-dir analysis/html
+</code></pre>
+<h2>产物</h2>
+<ul>
+<li>Owner 审核页：<code>analysis/html/p2_owner_short_train_hardneg_review200_20260811.html</code></li>
+<li>报告 HTML：<code>analysis/html/p2_owner_short_train_hardneg_review200_report_20260811.html</code></li>
+<li>机器摘要：<code>analysis/output/owner_short_train_hardneg_review200_v1/summary.json</code></li>
+<li>安全候选池：<code>analysis/output/owner_short_train_hardneg_review200_v1/candidate_pool.jsonl</code></li>
+<li>200 张选择记录：<code>analysis/output/owner_short_train_hardneg_review200_v1/selected_candidates.jsonl</code></li>
+<li>审核 manifest：<code>analysis/output/owner_short_train_hardneg_review200_v1/review_manifest.jsonl</code></li>
+</ul>
+<h2>Further Novel Deductions</h2>
+<ul>
+<li>如果 Owner 在 200 张中仍判出约 75% 的明确负例，预计可一次获得约 150 个高价值、时间合法的错误种子；这足够校准下一轮自动挖掘，但仍不足以不经审计直接替代 2,286 个 hard-negative 槽位。</li>
+<li>五块触发密度波动很大，第三臂应控制时间块权重；否则高密度阶段会成为隐性时间特征，训练后的“降触发”可能只对特定行情有效。</li>
+<li>4–7 根核心和 3–5 根延迟在候选中已经占大多数，但 precision 仍低，说明下一阶段的主要矛盾不是框长或延迟，而是“均线密集平台是否真的具备启动语义”的区分能力。</li>
+</ul>
+<h2>Open Questions</h2>
+<ul>
+<li>Owner 审完后，<code>2=框偏</code> 应作为几何回归样本重新框选，还是先排除，只用 <code>3=不对</code> 做第三臂负例？</li>
+<li>第三臂的硬负例目标量是否保持 2,286 不变，还是先做较小的单变量试验？两者都需要 Owner 在看完确认数量后裁决。</li>
+</ul>
+</body>
+</html>
