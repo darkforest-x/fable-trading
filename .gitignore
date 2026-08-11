@@ -32,6 +32,15 @@ runs/
 !models/owner_*.pt
 # 2026-08-10: analysis 路径下的自训 best/last 也入库（w20 / lsv2 StageB）
 !analysis/output/**/weights/*.pt
+# 2026-08-11 owner: 3060 抢救的历史自训权重也必须可恢复。只放行
+# owner/eth3m 训练产物及它们的链式底座；公开 yolo11*/yolo26* COCO 底座继续忽略。
+!models/archive_3060/owner_*/
+!models/archive_3060/owner_*/*.pt
+!models/archive_3060/eth3m_short_pilot_v2_cls_diag_20260730/
+!models/archive_3060/eth3m_short_pilot_v2_cls_diag_20260730/*.pt
+!models/archive_3060/bases/owner_*.pt
+!models/archive_3060/bases/base_v8.pt
+!models/archive_3060/bases/base_v9.pt
 
 # Python
 __pycache__/
