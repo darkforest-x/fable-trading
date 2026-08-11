@@ -1,0 +1,21 @@
+forward_scan: series=344 workers=3 source=yolo yolo_mode=tip weights=/opt/fable-trading/models/owner_v12_htip.pt
+forward_scan: discover_wall=237s (indicators+render+predict, 3 workers)
+forward_scan: phase2_wall=2s (features+score+resolve, 91 series with candidates)
+Traceback (most recent call last):
+  File "/opt/fable-trading/scripts/forward_track_v12_shadow.py", line 95, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/opt/fable-trading/scripts/forward_track_v12_shadow.py", line 86, in main
+    payload["shadow"] = "v12_htip_tip_only"
+    ~~~~~~~^^^^^^^^^^
+TypeError: 'str' object does not support item assignment
+forward_scan: discover_wall=224s (indicators+render+predict, 3 workers)
+forward_scan: phase2_wall=1s (features+score+resolve, 91 series with candidates)
+Traceback (most recent call last):
+  File "/opt/fable-trading/scripts/forward_track_v12_shadow.py", line 95, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/opt/fable-trading/scripts/forward_track_v12_shadow.py", line 86, in main
+    payload["shadow"] = "v12_htip_tip_only"
+    ~~~~~~~^^^^^^^^^^
+TypeError: 'str' object does not support item assignment

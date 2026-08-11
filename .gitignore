@@ -76,10 +76,17 @@ analysis/output/owner_side_review/stream.log
 
 # 运行时产物（不入库）
 logs/
+# VPS 退服前抢救的运行日志是唯一副本，例外保留。
+!vps_rescue/logs/
+!vps_rescue/logs/*.log
 label_studio_data/
 .venv_label_studio/
 .vscode/
 nohup.out
+
+# 本地浏览器会话与 PDF 中间渲染；正式审核截图放在 output/playwright/ 并入库。
+/.playwright-cli/
+/tmp/
 
 # 视觉侦察运行时产物（每10分钟重生成，不入库）
 src/webapp/static/scout/
