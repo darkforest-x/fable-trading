@@ -1,0 +1,41 @@
+{
+  "protocol": "local_signal_v2_stagea_position_eval_v1_20260811",
+  "created_before_inference": true,
+  "scope": "diagnose whether Stage A removed the fixed-right position shortcut",
+  "dataset": "datasets/local_signal_v2_stagea_randomcrop_v1",
+  "split": "val_only",
+  "expected_counts": {
+    "positive": 358,
+    "easy_negative": 358
+  },
+  "weights": "analysis/output/lsv2_stagea/owner_lsv2_stagea_randomcrop_v1_cold/weights/best.pt",
+  "weights_sha256": "c0e94f47df125e298b044d9f10acd0b8e4f525ccd6143ce34f8d174af802bf1a",
+  "prediction": {
+    "imgsz": 960,
+    "confidence_floor": 0.01,
+    "nms_iou": 0.7,
+    "match_iou": 0.5,
+    "threshold_grid": [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+  },
+  "fixed_position_diagnostic": {
+    "confidence": 0.05,
+    "minimum_recall_in_each_real_candle_bucket": 0.25,
+    "maximum_bucket_recall_spread": 0.2,
+    "maximum_absolute_spearman_anchor_x_vs_iou_matched_score": 0.2
+  },
+  "easy_negative_fire_rate": "report_only_not_a_gate_until_hard_negative_stage",
+  "same_validation_best_f1": "optimistic_diagnostic_only_not_acceptance",
+  "limitations": [
+    "validation was used for early stopping",
+    "easy negatives do not represent continuous market exposure",
+    "Stage A contains post-decision real candles by owner authorization"
+  ],
+  "holdout_read": false,
+  "production_eligible": false,
+  "forbidden": [
+    "promote",
+    "deploy",
+    "read holdout",
+    "claim live density success from this evaluation"
+  ]
+}
