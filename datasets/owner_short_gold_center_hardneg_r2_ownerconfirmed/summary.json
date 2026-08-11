@@ -1,0 +1,104 @@
+{
+  "generated_at": "2026-08-11T15:08:12.484653+00:00",
+  "protocol": "owner_short_gold_center_hardneg_r2_ownerconfirmed_20260811",
+  "base_dataset": "datasets/owner_short_gold_center_v1",
+  "comparison_dataset": "datasets/owner_short_gold_center_hardneg_r1",
+  "dataset": "datasets/owner_short_gold_center_hardneg_r2_ownerconfirmed",
+  "counts": {
+    "train_positive": 1143,
+    "val_positive": 202,
+    "train_easy_negative": 1143,
+    "val_easy_negative": 200,
+    "train_hard_negative": 2286
+  },
+  "filesystem_counts": {
+    "train_images": 4572,
+    "val_images": 402
+  },
+  "train_negative_to_positive": 3.0,
+  "hard_share_of_train_negatives": 0.6666666666666666,
+  "confirmed_source_audit": {
+    "available": 584,
+    "by_source": {
+      "analysis/output/owner_short_train_hardneg_review200_v1/owner_review_labeled_manifest.jsonl": 182,
+      "analysis/output/owner_short_train_positive_retrieval100_v1/owner_review_labeled_manifest.jsonl": 55,
+      "analysis/output/owner_short_train_hardneg_expansion200_v2/owner_review_labeled_manifest.jsonl": 175,
+      "analysis/output/owner_short_train_hardneg_newblocks200_v3/owner_review_labeled_manifest.jsonl": 172
+    },
+    "by_w": {
+      "12": 152,
+      "13": 76,
+      "14": 22,
+      "15": 86,
+      "16": 6,
+      "17": 65,
+      "18": 68,
+      "19": 109
+    },
+    "unique_events": 584,
+    "unique_images": 584,
+    "unique_intervals": 584,
+    "holdout_read": false,
+    "future_data_in_training_images": false,
+    "owner_label_future_review_available": true
+  },
+  "selection_profile": {
+    "target_by_w": {
+      "12": 348,
+      "13": 580,
+      "14": 478,
+      "15": 228,
+      "16": 392,
+      "17": 136,
+      "18": 42,
+      "19": 82
+    },
+    "selected_by_w": {
+      "12": 348,
+      "13": 580,
+      "14": 478,
+      "15": 228,
+      "16": 392,
+      "17": 136,
+      "18": 42,
+      "19": 82
+    },
+    "owner_confirmed_available": 584,
+    "owner_confirmed_selected": 531,
+    "owner_confirmed_deferred_for_bucket_overflow": 53,
+    "confirmed_selected_by_w": {
+      "12": 152,
+      "13": 76,
+      "14": 22,
+      "15": 86,
+      "16": 6,
+      "17": 65,
+      "18": 42,
+      "19": 82
+    },
+    "confirmed_deferred_by_w": {
+      "18": 26,
+      "19": 27
+    },
+    "retained_r1_by_kind": {
+      "model_ranked_background": 903,
+      "owner_long": 852
+    },
+    "semantic_old_collisions_excluded": 1,
+    "score_threshold_selected": false
+  },
+  "duplicate_joint_sha256": 0,
+  "duplicate_semantic_hard_intervals": 0,
+  "byte_identical_base_files": 5376,
+  "base_positive_easy_val_mutated": false,
+  "validation_mutated": false,
+  "window_histogram_mutated": false,
+  "future_data_in_training_images": false,
+  "owner_label_future_review_available": true,
+  "holdout_read": false,
+  "score_threshold_selected": false,
+  "training_started": false,
+  "auto_promote": false,
+  "training_preregistration_sha256": "ab2ecfbea5ac6d5ae1b1dca210b2cabf138f642410e0f517891d3ac6d26f7d9c",
+  "initialization_sha256": "c0e94f47df125e298b044d9f10acd0b8e4f525ccd6143ce34f8d174af802bf1a"
+}

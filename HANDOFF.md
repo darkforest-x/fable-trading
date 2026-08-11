@@ -4,6 +4,18 @@
 
 ## ⚡ 当前真相（2026-08-11 — Owner 二次收紧：两条边界线 + 3–5 根确认）
 
+**最新进展（2026-08-11 23:08 CST）：第三训练臂数据集已完成，等待Owner单独授权训练。**
+新时间块200张裁决为26对、2框偏、172不对；四张train-time页累计114 target、2 rebox、584
+Owner确认难负例。584个全部唯一、0 Owner框重叠、0 holdout、训练因果图0未来。为保持第二臂
+W12–19分布和2,286 hard总量不变，本轮按桶内当前模型触发置信度纳入531个；W18/W19溢出的
+53个暂存，未改W、复制或挤占别桶。第三臂仍为train 1,143正+1,143 easy负+2,286 hard、val
+202正+200 easy负；hard组成531确认误报+852 Owner-long+903旧模型背景。base 5,376文件逐SHA
+一致，0联合SHA重复、0语义区间重复、0 train/val交叉；Ultralytics数据检查通过；全测674 passed、
+2 skipped。训练输入200张审计：
+`analysis/html/p2_owner_short_gold_center_hardneg_r2_audit200_20260811.html`；数据报告：
+`analysis/html/p2_owner_short_gold_center_hardneg_r2_dataset_audit_20260811.html`。Stage A初始化、40轮、
+batch8、AdamW 1e-4和增强合同均已预注册但**尚未启动训练，未promote、未部署、未读holdout**。
+
 **最新进展（2026-08-11 22:42 CST）：第二张 train-time 难负例扩充页已由 Owner 全部裁决为
 25对、0框偏、175不对，协议/源SHA/200 ID/计数/因果与时间门全部通过。** 三张 train-time
 审核页累计为88正例+412难负例；412只占第二臂2,286 hard槽位18.02%，因此没有直接训练。
