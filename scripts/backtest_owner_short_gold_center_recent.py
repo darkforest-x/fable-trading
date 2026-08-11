@@ -11,6 +11,8 @@ The command has four explicit phases so the LAN RTX 3060 never receives
 Telegram credentials and the VPS remains the only writer of canonical klines:
 
 * ``fetch`` writes a disposable OKX snapshot under ``analysis/output``;
+* ``historical`` materializes a disposable pre-holdout prefix without opening
+  rows at or beyond the repository holdout boundary;
 * ``scan`` performs exhaustive W12--19 inference and 5-bar event deduplication;
 * ``finalize`` resolves the already-frozen TP5/SL2/72 research outcome, builds
   matched random controls, and renders review charts with future bars clearly
@@ -86,6 +88,7 @@ HOLDOUT_USE_NUMBER = 1
 MAX_TG_PHOTOS = 25
 OWNER_ETH_TARGET_START = pd.Timestamp("2026-08-10T11:30:00Z")  # 19:30 CST
 OWNER_ETH_TARGET_END = pd.Timestamp("2026-08-10T12:45:00Z")  # 20:45 CST
+HOLDOUT_START = pd.Timestamp("2026-05-04T00:00:00Z")
 
 
 def stable_int(*parts: object) -> int:
@@ -220,6 +223,147 @@ def fetch_snapshot(args: argparse.Namespace) -> int:
         json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     print(json.dumps({key: summary[key] for key in ("requested_symbols", "usable_symbols", "wall_seconds")}, ensure_ascii=False))
+    return 0 if summary["usable_symbols"] else 2
+
+
+def historical_target_index(
+    reference_index: int,
+    reference_time: object,
+    target_time: object,
+) -> int:
+    """Map a frozen continuous-series index to an earlier pre-holdout time."""
+    reference = pd.Timestamp(reference_time)
+    target = pd.Timestamp(target_time)
+    if reference.tzinfo is None:
+        reference = reference.tz_localize("UTC")
+    else:
+        reference = reference.tz_convert("UTC")
+    if target.tzinfo is None:
+        target = target.tz_localize("UTC")
+    else:
+        target = target.tz_convert("UTC")
+    if target >= HOLDOUT_START:
+        raise ValueError(f"historical target touches holdout: {target}")
+    delta_bars = (target - reference) / pd.Timedelta(minutes=BAR_MINUTES)
+    if not float(delta_bars).is_integer():
+        raise ValueError("historical target must align to a 15m bar")
+    result = int(reference_index) + int(delta_bars)
+    if result < 0:
+        raise ValueError("historical target predates source series")
+    return result
+
+
+def build_historical_snapshot(args: argparse.Namespace) -> int:
+    """Build one fixed pre-holdout snapshot via bounded CSV-prefix reads."""
+    from scripts.build_owner_eth_shortdelay_calibration import (  # noqa: PLC0415
+        Skip,
+        load_preholdout_prefix,
+    )
+
+    manifest = Path(args.manifest)
+    rows = read_jsonl(manifest)
+    by_symbol: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        by_symbol.setdefault(str(row["symbol"]), []).append(row)
+    symbols = sorted(by_symbol)
+    if args.max_symbols:
+        symbols = symbols[: args.max_symbols]
+    target = pd.Timestamp(args.end)
+    if target.tzinfo is None:
+        target = target.tz_localize("UTC")
+    else:
+        target = target.tz_convert("UTC")
+    if target >= HOLDOUT_START:
+        raise SystemExit(f"historical end must be before {HOLDOUT_START}")
+    out_dir = Path(args.out_dir)
+    snapshot_dir = out_dir / "kline_snapshot"
+    snapshot_dir.mkdir(parents=True, exist_ok=True)
+    built: list[dict[str, Any]] = []
+    for number, symbol in enumerate(symbols, 1):
+        candidates = by_symbol[symbol]
+        source_paths = {str(row["source_csv"]) for row in candidates}
+        if len(source_paths) != 1:
+            raise ValueError(f"{symbol} has ambiguous source CSVs: {source_paths}")
+        reference = min(
+            candidates,
+            key=lambda row: abs(pd.Timestamp(row["end_time"]) - target),
+        )
+        try:
+            required_end = historical_target_index(
+                int(reference["win_end"]), reference["end_time"], target
+            )
+            frame, audit = load_preholdout_prefix(
+                ROOT / next(iter(source_paths)), required_end
+            )
+            visible = frame[frame["open_time"] <= target].tail(args.context_bars).copy()
+            latest = pd.Timestamp(visible["open_time"].iloc[-1]) if len(visible) else None
+            if len(visible) < 160 or latest is None or latest < target - pd.Timedelta(minutes=30):
+                built.append(
+                    {
+                        "symbol": symbol,
+                        "rows": 0,
+                        "error": "insufficient_or_stale_prefix",
+                        "source_audit": audit,
+                    }
+                )
+                continue
+            path = snapshot_dir / f"{symbol}.csv"
+            visible.to_csv(path, index=False)
+            built.append(
+                {
+                    "symbol": symbol,
+                    "rows": int(len(visible)),
+                    "start": pd.Timestamp(visible["open_time"].iloc[0]).isoformat(),
+                    "end": latest.isoformat(),
+                    "sha256": sha256_file(path),
+                    "error": None,
+                    "source_audit": audit,
+                }
+            )
+        except (Skip, ValueError, IndexError) as exc:
+            built.append(
+                {
+                    "symbol": symbol,
+                    "rows": 0,
+                    "error": f"{type(exc).__name__}:{exc}",
+                }
+            )
+        if number % 25 == 0 or number == len(symbols):
+            usable = sum(int(item["rows"] > 0) for item in built)
+            print(f"historical [{number}/{len(symbols)}] usable={usable}", flush=True)
+    materialized_max = max(
+        (
+            str(item["source_audit"]["max_materialized_time"])
+            for item in built
+            if item.get("source_audit")
+        ),
+        default=None,
+    )
+    summary = {
+        "protocol": PROTOCOL,
+        "evaluation_scope": "preholdout_postval_canary",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "manifest": str(manifest),
+        "manifest_sha256": sha256_file(manifest),
+        "requested_symbols": len(symbols),
+        "usable_symbols": sum(int(item["rows"] > 0) for item in built),
+        "snapshot_end": target.isoformat(),
+        "context_bars": args.context_bars,
+        "max_materialized_time": materialized_max,
+        "holdout_start": HOLDOUT_START.isoformat(),
+        "holdout_rows_materialized": 0,
+        "canonical_data_written": False,
+        "symbols": built,
+    }
+    (out_dir / "fetch_summary.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    print(
+        json.dumps(
+            {key: summary[key] for key in ("requested_symbols", "usable_symbols", "snapshot_end", "max_materialized_time")},
+            ensure_ascii=False,
+        )
+    )
     return 0 if summary["usable_symbols"] else 2
 
 
@@ -402,8 +546,9 @@ def scan_snapshot(args: argparse.Namespace) -> int:
         "raw_detections": len(raw),
         "deduplicated_events": len(events),
         "wall_seconds": round(time.perf_counter() - started, 3),
-        "holdout_use_number": HOLDOUT_USE_NUMBER,
-        "owner_authorized_in_conversation": True,
+        "evaluation_scope": args.evaluation_scope,
+        "holdout_use_number": HOLDOUT_USE_NUMBER if args.evaluation_scope == "holdout" else 0,
+        "owner_authorized_in_conversation": args.evaluation_scope == "holdout",
         "promoted": False,
         "orders_placed": False,
         "shard_index": args.shard_index,
@@ -1133,6 +1278,13 @@ def parser() -> argparse.ArgumentParser:
     fetch.add_argument("--workers", type=int, default=8)
     fetch.add_argument("--max-symbols", type=int, default=0)
 
+    historical = commands.add_parser("historical")
+    historical.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
+    historical.add_argument("--out-dir", type=Path, required=True)
+    historical.add_argument("--end", required=True)
+    historical.add_argument("--context-bars", type=int, default=420)
+    historical.add_argument("--max-symbols", type=int, default=0)
+
     scan = commands.add_parser("scan")
     scan.add_argument("--snapshot-dir", type=Path, required=True)
     scan.add_argument("--out-dir", type=Path, required=True)
@@ -1148,6 +1300,11 @@ def parser() -> argparse.ArgumentParser:
     scan.add_argument("--max-symbols", type=int, default=0)
     scan.add_argument("--shard-index", type=int, default=0)
     scan.add_argument("--shard-count", type=int, default=1)
+    scan.add_argument(
+        "--evaluation-scope",
+        choices=("holdout", "preholdout_postval_canary"),
+        default="holdout",
+    )
 
     merge = commands.add_parser("merge")
     merge.add_argument("--scan-dirs", type=Path, nargs="+", required=True)
@@ -1175,6 +1332,8 @@ def main() -> int:
     args = parser().parse_args()
     if args.command == "fetch":
         return fetch_snapshot(args)
+    if args.command == "historical":
+        return build_historical_snapshot(args)
     if args.command == "scan":
         return scan_snapshot(args)
     if args.command == "merge":

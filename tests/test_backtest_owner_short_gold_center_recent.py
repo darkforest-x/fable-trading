@@ -6,6 +6,7 @@ from scripts.backtest_owner_short_gold_center_recent import (
     EVENT_GAP_BARS,
     bar_from_x_normalized,
     deduplicate_detections,
+    historical_target_index,
     paired_closed_metrics,
     shard_paths,
 )
@@ -79,3 +80,20 @@ def test_matched_control_difference_uses_identical_closed_event_ids() -> None:
     assert result["paired_event_net_taker_mean"] == 0.02
     assert result["paired_control_net_taker_mean"] == 0.01
     assert result["paired_event_minus_control_net_taker"] == 0.01
+
+
+def test_historical_target_index_uses_frozen_15m_series_coordinates() -> None:
+    assert historical_target_index(
+        100, "2026-05-02T00:00:00Z", "2026-05-03T00:00:00Z"
+    ) == 196
+
+
+def test_historical_target_index_refuses_holdout() -> None:
+    try:
+        historical_target_index(
+            100, "2026-05-02T00:00:00Z", "2026-05-04T00:00:00Z"
+        )
+    except ValueError as exc:
+        assert "touches holdout" in str(exc)
+    else:
+        raise AssertionError("holdout target must be rejected")
