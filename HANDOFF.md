@@ -4,6 +4,22 @@
 
 ## ⚡ 当前真相（2026-08-11 — Owner 二次收紧：两条边界线 + 3–5 根确认）
 
+**最新进展（2026-08-11 21:06 CST）：文档路线没有跳步。** 第一臂 1:1 easy-negative
+baseline 后，第二臂已按文档完成 `1,143 positive + 1,143 easy + 2,286 hard`（负:正=3:1，
+hard占负例2/3），best SHA=`029f80a5…f537`；连续行情密度仍失败，未promote。train-time
+负例偏置 review200 已由 Owner 全部裁决为18对、0框偏、182不对；协议、源SHA、200 ID一一
+对应、0 pending、0 Owner框重叠、0前视全部通过。182是第三臂的高质量新hard种子，但只占
+2,286槽位7.96%，不能直接开训或复制凑数。
+
+为单独回答“模型能否找到接近早上ETH的形态”，已从剩余717个未审train事件新建正例检索页，
+与负例页目的相反：参考为1,143个冻结train Owner金标 + 77个post-val已审语义正例 + 18个
+train新正例，对照254+182个确认误报；只用decision前OHLC/六均线/框几何排序，未直接读取
+2026-08-10 ETH holdout行情。选出100个全新事件、75币、五块20/20/20/21/19，与已审200零
+重复；300张图存在、未来48根全满、0 holdout、0 labels、0 training-eligible。审核入口：
+`analysis/html/p2_owner_short_train_positive_retrieval100_20260811.html`；报告：
+`analysis/html/p2_owner_short_train_positive_retrieval100_report_20260811.html`。下一步等Owner完成
+100张1/2/3裁决，再扩hard种子并设计第三臂；**尚未授权下一次训练。**
+
 **最新进展（2026-08-11 晚）：第三臂训练前的 train-time 难负例审核集已经就绪，下一动作是
 Owner 审核 200 张，不是直接训练。** 使用当前 hard-negative R1 best 在冻结 train 末端之前的
 5 个独立 12h 时间块扫描：916 symbol-block、43,968 endpoints、351,744 个 W12–19 因果窗，

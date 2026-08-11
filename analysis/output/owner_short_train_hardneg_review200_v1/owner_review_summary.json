@@ -1,0 +1,103 @@
+{
+  "protocol": "owner_short_train_hardneg_review200_v1_20260811",
+  "source_sha256": "8d123d806adbb0ab5ee8a932f4d853792cfc292ac5aa1cc7748476ef487759ab",
+  "review_input_sha256": "3e069504a89ba78c56443414a0720a8b525cd43b7132470916e0fe619d242f0a",
+  "rows": 200,
+  "counts": {
+    "pending": 0,
+    "target": 18,
+    "rebox": 0,
+    "hard_negative": 182
+  },
+  "rates": {
+    "target_rate_in_negative_biased_review": 0.09,
+    "hard_negative_rate_in_negative_biased_review": 0.91
+  },
+  "by_decision": {
+    "target": {
+      "events": 18,
+      "symbols": 17,
+      "share": 0.09,
+      "peak_confidence": {
+        "median": 0.622748076915741,
+        "p90": 0.8342594683170319,
+        "mean": 0.6036966310607063
+      },
+      "selection_affinity": {
+        "median": 2.7356264211334884,
+        "p90": 3.1479045154234306,
+        "mean": 2.277030080966393
+      }
+    },
+    "rebox": {
+      "events": 0,
+      "symbols": 0,
+      "share": 0.0,
+      "peak_confidence": {
+        "median": null,
+        "p90": null,
+        "mean": null
+      },
+      "selection_affinity": {
+        "median": null,
+        "p90": null,
+        "mean": null
+      }
+    },
+    "hard_negative": {
+      "events": 182,
+      "symbols": 120,
+      "share": 0.91,
+      "peak_confidence": {
+        "median": 0.45838625729084015,
+        "p90": 0.7255394220352173,
+        "mean": 0.48447306306807547
+      },
+      "selection_affinity": {
+        "median": 2.5999368831270435,
+        "p90": 7.371717853472412,
+        "mean": 3.694101286081141
+      }
+    }
+  },
+  "by_block": {
+    "B01_20250715": {
+      "target": 1,
+      "hard_negative": 39
+    },
+    "B02_20250915": {
+      "hard_negative": 35,
+      "target": 5
+    },
+    "B03_20251115": {
+      "hard_negative": 40
+    },
+    "B04_20260115": {
+      "hard_negative": 34,
+      "target": 6
+    },
+    "B05_20260301": {
+      "hard_negative": 34,
+      "target": 6
+    }
+  },
+  "training_gate": {
+    "owner_confirmed_train_hard_negative_candidates": 182,
+    "owner_confirmed_target_references": 18,
+    "immediately_training_eligible": 0,
+    "reason": "freeze as active-learning references; a later dataset builder must preserve time split, deduplicate, bucket-match, and receive separate training authorization"
+  },
+  "quality_gates": {
+    "protocol_matches": true,
+    "source_hash_matches": true,
+    "exactly_200_unique_decisions": true,
+    "declared_counts_recompute": true,
+    "no_pending": true,
+    "allowed_values_only": true,
+    "one_to_one_manifest_join": true,
+    "all_rows_train_time": true,
+    "no_owner_box_overlap": true,
+    "selection_was_causal": true,
+    "nothing_auto_training_eligible": true
+  }
+}

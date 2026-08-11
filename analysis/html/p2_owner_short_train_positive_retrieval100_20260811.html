@@ -1,0 +1,1479 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>训练区间ETH语义正例检索100张审核</title>
+<style>:root{--bg:#f3f6f8;--ink:#17232d;--muted:#60717f;--green:#198754;--orange:#d98700;--red:#d33;--blue:#1769aa}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #d8e0e6;padding:14px 20px;box-shadow:0 2px 10px #0001}h1{margin:0 0 6px;font-size:24px}header p{margin:4px 0;color:#435664}.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}.bar button,.bar select{padding:7px 11px;border:1px solid #b9c5ce;border-radius:8px;background:#fff;cursor:pointer}.bar .copy{background:var(--blue);color:#fff;border-color:var(--blue)}#stats{margin-left:auto;font-weight:800}main{max-width:1500px;margin:auto;padding:16px}.notice{background:#fff7df;border:1px solid #ebcb75;border-radius:10px;padding:11px 14px;margin-bottom:14px}.hotkeys{font-weight:800;color:#7c4f00}.grid{display:grid;grid-template-columns:1fr;gap:16px}.card{scroll-margin-top:138px;background:#fff;border:3px solid transparent;border-radius:11px;overflow:hidden;box-shadow:0 2px 10px #0001}.card.current{outline:4px solid var(--blue);outline-offset:2px}.card[data-choice="target"]{border-color:var(--green)}.card[data-choice="rebox"]{border-color:var(--orange)}.card[data-choice="hard_negative"]{border-color:var(--red)}.head{display:flex;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #e3e8ec}.chip{background:#edf1f4;border-radius:999px;padding:3px 8px;font-size:13px}.meta{padding:7px 12px;color:var(--muted);font-size:13px}.pair{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#dce3e8}.pair button{padding:0;border:0;background:#fff;cursor:zoom-in}.pair span{display:block;padding:6px 10px;text-align:left;font-weight:800;color:#344b5b;background:#edf3f6}.pair img{display:block;width:100%;height:auto}.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:10px 12px}.choices button{padding:11px 5px;border:1px solid #c3cdd5;border-radius:8px;background:#fff;cursor:pointer;font-size:16px}.choices button.active{color:#fff;font-weight:800}.choices [data-value="target"].active{background:var(--green)}.choices [data-value="rebox"].active{background:var(--orange)}.choices [data-value="hard_negative"].active{background:var(--red)}.hidden{display:none}textarea{width:100%;min-height:150px;margin-top:16px}dialog{width:min(96vw,1500px);border:0;border-radius:10px}dialog img{width:100%}@media(max-width:900px){header{position:static}.card{scroll-margin-top:10px}.pair{grid-template-columns:1fr}#stats{width:100%;margin:0}}</style></head>
+<body><header><h1>Owner-short · ETH语义正例检索100张</h1><p>这页专门寻找接近Owner正例的模型触发，不是难负例页；左图只到decision，右图未来48根仅供人工判断。</p><p class="hotkeys">快捷键：1=对 · 2=框偏 · 3=不对 · Z=撤销；分类后自动跳到下一张。</p><div class="bar"><select id="filter" onchange="applyFilter()"><option value="all">全部</option><option value="pending">未确认</option><option value="target">对</option><option value="rebox">框偏</option><option value="hard_negative">不对</option></select><button onclick="clearAll()">清空选择</button><button class="copy" onclick="copyResults()">复制审核JSON</button><span id="stats"></span></div></header>
+<main><div class="notice"><b>只判断三件事：</b>形态和框都正确按1；形态正确但框偏按2；不是目标形态按3。全部默认未确认，不会自动写入训练集。</div><section class="grid">
+    <article class="card" id="card-P001" data-id="P001" data-choice="pending">
+      <div class="head"><b>P001 · SIGN_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event e9f3e1f07f9798e0 · 决策 09-15 14:30 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 4.54% · first 0.651 · peak 0.921 · raw 50 · 训练块 B02_20250915 · 正例相似度 6.456</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P001','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P001_e9f3e1f07f9798e0.png" alt="P001 causal"></button>
+        <button type="button" onclick="zoom('P001','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P001_e9f3e1f07f9798e0.png" alt="P001 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P001','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P001','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P001','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P002" data-id="P002" data-choice="pending">
+      <div class="head"><b>P002 · SENT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event e7db802be094dd4a · 决策 01-15 11:30 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 4.46% · first 0.328 · peak 0.814 · raw 31 · 训练块 B04_20260115 · 正例相似度 6.300</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P002','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P002_e7db802be094dd4a.png" alt="P002 causal"></button>
+        <button type="button" onclick="zoom('P002','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P002_e7db802be094dd4a.png" alt="P002 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P002','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P002','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P002','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P003" data-id="P003" data-choice="pending">
+      <div class="head"><b>P003 · PEPE_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 9950af1a05696983 · 决策 09-15 14:30 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 9.76% · first 0.651 · peak 0.784 · raw 46 · 训练块 B02_20250915 · 正例相似度 6.045</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P003','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P003_9950af1a05696983.png" alt="P003 causal"></button>
+        <button type="button" onclick="zoom('P003','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P003_9950af1a05696983.png" alt="P003 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P003','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P003','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P003','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P004" data-id="P004" data-choice="pending">
+      <div class="head"><b>P004 · FOGO_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event fecb47e2a2ccb2b9 · 决策 01-15 14:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 39.11% · first 0.530 · peak 0.669 · raw 18 · 训练块 B04_20260115 · 正例相似度 4.962</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P004','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P004_fecb47e2a2ccb2b9.png" alt="P004 causal"></button>
+        <button type="button" onclick="zoom('P004','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P004_fecb47e2a2ccb2b9.png" alt="P004 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P004','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P004','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P004','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P005" data-id="P005" data-choice="pending">
+      <div class="head"><b>P005 · TRX_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 03baa8ed5066eb79 · 决策 09-15 16:45 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 2.72% · first 0.497 · peak 0.837 · raw 72 · 训练块 B02_20250915 · 正例相似度 3.954</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P005','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P005_03baa8ed5066eb79.png" alt="P005 causal"></button>
+        <button type="button" onclick="zoom('P005','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P005_03baa8ed5066eb79.png" alt="P005 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P005','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P005','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P005','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P006" data-id="P006" data-choice="pending">
+      <div class="head"><b>P006 · LRC_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event e2467cd461bcf618 · 决策 01-15 11:15 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 4.82% · first 0.664 · peak 0.664 · raw 18 · 训练块 B04_20260115 · 正例相似度 3.744</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P006','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P006_e2467cd461bcf618.png" alt="P006 causal"></button>
+        <button type="button" onclick="zoom('P006','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P006_e2467cd461bcf618.png" alt="P006 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P006','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P006','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P006','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P007" data-id="P007" data-choice="pending">
+      <div class="head"><b>P007 · ENS_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event f13acf2924f664a7 · 决策 09-15 16:00 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 6.68% · first 0.677 · peak 0.941 · raw 65 · 训练块 B02_20250915 · 正例相似度 3.675</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P007','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P007_f13acf2924f664a7.png" alt="P007 causal"></button>
+        <button type="button" onclick="zoom('P007','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P007_f13acf2924f664a7.png" alt="P007 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P007','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P007','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P007','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P008" data-id="P008" data-choice="pending">
+      <div class="head"><b>P008 · SAPIEN_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event a6868b44315e1111 · 决策 03-01 16:45 CST · W19 · 核心7根 · 延迟5根 · 对照真实波幅 9.04% · first 0.549 · peak 0.667 · raw 19 · 训练块 B05_20260301 · 正例相似度 3.645</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P008','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P008_a6868b44315e1111.png" alt="P008 causal"></button>
+        <button type="button" onclick="zoom('P008','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P008_a6868b44315e1111.png" alt="P008 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P008','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P008','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P008','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P009" data-id="P009" data-choice="pending">
+      <div class="head"><b>P009 · HUMA_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event cd477137f455ab57 · 决策 09-15 15:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 10.04% · first 0.598 · peak 0.832 · raw 73 · 训练块 B02_20250915 · 正例相似度 3.596</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P009','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P009_cd477137f455ab57.png" alt="P009 causal"></button>
+        <button type="button" onclick="zoom('P009','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P009_cd477137f455ab57.png" alt="P009 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P009','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P009','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P009','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P010" data-id="P010" data-choice="pending">
+      <div class="head"><b>P010 · FARTCOIN_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event e932035b9f9c3cc3 · 决策 09-15 15:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 12.43% · first 0.538 · peak 0.719 · raw 57 · 训练块 B02_20250915 · 正例相似度 3.552</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P010','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P010_e932035b9f9c3cc3.png" alt="P010 causal"></button>
+        <button type="button" onclick="zoom('P010','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P010_e932035b9f9c3cc3.png" alt="P010 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P010','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P010','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P010','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P011" data-id="P011" data-choice="pending">
+      <div class="head"><b>P011 · PUMP_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event c0bdfd47764694ec · 决策 01-15 11:15 CST · W19 · 核心7根 · 延迟5根 · 对照真实波幅 13.05% · first 0.491 · peak 0.622 · raw 15 · 训练块 B04_20260115 · 正例相似度 3.552</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P011','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P011_c0bdfd47764694ec.png" alt="P011 causal"></button>
+        <button type="button" onclick="zoom('P011','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P011_c0bdfd47764694ec.png" alt="P011 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P011','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P011','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P011','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P012" data-id="P012" data-choice="pending">
+      <div class="head"><b>P012 · 2Z_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 529b79c13e1b0c90 · 决策 11-15 16:15 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 7.20% · first 0.357 · peak 0.722 · raw 38 · 训练块 B03_20251115 · 正例相似度 3.421</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P012','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P012_529b79c13e1b0c90.png" alt="P012 causal"></button>
+        <button type="button" onclick="zoom('P012','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P012_529b79c13e1b0c90.png" alt="P012 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P012','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P012','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P012','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P013" data-id="P013" data-choice="pending">
+      <div class="head"><b>P013 · 0G_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 2b3bc85eaac5d8af · 决策 01-15 09:15 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 5.03% · first 0.887 · peak 0.887 · raw 61 · 训练块 B04_20260115 · 正例相似度 3.412</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P013','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P013_2b3bc85eaac5d8af.png" alt="P013 causal"></button>
+        <button type="button" onclick="zoom('P013','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P013_2b3bc85eaac5d8af.png" alt="P013 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P013','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P013','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P013','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P014" data-id="P014" data-choice="pending">
+      <div class="head"><b>P014 · AGLD_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event ffe6d140b58775e3 · 决策 01-15 11:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 4.14% · first 0.701 · peak 0.701 · raw 41 · 训练块 B04_20260115 · 正例相似度 3.390</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P014','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P014_ffe6d140b58775e3.png" alt="P014 causal"></button>
+        <button type="button" onclick="zoom('P014','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P014_ffe6d140b58775e3.png" alt="P014 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P014','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P014','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P014','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P015" data-id="P015" data-choice="pending">
+      <div class="head"><b>P015 · IOST_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 3c147ab06ae8da39 · 决策 09-15 15:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 5.52% · first 0.509 · peak 0.857 · raw 40 · 训练块 B02_20250915 · 正例相似度 3.374</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P015','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P015_3c147ab06ae8da39.png" alt="P015 causal"></button>
+        <button type="button" onclick="zoom('P015','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P015_3c147ab06ae8da39.png" alt="P015 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P015','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P015','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P015','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P016" data-id="P016" data-choice="pending">
+      <div class="head"><b>P016 · ZETA_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event eb91b1399dcac4b9 · 决策 09-15 15:45 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 6.84% · first 0.299 · peak 0.931 · raw 49 · 训练块 B02_20250915 · 正例相似度 3.352</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P016','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P016_eb91b1399dcac4b9.png" alt="P016 causal"></button>
+        <button type="button" onclick="zoom('P016','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P016_eb91b1399dcac4b9.png" alt="P016 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P016','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P016','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P016','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P017" data-id="P017" data-choice="pending">
+      <div class="head"><b>P017 · JELLYJELLY_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 434c4c8d8414c19c · 决策 11-15 10:45 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 27.84% · first 0.663 · peak 0.889 · raw 44 · 训练块 B03_20251115 · 正例相似度 3.274</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P017','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P017_434c4c8d8414c19c.png" alt="P017 causal"></button>
+        <button type="button" onclick="zoom('P017','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P017_434c4c8d8414c19c.png" alt="P017 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P017','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P017','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P017','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P018" data-id="P018" data-choice="pending">
+      <div class="head"><b>P018 · SNX_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 9d2955e930f775bd · 决策 11-15 16:45 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 4.64% · first 0.867 · peak 0.867 · raw 67 · 训练块 B03_20251115 · 正例相似度 3.261</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P018','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P018_9d2955e930f775bd.png" alt="P018 causal"></button>
+        <button type="button" onclick="zoom('P018','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P018_9d2955e930f775bd.png" alt="P018 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P018','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P018','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P018','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P019" data-id="P019" data-choice="pending">
+      <div class="head"><b>P019 · INJ_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 18a168e69edd0e0d · 决策 09-15 15:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 7.76% · first 0.668 · peak 0.902 · raw 61 · 训练块 B02_20250915 · 正例相似度 3.235</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P019','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P019_18a168e69edd0e0d.png" alt="P019 causal"></button>
+        <button type="button" onclick="zoom('P019','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P019_18a168e69edd0e0d.png" alt="P019 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P019','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P019','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P019','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P020" data-id="P020" data-choice="pending">
+      <div class="head"><b>P020 · PENGU_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 1ba7d5d7aede8ca4 · 决策 09-15 16:00 CST · W13 · 核心6根 · 延迟2根 · 对照真实波幅 8.80% · first 0.380 · peak 0.864 · raw 67 · 训练块 B02_20250915 · 正例相似度 3.223</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P020','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P020_1ba7d5d7aede8ca4.png" alt="P020 causal"></button>
+        <button type="button" onclick="zoom('P020','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P020_1ba7d5d7aede8ca4.png" alt="P020 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P020','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P020','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P020','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P021" data-id="P021" data-choice="pending">
+      <div class="head"><b>P021 · ICX_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 290cfdd20614e5b0 · 决策 01-15 11:15 CST · W14 · 核心6根 · 延迟3根 · 对照真实波幅 4.35% · first 0.331 · peak 0.404 · raw 11 · 训练块 B04_20260115 · 正例相似度 3.169</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P021','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P021_290cfdd20614e5b0.png" alt="P021 causal"></button>
+        <button type="button" onclick="zoom('P021','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P021_290cfdd20614e5b0.png" alt="P021 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P021','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P021','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P021','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P022" data-id="P022" data-choice="pending">
+      <div class="head"><b>P022 · COMP_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event f37014556319a6c6 · 决策 09-15 15:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 6.17% · first 0.588 · peak 0.770 · raw 42 · 训练块 B02_20250915 · 正例相似度 3.139</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P022','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P022_f37014556319a6c6.png" alt="P022 causal"></button>
+        <button type="button" onclick="zoom('P022','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P022_f37014556319a6c6.png" alt="P022 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P022','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P022','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P022','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P023" data-id="P023" data-choice="pending">
+      <div class="head"><b>P023 · BONK_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 4843d6d27c6fafbf · 决策 09-15 16:15 CST · W18 · 核心7根 · 延迟5根 · 对照真实波幅 11.13% · first 0.272 · peak 0.272 · raw 2 · 训练块 B02_20250915 · 正例相似度 3.113</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P023','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P023_4843d6d27c6fafbf.png" alt="P023 causal"></button>
+        <button type="button" onclick="zoom('P023','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P023_4843d6d27c6fafbf.png" alt="P023 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P023','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P023','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P023','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P024" data-id="P024" data-choice="pending">
+      <div class="head"><b>P024 · MAGIC_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 03ce16669e366135 · 决策 09-15 15:45 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 8.65% · first 0.274 · peak 0.681 · raw 23 · 训练块 B02_20250915 · 正例相似度 3.088</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P024','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P024_03ce16669e366135.png" alt="P024 causal"></button>
+        <button type="button" onclick="zoom('P024','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P024_03ce16669e366135.png" alt="P024 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P024','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P024','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P024','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P025" data-id="P025" data-choice="pending">
+      <div class="head"><b>P025 · BRETT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 1f5ca6939bd1a594 · 决策 01-15 11:15 CST · W17 · 核心8根 · 延迟3根 · 对照真实波幅 9.05% · first 0.361 · peak 0.361 · raw 2 · 训练块 B04_20260115 · 正例相似度 3.068</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P025','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P025_1f5ca6939bd1a594.png" alt="P025 causal"></button>
+        <button type="button" onclick="zoom('P025','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P025_1f5ca6939bd1a594.png" alt="P025 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P025','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P025','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P025','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P026" data-id="P026" data-choice="pending">
+      <div class="head"><b>P026 · XLM_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event dc87614dce1f2ff5 · 决策 11-15 16:45 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 3.04% · first 0.652 · peak 0.739 · raw 39 · 训练块 B03_20251115 · 正例相似度 3.053</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P026','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P026_dc87614dce1f2ff5.png" alt="P026 causal"></button>
+        <button type="button" onclick="zoom('P026','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P026_dc87614dce1f2ff5.png" alt="P026 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P026','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P026','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P026','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P027" data-id="P027" data-choice="pending">
+      <div class="head"><b>P027 · CELO_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 3f24874ce7b01d76 · 决策 11-15 16:15 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 3.85% · first 0.302 · peak 0.677 · raw 25 · 训练块 B03_20251115 · 正例相似度 3.045</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P027','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P027_3f24874ce7b01d76.png" alt="P027 causal"></button>
+        <button type="button" onclick="zoom('P027','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P027_3f24874ce7b01d76.png" alt="P027 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P027','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P027','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P027','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P028" data-id="P028" data-choice="pending">
+      <div class="head"><b>P028 · RSR_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 6c65f637a4a5ac4b · 决策 09-15 16:00 CST · W13 · 核心6根 · 延迟2根 · 对照真实波幅 7.43% · first 0.272 · peak 0.598 · raw 11 · 训练块 B02_20250915 · 正例相似度 3.008</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P028','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P028_6c65f637a4a5ac4b.png" alt="P028 causal"></button>
+        <button type="button" onclick="zoom('P028','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P028_6c65f637a4a5ac4b.png" alt="P028 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P028','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P028','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P028','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P029" data-id="P029" data-choice="pending">
+      <div class="head"><b>P029 · PEOPLE_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 4eae444ad186d164 · 决策 09-15 15:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 11.13% · first 0.561 · peak 0.906 · raw 57 · 训练块 B02_20250915 · 正例相似度 2.997</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P029','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P029_4eae444ad186d164.png" alt="P029 causal"></button>
+        <button type="button" onclick="zoom('P029','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P029_4eae444ad186d164.png" alt="P029 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P029','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P029','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P029','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P030" data-id="P030" data-choice="pending">
+      <div class="head"><b>P030 · ACH_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 9b6a9369a8a668aa · 决策 11-15 16:30 CST · W14 · 核心6根 · 延迟3根 · 对照真实波幅 3.82% · first 0.431 · peak 0.810 · raw 42 · 训练块 B03_20251115 · 正例相似度 2.936</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P030','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P030_9b6a9369a8a668aa.png" alt="P030 causal"></button>
+        <button type="button" onclick="zoom('P030','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P030_9b6a9369a8a668aa.png" alt="P030 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P030','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P030','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P030','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P031" data-id="P031" data-choice="pending">
+      <div class="head"><b>P031 · FIL_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 60abb6e41a2250ad · 决策 09-15 15:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 7.59% · first 0.536 · peak 0.910 · raw 51 · 训练块 B02_20250915 · 正例相似度 2.936</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P031','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P031_60abb6e41a2250ad.png" alt="P031 causal"></button>
+        <button type="button" onclick="zoom('P031','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P031_60abb6e41a2250ad.png" alt="P031 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P031','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P031','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P031','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P032" data-id="P032" data-choice="pending">
+      <div class="head"><b>P032 · SHIB_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 1f63b2c315b8e105 · 决策 01-15 11:15 CST · W19 · 核心7根 · 延迟5根 · 对照真实波幅 4.66% · first 0.374 · peak 0.492 · raw 10 · 训练块 B04_20260115 · 正例相似度 2.931</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P032','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P032_1f63b2c315b8e105.png" alt="P032 causal"></button>
+        <button type="button" onclick="zoom('P032','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P032_1f63b2c315b8e105.png" alt="P032 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P032','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P032','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P032','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P033" data-id="P033" data-choice="pending">
+      <div class="head"><b>P033 · PUMP_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 6b6457d89dfe559f · 决策 11-15 16:45 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 5.40% · first 0.609 · peak 0.764 · raw 28 · 训练块 B03_20251115 · 正例相似度 2.930</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P033','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P033_6b6457d89dfe559f.png" alt="P033 causal"></button>
+        <button type="button" onclick="zoom('P033','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P033_6b6457d89dfe559f.png" alt="P033 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P033','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P033','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P033','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P034" data-id="P034" data-choice="pending">
+      <div class="head"><b>P034 · W_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event a3d047d9820636c4 · 决策 11-15 16:45 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 3.76% · first 0.496 · peak 0.496 · raw 19 · 训练块 B03_20251115 · 正例相似度 2.905</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P034','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P034_a3d047d9820636c4.png" alt="P034 causal"></button>
+        <button type="button" onclick="zoom('P034','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P034_a3d047d9820636c4.png" alt="P034 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P034','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P034','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P034','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P035" data-id="P035" data-choice="pending">
+      <div class="head"><b>P035 · A_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event d4709fb12568f7fa · 决策 09-15 15:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 5.22% · first 0.326 · peak 0.932 · raw 47 · 训练块 B02_20250915 · 正例相似度 2.886</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P035','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P035_d4709fb12568f7fa.png" alt="P035 causal"></button>
+        <button type="button" onclick="zoom('P035','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P035_d4709fb12568f7fa.png" alt="P035 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P035','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P035','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P035','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P036" data-id="P036" data-choice="pending">
+      <div class="head"><b>P036 · STX_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 516f9d5c03f1ab01 · 决策 11-15 16:45 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 3.91% · first 0.583 · peak 0.588 · raw 33 · 训练块 B03_20251115 · 正例相似度 2.872</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P036','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P036_516f9d5c03f1ab01.png" alt="P036 causal"></button>
+        <button type="button" onclick="zoom('P036','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P036_516f9d5c03f1ab01.png" alt="P036 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P036','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P036','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P036','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P037" data-id="P037" data-choice="pending">
+      <div class="head"><b>P037 · GALA_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event d9e58c6cab277d5d · 决策 09-15 15:45 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 9.19% · first 0.270 · peak 0.883 · raw 45 · 训练块 B02_20250915 · 正例相似度 2.860</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P037','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P037_d9e58c6cab277d5d.png" alt="P037 causal"></button>
+        <button type="button" onclick="zoom('P037','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P037_d9e58c6cab277d5d.png" alt="P037 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P037','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P037','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P037','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P038" data-id="P038" data-choice="pending">
+      <div class="head"><b>P038 · TAO_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 442532f9810c0b03 · 决策 01-15 10:00 CST · W19 · 核心7根 · 延迟5根 · 对照真实波幅 5.57% · first 0.386 · peak 0.512 · raw 16 · 训练块 B04_20260115 · 正例相似度 2.857</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P038','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P038_442532f9810c0b03.png" alt="P038 causal"></button>
+        <button type="button" onclick="zoom('P038','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P038_442532f9810c0b03.png" alt="P038 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P038','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P038','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P038','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P039" data-id="P039" data-choice="pending">
+      <div class="head"><b>P039 · API3_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 1d5790899a51874b · 决策 09-15 16:15 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 8.95% · first 0.508 · peak 0.573 · raw 9 · 训练块 B02_20250915 · 正例相似度 2.848</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P039','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P039_1d5790899a51874b.png" alt="P039 causal"></button>
+        <button type="button" onclick="zoom('P039','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P039_1d5790899a51874b.png" alt="P039 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P039','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P039','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P039','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P040" data-id="P040" data-choice="pending">
+      <div class="head"><b>P040 · DOT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 1c9372fe79380f8c · 决策 09-15 15:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 7.08% · first 0.616 · peak 0.894 · raw 60 · 训练块 B02_20250915 · 正例相似度 2.829</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P040','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P040_1c9372fe79380f8c.png" alt="P040 causal"></button>
+        <button type="button" onclick="zoom('P040','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P040_1c9372fe79380f8c.png" alt="P040 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P040','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P040','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P040','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P041" data-id="P041" data-choice="pending">
+      <div class="head"><b>P041 · ATH_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 6797b854dfa7f728 · 决策 01-15 11:15 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 5.84% · first 0.526 · peak 0.540 · raw 17 · 训练块 B04_20260115 · 正例相似度 2.825</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P041','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P041_6797b854dfa7f728.png" alt="P041 causal"></button>
+        <button type="button" onclick="zoom('P041','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P041_6797b854dfa7f728.png" alt="P041 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P041','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P041','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P041','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P042" data-id="P042" data-choice="pending">
+      <div class="head"><b>P042 · MOVE_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 60790527d42b10cb · 决策 11-15 16:45 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 4.44% · first 0.427 · peak 0.798 · raw 48 · 训练块 B03_20251115 · 正例相似度 2.817</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P042','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P042_60790527d42b10cb.png" alt="P042 causal"></button>
+        <button type="button" onclick="zoom('P042','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P042_60790527d42b10cb.png" alt="P042 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P042','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P042','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P042','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P043" data-id="P043" data-choice="pending">
+      <div class="head"><b>P043 · KAITO_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 6450f4cae5a8c631 · 决策 11-15 16:45 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 3.21% · first 0.666 · peak 0.846 · raw 49 · 训练块 B03_20251115 · 正例相似度 2.787</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P043','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P043_6450f4cae5a8c631.png" alt="P043 causal"></button>
+        <button type="button" onclick="zoom('P043','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P043_6450f4cae5a8c631.png" alt="P043 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P043','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P043','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P043','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P044" data-id="P044" data-choice="pending">
+      <div class="head"><b>P044 · ENS_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 9169ffd682200654 · 决策 01-15 11:15 CST · W14 · 核心6根 · 延迟3根 · 对照真实波幅 4.29% · first 0.703 · peak 0.752 · raw 27 · 训练块 B04_20260115 · 正例相似度 2.766</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P044','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P044_9169ffd682200654.png" alt="P044 causal"></button>
+        <button type="button" onclick="zoom('P044','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P044_9169ffd682200654.png" alt="P044 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P044','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P044','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P044','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P045" data-id="P045" data-choice="pending">
+      <div class="head"><b>P045 · ONE_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event beb19f4881ecb538 · 决策 11-15 16:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 3.59% · first 0.524 · peak 0.916 · raw 58 · 训练块 B03_20251115 · 正例相似度 2.735</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P045','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P045_beb19f4881ecb538.png" alt="P045 causal"></button>
+        <button type="button" onclick="zoom('P045','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P045_beb19f4881ecb538.png" alt="P045 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P045','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P045','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P045','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P046" data-id="P046" data-choice="pending">
+      <div class="head"><b>P046 · TRUTH_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 73f83a92da2168ca · 决策 01-15 14:45 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 9.46% · first 0.526 · peak 0.526 · raw 10 · 训练块 B04_20260115 · 正例相似度 2.668</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P046','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P046_73f83a92da2168ca.png" alt="P046 causal"></button>
+        <button type="button" onclick="zoom('P046','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P046_73f83a92da2168ca.png" alt="P046 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P046','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P046','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P046','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P047" data-id="P047" data-choice="pending">
+      <div class="head"><b>P047 · AEVO_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 8e3b587c8ea8c794 · 决策 11-15 16:30 CST · W19 · 核心7根 · 延迟5根 · 对照真实波幅 4.02% · first 0.329 · peak 0.837 · raw 12 · 训练块 B03_20251115 · 正例相似度 2.652</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P047','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P047_8e3b587c8ea8c794.png" alt="P047 causal"></button>
+        <button type="button" onclick="zoom('P047','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P047_8e3b587c8ea8c794.png" alt="P047 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P047','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P047','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P047','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P048" data-id="P048" data-choice="pending">
+      <div class="head"><b>P048 · GALA_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 8853833a3115b710 · 决策 01-15 11:15 CST · W19 · 核心7根 · 延迟6根 · 对照真实波幅 5.88% · first 0.353 · peak 0.353 · raw 4 · 训练块 B04_20260115 · 正例相似度 2.641</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P048','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P048_8853833a3115b710.png" alt="P048 causal"></button>
+        <button type="button" onclick="zoom('P048','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P048_8853833a3115b710.png" alt="P048 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P048','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P048','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P048','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P049" data-id="P049" data-choice="pending">
+      <div class="head"><b>P049 · RSR_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event d576024c6723bbbc · 决策 11-15 16:45 CST · W19 · 核心8根 · 延迟5根 · 对照真实波幅 4.19% · first 0.683 · peak 0.683 · raw 15 · 训练块 B03_20251115 · 正例相似度 2.633</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P049','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P049_d576024c6723bbbc.png" alt="P049 causal"></button>
+        <button type="button" onclick="zoom('P049','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P049_d576024c6723bbbc.png" alt="P049 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P049','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P049','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P049','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P050" data-id="P050" data-choice="pending">
+      <div class="head"><b>P050 · ENSO_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event e81a2c13262f8c51 · 决策 01-15 11:45 CST · W13 · 核心6根 · 延迟2根 · 对照真实波幅 4.77% · first 0.449 · peak 0.587 · raw 41 · 训练块 B04_20260115 · 正例相似度 2.606</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P050','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P050_e81a2c13262f8c51.png" alt="P050 causal"></button>
+        <button type="button" onclick="zoom('P050','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P050_e81a2c13262f8c51.png" alt="P050 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P050','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P050','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P050','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P051" data-id="P051" data-choice="pending">
+      <div class="head"><b>P051 · ONE_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 1992cd58d42fb405 · 决策 01-15 11:30 CST · W14 · 核心6根 · 延迟3根 · 对照真实波幅 5.24% · first 0.596 · peak 0.596 · raw 30 · 训练块 B04_20260115 · 正例相似度 2.596</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P051','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P051_1992cd58d42fb405.png" alt="P051 causal"></button>
+        <button type="button" onclick="zoom('P051','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P051_1992cd58d42fb405.png" alt="P051 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P051','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P051','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P051','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P052" data-id="P052" data-choice="pending">
+      <div class="head"><b>P052 · NEIRO_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 3b8e0f8a471851ef · 决策 11-15 16:45 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 4.15% · first 0.522 · peak 0.522 · raw 6 · 训练块 B03_20251115 · 正例相似度 2.581</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P052','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P052_3b8e0f8a471851ef.png" alt="P052 causal"></button>
+        <button type="button" onclick="zoom('P052','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P052_3b8e0f8a471851ef.png" alt="P052 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P052','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P052','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P052','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P053" data-id="P053" data-choice="pending">
+      <div class="head"><b>P053 · RSR_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 2637c048b555acc5 · 决策 01-15 11:15 CST · W19 · 核心7根 · 延迟5根 · 对照真实波幅 7.44% · first 0.603 · peak 0.603 · raw 12 · 训练块 B04_20260115 · 正例相似度 2.570</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P053','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P053_2637c048b555acc5.png" alt="P053 causal"></button>
+        <button type="button" onclick="zoom('P053','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P053_2637c048b555acc5.png" alt="P053 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P053','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P053','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P053','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P054" data-id="P054" data-choice="pending">
+      <div class="head"><b>P054 · ENJ_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 4d904c99e8a64871 · 决策 01-15 11:15 CST · W18 · 核心7根 · 延迟5根 · 对照真实波幅 4.05% · first 0.303 · peak 0.415 · raw 4 · 训练块 B04_20260115 · 正例相似度 2.536</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P054','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P054_4d904c99e8a64871.png" alt="P054 causal"></button>
+        <button type="button" onclick="zoom('P054','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P054_4d904c99e8a64871.png" alt="P054 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P054','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P054','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P054','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P055" data-id="P055" data-choice="pending">
+      <div class="head"><b>P055 · HBAR_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event cf675fb1efe02474 · 决策 01-15 11:15 CST · W17 · 核心7根 · 延迟4根 · 对照真实波幅 4.24% · first 0.347 · peak 0.364 · raw 6 · 训练块 B04_20260115 · 正例相似度 2.535</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P055','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P055_cf675fb1efe02474.png" alt="P055 causal"></button>
+        <button type="button" onclick="zoom('P055','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P055_cf675fb1efe02474.png" alt="P055 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P055','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P055','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P055','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P056" data-id="P056" data-choice="pending">
+      <div class="head"><b>P056 · INIT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 5ee7a6cb5b265de2 · 决策 03-01 13:30 CST · W13 · 核心6根 · 延迟2根 · 对照真实波幅 7.67% · first 0.494 · peak 0.913 · raw 54 · 训练块 B05_20260301 · 正例相似度 2.534</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P056','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P056_5ee7a6cb5b265de2.png" alt="P056 causal"></button>
+        <button type="button" onclick="zoom('P056','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P056_5ee7a6cb5b265de2.png" alt="P056 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P056','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P056','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P056','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P057" data-id="P057" data-choice="pending">
+      <div class="head"><b>P057 · AIXBT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 41dfe7cccdd12c2a · 决策 11-15 17:00 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 5.88% · first 0.835 · peak 0.835 · raw 40 · 训练块 B03_20251115 · 正例相似度 2.489</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P057','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P057_41dfe7cccdd12c2a.png" alt="P057 causal"></button>
+        <button type="button" onclick="zoom('P057','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P057_41dfe7cccdd12c2a.png" alt="P057 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P057','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P057','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P057','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P058" data-id="P058" data-choice="pending">
+      <div class="head"><b>P058 · DOOD_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 7736de55d63836b8 · 决策 11-15 16:45 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 6.13% · first 0.639 · peak 0.639 · raw 11 · 训练块 B03_20251115 · 正例相似度 2.469</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P058','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P058_7736de55d63836b8.png" alt="P058 causal"></button>
+        <button type="button" onclick="zoom('P058','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P058_7736de55d63836b8.png" alt="P058 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P058','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P058','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P058','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P059" data-id="P059" data-choice="pending">
+      <div class="head"><b>P059 · ANIME_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 754e42a467e27df7 · 决策 07-15 11:15 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 6.44% · first 0.843 · peak 0.869 · raw 59 · 训练块 B01_20250715 · 正例相似度 2.445</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P059','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P059_754e42a467e27df7.png" alt="P059 causal"></button>
+        <button type="button" onclick="zoom('P059','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P059_754e42a467e27df7.png" alt="P059 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P059','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P059','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P059','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P060" data-id="P060" data-choice="pending">
+      <div class="head"><b>P060 · XRP_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event ad7de819c3f4bec0 · 决策 11-15 16:45 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 3.29% · first 0.437 · peak 0.636 · raw 39 · 训练块 B03_20251115 · 正例相似度 2.437</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P060','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P060_ad7de819c3f4bec0.png" alt="P060 causal"></button>
+        <button type="button" onclick="zoom('P060','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P060_ad7de819c3f4bec0.png" alt="P060 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P060','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P060','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P060','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P061" data-id="P061" data-choice="pending">
+      <div class="head"><b>P061 · SAND_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event ac2d5d4a20a30275 · 决策 01-15 11:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 5.82% · first 0.557 · peak 0.557 · raw 16 · 训练块 B04_20260115 · 正例相似度 2.418</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P061','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P061_ac2d5d4a20a30275.png" alt="P061 causal"></button>
+        <button type="button" onclick="zoom('P061','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P061_ac2d5d4a20a30275.png" alt="P061 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P061','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P061','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P061','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P062" data-id="P062" data-choice="pending">
+      <div class="head"><b>P062 · ZETA_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 4936b73d01b9c24b · 决策 01-15 12:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 11.32% · first 0.797 · peak 0.848 · raw 65 · 训练块 B04_20260115 · 正例相似度 2.398</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P062','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P062_4936b73d01b9c24b.png" alt="P062 causal"></button>
+        <button type="button" onclick="zoom('P062','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P062_4936b73d01b9c24b.png" alt="P062 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P062','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P062','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P062','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P063" data-id="P063" data-choice="pending">
+      <div class="head"><b>P063 · MASK_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 61f204ce5c8e144c · 决策 11-15 17:15 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 3.18% · first 0.891 · peak 0.891 · raw 54 · 训练块 B03_20251115 · 正例相似度 2.380</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P063','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P063_61f204ce5c8e144c.png" alt="P063 causal"></button>
+        <button type="button" onclick="zoom('P063','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P063_61f204ce5c8e144c.png" alt="P063 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P063','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P063','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P063','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P064" data-id="P064" data-choice="pending">
+      <div class="head"><b>P064 · MOODENG_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event f392afed0f3d8482 · 决策 07-15 11:00 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 7.23% · first 0.365 · peak 0.794 · raw 23 · 训练块 B01_20250715 · 正例相似度 2.252</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P064','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P064_f392afed0f3d8482.png" alt="P064 causal"></button>
+        <button type="button" onclick="zoom('P064','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P064_f392afed0f3d8482.png" alt="P064 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P064','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P064','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P064','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P065" data-id="P065" data-choice="pending">
+      <div class="head"><b>P065 · ZRO_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 418d6d6a16297ba7 · 决策 11-15 17:15 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 4.47% · first 0.845 · peak 0.870 · raw 43 · 训练块 B03_20251115 · 正例相似度 2.246</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P065','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P065_418d6d6a16297ba7.png" alt="P065 causal"></button>
+        <button type="button" onclick="zoom('P065','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P065_418d6d6a16297ba7.png" alt="P065 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P065','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P065','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P065','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P066" data-id="P066" data-choice="pending">
+      <div class="head"><b>P066 · LPT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event e6a05755ea124745 · 决策 07-15 10:15 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 7.98% · first 0.343 · peak 0.919 · raw 22 · 训练块 B01_20250715 · 正例相似度 2.087</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P066','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P066_e6a05755ea124745.png" alt="P066 causal"></button>
+        <button type="button" onclick="zoom('P066','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P066_e6a05755ea124745.png" alt="P066 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P066','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P066','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P066','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P067" data-id="P067" data-choice="pending">
+      <div class="head"><b>P067 · TRX_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 577874d10d34a5a3 · 决策 07-15 12:00 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 2.46% · first 0.663 · peak 0.871 · raw 44 · 训练块 B01_20250715 · 正例相似度 2.050</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P067','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P067_577874d10d34a5a3.png" alt="P067 causal"></button>
+        <button type="button" onclick="zoom('P067','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P067_577874d10d34a5a3.png" alt="P067 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P067','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P067','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P067','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P068" data-id="P068" data-choice="pending">
+      <div class="head"><b>P068 · ZBT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 9b163af0c4257276 · 决策 03-01 16:45 CST · W13 · 核心6根 · 延迟2根 · 对照真实波幅 5.78% · first 0.435 · peak 0.832 · raw 56 · 训练块 B05_20260301 · 正例相似度 1.925</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P068','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P068_9b163af0c4257276.png" alt="P068 causal"></button>
+        <button type="button" onclick="zoom('P068','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P068_9b163af0c4257276.png" alt="P068 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P068','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P068','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P068','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P069" data-id="P069" data-choice="pending">
+      <div class="head"><b>P069 · LA_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 7cbc2376b7028c53 · 决策 07-15 08:15 CST · W17 · 核心7根 · 延迟4根 · 对照真实波幅 8.58% · first 0.646 · peak 0.878 · raw 34 · 训练块 B01_20250715 · 正例相似度 1.844</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P069','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P069_7cbc2376b7028c53.png" alt="P069 causal"></button>
+        <button type="button" onclick="zoom('P069','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P069_7cbc2376b7028c53.png" alt="P069 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P069','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P069','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P069','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P070" data-id="P070" data-choice="pending">
+      <div class="head"><b>P070 · LTC_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event c7510b7b54aa482e · 决策 07-15 08:45 CST · W19 · 核心8根 · 延迟5根 · 对照真实波幅 5.56% · first 0.432 · peak 0.432 · raw 5 · 训练块 B01_20250715 · 正例相似度 1.756</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P070','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P070_c7510b7b54aa482e.png" alt="P070 causal"></button>
+        <button type="button" onclick="zoom('P070','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P070_c7510b7b54aa482e.png" alt="P070 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P070','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P070','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P070','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P071" data-id="P071" data-choice="pending">
+      <div class="head"><b>P071 · SENT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event c7d30a26feb3ad44 · 决策 03-01 14:45 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 4.68% · first 0.375 · peak 0.375 · raw 1 · 训练块 B05_20260301 · 正例相似度 1.724</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P071','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P071_c7d30a26feb3ad44.png" alt="P071 causal"></button>
+        <button type="button" onclick="zoom('P071','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P071_c7d30a26feb3ad44.png" alt="P071 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P071','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P071','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P071','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P072" data-id="P072" data-choice="pending">
+      <div class="head"><b>P072 · LA_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event f0bbc7d887e0c4c6 · 决策 03-01 14:30 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 5.76% · first 0.283 · peak 0.682 · raw 30 · 训练块 B05_20260301 · 正例相似度 1.652</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P072','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P072_f0bbc7d887e0c4c6.png" alt="P072 causal"></button>
+        <button type="button" onclick="zoom('P072','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P072_f0bbc7d887e0c4c6.png" alt="P072 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P072','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P072','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P072','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P073" data-id="P073" data-choice="pending">
+      <div class="head"><b>P073 · GAS_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 21765cd701bf003b · 决策 07-15 10:15 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 6.53% · first 0.359 · peak 0.359 · raw 1 · 训练块 B01_20250715 · 正例相似度 1.596</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P073','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P073_21765cd701bf003b.png" alt="P073 causal"></button>
+        <button type="button" onclick="zoom('P073','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P073_21765cd701bf003b.png" alt="P073 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P073','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P073','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P073','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P074" data-id="P074" data-choice="pending">
+      <div class="head"><b>P074 · MOVE_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 191dac248b0f2a84 · 决策 07-15 11:00 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 7.42% · first 0.574 · peak 0.837 · raw 32 · 训练块 B01_20250715 · 正例相似度 1.583</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P074','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P074_191dac248b0f2a84.png" alt="P074 causal"></button>
+        <button type="button" onclick="zoom('P074','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P074_191dac248b0f2a84.png" alt="P074 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P074','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P074','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P074','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P075" data-id="P075" data-choice="pending">
+      <div class="head"><b>P075 · ZBT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 2fafb4f48adc6127 · 决策 03-01 15:15 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 5.56% · first 0.746 · peak 0.861 · raw 44 · 训练块 B05_20260301 · 正例相似度 1.526</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P075','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P075_2fafb4f48adc6127.png" alt="P075 causal"></button>
+        <button type="button" onclick="zoom('P075','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P075_2fafb4f48adc6127.png" alt="P075 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P075','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P075','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P075','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P076" data-id="P076" data-choice="pending">
+      <div class="head"><b>P076 · RAY_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event aa6149596fa4b41a · 决策 07-15 10:15 CST · W13 · 核心6根 · 延迟2根 · 对照真实波幅 12.04% · first 0.388 · peak 0.388 · raw 5 · 训练块 B01_20250715 · 正例相似度 1.519</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P076','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P076_aa6149596fa4b41a.png" alt="P076 causal"></button>
+        <button type="button" onclick="zoom('P076','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P076_aa6149596fa4b41a.png" alt="P076 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P076','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P076','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P076','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P077" data-id="P077" data-choice="pending">
+      <div class="head"><b>P077 · AT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event f0d1f2db3e52fe3f · 决策 03-01 12:45 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 5.51% · first 0.469 · peak 0.645 · raw 30 · 训练块 B05_20260301 · 正例相似度 1.507</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P077','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P077_f0d1f2db3e52fe3f.png" alt="P077 causal"></button>
+        <button type="button" onclick="zoom('P077','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P077_f0d1f2db3e52fe3f.png" alt="P077 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P077','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P077','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P077','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P078" data-id="P078" data-choice="pending">
+      <div class="head"><b>P078 · SENT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 65ec3761ef0a9ce5 · 决策 03-01 17:45 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 6.03% · first 0.482 · peak 0.524 · raw 31 · 训练块 B05_20260301 · 正例相似度 1.476</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P078','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P078_65ec3761ef0a9ce5.png" alt="P078 causal"></button>
+        <button type="button" onclick="zoom('P078','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P078_65ec3761ef0a9ce5.png" alt="P078 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P078','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P078','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P078','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P079" data-id="P079" data-choice="pending">
+      <div class="head"><b>P079 · KAITO_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event d455882085ad4147 · 决策 07-15 09:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 6.38% · first 0.407 · peak 0.422 · raw 10 · 训练块 B01_20250715 · 正例相似度 1.389</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P079','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P079_d455882085ad4147.png" alt="P079 causal"></button>
+        <button type="button" onclick="zoom('P079','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P079_d455882085ad4147.png" alt="P079 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P079','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P079','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P079','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P080" data-id="P080" data-choice="pending">
+      <div class="head"><b>P080 · AT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 3ab9b80ab05b0da2 · 决策 03-01 12:00 CST · W18 · 核心7根 · 延迟5根 · 对照真实波幅 5.28% · first 0.253 · peak 0.517 · raw 10 · 训练块 B05_20260301 · 正例相似度 1.340</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P080','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P080_3ab9b80ab05b0da2.png" alt="P080 causal"></button>
+        <button type="button" onclick="zoom('P080','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P080_3ab9b80ab05b0da2.png" alt="P080 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P080','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P080','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P080','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P081" data-id="P081" data-choice="pending">
+      <div class="head"><b>P081 · ENS_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 3b7c373f57296974 · 决策 07-15 09:15 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 5.43% · first 0.396 · peak 0.587 · raw 23 · 训练块 B01_20250715 · 正例相似度 1.319</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P081','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P081_3b7c373f57296974.png" alt="P081 causal"></button>
+        <button type="button" onclick="zoom('P081','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P081_3b7c373f57296974.png" alt="P081 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P081','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P081','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P081','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P082" data-id="P082" data-choice="pending">
+      <div class="head"><b>P082 · ONDO_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 3ba7b5a61471ba58 · 决策 07-15 11:00 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 6.21% · first 0.480 · peak 0.894 · raw 34 · 训练块 B01_20250715 · 正例相似度 1.297</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P082','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P082_3ba7b5a61471ba58.png" alt="P082 causal"></button>
+        <button type="button" onclick="zoom('P082','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P082_3ba7b5a61471ba58.png" alt="P082 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P082','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P082','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P082','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P083" data-id="P083" data-choice="pending">
+      <div class="head"><b>P083 · W_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 4dbc9220cf8b5702 · 决策 07-15 09:15 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 6.57% · first 0.728 · peak 0.728 · raw 29 · 训练块 B01_20250715 · 正例相似度 1.285</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P083','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P083_4dbc9220cf8b5702.png" alt="P083 causal"></button>
+        <button type="button" onclick="zoom('P083','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P083_4dbc9220cf8b5702.png" alt="P083 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P083','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P083','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P083','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P084" data-id="P084" data-choice="pending">
+      <div class="head"><b>P084 · ENSO_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event db6ae101d8aa2365 · 决策 03-01 18:00 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 8.55% · first 0.313 · peak 0.525 · raw 12 · 训练块 B05_20260301 · 正例相似度 1.257</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P084','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P084_db6ae101d8aa2365.png" alt="P084 causal"></button>
+        <button type="button" onclick="zoom('P084','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P084_db6ae101d8aa2365.png" alt="P084 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P084','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P084','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P084','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P085" data-id="P085" data-choice="pending">
+      <div class="head"><b>P085 · UNI_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 9331bcaae0ce5e7c · 决策 07-15 10:15 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 6.91% · first 0.553 · peak 0.706 · raw 38 · 训练块 B01_20250715 · 正例相似度 1.256</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P085','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P085_9331bcaae0ce5e7c.png" alt="P085 causal"></button>
+        <button type="button" onclick="zoom('P085','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P085_9331bcaae0ce5e7c.png" alt="P085 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P085','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P085','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P085','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P086" data-id="P086" data-choice="pending">
+      <div class="head"><b>P086 · ETH_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 57e753bdf027c747 · 决策 07-15 09:15 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 3.49% · first 0.333 · peak 0.834 · raw 42 · 训练块 B01_20250715 · 正例相似度 1.181</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P086','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P086_57e753bdf027c747.png" alt="P086 causal"></button>
+        <button type="button" onclick="zoom('P086','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P086_57e753bdf027c747.png" alt="P086 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P086','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P086','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P086','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P087" data-id="P087" data-choice="pending">
+      <div class="head"><b>P087 · MAGIC_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 3b8ba324f1bb03a7 · 决策 07-15 11:15 CST · W17 · 核心7根 · 延迟4根 · 对照真实波幅 10.62% · first 0.388 · peak 0.492 · raw 11 · 训练块 B01_20250715 · 正例相似度 1.142</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P087','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P087_3b8ba324f1bb03a7.png" alt="P087 causal"></button>
+        <button type="button" onclick="zoom('P087','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P087_3b8ba324f1bb03a7.png" alt="P087 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P087','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P087','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P087','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P088" data-id="P088" data-choice="pending">
+      <div class="head"><b>P088 · LAYER_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 607be89077369af8 · 决策 07-15 09:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 4.90% · first 0.300 · peak 0.613 · raw 11 · 训练块 B01_20250715 · 正例相似度 1.030</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P088','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P088_607be89077369af8.png" alt="P088 causal"></button>
+        <button type="button" onclick="zoom('P088','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P088_607be89077369af8.png" alt="P088 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P088','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P088','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P088','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P089" data-id="P089" data-choice="pending">
+      <div class="head"><b>P089 · SAHARA_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 24ba3b864e06313a · 决策 07-15 16:00 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 3.38% · first 0.281 · peak 0.381 · raw 5 · 训练块 B01_20250715 · 正例相似度 1.000</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P089','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P089_24ba3b864e06313a.png" alt="P089 causal"></button>
+        <button type="button" onclick="zoom('P089','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P089_24ba3b864e06313a.png" alt="P089 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P089','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P089','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P089','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P090" data-id="P090" data-choice="pending">
+      <div class="head"><b>P090 · LUNA_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event bce99c47fa06710d · 决策 07-15 10:15 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 5.61% · first 0.597 · peak 0.597 · raw 8 · 训练块 B01_20250715 · 正例相似度 0.974</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P090','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P090_bce99c47fa06710d.png" alt="P090 causal"></button>
+        <button type="button" onclick="zoom('P090','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P090_bce99c47fa06710d.png" alt="P090 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P090','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P090','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P090','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P091" data-id="P091" data-choice="pending">
+      <div class="head"><b>P091 · AT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 2b44cdb4f1c7ab9a · 决策 03-01 16:45 CST · W16 · 核心7根 · 延迟3根 · 对照真实波幅 16.76% · first 0.296 · peak 0.670 · raw 32 · 训练块 B05_20260301 · 正例相似度 0.922</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P091','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P091_2b44cdb4f1c7ab9a.png" alt="P091 causal"></button>
+        <button type="button" onclick="zoom('P091','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P091_2b44cdb4f1c7ab9a.png" alt="P091 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P091','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P091','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P091','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P092" data-id="P092" data-choice="pending">
+      <div class="head"><b>P092 · XRP_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 8b1d4a54058aa64d · 决策 07-15 11:00 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 5.45% · first 0.739 · peak 0.902 · raw 46 · 训练块 B01_20250715 · 正例相似度 0.867</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P092','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P092_8b1d4a54058aa64d.png" alt="P092 causal"></button>
+        <button type="button" onclick="zoom('P092','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P092_8b1d4a54058aa64d.png" alt="P092 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P092','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P092','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P092','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P093" data-id="P093" data-choice="pending">
+      <div class="head"><b>P093 · BAT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 4f2874cfe9800440 · 决策 03-01 16:45 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 6.39% · first 0.276 · peak 0.797 · raw 27 · 训练块 B05_20260301 · 正例相似度 0.739</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P093','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P093_4f2874cfe9800440.png" alt="P093 causal"></button>
+        <button type="button" onclick="zoom('P093','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P093_4f2874cfe9800440.png" alt="P093 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P093','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P093','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P093','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P094" data-id="P094" data-choice="pending">
+      <div class="head"><b>P094 · MORPHO_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 1763ff46a8815f87 · 决策 03-01 14:30 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 5.19% · first 0.315 · peak 0.734 · raw 26 · 训练块 B05_20260301 · 正例相似度 0.554</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P094','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P094_1763ff46a8815f87.png" alt="P094 causal"></button>
+        <button type="button" onclick="zoom('P094','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P094_1763ff46a8815f87.png" alt="P094 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P094','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P094','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P094','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P095" data-id="P095" data-choice="pending">
+      <div class="head"><b>P095 · AT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 00d429fcbac3a8e3 · 决策 03-01 09:15 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 1.99% · first 0.415 · peak 0.585 · raw 24 · 训练块 B05_20260301 · 正例相似度 0.524</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P095','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P095_00d429fcbac3a8e3.png" alt="P095 causal"></button>
+        <button type="button" onclick="zoom('P095','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P095_00d429fcbac3a8e3.png" alt="P095 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P095','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P095','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P095','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P096" data-id="P096" data-choice="pending">
+      <div class="head"><b>P096 · METIS_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 3a71342a20dd7d74 · 决策 03-01 17:45 CST · W19 · 核心8根 · 延迟5根 · 对照真实波幅 7.55% · first 0.255 · peak 0.746 · raw 11 · 训练块 B05_20260301 · 正例相似度 0.451</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P096','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P096_3a71342a20dd7d74.png" alt="P096 causal"></button>
+        <button type="button" onclick="zoom('P096','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P096_3a71342a20dd7d74.png" alt="P096 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P096','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P096','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P096','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P097" data-id="P097" data-choice="pending">
+      <div class="head"><b>P097 · AT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 1882de1c31e6afd5 · 决策 03-01 20:00 CST · W17 · 核心7根 · 延迟4根 · 对照真实波幅 17.29% · first 0.395 · peak 0.395 · raw 3 · 训练块 B05_20260301 · 正例相似度 0.410</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P097','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P097_1882de1c31e6afd5.png" alt="P097 causal"></button>
+        <button type="button" onclick="zoom('P097','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P097_1882de1c31e6afd5.png" alt="P097 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P097','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P097','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P097','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P098" data-id="P098" data-choice="pending">
+      <div class="head"><b>P098 · XPT_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 40b3e6a45e73402d · 决策 03-01 13:45 CST · W15 · 核心7根 · 延迟3根 · 对照真实波幅 1.31% · first 0.461 · peak 0.501 · raw 13 · 训练块 B05_20260301 · 正例相似度 0.067</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P098','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P098_40b3e6a45e73402d.png" alt="P098 causal"></button>
+        <button type="button" onclick="zoom('P098','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P098_40b3e6a45e73402d.png" alt="P098 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P098','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P098','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P098','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P099" data-id="P099" data-choice="pending">
+      <div class="head"><b>P099 · JELLYJELLY_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event d67c51fcdcd01b16 · 决策 03-01 14:45 CST · W13 · 核心5根 · 延迟3根 · 对照真实波幅 10.35% · first 0.330 · peak 0.728 · raw 19 · 训练块 B05_20260301 · 正例相似度 -0.212</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P099','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P099_d67c51fcdcd01b16.png" alt="P099 causal"></button>
+        <button type="button" onclick="zoom('P099','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P099_d67c51fcdcd01b16.png" alt="P099 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P099','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P099','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P099','hard_negative')">3 · 不对</button>
+      </div>
+    </article>
+
+    <article class="card" id="card-P100" data-id="P100" data-choice="pending">
+      <div class="head"><b>P100 · LA_USDT_SWAP</b><span class="chip">未确认</span></div>
+      <div class="meta">event 703951cf34a727b8 · 决策 03-01 15:30 CST · W12 · 核心4根 · 延迟3根 · 对照真实波幅 6.13% · first 0.325 · peak 0.793 · raw 23 · 训练块 B05_20260301 · 正例相似度 -0.245</div>
+      <div class="pair">
+        <button type="button" onclick="zoom('P100','causal')"><span>模型当时可见输入＋预测框</span><img loading="lazy" data-role="causal" src="../output/owner_short_train_positive_retrieval100_v1/causal_review/P100_703951cf34a727b8.png" alt="P100 causal"></button>
+        <button type="button" onclick="zoom('P100','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="../output/owner_short_train_positive_retrieval100_v1/future_review_only/P100_703951cf34a727b8.png" alt="P100 future"></button>
+      </div>
+      <div class="choices">
+        <button type="button" data-value="target" onclick="choose('P100','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('P100','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('P100','hard_negative')">3 · 不对</button>
+      </div>
+    </article></section><textarea id="export" readonly placeholder="点击复制审核JSON"></textarea></main>
+<dialog id="zoom"><button onclick="document.getElementById('zoom').close()">关闭</button><img id="zoom-img" alt="zoom"></dialog>
+<script>
+const IDS=["P001", "P002", "P003", "P004", "P005", "P006", "P007", "P008", "P009", "P010", "P011", "P012", "P013", "P014", "P015", "P016", "P017", "P018", "P019", "P020", "P021", "P022", "P023", "P024", "P025", "P026", "P027", "P028", "P029", "P030", "P031", "P032", "P033", "P034", "P035", "P036", "P037", "P038", "P039", "P040", "P041", "P042", "P043", "P044", "P045", "P046", "P047", "P048", "P049", "P050", "P051", "P052", "P053", "P054", "P055", "P056", "P057", "P058", "P059", "P060", "P061", "P062", "P063", "P064", "P065", "P066", "P067", "P068", "P069", "P070", "P071", "P072", "P073", "P074", "P075", "P076", "P077", "P078", "P079", "P080", "P081", "P082", "P083", "P084", "P085", "P086", "P087", "P088", "P089", "P090", "P091", "P092", "P093", "P094", "P095", "P096", "P097", "P098", "P099", "P100"];
+const KEY="owner_short_hardneg_canary_review331_v3_20260811:31da7fd4c9150fc7c9450cef47d67ed33f7759d5dd630085af422dba2c155eb8";
+const LABELS={pending:"未确认",target:"对",rebox:"框偏",hard_negative:"不对"};
+let d={},currentId=null,history=[];
+try{d=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(_e){d={}}
+function save(){localStorage.setItem(KEY,JSON.stringify(d))}
+function setCurrent(id,scroll=true){
+  if(currentId)document.getElementById('card-'+currentId)?.classList.remove('current');
+  currentId=id;
+  const card=document.getElementById('card-'+id);
+  card?.classList.add('current');
+  if(scroll)card?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function paint(id){
+  const c=document.getElementById('card-'+id),v=d[id]||'pending';
+  c.dataset.choice=v;c.querySelector('.chip').textContent=LABELS[v];
+  c.querySelectorAll('[data-value]').forEach(b=>b.classList.toggle('active',b.dataset.value===v));
+}
+function counts(){
+  const c={pending:0,target:0,rebox:0,hard_negative:0};
+  IDS.forEach(id=>c[d[id]||'pending']++);return c;
+}
+function stats(){
+  const c=counts();
+  document.getElementById('stats').textContent=`对 ${c.target} · 框偏 ${c.rebox} · 不对 ${c.hard_negative} · 未确认 ${c.pending}`;
+}
+function applyFilter(resetCurrent=true){
+  const f=document.getElementById('filter').value;
+  document.querySelectorAll('.card').forEach(c=>c.classList.toggle('hidden',f!=='all'&&c.dataset.choice!==f));
+  const current=document.getElementById('card-'+currentId);
+  if(resetCurrent&&(!current||current.classList.contains('hidden'))){
+    const first=document.querySelector('.card:not(.hidden)');if(first)setCurrent(first.dataset.id,false);
+  }
+}
+function advance(id){
+  const start=IDS.indexOf(id);
+  for(let step=1;step<=IDS.length;step++){
+    const candidate=IDS[(start+step)%IDS.length];
+    if((d[candidate]||'pending')==='pending'){
+      const filter=document.getElementById('filter');
+      if(filter.value!=='all'&&filter.value!=='pending')filter.value='all';
+      applyFilter(false);setCurrent(candidate,true);return;
+    }
+  }
+  setCurrent(id,true);
+}
+function choose(id,v){
+  const previous=Object.prototype.hasOwnProperty.call(d,id)?d[id]:null;
+  if(previous!==v){history.push({id,previous});d[id]=v;save();paint(id);stats();applyFilter(false)}
+  advance(id);
+}
+function undo(){
+  const last=history.pop();if(!last)return;
+  if(last.previous===null)delete d[last.id];else d[last.id]=last.previous;
+  save();paint(last.id);stats();document.getElementById('filter').value='all';applyFilter(false);setCurrent(last.id,true);
+}
+function clearAll(){
+  if(!confirm('清空全部选择？'))return;
+  d={};history=[];save();IDS.forEach(paint);stats();document.getElementById('filter').value='all';applyFilter(false);setCurrent(IDS[0],true);
+}
+function payload(){return{protocol:"owner_short_train_positive_retrieval100_v1_20260811",source_sha256:"31da7fd4c9150fc7c9450cef47d67ed33f7759d5dd630085af422dba2c155eb8",total:IDS.length,counts:counts(),decisions:Object.fromEntries(IDS.map(id=>[id,d[id]||'pending']))}}
+async function copyResults(){
+  const t=JSON.stringify(payload(),null,2),b=document.getElementById('export');b.value=t;b.select();
+  try{await navigator.clipboard.writeText(t)}catch(_e){document.execCommand('copy')}
+}
+function zoom(id,role){setCurrent(id,false);document.getElementById('zoom-img').src=document.querySelector(`#card-${id} img[data-role="${role}"]`).src;document.getElementById('zoom').showModal()}
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey||e.target.matches('input,select,textarea'))return;
+  const mapping={'1':'target','2':'rebox','3':'hard_negative'};
+  if(mapping[e.key]&&currentId){e.preventDefault();choose(currentId,mapping[e.key])}
+  else if(e.key.toLowerCase()==='z'){e.preventDefault();undo()}
+});
+IDS.forEach(paint);stats();applyFilter();if(!currentId)setCurrent(IDS[0],false);
+</script></body></html>
