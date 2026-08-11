@@ -426,6 +426,30 @@ def build(
         ),
         encoding="utf-8",
     )
+    scan_totals = {
+        "symbol_blocks": sum(int(row["symbols"]) for row in block_audit.values()),
+        "bar_endpoints": sum(int(row["bar_endpoints"]) for row in block_audit.values()),
+        "window_exposures": sum(int(row["window_exposures"]) for row in block_audit.values()),
+        "raw_detections": sum(int(row["raw_detections"]) for row in block_audit.values()),
+        "deduplicated_events": sum(int(row["events"]) for row in block_audit.values()),
+    }
+    selected_distributions = {
+        "window_len": dict(sorted(Counter(int(row["window_len"]) for row in review_rows).items())),
+        "predicted_core_bars": dict(
+            sorted(Counter(int(row["predicted_core_bars"]) for row in review_rows).items())
+        ),
+        "decision_delay_bars": dict(
+            sorted(Counter(int(row["decision_delay_bars"]) for row in review_rows).items())
+        ),
+        "future_review_bars": dict(
+            sorted(Counter(int(row["future_review_bars"]) for row in review_rows).items())
+        ),
+    }
+    review_image_paths = [
+        ROOT / str(row[path_key])
+        for row in review_rows
+        for path_key in ("causal_input_path", "causal_review_path", "future_review_path")
+    ]
     summary = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "protocol": PROTOCOL,
@@ -435,6 +459,7 @@ def build(
         "weights_sha256": EXPECTED_WEIGHTS_SHA256,
         "train_end": train_end.isoformat(),
         "blocks": block_audit,
+        "scan_totals": scan_totals,
         "candidate_pool": len(pool),
         "candidate_skips": dict(skip_counts),
         "selected_review": len(review_rows),
@@ -445,6 +470,7 @@ def build(
             "median": float(np.median([float(row["hard_negative_affinity"]) for row in review_rows])),
             "p90": float(np.quantile([float(row["hard_negative_affinity"]) for row in review_rows], 0.90)),
         },
+        "selected_distributions": selected_distributions,
         "future_used_for_selection": False,
         "holdout_read": False,
         "owner_decisions_preselected": 0,
@@ -466,6 +492,9 @@ def build(
             "nothing_training_eligible": all(not row["training_eligible"] for row in review_rows),
             "no_label_directory": not (output / "labels").exists(),
             "strictly_preholdout": all(utc(row["future_review_end_time"]) < HOLDOUT_START for row in review_rows),
+            "all_three_images_exist": len(review_image_paths) == REVIEW_TOTAL * 3
+            and all(path.is_file() for path in review_image_paths),
+            "all_full_48_future": all(int(row["future_review_bars"]) == 48 for row in review_rows),
         },
     }
     if not all(summary["quality_gates"].values()):
