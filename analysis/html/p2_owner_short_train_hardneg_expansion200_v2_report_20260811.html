@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>P2 第三训练臂难负例扩充 200 张报告</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P2 第三训练臂难负例扩充 200 张报告</h1>
+<h2>Technical Summary</h2>
+<p>Owner 已完成正例检索 100 张：45 对、0 框偏、55 不对。该结果把 train-time 主动学习参考累计到 <strong>63 个正例 + 237 个难负例</strong>，但 237 只相当于第二臂 2,286 个 hard-negative 槽位的 10.37%，第三臂仍不能直接开训。</p>
+<ul>
+<li>正例检索页 target 占比 45%，是前一张负例偏置页 9% 的 5 倍，证明相反选样目标确实能富集不同样本。</li>
+<li>两个比例都来自主动学习偏置样本，不是模型总体 precision，也没有 recall 分母。</li>
+<li>已使用累计 1,283 个正例参考和 491 个确认误报参考，重新评分原池中剩余的 617 个未审事件。</li>
+<li>新建难负例扩充页 200 张，覆盖 126 个币；与此前 300 个 Owner 已审事件零重复。</li>
+<li>新页明确以“多数按 3=不对”为目标；3 是有效难负例，不代表审核或页面失败。</li>
+<li>选择只读取 decision bar 及之前的 OHLC、六条均线和预测框；未来 48 根只在选择结束后渲染。0 holdout、0 labels、0 training-eligible、0生产变更。</li>
+</ul>
+<p>Owner 审核入口：<code>analysis/html/p2_owner_short_train_hardneg_expansion200_v2_20260811.html</code>。</p>
+<h2>正例检索把 target 富集提高了 5 倍</h2>
+<table><thead><tr>
+<th>审核页</th>
+<th>选样目标</th>
+<th>Owner target</th>
+<th>Owner hard negative</th>
+<th>target 占比</th>
+<th>可当总体 precision？</th>
+</tr></thead><tbody>
+<tr><td>train review200 V1</td><td>靠近确认误报</td><td>18</td><td>182</td><td>9%</td><td>否；负例偏置</td></tr>
+<tr><td>positive retrieval100</td><td>靠近确认正例</td><td>45</td><td>55</td><td>45%</td><td>否；正例偏置</td></tr>
+<tr><td><strong>累计 train-time 已审</strong></td><td>两种互补主动学习</td><td><strong>63</strong></td><td><strong>237</strong></td><td><strong>21%</strong></td><td>否；非随机样本</td></tr>
+</tbody></table>
+<p>45% 对 9% 的差异说明形态距离排序具有富集能力，但不能解释为模型提升：两页使用的是同一个第二臂权重 <code>029f80a5…f537</code>，变化来自选样目标，不是模型参数变化。</p>
+<h2>时间块差异说明不能只看总命中率</h2>
+<table><thead><tr>
+<th>时间块</th>
+<th>正例检索审核数</th>
+<th>target</th>
+<th>hard negative</th>
+<th>target 占比</th>
+</tr></thead><tbody>
+<tr><td>B01 2025-07-15</td><td>20</td><td>5</td><td>15</td><td>25.0%</td></tr>
+<tr><td>B02 2025-09-15</td><td>20</td><td>17</td><td>3</td><td>85.0%</td></tr>
+<tr><td>B03 2025-11-15</td><td>20</td><td>3</td><td>17</td><td>15.0%</td></tr>
+<tr><td>B04 2026-01-15</td><td>21</td><td>9</td><td>12</td><td>42.9%</td></tr>
+<tr><td>B05 2026-03-01</td><td>19</td><td>11</td><td>8</td><td>57.9%</td></tr>
+<tr><td><strong>合计</strong></td><td><strong>100</strong></td><td><strong>45</strong></td><td><strong>55</strong></td><td><strong>45.0%</strong></td></tr>
+</tbody></table>
+<p>B02 与 B03 相差 70 个百分点。当前模型在不同训练行情块的可检索正例密度明显不同，因此第三臂 hard-negative 不能只从单一高误报块堆积，也不能用总体 45% 掩盖分块失败。</p>
+<h2>第二臂负样本不少，缺的是确认质量与覆盖</h2>
+<table><thead><tr>
+<th>口径</th>
+<th>hard negative 数量</th>
+<th>是否能直接进第三臂</th>
+</tr></thead><tbody>
+<tr><td>第二臂训练 hard-negative</td><td>2,286</td><td>已用于第二臂；其中部分是模型排序背景，不等于新 Owner 真值</td></tr>
+<tr><td>post-val Owner 确认误报</td><td>254</td><td>否；晚于冻结 val，只作参考</td></tr>
+<tr><td>第一张 train 负例页确认误报</td><td>182</td><td>需经第三臂 dataset builder 审计</td></tr>
+<tr><td>正例检索页顺带确认误报</td><td>55</td><td>需经第三臂 dataset builder 审计</td></tr>
+<tr><td><strong>累计新 train Owner 确认误报</strong></td><td><strong>237</strong></td><td><strong>仍不足；占2,286槽位10.37%</strong></td></tr>
+</tbody></table>
+<p>当前工作不是重新补 easy negative，而是把模型实际会误触发的 train-time 事件变成 Owner 确认 hard-negative，并控制时间块、币种、W 长度和重复关系。</p>
+<h2>新200张使用累计63正/237负重新排序</h2>
+<p>参考空间：</p>
+<table><thead><tr>
+<th>参考来源</th>
+<th>正例</th>
+<th>负例</th>
+<th>用途</th>
+</tr></thead><tbody>
+<tr><td>冻结 train Owner 金标</td><td>1,143</td><td>0</td><td>正例语义主体</td></tr>
+<tr><td>post-val Owner 审核</td><td>77</td><td>254</td><td>形态参考；不回流训练</td></tr>
+<tr><td>train 负例页审核</td><td>18</td><td>182</td><td>主动学习参考</td></tr>
+<tr><td>train 正例检索页审核</td><td>45</td><td>55</td><td>主动学习参考</td></tr>
+<tr><td><strong>合计</strong></td><td><strong>1,283</strong></td><td><strong>491</strong></td><td>因果距离排序</td></tr>
+</tbody></table>
+<p>在原 917 个安全候选中排除已审 300 个，剩余 617 个。B05 的 59 个安全事件已在前两页全部审核，因此新页不伪造 B05 候选；配额为：</p>
+<table><thead><tr>
+<th>时间块</th>
+<th>剩余未审</th>
+<th>新页数量</th>
+</tr></thead><tbody>
+<tr><td>B01</td><td>21</td><td>21</td></tr>
+<tr><td>B02</td><td>188</td><td>60</td></tr>
+<tr><td>B03</td><td>199</td><td>60</td></tr>
+<tr><td>B04</td><td>209</td><td>59</td></tr>
+<tr><td>B05</td><td>0</td><td>0</td></tr>
+<tr><td><strong>合计</strong></td><td><strong>617</strong></td><td><strong>200</strong></td></tr>
+</tbody></table>
+<p>选择时先提高币种多样性，再按难负例 affinity 补齐配额。新 200 张覆盖 126 个币；affinity p10 / median / p90 = -0.713 / -0.018 / 1.322。分数只是审核优先级，不是标签。</p>
+<h2>数据、图像与浏览器门全部通过</h2>
+<table><thead><tr>
+<th>质量门</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>200 个唯一事件</td><td>PASS</td></tr>
+<tr><td>与前两页 300 个事件零重复</td><td>PASS</td></tr>
+<tr><td>固定时间块配额 21/60/60/59</td><td>PASS</td></tr>
+<tr><td>decision 与未来审核终点全在冻结 train 内</td><td>PASS</td></tr>
+<tr><td>0 候选碰 Owner 框 ±12 bars</td><td>PASS</td></tr>
+<tr><td>选样过程 0 future bars</td><td>PASS</td></tr>
+<tr><td>600/600 图片存在</td><td>PASS</td></tr>
+<tr><td>200/200 未来图完整 48 根</td><td>PASS</td></tr>
+<tr><td>0 labels / 0 training-eligible / 0 production-eligible</td><td>PASS</td></tr>
+<tr><td>holdout 读取</td><td><strong>0</strong></td></tr>
+<tr><td>浏览器控制台</td><td><strong>0 errors / 0 warnings</strong></td></tr>
+<tr><td>快捷键 <code>3</code> 与 <code>Z</code> 撤销</td><td>PASS</td></tr>
+</tbody></table>
+<p>关键血缘：</p>
+<ul>
+<li>权重 SHA256：<code>029f80a52b5beda2e32f6bb5a188a39fd7f74fe0a3fef4dffa79ae620384f537</code></li>
+<li>正例检索100标注 manifest：<code>8dd060b3ba56ecebf5af30360e875af51328874d2dcc85326009cc2d6062ea3b</code></li>
+<li>剩余617评分池：<code>bbc96a9deb00a5b4e4e2ae000e707950d657d76956018219292f82e5a31deeb2</code></li>
+<li>新200选择结果：<code>168751ea1e10622dc9336eb9cadb39d0b23360bd9c0c27515c047211a35e090a</code></li>
+<li>新审核 manifest：<code>8630381d2d4370b58fd49140bacaf90105b58763d0c1493afb90a066f6b9eeef</code></li>
+<li>新 HTML：<code>e2a6bcf788ea4734a1bff3607de7594de7d10c5092582c2b19bf4061e3371c2c</code></li>
+</ul>
+<h2>必报模型与交易指标状态</h2>
+<p>本轮没有训练新模型，也没有收益回测，因此以下指标均不适用。</p>
+<table><thead><tr>
+<th>指标</th>
+<th>本轮结果</th>
+<th>原因</th>
+</tr></thead><tbody>
+<tr><td>val AUC</td><td>N/A</td><td>YOLO 主动学习选样，不是 L2 排序模型</td></tr>
+<tr><td>置换检验 p</td><td>N/A</td><td>无收益排序实验</td></tr>
+<tr><td>top-decile 毛/净收益</td><td>N/A</td><td>无收益标签</td></tr>
+<tr><td>胜率</td><td>N/A</td><td>无交易回测</td></tr>
+<tr><td>单特征基线</td><td>N/A</td><td>只比较正负形态距离</td></tr>
+<tr><td>匹配随机对照组</td><td>N/A</td><td>不作方向性收益结论</td></tr>
+</tbody></table>
+<h2>限制、稳健性与不能下的结论</h2>
+<ul>
+<li>45% 与 9% 只证明选样富集方向不同，不能证明模型总体 precision 是45%，也不能证明模型已经改善。</li>
+<li>当前页面只来自模型已经触发的事件，无法发现完全漏检的目标形态，因此没有 recall 分母。</li>
+<li>237 个 train Owner hard-negative 仍不足。即使新200全部判为误报，累计也只有437个，仍需更多未使用 train 时间块。</li>
+<li>当前617池来自原五个12小时块；完成后必须转向新的冻结 train 时间块，避免在同一小范围反复主动学习。</li>
+<li>第二臂权重继续禁止 promote，未修改 ACTIVE、阈值、训练配方或生产配置。</li>
+</ul>
+<h2>下一步</h2>
+<p>Owner 审核新页：目标形态按 <code>1</code>，框偏按 <code>2</code>，不是目标按 <code>3</code>。本页本来就是难负例扩充页，因此多数按3是预期结果。</p>
+<p>审核完成后：</p>
+<ol>
+<li>冻结新裁决并计算累计 hard-negative 数量、币种、时间块、W桶和重复覆盖。</li>
+<li>原617事件尚未审核的417个不再无限循环；开始扫描新的、未使用冻结 train 时间块。</li>
+<li>当确认负例覆盖足够后，构建第三臂候选数据集；保持正例、easy negative、冻结 val 和训练配方不变，单变量改变 hard-negative 组成。</li>
+<li>数据集审计完成后再请求 Owner 逐次授权3060训练。</li>
+</ol>
+<h2>Further Questions</h2>
+<ul>
+<li>新200张能新增多少真正的 Owner hard-negative，是否继续保持约90%的负例富集率？</li>
+<li>累计确认负例达到多少才足以替代第二臂中未审的模型排序背景，需要结合W桶与币种覆盖而不是只定绝对数量。</li>
+<li>第三臂是否完全替换2,286 hard槽位，还是先做固定总量的小规模单变量替换比例实验，需在完整审计后由Owner决定。</li>
+</ul>
+<h2>复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+export PYTHONPATH=.:/Users/zhangzc/yoyo-trading
+
+.venv/bin/python scripts/ingest_owner_short_train_hardneg_review.py \
+  --review-json /path/to/positive-retrieval100-owner-export.json \
+  --manifest analysis/output/owner_short_train_positive_retrieval100_v1/review_manifest.jsonl \
+  --build-summary analysis/output/owner_short_train_positive_retrieval100_v1/summary.json \
+  --out analysis/output/owner_short_train_positive_retrieval100_v1 \
+  --affinity-field positive_affinity --selection-goal positive_retrieval \
+  --expected-total 100
+
+.venv/bin/python scripts/build_owner_short_train_hardneg_expansion_review.py
+
+.venv/bin/python -m pytest \
+  tests/test_ingest_owner_short_train_hardneg_review.py \
+  tests/test_build_owner_short_train_hardneg_expansion_review.py -q
+
+python3 scripts/md_to_html.py \
+  analysis/p2_owner_short_train_hardneg_expansion200_v2_report_20260811.md \
+  --out-dir analysis/html
+</code></pre>
+<h2>产物</h2>
+<ul>
+<li>新难负例审核页：<code>analysis/html/p2_owner_short_train_hardneg_expansion200_v2_20260811.html</code></li>
+<li>报告 HTML：<code>analysis/html/p2_owner_short_train_hardneg_expansion200_v2_report_20260811.html</code></li>
+<li>正例检索 Owner 裁决：<code>analysis/output/owner_short_train_positive_retrieval100_v1/owner_review_decisions.json</code></li>
+<li>正例检索标注 manifest：<code>analysis/output/owner_short_train_positive_retrieval100_v1/owner_review_labeled_manifest.jsonl</code></li>
+<li>新617评分池：<code>analysis/output/owner_short_train_hardneg_expansion200_v2/hard_negative_scored_pool.jsonl</code></li>
+<li>新200选择记录：<code>analysis/output/owner_short_train_hardneg_expansion200_v2/selected_candidates.jsonl</code></li>
+<li>新审核 manifest：<code>analysis/output/owner_short_train_hardneg_expansion200_v2/review_manifest.jsonl</code></li>
+</ul>
+</body>
+</html>

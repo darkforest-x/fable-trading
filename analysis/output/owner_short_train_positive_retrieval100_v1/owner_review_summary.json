@@ -1,0 +1,106 @@
+{
+  "protocol": "owner_short_train_positive_retrieval100_v1_20260811",
+  "source_sha256": "31da7fd4c9150fc7c9450cef47d67ed33f7759d5dd630085af422dba2c155eb8",
+  "selection_goal": "positive_retrieval",
+  "affinity_field": "positive_affinity",
+  "review_input_sha256": "0c735dd8a15c6c75cbdb54d2aba73454d94aee1802fe9d47efcddf3a931b393a",
+  "rows": 100,
+  "counts": {
+    "pending": 0,
+    "target": 45,
+    "rebox": 0,
+    "hard_negative": 55
+  },
+  "rates": {
+    "target_rate_in_review": 0.45,
+    "hard_negative_rate_in_review": 0.55
+  },
+  "by_decision": {
+    "target": {
+      "events": 45,
+      "symbols": 36,
+      "share": 0.45,
+      "peak_confidence": {
+        "median": 0.7459651827812195,
+        "p90": 0.9115977048873901,
+        "mean": 0.7255719323952993
+      },
+      "selection_affinity": {
+        "median": 2.8477328384511926,
+        "p90": 3.869622430429616,
+        "mean": 2.727708169959214
+      }
+    },
+    "rebox": {
+      "events": 0,
+      "symbols": 0,
+      "share": 0.0,
+      "peak_confidence": {
+        "median": null,
+        "p90": null,
+        "mean": null
+      },
+      "selection_affinity": {
+        "median": null,
+        "p90": null,
+        "mean": null
+      }
+    },
+    "hard_negative": {
+      "events": 55,
+      "symbols": 48,
+      "share": 0.55,
+      "peak_confidence": {
+        "median": 0.7014477252960205,
+        "p90": 0.880505394935608,
+        "mean": 0.6661639917980541
+      },
+      "selection_affinity": {
+        "median": 2.4690367302906573,
+        "p90": 3.1565840173449096,
+        "mean": 2.199161787803567
+      }
+    }
+  },
+  "by_block": {
+    "B01_20250715": {
+      "hard_negative": 15,
+      "target": 5
+    },
+    "B02_20250915": {
+      "target": 17,
+      "hard_negative": 3
+    },
+    "B03_20251115": {
+      "hard_negative": 17,
+      "target": 3
+    },
+    "B04_20260115": {
+      "target": 9,
+      "hard_negative": 12
+    },
+    "B05_20260301": {
+      "target": 11,
+      "hard_negative": 8
+    }
+  },
+  "training_gate": {
+    "owner_confirmed_train_hard_negative_candidates": 55,
+    "owner_confirmed_target_references": 45,
+    "immediately_training_eligible": 0,
+    "reason": "freeze as active-learning references; a later dataset builder must preserve time split, deduplicate, bucket-match, and receive separate training authorization"
+  },
+  "quality_gates": {
+    "protocol_matches": true,
+    "source_hash_matches": true,
+    "exactly_expected_unique_decisions": true,
+    "declared_counts_recompute": true,
+    "no_pending": true,
+    "allowed_values_only": true,
+    "one_to_one_manifest_join": true,
+    "all_rows_train_time": true,
+    "no_owner_box_overlap": true,
+    "selection_was_causal": true,
+    "nothing_auto_training_eligible": true
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "generated_at": "2026-08-11T13:24:54.654370+00:00",
+  "protocol": "owner_short_train_hardneg_expansion200_v2_20260811",
+  "weights_sha256": "029f80a52b5beda2e32f6bb5a188a39fd7f74fe0a3fef4dffa79ae620384f537",
+  "train_end": "2026-03-13T18:30:00+00:00",
+  "source_candidate_pool": 917,
+  "already_reviewed_excluded": 300,
+  "unreviewed_scored_pool": 617,
+  "selected_review": 200,
+  "selected_by_block": {
+    "B03_20251115": 60,
+    "B04_20260115": 59,
+    "B02_20250915": 60,
+    "B01_20250715": 21
+  },
+  "selected_symbols": 126,
+  "reference_counts": {
+    "positive_total": 1283,
+    "negative_total": 491,
+    "train_owner_gold_positive": 1143,
+    "postval_semantic_positive": 77,
+    "train_review_positive": 63,
+    "postval_hard_negative": 254,
+    "train_review_hard_negative": 237
+  },
+  "hard_negative_affinity_v2": {
+    "p10": -0.712517239480421,
+    "median": -0.01818294294461653,
+    "p90": 1.3219956219952296
+  },
+  "future_used_for_selection": false,
+  "holdout_read": false,
+  "owner_decisions_preselected": 0,
+  "training_eligible": 0,
+  "labels_created": 0,
+  "html": "analysis/html/p2_owner_short_train_hardneg_expansion200_v2_20260811.html",
+  "source_pool_sha256": "d14372defa7377d03700b38f283e46398bc12b0f384740ba23e0e517656c0cb1",
+  "hardneg_review_labeled_sha256": "ce41d686ae7ccab9551ff825ba57ffe98679f47ab2c4a2c79e58a1f363372e27",
+  "positive_review_labeled_sha256": "8dd060b3ba56ecebf5af30360e875af51328874d2dcc85326009cc2d6062ea3b",
+  "hard_negative_scored_pool_sha256": "bbc96a9deb00a5b4e4e2ae000e707950d657d76956018219292f82e5a31deeb2",
+  "selected_candidates_sha256": "168751ea1e10622dc9336eb9cadb39d0b23360bd9c0c27515c047211a35e090a",
+  "review_manifest_sha256": "8630381d2d4370b58fd49140bacaf90105b58763d0c1493afb90a066f6b9eeef",
+  "html_sha256": "e2a6bcf788ea4734a1bff3607de7594de7d10c5092582c2b19bf4061e3371c2c",
+  "quality_gates": {
+    "exactly_200_unique_events": true,
+    "fixed_block_quotas": true,
+    "all_new_unreviewed_events": true,
+    "all_decisions_within_train": true,
+    "all_future_context_within_train": true,
+    "no_owner_box_overlap": true,
+    "selection_is_causal": true,
+    "nothing_training_eligible": true,
+    "no_label_directory": true,
+    "strictly_preholdout": true,
+    "all_three_images_exist": true,
+    "all_full_48_future": true
+  }
+}

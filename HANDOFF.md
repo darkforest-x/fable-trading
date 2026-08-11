@@ -4,6 +4,20 @@
 
 ## ⚡ 当前真相（2026-08-11 — Owner 二次收紧：两条边界线 + 3–5 根确认）
 
+**最新进展（2026-08-11 21:25 CST）：正例检索100张已由Owner裁决为45对、0框偏、55不对。**
+源SHA、100 ID、声明计数、0 pending、0 Owner框重叠、0前视均通过。与负例偏置页18/200=9%
+target相比，正例检索页45/100=45%，同一权重下富集提高5倍，证明两种审核页必须分开；两者均为
+偏置主动学习集，不能冒充总体precision。累计train-time Owner参考为63正例+237难负例；237只占
+第二臂2,286 hard槽位10.37%，仍不能开第三臂训练。
+
+已用累计1,283正例参考（1,143 train金标+77 post-val语义正例+63 train新正例）与491确认误报
+参考（254 post-val+237 train）重评原池剩余617事件，生成第二张**明确标注预期多数按3**的
+难负例扩充页200张：B01/B02/B03/B04=21/60/60/59，B05原59事件已全部在前两页审完而不伪造；
+200事件、126币，与前300零重复，600图存在、未来48根全满、0 holdout、0 labels、0
+training-eligible。入口：`analysis/html/p2_owner_short_train_hardneg_expansion200_v2_20260811.html`；
+报告：`analysis/html/p2_owner_short_train_hardneg_expansion200_v2_report_20260811.html`。下一步等Owner
+审核新200；随后转向新的未使用冻结train时间块扩挖，不在原五块无限循环。**尚未授权训练。**
+
 **最新进展（2026-08-11 21:06 CST）：文档路线没有跳步。** 第一臂 1:1 easy-negative
 baseline 后，第二臂已按文档完成 `1,143 positive + 1,143 easy + 2,286 hard`（负:正=3:1，
 hard占负例2/3），best SHA=`029f80a5…f537`；连续行情密度仍失败，未promote。train-time
