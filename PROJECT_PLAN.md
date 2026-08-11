@@ -74,8 +74,11 @@
 > 个独立目标。1,287个依赖块按85/15时间切分+150 bars purge后正例train/val/drop=
 > 1,143/202/1，实际隔离162 bars；同币、同split、同W真实空背景train/val=1,143/200，2个val
 > 无安全背景而诚实缺失。Owner随后明确“直接去训练吧”，3060已启动1:1 easy-negative baseline
-> `owner_lsv2_short_gold_center_v1_ft`以挖hard negatives。按交接规范，第二臂才使用1:2/1:3且hard
-> negative占大头；未读holdout、未promote、未改ACTIVE、未部署。
+> `owner_lsv2_short_gold_center_v1_ft`以挖hard negatives。训练40/40完成，best epoch=30；3060最终
+> best复验P/R/mAP50/mAP50-95=0.8508/0.9035/0.9224/0.7302，Mac独立复验=
+> 0.8467/0.9024/0.9206/0.7294，best SHA=`da278820…fc65b4`。该高分只来自easy-negative val，
+> 不能晋升；按交接规范，第二臂才使用1:2/1:3且hard negative占大头。未读holdout、未promote、
+> 未改ACTIVE、未部署。
 
 # 项目路线图（三阶段）
 

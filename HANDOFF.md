@@ -70,10 +70,15 @@ Owner原始金标坐标时重新凭感觉画框。新血缘必须是`原始⭐�
   Owner框±12根；同路径二次重建正/负manifest SHA完全一致。当前为交接规范的1:1 easy-negative
   首臂，只用于挖hard negatives；第二臂必须是1:2/1:3且hard占大头，不能直接堆三倍easy。
 - Owner于2026-08-11 13:29 CST明确“直接去训练吧”。3060 run
-  `owner_lsv2_short_gold_center_v1_ft`已启动：Stage A best初始化、YOLO11s、imgsz960、batch8、
+  `owner_lsv2_short_gold_center_v1_ft`已完成：Stage A best初始化、YOLO11s、imgsz960、batch8、
   seed0、40 epochs、patience10、显式finetune AdamW lr0=1e-4；flip/mosaic/mixup/HSV全0。
-  WMI launch pid=37596，CUDA/版本/首轮参数日志均通过；仍`production_eligible=false /`
-  `auto_promote=false`，不读holdout、不改ACTIVE、不部署。
+  40/40耗时1,833.54秒，best epoch=30；epoch记录P/R/mAP50/mAP50-95=
+  0.8619/0.9010/0.9244/0.7427，3060最终best复验=0.8508/0.9035/0.9224/0.7302，
+  Mac MPS独立复验=0.8467/0.9024/0.9206/0.7294。远端/本地best SHA均为
+  `da278820…fc65b4`。曲线早期曾从mAP50 0.6468跌至0.0799再恢复，且当前val只是平衡Owner正例
+  与easy背景，**不得用高mAP宣布成功**。下一步冻结best扫训练时间块连续窗口，挖hard negatives并
+  建1:2/1:3（hard为主）第二臂；仍`production_eligible=false / auto_promote=false`，不读holdout、
+  不改ACTIVE、不部署。
 - 数量口径：本机原始缓存有602个CSV（1.2GB），其中456个15m文件，237个至少覆盖365天，
   单文件最长约430天。Stage-A可追溯正事件池为2,378个（train 2,020 / val 358），不是200个；
   当前200只是从2020个train中满足旧框后3–5根条件的316个候选里抽出的语义校准包。
