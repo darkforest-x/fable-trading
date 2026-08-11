@@ -507,7 +507,12 @@ def verify_base_copy(base: Path, out: Path) -> dict[str, int]:
     checked = 0
     for top in ("images", "labels"):
         for source in sorted((base / top).rglob("*")):
-            if not source.is_file() or source.name.startswith("._"):
+            expected_suffix = ".png" if top == "images" else ".txt"
+            if (
+                not source.is_file()
+                or source.name.startswith("._")
+                or source.suffix.lower() != expected_suffix
+            ):
                 continue
             target = out / source.relative_to(base)
             if not target.exists() or sha256_file(source) != sha256_file(target):
