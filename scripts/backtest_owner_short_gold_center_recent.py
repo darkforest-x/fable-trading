@@ -297,6 +297,15 @@ def deduplicate_detections(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return events
 
 
+def shard_paths(paths: list[Path], *, shard_index: int, shard_count: int) -> list[Path]:
+    """Return one deterministic, disjoint symbol shard for parallel GPU replay."""
+    if shard_count < 1:
+        raise ValueError("shard_count must be >= 1")
+    if shard_index < 0 or shard_index >= shard_count:
+        raise ValueError("shard_index must satisfy 0 <= index < count")
+    return paths[shard_index::shard_count]
+
+
 def scan_snapshot(args: argparse.Namespace) -> int:
     from ultralytics import YOLO  # noqa: PLC0415
 
@@ -312,6 +321,7 @@ def scan_snapshot(args: argparse.Namespace) -> int:
         for path in snapshot_dir.glob("*_USDT_SWAP.csv")
         if not path.name.startswith("._")
     )
+    paths = shard_paths(paths, shard_index=args.shard_index, shard_count=args.shard_count)
     if args.max_symbols:
         paths = paths[: args.max_symbols]
     if not paths:
@@ -373,6 +383,7 @@ def scan_snapshot(args: argparse.Namespace) -> int:
         "weights_sha256": sha256_file(weights),
         "snapshot_dir": str(snapshot_dir),
         "symbols": len(frames),
+        "scanned_symbols": sorted(frames),
         "stale_symbols": stale,
         "latest_bar": latest.isoformat(),
         "replay_start_exclusive": replay_start.isoformat(),
@@ -393,6 +404,8 @@ def scan_snapshot(args: argparse.Namespace) -> int:
         "owner_authorized_in_conversation": True,
         "promoted": False,
         "orders_placed": False,
+        "shard_index": args.shard_index,
+        "shard_count": args.shard_count,
     }
     (out_dir / "scan_summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
@@ -402,6 +415,69 @@ def scan_snapshot(args: argparse.Namespace) -> int:
         encoding="utf-8",
     )
     print(json.dumps(summary, ensure_ascii=False, indent=2), flush=True)
+    return 0
+
+
+def merge_scans(args: argparse.Namespace) -> int:
+    """Merge disjoint symbol shards without rescoring or changing event rules."""
+    scan_dirs = [Path(path) for path in args.scan_dirs]
+    out_dir = Path(args.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    summaries = [
+        json.loads((path / "scan_summary.json").read_text(encoding="utf-8"))
+        for path in scan_dirs
+    ]
+    hashes = {str(summary["weights_sha256"]) for summary in summaries}
+    protocols = {str(summary["protocol"]) for summary in summaries}
+    if len(hashes) != 1 or protocols != {PROTOCOL}:
+        raise ValueError("scan shards do not share one protocol and weight hash")
+    seen_symbols: set[str] = set()
+    raw: list[dict[str, Any]] = []
+    events: list[dict[str, Any]] = []
+    for path in scan_dirs:
+        shard_raw = read_jsonl(path / "raw_detections.jsonl")
+        shard_events = read_jsonl(path / "events.jsonl")
+        shard_summary = json.loads((path / "scan_summary.json").read_text(encoding="utf-8"))
+        symbols = {str(symbol) for symbol in shard_summary.get("scanned_symbols", [])}
+        overlap = seen_symbols & symbols
+        if overlap:
+            raise ValueError(f"symbol overlap across shards: {sorted(overlap)[:5]}")
+        seen_symbols.update(symbols)
+        raw.extend(shard_raw)
+        events.extend(shard_events)
+    raw.sort(key=lambda row: (str(row["symbol"]), str(row["decision_time"]), -float(row["conf"])))
+    events.sort(key=lambda row: (str(row["decision_time"]), str(row["symbol"])))
+    write_jsonl(out_dir / "raw_detections.jsonl", raw)
+    write_jsonl(out_dir / "events.jsonl", events)
+    pd.DataFrame(raw).to_csv(out_dir / "raw_detections.csv", index=False)
+    pd.DataFrame(events).to_csv(out_dir / "events.csv", index=False)
+    first = dict(summaries[0])
+    first.update(
+        {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "symbols": sum(int(summary["symbols"]) for summary in summaries),
+            "scanned_symbols": sorted(seen_symbols),
+            "stale_symbols": sorted(
+                {symbol for summary in summaries for symbol in summary.get("stale_symbols", [])}
+            ),
+            "bar_endpoints": sum(int(summary["bar_endpoints"]) for summary in summaries),
+            "window_exposures": sum(int(summary["window_exposures"]) for summary in summaries),
+            "raw_detections": len(raw),
+            "deduplicated_events": len(events),
+            "wall_seconds": max(float(summary["wall_seconds"]) for summary in summaries),
+            "parallel_shards": len(summaries),
+            "shard_index": None,
+            "shard_count": len(summaries),
+        }
+    )
+    (out_dir / "scan_summary.json").write_text(
+        json.dumps(first, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    (out_dir / "_SUCCESS.json").write_text(
+        json.dumps({"ok": True, "events": len(events), "merged_shards": len(summaries)}) + "\n",
+        encoding="utf-8",
+    )
+    print(json.dumps(first, ensure_ascii=False, indent=2))
     return 0
 
 
@@ -904,6 +980,12 @@ def parser() -> argparse.ArgumentParser:
     scan.add_argument("--device", default="mps")
     scan.add_argument("--batch", type=int, default=32)
     scan.add_argument("--max-symbols", type=int, default=0)
+    scan.add_argument("--shard-index", type=int, default=0)
+    scan.add_argument("--shard-count", type=int, default=1)
+
+    merge = commands.add_parser("merge")
+    merge.add_argument("--scan-dirs", type=Path, nargs="+", required=True)
+    merge.add_argument("--out-dir", type=Path, required=True)
 
     final = commands.add_parser("finalize")
     final.add_argument("--snapshot-dir", type=Path, required=True)
@@ -929,6 +1011,8 @@ def main() -> int:
         return fetch_snapshot(args)
     if args.command == "scan":
         return scan_snapshot(args)
+    if args.command == "merge":
+        return merge_scans(args)
     if args.command == "finalize":
         return finalize(args)
     if args.command == "send":

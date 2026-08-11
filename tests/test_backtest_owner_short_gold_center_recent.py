@@ -1,4 +1,4 @@
-from __future__ import annotations
+from pathlib import Path
 
 import pandas as pd
 
@@ -6,6 +6,7 @@ from scripts.backtest_owner_short_gold_center_recent import (
     EVENT_GAP_BARS,
     bar_from_x_normalized,
     deduplicate_detections,
+    shard_paths,
 )
 
 
@@ -49,3 +50,11 @@ def test_dedupe_never_merges_symbols() -> None:
         _detection(decision=20, mid=10, conf=0.4, symbol="BTC_USDT_SWAP"),
     ]
     assert len(deduplicate_detections(rows)) == 2
+
+
+def test_symbol_shards_are_disjoint_and_complete() -> None:
+    paths = [Path(f"S{i}.csv") for i in range(11)]
+    shards = [shard_paths(paths, shard_index=i, shard_count=4) for i in range(4)]
+    assert sum(shards, []) != paths  # interleaved by design, not contiguous slicing
+    assert {path for shard in shards for path in shard} == set(paths)
+    assert sum(len(shard) for shard in shards) == len(paths)
