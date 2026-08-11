@@ -4,6 +4,21 @@
 
 ## ⚡ 当前真相（2026-08-11 — Owner 二次收紧：两条边界线 + 3–5 根确认）
 
+**最新进展（2026-08-11 22:42 CST）：第二张 train-time 难负例扩充页已由 Owner 全部裁决为
+25对、0框偏、175不对，协议/源SHA/200 ID/计数/因果与时间门全部通过。** 三张 train-time
+审核页累计为88正例+412难负例；412只占第二臂2,286 hard槽位18.02%，因此没有直接训练。
+Owner裁决报告：`analysis/html/p2_owner_short_train_hardneg_expansion200_v2_owner_review_20260811.html`。
+
+已转向五个未使用冻结train 12小时块（2025-06/08/10/12、2026-02）：881 symbol-block、42,288
+endpoints、338,304个W12–19因果窗，固定权重/conf/NMS/去重合同得到10,533 raw→589事件；剔除
+22个Owner框±12 bars重叠后安全池567。C02真实只有12事件，未降阈值或复制，缺额确定性均分给
+其余块；新审核页最终47/12/47/47/47，共200事件、131币，与此前500个train已审事件零重复。
+选择使用累计1,308正例/666负例参考且不看未来；未来48根只在选定后渲染。600图存在、全部未来
+48根完整、0 holdout、0 labels、0 training-eligible。审核入口：
+`analysis/html/p2_owner_short_train_hardneg_newblocks200_v3_20260811.html`；报告：
+`analysis/html/p2_owner_short_train_hardneg_newblocks200_v3_report_20260811.html`。下一步仍是Owner完成
+1/2/3裁决，随后审计累计覆盖；**尚未授权训练、promote或部署。**
+
 **最新进展（2026-08-11 21:25 CST）：正例检索100张已由Owner裁决为45对、0框偏、55不对。**
 源SHA、100 ID、声明计数、0 pending、0 Owner框重叠、0前视均通过。与负例偏置页18/200=9%
 target相比，正例检索页45/100=45%，同一权重下富集提高5倍，证明两种审核页必须分开；两者均为
