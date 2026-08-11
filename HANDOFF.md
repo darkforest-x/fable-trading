@@ -2,7 +2,20 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-11 — Owner 二次收紧：两条边界线 + 3–5 根确认）
+## ⚡ 当前真相（2026-08-12 — R2独立连续密度终审失败）
+
+**最新进展（2026-08-12 00:50 CST）：第三训练臂R2已完整训练并在新连续块终审，结论失败。**
+run=`owner_lsv2_short_gold_center_hardneg_r2_ownerconfirmed_ft`在RTX 3060跑满40轮，best epoch35，
+best SHA=`52cd38fd…32afe`；3060最终best复验P/R/mAP50/mAP50-95=
+0.8365/0.7596/0.8780/0.7432，Mac固定val独立复验=0.8475/0.7525/0.8774/0.7413，
+与R1的0.8626/0.7770/0.8980/0.7405相比没有实质val提升。新非重叠pre-holdout块为
+2026-05-03 12:15–23:45 UTC，215币、10,105 endpoints、80,840个W12–19暴露窗，conf0.25、
+NMS0.70、同币核心中点±5根去重全部冻结，holdout读取0。R1→R2 raw 3,964→3,538
+（-10.75%），事件223→195（-12.56%），折算455.5→398.3 events/day，触发币98→93；仍远超
+“少而准”。跨模型一对一配对为共同163、仅R1 60、仅R2 32，R2自身旧问题保留率83.59%。
+R2不得promote、部署或调高conf美化。完整报告：
+`analysis/html/p2_owner_short_gold_center_hardneg_r2_canary_20260812.html`。下一步先分层审计共同保留/
+R2新生/R1被抑制事件，不自动开第四臂、不读holdout。
 
 **最新进展（2026-08-11 23:14 CST）：Owner明确回复“允许”，第三训练臂已在RTX 3060启动。**
 run=`owner_lsv2_short_gold_center_hardneg_r2_ownerconfirmed_ft`，远端`zzc@192.168.1.4`，WMI cmd
