@@ -2,7 +2,107 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-11 — Owner 授权恢复真正的 Stage A 随机裁剪）
+## ⚡ 当前真相（2026-08-11 — Owner 二次收紧：两条边界线 + 3–5 根确认）
+
+**Owner最新纠正覆盖本节后文“Codex逐图寻找启动边界并重画61个橙框”的下一步：不得在已有
+Owner原始金标坐标时重新凭感觉画框。新血缘必须是`原始⭐手框 ∩ Owner亲自确认short`，外层只
+重裁十几根短窗，内层橙框从原手框正中心机械截取。61张Codex橙框保留为失败对照，不再作为待
+批准训练标签。**
+
+**最新裁决覆盖下面同日所有“固定20–30根窗口 / 0–10根后文”的表述：Local Signal V2 检测
+“完美平台/启动形态”语义，不是盘口信号，也不是固定裁剪模板。ETH参考中红框只落在Owner
+标出的两条竖线之间，核心约4–7根，不能包入右侧快速下跌。输入从最短充分上下文开始动态变化；
+首轮只试约14–22根并继续向更短收缩。核心结束后3–5根内确认，3根优先、5根硬封顶。**
+
+- 今天 Owner 提供的 ETHUSDT 15m 图是终极形态语义参考，不替代昨晚的数据集和训练成果。
+- 昨晚 3060 真正完成训练的是 `local_signal_v2_stagea_randomcrop_v1`：2,378 正例 + 2,378
+  easy negatives，train 4,040 / val 716，0 holdout。模型最佳 epoch 38、53 轮 early stop，
+  最终复验 P/R/mAP50/mAP50-95=0.2376/0.4330/0.2332/0.1266。
+- Stage A 继续作为宽位置表征底座，不从零推倒；但它机械使用 `anchor-2..decision`，实际框宽
+  只有 4/5 根。旧 `dense_owner_w20_midbox` 保存了原始 Owner 5/7 根框；按 Stage A 修复后的
+  event/time split 重新联结，2,378/2,378 事件完整对应。
+- 旧W20–30候选中只有 **316** 个Stage-A train事件满足框后3–5根：delay3/4/5分别94/107/115，
+  旧框宽5/7根分别171/145。位置为middle/right/far-right=36/265/15，**83.86%落在right带**；
+  这批只能复核语义与边界，不能直接成为新短窗训练集。
+- 模型已基本打掉固定右侧 shortcut：四位置桶 recall spread 14.72pp，位置-分数
+  Spearman=-0.134；但精确度不合格。conf=0.10 event precision 22.66% / recall 52.79%，
+  conf=0.20 precision 30.67% / recall 13.97%，阈值无法同时修复精确度与召回。
+- 最大数据缺口：这316个旧框尚未按ETH两条边界线重新裁决；hard negative=0。V2审查页抽取
+  200张：delay3/4/5分别80/65/55，按钮区分“形态和框都准 / 形态像但框要改 / 不是目标”。
+  不看后续收益、不看模型置信度、不读取val/holdout。Owner裁决前全部
+  `semantic_status=unreviewed / geometry_status=unreviewed / training_eligible=false`。
+  诚实路径说明：316张母池中45张、200张审查中30张源文件物理路径位于旧
+  `dense_owner_w20_midbox/images/val/`；这是历史按币种错split留下的目录名，按修复后的Stage-A
+  时间split它们全部属于train，未使用358个Stage-A val事件。
+- 已新增30张**动态短窗校准集**，不是训练集：post 3/4/5各10张，pre 6–10各6张，旧核心
+  5/7根各15张；W实际14–22，框中心自然分布53%–71%，30个事件/币种全不重复。三张大图证明
+  “固定最右/固定正中”的几何偏差已消除，但也直接暴露旧核心框仍会把部分明显启动大K包进去。
+  因而全部保持`semantic_status=unreviewed`、`geometry_status=unreviewed_legacy_core_proposal`、
+  `training_eligible=false`；动态重裁剪不能替代Owner语义/边界裁决。
+- Codex已按唯一确认的ETH空头参考完成保守一审：`short_keep=5`、`short_rebox=4`、
+  `short_hard_negative=4`、`mirror_unconfirmed=17`。4张rebox已把明显启动侧K从核心proposal
+  移到3–5根确认区；代表板用绿=保留、橙=新框（红虚线=旧框）、红叉=难负例候选、紫=多头
+  镜像。该一审不是Owner金标，全部`owner_confirmed=false / training_eligible=false`。
+  当前必须先由Owner确认空头一审方向，并决定多头镜像是排除、独立类别还是方向归一化同类；
+  决策前17张镜像既不是正例也不是负例。
+- Owner随后明确回复“确认”，冻结为**只做空**，认可绿/橙/红代表板方向，并授权把冻结train事件
+  扩到200张动态短窗；多头镜像排除且不得当负例。确认回执明确：只授权扩200，不授权训练、
+  holdout、生产，也不自动确认200张逐样本标签。
+- 200张已按相同事件重渲染完成：post3/4/5=80/65/55、core5/7=100/100、pre6–10各40、
+  W14–22、112 symbols、0重复、0 val图/标签、0 holdout行。Codex逐板一审为：
+  `short_keep=40`、`short_rebox_pending=61`、`short_hard_negative=25`、`mirror_excluded=74`。
+  61张橙桶已完成逐图编号、启动边界判定和重画：没有统一左移，形成14种起止位移；新核心
+  4/5/6/7根=2/56/2/1，post3/4/5=25/20/16，新完整窗W14–20，框中心自然为53.3%–71.9%。
+  每个新核心都早于旧核心结束，橙色新框与红色旧框已在7张对照板重渲染；最大读取时间
+  2026-03-18 12:15 UTC，0 holdout。几何已完成但仍是Codex proposal，当前200张全部
+  `sample_owner_confirmed=false / training_eligible=false`，未开训。**该61张手工proposal现已被
+  Owner否决为标签来源**；不得再请求批量认可或写入正式数据集。
+- 已恢复真正Owner金标血缘：独立Owner框2,525个中，Owner亲自确认short为1,361框/1,317图；
+  再与原始`⭐标杆`坐标逐框IoU=1.000联结得到71框，69框仍有未加工原PNG、2框原图缺失而诚实
+  跳过。69张新橙框全部取原红框正中心，4/5/6/7根=24/16/12/17；外层W12–17，后文3/4根=
+  56/13。无Codex重画、无模型预测、几何不看未来；审核未来48根独立。当前仍
+  `training_eligible=false`，Owner只需确认“原框中心裁切”合同，确认后按同法扩1,361个short框。
+- Owner已回复“可以”，中心裁切合同通过并已扩全量：1,361行short标注全部定位；独立审计发现
+  15组为同一市场窗+同一核心框的历史别名，已在split前去重为1,346个目标，并把全部原Owner id
+  保留在canonical manifest。重叠输入仍为1,287个依赖块；按块时间切分+150 bars purge后，
+  train/val/drop正例=1,143/202/1，实际间隔162 bars。配套同币、同split、同W真实空背景
+  train/val=1,143/200；2个val无安全背景而诚实缺失。0联合SHA重复、0跨split、0负例碰全部
+  Owner框±12根；同路径二次重建正/负manifest SHA完全一致。当前为交接规范的1:1 easy-negative
+  首臂，只用于挖hard negatives；第二臂必须是1:2/1:3且hard占大头，不能直接堆三倍easy。
+- Owner于2026-08-11 13:29 CST明确“直接去训练吧”。3060 run
+  `owner_lsv2_short_gold_center_v1_ft`已启动：Stage A best初始化、YOLO11s、imgsz960、batch8、
+  seed0、40 epochs、patience10、显式finetune AdamW lr0=1e-4；flip/mosaic/mixup/HSV全0。
+  WMI launch pid=37596，CUDA/版本/首轮参数日志均通过；仍`production_eligible=false /`
+  `auto_promote=false`，不读holdout、不改ACTIVE、不部署。
+- 数量口径：本机原始缓存有602个CSV（1.2GB），其中456个15m文件，237个至少覆盖365天，
+  单文件最长约430天。Stage-A可追溯正事件池为2,378个（train 2,020 / val 358），不是200个；
+  当前200只是从2020个train中满足旧框后3–5根条件的316个候选里抽出的语义校准包。
+  “3–5”是3–5根15m K（45–75分钟），不是3–5天。正式训练数据必须在Owner确认语义后回到完整
+  历史池扩正例与难负例，禁止拿200张校准包直接开训。
+- Owner审核页已改为双图：左图是冻结训练短窗，右图额外显示未来48根/12小时。未来图只存在
+  `review_future_only/`及独立manifest，紫线标记训练截止；61张训练图生成前后SHA逐字节不变，
+  未来目录无labels、0 holdout。HTML可逐张选择“认可/还要改/剔除”，也可浏览后全部认可并复制JSON。
+- 所有旧数据、权重、日志、候选 ledger 和失败对照臂均保留。固定右侧/causal blank 臂只停用，
+  不删除。延迟形态检测器仍 `production_eligible=false`，不得冒充新鲜信号进入 forward/ACTIVE/
+  部署；若未来用于执行，必须另批完整窗口右端时间戳和延迟预算。
+
+V2审查页：`analysis/output/owner_eth_target_review_v2_shortdelay/index.html`。30张动态校准图：
+`analysis/output/owner_eth_shortdelay_calibration30_v1/`。Owner已回到当前会话，当前无需TG；
+优先直接在对话中展示PNG。Codex空头一审与代表板：
+`analysis/output/owner_eth_shortdelay_codex_firstpass_v1/`。动态200与一审：
+`analysis/output/owner_eth_shortdelay_dynamic_review200_v1/`、
+`analysis/output/owner_eth_shortdelay_review200_codex_firstpass_v1/`。61张逐图改框与7张对照板：
+`analysis/output/owner_eth_shortdelay_review200_rebox_v1/`。
+Owner交互确认页：`analysis/html/p1_owner_eth_shortdelay_review61_owner_gate_20260811.html`；未来审核图：
+`analysis/output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/`。
+上述61页只保留失败对照。当前Owner审核入口：
+`analysis/html/p1_owner_gold_center_crop_owner_gate_20260811.html`；源/短窗/未来三联图：
+`analysis/output/owner_gold_center_crop_review_v1/`。
+全量数据：`datasets/owner_short_gold_center_v1/`；64张正/背景配对审计：
+`analysis/html/p1_owner_short_gold_center_dataset_audit_20260811.html`；报告：
+`analysis/html/p1_owner_short_gold_center_dataset_20260811.html`。
+
+## ⚡ 历史阶段（2026-08-11 — Owner 授权恢复真正的 Stage A 随机裁剪）
 
 **直接裁决：`causal_blank_w30_v3` 只改变画布 X，框相对真实 K 线内容仍贴在最后几根，
 Owner 已目视否决。该数据即使九道旧 P0 为绿也不得训练。Owner 随后明确授权恢复交接文档
