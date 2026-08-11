@@ -1,0 +1,24 @@
+{
+  "recorded_at": "2026-08-11",
+  "owner_statement": "eth昨天晚上最新的走势，看到我标的位置没，这个就是我想要的完美信号，这是我们的最终目标",
+  "instrument_visible_in_screenshot": "ETHUSDT.P",
+  "timeframe_visible_in_screenshot": "15m",
+  "chart_date_visible_in_screenshot": "2026-08-10",
+  "marked_time": "approximately 20:15--20:30 Asia/Shanghai; screenshot gesture is authoritative and exact source-bar reconciliation is intentionally deferred",
+  "screenshot": "analysis/reference/owner_ethusdt_15m_perfect_signal_20260810.png",
+  "screenshot_sha256": "6b028a1820e8ff6bd893c10e3b3521e641388474a1375609ac28b7f7f2a53b98",
+  "target_semantics": {
+    "direction": "short",
+    "entry_phase": "pre-break / break-frontier",
+    "visible_pattern": "均线密集完成后，价格在密集带右缘反抽或贴线失败，短均线刚开始向下张口，主跌尚未完成",
+    "causal_right_edge": "训练或实时检测画面的最右真实 K 线必须停在 owner 箭头对应 K 线",
+    "forbidden_future": "箭头右侧连续大阴线仅用于 owner 说明结果，不得进入 YOLO 输入、训练正例图或候选时点特征"
+  },
+  "usage": {
+    "owner_final_target_reference": true,
+    "training_sample": false,
+    "evaluation_sample": false,
+    "holdout_consumed": false,
+    "production_threshold_decision": false
+  }
+}

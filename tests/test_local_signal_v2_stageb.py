@@ -292,3 +292,14 @@ def test_3060_wrapper_ships_repository_safe_trainer_and_uses_strict_dataset():
     assert "local_signal_v2_stageb_strictneg_v2" in stageb
     assert "local_signal_v2_stageb_strictneg_v2" in p0_gate
     assert "bash scripts/train_local_signal_v2_stageb_on_3060.sh" not in p0_gate
+
+
+def test_3060_wrapper_can_force_finetune_after_remote_weight_rename():
+    project = Path(__file__).resolve().parents[1]
+    wrapper = (project / "scripts" / "train_w20_midbox_on_3060.sh").read_text()
+
+    # The wrapper deliberately gives every uploaded base one fixed remote name.
+    # Training mode must therefore travel as an explicit independent argument.
+    assert '--finetune) FINETUNE_ARG="--finetune"' in wrapper
+    assert '--no-finetune) FINETUNE_ARG="--no-finetune"' in wrapper
+    assert "$FINETUNE_ARG --cache false" in wrapper

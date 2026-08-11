@@ -1,0 +1,59 @@
+{
+  "preregistered_at": "2026-08-11",
+  "owner_authorization": {
+    "confirmed": true,
+    "confirmation_text": "确认",
+    "scope": "Stage B 严格因果布局：真实 K 线止于 decision，框位于真实内容右缘，右侧仅允许 0--12 个空白布局槽；使用 Stage A best.pt 初始化微调"
+  },
+  "experiment": "local_signal_v2_stageb_from_stagea_v1",
+  "single_variable": "相对 Stage A，仅把可见窗口改回严格因果 decision 截止的 Stage B 布局；事件、时间切分、标签语义与 YOLO 安全增强纪律保持冻结",
+  "dataset": {
+    "output": "datasets/local_signal_v2_stageb_from_stagea_v1",
+    "source": "datasets/local_signal_v2_p1_causal_blank_w30_v3",
+    "source_role_correction": "该源曾被正确否决为 Stage A 替代品，但其严格因果几何经 owner 明确认可为 Stage B；新版本独立物化，不改写历史目录和历史裁决",
+    "source_positive_manifest_sha256": "f82a49100949b7b10425cd6c822830083fc758f77a94db275cfd2213d6fb43a1",
+    "source_negative_manifest_sha256": "8357528442c9e0c8e1d63a2fb2b4497f1cb96d51462bea7b4c5a0af008a594c8",
+    "positive": 2388,
+    "easy_negative": 2388,
+    "train_total": 4060,
+    "val_total": 716,
+    "window_bars": 30,
+    "right_blank_slots": [0, 12],
+    "blank_slots_are_market_bars": false,
+    "future_bars": 0,
+    "holdout_read": false
+  },
+  "initialization": {
+    "path": "analysis/output/lsv2_stagea/owner_lsv2_stagea_randomcrop_v1_cold/weights/best.pt",
+    "sha256": "c0e94f47df125e298b044d9f10acd0b8e4f525ccd6143ce34f8d174af802bf1a",
+    "mode": "explicit_finetune"
+  },
+  "training": {
+    "name": "owner_lsv2_stageb_from_stagea_v1",
+    "epochs": 40,
+    "patience": 10,
+    "batch": 8,
+    "imgsz": 960,
+    "seed": 0,
+    "optimizer": "AdamW",
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "warmup_epochs": 0.5,
+    "fliplr": 0.0,
+    "flipud": 0.0,
+    "mosaic": 0.0,
+    "mixup": 0.0,
+    "hsv_h": 0.0,
+    "hsv_s": 0.0,
+    "hsv_v": 0.0
+  },
+  "gates": {
+    "training_eligible_after_materialization_audit": true,
+    "production_eligible": false,
+    "may_read_holdout": false,
+    "may_promote": false,
+    "may_change_active": false,
+    "may_deploy": false,
+    "may_trade": false
+  }
+}
