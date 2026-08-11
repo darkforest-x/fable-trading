@@ -65,3 +65,21 @@ def test_select_positive_diverse_rejects_underfilled_block() -> None:
         assert "need 2" in str(exc)
     else:
         raise AssertionError("underfilled block must fail")
+
+
+def test_select_positive_diverse_relaxes_symbol_cap_when_block_is_concentrated() -> None:
+    rows = [
+        {
+            "candidate_block": "A",
+            "symbol": "ONLY",
+            "positive_affinity": 10.0 - index,
+            "event_conf_max": 0.5,
+            "decision_time": f"2026-01-01T00:0{index}:00Z",
+            "event_id": f"A-{index}",
+        }
+        for index in range(4)
+    ]
+
+    selected = select_positive_diverse(rows, {"A": 4})
+
+    assert len(selected) == 4

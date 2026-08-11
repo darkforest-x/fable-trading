@@ -104,7 +104,7 @@ def select_positive_diverse(
         )
         chosen: list[dict[str, Any]] = []
         symbol_counts: Counter[str] = Counter()
-        for cap in (1, 2, 3):
+        for cap in (1, 2, 3, quota):
             for row in ranked:
                 if row in chosen or symbol_counts[str(row["symbol"])] >= cap:
                     continue
