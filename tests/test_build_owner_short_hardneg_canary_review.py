@@ -1,6 +1,10 @@
 import pandas as pd
 
-from scripts.build_owner_short_hardneg_canary_review import future_bar_count
+from scripts.build_owner_short_hardneg_canary_review import (
+    ROOT,
+    future_bar_count,
+    render_html,
+)
 
 
 def test_future_bar_count_caps_review_at_48_bars() -> None:
@@ -14,3 +18,31 @@ def test_future_bar_count_shortens_at_physical_prefix_end() -> None:
         pd.Timestamp("2026-05-03T12:00:00Z"),
         pd.Timestamp("2026-05-03T23:45:00Z"),
     ) == 47
+
+
+def test_review_html_has_three_shortcuts_and_no_continuation_button(tmp_path) -> None:
+    source = tmp_path / "events.jsonl"
+    source.write_text("{}\n", encoding="utf-8")
+    row = {
+        "review_id": "C001",
+        "event_id": "event-1",
+        "symbol": "ETH_USDT_SWAP",
+        "decision_time": "2026-05-03T00:00:00Z",
+        "window_len": 15,
+        "predicted_core_bars": 5,
+        "decision_delay_bars": 3,
+        "conf": 0.5,
+        "event_conf_max": 0.8,
+        "raw_detection_count": 2,
+        "causal_review_path": "analysis/output/example/causal.png",
+        "future_review_path": "analysis/output/example/future.png",
+    }
+
+    page = render_html([row], source, ROOT / "analysis/html/example.html")
+
+    assert 'data-value="target"' in page
+    assert 'data-value="rebox"' in page
+    assert 'data-value="hard_negative"' in page
+    assert 'data-value="continuation"' not in page
+    assert "const mapping={'1':'target','2':'rebox','3':'hard_negative'}" in page
+    assert "advance(id)" in page

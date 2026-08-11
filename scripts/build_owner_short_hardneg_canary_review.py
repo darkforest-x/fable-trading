@@ -43,7 +43,7 @@ from scripts.backtest_owner_short_gold_center_recent import (  # noqa: E402
 from scripts.build_w20_midbox_dataset import yolo_box_from_bars  # noqa: E402
 
 
-PROTOCOL = "owner_short_hardneg_canary_review331_v1_20260811"
+PROTOCOL = "owner_short_hardneg_canary_review331_v2_20260811"
 DEFAULT_EVENTS = (
     ROOT
     / "analysis/output/owner_short_gold_center_preholdout_canary_20260503_v1"
@@ -57,7 +57,7 @@ DEFAULT_SNAPSHOT = (
 DEFAULT_SNAPSHOT_SUMMARY = DEFAULT_SNAPSHOT.parent / "fetch_summary.json"
 DEFAULT_OUT = (
     ROOT
-    / "analysis/output/owner_short_gold_center_hardneg_canary_review331_v1"
+    / "analysis/output/owner_short_gold_center_hardneg_canary_review331_v2"
 )
 DEFAULT_HTML = (
     ROOT
@@ -266,10 +266,9 @@ def card(row: dict[str, Any], output_html: Path) -> str:
         <button type="button" onclick="zoom('{review_id}','future')"><span>人工审核未来（最多48根）</span><img loading="lazy" data-role="future" src="{future}" alt="{review_id} future"></button>
       </div>
       <div class="choices">
-        <button data-value="target" onclick="choose('{review_id}','target')">✓ 真目标</button>
-        <button data-value="continuation" onclick="choose('{review_id}','continuation')">↪ 延续/重复</button>
-        <button data-value="rebox" onclick="choose('{review_id}','rebox')">↔ 框不准</button>
-        <button data-value="hard_negative" onclick="choose('{review_id}','hard_negative')">✕ 明确负例</button>
+        <button type="button" data-value="target" onclick="choose('{review_id}','target')">1 · 对</button>
+        <button type="button" data-value="rebox" onclick="choose('{review_id}','rebox')">2 · 框偏</button>
+        <button type="button" data-value="hard_negative" onclick="choose('{review_id}','hard_negative')">3 · 不对</button>
       </div>
     </article>"""
 
@@ -280,11 +279,85 @@ def render_html(rows: list[dict[str, Any]], source: Path, output_html: Path) -> 
     cards = "\n".join(card(row, output_html) for row in rows)
     source_hash = sha256_file(source)
     return f"""<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>331事件语义审核</title>
-<style>:root{{--bg:#f3f6f8;--ink:#17232d;--muted:#60717f;--green:#198754;--orange:#d98700;--red:#d33;--blue:#1769aa}}*{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}}header{{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #d8e0e6;padding:14px 20px;box-shadow:0 2px 10px #0001}}h1{{margin:0 0 6px;font-size:24px}}header p{{margin:4px 0;color:#435664}}.bar{{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}}.bar button,.bar select{{padding:7px 11px;border:1px solid #b9c5ce;border-radius:8px;background:#fff;cursor:pointer}}.bar .copy{{background:var(--blue);color:#fff;border-color:var(--blue)}}#stats{{margin-left:auto;font-weight:800}}main{{max-width:1500px;margin:auto;padding:16px}}.notice{{background:#fff7df;border:1px solid #ebcb75;border-radius:10px;padding:11px 14px;margin-bottom:14px}}.grid{{display:grid;grid-template-columns:1fr;gap:16px}}.card{{background:#fff;border:3px solid transparent;border-radius:11px;overflow:hidden;box-shadow:0 2px 10px #0001}}.card[data-choice="target"]{{border-color:var(--green)}}.card[data-choice="continuation"]{{border-color:#7e57c2}}.card[data-choice="rebox"]{{border-color:var(--orange)}}.card[data-choice="hard_negative"]{{border-color:var(--red)}}.head{{display:flex;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #e3e8ec}}.chip{{background:#edf1f4;border-radius:999px;padding:3px 8px;font-size:13px}}.meta{{padding:7px 12px;color:var(--muted);font-size:13px}}.pair{{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#dce3e8}}.pair button{{padding:0;border:0;background:#fff;cursor:zoom-in}}.pair span{{display:block;padding:6px 10px;text-align:left;font-weight:800;color:#344b5b;background:#edf3f6}}.pair img{{display:block;width:100%;height:auto}}.choices{{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:10px 12px}}.choices button{{padding:9px 5px;border:1px solid #c3cdd5;border-radius:8px;background:#fff;cursor:pointer}}.choices button.active{{color:#fff;font-weight:800}}.choices [data-value="target"].active{{background:var(--green)}}.choices [data-value="continuation"].active{{background:#7e57c2}}.choices [data-value="rebox"].active{{background:var(--orange)}}.choices [data-value="hard_negative"].active{{background:var(--red)}}.hidden{{display:none}}textarea{{width:100%;min-height:150px;margin-top:16px}}dialog{{width:min(96vw,1500px);border:0;border-radius:10px}}dialog img{{width:100%}}@media(max-width:900px){{header{{position:static}}.pair{{grid-template-columns:1fr}}.choices{{grid-template-columns:1fr 1fr}}#stats{{width:100%;margin:0}}}}</style></head>
-<body><header><h1>Owner-short · 331个剩余事件逐张审核</h1><p>左图只含模型首次触发时可见的因果输入；右图紫色区域是人工审核未来，绝不进入训练图片或标签。</p><p>不要把“后面跌了”等同于真目标：优先判断核心形态、位置和是否只是上一事件的延续。</p><div class="bar"><select id="filter" onchange="applyFilter()"><option value="all">全部</option><option value="pending">未确认</option><option value="target">真目标</option><option value="continuation">延续/重复</option><option value="rebox">框不准</option><option value="hard_negative">明确负例</option></select><button onclick="clearAll()">清空选择</button><button class="copy" onclick="copyResults()">复制审核JSON</button><span id="stats"></span></div></header>
-<main><div class="notice"><b>重要：</b>默认331张全部未确认；页面只把选择存在本机浏览器。只有你把导出的JSON交回后，明确负例才有资格进入候选池，仍不会自动开训。</div><section class="grid">{cards}</section><textarea id="export" readonly placeholder="点击复制审核JSON"></textarea></main>
+<style>:root{{--bg:#f3f6f8;--ink:#17232d;--muted:#60717f;--green:#198754;--orange:#d98700;--red:#d33;--blue:#1769aa}}*{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}}header{{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #d8e0e6;padding:14px 20px;box-shadow:0 2px 10px #0001}}h1{{margin:0 0 6px;font-size:24px}}header p{{margin:4px 0;color:#435664}}.bar{{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}}.bar button,.bar select{{padding:7px 11px;border:1px solid #b9c5ce;border-radius:8px;background:#fff;cursor:pointer}}.bar .copy{{background:var(--blue);color:#fff;border-color:var(--blue)}}#stats{{margin-left:auto;font-weight:800}}main{{max-width:1500px;margin:auto;padding:16px}}.notice{{background:#fff7df;border:1px solid #ebcb75;border-radius:10px;padding:11px 14px;margin-bottom:14px}}.hotkeys{{font-weight:800;color:#7c4f00}}.grid{{display:grid;grid-template-columns:1fr;gap:16px}}.card{{scroll-margin-top:138px;background:#fff;border:3px solid transparent;border-radius:11px;overflow:hidden;box-shadow:0 2px 10px #0001}}.card.current{{outline:4px solid var(--blue);outline-offset:2px}}.card[data-choice="target"]{{border-color:var(--green)}}.card[data-choice="rebox"]{{border-color:var(--orange)}}.card[data-choice="hard_negative"]{{border-color:var(--red)}}.head{{display:flex;justify-content:space-between;padding:10px 12px;border-bottom:1px solid #e3e8ec}}.chip{{background:#edf1f4;border-radius:999px;padding:3px 8px;font-size:13px}}.meta{{padding:7px 12px;color:var(--muted);font-size:13px}}.pair{{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#dce3e8}}.pair button{{padding:0;border:0;background:#fff;cursor:zoom-in}}.pair span{{display:block;padding:6px 10px;text-align:left;font-weight:800;color:#344b5b;background:#edf3f6}}.pair img{{display:block;width:100%;height:auto}}.choices{{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:10px 12px}}.choices button{{padding:11px 5px;border:1px solid #c3cdd5;border-radius:8px;background:#fff;cursor:pointer;font-size:16px}}.choices button.active{{color:#fff;font-weight:800}}.choices [data-value="target"].active{{background:var(--green)}}.choices [data-value="rebox"].active{{background:var(--orange)}}.choices [data-value="hard_negative"].active{{background:var(--red)}}.hidden{{display:none}}textarea{{width:100%;min-height:150px;margin-top:16px}}dialog{{width:min(96vw,1500px);border:0;border-radius:10px}}dialog img{{width:100%}}@media(max-width:900px){{header{{position:static}}.card{{scroll-margin-top:10px}}.pair{{grid-template-columns:1fr}}#stats{{width:100%;margin:0}}}}</style></head>
+<body><header><h1>Owner-short · 331个剩余事件逐张审核</h1><p>左图只含模型首次触发时可见的因果输入；右图紫色区域是人工审核未来，绝不进入训练图片或标签。</p><p class="hotkeys">快捷键：1=对 · 2=框偏 · 3=不对 · Z=撤销；分类后自动跳到下一张。</p><div class="bar"><select id="filter" onchange="applyFilter()"><option value="all">全部</option><option value="pending">未确认</option><option value="target">对</option><option value="rebox">框偏</option><option value="hard_negative">不对</option></select><button onclick="clearAll()">清空选择</button><button class="copy" onclick="copyResults()">复制审核JSON</button><span id="stats"></span></div></header>
+<main><div class="notice"><b>只判断三件事：</b>形态和框都正确按1；形态正确但框偏按2；不是目标形态按3。默认331张全部未确认，审核结果只存在本机浏览器，仍不会自动开训。</div><section class="grid">{cards}</section><textarea id="export" readonly placeholder="点击复制审核JSON"></textarea></main>
 <dialog id="zoom"><button onclick="document.getElementById('zoom').close()">关闭</button><img id="zoom-img" alt="zoom"></dialog>
-<script>const IDS={js_ids};const KEY="{PROTOCOL}:{source_hash}";const LABELS={{pending:"未确认",target:"真目标",continuation:"延续/重复",rebox:"框不准",hard_negative:"明确负例"}};let d={{}};try{{d=JSON.parse(localStorage.getItem(KEY)||"{{}}")||{{}}}}catch(_e){{d={{}}}}function save(){{localStorage.setItem(KEY,JSON.stringify(d))}}function choose(id,v){{d[id]=v;save();paint(id);stats();applyFilter()}}function paint(id){{const c=document.getElementById('card-'+id),v=d[id]||'pending';c.dataset.choice=v;c.querySelector('.chip').textContent=LABELS[v];c.querySelectorAll('[data-value]').forEach(b=>b.classList.toggle('active',b.dataset.value===v))}}function counts(){{const c={{pending:0,target:0,continuation:0,rebox:0,hard_negative:0}};IDS.forEach(id=>c[d[id]||'pending']++);return c}}function stats(){{const c=counts();document.getElementById('stats').textContent=`真目标 ${{c.target}} · 延续 ${{c.continuation}} · 框不准 ${{c.rebox}} · 负例 ${{c.hard_negative}} · 未确认 ${{c.pending}}`}}function applyFilter(){{const f=document.getElementById('filter').value;document.querySelectorAll('.card').forEach(c=>c.classList.toggle('hidden',f!=='all'&&c.dataset.choice!==f))}}function clearAll(){{if(!confirm('清空全部选择？'))return;d={{}};save();IDS.forEach(paint);stats();applyFilter()}}function payload(){{return{{protocol:"{PROTOCOL}",source_sha256:"{source_hash}",total:IDS.length,counts:counts(),decisions:Object.fromEntries(IDS.map(id=>[id,d[id]||'pending']))}}}}async function copyResults(){{const t=JSON.stringify(payload(),null,2),b=document.getElementById('export');b.value=t;b.select();try{{await navigator.clipboard.writeText(t)}}catch(_e){{document.execCommand('copy')}}}}function zoom(id,role){{document.getElementById('zoom-img').src=document.querySelector(`#card-${{id}} img[data-role="${{role}}"]`).src;document.getElementById('zoom').showModal()}}IDS.forEach(paint);stats();</script></body></html>"""
+<script>
+const IDS={js_ids};
+const KEY="{PROTOCOL}:{source_hash}";
+const LABELS={{pending:"未确认",target:"对",rebox:"框偏",hard_negative:"不对"}};
+let d={{}},currentId=null,history=[];
+try{{d=JSON.parse(localStorage.getItem(KEY)||"{{}}")||{{}}}}catch(_e){{d={{}}}}
+function save(){{localStorage.setItem(KEY,JSON.stringify(d))}}
+function setCurrent(id,scroll=true){{
+  if(currentId)document.getElementById('card-'+currentId)?.classList.remove('current');
+  currentId=id;
+  const card=document.getElementById('card-'+id);
+  card?.classList.add('current');
+  if(scroll)card?.scrollIntoView({{behavior:'smooth',block:'start'}});
+}}
+function paint(id){{
+  const c=document.getElementById('card-'+id),v=d[id]||'pending';
+  c.dataset.choice=v;c.querySelector('.chip').textContent=LABELS[v];
+  c.querySelectorAll('[data-value]').forEach(b=>b.classList.toggle('active',b.dataset.value===v));
+}}
+function counts(){{
+  const c={{pending:0,target:0,rebox:0,hard_negative:0}};
+  IDS.forEach(id=>c[d[id]||'pending']++);return c;
+}}
+function stats(){{
+  const c=counts();
+  document.getElementById('stats').textContent=`对 ${{c.target}} · 框偏 ${{c.rebox}} · 不对 ${{c.hard_negative}} · 未确认 ${{c.pending}}`;
+}}
+function applyFilter(resetCurrent=true){{
+  const f=document.getElementById('filter').value;
+  document.querySelectorAll('.card').forEach(c=>c.classList.toggle('hidden',f!=='all'&&c.dataset.choice!==f));
+  const current=document.getElementById('card-'+currentId);
+  if(resetCurrent&&(!current||current.classList.contains('hidden'))){{
+    const first=document.querySelector('.card:not(.hidden)');if(first)setCurrent(first.dataset.id,false);
+  }}
+}}
+function advance(id){{
+  const start=IDS.indexOf(id);
+  for(let step=1;step<=IDS.length;step++){{
+    const candidate=IDS[(start+step)%IDS.length];
+    if((d[candidate]||'pending')==='pending'){{
+      const filter=document.getElementById('filter');
+      if(filter.value!=='all'&&filter.value!=='pending')filter.value='all';
+      applyFilter(false);setCurrent(candidate,true);return;
+    }}
+  }}
+  setCurrent(id,true);
+}}
+function choose(id,v){{
+  const previous=Object.prototype.hasOwnProperty.call(d,id)?d[id]:null;
+  if(previous!==v){{history.push({{id,previous}});d[id]=v;save();paint(id);stats();applyFilter(false)}}
+  advance(id);
+}}
+function undo(){{
+  const last=history.pop();if(!last)return;
+  if(last.previous===null)delete d[last.id];else d[last.id]=last.previous;
+  save();paint(last.id);stats();document.getElementById('filter').value='all';applyFilter(false);setCurrent(last.id,true);
+}}
+function clearAll(){{
+  if(!confirm('清空全部选择？'))return;
+  d={{}};history=[];save();IDS.forEach(paint);stats();document.getElementById('filter').value='all';applyFilter(false);setCurrent(IDS[0],true);
+}}
+function payload(){{return{{protocol:"{PROTOCOL}",source_sha256:"{source_hash}",total:IDS.length,counts:counts(),decisions:Object.fromEntries(IDS.map(id=>[id,d[id]||'pending']))}}}}
+async function copyResults(){{
+  const t=JSON.stringify(payload(),null,2),b=document.getElementById('export');b.value=t;b.select();
+  try{{await navigator.clipboard.writeText(t)}}catch(_e){{document.execCommand('copy')}}
+}}
+function zoom(id,role){{setCurrent(id,false);document.getElementById('zoom-img').src=document.querySelector(`#card-${{id}} img[data-role="${{role}}"]`).src;document.getElementById('zoom').showModal()}}
+document.addEventListener('keydown',e=>{{
+  if(e.metaKey||e.ctrlKey||e.altKey||e.target.matches('input,select,textarea'))return;
+  const mapping={{'1':'target','2':'rebox','3':'hard_negative'}};
+  if(mapping[e.key]&&currentId){{e.preventDefault();choose(currentId,mapping[e.key])}}
+  else if(e.key.toLowerCase()==='z'){{e.preventDefault();undo()}}
+}});
+IDS.forEach(paint);stats();applyFilter();if(!currentId)setCurrent(IDS[0],false);
+</script></body></html>"""
 
 
 def build(

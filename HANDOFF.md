@@ -95,9 +95,10 @@ Owner原始金标坐标时重新凭感觉画框。新血缘必须是`原始⭐�
 - 上述331个事件已全部做成逐张Owner审核页，不是抽样或订单：140币，首次conf median/p90=
   0.3627/0.6553，事件peak conf median/p90=0.6344/0.8699。每个事件物理隔离为原始因果输入、
   橙框审核副本、最多未来48根对照，共993张PNG；328张有完整48根、3张47根，最大读取时间
-  2026-05-03 23:45 UTC，0 holdout、0 labels、0 training-eligible、0预选。页面四类为真目标/
-  延续重复/框不准/明确负例，选择只存在本机并可导出完整JSON。331只够做错误分类种子，不够直接
-  承担第三臂全部hard negatives；Owner裁决后还要从多个未使用pre-holdout块补挖。审核入口：
+  2026-05-03 23:45 UTC，0 holdout、0 labels、0 training-eligible、0预选。审核V2已按Owner反馈
+  缩成三项：`1=对 / 2=框偏 / 3=不对`，按键后自动下一张，`Z`撤销；延续重复改由相邻事件关系
+  另行诊断，不再占Owner主按钮。选择只存在本机并可导出完整JSON。331只够做错误分类种子，
+  不够直接承担第三臂全部hard negatives；Owner裁决后还要从多个未使用pre-holdout块补挖。审核入口：
   `analysis/html/p2_owner_short_gold_center_hardneg_canary_review331_20260811.html`；报告：
   `analysis/html/p2_owner_short_gold_center_hardneg_canary_review331_report_20260811.html`。
 - Owner随后明确要求用刚训练权重回放最近2天并发TG，登记为该配置第1次消耗holdout。一次性OKX

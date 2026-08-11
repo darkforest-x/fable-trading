@@ -1,0 +1,33 @@
+{
+  "protocol": "owner_short_hardneg_canary_review331_v2_20260811",
+  "events_source": "analysis/output/owner_short_gold_center_preholdout_canary_20260503_v1/merged_hardneg/events.jsonl",
+  "events_source_sha256": "e81ec8088a77df1203da5cee8f18461ab1aae0426c087985ac23da78a540898e",
+  "rows": 331,
+  "symbols": 140,
+  "first_confidence": {
+    "median": 0.3626508414745331,
+    "p90": 0.65528804063797
+  },
+  "peak_confidence": {
+    "median": 0.6344247460365295,
+    "p90": 0.8699045777320862
+  },
+  "future_bars": {
+    "47": 3,
+    "48": 328
+  },
+  "max_future_time": "2026-05-03T23:45:00+00:00",
+  "snapshot_max_materialized_time": "2026-05-03T23:45:00+00:00",
+  "holdout_rows_materialized": 0,
+  "owner_decisions_preselected": 0,
+  "training_eligible": 0,
+  "html": "analysis/html/p2_owner_short_gold_center_hardneg_canary_review331_20260811.html",
+  "quality_gates": {
+    "exactly_331_unique_events": true,
+    "all_three_images_exist": true,
+    "future_strictly_preholdout": true,
+    "causal_has_no_future": true,
+    "nothing_training_eligible": true,
+    "no_label_directory": true
+  }
+}
