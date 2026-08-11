@@ -1,0 +1,71 @@
+{
+  "generated_at": "2026-08-10T22:21:05.860075+00:00",
+  "protocol": "local_signal_v2_stagea_randomcrop_v1_20260811",
+  "source_manifest": "/Users/zhangzc/fable-trading/datasets/dense_owner_w20_midbox/w20_manifest.json",
+  "dataset": "datasets/local_signal_v2_stagea_randomcrop_v1",
+  "seed": 20260807,
+  "stage": "A",
+  "mode": "C",
+  "production_eligible": false,
+  "window_len": [
+    20,
+    30
+  ],
+  "confirm_delays": [
+    1,
+    2
+  ],
+  "box_rule": "anchor-2..decision",
+  "position_buckets": [
+    {
+      "name": "left_mid",
+      "lo": 0.2,
+      "hi": 0.35,
+      "target_share": 0.2
+    },
+    {
+      "name": "mid",
+      "lo": 0.35,
+      "hi": 0.55,
+      "target_share": 0.35
+    },
+    {
+      "name": "mid_right",
+      "lo": 0.55,
+      "hi": 0.75,
+      "target_share": 0.3
+    },
+    {
+      "name": "right",
+      "lo": 0.75,
+      "hi": 0.85,
+      "target_share": 0.15
+    }
+  ],
+  "position_share_tolerance": 0.05,
+  "split_rule": "time-ordered decision events; last 15% val; full-window train/val separation with 150-bar purge",
+  "purge_bars": 150,
+  "strict_negative_time_split": true,
+  "holdout_start": "2026-05-04 00:00:00+00:00",
+  "full_window_before_holdout": true,
+  "counts": {
+    "train_positive": 2020,
+    "val_positive": 358,
+    "train_negative": 2020,
+    "val_negative": 358
+  },
+  "positive_bucket_counts": {
+    "left_mid": 479,
+    "mid": 851,
+    "mid_right": 697,
+    "right": 351
+  },
+  "skip_reasons": {
+    "source_holdout_or_no_time": 246,
+    "purge_zone": 11
+  },
+  "n_positive_manifest": 2378,
+  "n_negative_manifest": 2378,
+  "renderer_version": "yoyo.l1_detection.render.render_chart",
+  "holdout_read": false
+}

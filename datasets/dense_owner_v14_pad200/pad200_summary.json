@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-07-22T12:03:20.501396+00:00",
+  "protocol": "crop_after_box_pad200",
+  "src": "datasets/dense_owner_v11",
+  "out": "datasets/dense_owner_v14_pad200",
+  "window": 200,
+  "train_pad200": 2635,
+  "train_skip": 1406,
+  "train_skip_reasons": {
+    "mad_fail_both_high": 1318,
+    "short_history": 6,
+    "other": 82
+  },
+  "train_bg_copied": 4520,
+  "val_orig": 3169,
+  "empty_bg_policy": "copy_as_is",
+  "val_policy": "copy_orig_unchanged",
+  "mad_gate": true,
+  "win_index_default": "mad_vs_stored_png",
+  "skip_log": "datasets/dense_owner_v14_pad200/pad200_skip.log",
+  "note": "v11 stem index is MIXED; mad_gate=false corrupts okx_* pad200 boxes; mad_fail_both_high = best stored MAD>5 (drift / both_high skip)"
+}

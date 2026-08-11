@@ -1,0 +1,43 @@
+{
+  "generated_at": "2026-08-11T03:42:17.290959+00:00",
+  "protocol": "owner_eth_shortdelay_review200_codex_firstpass_v1_20260811",
+  "source": "analysis/output/owner_eth_shortdelay_dynamic_review200_v1",
+  "source_manifest_sha256": "734b9682f56c62b2c2f5d11ace7d1fd9f637764002dc46225b1d83d908d1f68b",
+  "review_method": "manual_visual_review_of_8_frozen_contact_sheets",
+  "counts": {
+    "mirror_excluded": 74,
+    "short_keep": 40,
+    "short_rebox_pending": 61,
+    "short_hard_negative": 25
+  },
+  "representative_board": "analysis/output/owner_eth_shortdelay_review200_codex_firstpass_v1/representative_review200_firstpass16.png",
+  "queue_sheets": [
+    "analysis/output/owner_eth_shortdelay_review200_codex_firstpass_v1/queues/short_keep_01.png",
+    "analysis/output/owner_eth_shortdelay_review200_codex_firstpass_v1/queues/short_keep_02.png",
+    "analysis/output/owner_eth_shortdelay_review200_codex_firstpass_v1/queues/short_rebox_pending_01.png",
+    "analysis/output/owner_eth_shortdelay_review200_codex_firstpass_v1/queues/short_rebox_pending_02.png",
+    "analysis/output/owner_eth_shortdelay_review200_codex_firstpass_v1/queues/short_rebox_pending_03.png",
+    "analysis/output/owner_eth_shortdelay_review200_codex_firstpass_v1/queues/short_hard_negative_01.png",
+    "analysis/output/owner_eth_shortdelay_review200_codex_firstpass_v1/queues/short_hard_negative_02.png",
+    "analysis/output/owner_eth_shortdelay_review200_codex_firstpass_v1/queues/mirror_excluded_01.png",
+    "analysis/output/owner_eth_shortdelay_review200_codex_firstpass_v1/queues/mirror_excluded_02.png",
+    "analysis/output/owner_eth_shortdelay_review200_codex_firstpass_v1/queues/mirror_excluded_03.png",
+    "analysis/output/owner_eth_shortdelay_review200_codex_firstpass_v1/queues/mirror_excluded_04.png"
+  ],
+  "owner_protocol_confirmed": true,
+  "sample_owner_confirmed": false,
+  "rebox_geometry_complete": false,
+  "quality_gates": {
+    "all_200_partitioned": true,
+    "four_statuses_present": true,
+    "partition_indices_unique": true,
+    "mirror_excluded_not_negative": true,
+    "rebox_queue_not_promoted": true,
+    "sample_owner_confirmation_not_faked": true,
+    "training_blocked": true,
+    "production_blocked": true
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "holdout_read": false
+}

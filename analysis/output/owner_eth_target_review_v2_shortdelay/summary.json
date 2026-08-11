@@ -1,0 +1,87 @@
+{
+  "generated_at": "2026-08-11T02:58:01.874799+00:00",
+  "protocol": "owner_eth_perfect_platform_shortdelay_review_v2_20260811",
+  "scope": "semantic_owner_review_only",
+  "stage_manifest": "datasets/local_signal_v2_stagea_randomcrop_v1/w20_manifest.json",
+  "stage_manifest_sha256": "ae4675a6ef4cec3b3d471dce99b000cef8736f7e72955cd0df2d1425073cde89",
+  "owner_geometry_manifest": "datasets/dense_owner_w20_midbox/w20_manifest.json",
+  "owner_geometry_manifest_sha256": "efabb41b1f53f160b9bffcf7e33c70cd0ebef05a328e0119e4caeefa9841b007",
+  "reference_image": "analysis/reference/owner_ethusdt_15m_semantic_delay_contract_20260811.png",
+  "reference_image_sha256": "c16970b5304a833663064f2dcec200271e94f235b2bd07639063fc0084e3663a",
+  "raw_market_data_read": false,
+  "holdout_read": false,
+  "validation_rows_used": 0,
+  "model_weights_read": false,
+  "later_return_used": false,
+  "model_confidence_used": false,
+  "automatic_training_labels": false,
+  "production_eligible": false,
+  "profile": {
+    "stage_manifest_rows": 2378,
+    "stage_train_rows": 2020,
+    "stage_val_rows_excluded": 358,
+    "owner_manifest_rows": 2635,
+    "joined_stage_events": 2378,
+    "eligible_train_events": 316,
+    "legacy_owner_physical_val_path_rows": 45,
+    "missing_owner_stems": [],
+    "missing_artifacts": [],
+    "box_width_counts": {
+      "5": 171,
+      "7": 145
+    },
+    "post_bar_counts": {
+      "3": 94,
+      "4": 107,
+      "5": 115
+    },
+    "position_band_counts": {
+      "right_band": 265,
+      "far_right_band": 15,
+      "middle_band": 36
+    }
+  },
+  "review_counts": {
+    "delay_3": 80,
+    "delay_4": 65,
+    "delay_5": 55
+  },
+  "review_total": 200,
+  "review_legacy_owner_physical_val_path_rows": 30,
+  "contract": {
+    "semantic_target": "owner-perfect-platform morphology",
+    "input_window_strategy": "dynamic shortest-sufficient context; never a fixed bar count",
+    "initial_probe_total_bars": [
+      14,
+      22
+    ],
+    "initial_probe_pre_core_bars": [
+      6,
+      10
+    ],
+    "owner_core_box_bars_observed": [
+      5,
+      7
+    ],
+    "owner_example_core_boundary": "between the two owner-marked vertical lines; approximately 6 bars",
+    "post_core_real_bars": [
+      3,
+      5
+    ],
+    "post_core_interpretation": "3 is preferred; 5 is the hard ceiling; 6-10 is excluded",
+    "box_position": "varies naturally with the shortest sufficient context; never frozen to a coordinate",
+    "training_goal": "high semantic precision and the earliest reliable hit within delay 3-5"
+  },
+  "quality_gates": {
+    "stage_event_ids_unique": true,
+    "owner_join_complete": true,
+    "artifacts_complete": true,
+    "original_owner_box_widths_restored": true,
+    "post_delay_3_to_5_only": true,
+    "multiple_position_bands": true,
+    "review_counts_frozen": true,
+    "val_excluded": true,
+    "semantic_status_unreviewed": true,
+    "geometry_status_unreviewed": true
+  }
+}

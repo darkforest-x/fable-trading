@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P1 Owner ETH 短延迟语义 Codex 一审（2026-08-11）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P1 Owner ETH 短延迟语义 Codex 一审（2026-08-11）</h1>
+<h2>结论先行</h2>
+<p>基于Owner当前唯一明确的ETH空头参考，已逐张复核30张动态短窗校准样本，并形成保守四桶：</p>
+<table><thead><tr>
+<th>一审桶</th>
+<th>数量</th>
+<th>含义</th>
+</tr></thead><tbody>
+<tr><td><code>short_keep</code></td><td>5</td><td>空头平台形态较干净，旧核心暂可保留</td></tr>
+<tr><td><code>short_rebox</code></td><td>4</td><td>空头形态可参考，但旧框吃进启动K；已提出新边界</td></tr>
+<tr><td><code>short_hard_negative</code></td><td>4</td><td>双向波动、核心过乱或无清晰启动，不符合precision-first目标</td></tr>
+<tr><td><code>mirror_unconfirmed</code></td><td>17</td><td>多头镜像；当前既不是正例也不是负例</td></tr>
+</tbody></table>
+<p>这不是Owner金标。全部30张仍为<code>owner_confirmed=false</code>、<code>training_eligible=false</code>、</p>
+<p><code>production_eligible=false</code>。本轮价值是把需要Owner回答的问题压缩成一张16例代表板，而不是</p>
+<p>擅自扩训练集。</p>
+<h2>一审依据</h2>
+<p>只使用Owner ETH参考已经表达的语义：</p>
+<p>1. 核心是均线密集附近的平台/拒绝/转折段；</p>
+<p>2. 核心约4–7根，明显快速启动K应落在框外；</p>
+<p>3. 核心后只看3–5根确认，3优先、5封顶；</p>
+<p>4. 优先精确度，双向大K、核心过乱或没有清晰离开均降级；</p>
+<p>5. 后续涨跌只能作确认上下文，不能反向自动定义正例。</p>
+<p>未写任何均线距离、K线幅度或收益阈值。每张是视觉一审，不是规则扫描。</p>
+<h2>为什么增加镜像隔离桶</h2>
+<p>当前参考只明确了空头形态。若把17张多头镜像混进同一正类，会把红绿K线和方向语义混在一起；</p>
+<p>若把它们当空头负例，又会让模型对相同平台结构接受冲突监督。因此在Owner明确下面三种策略前，</p>
+<p>它们不进入任何训练集合：</p>
+<ul>
+<li>仅训练空头单类，多头排除；</li>
+<li>多头与空头分成两个类别；</li>
+<li>做有明确颜色/方向变换合同的归一化同类。</li>
+</ul>
+<h2>改框结果</h2>
+<p>4张<code>short_rebox</code>均保留原有pre与post合同，只把核心右端前移，使明显启动侧K进入3–5根确认区。</p>
+<p>修正后核心宽仍为4–7根。代表板中：</p>
+<ul>
+<li>绿色实框：暂保留空头核心；</li>
+<li>橙色实框：Codex提出的新核心；</li>
+<li>红色虚框：旧核心中仍可见的启动侧部分；</li>
+<li>红叉：难负例候选；</li>
+<li>紫框：多头镜像隔离。</li>
+</ul>
+<h2>数据与安全</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>输入校准样本</td><td>30</td></tr>
+<tr><td>一审覆盖</td><td>30/30</td></tr>
+<tr><td>post范围</td><td>3–5</td></tr>
+<tr><td>改框后core范围</td><td>4–7</td></tr>
+<tr><td>holdout行物化</td><td>0</td></tr>
+<tr><td>Owner确认</td><td>0/30</td></tr>
+<tr><td>可训练</td><td>0/30</td></tr>
+</tbody></table>
+<p>原始CSV继续按每张图最终所需bar做前缀读取；未读取Stage-A val图/标签、模型权重、后续收益或</p>
+<p>holdout。未改阈值、成本、障碍、新鲜度、ACTIVE，未promote、未部署、未下单。</p>
+<h2>非适用指标</h2>
+<p>本轮未训练、未推理、未回测，因此AUC、mAP、置换p值、收益、胜率、匹配随机对照均不适用。</p>
+<p>一审数量不是模型precision，也不是母池正类率。</p>
+<h2>复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+PYTHONPATH=.:../yoyo-trading .venv/bin/python \
+  scripts/review_owner_eth_shortdelay_calibration.py
+
+PYTHONPATH=.:../yoyo-trading .venv/bin/pytest -q \
+  tests/test_review_owner_eth_shortdelay_calibration.py
+</code></pre>
+<p>产物：</p>
+<ul>
+<li><code>analysis/output/owner_eth_shortdelay_codex_firstpass_v1/first_pass.jsonl</code></li>
+<li><code>analysis/output/owner_eth_shortdelay_codex_firstpass_v1/summary.json</code></li>
+<li><code>analysis/output/owner_eth_shortdelay_codex_firstpass_v1/representative_semantic_calibration16.png</code></li>
+</ul>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>Codex一审可能理解错Owner的细微语义，尤其<code>short_keep</code>与<code>short_hard_negative</code>边界。</li>
+<li>4张新框只是逐图proposal，不应被抽象成固定偏移参数。</li>
+<li>当前方向范围未最终冻结；17张镜像不能在决策前进入二分类。</li>
+<li>只有Owner确认后的样本才能进入正式训练集，且仍需独立时间切分与难负例匹配。</li>
+</ul>
+<h2>下一步Owner门</h2>
+<p>Owner只需先看16例代表板并回答两件事：</p>
+<p>1. 绿/橙/红三类对空头“完美平台”的理解是否正确；</p>
+<p>2. 多头镜像选择排除、独立类别，还是方向归一化同类。</p>
+<p>确认后才把该语义扩到200张审查池，并生成正式短窗正例与同时间块难负例；不得在确认前训练。</p>
+</body>
+</html>

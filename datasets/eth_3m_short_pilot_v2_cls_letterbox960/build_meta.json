@@ -1,0 +1,50 @@
+{
+  "dataset": "eth_3m_short_pilot_v2_cls_letterbox960",
+  "task": "image_classification_current_tip_short_start",
+  "source_dataset": "/Users/zhangzc/fable-trading/datasets/eth_3m_short_pilot_v2",
+  "source_manifest_sha256": "c077cf75594c5f7d4f7ffd576e45cba42df99d6c885a418745bed4494b5473d0",
+  "source_build_meta_sha256": "9b6b40e10449f0881ea2a832592ec11c22dab97f75bfb98244ddf9213bee3f45",
+  "source_validation_receipt": "/Users/zhangzc/fable-trading/analysis/output/eth3m_short_pilot_v2_dataset/validation.json",
+  "source_validation_sha256": "8076c7f07a8c79317be3d73a71e07781e7493293c86aff83a4fe72799881c078",
+  "source_validation_status": "passed",
+  "prereg_sha256": "0b146f85671a4aa9e9e99ced9f577e7836785ba27714e2b24ac22c187904aa6f",
+  "image_size": 960,
+  "transform": "deterministic_white_square_letterbox_lanczos",
+  "full_frame_preserved": true,
+  "right_tip_preserved": true,
+  "classes": {
+    "no_start": 0,
+    "short_start": 1
+  },
+  "counts": {
+    "train": {
+      "total": 95,
+      "short_start": 22,
+      "no_start": 73,
+      "global_events": 53,
+      "positive_events": 21
+    },
+    "val": {
+      "total": 42,
+      "short_start": 8,
+      "no_start": 34,
+      "global_events": 18,
+      "positive_events": 8
+    }
+  },
+  "total": 137,
+  "included_roots": [
+    "train",
+    "val"
+  ],
+  "excluded_from_training": [
+    "weak_or_review",
+    "continuous_smoke",
+    "holdout"
+  ],
+  "owner_authorized_diagnostic_training": true,
+  "diagnostic_pilot_only": true,
+  "formal_gold_dataset": false,
+  "promotion_eligible": false,
+  "active_eligible": false
+}

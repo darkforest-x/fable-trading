@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-08-11T03:28:29.859127+00:00",
+  "protocol": "owner_eth_shortdelay_codex_firstpass_v1_20260811",
+  "source_calibration": "analysis/output/owner_eth_shortdelay_calibration30_v1",
+  "reviewer": "codex_visual_first_pass_against_owner_eth_short_reference",
+  "owner_confirmed": false,
+  "confirmed_direction_scope": "short_only_reference",
+  "mirror_policy": "isolate_as_mirror_unconfirmed; neither positive nor negative",
+  "counts": {
+    "short_hard_negative": 4,
+    "mirror_unconfirmed": 17,
+    "short_rebox": 4,
+    "short_keep": 5
+  },
+  "total": 30,
+  "representative_board": "analysis/output/owner_eth_shortdelay_codex_firstpass_v1/representative_semantic_calibration16.png",
+  "quality_gates": {
+    "all_30_reviewed": true,
+    "status_partition_complete": true,
+    "rebox_width_4_to_7": true,
+    "rebox_removes_launch_side_bars": true,
+    "post_3_to_5_only": true,
+    "holdout_rows_materialized_zero": true,
+    "owner_confirmation_not_faked": true,
+    "training_still_blocked": true,
+    "production_still_blocked": true
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "holdout_read": false
+}

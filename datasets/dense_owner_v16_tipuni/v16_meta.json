@@ -1,0 +1,21 @@
+{
+  "recipe": "v16 tipuni: fresh-render everything through one pipeline",
+  "src": "/Users/zhangzc/fable-trading/datasets/dense_owner_v14_pad200",
+  "stats": {
+    "train_neg_rerendered": 4295,
+    "train_pos": 2635,
+    "train_neg_skipped": 225,
+    "val_pos": 803,
+    "val_neg_rerendered": 1478,
+    "val_neg_skipped": 182,
+    "train_neg_livetip": 33
+  },
+  "neg_archive_mad": {
+    "n": 5773,
+    "mean": 3.151,
+    "p95": 10.94
+  },
+  "n_skipped": 407,
+  "confound_doc": "analysis/p_v15_dataset_confound.md",
+  "val_pos_fix_20260723": "v14 val was never tip-aligned; the 1509 mid-window val positives were replaced by v15 tipval's 803 _pad200 tip-aligned val positives (owner caught the mid-window box in the sample gallery)"
+}

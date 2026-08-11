@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P1 Owner ETH 短延迟动态窗口 30 张校准报告（2026-08-11）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P1 Owner ETH 短延迟动态窗口 30 张校准报告（2026-08-11）</h1>
+<h2>结论先行</h2>
+<p>已按最新语义合同重渲染 30 张短延迟校准图：核心后文 3/4/5 根各 10 张，前文 6–10 根、</p>
+<p>旧核心 proposal 5/7 根均衡覆盖，实际总窗 W14–22。红框中心自然落在 52.94%–70.59%，</p>
+<p>没有固定在最右侧或正中，说明动态最短上下文可以消除旧固定位置偏差。</p>
+<p>但这轮<strong>没有形成训练集</strong>。目视检查发现部分旧核心 proposal 仍把明显启动大K包进红框，</p>
+<p>证明“重新裁剪”只能修复输入位置分布，不能自动修复旧标签语义。全部 30 张保持</p>
+<p><code>semantic_status=unreviewed</code>、<code>geometry_status=unreviewed_legacy_core_proposal</code>、</p>
+<p><code>training_eligible=false</code>。</p>
+<h2>冻结合同</h2>
+<ul>
+<li>事件身份和 train/val 边界：修复后的 Stage-A manifest。</li>
+<li>核心候选：旧 Owner W20–30 manifest 的 5/7 根框，仅作 proposal。</li>
+<li>动态窗口：<code>pre 6–10 + core 5/7 + post 3/4/5</code>，总长由样本自然决定。</li>
+<li>后文：3 根优先、5 根硬封顶；不再使用 6–10 根。</li>
+<li>选择禁止项：后续收益、模型置信度、手写形态分数、Stage-A val 图/标签、holdout。</li>
+<li>生产资格：false；不得进入 forward、ACTIVE、部署或交易。</li>
+</ul>
+<h2>数据统计</h2>
+<table><thead><tr>
+<th>指标</th>
+<th>本轮结果</th>
+</tr></thead><tbody>
+<tr><td>Stage-A manifest</td><td>2,378</td></tr>
+<tr><td>可用 train proposal 母池</td><td>2,020</td></tr>
+<tr><td>校准样本</td><td>30</td></tr>
+<tr><td>post=3 / 4 / 5</td><td>10 / 10 / 10</td></tr>
+<tr><td>core=5 / 7</td><td>15 / 15</td></tr>
+<tr><td>pre=6 / 7 / 8 / 9 / 10</td><td>各 6</td></tr>
+<tr><td>唯一 event / symbol</td><td>30 / 30</td></tr>
+<tr><td>实际 W 范围</td><td>14–22</td></tr>
+<tr><td>红框中心范围</td><td>52.94%–70.59%</td></tr>
+<tr><td>Stage-A val 图/标签读取</td><td>0 / 0</td></tr>
+<tr><td>holdout 行物化</td><td>0</td></tr>
+</tbody></table>
+<p>val manifest 只读取时间边界元数据：最早 val 完整窗口开始于 2026-03-20 02:45 UTC，按 150 bars</p>
+<p>purge 得到 train 动态窗口最晚允许结束于 2026-03-18 13:15 UTC。30 张全部早于该边界；原始 CSV</p>
+<p>按所需最终 bar 的 <code>nrows</code> 前缀读取，不物化后续或 holdout 行。</p>
+<h2>与上一底座同表对照</h2>
+<table><thead><tr>
+<th>维度</th>
+<th>昨晚 Stage A</th>
+<th>本轮动态校准</th>
+</tr></thead><tbody>
+<tr><td>用途</td><td>宽位置离线表征底座</td><td>最新语义的几何/上下文校准</td></tr>
+<tr><td>输入窗口</td><td>W20–30</td><td>W14–22（首轮试探）</td></tr>
+<tr><td>框宽</td><td>4/5 根机械框</td><td>5/7 根旧 Owner proposal</td></tr>
+<tr><td>核心后真实 K</td><td>1–22 根</td><td>3/4/5 根</td></tr>
+<tr><td>位置策略</td><td>20%–85% 四桶随机</td><td>由 pre/core/post 自然产生</td></tr>
+<tr><td>本轮观察位置</td><td>四桶目标分布</td><td>52.94%–70.59%</td></tr>
+<tr><td>语义/边界金标</td><td>否</td><td>否，仍待 Owner 裁决</td></tr>
+<tr><td>训练资格</td><td>已完成 Stage-A 训练</td><td>false</td></tr>
+</tbody></table>
+<h2>结果解读</h2>
+<p>1. <strong>几何问题已被隔离</strong>：当 post 从 3 增至 5，框中心会自然由偏右向中间移动；无需固定一个</p>
+<p>   坐标，也无需右侧补白。</p>
+<p>2. <strong>短延迟与位置有关但不是位置模板</strong>：post=3 的框更靠右是时间合同的自然结果，不等于固定</p>
+<p>   右侧 shortcut；同组内仍因 pre/core 变化而移动。</p>
+<p>3. <strong>旧框语义仍不可靠</strong>：若旧 proposal 已包含启动大K，重渲染后红框仍会包含它。继续调整 crop</p>
+<p>   无法解决，下一门必须是类别与边界的人工语义裁决。</p>
+<h2>非适用指标</h2>
+<p>本轮未训练、未推理、未做方向性回测，因此 val AUC、置换检验 p、top-decile 毛/净收益、胜率、</p>
+<p>单特征基线和匹配随机对照组均不适用。任何从这 30 张图外推模型精度或交易收益的说法都不成立。</p>
+<h2>复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+PYTHONPATH=.:../yoyo-trading .venv/bin/python \
+  scripts/build_owner_eth_shortdelay_calibration.py
+
+PYTHONPATH=.:../yoyo-trading .venv/bin/pytest -q \
+  tests/test_build_owner_eth_shortdelay_calibration.py
+</code></pre>
+<p>输出：</p>
+<ul>
+<li><code>analysis/output/owner_eth_shortdelay_calibration30_v1/summary.json</code></li>
+<li><code>analysis/output/owner_eth_shortdelay_calibration30_v1/manifest.jsonl</code></li>
+<li><code>analysis/output/owner_eth_shortdelay_calibration30_v1/calibration_post3_10.png</code></li>
+<li><code>analysis/output/owner_eth_shortdelay_calibration30_v1/calibration_post4_10.png</code></li>
+<li><code>analysis/output/owner_eth_shortdelay_calibration30_v1/calibration_post5_10.png</code></li>
+</ul>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>30 张来自旧 Owner proposal，尚未被 Owner 按最新 ETH 两条边界语义重新裁决。</li>
+<li>三张大图能验证位置和上下文合同，不能验证母池正例率，也不能代替难负例设计。</li>
+<li>本轮使用 30 个不同币种以暴露形态差异；正式训练集仍需按时间块构建 train/val，并在 Owner</li>
+</ul>
+<p>  确认后的正例周围补入语义相近难负例。</p>
+<ul>
+<li>未读取 holdout，未改阈值、成本、障碍、新鲜度、ACTIVE，未 promote、未部署、未下单。</li>
+</ul>
+<h2>下一步</h2>
+<p>Owner 先在三张大图上确认红框方向是否终于正确。确认后不再继续调 crop 坐标，而是把这 30 张</p>
+<p>作为边界校准尺：逐张裁决“形态和框都准 / 形态像但框要改 / 不是目标”。只有通过的样本及其修正</p>
+<p>边界才能进入正式短窗数据集；随后补同时间块难负例，再训练 delay 3/4/5 单变量对照。</p>
+</body>
+</html>

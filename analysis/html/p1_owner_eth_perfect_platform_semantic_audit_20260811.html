@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ETH 完美平台语义审查：短延迟、多位置、不自动贴标签</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>ETH 完美平台语义审查：短延迟、多位置、不自动贴标签</h1>
+<blockquote><strong>已被同日二次修正版取代。</strong> Owner 随后用两条竖线明确核心边界，并把确认延迟收紧为 3–5 根（3 优先、5 封顶）；20–30 根固定输入和 delay 6–10 均退出新训练合同。当前以 <code>analysis/p1_owner_eth_shortdelay_boundary_contract_20260811.md</code> 为准。</blockquote>
+<p>日期：2026-08-11  </p>
+<p>状态：<strong>200 张 Owner 语义审查页已完成；尚未生成新训练标签，尚未训练新模型</strong></p>
+<h2>Executive Summary</h2>
+<ul>
+<li><strong>目标合同已经纠正。</strong> <code>11根前文 + 中间6根 + 11根后文</code> 只是曾用于解释的一张示意，</li>
+</ul>
+<p>  不是训练模板。当前合同是：20–30 根真实 K、核心约 4–7 根、位置自然分散、框后 0–10 根；</p>
+<p>  <strong>10 根是最大容忍延迟，不是目标延迟，越早可靠检出越好。</strong></p>
+<ul>
+<li><strong>旧资产不丢，而且找到了更正确的复用方式。</strong> 昨晚 Stage A 的 event_id/时间 split 与旧</li>
+</ul>
+<p>  <code>dense_owner_w20_midbox</code> 原始 Owner 框 2,378/2,378 完整对应。Stage A 负责宽位置表征；</p>
+<p>  原始 manifest 恢复真实 5/7 根 Owner 框，避免继续使用机械生成的 4/5 根 Mode-C 框。</p>
+<ul>
+<li><strong>可复用训练期语义母池为 1,120 张。</strong> 它们全部来自 Stage-A train、窗口 20–30 根、原始</li>
+</ul>
+<p>  Owner 框 5/7 根、框后 0–10 根；358 张 Stage-A val 全部隔离，没有参与筛选。</p>
+<ul>
+<li><strong>现在不能直接训练。</strong> 1,120 张只是“过去 Owner 框 + 正确几何/时间合同”的候选母池，尚未</li>
+</ul>
+<p>  按今天 ETH 终极目标重新确认语义。已生成 200 张可交互审查页；在 Owner 裁决前全部标记</p>
+<p>  <code>semantic_status=unreviewed / training_eligible=false</code>。</p>
+<p><a href="../reference/owner_ethusdt_15m_semantic_delay_contract_20260811.png">查看最新训练与延迟合同示意图</a></p>
+<h2>固定坐标不是标签，完美平台语义才是标签</h2>
+<p>Owner 的目标不是训练出一个“看到红框在某个 X 坐标就开火”的模型，而是让 YOLO 在不同真实</p>
+<p>上下文中都能识别同一种完美平台。窗口长度、框位置和后文根数是模型必须抵抗的干扰变量；</p>
+<p>核心平台是否成立才是正例语义。</p>
+<p>因此本轮明确撤销两条错误做法：</p>
+<p>1. 不再用“框中心 40%–60%”筛正例；框可以自然偏右、中右或靠中，但不能整批固定在一个位置。</p>
+<p>2. 不再用“框后 8–12 根”筛正例；0 是最早检测，10 是最大容忍，超过 10 不进入当前母池。</p>
+<p>同样，本轮没有按后续跌幅、未来收益或昨晚模型置信度给候选排序。后面已经走出来只能帮助测</p>
+<p>延迟，不能反过来自动证明红框里的平台语义正确。</p>
+<h2>原始 5/7 根 Owner 框比 Stage A 机械 4/5 根更接近目标</h2>
+<table><thead><tr>
+<th>证据</th>
+<th>结果</th>
+<th>影响</th>
+</tr></thead><tbody>
+<tr><td>Stage A 事件数</td><td>2,378</td><td>修复后的 event_id、时间切分与 pre-holdout 资格继续复用</td></tr>
+<tr><td>与旧 Owner manifest 联结</td><td>2,378 / 2,378</td><td>无 orphan、无重复，能够恢复原始框语义</td></tr>
+<tr><td>Stage A 当前框宽</td><td>4 根 1,188；5 根 1,190</td><td>来自 <code>anchor-2..decision</code> 机械规则，不是原始 Owner 框</td></tr>
+<tr><td>原始 Owner 框宽</td><td>5 根 1,249；7 根 1,129</td><td>完整覆盖 Owner 早先真正画过的两种核心宽度</td></tr>
+<tr><td>当前训练期、delay≤10 母池</td><td><strong>1,120</strong></td><td>可进入语义复核，但尚不能直接成为新训练金标</td></tr>
+</tbody></table>
+<p>这是本轮最重要的数据质量发现：昨晚 Stage A 权重仍然有价值，因为它通过了位置不变性诊断；</p>
+<p>但下一轮精调不应继续把机械 4/5 根框当最终语义。正确做法是用 Stage A <code>best.pt</code> 作初始化，</p>
+<p>并把原始 5/7 根 Owner 核心重新置于修复后的时间 split 下。</p>
+<h2>1,120 张母池支持短延迟和多位置，不需要固定中间</h2>
+<p>框后根数在 0–10 之间接近均匀覆盖：</p>
+<table><thead><tr>
+<th>框后真实 K</th>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+<th>10</th>
+</tr></thead><tbody>
+<tr><td>训练期候选</td><td>95</td><td>101</td><td>99</td><td>94</td><td>107</td><td>115</td><td>107</td><td>95</td><td>120</td><td>86</td><td>101</td></tr>
+</tbody></table>
+<p>框中心自然位置分布：</p>
+<table><thead><tr>
+<th>位置带</th>
+<th>数量</th>
+<th>占 1,120</th>
+</tr></thead><tbody>
+<tr><td>中点左侧</td><td>123</td><td>10.98%</td></tr>
+<tr><td>中间带</td><td>360</td><td>32.14%</td></tr>
+<tr><td>右侧带</td><td>376</td><td>33.57%</td></tr>
+<tr><td>远右带</td><td>261</td><td>23.30%</td></tr>
+</tbody></table>
+<p>这些位置不是人为验收阈值，只用于证明母池没有被固定成“全部最右”或“全部正中”。短延迟样本</p>
+<p>自然更偏右，长一点的确认样本自然向中部移动；训练目标是让模型跨位置保持语义识别，而不是</p>
+<p>强行把各带变成相同数量。</p>
+<h2>200 张审查页已经把“语义确认”与“位置/延迟覆盖”分开</h2>
+<p>审查页采用可复现的 <code>delay × box-width × position</code> 分层抽样，不做形态自动评分：</p>
+<table><thead><tr>
+<th>审查组</th>
+<th>数量</th>
+<th>用途</th>
+</tr></thead><tbody>
+<tr><td>0–2 根后文</td><td>80</td><td>优先审查最早可见形态，避免默认依赖后文</td></tr>
+<tr><td>3–5 根后文</td><td>70</td><td>审查短确认后是否更稳定，同时保持较低延迟</td></tr>
+<tr><td>6–10 根后文</td><td>50</td><td>覆盖难例和最大容忍区间，不把它当默认目标</td></tr>
+<tr><td>合计</td><td><strong>200</strong></td><td>110 个币种，2025-06-08 至 2026-03-18</td></tr>
+</tbody></table>
+<p>页面支持“完美平台 / 接近待定 / 不是”、分组筛选、localStorage 暂存和 JSON 导出。导出的</p>
+<p>Owner 选择才是后续语义标签；当前候选分组本身不是标签。</p>
+<p>审查页：<code>analysis/output/owner_eth_target_review_v1/index.html</code>。</p>
+<h2>数据质量裁决</h2>
+<table><thead><tr>
+<th>发现</th>
+<th>证据</th>
+<th>严重度</th>
+<th>置信度</th>
+<th>裁决</th>
+</tr></thead><tbody>
+<tr><td>固定居中 + 8–12 后文合同错误</td><td>Owner 明确 10 为最大延迟，位置不得固定</td><td>Critical</td><td>高</td><td>已撤销并更新活文档</td></tr>
+<tr><td>Stage A 框宽丢失部分原始语义</td><td>4/5 机械框 vs 5/7 Owner 原框</td><td>High</td><td>高</td><td>精调恢复原始 5/7 框</td></tr>
+<tr><td>位置 shortcut 已明显改善</td><td>Stage A 四桶 recall spread 14.72pp、Spearman=-0.134</td><td>Medium</td><td>中高</td><td>保留 Stage A <code>best.pt</code> 和宽位置 replay</td></tr>
+<tr><td>精确度仍不可用</td><td>conf=0.10 precision 22.66%；conf=0.20 precision 30.67% 但 recall 13.97%</td><td>High</td><td>高</td><td>需语义清洗 + hard negatives，不能抬阈值解决</td></tr>
+<tr><td>当前母池语义纯度未知</td><td>200/1,120 尚未 Owner 复核</td><td>Critical</td><td>高</td><td>Owner 导出裁决前禁止训练</td></tr>
+<tr><td>hard negatives 缺失</td><td>Stage A hard negative=0</td><td>High</td><td>高</td><td>语义正例确认后再构建匹配难负例</td></tr>
+</tbody></table>
+<h2>下一步：先完成语义裁决，再做单变量精调</h2>
+<p>1. Owner 打开 200 张审查页，优先看 0–2 根后文组，并导出 JSON。</p>
+<p>2. 导入裁决后，按 delay、框宽、位置和时间段统计 <code>yes/no/uncertain</code> 纯度；如果某组语义污染</p>
+<p>   明显，修的是标签来源，不是随手改 YOLO 阈值。</p>
+<p>3. 构建新的 precision fine-tune 集：确认正例使用原始 5/7 根框；保留一部分 Stage A 宽位置</p>
+<p>   replay，防止重新学会最右/正中 shortcut；负例按相同窗口、延迟和位置分布匹配。</p>
+<p>4. 第一轮只加入经过确认的 hard negatives，固定 Stage A <code>best.pt</code>、seed 和训练配方，遵守</p>
+<p>   单变量纪律。</p>
+<p>5. 在独立 pre-holdout 时间块渲染 delay 0..10 的同事件序列，报告每一档 event precision、</p>
+<p>   recall、FP/1000 和首次命中 delay；选择满足精确度要求的最短延迟，而不是把 10 写死。</p>
+<h2>Further questions</h2>
+<ul>
+<li>当前 ETH 参考明确展示空头启动。如果“完美平台”还包括多头镜像，后续必须明确是同一类的</li>
+</ul>
+<p>  镜像归一化，还是两个独立类别；不能在没有声明的情况下把多空语义混进一个正类。</p>
+<ul>
+<li>precision 的最低验收值仍需在新训练前由 Owner 冻结；本轮只确认“精确度优先”，没有擅自</li>
+</ul>
+<p>  发明数值门。</p>
+<h2>Caveats and assumptions</h2>
+<ul>
+<li>本轮只读取既有 manifest、标签与 pre-holdout PNG；没有打开原始行情、holdout、Stage-A val</li>
+</ul>
+<p>  图片、模型权重或未来收益。</p>
+<ul>
+<li>旧 <code>dense_owner_w20_midbox</code> 的历史 split 和 246 条 holdout 资格问题仍然存在；本轮没有直接</li>
+</ul>
+<p>  恢复该数据集训练，而是只取与修复后 Stage-A train event_id 对应的 1,120 张候选。</p>
+<ul>
+<li>200 张代表抽样能测语义纯度和分组污染，但不能在 Owner 裁决前声称整个 1,120 张母池已经</li>
+</ul>
+<p>  合格。</p>
+<ul>
+<li>AUC、置换检验、top-decile 收益、胜率和匹配随机对照组均为 N/A：本轮是 YOLO 检测层的</li>
+</ul>
+<p>  数据语义审查，不是判断层或方向性回测。</p>
+<ul>
+<li><code>production_eligible=false</code>；未训练新模型、未读取 holdout、未 promote、未部署、未下单。</li>
+</ul>
+<h2>复现命令</h2>
+<pre><code>
+python3 scripts/build_owner_eth_target_review.py
+python3 scripts/md_to_html.py \
+  analysis/p1_owner_eth_perfect_platform_semantic_audit_20260811.md \
+  --out-dir analysis/html
+</code></pre>
+<p>机器可读产物：</p>
+<ul>
+<li><code>analysis/output/owner_eth_target_review_v1/summary.json</code></li>
+<li><code>analysis/output/owner_eth_target_review_v1/contract.json</code></li>
+<li><code>analysis/output/owner_eth_target_review_v1/candidates.jsonl</code></li>
+<li><code>analysis/output/owner_eth_target_review_v1/candidates.csv</code></li>
+</ul>
+</body>
+</html>

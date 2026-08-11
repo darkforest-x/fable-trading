@@ -1,0 +1,116 @@
+{
+  "dataset": "eth_3m_short_pilot_v2",
+  "task": "image_classification_current_tip_short_start",
+  "classes": {
+    "no_start": 0,
+    "short_start": 1
+  },
+  "source_detail": "/Users/zhangzc/fable-trading/analysis/output/eth3m_v10_label_timing/task_timing_metrics.csv",
+  "source_calibration": "/Users/zhangzc/fable-trading/datasets/eth_3m_entry_timing_calibration30/manifest.csv",
+  "source_ohlc": "/Users/zhangzc/fable-trading/data/kline_fetched/okx_ETH_USDT_SWAP_3m_57705.csv",
+  "holdout_start": "2026-05-04T00:00:00+00:00",
+  "holdout_consumed_by_build": false,
+  "causal_window_bars": 200,
+  "human_review_horizon_bars": 60,
+  "bar_minutes": 3,
+  "confirmed_positive_anchor": "current_T_only",
+  "weak_review_offsets": [
+    -1,
+    1,
+    2,
+    3
+  ],
+  "weak_review_original_v10_in_train_val": false,
+  "label_contract": "current causal tip classification; only owner-confirmed current T is short_start; manual owner-no rows are current-tip negatives; T-1/T+1/T+2/T+3/original_v10 are blank-target weak/review rows",
+  "owner_timing_evidence": "batch confirmation in conversation for the fixed 30-image calibration pack; not 30 row-level Label Studio annotations",
+  "counts": {
+    "train": {
+      "total": 95,
+      "short_start": 22,
+      "no_start": 73,
+      "global_events": 53,
+      "positive_events": 21
+    },
+    "val": {
+      "total": 42,
+      "short_start": 8,
+      "no_start": 34,
+      "global_events": 18,
+      "positive_events": 8
+    }
+  },
+  "totals": {
+    "total": 137,
+    "short_start": 30,
+    "no_start": 107,
+    "global_events": 71,
+    "independent_positive_events": 29,
+    "sealed_smoke_bars": 7089,
+    "weak_or_review_rows": 150
+  },
+  "sample_kind_counts": {
+    "owner_no_tip_negative": 107,
+    "confirmed_current_tip": 30
+  },
+  "calibration_audit": {
+    "batch_confirmed_calibration_rows": 30,
+    "independent_positive_events": 29,
+    "overlapping_calibration_rows_grouped": 1
+  },
+  "sequence_audit": {
+    "weak_review_rows_withheld_from_train_val": 150,
+    "weak_review_offsets_per_calibration": [
+      -1,
+      1,
+      2,
+      3
+    ],
+    "weak_review_original_v10_rows": 30,
+    "manual_owner_no_rows": 107
+  },
+  "exact_duplicate_samples_removed": 0,
+  "split_audit": {
+    "target_train_positive_event_fraction": 0.75,
+    "actual_train_positive_event_fraction": 0.7241379310344828,
+    "train_positive_events": 21,
+    "val_positive_events": 8,
+    "last_train_anchor": "2026-04-18T07:39:00+00:00",
+    "last_train_label_end": "2026-04-18T10:39:00+00:00",
+    "first_val_input_start": "2026-04-18T16:36:00+00:00",
+    "first_val_anchor": "2026-04-19T02:33:00+00:00",
+    "anchor_embargo_bars": 378,
+    "required_anchor_embargo_bars": 260
+  },
+  "automatic_acceptance": {
+    "all_anchors_pre_holdout": true,
+    "all_label_ends_pre_holdout": true,
+    "all_inputs_end_at_decision_tip": true,
+    "all_input_windows_200_bars": true,
+    "future_outcome_columns_loaded": [],
+    "positive_negative_anchor_conflicts": 0,
+    "cross_split_event_count": 0,
+    "cross_split_input_overlap_pairs": 0,
+    "first_val_input_after_last_train_label": true,
+    "image_sha256_duplicate_groups": 0,
+    "manifest_image_count_matches": true
+  },
+  "diagnostic_pilot_only": true,
+  "formal_gold_dataset": false,
+  "promotion_eligible": false,
+  "training_started": false,
+  "status": {
+    "build_valid": true,
+    "diagnostic_pilot_only": true,
+    "pilot_training_eligible": false,
+    "formal_gold_dataset": false,
+    "promotion_eligible": false,
+    "training_started": false
+  },
+  "risks": [
+    "Only batch-confirmed timing anchors are positive; independent positive events remain pilot-scale.",
+    "All human-reviewed sources came from the v10 candidate pool, so shape-selection bias remains.",
+    "Owner-no rows are current-tip negatives, not clean whole-image backgrounds.",
+    "The contiguous smoke block is deliberately unlabeled and must not be converted to negatives automatically.",
+    "Static val is development-only; continuous replay and owner-approved density gates remain required before promotion."
+  ]
+}

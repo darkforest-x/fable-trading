@@ -1,0 +1,1955 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Owner确认：61张空头核心改框</title>
+  <style>
+    :root { --ink:#17212b; --muted:#607080; --line:#d9e0e6; --bg:#f4f7f9; --card:#fff;
+      --orange:#d98700; --green:#198754; --red:#dc3545; --blue:#1769aa; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+    .top { position:sticky; top:0; z-index:20; background:rgba(255,255,255,.97); border-bottom:1px solid var(--line); box-shadow:0 3px 16px rgba(18,35,52,.08); }
+    .top-inner { max-width:1480px; margin:auto; padding:16px 22px 14px; }
+    h1 { margin:0 0 8px; font-size:25px; }
+    .explain { margin:0; color:#354758; line-height:1.55; }
+    .legend { display:flex; flex-wrap:wrap; gap:8px 18px; margin:10px 0; font-size:14px; }
+    .legend b.orange { color:var(--orange); } .legend b.red { color:var(--red); }
+    .toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px; }
+    button, select { font:inherit; }
+    .toolbar button, .toolbar select { border:1px solid #bac6d0; background:#fff; color:var(--ink); border-radius:8px; padding:8px 12px; cursor:pointer; }
+    .toolbar button.primary { background:var(--green); color:#fff; border-color:var(--green); font-weight:700; }
+    .toolbar button.copy { background:var(--blue); color:#fff; border-color:var(--blue); font-weight:700; }
+    .stats { margin-left:auto; font-weight:700; font-variant-numeric:tabular-nums; }
+    main { max-width:1480px; margin:0 auto; padding:20px 18px 70px; }
+    .how { background:#fff8e7; border:1px solid #f0d08c; border-radius:10px; padding:12px 15px; margin-bottom:16px; line-height:1.55; }
+    .source-note { background:#eaf4ff; border:1px solid #a9cdeb; border-radius:10px; padding:12px 15px; margin-bottom:12px; line-height:1.55; }
+    .grid { display:grid; grid-template-columns:1fr; gap:18px; }
+    .sample-card { background:var(--card); border:3px solid transparent; border-radius:12px; overflow:hidden; box-shadow:0 2px 11px rgba(30,50,70,.09); scroll-margin-top:210px; }
+    .sample-card[data-decision="accept"] { border-color:var(--green); }
+    .sample-card[data-decision="adjust"] { border-color:var(--orange); }
+    .sample-card[data-decision="reject"] { border-color:var(--red); }
+    .card-head { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--line); }
+    .sample-id { font-weight:800; margin-right:10px; } .symbol { color:var(--muted); font-size:14px; }
+    .decision-chip { background:#eef2f5; color:#586a79; border-radius:999px; padding:4px 9px; font-size:13px; font-weight:700; }
+    .image-button { display:block; width:100%; padding:0; margin:0; border:0; background:#fff; cursor:zoom-in; }
+    .image-button img { display:block; width:100%; height:auto; aspect-ratio:1280/742; object-fit:contain; }
+    .image-pair { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); }
+    .image-pair > div { background:#fff; }
+    .panel-label { padding:7px 10px; font-size:13px; font-weight:800; color:#304557; background:#eef4f7; }
+    .future-label { color:#873a77; background:#f8edf7; }
+    .geometry { display:flex; flex-wrap:wrap; gap:6px 14px; padding:9px 12px; color:#465867; font-size:13px; border-top:1px solid #eef1f3; }
+    .geometry b { color:var(--orange); }
+    .decision-buttons { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:0 12px 12px; }
+    .decision-buttons button { border:1px solid #c4ced6; background:#fff; border-radius:8px; padding:9px 5px; cursor:pointer; }
+    .decision-buttons button[data-choice="accept"].active { background:var(--green); color:white; border-color:var(--green); }
+    .decision-buttons button[data-choice="adjust"].active { background:var(--orange); color:white; border-color:var(--orange); }
+    .decision-buttons button[data-choice="reject"].active { background:var(--red); color:white; border-color:var(--red); }
+    textarea { width:100%; min-height:145px; margin-top:18px; border:1px solid #b9c5ce; border-radius:10px; padding:10px; font:12px ui-monospace,SFMono-Regular,Menlo,monospace; background:#fff; }
+    dialog { width:min(96vw,1500px); max-height:96vh; border:0; border-radius:12px; padding:10px; box-shadow:0 18px 70px rgba(0,0,0,.35); }
+    dialog::backdrop { background:rgba(0,0,0,.72); } dialog img { display:block; width:100%; height:auto; }
+    .zoom-close { float:right; margin-bottom:8px; border:0; border-radius:7px; padding:7px 11px; cursor:pointer; }
+    .hidden { display:none !important; }
+    @media (max-width:900px) { .image-pair { grid-template-columns:1fr; } .stats { width:100%; margin:4px 0 0; } .top { position:static; } .sample-card { scroll-margin-top:10px; } }
+  </style>
+</head>
+<body>
+  <header class="top"><div class="top-inner">
+    <h1>Owner确认：61张空头核心改框</h1>
+    <p class="explain">这里才是确认页面。每个样本左边是<strong>真正训练输入短窗</strong>，右边额外展示<strong>未来48根K线（12小时）</strong>帮助你人工判断。未来走势只用于审核，绝不进入训练图片或标签。</p>
+    <div class="legend">
+      <span><b class="orange">橙框</b>＝拟采用的新核心</span><span><b class="red">红虚框</b>＝被替换的旧核心</span>
+      <span>右图紫色区域＝训练窗之后的未来</span>
+      <span>61张仍未写入训练标签</span><span>当前不会训练或读取holdout</span>
+    </div>
+    <div class="toolbar">
+      <button class="primary" type="button" onclick="setAllAccepted()">✓ 浏览后全部认可</button>
+      <button type="button" onclick="clearAll()">清空选择</button>
+      <select id="filter" onchange="applyFilter()" aria-label="筛选裁决状态">
+        <option value="all">显示全部</option><option value="pending">只看未确认</option>
+        <option value="accept">只看已认可</option><option value="adjust">只看还要改</option><option value="reject">只看剔除</option>
+      </select>
+      <button class="copy" type="button" onclick="copyResults()">复制确认结果</button>
+      <span class="stats" id="stats">未确认 61 / 61</span>
+    </div>
+  </div></header>
+  <main>
+    <div class="source-note"><strong>数据来源与数量：</strong>本页61张属于当前200张语义校准包；200张是从Stage-A的2,020个train正事件中、满足旧框后3–5根条件的316个候选里抽出的，不是最终训练集。Stage-A正事件总池为2,378个（train 2,020 / val 358），本机15分钟原始缓存最长约430天。这里“3–5”是3–5根15分钟K线（45–75分钟），不是3–5天。</div>
+    <div class="how"><strong>最简单的确认方法：</strong>先从上到下浏览；如果整体都对，点击“浏览后全部认可”，再点“复制确认结果”，把下面生成的JSON直接粘贴回对话。如果只有少数不对，就只给那些样本点“还要改”或“剔除”。页面会在本机保存选择。</div>
+    <section class="grid" id="grid">
+      <article class="sample-card" id="card-R006_01dc726f31b26d73" data-sample="R006_01dc726f31b26d73" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R006_01dc726f31b26d73</span><span class="symbol">SOL_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R006_01dc726f31b26d73','train')" aria-label="放大 R006_01dc726f31b26d73 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R006_01dc726f31b26d73.png" alt="R006_01dc726f31b26d73 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R006_01dc726f31b26d73.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R006_01dc726f31b26d73','future')" aria-label="放大 R006_01dc726f31b26d73 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R006_01dc726f31b26d73_future48.png" alt="R006_01dc726f31b26d73 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R006_01dc726f31b26d73_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>3–7</b>（5根）</span>
+          <span>旧框 8–14</span>
+          <span>确认 3根</span>
+          <span>完整窗 W16</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R006_01dc726f31b26d73 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R006_01dc726f31b26d73','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R006_01dc726f31b26d73','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R006_01dc726f31b26d73','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R008_6769ca2aacf56f21" data-sample="R008_6769ca2aacf56f21" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R008_6769ca2aacf56f21</span><span class="symbol">GMX_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R008_6769ca2aacf56f21','train')" aria-label="放大 R008_6769ca2aacf56f21 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R008_6769ca2aacf56f21.png" alt="R008_6769ca2aacf56f21 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R008_6769ca2aacf56f21.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R008_6769ca2aacf56f21','future')" aria-label="放大 R008_6769ca2aacf56f21 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R008_6769ca2aacf56f21_future48.png" alt="R008_6769ca2aacf56f21 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R008_6769ca2aacf56f21_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>5–9</b>（5根）</span>
+          <span>旧框 10–14</span>
+          <span>确认 3根</span>
+          <span>完整窗 W18</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R008_6769ca2aacf56f21 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R008_6769ca2aacf56f21','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R008_6769ca2aacf56f21','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R008_6769ca2aacf56f21','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R012_b1bd3858922a0326" data-sample="R012_b1bd3858922a0326" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R012_b1bd3858922a0326</span><span class="symbol">INJ_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R012_b1bd3858922a0326','train')" aria-label="放大 R012_b1bd3858922a0326 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R012_b1bd3858922a0326.png" alt="R012_b1bd3858922a0326 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R012_b1bd3858922a0326.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R012_b1bd3858922a0326','future')" aria-label="放大 R012_b1bd3858922a0326 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R012_b1bd3858922a0326_future48.png" alt="R012_b1bd3858922a0326 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R012_b1bd3858922a0326_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>1–5</b>（5根）</span>
+          <span>旧框 6–12</span>
+          <span>确认 3根</span>
+          <span>完整窗 W14</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R012_b1bd3858922a0326 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R012_b1bd3858922a0326','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R012_b1bd3858922a0326','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R012_b1bd3858922a0326','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R013_fe443f9102b0662c" data-sample="R013_fe443f9102b0662c" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R013_fe443f9102b0662c</span><span class="symbol">FLOKI_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R013_fe443f9102b0662c','train')" aria-label="放大 R013_fe443f9102b0662c 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R013_fe443f9102b0662c.png" alt="R013_fe443f9102b0662c 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R013_fe443f9102b0662c.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R013_fe443f9102b0662c','future')" aria-label="放大 R013_fe443f9102b0662c 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R013_fe443f9102b0662c_future48.png" alt="R013_fe443f9102b0662c 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R013_fe443f9102b0662c_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>2–6</b>（5根）</span>
+          <span>旧框 7–11</span>
+          <span>确认 3根</span>
+          <span>完整窗 W15</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R013_fe443f9102b0662c 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R013_fe443f9102b0662c','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R013_fe443f9102b0662c','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R013_fe443f9102b0662c','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R019_edbd7578debbb66a" data-sample="R019_edbd7578debbb66a" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R019_edbd7578debbb66a</span><span class="symbol">ANIME_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R019_edbd7578debbb66a','train')" aria-label="放大 R019_edbd7578debbb66a 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R019_edbd7578debbb66a.png" alt="R019_edbd7578debbb66a 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R019_edbd7578debbb66a.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R019_edbd7578debbb66a','future')" aria-label="放大 R019_edbd7578debbb66a 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R019_edbd7578debbb66a_future48.png" alt="R019_edbd7578debbb66a 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R019_edbd7578debbb66a_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>3–7</b>（5根）</span>
+          <span>旧框 8–12</span>
+          <span>确认 3根</span>
+          <span>完整窗 W16</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R019_edbd7578debbb66a 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R019_edbd7578debbb66a','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R019_edbd7578debbb66a','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R019_edbd7578debbb66a','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R021_24b77936dd103271" data-sample="R021_24b77936dd103271" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R021_24b77936dd103271</span><span class="symbol">BAND_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R021_24b77936dd103271','train')" aria-label="放大 R021_24b77936dd103271 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R021_24b77936dd103271.png" alt="R021_24b77936dd103271 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R021_24b77936dd103271.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R021_24b77936dd103271','future')" aria-label="放大 R021_24b77936dd103271 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R021_24b77936dd103271_future48.png" alt="R021_24b77936dd103271 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R021_24b77936dd103271_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>9–14</b>（6根）</span>
+          <span>旧框 9–15</span>
+          <span>确认 3根</span>
+          <span>完整窗 W18</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R021_24b77936dd103271 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R021_24b77936dd103271','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R021_24b77936dd103271','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R021_24b77936dd103271','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R024_503ba79a3c6f9f1e" data-sample="R024_503ba79a3c6f9f1e" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R024_503ba79a3c6f9f1e</span><span class="symbol">H_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R024_503ba79a3c6f9f1e','train')" aria-label="放大 R024_503ba79a3c6f9f1e 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R024_503ba79a3c6f9f1e.png" alt="R024_503ba79a3c6f9f1e 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R024_503ba79a3c6f9f1e.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R024_503ba79a3c6f9f1e','future')" aria-label="放大 R024_503ba79a3c6f9f1e 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R024_503ba79a3c6f9f1e_future48.png" alt="R024_503ba79a3c6f9f1e 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R024_503ba79a3c6f9f1e_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>6–10</b>（5根）</span>
+          <span>旧框 10–16</span>
+          <span>确认 3根</span>
+          <span>完整窗 W18</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R024_503ba79a3c6f9f1e 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R024_503ba79a3c6f9f1e','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R024_503ba79a3c6f9f1e','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R024_503ba79a3c6f9f1e','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R034_09d0410612322c7f" data-sample="R034_09d0410612322c7f" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R034_09d0410612322c7f</span><span class="symbol">KSM_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R034_09d0410612322c7f','train')" aria-label="放大 R034_09d0410612322c7f 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R034_09d0410612322c7f.png" alt="R034_09d0410612322c7f 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R034_09d0410612322c7f.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R034_09d0410612322c7f','future')" aria-label="放大 R034_09d0410612322c7f 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R034_09d0410612322c7f_future48.png" alt="R034_09d0410612322c7f 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R034_09d0410612322c7f_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>2–6</b>（5根）</span>
+          <span>旧框 7–11</span>
+          <span>确认 3根</span>
+          <span>完整窗 W15</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R034_09d0410612322c7f 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R034_09d0410612322c7f','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R034_09d0410612322c7f','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R034_09d0410612322c7f','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R035_fdbe9a2618f5984d" data-sample="R035_fdbe9a2618f5984d" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R035_fdbe9a2618f5984d</span><span class="symbol">BONK_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R035_fdbe9a2618f5984d','train')" aria-label="放大 R035_fdbe9a2618f5984d 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R035_fdbe9a2618f5984d.png" alt="R035_fdbe9a2618f5984d 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R035_fdbe9a2618f5984d.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R035_fdbe9a2618f5984d','future')" aria-label="放大 R035_fdbe9a2618f5984d 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R035_fdbe9a2618f5984d_future48.png" alt="R035_fdbe9a2618f5984d 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R035_fdbe9a2618f5984d_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>6–10</b>（5根）</span>
+          <span>旧框 7–11</span>
+          <span>确认 3根</span>
+          <span>完整窗 W15</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R035_fdbe9a2618f5984d 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R035_fdbe9a2618f5984d','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R035_fdbe9a2618f5984d','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R035_fdbe9a2618f5984d','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R038_a0a9727f1ce5935f" data-sample="R038_a0a9727f1ce5935f" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R038_a0a9727f1ce5935f</span><span class="symbol">RESOLV_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R038_a0a9727f1ce5935f','train')" aria-label="放大 R038_a0a9727f1ce5935f 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R038_a0a9727f1ce5935f.png" alt="R038_a0a9727f1ce5935f 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R038_a0a9727f1ce5935f.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R038_a0a9727f1ce5935f','future')" aria-label="放大 R038_a0a9727f1ce5935f 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R038_a0a9727f1ce5935f_future48.png" alt="R038_a0a9727f1ce5935f 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R038_a0a9727f1ce5935f_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>4–8</b>（5根）</span>
+          <span>旧框 10–14</span>
+          <span>确认 3根</span>
+          <span>完整窗 W18</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R038_a0a9727f1ce5935f 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R038_a0a9727f1ce5935f','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R038_a0a9727f1ce5935f','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R038_a0a9727f1ce5935f','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R039_1a18b76866fc6be4" data-sample="R039_1a18b76866fc6be4" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R039_1a18b76866fc6be4</span><span class="symbol">MASK_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R039_1a18b76866fc6be4','train')" aria-label="放大 R039_1a18b76866fc6be4 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R039_1a18b76866fc6be4.png" alt="R039_1a18b76866fc6be4 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R039_1a18b76866fc6be4.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R039_1a18b76866fc6be4','future')" aria-label="放大 R039_1a18b76866fc6be4 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R039_1a18b76866fc6be4_future48.png" alt="R039_1a18b76866fc6be4 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R039_1a18b76866fc6be4_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>5–9</b>（5根）</span>
+          <span>旧框 9–15</span>
+          <span>确认 3根</span>
+          <span>完整窗 W17</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R039_1a18b76866fc6be4 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R039_1a18b76866fc6be4','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R039_1a18b76866fc6be4','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R039_1a18b76866fc6be4','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R046_bab4a791afb4593d" data-sample="R046_bab4a791afb4593d" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R046_bab4a791afb4593d</span><span class="symbol">SNX_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R046_bab4a791afb4593d','train')" aria-label="放大 R046_bab4a791afb4593d 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R046_bab4a791afb4593d.png" alt="R046_bab4a791afb4593d 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R046_bab4a791afb4593d.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R046_bab4a791afb4593d','future')" aria-label="放大 R046_bab4a791afb4593d 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R046_bab4a791afb4593d_future48.png" alt="R046_bab4a791afb4593d 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R046_bab4a791afb4593d_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>5–9</b>（5根）</span>
+          <span>旧框 9–13</span>
+          <span>确认 3根</span>
+          <span>完整窗 W17</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R046_bab4a791afb4593d 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R046_bab4a791afb4593d','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R046_bab4a791afb4593d','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R046_bab4a791afb4593d','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R047_af9b694a5e49fcda" data-sample="R047_af9b694a5e49fcda" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R047_af9b694a5e49fcda</span><span class="symbol">PARTI_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R047_af9b694a5e49fcda','train')" aria-label="放大 R047_af9b694a5e49fcda 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R047_af9b694a5e49fcda.png" alt="R047_af9b694a5e49fcda 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R047_af9b694a5e49fcda.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R047_af9b694a5e49fcda','future')" aria-label="放大 R047_af9b694a5e49fcda 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R047_af9b694a5e49fcda_future48.png" alt="R047_af9b694a5e49fcda 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R047_af9b694a5e49fcda_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>5–9</b>（5根）</span>
+          <span>旧框 10–16</span>
+          <span>确认 3根</span>
+          <span>完整窗 W18</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R047_af9b694a5e49fcda 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R047_af9b694a5e49fcda','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R047_af9b694a5e49fcda','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R047_af9b694a5e49fcda','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R050_a067ef36c0229378" data-sample="R050_a067ef36c0229378" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R050_a067ef36c0229378</span><span class="symbol">LINK_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R050_a067ef36c0229378','train')" aria-label="放大 R050_a067ef36c0229378 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R050_a067ef36c0229378.png" alt="R050_a067ef36c0229378 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R050_a067ef36c0229378.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R050_a067ef36c0229378','future')" aria-label="放大 R050_a067ef36c0229378 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R050_a067ef36c0229378_future48.png" alt="R050_a067ef36c0229378 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R050_a067ef36c0229378_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>4–8</b>（5根）</span>
+          <span>旧框 8–12</span>
+          <span>确认 3根</span>
+          <span>完整窗 W16</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R050_a067ef36c0229378 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R050_a067ef36c0229378','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R050_a067ef36c0229378','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R050_a067ef36c0229378','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R051_59158fce9fcec0e4" data-sample="R051_59158fce9fcec0e4" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R051_59158fce9fcec0e4</span><span class="symbol">SHELL_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R051_59158fce9fcec0e4','train')" aria-label="放大 R051_59158fce9fcec0e4 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R051_59158fce9fcec0e4.png" alt="R051_59158fce9fcec0e4 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R051_59158fce9fcec0e4.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R051_59158fce9fcec0e4','future')" aria-label="放大 R051_59158fce9fcec0e4 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R051_59158fce9fcec0e4_future48.png" alt="R051_59158fce9fcec0e4 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R051_59158fce9fcec0e4_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>5–9</b>（5根）</span>
+          <span>旧框 10–16</span>
+          <span>确认 3根</span>
+          <span>完整窗 W18</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R051_59158fce9fcec0e4 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R051_59158fce9fcec0e4','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R051_59158fce9fcec0e4','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R051_59158fce9fcec0e4','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R054_12e33755faaafe1a" data-sample="R054_12e33755faaafe1a" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R054_12e33755faaafe1a</span><span class="symbol">CORE_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R054_12e33755faaafe1a','train')" aria-label="放大 R054_12e33755faaafe1a 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R054_12e33755faaafe1a.png" alt="R054_12e33755faaafe1a 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R054_12e33755faaafe1a.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R054_12e33755faaafe1a','future')" aria-label="放大 R054_12e33755faaafe1a 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R054_12e33755faaafe1a_future48.png" alt="R054_12e33755faaafe1a 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R054_12e33755faaafe1a_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>2–6</b>（5根）</span>
+          <span>旧框 7–11</span>
+          <span>确认 3根</span>
+          <span>完整窗 W15</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R054_12e33755faaafe1a 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R054_12e33755faaafe1a','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R054_12e33755faaafe1a','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R054_12e33755faaafe1a','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R056_d0668459475d2172" data-sample="R056_d0668459475d2172" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R056_d0668459475d2172</span><span class="symbol">SNX_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R056_d0668459475d2172','train')" aria-label="放大 R056_d0668459475d2172 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R056_d0668459475d2172.png" alt="R056_d0668459475d2172 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R056_d0668459475d2172.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R056_d0668459475d2172','future')" aria-label="放大 R056_d0668459475d2172 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R056_d0668459475d2172_future48.png" alt="R056_d0668459475d2172 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R056_d0668459475d2172_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>9–12</b>（4根）</span>
+          <span>旧框 10–14</span>
+          <span>确认 3根</span>
+          <span>完整窗 W17</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R056_d0668459475d2172 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R056_d0668459475d2172','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R056_d0668459475d2172','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R056_d0668459475d2172','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R057_0a3d4188c94c81a0" data-sample="R057_0a3d4188c94c81a0" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R057_0a3d4188c94c81a0</span><span class="symbol">LINK_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R057_0a3d4188c94c81a0','train')" aria-label="放大 R057_0a3d4188c94c81a0 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R057_0a3d4188c94c81a0.png" alt="R057_0a3d4188c94c81a0 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R057_0a3d4188c94c81a0.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R057_0a3d4188c94c81a0','future')" aria-label="放大 R057_0a3d4188c94c81a0 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R057_0a3d4188c94c81a0_future48.png" alt="R057_0a3d4188c94c81a0 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R057_0a3d4188c94c81a0_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>3–7</b>（5根）</span>
+          <span>旧框 8–14</span>
+          <span>确认 3根</span>
+          <span>完整窗 W16</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R057_0a3d4188c94c81a0 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R057_0a3d4188c94c81a0','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R057_0a3d4188c94c81a0','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R057_0a3d4188c94c81a0','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R064_012b7ac8ea69ebaa" data-sample="R064_012b7ac8ea69ebaa" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R064_012b7ac8ea69ebaa</span><span class="symbol">KSM_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R064_012b7ac8ea69ebaa','train')" aria-label="放大 R064_012b7ac8ea69ebaa 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R064_012b7ac8ea69ebaa.png" alt="R064_012b7ac8ea69ebaa 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R064_012b7ac8ea69ebaa.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R064_012b7ac8ea69ebaa','future')" aria-label="放大 R064_012b7ac8ea69ebaa 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R064_012b7ac8ea69ebaa_future48.png" alt="R064_012b7ac8ea69ebaa 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R064_012b7ac8ea69ebaa_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>3–7</b>（5根）</span>
+          <span>旧框 8–12</span>
+          <span>确认 3根</span>
+          <span>完整窗 W16</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R064_012b7ac8ea69ebaa 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R064_012b7ac8ea69ebaa','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R064_012b7ac8ea69ebaa','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R064_012b7ac8ea69ebaa','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R067_669ee2e1eb46ca18" data-sample="R067_669ee2e1eb46ca18" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R067_669ee2e1eb46ca18</span><span class="symbol">WCT_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R067_669ee2e1eb46ca18','train')" aria-label="放大 R067_669ee2e1eb46ca18 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R067_669ee2e1eb46ca18.png" alt="R067_669ee2e1eb46ca18 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R067_669ee2e1eb46ca18.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R067_669ee2e1eb46ca18','future')" aria-label="放大 R067_669ee2e1eb46ca18 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R067_669ee2e1eb46ca18_future48.png" alt="R067_669ee2e1eb46ca18 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R067_669ee2e1eb46ca18_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>1–5</b>（5根）</span>
+          <span>旧框 7–13</span>
+          <span>确认 3根</span>
+          <span>完整窗 W15</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R067_669ee2e1eb46ca18 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R067_669ee2e1eb46ca18','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R067_669ee2e1eb46ca18','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R067_669ee2e1eb46ca18','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R069_499b90005665e71e" data-sample="R069_499b90005665e71e" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R069_499b90005665e71e</span><span class="symbol">CRO_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R069_499b90005665e71e','train')" aria-label="放大 R069_499b90005665e71e 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R069_499b90005665e71e.png" alt="R069_499b90005665e71e 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R069_499b90005665e71e.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R069_499b90005665e71e','future')" aria-label="放大 R069_499b90005665e71e 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R069_499b90005665e71e_future48.png" alt="R069_499b90005665e71e 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R069_499b90005665e71e_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>4–8</b>（5根）</span>
+          <span>旧框 6–12</span>
+          <span>确认 3根</span>
+          <span>完整窗 W14</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R069_499b90005665e71e 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R069_499b90005665e71e','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R069_499b90005665e71e','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R069_499b90005665e71e','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R072_7c7ebdf40eb36304" data-sample="R072_7c7ebdf40eb36304" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R072_7c7ebdf40eb36304</span><span class="symbol">KMNO_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R072_7c7ebdf40eb36304','train')" aria-label="放大 R072_7c7ebdf40eb36304 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R072_7c7ebdf40eb36304.png" alt="R072_7c7ebdf40eb36304 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R072_7c7ebdf40eb36304.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R072_7c7ebdf40eb36304','future')" aria-label="放大 R072_7c7ebdf40eb36304 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R072_7c7ebdf40eb36304_future48.png" alt="R072_7c7ebdf40eb36304 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R072_7c7ebdf40eb36304_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>6–10</b>（5根）</span>
+          <span>旧框 8–12</span>
+          <span>确认 3根</span>
+          <span>完整窗 W16</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R072_7c7ebdf40eb36304 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R072_7c7ebdf40eb36304','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R072_7c7ebdf40eb36304','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R072_7c7ebdf40eb36304','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R073_b61499c5691b0cc5" data-sample="R073_b61499c5691b0cc5" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R073_b61499c5691b0cc5</span><span class="symbol">SHELL_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R073_b61499c5691b0cc5','train')" aria-label="放大 R073_b61499c5691b0cc5 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R073_b61499c5691b0cc5.png" alt="R073_b61499c5691b0cc5 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R073_b61499c5691b0cc5.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R073_b61499c5691b0cc5','future')" aria-label="放大 R073_b61499c5691b0cc5 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R073_b61499c5691b0cc5_future48.png" alt="R073_b61499c5691b0cc5 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R073_b61499c5691b0cc5_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>7–11</b>（5根）</span>
+          <span>旧框 9–15</span>
+          <span>确认 3根</span>
+          <span>完整窗 W17</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R073_b61499c5691b0cc5 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R073_b61499c5691b0cc5','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R073_b61499c5691b0cc5','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R073_b61499c5691b0cc5','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R075_7c66427b5e4070b6" data-sample="R075_7c66427b5e4070b6" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R075_7c66427b5e4070b6</span><span class="symbol">A_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R075_7c66427b5e4070b6','train')" aria-label="放大 R075_7c66427b5e4070b6 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R075_7c66427b5e4070b6.png" alt="R075_7c66427b5e4070b6 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R075_7c66427b5e4070b6.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R075_7c66427b5e4070b6','future')" aria-label="放大 R075_7c66427b5e4070b6 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R075_7c66427b5e4070b6_future48.png" alt="R075_7c66427b5e4070b6 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R075_7c66427b5e4070b6_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>7–11</b>（5根）</span>
+          <span>旧框 9–15</span>
+          <span>确认 3根</span>
+          <span>完整窗 W17</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R075_7c66427b5e4070b6 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R075_7c66427b5e4070b6','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R075_7c66427b5e4070b6','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R075_7c66427b5e4070b6','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R076_4f4f7dc8ba34ce7c" data-sample="R076_4f4f7dc8ba34ce7c" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R076_4f4f7dc8ba34ce7c</span><span class="symbol">ONE_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R076_4f4f7dc8ba34ce7c','train')" aria-label="放大 R076_4f4f7dc8ba34ce7c 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R076_4f4f7dc8ba34ce7c.png" alt="R076_4f4f7dc8ba34ce7c 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R076_4f4f7dc8ba34ce7c.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R076_4f4f7dc8ba34ce7c','future')" aria-label="放大 R076_4f4f7dc8ba34ce7c 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R076_4f4f7dc8ba34ce7c_future48.png" alt="R076_4f4f7dc8ba34ce7c 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R076_4f4f7dc8ba34ce7c_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>9–12</b>（4根）</span>
+          <span>旧框 9–13</span>
+          <span>确认 3根</span>
+          <span>完整窗 W16</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R076_4f4f7dc8ba34ce7c 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R076_4f4f7dc8ba34ce7c','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R076_4f4f7dc8ba34ce7c','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R076_4f4f7dc8ba34ce7c','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R082_3947fb8fe7cca341" data-sample="R082_3947fb8fe7cca341" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R082_3947fb8fe7cca341</span><span class="symbol">MASK_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R082_3947fb8fe7cca341','train')" aria-label="放大 R082_3947fb8fe7cca341 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R082_3947fb8fe7cca341.png" alt="R082_3947fb8fe7cca341 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R082_3947fb8fe7cca341.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R082_3947fb8fe7cca341','future')" aria-label="放大 R082_3947fb8fe7cca341 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R082_3947fb8fe7cca341_future48.png" alt="R082_3947fb8fe7cca341 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R082_3947fb8fe7cca341_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>7–11</b>（5根）</span>
+          <span>旧框 9–15</span>
+          <span>确认 4根</span>
+          <span>完整窗 W18</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R082_3947fb8fe7cca341 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R082_3947fb8fe7cca341','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R082_3947fb8fe7cca341','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R082_3947fb8fe7cca341','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R083_209526184e9b5d07" data-sample="R083_209526184e9b5d07" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R083_209526184e9b5d07</span><span class="symbol">PEOPLE_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R083_209526184e9b5d07','train')" aria-label="放大 R083_209526184e9b5d07 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R083_209526184e9b5d07.png" alt="R083_209526184e9b5d07 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R083_209526184e9b5d07.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R083_209526184e9b5d07','future')" aria-label="放大 R083_209526184e9b5d07 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R083_209526184e9b5d07_future48.png" alt="R083_209526184e9b5d07 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R083_209526184e9b5d07_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>4–8</b>（5根）</span>
+          <span>旧框 9–15</span>
+          <span>确认 4根</span>
+          <span>完整窗 W18</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R083_209526184e9b5d07 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R083_209526184e9b5d07','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R083_209526184e9b5d07','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R083_209526184e9b5d07','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R084_c69b228fd9827a72" data-sample="R084_c69b228fd9827a72" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R084_c69b228fd9827a72</span><span class="symbol">0G_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R084_c69b228fd9827a72','train')" aria-label="放大 R084_c69b228fd9827a72 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R084_c69b228fd9827a72.png" alt="R084_c69b228fd9827a72 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R084_c69b228fd9827a72.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R084_c69b228fd9827a72','future')" aria-label="放大 R084_c69b228fd9827a72 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R084_c69b228fd9827a72_future48.png" alt="R084_c69b228fd9827a72 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R084_c69b228fd9827a72_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>6–10</b>（5根）</span>
+          <span>旧框 10–14</span>
+          <span>确认 4根</span>
+          <span>完整窗 W19</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R084_c69b228fd9827a72 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R084_c69b228fd9827a72','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R084_c69b228fd9827a72','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R084_c69b228fd9827a72','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R085_b2211caa6180b782" data-sample="R085_b2211caa6180b782" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R085_b2211caa6180b782</span><span class="symbol">RSR_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R085_b2211caa6180b782','train')" aria-label="放大 R085_b2211caa6180b782 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R085_b2211caa6180b782.png" alt="R085_b2211caa6180b782 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R085_b2211caa6180b782.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R085_b2211caa6180b782','future')" aria-label="放大 R085_b2211caa6180b782 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R085_b2211caa6180b782_future48.png" alt="R085_b2211caa6180b782 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R085_b2211caa6180b782_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>2–6</b>（5根）</span>
+          <span>旧框 6–12</span>
+          <span>确认 4根</span>
+          <span>完整窗 W15</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R085_b2211caa6180b782 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R085_b2211caa6180b782','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R085_b2211caa6180b782','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R085_b2211caa6180b782','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R094_f13dd5dd29d23ffd" data-sample="R094_f13dd5dd29d23ffd" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R094_f13dd5dd29d23ffd</span><span class="symbol">GAS_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R094_f13dd5dd29d23ffd','train')" aria-label="放大 R094_f13dd5dd29d23ffd 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R094_f13dd5dd29d23ffd.png" alt="R094_f13dd5dd29d23ffd 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R094_f13dd5dd29d23ffd.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R094_f13dd5dd29d23ffd','future')" aria-label="放大 R094_f13dd5dd29d23ffd 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R094_f13dd5dd29d23ffd_future48.png" alt="R094_f13dd5dd29d23ffd 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R094_f13dd5dd29d23ffd_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>10–15</b>（6根）</span>
+          <span>旧框 10–16</span>
+          <span>确认 4根</span>
+          <span>完整窗 W20</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R094_f13dd5dd29d23ffd 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R094_f13dd5dd29d23ffd','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R094_f13dd5dd29d23ffd','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R094_f13dd5dd29d23ffd','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R097_3b2e5a344df460e0" data-sample="R097_3b2e5a344df460e0" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R097_3b2e5a344df460e0</span><span class="symbol">CELO_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R097_3b2e5a344df460e0','train')" aria-label="放大 R097_3b2e5a344df460e0 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R097_3b2e5a344df460e0.png" alt="R097_3b2e5a344df460e0 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R097_3b2e5a344df460e0.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R097_3b2e5a344df460e0','future')" aria-label="放大 R097_3b2e5a344df460e0 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R097_3b2e5a344df460e0_future48.png" alt="R097_3b2e5a344df460e0 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R097_3b2e5a344df460e0_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>7–11</b>（5根）</span>
+          <span>旧框 6–12</span>
+          <span>确认 4根</span>
+          <span>完整窗 W15</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R097_3b2e5a344df460e0 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R097_3b2e5a344df460e0','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R097_3b2e5a344df460e0','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R097_3b2e5a344df460e0','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R098_ab7ddc654a07521d" data-sample="R098_ab7ddc654a07521d" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R098_ab7ddc654a07521d</span><span class="symbol">SOL_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R098_ab7ddc654a07521d','train')" aria-label="放大 R098_ab7ddc654a07521d 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R098_ab7ddc654a07521d.png" alt="R098_ab7ddc654a07521d 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R098_ab7ddc654a07521d.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R098_ab7ddc654a07521d','future')" aria-label="放大 R098_ab7ddc654a07521d 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R098_ab7ddc654a07521d_future48.png" alt="R098_ab7ddc654a07521d 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R098_ab7ddc654a07521d_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>7–11</b>（5根）</span>
+          <span>旧框 8–12</span>
+          <span>确认 4根</span>
+          <span>完整窗 W17</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R098_ab7ddc654a07521d 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R098_ab7ddc654a07521d','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R098_ab7ddc654a07521d','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R098_ab7ddc654a07521d','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R099_637daf883d7a87d4" data-sample="R099_637daf883d7a87d4" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R099_637daf883d7a87d4</span><span class="symbol">WCT_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R099_637daf883d7a87d4','train')" aria-label="放大 R099_637daf883d7a87d4 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R099_637daf883d7a87d4.png" alt="R099_637daf883d7a87d4 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R099_637daf883d7a87d4.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R099_637daf883d7a87d4','future')" aria-label="放大 R099_637daf883d7a87d4 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R099_637daf883d7a87d4_future48.png" alt="R099_637daf883d7a87d4 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R099_637daf883d7a87d4_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>6–10</b>（5根）</span>
+          <span>旧框 7–13</span>
+          <span>确认 4根</span>
+          <span>完整窗 W16</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R099_637daf883d7a87d4 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R099_637daf883d7a87d4','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R099_637daf883d7a87d4','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R099_637daf883d7a87d4','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R104_0490b28abb448c11" data-sample="R104_0490b28abb448c11" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R104_0490b28abb448c11</span><span class="symbol">DASH_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R104_0490b28abb448c11','train')" aria-label="放大 R104_0490b28abb448c11 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R104_0490b28abb448c11.png" alt="R104_0490b28abb448c11 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R104_0490b28abb448c11.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R104_0490b28abb448c11','future')" aria-label="放大 R104_0490b28abb448c11 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R104_0490b28abb448c11_future48.png" alt="R104_0490b28abb448c11 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R104_0490b28abb448c11_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>4–8</b>（5根）</span>
+          <span>旧框 9–13</span>
+          <span>确认 4根</span>
+          <span>完整窗 W18</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R104_0490b28abb448c11 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R104_0490b28abb448c11','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R104_0490b28abb448c11','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R104_0490b28abb448c11','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R105_0332df075005eb12" data-sample="R105_0332df075005eb12" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R105_0332df075005eb12</span><span class="symbol">SUSHI_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R105_0332df075005eb12','train')" aria-label="放大 R105_0332df075005eb12 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R105_0332df075005eb12.png" alt="R105_0332df075005eb12 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R105_0332df075005eb12.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R105_0332df075005eb12','future')" aria-label="放大 R105_0332df075005eb12 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R105_0332df075005eb12_future48.png" alt="R105_0332df075005eb12 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R105_0332df075005eb12_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>5–9</b>（5根）</span>
+          <span>旧框 9–15</span>
+          <span>确认 4根</span>
+          <span>完整窗 W18</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R105_0332df075005eb12 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R105_0332df075005eb12','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R105_0332df075005eb12','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R105_0332df075005eb12','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R106_de0fa309c5971807" data-sample="R106_de0fa309c5971807" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R106_de0fa309c5971807</span><span class="symbol">IOTA_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R106_de0fa309c5971807','train')" aria-label="放大 R106_de0fa309c5971807 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R106_de0fa309c5971807.png" alt="R106_de0fa309c5971807 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R106_de0fa309c5971807.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R106_de0fa309c5971807','future')" aria-label="放大 R106_de0fa309c5971807 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R106_de0fa309c5971807_future48.png" alt="R106_de0fa309c5971807 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R106_de0fa309c5971807_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>5–9</b>（5根）</span>
+          <span>旧框 7–11</span>
+          <span>确认 4根</span>
+          <span>完整窗 W16</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R106_de0fa309c5971807 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R106_de0fa309c5971807','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R106_de0fa309c5971807','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R106_de0fa309c5971807','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R115_c608067c889a9870" data-sample="R115_c608067c889a9870" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R115_c608067c889a9870</span><span class="symbol">BERA_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R115_c608067c889a9870','train')" aria-label="放大 R115_c608067c889a9870 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R115_c608067c889a9870.png" alt="R115_c608067c889a9870 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R115_c608067c889a9870.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R115_c608067c889a9870','future')" aria-label="放大 R115_c608067c889a9870 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R115_c608067c889a9870_future48.png" alt="R115_c608067c889a9870 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R115_c608067c889a9870_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>1–5</b>（5根）</span>
+          <span>旧框 6–12</span>
+          <span>确认 4根</span>
+          <span>完整窗 W15</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R115_c608067c889a9870 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R115_c608067c889a9870','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R115_c608067c889a9870','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R115_c608067c889a9870','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R121_73871c2c52754baa" data-sample="R121_73871c2c52754baa" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R121_73871c2c52754baa</span><span class="symbol">SOON_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R121_73871c2c52754baa','train')" aria-label="放大 R121_73871c2c52754baa 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R121_73871c2c52754baa.png" alt="R121_73871c2c52754baa 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R121_73871c2c52754baa.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R121_73871c2c52754baa','future')" aria-label="放大 R121_73871c2c52754baa 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R121_73871c2c52754baa_future48.png" alt="R121_73871c2c52754baa 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R121_73871c2c52754baa_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>8–12</b>（5根）</span>
+          <span>旧框 8–14</span>
+          <span>确认 4根</span>
+          <span>完整窗 W17</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R121_73871c2c52754baa 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R121_73871c2c52754baa','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R121_73871c2c52754baa','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R121_73871c2c52754baa','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R122_774eead6424f91b5" data-sample="R122_774eead6424f91b5" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R122_774eead6424f91b5</span><span class="symbol">DOGE_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R122_774eead6424f91b5','train')" aria-label="放大 R122_774eead6424f91b5 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R122_774eead6424f91b5.png" alt="R122_774eead6424f91b5 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R122_774eead6424f91b5.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R122_774eead6424f91b5','future')" aria-label="放大 R122_774eead6424f91b5 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R122_774eead6424f91b5_future48.png" alt="R122_774eead6424f91b5 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R122_774eead6424f91b5_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>6–10</b>（5根）</span>
+          <span>旧框 10–14</span>
+          <span>确认 4根</span>
+          <span>完整窗 W19</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R122_774eead6424f91b5 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R122_774eead6424f91b5','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R122_774eead6424f91b5','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R122_774eead6424f91b5','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R129_5c748aa85f712ce8" data-sample="R129_5c748aa85f712ce8" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R129_5c748aa85f712ce8</span><span class="symbol">FIL_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R129_5c748aa85f712ce8','train')" aria-label="放大 R129_5c748aa85f712ce8 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R129_5c748aa85f712ce8.png" alt="R129_5c748aa85f712ce8 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R129_5c748aa85f712ce8.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R129_5c748aa85f712ce8','future')" aria-label="放大 R129_5c748aa85f712ce8 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R129_5c748aa85f712ce8_future48.png" alt="R129_5c748aa85f712ce8 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R129_5c748aa85f712ce8_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>2–6</b>（5根）</span>
+          <span>旧框 7–13</span>
+          <span>确认 4根</span>
+          <span>完整窗 W16</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R129_5c748aa85f712ce8 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R129_5c748aa85f712ce8','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R129_5c748aa85f712ce8','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R129_5c748aa85f712ce8','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R133_3e844a1e5745418c" data-sample="R133_3e844a1e5745418c" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R133_3e844a1e5745418c</span><span class="symbol">KMNO_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R133_3e844a1e5745418c','train')" aria-label="放大 R133_3e844a1e5745418c 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R133_3e844a1e5745418c.png" alt="R133_3e844a1e5745418c 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R133_3e844a1e5745418c.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R133_3e844a1e5745418c','future')" aria-label="放大 R133_3e844a1e5745418c 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R133_3e844a1e5745418c_future48.png" alt="R133_3e844a1e5745418c 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R133_3e844a1e5745418c_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>3–7</b>（5根）</span>
+          <span>旧框 7–13</span>
+          <span>确认 4根</span>
+          <span>完整窗 W16</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R133_3e844a1e5745418c 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R133_3e844a1e5745418c','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R133_3e844a1e5745418c','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R133_3e844a1e5745418c','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R139_0a67a84800c677ef" data-sample="R139_0a67a84800c677ef" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R139_0a67a84800c677ef</span><span class="symbol">GALA_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R139_0a67a84800c677ef','train')" aria-label="放大 R139_0a67a84800c677ef 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R139_0a67a84800c677ef.png" alt="R139_0a67a84800c677ef 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R139_0a67a84800c677ef.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R139_0a67a84800c677ef','future')" aria-label="放大 R139_0a67a84800c677ef 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R139_0a67a84800c677ef_future48.png" alt="R139_0a67a84800c677ef 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R139_0a67a84800c677ef_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>9–13</b>（5根）</span>
+          <span>旧框 10–16</span>
+          <span>确认 4根</span>
+          <span>完整窗 W19</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R139_0a67a84800c677ef 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R139_0a67a84800c677ef','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R139_0a67a84800c677ef','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R139_0a67a84800c677ef','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R142_0d92cc78a973ba52" data-sample="R142_0d92cc78a973ba52" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R142_0d92cc78a973ba52</span><span class="symbol">MASK_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R142_0d92cc78a973ba52','train')" aria-label="放大 R142_0d92cc78a973ba52 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R142_0d92cc78a973ba52.png" alt="R142_0d92cc78a973ba52 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R142_0d92cc78a973ba52.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R142_0d92cc78a973ba52','future')" aria-label="放大 R142_0d92cc78a973ba52 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R142_0d92cc78a973ba52_future48.png" alt="R142_0d92cc78a973ba52 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R142_0d92cc78a973ba52_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>4–8</b>（5根）</span>
+          <span>旧框 9–13</span>
+          <span>确认 4根</span>
+          <span>完整窗 W18</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R142_0d92cc78a973ba52 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R142_0d92cc78a973ba52','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R142_0d92cc78a973ba52','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R142_0d92cc78a973ba52','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R143_3cabff2a35508c6e" data-sample="R143_3cabff2a35508c6e" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R143_3cabff2a35508c6e</span><span class="symbol">S_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R143_3cabff2a35508c6e','train')" aria-label="放大 R143_3cabff2a35508c6e 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R143_3cabff2a35508c6e.png" alt="R143_3cabff2a35508c6e 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R143_3cabff2a35508c6e.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R143_3cabff2a35508c6e','future')" aria-label="放大 R143_3cabff2a35508c6e 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R143_3cabff2a35508c6e_future48.png" alt="R143_3cabff2a35508c6e 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R143_3cabff2a35508c6e_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>3–7</b>（5根）</span>
+          <span>旧框 8–14</span>
+          <span>确认 4根</span>
+          <span>完整窗 W17</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R143_3cabff2a35508c6e 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R143_3cabff2a35508c6e','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R143_3cabff2a35508c6e','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R143_3cabff2a35508c6e','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R145_414229d1bc05a505" data-sample="R145_414229d1bc05a505" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R145_414229d1bc05a505</span><span class="symbol">SHELL_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R145_414229d1bc05a505','train')" aria-label="放大 R145_414229d1bc05a505 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R145_414229d1bc05a505.png" alt="R145_414229d1bc05a505 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R145_414229d1bc05a505.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R145_414229d1bc05a505','future')" aria-label="放大 R145_414229d1bc05a505 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R145_414229d1bc05a505_future48.png" alt="R145_414229d1bc05a505 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R145_414229d1bc05a505_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>2–6</b>（5根）</span>
+          <span>旧框 7–13</span>
+          <span>确认 4根</span>
+          <span>完整窗 W16</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R145_414229d1bc05a505 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R145_414229d1bc05a505','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R145_414229d1bc05a505','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R145_414229d1bc05a505','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R151_dce78c58e3306f9f" data-sample="R151_dce78c58e3306f9f" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R151_dce78c58e3306f9f</span><span class="symbol">GAS_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R151_dce78c58e3306f9f','train')" aria-label="放大 R151_dce78c58e3306f9f 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R151_dce78c58e3306f9f.png" alt="R151_dce78c58e3306f9f 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R151_dce78c58e3306f9f.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R151_dce78c58e3306f9f','future')" aria-label="放大 R151_dce78c58e3306f9f 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R151_dce78c58e3306f9f_future48.png" alt="R151_dce78c58e3306f9f 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R151_dce78c58e3306f9f_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>4–8</b>（5根）</span>
+          <span>旧框 9–15</span>
+          <span>确认 5根</span>
+          <span>完整窗 W19</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R151_dce78c58e3306f9f 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R151_dce78c58e3306f9f','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R151_dce78c58e3306f9f','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R151_dce78c58e3306f9f','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R159_7e00b503560a213b" data-sample="R159_7e00b503560a213b" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R159_7e00b503560a213b</span><span class="symbol">MOVE_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R159_7e00b503560a213b','train')" aria-label="放大 R159_7e00b503560a213b 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R159_7e00b503560a213b.png" alt="R159_7e00b503560a213b 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R159_7e00b503560a213b.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R159_7e00b503560a213b','future')" aria-label="放大 R159_7e00b503560a213b 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R159_7e00b503560a213b_future48.png" alt="R159_7e00b503560a213b 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R159_7e00b503560a213b_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>3–7</b>（5根）</span>
+          <span>旧框 8–14</span>
+          <span>确认 5根</span>
+          <span>完整窗 W18</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R159_7e00b503560a213b 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R159_7e00b503560a213b','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R159_7e00b503560a213b','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R159_7e00b503560a213b','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R160_ccbe5a6b71724c55" data-sample="R160_ccbe5a6b71724c55" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R160_ccbe5a6b71724c55</span><span class="symbol">MOVE_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R160_ccbe5a6b71724c55','train')" aria-label="放大 R160_ccbe5a6b71724c55 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R160_ccbe5a6b71724c55.png" alt="R160_ccbe5a6b71724c55 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R160_ccbe5a6b71724c55.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R160_ccbe5a6b71724c55','future')" aria-label="放大 R160_ccbe5a6b71724c55 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R160_ccbe5a6b71724c55_future48.png" alt="R160_ccbe5a6b71724c55 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R160_ccbe5a6b71724c55_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>6–10</b>（5根）</span>
+          <span>旧框 6–12</span>
+          <span>确认 5根</span>
+          <span>完整窗 W16</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R160_ccbe5a6b71724c55 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R160_ccbe5a6b71724c55','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R160_ccbe5a6b71724c55','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R160_ccbe5a6b71724c55','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R164_41458234204536d5" data-sample="R164_41458234204536d5" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R164_41458234204536d5</span><span class="symbol">RAY_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R164_41458234204536d5','train')" aria-label="放大 R164_41458234204536d5 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R164_41458234204536d5.png" alt="R164_41458234204536d5 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R164_41458234204536d5.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R164_41458234204536d5','future')" aria-label="放大 R164_41458234204536d5 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R164_41458234204536d5_future48.png" alt="R164_41458234204536d5 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R164_41458234204536d5_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>3–7</b>（5根）</span>
+          <span>旧框 7–13</span>
+          <span>确认 5根</span>
+          <span>完整窗 W17</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R164_41458234204536d5 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R164_41458234204536d5','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R164_41458234204536d5','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R164_41458234204536d5','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R165_94ac2e8d5f826cf2" data-sample="R165_94ac2e8d5f826cf2" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R165_94ac2e8d5f826cf2</span><span class="symbol">OKB_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R165_94ac2e8d5f826cf2','train')" aria-label="放大 R165_94ac2e8d5f826cf2 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R165_94ac2e8d5f826cf2.png" alt="R165_94ac2e8d5f826cf2 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R165_94ac2e8d5f826cf2.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R165_94ac2e8d5f826cf2','future')" aria-label="放大 R165_94ac2e8d5f826cf2 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R165_94ac2e8d5f826cf2_future48.png" alt="R165_94ac2e8d5f826cf2 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R165_94ac2e8d5f826cf2_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>5–9</b>（5根）</span>
+          <span>旧框 9–13</span>
+          <span>确认 5根</span>
+          <span>完整窗 W19</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R165_94ac2e8d5f826cf2 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R165_94ac2e8d5f826cf2','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R165_94ac2e8d5f826cf2','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R165_94ac2e8d5f826cf2','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R167_90c436666790c728" data-sample="R167_90c436666790c728" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R167_90c436666790c728</span><span class="symbol">TAO_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R167_90c436666790c728','train')" aria-label="放大 R167_90c436666790c728 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R167_90c436666790c728.png" alt="R167_90c436666790c728 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R167_90c436666790c728.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R167_90c436666790c728','future')" aria-label="放大 R167_90c436666790c728 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R167_90c436666790c728_future48.png" alt="R167_90c436666790c728 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R167_90c436666790c728_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>2–6</b>（5根）</span>
+          <span>旧框 7–13</span>
+          <span>确认 5根</span>
+          <span>完整窗 W17</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R167_90c436666790c728 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R167_90c436666790c728','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R167_90c436666790c728','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R167_90c436666790c728','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R168_02e1b20e115bab8c" data-sample="R168_02e1b20e115bab8c" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R168_02e1b20e115bab8c</span><span class="symbol">CELO_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R168_02e1b20e115bab8c','train')" aria-label="放大 R168_02e1b20e115bab8c 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R168_02e1b20e115bab8c.png" alt="R168_02e1b20e115bab8c 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R168_02e1b20e115bab8c.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R168_02e1b20e115bab8c','future')" aria-label="放大 R168_02e1b20e115bab8c 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R168_02e1b20e115bab8c_future48.png" alt="R168_02e1b20e115bab8c 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R168_02e1b20e115bab8c_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>4–8</b>（5根）</span>
+          <span>旧框 9–15</span>
+          <span>确认 5根</span>
+          <span>完整窗 W19</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R168_02e1b20e115bab8c 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R168_02e1b20e115bab8c','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R168_02e1b20e115bab8c','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R168_02e1b20e115bab8c','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R171_6a8d02b943130bbd" data-sample="R171_6a8d02b943130bbd" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R171_6a8d02b943130bbd</span><span class="symbol">ME_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R171_6a8d02b943130bbd','train')" aria-label="放大 R171_6a8d02b943130bbd 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R171_6a8d02b943130bbd.png" alt="R171_6a8d02b943130bbd 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R171_6a8d02b943130bbd.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R171_6a8d02b943130bbd','future')" aria-label="放大 R171_6a8d02b943130bbd 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R171_6a8d02b943130bbd_future48.png" alt="R171_6a8d02b943130bbd 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R171_6a8d02b943130bbd_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>5–9</b>（5根）</span>
+          <span>旧框 9–15</span>
+          <span>确认 5根</span>
+          <span>完整窗 W19</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R171_6a8d02b943130bbd 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R171_6a8d02b943130bbd','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R171_6a8d02b943130bbd','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R171_6a8d02b943130bbd','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R180_b454bd5943427421" data-sample="R180_b454bd5943427421" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R180_b454bd5943427421</span><span class="symbol">ME_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R180_b454bd5943427421','train')" aria-label="放大 R180_b454bd5943427421 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R180_b454bd5943427421.png" alt="R180_b454bd5943427421 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R180_b454bd5943427421.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R180_b454bd5943427421','future')" aria-label="放大 R180_b454bd5943427421 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R180_b454bd5943427421_future48.png" alt="R180_b454bd5943427421 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R180_b454bd5943427421_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>3–7</b>（5根）</span>
+          <span>旧框 8–12</span>
+          <span>确认 5根</span>
+          <span>完整窗 W18</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R180_b454bd5943427421 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R180_b454bd5943427421','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R180_b454bd5943427421','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R180_b454bd5943427421','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R189_65bbfb97ff4610f9" data-sample="R189_65bbfb97ff4610f9" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R189_65bbfb97ff4610f9</span><span class="symbol">XRP_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R189_65bbfb97ff4610f9','train')" aria-label="放大 R189_65bbfb97ff4610f9 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R189_65bbfb97ff4610f9.png" alt="R189_65bbfb97ff4610f9 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R189_65bbfb97ff4610f9.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R189_65bbfb97ff4610f9','future')" aria-label="放大 R189_65bbfb97ff4610f9 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R189_65bbfb97ff4610f9_future48.png" alt="R189_65bbfb97ff4610f9 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R189_65bbfb97ff4610f9_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>2–6</b>（5根）</span>
+          <span>旧框 6–10</span>
+          <span>确认 5根</span>
+          <span>完整窗 W16</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R189_65bbfb97ff4610f9 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R189_65bbfb97ff4610f9','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R189_65bbfb97ff4610f9','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R189_65bbfb97ff4610f9','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R194_bc8e2685047f4383" data-sample="R194_bc8e2685047f4383" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R194_bc8e2685047f4383</span><span class="symbol">DOGE_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R194_bc8e2685047f4383','train')" aria-label="放大 R194_bc8e2685047f4383 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R194_bc8e2685047f4383.png" alt="R194_bc8e2685047f4383 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R194_bc8e2685047f4383.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R194_bc8e2685047f4383','future')" aria-label="放大 R194_bc8e2685047f4383 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R194_bc8e2685047f4383_future48.png" alt="R194_bc8e2685047f4383 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R194_bc8e2685047f4383_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>5–9</b>（5根）</span>
+          <span>旧框 10–16</span>
+          <span>确认 5根</span>
+          <span>完整窗 W20</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R194_bc8e2685047f4383 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R194_bc8e2685047f4383','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R194_bc8e2685047f4383','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R194_bc8e2685047f4383','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R195_3ce432969645cc99" data-sample="R195_3ce432969645cc99" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R195_3ce432969645cc99</span><span class="symbol">SENT_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R195_3ce432969645cc99','train')" aria-label="放大 R195_3ce432969645cc99 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R195_3ce432969645cc99.png" alt="R195_3ce432969645cc99 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R195_3ce432969645cc99.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R195_3ce432969645cc99','future')" aria-label="放大 R195_3ce432969645cc99 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R195_3ce432969645cc99_future48.png" alt="R195_3ce432969645cc99 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R195_3ce432969645cc99_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>8–12</b>（5根）</span>
+          <span>旧框 10–14</span>
+          <span>确认 5根</span>
+          <span>完整窗 W20</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R195_3ce432969645cc99 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R195_3ce432969645cc99','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R195_3ce432969645cc99','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R195_3ce432969645cc99','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R196_dfa3e36600bba62c" data-sample="R196_dfa3e36600bba62c" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R196_dfa3e36600bba62c</span><span class="symbol">SNX_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R196_dfa3e36600bba62c','train')" aria-label="放大 R196_dfa3e36600bba62c 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R196_dfa3e36600bba62c.png" alt="R196_dfa3e36600bba62c 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R196_dfa3e36600bba62c.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R196_dfa3e36600bba62c','future')" aria-label="放大 R196_dfa3e36600bba62c 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R196_dfa3e36600bba62c_future48.png" alt="R196_dfa3e36600bba62c 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R196_dfa3e36600bba62c_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>1–5</b>（5根）</span>
+          <span>旧框 6–12</span>
+          <span>确认 5根</span>
+          <span>完整窗 W16</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R196_dfa3e36600bba62c 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R196_dfa3e36600bba62c','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R196_dfa3e36600bba62c','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R196_dfa3e36600bba62c','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R197_26cae4b3c9da83e0" data-sample="R197_26cae4b3c9da83e0" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R197_26cae4b3c9da83e0</span><span class="symbol">BLUR_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R197_26cae4b3c9da83e0','train')" aria-label="放大 R197_26cae4b3c9da83e0 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R197_26cae4b3c9da83e0.png" alt="R197_26cae4b3c9da83e0 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R197_26cae4b3c9da83e0.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R197_26cae4b3c9da83e0','future')" aria-label="放大 R197_26cae4b3c9da83e0 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R197_26cae4b3c9da83e0_future48.png" alt="R197_26cae4b3c9da83e0 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R197_26cae4b3c9da83e0_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>10–14</b>（5根）</span>
+          <span>旧框 10–16</span>
+          <span>确认 5根</span>
+          <span>完整窗 W20</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R197_26cae4b3c9da83e0 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R197_26cae4b3c9da83e0','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R197_26cae4b3c9da83e0','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R197_26cae4b3c9da83e0','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R198_4087c5e155e5cbc5" data-sample="R198_4087c5e155e5cbc5" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R198_4087c5e155e5cbc5</span><span class="symbol">RVN_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R198_4087c5e155e5cbc5','train')" aria-label="放大 R198_4087c5e155e5cbc5 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R198_4087c5e155e5cbc5.png" alt="R198_4087c5e155e5cbc5 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R198_4087c5e155e5cbc5.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R198_4087c5e155e5cbc5','future')" aria-label="放大 R198_4087c5e155e5cbc5 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R198_4087c5e155e5cbc5_future48.png" alt="R198_4087c5e155e5cbc5 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R198_4087c5e155e5cbc5_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>9–13</b>（5根）</span>
+          <span>旧框 10–14</span>
+          <span>确认 5根</span>
+          <span>完整窗 W20</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R198_4087c5e155e5cbc5 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R198_4087c5e155e5cbc5','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R198_4087c5e155e5cbc5','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R198_4087c5e155e5cbc5','reject')">✕ 剔除</button>
+        </div>
+      </article>
+
+      <article class="sample-card" id="card-R199_b6f90905986e6409" data-sample="R199_b6f90905986e6409" data-decision="pending">
+        <div class="card-head">
+          <div><span class="sample-id">R199_b6f90905986e6409</span><span class="symbol">KSM_USDT_SWAP</span></div>
+          <span class="decision-chip">未确认</span>
+        </div>
+        <div class="image-pair">
+          <div><div class="panel-label">训练输入：只用这张短窗</div>
+            <button class="image-button" type="button" onclick="openZoom('R199_b6f90905986e6409','train')" aria-label="放大 R199_b6f90905986e6409 训练输入">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R199_b6f90905986e6409.png" alt="R199_b6f90905986e6409 训练输入新旧框对照" loading="lazy" data-role="train" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/proposals/R199_b6f90905986e6409.png">
+            </button>
+          </div>
+          <div><div class="panel-label future-label">人工审核：额外未来48根 / 12小时</div>
+            <button class="image-button" type="button" onclick="openZoom('R199_b6f90905986e6409','future')" aria-label="放大 R199_b6f90905986e6409 未来走势">
+              <img src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R199_b6f90905986e6409_future48.png" alt="R199_b6f90905986e6409 未来48根审核对照" loading="lazy" data-role="future" data-full-src="../output/owner_eth_shortdelay_review200_rebox_v1/review_future_only/R199_b6f90905986e6409_future48.png">
+            </button>
+          </div>
+        </div>
+        <div class="geometry">
+          <span>新框 <b>7–13</b>（7根）</span>
+          <span>旧框 8–14</span>
+          <span>确认 5根</span>
+          <span>完整窗 W20</span>
+        </div>
+        <div class="decision-buttons" role="group" aria-label="R199_b6f90905986e6409 裁决">
+          <button type="button" data-choice="accept" onclick="setDecision('R199_b6f90905986e6409','accept')">✓ 认可新框</button>
+          <button type="button" data-choice="adjust" onclick="setDecision('R199_b6f90905986e6409','adjust')">↔ 还要改</button>
+          <button type="button" data-choice="reject" onclick="setDecision('R199_b6f90905986e6409','reject')">✕ 剔除</button>
+        </div>
+      </article></section>
+    <textarea id="export" readonly aria-label="确认结果JSON" placeholder="点击“复制确认结果”后，这里会出现可粘贴回Codex的JSON。"></textarea>
+  </main>
+  <dialog id="zoom"><button class="zoom-close" type="button" onclick="closeZoom()">关闭</button><img id="zoom-image" alt="放大查看"></dialog>
+  <script>
+    const SAMPLE_IDS = ["R006_01dc726f31b26d73", "R008_6769ca2aacf56f21", "R012_b1bd3858922a0326", "R013_fe443f9102b0662c", "R019_edbd7578debbb66a", "R021_24b77936dd103271", "R024_503ba79a3c6f9f1e", "R034_09d0410612322c7f", "R035_fdbe9a2618f5984d", "R038_a0a9727f1ce5935f", "R039_1a18b76866fc6be4", "R046_bab4a791afb4593d", "R047_af9b694a5e49fcda", "R050_a067ef36c0229378", "R051_59158fce9fcec0e4", "R054_12e33755faaafe1a", "R056_d0668459475d2172", "R057_0a3d4188c94c81a0", "R064_012b7ac8ea69ebaa", "R067_669ee2e1eb46ca18", "R069_499b90005665e71e", "R072_7c7ebdf40eb36304", "R073_b61499c5691b0cc5", "R075_7c66427b5e4070b6", "R076_4f4f7dc8ba34ce7c", "R082_3947fb8fe7cca341", "R083_209526184e9b5d07", "R084_c69b228fd9827a72", "R085_b2211caa6180b782", "R094_f13dd5dd29d23ffd", "R097_3b2e5a344df460e0", "R098_ab7ddc654a07521d", "R099_637daf883d7a87d4", "R104_0490b28abb448c11", "R105_0332df075005eb12", "R106_de0fa309c5971807", "R115_c608067c889a9870", "R121_73871c2c52754baa", "R122_774eead6424f91b5", "R129_5c748aa85f712ce8", "R133_3e844a1e5745418c", "R139_0a67a84800c677ef", "R142_0d92cc78a973ba52", "R143_3cabff2a35508c6e", "R145_414229d1bc05a505", "R151_dce78c58e3306f9f", "R159_7e00b503560a213b", "R160_ccbe5a6b71724c55", "R164_41458234204536d5", "R165_94ac2e8d5f826cf2", "R167_90c436666790c728", "R168_02e1b20e115bab8c", "R171_6a8d02b943130bbd", "R180_b454bd5943427421", "R189_65bbfb97ff4610f9", "R194_bc8e2685047f4383", "R195_3ce432969645cc99", "R196_dfa3e36600bba62c", "R197_26cae4b3c9da83e0", "R198_4087c5e155e5cbc5", "R199_b6f90905986e6409"];
+    const STORAGE_KEY = "owner_eth_shortdelay_review61_owner_gate_v1_20260811:c2f6e94550c50af6394ec270302a1d6a3610705e87a5b4b84284d952b2abd6e2";
+    const LABELS = {pending:"未确认",accept:"已认可",adjust:"还要改",reject:"已剔除"};
+    let decisions = {};
+    try { decisions = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {}; } catch (_) { decisions = {}; }
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(decisions)); }
+    function setDecision(id, value) {
+      decisions[id] = value; save(); paintCard(id); updateStats(); applyFilter();
+    }
+    function paintCard(id) {
+      const card = document.getElementById("card-" + id); const value = decisions[id] || "pending";
+      card.dataset.decision = value; card.querySelector(".decision-chip").textContent = LABELS[value];
+      card.querySelectorAll("[data-choice]").forEach(b => b.classList.toggle("active", b.dataset.choice === value));
+    }
+    function counts() {
+      const c = {pending:0,accept:0,adjust:0,reject:0};
+      SAMPLE_IDS.forEach(id => c[decisions[id] || "pending"]++); return c;
+    }
+    function updateStats() { const c=counts(); document.getElementById("stats").textContent=`认可 ${c.accept} · 改 ${c.adjust} · 剔除 ${c.reject} · 未确认 ${c.pending}`; }
+    function setAllAccepted() {
+      if (!confirm("确认把当前61张全部标为“认可新框”？仍需复制结果并发回Codex才会进入下一步。")) return;
+      SAMPLE_IDS.forEach(id => decisions[id]="accept"); save(); SAMPLE_IDS.forEach(paintCard); updateStats(); applyFilter();
+    }
+    function clearAll() { if (!confirm("清空本页全部选择？")) return; decisions={}; save(); SAMPLE_IDS.forEach(paintCard); updateStats(); applyFilter(); document.getElementById("export").value=""; }
+    function applyFilter() {
+      const wanted=document.getElementById("filter").value;
+      document.querySelectorAll(".sample-card").forEach(card => card.classList.toggle("hidden", wanted!=="all" && card.dataset.decision!==wanted));
+    }
+    function payload() {
+      const c=counts(); return {protocol:"owner_eth_shortdelay_review61_owner_gate_v1_20260811",source_sha256:"c2f6e94550c50af6394ec270302a1d6a3610705e87a5b4b84284d952b2abd6e2",total:61,counts:c,decisions:Object.fromEntries(SAMPLE_IDS.map(id=>[id,decisions[id]||"pending"]))};
+    }
+    async function copyResults() {
+      const text=JSON.stringify(payload(),null,2); const box=document.getElementById("export"); box.value=text; box.focus(); box.select();
+      try { await navigator.clipboard.writeText(text); } catch (_) { try { document.execCommand("copy"); } catch (_) {} }
+      document.getElementById("stats").textContent="确认结果已生成；请粘贴回Codex";
+    }
+    function openZoom(id, role) { const img=document.querySelector(`#card-${CSS.escape(id)} img[data-role="${role}"]`); document.getElementById("zoom-image").src=img.dataset.fullSrc; document.getElementById("zoom").showModal(); }
+    function closeZoom() { document.getElementById("zoom").close(); }
+    SAMPLE_IDS.forEach(paintCard); updateStats();
+  </script>
+</body>
+</html>

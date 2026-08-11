@@ -1,0 +1,51 @@
+{
+  "generated_at": "2026-07-24T04:45:19.303594+00:00",
+  "script": "scripts/build_owner_side_short_yolo_tip.py",
+  "git": "92bf084",
+  "source_sheet": "analysis/output/owner_side_review/review_sheet.csv",
+  "out": "datasets/dense_owner_side_short_tip",
+  "recipe": "tip re-crop: window ends at cut_global; full-series add_mas then slice; YOLO box right edge forced to tip; one image per box_id; short only",
+  "window": 200,
+  "val_cut": "2026-02-01 00:00:00+00:00",
+  "holdout_cut": "2026-05-04 00:00:00+00:00",
+  "n_short_rows_raw": 1361,
+  "holdout_dropped": 0,
+  "n_images": {
+    "train": 1037,
+    "val": 324
+  },
+  "n_boxes": {
+    "train": 1037,
+    "val": 324
+  },
+  "skips": {
+    "no_series": 0,
+    "window": 0,
+    "box": 0,
+    "error": 0
+  },
+  "missing_symbols_unique": [],
+  "box_right_frac_before": {
+    "n": 1361,
+    "p25": 0.2925,
+    "p50": 0.5175,
+    "p75": 0.7125,
+    "frac_ge_0.9": 0.047,
+    "frac_ge_0.95": 0.0206
+  },
+  "box_right_frac_after": {
+    "n": 1361,
+    "p25": 0.9969,
+    "p50": 0.9969,
+    "p75": 0.9969,
+    "frac_ge_0.9": 1.0,
+    "frac_ge_0.95": 1.0
+  },
+  "time_split_evidence": {
+    "train_cut_time_max": "2026-01-31 15:30:00+00:00",
+    "val_cut_time_min": "2026-02-01 10:30:00+00:00",
+    "train_max_ge_val_min": false,
+    "rule": "train: cut_time < 2026-02-01; val: [2026-02-01, 2026-05-04)"
+  },
+  "training": "NOT started \u2014 await owner sample review"
+}

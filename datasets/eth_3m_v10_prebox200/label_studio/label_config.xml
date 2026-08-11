@@ -1,0 +1,37 @@
+<View>
+  <View style="display:none">
+    <Image name="causal" value="$causal_image"/>
+    <RectangleLabels name="box" toName="causal">
+      <Label value="short_start" background="#d32f2f"/>
+    </RectangleLabels>
+    <Choices name="shape" toName="causal" choice="single">
+      <Choice value="valid"/>
+      <Choice value="invalid"/>
+      <Choice value="uncertain"/>
+      <Choice value="bad_data"/>
+    </Choices>
+    <Choices name="error_reason" toName="causal" choice="multiple">
+      <Choice value="not_dense"/>
+      <Choice value="too_late"/>
+      <Choice value="wrong_box"/>
+      <Choice value="wrong_direction"/>
+      <Choice value="repeated_trend"/>
+      <Choice value="other"/>
+    </Choices>
+    <Choices name="outcome" toName="review" choice="single">
+      <Choice value="strong_drop"/>
+      <Choice value="weak_drop"/>
+      <Choice value="fail"/>
+      <Choice value="rebound"/>
+      <Choice value="outcome_uncertain"/>
+    </Choices>
+    <TextArea name="note" toName="causal"/>
+  </View>
+  <Header value="ETH 3m · 这个红框是不是你要的做空形态？"/>
+  <Choices name="is_target" toName="review" choice="single" required="true" showInline="true">
+    <Choice value="是" hotkey="1"/>
+    <Choice value="不是" hotkey="2"/>
+  </Choices>
+  <Header value="竖虚线左侧是模型当时可见范围，右侧是固定未来 3 小时；未来只供你判断。"/>
+  <Image name="review" value="$review_image" zoom="true" zoomControl="true"/>
+</View>

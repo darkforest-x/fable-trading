@@ -1,0 +1,3242 @@
+{
+  "protocol": "owner_short_gold_center_recent2d_v1_20260811",
+  "evaluation_scope": "preholdout_postval_canary",
+  "generated_at": "2026-08-11T09:44:50.539850+00:00",
+  "manifest": "/Users/zhangzc/fable-trading/datasets/owner_short_gold_center_v1/positive_manifest.jsonl",
+  "manifest_sha256": "8f4119fbf634ec976077e8eb50b36e57ae3aa0471759cad04f2eaeaeacd6d21b",
+  "requested_symbols": 215,
+  "usable_symbols": 215,
+  "snapshot_end": "2026-05-03T12:00:00+00:00",
+  "context_bars": 420,
+  "max_materialized_time": "2026-05-03T12:00:00+00:00",
+  "holdout_start": "2026-05-04T00:00:00+00:00",
+  "holdout_rows_materialized": 0,
+  "canonical_data_written": false,
+  "symbols": [
+    {
+      "symbol": "0G_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "479fc02a1dabf0a556678b525b3afe73f85a52273d164d230222661ad372cdf4",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_0G_USDT_SWAP_15m_30441.csv",
+        "csv_rows_requested": 21415,
+        "rows_materialized": 21415,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "1INCH_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "50c2d6b7076af637d6d3785bfff05230c8d08aba1b69e23b952236d75b1ae406",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_1INCH_USDT_SWAP_15m_41086.csv",
+        "csv_rows_requested": 32060,
+        "rows_materialized": 32060,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "2Z_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "5a3cd90a166aeef34b503e214f1303568edfb52b945ec6519a7414396c36e6dc",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_2Z_USDT_SWAP_15m_29471.csv",
+        "csv_rows_requested": 20445,
+        "rows_materialized": 20445,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "AAVE_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "3786652aa7e0727715c84a327a14542fac763aaa0dbf4bc6def2d3c0394f6ddc",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_AAVE_USDT_SWAP_15m_41176.csv",
+        "csv_rows_requested": 32150,
+        "rows_materialized": 32150,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ACH_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "94a028c2142277bbef033018e88ed9beceb272080ce52ae618903b89835ad9a0",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ACH_USDT_SWAP_15m_41086.csv",
+        "csv_rows_requested": 32060,
+        "rows_materialized": 32060,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ACU_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "0181001225eadd6d2a45e3612587cc8eefb34bf51caeff24cab6dfe13d9727f6",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ACU_USDT_SWAP_15m_18647.csv",
+        "csv_rows_requested": 9621,
+        "rows_materialized": 9621,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ADA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "836aeaaaec6475a4d428dcc4e38f099f104b7729731eefbe5e4b4590c5aa328b",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ADA_USDT_SWAP_15m_41176.csv",
+        "csv_rows_requested": 32150,
+        "rows_materialized": 32150,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "AERO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "c4b81f7020504745553d6327287b6ff792d41d8e55a9c6e23b01f9c0ed492351",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_AERO_USDT_SWAP_15m_38234.csv",
+        "csv_rows_requested": 29208,
+        "rows_materialized": 29208,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "AEVO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "8d6bc558f1469beaba33bae0659e9960e8ab59313538f2fc8af2e797ee9d7477",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_AEVO_USDT_SWAP_15m_41085.csv",
+        "csv_rows_requested": 32059,
+        "rows_materialized": 32059,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "AGLD_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "708ec378822b86142d6d3434ec34cf608610117caaae6b774c30a086b6bc938d",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_AGLD_USDT_SWAP_15m_41085.csv",
+        "csv_rows_requested": 32059,
+        "rows_materialized": 32059,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "AIXBT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "de8046ca212035067cb69bafe1fc7721cf0597a02881070eb8a985591b0f87b2",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_AIXBT_USDT_SWAP_15m_41085.csv",
+        "csv_rows_requested": 32059,
+        "rows_materialized": 32059,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ALLO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "aa285bef7d2a7188a62c707dc6626912f4b144c861da9d0bba9c0b596d749a3f",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ALLO_USDT_SWAP_15m_25616.csv",
+        "csv_rows_requested": 16590,
+        "rows_materialized": 16590,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ANIME_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "5f2b315af486c002c91833ebd56bf606f5cffcab03b7f7af95c197f8bb9656aa",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ANIME_USDT_SWAP_15m_40984.csv",
+        "csv_rows_requested": 31958,
+        "rows_materialized": 31958,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "APE_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "048e75fc862109b516d7804871b1d1d406b270dcbab9a981feb34fe16a6f0e11",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_APE_USDT_SWAP_15m_41176.csv",
+        "csv_rows_requested": 32150,
+        "rows_materialized": 32150,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "API3_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "d44cfaaefb0959a82cebdad3cf2f586eb2f79de9d55afcb2f8c20dd56fa45c86",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_API3_USDT_SWAP_15m_41084.csv",
+        "csv_rows_requested": 32058,
+        "rows_materialized": 32058,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "APR_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "9f551c43122ec5f91a32d665dc2f3ee930b2a191a2ee0febd7b367b33327a0f7",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_APR_USDT_SWAP_15m_27387.csv",
+        "csv_rows_requested": 18361,
+        "rows_materialized": 18361,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "APT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "71a97531e14511e957846312fdc371c0ea2febaad0272d0cac523ce5cfde8449",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_APT_USDT_SWAP_15m_41176.csv",
+        "csv_rows_requested": 32150,
+        "rows_materialized": 32150,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ARB_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "a19e6a510c6104186980db7a5fe1ab3f1150bebb6922910679f2cc9687b6d242",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ARB_USDT_SWAP_15m_41176.csv",
+        "csv_rows_requested": 32150,
+        "rows_materialized": 32150,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ARKM_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "3f4747ecedbf6b0c77bee9feaada173ad83c0cbfa6193941ea566370e49e6f80",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ARKM_USDT_SWAP_15m_41084.csv",
+        "csv_rows_requested": 32058,
+        "rows_materialized": 32058,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ASTER_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "ea64843c2df2c76478ef0cb68c313eeb6d681445434a1c128e053949096df4ce",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ASTER_USDT_SWAP_15m_30463.csv",
+        "csv_rows_requested": 21437,
+        "rows_materialized": 21437,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ATH_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "5edef9704a5681762ca8d8862cf4b36c54025dc90878f999bd24c2f07a037648",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ATH_USDT_SWAP_15m_41084.csv",
+        "csv_rows_requested": 32058,
+        "rows_materialized": 32058,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ATOM_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "a3141c74380fac6349078dd9fce56bf13626094800d3909e50ccb060ebe1e58e",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ATOM_USDT_SWAP_15m_41177.csv",
+        "csv_rows_requested": 32150,
+        "rows_materialized": 32150,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "AT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "ec401017bacc7cb521e3a6488d0ae7d4a39148444d5dcd9b03794d33090a1164",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_AT_USDT_SWAP_15m_26796.csv",
+        "csv_rows_requested": 17769,
+        "rows_materialized": 17769,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "AUCTION_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "07e36138b81c2ad94f6053b5265c49a2241d4dc142ca9bb58f78f208965e705f",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_AUCTION_USDT_SWAP_15m_41084.csv",
+        "csv_rows_requested": 32057,
+        "rows_materialized": 32057,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "AVAX_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "a2e69989ce07538fa240cb8462bc01d30cfbe2860ad859d6fdce467380d42722",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_AVAX_USDT_SWAP_15m_41177.csv",
+        "csv_rows_requested": 32150,
+        "rows_materialized": 32150,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "AVNT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "e462dbbe224536c96cb39f4e6ca5c775d32728f3e48dda2dfa79646e74468da2",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_AVNT_USDT_SWAP_15m_30422.csv",
+        "csv_rows_requested": 21395,
+        "rows_materialized": 21395,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "AXS_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "8a79bfad619006e9269a0f55b88fe69dd88beb94a51e38472a7e14493ec7aa16",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_AXS_USDT_SWAP_15m_41084.csv",
+        "csv_rows_requested": 32057,
+        "rows_materialized": 32057,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "AZTEC_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "23a49d3d9d3e9d9fa347644c77d1e5f0f054d0cb8c5f58e1cb871bde9010977d",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_AZTEC_USDT_SWAP_15m_16810.csv",
+        "csv_rows_requested": 7783,
+        "rows_materialized": 7783,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "A_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "cb7b385615ee6f6732642f9a491746ca79351c90f86927ec7b88e815c3388bb3",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_A_USDT_SWAP_15m_41087.csv",
+        "csv_rows_requested": 32060,
+        "rows_materialized": 32060,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "BAND_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "f22aa8c144653499c14b2fa166d1ab2c98f9598ee526ce03ef4cbf75f7b863e6",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_BAND_USDT_SWAP_15m_41083.csv",
+        "csv_rows_requested": 32056,
+        "rows_materialized": 32056,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "BARD_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "a608e2e96d9be18ccd2826aa32a40ef2817a343e7b5d1de0f3837ddad6cec729",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_BARD_USDT_SWAP_15m_30820.csv",
+        "csv_rows_requested": 21793,
+        "rows_materialized": 21793,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "BAT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "7b2a225aebdfcc2438995aa7cfbc1ff4786985a714ecfc8a38603a70b43fbb40",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_BAT_USDT_SWAP_15m_41083.csv",
+        "csv_rows_requested": 32056,
+        "rows_materialized": 32056,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "BEAT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "b9e7522644c20588576b806d3d7b1c7b6ae888223da67be0b8e136184289165a",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_BEAT_USDT_SWAP_15m_25523.csv",
+        "csv_rows_requested": 16496,
+        "rows_materialized": 16496,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "BERA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "104c64345ee0ec9a6c505093796ff165621edc1fbd7e85ce2afffac72004382b",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_BERA_USDT_SWAP_15m_41083.csv",
+        "csv_rows_requested": 32056,
+        "rows_materialized": 32056,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "BICO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "a6b150292ecdc1308fd44b46736fea2acf848a8bc29fce27c24f1ba61400803c",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_BICO_USDT_SWAP_15m_41083.csv",
+        "csv_rows_requested": 32056,
+        "rows_materialized": 32056,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "BLUR_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "2851c58da3baf359d0b379ac27d478a34d355e439140a5d5cb098e2fe9cc4d86",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_BLUR_USDT_SWAP_15m_41082.csv",
+        "csv_rows_requested": 32055,
+        "rows_materialized": 32055,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "BNB_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "6ca460b010f81d9f5579537a08075f77ae5ccdb493cc4d2867fec0e36e75f522",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_BNB_USDT_SWAP_15m_41177.csv",
+        "csv_rows_requested": 32150,
+        "rows_materialized": 32150,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "BOME_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "70d16dc53f026b7cf26c26a73312f89282cc37f860c71e6742c7d9f2d2ea0381",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_BOME_USDT_SWAP_15m_41082.csv",
+        "csv_rows_requested": 32055,
+        "rows_materialized": 32055,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "BONK_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "a32d15da89a35247d9c1a53c7affebc537c2da50ee9a2cfd89f04abe090879c0",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_BONK_USDT_SWAP_15m_41082.csv",
+        "csv_rows_requested": 32055,
+        "rows_materialized": 32055,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "BRETT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "a40bd2b3a8369875d10728071ecf85d29cb5a176738e1a954dce4ba99f10fed6",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_BRETT_USDT_SWAP_15m_41082.csv",
+        "csv_rows_requested": 32055,
+        "rows_materialized": 32055,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "BREV_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "b36f9a30bdb3b589564eee63279504c20a2e87e79afa71752bc38c35c29f4371",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_BREV_USDT_SWAP_15m_20928.csv",
+        "csv_rows_requested": 11901,
+        "rows_materialized": 11901,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "BSB_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "0806901c3cf2fc60642fc0b915c57c28cd4a50d261eaf80aba1259440088234c",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_BSB_USDT_SWAP_15m_12012.csv",
+        "csv_rows_requested": 2985,
+        "rows_materialized": 2985,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "CC_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "7bd161197391f6b350ad9728b4550eb591631dc27f1a892cf3fe1111da2c4661",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_CC_USDT_SWAP_15m_26684.csv",
+        "csv_rows_requested": 17657,
+        "rows_materialized": 17657,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "CELO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "59fd84f3cdae804d67af448889da973e10ff8fef7578ed809dcc0723f70ff097",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_CELO_USDT_SWAP_15m_41081.csv",
+        "csv_rows_requested": 32054,
+        "rows_materialized": 32054,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "CFX_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "14f5a857e35b3f5b847c5a938d24b416c803b74556326c3c160cb25f3c523150",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_CFX_USDT_SWAP_15m_41176.csv",
+        "csv_rows_requested": 32149,
+        "rows_materialized": 32149,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "CHZ_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "64805be688ea459d944d90c37f2b28bda161cbb048ad0aa7a3b11b9330a09399",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_CHZ_USDT_SWAP_15m_41176.csv",
+        "csv_rows_requested": 32149,
+        "rows_materialized": 32149,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "COAI_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "1a0dcb25b0c700e07afbe7b409d14dbfde5ad46f5e5485414bcd94c387d70c08",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_COAI_USDT_SWAP_15m_28218.csv",
+        "csv_rows_requested": 19191,
+        "rows_materialized": 19191,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "COIN_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "1f9f2b5a88d9b155e41497acfbae3e2cf58b0c7a0a6c1722e1baeefa89666763",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_COIN_USDT_SWAP_15m_15381.csv",
+        "csv_rows_requested": 6354,
+        "rows_materialized": 6354,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "COMP_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "85a1bcbdfe389fd011f971e3fa1b6993789efc9aef7b1bca5c1af8be2fbc4115",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_COMP_USDT_SWAP_15m_41081.csv",
+        "csv_rows_requested": 32054,
+        "rows_materialized": 32054,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "CORE_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "47e513ee50c7069f984c7d749d1ad45d57f981f520bca2878a2da09223b3b3ce",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_CORE_USDT_SWAP_15m_41081.csv",
+        "csv_rows_requested": 32054,
+        "rows_materialized": 32054,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "CRO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "cf5be87f1b26f15f2984f6a125329c3948f92e6328d7244dd14a74054e04671c",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_CRO_USDT_SWAP_15m_41080.csv",
+        "csv_rows_requested": 32053,
+        "rows_materialized": 32053,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "CRV_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "3bc265003d14230ade7a3cb30655d6568e2068e67e3e68eb9fa2820fd8b4b7e6",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_CRV_USDT_SWAP_15m_41176.csv",
+        "csv_rows_requested": 32149,
+        "rows_materialized": 32149,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "DASH_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "c2a4fa59223e4f661c5c3e302862ba05c62487c79cf51fc03edfb6ac14a4610b",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_DASH_USDT_SWAP_15m_26152.csv",
+        "csv_rows_requested": 17125,
+        "rows_materialized": 17125,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "DOGE_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "03ac9b35662a153bdfc839cdc997cce2b61d316e49b8878120ed6d5341d3424e",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_DOGE_USDT_SWAP_15m_41176.csv",
+        "csv_rows_requested": 32149,
+        "rows_materialized": 32149,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "DOOD_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "0f54d568326b58f485e6eb1e6c3e41d6923e79d997fb7a98c6606e18262514ae",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_DOOD_USDT_SWAP_15m_41080.csv",
+        "csv_rows_requested": 32053,
+        "rows_materialized": 32053,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "DOT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "3dca714294e12caf96f16e97ee5e211bc7e8095dfac742622cbaf315a61955e0",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_DOT_USDT_SWAP_15m_41176.csv",
+        "csv_rows_requested": 32149,
+        "rows_materialized": 32149,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "DYDX_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "356265f14768d1b036715feb950c5fb33257bf76965c0016f8a92bffce4fb345",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_DYDX_USDT_SWAP_15m_41080.csv",
+        "csv_rows_requested": 32053,
+        "rows_materialized": 32053,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "EDEN_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "5b1536caf49471292df7f4d0cc578aece7f862366b57cd5c7ee55a253fd24abc",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_EDEN_USDT_SWAP_15m_29670.csv",
+        "csv_rows_requested": 20643,
+        "rows_materialized": 20643,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "EGLD_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "f2ef592bdc97edf263e694bea76638c23979dddaea98dc8c5ef21c246b5ce29f",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_EGLD_USDT_SWAP_15m_41079.csv",
+        "csv_rows_requested": 32052,
+        "rows_materialized": 32052,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ENA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "39d61569e51aab5693bf6b16cfc4a9d349d084071c0d9806fffd634c50c6dd1f",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ENA_USDT_SWAP_15m_30934.csv",
+        "csv_rows_requested": 21907,
+        "rows_materialized": 21907,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ENJ_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "590df63cdedcbb58126950ee3b5cde12cf0fde379e98cbb05339f25237286fc9",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ENJ_USDT_SWAP_15m_41079.csv",
+        "csv_rows_requested": 32052,
+        "rows_materialized": 32052,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ENSO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "ac64da1ad0c4765dc812fbd1d4e837eddbd1a405dad13ceba5a44e29275fe4b8",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ENSO_USDT_SWAP_15m_26892.csv",
+        "csv_rows_requested": 17865,
+        "rows_materialized": 17865,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ENS_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "8443c8f2e95628d8c3dac50fe05bb4b99053b5bc1232a048a698160e1a564e7f",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ENS_USDT_SWAP_15m_41079.csv",
+        "csv_rows_requested": 32052,
+        "rows_materialized": 32052,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ESP_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "8962c4e0192c8940b742483709ee5386d50bec11536e52be9d47c472237e305c",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ESP_USDT_SWAP_15m_16884.csv",
+        "csv_rows_requested": 7857,
+        "rows_materialized": 7857,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ETC_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "71a23deb5eacd1dc15593b56ba3c194505c68603049c96922dc2d6e02f0e1a0f",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ETC_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32148,
+        "rows_materialized": 32148,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ETHFI_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "02267754fc2548d31f8b5da2fa2a1ae7b14b551cdc3089fcad79f7903894c4b5",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ETHFI_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32148,
+        "rows_materialized": 32148,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ETH_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "9fc7ce7e4052007e7c9046f558c87267c4c57af517f3e94c70e1e2cf87bad25e",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ETH_USDT_SWAP_15m_41281.csv",
+        "csv_rows_requested": 32254,
+        "rows_materialized": 32254,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "FARTCOIN_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "1e557ada93ea7f75a0947e3eeaf699ea22df98495c6f4a685744059ceae18065",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_FARTCOIN_USDT_SWAP_15m_41078.csv",
+        "csv_rows_requested": 32051,
+        "rows_materialized": 32051,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "FIL_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "b70a673fb7937fd0aaabe54ac607414b007c23ca5fad164529720734cd132bb3",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_FIL_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32148,
+        "rows_materialized": 32148,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "FLOKI_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "d7fdf664c2cc8c33db9c7ab4f9c4e04a621f0c95356f4f5ca0cc9cdc5aa49ae1",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_FLOKI_USDT_SWAP_15m_41078.csv",
+        "csv_rows_requested": 32051,
+        "rows_materialized": 32051,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "FLOW_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "3ea526314995b183a7386d16ef0cc40d730618a8b18d99b41fd61958ee78893d",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_FLOW_USDT_SWAP_15m_41078.csv",
+        "csv_rows_requested": 32051,
+        "rows_materialized": 32051,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "FOGO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "740e844a14506015eb09f37a07e8ca731258827f08279ae0968e08e4585e8bad",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_FOGO_USDT_SWAP_15m_19861.csv",
+        "csv_rows_requested": 10834,
+        "rows_materialized": 10834,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "GALA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "da9a27e50a0e194db1ff9c3d6c2a89b8447c4f29e5c0652230e09e90e16ec51c",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_GALA_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32148,
+        "rows_materialized": 32148,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "GAS_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "233428bb4a6db809ba09d50edf2dd272b951349d88ad8152076d750aa9ba9944",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_GAS_USDT_SWAP_15m_41078.csv",
+        "csv_rows_requested": 32051,
+        "rows_materialized": 32051,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "GIGGLE_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "729d9d47db1d285b9dd0e8519793aa412aab045a7eacca8400480877569f8ed6",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_GIGGLE_USDT_SWAP_15m_27288.csv",
+        "csv_rows_requested": 18261,
+        "rows_materialized": 18261,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "GLM_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "9b7744b9fe38892cc0c8c382ec0ab3bdaafd2e97b13f40b4854101d6aa65c756",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_GLM_USDT_SWAP_15m_41078.csv",
+        "csv_rows_requested": 32051,
+        "rows_materialized": 32051,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "GMT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "ae607d5995376276488bc089a98052d5fbdbf6b22482da52ce427e084f4b9b27",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_GMT_USDT_SWAP_15m_41077.csv",
+        "csv_rows_requested": 32050,
+        "rows_materialized": 32050,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "GMX_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "cf8ed51eaa5ec698bdb75397cbb0c23eb3006f2652e2f70085eefecf823e406a",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_GMX_USDT_SWAP_15m_41077.csv",
+        "csv_rows_requested": 32050,
+        "rows_materialized": 32050,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "GPS_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "9ccb2576bfc25638b7c52c50229a5e6f842350d36bd80edba7fd5dd4d07f8a6b",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_GPS_USDT_SWAP_15m_41077.csv",
+        "csv_rows_requested": 32050,
+        "rows_materialized": 32050,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "GRT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "6f204df5293dfd57bd6e0981d5ee8dd5cda17241aa343f794b88a905a533e6f3",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_GRT_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32148,
+        "rows_materialized": 32148,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "HBAR_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "2567474f7362267aab54e4cc77fb2f42524fa08b342146375ca52976cafc765b",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_HBAR_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32148,
+        "rows_materialized": 32148,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "HMSTR_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "5ce1a72031c1a458244193dcaa0d3f9093b76438f6f29709a990e1bc067ba39f",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_HMSTR_USDT_SWAP_15m_41077.csv",
+        "csv_rows_requested": 32050,
+        "rows_materialized": 32050,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "HOME_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "68d5205a08c52be957543715dd643e9790b36023b836c7db17858f9a06368ee6",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_HOME_USDT_SWAP_15m_40139.csv",
+        "csv_rows_requested": 31112,
+        "rows_materialized": 31112,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "HOOD_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "2d80914ed375c7a284ae0670051197ea21de3964eff9de35bb29c0fe1d16bd8d",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_HOOD_USDT_SWAP_15m_15480.csv",
+        "csv_rows_requested": 6453,
+        "rows_materialized": 6453,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "HUMA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "88a8db57bc1bc9d87bf08d63eb73fb94c10c004a705dd32c4357077e825e4745",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_HUMA_USDT_SWAP_15m_41076.csv",
+        "csv_rows_requested": 32049,
+        "rows_materialized": 32049,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "HYPE_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "0951b94853c4386fb474a376fa41642e3cc9408f1efe477ae224e63b37877f8d",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_HYPE_USDT_SWAP_15m_41176.csv",
+        "csv_rows_requested": 32148,
+        "rows_materialized": 32148,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "H_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "98f2435ed37be4f57a3929d8a49f21a8c68539811cd0696e9e19ff110bad9856",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_H_USDT_SWAP_15m_38237.csv",
+        "csv_rows_requested": 29209,
+        "rows_materialized": 29209,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ICP_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "72f2a28639abc7e02cbde184e026d05dc1325a94b7e5fcbdc4a2f0ee9484133b",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ICP_USDT_SWAP_15m_41176.csv",
+        "csv_rows_requested": 32148,
+        "rows_materialized": 32148,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ICX_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "7de52b7fc8db001143d7468aec46ac7a373d8e52ba94ca445cdd605353f4bce1",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ICX_USDT_SWAP_15m_41077.csv",
+        "csv_rows_requested": 32049,
+        "rows_materialized": 32049,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "INIT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "878c9b0200aec2706829728529e8adef518f4b1ec7b100fcdef38388936186b7",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_INIT_USDT_SWAP_15m_41077.csv",
+        "csv_rows_requested": 32049,
+        "rows_materialized": 32049,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "INJ_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "c406c8a1c5ead88da5ac978d63f696e54bf332323628acd6034761b38a824f3d",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_INJ_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32147,
+        "rows_materialized": 32147,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "IOST_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "47c0d4f3ebf5b1dd9f5b4d1d772dd58add8c9c7e2e5f5853b80959054d8abe05",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_IOST_USDT_SWAP_15m_41077.csv",
+        "csv_rows_requested": 32049,
+        "rows_materialized": 32049,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "IOTA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "ea7f7795fbacc9b042abd1623c9d55a7f96c4f96fc708e00b517383d6505db92",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_IOTA_USDT_SWAP_15m_41077.csv",
+        "csv_rows_requested": 32049,
+        "rows_materialized": 32049,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "JELLYJELLY_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "a6d7441492b1f61b1e5bf5f4bc9894874f19b70a29a9c7c35ea535176827fb9e",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_JELLYJELLY_USDT_SWAP_15m_41077.csv",
+        "csv_rows_requested": 32049,
+        "rows_materialized": 32049,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "JTO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "6c2d45ae32674b5a51c99cf36d57c71a43250c665c13d3d80075d7dbdcf5a1ae",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_JTO_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32147,
+        "rows_materialized": 32147,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "JUP_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "8ba077411f74eb00536f9c94576379f917ff96320c13ae5b11223a5d0a58de96",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_JUP_USDT_SWAP_15m_41077.csv",
+        "csv_rows_requested": 32049,
+        "rows_materialized": 32049,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "KAITO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "28a31e57f62555bd8c5278c59926455a5702a8cd15e1942887b4f402fcba0e9a",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_KAITO_USDT_SWAP_15m_41077.csv",
+        "csv_rows_requested": 32049,
+        "rows_materialized": 32049,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "KGEN_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "8dccc87941f8a8019b4f61a71822840c258a267d6f42608e592eeb10ce591161",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_KGEN_USDT_SWAP_15m_27971.csv",
+        "csv_rows_requested": 18943,
+        "rows_materialized": 18943,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "KITE_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "fedf6ff508bced82ff001fe91562cadd3fc20899f7148974d0151e2bc188792c",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_KITE_USDT_SWAP_15m_11369.csv",
+        "csv_rows_requested": 2341,
+        "rows_materialized": 2341,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "KMNO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "33f92372828ef361bbab2efc7d7b27d8449932dd1137944da6e6436742f527f6",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_KMNO_USDT_SWAP_15m_41077.csv",
+        "csv_rows_requested": 32049,
+        "rows_materialized": 32049,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "KSM_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "52f18f80e3bc7075969ce4665cc8f3048ad43f60a6498a31422f5ec0c15d5041",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_KSM_USDT_SWAP_15m_41077.csv",
+        "csv_rows_requested": 32049,
+        "rows_materialized": 32049,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "LAYER_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "72e7c6d1b3c970b7fadcf7936cdbf303a7ca0914485df6f4bd4f6b2d9fd4d9e9",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_LAYER_USDT_SWAP_15m_41077.csv",
+        "csv_rows_requested": 32049,
+        "rows_materialized": 32049,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "LA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "609bb32701550c45cee1516501b9c6aa563754b94c231cda13600e1bfd32c0ad",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_LA_USDT_SWAP_15m_40141.csv",
+        "csv_rows_requested": 31113,
+        "rows_materialized": 31113,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "LIGHT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "2ad4a2b063740a1354075801014ed93000d398c8b7443d79fb7aaa1023419d98",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_LIGHT_USDT_SWAP_15m_22293.csv",
+        "csv_rows_requested": 13265,
+        "rows_materialized": 13265,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "LINEA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "e99881bfd68bd2f993c47e4fefe5ea15e7a6a5fbc2516f7cff5268f9f12edeed",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_LINEA_USDT_SWAP_15m_32445.csv",
+        "csv_rows_requested": 23417,
+        "rows_materialized": 23417,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "LINK_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "fb9fd26cb63adc05f7c60815d69a62500459538dfc91c5aa375f9492088bd3a0",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_LINK_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32147,
+        "rows_materialized": 32147,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "LIT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "47d4957572ced743bf89b4b6014d77a46690f7f65dae986c0ac18b8ba2516abd",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_LIT_USDT_SWAP_15m_21543.csv",
+        "csv_rows_requested": 12515,
+        "rows_materialized": 12515,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "LPT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "3e03cbb271c43dea58fd4bc39b802cb5602e6dda1085b472a3cf8ac11f54293f",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_LPT_USDT_SWAP_15m_41076.csv",
+        "csv_rows_requested": 32048,
+        "rows_materialized": 32048,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "LQTY_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "17ba58fd5310746da8a97dac20f6ebf573c26464690397cf9d3dbad7cae431a6",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_LQTY_USDT_SWAP_15m_41076.csv",
+        "csv_rows_requested": 32048,
+        "rows_materialized": 32048,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "LRC_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "529a016343600f7fa59c1996cfcbbcb99ed2aa4c42a3279414446d6da44e4804",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_LRC_USDT_SWAP_15m_39172.csv",
+        "csv_rows_requested": 32048,
+        "rows_materialized": 32048,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "LTC_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "ffc22707e58e7e69822544440e8c2d22a6b7a689077c8d456f354ce063164c02",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_LTC_USDT_SWAP_15m_41075.csv",
+        "csv_rows_requested": 32047,
+        "rows_materialized": 32047,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "LUNA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "69981638a8d43cdadf475f721eccf839ad9883014f5ecd73652576259f26be6d",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_LUNA_USDT_SWAP_15m_41076.csv",
+        "csv_rows_requested": 32048,
+        "rows_materialized": 32048,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "MAGIC_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "0d2ee0d36d65533be61a3771be46f10b94be89f10cd6ad3557a61f98745fa06a",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_MAGIC_USDT_SWAP_15m_41076.csv",
+        "csv_rows_requested": 32048,
+        "rows_materialized": 32048,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "MANA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "d618a490e046ebb0ecf01958ce029c0b6c98001a4b24e70c58096caca0fe2e85",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_MANA_USDT_SWAP_15m_40976.csv",
+        "csv_rows_requested": 31948,
+        "rows_materialized": 31948,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "MASK_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "ce82fbd2fcbcbc167a6046dd3c5607703a14f3dceb8882a70adc0d5e33f86a6b",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_MASK_USDT_SWAP_15m_41076.csv",
+        "csv_rows_requested": 32048,
+        "rows_materialized": 32048,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "MEME_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "f54b4a7dc36e3b5a95f581e50f45b9c62d4e935173255b42249854620d3eeefa",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_MEME_USDT_SWAP_15m_41075.csv",
+        "csv_rows_requested": 32047,
+        "rows_materialized": 32047,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "MERL_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "e78df7232b5fa0ccce525b69d1cb8199d69813d27b7668aa4b5ce2bb26c52835",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_MERL_USDT_SWAP_15m_41075.csv",
+        "csv_rows_requested": 32047,
+        "rows_materialized": 32047,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "METIS_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "d36871392889fb5a26fa9f0b32b8e143a1b95638ce3dcabb0ca54790457c1dea",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_METIS_USDT_SWAP_15m_41075.csv",
+        "csv_rows_requested": 32047,
+        "rows_materialized": 32047,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "MEW_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "b4bb1ba6769a790fad004f64be6c926f3de39900e638ffa4b2839ac01b5f86cc",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_MEW_USDT_SWAP_15m_41075.csv",
+        "csv_rows_requested": 32047,
+        "rows_materialized": 32047,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "MMT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "3ae1590b031bf9be04d53789bf7169f675a203925b760aca03ab5eb95711e3da",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_MMT_USDT_SWAP_15m_26307.csv",
+        "csv_rows_requested": 17279,
+        "rows_materialized": 17279,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "MON_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "961178724719b6ffb6727789f031456723160647514806e0193cd45a0e80072d",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_MON_USDT_SWAP_15m_28725.csv",
+        "csv_rows_requested": 19697,
+        "rows_materialized": 19697,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "MOODENG_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "9323219c1fbcd746f3685b5d11b228d2626d11317fb9415da7c4cb01e9df9b56",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_MOODENG_USDT_SWAP_15m_41075.csv",
+        "csv_rows_requested": 32047,
+        "rows_materialized": 32047,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "MORPHO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "ca5c177289873fedd168aa6d3ffbe5ccfc45c978a3d2f4528ff9f5558b5f02a7",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_MORPHO_USDT_SWAP_15m_41075.csv",
+        "csv_rows_requested": 32047,
+        "rows_materialized": 32047,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "MOVE_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "ad643ada84fbb0d9b399c6d38d2a6a37bebb67cf7f07db9a02a48381aeca4029",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_MOVE_USDT_SWAP_15m_41075.csv",
+        "csv_rows_requested": 32047,
+        "rows_materialized": 32047,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "MUBARAK_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "babeaaae650fe2666e25a07aa8c3e430b6971b704745cea08d4ee182dcc00e85",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_MUBARAK_USDT_SWAP_15m_41075.csv",
+        "csv_rows_requested": 32047,
+        "rows_materialized": 32047,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "NEIRO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "d7339ce48d6519a2a353794a09a28a062db38f7910d0a28daa29333dab860f41",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_NEIRO_USDT_SWAP_15m_41075.csv",
+        "csv_rows_requested": 32047,
+        "rows_materialized": 32047,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "NEO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "3fc8b86239588e4013a7e4992876612aabd444afd89472bf78104ffcfb9f59a5",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_NEO_USDT_SWAP_15m_41075.csv",
+        "csv_rows_requested": 32047,
+        "rows_materialized": 32047,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "NG_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "6d5a67c4c85be2993bb09ca380cd34b89c619e3362a194219eca404238cd9d97",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_NG_USDT_SWAP_15m_14225.csv",
+        "csv_rows_requested": 5197,
+        "rows_materialized": 5197,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "NIGHT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "2d47086afcaeae0dc267b5ede89fa1d34e6dd79d7e1fa9cae289b5bdd44a687e",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_NIGHT_USDT_SWAP_15m_22951.csv",
+        "csv_rows_requested": 13923,
+        "rows_materialized": 13923,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "NMR_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "afa9c175cc0e0939bce5aa958588fb9770c832c37a5b5929c13c6b08f2a92737",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_NMR_USDT_SWAP_15m_41074.csv",
+        "csv_rows_requested": 32046,
+        "rows_materialized": 32046,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "NOT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "abaadc095c2d3eda36b100d7e181834c1d098e97d6a252f0cb5385416a285644",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_NOT_USDT_SWAP_15m_41074.csv",
+        "csv_rows_requested": 32046,
+        "rows_materialized": 32046,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "OFC_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "41cd76f94629f466ac8fc6ec9404352a5dec7e68b43669a06bacd5fa1efb12b6",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_OFC_USDT_SWAP_15m_11337.csv",
+        "csv_rows_requested": 2309,
+        "rows_materialized": 2309,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "OKB_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "919cc7d232eb02c64a3832ccae72c538eed196dd701d1979d28b70c0fcc96a92",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_OKB_USDT_SWAP_15m_32205.csv",
+        "csv_rows_requested": 23177,
+        "rows_materialized": 23177,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "OL_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "4d94a839b8caec47cb3e53c9e8fec9686d70d83e9605375caec550b1fffd74ba",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_OL_USDT_SWAP_15m_26892.csv",
+        "csv_rows_requested": 17864,
+        "rows_materialized": 17864,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ONDO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "90e57f17a9ee8613405ab2ce704c85348a0cce2b54c4a498bbea198c2d524787",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ONDO_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32147,
+        "rows_materialized": 32147,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ONE_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "4e73935d5620cd9a02e34ab5300f1953df350c0b4e2502e2bf6d0e3849097ff8",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ONE_USDT_SWAP_15m_41074.csv",
+        "csv_rows_requested": 32046,
+        "rows_materialized": 32046,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ONT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "e1d933ee0f5a3cf0ab2db329d2f1874529b3bd0dbc9b43f4e9d8248bf376529c",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ONT_USDT_SWAP_15m_41074.csv",
+        "csv_rows_requested": 32046,
+        "rows_materialized": 32046,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "OP_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "79b0a6354e466e7904b6df12d91b79a34f7debd121cc0c5d1e9582915a83ebd0",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_OP_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32147,
+        "rows_materialized": 32147,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ORCL_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "8e7f7adda2c1fc2875b9b84fe64ebd49957cee31258ea661bc2510600c1939de",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ORCL_USDT_SWAP_15m_14125.csv",
+        "csv_rows_requested": 5097,
+        "rows_materialized": 5097,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ORDER_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "5f10528f1ed079694fd4758edb49ffff74e6764576b4f070563a39168d695501",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ORDER_USDT_SWAP_15m_29656.csv",
+        "csv_rows_requested": 20628,
+        "rows_materialized": 20628,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ORDI_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "d5eb660f6f830e3d27fe3b47b3ddc0ad937387fdd4a5453870fdaa97fd941a55",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ORDI_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32147,
+        "rows_materialized": 32147,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "PARTI_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "99187bafdbd4ebfd8666ffd769b007d48de64131bee9e876fb7a9e467f8eef3a",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_PARTI_USDT_SWAP_15m_41074.csv",
+        "csv_rows_requested": 32046,
+        "rows_materialized": 32046,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "PENGU_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "7c5a629f89e5b6581566744c250aff45bf6f4220dc260b00fde96f8dd30ca985",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_PENGU_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32147,
+        "rows_materialized": 32147,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "PEOPLE_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "b5d05651089b64350e22e427b376d88032b514d64ab1e7af406feaaaa5521707",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_PEOPLE_USDT_SWAP_15m_41074.csv",
+        "csv_rows_requested": 32046,
+        "rows_materialized": 32046,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "PEPE_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "500ed632bcf7e8644c61259f80929a517be7abe19bc449dd3b641fae3bb1bcbb",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_PEPE_USDT_SWAP_15m_41174.csv",
+        "csv_rows_requested": 32146,
+        "rows_materialized": 32146,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "PIEVERSE_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "a91dc96387afba7c065d987cead861656980dfb799ce2178cc766a6e00413fc3",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_PIEVERSE_USDT_SWAP_15m_25191.csv",
+        "csv_rows_requested": 16163,
+        "rows_materialized": 16163,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "PIPPIN_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "3526ea1c14ff5ad6a1327e2d948b5b917af29105f7a1b79c9725aead2ccb4cfa",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_PIPPIN_USDT_SWAP_15m_23609.csv",
+        "csv_rows_requested": 14581,
+        "rows_materialized": 14581,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "PI_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "d4d14a2fa8602ad915970a7cae2f3182a361cafdd87adeea60f85385791622e5",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_PI_USDT_SWAP_15m_41174.csv",
+        "csv_rows_requested": 32146,
+        "rows_materialized": 32146,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "PLUME_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "aff3e080da8403786660590a9c4f3c5532fb0688a55fcf00fc6e37683286b069",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_PLUME_USDT_SWAP_15m_41073.csv",
+        "csv_rows_requested": 32045,
+        "rows_materialized": 32045,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "PNUT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "de5947e4e63f7f72553fc6d63203487998856e2a62994af7eaa7d2098712cd3e",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_PNUT_USDT_SWAP_15m_41073.csv",
+        "csv_rows_requested": 32045,
+        "rows_materialized": 32045,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "PROVE_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "d7c21cac87f4763180483b8274bc4687bd98ec5e98cadd873ae1ecb7850983ef",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_PROVE_USDT_SWAP_15m_28039.csv",
+        "csv_rows_requested": 19011,
+        "rows_materialized": 19011,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "PUMP_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "3aff4a717b86a9fb01b88a418a5c13177b37d33acb53b014dd90d12d535c36ad",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_PUMP_USDT_SWAP_15m_37135.csv",
+        "csv_rows_requested": 28107,
+        "rows_materialized": 28107,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "QTUM_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "355954ac8c79320d2edd419e2d4f17d41746ecfa0d664e31c32538d7c8070c6e",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_QTUM_USDT_SWAP_15m_41073.csv",
+        "csv_rows_requested": 32045,
+        "rows_materialized": 32045,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "RAVE_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "bcfaac11e2c87ead35d2a03b94c3b7b79f313f0ba7f563994790b47a1c3a88b7",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_RAVE_USDT_SWAP_15m_22389.csv",
+        "csv_rows_requested": 13361,
+        "rows_materialized": 13361,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "RAY_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "394ce4780a0fd9b4eb1cd63cdfd25a002c65e37129c1b4fea195d00e486af77a",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_RAY_USDT_SWAP_15m_41073.csv",
+        "csv_rows_requested": 32045,
+        "rows_materialized": 32045,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "RESOLV_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "93ebb16da5bb70a6a05372fff5276c702a3ec10bf221d3f5f2031867cf557928",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_RESOLV_USDT_SWAP_15m_40412.csv",
+        "csv_rows_requested": 31383,
+        "rows_materialized": 31383,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "RLS_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "bbe51c1136874d145f3f2712a097290dcd0ceac8ede0adaee6e0c25695c25bc4",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_RLS_USDT_SWAP_15m_23609.csv",
+        "csv_rows_requested": 14580,
+        "rows_materialized": 14580,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "RSR_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "f1496b1098588e1cfb020282aeb1e1cce9480cdb4c4bd42f0d5a5f44e6a36be2",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_RSR_USDT_SWAP_15m_41073.csv",
+        "csv_rows_requested": 32044,
+        "rows_materialized": 32044,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "RVN_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "dfc7a1887881b35c41c6ea243aa8486a7c2e50747ac5563e13a72cb498fccc68",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_RVN_USDT_SWAP_15m_41073.csv",
+        "csv_rows_requested": 32044,
+        "rows_materialized": 32044,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SAHARA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "945a745ce4f1d4ce9149e6996f375b7cdfca018cf91e57201da8a9833e885ee1",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SAHARA_USDT_SWAP_15m_38884.csv",
+        "csv_rows_requested": 29855,
+        "rows_materialized": 29855,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SAND_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "c38f3f26a765cbb83de73260d07adc0d9567dfba944d3aea024a02ab0f9fa443",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SAND_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32146,
+        "rows_materialized": 32146,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SAPIEN_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "433dabc8082d6cd1eedcbea40830020f3a008a0ec10ed675b56b91705bd25308",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SAPIEN_USDT_SWAP_15m_26119.csv",
+        "csv_rows_requested": 17090,
+        "rows_materialized": 17090,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SEI_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "fe0def082797d71500903c6d4fa65c017c1974dc642907f40b71d21ef6d85064",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SEI_USDT_SWAP_15m_25368.csv",
+        "csv_rows_requested": 16339,
+        "rows_materialized": 16339,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SENT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "3f256709b293c764042b2c7642d2cd8105f5d08d4fa6bd335f2ecc4b9838dcad",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SENT_USDT_SWAP_15m_25338.csv",
+        "csv_rows_requested": 16309,
+        "rows_materialized": 16309,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SHELL_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "d7bf9ec15c0d21c86b1e2974bd02187254a4244eec5469801d77efbf31237158",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SHELL_USDT_SWAP_15m_41073.csv",
+        "csv_rows_requested": 32044,
+        "rows_materialized": 32044,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SHIB_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "9e4dd7a98372b2be7e20c5d522dfd482074e55ae71b6ee0800c1e3c86680be1b",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SHIB_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32146,
+        "rows_materialized": 32146,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SIGN_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "11e2d7f197e431f5f8348a39f621a2e9b83275bd993aa2956a81f43dc409b9ec",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SIGN_USDT_SWAP_15m_41073.csv",
+        "csv_rows_requested": 32044,
+        "rows_materialized": 32044,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SKY_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "046af3bbf8647a435afb4e6286fdf97d3bd654b8e292cc0667b2b371ec630bd7",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SKY_USDT_SWAP_15m_31496.csv",
+        "csv_rows_requested": 22467,
+        "rows_materialized": 22467,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SNX_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "32c6ddb76362b6037eaa63cefef5be4616a61928606947ac7f08b5be39a07d24",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SNX_USDT_SWAP_15m_41073.csv",
+        "csv_rows_requested": 32044,
+        "rows_materialized": 32044,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SOL_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "a7d75f9c729464760b3ae23cb85f4a8956a7d03177290c4b53098b0e92010757",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SOL_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32146,
+        "rows_materialized": 32146,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SOON_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "498cb77e11a09d7a7283158f30dffdab304d23cb5006efa7af1b3506fad0ab5d",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SOON_USDT_SWAP_15m_41073.csv",
+        "csv_rows_requested": 32044,
+        "rows_materialized": 32044,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SPK_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "41cc48bee27e50ad90f2da1f988d8fc80dc1c068e3c7c9d6a964798a39fe32c0",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SPK_USDT_SWAP_15m_39756.csv",
+        "csv_rows_requested": 30727,
+        "rows_materialized": 30727,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SPX_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "60553b158f1be293ef106219450ad1c2e5ec521e12272915dd55f77d34af14f0",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SPX_USDT_SWAP_15m_36898.csv",
+        "csv_rows_requested": 27869,
+        "rows_materialized": 27869,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "STABLE_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "9a675bc89da33e9ea5755a99a7778b686969def0f59ee616ce778762b3e38c13",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_STABLE_USDT_SWAP_15m_23040.csv",
+        "csv_rows_requested": 14011,
+        "rows_materialized": 14011,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "STRK_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "7eb11bbff2c36e6bef0c9203775aa4ecefb11b469821e22426c3bc8a25d66e90",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_STRK_USDT_SWAP_15m_41072.csv",
+        "csv_rows_requested": 32043,
+        "rows_materialized": 32043,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "STX_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "3c910944baa53f81f799d79b30eb0c992c62079fe655f3724f47fd76c02bb13a",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_STX_USDT_SWAP_15m_41072.csv",
+        "csv_rows_requested": 32043,
+        "rows_materialized": 32043,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SUI_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "b535449eaad8f5a7c721cf93b1d78598d986ad1103dddf77a2498b45c5533ebd",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SUI_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32146,
+        "rows_materialized": 32146,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SUSHI_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "5231d808fc41f8e19a62a639386de8484d140748355ae352fbf21899bb42aed9",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SUSHI_USDT_SWAP_15m_41072.csv",
+        "csv_rows_requested": 32043,
+        "rows_materialized": 32043,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "SYRUP_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "7f45a7ffb6344b9267a100aa0eda77923167d950d2dc85a82973f3ef85945655",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_SYRUP_USDT_SWAP_15m_38236.csv",
+        "csv_rows_requested": 29207,
+        "rows_materialized": 29207,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "S_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "2424c019f295ce1109165238b148067140e2a041582a644bbbb8e8f4c733743e",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_S_USDT_SWAP_15m_41073.csv",
+        "csv_rows_requested": 32044,
+        "rows_materialized": 32044,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "TAO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "3c333d2f0e05b86b9992b4043e9267a81bca281fc9281763e2108789d931d34d",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_TAO_USDT_SWAP_15m_41072.csv",
+        "csv_rows_requested": 32043,
+        "rows_materialized": 32043,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "THETA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "de9440bd1f2a87c09cc66ba335076ab4e2f5ce32377ffaa5227f73e16e39c161",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_THETA_USDT_SWAP_15m_41072.csv",
+        "csv_rows_requested": 32043,
+        "rows_materialized": 32043,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "TIA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "301a1bc0068ce179fe8750eb79f1c95a7bd7c7aff35530b9e0cf2564bd28f078",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_TIA_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32146,
+        "rows_materialized": 32146,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "TRB_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "dc541a79c15fec3e9eb3fedf0a78d7459a0829d400ffe80d1b46a9f2c99a629a",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_TRB_USDT_SWAP_15m_41072.csv",
+        "csv_rows_requested": 32043,
+        "rows_materialized": 32043,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "TRUMP_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "1943ee13352fd218c407775f0adbf4151de1927693cf2766ca0bcd1f68e076fc",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_TRUMP_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32146,
+        "rows_materialized": 32146,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "TRUST_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "1184180ef8b16fc204fc8603a98084ad6e0e77775c7c2cf3c5eaa02d95174f91",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_TRUST_USDT_SWAP_15m_26216.csv",
+        "csv_rows_requested": 17187,
+        "rows_materialized": 17187,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "TRUTH_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "0f43d29a4cc50964cfa94e8a45f70e585b7058c207516500efd1ee0f2f1c7b89",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_TRUTH_USDT_SWAP_15m_24008.csv",
+        "csv_rows_requested": 14979,
+        "rows_materialized": 14979,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "TRX_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "29e7a50c21aa02fb8f0a78be8e5f318071f0359e76e2f722fa064bd2cdb42d3f",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_TRX_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32146,
+        "rows_materialized": 32146,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "TURBO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "fa07d24c1ad30cd60e22c98727768ca378a191166bad446e261cef3155794350",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_TURBO_USDT_SWAP_15m_41071.csv",
+        "csv_rows_requested": 32042,
+        "rows_materialized": 32042,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "UMA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "88e0ed35d6710602d18843067b4c7f7534fc493162662f84bb0fe9725cbebb5a",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_UMA_USDT_SWAP_15m_41071.csv",
+        "csv_rows_requested": 32042,
+        "rows_materialized": 32042,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "UNI_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "928839caee480246639c1bf3c3616063f4c934cca29a4e4f13a2edc4f6ac4877",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_UNI_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32146,
+        "rows_materialized": 32146,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "USELESS_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "ef2341975a9606384e1824121fbf6cd8e55f0e192bf3ae58823bb5c8edbf3f02",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_USELESS_USDT_SWAP_15m_36110.csv",
+        "csv_rows_requested": 27081,
+        "rows_materialized": 27081,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "VANA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "735126b663940b625f25ce23d113f301d408534eb9dba910848f00948b8eb8cb",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_VANA_USDT_SWAP_15m_41071.csv",
+        "csv_rows_requested": 32042,
+        "rows_materialized": 32042,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "WCT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "4f7884a53f8e45b0bafc33ef48f151ad326520cbcef5f131df4a3dd013fe1ce9",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_WCT_USDT_SWAP_15m_41071.csv",
+        "csv_rows_requested": 32042,
+        "rows_materialized": 32042,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "WET_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "d5da72a1694d52b283b6324db5e6afa9b16b33d529466670e728eceb3168e1aa",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_WET_USDT_SWAP_15m_22934.csv",
+        "csv_rows_requested": 13905,
+        "rows_materialized": 13905,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "WIF_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "0b5145058a7eee77a36ca22ee79ca89ba9147956466cab477f5b3ae62d88cc98",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_WIF_USDT_SWAP_15m_41071.csv",
+        "csv_rows_requested": 32042,
+        "rows_materialized": 32042,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "WLD_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "ce58360ce285e52f6a278ca73c98b7f5e4f02729c2ca1f72d102bb0561af841c",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_WLD_USDT_SWAP_15m_41174.csv",
+        "csv_rows_requested": 32145,
+        "rows_materialized": 32145,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "WOO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "b094fbe1fac9893246145e5d70dab47ce64133244879e490cf3487d84c358fa7",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_WOO_USDT_SWAP_15m_41071.csv",
+        "csv_rows_requested": 32042,
+        "rows_materialized": 32042,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "W_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "8a46bb80a05fe789355fc748d63dac4b602017e177f16b84593a36d91be8fbf9",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_W_USDT_SWAP_15m_41071.csv",
+        "csv_rows_requested": 32042,
+        "rows_materialized": 32042,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "XLM_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "032f4e0bb548463237677331b37fd023ee5292d5e97e18c3873707329304a631",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_XLM_USDT_SWAP_15m_41174.csv",
+        "csv_rows_requested": 32145,
+        "rows_materialized": 32145,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "XPT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "a584fe4941e98452305fcbcf8367a461fb41aeaca38f09178aa90310c1cc254a",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_XPT_USDT_SWAP_15m_17692.csv",
+        "csv_rows_requested": 8663,
+        "rows_materialized": 8663,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "XRP_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "f39e5180b14e5f340a0471cfe1f043718b23617bd5e1c8ccaae304c3b08841ea",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_XRP_USDT_SWAP_15m_41174.csv",
+        "csv_rows_requested": 32145,
+        "rows_materialized": 32145,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "XTZ_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "fd7c2485ea893bf999b9b8df9db7216d406ff7feb51d379d7ee53fcec1a484a0",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_XTZ_USDT_SWAP_15m_41070.csv",
+        "csv_rows_requested": 32041,
+        "rows_materialized": 32041,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "YFI_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "0f560bebb32637cabc234f5acf410a16214799cc1f45e77236a4eb3f61f8c9cf",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_YFI_USDT_SWAP_15m_41070.csv",
+        "csv_rows_requested": 32041,
+        "rows_materialized": 32041,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "YGG_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "396d5578fa1d95a81fc5330acaec44ed92b1be492eb023783ec5521761d984f3",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_YGG_USDT_SWAP_15m_41070.csv",
+        "csv_rows_requested": 32041,
+        "rows_materialized": 32041,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ZAMA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "919055d571d976421100a2d49c365a27651caf8d2c82e8a32ebfa98869e604ec",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ZAMA_USDT_SWAP_15m_19964.csv",
+        "csv_rows_requested": 10935,
+        "rows_materialized": 10935,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ZBT_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "d02fb6930538ad470667e810b65b5a02f69e56f033cbd5eae5bf3595cd909505",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ZBT_USDT_SWAP_15m_28040.csv",
+        "csv_rows_requested": 19011,
+        "rows_materialized": 19011,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ZEC_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "d817d604280a43be0765ae32335f3f28ef5fa0a4df6ad45c549769ce80505dce",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ZEC_USDT_SWAP_15m_26153.csv",
+        "csv_rows_requested": 17124,
+        "rows_materialized": 17124,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ZEN_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "cafbea47dea7e2fa486bc94509e49b85607f22a13ebef9a70e74ab04f71d2241",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ZEN_USDT_SWAP_15m_26430.csv",
+        "csv_rows_requested": 17401,
+        "rows_materialized": 17401,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ZETA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "5304778adcd4449c79b5b7cc99799dd993fa03853e84d3618273b9898f766f0a",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ZETA_USDT_SWAP_15m_41070.csv",
+        "csv_rows_requested": 32041,
+        "rows_materialized": 32041,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ZIL_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "866f23d935cd881e144afb487edb1c5613cdeedce155525de3bdc259e5f8356a",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ZIL_USDT_SWAP_15m_41070.csv",
+        "csv_rows_requested": 32041,
+        "rows_materialized": 32041,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ZKP_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "6dc927df82c1df8b42a692d852f06ef28fa9c165af2211d512a1f8dac416cc14",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ZKP_USDT_SWAP_15m_20160.csv",
+        "csv_rows_requested": 11130,
+        "rows_materialized": 11130,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ZK_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "d00ada2775c7a5d45505afc206dfdf5a060b7ed168fa98db7f4f3d8aee1d1496",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ZK_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32145,
+        "rows_materialized": 32145,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ZORA_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "fad6d83f4cd54bc3e07f25a925d5b4aa566decdfaeb7197fe47ad36b443e4d33",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ZORA_USDT_SWAP_15m_28713.csv",
+        "csv_rows_requested": 19683,
+        "rows_materialized": 19683,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    },
+    {
+      "symbol": "ZRO_USDT_SWAP",
+      "rows": 420,
+      "start": "2026-04-29T03:15:00+00:00",
+      "end": "2026-05-03T12:00:00+00:00",
+      "sha256": "83239a8c3ac711de679ed977c44114880c3a21b31bec5284a9dcec02a87964b9",
+      "error": null,
+      "source_audit": {
+        "source_csv": "data/kline_fetched/okx_ZRO_USDT_SWAP_15m_41175.csv",
+        "csv_rows_requested": 32145,
+        "rows_materialized": 32145,
+        "max_materialized_time": "2026-05-03T12:00:00+00:00",
+        "holdout_rows_materialized": 0
+      }
+    }
+  ]
+}

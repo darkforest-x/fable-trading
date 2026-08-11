@@ -1,0 +1,9 @@
+<View>
+  <Header value="ETH 3m · 橙色入场判断点来得及吗？"/>
+  <Choices name="entry_timing" toName="review" choice="single" required="true" showInline="true">
+    <Choice value="是" hotkey="1"/>
+    <Choice value="不是" hotkey="2"/>
+  </Choices>
+  <Header value="橙线左侧是模型因果输入；右侧固定未来3小时，只供人工判断。"/>
+  <Image name="review" value="$review_image" zoom="true" zoomControl="true"/>
+</View>

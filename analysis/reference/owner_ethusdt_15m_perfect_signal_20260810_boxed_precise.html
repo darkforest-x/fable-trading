@@ -1,0 +1,29 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>ETHUSDT 15m exact YOLO box</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 2940px; height: 1696px; overflow: hidden; background: white; }
+  #canvas { position: relative; width: 2940px; height: 1696px; }
+  #source { position: absolute; inset: 0; width: 2940px; height: 1696px; }
+  .context { position: absolute; left: 1132px; top: 268px; width: 462px; height: 552px;
+    border: 6px dashed #00aeca; border-radius: 5px; }
+  .signal { position: absolute; left: 1483px; top: 510px; width: 111px; height: 160px;
+    border: 7px solid #ff2d2d; border-radius: 4px; background: rgba(255,45,45,.05); }
+  .edge { position: absolute; left: 1592px; top: 250px; height: 590px;
+    border-left: 4px dashed #ffb000; }
+  .label { position: absolute; padding: 5px 14px; border-radius: 8px; background: rgba(255,255,255,.92);
+    font: 700 33px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; white-space: nowrap; }
+  .context-label { left: 1132px; top: 205px; color: #009bb5; }
+  .signal-label { left: 1390px; top: 448px; color: #ef2020; }
+  .edge-label { left: 1610px; top: 270px; color: #a96f00; font-size: 31px; }
+</style>
+<div id="canvas">
+  <img id="source" src="owner_ethusdt_15m_perfect_signal_20260810.png" alt="">
+  <div class="context"></div>
+  <div class="signal"></div>
+  <div class="edge"></div>
+  <div class="label context-label">检测输入：25根K（截至决策K）</div>
+  <div class="label signal-label">信号框：6根K</div>
+  <div class="label edge-label">决策右边界</div>
+</div>

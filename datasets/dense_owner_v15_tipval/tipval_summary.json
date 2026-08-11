@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-07-22T13:55:27.380975+00:00",
+  "protocol": "v15_tipval_pad200_mad_on",
+  "single_variable": "val_earlystop_distribution_only",
+  "train_source": "/Users/zhangzc/fable-trading/datasets/dense_owner_v14_pad200",
+  "train_path_in_yaml": "../dense_owner_v14_pad200/images/train",
+  "src_val": "/Users/zhangzc/fable-trading/datasets/dense_owner_v11",
+  "out": "/Users/zhangzc/fable-trading/datasets/dense_owner_v15_tipval",
+  "val_pad200": 803,
+  "val_skip": 706,
+  "val_skip_reasons": {
+    "mad_fail_both_high": 552,
+    "other": 87,
+    "short_history": 2,
+    "holdout": 65
+  },
+  "val_holdout_skipped": 8,
+  "val_bg_copied": 1660,
+  "holdout_excluded_from": "2026-05-04",
+  "val_policy": "pad200_mad_on_same_as_v14_train",
+  "mad_gate": true,
+  "train_files_linked": 0,
+  "geometry_val_pad200": {
+    "n_boxes": 842,
+    "right_p50": 0.9921875,
+    "right_ge_0.95": 0.9631828978622328
+  },
+  "gap_vs_tip_smoke": "tip-val = historical dense gold cropped to box-right (no aftermath); tip-smoke = forward_log coins at *current* tip (may lack dense start). Same render+full-MA as live, but positive semantics still gold crop-after-box.",
+  "note": "Does not promote; does not rebuild v14 train positives."
+}

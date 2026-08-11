@@ -1,0 +1,46 @@
+{
+  "generated_at": "2026-07-26T16:57:06.809466+00:00",
+  "script": "scripts/build_owner_side_short_yolo_tip_v2.py",
+  "git": "0d7e030",
+  "source_sheet": "analysis/output/owner_side_review/review_sheet.csv",
+  "corrections_vs_v1": [
+    "tip anchored at local fast_spread trough in [cut-24, cut], not cut_global",
+    "kept only boxes dense at the anchor under expanded preset (fast<=0.0045, full<=0.0088)"
+  ],
+  "owner_approval": "2026-07-27 (全做)",
+  "window": 200,
+  "val_cut": "2026-02-01 00:00:00+00:00",
+  "holdout_cut": "2026-05-04 00:00:00+00:00",
+  "n_short_rows_raw": 1361,
+  "n_images": {
+    "train": 571,
+    "val": 194
+  },
+  "n_total": 765,
+  "dedup_note": "rows whose anchor collided with an existing tip are counted in skips.dup_anchor; the widest span wins",
+  "coverage_pct": 56.2,
+  "skips": {
+    "no_series": 0,
+    "oob": 0,
+    "holdout": 0,
+    "not_dense": 544,
+    "window": 0,
+    "box": 0,
+    "error": 0,
+    "dup_anchor": 52
+  },
+  "anchor_shift_bars": {
+    "p50": 9.0,
+    "p90": 20.0
+  },
+  "anchor_spread": {
+    "fast_p50": 0.0009350116169604306,
+    "fast_max": 0.004480451189830612,
+    "full_p50": 0.0044309499360943964,
+    "full_max": 0.00878410020567163
+  },
+  "box_right_frac": {
+    "p50": 0.996875,
+    "min": 0.996875
+  }
+}

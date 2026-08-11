@@ -1,0 +1,73 @@
+{
+  "generated_at": "2026-08-11T03:42:14.495055+00:00",
+  "protocol": "owner_eth_shortdelay_dynamic_review200_v1_20260811",
+  "owner_confirmation_receipt": "analysis/output/owner_eth_shortdelay_codex_firstpass_v1/owner_confirmation_receipt.json",
+  "owner_confirmation_receipt_sha256": "d8893b4b71673ca8b66b6828ecf73b6cb68937fbcb5cec60c02dbf230f5ba3ca",
+  "confirmed_direction_scope": "short_only",
+  "frozen_source_review": "analysis/output/owner_eth_target_review_v2_shortdelay/candidates.jsonl",
+  "frozen_source_review_sha256": "f329c8becdc35eb04668fbbacf3c5df063d7fc7bef7c32126bf77d40e0baf2b2",
+  "counts": {
+    "total": 200,
+    "unique_events": 200,
+    "by_post": {
+      "3": 80,
+      "4": 65,
+      "5": 55
+    },
+    "by_core": {
+      "5": 100,
+      "7": 100
+    },
+    "by_pre": {
+      "6": 40,
+      "7": 40,
+      "8": 40,
+      "9": 40,
+      "10": 40
+    }
+  },
+  "unique_symbols": 112,
+  "window_len_observed": [
+    14,
+    22
+  ],
+  "box_center_ratio_observed": [
+    0.5294117647058824,
+    0.7058823529411765
+  ],
+  "profile": {
+    "val_metadata_rows_for_boundary_only": 358,
+    "val_images_read": 0,
+    "val_labels_read": 0,
+    "val_start_min": "2026-03-20T02:45:00+00:00",
+    "purge_bars": 150,
+    "train_allowed_end": "2026-03-18T13:15:00+00:00"
+  },
+  "sheets": [
+    "analysis/output/owner_eth_shortdelay_dynamic_review200_v1/sheets/sheet_01_R001-R025.png",
+    "analysis/output/owner_eth_shortdelay_dynamic_review200_v1/sheets/sheet_02_R026-R050.png",
+    "analysis/output/owner_eth_shortdelay_dynamic_review200_v1/sheets/sheet_03_R051-R075.png",
+    "analysis/output/owner_eth_shortdelay_dynamic_review200_v1/sheets/sheet_04_R076-R100.png",
+    "analysis/output/owner_eth_shortdelay_dynamic_review200_v1/sheets/sheet_05_R101-R125.png",
+    "analysis/output/owner_eth_shortdelay_dynamic_review200_v1/sheets/sheet_06_R126-R150.png",
+    "analysis/output/owner_eth_shortdelay_dynamic_review200_v1/sheets/sheet_07_R151-R175.png",
+    "analysis/output/owner_eth_shortdelay_dynamic_review200_v1/sheets/sheet_08_R176-R200.png"
+  ],
+  "quality_gates": {
+    "exactly_200_unique_events": true,
+    "frozen_delay_counts": true,
+    "frozen_width_counts": true,
+    "pre_context_exactly_balanced": true,
+    "dynamic_w14_to_22": true,
+    "train_only": true,
+    "full_window_before_purge": true,
+    "holdout_rows_materialized_zero": true,
+    "sample_labels_still_unconfirmed": true,
+    "training_still_blocked": true,
+    "production_still_blocked": true,
+    "eight_review_sheets": true
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "holdout_read": false
+}

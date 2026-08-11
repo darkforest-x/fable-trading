@@ -32,23 +32,36 @@
 10. **不自动 promote**：models/ACTIVE 与 frozen 默认配置的切换需 owner 点头；
     forward_log 不清空（清账 = owner 决策）。
 11. **真金操作**（下单/撤单/kill 开关/改仓位/改 API key）只有 owner 亲手做或明确逐次授权。
-12. **检测只认盘口**（owner 2026-07-23）：live 扫描只扫 tip/tip-1/tip-2 窗；凡"只能产出
-    事后信号"的路径（回看窗、事后模型、非盘口分布数据集）一律不得存在。~~pre-v16 检测器
-    权重已三机清除（仅存 COCO yolo11 底座）~~ **事实更正 2026-08-05：只清除了两机。
+12. **检测任务分流（owner 2026-08-11 最新口径，覆盖 Local Signal V2 的 07-23 旧口径）**：
+    实盘执行路径仍只扫 tip/tip-1/tip-2 因果窗；任何使用核心形态之后 K 线的模型都不得冒充
+    新鲜盘口信号，不得直接进入 tip-smoke、forward、ACTIVE 或部署。若未来接入实盘，输出时间
+    必须记为完整检测窗右端，并由 owner 另行批准延迟预算和执行架构。
+
+    **Local Signal V2 研究主目标已改为短延迟事后形态检测**：标签是“完美平台/启动形态”语义，
+    不是固定裁剪模板。Owner 的 ETH 参考中，核心约 4–7 根，边界是两条竖线之间的平台/转折段；
+    红框不得包入右侧快速下跌。输入窗口不固定为 20–30 根，必须从最短充分上下文开始动态变化；
+    当前首轮只试约 14–22 根，并继续按 precision 向更短收缩。核心结束后只允许 **3–5 根**确认：
+    3 根优先，5 根为硬上限，6–10 根撤出。红框位置随最短充分上下文自然变化，不得固定最右或
+    正中。验收分别报告 delay 3/4/5 的首次命中，精确度优先。不得因为后面已经上涨/下跌就自动
+    把核心框判成正例。旧 W20–30 派生框只能作复核来源；但能够逐框追溯到Label Studio坐标、
+    又经Owner亲自确认short方向的原始金标，是新合同的几何源。外层可重裁，内框只能按Owner批准
+    的中心截取规则从原坐标派生，禁止Codex或模型二次目测重画；未经Owner确认裁切合同不得训练。
+    Stage A 数据和权重继续保留作表征底座。该研究不再以严格因果 Stage B + 真 tip 作为离线检测器唯一验收；但
+    `production_eligible=false`，直到 owner 单独批准生产用途。今天 ETH 图是语义参考尺，不是
+    坐标模板，不得据此删除或替代既有 Stage A 数据、权重、日志和候选池。当前ETH参考只冻结
+    空头语义；Owner未明确多头镜像策略前，一律标为`mirror_unconfirmed`，既不进正例也不进负例。
+    Owner确认类别协议/代表板只设置`owner_protocol_confirmed=true`，不得批量推导
+    `sample_owner_confirmed=true`；协议级确认与逐样本金标必须分层记录。
+
+    ~~pre-v16 检测器权重已三机清除（仅存 COCO yolo11 底座）~~
+    **事实更正 2026-08-05：只清除了两机。
     Mac 与 VPS 已删，Windows 3060（`C:\fable`）上 59 个权重完好，含 v8_chain / v9 四版 /
     v10_chain / v14 / v15 / v16 / short_star 全系。唯 v11、v12、v13 不在 3060——那三版是
     Mac 上 MPS 训的；v12/v13 的 Mac 副本尚存，v11 两头皆空，是唯一真正不可恢复的模型。
-    这条纪律的意图（不用事后模型跑实盘）不变，但"权重已不存在"不能再当前提，
+    “不用事后模型冒充新鲜实盘信号”的纪律不变，但“权重已不存在”不能再当前提，
     见 `docs/learnings/purge-records-are-claims-not-facts.md`。**
-    检测器晋升唯一门 = 真 tip 金标 + tip-smoke，
-    自家 val/mAP/旧 frozen-F1 永不作裁决。无验证过的检测器时管道诚实空转（detector=none）。
-
-    **Stage A 窄例外（owner 2026-08-11 明确授权）**：允许按
-    `YOLO局部信号检测重构_Claude开发交接规范_V1.md` 恢复离线 Local-pattern pretrain，
-    从原始连续 K 线改变 `crop_start_bar`，让历史信号出现在真实 K 线序列的不同位置。
-    该数据必须明确标记 `stage_a_only / production_eligible=false`，整张窗口严格早于 holdout，
-    不得进入 tip-smoke、forward、ACTIVE 或部署；最终候选仍必须经过严格因果 Stage B 与真 tip
-    验收。右侧加空白但框仍贴真实 K 线末端，不算完成 Stage A 位置随机化。
+    实盘检测器仍只认真 tip 金标 + tip-smoke，自家 val/mAP/旧 frozen-F1 不得作生产裁决；
+    无验证过的实盘检测器时管道诚实空转（detector=none）。
 13. **单分支纪律**（owner 2026-07-30）：**只有 `main`，不开新分支、不建 worktree。**
     直接在 main 上提交、`git push origin HEAD:main`。**每次提交前先 `git branch --show-current`
     确认自己在 main**——曾有并行会话把 HEAD 切到别的分支，后续 6 个提交落在那里，
@@ -81,6 +94,26 @@
 - **把窗口缩短当成因果化** → 决定看得见多少未来的是**窗口右端落在哪根**，不是窗口有多长。
   w20_midbox 从 200 根缩到 20–30 根，95.3% 的样本窗口右端仍晚于 decision bar（中位 9 根未来 K）。
   见 `docs/learnings/window-length-does-not-control-future-visibility.md`。
+- **把动态重裁剪当成重标注** → 动态短窗只能修复位置/上下文分布，不能把旧核心proposal变成
+  新语义金标。先同时审类别与核心边界，再生成训练图；见
+  `docs/learnings/dynamic-recrop-does-not-repair-label-semantics.md`。
+- **有原始金标还让Codex二次手画** → 二次视觉重框会引入新的主观边界和宽度锚定。先逐框联结
+  原Label Studio坐标与Owner方向裁决，外层只负责重裁，内层从原框中心派生；见
+  `docs/learnings/original-gold-geometry-beats-secondary-manual-reboxing.md`。
+- **为了正负1:1缩小金标禁入区** → 配对比例是软目标，Owner框保护、同币同时间块和时间隔离是
+  硬约束；找不到安全背景就诚实缺样，禁止跨币、复用或靠近金标凑数；见
+  `docs/learnings/negative-ratio-must-not-weaken-gold-exclusion.md`。
+- **把一批偏右框统一左移** → 每张图的启动首根不同，统一delta只是换一个位置shortcut。先给K线
+  编号，逐图把核心右端落在启动前一根，再重渲染新旧框对照；见
+  `docs/learnings/per-image-reboxing-needs-indexed-boundaries-not-global-offsets.md`。
+- **把人工审核的未来K线混进训练图** → Owner审核可以看更远未来，但训练短窗必须保持逐字节
+  不变。审核未来单独目录/manifest，生成前后核对训练图SHA，未来目录禁止labels；见
+  `docs/learnings/human-review-future-context-must-be-physically-separated-from-training-input.md`。
+- **把未确认的方向镜像强塞进二分类** → 当前只确认空头参考时，多头镜像既不能混作同类正例，
+  也不能当空头负例；先隔离为`mirror_unconfirmed`。见
+  `docs/learnings/unconfirmed-mirror-is-neither-positive-nor-negative.md`。
+- **把协议确认冒充逐样本确认** → Owner认可类别方向不等于确认扩展后的每张图/每个框；确认层级
+  必须拆开记录。见`docs/learnings/protocol-confirmation-is-not-sample-confirmation.md`。
 - **哈希对上就宣布数据集可复现** → 数据集有多个自由度：像素内容、split 落点、样本集合。
   w20_midbox 重建时 2635/2635 图片逐字节一致，**但 405 个样本的 split 落点全错**。
   见 `docs/learnings/reproducibility-is-per-axis-not-a-boolean.md`。

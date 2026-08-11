@@ -1,0 +1,1208 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ETH完美平台语义审查 V1</title>
+<style>
+:root{--bg:#edf2f5;--card:#fff;--text:#172631;--muted:#657581;--red:#f3283d}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}header{background:#14212c;color:#fff;padding:27px 35px}h1{margin:0 0 8px;font-size:34px}header p{margin:0;color:#cbd7df;font-size:17px}.intro{max-width:1500px;margin:22px auto;padding:0 22px}.reference{background:#fff;border-radius:15px;padding:18px;box-shadow:0 2px 10px #0001}.reference img{width:100%;display:block;border-radius:9px}.rule{font-size:16px;line-height:1.75;margin:15px 0 0}.warn{border-left:5px solid #e19a16;background:#fff5d8;padding:12px 15px;border-radius:8px;margin-top:12px}.toolbar{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #cbd5dc;padding:12px 22px;display:flex;gap:9px;align-items:center;flex-wrap:wrap}button{border:1px solid #b8c4cc;background:#fff;border-radius:8px;padding:8px 11px;cursor:pointer}.toolbar button.active{background:#19384a;color:#fff}.spacer{flex:1}.grid{max-width:1500px;margin:20px auto 45px;padding:0 22px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.card{background:var(--card);border-radius:13px;overflow:hidden;box-shadow:0 2px 9px #0002;border:3px solid transparent}.card[data-choice="yes"]{border-color:#17a568}.card[data-choice="no"]{border-color:#d83c4c;opacity:.72}.card[data-choice="uncertain"]{border-color:#e3a321}.card-head{display:flex;gap:9px;align-items:center;padding:10px 13px}.position{margin-left:auto;color:var(--muted)}.tag{font-size:13px;font-weight:750;border-radius:999px;padding:4px 9px}.earliest_0_2{background:#d9f2e8;color:#087252}.short_3_5{background:#e1ebfb;color:#2c5e9f}.ceiling_6_10{background:#eee1f6;color:#754394}.chart{position:relative;aspect-ratio:1280/742;background:#fff}.chart img{position:absolute;inset:0;width:100%;height:100%}.box{position:absolute;border:4px solid var(--red);background:#f3283d0d;pointer-events:none}.facts{padding:11px 13px;display:grid;gap:4px;font-size:14px}.facts small{color:var(--muted)}.actions{display:flex;gap:8px;padding:0 13px 14px}.actions button{flex:1;font-weight:700}.hidden{display:none!important}footer{max-width:1450px;margin:0 auto 40px;padding:0 24px;color:var(--muted)}@media(max-width:900px){.grid{grid-template-columns:1fr}.toolbar{position:static}}
+</style></head><body><header><h1>ETH完美平台语义审查 V1</h1><p>200张代表样本 · 10根是最大允许后文，不是目标延迟 · 框位置不固定</p></header><main>
+<section class="intro"><div class="reference"><img src="../../../analysis/reference/owner_ethusdt_15m_semantic_delay_contract_20260811.png" alt="短延迟多位置训练合同"><p class="rule"><b>只回答语义：</b>红框覆盖的5/7根Owner原始核心，是否属于你要的“完美平台/启动形态”？位置、窗口长度和框后根数只是训练分布，不是正例语义。后面走出来不能反过来自动证明红框正确。</p><div class="warn"><b>本页没有自动挑“最像”。</b>没有看后续收益、没有按模型置信度排序、没有固定中间或右侧；只在Stage-A train事件中，按0–10根延迟、5/7根框宽和不同位置做可复现分层抽样。val 358张完全不参与。</div></div></section>
+<div class="toolbar"><b>筛选</b><button class="active" data-filter="all">全部 200</button><button data-filter="earliest_0_2">0–2根 80</button><button data-filter="short_3_5">3–5根 70</button><button data-filter="ceiling_6_10">6–10根 50</button><button data-filter="unreviewed">仅未审</button><span class="spacer"></span><span id="progress">已审 0 / 200</span><button id="export">导出审查JSON</button><button id="clear">清空选择</button></div>
+<section class="grid">
+<article class="card" data-group="earliest_0_2" data-event="27acf5132c18d8d5">
+ <div class="card-head"><b>#001</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 87.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/CELO_USDT_SWAP_021893_w20.png" alt="27acf5132c18d8d5"><div class="box" style="left:77.2656%;top:22.6415%;width:18.9844%;height:25.6065%"></div></div>
+ <div class="facts"><b>CELO_USDT_SWAP</b><span>W25 · 原始Owner框5根 · 框后1根 · far_right_band</span><small>27acf5132c18d8d5 · 2026-01-16 18:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="0aaaea92bb4fd114">
+ <div class="card-head"><b>#002</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_KMNO_USDT_SWAP_011960_w20.png" alt="0aaaea92bb4fd114"><div class="box" style="left:66.4062%;top:33.4232%;width:23.9063%;height:22.3720%"></div></div>
+ <div class="facts"><b>KMNO_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后2根 · right_band</span><small>0aaaea92bb4fd114 · 2025-10-06 22:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="6e40773cae9fa5d5">
+ <div class="card-head"><b>#003</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 85.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_HUMA_USDT_SWAP_018060_w20.png" alt="6e40773cae9fa5d5"><div class="box" style="left:69.5312%;top:44.3396%;width:30.4688%;height:33.9623%"></div></div>
+ <div class="facts"><b>HUMA_USDT_SWAP</b><span>W22 · 原始Owner框7根 · 框后0根 · far_right_band</span><small>6e40773cae9fa5d5 · 2025-12-09 22:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="d11b9cae66451a27">
+ <div class="card-head"><b>#004</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 84.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/FLOKI_USDT_SWAP_007730_w20.png" alt="d11b9cae66451a27"><div class="box" style="left:74.2188%;top:15.7682%;width:18.2031%;height:69.2722%"></div></div>
+ <div class="facts"><b>FLOKI_USDT_SWAP</b><span>W26 · 原始Owner框5根 · 框后2根 · far_right_band</span><small>d11b9cae66451a27 · 2025-08-22 14:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="9f86b33eb0ea0679">
+ <div class="card-head"><b>#005</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 82.6%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_FIL_USDT_SWAP_001160_w20.png" alt="9f86b33eb0ea0679"><div class="box" style="left:67.8124%;top:22.7763%;width:28.2813%;height:35.1752%"></div></div>
+ <div class="facts"><b>FIL_USDT_SWAP</b><span>W24 · 原始Owner框7根 · 框后1根 · far_right_band</span><small>9f86b33eb0ea0679 · 2025-06-16 01:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="7a78832e992cba17">
+ <div class="card-head"><b>#006</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 90.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_ONE_USDT_SWAP_002460_w20.png" alt="7a78832e992cba17"><div class="box" style="left:79.7656%;top:28.7061%;width:20.2344%;height:21.9677%"></div></div>
+ <div class="facts"><b>ONE_USDT_SWAP</b><span>W23 · 原始Owner框5根 · 框后0根 · far_right_band</span><small>7a78832e992cba17 · 2025-06-29 21:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="29b44722443ef3f1">
+ <div class="card-head"><b>#007</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/BAND_USDT_SWAP_015130_w20.png" alt="29b44722443ef3f1"><div class="box" style="left:61.2501%;top:15.6334%;width:34.2187%;height:72.7763%"></div></div>
+ <div class="facts"><b>BAND_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后1根 · right_band</span><small>29b44722443ef3f1 · 2025-11-07 15:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="51291c666db5b738">
+ <div class="card-head"><b>#008</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 80.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/okx_SOON_USDT_SWAP_014460_w20.png" alt="51291c666db5b738"><div class="box" style="left:66.4063%;top:37.0620%;width:26.0156%;height:17.9245%"></div></div>
+ <div class="facts"><b>SOON_USDT_SWAP</b><span>W26 · 原始Owner框7根 · 框后2根 · far_right_band</span><small>51291c666db5b738 · 2025-11-02 16:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="546e72a38d77c6ba">
+ <div class="card-head"><b>#009</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 79.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_SUSHI_USDT_SWAP_002360_w20.png" alt="546e72a38d77c6ba"><div class="box" style="left:65.0000%;top:34.3666%;width:27.1875%;height:26.4151%"></div></div>
+ <div class="facts"><b>SUSHI_USDT_SWAP</b><span>W25 · 原始Owner框7根 · 框后2根 · right_band</span><small>546e72a38d77c6ba · 2025-06-28 10:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="c8bb2202ca86452d">
+ <div class="card-head"><b>#010</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 89.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_PI_USDT_SWAP_012760_w20.png" alt="c8bb2202ca86452d"><div class="box" style="left:81.0157%;top:54.9865%;width:15.7031%;height:14.6900%"></div></div>
+ <div class="facts"><b>PI_USDT_SWAP</b><span>W30 · 原始Owner框5根 · 框后1根 · far_right_band</span><small>c8bb2202ca86452d · 2025-10-15 12:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="ad9327721622de45">
+ <div class="card-head"><b>#011</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/PNUT_USDT_SWAP_027084_w20.png" alt="ad9327721622de45"><div class="box" style="left:66.4062%;top:33.9622%;width:23.9063%;height:20.7547%"></div></div>
+ <div class="facts"><b>PNUT_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后2根 · right_band</span><small>ad9327721622de45 · 2026-03-12 15:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="43b851e1b69dc929">
+ <div class="card-head"><b>#012</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 88.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/S_USDT_SWAP_005930_w20.png" alt="43b851e1b69dc929"><div class="box" style="left:75.2344%;top:35.9838%;width:24.7656%;height:36.5229%"></div></div>
+ <div class="facts"><b>S_USDT_SWAP</b><span>W27 · 原始Owner框7根 · 框后0根 · far_right_band</span><small>43b851e1b69dc929 · 2025-08-04 07:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="810b39880f44e93b">
+ <div class="card-head"><b>#013</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 84.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_AUCTION_USDT_SWAP_008860_w20.png" alt="810b39880f44e93b"><div class="box" style="left:74.2188%;top:46.2264%;width:18.2031%;height:11.7251%"></div></div>
+ <div class="facts"><b>AUCTION_USDT_SWAP</b><span>W26 · 原始Owner框5根 · 框后2根 · far_right_band</span><small>810b39880f44e93b · 2025-09-04 02:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="a8f3769b8398e0b0">
+ <div class="card-head"><b>#014</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 84.6%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/BNB_USDT_SWAP_003730_w20.png" alt="a8f3769b8398e0b0"><div class="box" style="left:71.4063%;top:46.3612%;width:25.0000%;height:2.9650%"></div></div>
+ <div class="facts"><b>BNB_USDT_SWAP</b><span>W27 · 原始Owner框7根 · 框后1根 · far_right_band</span><small>a8f3769b8398e0b0 · 2025-07-09 16:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="1f1d5cdc0973c5fa">
+ <div class="card-head"><b>#015</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 93.1%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_PEOPLE_USDT_SWAP_026560_w20.png" alt="1f1d5cdc0973c5fa"><div class="box" style="left:84.3750%;top:32.2102%;width:15.6250%;height:32.4798%"></div></div>
+ <div class="facts"><b>PEOPLE_USDT_SWAP</b><span>W30 · 原始Owner框5根 · 框后0根 · far_right_band</span><small>1f1d5cdc0973c5fa · 2026-03-08 23:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="5e8b8747807fd831">
+ <div class="card-head"><b>#016</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/BAT_USDT_SWAP_012730_w20.png" alt="5e8b8747807fd831"><div class="box" style="left:61.2501%;top:16.1726%;width:34.2187%;height:18.0593%"></div></div>
+ <div class="facts"><b>BAT_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后1根 · right_band</span><small>5e8b8747807fd831 · 2025-10-12 06:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="b927aeb270c9acd9">
+ <div class="card-head"><b>#017</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 82.1%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_NOT_USDT_SWAP_024460_w20.png" alt="b927aeb270c9acd9"><div class="box" style="left:69.9218%;top:44.4745%;width:23.2031%;height:31.8059%"></div></div>
+ <div class="facts"><b>NOT_USDT_SWAP</b><span>W29 · 原始Owner框7根 · 框后2根 · far_right_band</span><small>b927aeb270c9acd9 · 2026-02-13 13:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="536e86356b38bcfb">
+ <div class="card-head"><b>#018</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.3%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/FARTCOIN_USDT_SWAP_006330_w20.png" alt="536e86356b38bcfb"><div class="box" style="left:63.5938%;top:18.0593%;width:28.2031%;height:75.0674%"></div></div>
+ <div class="facts"><b>FARTCOIN_USDT_SWAP</b><span>W24 · 原始Owner框7根 · 框后2根 · right_band</span><small>536e86356b38bcfb · 2025-08-07 09:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="6dce24eb5a060b6a">
+ <div class="card-head"><b>#019</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 87.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/NMR_USDT_SWAP_002730_w20.png" alt="6dce24eb5a060b6a"><div class="box" style="left:76.3281%;top:36.2534%;width:19.7656%;height:29.3801%"></div></div>
+ <div class="facts"><b>NMR_USDT_SWAP</b><span>W24 · 原始Owner框5根 · 框后1根 · far_right_band</span><small>6dce24eb5a060b6a · 2025-06-30 15:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="1adfd27d4ab2c0bf">
+ <div class="card-head"><b>#020</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/1INCH_USDT_SWAP_007330_w20.png" alt="1adfd27d4ab2c0bf"><div class="box" style="left:66.4062%;top:44.0701%;width:23.9063%;height:12.8032%"></div></div>
+ <div class="facts"><b>1INCH_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后2根 · right_band</span><small>1adfd27d4ab2c0bf · 2025-08-18 00:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="4d84904f94f07280">
+ <div class="card-head"><b>#021</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 87.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/SPK_USDT_SWAP_011330_w20.png" alt="4d84904f94f07280"><div class="box" style="left:73.2031%;top:6.7385%;width:26.7969%;height:76.2803%"></div></div>
+ <div class="facts"><b>SPK_USDT_SWAP</b><span>W25 · 原始Owner框7根 · 框后0根 · far_right_band</span><small>4d84904f94f07280 · 2025-10-12 14:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="b44ee0d3a9c90527">
+ <div class="card-head"><b>#022</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 82.6%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_YFI_USDT_SWAP_011060_w20.png" alt="b44ee0d3a9c90527"><div class="box" style="left:72.1094%;top:59.2992%;width:19.6875%;height:12.8032%"></div></div>
+ <div class="facts"><b>YFI_USDT_SWAP</b><span>W24 · 原始Owner框5根 · 框后2根 · far_right_band</span><small>b44ee0d3a9c90527 · 2025-09-28 11:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="1a6db37280df5f5a">
+ <div class="card-head"><b>#023</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 80.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/RECALL_USDT_SWAP_010807_w20.png" alt="1a6db37280df5f5a"><div class="box" style="left:63.1250%;top:6.7385%;width:32.5781%;height:84.7709%"></div></div>
+ <div class="facts"><b>RECALL_USDT_SWAP</b><span>W21 · 原始Owner框7根 · 框后1根 · far_right_band</span><small>1a6db37280df5f5a · 2026-02-18 20:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="cd2e45bf2eb2bbda">
+ <div class="card-head"><b>#024</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 91.3%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/ZETA_USDT_SWAP_000730_w20.png" alt="cd2e45bf2eb2bbda"><div class="box" style="left:80.6250%;top:26.2803%;width:19.3750%;height:24.6631%"></div></div>
+ <div class="facts"><b>ZETA_USDT_SWAP</b><span>W24 · 原始Owner框5根 · 框后0根 · far_right_band</span><small>cd2e45bf2eb2bbda · 2025-06-09 10:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="15116cd6a04c51c1">
+ <div class="card-head"><b>#025</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/GPS_USDT_SWAP_004730_w20.png" alt="15116cd6a04c51c1"><div class="box" style="left:61.2501%;top:37.0620%;width:34.2187%;height:33.4232%"></div></div>
+ <div class="facts"><b>GPS_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后1根 · right_band</span><small>15116cd6a04c51c1 · 2025-07-22 02:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="811138e5acc667f4">
+ <div class="card-head"><b>#026</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 81.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/PARTI_USDT_SWAP_017130_w20.png" alt="811138e5acc667f4"><div class="box" style="left:68.7500%;top:6.7386%;width:24.1406%;height:79.5148%"></div></div>
+ <div class="facts"><b>PARTI_USDT_SWAP</b><span>W28 · 原始Owner框7根 · 框后2根 · far_right_band</span><small>811138e5acc667f4 · 2025-11-27 16:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="cbac2eab1e115bad">
+ <div class="card-head"><b>#027</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 75.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/PEPE_USDT_SWAP_002530_w20.png" alt="cbac2eab1e115bad"><div class="box" style="left:58.2032%;top:42.9919%;width:32.5781%;height:5.5256%"></div></div>
+ <div class="facts"><b>PEPE_USDT_SWAP</b><span>W21 · 原始Owner框7根 · 框后2根 · right_band</span><small>cbac2eab1e115bad · 2025-06-28 03:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="427f84df76692370">
+ <div class="card-head"><b>#028</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 89.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/TRUMP_USDT_SWAP_015130_w20.png" alt="427f84df76692370"><div class="box" style="left:81.0157%;top:11.0511%;width:15.7031%;height:22.9111%"></div></div>
+ <div class="facts"><b>TRUMP_USDT_SWAP</b><span>W30 · 原始Owner框5根 · 框后1根 · far_right_band</span><small>427f84df76692370 · 2025-11-05 13:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="39ac1cf1431ff246">
+ <div class="card-head"><b>#029</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/VANA_USDT_SWAP_025881_w20.png" alt="39ac1cf1431ff246"><div class="box" style="left:66.4062%;top:39.6227%;width:23.9063%;height:28.5714%"></div></div>
+ <div class="facts"><b>VANA_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后2根 · right_band</span><small>39ac1cf1431ff246 · 2026-02-27 19:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="905c38ee1e503a92">
+ <div class="card-head"><b>#030</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 85.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_TAO_USDT_SWAP_009360_w20.png" alt="905c38ee1e503a92"><div class="box" style="left:69.5312%;top:18.1940%;width:30.4688%;height:37.3315%"></div></div>
+ <div class="facts"><b>TAO_USDT_SWAP</b><span>W22 · 原始Owner框7根 · 框后0根 · far_right_band</span><small>905c38ee1e503a92 · 2025-09-10 12:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="4a19fcea126bc9a9">
+ <div class="card-head"><b>#031</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 82.6%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_SIGN_USDT_SWAP_023860_w20.png" alt="4a19fcea126bc9a9"><div class="box" style="left:72.1094%;top:26.0107%;width:19.6875%;height:41.3747%"></div></div>
+ <div class="facts"><b>SIGN_USDT_SWAP</b><span>W24 · 原始Owner框5根 · 框后2根 · far_right_band</span><small>4a19fcea126bc9a9 · 2026-02-07 06:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="825c9a8ebd148be7">
+ <div class="card-head"><b>#032</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 81.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_KSM_USDT_SWAP_018560_w20.png" alt="825c9a8ebd148be7"><div class="box" style="left:64.8438%;top:44.7439%;width:31.0156%;height:9.5687%"></div></div>
+ <div class="facts"><b>KSM_USDT_SWAP</b><span>W22 · 原始Owner框7根 · 框后1根 · far_right_band</span><small>825c9a8ebd148be7 · 2025-12-14 03:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="b02d2d96cb7c2a09">
+ <div class="card-head"><b>#033</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 90.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/SAHARA_USDT_SWAP_004130_w20.png" alt="b02d2d96cb7c2a09"><div class="box" style="left:79.7656%;top:31.5364%;width:20.2344%;height:19.4070%"></div></div>
+ <div class="facts"><b>SAHARA_USDT_SWAP</b><span>W23 · 原始Owner框5根 · 框后0根 · far_right_band</span><small>b02d2d96cb7c2a09 · 2025-08-07 09:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="766cc7d41ddac9b9">
+ <div class="card-head"><b>#034</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/LAYER_USDT_SWAP_005330_w20.png" alt="766cc7d41ddac9b9"><div class="box" style="left:61.2501%;top:51.6172%;width:34.2187%;height:15.9030%"></div></div>
+ <div class="facts"><b>LAYER_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后1根 · right_band</span><small>766cc7d41ddac9b9 · 2025-07-28 09:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="ba93f11767000bcb">
+ <div class="card-head"><b>#035</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 82.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/SUSHI_USDT_SWAP_004530_w20.png" alt="ba93f11767000bcb"><div class="box" style="left:70.8594%;top:16.3072%;width:22.5000%;height:46.7655%"></div></div>
+ <div class="facts"><b>SUSHI_USDT_SWAP</b><span>W30 · 原始Owner框7根 · 框后2根 · far_right_band</span><small>ba93f11767000bcb · 2025-07-19 03:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="8e3b55a8c91ee068">
+ <div class="card-head"><b>#036</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 77.3%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/LUNA_USDT_SWAP_006930_w20.png" alt="8e3b55a8c91ee068"><div class="box" style="left:61.9532%;top:47.3047%;width:29.5312%;height:21.5633%"></div></div>
+ <div class="facts"><b>LUNA_USDT_SWAP</b><span>W23 · 原始Owner框7根 · 框后2根 · right_band</span><small>8e3b55a8c91ee068 · 2025-08-14 07:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="341b2122407ba138">
+ <div class="card-head"><b>#037</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 87.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/SNX_USDT_SWAP_009930_w20.png" alt="341b2122407ba138"><div class="box" style="left:77.2656%;top:42.9920%;width:18.9844%;height:20.8895%"></div></div>
+ <div class="facts"><b>SNX_USDT_SWAP</b><span>W25 · 原始Owner框5根 · 框后1根 · far_right_band</span><small>341b2122407ba138 · 2025-09-13 15:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="81d8f06b968d7f4b">
+ <div class="card-head"><b>#038</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/FIL_USDT_SWAP_007530_w20.png" alt="81d8f06b968d7f4b"><div class="box" style="left:66.4062%;top:36.2533%;width:23.9063%;height:28.9757%"></div></div>
+ <div class="facts"><b>FIL_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后2根 · right_band</span><small>81d8f06b968d7f4b · 2025-08-18 01:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="f4389c09a44815d0">
+ <div class="card-head"><b>#039</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 86.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/MUBARAK_USDT_SWAP_007730_w20.png" alt="f4389c09a44815d0"><div class="box" style="left:70.8594%;top:6.7385%;width:29.1406%;height:68.8679%"></div></div>
+ <div class="facts"><b>MUBARAK_USDT_SWAP</b><span>W23 · 原始Owner框7根 · 框后0根 · far_right_band</span><small>f4389c09a44815d0 · 2025-08-22 14:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="46341661b893ad17">
+ <div class="card-head"><b>#040</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 84.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/QTUM_USDT_SWAP_001330_w20.png" alt="46341661b893ad17"><div class="box" style="left:74.2188%;top:30.3235%;width:18.2031%;height:16.4420%"></div></div>
+ <div class="facts"><b>QTUM_USDT_SWAP</b><span>W26 · 原始Owner框5根 · 框后2根 · far_right_band</span><small>46341661b893ad17 · 2025-06-16 02:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="020e555fb3ea0b79">
+ <div class="card-head"><b>#041</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 85.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_GMX_USDT_SWAP_009860_w20.png" alt="020e555fb3ea0b79"><div class="box" style="left:73.4376%;top:35.4447%;width:23.2031%;height:14.0162%"></div></div>
+ <div class="facts"><b>GMX_USDT_SWAP</b><span>W29 · 原始Owner框7根 · 框后1根 · far_right_band</span><small>020e555fb3ea0b79 · 2025-09-14 10:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="635a03d8c20a0161">
+ <div class="card-head"><b>#042</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 92.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/PLUME_USDT_SWAP_016930_w20.png" alt="635a03d8c20a0161"><div class="box" style="left:82.1094%;top:48.7870%;width:17.8906%;height:18.7332%"></div></div>
+ <div class="facts"><b>PLUME_USDT_SWAP</b><span>W26 · 原始Owner框5根 · 框后0根 · far_right_band</span><small>635a03d8c20a0161 · 2025-11-26 04:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="5879a34ab57a8171">
+ <div class="card-head"><b>#043</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_GAS_USDT_SWAP_008760_w20.png" alt="5879a34ab57a8171"><div class="box" style="left:61.2501%;top:47.0350%;width:34.2187%;height:8.8949%"></div></div>
+ <div class="facts"><b>GAS_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后1根 · right_band</span><small>5879a34ab57a8171 · 2025-09-04 01:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="b31e1cec09244f7b">
+ <div class="card-head"><b>#044</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 80.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/MOVE_USDT_SWAP_007930_w20.png" alt="b31e1cec09244f7b"><div class="box" style="left:66.4063%;top:52.5606%;width:26.0156%;height:9.7035%"></div></div>
+ <div class="facts"><b>MOVE_USDT_SWAP</b><span>W26 · 原始Owner框7根 · 框后2根 · far_right_band</span><small>b31e1cec09244f7b · 2025-08-24 04:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="1225bb3053919a4c">
+ <div class="card-head"><b>#045</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 73.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/S_USDT_SWAP_007730_w20.png" alt="1225bb3053919a4c"><div class="box" style="left:56.0938%;top:6.7386%;width:34.2187%;height:73.9892%"></div></div>
+ <div class="facts"><b>S_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后2根 · right_band</span><small>1225bb3053919a4c · 2025-08-22 13:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="ebc553b8c213a43d">
+ <div class="card-head"><b>#046</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 85.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/AXS_USDT_SWAP_011130_w20.png" alt="ebc553b8c213a43d"><div class="box" style="left:74.1406%;top:27.7628%;width:21.7188%;height:24.9326%"></div></div>
+ <div class="facts"><b>AXS_USDT_SWAP</b><span>W22 · 原始Owner框5根 · 框后1根 · far_right_band</span><small>ebc553b8c213a43d · 2025-09-26 15:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="c1bc82da88777778">
+ <div class="card-head"><b>#047</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 85.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/SKY_USDT_SWAP_001730_w20.png" alt="c1bc82da88777778"><div class="box" style="left:68.0469%;top:30.7278%;width:31.9531%;height:20.4852%"></div></div>
+ <div class="facts"><b>SKY_USDT_SWAP</b><span>W21 · 原始Owner框7根 · 框后0根 · far_right_band</span><small>c1bc82da88777778 · 2025-09-28 11:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="44c49342784051d7">
+ <div class="card-head"><b>#048</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 81.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/okx_BICO_USDT_SWAP_008760_w20.png" alt="44c49342784051d7"><div class="box" style="left:70.8594%;top:45.8221%;width:20.6250%;height:16.5768%"></div></div>
+ <div class="facts"><b>BICO_USDT_SWAP</b><span>W23 · 原始Owner框5根 · 框后2根 · far_right_band</span><small>44c49342784051d7 · 2025-09-04 01:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="0c8f335e12e30deb">
+ <div class="card-head"><b>#049</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 81.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_ONDO_USDT_SWAP_008660_w20.png" alt="0c8f335e12e30deb"><div class="box" style="left:66.4063%;top:42.9920%;width:29.5312%;height:15.2291%"></div></div>
+ <div class="facts"><b>ONDO_USDT_SWAP</b><span>W23 · 原始Owner框7根 · 框后1根 · far_right_band</span><small>0c8f335e12e30deb · 2025-08-31 22:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="873a71950cb6ce07">
+ <div class="card-head"><b>#050</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 92.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/ONE_USDT_SWAP_021285_w20.png" alt="873a71950cb6ce07"><div class="box" style="left:82.1094%;top:45.4178%;width:17.8906%;height:33.1536%"></div></div>
+ <div class="facts"><b>ONE_USDT_SWAP</b><span>W26 · 原始Owner框5根 · 框后0根 · far_right_band</span><small>873a71950cb6ce07 · 2026-01-09 18:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="57408cdabbae953f">
+ <div class="card-head"><b>#051</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/JUP_USDT_SWAP_015330_w20.png" alt="57408cdabbae953f"><div class="box" style="left:61.2501%;top:21.2938%;width:34.2187%;height:24.3935%"></div></div>
+ <div class="facts"><b>JUP_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后1根 · right_band</span><small>57408cdabbae953f · 2025-11-09 13:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="90e7a3c73b587b0e">
+ <div class="card-head"><b>#052</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 82.1%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/WLD_USDT_SWAP_015330_w20.png" alt="90e7a3c73b587b0e"><div class="box" style="left:69.9218%;top:37.8706%;width:23.2031%;height:55.2561%"></div></div>
+ <div class="facts"><b>WLD_USDT_SWAP</b><span>W29 · 原始Owner框7根 · 框后2根 · far_right_band</span><small>90e7a3c73b587b0e · 2025-11-07 13:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="a32848c306d64eba">
+ <div class="card-head"><b>#053</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 75.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/LIT_USDT_SWAP_004354_w20.png" alt="a32848c306d64eba"><div class="box" style="left:58.2032%;top:6.7385%;width:32.5781%;height:48.1132%"></div></div>
+ <div class="facts"><b>LIT_USDT_SWAP</b><span>W21 · 原始Owner框7根 · 框后2根 · right_band</span><small>a32848c306d64eba · 2026-02-06 13:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="4fd75115f304a536">
+ <div class="card-head"><b>#054</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 86.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/BICO_USDT_SWAP_002530_w20.png" alt="4fd75115f304a536"><div class="box" style="left:75.3125%;top:28.9757%;width:20.6250%;height:39.8922%"></div></div>
+ <div class="facts"><b>BICO_USDT_SWAP</b><span>W23 · 原始Owner框5根 · 框后1根 · far_right_band</span><small>4fd75115f304a536 · 2025-06-28 15:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="7387a8c9f599ad19">
+ <div class="card-head"><b>#055</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 89.3%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_TURBO_USDT_SWAP_005160_w20.png" alt="7387a8c9f599ad19"><div class="box" style="left:76.8750%;top:48.1132%;width:23.1250%;height:24.1240%"></div></div>
+ <div class="facts"><b>TURBO_USDT_SWAP</b><span>W29 · 原始Owner框7根 · 框后0根 · far_right_band</span><small>7387a8c9f599ad19 · 2025-07-28 12:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="c4b1ad901d3f0d26">
+ <div class="card-head"><b>#056</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 81.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_ASTER_USDT_SWAP_015560_w20.png" alt="c4b1ad901d3f0d26"><div class="box" style="left:69.5313%;top:43.9353%;width:21.6406%;height:16.4420%"></div></div>
+ <div class="facts"><b>ASTER_USDT_SWAP</b><span>W22 · 原始Owner框5根 · 框后2根 · far_right_band</span><small>c4b1ad901d3f0d26 · 2026-03-04 08:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="362bf82ae24b94e7">
+ <div class="card-head"><b>#057</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 80.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/okx_RESOLV_USDT_SWAP_007560_w20.png" alt="362bf82ae24b94e7"><div class="box" style="left:63.1250%;top:23.5849%;width:32.5781%;height:52.6954%"></div></div>
+ <div class="facts"><b>RESOLV_USDT_SWAP</b><span>W21 · 原始Owner框7根 · 框后1根 · far_right_band</span><small>362bf82ae24b94e7 · 2025-08-29 06:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="b2a4abd06117db3f">
+ <div class="card-head"><b>#058</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 92.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_XRP_USDT_SWAP_009760_w20.png" alt="b2a4abd06117db3f"><div class="box" style="left:82.1094%;top:36.6577%;width:17.8906%;height:13.4771%"></div></div>
+ <div class="facts"><b>XRP_USDT_SWAP</b><span>W26 · 原始Owner框5根 · 框后0根 · far_right_band</span><small>b2a4abd06117db3f · 2025-09-12 17:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="dfc4983111d97353">
+ <div class="card-head"><b>#059</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/TAO_USDT_SWAP_025882_w20.png" alt="dfc4983111d97353"><div class="box" style="left:61.2501%;top:50.5391%;width:34.2187%;height:31.4016%"></div></div>
+ <div class="facts"><b>TAO_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后1根 · right_band</span><small>dfc4983111d97353 · 2026-02-27 11:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="bde2fc1e37307ae7">
+ <div class="card-head"><b>#060</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 80.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/CORE_USDT_SWAP_025693_w20.png" alt="bde2fc1e37307ae7"><div class="box" style="left:66.4063%;top:22.6414%;width:26.0156%;height:48.7871%"></div></div>
+ <div class="facts"><b>CORE_USDT_SWAP</b><span>W26 · 原始Owner框7根 · 框后2根 · far_right_band</span><small>bde2fc1e37307ae7 · 2026-02-25 00:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="b85526d07a624e2f">
+ <div class="card-head"><b>#061</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 76.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_ONDO_USDT_SWAP_008560_w20.png" alt="b85526d07a624e2f"><div class="box" style="left:60.1563%;top:37.6011%;width:31.0156%;height:21.8329%"></div></div>
+ <div class="facts"><b>ONDO_USDT_SWAP</b><span>W22 · 原始Owner框7根 · 框后2根 · right_band</span><small>b85526d07a624e2f · 2025-08-31 22:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="1e95fee2e0acacc3">
+ <div class="card-head"><b>#062</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 87.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/KSM_USDT_SWAP_000930_w20.png" alt="1e95fee2e0acacc3"><div class="box" style="left:77.2656%;top:48.2479%;width:18.9844%;height:21.8329%"></div></div>
+ <div class="facts"><b>KSM_USDT_SWAP</b><span>W25 · 原始Owner框5根 · 框后1根 · far_right_band</span><small>1e95fee2e0acacc3 · 2025-06-11 19:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="bdfab8299873d581">
+ <div class="card-head"><b>#063</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 87.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/SAHARA_USDT_SWAP_010130_w20.png" alt="bdfab8299873d581"><div class="box" style="left:73.2031%;top:42.3180%;width:26.7969%;height:19.8113%"></div></div>
+ <div class="facts"><b>SAHARA_USDT_SWAP</b><span>W25 · 原始Owner框7根 · 框后0根 · far_right_band</span><small>bdfab8299873d581 · 2025-10-09 00:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="90ab511ba0369898">
+ <div class="card-head"><b>#064</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 82.6%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/AIXBT_USDT_SWAP_003330_w20.png" alt="90ab511ba0369898"><div class="box" style="left:72.1094%;top:48.2479%;width:19.6875%;height:14.5553%"></div></div>
+ <div class="facts"><b>AIXBT_USDT_SWAP</b><span>W24 · 原始Owner框5根 · 框后2根 · far_right_band</span><small>90ab511ba0369898 · 2025-07-07 15:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="56bd84a0a79f50ac">
+ <div class="card-head"><b>#065</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 81.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/TAO_USDT_SWAP_007930_w20.png" alt="56bd84a0a79f50ac"><div class="box" style="left:66.4063%;top:28.8409%;width:29.5312%;height:29.3801%"></div></div>
+ <div class="facts"><b>TAO_USDT_SWAP</b><span>W23 · 原始Owner框7根 · 框后1根 · far_right_band</span><small>56bd84a0a79f50ac · 2025-08-25 02:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="59452abceb0588cb">
+ <div class="card-head"><b>#066</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 91.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_LUNA_USDT_SWAP_020260_w20.png" alt="59452abceb0588cb"><div class="box" style="left:81.3281%;top:32.6145%;width:18.6719%;height:16.9811%"></div></div>
+ <div class="facts"><b>LUNA_USDT_SWAP</b><span>W25 · 原始Owner框5根 · 框后0根 · far_right_band</span><small>59452abceb0588cb · 2026-01-02 16:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="3b3c041ee1f8b4a0">
+ <div class="card-head"><b>#067</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/TRB_USDT_SWAP_010130_w20.png" alt="3b3c041ee1f8b4a0"><div class="box" style="left:61.2501%;top:13.7466%;width:34.2187%;height:41.7790%"></div></div>
+ <div class="facts"><b>TRB_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后1根 · right_band</span><small>3b3c041ee1f8b4a0 · 2025-09-15 07:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="aec9b791286aa28c">
+ <div class="card-head"><b>#068</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 80.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_DOGE_USDT_SWAP_008260_w20.png" alt="aec9b791286aa28c"><div class="box" style="left:67.6562%;top:43.1268%;width:25.0000%;height:20.6199%"></div></div>
+ <div class="facts"><b>DOGE_USDT_SWAP</b><span>W27 · 原始Owner框7根 · 框后2根 · far_right_band</span><small>aec9b791286aa28c · 2025-08-29 04:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="b824ed6fc8bf7f7c">
+ <div class="card-head"><b>#069</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.3%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/CRV_USDT_SWAP_002330_w20.png" alt="b824ed6fc8bf7f7c"><div class="box" style="left:63.5938%;top:13.8814%;width:28.2031%;height:56.4690%"></div></div>
+ <div class="facts"><b>CRV_USDT_SWAP</b><span>W24 · 原始Owner框7根 · 框后2根 · right_band</span><small>b824ed6fc8bf7f7c · 2025-06-25 14:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="b7b4e8a83e6f61a1">
+ <div class="card-head"><b>#070</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 85.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/ME_USDT_SWAP_013130_w20.png" alt="b7b4e8a83e6f61a1"><div class="box" style="left:74.1406%;top:10.1078%;width:21.7188%;height:71.4286%"></div></div>
+ <div class="facts"><b>ME_USDT_SWAP</b><span>W22 · 原始Owner框5根 · 框后1根 · far_right_band</span><small>b7b4e8a83e6f61a1 · 2025-10-16 15:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="f0bbed112abeddd2">
+ <div class="card-head"><b>#071</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 88.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/PEOPLE_USDT_SWAP_006930_w20.png" alt="f0bbed112abeddd2"><div class="box" style="left:76.0156%;top:56.1995%;width:23.9844%;height:23.5849%"></div></div>
+ <div class="facts"><b>PEOPLE_USDT_SWAP</b><span>W28 · 原始Owner框7根 · 框后0根 · far_right_band</span><small>f0bbed112abeddd2 · 2025-08-14 07:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="f2c5ebb80b29b91c">
+ <div class="card-head"><b>#072</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 81.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_XRP_USDT_SWAP_026760_w20.png" alt="f2c5ebb80b29b91c"><div class="box" style="left:70.8594%;top:46.0916%;width:20.6250%;height:10.7817%"></div></div>
+ <div class="facts"><b>XRP_USDT_SWAP</b><span>W23 · 原始Owner框5根 · 框后2根 · far_right_band</span><small>f2c5ebb80b29b91c · 2026-03-09 11:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="ef07da6531065d1f">
+ <div class="card-head"><b>#073</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 81.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_HMSTR_USDT_SWAP_009560_w20.png" alt="ef07da6531065d1f"><div class="box" style="left:66.4063%;top:38.9488%;width:29.5312%;height:11.3208%"></div></div>
+ <div class="facts"><b>HMSTR_USDT_SWAP</b><span>W23 · 原始Owner框7根 · 框后1根 · far_right_band</span><small>ef07da6531065d1f · 2025-09-11 19:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="70f58f431e014669">
+ <div class="card-head"><b>#074</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 93.1%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/S_USDT_SWAP_001330_w20.png" alt="70f58f431e014669"><div class="box" style="left:84.3750%;top:19.5418%;width:15.6250%;height:12.6685%"></div></div>
+ <div class="facts"><b>S_USDT_SWAP</b><span>W30 · 原始Owner框5根 · 框后0根 · far_right_band</span><small>70f58f431e014669 · 2025-06-16 02:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="5a9dfce505bff1e1">
+ <div class="card-head"><b>#075</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 78.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/TURBO_USDT_SWAP_008930_w20.png" alt="5a9dfce505bff1e1"><div class="box" style="left:61.2501%;top:50.8086%;width:34.2187%;height:22.3720%"></div></div>
+ <div class="facts"><b>TURBO_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后1根 · right_band</span><small>5a9dfce505bff1e1 · 2025-09-04 03:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="ee7783690bc660b8">
+ <div class="card-head"><b>#076</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 82.1%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/NOT_USDT_SWAP_017130_w20.png" alt="ee7783690bc660b8"><div class="box" style="left:69.9218%;top:38.1402%;width:23.2031%;height:29.9191%"></div></div>
+ <div class="facts"><b>NOT_USDT_SWAP</b><span>W29 · 原始Owner框7根 · 框后2根 · far_right_band</span><small>ee7783690bc660b8 · 2025-11-27 14:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="bc39af10e181d901">
+ <div class="card-head"><b>#077</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 77.3%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/BAND_USDT_SWAP_002330_w20.png" alt="bc39af10e181d901"><div class="box" style="left:61.9532%;top:47.5741%;width:29.5312%;height:17.5202%"></div></div>
+ <div class="facts"><b>BAND_USDT_SWAP</b><span>W23 · 原始Owner框7根 · 框后2根 · right_band</span><small>bc39af10e181d901 · 2025-06-26 10:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="107cad4227a08937">
+ <div class="card-head"><b>#078</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 84.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_S_USDT_SWAP_006960_w20.png" alt="107cad4227a08937"><div class="box" style="left:71.5624%;top:37.0620%;width:23.9063%;height:13.3423%"></div></div>
+ <div class="facts"><b>S_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后1根 · far_right_band</span><small>107cad4227a08937 · 2025-08-16 17:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="e64eb5d9ff20a710">
+ <div class="card-head"><b>#079</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 85.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/ME_USDT_SWAP_006930_w20.png" alt="e64eb5d9ff20a710"><div class="box" style="left:68.0469%;top:50.2695%;width:31.9531%;height:33.5580%"></div></div>
+ <div class="facts"><b>ME_USDT_SWAP</b><span>W21 · 原始Owner框7根 · 框后0根 · far_right_band</span><small>e64eb5d9ff20a710 · 2025-08-14 07:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="earliest_0_2" data-event="5d6b1575230380bf">
+ <div class="card-head"><b>#080</b><span class="tag earliest_0_2">最早识别 0–2根</span><span class="position">位置 81.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/THETA_USDT_SWAP_007330_w20.png" alt="5d6b1575230380bf"><div class="box" style="left:70.8594%;top:44.3396%;width:20.6250%;height:12.8032%"></div></div>
+ <div class="facts"><b>THETA_USDT_SWAP</b><span>W23 · 原始Owner框5根 · 框后2根 · far_right_band</span><small>5d6b1575230380bf · 2025-08-17 18:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="36a3510662baf55b">
+ <div class="card-head"><b>#081</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 63.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/THETA_USDT_SWAP_004330_w20.png" alt="36a3510662baf55b"><div class="box" style="left:45.7031%;top:12.5337%;width:34.2969%;height:39.0836%"></div></div>
+ <div class="facts"><b>THETA_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后4根 · middle_band</span><small>36a3510662baf55b · 2025-07-17 22:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="4c199e9b2a757814">
+ <div class="card-head"><b>#082</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 72.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_APT_USDT_SWAP_020260_w20.png" alt="4c199e9b2a757814"><div class="box" style="left:60.7031%;top:39.2184%;width:22.5000%;height:7.6819%"></div></div>
+ <div class="facts"><b>APT_USDT_SWAP</b><span>W30 · 原始Owner框7根 · 框后5根 · right_band</span><small>4c199e9b2a757814 · 2026-01-01 10:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="12e33755faaafe1a">
+ <div class="card-head"><b>#083</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 75.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/CORE_USDT_SWAP_006730_w20.png" alt="12e33755faaafe1a"><div class="box" style="left:63.1250%;top:41.5095%;width:22.7344%;height:32.0755%"></div></div>
+ <div class="facts"><b>CORE_USDT_SWAP</b><span>W21 · 原始Owner框5根 · 框后3根 · right_band</span><small>12e33755faaafe1a · 2025-08-11 07:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="b02d8f1fbbffbd9f">
+ <div class="card-head"><b>#084</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 57.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/GLM_USDT_SWAP_002930_w20.png" alt="b02d8f1fbbffbd9f"><div class="box" style="left:40.5468%;top:27.7628%;width:34.2969%;height:11.3208%"></div></div>
+ <div class="facts"><b>GLM_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后5根 · middle_band</span><small>b02d8f1fbbffbd9f · 2025-07-02 06:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="b6f07110764d1736">
+ <div class="card-head"><b>#085</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 70.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/GALA_USDT_SWAP_005530_w20.png" alt="b6f07110764d1736"><div class="box" style="left:56.7969%;top:35.9838%;width:27.1875%;height:44.4744%"></div></div>
+ <div class="facts"><b>GALA_USDT_SWAP</b><span>W25 · 原始Owner框7根 · 框后4根 · right_band</span><small>b6f07110764d1736 · 2025-07-28 14:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="e3d15017c1a0bf48">
+ <div class="card-head"><b>#086</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 63.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/TAO_USDT_SWAP_016130_w20.png" alt="e3d15017c1a0bf48"><div class="box" style="left:50.9374%;top:45.0134%;width:23.9063%;height:34.7709%"></div></div>
+ <div class="facts"><b>TAO_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后5根 · middle_band</span><small>e3d15017c1a0bf48 · 2025-11-18 14:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="65bbfb97ff4610f9">
+ <div class="card-head"><b>#087</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 75.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_XRP_USDT_SWAP_008260_w20.png" alt="65bbfb97ff4610f9"><div class="box" style="left:66.4062%;top:46.4960%;width:16.1719%;height:19.9461%"></div></div>
+ <div class="facts"><b>XRP_USDT_SWAP</b><span>W29 · 原始Owner框5根 · 框后5根 · right_band</span><small>65bbfb97ff4610f9 · 2025-08-28 16:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="9692addcdfe61a42">
+ <div class="card-head"><b>#088</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 78.6%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/RVN_USDT_SWAP_004330_w20.png" alt="9692addcdfe61a42"><div class="box" style="left:66.4062%;top:15.2291%;width:23.2031%;height:46.4960%"></div></div>
+ <div class="facts"><b>RVN_USDT_SWAP</b><span>W29 · 原始Owner框7根 · 框后3根 · right_band</span><small>9692addcdfe61a42 · 2025-07-18 00:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="f88e8bdd496f7045">
+ <div class="card-head"><b>#089</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 82.1%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_PI_USDT_SWAP_025560_w20.png" alt="f88e8bdd496f7045"><div class="box" style="left:73.4374%;top:49.0566%;width:16.1719%;height:14.1509%"></div></div>
+ <div class="facts"><b>PI_USDT_SWAP</b><span>W29 · 原始Owner框5根 · 框后3根 · far_right_band</span><small>f88e8bdd496f7045 · 2026-02-24 23:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="4ba5d02738bf41e5">
+ <div class="card-head"><b>#090</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 77.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/FIL_USDT_SWAP_001730_w20.png" alt="4ba5d02738bf41e5"><div class="box" style="left:68.7500%;top:28.9758%;width:16.8750%;height:28.9757%"></div></div>
+ <div class="facts"><b>FIL_USDT_SWAP</b><span>W28 · 原始Owner框5根 · 框后4根 · right_band</span><small>4ba5d02738bf41e5 · 2025-06-20 13:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="209526184e9b5d07">
+ <div class="card-head"><b>#091</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 63.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/PEOPLE_USDT_SWAP_010130_w20.png" alt="209526184e9b5d07"><div class="box" style="left:45.7031%;top:8.7601%;width:34.2969%;height:46.0916%"></div></div>
+ <div class="facts"><b>PEOPLE_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后4根 · middle_band</span><small>209526184e9b5d07 · 2025-09-15 07:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="52cb6c667d8f8ce5">
+ <div class="card-head"><b>#092</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 66.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_MOVE_USDT_SWAP_017160_w20.png" alt="52cb6c667d8f8ce5"><div class="box" style="left:52.7343%;top:7.0081%;width:27.1875%;height:19.5418%"></div></div>
+ <div class="facts"><b>MOVE_USDT_SWAP</b><span>W25 · 原始Owner框7根 · 框后5根 · right_band</span><small>52cb6c667d8f8ce5 · 2025-11-30 22:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="d0668459475d2172">
+ <div class="card-head"><b>#093</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 75.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_SNX_USDT_SWAP_027560_w20.png" alt="d0668459475d2172"><div class="box" style="left:63.1250%;top:27.4933%;width:22.7344%;height:47.1698%"></div></div>
+ <div class="facts"><b>SNX_USDT_SWAP</b><span>W21 · 原始Owner框5根 · 框后3根 · right_band</span><small>d0668459475d2172 · 2026-03-18 11:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="9f53b0975cdede1e">
+ <div class="card-head"><b>#094</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 61.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_EGLD_USDT_SWAP_020160_w20.png" alt="9f53b0975cdede1e"><div class="box" style="left:46.1719%;top:24.3935%;width:30.9375%;height:12.5337%"></div></div>
+ <div class="facts"><b>EGLD_USDT_SWAP</b><span>W22 · 原始Owner框7根 · 框后5根 · middle_band</span><small>9f53b0975cdede1e · 2025-12-31 15:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="07072669588ef072">
+ <div class="card-head"><b>#095</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 65.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_WOO_USDT_SWAP_017560_w20.png" alt="07072669588ef072"><div class="box" style="left:48.4375%;top:33.9622%;width:32.5000%;height:54.9865%"></div></div>
+ <div class="facts"><b>WOO_USDT_SWAP</b><span>W21 · 原始Owner框7根 · 框后4根 · right_band</span><small>07072669588ef072 · 2025-12-04 18:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="767bd677c85b3a27">
+ <div class="card-head"><b>#096</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 63.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/MUBARAK_USDT_SWAP_008330_w20.png" alt="767bd677c85b3a27"><div class="box" style="left:50.9374%;top:49.3261%;width:23.9063%;height:12.9380%"></div></div>
+ <div class="facts"><b>MUBARAK_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后5根 · middle_band</span><small>767bd677c85b3a27 · 2025-08-29 03:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="e1b1d5d96619b8ee">
+ <div class="card-head"><b>#097</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 69.6%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/TURBO_USDT_SWAP_000930_w20.png" alt="e1b1d5d96619b8ee"><div class="box" style="left:59.2968%;top:39.7575%;width:19.6875%;height:42.9919%"></div></div>
+ <div class="facts"><b>TURBO_USDT_SWAP</b><span>W24 · 原始Owner框5根 · 框后5根 · right_band</span><small>e1b1d5d96619b8ee · 2025-06-11 21:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="9113651639d0b18e">
+ <div class="card-head"><b>#098</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 75.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_METIS_USDT_SWAP_001060_w20.png" alt="9113651639d0b18e"><div class="box" style="left:60.9376%;top:25.7413%;width:27.1875%;height:27.2237%"></div></div>
+ <div class="facts"><b>METIS_USDT_SWAP</b><span>W25 · 原始Owner框7根 · 框后3根 · right_band</span><small>9113651639d0b18e · 2025-06-16 02:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="001bb08081cf0aae">
+ <div class="card-head"><b>#099</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 82.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_OL_USDT_SWAP_004960_w20.png" alt="001bb08081cf0aae"><div class="box" style="left:74.2188%;top:44.0701%;width:15.7812%;height:13.4771%"></div></div>
+ <div class="facts"><b>OL_USDT_SWAP</b><span>W30 · 原始Owner框5根 · 框后3根 · far_right_band</span><small>001bb08081cf0aae · 2025-12-21 10:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="84d64c10310544ec">
+ <div class="card-head"><b>#100</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 68.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/ATOM_USDT_SWAP_001330_w20.png" alt="84d64c10310544ec"><div class="box" style="left:56.0938%;top:35.4447%;width:23.9063%;height:25.6065%"></div></div>
+ <div class="facts"><b>ATOM_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后4根 · right_band</span><small>84d64c10310544ec · 2025-06-16 01:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="9c98dc0a9f87fc05">
+ <div class="card-head"><b>#101</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 63.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/SUSHI_USDT_SWAP_011530_w20.png" alt="9c98dc0a9f87fc05"><div class="box" style="left:45.7031%;top:39.2183%;width:34.2969%;height:26.0108%"></div></div>
+ <div class="facts"><b>SUSHI_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后4根 · middle_band</span><small>9c98dc0a9f87fc05 · 2025-09-29 19:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="92dfe27fb1c5606c">
+ <div class="card-head"><b>#102</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 65.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/okx_ZIL_USDT_SWAP_002360_w20.png" alt="92dfe27fb1c5606c"><div class="box" style="left:50.7812%;top:40.7008%;width:28.2031%;height:40.8356%"></div></div>
+ <div class="facts"><b>ZIL_USDT_SWAP</b><span>W24 · 原始Owner框7根 · 框后5根 · right_band</span><small>92dfe27fb1c5606c · 2025-06-29 21:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="e06871352d93cb49">
+ <div class="card-head"><b>#103</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 79.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/CELO_USDT_SWAP_021493_w20.png" alt="e06871352d93cb49"><div class="box" style="left:69.0624%;top:30.0540%;width:19.0625%;height:10.5121%"></div></div>
+ <div class="facts"><b>CELO_USDT_SWAP</b><span>W25 · 原始Owner框5根 · 框后3根 · right_band</span><small>e06871352d93cb49 · 2026-01-13 06:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="b91b7861429ffeaf">
+ <div class="card-head"><b>#104</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 61.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/okx_A_USDT_SWAP_018060_w20.png" alt="b91b7861429ffeaf"><div class="box" style="left:46.1719%;top:49.5956%;width:30.9375%;height:18.1941%"></div></div>
+ <div class="facts"><b>A_USDT_SWAP</b><span>W22 · 原始Owner框7根 · 框后5根 · middle_band</span><small>b91b7861429ffeaf · 2025-12-09 13:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="a1d0cb42603e5633">
+ <div class="card-head"><b>#105</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 70.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_PNUT_USDT_SWAP_021860_w20.png" alt="a1d0cb42603e5633"><div class="box" style="left:56.7969%;top:8.8948%;width:27.1875%;height:21.9677%"></div></div>
+ <div class="facts"><b>PNUT_USDT_SWAP</b><span>W25 · 原始Owner框7根 · 框后4根 · right_band</span><small>a1d0cb42603e5633 · 2026-01-18 22:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="f51fcab248bbbe38">
+ <div class="card-head"><b>#106</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 63.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/RAY_USDT_SWAP_013930_w20.png" alt="f51fcab248bbbe38"><div class="box" style="left:50.9374%;top:46.4960%;width:23.9063%;height:9.0296%"></div></div>
+ <div class="facts"><b>RAY_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后5根 · middle_band</span><small>f51fcab248bbbe38 · 2025-10-26 05:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="a4ea61fe60130365">
+ <div class="card-head"><b>#107</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 66.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/PYTH_USDT_SWAP_004330_w20.png" alt="a4ea61fe60130365"><div class="box" style="left:55.4688%;top:21.6981%;width:21.6406%;height:35.8491%"></div></div>
+ <div class="facts"><b>PYTH_USDT_SWAP</b><span>W22 · 原始Owner框5根 · 框后5根 · right_band</span><small>a4ea61fe60130365 · 2025-07-17 21:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="462af6152548b95a">
+ <div class="card-head"><b>#108</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 71.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/LA_USDT_SWAP_020552_w20.png" alt="462af6152548b95a"><div class="box" style="left:55.4688%;top:40.2966%;width:31.0156%;height:22.5067%"></div></div>
+ <div class="facts"><b>LA_USDT_SWAP</b><span>W22 · 原始Owner框7根 · 框后3根 · right_band</span><small>462af6152548b95a · 2026-01-11 16:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="a0a9727f1ce5935f">
+ <div class="card-head"><b>#109</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 81.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/okx_RESOLV_USDT_SWAP_007760_w20.png" alt="a0a9727f1ce5935f"><div class="box" style="left:72.4219%;top:34.9057%;width:16.8750%;height:25.0674%"></div></div>
+ <div class="facts"><b>RESOLV_USDT_SWAP</b><span>W28 · 原始Owner框5根 · 框后3根 · far_right_band</span><small>a0a9727f1ce5935f · 2025-08-31 23:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="c900467fc2fed54d">
+ <div class="card-head"><b>#110</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 70.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/CORE_USDT_SWAP_025093_w20.png" alt="c900467fc2fed54d"><div class="box" style="left:58.2031%;top:33.8275%;width:22.7344%;height:26.0108%"></div></div>
+ <div class="facts"><b>CORE_USDT_SWAP</b><span>W21 · 原始Owner框5根 · 框后4根 · right_band</span><small>c900467fc2fed54d · 2026-02-18 15:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="a6582e6dba24a26f">
+ <div class="card-head"><b>#111</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 63.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_BNB_USDT_SWAP_006660_w20.png" alt="a6582e6dba24a26f"><div class="box" style="left:45.7031%;top:36.2533%;width:34.2969%;height:18.7332%"></div></div>
+ <div class="facts"><b>BNB_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后4根 · middle_band</span><small>a6582e6dba24a26f · 2025-08-12 13:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="5b932ecd9200683f">
+ <div class="card-head"><b>#112</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 68.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/W_USDT_SWAP_015730_w20.png" alt="5b932ecd9200683f"><div class="box" style="left:54.6094%;top:11.1860%;width:26.0156%;height:40.8356%"></div></div>
+ <div class="facts"><b>W_USDT_SWAP</b><span>W26 · 原始Owner框7根 · 框后5根 · right_band</span><small>5b932ecd9200683f · 2025-11-13 15:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="0f00e5a5fa65f9b3">
+ <div class="card-head"><b>#113</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 76.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/TAO_USDT_SWAP_006130_w20.png" alt="0f00e5a5fa65f9b3"><div class="box" style="left:64.8438%;top:41.6442%;width:21.6406%;height:22.7763%"></div></div>
+ <div class="facts"><b>TAO_USDT_SWAP</b><span>W22 · 原始Owner框5根 · 框后3根 · right_band</span><small>0f00e5a5fa65f9b3 · 2025-08-05 03:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="d48a029b27be0e45">
+ <div class="card-head"><b>#114</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 61.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_YFI_USDT_SWAP_009860_w20.png" alt="d48a029b27be0e45"><div class="box" style="left:46.1719%;top:27.4933%;width:30.9375%;height:43.5310%"></div></div>
+ <div class="facts"><b>YFI_USDT_SWAP</b><span>W22 · 原始Owner框7根 · 框后5根 · middle_band</span><small>d48a029b27be0e45 · 2025-09-15 07:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="4e22f5cf7bd4b189">
+ <div class="card-head"><b>#115</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 65.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_OKB_USDT_SWAP_013860_w20.png" alt="4e22f5cf7bd4b189"><div class="box" style="left:48.4375%;top:44.6092%;width:32.5000%;height:12.1294%"></div></div>
+ <div class="facts"><b>OKB_USDT_SWAP</b><span>W21 · 原始Owner框7根 · 框后4根 · right_band</span><small>4e22f5cf7bd4b189 · 2026-01-26 13:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="980c67eeec1b6360">
+ <div class="card-head"><b>#116</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 63.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/SOL_USDT_SWAP_011730_w20.png" alt="980c67eeec1b6360"><div class="box" style="left:50.9374%;top:62.1293%;width:23.9063%;height:15.3639%"></div></div>
+ <div class="facts"><b>SOL_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后5根 · middle_band</span><small>980c67eeec1b6360 · 2025-10-01 07:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="320ed4dc21311d9f">
+ <div class="card-head"><b>#117</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 66.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/GRT_USDT_SWAP_002530_w20.png" alt="320ed4dc21311d9f"><div class="box" style="left:55.4688%;top:35.1753%;width:21.6406%;height:16.1725%"></div></div>
+ <div class="facts"><b>GRT_USDT_SWAP</b><span>W22 · 原始Owner框5根 · 框后5根 · right_band</span><small>320ed4dc21311d9f · 2025-06-27 20:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="8bb83c0f91c9ccdb">
+ <div class="card-head"><b>#118</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 70.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/MERL_USDT_SWAP_010930_w20.png" alt="8bb83c0f91c9ccdb"><div class="box" style="left:53.2812%;top:32.3451%;width:32.5781%;height:51.3477%"></div></div>
+ <div class="facts"><b>MERL_USDT_SWAP</b><span>W21 · 原始Owner框7根 · 框后3根 · right_band</span><small>8bb83c0f91c9ccdb · 2025-09-23 11:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="4ac3b4434e64f8f4">
+ <div class="card-head"><b>#119</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 80.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/SNX_USDT_SWAP_005330_w20.png" alt="4ac3b4434e64f8f4"><div class="box" style="left:71.4062%;top:57.2777%;width:17.5000%;height:34.6361%"></div></div>
+ <div class="facts"><b>SNX_USDT_SWAP</b><span>W27 · 原始Owner框5根 · 框后3根 · far_right_band</span><small>4ac3b4434e64f8f4 · 2025-07-28 14:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="2ede75e55c080b05">
+ <div class="card-head"><b>#120</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 73.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_LUNA_USDT_SWAP_012060_w20.png" alt="2ede75e55c080b05"><div class="box" style="left:63.5938%;top:10.9164%;width:19.6875%;height:53.0997%"></div></div>
+ <div class="facts"><b>LUNA_USDT_SWAP</b><span>W24 · 原始Owner框5根 · 框后4根 · right_band</span><small>2ede75e55c080b05 · 2025-10-07 14:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="b397423f467e8b64">
+ <div class="card-head"><b>#121</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 63.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/HOME_USDT_SWAP_012530_w20.png" alt="b397423f467e8b64"><div class="box" style="left:45.7031%;top:32.6146%;width:34.2969%;height:10.9164%"></div></div>
+ <div class="facts"><b>HOME_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后4根 · middle_band</span><small>b397423f467e8b64 · 2025-10-20 14:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="57abc9a150aa1a66">
+ <div class="card-head"><b>#122</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 71.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_GLM_USDT_SWAP_016560_w20.png" alt="57abc9a150aa1a66"><div class="box" style="left:59.3751%;top:42.9920%;width:23.2031%;height:34.7709%"></div></div>
+ <div class="facts"><b>GLM_USDT_SWAP</b><span>W29 · 原始Owner框7根 · 框后5根 · right_band</span><small>57abc9a150aa1a66 · 2025-11-24 16:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="6676d070028abab7">
+ <div class="card-head"><b>#123</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 77.3%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/LINEA_USDT_SWAP_005930_w20.png" alt="6676d070028abab7"><div class="box" style="left:66.4063%;top:36.7925%;width:20.6250%;height:22.9111%"></div></div>
+ <div class="facts"><b>LINEA_USDT_SWAP</b><span>W23 · 原始Owner框5根 · 框后3根 · right_band</span><small>6676d070028abab7 · 2025-11-01 03:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="cc173f9434371879">
+ <div class="card-head"><b>#124</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 61.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/GPS_USDT_SWAP_012530_w20.png" alt="cc173f9434371879"><div class="box" style="left:46.1719%;top:6.7385%;width:30.9375%;height:86.3881%"></div></div>
+ <div class="facts"><b>GPS_USDT_SWAP</b><span>W22 · 原始Owner框7根 · 框后5根 · middle_band</span><small>cc173f9434371879 · 2025-10-10 16:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="e706f627825b98b2">
+ <div class="card-head"><b>#125</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 65.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_JUP_USDT_SWAP_020260_w20.png" alt="e706f627825b98b2"><div class="box" style="left:48.4375%;top:40.4312%;width:32.5000%;height:11.4555%"></div></div>
+ <div class="facts"><b>JUP_USDT_SWAP</b><span>W21 · 原始Owner框7根 · 框后4根 · right_band</span><small>e706f627825b98b2 · 2026-01-01 11:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="9b530b7b6bd3dd6b">
+ <div class="card-head"><b>#126</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 63.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/MOVE_USDT_SWAP_015130_w20.png" alt="9b530b7b6bd3dd6b"><div class="box" style="left:50.9374%;top:20.4852%;width:23.9063%;height:51.7520%"></div></div>
+ <div class="facts"><b>MOVE_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后5根 · middle_band</span><small>9b530b7b6bd3dd6b · 2025-11-06 13:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="17a865ea56566c6d">
+ <div class="card-head"><b>#127</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 66.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_INJ_USDT_SWAP_020660_w20.png" alt="17a865ea56566c6d"><div class="box" style="left:55.4688%;top:37.3316%;width:21.6406%;height:22.9111%"></div></div>
+ <div class="facts"><b>INJ_USDT_SWAP</b><span>W22 · 原始Owner框5根 · 框后5根 · right_band</span><small>17a865ea56566c6d · 2026-01-05 16:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="6986071b86c13f46">
+ <div class="card-head"><b>#128</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 68.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/LUNA_USDT_SWAP_006730_w20.png" alt="6986071b86c13f46"><div class="box" style="left:50.9376%;top:38.0054%;width:34.2187%;height:20.2156%"></div></div>
+ <div class="facts"><b>LUNA_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后3根 · right_band</span><small>6986071b86c13f46 · 2025-08-11 09:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="d7215a6504cdbd14">
+ <div class="card-head"><b>#129</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 81.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/APT_USDT_SWAP_011130_w20.png" alt="d7215a6504cdbd14"><div class="box" style="left:72.4219%;top:47.3046%;width:16.8750%;height:11.3208%"></div></div>
+ <div class="facts"><b>APT_USDT_SWAP</b><span>W28 · 原始Owner框5根 · 框后3根 · far_right_band</span><small>d7215a6504cdbd14 · 2025-09-24 18:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="e2065b2b7388a63b">
+ <div class="card-head"><b>#130</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 73.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/A_USDT_SWAP_010730_w20.png" alt="e2065b2b7388a63b"><div class="box" style="left:63.5938%;top:35.9838%;width:19.6875%;height:8.8949%"></div></div>
+ <div class="facts"><b>A_USDT_SWAP</b><span>W24 · 原始Owner框5根 · 框后4根 · right_band</span><small>e2065b2b7388a63b · 2025-09-21 07:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="25b511e35f0fe50d">
+ <div class="card-head"><b>#131</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 69.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_FIL_USDT_SWAP_021460_w20.png" alt="25b511e35f0fe50d"><div class="box" style="left:56.3281%;top:47.0350%;width:25.0000%;height:21.4286%"></div></div>
+ <div class="facts"><b>FIL_USDT_SWAP</b><span>W27 · 原始Owner框7根 · 框后5根 · right_band</span><small>25b511e35f0fe50d · 2026-01-13 03:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="1a253c02b2ef7d32">
+ <div class="card-head"><b>#132</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 73.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_WLD_USDT_SWAP_006760_w20.png" alt="1a253c02b2ef7d32"><div class="box" style="left:61.2499%;top:16.3072%;width:23.9063%;height:29.9191%"></div></div>
+ <div class="facts"><b>WLD_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后3根 · right_band</span><small>1a253c02b2ef7d32 · 2025-08-12 15:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="26a301c4de936d6d">
+ <div class="card-head"><b>#133</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 57.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/okx_F_USDT_SWAP_005060_w20.png" alt="26a301c4de936d6d"><div class="box" style="left:40.5468%;top:19.0026%;width:34.2969%;height:73.5849%"></div></div>
+ <div class="facts"><b>F_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后5根 · middle_band</span><small>26a301c4de936d6d · 2025-12-18 23:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="af7587f7306bc946">
+ <div class="card-head"><b>#134</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 68.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_ME_USDT_SWAP_011660_w20.png" alt="af7587f7306bc946"><div class="box" style="left:53.0469%;top:30.3235%;width:29.5312%;height:40.1617%"></div></div>
+ <div class="facts"><b>ME_USDT_SWAP</b><span>W23 · 原始Owner框7根 · 框后4根 · right_band</span><small>af7587f7306bc946 · 2025-10-03 15:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="7abd82936d62a905">
+ <div class="card-head"><b>#135</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 63.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_JELLYJELLY_USDT_SWAP_000360_w20.png" alt="7abd82936d62a905"><div class="box" style="left:50.9374%;top:36.2533%;width:23.9063%;height:12.2642%"></div></div>
+ <div class="facts"><b>JELLYJELLY_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后5根 · middle_band</span><small>7abd82936d62a905 · 2025-06-08 05:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="29425ea730572f58">
+ <div class="card-head"><b>#136</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 65.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/LUNA_USDT_SWAP_023287_w20.png" alt="29425ea730572f58"><div class="box" style="left:53.2812%;top:59.9731%;width:22.8125%;height:17.5202%"></div></div>
+ <div class="facts"><b>LUNA_USDT_SWAP</b><span>W21 · 原始Owner框5根 · 框后5根 · right_band</span><small>29425ea730572f58 · 2026-01-31 09:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="503ba79a3c6f9f1e">
+ <div class="card-head"><b>#137</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 68.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/H_USDT_SWAP_005530_w20.png" alt="503ba79a3c6f9f1e"><div class="box" style="left:50.9376%;top:18.4636%;width:34.2187%;height:66.3073%"></div></div>
+ <div class="facts"><b>H_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后3根 · right_band</span><small>503ba79a3c6f9f1e · 2025-08-29 06:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="37214cb73b0111fd">
+ <div class="card-head"><b>#138</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 80.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_GALA_USDT_SWAP_010560_w20.png" alt="37214cb73b0111fd"><div class="box" style="left:70.3126%;top:38.4097%;width:18.2031%;height:21.4286%"></div></div>
+ <div class="facts"><b>GALA_USDT_SWAP</b><span>W26 · 原始Owner框5根 · 框后3根 · far_right_band</span><small>37214cb73b0111fd · 2025-09-21 15:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="ae620cb111138535">
+ <div class="card-head"><b>#139</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 68.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/SAPIEN_USDT_SWAP_001330_w20.png" alt="ae620cb111138535"><div class="box" style="left:56.0938%;top:47.0350%;width:23.9063%;height:31.5364%"></div></div>
+ <div class="facts"><b>SAPIEN_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后4根 · right_band</span><small>ae620cb111138535 · 2025-11-19 13:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="ef6847da7c782b0b">
+ <div class="card-head"><b>#140</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 66.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/CRV_USDT_SWAP_014130_w20.png" alt="ef6847da7c782b0b"><div class="box" style="left:52.7343%;top:36.9273%;width:27.1875%;height:31.1321%"></div></div>
+ <div class="facts"><b>CRV_USDT_SWAP</b><span>W25 · 原始Owner框7根 · 框后5根 · right_band</span><small>ef6847da7c782b0b · 2025-10-26 08:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="2738735b061dc56c">
+ <div class="card-head"><b>#141</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 73.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_TRB_USDT_SWAP_004960_w20.png" alt="2738735b061dc56c"><div class="box" style="left:61.2499%;top:32.3451%;width:23.9063%;height:37.3315%"></div></div>
+ <div class="facts"><b>TRB_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后3根 · right_band</span><small>2738735b061dc56c · 2025-07-25 20:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="600288ea853efee2">
+ <div class="card-head"><b>#142</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 63.6%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/MON_USDT_SWAP_010536_w20.png" alt="600288ea853efee2"><div class="box" style="left:48.5938%;top:25.8759%;width:29.5312%;height:44.2049%"></div></div>
+ <div class="facts"><b>MON_USDT_SWAP</b><span>W23 · 原始Owner框7根 · 框后5根 · middle_band</span><small>600288ea853efee2 · 2026-01-26 15:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="3947fb8fe7cca341">
+ <div class="card-head"><b>#143</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 73.1%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_MASK_USDT_SWAP_015860_w20.png" alt="3947fb8fe7cca341"><div class="box" style="left:60.0781%;top:29.2453%;width:25.0000%;height:42.5876%"></div></div>
+ <div class="facts"><b>MASK_USDT_SWAP</b><span>W27 · 原始Owner框7根 · 框后4根 · right_band</span><small>3947fb8fe7cca341 · 2025-11-16 11:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="397fc7b5f1e6dd63">
+ <div class="card-head"><b>#144</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 63.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/INJ_USDT_SWAP_002730_w20.png" alt="397fc7b5f1e6dd63"><div class="box" style="left:50.9374%;top:30.8625%;width:23.9063%;height:17.9245%"></div></div>
+ <div class="facts"><b>INJ_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后5根 · middle_band</span><small>397fc7b5f1e6dd63 · 2025-06-29 19:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="01b22c1f6c8df737">
+ <div class="card-head"><b>#145</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 70.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/GPS_USDT_SWAP_006930_w20.png" alt="01b22c1f6c8df737"><div class="box" style="left:60.9375%;top:27.7628%;width:18.9844%;height:36.2534%"></div></div>
+ <div class="facts"><b>GPS_USDT_SWAP</b><span>W25 · 原始Owner框5根 · 框后5根 · right_band</span><small>01b22c1f6c8df737 · 2025-08-14 05:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="499b90005665e71e">
+ <div class="card-head"><b>#146</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 79.3%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_CRO_USDT_SWAP_006660_w20.png" alt="499b90005665e71e"><div class="box" style="left:67.5000%;top:38.1402%;width:22.5000%;height:25.3369%"></div></div>
+ <div class="facts"><b>CRO_USDT_SWAP</b><span>W30 · 原始Owner框7根 · 框后3根 · right_band</span><small>499b90005665e71e · 2025-08-12 18:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="c25ab753aa7414f1">
+ <div class="card-head"><b>#147</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 82.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/AUCTION_USDT_SWAP_008930_w20.png" alt="c25ab753aa7414f1"><div class="box" style="left:74.2188%;top:46.3611%;width:15.7812%;height:11.7251%"></div></div>
+ <div class="facts"><b>AUCTION_USDT_SWAP</b><span>W30 · 原始Owner框5根 · 框后3根 · far_right_band</span><small>c25ab753aa7414f1 · 2025-09-04 02:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="fc32db96c59ba977">
+ <div class="card-head"><b>#148</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 68.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_SEI_USDT_SWAP_004460_w20.png" alt="fc32db96c59ba977"><div class="box" style="left:56.0938%;top:49.7305%;width:23.9063%;height:10.2426%"></div></div>
+ <div class="facts"><b>SEI_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后4根 · right_band</span><small>fc32db96c59ba977 · 2026-01-01 12:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="e780af0431e84729">
+ <div class="card-head"><b>#149</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 65.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/RAY_USDT_SWAP_002930_w20.png" alt="e780af0431e84729"><div class="box" style="left:50.7812%;top:46.7654%;width:28.2031%;height:26.4151%"></div></div>
+ <div class="facts"><b>RAY_USDT_SWAP</b><span>W24 · 原始Owner框7根 · 框后5根 · right_band</span><small>e780af0431e84729 · 2025-07-02 14:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="short_3_5" data-event="012b7ac8ea69ebaa">
+ <div class="card-head"><b>#150</b><span class="tag short_3_5">短确认 3–5根</span><span class="position">位置 75.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/KSM_USDT_SWAP_010530_w20.png" alt="012b7ac8ea69ebaa"><div class="box" style="left:63.1250%;top:38.4097%;width:22.7344%;height:25.8760%"></div></div>
+ <div class="facts"><b>KSM_USDT_SWAP</b><span>W21 · 原始Owner框5根 · 框后3根 · right_band</span><small>012b7ac8ea69ebaa · 2025-09-19 09:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="86b1faec2df692fd">
+ <div class="card-head"><b>#151</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 67.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/A_USDT_SWAP_009530_w20.png" alt="86b1faec2df692fd"><div class="box" style="left:55.8593%;top:28.0324%;width:23.2031%;height:32.0755%"></div></div>
+ <div class="facts"><b>A_USDT_SWAP</b><span>W29 · 原始Owner框7根 · 框后6根 · right_band</span><small>86b1faec2df692fd · 2025-09-09 14:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="c8b1104fb5ccfad9">
+ <div class="card-head"><b>#152</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 65.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/PNUT_USDT_SWAP_010130_w20.png" alt="c8b1104fb5ccfad9"><div class="box" style="left:57.3438%;top:9.7035%;width:15.7031%;height:30.7278%"></div></div>
+ <div class="facts"><b>PNUT_USDT_SWAP</b><span>W30 · 原始Owner框5根 · 框后8根 · right_band</span><small>c8b1104fb5ccfad9 · 2025-09-15 06:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="fe4c5835e0ad8555">
+ <div class="card-head"><b>#153</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 65.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_ME_USDT_SWAP_008460_w20.png" alt="fe4c5835e0ad8555"><div class="box" style="left:53.9063%;top:37.4663%;width:22.5000%;height:8.3558%"></div></div>
+ <div class="facts"><b>ME_USDT_SWAP</b><span>W30 · 原始Owner框7根 · 框后7根 · right_band</span><small>fe4c5835e0ad8555 · 2025-08-31 21:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="74545817ff54bf36">
+ <div class="card-head"><b>#154</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 42.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_LUNA_USDT_SWAP_007060_w20.png" alt="74545817ff54bf36"><div class="box" style="left:27.4219%;top:42.7224%;width:31.0156%;height:30.5930%"></div></div>
+ <div class="facts"><b>LUNA_USDT_SWAP</b><span>W22 · 原始Owner框7根 · 框后9根 · left_of_center</span><small>74545817ff54bf36 · 2025-08-17 18:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="c0d5828d4cc9f6f6">
+ <div class="card-head"><b>#155</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 42.1%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/KSM_USDT_SWAP_015930_w20.png" alt="c0d5828d4cc9f6f6"><div class="box" style="left:30.2344%;top:23.5849%;width:23.9844%;height:19.5418%"></div></div>
+ <div class="facts"><b>KSM_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后9根 · left_of_center</span><small>c0d5828d4cc9f6f6 · 2025-11-16 10:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="2cab72d28e07a200">
+ <div class="card-head"><b>#156</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 43.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/UMA_USDT_SWAP_004530_w20.png" alt="2cab72d28e07a200"><div class="box" style="left:29.4532%;top:27.0890%;width:28.2031%;height:28.9757%"></div></div>
+ <div class="facts"><b>UMA_USDT_SWAP</b><span>W24 · 原始Owner框7根 · 框后10根 · left_of_center</span><small>2cab72d28e07a200 · 2025-07-19 21:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="f229ec8bf9a9e587">
+ <div class="card-head"><b>#157</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 47.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/INIT_USDT_SWAP_023688_w20.png" alt="f229ec8bf9a9e587"><div class="box" style="left:30.2343%;top:11.7251%;width:34.2969%;height:48.6523%"></div></div>
+ <div class="facts"><b>INIT_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后7根 · left_of_center</span><small>f229ec8bf9a9e587 · 2026-02-03 16:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="086b5a90008be472">
+ <div class="card-head"><b>#158</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 60.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/COMP_USDT_SWAP_015130_w20.png" alt="086b5a90008be472"><div class="box" style="left:46.4843%;top:28.7062%;width:28.2813%;height:46.4960%"></div></div>
+ <div class="facts"><b>COMP_USDT_SWAP</b><span>W24 · 原始Owner框7根 · 框后6根 · middle_band</span><small>086b5a90008be472 · 2025-11-07 00:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="ed25c560691691fc">
+ <div class="card-head"><b>#159</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 57.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/ZETA_USDT_SWAP_015730_w20.png" alt="ed25c560691691fc"><div class="box" style="left:48.8282%;top:23.8544%;width:17.4219%;height:25.0674%"></div></div>
+ <div class="facts"><b>ZETA_USDT_SWAP</b><span>W27 · 原始Owner框5根 · 框后9根 · middle_band</span><small>ed25c560691691fc · 2025-11-13 16:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="6d3db77c76071f79">
+ <div class="card-head"><b>#160</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 53.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/QTUM_USDT_SWAP_015530_w20.png" alt="6d3db77c76071f79"><div class="box" style="left:41.2500%;top:29.5148%;width:25.0000%;height:39.6226%"></div></div>
+ <div class="facts"><b>QTUM_USDT_SWAP</b><span>W27 · 原始Owner框7根 · 框后9根 · middle_band</span><small>6d3db77c76071f79 · 2025-11-11 19:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="bd86fb93ef226153">
+ <div class="card-head"><b>#161</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 54.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_ZETA_USDT_SWAP_008760_w20.png" alt="bd86fb93ef226153"><div class="box" style="left:40.4688%;top:35.1752%;width:27.1875%;height:17.5202%"></div></div>
+ <div class="facts"><b>ZETA_USDT_SWAP</b><span>W25 · 原始Owner框7根 · 框后8根 · middle_band</span><small>bd86fb93ef226153 · 2025-09-04 02:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="a86fdd42a3fa1666">
+ <div class="card-head"><b>#162</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 55.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_IOTA_USDT_SWAP_008560_w20.png" alt="a86fdd42a3fa1666"><div class="box" style="left:43.5156%;top:33.0189%;width:22.7344%;height:7.5472%"></div></div>
+ <div class="facts"><b>IOTA_USDT_SWAP</b><span>W21 · 原始Owner框5根 · 框后7根 · middle_band</span><small>a86fdd42a3fa1666 · 2025-08-31 21:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="61e7682cc08f26fc">
+ <div class="card-head"><b>#163</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 64.3%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/FIL_USDT_SWAP_016530_w20.png" alt="61e7682cc08f26fc"><div class="box" style="left:52.3438%;top:11.9947%;width:23.2813%;height:48.5175%"></div></div>
+ <div class="facts"><b>FIL_USDT_SWAP</b><span>W29 · 原始Owner框7根 · 框后7根 · middle_band</span><small>61e7682cc08f26fc · 2025-11-21 02:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="cbe1ebc09faa4c2b">
+ <div class="card-head"><b>#164</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 51.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_CELO_USDT_SWAP_013760_w20.png" alt="cbe1ebc09faa4c2b"><div class="box" style="left:39.6875%;top:46.4960%;width:24.1406%;height:29.5148%"></div></div>
+ <div class="facts"><b>CELO_USDT_SWAP</b><span>W28 · 原始Owner框7根 · 框后10根 · middle_band</span><small>cbe1ebc09faa4c2b · 2025-10-26 06:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="2a956a72044ad168">
+ <div class="card-head"><b>#165</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 65.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_SHELL_USDT_SWAP_024760_w20.png" alt="2a956a72044ad168"><div class="box" style="left:56.3282%;top:42.5876%;width:17.4219%;height:17.6550%"></div></div>
+ <div class="facts"><b>SHELL_USDT_SWAP</b><span>W27 · 原始Owner框5根 · 框后7根 · right_band</span><small>2a956a72044ad168 · 2026-02-18 05:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="46a0111279bb8a34">
+ <div class="card-head"><b>#166</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 42.1%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/BARD_USDT_SWAP_004930_w20.png" alt="46a0111279bb8a34"><div class="box" style="left:25.0782%;top:37.3316%;width:34.2969%;height:55.7951%"></div></div>
+ <div class="facts"><b>BARD_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后8根 · left_of_center</span><small>46a0111279bb8a34 · 2025-11-07 13:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="57a6cdf54aa6e728">
+ <div class="card-head"><b>#167</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 72.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/AUCTION_USDT_SWAP_010330_w20.png" alt="57a6cdf54aa6e728"><div class="box" style="left:64.0625%;top:40.2965%;width:15.7812%;height:19.1375%"></div></div>
+ <div class="facts"><b>AUCTION_USDT_SWAP</b><span>W30 · 原始Owner框5根 · 框后6根 · right_band</span><small>57a6cdf54aa6e728 · 2025-09-19 03:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="e8fd10f49aa74930">
+ <div class="card-head"><b>#168</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 50.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/NEO_USDT_SWAP_010130_w20.png" alt="e8fd10f49aa74930"><div class="box" style="left:38.5937%;top:26.5499%;width:22.7344%;height:24.7978%"></div></div>
+ <div class="facts"><b>NEO_USDT_SWAP</b><span>W21 · 原始Owner框5根 · 框后8根 · middle_band</span><small>e8fd10f49aa74930 · 2025-09-15 07:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="7b3ec8ad673e6985">
+ <div class="card-head"><b>#169</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 57.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_XRP_USDT_SWAP_002160_w20.png" alt="7b3ec8ad673e6985"><div class="box" style="left:45.7031%;top:45.0134%;width:23.9844%;height:9.8383%"></div></div>
+ <div class="facts"><b>XRP_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后6根 · middle_band</span><small>7b3ec8ad673e6985 · 2025-06-26 09:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="e7f05d17b07d6862">
+ <div class="card-head"><b>#170</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 47.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/okx_1INCH_USDT_SWAP_026160_w20.png" alt="e7f05d17b07d6862"><div class="box" style="left:35.3906%;top:72.3719%;width:23.9844%;height:13.4771%"></div></div>
+ <div class="facts"><b>1INCH_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后8根 · left_of_center</span><small>e7f05d17b07d6862 · 2026-03-04 07:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="c2af17e3cd6e0642">
+ <div class="card-head"><b>#171</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 40.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/PNUT_USDT_SWAP_011530_w20.png" alt="c2af17e3cd6e0642"><div class="box" style="left:28.7499%;top:68.5984%;width:22.8125%;height:12.2642%"></div></div>
+ <div class="facts"><b>PNUT_USDT_SWAP</b><span>W21 · 原始Owner框5根 · 框后10根 · left_of_center</span><small>c2af17e3cd6e0642 · 2025-10-01 07:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="405aa010404695ba">
+ <div class="card-head"><b>#172</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 53.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/PEPE_USDT_SWAP_003330_w20.png" alt="405aa010404695ba"><div class="box" style="left:44.9999%;top:62.2641%;width:17.4219%;height:19.1375%"></div></div>
+ <div class="facts"><b>PEPE_USDT_SWAP</b><span>W27 · 原始Owner框5根 · 框后10根 · middle_band</span><small>405aa010404695ba · 2025-07-06 11:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="0f7cdd95783b4677">
+ <div class="card-head"><b>#173</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 69.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/DOGE_USDT_SWAP_015930_w20.png" alt="0f7cdd95783b4677"><div class="box" style="left:57.3437%;top:11.5903%;width:22.5000%;height:43.9353%"></div></div>
+ <div class="facts"><b>DOGE_USDT_SWAP</b><span>W30 · 原始Owner框7根 · 框后6根 · right_band</span><small>0f7cdd95783b4677 · 2025-11-13 16:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="a88ea704e890cc0b">
+ <div class="card-head"><b>#174</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 65.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/TAO_USDT_SWAP_008330_w20.png" alt="a88ea704e890cc0b"><div class="box" style="left:57.3438%;top:28.4366%;width:15.7031%;height:14.5553%"></div></div>
+ <div class="facts"><b>TAO_USDT_SWAP</b><span>W30 · 原始Owner框5根 · 框后8根 · right_band</span><small>a88ea704e890cc0b · 2025-08-29 05:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="f599d56e9769dcab">
+ <div class="card-head"><b>#175</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 65.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/BONK_USDT_SWAP_009330_w20.png" alt="f599d56e9769dcab"><div class="box" style="left:53.9063%;top:36.9272%;width:22.5000%;height:22.2372%"></div></div>
+ <div class="facts"><b>BONK_USDT_SWAP</b><span>W30 · 原始Owner框7根 · 框后7根 · right_band</span><small>f599d56e9769dcab · 2025-09-07 01:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="875fa3ec9cb1903c">
+ <div class="card-head"><b>#176</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 45.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_MMT_USDT_SWAP_001060_w20.png" alt="875fa3ec9cb1903c"><div class="box" style="left:30.7031%;top:23.8545%;width:29.6094%;height:33.1536%"></div></div>
+ <div class="facts"><b>MMT_USDT_SWAP</b><span>W23 · 原始Owner框7根 · 框后9根 · left_of_center</span><small>875fa3ec9cb1903c · 2025-11-15 23:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="036cd5b7c675fc7f">
+ <div class="card-head"><b>#177</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 45.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_ONE_USDT_SWAP_015860_w20.png" alt="036cd5b7c675fc7f"><div class="box" style="left:33.6719%;top:24.1241%;width:22.7344%;height:19.6765%"></div></div>
+ <div class="facts"><b>ONE_USDT_SWAP</b><span>W21 · 原始Owner框5根 · 框后9根 · left_of_center</span><small>036cd5b7c675fc7f · 2025-11-16 09:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="448a1ea421731f06">
+ <div class="card-head"><b>#178</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 35.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_BAT_USDT_SWAP_011660_w20.png" alt="448a1ea421731f06"><div class="box" style="left:18.9843%;top:46.6307%;width:32.5781%;height:11.1860%"></div></div>
+ <div class="facts"><b>BAT_USDT_SWAP</b><span>W21 · 原始Owner框7根 · 框后10根 · left_of_center</span><small>448a1ea421731f06 · 2025-10-04 04:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="2504e66e17d643e2">
+ <div class="card-head"><b>#179</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 47.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/TAO_USDT_SWAP_022682_w20.png" alt="2504e66e17d643e2"><div class="box" style="left:30.2343%;top:40.1617%;width:34.2969%;height:16.4420%"></div></div>
+ <div class="facts"><b>TAO_USDT_SWAP</b><span>W20 · 原始Owner框7根 · 框后7根 · left_of_center</span><small>2504e66e17d643e2 · 2026-01-25 03:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="922db87b049d7cdd">
+ <div class="card-head"><b>#180</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 55.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_GLM_USDT_SWAP_013760_w20.png" alt="922db87b049d7cdd"><div class="box" style="left:38.5938%;top:45.6874%;width:32.5781%;height:9.5687%"></div></div>
+ <div class="facts"><b>GLM_USDT_SWAP</b><span>W21 · 原始Owner框7根 · 框后6根 · middle_band</span><small>922db87b049d7cdd · 2025-10-26 08:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="fd781df15b3afdc3">
+ <div class="card-head"><b>#181</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 54.2%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/TIA_USDT_SWAP_002930_w20.png" alt="fd781df15b3afdc3"><div class="box" style="left:44.5312%;top:47.3045%;width:19.0625%;height:22.9111%"></div></div>
+ <div class="facts"><b>TIA_USDT_SWAP</b><span>W25 · 原始Owner框5根 · 框后9根 · middle_band</span><small>fd781df15b3afdc3 · 2025-07-02 03:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="927e4ea9792c594b">
+ <div class="card-head"><b>#182</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 53.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/LIGHT_USDT_SWAP_004504_w20.png" alt="927e4ea9792c594b"><div class="box" style="left:41.2500%;top:22.5067%;width:25.0000%;height:24.9326%"></div></div>
+ <div class="facts"><b>LIGHT_USDT_SWAP</b><span>W27 · 原始Owner框7根 · 框后9根 · middle_band</span><small>927e4ea9792c594b · 2026-01-31 05:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="b5b39d3f27bb850f">
+ <div class="card-head"><b>#183</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 50.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/LUNA_USDT_SWAP_006130_w20.png" alt="b5b39d3f27bb850f"><div class="box" style="left:35.1562%;top:32.6145%;width:29.6094%;height:40.2965%"></div></div>
+ <div class="facts"><b>LUNA_USDT_SWAP</b><span>W23 · 原始Owner框7根 · 框后8根 · middle_band</span><small>b5b39d3f27bb850f · 2025-08-05 13:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="9538312ee9026a38">
+ <div class="card-head"><b>#184</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 62.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_ATH_USDT_SWAP_000660_w20.png" alt="9538312ee9026a38"><div class="box" style="left:52.7344%;top:54.9865%;width:18.9844%;height:15.6334%"></div></div>
+ <div class="facts"><b>ATH_USDT_SWAP</b><span>W25 · 原始Owner框5根 · 框后7根 · middle_band</span><small>9538312ee9026a38 · 2025-06-11 23:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="33553c510897471d">
+ <div class="card-head"><b>#185</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 61.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/BERA_USDT_SWAP_014130_w20.png" alt="33553c510897471d"><div class="box" style="left:48.8282%;top:26.5498%;width:24.9219%;height:36.7925%"></div></div>
+ <div class="facts"><b>BERA_USDT_SWAP</b><span>W27 · 原始Owner框7根 · 框后7根 · middle_band</span><small>33553c510897471d · 2025-10-27 07:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="1a5a76190bdcdd69">
+ <div class="card-head"><b>#186</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 50.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/ZORA_USDT_SWAP_003930_w20.png" alt="1a5a76190bdcdd69"><div class="box" style="left:37.5000%;top:27.0889%;width:24.9219%;height:64.8248%"></div></div>
+ <div class="facts"><b>ZORA_USDT_SWAP</b><span>W27 · 原始Owner框7根 · 框后10根 · middle_band</span><small>1a5a76190bdcdd69 · 2025-11-19 20:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="4e01f571b6616810">
+ <div class="card-head"><b>#187</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 66.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/FIL_USDT_SWAP_012330_w20.png" alt="4e01f571b6616810"><div class="box" style="left:57.8906%;top:9.0296%;width:16.8750%;height:45.5526%"></div></div>
+ <div class="facts"><b>FIL_USDT_SWAP</b><span>W28 · 原始Owner框5根 · 框后7根 · right_band</span><small>4e01f571b6616810 · 2025-10-07 13:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="c37a8292f7eec574">
+ <div class="card-head"><b>#188</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 47.6%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_SOL_USDT_SWAP_027060_w20.png" alt="c37a8292f7eec574"><div class="box" style="left:32.1094%;top:79.2453%;width:31.0156%;height:9.2992%"></div></div>
+ <div class="facts"><b>SOL_USDT_SWAP</b><span>W22 · 原始Owner框7根 · 框后8根 · left_of_center</span><small>c37a8292f7eec574 · 2026-03-12 21:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="71d4d9ac4fb118c4">
+ <div class="card-head"><b>#189</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 70.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/val/COAI_USDT_SWAP_013030_w20.png" alt="71d4d9ac4fb118c4"><div class="box" style="left:61.4844%;top:49.8653%;width:16.8750%;height:24.7978%"></div></div>
+ <div class="facts"><b>COAI_USDT_SWAP</b><span>W28 · 原始Owner框5根 · 框后6根 · right_band</span><small>71d4d9ac4fb118c4 · 2026-02-27 11:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="2593df5bfb2af8db">
+ <div class="card-head"><b>#190</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 61.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_BAT_USDT_SWAP_022960_w20.png" alt="2593df5bfb2af8db"><div class="box" style="left:52.5781%;top:34.5014%;width:17.4219%;height:14.1509%"></div></div>
+ <div class="facts"><b>BAT_USDT_SWAP</b><span>W27 · 原始Owner框5根 · 框后8根 · middle_band</span><small>2593df5bfb2af8db · 2026-01-28 23:30:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="827ddf0abb1bd019">
+ <div class="card-head"><b>#191</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 63.6%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_CORE_USDT_SWAP_022860_w20.png" alt="827ddf0abb1bd019"><div class="box" style="left:53.0469%;top:32.4798%;width:20.6250%;height:17.5202%"></div></div>
+ <div class="facts"><b>CORE_USDT_SWAP</b><span>W23 · 原始Owner框5根 · 框后6根 · middle_band</span><small>827ddf0abb1bd019 · 2026-01-28 14:15:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="11da9dd8c4304f10">
+ <div class="card-head"><b>#192</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 47.4%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/ATOM_USDT_SWAP_020589_w20.png" alt="11da9dd8c4304f10"><div class="box" style="left:35.3906%;top:53.2345%;width:23.9844%;height:6.6038%"></div></div>
+ <div class="facts"><b>ATOM_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后8根 · left_of_center</span><small>11da9dd8c4304f10 · 2026-01-01 11:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="f3e92e8d73985b22">
+ <div class="card-head"><b>#193</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 36.8%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/ONDO_USDT_SWAP_012930_w20.png" alt="f3e92e8d73985b22"><div class="box" style="left:25.0780%;top:20.7548%;width:23.9063%;height:23.4501%"></div></div>
+ <div class="facts"><b>ONDO_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后10根 · left_of_center</span><small>f3e92e8d73985b22 · 2025-10-14 04:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="8d508cada8627d50">
+ <div class="card-head"><b>#194</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 57.1%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/WCT_USDT_SWAP_013130_w20.png" alt="8d508cada8627d50"><div class="box" style="left:48.9063%;top:34.0970%;width:16.1719%;height:55.6604%"></div></div>
+ <div class="facts"><b>WCT_USDT_SWAP</b><span>W29 · 原始Owner框5根 · 框后10根 · middle_band</span><small>8d508cada8627d50 · 2025-10-16 15:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="1b20bac280fa8fe0">
+ <div class="card-head"><b>#195</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 66.7%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/BAND_USDT_SWAP_014730_w20.png" alt="1b20bac280fa8fe0"><div class="box" style="left:54.2188%;top:8.8948%;width:24.1406%;height:48.5175%"></div></div>
+ <div class="facts"><b>BAND_USDT_SWAP</b><span>W28 · 原始Owner框7根 · 框后6根 · right_band</span><small>1b20bac280fa8fe0 · 2025-11-03 00:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="19d30606b7a89ac9">
+ <div class="card-head"><b>#196</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 65.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_GMT_USDT_SWAP_018760_w20.png" alt="19d30606b7a89ac9"><div class="box" style="left:57.3438%;top:6.7385%;width:15.7031%;height:75.4717%"></div></div>
+ <div class="facts"><b>GMT_USDT_SWAP</b><span>W30 · 原始Owner框5根 · 框后8根 · right_band</span><small>19d30606b7a89ac9 · 2025-12-17 15:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="4efb165d94939f51">
+ <div class="card-head"><b>#197</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 65.5%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/MOVE_USDT_SWAP_005730_w20.png" alt="4efb165d94939f51"><div class="box" style="left:53.9063%;top:27.0890%;width:22.5000%;height:35.7143%"></div></div>
+ <div class="facts"><b>MOVE_USDT_SWAP</b><span>W30 · 原始Owner框7根 · 框后7根 · right_band</span><small>4efb165d94939f51 · 2025-07-31 13:00:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="9fbdd610492ef20a">
+ <div class="card-head"><b>#198</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 42.9%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_OKB_USDT_SWAP_001260_w20.png" alt="9fbdd610492ef20a"><div class="box" style="left:27.4219%;top:40.5660%;width:31.0156%;height:16.9811%"></div></div>
+ <div class="facts"><b>OKB_USDT_SWAP</b><span>W22 · 原始Owner框7根 · 框后9根 · left_of_center</span><small>9fbdd610492ef20a · 2025-09-19 03:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="9b85aecf287dc1df">
+ <div class="card-head"><b>#199</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 42.1%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/LTC_USDT_SWAP_001730_w20.png" alt="9b85aecf287dc1df"><div class="box" style="left:30.2344%;top:13.0728%;width:23.9844%;height:31.6712%"></div></div>
+ <div class="facts"><b>LTC_USDT_SWAP</b><span>W20 · 原始Owner框5根 · 框后9根 · left_of_center</span><small>9b85aecf287dc1df · 2025-06-20 14:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article>
+<article class="card" data-group="ceiling_6_10" data-event="63329fe677aa312c">
+ <div class="card-head"><b>#200</b><span class="tag ceiling_6_10">上限覆盖 6–10根</span><span class="position">位置 48.0%</span></div>
+ <div class="chart"><img loading="lazy" src="../../../datasets/dense_owner_w20_midbox/images/train/okx_STRK_USDT_SWAP_002960_w20.png" alt="63329fe677aa312c"><div class="box" style="left:35.0000%;top:62.1294%;width:26.0156%;height:14.0162%"></div></div>
+ <div class="facts"><b>STRK_USDT_SWAP</b><span>W26 · 原始Owner框7根 · 框后10根 · left_of_center</span><small>63329fe677aa312c · 2025-07-06 10:45:00+00:00</small></div>
+ <div class="actions"><button data-choice="yes">✓ 完美平台</button><button data-choice="uncertain">? 接近/待定</button><button data-choice="no">✕ 不是</button></div>
+</article></section></main><footer>候选母池 1120 张；审查选择只保存在浏览器localStorage，导出后才形成标签文件。生成于 2026-08-11T02:22:10.651338+00:00</footer>
+<script>const items=[{"event_id": "27acf5132c18d8d5", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 5, "box_center_ratio": 0.875}, {"event_id": "0aaaea92bb4fd114", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 5, "box_center_ratio": 0.7894736842105263}, {"event_id": "6e40773cae9fa5d5", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 7, "box_center_ratio": 0.8571428571428571}, {"event_id": "d11b9cae66451a27", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 5, "box_center_ratio": 0.84}, {"event_id": "9f86b33eb0ea0679", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.8260869565217391}, {"event_id": "7a78832e992cba17", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 5, "box_center_ratio": 0.9090909090909091}, {"event_id": "29b44722443ef3f1", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.7894736842105263}, {"event_id": "51291c666db5b738", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.8}, {"event_id": "546e72a38d77c6ba", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.7916666666666666}, {"event_id": "c8bb2202ca86452d", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 5, "box_center_ratio": 0.896551724137931}, {"event_id": "ad9327721622de45", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 5, "box_center_ratio": 0.7894736842105263}, {"event_id": "43b851e1b69dc929", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 7, "box_center_ratio": 0.8846153846153846}, {"event_id": "810b39880f44e93b", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 5, "box_center_ratio": 0.84}, {"event_id": "a8f3769b8398e0b0", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.8461538461538461}, {"event_id": "1f1d5cdc0973c5fa", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 5, "box_center_ratio": 0.9310344827586207}, {"event_id": "5e8b8747807fd831", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.7894736842105263}, {"event_id": "b927aeb270c9acd9", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.8214285714285714}, {"event_id": "536e86356b38bcfb", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.782608695652174}, {"event_id": "6dce24eb5a060b6a", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 5, "box_center_ratio": 0.8695652173913043}, {"event_id": "1adfd27d4ab2c0bf", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 5, "box_center_ratio": 0.7894736842105263}, {"event_id": "4d84904f94f07280", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 7, "box_center_ratio": 0.875}, {"event_id": "b44ee0d3a9c90527", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 5, "box_center_ratio": 0.8260869565217391}, {"event_id": "1a6db37280df5f5a", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.8}, {"event_id": "cd2e45bf2eb2bbda", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 5, "box_center_ratio": 0.9130434782608695}, {"event_id": "15116cd6a04c51c1", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.7894736842105263}, {"event_id": "811138e5acc667f4", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.8148148148148148}, {"event_id": "cbac2eab1e115bad", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.75}, {"event_id": "427f84df76692370", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 5, "box_center_ratio": 0.896551724137931}, {"event_id": "39ac1cf1431ff246", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 5, "box_center_ratio": 0.7894736842105263}, {"event_id": "905c38ee1e503a92", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 7, "box_center_ratio": 0.8571428571428571}, {"event_id": "4a19fcea126bc9a9", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 5, "box_center_ratio": 0.8260869565217391}, {"event_id": "825c9a8ebd148be7", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.8095238095238095}, {"event_id": "b02d2d96cb7c2a09", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 5, "box_center_ratio": 0.9090909090909091}, {"event_id": "766cc7d41ddac9b9", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.7894736842105263}, {"event_id": "ba93f11767000bcb", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.8275862068965517}, {"event_id": "8e3b55a8c91ee068", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.7727272727272727}, {"event_id": "341b2122407ba138", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 5, "box_center_ratio": 0.875}, {"event_id": "81d8f06b968d7f4b", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 5, "box_center_ratio": 0.7894736842105263}, {"event_id": "f4389c09a44815d0", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 7, "box_center_ratio": 0.8636363636363636}, {"event_id": "46341661b893ad17", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 5, "box_center_ratio": 0.84}, {"event_id": "020e555fb3ea0b79", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.8571428571428571}, {"event_id": "635a03d8c20a0161", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 5, "box_center_ratio": 0.92}, {"event_id": "5879a34ab57a8171", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.7894736842105263}, {"event_id": "b31e1cec09244f7b", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.8}, {"event_id": "1225bb3053919a4c", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.7368421052631579}, {"event_id": "ebc553b8c213a43d", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 5, "box_center_ratio": 0.8571428571428571}, {"event_id": "c1bc82da88777778", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 7, "box_center_ratio": 0.85}, {"event_id": "44c49342784051d7", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 5, "box_center_ratio": 0.8181818181818182}, {"event_id": "0c8f335e12e30deb", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.8181818181818182}, {"event_id": "873a71950cb6ce07", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 5, "box_center_ratio": 0.92}, {"event_id": "57408cdabbae953f", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.7894736842105263}, {"event_id": "90e7a3c73b587b0e", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.8214285714285714}, {"event_id": "a32848c306d64eba", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.75}, {"event_id": "4fd75115f304a536", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 5, "box_center_ratio": 0.8636363636363636}, {"event_id": "7387a8c9f599ad19", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 7, "box_center_ratio": 0.8928571428571429}, {"event_id": "c4b1ad901d3f0d26", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 5, "box_center_ratio": 0.8095238095238095}, {"event_id": "362bf82ae24b94e7", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.8}, {"event_id": "b2a4abd06117db3f", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 5, "box_center_ratio": 0.92}, {"event_id": "dfc4983111d97353", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.7894736842105263}, {"event_id": "bde2fc1e37307ae7", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.8}, {"event_id": "b85526d07a624e2f", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.7619047619047619}, {"event_id": "1e95fee2e0acacc3", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 5, "box_center_ratio": 0.875}, {"event_id": "bdfab8299873d581", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 7, "box_center_ratio": 0.875}, {"event_id": "90ab511ba0369898", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 5, "box_center_ratio": 0.8260869565217391}, {"event_id": "56bd84a0a79f50ac", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.8181818181818182}, {"event_id": "59452abceb0588cb", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 5, "box_center_ratio": 0.9166666666666666}, {"event_id": "3b3c041ee1f8b4a0", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.7894736842105263}, {"event_id": "aec9b791286aa28c", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.8076923076923077}, {"event_id": "b824ed6fc8bf7f7c", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.782608695652174}, {"event_id": "b7b4e8a83e6f61a1", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 5, "box_center_ratio": 0.8571428571428571}, {"event_id": "f0bbed112abeddd2", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 7, "box_center_ratio": 0.8888888888888888}, {"event_id": "f2c5ebb80b29b91c", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 5, "box_center_ratio": 0.8181818181818182}, {"event_id": "ef07da6531065d1f", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.8181818181818182}, {"event_id": "70f58f431e014669", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 5, "box_center_ratio": 0.9310344827586207}, {"event_id": "5a9dfce505bff1e1", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 7, "box_center_ratio": 0.7894736842105263}, {"event_id": "ee7783690bc660b8", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.8214285714285714}, {"event_id": "bc39af10e181d901", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 7, "box_center_ratio": 0.7727272727272727}, {"event_id": "107cad4227a08937", "review_group": "earliest_0_2", "post_bars": 1, "box_bars": 5, "box_center_ratio": 0.8421052631578947}, {"event_id": "e64eb5d9ff20a710", "review_group": "earliest_0_2", "post_bars": 0, "box_bars": 7, "box_center_ratio": 0.85}, {"event_id": "5d6b1575230380bf", "review_group": "earliest_0_2", "post_bars": 2, "box_bars": 5, "box_center_ratio": 0.8181818181818182}, {"event_id": "36a3510662baf55b", "review_group": "short_3_5", "post_bars": 4, "box_bars": 7, "box_center_ratio": 0.631578947368421}, {"event_id": "4c199e9b2a757814", "review_group": "short_3_5", "post_bars": 5, "box_bars": 7, "box_center_ratio": 0.7241379310344828}, {"event_id": "12e33755faaafe1a", "review_group": "short_3_5", "post_bars": 3, "box_bars": 5, "box_center_ratio": 0.75}, {"event_id": "b02d8f1fbbffbd9f", "review_group": "short_3_5", "post_bars": 5, "box_bars": 7, "box_center_ratio": 0.5789473684210527}, {"event_id": "b6f07110764d1736", "review_group": "short_3_5", "post_bars": 4, "box_bars": 7, "box_center_ratio": 0.7083333333333334}, {"event_id": "e3d15017c1a0bf48", "review_group": "short_3_5", "post_bars": 5, "box_bars": 5, "box_center_ratio": 0.631578947368421}, {"event_id": "65bbfb97ff4610f9", "review_group": "short_3_5", "post_bars": 5, "box_bars": 5, "box_center_ratio": 0.75}, {"event_id": "9692addcdfe61a42", "review_group": "short_3_5", "post_bars": 3, "box_bars": 7, "box_center_ratio": 0.7857142857142857}, {"event_id": "f88e8bdd496f7045", "review_group": "short_3_5", "post_bars": 3, "box_bars": 5, "box_center_ratio": 0.8214285714285714}, {"event_id": "4ba5d02738bf41e5", "review_group": "short_3_5", "post_bars": 4, "box_bars": 5, "box_center_ratio": 0.7777777777777778}, {"event_id": "209526184e9b5d07", "review_group": "short_3_5", "post_bars": 4, "box_bars": 7, "box_center_ratio": 0.631578947368421}, {"event_id": "52cb6c667d8f8ce5", "review_group": "short_3_5", "post_bars": 5, "box_bars": 7, "box_center_ratio": 0.6666666666666666}, {"event_id": "d0668459475d2172", "review_group": "short_3_5", "post_bars": 3, "box_bars": 5, "box_center_ratio": 0.75}, {"event_id": "9f53b0975cdede1e", "review_group": "short_3_5", "post_bars": 5, "box_bars": 7, "box_center_ratio": 0.6190476190476191}, {"event_id": "07072669588ef072", "review_group": "short_3_5", "post_bars": 4, "box_bars": 7, "box_center_ratio": 0.65}, {"event_id": "767bd677c85b3a27", "review_group": "short_3_5", "post_bars": 5, "box_bars": 5, "box_center_ratio": 0.631578947368421}, {"event_id": "e1b1d5d96619b8ee", "review_group": "short_3_5", "post_bars": 5, "box_bars": 5, "box_center_ratio": 0.6956521739130435}, {"event_id": "9113651639d0b18e", "review_group": "short_3_5", "post_bars": 3, "box_bars": 7, "box_center_ratio": 0.75}, {"event_id": "001bb08081cf0aae", "review_group": "short_3_5", "post_bars": 3, "box_bars": 5, "box_center_ratio": 0.8275862068965517}, {"event_id": "84d64c10310544ec", "review_group": "short_3_5", "post_bars": 4, "box_bars": 5, "box_center_ratio": 0.6842105263157895}, {"event_id": "9c98dc0a9f87fc05", "review_group": "short_3_5", "post_bars": 4, "box_bars": 7, "box_center_ratio": 0.631578947368421}, {"event_id": "92dfe27fb1c5606c", "review_group": "short_3_5", "post_bars": 5, "box_bars": 7, "box_center_ratio": 0.6521739130434783}, {"event_id": "e06871352d93cb49", "review_group": "short_3_5", "post_bars": 3, "box_bars": 5, "box_center_ratio": 0.7916666666666666}, {"event_id": "b91b7861429ffeaf", "review_group": "short_3_5", "post_bars": 5, "box_bars": 7, "box_center_ratio": 0.6190476190476191}, {"event_id": "a1d0cb42603e5633", "review_group": "short_3_5", "post_bars": 4, "box_bars": 7, "box_center_ratio": 0.7083333333333334}, {"event_id": "f51fcab248bbbe38", "review_group": "short_3_5", "post_bars": 5, "box_bars": 5, "box_center_ratio": 0.631578947368421}, {"event_id": "a4ea61fe60130365", "review_group": "short_3_5", "post_bars": 5, "box_bars": 5, "box_center_ratio": 0.6666666666666666}, {"event_id": "462af6152548b95a", "review_group": "short_3_5", "post_bars": 3, "box_bars": 7, "box_center_ratio": 0.7142857142857143}, {"event_id": "a0a9727f1ce5935f", "review_group": "short_3_5", "post_bars": 3, "box_bars": 5, "box_center_ratio": 0.8148148148148148}, {"event_id": "c900467fc2fed54d", "review_group": "short_3_5", "post_bars": 4, "box_bars": 5, "box_center_ratio": 0.7}, {"event_id": "a6582e6dba24a26f", "review_group": "short_3_5", "post_bars": 4, "box_bars": 7, "box_center_ratio": 0.631578947368421}, {"event_id": "5b932ecd9200683f", "review_group": "short_3_5", "post_bars": 5, "box_bars": 7, "box_center_ratio": 0.68}, {"event_id": "0f00e5a5fa65f9b3", "review_group": "short_3_5", "post_bars": 3, "box_bars": 5, "box_center_ratio": 0.7619047619047619}, {"event_id": "d48a029b27be0e45", "review_group": "short_3_5", "post_bars": 5, "box_bars": 7, "box_center_ratio": 0.6190476190476191}, {"event_id": "4e22f5cf7bd4b189", "review_group": "short_3_5", "post_bars": 4, "box_bars": 7, "box_center_ratio": 0.65}, {"event_id": "980c67eeec1b6360", "review_group": "short_3_5", "post_bars": 5, "box_bars": 5, "box_center_ratio": 0.631578947368421}, {"event_id": "320ed4dc21311d9f", "review_group": "short_3_5", "post_bars": 5, "box_bars": 5, "box_center_ratio": 0.6666666666666666}, {"event_id": "8bb83c0f91c9ccdb", "review_group": "short_3_5", "post_bars": 3, "box_bars": 7, "box_center_ratio": 0.7}, {"event_id": "4ac3b4434e64f8f4", "review_group": "short_3_5", "post_bars": 3, "box_bars": 5, "box_center_ratio": 0.8076923076923077}, {"event_id": "2ede75e55c080b05", "review_group": "short_3_5", "post_bars": 4, "box_bars": 5, "box_center_ratio": 0.7391304347826086}, {"event_id": "b397423f467e8b64", "review_group": "short_3_5", "post_bars": 4, "box_bars": 7, "box_center_ratio": 0.631578947368421}, {"event_id": "57abc9a150aa1a66", "review_group": "short_3_5", "post_bars": 5, "box_bars": 7, "box_center_ratio": 0.7142857142857143}, {"event_id": "6676d070028abab7", "review_group": "short_3_5", "post_bars": 3, "box_bars": 5, "box_center_ratio": 0.7727272727272727}, {"event_id": "cc173f9434371879", "review_group": "short_3_5", "post_bars": 5, "box_bars": 7, "box_center_ratio": 0.6190476190476191}, {"event_id": "e706f627825b98b2", "review_group": "short_3_5", "post_bars": 4, "box_bars": 7, "box_center_ratio": 0.65}, {"event_id": "9b530b7b6bd3dd6b", "review_group": "short_3_5", "post_bars": 5, "box_bars": 5, "box_center_ratio": 0.631578947368421}, {"event_id": "17a865ea56566c6d", "review_group": "short_3_5", "post_bars": 5, "box_bars": 5, "box_center_ratio": 0.6666666666666666}, {"event_id": "6986071b86c13f46", "review_group": "short_3_5", "post_bars": 3, "box_bars": 7, "box_center_ratio": 0.6842105263157895}, {"event_id": "d7215a6504cdbd14", "review_group": "short_3_5", "post_bars": 3, "box_bars": 5, "box_center_ratio": 0.8148148148148148}, {"event_id": "e2065b2b7388a63b", "review_group": "short_3_5", "post_bars": 4, "box_bars": 5, "box_center_ratio": 0.7391304347826086}, {"event_id": "25b511e35f0fe50d", "review_group": "short_3_5", "post_bars": 5, "box_bars": 7, "box_center_ratio": 0.6923076923076923}, {"event_id": "1a253c02b2ef7d32", "review_group": "short_3_5", "post_bars": 3, "box_bars": 5, "box_center_ratio": 0.7368421052631579}, {"event_id": "26a301c4de936d6d", "review_group": "short_3_5", "post_bars": 5, "box_bars": 7, "box_center_ratio": 0.5789473684210527}, {"event_id": "af7587f7306bc946", "review_group": "short_3_5", "post_bars": 4, "box_bars": 7, "box_center_ratio": 0.6818181818181818}, {"event_id": "7abd82936d62a905", "review_group": "short_3_5", "post_bars": 5, "box_bars": 5, "box_center_ratio": 0.631578947368421}, {"event_id": "29425ea730572f58", "review_group": "short_3_5", "post_bars": 5, "box_bars": 5, "box_center_ratio": 0.65}, {"event_id": "503ba79a3c6f9f1e", "review_group": "short_3_5", "post_bars": 3, "box_bars": 7, "box_center_ratio": 0.6842105263157895}, {"event_id": "37214cb73b0111fd", "review_group": "short_3_5", "post_bars": 3, "box_bars": 5, "box_center_ratio": 0.8}, {"event_id": "ae620cb111138535", "review_group": "short_3_5", "post_bars": 4, "box_bars": 5, "box_center_ratio": 0.6842105263157895}, {"event_id": "ef6847da7c782b0b", "review_group": "short_3_5", "post_bars": 5, "box_bars": 7, "box_center_ratio": 0.6666666666666666}, {"event_id": "2738735b061dc56c", "review_group": "short_3_5", "post_bars": 3, "box_bars": 5, "box_center_ratio": 0.7368421052631579}, {"event_id": "600288ea853efee2", "review_group": "short_3_5", "post_bars": 5, "box_bars": 7, "box_center_ratio": 0.6363636363636364}, {"event_id": "3947fb8fe7cca341", "review_group": "short_3_5", "post_bars": 4, "box_bars": 7, "box_center_ratio": 0.7307692307692307}, {"event_id": "397fc7b5f1e6dd63", "review_group": "short_3_5", "post_bars": 5, "box_bars": 5, "box_center_ratio": 0.631578947368421}, {"event_id": "01b22c1f6c8df737", "review_group": "short_3_5", "post_bars": 5, "box_bars": 5, "box_center_ratio": 0.7083333333333334}, {"event_id": "499b90005665e71e", "review_group": "short_3_5", "post_bars": 3, "box_bars": 7, "box_center_ratio": 0.7931034482758621}, {"event_id": "c25ab753aa7414f1", "review_group": "short_3_5", "post_bars": 3, "box_bars": 5, "box_center_ratio": 0.8275862068965517}, {"event_id": "fc32db96c59ba977", "review_group": "short_3_5", "post_bars": 4, "box_bars": 5, "box_center_ratio": 0.6842105263157895}, {"event_id": "e780af0431e84729", "review_group": "short_3_5", "post_bars": 5, "box_bars": 7, "box_center_ratio": 0.6521739130434783}, {"event_id": "012b7ac8ea69ebaa", "review_group": "short_3_5", "post_bars": 3, "box_bars": 5, "box_center_ratio": 0.75}, {"event_id": "86b1faec2df692fd", "review_group": "ceiling_6_10", "post_bars": 6, "box_bars": 7, "box_center_ratio": 0.6785714285714286}, {"event_id": "c8b1104fb5ccfad9", "review_group": "ceiling_6_10", "post_bars": 8, "box_bars": 5, "box_center_ratio": 0.6551724137931034}, {"event_id": "fe4c5835e0ad8555", "review_group": "ceiling_6_10", "post_bars": 7, "box_bars": 7, "box_center_ratio": 0.6551724137931034}, {"event_id": "74545817ff54bf36", "review_group": "ceiling_6_10", "post_bars": 9, "box_bars": 7, "box_center_ratio": 0.42857142857142855}, {"event_id": "c0d5828d4cc9f6f6", "review_group": "ceiling_6_10", "post_bars": 9, "box_bars": 5, "box_center_ratio": 0.42105263157894735}, {"event_id": "2cab72d28e07a200", "review_group": "ceiling_6_10", "post_bars": 10, "box_bars": 7, "box_center_ratio": 0.43478260869565216}, {"event_id": "f229ec8bf9a9e587", "review_group": "ceiling_6_10", "post_bars": 7, "box_bars": 7, "box_center_ratio": 0.47368421052631576}, {"event_id": "086b5a90008be472", "review_group": "ceiling_6_10", "post_bars": 6, "box_bars": 7, "box_center_ratio": 0.6086956521739131}, {"event_id": "ed25c560691691fc", "review_group": "ceiling_6_10", "post_bars": 9, "box_bars": 5, "box_center_ratio": 0.5769230769230769}, {"event_id": "6d3db77c76071f79", "review_group": "ceiling_6_10", "post_bars": 9, "box_bars": 7, "box_center_ratio": 0.5384615384615384}, {"event_id": "bd86fb93ef226153", "review_group": "ceiling_6_10", "post_bars": 8, "box_bars": 7, "box_center_ratio": 0.5416666666666666}, {"event_id": "a86fdd42a3fa1666", "review_group": "ceiling_6_10", "post_bars": 7, "box_bars": 5, "box_center_ratio": 0.55}, {"event_id": "61e7682cc08f26fc", "review_group": "ceiling_6_10", "post_bars": 7, "box_bars": 7, "box_center_ratio": 0.6428571428571429}, {"event_id": "cbe1ebc09faa4c2b", "review_group": "ceiling_6_10", "post_bars": 10, "box_bars": 7, "box_center_ratio": 0.5185185185185185}, {"event_id": "2a956a72044ad168", "review_group": "ceiling_6_10", "post_bars": 7, "box_bars": 5, "box_center_ratio": 0.6538461538461539}, {"event_id": "46a0111279bb8a34", "review_group": "ceiling_6_10", "post_bars": 8, "box_bars": 7, "box_center_ratio": 0.42105263157894735}, {"event_id": "57a6cdf54aa6e728", "review_group": "ceiling_6_10", "post_bars": 6, "box_bars": 5, "box_center_ratio": 0.7241379310344828}, {"event_id": "e8fd10f49aa74930", "review_group": "ceiling_6_10", "post_bars": 8, "box_bars": 5, "box_center_ratio": 0.5}, {"event_id": "7b3ec8ad673e6985", "review_group": "ceiling_6_10", "post_bars": 6, "box_bars": 5, "box_center_ratio": 0.5789473684210527}, {"event_id": "e7f05d17b07d6862", "review_group": "ceiling_6_10", "post_bars": 8, "box_bars": 5, "box_center_ratio": 0.47368421052631576}, {"event_id": "c2af17e3cd6e0642", "review_group": "ceiling_6_10", "post_bars": 10, "box_bars": 5, "box_center_ratio": 0.4}, {"event_id": "405aa010404695ba", "review_group": "ceiling_6_10", "post_bars": 10, "box_bars": 5, "box_center_ratio": 0.5384615384615384}, {"event_id": "0f7cdd95783b4677", "review_group": "ceiling_6_10", "post_bars": 6, "box_bars": 7, "box_center_ratio": 0.6896551724137931}, {"event_id": "a88ea704e890cc0b", "review_group": "ceiling_6_10", "post_bars": 8, "box_bars": 5, "box_center_ratio": 0.6551724137931034}, {"event_id": "f599d56e9769dcab", "review_group": "ceiling_6_10", "post_bars": 7, "box_bars": 7, "box_center_ratio": 0.6551724137931034}, {"event_id": "875fa3ec9cb1903c", "review_group": "ceiling_6_10", "post_bars": 9, "box_bars": 7, "box_center_ratio": 0.45454545454545453}, {"event_id": "036cd5b7c675fc7f", "review_group": "ceiling_6_10", "post_bars": 9, "box_bars": 5, "box_center_ratio": 0.45}, {"event_id": "448a1ea421731f06", "review_group": "ceiling_6_10", "post_bars": 10, "box_bars": 7, "box_center_ratio": 0.35}, {"event_id": "2504e66e17d643e2", "review_group": "ceiling_6_10", "post_bars": 7, "box_bars": 7, "box_center_ratio": 0.47368421052631576}, {"event_id": "922db87b049d7cdd", "review_group": "ceiling_6_10", "post_bars": 6, "box_bars": 7, "box_center_ratio": 0.55}, {"event_id": "fd781df15b3afdc3", "review_group": "ceiling_6_10", "post_bars": 9, "box_bars": 5, "box_center_ratio": 0.5416666666666666}, {"event_id": "927e4ea9792c594b", "review_group": "ceiling_6_10", "post_bars": 9, "box_bars": 7, "box_center_ratio": 0.5384615384615384}, {"event_id": "b5b39d3f27bb850f", "review_group": "ceiling_6_10", "post_bars": 8, "box_bars": 7, "box_center_ratio": 0.5}, {"event_id": "9538312ee9026a38", "review_group": "ceiling_6_10", "post_bars": 7, "box_bars": 5, "box_center_ratio": 0.625}, {"event_id": "33553c510897471d", "review_group": "ceiling_6_10", "post_bars": 7, "box_bars": 7, "box_center_ratio": 0.6153846153846154}, {"event_id": "1a5a76190bdcdd69", "review_group": "ceiling_6_10", "post_bars": 10, "box_bars": 7, "box_center_ratio": 0.5}, {"event_id": "4e01f571b6616810", "review_group": "ceiling_6_10", "post_bars": 7, "box_bars": 5, "box_center_ratio": 0.6666666666666666}, {"event_id": "c37a8292f7eec574", "review_group": "ceiling_6_10", "post_bars": 8, "box_bars": 7, "box_center_ratio": 0.47619047619047616}, {"event_id": "71d4d9ac4fb118c4", "review_group": "ceiling_6_10", "post_bars": 6, "box_bars": 5, "box_center_ratio": 0.7037037037037037}, {"event_id": "2593df5bfb2af8db", "review_group": "ceiling_6_10", "post_bars": 8, "box_bars": 5, "box_center_ratio": 0.6153846153846154}, {"event_id": "827ddf0abb1bd019", "review_group": "ceiling_6_10", "post_bars": 6, "box_bars": 5, "box_center_ratio": 0.6363636363636364}, {"event_id": "11da9dd8c4304f10", "review_group": "ceiling_6_10", "post_bars": 8, "box_bars": 5, "box_center_ratio": 0.47368421052631576}, {"event_id": "f3e92e8d73985b22", "review_group": "ceiling_6_10", "post_bars": 10, "box_bars": 5, "box_center_ratio": 0.3684210526315789}, {"event_id": "8d508cada8627d50", "review_group": "ceiling_6_10", "post_bars": 10, "box_bars": 5, "box_center_ratio": 0.5714285714285714}, {"event_id": "1b20bac280fa8fe0", "review_group": "ceiling_6_10", "post_bars": 6, "box_bars": 7, "box_center_ratio": 0.6666666666666666}, {"event_id": "19d30606b7a89ac9", "review_group": "ceiling_6_10", "post_bars": 8, "box_bars": 5, "box_center_ratio": 0.6551724137931034}, {"event_id": "4efb165d94939f51", "review_group": "ceiling_6_10", "post_bars": 7, "box_bars": 7, "box_center_ratio": 0.6551724137931034}, {"event_id": "9fbdd610492ef20a", "review_group": "ceiling_6_10", "post_bars": 9, "box_bars": 7, "box_center_ratio": 0.42857142857142855}, {"event_id": "9b85aecf287dc1df", "review_group": "ceiling_6_10", "post_bars": 9, "box_bars": 5, "box_center_ratio": 0.42105263157894735}, {"event_id": "63329fe677aa312c", "review_group": "ceiling_6_10", "post_bars": 10, "box_bars": 7, "box_center_ratio": 0.48}];const key='owner_eth_perfect_platform_review_v1';let choices=JSON.parse(localStorage.getItem(key)||'{}');let filter='all';function apply(){document.querySelectorAll('.card').forEach(card=>{const choice=choices[card.dataset.event]||'';card.dataset.choice=choice;const show=filter==='all'||filter===card.dataset.group||(filter==='unreviewed'&&!choice);card.classList.toggle('hidden',!show);card.querySelectorAll('.actions button').forEach(b=>b.style.background=b.dataset.choice===choice?'#dfe9ee':'#fff')});document.getElementById('progress').textContent=`已审 ${Object.keys(choices).length} / ${items.length}`;localStorage.setItem(key,JSON.stringify(choices))}document.querySelectorAll('.actions button').forEach(b=>b.addEventListener('click',()=>{choices[b.closest('.card').dataset.event]=b.dataset.choice;apply()}));document.querySelectorAll('.toolbar [data-filter]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;document.querySelectorAll('.toolbar [data-filter]').forEach(x=>x.classList.toggle('active',x===b));apply()}));document.getElementById('clear').addEventListener('click',()=>{if(confirm('确认清空全部选择？')){choices={};apply()}});document.getElementById('export').addEventListener('click',()=>{const rows=items.map(x=>({...x,owner_choice:choices[x.event_id]||'unreviewed'}));const blob=new Blob([JSON.stringify({protocol:'owner_eth_perfect_platform_semantic_review_v1_20260811',exported_at:new Date().toISOString(),rows},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='owner_eth_perfect_platform_review_v1_labels.json';a.click();URL.revokeObjectURL(a.href)});apply();</script></body></html>

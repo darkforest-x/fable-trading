@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Local Signal V2：昨晚 3060 Stage A 与 Owner 最终目标差距复盘</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>Local Signal V2：昨晚 3060 Stage A 与 Owner 最终目标差距复盘</h1>
+<blockquote><strong>Owner 口径更正（2026-08-11）</strong>：本报告中的“固定居中 + 框后 8–12 根”只是当时误解， 已撤销。最新合同为位置自然分散、框后 0–10 根且越短越好；10 是最大延迟。请以 <code>p1_owner_eth_perfect_platform_semantic_audit_20260811.html</code> 为当前结论。本报告保留用于记录 Stage A 3060 训练结果与当时诊断数字，不再作为下一版数据合同。</blockquote>
+<p>日期：2026-08-11  </p>
+<p>状态：<strong>已完成事实核对；保留 Stage A 数据集与权重；模型不得直接使用</strong></p>
+<h2>Executive Summary</h2>
+<p>昨晚在 3060 上真正训练完成的是 <code>local_signal_v2_stagea_randomcrop_v1</code>。它不是废数据，</p>
+<p>也不应因为今天早上的 ETH 参考图被丢弃。它已经完成一件重要的事：把目标框从固定最右侧</p>
+<p>打散到真实 K 线序列不同位置，模型的四位置桶召回差只有 14.72pp，位置分数相关性</p>
+<p>Spearman=-0.134，说明“只认最右侧”的 shortcut 已明显降低。</p>
+<p>它与 Owner 今天确认的最终几何目标也不是完全相反：2,378 个正例全部为 20–30 根窗口，</p>
+<p>全部框 4–5 根；框中心中位数恰好为整段真实 K 线的 50%，框后真实 K 数中位数恰好为 10 根。</p>
+<p>若把目标严格收窄为“20–30 根 + 框 4–7 根 + 框中心 40%–60% + 框后 8–12 根”，现有正例</p>
+<p>有 <strong>603/2,378 = 25.36%</strong> 同时满足。因此 Stage A 是可继续利用的宽分布表征底座，</p>
+<p>不是最终精标集。</p>
+<p>模型的问题也很明确：<strong>它已经学到一些形态，但精确度仍严重不足。</strong> 最终复验</p>
+<p>P/R/mAP50/mAP50-95 = 0.2376/0.4330/0.2332/0.1266。在事件诊断中，conf=0.10 的</p>
+<p>event precision 只有 22.66%，recall 52.79%；conf=0.20 精确度升到 30.67%，但 recall 已掉到</p>
+<p>13.97%。继续抬阈值无法同时得到高精确度和可用召回。</p>
+<p>真正优先级最高的差距不是“再把框向中间挪一点”，而是：</p>
+<p>1. 现有正例来自旧 pad200 anchor，尚未按今天 ETH 完美信号的形态语义由 Owner 审核；</p>
+<p>2. 数据集中 <strong>hard negative 为 0</strong>，只有 2,378 个 easy background，模型没有系统学过</p>
+<p>   “长得很像但不是完美形态”的拒绝能力；</p>
+<p>3. 框宽目前只覆盖 4、5 根，没有覆盖 Owner 允许的 6、7 根。</p>
+<p>结论：<strong>保留全部旧资产，从昨晚 Stage A <code>best.pt</code> 继续精调；不从零推倒重来。</strong></p>
+<p>今天 ETH 图作为终极形态参考尺，用于复审正例和定义难负例，不替代过去已经完成的数据、训练、</p>
+<p>审计与候选挖掘。</p>
+<h2>1. 昨晚到底训练了什么</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>实际值</th>
+</tr></thead><tbody>
+<tr><td>数据集</td><td><code>datasets/local_signal_v2_stagea_randomcrop_v1</code></td></tr>
+<tr><td>正例 / easy negative / hard negative</td><td>2,378 / 2,378 / <strong>0</strong></td></tr>
+<tr><td>train / val 总样本</td><td>4,040 / 716</td></tr>
+<tr><td>正类率</td><td>50%</td></tr>
+<tr><td>切分</td><td>按时间切分，train/val 间 purge 150 bars</td></tr>
+<tr><td>holdout</td><td><strong>0 次读取</strong>；所有完整窗口早于 2026-05-04</td></tr>
+<tr><td>训练硬件</td><td>Windows RTX 3060</td></tr>
+<tr><td>配方</td><td>YOLO11s，imgsz=960，batch=8，seed=0，最多 60 epoch，patience=15</td></tr>
+<tr><td>增强</td><td>flip/mosaic/mixup/HSV 全部关闭</td></tr>
+<tr><td>训练结果</td><td>epoch 53 early stop，最佳 epoch 38，总耗时 4,207.2 秒</td></tr>
+<tr><td>权重 SHA-256</td><td><code>c0e94f47df125e298b044d9f10acd0b8e4f525ccd6143ce34f8d174af802bf1a</code></td></tr>
+</tbody></table>
+<p>权重位置：</p>
+<p><code>analysis/output/lsv2_stagea/owner_lsv2_stagea_randomcrop_v1_cold/weights/best.pt</code>。</p>
+<h2>2. 数据集与 Owner 今天目标的差距</h2>
+<p>本报告按 Owner 最新确认口径做量化：输入为 20–30 根真实 K；核心形态框 4–7 根；框位于</p>
+<p>真实 K 线序列中部；允许核心形态后再看到约 10 根真实 K 作为确认延迟。这里不要求盘口实时，</p>
+<p>检测对象是完整形态。</p>
+<table><thead><tr>
+<th>几何条件</th>
+<th>现有正例符合数</th>
+<th>占 2,378 正例</th>
+<th>解读</th>
+</tr></thead><tbody>
+<tr><td>窗口 20–30 根</td><td>2,378</td><td><strong>100.00%</strong></td><td>完全一致</td></tr>
+<tr><td>窗口 25–30 根</td><td>1,339</td><td>56.31%</td><td>若进一步偏好 25–30 根，约一半可直接沿用</td></tr>
+<tr><td>框 4–7 根</td><td>2,378</td><td><strong>100.00%</strong></td><td>范围一致，但实际只有 4/5 根</td></tr>
+<tr><td>框中心位于 40%–60%</td><td>839</td><td>35.28%</td><td>其余是为抗位置 shortcut 保留的宽位置样本</td></tr>
+<tr><td>框中心位于 45%–55%</td><td>413</td><td>17.37%</td><td>极严格居中子集</td></tr>
+<tr><td>框后 8–12 根真实 K</td><td>831</td><td>34.95%</td><td>对齐“约 10 根确认延迟”</td></tr>
+<tr><td>框后 7–13 根真实 K</td><td>1,146</td><td>48.19%</td><td>放宽一根后的可沿用范围</td></tr>
+<tr><td>四条件严格联合</td><td><strong>603</strong></td><td><strong>25.36%</strong></td><td>最接近今天目标的现成子集；train 505 / val 98</td></tr>
+<tr><td>四条件联合且窗口 25–30</td><td>302</td><td>12.70%</td><td>若坚持 25–30 根；train 250 / val 52</td></tr>
+</tbody></table>
+<p>分布中位数非常关键：框中心位置为 <strong>50%</strong>，框后真实 K 数为 <strong>10</strong>。这说明 Stage A 的</p>
+<p>中心落点与确认延迟在整体上恰好命中今天的口径，只是当初为了训练位置不变性，主动把样本铺到</p>
+<p>更宽的 20%–85% 区间。因此不能简单说“75% 全错”；准确说法是：**25.36% 已严格命中，</p>
+<p>其余大部分仍是有价值的宽位置表征样本，但不应当作最终窄分布精标集。**</p>
+<p>框宽分布为 4 根 1,188 个、5 根 1,190 个、6/7 根均为 0。这是下一轮需要补齐的真实几何缺口。</p>
+<h2>3. 模型训练出来的结果</h2>
+<h3>3.1 Ultralytics 最终复验</h3>
+<table><thead><tr>
+<th>指标</th>
+<th>最终复验</th>
+</tr></thead><tbody>
+<tr><td>Precision</td><td>0.2376</td></tr>
+<tr><td>Recall</td><td>0.4330</td></tr>
+<tr><td>mAP50</td><td>0.2332</td></tr>
+<tr><td>mAP50-95</td><td>0.1266</td></tr>
+</tbody></table>
+<p><code>results.csv</code> 的最佳 epoch 38 行为 P=0.2380、R=0.4246、mAP50=0.2285、mAP50-95=0.1251；</p>
+<p>训练结束后的最终复验与该行接近但不完全相同，二者不能混写。</p>
+<h3>3.2 事件级阈值诊断</h3>
+<table><thead><tr>
+<th>conf</th>
+<th>Event precision</th>
+<th>Event recall</th>
+<th>F1</th>
+<th>easy-negative fire</th>
+<th>false-positive boxes</th>
+</tr></thead><tbody>
+<tr><td>0.05</td><td>15.23%</td><td>76.26%</td><td>25.40%</td><td>26.54%</td><td>1,519</td></tr>
+<tr><td>0.10</td><td>22.66%</td><td>52.79%</td><td>31.71%</td><td>13.97%</td><td>645</td></tr>
+<tr><td>0.15</td><td>27.62%</td><td>27.93%</td><td>27.78%</td><td>8.10%</td><td>262</td></tr>
+<tr><td>0.20</td><td>30.67%</td><td>13.97%</td><td>19.19%</td><td>3.91%</td><td>113</td></tr>
+<tr><td>0.35</td><td>8.33%</td><td>0.28%</td><td>0.54%</td><td>0.28%</td><td>11</td></tr>
+</tbody></table>
+<p>这张表回答了“模型结果怎么样”：<strong>位置学习达标，形态选择性不达标。</strong> conf=0.10 是同一 val</p>
+<p>上的乐观 best-F1 点，也只有 22.66% 精确度；conf=0.20 虽达到本次表内最高精确度 30.67%，</p>
+<p>却漏掉 86.03% 正例。不能用继续抬阈值掩盖数据缺少 hard negatives 的问题。</p>
+<p>四位置桶在 conf=0.05 的 recall 为 84.72% / 74.29% / 75.47% / 70.00%，最大差 14.72pp；</p>
+<p>anchor X 与匹配分数 Spearman=-0.134。这个结果支持保留 Stage A 作为表征底座：它确实不再只认</p>
+<p>最右侧。</p>
+<h2>4. 为什么精确度差</h2>
+<p>按证据排序：</p>
+<p>1. <strong>没有 hard negatives。</strong> 2,378 个负例全部是 easy background。模型只学了“有形态/空背景”，</p>
+<p>   没学会拒绝最容易误判的相似结构。这与大量 false-positive boxes 直接一致。</p>
+<p>2. <strong>正例语义尚未按最终目标复核。</strong> 现有 anchor 继承自旧 pad200 标注；今天早上的 ETH 图明确了</p>
+<p>   Owner 真正想要的是“均线密集后向下启动”的完整局部形态。几何接近不等于语义纯度已证明。</p>
+<p>3. <strong>位置分布是宽课程，不是最终窄验收分布。</strong> 宽位置对打掉 shortcut 有用；最终精调需提高</p>
+<p>   居中 + 约 10 根后文样本权重，但不应删除宽位置数据。</p>
+<p>4. <strong>框宽少两个档。</strong> 只有 4/5 根，需要补 6/7 根真例，避免模型把“形态”偷学成固定宽度。</p>
+<h2>5. 之前做的东西怎么处理</h2>
+<table><thead><tr>
+<th>资产</th>
+<th>决定</th>
+<th>后续用途</th>
+</tr></thead><tbody>
+<tr><td>Stage A 2,378 正 + 2,378 easy negative</td><td><strong>保留</strong></td><td>宽分布预训练与背景基础</td></tr>
+<tr><td>Stage A <code>best.pt</code></td><td><strong>保留</strong></td><td>下一轮 fine-tune 初始化，不冷启动</td></tr>
+<tr><td>3060 <code>train.log</code> / <code>results.csv</code> / 位置诊断</td><td><strong>保留</strong></td><td>对照基线和防止重复踩坑</td></tr>
+<tr><td>P2 hard-negative 候选 ledger</td><td><strong>保留</strong></td><td>按新的居中事后几何重渲染后，作为难负例候选来源</td></tr>
+<tr><td>causal blank / 固定最右臂</td><td><strong>保留但停用</strong></td><td>历史失败证据与对照，不训练、不 promote</td></tr>
+<tr><td>今天 ETH 完美形态图</td><td><strong>新增参考尺</strong></td><td>Owner 语义审查、正例筛选、难负例定义；不替代全部旧语料</td></tr>
+</tbody></table>
+<p>不会删除数据集、权重、日志、候选清单或失败臂。所谓“改方向”是纠正时间语义和训练目标，</p>
+<p>不是把已经验证有效的 Stage A 位置表征工作推倒重来。</p>
+<h2>6. 推荐的下一轮（不从零重训）</h2>
+<p>1. 冻结新目标合同：20–30 根真实 K，框 4–7 根，优先居中，框后约 8–12 根真实 K；允许事后</p>
+<p>   确认延迟，精确度优先。</p>
+<p>2. 保持原 event_id 与时间 split，从现有 2,378 正例中先取严格命中的 603 个作为高权重核心，</p>
+<p>   其余宽位置正例保留为低权重/课程样本；补充 6–7 根框宽。</p>
+<p>3. 用今天 ETH 图的语义做 Owner 审核标准，抽审/筛选 legacy pad200 正例；这一步决定标签纯度。</p>
+<p>4. 从 Stage A 的 false positives 和既有 P2 candidate ledger 中挖真正的 hard negatives，按新几何</p>
+<p>   重渲染，不直接沿用错误的最右侧像素。</p>
+<p>5. 从现有 Stage A <code>best.pt</code> fine-tune；单次实验只改变“加入 hard negatives / 目标重加权”中的</p>
+<p>   一个变量。</p>
+<p>6. 在独立 pre-holdout 时间块验 event precision、recall、FP/1000；不读取现有 holdout，</p>
+<p>   不在同一 early-stop val 上选阈值后宣布验收。</p>
+<p>本报告不擅自冻结新的 precision/recall 数值门。Owner 已明确“精确度优先”，具体最低精确度和</p>
+<p>可接受召回仍属于下一轮预注册时的 Owner 决策。</p>
+<h2>7. 复现命令</h2>
+<pre><code>
+python3 scripts/analyze_stagea_gap_to_owner_target.py
+python3 scripts/md_to_html.py \
+  analysis/p1_local_signal_v2_stagea_gap_to_owner_target_20260811.md \
+  --out-dir analysis/html
+</code></pre>
+<p>机器可读结果：</p>
+<p><code>analysis/output/p1_local_signal_v2_stagea_gap_to_owner_target_20260811.json</code>。</p>
+<h2>8. 风险与诚实声明</h2>
+<ul>
+<li>本次没有读取 holdout，也没有消耗 holdout；所有统计来自既有 pre-holdout Stage A manifest、</li>
+</ul>
+<p>  3060 训练产物和 Stage A val 诊断。</p>
+<ul>
+<li>716 个 val 样本参与过 early stopping，因此事件阈值表只能用于诊断，不是独立验收结论。</li>
+<li>今天 ETH 图只是一张 Owner 明确认可的终极参考，尚不能单独估计整个正例池的语义纯度；</li>
+</ul>
+<p>  “语义差多少”目前没有可信百分比，必须通过 Owner 口径抽审后才能量化。</p>
+<ul>
+<li>AUC、置换检验、top-decile 毛/净收益、胜率、单特征基线、匹配随机对照组在本报告均为 N/A：</li>
+</ul>
+<p>  这是 YOLO 检测层的数据/模型诊断，不是 2b 判断层或方向性交易回测。不得用检测层 mAP 替代</p>
+<p>  交易收益结论。</p>
+<ul>
+<li><code>production_eligible=false</code> 保持不变；未 promote、未改 ACTIVE、未部署、未下单。</li>
+</ul>
+</body>
+</html>

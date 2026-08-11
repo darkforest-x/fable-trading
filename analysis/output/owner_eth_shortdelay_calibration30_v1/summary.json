@@ -1,0 +1,88 @@
+{
+  "generated_at": "2026-08-11T03:18:31.471788+00:00",
+  "protocol": "owner_eth_shortdelay_calibration30_v1_20260811",
+  "scope": "owner_visual_geometry_calibration_only",
+  "stage_manifest": "datasets/local_signal_v2_stagea_randomcrop_v1/w20_manifest.json",
+  "stage_manifest_sha256": "ae4675a6ef4cec3b3d471dce99b000cef8736f7e72955cd0df2d1425073cde89",
+  "owner_manifest": "datasets/dense_owner_w20_midbox/w20_manifest.json",
+  "owner_manifest_sha256": "efabb41b1f53f160b9bffcf7e33c70cd0ebef05a328e0119e4caeefa9841b007",
+  "profile": {
+    "stage_manifest_rows": 2378,
+    "stage_train_rows": 2020,
+    "stage_val_metadata_rows_for_boundary_only": 358,
+    "stage_val_images_read": 0,
+    "stage_val_labels_read": 0,
+    "val_start_min": "2026-03-20T02:45:00+00:00",
+    "purge_bars": 150,
+    "train_allowed_end": "2026-03-18T13:15:00+00:00",
+    "candidate_rows": 2020,
+    "candidate_width_counts": {
+      "5": 1064,
+      "7": 956
+    },
+    "candidate_time_bucket_counts": {
+      "middle": 676,
+      "late": 674,
+      "early": 670
+    },
+    "skip_reasons": {}
+  },
+  "counts": {
+    "total": 30,
+    "by_post_bars": {
+      "3": 10,
+      "4": 10,
+      "5": 10
+    },
+    "by_core_bars": {
+      "5": 15,
+      "7": 15
+    },
+    "by_pre_bars": {
+      "6": 6,
+      "7": 6,
+      "8": 6,
+      "9": 6,
+      "10": 6
+    },
+    "unique_events": 30,
+    "unique_symbols": 30
+  },
+  "window_len_observed": [
+    14,
+    22
+  ],
+  "box_center_ratio_observed": [
+    0.5294117647058824,
+    0.7058823529411765
+  ],
+  "contact_sheets": {
+    "post_3": "analysis/output/owner_eth_shortdelay_calibration30_v1/calibration_post3_10.png",
+    "post_4": "analysis/output/owner_eth_shortdelay_calibration30_v1/calibration_post4_10.png",
+    "post_5": "analysis/output/owner_eth_shortdelay_calibration30_v1/calibration_post5_10.png"
+  },
+  "selection_inputs": {
+    "later_return": false,
+    "model_confidence": false,
+    "handwritten_morphology_score": false,
+    "stage_val_market_rows": false,
+    "holdout_rows": false
+  },
+  "quality_gates": {
+    "exactly_30": true,
+    "ten_per_post_delay": true,
+    "pre_6_to_10_balanced": true,
+    "core_5_7_balanced": true,
+    "unique_events": true,
+    "unique_symbols": true,
+    "train_only": true,
+    "full_window_before_purge_boundary": true,
+    "holdout_rows_materialized_zero": true,
+    "no_training_labels_yet": true,
+    "semantic_and_geometry_unreviewed": true
+  },
+  "automatic_training_labels": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "holdout_read": false
+}

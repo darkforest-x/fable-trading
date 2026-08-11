@@ -1,0 +1,57 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>ETH retrospective morphology target</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1800px; height: 1200px; overflow: hidden; background: #e9eef2; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
+  header { height: 108px; padding: 19px 38px; color: white; background: #15202b; }
+  h1 { margin: 0 0 6px; font-size: 35px; }
+  header p { margin: 0; color: #cbd7e0; font-size: 22px; }
+  .card { margin: 22px; width: 1756px; height: 1048px; background: white; border: 1px solid #c7d1d9;
+    border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,.1); overflow: hidden; }
+  .legend { height: 78px; display: grid; grid-template-columns: 11fr 6fr 11fr; padding: 14px 70px 8px; gap: 0; }
+  .legend div { display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: 750;
+    border-bottom: 7px solid; }
+  .before { color: #19789a; border-color: #28a9c8 !important; }
+  .core { color: #e32232; border-color: #ff3344 !important; }
+  .after { color: #7554a5; border-color: #8a6bb8 !important; }
+  .canvas { position: relative; margin: 0 70px; width: 1616px; height: 820px; border: 5px solid #00aeca;
+    background: white; overflow: hidden; }
+  .canvas > svg { width: 100%; height: 100%; display: block; }
+  .foot { height: 135px; display: flex; align-items: center; justify-content: center; gap: 32px;
+    font-size: 25px; color: #263746; }
+  .foot strong { color: #e32232; font-size: 29px; }
+  .pill { padding: 8px 16px; border-radius: 999px; background: #eef3f6; }
+</style>
+<header>
+  <h1>正确目标：事后局部形态检测，不是盘口 tip</h1>
+  <p>完整输入由 28 根真实 K 构成；中间 6 根是 YOLO 目标框；框后保留 11 根真实 K 作为允许的确认延迟。</p>
+</header>
+<section class="card">
+  <div class="legend">
+    <div class="before">框前上下文：11 根 K</div>
+    <div class="core">核心形态：6 根 K</div>
+    <div class="after">框后确认：11 根 K</div>
+  </div>
+  <div class="canvas">
+    <svg viewBox="0 0 1606 810" xmlns="http://www.w3.org/2000/svg">
+      <svg x="0" y="0" width="1606" height="810" viewBox="1279 390 519 950" preserveAspectRatio="none" overflow="hidden">
+        <image href="owner_ethusdt_15m_perfect_signal_20260810.png" x="0" y="0" width="2940" height="1696"/>
+      </svg>
+      <!-- 28 bars total: 11 before + 6 core + 11 after. -->
+      <rect x="631" y="102" width="344" height="138" rx="5" fill="#ff3344" fill-opacity=".07"
+            stroke="#ff2638" stroke-width="8"/>
+      <line x1="631" y1="0" x2="631" y2="810" stroke="#28a9c8" stroke-width="5" stroke-dasharray="13 9"/>
+      <line x1="975" y1="0" x2="975" y2="810" stroke="#8a6bb8" stroke-width="5" stroke-dasharray="13 9"/>
+      <rect x="645" y="46" width="317" height="48" rx="8" fill="white" fill-opacity=".92"/>
+      <text x="666" y="81" font-family="-apple-system, PingFang SC, sans-serif" font-size="30" font-weight="750" fill="#e32232">YOLO 红框：中间 6 根 K</text>
+    </svg>
+  </div>
+  <div class="foot">
+    <strong>红框中心 = 整张图 50%</strong>
+    <span class="pill">无右侧空白</span>
+    <span class="pill">允许约 10 根 K 延迟</span>
+    <span class="pill">目标：形态 precision 优先</span>
+  </div>
+</section>

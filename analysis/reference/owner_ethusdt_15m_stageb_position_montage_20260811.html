@@ -1,0 +1,71 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>ETHUSDT Stage B causal position montage</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1800px; height: 1200px; overflow: hidden; background: #eef2f5; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
+  header { height: 92px; padding: 18px 34px; background: #15202b; color: white; }
+  header h1 { margin: 0 0 4px; font-size: 31px; }
+  header p { margin: 0; color: #cbd6df; font-size: 20px; }
+  main { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 18px; }
+  .card { height: 527px; background: white; border: 1px solid #c8d2da; border-radius: 12px;
+    overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  .title { height: 55px; padding: 10px 18px; display: flex; align-items: baseline; gap: 18px;
+    border-bottom: 1px solid #d8e0e6; }
+  .title strong { font-size: 26px; color: #df202f; }
+  .title span { font-size: 19px; color: #34495e; }
+  .card > svg { display: block; width: 100%; height: 470px; background: white; }
+</style>
+<header>
+  <h1>同一 ETH 完美信号：Stage B 因果画布位置示例</h1>
+  <p>真实 K 线全部在决策 K 截止；灰色区域仅是布局空白，不包含未来行情。</p>
+</header>
+<main id="grid"></main>
+<script>
+const source = "owner_ethusdt_15m_perfect_signal_20260810.png";
+const decisionSourceX = 1585;
+const candleStep = 18.5;
+const configs = [
+  {label: "框中心 65%",  w: 23, b: 6, blank: 8},
+  {label: "框中心 75%",  w: 24, b: 5, blank: 5},
+  {label: "框中心 85%",  w: 29, b: 6, blank: 2},
+  {label: "框中心 94.8%", w: 30, b: 4, blank: 0},
+];
+
+for (const [index, cfg] of configs.entries()) {
+  const denom = cfg.w + cfg.blank - 1;
+  const ratio = (cfg.w - (cfg.b + 1) / 2) / denom;
+  const plotX = 34, plotY = 48, plotW = 814, plotH = 374;
+  const decisionX = plotX + (cfg.w - 1) / denom * plotW;
+  const realRight = decisionX + 0.5 / denom * plotW;
+  const realLeft = plotX;
+  const sourceLeft = decisionSourceX - (cfg.w - 1) * candleStep - candleStep / 2;
+  const sourceWidth = (cfg.w - 1) * candleStep + candleStep;
+  const boxWidth = cfg.b / denom * plotW;
+  const boxCenter = plotX + ratio * plotW;
+  const boxLeft = boxCenter - boxWidth / 2;
+  const boxTop = 185;
+  const boxHeight = 112;
+  const blankX = Math.min(realRight, plotX + plotW);
+  const blankW = Math.max(0, plotX + plotW - blankX);
+  const card = document.createElement("section");
+  card.className = "card";
+  card.innerHTML = `
+    <div class="title"><strong>${cfg.label}</strong><span>输入 ${cfg.w} 根 · 框 ${cfg.b} 根 · 右侧空白 ${cfg.blank} 槽</span></div>
+    <svg viewBox="0 0 882 470" xmlns="http://www.w3.org/2000/svg">
+      <rect x="${plotX}" y="${plotY}" width="${plotW}" height="${plotH}" fill="#fff" stroke="#00aeca" stroke-width="4" stroke-dasharray="12 8"/>
+      <svg x="${realLeft}" y="${plotY}" width="${Math.max(0, realRight-realLeft)}" height="${plotH}"
+           viewBox="${sourceLeft} 300 ${sourceWidth} 520" preserveAspectRatio="none" overflow="hidden">
+        <image href="${source}" x="0" y="0" width="2940" height="1696"/>
+      </svg>
+      <rect x="${blankX}" y="${plotY}" width="${blankW}" height="${plotH}" fill="#edf1f3" fill-opacity=".97"/>
+      <text x="${blankX + 10}" y="${plotY + 28}" font-size="18" fill="#667985">纯空白</text>
+      <rect x="${boxLeft}" y="${boxTop}" width="${boxWidth}" height="${boxHeight}" fill="#ff2d2d" fill-opacity=".06" stroke="#ff2d2d" stroke-width="5"/>
+      <line x1="${decisionX}" y1="${plotY}" x2="${decisionX}" y2="${plotY + plotH}" stroke="#ffad00" stroke-width="4" stroke-dasharray="9 7"/>
+      <text x="${Math.max(plotX + 8, decisionX - 114)}" y="${plotY + plotH + 31}" font-size="20" font-weight="700" fill="#a86d00">决策 K：真实行情截止</text>
+      <text x="${plotX + 10}" y="31" font-size="19" fill="#263746">红框中心=${(ratio*100).toFixed(1)}%；红框右侧没有任何真实 K</text>
+    </svg>`;
+  document.getElementById("grid").appendChild(card);
+}
+</script>
