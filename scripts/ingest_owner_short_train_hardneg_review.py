@@ -107,6 +107,14 @@ def distribution(values: list[float]) -> dict[str, float | None]:
     }
 
 
+def selection_is_causal(rows: list[dict[str, Any]], causal_field: str) -> bool:
+    """Validate the builder-specific future-use proof without guessing aliases."""
+    missing = [str(row.get("review_id", row.get("event_id", "unknown"))) for row in rows if causal_field not in row]
+    if missing:
+        raise ValueError(f"causal proof field {causal_field!r} missing for rows: {missing[:5]}")
+    return all(not bool(row[causal_field]) for row in rows)
+
+
 def ingest(
     review_path: Path,
     *,
@@ -114,6 +122,7 @@ def ingest(
     build_summary_path: Path = DEFAULT_BUILD_SUMMARY,
     output_dir: Path = DEFAULT_REVIEW_DIR,
     affinity_field: str = "hard_negative_affinity",
+    causal_field: str = "selection_future_used",
     selection_goal: str = "hard_negative_mining",
     expected_total: int = 200,
 ) -> dict[str, Any]:
@@ -139,6 +148,7 @@ def ingest(
             }
         )
         joined.append(item)
+    causal_selection = selection_is_causal(joined, causal_field)
 
     by_decision: dict[str, Any] = {}
     for decision in ("target", "rebox", "hard_negative"):
@@ -156,6 +166,7 @@ def ingest(
         "source_sha256": str(payload["source_sha256"]),
         "selection_goal": selection_goal,
         "affinity_field": affinity_field,
+        "causal_field": causal_field,
         "review_input_sha256": sha256_file(review_path),
         "rows": len(joined),
         "counts": counts,
@@ -185,7 +196,7 @@ def ingest(
             "one_to_one_manifest_join": len(joined) == len(manifest),
             "all_rows_train_time": all(not row["holdout_read"] for row in joined),
             "no_owner_box_overlap": all(not row["touches_owner_box_guard"] for row in joined),
-            "selection_was_causal": all(not row["selection_future_used"] for row in joined),
+            "selection_was_causal": causal_selection,
             "nothing_auto_training_eligible": all(not row["training_eligible"] for row in joined),
         },
     }
@@ -209,6 +220,7 @@ def main() -> int:
     parser.add_argument("--build-summary", type=Path, default=DEFAULT_BUILD_SUMMARY)
     parser.add_argument("--out", type=Path, default=DEFAULT_REVIEW_DIR)
     parser.add_argument("--affinity-field", default="hard_negative_affinity")
+    parser.add_argument("--causal-field", default="selection_future_used")
     parser.add_argument("--selection-goal", default="hard_negative_mining")
     parser.add_argument("--expected-total", type=int, default=200)
     args = parser.parse_args()
@@ -218,6 +230,7 @@ def main() -> int:
         build_summary_path=args.build_summary,
         output_dir=args.out,
         affinity_field=args.affinity_field,
+        causal_field=args.causal_field,
         selection_goal=args.selection_goal,
         expected_total=args.expected_total,
     )

@@ -1,0 +1,108 @@
+{
+  "protocol": "owner_short_train_hardneg_newblocks200_v3_20260811",
+  "source_sha256": "78771b7645f57e172f4024f2b4f644305ba8408ab4a9cfd1dfe62ff4b25c7801",
+  "selection_goal": "hard_negative_newblocks",
+  "affinity_field": "hard_negative_affinity_v3",
+  "causal_field": "hard_negative_newblocks_future_used",
+  "review_input_sha256": "8fd3e3055cfe4877cbdf05a65103f1b14ef27aa3274fdce3857bad44a10a8916",
+  "rows": 200,
+  "counts": {
+    "pending": 0,
+    "target": 26,
+    "rebox": 2,
+    "hard_negative": 172
+  },
+  "rates": {
+    "target_rate_in_review": 0.13,
+    "hard_negative_rate_in_review": 0.86
+  },
+  "by_decision": {
+    "target": {
+      "events": 26,
+      "symbols": 23,
+      "share": 0.13,
+      "peak_confidence": {
+        "median": 0.6209561824798584,
+        "p90": 0.8554642200469971,
+        "mean": 0.604186074091838
+      },
+      "selection_affinity": {
+        "median": 0.4915873599553149,
+        "p90": 1.0871467306035631,
+        "mean": 0.4624976708284389
+      }
+    },
+    "rebox": {
+      "events": 2,
+      "symbols": 2,
+      "share": 0.01,
+      "peak_confidence": {
+        "median": 0.6392377763986588,
+        "p90": 0.828850057721138,
+        "mean": 0.6392377763986588
+      },
+      "selection_affinity": {
+        "median": 0.48086858943490585,
+        "p90": 0.4824881403051138,
+        "mean": 0.48086858943490585
+      }
+    },
+    "hard_negative": {
+      "events": 172,
+      "symbols": 122,
+      "share": 0.86,
+      "peak_confidence": {
+        "median": 0.41540268063545227,
+        "p90": 0.6861520290374756,
+        "mean": 0.45486490133889884
+      },
+      "selection_affinity": {
+        "median": 0.8949244407731616,
+        "p90": 5.720059691446173,
+        "mean": 2.021020366980291
+      }
+    }
+  },
+  "by_block": {
+    "C01_20250615": {
+      "hard_negative": 47
+    },
+    "C02_20250815": {
+      "hard_negative": 10,
+      "target": 2
+    },
+    "C03_20251015": {
+      "hard_negative": 46,
+      "target": 1
+    },
+    "C04_20251215": {
+      "hard_negative": 37,
+      "target": 9,
+      "rebox": 1
+    },
+    "C05_20260215": {
+      "hard_negative": 32,
+      "target": 14,
+      "rebox": 1
+    }
+  },
+  "training_gate": {
+    "owner_confirmed_train_hard_negative_candidates": 172,
+    "owner_confirmed_target_references": 26,
+    "immediately_training_eligible": 0,
+    "reason": "freeze as active-learning references; a later dataset builder must preserve time split, deduplicate, bucket-match, and receive separate training authorization"
+  },
+  "quality_gates": {
+    "protocol_matches": true,
+    "source_hash_matches": true,
+    "exactly_expected_unique_decisions": true,
+    "declared_counts_recompute": true,
+    "no_pending": true,
+    "allowed_values_only": true,
+    "one_to_one_manifest_join": true,
+    "all_rows_train_time": true,
+    "no_owner_box_overlap": true,
+    "selection_was_causal": true,
+    "nothing_auto_training_eligible": true
+  }
+}

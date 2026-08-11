@@ -2,7 +2,11 @@
 
 import pytest
 
-from scripts.ingest_owner_short_train_hardneg_review import distribution, validate_review
+from scripts.ingest_owner_short_train_hardneg_review import (
+    distribution,
+    selection_is_causal,
+    validate_review,
+)
 
 
 def fixtures() -> tuple[dict, list[dict], dict]:
@@ -60,3 +64,23 @@ def test_validate_review_rejects_red_build_gate() -> None:
 
 def test_distribution_accepts_empty_rebox_bucket() -> None:
     assert distribution([]) == {"median": None, "p90": None, "mean": None}
+
+
+def test_selection_is_causal_accepts_explicit_builder_field() -> None:
+    rows = [
+        {"review_id": "M001", "hard_negative_newblocks_future_used": False},
+        {"review_id": "M002", "hard_negative_newblocks_future_used": False},
+    ]
+
+    assert selection_is_causal(rows, "hard_negative_newblocks_future_used")
+
+
+def test_selection_is_causal_rejects_missing_field() -> None:
+    with pytest.raises(ValueError, match="causal proof field"):
+        selection_is_causal([{"review_id": "M001"}], "hard_negative_newblocks_future_used")
+
+
+def test_selection_is_causal_rejects_future_use() -> None:
+    rows = [{"review_id": "M001", "hard_negative_newblocks_future_used": True}]
+
+    assert not selection_is_causal(rows, "hard_negative_newblocks_future_used")
