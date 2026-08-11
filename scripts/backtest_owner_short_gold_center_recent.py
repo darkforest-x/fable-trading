@@ -304,7 +304,14 @@ def scan_snapshot(args: argparse.Namespace) -> int:
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     weights = Path(args.weights)
-    paths = sorted(snapshot_dir.glob("*_USDT_SWAP.csv"))
+    # macOS tar can materialize one AppleDouble ``._name.csv`` beside every
+    # real snapshot when a caller forgets COPYFILE_DISABLE=1.  These are Finder
+    # metadata, not klines; fail closed here as well as excluding them at pack.
+    paths = sorted(
+        path
+        for path in snapshot_dir.glob("*_USDT_SWAP.csv")
+        if not path.name.startswith("._")
+    )
     if args.max_symbols:
         paths = paths[: args.max_symbols]
     if not paths:
