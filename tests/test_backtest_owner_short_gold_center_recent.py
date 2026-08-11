@@ -6,6 +6,7 @@ from scripts.backtest_owner_short_gold_center_recent import (
     EVENT_GAP_BARS,
     bar_from_x_normalized,
     deduplicate_detections,
+    paired_closed_metrics,
     shard_paths,
 )
 
@@ -58,3 +59,23 @@ def test_symbol_shards_are_disjoint_and_complete() -> None:
     assert sum(shards, []) != paths  # interleaved by design, not contiguous slicing
     assert {path for shard in shards for path in shard} == set(paths)
     assert sum(len(shard) for shard in shards) == len(paths)
+
+
+def test_matched_control_difference_uses_identical_closed_event_ids() -> None:
+    events = [
+        {"event_id": "a", "status": "closed", "net_taker": 0.02},
+        {"event_id": "b", "status": "closed", "net_taker": -0.01},
+        {"event_id": "c", "status": "open", "net_taker": None},
+    ]
+    controls = [
+        {"event_id": "a", "status": "closed", "net_taker": 0.01},
+        {"event_id": "b", "status": "open", "net_taker": None},
+        {"event_id": "c", "status": "closed", "net_taker": 0.50},
+    ]
+
+    result = paired_closed_metrics(events, controls)
+
+    assert result["paired_closed"] == 1
+    assert result["paired_event_net_taker_mean"] == 0.02
+    assert result["paired_control_net_taker_mean"] == 0.01
+    assert result["paired_event_minus_control_net_taker"] == 0.01

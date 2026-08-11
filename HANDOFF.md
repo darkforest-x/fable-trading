@@ -79,6 +79,24 @@ Owner原始金标坐标时重新凭感觉画框。新血缘必须是`原始⭐�
   与easy背景，**不得用高mAP宣布成功**。下一步冻结best扫训练时间块连续窗口，挖hard negatives并
   建1:2/1:3（hard为主）第二臂；仍`production_eligible=false / auto_promote=false`，不读holdout、
   不改ACTIVE、不部署。
+- 第二训练臂的数据已按交接规范完成并审计：train正例1,143、easy negative 1,143、hard
+  negative 2,286，总负例:正例=3:1，hard占负例2/3；val仍冻结为202正例+200 easy背景，没有拿
+  holdout或未来收益挑负例。hard来源为916个Owner-long语义负例和1,370个仅在原train时间块由
+  当前模型排序挖出的背景；200张独立审计页已生成。该数据臂只是“可训练”，本轮尚未获得新的
+  3060逐次训练授权，不得自行开训。
+- Owner随后明确要求用刚训练权重回放最近2天并发TG，登记为该配置第1次消耗holdout。一次性OKX
+  快照覆盖214/215个训练分布币种，W12–19逐bar扫描328,704窗，71,204条原始命中去重为2,500
+  个事件，即60.845 events/1000 bar endpoints、1,250 events/day、5.84 events/币/天；211/214
+  币触发，密度明确失败。2,091个已了结事件净@taker均值-0.203%；严格同event_id成对的1,498组
+  为事件-0.231%、同币×同日×ATR桶随机+0.170%、差值-0.401%。不得在本次holdout上调阈值，
+  当前权重禁止promote。
+- 几何/时序并非全错：94.92%核心为4–7根，98.12%首次确认延迟为3–5根；模型精确命中Owner的
+  ETH参考核心（2026-08-10 19:30–20:15 CST，4根，21:00决策，延迟3根，conf_max=0.905，
+  纸面TP净@taker+1.020%）。但相邻20:45–21:45又产生一个延续事件，说明“能命中终极样例”与
+  “全市场precision合格”必须分开裁决，后者当前失败。
+- TG交付已核对：摘要、25/25张信号图（ETH目标为第1张）、HTML和全量事件CSV全部发送成功；
+  回执在`analysis/output/owner_short_gold_center_recent2d_v1/telegram_receipt.json`。详细报告：
+  `analysis/html/p1_owner_short_gold_center_recent2d_holdout_20260811.html`。
 - 数量口径：本机原始缓存有602个CSV（1.2GB），其中456个15m文件，237个至少覆盖365天，
   单文件最长约430天。Stage-A可追溯正事件池为2,378个（train 2,020 / val 358），不是200个；
   当前200只是从2020个train中满足旧框后3–5根条件的316个候选里抽出的语义校准包。

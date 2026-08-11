@@ -132,6 +132,14 @@ li { margin: .25rem 0; }
 <li>本轮没有改增强、初始化、epoch、batch、学习率、val或阈值。第二臂训练必须沿用Stage A best初始化与baseline同一训练脚本，才满足单变量纪律。</li>
 <li>第二次3060训练是新的Owner逐次授权门；本报告不把数据完成表述成模型已修好。</li>
 </ul>
+<h2>200张逐图人工审核页</h2>
+<p>已生成独立审核页 <code>analysis/html/p2_owner_short_gold_center_hardneg_audit200_20260811.html</code>：</p>
+<ul>
+<li>前100张为Owner-long方向反类，橙色竖带仅在审核页标出原long核心；</li>
+<li>后100张为baseline分数最高的安全背景；</li>
+<li>每张图独立展示并可点开原图，不是3张大拼图；</li>
+<li>200/200图片引用存在；审核页不读取未来收益、holdout或val。</li>
+</ul>
 <h2>复现命令</h2>
 <pre><code>
 PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python \
@@ -143,6 +151,9 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python \
 
 PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python \
   scripts/build_owner_short_gold_center_hardneg.py --mode assemble
+
+PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python \
+  scripts/build_owner_short_gold_center_hardneg.py --mode audit
 
 PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/pytest -q \
   tests/test_build_owner_short_gold_center_hardneg.py \
@@ -157,7 +168,8 @@ python3 scripts/md_to_html.py \
 <li>候选与排序：<code>datasets/owner_short_gold_center_hardneg_candidates_r1/</code></li>
 <li>第二训练臂：<code>datasets/owner_short_gold_center_hardneg_r1/</code></li>
 <li>machine-readable summary：<code>datasets/owner_short_gold_center_hardneg_r1/summary.json</code></li>
+<li>200张逐图审核页：<code>analysis/html/p2_owner_short_gold_center_hardneg_audit200_20260811.html</code></li>
 </ul>
-<p>下一步先生成最高分hard-negative人工抽查页，并完成独立purge-gap连续窗口审计协议；Owner明确授权后才把第二臂同步到3060训练。</p>
+<p>下一步由Owner审核200张hard negatives，并完成独立purge-gap连续窗口审计协议；Owner明确授权后才把第二臂同步到3060训练。</p>
 </body>
 </html>

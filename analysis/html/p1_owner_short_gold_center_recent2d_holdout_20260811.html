@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Owner-short compact YOLO 最近2天全市场回放（2026-08-11）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>Owner-short compact YOLO 最近2天全市场回放（2026-08-11）</h1>
+<h2>结论先行</h2>
+<ul>
+<li>本次按Owner在对话中的明确要求读取最近48小时数据，登记为该配置第 <strong>1</strong> 次消耗holdout。</li>
+<li>使用刚训练完成且未promote的<code>owner_lsv2_short_gold_center_v1_ft</code>，只扫其训练分布内的215币种；实际新鲜可用币种 <strong>214</strong>。</li>
+<li>因果扫描W12–19共 <strong>328,704</strong> 个窗口，原始触发 <strong>71,204</strong> 条；按同币、核心中点±5根合并为 <strong>2,500</strong> 个事件。</li>
+<li>密度为 <strong>60.845 events/1000 bar endpoints</strong>，即 <strong>1250.0 events/day</strong>。这才是检测事件数，不把8种窗口的重复命中当8笔单。</li>
+<li>折算到单币为 <strong>5.84 events/币/天</strong>；211/214个币至少触发一次。核心宽度落在Owner要求4–7根的比例为 <strong>94.9%</strong>。</li>
+<li>已了结事件 2091 个，TP/SL/timeout/open分布：<code>{&#x27;tp&#x27;: 453, &#x27;sl_ambiguous&#x27;: 4, &#x27;sl&#x27;: 1517, &#x27;timeout&#x27;: 117, &#x27;running&#x27;: 390, &#x27;no_entry&#x27;: 19}</code>；全部已了结事件净@taker均值 <strong>-0.203%</strong>。严格成对可比样本 1498 个：事件 <strong>-0.231%</strong>、匹配随机 <strong>+0.170%</strong>、差值 <strong>-0.401%</strong>。</li>
+<li>已了结事件TP率 <strong>21.7%</strong>；匹配随机对照覆盖 1950/2500 个事件，其中双方都已了结的严格配对为 1498。</li>
+<li>这仍是检测器诊断回放，不是生产晋升：无ACTIVE修改、无下单、无阈值调优，TG图均标注纸面回放。</li>
+</ul>
+<h2>回放协议</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>冻结值</th>
+</tr></thead><tbody>
+<tr><td>权重SHA-256</td><td><code>da278820f2d96a64006d9ff6358b7c98faec52249ec8a6f4fe6bf55254fc65b4</code></td></tr>
+<tr><td>数据范围</td><td><code>2026-08-09T06:30:00+00:00</code>之后至<code>2026-08-11T06:30:00+00:00</code></td></tr>
+<tr><td>周期/窗口</td><td>15m；W12–19逐bar全扫</td></tr>
+<tr><td>推理门</td><td>conf=0.25（Ultralytics诊断默认值，未调参）；NMS IoU=0.7</td></tr>
+<tr><td>事件去重</td><td>同币预测核心中点相差≤5根；第一阈值穿越作为决策时刻</td></tr>
+<tr><td>交易诊断</td><td>下一根开盘做空；TP5×ATR14 / SL2×ATR14 / 72根；同bar双触保守判SL</td></tr>
+<tr><td>成本</td><td>swap taker往返10bp；maker往返6bp</td></tr>
+<tr><td>holdout</td><td>Owner明确授权；该配置第1次消耗</td></tr>
+</tbody></table>
+<h2>数据统计</h2>
+<ul>
+<li>数据源：OKX公开15m接口的一次性快照；生成于<code>2026-08-11T06:53:13.379934+00:00</code>，未写canonical <code>data/</code>。</li>
+<li>请求/可用币种：215 / 214；缺失：<code>[&#x27;LRC_USDT_SWAP&#x27;]</code>。</li>
+<li>bar endpoints：41,088</li>
+<li>window exposures：328,704</li>
+<li>raw detections：71,204</li>
+<li>deduplicated events：2,500</li>
+<li>单币两天事件数 median / p90 / max：11.0 / 20.0 / 27</li>
+<li>决策延迟 median / p90：3.0 / 5.0根；0–2根 1.4%，3–5根 98.1%，&gt;5根 0.4%</li>
+<li>事件最多的币种：<code>[(&#x27;XLM_USDT_SWAP&#x27;, 27), (&#x27;LAYER_USDT_SWAP&#x27;, 26), (&#x27;APT_USDT_SWAP&#x27;, 25), (&#x27;COMP_USDT_SWAP&#x27;, 25), (&#x27;LUNA_USDT_SWAP&#x27;, 24), (&#x27;ENS_USDT_SWAP&#x27;, 23), (&#x27;YFI_USDT_SWAP&#x27;, 23), (&#x27;DOGE_USDT_SWAP&#x27;, 22), (&#x27;DOT_USDT_SWAP&#x27;, 22), (&#x27;ETC_USDT_SWAP&#x27;, 22)]</code></li>
+<li>ETH events：17</li>
+<li>matched random controls：1950（已了结1674）</li>
+<li>已了结事件TP率：21.66%</li>
+<li>扫描耗时：53.0分钟</li>
+</ul>
+<h2>强信号明细（按事件最大置信度）</h2>
+<table><thead><tr>
+<th>币种</th>
+<th>决策时间CST</th>
+<th>conf max</th>
+<th>核心宽度</th>
+<th>首次延迟</th>
+<th>结果</th>
+<th>净@taker</th>
+</tr></thead><tbody>
+<tr><td>XPT_USDT_SWAP</td><td>08-10 08:00</td><td>0.956</td><td>5</td><td>3</td><td>sl</td><td>-0.515%</td></tr>
+<tr><td>HUMA_USDT_SWAP</td><td>08-11 02:45</td><td>0.954</td><td>5</td><td>3</td><td>sl</td><td>-1.253%</td></tr>
+<tr><td>STRK_USDT_SWAP</td><td>08-11 02:30</td><td>0.952</td><td>4</td><td>3</td><td>sl</td><td>-1.220%</td></tr>
+<tr><td>ATH_USDT_SWAP</td><td>08-11 04:45</td><td>0.947</td><td>4</td><td>3</td><td>running</td><td>—</td></tr>
+<tr><td>ENJ_USDT_SWAP</td><td>08-10 08:15</td><td>0.946</td><td>4</td><td>3</td><td>sl</td><td>-0.757%</td></tr>
+<tr><td>ADA_USDT_SWAP</td><td>08-10 18:45</td><td>0.943</td><td>4</td><td>3</td><td>sl</td><td>-0.920%</td></tr>
+<tr><td>DYDX_USDT_SWAP</td><td>08-11 06:45</td><td>0.942</td><td>5</td><td>3</td><td>sl</td><td>-1.011%</td></tr>
+<tr><td>PLUME_USDT_SWAP</td><td>08-11 08:00</td><td>0.940</td><td>4</td><td>3</td><td>sl</td><td>-1.574%</td></tr>
+<tr><td>AERO_USDT_SWAP</td><td>08-10 23:00</td><td>0.938</td><td>4</td><td>3</td><td>sl</td><td>-1.322%</td></tr>
+<tr><td>ZIL_USDT_SWAP</td><td>08-09 20:15</td><td>0.937</td><td>4</td><td>3</td><td>tp</td><td>+2.160%</td></tr>
+<tr><td>ENSO_USDT_SWAP</td><td>08-11 02:30</td><td>0.936</td><td>4</td><td>3</td><td>sl</td><td>-1.372%</td></tr>
+<tr><td>BLUR_USDT_SWAP</td><td>08-11 05:45</td><td>0.935</td><td>5</td><td>3</td><td>running</td><td>—</td></tr>
+<tr><td>RESOLV_USDT_SWAP</td><td>08-10 15:00</td><td>0.933</td><td>4</td><td>3</td><td>sl</td><td>-1.454%</td></tr>
+<tr><td>UMA_USDT_SWAP</td><td>08-10 08:45</td><td>0.931</td><td>5</td><td>3</td><td>sl</td><td>-0.816%</td></tr>
+<tr><td>APE_USDT_SWAP</td><td>08-11 06:45</td><td>0.928</td><td>5</td><td>3</td><td>sl</td><td>-1.122%</td></tr>
+<tr><td>GRT_USDT_SWAP</td><td>08-10 23:30</td><td>0.927</td><td>4</td><td>3</td><td>tp</td><td>+1.801%</td></tr>
+<tr><td>ENS_USDT_SWAP</td><td>08-10 08:30</td><td>0.927</td><td>5</td><td>3</td><td>sl</td><td>-0.777%</td></tr>
+<tr><td>SEI_USDT_SWAP</td><td>08-11 06:45</td><td>0.926</td><td>5</td><td>3</td><td>running</td><td>—</td></tr>
+<tr><td>WCT_USDT_SWAP</td><td>08-11 05:45</td><td>0.926</td><td>4</td><td>3</td><td>sl</td><td>-1.062%</td></tr>
+<tr><td>AERO_USDT_SWAP</td><td>08-11 00:30</td><td>0.925</td><td>5</td><td>3</td><td>sl</td><td>-1.206%</td></tr>
+<tr><td>BERA_USDT_SWAP</td><td>08-10 07:30</td><td>0.924</td><td>4</td><td>3</td><td>sl</td><td>-1.041%</td></tr>
+<tr><td>PIEVERSE_USDT_SWAP</td><td>08-11 02:30</td><td>0.924</td><td>4</td><td>3</td><td>sl</td><td>-1.381%</td></tr>
+<tr><td>TURBO_USDT_SWAP</td><td>08-11 00:00</td><td>0.923</td><td>4</td><td>3</td><td>sl</td><td>-1.351%</td></tr>
+<tr><td>IOTA_USDT_SWAP</td><td>08-10 07:15</td><td>0.923</td><td>4</td><td>3</td><td>sl</td><td>-0.919%</td></tr>
+<tr><td>STX_USDT_SWAP</td><td>08-10 08:45</td><td>0.923</td><td>5</td><td>3</td><td>sl</td><td>-0.981%</td></tr>
+<tr><td>UMA_USDT_SWAP</td><td>08-10 07:15</td><td>0.922</td><td>4</td><td>3</td><td>sl</td><td>-0.623%</td></tr>
+<tr><td>APE_USDT_SWAP</td><td>08-11 05:15</td><td>0.921</td><td>6</td><td>2</td><td>sl</td><td>-1.137%</td></tr>
+<tr><td>PIEVERSE_USDT_SWAP</td><td>08-10 16:15</td><td>0.921</td><td>4</td><td>3</td><td>sl</td><td>-1.642%</td></tr>
+<tr><td>SKY_USDT_SWAP</td><td>08-10 04:15</td><td>0.921</td><td>5</td><td>3</td><td>timeout</td><td>+0.608%</td></tr>
+<tr><td>GAS_USDT_SWAP</td><td>08-10 08:00</td><td>0.921</td><td>5</td><td>3</td><td>timeout</td><td>+0.334%</td></tr>
+</tbody></table>
+<p>完整事件表：<code>analysis/output/owner_short_gold_center_recent2d_v1/events_with_outcomes.csv</code>；匹配对照：<code>analysis/output/owner_short_gold_center_recent2d_v1/matched_controls.csv</code>。</p>
+<h2>Owner ETH终极参考段核对</h2>
+<p>Owner标出的核心候选时段为8月10日19:30–20:45 CST。当前模型有2个预测核心与其重叠：</p>
+<table><thead><tr>
+<th>角色</th>
+<th>event_id</th>
+<th>预测核心CST</th>
+<th>决策CST</th>
+<th>核心根数</th>
+<th>延迟根数</th>
+<th>conf max</th>
+<th>结果</th>
+<th>净@taker</th>
+</tr></thead><tbody>
+<tr><td>主目标匹配</td><td>2efeebe2eeb55f6d</td><td>08-10 19:30–20:15</td><td>08-10 21:00</td><td>4</td><td>3</td><td>0.905</td><td>tp</td><td>+1.020%</td></tr>
+<tr><td>后续重叠事件（需作为延续/重复复核）</td><td>2ea2ed0fc0a72950</td><td>08-10 20:45–21:45</td><td>08-10 22:30</td><td>5</td><td>3</td><td>0.884</td><td>tp</td><td>+1.251%</td></tr>
+</tbody></table>
+<p>第一条主匹配把核心落在19:30–20:15的4根K，21:00首次决策，正好是3根确认延迟；它没有把后面的整段暴跌塞入核心。第二条从20:45继续框到21:45，已进入下跌过程，不能因为同样TP就自动视为另一个高质量形态，应进入相邻延续/重复难例复核。</p>
+<h2>与上一版同表对照</h2>
+<table><thead><tr>
+<th>配置</th>
+<th>正/负训练比</th>
+<th>最近2天events/1000</th>
+<th>events/day</th>
+<th>holdout次数</th>
+<th>裁决</th>
+</tr></thead><tbody>
+<tr><td>当前1:1 easy baseline</td><td>1:1</td><td>60.845</td><td>1250.0</td><td>1</td><td>仅诊断，等待hard-negative arm</td></tr>
+<tr><td>下一步1:3（1 easy+2 hard）</td><td>1:3</td><td>未运行</td><td>未运行</td><td>0</td><td>未获本轮3060训练授权</td></tr>
+</tbody></table>
+<h2>匹配随机对照</h2>
+<p>对每个可匹配事件，在同一币、同一UTC日、同ATR波动五分桶中确定性抽取一个非事件bar，使用完全相同的入场、障碍、期限和成本。只在事件与其对应随机入场都已了结时进入差值分母，共1498对；事件净@taker均值为-0.231%，随机对照为+0.170%，逐对差值均值为-0.401%。短样本不能据此宣称统计显著或可交易。</p>
+<h2>必报指标状态</h2>
+<ul>
+<li>val AUC：N/A，本轮只评估YOLO检测器，不训练/评分LightGBM排序层。</li>
+<li>置换检验p：N/A，没有排序分数与独立大样本。</li>
+<li>top-decile毛/净收益：N/A，没有判断层分位数。</li>
+<li>胜率：已了结事件TP率21.66%；未完结样本不进入分母。</li>
+<li>单特征基线：N/A；本轮有效对照为同币×同日×同波动桶随机入场。</li>
+</ul>
+<h2>风险与诚实声明</h2>
+<ul>
+<li><code>conf=0.25</code>只是未调优诊断门，不能自动成为生产阈值；任何阈值晋升仍需Owner决策。</li>
+<li>最新2天没有完整Owner逐事件金标，收益方向不能替代形态precision；本报告不能给出可信event precision/recall。</li>
+<li>事件图中的紫色区域仅供人工看未来结果，模型输入严格止于青色decision线。</li>
+<li>本次holdout已经消耗，不能拿同一结果反复改数据集并当独立验收。</li>
+<li>模型未promote、未部署、未写forward_log、未下单。</li>
+</ul>
+<h2>复现命令</h2>
+<pre><code>
+PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python \
+  scripts/backtest_owner_short_gold_center_recent.py fetch \
+  --out-dir analysis/output/owner_short_gold_center_recent2d_v1
+
+# Windows 3060 PowerShell；四个i可并行启动
+foreach ($i in 0..3) {
+  C:/fable/.venv/Scripts/python.exe \
+    C:/fable/scripts/backtest_owner_short_gold_center_recent.py scan \
+    --snapshot-dir C:/fable/analysis/input/owner_short_gold_center_recent2d_v1/snapshot \
+    --out-dir &quot;C:/fable/analysis/output/owner_short_gold_center_recent2d_v1/shard$i&quot; \
+    --weights C:/fable/analysis/input/owner_short_gold_center_recent2d_v1/best.pt \
+    --device 0 --shard-index $i --shard-count 4
+}
+
+# 将四个shard目录取回Mac后合并
+PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python \
+  scripts/backtest_owner_short_gold_center_recent.py merge \
+  --scan-dirs analysis/output/owner_short_gold_center_recent2d_v1/remote_shards/shard0 \
+  analysis/output/owner_short_gold_center_recent2d_v1/remote_shards/shard1 \
+  analysis/output/owner_short_gold_center_recent2d_v1/remote_shards/shard2 \
+  analysis/output/owner_short_gold_center_recent2d_v1/remote_shards/shard3 \
+  --out-dir analysis/output/owner_short_gold_center_recent2d_v1/merged_scan
+
+PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python \
+  scripts/backtest_owner_short_gold_center_recent.py finalize \
+  --snapshot-dir analysis/output/owner_short_gold_center_recent2d_v1/kline_snapshot --scan-dir analysis/output/owner_short_gold_center_recent2d_v1/merged_scan \
+  --out-dir analysis/output/owner_short_gold_center_recent2d_v1 --report analysis/p1_owner_short_gold_center_recent2d_holdout_20260811.md
+
+python3 scripts/md_to_html.py analysis/p1_owner_short_gold_center_recent2d_holdout_20260811.md --out-dir analysis/html
+</code></pre>
+<h2>下一步</h2>
+<p>继续按交接文档从原train时间块挖hard negatives，构建固定val的1:3第二训练臂。该臂构建和审计可继续；再次上3060训练前停在Owner逐次授权门。</p>
+</body>
+</html>

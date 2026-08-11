@@ -84,6 +84,8 @@ SL_ATR = 2.0
 HORIZON_BARS = 72
 HOLDOUT_USE_NUMBER = 1
 MAX_TG_PHOTOS = 25
+OWNER_ETH_TARGET_START = pd.Timestamp("2026-08-10T11:30:00Z")  # 19:30 CST
+OWNER_ETH_TARGET_END = pd.Timestamp("2026-08-10T12:45:00Z")  # 20:45 CST
 
 
 def stable_int(*parts: object) -> int:
@@ -638,6 +640,44 @@ def build_controls(events: list[dict[str, Any]], frames: dict[str, pd.DataFrame]
     return controls
 
 
+def paired_closed_metrics(
+    events: list[dict[str, Any]], controls: list[dict[str, Any]]
+) -> dict[str, float | int | None]:
+    """Compare only event/control pairs whose two outcomes are both closed."""
+    event_by_id = {
+        str(row["event_id"]): row
+        for row in events
+        if row.get("status") == "closed" and row.get("net_taker") is not None
+    }
+    control_by_id = {
+        str(row["event_id"]): row
+        for row in controls
+        if row.get("status") == "closed" and row.get("net_taker") is not None
+    }
+    ids = sorted(set(event_by_id) & set(control_by_id))
+    if not ids:
+        return {
+            "paired_closed": 0,
+            "paired_event_net_taker_mean": None,
+            "paired_control_net_taker_mean": None,
+            "paired_event_minus_control_net_taker": None,
+        }
+    event_values = np.asarray(
+        [float(event_by_id[event_id]["net_taker"]) for event_id in ids], dtype=float
+    )
+    control_values = np.asarray(
+        [float(control_by_id[event_id]["net_taker"]) for event_id in ids], dtype=float
+    )
+    return {
+        "paired_closed": len(ids),
+        "paired_event_net_taker_mean": float(np.mean(event_values)),
+        "paired_control_net_taker_mean": float(np.mean(control_values)),
+        "paired_event_minus_control_net_taker": float(
+            np.mean(event_values - control_values)
+        ),
+    }
+
+
 def draw_event(frame: pd.DataFrame, event: dict[str, Any], out_path: Path) -> None:
     import matplotlib  # noqa: PLC0415
 
@@ -738,9 +778,20 @@ def finalize(args: argparse.Namespace) -> int:
     pd.DataFrame(controls).to_csv(out_dir / "matched_controls.csv", index=False)
     ranked = sorted(completed, key=lambda row: (-float(row["event_conf_max"]), str(row["decision_time"])))
     eth = [row for row in completed if str(row["symbol"]) == "ETH_USDT_SWAP"]
+    eth_target_matches = sorted(
+        [
+            row
+            for row in eth
+            if pd.Timestamp(row["core_end_time"]) >= OWNER_ETH_TARGET_START
+            and pd.Timestamp(row["core_start_time"]) <= OWNER_ETH_TARGET_END
+        ],
+        key=lambda row: (str(row["core_start_time"]), str(row["decision_time"])),
+    )
     selected: list[dict[str, Any]] = []
     seen: set[str] = set()
-    for row in [*eth, *ranked]:
+    # Put the Owner's explicit ETH reference match first in Telegram/review,
+    # then the remaining ETH events and finally the strongest market-wide rows.
+    for row in [*eth_target_matches, *eth, *ranked]:
         if row["event_id"] in seen:
             continue
         selected.append(row)
@@ -748,6 +799,9 @@ def finalize(args: argparse.Namespace) -> int:
         if len(selected) >= args.max_render:
             break
     chart_dir = out_dir / "charts"
+    chart_dir.mkdir(parents=True, exist_ok=True)
+    for stale_chart in chart_dir.glob("*.png"):
+        stale_chart.unlink()
     for number, event in enumerate(selected, 1):
         decision = pd.Timestamp(event["decision_time"]).strftime("%Y%m%d_%H%M")
         path = chart_dir / f"{number:03d}_{event['symbol']}_{decision}_{event['event_id']}.png"
@@ -758,26 +812,86 @@ def finalize(args: argparse.Namespace) -> int:
     closed = [row for row in completed if row.get("status") == "closed"]
     control_closed = [row for row in controls if row.get("status") == "closed"]
     event_mean = float(np.mean([float(row["net_taker"]) for row in closed])) if closed else None
-    control_mean = float(np.mean([float(row["net_taker"]) for row in control_closed])) if control_closed else None
+    paired = paired_closed_metrics(completed, controls)
+    fetch_summary_path = out_dir / "fetch_summary.json"
+    fetch_summary = (
+        json.loads(fetch_summary_path.read_text(encoding="utf-8"))
+        if fetch_summary_path.exists()
+        else {}
+    )
+    missing_symbols = sorted(
+        str(row["symbol"])
+        for row in fetch_summary.get("symbols", [])
+        if not int(row.get("rows", 0))
+    )
+    events_by_symbol = Counter(str(row["symbol"]) for row in completed)
+    all_symbol_counts = np.asarray(
+        [events_by_symbol.get(str(symbol), 0) for symbol in scan_summary["scanned_symbols"]],
+        dtype=float,
+    )
+    delays = np.asarray([int(row["decision_delay_bars"]) for row in completed], dtype=float)
+    core_widths = np.asarray([int(row["predicted_core_bars"]) for row in completed], dtype=float)
     summary = {
         **scan_summary,
         "finalized_at": datetime.now(timezone.utc).isoformat(),
+        "snapshot_generated_at": fetch_summary.get("generated_at"),
+        "requested_symbols": fetch_summary.get("requested_symbols", scan_summary["symbols"]),
+        "usable_symbols": fetch_summary.get("usable_symbols", scan_summary["symbols"]),
+        "missing_symbols": missing_symbols,
+        "canonical_data_written": fetch_summary.get("canonical_data_written", False),
         "closed_events": len(closed),
         "open_events": len(completed) - len(closed),
         "outcomes": dict(Counter(str(row.get("outcome")) for row in completed)),
+        "closed_tp_rate": (
+            sum(str(row.get("outcome")) == "tp" for row in closed) / len(closed)
+            if closed
+            else 0.0
+        ),
         "event_net_taker_mean": event_mean,
         "matched_controls": len(controls),
         "matched_control_closed": len(control_closed),
-        "control_net_taker_mean": control_mean,
-        "event_minus_control_net_taker": (
-            event_mean - control_mean if event_mean is not None and control_mean is not None else None
-        ),
+        **paired,
+        "control_net_taker_mean": paired["paired_control_net_taker_mean"],
+        "event_minus_control_net_taker": paired["paired_event_minus_control_net_taker"],
         "events_per_1000_bar_endpoints": (
             len(completed) / int(scan_summary["bar_endpoints"]) * 1000
             if scan_summary.get("bar_endpoints") else None
         ),
         "events_per_day": len(completed) / (float(scan_summary["hours"]) / 24),
+        "events_per_symbol_day": (
+            len(completed)
+            / max(1, int(scan_summary["symbols"]))
+            / (float(scan_summary["hours"]) / 24)
+        ),
+        "triggered_symbols": int(np.sum(all_symbol_counts > 0)),
+        "events_per_symbol_2d_median": float(np.median(all_symbol_counts)),
+        "events_per_symbol_2d_p90": float(np.quantile(all_symbol_counts, 0.90)),
+        "events_per_symbol_2d_max": int(np.max(all_symbol_counts)) if len(all_symbol_counts) else 0,
+        "top_symbols_by_events": events_by_symbol.most_common(10),
+        "decision_delay_median": float(np.median(delays)) if len(delays) else 0.0,
+        "decision_delay_p90": float(np.quantile(delays, 0.90)) if len(delays) else 0.0,
+        "decision_delay_0_2_share": float(np.mean(delays <= 2)) if len(delays) else 0.0,
+        "decision_delay_3_5_share": float(np.mean((delays >= 3) & (delays <= 5))) if len(delays) else 0.0,
+        "decision_delay_gt5_share": float(np.mean(delays > 5)) if len(delays) else 0.0,
+        "core_width_4_7_share": float(np.mean((core_widths >= 4) & (core_widths <= 7))) if len(core_widths) else 0.0,
         "eth_events": len(eth),
+        "eth_owner_target_matches": [
+            {
+                key: row.get(key)
+                for key in (
+                    "event_id",
+                    "core_start_time",
+                    "core_end_time",
+                    "decision_time",
+                    "event_conf_max",
+                    "predicted_core_bars",
+                    "decision_delay_bars",
+                    "outcome",
+                    "net_taker",
+                )
+            }
+            for row in eth_target_matches
+        ],
         "charts_rendered": len(selected),
     }
     (out_dir / "summary.json").write_text(
@@ -809,6 +923,18 @@ def build_report(
             f"{int(event['predicted_core_bars'])} | {int(event['decision_delay_bars'])} | "
             f"{event.get('outcome', '—')} | {pct(event.get('net_taker'))} |"
         )
+    target_rows = []
+    for number, event in enumerate(summary.get("eth_owner_target_matches", []), 1):
+        core_start = pd.Timestamp(event["core_start_time"]).tz_convert("Asia/Shanghai")
+        core_end = pd.Timestamp(event["core_end_time"]).tz_convert("Asia/Shanghai")
+        decision = pd.Timestamp(event["decision_time"]).tz_convert("Asia/Shanghai")
+        role = "主目标匹配" if number == 1 else "后续重叠事件（需作为延续/重复复核）"
+        target_rows.append(
+            f"| {role} | {event['event_id']} | {core_start:%m-%d %H:%M}–{core_end:%H:%M} | "
+            f"{decision:%m-%d %H:%M} | {int(event['predicted_core_bars'])} | "
+            f"{int(event['decision_delay_bars'])} | {float(event['event_conf_max']):.3f} | "
+            f"{event.get('outcome', '—')} | {pct(event.get('net_taker'))} |"
+        )
     report.parent.mkdir(parents=True, exist_ok=True)
     report.write_text(
         f"""# Owner-short compact YOLO 最近2天全市场回放（2026-08-11）
@@ -819,7 +945,9 @@ def build_report(
 - 使用刚训练完成且未promote的`owner_lsv2_short_gold_center_v1_ft`，只扫其训练分布内的215币种；实际新鲜可用币种 **{summary['symbols']}**。
 - 因果扫描W12–19共 **{summary['window_exposures']:,}** 个窗口，原始触发 **{summary['raw_detections']:,}** 条；按同币、核心中点±{EVENT_GAP_BARS}根合并为 **{summary['deduplicated_events']:,}** 个事件。
 - 密度为 **{summary['events_per_1000_bar_endpoints']:.3f} events/1000 bar endpoints**，即 **{summary['events_per_day']:.1f} events/day**。这才是检测事件数，不把8种窗口的重复命中当8笔单。
-- 已了结事件 {summary['closed_events']} 个，TP/SL/timeout/open分布：`{summary['outcomes']}`；事件净@taker均值 **{pct(summary['event_net_taker_mean'])}**，匹配随机对照 **{pct(summary['control_net_taker_mean'])}**，超额 **{pct(summary['event_minus_control_net_taker'])}**。
+- 折算到单币为 **{summary['events_per_symbol_day']:.2f} events/币/天**；{summary['triggered_symbols']}/{summary['symbols']}个币至少触发一次。核心宽度落在Owner要求4–7根的比例为 **{summary['core_width_4_7_share']*100:.1f}%**。
+- 已了结事件 {summary['closed_events']} 个，TP/SL/timeout/open分布：`{summary['outcomes']}`；全部已了结事件净@taker均值 **{pct(summary['event_net_taker_mean'])}**。严格成对可比样本 {summary['paired_closed']} 个：事件 **{pct(summary['paired_event_net_taker_mean'])}**、匹配随机 **{pct(summary['paired_control_net_taker_mean'])}**、差值 **{pct(summary['paired_event_minus_control_net_taker'])}**。
+- 已了结事件TP率 **{summary['closed_tp_rate']*100:.1f}%**；匹配随机对照覆盖 {summary['matched_controls']}/{summary['deduplicated_events']} 个事件，其中双方都已了结的严格配对为 {summary['paired_closed']}。
 - 这仍是检测器诊断回放，不是生产晋升：无ACTIVE修改、无下单、无阈值调优，TG图均标注纸面回放。
 
 ## 回放协议
@@ -837,12 +965,18 @@ def build_report(
 
 ## 数据统计
 
+- 数据源：OKX公开15m接口的一次性快照；生成于`{summary.get('snapshot_generated_at')}`，未写canonical `data/`。
+- 请求/可用币种：{summary.get('requested_symbols')} / {summary.get('usable_symbols')}；缺失：`{summary.get('missing_symbols') or []}`。
 - bar endpoints：{summary['bar_endpoints']:,}
 - window exposures：{summary['window_exposures']:,}
 - raw detections：{summary['raw_detections']:,}
 - deduplicated events：{summary['deduplicated_events']:,}
+- 单币两天事件数 median / p90 / max：{summary['events_per_symbol_2d_median']:.1f} / {summary['events_per_symbol_2d_p90']:.1f} / {summary['events_per_symbol_2d_max']}
+- 决策延迟 median / p90：{summary['decision_delay_median']:.1f} / {summary['decision_delay_p90']:.1f}根；0–2根 {summary['decision_delay_0_2_share']*100:.1f}%，3–5根 {summary['decision_delay_3_5_share']*100:.1f}%，>5根 {summary['decision_delay_gt5_share']*100:.1f}%
+- 事件最多的币种：`{summary['top_symbols_by_events']}`
 - ETH events：{summary['eth_events']}
 - matched random controls：{summary['matched_controls']}（已了结{summary['matched_control_closed']}）
+- 已了结事件TP率：{summary['closed_tp_rate']*100:.2f}%
 - 扫描耗时：{summary['wall_seconds']/60:.1f}分钟
 
 ## 强信号明细（按事件最大置信度）
@@ -853,6 +987,16 @@ def build_report(
 
 完整事件表：`{out_dir / 'events_with_outcomes.csv'}`；匹配对照：`{out_dir / 'matched_controls.csv'}`。
 
+## Owner ETH终极参考段核对
+
+Owner标出的核心候选时段为8月10日19:30–20:45 CST。当前模型有{len(target_rows)}个预测核心与其重叠：
+
+| 角色 | event_id | 预测核心CST | 决策CST | 核心根数 | 延迟根数 | conf max | 结果 | 净@taker |
+|---|---|---|---|---:|---:|---:|---|---:|
+{chr(10).join(target_rows) if target_rows else '| 未命中 | — | — | — | — | — | — | — | — |'}
+
+第一条主匹配把核心落在19:30–20:15的4根K，21:00首次决策，正好是3根确认延迟；它没有把后面的整段暴跌塞入核心。第二条从20:45继续框到21:45，已进入下跌过程，不能因为同样TP就自动视为另一个高质量形态，应进入相邻延续/重复难例复核。
+
 ## 与上一版同表对照
 
 | 配置 | 正/负训练比 | 最近2天events/1000 | events/day | holdout次数 | 裁决 |
@@ -862,14 +1006,14 @@ def build_report(
 
 ## 匹配随机对照
 
-对每个可匹配事件，在同一币、同一UTC日、同ATR波动五分桶中确定性抽取一个非事件bar，使用完全相同的入场、障碍、期限和成本。事件净@taker均值为{pct(summary['event_net_taker_mean'])}，随机对照为{pct(summary['control_net_taker_mean'])}，差值为{pct(summary['event_minus_control_net_taker'])}。短样本不能据此宣称统计显著或可交易。
+对每个可匹配事件，在同一币、同一UTC日、同ATR波动五分桶中确定性抽取一个非事件bar，使用完全相同的入场、障碍、期限和成本。只在事件与其对应随机入场都已了结时进入差值分母，共{summary['paired_closed']}对；事件净@taker均值为{pct(summary['paired_event_net_taker_mean'])}，随机对照为{pct(summary['paired_control_net_taker_mean'])}，逐对差值均值为{pct(summary['paired_event_minus_control_net_taker'])}。短样本不能据此宣称统计显著或可交易。
 
 ## 必报指标状态
 
 - val AUC：N/A，本轮只评估YOLO检测器，不训练/评分LightGBM排序层。
 - 置换检验p：N/A，没有排序分数与独立大样本。
 - top-decile毛/净收益：N/A，没有判断层分位数。
-- 胜率：仅列TP/SL/timeout原始分布，不把未完结样本塞进分母。
+- 胜率：已了结事件TP率{summary['closed_tp_rate']*100:.2f}%；未完结样本不进入分母。
 - 单特征基线：N/A；本轮有效对照为同币×同日×同波动桶随机入场。
 
 ## 风险与诚实声明
@@ -887,10 +1031,24 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python \\
   scripts/backtest_owner_short_gold_center_recent.py fetch \\
   --out-dir {out_dir}
 
+# Windows 3060 PowerShell；四个i可并行启动
+foreach ($i in 0..3) {{
+  C:/fable/.venv/Scripts/python.exe \\
+    C:/fable/scripts/backtest_owner_short_gold_center_recent.py scan \\
+    --snapshot-dir C:/fable/analysis/input/owner_short_gold_center_recent2d_v1/snapshot \\
+    --out-dir "C:/fable/analysis/output/owner_short_gold_center_recent2d_v1/shard$i" \\
+    --weights C:/fable/analysis/input/owner_short_gold_center_recent2d_v1/best.pt \\
+    --device 0 --shard-index $i --shard-count 4
+}}
+
+# 将四个shard目录取回Mac后合并
 PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python \\
-  scripts/backtest_owner_short_gold_center_recent.py scan \\
-  --snapshot-dir {out_dir / 'kline_snapshot'} \\
-  --out-dir {scan_dir} --weights {summary['weights']} --device 0
+  scripts/backtest_owner_short_gold_center_recent.py merge \\
+  --scan-dirs {out_dir / 'remote_shards/shard0'} \\
+  {out_dir / 'remote_shards/shard1'} \\
+  {out_dir / 'remote_shards/shard2'} \\
+  {out_dir / 'remote_shards/shard3'} \\
+  --out-dir {scan_dir}
 
 PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python \\
   scripts/backtest_owner_short_gold_center_recent.py finalize \\
@@ -917,12 +1075,15 @@ def send_to_telegram(args: argparse.Namespace) -> int:
     report_html = Path(args.report_html)
     message = (
         "<b>刚训练YOLO · 最近2天全市场回放</b>\n"
-        f"币种 {summary['symbols']} · 窗口 {summary['window_exposures']:,}\n"
+        f"币种 {summary['symbols']}/{summary.get('requested_symbols', summary['symbols'])} · "
+        f"窗口 {summary['window_exposures']:,}\n"
         f"原始触发 {summary['raw_detections']:,} → 去重事件 <b>{summary['deduplicated_events']:,}</b>\n"
         f"密度 {summary['events_per_1000_bar_endpoints']:.3f}/1000 bar · "
-        f"{summary['events_per_day']:.1f}事件/天\n"
+        f"{summary['events_per_day']:.1f}事件/天（单币 {summary['events_per_symbol_day']:.2f}/天）\n"
         f"已了结 {summary['closed_events']} · 净@taker {pct(summary['event_net_taker_mean'])} · "
-        f"匹配随机 {pct(summary['control_net_taker_mean'])}\n"
+        f"成对 {summary['paired_closed']}：事件 {pct(summary['paired_event_net_taker_mean'])} / "
+        f"随机 {pct(summary['paired_control_net_taker_mean'])} / "
+        f"差值 {pct(summary['paired_event_minus_control_net_taker'])}\n"
         f"holdout：该配置第{HOLDOUT_USE_NUMBER}次（本次Owner明确授权）\n"
         "<i>纸面回放；未下单、未promote。紫色K线只用于事后审核，不是模型输入。</i>"
     )
@@ -941,19 +1102,24 @@ def send_to_telegram(args: argparse.Namespace) -> int:
         ok = notify.send_photo(chart, caption)
         photo_results.append({"event_id": event["event_id"], "path": str(chart), "sent": ok})
     document_sent = notify.send_document(report_html, "最近2天详细回放HTML（纸面、未下单）")
+    events_csv_sent = notify.send_document(
+        out_dir / "events_with_outcomes.csv",
+        "最近2天全部去重事件与纸面结果CSV（不是订单）",
+    )
     receipt = {
         "sent_at": datetime.now(timezone.utc).isoformat(),
         "summary_sent": summary_sent,
         "photos_requested": min(len(rendered), args.max_send),
         "photos_sent": sum(int(item["sent"]) for item in photo_results),
         "document_sent": document_sent,
+        "events_csv_sent": events_csv_sent,
         "photo_results": photo_results,
     }
     (out_dir / "telegram_receipt.json").write_text(
         json.dumps(receipt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     print(json.dumps(receipt, ensure_ascii=False, indent=2))
-    return 0 if summary_sent and document_sent else 2
+    return 0 if summary_sent and document_sent and events_csv_sent else 2
 
 
 def parser() -> argparse.ArgumentParser:
