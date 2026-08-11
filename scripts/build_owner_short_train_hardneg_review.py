@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 from collections import Counter, defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -258,8 +259,11 @@ def _validate_block(
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     merged = Path(spec["merged_scan"])
     audit = Path(spec["audit_snapshot"])
-    scan_summary = json.loads((merged / "scan_summary.json").read_text(encoding="utf-8"))
-    audit_summary = json.loads((audit / "fetch_summary.json").read_text(encoding="utf-8"))
+    scan_summary_path = merged / "scan_summary.json"
+    events_path = merged / "events.jsonl"
+    audit_summary_path = audit / "fetch_summary.json"
+    scan_summary = json.loads(scan_summary_path.read_text(encoding="utf-8"))
+    audit_summary = json.loads(audit_summary_path.read_text(encoding="utf-8"))
     if scan_summary.get("evaluation_scope") != "train_hardneg_mining":
         raise ValueError(f"{spec['block_id']}: scan scope is not train mining")
     if audit_summary.get("evaluation_scope") != "train_hardneg_mining":
@@ -274,7 +278,7 @@ def _validate_block(
         raise ValueError(f"{spec['block_id']}: holdout proof missing")
     if utc(audit_summary["max_materialized_time"]) > train_end:
         raise ValueError(f"{spec['block_id']}: audit context exceeds frozen train")
-    events = read_jsonl(merged / "events.jsonl")
+    events = read_jsonl(events_path)
     return events, {
         "events": len(events),
         "symbols": int(scan_summary["symbols"]),
@@ -284,6 +288,9 @@ def _validate_block(
         "scan_end": utc(spec["scan_end"]).isoformat(),
         "audit_end": utc(spec["audit_end"]).isoformat(),
         "weights_sha256": scan_summary["weights_sha256"],
+        "scan_summary_sha256": sha256_file(scan_summary_path),
+        "events_sha256": sha256_file(events_path),
+        "audit_snapshot_summary_sha256": sha256_file(audit_summary_path),
     }
 
 
@@ -420,6 +427,7 @@ def build(
         encoding="utf-8",
     )
     summary = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "protocol": PROTOCOL,
         "reference_manifest": str(REFERENCE_MANIFEST.relative_to(ROOT)),
         "reference_manifest_sha256": sha256_file(REFERENCE_MANIFEST),
@@ -443,6 +451,10 @@ def build(
         "training_eligible": 0,
         "labels_created": 0,
         "html": str(output_html.relative_to(ROOT)),
+        "candidate_pool_sha256": sha256_file(output / "candidate_pool.jsonl"),
+        "selected_candidates_sha256": sha256_file(selected_path),
+        "review_manifest_sha256": sha256_file(review_manifest),
+        "html_sha256": sha256_file(output_html),
         "quality_gates": {
             "exactly_200_unique_events": len(review_rows) == REVIEW_TOTAL
             and len({str(row["event_id"]) for row in review_rows}) == REVIEW_TOTAL,
