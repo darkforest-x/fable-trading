@@ -24,14 +24,22 @@ train 4,040、val 716。24 张独立预览按四个真实 K 线位置桶各 6 �
 0 holdout、0 跨 split、4,756 image/label/manifest 守恒，十道 Stage A P0 门全绿。
 同 seed 二次重建正/负 manifest SHA 分别稳定为 `ae4675a6…e89` / `0fdced5c…3f0`。
 
-Owner 于 2026-08-11 06:33 CST 明确授权上传并开训；3060 `zzc@192.168.1.4` 已核验空闲，
-`owner_lsv2_stagea_randomcrop_v1_cold` 已通过 WMI 启动（launch pid 35164，ret=0）。远端重新
-扫描 train 4,040 / val 716、0 corrupt，已进入 `Starting training for 60 epochs`。实际参数为
-YOLO11s、imgsz 960、batch 8、seed 0、epochs 60、patience 15；flip/mosaic/mixup/HSV 全为 0。
+Owner 于 2026-08-11 06:33 CST 明确授权上传并开训；3060 `zzc@192.168.1.4` 上的
+`owner_lsv2_stagea_randomcrop_v1_cold` 已正常完成。配置为 YOLO11s、imgsz 960、batch 8、
+seed 0、epochs 60、patience 15；flip/mosaic/mixup/HSV 全为 0。early stopping 于 53 轮结束，
+最佳 epoch=38，总耗时 4,207.2s；最终复验 P/R/mAP50/mAP50-95 =
+0.2376 / 0.4330 / 0.2332 / 0.1266。远端与本地 `best.pt` SHA-256 均为
+`c0e94f47…bf1a`，训练目录和日志已取回独立 Stage A 路径。
 
-当前停止点：监控 **Stage A 离线预训练**并在结束后取回独立权重与结果；训练结果仍须标记
-`production_eligible=false`，不得 promote/forward/ACTIVE/部署。该权重只可作为严格因果
-Stage B 的初始化。
+按推理前冻结的真实 K 线位置门，conf=0.05 四桶 recall 为
+84.72% / 74.29% / 75.47% / 70.00%，最大差 14.72pp（门 20pp）；anchor X 与 IoU-matched
+score 的 Spearman=-0.134（门 |rho|≤0.20），三门全绿，确认不再只认真实内容最右端。但同一
+阈值 easy-negative fire=26.54%、event precision=15.23%，**安静度未解决**；conf=0.35 虽近乎
+静默，recall 也只剩 0.28%，禁止靠沿用/抬高旧阈值宣布成功。
+
+当前停止点：Stage A 仅通过“位置表征”诊断，可作为严格因果 Stage B 的初始化；仍标记
+`production_eligible=false`，不得 promote/forward/ACTIVE/部署。下一步固定 Stage A 权重，
+只做因果 Stage B 微调；随后才从新模型收集 hard negatives 并验证连续窗口密度。
 
 ## ⚡ 当前真相（2026-08-11 — Owner 发现 B2/P2 固定最右位置 shortcut；P2 训练已停）
 

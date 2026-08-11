@@ -1,7 +1,7 @@
 {
   "launched_at_utc": "2026-08-10T22:34:03Z",
   "launched_at_cst": "2026-08-11 06:34:03 CST",
-  "status": "running_epoch_2_verified",
+  "status": "completed_early_stopping",
   "run_name": "owner_lsv2_stagea_randomcrop_v1_cold",
   "role": "stage_a_offline_representation_pretrain_only",
   "production_eligible": false,
@@ -60,6 +60,33 @@
     "best_checkpoint_bytes": 76007713,
     "next_epoch_observed": 2,
     "interpretation": "Startup evidence only; Stage A metrics are not production acceptance."
+  },
+  "completion": {
+    "epochs_completed": 53,
+    "configured_epochs": 60,
+    "best_epoch": 38,
+    "early_stopping_patience": 15,
+    "total_seconds": 4207.2,
+    "final_best_validation": {
+      "precision": 0.23761429640227197,
+      "recall": 0.4329608938547486,
+      "map50": 0.23317673703088682,
+      "map50_95": 0.12657168360938434
+    },
+    "artifacts_fetched": true,
+    "remote_local_sha256_match": true,
+    "local_run_directory": "analysis/output/lsv2_stagea/owner_lsv2_stagea_randomcrop_v1_cold",
+    "sha256": {
+      "best.pt": "c0e94f47df125e298b044d9f10acd0b8e4f525ccd6143ce34f8d174af802bf1a",
+      "last.pt": "792080c2ddc592f5134477de41a429cd21c6305f890e56c5e9904277225b6417",
+      "results.csv": "7ec7943737c3c8d142cc9fb413d9efd44427c83d9c7e8c34b8ccea240735af16",
+      "args.yaml": "8c8d224acc73441ecc39872886f87b3bb4c2bcb3e663ce83fb758c2dee648600"
+    }
+  },
+  "position_evaluation": {
+    "result": "analysis/output/p1_local_signal_v2_stagea_position_eval_20260811.json",
+    "position_invariance_diagnostic_pass": true,
+    "production_eligible": false
   },
   "forbidden": [
     "promote Stage A weights",

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Local Signal V2 Stage A 训练与分位置诊断（2026-08-11）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>Local Signal V2 Stage A 训练与分位置诊断（2026-08-11）</h1>
+<h2>直接结论</h2>
+<p>Stage A 离线预训练已正常完成，且通过推理前冻结的真实 K 线位置门：模型不再只识别真实内容</p>
+<p>最右端，可作为严格因果 Stage B 的初始化权重。</p>
+<p>这不代表“触发过多”已解决。固定 conf=0.05 时，easy-negative endpoint fire rate 仍为 26.54%，</p>
+<p>整体 event precision 只有 15.23%；安静度必须在 Stage B 后通过新模型自己的 hard negatives 与</p>
+<p>连续窗口回放解决。该权重继续标记 <code>production_eligible=false</code>，不得晋升或部署。</p>
+<h2>训练事实</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>run</td><td><code>owner_lsv2_stagea_randomcrop_v1_cold</code></td></tr>
+<tr><td>设备</td><td>RTX 3060 12GB</td></tr>
+<tr><td>数据</td><td>train 4,040 / val 716，正负 1:1</td></tr>
+<tr><td>配方</td><td>YOLO11s, imgsz 960, batch 8, seed 0</td></tr>
+<tr><td>增强</td><td>flip/mosaic/mixup/HSV 全部 0</td></tr>
+<tr><td>配置轮数 / patience</td><td>60 / 15</td></tr>
+<tr><td>实际轮数</td><td>53，early stopping</td></tr>
+<tr><td>最佳轮次</td><td>38</td></tr>
+<tr><td>总耗时</td><td>4,207.2s（约 70.1min）</td></tr>
+<tr><td>最终复验 P / R</td><td>0.2376 / 0.4330</td></tr>
+<tr><td>最终复验 mAP50 / mAP50-95</td><td>0.2332 / 0.1266</td></tr>
+</tbody></table>
+<p>远端与本地取回产物逐一核对：</p>
+<table><thead><tr>
+<th>产物</th>
+<th>SHA-256</th>
+</tr></thead><tbody>
+<tr><td><code>best.pt</code></td><td><code>c0e94f47df125e298b044d9f10acd0b8e4f525ccd6143ce34f8d174af802bf1a</code></td></tr>
+<tr><td><code>last.pt</code></td><td><code>792080c2ddc592f5134477de41a429cd21c6305f890e56c5e9904277225b6417</code></td></tr>
+<tr><td><code>results.csv</code></td><td><code>7ec7943737c3c8d142cc9fb413d9efd44427c83d9c7e8c34b8ccea240735af16</code></td></tr>
+<tr><td><code>args.yaml</code></td><td><code>8c8d224acc73441ecc39872886f87b3bb4c2bcb3e663ce83fb758c2dee648600</code></td></tr>
+</tbody></table>
+<h2>冻结位置诊断</h2>
+<p>评估器与门在正式推理前提交。输入只含 Stage A 的 pre-holdout val：358 正例 + 358 easy</p>
+<p>negatives；conf=0.05、NMS IoU=0.70、正例匹配 IoU≥0.50。</p>
+<table><thead><tr>
+<th>真实 K 线位置桶</th>
+<th>事件数</th>
+<th>TP</th>
+<th>Recall</th>
+<th>正例图 precision</th>
+<th>平均中心误差</th>
+</tr></thead><tbody>
+<tr><td>left_mid</td><td>72</td><td>61</td><td>84.72%</td><td>19.37%</td><td>0.20 bars</td></tr>
+<tr><td>mid</td><td>140</td><td>104</td><td>74.29%</td><td>16.97%</td><td>0.26 bars</td></tr>
+<tr><td>mid_right</td><td>106</td><td>80</td><td>75.47%</td><td>18.56%</td><td>0.32 bars</td></tr>
+<tr><td>right</td><td>40</td><td>28</td><td>70.00%</td><td>20.29%</td><td>0.28 bars</td></tr>
+</tbody></table>
+<p>冻结门：</p>
+<table><thead><tr>
+<th>门</th>
+<th>实际</th>
+<th>要求</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>每桶最低 recall</td><td>70.00%</td><td>≥25%</td><td>PASS</td></tr>
+<tr><td>桶间 recall 最大差</td><td>14.72pp</td><td>≤20pp</td><td>PASS</td></tr>
+<tr><td>anchor X vs matched score Spearman</td><td>-0.134</td><td>abs≤0.20</td><td>PASS</td></tr>
+</tbody></table>
+<p>三个位置门全部通过。负相关幅度很小，且最右桶不是最强桶，因此没有“仍然只认最右边”的证据。</p>
+<p>四桶匹配框的平均中心误差均小于 0.32 bars。</p>
+<h2>安静度与阈值诚实声明</h2>
+<table><thead><tr>
+<th>conf</th>
+<th>Event P</th>
+<th>Event R</th>
+<th>F1</th>
+<th>Easy-negative fire rate</th>
+<th>裁决</th>
+</tr></thead><tbody>
+<tr><td>0.05（冻结位置门）</td><td>15.23%</td><td>76.26%</td><td>25.40%</td><td>26.54%</td><td>位置可诊断，误触高</td></tr>
+<tr><td>0.10（同 val 乐观 best-F1）</td><td>22.66%</td><td>52.79%</td><td>31.71%</td><td>13.97%</td><td>仅诊断，不是验收点</td></tr>
+<tr><td>0.35（旧 B2 conf）</td><td>8.33%</td><td>0.28%</td><td>0.54%</td><td>0.28%</td><td>几乎静默且召回崩溃</td></tr>
+</tbody></table>
+<p>旧 conf=0.35 不能沿用：它让 Stage A 几乎完全不报，并不是模型变安静。反过来，conf=0.05</p>
+<p>虽然位置召回足够观察，却产生 1,519 个 false-positive boxes。阈值无法同时修复召回与误触，</p>
+<p>后续必须依赖因果 Stage B 和 hard-negative 重训。</p>
+<h2>与前一方案同表对照</h2>
+<table><thead><tr>
+<th>方案</th>
+<th>真实内容位置</th>
+<th>四桶门</th>
+<th>Easy-negative 安静度</th>
+<th>生产资格</th>
+</tr></thead><tbody>
+<tr><td>B2 fixed-right</td><td>约 93%/95%，100% 最右带</td><td>FAIL（结构确定）</td><td>conf=.35 为 15.69% fire</td><td>false</td></tr>
+<tr><td>blank-only v3</td><td>画布移动，内容仍贴右</td><td>Owner 目视 FAIL</td><td>未训练</td><td>false</td></tr>
+<tr><td><strong>Stage A real-crop</strong></td><td><strong>20%–85% 真实 K 线</strong></td><td><strong>PASS</strong></td><td><strong>仍需 hard negatives</strong></td><td><strong>false</strong></td></tr>
+</tbody></table>
+<p>该表只说明 Stage A 修好了位置表征。不同数据分布与权重的 easy-negative fire 不能作严格 A/B</p>
+<p>收益归因，更不能外推连续市场触发次数。</p>
+<h2>模型与回测指标</h2>
+<p>本轮是 YOLO 表征训练，不产生 LightGBM val AUC、置换检验 p、top-decile 毛/净收益、胜率、</p>
+<p>单特征基线或匹配随机入场对照，这些均为 <strong>不适用</strong>。没有读取价格 outcome，也没有把 716 个</p>
+<p>平衡端点当成连续市场或订单回测。</p>
+<h2>复现命令</h2>
+<pre><code>
+# 评估合同测试
+PYTHONPATH=.:../yoyo-trading .venv/bin/pytest -q \
+  tests/test_eval_local_signal_v2_stagea_position.py \
+  tests/test_local_signal_v2_stagea.py \
+  tests/test_local_signal_v2_stageb.py
+
+# 正式推理（只读 pre-holdout Stage A val）
+PYTHONPATH=.:../yoyo-trading .venv/bin/python \
+  scripts/eval_local_signal_v2_stagea_position.py \
+  --device mps --batch 16
+
+# 已有 predictions 时只重算门，不重复推理
+PYTHONPATH=.:../yoyo-trading .venv/bin/python \
+  scripts/eval_local_signal_v2_stagea_position.py \
+  --predictions analysis/output/p1_local_signal_v2_stagea_position_predictions_20260811.json
+</code></pre>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>Stage A val 参与了 early stopping，不是独立模型验收集；best-F1 更是同 val 乐观选择。</li>
+<li>Stage A 图片按 owner 授权包含 decision 后真实 K，只能作为离线表征，不是盘口推理合同。</li>
+<li>easy negatives 是平衡抽样，不代表连续市场先验；26.54% 不能直接换算成 fires/day。</li>
+<li>位置桶由冻结 seed 随机分配，支持位置诊断；每桶事件内容仍不完全相同，14.72pp 差异不能</li>
+</ul>
+<p>  解释为纯因果位置效应。</p>
+<ul>
+<li>本轮未读取 holdout，未改阈值、成本、障碍、新鲜度或 ACTIVE，未 promote、部署或下单。</li>
+</ul>
+<h2>下一步</h2>
+<p>固定 <code>best.pt</code> SHA-256 <code>c0e94f47…bf1a</code>，作为严格因果 Stage B 的唯一初始化权重；保持 Stage B</p>
+<p>数据、seed、训练配方和增强不变，只改变初始化这一变量。Stage B 完成后从该新模型在</p>
+<p>pre-holdout 连续窗口上的实际误报构建 hard-negative 集，再进行 P2 重训与密度回放。</p>
+</body>
+</html>
