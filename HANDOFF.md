@@ -4,6 +4,15 @@
 
 ## ⚡ 当前真相（2026-08-11 — Owner 二次收紧：两条边界线 + 3–5 根确认）
 
+**最新进展（2026-08-11 23:14 CST）：Owner明确回复“允许”，第三训练臂已在RTX 3060启动。**
+run=`owner_lsv2_short_gold_center_hardneg_r2_ownerconfirmed_ft`，远端`zzc@192.168.1.4`，WMI cmd
+PID 42396、python PID 37808/worker 40452。上传端核对train 4,572、val 402，0 corrupt；首轮已
+运行到约28%，约7 batch/s、显存2.7G。日志逐项确认Stage A SHA `c0e94f47…bf1a`、YOLO11s、
+imgsz960、batch8、epochs40、patience10、seed0、AdamW lr0=1e-4、warmup0.5、rect=true，
+flip/mosaic/mixup/HSV等禁用增强全0；三库版本Mac/3060一致。授权只覆盖本次训练启动，**不含
+holdout、promote、部署、TG或交易操作**。启动回执：
+`analysis/output/owner_short_gold_center_hardneg_r2_train_launch_20260811.json`。训练尚未完成。
+
 **最新进展（2026-08-11 23:08 CST）：第三训练臂数据集已完成，等待Owner单独授权训练。**
 新时间块200张裁决为26对、2框偏、172不对；四张train-time页累计114 target、2 rebox、584
 Owner确认难负例。584个全部唯一、0 Owner框重叠、0 holdout、训练因果图0未来。为保持第二臂
