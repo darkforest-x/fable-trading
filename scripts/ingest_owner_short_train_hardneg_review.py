@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate and freeze Owner decisions for the train-time review200 page.
+"""Validate and freeze Owner decisions for a train-time active-learning page.
 
 The browser export is joined one-to-one with the frozen review manifest.  The
 output remains an audit ledger: even Owner-confirmed train-time negatives stay
@@ -113,6 +113,9 @@ def ingest(
     manifest_path: Path = DEFAULT_MANIFEST,
     build_summary_path: Path = DEFAULT_BUILD_SUMMARY,
     output_dir: Path = DEFAULT_REVIEW_DIR,
+    affinity_field: str = "hard_negative_affinity",
+    selection_goal: str = "hard_negative_mining",
+    expected_total: int = 200,
 ) -> dict[str, Any]:
     payload = json.loads(review_path.read_text(encoding="utf-8"))
     manifest = read_jsonl(manifest_path)
@@ -145,18 +148,20 @@ def ingest(
             "symbols": len({str(row["symbol"]) for row in rows}),
             "share": len(rows) / len(joined),
             "peak_confidence": distribution([float(row["event_conf_max"]) for row in rows]),
-            "selection_affinity": distribution([float(row["hard_negative_affinity"]) for row in rows]),
+            "selection_affinity": distribution([float(row[affinity_field]) for row in rows]),
         }
 
     result = {
         "protocol": str(payload["protocol"]),
         "source_sha256": str(payload["source_sha256"]),
+        "selection_goal": selection_goal,
+        "affinity_field": affinity_field,
         "review_input_sha256": sha256_file(review_path),
         "rows": len(joined),
         "counts": counts,
         "rates": {
-            "target_rate_in_negative_biased_review": counts["target"] / len(joined),
-            "hard_negative_rate_in_negative_biased_review": counts["hard_negative"] / len(joined),
+            "target_rate_in_review": counts["target"] / len(joined),
+            "hard_negative_rate_in_review": counts["hard_negative"] / len(joined),
         },
         "by_decision": by_decision,
         "by_block": {
@@ -172,7 +177,8 @@ def ingest(
         "quality_gates": {
             "protocol_matches": payload["protocol"] == build_summary["protocol"],
             "source_hash_matches": payload["source_sha256"] == build_summary["selected_candidates_sha256"],
-            "exactly_200_unique_decisions": len(joined) == 200 and len(decisions) == 200,
+            "exactly_expected_unique_decisions": len(joined) == expected_total
+            and len(decisions) == expected_total,
             "declared_counts_recompute": counts == payload["counts"],
             "no_pending": counts["pending"] == 0,
             "allowed_values_only": set(decisions.values()) <= ALLOWED_DECISIONS,
@@ -202,12 +208,18 @@ def main() -> int:
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--build-summary", type=Path, default=DEFAULT_BUILD_SUMMARY)
     parser.add_argument("--out", type=Path, default=DEFAULT_REVIEW_DIR)
+    parser.add_argument("--affinity-field", default="hard_negative_affinity")
+    parser.add_argument("--selection-goal", default="hard_negative_mining")
+    parser.add_argument("--expected-total", type=int, default=200)
     args = parser.parse_args()
     result = ingest(
         args.review_json,
         manifest_path=args.manifest,
         build_summary_path=args.build_summary,
         output_dir=args.out,
+        affinity_field=args.affinity_field,
+        selection_goal=args.selection_goal,
+        expected_total=args.expected_total,
     )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0

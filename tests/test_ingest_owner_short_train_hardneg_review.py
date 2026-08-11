@@ -2,7 +2,7 @@
 
 import pytest
 
-from scripts.ingest_owner_short_train_hardneg_review import validate_review
+from scripts.ingest_owner_short_train_hardneg_review import distribution, validate_review
 
 
 def fixtures() -> tuple[dict, list[dict], dict]:
@@ -56,3 +56,7 @@ def test_validate_review_rejects_red_build_gate() -> None:
 
     with pytest.raises(ValueError, match="quality gates"):
         validate_review(payload, manifest, summary)
+
+
+def test_distribution_accepts_empty_rebox_bucket() -> None:
+    assert distribution([]) == {"median": None, "p90": None, "mean": None}
