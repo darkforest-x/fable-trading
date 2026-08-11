@@ -83,9 +83,15 @@ Owner原始金标坐标时重新凭感觉画框。新血缘必须是`原始⭐�
   negative 2,286，总负例:正例=3:1，hard占负例2/3；val仍冻结为202正例+200 easy背景，没有拿
   holdout或未来收益挑负例。hard来源为916个Owner-long语义负例和1,370个仅在原train时间块由
   当前模型排序挖出的背景；200张独立审计页已生成。Owner于2026-08-11 16:12 CST明确回复
-  “允许 开始吧”，逐次授权run `owner_lsv2_short_gold_center_hardneg_r1_ft`。数据已上传3060并由
-  WMI成功启动；Stage A初始化、epochs40、patience10、batch8、seed0、AdamW lr0=1e-4、
-  warmup0.5及全禁用增强均与1:1 baseline一致。当前训练中，尚无结果，不得据启动状态宣称修好。
+  “允许 开始吧”，逐次授权run `owner_lsv2_short_gold_center_hardneg_r1_ft`。该run已完整跑满40轮，
+  总耗时3423.21秒，best SHA=`029f80a5…f537`；Stage A初始化、epochs40、patience10、batch8、
+  seed0、AdamW lr0=1e-4、warmup0.5及全禁用增强均与1:1 baseline一致。Mac独立固定val
+  P/R/mAP50/mAP50-95=0.8626/0.7770/0.8980/0.7405，模型更保守但不能仅凭mAP晋升。
+- 新旧模型已在固定post-val、pre-holdout连续12小时canary同场扫描：215币、10,320 endpoints、
+  82,560 W12–19 exposures/模型，最大物理读取时间2026-05-03 12:00 UTC，holdout读取0。原始命中
+  22,037→8,268（-62.48%），去重事件732→331（-54.78%），全市场折算1,464→662 events/day，
+  触发币177→140。方向有效但密度仍失败，当前权重禁止promote；先人工复核331事件，再决定是否
+  建第三臂。报告：`analysis/html/p2_owner_short_gold_center_hardneg_canary_20260811.html`。
 - Owner随后明确要求用刚训练权重回放最近2天并发TG，登记为该配置第1次消耗holdout。一次性OKX
   快照覆盖214/215个训练分布币种，W12–19逐bar扫描328,704窗，71,204条原始命中去重为2,500
   个事件，即60.845 events/1000 bar endpoints、1,250 events/day、5.84 events/币/天；211/214

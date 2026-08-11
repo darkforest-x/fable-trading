@@ -7,7 +7,8 @@
 - W12–19的hard-negative数量逐档严格等于train正例的2倍；完整val仍为202正/200 easy负，未加入hard negative，也未参与选择。
 - 旧1:1 baseline的5376个训练图/标签在新数据集中逐文件SHA一致；重复image+label SHA为0。
 - 未读取holdout、未来收益或val误报；没有选择新置信度阈值；未promote。Owner于2026-08-11
-  16:12 CST在对话中明确回复“允许 开始吧”，第二次3060训练已按冻结配方启动。
+  16:12 CST在对话中明确回复“允许 开始吧”，第二次3060训练已按冻结配方完整跑满40轮；
+  训练与连续密度终局见`analysis/p2_owner_short_gold_center_hardneg_canary_20260811.md`。
 
 ## 数据统计
 
@@ -56,7 +57,7 @@ Owner-long初始1152行的排除：25行不在当前short训练币种宇宙、20
 | 配置 | train正 | train easy负 | train hard负 | train负正比 | val正/负 | 状态 |
 |---|---:|---:|---:|---:|---:|---|
 | 1:1 easy baseline | 1,143 | 1,143 | 0 | 1.0 | 202 / 200 | 已训练；只用于挖hard negatives |
-| 1:3 hard-negative arm | 1,143 | 1,143 | 2,286 | 3.0 | 202 / 200 | Owner已授权；3060训练中 |
+| 1:3 hard-negative arm | 1,143 | 1,143 | 2,286 | 3.0 | 202 / 200 | 已训练；连续密度仍失败 |
 
 ## 数据完整性
 
@@ -123,7 +124,8 @@ python3 scripts/md_to_html.py \
 - machine-readable summary：`datasets/owner_short_gold_center_hardneg_r1/summary.json`
 - 200张逐图审核页：`analysis/html/p2_owner_short_gold_center_hardneg_audit200_20260811.html`
 
-当前run `owner_lsv2_short_gold_center_hardneg_r1_ft`已同步到3060并启动：Stage A best初始化、
-epochs40、patience10、batch8、seed0、显式finetune、AdamW lr0=1e-4、warmup0.5，所有禁用增强均
-保持0。下一步监控训练、取回best并在同一固定val复验；随后先做独立purge-gap/训练时间块连续
-窗口密度对照，不能仅凭val mAP宣布解决。
+run `owner_lsv2_short_gold_center_hardneg_r1_ft`已完成：Stage A best初始化、epochs40、
+patience10、batch8、seed0、显式finetune、AdamW lr0=1e-4、warmup0.5，所有禁用增强均保持0。
+Mac固定val mAP50/mAP50-95=0.8980/0.7405；独立pre-holdout连续canary将事件从1,464/day降至
+662/day（-54.78%），改善明确但密度仍失败。当前权重不得promote；下一步先审核剩余331事件，
+不能自动全写负例。

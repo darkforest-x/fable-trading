@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P2 Owner-short Hard-Negative重训与连续密度Canary（2026-08-11）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P2 Owner-short Hard-Negative重训与连续密度Canary（2026-08-11）</h1>
+<h2>结论先行</h2>
+<ul>
+<li>Owner于2026-08-11 16:12 CST明确授权的run</li>
+</ul>
+<p>  <code>owner_lsv2_short_gold_center_hardneg_r1_ft</code>已在3060完整跑满40轮，耗时3423.21秒；曲线最佳点</p>
+<p>  epoch 38，取回<code>best.pt</code> SHA-256为</p>
+<p>  <code>029f80a52b5beda2e32f6bb5a188a39fd7f74fe0a3fef4dffa79ae620384f537</code>。</p>
+<ul>
+<li>Mac独立固定val复验为P/R/mAP50/mAP50-95 =</li>
+</ul>
+<p>  <strong>0.8626 / 0.7770 / 0.8980 / 0.7405</strong>。相对1:1 baseline，模型更保守：precision略升，</p>
+<p>  recall下降约12.5pp；不能只凭mAP裁决。</p>
+<ul>
+<li>在固定的post-val、pre-holdout连续12小时canary上，两模型各扫描215币、10,320个bar endpoints、</li>
+</ul>
+<p>  82,560个W12–19暴露窗。hard-negative新模型的原始命中由22,037降至8,268（<strong>-62.48%</strong>），</p>
+<p>  去重事件由732降至331（<strong>-54.78%</strong>）。</p>
+<ul>
+<li>但新模型仍为 <strong>32.074 events/1000 bar endpoints</strong>，折算全市场 <strong>662 events/day</strong>，140/215</li>
+</ul>
+<p>  个币在12小时内至少触发一次。相比旧模型1,464 events/day虽明显改善，密度仍然失败。</p>
+<ul>
+<li>裁决：第二训练臂证明hard negatives方向有效，但尚未解决泛滥触发；不得promote、不得调高conf</li>
+</ul>
+<p>  在同一canary上自我美化、不得读取最近两天holdout。下一步先人工复核canary的331个事件，区分</p>
+<p>  真形态与可安全写入第三臂的难负例。</p>
+<h2>冻结训练合同</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>1:1 baseline</th>
+<th>1:3 hard-negative arm</th>
+</tr></thead><tbody>
+<tr><td>train positive</td><td>1,143</td><td>1,143</td></tr>
+<tr><td>train easy negative</td><td>1,143</td><td>1,143</td></tr>
+<tr><td>train hard negative</td><td>0</td><td>2,286</td></tr>
+<tr><td>val positive / easy negative</td><td>202 / 200</td><td>202 / 200（逐文件相同）</td></tr>
+<tr><td>初始化</td><td>Stage A best</td><td>同一Stage A best</td></tr>
+<tr><td>配方</td><td>40ep / patience10 / batch8 / seed0</td><td>完全相同</td></tr>
+<tr><td>增强</td><td>flip/mosaic/mixup/HSV全0</td><td>完全相同</td></tr>
+<tr><td>唯一变量</td><td>—</td><td>增加hard negatives</td></tr>
+</tbody></table>
+<p>hard negative中916个来自Owner-long方向反类，1,370个来自原train时间块的模型排序安全背景；</p>
+<p>hard占训练负例66.67%。选样未使用val、未来收益或holdout。</p>
+<h2>固定val结果</h2>
+<table><thead><tr>
+<th>模型 / 设备</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>mAP50</th>
+<th>mAP50-95</th>
+</tr></thead><tbody>
+<tr><td>1:1 baseline / 3060 best复验</td><td>0.8508</td><td>0.9035</td><td>0.9224</td><td>0.7302</td></tr>
+<tr><td>1:1 baseline / Mac MPS</td><td>0.8467</td><td>0.9024</td><td>0.9206</td><td>0.7294</td></tr>
+<tr><td>1:3 hardneg / epoch38记录</td><td>0.8376</td><td>0.8069</td><td>0.9000</td><td>0.7486</td></tr>
+<tr><td>1:3 hardneg / 3060 best复验</td><td>0.8329</td><td>0.7895</td><td>0.8927</td><td>0.7307</td></tr>
+<tr><td>1:3 hardneg / Mac MPS</td><td>0.8626</td><td>0.7770</td><td>0.8980</td><td>0.7405</td></tr>
+</tbody></table>
+<p>3060与Mac结论一致：mAP50-95没有崩，但recall明显下降。固定val仍只是平衡Owner正例和easy背景，</p>
+<p>不能替代连续市场密度与真形态precision。</p>
+<h2>Pre-holdout连续Canary合同</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>冻结值</th>
+</tr></thead><tbody>
+<tr><td>val最后窗口结束</td><td>2026-05-02 23:45 UTC</td></tr>
+<tr><td>canary endpoints</td><td>2026-05-03 00:15–12:00 UTC</td></tr>
+<tr><td>holdout边界</td><td>2026-05-04 00:00 UTC</td></tr>
+<tr><td>币种</td><td>215 / 215，无stale</td></tr>
+<tr><td>bar endpoints / 模型</td><td>10,320</td></tr>
+<tr><td>W12–19 exposures / 模型</td><td>82,560</td></tr>
+<tr><td>conf / NMS IoU</td><td>0.25 / 0.70（沿用，未调参）</td></tr>
+<tr><td>事件去重</td><td>同币核心中点±5根；保留首次跨门决策</td></tr>
+<tr><td>数据读取</td><td>有界CSV前缀；<code>max_materialized_time=2026-05-03 12:00 UTC</code></td></tr>
+<tr><td>holdout读取</td><td>0</td></tr>
+</tbody></table>
+<p>这块数据晚于val，不参与训练、hard-negative选择或best epoch选择；又严格早于holdout。原始K线通过</p>
+<p>连续序列索引推导<code>nrows</code>，不是整表读取后过滤，因此没有在内存里碰到holdout行。</p>
+<h2>连续密度结果</h2>
+<table><thead><tr>
+<th>指标</th>
+<th>1:1 baseline</th>
+<th>1:3 hardneg</th>
+<th>变化</th>
+</tr></thead><tbody>
+<tr><td>raw detections</td><td>22,037</td><td>8,268</td><td>-62.48%</td></tr>
+<tr><td>raw / 1000 exposures</td><td>266.921</td><td>100.145</td><td>-62.48%</td></tr>
+<tr><td>deduplicated events</td><td>732</td><td>331</td><td>-54.78%</td></tr>
+<tr><td>events / 1000 bar endpoints</td><td>70.930</td><td>32.074</td><td>-54.78%</td></tr>
+<tr><td>全市场折算events/day</td><td>1,464</td><td>662</td><td>-54.78%</td></tr>
+<tr><td>触发币种 / 215</td><td>177</td><td>140</td><td>-20.90%</td></tr>
+<tr><td>单币12h事件 median / p90 / max</td><td>3 / 7 / 9</td><td>2 / 3 / 5</td><td>改善但不静默</td></tr>
+<tr><td>核心4–7根占比</td><td>93.03%</td><td>96.07%</td><td>+3.04pp</td></tr>
+<tr><td>首次延迟3–5根占比</td><td>99.32%</td><td>95.77%</td><td>-3.55pp</td></tr>
+</tbody></table>
+<p>新模型没有靠把框宽或确认位置整体破坏来换取静默：核心4–7根占比反而略升，确认延迟中位/p90</p>
+<p>仍为3/5根。问题是剩余触发覆盖140个币，331个事件仍远超“少而准”的目标。</p>
+<h2>必报指标状态</h2>
+<ul>
+<li>val AUC、置换检验p、top-decile毛/净收益、胜率、单特征基线：N/A；本轮只验证YOLO检测密度，</li>
+</ul>
+<p>  没有LightGBM排序和交易收益裁决。</p>
+<ul>
+<li>匹配随机对照：N/A；canary没有使用未来收益，也没有把检测事件冒充订单。</li>
+<li>event precision / recall：N/A；canary没有独立逐事件Owner金标。低密度是必要门，不等于precision</li>
+</ul>
+<p>  已经合格；当前密度本身已足以判失败。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>12小时canary只是一个独立市场块，不能代表所有行情；但662 events/day已经高到无需holdout即可</li>
+</ul>
+<p>  判定当前版本不具生产资格。</p>
+<ul>
+<li>331个事件中可能包含真实目标形态，不能全部自动写成负例；必须先做只看形态的人工审核。</li>
+<li>不得在这块canary上反复选择新conf再把它称为独立结果；阈值仍是Owner决策。</li>
+<li>未读取holdout、未改ACTIVE、未promote、未部署、未下单。</li>
+</ul>
+<h2>复现命令</h2>
+<pre><code>
+# 数据与训练
+FABLE_3060_HOST=zzc@192.168.1.4 bash scripts/train_w20_midbox_on_3060.sh \
+  --dataset datasets/owner_short_gold_center_hardneg_r1 \
+  --base analysis/output/lsv2_stagea/owner_lsv2_stagea_randomcrop_v1_cold/weights/best.pt \
+  --name owner_lsv2_short_gold_center_hardneg_r1_ft \
+  --epochs 40 --patience 10 --batch 8 --seed 0 --finetune
+
+# 物理前缀截断的独立canary快照
+PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python \
+  scripts/backtest_owner_short_gold_center_recent.py historical \
+  --out-dir analysis/output/owner_short_gold_center_preholdout_canary_20260503_v1 \
+  --end 2026-05-03T12:00:00Z --context-bars 420
+
+# 两个权重分别以完全相同参数运行scan；可用--shard-index 0/1并行
+PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python \
+  scripts/backtest_owner_short_gold_center_recent.py scan \
+  --snapshot-dir analysis/output/owner_short_gold_center_preholdout_canary_20260503_v1/kline_snapshot \
+  --out-dir analysis/output/owner_short_gold_center_preholdout_canary_20260503_v1/example_shard \
+  --weights /path/to/frozen_best.pt --device 0 --batch 32 --hours 12 \
+  --shard-index 0 --shard-count 2 --evaluation-scope preholdout_postval_canary
+
+PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/pytest -q tests
+python3 scripts/md_to_html.py \
+  analysis/p2_owner_short_gold_center_hardneg_canary_20260811.md --out-dir analysis/html
+</code></pre>
+<h2>下一步</h2>
+<p>先把331个新模型事件渲染成独立审核页，按Owner形态语义分为“真目标 / 相邻延续重复 / 镜像或普通</p>
+<p>平台 / 明确难负例”。只允许最后两类中语义确定的样本进入第三臂；保持正例、val、初始化、训练</p>
+<p>配方和conf不变，再验证另一个未使用的pre-holdout时间块。第三臂训练与任何新holdout读取均需Owner</p>
+<p>再次逐次授权。</p>
+</body>
+</html>
