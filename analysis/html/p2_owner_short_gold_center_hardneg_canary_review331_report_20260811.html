@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P2 Owner-short Hard-Negative Canary 331事件审核包（2026-08-11）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P2 Owner-short Hard-Negative Canary 331事件审核包（2026-08-11）</h1>
+<h2>结论先行</h2>
+<ul>
+<li>第二训练臂在独立pre-holdout连续canary产生的 <strong>331个去重事件已全部逐张渲染</strong>，覆盖140个币，</li>
+</ul>
+<p>  不是抽样、不是331笔订单，也没有按未来涨跌筛选。</p>
+<ul>
+<li>每个事件固定分成三份物理文件：模型当时的原始因果输入、仅供人工看的橙框副本、最多48根的</li>
+</ul>
+<p>  未来走势对照。共331×3=993张PNG；未来数据不在训练图、标签或候选训练manifest中。</p>
+<ul>
+<li>审核页提供“真目标 / 延续重复 / 框不准 / 明确负例”四类按钮、筛选和JSON导出。默认331张</li>
+</ul>
+<p>  全部未确认，只有Owner导出的裁决才能改变语义；本轮没有自动预选任何一张。</p>
+<ul>
+<li>本审核包只是为331个剩余触发建立错误分类和校准依据，<strong>不是第三训练臂数据集</strong>。331个事件只来自</li>
+</ul>
+<p>  一个12小时独立时间块，数量和行情覆盖都不足以直接承担下一轮全部hard negatives。</p>
+<ul>
+<li>未读取holdout、未写训练labels、未改ACTIVE、未promote、未训练新权重、未部署或下单。</li>
+</ul>
+<h2>331个事件从哪里来</h2>
+<p>第二训练臂以冻结参数扫描2026-05-03 00:15–12:00 UTC的连续市场窗口，共得到8,268条原始</p>
+<p>YOLO命中。按“同币种 + 预测核心中点相距不超过5根”的冻结规则聚类，并保留每组首次跨过</p>
+<p>conf=0.25门的决策，得到331个独立候选事件。</p>
+<table><thead><tr>
+<th>口径</th>
+<th>数量</th>
+</tr></thead><tbody>
+<tr><td>原始YOLO命中</td><td>8,268</td></tr>
+<tr><td>去重候选事件</td><td>331</td></tr>
+<tr><td>覆盖币种</td><td>140</td></tr>
+<tr><td>首次置信度 median / p90</td><td>0.3627 / 0.6553</td></tr>
+<tr><td>事件峰值置信度 median / p90</td><td>0.6344 / 0.8699</td></tr>
+</tbody></table>
+<p>排序只用于让Owner先看高峰值置信度事件；331个事件全部保留，排序没有改变样本集合，也没有用未来</p>
+<p>收益或未来K线选样。首次置信度是事件第一次跨门时的分数，峰值置信度是同一去重簇内最高分；</p>
+<p>审核页同时展示两者，避免把峰值误当成决策当刻置信度。</p>
+<h2>人工审核合同</h2>
+<table><thead><tr>
+<th>按钮</th>
+<th>含义</th>
+<th>是否可直接写成训练负例</th>
+</tr></thead><tbody>
+<tr><td>真目标</td><td>形态和核心位置符合Owner目标</td><td>否；应保留为正例候选</td></tr>
+<tr><td>延续/重复</td><td>上一启动事件的相邻延续，不是新事件</td><td>否；先用于事件去重规则诊断</td></tr>
+<tr><td>框不准</td><td>形态可能正确，但模型核心框边界有偏差</td><td>否；需要Owner重框或回到原金标几何</td></tr>
+<tr><td>明确负例</td><td>当时可见形态就不是目标</td><td>仅为hard-negative候选；仍需数据去重和时间切分</td></tr>
+</tbody></table>
+<p>页面右侧未来最多48根只帮助人工判断“后续是否真的启动/是否只是震荡”，不能反过来把“后来跌了”</p>
+<p>自动等价为真目标。训练输入只允许使用左侧对应的原始因果文件；审核页中带橙框的左图也是单独副本，</p>
+<p>避免框线像素污染训练输入。</p>
+<h2>数据与隔离审计</h2>
+<table><thead><tr>
+<th>检查项</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>manifest唯一事件</td><td>331 / 331</td></tr>
+<tr><td>原始因果输入PNG</td><td>331</td></tr>
+<tr><td>橙框审核副本PNG</td><td>331</td></tr>
+<tr><td>未来审核PNG</td><td>331</td></tr>
+<tr><td>总PNG</td><td>993</td></tr>
+<tr><td>完整48根未来</td><td>328</td></tr>
+<tr><td>仅47根未来</td><td>3</td></tr>
+<tr><td>最大物理读取时间</td><td>2026-05-03 23:45 UTC</td></tr>
+<tr><td>holdout开始</td><td>2026-05-04 00:00 UTC</td></tr>
+<tr><td>holdout materialized rows</td><td>0</td></tr>
+<tr><td>labels目录</td><td>0</td></tr>
+<tr><td><code>training_eligible=true</code></td><td>0</td></tr>
+<tr><td>Owner预选裁决</td><td>0</td></tr>
+</tbody></table>
+<p>所有事件的因果图严格截止于各自首次决策时刻；只有独立<code>future_review_only/</code>目录含决策后的K线。</p>
+<p>审核HTML引用的是带框副本和未来对照，训练原图另存在<code>causal_input/</code>，没有任何标签目录。</p>
+<h2>浏览器与代码验收</h2>
+<ul>
+<li>实际浏览器加载331张卡片，首尾C001–C331均存在；页面无console error或warning。</li>
+<li>实测点击C001“真目标”后，统计变为<code>target=1 / pending=330</code>；筛选只显示C001；JSON导出包含</li>
+</ul>
+<p>  冻结protocol、源事件SHA、331个完整decision和正确计数。</p>
+<ul>
+<li>验收后已清除浏览器测试选择并刷新，交付页恢复<code>pending=331</code>。</li>
+<li>全量测试：<code>639 passed, 2 skipped</code>。</li>
+</ul>
+<h2>必报指标状态</h2>
+<ul>
+<li>val AUC、置换检验p、top-decile毛/净收益、胜率、单特征基线：N/A；本轮产物是YOLO候选的</li>
+</ul>
+<p>  人工语义审核界面，没有训练LightGBM或形成交易排序。</p>
+<ul>
+<li>匹配随机对照：N/A；没有把331个候选事件当订单，也没有用未来收益作本轮裁决。</li>
+<li>event precision / recall：待Owner完成逐事件审核后才有可信分子；331仍不是全市场召回分母。</li>
+</ul>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>331个事件全部来自一个12小时pre-holdout时间块，适合发现主要误触发类型，但不覆盖不同波动、</li>
+</ul>
+<p>  趋势、币种生命周期和市场阶段。</p>
+<ul>
+<li>不能把331张全部默认标负。若里面存在真目标、延续事件或框偏事件，自动写负会直接污染模型。</li>
+<li>即使Owner把331张全部审完，第三臂还应从多个未使用的pre-holdout时间块补充多样化候选；以错误类型</li>
+</ul>
+<p>  覆盖和新增时间块触发密度趋稳为停止条件，不以机械凑数宣布足够。</p>
+<ul>
+<li>当前第二臂权重仍是密度失败，禁止promote；本审核页不会自动发起训练。</li>
+</ul>
+<h2>复现命令</h2>
+<pre><code>
+# 物理截断的审核未来快照；最大时间仍早于holdout
+PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python \
+  scripts/backtest_owner_short_gold_center_recent.py historical \
+  --out-dir analysis/output/owner_short_gold_center_preholdout_canary_audit_20260503_v1 \
+  --end 2026-05-03T23:45:00Z --context-bars 600
+
+# 用冻结331事件渲染三份物理隔离图片和审核HTML
+PYTHONPATH=. .venv/bin/python scripts/build_owner_short_hardneg_canary_review.py
+
+# 测试与报告转换
+PYTHONPATH=.:/Users/zhangzc/fable-trading .venv/bin/pytest -q tests
+python3 scripts/md_to_html.py \
+  analysis/p2_owner_short_gold_center_hardneg_canary_review331_report_20260811.md \
+  --out-dir analysis/html
+</code></pre>
+<h2>交付物与下一步</h2>
+<ul>
+<li>Owner审核入口：<code>analysis/html/p2_owner_short_gold_center_hardneg_canary_review331_20260811.html</code></li>
+<li>冻结清单：</li>
+</ul>
+<p>  <code>analysis/output/owner_short_gold_center_hardneg_canary_review331_v1/review_manifest.jsonl</code></p>
+<ul>
+<li>机器审计摘要：</li>
+</ul>
+<p>  <code>analysis/output/owner_short_gold_center_hardneg_canary_review331_v1/summary.json</code></p>
+<p>Owner先逐张完成四类裁决并复制页面底部JSON。收到裁决后，先统计真目标precision、延续重复率、框偏率</p>
+<p>和明确负例率，再据此设计跨多个未使用pre-holdout时间块的补挖策略。第三训练臂的正式数据构建和开训</p>
+<p>是下一次单独动作，不能由本审核页自动触发。</p>
+</body>
+</html>

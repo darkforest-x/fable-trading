@@ -92,6 +92,14 @@ Owner原始金标坐标时重新凭感觉画框。新血缘必须是`原始⭐�
   22,037→8,268（-62.48%），去重事件732→331（-54.78%），全市场折算1,464→662 events/day，
   触发币177→140。方向有效但密度仍失败，当前权重禁止promote；先人工复核331事件，再决定是否
   建第三臂。报告：`analysis/html/p2_owner_short_gold_center_hardneg_canary_20260811.html`。
+- 上述331个事件已全部做成逐张Owner审核页，不是抽样或订单：140币，首次conf median/p90=
+  0.3627/0.6553，事件peak conf median/p90=0.6344/0.8699。每个事件物理隔离为原始因果输入、
+  橙框审核副本、最多未来48根对照，共993张PNG；328张有完整48根、3张47根，最大读取时间
+  2026-05-03 23:45 UTC，0 holdout、0 labels、0 training-eligible、0预选。页面四类为真目标/
+  延续重复/框不准/明确负例，选择只存在本机并可导出完整JSON。331只够做错误分类种子，不够直接
+  承担第三臂全部hard negatives；Owner裁决后还要从多个未使用pre-holdout块补挖。审核入口：
+  `analysis/html/p2_owner_short_gold_center_hardneg_canary_review331_20260811.html`；报告：
+  `analysis/html/p2_owner_short_gold_center_hardneg_canary_review331_report_20260811.html`。
 - Owner随后明确要求用刚训练权重回放最近2天并发TG，登记为该配置第1次消耗holdout。一次性OKX
   快照覆盖214/215个训练分布币种，W12–19逐bar扫描328,704窗，71,204条原始命中去重为2,500
   个事件，即60.845 events/1000 bar endpoints、1,250 events/day、5.84 events/币/天；211/214
