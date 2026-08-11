@@ -108,12 +108,18 @@ def block_specs(root: Path = BLOCK_ROOT) -> list[dict[str, Any]]:
 def select_hard_negative_diverse(
     rows: list[dict[str, Any]],
     *,
-    per_block: int = REVIEW_PER_BLOCK,
+    total: int = REVIEW_TOTAL,
+    preferred_per_block: int = REVIEW_PER_BLOCK,
 ) -> list[dict[str, Any]]:
-    """Select equal block quotas while preferring symbol diversity."""
+    """Select balanced quotas without inventing rows for a sparse block."""
     by_block: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
         by_block[str(row["candidate_block"])].append(row)
+    quotas = allocate_block_quotas(
+        rows,
+        total=total,
+        preferred_per_block=preferred_per_block,
+    )
     selected: list[dict[str, Any]] = []
     for block_id, _scan_end in BLOCKS:
         ranked = sorted(
@@ -125,10 +131,11 @@ def select_hard_negative_diverse(
                 str(row["event_id"]),
             ),
         )
+        quota = quotas[block_id]
         chosen: list[dict[str, Any]] = []
         chosen_ids: set[str] = set()
         symbol_counts: Counter[str] = Counter()
-        for cap in (1, 2, 3, per_block):
+        for cap in (1, 2, 3, max(quota, 1)):
             for row in ranked:
                 event_id = str(row["event_id"])
                 symbol = str(row["symbol"])
@@ -137,14 +144,45 @@ def select_hard_negative_diverse(
                 chosen.append(row)
                 chosen_ids.add(event_id)
                 symbol_counts[symbol] += 1
-                if len(chosen) == per_block:
+                if len(chosen) == quota:
                     break
-            if len(chosen) == per_block:
+            if len(chosen) == quota:
                 break
-        if len(chosen) != per_block:
-            raise ValueError(f"{block_id}: need {per_block} candidates, have {len(chosen)}")
+        if len(chosen) != quota:
+            raise ValueError(f"{block_id}: need {quota} candidates, have {len(chosen)}")
         selected.extend(chosen)
     return selected
+
+
+def allocate_block_quotas(
+    rows: list[dict[str, Any]],
+    *,
+    total: int = REVIEW_TOTAL,
+    preferred_per_block: int = REVIEW_PER_BLOCK,
+) -> dict[str, int]:
+    """Keep sparse blocks intact and distribute their shortfall round-robin."""
+    available = Counter(str(row["candidate_block"]) for row in rows)
+    ordered_blocks = [block_id for block_id, _scan_end in BLOCKS]
+    quotas = {
+        block_id: min(preferred_per_block, int(available.get(block_id, 0)))
+        for block_id in ordered_blocks
+    }
+    remaining = total - sum(quotas.values())
+    if remaining < 0:
+        raise ValueError("preferred block quotas exceed requested total")
+    while remaining:
+        progressed = False
+        for block_id in ordered_blocks:
+            if quotas[block_id] >= int(available.get(block_id, 0)):
+                continue
+            quotas[block_id] += 1
+            remaining -= 1
+            progressed = True
+            if not remaining:
+                break
+        if not progressed:
+            raise ValueError(f"need {total} candidates, only {sum(available.values())} available")
+    return quotas
 
 
 def _validate_review(directory: Path, expected_counts: dict[str, int]) -> list[dict[str, Any]]:
@@ -282,6 +320,7 @@ def build(
         positive_raw=positive_raw,
         negative_raw=negative_raw,
     )
+    selected_quotas = allocate_block_quotas(pool)
     selected = select_hard_negative_diverse(pool)
     selected.sort(
         key=lambda row: (
@@ -361,6 +400,7 @@ def build(
         "candidate_skips": dict(skips),
         "selected_review": len(review_rows),
         "selected_by_block": dict(selected_counts),
+        "selected_block_quotas": selected_quotas,
         "selected_symbols": len({str(row["symbol"]) for row in review_rows}),
         "reference_counts": reference_counts,
         "hard_negative_affinity_v3": {
@@ -380,8 +420,7 @@ def build(
         "html_sha256": sha256_file(output_html),
         "quality_gates": {
             "exactly_200_unique_events": len(review_rows) == REVIEW_TOTAL and len(selected_ids) == REVIEW_TOTAL,
-            "exactly_40_per_new_block": dict(selected_counts)
-            == {block_id: REVIEW_PER_BLOCK for block_id, _ in BLOCKS},
+            "balanced_dynamic_block_quotas": dict(selected_counts) == selected_quotas,
             "all_events_new_vs_prior_reviews": not (selected_ids & prior_ids),
             "all_decisions_within_train": all(utc(row["decision_time"]) <= train_end for row in review_rows),
             "all_future_context_within_train": all(
