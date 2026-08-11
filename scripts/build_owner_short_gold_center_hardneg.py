@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import html
 import json
 import shutil
 import sys
@@ -61,6 +62,7 @@ PROTOCOL = "owner_short_gold_center_hardneg_r1_20260811"
 BASE = ROOT / "datasets/owner_short_gold_center_v1"
 CANDIDATE_ROOT = ROOT / "datasets/owner_short_gold_center_hardneg_candidates_r1"
 OUT = ROOT / "datasets/owner_short_gold_center_hardneg_r1"
+AUDIT_HTML = ROOT / "analysis/html/p2_owner_short_gold_center_hardneg_audit200_20260811.html"
 WEIGHTS = (
     ROOT
     / "analysis/output/lsv2_stageb/owner_lsv2_short_gold_center_v1_ft/weights/best.pt"
@@ -633,9 +635,80 @@ def assemble(
     return summary
 
 
+def _audit_cards(rows: list[dict[str, Any]], *, section: str) -> str:
+    cards: list[str] = []
+    for number, row in enumerate(rows, 1):
+        source = Path("../../") / str(row["image_path"])
+        score = row.get("max_confidence")
+        score_text = "Owner人工long" if score is None else f"baseline max conf {float(score):.3f}"
+        band = ""
+        if row.get("core_start") is not None:
+            window = int(row["win_len"])
+            local_start = int(row["core_start"]) - int(row["win_start"])
+            local_end = int(row["core_end"]) - int(row["win_start"])
+            left = max(0.0, local_start / max(1, window - 1) * 98.0 + 1.0)
+            right = min(100.0, local_end / max(1, window - 1) * 98.0 + 1.0)
+            band = f'<i class="core" style="left:{left:.3f}%;width:{max(1.0,right-left):.3f}%"></i>'
+        cards.append(
+            f"""<article><h3>{section} #{number:03d} · {html.escape(str(row['symbol']))} · W{int(row['win_len'])}</h3>
+<p>{html.escape(score_text)} · {html.escape(str(row.get('end_time','')))}</p>
+<a class="chart" href="{source.as_posix()}" target="_blank"><img loading="lazy" src="{source.as_posix()}" alt="hard negative">{band}</a></article>"""
+        )
+    return "".join(cards)
+
+
+def build_audit(dataset: Path, output: Path, *, per_kind: int = 100) -> dict[str, Any]:
+    """Write a real 200-card HTML audit, not three contact-sheet thumbnails."""
+    rows = read_jsonl(dataset / "hard_negative_manifest.jsonl")
+    owner_long = [row for row in rows if row["selected_hard_kind"] == "owner_long"]
+    model_ranked = [
+        row for row in rows if row["selected_hard_kind"] == "model_ranked_background"
+    ]
+    owner_long.sort(key=lambda row: stable_seed(PROTOCOL, "audit", row["sample_id"]))
+    model_ranked.sort(
+        key=lambda row: (-float(row["max_confidence"]), str(row["sample_id"]))
+    )
+    owner_chosen = owner_long[:per_kind]
+    model_chosen = model_ranked[:per_kind]
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        f"""<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Owner-short hard negative 200张审计</title>
+<style>body{{margin:0;background:#edf2f5;color:#172631;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}}header{{background:#14212c;color:#fff;padding:25px 30px}}header p{{margin:6px 0;color:#d5e0e8}}main{{padding:18px;max-width:1600px;margin:auto}}h2{{grid-column:1/-1;margin:18px 0 0}}section{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}}article{{background:white;border-radius:10px;padding:10px;box-shadow:0 2px 8px #0002}}h3{{font-size:14px;margin:0}}article p{{font-size:12px;color:#60707c;margin:5px 0}}.chart{{display:block;position:relative}}img{{display:block;width:100%}}.core{{position:absolute;top:0;bottom:0;background:#ff980033;border-left:3px solid #f57c00;border-right:3px solid #f57c00;box-sizing:border-box;pointer-events:none}}@media(max-width:900px){{section{{grid-template-columns:1fr}}}}</style></head>
+<body><header><h1>Owner-short hard negative · 200张逐图审计</h1><p>不是3张大拼图：下面是200张独立可点开的真实训练图。</p><p>前100张：Owner明确判long的相似平台，橙色竖带只在审计层标示原long核心；后100张：baseline最高分的安全背景。训练图片本身没有橙带、文字或预测框。</p><p>全部来自train截止前；不读未来收益、不读holdout、不读val作选择。</p></header><main>
+<section><h2>Owner-long方向反类（100张）</h2>{_audit_cards(owner_chosen, section='Owner-long')}</section>
+<section><h2>模型最高分安全背景（100张）</h2>{_audit_cards(model_chosen, section='Model-ranked')}</section>
+</main></body></html>""",
+        encoding="utf-8",
+    )
+    try:
+        dataset_name = str(dataset.relative_to(ROOT))
+    except ValueError:
+        dataset_name = str(dataset)
+    try:
+        output_name = str(output.relative_to(ROOT))
+    except ValueError:
+        output_name = str(output)
+    summary = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "protocol": PROTOCOL,
+        "dataset": dataset_name,
+        "owner_long_available": len(owner_long),
+        "owner_long_shown": len(owner_chosen),
+        "model_ranked_available": len(model_ranked),
+        "model_ranked_shown": len(model_chosen),
+        "holdout_read": False,
+        "future_outcome_used": False,
+        "output": output_name,
+    }
+    (output.parent / f"{output.stem}_summary.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    return summary
+
+
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(description=__doc__)
-    root.add_argument("--mode", choices=("prepare", "mine", "assemble"), required=True)
+    root.add_argument("--mode", choices=("prepare", "mine", "assemble", "audit"), required=True)
     root.add_argument("--base", type=Path, default=BASE)
     root.add_argument("--candidate-root", type=Path, default=CANDIDATE_ROOT)
     root.add_argument("--out", type=Path, default=OUT)
@@ -644,6 +717,7 @@ def parser() -> argparse.ArgumentParser:
     root.add_argument("--predictions", type=Path, default=None)
     root.add_argument("--device", default="mps")
     root.add_argument("--batch", type=int, default=32)
+    root.add_argument("--audit-html", type=Path, default=AUDIT_HTML)
     return root
 
 
@@ -660,8 +734,10 @@ def main() -> int:
             device=args.device,
             batch=args.batch,
         )
-    else:
+    elif args.mode == "assemble":
         result = assemble(args.base, args.candidate_root, args.out, predictions)
+    else:
+        result = build_audit(args.out, args.audit_html)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
