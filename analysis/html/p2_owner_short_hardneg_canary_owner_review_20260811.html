@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Owner审核结论：当前模型约20%精确命中</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>Owner审核结论：当前模型约20%精确命中</h1>
+<h2>Executive Summary</h2>
+<ul>
+<li><strong>331个事件已全部完成Owner裁决且数据可信。</strong> 协议、源事件SHA、ID集合和声明计数全部一致， 0条未确认；结果为66个“对”、11个“框偏”、254个“不对”。</li>
+<li><strong>当前12小时canary的精确事件命中率为19.94%。</strong> 若把“形态对但框偏”也计作语义命中， 语义precision为23.26%；其余76.74%是Owner明确否决的形态。</li>
+<li><strong>置信度有排序能力，但阈值不能解决问题。</strong> <code>peak≥0.8</code>时语义precision仅50.63%；提高到0.9 虽达到81.25%，却只保留77个语义正例中的13个（16.88%），不能靠抬门槛冒充模型修复。</li>
+<li><strong>254个误报只能作为错误参考尺，不能直接回流当前训练。</strong> 它们全部位于冻结val之后；直接加入 会让训练时间晚于验证时间。下一步应在原train截止时间内挖出同类负例，再建单变量第三臂。</li>
+</ul>
+<h2>四分之三触发是Owner明确误报</h2>
+<p>本次单位是经“同币种 + 核心中点±5根”去重后的事件，不是YOLO原始框、订单或收益样本。331个事件 来自2026年5月3日00:15–12:00 UTC的完整连续canary，没有抽样丢弃；Owner逐张查看当时因果窗口和 独立未来对照后完成三项裁决。</p>
+<table><thead><tr>
+<th>Owner裁决</th>
+<th>事件</th>
+<th>覆盖币种</th>
+<th>占331事件</th>
+<th>解释</th>
+</tr></thead><tbody>
+<tr><td>对</td><td>66</td><td>49</td><td>19.94%</td><td>形态与预测框都正确</td></tr>
+<tr><td>框偏</td><td>11</td><td>11</td><td>3.32%</td><td>形态正确，但核心框位置不准</td></tr>
+<tr><td>不对</td><td>254</td><td>125</td><td>76.74%</td><td>不是Owner目标形态</td></tr>
+<tr><td>合计</td><td>331</td><td>140</td><td>100.00%</td><td>0条未确认</td></tr>
+</tbody></table>
+<p>将“对 + 框偏”合并后，模型找到目标形态的语义precision为77/331 = <strong>23.26%</strong>。在这77个语义 命中里，66个框正确，几何正确率为 <strong>85.71%</strong>；当前主要矛盾仍是把普通形态识别为目标，而不是 框偏本身。</p>
+<h2>置信度能排序，但无法形成可用门槛</h2>
+<p>真目标的事件峰值置信度中位数为0.830，明确负例为0.563，说明分数有排序信息。但高分区仍包含 大量误报；门槛越高，precision改善的代价是绝大多数真形态一起消失。</p>
+<table><thead><tr>
+<th>peak conf门</th>
+<th>保留事件</th>
+<th>精确precision</th>
+<th>语义precision</th>
+<th>保留语义正例 / 77</th>
+</tr></thead><tbody>
+<tr><td>≥0.50</td><td>215</td><td>26.05%</td><td>30.70%</td><td>66 / 77（85.71%）</td></tr>
+<tr><td>≥0.60</td><td>181</td><td>29.28%</td><td>33.70%</td><td>61 / 77（79.22%）</td></tr>
+<tr><td>≥0.70</td><td>126</td><td>36.51%</td><td>42.86%</td><td>54 / 77（70.13%）</td></tr>
+<tr><td>≥0.80</td><td>79</td><td>45.57%</td><td>50.63%</td><td>40 / 77（51.95%）</td></tr>
+<tr><td>≥0.90</td><td>16</td><td>68.75%</td><td>81.25%</td><td>13 / 77（16.88%）</td></tr>
+</tbody></table>
+<p>这里的“保留语义正例”只表示331个已审核事件内的保留率，不是全市场recall；项目仍没有独立完整 真形态分母。结论只用于排除“调高conf即可解决”的路线，<strong>不授权修改冻结阈值</strong>。</p>
+<p>按peak confidence从高到低看，前50个事件语义precision为62%，但第101–200名已经降至15%， 第201–331名仅10.69%。这说明置信度适合决定人工审核顺序和挖负例优先级，不足以直接做生产裁决。</p>
+<table><thead><tr>
+<th>peak排名</th>
+<th>事件</th>
+<th>对</th>
+<th>框偏</th>
+<th>不对</th>
+<th>语义precision</th>
+</tr></thead><tbody>
+<tr><td>1–50</td><td>50</td><td>29</td><td>2</td><td>19</td><td>62.00%</td></tr>
+<tr><td>51–100</td><td>50</td><td>12</td><td>5</td><td>33</td><td>34.00%</td></tr>
+<tr><td>101–200</td><td>100</td><td>12</td><td>3</td><td>85</td><td>15.00%</td></tr>
+<tr><td>201–331</td><td>131</td><td>13</td><td>1</td><td>117</td><td>10.69%</td></tr>
+</tbody></table>
+<h2>254个误报是参考尺，不是当前训练样本</h2>
+<table><thead><tr>
+<th>时间边界</th>
+<th>UTC时间</th>
+</tr></thead><tbody>
+<tr><td>冻结train最后窗口</td><td>2026-03-13 18:30</td></tr>
+<tr><td>冻结val最后窗口</td><td>2026-05-02 23:45</td></tr>
+<tr><td>Owner审核事件范围</td><td>2026-05-03 00:15–12:00</td></tr>
+</tbody></table>
+<p>331个审核事件被预注册为<code>preholdout_postval_canary</code>，全部严格晚于冻结val。若把254个负例直接加入 训练，同时继续报告原val结果，就会形成“训练数据晚于验证数据”的时间倒置；即使图片本身严格因果， 评估仍然失真。因此254行保持<code>training_eligible=false</code>，66个目标和11个框偏也不会被误写成负例。</p>
+<h2>推荐下一步</h2>
+<ol>
+<li>冻结本次331条Owner回执，作为错误语义参考和后续独立密度对照，不再修改标签。</li>
+<li>只在冻结train截止时间（不晚于2026-03-13 18:30 UTC）内连续扫描，寻找与254个误报相似的 高分假形态；不得读取未来收益、val或holdout选择样本。</li>
+<li>对train-time候选按币种、时间、窗口长度和视觉相似簇去重，再做一轮小规模Owner确认；禁止把 254张post-val图片直接复制进训练集。</li>
+<li>第三训练臂保持1,143正例、1,143 easy negative、2,286 hard negative、冻结val和训练配方不变， 只用已确认的train-time难负例替换相同W桶的旧model-ranked背景，维持单变量纪律。</li>
+<li>新权重先在另一个未使用的post-train、pre-holdout连续时间块验证密度和Owner precision；通过后 才讨论新的holdout授权，仍不得自动promote。</li>
+</ol>
+<h2>Further Questions</h2>
+<ul>
+<li>train时间块内能否找到足量、跨币种且不碰Owner框±12根的同类误报？数量不足时应扩时间覆盖， 不能降低语义标准凑数。</li>
+<li>11个“框偏”是否需要Owner逐张重框？它们不影响下一轮负例臂，可延后到正例几何专项处理。</li>
+<li>后续连续验证应优先覆盖哪几种行情状态，才能证明误报下降不是只适配5月3日单一市场环境？</li>
+</ul>
+<h2>Caveats and Assumptions</h2>
+<ul>
+<li>19.94% / 23.26%只代表一个12小时、140币的post-val canary，不等于长期全市场precision。</li>
+<li>Owner审核看到了最多48根未来K线；未来只用于人工确认形态结果，没有进入因果图片、模型特征或标签 几何，但裁决本身属于事后形态语义。</li>
+<li>事件以核心中点±5根去重，仍可能存在跨更长距离的同趋势延续；延续率需另做关系层分析。</li>
+<li>没有完整真形态事件集，因此本轮不能报告市场recall、F1或FP/1000真金标口径。</li>
+<li>未读取holdout、未改阈值、未构建新训练集、未启动训练、未改ACTIVE、未promote或下单。</li>
+</ul>
+<h2>数据质量与必报指标</h2>
+<ul>
+<li>协议：<code>owner_short_hardneg_canary_review331_v3_20260811</code>，匹配。</li>
+<li>源事件SHA：<code>e81ec8088a77df1203da5cee8f18461ab1aae0426c087985ac23da78a540898e</code>，匹配。</li>
+<li>Owner回执SHA：<code>fa7f39c537fbeeee2597cce06d32f6b7f6c0fdc7edffaadf993b040b89171a9d</code>。</li>
+<li>331个review_id和event_id均唯一，决策ID一对一覆盖；声明计数重算一致；标签值全部合法。</li>
+<li>全量测试：<strong>646 passed，2 skipped</strong>；14条均为既有matplotlib/pyparsing弃用警告。</li>
+<li>val AUC、置换检验p、top-decile毛/净收益、胜率、单特征基线、匹配随机对照：N/A；本轮是YOLO 事件语义审核，没有LightGBM排序、收益实验或订单。</li>
+</ul>
+<h2>复现命令与交付物</h2>
+<pre><code>
+PYTHONPATH=. .venv/bin/python scripts/ingest_owner_short_canary_review.py \
+  --review-json \
+  analysis/output/owner_short_gold_center_hardneg_canary_review331_v3/owner_review_decisions.json
+
+PYTHONPATH=.:/Users/zhangzc/fable-trading .venv/bin/pytest -q tests
+python3 scripts/md_to_html.py \
+  analysis/p2_owner_short_hardneg_canary_owner_review_20260811.md \
+  --out-dir analysis/html
+</code></pre>
+<ul>
+<li>Owner原始决策： <code>analysis/output/owner_short_gold_center_hardneg_canary_review331_v3/owner_review_decisions.json</code></li>
+<li>一对一带标签manifest： <code>analysis/output/owner_short_gold_center_hardneg_canary_review331_v3/owner_review_labeled_manifest.jsonl</code></li>
+<li>机器统计与质量门： <code>analysis/output/owner_short_gold_center_hardneg_canary_review331_v3/owner_review_summary.json</code></li>
+</ul>
+</body>
+</html>

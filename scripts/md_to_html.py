@@ -8,8 +8,10 @@ of the document, so no viewer has to guess -- and tables render as tables instea
 of pipe characters.
 
 The converter is deliberately small and covers exactly what these reports use:
-ATX headings, pipe tables, fenced code, bullet lists, blockquotes, horizontal
-rules, and inline bold/code/links. No new dependency (CLAUDE.md: no heavy deps),
+ATX headings, pipe tables, fenced code, ordered/unordered lists, blockquotes,
+horizontal rules, and inline bold/code/links. Wrapped paragraph and list-item
+lines are joined before rendering so source line wrapping does not create fake
+HTML paragraphs. No new dependency (CLAUDE.md: no heavy deps),
 and nothing here needs to be a general markdown implementation -- it needs to be
 correct on the documents in analysis/.
 
@@ -27,6 +29,7 @@ from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[1]
 BULLET = re.compile(r"^\s*[-*+]\s+")
+ORDERED = re.compile(r"^\s*\d+\.\s+")
 
 CSS = """
 :root { color-scheme: light dark; }
@@ -82,13 +85,29 @@ def convert(md: str) -> str:
     out: list[str] = []
     i, n = 0, len(lines)
     in_code = False
-    list_open = False
+    list_tag: str | None = None
 
     def close_list() -> None:
-        nonlocal list_open
-        if list_open:
-            out.append("</ul>")
-            list_open = False
+        nonlocal list_tag
+        if list_tag:
+            out.append(f"</{list_tag}>")
+            list_tag = None
+
+    def block_start(index: int) -> bool:
+        """Return whether a line starts a new Markdown block."""
+        candidate = lines[index]
+        stripped = candidate.strip()
+        if not stripped:
+            return True
+        if candidate.startswith("```") or candidate.startswith(">"):
+            return True
+        if re.match(r"^#{1,6}\s+", candidate):
+            return True
+        if BULLET.match(candidate) or ORDERED.match(candidate):
+            return True
+        if re.match(r"^\s*(---+|___+|\*\*\*+)\s*$", candidate):
+            return True
+        return stripped.startswith("|")
 
     while i < n:
         line = lines[i]
@@ -133,13 +152,22 @@ def convert(md: str) -> str:
             i += 1
             continue
 
-        if BULLET.match(line):
-            if not list_open:
-                out.append("<ul>")
-                list_open = True
-            item = inline(BULLET.sub("", line))
-            out.append(f"<li>{item}</li>")
+        list_match = BULLET.match(line) or ORDERED.match(line)
+        if list_match:
+            wanted_tag = "ul" if BULLET.match(line) else "ol"
+            if list_tag != wanted_tag:
+                close_list()
+                out.append(f"<{wanted_tag}>")
+                list_tag = wanted_tag
+            pattern = BULLET if wanted_tag == "ul" else ORDERED
+            item_lines = [pattern.sub("", line).strip()]
             i += 1
+            while (i < n and lines[i].strip()
+                   and not block_start(i)
+                   and lines[i][:1].isspace()):
+                item_lines.append(lines[i].strip())
+                i += 1
+            out.append(f"<li>{inline(' '.join(item_lines))}</li>")
             continue
 
         if line.startswith(">"):
@@ -163,8 +191,12 @@ def convert(md: str) -> str:
             continue
 
         close_list()
-        out.append(f"<p>{inline(line)}</p>")
+        paragraph = [line.strip()]
         i += 1
+        while i < n and not block_start(i):
+            paragraph.append(lines[i].strip())
+            i += 1
+        out.append(f"<p>{inline(' '.join(paragraph))}</p>")
 
     if in_code:
         out.append("</code></pre>")
@@ -194,6 +226,7 @@ def main() -> int:
         doc = (f'<!doctype html>\n<html lang="zh-CN">\n<head>\n'
                f'<meta charset="utf-8">\n'
                f'<meta name="viewport" content="width=device-width,initial-scale=1">\n'
+               f'<link rel="icon" href="data:,">\n'
                f'<title>{html.escape(title)}</title>\n<style>{CSS}</style>\n'
                f'</head>\n<body>\n{convert(md)}\n</body>\n</html>\n')
         dst = out_dir / (p.stem + ".html")
