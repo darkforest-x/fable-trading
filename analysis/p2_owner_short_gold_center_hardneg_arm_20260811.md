@@ -6,7 +6,8 @@
 - 2286个hard negative不是3倍随机空背景：**916**个来自Owner明确判为`long`、且不碰任何short保护区的相似平台；**1370**个来自原train时间块6858个安全背景的baseline模型排序。
 - W12–19的hard-negative数量逐档严格等于train正例的2倍；完整val仍为202正/200 easy负，未加入hard negative，也未参与选择。
 - 旧1:1 baseline的5376个训练图/标签在新数据集中逐文件SHA一致；重复image+label SHA为0。
-- 未读取holdout、未来收益或val误报；没有选择新置信度阈值；未开始第二次3060训练、未promote。
+- 未读取holdout、未来收益或val误报；没有选择新置信度阈值；未promote。Owner于2026-08-11
+  16:12 CST在对话中明确回复“允许 开始吧”，第二次3060训练已按冻结配方启动。
 
 ## 数据统计
 
@@ -55,7 +56,7 @@ Owner-long初始1152行的排除：25行不在当前short训练币种宇宙、20
 | 配置 | train正 | train easy负 | train hard负 | train负正比 | val正/负 | 状态 |
 |---|---:|---:|---:|---:|---:|---|
 | 1:1 easy baseline | 1,143 | 1,143 | 0 | 1.0 | 202 / 200 | 已训练；只用于挖hard negatives |
-| 1:3 hard-negative arm | 1,143 | 1,143 | 2,286 | 3.0 | 202 / 200 | 数据完成；尚未获本轮3060训练授权 |
+| 1:3 hard-negative arm | 1,143 | 1,143 | 2,286 | 3.0 | 202 / 200 | Owner已授权；3060训练中 |
 
 ## 数据完整性
 
@@ -78,7 +79,8 @@ Owner-long初始1152行的排除：25行不在当前short训练币种宇宙、20
 - Owner-long是可靠的方向反类，但不是“所有相似结构都失败”的证明；其作用是教short-only模型拒绝镜像方向。
 - 模型排序背景虽避开全部已知Owner框，历史标注仍不可能穷举市场中的每个真实形态；训练前应抽查最高分montage，防止把漏标真阳性大批写成负例。
 - 本轮没有改增强、初始化、epoch、batch、学习率、val或阈值。第二臂训练必须沿用Stage A best初始化与baseline同一训练脚本，才满足单变量纪律。
-- 第二次3060训练是新的Owner逐次授权门；本报告不把数据完成表述成模型已修好。
+- 本次第二轮3060训练已获得Owner逐次授权，仅覆盖run
+  `owner_lsv2_short_gold_center_hardneg_r1_ft`；本报告不把启动训练表述成模型已修好。
 
 ## 200张逐图人工审核页
 
@@ -121,4 +123,7 @@ python3 scripts/md_to_html.py \
 - machine-readable summary：`datasets/owner_short_gold_center_hardneg_r1/summary.json`
 - 200张逐图审核页：`analysis/html/p2_owner_short_gold_center_hardneg_audit200_20260811.html`
 
-下一步由Owner审核200张hard negatives，并完成独立purge-gap连续窗口审计协议；Owner明确授权后才把第二臂同步到3060训练。
+当前run `owner_lsv2_short_gold_center_hardneg_r1_ft`已同步到3060并启动：Stage A best初始化、
+epochs40、patience10、batch8、seed0、显式finetune、AdamW lr0=1e-4、warmup0.5，所有禁用增强均
+保持0。下一步监控训练、取回best并在同一固定val复验；随后先做独立purge-gap/训练时间块连续
+窗口密度对照，不能仅凭val mAP宣布解决。

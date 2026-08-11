@@ -82,8 +82,10 @@ Owner原始金标坐标时重新凭感觉画框。新血缘必须是`原始⭐�
 - 第二训练臂的数据已按交接规范完成并审计：train正例1,143、easy negative 1,143、hard
   negative 2,286，总负例:正例=3:1，hard占负例2/3；val仍冻结为202正例+200 easy背景，没有拿
   holdout或未来收益挑负例。hard来源为916个Owner-long语义负例和1,370个仅在原train时间块由
-  当前模型排序挖出的背景；200张独立审计页已生成。该数据臂只是“可训练”，本轮尚未获得新的
-  3060逐次训练授权，不得自行开训。
+  当前模型排序挖出的背景；200张独立审计页已生成。Owner于2026-08-11 16:12 CST明确回复
+  “允许 开始吧”，逐次授权run `owner_lsv2_short_gold_center_hardneg_r1_ft`。数据已上传3060并由
+  WMI成功启动；Stage A初始化、epochs40、patience10、batch8、seed0、AdamW lr0=1e-4、
+  warmup0.5及全禁用增强均与1:1 baseline一致。当前训练中，尚无结果，不得据启动状态宣称修好。
 - Owner随后明确要求用刚训练权重回放最近2天并发TG，登记为该配置第1次消耗holdout。一次性OKX
   快照覆盖214/215个训练分布币种，W12–19逐bar扫描328,704窗，71,204条原始命中去重为2,500
   个事件，即60.845 events/1000 bar endpoints、1,250 events/day、5.84 events/币/天；211/214
