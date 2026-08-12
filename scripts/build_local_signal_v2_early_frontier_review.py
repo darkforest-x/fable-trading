@@ -2,9 +2,10 @@
 """Build a blind 300-item review for the early SHORT semantic frontier.
 
 The retrieval reference is the 11 YES versus 89 NO Owner verdicts from the
-completed causal Canary review.  Candidate events come from eight disjoint
-post-train, pre-holdout blocks scanned with the frozen R1 detector.  Candidate
-ranking uses only OHLC and SMA/EMA 20/60/120 values through each decision bar;
+completed causal Canary review.  Candidate events are the previously
+unreviewed remainder of ten frozen pre-holdout R1 scan blocks.  All 700 events
+shown in earlier Owner pages are excluded before ranking. Candidate ranking
+uses only OHLC and SMA/EMA 20/60/120 values through each decision bar;
 the following 48 bars are loaded only after selection and rendered into a
 physically separate Owner-review image.
 
@@ -83,41 +84,44 @@ BOUNDARY_FEATURES = (
     / "analysis/output/local_signal_v2_semantic_boundary_diagnosis_20260812"
     / "boundary_features.jsonl"
 )
-BLOCK_ROOT = ROOT / "analysis/output/local_signal_v2_early_frontier_blocks_v1"
 DEFAULT_OUT = ROOT / "analysis/output/local_signal_v2_early_frontier_review300_v1"
 BLOCKS = (
-    ("D01_20260317", "2026-03-17T12:00:00Z"),
-    ("D02_20260323", "2026-03-23T12:00:00Z"),
-    ("D03_20260329", "2026-03-29T12:00:00Z"),
-    ("D04_20260404", "2026-04-04T12:00:00Z"),
-    ("D05_20260410", "2026-04-10T12:00:00Z"),
-    ("D06_20260416", "2026-04-16T12:00:00Z"),
-    ("D07_20260422", "2026-04-22T12:00:00Z"),
-    ("D08_20260428", "2026-04-28T12:00:00Z"),
+    ("B01_20250715", "2025-07-15T12:00:00Z"),
+    ("B02_20250915", "2025-09-15T12:00:00Z"),
+    ("B03_20251115", "2025-11-15T12:00:00Z"),
+    ("B04_20260115", "2026-01-15T12:00:00Z"),
+    ("B05_20260301", "2026-03-01T12:00:00Z"),
+    ("C01_20250615", "2025-06-15T12:00:00Z"),
+    ("C02_20250815", "2025-08-15T12:00:00Z"),
+    ("C03_20251015", "2025-10-15T12:00:00Z"),
+    ("C04_20251215", "2025-12-15T12:00:00Z"),
+    ("C05_20260215", "2026-02-15T12:00:00Z"),
 )
-PREVIOUS_BLOCK_IDS = frozenset(
-    {
-        "B01_20250715",
-        "B02_20250915",
-        "B03_20251115",
-        "B04_20260115",
-        "B05_20260301",
-        "C01_20250615",
-        "C02_20250815",
-        "C03_20251015",
-        "C04_20251215",
-        "C05_20260215",
-    }
+BLOCK_ROOT_V1 = ROOT / "analysis/output/owner_short_train_hardneg_blocks_v1"
+BLOCK_ROOT_V2 = ROOT / "analysis/output/owner_short_train_hardneg_blocks_v2"
+SOURCE_POOLS = (
+    ROOT / "analysis/output/owner_short_train_hardneg_review200_v1/candidate_pool.jsonl",
+    ROOT / "analysis/output/owner_short_train_hardneg_newblocks200_v3/candidate_pool.jsonl",
+)
+PRIOR_REVIEW_MANIFESTS = (
+    ROOT / "analysis/output/owner_short_train_hardneg_review200_v1/review_manifest.jsonl",
+    ROOT / "analysis/output/owner_short_train_positive_retrieval100_v1/review_manifest.jsonl",
+    ROOT / "analysis/output/owner_short_train_hardneg_expansion200_v2/review_manifest.jsonl",
+    ROOT / "analysis/output/owner_short_train_hardneg_newblocks200_v3/review_manifest.jsonl",
 )
 
 
-def block_specs(root: Path = BLOCK_ROOT) -> list[dict[str, Any]]:
-    """Return the eight frozen post-train, pre-holdout block contracts."""
+def block_specs(root: Path | None = None) -> list[dict[str, Any]]:
+    """Return the ten frozen pre-holdout scan block contracts."""
     specs: list[dict[str, Any]] = []
     for block_id, scan_end_value in BLOCKS:
         scan_end = utc(scan_end_value)
         audit_end = scan_end + pd.Timedelta(minutes=15 * FUTURE_REVIEW_BARS)
-        base = root / block_id
+        base = (
+            root / block_id
+            if root is not None
+            else (BLOCK_ROOT_V1 if block_id.startswith("B") else BLOCK_ROOT_V2) / block_id
+        )
         specs.append(
             {
                 "block_id": block_id,
@@ -187,6 +191,8 @@ def _take_diverse(
     excluded: set[str],
 ) -> list[dict[str, Any]]:
     """Take deterministic rows while limiting one symbol from dominating a block."""
+    if quota == 0:
+        return []
     chosen: list[dict[str, Any]] = []
     chosen_ids: set[str] = set()
     symbol_counts: Counter[str] = Counter()
@@ -311,11 +317,11 @@ def _validate_block(spec: dict[str, Any]) -> tuple[list[dict[str, Any]], dict[st
     scan = json.loads(scan_summary_path.read_text(encoding="utf-8"))
     scan_snapshot = json.loads(scan_snapshot_summary_path.read_text(encoding="utf-8"))
     audit_snapshot = json.loads(audit_snapshot_summary_path.read_text(encoding="utf-8"))
-    if scan.get("evaluation_scope") != "preholdout_postval_canary":
+    if scan.get("evaluation_scope") != "train_hardneg_mining":
         raise ValueError(f"{spec['block_id']}: scan scope drift")
-    if scan_snapshot.get("evaluation_scope") != "preholdout_postval_canary":
+    if scan_snapshot.get("evaluation_scope") != "train_hardneg_mining":
         raise ValueError(f"{spec['block_id']}: scan snapshot scope drift")
-    if audit_snapshot.get("evaluation_scope") != "preholdout_postval_canary":
+    if audit_snapshot.get("evaluation_scope") != "train_hardneg_mining":
         raise ValueError(f"{spec['block_id']}: audit snapshot scope drift")
     if str(scan.get("weights_sha256")) != EXPECTED_R1_SHA256:
         raise ValueError(f"{spec['block_id']}: R1 weight drift")
@@ -351,6 +357,7 @@ def _candidate_pool(
     specs: list[dict[str, Any]],
     yes_reference: np.ndarray,
     no_reference: np.ndarray,
+    reviewed_ids: set[str],
 ) -> tuple[list[dict[str, Any]], dict[str, Any], Counter[str]]:
     joint = np.vstack([yes_reference, no_reference])
     mean = joint.mean(axis=0)
@@ -363,13 +370,22 @@ def _candidate_pool(
     block_audit: dict[str, Any] = {}
     skips: Counter[str] = Counter()
     seen_events: set[str] = set()
+    source_rows: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for path in SOURCE_POOLS:
+        for row in read_jsonl(path):
+            source_rows[str(row["candidate_block"])].append(row)
     for spec in specs:
-        events, audit = _validate_block(spec)
+        _events, audit = _validate_block(spec)
         block_id = str(spec["block_id"])
+        events = source_rows.get(block_id, [])
+        audit["source_candidate_rows"] = len(events)
         block_audit[block_id] = audit
         frames: dict[str, pd.DataFrame] = {}
         for event in events:
             event_id = str(event["event_id"])
+            if event_id in reviewed_ids:
+                skips["previously_reviewed"] += 1
+                continue
             if event_id in seen_events:
                 skips["duplicate_event_id"] += 1
                 continue
@@ -394,7 +410,7 @@ def _candidate_pool(
                     **event,
                     "candidate_block": block_id,
                     "source_model_internal": "R1",
-                    "source_dataset_internal": "local_signal_v2_early_frontier_blocks_v1",
+                    "source_dataset_internal": "owner_short_train_hardneg_unreviewed_remainder",
                     "model_confidence_internal": float(event["event_conf_max"]),
                     "future_review_bars_internal": FUTURE_REVIEW_BARS,
                     "selection_future_used": False,
@@ -456,7 +472,7 @@ def _write_review_artifacts(
             {
                 "review_id": review_id,
                 "source_type": "early_frontier_candidate",
-                "source_dataset": "local_signal_v2_early_frontier_blocks_v1",
+                "source_dataset": "owner_short_train_hardneg_unreviewed_remainder",
                 "source_manifest_reference": portable_artifact_path(
                     Path(spec_by_id[block_id]["merged_scan"]) / "events.jsonl"
                 ),
@@ -517,7 +533,7 @@ def _causality_audit(rows: list[dict[str, Any]], output: Path) -> dict[str, Any]
 
 def build(
     *,
-    block_root: Path = BLOCK_ROOT,
+    block_root: Path | None = None,
     output: Path = DEFAULT_OUT,
     frozen_main_commit: str,
 ) -> dict[str, Any]:
@@ -533,8 +549,17 @@ def build(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
     ).strip()
     yes_reference, no_reference, reference_counts = _reference_vectors()
+    reviewed_ids = {
+        str(row["event_id"])
+        for path in PRIOR_REVIEW_MANIFESTS
+        for row in read_jsonl(path)
+    }
+    if len(reviewed_ids) != 700:
+        raise ValueError(f"prior reviewed event count drift: {len(reviewed_ids)}")
     specs = block_specs(block_root)
-    pool, block_audit, skips = _candidate_pool(specs, yes_reference, no_reference)
+    pool, block_audit, skips = _candidate_pool(
+        specs, yes_reference, no_reference, reviewed_ids
+    )
     selected, block_quotas, stratum_quotas = select_review_rows(pool)
 
     output.mkdir(parents=True, exist_ok=False)
@@ -575,6 +600,7 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
         "seed": SEED,
         "reference_counts": reference_counts,
         "reference_role": "discovery retrieval only; not an independent validation target",
+        "prior_reviewed_unique_events_excluded": len(reviewed_ids),
         "candidate_population": len(pool),
         "candidate_skips": dict(skips),
         "selected": len(rows),
@@ -583,9 +609,10 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
         "retrieval_stratum_quotas": stratum_quotas,
         "selected_by_retrieval_stratum_internal": dict(sorted(retrieval_counts.items())),
         "selected_symbols": len({str(row["symbol"]) for row in rows}),
-        "new_block_ids": [block_id for block_id, _end in BLOCKS],
-        "previous_block_ids": sorted(PREVIOUS_BLOCK_IDS),
-        "block_id_overlap": sorted({block_id for block_id, _end in BLOCKS} & PREVIOUS_BLOCK_IDS),
+        "source_block_ids": [block_id for block_id, _end in BLOCKS],
+        "selected_overlap_with_prior_reviews": len(
+            {str(row["event_id"]) for row in rows} & reviewed_ids
+        ),
         "selection_future_used": False,
         "future_loaded_after_selection_only": True,
         "owner_ui_blinded_fields": [
@@ -610,6 +637,10 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
             portable_artifact_path(BOUNDARY_FEATURES): sha256_file(BOUNDARY_FEATURES),
             portable_artifact_path(DEFAULT_R1_EVENTS): sha256_file(DEFAULT_R1_EVENTS),
             portable_artifact_path(DEFAULT_R2_EVENTS): sha256_file(DEFAULT_R2_EVENTS),
+            **{
+                portable_artifact_path(path): sha256_file(path)
+                for path in SOURCE_POOLS + PRIOR_REVIEW_MANIFESTS
+            },
             **{
                 f"{block_id}:events": audit["events_sha256"]
                 for block_id, audit in block_audit.items()
@@ -680,7 +711,9 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
             "unique_300_review_ids": len({row["review_id"] for row in rows}) == REVIEW_TOTAL,
             "retrieval_150_plus_150": retrieval_counts
             == Counter({"yes_like": YES_LIKE_TOTAL, "similar_no_boundary": SIMILAR_NO_TOTAL}),
-            "all_blocks_new": not ({block_id for block_id, _end in BLOCKS} & PREVIOUS_BLOCK_IDS),
+            "all_events_unreviewed": not (
+                {str(row["event_id"]) for row in rows} & reviewed_ids
+            ),
             "all_blocks_preholdout": all(utc(spec["audit_end"]) < HOLDOUT_START for spec in specs),
             "independent_causal_images": len({row["image_path"] for row in rows}) == REVIEW_TOTAL,
             "unique_causal_image_hashes": len({row["image_sha256"] for row in rows}) == REVIEW_TOTAL,
@@ -701,7 +734,12 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--block-root", type=Path, default=BLOCK_ROOT)
+    parser.add_argument(
+        "--block-root",
+        type=Path,
+        default=None,
+        help="test/rebuild override; default uses the frozen B/C block roots",
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--frozen-main-commit", required=True)
     args = parser.parse_args()

@@ -10,9 +10,9 @@ from scripts.build_local_signal_v2_early_frontier_review import (
 )
 
 
-def test_block_contract_is_new_preholdout_and_has_48_future_bars(tmp_path) -> None:
+def test_block_contract_is_frozen_preholdout_and_has_48_future_bars(tmp_path) -> None:
     specs = block_specs(tmp_path)
-    assert len(specs) == 8
+    assert len(specs) == 10
     assert [spec["block_id"] for spec in specs] == [block_id for block_id, _end in BLOCKS]
     assert all(spec["audit_end"] < HOLDOUT_START for spec in specs)
     assert all((spec["audit_end"] - spec["scan_end"]).total_seconds() == 48 * 15 * 60 for spec in specs)
@@ -50,3 +50,22 @@ def test_selector_returns_unique_balanced_blind_discovery_rows() -> None:
     )
     assert Counter(row["candidate_block"] for row in selected) == Counter(block_quotas)
     assert all("owner_verdict" not in row for row in selected)
+
+
+def test_selector_redistributes_zero_block_quotas() -> None:
+    rows = []
+    for block_number, (block_id, _end) in enumerate(BLOCKS[1:8]):
+        for number in range(60):
+            rows.append(
+                {
+                    "candidate_block": block_id,
+                    "event_id": f"sparse:{block_id}:{number}",
+                    "symbol": f"Q{block_number:02d}_{number % 20:02d}",
+                    "owner_yes_affinity": 2.0 - number / 10,
+                    "nearest_owner_yes_distance": 1.0 + number / 100,
+                }
+            )
+    selected, block_quotas, _stratum_quotas = select_review_rows(rows)
+    assert len(selected) == 300
+    assert block_quotas[BLOCKS[0][0]] == 0
+    assert all(row["candidate_block"] != BLOCKS[0][0] for row in selected)
