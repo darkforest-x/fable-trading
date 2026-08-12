@@ -2,7 +2,17 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-12 — R2独立连续密度终审失败）
+## ⚡ 当前真相（2026-08-12 — Positive语义盲审包等待Owner裁决）
+
+**最新进展（2026-08-12 10:18 CST）：Local Signal V2 Positive语义纯度审计PRE-REVIEW已完成，
+当前必须停止实验并等待Owner完成200张YES/NO/SKIP。** 审核包包含当前R2使用的1,345个SHORT
+positive分层抽样100张，以及最新独立Canary分层抽样100张（内部为共同保留50、R2新生25、
+R1抑制25，UI已盲化）。全部为独立PNG；`visible_end_bar == decision_bar`和`future_bars == 0`
+均为200/200，0预选答案、0训练资格、0 holdout读取。界面只提供YES/NO/SKIP及Y/N/S、左右键，
+裁决append-only保存，可中断继续和修改。正式入口需先运行
+`scripts/serve_local_signal_v2_semantic_review.py --port 8766`，再打开`http://127.0.0.1:8766/`；
+PRE-REVIEW报告：`analysis/html/p2_local_signal_v2_positive_semantic_audit_prereview_20260812.html`。
+**在Owner审完前禁止训练R3/R4、继续加hard negative或提前判断模型好坏。**
 
 **最新进展（2026-08-12 00:50 CST）：第三训练臂R2已完整训练并在新连续块终审，结论失败。**
 run=`owner_lsv2_short_gold_center_hardneg_r2_ownerconfirmed_ft`在RTX 3060跑满40轮，best epoch35，

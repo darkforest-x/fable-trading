@@ -1,0 +1,77 @@
+{
+  "protocol": "local_signal_v2_positive_semantic_review200_v1_20260812",
+  "seed": 20260812,
+  "positive_pool": {
+    "population": 1345,
+    "selected": 100,
+    "symbols": 100,
+    "split": {
+      "train": 77,
+      "val": 23
+    },
+    "time": {
+      "early": 28,
+      "late": 50,
+      "middle": 22
+    },
+    "position": {
+      "high": 40,
+      "low": 22,
+      "mid": 38
+    },
+    "confidence": {
+      "high": 35,
+      "low": 38,
+      "mid": 27
+    },
+    "volatility": {
+      "high": 27,
+      "low": 35,
+      "mid": 38
+    },
+    "core_bars": {
+      "4": 23,
+      "5": 17,
+      "6": 22,
+      "7": 38
+    },
+    "selection_rule": "deterministic round-robin over split/time/position/confidence/volatility/core strata with symbol caps"
+  },
+  "canary": {
+    "population_decomposition": {
+      "common_retained": 163,
+      "r2_new": 32,
+      "r1_suppressed": 60
+    },
+    "selected": 100,
+    "selected_by_internal_cohort": {
+      "common_retained": 50,
+      "r1_suppressed": 25,
+      "r2_new": 25
+    },
+    "symbols": 78,
+    "confidence": {
+      "high": 27,
+      "low": 40,
+      "mid": 33
+    },
+    "time": {
+      "early": 34,
+      "late": 33,
+      "middle": 33
+    },
+    "volatility": {
+      "high": 36,
+      "low": 33,
+      "mid": 31
+    },
+    "selection_rule": "frozen 50 common / 25 R2-new / 25 R1-suppressed, deterministic round-robin by confidence/time/volatility with symbol caps"
+  },
+  "owner_ui_blinded_fields": [
+    "source_type",
+    "source_model",
+    "model_confidence",
+    "canary_cohort"
+  ],
+  "owner_verdicts_preselected": 0
+}
