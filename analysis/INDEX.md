@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **221** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **222** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -11,6 +11,7 @@
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
 | 2026-08-12 | [`p2_local_signal_v2_positive_semantic_audit_prereview_20260812.md`](p2_local_signal_v2_positive_semantic_audit_prereview_20260812.md) | Local Signal V2 Positive 语义纯度审计 PRE-REVIEW（2026-08-12） | 本轮 `DATA / SEMANTIC AUDIT ONLY` 的200张 Owner YES / NO / SKIP审核包已经完成，等待Owner人工审核。 |
+| 2026-08-12 | [`p2_local_signal_v2_positive_semantic_audit_prereview_v2_20260812.md`](p2_local_signal_v2_positive_semantic_audit_prereview_v2_20260812.md) | Local Signal V2 Positive 语义审核 PRE-REVIEW v2（2026-08-12） | Owner指出v1审核包“没有走势对照，且K线像水平线”后，问题已定位并修正。当前正式入口已切换为v2；v1保留为历史构建证据，但不再用于Owner裁决。 |
 | 2026-08-12 | [`p2_owner_short_gold_center_hardneg_r2_canary_20260812.md`](p2_owner_short_gold_center_hardneg_r2_canary_20260812.md) | P2 Owner确认误报第三训练臂与独立连续Canary（2026-08-12） | Owner于2026-08-11 23:14 CST授权的第三训练臂 |
 | 2026-08-11 | [`local_signal_v2_progress.md`](local_signal_v2_progress.md) | Local Signal V2 — 进度一页纸 | P1 历史发现级对照已完成，B2 30 根固定因果窗胜出；生产级仍未验收。 |
 | 2026-08-11 | [`p0_local_signal_v2_stagea_randomcrop_v1_report_20260811.md`](p0_local_signal_v2_stagea_randomcrop_v1_report_20260811.md) | Local Signal V2 Stage A 真实裁剪 P0 报告（2026-08-11） | Owner 已明确授权恢复交接文档中的 Stage A 离线预训练。新版 |
@@ -290,6 +291,7 @@
 - [`p2_l2_audit_and_prereg_20260803.md`](p2_l2_audit_and_prereg_20260803.md) — P2-L2 只读审计与预注册（训练前 Owner 门）
 - [`p2_l2_preholdout_validation_20260803.md`](p2_l2_preholdout_validation_20260803.md) — P2-L2：immutable P1 dataset 训练与 pre-holdout 验收
 - [`p2_local_signal_v2_positive_semantic_audit_prereview_20260812.md`](p2_local_signal_v2_positive_semantic_audit_prereview_20260812.md) — Local Signal V2 Positive 语义纯度审计 PRE-REVIEW（2026-08-12）
+- [`p2_local_signal_v2_positive_semantic_audit_prereview_v2_20260812.md`](p2_local_signal_v2_positive_semantic_audit_prereview_v2_20260812.md) — Local Signal V2 Positive 语义审核 PRE-REVIEW v2（2026-08-12）
 - [`p2_owner_short_gold_center_hardneg_arm_20260811.md`](p2_owner_short_gold_center_hardneg_arm_20260811.md) — P2 Owner-short compact YOLO Hard-Negative第二训练臂（2026-08-11）
 - [`p2_owner_short_gold_center_hardneg_canary_20260811.md`](p2_owner_short_gold_center_hardneg_canary_20260811.md) — P2 Owner-short Hard-Negative重训与连续密度Canary（2026-08-11）
 - [`p2_owner_short_gold_center_hardneg_canary_review331_report_20260811.md`](p2_owner_short_gold_center_hardneg_canary_review331_report_20260811.md) — P2 Owner-short Hard-Negative Canary 331事件审核包（2026-08-11）

@@ -13,7 +13,7 @@ from scripts.serve_local_signal_v2_semantic_review import load_verdicts
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUT = ROOT / "analysis/output/local_signal_v2_positive_semantic_review200_v1"
+DEFAULT_OUT = ROOT / "analysis/output/local_signal_v2_positive_semantic_review200_v2"
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -34,6 +34,7 @@ def metrics(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 def summarize(out_dir: Path) -> dict[str, Any]:
     manifest = read_jsonl(out_dir / "review_manifest.jsonl")
+    pack_summary = json.loads((out_dir / "summary.json").read_text(encoding="utf-8"))
     verdicts = load_verdicts(out_dir)
     if len(manifest) != 200 or len(verdicts) != 200:
         raise ValueError(f"review incomplete: manifest={len(manifest)} verdicts={len(verdicts)}")
@@ -49,7 +50,7 @@ def summarize(out_dir: Path) -> dict[str, Any]:
         for cohort in ("common_retained", "r2_new", "r1_suppressed")
     }
     result = {
-        "protocol": "local_signal_v2_positive_semantic_review200_v1_20260812",
+        "protocol": pack_summary["protocol"],
         "positive_pool": metrics(positive),
         "canary_candidate": metrics(canary),
         "canary_by_internal_source_after_unblinding": by_cohort,

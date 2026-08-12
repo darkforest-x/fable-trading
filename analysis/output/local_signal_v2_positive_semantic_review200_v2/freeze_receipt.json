@@ -1,0 +1,76 @@
+{
+  "protocol": "local_signal_v2_positive_semantic_review200_v2_20260812",
+  "generated_at": "2026-08-12T03:44:30.902837+00:00",
+  "audit_start_main_commit": "b134f211b4300d7d95679bebd5c50dc3b23d0789",
+  "builder_commit": "0fc58fb6f1aa2bf85e5e732a882ffbb2c7b0f3ad",
+  "weights": {
+    "stage_a": {
+      "path": "analysis/output/lsv2_stagea/owner_lsv2_stagea_randomcrop_v1_cold/weights/best.pt",
+      "sha256": "c0e94f47df125e298b044d9f10acd0b8e4f525ccd6143ce34f8d174af802bf1a"
+    },
+    "stage_b_cold": {
+      "path": "analysis/output/lsv2_stageb/owner_lsv2_stageb_cold/weights/best.pt",
+      "sha256": "de80173ed05962d70bb19ae50539ff08309579a9cae205403c4645e88b13b362"
+    },
+    "positive_baseline": {
+      "path": "analysis/output/lsv2_stageb/owner_lsv2_short_gold_center_v1_ft/weights/best.pt",
+      "sha256": "da278820f2d96a64006d9ff6358b7c98faec52249ec8a6f4fe6bf55254fc65b4"
+    },
+    "r1": {
+      "path": "analysis/output/lsv2_stageb/owner_lsv2_short_gold_center_hardneg_r1_ft/weights/best.pt",
+      "sha256": "029f80a52b5beda2e32f6bb5a188a39fd7f74fe0a3fef4dffa79ae620384f537"
+    },
+    "r2": {
+      "path": "analysis/output/lsv2_stageb/owner_lsv2_short_gold_center_hardneg_r2_ownerconfirmed_ft/weights/best.pt",
+      "sha256": "52cd38fda253f052c3c8eb712d93557c0125dceb336fb4cd58136236dca32afe"
+    }
+  },
+  "input_sha256": {
+    "datasets/owner_short_gold_center_hardneg_r2_ownerconfirmed/positive_manifest.jsonl": "dc82541c8404468d7b0dc38424535b478bbb79f14106690690870b38e1318492",
+    "analysis/output/owner_short_gold_center_preholdout_canary_20260503_pm_v1/merged_r1/events.jsonl": "72533957f18b017c18cdf913e8d609e56b56a439ba87c70fdbf290cb5e221dc0",
+    "analysis/output/owner_short_gold_center_preholdout_canary_20260503_pm_v1/merged_r2/events.jsonl": "d61c91e30a7ac4aa3b358088fc863aacc6ff41c7063b27ecfa229e445a4050b5",
+    "analysis/output/owner_short_gold_center_preholdout_canary_20260503_pm_v1/fetch_summary.json": "2f24513c6247d9191ae5a741aacf78d586ce07c9c26853819ba17ad2f3b4b29a",
+    "analysis/output/owner_short_gold_center_preholdout_canary_20260503_pm_v1/r1_r2_comparison.json": "5b8c1798f88e732cadd145a280ee5bbb363777bff09b75b94fa48ac0b8a9ffa4",
+    "analysis/output/lsv2_stageb/owner_lsv2_short_gold_center_hardneg_r2_ownerconfirmed_ft/weights/best.pt": "52cd38fda253f052c3c8eb712d93557c0125dceb336fb4cd58136236dca32afe"
+  },
+  "active_pointer": {
+    "path": "models/ACTIVE",
+    "sha256": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+    "value": "models/frozen_tp5_sl2_swap_yolo_v10_reg_20260731.txt"
+  },
+  "acceptance_decision_sha256": "8c3495257ba317f93745990feb4242251e423e7492377235b7c545bbf3e0b2c1",
+  "canary": {
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "event_gap_bars": 5,
+    "window_lengths": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "latest_bar": "2026-05-03T23:45:00+00:00"
+  },
+  "holdout": {
+    "start": "2026-05-04T00:00:00+00:00",
+    "use_number": 0,
+    "rows_materialized": 0,
+    "max_materialized_time": "2026-05-03T23:45:00+00:00"
+  },
+  "prohibitions_observed": {
+    "new_model_training": false,
+    "r3_or_r4_created": false,
+    "weights_modified": false,
+    "confidence_modified": false,
+    "nms_modified": false,
+    "active_modified": false,
+    "deployed": false,
+    "orders": false,
+    "forward_log_cleared": false,
+    "new_holdout_read": false
+  }
+}

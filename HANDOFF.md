@@ -2,7 +2,19 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-12 — Positive语义盲审包等待Owner裁决）
+## ⚡ 当前真相（2026-08-12 — Positive走势辅助语义审核等待Owner裁决）
+
+**最新进展（2026-08-12 11:36 CST）：Owner指出v1无走势对照且K线被压平，正式审核入口已
+切换为v2，v1禁止继续裁决。** 根因是模型输入renderer的`MIN_REL_SPAN=0.06`：真实波幅不足6%
+时蜡烛会被训练纵轴压成水平带；train/live虽一致，但低波幅形态分辨率可能因此受损，尚未验收。
+v2物理分开200张原始模型输入、200张人眼auto-Y因果图和
+200张独立auto-Y未来对照；左图仍为200/200止于decision，右图只作Owner参考且全部早于
+holdout。Positive保持v1原100个不换；Canary保留69个并替换31个未来不足16根的事件，内部配额
+仍为共同50/R2新25/R1抑制25。Positive未来48根，Canary安全未来16–46根，0 holdout读取、
+0预选答案、0训练资格。正式入口`http://127.0.0.1:8766/`，裁决写入
+`analysis/output/local_signal_v2_positive_semantic_review200_v2/owner_verdicts.jsonl`；报告：
+`analysis/html/p2_local_signal_v2_positive_semantic_audit_prereview_v2_20260812.html`。最终YES率必须
+称为“未来走势辅助的Owner语义裁决”，不得冒充纯causal precision。继续停止R3/R4与hard-negative。
 
 **最新进展（2026-08-12 10:18 CST）：Local Signal V2 Positive语义纯度审计PRE-REVIEW已完成，
 当前必须停止实验并等待Owner完成200张YES/NO/SKIP。** 审核包包含当前R2使用的1,345个SHORT
