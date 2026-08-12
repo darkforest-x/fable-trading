@@ -6,6 +6,7 @@ from scripts.build_local_signal_v2_semantic_review import (
     pair_canary_events,
     render_review_html,
     round_robin_stratified,
+    tercile_bucket,
 )
 import numpy as np
 
@@ -54,3 +55,10 @@ def test_decision_boundary_changes_only_a_narrow_right_edge() -> None:
     changed = np.any(image != 255, axis=2)
     assert changed.any()
     assert changed[:, :1100].sum() < 500
+
+
+def test_tercile_bucket_uses_population_relative_boundaries() -> None:
+    values = list(range(9))
+    assert tercile_bucket(0, values) == "low"
+    assert tercile_bucket(4, values) == "mid"
+    assert tercile_bucket(8, values) == "high"

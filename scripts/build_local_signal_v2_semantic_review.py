@@ -69,7 +69,6 @@ CANARY_QUOTAS = {
     "r1_suppressed": 25,
 }
 CONFIDENCE_BINS = (0.35, 0.55)
-VOLATILITY_BINS = (0.008, 0.018)
 
 DEFAULT_POSITIVE_MANIFEST = (
     ROOT / "datasets/owner_short_gold_center_hardneg_r2_ownerconfirmed/positive_manifest.jsonl"
@@ -125,6 +124,17 @@ def time_bucket(value: object, values: list[pd.Timestamp]) -> str:
     if stamp < q2:
         return "middle"
     return "late"
+
+
+def tercile_bucket(value: float, values: list[float]) -> str:
+    ordered = sorted(float(item) for item in values)
+    q1 = ordered[len(ordered) // 3]
+    q2 = ordered[(2 * len(ordered)) // 3]
+    if value < q1:
+        return "low"
+    if value < q2:
+        return "mid"
+    return "high"
 
 
 def frame_volatility(frame: pd.DataFrame) -> float:
@@ -183,10 +193,33 @@ def score_positive_pool(
     return scores
 
 
+def positive_pool_volatility(rows: list[dict[str, Any]]) -> dict[str, float]:
+    """Measure each positive's causal OHLC range without opening later rows."""
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in rows:
+        grouped[str(row["source_csv"])].append(row)
+    result: dict[str, float] = {}
+    for source_csv, cohort in sorted(grouped.items()):
+        max_end = max(int(row["win_end"]) for row in cohort)
+        frame, _audit = load_preholdout_prefix(ROOT / source_csv, max_end)
+        for row in cohort:
+            window = frame.iloc[int(row["win_start"]) : int(row["win_end"]) + 1]
+            if len(window) != int(row["win_len"]):
+                raise ValueError(f"positive volatility window mismatch: {row['sample_id']}")
+            result[str(row["sample_id"])] = frame_volatility(window)
+    if len(result) != len(rows):
+        raise ValueError(f"positive volatility coverage mismatch: {len(result)} / {len(rows)}")
+    return result
+
+
 def normalize_positive_pool(
-    rows: list[dict[str, Any]], scores: dict[str, float]
+    rows: list[dict[str, Any]],
+    scores: dict[str, float],
+    volatilities: dict[str, float],
 ) -> list[dict[str, Any]]:
     stamps = sorted(utc(row["end_time"]) for row in rows)
+    positions = sorted(float(row["yolo_box"][0]) for row in rows)
+    volatility_values = sorted(volatilities.values())
     normalized: list[dict[str, Any]] = []
     for row in rows:
         item = dict(row)
@@ -207,7 +240,13 @@ def normalize_positive_pool(
                     float(scores[str(row["sample_id"])]), CONFIDENCE_BINS
                 ),
                 "time_stratum_internal": time_bucket(row["end_time"], stamps),
-                "position_stratum_internal": bucket(float(row["yolo_box"][0]), (0.45, 0.65)),
+                "position_stratum_internal": tercile_bucket(
+                    float(row["yolo_box"][0]), positions
+                ),
+                "volatility_internal": float(volatilities[str(row["sample_id"])]),
+                "volatility_stratum_internal": tercile_bucket(
+                    float(volatilities[str(row["sample_id"])]), volatility_values
+                ),
                 "core_stratum_internal": str(int(row["core_bars"])),
                 "split_stratum_internal": str(row["split"]),
             }
@@ -262,9 +301,11 @@ def round_robin_stratified(
 
 
 def select_positive_rows(
-    rows: list[dict[str, Any]], scores: dict[str, float]
+    rows: list[dict[str, Any]],
+    scores: dict[str, float],
+    volatilities: dict[str, float],
 ) -> list[dict[str, Any]]:
-    normalized = normalize_positive_pool(rows, scores)
+    normalized = normalize_positive_pool(rows, scores, volatilities)
     return round_robin_stratified(
         normalized,
         POSITIVE_TOTAL,
@@ -273,6 +314,7 @@ def select_positive_rows(
             "time_stratum_internal",
             "position_stratum_internal",
             "confidence_stratum_internal",
+            "volatility_stratum_internal",
             "core_stratum_internal",
         ),
         salt="positive",
@@ -351,6 +393,7 @@ def select_canary_rows(
             window = frame.iloc[start : end + 1]
             if len(window) != int(row["window_len"]):
                 raise ValueError(f"canary window mismatch: {row['event_id']}")
+            volatility = frame_volatility(window)
             row.update(
                 {
                     "source_type_internal": "canary_candidate",
@@ -359,12 +402,14 @@ def select_canary_rows(
                     "model_confidence_internal": float(row["event_conf_max"]),
                     "canary_cohort_internal": cohort,
                     "confidence_stratum_internal": bucket(float(row["event_conf_max"]), CONFIDENCE_BINS),
-                    "volatility_internal": frame_volatility(window),
-                    "volatility_stratum_internal": bucket(
-                        frame_volatility(window), VOLATILITY_BINS
-                    ),
+                    "volatility_internal": volatility,
                     "time_stratum_internal": time_bucket(row["decision_time"], stamps),
                 }
+            )
+        volatility_values = [float(row["volatility_internal"]) for row in rows]
+        for row in rows:
+            row["volatility_stratum_internal"] = tercile_bucket(
+                float(row["volatility_internal"]), volatility_values
             )
         selected.extend(
             round_robin_stratified(
@@ -439,6 +484,7 @@ def render_positive(row: dict[str, Any], output: Path, review_id: str) -> dict[s
             "time": row["time_stratum_internal"],
             "position": row["position_stratum_internal"],
             "confidence": row["confidence_stratum_internal"],
+            "volatility": row["volatility_stratum_internal"],
             "core_bars": row["core_stratum_internal"],
         },
         "source_read_audit": read_audit,
@@ -561,7 +607,10 @@ def build(
     if len(positives) != 1345:
         raise ValueError(f"expected 1345 positives, got {len(positives)}")
     positive_scores = score_positive_pool(positives, R2_WEIGHTS, device=device, batch=batch)
-    positive_selected = select_positive_rows(positives, positive_scores)
+    positive_volatilities = positive_pool_volatility(positives)
+    positive_selected = select_positive_rows(
+        positives, positive_scores, positive_volatilities
+    )
     canary_selected, canary_decomposition = select_canary_rows(
         read_jsonl(r1_events),
         read_jsonl(r2_events),
@@ -662,6 +711,7 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
             "time": distributions(positive_selected, "time_stratum_internal"),
             "position": distributions(positive_selected, "position_stratum_internal"),
             "confidence": distributions(positive_selected, "confidence_stratum_internal"),
+            "volatility": distributions(positive_selected, "volatility_stratum_internal"),
             "core_bars": distributions(positive_selected, "core_stratum_internal"),
             "selection_rule": "deterministic round-robin over split/time/position/core strata with symbol caps",
         },
@@ -672,6 +722,7 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
             "symbols": len({row["symbol"] for row in canary_selected}),
             "confidence": distributions(canary_selected, "confidence_stratum_internal"),
             "time": distributions(canary_selected, "time_stratum_internal"),
+            "volatility": distributions(canary_selected, "volatility_stratum_internal"),
             "selection_rule": "frozen 50 common / 25 R2-new / 25 R1-suppressed, deterministic round-robin by confidence/time with symbol caps",
         },
         "owner_ui_blinded_fields": ["source_type", "source_model", "model_confidence", "canary_cohort"],
