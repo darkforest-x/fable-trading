@@ -534,7 +534,7 @@ def render_canary(row: dict[str, Any], frame: pd.DataFrame, output: Path, review
         "sampling_strata": {
             "confidence": row["confidence_stratum_internal"],
             "time": row["time_stratum_internal"],
-            "volatility": bucket(float(row["volatility_internal"]), VOLATILITY_BINS),
+            "volatility": row["volatility_stratum_internal"],
         },
     }
 

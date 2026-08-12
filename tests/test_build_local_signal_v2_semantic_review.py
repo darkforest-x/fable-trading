@@ -1,5 +1,7 @@
 import json
 
+import scripts.build_local_signal_v2_semantic_review as semantic_review
+
 from scripts.build_local_signal_v2_semantic_review import (
     CANARY_QUOTAS,
     draw_decision_boundary,
@@ -62,3 +64,43 @@ def test_tercile_bucket_uses_population_relative_boundaries() -> None:
     assert tercile_bucket(0, values) == "low"
     assert tercile_bucket(4, values) == "mid"
     assert tercile_bucket(8, values) == "high"
+
+
+def test_canary_renderer_uses_precomputed_relative_volatility_stratum(tmp_path, monkeypatch) -> None:
+    import pandas as pd
+
+    frame = pd.DataFrame(
+        {
+            "open_time": pd.date_range("2026-05-03", periods=130, freq="15min", tz="UTC"),
+            "open": np.linspace(100, 101, 130),
+            "high": np.linspace(100.1, 101.1, 130),
+            "low": np.linspace(99.9, 100.9, 130),
+            "close": np.linspace(100, 101, 130),
+            "volume": np.ones(130),
+        }
+    )
+    row = {
+        "event_id": "e1",
+        "symbol": "ETH_USDT_SWAP",
+        "window_start_i": 118,
+        "decision_i": 129,
+        "window_len": 12,
+        "core_start_i": 123,
+        "core_end_i": 126,
+        "decision_time": frame.iloc[129]["open_time"].isoformat(),
+        "x1n": 0.3,
+        "x2n": 0.7,
+        "y1n": 0.3,
+        "y2n": 0.7,
+        "model_confidence_internal": 0.5,
+        "source_model_internal": "R2",
+        "source_dataset_internal": "canary",
+        "canary_cohort_internal": "common_retained",
+        "confidence_stratum_internal": "mid",
+        "time_stratum_internal": "middle",
+        "volatility_stratum_internal": "high",
+    }
+    monkeypatch.setattr(semantic_review, "ROOT", tmp_path)
+    monkeypatch.setattr(semantic_review, "DEFAULT_R2_EVENTS", tmp_path / "r2.jsonl")
+    item = semantic_review.render_canary(row, frame, tmp_path, "C001")
+    assert item["sampling_strata"]["volatility"] == "high"
