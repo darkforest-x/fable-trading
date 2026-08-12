@@ -67,6 +67,7 @@ from scripts.build_w20_midbox_dataset import yolo_box_from_bars  # noqa: E402
 
 
 PROTOCOL = "local_signal_v2_positive_semantic_review200_v2_20260812"
+SAMPLING_PROTOCOL = "local_signal_v2_positive_semantic_review200_v1_20260812"
 SEED = 20260812
 POSITIVE_TOTAL = 100
 CANARY_TOTAL = 100
@@ -277,11 +278,17 @@ def round_robin_stratified(
         key = tuple(str(row.get(field, "")) for field in stratum_fields)
         groups[key].append(row)
     for key, cohort in groups.items():
-        cohort.sort(key=lambda row: stable_hash(PROTOCOL, SEED, salt, key, row["event_id"]))
+        cohort.sort(
+            key=lambda row: stable_hash(
+                SAMPLING_PROTOCOL, SEED, salt, key, row["event_id"]
+            )
+        )
     selected: list[dict[str, Any]] = []
     selected_ids: set[str] = set()
     symbol_counts: Counter[str] = Counter()
-    ordered_keys = sorted(groups, key=lambda key: stable_hash(PROTOCOL, SEED, salt, key))
+    ordered_keys = sorted(
+        groups, key=lambda key: stable_hash(SAMPLING_PROTOCOL, SEED, salt, key)
+    )
     for symbol_cap in (1, 2, 3, 5, total):
         made_progress = True
         while len(selected) < total and made_progress:
@@ -684,7 +691,12 @@ def render_canary(row: dict[str, Any], frame: pd.DataFrame, output: Path, review
 
 
 def review_order(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return sorted(rows, key=lambda row: stable_hash(PROTOCOL, SEED, "blind-order", row["event_id"]))
+    return sorted(
+        rows,
+        key=lambda row: stable_hash(
+            SAMPLING_PROTOCOL, SEED, "blind-order", row["event_id"]
+        ),
+    )
 
 
 def image_href(path: str, output_html: Path) -> str:
@@ -875,6 +887,7 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
     sampling_audit = {
         "protocol": PROTOCOL,
         "seed": SEED,
+        "sampling_protocol": SAMPLING_PROTOCOL,
         "positive_pool": {
             "population": len(positives),
             "selected": len(positive_selected),
