@@ -2,9 +2,30 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-12 — Positive语义基本成立，连续判别边界失败）
+## ⚡ 当前真相（2026-08-12 — 拿到119个早期前沿YES；主动检索机制被证伪，块效应主导）
 
-**最新进展（2026-08-12 13:29 CST）：Owner批准的“早期启动前沿 YES / 相似NO”300张语义
+**最新进展（2026-08-12 13:47 CST）：Owner已完成300张早期前沿审核，解盲诊断完成；
+检索分层零区分度，时间块解释几乎全部方差；等待Owner在A–E选项中点头，不得自动开R3。**
+300/300裁决与manifest精确一一对应，119 YES / 181 NO / 0 SKIP / 0改判，总YES率39.7%
+（Wilson 34.3–45.3%），覆盖89个币。解盲后内部`yes_like` 61/150=40.7%、
+`similar_no_boundary` 58/150=38.7%，差2.0pp、置换p=0.81；affinity AUC 0.534(p=0.33)、
+最近邻距离AUC 0.509(p=0.78)、model_confidence AUC 0.548(p=0.17)——用11个Canary YES做的
+5-NN检索在Owner语义上等于随机，且方向在块间翻转（B04 boundary 0.56>yes_like 0.29，
+C03 反过来0.74>0.32）。唯一显著的轴是候选块：B03_20251115 4.0% → C05_20260215 73.5%，
+极差69.5pp、置换p=1e-4，且各块两层样本数均衡（24–26/7–8），不是抽样混淆。几何切片
+（核心6–7根44–45% vs 4–5根34%）与低波幅1–2%仅19.1% YES均未做块内控制，不能当结论。
+本轮YES是**未来辅助语义裁决**，不是precision、不是基率、不是独立时间块；框坐标仍是R1提议，
+只算逐样本类别确认，不算框几何金标。审核节奏中位0.87s/张（上一轮0.98s），标注噪声未量化。
+300个事件仍全部`training_eligible=false`、`production_eligible=false`，未训练、未转标签、
+未改conf/NMS/窗口/ACTIVE、未deploy、未读holdout。报告：
+`analysis/html/p2_local_signal_v2_early_frontier_review300_owner_result_20260812.html`；
+产物：同目录`owner_review_summary.json` / `owner_review_joined.jsonl`；
+汇总器`scripts/summarize_local_signal_v2_early_frontier_review.py`（先入库commit e7ba4b1后运行）。
+测试`pytest tests`：709 passed、2 skipped。下一步选项（需Owner决策）：
+A 批准119 YES/181 NO转为**仅类别**训练标签；B 做块内随机抽样150–200张拿真实基率（推荐）；
+C 用130个YES重建检索但先离线验证；D 盲重复审核10–15%估一致率；E 直接开R3（不推荐）。
+
+**上一进展（2026-08-12 13:29 CST）：Owner批准的“早期启动前沿 YES / 相似NO”300张语义
 发现包已完成，当前必须停止并等待Owner审核。** 两个冻结R1候选池合计1,484事件；精确剔除
 此前四轮700个已审唯一event_id后剩784，再用上一轮Canary 11 YES / 89 NO的decision前因果
 OHLC+SMA/EMA20/60/120+框几何做5-NN主动检索，内部选150 `yes_like` + 150
