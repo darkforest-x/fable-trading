@@ -13,7 +13,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUT = ROOT / "analysis/output/local_signal_v2_positive_semantic_review200_v1"
+DEFAULT_OUT = ROOT / "analysis/output/local_signal_v2_positive_semantic_review200_v2"
 VALID = frozenset({"YES", "NO", "SKIP"})
 
 

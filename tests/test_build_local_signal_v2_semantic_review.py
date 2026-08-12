@@ -40,14 +40,25 @@ def test_stratified_selector_is_deterministic_and_exact() -> None:
 
 
 def test_owner_html_blinds_internal_source_and_has_only_three_choices(tmp_path) -> None:
-    rows = [{"review_id": "S001", "symbol": "ETH", "image_path": "analysis/output/x/S001.png"}]
+    rows = [
+        {
+            "review_id": "S001",
+            "symbol": "ETH",
+            "image_path": "analysis/output/x/S001.png",
+            "future_review_path": "analysis/output/x/S001_future.png",
+            "future_review_bars": 24,
+        }
+    ]
     page = render_review_html(rows, tmp_path / "index.html")
     assert "YES" in page and "NO" in page and "SKIP" in page
     assert "Y=YES" in page and "N=NO" in page and "S=SKIP" in page
     assert "model_confidence" not in page
     assert "source_model" not in page
     assert "common_retained" not in page
-    assert "future" not in json.loads(page.split("const ITEMS=", 1)[1].split(";let index", 1)[0])[0]
+    payload = json.loads(page.split("const ITEMS=", 1)[1].split(";let index", 1)[0])[0]
+    assert payload["future_bars"] == 24
+    assert "future_image" in payload
+    assert set(payload) == {"review_id", "symbol", "image", "future_image", "future_bars"}
     assert CANARY_QUOTAS == {"common_retained": 50, "r2_new": 25, "r1_suppressed": 25}
 
 
@@ -71,12 +82,12 @@ def test_canary_renderer_uses_precomputed_relative_volatility_stratum(tmp_path, 
 
     frame = pd.DataFrame(
         {
-            "open_time": pd.date_range("2026-05-03", periods=130, freq="15min", tz="UTC"),
-            "open": np.linspace(100, 101, 130),
-            "high": np.linspace(100.1, 101.1, 130),
-            "low": np.linspace(99.9, 100.9, 130),
-            "close": np.linspace(100, 101, 130),
-            "volume": np.ones(130),
+            "open_time": pd.date_range("2026-05-02", periods=150, freq="15min", tz="UTC"),
+            "open": np.linspace(100, 101, 150),
+            "high": np.linspace(100.1, 101.1, 150),
+            "low": np.linspace(99.9, 100.9, 150),
+            "close": np.linspace(100, 101, 150),
+            "volume": np.ones(150),
         }
     )
     row = {
@@ -99,8 +110,13 @@ def test_canary_renderer_uses_precomputed_relative_volatility_stratum(tmp_path, 
         "confidence_stratum_internal": "mid",
         "time_stratum_internal": "middle",
         "volatility_stratum_internal": "high",
+        "future_review_bars_internal": 20,
     }
     monkeypatch.setattr(semantic_review, "ROOT", tmp_path)
     monkeypatch.setattr(semantic_review, "DEFAULT_R2_EVENTS", tmp_path / "r2.jsonl")
     item = semantic_review.render_canary(row, frame, tmp_path, "C001")
     assert item["sampling_strata"]["volatility"] == "high"
+    assert item["future_review_bars"] == 20
+    assert item["causal_review_actual_span_pct"] < 6.0
+    assert (tmp_path / item["image_path"]).is_file()
+    assert (tmp_path / item["future_review_path"]).is_file()

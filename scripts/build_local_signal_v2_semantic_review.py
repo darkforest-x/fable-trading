@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Build the blind 200-item Local Signal V2 positive-semantics review.
+"""Build the 200-item Local Signal V2 positive-semantics Owner review.
 
 This is a data/semantic audit only. It reads the frozen R2 positive manifest and
 the already-materialized pre-holdout R1/R2 canary events, then writes exactly
 100 stratified positive-pool items plus 100 stratified canary items. Every
-review image contains only bars at or before ``decision_bar``; no outcome,
-future candle, model source, confidence, or recommended verdict is rendered in
-the Owner UI.
+causal review image contains only bars at or before ``decision_bar``.  A
+physically separate, review-only future chart is shown beside it because the
+Owner requires outcome context for manual semantic adjudication.  The future
+chart is independently auto-scaled, never becomes a model input or label, and
+is hard-capped before holdout.  Model source, confidence and recommended
+verdict remain hidden from the Owner UI.
 
 Positive rows use the stored R2 image/label bytes and rebuild the review image
 from prefix-limited OHLCV only through the stored window end. Canary rows use
@@ -51,15 +54,19 @@ from scripts.backtest_owner_short_gold_center_recent import (  # noqa: E402
 )
 from scripts.build_owner_eth_shortdelay_calibration import load_preholdout_prefix  # noqa: E402
 from scripts.build_owner_short_hardneg_canary_review import (  # noqa: E402
+    BOUNDARY,
     ORANGE,
+    PURPLE,
     box_rect,
     draw_normalized_box,
+    render_human_review_chart,
     utc,
     write_image,
 )
+from scripts.build_w20_midbox_dataset import yolo_box_from_bars  # noqa: E402
 
 
-PROTOCOL = "local_signal_v2_positive_semantic_review200_v1_20260812"
+PROTOCOL = "local_signal_v2_positive_semantic_review200_v2_20260812"
 SEED = 20260812
 POSITIVE_TOTAL = 100
 CANARY_TOTAL = 100
@@ -90,12 +97,14 @@ DEFAULT_SNAPSHOT = (
 )
 DEFAULT_SNAPSHOT_SUMMARY = DEFAULT_SNAPSHOT.parent / "fetch_summary.json"
 DEFAULT_COMPARISON = DEFAULT_SNAPSHOT.parent / "r1_r2_comparison.json"
-DEFAULT_OUT = ROOT / "analysis/output/local_signal_v2_positive_semantic_review200_v1"
+DEFAULT_OUT = ROOT / "analysis/output/local_signal_v2_positive_semantic_review200_v2"
 R2_WEIGHTS = (
     ROOT
     / "analysis/output/lsv2_stageb"
     / "owner_lsv2_short_gold_center_hardneg_r2_ownerconfirmed_ft/weights/best.pt"
 )
+FUTURE_REVIEW_BARS = 48
+MIN_CANARY_FUTURE_BARS = 16
 
 
 def stable_hash(*parts: object) -> str:
@@ -383,6 +392,7 @@ def select_canary_rows(
     selected: list[dict[str, Any]] = []
     for cohort, rows in cohorts.items():
         stamps = sorted(utc(row["decision_time"]) for row in rows)
+        eligible: list[dict[str, Any]] = []
         for row in rows:
             symbol = str(row["symbol"])
             if symbol not in frames:
@@ -394,6 +404,7 @@ def select_canary_rows(
             if len(window) != int(row["window_len"]):
                 raise ValueError(f"canary window mismatch: {row['event_id']}")
             volatility = frame_volatility(window)
+            future_bars = min(FUTURE_REVIEW_BARS, len(frame) - 1 - end)
             row.update(
                 {
                     "source_type_internal": "canary_candidate",
@@ -404,16 +415,24 @@ def select_canary_rows(
                     "confidence_stratum_internal": bucket(float(row["event_conf_max"]), CONFIDENCE_BINS),
                     "volatility_internal": volatility,
                     "time_stratum_internal": time_bucket(row["decision_time"], stamps),
+                    "future_review_bars_internal": future_bars,
                 }
             )
-        volatility_values = [float(row["volatility_internal"]) for row in rows]
-        for row in rows:
+            if future_bars >= MIN_CANARY_FUTURE_BARS:
+                eligible.append(row)
+        if len(eligible) < CANARY_QUOTAS[cohort]:
+            raise ValueError(
+                f"not enough {cohort} candidates with >= {MIN_CANARY_FUTURE_BARS} "
+                f"safe future bars: {len(eligible)} / {CANARY_QUOTAS[cohort]}"
+            )
+        volatility_values = [float(row["volatility_internal"]) for row in eligible]
+        for row in eligible:
             row["volatility_stratum_internal"] = tercile_bucket(
                 float(row["volatility_internal"]), volatility_values
             )
         selected.extend(
             round_robin_stratified(
-                rows,
+                eligible,
                 CANARY_QUOTAS[cohort],
                 stratum_fields=(
                     "confidence_stratum_internal",
@@ -444,21 +463,108 @@ def draw_decision_boundary(image: np.ndarray) -> None:
     )
 
 
+def render_owner_chart(
+    frame: pd.DataFrame,
+    *,
+    core_start_local: int,
+    core_end_local: int,
+    decision_local: int,
+    caption: str,
+) -> tuple[np.ndarray, float]:
+    """Render a review-only auto-Y chart; never use this as a model input."""
+    image, transform, actual_span_pct = render_human_review_chart(frame)
+    core_box = yolo_box_from_bars(
+        transform, frame, core_start_local, core_end_local
+    )
+    if core_box is None:
+        raise ValueError("review core box is not drawable")
+    if decision_local < len(frame) - 1:
+        boundary_x = (
+            transform.x_at(decision_local)
+            + transform.x_at(decision_local + 1)
+        ) // 2
+        tint = image.copy()
+        cv2.rectangle(
+            tint,
+            (boundary_x, 50),
+            (image.shape[1] - 1, image.shape[0] - 1),
+            PURPLE,
+            -1,
+        )
+        image[50:] = cv2.addWeighted(image[50:], 0.68, tint[50:], 0.32, 0)
+    else:
+        boundary_x = transform.x_at(decision_local)
+    cv2.line(
+        image,
+        (boundary_x, 50),
+        (boundary_x, image.shape[0] - 1),
+        BOUNDARY,
+        4,
+        cv2.LINE_AA,
+    )
+    rect = box_rect(image, core_box)
+    cv2.rectangle(
+        image,
+        (rect[0], rect[1]),
+        (rect[2], rect[3]),
+        ORANGE,
+        4,
+        cv2.LINE_AA,
+    )
+    cv2.rectangle(image, (0, 0), (image.shape[1], 49), (250, 250, 250), -1)
+    cv2.putText(
+        image,
+        f"{caption} | AUTO-Y {actual_span_pct:.2f}%",
+        (10, 31),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.62,
+        (22, 32, 39),
+        2,
+        cv2.LINE_AA,
+    )
+    return image, actual_span_pct
+
+
 def render_positive(row: dict[str, Any], output: Path, review_id: str) -> dict[str, Any]:
-    window, read_audit = read_positive_frame(row)
+    start = int(row["win_start"])
+    decision = int(row["win_end"])
+    future_end = decision + FUTURE_REVIEW_BARS
+    frame, read_audit = load_preholdout_prefix(
+        ROOT / str(row["source_csv"]), future_end
+    )
+    enriched = add_mas(frame)
+    window = enriched.iloc[start : decision + 1].reset_index(drop=True)
+    if len(window) != int(row["win_len"]):
+        raise ValueError(f"positive review window mismatch: {row['sample_id']}")
+    if utc(window["open_time"].iloc[-1]) != utc(row["end_time"]):
+        raise ValueError(f"positive review decision mismatch: {row['sample_id']}")
     image, _transform = render_chart(window, out_path=None)
     stored = cv2.imread(str(ROOT / str(row["image_path"])), cv2.IMREAD_COLOR)
     if stored is None or not np.array_equal(stored, image):
         raise ValueError(f"positive rerender drift: {row['sample_id']}")
-    annotated = image.copy()
-    xc, yc, width, height = map(float, row["yolo_box"])
-    draw_normalized_box(
-        annotated,
-        {"x1n": xc - width / 2, "x2n": xc + width / 2, "y1n": yc - height / 2, "y2n": yc + height / 2},
+    model_path = output / "model_input" / f"{review_id}.png"
+    write_image(model_path, image)
+    core_start_local = int(row["core_global"][0]) - start
+    core_end_local = int(row["core_global"][1]) - start
+    causal_review, causal_span = render_owner_chart(
+        window,
+        core_start_local=core_start_local,
+        core_end_local=core_end_local,
+        decision_local=len(window) - 1,
+        caption="CAUSAL REVIEW",
     )
-    draw_decision_boundary(annotated)
-    path = output / "images" / f"{review_id}.png"
-    write_image(path, annotated)
+    path = output / "causal_review" / f"{review_id}.png"
+    write_image(path, causal_review)
+    future_frame = enriched.iloc[start : future_end + 1].reset_index(drop=True)
+    future_review, future_span = render_owner_chart(
+        future_frame,
+        core_start_local=core_start_local,
+        core_end_local=core_end_local,
+        decision_local=decision - start,
+        caption=f"FUTURE REVIEW {FUTURE_REVIEW_BARS} BARS",
+    )
+    future_path = output / "future_review_only" / f"{review_id}.png"
+    write_image(future_path, future_review)
     return {
         "source_type": "positive_pool",
         "event_id": str(row["event_id"]),
@@ -479,6 +585,15 @@ def render_positive(row: dict[str, Any], output: Path, review_id: str) -> dict[s
         "source_image_sha256": str(row["image_sha256"]),
         "image_path": str(path.relative_to(ROOT)),
         "image_sha256": sha256_file(path),
+        "model_input_path": str(model_path.relative_to(ROOT)),
+        "model_input_sha256": sha256_file(model_path),
+        "causal_review_actual_span_pct": causal_span,
+        "future_review_path": str(future_path.relative_to(ROOT)),
+        "future_review_sha256": sha256_file(future_path),
+        "future_review_bars": FUTURE_REVIEW_BARS,
+        "future_review_end_time": utc(future_frame["open_time"].iloc[-1]).isoformat(),
+        "future_review_actual_span_pct": future_span,
+        "future_review_only": True,
         "sampling_strata": {
             "split": row["split_stratum_internal"],
             "time": row["time_stratum_internal"],
@@ -501,11 +616,31 @@ def render_canary(row: dict[str, Any], frame: pd.DataFrame, output: Path, review
     if utc(window["open_time"].iloc[-1]) != utc(row["decision_time"]):
         raise ValueError(f"canary decision time mismatch: {row['event_id']}")
     image, _transform = render_chart(window, out_path=None)
-    annotated = image.copy()
-    draw_normalized_box(annotated, row)
-    draw_decision_boundary(annotated)
-    path = output / "images" / f"{review_id}.png"
-    write_image(path, annotated)
+    model_path = output / "model_input" / f"{review_id}.png"
+    write_image(model_path, image)
+    core_start_local = int(row["core_start_i"]) - start
+    core_end_local = int(row["core_end_i"]) - start
+    causal_review, causal_span = render_owner_chart(
+        window,
+        core_start_local=core_start_local,
+        core_end_local=core_end_local,
+        decision_local=len(window) - 1,
+        caption="CAUSAL REVIEW",
+    )
+    path = output / "causal_review" / f"{review_id}.png"
+    write_image(path, causal_review)
+    future_bars = int(row["future_review_bars_internal"])
+    future_end = decision + future_bars
+    future_frame = enriched.iloc[start : future_end + 1].reset_index(drop=True)
+    future_review, future_span = render_owner_chart(
+        future_frame,
+        core_start_local=core_start_local,
+        core_end_local=core_end_local,
+        decision_local=decision - start,
+        caption=f"FUTURE REVIEW {future_bars} BARS",
+    )
+    future_path = output / "future_review_only" / f"{review_id}.png"
+    write_image(future_path, future_review)
     return {
         "source_type": "canary_candidate",
         "event_id": str(row["event_id"]),
@@ -530,6 +665,15 @@ def render_canary(row: dict[str, Any], frame: pd.DataFrame, output: Path, review
         "source_image_sha256": None,
         "image_path": str(path.relative_to(ROOT)),
         "image_sha256": sha256_file(path),
+        "model_input_path": str(model_path.relative_to(ROOT)),
+        "model_input_sha256": sha256_file(model_path),
+        "causal_review_actual_span_pct": causal_span,
+        "future_review_path": str(future_path.relative_to(ROOT)),
+        "future_review_sha256": sha256_file(future_path),
+        "future_review_bars": future_bars,
+        "future_review_end_time": utc(future_frame["open_time"].iloc[-1]).isoformat(),
+        "future_review_actual_span_pct": future_span,
+        "future_review_only": True,
         "canary_cohort": str(row["canary_cohort_internal"]),
         "sampling_strata": {
             "confidence": row["confidence_stratum_internal"],
@@ -553,16 +697,18 @@ def render_review_html(rows: list[dict[str, Any]], output_html: Path) -> str:
             "review_id": row["review_id"],
             "symbol": row["symbol"],
             "image": image_href(row["image_path"], output_html),
+            "future_image": image_href(row["future_review_path"], output_html),
+            "future_bars": row["future_review_bars"],
         }
         for row in rows
     ]
     payload = json.dumps(public, ensure_ascii=False).replace("</", "<\\/")
     return f"""<!doctype html><html lang=\"zh-CN\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><link rel=\"icon\" href=\"data:,\"><title>Local Signal V2 · Owner YES / NO</title>
-<style>:root{{--bg:#eef2f4;--ink:#15232d;--muted:#667784;--yes:#16864b;--no:#cf3d3d;--skip:#8b6b12;--blue:#1769aa}}*{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}}header{{background:#fff;border-bottom:1px solid #d7e0e6;padding:14px 20px}}h1{{margin:0 0 5px;font-size:23px}}header p{{margin:4px 0;color:#4e616f}}main{{max-width:1320px;margin:16px auto;padding:0 16px}}.panel{{background:#fff;border-radius:13px;overflow:hidden;box-shadow:0 3px 14px #0002}}.top{{display:flex;justify-content:space-between;padding:12px 15px;border-bottom:1px solid #e0e6ea;font-weight:800}}#chart{{display:block;width:100%;height:auto;background:#fff}}.choices{{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:13px}}button{{padding:14px;border:1px solid #bdc9d1;border-radius:9px;background:#fff;font-size:18px;font-weight:800;cursor:pointer}}button[data-v=yes].active{{background:var(--yes);color:#fff}}button[data-v=no].active{{background:var(--no);color:#fff}}button[data-v=skip].active{{background:var(--skip);color:#fff}}.nav{{display:flex;gap:8px;padding:0 13px 13px}}.nav button{{padding:8px 12px;font-size:14px}}#status{{margin-left:auto;padding:8px 0;color:var(--muted);font-weight:800}}.notice{{background:#fff6d9;border:1px solid #e5c462;border-radius:10px;padding:10px 13px;margin-bottom:12px}}.error{{color:#b21d1d}}@media(max-width:700px){{.choices{{grid-template-columns:1fr}}}}</style></head>
-<body><header><h1>Local Signal V2 · SHORT 语义审核</h1><p>假设时间停在图中最后一根 K：这是不是你要的“启动前沿”？橙框只是候选核心。</p><p><b>快捷键：</b>Y=YES · N=NO · S=SKIP · ←/→=上一张/下一张。判断后自动保存并前进。</p></header><main><div class=\"notice\"><b>只看当时：</b>图中没有 decision 之后的 K 线、未来收益、模型来源、置信度或推荐答案。</div><section class=\"panel\"><div class=\"top\"><span id=\"item\"></span><span id=\"progress\"></span></div><img id=\"chart\" alt=\"causal review chart\"><div class=\"choices\"><button data-v=\"yes\" onclick=\"choose('YES')\">Y · YES</button><button data-v=\"no\" onclick=\"choose('NO')\">N · NO</button><button data-v=\"skip\" onclick=\"choose('SKIP')\">S · SKIP</button></div><div class=\"nav\"><button onclick=\"move(-1)\">← 上一张</button><button onclick=\"move(1)\">下一张 →</button><span id=\"status\"></span></div></section></main>
+<style>:root{{--bg:#eef2f4;--ink:#15232d;--muted:#667784;--yes:#16864b;--no:#cf3d3d;--skip:#8b6b12;--blue:#1769aa}}*{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}}header{{background:#fff;border-bottom:1px solid #d7e0e6;padding:14px 20px}}h1{{margin:0 0 5px;font-size:23px}}header p{{margin:4px 0;color:#4e616f}}main{{max-width:1560px;margin:16px auto;padding:0 16px}}.panel{{background:#fff;border-radius:13px;overflow:hidden;box-shadow:0 3px 14px #0002}}.top{{display:flex;justify-content:space-between;padding:12px 15px;border-bottom:1px solid #e0e6ea;font-weight:800}}.pair{{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:#d5dfe5}}.view{{background:#fff}}.view b{{display:block;padding:8px 12px;background:#edf3f6}}.view img{{display:block;width:100%;height:auto;background:#fff}}.choices{{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:13px}}button{{padding:14px;border:1px solid #bdc9d1;border-radius:9px;background:#fff;font-size:18px;font-weight:800;cursor:pointer}}button[data-v=yes].active{{background:var(--yes);color:#fff}}button[data-v=no].active{{background:var(--no);color:#fff}}button[data-v=skip].active{{background:var(--skip);color:#fff}}.nav{{display:flex;gap:8px;padding:0 13px 13px}}.nav button{{padding:8px 12px;font-size:14px}}#status{{margin-left:auto;padding:8px 0;color:var(--muted);font-weight:800}}.notice{{background:#fff6d9;border:1px solid #e5c462;border-radius:10px;padding:10px 13px;margin-bottom:12px}}.error{{color:#b21d1d}}@media(max-width:900px){{.pair,.choices{{grid-template-columns:1fr}}}}</style></head>
+<body><header><h1>Local Signal V2 · SHORT 语义审核</h1><p>左图是decision当时可见信息，右图是独立缩放的后续走势对照；橙框是候选核心，竖线是decision。</p><p><b>快捷键：</b>Y=YES · N=NO · S=SKIP · ←/→=上一张/下一张。判断后自动保存并前进。</p></header><main><div class=\"notice\"><b>显示规则：</b>两图都按各自真实价差自适应纵轴，解决模型输入6%固定跨度导致的“水平K线”。右图紫色区域只供Owner审核，不进入模型输入、训练标签或自动裁决；仍不显示来源、置信度和推荐答案。</div><section class=\"panel\"><div class=\"top\"><span id=\"item\"></span><span id=\"progress\"></span></div><div class=\"pair\"><div class=\"view\"><b>当时可见（因果、自适应纵轴）</b><img id=\"chart\" alt=\"causal review chart\"></div><div class=\"view\"><b id=\"future-title\">后续走势对照</b><img id=\"future-chart\" alt=\"future review chart\"></div></div><div class=\"choices\"><button data-v=\"yes\" onclick=\"choose('YES')\">Y · YES</button><button data-v=\"no\" onclick=\"choose('NO')\">N · NO</button><button data-v=\"skip\" onclick=\"choose('SKIP')\">S · SKIP</button></div><div class=\"nav\"><button onclick=\"move(-1)\">← 上一张</button><button onclick=\"move(1)\">下一张 →</button><span id=\"status\"></span></div></section></main>
 <script>const ITEMS={payload};let index=0,state={{}};const status=document.getElementById('status');
 async function loadState(){{try{{const r=await fetch('/api/state');if(!r.ok)throw new Error(await r.text());state=(await r.json()).verdicts||{{}}}}catch(e){{status.innerHTML='<span class=\"error\">请用 README 命令启动审核服务，不能直接双击 HTML。</span>'}}render()}}
-function render(){{const it=ITEMS[index];document.getElementById('chart').src=it.image;document.getElementById('item').textContent=it.review_id+' · '+it.symbol;document.getElementById('progress').textContent=(index+1)+' / '+ITEMS.length;document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('active',b.dataset.v.toUpperCase()===state[it.review_id]));const done=Object.keys(state).length;status.textContent='已保存 '+done+' / '+ITEMS.length}}
+function render(){{const it=ITEMS[index];document.getElementById('chart').src=it.image;document.getElementById('future-chart').src=it.future_image;document.getElementById('future-title').textContent='后续走势对照（'+it.future_bars+'根，未读取holdout）';document.getElementById('item').textContent=it.review_id+' · '+it.symbol;document.getElementById('progress').textContent=(index+1)+' / '+ITEMS.length;document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('active',b.dataset.v.toUpperCase()===state[it.review_id]));const done=Object.keys(state).length;status.textContent='已保存 '+done+' / '+ITEMS.length}}
 async function choose(v){{const it=ITEMS[index];const r=await fetch('/api/verdict',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{review_id:it.review_id,owner_verdict:v}})}});if(!r.ok){{status.textContent='保存失败：'+await r.text();return}}state[it.review_id]=v;if(index<ITEMS.length-1)index++;render()}}
 function move(delta){{index=Math.max(0,Math.min(ITEMS.length-1,index+delta));render()}}
 document.addEventListener('keydown',e=>{{if(e.metaKey||e.ctrlKey||e.altKey)return;const k=e.key.toLowerCase();if(k==='y')choose('YES');else if(k==='n')choose('NO');else if(k==='s')choose('SKIP');else if(e.key==='ArrowLeft')move(-1);else if(e.key==='ArrowRight')move(1)}});loadState();</script></body></html>"""
@@ -661,7 +807,9 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
 
 浏览器打开 `http://127.0.0.1:8766/`。Y=YES，N=NO，S=SKIP，左右方向键前后移动。
 每次判断立即写入本目录的 `owner_verdicts.jsonl`；可中断后继续，也可修改上一张。
-主图严格止于 decision bar，不含未来 K、收益、TP/SL、模型来源和置信度。
+左图严格止于 decision bar并使用人眼自适应纵轴；右图显示独立缩放的安全未来走势，
+紫色区域不进入模型输入、训练标签或自动裁决。页面不显示模型来源、置信度和推荐答案。
+最新Canary为避免读取holdout，每张只显示边界前实际可用的16–46根；Positive显示48根。
 审核完成前不要运行任何训练；完成后只生成解盲诊断报告。
 """,
         encoding="utf-8",
@@ -670,6 +818,9 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
     causality_rows = []
     for row in blinded:
         image = ROOT / str(row["image_path"])
+        model_input = ROOT / str(row["model_input_path"])
+        future_image = ROOT / str(row["future_review_path"])
+        future_end = utc(row["future_review_end_time"])
         causality_rows.append(
             {
                 "review_id": row["review_id"],
@@ -678,11 +829,26 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
                 "future_bars": row["future_bars"],
                 "image_exists": image.is_file(),
                 "image_sha_matches": image.is_file() and sha256_file(image) == row["image_sha256"],
+                "model_input_exists": model_input.is_file(),
+                "model_input_sha_matches": model_input.is_file()
+                and sha256_file(model_input) == row["model_input_sha256"],
+                "future_review_exists": future_image.is_file(),
+                "future_review_sha_matches": future_image.is_file()
+                and sha256_file(future_image) == row["future_review_sha256"],
+                "future_review_bars": row["future_review_bars"],
+                "future_review_end_before_holdout": future_end < HOLDOUT_START,
+                "future_review_is_separate": row["future_review_only"],
                 "pass": (
                     int(row["visible_end_bar"]) == int(row["decision_bar"])
                     and int(row["future_bars"]) == 0
                     and image.is_file()
                     and sha256_file(image) == row["image_sha256"]
+                    and model_input.is_file()
+                    and sha256_file(model_input) == row["model_input_sha256"]
+                    and future_image.is_file()
+                    and sha256_file(future_image) == row["future_review_sha256"]
+                    and future_end < HOLDOUT_START
+                    and bool(row["future_review_only"])
                 ),
             }
         )
@@ -693,6 +859,12 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
             int(row["visible_end_bar"]) == int(row["decision_bar"]) for row in blinded
         ),
         "future_bars_zero": sum(int(row["future_bars"]) == 0 for row in blinded),
+        "separate_future_review_images": sum(
+            bool(row["future_review_only"]) for row in blinded
+        ),
+        "future_review_ends_before_holdout": sum(
+            utc(row["future_review_end_time"]) < HOLDOUT_START for row in blinded
+        ),
         "all_pass": all(row["pass"] for row in causality_rows),
         "items": causality_rows,
         "holdout_read": False,
@@ -723,6 +895,12 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
             "confidence": distributions(canary_selected, "confidence_stratum_internal"),
             "time": distributions(canary_selected, "time_stratum_internal"),
             "volatility": distributions(canary_selected, "volatility_stratum_internal"),
+            "minimum_safe_future_bars": min(
+                int(row["future_review_bars_internal"]) for row in canary_selected
+            ),
+            "maximum_safe_future_bars": max(
+                int(row["future_review_bars_internal"]) for row in canary_selected
+            ),
             "selection_rule": "frozen 50 common / 25 R2-new / 25 R1-suppressed, deterministic round-robin by confidence/time/volatility with symbol caps",
         },
         "owner_ui_blinded_fields": ["source_type", "source_model", "model_confidence", "canary_cohort"],
@@ -815,6 +993,8 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
         "unique_review_ids": len({row["review_id"] for row in blinded}),
         "unique_event_ids": len({row["event_id"] for row in blinded}),
         "unique_image_sha256": len({row["image_sha256"] for row in blinded}),
+        "model_input_images": len({row["model_input_path"] for row in blinded}),
+        "future_review_images": len({row["future_review_path"] for row in blinded}),
         "owner_verdicts_preselected": sum(row["owner_verdict"] is not None for row in blinded),
         "causality_pass": causality_audit["all_pass"],
         "training_eligible": 0,
@@ -823,6 +1003,12 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
         "manifest": str(manifest.relative_to(ROOT)),
         "manifest_sha256": sha256_file(manifest),
         "image_tree_sha256": json_sha256(sorted(row["image_sha256"] for row in blinded)),
+        "model_input_tree_sha256": json_sha256(
+            sorted(row["model_input_sha256"] for row in blinded)
+        ),
+        "future_review_tree_sha256": json_sha256(
+            sorted(row["future_review_sha256"] for row in blinded)
+        ),
         "sampling_audit_sha256": sha256_file(output / "sampling_audit.json"),
         "causality_audit_sha256": sha256_file(output / "causality_audit.json"),
         "freeze_receipt_sha256": sha256_file(output / "freeze_receipt.json"),
@@ -835,6 +1021,11 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
             "canary_100": sum(row["source_type"] == "canary_candidate" for row in blinded) == 100,
             "independent_images_200": len({row["image_path"] for row in blinded}) == 200,
             "unique_image_hashes_200": len({row["image_sha256"] for row in blinded}) == 200,
+            "model_inputs_200": len({row["model_input_path"] for row in blinded}) == 200,
+            "future_reviews_200": len({row["future_review_path"] for row in blinded}) == 200,
+            "future_reviews_preholdout": all(
+                utc(row["future_review_end_time"]) < HOLDOUT_START for row in blinded
+            ),
             "no_owner_default": all(row["owner_verdict"] is None for row in blinded),
             "causality_all_green": causality_audit["all_pass"],
             "holdout_clean": not any(row["holdout_read"] for row in blinded),
