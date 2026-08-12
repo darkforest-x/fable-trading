@@ -30,7 +30,13 @@ SEED=0
 FINETUNE_ARG=""
 MODE="run"
 
-SSH=(ssh -o BatchMode=yes -o ConnectTimeout=15)
+# Every remote command below is PowerShell, but the 3060's sshd DefaultShell is
+# cmd.exe (confirmed 2026-08-12). Sent bare, those commands fail *and* leave the
+# exec channel open, so the client hangs instead of erroring -- which looks from
+# here like an unreachable machine. ssh_ps.sh invokes powershell.exe explicitly
+# and passes the body as -EncodedCommand so quoting survives.
+# See docs/learnings/windows-ssh-default-shell-change-looks-like-an-unreachable-host.md
+SSH=(bash "$(dirname "${BASH_SOURCE[0]}")/ssh_ps.sh")
 SCP=(scp -o BatchMode=yes -o ConnectTimeout=15 -q)
 
 say() { printf '\n\033[1;36m=== %s ===\033[0m\n' "$*"; }
@@ -70,13 +76,30 @@ fi
 say "0) SSH + CUDA + version parity"
 "${SSH[@]}" "$HOST" "echo ok" >/dev/null || die "SSH fail: $HOST"
 LOCAL_V=$(.venv/bin/python -c "import torch,ultralytics,numpy;print(f'{torch.__version__.split(\"+\")[0]}|{ultralytics.__version__}|{numpy.__version__}')")
-REMOTE_V=$("${SSH[@]}" "$HOST" "$RPY -c \"import torch,ultralytics,numpy;print(f'{torch.__version__.split(chr(43))[0]}|{ultralytics.__version__}|{numpy.__version__}')\"" | tr -d '\r')
+# The probe runs detached and writes a file, then we read the file. An inline
+# `python -c` over ssh never returns on this box: a child process started inside
+# the session holds the exec channel open even after it has printed and exited,
+# so the shell keeps waiting for an EOF that never comes. WMI-created processes
+# do not belong to the session, so they cannot wedge it.
+"${SCP[@]}" scripts/remote_env_probe.py "$HOST:$REMOTE/remote_env_probe.py" \
+  || die "scp env probe failed"
+"${SSH[@]}" "$HOST" "New-Item -ItemType Directory -Force $REMOTE/logs | Out-Null; Remove-Item -Force $REMOTE/logs/_env_probe.txt -ErrorAction SilentlyContinue; \$r = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine='cmd.exe /c \"C:\\fable\\.venv\\Scripts\\python.exe -u C:\\fable\\remote_env_probe.py > C:\\fable\\logs\\_env_probe.txt 2>&1\"'}; Write-Output ('ret=' + \$r.ReturnValue)" >/dev/null \
+  || die "remote env probe launch failed"
+REMOTE_LINE=""
+for _ in $(seq 1 20); do
+  REMOTE_LINE=$("${SSH[@]}" "$HOST" "if (Test-Path $REMOTE/logs/_env_probe.txt) { Get-Content $REMOTE/logs/_env_probe.txt -Tail 1 }" | tr -d '\r' | tail -1)
+  [[ -n "$REMOTE_LINE" ]] && break
+  sleep 5
+done
+[[ -n "$REMOTE_LINE" ]] || die "remote env probe produced no output"
+REMOTE_V="${REMOTE_LINE%|*|*}"
+CUDA_OK=$(printf '%s' "$REMOTE_LINE" | awk -F'|' '{print $4}')
+DEVICE=$(printf '%s' "$REMOTE_LINE" | awk -F'|' '{print $5}')
 echo "  Mac : $LOCAL_V"
 echo "  3060: $REMOTE_V"
 [[ "$LOCAL_V" == "$REMOTE_V" ]] || die "version mismatch"
-CUDA_OK=$("${SSH[@]}" "$HOST" "$RPY -c \"import torch;print(torch.cuda.is_available())\"" | tr -d '\r')
 [[ "$CUDA_OK" == "True" ]] || die "CUDA not available on remote"
-"${SSH[@]}" "$HOST" "$RPY -c \"import torch;print(torch.cuda.get_device_name(0))\"" | tr -d '\r'
+echo "  device: $DEVICE"
 [[ -f src/detection/train.py ]] || die "missing repository trainer: src/detection/train.py"
 
 if [[ "$MODE" == "check" ]]; then
