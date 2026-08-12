@@ -21,6 +21,7 @@ import hashlib
 import html
 import json
 import os
+import subprocess
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
@@ -536,9 +537,18 @@ def build(
     *,
     device: str,
     batch: int,
+    frozen_main_commit: str,
 ) -> dict[str, Any]:
     snapshot_summary = json.loads(snapshot_summary_path.read_text(encoding="utf-8"))
     comparison = json.loads(comparison_path.read_text(encoding="utf-8"))
+    subprocess.run(
+        ["git", "cat-file", "-e", f"{frozen_main_commit}^{{commit}}"],
+        cwd=ROOT,
+        check=True,
+    )
+    builder_commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+    ).strip()
     if int(snapshot_summary.get("holdout_rows_materialized", -1)) != 0:
         raise ValueError("snapshot contains holdout rows")
     if utc(snapshot_summary["max_materialized_time"]) >= HOLDOUT_START:
@@ -673,7 +683,8 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
     freeze = {
         "protocol": PROTOCOL,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "frozen_main_commit": os.popen(f"git -C {ROOT} rev-parse HEAD").read().strip(),
+        "audit_start_main_commit": frozen_main_commit,
+        "builder_commit": builder_commit,
         "weights": {
             "stage_a": {
                 "path": "analysis/output/lsv2_stagea/owner_lsv2_stagea_randomcrop_v1_cold/weights/best.pt",
@@ -797,6 +808,7 @@ def main() -> int:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--device", default="mps")
     parser.add_argument("--batch", type=int, default=16)
+    parser.add_argument("--frozen-main-commit", required=True)
     args = parser.parse_args()
     summary = build(
         args.positive_manifest,
@@ -808,6 +820,7 @@ def main() -> int:
         args.out,
         device=args.device,
         batch=args.batch,
+        frozen_main_commit=args.frozen_main_commit,
     )
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0
