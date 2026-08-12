@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>yoyo-trading — Dataset V3 Gold Core 训练前验收</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>yoyo-trading — Dataset V3 Gold Core 训练前验收</h1>
+<p>生成日期：2026-08-12</p>
+<p>协议：<code>yoyo_dataset_v3_gold_core_v1_20260812</code></p>
+<p>方向：仅 SHORT · 类别：<code>ma_dense_core</code> · 窗口：W12–19 动态 center-crop</p>
+<p>状态：<strong>数据集已构建、机器质量门全过；两道人工门未过（一致率/kappa、错标率抽查）， 训练臂被 3060 阻塞。未训练、未 promote、未读 holdout。</strong></p>
+<h2>结论先行（Owner 八问）</h2>
+<table><thead><tr>
+<th>#</th>
+<th>问题</th>
+<th>回答</th>
+</tr></thead><tbody>
+<tr><td>1</td><td>旧模型哪些继续用了</td><td>R1 <code>029f80a5…</code> 作 R3A 初始化与全部对照基线；R2 <code>52cd38fd…</code> 只作对照；Stage A <code>c0e94f47…</code> 保留为血统起点；官方 <code>yolo11s.pt</code> <code>85a76fe8…</code> 作 R3B 冷启</td></tr>
+<tr><td>2</td><td>Dataset V3 修掉了哪些错标</td><td>916 个 Owner-long 镜像不再当负例；1,370 个从未被人看过的模型挖掘硬负例被移出；100 个与金标框重叠的审核事件被隔离（其中 15 个是 Owner-NO，本来会压在金标正例上）</td></tr>
+<tr><td>3</td><td>正/负/ignore 和金框数量</td><td>正 1,345（train 1,143 / val 202）、负 2,108（train 1,908 / val 200，含 765 硬负例）、ignore 池 2,411；<strong>human_gold 框 0</strong>、rule_verified 1,345、model_proposed 0 进训练</td></tr>
+<tr><td>4</td><td>数据审核一致率是否达标</td><td><strong>未知——这道门只有 Owner 能过</strong>：需分层抽 10%–15% 盲重复审核算一致率与 kappa。审核包尚未生成（等你点头再做）</td></tr>
+<tr><td>5</td><td>R3A 与 R3B 谁更好</td><td><strong>未训练</strong>：3060（192.168.1.4）ping 通但 SSH 无响应</td></tr>
+<tr><td>6</td><td>连续错误候选从多少降到多少</td><td>尚无 R3 数字。冻结基线：baseline 732 → R1 331（am 快照）；R1 223 → R2 195（pm 快照）</td></tr>
+<tr><td>7</td><td>正样本召回是否保持</td><td>尚无 R3 数字。冻结基线：R1 val recall 0.7770、R2 0.7525、1:1 baseline 0.9024</td></tr>
+<tr><td>8</td><td>模型是否可进入 L2 集成</td><td><strong>否</strong>。<code>production_eligible=false</code>，无 R3 结果</td></tr>
+</tbody></table>
+<h2>复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/yoyo-trading
+PYTHONPATH=. /Users/zhangzc/fable-trading/.venv/bin/python tools/freeze_baseline.py
+PYTHONPATH=. /Users/zhangzc/fable-trading/.venv/bin/python tools/smoke_parity.py --per-class 15
+PYTHONPATH=. /Users/zhangzc/fable-trading/.venv/bin/python tools/audit_legacy_labels.py
+PYTHONPATH=. /Users/zhangzc/fable-trading/.venv/bin/python tools/build_dataset_v3.py \
+  --builder-commit &quot;$(git rev-parse --short HEAD)&quot;
+PYTHONPATH=. /Users/zhangzc/fable-trading/.venv/bin/python -m pytest tests -q
+</code></pre>
+<p>测试：<strong>205 passed</strong>（yoyo-trading）。fable-trading 侧未改动，仍 709 passed / 2 skipped。</p>
+<h2>1. 冻结基线（先冻结，再动数据）</h2>
+<p><code>manifests/frozen_baseline_r1_r2_v1.json</code>，SHA <code>2258566017153390…</code>。</p>
+<table><thead><tr>
+<th>模型</th>
+<th>权重 SHA</th>
+<th>val P / R / mAP50</th>
+<th>am canary 事件</th>
+<th>pm canary 事件</th>
+</tr></thead><tbody>
+<tr><td>1:1 baseline</td><td><code>da278820…</code></td><td>.8467 / .9024 / .9206</td><td>732</td><td>—</td></tr>
+<tr><td><strong>R1</strong></td><td><code>029f80a5…</code></td><td>.8626 / .7770 / .8980</td><td>331</td><td>223</td></tr>
+<tr><td><strong>R2</strong></td><td><code>52cd38fd…</code></td><td>.8475 / .7525 / .8774</td><td>—</td><td>195</td></tr>
+</tbody></table>
+<p>canary 契约（两快照一致）：conf 0.25 / NMS 0.7 / event_gap 5 bars / W12–19 / 215 币 / pre-holdout。冻结工具会拒绝冻结跨契约的比较。</p>
+<p>R1 训练配方（R3A/R3B 必须逐项相同）：40 epoch / patience 10 / batch 8 / imgsz 960 / AdamW / rect / seed 0；增强全 0（translate 0.02、scale 0.1 为原值）。</p>
+<h2>2. Smoke parity：本仓能逐字节复现旧数据集</h2>
+<table><thead><tr>
+<th>项</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>抽样样本</td><td>45（15 正 / 4 易负 / 26 硬负）</td></tr>
+<tr><td>图片 SHA256 完全一致</td><td>45/45</td></tr>
+<tr><td>标签 SHA256 完全一致</td><td>45/45</td></tr>
+<tr><td>YOLO 框数值不一致</td><td>0</td></tr>
+</tbody></table>
+<p>后续整库构建又把这个证明扩大到 <strong>2,688 个复用样本、0 个 SHA 漂移</strong>。 &quot;复用旧数据&quot;因此不是声明，是可验证的事实。</p>
+<h2>3. 旧标签迁移表</h2>
+<p><code>manifests/legacy_label_migration_v3.json</code>。</p>
+<table><thead><tr>
+<th>群体</th>
+<th>n</th>
+<th>KEEP_POSITIVE</th>
+<th>KEEP_NEGATIVE</th>
+<th>MOVE_TO_IGNORE</th>
+<th>REBOX_REQUIRED</th>
+<th>RELABEL_REQUIRED</th>
+</tr></thead><tbody>
+<tr><td>旧正例</td><td>1,345</td><td>1,345</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>旧易负例</td><td>1,343</td><td>—</td><td>1,343</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>旧硬负例</td><td>2,286</td><td>—</td><td>—</td><td>916</td><td>—</td><td>1,370</td></tr>
+<tr><td>Owner 审核事件</td><td>1,200</td><td>—</td><td>765</td><td>200</td><td>235</td><td>—</td></tr>
+</tbody></table>
+<p>三条关键判断：</p>
+<ol>
+<li><strong>916 个 Owner-long 镜像 → IGNORE。</strong> 它们是 Owner 亲手画、亲口判为&quot;多头&quot;的真实结构。 按 <code>docs/learnings/unconfirmed-mirror-is-neither-positive-nor-negative.md</code>，未确认的镜像 既不进正例也不进负例。R1 把它们当负例训练，等于教检测器&quot;这个密集不是密集&quot;。</li>
+<li><strong>1,370 个模型挖掘硬负例 → RELABEL_REQUIRED（移出训练）。</strong> 按 (symbol, 时间重叠) 联结， 只有 15 个能对上 Owner 的 NO、2 个对上 Owner 的 YES，其余 1,353 个从未被人看过。 V5 §6.4 要求硬负例必须是 <strong>shape NO</strong>，未审样本无法认证。</li>
+<li><strong>765 个 Owner 确认的 shape-NO → 新硬负例。</strong> 来自五个审核包，覆盖 190 个币， 全部落在 train 时间段内、且不与任何金标框（含 12 根护栏）重叠。</li>
+</ol>
+<p>被隔离的 200 个审核事件：100 个 decision 落在冻结 val 期（val 必须逐字节不动）， 100 个与金标框重叠（85 个是 YES——模型重新检出了已知金标，是好现象；15 个是 NO—— Owner 在含金标框的窗口上说了 NO，属真实分歧，不能当负例）。</p>
+<p><strong>注意</strong>：审核包自带的 <code>touches_owner_box_guard</code> 对 1,200 条全是 false，是从正例 manifest 重建框区间后才抓出这 100 个重叠。<strong>不要信任上游的护栏标记。</strong></p>
+<h2>4. shape verdict vs outcome verdict（V5 §6.2）</h2>
+<p><strong>六个审核包全部带 48 根未来对照图，所以 1,200 条裁决没有一条是纯因果的。</strong> 能量化的只有&quot;裁决是否与后市一致&quot;（decision 后 16 根 close-to-close）：</p>
+<table><thead><tr>
+<th>裁决</th>
+<th>与后市一致</th>
+<th>与后市相反</th>
+</tr></thead><tbody>
+<tr><td>YES（329）</td><td>281</td><td><strong>48</strong></td></tr>
+<tr><td>NO（869）</td><td>510</td><td><strong>359</strong></td></tr>
+</tbody></table>
+<p>&quot;相反&quot;的那 407 条是可以确信为形态判断的——Owner 在后市打脸的情况下仍坚持了裁决。 &quot;一致&quot;的不能反推为 outcome-driven：整个候选池本身就向下漂（16 根中位 −14.1bp）， 一致是基率使然。<strong>因此本轮不把 outcome 一致性当作标签权重，只作为记录。</strong></p>
+<h2>5. Dataset V3 组成</h2>
+<p><code>manifests/dataset_v3_gold_core_v1.json</code>，manifest SHA <code>db9ca3eef7b1900b…</code>。</p>
+<table><thead><tr>
+<th>项</th>
+<th>train</th>
+<th>val</th>
+<th>合计</th>
+</tr></thead><tbody>
+<tr><td>正例</td><td>1,143</td><td>202</td><td>1,345</td></tr>
+<tr><td>易负例</td><td>1,143</td><td>200</td><td>1,343</td></tr>
+<tr><td>硬负例（Owner shape-NO）</td><td>765</td><td>0</td><td>765</td></tr>
+<tr><td><strong>负例合计</strong></td><td><strong>1,908</strong></td><td><strong>200</strong></td><td><strong>2,108</strong></td></tr>
+<tr><td>负正比</td><td><strong>1.67 : 1</strong></td><td>—</td><td>—</td></tr>
+</tbody></table>
+<ul>
+<li>与 R1 相比：正例、窗口协议、renderer、<strong>整个 val split 逐字节不变</strong>；唯一变量是训练负例；</li>
+<li>负正比 1.67:1 落在合同要求的 1:1 ～ 1:2 内（R1 是 1:3，且其中 2,286 个硬负例未经确认）；</li>
+<li>框状态：<code>rule_verified</code> 1,345、<code>model_proposed</code> 进入训练 <strong>0</strong>、<code>human_gold</code> <strong>0</strong> （Owner 原框经中心截取规则派生，不是原框本身——所以诚实标为 rule_verified）；</li>
+<li>235 个 Owner-YES 事件<strong>没有</strong>变成正例：类别已确认、几何仍是模型提议，等 Owner 审框。</li>
+</ul>
+<h3>覆盖度</h3>
+<table><thead><tr>
+<th>轴</th>
+<th>分布</th>
+</tr></thead><tbody>
+<tr><td>币种</td><td>215（负例 214、硬负例 190）</td></tr>
+<tr><td>月份</td><td>2025-06 ~ 2026-05 共 12 个月，最少 192、最多 483</td></tr>
+<tr><td>窗口长度</td><td>W12 639 / W13 787 / W14 591 / W15 374 / W16 469 / W17 245 / W18 125 / W19 223</td></tr>
+<tr><td>因果纵向跨度</td><td>&lt;1% 101 / 1–2% 784 / 2–4% 1,456 / ≥4% 1,112</td></tr>
+<tr><td><strong>正例核心水平位置</strong></td><td><strong>middle 1,345、left 0、right 0</strong></td></tr>
+</tbody></table>
+<p>最后一行是本轮最该盯住的结构性缺陷：center-crop 让 100% 正例的核心落在窗口中三分之一 （中位 0.577）。<strong>位置 shortcut 本轮修不掉</strong>（Owner 2026-08-12 裁定沿用 W12–19）， 左/右召回必须在评估里照报，不得声称已解决。</p>
+<h3>机器质量门</h3>
+<table><thead><tr>
+<th>门</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>复用样本逐字节复现</td><td>2,688 / 2,688</td></tr>
+<tr><td>SHA 漂移</td><td>0</td></tr>
+<tr><td>重复窗口（symbol × win_start × win_end）</td><td>0</td></tr>
+<tr><td>跨 split 的 event_id</td><td>0</td></tr>
+<tr><td><code>visible_end_bar &lt;= decision_bar</code></td><td>3,453 / 3,453</td></tr>
+<tr><td><code>future_used_for_l1_label</code></td><td>全 false</td></tr>
+<tr><td>val 中的硬负例</td><td>0（val 保持 R1 原样）</td></tr>
+<tr><td>train 末 → val 首的 purge 间隔</td><td>162 根 15m bar（约 1 天 16.5 小时）</td></tr>
+<tr><td>最晚 decision 时间</td><td>2026-05-02 23:45 UTC</td></tr>
+<tr><td>holdout 读取</td><td>0</td></tr>
+<tr><td>Owner-NO 事件解析失败</td><td>0 / 765</td></tr>
+</tbody></table>
+<h3>未过的门（只有 Owner 能过）</h3>
+<ol>
+<li><strong>重复审核一致率与 Cohen&#x27;s kappa</strong>：需分层抽 10%–15%（约 350–520 张）盲重复审核。 审核包尚未生成，等你点头。</li>
+<li><strong>每 split 的标签抽查错标率</strong>：同上依赖。</li>
+</ol>
+<p>按合同，这两道门不过就不能宣布数据集&quot;准确&quot;。当前只能说：<strong>机器可验证的部分全部通过， 人工一致性未知。</strong></p>
+<h2>6. 阻塞</h2>
+<ol>
+<li><strong>3060 训练机</strong>：<code>192.168.1.4</code> ping 通、SSH 无响应（本轮探测挂起 &gt;25 分钟）。 R3A/R3B 无算力。Mac MPS 跑完整 W12–19 训练历史上已放弃过一次，不作默认替代。</li>
+<li><strong>人工一致性审核</strong>：见上。</li>
+</ol>
+<h2>7. 风险与诚实声明</h2>
+<ol>
+<li><strong>正例一根未换。</strong> V3 修的是负例。如果 Owner 的正例里本来就有错标，本轮不会发现它—— 一致性抽查正是为此设计的，而它还没做。</li>
+<li><strong>框不是 human_gold。</strong> 1,345 个框来自&quot;取 Owner 原框中央一半、夹到 4–7 根&quot;的规则。 规则是 Owner 批准的，但框本身没有被逐个确认过。</li>
+<li><strong>765 个新硬负例的窗口是重建的</strong>：由 decision_time 反查全局 bar 下标再渲染， 不是复制旧像素；它们没有 SHA 对照物，只能靠因果门与去重门保证。</li>
+<li><strong>移除 1,370 个模型硬负例可能降低对某类背景的抑制。</strong> 这是把&quot;未经确认的负例&quot;换成 &quot;经确认但更少的负例&quot;的交换，代价要在连续回放里看，不能预先声称是改进。</li>
+<li><strong>outcome 一致性统计受候选池向下漂影响</strong>，不能当作 shape/outcome 的判定器。</li>
+<li>本轮没有训练、没有评估模型、没有 promote、没有部署、没有读 holdout。</li>
+</ol>
+<h2>8. 下一步（需 Owner 决策）</h2>
+<table><thead><tr>
+<th>选项</th>
+<th>内容</th>
+<th>我的建议</th>
+</tr></thead><tbody>
+<tr><td>A</td><td>开 3060（或授权替代算力），跑 R3A/R3B 快速筛选臂</td><td><strong>最高优先</strong>，其余都在等它</td></tr>
+<tr><td>B</td><td>生成 10%–15% 盲重复审核包，你花 15–25 分钟过一遍，拿一致率与 kappa</td><td><strong>推荐</strong>，这是&quot;数据集准确&quot;唯一缺的证据</td></tr>
+<tr><td>C</td><td>审 235 个 Owner-YES 事件的框，把类别确认升级为几何确认，扩充正例</td><td>推荐，但排在 A/B 后</td></tr>
+<tr><td>D</td><td>若你认为 916 个 Owner-long 镜像应当继续当负例，我按你的口径回滚这一条</td><td>需要你明确点头</td></tr>
+<tr><td>E</td><td>把 1,370 个模型硬负例送进审核队列，逐步转成确认过的 shape-NO</td><td>中期方案</td></tr>
+</tbody></table>
+</body>
+</html>
