@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **222** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **223** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -216,6 +216,7 @@
 | — | [`p1_owner_eth_perfect_platform_semantic_audit_20260811.md`](p1_owner_eth_perfect_platform_semantic_audit_20260811.md) | ETH 完美平台语义审查：短延迟、多位置、不自动贴标签 | 发现 \| 证据 \| 严重度 \| 置信度 \| 裁决 \| |
 | — | [`p1_owner_gold_center_crop_review_20260811.md`](p1_owner_gold_center_crop_review_20260811.md) | P1 原始空头金标中心裁切审核 | 当前61张Codex逐图目测橙框不再作为下一版标签来源。新的审核包直接联结两份Owner事实： |
 | — | [`p1_owner_short_gold_center_dataset_20260811.md`](p1_owner_short_gold_center_dataset_20260811.md) | P1 Owner空头金标中心裁切全量数据集 | Owner确认“不要Codex重新手割；从最早金标红框中心取几根K线作为橙框”后，已将该合同扩到完整Owner-short母池。 |
+| — | [`p2_local_signal_v2_positive_semantic_audit_owner_result_20260812.md`](p2_local_signal_v2_positive_semantic_audit_owner_result_20260812.md) | Local Signal V2 语义审核结果：Positive基本成立，连续判别边界失败 |  |
 | — | [`p2_owner_short_hardneg_canary_owner_review_20260811.md`](p2_owner_short_hardneg_canary_owner_review_20260811.md) | Owner审核结论：当前模型约20%精确命中 | 331个事件已全部完成Owner裁决且数据可信。** 协议、源事件SHA、ID集合和声明计数全部一致， |
 | — | [`p2_owner_short_train_hardneg_expansion200_v2_owner_review_20260811.md`](p2_owner_short_train_hardneg_expansion200_v2_owner_review_20260811.md) | P2 难负例扩充 V2 Owner 裁决报告 | Owner 已完成第二张 train-time 难负例扩充页 200/200 裁决：**25 个目标形态、0 个框偏、175 个难负例、0 pending**。协议、源 SHA、200 个唯一 ID、声明计数和 manifest 一一联结全部通过。 |
 | — | [`p2_owner_short_train_hardneg_expansion200_v2_report_20260811.md`](p2_owner_short_train_hardneg_expansion200_v2_report_20260811.md) | P2 第三训练臂难负例扩充 200 张报告 | 45% 与 9% 只证明选样富集方向不同，不能证明模型总体 precision 是45%，也不能证明模型已经改善。 |
@@ -290,6 +291,7 @@
 - [`p2_data_audit_report.md`](p2_data_audit_report.md) — P2-12 数据质量审计
 - [`p2_l2_audit_and_prereg_20260803.md`](p2_l2_audit_and_prereg_20260803.md) — P2-L2 只读审计与预注册（训练前 Owner 门）
 - [`p2_l2_preholdout_validation_20260803.md`](p2_l2_preholdout_validation_20260803.md) — P2-L2：immutable P1 dataset 训练与 pre-holdout 验收
+- [`p2_local_signal_v2_positive_semantic_audit_owner_result_20260812.md`](p2_local_signal_v2_positive_semantic_audit_owner_result_20260812.md) — Local Signal V2 语义审核结果：Positive基本成立，连续判别边界失败
 - [`p2_local_signal_v2_positive_semantic_audit_prereview_20260812.md`](p2_local_signal_v2_positive_semantic_audit_prereview_20260812.md) — Local Signal V2 Positive 语义纯度审计 PRE-REVIEW（2026-08-12）
 - [`p2_local_signal_v2_positive_semantic_audit_prereview_v2_20260812.md`](p2_local_signal_v2_positive_semantic_audit_prereview_v2_20260812.md) — Local Signal V2 Positive 语义审核 PRE-REVIEW v2（2026-08-12）
 - [`p2_owner_short_gold_center_hardneg_arm_20260811.md`](p2_owner_short_gold_center_hardneg_arm_20260811.md) — P2 Owner-short compact YOLO Hard-Negative第二训练臂（2026-08-11）

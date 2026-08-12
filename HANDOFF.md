@@ -2,7 +2,18 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-12 — Positive走势辅助语义审核等待Owner裁决）
+## ⚡ 当前真相（2026-08-12 — Positive语义基本成立，连续判别边界失败）
+
+**最新进展（2026-08-12 11:55 CST）：Owner已完成v2全部200张YES/NO审核，机器诊断明确为情况B；
+禁止自动开R3/R4。** 裁决日志200行/200唯一ID，与manifest精确对应，96 YES、104 NO、0 SKIP，
+0 holdout。旧Positive Pool为85 YES/15 NO（85%），当前Canary为11 YES/89 NO（11%）；内部
+common retained=6/50、R2 new=0/25、R1 suppressed=5/25。R2既产生纯NO的新候选，又抑制部分
+Owner认可的R1信号；R1/R2均继续blocked。Canary high-confidence也仅4/27 YES，调conf无证据
+解决。真实波幅<1%的Canary为2/39 YES，2%–4%为4/15，说明模型6%最小纵轴可能损害低波幅
+分辨率，但≥4%仍0/8，不能直接归因或立刻换renderer。下一步推荐先做**只读边界诊断**：比较
+尺度占用、均线结构、框位置、decision延迟和R1/R2差异；不训练、不读holdout。结果报告：
+`analysis/html/p2_local_signal_v2_positive_semantic_audit_owner_result_20260812.html`。85个旧Positive
+YES、11个Canary YES和104个NO当前仍`training_eligible=false`，转换训练数据需Owner另行批准。
 
 **最新进展（2026-08-12 11:36 CST）：Owner指出v1无走势对照且K线被压平，正式审核入口已
 切换为v2，v1禁止继续裁决。** 根因是模型输入renderer的`MIN_REL_SPAN=0.06`：真实波幅不足6%
