@@ -4,6 +4,20 @@
 
 ## ⚡ 当前真相（2026-08-12 — Positive语义基本成立，连续判别边界失败）
 
+**最新进展（2026-08-12 12:40 CST）：Owner批准的只读边界诊断已完成，根因进一步收敛为
+“尺度分布偏移 + 启动释放语义未学稳 + 正例成熟度偏后”，禁止据此直接开R3。** 200条审核样本
+逐条联结原始causal OHLC并复算：200/200 source lineage与model-input SHA通过，最大物化时间
+2026-05-03 19:45 UTC，0 future图片、0 future OHLC、0 holdout。Canary模型纵轴占用/单根K高度
+中位仅18.0%/29.0px，Positive为51.0%/55.2px；97/100 Canary触发6% floor，说明尺度风险明确，
+但floor-off仅3条且真实跨度≥4%的8条仍0 YES，不能宣布“改auto-Y即可解决”。Canary YES相对NO
+的核心差异是核心跌幅-45.4/-13.7bp、decision收盘相对六线-73.0/-9.8bp、decision六线跨度
+75.4/35.0bp、20线框后斜率-4.68/-1.24bp/bar；核心横向中心57.1%/56.3%，位置不是主因。
+Positive YES又明显比Canary YES成熟：框后跌幅-60.1bp vs -13.1bp，说明85% purity没有覆盖
+“启动前沿”。R2 new仍0/25且结构最弱，R1 suppressed 5/25。下一步推荐先扩新的pre-holdout
+早期YES/相似NO语义对照，再固定数据/split/框/配方只改renderer表示做单变量臂；当前不训练、
+不调conf/NMS、不转标签。仓库主测试697 passed、2 skipped。报告：
+`analysis/html/p2_local_signal_v2_semantic_boundary_diagnosis_20260812.html`。
+
 **最新进展（2026-08-12 11:55 CST）：Owner已完成v2全部200张YES/NO审核，机器诊断明确为情况B；
 禁止自动开R3/R4。** 裁决日志200行/200唯一ID，与manifest精确对应，96 YES、104 NO、0 SKIP，
 0 holdout。旧Positive Pool为85 YES/15 NO（85%），当前Canary为11 YES/89 NO（11%）；内部

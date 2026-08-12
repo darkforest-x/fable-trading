@@ -1,0 +1,974 @@
+{
+  "protocol": "local_signal_v2_semantic_boundary_diagnosis_v1_20260812",
+  "source_review_protocol": "local_signal_v2_positive_semantic_review200_v2_20260812",
+  "data_quality": {
+    "review_rows": 200,
+    "unique_review_ids": 200,
+    "source_lineage_joined": 200,
+    "model_input_sha_verified": 200,
+    "model_input_sizes": {
+      "1280x742": 200
+    },
+    "causal_visible_end_equals_decision": true,
+    "max_materialized_time": "2026-05-03T19:45:00+00:00",
+    "holdout_rows_materialized": 0,
+    "future_review_files_read": 0,
+    "future_ohlc_rows_read": 0,
+    "joined_sha256": "e6eae060d825f95b3018aed7ca4e8955e4bae60728f6b4948ed49def05307023",
+    "feature_rows_sha256": "3e8b09fbd4c7e0726634e6a990fb3f13f09a25d8660effe52123582321284f9b",
+    "renderer_source_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+    "renderer_min_relative_span": 0.06
+  },
+  "population": {
+    "positive_pool": {
+      "reviewed": 100,
+      "YES": 85,
+      "NO": 15,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.85,
+      "wilson95": [
+        0.7671644040916763,
+        0.9069401471634337
+      ]
+    },
+    "canary_candidate": {
+      "reviewed": 100,
+      "YES": 11,
+      "NO": 89,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.11,
+      "wilson95": [
+        0.06254196357064568,
+        0.18631296503080313
+      ]
+    }
+  },
+  "renderer_scale": {
+    "positive_floor_active": {
+      "reviewed": 87,
+      "YES": 75,
+      "NO": 12,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.8620689655172413,
+      "wilson95": [
+        0.7742137261595751,
+        0.9193022170877859
+      ]
+    },
+    "positive_floor_inactive": {
+      "reviewed": 13,
+      "YES": 10,
+      "NO": 3,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.7692307692307693,
+      "wilson95": [
+        0.49743624053272495,
+        0.9182047128150143
+      ]
+    },
+    "canary_floor_active": {
+      "reviewed": 97,
+      "YES": 11,
+      "NO": 86,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.1134020618556701,
+      "wilson95": [
+        0.06451358102935628,
+        0.1917446992742115
+      ]
+    },
+    "canary_floor_inactive": {
+      "reviewed": 3,
+      "YES": 0,
+      "NO": 3,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.0,
+      "wilson95": [
+        5.551115123125783e-17,
+        0.5614970317550454
+      ]
+    },
+    "canary_median_vertical_occupancy_pct": 17.959240704643747,
+    "canary_median_candle_height_px": 29.039739074534968,
+    "positive_median_vertical_occupancy_pct": 51.0321605418331,
+    "positive_median_candle_height_px": 55.193300433344675
+  },
+  "canary_by_actual_span_pct": {
+    "lt1": {
+      "reviewed": 39,
+      "YES": 2,
+      "NO": 37,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.05128205128205128,
+      "wilson95": [
+        0.014177955415274113,
+        0.16885640047613612
+      ]
+    },
+    "1to2": {
+      "reviewed": 38,
+      "YES": 5,
+      "NO": 33,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.13157894736842105,
+      "wilson95": [
+        0.05753867690120133,
+        0.2732685944229131
+      ]
+    },
+    "2to4": {
+      "reviewed": 15,
+      "YES": 4,
+      "NO": 11,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.26666666666666666,
+      "wilson95": [
+        0.10897453325692374,
+        0.5195043405598057
+      ]
+    },
+    "ge4": {
+      "reviewed": 8,
+      "YES": 0,
+      "NO": 8,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.0,
+      "wilson95": [
+        0.0,
+        0.32440756488388023
+      ]
+    }
+  },
+  "canary_by_vertical_occupancy_pct": {
+    "lt15": {
+      "reviewed": 39,
+      "YES": 2,
+      "NO": 37,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.05128205128205128,
+      "wilson95": [
+        0.014177955415274113,
+        0.16885640047613612
+      ]
+    },
+    "15to30": {
+      "reviewed": 40,
+      "YES": 7,
+      "NO": 33,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.175,
+      "wilson95": [
+        0.0874541374603592,
+        0.31949990331787714
+      ]
+    },
+    "30to60": {
+      "reviewed": 13,
+      "YES": 2,
+      "NO": 11,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.15384615384615385,
+      "wilson95": [
+        0.043258178358081184,
+        0.4223463101948254
+      ]
+    },
+    "ge60": {
+      "reviewed": 8,
+      "YES": 0,
+      "NO": 8,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.0,
+      "wilson95": [
+        0.0,
+        0.32440756488388023
+      ]
+    }
+  },
+  "canary_by_decision_delay": {
+    "0to2": {
+      "reviewed": 3,
+      "YES": 0,
+      "NO": 3,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.0,
+      "wilson95": [
+        5.551115123125783e-17,
+        0.5614970317550454
+      ]
+    },
+    "3": {
+      "reviewed": 46,
+      "YES": 8,
+      "NO": 38,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.17391304347826086,
+      "wilson95": [
+        0.09085791702246311,
+        0.30723353716378493
+      ]
+    },
+    "4": {
+      "reviewed": 37,
+      "YES": 2,
+      "NO": 35,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.05405405405405406,
+      "wilson95": [
+        0.014950976833157673,
+        0.17704654350813104
+      ]
+    },
+    "5": {
+      "reviewed": 11,
+      "YES": 0,
+      "NO": 11,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.0,
+      "wilson95": [
+        0.0,
+        0.2588329669680317
+      ]
+    },
+    "gt5": {
+      "reviewed": 3,
+      "YES": 1,
+      "NO": 2,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.3333333333333333,
+      "wilson95": [
+        0.06149194472039621,
+        0.7923403991979522
+      ]
+    }
+  },
+  "canary_by_cohort": {
+    "common_retained": {
+      "reviewed": 50,
+      "YES": 6,
+      "NO": 44,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.12,
+      "wilson95": [
+        0.05617600150932274,
+        0.23804817383202992
+      ]
+    },
+    "r2_new": {
+      "reviewed": 25,
+      "YES": 0,
+      "NO": 25,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.0,
+      "wilson95": [
+        1.3877787807814457e-17,
+        0.13319225093904846
+      ]
+    },
+    "r1_suppressed": {
+      "reviewed": 25,
+      "YES": 5,
+      "NO": 20,
+      "SKIP": 0,
+      "yes_rate_excluding_skip": 0.2,
+      "wilson95": [
+        0.08860584686802572,
+        0.3913095036954033
+      ]
+    }
+  },
+  "canary_cohort_medians": {
+    "common_retained": {
+      "n": 50,
+      "model_vertical_occupancy_pct": 16.208142991652124,
+      "median_candle_height_px": 27.926744978748964,
+      "decision_delay_bars": 3.0,
+      "core_full_spread_bps": 35.19639304877794,
+      "spread_release_ratio": 1.0664414114478753,
+      "post_core_return_bps": -2.520027984000972,
+      "raw_detection_count": 10.5
+    },
+    "r1_suppressed": {
+      "n": 25,
+      "model_vertical_occupancy_pct": 28.529930490714893,
+      "median_candle_height_px": 36.03245530570322,
+      "decision_delay_bars": 4.0,
+      "core_full_spread_bps": 60.22474663043828,
+      "spread_release_ratio": 1.154344923010493,
+      "post_core_return_bps": -13.10459852275403,
+      "raw_detection_count": 6.0
+    },
+    "r2_new": {
+      "n": 25,
+      "model_vertical_occupancy_pct": 14.05189082242882,
+      "median_candle_height_px": 28.833451558516252,
+      "decision_delay_bars": 4.0,
+      "core_full_spread_bps": 24.568089887290178,
+      "spread_release_ratio": 1.0665006039241154,
+      "post_core_return_bps": 10.737294201861314,
+      "raw_detection_count": 2.0
+    }
+  },
+  "positive_vs_canary_medians": {
+    "positive_all": {
+      "actual_span_pct": 3.4293611884111854,
+      "model_vertical_occupancy_pct": 51.0321605418331,
+      "median_candle_height_px": 55.193300433344675,
+      "core_full_spread_bps": 61.072110028137544,
+      "decision_full_spread_bps": 79.11704395242185,
+      "spread_release_ratio": 1.3252388653810463,
+      "fast20_slope_bps_per_bar": -10.317315290014339,
+      "close_vs_bundle_decision_bps": -151.31343410105913,
+      "core_return_bps": -75.31798611248696,
+      "post_core_return_bps": -60.40595134538695,
+      "box_height_norm_pct": 23.045822102425873,
+      "decision_delay_bars": 3.0
+    },
+    "positive_yes": {
+      "actual_span_pct": 3.3238207151250676,
+      "model_vertical_occupancy_pct": 49.4616177845993,
+      "median_candle_height_px": 54.737509214621625,
+      "core_full_spread_bps": 60.32323069364,
+      "decision_full_spread_bps": 77.33821228021648,
+      "spread_release_ratio": 1.3213037408561117,
+      "fast20_slope_bps_per_bar": -10.01266277739693,
+      "close_vs_bundle_decision_bps": -147.2090332884879,
+      "core_return_bps": -76.23467020218877,
+      "post_core_return_bps": -60.132291040287946,
+      "box_height_norm_pct": 21.69811320754717,
+      "decision_delay_bars": 3.0
+    },
+    "canary_yes": {
+      "actual_span_pct": 1.8079987835650897,
+      "model_vertical_occupancy_pct": 26.904743803052007,
+      "median_candle_height_px": 40.35088482612384,
+      "core_full_spread_bps": 61.45416851769501,
+      "decision_full_spread_bps": 75.40071965979678,
+      "spread_release_ratio": 1.2716594918706547,
+      "fast20_slope_bps_per_bar": -4.678927081196808,
+      "close_vs_bundle_decision_bps": -73.00387971385658,
+      "core_return_bps": -45.3955901426728,
+      "post_core_return_bps": -13.10459852275403,
+      "box_height_norm_pct": 16.148290038108826,
+      "decision_delay_bars": 3.0
+    },
+    "canary_no": {
+      "actual_span_pct": 1.1161960040183017,
+      "model_vertical_occupancy_pct": 16.610059583605636,
+      "median_candle_height_px": 28.906388392354714,
+      "core_full_spread_bps": 35.83123225579639,
+      "decision_full_spread_bps": 34.971910112359446,
+      "spread_release_ratio": 1.068318329797364,
+      "fast20_slope_bps_per_bar": -1.2395327309662936,
+      "close_vs_bundle_decision_bps": -9.847379670732126,
+      "core_return_bps": -13.723696248857387,
+      "post_core_return_bps": 0.0,
+      "box_height_norm_pct": 10.3242427110672,
+      "decision_delay_bars": 4.0
+    }
+  },
+  "common_retained_paired_r2_minus_r1_medians": {
+    "NO": {
+      "n": 44,
+      "paired_r2_minus_r1_core_mid_bars": 0.0,
+      "paired_r2_minus_r1_decision_bars": 0.0,
+      "paired_r2_minus_r1_core_bars": 0.0,
+      "paired_r2_minus_r1_delay_bars": 0.0,
+      "paired_r2_minus_r1_peak_confidence": -0.06271499395370483,
+      "paired_r2_minus_r1_raw_detection_count": 0.0
+    },
+    "YES": {
+      "n": 6,
+      "paired_r2_minus_r1_core_mid_bars": 1.5,
+      "paired_r2_minus_r1_decision_bars": 1.5,
+      "paired_r2_minus_r1_core_bars": 0.5,
+      "paired_r2_minus_r1_delay_bars": 0.0,
+      "paired_r2_minus_r1_peak_confidence": -0.19654089212417603,
+      "paired_r2_minus_r1_raw_detection_count": -4.0
+    }
+  },
+  "canary_univariate_effects": {
+    "model_vertical_occupancy_pct": {
+      "label": "模型纵轴占用",
+      "unit": "%",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": 26.904743803052007,
+      "median_no": 16.610059583605636,
+      "median_difference": 10.29468421944637,
+      "cliffs_delta": 0.33605720122574056,
+      "cliffs_delta_bootstrap95": [
+        0.01940755873340143,
+        0.599591419816139
+      ],
+      "median_permutation_p": 0.0665933406659334,
+      "bh_q": 0.14151084891510848
+    },
+    "median_candle_height_px": {
+      "label": "中位单根K高度",
+      "unit": "px",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": 40.35088482612384,
+      "median_no": 28.906388392354714,
+      "median_difference": 11.444496433769125,
+      "cliffs_delta": 0.15832482124616956,
+      "cliffs_delta_bootstrap95": [
+        -0.24417773237997956,
+        0.526046986721144
+      ],
+      "median_permutation_p": 0.031596840315968405,
+      "bh_q": 0.0767351836244947
+    },
+    "core_center_pct": {
+      "label": "核心横向中心",
+      "unit": "%窗宽",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": 57.14285714285714,
+      "median_no": 56.25,
+      "median_difference": 0.8928571428571388,
+      "cliffs_delta": 0.24719101123595505,
+      "cliffs_delta_bootstrap95": [
+        -0.1297497446373851,
+        0.5822778345250258
+      ],
+      "median_permutation_p": 0.5814418558144185,
+      "bh_q": 0.6589674365896744
+    },
+    "decision_delay_bars": {
+      "label": "框后确认延迟",
+      "unit": "bars",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": 3.0,
+      "median_no": 4.0,
+      "median_difference": -1.0,
+      "cliffs_delta": -0.2216547497446374,
+      "cliffs_delta_bootstrap95": [
+        -0.5045965270684372,
+        0.10829928498467833
+      ],
+      "median_permutation_p": 0.7564243575642435,
+      "bh_q": 0.8037008799120088
+    },
+    "box_height_norm_pct": {
+      "label": "预测框纵向高度",
+      "unit": "%图高",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": 16.148290038108826,
+      "median_no": 10.3242427110672,
+      "median_difference": 5.824047327041626,
+      "cliffs_delta": 0.43003064351378956,
+      "cliffs_delta_bootstrap95": [
+        0.10924412665985701,
+        0.7037793667007151
+      ],
+      "median_permutation_p": 0.013898610138986101,
+      "bh_q": 0.055414458554144584
+    },
+    "core_full_spread_bps": {
+      "label": "核心六线密集度",
+      "unit": "bp",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": 61.45416851769501,
+      "median_no": 35.83123225579639,
+      "median_difference": 25.622936261898623,
+      "cliffs_delta": 0.38100102145045966,
+      "cliffs_delta_bootstrap95": [
+        0.08478038815117467,
+        0.6363636363636364
+      ],
+      "median_permutation_p": 0.011898810118988102,
+      "bh_q": 0.055414458554144584
+    },
+    "decision_full_spread_bps": {
+      "label": "decision六线跨度",
+      "unit": "bp",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": 75.40071965979678,
+      "median_no": 34.971910112359446,
+      "median_difference": 40.42880954743733,
+      "cliffs_delta": 0.515832482124617,
+      "cliffs_delta_bootstrap95": [
+        0.3033197139938713,
+        0.7119509703779366
+      ],
+      "median_permutation_p": 0.015998400159984,
+      "bh_q": 0.055414458554144584
+    },
+    "spread_release_ratio": {
+      "label": "六线释放倍数",
+      "unit": "x",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": 1.2716594918706547,
+      "median_no": 1.068318329797364,
+      "median_difference": 0.20334116207329078,
+      "cliffs_delta": 0.4402451481103167,
+      "cliffs_delta_bootstrap95": [
+        0.20531154239019409,
+        0.6629724208375896
+      ],
+      "median_permutation_p": 0.11658834116588342,
+      "bh_q": 0.19820017998200182
+    },
+    "fast20_slope_bps_per_bar": {
+      "label": "20线框后斜率",
+      "unit": "bp/bar",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": -4.678927081196808,
+      "median_no": -1.2395327309662936,
+      "median_difference": -3.439394350230515,
+      "cliffs_delta": -0.4606741573033708,
+      "cliffs_delta_bootstrap95": [
+        -0.7139938712972421,
+        -0.16241062308478038
+      ],
+      "median_permutation_p": 0.013898610138986101,
+      "bh_q": 0.055414458554144584
+    },
+    "slow120_slope_bps_per_bar": {
+      "label": "120线全窗斜率",
+      "unit": "bp/bar",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": -0.35443210817435017,
+      "median_no": 0.06004119450101856,
+      "median_difference": -0.41447330267536875,
+      "cliffs_delta": -0.26455566905005107,
+      "cliffs_delta_bootstrap95": [
+        -0.5710418794688458,
+        0.06230847803881512
+      ],
+      "median_permutation_p": 0.08259174082591741,
+      "bh_q": 0.15600662156006623
+    },
+    "close_vs_bundle_decision_bps": {
+      "label": "decision收盘相对六线",
+      "unit": "bp",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": -73.00387971385658,
+      "median_no": -9.847379670732126,
+      "median_difference": -63.15650004312445,
+      "cliffs_delta": -0.5342185903983657,
+      "cliffs_delta_bootstrap95": [
+        -0.7099080694586313,
+        -0.35444330949948927
+      ],
+      "median_permutation_p": 0.016298370162983702,
+      "bh_q": 0.055414458554144584
+    },
+    "post_core_return_bps": {
+      "label": "框后至decision收益",
+      "unit": "bp",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": -13.10459852275403,
+      "median_no": 0.0,
+      "median_difference": -13.10459852275403,
+      "cliffs_delta": -0.08069458631256383,
+      "cliffs_delta_bootstrap95": [
+        -0.3830439223697651,
+        0.23391215526046988
+      ],
+      "median_permutation_p": 0.26207379262073793,
+      "bh_q": 0.33790192409330494
+    },
+    "core_return_bps": {
+      "label": "核心区间收益",
+      "unit": "bp",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": -45.3955901426728,
+      "median_no": -13.723696248857387,
+      "median_difference": -31.671893893815415,
+      "cliffs_delta": -0.5526046986721144,
+      "cliffs_delta_bootstrap95": [
+        -0.7691521961184883,
+        -0.29719101123595487
+      ],
+      "median_permutation_p": 0.026697330266973303,
+      "bh_q": 0.07564243575642436
+    },
+    "decision_vs_core_low_bps": {
+      "label": "decision相对核心低点",
+      "unit": "bp",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": 14.613309352518034,
+      "median_no": 28.47056143947091,
+      "median_difference": -13.857252086952876,
+      "cliffs_delta": -0.19918283963227784,
+      "cliffs_delta_bootstrap95": [
+        -0.5281920326864147,
+        0.15219611848825332
+      ],
+      "median_permutation_p": 0.1877812218778122,
+      "bh_q": 0.266023397660234
+    },
+    "raw_detection_count": {
+      "label": "事件原始重复触发",
+      "unit": "count",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": 11.0,
+      "median_no": 5.0,
+      "median_difference": 6.0,
+      "cliffs_delta": 0.20122574055158324,
+      "cliffs_delta_bootstrap95": [
+        -0.16036772216547499,
+        0.5321756894790602
+      ],
+      "median_permutation_p": 0.1710828917108289,
+      "bh_q": 0.2644008326440083
+    },
+    "windows_seen_count": {
+      "label": "触发窗口长度种数",
+      "unit": "count",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": 4.0,
+      "median_no": 4.0,
+      "median_difference": 0.0,
+      "cliffs_delta": 0.19101123595505617,
+      "cliffs_delta_bootstrap95": [
+        -0.17162921348314608,
+        0.5577374872318693
+      ],
+      "median_permutation_p": 1.0,
+      "bh_q": 1.0
+    },
+    "model_confidence": {
+      "label": "模型置信度",
+      "unit": "score",
+      "n_yes": 11,
+      "n_no": 89,
+      "median_yes": 0.45971423387527466,
+      "median_no": 0.38050758838653564,
+      "median_difference": 0.07920664548873901,
+      "cliffs_delta": 0.16036772216547499,
+      "cliffs_delta_bootstrap95": [
+        -0.1502042900919305,
+        0.466802860061287
+      ],
+      "median_permutation_p": 0.2782721727827217,
+      "bh_q": 0.33790192409330494
+    }
+  },
+  "positive_univariate_effects": {
+    "model_vertical_occupancy_pct": {
+      "label": "模型纵轴占用",
+      "unit": "%",
+      "n_yes": 85,
+      "n_no": 15,
+      "median_yes": 49.4616177845993,
+      "median_no": 59.51650688492788,
+      "median_difference": -10.05488910032858,
+      "cliffs_delta": -0.21803921568627452,
+      "cliffs_delta_bootstrap95": [
+        -0.5074705882352941,
+        0.09178431372549027
+      ],
+      "median_permutation_p": 0.28757124287571245,
+      "bh_q": 0.7257131429714171
+    },
+    "median_candle_height_px": {
+      "label": "中位单根K高度",
+      "unit": "px",
+      "n_yes": 85,
+      "n_no": 15,
+      "median_yes": 54.737509214621625,
+      "median_no": 65.54118396223754,
+      "median_difference": -10.803674747615915,
+      "cliffs_delta": -0.12941176470588237,
+      "cliffs_delta_bootstrap95": [
+        -0.49176470588235294,
+        0.22980392156862745
+      ],
+      "median_permutation_p": 0.30616938306169383,
+      "bh_q": 0.7257131429714171
+    },
+    "core_center_pct": {
+      "label": "核心横向中心",
+      "unit": "%窗宽",
+      "n_yes": 85,
+      "n_no": 15,
+      "median_yes": 57.692307692307686,
+      "median_no": 57.14285714285714,
+      "median_difference": 0.5494505494505475,
+      "cliffs_delta": 0.19294117647058823,
+      "cliffs_delta_bootstrap95": [
+        -0.13496078431372546,
+        0.5121764705882355
+      ],
+      "median_permutation_p": 0.33866613338666135,
+      "bh_q": 0.7257131429714171
+    },
+    "decision_delay_bars": {
+      "label": "框后确认延迟",
+      "unit": "bars",
+      "n_yes": 85,
+      "n_no": 15,
+      "median_yes": 3.0,
+      "median_no": 3.0,
+      "median_difference": 0.0,
+      "cliffs_delta": -0.06431372549019608,
+      "cliffs_delta_bootstrap95": [
+        -0.32707843137254905,
+        0.17411764705882352
+      ],
+      "median_permutation_p": 1.0,
+      "bh_q": 1.0
+    },
+    "box_height_norm_pct": {
+      "label": "预测框纵向高度",
+      "unit": "%图高",
+      "n_yes": 85,
+      "n_no": 15,
+      "median_yes": 21.69811320754717,
+      "median_no": 28.84097035040431,
+      "median_difference": -7.142857142857139,
+      "cliffs_delta": -0.22901960784313727,
+      "cliffs_delta_bootstrap95": [
+        -0.5302156862745098,
+        0.09652941176470609
+      ],
+      "median_permutation_p": 0.2106789321067893,
+      "bh_q": 0.7257131429714171
+    },
+    "core_full_spread_bps": {
+      "label": "核心六线密集度",
+      "unit": "bp",
+      "n_yes": 85,
+      "n_no": 15,
+      "median_yes": 60.32323069364,
+      "median_no": 70.32108289449769,
+      "median_difference": -9.997852200857693,
+      "cliffs_delta": -0.18588235294117647,
+      "cliffs_delta_bootstrap95": [
+        -0.4792156862745098,
+        0.12003921568627465
+      ],
+      "median_permutation_p": 0.5926407359264073,
+      "bh_q": 0.8505513085055131
+    },
+    "decision_full_spread_bps": {
+      "label": "decision六线跨度",
+      "unit": "bp",
+      "n_yes": 85,
+      "n_no": 15,
+      "median_yes": 77.33821228021648,
+      "median_no": 117.35765103435838,
+      "median_difference": -40.0194387541419,
+      "cliffs_delta": -0.13568627450980392,
+      "cliffs_delta_bootstrap95": [
+        -0.47768627450980394,
+        0.22980392156862745
+      ],
+      "median_permutation_p": 0.0380961903809619,
+      "bh_q": 0.23297670232976705
+    },
+    "spread_release_ratio": {
+      "label": "六线释放倍数",
+      "unit": "x",
+      "n_yes": 85,
+      "n_no": 15,
+      "median_yes": 1.3213037408561117,
+      "median_no": 1.3415758948257954,
+      "median_difference": -0.020272153969683737,
+      "cliffs_delta": 0.03215686274509804,
+      "cliffs_delta_bootstrap95": [
+        -0.27062745098039215,
+        0.3349019607843137
+      ],
+      "median_permutation_p": 0.9163083691630837,
+      "bh_q": 1.0
+    },
+    "fast20_slope_bps_per_bar": {
+      "label": "20线框后斜率",
+      "unit": "bp/bar",
+      "n_yes": 85,
+      "n_no": 15,
+      "median_yes": -10.01266277739693,
+      "median_no": -14.49617168982309,
+      "median_difference": 4.48350891242616,
+      "cliffs_delta": 0.2376470588235294,
+      "cliffs_delta_bootstrap95": [
+        -0.09647058823529411,
+        0.548235294117647
+      ],
+      "median_permutation_p": 0.023997600239976002,
+      "bh_q": 0.23297670232976705
+    },
+    "slow120_slope_bps_per_bar": {
+      "label": "120线全窗斜率",
+      "unit": "bp/bar",
+      "n_yes": 85,
+      "n_no": 15,
+      "median_yes": -0.7226250887683625,
+      "median_no": -0.893430041628483,
+      "median_difference": 0.17080495286012054,
+      "cliffs_delta": 0.0996078431372549,
+      "cliffs_delta_bootstrap95": [
+        -0.2549411764705882,
+        0.4384705882352942
+      ],
+      "median_permutation_p": 0.42005799420057993,
+      "bh_q": 0.7876087391260874
+    },
+    "close_vs_bundle_decision_bps": {
+      "label": "decision收盘相对六线",
+      "unit": "bp",
+      "n_yes": 85,
+      "n_no": 15,
+      "median_yes": -147.2090332884879,
+      "median_no": -210.81688167390865,
+      "median_difference": 63.607848385420766,
+      "cliffs_delta": 0.1607843137254902,
+      "cliffs_delta_bootstrap95": [
+        -0.16705882352941176,
+        0.4808235294117648
+      ],
+      "median_permutation_p": 0.04659534046595341,
+      "bh_q": 0.23297670232976705
+    },
+    "post_core_return_bps": {
+      "label": "框后至decision收益",
+      "unit": "bp",
+      "n_yes": 85,
+      "n_no": 15,
+      "median_yes": -60.132291040287946,
+      "median_no": -60.67961165048597,
+      "median_difference": 0.547320610198021,
+      "cliffs_delta": 0.013333333333333334,
+      "cliffs_delta_bootstrap95": [
+        -0.28,
+        0.29568627450980395
+      ],
+      "median_permutation_p": 1.0,
+      "bh_q": 1.0
+    },
+    "core_return_bps": {
+      "label": "核心区间收益",
+      "unit": "bp",
+      "n_yes": 85,
+      "n_no": 15,
+      "median_yes": -76.23467020218877,
+      "median_no": -71.85628742514938,
+      "median_difference": -4.378382777039391,
+      "cliffs_delta": -0.0996078431372549,
+      "cliffs_delta_bootstrap95": [
+        -0.45254901960784316,
+        0.25650980392156875
+      ],
+      "median_permutation_p": 0.8907109289071092,
+      "bh_q": 1.0
+    },
+    "decision_vs_core_low_bps": {
+      "label": "decision相对核心低点",
+      "unit": "bp",
+      "n_yes": 85,
+      "n_no": 15,
+      "median_yes": -28.446389496717963,
+      "median_no": -14.777285201604817,
+      "median_difference": -13.669104295113145,
+      "cliffs_delta": -0.15450980392156863,
+      "cliffs_delta_bootstrap95": [
+        -0.483921568627451,
+        0.17811764705882382
+      ],
+      "median_permutation_p": 0.6237376262373763,
+      "bh_q": 0.8505513085055131
+    },
+    "raw_detection_count": {
+      "label": "事件原始重复触发",
+      "unit": "count",
+      "n_yes": 0,
+      "n_no": 0,
+      "median_yes": null,
+      "median_no": null,
+      "median_difference": null,
+      "cliffs_delta": null,
+      "cliffs_delta_bootstrap95": [
+        null,
+        null
+      ],
+      "median_permutation_p": null,
+      "bh_q": null
+    },
+    "windows_seen_count": {
+      "label": "触发窗口长度种数",
+      "unit": "count",
+      "n_yes": 0,
+      "n_no": 0,
+      "median_yes": null,
+      "median_no": null,
+      "median_difference": null,
+      "cliffs_delta": null,
+      "cliffs_delta_bootstrap95": [
+        null,
+        null
+      ],
+      "median_permutation_p": null,
+      "bh_q": null
+    },
+    "model_confidence": {
+      "label": "模型置信度",
+      "unit": "score",
+      "n_yes": 85,
+      "n_no": 15,
+      "median_yes": 0.4530786871910095,
+      "median_no": 0.3726261556148529,
+      "median_difference": 0.08045253157615662,
+      "cliffs_delta": 0.2,
+      "cliffs_delta_bootstrap95": [
+        -0.11529411764705882,
+        0.483921568627451
+      ],
+      "median_permutation_p": 0.47665233476652336,
+      "bh_q": 0.7944205579442056
+    }
+  },
+  "interpretation_limits": {
+    "future_assisted_owner_verdicts": true,
+    "stratified_review_sample": true,
+    "not_market_precision_estimate": true,
+    "univariate_not_causal": true,
+    "classifier_trained": false,
+    "threshold_changed": false,
+    "labels_changed": false,
+    "holdout_read": false
+  },
+  "artifacts": {
+    "features": {
+      "path": "analysis/output/local_signal_v2_semantic_boundary_diagnosis_20260812/boundary_features.jsonl",
+      "sha256": "3e8b09fbd4c7e0726634e6a990fb3f13f09a25d8660effe52123582321284f9b"
+    },
+    "source_read_audit": {
+      "path": "analysis/output/local_signal_v2_semantic_boundary_diagnosis_20260812/source_read_audit.jsonl",
+      "sha256": "384108e291a29c29562a634b52666f09f12b1c51b41bd8543591d9d3c041ac72"
+    },
+    "causality_audit": {
+      "path": "analysis/output/local_signal_v2_semantic_boundary_diagnosis_20260812/causality_audit.json",
+      "sha256": "c01cca5995b7026af750aabdeb79f988d561906f2621712fe7fad3259613c74c"
+    },
+    "cohort_chart": {
+      "path": "analysis/output/local_signal_v2_semantic_boundary_diagnosis_20260812/canary_cohort_yes_rate.png",
+      "sha256": "c733de92b6c265c0548c26d286dfab2003b4c08556ead441c71e200610f0dd38"
+    },
+    "span_chart": {
+      "path": "analysis/output/local_signal_v2_semantic_boundary_diagnosis_20260812/canary_span_yes_rate.png",
+      "sha256": "66e029a68c69d939cb5568db952d8d9349fe25fe9eb605e9d0a98044edd65a21"
+    },
+    "effect_chart": {
+      "path": "analysis/output/local_signal_v2_semantic_boundary_diagnosis_20260812/canary_feature_effects.png",
+      "sha256": "6f492dcf30d9bf5314d90f62323326bf2064a89bbe8ba20dacc190328b1ce4e4"
+    }
+  }
+}

@@ -1,5 +1,7 @@
 """Regression tests for the dependency-free project report renderer."""
 
+from pathlib import Path
+
 from scripts.md_to_html import convert
 
 
@@ -41,3 +43,17 @@ def test_convert_renders_ordered_lists_without_breaking_following_blocks() -> No
     assert "</ol>" in rendered
     assert "<h2>Next heading</h2>" in rendered
     assert "<table>" in rendered
+
+
+def test_convert_embeds_local_report_images(tmp_path: Path) -> None:
+    image = tmp_path / "chart.png"
+    image.write_bytes(b"\x89PNG\r\n\x1a\n")
+
+    rendered = convert(
+        "![Boundary chart](chart.png)",
+        asset_base=tmp_path,
+        embed_images=True,
+    )
+
+    assert '<img src="data:image/png;base64,' in rendered
+    assert 'alt="Boundary chart"' in rendered

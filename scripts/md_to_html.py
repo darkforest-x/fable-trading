@@ -22,7 +22,9 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import base64
 import html
+import mimetypes
 import re
 import sys
 from pathlib import Path
@@ -58,6 +60,8 @@ blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2
              background: #f5f9ff; color: #2c3e50; }
 hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
 a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
 ul, ol { padding-left: 1.5rem; }
 li { margin: .25rem 0; }
 @media (prefers-color-scheme: dark) {
@@ -70,22 +74,56 @@ li { margin: .25rem 0; }
 """
 
 
-def inline(text: str) -> str:
+def inline(
+    text: str,
+    *,
+    asset_base: Path | None = None,
+    embed_images: bool = False,
+) -> str:
     """Escape, then re-introduce the inline markup we actually use."""
+    images: dict[str, str] = {}
+
+    def image_tag(match: re.Match[str]) -> str:
+        alt, source = match.group(1), match.group(2)
+        resolved_source = source
+        if embed_images and asset_base is not None and "://" not in source:
+            image_path = (asset_base / source).resolve()
+            if image_path.is_file():
+                mime = mimetypes.guess_type(image_path.name)[0] or "application/octet-stream"
+                payload = base64.b64encode(image_path.read_bytes()).decode("ascii")
+                resolved_source = f"data:{mime};base64,{payload}"
+        token = f"CODEX_IMAGE_PLACEHOLDER_{len(images)}"
+        images[token] = (
+            f'<img src="{html.escape(resolved_source, quote=True)}" '
+            f'alt="{html.escape(alt, quote=True)}">'
+        )
+        return token
+
+    text = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", image_tag, text)
     out = html.escape(text)
     out = re.sub(r"`([^`]+)`", r"<code>\1</code>", out)
     out = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", out)
     out = re.sub(r"(?<![*\w])\*([^*\n]+)\*(?![*\w])", r"<em>\1</em>", out)
     out = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', out)
+    for token, tag in images.items():
+        out = out.replace(token, tag)
     return out
 
 
-def convert(md: str) -> str:
+def convert(
+    md: str,
+    *,
+    asset_base: Path | None = None,
+    embed_images: bool = False,
+) -> str:
     lines = md.splitlines()
     out: list[str] = []
     i, n = 0, len(lines)
     in_code = False
     list_tag: str | None = None
+
+    def render_inline(text: str) -> str:
+        return inline(text, asset_base=asset_base, embed_images=embed_images)
 
     def close_list() -> None:
         nonlocal list_tag
@@ -134,11 +172,11 @@ def convert(md: str) -> str:
             def cells(row: str) -> list[str]:
                 return [c.strip() for c in row.strip().strip("|").split("|")]
             out.append("<table><thead><tr>")
-            out += [f"<th>{inline(c)}</th>" for c in cells(line)]
+            out += [f"<th>{render_inline(c)}</th>" for c in cells(line)]
             out.append("</tr></thead><tbody>")
             i += 2
             while i < n and lines[i].strip().startswith("|"):
-                out.append("<tr>" + "".join(f"<td>{inline(c)}</td>"
+                out.append("<tr>" + "".join(f"<td>{render_inline(c)}</td>"
                                             for c in cells(lines[i])) + "</tr>")
                 i += 1
             out.append("</tbody></table>")
@@ -148,7 +186,7 @@ def convert(md: str) -> str:
         if m:
             close_list()
             lvl = len(m.group(1))
-            out.append(f"<h{lvl}>{inline(m.group(2))}</h{lvl}>")
+            out.append(f"<h{lvl}>{render_inline(m.group(2))}</h{lvl}>")
             i += 1
             continue
 
@@ -167,7 +205,7 @@ def convert(md: str) -> str:
                    and lines[i][:1].isspace()):
                 item_lines.append(lines[i].strip())
                 i += 1
-            out.append(f"<li>{inline(' '.join(item_lines))}</li>")
+            out.append(f"<li>{render_inline(' '.join(item_lines))}</li>")
             continue
 
         if line.startswith(">"):
@@ -176,7 +214,7 @@ def convert(md: str) -> str:
             while i < n and lines[i].startswith(">"):
                 buf.append(lines[i].lstrip("> ").rstrip())
                 i += 1
-            out.append(f"<blockquote>{inline(' '.join(buf))}</blockquote>")
+            out.append(f"<blockquote>{render_inline(' '.join(buf))}</blockquote>")
             continue
 
         if re.match(r"^\s*(---+|___+|\*\*\*+)\s*$", line):
@@ -196,7 +234,7 @@ def convert(md: str) -> str:
         while i < n and not block_start(i):
             paragraph.append(lines[i].strip())
             i += 1
-        out.append(f"<p>{inline(' '.join(paragraph))}</p>")
+        out.append(f"<p>{render_inline(' '.join(paragraph))}</p>")
 
     if in_code:
         out.append("</code></pre>")
@@ -228,7 +266,7 @@ def main() -> int:
                f'<meta name="viewport" content="width=device-width,initial-scale=1">\n'
                f'<link rel="icon" href="data:,">\n'
                f'<title>{html.escape(title)}</title>\n<style>{CSS}</style>\n'
-               f'</head>\n<body>\n{convert(md)}\n</body>\n</html>\n')
+               f'</head>\n<body>\n{convert(md, asset_base=p.parent, embed_images=True)}\n</body>\n</html>\n')
         dst = out_dir / (p.stem + ".html")
         dst.write_text(doc, encoding="utf-8")
         made.append(dst)
