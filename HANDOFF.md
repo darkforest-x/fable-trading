@@ -4,6 +4,45 @@
 
 ## ⚡ 当前真相（2026-08-12 — Positive语义基本成立，连续判别边界失败）
 
+**最新进展（2026-08-12，当前会话额度交接）：Owner已批准构建“早期启动前沿 YES / 相似NO”
+语义发现集；工作尚未完成，禁止误报为已有300张审核包。** 已完成并推送第一版构建器与单测：
+commit=`78fbff4fe76c28ed935f27ccdbaa6ca24131e8cd`（`origin/main`同SHA），文件
+`scripts/build_local_signal_v2_early_frontier_review.py`与
+`tests/test_build_local_signal_v2_early_frontier_review.py`，首次12项相关测试通过。原计划扫描8个全新
+post-train/pre-holdout时间块（2026-03-17至2026-04-28）；16份因果/未来快照已在本机生成，均
+`holdout_rows_materialized=0`，但RTX 3060当前不在局域网，本机MPS完整W12–19扫描实测过慢，
+两次试跑均已手动停止，**没有产生可用events，也没有读取holdout**。
+
+为避免卡数小时，已开始把构建器改为使用现有B01–B05/C01–C05冻结扫描池中“从未展示、从未
+进入训练”的剩余事件：两个候选池合计1,484事件；精确剔除此前4个审核包700个唯一event_id后，
+剩784个未审事件（B池417：B02=128/B03=139/B04=150；C池367：C01=124/C03=38/
+C04=15/C05=190），足够构建300张。计划内部盲抽150个“接近上一轮11个Canary YES”的候选，
+另150个“YES邻域但更靠近89个NO一侧”的边界候选；这两个名字只用于内部抽样，UI不显示、
+不预选答案。排序只用decision及之前OHLC与SMA/EMA20/60/120，未来48根仅在选中后生成右侧人工
+对照。该包是**主动发现集，不是独立precision验收集**。
+
+**当前工作树状态（下一个模型必须先看）：** `scripts/build_local_signal_v2_early_frontier_review.py`
+有未提交适配改动，`py_compile`已通过，但原单测仍按8个D块编写，需改为10个B/C块后重跑；
+审核包`analysis/output/local_signal_v2_early_frontier_review300_v1`尚不存在。另有Owner原本的无关
+改动`output/playwright/eth3m-v2-problem-report-mobile.png`，严禁覆盖或提交。临时目录
+`analysis/output/local_signal_v2_early_frontier_blocks_v1/`是本会话生成的8组未用快照，未入git；
+确认改走784个冻结余量后可精确删除该目录，不能碰其他`analysis/output`。
+
+**下一步精确顺序：**
+
+1. 完成当前builder适配并更新单测：验证700个已审ID全部排除、候选池=784、最终300唯一事件、
+   内部150/150、0默认裁决、0 training-eligible、future selection=false、全部未来结束早于holdout。
+2. 在main上只提交builder+test并`git push origin HEAD:main`；必须先提交builder再生成产物。
+3. 运行：`PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/build_local_signal_v2_early_frontier_review.py --frozen-main-commit 84501ad199034a8ffac8f9091a0015a55ccde54b`。
+4. 输出PRE-REVIEW MD+HTML，报告必须说明“784未审余量中主动检索300”，不能说新时间块/独立验收；
+   浏览器验证左右图清晰、右图48根、Y/N/S与方向键、自动保存与中断恢复。
+5. 跑全测；按learning law写`docs/learnings/`；提交并推送全部必要manifest、300组独立图片、
+   audits、README、HTML/MD报告。启动
+   `scripts/serve_local_signal_v2_semantic_review.py --out analysis/output/local_signal_v2_early_frontier_review300_v1 --port 8766`，然后停止等待Owner审核。
+
+**本阶段铁禁：** 不训练R3/R4、不改positive标签、conf、NMS、窗口、ACTIVE，不deploy、不下单、
+不清forward log、不读取`>=2026-05-04` holdout。Owner本次“可以”只批准语义审核包。
+
 **最新进展（2026-08-12 12:40 CST）：Owner批准的只读边界诊断已完成，根因进一步收敛为
 “尺度分布偏移 + 启动释放语义未学稳 + 正例成熟度偏后”，禁止据此直接开R3。** 200条审核样本
 逐条联结原始causal OHLC并复算：200/200 source lineage与model-input SHA通过，最大物化时间
