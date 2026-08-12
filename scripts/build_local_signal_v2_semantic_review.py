@@ -713,7 +713,7 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
             "confidence": distributions(positive_selected, "confidence_stratum_internal"),
             "volatility": distributions(positive_selected, "volatility_stratum_internal"),
             "core_bars": distributions(positive_selected, "core_stratum_internal"),
-            "selection_rule": "deterministic round-robin over split/time/position/core strata with symbol caps",
+            "selection_rule": "deterministic round-robin over split/time/position/confidence/volatility/core strata with symbol caps",
         },
         "canary": {
             "population_decomposition": canary_decomposition,
@@ -723,7 +723,7 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
             "confidence": distributions(canary_selected, "confidence_stratum_internal"),
             "time": distributions(canary_selected, "time_stratum_internal"),
             "volatility": distributions(canary_selected, "volatility_stratum_internal"),
-            "selection_rule": "frozen 50 common / 25 R2-new / 25 R1-suppressed, deterministic round-robin by confidence/time with symbol caps",
+            "selection_rule": "frozen 50 common / 25 R2-new / 25 R1-suppressed, deterministic round-robin by confidence/time/volatility with symbol caps",
         },
         "owner_ui_blinded_fields": ["source_type", "source_model", "model_confidence", "canary_cohort"],
         "owner_verdicts_preselected": 0,
