@@ -30,7 +30,16 @@
   这是唯一一次拿到干净输出的形式（`ps-ok cwd=C:\Users\zzc`，无 CLIXML 噪声，无引号地狱）。
   但**它只在会话干净时有效**。
 
-- **真正的病根**：这台机器上的 ssh **exec 通道跑完命令也不关闭**。每探测一次就留下一个
+- **决定性的一刀：分别测 sftp 和 exec**。
+  `sftp` 2 秒连上、`ls` 正常、干净退出；`scp` 每次都成功。而 `ssh host "cmd"` 连上后
+  什么都不跑、也不关闭。**sftp-server 是独立子系统，不走 `DefaultShell`；exec 走。**
+  两者一好一坏 ⇒ 病在 **sshd 的 shell 配置**，不在网络、不在认证、不在机器负载。
+  （顺手用 sftp 查了候选 shell：`powershell.exe` 5.1 和 `cmd.exe` 都在，
+  **`C:\Program Files\PowerShell\7\pwsh.exe` 不存在** —— 若 `DefaultShell` 指向它，
+  症状会与观察到的完全一致。）
+  修复只能在机器上做（读/改 `HKLM:\SOFTWARE\OpenSSH\DefaultShell` 后重启 sshd）。
+
+- **另一个真实病根**：这台机器上的 ssh **exec 通道跑完命令也不关闭**。每探测一次就留下一个
   卡住的会话；会话越堆越多，新连接越来越慢，最后完全不回。所以：
   - codex 早些时候能连上（那时干净），我后来连不上（我自己把它探坏了）；
   - `$(ssh ...)` 命令替换会一直等 EOF ⇒ 整套自动化**静默变成永久挂起，而不是失败**。
