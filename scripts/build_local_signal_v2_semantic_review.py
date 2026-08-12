@@ -117,6 +117,15 @@ def json_sha256(value: object) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def portable_artifact_path(path: Path) -> str:
+    """Use repo-relative lineage locally and an absolute path for external rebuilds."""
+    resolved = path.resolve()
+    try:
+        return str(resolved.relative_to(ROOT.resolve()))
+    except ValueError:
+        return str(resolved)
+
+
 def bucket(value: float, cuts: tuple[float, float]) -> str:
     if value < cuts[0]:
         return "low"
@@ -590,12 +599,12 @@ def render_positive(row: dict[str, Any], output: Path, review_id: str) -> dict[s
         "source_manifest_reference": str(DEFAULT_POSITIVE_MANIFEST.relative_to(ROOT)),
         "label_sha256": str(row["label_sha256"]),
         "source_image_sha256": str(row["image_sha256"]),
-        "image_path": str(path.relative_to(ROOT)),
+        "image_path": portable_artifact_path(path),
         "image_sha256": sha256_file(path),
-        "model_input_path": str(model_path.relative_to(ROOT)),
+        "model_input_path": portable_artifact_path(model_path),
         "model_input_sha256": sha256_file(model_path),
         "causal_review_actual_span_pct": causal_span,
-        "future_review_path": str(future_path.relative_to(ROOT)),
+        "future_review_path": portable_artifact_path(future_path),
         "future_review_sha256": sha256_file(future_path),
         "future_review_bars": FUTURE_REVIEW_BARS,
         "future_review_end_time": utc(future_frame["open_time"].iloc[-1]).isoformat(),
@@ -670,12 +679,12 @@ def render_canary(row: dict[str, Any], frame: pd.DataFrame, output: Path, review
         ),
         "label_sha256": None,
         "source_image_sha256": None,
-        "image_path": str(path.relative_to(ROOT)),
+        "image_path": portable_artifact_path(path),
         "image_sha256": sha256_file(path),
-        "model_input_path": str(model_path.relative_to(ROOT)),
+        "model_input_path": portable_artifact_path(model_path),
         "model_input_sha256": sha256_file(model_path),
         "causal_review_actual_span_pct": causal_span,
-        "future_review_path": str(future_path.relative_to(ROOT)),
+        "future_review_path": portable_artifact_path(future_path),
         "future_review_sha256": sha256_file(future_path),
         "future_review_bars": future_bars,
         "future_review_end_time": utc(future_frame["open_time"].iloc[-1]).isoformat(),
@@ -1013,7 +1022,7 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
         "training_eligible": 0,
         "production_eligible": False,
         "holdout_read": False,
-        "manifest": str(manifest.relative_to(ROOT)),
+        "manifest": portable_artifact_path(manifest),
         "manifest_sha256": sha256_file(manifest),
         "image_tree_sha256": json_sha256(sorted(row["image_sha256"] for row in blinded)),
         "model_input_tree_sha256": json_sha256(
@@ -1025,7 +1034,7 @@ PYTHONPATH=.:/Users/zhangzc/yoyo-trading .venv/bin/python scripts/serve_local_si
         "sampling_audit_sha256": sha256_file(output / "sampling_audit.json"),
         "causality_audit_sha256": sha256_file(output / "causality_audit.json"),
         "freeze_receipt_sha256": sha256_file(output / "freeze_receipt.json"),
-        "review_html": str(html_path.relative_to(ROOT)),
+        "review_html": portable_artifact_path(html_path),
         "review_html_sha256": sha256_file(html_path),
         "readme_sha256": sha256_file(readme),
         "quality_gates": {

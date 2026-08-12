@@ -6,11 +6,21 @@ from scripts.build_local_signal_v2_semantic_review import (
     CANARY_QUOTAS,
     draw_decision_boundary,
     pair_canary_events,
+    portable_artifact_path,
     render_review_html,
     round_robin_stratified,
     tercile_bucket,
 )
 import numpy as np
+
+
+def test_portable_artifact_path_supports_repo_and_external_rebuilds(tmp_path, monkeypatch) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    monkeypatch.setattr(semantic_review, "ROOT", repo)
+    assert portable_artifact_path(repo / "analysis" / "x.png") == "analysis/x.png"
+    external = tmp_path / "external" / "x.png"
+    assert portable_artifact_path(external) == str(external.resolve())
 
 
 def test_pair_canary_events_reproduces_retained_and_unique_sets() -> None:
