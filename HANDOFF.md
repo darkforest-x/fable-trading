@@ -2,7 +2,24 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-12 — 拿到119个早期前沿YES；主动检索机制被证伪，块效应主导）
+## ⚡ 当前真相（2026-08-13 — ETH全年冻结形态门命中2次；1参考+1待Owner确认）
+
+**最新进展（2026-08-13 17:44 CST）：Owner要求统计今年ETH有多少次8月10日参考形态，冻结门
+v1已一次性扫完。** 覆盖2026-01-01至08-13 17:15 CST、21,542根连续ETH永续15m bar，0缺口；
+本地规范文件止于08-05，缺失后缀用同一OKX history-candles公共接口只读内存补齐900行，未写
+`data/kline_fetched`。核心门只用结束bar及以前OHLC、8根前文、ATR14和六均线；后3/5根只作
+事后确认标签。扫描前冻结门、扫描后未调参，11个宽度组合→4个端点→12-bar去重为**2个事件**：
+①Owner参考本身，2026-08-10 19:30–20:15 CST，4根；②唯一新候选，2026-02-22
+19:00–20:15 CST，6根。Codex视觉复核第二张相似，但不得冒充Owner金标；当前口径是机器候选2、
+Owner语义确认1、待确认1，且两张核心几何均未获Owner逐bar确认。该冻结门读取9,734根holdout，
+登记为配置第1次且由本轮“找今年有多少”的请求明确授权；所有产物`training_eligible=false /
+production_eligible=false`，不训练、不promote、不部署。报告：
+`analysis/html/p2_eth_yearly_morphology_count_20260813.html`；对照图与manifest：
+`analysis/output/eth_yearly_morphology_gate_v1/`；builder先由commit `afad164`入库。下一步只等Owner
+对2月22日候选回复YES/NO。正确项目环境全测712 passed、2 skipped；系统Python曾因缺少yoyo/
+ultralytics在收集期失败，未当代码失败或通过隐去。
+
+**上一进展（2026-08-12 — 拿到119个早期前沿YES；主动检索机制被证伪，块效应主导）：**
 
 **最新进展（2026-08-12 13:47 CST）：Owner已完成300张早期前沿审核，解盲诊断完成；
 检索分层零区分度，时间块解释几乎全部方差；等待Owner在A–E选项中点头，不得自动开R3。**
