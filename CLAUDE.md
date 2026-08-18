@@ -121,6 +121,13 @@
   `git log --diff-filter=A` 的 builder 首次入库时间 = 跑出它的代码不在 git 里，
   一切复现声明未经验证。**先提交 builder，再跑构建。**
   见 `docs/learnings/artifacts-built-before-their-builder-landed.md`。
+- **把"币波动高"和"这根波动在扩张"当成一个变量** → 这是两条方向相反的轴：币层波动水平
+  在因果排名下是倒 U（榜单前 10% 超额胜率 t=1.32≈0），而 bar 层相对自身扩张 +9.21pp（p=5e-5）。
+  用 bp 判永远判不清（TP/SL 精确 ±5/2 ATR），必须换 ATR 单位或胜率；见
+  `docs/learnings/volatility-level-and-volatility-expansion-are-opposite-axes.md`。
+- **按"当前涨跌幅榜单"挑币回测** → 排名窗必须在交易窗之前闭合。同窗排名下"高波动更赚"是单调的，
+  换成上月排名单调性当场消失；见
+  `docs/learnings/symbol-ranking-window-must-end-before-the-trading-window.md`。
 - **改一道新鲜度门忘了另两道** → 三门必须同值，见实盘纪律 7。
 - **往脉冲里塞实验扫描** → 超 15min 节拍 = 结构性挡 tip；见实盘纪律 8。
 - **自动 promote / 清 forward_log** → 禁止；owner 点头。

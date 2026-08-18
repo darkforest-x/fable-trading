@@ -1,0 +1,59 @@
+<!doctype html><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>未匹配开火复核</title><style>
+:root{color-scheme:dark}
+body{margin:0;background:#0d1117;color:#c9d1d9;font:14px/1.5 -apple-system,system-ui,sans-serif}
+header{position:sticky;top:0;background:#161b22;border-bottom:1px solid #30363d;padding:12px 16px;z-index:9}
+h1{margin:0 0 2px;font-size:17px} .q{color:#58a6ff;font-size:15px;font-weight:600}
+img{width:100%;max-width:900px;display:block;margin:8px auto;border:1px solid #30363d;border-radius:6px}
+.meta{color:#8b949e;font-size:12px} kbd{background:#21262d;border:1px solid #30363d;border-radius:4px;padding:2px 8px}
+.keys{margin-top:8px;font-size:14px} .keys b{color:#3fb950}
+button{background:#21262d;color:#c9d1d9;border:1px solid #30363d;border-radius:6px;padding:6px 12px;cursor:pointer}
+.lab{text-align:center;color:#8b949e;font-size:12px;margin-top:6px}
+.done{color:#3fb950;font-weight:600}
+</style>
+<header>
+<h1><span id="pos"></span> · 已判 <span class="done" id="done">0</span>/<span id="tot"></span>
+&nbsp;<button onclick="dl()">导出 JSONL</button></h1>
+<div class="q">模型在这里开了一枪。这是不是一个你要的形态？</div>
+<div class="keys"><b><kbd>Y</kbd> 是</b>　<kbd>N</kbd> 不是　<kbd>S</kbd> 说不准　<kbd>←</kbd> 上一个</div>
+<div class="meta" id="info"></div>
+</header>
+<img id="s"><div class="lab">↑ 模型实际看到的 16 根（黄框 = 模型的检出）</div>
+<img id="w"><div class="lab">↑ 同一时刻的 200 根上下文（决策点 = 图最右）</div>
+<div id="fw">
+<img id="f"><div class="lab" id="mv"></div>
+</div>
+
+<script>
+const IT=[{"rid": "u_410be1f974", "symbol": "BABY_USDT_SWAP", "t": "2026-03-16 14:30:00+00:00", "move": {"low_pct": -6.25, "high_pct": 11.44, "end_pct": -2.84, "bars": 48}}, {"rid": "u_6c636d3e7c", "symbol": "ACH_USDT_SWAP", "t": "2026-04-12 17:45:00+00:00", "move": {"low_pct": -0.41, "high_pct": 7.11, "end_pct": 4.99, "bars": 48}}, {"rid": "u_41955938cf", "symbol": "AR_USDT_SWAP", "t": "2026-03-18 12:30:00+00:00", "move": {"low_pct": -4.5, "high_pct": 0.0, "end_pct": -3.55, "bars": 48}}, {"rid": "u_eac55b4ceb", "symbol": "EIGEN_USDT", "t": "2026-03-06 05:30:00+00:00", "move": {"low_pct": -6.89, "high_pct": 1.08, "end_pct": -6.58, "bars": 48}}, {"rid": "u_5749931fec", "symbol": "ADA_USDT", "t": "2026-03-20 08:45:00+00:00", "move": {"low_pct": -3.32, "high_pct": -0.07, "end_pct": -2.55, "bars": 48}}, {"rid": "u_77808638fd", "symbol": "ACH_USDT_SWAP", "t": "2026-02-03 09:00:00+00:00", "move": {"low_pct": -4.86, "high_pct": 3.03, "end_pct": 1.54, "bars": 48}}, {"rid": "u_4f827d2e9d", "symbol": "AR_USDT_SWAP", "t": "2026-03-29 11:15:00+00:00", "move": {"low_pct": -3.26, "high_pct": 0.3, "end_pct": -1.48, "bars": 48}}, {"rid": "u_702bbbf9c4", "symbol": "BABY_USDT_SWAP", "t": "2026-02-03 00:30:00+00:00", "move": {"low_pct": -2.57, "high_pct": 1.49, "end_pct": -1.73, "bars": 48}}, {"rid": "u_3b1ae82795", "symbol": "BCH_USDT", "t": "2026-02-16 10:45:00+00:00", "move": {"low_pct": -1.0, "high_pct": 4.34, "end_pct": 2.23, "bars": 48}}, {"rid": "u_3fbabc6e38", "symbol": "ACH_USDT_SWAP", "t": "2026-03-31 02:45:00+00:00", "move": {"low_pct": -1.48, "high_pct": 0.67, "end_pct": -0.03, "bars": 48}}, {"rid": "u_767fbe95cd", "symbol": "BOME_USDT_SWAP", "t": "2026-03-13 01:30:00+00:00", "move": {"low_pct": -1.63, "high_pct": 7.32, "end_pct": 7.32, "bars": 48}}, {"rid": "u_c63ba6860f", "symbol": "BCH_USDT", "t": "2026-03-13 22:30:00+00:00", "move": {"low_pct": -1.37, "high_pct": 0.52, "end_pct": -1.13, "bars": 48}}, {"rid": "u_179e87f6c5", "symbol": "EIGEN_USDT", "t": "2026-04-22 00:30:00+00:00", "move": {"low_pct": -0.5, "high_pct": 10.4, "end_pct": 4.29, "bars": 48}}, {"rid": "u_4a7504b210", "symbol": "ADA_USDT", "t": "2026-03-06 14:45:00+00:00", "move": {"low_pct": -1.2, "high_pct": 0.73, "end_pct": 0.31, "bars": 48}}, {"rid": "u_c421fd3dd0", "symbol": "EGLD_USDT_SWAP", "t": "2026-04-26 01:30:00+00:00", "move": {"low_pct": -0.3, "high_pct": 4.82, "end_pct": 2.43, "bars": 48}}, {"rid": "u_3dc63a36be", "symbol": "BOME_USDT_SWAP", "t": "2026-04-13 17:45:00+00:00", "move": {"low_pct": -0.45, "high_pct": 13.35, "end_pct": 5.36, "bars": 48}}, {"rid": "u_db4cb64095", "symbol": "0G_USDT_SWAP", "t": "2026-05-03 12:30:00+00:00", "move": {"low_pct": -1.96, "high_pct": 0.21, "end_pct": -1.47, "bars": 48}}, {"rid": "u_e3afdf6e9e", "symbol": "ACH_USDT_SWAP", "t": "2026-02-03 18:15:00+00:00", "move": {"low_pct": -0.7, "high_pct": 7.53, "end_pct": 5.42, "bars": 48}}, {"rid": "u_573be36013", "symbol": "BCH_USDT", "t": "2026-03-04 06:30:00+00:00", "move": {"low_pct": -0.43, "high_pct": 7.09, "end_pct": 6.34, "bars": 48}}, {"rid": "u_c4bcdb3a85", "symbol": "BOME_USDT_SWAP", "t": "2026-02-27 13:00:00+00:00", "move": {"low_pct": -4.46, "high_pct": 0.15, "end_pct": -1.42, "bars": 48}}, {"rid": "u_bfe53436f2", "symbol": "EIGEN_USDT", "t": "2026-02-16 17:30:00+00:00", "move": {"low_pct": -0.58, "high_pct": 2.83, "end_pct": 1.49, "bars": 48}}, {"rid": "u_6fb40fec5c", "symbol": "CRV_USDT_SWAP", "t": "2026-05-02 17:15:00+00:00", "move": {"low_pct": -0.6, "high_pct": 2.31, "end_pct": -0.17, "bars": 48}}, {"rid": "u_51c9641b97", "symbol": "BCH_USDT", "t": "2026-02-19 10:15:00+00:00", "move": {"low_pct": -1.68, "high_pct": 2.77, "end_pct": 2.26, "bars": 48}}, {"rid": "u_dcb24bc1c1", "symbol": "AI_USDT_SWAP", "t": "2026-05-03 11:30:00+00:00", "move": {"low_pct": -7.71, "high_pct": 10.24, "end_pct": 6.3, "bars": 48}}, {"rid": "u_db6970536e", "symbol": "AR_USDT_SWAP", "t": "2026-02-25 11:45:00+00:00", "move": {"low_pct": -9.74, "high_pct": 17.36, "end_pct": 5.43, "bars": 48}}, {"rid": "u_110fee8c9e", "symbol": "BCH_USDT", "t": "2026-02-18 11:45:00+00:00", "move": {"low_pct": -1.48, "high_pct": 1.0, "end_pct": -0.23, "bars": 48}}, {"rid": "u_db29f7945f", "symbol": "BOME_USDT_SWAP", "t": "2026-04-07 21:15:00+00:00", "move": {"low_pct": 0.0, "high_pct": 7.46, "end_pct": 6.56, "bars": 48}}, {"rid": "u_c3d0130cab", "symbol": "0G_USDT_SWAP", "t": "2026-03-17 06:15:00+00:00", "move": {"low_pct": -1.44, "high_pct": 0.84, "end_pct": -0.67, "bars": 48}}, {"rid": "u_52796e59f0", "symbol": "BABY_USDT_SWAP", "t": "2026-04-13 20:30:00+00:00", "move": {"low_pct": -1.18, "high_pct": 6.33, "end_pct": 3.69, "bars": 48}}, {"rid": "u_55a10b2627", "symbol": "CRV_USDT_SWAP", "t": "2026-02-13 09:30:00+00:00", "move": {"low_pct": -0.95, "high_pct": 5.27, "end_pct": 4.9, "bars": 48}}, {"rid": "u_463238d22d", "symbol": "EIGEN_USDT", "t": "2026-03-11 13:30:00+00:00", "move": {"low_pct": -1.69, "high_pct": 0.63, "end_pct": -1.53, "bars": 48}}, {"rid": "u_b0cf6608fe", "symbol": "ACH_USDT_SWAP", "t": "2026-02-12 06:00:00+00:00", "move": {"low_pct": -1.61, "high_pct": 3.96, "end_pct": 0.12, "bars": 48}}, {"rid": "u_05d410d7db", "symbol": "BABY_USDT_SWAP", "t": "2026-03-27 11:30:00+00:00", "move": {"low_pct": -1.25, "high_pct": 1.88, "end_pct": 0.08, "bars": 48}}, {"rid": "u_28b7913273", "symbol": "BZ_USDT_SWAP", "t": "2026-04-21 09:30:00+00:00", "move": {"low_pct": -0.71, "high_pct": 5.6, "end_pct": 3.72, "bars": 48}}, {"rid": "u_3dc0fd4272", "symbol": "EGLD_USDT_SWAP", "t": "2026-03-18 06:00:00+00:00", "move": {"low_pct": -6.59, "high_pct": 0.62, "end_pct": -5.56, "bars": 48}}, {"rid": "u_d20b4908b6", "symbol": "ACH_USDT_SWAP", "t": "2026-03-25 02:00:00+00:00", "move": {"low_pct": -0.49, "high_pct": 0.9, "end_pct": -0.15, "bars": 48}}, {"rid": "u_c46e00bf1e", "symbol": "AR_USDT_SWAP", "t": "2026-04-20 10:15:00+00:00", "move": {"low_pct": -1.38, "high_pct": 3.96, "end_pct": 0.95, "bars": 48}}, {"rid": "u_dec50fcb24", "symbol": "ACH_USDT_SWAP", "t": "2026-04-30 12:45:00+00:00", "move": {"low_pct": -5.94, "high_pct": 0.67, "end_pct": -5.35, "bars": 48}}, {"rid": "u_d6a85b7f5c", "symbol": "EIGEN_USDT", "t": "2026-04-28 18:45:00+00:00", "move": {"low_pct": -0.22, "high_pct": 5.8, "end_pct": 5.08, "bars": 48}}, {"rid": "u_665286c539", "symbol": "BABY_USDT_SWAP", "t": "2026-02-20 12:30:00+00:00", "move": {"low_pct": -3.37, "high_pct": 0.67, "end_pct": 0.0, "bars": 48}}, {"rid": "u_d1abe3f209", "symbol": "BOME_USDT_SWAP", "t": "2026-04-28 15:15:00+00:00", "move": {"low_pct": -1.27, "high_pct": 0.49, "end_pct": 0.39, "bars": 48}}, {"rid": "u_481bcf32b4", "symbol": "EIGEN_USDT", "t": "2026-02-13 15:45:00+00:00", "move": {"low_pct": -0.05, "high_pct": 3.96, "end_pct": 3.42, "bars": 48}}, {"rid": "u_03ddb8fa03", "symbol": "BOME_USDT_SWAP", "t": "2026-03-11 14:45:00+00:00", "move": {"low_pct": -1.1, "high_pct": 3.6, "end_pct": 0.21, "bars": 48}}, {"rid": "u_fba13492a7", "symbol": "BABY_USDT_SWAP", "t": "2026-02-11 21:00:00+00:00", "move": {"low_pct": -1.55, "high_pct": 2.21, "end_pct": 0.96, "bars": 48}}, {"rid": "u_48b069e7d0", "symbol": "AR_USDT_SWAP", "t": "2026-03-10 08:15:00+00:00", "move": {"low_pct": -0.5, "high_pct": 5.46, "end_pct": 2.67, "bars": 48}}, {"rid": "u_4b910b13d7", "symbol": "BCH_USDT", "t": "2026-02-19 19:45:00+00:00", "move": {"low_pct": -0.95, "high_pct": 0.93, "end_pct": -0.05, "bars": 48}}, {"rid": "u_534ff773a3", "symbol": "CRV_USDT_SWAP", "t": "2026-03-26 05:30:00+00:00", "move": {"low_pct": -2.44, "high_pct": 0.44, "end_pct": -2.13, "bars": 48}}, {"rid": "u_48a4f6b07b", "symbol": "BCH_USDT", "t": "2026-02-22 05:30:00+00:00", "move": {"low_pct": -0.16, "high_pct": 3.24, "end_pct": 0.88, "bars": 48}}, {"rid": "u_b0dd614308", "symbol": "CRV_USDT_SWAP", "t": "2026-05-03 20:30:00+00:00", "move": {"low_pct": -1.66, "high_pct": 3.57, "end_pct": 1.91, "bars": 48}}, {"rid": "u_385df1d527", "symbol": "EIGEN_USDT", "t": "2026-02-21 16:30:00+00:00", "move": {"low_pct": -4.06, "high_pct": 0.46, "end_pct": -3.91, "bars": 48}}];
+const K='unmatched_review_v1';
+let ans=JSON.parse(localStorage.getItem(K)||'{}'), i=0, seen=true;
+const $=s=>document.querySelector(s);
+function render(){
+  const it=IT[i]; if(!it) return;
+  $('#s').src='img/'+it.rid+'_s.jpg'; $('#w').src='img/'+it.rid+'_w.jpg';
+  $('#pos').textContent=(i+1)+' / '+IT.length; $('#tot').textContent=IT.length;
+  $('#done').textContent=Object.keys(ans).length;
+  $('#f').src='img/'+it.rid+'_f.jpg';
+  const m=it.move||{};
+  $('#mv').textContent = m.bars ? ('↑ 后续 '+m.bars+' 根：最低 '+m.low_pct+'%　最高 '+m.high_pct+'%　收于 '+m.end_pct+'%') : '';
+  const a=ans[it.rid];
+  $('#info').textContent=(a?('已判: '+a.v+(a.seen?'':'')+'　'):'')+it.symbol+' · '+it.t;
+}
+function set(v){ ans[IT[i].rid]={v:v, seen:seen}; localStorage.setItem(K,JSON.stringify(ans));
+  if(i<IT.length-1){i++;} render(); }
+function dl(){
+  const lines=IT.map(it=>{const a=ans[it.rid]||{};
+    return JSON.stringify({rid:it.rid,symbol:it.symbol,t:it.t,
+      verdict:a.v||null, future_seen:!!a.seen, move:it.move||null, reviewer:'owner'});});
+  const b=new Blob([lines.join('\n')+'\n'],{type:'application/x-ndjson'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download='unmatched_verdicts.jsonl';a.click();
+}
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();
+  if(k===' '){e.preventDefault(); seen=true; render(); return;}
+  if(k==='y')set('YES'); else if(k==='n')set('NO'); else if(k==='s')set('SKIP');
+  else if(k==='arrowleft'){if(i>0){i--;} render();}});
+render();
+</script>
