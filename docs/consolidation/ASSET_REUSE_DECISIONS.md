@@ -61,3 +61,14 @@
 | `darkforest-one` | `src/darkforest_one/{cli,candidate,strategy,execution}/` | `REJECT` | 第二套完整 package 根、第二个 CLI、第二份 ETH 数据、未接入实际系统的 paper 外壳。任务书 §8.1 明列禁止。 |
 | 本仓新建 | `yoyo/contracts/holdout.py` | 新增（非迁移） | 收敛后 holdout 边界在本仓有 **11 处定义、6 个不同名字**（`HOLDOUT_START` / `HOLDOUT_CUTOFF` / `HOLD_DEFAULT` / `ACCEPT_START` / `holdout_start_exclusive` / `data_end_boundary`）。今天全部一致，但没有任何东西让它们一致。本模块是唯一定义；**不改动其余 11 处**（那是在动运行中的代码），改由 `tests/causality/test_holdout_boundary_is_single_valued.py` 逐个读出来比对，任何一处漂移当场红。 |
 | 本仓新建 | `yoyo/evaluation/{walk_forward,matched_controls,permutation,economic_gates}.py` | 新增（非迁移） | 四个仓在用四套写法回答同样四个问题。合并为一套：purge/embargo 切分（yoyo-eth 的 fold 布局 + darkforest-one 的 purge 设计 + **新增的事后泄漏断言**，两个来源仓都只依赖切分函数写对、没有事后校验）；匹配对照（采用 darkforest-one 的 sha256 确定性选择，优于 yoyo-eth 依赖循环顺序的 rng）；置换检验（p 值用 (r+1)/(n+1)，永不返回 0）；三重经济门（净收益 > 0、p < 0.01、跑赢匹配对照，缺一不可，且对照组是**必填参数**——设成可选就等于给"忘了带对照"留了个看起来正常的短签名）。 |
+
+## C4 — Pattern Teacher 与 proposal 语义隔离
+
+| 来源 | 资产 | 裁决 | 理由 |
+|---|---|---|---|
+| `fable-trading`（本仓已有） | `models/owner_v10_chain.pt` 等 3 个权重 | `REFERENCE_ONLY`（登记不复制） | 物理文件已在本仓，登记同一 artifact_id + SHA-256，不创建第二份。v10_chain 的摘要与 yolo-xx `reports/pattern_teacher_asset_inventory.md` 独立记录的一致，且该清单已与 3060 上的 `best.pt`、`base_hts.pt` 三方核对——三个文件一个摘要。 |
+| `yolo-xx` | 3060 上的 59 个检测权重（`C:\fable`） | `REFERENCE_ONLY` | 任务书 §8.3 禁止把权重副本复制进来。登记为 `storage_uri: host://windows-3060/...`，并让"权重已被清除"不能再当作前提（见 `docs/learnings/purge-records-are-claims-not-facts.md`）。 |
+| `yolo-xx` | `src/yolo_xx/{predict,scan_predict,scan_set,train}.py` | `REJECT` | 已被替代的 bbox-only 默认 CLI；本仓 `yoyo/layers/l1_detection/candidates.py` 是主线检测路径，任务书 §8.3 明列禁止迁入。 |
+| `yolo-xx` | `src/yolo_xx/outcome.py` 及收益/判断层支线 | `REJECT` | 旧 outcome / 交易判断支线。yolo-xx 自己的 README 已声明这些是历史资产，不被新 core import、不作默认 CLI、不决定验收结论。 |
+| 本仓新建 | `yoyo/contracts/candidates.py` | 新增（非迁移） | CandidateProposal 合同。核心是把 `available_at` 定义为**生成器最后一根输入 K 线的收盘时间**，不是它画的框的右边界——两者之差恰好等于生成器看到的未来，混同就是"事后检测冒充新鲜信号"（铁律 12）。`production_eligible=True` 与 `training_eligible=True` 在构造函数里直接抛错，不是靠人记得。 |
+| 本仓新建 | `yoyo/layers/l1_detection/teacher/` | 新增（非迁移） | PatternTeacher Protocol + 注册闸门。teacher 只能通过 `artifacts/registry.yaml` 里登记过的 artifact 使用，且加载时校验磁盘文件仍然哈希得上——"这批候选是哪个模型产的"永远答得出来，被人偷换过的权重在加载时就被抓住，而不是在报告里被发现。 |

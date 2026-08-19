@@ -27,7 +27,7 @@ artifacts:
     source_repo: darkforest-x/fable-trading
     source_commit: "59e13a61c43e1e72f397f38985fd8c700533550b"
     source_path: models/owner_v10_chain.pt
-    sha256: null           # unhashed on purpose: see notes
+    sha256: "b9a84b5f5ebf0032dfa8ddf1ed1f12c19b7cc2d410a57480bd196d76cbc7d953"
     size_bytes: 19185754
     storage_uri: "file://models/owner_v10_chain.pt"
     holdout_status: historical
@@ -35,10 +35,13 @@ artifacts:
     production_eligible: false
     notes: >-
       Already present in this repository; registered rather than re-copied so
-      that one physical file keeps one identity. Left unhashed at C1 because
-      hashing it is a read of a 19 MB working artifact with no bearing on any
-      consolidation acceptance gate; hash it when something wants to promote it,
-      which the production_eligible=false above currently forbids.
+      that one physical file keeps one identity. The hash is the one yolo-xx
+      recorded independently in reports/pattern_teacher_asset_inventory.md and
+      cross-checked against the Windows 3060 copy and C:\fable\base_hts.pt --
+      three files, one digest. That inventory's SIZE field reads 18,185,754,
+      which is a typo for 19,185,754; the digest agrees, which is the whole
+      reason artifacts are identified by hash and not by size.
+      Lineage: yolo11s (COCO) -> v7_chain -> v8_chain -> v9_chain -> v10_chain.
 
   - artifact_id: owner-short-star-v10
     artifact_type: weights
@@ -46,7 +49,7 @@ artifacts:
     source_repo: darkforest-x/fable-trading
     source_commit: "59e13a61c43e1e72f397f38985fd8c700533550b"
     source_path: models/owner_short_star_v10.pt
-    sha256: null
+    sha256: "86d969c830189b2d1048dca24e10bacc27341e75643cf4f7a912e5a8d5542ad9"
     size_bytes: 19185818
     storage_uri: "file://models/owner_short_star_v10.pt"
     holdout_status: historical
@@ -61,7 +64,7 @@ artifacts:
     source_repo: darkforest-x/fable-trading
     source_commit: "59e13a61c43e1e72f397f38985fd8c700533550b"
     source_path: models/owner_v16_tipuni_cold.pt
-    sha256: null
+    sha256: "5c4eef0bb292f3343a58e5693a55e01c095d0422872d0671bdc436c401079d2d"
     size_bytes: 5480602
     storage_uri: "file://models/owner_v16_tipuni_cold.pt"
     holdout_status: historical
