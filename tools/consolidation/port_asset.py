@@ -112,7 +112,25 @@ def main() -> int:
     ap.add_argument("--max-bytes", type=int, default=DEFAULT_MAX_BYTES)
     ap.add_argument("--allow-large", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument(
+        "--record-only",
+        action="store_true",
+        help="do not copy; record an already-written destination. For an adaptation "
+        "that was rewritten by hand, so its provenance still goes through the ledger "
+        "rather than around it. Incompatible with DIRECT_PORT, which means bytes.",
+    )
     args = ap.parse_args()
+
+    reference_only = args.decision == "REFERENCE_ONLY"
+    if reference_only and args.record_only:
+        raise SystemExit(
+            "REFERENCE_ONLY already implies no copy; --record-only adds nothing"
+        )
+    if args.record_only and args.decision == "DIRECT_PORT":
+        raise SystemExit(
+            "--record-only with DIRECT_PORT is a contradiction: DIRECT_PORT asserts the "
+            "bytes are the source's, which is exactly what copying establishes"
+        )
 
     source_root = Path(args.source_root).expanduser().resolve()
     if not (source_root / ".git").exists():
@@ -135,13 +153,15 @@ def main() -> int:
         if src_rel in dirty:
             problems.append(f"source file is uncommitted, so source_commit would lie: {src_rel}")
     for src_abs, dest_rel, src_rel, _ in pairs:
+        if args.record_only and not dest_rel.is_file():
+            problems.append(f"--record-only but destination does not exist: {dest_rel}")
         size = src_abs.stat().st_size
-        if size > args.max_bytes and not args.allow_large:
+        if size > args.max_bytes and not args.allow_large and not reference_only:
             problems.append(
                 f"{src_rel} is {size} bytes (> {args.max_bytes}); register it as an "
                 "artifact instead of committing it, or pass --allow-large"
             )
-        if gitignored(dest_rel):
+        if not reference_only and gitignored(dest_rel):
             problems.append(f"destination is gitignored, the copy would be invisible: {dest_rel}")
     if problems:
         for problem in problems:
@@ -151,7 +171,11 @@ def main() -> int:
     records = []
     for src_abs, dest_rel, src_rel, dest_rel_str in pairs:
         src_sha = sha256_file(src_abs)
-        if not args.dry_run:
+        if reference_only:
+            dest_sha = None
+        elif args.record_only:
+            dest_sha = sha256_file(dest_rel)
+        elif not args.dry_run:
             dest_rel.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src_abs, dest_rel)
             dest_sha = sha256_file(dest_rel)
@@ -166,7 +190,8 @@ def main() -> int:
                 "source_repo": args.source_repo,
                 "source_commit": source_commit,
                 "source_path": src_rel,
-                "destination_path": dest_rel_str,
+                "destination_path": None if reference_only else dest_rel_str,
+                "reference_pointer": dest_rel_str if reference_only else None,
                 "decision": args.decision,
                 "reason": args.reason,
                 "source_sha256": src_sha,

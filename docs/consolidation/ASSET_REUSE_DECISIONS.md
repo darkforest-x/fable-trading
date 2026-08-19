@@ -33,3 +33,18 @@
 | `yoyo-trading` | `configs/source_repo.json` | `REJECT` | 跨仓只读指针，收敛后指向自己。已加测试禁止 `yoyo/` 再引用它。 |
 | `yoyo-trading` | `yoyo_trading.egg-info/`、`uv.lock` | `REJECT` | 打包产物与另一个仓的锁文件。 |
 | `yolo-xx` | `docs/asset_registry_v2.json`（157 条含 SHA-256） | `REFERENCE_ONLY` | 设计被本仓 `artifacts/registry.yaml` 吸收；157 条原始登记留在来源仓，归档后仍可查。 |
+
+## C2 — Gold 标注与 Causal Onset
+
+| 来源 | 资产 | 裁决 | 理由 |
+|---|---|---|---|
+| `yolo-xx` | `src/yolo_xx/pis/{events,common}`（8 个 .py） | `DIRECT_PORT` | Causal Onset v3 schema / validator / no-auto-onset 迁移 / progressive-reveal review pack。保持 `events/` 与 `common/` 并列结构，相对 import 不变，字节一致；只改顶层目录名 `pis` → `onset`。 |
+| `yolo-xx` | `src/yolo_xx/pis/events/render_frames.py` | `ADAPT_AND_PORT` | 删掉 `fable_root`/`yoyo_root` 的 sys.path 跨仓桥，直接 import `yoyo.data.loader` 与 `yoyo.layers.l1_detection.{data,render}`。桥的存在理由（渲染器在另一个仓）已被收敛消除。`ohlcv_root` 仍是显式参数——库代码不许自己猜数据在哪。 |
+| `yolo-xx` | `tests/pis/events/*`（3 个） | `ADAPT_AND_PORT` | 只改 import 前缀；断言（含 render-time blinding 全部检查）一字未动。 |
+| `yoyo-trading` | `configs/labelstudio_gold_v1.xml`、`configs/gold_annotation_v1.json` | `DIRECT_PORT` | 标注界面与协议是 owner 屏幕与 gold schema 之间的合同，必须和解析其导出的代码放在一起。 |
+| `yoyo-trading` | `tools/{build_labelstudio_tasks,convert_labelstudio_export,audit_gold_dataset,audit_legacy_*}.py` + 2 个 HTML | `DIRECT_PORT` | 已经 import `yoyo.datasets.*`，收敛后本地可解析，无需适配。迁入 `tools/review/`。 |
+| `yoyo-trading` | `manifests/*.json`（8 份，均 < 2 MiB） | `DIRECT_PORT` | 是 `experiments/registry.yaml` 引用的 gold core 身份文件；没有它们注册表行指向空。 |
+| `yoyo-trading` | `manifests/legacy_label_migration_v3.jsonl`（2.4 MiB） | `REFERENCE_ONLY` | 超过 2 MiB 阈值。2.6 KB 的 summary JSON 承载结论并已入库；来源仓只读归档不删除，逐行数据按 commit + SHA 仍可取回。 |
+| `yoyo-trading` | `tests/test_gold_annotation.py` | `ADAPT_AND_PORT` | 一行 import 跟随 `tools/review/` 迁移，其余不动。 |
+| `yoyo-trading` | `tests/test_{local_v2_render,window_render,position_spread,legacy_audit}.py` | `DIRECT_PORT` | 覆盖随 `yoyo` 包一起迁回的 datasets/render 模块。 |
+| 本仓新建 | `yoyo/contracts/pattern.py` | 新增（非迁移） | 任务书 C2.1 要求的 canonical PatternEvent。**刻意不是第三套 schema**：gold row 与 onset v3 record 各自保留，本模块只做跨层时间语义 + 五条规则 + 两个适配器，让两者收敛到一处而不是分叉成三处。 |

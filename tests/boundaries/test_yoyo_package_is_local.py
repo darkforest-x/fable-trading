@@ -119,3 +119,34 @@ def test_no_module_here_points_readers_back_at_the_other_repository() -> None:
         f"{offenders} still read configs/source_repo.json, the cross-repository "
         "pointer that consolidation removes"
     )
+
+
+# --------------------------------------------------------------------------
+# the same hazard, one directory over
+# --------------------------------------------------------------------------
+
+def test_tools_resolves_to_this_repository_even_mid_session() -> None:
+    """`tools` must be a regular package, not an implicit namespace one.
+
+    yoyo-trading also has a tools/ directory and it has an __init__.py. Under
+    namespace rules the interpreter scans past a directory without one,
+    collecting portions, and stops at the first regular package it finds -- so
+    once any of the scripts that still insert ~/yoyo-trading onto sys.path had
+    been imported, `import tools.review` resolved into the other repository and
+    failed. Alone the test passed; in a full session it did not.
+    """
+    import tools
+
+    assert getattr(tools, "__file__", None), (
+        "tools is an implicit namespace package again. Restore tools/__init__.py: "
+        "without it, resolution depends on which script ran first."
+    )
+    assert Path(tools.__file__).resolve().is_relative_to(REPO), (
+        f"tools resolved to {tools.__file__}, outside this repository"
+    )
+
+
+def test_the_review_toolchain_imports() -> None:
+    from tools.review import convert_labelstudio_export
+
+    assert Path(convert_labelstudio_export.__file__).resolve().is_relative_to(REPO)
