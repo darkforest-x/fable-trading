@@ -1,7 +1,7 @@
 # 单仓收敛 — 最终验收
 
 > 机器版本：[`final_acceptance.json`](final_acceptance.json)
-> 迁移台账：[`migration_ledger.jsonl`](migration_ledger.jsonl)（131 条）
+> 迁移台账：[`migration_ledger.jsonl`](migration_ledger.jsonl)（165 条）
 > 资产裁决：[`../../docs/consolidation/source_asset_registry.json`](../../docs/consolidation/source_asset_registry.json)
 > 生成时间：`2026-08-19T16:48:12+00:00`
 
@@ -12,10 +12,10 @@
 | 检查 | 结果 |
 |---|---|
 | 运行安全哈希与 C0 一致 | PASS — 12 个对象逐字节相同 |
-| 无新增测试失败 | PASS — 701 → 1185 passing，新增失败 **0** |
+| 无新增测试失败 | PASS — 701 → 1227 passing，新增失败 **0** |
 | 秘密扫描 | PASS — 新增行中无密钥形态内容 |
 | 大文件扫描 | PASS — 无新增 >2 MiB 文件 |
-| 迁移台账可追溯 | PASS — 131 项全部可追至 source commit |
+| 迁移台账可追溯 | PASS — 165 项全部可追至 source commit |
 | 无任何 promote | PASS — 无 artifact / experiment 为 `production_eligible` |
 | holdout | PASS — 本次消耗 **0**；唯一一次记录早于本任务且未重读 |
 
@@ -47,6 +47,20 @@
 | `deploy/fable-forward.timer` | `bfddb136a1fcf7be…` | unchanged |
 | `deploy/fable-live-health.service` | `d6ecc03f37eb23ed…` | unchanged |
 | `deploy/fable-live-health.timer` | `c133fad519f9e67d…` | unchanged |
+
+## 迁移覆盖率：每个 tracked 文件都有归属
+
+逐文件核对，不靠回忆。详表 [`MIGRATION_COVERAGE.md`](MIGRATION_COVERAGE.md)。
+
+| 来源仓 | tracked | 已迁移 | 按类排除（有书面理由） | **未归类** |
+|---|---|---|---|---|
+| `darkforest-x/darkforest-one` | 68 | 9 | 59 | **0** |
+| `darkforest-x/yolo-xx` | 150,810 | 22 | 150,788 | **0** |
+| `darkforest-x/yoyo-trading` | 15,416 | 109 | 15,307 | **0** |
+| `darkforest-x/yoyo-eth` | 1,305 | 25 | 1,280 | **0** |
+
+**未归类 0。** 排除类别共 8 个，每个都写明理由并报出吸收了多少文件——
+一个过宽的类别会在报告里显形。
 
 ## 迁移矩阵
 

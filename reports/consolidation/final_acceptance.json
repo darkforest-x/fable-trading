@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-19T16:51:26+00:00",
+  "generated_at": "2026-08-19T17:09:40+00:00",
   "generated_by": "tools/consolidation/final_acceptance.py",
   "decision": "accepted",
   "branch": "claude/fable-trading-consolidation-758d61",
-  "head": "39e287082e4519b4a99d7ff6582f343b7a5b5149",
+  "head": "35e291e8c91e2b1fd90bd4296dd7bf2341dd4d0c",
   "base": "main",
   "checks": {
     "runtime_safety_hashes": {
@@ -86,19 +86,23 @@
       },
       "final_counts": {
         "failed": 5,
-        "passed": 1185,
+        "passed": 1227,
         "skipped": 4,
         "warnings": 14,
         "error": 6
       },
       "new_failures": [],
       "no_longer_failing": [],
-      "detail": "701 -> 1185 passing, 0 new failures"
+      "detail": "701 -> 1227 passing, 0 new failures"
     },
     "secret_scan": {
       "passed": true,
       "findings": [],
       "allowlisted": [
+        {
+          "path": "tools/consolidation/final_acceptance.py",
+          "pattern": "okx_api_credential"
+        },
         {
           "path": "yoyo/layers/l4_execution/okx_client.py",
           "pattern": "okx_api_credential"
@@ -122,15 +126,15 @@
     },
     "migration_ledger": {
       "passed": true,
-      "n_entries": 131,
+      "n_entries": 165,
       "by_decision": {
         "ADAPT_AND_PORT": 7,
-        "DIRECT_PORT": 97,
-        "HISTORICAL_REPORT": 26,
-        "REFERENCE_ONLY": 1
+        "DIRECT_PORT": 127,
+        "HISTORICAL_REPORT": 28,
+        "REFERENCE_ONLY": 3
       },
       "untraceable": [],
-      "detail": "131 assets, all traceable to a source commit"
+      "detail": "165 assets, all traceable to a source commit"
     },
     "nothing_promoted": {
       "passed": true,

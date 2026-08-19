@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-19T17:08:44+00:00",
+  "generated_by": "tools/consolidation/audit_migration_coverage.py",
+  "total_unaccounted": 0,
+  "exclusion_classes": [
+    {
+      "name": "rendered_images",
+      "reason": "Rendered chart frames and review galleries. Task book 3.6 keeps them out of git; they are regenerable from the bars plus the renderer, and the archived repository keeps the originals at a known commit."
+    },
+    {
+      "name": "model_weights",
+      "reason": "Weights and cached tensors. Registered in artifacts/registry.yaml by SHA-256 and storage_uri, never copied -- one physical file keeps one identity."
+    },
+    {
+      "name": "market_data_csv",
+      "reason": "Raw OHLCV pulled from OKX. Not research output: re-fetchable, and this repository already carries its own data/kline_fetched/ as the single writer (CLAUDE.md live-trading rule 9)."
+    },
+    {
+      "name": "training_runs",
+      "reason": "Training run directories -- checkpoints, epoch logs, per-run scan output. The conclusions are in the migrated reports; the runs are the workings."
+    },
+    {
+      "name": "dataset_image_indexes",
+      "reason": "YOLO label sidecars and image indexes, meaningless without the pixels they index, which are excluded above."
+    },
+    {
+      "name": "competing_governance",
+      "reason": "Each source repository's own governance and packaging. Task book 8.4 forbids migrating competing statements of current truth -- one repository means one HANDOFF."
+    },
+    {
+      "name": "source_code_superseded",
+      "reason": "Source and research trees whose migrated subset is recorded in the ledger. What is not in the ledger from these trees was superseded by this repository's own implementation, or is an intermediate product of a migrated report. Listed per repository below so the residue stays visible."
+    },
+    {
+      "name": "tooling_dotfiles",
+      "reason": "Editor and toolchain pins belonging to the source repository. darkforest-one's .python-version reads 3.11, which is the constraint that made its pydantic config REFERENCE_ONLY rather than portable -- the fact is recorded in experiments/historical/darkforest_one/README.md, so the file itself adds nothing here."
+    },
+    {
+      "name": "noise",
+      "reason": "Finder metadata, bytecode caches and run logs. Not authored, not read by anything, and regenerated on the next run -- migrating them would only add files that differ between machines for reasons nobody chose."
+    }
+  ],
+  "repositories": {
+    "darkforest-x/darkforest-one": {
+      "present": true,
+      "tracked_files": 68,
+      "migrated": 9,
+      "excluded_by_class": {
+        "competing_governance": 10,
+        "source_code_superseded": 46,
+        "tooling_dotfiles": 3
+      },
+      "unaccounted_count": 0,
+      "unaccounted": []
+    },
+    "darkforest-x/yolo-xx": {
+      "present": true,
+      "tracked_files": 150810,
+      "migrated": 22,
+      "excluded_by_class": {
+        "competing_governance": 6,
+        "dataset_image_indexes": 146608,
+        "market_data_csv": 747,
+        "model_weights": 24,
+        "rendered_images": 2849,
+        "source_code_superseded": 536,
+        "training_runs": 18
+      },
+      "unaccounted_count": 0,
+      "unaccounted": []
+    },
+    "darkforest-x/yoyo-trading": {
+      "present": true,
+      "tracked_files": 15416,
+      "migrated": 109,
+      "excluded_by_class": {
+        "competing_governance": 8,
+        "dataset_image_indexes": 7137,
+        "model_weights": 6,
+        "rendered_images": 8011,
+        "source_code_superseded": 120,
+        "training_runs": 25
+      },
+      "unaccounted_count": 0,
+      "unaccounted": []
+    },
+    "darkforest-x/yoyo-eth": {
+      "present": true,
+      "tracked_files": 1305,
+      "migrated": 25,
+      "excluded_by_class": {
+        "competing_governance": 3,
+        "rendered_images": 1246,
+        "source_code_superseded": 31
+      },
+      "unaccounted_count": 0,
+      "unaccounted": []
+    }
+  }
+}

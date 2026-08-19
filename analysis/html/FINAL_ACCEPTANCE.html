@@ -47,7 +47,7 @@ li { margin: .25rem 0; }
 </head>
 <body>
 <h1>单仓收敛 — 最终验收</h1>
-<blockquote>机器版本：<a href="final_acceptance.json"><code>final_acceptance.json</code></a> 迁移台账：<a href="migration_ledger.jsonl"><code>migration_ledger.jsonl</code></a>（131 条） 资产裁决：<a href="../../docs/consolidation/source_asset_registry.json"><code>../../docs/consolidation/source_asset_registry.json</code></a> 生成时间：<code>2026-08-19T16:48:12+00:00</code></blockquote>
+<blockquote>机器版本：<a href="final_acceptance.json"><code>final_acceptance.json</code></a> 迁移台账：<a href="migration_ledger.jsonl"><code>migration_ledger.jsonl</code></a>（165 条） 资产裁决：<a href="../../docs/consolidation/source_asset_registry.json"><code>../../docs/consolidation/source_asset_registry.json</code></a> 生成时间：<code>2026-08-19T16:48:12+00:00</code></blockquote>
 <h2>裁决：<strong>accepted</strong></h2>
 <p>七项验收全部通过。逐项都是与 C0 记录的对比或对真实 diff 的扫描，不含判断。</p>
 <table><thead><tr>
@@ -55,10 +55,10 @@ li { margin: .25rem 0; }
 <th>结果</th>
 </tr></thead><tbody>
 <tr><td>运行安全哈希与 C0 一致</td><td>PASS — 12 个对象逐字节相同</td></tr>
-<tr><td>无新增测试失败</td><td>PASS — 701 → 1185 passing，新增失败 <strong>0</strong></td></tr>
+<tr><td>无新增测试失败</td><td>PASS — 701 → 1227 passing，新增失败 <strong>0</strong></td></tr>
 <tr><td>秘密扫描</td><td>PASS — 新增行中无密钥形态内容</td></tr>
 <tr><td>大文件扫描</td><td>PASS — 无新增 &gt;2 MiB 文件</td></tr>
-<tr><td>迁移台账可追溯</td><td>PASS — 131 项全部可追至 source commit</td></tr>
+<tr><td>迁移台账可追溯</td><td>PASS — 165 项全部可追至 source commit</td></tr>
 <tr><td>无任何 promote</td><td>PASS — 无 artifact / experiment 为 <code>production_eligible</code></td></tr>
 <tr><td>holdout</td><td>PASS — 本次消耗 <strong>0</strong>；唯一一次记录早于本任务且未重读</td></tr>
 </tbody></table>
@@ -93,6 +93,21 @@ li { margin: .25rem 0; }
 <tr><td><code>deploy/fable-live-health.service</code></td><td><code>d6ecc03f37eb23ed…</code></td><td>unchanged</td></tr>
 <tr><td><code>deploy/fable-live-health.timer</code></td><td><code>c133fad519f9e67d…</code></td><td>unchanged</td></tr>
 </tbody></table>
+<h2>迁移覆盖率：每个 tracked 文件都有归属</h2>
+<p>逐文件核对，不靠回忆。详表 <a href="MIGRATION_COVERAGE.md"><code>MIGRATION_COVERAGE.md</code></a>。</p>
+<table><thead><tr>
+<th>来源仓</th>
+<th>tracked</th>
+<th>已迁移</th>
+<th>按类排除（有书面理由）</th>
+<th><strong>未归类</strong></th>
+</tr></thead><tbody>
+<tr><td><code>darkforest-x/darkforest-one</code></td><td>68</td><td>9</td><td>59</td><td><strong>0</strong></td></tr>
+<tr><td><code>darkforest-x/yolo-xx</code></td><td>150,810</td><td>22</td><td>150,788</td><td><strong>0</strong></td></tr>
+<tr><td><code>darkforest-x/yoyo-trading</code></td><td>15,416</td><td>109</td><td>15,307</td><td><strong>0</strong></td></tr>
+<tr><td><code>darkforest-x/yoyo-eth</code></td><td>1,305</td><td>25</td><td>1,280</td><td><strong>0</strong></td></tr>
+</tbody></table>
+<p><strong>未归类 0。</strong> 排除类别共 8 个，每个都写明理由并报出吸收了多少文件—— 一个过宽的类别会在报告里显形。</p>
 <h2>迁移矩阵</h2>
 <table><thead><tr>
 <th>裁决</th>

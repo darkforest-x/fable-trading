@@ -83,3 +83,26 @@
 | SMA / EMA 的 3 个实现 | **保留** | 实测六条均线最大绝对差 **0.000e+00**，唯一差异是列名下划线。合并意味着在检测路径上改列名，而那条路径的像素不许动一位。 |
 | ATR 的 2 个实现 | **保留 + 量化 + 上报** | **不一致**：warmup 播种不同，bar 14 差 0.109，200 根后耗尽。ATR 定义 TP/SL 障碍距离，且差异方向取决于取数起点——ATR 变成了「bar + 从哪开始读」的属性。已钉住，**需 owner 在三个选项中裁决**。见 `docs/consolidation/DUPLICATE_SEMANTICS.md` §4 与 `docs/learnings/two-atrs-agreeing-late-still-disagree-where-it-matters.md`。 |
 | 成本常量 177 处引用 | **不动** | CLAUDE.md 明文：`scripts/` 下支撑已发布报告的实验脚本故意保留内联副本。这不是债，是记录。 |
+
+## C7 补迁 — 金标数据与 owner 审核记录（2026-08-20）
+
+**C2 迁了描述金标的 manifest，没迁金标本身。** 从每个角度看都像迁完了——manifest 校验通过、
+注册表行能解析、标注工具链能 import——**只有真去打开数据集的时候才看得出来**。
+而下一条允许的动作恰好就是 P0 → P1（Gold Dataset）。
+
+| 来源 | 资产 | 裁决 | 理由 |
+|---|---|---|---|
+| `yoyo-trading` | `datasets/gold_v1.jsonl` 等 4 份 | `DIRECT_PORT` → `datasets/annotations/` | yoyo-trading 自己的 `tools/backup_current_gold_state.py` 就是把这四个文件列为「current gold state」；`gold_schema.py::parse_jsonl` 读的就是它。迁入后 24 + 10 行通过 schema 校验，1345 候选与 1345 个 Label Studio task 数量对齐。 |
+| `yoyo-trading` | `reviews/v3_blind_r1/`、`reviews/v3_dispute_r1/` 文本部分（11 份） | `DIRECT_PORT` → `datasets/annotations/reviews/` | **盲审裁决 + 解盲答案 + 争议裁决**。这正是 P0 测重复标注一致性与 κ 要用的材料，此前只在 yoyo-trading。审核图片留在原仓。 |
+| `yoyo-trading` | V3.2 逐行 manifest + 3 份 data.yaml + 2 份抽样 manifest | `DIRECT_PORT` → `datasets/manifests/` | 注册表引用的 reviewed-core 的逐行身份。 |
+| `yoyo-trading` | V3 gold core / position spread 的 4 MiB 逐行图片 manifest | `REFERENCE_ONLY` | 只有和它索引的像素在一起才有意义，两者都留在归档仓，按 commit + SHA 可取回。 |
+| `yoyo-eth` | `configs/{walkforward,iteration_v1}.yaml` + iteration_v1 报告 + 5 份 metrics JSON | `DIRECT_PORT` | 没有配置，已迁报告里的复现命令指向不存在的文件。 |
+| `darkforest-one` | `docs/ARCHITECTURE.md`、`configs/base.yaml` | `HISTORICAL_REPORT` | ADR 解释决策，ARCHITECTURE 解释决策产生的形状；base.yaml 是那套被 `REFERENCE_ONLY` 的 fail-closed 配置 schema 的唯一实例，留着让那个裁决可查而不只是可读。 |
+
+### 覆盖率审计（新建）
+
+`tools/consolidation/audit_migration_coverage.py` 把「是不是都迁完了」变成数字：
+四个来源仓 **167,599 个 tracked 文件**逐个归桶，**未归类 0**。
+8 个排除类别每个都有书面理由并报出吸收量，过宽的类别会显形。
+由 `tests/parity/test_migration_ledger_parity.py` 的两个测试守住
+（未归类必须为 0；排除类别必须有真实理由）。

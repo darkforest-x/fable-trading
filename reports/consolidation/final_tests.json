@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "label": "final",
-  "generated_at": "2026-08-19T16:51:26+00:00",
-  "duration_seconds": 12.03,
+  "generated_at": "2026-08-19T17:09:40+00:00",
+  "duration_seconds": 12.87,
   "command": [
     "/Users/zhangzc/fable-trading/.venv/bin/python",
     "-m",
@@ -17,7 +17,7 @@
   "exit_code": 1,
   "counts": {
     "failed": 5,
-    "passed": 1185,
+    "passed": 1227,
     "skipped": 4,
     "warnings": 14,
     "error": 6
@@ -68,6 +68,6 @@
       "nodeid": "tests/test_p2r_root_cause_audit.py::test_full_audit_reaches_stop_without_runtime_mutation"
     }
   ],
-  "note": "C7 final run, same worktree and interpreter as the C0 baseline. The 11 failing nodes are the same pre-existing ones: each reads a gitignored file under data/ that a fresh worktree does not have.",
+  "note": "C7 final run after the gold-data gap was closed. Same worktree and interpreter as the C0 baseline; the 11 failing nodes are the same pre-existing ones (gitignored data/ artifacts a fresh worktree does not have).",
   "holdout_consumed_during_consolidation": false
 }

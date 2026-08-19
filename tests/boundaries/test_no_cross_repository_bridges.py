@@ -37,6 +37,9 @@ ALLOWED_TO_NAME_SOURCES = {
         "freezes the source repositories' state; naming them is the whole task",
     "tools/consolidation/port_asset.py":
         "copies from a source repository and records the provenance",
+    "tools/consolidation/audit_migration_coverage.py":
+        "enumerates every tracked file in each source repository to prove none "
+        "fell through; it must name and open them to count them",
     "tools/consolidation/build_source_asset_registry.py":
         "keys its per-repository summaries by the GitHub slug; those are registry "
         "identifiers, not filesystem paths, and the check cannot tell them apart",

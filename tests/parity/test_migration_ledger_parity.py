@@ -138,3 +138,44 @@ def test_no_ported_file_exceeds_the_size_ceiling_without_a_reason():
         f"{oversized} were committed despite exceeding {ceiling} bytes; they belong in "
         "artifacts/registry.yaml as a pointer, not in git"
     )
+
+
+# --------------------------------------------------------------------------
+# coverage: every source file lands in a bucket, or it is a gap
+# --------------------------------------------------------------------------
+
+COVERAGE = REPO / "reports" / "consolidation" / "migration_coverage.json"
+
+
+def test_every_source_file_is_accounted_for():
+    """Zero unaccounted, per repository.
+
+    "Is everything migrated?" was answered by recollection once and the answer
+    was wrong: the gold manifests came across and the gold rows did not, which
+    looked complete from every angle except opening the dataset. This turns the
+    question into a number.
+    """
+    if not COVERAGE.is_file():
+        pytest.skip("coverage audit not generated yet")
+    payload = json.loads(COVERAGE.read_text(encoding="utf-8"))
+    leftovers = {
+        slug: repo["unaccounted"][:20]
+        for slug, repo in payload["repositories"].items()
+        if repo.get("present") and repo["unaccounted_count"]
+    }
+    assert not leftovers, (
+        f"unaccounted source files: {leftovers}. Either migrate them or add an "
+        "exclusion class with a written reason -- the point of the audit is that "
+        "nothing falls through silently."
+    )
+
+
+def test_every_exclusion_class_states_a_reason():
+    """A class with no reason is a filter for making the number look good."""
+    if not COVERAGE.is_file():
+        pytest.skip("coverage audit not generated yet")
+    payload = json.loads(COVERAGE.read_text(encoding="utf-8"))
+    unreasoned = [
+        entry["name"] for entry in payload["exclusion_classes"] if len(entry["reason"]) < 40
+    ]
+    assert not unreasoned, f"exclusion classes without a real reason: {unreasoned}"
