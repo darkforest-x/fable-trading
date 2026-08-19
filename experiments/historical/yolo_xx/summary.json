@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-19T16:45:07+00:00",
+  "generated_by": "tools/consolidation/build_source_asset_registry.py",
+  "source_repo": "darkforest-x/yolo-xx",
+  "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+  "experiments": [
+    {
+      "experiment_id": "exp-yolo-xx-formation-gpt-variant",
+      "status": "accepted",
+      "question": "How early can formation be called, and what does moving the evaluation point cost in discrimination?",
+      "result": "Best formation number to date: AUC 0.7417, 95% CI [0.6888, 0.7882], kappa 0.295 at T0-T30. The 30-bars-early (7.5h) variant scores AUC 0.6453, 95% CI [0.5846, 0.7032], kappa 0.206, and pattern-quality A-grade classification scores AUC 0.6323, 95% CI [0.5661, 0.6945], kappa 0.159. Strict contamination rate of the formation negatives is 4.0%, 95% CI [1.1%, 13.5%]. Frozen at tag phase3-formation-v1-frozen-20260806.",
+      "single_variable": "evaluation offset (T0-T30 = 8 bars before completion, vs 30 bars early)",
+      "holdout_consumed": false,
+      "training_eligible": false,
+      "production_eligible": false,
+      "canonical_report": "experiments/historical/yolo_xx/README.md",
+      "reuse_allowed": true
+    },
+    {
+      "experiment_id": "exp-yolo-xx-pooled-auc-source-discrimination",
+      "status": "rejected",
+      "question": "Was the pooled AUC 0.8067 over 659 samples a breakthrough in pattern quality discrimination?",
+      "result": "source_discrimination. Stratified by source, each subset retains only 0.57-0.65, and the three sources have positive-class rates of 85% / 84% / 29%. The model was separating collection batches, not patterns. The render pipeline had already been unified, so this is the v15 \"two render pipelines\" fault with the trigger surface moved from rendering to batching, and grouped CV does not defend against it -- grouped CV stops one entity crossing folds, which is a different disease from different sources having different base rates.",
+      "single_variable": "pooling vs per-source stratification",
+      "holdout_consumed": false,
+      "training_eligible": false,
+      "production_eligible": false,
+      "canonical_report": "docs/learnings/pooled-auc-can-be-source-discrimination.md",
+      "reuse_allowed": true
+    },
+    {
+      "experiment_id": "exp-yolo-xx-quality-ranker-v1",
+      "status": "rejected",
+      "question": "Can a direction-neutral geometry ranker score pattern quality, and is the lift from adding further features real?",
+      "result": "leakage. Direction-neutral geometry scores 0.53/0.55, and the apparent lift to 0.64 was leakage rather than signal. Recorded together with the prior finding that events carried no direction at all while 46% of the boxes were long -- a label-semantics fault, not a modelling one.",
+      "single_variable": "feature set (direction-neutral geometry vs extended)",
+      "holdout_consumed": false,
+      "training_eligible": false,
+      "production_eligible": false,
+      "canonical_report": "experiments/historical/yolo_xx/README.md",
+      "reuse_allowed": true
+    },
+    {
+      "experiment_id": "exp-yolo-xx-teacher-tip-vs-full-context",
+      "status": "rejected",
+      "question": "Does the old YOLO detector reproduce its full-context performance when it is only allowed to see up to the current closed bar (the Tip protocol)?",
+      "result": "collapses_at_the_tip. Old-detector reproduction rate is about 9-10% at the tip against 62-72% with full context. Recognising a completed pattern and recognising one at the live edge are different tasks, and a bbox's right edge cannot stand in for a causal onset. This is why YOLO is retained as a Pattern Teacher and explicitly not as the final tip trigger.",
+      "single_variable": "evaluation window right edge (full context vs tip)",
+      "holdout_consumed": false,
+      "training_eligible": false,
+      "production_eligible": false,
+      "canonical_report": "experiments/historical/yolo_xx/README.md",
+      "reuse_allowed": true
+    }
+  ],
+  "artifacts": [
+    {
+      "artifact_id": "yolo-xx-detector-weights-3060",
+      "artifact_type": "weights",
+      "role": "pattern_teacher",
+      "sha256": null,
+      "holdout_status": "historical",
+      "training_eligible": false,
+      "production_eligible": false
+    }
+  ],
+  "migrated_files": {
+    "ADAPT_AND_PORT": [
+      "tests/causality/test_migration_no_auto_onset.py",
+      "tests/causality/test_onset_schema.py",
+      "tests/causality/test_review_pack_blinding.py",
+      "yoyo/layers/l1_detection/onset/events/render_frames.py"
+    ],
+    "DIRECT_PORT": [
+      "yoyo/layers/l1_detection/onset/__init__.py",
+      "yoyo/layers/l1_detection/onset/common/__init__.py",
+      "yoyo/layers/l1_detection/onset/common/hashing.py",
+      "yoyo/layers/l1_detection/onset/events/__init__.py",
+      "yoyo/layers/l1_detection/onset/events/migration.py",
+      "yoyo/layers/l1_detection/onset/events/review_pack.py",
+      "yoyo/layers/l1_detection/onset/events/schema.py",
+      "yoyo/layers/l1_detection/onset/events/validator.py"
+    ],
+    "HISTORICAL_REPORT": [
+      "experiments/historical/yolo_xx/PHASE0_EXPERIMENT_POSTMORTEM.md",
+      "experiments/historical/yolo_xx/formation_gpt_spec_vs_v1.md",
+      "experiments/historical/yolo_xx/formation_model_v1.md",
+      "experiments/historical/yolo_xx/pattern_library_v1.md",
+      "experiments/historical/yolo_xx/pattern_quality_v1.md",
+      "experiments/historical/yolo_xx/pattern_quality_v3_merged.md",
+      "experiments/historical/yolo_xx/pattern_quality_v5_val_expanded.md",
+      "experiments/historical/yolo_xx/pattern_teacher_analysis.md",
+      "experiments/historical/yolo_xx/pattern_teacher_asset_inventory.md",
+      "experiments/historical/yolo_xx/pu_contamination_audit.md"
+    ]
+  },
+  "holdout_consumed_by_this_repo": []
+}

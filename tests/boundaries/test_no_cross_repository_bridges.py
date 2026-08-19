@@ -37,6 +37,9 @@ ALLOWED_TO_NAME_SOURCES = {
         "freezes the source repositories' state; naming them is the whole task",
     "tools/consolidation/port_asset.py":
         "copies from a source repository and records the provenance",
+    "tools/consolidation/build_source_asset_registry.py":
+        "keys its per-repository summaries by the GitHub slug; those are registry "
+        "identifiers, not filesystem paths, and the check cannot tell them apart",
     "tests/parity/test_numeric_baseline_parity.py":
         "cross-checks the port against the source while it is still on disk; it "
         "APPENDS to sys.path rather than prepending, and asserts afterwards that "

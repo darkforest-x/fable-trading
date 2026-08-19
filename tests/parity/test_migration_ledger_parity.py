@@ -41,7 +41,10 @@ def _sha256(path: Path) -> str:
 
 
 ENTRIES = _entries()
-COPIED = [e for e in ENTRIES if e["decision"] in ("DIRECT_PORT", "ADAPT_AND_PORT")]
+COPIED = [
+    e for e in ENTRIES
+    if e["decision"] in ("DIRECT_PORT", "ADAPT_AND_PORT", "HISTORICAL_REPORT")
+]
 
 
 def test_the_ledger_exists_and_is_not_empty():
@@ -80,11 +83,16 @@ def test_a_ported_file_still_has_its_recorded_hash(entry):
 
 
 def test_direct_ports_are_byte_identical_to_their_source():
-    """The claim DIRECT_PORT makes, restated from the recorded hashes."""
+    """The claim DIRECT_PORT makes, restated from the recorded hashes.
+
+    HISTORICAL_REPORT carries the same claim: a migrated report whose bytes
+    changed is a rewritten conclusion.
+    """
     mismatched = [
         e["destination_path"]
         for e in ENTRIES
-        if e["decision"] == "DIRECT_PORT" and e["source_sha256"] != e["destination_sha256"]
+        if e["decision"] in ("DIRECT_PORT", "HISTORICAL_REPORT")
+        and e["source_sha256"] != e["destination_sha256"]
     ]
     assert not mismatched, (
         f"{mismatched} are recorded as DIRECT_PORT but their source and destination "
