@@ -1,0 +1,24 @@
+# 评估用依赖 —— **绝不要装进主 venv**
+#
+# 这些库会降级主 venv 的固定版本：
+#   cleanlab → numpy 2.0.2 变 1.26.4
+#   aeon     → pandas 2.3.3 变 2.2.3，并引入 numba + llvmlite
+#
+# 主 venv 的 numpy / torch / ultralytics 版本是 Mac↔3060 训练契约的一部分：
+# scripts/train_on_3060.sh 在两端版本不一致时拒绝开训，理由是结果无法与历史曲线
+# 对照。降级 numpy 会同时打断这个契约，并可能改变数值结果。
+#
+# 用法：
+#   python3 -m venv /tmp/fable_eval_venv
+#   /tmp/fable_eval_venv/bin/pip install -r requirements-eval.txt
+#
+# 评估结论见 analysis/p_oss_framework_survey_20260820.md
+
+# 标签质量：confident learning，估计金标的错误率
+cleanlab>=2.7,<3
+
+# 早期时间序列分类（eTSC）对照基线
+# aeon>=1.1,<2          # 需要时再解注释：会引入 numba + llvmlite
+
+# purged / combinatorial purged 交叉验证
+# purged-cross-validation   # 或 skfolio 的 CombinatorialPurgedCV
