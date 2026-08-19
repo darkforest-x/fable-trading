@@ -44,11 +44,8 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[1]
-YOYO_REPO = Path.home() / "yoyo-trading"
-for module_path in (ROOT, YOYO_REPO):
-    if str(module_path) not in sys.path:
-        sys.path.insert(0, str(module_path))
-
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 from yoyo.layers.l1_detection.data import ALL_MA_COLS, add_mas  # noqa: E402
 from yoyo.layers.l1_detection.render import (  # noqa: E402
     IMG_HEIGHT,

@@ -23,7 +23,7 @@ from pathlib import Path
 import cv2, pandas as pd
 
 PROJECT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT)); sys.path.insert(0, str(Path.home() / "yoyo-trading"))
+sys.path.insert(0, str(PROJECT))
 from src.detection.data import add_mas          # noqa: E402
 from src.detection.render import render_chart   # noqa: E402
 

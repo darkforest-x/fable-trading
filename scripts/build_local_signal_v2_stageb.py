@@ -41,11 +41,8 @@ import numpy as np
 import pandas as pd
 
 PROJECT = Path(__file__).resolve().parents[1]
-_YOYO = Path.home() / "yoyo-trading"
-for p in (PROJECT, _YOYO):
-    if str(p) not in sys.path:
-        sys.path.insert(0, str(p))
-
+if str(PROJECT) not in sys.path:
+    sys.path.insert(0, str(PROJECT))
 from yoyo.layers.l1_detection.data import add_mas  # noqa: E402
 from yoyo.layers.l1_detection.local_v2_render import render_causal_chart  # noqa: E402
 from yoyo.layers.l1_detection.render import (  # noqa: E402

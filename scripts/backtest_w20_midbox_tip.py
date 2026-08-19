@@ -40,10 +40,8 @@ import numpy as np
 import pandas as pd
 
 PROJECT = Path(__file__).resolve().parents[1]
-_YOYO = Path.home() / "yoyo-trading"
-for p in (PROJECT, _YOYO):
-    if str(p) not in sys.path:
-        sys.path.insert(0, str(p))
+if str(PROJECT) not in sys.path:
+    sys.path.insert(0, str(PROJECT))
 os.environ.setdefault("YOYO_DATA_ROOT", str(PROJECT))
 
 from yoyo.data.loader import list_series, load_series  # noqa: E402

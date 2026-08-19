@@ -29,11 +29,8 @@ import pandas as pd
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-YOYO_REPO = Path.home() / "yoyo-trading"
-for module_path in (ROOT, YOYO_REPO):
-    if str(module_path) not in sys.path:
-        sys.path.insert(0, str(module_path))
-
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 from yoyo.contracts.costs import SWAP_MAKER, SWAP_TAKER  # noqa: E402
 from yoyo.contracts.outcomes import (  # noqa: E402
     ATR_PCT_MIN,

@@ -39,10 +39,6 @@ import pandas as pd
 
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
-_YOYO = Path.home() / "yoyo-trading"
-if _YOYO.is_dir():
-    sys.path.insert(0, str(_YOYO))
-
 from src.detection.data import add_mas  # noqa: E402
 from src.detection.render import render_chart  # noqa: E402
 from yoyo.layers.l1_detection.candidates import (  # noqa: E402

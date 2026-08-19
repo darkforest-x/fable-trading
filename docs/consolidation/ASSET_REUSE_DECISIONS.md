@@ -72,3 +72,14 @@
 | `yolo-xx` | `src/yolo_xx/outcome.py` 及收益/判断层支线 | `REJECT` | 旧 outcome / 交易判断支线。yolo-xx 自己的 README 已声明这些是历史资产，不被新 core import、不作默认 CLI、不决定验收结论。 |
 | 本仓新建 | `yoyo/contracts/candidates.py` | 新增（非迁移） | CandidateProposal 合同。核心是把 `available_at` 定义为**生成器最后一根输入 K 线的收盘时间**，不是它画的框的右边界——两者之差恰好等于生成器看到的未来，混同就是"事后检测冒充新鲜信号"（铁律 12）。`production_eligible=True` 与 `training_eligible=True` 在构造函数里直接抛错，不是靠人记得。 |
 | 本仓新建 | `yoyo/layers/l1_detection/teacher/` | 新增（非迁移） | PatternTeacher Protocol + 注册闸门。teacher 只能通过 `artifacts/registry.yaml` 里登记过的 artifact 使用，且加载时校验磁盘文件仍然哈希得上——"这批候选是哪个模型产的"永远答得出来，被人偷换过的权重在加载时就被抓住，而不是在报告里被发现。 |
+
+## C5 — 兼容壳与语义去重
+
+| 对象 | 裁决 | 理由 |
+|---|---|---|
+| `scripts/` 里 35 个 `sys.path.insert(0, ~/yoyo-trading)` 跨仓桥 | **删除** | 不是整洁问题。`for p in (PROJECT, _YOYO): sys.path.insert(0, ...)` 先插 PROJECT 再插 _YOYO，**结果 yoyo-trading 排第一**——这 35 个脚本一直在 import 另一个仓的 `yoyo`，而测试验的是本仓那份。两边一样时无害；yoyo-trading 一冻结、本仓继续走，就静默分叉，`render.py` 的像素也在其中。全部删除后 35 个脚本 compileall 通过，`tests/boundaries/test_no_cross_repository_bridges.py` 防止长回来。 |
+| `src/` 下 23 个转发壳 | **保留** | 数百个调用点仍在用；本轮不改写。新增 `tests/boundaries/test_legacy_shims_forward.py`：逐个 import，并用 `is` 断言转发出来的是**同一个对象**——壳偷偷长出自己那份拷贝，正是"一个语义一个实现"在没人改调用点的情况下失效的方式。 |
+| 文件 SHA-256 的 7 个实现 | **暂留 + 钉住** | 3 MB 随机文件实测 7 个摘要完全一致。合并要动 7 处调用点（含 `protocol.py`——`yoyo` 搬出本仓时特意内联了它，为的就是不向 judgment 层借），属独立一轮工作。 |
+| SMA / EMA 的 3 个实现 | **保留** | 实测六条均线最大绝对差 **0.000e+00**，唯一差异是列名下划线。合并意味着在检测路径上改列名，而那条路径的像素不许动一位。 |
+| ATR 的 2 个实现 | **保留 + 量化 + 上报** | **不一致**：warmup 播种不同，bar 14 差 0.109，200 根后耗尽。ATR 定义 TP/SL 障碍距离，且差异方向取决于取数起点——ATR 变成了「bar + 从哪开始读」的属性。已钉住，**需 owner 在三个选项中裁决**。见 `docs/consolidation/DUPLICATE_SEMANTICS.md` §4 与 `docs/learnings/two-atrs-agreeing-late-still-disagree-where-it-matters.md`。 |
+| 成本常量 177 处引用 | **不动** | CLAUDE.md 明文：`scripts/` 下支撑已发布报告的实验脚本故意保留内联副本。这不是债，是记录。 |

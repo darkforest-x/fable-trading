@@ -23,9 +23,6 @@ import pandas as pd
 
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
-_YOYO = Path.home() / "yoyo-trading"
-if _YOYO.is_dir():
-    sys.path.insert(0, str(_YOYO))
 os.environ.setdefault("YOYO_DATA_ROOT", str(PROJECT))
 
 from yoyo.layers.l1_detection.data import add_mas  # noqa: E402

@@ -18,11 +18,8 @@ import cv2
 import pandas as pd
 
 PROJECT = Path(__file__).resolve().parents[1]
-YOYO = Path.home() / "yoyo-trading"
-for path in (PROJECT, YOYO):
-    if str(path) not in sys.path:
-        sys.path.insert(0, str(path))
-
+if str(PROJECT) not in sys.path:
+    sys.path.insert(0, str(PROJECT))
 from scripts.build_local_signal_v2_stageb import HOLDOUT_START  # noqa: E402
 from scripts.build_w20_midbox_dataset import resolve_series  # noqa: E402
 from yoyo.layers.l1_detection.data import add_mas  # noqa: E402

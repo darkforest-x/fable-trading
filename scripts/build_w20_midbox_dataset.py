@@ -36,12 +36,9 @@ import numpy as np
 import pandas as pd
 
 PROJECT = Path(__file__).resolve().parents[1]
-# yoyo package lives in sibling repo after 2026-08-03 split.
-_YOYO = Path.home() / "yoyo-trading"
-for p in (PROJECT, _YOYO):
-    if str(p) not in sys.path:
-        sys.path.insert(0, str(p))
-
+# yoyo lives in this repository again (single-repo consolidation, 2026-08).
+if str(PROJECT) not in sys.path:
+    sys.path.insert(0, str(PROJECT))
 from yoyo.data.loader import list_series, load_series  # noqa: E402
 from yoyo.layers.l1_detection.data import add_mas  # noqa: E402
 from yoyo.layers.l1_detection.render import (  # noqa: E402

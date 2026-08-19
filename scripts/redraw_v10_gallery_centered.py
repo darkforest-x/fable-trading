@@ -15,8 +15,6 @@ import pandas as pd
 
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
-sys.path.insert(0, str(Path.home() / "yoyo-trading"))
-
 import scripts.scan_v10_yolo_5d_gallery as g
 from src.data.loader import list_series, load_series
 from src.detection.data import add_mas
