@@ -1,0 +1,329 @@
+# Experiment registry -- every experiment that any current decision rests on.
+#
+# Registered from the four repositories being consolidated, at the frozen source
+# commits in reports/consolidation/source_repo_snapshots.json. Each row answers
+# the six questions the task book requires: what was tested, which variable
+# moved, on what data, whether holdout was consumed, what happened, and whether
+# the result may be reused.
+#
+# A negative result is a result. `rejected` and `inconclusive` are terminal and
+# citable; neither may be quietly rewritten as "pending optimisation".
+#
+# Validated by yoyo.contracts.artifacts.ExperimentRecord and cross-checked
+# against artifacts/registry.yaml by yoyo.artifacts.load_registries.
+schema_version: 1
+
+experiments:
+  # ==========================================================================
+  # yoyo-eth -- numeric semantic baseline, no YOLO
+  # ==========================================================================
+  - experiment_id: exp-yoyo-eth-semantic-mvp
+    source_repo: darkforest-x/yoyo-eth
+    source_commit: "6147810afb46be1c664128e9a5359e8e7d0a3923"
+    status: rejected
+    question: >-
+      Without YOLO, using only OHLCV, SMA/EMA 20/60/120, ATR and 27 causal
+      semantic features, can a LightGBM regressor rank MA-compression candidates
+      so that the top of the ranking more often precedes a profitable SHORT?
+    single_variable: ranking model vs single-feature dispersion baseline
+    result: >-
+      underperformed_matched_random_control. Validation spearman +0.167 (p=0.28)
+      did not survive into test, where it reversed to -0.068 (p=0.68). The
+      decisive line is the matched control (same symbol, same month, same ATR
+      tercile, same horizon, same cost): control +19.9bp gross on validation
+      against -14.6bp for the whole candidate pool, i.e. the compression pool was
+      34.5bp WORSE than random short entries; on test, -2.0bp against -39.1bp,
+      worse by 37.1bp. The val top-decile +62.6bp sits on 5 samples during a
+      falling-ETH window and is short beta, not model skill. On test the naive
+      "tighter is better" dispersion baseline (+0.349, p=0.027) outranked the
+      27-feature model.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/historical/yoyo_eth/MVP_REPORT.md
+    artifacts:
+      - yoyo-eth-mvp-report
+    reuse_allowed: true
+    notes: >-
+      Sample size is the first-order limitation and the report says so: 44
+      validation and 40 test events, 4-5 samples per decile group. The pool-level
+      finding (compression events are worse than random short entries in these
+      windows) is the part that carries; the model-level numbers have no
+      statistical power. No permutation test was run at MVP stage.
+
+  - experiment_id: exp-yoyo-eth-p02-walkforward-grid
+    source_repo: darkforest-x/yoyo-eth
+    source_commit: "6147810afb46be1c664128e9a5359e8e7d0a3923"
+    status: inconclusive
+    question: >-
+      Does a walk-forward trigger x quantile grid find a configuration where the
+      MA-compression pool beats its matched random control?
+    single_variable: trigger definition x score quantile
+    result: >-
+      No configuration separated the pool from its control; pool-minus-control
+      stayed inside -3.9bp..+4.8bp after the control function was corrected.
+      Model metrics were bit-identical before and after that correction.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/historical/yoyo_eth/P02_WALKFORWARD_REPORT.md
+    reuse_allowed: true
+
+  - experiment_id: exp-yoyo-eth-p03-anchored-walkforward
+    source_repo: darkforest-x/yoyo-eth
+    source_commit: "6147810afb46be1c664128e9a5359e8e7d0a3923"
+    status: rejected
+    question: >-
+      Was iteration_v1's anchored val rho=+0.465 (p=0.01, n=31) a real signal or
+      a single-split regime coincidence?
+    single_variable: decision anchor (legacy zone_start vs anchored causal trigger)
+    result: >-
+      not_reproducible. Under a 4-fold anchored walk-forward the same events give
+      rho +0.219 on the corresponding fold and -0.151 on the next; weighted mean
+      rho +0.065 over OOS n=140, inside a +-0.17 noise band. The original +0.465
+      was that split serving as both early-stopping selector and a single
+      favourable regime. Secondary observation, recorded but not promoted to a
+      conclusion: the anchored arm beat legacy in all 4 folds (paired sign test
+      p~=0.06), so semantic anchoring helps direction-wise but not enough to
+      matter. Pool level unchanged: anchored all-minus-control -5.4bp, legacy
+      +4.8bp -- both indistinguishable from same-month same-volatility-bucket
+      random entry.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/historical/yoyo_eth/P03_ANCHORED_WF_REPORT.md
+    artifacts:
+      - yoyo-eth-p03-anchored-walkforward-report
+    reuse_allowed: true
+    notes: >-
+      The owner-facing options at the end of this report were A stop, B swap the
+      6h fixed horizon for a first-hit ATR barrier, C adjudicate the gallery
+      first. No option was taken before the repository was frozen for
+      consolidation; the label/exit definition is the named next single variable
+      if this line is ever resumed.
+
+  - experiment_id: exp-yoyo-eth-p04-strict-platform-v2
+    source_repo: darkforest-x/yoyo-eth
+    source_commit: "6147810afb46be1c664128e9a5359e8e7d0a3923"
+    status: active
+    question: >-
+      Does a strict platform definition v2, adjudicated by the owner rather than
+      by a threshold, isolate a subset of compression events that the loose pool
+      dilutes?
+    single_variable: platform definition (loose scanner vs strict v2)
+    result: >-
+      definition_and_review_gallery_only. P04 produced the definition and a
+      decision_view/outcome_view review gallery; no model was trained and no
+      economic claim was made or tested. Carried forward as an open question,
+      not as evidence.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/historical/yoyo_eth/README.md
+    reuse_allowed: true
+
+  # ==========================================================================
+  # darkforest-one -- minimal causal engine
+  # ==========================================================================
+  - experiment_id: exp-darkforest-one-p1-causal-candidate-dataset
+    source_repo: darkforest-x/darkforest-one
+    source_commit: "fd36dd1adc5844f241122c3853eb4d3e675a9c11"
+    status: superseded
+    question: >-
+      Can a deterministic, fully typed, fail-closed engine build a causal
+      MA-density candidate dataset with matched random controls, such that
+      identical inputs reproduce identical bars, features, candidates and hashes?
+    single_variable: n/a -- infrastructure phase, no competing arms
+    result: >-
+      P1 gate passed; P2 never started. The repository reaches ROADMAP P1
+      complete (canonical OKX ingestion, idempotent incremental updates, Parquet
+      snapshots with manifests, gap/duplicate/stale/unclosed rejection, causal
+      MA-density candidates, density diagnostics, matched random controls) with
+      every P2 box unchecked, reports/generated/ empty, and no LightGBM, label
+      or walk-forward code on any branch including the remotes. Superseded by
+      this consolidation, which ports the engineering (typed contracts,
+      fail-closed config, artifact lineage, matched-control design, closed-bar
+      continuity checks) into fable-trading rather than continuing the engine.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/historical/darkforest_one/README.md
+    reuse_allowed: true
+    notes: >-
+      CORRECTION TO THE TASK BOOK. Task book section 8.1 lists as facts to be
+      preserved that darkforest-one's "P2 economic gate failed", that "accepted
+      candidates had negative OOS net return", that they "lost to matched
+      controls" and that "P3 was blocked". None of that happened in this
+      repository. Verified at fd36dd1 across main and both remote agent
+      branches: P2 is entirely unchecked in ROADMAP.md, reports/generated/
+      contains only .gitkeep, and no judgment code exists. Recording those
+      claims would have put four fabricated results into the permanent
+      experiment log, so the true status -- P1 done, P2 never attempted -- is
+      recorded instead, per the task book's own instruction that the real source
+      commit wins when it disagrees with the description.
+
+  # ==========================================================================
+  # yolo-xx -- pattern teacher, pattern quality, formation
+  # ==========================================================================
+  - experiment_id: exp-yolo-xx-formation-gpt-variant
+    source_repo: darkforest-x/yolo-xx
+    source_commit: "9296cfa8e5053d86cea44e29dbd45874c3dff689"
+    status: accepted
+    question: >-
+      How early can formation be called, and what does moving the evaluation
+      point cost in discrimination?
+    single_variable: evaluation offset (T0-T30 = 8 bars before completion, vs 30 bars early)
+    result: >-
+      Best formation number to date: AUC 0.7417, 95% CI [0.6888, 0.7882], kappa
+      0.295 at T0-T30. The 30-bars-early (7.5h) variant scores AUC 0.6453,
+      95% CI [0.5846, 0.7032], kappa 0.206, and pattern-quality A-grade
+      classification scores AUC 0.6323, 95% CI [0.5661, 0.6945], kappa 0.159.
+      Strict contamination rate of the formation negatives is 4.0%,
+      95% CI [1.1%, 13.5%]. Frozen at tag phase3-formation-v1-frozen-20260806.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/historical/yolo_xx/README.md
+    reuse_allowed: true
+    notes: >-
+      "accepted" here means the measurement stands, not that the model may
+      trade. The confidence intervals on every arm overlap the next arm's, and
+      kappa 0.295 is fair agreement at best.
+
+  - experiment_id: exp-yolo-xx-teacher-tip-vs-full-context
+    source_repo: darkforest-x/yolo-xx
+    source_commit: "9296cfa8e5053d86cea44e29dbd45874c3dff689"
+    status: rejected
+    question: >-
+      Does the old YOLO detector reproduce its full-context performance when it
+      is only allowed to see up to the current closed bar (the Tip protocol)?
+    single_variable: evaluation window right edge (full context vs tip)
+    result: >-
+      collapses_at_the_tip. Old-detector reproduction rate is about 9-10% at the
+      tip against 62-72% with full context. Recognising a completed pattern and
+      recognising one at the live edge are different tasks, and a bbox's right
+      edge cannot stand in for a causal onset. This is why YOLO is retained as a
+      Pattern Teacher and explicitly not as the final tip trigger.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/historical/yolo_xx/README.md
+    reuse_allowed: true
+
+  - experiment_id: exp-yolo-xx-quality-ranker-v1
+    source_repo: darkforest-x/yolo-xx
+    source_commit: "9296cfa8e5053d86cea44e29dbd45874c3dff689"
+    status: rejected
+    question: >-
+      Can a direction-neutral geometry ranker score pattern quality, and is the
+      lift from adding further features real?
+    single_variable: feature set (direction-neutral geometry vs extended)
+    result: >-
+      leakage. Direction-neutral geometry scores 0.53/0.55, and the apparent
+      lift to 0.64 was leakage rather than signal. Recorded together with the
+      prior finding that events carried no direction at all while 46% of the
+      boxes were long -- a label-semantics fault, not a modelling one.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/historical/yolo_xx/README.md
+    reuse_allowed: true
+
+  - experiment_id: exp-yolo-xx-pooled-auc-source-discrimination
+    source_repo: darkforest-x/yolo-xx
+    source_commit: "9296cfa8e5053d86cea44e29dbd45874c3dff689"
+    status: rejected
+    question: >-
+      Was the pooled AUC 0.8067 over 659 samples a breakthrough in pattern
+      quality discrimination?
+    single_variable: pooling vs per-source stratification
+    result: >-
+      source_discrimination. Stratified by source, each subset retains only
+      0.57-0.65, and the three sources have positive-class rates of 85% / 84% /
+      29%. The model was separating collection batches, not patterns. The render
+      pipeline had already been unified, so this is the v15 "two render
+      pipelines" fault with the trigger surface moved from rendering to
+      batching, and grouped CV does not defend against it -- grouped CV stops
+      one entity crossing folds, which is a different disease from different
+      sources having different base rates.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: docs/learnings/pooled-auc-can-be-source-discrimination.md
+    reuse_allowed: true
+
+  # ==========================================================================
+  # yoyo-trading -- gold annotation, dataset V3, fixed W10
+  # ==========================================================================
+  - experiment_id: exp-yoyo-trading-fixed-w10-gold-freeze
+    source_repo: darkforest-x/yoyo-trading
+    source_commit: "784766de45a3b876c986d3ba672779124b46a66f"
+    status: active
+    question: >-
+      What is the reviewed gold core for the fixed W10 / Core4 / Confirm1
+      protocol, and does it qualify as a training set?
+    single_variable: n/a -- dataset construction
+    result: >-
+      frozen_but_not_training_eligible. SIGNAL 1,247 and NO_SIGNAL 1,402 frozen
+      into 2,649 training images (train 1,849 / val 350 / test 450), manifest
+      SHA 20686feba41d15b82e34109402840c2d640fe1e2daea0392b35e1ea79320a7fc.
+      training_eligible stays false for a specific reason: protocol 17.6
+      requires a DIRECT spot-check error rate and the migration produced
+      DIRECT=0, so that rate is unknown. Every other gate passed. 44 CONFLICT
+      items excluded, coreless A items not used as positives, 17 competing-core
+      SIGNAL items excluded.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/historical/yoyo_trading/README.md
+    artifacts:
+      - yoyo-trading-dataset-v3-gold-core
+      - yoyo-trading-dataset-v3-2-reviewed-core
+      - yoyo-trading-legacy-label-migration-v3
+    reuse_allowed: true
+    notes: >-
+      A frozen dataset with a known-unmeasured label error rate is exactly the
+      thing that looks ready and is not. The freeze is a checkpoint, not a
+      qualification.
+
+  - experiment_id: exp-yoyo-trading-fixed-w10-classifier-holdout3d
+    source_repo: darkforest-x/yoyo-trading
+    source_commit: "784766de45a3b876c986d3ba672779124b46a66f"
+    status: inconclusive
+    question: >-
+      On three freshly pulled days, what does the fixed W10 classifier protocol
+      return after costs?
+    single_variable: n/a -- first holdout trial of this configuration
+    result: >-
+      126 signals after dedup, 119 closed, maker net +0.0453, taker net -0.0023,
+      win rate 31.9%. Three days is a trial, not an acceptance: the sign flips
+      with the fee route, and n=119 over one 3-day window carries no walk-forward
+      or matched control. Not promoted, not deployed.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/historical/yoyo_trading/README.md
+    reuse_allowed: false
+    notes: >-
+      HOLDOUT LEDGER ENTRY. This is consumption number 1 for the fixed W10
+      Core4/Confirm1 configuration, on data the owner named directly
+      (UTC 2026-08-10 00:00 to 2026-08-13 12:00, 26 USDT-SWAP symbols). It was
+      consumed in yoyo-trading before this consolidation began, is recorded here
+      so the count survives the merge, and is NOT re-read by anything in this
+      task. reuse_allowed is false: the window is burned for this configuration.
+
+  - experiment_id: exp-consolidation-single-repo-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "59e13a61c43e1e72f397f38985fd8c700533550b"
+    status: active
+    question: >-
+      Can the four satellite repositories' proven capabilities be brought into
+      fable-trading without changing any production pointer, consuming holdout,
+      or training a model?
+    single_variable: n/a -- engineering consolidation
+    result: in_progress
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: reports/consolidation/FINAL_ACCEPTANCE.md
+    reuse_allowed: true

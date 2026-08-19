@@ -1,0 +1,163 @@
+# Artifact registry -- one row per dataset, model, weight file, manifest or report
+# that any report in this repository cites.
+#
+# The registry holds identity and a pointer, never the bytes. Task book section
+# 3.6 and CLAUDE.md both forbid growing git with weights and image packs; a row
+# here with an sha256 and a storage_uri is what "we have this artifact" means.
+#
+# Validated by yoyo.contracts.artifacts.ArtifactRecord. Rules worth knowing
+# before adding a row:
+#   - training_eligible and production_eligible are separate, and both default
+#     to false. Owner approving a class protocol is not owner approving every
+#     sample; a model that trained is not a model that may trade.
+#   - production_eligible requires an sha256 and a holdout_status that is not
+#     "unknown".
+#   - holdout_status "historical" means the artifact predates the holdout rule
+#     and its status was inherited, not re-derived. It is not a synonym for
+#     "pre_holdout" and does not clear anything for production.
+schema_version: 1
+
+artifacts:
+  # ---- pattern teacher weights (registered, not copied) --------------------
+  # CLAUDE.md's fact correction of 2026-08-05: the pre-v16 detector purge
+  # reached two machines, not three. These are the copies that exist here.
+  - artifact_id: owner-v10-chain
+    artifact_type: weights
+    role: pattern_teacher
+    source_repo: darkforest-x/fable-trading
+    source_commit: "59e13a61c43e1e72f397f38985fd8c700533550b"
+    source_path: models/owner_v10_chain.pt
+    sha256: null           # unhashed on purpose: see notes
+    size_bytes: 19185754
+    storage_uri: "file://models/owner_v10_chain.pt"
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      Already present in this repository; registered rather than re-copied so
+      that one physical file keeps one identity. Left unhashed at C1 because
+      hashing it is a read of a 19 MB working artifact with no bearing on any
+      consolidation acceptance gate; hash it when something wants to promote it,
+      which the production_eligible=false above currently forbids.
+
+  - artifact_id: owner-short-star-v10
+    artifact_type: weights
+    role: pattern_teacher
+    source_repo: darkforest-x/fable-trading
+    source_commit: "59e13a61c43e1e72f397f38985fd8c700533550b"
+    source_path: models/owner_short_star_v10.pt
+    sha256: null
+    size_bytes: 19185818
+    storage_uri: "file://models/owner_short_star_v10.pt"
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      Target of the models/owner_best.pt symlink. Registered for identity only.
+
+  - artifact_id: owner-v16-tipuni-cold
+    artifact_type: weights
+    role: pattern_teacher
+    source_repo: darkforest-x/fable-trading
+    source_commit: "59e13a61c43e1e72f397f38985fd8c700533550b"
+    source_path: models/owner_v16_tipuni_cold.pt
+    sha256: null
+    size_bytes: 5480602
+    storage_uri: "file://models/owner_v16_tipuni_cold.pt"
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+
+  - artifact_id: yolo-xx-detector-weights-3060
+    artifact_type: weights
+    role: pattern_teacher
+    source_repo: darkforest-x/yolo-xx
+    source_commit: "9296cfa8e5053d86cea44e29dbd45874c3dff689"
+    source_path: weights/
+    sha256: null
+    size_bytes: null
+    storage_uri: "host://windows-3060/C:/fable"
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      Reference-only. 59 detector weights (v8_chain / v9 four versions /
+      v10_chain / v14 / v15 / v16 / short_star) survive on the Windows 3060 at
+      C:\fable; v11 exists nowhere and v12/v13 only as Mac copies. Registered so
+      that "the weights were purged" stops being repeated as a premise --
+      docs/learnings/purge-records-are-claims-not-facts.md. Not copied: task book
+      section 8.3 forbids duplicating weight files into this repository.
+
+  # ---- gold annotation data -------------------------------------------------
+  - artifact_id: yoyo-trading-dataset-v3-gold-core
+    artifact_type: annotation_set
+    role: gold_labels
+    source_repo: darkforest-x/yoyo-trading
+    source_commit: "784766de45a3b876c986d3ba672779124b46a66f"
+    source_path: manifests/dataset_v3_gold_core_v1.json
+    sha256: null
+    size_bytes: null
+    storage_uri: "repo://datasets/manifests/dataset_v3_gold_core_v1.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      Owner-reviewed core of Dataset V3. training_eligible stays false: the
+      review recorded a class verdict, and the box geometry remains an R1
+      proposal. Promotion to a training label set is an owner decision.
+
+  - artifact_id: yoyo-trading-dataset-v3-2-reviewed-core
+    artifact_type: annotation_set
+    role: gold_labels
+    source_repo: darkforest-x/yoyo-trading
+    source_commit: "784766de45a3b876c986d3ba672779124b46a66f"
+    source_path: manifests/dataset_v3_2_reviewed_core_v1.json
+    sha256: null
+    size_bytes: null
+    storage_uri: "repo://datasets/manifests/dataset_v3_2_reviewed_core_v1.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+
+  - artifact_id: yoyo-trading-legacy-label-migration-v3
+    artifact_type: manifest
+    role: annotation_lineage
+    source_repo: darkforest-x/yoyo-trading
+    source_commit: "784766de45a3b876c986d3ba672779124b46a66f"
+    source_path: manifests/legacy_label_migration_v3.json
+    sha256: null
+    size_bytes: null
+    storage_uri: "repo://datasets/manifests/legacy_label_migration_v3.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      Audit trail from legacy annotation sources to the canonical gold schema.
+      Its value is the conflict list, not the labels.
+
+  # ---- historical research reports -----------------------------------------
+  - artifact_id: yoyo-eth-mvp-report
+    artifact_type: report
+    role: historical_conclusion
+    source_repo: darkforest-x/yoyo-eth
+    source_commit: "6147810afb46be1c664128e9a5359e8e7d0a3923"
+    source_path: reports/MVP_REPORT.md
+    sha256: null
+    size_bytes: null
+    storage_uri: "repo://experiments/historical/yoyo_eth/MVP_REPORT.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+
+  - artifact_id: yoyo-eth-p03-anchored-walkforward-report
+    artifact_type: report
+    role: historical_conclusion
+    source_repo: darkforest-x/yoyo-eth
+    source_commit: "6147810afb46be1c664128e9a5359e8e7d0a3923"
+    source_path: reports/P03_ANCHORED_WF_REPORT.md
+    sha256: null
+    size_bytes: null
+    storage_uri: "repo://experiments/historical/yoyo_eth/P03_ANCHORED_WF_REPORT.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false

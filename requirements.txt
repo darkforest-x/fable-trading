@@ -16,3 +16,7 @@ uvicorn>=0.23
 
 # 图片工具（fix_images.py、部分检测脚本）
 Pillow>=10.0
+
+# 治理注册表（artifacts/registry.yaml、experiments/registry.yaml）
+# 纯 Python、无编译依赖；两个 scripts/ 早已在用，只是从未写进本文件。
+PyYAML>=6.0

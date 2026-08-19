@@ -26,6 +26,7 @@ jobs:
             "lightgbm>=4.0" \
             "fastapi>=0.100" \
             "uvicorn>=0.23" \
+            "PyYAML>=6.0" \
             pytest
       - name: Compile Python sources
         run: python -m compileall src scripts tests
