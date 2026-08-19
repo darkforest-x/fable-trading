@@ -131,3 +131,10 @@ external/Kronos/
 
 # local agent / fabric mesh runtime
 .pi/
+
+# Review-pack images: regenerable from the manifest beside them, and ls_pack
+# alone is 1.0 GB of JPEG. The manifests, answer keys and pages stay tracked so
+# a pack can be rebuilt byte-for-byte from what is committed.
+/reports/ls_pack/img/
+/reports/unmatched_review/img/
+/reports/phase_pilot/img/
