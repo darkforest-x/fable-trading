@@ -48,3 +48,16 @@
 | `yoyo-trading` | `tests/test_gold_annotation.py` | `ADAPT_AND_PORT` | 一行 import 跟随 `tools/review/` 迁移，其余不动。 |
 | `yoyo-trading` | `tests/test_{local_v2_render,window_render,position_spread,legacy_audit}.py` | `DIRECT_PORT` | 覆盖随 `yoyo` 包一起迁回的 datasets/render 模块。 |
 | 本仓新建 | `yoyo/contracts/pattern.py` | 新增（非迁移） | 任务书 C2.1 要求的 canonical PatternEvent。**刻意不是第三套 schema**：gold row 与 onset v3 record 各自保留，本模块只做跨层时间语义 + 五条规则 + 两个适配器，让两者收敛到一处而不是分叉成三处。 |
+
+## C3 — 数值基线、匹配对照、因果测试与经济门
+
+| 来源 | 资产 | 裁决 | 理由 |
+|---|---|---|---|
+| `yoyo-eth` | `src/yoyo_eth/`（12 个 .py） | `DIRECT_PORT` | 因果指标、松压缩扫描器（三种 trigger）、27 个因果特征、MFE/MAE short_utility 标签、anchored walk-forward、matched random control。字节一致：MVP/P02/P03 三份报告的数字就是这段代码跑出来的，改一个字符那些报告的复现命令就不再复现。 |
+| `yoyo-eth` | `configs/mvp.yaml` | `DIRECT_PORT` | 被迁代码读的全部旋钮，含 owner 决策的成本值与冻结的 `data_end_boundary`。 |
+| `darkforest-one` | `src/darkforest_one/data/validator.py` | `ADAPT_AND_PORT` | → `yoyo/data/continuity.py`。改为对本仓 loader 返回的 pandas frame 工作（任务书 C3.1 单一数据接口），3.11 → 3.9。**一处行为差异是刻意的**：缺口改为登记而非抛错——darkforest-one 只吃一个币可以整条拒绝，本仓扫 200+ 个上市时间不同的币，抛错会让最新上市的币掀翻整轮扫描；需要拒绝的 builder 用 `assert_continuous()`。 |
+| `darkforest-one` | `src/darkforest_one/governance/manifest.py` | `ADAPT_AND_PORT` | → `yoyo/artifacts/lineage.py`。3.9 化 + 对齐本仓注册表词汇，并加两条本仓自己付过学费的规则：`assert_builder_landed_first()`（产物早于 builder 入库 = 复现声明未经验证）与**逐轴**可复现性（w20_midbox 2635/2635 图字节一致但 405 个 split 落点全错，一个 bool 装不下这两件同时为真的事）。 |
+| `darkforest-one` | `governance/config.py`（pydantic + `typing.Self`） | `REFERENCE_ONLY` | fail-closed 配置的设计值得学，但实现绑死 pydantic 与 Python 3.11；本仓 venv 是 3.9 且 CLAUDE.md 禁止新增重型依赖。fail-closed 的**语义**已由 `yoyo/contracts/{artifacts,pattern,holdout}.py` 用 stdlib 实现。 |
+| `darkforest-one` | `src/darkforest_one/{cli,candidate,strategy,execution}/` | `REJECT` | 第二套完整 package 根、第二个 CLI、第二份 ETH 数据、未接入实际系统的 paper 外壳。任务书 §8.1 明列禁止。 |
+| 本仓新建 | `yoyo/contracts/holdout.py` | 新增（非迁移） | 收敛后 holdout 边界在本仓有 **11 处定义、6 个不同名字**（`HOLDOUT_START` / `HOLDOUT_CUTOFF` / `HOLD_DEFAULT` / `ACCEPT_START` / `holdout_start_exclusive` / `data_end_boundary`）。今天全部一致，但没有任何东西让它们一致。本模块是唯一定义；**不改动其余 11 处**（那是在动运行中的代码），改由 `tests/causality/test_holdout_boundary_is_single_valued.py` 逐个读出来比对，任何一处漂移当场红。 |
+| 本仓新建 | `yoyo/evaluation/{walk_forward,matched_controls,permutation,economic_gates}.py` | 新增（非迁移） | 四个仓在用四套写法回答同样四个问题。合并为一套：purge/embargo 切分（yoyo-eth 的 fold 布局 + darkforest-one 的 purge 设计 + **新增的事后泄漏断言**，两个来源仓都只依赖切分函数写对、没有事后校验）；匹配对照（采用 darkforest-one 的 sha256 确定性选择，优于 yoyo-eth 依赖循环顺序的 rng）；置换检验（p 值用 (r+1)/(n+1)，永不返回 0）；三重经济门（净收益 > 0、p < 0.01、跑赢匹配对照，缺一不可，且对照组是**必填参数**——设成可选就等于给"忘了带对照"留了个看起来正常的短签名）。 |
