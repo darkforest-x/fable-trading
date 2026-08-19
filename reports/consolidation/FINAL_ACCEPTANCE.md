@@ -108,6 +108,10 @@ egg-info 与 uv.lock、竞争性的 AGENTS/CLAUDE/HANDOFF。
    `docs/consolidation/DUPLICATE_SEMANTICS.md` §4。
 7. **任务书 §8.1 的四条 darkforest-one 结论没有发生。** 已按真实 source commit 更正。
 
+## PR
+
+https://github.com/darkforest-x/fable-trading/pull/1 （Draft）
+
 ## 提交
 
 - `4f9203c consolidation(c0): add source repository snapshot tool`
