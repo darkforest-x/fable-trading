@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-19T16:51:26+00:00",
+  "generated_by": "tools/consolidation/final_acceptance.py",
+  "decision": "accepted",
+  "branch": "claude/fable-trading-consolidation-758d61",
+  "head": "39e287082e4519b4a99d7ff6582f343b7a5b5149",
+  "base": "main",
+  "checks": {
+    "runtime_safety_hashes": {
+      "passed": true,
+      "n_checked": 12,
+      "changed": [],
+      "hashes": {
+        "models/ACTIVE": {
+          "c0": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+          "c7": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+          "unchanged": true
+        },
+        "models/ACTIVE_PREV": {
+          "c0": "5142d8a143799a826de176e75bcf1512070bded1a76cedb1b025c5ac8bca6066",
+          "c7": "5142d8a143799a826de176e75bcf1512070bded1a76cedb1b025c5ac8bca6066",
+          "unchanged": true
+        },
+        "models/owner_best.json": {
+          "c0": "1fb35c712dbff41789be546d2486f83824fcfebacb3c65b910b5ee7d8ebc47b5",
+          "c7": "1fb35c712dbff41789be546d2486f83824fcfebacb3c65b910b5ee7d8ebc47b5",
+          "unchanged": true
+        },
+        "models/active_bundle.example.json": {
+          "c0": "fb2bf9dd0fcf65e6214a8014e6e205d6f7fc17e20052b831a4ea4cb8ffeebbf1",
+          "c7": "fb2bf9dd0fcf65e6214a8014e6e205d6f7fc17e20052b831a4ea4cb8ffeebbf1",
+          "unchanged": true
+        },
+        "data/forward_log.csv": {
+          "c0": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb",
+          "c7": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb",
+          "unchanged": true
+        },
+        "data/forward_log_ma206.csv": {
+          "c0": "e03ada090caec2d7087c2d35bf9a8f1e4ceab16f4be618df0e90a84fe0588a5e",
+          "c7": "e03ada090caec2d7087c2d35bf9a8f1e4ceab16f4be618df0e90a84fe0588a5e",
+          "unchanged": true
+        },
+        "src/costs.py": {
+          "c0": "e2245409d815db6b440fe81e552a59fcd6eed1fa7fc606138f3d674fbb5e971e",
+          "c7": "e2245409d815db6b440fe81e552a59fcd6eed1fa7fc606138f3d674fbb5e971e",
+          "unchanged": true
+        },
+        "scripts/deploy_vps.sh": {
+          "c0": "47389ad26bbdc30fea44bf18c200fda1a9ceb6fd844338fa4c8b534c412210f4",
+          "c7": "47389ad26bbdc30fea44bf18c200fda1a9ceb6fd844338fa4c8b534c412210f4",
+          "unchanged": true
+        },
+        "scripts/deploy_vps_short_protocol.sh": {
+          "c0": "6ab012d6767dd9ba5228b050999376fd32155edf6df76f90e96b394a012b9741",
+          "c7": "6ab012d6767dd9ba5228b050999376fd32155edf6df76f90e96b394a012b9741",
+          "unchanged": true
+        },
+        "deploy/fable-forward.timer": {
+          "c0": "bfddb136a1fcf7bea2a040c6cd28c14e007a8e7b5e95fa7aa429dce5160b7549",
+          "c7": "bfddb136a1fcf7bea2a040c6cd28c14e007a8e7b5e95fa7aa429dce5160b7549",
+          "unchanged": true
+        },
+        "deploy/fable-live-health.service": {
+          "c0": "d6ecc03f37eb23eda5c09ec4cc29ec57947071037d3d55ec3ab7b9b585510107",
+          "c7": "d6ecc03f37eb23eda5c09ec4cc29ec57947071037d3d55ec3ab7b9b585510107",
+          "unchanged": true
+        },
+        "deploy/fable-live-health.timer": {
+          "c0": "c133fad519f9e67dee5f48925e40221f2fe118aa24294e7631d37a3219c7193d",
+          "c7": "c133fad519f9e67dee5f48925e40221f2fe118aa24294e7631d37a3219c7193d",
+          "unchanged": true
+        }
+      },
+      "detail": "every runtime-safety object is byte-identical to C0"
+    },
+    "tests": {
+      "passed": true,
+      "baseline_counts": {
+        "failed": 5,
+        "passed": 701,
+        "skipped": 2,
+        "warnings": 14,
+        "error": 6
+      },
+      "final_counts": {
+        "failed": 5,
+        "passed": 1185,
+        "skipped": 4,
+        "warnings": 14,
+        "error": 6
+      },
+      "new_failures": [],
+      "no_longer_failing": [],
+      "detail": "701 -> 1185 passing, 0 new failures"
+    },
+    "secret_scan": {
+      "passed": true,
+      "findings": [],
+      "allowlisted": [
+        {
+          "path": "yoyo/layers/l4_execution/okx_client.py",
+          "pattern": "okx_api_credential"
+        }
+      ],
+      "patterns_checked": [
+        "aws_access_key",
+        "generic_assigned_secret",
+        "okx_api_credential",
+        "private_key_block",
+        "ssh_url_with_password",
+        "telegram_bot_token"
+      ],
+      "detail": "no secret-shaped content in added lines"
+    },
+    "large_files": {
+      "passed": true,
+      "ceiling_bytes": 2097152,
+      "oversized": [],
+      "detail": "no added file exceeds 2097152 bytes"
+    },
+    "migration_ledger": {
+      "passed": true,
+      "n_entries": 131,
+      "by_decision": {
+        "ADAPT_AND_PORT": 7,
+        "DIRECT_PORT": 97,
+        "HISTORICAL_REPORT": 26,
+        "REFERENCE_ONLY": 1
+      },
+      "untraceable": [],
+      "detail": "131 assets, all traceable to a source commit"
+    },
+    "nothing_promoted": {
+      "passed": true,
+      "production_eligible": [],
+      "training_eligible": [],
+      "detail": "nothing is production_eligible or training_eligible"
+    },
+    "holdout": {
+      "passed": true,
+      "holdout_consumed_during_consolidation": false,
+      "pre_existing_consumers": [
+        "exp-yoyo-trading-fixed-w10-classifier-holdout3d"
+      ],
+      "detail": "the only recorded consumption predates this task and was not re-read"
+    }
+  }
+}

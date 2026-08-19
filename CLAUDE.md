@@ -62,7 +62,12 @@
     见 `docs/learnings/purge-records-are-claims-not-facts.md`。**
     实盘检测器仍只认真 tip 金标 + tip-smoke，自家 val/mAP/旧 frozen-F1 不得作生产裁决；
     无验证过的实盘检测器时管道诚实空转（detector=none）。
-13. **单分支纪律**（owner 2026-07-30）：**只有 `main`，不开新分支、不建 worktree。**
+13. **单仓 + 单分支纪律**（owner 2026-07-30；单仓部分 2026-08-19 收敛后生效）：
+    **fable-trading 是唯一 ACTIVE 交易研究仓**——`darkforest-one` / `yolo-xx` /
+    `yoyo-trading` / `yoyo-eth` 已回迁并只读归档，**不得再开新仓**（`yoyo-eth-v2` /
+    `yolo-new` / `fable-next` 一律不建）；新研究进 `experiments/active/<experiment_id>/`
+    并注册到 `experiments/registry.yaml`。
+    **只有 `main`，不开新分支、不建 worktree。**
     直接在 main 上提交、`git push origin HEAD:main`。**每次提交前先 `git branch --show-current`
     确认自己在 main**——曾有并行会话把 HEAD 切到别的分支，后续 6 个提交落在那里，
     只因用的是显式 `HEAD:main` 才没丢。需要隔离环境（并行 agent / 跨模型实现）时，
@@ -70,7 +75,7 @@
 
 14. **层间契约**（owner 2026-08-03 重构）：`yoyo/layers/` 的四层**禁止互相 import**，
     只能经 `yoyo/contracts/`（protocol / outcomes / costs / schema）和 `yoyo/data/`。
-    由 `tests/test_layer_boundaries.py` 用 AST 强制，不是口头约定。
+    由 `tests/boundaries/test_layer_imports.py` 用 AST 强制，不是口头约定。
     病因：2026-08-03 的 side/feature-semantics 故障横跨 forward_scan + frozen + executor
     三个文件——L2 的事实（模型用什么坐标系训的）被 L1 的事实（这单做多还是做空）决定了，
     而代码里没有任何东西反对。**旧 `src/` 是转发壳，迁移期并存；新代码一律写进 `yoyo/`。**
@@ -178,6 +183,19 @@ md 源文件必须包含：
 - 结果好得反常（AUC 突然 >0.7、净收益突然翻倍、accept PF 夸张）→ 第一假设是泄漏或 bug，
   写最小复现验证后再汇报；确认级只认前向新鲜样本。
 - 项目所有者用中文交流，汇报用中文；代码与注释用英文。
+
+## 收敛后的入口（2026-08-19）
+
+- **注册表是入口**：实验进 `experiments/registry.yaml`，产物进 `artifacts/registry.yaml`。
+  `production_eligible` / `training_eligible` 默认 false，改动需 owner。
+- **四道守门测试别绕**：`tests/boundaries/test_yoyo_package_is_local.py`（`yoyo` 必须解析
+  在本仓内）、`test_no_cross_repository_bridges.py`（sys.path 不许出现兄弟仓）、
+  `tests/causality/test_holdout_boundary_is_single_valued.py`（11 处 holdout 定义不许漂移）、
+  `tests/parity/test_migration_ledger_parity.py`（131 项迁移资产逐个重算哈希）。
+- **两个 ATR 实现不一致**（warmup 播种，bar 14 差 0.109），已钉住未修，
+  等 owner 裁决：`docs/consolidation/DUPLICATE_SEMANTICS.md` §4。
+- 四仓历史结论（含全部负面结果）在 `experiments/historical/`，
+  验收在 `reports/consolidation/FINAL_ACCEPTANCE.md`。
 
 ## learning law
 

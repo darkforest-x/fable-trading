@@ -2,6 +2,35 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-19 — 单仓收敛完成，ACTIVE 未变）
+
+**四个卫星仓已回迁并可归档；本仓成为唯一 ACTIVE 交易研究仓。** 分支
+`claude/fable-trading-consolidation-758d61`，8 个 `consolidation(c0..c7)` 提交，
+验收 `accepted`：七项检查全过。**ACTIVE 指针、forward log、成本合同、部署脚本、
+systemd 单元共 12 个运行安全对象与 C0 逐字节相同**；未训练、未 promote、未部署、
+未下单、**holdout 本次消耗 0**。测试 701 → **1185 passing**，新增失败 **0**
+（11 个先存失败全是本 worktree 缺 gitignore 掉的 `data/` 产物，集合与 C0 完全一致）。
+
+最要紧的一条：**本仓此前跑不起来，除非 `~/yoyo-trading` 在磁盘上**——63 个文件
+import `yoyo.*`，靠 editable 安装指向仓外。整包 55 个 `.py` 已字节一致迁回 `yoyo/`。
+另发现 35 个脚本的跨仓 `sys.path` 桥把 yoyo-trading 插在**第一位**，即它们一直在
+import 另一个仓的 `yoyo`（含 `render.py`，检测器绑死其像素）；已全部删除并加两道
+AST 防回归。
+
+**需要 owner 裁决的一件事**：两个 ATR 实现不一致（warmup 播种差异，bar 14 差 0.109，
+200 根后耗尽）。ATR 定义 TP/SL 障碍距离，且差异方向取决于取数起点。已量化并钉住，
+**未修**——改任一边都会移动已发布数字，障碍参数是 owner 保留项。三个选项见
+`docs/consolidation/DUPLICATE_SEMANTICS.md` §4。
+
+验收报告：[`reports/consolidation/FINAL_ACCEPTANCE.md`](reports/consolidation/FINAL_ACCEPTANCE.md)
+· 交接：[`docs/consolidation/HANDOFF_AFTER_CONSOLIDATION.md`](docs/consolidation/HANDOFF_AFTER_CONSOLIDATION.md)
+· 四仓历史结论：`experiments/historical/`
+
+**下一条允许的动作：只有 P0（owner 形态定义与重复标注稳定性）→ P1（Gold Dataset）。**
+在 P0/P1 通过前禁止新训练、多周期扩展、promote 与实盘替换。归档 commit 须待 PR 形成后再打。
+
+---
+
 ## ⚡ 当前真相（2026-08-13 — ETH全年冻结形态门命中2次；1参考+1待Owner确认）
 
 **最新进展（2026-08-13 17:44 CST）：Owner要求统计今年ETH有多少次8月10日参考形态，冻结门

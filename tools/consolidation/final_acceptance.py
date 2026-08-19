@@ -57,6 +57,13 @@ SECRET_SCAN_ALLOWLIST = {
     "tools/consolidation/final_acceptance.py",
     "docs/consolidation/REPO_CONSOLIDATION_PLAN.md",
     "reports/consolidation/FINAL_ACCEPTANCE.md",
+    # Verified by hand at C7, not waved through. The four matches are HTTP
+    # header NAMES -- OK-ACCESS-KEY, OK-ACCESS-SIGN, OK-ACCESS-TIMESTAMP,
+    # OK-ACCESS-PASSPHRASE -- and dict key names. The values come from
+    # data/okx_demo_keys.json at runtime, which is gitignored (.gitignore line
+    # 59), is not tracked, and is not in this branch's diff. There is no literal
+    # of credential shape anywhere in the file.
+    "yoyo/layers/l4_execution/okx_client.py",
 }
 
 
