@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-19T17:27:33+00:00",
+  "generated_by": "tools/consolidation/mirror_bulk_artifacts.py",
+  "note": "Bulk artifacts cloned from the four archived source repositories. Not in git: .gitignore excludes archive/consolidated/** apart from README.md and this manifest. Curated text from these repositories was migrated separately with provenance -- see reports/consolidation/migration_ledger.jsonl.",
+  "totals": {
+    "files": 300467,
+    "bytes": 21971992298
+  },
+  "skipped_because_already_present": [
+    "dense_owner_short_star_tip_v10",
+    "dense_owner_side_short_tip_v3",
+    "eth_3m_short_pilot_v1",
+    "eth_short_tip_label2000"
+  ],
+  "repositories": {
+    "yolo-xx": {
+      "present": true,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "files": 281349,
+      "bytes": 20961358410,
+      "skipped_already_present": 14997,
+      "per_directory": {
+        "datasets": {
+          "files": 183431,
+          "bytes": 18669451598
+        },
+        "reports": {
+          "files": 97121,
+          "bytes": 1094796968
+        },
+        "data": {
+          "files": 746,
+          "bytes": 843227365
+        },
+        "runs": {
+          "files": 36,
+          "bytes": 298755967
+        },
+        "weights": {
+          "files": 5,
+          "bytes": 55080214
+        },
+        "build": {
+          "files": 10,
+          "bytes": 46298
+        }
+      }
+    },
+    "yoyo-trading": {
+      "present": true,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "files": 17833,
+      "bytes": 863507768,
+      "skipped_already_present": 0,
+      "per_directory": {
+        "datasets": {
+          "files": 16982,
+          "bytes": 673260702
+        },
+        "runs": {
+          "files": 27,
+          "bytes": 122456543
+        },
+        "reviews": {
+          "files": 824,
+          "bytes": 67790523
+        }
+      }
+    },
+    "yoyo-eth": {
+      "present": true,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "files": 1279,
+      "bytes": 143043460,
+      "skipped_already_present": 0,
+      "per_directory": {
+        "reports": {
+          "files": 1256,
+          "bytes": 131456376
+        },
+        "artifacts": {
+          "files": 23,
+          "bytes": 11587084
+        }
+      }
+    },
+    "darkforest-one": {
+      "present": true,
+      "source_commit": "fd36dd1adc5844f241122c3853eb4d3e675a9c11",
+      "files": 6,
+      "bytes": 4082660,
+      "skipped_already_present": 0,
+      "per_directory": {
+        "data": {
+          "files": 6,
+          "bytes": 4082660
+        }
+      }
+    }
+  }
+}

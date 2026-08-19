@@ -106,3 +106,39 @@
 8 个排除类别每个都有书面理由并报出吸收量，过宽的类别会显形。
 由 `tests/parity/test_migration_ledger_parity.py` 的两个测试守住
 （未归类必须为 0；排除类别必须有真实理由）。
+
+## 2026-08-20 追加 — 大体积产物整体回迁（owner 指示）
+
+Owner：「~24 GB 大体积产物仍在原仓……你可以全部迁移过来，修改 gitignore 大的文件不提交」。
+
+先前那些 `REFERENCE_ONLY` 裁决的**理由是"不进 git"，不是"不进本机"**。
+Owner 的指示把这两件事分开了：物理上全部搬过来，git 里一个都不进。
+
+| 项 | 值 |
+|---|---|
+| 落点 | `archive/consolidated/<repo>/<原相对路径>` |
+| 规模 | 300,467 个文件 / 20.5 GB |
+| 方式 | APFS 写时复制（`cp -c`），**磁盘增量 ≈ 0，源仓完好** |
+| 跳过 | 与本仓重复的 4 个 yolo-xx 数据集（约 1.6 GB，14,997 个文件） |
+| git | `archive/consolidated/**` 忽略；只有 `README.md` 与 `MANIFEST.json` 用 `!` negate 回来 |
+| 生成器 | `tools/consolidation/mirror_bulk_artifacts.py`（幂等，可重跑） |
+
+### 三个具体判断
+
+1. **克隆而不是移动。** 源仓保持完好是必需的——`migration_ledger.jsonl` 里多条
+   `REFERENCE_ONLY` 按 commit + SHA 指回那些仓。APFS 写时复制让"两份都在"几乎不要钱。
+2. **重复的 4 个数据集不复制。** 逐文件核对：文件名集合与大小一致，抽样 12 个哈希全同，
+   唯一差异是 `data.yaml` 里烘进去的仓库路径前缀。省下 1.6 GB。
+3. **忽略规则写 `archive/consolidated/**` 而不是 `archive/consolidated/`。**
+   在临时仓里实测过两种写法：目录级排除下 git 不下降进去，`!README.md` 完全失效；
+   glob 形式则保留否定能力。这正是
+   `docs/learnings/directory-level-gitignore-kills-every-negation-below-it.md` 记的那个坑。
+   由 `tests/boundaries/test_bulk_archive_stays_out_of_git.py` 每次重新推导一遍，
+   不靠读笔记。
+
+### 这棵树不是策展来源
+
+有价值的文本已按 provenance 逐份迁到 `datasets/annotations/`、`datasets/manifests/`、
+`experiments/historical/` 并记进台账。**引用结论请引用那些位置**——
+这里的同名文件是未策展的原始副本，一旦分叉，台账那份才准。
+说明写在 `archive/consolidated/README.md`（该文件本身入 git）。

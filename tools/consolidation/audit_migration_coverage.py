@@ -46,33 +46,37 @@ EXCLUSIONS: List[Tuple[str, Tuple[str, ...], str]] = [
         ("*.png", "*.jpg", "*.jpeg", "*.webp", "*.gif"),
         "Rendered chart frames and review galleries. Task book 3.6 keeps them out "
         "of git; they are regenerable from the bars plus the renderer, and the "
-        "archived repository keeps the originals at a known commit.",
+        "archived repository keeps the originals at a known commit. Mirrored onto "
+        "this machine at archive/consolidated/ since 2026-08-20, so archiving the "
+        "sources does not remove them locally.",
     ),
     (
         "model_weights",
         ("*.pt", "*.onnx", "*.npz", "*.npy", "*.pkl"),
         "Weights and cached tensors. Registered in artifacts/registry.yaml by "
         "SHA-256 and storage_uri, never copied -- one physical file keeps one "
-        "identity.",
+        "identity. The bytes are mirrored at archive/consolidated/ too.",
     ),
     (
         "market_data_csv",
         ("data/*", "*/kline*/*", "*_15m_*.csv", "*_5m_*.csv", "*_3m_*.csv", "*_2m_*.csv"),
         "Raw OHLCV pulled from OKX. Not research output: re-fetchable, and this "
         "repository already carries its own data/kline_fetched/ as the single "
-        "writer (CLAUDE.md live-trading rule 9).",
+        "writer (CLAUDE.md live-trading rule 9). Mirrored at archive/consolidated/ "
+        "for reference; never read by the live path.",
     ),
     (
         "training_runs",
         ("runs/*", "*/runs/*", "*/weights/*", "build/*"),
         "Training run directories -- checkpoints, epoch logs, per-run scan output. "
-        "The conclusions are in the migrated reports; the runs are the workings.",
+        "The conclusions are in the migrated reports; the runs are the workings, "
+        "mirrored at archive/consolidated/ and not in git.",
     ),
     (
         "dataset_image_indexes",
         ("datasets/*/labels/*", "datasets/*/images/*", "*/labels/*.txt", "*.cache"),
         "YOLO label sidecars and image indexes, meaningless without the pixels "
-        "they index, which are excluded above.",
+        "they index. Both are mirrored together at archive/consolidated/.",
     ),
     (
         "competing_governance",

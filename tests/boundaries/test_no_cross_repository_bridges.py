@@ -37,6 +37,9 @@ ALLOWED_TO_NAME_SOURCES = {
         "freezes the source repositories' state; naming them is the whole task",
     "tools/consolidation/port_asset.py":
         "copies from a source repository and records the provenance",
+    "tools/consolidation/mirror_bulk_artifacts.py":
+        "clones the bulk artifacts out of the source repositories into "
+        "archive/consolidated/; it reads them by name and never puts them on sys.path",
     "tools/consolidation/audit_migration_coverage.py":
         "enumerates every tracked file in each source repository to prove none "
         "fell through; it must name and open them to count them",
@@ -47,6 +50,9 @@ ALLOWED_TO_NAME_SOURCES = {
         "cross-checks the port against the source while it is still on disk; it "
         "APPENDS to sys.path rather than prepending, and asserts afterwards that "
         "the local yoyo still won",
+    "tests/boundaries/test_bulk_archive_stays_out_of_git.py":
+        "builds a scratch archive/consolidated/yolo-xx/... tree to prove the "
+        "ignore rules work; the name is fixture data, never a path it opens",
     "tests/boundaries/test_no_cross_repository_bridges.py":
         "this file, which has to name them in order to look for them",
 }

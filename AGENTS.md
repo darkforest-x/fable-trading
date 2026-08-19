@@ -2,6 +2,7 @@
 
 一句话：两层架构验证"双均线密集启动"信号——YOLO 检测层（2a）+ LightGBM 判断层（2b），
 2026-07 起进入 **VPS 实盘阶段**（执行层 + 前向 100 笔新鲜裁决）。
+**项目章程（东西放哪 / 一轮怎么走）看 `docs/PROJECT_CHARTER.md`。**
 当前进度与下一步看 `HANDOFF.md` 顶部"当前真相"；各阶段结论看 `analysis/p*_report.md`；
 本周执行计划看 `analysis/week_plan_20260720.md`；路线图（历史）看 `PROJECT_PLAN.md`。
 
