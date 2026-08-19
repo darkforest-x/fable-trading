@@ -52,8 +52,11 @@ SAFETY_PATHS: list[str] = [
     "data/forward_log.csv",
     "data/forward_log_ma206.csv",
     "src/costs.py",
-    "configs/live_w10_pulse_v1.json",
-    "deploy/deploy_vps.sh",
+    "scripts/deploy_vps.sh",
+    "scripts/deploy_vps_short_protocol.sh",
+    "deploy/fable-forward.timer",
+    "deploy/fable-live-health.service",
+    "deploy/fable-live-health.timer",
 ]
 
 TEST_ENTRY_CANDIDATES = [
