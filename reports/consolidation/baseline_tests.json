@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "label": "baseline",
+  "generated_at": "2026-08-19T12:33:38+00:00",
+  "duration_seconds": 6.58,
+  "command": [
+    "/Users/zhangzc/fable-trading/.venv/bin/python",
+    "-m",
+    "pytest",
+    "tests",
+    "-q",
+    "-p",
+    "no:cacheprovider"
+  ],
+  "cwd": "/Users/zhangzc/fable-trading/.claude/worktrees/fable-trading-consolidation-758d61",
+  "python": "/Users/zhangzc/fable-trading/.venv/bin/python",
+  "exit_code": 1,
+  "counts": {
+    "failed": 5,
+    "passed": 701,
+    "skipped": 2,
+    "warnings": 14,
+    "error": 6
+  },
+  "failing_outcomes": [
+    {
+      "kind": "ERROR",
+      "nodeid": "tests/test_p2m_mechanism_audit.py::test_atr_normalization_recovers_frozen_barrier_units"
+    },
+    {
+      "kind": "ERROR",
+      "nodeid": "tests/test_p2m_mechanism_audit.py::test_five_readonly_folds_and_atr_quintiles"
+    },
+    {
+      "kind": "ERROR",
+      "nodeid": "tests/test_p2m_mechanism_audit.py::test_full_audit_stops_without_runtime_mutation"
+    },
+    {
+      "kind": "ERROR",
+      "nodeid": "tests/test_p2m_mechanism_audit.py::test_preregistered_mechanism_counts_and_decision"
+    },
+    {
+      "kind": "ERROR",
+      "nodeid": "tests/test_p2r_root_cause_audit.py::test_feature_ic_rule_is_pre_registered_and_complete"
+    },
+    {
+      "kind": "ERROR",
+      "nodeid": "tests/test_p2r_root_cause_audit.py::test_readonly_folds_reproduce_frozen_p2_rows"
+    },
+    {
+      "kind": "FAILED",
+      "nodeid": "tests/test_active_bundle_protocol.py::test_repo_example_bundle_is_valid_and_honest"
+    },
+    {
+      "kind": "FAILED",
+      "nodeid": "tests/test_eth3m_v2_classification.py::test_prepared_real_dataset_is_train_val_only_and_hash_clean"
+    },
+    {
+      "kind": "FAILED",
+      "nodeid": "tests/test_p2m_mechanism_audit.py::test_frozen_inputs_and_only_p1_data_source"
+    },
+    {
+      "kind": "FAILED",
+      "nodeid": "tests/test_p2r_root_cause_audit.py::test_all_frozen_input_hashes_match"
+    },
+    {
+      "kind": "FAILED",
+      "nodeid": "tests/test_p2r_root_cause_audit.py::test_full_audit_reaches_stop_without_runtime_mutation"
+    }
+  ],
+  "note": "Run inside the isolated consolidation worktree. /data/ is gitignored, so the 11 failing nodes are missing-artifact failures of the worktree, not code defects: each reads a file present in ~/fable-trading but never tracked by git (verified for data/p1/p1_short_l2_preholdout_aade2a334448d644.manifest.json). No data was copied in, because data/ also holds forward_log.csv and live-run state this task must not touch.",
+  "holdout_consumed_during_consolidation": false
+}
