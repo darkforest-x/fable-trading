@@ -2,7 +2,7 @@
   "status": "pass",
   "checks": {
     "contract_is_eth_15m": true,
-    "holdout_flags_false": true,
+    "holdout_evaluation_false_and_access_incident_visible": true,
     "safe_end_precedes_holdout": true,
     "loader_read_zero_holdout_rows": true,
     "data_is_gapless_and_valid": true,
@@ -64,5 +64,7 @@
     "intrabar_3m_rows": 203520
   },
   "assessment": "research_candidate_with_material_statistical_caveats",
-  "holdout_consumed": false
+  "holdout_consumed": false,
+  "holdout_safe": false,
+  "unapproved_holdout_access_incident": true
 }

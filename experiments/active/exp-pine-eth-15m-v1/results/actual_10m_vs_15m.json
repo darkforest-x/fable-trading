@@ -21,6 +21,10 @@
   "tradingview_parity_passed": false,
   "barrier_parameters_changed": false,
   "selection_or_promotion_allowed": false,
+  "matched_control_unavailable_variants": [
+    "V8_10m",
+    "V9_10m"
+  ],
   "variants": {
     "V8_10m": {
       "bar_minutes": 10,
@@ -33,32 +37,31 @@
         "project_net_bp_per_trade": 27.38847546427204,
         "pine_net_bp_per_trade": 27.413739793718744,
         "win_rate": 0.21153846153846154,
-        "monetary_profit_factor": 1.6659138690086095,
+        "monetary_profit_factor": 1.6658027316205863,
         "unit_profit_factor": 1.311332495308279,
-        "return_percent": 21.279881876735086,
-        "max_drawdown_15m_percent": 14.133541678417815,
-        "max_drawdown_daily_percent": 12.671209601729473,
+        "return_percent": 21.27644303025187,
+        "max_drawdown_15m_percent": 14.133653983321393,
+        "max_drawdown_daily_percent": 12.671749702804803,
         "median_holding_bars": 50.5,
-        "mean_leverage": 0.7664635958015587,
-        "max_leverage": 1.7026544580876655,
+        "mean_leverage": 0.7664820000902746,
+        "max_leverage": 1.703065662665022,
         "long_trades": 25,
         "short_trades": 27,
         "period_end_exits": 0
       },
       "matched_control": {
-        "control_rows": 156,
-        "controls_per_trade_min": 3,
-        "duplicate_control_starts": 0,
-        "control_net_bp": -4.750210698359019,
-        "candidate_minus_control_bp": 32.138686162631075
+        "available": false,
+        "failure_reason": "matched-control construction must fail closed when an exact stratum is underfilled; missing=['v8_actual_10m|common_short_20251223_202602|1203|1204|short', 'v8_actual_10m|common_short_20251223_202602|1231|1232|long', 'v8_actual_10m|common_short_20251223_202602|1294|1295|short', 'v8_actual_10m|common_short_20251223_202602|1404|1405|long', 'v8_actual_10m|common_short_20251223_202602|1535|1536|long'], underfilled={}",
+        "control_rows": 0,
+        "controls_per_trade_min": null,
+        "duplicate_control_starts": null,
+        "control_net_bp": null,
+        "candidate_minus_control_bp": null
       },
       "week_signflip": {
-        "statistic_mean_excess_bp": 112.60280536270231,
-        "p_value": 0.280971902809719,
-        "n_blocks": 10,
-        "n_resamples": 10000,
-        "null_mean_bp": -0.6653136553968465,
-        "null_std_bp": 126.59033277472989
+        "available": false,
+        "p_value": null,
+        "failure_reason": "matched-control construction must fail closed when an exact stratum is underfilled; missing=['v8_actual_10m|common_short_20251223_202602|1203|1204|short', 'v8_actual_10m|common_short_20251223_202602|1231|1232|long', 'v8_actual_10m|common_short_20251223_202602|1294|1295|short', 'v8_actual_10m|common_short_20251223_202602|1404|1405|long', 'v8_actual_10m|common_short_20251223_202602|1535|1536|long'], underfilled={}"
       }
     },
     "V8_15m": {
@@ -72,32 +75,36 @@
         "project_net_bp_per_trade": -39.78422235382047,
         "pine_net_bp_per_trade": -39.774322039466284,
         "win_rate": 0.12903225806451613,
-        "monetary_profit_factor": 0.7792508398844175,
+        "monetary_profit_factor": 0.7792881200442788,
         "unit_profit_factor": 0.5732749903358555,
-        "return_percent": -3.3127423220479124,
-        "max_drawdown_15m_percent": 9.392789320739059,
-        "max_drawdown_daily_percent": 8.80949350120498,
+        "return_percent": -3.312120427374532,
+        "max_drawdown_15m_percent": 9.392364236626882,
+        "max_drawdown_daily_percent": 8.80910372623016,
         "median_holding_bars": 63.0,
-        "mean_leverage": 0.5905444203906349,
-        "max_leverage": 1.0710048656848785,
+        "mean_leverage": 0.5905354678672199,
+        "max_leverage": 1.0711687362442552,
         "long_trades": 14,
         "short_trades": 17,
         "period_end_exits": 0
       },
       "matched_control": {
+        "available": true,
+        "failure_reason": null,
         "control_rows": 93,
         "controls_per_trade_min": 3,
         "duplicate_control_starts": 0,
-        "control_net_bp": 4.132316114266374,
-        "candidate_minus_control_bp": -43.91653846808683
+        "control_net_bp": 11.823339951930794,
+        "candidate_minus_control_bp": -51.607562305751266
       },
       "week_signflip": {
-        "statistic_mean_excess_bp": 12.785607700673296,
-        "p_value": 0.39766023397660233,
+        "available": true,
+        "statistic_mean_excess_bp": -4.791780617140216,
+        "p_value": 0.5251474852514748,
         "n_blocks": 10,
         "n_resamples": 10000,
-        "null_mean_bp": -1.0425683777413846,
-        "null_std_bp": 47.74550079316201
+        "null_mean_bp": -1.1933151459246756,
+        "null_std_bp": 56.95748333317857,
+        "failure_reason": null
       }
     },
     "V9_10m": {
@@ -111,32 +118,31 @@
         "project_net_bp_per_trade": -15.992406803016062,
         "pine_net_bp_per_trade": -15.960469888388372,
         "win_rate": 0.10344827586206896,
-        "monetary_profit_factor": 1.1014384186813002,
+        "monetary_profit_factor": 1.101479220532688,
         "unit_profit_factor": 0.8419492167874855,
-        "return_percent": 2.117693669999743,
-        "max_drawdown_15m_percent": 12.79783388656518,
-        "max_drawdown_daily_percent": 11.739815985579849,
+        "return_percent": 2.1185235122521906,
+        "max_drawdown_15m_percent": 12.79806110892433,
+        "max_drawdown_daily_percent": 11.740072189799855,
         "median_holding_bars": 66.0,
-        "mean_leverage": 0.8206734902193837,
-        "max_leverage": 1.8595104895104895,
+        "mean_leverage": 0.8206583769059264,
+        "max_leverage": 1.858995412346832,
         "long_trades": 11,
         "short_trades": 18,
         "period_end_exits": 0
       },
       "matched_control": {
-        "control_rows": 87,
-        "controls_per_trade_min": 3,
-        "duplicate_control_starts": 0,
-        "control_net_bp": 0.5733971506948251,
-        "candidate_minus_control_bp": -16.565803953710876
+        "available": false,
+        "failure_reason": "matched-control construction must fail closed when an exact stratum is underfilled; missing=['v9_actual_10m|common_short_20251223_202602|1014|1015|short', 'v9_actual_10m|common_short_20251223_202602|1231|1232|long', 'v9_actual_10m|common_short_20251223_202602|1535|1536|long', 'v9_actual_10m|common_short_20251223_202602|533|534|short'], underfilled={}",
+        "control_rows": 0,
+        "controls_per_trade_min": null,
+        "duplicate_control_starts": null,
+        "control_net_bp": null,
+        "candidate_minus_control_bp": null
       },
       "week_signflip": {
-        "statistic_mean_excess_bp": 16.054078505652857,
-        "p_value": 0.40335966403359663,
-        "n_blocks": 10,
-        "n_resamples": 10000,
-        "null_mean_bp": 0.43717243203656136,
-        "null_std_bp": 53.296381368800596
+        "available": false,
+        "p_value": null,
+        "failure_reason": "matched-control construction must fail closed when an exact stratum is underfilled; missing=['v9_actual_10m|common_short_20251223_202602|1014|1015|short', 'v9_actual_10m|common_short_20251223_202602|1231|1232|long', 'v9_actual_10m|common_short_20251223_202602|1535|1536|long', 'v9_actual_10m|common_short_20251223_202602|533|534|short'], underfilled={}"
       }
     },
     "V9_15m": {
@@ -150,32 +156,36 @@
         "project_net_bp_per_trade": -58.67520777367896,
         "pine_net_bp_per_trade": -58.633731460314145,
         "win_rate": 0.08,
-        "monetary_profit_factor": 0.5684392942475255,
+        "monetary_profit_factor": 0.5684392589600781,
         "unit_profit_factor": 0.4439436644393485,
-        "return_percent": -5.980739389519907,
-        "max_drawdown_15m_percent": 11.402925992352674,
-        "max_drawdown_daily_percent": 10.671453680115139,
+        "return_percent": -5.98049688663097,
+        "max_drawdown_15m_percent": 11.402570715309746,
+        "max_drawdown_daily_percent": 10.671119160225018,
         "median_holding_bars": 46.0,
-        "mean_leverage": 0.6266690831485481,
-        "max_leverage": 1.148444962143273,
+        "mean_leverage": 0.6266523007686138,
+        "max_leverage": 1.1482506996887534,
         "long_trades": 11,
         "short_trades": 14,
         "period_end_exits": 0
       },
       "matched_control": {
+        "available": true,
+        "failure_reason": null,
         "control_rows": 75,
         "controls_per_trade_min": 3,
         "duplicate_control_starts": 0,
-        "control_net_bp": -3.0594428281875774,
-        "candidate_minus_control_bp": -55.61576494549139
+        "control_net_bp": 2.794037809066238,
+        "candidate_minus_control_bp": -61.4692455827452
       },
       "week_signflip": {
-        "statistic_mean_excess_bp": 18.400788278899785,
-        "p_value": 0.49545045495450457,
+        "available": true,
+        "statistic_mean_excess_bp": 10.7553350401479,
+        "p_value": 0.4958504149585041,
         "n_blocks": 10,
         "n_resamples": 10000,
-        "null_mean_bp": 0.34114345401846413,
-        "null_std_bp": 84.31114589769987
+        "null_mean_bp": 0.18481957383433184,
+        "null_std_bp": 85.49836977990755,
+        "failure_reason": null
       }
     }
   },
@@ -185,5 +195,5 @@
     "V9_minus_V8_within_10m": -43.3808822672881,
     "V9_minus_V8_within_15m": -18.890985419858495
   },
-  "decision": "In this roughly ten-week common window, actual 10m V8 beats 15m V8 and both V9 arms are negative after cost. None passes matched-control p<0.01. The short post-selection window cannot overturn the long chronological V9 freeze, but it rejects any claim that 15m is inherently superior to 10m."
+  "decision": "In this roughly ten-week common window, actual 10m V8 beats 15m V8 and both V9 arms are negative after cost. Exact causal matched controls are reported only where all frozen strata have three unique starts; underfilled arms have no control estimate and this diagnostic remains descriptive. The short post-selection window cannot overturn the long chronological V9 freeze, but it rejects any claim that 15m is inherently superior to 10m."
 }
