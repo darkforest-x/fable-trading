@@ -112,6 +112,14 @@ top-decile rows), but only 3 rows win and its raw/Holm top-decile p-values are
 history.  A flexible 28-feature prequential selector is worse: pooled next-fold
 AUC 0.430 and 0/13 positive top-decile rows.  No LR or LightGBM was fitted.
 
+The durable search ledger now has an explicit selection-budget audit: 12
+oscillator thresholds, 11 slope lags, 18 natural gates, 3 side policies and 21
+trailing configurations are 65 known configurations / 60 unique four-block
+performance paths.  A common-block exact max-stat chooses long-only but gives
+p=0.25.  This ledger cannot recover every code iteration or human choice, so
+it is a lower bound on selection pressure.  More 2023/2024 mining is stopped;
+V10/V11 require fresh forward evidence.
+
 The three Pine files are now hashed into a blocked paper-forward protocol.
 No collection, log, paper order, or live order was started.  Historical arrival
 rates imply roughly 12.7, 18.1, and 24.9 months for V9/V10/V11 respectively to
@@ -167,6 +175,7 @@ PYTHONPATH=. .venv/bin/python scripts/generate_pine_eth_15m_paper_variants.py
 PYTHONPATH=. .venv/bin/python scripts/prepare_pine_eth_15m_judgment_research.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_judgment_feasibility.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_judgment_signal.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_selection_risk.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_stateful_gate.py
 PYTHONPATH=. .venv/bin/python scripts/audit_pine_eth_15m_static_contract.py
 PYTHONPATH=. .venv/bin/python scripts/design_pine_eth_15m_paper_protocol.py

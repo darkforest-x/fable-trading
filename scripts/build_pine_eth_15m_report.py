@@ -74,6 +74,7 @@ def load_evidence() -> dict[str, Any]:
         "judgment_feasibility": json.loads((RESULTS / "judgment_feasibility.json").read_text(encoding="utf-8")),
         "judgment_signal": json.loads((RESULTS / "judgment_signal_audit.json").read_text(encoding="utf-8")),
         "stateful_gate": json.loads((RESULTS / "stateful_gate_static_vs_dynamic.json").read_text(encoding="utf-8")),
+        "selection_risk": json.loads((RESULTS / "selection_risk_audit.json").read_text(encoding="utf-8")),
         "pine_static": json.loads((RESULTS / "pine_static_contract.json").read_text(encoding="utf-8")),
         "validation": validation,
         "split": pd.read_csv(RESULTS / "split_summary.csv"),
@@ -151,6 +152,7 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
         if row["feature"] == "vol_ratio_mean8"
     )
     stateful_gate = evidence["stateful_gate"]
+    selection_risk = evidence["selection_risk"]
     pine_static = evidence["pine_static"]
     validation = evidence["validation"]
     split = evidence["split"]
@@ -310,6 +312,17 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
             _fmt(row["validation_auc"], 3),
         ]
         for row in judgment_signal["prequential_28_feature_selector"]["folds"]
+    ]
+    selection_chronology_rows = [
+        [
+            ", ".join(row["selected_on"]),
+            row["test_period"],
+            row["selected_configuration"],
+            _fmt(row["selected_test_net_bp"]),
+            _fmt(row["v9_test_net_bp"]),
+            _fmt(row["selected_minus_v9_bp"]),
+        ]
+        for row in selection_risk["chronological_selection"]
     ]
 
     periods = ["discovery_2023", "confirmation_2024", "final_preholdout_2025_202602"]
@@ -614,6 +627,24 @@ oscillator 阈值只在 2023/2024 搜索；`0.1` 与 `0.15` 形成稳定平台�
 所以 `vol_ratio_mean8 >= 1` 的 V10 虽改善历史点估计和回撤，但 final 已污染、尾部更集中，
 且多重选择校正未过，不能冒充验证成功。
 
+把已经落盘的 12 个 oscillator 阈值、11 个 slope lag、18 个自然特征门、3 个方向策略和
+21 个 trailing 组合放进同一份选择预算，共 {selection_risk['raw_known_configurations']} 个已知配置、
+折叠后 {selection_risk['unique_four_block_performance_paths']} 条独立四块表现路径。使用同一个
+half-year sign vector 同时翻转所有路径的 exact max-stat，观察期最优是
+`{selection_risk['exact_global_max_stat']['selected_configuration']}`，但选择校正
+`p={_fmt(selection_risk['exact_global_max_stat']['selection_adjusted_p_value'], 4)}`；V9 的四块均值/最差块
+排名仅为 {selection_risk['v9_performance_path']['mean_rank_of_unique_paths']}/
+{selection_risk['v9_performance_path']['minimum_block_rank_of_unique_paths']}（分母均为
+{selection_risk['unique_four_block_performance_paths']}）。这不是说 V9 必须改成榜首，而是说明可被挑中的“榜首”太多，
+继续挖同一开发期会扩大选择偏差。
+
+只用过去块选择、再看紧接着半年，也没有形成单一稳定冠军：
+
+{markdown_table(['选择所用块', '下一块', '选中配置', '选中 bp', 'V9 bp', '差值 bp'], selection_chronology_rows)}
+
+四块只能形成 16 个 sign patterns，选择风险审计明确不声称正式 PBO；它只给出停止条件：
+**不再在 2023/2024 上增加超参搜索，V10/V11 必须靠新鲜前向。**
+
 为后续互斥 paper A/B，已从 V9 通过严格生成器产出两份 Pine：
 
 - `pine/allin_eth_15m_v10_volume_paper.pine`：只增加 20-bar volume ratio 的 8-bar 均值 `>=1`；
@@ -827,6 +858,7 @@ Pine confirmed close(t)
 - **Final 已消耗。** 2025-01 至 2026-02 已用于 V9 单次终测；V10 是其后的 post-selection 假设。
 - **统计未过门。** V9/V10 的区块 p 值都远高于 0.01，CI 跨 0，不能说收益已稳定。
 - **特征搜索未过多重校正。** `vol_ratio_mean8 >= 1` 的四块增量都为正，但 18-gate max-stat `p={_fmt(robustness['selection_adjusted_feature_test']['selection_adjusted_p_value'], 4)}`；V10 仍只是 paper-forward 假设。
+- **已知搜索预算已很大。** 五类落盘搜索共 {selection_risk['raw_known_configurations']} 个配置 / {selection_risk['unique_four_block_performance_paths']} 条独立四块路径，全局 max-stat p={_fmt(selection_risk['exact_global_max_stat']['selection_adjusted_p_value'], 4)}；历史代码迭代和人工选择还无法完整枚举，因此这个校正只可能低估、不会消除 selection risk。
 - **收益高度集中。** V9 去掉最大赢家后转负；V10 集中更严重。
 - **V11 也未解决尾部依赖。** 56 笔只有 5 笔盈利，去掉最大赢家后均值 {_fmt(v11['profit_concentration']['mean_without_top1_bp'])} bp/笔；它没有资格替换 V9。
 - **真实 10m 短窗反对简单周期优越论。** 约 10 周同窗中，10m 原 V8 为正而 15m V8/V9 为负；四组匹配检验均不显著，不能选回 10m，也不能宣称 15m 在所有制度更好。

@@ -52,6 +52,7 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
     judgment_feasibility = load_json("judgment_feasibility.json")
     judgment_signal = load_json("judgment_signal_audit.json")
     stateful_gate = load_json("stateful_gate_static_vs_dynamic.json")
+    selection_risk = load_json("selection_risk_audit.json")
     pine_static = load_json("pine_static_contract.json")
     docker_replay = load_json("docker_offline_replay.json")
     validation = load_json("validation.json")
@@ -216,6 +217,15 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
             stateful_gate["static_top_decile_filtering_valid_for_l2"] is False
             and stateful_gate["final_summary"]["vol_ratio_mean8_ge1"]["entry_jaccard"]
             < 0.90
+        ),
+        "selection_budget_blocks_more_development_mining": bool(
+            selection_risk["holdout_rows_read"] == 0
+            and selection_risk["new_parameter_combinations_run"] == 0
+            and selection_risk["raw_known_configurations"] == 65
+            and selection_risk["unique_four_block_performance_paths"] == 60
+            and selection_risk["exact_global_max_stat"]["selection_adjusted_p_value"]
+            >= 0.01
+            and selection_risk["production_eligible"] is False
         ),
         "pine_static_contract_passes_without_compiler_claim": bool(
             pine_static["status"] == "pass"

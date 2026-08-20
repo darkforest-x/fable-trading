@@ -86,6 +86,9 @@ def main() -> int:
     stateful_gate = json.loads(
         (RESULTS / "stateful_gate_static_vs_dynamic.json").read_text(encoding="utf-8")
     )
+    selection_risk = json.loads(
+        (RESULTS / "selection_risk_audit.json").read_text(encoding="utf-8")
+    )
     pine_static = json.loads(
         (RESULTS / "pine_static_contract.json").read_text(encoding="utf-8")
     )
@@ -407,6 +410,19 @@ def main() -> int:
         ["static_minus_dynamic_net_bp"]
         > 0.0
     )
+    checks["known_search_budget_is_selection_adjusted_and_blocks_more_mining"] = bool(
+        selection_risk["consumed_final_rows_read"] == 0
+        and selection_risk["holdout_rows_read"] == 0
+        and selection_risk["new_parameter_combinations_run"] == 0
+        and selection_risk["barrier_or_cost_changed"] is False
+        and selection_risk["raw_known_configurations"] == 65
+        and selection_risk["unique_four_block_performance_paths"] == 60
+        and selection_risk["exact_global_max_stat"]["selection_adjusted_p_value"]
+        >= 0.01
+        and selection_risk["two_by_two_rank_reversal"]["formal_pbo_claimed"] is False
+        and selection_risk["training_eligible"] is False
+        and selection_risk["production_eligible"] is False
+    )
     tv_template = EXPERIMENT / "tradingview/trades_normalized.template.csv"
     checks["pine_static_contract_passes_and_tv_parity_harness_is_pending"] = bool(
         pine_static["status"] == "pass"
@@ -421,7 +437,7 @@ def main() -> int:
     )
     checks["offline_docker_artifact_smoke_passed_without_overclaim"] = bool(
         docker_smoke["status"] == "pass"
-        and docker_smoke["count"] == 33
+        and docker_smoke["count"] == 34
         and docker_smoke["runtime_label"] == "offline-local-label-studio-image"
         and docker_smoke["pinned_docker_recipe_built"] is False
         and docker_smoke["tradingview_parity_passed"] is False
