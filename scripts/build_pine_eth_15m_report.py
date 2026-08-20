@@ -978,7 +978,7 @@ Pine confirmed close(t)
 - **已知搜索预算已很大。** 五类落盘搜索共 {selection_risk['raw_known_configurations']} 个配置 / {selection_risk['unique_four_block_performance_paths']} 条独立四块路径，全局 max-stat p={_fmt(selection_risk['exact_global_max_stat']['selection_adjusted_p_value'], 4)}；历史代码迭代和人工选择还无法完整枚举，因此这个校正只可能低估、不会消除 selection risk。
 - **收益高度集中。** V9 去掉最大赢家后转负；V10 集中更严重。
 - **V11 也未解决尾部依赖。** 56 笔只有 5 笔盈利，去掉最大赢家后均值 {_fmt(v11['profit_concentration']['mean_without_top1_bp'])} bp/笔；它没有资格替换 V9。
-- **真实 10m 短窗反对简单周期优越论。** 约 10 周同窗中，10m 原 V8 为正而 15m V8/V9 为负；四组匹配检验均不显著，不能选回 10m，也不能宣称 15m 在所有制度更好。
+- **真实 10m 短窗反对简单周期优越论。** 约 10 周同窗中，10m 原 V8 为正而 15m V8/V9 为负；两个 10m 臂因严格因果对照不足而不可估，两个 15m 臂也不显著，不能选回 10m，也不能宣称 15m 在所有制度更好。
 - **跨制度仍未过门。** V9 虽 7/9 时间块为正，但绝对/匹配精确 p 为 {_fmt(regime_stability['absolute_net_equal_block_test']['one_sided_p_value'], 4)} / {_fmt(regime_stability['matched_excess_equal_block_test']['one_sided_p_value'], 4)}；2025H1、2026M1M2 为负。
 - **break-even 经济语义错误但本轮未改。** +10 bp 锁盈低于 20 bp 成本，49 笔固定净 -10 bp；任何 offset 修改仍是需 owner 单独批准的新 barrier 实验。
 - **随机对照有 assignment 方差。** V9 的 64-seed 超额 5%–95% 为 [{_fmt(control_sensitivity['variants'][0]['candidate_minus_control_bp']['q05'])}, {_fmt(control_sensitivity['variants'][0]['candidate_minus_control_bp']['q95'])}] bp；单 seed 不能当确定事实。
