@@ -2,7 +2,33 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-19 — 单仓收敛完成，ACTIVE 未变）
+## ⚡ 当前真相（2026-08-20 — P0/P1 门禁已修，等待 Owner 主盲审）
+
+**fixed-W10 的工程门禁与数据谱系已修正，但 P0/P1 仍未通过。** 旧 acceptance 把
+迁移前 `DIRECT=0` 的 rows 与最终 Gold SHA 混在一起，并让 0 DIRECT 空通过 15% 比例门；
+最终 2,649 行 Gold 实际有 **1,251 DIRECT**。新 acceptance 只接受逐条盲审结果按
+`gold_id` 回连同一最终快照，并重新计算错误率；裸错误率、非 DIRECT 冒充抽检、快照混用均
+fail-closed。当前正确状态仍为 `training_eligible=false`。
+
+2,649 张图片已逐张重算 SHA，独立 artifact 为
+`fixed-w10-core4-confirm1-v1-2649`，不再把 fixed-W10 实验指向旧 3,453 张 W12–19 V3 或
+另一个 2,599 张 v2 manifest。主盲审包已生成：**398 个分层随机唯一项（其中 DIRECT 188）
++ 50 个隐藏重复 = 448 项**；Cleanlab 28 张为独立优先修错队列。两队列自然重叠 3 张，
+所以必须**先完成并导出主盲审，再打开 Cleanlab 队列**。入口：
+`datasets/fixed_w10_core4_confirm1_v1/review/p1_blind_audit_v1/public/index.html`；报告：
+`analysis/html/p1_fixed_w10_blind_audit_pack_20260820.html`。
+
+**下一条允许的动作**：Owner 完成 448 项主盲审并导出 JSON；然后只运行
+`tools/datasets/fixed_w10_p1_audit.py score`，计算总体/DIRECT 错误率、重复一致率、κ 与核心
+边界一致率。错误率 >5% 就停止；即便数字通过，也必须由 Owner 明确批准后才能生成新版本数据
+并改变 `training_eligible`。当前禁止训练、禁止读既有 fixed-W10 holdout。
+
+仍需 Owner 独立裁决：两个 ATR 实现的 warmup 分歧，三选项见
+`docs/consolidation/DUPLICATE_SEMANTICS.md` §4。
+
+---
+
+## 历史真相（2026-08-19 — 单仓收敛完成，ACTIVE 未变）
 
 **四个卫星仓已回迁并可归档；本仓成为唯一 ACTIVE 交易研究仓。** 分支
 `claude/fable-trading-consolidation-758d61`，8 个 `consolidation(c0..c7)` 提交，
@@ -33,9 +59,8 @@ AST 防回归。
 **下一条允许的动作：只有 P0（owner 形态定义与重复标注稳定性）→ P1（Gold Dataset）。**
 在 P0/P1 通过前禁止新训练、多周期扩展、promote 与实盘替换。
 
-**等 owner 的两件事**：①复审 `experiments/active/exp-p1-gold-label-quality-cleanlab-v1/`
-里那 28 张可疑标注，把 6.22% 的筛查值变成协议 17.6 要的 DIRECT 裁决；
-②两个 ATR 实现的 warmup 分歧，三选项见 `docs/consolidation/DUPLICATE_SEMANTICS.md` §4。
+旧交接曾把 Cleanlab 28 张写成可直接转成 DIRECT 错误率证据；该口径已被上面的 2026-08-20
+审计纠正。28 张是模型选择队列，只能用于优先修错，不能估计无偏错误率。
 
 ---
 

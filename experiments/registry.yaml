@@ -264,22 +264,21 @@ experiments:
       protocol, and does it qualify as a training set?
     single_variable: n/a -- dataset construction
     result: >-
-      frozen_but_not_training_eligible. SIGNAL 1,247 and NO_SIGNAL 1,402 frozen
-      into 2,649 training images (train 1,849 / val 350 / test 450), manifest
-      SHA 20686feba41d15b82e34109402840c2d640fe1e2daea0392b35e1ea79320a7fc.
-      training_eligible stays false for a specific reason: protocol 17.6
-      requires a DIRECT spot-check error rate and the migration produced
-      DIRECT=0, so that rate is unknown. Every other gate passed. 44 CONFLICT
-      items excluded, coreless A items not used as positives, 17 competing-core
-      SIGNAL items excluded.
+      frozen_but_not_training_eligible. SIGNAL 1,247 and NO_SIGNAL 1,402 are
+      frozen into 2,649 images (train 1,849 / val 350 / test 450). The old
+      acceptance mixed pre-review migration rows (DIRECT=0) with the final Gold
+      hash; the final snapshot actually contains 1,251 DIRECT rows. Acceptance
+      has been rebuilt from that one snapshot and now correctly remains pending
+      until at least 188 DIRECT rows complete blind review with error <=5%,
+      repeat/boundary metrics exist, and the owner explicitly approves
+      training_eligible. 44 CONFLICT items, coreless positives and 17
+      competing-core SIGNAL items remain excluded.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: experiments/historical/yoyo_trading/README.md
     artifacts:
-      - yoyo-trading-dataset-v3-gold-core
-      - yoyo-trading-dataset-v3-2-reviewed-core
-      - yoyo-trading-legacy-label-migration-v3
+      - fixed-w10-core4-confirm1-v1-2649
     reuse_allowed: true
     notes: >-
       A frozen dataset with a known-unmeasured label error rate is exactly the
@@ -342,7 +341,7 @@ experiments:
     production_eligible: false
     canonical_report: analysis/p1_gold_label_quality_20260820.md
     artifacts:
-      - yoyo-trading-dataset-v3-gold-core
+      - fixed-w10-core4-confirm1-v1-2649
     reuse_allowed: true
     notes: >-
       只推理不训练：用 2026-08-13 从 3060 取回的冻结权重
@@ -352,6 +351,37 @@ experiments:
       模型通过模型选择间接看过它的标签，两者必须分开报告。
       不读 holdout：金标行 holdout_read 全为 false，W10 数据集止于 pre-holdout。
       本实验产出一个数字，**不改变 training_eligible**——那是 owner 决策。
+
+  - experiment_id: exp-p1-fixed-w10-blind-audit-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2e8ce475438a8987960e13eec210f9df1cf97090"
+    status: active
+    question: >-
+      Can the final 2,649-row fixed-W10 Gold snapshot clear P0/P1 with an
+      unbiased, lineage-bound owner review rather than a model-selected queue
+      or a vacuous zero-DIRECT gate?
+    single_variable: n/a —— data and label audit, no model training
+    result: >-
+      pending_owner_review. All 2,649 decision-visible images were re-hashed and
+      joined to the same final Gold snapshot. A deterministic stratified sample
+      contains 398 unique rows, including 188/1,251 DIRECT rows, plus 50 hidden
+      repeats (12.56%). Cleanlab's 28 flags are in a separate priority queue;
+      only 3 overlap the random sample, consistent with the stratified null
+      control (permutation p=0.7931). No holdout was read and no training ran.
+      Error rate, repeat agreement, kappa and boundary agreement remain unknown
+      until the owner completes the pack; training_eligible remains false.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_fixed_w10_blind_audit_pack_20260820.md
+    artifacts:
+      - fixed-w10-core4-confirm1-v1-2649
+      - fixed-w10-p1-blind-audit-v1
+    reuse_allowed: true
+    notes: >-
+      Public page shows opaque IDs and decision-visible W10 images only. Truth,
+      source, split, migration status and repeat identity live in the private
+      admin manifest. Future reference has a physically separate directory.
 
   - experiment_id: exp-consolidation-single-repo-v1
     source_repo: darkforest-x/fable-trading

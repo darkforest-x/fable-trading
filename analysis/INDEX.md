@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **224** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **233** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,9 +10,17 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-08-20 | [`p1_fixed_w10_blind_audit_pack_20260820.md`](p1_fixed_w10_blind_audit_pack_20260820.md) | P1 fixed-W10 门禁修复、artifact 谱系与盲审包（2026-08-20） | 工程交付完成，标签验收仍待 Owner 盲审。** 已修复旧 acceptance 把迁移前 |
+| 2026-08-20 | [`p1_gold_label_quality_20260820.md`](p1_gold_label_quality_20260820.md) | P1 — 固定 W10 金标的标签错误率（2026-08-20） |  |
+| 2026-08-20 | [`p_model_inventory_20260820.md`](p_model_inventory_20260820.md) | 模型清单 — 我们到底训出了什么（2026-08-20） |  |
+| 2026-08-20 | [`p_oss_framework_survey_20260820.md`](p_oss_framework_survey_20260820.md) | 开源 AI 框架评估 —— 哪些真能帮到这个项目（2026-08-20） | 库 \| 治什么 \| 裁决 \| |
+| 2026-08-18 | [`p_volatility_axes_20260818.md`](p_volatility_axes_20260818.md) | 波动率两条轴：owner「币波动越高越好」假说的匹配对照检验 — 2026-08-18 |  |
+| 2026-08-12 | [`p2_local_signal_v2_early_frontier_review300_owner_result_20260812.md`](p2_local_signal_v2_early_frontier_review300_owner_result_20260812.md) | Local Signal V2 — 早期启动前沿 300 张 Owner 审核结果 | 1. Owner 完成 300/300 裁决：**119 YES、181 NO、0 SKIP、0 改判**，与 manifest 的 300 个 |
+| 2026-08-12 | [`p2_local_signal_v2_early_frontier_review300_prereview_20260812.md`](p2_local_signal_v2_early_frontier_review300_prereview_20260812.md) | Local Signal V2 — 早期启动前沿 300 张 Owner 审核包 PRE-REVIEW | 本轮已从两个冻结的 R1 pre-holdout 候选池中，精确排除此前四个审核包已经展示过的 |
 | 2026-08-12 | [`p2_local_signal_v2_positive_semantic_audit_prereview_20260812.md`](p2_local_signal_v2_positive_semantic_audit_prereview_20260812.md) | Local Signal V2 Positive 语义纯度审计 PRE-REVIEW（2026-08-12） | 本轮 `DATA / SEMANTIC AUDIT ONLY` 的200张 Owner YES / NO / SKIP审核包已经完成，等待Owner人工审核。 |
 | 2026-08-12 | [`p2_local_signal_v2_positive_semantic_audit_prereview_v2_20260812.md`](p2_local_signal_v2_positive_semantic_audit_prereview_v2_20260812.md) | Local Signal V2 Positive 语义审核 PRE-REVIEW v2（2026-08-12） | Owner指出v1审核包“没有走势对照，且K线像水平线”后，问题已定位并修正。当前正式入口已切换为v2；v1保留为历史构建证据，但不再用于Owner裁决。 |
 | 2026-08-12 | [`p2_owner_short_gold_center_hardneg_r2_canary_20260812.md`](p2_owner_short_gold_center_hardneg_r2_canary_20260812.md) | P2 Owner确认误报第三训练臂与独立连续Canary（2026-08-12） | Owner于2026-08-11 23:14 CST授权的第三训练臂 |
+| 2026-08-12 | [`p3_yoyo_dataset_v3_gold_core_prereview_20260812.md`](p3_yoyo_dataset_v3_gold_core_prereview_20260812.md) | yoyo-trading — Dataset V3 Gold Core 训练前验收 | 1 \| 旧模型哪些继续用了 \| R1 `029f80a5…` 作 R3A 初始化与全部对照基线；R2 `52cd38fd…` 只作对照；Stage A `c0e94f47…` 保留为血统起点；官方 `yolo11s.pt` `85a76fe8…` 作 R3B 冷启 \| |
 | 2026-08-11 | [`local_signal_v2_progress.md`](local_signal_v2_progress.md) | Local Signal V2 — 进度一页纸 | P1 历史发现级对照已完成，B2 30 根固定因果窗胜出；生产级仍未验收。 |
 | 2026-08-11 | [`p0_local_signal_v2_stagea_randomcrop_v1_report_20260811.md`](p0_local_signal_v2_stagea_randomcrop_v1_report_20260811.md) | Local Signal V2 Stage A 真实裁剪 P0 报告（2026-08-11） | Owner 已明确授权恢复交接文档中的 Stage A 离线预训练。新版 |
 | 2026-08-11 | [`p0_local_signal_v2_stageb_from_stagea_v1_report_20260811.md`](p0_local_signal_v2_stageb_from_stagea_v1_report_20260811.md) | Local Signal V2 Stage B-from-A 数据验收报告（2026-08-11） | Owner 已确认 Stage B 的严格因果布局，并确认使用 Stage A `best.pt` 初始化微调。独立数据版本 |
@@ -210,6 +218,7 @@
 | 2026-07-07 | [`p2a_detection_report.md`](p2a_detection_report.md) | P2a 报告：YOLO 检测双均线密集区域 | 检测层冒烟流水线已跑通：**val mAP50 = 0.835**（best.pt 官方评估），超过 0.8 冒烟验收线。 |
 | 2026-07-07 | [`p2b_judgment_report.md`](p2b_judgment_report.md) | 阶段 2b 报告：判断层（triple-barrier + LightGBM） | 判断层信号统计上真实存在（holdout AUC 0.59，置换检验 p=0.002，稳定优于单特征基线）， |
 | 2026-05-04 | [`strategy_stability_preholdout.md`](strategy_stability_preholdout.md) | Pre-holdout strategy stability audit |  |
+| 2026-01-01 | [`p2_eth_yearly_morphology_count_20260813.md`](p2_eth_yearly_morphology_count_20260813.md) | ETH 2026 同类空头形态计数（冻结门 v1） | 按本轮在扫描前冻结的 `eth_yearly_morphology_gate_v1_20260813`，2026-01-01 至 |
 | — | [`OPEN_QUESTIONS_FOR_RESEARCH.md`](OPEN_QUESTIONS_FOR_RESEARCH.md) | 卡点与待研究问题清单(给外部调研用) |  |
 | — | [`ma206_profitability_diagnosis.md`](ma206_profitability_diagnosis.md) | MA206 收益为什么弱 |  |
 | — | [`ma206_q80_shadow_diagnosis.md`](ma206_q80_shadow_diagnosis.md) | MA206 q80 影子漏斗诊断 | 当前不是“只监控 50 多个币”。本地共有 `401` 个 OKX USDT SWAP 15m 文件；按既定 |
@@ -271,6 +280,8 @@
 - [`p15_h5_vol_adaptive.md`](p15_h5_vol_adaptive.md) — P1.5 H5：波动率自适应障碍
 - [`p15_h9_report.md`](p15_h9_report.md) — P1.5 R1'：H9 高层趋势过滤复测与推广
 - [`p1_b2_short_l2_backtest_20260811.md`](p1_b2_short_l2_backtest_20260811.md) — Local Signal V2 B2：候选密度与收益诊断
+- [`p1_fixed_w10_blind_audit_pack_20260820.md`](p1_fixed_w10_blind_audit_pack_20260820.md) — P1 fixed-W10 门禁修复、artifact 谱系与盲审包（2026-08-20）
+- [`p1_gold_label_quality_20260820.md`](p1_gold_label_quality_20260820.md) — P1 — 固定 W10 金标的标签错误率（2026-08-20）
 - [`p1_local_signal_v2_position_shortcut_20260811.md`](p1_local_signal_v2_position_shortcut_20260811.md) — Local Signal V2 位置 shortcut 纠错（2026-08-11）
 - [`p1_local_signal_v2_prereg_20260810.md`](p1_local_signal_v2_prereg_20260810.md) — P1 局部因果窗口对照预注册
 - [`p1_local_signal_v2_report_20260811.md`](p1_local_signal_v2_report_20260811.md) — Local Signal V2 P1 局部因果窗口对照报告
@@ -290,8 +301,11 @@
 - [`p25_local_acceptance_20260710.md`](p25_local_acceptance_20260710.md) — P2.5 本地验收（2026-07-10）
 - [`p25_vps_acceptance_20260710.md`](p25_vps_acceptance_20260710.md) — P2.5 VPS 公网验收（2026-07-10）
 - [`p2_data_audit_report.md`](p2_data_audit_report.md) — P2-12 数据质量审计
+- [`p2_eth_yearly_morphology_count_20260813.md`](p2_eth_yearly_morphology_count_20260813.md) — ETH 2026 同类空头形态计数（冻结门 v1）
 - [`p2_l2_audit_and_prereg_20260803.md`](p2_l2_audit_and_prereg_20260803.md) — P2-L2 只读审计与预注册（训练前 Owner 门）
 - [`p2_l2_preholdout_validation_20260803.md`](p2_l2_preholdout_validation_20260803.md) — P2-L2：immutable P1 dataset 训练与 pre-holdout 验收
+- [`p2_local_signal_v2_early_frontier_review300_owner_result_20260812.md`](p2_local_signal_v2_early_frontier_review300_owner_result_20260812.md) — Local Signal V2 — 早期启动前沿 300 张 Owner 审核结果
+- [`p2_local_signal_v2_early_frontier_review300_prereview_20260812.md`](p2_local_signal_v2_early_frontier_review300_prereview_20260812.md) — Local Signal V2 — 早期启动前沿 300 张 Owner 审核包 PRE-REVIEW
 - [`p2_local_signal_v2_positive_semantic_audit_owner_result_20260812.md`](p2_local_signal_v2_positive_semantic_audit_owner_result_20260812.md) — Local Signal V2 语义审核结果：Positive基本成立，连续判别边界失败
 - [`p2_local_signal_v2_positive_semantic_audit_prereview_20260812.md`](p2_local_signal_v2_positive_semantic_audit_prereview_20260812.md) — Local Signal V2 Positive 语义纯度审计 PRE-REVIEW（2026-08-12）
 - [`p2_local_signal_v2_positive_semantic_audit_prereview_v2_20260812.md`](p2_local_signal_v2_positive_semantic_audit_prereview_v2_20260812.md) — Local Signal V2 Positive 语义审核 PRE-REVIEW v2（2026-08-12）
@@ -354,6 +368,7 @@
 - [`p3_v11_pool_cutover.md`](p3_v11_pool_cutover.md) — p3 — v11 池判断层切换 ACTIVE
 - [`p3_v8_pool_cutover.md`](p3_v8_pool_cutover.md) — p3 — 干净池(v8_chain)判断层切换 ACTIVE
 - [`p3_yolo_mainline_backtest.md`](p3_yolo_mainline_backtest.md) — YOLO 主线整体回测（切流后，2026-07-15）
+- [`p3_yoyo_dataset_v3_gold_core_prereview_20260812.md`](p3_yoyo_dataset_v3_gold_core_prereview_20260812.md) — yoyo-trading — Dataset V3 Gold Core 训练前验收
 - [`p_20260728_four_tracks.md`](p_20260728_four_tracks.md) — 2026-07-28 四件事的结果 + 判断层判定
 - [`p_20260728_matched_control_verdict.md`](p_20260728_matched_control_verdict.md) — 对照组终判：检测器的边 ≈ 成本，而金标本身没有一个盘口样本 — 2026-07-28
 - [`p_attribution_23bp_vs_minus16bp_20260803.md`](p_attribution_23bp_vs_minus16bp_20260803.md) — 归因:+23.49bp 与 -15.91bp 的 44bp 差从哪来
@@ -394,7 +409,9 @@
 - [`p_launch_entry_base_rate.md`](p_launch_entry_base_rate.md) — 启动入场 vs 盘整中入场：因果 base rate 单变量对照 — 2026-07-23
 - [`p_launch_entry_long_short.md`](p_launch_entry_long_short.md) — 启动入场：强制多空分边 base rate — 2026-07-23
 - [`p_live_readiness_checklist.md`](p_live_readiness_checklist.md) — 可上实盘检查清单（判断层重构 — 停在 Owner 点头门前）
+- [`p_model_inventory_20260820.md`](p_model_inventory_20260820.md) — 模型清单 — 我们到底训出了什么（2026-08-20）
 - [`p_mtf_yolo_l2_bridge_prep_20260804.md`](p_mtf_yolo_l2_bridge_prep_20260804.md) — 小周期 YOLO → 冻结 L2 因果桥准备报告 — 2026-08-04
+- [`p_oss_framework_survey_20260820.md`](p_oss_framework_survey_20260820.md) — 开源 AI 框架评估 —— 哪些真能帮到这个项目（2026-08-20）
 - [`p_overnight_20260722.md`](p_overnight_20260722.md) — 夜间工作纪要 — 2026-07-22
 - [`p_owner_label_feature_verdict.md`](p_owner_label_feature_verdict.md) — Owner 标框手法 → 因果特征 → train base rate 裁决 — 2026-07-23
 - [`p_owner_side_feature_verdict.md`](p_owner_side_feature_verdict.md) — Owner 分边标框 → 因果特征 → train base rate 裁决 — 2026-07-23
@@ -441,6 +458,7 @@
 - [`p_v15_tip_val.md`](p_v15_tip_val.md) — v15 tip-val（Hypothesis B）中期裁决 — 2026-07-23
 - [`p_v16_holdout_verdict.md`](p_v16_holdout_verdict.md) — v16 holdout 终审:纯检测亏损,判断层反预测 — 2026-07-23
 - [`p_v16_tipuni_train.md`](p_v16_tipuni_train.md) — v16 tipuni(统一管线冷启动)训练与金标验收 — 2026-07-23
+- [`p_volatility_axes_20260818.md`](p_volatility_axes_20260818.md) — 波动率两条轴：owner「币波动越高越好」假说的匹配对照检验 — 2026-08-18
 - [`p_w20_manifest_traceability_20260810.md`](p_w20_manifest_traceability_20260810.md) — w20 / lsv2 数据集可追溯性与可复现性审计 — 2026-08-10
 - [`p_w20_midbox_tip_backtest_20260807.md`](p_w20_midbox_tip_backtest_20260807.md) — w20 midbox tip 回测裁决 — 2026-08-07
 - [`p_weight_centric_val.md`](p_weight_centric_val.md) — p_weight_centric — score→size 连续仓位 vs 二元 all-in（严格 val 窗离线回测）

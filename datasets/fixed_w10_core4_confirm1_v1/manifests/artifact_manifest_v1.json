@@ -1,0 +1,51 @@
+{
+  "artifact_id": "fixed-w10-core4-confirm1-v1-2649",
+  "artifact_type": "dataset",
+  "builder_commit": "41e183cdba68a89fdef9d7f743837355a2a55612",
+  "components": {
+    "blind_audit_pack": {
+      "path": "datasets/fixed_w10_core4_confirm1_v1/review/p1_blind_audit_v1/public/manifest.json",
+      "sha256": "ab2035914f431f0c245fc48dcdf7b8f7fbccb6c078bc139c30a58834a2bd8829"
+    },
+    "final_gold_snapshot": {
+      "n_rows": 2649,
+      "path": "datasets/fixed_w10_core4_confirm1_v1/gold/events.jsonl",
+      "sha256": "344212f8e5ef1fac3616b2026d19d6e721ce29984b3bbda194d4071c9fc327c4"
+    },
+    "frozen_dataset_manifest": {
+      "path": "datasets/fixed_w10_core4_confirm1_v1/manifests/dataset_manifest.json",
+      "sha256": "20686feba41d15b82e34109402840c2d640fe1e2daea0392b35e1ea79320a7fc"
+    },
+    "image_manifest": {
+      "path": "datasets/fixed_w10_core4_confirm1_v1/manifests/image_manifest.jsonl",
+      "sha256": "9f51218a9221308530c68968c525a9f7ac21d20193998431f83fed568d67cefd"
+    },
+    "image_set": {
+      "duplicate_sha_across_splits": 0,
+      "sha256": "85aade6088e5f55a0dde91f2a12b7cfc94e785143698e8219fea87f63f542084",
+      "size_bytes": 163100310
+    },
+    "pending_acceptance": {
+      "path": "datasets/fixed_w10_core4_confirm1_v1/reports/p1_acceptance_pending.json",
+      "sha256": "4380c9181cac2722a2f4f620081cf8cf2acbf3f728aab25f69129b72803d9111"
+    }
+  },
+  "config_sha256": "7db6c09930d122389b3648ff70551b41cfc6b26286ed8497510f2e3daf0d7652",
+  "counts": {
+    "test/NO_SIGNAL": 251,
+    "test/SIGNAL": 199,
+    "train/NO_SIGNAL": 980,
+    "train/SIGNAL": 869,
+    "val/NO_SIGNAL": 171,
+    "val/SIGNAL": 179
+  },
+  "data_cutoff": "2026-05-02T23:45:00+00:00",
+  "dataset_root": "datasets/fixed_w10_core4_confirm1_v1",
+  "holdout_rows": 0,
+  "n_images": 2649,
+  "note": "This registers the 2,649-image fixed-W10 snapshot. It is not the 3,453-image W12-19 V3 artifact and not the unrelated 2,599-image v2 manifest.",
+  "production_eligible": false,
+  "schema_version": 1,
+  "task_name": "short_dense_core_w10_core4_confirm1_v1",
+  "training_eligible": false
+}

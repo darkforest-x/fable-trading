@@ -92,6 +92,48 @@ artifacts:
       section 8.3 forbids duplicating weight files into this repository.
 
   # ---- gold annotation data -------------------------------------------------
+  - artifact_id: fixed-w10-core4-confirm1-v1-2649
+    artifact_type: dataset
+    role: gold_training_candidate
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2e8ce475438a8987960e13eec210f9df1cf97090"
+    source_path: datasets/fixed_w10_core4_confirm1_v1/manifests/artifact_manifest_v1.json
+    sha256: "a8a4515b302eb08876e33f1ab967da8d2324d63a4b8ec39d01b672a9ef042f34"
+    size_bytes: 2097
+    storage_uri: "file://datasets/fixed_w10_core4_confirm1_v1"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2e8ce475438a8987960e13eec210f9df1cf97090"
+    config_hash: "7db6c09930d122389b3648ff70551b41cfc6b26286ed8497510f2e3daf0d7652"
+    data_cutoff: "2026-05-02T23:45:00+00:00"
+    notes: >-
+      Exact identity for the fixed-W10/Core4/Confirm1 2,649-image snapshot:
+      SIGNAL 1,247, NO_SIGNAL 1,402, image-set SHA
+      85aade6088e5f55a0dde91f2a12b7cfc94e785143698e8219fea87f63f542084.
+      Its final Gold snapshot has 1,251 DIRECT rows. This is neither the old
+      3,453-image W12-19 Dataset V3 artifact nor the unrelated 2,599-image
+      v2_owner_short manifest. training_eligible remains false pending blind
+      review and explicit owner approval.
+
+  - artifact_id: fixed-w10-p1-blind-audit-v1
+    artifact_type: manifest
+    role: gold_label_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2e8ce475438a8987960e13eec210f9df1cf97090"
+    source_path: datasets/fixed_w10_core4_confirm1_v1/review/p1_blind_audit_v1/public/manifest.json
+    sha256: "ab2035914f431f0c245fc48dcdf7b8f7fbccb6c078bc139c30a58834a2bd8829"
+    size_bytes: 50138
+    storage_uri: "file://datasets/fixed_w10_core4_confirm1_v1/review/p1_blind_audit_v1"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2e8ce475438a8987960e13eec210f9df1cf97090"
+    notes: >-
+      Public blind manifest for 398 unique stratified rows plus 50 hidden
+      repeats. The 28 Cleanlab flags are a physically separate priority queue
+      and are not part of the unbiased error-rate estimator.
+
   - artifact_id: yoyo-trading-dataset-v3-gold-core
     artifact_type: annotation_set
     role: gold_labels

@@ -1,0 +1,213 @@
+{
+  "acceptance_path": "/Users/zhangzc/fable-trading/datasets/fixed_w10_core4_confirm1_v1/reports/p1_acceptance_pending.json",
+  "acceptance_sha256": "4380c9181cac2722a2f4f620081cf8cf2acbf3f728aab25f69129b72803d9111",
+  "artifact_manifest_path": "/Users/zhangzc/fable-trading/datasets/fixed_w10_core4_confirm1_v1/manifests/artifact_manifest_v1.json",
+  "artifact_manifest_sha256": "a8a4515b302eb08876e33f1ab967da8d2324d63a4b8ec39d01b672a9ef042f34",
+  "generated_at": "2026-08-20T15:34:01+00:00",
+  "holdout_read": false,
+  "null_control": {
+    "draws": 2000,
+    "null_hypothesis": "the unbiased sample is not enriched for Cleanlab flags after preserving migration-status/class/source/split flag counts",
+    "null_max_overlap": 10,
+    "null_mean_overlap": 3.951,
+    "null_min_overlap": 0,
+    "observed_overlap": 3,
+    "two_sided_permutation_p": 0.793103
+  },
+  "pack": {
+    "index_path": "/Users/zhangzc/fable-trading/datasets/fixed_w10_core4_confirm1_v1/review/p1_blind_audit_v1/public/index.html",
+    "index_sha256": "4b6c3bf7e9472d94120c875d4340773daab098359e9de1f5151bd685f7be4fe1",
+    "manifest_path": "/Users/zhangzc/fable-trading/datasets/fixed_w10_core4_confirm1_v1/review/p1_blind_audit_v1/public/manifest.json",
+    "manifest_sha256": "ab2035914f431f0c245fc48dcdf7b8f7fbccb6c078bc139c30a58834a2bd8829",
+    "n_items": 448,
+    "n_primary": 398,
+    "n_repeats": 50,
+    "pack_id": "fixed_w10_core4_confirm1_v1_p1_blind_audit_v1",
+    "truth_path": "/Users/zhangzc/fable-trading/datasets/fixed_w10_core4_confirm1_v1/review/p1_blind_audit_v1/admin/truth.jsonl",
+    "truth_sha256": "d470d27552113735fcbca78136395db1d845db314f7b38e337c23116cb3d7878"
+  },
+  "population_direct": 1251,
+  "population_n": 2649,
+  "priority_cleanlab28": {
+    "index_path": "/Users/zhangzc/fable-trading/datasets/fixed_w10_core4_confirm1_v1/review/p1_blind_audit_v1/priority_cleanlab28/public/index.html",
+    "index_sha256": "308f85041dbc7d4be8f0b0ea2c67eec1ae047d89f3c15a7b3fefc37ad2565f6a",
+    "manifest_path": "/Users/zhangzc/fable-trading/datasets/fixed_w10_core4_confirm1_v1/review/p1_blind_audit_v1/priority_cleanlab28/public/manifest.json",
+    "manifest_sha256": "50488a6df5b00b70177de78dea2737484fcc32a57bd9dc974196217fc4cb565b",
+    "n_items": 28,
+    "n_primary": 28,
+    "n_repeats": 0,
+    "pack_id": "fixed_w10_core4_confirm1_v1_cleanlab28_priority_v1",
+    "truth_path": "/Users/zhangzc/fable-trading/datasets/fixed_w10_core4_confirm1_v1/review/p1_blind_audit_v1/priority_cleanlab28/admin/truth.jsonl",
+    "truth_sha256": "9d09fe6185d143c29c41ea45c62e7cb5f7174e30dbe653e0e77e49bff2db0a1e"
+  },
+  "sample_direct": 188,
+  "sample_other": 210,
+  "sample_primary": 398,
+  "schema_version": 1,
+  "strata": [
+    {
+      "migration_status": "DIRECT",
+      "population": 4,
+      "sample_fraction": 0.25,
+      "sampled": 1,
+      "shape_label": "NO_SIGNAL",
+      "source_annotation_type": "owner_review_jsonl",
+      "split": "train"
+    },
+    {
+      "migration_status": "DIRECT",
+      "population": 171,
+      "sample_fraction": 0.152047,
+      "sampled": 26,
+      "shape_label": "SIGNAL",
+      "source_annotation_type": "human_gold_owner_box",
+      "split": "test"
+    },
+    {
+      "migration_status": "DIRECT",
+      "population": 771,
+      "sample_fraction": 0.150454,
+      "sampled": 116,
+      "shape_label": "SIGNAL",
+      "source_annotation_type": "human_gold_owner_box",
+      "split": "train"
+    },
+    {
+      "migration_status": "DIRECT",
+      "population": 147,
+      "sample_fraction": 0.14966,
+      "sampled": 22,
+      "shape_label": "SIGNAL",
+      "source_annotation_type": "human_gold_owner_box",
+      "split": "val"
+    },
+    {
+      "migration_status": "DIRECT",
+      "population": 2,
+      "sample_fraction": 0.5,
+      "sampled": 1,
+      "shape_label": "SIGNAL",
+      "source_annotation_type": "local_8768",
+      "split": "test"
+    },
+    {
+      "migration_status": "DIRECT",
+      "population": 16,
+      "sample_fraction": 0.125,
+      "sampled": 2,
+      "shape_label": "SIGNAL",
+      "source_annotation_type": "local_8768",
+      "split": "train"
+    },
+    {
+      "migration_status": "DIRECT",
+      "population": 5,
+      "sample_fraction": 0.2,
+      "sampled": 1,
+      "shape_label": "SIGNAL",
+      "source_annotation_type": "local_8768",
+      "split": "val"
+    },
+    {
+      "migration_status": "DIRECT",
+      "population": 26,
+      "sample_fraction": 0.115385,
+      "sampled": 3,
+      "shape_label": "SIGNAL",
+      "source_annotation_type": "owner_review_jsonl",
+      "split": "test"
+    },
+    {
+      "migration_status": "DIRECT",
+      "population": 82,
+      "sample_fraction": 0.146341,
+      "sampled": 12,
+      "shape_label": "SIGNAL",
+      "source_annotation_type": "owner_review_jsonl",
+      "split": "train"
+    },
+    {
+      "migration_status": "DIRECT",
+      "population": 27,
+      "sample_fraction": 0.148148,
+      "sampled": 4,
+      "shape_label": "SIGNAL",
+      "source_annotation_type": "owner_review_jsonl",
+      "split": "val"
+    },
+    {
+      "migration_status": "IGNORE",
+      "population": 225,
+      "sample_fraction": 0.151111,
+      "sampled": 34,
+      "shape_label": "NO_SIGNAL",
+      "source_annotation_type": "easy_negative_pool",
+      "split": "test"
+    },
+    {
+      "migration_status": "IGNORE",
+      "population": 877,
+      "sample_fraction": 0.150513,
+      "sampled": 132,
+      "shape_label": "NO_SIGNAL",
+      "source_annotation_type": "easy_negative_pool",
+      "split": "train"
+    },
+    {
+      "migration_status": "IGNORE",
+      "population": 154,
+      "sample_fraction": 0.149351,
+      "sampled": 23,
+      "shape_label": "NO_SIGNAL",
+      "source_annotation_type": "easy_negative_pool",
+      "split": "val"
+    },
+    {
+      "migration_status": "MANUAL_ADJUST",
+      "population": 2,
+      "sample_fraction": 0.5,
+      "sampled": 1,
+      "shape_label": "NO_SIGNAL",
+      "source_annotation_type": "human_gold_owner_box",
+      "split": "train"
+    },
+    {
+      "migration_status": "MANUAL_ADJUST",
+      "population": 1,
+      "sample_fraction": 1.0,
+      "sampled": 1,
+      "shape_label": "NO_SIGNAL",
+      "source_annotation_type": "owner_review_jsonl",
+      "split": "train"
+    },
+    {
+      "migration_status": "ONE_CLICK_REVIEW",
+      "population": 26,
+      "sample_fraction": 0.115385,
+      "sampled": 3,
+      "shape_label": "NO_SIGNAL",
+      "source_annotation_type": "owner_review_jsonl",
+      "split": "test"
+    },
+    {
+      "migration_status": "ONE_CLICK_REVIEW",
+      "population": 96,
+      "sample_fraction": 0.145833,
+      "sampled": 14,
+      "shape_label": "NO_SIGNAL",
+      "source_annotation_type": "owner_review_jsonl",
+      "split": "train"
+    },
+    {
+      "migration_status": "ONE_CLICK_REVIEW",
+      "population": 17,
+      "sample_fraction": 0.117647,
+      "sampled": 2,
+      "shape_label": "NO_SIGNAL",
+      "source_annotation_type": "owner_review_jsonl",
+      "split": "val"
+    }
+  ],
+  "training_eligible_changed": false,
+  "training_performed": false
+}

@@ -1,0 +1,53 @@
+{
+  "pack_id": "fixed_w10_core4_confirm1_v1_p1_blind_audit_v1",
+  "population": {
+    "dataset_manifest_sha256": "20686feba41d15b82e34109402840c2d640fe1e2daea0392b35e1ea79320a7fc",
+    "gold_events_sha256": "344212f8e5ef1fac3616b2026d19d6e721ce29984b3bbda194d4071c9fc327c4",
+    "image_set_sha256": "85aade6088e5f55a0dde91f2a12b7cfc94e785143698e8219fea87f63f542084",
+    "n": 2649,
+    "n_direct": 1251
+  },
+  "safety": {
+    "future_in_public_pack": false,
+    "holdout_read": false,
+    "owner_approval_required_after_metrics": true,
+    "review_order": "complete and export the unbiased main pack before opening the Cleanlab priority queue",
+    "training_eligible_changed": false,
+    "training_performed": false
+  },
+  "sampling": {
+    "blind_repeats": 50,
+    "direct_fraction": 0.15027978,
+    "direct_unique": 188,
+    "primary_unique": 398,
+    "repeat_fraction_of_primary": 0.12562814,
+    "strata": [
+      "migration_status",
+      "shape_label",
+      "source_annotation_type",
+      "split"
+    ],
+    "within_stratum_order": "sha256(seed|stratum|gold_id)"
+  },
+  "schema_version": 1,
+  "scoring": {
+    "boundary_metric": "exact core-start agreement on repeated SIGNAL/SIGNAL pairs",
+    "direct_error_rate_max": 0.05,
+    "direct_sample_fraction_min": 0.15,
+    "frozen_signal_core_start_position": 6,
+    "note": "repeat thresholds were not owner-frozen; report numbers, do not invent a pass line",
+    "repeat_metrics": [
+      "raw_agreement",
+      "cohen_kappa"
+    ],
+    "repeat_threshold": null,
+    "review_labels": [
+      "SIGNAL",
+      "NO_SIGNAL",
+      "IGNORE",
+      "UNCERTAIN"
+    ],
+    "uncertain_counts_as_error": true
+  },
+  "seed": 20260820
+}

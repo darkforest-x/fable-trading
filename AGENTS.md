@@ -2,6 +2,14 @@
 
 一句话：两层架构验证"双均线密集启动"信号——YOLO 检测层（L1）+ LightGBM 判断层（L2）。
 
+## Sol 委派约定（owner 固定口径）
+
+- Sol 可以直接完成任务；需要并行调查、复核或第二意见时，只能新建**本机 Codex 可见任务/线程**，并明确指定 `gpt-5.6-luna` + `thinking=max`。
+- 禁止使用 collaboration 子 agent（`spawn_agent` 等）、Hermes 或浏览器 ChatGPT 代替 Luna Max 线程，除非 owner 在当前对话明确点名要求该机制。
+- 本仓线程使用已保存的 `fable-trading` 项目和 `local` 环境，不建 worktree、不切分支；“线程”不是隐藏子 agent。
+- 必须核对新任务界面实际显示 **Luna Max**。若显示 Luna 中或其他推理档位，该结果不算，需重建或显式切到 Max。
+- Luna Max 线程不可用时，由 Sol 自己继续并如实告知 owner；不得静默降级为子 agent 或较低推理档位。
+
 **当前阶段：P0（形态定义与重复标注稳定性）→ P1（Gold Dataset）。**
 执行层代码在 `yoyo/layers/l4_execution/`，但 `models/active_bundle.json` 不存在，
 `require_active_bundle()` fail-closed，**生产上跑着 0 个模型**。
