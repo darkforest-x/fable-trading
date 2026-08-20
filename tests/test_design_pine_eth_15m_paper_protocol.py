@@ -12,6 +12,8 @@ def test_paper_protocol_starts_nothing_and_fails_closed() -> None:
     assert payload["forward_log_written"] is False
     assert payload["live_or_paper_order_sent"] is False
     assert payload["blocked"] is True
+    assert payload["official_pine_compiler_run"] is True
+    assert "trade export" in payload["blocking_gate"]
     assert payload["tradingview_parity_passed"] is False
     assert payload["forward_eligible"] is False
     assert payload["combined_v10_v11_arm_allowed"] is False

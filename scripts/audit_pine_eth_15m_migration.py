@@ -19,6 +19,7 @@ EXPERIMENT = PROJECT / "experiments/active/exp-pine-eth-15m-v1"
 CONFIG = EXPERIMENT / "config.json"
 V9 = EXPERIMENT / "pine/allin_eth_15m_v9_research.pine"
 OUTPUT = EXPERIMENT / "results/migration_audit.json"
+COMPILER_RECEIPT = EXPERIMENT / "results/tradingview_compile_receipt.json"
 
 
 def sha256(path: Path) -> str:
@@ -104,11 +105,14 @@ def main() -> None:
     source_path = Path(config["source_attachment"])
     original = source_path.read_text(encoding="utf-8")
     v9 = V9.read_text(encoding="utf-8")
+    compiler_receipt = json.loads(COMPILER_RECEIPT.read_text(encoding="utf-8"))
     checks = migration_checks(original, v9)
     source_hash = sha256(source_path)
     expected_hash = config["source_attachment_sha256"]
     checks["source_attachment_hash_matches_config"] = source_hash == expected_hash
     failed = sorted(name for name, passed in checks.items() if not passed)
+    if not compiler_receipt["official_pine_compiler_run"] or compiler_receipt["source_sha256"] != sha256(V9):
+        raise RuntimeError("official compiler receipt does not match frozen V9")
     payload: dict[str, Any] = {
         "audit": "user-supplied ALLIN V7.2 to ETH 15m V9 migration ledger",
         "status": "pass" if not failed else "fail",
@@ -139,7 +143,7 @@ def main() -> None:
             "confirmed close, 15m/ETH/date guards and explicit HK timezone",
         ],
         "known_unresolved_semantics": [
-            "TradingView compilation/export parity has not passed",
+            "TradingView official compilation passed in a separate receipt; historical trade-export parity has not passed",
             "the configured +0.1% break-even lock remains -0.1% after 0.2% round-trip cost",
             "OKX proxy bars are not asserted equal to an unspecified TradingView ETHUSDT.P venue",
         ],
@@ -147,6 +151,7 @@ def main() -> None:
         "holdout_rows_read": 0,
         "barrier_parameters_changed": False,
         "training_or_scoring_performed": False,
+        "official_pine_compiler_run": True,
         "tradingview_parity_passed": False,
         "production_eligible": False,
     }

@@ -47,6 +47,9 @@ def main() -> None:
     manifest = json.loads(
         (PINE / "paper_variants_manifest.json").read_text(encoding="utf-8")
     )
+    tv_compile = json.loads(
+        (RESULTS / "tradingview_compile_receipt.json").read_text(encoding="utf-8")
+    )
     split = pd.read_csv(RESULTS / "split_summary.csv")
     period_days = (FINAL_END - FINAL_START).total_seconds() / 86_400.0
     source_by_arm = {
@@ -104,9 +107,11 @@ def main() -> None:
         "live_or_paper_order_sent": False,
         "blocked": True,
         "blocking_gate": (
-            "venue-specific TradingView compile plus 110-trade signal/entry/exit/fee "
-            "ledger parity has not passed"
+            "official compilation passed, but historical TradingView trade export and "
+            "110-trade signal/entry/exit/fee ledger parity have not passed"
         ),
+        "official_pine_compiler_run": bool(tv_compile["official_pine_compiler_run"]),
+        "compiled_source_sha256": str(tv_compile["source_sha256"]),
         "tradingview_parity_passed": bool(summary["tradingview_parity_passed"]),
         "forward_eligible": bool(config["eligibility"]["forward_eligible"]),
         "paper_risk_profile": {
@@ -150,13 +155,15 @@ def main() -> None:
             "tradingview_parity_passed": manifest["tradingview_parity_passed"],
         },
         "owner_decisions_required_before_start": [
-            "select the exact TradingView ETH perpetual venue and export its ledger",
+            "provide a TradingView plan/session that can export the 2025-01 through 2026-02 historical ledger",
             "approve paper collection after parity passes",
             "approve any change to break-even, TP/SL, ATR floor, or cost assumptions separately",
         ],
     }
     if payload["tradingview_parity_passed"] or payload["forward_eligible"]:
         raise RuntimeError("protocol must fail closed while parity/forward eligibility are false")
+    if not payload["official_pine_compiler_run"] or payload["compiled_source_sha256"] != arms["V9"]["sha256"]:
+        raise RuntimeError("official compiler receipt does not match the frozen V9 source")
     if payload["manifest_consistency"] != {
         "combined_v10_v11_generated": False,
         "production_eligible": False,

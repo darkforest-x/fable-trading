@@ -350,6 +350,8 @@ def main() -> int:
         and paper_protocol["forward_log_written"] is False
         and paper_protocol["live_or_paper_order_sent"] is False
         and paper_protocol["blocked"] is True
+        and paper_protocol["official_pine_compiler_run"] is True
+        and paper_protocol["compiled_source_sha256"] == tv_compile["source_sha256"]
         and paper_protocol["tradingview_parity_passed"] is False
         and paper_protocol["combined_v10_v11_arm_allowed"] is False
         and all(
@@ -458,6 +460,7 @@ def main() -> int:
     checks["original_to_v9_migration_is_hashed_and_execution_safe"] = bool(
         migration_audit["status"] == "pass"
         and migration_audit["check_count"] == 16
+        and migration_audit["official_pine_compiler_run"] is True
         and not migration_audit["failed"]
         and migration_audit["source_attachment_sha256"]
         == config["source_attachment_sha256"]

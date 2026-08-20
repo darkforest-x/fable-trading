@@ -183,6 +183,8 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
             and paper_protocol["forward_log_written"] is False
             and paper_protocol["live_or_paper_order_sent"] is False
             and paper_protocol["blocked"] is True
+            and paper_protocol["official_pine_compiler_run"] is True
+            and paper_protocol["compiled_source_sha256"] == tv_compile["source_sha256"]
         ),
         "actual_10m_warning_visible": bool(
             actual_timeframe["ten_minute_quality"]["parents_not_exactly_two_5m_bars"] == 0
@@ -243,6 +245,7 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
         "migration_audit_hashes_original_and_keeps_limits_visible": bool(
             migration_audit["status"] == "pass"
             and migration_audit["check_count"] == 16
+            and migration_audit["official_pine_compiler_run"] is True
             and not migration_audit["failed"]
             and migration_audit["source_attachment_sha256"]
             == config["source_attachment_sha256"]
