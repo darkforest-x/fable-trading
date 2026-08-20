@@ -80,6 +80,7 @@ class Variant:
     skip_logic: bool = True
     break_even: bool = True
     trailing: bool = False
+    opposite_signal_action: str = "reverse"
     params: SignalParameters = SignalParameters()
     final_evaluated: bool = False
     selection_status: str = "development_ablation"
@@ -249,6 +250,8 @@ def build_feature_frame(raw: pd.DataFrame) -> pd.DataFrame:
     out["v9_confirm_long"] = out["v9_long"].shift(1, fill_value=False)
     out["v9_confirm_short"] = out["v9_short"].shift(1, fill_value=False)
     out["v9_confirm_score"] = out["v9_score"].shift(1).fillna(0.0)
+    out["v10_volume_long"] = out["v9_long"] & out["vol_ratio_mean8"].ge(1.0)
+    out["v10_volume_short"] = out["v9_short"] & out["vol_ratio_mean8"].ge(1.0)
     return out
 
 
@@ -307,6 +310,19 @@ def variants() -> tuple[Variant, ...]:
             "v9_short",
             trailing=True,
         ),
+        Variant(
+            "v9_close_only",
+            "v9_long",
+            "v9_short",
+            opposite_signal_action="close_only",
+        ),
+        Variant(
+            "v10_volume_hypothesis",
+            "v10_volume_long",
+            "v10_volume_short",
+            final_evaluated=True,
+            selection_status="post_final_selection_forward_hypothesis",
+        ),
     )
 
 
@@ -321,6 +337,7 @@ def _arm(spec: Variant, risk_percent: float) -> Arm:
         skip_logic=spec.skip_logic,
         use_break_even=spec.break_even,
         use_trailing_stop=spec.trailing,
+        opposite_signal_action=spec.opposite_signal_action,
     )
 
 
@@ -895,6 +912,169 @@ def trailing_search(frame: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def feature_filter_search(frame: pd.DataFrame) -> pd.DataFrame:
+    """One-feature, natural-threshold screens on 2023/2024 only.
+
+    The screen is deliberately rules-only: it does not fit LR/LightGBM and
+    never reads the final-preholdout period to choose a filter.  Directional
+    conditions use the same long/short semantics as the project's L2 feature
+    alignment; non-directional conditions are identical for both sides.
+    """
+
+    both_true = pd.Series(True, index=frame.index)
+    filters: dict[str, tuple[pd.Series, pd.Series]] = {
+        "none": (both_true, both_true),
+        "ema200_price_side": (frame["close"] > frame["ema200"], frame["close"] < frame["ema200"]),
+        "ema55_price_side": (frame["close"] > frame["ema55"], frame["close"] < frame["ema55"]),
+        "order_ge3": (frame["order_score"] >= 3, frame["down_order_score"] >= 3),
+        "order_eq4": (frame["order_score"] == 4, frame["down_order_score"] == 4),
+        "ret4_aligned": (frame["ret_4"] > 0, frame["ret_4"] < 0),
+        "ret12_aligned": (frame["ret_12"] > 0, frame["ret_12"] < 0),
+        "ret24_aligned": (frame["ret_24"] > 0, frame["ret_24"] < 0),
+        "ret48_aligned": (frame["ret_48"] > 0, frame["ret_48"] < 0),
+        "cluster_breakout": (frame["ext_up"] > 0, frame["ext_down"] > 0),
+        "volume_ratio_ge1": (frame["volume_ratio"] >= 1, frame["volume_ratio"] >= 1),
+        "vol_ratio_mean8_ge1": (frame["vol_ratio_mean8"] >= 1, frame["vol_ratio_mean8"] >= 1),
+        "atr_ratio96_ge1": (frame["atr_pct_ratio96"] >= 1, frame["atr_pct_ratio96"] >= 1),
+        "spread_expanding8": (frame["spread_chg8"] > 0, frame["spread_chg8"] > 0),
+        "spread_converging8": (frame["spread_chg8"] < 0, frame["spread_chg8"] < 0),
+        "strict_dense": (frame["ma_spread_pct"] <= 0.0028, frame["ma_spread_pct"] <= 0.0028),
+        "not_strict_dense": (frame["ma_spread_pct"] > 0.0028, frame["ma_spread_pct"] > 0.0028),
+        "pre_range48_le0032": (frame["pre_range48"] <= 0.032, frame["pre_range48"] <= 0.032),
+    }
+    rows: list[dict[str, Any]] = []
+    for name, (long_gate, short_gate) in filters.items():
+        long_column = f"feature_search_{name}_long"
+        short_column = f"feature_search_{name}_short"
+        frame[long_column] = frame["v9_long"] & long_gate.fillna(False)
+        frame[short_column] = frame["v9_short"] & short_gate.fillna(False)
+        spec = Variant(f"feature_{name}", long_column, short_column)
+        block_rows = []
+        for period in DEVELOPMENT_BLOCKS:
+            trades, marked = simulate_period(frame, spec, period, risk_percent=1.0)
+            metric = summarize(
+                trades,
+                marked,
+                variant=spec.name,
+                period=period.name,
+                risk_percent=1.0,
+            )
+            block_rows.append(metric)
+            rows.append({"feature_filter": name, **metric})
+        weighted = sum(r["trades"] * r["project_net_bp_per_trade"] for r in block_rows) / sum(
+            r["trades"] for r in block_rows
+        )
+        for row in rows[-len(DEVELOPMENT_BLOCKS) :]:
+            row["min_block_net_bp"] = min(r["project_net_bp_per_trade"] for r in block_rows)
+            row["weighted_net_bp"] = weighted
+            row["development_selected"] = name == "vol_ratio_mean8_ge1"
+            row["selection_note"] = (
+                "selected only as a post-V9 forward hypothesis; final-preholdout was already consumed"
+                if name == "vol_ratio_mean8_ge1"
+                else "development diagnostic only"
+            )
+    return pd.DataFrame(rows)
+
+
+def timeframe_rescale_ablation(raw: pd.DataFrame) -> pd.DataFrame:
+    """Compare 15m bar-count windows with a 10m wall-clock-rescaled bundle.
+
+    This is one conceptual variable: whether an original ten-minute window is
+    translated to the nearest equal wall-clock duration on 15m bars.  ATR14,
+    the 4x/3% stop and all cost/BE rules stay frozen.
+    """
+
+    params = SignalParameters(
+        fast_len=7,
+        slow_len=40,
+        regime_len=67,
+        atr_len=14,
+        atr_mult=4.0,
+        max_sl_percent=3.0,
+        osc_basis_len=27,
+        osc_percentile_len=133,
+        osc_percentile=99.0,
+        osc_change_lag=7,
+        osc_hma_len=7,
+        osc_threshold=0.1,
+    )
+    frame = add_pine_indicators(raw, params)
+    project = add_features(add_project_indicators(raw))
+    for column in project.columns:
+        if column not in frame.columns:
+            frame[column] = project[column].to_numpy()
+    source = (frame["high"] + frame["low"]) / 2.0
+    difference = source - source.rolling(27, min_periods=27).mean()
+    percentile = difference.rolling(133, min_periods=133).quantile(0.99, interpolation="linear")
+    safe = percentile.gt(0.0)
+    fast = frame["fast_ma"]
+    slow = frame["slow_ma"]
+    frame["rescaled_long"] = (
+        safe
+        & (fast > slow)
+        & (fast.shift(1) <= slow.shift(1))
+        & (frame["close"] > slow)
+        & (frame["close"] > frame["regime_ma"])
+        & frame["slow_slope_12"].gt(0.0)
+        & frame["osc"].gt(0.1)
+        & frame["osc"].gt(frame["osc"].shift(1))
+    )
+    frame["rescaled_short"] = (
+        safe
+        & (fast < slow)
+        & (fast.shift(1) >= slow.shift(1))
+        & (frame["close"] < slow)
+        & (frame["close"] < frame["regime_ma"])
+        & frame["slow_slope_12"].lt(0.0)
+        & frame["osc"].lt(-0.1)
+        & frame["osc"].lt(frame["osc"].shift(1))
+    )
+    frame["rescaled_score"] = frame["osc"].abs().fillna(0.0)
+    spec = Variant(
+        "wallclock_rescaled_from_10m",
+        "rescaled_long",
+        "rescaled_short",
+        score_column="rescaled_score",
+        params=params,
+    )
+    rows = []
+    for period in DEVELOPMENT_BLOCKS:
+        trades, marked = simulate_period(frame, spec, period, risk_percent=1.0)
+        rows.append(
+            {
+                "window_contract": "10m_wallclock_rescaled_to_15m",
+                **summarize(
+                    trades,
+                    marked,
+                    variant=spec.name,
+                    period=period.name,
+                    risk_percent=1.0,
+                ),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def cost_sensitivity(trades: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    final_name = "final_preholdout_2025_202602"
+    for variant in ("v9_locked", "v10_volume_hypothesis"):
+        selected = trades.loc[(trades["variant"] == variant) & (trades["split"] == final_name)]
+        gross = float(selected["gross_return"].mean())
+        for round_trip_cost in (0.0, 0.001, 0.002, 0.003, 0.004, 0.005, 0.006):
+            rows.append(
+                {
+                    "variant": variant,
+                    "round_trip_cost": round_trip_cost,
+                    "round_trip_cost_bp": round_trip_cost * 10_000.0,
+                    "gross_bp_per_trade": gross * 10_000.0,
+                    "net_bp_per_trade": (gross - round_trip_cost) * 10_000.0,
+                    "official_cost_row": round_trip_cost == 0.002,
+                }
+            )
+    return pd.DataFrame(rows)
+
+
 def make_charts(
     summaries: pd.DataFrame,
     equities: pd.DataFrame,
@@ -905,7 +1085,9 @@ def make_charts(
     final_name = "final_preholdout_2025_202602"
     subset = equities.loc[
         (equities["split"] == final_name)
-        & equities["variant"].isin(["v8_eth_baseline", "v9_locked"])
+        & equities["variant"].isin(
+            ["v8_eth_baseline", "v9_locked", "v10_volume_hypothesis"]
+        )
     ].copy()
     fig, ax = plt.subplots(figsize=(10, 5))
     for variant, group in subset.groupby("variant"):
@@ -1030,6 +1212,9 @@ def run(config_path: Path = CONFIG_PATH, output_dir: Path = RESULTS) -> dict[str
     )
     slope_results = slope_search(frame, config["selection_log"]["slope_lags_searched"])
     trailing_results = trailing_search(frame)
+    feature_filter_results = feature_filter_search(frame)
+    timeframe_results = timeframe_rescale_ablation(raw)
+    cost_results = cost_sensitivity(trades)
 
     final_period = next(period for period in SPLITS if period.name.startswith("final_"))
     final_trades = trades.loc[
@@ -1046,6 +1231,25 @@ def run(config_path: Path = CONFIG_PATH, output_dir: Path = RESULTS) -> dict[str
         final_trades["project_net_return"].to_numpy(dtype=float),
         n_permutations=N_RESAMPLES,
         seed=20260824,
+    )
+
+    v10_trades = trades.loc[
+        (trades["variant"] == "v10_volume_hypothesis")
+        & (trades["split"] == final_period.name)
+    ].copy()
+    v10_controls = build_matched_controls(
+        frame,
+        v10_trades,
+        final_period,
+        seed="pine-eth15m-v10-volume-controls-v1",
+    )
+    v10_pairs = pair_controls(v10_trades, v10_controls)
+    v10_signflip = block_signflip(v10_pairs, seed=20260825)
+    v10_excess_ci = week_bootstrap_ci(v10_pairs, "excess_return", seed=20260826)
+    v10_absolute_ci = week_bootstrap_ci(
+        v10_pairs.rename(columns={"project_net_return": "absolute_return"}),
+        "absolute_return",
+        seed=20260827,
     )
 
     l2_rows = attach_l2_features(featured, final_trades)
@@ -1093,6 +1297,21 @@ def run(config_path: Path = CONFIG_PATH, output_dir: Path = RESULTS) -> dict[str
             "n_permutations": ranking.n_permutations,
         },
         "profit_concentration": concentration_diagnostics(final_trades),
+        "v10_post_selection_hypothesis": {
+            "matched_control": {
+                "candidate_trades": int(len(v10_trades)),
+                "paired_trades": int(len(v10_pairs)),
+                "control_rows": int(len(v10_controls)),
+                "mean_candidate_net_bp": float(v10_pairs["project_net_return"].mean() * 10_000.0),
+                "mean_control_net_bp": float(v10_pairs["control_mean_project_net"].mean() * 10_000.0),
+                "mean_excess_bp": float(v10_pairs["excess_return"].mean() * 10_000.0),
+            },
+            "week_block_signflip": v10_signflip,
+            "week_bootstrap_excess": v10_excess_ci,
+            "week_bootstrap_absolute": v10_absolute_ci,
+            "profit_concentration": concentration_diagnostics(v10_trades),
+            "status": "post-final-selection forward hypothesis; not an independent OOS result",
+        },
     }
 
     selected_summary = summaries.loc[
@@ -1100,6 +1319,10 @@ def run(config_path: Path = CONFIG_PATH, output_dir: Path = RESULTS) -> dict[str
     ].iloc[0].to_dict()
     baseline_summary = summaries.loc[
         (summaries["variant"] == "v8_eth_baseline") & (summaries["period"] == final_period.name)
+    ].iloc[0].to_dict()
+    v10_summary = summaries.loc[
+        (summaries["variant"] == "v10_volume_hypothesis")
+        & (summaries["period"] == final_period.name)
     ].iloc[0].to_dict()
     summary = {
         "experiment_id": config["experiment_id"],
@@ -1109,6 +1332,7 @@ def run(config_path: Path = CONFIG_PATH, output_dir: Path = RESULTS) -> dict[str
         "research_data": quality,
         "baseline_final_preholdout": baseline_summary,
         "v9_final_preholdout": selected_summary,
+        "v10_post_selection_final_preholdout": v10_summary,
         "statistics": statistics,
         "honest_verdict": (
             "V9 improves the consumed final-preholdout unit net expectancy, but absolute week-bootstrap "
@@ -1125,8 +1349,13 @@ def run(config_path: Path = CONFIG_PATH, output_dir: Path = RESULTS) -> dict[str
     threshold_results.to_csv(RESULTS / "threshold_search.csv", index=False)
     slope_results.to_csv(RESULTS / "slope_search.csv", index=False)
     trailing_results.to_csv(RESULTS / "trailing_search.csv", index=False)
+    feature_filter_results.to_csv(RESULTS / "feature_filter_search.csv", index=False)
+    timeframe_results.to_csv(RESULTS / "timeframe_rescale_ablation.csv", index=False)
+    cost_results.to_csv(RESULTS / "cost_sensitivity.csv", index=False)
     controls.to_csv(RESULTS / "matched_controls.csv", index=False)
     pairs.to_csv(RESULTS / "matched_pairs.csv", index=False)
+    v10_controls.to_csv(RESULTS / "v10_matched_controls.csv", index=False)
+    v10_pairs.to_csv(RESULTS / "v10_matched_pairs.csv", index=False)
     l2_rows.to_csv(RESULTS / "pine_l2_feature_rows.csv", index=False)
     write_json(RESULTS / "data_quality.json", quality)
     write_json(RESULTS / "feature_contract.json", feature_contract)

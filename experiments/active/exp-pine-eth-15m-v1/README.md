@@ -12,6 +12,13 @@ in temporal development blocks: the existing project feature
 `0.1` instead of `0.2`.  Position risk defaults to 1% to reduce drawdown; that
 is a sizing overlay, not evidence of stronger unit alpha.
 
+After V9's final-preholdout period had already been inspected, a second
+project feature (`vol_ratio_mean8 >= 1`) improved the historical point estimate
+and drawdown.  That V10 result is recorded only as the next forward hypothesis:
+it is post-selection, more tail-concentrated, and not independent OOS evidence.
+V9 remains the last candidate whose two alpha changes were locked before its
+single final-preholdout evaluation.
+
 Important limitations:
 
 - `ETHUSDT.P` is a TradingView display convention, not a venue identity.  The

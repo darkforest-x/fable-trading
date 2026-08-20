@@ -180,6 +180,44 @@ def test_equity_frequency_none_keeps_each_15m_mark() -> None:
     assert unique_times.diff().dropna().min() == pd.Timedelta(minutes=15)
 
 
+def test_close_only_opposite_signal_does_not_open_the_reverse_side() -> None:
+    frame = _frame_for_stop()
+    frame.loc[241, ["open", "high", "low", "close"]] = [100.0, 100.2, 99.8, 100.0]
+    frame.loc[242, "v7_short"] = True
+    frame.loc[242, "entry_allowed"] = True
+    frame.loc[242, "atr"] = 1.0
+    frame.loc[242, "v7_score"] = 1.0
+    common = dict(
+        frame=frame,
+        symbol="TEST_USDT_SWAP",
+        start=pd.Timestamp("2025-01-01T00:00:00Z"),
+        end=pd.Timestamp("2025-01-04T00:00:00Z"),
+        params=SignalParameters(),
+        round_trip_cost=0.002,
+    )
+    reversed_trades, _ = simulate_symbol(
+        arm=Arm(
+            name="reverse",
+            signal_kind="v7",
+            sizing_kind="risk",
+            opposite_signal_action="reverse",
+        ),
+        **common,
+    )
+    close_only_trades, _ = simulate_symbol(
+        arm=Arm(
+            name="close_only",
+            signal_kind="v7",
+            sizing_kind="risk",
+            opposite_signal_action="close_only",
+        ),
+        **common,
+    )
+    assert reversed_trades["direction"].tolist() == ["long", "short"]
+    assert close_only_trades["direction"].tolist() == ["long"]
+    assert close_only_trades.iloc[0]["exit_reason"] == "reverse"
+
+
 def test_deterministic_controls_do_not_depend_on_input_order() -> None:
     a = deterministic_control_indices("candidate", [9, 2, 5, 1], n=3, seed="s")
     b = deterministic_control_indices("candidate", [1, 5, 2, 9], n=3, seed="s")

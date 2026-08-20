@@ -84,6 +84,7 @@ class Arm:
     skip_logic: bool = True
     use_break_even: bool = True
     use_trailing_stop: bool = False
+    opposite_signal_action: str = "reverse"
 
 
 @dataclass
@@ -348,6 +349,8 @@ def simulate_symbol(
         raise ValueError("commission_per_side must be a fraction")
     if execution.skip_return_basis not in {"gross", "net"}:
         raise ValueError("skip_return_basis must be gross|net")
+    if arm.opposite_signal_action not in {"reverse", "close_only"}:
+        raise ValueError("opposite_signal_action must be reverse|close_only")
     start = pd.Timestamp(start)
     end = pd.Timestamp(end)
     if start.tzinfo is None:
@@ -491,9 +494,15 @@ def simulate_symbol(
         # Confirmed signal on t-1 becomes an order at t open.  One reversal
         # order closes and opens; there is no duplicate strategy.close order.
         if pending_direction and pending_signal_i == i - 1:
+            closed_opposite = False
             if position is not None and position.direction != pending_direction:
                 close_position(i, float(open_[i]), "reverse")
-            if position is None and equity > 0.0:
+                closed_opposite = True
+            if (
+                position is None
+                and equity > 0.0
+                and not (closed_opposite and arm.opposite_signal_action == "close_only")
+            ):
                 open_position(i, pending_direction, pending_signal_i)
             pending_direction = 0
             pending_signal_i = -1
