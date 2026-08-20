@@ -547,6 +547,11 @@ TradingView 的 `ETHUSDT.P` 必须再明确具体交易所后做逐笔导出对�
 - 时间过滤改为明确 `Asia/Hong_Kong`，并增加 900 秒、ETH base、日期和 confirmed-bar 守卫；
 - percentile 分母从“仅不等于 0”改为 `not na and > 0` fail-closed。
 
+本地 Python 回放也已和 Pine 的下单时点对齐：反手单数量冻结在 signal close 的 marked equity
+（含未实现盈亏，并在显式佣金模式下扣除已付入场佣金），而不是到下一根开盘先平旧仓后再按新权益重算。
+这项机械 parity 修复不改变 110 笔的单位收益；V9 资金收益只变化约 +0.00005 个百分点，
+15m 收盘回撤由约 20.07% 校正为 {_fmt(v9['max_drawdown_15m_percent'])}%。
+
 这些修复让回测口径可审计，但不等于 alpha 增强。TradingView 官方 Pine v6 编译已经通过；仍未解决的是
 TradingView **交易导出**逐笔 parity，以及 +0.1% 锁盈在 0.2% 往返成本后仍是 -0.1%。
 
@@ -779,7 +784,9 @@ venue-exact 总成本同时通过。TradingView 逐笔 parity 未通过前，协
 
 ![Four-week block bootstrap path risk](../experiments/active/exp-pine-eth-15m-v1/results/charts/path_risk_bootstrap.png)
 
-0.5% 风险把 V9 的实际回撤从 20.07% 压到 10.63%，bootstrap 回撤 95 分位从
+0.5% 风险把 V9 的实际回撤从
+{_fmt(path_risk['arms'][2]['actual_drawdown_15m_percent'])}% 压到
+{_fmt(path_risk['arms'][0]['actual_drawdown_15m_percent'])}%，bootstrap 回撤 95 分位从
 {_fmt(path_risk['arms'][2]['drawdown_q95_percent'])}% 降到
 {_fmt(path_risk['arms'][0]['drawdown_q95_percent'])}%；但终值为负的重采样比例仍为
 {_fmt(path_risk['arms'][0]['probability_negative_terminal'] * 100)}%。因此 **0.5% 是更保守的
