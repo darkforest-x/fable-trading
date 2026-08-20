@@ -16,7 +16,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
+
+
+PROJECT = Path(__file__).resolve().parents[2]
+if str(PROJECT) not in sys.path:
+    sys.path.insert(0, str(PROJECT))
 
 from yoyo.datasets.fixed_w10_blind_audit import (
     DEFAULT_SEED,
@@ -25,7 +31,6 @@ from yoyo.datasets.fixed_w10_blind_audit import (
 )
 
 
-PROJECT = Path(__file__).resolve().parents[2]
 DEFAULT_DATASET = PROJECT / "datasets" / "fixed_w10_core4_confirm1_v1"
 DEFAULT_PACK = DEFAULT_DATASET / "review" / "p1_blind_audit_v1"
 DEFAULT_CLEANLAB = (

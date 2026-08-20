@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 from yoyo.datasets.fixed_w10_blind_audit import (
@@ -11,6 +13,9 @@ from yoyo.datasets.fixed_w10_blind_audit import (
     sha256_file,
     stratified_sample,
 )
+
+
+PROJECT = Path(__file__).resolve().parents[1]
 
 
 def _rows(tmp_path: Path) -> list[dict]:
@@ -79,3 +84,15 @@ def test_cohen_kappa_reports_repeat_consistency() -> None:
     mixed = [("SIGNAL", "SIGNAL"), ("SIGNAL", "NO_SIGNAL"), ("NO_SIGNAL", "NO_SIGNAL")]
     value = cohen_kappa(mixed)
     assert value is not None and -1.0 <= value <= 1.0
+
+
+def test_cli_can_be_invoked_by_path_outside_the_repository(tmp_path: Path) -> None:
+    result = subprocess.run(
+        [sys.executable, str(PROJECT / "tools/datasets/fixed_w10_p1_audit.py"), "--help"],
+        cwd=tmp_path,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "build" in result.stdout and "score" in result.stdout
