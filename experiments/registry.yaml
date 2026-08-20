@@ -448,7 +448,7 @@ experiments:
 
   - experiment_id: exp-pine-eth-15m-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "8b28666062e1622aa633e14467730ecbb1e92f50"
+    source_commit: "330d0bcce5bfbcf5e66f378260811f96a770ea0a"
     status: inconclusive
     question: >-
       Can the user-supplied ALLIN-V7.2 strategy be frozen as a causal
@@ -484,7 +484,8 @@ experiments:
       paper A/B. The +0.1% break-even lock is -10 bp after frozen cost. A full
       335-row raw-candidate feature surface exists for a future authorized
       dynamic LR gate, but P0/P1 blocks training and all eligibility flags stay
-      false.
+      false. The exact V9 hash passes TradingView's official Pine v6 compiler;
+      historical trade-export parity remains blocked by the available Basic plan.
 
   - experiment_id: exp-consolidation-single-repo-v1
     source_repo: darkforest-x/fable-trading

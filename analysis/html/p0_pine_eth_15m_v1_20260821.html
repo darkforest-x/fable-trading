@@ -103,7 +103,7 @@ li { margin: .25rem 0; }
 <li>时间过滤改为明确 <code>Asia/Hong_Kong</code>，并增加 900 秒、ETH base、日期和 confirmed-bar 守卫；</li>
 <li>percentile 分母从“仅不等于 0”改为 <code>not na and &gt; 0</code> fail-closed。</li>
 </ul>
-<p>这些修复让回测口径可审计，但不等于 alpha 增强。仍未解决的两项是：TradingView 编译/导出逐笔 parity， 以及 +0.1% 锁盈在 0.2% 往返成本后仍是 -0.1%。</p>
+<p>这些修复让回测口径可审计，但不等于 alpha 增强。TradingView 官方 Pine v6 编译已经通过；仍未解决的是 TradingView <strong>交易导出</strong>逐笔 parity，以及 +0.1% 锁盈在 0.2% 往返成本后仍是 -0.1%。</p>
 <h3>10m 改到 15m 到底改变了什么</h3>
 <p>保留 10/60 根后，墙钟窗口由约 100/600 分钟变为 <strong>150/900 分钟</strong>，策略变慢 50%。 我们把“按原 10m 墙钟长度换算到 15m”（约 7/40、EMA67、osc 27/133/7/7）作为一个概念变量， ATR14 和止损完全不动。结果：</p>
 <table><thead><tr>
@@ -425,8 +425,9 @@ li { margin: .25rem 0; }
 <li>最大单位收益误差 0.0000000000 bp；</li>
 <li>框架收益 +22.78%、最大回撤 20.01%， 与自定义引擎 +22.82% / 20.07% 接近。</li>
 </ul>
-<p>这通过了<strong>独立 Python 框架 reconciliation</strong>，但不是 TradingView broker-emulator parity。 Pine 仍需在同一交易所 15m 图表编译并导出逐笔 ledger。</p>
-<p>V9 Pine 静态契约 25/25 项通过：常量、900 秒周期守卫、ETH base 守卫、confirmed-bar、next-open、 commission、禁 tick 重算/放大器、无 <code>request.security</code>/lookahead 都与冻结配置一致；同时明确 <code>official_pine_compiler_run=false</code>。<code>tradingview/trades_normalized.template.csv</code> 与 <code>scripts/reconcile_pine_eth_15m_tradingview.py</code> 已准备好，真实导出必须 110/110 entry+side、exit time、 入/出价格一 tick 内全部通过；费用/净 P&amp;L 仍需 venue 会计复核。</p>
+<p>这通过了<strong>独立 Python 框架 reconciliation</strong>，但不是 TradingView broker-emulator parity。 精确 V9 hash 已在 <code>OKX:ETHUSDT.P</code> 15m 通过 TradingView 官方 Pine v6 编译，错误 0，且成功显示为 active strategy；但仍需导出逐笔 ledger。</p>
+<p>V9 Pine 静态契约 25/25 项通过：常量、900 秒周期守卫、ETH base 守卫、confirmed-bar、next-open、 commission、禁 tick 重算/放大器、无 <code>request.security</code>/lookahead 都与冻结配置一致。静态审计器自身没有 调用编译器，但独立 compiler receipt 已把 <code>official_pine_compiler_run=true</code> 钉到源 SHA <code>6465fa80f89907b2ed584085960f355f331de62e3c38ebf65f3065c57873dfe9</code>。<code>tradingview/trades_normalized.template.csv</code> 与 <code>scripts/reconcile_pine_eth_15m_tradingview.py</code> 已准备好，真实导出必须 110/110 entry+side、exit time、 入/出价格一 tick 内全部通过；费用/净 P&amp;L 仍需 venue 会计复核。</p>
+<p>本次浏览器 smoke 无法进入历史账本：账号计划为 Basic，已加载图表区间 2026-06-01～2026-08-21，完全晚于 <code>researchEnd=2026-03-01</code>；任意历史 Deep Backtesting 会弹出升级门，因此报告为 “This report requires trade data”， 没有导出或 reconciliation。编译成功与逐笔 parity 必须继续分开表述。</p>
 <p>同一 OKX 合约的 3m 有序路径又做了一层执行敏感性复核：</p>
 <ul>
 <li>2025-01 至 2026-02 共 40,704 根 15m 母 K， 每根都恰好由五根 3m K 构成，OHLC 最大误差为 0；</li>
@@ -452,7 +453,7 @@ li { margin: .25rem 0; }
 <p>固定配方两次都停在 Docker Hub 的 <code>python:3.11-slim</code> metadata 拉取，尚未进入依赖安装或代码执行， 因此明确记录 <code>pinned_docker_recipe_built=false</code>。为了区分“Docker runtime 坏了”和“外部镜像站阻塞”， 使用本机已有镜像在 <code>--network none</code> 下做了两层只读复核：</p>
 <ul>
 <li>Python 3.13.12 / pandas 2.2.3 / NumPy 2.2.6；</li>
-<li>产物算术 smoke 38/38 项通过，包括 110 笔收益重算、20 bp 成本、 330 个唯一对照、统计失败门、3m 出场对账和 eligibility；</li>
+<li>产物算术 smoke 39/39 项通过，包括 110 笔收益重算、20 bp 成本、 330 个唯一对照、统计失败门、3m 出场对账和 eligibility；</li>
 <li>另从原始 15m K 线前缀重新计算 V9 信号并运行 stateful replay：读取 145,666 根、holdout 0 行，重建 110 笔；方向、索引、退出原因、三组时间全部逐笔一致， 数值列最大绝对误差 9.095e-13；</li>
 <li>Linux runtime 为 Python 3.13.12 / pandas 2.2.3 / NumPy 2.2.6。</li>
 </ul>
@@ -554,11 +555,12 @@ Pine confirmed close(t)
 <li><strong>没有训练或生产动作。</strong> 所有策略计算的 bounded loader 都读取 0 行 holdout；未 train、promote、deploy、改 ACTIVE、写 forward_log 或操作真金账户。</li>
 <li><strong>意外 holdout 预览已披露。</strong> 在写 3m bounded loader 前，一次 shell <code>tail</code> 意外显示了原始文件末尾两行（均在 repository holdout）；它们没有进入 Python、没有被评分、没有参与任何配置选择或收益评估。按本仓“看一眼也要记录”的纪律，此事故不能写成“从未看见”，后续已用前缀加载器和不读取整文件的前缀哈希封死。</li>
 <li><strong>第二次意外预览已披露。</strong> 检查 funding coverage 时，shell 又显示了 8 条 holdout 期 funding 原始行，最晚到 2026-07-08T16:00:00Z；同样未进 Python、未汇总/评分/选参，发现本地 funding 不覆盖回测后立即停止该分析。</li>
+<li><strong>第三次意外预览已披露。</strong> TradingView 编译 smoke 默认打开 2026-06-01～2026-08-21 当前图表，晚于 repository holdout；事前没有 owner 的专项 holdout 批准。V9 日期门让入场/评分为 0，也没有读取任何策略指标、做收益评价或选参；临时策略已撤销、布局/脚本未保存、未发布。该事故只保留“官方编译通过”事实，不能当 holdout 验收。</li>
 <li><strong>正式 Docker 构建未完成。</strong> 两次都卡在外部基础镜像 metadata；已有断网 Linux 镜像完成了原始数据全重放并逐笔一致，但其依赖未按实验 Dockerfile 固定，不能冒充 pinned build，更不能冒充 TradingView parity。</li>
 </ul>
 <h2>下一步选项（需 owner 决策的已标出）</h2>
 <ol>
-<li><strong>可立即做：</strong> 在明确的 TradingView venue 上粘贴 V9 Pine，导出 trade list；对 signal/entry/exit/fee/equity 逐笔对账。未过不得 forward。</li>
+<li><strong>需 owner 提供可访问历史区间的 TradingView 方案：</strong> 官方编译已过；在支持 2025-01～2026-02 Deep Backtesting 的计划/会话中导出 trade list，再对 signal/entry/exit/fee/equity 逐笔对账。未过不得 forward；本轮不会替 owner 购买升级。</li>
 <li><strong>需 owner 单独批准：</strong> 把名义 BE 的 +0.1% offset 改成成本感知值并作为单一 barrier 变量重跑；当前只完成语义/会计诊断，未改参数。</li>
 <li><strong>parity 后再由 owner 启动：</strong> V9 / V10（成交量门）/ V11（只开多）做互斥 paper-only 新鲜前向 A/B，各积累至少 100 笔；纸面风险优先 0.5%，1% 留作可比基准；禁止把 V10+V11 打包，旧 final 不追认为 OOS。</li>
 <li><strong>需 owner 在 P0/P1 通过后批准：</strong> 先建 Pine-specific 单特征正则 LR；不要直接在 166 笔上训 28 特征 LightGBM。所有分数必须进入动态 replay。</li>
@@ -567,7 +569,7 @@ Pine confirmed close(t)
 </ol>
 <h2>复现命令</h2>
 <pre><code>
-git checkout 8db34dc0b38a3f0d0e715d2093aaeb7d756e12e1
+git checkout 330d0bcce5bfbcf5e66f378260811f96a770ea0a
 PYTHONPATH=. .venv/bin/python scripts/research_pine_eth_15m.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_robustness.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_side_hypothesis.py
@@ -627,6 +629,6 @@ docker run --rm --network none --entrypoint python -e PYTHONPATH=/workspace \
   --canonical-trades /workspace/experiments/active/exp-pine-eth-15m-v1/results/trades.csv \
   --output /output/docker_offline_replay.json
 </code></pre>
-<p>验证器结果：<strong>51/51 checks pass</strong>。</p>
+<p>验证器结果：<strong>52/52 checks pass</strong>。</p>
 </body>
 </html>
