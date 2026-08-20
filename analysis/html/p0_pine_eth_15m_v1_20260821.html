@@ -451,7 +451,7 @@ li { margin: .25rem 0; }
 </tbody></table>
 <p>V9/V11 的价格型规则入场重合约 96%，但成交量门 V10 只有 78%；<code>vol_ratio_mean8</code> 两 feed 相关性虽为 0.9303，成交量本身来自不同市场。 因此 feed 审计支持 V9 做本地 proxy 基线，同时进一步降低 V10 的可信度；仍不等于 TradingView parity。</p>
 <h3>Docker 复核状态</h3>
-<p>固定配方两次都停在 Docker Hub 的 <code>python:3.11-slim</code> metadata 拉取，尚未进入依赖安装或代码执行， 因此明确记录 <code>pinned_docker_recipe_built=false</code>。为了区分“Docker runtime 坏了”和“外部镜像站阻塞”， 使用本机已有镜像在 <code>--network none</code> 下做了两层只读复核：</p>
+<p>固定配方三次都停在 Docker Hub 的 <code>python:3.11-slim</code> metadata 拉取；第三次在又等待 90 秒后取消， 三次均尚未进入依赖安装或代码执行， 因此明确记录 <code>pinned_docker_recipe_built=false</code>。为了区分“Docker runtime 坏了”和“外部镜像站阻塞”， 使用本机已有镜像在 <code>--network none</code> 下做了两层只读复核：</p>
 <ul>
 <li>Python 3.13.12 / pandas 2.2.3 / NumPy 2.2.6；</li>
 <li>产物算术 smoke 39/39 项通过，包括 110 笔收益重算、20 bp 成本、 330 个唯一对照、统计失败门、3m 出场对账和 eligibility；</li>
@@ -557,7 +557,7 @@ Pine confirmed close(t)
 <li><strong>意外 holdout 预览已披露。</strong> 在写 3m bounded loader 前，一次 shell <code>tail</code> 意外显示了原始文件末尾两行（均在 repository holdout）；它们没有进入 Python、没有被评分、没有参与任何配置选择或收益评估。按本仓“看一眼也要记录”的纪律，此事故不能写成“从未看见”，后续已用前缀加载器和不读取整文件的前缀哈希封死。</li>
 <li><strong>第二次意外预览已披露。</strong> 检查 funding coverage 时，shell 又显示了 8 条 holdout 期 funding 原始行，最晚到 2026-07-08T16:00:00Z；同样未进 Python、未汇总/评分/选参，发现本地 funding 不覆盖回测后立即停止该分析。</li>
 <li><strong>第三次意外预览已披露。</strong> TradingView 编译 smoke 默认打开 2026-06-01～2026-08-21 当前图表，晚于 repository holdout；事前没有 owner 的专项 holdout 批准。V9 日期门让入场/评分为 0，也没有读取任何策略指标、做收益评价或选参；临时策略已撤销、布局/脚本未保存、未发布。该事故只保留“官方编译通过”事实，不能当 holdout 验收。</li>
-<li><strong>正式 Docker 构建未完成。</strong> 两次都卡在外部基础镜像 metadata；已有断网 Linux 镜像完成了原始数据全重放并逐笔一致，但其依赖未按实验 Dockerfile 固定，不能冒充 pinned build，更不能冒充 TradingView parity。</li>
+<li><strong>正式 Docker 构建未完成。</strong> 三次都卡在外部基础镜像 metadata（第三次等待 90 秒后取消）；已有断网 Linux 镜像完成了原始数据全重放并逐笔一致，但其依赖未按实验 Dockerfile 固定，不能冒充 pinned build，更不能冒充 TradingView parity。</li>
 </ul>
 <h2>下一步选项（需 owner 决策的已标出）</h2>
 <ol>
@@ -570,7 +570,7 @@ Pine confirmed close(t)
 </ol>
 <h2>复现命令</h2>
 <pre><code>
-git checkout 919624f076132434f44acebc034a7633022f9dd4
+git checkout 76ef1f14f6670c48ad3a94d427f4bb38a9858a19
 PYTHONPATH=. .venv/bin/python scripts/research_pine_eth_15m.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_robustness.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_side_hypothesis.py
