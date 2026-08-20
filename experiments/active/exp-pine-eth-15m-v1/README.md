@@ -45,7 +45,7 @@ PYTHONPATH=. python3 scripts/reconcile_pine_eth_15m_backtesting.py
 PYTHONPATH=. .venv/bin/python -m pytest -q \
   tests/test_pine_allin_v7_backtest.py \
   tests/test_research_pine_eth_15m.py
-PYTHONPATH=. .venv/bin/python scripts/build_pine_eth_15m_report.py
+PYTHONPATH=. /tmp/fable-pine-eval-venv/bin/python scripts/build_pine_eth_15m_report.py
 PYTHONPATH=. .venv/bin/python scripts/md_to_html.py \
   analysis/p0_pine_eth_15m_v1_20260821.md --out-dir analysis/html
 ```

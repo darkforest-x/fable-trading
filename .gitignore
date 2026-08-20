@@ -153,3 +153,18 @@ archive/consolidated/**
 # 两个例外：说明这棵树是什么，以及它包含什么。没有它们，20 GB 就是一堆无名文件。
 !archive/consolidated/README.md
 !archive/consolidated/MANIFEST.json
+
+# Pine 预留验证回放的逐笔/逐币明细可由 config + runner + kline_deep 重建，
+# 共约 310 MB；保留 summary/validation/portfolio_daily/图表作为轻量证据。
+experiments/active/exp-pine-allin-v7-preholdout-v1/results/trades.csv
+experiments/active/exp-pine-allin-v7-preholdout-v1/results/matched_controls.csv
+experiments/active/exp-pine-allin-v7-preholdout-v1/results/daily_symbol_equity.csv
+
+# ETH 15m Pine research ledgers/equity are deterministic rebuild products.
+# Keep compact summaries, paired diagnostics, validation and charts in git.
+experiments/active/exp-pine-eth-15m-v1/results/bar_equity.csv
+experiments/active/exp-pine-eth-15m-v1/results/trades.csv
+experiments/active/exp-pine-eth-15m-v1/results/matched_controls.csv
+experiments/active/exp-pine-eth-15m-v1/results/v10_matched_controls.csv
+experiments/active/exp-pine-eth-15m-v1/results/backtesting_trades.csv
+experiments/active/exp-pine-eth-15m-v1/results-docker/**

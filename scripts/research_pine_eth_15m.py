@@ -47,6 +47,7 @@ from yoyo.layers.l3_backtest.pine_allin_v7 import (
     ExecutionParameters,
     SignalParameters,
     add_indicators as add_pine_indicators,
+    auc_from_scores,
     deterministic_control_indices,
     load_development_frame,
     max_drawdown,
@@ -1289,6 +1290,10 @@ def run(config_path: Path = CONFIG_PATH, output_dir: Path = RESULTS) -> dict[str
         "week_bootstrap_excess": excess_ci,
         "week_bootstrap_absolute": absolute_ci,
         "oscillator_ranking_permutation": {
+            "auc_net_positive": auc_from_scores(
+                final_trades["score"].to_numpy(dtype=float),
+                final_trades["project_net_return"].gt(0.0).to_numpy(dtype=bool),
+            ),
             "top_decile_net_bp": ranking.statistic * 10_000.0,
             "p_value": ranking.p_value,
             "null_mean_bp": ranking.null_mean * 10_000.0,
