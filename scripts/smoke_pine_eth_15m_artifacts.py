@@ -52,6 +52,7 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
     judgment_feasibility = load_json("judgment_feasibility.json")
     stateful_gate = load_json("stateful_gate_static_vs_dynamic.json")
     pine_static = load_json("pine_static_contract.json")
+    docker_replay = load_json("docker_offline_replay.json")
     validation = load_json("validation.json")
     trades = pd.read_csv(RESULTS / "trades.csv")
     controls = pd.read_csv(RESULTS / "matched_controls.csv")
@@ -207,6 +208,17 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
             and pine_static["check_count"] == 25
             and pine_static["official_pine_compiler_run"] is False
             and pine_static["tradingview_parity_passed"] is False
+        ),
+        "offline_market_replay_exact_without_tv_claim": bool(
+            docker_replay["status"] == "pass"
+            and docker_replay["data_contract"]["holdout_rows_read"] == 0
+            and docker_replay["ledger"]["canonical_trade_count"] == 110
+            and docker_replay["ledger"]["replayed_trade_count"] == 110
+            and all(docker_replay["ledger"]["exact_matches"].values())
+            and all(docker_replay["ledger"]["time_matches"].values())
+            and max(docker_replay["ledger"]["numeric_max_abs_error"].values()) <= 1e-10
+            and docker_replay["model_training_or_scoring_performed"] is False
+            and docker_replay["tradingview_parity_passed"] is False
         ),
         "tradingview_parity_false": summary["tradingview_parity_passed"] is False,
         "training_and_production_false": bool(

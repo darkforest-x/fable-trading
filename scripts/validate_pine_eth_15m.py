@@ -48,6 +48,7 @@ def main() -> int:
     intrabar = json.loads((RESULTS / "intrabar_3m_reconciliation.json").read_text(encoding="utf-8"))
     robustness = json.loads((RESULTS / "robustness_checks.json").read_text(encoding="utf-8"))
     docker_smoke = json.loads((RESULTS / "docker_offline_smoke.json").read_text(encoding="utf-8"))
+    docker_replay = json.loads((RESULTS / "docker_offline_replay.json").read_text(encoding="utf-8"))
     v11 = json.loads((RESULTS / "v11_long_only_summary.json").read_text(encoding="utf-8"))
     control_sensitivity = json.loads(
         (RESULTS / "control_seed_sensitivity.json").read_text(encoding="utf-8")
@@ -388,10 +389,25 @@ def main() -> int:
     )
     checks["offline_docker_artifact_smoke_passed_without_overclaim"] = bool(
         docker_smoke["status"] == "pass"
-        and docker_smoke["count"] == 31
+        and docker_smoke["count"] == 32
         and docker_smoke["runtime_label"] == "offline-local-label-studio-image"
         and docker_smoke["pinned_docker_recipe_built"] is False
         and docker_smoke["tradingview_parity_passed"] is False
+    )
+    replay_errors = docker_replay["ledger"]["numeric_max_abs_error"]
+    checks["offline_docker_market_replay_is_exact_without_tv_claim"] = bool(
+        docker_replay["status"] == "pass"
+        and docker_replay["data_contract"]["bounded_rows_read"] == 145_666
+        and docker_replay["data_contract"]["holdout_rows_read"] == 0
+        and docker_replay["data_contract"]["full_file_hash_intentionally_omitted"] is True
+        and docker_replay["ledger"]["canonical_trade_count"] == 110
+        and docker_replay["ledger"]["replayed_trade_count"] == 110
+        and all(docker_replay["ledger"]["exact_matches"].values())
+        and all(docker_replay["ledger"]["time_matches"].values())
+        and max(replay_errors.values()) <= 1e-10
+        and docker_replay["model_training_or_scoring_performed"] is False
+        and docker_replay["tradingview_parity_passed"] is False
+        and docker_replay["production_eligible"] is False
     )
     checks["l2_export_exact_and_training_blocked"] = bool(
         len(feature_contract["project_l2_features"]) == 28

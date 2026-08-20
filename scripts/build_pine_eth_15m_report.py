@@ -59,6 +59,7 @@ def load_evidence() -> dict[str, Any]:
         "intrabar": json.loads((RESULTS / "intrabar_3m_reconciliation.json").read_text(encoding="utf-8")),
         "robustness": json.loads((RESULTS / "robustness_checks.json").read_text(encoding="utf-8")),
         "docker_smoke": json.loads((RESULTS / "docker_offline_smoke.json").read_text(encoding="utf-8")),
+        "docker_replay": json.loads((RESULTS / "docker_offline_replay.json").read_text(encoding="utf-8")),
         "v11": json.loads((RESULTS / "v11_long_only_summary.json").read_text(encoding="utf-8")),
         "control_sensitivity": json.loads((RESULTS / "control_seed_sensitivity.json").read_text(encoding="utf-8")),
         "path_risk": json.loads((RESULTS / "path_risk_bootstrap.json").read_text(encoding="utf-8")),
@@ -129,6 +130,7 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
     intrabar = evidence["intrabar"]
     robustness = evidence["robustness"]
     docker_smoke = evidence["docker_smoke"]
+    docker_replay = evidence["docker_replay"]
     v11 = evidence["v11"]
     control_sensitivity = evidence["control_sensitivity"]
     path_risk = evidence["path_risk"]
@@ -695,15 +697,21 @@ V9/V11 的价格型规则入场重合约 96%，但成交量门 V10 只有 78%；
 
 固定配方两次都停在 Docker Hub 的 `python:3.11-slim` metadata 拉取，尚未进入依赖安装或代码执行，
 因此明确记录 `pinned_docker_recipe_built=false`。为了区分“Docker runtime 坏了”和“外部镜像站阻塞”，
-又使用本机已有镜像在 `--network none` 下做只读产物算术 smoke：
+使用本机已有镜像在 `--network none` 下做了两层只读复核：
 
 - Python {docker_smoke['runtime']['python']} / pandas {docker_smoke['runtime']['pandas']} /
   NumPy {docker_smoke['runtime']['numpy']}；
-- {docker_smoke['count']}/{docker_smoke['count']} 项通过，包括 110 笔收益重算、20 bp 成本、
+- 产物算术 smoke {docker_smoke['count']}/{docker_smoke['count']} 项通过，包括 110 笔收益重算、20 bp 成本、
   330 个唯一对照、统计失败门、3m 出场对账和 eligibility；
-- scope 仅为 `{docker_smoke['scope']}`，没有重跑市场数据或回测。
+- 另从原始 15m K 线前缀重新计算 V9 信号并运行 stateful replay：读取
+  {docker_replay['data_contract']['bounded_rows_read']:,} 根、holdout 0 行，重建
+  {docker_replay['ledger']['replayed_trade_count']} 笔；方向、索引、退出原因、三组时间全部逐笔一致，
+  数值列最大绝对误差 {max(docker_replay['ledger']['numeric_max_abs_error'].values()):.3e}；
+- Linux runtime 为 Python {docker_replay['runtime']['python']} / pandas
+  {docker_replay['runtime']['pandas']} / NumPy {docker_replay['runtime']['numpy']}。
 
-所以 Docker 运行时和跨版本产物算术已通过 smoke，但**正式 pinned 容器构建仍未通过**。
+所以已有断网 Linux 镜像已通过“原始数据 → 信号 → 110 笔账本”的跨版本重放；但这不是固定依赖镜像，
+更不是 TradingView Pine 编译/成交导出，**正式 pinned 容器构建与 TradingView parity 仍未通过**。
 
 ## 项目判断层（用户称 LR）能否接入
 
@@ -779,7 +787,7 @@ Pine confirmed close(t)
 - **没有训练或生产动作。** 所有策略计算的 bounded loader 都读取 0 行 holdout；未 train、promote、deploy、改 ACTIVE、写 forward_log 或操作真金账户。
 - **意外 holdout 预览已披露。** 在写 3m bounded loader 前，一次 shell `tail` 意外显示了原始文件末尾两行（均在 repository holdout）；它们没有进入 Python、没有被评分、没有参与任何配置选择或收益评估。按本仓“看一眼也要记录”的纪律，此事故不能写成“从未看见”，后续已用前缀加载器和不读取整文件的前缀哈希封死。
 - **第二次意外预览已披露。** 检查 funding coverage 时，shell 又显示了 8 条 holdout 期 funding 原始行，最晚到 {funding_coverage['operational_incident']['displayed_range_end']}；同样未进 Python、未汇总/评分/选参，发现本地 funding 不覆盖回测后立即停止该分析。
-- **正式 Docker 构建未完成。** 两次都卡在外部基础镜像 metadata；离线已有镜像只通过产物算术 smoke，不能冒充 pinned backtest rerun。
+- **正式 Docker 构建未完成。** 两次都卡在外部基础镜像 metadata；已有断网 Linux 镜像完成了原始数据全重放并逐笔一致，但其依赖未按实验 Dockerfile 固定，不能冒充 pinned build，更不能冒充 TradingView parity。
 
 ## 下一步选项（需 owner 决策的已标出）
 
@@ -836,6 +844,16 @@ docker run --rm --network none --entrypoint python -w /workspace \\
   heartexlabs/label-studio:latest scripts/smoke_pine_eth_15m_artifacts.py \\
   --runtime-label offline-local-label-studio-image \\
   --output /output/docker_offline_smoke.json
+
+# Full frozen-V9 market-data replay in the same network-disabled Linux image
+docker run --rm --network none --entrypoint python -e PYTHONPATH=/workspace \\
+  -v "$PWD:/workspace:ro" \\
+  -v "$PWD/experiments/active/exp-pine-eth-15m-v1/results:/output" \\
+  heartexlabs/label-studio:latest \\
+  /workspace/scripts/replay_pine_eth_15m_offline.py \\
+  --config /workspace/experiments/active/exp-pine-eth-15m-v1/config.json \\
+  --canonical-trades /workspace/experiments/active/exp-pine-eth-15m-v1/results/trades.csv \\
+  --output /output/docker_offline_replay.json
 ```
 
 验证器结果：**{validation['counts']['checks']}/{validation['counts']['checks']} checks pass**。

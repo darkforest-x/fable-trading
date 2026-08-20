@@ -7,6 +7,7 @@ from scripts.analyze_pine_eth_15m_robustness import (
     exact_block_signflip,
     prequential_feature_replay,
     selection_adjusted_max_signflip,
+    selection_adjusted_side_signflip,
 )
 
 
@@ -56,4 +57,26 @@ def test_max_stat_selection_adjustment_never_beats_unadjusted_p() -> None:
     result = selection_adjusted_max_signflip(search)
     assert result["selected_feature"] == "stable"
     assert result["candidate_gate_count_including_none"] == 3
+    assert result["selection_adjusted_p_value"] >= result["selected_unadjusted"]["p_value"]
+
+
+def test_side_selection_adjustment_preserves_two_sided_as_zero_delta() -> None:
+    periods = ("2023H1", "2023H2", "2024H1", "2024H2")
+    rows = []
+    for variant, values in (
+        ("v9_two_sided", (10.0, 20.0, 30.0, 40.0)),
+        ("v9_long_only", (20.0, 35.0, 50.0, 55.0)),
+        ("v9_short_only", (0.0, 5.0, 10.0, 20.0)),
+    ):
+        for period, value in zip(periods, values):
+            rows.append(
+                {
+                    "variant": variant,
+                    "period": period,
+                    "project_net_bp_per_trade": value,
+                }
+            )
+    result = selection_adjusted_side_signflip(pd.DataFrame(rows))
+    assert result["selected_policy"] == "v9_long_only"
+    assert result["candidate_direction_policies"] == 3
     assert result["selection_adjusted_p_value"] >= result["selected_unadjusted"]["p_value"]
