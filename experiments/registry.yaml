@@ -448,7 +448,7 @@ experiments:
 
   - experiment_id: exp-pine-eth-15m-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "330d0bcce5bfbcf5e66f378260811f96a770ea0a"
+    source_commit: "919624f076132434f44acebc034a7633022f9dd4"
     status: inconclusive
     question: >-
       Can the user-supplied ALLIN-V7.2 strategy be frozen as a causal
@@ -462,9 +462,9 @@ experiments:
     result: >-
       research_candidate_with_material_statistical_caveats. Frozen V9 has 110
       final-preholdout trades, +30.22 bp/trade after 20 bp cost, PF 1.366,
-      +22.82% return and 20.07% bar-close drawdown at 1% stop risk. It fails the
+      +22.82% return and 20.03% bar-close drawdown at 1% stop risk. It fails the
       p<0.01 gate and becomes negative without its largest winner. V10 improves
-      the historical point estimate to +41.22 bp/trade and 13.50% drawdown;
+      the historical point estimate to +41.22 bp/trade and 13.56% drawdown;
       V11 reaches +63.39 bp/trade, but both are post-selection, tail-dependent
       and forward-only. Actual short-window 10m/15m comparison is adverse to
       V9. Only 4/276 V9 entries satisfy project strict density semantics, so the
