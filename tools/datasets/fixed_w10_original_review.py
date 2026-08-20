@@ -27,7 +27,7 @@ from yoyo.datasets.fixed_w10_original_review import (
 
 DEFAULT_DATASET = PROJECT / "datasets" / "fixed_w10_core4_confirm1_v1"
 DEFAULT_PACK = DEFAULT_DATASET / "review" / "original_source_triage_v1"
-DEFAULT_LEGACY_YOYO = PROJECT.parent / "yoyo-trading"
+DEFAULT_ARCHIVE = PROJECT / "archive" / "consolidated"
 
 
 def parser() -> argparse.ArgumentParser:
@@ -35,7 +35,7 @@ def parser() -> argparse.ArgumentParser:
     sub = ap.add_subparsers(dest="command", required=True)
     build = sub.add_parser("build", help="resolve all original images and build the page")
     build.add_argument("--project-root", type=Path, default=PROJECT)
-    build.add_argument("--legacy-yoyo-root", type=Path, default=DEFAULT_LEGACY_YOYO)
+    build.add_argument("--archive-root", type=Path, default=DEFAULT_ARCHIVE)
     build.add_argument("--dataset-root", type=Path, default=DEFAULT_DATASET)
     build.add_argument("--pack-root", type=Path, default=DEFAULT_PACK)
     build.add_argument("--seed", type=int, default=DEFAULT_SEED)
@@ -51,7 +51,7 @@ def main() -> int:
     if args.command == "build":
         result = build_original_review(
             args.project_root,
-            args.legacy_yoyo_root,
+            args.archive_root,
             args.dataset_root,
             args.pack_root,
             seed=args.seed,

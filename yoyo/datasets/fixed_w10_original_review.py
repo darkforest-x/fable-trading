@@ -84,12 +84,33 @@ def _verify_image(path: Path, expected_sha256: str | None, *, role: str) -> dict
     }
 
 
+def _find_one_archived_dataset(archive_root: Path, dataset_name: str) -> Path:
+    """Find one consolidated bulk dataset without reaching into a sibling repo.
+
+    The archive lives inside this repository.  Repository names are deliberately
+    not part of this contract: the dataset directory is the stable asset key.
+    """
+
+    archive_root = archive_root.resolve()
+    matches = sorted(
+        path.resolve()
+        for path in archive_root.glob(f"*/datasets/{dataset_name}")
+        if path.is_dir()
+    )
+    if len(matches) != 1:
+        raise AuditBuildError(
+            f"expected exactly one archived dataset {dataset_name!r} under "
+            f"{archive_root}, found {len(matches)}: {matches}"
+        )
+    return matches[0]
+
+
 class OriginalSourceCatalog:
     """Resolve final Gold rows back to the image the Owner originally saw."""
 
-    def __init__(self, project_root: Path, legacy_yoyo_root: Path):
+    def __init__(self, project_root: Path, archive_root: Path):
         self.project_root = project_root.resolve()
-        self.legacy_yoyo_root = legacy_yoyo_root.resolve()
+        self.archive_root = archive_root.resolve()
 
         owner_root = self.project_root / "datasets" / "owner_short_gold_center_v1"
         self.owner_positive = _index(
@@ -106,15 +127,21 @@ class OriginalSourceCatalog:
         self.owner_sheet = _csv_index(self.owner_sheet_root / "review_sheet.csv", "box_id")
 
         v32_path = (
-            self.legacy_yoyo_root
+            self.project_root
             / "datasets"
-            / "dataset_v3_2_reviewed_core_v1"
-            / "manifest.jsonl"
+            / "manifests"
+            / "dataset_v3_2_reviewed_core_v1_rows.jsonl"
         )
         self.v32 = _index(read_jsonl(v32_path), "sample_id", source=v32_path)
+        self.v32_root = _find_one_archived_dataset(
+            self.archive_root, "dataset_v3_2_reviewed_core_v1"
+        )
 
-        gold_path = self.legacy_yoyo_root / "datasets" / "gold_v1.jsonl"
+        gold_path = self.project_root / "datasets" / "annotations" / "gold_v1.jsonl"
         self.gold_8768 = _index(read_jsonl(gold_path), "gold_id", source=gold_path)
+        self.gold_render_root = _find_one_archived_dataset(
+            self.archive_root, "gold_labelstudio_v1"
+        ) / "images"
 
         semantic_path = (
             self.project_root
@@ -174,22 +201,30 @@ class OriginalSourceCatalog:
         elif "dataset_v3_2_reviewed_core_v1" in source_dataset:
             source_kind = "reviewed_v3_2_source_render"
             source_record = self._get(self.v32, source_id, source_kind)
+            image_path = Path(source_record["image_path"])
+            try:
+                image_rel = image_path.relative_to(
+                    Path("datasets") / "dataset_v3_2_reviewed_core_v1"
+                )
+            except ValueError as exc:
+                raise AuditBuildError(
+                    f"reviewed V3.2 source path escaped its dataset: {image_path}"
+                ) from exc
             primary = _verify_image(
-                _path(self.legacy_yoyo_root, source_record["image_path"]),
+                self.v32_root / image_rel,
                 source_record.get("image_sha256"),
                 role="reviewed V3.2 source image",
             )
         elif source_dataset.endswith("/gold_v1.jsonl"):
             source_kind = "owner_8768_context_and_local"
             source_record = self._get(self.gold_8768, source_id, source_kind)
-            render_root = self.legacy_yoyo_root / "datasets" / "gold_labelstudio_v1" / "images"
             primary = _verify_image(
-                render_root / "context" / f"{source_id}.png",
+                self.gold_render_root / "context" / f"{source_id}.png",
                 source_record.get("context_image_sha256"),
                 role="8768 context image",
             )
             reference = _verify_image(
-                render_root / "local" / f"{source_id}.png",
+                self.gold_render_root / "local" / f"{source_id}.png",
                 source_record.get("local_image_sha256"),
                 role="8768 local image",
             )
@@ -490,7 +525,7 @@ def build_pack_from_resolved(
 
 def build_original_review(
     project_root: Path,
-    legacy_yoyo_root: Path,
+    archive_root: Path,
     dataset_root: Path,
     pack_root: Path,
     *,
@@ -500,7 +535,7 @@ def build_original_review(
 
     validated = validate_dataset(dataset_root)
     events = validated["events"]
-    catalog = OriginalSourceCatalog(project_root, legacy_yoyo_root)
+    catalog = OriginalSourceCatalog(project_root, archive_root)
     resolved = [catalog.resolve(event) for event in events]
     if len(resolved) != 2649:
         raise AuditBuildError(f"expected 2,649 original rows, got {len(resolved)}")
@@ -514,7 +549,7 @@ def build_original_review(
         {
             "dataset_root": str(Path(dataset_root).resolve()),
             "project_root": str(Path(project_root).resolve()),
-            "legacy_yoyo_root": str(Path(legacy_yoyo_root).resolve()),
+            "archive_root": str(Path(archive_root).resolve()),
             "generator_commit": git_head(Path(project_root)),
         }
     )
