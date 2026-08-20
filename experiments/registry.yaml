@@ -312,6 +312,37 @@ experiments:
       so the count survives the merge, and is NOT re-read by anything in this
       task. reuse_allowed is false: the window is burned for this configuration.
 
+
+  # ==========================================================================
+  # P1 — Gold Dataset：解开 training_eligible 的那个未知数
+  # ==========================================================================
+  - experiment_id: exp-p1-gold-label-quality-cleanlab-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d0450ea6dc49669fce36310c37e29938b905aa34"
+    status: active
+    question: >-
+      固定 W10 金标的标签错误率是多少？协议 17.6 要求一个 DIRECT 抽检错误率，
+      迁移产出 DIRECT=0，所以这个数至今未知——而它是 training_eligible 卡在
+      false 的唯一原因（其余门全过）。用 confident learning 从已训分类器的
+      样本外预测里估计它，而不是靠人工抽样猜。
+    single_variable: n/a —— 测量，不是实验臂
+    result: in_progress
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_gold_label_quality_20260820.md
+    artifacts:
+      - yoyo-trading-dataset-v3-gold-core
+    reuse_allowed: true
+    notes: >-
+      只推理不训练：用 2026-08-13 从 3060 取回的冻结权重
+      （sha256 18bcb5988e6dd36bdf2fc8a1a22d3ad66ab78b777a1d02c88080c937e98d0541，
+      与 backtest_fixed_w10_cls_holdout3d.py 的 EXPECTED_WEIGHTS_SHA256 一致）
+      在 val+test 上跑一遍。**test(450) 才是真样本外**——val(350) 被用于早停，
+      模型通过模型选择间接看过它的标签，两者必须分开报告。
+      不读 holdout：金标行 holdout_read 全为 false，W10 数据集止于 pre-holdout。
+      本实验产出一个数字，**不改变 training_eligible**——那是 owner 决策。
+
   - experiment_id: exp-consolidation-single-repo-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "59e13a61c43e1e72f397f38985fd8c700533550b"
