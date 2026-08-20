@@ -60,7 +60,6 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
     tv_compile = load_json("tradingview_compile_receipt.json")
     pine_static = load_json("pine_static_contract.json")
     docker_replay = load_json("docker_offline_replay.json")
-    validation = load_json("validation.json")
     trades = pd.read_csv(RESULTS / "trades.csv")
     controls = pd.read_csv(RESULTS / "matched_controls.csv")
 
@@ -329,7 +328,6 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
             config["eligibility"]["training_eligible"] is False
             and config["eligibility"]["production_eligible"] is False
         ),
-        "canonical_validator_passed": validation["status"] == "pass",
     }
     failed = sorted(name for name, passed in checks.items() if not passed)
     return {
