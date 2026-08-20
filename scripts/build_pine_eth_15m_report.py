@@ -88,6 +88,7 @@ def load_evidence() -> dict[str, Any]:
         "stateful_gate": json.loads((RESULTS / "stateful_gate_static_vs_dynamic.json").read_text(encoding="utf-8")),
         "selection_risk": json.loads((RESULTS / "selection_risk_audit.json").read_text(encoding="utf-8")),
         "density_overlap": json.loads((RESULTS / "density_overlap_audit.json").read_text(encoding="utf-8")),
+        "migration_audit": json.loads((RESULTS / "migration_audit.json").read_text(encoding="utf-8")),
         "pine_static": json.loads((RESULTS / "pine_static_contract.json").read_text(encoding="utf-8")),
         "validation": validation,
         "split": pd.read_csv(RESULTS / "split_summary.csv"),
@@ -168,6 +169,7 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
     stateful_gate = evidence["stateful_gate"]
     selection_risk = evidence["selection_risk"]
     density_overlap = evidence["density_overlap"]
+    migration_audit = evidence["migration_audit"]
     pine_static = evidence["pine_static"]
     validation = evidence["validation"]
     split = evidence["split"]
@@ -525,6 +527,22 @@ TradingView 的 `ETHUSDT.P` 必须再明确具体交易所后做逐笔导出对�
 - 完成 bar 达到 +1.5% 后，下一 bar 起锁 +0.1%；trailing 关闭；
 - opposite signal 单次反转，legacy 03:00/周四仓位倍增关闭；
 - 仓位默认每笔止损风险 1%，13x 只是上限，final 实际最大杠杆 {_fmt(v9['max_leverage'])}x。
+
+### 从用户原 V7.2 到 V9 修了什么
+
+原附件 SHA-256 与配置完全一致，迁移静态账本 **{migration_audit['check_count']}/{migration_audit['check_count']}**
+通过。保留的 alpha 祖先是 SMA10/60 crossover、EMA100、ATR14、原振荡器、时间/周日意图和盈利后 cooldown；
+真正的 alpha 改动只有 `slow_slope_12` 与 oscillator `0.2 → 0.1`。执行层则做了这些必要修复：
+
+- 显式单边 0.10% commission 与 0 slippage，关闭 `calc_on_every_tick` / fill recalc / bar magnifier；
+- 固定 4x、03:00 和周四加仓改成按初始止损距离的 1% 风险仓位；
+- 初始止损从 signal close 改为 next-open 实际 fill 锚定；
+- 删除 `strategy.entry` 反转后又 `strategy.close` 的重复订单路径；
+- 时间过滤改为明确 `Asia/Hong_Kong`，并增加 900 秒、ETH base、日期和 confirmed-bar 守卫；
+- percentile 分母从“仅不等于 0”改为 `not na and > 0` fail-closed。
+
+这些修复让回测口径可审计，但不等于 alpha 增强。仍未解决的两项是：TradingView 编译/导出逐笔 parity，
+以及 +0.1% 锁盈在 0.2% 往返成本后仍是 -0.1%。
 
 ### 10m 改到 15m 到底改变了什么
 
@@ -955,6 +973,7 @@ PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_judgment_signal.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_selection_risk.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_density_overlap.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_stateful_gate.py
+PYTHONPATH=. .venv/bin/python scripts/audit_pine_eth_15m_migration.py
 PYTHONPATH=. .venv/bin/python scripts/audit_pine_eth_15m_static_contract.py
 PYTHONPATH=. .venv/bin/python scripts/design_pine_eth_15m_paper_protocol.py
 PYTHONPATH=. python3 scripts/reconcile_pine_eth_15m_backtesting.py

@@ -92,6 +92,9 @@ def main() -> int:
     density_overlap = json.loads(
         (RESULTS / "density_overlap_audit.json").read_text(encoding="utf-8")
     )
+    migration_audit = json.loads(
+        (RESULTS / "migration_audit.json").read_text(encoding="utf-8")
+    )
     pine_static = json.loads(
         (RESULTS / "pine_static_contract.json").read_text(encoding="utf-8")
     )
@@ -443,6 +446,18 @@ def main() -> int:
         and density_overlap["training_eligible"] is False
         and density_overlap["production_eligible"] is False
     )
+    checks["original_to_v9_migration_is_hashed_and_execution_safe"] = bool(
+        migration_audit["status"] == "pass"
+        and migration_audit["check_count"] == 16
+        and not migration_audit["failed"]
+        and migration_audit["source_attachment_sha256"]
+        == config["source_attachment_sha256"]
+        and migration_audit["market_rows_read"] == 0
+        and migration_audit["holdout_rows_read"] == 0
+        and migration_audit["barrier_parameters_changed"] is False
+        and migration_audit["tradingview_parity_passed"] is False
+        and migration_audit["production_eligible"] is False
+    )
     tv_template = EXPERIMENT / "tradingview/trades_normalized.template.csv"
     checks["pine_static_contract_passes_and_tv_parity_harness_is_pending"] = bool(
         pine_static["status"] == "pass"
@@ -457,7 +472,7 @@ def main() -> int:
     )
     checks["offline_docker_artifact_smoke_passed_without_overclaim"] = bool(
         docker_smoke["status"] == "pass"
-        and docker_smoke["count"] == 35
+        and docker_smoke["count"] == 36
         and docker_smoke["runtime_label"] == "offline-local-label-studio-image"
         and docker_smoke["pinned_docker_recipe_built"] is False
         and docker_smoke["tradingview_parity_passed"] is False

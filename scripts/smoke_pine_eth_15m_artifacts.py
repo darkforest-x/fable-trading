@@ -54,6 +54,7 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
     stateful_gate = load_json("stateful_gate_static_vs_dynamic.json")
     selection_risk = load_json("selection_risk_audit.json")
     density_overlap = load_json("density_overlap_audit.json")
+    migration_audit = load_json("migration_audit.json")
     pine_static = load_json("pine_static_contract.json")
     docker_replay = load_json("docker_offline_replay.json")
     validation = load_json("validation.json")
@@ -235,6 +236,15 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
             and density_overlap["overall"]["expanded_overlap"] == 29
             and density_overlap["training_eligible"] is False
             and density_overlap["production_eligible"] is False
+        ),
+        "migration_audit_hashes_original_and_keeps_limits_visible": bool(
+            migration_audit["status"] == "pass"
+            and migration_audit["check_count"] == 16
+            and not migration_audit["failed"]
+            and migration_audit["source_attachment_sha256"]
+            == config["source_attachment_sha256"]
+            and migration_audit["barrier_parameters_changed"] is False
+            and migration_audit["tradingview_parity_passed"] is False
         ),
         "pine_static_contract_passes_without_compiler_claim": bool(
             pine_static["status"] == "pass"

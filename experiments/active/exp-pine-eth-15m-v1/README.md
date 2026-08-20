@@ -5,6 +5,13 @@ from the user-supplied ALLIN-V7.2 script.  It uses the bounded OKX
 `ETH-USDT-SWAP` 15m series as the local research proxy and stops at
 `2026-03-01T00:00:00Z`, 64 days before the repository holdout.
 
+The supplied V7.2 attachment is hash-verified in `migration_audit.json`.
+Sixteen static migration checks record the execution fixes: explicit cost and
+slippage, close-only calculation, risk sizing instead of fixed 4x/time boosts,
+fill-anchored stops, one reversal path, explicit Hong Kong time, and fail-closed
+15m/ETH/date/percentile guards.  The audit also keeps the unresolved
+cost-underwater break-even and missing TradingView parity visible.
+
 The selected V9 candidate keeps the V7 SMA10/SMA60 crossover, EMA100 regime,
 ATR14 stop and oscillator construction.  It makes two alpha changes selected
 in temporal development blocks: the existing project feature
