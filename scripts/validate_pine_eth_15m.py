@@ -89,6 +89,9 @@ def main() -> int:
     selection_risk = json.loads(
         (RESULTS / "selection_risk_audit.json").read_text(encoding="utf-8")
     )
+    density_overlap = json.loads(
+        (RESULTS / "density_overlap_audit.json").read_text(encoding="utf-8")
+    )
     pine_static = json.loads(
         (RESULTS / "pine_static_contract.json").read_text(encoding="utf-8")
     )
@@ -423,6 +426,23 @@ def main() -> int:
         and selection_risk["training_eligible"] is False
         and selection_risk["production_eligible"] is False
     )
+    checks["density_overlap_disproves_semantic_equivalence_without_new_gate"] = bool(
+        density_overlap["data_quality"]["holdout_rows_read"] == 0
+        and density_overlap["overall"]["trades"] == 276
+        and density_overlap["overall"]["strict_overlap"] == 4
+        and density_overlap["overall"]["expanded_overlap"] == 29
+        and density_overlap["splits"]["final_preholdout_2025_202602"]
+        ["strict_overlap"]
+        == 1
+        and all(
+            row["circular_shift_null"]["strict"]
+            ["exact_circular_shift_p_enrichment"]
+            >= 0.01
+            for row in density_overlap["splits"].values()
+        )
+        and density_overlap["training_eligible"] is False
+        and density_overlap["production_eligible"] is False
+    )
     tv_template = EXPERIMENT / "tradingview/trades_normalized.template.csv"
     checks["pine_static_contract_passes_and_tv_parity_harness_is_pending"] = bool(
         pine_static["status"] == "pass"
@@ -437,7 +457,7 @@ def main() -> int:
     )
     checks["offline_docker_artifact_smoke_passed_without_overclaim"] = bool(
         docker_smoke["status"] == "pass"
-        and docker_smoke["count"] == 34
+        and docker_smoke["count"] == 35
         and docker_smoke["runtime_label"] == "offline-local-label-studio-image"
         and docker_smoke["pinned_docker_recipe_built"] is False
         and docker_smoke["tradingview_parity_passed"] is False

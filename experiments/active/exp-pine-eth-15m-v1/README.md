@@ -27,6 +27,15 @@ first stage positive in all four halves.  This is evidence for a sparse
 trend-aligned crossover, not evidence that a strict moving-average-density
 shape has been learned.
 
+That semantic distinction is now measured directly.  Across the 276 V9
+executions in 2023 through February 2026, only 4 (1.45%) satisfy the project's
+unchanged strict EMA8/13/21/34/55 plus EMA144/200 density mask, and only 29
+(10.50%) satisfy the expanded mask.  The final period has 1/110 strict
+overlaps.  Exact within-split circular time-shift nulls find no strict-density
+enrichment in any split.  Pine V9 and Local Signal V2 therefore share a
+research motivation, not candidate semantics; the old judgment model cannot
+be reused as if their rows were interchangeable.
+
 The volume gate was selected again in all three incremental prequential
 feature replays, but the exact three-block sign-flip p-value is 0.125 and the
 18-gate selection-adjusted max-stat p-value is 0.50.  It remains a useful

@@ -75,6 +75,7 @@ def load_evidence() -> dict[str, Any]:
         "judgment_signal": json.loads((RESULTS / "judgment_signal_audit.json").read_text(encoding="utf-8")),
         "stateful_gate": json.loads((RESULTS / "stateful_gate_static_vs_dynamic.json").read_text(encoding="utf-8")),
         "selection_risk": json.loads((RESULTS / "selection_risk_audit.json").read_text(encoding="utf-8")),
+        "density_overlap": json.loads((RESULTS / "density_overlap_audit.json").read_text(encoding="utf-8")),
         "pine_static": json.loads((RESULTS / "pine_static_contract.json").read_text(encoding="utf-8")),
         "validation": validation,
         "split": pd.read_csv(RESULTS / "split_summary.csv"),
@@ -153,6 +154,7 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
     )
     stateful_gate = evidence["stateful_gate"]
     selection_risk = evidence["selection_risk"]
+    density_overlap = evidence["density_overlap"]
     pine_static = evidence["pine_static"]
     validation = evidence["validation"]
     split = evidence["split"]
@@ -160,6 +162,19 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
     timeframe = evidence["timeframe"]
     threshold = evidence["threshold"].groupby("threshold", as_index=False).first()
     feature_search = evidence["feature_search"].groupby("feature_filter", as_index=False).first()
+
+    density_rows = [
+        [
+            name,
+            _fmt(row["trades"], 0),
+            f"{row['strict_overlap']}/{row['trades']} ({_fmt(row['strict_overlap_rate'] * 100)}%)",
+            f"{row['expanded_overlap']}/{row['trades']} ({_fmt(row['expanded_overlap_rate'] * 100)}%)",
+            _fmt(row["ma_spread_bp_median"]),
+            _fmt(row["circular_shift_null"]["strict"]["exact_circular_shift_p_enrichment"], 4),
+            _fmt(row["circular_shift_null"]["expanded"]["exact_circular_shift_p_enrichment"], 4),
+        ]
+        for name, row in density_overlap["splits"].items()
+    ]
 
     actual_timeframe_rows = [
         [
@@ -458,6 +473,10 @@ TradingView 的 `ETHUSDT.P` 必须再明确具体交易所后做逐笔导出对�
    {regime_stability['absolute_net_equal_block_test']['positive_blocks']}/9 为正，但绝对净收益/匹配超额
    精确 p 分别为 {_fmt(regime_stability['absolute_net_equal_block_test']['one_sided_p_value'], 4)} /
    {_fmt(regime_stability['matched_excess_equal_block_test']['one_sided_p_value'], 4)}，仍未到 0.01。
+10. “与项目同源”不等于同一信号：276 笔 V9 入场仅
+    {density_overlap['overall']['strict_overlap']} 笔（{_fmt(density_overlap['overall']['strict_overlap_rate'] * 100)}%）
+    满足项目严格 EMA ribbon density，扩展口径也只有
+    {density_overlap['overall']['expanded_overlap']} 笔（{_fmt(density_overlap['overall']['expanded_overlap_rate'] * 100)}%）。
 
 因此，**V9 是最后一个在 final 前锁定的 15m 研究基线；V10（成交量门）和 V11（只开多）
 是互不叠加的下一步 paper A/B 候选。三者都不能上线。**
@@ -550,6 +569,24 @@ V9 的 backcast 点估计和匹配超额为正，但 `p={_fmt(backcast['variants
 是第一个产生正加权期望的组件，但仍有一个半年为负。振荡器方向继续降噪，最终 `±0.1`
 门才让四块都为正。因此当前核心应理解为**趋势方向一致后的稀疏交叉触发**，而不是已经验证的
 “均线密集形态”。这也解释了为什么把严格 ribbon density 强塞进去反而不稳定。
+
+为了把“同源”从口头判断变成可检验语义，本轮把每笔 V9 的 signal bar 映射到项目现有、未经修改的
+EMA8/13/21/34/55 + EMA144/200 strict / expanded 密集规则：
+
+{markdown_table(['时期', 'V9 笔数', 'strict 重合', 'expanded 重合', 'MA spread 中位 bp', 'strict 移位 p', 'expanded 移位 p'], density_rows)}
+
+全时期只有 {density_overlap['overall']['strict_overlap']}/{density_overlap['overall']['trades']}
+笔满足 strict，final 更只有
+{density_overlap['splits']['final_preholdout_2025_202602']['strict_overlap']}/
+{density_overlap['splits']['final_preholdout_2025_202602']['trades']}；V9 signal bar 的五条快 EMA spread
+中位数为 {_fmt(density_overlap['overall']['ma_spread_bp_median'])} bp，高于 strict 的
+{_fmt(density_overlap['overall']['strict_fast_spread_threshold_bp'])} bp。每个时期都穷举 signal path
+相对 density mask 的所有循环时间移位；strict 三段均没有富集（p 都远高于 0.01）。2023 expanded
+重合虽有 p={_fmt(density_overlap['splits']['discovery_2023']['circular_shift_null']['expanded']['exact_circular_shift_p_enrichment'], 4)}，
+但 2024 / final 未复现，且这是事后语义诊断，不是可加到 V9 的 gate。
+
+所以答案是：两者共享“均线结构后启动”的研究祖先，但**当前 Pine 与 Local Signal V2 的事件定义不同**。
+旧 L2 的候选池、标签与密集特征分布不能直接当成 V9 的判断层训练集。
 
 方向 eligibility 作为另一个单变量，只在开发段比较：
 
@@ -901,6 +938,9 @@ PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_regime_stability.py
 PYTHONPATH=. .venv/bin/python scripts/generate_pine_eth_15m_paper_variants.py
 PYTHONPATH=. .venv/bin/python scripts/prepare_pine_eth_15m_judgment_research.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_judgment_feasibility.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_judgment_signal.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_selection_risk.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_density_overlap.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_stateful_gate.py
 PYTHONPATH=. .venv/bin/python scripts/audit_pine_eth_15m_static_contract.py
 PYTHONPATH=. .venv/bin/python scripts/design_pine_eth_15m_paper_protocol.py

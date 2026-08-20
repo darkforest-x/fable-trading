@@ -53,6 +53,7 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
     judgment_signal = load_json("judgment_signal_audit.json")
     stateful_gate = load_json("stateful_gate_static_vs_dynamic.json")
     selection_risk = load_json("selection_risk_audit.json")
+    density_overlap = load_json("density_overlap_audit.json")
     pine_static = load_json("pine_static_contract.json")
     docker_replay = load_json("docker_offline_replay.json")
     validation = load_json("validation.json")
@@ -226,6 +227,14 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
             and selection_risk["exact_global_max_stat"]["selection_adjusted_p_value"]
             >= 0.01
             and selection_risk["production_eligible"] is False
+        ),
+        "density_overlap_keeps_pine_and_project_semantics_distinct": bool(
+            density_overlap["data_quality"]["holdout_rows_read"] == 0
+            and density_overlap["overall"]["trades"] == 276
+            and density_overlap["overall"]["strict_overlap"] == 4
+            and density_overlap["overall"]["expanded_overlap"] == 29
+            and density_overlap["training_eligible"] is False
+            and density_overlap["production_eligible"] is False
         ),
         "pine_static_contract_passes_without_compiler_claim": bool(
             pine_static["status"] == "pass"
