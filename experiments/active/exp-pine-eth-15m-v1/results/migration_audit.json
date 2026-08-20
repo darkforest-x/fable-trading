@@ -45,7 +45,7 @@
     "confirmed close, 15m/ETH/date guards and explicit HK timezone"
   ],
   "known_unresolved_semantics": [
-    "TradingView compilation/export parity has not passed",
+    "TradingView official compilation passed in a separate receipt; historical trade-export parity has not passed",
     "the configured +0.1% break-even lock remains -0.1% after 0.2% round-trip cost",
     "OKX proxy bars are not asserted equal to an unspecified TradingView ETHUSDT.P venue"
   ],
@@ -53,6 +53,7 @@
   "holdout_rows_read": 0,
   "barrier_parameters_changed": false,
   "training_or_scoring_performed": false,
+  "official_pine_compiler_run": true,
   "tradingview_parity_passed": false,
   "production_eligible": false
 }

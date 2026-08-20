@@ -6,7 +6,9 @@
   "forward_log_written": false,
   "live_or_paper_order_sent": false,
   "blocked": true,
-  "blocking_gate": "venue-specific TradingView compile plus 110-trade signal/entry/exit/fee ledger parity has not passed",
+  "blocking_gate": "official compilation passed, but historical TradingView trade export and 110-trade signal/entry/exit/fee ledger parity have not passed",
+  "official_pine_compiler_run": true,
+  "compiled_source_sha256": "6465fa80f89907b2ed584085960f355f331de62e3c38ebf65f3065c57873dfe9",
   "tradingview_parity_passed": false,
   "forward_eligible": false,
   "paper_risk_profile": {
@@ -69,7 +71,7 @@
     "tradingview_parity_passed": false
   },
   "owner_decisions_required_before_start": [
-    "select the exact TradingView ETH perpetual venue and export its ledger",
+    "provide a TradingView plan/session that can export the 2025-01 through 2026-02 historical ledger",
     "approve paper collection after parity passes",
     "approve any change to break-even, TP/SL, ATR floor, or cost assumptions separately"
   ]
