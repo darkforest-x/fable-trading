@@ -45,6 +45,8 @@ def main() -> int:
     statistics = json.loads((RESULTS / "statistical_tests.json").read_text(encoding="utf-8"))
     feature_contract = json.loads((RESULTS / "feature_contract.json").read_text(encoding="utf-8"))
     framework = json.loads((RESULTS / "backtesting_reconciliation.json").read_text(encoding="utf-8"))
+    intrabar = json.loads((RESULTS / "intrabar_3m_reconciliation.json").read_text(encoding="utf-8"))
+    robustness = json.loads((RESULTS / "robustness_checks.json").read_text(encoding="utf-8"))
     trades = pd.read_csv(
         RESULTS / "trades.csv",
         parse_dates=["signal_time", "entry_time", "exit_time"],
@@ -141,6 +143,48 @@ def main() -> int:
         and framework["max_unit_return_error_bp"] < 0.01
     )
     checks["tradingview_parity_still_false"] = framework["tradingview_parity_passed"] is False
+    checks["intrabar_3m_prefix_is_bounded_and_gapless"] = bool(
+        intrabar["data_quality"]["holdout_rows_read"] == 0
+        and intrabar["data_quality"]["non_3m_gaps"] == 0
+        and intrabar["data_quality"]["duplicate_timestamps"] == 0
+        and intrabar["data_quality"]["full_file_hash_intentionally_omitted"] is True
+    )
+    parent = intrabar["parent_bar_reconstruction"]
+    checks["intrabar_3m_exactly_reconstructs_15m_ohlc"] = bool(
+        parent["joined_15m_bars"] == parent["expected_15m_bars"] == 40_704
+        and parent["parents_with_exactly_five_subbars"] == 40_704
+        and not any(parent["ohlc_mismatch_count"].values())
+    )
+    checks["intrabar_3m_exit_reconciliation_passed"] = bool(
+        intrabar["canonical_trade_count"] == 110
+        and intrabar["same_15m_exit_parent_count"] == 110
+        and intrabar["exact_exit_price_count"] == 110
+        and intrabar["maximum_absolute_net_return_delta_bp"] < 0.01
+        and intrabar["tradingview_bar_magnifier_parity_passed"] is False
+    )
+    checks["accidental_holdout_preview_is_disclosed_but_not_used"] = bool(
+        intrabar["operational_incident"]["post_holdout_rows_used_in_any_calculation"] == 0
+        and "two post-holdout raw 3m rows" in intrabar["operational_incident"]["note"]
+    )
+    core = robustness["core_component_aggregate"]
+    checks["core_ablation_is_development_only_and_nested"] = bool(
+        robustness["final_preholdout_rows_read"] == 0
+        and robustness["holdout_rows_read"] == 0
+        and [row["component_order"] for row in core] == list(range(5))
+        and core[0]["positive_blocks"] == 0
+        and core[-1]["positive_blocks"] == 4
+        and core[-1]["minimum_block_net_bp"] > 0.0
+    )
+    prequential = robustness["prequential_feature_replay"]
+    adjusted = robustness["selection_adjusted_feature_test"]
+    checks["feature_gate_prequential_result_keeps_failure_visible"] = bool(
+        prequential["test_blocks"] == 3
+        and prequential["same_feature_selected_every_step"] is True
+        and prequential["positive_increment_blocks"] == 3
+        and prequential["increment_exact_signflip"]["p_value"] >= 0.01
+        and adjusted["candidate_gate_count_including_none"] == 18
+        and adjusted["selection_adjusted_p_value"] >= 0.01
+    )
     checks["l2_export_exact_and_training_blocked"] = bool(
         len(feature_contract["project_l2_features"]) == 28
         and feature_contract["training_eligible"] is False
@@ -185,6 +229,7 @@ def main() -> int:
             "v9_final_trades": int(len(final_v9)),
             "v9_controls": int(len(controls)),
             "v10_controls": int(len(v10_controls)),
+            "intrabar_3m_rows": int(intrabar["data_quality"]["rows"]),
         },
         "assessment": "research_candidate_with_material_statistical_caveats" if not failed else "needs_revision",
         "holdout_consumed": False,

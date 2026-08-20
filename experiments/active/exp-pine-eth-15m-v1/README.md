@@ -19,6 +19,19 @@ it is post-selection, more tail-concentrated, and not independent OOS evidence.
 V9 remains the last candidate whose two alpha changes were locked before its
 single final-preholdout evaluation.
 
+A development-only nested ablation shows where that improvement comes from.
+SMA10/60 cross-only and cross-plus-EMA100 were negative after cost in every
+2023/2024 half-year.  EMA200 slope12 created the first positive weighted
+expectancy, oscillator direction reduced noise, and the 0.1 threshold was the
+first stage positive in all four halves.  This is evidence for a sparse
+trend-aligned crossover, not evidence that a strict moving-average-density
+shape has been learned.
+
+The volume gate was selected again in all three incremental prequential
+feature replays, but the exact three-block sign-flip p-value is 0.125 and the
+18-gate selection-adjusted max-stat p-value is 0.50.  It remains a useful
+paper-forward hypothesis, not a proven optimization.
+
 Important limitations:
 
 - `ETHUSDT.P` is a TradingView display convention, not a venue identity.  The
@@ -28,6 +41,10 @@ Important limitations:
   It is no longer an unseen OOS set for this strategy family.
 - No TradingView compile/export parity has passed.  Python results remain a
   translation diagnostic, not deployable broker-emulator evidence.
+- Ordered 3-minute replay on the same OKX feed reconstructs all 40,704 final
+  15-minute bars exactly and reconciles all 110 V9 exits and prices.  That
+  rejects hidden 15-minute aggregation optimism locally, but still is not
+  TradingView venue parity.
 - Matched controls use unique entry starts and split-contained exits.  Their
   return windows may overlap because multi-week trend holds otherwise make an
   exact same-regime control impossible; inference is therefore clustered by
@@ -36,15 +53,24 @@ Important limitations:
   feature table is explicitly training-ineligible while P0/P1 blocks training.
 - Nothing here changes `models/ACTIVE`, creates `active_bundle.json`, promotes,
   deploys, writes forward logs, or touches a live account.
+- An exploratory shell `tail` displayed two raw post-holdout 3-minute rows
+  before the bounded loader was written.  They were never loaded, scored, or
+  used in a strategy calculation.  The incident is retained in the report
+  because this repository records any holdout look, including an accidental
+  operational preview.
 
 ## Reproduce
 
 ```bash
 PYTHONPATH=. .venv/bin/python scripts/research_pine_eth_15m.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_robustness.py
 PYTHONPATH=. python3 scripts/reconcile_pine_eth_15m_backtesting.py
+PYTHONPATH=. python3 scripts/reconcile_pine_eth_15m_intrabar.py
 PYTHONPATH=. .venv/bin/python -m pytest -q \
   tests/test_pine_allin_v7_backtest.py \
-  tests/test_research_pine_eth_15m.py
+  tests/test_research_pine_eth_15m.py \
+  tests/test_reconcile_pine_eth_15m_intrabar.py \
+  tests/test_analyze_pine_eth_15m_robustness.py
 PYTHONPATH=. /tmp/fable-pine-eval-venv/bin/python scripts/build_pine_eth_15m_report.py
 PYTHONPATH=. .venv/bin/python scripts/md_to_html.py \
   analysis/p0_pine_eth_15m_v1_20260821.md --out-dir analysis/html

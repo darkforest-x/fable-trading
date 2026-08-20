@@ -56,6 +56,8 @@ def load_evidence() -> dict[str, Any]:
         "statistics": json.loads((RESULTS / "statistical_tests.json").read_text(encoding="utf-8")),
         "features": json.loads((RESULTS / "feature_contract.json").read_text(encoding="utf-8")),
         "framework": json.loads((RESULTS / "backtesting_reconciliation.json").read_text(encoding="utf-8")),
+        "intrabar": json.loads((RESULTS / "intrabar_3m_reconciliation.json").read_text(encoding="utf-8")),
+        "robustness": json.loads((RESULTS / "robustness_checks.json").read_text(encoding="utf-8")),
         "validation": validation,
         "split": pd.read_csv(RESULTS / "split_summary.csv"),
         "matrix": pd.read_csv(RESULTS / "experiment_matrix.csv"),
@@ -64,6 +66,8 @@ def load_evidence() -> dict[str, Any]:
         "slope": pd.read_csv(RESULTS / "slope_search.csv"),
         "trailing": pd.read_csv(RESULTS / "trailing_search.csv"),
         "feature_search": pd.read_csv(RESULTS / "feature_filter_search.csv"),
+        "core_ablation": pd.read_csv(RESULTS / "core_component_ablation.csv"),
+        "prequential": pd.read_csv(RESULTS / "prequential_feature_selection.csv"),
         "timeframe": pd.read_csv(RESULTS / "timeframe_rescale_ablation.csv"),
         "cost": pd.read_csv(RESULTS / "cost_sensitivity.csv"),
         "trades": pd.read_csv(RESULTS / "trades.csv", parse_dates=["entry_time", "exit_time"]),
@@ -106,12 +110,36 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
     summary = evidence["summary"]
     stats = evidence["statistics"]
     framework = evidence["framework"]
+    intrabar = evidence["intrabar"]
+    robustness = evidence["robustness"]
     validation = evidence["validation"]
     split = evidence["split"]
     risk = evidence["risk"]
     timeframe = evidence["timeframe"]
     threshold = evidence["threshold"].groupby("threshold", as_index=False).first()
     feature_search = evidence["feature_search"].groupby("feature_filter", as_index=False).first()
+
+    core_rows = [
+        [
+            row["variant"],
+            _fmt(int(row["trades"]), 0),
+            _fmt(row["minimum_block_net_bp"]),
+            _fmt(row["weighted_net_bp"]),
+            f"{int(row['positive_blocks'])}/4",
+        ]
+        for row in robustness["core_component_aggregate"]
+    ]
+    prequential_rows = [
+        [
+            row.selected_on_periods,
+            row.test_period,
+            row.selected_feature,
+            _fmt(row.selected_test_net_bp),
+            _fmt(row.baseline_test_net_bp),
+            _fmt(row.incremental_test_net_bp),
+        ]
+        for row in evidence["prequential"].itertuples(index=False)
+    ]
 
     periods = ["discovery_2023", "confirmation_2024", "final_preholdout_2025_202602"]
     comparison_rows = []
@@ -247,7 +275,7 @@ TradingView 的 `ETHUSDT.P` 必须再明确具体交易所后做逐笔导出对�
 | Discovery | 2023-01-01 → 2024-01-01 |
 | Confirmation | 2024-01-01 → 2025-01-01 |
 | Final-preholdout | 2025-01-01 → 2026-03-01（已消耗，今后不再称未见 OOS） |
-| Repository holdout | >= 2026-05-04；本轮读取 0 行、消耗 0 次 |
+| Repository holdout | >= 2026-05-04；策略计算读取 0 行、配置评估 0 次；另见下方意外预览披露 |
 
 所有特征只用信号 bar `t` 及以前数据；订单在 `t+1` 开盘成交。止损/标签才读取未来。
 正式成本固定为单边 0.10%，即往返 20 bp；没有滑点、资金费、强平和共享保证金模拟。
@@ -273,6 +301,19 @@ ATR14 和止损完全不动。结果：
 {markdown_table(['开发块', '笔数', '净 bp/笔', '资金收益 %', '15m DD %'], rescale_rows)}
 
 四块有两块净期望为负，所以拒绝等时长搬运；15m 版本应视为一个新的、较慢的固定策略。
+
+### 核心逻辑嵌套消融（只读 2023/2024）
+
+下面每一步只增加一个信号组件，执行、止损、仓位、冷却和 20 bp 成本完全不变：
+
+{markdown_table(['信号阶段', '总笔数', '最差半年 bp', '加权 bp', '正半年'], core_rows)}
+
+![Nested core component ablation](../experiments/active/exp-pine-eth-15m-v1/results/charts/core_component_ablation.png)
+
+单纯 SMA10/60 crossover 和再加 EMA100 的四个开发半年全部成本后为负；`EMA200 slope12`
+是第一个产生正加权期望的组件，但仍有一个半年为负。振荡器方向继续降噪，最终 `±0.1`
+门才让四块都为正。因此当前核心应理解为**趋势方向一致后的稀疏交叉触发**，而不是已经验证的
+“均线密集形态”。这也解释了为什么把严格 ribbon density 强塞进去反而不稳定。
 
 ## Results
 
@@ -312,7 +353,20 @@ oscillator 阈值只在 2023/2024 搜索；`0.1` 与 `0.15` 形成稳定平台�
 
 {markdown_table(['单特征门', '示例块笔数', '最差半年 bp', '四块加权 bp', '选择'], feature_rows)}
 
-`vol_ratio_mean8 >= 1` 的 V10 虽改善历史点估计和回撤，但 final 已污染、尾部更集中，不能冒充验证成功。
+增量 prequential 检查每次只用已经结束的半年选 gate，再测紧接着的下半年：
+
+{markdown_table(['选择所用历史块', '下一测试块', '选中 gate', 'gate bp', 'V9 bp', '增量 bp'], prequential_rows)}
+
+三次都选中 `vol_ratio_mean8 >= 1`，增量三次为正，测试块加权期望为
+{_fmt(robustness['prequential_feature_replay']['selected_weighted_test_net_bp'])} bp，
+同期 V9 为 {_fmt(robustness['prequential_feature_replay']['baseline_weighted_test_net_bp'])} bp。
+这是 V10 值得 paper A/B 的最好证据，但只有三个测试块，精确 sign-flip 最低也只能到
+`p={_fmt(robustness['prequential_feature_replay']['increment_exact_signflip']['p_value'], 4)}`；
+对 18 个 gate 的搜索做共同区块 max-stat 校正后为
+`p={_fmt(robustness['selection_adjusted_feature_test']['selection_adjusted_p_value'], 4)}`。
+
+所以 `vol_ratio_mean8 >= 1` 的 V10 虽改善历史点估计和回撤，但 final 已污染、尾部更集中，
+且多重选择校正未过，不能冒充验证成功。
 
 止损/退出结论：
 
@@ -344,6 +398,19 @@ oscillator 阈值只在 2023/2024 搜索；`0.1` 与 `0.15` 形成稳定平台�
 这通过了**独立 Python 框架 reconciliation**，但不是 TradingView broker-emulator parity。
 Pine 仍需在同一交易所 15m 图表编译并导出逐笔 ledger。
 
+同一 OKX 合约的 3m 有序路径又做了一层执行敏感性复核：
+
+- 2025-01 至 2026-02 共 {intrabar['parent_bar_reconstruction']['joined_15m_bars']:,} 根 15m 母 K，
+  每根都恰好由五根 3m K 构成，OHLC 最大误差为 0；
+- V9 的 {intrabar['canonical_trade_count']} 笔中，
+  {intrabar['same_15m_exit_parent_count']}/{intrabar['canonical_trade_count']} 出场母 K 一致，
+  {intrabar['exact_exit_price_count']}/{intrabar['canonical_trade_count']} 出场价一致；
+- {intrabar['stop_trade_count']} 笔止损没有发现 15m 聚合隐藏的 3m 跳空劣化，
+  单笔净收益最大差 {_fmt(intrabar['maximum_absolute_net_return_delta_bp'], 10)} bp。
+
+这只证明**本地 OKX 同源 15m 执行没有被聚合路径高估**；Pine 设置仍为
+`use_bar_magnifier=false`，也没有替代 TradingView venue-specific parity。
+
 ## 项目判断层（用户称 LR）能否接入
 
 可以接，但当前不能把旧模型直接拿来判定：
@@ -373,11 +440,13 @@ Pine confirmed close(t)
 
 - **Final 已消耗。** 2025-01 至 2026-02 已用于 V9 单次终测；V10 是其后的 post-selection 假设。
 - **统计未过门。** V9/V10 的区块 p 值都远高于 0.01，CI 跨 0，不能说收益已稳定。
+- **特征搜索未过多重校正。** `vol_ratio_mean8 >= 1` 的四块增量都为正，但 18-gate max-stat `p={_fmt(robustness['selection_adjusted_feature_test']['selection_adjusted_p_value'], 4)}`；V10 仍只是 paper-forward 假设。
 - **收益高度集中。** V9 去掉最大赢家后转负；V10 集中更严重。
 - **数据源未 parity。** OKX cache 不能证明等于任意 TradingView `ETHUSDT.P`。
 - **成本不完整。** 正式扣 20 bp，但滑点/资金费/强平/最小下单量未进入资金曲线。
 - **没有真实密集门。** 原始核心是 SMA10/60 单点 crossover，不是项目 Local Signal V2；严格 EMA ribbon density gate 在开发段不稳定。
-- **没有训练或生产动作。** holdout 读取 0 行；未 train、promote、deploy、改 ACTIVE、写 forward_log 或操作真金账户。
+- **没有训练或生产动作。** 所有策略计算的 bounded loader 都读取 0 行 holdout；未 train、promote、deploy、改 ACTIVE、写 forward_log 或操作真金账户。
+- **意外 holdout 预览已披露。** 在写 3m bounded loader 前，一次 shell `tail` 意外显示了原始文件末尾两行（均在 repository holdout）；它们没有进入 Python、没有被评分、没有参与任何配置选择或收益评估。按本仓“看一眼也要记录”的纪律，此事故不能写成“从未看见”，后续已用前缀加载器和不读取整文件的前缀哈希封死。
 - **Docker 首次拉镜像依赖外部 Docker Hub。** 主机两套引擎已复核；容器结果单独记录，不拿失败拉取冒充代码失败。
 
 ## 下一步选项（需 owner 决策的已标出）
@@ -393,13 +462,15 @@ Pine confirmed close(t)
 ```bash
 git checkout {summary['generated_from_commit']}
 PYTHONPATH=. .venv/bin/python scripts/research_pine_eth_15m.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_robustness.py
 PYTHONPATH=. python3 scripts/reconcile_pine_eth_15m_backtesting.py
+PYTHONPATH=. python3 scripts/reconcile_pine_eth_15m_intrabar.py
 PYTHONPATH=. .venv/bin/python scripts/validate_pine_eth_15m.py
 PYTHONPATH=. /tmp/fable-pine-eval-venv/bin/python scripts/build_pine_eth_15m_report.py
 PYTHONPATH=. .venv/bin/python scripts/md_to_html.py \\
   analysis/p0_pine_eth_15m_v1_20260821.md --out-dir analysis/html
 PYTHONPATH=. .venv/bin/python -m pytest -q \\
-  tests/test_pine_allin_v7_backtest.py tests/test_research_pine_eth_15m.py
+  tests/test_pine_allin_v7_backtest.py tests/test_research_pine_eth_15m.py tests/test_reconcile_pine_eth_15m_intrabar.py tests/test_analyze_pine_eth_15m_robustness.py
 ```
 
 Docker：
@@ -432,6 +503,8 @@ def make_notebook(evidence: dict[str, Any]) -> nbformat.NotebookNode:
             "validation=json.loads((R/'validation.json').read_text())\n"
             "summary=json.loads((R/'summary.json').read_text())\n"
             "stats=json.loads((R/'statistical_tests.json').read_text())\n"
+            "intrabar=json.loads((R/'intrabar_3m_reconciliation.json').read_text())\n"
+            "robustness=json.loads((R/'robustness_checks.json').read_text())\n"
             "split=pd.read_csv(R/'split_summary.csv')\n"
             "risk=pd.read_csv(R/'risk_grid.csv')\n"
             "assert validation['status']=='pass' and summary['holdout_consumed'] is False\n"
@@ -470,6 +543,11 @@ def make_notebook(evidence: dict[str, Any]) -> nbformat.NotebookNode:
             "assert stats['week_block_signflip']['p_value'] >= 0.01\n"
             "assert stats['week_bootstrap_absolute']['ci95_low_bp'] < 0\n"
             "assert stats['profit_concentration']['mean_without_top1_bp'] < 0\n"
+            "assert intrabar['data_quality']['holdout_rows_read'] == 0\n"
+            "assert intrabar['same_15m_exit_parent_count'] == 110\n"
+            "assert intrabar['exact_exit_price_count'] == 110\n"
+            "assert robustness['final_preholdout_rows_read'] == 0\n"
+            "assert robustness['selection_adjusted_feature_test']['selection_adjusted_p_value'] >= 0.01\n"
             "assert summary['tradingview_parity_passed'] is False\n"
             "print('Point estimate positive; robustness and parity gates correctly remain failed.')"
         ),
