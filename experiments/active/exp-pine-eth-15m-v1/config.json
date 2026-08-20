@@ -1,0 +1,97 @@
+{
+  "experiment_id": "exp-pine-eth-15m-v1",
+  "status": "active_research",
+  "purpose": "Freeze and audit a causal ETH perpetual 15-minute Pine strategy derived from the supplied ALLIN-V7.2 rules.",
+  "source_attachment": "/Users/zhangzc/.codex/attachments/a8101ae7-0925-4f31-baf5-79c6be603338/pasted-text.txt",
+  "source_attachment_sha256": "d721a4864a13cad1aae17ab634c87437a648897d1324d389e51ea591fb9aca8a",
+  "instrument": {
+    "research_source": "OKX",
+    "research_symbol": "ETH-USDT-SWAP",
+    "local_symbol": "ETH_USDT_SWAP",
+    "tradingview_label": "ETHUSDT.P (venue must be selected and exported explicitly)",
+    "data_path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+    "bar_minutes": 15,
+    "tick_size_research_assumption": 0.01,
+    "contract_note": "The local OKX series is a research proxy; it is not asserted bar-identical to an unspecified TradingView ETHUSDT.P venue."
+  },
+  "time_contract": {
+    "analysis_start": "2023-01-01T00:00:00Z",
+    "discovery_start": "2023-01-01T00:00:00Z",
+    "confirmation_start": "2024-01-01T00:00:00Z",
+    "final_preholdout_start": "2025-01-01T00:00:00Z",
+    "safe_end_exclusive": "2026-03-01T00:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "timezone_filter": "Asia/Hong_Kong",
+    "final_preholdout_status": "already consumed for this research family; not an unseen OOS set"
+  },
+  "frozen_execution": {
+    "entry": "confirmed signal close t, market fill at open t+1",
+    "commission_per_fill": 0.001,
+    "project_round_trip_cost": 0.002,
+    "slippage": 0.0,
+    "funding": "not modeled",
+    "initial_stop": "min(4 * Pine ATR14, 3% of signal close), rounded to one-cent ticks, anchored to actual entry fill",
+    "break_even": "after a completed bar reaches +1.5%, stop locks +0.1% for the next bar",
+    "trailing_stop": "disabled after development ablation",
+    "opposite_signal": "single reversal; no duplicate close order",
+    "bar_magnifier": false,
+    "force_close_at_split_end": true,
+    "default_risk_per_trade_percent": 1.0,
+    "max_leverage": 13.0,
+    "legacy_time_boosts": false
+  },
+  "signal_contract": {
+    "source": "hl2",
+    "fast_sma": 10,
+    "slow_sma": 60,
+    "regime_ema": 100,
+    "atr_length": 14,
+    "oscillator_basis_sma": 40,
+    "oscillator_percentile_window": 200,
+    "oscillator_percentile": 99.0,
+    "oscillator_change_lag": 10,
+    "oscillator_hma": 10,
+    "locked_oscillator_threshold": 0.1,
+    "project_direction_feature": "slow_slope_12 = EMA200 / EMA200[12] - 1; positive for long, negative for short",
+    "minimum_atr_percent": 0.1,
+    "maximum_atr_percent": 10.0,
+    "blocked_hk_hours": [21, 23],
+    "trade_on_sunday": false,
+    "percentile_guard": "require p99(difference) > 0; no historical ETH signal changed in the bounded sample"
+  },
+  "selection_log": {
+    "chronology": [
+      "V8 baseline audited on ETH",
+      "project slow_slope_12 sign gate selected on 2023/2024",
+      "slope lag 72 selected in development but rejected by its single final-preholdout evaluation",
+      "oscillator threshold 0.1 selected from the 0.1-0.15 robust plateau for higher sample coverage and weighted expectancy, then evaluated once on final pre-holdout",
+      "density, one-bar confirmation, cooldown removal, break-even removal and trailing families rejected in development/confirmation"
+    ],
+    "oscillator_thresholds_searched": [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.8, 1.0],
+    "slope_lags_searched": [1, 2, 4, 8, 12, 16, 24, 32, 48, 72, 96],
+    "multiple_testing_warning": "The final-preholdout period has been inspected. All future variants are post-selection hypotheses until fresh forward evidence or an owner-authorized holdout evaluation."
+  },
+  "matched_control": {
+    "controls_per_trade": 3,
+    "strata": ["UTC month", "Hong Kong six-hour block", "causal ATR quintile"],
+    "copy": ["direction", "holding bars", "stop", "break-even", "cost"],
+    "exclude_all_raw_signal_bars": true,
+    "disallow_control_reuse": true,
+    "require_exit_inside_split": true,
+    "inference": "UTC-week block sign-flip plus week bootstrap",
+    "seed": 20260821
+  },
+  "l2_contract": {
+    "existing_production_model_usable": false,
+    "reason": "The frozen LightGBM is a short-side YOLO-v10 model with different candidate and label semantics; active_bundle.json is absent and new training is blocked by P0/P1.",
+    "output": "Export all 28 causal project feature columns at Pine signal bars as a training-ineligible research table.",
+    "training_eligible": false
+  },
+  "eligibility": {
+    "holdout_consumed": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "forward_eligible": false,
+    "tradingview_parity_passed": false
+  }
+}
