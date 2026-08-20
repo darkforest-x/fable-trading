@@ -13,7 +13,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          # 3.9 是 Mac venv 与 3060 跑的版本。CI 用别的版本就会
+          # 解析出另一套依赖，测的便不再是产出数字的那套栈。
+          python-version: "3.9"
           cache: pip
 
       # opencv-python links against libGL, which the runner image does not
@@ -28,10 +30,16 @@ jobs:
       # place -- the same rule the holdout boundary and the cost table follow.
       # pytest is added separately because it is the runner, not a project
       # dependency, and does not belong in requirements.txt.
+      #
+      # -c constraints-ci.txt pins to the versions the Mac and the 3060 run.
+      # Without it CI floated to pandas 3.0.5 / numpy 2.4.6 / torch 2.13.0 while
+      # the project runs 2.3.3 / 2.0.2 / 2.8.0 -- so a green CI said nothing
+      # about whether the project's numbers reproduce, and a red one might only
+      # mean a newer pandas changed an API. Which is exactly what happened.
       - name: Install project dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
+          python -m pip install -r requirements.txt -c constraints-ci.txt
           python -m pip install pytest
 
       - name: Compile Python sources

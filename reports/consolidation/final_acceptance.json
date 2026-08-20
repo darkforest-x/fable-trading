@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-20T00:28:15+00:00",
+  "generated_at": "2026-08-20T00:43:12+00:00",
   "generated_by": "tools/consolidation/final_acceptance.py",
   "decision": "accepted",
   "branch": "claude/fable-trading-consolidation-758d61",
-  "head": "c46d1f7227fb4f530d052774829aff3baab78405",
+  "head": "2bf9eceeb0ee7924939965c7ced8a902c7e011a4",
   "base": "main",
   "checks": {
     "runtime_safety_hashes": {
@@ -85,7 +85,7 @@
         "error": 6
       },
       "final_counts": {
-        "passed": 1181,
+        "passed": 1197,
         "skipped": 83,
         "warnings": 14
       },
@@ -103,7 +103,7 @@
         "FAILED tests/test_p2r_root_cause_audit.py::test_all_frozen_input_hashes_match",
         "FAILED tests/test_p2r_root_cause_audit.py::test_full_audit_reaches_stop_without_runtime_mutation"
       ],
-      "detail": "701 -> 1181 passing, 0 new failures"
+      "detail": "701 -> 1197 passing, 0 new failures"
     },
     "secret_scan": {
       "passed": true,

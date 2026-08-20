@@ -1,0 +1,35 @@
+# CI 版本锁 —— 让 CI 测的是「产出这些数字的那套库」
+#
+# 为什么需要这个文件：
+# requirements.txt 全是 `>=` 无上界。2026-08-20 CI 因此装到了
+# pandas 3.0.5 / numpy 2.4.6 / torch 2.13.0，而本机与 3060 跑的是
+# pandas 2.3.3 / numpy 2.0.2 / torch 2.8.0。后果是双向的：
+#   CI 绿 ≠ 项目的数字能复现（测的根本不是同一套库）
+#   CI 红 也可能只是「新版 pandas 改了个 API」，与代码无关
+# 当天就是后者：pandas 3.0 下 date_range 的默认时间分辨率不再必然是纳秒，
+# 一处手写的 `view("int64") // 1e6` 因此算出错误的毫秒时间戳。
+#
+# 本项目已有一份跨机版本契约——scripts/train_on_3060.sh 在 Mac 与 3060
+# 版本不一致时拒绝开训，理由是「结果无法与历史曲线对照」。
+# 这个文件把同一条契约延伸到 CI。第三台机器，同一个理由。
+#
+# 用法（.github/workflows/tests.yml）：
+#   pip install -r requirements.txt -c constraints-ci.txt
+#
+# 改这里 = 改跨机契约：Mac、3060、CI 三处必须同时改，
+# 并且要意识到改完之后跑出来的数字与历史曲线不再可比。
+# 由 tests/boundaries/test_ci_installs_from_requirements.py 守着。
+
+pandas==2.3.3
+scipy==1.13.1
+matplotlib==3.9.4
+numpy==2.0.2
+ultralytics==8.4.89
+opencv-python==5.0.0.93
+torch==2.8.0
+scikit-learn==1.6.1
+lightgbm==4.6.0
+fastapi==0.128.8
+uvicorn==0.39.0
+Pillow==11.3.0
+PyYAML==6.0.3

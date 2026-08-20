@@ -29,7 +29,7 @@ def _synthetic_frame(n_bars: int) -> pd.DataFrame:
     lows = np.minimum(opens, closes) - spread
     return pd.DataFrame(
         {
-            "ts": (open_time.view("int64") // 10**6),
+            "ts": open_time.as_unit("ms").astype("int64"),
             "open": opens,
             "high": highs,
             "low": lows,

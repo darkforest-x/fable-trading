@@ -27,7 +27,7 @@ def _frame(n_bars: int = 650) -> pd.DataFrame:
     spread = np.abs(rng.normal(0.35, 0.05, n_bars)) + 0.1
     return pd.DataFrame(
         {
-            "ts": open_time.view("int64") // 10**6,
+            "ts": open_time.as_unit("ms").astype("int64"),
             "open": opens,
             "high": np.maximum(opens, closes) + spread,
             "low": np.minimum(opens, closes) - spread,

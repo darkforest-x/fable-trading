@@ -102,3 +102,71 @@ def test_compileall_covers_the_canonical_package():
         f"compileall does not cover yoyo/: {match.group(0)!r}. That is the "
         "canonical package -- src/ is a shim layer."
     )
+
+
+# --------------------------------------------------------------------------
+# CI must test the stack that produces the numbers
+# --------------------------------------------------------------------------
+
+CONSTRAINTS = REPO / "constraints-ci.txt"
+
+
+def _pins() -> dict[str, str]:
+    pins = {}
+    for line in CONSTRAINTS.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        name, _, version = line.partition("==")
+        pins[name.strip().lower()] = version.strip()
+    return pins
+
+
+def test_the_workflow_applies_the_constraints_file():
+    assert "-c constraints-ci.txt" in _workflow_text(), (
+        "CI does not pin versions. requirements.txt is all `>=` with no upper "
+        "bounds, so CI floats to the newest of everything: on 2026-08-20 that "
+        "was pandas 3.0.5 against the 2.3.3 this project runs. A green CI then "
+        "says nothing about whether the numbers reproduce, and a red one may "
+        "only mean a newer library changed an API."
+    )
+
+
+def test_every_declared_dependency_is_pinned():
+    missing = sorted(_declared_packages() - set(_pins()))
+    assert not missing, (
+        f"{missing} are declared in requirements.txt but unpinned in "
+        "constraints-ci.txt, so CI would float on them"
+    )
+
+
+@pytest.mark.parametrize(("package", "pinned"), sorted(_pins().items()))
+def test_the_pin_matches_what_is_installed_here(package: str, pinned: str):
+    """The pins are the Mac's versions; drift means CI stopped matching reality.
+
+    This is the same contract scripts/train_on_3060.sh enforces between the Mac
+    and the training box, extended to a third machine. If it fails locally, the
+    venv moved and CI is now testing a stack nobody runs.
+    """
+    import importlib.metadata as metadata
+
+    try:
+        installed = metadata.version(package)
+    except metadata.PackageNotFoundError:
+        pytest.skip(f"{package} is not installed in this environment")
+    assert installed == pinned, (
+        f"{package} is {installed} here but constraints-ci.txt pins {pinned}. "
+        "Changing it is changing a cross-machine contract: Mac, 3060 and CI move "
+        "together, and afterwards the numbers are no longer comparable with the "
+        "historical curves."
+    )
+
+
+def test_the_python_version_matches_the_one_the_project_runs():
+    match = re.search(r'python-version:\s*"([^"]+)"', _workflow_text())
+    assert match, "the workflow does not pin a Python version"
+    assert match.group(1) == "3.9", (
+        f"CI runs Python {match.group(1)} while the Mac venv and the 3060 run "
+        "3.9. A different interpreter resolves a different dependency set, which "
+        "is how CI came to test pandas 3.0 against a 2.3 project."
+    )

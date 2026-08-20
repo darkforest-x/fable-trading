@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "label": "final",
-  "generated_at": "2026-08-20T00:28:14+00:00",
-  "duration_seconds": 11.74,
+  "generated_at": "2026-08-20T00:43:11+00:00",
+  "duration_seconds": 12.35,
   "command": [
     "/Users/zhangzc/fable-trading/.venv/bin/python",
     "-m",
@@ -16,11 +16,11 @@
   "python": "/Users/zhangzc/fable-trading/.venv/bin/python",
   "exit_code": 0,
   "counts": {
-    "passed": 1181,
+    "passed": 1197,
     "skipped": 83,
     "warnings": 14
   },
   "failing_outcomes": [],
-  "note": "C7 final run after the CI fix. The 11 baseline failures are now skips that name the gitignored artifact they need, so the suite exits 0 here and on CI.",
+  "note": "C7 final run after the CI version-pin fix. Suite exits 0 locally and in a CI-identical pinned environment (1197 passed there, with torch installed).",
   "holdout_consumed_during_consolidation": false
 }
