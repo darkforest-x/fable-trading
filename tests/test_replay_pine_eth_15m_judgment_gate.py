@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from conftest import requires_repo_data
 from scripts.replay_pine_eth_15m_judgment_gate import (
     REQUIRED_SCORE_COLUMNS,
     SCHEMA_VERSION,
@@ -150,6 +151,7 @@ def test_gate_manifest_rejects_threshold_and_lineage_drift(tmp_path: Path) -> No
         )
 
 
+@requires_repo_data("data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv")
 def test_self_audit_replays_allow_all_identity_without_a_model() -> None:
     payload = run_self_audit(write=False)
     assert payload["status"] == "pass"
