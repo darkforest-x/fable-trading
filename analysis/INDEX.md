@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **233** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **234** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,6 +10,7 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-08-21 | [`p1_fixed_w10_original_source_triage_20260821.md`](p1_fixed_w10_original_source_triage_20260821.md) | P1 fixed-W10 原始来源图全量筛选包（2026-08-21） | Owner 指出得对：此前 448 项盲审包展示的是统一迁移后的 W10 图，不是原始视觉证据。 |
 | 2026-08-20 | [`p1_fixed_w10_blind_audit_pack_20260820.md`](p1_fixed_w10_blind_audit_pack_20260820.md) | P1 fixed-W10 门禁修复、artifact 谱系与盲审包（2026-08-20） | 工程交付完成，标签验收仍待 Owner 盲审。** 已修复旧 acceptance 把迁移前 |
 | 2026-08-20 | [`p1_gold_label_quality_20260820.md`](p1_gold_label_quality_20260820.md) | P1 — 固定 W10 金标的标签错误率（2026-08-20） |  |
 | 2026-08-20 | [`p_model_inventory_20260820.md`](p_model_inventory_20260820.md) | 模型清单 — 我们到底训出了什么（2026-08-20） |  |
@@ -281,6 +282,7 @@
 - [`p15_h9_report.md`](p15_h9_report.md) — P1.5 R1'：H9 高层趋势过滤复测与推广
 - [`p1_b2_short_l2_backtest_20260811.md`](p1_b2_short_l2_backtest_20260811.md) — Local Signal V2 B2：候选密度与收益诊断
 - [`p1_fixed_w10_blind_audit_pack_20260820.md`](p1_fixed_w10_blind_audit_pack_20260820.md) — P1 fixed-W10 门禁修复、artifact 谱系与盲审包（2026-08-20）
+- [`p1_fixed_w10_original_source_triage_20260821.md`](p1_fixed_w10_original_source_triage_20260821.md) — P1 fixed-W10 原始来源图全量筛选包（2026-08-21）
 - [`p1_gold_label_quality_20260820.md`](p1_gold_label_quality_20260820.md) — P1 — 固定 W10 金标的标签错误率（2026-08-20）
 - [`p1_local_signal_v2_position_shortcut_20260811.md`](p1_local_signal_v2_position_shortcut_20260811.md) — Local Signal V2 位置 shortcut 纠错（2026-08-11）
 - [`p1_local_signal_v2_prereg_20260810.md`](p1_local_signal_v2_prereg_20260810.md) — P1 局部因果窗口对照预注册

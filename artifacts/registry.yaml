@@ -134,6 +134,28 @@ artifacts:
       repeats. The 28 Cleanlab flags are a physically separate priority queue
       and are not part of the unbiased error-rate estimator.
 
+  - artifact_id: fixed-w10-original-source-triage-v1
+    artifact_type: manifest
+    role: gold_source_triage
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b6a48a02986a75b6a7dfa6c7ec12856794151bec"
+    source_path: datasets/fixed_w10_core4_confirm1_v1/review/original_source_triage_v1/public/manifest.json
+    sha256: "bd42b8509592f5e2c8fba4f6e0dc039923cc9c3783ebe15fd14ec4005a42249c"
+    size_bytes: 380459
+    storage_uri: "file://datasets/fixed_w10_core4_confirm1_v1/review/original_source_triage_v1"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b6a48a02986a75b6a7dfa6c7ec12856794151bec"
+    config_hash: "7db6c09930d122389b3648ff70551b41cfc6b26286ed8497510f2e3daf0d7652"
+    data_cutoff: "2026-05-02T23:45:00+00:00"
+    notes: >-
+      Public manifest for a full 2,649-row KEEP/REMOVE/UNCERTAIN review over
+      original source evidence, never the derived W10 classifier images. All
+      2,649 primary images resolve and 112 rows also expose the exact reference
+      image used by their historical review. Private lineage is kept under
+      admin/truth.jsonl; completing this pack does not mutate the frozen dataset.
+
   - artifact_id: yoyo-trading-dataset-v3-gold-core
     artifact_type: annotation_set
     role: gold_labels

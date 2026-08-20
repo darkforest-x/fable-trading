@@ -1,0 +1,22 @@
+{
+  "completion_required_before_dataset_rebuild": true,
+  "current_dataset_is_not_modified": true,
+  "decision_meaning": {
+    "KEEP": "retain this row as a candidate for the next dataset version",
+    "REMOVE": "exclude this row from the next dataset version",
+    "UNCERTAIN": "do not train; send to a later adjudication queue"
+  },
+  "decisions": [
+    "KEEP",
+    "REMOVE",
+    "UNCERTAIN"
+  ],
+  "gold_events_sha256": "344212f8e5ef1fac3616b2026d19d6e721ce29984b3bbda194d4071c9fc327c4",
+  "holdout_read": false,
+  "original_images_for_review_only": true,
+  "original_images_may_include_post_decision_human_context": true,
+  "pack_id": "fixed_w10_core4_confirm1_v1_original_source_triage_v1",
+  "population_n": 2649,
+  "schema_version": 1,
+  "training_eligible_changed": false
+}

@@ -355,21 +355,22 @@ experiments:
   - experiment_id: exp-p1-fixed-w10-blind-audit-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "2e8ce475438a8987960e13eec210f9df1cf97090"
-    status: active
+    status: superseded
     question: >-
       Can the final 2,649-row fixed-W10 Gold snapshot clear P0/P1 with an
       unbiased, lineage-bound owner review rather than a model-selected queue
       or a vacuous zero-DIRECT gate?
     single_variable: n/a —— data and label audit, no model training
     result: >-
-      pending_owner_review. All 2,649 decision-visible images were re-hashed and
+      superseded_before_owner_review. All 2,649 decision-visible images were re-hashed and
       joined to the same final Gold snapshot. A deterministic stratified sample
       contains 398 unique rows, including 188/1,251 DIRECT rows, plus 50 hidden
       repeats (12.56%). Cleanlab's 28 flags are in a separate priority queue;
       only 3 overlap the random sample, consistent with the stratified null
       control (permutation p=0.7931). No holdout was read and no training ran.
-      Error rate, repeat agreement, kappa and boundary agreement remain unknown
-      until the owner completes the pack; training_eligible remains false.
+      Before review began, the owner rejected derived W10 images as the first
+      curation surface and required all 2,649 original source images instead.
+      No answers were scored; training_eligible remains false.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
@@ -382,6 +383,39 @@ experiments:
       Public page shows opaque IDs and decision-visible W10 images only. Truth,
       source, split, migration status and repeat identity live in the private
       admin manifest. Future reference has a physically separate directory.
+      Keep this pack as historical evidence only; regenerate an unbiased pack
+      from the post-triage dataset rather than resuming this one.
+
+  - experiment_id: exp-p1-fixed-w10-original-source-triage-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b6a48a02986a75b6a7dfa6c7ec12856794151bec"
+    status: active
+    question: >-
+      Which rows of the mixed 2,649-row fixed-W10 snapshot should survive when
+      the owner reviews the exact pre-migration visual evidence rather than the
+      derived W10/Core4/Confirm1 render?
+    single_variable: n/a —— full-population source-evidence curation, no model training
+    result: >-
+      pending_owner_full_triage. Final Gold source_dataset + source_record_id
+      resolves 2,649/2,649 original primary images with zero missing rows:
+      1,091 Owner long-chart previews, 1,256 easy-negative source renders, 190
+      reviewed V3.2 images, 23 8768 context/local pairs, 88 Owner semantic-review
+      pairs and one hard-negative review pair. The page exposes only opaque IDs
+      and original evidence, supports KEEP/REMOVE/UNCERTAIN, keyboard auto-next,
+      undo, resume, import and export. No W10 image, OHLC, holdout or training was
+      used; the frozen dataset and training_eligible remain unchanged.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_fixed_w10_original_source_triage_20260821.md
+    artifacts:
+      - fixed-w10-core4-confirm1-v1-2649
+      - fixed-w10-original-source-triage-v1
+    reuse_allowed: true
+    notes: >-
+      KEEP means candidate for a new version, REMOVE means exclusion and
+      UNCERTAIN means a separate adjudication queue. Completion never mutates
+      the old 2,649 snapshot; a new manifest and a new blind pack are required.
 
   - experiment_id: exp-consolidation-single-repo-v1
     source_repo: darkforest-x/fable-trading

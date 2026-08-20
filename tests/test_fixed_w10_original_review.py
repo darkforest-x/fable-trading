@@ -9,10 +9,13 @@ from pathlib import Path
 
 import pytest
 
+from yoyo.artifacts import load_registries
 from yoyo.datasets.fixed_w10_blind_audit import AuditBuildError, sha256_file
 from yoyo.datasets.fixed_w10_original_review import (
     PACK_ID,
+    _find_one_archived_dataset,
     _page_html,
+    _verify_image,
     build_pack_from_resolved,
     summarize_export,
 )
@@ -97,6 +100,26 @@ def test_pack_uses_original_bytes_and_hides_private_lineage(tmp_path: Path) -> N
         assert sha256_file(copied) == row["original_primary_sha256"]
 
 
+def test_wrong_original_sha_is_rejected_as_a_negative_control(tmp_path: Path) -> None:
+    image = tmp_path / "source.png"
+    image.write_bytes(b"real-source-bytes")
+    with pytest.raises(AuditBuildError, match="sha256 drift"):
+        _verify_image(image, "0" * 64, role="negative control")
+
+
+def test_archived_dataset_is_resolved_inside_this_repository_by_asset_name(
+    tmp_path: Path,
+) -> None:
+    expected = tmp_path / "historical-source" / "datasets" / "example-v1"
+    expected.mkdir(parents=True)
+    assert _find_one_archived_dataset(tmp_path, "example-v1") == expected.resolve()
+
+    duplicate = tmp_path / "second-source" / "datasets" / "example-v1"
+    duplicate.mkdir(parents=True)
+    with pytest.raises(AuditBuildError, match="expected exactly one"):
+        _find_one_archived_dataset(tmp_path, "example-v1")
+
+
 def test_export_summary_joins_decisions_without_mutating_eligibility(tmp_path: Path) -> None:
     pack = tmp_path / "pack"
     build_pack_from_resolved(_resolved(tmp_path), pack, gold_sha256="c" * 64)
@@ -135,3 +158,27 @@ def test_cli_can_be_invoked_by_path_outside_repository(tmp_path: Path) -> None:
     )
     assert result.returncode == 0, result.stderr
     assert "build" in result.stdout and "summarize" in result.stdout
+
+
+def test_original_source_triage_registry_points_to_exact_public_manifest() -> None:
+    registries = load_registries(root=PROJECT)
+    artifact = registries.artifact("fixed-w10-original-source-triage-v1")
+    path = PROJECT / artifact.source_path
+    assert path.is_file()
+    assert artifact.sha256 == sha256_file(path)
+    assert artifact.size_bytes == path.stat().st_size
+    assert artifact.training_eligible is False
+    assert artifact.production_eligible is False
+
+    experiment = next(
+        row
+        for row in registries.experiments
+        if row.experiment_id == "exp-p1-fixed-w10-original-source-triage-v1"
+    )
+    assert experiment.artifacts == [
+        "fixed-w10-core4-confirm1-v1-2649",
+        "fixed-w10-original-source-triage-v1",
+    ]
+    assert experiment.holdout_consumed is False
+    assert experiment.training_eligible is False
+    assert experiment.production_eligible is False

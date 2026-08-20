@@ -2,7 +2,7 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-20 — P0/P1 门禁已修，等待 Owner 主盲审）
+## ⚡ 当前真相（2026-08-21 — 回到 2,649 张原图做全量保留/删除）
 
 **fixed-W10 的工程门禁与数据谱系已修正，但 P0/P1 仍未通过。** 旧 acceptance 把
 迁移前 `DIRECT=0` 的 rows 与最终 Gold SHA 混在一起，并让 0 DIRECT 空通过 15% 比例门；
@@ -12,16 +12,21 @@ fail-closed。当前正确状态仍为 `training_eligible=false`。
 
 2,649 张图片已逐张重算 SHA，独立 artifact 为
 `fixed-w10-core4-confirm1-v1-2649`，不再把 fixed-W10 实验指向旧 3,453 张 W12–19 V3 或
-另一个 2,599 张 v2 manifest。主盲审包已生成：**398 个分层随机唯一项（其中 DIRECT 188）
-+ 50 个隐藏重复 = 448 项**；Cleanlab 28 张为独立优先修错队列。两队列自然重叠 3 张，
-所以必须**先完成并导出主盲审，再打开 Cleanlab 队列**。入口：
-`datasets/fixed_w10_core4_confirm1_v1/review/p1_blind_audit_v1/public/index.html`；报告：
-`analysis/html/p1_fixed_w10_blind_audit_pack_20260820.html`。
+另一个 2,599 张 v2 manifest。Owner 进一步指出：先前 448 项包展示的是迁移后 W10 图，不是
+原始标注图，因此**当前执行顺序已改为先全量审核原图**。旧 448 包和 Cleanlab 28 包保留为
+历史产物，但在新集合出来前不得继续作为当前审核入口。
 
-**下一条允许的动作**：Owner 完成 448 项主盲审并导出 JSON；然后只运行
-`tools/datasets/fixed_w10_p1_audit.py score`，计算总体/DIRECT 错误率、重复一致率、κ 与核心
-边界一致率。错误率 >5% 就停止；即便数字通过，也必须由 Owner 明确批准后才能生成新版本数据
-并改变 `training_eligible`。当前禁止训练、禁止读既有 fixed-W10 holdout。
+已沿最终 Gold 的 `source_dataset + source_record_id` 回连 **2,649/2,649** 条原始视觉证据，
+缺失 0：Owner 原始长图 1,091、easy-negative source render 1,256、reviewed V3.2 图 190、
+8768 context/local 23、Owner semantic review pair 88、hard-negative review pair 1。
+全量快捷页只做 KEEP/REMOVE/UNCERTAIN，带键盘、自动下一张、撤销、断点保存、进度导入/导出：
+`datasets/fixed_w10_core4_confirm1_v1/review/original_source_triage_v1/public/index.html`；报告：
+`analysis/html/p1_fixed_w10_original_source_triage_20260821.html`。
+
+**下一条允许的动作**：Owner 完成 2,649 张原图筛选并导出 JSON。随后只生成**新版本**：
+REMOVE 进入 exclusions，UNCERTAIN 进入独立仲裁队列，KEEP 重新构建 Gold/图片/split/依赖与 SHA；
+不覆盖当前快照。新集合完成后重新生成随机重复盲审包。最终错误率等门通过且 Owner 明确批准前，
+`training_eligible=false`；当前禁止训练、禁止读既有 fixed-W10 holdout。
 
 仍需 Owner 独立裁决：两个 ATR 实现的 warmup 分歧，三选项见
 `docs/consolidation/DUPLICATE_SEMANTICS.md` §4。

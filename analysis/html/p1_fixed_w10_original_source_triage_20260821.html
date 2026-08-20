@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>P1 fixed-W10 原始来源图全量筛选包（2026-08-21）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P1 fixed-W10 原始来源图全量筛选包（2026-08-21）</h1>
+<h2>结论</h2>
+<p>Owner 指出得对：此前 448 项盲审包展示的是统一迁移后的 W10 图，不是原始视觉证据。 <code>W10/Core4/Confirm1</code> 的含义是把模型输入锁成 <strong>10 根 K 线 = 5 根前文 + 4 根固定核心 + 1 根确认/decision bar</strong>；其中把旧 4–7 根 Owner 核心压成固定 4 根属于迁移假设，不能靠审核 派生 W10 图自证正确。</p>
+<p>现已沿最终 Gold 的 <code>source_dataset + source_record_id</code> 把 <strong>2,649/2,649</strong> 条全部回连到 迁移前的原始审核图，缺失 <strong>0</strong>，并生成只做 <code>KEEP / REMOVE / UNCERTAIN</code> 的全量快捷页面。 页面主图不使用 W10 分类图；当前冻结数据不覆盖、不改标签，<code>training_eligible=false</code>。</p>
+<p>审核入口： <code>datasets/fixed_w10_core4_confirm1_v1/review/original_source_triage_v1/public/index.html</code></p>
+<h2>W10 / Core4 / Confirm1 到底是什么</h2>
+<table><thead><tr>
+<th>名称</th>
+<th>锁定含义</th>
+<th>风险</th>
+</tr></thead><tbody>
+<tr><td>W10</td><td>每张模型图仅显示连续 10 根 15m K 线</td><td>原始长图的走势上下文被删掉</td></tr>
+<tr><td>Core4</td><td>第 6–9 根固定当作 4 根核心</td><td>旧 Owner 框原为 4–7 根，中心压成 4 根不等于重新标注</td></tr>
+<tr><td>Confirm1</td><td>第 10 根为确认根，同时是 decision bar</td><td>模型只允许看到该根及以前；但原图人工审核可以有单独未来参考</td></tr>
+</tbody></table>
+<p>因此这套规格只能定义“未来若训练，模型看什么”，不能定义“Owner 原图中哪些框应该保留”。 本轮先回到原图做集合清理；清理完成后必须生成新版本 manifest，不能直接在旧 2,649 快照上改。</p>
+<h2>原图来源与覆盖</h2>
+<table><thead><tr>
+<th>原始视觉证据</th>
+<th>数量</th>
+<th>页面展示内容</th>
+</tr></thead><tbody>
+<tr><td>Owner 原始长图</td><td>1,091</td><td><code>owner_side_review/previews</code> 中带原框的 180 根左右长图</td></tr>
+<tr><td>easy-negative source render</td><td>1,256</td><td>当初进入负例 manifest 的 W12–19 源图；这些没有 Owner 长图</td></tr>
+<tr><td>reviewed V3.2 source render</td><td>190</td><td>旧 <code>dataset_v3_2_reviewed_core_v1</code> 的原始图片</td></tr>
+<tr><td>Owner 8768 context/local</td><td>23</td><td>当时审核的 context 主图，另有 local 参考图</td></tr>
+<tr><td>Owner semantic review pair</td><td>88</td><td>当时的 causal-review 主图，另有 future-review 参考图</td></tr>
+<tr><td>Owner hard-negative review pair</td><td>1</td><td>当时的 causal-review 主图，另有 future-review 参考图</td></tr>
+<tr><td><strong>合计</strong></td><td><strong>2,649</strong></td><td><strong>主图缺失 0；附加参考图 112</strong></td></tr>
+</tbody></table>
+<p>必须诚实区分：1,256 个 easy negative 本来就是程序抽取的干净背景，不存在一张更早的 Owner 人工框图；这里展示的是它们进入源 negative manifest 时的原始图片，而不是伪造 Owner 原图。</p>
+<p>私有逐条映射在 <code>datasets/fixed_w10_core4_confirm1_v1/review/original_source_triage_v1/admin/truth.jsonl</code>。 公开页面只含 opaque <code>review_id</code>、主图和可选参考图，不暴露旧标签、来源、split 或迁移状态。</p>
+<h2>页面操作</h2>
+<table><thead><tr>
+<th>动作</th>
+<th>快捷键</th>
+</tr></thead><tbody>
+<tr><td>保留</td><td><code>K</code> 或 <code>1</code></td></tr>
+<tr><td>去掉</td><td><code>X</code> 或 <code>2</code></td></tr>
+<tr><td>待定（不得进下一版训练集）</td><td><code>?</code> 或 <code>3</code></td></tr>
+<tr><td>上一张 / 下一张</td><td><code>J</code> / <code>L</code>，或左右方向键；空格也可下一张</td></tr>
+<tr><td>撤销上一次判断</td><td><code>U</code></td></tr>
+<tr><td>显示/隐藏附加参考图</td><td><code>R</code>（仅 112 个有参考图的项目出现）</td></tr>
+<tr><td>原尺寸缩放</td><td><code>Z</code></td></tr>
+</tbody></table>
+<p>默认“选择后自动下一张”，并用 <code>localStorage</code> 自动保存当前位置和答案；支持按状态过滤、编号 跳转、备注、导入旧进度和随时导出 JSON。导出文件包含完整度与已审数量；只有 2,649 条全部 完成后才能重建数据版本。</p>
+<h2>Artifact 与完整性</h2>
+<table><thead><tr>
+<th>项</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>Gold 快照 SHA</td><td><code>344212f8e5ef1fac3616b2026d19d6e721ce29984b3bbda194d4071c9fc327c4</code></td></tr>
+<tr><td>public manifest SHA</td><td><code>bd42b8509592f5e2c8fba4f6e0dc039923cc9c3783ebe15fd14ec4005a42249c</code></td></tr>
+<tr><td>private truth SHA</td><td><code>c5f576daaa1f1fb39410e753fabfdc3c82580b7f2ba80b9d8b67b250dda347fe</code></td></tr>
+<tr><td>页面 SHA</td><td><code>78ce524c80e1c85fd58ee08ae68654e460f0301492bc79a70c59f607ade2b2ac</code></td></tr>
+<tr><td>复制图片</td><td>2,649 主图 + 112 参考图；146,569,810 bytes</td></tr>
+<tr><td>builder commit</td><td><code>b6a48a02986a75b6a7dfa6c7ec12856794151bec</code></td></tr>
+<tr><td>holdout 读取 / 训练</td><td>0 / 0</td></tr>
+</tbody></table>
+<p>构建器对有历史 SHA 的来源逐张重算并严格比较；Owner 长图 preview 没有旧 SHA 时记录本次实际 SHA，复制后再次核对。零假设/负控制不是收益随机对照，而是给真实图片故意传入错误预期 SHA： <code>test_wrong_original_sha_is_rejected_as_a_negative_control</code> 必须 fail-closed。真实构建 2,649 条全部 通过，说明页面不是靠路径猜测或 W10 fallback 拼出来的。旧 V3.2 与 8768 的原始像素从本仓 <code>archive/consolidated</code> 按数据集名定位；构建器不读取任何外部兄弟仓。</p>
+<h2>浏览器验收</h2>
+<p>使用真实 Chromium 页面完成：<code>K/1</code> 保留并自动跳转、<code>X/2</code> 去掉、<code>U</code> 撤销、刷新后进度持久、 跳到第一个双图项目、<code>R</code> 展示参考图、JSON 下载。页面控制台 <strong>0 error / 0 warning</strong>。</p>
+<h2>非方向性实验说明</h2>
+<p>本轮是数据谱系与人工审核界面，不产生交易收益，因此 val AUC、置换收益 p、top-decile 毛/净收益、胜率、单特征基线和匹配随机交易对照均不适用，也不得编造。对应的严格对照是： 原图路径逐条联结、历史 SHA/复制 SHA 双门、错误 SHA 负控制、公开/私有字段隔离和真实浏览器验收。</p>
+<h2>复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+
+.venv/bin/python -m pytest -q tests/test_fixed_w10_original_review.py
+
+.venv/bin/python tools/datasets/fixed_w10_original_review.py build
+
+# Owner 导出答案后只做摘要，不修改数据：
+.venv/bin/python tools/datasets/fixed_w10_original_review.py summarize \
+  --answers /path/to/fixed_w10_core4_confirm1_v1_original_source_triage_v1_answers.json
+
+python3 scripts/md_to_html.py \
+  analysis/p1_fixed_w10_original_source_triage_20260821.md \
+  --out-dir analysis/html
+</code></pre>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>原图来源异构：Owner 长图、自动 easy negative、旧 V3.2 和后续语义审核图不能冒充同一种标注质量。</li>
+<li>112 个项目的附加图可能包含 decision 后的人类审核上下文；它们只用于人工保留裁决，严禁进入训练输入。</li>
+<li>KEEP 只表示保留为下一版候选，不自动确认旧 <code>SIGNAL/NO_SIGNAL</code> 标签正确；标签语义和边界仍需在新集合上另验。</li>
+<li>本轮没有覆盖旧数据、没有更改 registry eligibility、没有训练、没有读 holdout、没有 promote 或部署。</li>
+<li>此全量原图筛选取代“现在先做 448 张 W10 盲审”的执行顺序；旧包保留为历史，但不得先继续使用。</li>
+</ul>
+<h2>下一步</h2>
+<ol>
+<li>Owner 完成 2,649 张原图筛选并导出 JSON。</li>
+<li>先校验导出完整度，<code>REMOVE</code> 永久进入新版本 exclusions，<code>UNCERTAIN</code> 进入独立仲裁队列。</li>
+<li>只从 <code>KEEP</code> 构建新的、不覆盖旧数据的 Gold/图片 manifest，并重新做 split、依赖、图片/标签 SHA 门。</li>
+<li>在新集合上重新生成随机重复盲审包；数字通过后仍需 Owner 明确批准 <code>training_eligible=true</code>，才允许 3060 启动第一轮。</li>
+</ol>
+</body>
+</html>
