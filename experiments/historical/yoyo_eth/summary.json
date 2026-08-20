@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-19T17:08:56+00:00",
+  "generated_by": "tools/consolidation/build_source_asset_registry.py",
+  "source_repo": "darkforest-x/yoyo-eth",
+  "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+  "experiments": [
+    {
+      "experiment_id": "exp-yoyo-eth-p02-walkforward-grid",
+      "status": "inconclusive",
+      "question": "Does a walk-forward trigger x quantile grid find a configuration where the MA-compression pool beats its matched random control?",
+      "result": "No configuration separated the pool from its control; pool-minus-control stayed inside -3.9bp..+4.8bp after the control function was corrected. Model metrics were bit-identical before and after that correction.",
+      "single_variable": "trigger definition x score quantile",
+      "holdout_consumed": false,
+      "training_eligible": false,
+      "production_eligible": false,
+      "canonical_report": "experiments/historical/yoyo_eth/P02_WALKFORWARD_REPORT.md",
+      "reuse_allowed": true
+    },
+    {
+      "experiment_id": "exp-yoyo-eth-p03-anchored-walkforward",
+      "status": "rejected",
+      "question": "Was iteration_v1's anchored val rho=+0.465 (p=0.01, n=31) a real signal or a single-split regime coincidence?",
+      "result": "not_reproducible. Under a 4-fold anchored walk-forward the same events give rho +0.219 on the corresponding fold and -0.151 on the next; weighted mean rho +0.065 over OOS n=140, inside a +-0.17 noise band. The original +0.465 was that split serving as both early-stopping selector and a single favourable regime. Secondary observation, recorded but not promoted to a conclusion: the anchored arm beat legacy in all 4 folds (paired sign test p~=0.06), so semantic anchoring helps direction-wise but not enough to matter. Pool level unchanged: anchored all-minus-control -5.4bp, legacy +4.8bp -- both indistinguishable from same-month same-volatility-bucket random entry.",
+      "single_variable": "decision anchor (legacy zone_start vs anchored causal trigger)",
+      "holdout_consumed": false,
+      "training_eligible": false,
+      "production_eligible": false,
+      "canonical_report": "experiments/historical/yoyo_eth/P03_ANCHORED_WF_REPORT.md",
+      "reuse_allowed": true
+    },
+    {
+      "experiment_id": "exp-yoyo-eth-p04-strict-platform-v2",
+      "status": "active",
+      "question": "Does a strict platform definition v2, adjudicated by the owner rather than by a threshold, isolate a subset of compression events that the loose pool dilutes?",
+      "result": "definition_and_review_gallery_only. P04 produced the definition and a decision_view/outcome_view review gallery; no model was trained and no economic claim was made or tested. Carried forward as an open question, not as evidence.",
+      "single_variable": "platform definition (loose scanner vs strict v2)",
+      "holdout_consumed": false,
+      "training_eligible": false,
+      "production_eligible": false,
+      "canonical_report": "experiments/historical/yoyo_eth/README.md",
+      "reuse_allowed": true
+    },
+    {
+      "experiment_id": "exp-yoyo-eth-semantic-mvp",
+      "status": "rejected",
+      "question": "Without YOLO, using only OHLCV, SMA/EMA 20/60/120, ATR and 27 causal semantic features, can a LightGBM regressor rank MA-compression candidates so that the top of the ranking more often precedes a profitable SHORT?",
+      "result": "underperformed_matched_random_control. Validation spearman +0.167 (p=0.28) did not survive into test, where it reversed to -0.068 (p=0.68). The decisive line is the matched control (same symbol, same month, same ATR tercile, same horizon, same cost): control +19.9bp gross on validation against -14.6bp for the whole candidate pool, i.e. the compression pool was 34.5bp WORSE than random short entries; on test, -2.0bp against -39.1bp, worse by 37.1bp. The val top-decile +62.6bp sits on 5 samples during a falling-ETH window and is short beta, not model skill. On test the naive \"tighter is better\" dispersion baseline (+0.349, p=0.027) outranked the 27-feature model.",
+      "single_variable": "ranking model vs single-feature dispersion baseline",
+      "holdout_consumed": false,
+      "training_eligible": false,
+      "production_eligible": false,
+      "canonical_report": "experiments/historical/yoyo_eth/MVP_REPORT.md",
+      "reuse_allowed": true
+    }
+  ],
+  "artifacts": [
+    {
+      "artifact_id": "yoyo-eth-mvp-report",
+      "artifact_type": "report",
+      "role": "historical_conclusion",
+      "sha256": null,
+      "holdout_status": "pre_holdout",
+      "training_eligible": false,
+      "production_eligible": false
+    },
+    {
+      "artifact_id": "yoyo-eth-p03-anchored-walkforward-report",
+      "artifact_type": "report",
+      "role": "historical_conclusion",
+      "sha256": null,
+      "holdout_status": "pre_holdout",
+      "training_eligible": false,
+      "production_eligible": false
+    }
+  ],
+  "migrated_files": {
+    "DIRECT_PORT": [
+      "configs/numeric_baseline/iteration_v1.yaml",
+      "configs/numeric_baseline/mvp.yaml",
+      "configs/numeric_baseline/walkforward.yaml",
+      "experiments/historical/yoyo_eth/ITERATION_V1_REPORT.md",
+      "experiments/historical/yoyo_eth/metrics_iteration_v1.json",
+      "experiments/historical/yoyo_eth/metrics_mvp.json",
+      "experiments/historical/yoyo_eth/metrics_p02_walkforward.json",
+      "experiments/historical/yoyo_eth/metrics_p03_anchored_wf.json",
+      "experiments/historical/yoyo_eth/platform_v2_scan_stats.json",
+      "experiments/historical/yoyo_eth/run_manifest_iteration_v1.json",
+      "yoyo/layers/l1_detection/numeric_baseline/__init__.py",
+      "yoyo/layers/l1_detection/numeric_baseline/anchor.py",
+      "yoyo/layers/l1_detection/numeric_baseline/data.py",
+      "yoyo/layers/l1_detection/numeric_baseline/dataset.py",
+      "yoyo/layers/l1_detection/numeric_baseline/evaluate.py",
+      "yoyo/layers/l1_detection/numeric_baseline/features.py",
+      "yoyo/layers/l1_detection/numeric_baseline/indicators.py",
+      "yoyo/layers/l1_detection/numeric_baseline/labels.py",
+      "yoyo/layers/l1_detection/numeric_baseline/render.py",
+      "yoyo/layers/l1_detection/numeric_baseline/scanner.py",
+      "yoyo/layers/l1_detection/numeric_baseline/train.py",
+      "yoyo/layers/l1_detection/numeric_baseline/walkforward.py"
+    ],
+    "HISTORICAL_REPORT": [
+      "experiments/historical/yoyo_eth/MVP_REPORT.md",
+      "experiments/historical/yoyo_eth/P02_WALKFORWARD_REPORT.md",
+      "experiments/historical/yoyo_eth/P03_ANCHORED_WF_REPORT.md"
+    ]
+  },
+  "holdout_consumed_by_this_repo": []
+}

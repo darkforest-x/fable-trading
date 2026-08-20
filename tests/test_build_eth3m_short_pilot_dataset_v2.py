@@ -22,7 +22,7 @@ def test_pre_holdout_loader_reads_exact_continuous_prefix(tmp_path: Path) -> Non
     times = pd.date_range(start, periods=12, freq=BAR_DELTA)
     frame = pd.DataFrame(
         {
-            "ts": times.view("int64") // 1_000_000,
+            "ts": times.as_unit("ms").astype("int64"),
             "open": range(12),
             "high": range(1, 13),
             "low": range(12),

@@ -1,4 +1,21 @@
-# 文档地图（2026-08-03）
+# 文档地图（2026-08-20 单仓收敛后）
+
+## 四份权威文档，各管一段，不重叠
+
+| 文件 | 管什么 | 变化频率 |
+|---|---|---|
+| [`HANDOFF.md`](../HANDOFF.md) 顶部 | **当前真相**：进行到哪、在等什么、下一条允许的动作 | 每轮 |
+| [`CLAUDE.md`](../CLAUDE.md) = `AGENTS.md` | **铁律与实盘纪律** | 很少 |
+| [`ROADMAP.md`](../ROADMAP.md) | **阶段与门**（P0–P5 的通过条件） | 阶段推进时 |
+| [`docs/PROJECT_CHARTER.md`](PROJECT_CHARTER.md) | **结构与流程**：东西放哪、一轮怎么走 | 几乎不变 |
+
+**写新文档之前先问：这属于上面哪一段？** 答不上来就说明它该进
+`analysis/pXX_report.md`（单次实验）或 `docs/learnings/`（非平凡教训），
+而不是变成第五份权威文档——五个仓各有一份 HANDOFF 的教训刚付过。
+
+本文件是**索引**，不是内容。
+
+---
 
 **唯一实时状态**：仓库根目录 [`HANDOFF.md`](../HANDOFF.md) 顶部。  
 **本周执行**：[`analysis/week_plan_20260720.md`](../analysis/week_plan_20260720.md)。  
@@ -9,6 +26,7 @@
 | 文件 | 角色 |
 |---|---|
 | `HANDOFF.md` | 当前真相、holdout 账本、进行中 |
+| `docs/PROJECT_CHARTER.md` | **项目章程：结构与流程、东西放哪、一轮怎么走** |
 | `CLAUDE.md` / `AGENTS.md` | 铁律 + 实盘纪律（两文件保持同步,由 pre-commit 钩子强制;新克隆需 `git config core.hooksPath scripts/hooks`） |
 | `README.md` | 动机/架构/怎么跑（不堆日报） |
 | `docs/ARCHITECTURE.md` | 现行系统图与模块地图 |

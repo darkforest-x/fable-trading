@@ -131,3 +131,25 @@ external/Kronos/
 
 # local agent / fabric mesh runtime
 .pi/
+
+# Review-pack images: regenerable from the manifest beside them, and ls_pack
+# alone is 1.0 GB of JPEG. The manifests, answer keys and pages stay tracked so
+# a pack can be rebuilt byte-for-byte from what is committed.
+/reports/ls_pack/img/
+/reports/unmatched_review/img/
+/reports/phase_pilot/img/
+
+# ---- 单仓收敛回迁的大体积产物（2026-08-20，owner 指示"全部迁移过来，大文件不提交"）----
+# archive/consolidated/<repo>/ 下是四个来源仓的 20.5 GB / 300k 个产物，
+# 用 APFS 写时复制克隆进来（占用增量 ~0），源仓保持完好。
+# 有价值的文本已按 provenance 选择性迁到 datasets/annotations/、datasets/manifests/、
+# experiments/historical/，并记进 reports/consolidation/migration_ledger.jsonl。
+# 这棵树是整体备份，不是策展来源——**整体不入 git**。
+#
+# 写成 `archive/consolidated/**` 而不是 `archive/consolidated/`：实测过，目录级排除会让
+# 其下所有 `!` 否定规则失效（git 不下降进去），glob 形式则保留否定能力。
+# 见 docs/learnings/directory-level-gitignore-kills-every-negation-below-it.md
+archive/consolidated/**
+# 两个例外：说明这棵树是什么，以及它包含什么。没有它们，20 GB 就是一堆无名文件。
+!archive/consolidated/README.md
+!archive/consolidated/MANIFEST.json

@@ -131,7 +131,7 @@ class TestForwardScanStamping:
         opens = base
         closes = base + rng.normal(0, 0.25, n_bars)
         return pd.DataFrame({
-            "ts": (open_time.view("int64") // 10**6),
+            "ts": open_time.as_unit("ms").astype("int64"),
             "open": opens,
             "high": pd.Series(opens).combine(pd.Series(closes), max) + spread,
             "low": pd.Series(opens).combine(pd.Series(closes), min) - spread,

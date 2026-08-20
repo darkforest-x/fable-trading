@@ -8,6 +8,21 @@
 > 文档索引:[`docs/DOC_MAP.md`](docs/DOC_MAP.md)。  
 > 本 README 讲不随进度变化的东西:动机、架构、纪律、怎么跑。
 
+> **本仓是唯一 ACTIVE 交易研究仓（2026-08-19 单仓收敛完成）。**
+> `darkforest-one` / `yolo-xx` / `yoyo-trading` / `yoyo-eth` 四个卫星仓的有效能力已回迁，
+> 转为只读归档，不再开发。新实验一律进 `experiments/active/<experiment_id>/`，**不开新仓**。
+> 迁移台账 `reports/consolidation/migration_ledger.jsonl`；
+> 验收 [`reports/consolidation/FINAL_ACCEPTANCE.md`](reports/consolidation/FINAL_ACCEPTANCE.md)；
+> 四仓历史结论 `experiments/historical/`。
+>
+> 代码包名是 `yoyo`（`yoyo/contracts` + `yoyo/layers/l1..l4` + `yoyo/data` + `yoyo/evaluation`）；
+> `src/` 下 23 个模块是转发壳，旧 import 仍可用。新代码写进 `yoyo/`。
+>
+> **YOLO 是 Pattern Teacher，不是默认的生产触发器**——旧 detector 完整上下文复现率
+> 62–72%，Tip 只有 9–10%。候选是 proposal，进不了下单路径（`yoyo/contracts/candidates.py`）。
+>
+> **当前研究阶段只允许 P0（形态定义与重复标注稳定性）→ P1（Gold Dataset）。**
+
 ## 架构
 
 ```

@@ -11,6 +11,10 @@ from scripts import audit_p2m_mechanism_20260803 as audit
 from src.judgment.p1_dataset import load_immutable_dataset
 from src.judgment.p2_protocol import HOLDOUT_CUTOFF
 
+from conftest import requires_repo_data
+
+pytestmark = requires_repo_data("data/p1/p1_short_l2_preholdout_aade2a334448d644.manifest.json")
+
 
 @pytest.fixture(scope="module")
 def derived_frame() -> pd.DataFrame:

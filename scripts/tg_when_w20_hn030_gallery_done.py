@@ -15,9 +15,6 @@ from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
-_YOYO = Path.home() / "yoyo-trading"
-if _YOYO.is_dir():
-    sys.path.insert(0, str(_YOYO))
 os.environ.setdefault("YOYO_DATA_ROOT", str(PROJECT))
 
 from src.notify import send, send_photo  # noqa: E402

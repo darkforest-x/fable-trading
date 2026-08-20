@@ -1,0 +1,3036 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-19T17:08:56+00:00",
+  "generated_by": "tools/consolidation/build_source_asset_registry.py",
+  "holdout_consumed_during_consolidation": false,
+  "source_head_shas": {
+    "fable-trading": "59e13a61c43e1e72f397f38985fd8c700533550b",
+    "darkforest-one": "fd36dd1adc5844f241122c3853eb4d3e675a9c11",
+    "yolo-xx": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+    "yoyo-trading": "784766de45a3b876c986d3ba672779124b46a66f",
+    "yoyo-eth": "6147810afb46be1c664128e9a5359e8e7d0a3923"
+  },
+  "totals": {
+    "assets_recorded": 165,
+    "by_decision": {
+      "ADAPT_AND_PORT": 7,
+      "DIRECT_PORT": 127,
+      "HISTORICAL_REPORT": 28,
+      "REFERENCE_ONLY": 3
+    },
+    "by_repo": {
+      "darkforest-x/darkforest-one": {
+        "ADAPT_AND_PORT": 2,
+        "HISTORICAL_REPORT": 7
+      },
+      "darkforest-x/yolo-xx": {
+        "ADAPT_AND_PORT": 4,
+        "DIRECT_PORT": 8,
+        "HISTORICAL_REPORT": 10
+      },
+      "darkforest-x/yoyo-eth": {
+        "DIRECT_PORT": 22,
+        "HISTORICAL_REPORT": 3
+      },
+      "darkforest-x/yoyo-trading": {
+        "ADAPT_AND_PORT": 1,
+        "DIRECT_PORT": 97,
+        "HISTORICAL_REPORT": 8,
+        "REFERENCE_ONLY": 3
+      }
+    },
+    "artifacts_registered": 9,
+    "experiments_registered": 12
+  },
+  "assets": [
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/darkforest_one/ROADMAP_at_freeze.md",
+      "destination_sha256": "6cffca775c9d6b83ddd921cc7fd70bd828fa916717def2260af2520132fd9105",
+      "holdout_consumed": false,
+      "reason": "darkforest-one's three architecture decision records and its protocol document. These are the engineering rationale that C1/C3 ported the mechanics of; the ROADMAP is the evidence that P2 was never started, which corrects the task book.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 3246,
+      "source_commit": "fd36dd1adc5844f241122c3853eb4d3e675a9c11",
+      "source_path": "ROADMAP.md",
+      "source_repo": "darkforest-x/darkforest-one",
+      "source_sha256": "6cffca775c9d6b83ddd921cc7fd70bd828fa916717def2260af2520132fd9105",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/darkforest_one/config_base.yaml",
+      "destination_sha256": "849b1a8bfa11b3c39a1f19b8f67ac9ca0c584036c548739b1e636971df728726",
+      "holdout_consumed": false,
+      "reason": "darkforest-one's architecture document and its frozen config. The ADRs explain the decisions; ARCHITECTURE.md explains the shape they produced, and base.yaml is the only instance of the fail-closed config schema that was REFERENCE_ONLY'd -- keeping it makes that decision inspectable rather than described.",
+      "recorded_at": "2026-08-19T17:06:37+00:00",
+      "reference_pointer": null,
+      "size_bytes": 1265,
+      "source_commit": "fd36dd1adc5844f241122c3853eb4d3e675a9c11",
+      "source_path": "configs/base.yaml",
+      "source_repo": "darkforest-x/darkforest-one",
+      "source_sha256": "849b1a8bfa11b3c39a1f19b8f67ac9ca0c584036c548739b1e636971df728726",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/darkforest_one/ARCHITECTURE.md",
+      "destination_sha256": "4e679d96d4fe8e10699d23130c9e045f28b9fd9c3775dda2d78536ba47ebe6f7",
+      "holdout_consumed": false,
+      "reason": "darkforest-one's architecture document and its frozen config. The ADRs explain the decisions; ARCHITECTURE.md explains the shape they produced, and base.yaml is the only instance of the fail-closed config schema that was REFERENCE_ONLY'd -- keeping it makes that decision inspectable rather than described.",
+      "recorded_at": "2026-08-19T17:06:37+00:00",
+      "reference_pointer": null,
+      "size_bytes": 3334,
+      "source_commit": "fd36dd1adc5844f241122c3853eb4d3e675a9c11",
+      "source_path": "docs/ARCHITECTURE.md",
+      "source_repo": "darkforest-x/darkforest-one",
+      "source_sha256": "4e679d96d4fe8e10699d23130c9e045f28b9fd9c3775dda2d78536ba47ebe6f7",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/darkforest_one/PROTOCOL.md",
+      "destination_sha256": "4227f2d24637b6999dc1fee0d3d5dec4009af635589b5458eafac701a80cc572",
+      "holdout_consumed": false,
+      "reason": "darkforest-one's three architecture decision records and its protocol document. These are the engineering rationale that C1/C3 ported the mechanics of; the ROADMAP is the evidence that P2 was never started, which corrects the task book.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 3860,
+      "source_commit": "fd36dd1adc5844f241122c3853eb4d3e675a9c11",
+      "source_path": "docs/PROTOCOL.md",
+      "source_repo": "darkforest-x/darkforest-one",
+      "source_sha256": "4227f2d24637b6999dc1fee0d3d5dec4009af635589b5458eafac701a80cc572",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/darkforest_one/adr-0001-minimal-causal-core.md",
+      "destination_sha256": "6536124f335311eea644c180db2819586887ba80102437c60b150d47520e4aae",
+      "holdout_consumed": false,
+      "reason": "darkforest-one's three architecture decision records and its protocol document. These are the engineering rationale that C1/C3 ported the mechanics of; the ROADMAP is the evidence that P2 was never started, which corrects the task book.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 863,
+      "source_commit": "fd36dd1adc5844f241122c3853eb4d3e675a9c11",
+      "source_path": "docs/decisions/0001-minimal-causal-core.md",
+      "source_repo": "darkforest-x/darkforest-one",
+      "source_sha256": "6536124f335311eea644c180db2819586887ba80102437c60b150d47520e4aae",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/darkforest_one/adr-0002-canonical-okx-data.md",
+      "destination_sha256": "f5b6e1b7b25bdf43028728231a829058dfe00670345c880603ec77d5e55b3a4c",
+      "holdout_consumed": false,
+      "reason": "darkforest-one's three architecture decision records and its protocol document. These are the engineering rationale that C1/C3 ported the mechanics of; the ROADMAP is the evidence that P2 was never started, which corrects the task book.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 2502,
+      "source_commit": "fd36dd1adc5844f241122c3853eb4d3e675a9c11",
+      "source_path": "docs/decisions/0002-canonical-okx-data.md",
+      "source_repo": "darkforest-x/darkforest-one",
+      "source_sha256": "f5b6e1b7b25bdf43028728231a829058dfe00670345c880603ec77d5e55b3a4c",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/darkforest_one/adr-0003-causal-candidates-and-controls.md",
+      "destination_sha256": "c256ad76358225867ccb3e011e636547190d1aa26b066a55143be757c719437f",
+      "holdout_consumed": false,
+      "reason": "darkforest-one's three architecture decision records and its protocol document. These are the engineering rationale that C1/C3 ported the mechanics of; the ROADMAP is the evidence that P2 was never started, which corrects the task book.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 1907,
+      "source_commit": "fd36dd1adc5844f241122c3853eb4d3e675a9c11",
+      "source_path": "docs/decisions/0003-causal-candidates-and-controls.md",
+      "source_repo": "darkforest-x/darkforest-one",
+      "source_sha256": "c256ad76358225867ccb3e011e636547190d1aa26b066a55143be757c719437f",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "ADAPT_AND_PORT",
+      "destination_path": "yoyo/data/continuity.py",
+      "destination_sha256": "4765001823c0c587190a7f2862a88d34e7dfc6c9f5b10dc9d9cd89ec535e1029",
+      "holdout_consumed": false,
+      "reason": "Closed-bar continuity and availability checks. Rewritten against pandas frames from this repository's canonical loader instead of a tuple of Bar dataclasses (task book C3.1), and dropped from Python 3.11 to 3.9 (no datetime.UTC, no slots=True). One behavioural change, deliberate: gaps are reported rather than raised. darkforest-one ingested one symbol and could refuse a whole series; this repository scans 200+ whose listing dates differ, so a raise would let the newest symbol take down the scan. assert_continuous() is there for builders that should refuse.",
+      "recorded_at": "2026-08-19T13:08:40+00:00",
+      "reference_pointer": null,
+      "size_bytes": 3581,
+      "source_commit": "fd36dd1adc5844f241122c3853eb4d3e675a9c11",
+      "source_path": "src/darkforest_one/data/validator.py",
+      "source_repo": "darkforest-x/darkforest-one",
+      "source_sha256": "55159e6d512d82f317dc758c485f271ae344c3e983334fa997ad7a1e8a33cb37",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_continuity_and_availability.py"
+      ]
+    },
+    {
+      "decision": "ADAPT_AND_PORT",
+      "destination_path": "yoyo/artifacts/lineage.py",
+      "destination_sha256": "4d406a297faab2caef26cf0f92408e5438e998fbae02c68b0d6815dc54eafce0",
+      "holdout_consumed": false,
+      "reason": "Artifact lineage: file digests, canonical-JSON config hashing, and a run manifest that names the code, config and inputs by hash rather than by path. Adapted to Python 3.9 and to this repository's registry vocabulary, and extended with two rules this repository paid for: assert_builder_landed_first (an artifact older than its builder's commit cannot be reproduced by anyone) and per-axis reproducibility (w20_midbox rebuilt 2635/2635 images byte-identically with 405 samples in the wrong split; one boolean cannot hold both facts).",
+      "recorded_at": "2026-08-19T13:08:40+00:00",
+      "reference_pointer": null,
+      "size_bytes": 1518,
+      "source_commit": "fd36dd1adc5844f241122c3853eb4d3e675a9c11",
+      "source_path": "src/darkforest_one/governance/manifest.py",
+      "source_repo": "darkforest-x/darkforest-one",
+      "source_sha256": "ed7babbe5c59dd98e83de51ba3a42af1168a13fe5209bb44a13824a1899d7001",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_artifact_lineage.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yolo_xx/PHASE0_EXPERIMENT_POSTMORTEM.md",
+      "destination_sha256": "69ca6b054a9554b24425d9801c4f411bcff619b35c70487e0783c2a71d2240a2",
+      "holdout_consumed": false,
+      "reason": "yolo-xx's conclusions: the teacher asset inventory (weight lineage and the digest that survives archiving), the formation and pattern-quality result series, the PU contamination audit, and the Phase 0 postmortem. These are the numbers behind 'YOLO is a teacher, not the tip trigger'.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 15917,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "reports/PHASE0_EXPERIMENT_POSTMORTEM.md",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "69ca6b054a9554b24425d9801c4f411bcff619b35c70487e0783c2a71d2240a2",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yolo_xx/formation_gpt_spec_vs_v1.md",
+      "destination_sha256": "11deae0799729254b67d3b8e48cf313aca77404ab0755a1193e502f802aa7326",
+      "holdout_consumed": false,
+      "reason": "yolo-xx's conclusions: the teacher asset inventory (weight lineage and the digest that survives archiving), the formation and pattern-quality result series, the PU contamination audit, and the Phase 0 postmortem. These are the numbers behind 'YOLO is a teacher, not the tip trigger'.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 5447,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "reports/formation_gpt_spec_vs_v1.md",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "11deae0799729254b67d3b8e48cf313aca77404ab0755a1193e502f802aa7326",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yolo_xx/formation_model_v1.md",
+      "destination_sha256": "42add4f8fcfc7cb95ba7b5f33057926cb8739fa184efde33b35af77632a39f47",
+      "holdout_consumed": false,
+      "reason": "yolo-xx's conclusions: the teacher asset inventory (weight lineage and the digest that survives archiving), the formation and pattern-quality result series, the PU contamination audit, and the Phase 0 postmortem. These are the numbers behind 'YOLO is a teacher, not the tip trigger'.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 5668,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "reports/formation_model_v1.md",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "42add4f8fcfc7cb95ba7b5f33057926cb8739fa184efde33b35af77632a39f47",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yolo_xx/pattern_library_v1.md",
+      "destination_sha256": "600595acfd9a540cee5c62b64fbf1a7d21b008f9ba612ffb063ab1330a7cb2a8",
+      "holdout_consumed": false,
+      "reason": "yolo-xx's conclusions: the teacher asset inventory (weight lineage and the digest that survives archiving), the formation and pattern-quality result series, the PU contamination audit, and the Phase 0 postmortem. These are the numbers behind 'YOLO is a teacher, not the tip trigger'.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 5237,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "reports/pattern_library_v1.md",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "600595acfd9a540cee5c62b64fbf1a7d21b008f9ba612ffb063ab1330a7cb2a8",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yolo_xx/pattern_quality_v1.md",
+      "destination_sha256": "fa7ac9f5c74b597d4db9319ce6a1ba68f7ccdbc23c2bff1d87e6225303f99150",
+      "holdout_consumed": false,
+      "reason": "yolo-xx's conclusions: the teacher asset inventory (weight lineage and the digest that survives archiving), the formation and pattern-quality result series, the PU contamination audit, and the Phase 0 postmortem. These are the numbers behind 'YOLO is a teacher, not the tip trigger'.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 6029,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "reports/pattern_quality_v1.md",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "fa7ac9f5c74b597d4db9319ce6a1ba68f7ccdbc23c2bff1d87e6225303f99150",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yolo_xx/pattern_quality_v3_merged.md",
+      "destination_sha256": "bc59db1ddf78c7809fd247a7eb111da9b11a22b53aef8fdf7e2612810060dff6",
+      "holdout_consumed": false,
+      "reason": "yolo-xx's conclusions: the teacher asset inventory (weight lineage and the digest that survives archiving), the formation and pattern-quality result series, the PU contamination audit, and the Phase 0 postmortem. These are the numbers behind 'YOLO is a teacher, not the tip trigger'.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 6447,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "reports/pattern_quality_v3_merged.md",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "bc59db1ddf78c7809fd247a7eb111da9b11a22b53aef8fdf7e2612810060dff6",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yolo_xx/pattern_quality_v5_val_expanded.md",
+      "destination_sha256": "d63113e28eec642603ebbff8c0cc71c6416d3d53a59bcab941435b6b8ab46432",
+      "holdout_consumed": false,
+      "reason": "yolo-xx's conclusions: the teacher asset inventory (weight lineage and the digest that survives archiving), the formation and pattern-quality result series, the PU contamination audit, and the Phase 0 postmortem. These are the numbers behind 'YOLO is a teacher, not the tip trigger'.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 4517,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "reports/pattern_quality_v5_val_expanded.md",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "d63113e28eec642603ebbff8c0cc71c6416d3d53a59bcab941435b6b8ab46432",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yolo_xx/pattern_teacher_analysis.md",
+      "destination_sha256": "1d643fcc8a2941e0a840e901440d3d913c3acd238429668317d99a4b57af15f8",
+      "holdout_consumed": false,
+      "reason": "yolo-xx's conclusions: the teacher asset inventory (weight lineage and the digest that survives archiving), the formation and pattern-quality result series, the PU contamination audit, and the Phase 0 postmortem. These are the numbers behind 'YOLO is a teacher, not the tip trigger'.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 6281,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "reports/pattern_teacher_analysis.md",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "1d643fcc8a2941e0a840e901440d3d913c3acd238429668317d99a4b57af15f8",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yolo_xx/pattern_teacher_asset_inventory.md",
+      "destination_sha256": "084b58128f0e01c0020eb4c1713874493cfcd0827cf181e608fee2c6546227ef",
+      "holdout_consumed": false,
+      "reason": "yolo-xx's conclusions: the teacher asset inventory (weight lineage and the digest that survives archiving), the formation and pattern-quality result series, the PU contamination audit, and the Phase 0 postmortem. These are the numbers behind 'YOLO is a teacher, not the tip trigger'.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 8699,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "reports/pattern_teacher_asset_inventory.md",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "084b58128f0e01c0020eb4c1713874493cfcd0827cf181e608fee2c6546227ef",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yolo_xx/pu_contamination_audit.md",
+      "destination_sha256": "a2dd681829571593f918a5d414427541248346aedc85b54ebb8f3bf06871d3e0",
+      "holdout_consumed": false,
+      "reason": "yolo-xx's conclusions: the teacher asset inventory (weight lineage and the digest that survives archiving), the formation and pattern-quality result series, the PU contamination audit, and the Phase 0 postmortem. These are the numbers behind 'YOLO is a teacher, not the tip trigger'.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 3910,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "reports/pu_contamination_audit.md",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "a2dd681829571593f918a5d414427541248346aedc85b54ebb8f3bf06871d3e0",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/onset/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "holdout_consumed": false,
+      "reason": "Causal Onset v2/v3 event schema, validator, no-auto-onset migration and the progressive-reveal review pack. Ported with the pis/ package structure intact (events/ beside common/) so the relative imports and therefore the bytes are unchanged; only the top-level directory is renamed pis -> onset.",
+      "recorded_at": "2026-08-19T12:48:29+00:00",
+      "size_bytes": 0,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "src/yolo_xx/pis/__init__.py",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_onset_schema.py",
+        "tests/causality/test_review_pack_blinding.py",
+        "tests/causality/test_migration_no_auto_onset.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/onset/common/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "holdout_consumed": false,
+      "reason": "Causal Onset v2/v3 event schema, validator, no-auto-onset migration and the progressive-reveal review pack. Ported with the pis/ package structure intact (events/ beside common/) so the relative imports and therefore the bytes are unchanged; only the top-level directory is renamed pis -> onset.",
+      "recorded_at": "2026-08-19T12:48:29+00:00",
+      "size_bytes": 0,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "src/yolo_xx/pis/common/__init__.py",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_onset_schema.py",
+        "tests/causality/test_review_pack_blinding.py",
+        "tests/causality/test_migration_no_auto_onset.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/onset/common/hashing.py",
+      "destination_sha256": "328286a7a1023bfe38b3dea433975da2aaa30c38e390bd966aca87313d36e7f1",
+      "holdout_consumed": false,
+      "reason": "Causal Onset v2/v3 event schema, validator, no-auto-onset migration and the progressive-reveal review pack. Ported with the pis/ package structure intact (events/ beside common/) so the relative imports and therefore the bytes are unchanged; only the top-level directory is renamed pis -> onset.",
+      "recorded_at": "2026-08-19T12:48:29+00:00",
+      "size_bytes": 906,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "src/yolo_xx/pis/common/hashing.py",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "328286a7a1023bfe38b3dea433975da2aaa30c38e390bd966aca87313d36e7f1",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_onset_schema.py",
+        "tests/causality/test_review_pack_blinding.py",
+        "tests/causality/test_migration_no_auto_onset.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/onset/events/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "holdout_consumed": false,
+      "reason": "Causal Onset v2/v3 event schema, validator, no-auto-onset migration and the progressive-reveal review pack. Ported with the pis/ package structure intact (events/ beside common/) so the relative imports and therefore the bytes are unchanged; only the top-level directory is renamed pis -> onset.",
+      "recorded_at": "2026-08-19T12:48:29+00:00",
+      "size_bytes": 0,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "src/yolo_xx/pis/events/__init__.py",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_onset_schema.py",
+        "tests/causality/test_review_pack_blinding.py",
+        "tests/causality/test_migration_no_auto_onset.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/onset/events/migration.py",
+      "destination_sha256": "b68ebc2403b77478a762d7adf44efeb6575a574159c6d1c074cd118bb8945f45",
+      "holdout_consumed": false,
+      "reason": "Causal Onset v2/v3 event schema, validator, no-auto-onset migration and the progressive-reveal review pack. Ported with the pis/ package structure intact (events/ beside common/) so the relative imports and therefore the bytes are unchanged; only the top-level directory is renamed pis -> onset.",
+      "recorded_at": "2026-08-19T12:48:29+00:00",
+      "size_bytes": 3638,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "src/yolo_xx/pis/events/migration.py",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "b68ebc2403b77478a762d7adf44efeb6575a574159c6d1c074cd118bb8945f45",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_onset_schema.py",
+        "tests/causality/test_review_pack_blinding.py",
+        "tests/causality/test_migration_no_auto_onset.py"
+      ]
+    },
+    {
+      "decision": "ADAPT_AND_PORT",
+      "destination_path": "yoyo/layers/l1_detection/onset/events/render_frames.py",
+      "destination_sha256": "edb1c1ca187a97fe36cda0fa58aad305ed45ce3b9d8c8558a01b9c9dd27d8f2e",
+      "holdout_consumed": false,
+      "reason": "Dropped the fable_root/yoyo_root sys.path bridge and imported yoyo.data.loader and yoyo.layers.l1_detection.{data,render} directly. That bridge existed only because the renderer lived in another repository; consolidation removes the reason for it, and task book C3.1 requires migrated modules to reach data through the canonical interface rather than rediscovering paths at call time.",
+      "recorded_at": "2026-08-19T12:49:23+00:00",
+      "size_bytes": 2639,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "src/yolo_xx/pis/events/render_frames.py",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "50195882723e2d39c5532f7f305c725bad612be2f52390bf35fe81981042cfe3",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_render_frames_uses_canonical_imports.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/onset/events/review_pack.py",
+      "destination_sha256": "287442141f659720a76ef075886f37f2274fdcd0a042bfebde5ac1ec26938784",
+      "holdout_consumed": false,
+      "reason": "Causal Onset v2/v3 event schema, validator, no-auto-onset migration and the progressive-reveal review pack. Ported with the pis/ package structure intact (events/ beside common/) so the relative imports and therefore the bytes are unchanged; only the top-level directory is renamed pis -> onset.",
+      "recorded_at": "2026-08-19T12:48:29+00:00",
+      "size_bytes": 12086,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "src/yolo_xx/pis/events/review_pack.py",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "287442141f659720a76ef075886f37f2274fdcd0a042bfebde5ac1ec26938784",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_onset_schema.py",
+        "tests/causality/test_review_pack_blinding.py",
+        "tests/causality/test_migration_no_auto_onset.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/onset/events/schema.py",
+      "destination_sha256": "4d451ff544026c2d8b346646df8726f5ce7c0e73f5cc0592ebec84687d46daa6",
+      "holdout_consumed": false,
+      "reason": "Causal Onset v2/v3 event schema, validator, no-auto-onset migration and the progressive-reveal review pack. Ported with the pis/ package structure intact (events/ beside common/) so the relative imports and therefore the bytes are unchanged; only the top-level directory is renamed pis -> onset.",
+      "recorded_at": "2026-08-19T12:48:29+00:00",
+      "size_bytes": 5803,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "src/yolo_xx/pis/events/schema.py",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "4d451ff544026c2d8b346646df8726f5ce7c0e73f5cc0592ebec84687d46daa6",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_onset_schema.py",
+        "tests/causality/test_review_pack_blinding.py",
+        "tests/causality/test_migration_no_auto_onset.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/onset/events/validator.py",
+      "destination_sha256": "248498b151cbdb3e16b832cadec4f5e1bbd6916ea35d3414a95ca1abf97aef5f",
+      "holdout_consumed": false,
+      "reason": "Causal Onset v2/v3 event schema, validator, no-auto-onset migration and the progressive-reveal review pack. Ported with the pis/ package structure intact (events/ beside common/) so the relative imports and therefore the bytes are unchanged; only the top-level directory is renamed pis -> onset.",
+      "recorded_at": "2026-08-19T12:48:29+00:00",
+      "size_bytes": 4754,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "src/yolo_xx/pis/events/validator.py",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "248498b151cbdb3e16b832cadec4f5e1bbd6916ea35d3414a95ca1abf97aef5f",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_onset_schema.py",
+        "tests/causality/test_review_pack_blinding.py",
+        "tests/causality/test_migration_no_auto_onset.py"
+      ]
+    },
+    {
+      "decision": "ADAPT_AND_PORT",
+      "destination_path": "tests/causality/test_migration_no_auto_onset.py",
+      "destination_sha256": "1596495e4b478d922b24e048731c88f37eefcfccfc8a62e0c8cfbb1876065e75",
+      "holdout_consumed": false,
+      "reason": "Causal onset tests. Only the import prefix moves with the package rename (yolo_xx.pis.events -> yoyo.layers.l1_detection.onset.events); every assertion, including the render-time blinding checks, is unchanged.",
+      "recorded_at": "2026-08-19T12:50:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 2892,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "tests/pis/events/test_migration_no_auto_onset.py",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "033b84b7ceb26a4e387831a966b5c2db7da42af060149ed611f44a5bcc72c0d8",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_onset_schema.py",
+        "tests/causality/test_review_pack_blinding.py",
+        "tests/causality/test_migration_no_auto_onset.py"
+      ]
+    },
+    {
+      "decision": "ADAPT_AND_PORT",
+      "destination_path": "tests/causality/test_review_pack_blinding.py",
+      "destination_sha256": "7c3a86e252345773217cc03641b4ff8b2a87df94b4ba99da16cee435689ec904",
+      "holdout_consumed": false,
+      "reason": "Causal onset tests. Only the import prefix moves with the package rename (yolo_xx.pis.events -> yoyo.layers.l1_detection.onset.events); every assertion, including the render-time blinding checks, is unchanged.",
+      "recorded_at": "2026-08-19T12:50:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 5574,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "tests/pis/events/test_review_pack_blinding.py",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "9495cc8519d1aa432edcbcbb9d76912be55cb3bf7ca3bec02e07abac19a801a5",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_onset_schema.py",
+        "tests/causality/test_review_pack_blinding.py",
+        "tests/causality/test_migration_no_auto_onset.py"
+      ]
+    },
+    {
+      "decision": "ADAPT_AND_PORT",
+      "destination_path": "tests/causality/test_onset_schema.py",
+      "destination_sha256": "ef34664f82a6bb750834163e70aac19857b2390046c27d1cb95bb0512cadc0c4",
+      "holdout_consumed": false,
+      "reason": "Causal onset tests. Only the import prefix moves with the package rename (yolo_xx.pis.events -> yoyo.layers.l1_detection.onset.events); every assertion, including the render-time blinding checks, is unchanged.",
+      "recorded_at": "2026-08-19T12:50:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 4252,
+      "source_commit": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "source_path": "tests/pis/events/test_schema.py",
+      "source_repo": "darkforest-x/yolo-xx",
+      "source_sha256": "e62f86793337b891efcbfbd2fa1d6c3251cb00bda1b72d7031c461f7f50173dd",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_onset_schema.py",
+        "tests/causality/test_review_pack_blinding.py",
+        "tests/causality/test_migration_no_auto_onset.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "experiments/historical/yoyo_eth/metrics_iteration_v1.json",
+      "destination_sha256": "48f7884ff6211e50cab00af1b9352577ad1778b459b57779e40078a9946535f2",
+      "holdout_consumed": false,
+      "reason": "yoyo-eth's remaining configuration and results: the walk-forward and iteration_v1 configs the P02/P03 reports were produced with, the iteration_v1 report itself, and the metrics JSONs those reports cite. Without the configs the migrated reproduction commands name files that are not here.",
+      "recorded_at": "2026-08-19T17:06:37+00:00",
+      "reference_pointer": null,
+      "size_bytes": 17192,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "artifacts/iteration_v1/metrics.json",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "48f7884ff6211e50cab00af1b9352577ad1778b459b57779e40078a9946535f2",
+      "status": "accepted",
+      "tests": [
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "experiments/historical/yoyo_eth/run_manifest_iteration_v1.json",
+      "destination_sha256": "bba338e9c1aa0fe9125cb93e0059d03d3d4de5cba83ce738b18a24d4533d177c",
+      "holdout_consumed": false,
+      "reason": "yoyo-eth's remaining configuration and results: the walk-forward and iteration_v1 configs the P02/P03 reports were produced with, the iteration_v1 report itself, and the metrics JSONs those reports cite. Without the configs the migrated reproduction commands name files that are not here.",
+      "recorded_at": "2026-08-19T17:06:37+00:00",
+      "reference_pointer": null,
+      "size_bytes": 1001,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "artifacts/iteration_v1/run_manifest.json",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "bba338e9c1aa0fe9125cb93e0059d03d3d4de5cba83ce738b18a24d4533d177c",
+      "status": "accepted",
+      "tests": [
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "experiments/historical/yoyo_eth/metrics_mvp.json",
+      "destination_sha256": "023aa28347e5b17b7b7b149b30c562735ad4c966eaa348c859134389a4574bc5",
+      "holdout_consumed": false,
+      "reason": "yoyo-eth's remaining configuration and results: the walk-forward and iteration_v1 configs the P02/P03 reports were produced with, the iteration_v1 report itself, and the metrics JSONs those reports cite. Without the configs the migrated reproduction commands name files that are not here.",
+      "recorded_at": "2026-08-19T17:06:37+00:00",
+      "reference_pointer": null,
+      "size_bytes": 13102,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "artifacts/metrics.json",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "023aa28347e5b17b7b7b149b30c562735ad4c966eaa348c859134389a4574bc5",
+      "status": "accepted",
+      "tests": [
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "experiments/historical/yoyo_eth/metrics_p02_walkforward.json",
+      "destination_sha256": "6de8a55c76f3d63e23f957734b3b2c51b0b5ae7a61cf03be98a4f0a27afbb804",
+      "holdout_consumed": false,
+      "reason": "yoyo-eth's remaining configuration and results: the walk-forward and iteration_v1 configs the P02/P03 reports were produced with, the iteration_v1 report itself, and the metrics JSONs those reports cite. Without the configs the migrated reproduction commands name files that are not here.",
+      "recorded_at": "2026-08-19T17:06:37+00:00",
+      "reference_pointer": null,
+      "size_bytes": 14632,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "artifacts/p02/metrics_walkforward.json",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "6de8a55c76f3d63e23f957734b3b2c51b0b5ae7a61cf03be98a4f0a27afbb804",
+      "status": "accepted",
+      "tests": [
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "experiments/historical/yoyo_eth/metrics_p03_anchored_wf.json",
+      "destination_sha256": "a1ae2d0fe1bead365f734f4161623d1cd7089a060a55ee7bb560a3e06c1955c4",
+      "holdout_consumed": false,
+      "reason": "yoyo-eth's remaining configuration and results: the walk-forward and iteration_v1 configs the P02/P03 reports were produced with, the iteration_v1 report itself, and the metrics JSONs those reports cite. Without the configs the migrated reproduction commands name files that are not here.",
+      "recorded_at": "2026-08-19T17:06:37+00:00",
+      "reference_pointer": null,
+      "size_bytes": 5605,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "artifacts/p03_anchored_wf/metrics.json",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "a1ae2d0fe1bead365f734f4161623d1cd7089a060a55ee7bb560a3e06c1955c4",
+      "status": "accepted",
+      "tests": [
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "experiments/historical/yoyo_eth/platform_v2_scan_stats.json",
+      "destination_sha256": "90cecb667c722a1bcc91b74cd8f7d7f007df2a7900dc497c550f714ee9c42c60",
+      "holdout_consumed": false,
+      "reason": "yoyo-eth's remaining configuration and results: the walk-forward and iteration_v1 configs the P02/P03 reports were produced with, the iteration_v1 report itself, and the metrics JSONs those reports cite. Without the configs the migrated reproduction commands name files that are not here.",
+      "recorded_at": "2026-08-19T17:06:37+00:00",
+      "reference_pointer": null,
+      "size_bytes": 454,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "artifacts/platform_v2/scan_stats.json",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "90cecb667c722a1bcc91b74cd8f7d7f007df2a7900dc497c550f714ee9c42c60",
+      "status": "accepted",
+      "tests": [
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "configs/numeric_baseline/iteration_v1.yaml",
+      "destination_sha256": "13c84bc4e5ee3a1fe17e8879d897df6b151ddf6155fff873773032a665558ce2",
+      "holdout_consumed": false,
+      "reason": "yoyo-eth's remaining configuration and results: the walk-forward and iteration_v1 configs the P02/P03 reports were produced with, the iteration_v1 report itself, and the metrics JSONs those reports cite. Without the configs the migrated reproduction commands name files that are not here.",
+      "recorded_at": "2026-08-19T17:06:37+00:00",
+      "reference_pointer": null,
+      "size_bytes": 1472,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "configs/iteration_v1.yaml",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "13c84bc4e5ee3a1fe17e8879d897df6b151ddf6155fff873773032a665558ce2",
+      "status": "accepted",
+      "tests": [
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "configs/numeric_baseline/mvp.yaml",
+      "destination_sha256": "e575c2dfe533fbdfea38e20e85cae6aaf6db4f6d3eaca6ab758f2fb60a7e4ffe",
+      "holdout_consumed": false,
+      "reason": "The MVP configuration. Every knob the ported baseline reads, including the cost values that are owner decisions and the frozen data_end_boundary; without it the ported package has no reproducible entry point.",
+      "recorded_at": "2026-08-19T13:00:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 2187,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "configs/mvp.yaml",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "e575c2dfe533fbdfea38e20e85cae6aaf6db4f6d3eaca6ab758f2fb60a7e4ffe",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_holdout_boundary_is_single_valued.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "configs/numeric_baseline/walkforward.yaml",
+      "destination_sha256": "f17791afd172beddd3bd90c87640262ed57def933c3147257d5f77ccd1c94424",
+      "holdout_consumed": false,
+      "reason": "yoyo-eth's remaining configuration and results: the walk-forward and iteration_v1 configs the P02/P03 reports were produced with, the iteration_v1 report itself, and the metrics JSONs those reports cite. Without the configs the migrated reproduction commands name files that are not here.",
+      "recorded_at": "2026-08-19T17:06:37+00:00",
+      "reference_pointer": null,
+      "size_bytes": 1491,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "configs/walkforward.yaml",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "f17791afd172beddd3bd90c87640262ed57def933c3147257d5f77ccd1c94424",
+      "status": "accepted",
+      "tests": [
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yoyo_eth/MVP_REPORT.md",
+      "destination_sha256": "45022cc33543213f9b195020f6eccc62a977ee77e235c49fb847063fc64736db",
+      "holdout_consumed": false,
+      "reason": "The three reports that carry yoyo-eth's conclusions, including the one that matters most: the loose MA-compression pool underperformed its matched random control by 34.5bp on validation and 37.1bp on test. Migrated as history, not wired into any default run path.",
+      "recorded_at": "2026-08-19T16:41:06+00:00",
+      "reference_pointer": null,
+      "size_bytes": 8843,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "reports/MVP_REPORT.md",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "45022cc33543213f9b195020f6eccc62a977ee77e235c49fb847063fc64736db",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yoyo_eth/P02_WALKFORWARD_REPORT.md",
+      "destination_sha256": "f55c85cc6dfca8c7cf5a5e5ea7e188ecee9a6d8c6bc16777c46d8fd36973f23a",
+      "holdout_consumed": false,
+      "reason": "The three reports that carry yoyo-eth's conclusions, including the one that matters most: the loose MA-compression pool underperformed its matched random control by 34.5bp on validation and 37.1bp on test. Migrated as history, not wired into any default run path.",
+      "recorded_at": "2026-08-19T16:41:06+00:00",
+      "reference_pointer": null,
+      "size_bytes": 5909,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "reports/P02_WALKFORWARD_REPORT.md",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "f55c85cc6dfca8c7cf5a5e5ea7e188ecee9a6d8c6bc16777c46d8fd36973f23a",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yoyo_eth/P03_ANCHORED_WF_REPORT.md",
+      "destination_sha256": "3e64f47cd752400e820656a37ef7efbe497fe5d376f8eea7d5ba052d504a8a7d",
+      "holdout_consumed": false,
+      "reason": "The three reports that carry yoyo-eth's conclusions, including the one that matters most: the loose MA-compression pool underperformed its matched random control by 34.5bp on validation and 37.1bp on test. Migrated as history, not wired into any default run path.",
+      "recorded_at": "2026-08-19T16:41:06+00:00",
+      "reference_pointer": null,
+      "size_bytes": 3487,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "reports/P03_ANCHORED_WF_REPORT.md",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "3e64f47cd752400e820656a37ef7efbe497fe5d376f8eea7d5ba052d504a8a7d",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "experiments/historical/yoyo_eth/ITERATION_V1_REPORT.md",
+      "destination_sha256": "a2df9307091f8ee59b4bb8e338795215f7fcc7ff4f16136468f3c9a3f957634c",
+      "holdout_consumed": false,
+      "reason": "yoyo-eth's remaining configuration and results: the walk-forward and iteration_v1 configs the P02/P03 reports were produced with, the iteration_v1 report itself, and the metrics JSONs those reports cite. Without the configs the migrated reproduction commands name files that are not here.",
+      "recorded_at": "2026-08-19T17:06:37+00:00",
+      "reference_pointer": null,
+      "size_bytes": 10877,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "reports/iteration_v1/ITERATION_V1_REPORT.md",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "a2df9307091f8ee59b4bb8e338795215f7fcc7ff4f16136468f3c9a3f957634c",
+      "status": "accepted",
+      "tests": [
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/numeric_baseline/__init__.py",
+      "destination_sha256": "e9f3c8ccf38c85ad82665f6aa38374f9dd7aa5e7b5f6a65746fa94275e8ef09c",
+      "holdout_consumed": false,
+      "reason": "The numeric MA-compression baseline: causal indicators, the loose scanner with its three trigger definitions, 27 causal features, MFE/MAE short_utility labels, the anchored walk-forward harness and the matched random control. Ported byte-identical with relative imports intact, because the published MVP/P02/P03 numbers are reproduced by exactly this code and an edit would break the reproduction commands those reports state.",
+      "recorded_at": "2026-08-19T13:00:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 437,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "src/yoyo_eth/__init__.py",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "e9f3c8ccf38c85ad82665f6aa38374f9dd7aa5e7b5f6a65746fa94275e8ef09c",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_future_mutation.py",
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/numeric_baseline/anchor.py",
+      "destination_sha256": "f67bb85833ca71485e8608bc14e3f5823048902cde57b576a833e10f0d157e12",
+      "holdout_consumed": false,
+      "reason": "The numeric MA-compression baseline: causal indicators, the loose scanner with its three trigger definitions, 27 causal features, MFE/MAE short_utility labels, the anchored walk-forward harness and the matched random control. Ported byte-identical with relative imports intact, because the published MVP/P02/P03 numbers are reproduced by exactly this code and an edit would break the reproduction commands those reports state.",
+      "recorded_at": "2026-08-19T13:00:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 8084,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "src/yoyo_eth/anchor.py",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "f67bb85833ca71485e8608bc14e3f5823048902cde57b576a833e10f0d157e12",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_future_mutation.py",
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/numeric_baseline/data.py",
+      "destination_sha256": "9e20b7feb07dbdb42ee5fb579d73f94d0bc82592de44062b341a7f39cec07698",
+      "holdout_consumed": false,
+      "reason": "The numeric MA-compression baseline: causal indicators, the loose scanner with its three trigger definitions, 27 causal features, MFE/MAE short_utility labels, the anchored walk-forward harness and the matched random control. Ported byte-identical with relative imports intact, because the published MVP/P02/P03 numbers are reproduced by exactly this code and an edit would break the reproduction commands those reports state.",
+      "recorded_at": "2026-08-19T13:00:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 4228,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "src/yoyo_eth/data.py",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "9e20b7feb07dbdb42ee5fb579d73f94d0bc82592de44062b341a7f39cec07698",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_future_mutation.py",
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/numeric_baseline/dataset.py",
+      "destination_sha256": "e29fe50c4219d935674612d98e5d5856783e0a7ba8995d8314a9e7deaaefb01f",
+      "holdout_consumed": false,
+      "reason": "The numeric MA-compression baseline: causal indicators, the loose scanner with its three trigger definitions, 27 causal features, MFE/MAE short_utility labels, the anchored walk-forward harness and the matched random control. Ported byte-identical with relative imports intact, because the published MVP/P02/P03 numbers are reproduced by exactly this code and an edit would break the reproduction commands those reports state.",
+      "recorded_at": "2026-08-19T13:00:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 2536,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "src/yoyo_eth/dataset.py",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "e29fe50c4219d935674612d98e5d5856783e0a7ba8995d8314a9e7deaaefb01f",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_future_mutation.py",
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/numeric_baseline/evaluate.py",
+      "destination_sha256": "c00b24be52ea22cf1e6f7ee461aaa64e3c9f866fb7d1476725f4426cc03c2224",
+      "holdout_consumed": false,
+      "reason": "The numeric MA-compression baseline: causal indicators, the loose scanner with its three trigger definitions, 27 causal features, MFE/MAE short_utility labels, the anchored walk-forward harness and the matched random control. Ported byte-identical with relative imports intact, because the published MVP/P02/P03 numbers are reproduced by exactly this code and an edit would break the reproduction commands those reports state.",
+      "recorded_at": "2026-08-19T13:00:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 6055,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "src/yoyo_eth/evaluate.py",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "c00b24be52ea22cf1e6f7ee461aaa64e3c9f866fb7d1476725f4426cc03c2224",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_future_mutation.py",
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/numeric_baseline/features.py",
+      "destination_sha256": "66be1d92a168cede56517daba09dc291ad1523e771c5cff9111ceae30034175f",
+      "holdout_consumed": false,
+      "reason": "The numeric MA-compression baseline: causal indicators, the loose scanner with its three trigger definitions, 27 causal features, MFE/MAE short_utility labels, the anchored walk-forward harness and the matched random control. Ported byte-identical with relative imports intact, because the published MVP/P02/P03 numbers are reproduced by exactly this code and an edit would break the reproduction commands those reports state.",
+      "recorded_at": "2026-08-19T13:00:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 7551,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "src/yoyo_eth/features.py",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "66be1d92a168cede56517daba09dc291ad1523e771c5cff9111ceae30034175f",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_future_mutation.py",
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/numeric_baseline/indicators.py",
+      "destination_sha256": "4590e407f7b11d544a8c801fcd961c346bfaf90e07db5e55305f397837c6fe2a",
+      "holdout_consumed": false,
+      "reason": "The numeric MA-compression baseline: causal indicators, the loose scanner with its three trigger definitions, 27 causal features, MFE/MAE short_utility labels, the anchored walk-forward harness and the matched random control. Ported byte-identical with relative imports intact, because the published MVP/P02/P03 numbers are reproduced by exactly this code and an edit would break the reproduction commands those reports state.",
+      "recorded_at": "2026-08-19T13:00:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 1751,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "src/yoyo_eth/indicators.py",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "4590e407f7b11d544a8c801fcd961c346bfaf90e07db5e55305f397837c6fe2a",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_future_mutation.py",
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/numeric_baseline/labels.py",
+      "destination_sha256": "2a5b6e3f9a224c1bb24deffb9f586bf714183b57a318b16f77f26f9631aa1d59",
+      "holdout_consumed": false,
+      "reason": "The numeric MA-compression baseline: causal indicators, the loose scanner with its three trigger definitions, 27 causal features, MFE/MAE short_utility labels, the anchored walk-forward harness and the matched random control. Ported byte-identical with relative imports intact, because the published MVP/P02/P03 numbers are reproduced by exactly this code and an edit would break the reproduction commands those reports state.",
+      "recorded_at": "2026-08-19T13:00:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 4545,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "src/yoyo_eth/labels.py",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "2a5b6e3f9a224c1bb24deffb9f586bf714183b57a318b16f77f26f9631aa1d59",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_future_mutation.py",
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/numeric_baseline/render.py",
+      "destination_sha256": "167015e21d079e732bbeacb36d943b6fe76bad767a9fffbcde858582565a1450",
+      "holdout_consumed": false,
+      "reason": "The numeric MA-compression baseline: causal indicators, the loose scanner with its three trigger definitions, 27 causal features, MFE/MAE short_utility labels, the anchored walk-forward harness and the matched random control. Ported byte-identical with relative imports intact, because the published MVP/P02/P03 numbers are reproduced by exactly this code and an edit would break the reproduction commands those reports state.",
+      "recorded_at": "2026-08-19T13:00:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 6694,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "src/yoyo_eth/render.py",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "167015e21d079e732bbeacb36d943b6fe76bad767a9fffbcde858582565a1450",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_future_mutation.py",
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/numeric_baseline/scanner.py",
+      "destination_sha256": "29cd68c3efaf6b0fa1a694f6ac15c255596e24a43afb9a15be0e82b1b78182a8",
+      "holdout_consumed": false,
+      "reason": "The numeric MA-compression baseline: causal indicators, the loose scanner with its three trigger definitions, 27 causal features, MFE/MAE short_utility labels, the anchored walk-forward harness and the matched random control. Ported byte-identical with relative imports intact, because the published MVP/P02/P03 numbers are reproduced by exactly this code and an edit would break the reproduction commands those reports state.",
+      "recorded_at": "2026-08-19T13:00:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 5946,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "src/yoyo_eth/scanner.py",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "29cd68c3efaf6b0fa1a694f6ac15c255596e24a43afb9a15be0e82b1b78182a8",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_future_mutation.py",
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/numeric_baseline/train.py",
+      "destination_sha256": "aa41c7d29defccd180d4172e56bd85cb49ab374a462b009fca897b67632d7935",
+      "holdout_consumed": false,
+      "reason": "The numeric MA-compression baseline: causal indicators, the loose scanner with its three trigger definitions, 27 causal features, MFE/MAE short_utility labels, the anchored walk-forward harness and the matched random control. Ported byte-identical with relative imports intact, because the published MVP/P02/P03 numbers are reproduced by exactly this code and an edit would break the reproduction commands those reports state.",
+      "recorded_at": "2026-08-19T13:00:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 2238,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "src/yoyo_eth/train.py",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "aa41c7d29defccd180d4172e56bd85cb49ab374a462b009fca897b67632d7935",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_future_mutation.py",
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/numeric_baseline/walkforward.py",
+      "destination_sha256": "4fc2237111a6cfa41196d0b45a32e56597c6e4d4d8951b0bd62b453fb97558af",
+      "holdout_consumed": false,
+      "reason": "The numeric MA-compression baseline: causal indicators, the loose scanner with its three trigger definitions, 27 causal features, MFE/MAE short_utility labels, the anchored walk-forward harness and the matched random control. Ported byte-identical with relative imports intact, because the published MVP/P02/P03 numbers are reproduced by exactly this code and an edit would break the reproduction commands those reports state.",
+      "recorded_at": "2026-08-19T13:00:56+00:00",
+      "reference_pointer": null,
+      "size_bytes": 7841,
+      "source_commit": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "source_path": "src/yoyo_eth/walkforward.py",
+      "source_repo": "darkforest-x/yoyo-eth",
+      "source_sha256": "4fc2237111a6cfa41196d0b45a32e56597c6e4d4d8951b0bd62b453fb97558af",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_future_mutation.py",
+        "tests/parity/test_numeric_baseline_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "configs/labelstudio/gold_annotation_v1.json",
+      "destination_sha256": "b5cf2a70d8223925ba1c47fce0bb4b2b354bcb31d625d23ba2478702c942b5ea",
+      "holdout_consumed": false,
+      "reason": "Label Studio Gold annotation configuration. The XML labelling interface and the annotation protocol JSON are the contract between owner's screen and the gold schema; they must live beside the code that parses their export.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 477,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "configs/gold_annotation_v1.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "b5cf2a70d8223925ba1c47fce0bb4b2b354bcb31d625d23ba2478702c942b5ea",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "configs/labelstudio/labelstudio_gold_v1.xml",
+      "destination_sha256": "a2b5466bb089499924bbb16831497f859b77649558797c2316e5f4e8a4cbdb12",
+      "holdout_consumed": false,
+      "reason": "Label Studio Gold annotation configuration. The XML labelling interface and the annotation protocol JSON are the contract between owner's screen and the gold schema; they must live beside the code that parses their export.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 1127,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "configs/labelstudio_gold_v1.xml",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "a2b5466bb089499924bbb16831497f859b77649558797c2316e5f4e8a4cbdb12",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/manifests/dataset_v3_1_position_spread_v1_data.yaml",
+      "destination_sha256": "e5e83e50317b4ab1b7a1944a1f6912225dfa174a28b7e4fd0fda02b642248be2",
+      "holdout_consumed": false,
+      "reason": "The remaining Dataset V3 manifests and their YOLO data.yaml. The V3.2 reviewed-core manifest is the row-level identity of the owner-reviewed set that experiments/registry.yaml cites; the two 4 MiB gold-core and position-spread manifests are REFERENCE_ONLY below.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 137,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "datasets/dataset_v3_1_position_spread_v1/data.yaml",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "e5e83e50317b4ab1b7a1944a1f6912225dfa174a28b7e4fd0fda02b642248be2",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "REFERENCE_ONLY",
+      "destination_path": null,
+      "destination_sha256": null,
+      "holdout_consumed": false,
+      "reason": "4 MiB row-level image manifest for a V3 dataset whose images stay in the archived repository. The summary JSON in datasets/manifests/ carries the dataset's identity and SHA; these rows only matter alongside the pixels they index, and both are recoverable at this commit.",
+      "recorded_at": "2026-08-19T17:06:37+00:00",
+      "reference_pointer": "darkforest-x/yoyo-trading@784766de:datasets/dataset_v3_1_position_spread_v1/manifest.jsonl",
+      "size_bytes": 4557867,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "datasets/dataset_v3_1_position_spread_v1/manifest.jsonl",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "1e6f087a8a5c7f5918f44da9b9d3f54694518228034760edee119ef311bc7b3e",
+      "status": "accepted",
+      "tests": [
+        "tests/parity/test_migration_ledger_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/manifests/dataset_v3_2_reviewed_core_v1_data.yaml",
+      "destination_sha256": "03f57d066f311c83be2e0f29672e92be751458950bcb163794081ac8793692b2",
+      "holdout_consumed": false,
+      "reason": "The remaining Dataset V3 manifests and their YOLO data.yaml. The V3.2 reviewed-core manifest is the row-level identity of the owner-reviewed set that experiments/registry.yaml cites; the two 4 MiB gold-core and position-spread manifests are REFERENCE_ONLY below.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 135,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "datasets/dataset_v3_2_reviewed_core_v1/data.yaml",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "03f57d066f311c83be2e0f29672e92be751458950bcb163794081ac8793692b2",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/manifests/dataset_v3_2_reviewed_core_v1_rows.jsonl",
+      "destination_sha256": "fe097d77fed028323dbcd7c1afa7240592eff11783232caa801cfd541af2b4e9",
+      "holdout_consumed": false,
+      "reason": "The remaining Dataset V3 manifests and their YOLO data.yaml. The V3.2 reviewed-core manifest is the row-level identity of the owner-reviewed set that experiments/registry.yaml cites; the two 4 MiB gold-core and position-spread manifests are REFERENCE_ONLY below.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 305650,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "datasets/dataset_v3_2_reviewed_core_v1/manifest.jsonl",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "fe097d77fed028323dbcd7c1afa7240592eff11783232caa801cfd541af2b4e9",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/manifests/dataset_v3_gold_core_v1_data.yaml",
+      "destination_sha256": "469f6189f18dd86eb92d8453ee81e3ae687f471a846b4e732cf084ceb1d52e6f",
+      "holdout_consumed": false,
+      "reason": "The remaining Dataset V3 manifests and their YOLO data.yaml. The V3.2 reviewed-core manifest is the row-level identity of the owner-reviewed set that experiments/registry.yaml cites; the two 4 MiB gold-core and position-spread manifests are REFERENCE_ONLY below.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 129,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "datasets/dataset_v3_gold_core_v1/data.yaml",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "469f6189f18dd86eb92d8453ee81e3ae687f471a846b4e732cf084ceb1d52e6f",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "REFERENCE_ONLY",
+      "destination_path": null,
+      "destination_sha256": null,
+      "holdout_consumed": false,
+      "reason": "4 MiB row-level image manifest for a V3 dataset whose images stay in the archived repository. The summary JSON in datasets/manifests/ carries the dataset's identity and SHA; these rows only matter alongside the pixels they index, and both are recoverable at this commit.",
+      "recorded_at": "2026-08-19T17:06:37+00:00",
+      "reference_pointer": "darkforest-x/yoyo-trading@784766de:datasets/dataset_v3_gold_core_v1/manifest.jsonl",
+      "size_bytes": 4214297,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "datasets/dataset_v3_gold_core_v1/manifest.jsonl",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "db9ca3eef7b1900b932af208da03bf267be46037a750c5bff9f7ff943b9d80b3",
+      "status": "accepted",
+      "tests": [
+        "tests/parity/test_migration_ledger_parity.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/annotations/gold_candidates_v1.jsonl",
+      "destination_sha256": "f52b1a92d9c5224e02e55246012cdd1f1eb66d4fbea2104207392e676466be3d",
+      "holdout_consumed": false,
+      "reason": "The Gold annotation data itself, which C2 missed: it migrated the manifests that describe the gold cores but not the rows they describe. yoyo-trading's own tools/backup_current_gold_state.py names exactly these four files as the current gold state, and yoyo/datasets/gold_schema.py::parse_jsonl reads gold_v1.jsonl. Task book section 8.4 puts them under datasets/annotations/. Without them the next allowed action -- P0 semantic stability into P1 Gold Dataset -- has no data in this repository.",
+      "recorded_at": "2026-08-19T17:04:26+00:00",
+      "reference_pointer": null,
+      "size_bytes": 522769,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "datasets/gold_candidates_v1.jsonl",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "f52b1a92d9c5224e02e55246012cdd1f1eb66d4fbea2104207392e676466be3d",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py",
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/annotations/gold_labelstudio_v1_tasks.json",
+      "destination_sha256": "351db11ec2cf61002ca1f36a2a54bccb23ae3d38770ede688078dcd16e03b722",
+      "holdout_consumed": false,
+      "reason": "The Gold annotation data itself, which C2 missed: it migrated the manifests that describe the gold cores but not the rows they describe. yoyo-trading's own tools/backup_current_gold_state.py names exactly these four files as the current gold state, and yoyo/datasets/gold_schema.py::parse_jsonl reads gold_v1.jsonl. Task book section 8.4 puts them under datasets/annotations/. Without them the next allowed action -- P0 semantic stability into P1 Gold Dataset -- has no data in this repository.",
+      "recorded_at": "2026-08-19T17:04:26+00:00",
+      "reference_pointer": null,
+      "size_bytes": 1468489,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "datasets/gold_labelstudio_v1/tasks.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "351db11ec2cf61002ca1f36a2a54bccb23ae3d38770ede688078dcd16e03b722",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py",
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/annotations/gold_v1.jsonl",
+      "destination_sha256": "80f0510849d2383e9ca867700e7048dd13c96ccfd4bebd8423068bdc000883a1",
+      "holdout_consumed": false,
+      "reason": "The Gold annotation data itself, which C2 missed: it migrated the manifests that describe the gold cores but not the rows they describe. yoyo-trading's own tools/backup_current_gold_state.py names exactly these four files as the current gold state, and yoyo/datasets/gold_schema.py::parse_jsonl reads gold_v1.jsonl. Task book section 8.4 puts them under datasets/annotations/. Without them the next allowed action -- P0 semantic stability into P1 Gold Dataset -- has no data in this repository.",
+      "recorded_at": "2026-08-19T17:04:26+00:00",
+      "reference_pointer": null,
+      "size_bytes": 23744,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "datasets/gold_v1.jsonl",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "80f0510849d2383e9ca867700e7048dd13c96ccfd4bebd8423068bdc000883a1",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py",
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/annotations/gold_v1_demo.jsonl",
+      "destination_sha256": "7810dea9b9f106ab7f7a076020643e9c771239ff2b3a0190f22d1ddbd751e7ff",
+      "holdout_consumed": false,
+      "reason": "The Gold annotation data itself, which C2 missed: it migrated the manifests that describe the gold cores but not the rows they describe. yoyo-trading's own tools/backup_current_gold_state.py names exactly these four files as the current gold state, and yoyo/datasets/gold_schema.py::parse_jsonl reads gold_v1.jsonl. Task book section 8.4 puts them under datasets/annotations/. Without them the next allowed action -- P0 semantic stability into P1 Gold Dataset -- has no data in this repository.",
+      "recorded_at": "2026-08-19T17:04:26+00:00",
+      "reference_pointer": null,
+      "size_bytes": 8298,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "datasets/gold_v1_demo.jsonl",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "7810dea9b9f106ab7f7a076020643e9c771239ff2b3a0190f22d1ddbd751e7ff",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py",
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/manifests/dataset_v3_1_position_spread_assignments.jsonl",
+      "destination_sha256": "1c7235ecf92bf0c2d507cbd51a1da6151e632f3f8ca5df9e687295b7b1eeb08d",
+      "holdout_consumed": false,
+      "reason": "The remaining Dataset V3 manifests and their YOLO data.yaml. The V3.2 reviewed-core manifest is the row-level identity of the owner-reviewed set that experiments/registry.yaml cites; the two 4 MiB gold-core and position-spread manifests are REFERENCE_ONLY below.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 531858,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "manifests/dataset_v3_1_position_spread_assignments.jsonl",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "1c7235ecf92bf0c2d507cbd51a1da6151e632f3f8ca5df9e687295b7b1eeb08d",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/manifests/dataset_v3_1_position_spread_plan.json",
+      "destination_sha256": "ee6bf114c38f6207e0ff4da2adff94a9b66685eee2c04774372edc3b35c404ee",
+      "holdout_consumed": false,
+      "reason": "Dataset manifests. These are the identity documents for the gold cores that experiments/registry.yaml cites; without them the registry rows point at nothing. All are small JSON/JSONL -- the 2.4 MiB legacy migration JSONL is deliberately NOT here, see the REFERENCE_ONLY row.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 1019,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "manifests/dataset_v3_1_position_spread_plan.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "ee6bf114c38f6207e0ff4da2adff94a9b66685eee2c04774372edc3b35c404ee",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/manifests/dataset_v3_1_position_spread_v1.json",
+      "destination_sha256": "f47b37ea68217236e01d596a6b7631c07c1e93d5a7e3f0c47d13267822bc0eb1",
+      "holdout_consumed": false,
+      "reason": "Dataset manifests. These are the identity documents for the gold cores that experiments/registry.yaml cites; without them the registry rows point at nothing. All are small JSON/JSONL -- the 2.4 MiB legacy migration JSONL is deliberately NOT here, see the REFERENCE_ONLY row.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 1644,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "manifests/dataset_v3_1_position_spread_v1.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "f47b37ea68217236e01d596a6b7631c07c1e93d5a7e3f0c47d13267822bc0eb1",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/manifests/dataset_v3_2_reviewed_core_v1.json",
+      "destination_sha256": "1d4432ab6e0db3dfb3cd97d9d81878ba98222d2f607c0fdc5339a3e474755ce3",
+      "holdout_consumed": false,
+      "reason": "Dataset manifests. These are the identity documents for the gold cores that experiments/registry.yaml cites; without them the registry rows point at nothing. All are small JSON/JSONL -- the 2.4 MiB legacy migration JSONL is deliberately NOT here, see the REFERENCE_ONLY row.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 1023,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "manifests/dataset_v3_2_reviewed_core_v1.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "1d4432ab6e0db3dfb3cd97d9d81878ba98222d2f607c0fdc5339a3e474755ce3",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/manifests/dataset_v3_gold_core_v1.json",
+      "destination_sha256": "057131564ad9dc64529a15a85139b84270bab0ebe9b4594153f2ac996f9a7f76",
+      "holdout_consumed": false,
+      "reason": "Dataset manifests. These are the identity documents for the gold cores that experiments/registry.yaml cites; without them the registry rows point at nothing. All are small JSON/JSONL -- the 2.4 MiB legacy migration JSONL is deliberately NOT here, see the REFERENCE_ONLY row.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 2340,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "manifests/dataset_v3_gold_core_v1.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "057131564ad9dc64529a15a85139b84270bab0ebe9b4594153f2ac996f9a7f76",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/manifests/fixed_w10_core4_confirm1_v1.json",
+      "destination_sha256": "3772d7fc463c7bab557526d75a5706b0db752fef5dc79866249b36c77e140431",
+      "holdout_consumed": false,
+      "reason": "Dataset manifests. These are the identity documents for the gold cores that experiments/registry.yaml cites; without them the registry rows point at nothing. All are small JSON/JSONL -- the 2.4 MiB legacy migration JSONL is deliberately NOT here, see the REFERENCE_ONLY row.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 714,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "manifests/fixed_w10_core4_confirm1_v1.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "3772d7fc463c7bab557526d75a5706b0db752fef5dc79866249b36c77e140431",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/manifests/frozen_baseline_r1_r2_v1.json",
+      "destination_sha256": "2258566017153390c7aa1fe52410518ef58c4aa5780618bef0af6219e5cb65bf",
+      "holdout_consumed": false,
+      "reason": "Dataset manifests. These are the identity documents for the gold cores that experiments/registry.yaml cites; without them the registry rows point at nothing. All are small JSON/JSONL -- the 2.4 MiB legacy migration JSONL is deliberately NOT here, see the REFERENCE_ONLY row.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 16119,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "manifests/frozen_baseline_r1_r2_v1.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "2258566017153390c7aa1fe52410518ef58c4aa5780618bef0af6219e5cb65bf",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/manifests/legacy_label_migration_v3.json",
+      "destination_sha256": "71c84818db611ab56e787e10b2603d4d07aae66c87dab9de36108e8efe96ab69",
+      "holdout_consumed": false,
+      "reason": "Dataset manifests. These are the identity documents for the gold cores that experiments/registry.yaml cites; without them the registry rows point at nothing. All are small JSON/JSONL -- the 2.4 MiB legacy migration JSONL is deliberately NOT here, see the REFERENCE_ONLY row.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 2631,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "manifests/legacy_label_migration_v3.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "71c84818db611ab56e787e10b2603d4d07aae66c87dab9de36108e8efe96ab69",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "REFERENCE_ONLY",
+      "destination_path": null,
+      "destination_sha256": null,
+      "holdout_consumed": false,
+      "reason": "2.4 MiB row-level audit trail from legacy annotation sources to the canonical gold schema. Task book section 3.6 keeps products this size out of git; the 2.6 KB summary legacy_label_migration_v3.json carries the conclusions and IS committed, and yoyo-trading is archived read-only rather than deleted, so the rows stay retrievable at this commit and hash.",
+      "recorded_at": "2026-08-19T12:50:55+00:00",
+      "reference_pointer": "darkforest-x/yoyo-trading@784766de:manifests/legacy_label_migration_v3.jsonl",
+      "size_bytes": 2488884,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "manifests/legacy_label_migration_v3.jsonl",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "b281d858f83284dae01f587d3248a4c719d59e5d89fa2994e904e088999dfca0",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_registries.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/manifests/smoke_parity_r1_dataset.json",
+      "destination_sha256": "838a1f430458112f8d379857616d28dbc499645031caaacf31833a5d42617ecd",
+      "holdout_consumed": false,
+      "reason": "Dataset manifests. These are the identity documents for the gold cores that experiments/registry.yaml cites; without them the registry rows point at nothing. All are small JSON/JSONL -- the 2.4 MiB legacy migration JSONL is deliberately NOT here, see the REFERENCE_ONLY row.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 30955,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "manifests/smoke_parity_r1_dataset.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "838a1f430458112f8d379857616d28dbc499645031caaacf31833a5d42617ecd",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/manifests/v3_blind_review_sample_v1.jsonl",
+      "destination_sha256": "4e9c8dc7d5d0c1afcdd2236d7dec55ed57aea045c0e4a62533295edd4efce338",
+      "holdout_consumed": false,
+      "reason": "The remaining Dataset V3 manifests and their YOLO data.yaml. The V3.2 reviewed-core manifest is the row-level identity of the owner-reviewed set that experiments/registry.yaml cites; the two 4 MiB gold-core and position-spread manifests are REFERENCE_ONLY below.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 110531,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "manifests/v3_blind_review_sample_v1.jsonl",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "4e9c8dc7d5d0c1afcdd2236d7dec55ed57aea045c0e4a62533295edd4efce338",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yoyo_trading/dataset_v3_pretrain_acceptance.md",
+      "destination_sha256": "2ba3403cb831de796c1d16f5e187ecf6cc0d2b99a9579a4b259b169a6de7343c",
+      "holdout_consumed": false,
+      "reason": "The fixed W10 gold pipeline's own record: what was frozen, what the leakage and split audits found, why training_eligible stayed false, and the one holdout trial that was consumed. The freeze and holdout3d reports are the evidence for the two registry rows that cite them.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 2154,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reports/dataset_v3_pretrain_acceptance.md",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "2ba3403cb831de796c1d16f5e187ecf6cc0d2b99a9579a4b259b169a6de7343c",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yoyo_trading/fixed_w10_conflict_report.md",
+      "destination_sha256": "e0d057c46e2769f2032ff0d83a651b7e5c561ea422ac15cf7997d7e37ee587a9",
+      "holdout_consumed": false,
+      "reason": "The fixed W10 gold pipeline's own record: what was frozen, what the leakage and split audits found, why training_eligible stayed false, and the one holdout trial that was consumed. The freeze and holdout3d reports are the evidence for the two registry rows that cite them.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 126,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reports/fixed_w10_core4_confirm1_v1/conflict_report.md",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "e0d057c46e2769f2032ff0d83a651b7e5c561ea422ac15cf7997d7e37ee587a9",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yoyo_trading/fixed_w10_dataset_acceptance.md",
+      "destination_sha256": "29eeb30152faaf43ad6aa6d39951e3c974c8d2b35ca7eadbb34d9f59736a9331",
+      "holdout_consumed": false,
+      "reason": "The fixed W10 gold pipeline's own record: what was frozen, what the leakage and split audits found, why training_eligible stayed false, and the one holdout trial that was consumed. The freeze and holdout3d reports are the evidence for the two registry rows that cite them.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 699,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reports/fixed_w10_core4_confirm1_v1/dataset_acceptance.md",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "29eeb30152faaf43ad6aa6d39951e3c974c8d2b35ca7eadbb34d9f59736a9331",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yoyo_trading/fixed_w10_freeze.md",
+      "destination_sha256": "93f3380b74a95ea804d06ea811cf65ffde16d2675c2e5489abd695846ade43bd",
+      "holdout_consumed": false,
+      "reason": "The fixed W10 gold pipeline's own record: what was frozen, what the leakage and split audits found, why training_eligible stayed false, and the one holdout trial that was consumed. The freeze and holdout3d reports are the evidence for the two registry rows that cite them.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 2953,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reports/fixed_w10_core4_confirm1_v1/freeze.md",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "93f3380b74a95ea804d06ea811cf65ffde16d2675c2e5489abd695846ade43bd",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yoyo_trading/fixed_w10_holdout3d_backtest.md",
+      "destination_sha256": "1b676b5d9c7dac88321bfd66e60b7d0610d897b7bb3df086db0b821bd2a9edcb",
+      "holdout_consumed": false,
+      "reason": "The fixed W10 gold pipeline's own record: what was frozen, what the leakage and split audits found, why training_eligible stayed false, and the one holdout trial that was consumed. The freeze and holdout3d reports are the evidence for the two registry rows that cite them.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 14320,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reports/fixed_w10_core4_confirm1_v1/holdout3d_backtest.md",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "1b676b5d9c7dac88321bfd66e60b7d0610d897b7bb3df086db0b821bd2a9edcb",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yoyo_trading/fixed_w10_leakage_audit.md",
+      "destination_sha256": "9ae61df455e7b62f51a6afa94ceb04cf9bf8585621e8c0833d03cd63e0b28947",
+      "holdout_consumed": false,
+      "reason": "The fixed W10 gold pipeline's own record: what was frozen, what the leakage and split audits found, why training_eligible stayed false, and the one holdout trial that was consumed. The freeze and holdout3d reports are the evidence for the two registry rows that cite them.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 129,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reports/fixed_w10_core4_confirm1_v1/leakage_audit.md",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "9ae61df455e7b62f51a6afa94ceb04cf9bf8585621e8c0833d03cd63e0b28947",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yoyo_trading/fixed_w10_split_audit.md",
+      "destination_sha256": "ae1833724af20ab6f68661e1559fd81910c1414ee7a5000983bd752b8f64cb72",
+      "holdout_consumed": false,
+      "reason": "The fixed W10 gold pipeline's own record: what was frozen, what the leakage and split audits found, why training_eligible stayed false, and the one holdout trial that was consumed. The freeze and holdout3d reports are the evidence for the two registry rows that cite them.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 120,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reports/fixed_w10_core4_confirm1_v1/split_audit.md",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "ae1833724af20ab6f68661e1559fd81910c1414ee7a5000983bd752b8f64cb72",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "HISTORICAL_REPORT",
+      "destination_path": "experiments/historical/yoyo_trading/gold_annotation_status.md",
+      "destination_sha256": "5888d6c6af1748afa4505f89609254e40deb9f64ca63430d1ee20578a14daee0",
+      "holdout_consumed": false,
+      "reason": "The fixed W10 gold pipeline's own record: what was frozen, what the leakage and split audits found, why training_eligible stayed false, and the one holdout trial that was consumed. The freeze and holdout3d reports are the evidence for the two registry rows that cite them.",
+      "recorded_at": "2026-08-19T16:41:08+00:00",
+      "reference_pointer": null,
+      "size_bytes": 346,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reports/gold_annotation_status.md",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "5888d6c6af1748afa4505f89609254e40deb9f64ca63430d1ee20578a14daee0",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_known_conclusions.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/annotations/reviews/v3_blind_r1/README.md",
+      "destination_sha256": "aaf401dcd7934ea394e0a02e34c4c65f406b72c7ec415783f6bbfd5975ef7fe6",
+      "holdout_consumed": false,
+      "reason": "Owner blind-review and dispute-resolution records. verdicts.jsonl is what the owner actually decided, answer_key.jsonl unblinds it, final_labels.jsonl carries the dispute-resolved outcome, and context_receipt.json records what the reviewer could see. This is the material P0 needs to compute repeat-labelling stability and kappa -- the very next allowed step -- and it existed only in yoyo-trading. Review images stay behind.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 332,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reviews/v3_blind_r1/README.md",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "aaf401dcd7934ea394e0a02e34c4c65f406b72c7ec415783f6bbfd5975ef7fe6",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/annotations/reviews/v3_blind_r1/answer_key.jsonl",
+      "destination_sha256": "5cd7e38b8b0eacd23b64c01f320f1e647788e32d93ebd67eeea1997441212b33",
+      "holdout_consumed": false,
+      "reason": "Owner blind-review and dispute-resolution records. verdicts.jsonl is what the owner actually decided, answer_key.jsonl unblinds it, final_labels.jsonl carries the dispute-resolved outcome, and context_receipt.json records what the reviewer could see. This is the material P0 needs to compute repeat-labelling stability and kappa -- the very next allowed step -- and it existed only in yoyo-trading. Review images stay behind.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 136751,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reviews/v3_blind_r1/answer_key.jsonl",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "5cd7e38b8b0eacd23b64c01f320f1e647788e32d93ebd67eeea1997441212b33",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/annotations/reviews/v3_blind_r1/context_receipt.json",
+      "destination_sha256": "cd751f69203e264aa0e3f467a39c8f08bbf0c71d3d5a1f4ae0af7ea92a6b4d79",
+      "holdout_consumed": false,
+      "reason": "Owner blind-review and dispute-resolution records. verdicts.jsonl is what the owner actually decided, answer_key.jsonl unblinds it, final_labels.jsonl carries the dispute-resolved outcome, and context_receipt.json records what the reviewer could see. This is the material P0 needs to compute repeat-labelling stability and kappa -- the very next allowed step -- and it existed only in yoyo-trading. Review images stay behind.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 35542,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reviews/v3_blind_r1/context_receipt.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "cd751f69203e264aa0e3f467a39c8f08bbf0c71d3d5a1f4ae0af7ea92a6b4d79",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/annotations/reviews/v3_blind_r1/pack_manifest.json",
+      "destination_sha256": "9bab223804d0464218b646f5da2ec04be9327b888b88beb02398eddbb0acf160",
+      "holdout_consumed": false,
+      "reason": "Owner blind-review and dispute-resolution records. verdicts.jsonl is what the owner actually decided, answer_key.jsonl unblinds it, final_labels.jsonl carries the dispute-resolved outcome, and context_receipt.json records what the reviewer could see. This is the material P0 needs to compute repeat-labelling stability and kappa -- the very next allowed step -- and it existed only in yoyo-trading. Review images stay behind.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 581,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reviews/v3_blind_r1/pack_manifest.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "9bab223804d0464218b646f5da2ec04be9327b888b88beb02398eddbb0acf160",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/annotations/reviews/v3_blind_r1/prefilter_decision_gt_purple_mean.json",
+      "destination_sha256": "42236507c0d30b13405f901b19f6ea2c4dfdff1727f607c4911f5081ee1d59aa",
+      "holdout_consumed": false,
+      "reason": "Owner blind-review and dispute-resolution records. verdicts.jsonl is what the owner actually decided, answer_key.jsonl unblinds it, final_labels.jsonl carries the dispute-resolved outcome, and context_receipt.json records what the reviewer could see. This is the material P0 needs to compute repeat-labelling stability and kappa -- the very next allowed step -- and it existed only in yoyo-trading. Review images stay behind.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 125873,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reviews/v3_blind_r1/prefilter_decision_gt_purple_mean.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "42236507c0d30b13405f901b19f6ea2c4dfdff1727f607c4911f5081ee1d59aa",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/annotations/reviews/v3_blind_r1/items.json",
+      "destination_sha256": "7b71e3265d7306a852fbd96a4881b4eee8989b1a16f901b8e45f9372c315b6b6",
+      "holdout_consumed": false,
+      "reason": "Owner blind-review and dispute-resolution records. verdicts.jsonl is what the owner actually decided, answer_key.jsonl unblinds it, final_labels.jsonl carries the dispute-resolved outcome, and context_receipt.json records what the reviewer could see. This is the material P0 needs to compute repeat-labelling stability and kappa -- the very next allowed step -- and it existed only in yoyo-trading. Review images stay behind.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 79813,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reviews/v3_blind_r1/public/items.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "7b71e3265d7306a852fbd96a4881b4eee8989b1a16f901b8e45f9372c315b6b6",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/annotations/reviews/v3_blind_r1/verdicts.jsonl",
+      "destination_sha256": "331ae34234d3cdea56688e888acfdcd3e2549872c7ef222ebda7c592e9d8a8b7",
+      "holdout_consumed": false,
+      "reason": "Owner blind-review and dispute-resolution records. verdicts.jsonl is what the owner actually decided, answer_key.jsonl unblinds it, final_labels.jsonl carries the dispute-resolved outcome, and context_receipt.json records what the reviewer could see. This is the material P0 needs to compute repeat-labelling stability and kappa -- the very next allowed step -- and it existed only in yoyo-trading. Review images stay behind.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 25474,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reviews/v3_blind_r1/verdicts.jsonl",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "331ae34234d3cdea56688e888acfdcd3e2549872c7ef222ebda7c592e9d8a8b7",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/annotations/reviews/v3_dispute_r1/disputes.json",
+      "destination_sha256": "ce91ceb366d3cf8fc7ecbb277a8f2cb72624191497f230ccb77d8dc2d10ad9db",
+      "holdout_consumed": false,
+      "reason": "Owner blind-review and dispute-resolution records. verdicts.jsonl is what the owner actually decided, answer_key.jsonl unblinds it, final_labels.jsonl carries the dispute-resolved outcome, and context_receipt.json records what the reviewer could see. This is the material P0 needs to compute repeat-labelling stability and kappa -- the very next allowed step -- and it existed only in yoyo-trading. Review images stay behind.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 34221,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reviews/v3_dispute_r1/disputes.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "ce91ceb366d3cf8fc7ecbb277a8f2cb72624191497f230ccb77d8dc2d10ad9db",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/annotations/reviews/v3_dispute_r1/final_labels.jsonl",
+      "destination_sha256": "1bed259a240ea5da31ea3799398820d12940f5bc6fc00b0755a563ac79776b2d",
+      "holdout_consumed": false,
+      "reason": "Owner blind-review and dispute-resolution records. verdicts.jsonl is what the owner actually decided, answer_key.jsonl unblinds it, final_labels.jsonl carries the dispute-resolved outcome, and context_receipt.json records what the reviewer could see. This is the material P0 needs to compute repeat-labelling stability and kappa -- the very next allowed step -- and it existed only in yoyo-trading. Review images stay behind.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 118677,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reviews/v3_dispute_r1/final_labels.jsonl",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "1bed259a240ea5da31ea3799398820d12940f5bc6fc00b0755a563ac79776b2d",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/annotations/reviews/v3_dispute_r1/rebox_held_out.json",
+      "destination_sha256": "7c6140ddb155c83d0d729809db2a7f5631287737f269ddaf6c36af48dc129a14",
+      "holdout_consumed": false,
+      "reason": "Owner blind-review and dispute-resolution records. verdicts.jsonl is what the owner actually decided, answer_key.jsonl unblinds it, final_labels.jsonl carries the dispute-resolved outcome, and context_receipt.json records what the reviewer could see. This is the material P0 needs to compute repeat-labelling stability and kappa -- the very next allowed step -- and it existed only in yoyo-trading. Review images stay behind.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 12395,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reviews/v3_dispute_r1/rebox_held_out.json",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "7c6140ddb155c83d0d729809db2a7f5631287737f269ddaf6c36af48dc129a14",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "datasets/annotations/reviews/v3_dispute_r1/resolutions.jsonl",
+      "destination_sha256": "08e860b1f2d1551541751918aaa19b35befc136b1978534334ac7df7dca41610",
+      "holdout_consumed": false,
+      "reason": "Owner blind-review and dispute-resolution records. verdicts.jsonl is what the owner actually decided, answer_key.jsonl unblinds it, final_labels.jsonl carries the dispute-resolved outcome, and context_receipt.json records what the reviewer could see. This is the material P0 needs to compute repeat-labelling stability and kappa -- the very next allowed step -- and it existed only in yoyo-trading. Review images stay behind.",
+      "recorded_at": "2026-08-19T17:06:18+00:00",
+      "reference_pointer": null,
+      "size_bytes": 9814,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "reviews/v3_dispute_r1/resolutions.jsonl",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "08e860b1f2d1551541751918aaa19b35befc136b1978534334ac7df7dca41610",
+      "status": "accepted",
+      "tests": [
+        "tests/contracts/test_gold_data_is_present.py"
+      ]
+    },
+    {
+      "decision": "ADAPT_AND_PORT",
+      "destination_path": "tests/causality/test_gold_annotation_contract.py",
+      "destination_sha256": "912e11fd46577d951adbf0fe1cebe01fa96926ddc76b5cb3af062e299d3c2bd4",
+      "holdout_consumed": false,
+      "reason": "Gold annotation contract test. One line changed: the Label Studio export converter now lives under tools/review/, so the import follows it. Everything else -- the box snapping, the causal prefix rendering, the schema validation -- is unchanged.",
+      "recorded_at": "2026-08-19T12:50:30+00:00",
+      "size_bytes": 8751,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "tests/test_gold_annotation.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "843bab2b1ff1ff1db3ce58caa8ac3a237a5e546f533008d11ac6c08088434862",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "tests/test_legacy_audit.py",
+      "destination_sha256": "17e2e2fc6b042906e416face44c04a510c3e7d15eb7450fe36d529a4d333ceee",
+      "holdout_consumed": false,
+      "reason": "Unit tests for the dataset/render modules that arrived with the yoyo package. Without them the ported code is untested here, which is how a byte-identical port silently stops being byte-correct.",
+      "recorded_at": "2026-08-19T12:50:30+00:00",
+      "size_bytes": 5429,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "tests/test_legacy_audit.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "17e2e2fc6b042906e416face44c04a510c3e7d15eb7450fe36d529a4d333ceee",
+      "status": "accepted",
+      "tests": [
+        "tests/test_local_v2_render.py",
+        "tests/test_window_render.py",
+        "tests/test_position_spread.py",
+        "tests/test_legacy_audit.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "tests/test_local_v2_render.py",
+      "destination_sha256": "cc5f53500a6e82ccb02e2bf3c846cd0a064b59c98db39dce398a785bd69e0018",
+      "holdout_consumed": false,
+      "reason": "Unit tests for the dataset/render modules that arrived with the yoyo package. Without them the ported code is untested here, which is how a byte-identical port silently stops being byte-correct.",
+      "recorded_at": "2026-08-19T12:50:30+00:00",
+      "size_bytes": 1975,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "tests/test_local_v2_render.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "cc5f53500a6e82ccb02e2bf3c846cd0a064b59c98db39dce398a785bd69e0018",
+      "status": "accepted",
+      "tests": [
+        "tests/test_local_v2_render.py",
+        "tests/test_window_render.py",
+        "tests/test_position_spread.py",
+        "tests/test_legacy_audit.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "tests/test_position_spread.py",
+      "destination_sha256": "51cc7d5394afb6fa116d030556475f8e25076327331ed2f65dd3c6282c9b2742",
+      "holdout_consumed": false,
+      "reason": "Unit tests for the dataset/render modules that arrived with the yoyo package. Without them the ported code is untested here, which is how a byte-identical port silently stops being byte-correct.",
+      "recorded_at": "2026-08-19T12:50:30+00:00",
+      "size_bytes": 1894,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "tests/test_position_spread.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "51cc7d5394afb6fa116d030556475f8e25076327331ed2f65dd3c6282c9b2742",
+      "status": "accepted",
+      "tests": [
+        "tests/test_local_v2_render.py",
+        "tests/test_window_render.py",
+        "tests/test_position_spread.py",
+        "tests/test_legacy_audit.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "tests/test_window_render.py",
+      "destination_sha256": "50bc949653a0ae4174c0a9339abfb45935cd5e2c499516ef4651c10f185e09b0",
+      "holdout_consumed": false,
+      "reason": "Unit tests for the dataset/render modules that arrived with the yoyo package. Without them the ported code is untested here, which is how a byte-identical port silently stops being byte-correct.",
+      "recorded_at": "2026-08-19T12:50:30+00:00",
+      "size_bytes": 4066,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "tests/test_window_render.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "50bc949653a0ae4174c0a9339abfb45935cd5e2c499516ef4651c10f185e09b0",
+      "status": "accepted",
+      "tests": [
+        "tests/test_local_v2_render.py",
+        "tests/test_window_render.py",
+        "tests/test_position_spread.py",
+        "tests/test_legacy_audit.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "tools/review/audit_gold_dataset.py",
+      "destination_sha256": "850104bfe12b548512bbc8a56f2fb7055fb0764bfd1a45e84dc29cb657562eaf",
+      "holdout_consumed": false,
+      "reason": "Gold annotation toolchain: build Label Studio tasks, convert the export back into the canonical gold schema, audit the dataset, and audit the legacy annotation sources. All four already import yoyo.datasets.* and yoyo.layers.l1_detection.render, which now resolve inside this repository, so no adaptation is needed.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 1862,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "tools/audit_gold_dataset.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "850104bfe12b548512bbc8a56f2fb7055fb0764bfd1a45e84dc29cb657562eaf",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "tools/review/audit_legacy_annotation_sources.py",
+      "destination_sha256": "e0f3b289bd2122cfbe84c22b99e4087bf2889a7e77d965979e37dedcf153c57e",
+      "holdout_consumed": false,
+      "reason": "Gold annotation toolchain: build Label Studio tasks, convert the export back into the canonical gold schema, audit the dataset, and audit the legacy annotation sources. All four already import yoyo.datasets.* and yoyo.layers.l1_detection.render, which now resolve inside this repository, so no adaptation is needed.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 2678,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "tools/audit_legacy_annotation_sources.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "e0f3b289bd2122cfbe84c22b99e4087bf2889a7e77d965979e37dedcf153c57e",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "tools/review/audit_legacy_labels.py",
+      "destination_sha256": "f290b77c9e426e9f3950cdbab3db9a6969ec0457ebade539ca4460b1939141e6",
+      "holdout_consumed": false,
+      "reason": "Gold annotation toolchain: build Label Studio tasks, convert the export back into the canonical gold schema, audit the dataset, and audit the legacy annotation sources. All four already import yoyo.datasets.* and yoyo.layers.l1_detection.render, which now resolve inside this repository, so no adaptation is needed.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 13580,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "tools/audit_legacy_labels.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "f290b77c9e426e9f3950cdbab3db9a6969ec0457ebade539ca4460b1939141e6",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "tools/review/build_labelstudio_tasks.py",
+      "destination_sha256": "37ea3828124c9b2946436f9bb031fae6d9048ed3f1bd2c5d07cf144556be94df",
+      "holdout_consumed": false,
+      "reason": "Gold annotation toolchain: build Label Studio tasks, convert the export back into the canonical gold schema, audit the dataset, and audit the legacy annotation sources. All four already import yoyo.datasets.* and yoyo.layers.l1_detection.render, which now resolve inside this repository, so no adaptation is needed.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 4544,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "tools/build_labelstudio_tasks.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "37ea3828124c9b2946436f9bb031fae6d9048ed3f1bd2c5d07cf144556be94df",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "tools/review/convert_labelstudio_export.py",
+      "destination_sha256": "7c9425a1a94d320ec51133f784639b5e3ec8fb7204469c7c0ba0112502187714",
+      "holdout_consumed": false,
+      "reason": "Gold annotation toolchain: build Label Studio tasks, convert the export back into the canonical gold schema, audit the dataset, and audit the legacy annotation sources. All four already import yoyo.datasets.* and yoyo.layers.l1_detection.render, which now resolve inside this repository, so no adaptation is needed.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 5218,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "tools/convert_labelstudio_export.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "7c9425a1a94d320ec51133f784639b5e3ec8fb7204469c7c0ba0112502187714",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "tools/review/gold_annotate.html",
+      "destination_sha256": "004cbdbfe0066cc8dfe04bfb78a41bc1b48cb68de03da1e92eb0b36e8855d9e1",
+      "holdout_consumed": false,
+      "reason": "Gold annotation toolchain: build Label Studio tasks, convert the export back into the canonical gold schema, audit the dataset, and audit the legacy annotation sources. All four already import yoyo.datasets.* and yoyo.layers.l1_detection.render, which now resolve inside this repository, so no adaptation is needed.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 7824,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "tools/gold_annotate.html",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "004cbdbfe0066cc8dfe04bfb78a41bc1b48cb68de03da1e92eb0b36e8855d9e1",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "tools/review/gold_migrate_review.html",
+      "destination_sha256": "5f3c3fbf32d5a712963df71df27f8ee8fb3f1e305bbd319bb220623922589dcb",
+      "holdout_consumed": false,
+      "reason": "Gold annotation toolchain: build Label Studio tasks, convert the export back into the canonical gold schema, audit the dataset, and audit the legacy annotation sources. All four already import yoyo.datasets.* and yoyo.layers.l1_detection.render, which now resolve inside this repository, so no adaptation is needed.",
+      "recorded_at": "2026-08-19T12:49:41+00:00",
+      "size_bytes": 5745,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "tools/gold_migrate_review.html",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "5f3c3fbf32d5a712963df71df27f8ee8fb3f1e305bbd319bb220623922589dcb",
+      "status": "accepted",
+      "tests": [
+        "tests/causality/test_gold_annotation_contract.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 0,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/__init__.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/cli/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 0,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/cli/__init__.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/cli/forward_pulse_w10.py",
+      "destination_sha256": "3f82556f883ef9ca67094fe96c032e1fdba3abe9e63ddf5cedc8a34d8419c867",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 26505,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/cli/forward_pulse_w10.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "3f82556f883ef9ca67094fe96c032e1fdba3abe9e63ddf5cedc8a34d8419c867",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/contracts/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 0,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/contracts/__init__.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/contracts/costs.py",
+      "destination_sha256": "2e6c0071e07b98404ad4f761b1abac99b7c745019ff227c0780f544bfaab103c",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 4028,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/contracts/costs.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "2e6c0071e07b98404ad4f761b1abac99b7c745019ff227c0780f544bfaab103c",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/contracts/forward_log.py",
+      "destination_sha256": "4b9fb37c39fade467277a9ba356e1ae384ae120cb7f3e43ff3f304a606eb0ead",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 15188,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/contracts/forward_log.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "4b9fb37c39fade467277a9ba356e1ae384ae120cb7f3e43ff3f304a606eb0ead",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/contracts/outcomes.py",
+      "destination_sha256": "14f84f3ebaf44fa9b8f8d3bbc89c63d878a2b5665202186c35ad44760fd128e9",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 8368,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/contracts/outcomes.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "14f84f3ebaf44fa9b8f8d3bbc89c63d878a2b5665202186c35ad44760fd128e9",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/contracts/paths.py",
+      "destination_sha256": "a0b89fce647c77aac3d731d422fea10651114d5e4659804d9c9f8bddb2b68971",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 2179,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/contracts/paths.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "a0b89fce647c77aac3d731d422fea10651114d5e4659804d9c9f8bddb2b68971",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/contracts/protocol.py",
+      "destination_sha256": "45cc3feeb0b4de00db55c227d1609ce3ae471bcc38d1df80474f1620b84a5225",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 18016,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/contracts/protocol.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "45cc3feeb0b4de00db55c227d1609ce3ae471bcc38d1df80474f1620b84a5225",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/data/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 0,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/data/__init__.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/data/bars.py",
+      "destination_sha256": "6cab5de48eff1dbb8b2062d767fa36c41f65ff612fb743d17ef97e10705b97b4",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 907,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/data/bars.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "6cab5de48eff1dbb8b2062d767fa36c41f65ff612fb743d17ef97e10705b97b4",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/data/indicators.py",
+      "destination_sha256": "bbae72e14322ca4b06eedf48df53f8aef3da0df25d49d72c592381e0a13cd3de",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 10062,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/data/indicators.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "bbae72e14322ca4b06eedf48df53f8aef3da0df25d49d72c592381e0a13cd3de",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/data/loader.py",
+      "destination_sha256": "3fa4be64a9a7d5cf1d41a9a3447d714d4cca33363a5ed11e45f5bc45e87d6f93",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 4979,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/data/loader.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "3fa4be64a9a7d5cf1d41a9a3447d714d4cca33363a5ed11e45f5bc45e87d6f93",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/data/universe.py",
+      "destination_sha256": "d5c1a6556592ad5e16671342f73239d06925487f5544d04e3d4d5dbbb38ad7ff",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 760,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/data/universe.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "d5c1a6556592ad5e16671342f73239d06925487f5544d04e3d4d5dbbb38ad7ff",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/__init__.py",
+      "destination_sha256": "ab9b3511b16abdb4c368de7e01e3d4d06b2e4b64f22ccc18203f393ccc4ee97f",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 286,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/__init__.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "ab9b3511b16abdb4c368de7e01e3d4d06b2e4b64f22ccc18203f393ccc4ee97f",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/gold_box.py",
+      "destination_sha256": "bec09be1c01145cd5e47e146584d4ef7f5108c57b9d7cca09c8db9636081d381",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 3383,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/gold_box.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "bec09be1c01145cd5e47e146584d4ef7f5108c57b9d7cca09c8db9636081d381",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/gold_render.py",
+      "destination_sha256": "4e3454ad8a3e66a983710dca78204924be6cd7ff0eec645905b76187d1ecb710",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 8005,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/gold_render.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "4e3454ad8a3e66a983710dca78204924be6cd7ff0eec645905b76187d1ecb710",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/gold_schema.py",
+      "destination_sha256": "94e71d7d87a05c41a85c9064b17605c8d2761a46aa9b4521a78affb88ba4c0b4",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 2672,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/gold_schema.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "94e71d7d87a05c41a85c9064b17605c8d2761a46aa9b4521a78affb88ba4c0b4",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/legacy_audit.py",
+      "destination_sha256": "49273201016102876e2eae136dc955c5687dec10ca8845008c43cd5fa15becb0",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 8726,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/legacy_audit.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "49273201016102876e2eae136dc955c5687dec10ca8845008c43cd5fa15becb0",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/legacy_gold_migration/__init__.py",
+      "destination_sha256": "b2cff849f8052523f11671c28540beb45439bebaa914fa42136d205d4877de72",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 781,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/legacy_gold_migration/__init__.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "b2cff849f8052523f11671c28540beb45439bebaa914fa42136d205d4877de72",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/legacy_gold_migration/audit.py",
+      "destination_sha256": "537afce8899e7618cf9acb4433b6359f650cacc5f765fa83a8a33eab3e816209",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 6129,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/legacy_gold_migration/audit.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "537afce8899e7618cf9acb4433b6359f650cacc5f765fa83a8a33eab3e816209",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/legacy_gold_migration/canonical.py",
+      "destination_sha256": "530b835c30d3c0ff738c881244846ed9cfcb7cc9be5013ce3f09f0c544aa6eab",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 3222,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/legacy_gold_migration/canonical.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "530b835c30d3c0ff738c881244846ed9cfcb7cc9be5013ce3f09f0c544aa6eab",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/legacy_gold_migration/conflicts.py",
+      "destination_sha256": "c1dae1b1c8b17807cfe45a668499338a4d1ad0f89d67a5bb7c6f8be7f88308e5",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 4473,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/legacy_gold_migration/conflicts.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "c1dae1b1c8b17807cfe45a668499338a4d1ad0f89d67a5bb7c6f8be7f88308e5",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/legacy_gold_migration/intervals.py",
+      "destination_sha256": "7b48724f219137d42c4082a768a27734a03b1e1b2e24dc38a3da686e53d39448",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 8180,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/legacy_gold_migration/intervals.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "7b48724f219137d42c4082a768a27734a03b1e1b2e24dc38a3da686e53d39448",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/legacy_gold_migration/io.py",
+      "destination_sha256": "87c3a83569803541fedb860695c808851b800857743b264a3c264bde616dc2fc",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 3137,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/legacy_gold_migration/io.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "87c3a83569803541fedb860695c808851b800857743b264a3c264bde616dc2fc",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/legacy_gold_migration/migration.py",
+      "destination_sha256": "abcb6bbfae91b189379dfe762c89773a6f884a25e1138450da63d328c04a5b62",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 14706,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/legacy_gold_migration/migration.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "abcb6bbfae91b189379dfe762c89773a6f884a25e1138450da63d328c04a5b62",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/legacy_gold_migration/renderer.py",
+      "destination_sha256": "4e806ff949fbc749596eba8e5d223302ded777ad3b41476e200d257556ea5234",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 4564,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/legacy_gold_migration/renderer.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "4e806ff949fbc749596eba8e5d223302ded777ad3b41476e200d257556ea5234",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/legacy_gold_migration/review_queue.py",
+      "destination_sha256": "9ee64ef091d3b64170ca3f8ab8e759a29f885bc05c22ea0620b971e17d2fc77a",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 2697,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/legacy_gold_migration/review_queue.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "9ee64ef091d3b64170ca3f8ab8e759a29f885bc05c22ea0620b971e17d2fc77a",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/legacy_gold_migration/sources.py",
+      "destination_sha256": "b64c751f5eead1580ba6dcf9342bf6d75e2d65f17c8e53caa9aaafe250bdb5fa",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 24634,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/legacy_gold_migration/sources.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "b64c751f5eead1580ba6dcf9342bf6d75e2d65f17c8e53caa9aaafe250bdb5fa",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/position_spread.py",
+      "destination_sha256": "4ed3ae3ac28b30de9e564e48cbf7d3737e2e750a9c14e6f7b25c9d15611931c9",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 4325,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/position_spread.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "4ed3ae3ac28b30de9e564e48cbf7d3737e2e750a9c14e6f7b25c9d15611931c9",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/datasets/window_render.py",
+      "destination_sha256": "fafcc69f486cf30a7d1c2c28ed3b4867547e50cb937fe1389d017aa1fb3dce82",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 5329,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/datasets/window_render.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "fafcc69f486cf30a7d1c2c28ed3b4867547e50cb937fe1389d017aa1fb3dce82",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 0,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/__init__.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 0,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l1_detection/__init__.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/candidates.py",
+      "destination_sha256": "8c2594ef2cbc45686e8155dc8581c6c3ab92a8388b29b3801556b117d0c326dd",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 22253,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l1_detection/candidates.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "8c2594ef2cbc45686e8155dc8581c6c3ab92a8388b29b3801556b117d0c326dd",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/data.py",
+      "destination_sha256": "bce9af28b00d1deb8346cafb19654e18d4987d42b3849b420a9739b5e9aeb265",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 2796,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l1_detection/data.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "bce9af28b00d1deb8346cafb19654e18d4987d42b3849b420a9739b5e9aeb265",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/local_v2_render.py",
+      "destination_sha256": "bcbe85d4237e44891f2ff75e3b73de4a0dc4011be4a24451cb81be3f1bf389c2",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 3744,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l1_detection/local_v2_render.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "bcbe85d4237e44891f2ff75e3b73de4a0dc4011be4a24451cb81be3f1bf389c2",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/render.py",
+      "destination_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 4707,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l1_detection/render.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l1_detection/scan.py",
+      "destination_sha256": "37e2b8e9d26e01900d37b68d5eee5a4acf48fd1ecc847cda22f14ac9c889e2db",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 7468,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l1_detection/scan.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "37e2b8e9d26e01900d37b68d5eee5a4acf48fd1ecc847cda22f14ac9c889e2db",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l2_judgment/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 0,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l2_judgment/__init__.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l2_judgment/candidate_bridge.py",
+      "destination_sha256": "d9703ff14bd6a6b24038fa9c4841c46bcc52d518c74514535cf477ab7a1dff45",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 38133,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l2_judgment/candidate_bridge.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "d9703ff14bd6a6b24038fa9c4841c46bcc52d518c74514535cf477ab7a1dff45",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l2_judgment/features.py",
+      "destination_sha256": "2fed40ed52440d4c76c0f74c5638a707449c2d6c1f56f91bb2030c914a1cddfa",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 6590,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l2_judgment/features.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "2fed40ed52440d4c76c0f74c5638a707449c2d6c1f56f91bb2030c914a1cddfa",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l2_judgment/forward_types.py",
+      "destination_sha256": "34c0c3937f4d93b7ced8025ee5280b4cf5a4db107fe5a583ddaf8dcf1db71d20",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 5330,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l2_judgment/forward_types.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "34c0c3937f4d93b7ced8025ee5280b4cf5a4db107fe5a583ddaf8dcf1db71d20",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l2_judgment/frozen.py",
+      "destination_sha256": "bbdeceb52de57c0ab02c072e49d03ab4ae682fcd1f5eb75dff3d10987b69f1ff",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 21520,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l2_judgment/frozen.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "bbdeceb52de57c0ab02c072e49d03ab4ae682fcd1f5eb75dff3d10987b69f1ff",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l2_judgment/labeling.py",
+      "destination_sha256": "18c90468c9e6a75de1fb486934295bd3c45b0ca92229d6d9bfb7cd30c288994a",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 22800,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l2_judgment/labeling.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "18c90468c9e6a75de1fb486934295bd3c45b0ca92229d6d9bfb7cd30c288994a",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l2_judgment/train.py",
+      "destination_sha256": "bde2886abba645238fa60d773d1be9bd18756aa239a649c43433d720b9492112",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 17025,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l2_judgment/train.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "bde2886abba645238fa60d773d1be9bd18756aa239a649c43433d720b9492112",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l3_backtest/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 0,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l3_backtest/__init__.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l4_execution/__init__.py",
+      "destination_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 0,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l4_execution/__init__.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l4_execution/__main__.py",
+      "destination_sha256": "0a93583d24e6ebc6c9d77b3b06b04766867f66a26b38350ed755f5b51f38e4d6",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 3003,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l4_execution/__main__.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "0a93583d24e6ebc6c9d77b3b06b04766867f66a26b38350ed755f5b51f38e4d6",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l4_execution/config.py",
+      "destination_sha256": "35476535b66a04002dd87c30e1ed3f329598e2a21fdc60f28336eea97c11388c",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 3828,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l4_execution/config.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "35476535b66a04002dd87c30e1ed3f329598e2a21fdc60f28336eea97c11388c",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l4_execution/executor.py",
+      "destination_sha256": "8e9f3a75e90a67bf3b268f68ef46a174302297d57da66b730e46dc821041d8bc",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 25809,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l4_execution/executor.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "8e9f3a75e90a67bf3b268f68ef46a174302297d57da66b730e46dc821041d8bc",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l4_execution/ledger.py",
+      "destination_sha256": "80724c65bfa2387ee16cd0d6a81bbc84c0d23fbb7662ca57f249c347464f0654",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 2086,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l4_execution/ledger.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "80724c65bfa2387ee16cd0d6a81bbc84c0d23fbb7662ca57f249c347464f0654",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l4_execution/okx_client.py",
+      "destination_sha256": "f05562b4184302713876a72aea3f7218d54442466e15d1d7aece0c86ef008c96",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 9910,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l4_execution/okx_client.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "f05562b4184302713876a72aea3f7218d54442466e15d1d7aece0c86ef008c96",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/layers/l4_execution/symbols.py",
+      "destination_sha256": "8fbf035d38ba09795dc2d867def9e9a8f1d5847aa7deeeae6271e02f1cb1f5c6",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 2509,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/layers/l4_execution/symbols.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "8fbf035d38ba09795dc2d867def9e9a8f1d5847aa7deeeae6271e02f1cb1f5c6",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/notify.py",
+      "destination_sha256": "1ad017f6ab6f788a4d8117543bdad21ef181e6f93e86dc1eb1ce6e4bf6aa371a",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 9270,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/notify.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "1ad017f6ab6f788a4d8117543bdad21ef181e6f93e86dc1eb1ce6e4bf6aa371a",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    },
+    {
+      "decision": "DIRECT_PORT",
+      "destination_path": "yoyo/timefmt.py",
+      "destination_sha256": "3e9ce1c4a6959ca5f584ccf802daf352b24763a3c760ace7e58b3ee0ed6bf034",
+      "holdout_consumed": false,
+      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
+      "recorded_at": "2026-08-19T12:36:05+00:00",
+      "size_bytes": 1389,
+      "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
+      "source_path": "yoyo/timefmt.py",
+      "source_repo": "darkforest-x/yoyo-trading",
+      "source_sha256": "3e9ce1c4a6959ca5f584ccf802daf352b24763a3c760ace7e58b3ee0ed6bf034",
+      "status": "accepted",
+      "tests": [
+        "tests/boundaries/test_layer_imports.py",
+        "tests/boundaries/test_yoyo_package_is_local.py"
+      ]
+    }
+  ]
+}

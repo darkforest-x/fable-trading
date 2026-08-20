@@ -34,11 +34,8 @@ import pandas as pd
 
 
 ROOT = Path(__file__).resolve().parents[1]
-YOYO_REPO = Path.home() / "yoyo-trading"
-for path in (ROOT, YOYO_REPO):
-    if str(path) not in sys.path:
-        sys.path.insert(0, str(path))
-
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 from yoyo.data.loader import OHLCV_COLUMNS, list_series  # noqa: E402
 from yoyo.layers.l1_detection.data import add_mas  # noqa: E402
 from yoyo.layers.l1_detection.render import render_chart  # noqa: E402

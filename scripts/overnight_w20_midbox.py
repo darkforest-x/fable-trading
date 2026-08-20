@@ -37,11 +37,8 @@ from pathlib import Path
 import numpy as np
 
 PROJECT = Path(__file__).resolve().parents[1]
-_YOYO = Path.home() / "yoyo-trading"
-for p in (PROJECT, _YOYO):
-    if str(p) not in sys.path:
-        sys.path.insert(0, str(p))
-
+if str(PROJECT) not in sys.path:
+    sys.path.insert(0, str(PROJECT))
 HOST_DEFAULT = os.environ.get("FABLE_3060_HOST", "zzc@192.168.1.4")
 REMOTE = "C:/fable"
 RUN_NAME = "owner_w20_midbox_cold"

@@ -1,0 +1,72 @@
+<!doctype html><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>形态过程标注 · 手感测试</title>
+<style>
+:root{color-scheme:dark}
+body{margin:0;background:#0d1117;color:#c9d1d9;font:14px/1.5 -apple-system,system-ui,sans-serif}
+header{position:sticky;top:0;background:#161b22;border-bottom:1px solid #30363d;padding:10px 16px;z-index:9}
+h1{margin:0 0 2px;font-size:16px}
+.q{font-size:15px;font-weight:600}
+.a1{color:#58a6ff}.a2{color:#f85149}
+kbd{background:#21262d;border:1px solid #30363d;border-radius:4px;padding:1px 7px;font-size:13px}
+.keys{margin-top:6px;font-size:13.5px;color:#8b949e}
+.wrap{position:relative;max-width:1600px;margin:8px auto}
+img{width:100%;display:block;border:1px solid #30363d;border-radius:6px}
+.ln{position:absolute;top:0;bottom:0;width:2px;pointer-events:none}
+.l1{background:#58a6ff}.l2{background:#f85149}.lc{background:#8b949e;opacity:.5;width:1px}
+.tag{position:absolute;top:2px;font-size:11px;padding:1px 4px;border-radius:3px;color:#fff;transform:translateX(-50%)}
+.meta{color:#8b949e;font-size:12px}
+button{background:#21262d;color:#c9d1d9;border:1px solid #30363d;border-radius:6px;padding:5px 11px;cursor:pointer}
+.done{color:#3fb950;font-weight:600}
+</style>
+<header>
+<h1>事件 <span id="pos"></span> · 已标 <span class="done" id="done">0</span>/<span id="tot"></span>
+&nbsp;<button onclick="dl()">导出 JSONL</button></h1>
+<div class="q"><span class="a1">① 六线开始收敛</span>　→　<span class="a2">② 反抽不过、确认破位</span></div>
+<div class="keys">在图上<b>点两下</b>：第一下标 ①，第二下标 ②　·　<kbd>R</kbd> 重来　<kbd>Enter</kbd> 下一条　<kbd>S</kbd> 这条没有清晰过程　<kbd>←</kbd> 上一条</div>
+<div class="meta" id="info"></div>
+</header>
+<div class="wrap" id="wrap">
+  <img id="im">
+  <div class="ln lc" id="cur" style="display:none"></div>
+  <div class="ln l1" id="p1" style="display:none"></div><div class="tag" id="t1" style="display:none;background:#58a6ff">①</div>
+  <div class="ln l2" id="p2" style="display:none"></div><div class="tag" id="t2" style="display:none;background:#f85149">②</div>
+</div>
+<script>
+let IT=[], ans={}, i=0;
+const K='phase_pilot_v1';
+const $=s=>document.querySelector(s);
+fetch('tasks.json').then(r=>r.json()).then(d=>{IT=d; ans=JSON.parse(localStorage.getItem(K)||'{}'); render();});
+const barOf=x=>{const w=$('#im').clientWidth; return Math.max(0,Math.min(IT[i].n_bars-1,Math.round(x/w*(IT[i].n_bars-1))));};
+const xOf=b=>b/(IT[i].n_bars-1)*$('#im').clientWidth;
+function place(id,tag,b){const e=$(id),t=$(tag);
+  if(b==null){e.style.display='none';t.style.display='none';return;}
+  e.style.display='block';e.style.left=xOf(b)+'px';t.style.display='block';t.style.left=xOf(b)+'px';}
+function render(){const it=IT[i]; if(!it)return;
+  $('#im').src=it.img; $('#pos').textContent=(i+1)+' / '+IT.length; $('#tot').textContent=IT.length;
+  $('#done').textContent=Object.keys(ans).length;
+  const a=ans[it.event_id]||{};
+  $('#im').onload=()=>{place('#p1','#t1',a.a1);place('#p2','#t2',a.a2);};
+  place('#p1','#t1',a.a1);place('#p2','#t2',a.a2);
+  $('#info').textContent=`${it.symbol} · ${it.grade||''}${it.star?' ⭐':''} · 窗口 ${it.n_bars} 根 · 黄框=你原来画的 ${it.box[0]}–${it.box[1]}`
+    +(a.skip?' · 已标「无清晰过程」':(a.a1!=null?` · ①=${a.a1}`:'')+(a.a2!=null?` ②=${a.a2}`:''));}
+$('#wrap').addEventListener('mousemove',e=>{const r=$('#im').getBoundingClientRect();
+  const c=$('#cur');c.style.display='block';c.style.left=(e.clientX-r.left)+'px';});
+$('#wrap').addEventListener('click',e=>{const r=$('#im').getBoundingClientRect();
+  const b=barOf(e.clientX-r.left), it=IT[i], a=ans[it.event_id]||{};
+  if(a.a1==null) a.a1=b; else a.a2=b;
+  delete a.skip; ans[it.event_id]=a; localStorage.setItem(K,JSON.stringify(ans)); render();});
+addEventListener('keydown',e=>{const k=e.key.toLowerCase(), it=IT[i]; if(!it)return;
+  if(k==='r'){delete ans[it.event_id];localStorage.setItem(K,JSON.stringify(ans));render();}
+  else if(k==='s'){ans[it.event_id]={skip:true};localStorage.setItem(K,JSON.stringify(ans));if(i<IT.length-1)i++;render();}
+  else if(k==='enter'){if(i<IT.length-1)i++;render();}
+  else if(k==='arrowleft'){if(i>0)i--;render();}});
+function dl(){const lines=IT.map(it=>{const a=ans[it.event_id]||{};
+  return JSON.stringify({event_id:it.event_id,symbol:it.symbol,grade:it.grade,star:it.star,
+    window_start_i:it.ws,n_bars:it.n_bars,box_local:it.box,
+    formation_start_local:a.a1??null, breakdown_local:a.a2??null,
+    formation_start_i:a.a1!=null?it.ws+a.a1:null, breakdown_i:a.a2!=null?it.ws+a.a2:null,
+    no_clear_phase:!!a.skip, reviewer:'owner'});});
+  const b=new Blob([lines.join('\n')+'\n'],{type:'application/x-ndjson'});
+  const el=document.createElement('a');el.href=URL.createObjectURL(b);el.download='phase_anchors.jsonl';el.click();}
+</script>

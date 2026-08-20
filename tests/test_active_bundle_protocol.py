@@ -29,6 +29,10 @@ from src.judgment.protocol import (
     runtime_artifact,
 )
 
+from conftest import requires_repo_data
+
+pytestmark = requires_repo_data("data/judgment_yolo_swap_v10.csv")
+
 
 def _artefacts(tmp_path: Path) -> dict[str, Path]:
     models = tmp_path / "models"

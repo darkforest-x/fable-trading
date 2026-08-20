@@ -1,0 +1,55 @@
+{
+  "comparison_path": "analysis/output/eth_yearly_morphology_gate_v1/comparison.png",
+  "comparison_sha256": "34557a4045a2c2cc7afcf483adc0aff705a3e48da53bd48faf035507fb08ec7f",
+  "generated_at": "2026-08-13T09:42:10.858445+00:00",
+  "holdout": {
+    "authorization_scope": "find how many matching ETH shapes occurred this year",
+    "owner_authorized_in_conversation": true,
+    "read": true,
+    "rows_read": 9734,
+    "use_number_for_this_frozen_gate": 1
+  },
+  "lookahead_contract": {
+    "core_feature_future_bars": 0,
+    "historical_confirmation_label_future_bars": 5,
+    "human_review_future_bars": 12
+  },
+  "machine_candidate_events_including_reference": 2,
+  "model_used": false,
+  "new_candidate_events": 1,
+  "owner_confirmed_semantic_events": 1,
+  "owner_reference_events": 1,
+  "pending_owner_confirmation_events": 1,
+  "production_eligible": false,
+  "protocol": "eth_yearly_morphology_gate_v1_20260813",
+  "reference_core_end": "2026-08-10T12:15:00+00:00",
+  "reference_core_start": "2026-08-10T11:30:00+00:00",
+  "scan_counts": {
+    "deduplicated_events": 2,
+    "gate_passing_unique_endpoints": 4,
+    "gate_passing_width_rows": 11
+  },
+  "scan_end": "2026-08-13T09:15:00+00:00",
+  "scan_start": "2026-01-01T00:00:00+00:00",
+  "source_audit": {
+    "api_calls": 3,
+    "api_first_time": "2026-08-04T00:30:00+00:00",
+    "api_last_time": "2026-08-13T09:15:00+00:00",
+    "api_rows": 900,
+    "extra_15m_bars": 0,
+    "local_last_time": "2026-08-05T12:45:00+00:00",
+    "local_path": "data/kline_fetched/okx_ETH_USDT_SWAP_15m_41281.csv",
+    "local_sha256": "9cca1f7f5dbb65c5a564c8ccaf452e5a235b1b375199f3826c318f9cc06fab34",
+    "merged_first_time": "2025-12-25T00:00:00+00:00",
+    "merged_last_time": "2026-08-13T09:15:00+00:00",
+    "merged_rows_with_warmup": 22214,
+    "missing_15m_bars": 0,
+    "raw_klines_written_locally": 0,
+    "series_sha256": "d4c90429061037260edc7df4f0a98d5bb75ff3dbb7f058ea1f20055294001410",
+    "year_rows": 21542
+  },
+  "symbol": "ETH_USDT_SWAP",
+  "threshold_tuned_after_scan": false,
+  "timeframe": "15m",
+  "training_eligible": false
+}

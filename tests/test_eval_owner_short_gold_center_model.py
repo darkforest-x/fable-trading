@@ -3,7 +3,14 @@ from types import SimpleNamespace
 
 import pytest
 
-from scripts.eval_owner_short_gold_center_model import metric_receipt, resolve_dataset
+# The script under test imports torch and ultralytics at module level -- it
+# evaluates a YOLO checkpoint, so that is not incidental. Where the GPU stack is
+# absent (CI, a fresh clone), skipping says so; a collection error would report
+# it as a broken test suite instead.
+pytest.importorskip("torch", reason="the script under test evaluates a YOLO checkpoint")
+pytest.importorskip("ultralytics", reason="the script under test evaluates a YOLO checkpoint")
+
+from scripts.eval_owner_short_gold_center_model import metric_receipt, resolve_dataset  # noqa: E402
 
 
 def test_resolve_dataset_requires_paired_rendered_val(tmp_path: Path) -> None:

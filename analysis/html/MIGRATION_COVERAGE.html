@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>迁移覆盖率审计</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>迁移覆盖率审计</h1>
+<p>生成于 <code>2026-08-19T17:08:44+00:00</code></p>
+<p>每个来源仓的<strong>每一个 tracked 文件</strong>必须落进恰好一个桶。 落不进任何桶的就是缺口——按定义，不靠谁想起来。</p>
+<table><thead><tr>
+<th>来源仓</th>
+<th>tracked</th>
+<th>已迁移</th>
+<th>按类排除</th>
+<th><strong>未归类</strong></th>
+</tr></thead><tbody>
+<tr><td><code>darkforest-x/darkforest-one</code></td><td>68</td><td>9</td><td>59</td><td><strong>0</strong></td></tr>
+<tr><td><code>darkforest-x/yolo-xx</code></td><td>150,810</td><td>22</td><td>150,788</td><td><strong>0</strong></td></tr>
+<tr><td><code>darkforest-x/yoyo-trading</code></td><td>15,416</td><td>109</td><td>15,307</td><td><strong>0</strong></td></tr>
+<tr><td><code>darkforest-x/yoyo-eth</code></td><td>1,305</td><td>25</td><td>1,280</td><td><strong>0</strong></td></tr>
+</tbody></table>
+<h2>排除类别与理由</h2>
+<h3><code>rendered_images</code> — 吸收 12,106 个文件</h3>
+<p>Rendered chart frames and review galleries. Task book 3.6 keeps them out of git; they are regenerable from the bars plus the renderer, and the archived repository keeps the originals at a known commit.</p>
+<h3><code>model_weights</code> — 吸收 30 个文件</h3>
+<p>Weights and cached tensors. Registered in artifacts/registry.yaml by SHA-256 and storage_uri, never copied -- one physical file keeps one identity.</p>
+<h3><code>market_data_csv</code> — 吸收 747 个文件</h3>
+<p>Raw OHLCV pulled from OKX. Not research output: re-fetchable, and this repository already carries its own data/kline_fetched/ as the single writer (CLAUDE.md live-trading rule 9).</p>
+<h3><code>training_runs</code> — 吸收 43 个文件</h3>
+<p>Training run directories -- checkpoints, epoch logs, per-run scan output. The conclusions are in the migrated reports; the runs are the workings.</p>
+<h3><code>dataset_image_indexes</code> — 吸收 153,745 个文件</h3>
+<p>YOLO label sidecars and image indexes, meaningless without the pixels they index, which are excluded above.</p>
+<h3><code>competing_governance</code> — 吸收 27 个文件</h3>
+<p>Each source repository&#x27;s own governance and packaging. Task book 8.4 forbids migrating competing statements of current truth -- one repository means one HANDOFF.</p>
+<h3><code>source_code_superseded</code> — 吸收 733 个文件</h3>
+<p>Source and research trees whose migrated subset is recorded in the ledger. What is not in the ledger from these trees was superseded by this repository&#x27;s own implementation, or is an intermediate product of a migrated report. Listed per repository below so the residue stays visible.</p>
+<h3><code>tooling_dotfiles</code> — 吸收 3 个文件</h3>
+<p>Editor and toolchain pins belonging to the source repository. darkforest-one&#x27;s .python-version reads 3.11, which is the constraint that made its pydantic config REFERENCE_ONLY rather than portable -- the fact is recorded in experiments/historical/darkforest_one/README.md, so the file itself adds nothing here.</p>
+<h3><code>noise</code> — 吸收 0 个文件</h3>
+<p>Finder metadata, bytecode caches and run logs. Not authored, not read by anything, and regenerated on the next run -- migrating them would only add files that differ between machines for reasons nobody chose.</p>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-19T17:08:56+00:00",
+  "generated_by": "tools/consolidation/build_source_asset_registry.py",
+  "source_repo": "darkforest-x/darkforest-one",
+  "source_commit": "fd36dd1adc5844f241122c3853eb4d3e675a9c11",
+  "experiments": [
+    {
+      "experiment_id": "exp-darkforest-one-p1-causal-candidate-dataset",
+      "status": "superseded",
+      "question": "Can a deterministic, fully typed, fail-closed engine build a causal MA-density candidate dataset with matched random controls, such that identical inputs reproduce identical bars, features, candidates and hashes?",
+      "result": "P1 gate passed; P2 never started. The repository reaches ROADMAP P1 complete (canonical OKX ingestion, idempotent incremental updates, Parquet snapshots with manifests, gap/duplicate/stale/unclosed rejection, causal MA-density candidates, density diagnostics, matched random controls) with every P2 box unchecked, reports/generated/ empty, and no LightGBM, label or walk-forward code on any branch including the remotes. Superseded by this consolidation, which ports the engineering (typed contracts, fail-closed config, artifact lineage, matched-control design, closed-bar continuity checks) into fable-trading rather than continuing the engine.",
+      "single_variable": "n/a -- infrastructure phase, no competing arms",
+      "holdout_consumed": false,
+      "training_eligible": false,
+      "production_eligible": false,
+      "canonical_report": "experiments/historical/darkforest_one/README.md",
+      "reuse_allowed": true
+    }
+  ],
+  "artifacts": [],
+  "migrated_files": {
+    "ADAPT_AND_PORT": [
+      "yoyo/artifacts/lineage.py",
+      "yoyo/data/continuity.py"
+    ],
+    "HISTORICAL_REPORT": [
+      "experiments/historical/darkforest_one/ARCHITECTURE.md",
+      "experiments/historical/darkforest_one/PROTOCOL.md",
+      "experiments/historical/darkforest_one/ROADMAP_at_freeze.md",
+      "experiments/historical/darkforest_one/adr-0001-minimal-causal-core.md",
+      "experiments/historical/darkforest_one/adr-0002-canonical-okx-data.md",
+      "experiments/historical/darkforest_one/adr-0003-causal-candidates-and-controls.md",
+      "experiments/historical/darkforest_one/config_base.yaml"
+    ]
+  },
+  "holdout_consumed_by_this_repo": []
+}

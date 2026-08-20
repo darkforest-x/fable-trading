@@ -24,11 +24,7 @@ import pandas as pd
 
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
-# restructure: L1 lives in yoyo-trading
-_YOYO = Path.home() / "yoyo-trading"
-if _YOYO.is_dir():
-    sys.path.insert(0, str(_YOYO))
-
+# L1 lives in this repository: yoyo/layers/l1_detection/
 from src.data.loader import list_series, load_series  # noqa: E402
 from src.data.universe import is_stockish  # noqa: E402
 from src.detection.data import add_mas  # noqa: E402

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>单仓收敛 — 最终验收</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>单仓收敛 — 最终验收</h1>
+<blockquote>机器版本：<a href="final_acceptance.json"><code>final_acceptance.json</code></a> 迁移台账：<a href="migration_ledger.jsonl"><code>migration_ledger.jsonl</code></a>（165 条） 资产裁决：<a href="../../docs/consolidation/source_asset_registry.json"><code>../../docs/consolidation/source_asset_registry.json</code></a> 生成时间：<code>2026-08-19T16:48:12+00:00</code></blockquote>
+<h2>裁决：<strong>accepted</strong></h2>
+<p>七项验收全部通过。逐项都是与 C0 记录的对比或对真实 diff 的扫描，不含判断。</p>
+<table><thead><tr>
+<th>检查</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>运行安全哈希与 C0 一致</td><td>PASS — 12 个对象逐字节相同</td></tr>
+<tr><td>无新增测试失败</td><td>PASS — 701 → <strong>1181 passing / 0 failed</strong>（exit 0），新增失败 <strong>0</strong></td></tr>
+<tr><td>秘密扫描</td><td>PASS — 新增行中无密钥形态内容</td></tr>
+<tr><td>大文件扫描</td><td>PASS — 无新增 &gt;2 MiB 文件</td></tr>
+<tr><td>迁移台账可追溯</td><td>PASS — 165 项全部可追至 source commit</td></tr>
+<tr><td>无任何 promote</td><td>PASS — 无 artifact / experiment 为 <code>production_eligible</code></td></tr>
+<tr><td>holdout</td><td>PASS — 本次消耗 <strong>0</strong>；唯一一次记录早于本任务且未重读</td></tr>
+</tbody></table>
+<h2>五仓冻结 SHA</h2>
+<table><thead><tr>
+<th>仓库</th>
+<th>HEAD</th>
+</tr></thead><tbody>
+<tr><td><code>fable-trading</code>（目的）</td><td><code>59e13a61c43e1e72f397f38985fd8c700533550b</code></td></tr>
+<tr><td><code>darkforest-one</code></td><td><code>fd36dd1adc5844f241122c3853eb4d3e675a9c11</code></td></tr>
+<tr><td><code>yolo-xx</code></td><td><code>9296cfa8e5053d86cea44e29dbd45874c3dff689</code></td></tr>
+<tr><td><code>yoyo-trading</code></td><td><code>784766de45a3b876c986d3ba672779124b46a66f</code></td></tr>
+<tr><td><code>yoyo-eth</code></td><td><code>6147810afb46be1c664128e9a5359e8e7d0a3923</code></td></tr>
+</tbody></table>
+<h2>运行安全：C0 与 C7 哈希对比</h2>
+<p><strong>全部未变。</strong> 这是&quot;没有影响当前运行&quot;的证明方式，不是声明。</p>
+<table><thead><tr>
+<th>对象</th>
+<th>SHA-256 (C0)</th>
+<th>状态</th>
+</tr></thead><tbody>
+<tr><td><code>models/ACTIVE</code></td><td><code>899c36259950a3d3…</code></td><td>unchanged</td></tr>
+<tr><td><code>models/ACTIVE_PREV</code></td><td><code>5142d8a143799a82…</code></td><td>unchanged</td></tr>
+<tr><td><code>models/owner_best.json</code></td><td><code>1fb35c712dbff417…</code></td><td>unchanged</td></tr>
+<tr><td><code>models/active_bundle.example.json</code></td><td><code>fb2bf9dd0fcf65e6…</code></td><td>unchanged</td></tr>
+<tr><td><code>data/forward_log.csv</code></td><td><code>6035eb60482481fb…</code></td><td>unchanged</td></tr>
+<tr><td><code>data/forward_log_ma206.csv</code></td><td><code>e03ada090caec2d7…</code></td><td>unchanged</td></tr>
+<tr><td><code>src/costs.py</code></td><td><code>e2245409d815db6b…</code></td><td>unchanged</td></tr>
+<tr><td><code>scripts/deploy_vps.sh</code></td><td><code>47389ad26bbdc30f…</code></td><td>unchanged</td></tr>
+<tr><td><code>scripts/deploy_vps_short_protocol.sh</code></td><td><code>6ab012d6767dd9ba…</code></td><td>unchanged</td></tr>
+<tr><td><code>deploy/fable-forward.timer</code></td><td><code>bfddb136a1fcf7be…</code></td><td>unchanged</td></tr>
+<tr><td><code>deploy/fable-live-health.service</code></td><td><code>d6ecc03f37eb23ed…</code></td><td>unchanged</td></tr>
+<tr><td><code>deploy/fable-live-health.timer</code></td><td><code>c133fad519f9e67d…</code></td><td>unchanged</td></tr>
+</tbody></table>
+<h2>迁移覆盖率：每个 tracked 文件都有归属</h2>
+<p>逐文件核对，不靠回忆。详表 <a href="MIGRATION_COVERAGE.md"><code>MIGRATION_COVERAGE.md</code></a>。</p>
+<table><thead><tr>
+<th>来源仓</th>
+<th>tracked</th>
+<th>已迁移</th>
+<th>按类排除（有书面理由）</th>
+<th><strong>未归类</strong></th>
+</tr></thead><tbody>
+<tr><td><code>darkforest-x/darkforest-one</code></td><td>68</td><td>9</td><td>59</td><td><strong>0</strong></td></tr>
+<tr><td><code>darkforest-x/yolo-xx</code></td><td>150,810</td><td>22</td><td>150,788</td><td><strong>0</strong></td></tr>
+<tr><td><code>darkforest-x/yoyo-trading</code></td><td>15,416</td><td>109</td><td>15,307</td><td><strong>0</strong></td></tr>
+<tr><td><code>darkforest-x/yoyo-eth</code></td><td>1,305</td><td>25</td><td>1,280</td><td><strong>0</strong></td></tr>
+</tbody></table>
+<p><strong>未归类 0。</strong> 排除类别共 8 个，每个都写明理由并报出吸收了多少文件—— 一个过宽的类别会在报告里显形。</p>
+<h2>迁移矩阵</h2>
+<table><thead><tr>
+<th>裁决</th>
+<th>数量</th>
+</tr></thead><tbody>
+<tr><td><code>ADAPT_AND_PORT</code></td><td>7</td></tr>
+<tr><td><code>DIRECT_PORT</code></td><td>97</td></tr>
+<tr><td><code>HISTORICAL_REPORT</code></td><td>26</td></tr>
+<tr><td><code>REFERENCE_ONLY</code></td><td>1</td></tr>
+</tbody></table>
+<table><thead><tr>
+<th>来源仓</th>
+<th>分布</th>
+</tr></thead><tbody>
+<tr><td><code>darkforest-x/darkforest-one</code></td><td>ADAPT_AND_PORT 2 / HISTORICAL_REPORT 5</td></tr>
+<tr><td><code>darkforest-x/yolo-xx</code></td><td>ADAPT_AND_PORT 4 / DIRECT_PORT 8 / HISTORICAL_REPORT 10</td></tr>
+<tr><td><code>darkforest-x/yoyo-eth</code></td><td>DIRECT_PORT 13 / HISTORICAL_REPORT 3</td></tr>
+<tr><td><code>darkforest-x/yoyo-trading</code></td><td>ADAPT_AND_PORT 1 / DIRECT_PORT 76 / HISTORICAL_REPORT 8 / REFERENCE_ONLY 1</td></tr>
+</tbody></table>
+<h2>迁进来的核心能力</h2>
+<table><thead><tr>
+<th>能力</th>
+<th>落点</th>
+<th>来源</th>
+</tr></thead><tbody>
+<tr><td>canonical <code>yoyo</code> 包（55 个 .py，字节一致）</td><td><code>yoyo/</code></td><td>yoyo-trading</td></tr>
+<tr><td>层边界 AST 强制 + 具名历史债务</td><td><code>tests/boundaries/test_layer_imports.py</code></td><td>yoyo-trading（扩充）</td></tr>
+<tr><td>Causal Onset v3 六锚点 + 渲染期盲化 review pack</td><td><code>yoyo/layers/l1_detection/onset/</code></td><td>yolo-xx</td></tr>
+<tr><td>Gold 标注全链（Label Studio + 审计）</td><td><code>tools/review/</code>、<code>configs/labelstudio/</code></td><td>yoyo-trading</td></tr>
+<tr><td>数值基线（扫描器 / 27 因果特征 / 标签）</td><td><code>yoyo/layers/l1_detection/numeric_baseline/</code></td><td>yoyo-eth</td></tr>
+<tr><td>closed-bar 连续性与可用性</td><td><code>yoyo/data/continuity.py</code></td><td>darkforest-one（适配）</td></tr>
+<tr><td>产物血统 + 逐轴可复现性</td><td><code>yoyo/artifacts/lineage.py</code></td><td>darkforest-one（适配）</td></tr>
+<tr><td>匹配对照 / walk-forward / 置换 / 经济门</td><td><code>yoyo/evaluation/</code></td><td>两仓合并 + 新增泄漏断言</td></tr>
+<tr><td><strong>canonical holdout 边界</strong></td><td><code>yoyo/contracts/holdout.py</code></td><td>新增（原有 11 处定义）</td></tr>
+<tr><td><strong>canonical PatternEvent</strong></td><td><code>yoyo/contracts/pattern.py</code></td><td>新增（桥接两套存储 schema）</td></tr>
+<tr><td><strong>CandidateProposal + Teacher 闸门</strong></td><td><code>yoyo/contracts/candidates.py</code>、<code>yoyo/layers/l1_detection/teacher/</code></td><td>新增</td></tr>
+</tbody></table>
+<h2>只登记不迁移（REFERENCE_ONLY）</h2>
+<ul>
+<li>3060 上 59 个检测权重（<code>host://windows-3060/C:/fable</code>）</li>
+<li><code>yoyo-trading/manifests/legacy_label_migration_v3.jsonl</code>（2.4 MiB 逐行审计）</li>
+<li>darkforest-one 的 pydantic fail-closed 配置（绑死 Python 3.11）</li>
+</ul>
+<h2>明确拒绝（REJECT）</h2>
+<p>第二套 package 根、重复 CLI、重复 ETH canonical 数据、未接入的 paper 外壳、 已被替代的 bbox-only CLI、旧 outcome 支线、<code>configs/source_repo.json</code> 跨仓指针、 egg-info 与 uv.lock、竞争性的 AGENTS/CLAUDE/HANDOFF。</p>
+<h2>本次发现的问题（都已处理或已上报）</h2>
+<ol>
+<li><strong>fable-trading 此前跑不起来，除非 <code>~/yoyo-trading</code> 在磁盘上。</strong> 63 个文件 import <code>yoyo.*</code>，靠 editable 安装指向仓外。已整包迁回，55/55 字节一致。</li>
+<li><strong>半迁移与全迁移长得一模一样。</strong> editable finder 排在 PathFinder 之后，本地缺 哪个子模块就静默落回另一个仓。已加 provenance 守门测试。</li>
+<li><strong>35 个脚本一直在 import 另一个仓的 <code>yoyo</code>。</strong> 跨仓桥把 yoyo-trading 插在 sys.path 第一位。全部删除 + 两道 AST 防回归。</li>
+<li><strong><code>tools</code> 是隐式命名空间包，被 yoyo-trading 的同名 regular package 抢走。</strong> 单文件跑绿、全量跑红。已加 <code>__init__.py</code> + 测试。</li>
+<li><strong>holdout 边界有 11 处定义、6 个名字。</strong> 已建 canonical + 逐处比对测试。</li>
+<li><strong>两个 ATR 实现不一致</strong>（warmup 播种，bar 14 差 0.109，200 根后耗尽）。 ATR 定义 TP/SL 障碍距离。<strong>已量化钉住，需 owner 裁决</strong>——见 <code>docs/consolidation/DUPLICATE_SEMANTICS.md</code> §4。</li>
+<li><strong>任务书 §8.1 的四条 darkforest-one 结论没有发生。</strong> 已按真实 source commit 更正。</li>
+</ol>
+<h2>PR</h2>
+<p>https://github.com/darkforest-x/fable-trading/pull/1 （Draft）</p>
+<h2>提交</h2>
+<ul>
+<li><code>4f9203c consolidation(c0): add source repository snapshot tool</code></li>
+<li><code>813cd75 consolidation(c0): add test-run recorder for baseline/final comparison</code></li>
+<li><code>595821d consolidation(c0): point safety hashes at the paths that actually exist</code></li>
+<li><code>e9b4d73 consolidation(c0): freeze source repository state</code></li>
+<li><code>8082deb consolidation(c1): add the port tool that writes the migration ledger</code></li>
+<li><code>e01c61a consolidation(c1): establish canonical governance and bring yoyo home</code></li>
+<li><code>87f13da consolidation(c2): unify gold annotation and causal onset workflow</code></li>
+<li><code>6ff7c74 consolidation(c3): port causal numeric baselines and evaluation gates</code></li>
+<li><code>13b3038 consolidation(c4): register pattern teacher and isolate proposal semantics</code></li>
+<li><code>8281599 consolidation(c5): cut the cross-repo bridges and inventory duplicate semantics</code></li>
+<li><code>fdc1f57 consolidation(c6): add the generator for the source asset registry</code></li>
+<li><code>6ad1c2b consolidation(c6): register historical and negative research results</code></li>
+<li><code>39e2870 consolidation(c7): add the acceptance checker</code></li>
+</ul>
+<h2>仍存在的风险</h2>
+<ul>
+<li><strong>ATR 分歧未裁决</strong>（见上第 6 条）。当前两套并存，差异已钉住。</li>
+<li>~~<strong>11 个先存测试失败</strong>~~ <strong>已解决（2026-08-20）</strong>：它们缺的是 gitignore 掉的 <code>data/</code> 产物。 改为<strong>条件跳过</strong>并在原因里点名缺哪个文件——一个跑不了的测试不等于一个失败的测试， 而 11 条常红会教会所有人无视 CI 徽章。本机有数据时它们照常运行（实测 55 passed）。</li>
+<li><strong><code>yoyo/layers/l1_detection/data.py</code> 保留一个硬编码绝对路径</strong> （<code>/Users/zhangzc/Documents/Codex/...</code> 的旧 kline 缓存）。字节一致迁移的代价； 改它会破坏与来源仓的字节校验。</li>
+<li><strong>7 个文件哈希实现、3 个 MA 实现未合并</strong>：实测一致且已钉住，合并留待专门一轮。</li>
+<li><strong>venv 里 yoyo-trading 的 editable 安装未卸载</strong>（不动 owner 环境）。 测试保证即使它还在，跑的也是本仓的 <code>yoyo/</code>。彻底清除：<code>pip uninstall yoyo-trading</code>。</li>
+<li><strong>归档 commit 尚未执行</strong>：按任务书 §9 C7.5，需先推送并形成 PR。</li>
+</ul>
+<h2>下一条允许的动作</h2>
+<p><strong>只有 P0（owner 形态定义与重复标注稳定性）→ P1（Gold Dataset）。</strong></p>
+<p>在 P0/P1 通过前禁止：新 YOLO 训练、新 Onset 训练、新 LightGBM 训练、多周期扩展、 强化学习、仓位优化、执行层重构、模型 promote、实盘替换。</p>
+</body>
+</html>

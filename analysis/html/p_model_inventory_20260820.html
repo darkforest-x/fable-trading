@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>模型清单 — 我们到底训出了什么（2026-08-20）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>模型清单 — 我们到底训出了什么（2026-08-20）</h1>
+<blockquote>全树实测，按 SHA-256 去重。不是凭记忆列的。 复现： ``<code>bash python3 tools/consolidation/audit_models.py </code>``</blockquote>
+<h2>一句话</h2>
+<p><strong>111 个不同的权重文件，其中 107 个是训练产物、4 个是 COCO 底座。 外加 17 个 LightGBM 判断层模型。</strong></p>
+<p><strong>但生产上没有模型在跑</strong>：<code>models/active_bundle.json</code> 不存在， 执行器 <code>require_active_bundle()</code> fail-closed。<code>models/ACTIVE</code> 是<strong>研究指针，不是生产权威</strong>。</p>
+<h2>一、L1 检测层（YOLO）— 111 个权重</h2>
+<h3>按家族</h3>
+<table><thead><tr>
+<th>家族</th>
+<th>去重后</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr><td><code>owner_v*</code> 检测器主链</td><td><strong>29</strong></td><td>v6→v7s→v8→v9→v10→…→v16，主线</td></tr>
+<tr><td><code>hardneg</code> 困难负例</td><td>17</td><td>w96/w200 多轮</td></tr>
+<tr><td><code>owner_short_star</code></td><td>12</td><td>short 专用分支，含当前 <code>owner_best.pt</code></td></tr>
+<tr><td><code>side_short_tip</code></td><td>8</td><td>带方向的 tip 实验 v1b/v2/v3</td></tr>
+<tr><td>分类器（cls）</td><td>7</td><td>含 W10 分类器</td></tr>
+<tr><td>R3 gold 微调</td><td>6</td><td>yoyo-trading 的 v3gold ft/cold</td></tr>
+<tr><td>smallwin</td><td>5</td><td>小赢实验（Mac）</td></tr>
+<tr><td>paired A/B</td><td>4</td><td>配对对照</td></tr>
+<tr><td>COCO 底座</td><td>4</td><td>yolo11n/s、yolo11n-cls、yolo26n</td></tr>
+<tr><td>local_signal_v2</td><td>3</td><td>hardneg r1/r2</td></tr>
+<tr><td>其他</td><td>16</td><td>exemplar、hts_chain、eth3m pilot 等</td></tr>
+</tbody></table>
+<p>文件数 149（同一模型多处存放），<strong>不同模型 111</strong>。 存放最多的一个存了 14 份（<code>owner_short_star_v10.pt</code>）。</p>
+<h3>主链血统与固定尺子</h3>
+<pre><code>
+yolo11s (COCO)
+   → owner_v7_chain
+   → owner_v8_chain    frozen-F1 0.650
+   → owner_v9_chain    frozen-F1 0.627
+   → owner_v10_chain   frozen-F1 0.645   ★ 当前 Pattern Teacher
+   → owner_v11_chain   frozen-F1 0.658   ✗ 权重永久丢失（Mac MPS 训的，两头皆空）
+   → owner_v12_htip    frozen-F1 0.650
+   → v13 / v14_pad200 / v15_tipval / v16_tipuni_cold
+</code></pre>
+<p><strong>frozen-F1 从 0.650 → 0.627 → 0.645：没有涨。</strong> 十几版之后固定尺子基本平的。</p>
+<h3>⚠️ 两条让这些数字大打折扣的污染</h3>
+<p><strong>1. <code>optimizer=&#x27;auto&#x27;</code> 的 lr bug —— 修复前的全部 chain 模型「实为底座 + 1 个 warmup epoch」。</strong> epoch 3 就被打飞，而<strong>貌似合理的 frozen-F1 把这件事掩盖了数月</strong>。 <code>owner_v10_chain</code> 不受影响（<code>args.yaml</code> 里 <code>lr0: 0.0001</code> 是显式值，属修复后）。 即：v8/v9 那两个 frozen-F1 数字，量的可能根本不是训练出来的模型。</p>
+<p><strong>2. 训练分布含未来 —— 训练图里信号右侧带着启动后文。</strong> 2026-08-05 ablation 实测：v10 在 <strong>tip 复现率 10%，完整上下文 62%</strong>。 frozen-eval 自身也在有后文的分布上量，所以 <strong>frozen-F1 预测不了盘口表现</strong>。</p>
+<p>这两条合起来的结论就是 <code>CLAUDE.md</code> 铁律 12 的由来： <strong>自家 val / mAP / 旧 frozen-F1 不得作生产裁决。</strong></p>
+<h3>唯一有 owner 语义确认的数字</h3>
+<p>owner 手标的 1313 个框在 val 期做空 <strong>PF 8.98、胜率 79%</strong>； 完全相同语境下随机进场只赢 32%。<strong>owner 的判别力是真实的</strong>—— 问题从来不在「形态存不存在」，在「模型能不能在盘口认出来」。</p>
+<h2>二、L2 判断层（LightGBM）— 17 个</h2>
+<h3>9 个冻结工件（<code>models/frozen_*.txt</code>）</h3>
+<table><thead><tr>
+<th>工件</th>
+<th>目标</th>
+<th>分位</th>
+<th>角色</th>
+</tr></thead><tbody>
+<tr><td><code>..._yolo_v10_reg_20260731</code></td><td>regression</td><td>q90</td><td><strong>ACTIVE</strong></td></tr>
+<tr><td><code>..._yolo_v11_reg_20260718</code></td><td>regression</td><td>q90</td><td>ACTIVE_PREV / SHADOW_V11</td></tr>
+<tr><td><code>..._yolo_v8_reg_20260716</code></td><td>regression</td><td>q90</td><td>SHADOW_V8</td></tr>
+<tr><td><code>..._yolo_reg_20260715</code></td><td>regression</td><td>q90</td><td>—</td></tr>
+<tr><td><code>..._yolo_20260715</code></td><td>二分类</td><td>q90</td><td>SHADOW_BINARY</td></tr>
+<tr><td><code>..._swap_ma206_20260710</code></td><td>—</td><td>q90</td><td>规则候选池</td></tr>
+<tr><td><code>..._swap_20260709</code></td><td>—</td><td>q90</td><td>规则候选池</td></tr>
+<tr><td><code>frozen_tp5_sl2_2026-07-09</code></td><td>—</td><td>—</td><td>早期</td></tr>
+<tr><td><code>frozen_scaled_25_t3_2026-07-09</code></td><td>—</td><td>—</td><td>早期</td></tr>
+</tbody></table>
+<h3>ACTIVE 的实际内容（值得看清楚）</h3>
+<pre><code>
+config            tp5_sl2_swap_yolo_v10_reg
+threshold_val_q90 -0.0004397          ← 阈值是负的
+best_iteration    1                   ← LightGBM 只留了 1 棵树
+score_semantics   predicted_realized_ret
+holdout           not consumed; pool ends 2026-05-03
+owner_decision    L2 用 v10 池回归（2026-07-31），与 L1 short_star_v10 对齐
+note              Walkforward not all-net-positive (rho_mean=0.043).
+                  Not a tip-smoke claim for detector quality.
+</code></pre>
+<p><strong><code>best_iteration: 1</code> 和 <code>rho_mean=0.043</code> 放在一起读</strong>： 这个 L2 早停在第一棵树，且 walk-forward 的排序相关性 ≈ 0.04。 它是 owner 定向切换的（与 L1 v10 对齐），工件自己的 note 也写明 <strong>不构成检测器质量的主张</strong>。</p>
+<h3>5 轮 L2 evolution（<code>experiments/</code>）</h3>
+<p><code>r1_feedback_pilot3</code> / <code>r3_walkforward_inner9</code>（两版）/ <code>r4·r5_crosssection_confirm3</code> / <code>r5·r6_data_expansion_inner12·15</code>。</p>
+<p>r1 的数字有代表性：<strong>ROC-AUC 0.5992，但 top-decile 净收益 −0.00061</strong>。 ——AUC 接近 0.6 而钱是负的，正是 <code>CLAUDE.md</code> 开篇那条「把 AUC 当成功标准」的实例。</p>
+<h3>3 个 yoyo-eth LightGBM（已归档）</h3>
+<p><code>artifacts/model.txt</code>（MVP）、<code>iteration_v1/anchored_model.txt</code>、<code>legacy_model.txt</code>。 结论已登记为 <code>rejected</code>：<strong>压缩池跑输匹配随机对照 34.5bp（val）/ 37.1bp（test）</strong>。</p>
+<h2>三、W10 分类器（yoyo-trading，3060）</h2>
+<p>停在 23/100 epoch，best epoch 3，<strong>val top1 91.4% / val loss 0.248</strong>，test 没跑。 3 天 holdout 试跑：126 信号、119 已平仓、<strong>maker 净 +0.0453 / taker 净 −0.0023、胜率 31.9%</strong>。</p>
+<p><code>training_eligible</code> 仍是 <strong>false</strong> —— 协议 17.6 要的 DIRECT 抽检错误率未知（迁移产出 DIRECT=0）。 <strong>未 promote、未部署。</strong> 三天试跑不是验收：换个费率路由符号就翻。</p>
+<h2>四、状态总表</h2>
+<table><thead><tr>
+<th></th>
+<th>数量</th>
+<th>生产资格</th>
+</tr></thead><tbody>
+<tr><td>L1 检测器权重（去重）</td><td>111（107 训练 + 4 底座）</td><td><strong>0 个 production_eligible</strong></td></tr>
+<tr><td>L2 冻结工件</td><td>9</td><td>ACTIVE 指针指向 1 个，但那是<strong>研究权威</strong></td></tr>
+<tr><td>L2 evolution 轮次</td><td>5</td><td>0</td></tr>
+<tr><td>yoyo-eth LightGBM</td><td>3</td><td>0，已 <code>rejected</code></td></tr>
+<tr><td>W10 分类器</td><td>1</td><td>0，<code>training_eligible=false</code></td></tr>
+<tr><td><strong>生产在跑的模型</strong></td><td><strong>0</strong></td><td><code>active_bundle.json</code> 不存在，执行器 fail-closed</td></tr>
+</tbody></table>
+<p><code>artifacts/registry.yaml</code> 里登记的 4 项权重资产，<code>production_eligible</code> 全部为 false， 由 <code>tests/contracts/test_registries.py::test_nothing_in_the_registries_is_production_eligible_yet</code> 守着。</p>
+<h2>五、诚实声明</h2>
+<ol>
+<li><strong>111 这个数字是「不同的权重文件」，不是「111 次有意义的实验」。</strong> 同一次训练的 <code>best.pt</code> / <code>last.pt</code> 会是两个不同哈希，多轮 sweep 的中间产物也各算一个。</li>
+<li><strong>绝大多数模型没有可比的验收数字。</strong> 各版自家 val mAP 不可跨版本比较（考卷不一致， §已知污染 3），frozen-F1 在有后文的分布上量，两者都不作生产裁决。</li>
+<li><strong>3060 上还有 59 个权重没取回本机</strong>，登记为 <code>REFERENCE_ONLY</code> （<code>storage_uri: host://windows-3060/C:/fable</code>）。本清单只覆盖本机可见的。</li>
+<li><strong>v11 权重永久丢失</strong>，其 frozen-F1 0.658 是本链最高值，但无法复核也无法复现。</li>
+<li>本清单<strong>只盘点存在什么，不对任何模型下质量判决</strong>。真正的裁决口径是 <code>ROADMAP.md</code> 的三重经济门，而目前没有任何模型走完过。</li>
+<li><strong>发现一个残留 worktree</strong>：<code>.claude/worktrees/peaceful-ardinghelli-b84300</code> （分支 <code>claude/directory-structure-confusion-bafc06</code>，HEAD 停在 <code>9170987</code>）。 它使全树 <code>.pt</code> 从 149 虚增到 318。<code>CLAUDE.md</code> 铁律 13 禁止留 worktree—— <strong>是否删除是 owner 决策</strong>，本轮只报告不动。</li>
+</ol>
+</body>
+</html>

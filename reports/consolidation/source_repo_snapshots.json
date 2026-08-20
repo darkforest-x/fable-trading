@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-19T12:33:31+00:00",
+  "holdout_consumed_during_consolidation": false,
+  "repositories": [
+    {
+      "repo": "fable-trading",
+      "role": "destination",
+      "path": "/Users/zhangzc/fable-trading",
+      "present": true,
+      "origin_url": "https://github.com/darkforest-x/fable-trading.git",
+      "branch": "main",
+      "head_sha": "59e13a61c43e1e72f397f38985fd8c700533550b",
+      "head_commit_time": "2026-08-19T19:39:25+08:00",
+      "head_subject": "Ignore the review-pack images, keep what rebuilds them",
+      "clean": false,
+      "tracked_modification_count": 0,
+      "untracked_file_count": 8569,
+      "tracked_file_count": 36906,
+      "tags": [
+        "pre-codex-20260709"
+      ],
+      "test_entry": "python -m pytest tests -q",
+      "safety_hashes": {
+        "models/ACTIVE": {
+          "sha256": "899c36259950a3d376067958ec040638253defa9ef545fa51af2a004f95bb6ef",
+          "size_bytes": 53
+        },
+        "models/ACTIVE_PREV": {
+          "sha256": "5142d8a143799a826de176e75bcf1512070bded1a76cedb1b025c5ac8bca6066",
+          "size_bytes": 53
+        },
+        "models/owner_best.json": {
+          "sha256": "1fb35c712dbff41789be546d2486f83824fcfebacb3c65b910b5ee7d8ebc47b5",
+          "size_bytes": 1033
+        },
+        "models/active_bundle.example.json": {
+          "sha256": "fb2bf9dd0fcf65e6214a8014e6e205d6f7fc17e20052b831a4ea4cb8ffeebbf1",
+          "size_bytes": 1659
+        },
+        "data/forward_log.csv": {
+          "sha256": "6035eb60482481fb60d7e73aa72dd15d1b8884ee4c2da5410fbffa18b17b34bb",
+          "size_bytes": 223
+        },
+        "data/forward_log_ma206.csv": {
+          "sha256": "e03ada090caec2d7087c2d35bf9a8f1e4ceab16f4be618df0e90a84fe0588a5e",
+          "size_bytes": 26055
+        },
+        "src/costs.py": {
+          "sha256": "e2245409d815db6b440fe81e552a59fcd6eed1fa7fc606138f3d674fbb5e971e",
+          "size_bytes": 142
+        },
+        "scripts/deploy_vps.sh": {
+          "sha256": "47389ad26bbdc30fea44bf18c200fda1a9ceb6fd844338fa4c8b534c412210f4",
+          "size_bytes": 2443
+        },
+        "scripts/deploy_vps_short_protocol.sh": {
+          "sha256": "6ab012d6767dd9ba5228b050999376fd32155edf6df76f90e96b394a012b9741",
+          "size_bytes": 3232
+        },
+        "deploy/fable-forward.timer": {
+          "sha256": "bfddb136a1fcf7bea2a040c6cd28c14e007a8e7b5e95fa7aa429dce5160b7549",
+          "size_bytes": 289
+        },
+        "deploy/fable-live-health.service": {
+          "sha256": "d6ecc03f37eb23eda5c09ec4cc29ec57947071037d3d55ec3ab7b9b585510107",
+          "size_bytes": 272
+        },
+        "deploy/fable-live-health.timer": {
+          "sha256": "c133fad519f9e67dee5f48925e40221f2fe118aa24294e7631d37a3219c7193d",
+          "size_bytes": 185
+        }
+      }
+    },
+    {
+      "repo": "darkforest-one",
+      "role": "source",
+      "path": "/Users/zhangzc/darkforest-one",
+      "present": true,
+      "origin_url": "https://github.com/darkforest-x/darkforest-one.git",
+      "branch": "main",
+      "head_sha": "fd36dd1adc5844f241122c3853eb4d3e675a9c11",
+      "head_commit_time": "2026-08-03T15:04:36+08:00",
+      "head_subject": "Merge pull request #2 from darkforest-x/agent/p1-candidate-dataset",
+      "clean": true,
+      "tracked_modification_count": 0,
+      "untracked_file_count": 0,
+      "tracked_file_count": 68,
+      "tags": [],
+      "test_entry": "make check"
+    },
+    {
+      "repo": "yolo-xx",
+      "role": "source",
+      "path": "/Users/zhangzc/yolo-xx",
+      "present": true,
+      "origin_url": "https://github.com/darkforest-x/yolo-xx.git",
+      "branch": "main",
+      "head_sha": "9296cfa8e5053d86cea44e29dbd45874c3dff689",
+      "head_commit_time": "2026-08-18T22:51:14+08:00",
+      "head_subject": "Quality ranker v1: direction-neutral geometry scores 0.53/0.55, and the lift to 0.64 is leakage",
+      "clean": true,
+      "tracked_modification_count": 0,
+      "untracked_file_count": 0,
+      "tracked_file_count": 150810,
+      "tags": [
+        "phase3-formation-v1-frozen-20260806"
+      ],
+      "test_entry": "python -m pytest -q"
+    },
+    {
+      "repo": "yoyo-trading",
+      "role": "source",
+      "path": "/Users/zhangzc/yoyo-trading",
+      "present": true,
+      "origin_url": "https://github.com/darkforest-x/yoyo-trading.git",
+      "branch": "main",
+      "head_sha": "784766de45a3b876c986d3ba672779124b46a66f",
+      "head_commit_time": "2026-08-18T22:53:33+08:00",
+      "head_subject": "Fixed W10 gold pipeline, legacy migration, and the L2 walkforward/feedback tooling",
+      "clean": true,
+      "tracked_modification_count": 0,
+      "untracked_file_count": 0,
+      "tracked_file_count": 15416,
+      "tags": [],
+      "test_entry": "python -m pytest -q"
+    },
+    {
+      "repo": "yoyo-eth",
+      "role": "source",
+      "path": "/Users/zhangzc/yoyo-eth",
+      "present": true,
+      "origin_url": "https://github.com/darkforest-x/yoyo-eth.git",
+      "branch": "main",
+      "head_sha": "6147810afb46be1c664128e9a5359e8e7d0a3923",
+      "head_commit_time": "2026-08-13T18:03:57+08:00",
+      "head_subject": "P04: strict platform definition v2 for owner semantic adjudication",
+      "clean": true,
+      "tracked_modification_count": 0,
+      "untracked_file_count": 0,
+      "tracked_file_count": 1305,
+      "tags": [],
+      "test_entry": "python -m pytest -q"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+project:
+  name: darkforest-one
+  protocol_version: df1-eth-15m-short-v1
+market:
+  exchange: okx
+  symbol: ETH-USDT-SWAP
+  timeframe: 15m
+  side: short
+data:
+  history_start: 2024-01-01T00:00:00Z
+  canonical_path: data/canonical/okx/ETH-USDT-SWAP/15m/bars.parquet
+  manifest_path: data/canonical/okx/ETH-USDT-SWAP/15m/manifest.json
+  request_limit: 300
+  timeout_seconds: 20.0
+  max_retries: 5
+  request_interval_seconds: 0.12
+  stale_after_bars: 2
+candidate:
+  type: ma_density
+  version: ma-density-v1
+  bandwidth_atr_max: 0.35
+  volatility_percentile_max: 0.40
+  volatility_lookback_bars: 2880
+  volatility_min_periods: 2880
+  volatility_buckets: 10
+  matcher_version: volatility-bucket-random-v1
+  controls_per_candidate: 1
+  control_seed: df1-ma-density-controls-v1
+  dataset_path: data/research/candidates/ma-density-v1/samples.parquet
+  diagnostics_path: data/research/candidates/ma-density-v1/diagnostics.json
+  manifest_path: data/research/candidates/ma-density-v1/manifest.json
+strategy:
+  version: fixed-policy-v1
+  entry: next_bar_open
+  threshold: 0.0
+  stop_atr: 2.0
+  target_atr: 4.0
+  max_holding_bars: 48
+  risk_fraction: 0.002
+  max_positions: 1
+costs:
+  fee_bps_round_trip: 8.0
+  slippage_bps_round_trip: 4.0
+safety:
+  live_orders_enabled: false

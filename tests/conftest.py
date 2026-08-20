@@ -33,3 +33,40 @@ def pytest_configure(config) -> None:  # noqa: ARG001
     except Exception:  # noqa: BLE001
         # torch absent or broken -- the tests that need it will say so themselves
         pass
+
+
+# --------------------------------------------------------------------------
+# Data artifacts that live outside git
+# --------------------------------------------------------------------------
+# Several suites read files under data/ that .gitignore excludes: they exist in
+# a working checkout and never in a fresh clone or on CI. Erroring there is the
+# wrong signal -- a test that could not run is not a test that failed, and
+# eleven red results teach everyone to ignore the CI badge.
+#
+# Skipping states the same fact without the false alarm, and names the missing
+# file so the reader knows whether it is expected (CI) or a broken checkout.
+import os
+from pathlib import Path
+
+import pytest
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+def requires_repo_data(*relative_paths: str):
+    """Skip the module when a gitignored data artifact is absent.
+
+    Use at module level:
+
+        pytestmark = requires_repo_data("data/judgment_yolo_swap_v10.csv")
+    """
+    missing = [rel for rel in relative_paths if not (REPO_ROOT / rel).exists()]
+    return pytest.mark.skipif(
+        bool(missing),
+        reason=(
+            "needs gitignored data not present here: "
+            + ", ".join(missing)
+            + ". Expected on CI and in a fresh clone; in a working checkout it "
+            "means the artifact was never built or was removed."
+        ),
+    )
