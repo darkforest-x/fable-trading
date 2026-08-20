@@ -446,6 +446,46 @@ experiments:
       KEEP is only a candidate for a new dataset version; no decision mutates
       the frozen snapshot or changes training_eligible.
 
+  - experiment_id: exp-pine-eth-15m-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8b28666062e1622aa633e14467730ecbb1e92f50"
+    status: inconclusive
+    question: >-
+      Can the user-supplied ALLIN-V7.2 strategy be frozen as a causal
+      ETH-USDT perpetual 15-minute research contract with positive net
+      expectancy, tolerable drawdown and a valid path to the project's
+      judgment layer?
+    single_variable: >-
+      umbrella registration only; every optimization inside the canonical
+      report is a time-ordered single-variable comparison, while V10 volume
+      and V11 long-only remain separate paper hypotheses
+    result: >-
+      research_candidate_with_material_statistical_caveats. Frozen V9 has 110
+      final-preholdout trades, +30.22 bp/trade after 20 bp cost, PF 1.366,
+      +22.82% return and 20.07% bar-close drawdown at 1% stop risk. It fails the
+      p<0.01 gate and becomes negative without its largest winner. V10 improves
+      the historical point estimate to +41.22 bp/trade and 13.50% drawdown;
+      V11 reaches +63.39 bp/trade, but both are post-selection, tail-dependent
+      and forward-only. Actual short-window 10m/15m comparison is adverse to
+      V9. Only 4/276 V9 entries satisfy project strict density semantics, so the
+      old LightGBM cannot be reused. No LR/LightGBM was trained or scored.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_pine_eth_15m_v1_20260821.md
+    artifacts:
+      - pine-eth-15m-v1-report
+      - pine-eth-15m-v1-html
+      - pine-eth-15m-v1-manifest
+    reuse_allowed: true
+    notes: >-
+      V9 is frozen to 15m as the last pre-final-selected research baseline.
+      V10 and V11 must stay separate and require TradingView parity plus fresh
+      paper A/B. The +0.1% break-even lock is -10 bp after frozen cost. A full
+      335-row raw-candidate feature surface exists for a future authorized
+      dynamic LR gate, but P0/P1 blocks training and all eligibility flags stay
+      false.
+
   - experiment_id: exp-consolidation-single-repo-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "59e13a61c43e1e72f397f38985fd8c700533550b"
