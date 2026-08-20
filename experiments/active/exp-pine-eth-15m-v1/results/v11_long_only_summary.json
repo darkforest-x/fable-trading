@@ -1,0 +1,86 @@
+{
+  "hypothesis": "V11 long-only entry eligibility on frozen V9",
+  "status": "post-final-selection paper-forward hypothesis",
+  "single_variable": "entry directions (-1, 1) -> (1,); short signals remain exits",
+  "selection_source": "development-only side ablation",
+  "final_preholdout_was_already_consumed": true,
+  "holdout_consumed": false,
+  "holdout_rows_read": 0,
+  "barrier_cost_or_risk_changed": false,
+  "final_preholdout": {
+    "variant": "v11_long_only_postselection",
+    "period": "final_preholdout_2025_202602",
+    "risk_percent": 1.0,
+    "trades": 56,
+    "gross_bp_per_trade": 83.39284101908956,
+    "project_net_bp_per_trade": 63.39284101908954,
+    "pine_net_bp_per_trade": 63.30944817807048,
+    "win_rate": 0.08928571428571429,
+    "monetary_profit_factor": 1.508157992225047,
+    "unit_profit_factor": 1.6279404949082918,
+    "return_percent": 17.46341915981371,
+    "max_drawdown_15m_percent": 16.76725570308475,
+    "max_drawdown_daily_percent": 15.339328791012496,
+    "median_holding_bars": 36.5,
+    "mean_leverage": 0.5995410538563465,
+    "max_leverage": 1.148444962143273,
+    "long_trades": 56,
+    "short_trades": 0,
+    "period_end_exits": 0
+  },
+  "matched_control": {
+    "trades": 56,
+    "controls": 168,
+    "mean_candidate_net_bp": 63.39284101908954,
+    "mean_control_net_bp": 15.425536327523842,
+    "mean_excess_bp": 47.96730469156572,
+    "unique_control_starts": true
+  },
+  "week_block_signflip": {
+    "statistic_mean_excess_bp": 60.69919817418482,
+    "p_value": 0.270972902709729,
+    "n_blocks": 40,
+    "n_resamples": 10000,
+    "null_mean_bp": 0.197693589527615,
+    "null_std_bp": 77.33405552566363
+  },
+  "week_bootstrap_absolute": {
+    "mean_bp": 87.74456568332933,
+    "ci95_low_bp": -95.277538821245,
+    "ci95_high_bp": 344.2803281228827,
+    "n_weeks": 40
+  },
+  "week_bootstrap_excess": {
+    "mean_bp": 60.69919817418482,
+    "ci95_low_bp": -63.31518649926965,
+    "ci95_high_bp": 229.77913432044988,
+    "n_weeks": 40
+  },
+  "profit_concentration": {
+    "trades": 56,
+    "positive_trades": 5,
+    "positive_trade_fraction": 0.08928571428571429,
+    "total_unit_net_bp": 3549.999097069014,
+    "top1_share_of_net": 1.0828515864450232,
+    "top3_share_of_net": 2.3527174965286255,
+    "top5_share_of_net": 2.5925075832958435,
+    "top1_share_of_positive_sum": 0.41768502179978145,
+    "top3_share_of_positive_sum": 0.9075065051642496,
+    "mean_without_top1_bp": -5.347691946737591,
+    "mean_without_top3_bp": -90.60652625030336,
+    "reverse_trades": 5,
+    "reverse_total_unit_net_bp": 9203.399579844818,
+    "stop_trades": 51,
+    "stop_total_unit_net_bp": -5653.4004827758035,
+    "positive_months": 4,
+    "months_with_trades": 14,
+    "median_monthly_net_bp": -96.95212855654722
+  },
+  "eligibility": {
+    "training": false,
+    "production": false,
+    "forward": false,
+    "paper_ab_only": true
+  },
+  "honest_verdict": "Long-only improves the descriptive point estimate and drawdown, but the consumed final period is not OOS, week inference crosses zero, and removing the largest winner makes mean expectancy negative. It cannot replace V9."
+}

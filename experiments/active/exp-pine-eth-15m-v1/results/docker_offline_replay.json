@@ -1,0 +1,83 @@
+{
+  "status": "pass",
+  "scope": "network-disabled portable market-data replay of frozen V9; not a TradingView compiler/export parity test",
+  "runtime": {
+    "python": "3.13.12",
+    "pandas": "2.2.3",
+    "numpy": "2.2.6",
+    "platform": "Linux-6.12.65-linuxkit-aarch64-with"
+  },
+  "implementation_lineage": {
+    "repository_head": "1ef2ea46d087f9c7d69528050ca84c3438181290",
+    "replay_script_sha256": "55925112ad1617fe2be78fd5405b480ced98b11589546d76ef671fe079d08b80",
+    "execution_engine_sha256": "24c2d6ef127e3d7d0c17ca8c726e76f1e19a966b5f80806dbaab43ced2a40894",
+    "config_sha256": "8720bc87b41c1769712b99fbc6a5082c8d293d8d521cc85377eb83ff5f45df78",
+    "canonical_trades_sha256": "2dbf8f7d16e644c4096c8b2ff7482bfc8ebb040b894f9a0bfa71d7375b0bf8d3",
+    "canonical_summary_sha256": "c09a9c2092f0bc0b8a8ddf1a301d23a805d58972758f57e56bef6c8b6f0a4995",
+    "canonical_generated_from_commit": "d3ed09833885bef4930f2129b67048012e8a44e2"
+  },
+  "data_contract": {
+    "path": "/workspace/data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+    "bounded_rows_read": 145666,
+    "first_bar": "2022-01-03T15:30:00+00:00",
+    "last_bar": "2026-02-28T23:45:00+00:00",
+    "safe_end_exclusive": "2026-03-01T00:00:00+00:00",
+    "holdout_start": "2026-05-04T00:00:00+00:00",
+    "holdout_rows_read": 0,
+    "full_file_hash_intentionally_omitted": true
+  },
+  "ledger": {
+    "canonical_trade_count": 110,
+    "replayed_trade_count": 110,
+    "exact_matches": {
+      "direction": true,
+      "signal_i": true,
+      "entry_i": true,
+      "exit_i": true,
+      "holding_bars": true,
+      "exit_reason": true
+    },
+    "time_matches": {
+      "signal_time": true,
+      "entry_time": true,
+      "exit_time": true
+    },
+    "numeric_max_abs_error": {
+      "entry_price": 0.0,
+      "exit_price": 4.547473508864641e-13,
+      "quantity": 9.71445146547012e-17,
+      "initial_stop_price": 9.094947017729282e-13,
+      "initial_stop_distance": 1.4210854715202004e-14,
+      "score": 8.881784197001252e-16,
+      "leverage": 1.1102230246251565e-16,
+      "gross_return": 9.71445146547012e-17,
+      "net_return": 9.952975943416931e-17,
+      "project_net_return": 9.90960785651751e-17,
+      "commission_return": 9.974659986866641e-17,
+      "pnl": 8.881784197001252e-16,
+      "entry_equity": 5.684341886080802e-14,
+      "exit_equity": 5.684341886080802e-14
+    },
+    "final_exit_equity": 614.0915835044709
+  },
+  "checks": {
+    "contract_is_eth_swap_15m": true,
+    "safe_end_precedes_holdout": true,
+    "bounded_loader_read_zero_holdout_rows": true,
+    "trade_count_exact": true,
+    "categorical_and_index_columns_exact": true,
+    "timestamps_exact": true,
+    "numeric_columns_within_1e_10": true,
+    "final_equity_exact_within_1e_10": true,
+    "no_model_training_or_scoring": true,
+    "tradingview_parity_not_claimed": true,
+    "production_eligibility_unchanged_false": true
+  },
+  "failed": [],
+  "check_count": 11,
+  "official_pine_compiler_run": false,
+  "tradingview_parity_passed": false,
+  "model_training_or_scoring_performed": false,
+  "holdout_consumed": false,
+  "production_eligible": false
+}

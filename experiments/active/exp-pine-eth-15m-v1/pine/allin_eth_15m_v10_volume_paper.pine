@@ -1,0 +1,196 @@
+//@version=6
+// ALLIN ETH 15m V10 Volume — post-selection paper hypothesis.
+// Paper only: not TradingView-parity-approved, forward-eligible or production-eligible.
+strategy(
+     "ALLIN ETH 15m V10 Research",
+     overlay = true,
+     initial_capital = 500,
+     pyramiding = 0,
+     default_qty_type = strategy.fixed,
+     calc_on_every_tick = false,
+     calc_on_order_fills = false,
+     process_orders_on_close = false,
+     use_bar_magnifier = false,
+     commission_type = strategy.commission.percent,
+     commission_value = 0.10,
+     slippage = 0,
+     margin_long = 7.69,
+     margin_short = 7.69,
+     alert_message = "{{strategy.order.alert_message}}")
+
+// Fixed research contract. Only the bounded dates are inputs; changing any
+// constant below creates a different strategy version and invalidates V10's
+// recorded selection history.
+string GROUP_SCOPE = "Research scope"
+int researchStart = input.time(timestamp("2023-01-01T00:00:00+00:00"), "Start (UTC)", group = GROUP_SCOPE)
+int researchEnd = input.time(timestamp("2026-03-01T00:00:00+00:00"), "End, exclusive (UTC)", group = GROUP_SCOPE)
+
+const int FAST_LEN = 10
+const int SLOW_LEN = 60
+const int REGIME_LEN = 100
+const int ATR_LEN = 14
+const float ATR_MULT = 4.0
+const float MAX_SL_PERCENT = 3.0
+const int OSC_BASIS_LEN = 40
+const int OSC_PERCENTILE_LEN = 200
+const float OSC_PERCENTILE = 99.0
+const int OSC_CHANGE_LAG = 10
+const int OSC_HMA_LEN = 10
+const float OSC_THRESHOLD = 0.1
+const int SLOW_SLOPE_LAG = 12
+const int VOLUME_BASE_LEN = 20
+const int VOLUME_SMOOTH_LEN = 8
+const float VOLUME_RATIO_THRESHOLD = 1.0
+const float MIN_ATR_PERCENT = 0.1
+const float MAX_ATR_PERCENT = 10.0
+const float RISK_PER_TRADE_PERCENT = 1.0
+const float MAX_LEVERAGE = 13.0
+const float BREAK_EVEN_TRIGGER_PERCENT = 1.5
+const float BREAK_EVEN_OFFSET_PERCENT = 0.1
+const float SKIP_THRESHOLD_PERCENT = 2.0
+const int SKIP_COUNT = 1
+const float BIG_SKIP_THRESHOLD_PERCENT = 20.0
+const int BIG_SKIP_COUNT = 7
+
+if barstate.isfirst
+    if timeframe.in_seconds() != 900
+        runtime.error("ALLIN ETH V10 is frozen to 15-minute bars.")
+    if syminfo.basecurrency != "ETH"
+        runtime.error("ALLIN ETH V10 requires an ETH-base instrument.")
+
+float source = hl2
+float fastMa = ta.sma(source, FAST_LEN)
+float slowMa = ta.sma(source, SLOW_LEN)
+float regimeMa = ta.ema(close, REGIME_LEN)
+float ema200 = ta.ema(close, 200)
+float slowSlope12 = ema200 / ema200[SLOW_SLOPE_LAG] - 1.0
+float atr = ta.atr(ATR_LEN)
+float volumeBase = ta.sma(volume, VOLUME_BASE_LEN)
+float volumeRatio = not na(volumeBase) and volumeBase > 0.0 ? volume / volumeBase : 0.0
+float volRatioMean8 = ta.sma(volumeRatio, VOLUME_SMOOTH_LEN)
+bool volumeExpansion = not na(volRatioMean8) and volRatioMean8 >= VOLUME_RATIO_THRESHOLD
+
+float oscillatorBasis = ta.sma(source, OSC_BASIS_LEN)
+float difference = source - oscillatorBasis
+float percentile99 = ta.percentile_linear_interpolation(difference, OSC_PERCENTILE_LEN, OSC_PERCENTILE)
+bool percentileSafe = not na(percentile99) and percentile99 > 0.0
+float ratio = percentileSafe ? difference / percentile99 : 0.0
+float changeRatio = ratio - ratio[OSC_CHANGE_LAG]
+float oscillator = ta.hma(changeRatio, OSC_HMA_LEN)
+
+bool crossUp = ta.crossover(fastMa, slowMa)
+bool crossDown = ta.crossunder(fastMa, slowMa)
+bool oscillatorRising = oscillator > OSC_THRESHOLD and oscillator > oscillator[1]
+bool oscillatorFalling = oscillator < -OSC_THRESHOLD and oscillator < oscillator[1]
+bool rawLong = percentileSafe and volumeExpansion and crossUp and close > slowMa and close > regimeMa and slowSlope12 > 0.0 and oscillatorRising
+bool rawShort = percentileSafe and volumeExpansion and crossDown and close < slowMa and close < regimeMa and slowSlope12 < 0.0 and oscillatorFalling
+
+f_inWindow(int value, int startValue, int endValue) =>
+    startValue == endValue ? false :
+     startValue < endValue ? value >= startValue and value < endValue :
+     value >= startValue or value < endValue
+
+int hourHk = hour(time, "Asia/Hong_Kong")
+int weekdayHk = dayofweek(time, "Asia/Hong_Kong")
+bool timeAllowed = not f_inWindow(hourHk, 21, 23)
+bool dayAllowed = weekdayHk != dayofweek.sunday
+float atrPercent = atr / close * 100.0
+bool volatilityAllowed = atrPercent >= MIN_ATR_PERCENT and atrPercent <= MAX_ATR_PERCENT
+bool dateAllowed = time >= researchStart and time_close < researchEnd
+
+// `profit_percent()` is used so the cooldown contract is percentage-based and
+// follows the broker emulator's closed-trade accounting instead of reconstructing
+// notional from a potentially reversed order.
+var int tradesToSkip = 0
+bool justClosed = strategy.closedtrades > nz(strategy.closedtrades[1])
+if justClosed
+    int tradeIndex = strategy.closedtrades - 1
+    float tradeReturnPercent = strategy.closedtrades.profit_percent(tradeIndex)
+    if tradeReturnPercent > BIG_SKIP_THRESHOLD_PERCENT
+        tradesToSkip := BIG_SKIP_COUNT
+    else if tradeReturnPercent > SKIP_THRESHOLD_PERCENT
+        tradesToSkip := SKIP_COUNT
+
+bool rawSignal = rawLong or rawShort
+bool skippedSignal = rawSignal and tradesToSkip > 0
+if skippedSignal
+    tradesToSkip -= 1
+
+bool commonAllowed = barstate.isconfirmed and dateAllowed and timeAllowed and dayAllowed and volatilityAllowed and not skippedSignal
+bool longSignal = rawLong and commonAllowed
+bool shortSignal = rawShort and commonAllowed
+
+float signalStopDistance = math.min(atr * ATR_MULT, close * MAX_SL_PERCENT / 100.0)
+int signalStopTicks = math.max(1, int(math.round(signalStopDistance / syminfo.mintick)))
+float stopFraction = signalStopDistance / close
+float targetLeverage = stopFraction > 0.0 ? math.min(RISK_PER_TRADE_PERCENT / 100.0 / stopFraction, MAX_LEVERAGE) : 0.0
+float targetQuantity = strategy.equity > 0.0 and close > 0.0 ? strategy.equity * targetLeverage / close : 0.0
+
+string longEntryAlert = "PAPER ONLY | ALLIN ETH 15m V10 | OPEN LONG | {{ticker}} | {{strategy.order.price}}"
+string shortEntryAlert = "PAPER ONLY | ALLIN ETH 15m V10 | OPEN SHORT | {{ticker}} | {{strategy.order.price}}"
+string longExitAlert = "PAPER ONLY | ALLIN ETH 15m V10 | CLOSE LONG | {{ticker}} | {{strategy.order.price}}"
+string shortExitAlert = "PAPER ONLY | ALLIN ETH 15m V10 | CLOSE SHORT | {{ticker}} | {{strategy.order.price}}"
+
+var int pendingLongStopTicks = na
+var int pendingShortStopTicks = na
+if longSignal and strategy.position_size <= 0.0 and targetQuantity > 0.0
+    pendingLongStopTicks := signalStopTicks
+    strategy.entry("Long", strategy.long, qty = targetQuantity, comment = "V10 confirmed long", alert_message = longEntryAlert)
+    strategy.exit("Exit Long", "Long", loss = signalStopTicks, comment = "Initial stop", alert_message = longExitAlert)
+
+if shortSignal and strategy.position_size >= 0.0 and targetQuantity > 0.0
+    pendingShortStopTicks := signalStopTicks
+    strategy.entry("Short", strategy.short, qty = targetQuantity, comment = "V10 confirmed short", alert_message = shortEntryAlert)
+    strategy.exit("Exit Short", "Short", loss = signalStopTicks, comment = "Initial stop", alert_message = shortExitAlert)
+
+bool newLongPosition = strategy.position_size > 0.0 and nz(strategy.position_size[1]) <= 0.0
+bool newShortPosition = strategy.position_size < 0.0 and nz(strategy.position_size[1]) >= 0.0
+var float stopPrice = na
+if newLongPosition
+    stopPrice := strategy.position_avg_price - nz(pendingLongStopTicks, signalStopTicks) * syminfo.mintick
+if newShortPosition
+    stopPrice := strategy.position_avg_price + nz(pendingShortStopTicks, signalStopTicks) * syminfo.mintick
+if strategy.position_size == 0.0 and nz(strategy.position_size[1]) != 0.0
+    stopPrice := na
+
+if strategy.position_size > 0.0 and not na(stopPrice)
+    float entryPrice = strategy.position_avg_price
+    if high >= entryPrice * (1.0 + BREAK_EVEN_TRIGGER_PERCENT / 100.0)
+        stopPrice := math.max(stopPrice, entryPrice * (1.0 + BREAK_EVEN_OFFSET_PERCENT / 100.0))
+    strategy.exit("Exit Long", "Long", stop = stopPrice, comment = "Managed stop", alert_message = longExitAlert)
+
+if strategy.position_size < 0.0 and not na(stopPrice)
+    float entryPrice = strategy.position_avg_price
+    if low <= entryPrice * (1.0 - BREAK_EVEN_TRIGGER_PERCENT / 100.0)
+        stopPrice := math.min(stopPrice, entryPrice * (1.0 - BREAK_EVEN_OFFSET_PERCENT / 100.0))
+    strategy.exit("Exit Short", "Short", stop = stopPrice, comment = "Managed stop", alert_message = shortExitAlert)
+
+bool finalResearchBar = time < researchEnd and time_close >= researchEnd
+if barstate.isconfirmed and finalResearchBar and strategy.position_size != 0.0
+    strategy.close_all(comment = "Research end", alert_message = "PAPER ONLY | V10 | PERIOD END", immediately = true)
+
+color longColor = #2563EB
+color shortColor = #D97706
+plot(regimeMa, "EMA100 regime", color = color.new(#64748B, 35))
+plot(ema200, "EMA200 judgment direction", color = color.new(#6B8E23, 45))
+fastPlot = plot(fastMa, "SMA10", color = color.new(longColor, 65), display = display.none)
+slowPlot = plot(slowMa, "SMA60", color = color.new(shortColor, 65), display = display.none)
+fill(fastPlot, slowPlot, color = color.new(fastMa >= slowMa ? longColor : shortColor, 88), title = "SMA cloud")
+plot(strategy.position_size != 0.0 ? stopPrice : na, "Managed stop", color = shortColor, style = plot.style_linebr)
+plotshape(longSignal, "V10 long", shape.triangleup, location.belowbar, longColor, size = size.tiny, text = "L")
+plotshape(shortSignal, "V10 short", shape.triangledown, location.abovebar, shortColor, size = size.tiny, text = "S")
+
+var table hud = table.new(position.bottom_right, 2, 6, bgcolor = color.new(#FFFFFF, 8), frame_color = #CBD5E1, frame_width = 1)
+if barstate.islast
+    table.cell(hud, 0, 0, "Contract")
+    table.cell(hud, 1, 0, "ETH · 15m · V10")
+    table.cell(hud, 0, 1, "Ticker")
+    table.cell(hud, 1, 1, syminfo.tickerid)
+    table.cell(hud, 0, 2, "Risk")
+    table.cell(hud, 1, 2, "1.0%")
+    table.cell(hud, 0, 3, "Target lev")
+    table.cell(hud, 1, 3, str.tostring(targetLeverage, "#.##") + "x")
+    table.cell(hud, 0, 4, "Cooldown")
+    table.cell(hud, 1, 4, str.tostring(tradesToSkip))
+    table.cell(hud, 0, 5, "Status")
+    table.cell(hud, 1, 5, "PAPER VOLUME / PARITY REQUIRED", text_color = #C2417A)

@@ -1,0 +1,33 @@
+{
+  "framework": "Backtesting.py",
+  "framework_version": "0.6.5",
+  "data_rows": 40704,
+  "period": [
+    "2025-01-01 00:00:00+00:00",
+    "2026-02-28 23:45:00+00:00"
+  ],
+  "custom_engine_trades": 110,
+  "framework_trades": 110,
+  "entry_time_intersection": 110,
+  "custom_only_entry_times": 0,
+  "framework_only_entry_times": 0,
+  "exit_time_matches": 110,
+  "max_entry_price_error": 4.547473508864641e-13,
+  "max_exit_price_error": 9.094947017729282e-13,
+  "max_unit_return_error_bp": 2.949029909160572e-12,
+  "custom_same_entry_bar_stops": 0,
+  "framework_return_percent": 22.782705035579465,
+  "framework_max_drawdown_percent": 20.008680332544394,
+  "framework_profit_factor": 1.3004249973955495,
+  "framework_commission_paid": 68.11490519810198,
+  "authoritative_for_v9": false,
+  "independent_framework_reconciliation_passed": true,
+  "tradingview_parity_passed": false,
+  "semantic_limitations": [
+    "initial stop becomes active at the entry bar close, not at the entry fill; no same-entry-bar stop occurred in this bounded sample",
+    "broker-emulator intrabar sequencing differs from the custom confirmed-bar contract",
+    "fractional contract composition and margin accounting differ from TradingView/OKX",
+    "results are a sensitivity check and cannot replace a TradingView trade export"
+  ],
+  "holdout_consumed": false
+}

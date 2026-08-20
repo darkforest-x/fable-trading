@@ -1,0 +1,143 @@
+{
+  "audit": "Pine judgment layer sample-capacity feasibility",
+  "source_status": "training-ineligible interface audit",
+  "holdout_rows_read": 0,
+  "consumed_final_rows_read": 0,
+  "training_or_scoring_performed": false,
+  "training_eligible": false,
+  "rows": 166,
+  "positive_events": 27,
+  "positive_rate": 0.16265060240963855,
+  "candidate_features": 28,
+  "overall_positive_events_per_feature": 0.9642857142857143,
+  "fold_capacity": [
+    {
+      "fold": "wf_2023h2",
+      "purged_train_rows": 41,
+      "train_positive_events": 7,
+      "validation_rows": 40,
+      "validation_positive_events": 4,
+      "events_per_28_features_train": 0.25
+    },
+    {
+      "fold": "wf_2024h1",
+      "purged_train_rows": 82,
+      "train_positive_events": 11,
+      "validation_rows": 38,
+      "validation_positive_events": 8,
+      "events_per_28_features_train": 0.39285714285714285
+    },
+    {
+      "fold": "wf_2024h2",
+      "purged_train_rows": 121,
+      "train_positive_events": 19,
+      "validation_rows": 45,
+      "validation_positive_events": 8,
+      "events_per_28_features_train": 0.6785714285714286
+    }
+  ],
+  "planning_scenarios": [
+    {
+      "effective_features": 1,
+      "planning_events_per_feature": 5,
+      "required_positive_events": 5,
+      "required_total_rows_at_observed_rate": 30.74074074074074,
+      "years_at_observed_eth_row_rate": 0.37037037037037035,
+      "current_rows_meet_scenario": true
+    },
+    {
+      "effective_features": 1,
+      "planning_events_per_feature": 10,
+      "required_positive_events": 10,
+      "required_total_rows_at_observed_rate": 61.48148148148148,
+      "years_at_observed_eth_row_rate": 0.7407407407407407,
+      "current_rows_meet_scenario": true
+    },
+    {
+      "effective_features": 1,
+      "planning_events_per_feature": 20,
+      "required_positive_events": 20,
+      "required_total_rows_at_observed_rate": 122.96296296296296,
+      "years_at_observed_eth_row_rate": 1.4814814814814814,
+      "current_rows_meet_scenario": true
+    },
+    {
+      "effective_features": 3,
+      "planning_events_per_feature": 5,
+      "required_positive_events": 15,
+      "required_total_rows_at_observed_rate": 92.22222222222223,
+      "years_at_observed_eth_row_rate": 1.1111111111111112,
+      "current_rows_meet_scenario": true
+    },
+    {
+      "effective_features": 3,
+      "planning_events_per_feature": 10,
+      "required_positive_events": 30,
+      "required_total_rows_at_observed_rate": 184.44444444444446,
+      "years_at_observed_eth_row_rate": 2.2222222222222223,
+      "current_rows_meet_scenario": false
+    },
+    {
+      "effective_features": 3,
+      "planning_events_per_feature": 20,
+      "required_positive_events": 60,
+      "required_total_rows_at_observed_rate": 368.8888888888889,
+      "years_at_observed_eth_row_rate": 4.444444444444445,
+      "current_rows_meet_scenario": false
+    },
+    {
+      "effective_features": 5,
+      "planning_events_per_feature": 5,
+      "required_positive_events": 25,
+      "required_total_rows_at_observed_rate": 153.7037037037037,
+      "years_at_observed_eth_row_rate": 1.8518518518518519,
+      "current_rows_meet_scenario": true
+    },
+    {
+      "effective_features": 5,
+      "planning_events_per_feature": 10,
+      "required_positive_events": 50,
+      "required_total_rows_at_observed_rate": 307.4074074074074,
+      "years_at_observed_eth_row_rate": 3.7037037037037037,
+      "current_rows_meet_scenario": false
+    },
+    {
+      "effective_features": 5,
+      "planning_events_per_feature": 20,
+      "required_positive_events": 100,
+      "required_total_rows_at_observed_rate": 614.8148148148148,
+      "years_at_observed_eth_row_rate": 7.407407407407407,
+      "current_rows_meet_scenario": false
+    },
+    {
+      "effective_features": 28,
+      "planning_events_per_feature": 5,
+      "required_positive_events": 140,
+      "required_total_rows_at_observed_rate": 860.7407407407408,
+      "years_at_observed_eth_row_rate": 10.37037037037037,
+      "current_rows_meet_scenario": false
+    },
+    {
+      "effective_features": 28,
+      "planning_events_per_feature": 10,
+      "required_positive_events": 280,
+      "required_total_rows_at_observed_rate": 1721.4814814814815,
+      "years_at_observed_eth_row_rate": 20.74074074074074,
+      "current_rows_meet_scenario": false
+    },
+    {
+      "effective_features": 28,
+      "planning_events_per_feature": 20,
+      "required_positive_events": 560,
+      "required_total_rows_at_observed_rate": 3442.962962962963,
+      "years_at_observed_eth_row_rate": 41.48148148148148,
+      "current_rows_meet_scenario": false
+    }
+  ],
+  "planning_warning": "Events-per-effective-feature is only a transparent capacity stress test; it does not prove adequacy at any threshold and does not replace learning curves, calibration, temporal validation, or economic evaluation.",
+  "feasible_next_model_if_later_authorized": "Start with one preregistered causal feature in regularized LogisticRegression; at most a tiny prior-chosen feature set. Do not fit the 28-feature LightGBM on 166 ETH trades. Expand candidates with stateful dynamic labels and/or a time-grouped cross-symbol dataset before considering the full model.",
+  "old_project_model_reusable": false,
+  "old_project_model_failure_reason": "Existing frozen model is short-side YOLO-v10 with 72-bar barrier and legacy candidate/feature semantics; this table is bidirectional Pine V9 with stateful reverse/stop/break-even outcomes.",
+  "stateful_replay_required": true,
+  "counterfactual_limit": "Rows are baseline on-policy executions. A judgment gate changes subsequent position and cooldown state, so future authorized evaluation must score signals inside the dynamic replay; static top-decile filtering is insufficient."
+}

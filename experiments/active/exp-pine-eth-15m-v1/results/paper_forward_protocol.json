@@ -1,0 +1,76 @@
+{
+  "protocol": "ETH 15m mutually exclusive paper-forward comparison",
+  "created_from_consumed_data_only": true,
+  "holdout_rows_read": 0,
+  "formal_collection_started": false,
+  "forward_log_written": false,
+  "live_or_paper_order_sent": false,
+  "blocked": true,
+  "blocking_gate": "venue-specific TradingView compile plus 110-trade signal/entry/exit/fee ledger parity has not passed",
+  "tradingview_parity_passed": false,
+  "forward_eligible": false,
+  "paper_risk_profile": {
+    "primary_risk_per_trade_percent": 0.5,
+    "comparison_shadow_risk_percent": 1.0,
+    "reason": "Path bootstrap shows lower drawdown at 0.5%; sizing is a damage-control profile and not evidence of stronger alpha. No orders are authorized."
+  },
+  "arms": {
+    "V9": {
+      "source": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v9_research.pine",
+      "sha256": "6465fa80f89907b2ed584085960f355f331de62e3c38ebf65f3065c57873dfe9",
+      "single_variable_contract": "frozen baseline: SMA10/60 + EMA100 + slope12 + oscillator 0.1",
+      "historical_consumed_period_trades": 110,
+      "historical_trades_per_30p44_days": 7.89635908018868,
+      "planning_months_to_100_fresh_trades": 12.66406441050684,
+      "historical_rate_is_forecast": false,
+      "minimum_fresh_trades_for_formal_read": 100
+    },
+    "V10": {
+      "source": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v10_volume_paper.pine",
+      "sha256": "31de00424dda0e1daadf8f56a04c1023a98d5f5e5a5c882c9c672a708ddc2c55",
+      "single_variable_contract": "exactly one change from V9: vol_ratio_mean8 >= 1",
+      "historical_consumed_period_trades": 77,
+      "historical_trades_per_30p44_days": 5.527451356132075,
+      "planning_months_to_100_fresh_trades": 18.09152058643835,
+      "historical_rate_is_forecast": false,
+      "minimum_fresh_trades_for_formal_read": 100
+    },
+    "V11": {
+      "source": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v11_long_only_paper.pine",
+      "sha256": "c1250d5a30395387be2644ed180ef989938f2affeef3dae0f789305f7d946ea0",
+      "single_variable_contract": "exactly one change from V9: long entries only",
+      "historical_consumed_period_trades": 56,
+      "historical_trades_per_30p44_days": 4.019964622641509,
+      "planning_months_to_100_fresh_trades": 24.87584080635273,
+      "historical_rate_is_forecast": false,
+      "minimum_fresh_trades_for_formal_read": 100
+    }
+  },
+  "combined_v10_v11_arm_allowed": false,
+  "formal_evaluation": {
+    "timing": "one formal read after every arm reaches 100 fresh trades; monthly views may monitor data quality only and may not select parameters",
+    "time_ordered": true,
+    "venue_exact_fees_slippage_and_funding_required": true,
+    "matched_random_control": "same symbol x pre-entry calendar block x causal volatility bucket; exact non-reused starts; copied side and holding/exit contract",
+    "familywise_alpha": 0.01,
+    "multiple_arm_adjustment": "Holm correction across V9/V10/V11",
+    "success_requires_all": [
+      "net expectancy after venue-exact total costs is positive",
+      "matched-control excess is positive with Holm-adjusted p < 0.01",
+      "week-block absolute-return 95% interval lower bound is above zero",
+      "leave-largest-winner-out expectancy remains positive",
+      "TradingView ledger parity remains exact"
+    ],
+    "judgment_layer_if_later_authorized": "LR/LightGBM must be a separately preregistered fourth experiment, trained only on eligible data and evaluated inside dynamic stateful replay"
+  },
+  "manifest_consistency": {
+    "combined_v10_v11_generated": false,
+    "production_eligible": false,
+    "tradingview_parity_passed": false
+  },
+  "owner_decisions_required_before_start": [
+    "select the exact TradingView ETH perpetual venue and export its ledger",
+    "approve paper collection after parity passes",
+    "approve any change to break-even, TP/SL, ATR floor, or cost assumptions separately"
+  ]
+}

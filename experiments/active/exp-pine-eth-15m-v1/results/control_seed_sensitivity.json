@@ -1,0 +1,98 @@
+{
+  "audit": "exact matched-control assignment-seed sensitivity",
+  "assignment_seeds": 64,
+  "signflip_resamples_per_seed": 2000,
+  "holdout_rows_read": 0,
+  "strategy_or_evaluation_contract_changed": false,
+  "all_control_sets_exact": true,
+  "variants": [
+    {
+      "variant": "v9_locked",
+      "assignment_seeds": 64,
+      "candidate_trades": 110,
+      "candidate_net_bp": 30.223420855189616,
+      "control_net_bp": {
+        "min": -32.106138141595025,
+        "q05": -12.585283939543753,
+        "median": 12.253868433449469,
+        "q95": 45.05195353555068,
+        "max": 54.80847020089526
+      },
+      "candidate_minus_control_bp": {
+        "min": -24.585049345705638,
+        "q05": -14.828532680361095,
+        "median": 17.969552421740154,
+        "q95": 42.80870479473336,
+        "max": 62.32955899678462
+      },
+      "week_signflip_p": {
+        "min": 0.0769615192403798,
+        "q05": 0.14407796101949025,
+        "median": 0.23388305847076463,
+        "q95": 0.44020489755122416,
+        "max": 0.5462268865567217
+      },
+      "fraction_assignment_seeds_with_positive_excess": 0.890625,
+      "fraction_assignment_seeds_with_p_below_0p01": 0.0
+    },
+    {
+      "variant": "v10_volume_hypothesis",
+      "assignment_seeds": 64,
+      "candidate_trades": 77,
+      "candidate_net_bp": 41.218181621490125,
+      "control_net_bp": {
+        "min": -25.783990963854365,
+        "q05": -15.153090155060646,
+        "median": 16.09796140625736,
+        "q95": 48.711358507857994,
+        "max": 71.51108747691899
+      },
+      "candidate_minus_control_bp": {
+        "min": -30.29290585542884,
+        "q05": -7.493176886367864,
+        "median": 25.120220215232763,
+        "q95": 56.371271776550756,
+        "max": 67.00217258534448
+      },
+      "week_signflip_p": {
+        "min": 0.15342328835582209,
+        "q05": 0.1709895052473763,
+        "median": 0.2883558220889555,
+        "q95": 0.4303348325837081,
+        "max": 0.5732133933033483
+      },
+      "fraction_assignment_seeds_with_positive_excess": 0.890625,
+      "fraction_assignment_seeds_with_p_below_0p01": 0.0
+    },
+    {
+      "variant": "v11_long_only_postselection",
+      "assignment_seeds": 64,
+      "candidate_trades": 56,
+      "candidate_net_bp": 63.39284101908954,
+      "control_net_bp": {
+        "min": -41.32485829782756,
+        "q05": -20.725321268463823,
+        "median": 12.620410598321198,
+        "q95": 50.75227440076831,
+        "max": 76.71185972444762
+      },
+      "candidate_minus_control_bp": {
+        "min": -13.319018705358081,
+        "q05": 12.640566618321222,
+        "median": 50.77243042076836,
+        "q95": 84.11816228755336,
+        "max": 104.71769931691713
+      },
+      "week_signflip_p": {
+        "min": 0.15142428785607195,
+        "q05": 0.18445777111444278,
+        "median": 0.3180909545227386,
+        "q95": 0.47351324337831074,
+        "max": 0.679160419790105
+      },
+      "fraction_assignment_seeds_with_positive_excess": 0.953125,
+      "fraction_assignment_seeds_with_p_below_0p01": 0.0
+    }
+  ],
+  "honest_verdict": "One control seed is not an uncertainty interval. Candidate excess must be reported across exact assignment seeds, while the p<0.01 gate remains based on time-clustered inference and is not rescued by choosing a favorable seed."
+}

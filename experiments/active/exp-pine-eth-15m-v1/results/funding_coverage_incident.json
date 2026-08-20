@@ -1,0 +1,22 @@
+{
+  "audit": "ETH perpetual funding-data coverage",
+  "status": "unavailable_for_backtest_and_not_modeled",
+  "canonical_backtest_period": [
+    "2025-01-01T00:00:00Z",
+    "2026-03-01T00:00:00Z"
+  ],
+  "first_observed_funding_record": "2026-04-07T08:00:00Z",
+  "overlapping_funding_records": 0,
+  "funding_cost_assumed_zero": false,
+  "funding_cost_computed": false,
+  "post_holdout_rows_used_in_any_calculation": 0,
+  "operational_incident": {
+    "date": "2026-08-21",
+    "command_scope": "sed preview of eight tail rows",
+    "rows_displayed": 8,
+    "displayed_range_end": "2026-07-08T16:00:00Z",
+    "repository_holdout_start": "2026-05-04T00:00:00Z",
+    "note": "A shell coverage check accidentally displayed eight raw ETH funding rows in the repository holdout. The rows were not loaded into Python, scored, aggregated, or used for any strategy or configuration decision. Funding analysis stopped immediately because the local series begins after the canonical backtest period."
+  },
+  "decision": "Do not claim funding-adjusted returns. Obtain a venue-matched funding history covering the bounded backtest period before any future accounting audit."
+}

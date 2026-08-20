@@ -1,0 +1,58 @@
+{
+  "audit": "user-supplied ALLIN V7.2 to ETH 15m V9 migration ledger",
+  "status": "pass",
+  "source_attachment": "/Users/zhangzc/.codex/attachments/a8101ae7-0925-4f31-baf5-79c6be603338/pasted-text.txt",
+  "source_attachment_sha256": "d721a4864a13cad1aae17ab634c87437a648897d1324d389e51ea591fb9aca8a",
+  "v9_path": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v9_research.pine",
+  "v9_sha256": "6465fa80f89907b2ed584085960f355f331de62e3c38ebf65f3065c57873dfe9",
+  "checks": {
+    "original_is_v5_and_v9_is_v6": true,
+    "tick_recalculation_disabled": true,
+    "commission_made_explicit": true,
+    "slippage_made_explicit": true,
+    "fixed_4x_time_boosts_removed": true,
+    "risk_sizing_replaces_fixed_notional": true,
+    "stop_is_anchored_to_fill_not_signal_close": true,
+    "hk_time_filter_is_explicit": true,
+    "duplicate_close_plus_reverse_removed": true,
+    "timeframe_and_eth_guards_added": true,
+    "bounded_research_dates_added": true,
+    "percentile_denominator_fails_closed": true,
+    "bar_magnifier_decision_is_explicit": true,
+    "pyramiding_decision_is_explicit": true,
+    "research_alerts_fail_visibly": true,
+    "source_attachment_hash_matches_config": true
+  },
+  "check_count": 16,
+  "failed": [],
+  "preserved_alpha_ancestry": [
+    "hl2 SMA10/SMA60 crossover",
+    "EMA100 regime side",
+    "ATR14 with 4x and 3% cap",
+    "SMA40/p99/change10/HMA10 oscillator construction",
+    "HK blocked hours and Sunday exclusion intent",
+    "profit-triggered signal cooldown"
+  ],
+  "alpha_changes": [
+    "EMA200 slow_slope_12 direction gate",
+    "oscillator threshold 0.2 to locked 0.1"
+  ],
+  "execution_changes": [
+    "1% stop-risk sizing replaces fixed 4x/time boosts",
+    "commission and slippage are explicit",
+    "initial stop is anchored to actual next-open fill",
+    "single reversal replaces entry plus duplicate strategy.close",
+    "confirmed close, 15m/ETH/date guards and explicit HK timezone"
+  ],
+  "known_unresolved_semantics": [
+    "TradingView compilation/export parity has not passed",
+    "the configured +0.1% break-even lock remains -0.1% after 0.2% round-trip cost",
+    "OKX proxy bars are not asserted equal to an unspecified TradingView ETHUSDT.P venue"
+  ],
+  "market_rows_read": 0,
+  "holdout_rows_read": 0,
+  "barrier_parameters_changed": false,
+  "training_or_scoring_performed": false,
+  "tradingview_parity_passed": false,
+  "production_eligible": false
+}

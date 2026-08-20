@@ -1,0 +1,181 @@
+{
+  "audit": "Pine judgment feature signal without model fitting",
+  "source_rows": 166,
+  "source_period": [
+    "2023-01-01T00:00:00Z",
+    "2025-01-01T00:00:00Z"
+  ],
+  "consumed_final_rows_read": 0,
+  "holdout_rows_read": 0,
+  "features": 28,
+  "expanding_folds": 3,
+  "training_or_model_scoring_performed": false,
+  "threshold_selected_for_execution": false,
+  "dynamic_execution_replay_performed": false,
+  "static_economic_metrics_are_strategy_claims": false,
+  "fixed_prior_diagnostics": [
+    {
+      "validation_rows": 123,
+      "positive_rows": 20,
+      "auc": 0.4526699029126214,
+      "auc_exact_circular_shift_p": 0.5492982456140351,
+      "auc_null_q05": 0.3395631067961165,
+      "auc_null_q95": 0.5686893203883495,
+      "top_decile_score_cutoff": 0.9414634146341462,
+      "top_decile_rows": 13,
+      "top_decile_positive_rows": 0,
+      "top_decile_net_bp": -50.03061939773184,
+      "top_decile_net_bp_without_top1": -53.36650434754301,
+      "top_decile_exact_circular_shift_p": 0.8161111111111111,
+      "top_decile_null_q05_bp": -77.91674033054848,
+      "top_decile_null_q95_bp": 219.68487505081342,
+      "all_validation_net_bp": 109.37121844977558,
+      "exact_shift_combinations": 68400,
+      "fold_shift_counts": [
+        40,
+        38,
+        45
+      ],
+      "feature": "ma_spread_pct",
+      "favorable_direction": "lower",
+      "rationale": "original density/LR baseline: tighter is favorable",
+      "auc_holm_p_across_four_displayed_priors": 1.0,
+      "top_decile_holm_p_across_four_displayed_priors": 1.0
+    },
+    {
+      "validation_rows": 123,
+      "positive_rows": 20,
+      "auc": 0.570873786407767,
+      "auc_exact_circular_shift_p": 0.2222953216374269,
+      "auc_null_q05": 0.38786407766990294,
+      "auc_null_q95": 0.6361650485436893,
+      "top_decile_score_cutoff": 0.859504132231405,
+      "top_decile_rows": 14,
+      "top_decile_positive_rows": 3,
+      "top_decile_net_bp": 365.66523559911843,
+      "top_decile_net_bp_without_top1": 189.44140478597856,
+      "top_decile_exact_circular_shift_p": 0.05948830409356725,
+      "top_decile_null_q05_bp": -45.35552587358548,
+      "top_decile_null_q95_bp": 378.4255440432916,
+      "all_validation_net_bp": 109.37121844977558,
+      "exact_shift_combinations": 68400,
+      "fold_shift_counts": [
+        40,
+        38,
+        45
+      ],
+      "feature": "vol_ratio_mean8",
+      "favorable_direction": "higher",
+      "rationale": "V10 volume-expansion hypothesis: higher is favorable",
+      "auc_holm_p_across_four_displayed_priors": 0.8891812865497076,
+      "top_decile_holm_p_across_four_displayed_priors": 0.237953216374269
+    },
+    {
+      "validation_rows": 123,
+      "positive_rows": 20,
+      "auc": 0.5269417475728155,
+      "auc_exact_circular_shift_p": 0.46419590643274855,
+      "auc_null_q05": 0.4009708737864078,
+      "auc_null_q95": 0.6393203883495145,
+      "top_decile_score_cutoff": 0.9090909090909091,
+      "top_decile_rows": 14,
+      "top_decile_positive_rows": 2,
+      "top_decile_net_bp": 55.53132259446729,
+      "top_decile_net_bp_without_top1": -8.059491398437533,
+      "top_decile_exact_circular_shift_p": 0.5810233918128654,
+      "top_decile_null_q05_bp": -79.01259912944387,
+      "top_decile_null_q95_bp": 358.4125817602677,
+      "all_validation_net_bp": 109.37121844977558,
+      "exact_shift_combinations": 68400,
+      "fold_shift_counts": [
+        40,
+        38,
+        45
+      ],
+      "feature": "slow_slope_12",
+      "favorable_direction": "higher",
+      "rationale": "V9 side-aligned trend strength: higher is favorable",
+      "auc_holm_p_across_four_displayed_priors": 1.0,
+      "top_decile_holm_p_across_four_displayed_priors": 1.0
+    },
+    {
+      "validation_rows": 123,
+      "positive_rows": 20,
+      "auc": 0.4628640776699029,
+      "auc_exact_circular_shift_p": 0.6955263157894737,
+      "auc_null_q05": 0.36699029126213595,
+      "auc_null_q95": 0.6242718446601941,
+      "top_decile_score_cutoff": 0.859504132231405,
+      "top_decile_rows": 16,
+      "top_decile_positive_rows": 2,
+      "top_decile_net_bp": 134.96722067452473,
+      "top_decile_net_bp_without_top1": -33.13996702516927,
+      "top_decile_exact_circular_shift_p": 0.3857894736842105,
+      "top_decile_null_q05_bp": -72.3317301853462,
+      "top_decile_null_q95_bp": 316.86056908649203,
+      "all_validation_net_bp": 109.37121844977558,
+      "exact_shift_combinations": 68400,
+      "fold_shift_counts": [
+        40,
+        38,
+        45
+      ],
+      "feature": "atr_pct_ratio96",
+      "favorable_direction": "higher",
+      "rationale": "project volatility-expansion prior: higher is favorable",
+      "auc_holm_p_across_four_displayed_priors": 1.0,
+      "top_decile_holm_p_across_four_displayed_priors": 1.0
+    }
+  ],
+  "prequential_28_feature_selector": {
+    "folds": [
+      {
+        "fold": "wf_2023h2",
+        "selected_feature": "spread_mean24",
+        "favorable_direction": "lower",
+        "purged_train_rows": 41,
+        "validation_rows": 40,
+        "train_oriented_auc": 0.7226890756302521,
+        "validation_auc": 0.4826388888888889
+      },
+      {
+        "fold": "wf_2024h1",
+        "selected_feature": "ret_48",
+        "favorable_direction": "lower",
+        "purged_train_rows": 82,
+        "validation_rows": 38,
+        "train_oriented_auc": 0.6875800256081946,
+        "validation_auc": 0.47708333333333336
+      },
+      {
+        "fold": "wf_2024h2",
+        "selected_feature": "full_ratio_min48",
+        "favorable_direction": "higher",
+        "purged_train_rows": 121,
+        "validation_rows": 45,
+        "train_oriented_auc": 0.6429308565531475,
+        "validation_auc": 0.3902027027027027
+      }
+    ],
+    "pooled_validation_rows": 123,
+    "pooled_auc": 0.4298543689320388,
+    "pooled_all_net_bp": 109.37121844977558,
+    "pooled_top_decile_rows": 13,
+    "pooled_top_decile_positive_rows": 0,
+    "pooled_top_decile_net_bp": -65.93804585254846,
+    "pooled_top_decile_net_bp_without_top1": -70.59954967359434,
+    "passes_directional_sanity": false
+  },
+  "full_development_association_table": "/Users/zhangzc/fable-trading/experiments/active/exp-pine-eth-15m-v1/results/judgment_feature_associations.csv",
+  "null": {
+    "method": "exact Cartesian product of circular outcome shifts within each validation half-year",
+    "preserves": "outcome order and marginals within each validation half-year",
+    "breaks": "feature/outcome alignment",
+    "limitations": "diagnostic null only; does not make overlapping on-policy trade outcomes independent"
+  },
+  "selection_history_warning": "Holm correction covers only the four displayed priors. vol_ratio_mean8 was found after a wider development feature search, so its displayed p-values are not selection-history-adjusted evidence.",
+  "best_fixed_prior": "vol_ratio_mean8",
+  "decision": "No displayed prior passes p<0.01, and the flexible prequential selector fails directional sanity. vol_ratio_mean8 remains the only plausible first-feature candidate, but it is post-selected, sparse and unproven. Do not fit the 28-feature LightGBM; if training is later authorized, preregister one regularized LR feature and evaluate its score inside the stateful replay.",
+  "training_eligible": false,
+  "production_eligible": false
+}

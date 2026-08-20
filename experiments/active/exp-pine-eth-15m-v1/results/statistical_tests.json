@@ -1,0 +1,113 @@
+{
+  "matched_control": {
+    "candidate_trades": 110,
+    "paired_trades": 110,
+    "control_rows": 330,
+    "minimum_controls_per_pair": 3,
+    "mean_candidate_net_bp": 30.223420855189616,
+    "mean_control_net_bp": 0.7953046349881298,
+    "mean_excess_bp": 29.428116220201495,
+    "duplicate_control_starts": 0,
+    "controls_outside_split": 0
+  },
+  "week_block_signflip": {
+    "statistic_mean_excess_bp": 70.08014617018313,
+    "p_value": 0.1703829617038296,
+    "n_blocks": 52,
+    "n_resamples": 10000,
+    "null_mean_bp": 0.4034403238100177,
+    "null_std_bp": 66.99991437311219
+  },
+  "week_bootstrap_excess": {
+    "mean_bp": 70.08014617018313,
+    "ci95_low_bp": -43.436766887297836,
+    "ci95_high_bp": 213.51678850425802,
+    "n_weeks": 52
+  },
+  "week_bootstrap_absolute": {
+    "mean_bp": 62.84924654948815,
+    "ci95_low_bp": -61.86974435539076,
+    "ci95_high_bp": 214.1350954168343,
+    "n_weeks": 52
+  },
+  "oscillator_ranking_permutation": {
+    "auc_net_positive": 0.5169880624426079,
+    "top_decile_net_bp": 202.97154576939855,
+    "p_value": 0.1645835416458354,
+    "null_mean_bp": 30.3796550083039,
+    "null_std_bp": 163.34731358374947,
+    "n_samples": 110,
+    "n_permutations": 10000
+  },
+  "profit_concentration": {
+    "trades": 110,
+    "positive_trades": 11,
+    "positive_trade_fraction": 0.1,
+    "total_unit_net_bp": 3324.576294070858,
+    "top1_share_of_net": 1.1562743080961315,
+    "top3_share_of_net": 2.722526776826515,
+    "top5_share_of_net": 3.4978739604287408,
+    "top1_share_of_positive_sum": 0.26741914497626124,
+    "top3_share_of_positive_sum": 0.6296566288259976,
+    "mean_without_top1_bp": -4.766475780447011,
+    "mean_without_top3_bp": -53.52029615083845,
+    "reverse_trades": 11,
+    "reverse_total_unit_net_bp": 14374.895090180715,
+    "stop_trades": 99,
+    "stop_total_unit_net_bp": -11050.318796109857,
+    "positive_months": 6,
+    "months_with_trades": 14,
+    "median_monthly_net_bp": -38.03390955320029
+  },
+  "v10_post_selection_hypothesis": {
+    "matched_control": {
+      "candidate_trades": 77,
+      "paired_trades": 77,
+      "control_rows": 231,
+      "mean_candidate_net_bp": 41.218181621490125,
+      "mean_control_net_bp": 26.123846861641105,
+      "mean_excess_bp": 15.094334759849032
+    },
+    "week_block_signflip": {
+      "statistic_mean_excess_bp": 38.37198459435082,
+      "p_value": 0.29657034296570345,
+      "n_blocks": 44,
+      "n_resamples": 10000,
+      "null_mean_bp": 0.22002301919581227,
+      "null_std_bp": 67.69428652346686
+    },
+    "week_bootstrap_excess": {
+      "mean_bp": 38.37198459435082,
+      "ci95_low_bp": -74.46237610732639,
+      "ci95_high_bp": 187.01765500276892,
+      "n_weeks": 44
+    },
+    "week_bootstrap_absolute": {
+      "mean_bp": 58.59403754568246,
+      "ci95_low_bp": -73.9513289676647,
+      "ci95_high_bp": 229.27944240614877,
+      "n_weeks": 44
+    },
+    "profit_concentration": {
+      "trades": 77,
+      "positive_trades": 7,
+      "positive_trade_fraction": 0.09090909090909091,
+      "total_unit_net_bp": 3173.7999848547393,
+      "top1_share_of_net": 1.1481399329727027,
+      "top3_share_of_net": 2.770929764276708,
+      "top5_share_of_net": 3.189945497793695,
+      "top1_share_of_positive_sum": 0.32911546828704824,
+      "top3_share_of_positive_sum": 0.7942898080369538,
+      "mean_without_top1_bp": -6.186401539804549,
+      "mean_without_top3_bp": -75.95374133838136,
+      "reverse_trades": 7,
+      "reverse_total_unit_net_bp": 11072.000112439828,
+      "stop_trades": 70,
+      "stop_total_unit_net_bp": -7898.200127585089,
+      "positive_months": 5,
+      "months_with_trades": 14,
+      "median_monthly_net_bp": -80.82650872261308
+    },
+    "status": "post-final-selection forward hypothesis; not an independent OOS result"
+  }
+}

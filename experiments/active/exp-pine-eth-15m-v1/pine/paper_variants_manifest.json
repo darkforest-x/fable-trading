@@ -1,0 +1,23 @@
+{
+  "source": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v9_research.pine",
+  "source_sha256": "6465fa80f89907b2ed584085960f355f331de62e3c38ebf65f3065c57873dfe9",
+  "variants": [
+    {
+      "version": "V10",
+      "path": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v10_volume_paper.pine",
+      "sha256": "31de00424dda0e1daadf8f56a04c1023a98d5f5e5a5c882c9c672a708ddc2c55",
+      "single_variable": "add vol_ratio_mean8 >= 1 to both entry directions",
+      "status": "post-selection paper-only"
+    },
+    {
+      "version": "V11",
+      "path": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v11_long_only_paper.pine",
+      "sha256": "c1250d5a30395387be2644ed180ef989938f2affeef3dae0f789305f7d946ea0",
+      "single_variable": "allow long entries only; short signals remain exits",
+      "status": "post-selection paper-only"
+    }
+  ],
+  "combined_v10_v11_generated": false,
+  "tradingview_parity_passed": false,
+  "production_eligible": false
+}

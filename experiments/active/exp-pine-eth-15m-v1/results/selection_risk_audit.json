@@ -1,0 +1,192 @@
+{
+  "audit": "known ETH 15m development selection-budget risk",
+  "source": "generated development-only result tables; no market-data reload",
+  "periods": [
+    "2023H1",
+    "2023H2",
+    "2024H1",
+    "2024H2"
+  ],
+  "consumed_final_rows_read": 0,
+  "holdout_rows_read": 0,
+  "new_parameter_combinations_run": 0,
+  "barrier_or_cost_changed": false,
+  "training_or_model_scoring_performed": false,
+  "known_family_configuration_counts": {
+    "feature": 18,
+    "side": 3,
+    "slope": 11,
+    "threshold": 12,
+    "trailing": 21
+  },
+  "raw_known_configurations": 65,
+  "unique_four_block_performance_paths": 60,
+  "selection_history_exhaustive": false,
+  "selection_history_limit": "covers the five durable search tables only; code iterations and unrecorded human choices cannot be reconstructed as extra configurations",
+  "v9_performance_path": {
+    "representative": "feature:ema200_price_side",
+    "aliases": [
+      "feature:ema200_price_side",
+      "feature:none",
+      "side:v9_two_sided",
+      "threshold:0.1",
+      "trailing:trailing_off"
+    ],
+    "equal_block_mean_net_bp": 98.57697382265349,
+    "minimum_block_net_bp": 41.4930219849321,
+    "mean_rank_of_unique_paths": 19,
+    "minimum_block_rank_of_unique_paths": 12
+  },
+  "exact_global_max_stat": {
+    "selected_configuration": "side:v9_long_only",
+    "selected_equal_block_mean_net_bp": 186.13186768434096,
+    "selected_block_net_bp": [
+      140.12138353673083,
+      174.76334205325742,
+      350.2385141333001,
+      79.40423101407544
+    ],
+    "selection_adjusted_p_value": 0.25,
+    "exact_common_sign_patterns": 16,
+    "minimum_attainable_p_value": 0.0625,
+    "null_max_q05_bp": -0.16702341650577557,
+    "null_max_q95_bp": 227.00508796548925
+  },
+  "chronological_selection": [
+    {
+      "selected_on": [
+        "2023H1"
+      ],
+      "test_period": "2023H2",
+      "selected_configuration": "slope:24",
+      "selected_test_net_bp": 42.60165787229679,
+      "v9_test_net_bp": 41.4930219849321,
+      "selected_minus_v9_bp": 1.1086358873646915
+    },
+    {
+      "selected_on": [
+        "2023H1",
+        "2023H2"
+      ],
+      "test_period": "2024H1",
+      "selected_configuration": "side:v9_long_only",
+      "selected_test_net_bp": 350.2385141333001,
+      "v9_test_net_bp": 199.75929700700925,
+      "selected_minus_v9_bp": 150.47921712629085
+    },
+    {
+      "selected_on": [
+        "2023H1",
+        "2023H2",
+        "2024H1"
+      ],
+      "test_period": "2024H2",
+      "selected_configuration": "side:v9_long_only",
+      "selected_test_net_bp": 79.40423101407544,
+      "v9_test_net_bp": 92.03577071886176,
+      "selected_minus_v9_bp": -12.63153970478632
+    }
+  ],
+  "two_by_two_rank_reversal": {
+    "partitions": [
+      {
+        "train_periods": [
+          "2023H1",
+          "2023H2"
+        ],
+        "test_periods": [
+          "2024H1",
+          "2024H2"
+        ],
+        "selected_configuration": "side:v9_long_only",
+        "train_net_bp": 157.44236279499412,
+        "test_net_bp": 214.82137257368777,
+        "test_rank_percentile": 0.9166666666666666,
+        "below_test_median": false
+      },
+      {
+        "train_periods": [
+          "2023H1",
+          "2024H1"
+        ],
+        "test_periods": [
+          "2023H2",
+          "2024H2"
+        ],
+        "selected_configuration": "threshold:1.0",
+        "train_net_bp": 325.7530494364861,
+        "test_net_bp": 35.578907887221064,
+        "test_rank_percentile": 0.5166666666666667,
+        "below_test_median": false
+      },
+      {
+        "train_periods": [
+          "2023H1",
+          "2024H2"
+        ],
+        "test_periods": [
+          "2023H2",
+          "2024H1"
+        ],
+        "selected_configuration": "threshold:0.4",
+        "train_net_bp": 152.21710041141438,
+        "test_net_bp": 53.95942173448116,
+        "test_rank_percentile": 0.43333333333333335,
+        "below_test_median": true
+      },
+      {
+        "train_periods": [
+          "2023H2",
+          "2024H1"
+        ],
+        "test_periods": [
+          "2023H1",
+          "2024H2"
+        ],
+        "selected_configuration": "threshold:1.0",
+        "train_net_bp": 268.57129457461235,
+        "test_net_bp": 92.7606627490948,
+        "test_rank_percentile": 0.7833333333333333,
+        "below_test_median": false
+      },
+      {
+        "train_periods": [
+          "2023H2",
+          "2024H2"
+        ],
+        "test_periods": [
+          "2023H1",
+          "2024H1"
+        ],
+        "selected_configuration": "side:v9_long_only",
+        "train_net_bp": 127.08378653366643,
+        "test_net_bp": 245.17994883501547,
+        "test_rank_percentile": 0.95,
+        "below_test_median": false
+      },
+      {
+        "train_periods": [
+          "2024H1",
+          "2024H2"
+        ],
+        "test_periods": [
+          "2023H1",
+          "2023H2"
+        ],
+        "selected_configuration": "threshold:0.8",
+        "train_net_bp": 409.14800118744165,
+        "test_net_bp": -69.05389425645377,
+        "test_rank_percentile": 0.016666666666666666,
+        "below_test_median": true
+      }
+    ],
+    "below_test_median_partitions": 2,
+    "partition_count": 6,
+    "descriptive_pbo_fraction": 0.3333333333333333,
+    "formal_pbo_claimed": false,
+    "why_not_formal": "only four half-year blocks; the result is discrete and sensitive to the configuration universe"
+  },
+  "decision": "The best observed path does not survive the global max-stat gate. The known development search budget is already large enough that more in-sample tuning would deepen selection bias. Keep V9 frozen; treat V10/V11 as separate fresh forward hypotheses rather than continuing to mine 2023/2024.",
+  "training_eligible": false,
+  "production_eligible": false
+}

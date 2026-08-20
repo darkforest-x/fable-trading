@@ -250,3 +250,65 @@ artifacts:
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
+
+  - artifact_id: pine-eth-15m-v1-report
+    artifact_type: report
+    role: preholdout_strategy_research_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d51d30cbc147e950bf2a85d39ae9a6aa801f890c"
+    source_path: analysis/p0_pine_eth_15m_v1_20260821.md
+    sha256: "f1437b21e4c3f3ad6ae2860f67a7ca2fdab10edc6feb584077ce4c404bb91b8f"
+    size_bytes: 40693
+    storage_uri: "repo://analysis/p0_pine_eth_15m_v1_20260821.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d51d30cbc147e950bf2a85d39ae9a6aa801f890c"
+    config_hash: "8720bc87b41c1769712b99fbc6a5082c8d293d8d521cc85377eb83ff5f45df78"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: >-
+      Canonical ETH 15m V9/V10/V11 report. V9 is a research candidate with
+      +30.22 bp/trade after frozen 20 bp cost but fails p<0.01 and leave-top-one
+      robustness. V10/V11 are post-selection paper hypotheses. TradingView
+      parity, training, forward and production eligibility all remain false.
+
+  - artifact_id: pine-eth-15m-v1-html
+    artifact_type: report_html
+    role: owner_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d51d30cbc147e950bf2a85d39ae9a6aa801f890c"
+    source_path: analysis/html/p0_pine_eth_15m_v1_20260821.html
+    sha256: "ec6bdbd073c4bfd6ff5a9980fbee1332636bdb13975b749218ba83af9c321f10"
+    size_bytes: 632505
+    storage_uri: "repo://analysis/html/p0_pine_eth_15m_v1_20260821.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d51d30cbc147e950bf2a85d39ae9a6aa801f890c"
+    config_hash: "8720bc87b41c1769712b99fbc6a5082c8d293d8d521cc85377eb83ff5f45df78"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: >-
+      Browser-ready owner delivery generated from the canonical Markdown. It
+      contains the same caveats and does not imply TradingView or production
+      parity.
+
+  - artifact_id: pine-eth-15m-v1-manifest
+    artifact_type: manifest
+    role: reproducibility_hash_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d51d30cbc147e950bf2a85d39ae9a6aa801f890c"
+    source_path: experiments/active/exp-pine-eth-15m-v1/results/artifact_manifest.json
+    sha256: "1e9fe353d9b72fdb57f166feca370499c58daf1fab38d6e7672222564ee7cca9"
+    size_bytes: 19569
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-v1/results/artifact_manifest.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d51d30cbc147e950bf2a85d39ae9a6aa801f890c"
+    config_hash: "8720bc87b41c1769712b99fbc6a5082c8d293d8d521cc85377eb83ff5f45df78"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: >-
+      SHA-256/size ledger for 92 local research artifacts (114,338,493 bytes),
+      excluding raw data, models/ACTIVE, active_bundle and forward logs. The
+      verifier passes; some generated result tables remain local/ignored by
+      repository policy and are not claimed portable without regeneration.

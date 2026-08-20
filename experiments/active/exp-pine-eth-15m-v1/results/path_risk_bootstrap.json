@@ -1,0 +1,171 @@
+{
+  "audit": "four-week circular block bootstrap of marked weekly equity",
+  "status": "descriptive_consumed_final_only",
+  "resamples": 20000,
+  "block_weeks": 4,
+  "holdout_rows_read": 0,
+  "strategy_barrier_or_cost_changed": false,
+  "arms": [
+    {
+      "label": "V9 risk 0.50%",
+      "variant": "v9_risk_0p5",
+      "risk_percent": 0.5,
+      "trades": 110,
+      "weeks": 61,
+      "actual_return_percent": 12.138157346730981,
+      "actual_drawdown_15m_percent": 10.630492745648034,
+      "return_q05_percent": -11.417615973742283,
+      "return_median_percent": 11.49056297252301,
+      "return_q95_percent": 43.4027293200378,
+      "drawdown_median_percent": 9.742192675086702,
+      "drawdown_q95_percent": 18.440842970597526,
+      "probability_negative_terminal": 0.22595,
+      "probability_drawdown_over_15pct": 0.1403,
+      "probability_drawdown_over_20pct": 0.0296,
+      "longest_actual_losing_streak": 22,
+      "terminal_return_quantiles": {
+        "q05": -0.11417615973742283,
+        "q25": 0.010741199083706132,
+        "median": 0.11490562972523011,
+        "q75": 0.23248214379473991,
+        "q95": 0.434027293200378
+      },
+      "maximum_drawdown_quantiles": {
+        "q05": 0.05382167691062281,
+        "q25": 0.07551387356922223,
+        "median": 0.09742192675086703,
+        "q75": 0.12745101108309734,
+        "q95": 0.18440842970597526
+      }
+    },
+    {
+      "label": "V9 risk 0.75%",
+      "variant": "v9_risk_0p75",
+      "risk_percent": 0.75,
+      "trades": 110,
+      "weeks": 61,
+      "actual_return_percent": 17.68241077999173,
+      "actual_drawdown_15m_percent": 15.488285727975072,
+      "return_q05_percent": -16.952364186619015,
+      "return_median_percent": 17.025594777679476,
+      "return_q95_percent": 69.76936946877166,
+      "drawdown_median_percent": 14.224394965782967,
+      "drawdown_q95_percent": 26.41931966797783,
+      "probability_negative_terminal": 0.23245,
+      "probability_drawdown_over_15pct": 0.44645,
+      "probability_drawdown_over_20pct": 0.19385,
+      "longest_actual_losing_streak": 22,
+      "terminal_return_quantiles": {
+        "q05": -0.16952364186619015,
+        "q25": 0.012200573279290028,
+        "median": 0.17025594777679476,
+        "q75": 0.36189673862213195,
+        "q95": 0.6976936946877166
+      },
+      "maximum_drawdown_quantiles": {
+        "q05": 0.07858950350715896,
+        "q25": 0.11000298803794925,
+        "median": 0.14224394965782966,
+        "q75": 0.18583975607725067,
+        "q95": 0.2641931966797783
+      }
+    },
+    {
+      "label": "V9 risk 1.00%",
+      "variant": "v9_risk_1p0",
+      "risk_percent": 1.0,
+      "trades": 110,
+      "weeks": 61,
+      "actual_return_percent": 22.81831670089418,
+      "actual_drawdown_15m_percent": 20.066997145964706,
+      "return_q05_percent": -22.60802619409368,
+      "return_median_percent": 21.8615987956553,
+      "return_q95_percent": 99.77570822322946,
+      "drawdown_median_percent": 18.52254217580476,
+      "drawdown_q95_percent": 33.65920078904748,
+      "probability_negative_terminal": 0.24315,
+      "probability_drawdown_over_15pct": 0.71395,
+      "probability_drawdown_over_20pct": 0.42365,
+      "longest_actual_losing_streak": 22,
+      "terminal_return_quantiles": {
+        "q05": -0.22608026194093678,
+        "q25": 0.0057031457404690955,
+        "median": 0.21861598795655302,
+        "q75": 0.48819084230144194,
+        "q95": 0.9977570822322945
+      },
+      "maximum_drawdown_quantiles": {
+        "q05": 0.10282874253229066,
+        "q25": 0.14408305650591574,
+        "median": 0.18522542175804757,
+        "q75": 0.2408415546589776,
+        "q95": 0.33659200789047483
+      }
+    },
+    {
+      "label": "V10 volume 1.00%",
+      "variant": "v10_volume_1p0",
+      "risk_percent": 1.0,
+      "trades": 77,
+      "weeks": 61,
+      "actual_return_percent": 18.24034644020962,
+      "actual_drawdown_15m_percent": 13.50400429774522,
+      "return_q05_percent": -23.10066598007232,
+      "return_median_percent": 17.58309275776373,
+      "return_q95_percent": 89.82752385725294,
+      "drawdown_median_percent": 17.90364466159281,
+      "drawdown_q95_percent": 32.76090505139806,
+      "probability_negative_terminal": 0.2773,
+      "probability_drawdown_over_15pct": 0.67515,
+      "probability_drawdown_over_20pct": 0.38875,
+      "longest_actual_losing_streak": 27,
+      "terminal_return_quantiles": {
+        "q05": -0.2310066598007232,
+        "q25": -0.023456676695757683,
+        "median": 0.1758309275776373,
+        "q75": 0.42382175894337826,
+        "q95": 0.8982752385725294
+      },
+      "maximum_drawdown_quantiles": {
+        "q05": 0.0989475470194098,
+        "q25": 0.1384028307400286,
+        "median": 0.1790364466159281,
+        "q75": 0.23227345890325352,
+        "q95": 0.3276090505139806
+      }
+    },
+    {
+      "label": "V11 long-only 1.00%",
+      "variant": "v11_long_1p0",
+      "risk_percent": 1.0,
+      "trades": 56,
+      "weeks": 61,
+      "actual_return_percent": 17.46341915981371,
+      "actual_drawdown_15m_percent": 16.76725570308475,
+      "return_q05_percent": -19.91349254946196,
+      "return_median_percent": 15.400294942974234,
+      "return_q95_percent": 80.98141222462802,
+      "drawdown_median_percent": 14.735898881671144,
+      "drawdown_q95_percent": 26.314214260478096,
+      "probability_negative_terminal": 0.27775,
+      "probability_drawdown_over_15pct": 0.4814,
+      "probability_drawdown_over_20pct": 0.20725,
+      "longest_actual_losing_streak": 20,
+      "terminal_return_quantiles": {
+        "q05": -0.19913492549461959,
+        "q25": -0.018537189825557104,
+        "median": 0.15400294942974235,
+        "q75": 0.37501994889106643,
+        "q95": 0.8098141222462801
+      },
+      "maximum_drawdown_quantiles": {
+        "q05": 0.07917317621993525,
+        "q25": 0.11382944317182048,
+        "median": 0.14735898881671144,
+        "q75": 0.19011410046477994,
+        "q95": 0.26314214260478097
+      }
+    }
+  ],
+  "interpretation": "Lower risk scales the capital path but cannot repair unit expectancy. Bootstrap probabilities are conditional on observed final-preholdout week blocks and are not forecasts or statistical validation."
+}

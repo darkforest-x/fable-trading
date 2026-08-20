@@ -1,0 +1,98 @@
+{
+  "audit": "OKX swap versus spot 15m feed sensitivity",
+  "status": "consumed-final proxy diagnostic only",
+  "period": [
+    "2025-07-01T00:00:00+00:00",
+    "2026-03-01T00:00:00+00:00"
+  ],
+  "swap_quality": {
+    "path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+    "rows_common": 23328,
+    "first_common_bar": "2025-07-01T00:00:00+00:00",
+    "last_common_bar": "2026-02-28T23:45:00+00:00",
+    "holdout_rows_read": 0,
+    "non_15m_gaps": 0
+  },
+  "spot_quality": {
+    "path": "data/kline_fetched/okx_ETH_USDT_15m_41281.csv",
+    "rows_common": 23328,
+    "first_common_bar": "2025-07-01T00:00:00+00:00",
+    "last_common_bar": "2026-02-28T23:45:00+00:00",
+    "holdout_rows_read": 0,
+    "non_15m_gaps": 0
+  },
+  "common_bars": 23328,
+  "close_spot_minus_swap_basis_bp": {
+    "median": 4.732220400669451,
+    "q05": -0.3383718143916133,
+    "q95": 6.549628366811166,
+    "maximum_absolute": 15.040620985400377
+  },
+  "vol_ratio_mean8_cross_feed_correlation": 0.9303344356537191,
+  "raw_signal_comparisons": {
+    "v9_long": {
+      "left": 62,
+      "right": 63,
+      "intersection": 59,
+      "union": 66,
+      "jaccard": 0.8939393939393939
+    },
+    "v9_short": {
+      "left": 70,
+      "right": 73,
+      "intersection": 68,
+      "union": 75,
+      "jaccard": 0.9066666666666666
+    },
+    "v10_volume_long": {
+      "left": 40,
+      "right": 39,
+      "intersection": 37,
+      "union": 42,
+      "jaccard": 0.8809523809523809
+    },
+    "v10_volume_short": {
+      "left": 60,
+      "right": 55,
+      "intersection": 51,
+      "union": 64,
+      "jaccard": 0.796875
+    }
+  },
+  "executed_entry_comparisons": {
+    "V9": {
+      "left": 59,
+      "right": 57,
+      "intersection": 57,
+      "union": 59,
+      "jaccard": 0.9661016949152542,
+      "same_direction_on_common_entries": 57,
+      "same_exit_time_on_common_entries": 54,
+      "mean_absolute_net_return_delta_bp": 2.333697721946901
+    },
+    "V10": {
+      "left": 47,
+      "right": 42,
+      "intersection": 39,
+      "union": 50,
+      "jaccard": 0.78,
+      "same_direction_on_common_entries": 39,
+      "same_exit_time_on_common_entries": 36,
+      "mean_absolute_net_return_delta_bp": 6.993718942557805
+    },
+    "V11": {
+      "left": 28,
+      "right": 27,
+      "intersection": 27,
+      "union": 28,
+      "jaccard": 0.9642857142857143,
+      "same_direction_on_common_entries": 27,
+      "same_exit_time_on_common_entries": 27,
+      "mean_absolute_net_return_delta_bp": 2.962012993164133
+    }
+  },
+  "holdout_rows_read": 0,
+  "tradingview_parity_passed": false,
+  "spot_is_perpetual_substitute": false,
+  "interpretation": "V9/V11 price-based entries are highly stable across nearby OKX feeds in the common window. V10 is more feed-sensitive because spot and swap volume are different markets. This supports V9 as the canonical proxy baseline but does not identify the user's TradingView venue or prove parity."
+}

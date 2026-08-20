@@ -1,0 +1,235 @@
+{
+  "audit": "locked-rule reverse-time transport backcast",
+  "period": [
+    "2022-02-01T00:00:00+00:00",
+    "2023-01-01T00:00:00+00:00"
+  ],
+  "rows_read": 34786,
+  "first_bar": "2022-01-03T15:30:00+00:00",
+  "last_bar": "2022-12-31T23:45:00+00:00",
+  "post_backcast_rows_read": 0,
+  "discovery_rows_read": 0,
+  "final_preholdout_rows_read": 0,
+  "holdout_rows_read": 0,
+  "selection_occurs_after_evaluation_period": true,
+  "is_out_of_sample": false,
+  "may_change_locked_candidate": false,
+  "barrier_parameters_changed": false,
+  "matched_control_required": true,
+  "variants": {
+    "V9": {
+      "summary": {
+        "variant": "V9",
+        "period": "backcast_2022",
+        "risk_percent": 1.0,
+        "trades": 80,
+        "gross_bp_per_trade": 128.65738635867143,
+        "project_net_bp_per_trade": 108.65738635867139,
+        "pine_net_bp_per_trade": 108.7072983321136,
+        "win_rate": 0.1125,
+        "monetary_profit_factor": 1.9155309248632262,
+        "unit_profit_factor": 2.1614414075109463,
+        "return_percent": 47.73021521453338,
+        "max_drawdown_15m_percent": 14.133998428944594,
+        "max_drawdown_daily_percent": 13.264602718633666,
+        "median_holding_bars": 26.0,
+        "mean_leverage": 0.5813699335272786,
+        "max_leverage": 2.118374558303887,
+        "long_trades": 37,
+        "short_trades": 43,
+        "period_end_exits": 0
+      },
+      "matched_control": {
+        "candidate_net_bp": 108.65738635867139,
+        "control_net_bp": 26.965248892207118,
+        "candidate_minus_control_bp": 81.69213746646429,
+        "control_rows": 240,
+        "controls_per_trade_min": 3,
+        "duplicate_control_starts": 0
+      },
+      "week_signflip": {
+        "statistic_mean_excess_bp": 160.01334618561665,
+        "p_value": 0.06239376062393761,
+        "n_blocks": 37,
+        "n_resamples": 10000,
+        "null_mean_bp": -0.07236622717784957,
+        "null_std_bp": 104.52729844446678
+      },
+      "week_bootstrap_excess": {
+        "mean_bp": 160.01334618561665,
+        "ci95_low_bp": -21.47606906468267,
+        "ci95_high_bp": 374.07214383551394,
+        "n_weeks": 37
+      },
+      "week_bootstrap_absolute": {
+        "mean_bp": 209.0912940346995,
+        "ci95_low_bp": -0.4414931864197085,
+        "ci95_high_bp": 480.11334952453933,
+        "n_weeks": 37
+      },
+      "profit_concentration": {
+        "trades": 80,
+        "positive_trades": 9,
+        "positive_trade_fraction": 0.1125,
+        "total_unit_net_bp": 8692.59090869371,
+        "top1_share_of_net": 0.41984470446483263,
+        "top3_share_of_net": 1.1823143863868935,
+        "top5_share_of_net": 1.562688244620617,
+        "top1_share_of_positive_sum": 0.22560177795945316,
+        "top3_share_of_positive_sum": 0.6353116398500753,
+        "mean_without_top1_bp": 63.83610946328492,
+        "mean_without_top3_bp": -20.58161529390626,
+        "reverse_trades": 10,
+        "reverse_total_unit_net_bp": 16094.380204868348,
+        "stop_trades": 70,
+        "stop_total_unit_net_bp": -7401.789296174637,
+        "positive_months": 7,
+        "months_with_trades": 11,
+        "median_monthly_net_bp": 98.4719411035251
+      }
+    },
+    "V10": {
+      "summary": {
+        "variant": "V10",
+        "period": "backcast_2022",
+        "risk_percent": 1.0,
+        "trades": 70,
+        "gross_bp_per_trade": 69.68512926458601,
+        "project_net_bp_per_trade": 49.685129264585996,
+        "pine_net_bp_per_trade": 49.686216122988554,
+        "win_rate": 0.08571428571428572,
+        "monetary_profit_factor": 1.5591619591562365,
+        "unit_profit_factor": 1.5842706142634126,
+        "return_percent": 19.246030770408098,
+        "max_drawdown_15m_percent": 14.459906105914467,
+        "max_drawdown_daily_percent": 13.238851835537634,
+        "median_holding_bars": 26.5,
+        "mean_leverage": 0.5599758641414184,
+        "max_leverage": 2.118374558303887,
+        "long_trades": 35,
+        "short_trades": 35,
+        "period_end_exits": 0
+      },
+      "matched_control": {
+        "candidate_net_bp": 49.685129264585996,
+        "control_net_bp": 3.3067550735513045,
+        "candidate_minus_control_bp": 46.3783741910347,
+        "control_rows": 210,
+        "controls_per_trade_min": 3,
+        "duplicate_control_starts": 0
+      },
+      "week_signflip": {
+        "statistic_mean_excess_bp": 124.27646363721583,
+        "p_value": 0.1294870512948705,
+        "n_blocks": 36,
+        "n_resamples": 10000,
+        "null_mean_bp": -1.3531574767170762,
+        "null_std_bp": 102.70764303780592
+      },
+      "week_bootstrap_excess": {
+        "mean_bp": 124.27646363721583,
+        "ci95_low_bp": -45.28146758306157,
+        "ci95_high_bp": 344.4335529936266,
+        "n_weeks": 36
+      },
+      "week_bootstrap_absolute": {
+        "mean_bp": 137.50214893558297,
+        "ci95_low_bp": -54.76862884478729,
+        "ci95_high_bp": 396.6579116100272,
+        "n_weeks": 36
+      },
+      "profit_concentration": {
+        "trades": 70,
+        "positive_trades": 6,
+        "positive_trade_fraction": 0.08571428571428572,
+        "total_unit_net_bp": 3477.959048521021,
+        "top1_share_of_net": 0.9782488573653739,
+        "top3_share_of_net": 2.362325219486311,
+        "top5_share_of_net": 2.6776947581748143,
+        "top1_share_of_positive_sum": 0.3607729990378504,
+        "top3_share_of_positive_sum": 0.8712130330845927,
+        "mean_without_top1_bp": 1.0963707730691106,
+        "mean_without_top3_bp": -70.71807946478808,
+        "reverse_trades": 7,
+        "reverse_total_unit_net_bp": 9348.086431556238,
+        "stop_trades": 63,
+        "stop_total_unit_net_bp": -5870.127383035218,
+        "positive_months": 4,
+        "months_with_trades": 11,
+        "median_monthly_net_bp": -40.38565530627479
+      }
+    },
+    "V11": {
+      "summary": {
+        "variant": "V11",
+        "period": "backcast_2022",
+        "risk_percent": 1.0,
+        "trades": 42,
+        "gross_bp_per_trade": 62.94579468742477,
+        "project_net_bp_per_trade": 42.94579468742475,
+        "pine_net_bp_per_trade": 42.882848892737364,
+        "win_rate": 0.09523809523809523,
+        "monetary_profit_factor": 1.2217389594995183,
+        "unit_profit_factor": 1.4223407069221674,
+        "return_percent": 4.972415317602996,
+        "max_drawdown_15m_percent": 12.050041600608175,
+        "max_drawdown_daily_percent": 11.201214023338292,
+        "median_holding_bars": 24.5,
+        "mean_leverage": 0.569498218369534,
+        "max_leverage": 2.118374558303887,
+        "long_trades": 42,
+        "short_trades": 0,
+        "period_end_exits": 0
+      },
+      "matched_control": {
+        "candidate_net_bp": 42.94579468742475,
+        "control_net_bp": -17.021434849139425,
+        "candidate_minus_control_bp": 59.96722953656419,
+        "control_rows": 126,
+        "controls_per_trade_min": 3,
+        "duplicate_control_starts": 0
+      },
+      "week_signflip": {
+        "statistic_mean_excess_bp": 130.18668358524968,
+        "p_value": 0.2385761423857614,
+        "n_blocks": 29,
+        "n_resamples": 10000,
+        "null_mean_bp": -2.1130227890831996,
+        "null_std_bp": 144.2410343404555
+      },
+      "week_bootstrap_excess": {
+        "mean_bp": 130.18668358524968,
+        "ci95_low_bp": -92.11707853776672,
+        "ci95_high_bp": 446.0616602390643,
+        "n_weeks": 29
+      },
+      "week_bootstrap_absolute": {
+        "mean_bp": 105.70705750658078,
+        "ci95_low_bp": -99.9124105959026,
+        "ci95_high_bp": 411.981972403773,
+        "n_weeks": 29
+      },
+      "profit_concentration": {
+        "trades": 42,
+        "positive_trades": 4,
+        "positive_trade_fraction": 0.09523809523809523,
+        "total_unit_net_bp": 1803.72337687184,
+        "top1_share_of_net": 1.886270094852242,
+        "top3_share_of_net": 3.1839137265135014,
+        "top5_share_of_net": 3.3622125214727667,
+        "top1_share_of_positive_sum": 0.5600969173060681,
+        "top3_share_of_positive_sum": 0.9454108762342329,
+        "mean_without_top1_bp": -38.98990459286371,
+        "mean_without_top3_bp": -101.00451901496659,
+        "reverse_trades": 4,
+        "reverse_total_unit_net_bp": 6074.501322991643,
+        "stop_trades": 38,
+        "stop_total_unit_net_bp": -4270.777946119803,
+        "positive_months": 4,
+        "months_with_trades": 11,
+        "median_monthly_net_bp": -58.444456140825935
+      }
+    }
+  },
+  "decision": "V9 transports positively to 2022 and is stronger than V10/V11 in this reverse-time diagnostic, but its week sign-flip p-value still exceeds 0.01. Because selection occurred later, the backcast cannot promote any arm."
+}

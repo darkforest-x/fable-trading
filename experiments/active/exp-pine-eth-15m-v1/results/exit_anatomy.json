@@ -1,0 +1,91 @@
+{
+  "audit": "frozen V9 exit anatomy",
+  "period": [
+    "2025-01-01T00:00:00Z",
+    "2026-03-01T00:00:00+00:00"
+  ],
+  "trades": 110,
+  "holdout_rows_read": 0,
+  "final_preholdout_rows_read": 0,
+  "bar_path_semantics": "MFE/MAE use entry through the bar before exit; exit-bar OHLC is excluded because its intrabar ordering is unknown",
+  "barrier_parameters_changed": false,
+  "barrier_search_performed": false,
+  "break_even_cost_semantics": {
+    "configured_lock_bp": 10.0,
+    "frozen_round_trip_cost_bp": 20.0,
+    "locked_stop_project_net_bp": -10.0,
+    "cross_period_evidence": [
+      {
+        "split": "confirmation_2024",
+        "trades": 36,
+        "mean_gross_bp": 9.999999999998945,
+        "mean_project_net_bp": -10.000000000000052
+      },
+      {
+        "split": "discovery_2023",
+        "trades": 28,
+        "mean_gross_bp": 9.999999999999359,
+        "mean_project_net_bp": -9.999999999999645
+      },
+      {
+        "split": "final_preholdout_2025_202602",
+        "trades": 49,
+        "mean_gross_bp": 9.999999999998957,
+        "mean_project_net_bp": -10.000000000000039
+      }
+    ],
+    "semantic_finding": "The configured +10 bp lock is below the frozen 20 bp round-trip cost, so the so-called break-even stop is a guaranteed -10 bp project-net exit before slippage. Changing it is a barrier decision and was not attempted.",
+    "static_same_exit_accounting_only": {
+      "current_net_bp_per_trade": 30.22342085519003,
+      "if_all_locked_stops_were_exactly_zero_net_bp_per_trade": 34.67796630973552,
+      "increment_bp_per_trade": 4.454545454545488,
+      "mean_without_top1_bp": -0.2710629364098632,
+      "warning": "This only replaces -10 bp ledger values with zero while keeping the same exit times. It is not a replay and is an upper-bound accounting illustration, because changing the stop can change later strategy state."
+    }
+  },
+  "by_exit_subtype": {
+    "break_even_locked_stop": {
+      "trades": 49,
+      "positive_trades": 0,
+      "net_bp_per_trade": -10.000000000000039,
+      "total_net_bp": -490.000000000002,
+      "median_holding_bars": 51.0,
+      "median_mfe_before_exit_bp": 255.07455248306331,
+      "median_mae_before_exit_bp": 53.97870199564059
+    },
+    "initial_protective_stop": {
+      "trades": 50,
+      "positive_trades": 0,
+      "net_bp_per_trade": -211.20637592219603,
+      "total_net_bp": -10560.318796109803,
+      "median_holding_bars": 19.5,
+      "median_mfe_before_exit_bp": 55.96794251068738,
+      "median_mae_before_exit_bp": 151.74356420685876
+    },
+    "reverse": {
+      "trades": 11,
+      "positive_trades": 11,
+      "net_bp_per_trade": 1306.8086445618828,
+      "total_net_bp": 14374.895090180711,
+      "median_holding_bars": 747.0,
+      "median_mfe_before_exit_bp": 2205.76773187841,
+      "median_mae_before_exit_bp": 43.162512128476216
+    }
+  },
+  "initial_protective_stop_diagnostics": {
+    "trades": 50,
+    "fraction_never_reached_50bp_before_exit": 0.4,
+    "fraction_never_reached_100bp_before_exit": 0.74,
+    "fraction_reached_existing_be_trigger_before_exit": 0.02,
+    "median_initial_stop_distance_bp": 195.8695779905089,
+    "median_mfe_before_exit_bp": 55.96794251068738,
+    "median_mae_before_exit_bp": 151.74356420685876
+  },
+  "reverse_exit_diagnostics": {
+    "trades": 11,
+    "positive_trades": 11,
+    "total_net_bp": 14374.895090180711,
+    "share_of_all_positive_net_bp": 1.0
+  },
+  "interpretation": "The audit distinguishes entry-quality failures from the frozen stop mechanics. It does not authorize a wider stop, take-profit, or new break-even trigger."
+}

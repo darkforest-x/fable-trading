@@ -1,0 +1,163 @@
+{
+  "audit": "development-only core and feature-gate robustness",
+  "data_quality": {
+    "development_end_exclusive": "2025-01-01T00:00:00+00:00",
+    "last_bar": "2024-12-31T23:45:00+00:00",
+    "rows": 104962,
+    "rows_at_or_after_development_end": 0,
+    "rows_at_or_after_holdout": 0,
+    "duplicate_timestamps": 0,
+    "non_15m_gaps": 0
+  },
+  "final_preholdout_rows_read": 0,
+  "holdout_rows_read": 0,
+  "execution_or_cost_parameters_changed": false,
+  "core_component_aggregate": [
+    {
+      "variant": "core_cross_only",
+      "component_order": 0,
+      "blocks": 4,
+      "trades": 1196,
+      "minimum_block_net_bp": -25.727048701205167,
+      "weighted_net_bp": -19.573244559065337,
+      "positive_blocks": 0
+    },
+    {
+      "variant": "core_plus_ema100_regime",
+      "component_order": 1,
+      "blocks": 4,
+      "trades": 620,
+      "minimum_block_net_bp": -32.63707246320799,
+      "weighted_net_bp": -17.114973764393152,
+      "positive_blocks": 0
+    },
+    {
+      "variant": "core_plus_slope12",
+      "component_order": 2,
+      "blocks": 4,
+      "trades": 247,
+      "minimum_block_net_bp": -30.11109128082489,
+      "weighted_net_bp": 40.02683721522488,
+      "positive_blocks": 3
+    },
+    {
+      "variant": "core_plus_osc_direction",
+      "component_order": 3,
+      "blocks": 4,
+      "trades": 192,
+      "minimum_block_net_bp": -16.11106243251933,
+      "weighted_net_bp": 64.58908965378781,
+      "positive_blocks": 3
+    },
+    {
+      "variant": "core_v9_threshold_0p1",
+      "component_order": 4,
+      "blocks": 4,
+      "trades": 167,
+      "minimum_block_net_bp": 41.4930219849321,
+      "weighted_net_bp": 96.03593848104391,
+      "positive_blocks": 4
+    }
+  ],
+  "side_ablation_aggregate": [
+    {
+      "variant": "v9_two_sided",
+      "entry_directions": [
+        -1,
+        1
+      ],
+      "trades": 167,
+      "minimum_block_net_bp": 41.4930219849321,
+      "weighted_net_bp": 96.03593848104391,
+      "positive_blocks": 4,
+      "mean_return_percent": 38.118664583777424,
+      "worst_drawdown_percent": 16.71851143585299
+    },
+    {
+      "variant": "v9_long_only",
+      "entry_directions": [
+        1
+      ],
+      "trades": 81,
+      "minimum_block_net_bp": 79.40423101407544,
+      "weighted_net_bp": 171.14576171328065,
+      "positive_blocks": 4,
+      "mean_return_percent": 31.775416898650995,
+      "worst_drawdown_percent": 15.784510575861043
+    },
+    {
+      "variant": "v9_short_only",
+      "entry_directions": [
+        -1
+      ],
+      "trades": 99,
+      "minimum_block_net_bp": -40.288113329203064,
+      "weighted_net_bp": 23.482549105552653,
+      "positive_blocks": 2,
+      "mean_return_percent": 6.074337897437887,
+      "worst_drawdown_percent": 11.84480677138281
+    }
+  ],
+  "side_selection_test": {
+    "candidate_direction_policies": 3,
+    "selected_policy": "v9_long_only",
+    "selected_increment_by_block_bp": [
+      79.10157795692002,
+      133.2703200683253,
+      150.47921712629085,
+      -12.63153970478632
+    ],
+    "selected_unadjusted": {
+      "observed_mean_bp": 87.55489386168748,
+      "p_value": 0.125,
+      "blocks": 4,
+      "exact_sign_patterns": 16,
+      "minimum_attainable_one_sided_p": 0.0625
+    },
+    "selection_adjusted_p_value": 0.125,
+    "exact_common_sign_patterns": 16,
+    "verdict": "forward hypothesis only; p<0.01 not attainable with four blocks"
+  },
+  "prequential_feature_replay": {
+    "test_blocks": 3,
+    "same_feature_selected_every_step": true,
+    "selected_features": [
+      "vol_ratio_mean8_ge1",
+      "vol_ratio_mean8_ge1",
+      "vol_ratio_mean8_ge1"
+    ],
+    "positive_increment_blocks": 3,
+    "selected_weighted_test_net_bp": 151.91307976027568,
+    "baseline_weighted_test_net_bp": 107.80135913585822,
+    "increment_exact_signflip": {
+      "observed_mean_bp": 44.613551344977374,
+      "p_value": 0.125,
+      "blocks": 3,
+      "exact_sign_patterns": 8,
+      "minimum_attainable_one_sided_p": 0.125
+    },
+    "caveat": "This is prequential only for the incremental project feature gate. The V9 signal family itself had already been selected using all four development blocks."
+  },
+  "selection_adjusted_feature_test": {
+    "candidate_gate_count_including_none": 18,
+    "selected_feature": "vol_ratio_mean8_ge1",
+    "selected_increment_by_block_bp": [
+      60.14061600435127,
+      26.76050583587036,
+      74.36559342487988,
+      32.71455477418189
+    ],
+    "selected_unadjusted": {
+      "observed_mean_bp": 48.49531750982085,
+      "p_value": 0.0625,
+      "blocks": 4,
+      "exact_sign_patterns": 16,
+      "minimum_attainable_one_sided_p": 0.0625
+    },
+    "selection_adjusted_observed_max_mean_bp": 48.49531750982085,
+    "selection_adjusted_p_value": 0.5,
+    "exact_common_sign_patterns": 16,
+    "interpretation": "The common block signs preserve cross-feature dependence. The adjusted test asks whether the best gate among all searched natural gates is stronger than the best gate obtained after flipping time-block signs."
+  },
+  "honest_verdict": "The nested core improves monotonically and vol_ratio_mean8>=1 is selected at every incremental replay, but four development blocks cannot establish p<0.01 and the gate search fails the selection-adjusted max-stat test."
+}

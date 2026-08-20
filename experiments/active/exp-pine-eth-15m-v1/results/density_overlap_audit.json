@@ -1,0 +1,176 @@
+{
+  "artifact": "Pine V9 versus project moving-average density overlap",
+  "generated_from_commit": "1ded56d6f7e8464d2233f73092cd36cc7610d7f9",
+  "status": "descriptive semantic audit; no gate selected",
+  "data_quality": {
+    "data_path": "/Users/zhangzc/fable-trading/data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+    "sha256": "f6d8c10a995ca328f2de33e3e1a2a74b06f1e621cc657ccd50a6e9b16565ebe4",
+    "rows_read": 145666,
+    "first_bar": "2022-01-03T15:30:00+00:00",
+    "last_bar": "2026-02-28T23:45:00+00:00",
+    "safe_end_exclusive": "2026-03-01T00:00:00+00:00",
+    "holdout_start": "2026-05-04T00:00:00+00:00",
+    "holdout_rows_read": 0,
+    "duplicate_timestamps": 0,
+    "null_ohlcv_cells": 0,
+    "non_15m_gaps": 0,
+    "ohlc_body_violations": 0
+  },
+  "threshold_source": "yoyo.data.indicators existing owner-frozen strict/expanded presets",
+  "primary_question": "Does the SMA10/SMA60 crossover strategy actually fire on the project's EMA8/13/21/34/55 plus EMA144/200 density definition?",
+  "overall": {
+    "trades": 276,
+    "long_trades": 132,
+    "short_trades": 144,
+    "strict_overlap": 4,
+    "strict_overlap_rate": 0.014492753623188406,
+    "expanded_overlap": 29,
+    "expanded_overlap_rate": 0.10507246376811594,
+    "ma_spread_bp_q10": 13.690168543960317,
+    "ma_spread_bp_median": 33.631560815883574,
+    "ma_spread_bp_q90": 76.43629246978958,
+    "net_bp_all": 70.1944790012,
+    "net_bp_strict_overlap": -42.55388215194248,
+    "net_bp_not_strict": 71.85254313580504,
+    "strict_component_pass_rates": {
+      "fast_spread": 0.391304347826087,
+      "full_spread": 0.25,
+      "fast_slow_gap": 0.2753623188405797,
+      "full_ratio_min48": 0.40942028985507245,
+      "pre_range48": 0.7355072463768116,
+      "pre_range168": 0.7753623188405797,
+      "side_range24": 0.8152173913043478,
+      "side_extension": 0.7971014492753623,
+      "side_order": 0.9710144927536232,
+      "slow_slope_abs": 0.605072463768116,
+      "zero_volume96": 1.0,
+      "volume_ratio": 0.7971014492753623
+    },
+    "strict_fast_spread_threshold_bp": 28.0,
+    "expanded_fast_spread_threshold_bp": 45.0
+  },
+  "splits": {
+    "discovery_2023": {
+      "trades": 83,
+      "long_trades": 38,
+      "short_trades": 45,
+      "strict_overlap": 2,
+      "strict_overlap_rate": 0.024096385542168676,
+      "expanded_overlap": 15,
+      "expanded_overlap_rate": 0.18072289156626506,
+      "ma_spread_bp_q10": 9.194778964061989,
+      "ma_spread_bp_median": 22.765026267020207,
+      "ma_spread_bp_q90": 51.3689175962749,
+      "net_bp_all": 52.00767399572545,
+      "net_bp_strict_overlap": -75.10776430388442,
+      "net_bp_not_strict": 55.14632679324668,
+      "circular_shift_null": {
+        "strict": {
+          "bars": 35040,
+          "signals": 83,
+          "observed_overlap": 2,
+          "observed_rate": 0.024096385542168676,
+          "null_mean_overlap": 2.4440924657534246,
+          "null_q05_overlap": 0.0,
+          "null_q95_overlap": 5.0,
+          "exact_circular_shift_p_enrichment": 0.7044235159817351,
+          "exact_shifts": 35040
+        },
+        "expanded": {
+          "bars": 35040,
+          "signals": 83,
+          "observed_overlap": 15,
+          "observed_rate": 0.18072289156626506,
+          "null_mean_overlap": 7.109474885844749,
+          "null_q05_overlap": 3.0,
+          "null_q95_overlap": 12.0,
+          "exact_circular_shift_p_enrichment": 0.004994292237442922,
+          "exact_shifts": 35040
+        }
+      }
+    },
+    "confirmation_2024": {
+      "trades": 83,
+      "long_trades": 41,
+      "short_trades": 42,
+      "strict_overlap": 1,
+      "strict_overlap_rate": 0.012048192771084338,
+      "expanded_overlap": 6,
+      "expanded_overlap_rate": 0.07228915662650602,
+      "ma_spread_bp_q10": 16.014459901409797,
+      "ma_spread_bp_median": 33.57160254508773,
+      "ma_spread_bp_q90": 72.89613574289264,
+      "net_bp_all": 141.35497552548352,
+      "net_bp_strict_overlap": -9.999999999999991,
+      "net_bp_not_strict": 143.20076790994062,
+      "circular_shift_null": {
+        "strict": {
+          "bars": 35136,
+          "signals": 83,
+          "observed_overlap": 1,
+          "observed_rate": 0.012048192771084338,
+          "null_mean_overlap": 0.9091530054644809,
+          "null_q05_overlap": 0.0,
+          "null_q95_overlap": 3.0,
+          "exact_circular_shift_p_enrichment": 0.6022882513661202,
+          "exact_shifts": 35136
+        },
+        "expanded": {
+          "bars": 35136,
+          "signals": 83,
+          "observed_overlap": 6,
+          "observed_rate": 0.07228915662650602,
+          "null_mean_overlap": 4.217156193078324,
+          "null_q05_overlap": 1.0,
+          "null_q95_overlap": 8.0,
+          "exact_circular_shift_p_enrichment": 0.2451047358834244,
+          "exact_shifts": 35136
+        }
+      }
+    },
+    "final_preholdout_2025_202602": {
+      "trades": 110,
+      "long_trades": 53,
+      "short_trades": 57,
+      "strict_overlap": 1,
+      "strict_overlap_rate": 0.00909090909090909,
+      "expanded_overlap": 8,
+      "expanded_overlap_rate": 0.07272727272727272,
+      "ma_spread_bp_q10": 19.56105026956625,
+      "ma_spread_bp_median": 37.67381423828315,
+      "ma_spread_bp_q90": 86.12997130101719,
+      "net_bp_all": 30.223420855189616,
+      "net_bp_strict_overlap": -10.000000000001101,
+      "net_bp_not_strict": 30.592443064870267,
+      "circular_shift_null": {
+        "strict": {
+          "bars": 40704,
+          "signals": 110,
+          "observed_overlap": 1,
+          "observed_rate": 0.00909090909090909,
+          "null_mean_overlap": 1.1321983097484276,
+          "null_q05_overlap": 0.0,
+          "null_q95_overlap": 3.0,
+          "exact_circular_shift_p_enrichment": 0.679908608490566,
+          "exact_shifts": 40704
+        },
+        "expanded": {
+          "bars": 40704,
+          "signals": 110,
+          "observed_overlap": 8,
+          "observed_rate": 0.07272727272727272,
+          "null_mean_overlap": 4.838418828616352,
+          "null_q05_overlap": 2.0,
+          "null_q95_overlap": 9.0,
+          "exact_circular_shift_p_enrichment": 0.11278989779874214,
+          "exact_shifts": 40704
+        }
+      }
+    }
+  },
+  "null_hypothesis": "Within each split, circularly shift the complete long/short V9 signal path against the side-specific density masks; enumerate every possible shift.",
+  "interpretation_guardrail": "Overlap and outcome subgroup means are diagnostic only. They do not authorize adding a density gate, changing thresholds, training L2, or replacing V9.",
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false
+}

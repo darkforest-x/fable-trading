@@ -1,0 +1,103 @@
+{
+  "audit": "static ledger filtering versus dynamic stateful replay",
+  "holdout_rows_read": 0,
+  "training_or_scoring_performed": false,
+  "barrier_parameters_changed": false,
+  "final_preholdout_already_consumed": true,
+  "comparisons": [
+    {
+      "gate": "vol_ratio_mean8_ge1",
+      "split": "discovery_2023",
+      "static_trades": 61,
+      "dynamic_trades": 62,
+      "entry_intersection": 57,
+      "entry_union": 66,
+      "entry_jaccard": 0.8636363636363636,
+      "common_entry_same_exit": 56,
+      "static_net_bp_per_trade": 85.6701052074238,
+      "dynamic_net_bp_per_trade": 94.72468734645061,
+      "static_minus_dynamic_net_bp": -9.054582139026817
+    },
+    {
+      "gate": "long_only",
+      "split": "discovery_2023",
+      "static_trades": 38,
+      "dynamic_trades": 37,
+      "entry_intersection": 36,
+      "entry_union": 39,
+      "entry_jaccard": 0.9230769230769231,
+      "common_entry_same_exit": 36,
+      "static_net_bp_per_trade": 131.95583800930228,
+      "dynamic_net_bp_per_trade": 158.25243610999158,
+      "static_minus_dynamic_net_bp": -26.296598100689298
+    },
+    {
+      "gate": "vol_ratio_mean8_ge1",
+      "split": "confirmation_2024",
+      "static_trades": 64,
+      "dynamic_trades": 64,
+      "entry_intersection": 59,
+      "entry_union": 69,
+      "entry_jaccard": 0.855072463768116,
+      "common_entry_same_exit": 56,
+      "static_net_bp_per_trade": 197.57998168130254,
+      "dynamic_net_bp_per_trade": 192.4356752309583,
+      "static_minus_dynamic_net_bp": 5.144306450344249
+    },
+    {
+      "gate": "long_only",
+      "split": "confirmation_2024",
+      "static_trades": 41,
+      "dynamic_trades": 43,
+      "entry_intersection": 40,
+      "entry_union": 44,
+      "entry_jaccard": 0.9090909090909091,
+      "common_entry_same_exit": 40,
+      "static_net_bp_per_trade": 196.07896020258283,
+      "dynamic_net_bp_per_trade": 186.47824992167602,
+      "static_minus_dynamic_net_bp": 9.600710280906824
+    },
+    {
+      "gate": "vol_ratio_mean8_ge1",
+      "split": "final_preholdout_2025_202602",
+      "static_trades": 78,
+      "dynamic_trades": 77,
+      "entry_intersection": 71,
+      "entry_union": 84,
+      "entry_jaccard": 0.8452380952380952,
+      "common_entry_same_exit": 67,
+      "static_net_bp_per_trade": 50.504891061761164,
+      "dynamic_net_bp_per_trade": 41.21818162149058,
+      "static_minus_dynamic_net_bp": 9.286709440270583
+    },
+    {
+      "gate": "long_only",
+      "split": "final_preholdout_2025_202602",
+      "static_trades": 53,
+      "dynamic_trades": 56,
+      "entry_intersection": 53,
+      "entry_union": 56,
+      "entry_jaccard": 0.9464285714285714,
+      "common_entry_same_exit": 53,
+      "static_net_bp_per_trade": 75.57014878960902,
+      "dynamic_net_bp_per_trade": 63.39284101908975,
+      "static_minus_dynamic_net_bp": 12.177307770519274
+    }
+  ],
+  "final_summary": {
+    "vol_ratio_mean8_ge1": {
+      "entry_jaccard": 0.8452380952380952,
+      "static_net_bp_per_trade": 50.504891061761164,
+      "dynamic_net_bp_per_trade": 41.21818162149058,
+      "static_minus_dynamic_net_bp": 9.286709440270583
+    },
+    "long_only": {
+      "entry_jaccard": 0.9464285714285714,
+      "static_net_bp_per_trade": 75.57014878960902,
+      "dynamic_net_bp_per_trade": 63.39284101908975,
+      "static_minus_dynamic_net_bp": 12.177307770519274
+    }
+  },
+  "decision": "Both audited gates change subsequent entry availability and/or cooldown state. Static filtering produces a different ledger and overstates final net expectancy. Any future judgment score must execute inside dynamic replay.",
+  "static_top_decile_filtering_valid_for_l2": false
+}

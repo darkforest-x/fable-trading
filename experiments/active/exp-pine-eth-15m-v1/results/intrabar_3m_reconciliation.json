@@ -1,0 +1,55 @@
+{
+  "audit": "ordered 3-minute path sensitivity for frozen V9 final-preholdout trades",
+  "signal_and_barrier_parameters_changed": false,
+  "holdout_consumed_for_strategy_evaluation": false,
+  "data_quality": {
+    "source_path": "data/kline_deep/okx_ETH_USDT_SWAP_3m_525599.csv",
+    "bounded_prefix_sha256": "c33c3172ed46878ef30b8b6c0b02d4f9418d916d1aa58cfddede2d2db2c8b35a",
+    "full_file_hash_intentionally_omitted": true,
+    "rows": 203520,
+    "first_bar": "2025-01-01T00:00:00+00:00",
+    "last_bar": "2026-02-28T23:57:00+00:00",
+    "safe_end_exclusive": "2026-03-01T00:00:00+00:00",
+    "holdout_start": "2026-05-04T00:00:00+00:00",
+    "holdout_rows_read": 0,
+    "duplicate_timestamps": 0,
+    "non_3m_gaps": 0,
+    "null_ohlcv_cells": 0,
+    "ohlc_body_violations": 0
+  },
+  "parent_bar_reconstruction": {
+    "expected_15m_bars": 40704,
+    "joined_15m_bars": 40704,
+    "parents_with_exactly_five_subbars": 40704,
+    "maximum_absolute_ohlc_error": {
+      "open": 0.0,
+      "high": 0.0,
+      "low": 0.0,
+      "close": 0.0
+    },
+    "ohlc_mismatch_count": {
+      "open": 0,
+      "high": 0,
+      "low": 0,
+      "close": 0
+    }
+  },
+  "canonical_trade_count": 110,
+  "same_15m_exit_parent_count": 110,
+  "exact_exit_price_count": 110,
+  "earlier_or_later_parent_exit_count": 0,
+  "changed_exit_price_count": 0,
+  "maximum_absolute_exit_price_delta": 4.547473508864641e-13,
+  "maximum_absolute_net_return_delta_bp": 2.4980018054066022e-12,
+  "mean_net_return_delta_bp": -4.290483688026728e-13,
+  "canonical_mean_net_bp": 30.18154940539338,
+  "replay_mean_net_bp": 30.181549405392982,
+  "stop_trade_count": 99,
+  "break_even_armed_trade_count": 61,
+  "tradingview_bar_magnifier_parity_passed": false,
+  "interpretation": "This audit can reject hidden 15m path optimism on the same OKX feed. It cannot replace a TradingView venue-specific exported ledger.",
+  "operational_incident": {
+    "post_holdout_rows_used_in_any_calculation": 0,
+    "note": "Before this bounded loader was run, an exploratory shell tail displayed two post-holdout raw 3m rows. They were not loaded into Python, scored, or used to select/evaluate any strategy configuration. The disclosure is retained because the repository treats any holdout look as material."
+  }
+}
