@@ -28,6 +28,7 @@ from yoyo.datasets.fixed_w10_blind_audit import (
     write_json,
     write_jsonl,
 )
+from yoyo.datasets.legacy_gold_migration.io import git_head
 
 
 SCHEMA_VERSION = 1
@@ -514,6 +515,7 @@ def build_original_review(
             "dataset_root": str(Path(dataset_root).resolve()),
             "project_root": str(Path(project_root).resolve()),
             "legacy_yoyo_root": str(Path(legacy_yoyo_root).resolve()),
+            "generator_commit": git_head(Path(project_root)),
         }
     )
     write_json(Path(pack_root) / "build_summary.json", summary)
