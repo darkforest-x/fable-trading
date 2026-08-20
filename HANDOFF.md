@@ -2,7 +2,7 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-21 — 回到 2,649 张原图做全量保留/删除）
+## ⚡ 当前真相（2026-08-21 — 2,649 张已统一重绘，等待 Owner 全量裁决）
 
 **fixed-W10 的工程门禁与数据谱系已修正，但 P0/P1 仍未通过。** 旧 acceptance 把
 迁移前 `DIRECT=0` 的 rows 与最终 Gold SHA 混在一起，并让 0 DIRECT 空通过 15% 比例门；
@@ -16,12 +16,14 @@ fail-closed。当前正确状态仍为 `training_eligible=false`。
 原始标注图，因此**当前执行顺序已改为先全量审核原图**。旧 448 包和 Cleanlab 28 包保留为
 历史产物，但在新集合出来前不得继续作为当前审核入口。
 
-已沿最终 Gold 的 `source_dataset + source_record_id` 回连 **2,649/2,649** 条原始视觉证据，
-缺失 0：Owner 原始长图 1,091、easy-negative source render 1,256、reviewed V3.2 图 190、
-8768 context/local 23、Owner semantic review pair 88、hard-negative review pair 1。
+原始来源 v1 页经 Owner 指出并由 Luna Max 独立复核，确认混有六类历史审核面、三套画布以及
+因果/未来语义，**只能作来源证据，已停用为最终裁决入口**。替代的 v2 已将 2,649/2,649
+条按精确 `decision_time` 回连 215 份当前 pre-holdout OHLC，统一重绘为 200 根因果 K 线、
+1280×742 RGB PNG、最右青色 decision 线、未来 0 根；历史原文件逐条保留但默认隐藏。
 全量快捷页只做 KEEP/REMOVE/UNCERTAIN，带键盘、自动下一张、撤销、断点保存、进度导入/导出：
-`datasets/fixed_w10_core4_confirm1_v1/review/original_source_triage_v1/public/index.html`；报告：
-`analysis/html/p1_fixed_w10_original_source_triage_20260821.html`。
+`datasets/fixed_w10_core4_confirm1_v1/review/canonical_ohlc_triage_v2/public/index.html`；报告：
+`analysis/html/p1_fixed_w10_canonical_ohlc_triage_v2_20260821.html`。全量像素/SHA/端点验收与真实
+Chromium 流程已通过；stored `decision_bar` 未用于重绘（1,125 条当前行号已漂移）。
 
 **下一条允许的动作**：Owner 完成 2,649 张原图筛选并导出 JSON。随后只生成**新版本**：
 REMOVE 进入 exclusions，UNCERTAIN 进入独立仲裁队列，KEEP 重新构建 Gold/图片/split/依赖与 SHA；

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>P1 统一原始 OHLC 全量筛选包 v2（2026-08-21）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P1 统一原始 OHLC 全量筛选包 v2（2026-08-21）</h1>
+<h2>结论</h2>
+<p>Owner 指出“这些图完全不统一”是正确的。上一版 <code>original_source_triage_v1</code> 把六类历史审核产物直接混在同一个主审核面：三套画布、长短窗口、 有框/无框、因果图/未来参考图并存。它可以证明来源，但<strong>不能继续作为统一口径的最终 KEEP/REMOVE 页面</strong>。</p>
+<p>现已生成替代入口 <code>canonical_ohlc_triage_v2</code>：<strong>2,649/2,649</strong> 条全部从当前原始 OHLC 按精确 <code>decision_time</code> 重新锚定，主图统一为 <strong>200 根因果 K 线、1280×742 RGB PNG、 最右青色虚线为 decision、未来 K 线 0 根</strong>。页面保留 <code>K/X/?</code> 快捷裁决、自动下一张、撤销、 断点续审、导入/导出；历史原文件统一放在默认隐藏的 <code>R</code> 参考层。</p>
+<p>正式入口： <code>datasets/fixed_w10_core4_confirm1_v1/review/canonical_ohlc_triage_v2/public/index.html</code></p>
+<p>本轮没有训练、没有读取 holdout、没有覆盖旧数据、没有改标签，也没有改变 <code>training_eligible=false</code>。</p>
+<h2>为什么 v1 必须停用</h2>
+<p>Luna Max 独立只读复核与本地逐类抽图得到同一结论：v1 的 2,649 张主图不是一种渲染契约。</p>
+<table><thead><tr>
+<th>v1 历史来源</th>
+<th>数量</th>
+<th>主图差异</th>
+</tr></thead><tbody>
+<tr><td>easy negative source render</td><td>1,256</td><td>1280×742 PNG，短图，无框/decision 标记</td></tr>
+<tr><td>Owner 原始长图</td><td>1,091</td><td>900×521 JPEG，长窗口，绿色旧框</td></tr>
+<tr><td>reviewed V3.2</td><td>190</td><td>1280×742 PNG，旧 chart-only 风格</td></tr>
+<tr><td>Owner semantic review</td><td>88</td><td>1280×742 causal 图，橙框/紫线，另有 future reference</td></tr>
+<tr><td>Owner 8768 context/local</td><td>23</td><td>1540×682 RGBA context 主图，含 decision 后阴影；真正 local 图在 reference</td></tr>
+<tr><td>hard-negative review</td><td>1</td><td>1280×742 causal 主图，另有 future reference</td></tr>
+</tbody></table>
+<p>v1 只能回答“历史来源文件是什么”，不能让 Owner 在同一视觉标准下判断样本是否应留在下一版 Gold。旧报告与 v1 产物保留为历史证据，不回写、不伪装成已统一。</p>
+<h2>v2 冻结渲染合同</h2>
+<table><thead><tr>
+<th>项</th>
+<th>冻结值</th>
+</tr></thead><tbody>
+<tr><td><code>render_spec_id</code></td><td><code>owner_triage_causal_w200_v1</code></td></tr>
+<tr><td>锚点</td><td>当前 OHLC 中唯一命中的精确 <code>decision_time</code></td></tr>
+<tr><td>主图窗口</td><td><code>[decision_index-199, decision_index]</code>，共 200 根</td></tr>
+<tr><td>未来 K 线</td><td>0</td></tr>
+<tr><td>像素</td><td>1280×742，RGB PNG</td></tr>
+<tr><td>decision 标记</td><td>最后一根 K 线处固定青色虚线 + <code>DECISION</code></td></tr>
+<tr><td>标签/框</td><td>主图不暴露 SIGNAL/NO_SIGNAL，不复制迁移后的 Core4 框</td></tr>
+<tr><td>历史原文件</td><td>每项都有，默认隐藏；<code>R</code> 才显示，并提示可能含旧标签或未来上下文</td></tr>
+</tbody></table>
+<p>W200 是 <strong>Owner 审核显示参数</strong>，不是训练窗口，更不是把 W10 扩成 200。它在构建前写进 <code>prereg.json</code> 并冻结；本批所有事件都有至少 200 根历史。若以后要改显示窗口，必须生成新的 pack/spec，不能在 Owner 审核中途静默换图。</p>
+<h2>数据统计与时间纪律</h2>
+<table><thead><tr>
+<th>项</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>Gold 总体</td><td>2,649</td></tr>
+<tr><td>SIGNAL（私有，不在公开页显示）</td><td>1,247</td></tr>
+<tr><td>NO_SIGNAL（私有，不在公开页显示）</td><td>1,402</td></tr>
+<tr><td>train / val / test</td><td>1,849 / 350 / 450</td></tr>
+<tr><td>OHLC 来源</td><td>215 个币种文件</td></tr>
+<tr><td>decision 时间范围</td><td>2025-06-05 16:45 UTC ～ 2026-05-02 23:45 UTC</td></tr>
+<tr><td>holdout 起点</td><td>2026-05-04 00:00 UTC</td></tr>
+<tr><td>holdout 读取</td><td>0</td></tr>
+</tbody></table>
+<p>当前 <code>data/kline_fetched</code> 的文件行数后缀已变化，旧 <code>source_path</code> 与 <code>decision_bar</code> 不能直接复用。 逐条比较发现 <strong>1,125/2,649</strong> 条当前行号与旧行号不同，偏移范围 <strong>-3 ～ +24,250</strong>；若继续 按旧索引重画，会把大量事件画到错误时间。本版逐币顺序读取到该币本批最晚 decision 后立即 停止，每个目标时间必须唯一命中，缺失/重复均 fail-closed。</p>
+<h2>v1 / v2 同表对照</h2>
+<table><thead><tr>
+<th>验收轴</th>
+<th>v1 历史原文件页</th>
+<th>v2 统一 OHLC 页</th>
+</tr></thead><tbody>
+<tr><td>主图尺寸/编码</td><td>3 套</td><td>1 套：1280×742 RGB PNG</td></tr>
+<tr><td>主图窗口语义</td><td>6 类来源各自定义</td><td>统一因果 W200</td></tr>
+<tr><td>decision 位置</td><td>缺失、任意位置或不同画法</td><td>最后一根固定青色虚线</td></tr>
+<tr><td>主图未来</td><td>部分可能含未来/context</td><td>0 根</td></tr>
+<tr><td>迁移 W10/Core4 几何</td><td>未用，但页面语义异构</td><td>未用；只用 <code>decision_time</code></td></tr>
+<tr><td>历史原文件</td><td>直接充当主图</td><td>默认隐藏参考层</td></tr>
+<tr><td>最终 KEEP/REMOVE 适用性</td><td>不通过</td><td>工程门通过，等待 Owner 全量裁决</td></tr>
+</tbody></table>
+<h2>完整性验收</h2>
+<p>逐项验收结果：</p>
+<table><thead><tr>
+<th>门</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>canonical 主图存在</td><td>2,649 / 2,649</td></tr>
+<tr><td>历史原文件存在</td><td>2,649 / 2,649</td></tr>
+<tr><td>canonical SHA 与 private truth 一致</td><td>2,649 / 2,649</td></tr>
+<tr><td>历史原文件 SHA 一致</td><td>2,649 / 2,649</td></tr>
+<tr><td>1280×742 RGB PNG</td><td>2,649 / 2,649</td></tr>
+<tr><td>decision 标记像素存在</td><td>2,649 / 2,649</td></tr>
+<tr><td><code>future_bars=0</code> 与窗口端点一致</td><td>2,649 / 2,649</td></tr>
+<tr><td>公开 item 仅含 opaque ID + 两个图路径</td><td>2,649 / 2,649</td></tr>
+<tr><td>公开页标签/来源字段泄漏</td><td>0</td></tr>
+</tbody></table>
+<p>Artifact 身份：</p>
+<table><thead><tr>
+<th>项</th>
+<th>SHA / 值</th>
+</tr></thead><tbody>
+<tr><td>Gold events</td><td><code>344212f8e5ef1fac3616b2026d19d6e721ce29984b3bbda194d4071c9fc327c4</code></td></tr>
+<tr><td>public manifest</td><td><code>79d75d4bdbe9e1a6295ac9b8354fcf48418897a935e1791006a8c04a7e869f68</code></td></tr>
+<tr><td>private truth</td><td><code>6d01a716b223de83e582edc4c460c30088f9ccc0a453fe96a2a93dcb419f8ed4</code></td></tr>
+<tr><td>source inventory</td><td><code>b46914080fb9771eb24bc013c28b045ec1f1013ebd8803d6d9f5416c63bce5a7</code></td></tr>
+<tr><td>page</td><td><code>97f12106af5c8916fd4054bf6ae82e1cc832568977654ea7b5cf3ac7097a3a47</code></td></tr>
+<tr><td>builder commit</td><td><code>8b8d9d331f86eff04fda5ebdcbbfc418f1fb24de</code></td></tr>
+<tr><td>canonical / historical bytes</td><td>286,623,983 / 132,846,458</td></tr>
+</tbody></table>
+<p>仓库正式测试范围 <code>pytest -q tests</code>：<strong>1,313 passed、4 skipped</strong>。直接从仓库根目录无范围运行 还会收集当前 <code>external/Kronos</code> 的上游测试，并因本机未安装其可选 <code>qlib</code>/本地 <code>model</code> 依赖在 collection 阶段报 2 错；这不是本次变更回归，也没有据此宣称全绿。</p>
+<h2>真实浏览器验收</h2>
+<p>用真实 Chromium 验收了：</p>
+<ul>
+<li>点击 <code>K</code> 后计数变为 KEEP=1 并自动跳到下一张；</li>
+<li>键盘 <code>X</code> 正常记录 REMOVE，<code>U</code> 能撤销并回到原项；</li>
+<li><code>R</code> 展示历史原文件并出现红色“可能含未来/旧标签”警告，再按 <code>R</code> 隐藏；</li>
+<li>刷新后当前位置与答案从 <code>localStorage</code> 恢复；</li>
+<li>导出的 JSON 能由 CLI 回连 private truth，且保持 <code>training_eligible_changed=false</code>；</li>
+<li>页面请求全部 200/304，无加载错误。</li>
+</ul>
+<p>截图证据：<code>output/playwright/canonical_ohlc_triage_v2_reference.png</code>。</p>
+<h2>非方向性实验与零假设对照</h2>
+<p>本轮是数据谱系、因果渲染和人工审核界面，不产生交易收益。因此 val AUC、置换收益 p、 top-decile 毛/净收益、胜率、单特征基线和匹配随机交易对照均不适用，不能编造。</p>
+<p>同等严格的负控制是：</p>
+<ol>
+<li>给 loader 一个 CSV 中不存在的 decision 时间，必须 fail-closed，不能吸附到最近 K 线；</li>
+<li>当前 OHLC 文件必须每币恰好一个，不能静默回退到旧 <code>source_path</code>；</li>
+<li>逐张重算主图/历史图 SHA、尺寸、窗口端点和 decision 标记；</li>
+<li>公开页面只允许 opaque ID 与图路径，真实标签、来源和 split 留在 private truth。</li>
+</ol>
+<p>上述测试与全量验收均通过。</p>
+<h2>复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+
+# builder 必须先落在 main；正式产物记录的版本是 8b8d9d3
+git show --stat 8b8d9d331f86eff04fda5ebdcbbfc418f1fb24de
+
+.venv/bin/python -m pytest -q tests/test_fixed_w10_canonical_review.py
+
+.venv/bin/python tools/datasets/fixed_w10_canonical_review.py build
+
+# Owner 导出后只做摘要，不修改数据：
+.venv/bin/python tools/datasets/fixed_w10_canonical_review.py summarize \
+  --answers /path/to/fixed_w10_core4_confirm1_v1_canonical_ohlc_triage_v2_answers.json
+
+python3 scripts/md_to_html.py \
+  analysis/p1_fixed_w10_canonical_ohlc_triage_v2_20260821.md \
+  --out-dir analysis/html
+</code></pre>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>W200 主图不显示正负标签或旧框；Owner 判断的是“decision 时刻当前 tip 是否成立”。旧框只在 <code>R</code> 历史层里用于来源核对。</li>
+<li>历史原文件可能包含 decision 后上下文、旧标签或旧框；它们不能反向定义主图窗口或裁决。</li>
+<li>本版修复的是审核表面一致性，不代表 2,649 条标签已经正确；真正错误率要等 Owner 完成裁决后 在新版本集合上重新计算。</li>
+<li><code>KEEP</code> 只表示进入下一版候选，<code>REMOVE</code> 才排除，<code>UNCERTAIN</code> 必须进独立仲裁队列；任何选择都 不会自动改当前冻结数据。</li>
+<li>本轮没有训练、没有 holdout、没有 promote、没有部署，也没有改变任何 eligibility。</li>
+</ul>
+<h2>下一步</h2>
+<ol>
+<li>Owner 使用 v2 页面完成 2,649 项并导出 JSON。</li>
+<li>校验 <code>complete=true</code>；REMOVE 进新版本 exclusions，UNCERTAIN 进独立仲裁，KEEP 只进候选。</li>
+<li>生成不覆盖旧数据的新 Gold/图片 manifest，重验 split、依赖、图片/标签 SHA。</li>
+<li>重新生成无偏盲审包并通过 ≤5% 错误率门。</li>
+<li>最后仍需 Owner 明确批准 <code>training_eligible=true</code>，3060 才能启动第一轮训练。</li>
+</ol>
+</body>
+</html>

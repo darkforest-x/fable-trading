@@ -156,6 +156,28 @@ artifacts:
       image used by their historical review. Private lineage is kept under
       admin/truth.jsonl; completing this pack does not mutate the frozen dataset.
 
+  - artifact_id: fixed-w10-canonical-ohlc-triage-v2
+    artifact_type: manifest
+    role: gold_canonical_triage
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8b8d9d331f86eff04fda5ebdcbbfc418f1fb24de"
+    source_path: datasets/fixed_w10_core4_confirm1_v1/review/canonical_ohlc_triage_v2/public/manifest.json
+    sha256: "79d75d4bdbe9e1a6295ac9b8354fcf48418897a935e1791006a8c04a7e869f68"
+    size_bytes: 498774
+    storage_uri: "file://datasets/fixed_w10_core4_confirm1_v1/review/canonical_ohlc_triage_v2"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8b8d9d331f86eff04fda5ebdcbbfc418f1fb24de"
+    config_hash: "0a415ba993c47fb4951ffa9f8f34db0cae07fe44e345acb076432a692cc7921f"
+    data_cutoff: "2026-05-02T23:45:00+00:00"
+    notes: >-
+      Public manifest for the replacement full-population triage surface. All
+      2,649 primary images are uniform 1280x742 RGB PNG renders of 200 causal
+      OHLC bars ending at the exact decision_time; future_bars=0. Historical
+      source images are present but hidden by default. Stored row indices and
+      migrated W10/Core4 geometry are audit-only and were not used to render.
+
   - artifact_id: yoyo-trading-dataset-v3-gold-core
     artifact_type: annotation_set
     role: gold_labels

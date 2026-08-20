@@ -417,6 +417,35 @@ experiments:
       UNCERTAIN means a separate adjudication queue. Completion never mutates
       the old 2,649 snapshot; a new manifest and a new blind pack are required.
 
+  - experiment_id: exp-p1-fixed-w10-canonical-ohlc-triage-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8b8d9d331f86eff04fda5ebdcbbfc418f1fb24de"
+    status: active
+    question: >-
+      Which of the 2,649 frozen Gold rows should survive when every item is
+      judged on the same label-blind, causal raw-OHLC surface rather than six
+      visually and semantically different historical review surfaces?
+    single_variable: n/a —— full-population label triage on one frozen render contract
+    result: >-
+      pending_owner_full_triage. Every event was re-anchored by exact
+      decision_time in one of 215 current pre-holdout OHLC sources. All 2,649
+      primary images are 1280x742 RGB PNG, show exactly 200 bars ending at the
+      decision candle, and contain zero future bars. Historical original files
+      are default-hidden references. Pixel/SHA/marker checks and real Chromium
+      KEEP/REMOVE/UNCERTAIN, undo, resume and export flows passed.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_fixed_w10_canonical_ohlc_triage_v2_20260821.md
+    artifacts:
+      - fixed-w10-core4-confirm1-v1-2649
+      - fixed-w10-canonical-ohlc-triage-v2
+    reuse_allowed: true
+    notes: >-
+      This v2 replaces v1 as the Owner's active full-population triage page.
+      KEEP is only a candidate for a new dataset version; no decision mutates
+      the frozen snapshot or changes training_eligible.
+
   - experiment_id: exp-consolidation-single-repo-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "59e13a61c43e1e72f397f38985fd8c700533550b"

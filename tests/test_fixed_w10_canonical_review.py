@@ -12,7 +12,8 @@ import pandas as pd
 import pytest
 from PIL import Image
 
-from yoyo.datasets.fixed_w10_blind_audit import AuditBuildError
+from yoyo.artifacts import load_registries
+from yoyo.datasets.fixed_w10_blind_audit import AuditBuildError, sha256_file
 from yoyo.datasets.fixed_w10_canonical_review import (
     IMG_HEIGHT,
     IMG_WIDTH,
@@ -154,3 +155,27 @@ def test_cli_can_be_invoked_outside_repository(tmp_path: Path) -> None:
     )
     assert result.returncode == 0, result.stderr
     assert "build" in result.stdout and "summarize" in result.stdout
+
+
+def test_canonical_triage_registry_points_to_exact_manifest() -> None:
+    registries = load_registries(root=PROJECT)
+    artifact = registries.artifact("fixed-w10-canonical-ohlc-triage-v2")
+    path = PROJECT / artifact.source_path
+    assert path.is_file()
+    assert artifact.sha256 == sha256_file(path)
+    assert artifact.size_bytes == path.stat().st_size
+    assert artifact.training_eligible is False
+    assert artifact.production_eligible is False
+
+    experiment = next(
+        row
+        for row in registries.experiments
+        if row.experiment_id == "exp-p1-fixed-w10-canonical-ohlc-triage-v2"
+    )
+    assert experiment.artifacts == [
+        "fixed-w10-core4-confirm1-v1-2649",
+        "fixed-w10-canonical-ohlc-triage-v2",
+    ]
+    assert experiment.holdout_consumed is False
+    assert experiment.training_eligible is False
+    assert experiment.production_eligible is False
