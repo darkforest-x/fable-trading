@@ -59,10 +59,35 @@ def _stable_rank(seed: int, gold_id: str) -> str:
 
 
 def _utc(value: Any, *, field: str) -> pd.Timestamp:
-    parsed = pd.to_datetime(value, utc=True, errors="coerce")
-    if pd.isna(parsed):
-        raise AuditBuildError(f"invalid {field}: {value!r}")
-    return pd.Timestamp(parsed)
+    try:
+        if isinstance(value, pd.Timestamp):
+            parsed = value
+        elif isinstance(value, datetime):
+            parsed = pd.Timestamp(value)
+        else:
+            parsed = pd.Timestamp(datetime.fromisoformat(str(value).replace("Z", "+00:00")))
+        if parsed.tzinfo is None:
+            parsed = parsed.tz_localize("UTC")
+        else:
+            parsed = parsed.tz_convert("UTC")
+    except (TypeError, ValueError) as exc:
+        raise AuditBuildError(f"invalid {field}: {value!r}") from exc
+    return parsed
+
+
+def _utc_datetime(value: Any, *, field: str) -> datetime:
+    """Fast scalar parser for the multi-million-row streaming path."""
+
+    try:
+        if isinstance(value, datetime):
+            parsed = value
+        else:
+            parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        return parsed.astimezone(timezone.utc)
+    except (TypeError, ValueError) as exc:
+        raise AuditBuildError(f"invalid {field}: {value!r}") from exc
 
 
 def resolve_current_source(data_root: Path, symbol: str, timeframe: str) -> Path:
@@ -90,16 +115,16 @@ def load_preholdout_symbol_prefix(
     holdout row.  Source rows must already be strictly time ordered and unique.
     """
 
-    targets = {_utc(value, field="decision_time") for value in decision_times}
+    targets = {_utc_datetime(value, field="decision_time") for value in decision_times}
     if not targets:
         raise AuditBuildError("decision_times is empty")
-    holdout = _utc(holdout_start, field="holdout_start")
+    holdout = _utc_datetime(holdout_start.to_pydatetime(), field="holdout_start")
     if max(targets) >= holdout:
         raise AuditBuildError("requested decision reaches holdout")
 
     rows: list[dict[str, Any]] = []
-    anchors: dict[pd.Timestamp, int] = {}
-    previous: pd.Timestamp | None = None
+    anchors: dict[datetime, int] = {}
+    previous: datetime | None = None
     max_target = max(targets)
     reached_max = False
     path = path.resolve()
@@ -109,7 +134,7 @@ def load_preholdout_symbol_prefix(
         if missing_columns:
             raise AuditBuildError(f"bad OHLC schema {path}: missing {sorted(missing_columns)}")
         for raw in reader:
-            current = _utc(raw.get("open_time"), field=f"{path}:open_time")
+            current = _utc_datetime(raw.get("open_time"), field=f"{path}:open_time")
             if current >= holdout:
                 raise AuditBuildError(f"holdout row reached while resolving {path}: {current}")
             if previous is not None and current <= previous:
@@ -139,7 +164,7 @@ def load_preholdout_symbol_prefix(
     bad = frame[["open", "high", "low", "close"]].isna().any(axis=1)
     if bool(bad.any()):
         raise AuditBuildError(f"non-numeric OHLC before latest decision in {path}")
-    by_text = {timestamp.isoformat(): index for timestamp, index in anchors.items()}
+    by_text = {pd.Timestamp(timestamp).isoformat(): index for timestamp, index in anchors.items()}
     return frame, by_text
 
 
@@ -301,6 +326,7 @@ def build_canonical_review(
     source_inventory: list[dict[str, Any]] = []
     index_deltas: list[int] = []
     max_materialized_time: pd.Timestamp | None = None
+    image_bytes = 0
     for (symbol, timeframe), group in sorted(grouped.items()):
         source_path = resolve_current_source(data_root, symbol, timeframe)
         frame, anchors = load_preholdout_symbol_prefix(
@@ -330,14 +356,20 @@ def build_canonical_review(
                 current_index,
                 window_bars=window_bars,
             )
+            gold_id = str(event["gold_id"])
+            review_id = _stable_id(seed, gold_id)
+            image_target = image_dir / f"{review_id}.png"
+            image_sha = _write_png(image_target, result.pop("image"))
+            image_bytes += image_target.stat().st_size
             result.update(
                 {
                     "current_source_path": str(source_path),
                     "current_decision_index": current_index,
                     "decision_time": decision_time.isoformat(),
+                    "canonical_image_sha256": image_sha,
                 }
             )
-            rendered[str(event["gold_id"])] = result
+            rendered[gold_id] = result
             index_deltas.append(current_index - int(event["decision_bar"]))
 
     ordered = sorted(events, key=lambda row: _stable_rank(seed, str(row["gold_id"])))
@@ -345,15 +377,12 @@ def build_canonical_review(
     truth: list[dict[str, Any]] = []
     source_counts: Counter[str] = Counter()
     label_counts: Counter[str] = Counter()
-    image_bytes = 0
     historical_bytes = 0
     for event in ordered:
         gold_id = str(event["gold_id"])
         review_id = _stable_id(seed, gold_id)
         render = rendered[gold_id]
-        image_target = image_dir / f"{review_id}.png"
-        image_sha = _write_png(image_target, render["image"])
-        image_bytes += image_target.stat().st_size
+        image_sha = str(render["canonical_image_sha256"])
 
         original = original_by_gold[gold_id]
         historical = original["primary"]
