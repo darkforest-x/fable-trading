@@ -115,6 +115,7 @@ def test_pine_v8_execution_freezes_signal_close_ticks_quantity_and_fill_fees() -
         execution=ExecutionParameters(
             stop_distance_basis="signal_close",
             sizing_price_basis="signal_close",
+            sizing_equity_basis="signal_marked",
             tick_size=0.01,
             commission_per_side=0.001,
             skip_return_basis="net",
@@ -136,6 +137,51 @@ def test_pine_v8_execution_freezes_signal_close_ticks_quantity_and_fill_fees() -
     )
     assert trade["quantity"] == pytest.approx(10.0)
     assert trade["initial_stop_price"] == pytest.approx(100.0)
+
+
+def test_reversal_quantity_freezes_marked_equity_on_the_signal_close() -> None:
+    frame = _frame_for_stop()
+    frame.loc[240, "atr"] = 0.75  # 4*ATR = 3.0
+    frame.loc[241:, ["open", "high", "low", "close"]] = [100.0, 100.2, 99.8, 100.0]
+    frame.loc[242, ["open", "high", "low", "close"]] = [100.0, 110.2, 99.8, 110.0]
+    frame.loc[242, "v7_short"] = True
+    frame.loc[242, "entry_allowed"] = True
+    frame.loc[242, "atr"] = 0.75
+    frame.loc[242, "v7_score"] = 1.0
+    frame.loc[243:, ["open", "high", "low", "close"]] = [90.0, 90.2, 89.8, 90.0]
+
+    trades, _ = simulate_symbol(
+        frame,
+        symbol="TEST_USDT_SWAP",
+        arm=Arm(
+            name="signal_equity",
+            signal_kind="v7",
+            sizing_kind="risk",
+            use_break_even=False,
+        ),
+        start=pd.Timestamp("2025-01-01T00:00:00Z"),
+        end=pd.Timestamp("2025-01-04T00:00:00Z"),
+        params=SignalParameters(),
+        round_trip_cost=0.002,
+        execution=ExecutionParameters(
+            stop_distance_basis="signal_close",
+            sizing_price_basis="signal_close",
+            sizing_equity_basis="signal_marked",
+            tick_size=0.01,
+            commission_per_side=0.001,
+            skip_return_basis="net",
+        ),
+    )
+
+    assert trades["direction"].tolist() == ["long", "short"]
+    first, second = trades.iloc[0], trades.iloc[1]
+    signal_equity = 500.0 + first["quantity"] * (110.0 - 100.0)
+    signal_equity -= first["quantity"] * 100.0 * 0.001
+    expected_short_quantity = signal_equity * 0.02 / 3.0
+    assert second["quantity"] == pytest.approx(expected_short_quantity)
+    # The next-open realized equity is deliberately different; using it would
+    # reproduce the old bug rather than the submitted Pine order quantity.
+    assert second["quantity"] != pytest.approx(second["entry_equity"] * 0.02 / 3.0)
 
 
 def test_break_even_can_be_disabled_without_changing_the_signal() -> None:

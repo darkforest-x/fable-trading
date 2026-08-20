@@ -58,11 +58,15 @@ class ExecutionParameters:
     ``legacy`` values preserve the first 54-symbol Python audit.  The 15-minute
     ETH contract opts into Pine-V8 semantics explicitly: stop ticks and target
     quantity are frozen on the confirmed signal close, the stop is rounded to
-    ``tick_size``, and commission is charged on both fill notionals.
+    ``tick_size``, and commission is charged on both fill notionals.  Pine's
+    ``strategy.equity`` includes marked open P/L when an opposite signal submits
+    a reversal order, so ``sizing_equity_basis='signal_marked'`` also freezes
+    that signal-time equity rather than recomputing size after the next open.
     """
 
     stop_distance_basis: str = "entry"
     sizing_price_basis: str = "entry"
+    sizing_equity_basis: str = "entry_realized"
     tick_size: float | None = None
     commission_per_side: float | None = None
     skip_return_basis: str = "gross"
@@ -342,6 +346,8 @@ def simulate_symbol(
         raise ValueError("stop_distance_basis must be entry|signal_close")
     if execution.sizing_price_basis not in {"entry", "signal_close"}:
         raise ValueError("sizing_price_basis must be entry|signal_close")
+    if execution.sizing_equity_basis not in {"entry_realized", "signal_marked"}:
+        raise ValueError("sizing_equity_basis must be entry_realized|signal_marked")
     if execution.tick_size is not None and execution.tick_size <= 0.0:
         raise ValueError("tick_size must be positive when supplied")
     if execution.commission_per_side is not None and not (
@@ -385,6 +391,7 @@ def simulate_symbol(
     position: Position | None = None
     pending_direction = 0
     pending_signal_i = -1
+    pending_sizing_equity = float("nan")
     trades_to_skip = 0
     trade_rows: list[dict[str, Any]] = []
     equity_rows: list[dict[str, Any]] = []
@@ -444,9 +451,29 @@ def simulate_symbol(
         position = None
         return gross
 
-    def open_position(i: int, direction: int, signal_i: int) -> None:
+    def signal_marked_equity(i: int) -> float:
+        """Return Pine-like equity visible when the confirmed signal is submitted."""
+
+        if position is None:
+            return equity
+        open_pnl = position.notional * position.direction * (
+            float(close[i]) / position.entry_price - 1.0
+        )
+        entry_fee = (
+            position.notional * execution.commission_per_side
+            if execution.commission_per_side is not None
+            else 0.0
+        )
+        return equity + open_pnl - entry_fee
+
+    def open_position(
+        i: int,
+        direction: int,
+        signal_i: int,
+        sizing_equity: float,
+    ) -> None:
         nonlocal position
-        if equity <= 0.0 or not np.isfinite(atr[signal_i]):
+        if equity <= 0.0 or sizing_equity <= 0.0 or not np.isfinite(atr[signal_i]):
             return
         entry_price = float(open_[i])
         signal_price = float(close[signal_i])
@@ -465,7 +492,7 @@ def simulate_symbol(
         )
         target_leverage = _position_leverage(
             arm,
-            equity=equity,
+            equity=sizing_equity,
             entry_price=sizing_price,
             stop_distance=stop_distance,
             signal_hour=int(hours[signal_i]),
@@ -473,7 +500,7 @@ def simulate_symbol(
         )
         if target_leverage <= 0.0:
             return
-        target_notional = equity * target_leverage
+        target_notional = sizing_equity * target_leverage
         quantity = target_notional / sizing_price
         notional = quantity * entry_price
         leverage = notional / equity
@@ -509,9 +536,15 @@ def simulate_symbol(
                 and not (closed_opposite and arm.opposite_signal_action == "close_only")
                 and pending_direction in arm.entry_directions
             ):
-                open_position(i, pending_direction, pending_signal_i)
+                open_position(
+                    i,
+                    pending_direction,
+                    pending_signal_i,
+                    pending_sizing_equity,
+                )
             pending_direction = 0
             pending_signal_i = -1
+            pending_sizing_equity = float("nan")
 
         # The initial protective stop is live from the entry fill.  Gaps beyond
         # the stop fill at the bar open; otherwise the stop fills at its price.
@@ -567,8 +600,15 @@ def simulate_symbol(
                 trades_to_skip -= 1
             elif allowed[i] and equity > 0.0:
                 if position is None or position.direction != raw_direction:
-                    pending_direction = raw_direction
-                    pending_signal_i = i
+                    candidate_sizing_equity = (
+                        signal_marked_equity(i)
+                        if execution.sizing_equity_basis == "signal_marked"
+                        else equity
+                    )
+                    if candidate_sizing_equity > 0.0:
+                        pending_direction = raw_direction
+                        pending_signal_i = i
+                        pending_sizing_equity = candidate_sizing_equity
 
         if position is None:
             marked = equity
@@ -576,10 +616,16 @@ def simulate_symbol(
             open_pnl = position.notional * position.direction * (
                 float(close[i]) / position.entry_price - 1.0
             )
-            marked = equity + open_pnl
+            entry_fee = (
+                position.notional * execution.commission_per_side
+                if execution.commission_per_side is not None
+                else 0.0
+            )
+            marked = equity + open_pnl - entry_fee
         equity_rows.append({"open_time": times.iloc[i], "equity": marked})
         if equity <= 0.0:
             pending_direction = 0
+            pending_sizing_equity = float("nan")
             break
 
     if position is not None and execution.force_close_at_end:

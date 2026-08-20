@@ -145,6 +145,7 @@ def exact_execution(*, equity_frequency: str | None = None) -> ExecutionParamete
     return ExecutionParameters(
         stop_distance_basis="signal_close",
         sizing_price_basis="signal_close",
+        sizing_equity_basis="signal_marked",
         tick_size=0.01,
         commission_per_side=0.001,
         skip_return_basis="net",
