@@ -15,6 +15,7 @@ fit or score a model, call TradingView, or touch production state.
 from __future__ import annotations
 
 import argparse
+from hashlib import sha256
 import json
 import platform
 import sys
@@ -47,6 +48,42 @@ HOLDOUT_START = pd.Timestamp("2026-05-04T00:00:00Z")
 FINAL_START = pd.Timestamp("2025-01-01T00:00:00Z")
 FINAL_SPLIT = "final_preholdout_2025_202602"
 CANONICAL_VARIANT = "v9_locked"
+
+
+def _sha256_path(path: Path) -> str:
+    digest = sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _repository_head() -> str:
+    """Resolve the mounted repository HEAD without requiring git in Docker."""
+
+    git_dir = PROJECT / ".git"
+    if git_dir.is_file():
+        declaration = git_dir.read_text(encoding="utf-8").strip()
+        if not declaration.startswith("gitdir: "):
+            return "UNAVAILABLE"
+        git_dir = (PROJECT / declaration.removeprefix("gitdir: ")).resolve()
+    head_path = git_dir / "HEAD"
+    if not head_path.is_file():
+        return "UNAVAILABLE"
+    head = head_path.read_text(encoding="utf-8").strip()
+    if not head.startswith("ref: "):
+        return head
+    ref = head.removeprefix("ref: ")
+    loose_ref = git_dir / ref
+    if loose_ref.is_file():
+        return loose_ref.read_text(encoding="utf-8").strip()
+    packed = git_dir / "packed-refs"
+    if packed.is_file():
+        suffix = f" {ref}"
+        for line in packed.read_text(encoding="utf-8").splitlines():
+            if not line.startswith(("#", "^")) and line.endswith(suffix):
+                return line.split(" ", 1)[0]
+    return "UNAVAILABLE"
 
 
 def build_v9_frame(raw: pd.DataFrame) -> pd.DataFrame:
@@ -244,6 +281,9 @@ def replay_and_reconcile(
         ),
     }
     failed = sorted(name for name, passed in checks.items() if not passed)
+    engine_path = PROJECT / "yoyo/layers/l3_backtest/pine_allin_v7.py"
+    canonical_summary_path = RESULTS / "summary.json"
+    canonical_summary = json.loads(canonical_summary_path.read_text(encoding="utf-8"))
     return {
         "status": "pass" if not failed else "fail",
         "scope": (
@@ -255,6 +295,15 @@ def replay_and_reconcile(
             "pandas": pd.__version__,
             "numpy": np.__version__,
             "platform": platform.platform(),
+        },
+        "implementation_lineage": {
+            "repository_head": _repository_head(),
+            "replay_script_sha256": _sha256_path(Path(__file__).resolve()),
+            "execution_engine_sha256": _sha256_path(engine_path),
+            "config_sha256": _sha256_path(config_path),
+            "canonical_trades_sha256": _sha256_path(canonical_path),
+            "canonical_summary_sha256": _sha256_path(canonical_summary_path),
+            "canonical_generated_from_commit": canonical_summary["generated_from_commit"],
         },
         "data_contract": {
             "path": str(data_path),
