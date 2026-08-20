@@ -21,6 +21,10 @@ Important limitations:
   It is no longer an unseen OOS set for this strategy family.
 - No TradingView compile/export parity has passed.  Python results remain a
   translation diagnostic, not deployable broker-emulator evidence.
+- Matched controls use unique entry starts and split-contained exits.  Their
+  return windows may overlap because multi-week trend holds otherwise make an
+  exact same-regime control impossible; inference is therefore clustered by
+  UTC week rather than pretending trades are independent.
 - The existing project LightGBM model is not a valid Pine gate.  The exported
   feature table is explicitly training-ineligible while P0/P1 blocks training.
 - Nothing here changes `models/ACTIVE`, creates `active_bundle.json`, promotes,

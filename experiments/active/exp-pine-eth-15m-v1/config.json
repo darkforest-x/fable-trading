@@ -78,6 +78,7 @@
     "exclude_all_raw_signal_bars": true,
     "disallow_control_reuse": true,
     "require_exit_inside_split": true,
+    "overlap_policy": "return windows may overlap; exact control starts never repeat and inference is clustered by UTC week",
     "inference": "UTC-week block sign-flip plus week bootstrap",
     "seed": 20260821
   },

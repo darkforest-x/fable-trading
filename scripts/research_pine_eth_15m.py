@@ -21,7 +21,7 @@ import hashlib
 import json
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable
 
 import matplotlib
 
@@ -429,10 +429,6 @@ def _atr_month_buckets(frame: pd.DataFrame, period: Period, buckets: int = 5) ->
     return result
 
 
-def _interval_overlaps_any(start: int, end: int, intervals: Sequence[tuple[int, int]]) -> bool:
-    return any(start <= other_end and end >= other_start for other_start, other_end in intervals)
-
-
 def control_outcome(
     frame: pd.DataFrame,
     *,
@@ -522,9 +518,6 @@ def build_matched_controls(
         & (atr_bucket >= 0)
     )
 
-    forbidden_intervals = [
-        (int(row.signal_i), int(row.exit_i)) for row in trades.itertuples(index=False)
-    ]
     pool_by_stratum: dict[tuple[str, int, int], list[int]] = {}
     for i in np.flatnonzero(base_pool):
         key = (str(month[i]), int(block[i]), int(atr_bucket[i]))
@@ -540,8 +533,6 @@ def build_matched_controls(
         for candidate_i in pool_by_stratum.get(key, []):
             candidate_end = candidate_i + 1 + horizon
             if candidate_i in used or candidate_i < first_i or candidate_end > last_i:
-                continue
-            if _interval_overlaps_any(candidate_i, candidate_end, forbidden_intervals):
                 continue
             candidates.append(candidate_i)
         chosen = deterministic_control_indices(
@@ -574,7 +565,18 @@ def build_matched_controls(
                     **outcome,
                 }
             )
-    return pd.DataFrame(rows)
+    controls = pd.DataFrame(rows)
+    if controls.empty:
+        raise RuntimeError("matched-control construction produced no rows")
+    counts = controls.groupby("trade_id")["control_signal_i"].size()
+    missing = sorted(set(trades["trade_id"]) - set(counts.index))
+    underfilled = counts.loc[counts < controls_per_trade].to_dict()
+    if missing or underfilled:
+        raise RuntimeError(
+            "matched-control construction must fail closed when an exact stratum is "
+            f"underfilled; missing={missing[:5]}, underfilled={dict(list(underfilled.items())[:5])}"
+        )
+    return controls
 
 
 def block_signflip(
