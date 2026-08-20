@@ -454,7 +454,7 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
 生成日期：2026-08-21
 实验：`{config['experiment_id']}`
 构建提交：`{summary['generated_from_commit']}`
-状态：**研究候选；不可生产、不可 forward、未通过 TradingView parity**
+状态：**研究候选；存在未授权 holdout 字节访问事故，不是 holdout-safe 验收；不可生产、不可 forward、未通过 TradingView parity**
 
 ## 结论先行
 
@@ -657,7 +657,7 @@ long-only 的四块绝对期望都为正，但相对 two-sided 的增量在 2024
 | 检验 | V9 结果 | 判定 |
 |---|---:|---|
 | 策略净收益 | +{_fmt(v9_match['mean_candidate_net_bp'])} bp/笔 | 点估计为正 |
-| 匹配随机净收益 | {_fmt(v9_match['mean_control_net_bp'])} bp/笔 | 同月×HK 6h×ATR 五分位×方向×持有期 |
+| 匹配随机净收益 | {_fmt(v9_match['mean_control_net_bp'])} bp/笔 | 同月×HK 6h×前一 UTC 月标定 ATR 五分位×方向×持有期 |
 | 策略 - 对照 | +{_fmt(v9_match['mean_excess_bp'])} bp/笔 | 正，但不显著 |
 | UTC 周 sign-flip | p={_fmt(v9_flip['p_value'], 4)} | **未过 p<0.01** |
 | 绝对收益周 bootstrap | [{_fmt(v9_abs['ci95_low_bp'])}, {_fmt(v9_abs['ci95_high_bp'])}] bp | 跨 0 |
@@ -979,9 +979,10 @@ Pine confirmed close(t)
 - **路径 bootstrap 不是预测。** 它只重排已消费时期的 4 周区块；V9 0.5% 风险仍有 {_fmt(path_risk['arms'][0]['probability_negative_terminal'] * 100)}% 重采样终值为负，不能解释成未来亏损概率的精确估计。
 - **没有真实密集门。** 原始核心是 SMA10/60 单点 crossover，不是项目 Local Signal V2；严格 EMA ribbon density gate 在开发段不稳定。
 - **没有训练或生产动作。** 所有策略计算的 bounded loader 都读取 0 行 holdout；未 train、promote、deploy、改 ACTIVE、写 forward_log 或操作真金账户。
-- **意外 holdout 预览已披露。** 在写 3m bounded loader 前，一次 shell `tail` 意外显示了原始文件末尾两行（均在 repository holdout）；它们没有进入 Python、没有被评分、没有参与任何配置选择或收益评估。按本仓“看一眼也要记录”的纪律，此事故不能写成“从未看见”，后续已用前缀加载器和不读取整文件的前缀哈希封死。
+- **意外 holdout 预览已披露。** 在写 3m bounded loader 前，一次 shell `tail` 意外显示了原始文件末尾两行（均在 repository holdout）；它们没有进入 Python、没有被评分、没有参与任何配置选择或收益评估。按本仓“看一眼也要记录”的纪律，此事故不能写成“从未看见”。
 - **第二次意外预览已披露。** 检查 funding coverage 时，shell 又显示了 8 条 holdout 期 funding 原始行，最晚到 {funding_coverage['operational_incident']['displayed_range_end']}；同样未进 Python、未汇总/评分/选参，发现本地 funding 不覆盖回测后立即停止该分析。
 - **第三次意外预览已披露。** TradingView 编译 smoke 默认打开 {tv_compile['tradingview_loaded_chart_range'][0]}～{tv_compile['tradingview_loaded_chart_range'][1]} 当前图表，晚于 repository holdout；事前没有 owner 的专项 holdout 批准。V9 日期门让入场/评分为 0，也没有读取任何策略指标、做收益评价或选参；临时策略已撤销、布局/脚本未保存、未发布。该事故只保留“官方编译通过”事实，不能当 holdout 验收。
+- **第四类未授权访问由最终反证审计发现。** 旧 builder 虽只解析到 2026-03-01，却又用整文件 SHA-256 读取原始 CSV 到 EOF；因此 `holdout_rows_read=0` 不能等同于从未访问 holdout 字节，而且旧命令被运行过多次，准确访问次数无法可靠还原。没有 holdout 行被解析、评分、用于收益或选参，但按铁律本交付明确记为 `holdout_safe=false`，不能作为 holdout 验收。现已删除 EOF 哈希，只对已在内存中截断的前缀做 canonical hash；这防止未来重犯，不能抹掉事故。
 - **正式 Docker 构建未完成。** 三次都卡在外部基础镜像 metadata（第三次等待 90 秒后取消）；已有断网 Linux 镜像完成了原始数据全重放并逐笔一致，但其依赖未按实验 Dockerfile 固定，不能冒充 pinned build，更不能冒充 TradingView parity。
 
 ## 下一步选项（需 owner 决策的已标出）
@@ -1100,7 +1101,7 @@ def make_notebook(evidence: dict[str, Any]) -> nbformat.NotebookNode:
         ),
         nbformat.v4.new_markdown_cell(
             "## Context & Methods\n\nSignal close at t, entry at open(t+1); time splits only; "
-            "20 bp round-trip cost; exact ETH-month × HK 6h × ATR-quintile controls with unique starts; "
+            "20 bp round-trip cost; exact ETH-month × HK 6h × prior-month ATR-quintile controls with unique starts; "
             "week-clustered inference."
         ),
         nbformat.v4.new_code_cell(

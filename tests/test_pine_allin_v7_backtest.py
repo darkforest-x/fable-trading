@@ -116,6 +116,7 @@ def test_pine_v8_execution_freezes_signal_close_ticks_quantity_and_fill_fees() -
             stop_distance_basis="signal_close",
             sizing_price_basis="signal_close",
             sizing_equity_basis="signal_marked",
+            leverage_stop_distance_basis="raw",
             tick_size=0.01,
             commission_per_side=0.001,
             skip_return_basis="net",
@@ -125,9 +126,9 @@ def test_pine_v8_execution_freezes_signal_close_ticks_quantity_and_fill_fees() -
     trade = trades.iloc[0]
     assert trade["initial_stop_distance"] == pytest.approx(1.0)
     assert trade["exit_price"] == pytest.approx(100.0)
-    # Pine quantity is 10 contracts from the signal close; the gap makes actual
-    # entry leverage 2.02x rather than the 2.0026x signal-time target.
-    assert trade["leverage"] == pytest.approx(2.02)
+    # Pine sizes from the unrounded 1.004 distance, but protects at 100 ticks.
+    expected_quantity = 500.0 * 0.02 / 1.004
+    assert trade["leverage"] == pytest.approx(expected_quantity * 101.0 / 500.0)
     gross = 100.0 / 101.0 - 1.0
     assert trade["gross_return"] == pytest.approx(gross)
     assert trade["project_net_return"] == pytest.approx(gross - 0.002)
@@ -135,7 +136,7 @@ def test_pine_v8_execution_freezes_signal_close_ticks_quantity_and_fill_fees() -
     assert trade["net_return"] == pytest.approx(
         gross - 0.001 * (1.0 + 100.0 / 101.0)
     )
-    assert trade["quantity"] == pytest.approx(10.0)
+    assert trade["quantity"] == pytest.approx(expected_quantity)
     assert trade["initial_stop_price"] == pytest.approx(100.0)
 
 
@@ -167,6 +168,7 @@ def test_reversal_quantity_freezes_marked_equity_on_the_signal_close() -> None:
             stop_distance_basis="signal_close",
             sizing_price_basis="signal_close",
             sizing_equity_basis="signal_marked",
+            leverage_stop_distance_basis="raw",
             tick_size=0.01,
             commission_per_side=0.001,
             skip_return_basis="net",
@@ -182,6 +184,25 @@ def test_reversal_quantity_freezes_marked_equity_on_the_signal_close() -> None:
     # The next-open realized equity is deliberately different; using it would
     # reproduce the old bug rather than the submitted Pine order quantity.
     assert second["quantity"] != pytest.approx(second["entry_equity"] * 0.02 / 3.0)
+
+
+def test_signal_whose_bar_closes_at_end_is_not_submitted() -> None:
+    frame = _frame_for_stop()
+    frame.loc[240, "v7_long"] = False
+    frame.loc[258, "v7_long"] = True
+    frame.loc[258, "entry_allowed"] = True
+    frame.loc[258, "atr"] = 1.0
+    trades, _ = simulate_symbol(
+        frame,
+        symbol="TEST_USDT_SWAP",
+        arm=Arm(name="date_gate", signal_kind="v7", sizing_kind="risk"),
+        start=frame.loc[0, "open_time"],
+        end=frame.loc[258, "open_time"] + pd.Timedelta(minutes=15),
+        params=SignalParameters(),
+        round_trip_cost=0.002,
+        execution=ExecutionParameters(signal_bar_duration=pd.Timedelta(minutes=15)),
+    )
+    assert trades.empty
 
 
 def test_break_even_can_be_disabled_without_changing_the_signal() -> None:

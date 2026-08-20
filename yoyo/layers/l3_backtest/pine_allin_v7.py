@@ -58,7 +58,9 @@ class ExecutionParameters:
     ``legacy`` values preserve the first 54-symbol Python audit.  The 15-minute
     ETH contract opts into Pine-V8 semantics explicitly: stop ticks and target
     quantity are frozen on the confirmed signal close, the stop is rounded to
-    ``tick_size``, and commission is charged on both fill notionals.  Pine's
+    ``tick_size``, while its order quantity can use the unrounded signal-close
+    distance exactly as the submitted Pine expression does. Commission is
+    charged on both fill notionals. Pine's
     ``strategy.equity`` includes marked open P/L when an opposite signal submits
     a reversal order, so ``sizing_equity_basis='signal_marked'`` also freezes
     that signal-time equity rather than recomputing size after the next open.
@@ -67,11 +69,13 @@ class ExecutionParameters:
     stop_distance_basis: str = "entry"
     sizing_price_basis: str = "entry"
     sizing_equity_basis: str = "entry_realized"
+    leverage_stop_distance_basis: str = "rounded"
     tick_size: float | None = None
     commission_per_side: float | None = None
     skip_return_basis: str = "gross"
     force_close_at_end: bool = True
     equity_frequency: str | None = "1D"
+    signal_bar_duration: pd.Timedelta | None = None
 
 
 @dataclass(frozen=True)
@@ -348,6 +352,8 @@ def simulate_symbol(
         raise ValueError("sizing_price_basis must be entry|signal_close")
     if execution.sizing_equity_basis not in {"entry_realized", "signal_marked"}:
         raise ValueError("sizing_equity_basis must be entry_realized|signal_marked")
+    if execution.leverage_stop_distance_basis not in {"rounded", "raw"}:
+        raise ValueError("leverage_stop_distance_basis must be rounded|raw")
     if execution.tick_size is not None and execution.tick_size <= 0.0:
         raise ValueError("tick_size must be positive when supplied")
     if execution.commission_per_side is not None and not (
@@ -373,6 +379,14 @@ def simulate_symbol(
     if len(active_indices) < 2:
         return pd.DataFrame(), pd.DataFrame()
     first_i, last_i = int(active_indices[0]), int(active_indices[-1])
+    if execution.signal_bar_duration is None:
+        signal_date_allowed = (times < end).to_numpy(dtype=bool)
+    else:
+        if execution.signal_bar_duration <= pd.Timedelta(0):
+            raise ValueError("signal_bar_duration must be positive when supplied")
+        signal_date_allowed = (
+            times + execution.signal_bar_duration < end
+        ).to_numpy(dtype=bool)
 
     open_ = frame["open"].to_numpy(dtype=float)
     high = frame["high"].to_numpy(dtype=float)
@@ -480,10 +494,11 @@ def simulate_symbol(
         stop_reference = (
             signal_price if execution.stop_distance_basis == "signal_close" else entry_price
         )
-        stop_distance = min(
+        raw_stop_distance = min(
             float(atr[signal_i]) * params.atr_mult,
             stop_reference * params.max_sl_percent / 100.0,
         )
+        stop_distance = raw_stop_distance
         if execution.tick_size is not None:
             stop_ticks = max(1, int(round(stop_distance / execution.tick_size)))
             stop_distance = stop_ticks * execution.tick_size
@@ -494,7 +509,11 @@ def simulate_symbol(
             arm,
             equity=sizing_equity,
             entry_price=sizing_price,
-            stop_distance=stop_distance,
+            stop_distance=(
+                raw_stop_distance
+                if execution.leverage_stop_distance_basis == "raw"
+                else stop_distance
+            ),
             signal_hour=int(hours[signal_i]),
             signal_dayofweek=int(weekdays[signal_i]),
         )
@@ -598,7 +617,7 @@ def simulate_symbol(
         if raw_direction:
             if trades_to_skip > 0:
                 trades_to_skip -= 1
-            elif allowed[i] and equity > 0.0:
+            elif allowed[i] and signal_date_allowed[i] and equity > 0.0:
                 if position is None or position.direction != raw_direction:
                     candidate_sizing_equity = (
                         signal_marked_equity(i)

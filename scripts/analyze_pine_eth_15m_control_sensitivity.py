@@ -2,7 +2,7 @@
 """Audit matched-control assignment-seed sensitivity for ETH 15m candidates.
 
 Exact controls are sampled without replacement inside month x HK-six-hour x
-causal-ATR-quintile strata.  A single deterministic seed is reproducible but
+previous-UTC-month-ATR-quintile strata. A single deterministic seed is reproducible but
 can still be a noisy estimate.  This script reruns 64 predeclared assignment
 seeds for V9, V10, and the post-selection V11 long-only hypothesis, preserving
 each candidate ledger, direction, holding horizon, barriers, and 20 bp cost.

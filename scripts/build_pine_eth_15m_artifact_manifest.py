@@ -197,6 +197,8 @@ def build_manifest() -> dict[str, Any]:
             "artifact_manifest.json itself",
         ],
         "holdout_consumed": False,
+        "holdout_safe": False,
+        "unapproved_holdout_access_incident": True,
         "training_eligible": False,
         "production_eligible": False,
         "tradingview_parity_passed": False,

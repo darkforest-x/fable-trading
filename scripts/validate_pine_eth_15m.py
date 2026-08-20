@@ -128,9 +128,15 @@ def main() -> int:
         config["instrument"]["research_symbol"] == "ETH-USDT-SWAP"
         and config["instrument"]["bar_minutes"] == 15
     )
-    checks["holdout_flags_false"] = bool(
+    checks["holdout_evaluation_false_and_access_incident_visible"] = bool(
         config["eligibility"]["holdout_consumed"] is False
+        and config["eligibility"]["holdout_evaluation_consumed"] is False
+        and config["eligibility"]["holdout_safe"] is False
+        and config["eligibility"]["unapproved_holdout_access_incident"] is True
         and payload["holdout_consumed"] is False
+        and payload["holdout_evaluation_consumed"] is False
+        and payload["holdout_safe"] is False
+        and payload["unapproved_holdout_access_incident"] is True
         and framework["holdout_consumed"] is False
     )
     checks["safe_end_precedes_holdout"] = SAFE_END < HOLDOUT_START
@@ -624,6 +630,8 @@ def main() -> int:
         },
         "assessment": "research_candidate_with_material_statistical_caveats" if not failed else "needs_revision",
         "holdout_consumed": False,
+        "holdout_safe": False,
+        "unapproved_holdout_access_incident": True,
     }
     (RESULTS / "validation.json").write_text(
         json.dumps(validation, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"

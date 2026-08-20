@@ -113,6 +113,14 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
             and intrabar["data_quality"]["holdout_rows_read"] == 0
             and robustness["holdout_rows_read"] == 0
         ),
+        "holdout_access_incident_is_visible_and_not_evaluation": bool(
+            config["eligibility"]["holdout_consumed"] is False
+            and config["eligibility"]["holdout_evaluation_consumed"] is False
+            and config["eligibility"]["holdout_safe"] is False
+            and config["eligibility"]["unapproved_holdout_access_incident"] is True
+            and summary["holdout_safe"] is False
+            and summary["unapproved_holdout_access_incident"] is True
+        ),
         "statistical_failure_visible": bool(
             statistics["week_block_signflip"]["p_value"] >= 0.01
             and statistics["week_bootstrap_absolute"]["ci95_low_bp"] < 0.0

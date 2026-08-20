@@ -174,6 +174,8 @@ Important limitations:
   rejects hidden 15-minute aggregation optimism locally, but still is not
   TradingView venue parity.
 - Matched controls use unique entry starts and split-contained exits.  Their
+  ATR quintile is calibrated from the previous UTC month only; no bar's bucket
+  depends on later bars in its own month.  Their
   return windows may overlap because multi-week trend holds otherwise make an
   exact same-regime control impossible; inference is therefore clustered by
   UTC week rather than pretending trades are independent.
@@ -196,6 +198,12 @@ Important limitations:
   entered/scored zero trades and no metric or parameter decision used the
   visible post-holdout prices.  The incident is recorded rather than silently
   converting a compiler smoke into a clean holdout claim.
+- Final adversarial review found that older builder runs parsed only the safe
+  prefix but then hashed the source CSV through EOF.  No holdout row was parsed,
+  scored, evaluated, or used for selection, but the byte access was unapproved
+  and its exact repeat count is not recoverable.  This delivery is therefore
+  explicitly `holdout_safe=false`.  The builder now hashes only the bounded
+  in-memory frame; that prevents recurrence and does not erase the incident.
 
 ## Reproduce
 

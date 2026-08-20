@@ -111,12 +111,25 @@ def _utc(value: str) -> pd.Timestamp:
     return result.tz_localize("UTC") if result.tzinfo is None else result.tz_convert("UTC")
 
 
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+def sha256_bounded_frame(frame: pd.DataFrame) -> str:
+    """Hash only the already-bounded in-memory OHLCV prefix.
+
+    Columns used: ``open_time/open/high/low/close/volume`` for rows returned by
+    :func:`load_development_frame`. No source-file bytes after ``safe_end`` are
+    opened for provenance hashing.
+    """
+
+    columns = ["open_time", "open", "high", "low", "close", "volume"]
+    canonical = frame[columns].copy()
+    canonical["open_time"] = pd.to_datetime(canonical["open_time"], utc=True).map(
+        lambda value: value.isoformat()
+    )
+    payload = canonical.to_csv(
+        index=False,
+        lineterminator="\n",
+        float_format="%.17g",
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def current_commit() -> str:
@@ -134,6 +147,8 @@ def load_config(path: Path = CONFIG_PATH) -> dict[str, Any]:
     config = json.loads(path.read_text(encoding="utf-8"))
     if config["eligibility"]["holdout_consumed"]:
         raise RuntimeError("this research builder must never run after holdout consumption")
+    if config["eligibility"]["holdout_evaluation_consumed"]:
+        raise RuntimeError("holdout evaluation is forbidden for this repair replay")
     if config["instrument"]["bar_minutes"] != 15:
         raise ValueError("ETH Pine research contract must remain 15 minutes")
     return config
@@ -146,11 +161,13 @@ def exact_execution(*, equity_frequency: str | None = None) -> ExecutionParamete
         stop_distance_basis="signal_close",
         sizing_price_basis="signal_close",
         sizing_equity_basis="signal_marked",
+        leverage_stop_distance_basis="raw",
         tick_size=0.01,
         commission_per_side=0.001,
         skip_return_basis="net",
         force_close_at_end=True,
         equity_frequency=equity_frequency,
+        signal_bar_duration=pd.Timedelta(minutes=15),
     )
 
 
@@ -166,7 +183,8 @@ def load_research_frame(config: dict[str, Any]) -> tuple[pd.DataFrame, dict[str,
     )
     quality = {
         "data_path": str(data_path),
-        "sha256": sha256_file(data_path),
+        "bounded_prefix_sha256": sha256_bounded_frame(raw),
+        "hash_scope": "bounded in-memory rows only; source EOF is never read for hashing",
         "rows_read": int(len(raw)),
         "first_bar": times.iloc[0].isoformat(),
         "last_bar": times.iloc[-1].isoformat(),
@@ -445,24 +463,23 @@ def _period_mask(frame: pd.DataFrame, period: Period) -> np.ndarray:
 
 
 def _atr_month_buckets(frame: pd.DataFrame, period: Period, buckets: int = 5) -> np.ndarray:
+    """Assign each eligible bar using only the previous UTC month's ATR distribution."""
+
     times = pd.to_datetime(frame["open_time"], utc=True)
     mask = _period_mask(frame, period)
     result = np.full(len(frame), -1, dtype=int)
-    eligible = np.flatnonzero(mask & frame["entry_allowed"].fillna(False).to_numpy())
-    helper = pd.DataFrame(
-        {
-            "i": eligible,
-            "month": times.iloc[eligible].dt.strftime("%Y-%m").to_numpy(),
-            "atr": frame["atr"].iloc[eligible].to_numpy(dtype=float),
-        }
-    ).dropna()
-    for _, group in helper.groupby("month", sort=False):
-        indices = group["i"].to_numpy(dtype=int)
-        if len(group) < buckets:
-            result[indices] = 0
-        else:
-            ranks = group["atr"].rank(method="first")
-            result[indices] = pd.qcut(ranks, q=buckets, labels=False).to_numpy(dtype=int)
+    eligible = frame["entry_allowed"].fillna(False).to_numpy(dtype=bool)
+    month = times.dt.strftime("%Y-%m").to_numpy()
+    atr = frame["atr"].to_numpy(dtype=float)
+    target_months = pd.unique(month[mask & eligible])
+    for target_month in target_months:
+        prior_month = str(pd.Period(str(target_month), freq="M") - 1)
+        calibration = atr[eligible & (month == prior_month) & np.isfinite(atr)]
+        target_indices = np.flatnonzero(mask & eligible & (month == target_month) & np.isfinite(atr))
+        if len(calibration) < buckets or not len(target_indices):
+            continue
+        edges = np.quantile(calibration, np.arange(1, buckets) / buckets)
+        result[target_indices] = np.searchsorted(edges, atr[target_indices], side="right")
     return result
 
 
@@ -1336,6 +1353,9 @@ def run(config_path: Path = CONFIG_PATH, output_dir: Path = RESULTS) -> dict[str
         "experiment_id": config["experiment_id"],
         "generated_from_commit": current_commit(),
         "holdout_consumed": False,
+        "holdout_evaluation_consumed": False,
+        "holdout_safe": False,
+        "unapproved_holdout_access_incident": True,
         "tradingview_parity_passed": False,
         "research_data": quality,
         "baseline_final_preholdout": baseline_summary,

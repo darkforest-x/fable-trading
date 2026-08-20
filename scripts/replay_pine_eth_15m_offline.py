@@ -124,11 +124,13 @@ def _execution() -> ExecutionParameters:
         stop_distance_basis="signal_close",
         sizing_price_basis="signal_close",
         sizing_equity_basis="signal_marked",
+        leverage_stop_distance_basis="raw",
         tick_size=0.01,
         commission_per_side=0.001,
         skip_return_basis="net",
         force_close_at_end=True,
         equity_frequency=None,
+        signal_bar_duration=pd.Timedelta(minutes=15),
     )
 
 

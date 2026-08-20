@@ -7,11 +7,14 @@ import pytest
 
 from scripts.research_pine_eth_15m import (
     FEATURE_COLUMNS,
+    Period,
+    _atr_month_buckets,
     block_signflip,
     build_feature_frame,
     concentration_diagnostics,
     control_outcome,
     load_config,
+    sha256_bounded_frame,
 )
 from yoyo.layers.l2_judgment.features import add_features
 from yoyo.data.indicators import add_indicators as add_project_indicators
@@ -51,6 +54,9 @@ def test_config_freezes_15m_and_blocks_training() -> None:
     config = load_config()
     assert config["instrument"]["bar_minutes"] == 15
     assert config["eligibility"]["holdout_consumed"] is False
+    assert config["eligibility"]["holdout_evaluation_consumed"] is False
+    assert config["eligibility"]["holdout_safe"] is False
+    assert config["eligibility"]["unapproved_holdout_access_incident"] is True
     assert config["eligibility"]["training_eligible"] is False
     assert config["signal_contract"]["locked_oscillator_threshold"] == pytest.approx(0.1)
 
@@ -114,3 +120,33 @@ def test_profit_concentration_exposes_top_trade_dependency() -> None:
     assert result["positive_trades"] == 1
     assert result["top1_share_of_net"] > 1.0
     assert result["mean_without_top1_bp"] == pytest.approx(-200.0)
+
+
+def test_atr_control_bucket_uses_only_previous_utc_month() -> None:
+    frame = _bars(96 * 80)
+    frame["open_time"] = pd.date_range(
+        "2022-12-01", periods=len(frame), freq="15min", tz="UTC"
+    )
+    frame["entry_allowed"] = True
+    frame["atr"] = np.tile(np.arange(1.0, 97.0), 80)
+    period = Period(
+        "jan_feb",
+        pd.Timestamp("2023-01-01", tz="UTC"),
+        pd.Timestamp("2023-03-01", tz="UTC"),
+    )
+    before = _atr_month_buckets(frame, period)
+    changed = frame.copy()
+    changed.loc[changed.open_time >= pd.Timestamp("2023-01-15", tz="UTC"), "atr"] *= 100.0
+    after = _atr_month_buckets(changed, period)
+    january_prefix = changed.open_time < pd.Timestamp("2023-01-15", tz="UTC")
+    np.testing.assert_array_equal(before[january_prefix], after[january_prefix])
+    assert set(before[frame.open_time.dt.month.eq(1)]) == {0, 1, 2, 3, 4}
+
+
+def test_bounded_frame_hash_has_no_source_file_dependency() -> None:
+    frame = _bars(20)
+    first = sha256_bounded_frame(frame)
+    changed = frame.copy()
+    changed.loc[19, "close"] += 1.0
+    assert len(first) == 64
+    assert sha256_bounded_frame(changed) != first

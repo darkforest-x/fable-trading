@@ -75,7 +75,7 @@
   },
   "matched_control": {
     "controls_per_trade": 3,
-    "strata": ["UTC month", "Hong Kong six-hour block", "causal ATR quintile"],
+    "strata": ["UTC month", "Hong Kong six-hour block", "previous-UTC-month ATR quintile"],
     "copy": ["direction", "holding bars", "stop", "break-even", "cost"],
     "exclude_all_raw_signal_bars": true,
     "disallow_control_reuse": true,
@@ -92,6 +92,9 @@
   },
   "eligibility": {
     "holdout_consumed": false,
+    "holdout_evaluation_consumed": false,
+    "holdout_safe": false,
+    "unapproved_holdout_access_incident": true,
     "training_eligible": false,
     "production_eligible": false,
     "forward_eligible": false,
