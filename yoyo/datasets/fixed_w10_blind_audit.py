@@ -688,6 +688,10 @@ def build_audit(
             "future_in_public_pack": False,
             "training_eligible_changed": False,
             "owner_approval_required_after_metrics": True,
+            "review_order": (
+                "complete and export the unbiased main pack before opening the "
+                "Cleanlab priority queue"
+            ),
         },
     }
     write_json(pack_root / "prereg.json", prereg)
@@ -701,7 +705,7 @@ def build_audit(
         title="fixed-W10 P0/P1 随机盲审",
         notice=(
             "只看 decision 时刻可见的 10 根；原标签、来源、split 与重复身份均隐藏。"
-            "请完成全部项目后导出 JSON。"
+            "请完成全部项目并导出 JSON 后，才打开 Cleanlab 优先队列。"
         ),
     )
     flagged = _load_cleanlab_flags(cleanlab_per_image, rows)
@@ -712,7 +716,10 @@ def build_audit(
         seed=seed + 28,
         repeat_target=0,
         title="Cleanlab 28 张优先修错队列",
-        notice="这是模型筛选队列，只用于优先修错，不进入随机错误率估计。",
+        notice=(
+            "必须先完成并导出主随机盲审。这是模型筛选队列，只用于优先修错，"
+            "不进入随机错误率估计。"
+        ),
     )
 
     future_dir = pack_root / "future_reference"
@@ -732,7 +739,8 @@ def build_audit(
         "```bash\n"
         "python3 tools/datasets/fixed_w10_p1_audit.py score --answers <导出的JSON>\n"
         "```\n\n"
-        "Cleanlab 28 张的答案单独保存，不参与主包错误率。\n",
+        "先完成、导出并冻结主包答案，再打开 Cleanlab 28 张；后者答案单独保存，"
+        "不参与主包错误率。两个队列自然重叠的项目也必须遵守这个顺序。\n",
         encoding="utf-8",
     )
 
