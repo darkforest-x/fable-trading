@@ -50,6 +50,7 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
     actual_timeframe = load_json("actual_10m_vs_15m.json")
     regime_stability = load_json("regime_stability.json")
     judgment_feasibility = load_json("judgment_feasibility.json")
+    judgment_signal = load_json("judgment_signal_audit.json")
     stateful_gate = load_json("stateful_gate_static_vs_dynamic.json")
     pine_static = load_json("pine_static_contract.json")
     docker_replay = load_json("docker_offline_replay.json")
@@ -197,6 +198,19 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
             judgment_feasibility["overall_positive_events_per_feature"] < 1.0
             and judgment_feasibility["training_or_scoring_performed"] is False
             and judgment_feasibility["training_eligible"] is False
+        ),
+        "judgment_signal_audit_blocks_flexible_model": bool(
+            judgment_signal["source_rows"] == 166
+            and judgment_signal["holdout_rows_read"] == 0
+            and judgment_signal["training_or_model_scoring_performed"] is False
+            and all(
+                row["top_decile_holm_p_across_four_displayed_priors"] >= 0.01
+                for row in judgment_signal["fixed_prior_diagnostics"]
+            )
+            and judgment_signal["prequential_28_feature_selector"]["pooled_auc"] < 0.5
+            and judgment_signal["prequential_28_feature_selector"]
+            ["passes_directional_sanity"]
+            is False
         ),
         "stateful_gate_bias_visible": bool(
             stateful_gate["static_top_decile_filtering_valid_for_l2"] is False

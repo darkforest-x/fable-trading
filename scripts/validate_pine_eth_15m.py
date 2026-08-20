@@ -80,6 +80,9 @@ def main() -> int:
     judgment_feasibility = json.loads(
         (RESULTS / "judgment_feasibility.json").read_text(encoding="utf-8")
     )
+    judgment_signal = json.loads(
+        (RESULTS / "judgment_signal_audit.json").read_text(encoding="utf-8")
+    )
     stateful_gate = json.loads(
         (RESULTS / "stateful_gate_static_vs_dynamic.json").read_text(encoding="utf-8")
     )
@@ -366,6 +369,35 @@ def main() -> int:
         and judgment_feasibility["training_eligible"] is False
         and judgment_feasibility["stateful_replay_required"] is True
     )
+    volume_prior = next(
+        row
+        for row in judgment_signal["fixed_prior_diagnostics"]
+        if row["feature"] == "vol_ratio_mean8"
+    )
+    checks["judgment_signal_audit_rejects_flexible_model_and_keeps_volume_unproven"] = bool(
+        judgment_signal["source_rows"] == 166
+        and judgment_signal["consumed_final_rows_read"] == 0
+        and judgment_signal["holdout_rows_read"] == 0
+        and judgment_signal["training_or_model_scoring_performed"] is False
+        and judgment_signal["threshold_selected_for_execution"] is False
+        and len(judgment_signal["fixed_prior_diagnostics"]) == 4
+        and all(
+            row["auc_holm_p_across_four_displayed_priors"] >= 0.01
+            and row["top_decile_holm_p_across_four_displayed_priors"] >= 0.01
+            for row in judgment_signal["fixed_prior_diagnostics"]
+        )
+        and volume_prior["top_decile_exact_circular_shift_p"] >= 0.01
+        and volume_prior["top_decile_holm_p_across_four_displayed_priors"] >= 0.01
+        and judgment_signal["prequential_28_feature_selector"]["pooled_auc"] < 0.5
+        and judgment_signal["prequential_28_feature_selector"]
+        ["pooled_top_decile_positive_rows"]
+        == 0
+        and judgment_signal["prequential_28_feature_selector"]
+        ["passes_directional_sanity"]
+        is False
+        and judgment_signal["training_eligible"] is False
+        and judgment_signal["production_eligible"] is False
+    )
     checks["static_gate_bias_requires_dynamic_judgment_replay"] = bool(
         stateful_gate["holdout_rows_read"] == 0
         and stateful_gate["training_or_scoring_performed"] is False
@@ -389,7 +421,7 @@ def main() -> int:
     )
     checks["offline_docker_artifact_smoke_passed_without_overclaim"] = bool(
         docker_smoke["status"] == "pass"
-        and docker_smoke["count"] == 32
+        and docker_smoke["count"] == 33
         and docker_smoke["runtime_label"] == "offline-local-label-studio-image"
         and docker_smoke["pinned_docker_recipe_built"] is False
         and docker_smoke["tradingview_parity_passed"] is False

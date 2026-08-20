@@ -72,6 +72,7 @@ def load_evidence() -> dict[str, Any]:
         "actual_timeframe": json.loads((RESULTS / "actual_10m_vs_15m.json").read_text(encoding="utf-8")),
         "regime_stability": json.loads((RESULTS / "regime_stability.json").read_text(encoding="utf-8")),
         "judgment_feasibility": json.loads((RESULTS / "judgment_feasibility.json").read_text(encoding="utf-8")),
+        "judgment_signal": json.loads((RESULTS / "judgment_signal_audit.json").read_text(encoding="utf-8")),
         "stateful_gate": json.loads((RESULTS / "stateful_gate_static_vs_dynamic.json").read_text(encoding="utf-8")),
         "pine_static": json.loads((RESULTS / "pine_static_contract.json").read_text(encoding="utf-8")),
         "validation": validation,
@@ -143,6 +144,12 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
     actual_timeframe = evidence["actual_timeframe"]
     regime_stability = evidence["regime_stability"]
     judgment_feasibility = evidence["judgment_feasibility"]
+    judgment_signal = evidence["judgment_signal"]
+    volume_judgment_prior = next(
+        row
+        for row in judgment_signal["fixed_prior_diagnostics"]
+        if row["feature"] == "vol_ratio_mean8"
+    )
     stateful_gate = evidence["stateful_gate"]
     pine_static = evidence["pine_static"]
     validation = evidence["validation"]
@@ -280,6 +287,29 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
             _fmt(row["validation_positive_rate"] * 100),
         ]
         for row in judgment_research["folds"]
+    ]
+    judgment_prior_rows = [
+        [
+            row["feature"],
+            _fmt(row["auc"], 3),
+            _fmt(row["auc_exact_circular_shift_p"], 4),
+            f"{row['top_decile_positive_rows']}/{row['top_decile_rows']}",
+            _fmt(row["top_decile_net_bp"]),
+            _fmt(row["top_decile_net_bp_without_top1"]),
+            _fmt(row["top_decile_exact_circular_shift_p"], 4),
+            _fmt(row["top_decile_holm_p_across_four_displayed_priors"], 4),
+        ]
+        for row in judgment_signal["fixed_prior_diagnostics"]
+    ]
+    judgment_selector_rows = [
+        [
+            row["fold"],
+            row["selected_feature"],
+            row["favorable_direction"],
+            _fmt(row["train_oriented_auc"], 3),
+            _fmt(row["validation_auc"], 3),
+        ]
+        for row in judgment_signal["prequential_28_feature_selector"]["folds"]
     ]
 
     periods = ["discovery_2023", "confirmation_2024", "final_preholdout_2025_202602"]
@@ -602,7 +632,7 @@ venue-exact 总成本同时通过。TradingView 逐笔 parity 未通过前，协
 
 止损/退出结论：
 
-- 保留 break-even：关闭后单位期望有些块更高，但交易更少、资金 PF/收益不一致，证据不足以替换；
+- 本轮冻结保持 break-even 不变（不代表其经济语义正确）：原开发消融不足以直接替换，后续成本解剖则明确暴露 +10 bp 锁盈低于 20 bp 成本；任何参数改动仍需单独批准；
 - 拒绝 trailing：开发段搜索的所有 2.5–10% 激活、1–5% 距离组合，最差半年都为负；
 - `close only` 反转模式最差半年 +22.32 bp，低于 V9 的 +41.49 bp，拒绝；
 - 初始 `4×ATR / 3% cap`、ATR 下限和 20 bp 成本未调参。
@@ -754,12 +784,36 @@ V9 baseline 的 on-policy executed trades，一旦 LR 拒绝某单，后续持�
 LightGBM 再用好看的 AUC 自证。若要全量模型，需要相同 Pine 候选/标签语义的动态样本扩展，优先
 time-grouped 跨币训练并单独校验 ETH，而不是复用旧 YOLO-v10 判断层。
 
+为了先判断“有没有值得训练的单特征”，又做了一个**不拟合模型、不选择执行阈值**的时间外推审计。
+四个透明先验都只用早期 fold 的经验分位给下一半年打分；每项使用 40×38×45 = 68,400 个
+半年内 outcome circular-shift 组合做精确零假设，并对展示的四项做 Holm 校正：
+
+{markdown_table(['先验特征', 'AUC', 'AUC p', 'top 正/总', 'top10% bp', '去 top1 bp', 'top p', 'top Holm p'], judgment_prior_rows)}
+
+最好的 `vol_ratio_mean8` 静态 top-decile 为 +{_fmt(volume_judgment_prior['top_decile_net_bp'])} bp，
+但只有 3/14 笔为正，原始/四项 Holm p 分别为
+{_fmt(volume_judgment_prior['top_decile_exact_circular_shift_p'], 4)} /
+{_fmt(volume_judgment_prior['top_decile_holm_p_across_four_displayed_priors'], 4)}，
+且它此前来自更宽的 28 特征搜索，所以连这个 Holm p 也没有覆盖全部选择历史。结果只支持“V10 值得保留为
+paper 假设”，不支持训练或宣称通过。
+
+更灵活的 28 特征 prequential selector 每折只在 purged 过去选最强特征，下一半年表现如下：
+
+{markdown_table(['fold', '过去选中', '方向', 'train oriented AUC', 'next-fold AUC'], judgment_selector_rows)}
+
+合并下一期 AUC 只有
+{_fmt(judgment_signal['prequential_28_feature_selector']['pooled_auc'], 3)}；top-decile
+{judgment_signal['prequential_28_feature_selector']['pooled_top_decile_positive_rows']}/
+{judgment_signal['prequential_28_feature_selector']['pooled_top_decile_rows']} 笔为正，净收益
+{_fmt(judgment_signal['prequential_28_feature_selector']['pooled_top_decile_net_bp'])} bp/笔。
+这直接显示“从 28 个特征里挑当期最好再外推”是在过拟合，而不是可训练信号。
+
 未来获得训练许可后，正确链路是：
 
 ```text
 Pine confirmed close(t)
   → 28 causal L2 features available_at close(t)
-  → Pine-specific LR baseline + LightGBM ranker
+  → preregistered one-feature regularized LR（LightGBM deferred）
   → calibration-only q90 threshold
   → entry at open(t+1)
 ```

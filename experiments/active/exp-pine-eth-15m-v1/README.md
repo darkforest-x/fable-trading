@@ -103,6 +103,15 @@ LightGBM.  Static ledger filtering is empirically biased: for the volume gate
 it gives +50.50 bp/trade versus +41.22 bp in dynamic replay and only 84.52%
 entry Jaccard.
 
+A no-training judgment-signal audit makes the limitation concrete.  Four
+transparent one-feature priors were scored in expanding folds and compared
+with all 68,400 combinations of within-half-year circular outcome shifts.
+`vol_ratio_mean8` is the strongest static diagnostic (+365.67 bp in 14
+top-decile rows), but only 3 rows win and its raw/Holm top-decile p-values are
+0.0595/0.2380; the Holm family does not cover its earlier 28-feature selection
+history.  A flexible 28-feature prequential selector is worse: pooled next-fold
+AUC 0.430 and 0/13 positive top-decile rows.  No LR or LightGBM was fitted.
+
 The three Pine files are now hashed into a blocked paper-forward protocol.
 No collection, log, paper order, or live order was started.  Historical arrival
 rates imply roughly 12.7, 18.1, and 24.9 months for V9/V10/V11 respectively to
@@ -157,6 +166,7 @@ PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_regime_stability.py
 PYTHONPATH=. .venv/bin/python scripts/generate_pine_eth_15m_paper_variants.py
 PYTHONPATH=. .venv/bin/python scripts/prepare_pine_eth_15m_judgment_research.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_judgment_feasibility.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_judgment_signal.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_stateful_gate.py
 PYTHONPATH=. .venv/bin/python scripts/audit_pine_eth_15m_static_contract.py
 PYTHONPATH=. .venv/bin/python scripts/design_pine_eth_15m_paper_protocol.py
