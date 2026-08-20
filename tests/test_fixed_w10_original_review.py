@@ -72,6 +72,7 @@ def test_page_has_fast_shortcuts_resume_import_and_export() -> None:
         "导入进度",
         "导出 JSON",
         "autoNext",
+        "reference.removeAttribute('src')",
     ):
         assert required in page
 
