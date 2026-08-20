@@ -62,7 +62,9 @@ def test_public_pack_hides_truth_source_split_and_repeat_identity(tmp_path: Path
         notice="decision only",
     )
     manifest = json.loads((out / "public" / "manifest.json").read_text())
-    public = json.dumps(manifest["items"]) + (out / "public" / "index.html").read_text()
+    page = (out / "public" / "index.html").read_text()
+    public = json.dumps(manifest["items"]) + page
+    assert '<link rel="icon" href="data:,">' in page
     for leak in (
         "secret_gold_",
         "easy_negative_pool",

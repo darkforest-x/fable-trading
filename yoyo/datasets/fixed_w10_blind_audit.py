@@ -332,6 +332,7 @@ def _page_html(
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
 <title>{safe_title}</title>
 <style>
 :root{{--bg:#f3f1eb;--panel:#fff;--ink:#20211f;--muted:#676b65;--line:#d9d5ca;--accent:#174f43;--warn:#8b3a2b}}
