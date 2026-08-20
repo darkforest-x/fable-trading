@@ -34,6 +34,7 @@ FIXED_FILES = (
     EXPERIMENT / "tradingview/README.md",
     EXPERIMENT / "tradingview/trades_normalized.template.csv",
     EXPERIMENT / "judgment/README.md",
+    EXPERIMENT / "judgment/gate_manifest.template.json",
     EXPERIMENT / "judgment/judgment_scores.template.csv",
     EXPERIMENT / "notebooks/pine_eth_15m_v1_audit.ipynb",
     PROJECT / "analysis/p0_pine_eth_15m_v1_20260821.md",
@@ -171,6 +172,7 @@ def build_manifest() -> dict[str, Any]:
         "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v9_research.pine",
         "experiments/active/exp-pine-eth-15m-v1/results/validation.json",
         "experiments/active/exp-pine-eth-15m-v1/results/density_overlap_audit.json",
+        "experiments/active/exp-pine-eth-15m-v1/results/judgment_gate_replay_contract.json",
     }
     present = {row["path"] for row in entries}
     absent = sorted(required - present)

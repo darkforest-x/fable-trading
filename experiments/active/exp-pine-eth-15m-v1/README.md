@@ -117,6 +117,14 @@ defines a fail-closed score template: exact raw-candidate coverage, score ready
 by next-open, fixed model/feature hashes, preregistered threshold, and dynamic
 replay.  No score or threshold currently exists.
 
+The executable bridge now self-audits this contract.  A synthetic allow-all
+sentinel reproduces the 83-trade 2023 and 83-trade 2024 V9 ledgers exactly
+(maximum numeric error below `5e-13`), while eight deliberate missing,
+duplicate, timing, value, hash and preregistration mutations all fail closed.
+It also preserves a non-obvious Pine ordering rule: ineligible raw signals
+still consume cooldown before the calendar/volatility gate.  No model was
+trained or loaded and no threshold was selected by this identity test.
+
 The capacity audit also blocks a premature full model: those 166 rows contain
 only 27 net-positive events for 28 features (0.96 events/feature), and the
 walk-forward validation folds contain only 4–8 positives each.  A future
@@ -200,6 +208,7 @@ PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_judgment_feasibility.
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_judgment_signal.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_selection_risk.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_stateful_gate.py
+PYTHONPATH=. .venv/bin/python scripts/replay_pine_eth_15m_judgment_gate.py --self-audit
 PYTHONPATH=. .venv/bin/python scripts/audit_pine_eth_15m_static_contract.py
 PYTHONPATH=. .venv/bin/python scripts/design_pine_eth_15m_paper_protocol.py
 PYTHONPATH=. python3 scripts/reconcile_pine_eth_15m_backtesting.py
@@ -209,6 +218,7 @@ PYTHONPATH=. .venv/bin/python -m pytest -q \
   tests/test_research_pine_eth_15m.py \
   tests/test_reconcile_pine_eth_15m_intrabar.py \
   tests/test_analyze_pine_eth_15m_robustness.py \
+  tests/test_replay_pine_eth_15m_judgment_gate.py \
   tests/test_smoke_pine_eth_15m_artifacts.py
 PYTHONPATH=. /tmp/fable-pine-eval-venv/bin/python scripts/build_pine_eth_15m_report.py
 PYTHONPATH=. .venv/bin/python scripts/md_to_html.py \

@@ -56,6 +56,7 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
     density_overlap = load_json("density_overlap_audit.json")
     migration_audit = load_json("migration_audit.json")
     gate_surface = load_json("judgment_gate_surface_manifest.json")
+    gate_replay = load_json("judgment_gate_replay_contract.json")
     pine_static = load_json("pine_static_contract.json")
     docker_replay = load_json("docker_offline_replay.json")
     validation = load_json("validation.json")
@@ -257,6 +258,23 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
             and gate_surface["scores_present"] is False
             and gate_surface["training_eligible"] is False
             and gate_surface["production_eligible"] is False
+        ),
+        "dynamic_gate_contract_is_exact_and_fail_closed": bool(
+            gate_replay["status"] == "pass"
+            and gate_replay["check_count"] == 10
+            and gate_replay["consumed_final_rows_read"] == 0
+            and gate_replay["holdout_rows_read"] == 0
+            and gate_replay["model_trained"] is False
+            and gate_replay["model_loaded"] is False
+            and gate_replay["threshold_selected"] is False
+            and gate_replay["barrier_parameters_changed"] is False
+            and len(gate_replay["reconciliations"]) == 2
+            and all(row["passed"] for row in gate_replay["reconciliations"])
+            and all(
+                row["status"] == "rejected"
+                for row in gate_replay["fail_closed_mutations"]
+            )
+            and gate_replay["production_eligible"] is False
         ),
         "pine_static_contract_passes_without_compiler_claim": bool(
             pine_static["status"] == "pass"

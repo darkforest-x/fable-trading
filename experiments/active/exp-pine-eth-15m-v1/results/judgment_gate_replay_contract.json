@@ -1,0 +1,96 @@
+{
+  "artifact": "Pine V9 external judgment gate dynamic replay contract audit",
+  "status": "pass",
+  "checks": {
+    "development_loader_read_zero_final_rows": true,
+    "development_loader_read_zero_holdout_rows": true,
+    "surface_has_all_335_guarded_candidates": true,
+    "feature_contract_has_28_columns": true,
+    "allow_all_replays_both_split_ledgers_exactly": true,
+    "all_invalid_mutations_fail_closed": true,
+    "no_model_fitted_or_loaded": true,
+    "no_threshold_selected": true,
+    "frozen_cost_and_barriers_unchanged": true,
+    "production_remains_ineligible": true
+  },
+  "check_count": 10,
+  "surface_sha256": "2da2a309b33c57fd1a37dab626f56335c986cb1eadbaf7ee572a82330c3f5bf7",
+  "feature_contract_sha256": "e3a566dd71bcc711363433e6d37aad7bac6f656bf466f9c75d1282fee8f4c089",
+  "strategy_config_sha256": "8720bc87b41c1769712b99fbc6a5082c8d293d8d521cc85377eb83ff5f45df78",
+  "reconciliations": [
+    {
+      "baseline_trades": 83,
+      "replayed_trades": 83,
+      "exact_identity_columns": true,
+      "max_numeric_absolute_error": 2.2737367544323206e-13,
+      "passed": true,
+      "split": "discovery_2023",
+      "raw_candidates": 167,
+      "accepted_candidates": 167
+    },
+    {
+      "baseline_trades": 83,
+      "replayed_trades": 83,
+      "exact_identity_columns": true,
+      "max_numeric_absolute_error": 4.547473508864641e-13,
+      "passed": true,
+      "split": "confirmation_2024",
+      "raw_candidates": 168,
+      "accepted_candidates": 168
+    }
+  ],
+  "fail_closed_mutations": [
+    {
+      "case": "missing_candidate",
+      "status": "rejected",
+      "reason": "score coverage mismatch: missing=['pine-v9|short|69807|2023-12-31T19:15:00+00:00'] extra=[]"
+    },
+    {
+      "case": "duplicate_candidate",
+      "status": "rejected",
+      "reason": "scores must contain one unique row per candidate"
+    },
+    {
+      "case": "late_score",
+      "status": "rejected",
+      "reason": "a score arrived after the next-open decision"
+    },
+    {
+      "case": "pre_feature_score",
+      "status": "rejected",
+      "reason": "a score claims availability before its causal features"
+    },
+    {
+      "case": "non_finite_score",
+      "status": "rejected",
+      "reason": "scores contain missing or non-finite values"
+    },
+    {
+      "case": "model_hash_mismatch",
+      "status": "rejected",
+      "reason": "score rows do not share the locked model hash"
+    },
+    {
+      "case": "null_threshold",
+      "status": "rejected",
+      "reason": "gate threshold must be a finite number"
+    },
+    {
+      "case": "calibration_overlap",
+      "status": "rejected",
+      "reason": "calibration overlaps evaluation"
+    }
+  ],
+  "score_fixture": "synthetic allow-all sentinel used only to prove interface identity; not a model output or strategy result",
+  "model_trained": false,
+  "model_loaded": false,
+  "threshold_selected": false,
+  "outcomes_used_for_gate_selection": false,
+  "consumed_final_rows_read": 0,
+  "holdout_rows_read": 0,
+  "barrier_parameters_changed": false,
+  "round_trip_cost": 0.002,
+  "training_eligible": false,
+  "forward_eligible": false,
+  "production_eligible": false
+}

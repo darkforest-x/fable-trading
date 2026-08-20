@@ -90,6 +90,7 @@ def load_evidence() -> dict[str, Any]:
         "density_overlap": json.loads((RESULTS / "density_overlap_audit.json").read_text(encoding="utf-8")),
         "migration_audit": json.loads((RESULTS / "migration_audit.json").read_text(encoding="utf-8")),
         "gate_surface": json.loads((RESULTS / "judgment_gate_surface_manifest.json").read_text(encoding="utf-8")),
+        "gate_replay": json.loads((RESULTS / "judgment_gate_replay_contract.json").read_text(encoding="utf-8")),
         "pine_static": json.loads((RESULTS / "pine_static_contract.json").read_text(encoding="utf-8")),
         "validation": validation,
         "split": pd.read_csv(RESULTS / "split_summary.csv"),
@@ -172,6 +173,7 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
     density_overlap = evidence["density_overlap"]
     migration_audit = evidence["migration_audit"]
     gate_surface = evidence["gate_surface"]
+    gate_replay = evidence["gate_replay"]
     pine_static = evidence["pine_static"]
     validation = evidence["validation"]
     split = evidence["split"]
@@ -872,6 +874,15 @@ lineage（{judgment_research['long_rows']} long / {judgment_research['short_rows
 fail-closed，再把 pass 结果 AND 到 `v9_long/v9_short` 后进入动态状态机。当前 score template 为空，
 没有模型、分数或阈值。
 
+这条接口已经有可执行的恒等性自审，而不只是文档约定：用不含任何预测含义的 synthetic allow-all
+sentinel，2023 的 {gate_replay['reconciliations'][0]['baseline_trades']} 笔和 2024 的
+{gate_replay['reconciliations'][1]['baseline_trades']} 笔都逐笔复现，最大数值误差
+{max(row['max_numeric_absolute_error'] for row in gate_replay['reconciliations']):.3e}；缺候选、重复候选、
+早于特征、迟于 next-open、非有限分数、模型哈希漂移、空阈值、calibration overlap 八类输入全部拒绝。
+自审还钉住一个容易漏掉的顺序：不可入场的原始信号虽不需要模型分数，仍会在 Pine 中先消耗 cooldown；
+动态桥会只保留这个状态副作用，可入场候选才由分数控制。整个自审读取 final/holdout 各 0 行，未训练、
+未加载模型、未选择阈值，仍为 `production_eligible=false`。
+
 特征在 signal bar 收盘完成，时间戳与 `t+1` entry open 完全相同；label end 保守加到 exit bar
 收盘，两个跨切点样本已经 purge。这个表依然**不能直接拿来静态 top-decile 筛选**：它只记录
 V9 baseline 的 on-policy executed trades，一旦 LR 拒绝某单，后续持仓、反转与 cooldown 状态会改变。
@@ -986,6 +997,7 @@ PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_judgment_signal.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_selection_risk.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_density_overlap.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_stateful_gate.py
+PYTHONPATH=. .venv/bin/python scripts/replay_pine_eth_15m_judgment_gate.py --self-audit
 PYTHONPATH=. .venv/bin/python scripts/audit_pine_eth_15m_migration.py
 PYTHONPATH=. .venv/bin/python scripts/audit_pine_eth_15m_static_contract.py
 PYTHONPATH=. .venv/bin/python scripts/design_pine_eth_15m_paper_protocol.py
@@ -998,7 +1010,7 @@ PYTHONPATH=. .venv/bin/python scripts/md_to_html.py \\
 PYTHONPATH=. .venv/bin/python scripts/build_pine_eth_15m_artifact_manifest.py
 PYTHONPATH=. .venv/bin/python scripts/build_pine_eth_15m_artifact_manifest.py --verify
 PYTHONPATH=. .venv/bin/python -m pytest -q \\
-  tests/test_pine_allin_v7_backtest.py tests/test_research_pine_eth_15m.py tests/test_reconcile_pine_eth_15m*.py tests/test_analyze_pine_eth*.py tests/test_audit_pine_eth_15m_static_contract.py tests/test_design_pine_eth_15m_paper_protocol.py tests/test_generate_pine_eth_15m_paper_variants.py tests/test_prepare_pine_eth_15m_judgment_research.py tests/test_smoke_pine_eth_15m_artifacts.py
+  tests/test_pine_allin_v7_backtest.py tests/test_research_pine_eth_15m.py tests/test_reconcile_pine_eth_15m*.py tests/test_analyze_pine_eth*.py tests/test_audit_pine_eth_15m_static_contract.py tests/test_design_pine_eth_15m_paper_protocol.py tests/test_generate_pine_eth_15m_paper_variants.py tests/test_prepare_pine_eth_15m_judgment_research.py tests/test_replay_pine_eth_15m_judgment_gate.py tests/test_smoke_pine_eth_15m_artifacts.py
 ```
 
 Docker：

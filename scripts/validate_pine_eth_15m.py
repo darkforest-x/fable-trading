@@ -98,6 +98,9 @@ def main() -> int:
     gate_surface = json.loads(
         (RESULTS / "judgment_gate_surface_manifest.json").read_text(encoding="utf-8")
     )
+    gate_replay = json.loads(
+        (RESULTS / "judgment_gate_replay_contract.json").read_text(encoding="utf-8")
+    )
     pine_static = json.loads(
         (RESULTS / "pine_static_contract.json").read_text(encoding="utf-8")
     )
@@ -479,6 +482,28 @@ def main() -> int:
         and gate_surface["forward_eligible"] is False
         and gate_surface["production_eligible"] is False
     )
+    checks["dynamic_judgment_gate_contract_is_exact_and_fail_closed"] = bool(
+        gate_replay["status"] == "pass"
+        and gate_replay["check_count"] == 10
+        and gate_replay["consumed_final_rows_read"] == 0
+        and gate_replay["holdout_rows_read"] == 0
+        and gate_replay["model_trained"] is False
+        and gate_replay["model_loaded"] is False
+        and gate_replay["threshold_selected"] is False
+        and gate_replay["outcomes_used_for_gate_selection"] is False
+        and gate_replay["barrier_parameters_changed"] is False
+        and gate_replay["round_trip_cost"] == 0.002
+        and [row["baseline_trades"] for row in gate_replay["reconciliations"]]
+        == [83, 83]
+        and all(row["passed"] for row in gate_replay["reconciliations"])
+        and all(
+            row["status"] == "rejected"
+            for row in gate_replay["fail_closed_mutations"]
+        )
+        and gate_replay["training_eligible"] is False
+        and gate_replay["forward_eligible"] is False
+        and gate_replay["production_eligible"] is False
+    )
     tv_template = EXPERIMENT / "tradingview/trades_normalized.template.csv"
     checks["pine_static_contract_passes_and_tv_parity_harness_is_pending"] = bool(
         pine_static["status"] == "pass"
@@ -493,7 +518,7 @@ def main() -> int:
     )
     checks["offline_docker_artifact_smoke_passed_without_overclaim"] = bool(
         docker_smoke["status"] == "pass"
-        and docker_smoke["count"] == 37
+        and docker_smoke["count"] == 38
         and docker_smoke["runtime_label"] == "offline-local-label-studio-image"
         and docker_smoke["pinned_docker_recipe_built"] is False
         and docker_smoke["tradingview_parity_passed"] is False
