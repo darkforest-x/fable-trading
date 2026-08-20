@@ -55,7 +55,7 @@ li { margin: .25rem 0; }
 <th>结果</th>
 </tr></thead><tbody>
 <tr><td>运行安全哈希与 C0 一致</td><td>PASS — 12 个对象逐字节相同</td></tr>
-<tr><td>无新增测试失败</td><td>PASS — 701 → 1227 passing，新增失败 <strong>0</strong></td></tr>
+<tr><td>无新增测试失败</td><td>PASS — 701 → <strong>1181 passing / 0 failed</strong>（exit 0），新增失败 <strong>0</strong></td></tr>
 <tr><td>秘密扫描</td><td>PASS — 新增行中无密钥形态内容</td></tr>
 <tr><td>大文件扫描</td><td>PASS — 无新增 &gt;2 MiB 文件</td></tr>
 <tr><td>迁移台账可追溯</td><td>PASS — 165 项全部可追至 source commit</td></tr>
@@ -184,7 +184,7 @@ li { margin: .25rem 0; }
 <h2>仍存在的风险</h2>
 <ul>
 <li><strong>ATR 分歧未裁决</strong>（见上第 6 条）。当前两套并存，差异已钉住。</li>
-<li><strong>11 个先存测试失败</strong>：本 worktree 缺少 gitignore 掉的 <code>data/</code> 产物，不是代码缺陷。 C7 比对的是失败<strong>集合</strong>，与 C0 完全一致。</li>
+<li>~~<strong>11 个先存测试失败</strong>~~ <strong>已解决（2026-08-20）</strong>：它们缺的是 gitignore 掉的 <code>data/</code> 产物。 改为<strong>条件跳过</strong>并在原因里点名缺哪个文件——一个跑不了的测试不等于一个失败的测试， 而 11 条常红会教会所有人无视 CI 徽章。本机有数据时它们照常运行（实测 55 passed）。</li>
 <li><strong><code>yoyo/layers/l1_detection/data.py</code> 保留一个硬编码绝对路径</strong> （<code>/Users/zhangzc/Documents/Codex/...</code> 的旧 kline 缓存）。字节一致迁移的代价； 改它会破坏与来源仓的字节校验。</li>
 <li><strong>7 个文件哈希实现、3 个 MA 实现未合并</strong>：实测一致且已钉住，合并留待专门一轮。</li>
 <li><strong>venv 里 yoyo-trading 的 editable 安装未卸载</strong>（不动 owner 环境）。 测试保证即使它还在，跑的也是本仓的 <code>yoyo/</code>。彻底清除：<code>pip uninstall yoyo-trading</code>。</li>

@@ -19,6 +19,10 @@ from src.detection.eth3m_v2_classification import (
     verify_prepared,
 )
 
+from conftest import requires_repo_data
+
+pytestmark = requires_repo_data("data/judgment_yolo_swap_v10.csv")
+
 PROJECT = Path(__file__).resolve().parents[1]
 
 

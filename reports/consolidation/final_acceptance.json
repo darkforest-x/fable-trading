@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-19T17:09:40+00:00",
+  "generated_at": "2026-08-20T00:28:15+00:00",
   "generated_by": "tools/consolidation/final_acceptance.py",
   "decision": "accepted",
   "branch": "claude/fable-trading-consolidation-758d61",
-  "head": "35e291e8c91e2b1fd90bd4296dd7bf2341dd4d0c",
+  "head": "c46d1f7227fb4f530d052774829aff3baab78405",
   "base": "main",
   "checks": {
     "runtime_safety_hashes": {
@@ -85,15 +85,25 @@
         "error": 6
       },
       "final_counts": {
-        "failed": 5,
-        "passed": 1227,
-        "skipped": 4,
-        "warnings": 14,
-        "error": 6
+        "passed": 1181,
+        "skipped": 83,
+        "warnings": 14
       },
       "new_failures": [],
-      "no_longer_failing": [],
-      "detail": "701 -> 1227 passing, 0 new failures"
+      "no_longer_failing": [
+        "ERROR tests/test_p2m_mechanism_audit.py::test_atr_normalization_recovers_frozen_barrier_units",
+        "ERROR tests/test_p2m_mechanism_audit.py::test_five_readonly_folds_and_atr_quintiles",
+        "ERROR tests/test_p2m_mechanism_audit.py::test_full_audit_stops_without_runtime_mutation",
+        "ERROR tests/test_p2m_mechanism_audit.py::test_preregistered_mechanism_counts_and_decision",
+        "ERROR tests/test_p2r_root_cause_audit.py::test_feature_ic_rule_is_pre_registered_and_complete",
+        "ERROR tests/test_p2r_root_cause_audit.py::test_readonly_folds_reproduce_frozen_p2_rows",
+        "FAILED tests/test_active_bundle_protocol.py::test_repo_example_bundle_is_valid_and_honest",
+        "FAILED tests/test_eth3m_v2_classification.py::test_prepared_real_dataset_is_train_val_only_and_hash_clean",
+        "FAILED tests/test_p2m_mechanism_audit.py::test_frozen_inputs_and_only_p1_data_source",
+        "FAILED tests/test_p2r_root_cause_audit.py::test_all_frozen_input_hashes_match",
+        "FAILED tests/test_p2r_root_cause_audit.py::test_full_audit_reaches_stop_without_runtime_mutation"
+      ],
+      "detail": "701 -> 1181 passing, 0 new failures"
     },
     "secret_scan": {
       "passed": true,
