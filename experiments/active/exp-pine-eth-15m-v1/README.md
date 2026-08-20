@@ -243,8 +243,9 @@ docker run --rm --network none -v "$PWD:/workspace:ro" \
   fable-pine-eth15m-v1
 ```
 
-On 2026-08-21, two builds stopped at the Docker Hub metadata request for
-`python:3.11-slim`; neither reached dependency installation or project code.
+On 2026-08-21, three builds stopped at the Docker Hub metadata request for
+`python:3.11-slim`; the third was canceled after another 90-second metadata
+wait. None reached dependency installation or project code.
 An offline audit was therefore also run in a pre-existing local image with
 `--network none`.  First, the artifact arithmetic smoke passed under Python
 3.13 / pandas 2.2 / NumPy 2.2.  Second, the container read the bounded raw 15m

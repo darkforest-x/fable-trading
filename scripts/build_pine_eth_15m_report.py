@@ -844,7 +844,8 @@ V9/V11 的价格型规则入场重合约 96%，但成交量门 V10 只有 78%；
 
 ### Docker 复核状态
 
-固定配方两次都停在 Docker Hub 的 `python:3.11-slim` metadata 拉取，尚未进入依赖安装或代码执行，
+固定配方三次都停在 Docker Hub 的 `python:3.11-slim` metadata 拉取；第三次在又等待 90 秒后取消，
+三次均尚未进入依赖安装或代码执行，
 因此明确记录 `pinned_docker_recipe_built=false`。为了区分“Docker runtime 坏了”和“外部镜像站阻塞”，
 使用本机已有镜像在 `--network none` 下做了两层只读复核：
 
@@ -981,7 +982,7 @@ Pine confirmed close(t)
 - **意外 holdout 预览已披露。** 在写 3m bounded loader 前，一次 shell `tail` 意外显示了原始文件末尾两行（均在 repository holdout）；它们没有进入 Python、没有被评分、没有参与任何配置选择或收益评估。按本仓“看一眼也要记录”的纪律，此事故不能写成“从未看见”，后续已用前缀加载器和不读取整文件的前缀哈希封死。
 - **第二次意外预览已披露。** 检查 funding coverage 时，shell 又显示了 8 条 holdout 期 funding 原始行，最晚到 {funding_coverage['operational_incident']['displayed_range_end']}；同样未进 Python、未汇总/评分/选参，发现本地 funding 不覆盖回测后立即停止该分析。
 - **第三次意外预览已披露。** TradingView 编译 smoke 默认打开 {tv_compile['tradingview_loaded_chart_range'][0]}～{tv_compile['tradingview_loaded_chart_range'][1]} 当前图表，晚于 repository holdout；事前没有 owner 的专项 holdout 批准。V9 日期门让入场/评分为 0，也没有读取任何策略指标、做收益评价或选参；临时策略已撤销、布局/脚本未保存、未发布。该事故只保留“官方编译通过”事实，不能当 holdout 验收。
-- **正式 Docker 构建未完成。** 两次都卡在外部基础镜像 metadata；已有断网 Linux 镜像完成了原始数据全重放并逐笔一致，但其依赖未按实验 Dockerfile 固定，不能冒充 pinned build，更不能冒充 TradingView parity。
+- **正式 Docker 构建未完成。** 三次都卡在外部基础镜像 metadata（第三次等待 90 秒后取消）；已有断网 Linux 镜像完成了原始数据全重放并逐笔一致，但其依赖未按实验 Dockerfile 固定，不能冒充 pinned build，更不能冒充 TradingView parity。
 
 ## 下一步选项（需 owner 决策的已标出）
 
