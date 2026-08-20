@@ -10,6 +10,7 @@ that exposes the key calculations and decision assertions.
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -23,6 +24,17 @@ EXPERIMENT = PROJECT / "experiments/active/exp-pine-eth-15m-v1"
 RESULTS = EXPERIMENT / "results"
 NOTEBOOKS = EXPERIMENT / "notebooks"
 REPORT = PROJECT / "analysis/p0_pine_eth_15m_v1_20260821.md"
+
+
+def current_commit() -> str:
+    result = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=PROJECT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip() if result.returncode == 0 else "UNAVAILABLE"
 
 
 def _fmt(value: Any, digits: int = 2) -> str:
@@ -125,6 +137,7 @@ def _variant_row(split: pd.DataFrame, variant: str, period: str) -> pd.Series:
 
 
 def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
+    report_source_commit = current_commit()
     config = evidence["config"]
     quality = evidence["quality"]
     summary = evidence["summary"]
@@ -924,7 +937,7 @@ Pine confirmed close(t)
 ## 复现命令
 
 ```bash
-git checkout {summary['generated_from_commit']}
+git checkout {report_source_commit}
 PYTHONPATH=. .venv/bin/python scripts/research_pine_eth_15m.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_robustness.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_side_hypothesis.py
@@ -950,6 +963,8 @@ PYTHONPATH=. .venv/bin/python scripts/validate_pine_eth_15m.py
 PYTHONPATH=. /tmp/fable-pine-eval-venv/bin/python scripts/build_pine_eth_15m_report.py
 PYTHONPATH=. .venv/bin/python scripts/md_to_html.py \\
   analysis/p0_pine_eth_15m_v1_20260821.md --out-dir analysis/html
+PYTHONPATH=. .venv/bin/python scripts/build_pine_eth_15m_artifact_manifest.py
+PYTHONPATH=. .venv/bin/python scripts/build_pine_eth_15m_artifact_manifest.py --verify
 PYTHONPATH=. .venv/bin/python -m pytest -q \\
   tests/test_pine_allin_v7_backtest.py tests/test_research_pine_eth_15m.py tests/test_reconcile_pine_eth_15m*.py tests/test_analyze_pine_eth*.py tests/test_audit_pine_eth_15m_static_contract.py tests/test_design_pine_eth_15m_paper_protocol.py tests/test_generate_pine_eth_15m_paper_variants.py tests/test_prepare_pine_eth_15m_judgment_research.py tests/test_smoke_pine_eth_15m_artifacts.py
 ```

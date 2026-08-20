@@ -26,6 +26,7 @@ from scripts.research_pine_eth_15m import (
     SPLITS,
     Variant,
     build_feature_frame,
+    current_commit,
     load_config,
     load_research_frame,
     simulate_period,
@@ -258,6 +259,7 @@ def main() -> None:
 
     artifact = {
         "artifact": "Pine V9 versus project moving-average density overlap",
+        "generated_from_commit": current_commit(),
         "status": "descriptive semantic audit; no gate selected",
         "data_quality": quality,
         "threshold_source": "yoyo.data.indicators existing owner-frozen strict/expanded presets",
