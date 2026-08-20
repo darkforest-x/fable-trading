@@ -255,61 +255,65 @@ artifacts:
     artifact_type: report
     role: preholdout_strategy_research_audit
     source_repo: darkforest-x/fable-trading
-    source_commit: "76ef1f14f6670c48ad3a94d427f4bb38a9858a19"
+    source_commit: "6d6873a0e84312b7c5a9ecf5dddeb0c8e07ebc9f"
     source_path: analysis/p0_pine_eth_15m_v1_20260821.md
-    sha256: "5fb7cb8f1f9484497062345a98b2c49cb9f0ec65141eb47384d04a38c42eca5d"
-    size_bytes: 43275
+    sha256: "92f100b2532b2afa5837276fc1b1a8ce8eb082c69cf8ee41f07254d38e1ac660"
+    size_bytes: 44237
     storage_uri: "repo://analysis/p0_pine_eth_15m_v1_20260821.md"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "76ef1f14f6670c48ad3a94d427f4bb38a9858a19"
-    config_hash: "8720bc87b41c1769712b99fbc6a5082c8d293d8d521cc85377eb83ff5f45df78"
+    generator_commit: "e1ab73919e1a6b3797a5c6263f0a73cad25c2a69"
+    config_hash: "9475bc4346660d7292706d4198e3baf2715db697bf29a4c75c292926926b83e2"
     data_cutoff: "2026-03-01T00:00:00Z"
     notes: >-
       Canonical ETH 15m V9/V10/V11 report. V9 is a research candidate with
       +30.22 bp/trade after frozen 20 bp cost but fails p<0.01 and leave-top-one
       robustness. V10/V11 are post-selection paper hypotheses. TradingView's
       official Pine compiler passed, but trade-export parity, training, forward
-      and production eligibility all remain false.
+      and production eligibility all remain false. The build history includes
+      unapproved raw-file byte access beyond the cutoff, so holdout_safe=false;
+      no holdout row was parsed, scored, evaluated or used for selection.
 
   - artifact_id: pine-eth-15m-v1-html
     artifact_type: report
     role: owner_delivery
     source_repo: darkforest-x/fable-trading
-    source_commit: "76ef1f14f6670c48ad3a94d427f4bb38a9858a19"
+    source_commit: "6d6873a0e84312b7c5a9ecf5dddeb0c8e07ebc9f"
     source_path: analysis/html/p0_pine_eth_15m_v1_20260821.html
-    sha256: "ec6b792d1a215155396cd44ac02e0f034cd7203638e882974b45fd77bb7d86d8"
-    size_bytes: 635070
+    sha256: "3c8e6a240afba2d680e7ec86140e795b70b94513ac699da912ab02008fccf234"
+    size_bytes: 635947
     storage_uri: "repo://analysis/html/p0_pine_eth_15m_v1_20260821.html"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "76ef1f14f6670c48ad3a94d427f4bb38a9858a19"
-    config_hash: "8720bc87b41c1769712b99fbc6a5082c8d293d8d521cc85377eb83ff5f45df78"
+    generator_commit: "e1ab73919e1a6b3797a5c6263f0a73cad25c2a69"
+    config_hash: "9475bc4346660d7292706d4198e3baf2715db697bf29a4c75c292926926b83e2"
     data_cutoff: "2026-03-01T00:00:00Z"
     notes: >-
       Browser-ready owner delivery generated from the canonical Markdown. It
       contains the same caveats. Official compilation passed, but this does not
-      imply TradingView trade-export or production parity.
+      imply TradingView trade-export or production parity. It explicitly marks
+      the delivery holdout_safe=false after the unapproved byte-access incident.
 
   - artifact_id: pine-eth-15m-v1-manifest
     artifact_type: manifest
     role: reproducibility_hash_ledger
     source_repo: darkforest-x/fable-trading
-    source_commit: "76ef1f14f6670c48ad3a94d427f4bb38a9858a19"
+    source_commit: "764f80d89f49313791df096e932825c88e3011f5"
     source_path: experiments/active/exp-pine-eth-15m-v1/results/artifact_manifest.json
-    sha256: "b37a69257d41b45de17ed7e281b5acc1091a4e85419d2bfcc878cb35c0d51a6f"
-    size_bytes: 20416
+    sha256: "62714fa439657785ff99a826ca4592f29b405c8a99b3cc1521f6095b46db12ec"
+    size_bytes: 20486
     storage_uri: "repo://experiments/active/exp-pine-eth-15m-v1/results/artifact_manifest.json"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "76ef1f14f6670c48ad3a94d427f4bb38a9858a19"
-    config_hash: "8720bc87b41c1769712b99fbc6a5082c8d293d8d521cc85377eb83ff5f45df78"
+    generator_commit: "6d6873a0e84312b7c5a9ecf5dddeb0c8e07ebc9f"
+    config_hash: "9475bc4346660d7292706d4198e3baf2715db697bf29a4c75c292926926b83e2"
     data_cutoff: "2026-03-01T00:00:00Z"
     notes: >-
-      SHA-256/size ledger for 96 local research artifacts (114,362,116 bytes),
+      SHA-256/size ledger for 96 local research artifacts (114,287,310 bytes),
       excluding raw data, models/ACTIVE, active_bundle and forward logs. The
       verifier passes; some generated result tables remain local/ignored by
-      repository policy and are not claimed portable without regeneration.
+      repository policy and are not claimed portable without regeneration. It
+      records holdout_safe=false and the unapproved byte-access incident.

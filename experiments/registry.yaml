@@ -448,7 +448,7 @@ experiments:
 
   - experiment_id: exp-pine-eth-15m-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "76ef1f14f6670c48ad3a94d427f4bb38a9858a19"
+    source_commit: "764f80d89f49313791df096e932825c88e3011f5"
     status: inconclusive
     question: >-
       Can the user-supplied ALLIN-V7.2 strategy be frozen as a causal
@@ -463,11 +463,13 @@ experiments:
       research_candidate_with_material_statistical_caveats. Frozen V9 has 110
       final-preholdout trades, +30.22 bp/trade after 20 bp cost, PF 1.366,
       +22.82% return and 20.03% bar-close drawdown at 1% stop risk. It fails the
-      p<0.01 gate and becomes negative without its largest winner. V10 improves
+      p<0.01 gate (matched excess +7.64 bp/trade; weekly p=0.2761) and becomes
+      negative without its largest winner. V10 improves
       the historical point estimate to +41.22 bp/trade and 13.56% drawdown;
       V11 reaches +63.39 bp/trade, but both are post-selection, tail-dependent
-      and forward-only. Actual short-window 10m/15m comparison is adverse to
-      V9. Only 4/276 V9 entries satisfy project strict density semantics, so the
+      and forward-only. Actual short-window 10m/15m comparison is adverse to V9;
+      the two 10m arms lack enough exact causal controls and remain descriptive.
+      Only 4/276 V9 entries satisfy project strict density semantics, so the
       old LightGBM cannot be reused. No LR/LightGBM was trained or scored.
     holdout_consumed: false
     training_eligible: false
@@ -486,6 +488,9 @@ experiments:
       dynamic LR gate, but P0/P1 blocks training and all eligibility flags stay
       false. The exact V9 hash passes TradingView's official Pine v6 compiler;
       historical trade-export parity remains blocked by the available Basic plan.
+      holdout_consumed=false means no formal/economic holdout evaluation; it does
+      not erase four disclosed unapproved access incidents, including older
+      whole-file hashing beyond the cutoff. This delivery is holdout_safe=false.
 
   - experiment_id: exp-consolidation-single-repo-v1
     source_repo: darkforest-x/fable-trading
