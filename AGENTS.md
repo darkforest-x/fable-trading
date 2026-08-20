@@ -1,10 +1,16 @@
 # AGENTS.md — fable-trading 工作规范
 
-一句话：两层架构验证"双均线密集启动"信号——YOLO 检测层（2a）+ LightGBM 判断层（2b），
-2026-07 起进入 **VPS 实盘阶段**（执行层 + 前向 100 笔新鲜裁决）。
-**项目章程（东西放哪 / 一轮怎么走）看 `docs/PROJECT_CHARTER.md`。**
-当前进度与下一步看 `HANDOFF.md` 顶部"当前真相"；各阶段结论看 `analysis/p*_report.md`；
-本周执行计划看 `analysis/week_plan_20260720.md`；路线图（历史）看 `PROJECT_PLAN.md`。
+一句话：两层架构验证"双均线密集启动"信号——YOLO 检测层（L1）+ LightGBM 判断层（L2）。
+
+**当前阶段：P0（形态定义与重复标注稳定性）→ P1（Gold Dataset）。**
+执行层代码在 `yoyo/layers/l4_execution/`，但 `models/active_bundle.json` 不存在，
+`require_active_bundle()` fail-closed，**生产上跑着 0 个模型**。
+P0/P1 通过前禁止新训练与 promote。
+
+- **东西放哪 / 一轮怎么走** → `docs/PROJECT_CHARTER.md`
+- **当前真相、在等什么、下一条允许的动作** → `HANDOFF.md` 顶部
+- **阶段与门** → `ROADMAP.md`
+- 各阶段结论 → `analysis/p*_report.md`（索引在 `analysis/INDEX.md`）
 
 ## 铁律（违反 = 返工，没有例外）
 
@@ -21,6 +27,9 @@
    （旧项目 180 版失败的病因之一，见 README）。
 6. **数据**：`data/` 不入 git；`data/kline_cache` 是旧项目缓存的只读软链接；
    新数据用 `python3 -m src.data.fetch_okx`（可断点续传，需本机网络）。
+   **版本是契约不是依赖**：`torch`/`ultralytics`/`numpy` 三处必须同版本——
+   Mac venv、3060、CI（`constraints-ci.txt`）。`scripts/train_on_3060.sh` 不一致就拒绝开训，
+   理由是「结果无法与历史曲线对照」。装新库前先 `pip install --dry-run --report -` 看会不会降级。
 
 ## 实盘纪律（2026-07-20 起，与铁律同级）
 
@@ -33,36 +42,18 @@
 10. **不自动 promote**：models/ACTIVE 与 frozen 默认配置的切换需 owner 点头；
     forward_log 不清空（清账 = owner 决策）。
 11. **真金操作**（下单/撤单/kill 开关/改仓位/改 API key）只有 owner 亲手做或明确逐次授权。
-12. **检测任务分流（owner 2026-08-11 最新口径，覆盖 Local Signal V2 的 07-23 旧口径）**：
-    实盘执行路径仍只扫 tip/tip-1/tip-2 因果窗；任何使用核心形态之后 K 线的模型都不得冒充
-    新鲜盘口信号，不得直接进入 tip-smoke、forward、ACTIVE 或部署。若未来接入实盘，输出时间
-    必须记为完整检测窗右端，并由 owner 另行批准延迟预算和执行架构。
+12. **检测任务分流**（owner 2026-08-11 口径，覆盖 Local Signal V2 的 07-23 旧口径）：
+    实盘执行路径**只扫 tip / tip-1 / tip-2 因果窗**；任何使用核心形态之后 K 线的模型
+    都不得冒充新鲜盘口信号，不得直接进入 tip-smoke、forward、ACTIVE 或部署。
+    若未来接入实盘，输出时间必须记为**完整检测窗右端**，并由 owner 另行批准延迟预算与执行架构。
+    实盘检测器只认真 tip 金标 + tip-smoke，**自家 val / mAP / 旧 frozen-F1 不得作生产裁决**；
+    无验证过的实盘检测器时管道诚实空转（`detector=none`）。
 
-    **Local Signal V2 研究主目标已改为短延迟事后形态检测**：标签是“完美平台/启动形态”语义，
-    不是固定裁剪模板。Owner 的 ETH 参考中，核心约 4–7 根，边界是两条竖线之间的平台/转折段；
-    红框不得包入右侧快速下跌。输入窗口不固定为 20–30 根，必须从最短充分上下文开始动态变化；
-    当前首轮只试约 14–22 根，并继续按 precision 向更短收缩。核心结束后只允许 **3–5 根**确认：
-    3 根优先，5 根为硬上限，6–10 根撤出。红框位置随最短充分上下文自然变化，不得固定最右或
-    正中。验收分别报告 delay 3/4/5 的首次命中，精确度优先。不得因为后面已经上涨/下跌就自动
-    把核心框判成正例。旧 W20–30 派生框只能作复核来源；但能够逐框追溯到Label Studio坐标、
-    又经Owner亲自确认short方向的原始金标，是新合同的几何源。外层可重裁，内框只能按Owner批准
-    的中心截取规则从原坐标派生，禁止Codex或模型二次目测重画；未经Owner确认裁切合同不得训练。
-    Stage A 数据和权重继续保留作表征底座。该研究不再以严格因果 Stage B + 真 tip 作为离线检测器唯一验收；但
-    `production_eligible=false`，直到 owner 单独批准生产用途。今天 ETH 图是语义参考尺，不是
-    坐标模板，不得据此删除或替代既有 Stage A 数据、权重、日志和候选池。当前ETH参考只冻结
-    空头语义；Owner未明确多头镜像策略前，一律标为`mirror_unconfirmed`，既不进正例也不进负例。
-    Owner确认类别协议/代表板只设置`owner_protocol_confirmed=true`，不得批量推导
-    `sample_owner_confirmed=true`；协议级确认与逐样本金标必须分层记录。
-
-    ~~pre-v16 检测器权重已三机清除（仅存 COCO yolo11 底座）~~
-    **事实更正 2026-08-05：只清除了两机。
-    Mac 与 VPS 已删，Windows 3060（`C:\fable`）上 59 个权重完好，含 v8_chain / v9 四版 /
-    v10_chain / v14 / v15 / v16 / short_star 全系。唯 v11、v12、v13 不在 3060——那三版是
-    Mac 上 MPS 训的；v12/v13 的 Mac 副本尚存，v11 两头皆空，是唯一真正不可恢复的模型。
-    “不用事后模型冒充新鲜实盘信号”的纪律不变，但“权重已不存在”不能再当前提，
-    见 `docs/learnings/purge-records-are-claims-not-facts.md`。**
-    实盘检测器仍只认真 tip 金标 + tip-smoke，自家 val/mAP/旧 frozen-F1 不得作生产裁决；
-    无验证过的实盘检测器时管道诚实空转（detector=none）。
+    - Local Signal V2 的**研究规格**（核心根数、确认窗、镜像与确认层级）→
+      `docs/protocol/local_signal_v2.md`（owner 口径逐字保留）。本条只管纪律，那里管怎么做。
+    - 「pre-v16 权重已三机清除」是**错的**，只清了两机；哪些权重还在见
+      `analysis/p_model_inventory_20260820.md`，为什么记录不能当事实见
+      `docs/learnings/purge-records-are-claims-not-facts.md`。
 13. **单仓 + 单分支纪律**（owner 2026-07-30；单仓部分 2026-08-19 收敛后生效）：
     **fable-trading 是唯一 ACTIVE 交易研究仓**——`darkforest-one` / `yolo-xx` /
     `yoyo-trading` / `yoyo-eth` 已回迁并只读归档，**不得再开新仓**（`yoyo-eth-v2` /
@@ -83,16 +74,12 @@
 
 ## 弱模型在本仓库最容易犯的错（每条都真实发生过或差点发生）
 
+### 最贵的四条 —— 每一条都让这个项目损失过数月
+
+读不完整份清单也要记住这四条。它们的共同点是：**把不是证据的东西当成了证据。**
+
 - **把 AUC 当成功标准** → 本项目成功标准是 top-decile 扣 0.2% 往返成本后的净收益为正
   且置换检验 p<0.01；v1 的教训就是 AUC 0.59 照样亏钱。AUC 只是参考量。
-- **在 holdout 上"看一眼"** → 看一眼就是消耗一次，见铁律 1。
-- **重跑 build_dataset 覆盖别的池的数据集** → 输出文件名必须带池名
-  （`data/ma206/judgment_dataset_strict.csv` / `..._expanded.csv`），tag 必须带池名。
-- **顺手调 strict/expanded 阈值预设** → 阈值是项目所有者决策，改动需批准。
-- **只汇报好消息** → 报告必须含"风险与诚实声明"节；隐瞒失败的实验记录等于污染实验日志。
-- **默认拉全部币种重新 fetch** → 先检查 `data/kline_fetched/` 已有 `okx_*_15m_*.csv`，
-  fetcher 会自动跳过已完成币种。
-- **把 val/accept PF 当实盘** → 确认级只有前向新鲜 100 笔；v11 accept PF 高仍要前向终审。
 - **报池子的绝对收益，不带对照组** → 2026-07-28：100×6m 池 +16.9bp 里 +7.2bp 是做空 beta，
   检测器自己只值 +9.0bp 而往返成本 10bp。见 `docs/learnings/pool-internal-metrics-cannot-see-beta.md`。
 - **拿人工标注当天然可学习的目标** → 先量「标注时可见多少未来」：499 个 ⭐标杆里
@@ -100,6 +87,25 @@
 - **把窗口缩短当成因果化** → 决定看得见多少未来的是**窗口右端落在哪根**，不是窗口有多长。
   w20_midbox 从 200 根缩到 20–30 根，95.3% 的样本窗口右端仍晚于 decision bar（中位 9 根未来 K）。
   见 `docs/learnings/window-length-does-not-control-future-visibility.md`。
+
+### 验收口径 —— 什么才算数
+
+- **在 holdout 上"看一眼"** → 看一眼就是消耗一次，见铁律 1。
+- **把 val/accept PF 当实盘** → 确认级只有前向新鲜 100 笔；v11 accept PF 高仍要前向终审。
+- **只汇报好消息** → 报告必须含"风险与诚实声明"节；隐瞒失败的实验记录等于污染实验日志。
+- **哈希对上就宣布数据集可复现** → 数据集有多个自由度：像素内容、split 落点、样本集合。
+  w20_midbox 重建时 2635/2635 图片逐字节一致，**但 405 个样本的 split 落点全错**。
+  见 `docs/learnings/reproducibility-is-per-axis-not-a-boolean.md`。
+- **把"币波动高"和"这根波动在扩张"当成一个变量** → 这是两条方向相反的轴：币层波动水平
+  在因果排名下是倒 U（榜单前 10% 超额胜率 t=1.32≈0），而 bar 层相对自身扩张 +9.21pp（p=5e-5）。
+  用 bp 判永远判不清（TP/SL 精确 ±5/2 ATR），必须换 ATR 单位或胜率；见
+  `docs/learnings/volatility-level-and-volatility-expansion-are-opposite-axes.md`。
+- **按"当前涨跌幅榜单"挑币回测** → 排名窗必须在交易窗之前闭合。同窗排名下"高波动更赚"是单调的，
+  换成上月排名单调性当场消失；见
+  `docs/learnings/symbol-ranking-window-must-end-before-the-trading-window.md`。
+
+### 标签与金标 —— 谁有资格说这是正例
+
 - **把动态重裁剪当成重标注** → 动态短窗只能修复位置/上下文分布，不能把旧核心proposal变成
   新语义金标。先同时审类别与核心边界，再生成训练图；见
   `docs/learnings/dynamic-recrop-does-not-repair-label-semantics.md`。
@@ -120,27 +126,32 @@
   `docs/learnings/unconfirmed-mirror-is-neither-positive-nor-negative.md`。
 - **把协议确认冒充逐样本确认** → Owner认可类别方向不等于确认扩展后的每张图/每个框；确认层级
   必须拆开记录。见`docs/learnings/protocol-confirmation-is-not-sample-confirmation.md`。
-- **哈希对上就宣布数据集可复现** → 数据集有多个自由度：像素内容、split 落点、样本集合。
-  w20_midbox 重建时 2635/2635 图片逐字节一致，**但 405 个样本的 split 落点全错**。
-  见 `docs/learnings/reproducibility-is-per-axis-not-a-boolean.md`。
+
+### 数据与复现
+
+- **重跑 build_dataset 覆盖别的池的数据集** → 输出文件名必须带池名
+  （`data/ma206/judgment_dataset_strict.csv` / `..._expanded.csv`），tag 必须带池名。
+- **默认拉全部币种重新 fetch** → 先检查 `data/kline_fetched/` 已有 `okx_*_15m_*.csv`，
+  fetcher 会自动跳过已完成币种。
 - **默认「代码没变所以结果没变」** → 先比时间戳：产物 `generated_at` 早于
   `git log --diff-filter=A` 的 builder 首次入库时间 = 跑出它的代码不在 git 里，
   一切复现声明未经验证。**先提交 builder，再跑构建。**
   见 `docs/learnings/artifacts-built-before-their-builder-landed.md`。
-- **把"币波动高"和"这根波动在扩张"当成一个变量** → 这是两条方向相反的轴：币层波动水平
-  在因果排名下是倒 U（榜单前 10% 超额胜率 t=1.32≈0），而 bar 层相对自身扩张 +9.21pp（p=5e-5）。
-  用 bp 判永远判不清（TP/SL 精确 ±5/2 ATR），必须换 ATR 单位或胜率；见
-  `docs/learnings/volatility-level-and-volatility-expansion-are-opposite-axes.md`。
-- **按"当前涨跌幅榜单"挑币回测** → 排名窗必须在交易窗之前闭合。同窗排名下"高波动更赚"是单调的，
-  换成上月排名单调性当场消失；见
-  `docs/learnings/symbol-ranking-window-must-end-before-the-trading-window.md`。
+- **改历史报告里的路径** → 禁止。`analysis/` 与 `docs/learnings/` 记录的是
+  「当时发生了什么」，路径就是当时的真实路径。重构只改活文档，旧文档靠 `docs/RESTRUCTURE_MAP.md`
+  查新旧对应。2026-08-03 一次改名正则把历史报告里真实跑过的命令改了，已回退。
+
+### 运行安全 —— 碰到就可能动到真金
+
+- **顺手调 strict/expanded 阈值预设** → 阈值是项目所有者决策，改动需批准。
 - **改一道新鲜度门忘了另两道** → 三门必须同值，见实盘纪律 7。
 - **往脉冲里塞实验扫描** → 超 15min 节拍 = 结构性挡 tip；见实盘纪律 8。
 - **自动 promote / 清 forward_log** → 禁止；owner 点头。
-- **改历史报告里的路径** → 禁止。`analysis/` 207 份与 `docs/learnings/` 234 条记录的是
-  「当时发生了什么」，路径就是当时的真实路径。重构只改活文档，旧文档靠 `docs/RESTRUCTURE_MAP.md`
-  查新旧对应。2026-08-03 一次改名正则把历史报告里真实跑过的命令改了，已回退。
-- **开新分支 / 建 worktree** → 禁止；见铁律 13。提交前先确认 `git branch --show-current` 是 main。
+
+### git 与环境
+
+- **开新分支 / 建 worktree / 开新仓** → 默认禁止，**owner 点头才可以且用完当轮删**；见铁律 13。
+  提交前先确认 `git branch --show-current` 是 main。
 - **用 `git status --short` 验收 .gitignore 改动** → 它把未跟踪目录折叠成一行，
   9 万个文件缩成 14 行，泄漏根本看不见。一律用 `-uall` 展开，再加
   `git add --dry-run -A <dir> | wc -l` 看真实会 stage 多少。
@@ -167,12 +178,24 @@ md 源文件必须包含：
 - [ ] 必报指标：val AUC、置换检验 p、top-decile 毛/净收益、胜率、单特征基线对照
 - [ ] **匹配随机对照组**（同币 × 同时间块 × 同波动桶的随机入场，同障碍同成本）——
       方向性策略的每张结果表都要带。置换检验只验排序，抓不到整池踩在 beta 上
+- [ ] **非方向性实验**（标签质量、渲染 parity、数据审计等没有收益可言的）：
+      上面两条按字面不适用。**不许编造，也不许留空**——写一句说明为什么不适用，
+      并给出**同等严格的零假设对照**（例：标签质量审计把标签打乱重跑同一方法，
+      看真实标签的疑似错标率是噪声的几分之一）。
+      先例：`analysis/p1_gold_label_quality_20260820.md`
 - [ ] 解读（每个数字变化的归因）
 - [ ] 风险与诚实声明
 - [ ] 下一步选项（标注哪些需要项目所有者决策）
 
-代码标准：python3 + pandas/lightgbm/ultralytics，无新增重型依赖；模块级 docstring
-说明来源与决策依据（现有代码都是这个风格，照着写）。
+代码标准：python3 + pandas/lightgbm/ultralytics，模块级 docstring 说明来源与决策依据
+（现有代码都是这个风格，照着写）。
+
+**依赖有两类，别混：**
+- **契约**（`torch` / `ultralytics` / `numpy` / `pandas`）——Mac、3060、CI 三处同版本，
+  改动 = 改跨机契约，改完历史曲线不再可比。锁在 `constraints-ci.txt`。
+- **评估用**（cleanlab、aeon 之类）——**装进独立 venv**，见 `requirements-eval.txt`。
+  cleanlab 会把 numpy 降到 1.26，直接装进主 venv 就打断了上面那条契约。
+  装之前先 `pip install --dry-run --report -` 看会动哪些版本。
 
 ## 不确定时的升级规则
 
@@ -189,10 +212,10 @@ md 源文件必须包含：
 
 - **注册表是入口**：实验进 `experiments/registry.yaml`，产物进 `artifacts/registry.yaml`。
   `production_eligible` / `training_eligible` 默认 false，改动需 owner。
-- **四道守门测试别绕**：`tests/boundaries/test_yoyo_package_is_local.py`（`yoyo` 必须解析
-  在本仓内）、`test_no_cross_repository_bridges.py`（sys.path 不许出现兄弟仓）、
-  `tests/causality/test_holdout_boundary_is_single_valued.py`（11 处 holdout 定义不许漂移）、
-  `tests/parity/test_migration_ledger_parity.py`（131 项迁移资产逐个重算哈希）。
+- **守门测试别绕**（`tests/boundaries/` + `tests/causality/` + `tests/parity/`）：
+  `yoyo` 必须解析在本仓内、sys.path 不许出现兄弟仓、holdout 定义不许漂移、
+  迁移资产逐个重算哈希、CI 必须从 `requirements.txt` 装且锁版本。
+  **红了先看它在说什么，别先想怎么让它绿**——每一条都是有人踩过的坑。
 - **两个 ATR 实现不一致**（warmup 播种，bar 14 差 0.109），已钉住未修，
   等 owner 裁决：`docs/consolidation/DUPLICATE_SEMANTICS.md` §4。
 - 四仓历史结论（含全部负面结果）在 `experiments/historical/`，
