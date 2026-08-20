@@ -33,6 +33,8 @@ FIXED_FILES = (
     EXPERIMENT / "pine/paper_variants_manifest.json",
     EXPERIMENT / "tradingview/README.md",
     EXPERIMENT / "tradingview/trades_normalized.template.csv",
+    EXPERIMENT / "judgment/README.md",
+    EXPERIMENT / "judgment/judgment_scores.template.csv",
     EXPERIMENT / "notebooks/pine_eth_15m_v1_audit.ipynb",
     PROJECT / "analysis/p0_pine_eth_15m_v1_20260821.md",
     PROJECT / "analysis/html/p0_pine_eth_15m_v1_20260821.html",

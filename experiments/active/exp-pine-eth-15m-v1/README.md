@@ -110,6 +110,13 @@ or threshold was fitted.  Because rejecting an entry changes later position
 and cooldown state, any future authorized model must be evaluated inside the
 dynamic replay rather than by filtering the existing trade CSV.
 
+The complete feature-only gate surface contains 335 guarded V9 raw candidates,
+so the 166 executed baseline rows cover only 49.55%; 169 signals can become
+relevant after prior gate decisions change state.  `judgment/` therefore
+defines a fail-closed score template: exact raw-candidate coverage, score ready
+by next-open, fixed model/feature hashes, preregistered threshold, and dynamic
+replay.  No score or threshold currently exists.
+
 The capacity audit also blocks a premature full model: those 166 rows contain
 only 27 net-positive events for 28 features (0.96 events/feature), and the
 walk-forward validation folds contain only 4–8 positives each.  A future

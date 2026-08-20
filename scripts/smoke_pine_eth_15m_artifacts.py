@@ -55,6 +55,7 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
     selection_risk = load_json("selection_risk_audit.json")
     density_overlap = load_json("density_overlap_audit.json")
     migration_audit = load_json("migration_audit.json")
+    gate_surface = load_json("judgment_gate_surface_manifest.json")
     pine_static = load_json("pine_static_contract.json")
     docker_replay = load_json("docker_offline_replay.json")
     validation = load_json("validation.json")
@@ -245,6 +246,17 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
             == config["source_attachment_sha256"]
             and migration_audit["barrier_parameters_changed"] is False
             and migration_audit["tradingview_parity_passed"] is False
+        ),
+        "complete_gate_surface_blocks_static_executed_ledger_filtering": bool(
+            gate_surface["rows"] == 335
+            and gate_surface["feature_count"] == 28
+            and gate_surface["executed_coverage"]["baseline_executed_candidates"] == 166
+            and gate_surface["executed_coverage"]["raw_candidates_not_in_baseline_ledger"]
+            == 169
+            and gate_surface["labels_present"] is False
+            and gate_surface["scores_present"] is False
+            and gate_surface["training_eligible"] is False
+            and gate_surface["production_eligible"] is False
         ),
         "pine_static_contract_passes_without_compiler_claim": bool(
             pine_static["status"] == "pass"

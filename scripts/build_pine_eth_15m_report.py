@@ -89,6 +89,7 @@ def load_evidence() -> dict[str, Any]:
         "selection_risk": json.loads((RESULTS / "selection_risk_audit.json").read_text(encoding="utf-8")),
         "density_overlap": json.loads((RESULTS / "density_overlap_audit.json").read_text(encoding="utf-8")),
         "migration_audit": json.loads((RESULTS / "migration_audit.json").read_text(encoding="utf-8")),
+        "gate_surface": json.loads((RESULTS / "judgment_gate_surface_manifest.json").read_text(encoding="utf-8")),
         "pine_static": json.loads((RESULTS / "pine_static_contract.json").read_text(encoding="utf-8")),
         "validation": validation,
         "split": pd.read_csv(RESULTS / "split_summary.csv"),
@@ -170,6 +171,7 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
     selection_risk = evidence["selection_risk"]
     density_overlap = evidence["density_overlap"]
     migration_audit = evidence["migration_audit"]
+    gate_surface = evidence["gate_surface"]
     pine_static = evidence["pine_static"]
     validation = evidence["validation"]
     split = evidence["split"]
@@ -860,6 +862,16 @@ lineage（{judgment_research['long_rows']} long / {judgment_research['short_rows
 
 {markdown_table(['fold', 'raw train', 'purged train', 'label-overlap purge', 'validation', 'train 正类 %', 'val 正类 %'], judgment_fold_rows)}
 
+这 {judgment_research['rows']} 行只是基线实际执行账本，不能覆盖 gate 改写状态后的候选。为此另导出完整、
+无标签的 raw-candidate 因果特征面：共 {gate_surface['rows']} 行（{gate_surface['long_rows']} long /
+{gate_surface['short_rows']} short），其中只有
+{gate_surface['executed_coverage']['baseline_executed_candidates']} 行出现在基线执行账本，另有
+{gate_surface['executed_coverage']['raw_candidates_not_in_baseline_ledger']} 行因原持仓/cooldown 没有执行；
+基线覆盖率仅 {_fmt(gate_surface['executed_coverage']['baseline_coverage_of_raw_surface'] * 100)}%。
+未来 LR 必须给 scored period 的每个 raw candidate 恰好一个、在 next-open 前可用的分数；缺失、重复或迟到一律
+fail-closed，再把 pass 结果 AND 到 `v9_long/v9_short` 后进入动态状态机。当前 score template 为空，
+没有模型、分数或阈值。
+
 特征在 signal bar 收盘完成，时间戳与 `t+1` entry open 完全相同；label end 保守加到 exit bar
 收盘，两个跨切点样本已经 purge。这个表依然**不能直接拿来静态 top-decile 筛选**：它只记录
 V9 baseline 的 on-policy executed trades，一旦 LR 拒绝某单，后续持仓、反转与 cooldown 状态会改变。
@@ -968,6 +980,7 @@ PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_actual_10m_vs_15m.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_regime_stability.py
 PYTHONPATH=. .venv/bin/python scripts/generate_pine_eth_15m_paper_variants.py
 PYTHONPATH=. .venv/bin/python scripts/prepare_pine_eth_15m_judgment_research.py
+PYTHONPATH=. .venv/bin/python scripts/prepare_pine_eth_15m_gate_surface.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_judgment_feasibility.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_judgment_signal.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_selection_risk.py
