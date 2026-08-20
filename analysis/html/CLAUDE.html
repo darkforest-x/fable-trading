@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>CLAUDE.md — fable-trading 工作规范</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>CLAUDE.md — fable-trading 工作规范</h1>
+<p>一句话：两层架构验证&quot;双均线密集启动&quot;信号——YOLO 检测层（L1）+ LightGBM 判断层（L2）。</p>
+<p><strong>当前阶段：P0（形态定义与重复标注稳定性）→ P1（Gold Dataset）。</strong> 执行层代码在 <code>yoyo/layers/l4_execution/</code>，但 <code>models/active_bundle.json</code> 不存在， <code>require_active_bundle()</code> fail-closed，<strong>生产上跑着 0 个模型</strong>。 P0/P1 通过前禁止新训练与 promote。</p>
+<ul>
+<li><strong>东西放哪 / 一轮怎么走</strong> → <code>docs/PROJECT_CHARTER.md</code></li>
+<li><strong>当前真相、在等什么、下一条允许的动作</strong> → <code>HANDOFF.md</code> 顶部</li>
+<li><strong>阶段与门</strong> → <code>ROADMAP.md</code></li>
+<li>各阶段结论 → <code>analysis/p*_report.md</code>（索引在 <code>analysis/INDEX.md</code>）</li>
+</ul>
+<h2>铁律（违反 = 返工，没有例外）</h2>
+<ol>
+<li><strong>holdout 纪律</strong>：holdout（≥2026-05-04）只在最终验收时评估，每次动用必须先获得项目 所有者在对话中的明确批准，并在报告里记录&quot;这是该配置第 N 次消耗 holdout&quot;。 训练/调参/特征选择的任何环节不得读取 holdout；看板、缓存与图表同样不得给未授权配置 评分 holdout。<code>train.py</code> 不加 <code>--eval-holdout</code> 只是训练命令安全，不代表其他读取路径安全。</li>
+<li><strong>时间切分</strong>：所有评估按时间切分，禁止随机切分，禁止跨切点的样本进入训练。</li>
+<li><strong>无前视</strong>：特征只能使用信号 bar 及之前的数据；只有标签允许看未来。 新增特征必须在 docstring 写明用到的列与窗口。</li>
+<li><strong>单变量纪律</strong>：一次实验只改一个变量；结果无论成败都写入报告。 多变量打包改动需项目所有者批准并在 PROJECT_PLAN 记录（先例：2b-v2 三项打包，2026-07-07）。</li>
+<li><strong>YOLO 增强禁用</strong>：fliplr/flipud/mosaic/mixup/hsv 全关——它们破坏时间方向和红绿 K 线语义 （旧项目 180 版失败的病因之一，见 README）。</li>
+<li><strong>数据</strong>：<code>data/</code> 不入 git；<code>data/kline_cache</code> 是旧项目缓存的只读软链接； 新数据用 <code>python3 -m src.data.fetch_okx</code>（可断点续传，需本机网络）。 <strong>版本是契约不是依赖</strong>：<code>torch</code>/<code>ultralytics</code>/<code>numpy</code> 三处必须同版本—— Mac venv、3060、CI（<code>constraints-ci.txt</code>）。<code>scripts/train_on_3060.sh</code> 不一致就拒绝开训， 理由是「结果无法与历史曲线对照」。装新库前先 <code>pip install --dry-run --report -</code> 看会不会降级。</li>
+</ol>
+<h2>实盘纪律（2026-07-20 起，与铁律同级）</h2>
+<ol>
+<li><strong>新鲜度三门同值</strong>：执行器 max_signal_age_min / TG 过滤 / 看板 FRESH_DETECT_MIN 当前 30min，由管道时序推导（15 bar + 7 脉冲/扫描 + 余量）；改动必须附延迟预算表 且三处同改（见 <code>docs/learnings/freshness-gates-must-be-derived-from-pipeline-arithmetic.md</code>）。</li>
+<li><strong>脉冲预算 &lt;15min</strong>：禁止往 forward 脉冲加扫描窗或新任务；阶段耗时看 discover_wall / phase2_wall 日志，&gt;600s 要查因。</li>
+<li><strong>VPS 是唯一写者</strong>：K 线与 forward_log.csv 只在 VPS 写；deploy 不推 data/kline_fetched。</li>
+<li><strong>不自动 promote</strong>：models/ACTIVE 与 frozen 默认配置的切换需 owner 点头； forward_log 不清空（清账 = owner 决策）。</li>
+<li><strong>真金操作</strong>（下单/撤单/kill 开关/改仓位/改 API key）只有 owner 亲手做或明确逐次授权。</li>
+<li><strong>检测任务分流</strong>（owner 2026-08-11 口径，覆盖 Local Signal V2 的 07-23 旧口径）： 实盘执行路径<strong>只扫 tip / tip-1 / tip-2 因果窗</strong>；任何使用核心形态之后 K 线的模型 都不得冒充新鲜盘口信号，不得直接进入 tip-smoke、forward、ACTIVE 或部署。 若未来接入实盘，输出时间必须记为<strong>完整检测窗右端</strong>，并由 owner 另行批准延迟预算与执行架构。 实盘检测器只认真 tip 金标 + tip-smoke，<strong>自家 val / mAP / 旧 frozen-F1 不得作生产裁决</strong>； 无验证过的实盘检测器时管道诚实空转（<code>detector=none</code>）。</li>
+</ol>
+<ul>
+<li>Local Signal V2 的<strong>研究规格</strong>（核心根数、确认窗、镜像与确认层级）→ <code>docs/protocol/local_signal_v2.md</code>（owner 口径逐字保留）。本条只管纪律，那里管怎么做。</li>
+<li>「pre-v16 权重已三机清除」是<strong>错的</strong>，只清了两机；哪些权重还在见 <code>analysis/p_model_inventory_20260820.md</code>，为什么记录不能当事实见 <code>docs/learnings/purge-records-are-claims-not-facts.md</code>。</li>
+</ul>
+<ol>
+<li><strong>单仓 + 单分支纪律</strong>（owner 2026-07-30；单仓部分 2026-08-19 收敛后生效）： <strong>fable-trading 是唯一 ACTIVE 交易研究仓</strong>——<code>darkforest-one</code> / <code>yolo-xx</code> / <code>yoyo-trading</code> / <code>yoyo-eth</code> 已回迁并只读归档，<strong>不得再开新仓</strong>（<code>yoyo-eth-v2</code> / <code>yolo-new</code> / <code>fable-next</code> 一律不建）；新研究进 <code>experiments/active/&lt;experiment_id&gt;/</code> 并注册到 <code>experiments/registry.yaml</code>。 <strong>只有 <code>main</code>，不开新分支、不建 worktree。</strong> 直接在 main 上提交、<code>git push origin HEAD:main</code>。<strong>每次提交前先 <code>git branch --show-current</code> 确认自己在 main</strong>——曾有并行会话把 HEAD 切到别的分支，后续 6 个提交落在那里， 只因用的是显式 <code>HEAD:main</code> 才没丢。需要隔离环境（并行 agent / 跨模型实现）时， 先问 owner；owner 点头才开，且用完当轮就删。</li>
+</ol>
+<ol>
+<li><strong>层间契约</strong>（owner 2026-08-03 重构）：<code>yoyo/layers/</code> 的四层<strong>禁止互相 import</strong>， 只能经 <code>yoyo/contracts/</code>（protocol / outcomes / costs / schema）和 <code>yoyo/data/</code>。 由 <code>tests/boundaries/test_layer_imports.py</code> 用 AST 强制，不是口头约定。 病因：2026-08-03 的 side/feature-semantics 故障横跨 forward_scan + frozen + executor 三个文件——L2 的事实（模型用什么坐标系训的）被 L1 的事实（这单做多还是做空）决定了， 而代码里没有任何东西反对。<strong>旧 <code>src/</code> 是转发壳，迁移期并存；新代码一律写进 <code>yoyo/</code>。</strong></li>
+</ol>
+<h2>弱模型在本仓库最容易犯的错（每条都真实发生过或差点发生）</h2>
+<h3>最贵的四条 —— 每一条都让这个项目损失过数月</h3>
+<p>读不完整份清单也要记住这四条。它们的共同点是：<strong>把不是证据的东西当成了证据。</strong></p>
+<ul>
+<li><strong>把 AUC 当成功标准</strong> → 本项目成功标准是 top-decile 扣 0.2% 往返成本后的净收益为正 且置换检验 p&lt;0.01；v1 的教训就是 AUC 0.59 照样亏钱。AUC 只是参考量。</li>
+<li><strong>报池子的绝对收益，不带对照组</strong> → 2026-07-28：100×6m 池 +16.9bp 里 +7.2bp 是做空 beta， 检测器自己只值 +9.0bp 而往返成本 10bp。见 <code>docs/learnings/pool-internal-metrics-cannot-see-beta.md</code>。</li>
+<li><strong>拿人工标注当天然可学习的目标</strong> → 先量「标注时可见多少未来」：499 个 ⭐标杆里 只有 2 个画在盘口，中位可见 97 根。见 <code>docs/learnings/zero-live-edge-labels-means-the-target-is-unverified.md</code>。</li>
+<li><strong>把窗口缩短当成因果化</strong> → 决定看得见多少未来的是<strong>窗口右端落在哪根</strong>，不是窗口有多长。 w20_midbox 从 200 根缩到 20–30 根，95.3% 的样本窗口右端仍晚于 decision bar（中位 9 根未来 K）。 见 <code>docs/learnings/window-length-does-not-control-future-visibility.md</code>。</li>
+</ul>
+<h3>验收口径 —— 什么才算数</h3>
+<ul>
+<li><strong>在 holdout 上&quot;看一眼&quot;</strong> → 看一眼就是消耗一次，见铁律 1。</li>
+<li><strong>把 val/accept PF 当实盘</strong> → 确认级只有前向新鲜 100 笔；v11 accept PF 高仍要前向终审。</li>
+<li><strong>只汇报好消息</strong> → 报告必须含&quot;风险与诚实声明&quot;节；隐瞒失败的实验记录等于污染实验日志。</li>
+<li><strong>哈希对上就宣布数据集可复现</strong> → 数据集有多个自由度：像素内容、split 落点、样本集合。 w20_midbox 重建时 2635/2635 图片逐字节一致，<strong>但 405 个样本的 split 落点全错</strong>。 见 <code>docs/learnings/reproducibility-is-per-axis-not-a-boolean.md</code>。</li>
+<li><strong>把&quot;币波动高&quot;和&quot;这根波动在扩张&quot;当成一个变量</strong> → 这是两条方向相反的轴：币层波动水平 在因果排名下是倒 U（榜单前 10% 超额胜率 t=1.32≈0），而 bar 层相对自身扩张 +9.21pp（p=5e-5）。 用 bp 判永远判不清（TP/SL 精确 ±5/2 ATR），必须换 ATR 单位或胜率；见 <code>docs/learnings/volatility-level-and-volatility-expansion-are-opposite-axes.md</code>。</li>
+<li><strong>按&quot;当前涨跌幅榜单&quot;挑币回测</strong> → 排名窗必须在交易窗之前闭合。同窗排名下&quot;高波动更赚&quot;是单调的， 换成上月排名单调性当场消失；见 <code>docs/learnings/symbol-ranking-window-must-end-before-the-trading-window.md</code>。</li>
+</ul>
+<h3>标签与金标 —— 谁有资格说这是正例</h3>
+<ul>
+<li><strong>把动态重裁剪当成重标注</strong> → 动态短窗只能修复位置/上下文分布，不能把旧核心proposal变成 新语义金标。先同时审类别与核心边界，再生成训练图；见 <code>docs/learnings/dynamic-recrop-does-not-repair-label-semantics.md</code>。</li>
+<li><strong>有原始金标还让Codex二次手画</strong> → 二次视觉重框会引入新的主观边界和宽度锚定。先逐框联结 原Label Studio坐标与Owner方向裁决，外层只负责重裁，内层从原框中心派生；见 <code>docs/learnings/original-gold-geometry-beats-secondary-manual-reboxing.md</code>。</li>
+<li><strong>为了正负1:1缩小金标禁入区</strong> → 配对比例是软目标，Owner框保护、同币同时间块和时间隔离是 硬约束；找不到安全背景就诚实缺样，禁止跨币、复用或靠近金标凑数；见 <code>docs/learnings/negative-ratio-must-not-weaken-gold-exclusion.md</code>。</li>
+<li><strong>把一批偏右框统一左移</strong> → 每张图的启动首根不同，统一delta只是换一个位置shortcut。先给K线 编号，逐图把核心右端落在启动前一根，再重渲染新旧框对照；见 <code>docs/learnings/per-image-reboxing-needs-indexed-boundaries-not-global-offsets.md</code>。</li>
+<li><strong>把人工审核的未来K线混进训练图</strong> → Owner审核可以看更远未来，但训练短窗必须保持逐字节 不变。审核未来单独目录/manifest，生成前后核对训练图SHA，未来目录禁止labels；见 <code>docs/learnings/human-review-future-context-must-be-physically-separated-from-training-input.md</code>。</li>
+<li><strong>把未确认的方向镜像强塞进二分类</strong> → 当前只确认空头参考时，多头镜像既不能混作同类正例， 也不能当空头负例；先隔离为<code>mirror_unconfirmed</code>。见 <code>docs/learnings/unconfirmed-mirror-is-neither-positive-nor-negative.md</code>。</li>
+<li><strong>把协议确认冒充逐样本确认</strong> → Owner认可类别方向不等于确认扩展后的每张图/每个框；确认层级 必须拆开记录。见<code>docs/learnings/protocol-confirmation-is-not-sample-confirmation.md</code>。</li>
+</ul>
+<h3>数据与复现</h3>
+<ul>
+<li><strong>重跑 build_dataset 覆盖别的池的数据集</strong> → 输出文件名必须带池名 （<code>data/ma206/judgment_dataset_strict.csv</code> / <code>..._expanded.csv</code>），tag 必须带池名。</li>
+<li><strong>默认拉全部币种重新 fetch</strong> → 先检查 <code>data/kline_fetched/</code> 已有 <code>okx_*_15m_*.csv</code>， fetcher 会自动跳过已完成币种。</li>
+<li><strong>默认「代码没变所以结果没变」</strong> → 先比时间戳：产物 <code>generated_at</code> 早于 <code>git log --diff-filter=A</code> 的 builder 首次入库时间 = 跑出它的代码不在 git 里， 一切复现声明未经验证。<strong>先提交 builder，再跑构建。</strong> 见 <code>docs/learnings/artifacts-built-before-their-builder-landed.md</code>。</li>
+<li><strong>改历史报告里的路径</strong> → 禁止。<code>analysis/</code> 与 <code>docs/learnings/</code> 记录的是 「当时发生了什么」，路径就是当时的真实路径。重构只改活文档，旧文档靠 <code>docs/RESTRUCTURE_MAP.md</code> 查新旧对应。2026-08-03 一次改名正则把历史报告里真实跑过的命令改了，已回退。</li>
+</ul>
+<h3>运行安全 —— 碰到就可能动到真金</h3>
+<ul>
+<li><strong>顺手调 strict/expanded 阈值预设</strong> → 阈值是项目所有者决策，改动需批准。</li>
+<li><strong>改一道新鲜度门忘了另两道</strong> → 三门必须同值，见实盘纪律 7。</li>
+<li><strong>往脉冲里塞实验扫描</strong> → 超 15min 节拍 = 结构性挡 tip；见实盘纪律 8。</li>
+<li><strong>自动 promote / 清 forward_log</strong> → 禁止；owner 点头。</li>
+</ul>
+<h3>git 与环境</h3>
+<ul>
+<li><strong>开新分支 / 建 worktree / 开新仓</strong> → 默认禁止，<strong>owner 点头才可以且用完当轮删</strong>；见铁律 13。 提交前先确认 <code>git branch --show-current</code> 是 main。</li>
+<li><strong>用 <code>git status --short</code> 验收 .gitignore 改动</strong> → 它把未跟踪目录折叠成一行， 9 万个文件缩成 14 行，泄漏根本看不见。一律用 <code>-uall</code> 展开，再加 <code>git add --dry-run -A &lt;dir&gt; | wc -l</code> 看真实会 stage 多少。 另：目录级排除（<code>datasets/</code>）之下所有 <code>!</code> 否定规则都是死的，git 不会下降进去； 忽略规则按体积/扩展名写，别按目录名写。见 <code>docs/learnings/directory-level-gitignore-kills-every-negation-below-it.md</code>。</li>
+</ul>
+<h2>质量标准（可检查，不是形容词）</h2>
+<p>每轮实验的交付物是 <code>analysis/pXX_report.md</code> （源文件，用于 git 历史与复现）。</p>
+<p><strong>必须步骤</strong> (铁律，无例外)：</p>
+<ol>
+<li>完成 md 报告后，立即转换为 HTML： ``<code>bash python3 scripts/md_to_html.py analysis/pXX_xxx.md --out-dir analysis/html </code>``</li>
+<li><strong>交付给 owner 的是 HTML</strong> (<code>analysis/html/pXX_xxx.html</code>)，浏览器直接打开。</li>
+</ol>
+<p>md 源文件必须包含：</p>
+<ul>
+<li>[ ] 复现命令（从零跑通的完整命令序列）</li>
+<li>[ ] 数据统计（候选数 / 正类率 / 时间范围 / val 样本数）</li>
+<li>[ ] 结果表，且与上一版本同表对照</li>
+<li>[ ] 必报指标：val AUC、置换检验 p、top-decile 毛/净收益、胜率、单特征基线对照</li>
+<li>[ ] <strong>匹配随机对照组</strong>（同币 × 同时间块 × 同波动桶的随机入场，同障碍同成本）—— 方向性策略的每张结果表都要带。置换检验只验排序，抓不到整池踩在 beta 上</li>
+<li>[ ] <strong>非方向性实验</strong>（标签质量、渲染 parity、数据审计等没有收益可言的）： 上面两条按字面不适用。<strong>不许编造，也不许留空</strong>——写一句说明为什么不适用， 并给出<strong>同等严格的零假设对照</strong>（例：标签质量审计把标签打乱重跑同一方法， 看真实标签的疑似错标率是噪声的几分之一）。 先例：<code>analysis/p1_gold_label_quality_20260820.md</code></li>
+<li>[ ] 解读（每个数字变化的归因）</li>
+<li>[ ] 风险与诚实声明</li>
+<li>[ ] 下一步选项（标注哪些需要项目所有者决策）</li>
+</ul>
+<p>代码标准：python3 + pandas/lightgbm/ultralytics，模块级 docstring 说明来源与决策依据 （现有代码都是这个风格，照着写）。</p>
+<p><strong>依赖有两类，别混：</strong></p>
+<ul>
+<li><strong>契约</strong>（<code>torch</code> / <code>ultralytics</code> / <code>numpy</code> / <code>pandas</code>）——Mac、3060、CI 三处同版本， 改动 = 改跨机契约，改完历史曲线不再可比。锁在 <code>constraints-ci.txt</code>。</li>
+<li><strong>评估用</strong>（cleanlab、aeon 之类）——<strong>装进独立 venv</strong>，见 <code>requirements-eval.txt</code>。 cleanlab 会把 numpy 降到 1.26，直接装进主 venv 就打断了上面那条契约。 装之前先 <code>pip install --dry-run --report -</code> 看会动哪些版本。</li>
+</ul>
+<h2>不确定时的升级规则</h2>
+<ul>
+<li>涉及 <strong>holdout、阈值预设、障碍参数（TP/SL 倍数、atr 下限）、成本假设（0.2%）</strong> 的任何 改动 → 停下来问项目所有者，不要&quot;先试试&quot;。</li>
+<li>涉及 <strong>新鲜度门、脉冲预算、ACTIVE/frozen 切换、清空 forward_log、promote owner_best、 真下单/改仓</strong> → 同上，见实盘纪律 7–11。</li>
+<li>数据源不可用或返回结构变化 → 如实报告现象，不要静默换数据源或造数据。</li>
+<li>结果好得反常（AUC 突然 &gt;0.7、净收益突然翻倍、accept PF 夸张）→ 第一假设是泄漏或 bug， 写最小复现验证后再汇报；确认级只认前向新鲜样本。</li>
+<li>项目所有者用中文交流，汇报用中文；代码与注释用英文。</li>
+</ul>
+<h2>收敛后的入口（2026-08-19）</h2>
+<ul>
+<li><strong>注册表是入口</strong>：实验进 <code>experiments/registry.yaml</code>，产物进 <code>artifacts/registry.yaml</code>。 <code>production_eligible</code> / <code>training_eligible</code> 默认 false，改动需 owner。</li>
+<li><strong>守门测试别绕</strong>（<code>tests/boundaries/</code> + <code>tests/causality/</code> + <code>tests/parity/</code>）： <code>yoyo</code> 必须解析在本仓内、sys.path 不许出现兄弟仓、holdout 定义不许漂移、 迁移资产逐个重算哈希、CI 必须从 <code>requirements.txt</code> 装且锁版本。 <strong>红了先看它在说什么，别先想怎么让它绿</strong>——每一条都是有人踩过的坑。</li>
+<li><strong>两个 ATR 实现不一致</strong>（warmup 播种，bar 14 差 0.109），已钉住未修， 等 owner 裁决：<code>docs/consolidation/DUPLICATE_SEMANTICS.md</code> §4。</li>
+<li>四仓历史结论（含全部负面结果）在 <code>experiments/historical/</code>， 验收在 <code>reports/consolidation/FINAL_ACCEPTANCE.md</code>。</li>
+</ul>
+<h2>learning law</h2>
+<p>每解决一个非平凡问题（修 bug、架构决策、反直觉结论），先运行 extract-approach skill 在 <code>docs/learnings/</code> 留下笔记再继续。没有 learnings 笔记的解决方案视为未完成的工作。</p>
+</body>
+</html>
