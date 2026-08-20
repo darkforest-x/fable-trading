@@ -6,7 +6,9 @@ this is not a wall-clock parameter approximation.  The available 5m prefix is
 short (2025-12-20 onward), so evaluation starts on 2025-12-23 after indicator
 warmup and ends before 2026-03-01.  Four frozen arms separate timeframe from
 rule change: V8 on 10m/15m and V9 on 10m/15m.  Barriers, cost, and risk are
-identical.  Every directional result includes exact matched controls.
+identical.  Each directional result attempts the frozen exact matched-control
+design; an underfilled causal stratum is reported as unavailable rather than
+being backfilled from the future or weakened after seeing the result.
 
 This consumed-final, post-selection diagnostic cannot select or promote an
 arm and cannot establish TradingView venue parity.  Columns used are causal
@@ -124,18 +126,38 @@ def main() -> None:
             period=period.name,
             risk_percent=1.0,
         )
-        controls = build_matched_controls(
-            frame,
-            trades,
-            period,
-            seed=f"pine-eth-actual-timeframe-{label.lower()}-v1",
-        )
-        controls.insert(0, "variant_label", label)
-        controls_all.append(controls)
-        pairs = pair_controls(trades, controls)
-        signflip = block_signflip(pairs, seed=20260920 + offset)
-        control_bp = float(pairs["control_mean_project_net"].mean() * 10_000.0)
-        excess_bp = float(pairs["excess_return"].mean() * 10_000.0)
+        control_failure: str | None = None
+        try:
+            controls = build_matched_controls(
+                frame,
+                trades,
+                period,
+                seed=f"pine-eth-actual-timeframe-{label.lower()}-v1",
+            )
+        except RuntimeError as exc:
+            # Exact same-month / HK-session / lagged-ATR-quintile strata are
+            # part of the preregistered null. Sparse short-window strata stay
+            # missing; broadening them would be outcome-aware control redesign.
+            control_failure = str(exc)
+            controls = pd.DataFrame()
+            control_bp = None
+            excess_bp = None
+            signflip: dict[str, Any] = {
+                "available": False,
+                "p_value": None,
+                "failure_reason": control_failure,
+            }
+        else:
+            controls.insert(0, "variant_label", label)
+            controls_all.append(controls)
+            pairs = pair_controls(trades, controls)
+            signflip = {
+                "available": True,
+                **block_signflip(pairs, seed=20260920 + offset),
+                "failure_reason": None,
+            }
+            control_bp = float(pairs["control_mean_project_net"].mean() * 10_000.0)
+            excess_bp = float(pairs["excess_return"].mean() * 10_000.0)
         row = {
             "label": label,
             "bar_minutes": minutes,
@@ -149,10 +171,18 @@ def main() -> None:
             "bar_minutes": minutes,
             "summary": metric,
             "matched_control": {
+                "available": control_failure is None,
+                "failure_reason": control_failure,
                 "control_rows": int(len(controls)),
-                "controls_per_trade_min": int(controls.groupby("trade_id").size().min()),
-                "duplicate_control_starts": int(
-                    controls["control_signal_i"].duplicated().sum()
+                "controls_per_trade_min": (
+                    int(controls.groupby("trade_id").size().min())
+                    if control_failure is None
+                    else None
+                ),
+                "duplicate_control_starts": (
+                    int(controls["control_signal_i"].duplicated().sum())
+                    if control_failure is None
+                    else None
                 ),
                 "control_net_bp": control_bp,
                 "candidate_minus_control_bp": excess_bp,
@@ -161,7 +191,11 @@ def main() -> None:
         }
 
     table = pd.DataFrame(summaries)
-    controls_table = pd.concat(controls_all, ignore_index=True)
+    controls_table = (
+        pd.concat(controls_all, ignore_index=True)
+        if controls_all
+        else pd.DataFrame(columns=["variant_label"])
+    )
     table.to_csv(SUMMARY_CSV, index=False)
     controls_table.to_csv(CONTROLS_CSV, index=False)
 
@@ -183,6 +217,11 @@ def main() -> None:
         "tradingview_parity_passed": False,
         "barrier_parameters_changed": False,
         "selection_or_promotion_allowed": False,
+        "matched_control_unavailable_variants": [
+            label
+            for label, row in details.items()
+            if not row["matched_control"]["available"]
+        ],
         "variants": details,
         "isolated_deltas_bp_per_trade": {
             "V8_15m_minus_V8_10m": float(net["V8_15m"] - net["V8_10m"]),
@@ -192,7 +231,9 @@ def main() -> None:
         },
         "decision": (
             "In this roughly ten-week common window, actual 10m V8 beats 15m V8 and "
-            "both V9 arms are negative after cost. None passes matched-control p<0.01. "
+            "both V9 arms are negative after cost. Exact causal matched controls are "
+            "reported only where all frozen strata have three unique starts; underfilled "
+            "arms have no control estimate and this diagnostic remains descriptive. "
             "The short post-selection window cannot overturn the long chronological V9 "
             "freeze, but it rejects any claim that 15m is inherently superior to 10m."
         ),
@@ -200,11 +241,20 @@ def main() -> None:
     if payload["holdout_rows_read"] or payload["post_safe_rows_read"]:
         raise RuntimeError("actual timeframe audit crossed a data boundary")
     if any(
-        row["matched_control"]["controls_per_trade_min"] != 3
-        or row["matched_control"]["duplicate_control_starts"] != 0
+        row["matched_control"]["available"]
+        and (
+            row["matched_control"]["controls_per_trade_min"] != 3
+            or row["matched_control"]["duplicate_control_starts"] != 0
+        )
         for row in details.values()
     ):
         raise RuntimeError("actual timeframe controls failed exactness")
+    if any(
+        not row["matched_control"]["available"]
+        and not row["matched_control"]["failure_reason"]
+        for row in details.values()
+    ):
+        raise RuntimeError("unavailable actual timeframe control lacks a failure reason")
     OUTPUT_JSON.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(payload, indent=2))
 

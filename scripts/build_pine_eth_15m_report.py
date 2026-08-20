@@ -49,6 +49,11 @@ def _fmt(value: Any, digits: int = 2) -> str:
     return str(value)
 
 
+def _fmt_optional(value: Any, digits: int = 2) -> str:
+    """Render an unavailable preregistered estimate without inventing a number."""
+    return "不可估" if value is None else _fmt(value, digits)
+
+
 def markdown_table(headers: Iterable[str], rows: Iterable[Iterable[Any]]) -> str:
     headers = list(headers)
     rendered = ["| " + " | ".join(headers) + " |", "|" + "|".join(["---"] * len(headers)) + "|"]
@@ -202,9 +207,9 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
             label,
             _fmt(row["summary"]["trades"], 0),
             _fmt(row["summary"]["project_net_bp_per_trade"]),
-            _fmt(row["matched_control"]["control_net_bp"]),
-            _fmt(row["matched_control"]["candidate_minus_control_bp"]),
-            _fmt(row["week_signflip"]["p_value"], 4),
+            _fmt_optional(row["matched_control"]["control_net_bp"]),
+            _fmt_optional(row["matched_control"]["candidate_minus_control_bp"]),
+            _fmt_optional(row["week_signflip"]["p_value"], 4),
             _fmt(row["summary"]["return_percent"]),
             _fmt(row["summary"]["max_drawdown_15m_percent"]),
         ]
@@ -485,7 +490,8 @@ TradingView 的 `ETHUSDT.P` 必须再明确具体交易所后做逐笔导出对�
 7. 真实 10m 数据的短共同窗不支持“15m 天生更优”：原 V8 在 10m 为
    +{_fmt(actual_timeframe['variants']['V8_10m']['summary']['project_net_bp_per_trade'])} bp/笔，
    15m 为 {_fmt(actual_timeframe['variants']['V8_15m']['summary']['project_net_bp_per_trade'])} bp/笔；
-   V9 在 10m/15m 都为负。该窗只有约 10 周且四组 p 均未过门，不能反向选回 10m，但必须披露。
+   V9 在 10m/15m 都为负。该窗只有约 10 周，严格对照不足的组不报告 p；其余组也未过门，
+   不能反向选回 10m，但必须披露。
 8. 当前所谓 break-even 不是成本后保本：+10 bp 锁盈低于 20 bp 往返成本，final 有
    {exit_anatomy['by_exit_subtype']['break_even_locked_stop']['trades']} 笔固定为 -10 bp；
    另 {exit_anatomy['by_exit_subtype']['initial_protective_stop']['trades']} 笔初始止损，
@@ -569,7 +575,8 @@ ATR14 和止损完全不动。结果：
 
 本地 20,328 根无缺口 OKX 5m K 线被严格两两聚合为 10,164 根真实 10m K（0 个不完整母 K），
 与 15m 合约在 2025-12-23 至 2026-02 做同窗比较。这里同时隔离“周期变化”和“V8→V9 规则变化”，
-每组都带 3 个非复用同层随机对照：
+每组都尝试 3 个非复用、同月 × 同香港 6 小时段 × **前一月** ATR 五分位对照；冻结分层
+凑不满时 fail-closed 为“不可估”，不降级分层、不借未来月阈值补样：
 
 {markdown_table(['规则/周期', '笔数', '净 bp/笔', '对照 bp', '超额 bp', '周 p', '收益 %', 'bar-close DD %'], actual_timeframe_rows)}
 
@@ -577,7 +584,9 @@ V8 从 10m 改到 15m 的同窗差值为
 {_fmt(actual_timeframe['isolated_deltas_bp_per_trade']['V8_15m_minus_V8_10m'])} bp/笔；V9 为
 {_fmt(actual_timeframe['isolated_deltas_bp_per_trade']['V9_15m_minus_V9_10m'])} bp/笔。
 这段短窗明确反对“15m 一定优于 10m”，也显示最近两个月是 V9 的坏制度；但它发生在参数锁定和
-final 消费之后、只有 10 个周区块，不能用来选择回 10m。用户要求的 **15m 仍按长期协议定死**，
+final 消费之后、只有 10 个周区块；其中
+`{', '.join(actual_timeframe['matched_control_unavailable_variants']) or '无'}` 因严格因果对照池不足而
+没有匹配推断，不能用来选择回 10m。用户要求的 **15m 仍按长期协议定死**，
 同时把这条负面证据保留为 forward 风险警报。
 
 ### 2022 backcast 与跨制度稳定性

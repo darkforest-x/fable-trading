@@ -31,10 +31,15 @@ def test_common_short_window_keeps_negative_timeframe_result_visible() -> None:
     assert variants["V8_15m"]["summary"]["project_net_bp_per_trade"] < 0
     assert variants["V9_10m"]["summary"]["project_net_bp_per_trade"] < 0
     assert variants["V9_15m"]["summary"]["project_net_bp_per_trade"] < 0
-    assert all(row["week_signflip"]["p_value"] >= 0.01 for row in variants.values())
+    unavailable = set(payload["matched_control_unavailable_variants"])
+    assert unavailable
     assert all(
-        row["matched_control"]["controls_per_trade_min"] == 3
-        and row["matched_control"]["duplicate_control_starts"] == 0
+        (not row["matched_control"]["available"] and row["matched_control"]["failure_reason"])
+        or (
+            row["matched_control"]["controls_per_trade_min"] == 3
+            and row["matched_control"]["duplicate_control_starts"] == 0
+            and row["week_signflip"]["p_value"] >= 0.01
+        )
         for row in variants.values()
     )
     assert payload["isolated_deltas_bp_per_trade"]["V8_15m_minus_V8_10m"] < 0
@@ -45,5 +50,6 @@ def test_common_short_window_keeps_negative_timeframe_result_visible() -> None:
     expected_rows = {
         label: int(trades * 3)
         for label, trades in summary.set_index("label")["trades"].items()
+        if label not in unavailable
     }
     assert controls.groupby("variant_label").size().to_dict() == expected_rows

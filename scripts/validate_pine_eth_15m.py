@@ -374,7 +374,21 @@ def main() -> int:
         and actual_variants["V8_15m"]["summary"]["project_net_bp_per_trade"] < 0.0
         and actual_variants["V9_10m"]["summary"]["project_net_bp_per_trade"] < 0.0
         and actual_variants["V9_15m"]["summary"]["project_net_bp_per_trade"] < 0.0
-        and all(row["week_signflip"]["p_value"] >= 0.01 for row in actual_variants.values())
+        and bool(actual_timeframe["matched_control_unavailable_variants"])
+        and all(
+            row["matched_control"]["available"]
+            or bool(row["matched_control"]["failure_reason"])
+            for row in actual_variants.values()
+        )
+        and all(
+            (not row["matched_control"]["available"])
+            or (
+                row["matched_control"]["controls_per_trade_min"] == 3
+                and row["matched_control"]["duplicate_control_starts"] == 0
+                and row["week_signflip"]["p_value"] >= 0.01
+            )
+            for row in actual_variants.values()
+        )
     )
     checks["chronological_regime_dependence_and_exact_p_failure_visible"] = bool(
         regime_stability["blocks"] == 9
