@@ -1,16 +1,17 @@
 # 四个来源仓的归档状态
 
-> 归档 commit **只有在** fable-trading 最终验收通过、分支推送并形成 PR 之后才打。
-> 不删除任何来源仓。归档 = README 顶部加只读声明 + 停止开发，不是删库。
+> **✅ 已执行（2026-08-20）。** PR #1 合并（merge commit `31d6b2a`）后，
+> 四个来源仓的 README 顶部已加只读声明并推送到各自 main。
+> **一个仓都没删** —— 台账里多条 `REFERENCE_ONLY` 按 commit + SHA 指回它们。
 
 冻结 SHA 见 `reports/consolidation/source_repo_snapshots.json`。
 
-| 仓库 | 冻结 SHA | 最终状态 | 归档 commit |
+| 仓库 | 冻结 SHA | 最终状态 | 归档 commit（已推送） |
 |---|---|---|---|
-| `darkforest-x/darkforest-one` | `fd36dd1adc5844f241122c3853eb4d3e675a9c11` | `superseded` | 待验收后执行 |
-| `darkforest-x/yolo-xx` | `9296cfa8e5053d86cea44e29dbd45874c3dff689` | `historical_research` | 待验收后执行 |
-| `darkforest-x/yoyo-trading` | `784766de45a3b876c986d3ba672779124b46a66f` | `superseded` | 待验收后执行 |
-| `darkforest-x/yoyo-eth` | `6147810afb46be1c664128e9a5359e8e7d0a3923` | `closed_negative` | 待验收后执行 |
+| `darkforest-x/darkforest-one` | `fd36dd1adc5844f241122c3853eb4d3e675a9c11` | `superseded` | `e6e5164` ✅ |
+| `darkforest-x/yolo-xx` | `9296cfa8e5053d86cea44e29dbd45874c3dff689` | `historical_research` | `be1c7bb` ✅ |
+| `darkforest-x/yoyo-trading` | `784766de45a3b876c986d3ba672779124b46a66f` | `superseded` | `a16f495` ✅ |
+| `darkforest-x/yoyo-eth` | `6147810afb46be1c664128e9a5359e8e7d0a3923` | `closed_negative` | `06b97d5` ✅ |
 
 ## 状态用词为什么和任务书不同
 

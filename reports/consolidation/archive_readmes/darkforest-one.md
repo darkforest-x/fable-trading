@@ -5,7 +5,7 @@ This repository has been consolidated into `darkforest-x/fable-trading`.
 - Canonical repository: `darkforest-x/fable-trading`
 - Source frozen commit: `fd36dd1adc5844f241122c3853eb4d3e675a9c11`
 - Migration PR: https://github.com/darkforest-x/fable-trading/pull/1
-- Migration commit: `39e287082e4519b4a99d7ff6582f343b7a5b5149` (branch `claude/fable-trading-consolidation-758d61`)
+- Migration merge commit: `31d6b2aa39cc8cc454144228980c8eb427f868c4` (PR #1, merged into main)
 - Canonical module: `yoyo/data/continuity.py, yoyo/artifacts/lineage.py, yoyo/evaluation/, experiments/historical/darkforest_one/`
 - Status: read-only historical research — superseded — P1 complete, P2 never started
 

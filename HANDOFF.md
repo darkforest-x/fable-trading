@@ -26,8 +26,16 @@ AST 防回归。
 · 交接：[`docs/consolidation/HANDOFF_AFTER_CONSOLIDATION.md`](docs/consolidation/HANDOFF_AFTER_CONSOLIDATION.md)
 · 四仓历史结论：`experiments/historical/`
 
+**收敛已闭环（2026-08-20）**：PR #1 已合并（`31d6b2a`），随后 4 个提交也已进 main；
+四个来源仓的 README 顶部已加 ARCHIVED 只读声明并推送
+（`e6e5164` / `be1c7bb` / `a16f495` / `06b97d5`）。**一个仓都没删。**
+
 **下一条允许的动作：只有 P0（owner 形态定义与重复标注稳定性）→ P1（Gold Dataset）。**
-在 P0/P1 通过前禁止新训练、多周期扩展、promote 与实盘替换。归档 commit 须待 PR 形成后再打。
+在 P0/P1 通过前禁止新训练、多周期扩展、promote 与实盘替换。
+
+**等 owner 的两件事**：①复审 `experiments/active/exp-p1-gold-label-quality-cleanlab-v1/`
+里那 28 张可疑标注，把 6.22% 的筛查值变成协议 17.6 要的 DIRECT 裁决；
+②两个 ATR 实现的 warmup 分歧，三选项见 `docs/consolidation/DUPLICATE_SEMANTICS.md` §4。
 
 ---
 
