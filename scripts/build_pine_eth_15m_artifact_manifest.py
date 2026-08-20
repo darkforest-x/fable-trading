@@ -173,6 +173,7 @@ def build_manifest() -> dict[str, Any]:
         "experiments/active/exp-pine-eth-15m-v1/results/validation.json",
         "experiments/active/exp-pine-eth-15m-v1/results/density_overlap_audit.json",
         "experiments/active/exp-pine-eth-15m-v1/results/judgment_gate_replay_contract.json",
+        "experiments/active/exp-pine-eth-15m-v1/results/tradingview_compile_receipt.json",
     }
     present = {row["path"] for row in entries}
     absent = sorted(required - present)

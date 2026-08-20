@@ -164,8 +164,11 @@ Important limitations:
   TradingView perpetual feed.
 - The 2025-01 through 2026-02 final-preholdout period has now been inspected.
   It is no longer an unseen OOS set for this strategy family.
-- No TradingView compile/export parity has passed.  Python results remain a
-  translation diagnostic, not deployable broker-emulator evidence.
+- TradingView's official Pine v6 compiler accepted the exact V9 hash on
+  `OKX:ETHUSDT.P` 15m with zero compile errors.  Trade export parity has not
+  passed: the Basic plan's loaded range began after `researchEnd`, and arbitrary
+  historical Deep Backtesting required an upgrade.  Python results therefore
+  remain non-deployable broker-emulator diagnostics.
 - Ordered 3-minute replay on the same OKX feed reconstructs all 40,704 final
   15-minute bars exactly and reconciles all 110 V9 exits and prices.  That
   rejects hidden 15-minute aggregation optimism locally, but still is not
@@ -188,6 +191,11 @@ Important limitations:
   silently treated as zero.  A later shell coverage check accidentally printed
   eight holdout-period funding rows; they were not loaded, aggregated, scored,
   or used, and the funding audit stopped immediately.
+- The TradingView compiler attempt opened the site's default 2026-06 to
+  2026-08 chart before the safe-window limitation was known.  V9's date gate
+  entered/scored zero trades and no metric or parameter decision used the
+  visible post-holdout prices.  The incident is recorded rather than silently
+  converting a compiler smoke into a clean holdout claim.
 
 ## Reproduce
 

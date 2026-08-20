@@ -91,6 +91,7 @@ def load_evidence() -> dict[str, Any]:
         "migration_audit": json.loads((RESULTS / "migration_audit.json").read_text(encoding="utf-8")),
         "gate_surface": json.loads((RESULTS / "judgment_gate_surface_manifest.json").read_text(encoding="utf-8")),
         "gate_replay": json.loads((RESULTS / "judgment_gate_replay_contract.json").read_text(encoding="utf-8")),
+        "tv_compile": json.loads((RESULTS / "tradingview_compile_receipt.json").read_text(encoding="utf-8")),
         "pine_static": json.loads((RESULTS / "pine_static_contract.json").read_text(encoding="utf-8")),
         "validation": validation,
         "split": pd.read_csv(RESULTS / "split_summary.csv"),
@@ -174,6 +175,7 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
     migration_audit = evidence["migration_audit"]
     gate_surface = evidence["gate_surface"]
     gate_replay = evidence["gate_replay"]
+    tv_compile = evidence["tv_compile"]
     pine_static = evidence["pine_static"]
     validation = evidence["validation"]
     split = evidence["split"]
@@ -545,8 +547,8 @@ TradingView 的 `ETHUSDT.P` 必须再明确具体交易所后做逐笔导出对�
 - 时间过滤改为明确 `Asia/Hong_Kong`，并增加 900 秒、ETH base、日期和 confirmed-bar 守卫；
 - percentile 分母从“仅不等于 0”改为 `not na and > 0` fail-closed。
 
-这些修复让回测口径可审计，但不等于 alpha 增强。仍未解决的两项是：TradingView 编译/导出逐笔 parity，
-以及 +0.1% 锁盈在 0.2% 往返成本后仍是 -0.1%。
+这些修复让回测口径可审计，但不等于 alpha 增强。TradingView 官方 Pine v6 编译已经通过；仍未解决的是
+TradingView **交易导出**逐笔 parity，以及 +0.1% 锁盈在 0.2% 往返成本后仍是 -0.1%。
 
 ### 10m 改到 15m 到底改变了什么
 
@@ -794,13 +796,20 @@ paper 风险档，不是 alpha 优化**；1% 继续作为可比研究基准，2%
   与自定义引擎 +{_fmt(v9['return_percent'])}% / {_fmt(v9['max_drawdown_15m_percent'])}% 接近。
 
 这通过了**独立 Python 框架 reconciliation**，但不是 TradingView broker-emulator parity。
-Pine 仍需在同一交易所 15m 图表编译并导出逐笔 ledger。
+精确 V9 hash 已在 `OKX:ETHUSDT.P` 15m 通过 TradingView 官方 Pine v6 编译，错误 0，且成功显示为
+active strategy；但仍需导出逐笔 ledger。
 
 V9 Pine 静态契约 25/25 项通过：常量、900 秒周期守卫、ETH base 守卫、confirmed-bar、next-open、
-commission、禁 tick 重算/放大器、无 `request.security`/lookahead 都与冻结配置一致；同时明确
-`official_pine_compiler_run=false`。`tradingview/trades_normalized.template.csv` 与
+commission、禁 tick 重算/放大器、无 `request.security`/lookahead 都与冻结配置一致。静态审计器自身没有
+调用编译器，但独立 compiler receipt 已把 `official_pine_compiler_run=true` 钉到源 SHA
+`{tv_compile['source_sha256']}`。`tradingview/trades_normalized.template.csv` 与
 `scripts/reconcile_pine_eth_15m_tradingview.py` 已准备好，真实导出必须 110/110 entry+side、exit time、
 入/出价格一 tick 内全部通过；费用/净 P&L 仍需 venue 会计复核。
+
+本次浏览器 smoke 无法进入历史账本：账号计划为 {tv_compile['account_plan_observed']}，已加载图表区间
+{tv_compile['tradingview_loaded_chart_range'][0]}～{tv_compile['tradingview_loaded_chart_range'][1]}，完全晚于
+`researchEnd=2026-03-01`；任意历史 Deep Backtesting 会弹出升级门，因此报告为 “This report requires trade data”，
+没有导出或 reconciliation。编译成功与逐笔 parity 必须继续分开表述。
 
 同一 OKX 合约的 3m 有序路径又做了一层执行敏感性复核：
 
@@ -964,11 +973,12 @@ Pine confirmed close(t)
 - **没有训练或生产动作。** 所有策略计算的 bounded loader 都读取 0 行 holdout；未 train、promote、deploy、改 ACTIVE、写 forward_log 或操作真金账户。
 - **意外 holdout 预览已披露。** 在写 3m bounded loader 前，一次 shell `tail` 意外显示了原始文件末尾两行（均在 repository holdout）；它们没有进入 Python、没有被评分、没有参与任何配置选择或收益评估。按本仓“看一眼也要记录”的纪律，此事故不能写成“从未看见”，后续已用前缀加载器和不读取整文件的前缀哈希封死。
 - **第二次意外预览已披露。** 检查 funding coverage 时，shell 又显示了 8 条 holdout 期 funding 原始行，最晚到 {funding_coverage['operational_incident']['displayed_range_end']}；同样未进 Python、未汇总/评分/选参，发现本地 funding 不覆盖回测后立即停止该分析。
+- **第三次意外预览已披露。** TradingView 编译 smoke 默认打开 {tv_compile['tradingview_loaded_chart_range'][0]}～{tv_compile['tradingview_loaded_chart_range'][1]} 当前图表，晚于 repository holdout；事前没有 owner 的专项 holdout 批准。V9 日期门让入场/评分为 0，也没有读取任何策略指标、做收益评价或选参；临时策略已撤销、布局/脚本未保存、未发布。该事故只保留“官方编译通过”事实，不能当 holdout 验收。
 - **正式 Docker 构建未完成。** 两次都卡在外部基础镜像 metadata；已有断网 Linux 镜像完成了原始数据全重放并逐笔一致，但其依赖未按实验 Dockerfile 固定，不能冒充 pinned build，更不能冒充 TradingView parity。
 
 ## 下一步选项（需 owner 决策的已标出）
 
-1. **可立即做：** 在明确的 TradingView venue 上粘贴 V9 Pine，导出 trade list；对 signal/entry/exit/fee/equity 逐笔对账。未过不得 forward。
+1. **需 owner 提供可访问历史区间的 TradingView 方案：** 官方编译已过；在支持 2025-01～2026-02 Deep Backtesting 的计划/会话中导出 trade list，再对 signal/entry/exit/fee/equity 逐笔对账。未过不得 forward；本轮不会替 owner 购买升级。
 2. **需 owner 单独批准：** 把名义 BE 的 +0.1% offset 改成成本感知值并作为单一 barrier 变量重跑；当前只完成语义/会计诊断，未改参数。
 3. **parity 后再由 owner 启动：** V9 / V10（成交量门）/ V11（只开多）做互斥 paper-only 新鲜前向 A/B，各积累至少 100 笔；纸面风险优先 0.5%，1% 留作可比基准；禁止把 V10+V11 打包，旧 final 不追认为 OOS。
 4. **需 owner 在 P0/P1 通过后批准：** 先建 Pine-specific 单特征正则 LR；不要直接在 166 笔上训 28 特征 LightGBM。所有分数必须进入动态 replay。

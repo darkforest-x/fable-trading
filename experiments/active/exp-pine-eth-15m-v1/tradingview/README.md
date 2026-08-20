@@ -1,9 +1,15 @@
 # TradingView parity gate
 
+The exact frozen V9 source hash now passes TradingView's official Pine v6
+compiler on `OKX:ETHUSDT.P` 15m with zero compile errors.  That is a compiler
+smoke only: the Basic plan's loaded chart range began after `researchEnd`, so
+no historical trade export or broker-emulator ledger parity was obtained.
+
 The local OKX research proxy is not venue parity.  Before any paper-forward
-collection, compile `../pine/allin_eth_15m_v9_research.pine` on the exact ETH
-perpetual venue selected by the owner, set the chart to 15 minutes, preserve
-the frozen defaults, and export the Strategy Tester trade list covering
+collection, open a pre-holdout chart first, compile
+`../pine/allin_eth_15m_v9_research.pine` on the exact ETH perpetual venue
+selected by the owner, set the chart to 15 minutes, preserve the frozen
+defaults, and export the Strategy Tester trade list covering
 2025-01-01 through 2026-02-28.
 
 Normalize the export to `trades_normalized.csv` with these columns:

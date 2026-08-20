@@ -1,0 +1,52 @@
+{
+  "artifact": "TradingView official Pine compiler receipt for frozen V9",
+  "status": "compiler_passed_trade_export_blocked",
+  "observed_at_utc": "2026-08-20T20:44:42Z",
+  "source_path": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v9_research.pine",
+  "source_sha256": "6465fa80f89907b2ed584085960f355f331de62e3c38ebf65f3065c57873dfe9",
+  "pine_version": 6,
+  "venue_symbol": "OKX:ETHUSDT.P",
+  "chart_interval": "15m",
+  "chart_type": "Candles",
+  "script_title_observed": "ALLIN ETH 15m V9 Research",
+  "active_strategy_observed": true,
+  "pine_compile_error_count": 0,
+  "pine_editor_diagnostic_error_observed": false,
+  "official_pine_compiler_run": true,
+  "strategy_research_window": [
+    "2023-01-01T00:00:00Z",
+    "2026-03-01T00:00:00Z"
+  ],
+  "tradingview_loaded_chart_range": [
+    "2026-06-01",
+    "2026-08-21"
+  ],
+  "loaded_range_is_after_research_end": true,
+  "strategy_report_trade_data_present": false,
+  "strategy_report_message": "This report requires trade data",
+  "deep_backtesting_available": false,
+  "account_plan_observed": "Basic",
+  "trade_export_obtained": false,
+  "ledger_reconciliation_run": false,
+  "tradingview_parity_passed": false,
+  "blocking_reason": "Basic plan exposes only chart-loaded bars; the loaded range starts after researchEnd, while arbitrary historical Deep Backtesting requires an upgrade.",
+  "operational_incident": {
+    "post_holdout_chart_was_visible": true,
+    "owner_specific_holdout_approval_obtained_before_view": false,
+    "post_holdout_trades_entered_or_scored": 0,
+    "post_holdout_metrics_read": 0,
+    "used_for_parameter_selection": false,
+    "used_for_return_evaluation": false,
+    "note": "TradingView opened its default current chart before the safe-window limitation was known. The frozen date gate produced no trades. No performance metric or configuration decision used the visible post-holdout prices."
+  },
+  "external_state_cleanup": {
+    "temporary_strategy_insert_undone": true,
+    "layout_saved": false,
+    "script_saved": false,
+    "script_published": false,
+    "browser_tab_closed": true
+  },
+  "training_or_model_scoring_performed": false,
+  "forward_or_live_order_sent": false,
+  "production_eligible": false
+}

@@ -57,6 +57,7 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
     migration_audit = load_json("migration_audit.json")
     gate_surface = load_json("judgment_gate_surface_manifest.json")
     gate_replay = load_json("judgment_gate_replay_contract.json")
+    tv_compile = load_json("tradingview_compile_receipt.json")
     pine_static = load_json("pine_static_contract.json")
     docker_replay = load_json("docker_offline_replay.json")
     validation = load_json("validation.json")
@@ -275,6 +276,25 @@ def run_checks(runtime_label: str) -> dict[str, Any]:
                 for row in gate_replay["fail_closed_mutations"]
             )
             and gate_replay["production_eligible"] is False
+        ),
+        "official_pine_compile_passed_but_trade_parity_is_blocked": bool(
+            tv_compile["official_pine_compiler_run"] is True
+            and tv_compile["source_sha256"] == pine_static["sha256"]
+            and tv_compile["venue_symbol"] == "OKX:ETHUSDT.P"
+            and tv_compile["chart_interval"] == "15m"
+            and tv_compile["pine_compile_error_count"] == 0
+            and tv_compile["active_strategy_observed"] is True
+            and tv_compile["loaded_range_is_after_research_end"] is True
+            and tv_compile["strategy_report_trade_data_present"] is False
+            and tv_compile["trade_export_obtained"] is False
+            and tv_compile["tradingview_parity_passed"] is False
+            and tv_compile["operational_incident"]["post_holdout_chart_was_visible"]
+            is True
+            and tv_compile["operational_incident"]["post_holdout_trades_entered_or_scored"]
+            == 0
+            and tv_compile["operational_incident"]["used_for_return_evaluation"]
+            is False
+            and tv_compile["production_eligible"] is False
         ),
         "pine_static_contract_passes_without_compiler_claim": bool(
             pine_static["status"] == "pass"

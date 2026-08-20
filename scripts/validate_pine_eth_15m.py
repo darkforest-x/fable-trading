@@ -101,6 +101,9 @@ def main() -> int:
     gate_replay = json.loads(
         (RESULTS / "judgment_gate_replay_contract.json").read_text(encoding="utf-8")
     )
+    tv_compile = json.loads(
+        (RESULTS / "tradingview_compile_receipt.json").read_text(encoding="utf-8")
+    )
     pine_static = json.loads(
         (RESULTS / "pine_static_contract.json").read_text(encoding="utf-8")
     )
@@ -504,6 +507,38 @@ def main() -> int:
         and gate_replay["forward_eligible"] is False
         and gate_replay["production_eligible"] is False
     )
+    checks["official_pine_compiler_passes_but_trade_export_remains_blocked"] = bool(
+        tv_compile["official_pine_compiler_run"] is True
+        and tv_compile["source_sha256"] == pine_static["sha256"]
+        and tv_compile["venue_symbol"] == "OKX:ETHUSDT.P"
+        and tv_compile["chart_interval"] == "15m"
+        and tv_compile["pine_version"] == 6
+        and tv_compile["pine_compile_error_count"] == 0
+        and tv_compile["active_strategy_observed"] is True
+        and tv_compile["loaded_range_is_after_research_end"] is True
+        and tv_compile["deep_backtesting_available"] is False
+        and tv_compile["trade_export_obtained"] is False
+        and tv_compile["ledger_reconciliation_run"] is False
+        and tv_compile["tradingview_parity_passed"] is False
+        and tv_compile["operational_incident"]["post_holdout_chart_was_visible"]
+        is True
+        and tv_compile["operational_incident"]["owner_specific_holdout_approval_obtained_before_view"]
+        is False
+        and tv_compile["operational_incident"]["post_holdout_trades_entered_or_scored"]
+        == 0
+        and tv_compile["operational_incident"]["post_holdout_metrics_read"] == 0
+        and tv_compile["operational_incident"]["used_for_parameter_selection"]
+        is False
+        and tv_compile["operational_incident"]["used_for_return_evaluation"]
+        is False
+        and tv_compile["external_state_cleanup"]["temporary_strategy_insert_undone"]
+        is True
+        and tv_compile["external_state_cleanup"]["layout_saved"] is False
+        and tv_compile["external_state_cleanup"]["script_saved"] is False
+        and tv_compile["external_state_cleanup"]["script_published"] is False
+        and tv_compile["external_state_cleanup"]["browser_tab_closed"] is True
+        and tv_compile["production_eligible"] is False
+    )
     tv_template = EXPERIMENT / "tradingview/trades_normalized.template.csv"
     checks["pine_static_contract_passes_and_tv_parity_harness_is_pending"] = bool(
         pine_static["status"] == "pass"
@@ -518,7 +553,7 @@ def main() -> int:
     )
     checks["offline_docker_artifact_smoke_passed_without_overclaim"] = bool(
         docker_smoke["status"] == "pass"
-        and docker_smoke["count"] == 38
+        and docker_smoke["count"] == 39
         and docker_smoke["runtime_label"] == "offline-local-label-studio-image"
         and docker_smoke["pinned_docker_recipe_built"] is False
         and docker_smoke["tradingview_parity_passed"] is False
