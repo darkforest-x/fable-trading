@@ -58,6 +58,21 @@ def load_evidence() -> dict[str, Any]:
         "framework": json.loads((RESULTS / "backtesting_reconciliation.json").read_text(encoding="utf-8")),
         "intrabar": json.loads((RESULTS / "intrabar_3m_reconciliation.json").read_text(encoding="utf-8")),
         "robustness": json.loads((RESULTS / "robustness_checks.json").read_text(encoding="utf-8")),
+        "docker_smoke": json.loads((RESULTS / "docker_offline_smoke.json").read_text(encoding="utf-8")),
+        "v11": json.loads((RESULTS / "v11_long_only_summary.json").read_text(encoding="utf-8")),
+        "control_sensitivity": json.loads((RESULTS / "control_seed_sensitivity.json").read_text(encoding="utf-8")),
+        "path_risk": json.loads((RESULTS / "path_risk_bootstrap.json").read_text(encoding="utf-8")),
+        "judgment_research": json.loads((RESULTS / "pine_judgment_development_manifest.json").read_text(encoding="utf-8")),
+        "feed_sensitivity": json.loads((RESULTS / "feed_sensitivity.json").read_text(encoding="utf-8")),
+        "funding_coverage": json.loads((RESULTS / "funding_coverage_incident.json").read_text(encoding="utf-8")),
+        "exit_anatomy": json.loads((RESULTS / "exit_anatomy.json").read_text(encoding="utf-8")),
+        "backcast": json.loads((RESULTS / "backcast_2022.json").read_text(encoding="utf-8")),
+        "paper_protocol": json.loads((RESULTS / "paper_forward_protocol.json").read_text(encoding="utf-8")),
+        "actual_timeframe": json.loads((RESULTS / "actual_10m_vs_15m.json").read_text(encoding="utf-8")),
+        "regime_stability": json.loads((RESULTS / "regime_stability.json").read_text(encoding="utf-8")),
+        "judgment_feasibility": json.loads((RESULTS / "judgment_feasibility.json").read_text(encoding="utf-8")),
+        "stateful_gate": json.loads((RESULTS / "stateful_gate_static_vs_dynamic.json").read_text(encoding="utf-8")),
+        "pine_static": json.loads((RESULTS / "pine_static_contract.json").read_text(encoding="utf-8")),
         "validation": validation,
         "split": pd.read_csv(RESULTS / "split_summary.csv"),
         "matrix": pd.read_csv(RESULTS / "experiment_matrix.csv"),
@@ -70,6 +85,7 @@ def load_evidence() -> dict[str, Any]:
         "prequential": pd.read_csv(RESULTS / "prequential_feature_selection.csv"),
         "timeframe": pd.read_csv(RESULTS / "timeframe_rescale_ablation.csv"),
         "cost": pd.read_csv(RESULTS / "cost_sensitivity.csv"),
+        "regime_table": pd.read_csv(RESULTS / "regime_stability.csv"),
         "trades": pd.read_csv(RESULTS / "trades.csv", parse_dates=["entry_time", "exit_time"]),
     }
 
@@ -112,12 +128,76 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
     framework = evidence["framework"]
     intrabar = evidence["intrabar"]
     robustness = evidence["robustness"]
+    docker_smoke = evidence["docker_smoke"]
+    v11 = evidence["v11"]
+    control_sensitivity = evidence["control_sensitivity"]
+    path_risk = evidence["path_risk"]
+    judgment_research = evidence["judgment_research"]
+    feed_sensitivity = evidence["feed_sensitivity"]
+    funding_coverage = evidence["funding_coverage"]
+    exit_anatomy = evidence["exit_anatomy"]
+    backcast = evidence["backcast"]
+    paper_protocol = evidence["paper_protocol"]
+    actual_timeframe = evidence["actual_timeframe"]
+    regime_stability = evidence["regime_stability"]
+    judgment_feasibility = evidence["judgment_feasibility"]
+    stateful_gate = evidence["stateful_gate"]
+    pine_static = evidence["pine_static"]
     validation = evidence["validation"]
     split = evidence["split"]
     risk = evidence["risk"]
     timeframe = evidence["timeframe"]
     threshold = evidence["threshold"].groupby("threshold", as_index=False).first()
     feature_search = evidence["feature_search"].groupby("feature_filter", as_index=False).first()
+
+    actual_timeframe_rows = [
+        [
+            label,
+            _fmt(row["summary"]["trades"], 0),
+            _fmt(row["summary"]["project_net_bp_per_trade"]),
+            _fmt(row["matched_control"]["control_net_bp"]),
+            _fmt(row["matched_control"]["candidate_minus_control_bp"]),
+            _fmt(row["week_signflip"]["p_value"], 4),
+            _fmt(row["summary"]["return_percent"]),
+            _fmt(row["summary"]["max_drawdown_15m_percent"]),
+        ]
+        for label, row in actual_timeframe["variants"].items()
+    ]
+    backcast_rows = [
+        [
+            label,
+            _fmt(row["summary"]["trades"], 0),
+            _fmt(row["summary"]["project_net_bp_per_trade"]),
+            _fmt(row["matched_control"]["control_net_bp"]),
+            _fmt(row["matched_control"]["candidate_minus_control_bp"]),
+            _fmt(row["week_signflip"]["p_value"], 4),
+            _fmt(row["profit_concentration"]["mean_without_top1_bp"]),
+        ]
+        for label, row in backcast["variants"].items()
+    ]
+    regime_rows = [
+        [
+            row.period,
+            _fmt(int(row.trades), 0),
+            _fmt(row.candidate_net_bp),
+            _fmt(row.control_net_bp),
+            _fmt(row.candidate_minus_control_bp),
+            _fmt(row.return_percent),
+            _fmt(row.maximum_drawdown_percent),
+            _fmt(row.mean_without_top1_bp),
+        ]
+        for row in evidence["regime_table"].itertuples(index=False)
+    ]
+    feed_rows = [
+        [
+            label,
+            _fmt(row["left"], 0),
+            _fmt(row["right"], 0),
+            _fmt(row["jaccard"] * 100),
+            _fmt(row["mean_absolute_net_return_delta_bp"]),
+        ]
+        for label, row in feed_sensitivity["executed_entry_comparisons"].items()
+    ]
 
     core_rows = [
         [
@@ -139,6 +219,65 @@ def build_report(evidence: dict[str, Any], diagnostics: dict[str, Any]) -> str:
             _fmt(row.incremental_test_net_bp),
         ]
         for row in evidence["prequential"].itertuples(index=False)
+    ]
+    side_rows = [
+        [
+            row["variant"],
+            _fmt(int(row["trades"]), 0),
+            _fmt(row["minimum_block_net_bp"]),
+            _fmt(row["weighted_net_bp"]),
+            f"{int(row['positive_blocks'])}/4",
+            _fmt(row["worst_drawdown_percent"]),
+        ]
+        for row in robustness["side_ablation_aggregate"]
+    ]
+    control_seed_rows = [
+        [
+            row["variant"],
+            _fmt(row["candidate_net_bp"]),
+            (
+                f"{_fmt(row['control_net_bp']['median'])} "
+                f"[{_fmt(row['control_net_bp']['q05'])}, {_fmt(row['control_net_bp']['q95'])}]"
+            ),
+            (
+                f"{_fmt(row['candidate_minus_control_bp']['median'])} "
+                f"[{_fmt(row['candidate_minus_control_bp']['q05'])}, {_fmt(row['candidate_minus_control_bp']['q95'])}]"
+            ),
+            _fmt(row["fraction_assignment_seeds_with_positive_excess"] * 100),
+            (
+                f"{_fmt(row['week_signflip_p']['min'], 3)}–"
+                f"{_fmt(row['week_signflip_p']['max'], 3)}"
+            ),
+        ]
+        for row in control_sensitivity["variants"]
+    ]
+    path_risk_rows = [
+        [
+            row["label"],
+            _fmt(row["actual_return_percent"]),
+            _fmt(row["actual_drawdown_15m_percent"]),
+            (
+                f"{_fmt(row['return_median_percent'])} "
+                f"[{_fmt(row['return_q05_percent'])}, {_fmt(row['return_q95_percent'])}]"
+            ),
+            _fmt(row["drawdown_q95_percent"]),
+            _fmt(row["probability_negative_terminal"] * 100),
+            _fmt(row["probability_drawdown_over_20pct"] * 100),
+            _fmt(int(row["longest_actual_losing_streak"]), 0),
+        ]
+        for row in path_risk["arms"]
+    ]
+    judgment_fold_rows = [
+        [
+            row["fold"],
+            _fmt(row["raw_train_rows"], 0),
+            _fmt(row["purged_train_rows"], 0),
+            _fmt(row["purged_for_label_overlap"], 0),
+            _fmt(row["validation_rows"], 0),
+            _fmt(row["train_positive_rate"] * 100),
+            _fmt(row["validation_positive_rate"] * 100),
+        ]
+        for row in judgment_research["folds"]
     ]
 
     periods = ["discovery_2023", "confirmation_2024", "final_preholdout_2025_202602"]
@@ -257,8 +396,26 @@ TradingView 的 `ETHUSDT.P` 必须再明确具体交易所后做逐笔导出对�
 5. V10 的 `vol_ratio_mean8 >= 1` 历史点估计更好（+{_fmt(v10['project_net_bp_per_trade'])} bp/笔、
    回撤 {_fmt(v10['max_drawdown_15m_percent'])}%），但它是在 V9 final 已看过之后才选出的，
    且 sign-flip `p={_fmt(v10_stats['week_block_signflip']['p_value'], 4)}`；只能作为下一轮纸面 forward 假设。
+6. 开发段选择出的 long-only V11 历史点估计为
+   +{_fmt(v11['final_preholdout']['project_net_bp_per_trade'])} bp/笔、回撤
+   {_fmt(v11['final_preholdout']['max_drawdown_15m_percent'])}%，但这同样是 consumed-final 后的诊断，
+   仅 {v11['profit_concentration']['positive_trades']}/{v11['profit_concentration']['trades']} 笔盈利，
+   sign-flip `p={_fmt(v11['week_block_signflip']['p_value'], 4)}`。
+7. 真实 10m 数据的短共同窗不支持“15m 天生更优”：原 V8 在 10m 为
+   +{_fmt(actual_timeframe['variants']['V8_10m']['summary']['project_net_bp_per_trade'])} bp/笔，
+   15m 为 {_fmt(actual_timeframe['variants']['V8_15m']['summary']['project_net_bp_per_trade'])} bp/笔；
+   V9 在 10m/15m 都为负。该窗只有约 10 周且四组 p 均未过门，不能反向选回 10m，但必须披露。
+8. 当前所谓 break-even 不是成本后保本：+10 bp 锁盈低于 20 bp 往返成本，final 有
+   {exit_anatomy['by_exit_subtype']['break_even_locked_stop']['trades']} 笔固定为 -10 bp；
+   另 {exit_anatomy['by_exit_subtype']['initial_protective_stop']['trades']} 笔初始止损，
+   {exit_anatomy['by_exit_subtype']['reverse']['trades']} 笔反转单贡献全部正收益。
+9. 冻结 V9 跨 9 个时间块有
+   {regime_stability['absolute_net_equal_block_test']['positive_blocks']}/9 为正，但绝对净收益/匹配超额
+   精确 p 分别为 {_fmt(regime_stability['absolute_net_equal_block_test']['one_sided_p_value'], 4)} /
+   {_fmt(regime_stability['matched_excess_equal_block_test']['one_sided_p_value'], 4)}，仍未到 0.01。
 
-因此，**V9 是最后一个在 final 前锁定的 15m 研究基线；V10 是下一步候选。两者都不能上线。**
+因此，**V9 是最后一个在 final 前锁定的 15m 研究基线；V10（成交量门）和 V11（只开多）
+是互不叠加的下一步 paper A/B 候选。三者都不能上线。**
 
 ![V8/V9/V10 final-preholdout equity](../experiments/active/exp-pine-eth-15m-v1/results/charts/final_equity_v8_vs_v9.png)
 
@@ -302,6 +459,40 @@ ATR14 和止损完全不动。结果：
 
 四块有两块净期望为负，所以拒绝等时长搬运；15m 版本应视为一个新的、较慢的固定策略。
 
+### 真实 10m 与 15m 共同短窗
+
+本地 20,328 根无缺口 OKX 5m K 线被严格两两聚合为 10,164 根真实 10m K（0 个不完整母 K），
+与 15m 合约在 2025-12-23 至 2026-02 做同窗比较。这里同时隔离“周期变化”和“V8→V9 规则变化”，
+每组都带 3 个非复用同层随机对照：
+
+{markdown_table(['规则/周期', '笔数', '净 bp/笔', '对照 bp', '超额 bp', '周 p', '收益 %', 'bar-close DD %'], actual_timeframe_rows)}
+
+V8 从 10m 改到 15m 的同窗差值为
+{_fmt(actual_timeframe['isolated_deltas_bp_per_trade']['V8_15m_minus_V8_10m'])} bp/笔；V9 为
+{_fmt(actual_timeframe['isolated_deltas_bp_per_trade']['V9_15m_minus_V9_10m'])} bp/笔。
+这段短窗明确反对“15m 一定优于 10m”，也显示最近两个月是 V9 的坏制度；但它发生在参数锁定和
+final 消费之后、只有 10 个周区块，不能用来选择回 10m。用户要求的 **15m 仍按长期协议定死**，
+同时把这条负面证据保留为 forward 风险警报。
+
+### 2022 backcast 与跨制度稳定性
+
+把已锁参数反放到更早 2022 年，只能叫 reverse-time backcast，因为参数是在其后的 2023/24 选择：
+
+{markdown_table(['版本', '笔数', '净 bp/笔', '对照 bp', '超额 bp', '周 p', '去 top1 bp'], backcast_rows)}
+
+V9 的 backcast 点估计和匹配超额为正，但 `p={_fmt(backcast['variants']['V9']['week_signflip']['p_value'], 4)}`，
+仍未过门；V10/V11 在这个旧制度反而更弱，支持不让 post-selection 版本替换 V9。
+
+冻结 V9 进一步按固定半年重新起账（最后一段为 2026M1M2）：
+
+{markdown_table(['时间块', '笔数', 'V9 bp', '对照 bp', '超额 bp', '收益 %', 'DD %', '去 top1 bp'], regime_rows)}
+
+![V9 chronological regime stability](../experiments/active/exp-pine-eth-15m-v1/results/charts/v9_regime_stability.png)
+
+绝对净收益 7/9 块为正，但 512 种穷举 sign-flip `p={_fmt(regime_stability['absolute_net_equal_block_test']['one_sided_p_value'], 4)}`；
+匹配超额为正 6/9 块、`p={_fmt(regime_stability['matched_excess_equal_block_test']['one_sided_p_value'], 4)}`。
+2025H1 和 2026M1M2 为负，说明长期总和不是“每个制度都赚钱”。
+
 ### 核心逻辑嵌套消融（只读 2023/2024）
 
 下面每一步只增加一个信号组件，执行、止损、仓位、冷却和 20 bp 成本完全不变：
@@ -314,6 +505,20 @@ ATR14 和止损完全不动。结果：
 是第一个产生正加权期望的组件，但仍有一个半年为负。振荡器方向继续降噪，最终 `±0.1`
 门才让四块都为正。因此当前核心应理解为**趋势方向一致后的稀疏交叉触发**，而不是已经验证的
 “均线密集形态”。这也解释了为什么把严格 ribbon density 强塞进去反而不稳定。
+
+方向 eligibility 作为另一个单变量，只在开发段比较：
+
+{markdown_table(['方向策略', '总笔数', '最差半年 bp', '加权 bp', '正半年', '最差 DD %'], side_rows)}
+
+long-only 的四块绝对期望都为正，但相对 two-sided 的增量在 2024H2 为负；三种方向策略的
+共同区块 max-stat `p={_fmt(robustness['side_selection_test']['selection_adjusted_p_value'], 4)}`，
+仍过不了 `p<0.01`。随后查看的 V11 final 点估计为
+{_fmt(v11['final_preholdout']['project_net_bp_per_trade'])} bp/笔、PF
+{_fmt(v11['final_preholdout']['monetary_profit_factor'], 3)}、收益
+{_fmt(v11['final_preholdout']['return_percent'])}%、回撤
+{_fmt(v11['final_preholdout']['max_drawdown_15m_percent'])}%；但 final 已经消费，
+去掉最大赢家后均值 {_fmt(v11['profit_concentration']['mean_without_top1_bp'])} bp/笔，
+所以只能登记为 V11 paper-forward 假设。
 
 ## Results
 
@@ -339,6 +544,15 @@ ATR14 和止损完全不动。结果：
 | 正月份 | {concentration['positive_months']}/{concentration['months_with_trades']} | 月中位数 {_fmt(concentration['median_monthly_net_bp'])} bp/笔 |
 
 ![V9 monthly expectancy](../experiments/active/exp-pine-eth-15m-v1/results/charts/v9_monthly_net_bp.png)
+
+单个 deterministic control seed 可复现，但不是不确定性区间。64 个预定义 seed、每个仍严格
+3 个非复用同层对照后的敏感性如下（方括号为 seed 间 5%–95%）：
+
+{markdown_table(['候选', '候选 bp', '对照中位 [5%,95%]', '超额中位 [5%,95%]', '超额>0 seed %', '周 p 范围'], control_seed_rows)}
+
+V9/V10 各有 89.06% 的 assignment seed 得到正超额，V11 为 95.31%；但三者 64 个 seed 中
+`p<0.01` 的比例都为 **0%**。因此报告保留原 seed 作为逐笔可复现 ledger，同时把 seed 分布
+作为经济结论；禁止挑一个最有利 seed 代表策略。
 
 ### 参数选择与单变量实验
 
@@ -368,12 +582,48 @@ oscillator 阈值只在 2023/2024 搜索；`0.1` 与 `0.15` 形成稳定平台�
 所以 `vol_ratio_mean8 >= 1` 的 V10 虽改善历史点估计和回撤，但 final 已污染、尾部更集中，
 且多重选择校正未过，不能冒充验证成功。
 
+为后续互斥 paper A/B，已从 V9 通过严格生成器产出两份 Pine：
+
+- `pine/allin_eth_15m_v10_volume_paper.pine`：只增加 20-bar volume ratio 的 8-bar 均值 `>=1`；
+- `pine/allin_eth_15m_v11_long_only_paper.pine`：只允许开多，空信号仍在下一根开盘平多；
+- manifest 明确 `combined_v10_v11_generated=false`、parity/production 均为 false。
+
+两者都不覆盖 `allin_eth_15m_v9_research.pine`，也不能因为文件可运行就被解释成已验证。
+
+三份 Pine 的 SHA256 已写入 fail-closed paper protocol，但没有启动采集、写 forward log 或发任何订单。
+按 consumed-final 历史到达率，达到每臂 100 笔约需：V9
+{_fmt(paper_protocol['arms']['V9']['planning_months_to_100_fresh_trades'])} 个月、V10
+{_fmt(paper_protocol['arms']['V10']['planning_months_to_100_fresh_trades'])} 个月、V11
+{_fmt(paper_protocol['arms']['V11']['planning_months_to_100_fresh_trades'])} 个月（仅规划估计，不是预测）。
+正式一次性读取采用三臂 Holm familywise 0.01，并要求匹配超额、绝对周区块 CI、去最大赢家和
+venue-exact 总成本同时通过。TradingView 逐笔 parity 未通过前，协议保持 `blocked=true`。
+
 止损/退出结论：
 
 - 保留 break-even：关闭后单位期望有些块更高，但交易更少、资金 PF/收益不一致，证据不足以替换；
 - 拒绝 trailing：开发段搜索的所有 2.5–10% 激活、1–5% 距离组合，最差半年都为负；
 - `close only` 反转模式最差半年 +22.32 bp，低于 V9 的 +41.49 bp，拒绝；
 - 初始 `4×ATR / 3% cap`、ATR 下限和 20 bp 成本未调参。
+
+对冻结 final 退出逐笔解剖后：
+
+| 退出类型 | 笔数 | 净 bp/笔 | 持有中位 bars | 出场前 MFE 中位 bp | 出场前 MAE 中位 bp |
+|---|---:|---:|---:|---:|---:|
+| 成本下的“BE”止损 | {exit_anatomy['by_exit_subtype']['break_even_locked_stop']['trades']} | {_fmt(exit_anatomy['by_exit_subtype']['break_even_locked_stop']['net_bp_per_trade'])} | {_fmt(exit_anatomy['by_exit_subtype']['break_even_locked_stop']['median_holding_bars'])} | {_fmt(exit_anatomy['by_exit_subtype']['break_even_locked_stop']['median_mfe_before_exit_bp'])} | {_fmt(exit_anatomy['by_exit_subtype']['break_even_locked_stop']['median_mae_before_exit_bp'])} |
+| 初始保护止损 | {exit_anatomy['by_exit_subtype']['initial_protective_stop']['trades']} | {_fmt(exit_anatomy['by_exit_subtype']['initial_protective_stop']['net_bp_per_trade'])} | {_fmt(exit_anatomy['by_exit_subtype']['initial_protective_stop']['median_holding_bars'])} | {_fmt(exit_anatomy['by_exit_subtype']['initial_protective_stop']['median_mfe_before_exit_bp'])} | {_fmt(exit_anatomy['by_exit_subtype']['initial_protective_stop']['median_mae_before_exit_bp'])} |
+| 反转退出 | {exit_anatomy['by_exit_subtype']['reverse']['trades']} | +{_fmt(exit_anatomy['by_exit_subtype']['reverse']['net_bp_per_trade'])} | {_fmt(exit_anatomy['by_exit_subtype']['reverse']['median_holding_bars'])} | {_fmt(exit_anatomy['by_exit_subtype']['reverse']['median_mfe_before_exit_bp'])} | {_fmt(exit_anatomy['by_exit_subtype']['reverse']['median_mae_before_exit_bp'])} |
+
+`BREAK_EVEN_OFFSET=0.1%` 只锁 10 bp，而冻结往返成本为 20 bp，所以 2023、2024、final 三段
+所有此类退出都精确为 -10 bp；名称和经济语义不一致。50 笔初始止损中
+{_fmt(exit_anatomy['initial_protective_stop_diagnostics']['fraction_never_reached_100bp_before_exit'] * 100)}%
+在出场前连 +1% MFE 都没有，说明多数失败首先是入场不延续，而不只是止损太紧。
+
+把 49 笔 -10 bp 静态替换成 0、保持同一退出时点的**会计上限示意**，只把均值从
+{_fmt(exit_anatomy['break_even_cost_semantics']['static_same_exit_accounting_only']['current_net_bp_per_trade'])}
+提高到 {_fmt(exit_anatomy['break_even_cost_semantics']['static_same_exit_accounting_only']['if_all_locked_stops_were_exactly_zero_net_bp_per_trade'])} bp/笔；
+去掉最大赢家后仍为
+{_fmt(exit_anatomy['break_even_cost_semantics']['static_same_exit_accounting_only']['mean_without_top1_bp'])} bp/笔。
+这不是 barrier replay，不能据此偷改参数；但它证明修正 BE 语义也不是解决尾部依赖的万能药。
 
 ### 仓位风险与回撤
 
@@ -384,6 +634,19 @@ oscillator 阈值只在 2023/2024 搜索；`0.1` 与 `0.15` 形成稳定平台�
 本轮把 **1%** 作为默认研究风险：0.5% 更稳但收益低；2% 的历史回撤已达 {_fmt(risk_final.loc[risk_final.risk_percent.eq(2.0), 'max_drawdown_15m_percent'].iloc[0])}%。
 正式 20 bp 成本下 V9 毛期望 {_fmt(cost_break_even['v9_locked'])} bp/笔，意味着总成本接近该值时点估计归零；
 资金费和真实滑点未建模，不能忽略。
+
+为避免只盯着实际一条资金曲线，使用 consumed-final 的 61 个周收益做 20,000 次连续 4 周
+循环区块重采样（纯描述、不是 OOS/预测）：
+
+{markdown_table(['资金臂', '实际收益 %', '实际 DD %', 'bootstrap 收益中位 [5%,95%]', 'DD 95% %', '终值<0 %', 'DD>20 %', '最长连亏'], path_risk_rows)}
+
+![Four-week block bootstrap path risk](../experiments/active/exp-pine-eth-15m-v1/results/charts/path_risk_bootstrap.png)
+
+0.5% 风险把 V9 的实际回撤从 20.07% 压到 10.63%，bootstrap 回撤 95 分位从
+{_fmt(path_risk['arms'][2]['drawdown_q95_percent'])}% 降到
+{_fmt(path_risk['arms'][0]['drawdown_q95_percent'])}%；但终值为负的重采样比例仍为
+{_fmt(path_risk['arms'][0]['probability_negative_terminal'] * 100)}%。因此 **0.5% 是更保守的
+paper 风险档，不是 alpha 优化**；1% 继续作为可比研究基准，2% 不建议。
 
 ### 独立回测框架复核
 
@@ -398,6 +661,12 @@ oscillator 阈值只在 2023/2024 搜索；`0.1` 与 `0.15` 形成稳定平台�
 这通过了**独立 Python 框架 reconciliation**，但不是 TradingView broker-emulator parity。
 Pine 仍需在同一交易所 15m 图表编译并导出逐笔 ledger。
 
+V9 Pine 静态契约 25/25 项通过：常量、900 秒周期守卫、ETH base 守卫、confirmed-bar、next-open、
+commission、禁 tick 重算/放大器、无 `request.security`/lookahead 都与冻结配置一致；同时明确
+`official_pine_compiler_run=false`。`tradingview/trades_normalized.template.csv` 与
+`scripts/reconcile_pine_eth_15m_tradingview.py` 已准备好，真实导出必须 110/110 entry+side、exit time、
+入/出价格一 tick 内全部通过；费用/净 P&L 仍需 venue 会计复核。
+
 同一 OKX 合约的 3m 有序路径又做了一层执行敏感性复核：
 
 - 2025-01 至 2026-02 共 {intrabar['parent_bar_reconstruction']['joined_15m_bars']:,} 根 15m 母 K，
@@ -411,6 +680,31 @@ Pine 仍需在同一交易所 15m 图表编译并导出逐笔 ledger。
 这只证明**本地 OKX 同源 15m 执行没有被聚合路径高估**；Pine 设置仍为
 `use_bar_magnifier=false`，也没有替代 TradingView venue-specific parity。
 
+### 邻近数据源敏感性
+
+同一 2025-07 至 2026-02 时段，OKX swap 与 spot 各有 23,328 根无缺口 15m K；spot 只作为
+附近独立 feed，不是永续替代品：
+
+{markdown_table(['版本', 'swap 笔数', 'spot 笔数', '入场 Jaccard %', '共同入场净收益差 bp'], feed_rows)}
+
+V9/V11 的价格型规则入场重合约 96%，但成交量门 V10 只有 78%；`vol_ratio_mean8` 两 feed
+相关性虽为 {_fmt(feed_sensitivity['vol_ratio_mean8_cross_feed_correlation'], 4)}，成交量本身来自不同市场。
+因此 feed 审计支持 V9 做本地 proxy 基线，同时进一步降低 V10 的可信度；仍不等于 TradingView parity。
+
+### Docker 复核状态
+
+固定配方两次都停在 Docker Hub 的 `python:3.11-slim` metadata 拉取，尚未进入依赖安装或代码执行，
+因此明确记录 `pinned_docker_recipe_built=false`。为了区分“Docker runtime 坏了”和“外部镜像站阻塞”，
+又使用本机已有镜像在 `--network none` 下做只读产物算术 smoke：
+
+- Python {docker_smoke['runtime']['python']} / pandas {docker_smoke['runtime']['pandas']} /
+  NumPy {docker_smoke['runtime']['numpy']}；
+- {docker_smoke['count']}/{docker_smoke['count']} 项通过，包括 110 笔收益重算、20 bp 成本、
+  330 个唯一对照、统计失败门、3m 出场对账和 eligibility；
+- scope 仅为 `{docker_smoke['scope']}`，没有重跑市场数据或回测。
+
+所以 Docker 运行时和跨版本产物算术已通过 smoke，但**正式 pinned 容器构建仍未通过**。
+
 ## 项目判断层（用户称 LR）能否接入
 
 可以接，但当前不能把旧模型直接拿来判定：
@@ -423,6 +717,35 @@ Pine 仍需在同一交易所 15m 图表编译并导出逐笔 ledger。
 本轮已经输出每个 V9 final 信号 bar 的 28 个因果特征、side-aligned 语义和 label end：
 `results/pine_l2_feature_rows.csv`，但每行都标记 `training_eligible=false`。
 
+另外只读取 2023/2024，连续回放得到 {judgment_research['rows']} 条 Pine-specific judgment
+lineage（{judgment_research['long_rows']} long / {judgment_research['short_rows']} short，
+成本后正类率 {_fmt(judgment_research['net_positive_rate'] * 100)}%，28 特征缺失 0）：
+
+{markdown_table(['fold', 'raw train', 'purged train', 'label-overlap purge', 'validation', 'train 正类 %', 'val 正类 %'], judgment_fold_rows)}
+
+特征在 signal bar 收盘完成，时间戳与 `t+1` entry open 完全相同；label end 保守加到 exit bar
+收盘，两个跨切点样本已经 purge。这个表依然**不能直接拿来静态 top-decile 筛选**：它只记录
+V9 baseline 的 on-policy executed trades，一旦 LR 拒绝某单，后续持仓、反转与 cooldown 状态会改变。
+未来获批后，模型分数必须放回动态 replay 内逐信号执行，不能只过滤现成 trade CSV。
+
+这个限制不是理论提醒，两个已知 gate 的静态/动态 final 对照如下：
+
+| gate | 静态入场表 bp/笔 | 动态 replay bp/笔 | 静态高估 bp | 入场 Jaccard % |
+|---|---:|---:|---:|---:|
+| `vol_ratio_mean8>=1` | {_fmt(stateful_gate['final_summary']['vol_ratio_mean8_ge1']['static_net_bp_per_trade'])} | {_fmt(stateful_gate['final_summary']['vol_ratio_mean8_ge1']['dynamic_net_bp_per_trade'])} | {_fmt(stateful_gate['final_summary']['vol_ratio_mean8_ge1']['static_minus_dynamic_net_bp'])} | {_fmt(stateful_gate['final_summary']['vol_ratio_mean8_ge1']['entry_jaccard'] * 100)} |
+| long-only | {_fmt(stateful_gate['final_summary']['long_only']['static_net_bp_per_trade'])} | {_fmt(stateful_gate['final_summary']['long_only']['dynamic_net_bp_per_trade'])} | {_fmt(stateful_gate['final_summary']['long_only']['static_minus_dynamic_net_bp'])} | {_fmt(stateful_gate['final_summary']['long_only']['entry_jaccard'] * 100)} |
+
+判断层容量也不够直接上全量模型：{judgment_feasibility['rows']} 行只有
+{judgment_feasibility['positive_events']} 个正例 / {judgment_feasibility['candidate_features']} 特征，
+即 {_fmt(judgment_feasibility['overall_positive_events_per_feature'], 3)} 正例/特征；三折训练正例仅
+{min(row['train_positive_events'] for row in judgment_feasibility['fold_capacity'])}–
+{max(row['train_positive_events'] for row in judgment_feasibility['fold_capacity'])}，验证正例仅
+{min(row['validation_positive_events'] for row in judgment_feasibility['fold_capacity'])}–
+{max(row['validation_positive_events'] for row in judgment_feasibility['fold_capacity'])}。
+所以未来第一步应是**预注册单特征正则 LR**（最多极小先验子集）；不能在 166 笔上拟合 28 特征
+LightGBM 再用好看的 AUC 自证。若要全量模型，需要相同 Pine 候选/标签语义的动态样本扩展，优先
+time-grouped 跨币训练并单独校验 ETH，而不是复用旧 YOLO-v10 判断层。
+
 未来获得训练许可后，正确链路是：
 
 ```text
@@ -434,7 +757,8 @@ Pine confirmed close(t)
 ```
 
 标签必须用同一套 Pine 入场、反转、止损、BE 和 20 bp 成本；按时间 walk-forward，按 label end purge，
-并同时报告 top-decile 净收益、p<0.01、匹配随机对照。不能把旧 YOLO L2 分数当成 Pine 已验证 gate。
+并同时报告 top-decile 净收益、p<0.01、64-seed 匹配随机对照和 leave-top-winner-out。
+不能把旧 YOLO L2 分数当成 Pine 已验证 gate。
 
 ## 风险与诚实声明
 
@@ -442,20 +766,29 @@ Pine confirmed close(t)
 - **统计未过门。** V9/V10 的区块 p 值都远高于 0.01，CI 跨 0，不能说收益已稳定。
 - **特征搜索未过多重校正。** `vol_ratio_mean8 >= 1` 的四块增量都为正，但 18-gate max-stat `p={_fmt(robustness['selection_adjusted_feature_test']['selection_adjusted_p_value'], 4)}`；V10 仍只是 paper-forward 假设。
 - **收益高度集中。** V9 去掉最大赢家后转负；V10 集中更严重。
-- **数据源未 parity。** OKX cache 不能证明等于任意 TradingView `ETHUSDT.P`。
+- **V11 也未解决尾部依赖。** 56 笔只有 5 笔盈利，去掉最大赢家后均值 {_fmt(v11['profit_concentration']['mean_without_top1_bp'])} bp/笔；它没有资格替换 V9。
+- **真实 10m 短窗反对简单周期优越论。** 约 10 周同窗中，10m 原 V8 为正而 15m V8/V9 为负；四组匹配检验均不显著，不能选回 10m，也不能宣称 15m 在所有制度更好。
+- **跨制度仍未过门。** V9 虽 7/9 时间块为正，但绝对/匹配精确 p 为 {_fmt(regime_stability['absolute_net_equal_block_test']['one_sided_p_value'], 4)} / {_fmt(regime_stability['matched_excess_equal_block_test']['one_sided_p_value'], 4)}；2025H1、2026M1M2 为负。
+- **break-even 经济语义错误但本轮未改。** +10 bp 锁盈低于 20 bp 成本，49 笔固定净 -10 bp；任何 offset 修改仍是需 owner 单独批准的新 barrier 实验。
+- **随机对照有 assignment 方差。** V9 的 64-seed 超额 5%–95% 为 [{_fmt(control_sensitivity['variants'][0]['candidate_minus_control_bp']['q05'])}, {_fmt(control_sensitivity['variants'][0]['candidate_minus_control_bp']['q95'])}] bp；单 seed 不能当确定事实。
+- **数据源未 parity。** OKX cache 不能证明等于任意 TradingView `ETHUSDT.P`；swap/spot 审计中 V9 入场 Jaccard 96.61%，V10 仅 78%，后者更依赖 venue volume。
 - **成本不完整。** 正式扣 20 bp，但滑点/资金费/强平/最小下单量未进入资金曲线。
+- **资金费不可得而不是 0。** 本地 ETH funding 从 {funding_coverage['first_observed_funding_record']} 才开始，与 canonical final 交集 0；没有计算 funding-adjusted return。
+- **路径 bootstrap 不是预测。** 它只重排已消费时期的 4 周区块；V9 0.5% 风险仍有 {_fmt(path_risk['arms'][0]['probability_negative_terminal'] * 100)}% 重采样终值为负，不能解释成未来亏损概率的精确估计。
 - **没有真实密集门。** 原始核心是 SMA10/60 单点 crossover，不是项目 Local Signal V2；严格 EMA ribbon density gate 在开发段不稳定。
 - **没有训练或生产动作。** 所有策略计算的 bounded loader 都读取 0 行 holdout；未 train、promote、deploy、改 ACTIVE、写 forward_log 或操作真金账户。
 - **意外 holdout 预览已披露。** 在写 3m bounded loader 前，一次 shell `tail` 意外显示了原始文件末尾两行（均在 repository holdout）；它们没有进入 Python、没有被评分、没有参与任何配置选择或收益评估。按本仓“看一眼也要记录”的纪律，此事故不能写成“从未看见”，后续已用前缀加载器和不读取整文件的前缀哈希封死。
-- **Docker 首次拉镜像依赖外部 Docker Hub。** 主机两套引擎已复核；容器结果单独记录，不拿失败拉取冒充代码失败。
+- **第二次意外预览已披露。** 检查 funding coverage 时，shell 又显示了 8 条 holdout 期 funding 原始行，最晚到 {funding_coverage['operational_incident']['displayed_range_end']}；同样未进 Python、未汇总/评分/选参，发现本地 funding 不覆盖回测后立即停止该分析。
+- **正式 Docker 构建未完成。** 两次都卡在外部基础镜像 metadata；离线已有镜像只通过产物算术 smoke，不能冒充 pinned backtest rerun。
 
 ## 下一步选项（需 owner 决策的已标出）
 
 1. **可立即做：** 在明确的 TradingView venue 上粘贴 V9 Pine，导出 trade list；对 signal/entry/exit/fee/equity 逐笔对账。未过不得 forward。
-2. **可立即做：** V9 与 V10 只做 paper-only 新鲜前向 A/B，各积累至少 100 笔；V10 不追认旧 final 为 OOS。
-3. **需 owner 在 P0/P1 通过后批准：** 建 Pine-specific LR baseline / LightGBM judgment dataset 与训练；当前硬门禁止。
-4. **需 owner 单独批准：** 任何 TP/SL 倍数、ATR 下限、20 bp 成本或 holdout 评估；本轮都没动。
-5. **不建议：** 用 2% 风险或 legacy 日历倍增掩盖不显著的单位 alpha。
+2. **需 owner 单独批准：** 把名义 BE 的 +0.1% offset 改成成本感知值并作为单一 barrier 变量重跑；当前只完成语义/会计诊断，未改参数。
+3. **parity 后再由 owner 启动：** V9 / V10（成交量门）/ V11（只开多）做互斥 paper-only 新鲜前向 A/B，各积累至少 100 笔；纸面风险优先 0.5%，1% 留作可比基准；禁止把 V10+V11 打包，旧 final 不追认为 OOS。
+4. **需 owner 在 P0/P1 通过后批准：** 先建 Pine-specific 单特征正则 LR；不要直接在 166 笔上训 28 特征 LightGBM。所有分数必须进入动态 replay。
+5. **需 owner 单独批准：** 任何其他 TP/SL 倍数、ATR 下限、20 bp 成本或 holdout 评估；本轮都没动。
+6. **不建议：** 用 2% 风险、legacy 日历倍增、静态 trade CSV 过滤或继续挖 consumed-final 参数掩盖不显著的单位 alpha。
 
 ## 复现命令
 
@@ -463,6 +796,20 @@ Pine confirmed close(t)
 git checkout {summary['generated_from_commit']}
 PYTHONPATH=. .venv/bin/python scripts/research_pine_eth_15m.py
 PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_robustness.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_side_hypothesis.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_control_sensitivity.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_path_risk.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_feed_sensitivity.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_exit_anatomy.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_backcast.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_actual_10m_vs_15m.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_regime_stability.py
+PYTHONPATH=. .venv/bin/python scripts/generate_pine_eth_15m_paper_variants.py
+PYTHONPATH=. .venv/bin/python scripts/prepare_pine_eth_15m_judgment_research.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_judgment_feasibility.py
+PYTHONPATH=. .venv/bin/python scripts/analyze_pine_eth_15m_stateful_gate.py
+PYTHONPATH=. .venv/bin/python scripts/audit_pine_eth_15m_static_contract.py
+PYTHONPATH=. .venv/bin/python scripts/design_pine_eth_15m_paper_protocol.py
 PYTHONPATH=. python3 scripts/reconcile_pine_eth_15m_backtesting.py
 PYTHONPATH=. python3 scripts/reconcile_pine_eth_15m_intrabar.py
 PYTHONPATH=. .venv/bin/python scripts/validate_pine_eth_15m.py
@@ -470,7 +817,7 @@ PYTHONPATH=. /tmp/fable-pine-eval-venv/bin/python scripts/build_pine_eth_15m_rep
 PYTHONPATH=. .venv/bin/python scripts/md_to_html.py \\
   analysis/p0_pine_eth_15m_v1_20260821.md --out-dir analysis/html
 PYTHONPATH=. .venv/bin/python -m pytest -q \\
-  tests/test_pine_allin_v7_backtest.py tests/test_research_pine_eth_15m.py tests/test_reconcile_pine_eth_15m_intrabar.py tests/test_analyze_pine_eth_15m_robustness.py
+  tests/test_pine_allin_v7_backtest.py tests/test_research_pine_eth_15m.py tests/test_reconcile_pine_eth_15m*.py tests/test_analyze_pine_eth*.py tests/test_audit_pine_eth_15m_static_contract.py tests/test_design_pine_eth_15m_paper_protocol.py tests/test_generate_pine_eth_15m_paper_variants.py tests/test_prepare_pine_eth_15m_judgment_research.py tests/test_smoke_pine_eth_15m_artifacts.py
 ```
 
 Docker：
@@ -481,6 +828,14 @@ docker build -t fable-pine-eth15m-v1 \\
 docker run --rm --network none -v "$PWD:/workspace:ro" \\
   -v "$PWD/experiments/active/exp-pine-eth-15m-v1/results-docker:/output" \\
   fable-pine-eth15m-v1
+
+# External base-image pull unavailable: offline artifact-only smoke used here
+docker run --rm --network none --entrypoint python -w /workspace \\
+  -v "$PWD:/workspace:ro" \\
+  -v "$PWD/experiments/active/exp-pine-eth-15m-v1/results:/output" \\
+  heartexlabs/label-studio:latest scripts/smoke_pine_eth_15m_artifacts.py \\
+  --runtime-label offline-local-label-studio-image \\
+  --output /output/docker_offline_smoke.json
 ```
 
 验证器结果：**{validation['counts']['checks']}/{validation['counts']['checks']} checks pass**。
@@ -494,7 +849,8 @@ def make_notebook(evidence: dict[str, Any]) -> nbformat.NotebookNode:
             "# ETH perpetual 15m Pine V1 audit\n\n"
             "**TL;DR:** V9 improves the consumed final-preholdout ETH result to +30.22 bp/trade "
             "after the frozen 20 bp cost, but week-block p=0.17 and the mean turns negative after "
-            "removing the largest winner. V10 is only a post-selection forward hypothesis."
+            "removing the largest winner. Actual 10m comparison, regime blocks, and a cost-underwater "
+            "break-even warning keep V9 research-only; V10/V11 are post-selection hypotheses."
         ),
         nbformat.v4.new_code_cell(
             "from pathlib import Path\n"
@@ -505,6 +861,17 @@ def make_notebook(evidence: dict[str, Any]) -> nbformat.NotebookNode:
             "stats=json.loads((R/'statistical_tests.json').read_text())\n"
             "intrabar=json.loads((R/'intrabar_3m_reconciliation.json').read_text())\n"
             "robustness=json.loads((R/'robustness_checks.json').read_text())\n"
+            "docker_smoke=json.loads((R/'docker_offline_smoke.json').read_text())\n"
+            "v11=json.loads((R/'v11_long_only_summary.json').read_text())\n"
+            "control_sensitivity=json.loads((R/'control_seed_sensitivity.json').read_text())\n"
+            "path_risk=json.loads((R/'path_risk_bootstrap.json').read_text())\n"
+            "judgment=json.loads((R/'pine_judgment_development_manifest.json').read_text())\n"
+            "exit_anatomy=json.loads((R/'exit_anatomy.json').read_text())\n"
+            "actual_timeframe=json.loads((R/'actual_10m_vs_15m.json').read_text())\n"
+            "regime=json.loads((R/'regime_stability.json').read_text())\n"
+            "judgment_capacity=json.loads((R/'judgment_feasibility.json').read_text())\n"
+            "stateful_gate=json.loads((R/'stateful_gate_static_vs_dynamic.json').read_text())\n"
+            "pine_static=json.loads((R/'pine_static_contract.json').read_text())\n"
             "split=pd.read_csv(R/'split_summary.csv')\n"
             "risk=pd.read_csv(R/'risk_grid.csv')\n"
             "assert validation['status']=='pass' and summary['holdout_consumed'] is False\n"
@@ -548,6 +915,17 @@ def make_notebook(evidence: dict[str, Any]) -> nbformat.NotebookNode:
             "assert intrabar['exact_exit_price_count'] == 110\n"
             "assert robustness['final_preholdout_rows_read'] == 0\n"
             "assert robustness['selection_adjusted_feature_test']['selection_adjusted_p_value'] >= 0.01\n"
+            "assert docker_smoke['status'] == 'pass' and docker_smoke['pinned_docker_recipe_built'] is False\n"
+            "assert v11['profit_concentration']['mean_without_top1_bp'] < 0\n"
+            "assert all(row['fraction_assignment_seeds_with_p_below_0p01'] == 0 for row in control_sensitivity['variants'])\n"
+            "assert path_risk['arms'][0]['drawdown_q95_percent'] < path_risk['arms'][2]['drawdown_q95_percent']\n"
+            "assert judgment['training_eligible'] is False and judgment['lr_fitted'] is False\n"
+            "assert exit_anatomy['break_even_cost_semantics']['locked_stop_project_net_bp'] == -10.0\n"
+            "assert actual_timeframe['variants']['V9_15m']['summary']['project_net_bp_per_trade'] < 0\n"
+            "assert regime['absolute_net_equal_block_test']['one_sided_p_value'] >= 0.01\n"
+            "assert judgment_capacity['overall_positive_events_per_feature'] < 1.0\n"
+            "assert stateful_gate['static_top_decile_filtering_valid_for_l2'] is False\n"
+            "assert pine_static['status'] == 'pass' and pine_static['official_pine_compiler_run'] is False\n"
             "assert summary['tradingview_parity_passed'] is False\n"
             "print('Point estimate positive; robustness and parity gates correctly remain failed.')"
         ),

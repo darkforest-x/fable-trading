@@ -47,6 +47,44 @@ def main() -> int:
     framework = json.loads((RESULTS / "backtesting_reconciliation.json").read_text(encoding="utf-8"))
     intrabar = json.loads((RESULTS / "intrabar_3m_reconciliation.json").read_text(encoding="utf-8"))
     robustness = json.loads((RESULTS / "robustness_checks.json").read_text(encoding="utf-8"))
+    docker_smoke = json.loads((RESULTS / "docker_offline_smoke.json").read_text(encoding="utf-8"))
+    v11 = json.loads((RESULTS / "v11_long_only_summary.json").read_text(encoding="utf-8"))
+    control_sensitivity = json.loads(
+        (RESULTS / "control_seed_sensitivity.json").read_text(encoding="utf-8")
+    )
+    path_risk = json.loads((RESULTS / "path_risk_bootstrap.json").read_text(encoding="utf-8"))
+    paper_manifest = json.loads(
+        (EXPERIMENT / "pine/paper_variants_manifest.json").read_text(encoding="utf-8")
+    )
+    judgment_research = json.loads(
+        (RESULTS / "pine_judgment_development_manifest.json").read_text(encoding="utf-8")
+    )
+    feed_sensitivity = json.loads(
+        (RESULTS / "feed_sensitivity.json").read_text(encoding="utf-8")
+    )
+    funding_coverage = json.loads(
+        (RESULTS / "funding_coverage_incident.json").read_text(encoding="utf-8")
+    )
+    exit_anatomy = json.loads((RESULTS / "exit_anatomy.json").read_text(encoding="utf-8"))
+    backcast = json.loads((RESULTS / "backcast_2022.json").read_text(encoding="utf-8"))
+    paper_protocol = json.loads(
+        (RESULTS / "paper_forward_protocol.json").read_text(encoding="utf-8")
+    )
+    actual_timeframe = json.loads(
+        (RESULTS / "actual_10m_vs_15m.json").read_text(encoding="utf-8")
+    )
+    regime_stability = json.loads(
+        (RESULTS / "regime_stability.json").read_text(encoding="utf-8")
+    )
+    judgment_feasibility = json.loads(
+        (RESULTS / "judgment_feasibility.json").read_text(encoding="utf-8")
+    )
+    stateful_gate = json.loads(
+        (RESULTS / "stateful_gate_static_vs_dynamic.json").read_text(encoding="utf-8")
+    )
+    pine_static = json.loads(
+        (RESULTS / "pine_static_contract.json").read_text(encoding="utf-8")
+    )
     trades = pd.read_csv(
         RESULTS / "trades.csv",
         parse_dates=["signal_time", "entry_time", "exit_time"],
@@ -184,6 +222,176 @@ def main() -> int:
         and prequential["increment_exact_signflip"]["p_value"] >= 0.01
         and adjusted["candidate_gate_count_including_none"] == 18
         and adjusted["selection_adjusted_p_value"] >= 0.01
+    )
+    side_test = robustness["side_selection_test"]
+    checks["long_only_side_hypothesis_is_development_selected_but_unproven"] = bool(
+        side_test["selected_policy"] == "v9_long_only"
+        and side_test["selected_unadjusted"]["p_value"] >= 0.01
+        and side_test["selection_adjusted_p_value"] >= 0.01
+        and v11["final_preholdout_was_already_consumed"] is True
+        and v11["holdout_rows_read"] == 0
+        and v11["final_preholdout"]["trades"] == 56
+        and v11["week_block_signflip"]["p_value"] >= 0.01
+        and v11["profit_concentration"]["mean_without_top1_bp"] < 0.0
+        and v11["eligibility"]["paper_ab_only"] is True
+    )
+    control_variants = control_sensitivity["variants"]
+    checks["matched_control_assignment_seed_uncertainty_is_visible"] = bool(
+        control_sensitivity["assignment_seeds"] == 64
+        and control_sensitivity["all_control_sets_exact"] is True
+        and len(control_variants) == 3
+        and all(row["assignment_seeds"] == 64 for row in control_variants)
+        and all(row["fraction_assignment_seeds_with_p_below_0p01"] == 0.0 for row in control_variants)
+        and next(row for row in control_variants if row["variant"] == "v9_locked")[
+            "fraction_assignment_seeds_with_positive_excess"
+        ] < 1.0
+    )
+    path_arms = {row["label"]: row for row in path_risk["arms"]}
+    checks["path_risk_bootstrap_shows_sizing_reduces_dd_not_alpha_risk"] = bool(
+        path_risk["resamples"] == 20_000
+        and path_risk["block_weeks"] == 4
+        and path_risk["holdout_rows_read"] == 0
+        and len(path_arms) == 5
+        and path_arms["V9 risk 0.50%"]["drawdown_q95_percent"] < 20.0
+        and path_arms["V9 risk 1.00%"]["drawdown_q95_percent"] > 30.0
+        and path_arms["V9 risk 0.50%"]["probability_negative_terminal"] > 0.20
+    )
+    v10_pine = (EXPERIMENT / "pine/allin_eth_15m_v10_volume_paper.pine").read_text(
+        encoding="utf-8"
+    )
+    v11_pine = (EXPERIMENT / "pine/allin_eth_15m_v11_long_only_paper.pine").read_text(
+        encoding="utf-8"
+    )
+    checks["paper_pine_variants_are_single_variable_and_fail_closed"] = bool(
+        "volRatioMean8 >= VOLUME_RATIO_THRESHOLD" in v10_pine
+        and v10_pine.count("volumeExpansion and") == 2
+        and 'strategy.entry("Short"' not in v11_pine
+        and 'strategy.close("Long", comment = "V11 short signal exits long"' in v11_pine
+        and paper_manifest["combined_v10_v11_generated"] is False
+        and paper_manifest["tradingview_parity_passed"] is False
+        and paper_manifest["production_eligible"] is False
+    )
+    checks["pine_judgment_interface_is_causal_but_training_blocked"] = bool(
+        judgment_research["rows"] == 166
+        and judgment_research["feature_count"] == 28
+        and judgment_research["missing_feature_cells"] == 0
+        and judgment_research["features_available_exactly_at_entry_open"] is True
+        and judgment_research["data_quality"]["consumed_final_rows_read"] == 0
+        and judgment_research["data_quality"]["holdout_rows_read"] == 0
+        and judgment_research["training_eligible"] is False
+        and judgment_research["existing_frozen_model_scored"] is False
+        and judgment_research["lr_fitted"] is False
+        and judgment_research["lightgbm_fitted"] is False
+    )
+    feed_entries = feed_sensitivity["executed_entry_comparisons"]
+    checks["nearby_feed_sensitivity_keeps_v9_but_warns_on_v10_volume"] = bool(
+        feed_sensitivity["common_bars"] == 23_328
+        and feed_sensitivity["holdout_rows_read"] == 0
+        and feed_sensitivity["tradingview_parity_passed"] is False
+        and feed_sensitivity["spot_is_perpetual_substitute"] is False
+        and feed_entries["V9"]["jaccard"] > 0.95
+        and feed_entries["V11"]["jaccard"] > 0.95
+        and feed_entries["V10"]["jaccard"] < feed_entries["V9"]["jaccard"]
+    )
+    checks["funding_is_unavailable_not_silently_zero_and_preview_disclosed"] = bool(
+        funding_coverage["overlapping_funding_records"] == 0
+        and funding_coverage["funding_cost_assumed_zero"] is False
+        and funding_coverage["funding_cost_computed"] is False
+        and funding_coverage["post_holdout_rows_used_in_any_calculation"] == 0
+        and funding_coverage["operational_incident"]["rows_displayed"] == 8
+    )
+    exit_semantics = exit_anatomy["break_even_cost_semantics"]
+    checks["exit_anatomy_exposes_cost_underwater_break_even_without_tuning"] = bool(
+        exit_anatomy["trades"] == 110
+        and exit_anatomy["holdout_rows_read"] == 0
+        and exit_anatomy["barrier_parameters_changed"] is False
+        and exit_anatomy["barrier_search_performed"] is False
+        and exit_semantics["configured_lock_bp"] == 10.0
+        and exit_semantics["frozen_round_trip_cost_bp"] == 20.0
+        and exit_semantics["locked_stop_project_net_bp"] == -10.0
+        and exit_anatomy["by_exit_subtype"]["reverse"]["positive_trades"] == 11
+    )
+    checks["backcast_is_qualified_matched_and_cannot_promote"] = bool(
+        backcast["holdout_rows_read"] == 0
+        and backcast["discovery_rows_read"] == 0
+        and backcast["is_out_of_sample"] is False
+        and backcast["may_change_locked_candidate"] is False
+        and backcast["variants"]["V9"]["summary"]["project_net_bp_per_trade"] > 0.0
+        and backcast["variants"]["V9"]["week_signflip"]["p_value"] >= 0.01
+        and all(
+            row["matched_control"]["controls_per_trade_min"] == 3
+            for row in backcast["variants"].values()
+        )
+    )
+    checks["paper_forward_protocol_is_hashed_blocked_and_nonexecuting"] = bool(
+        paper_protocol["formal_collection_started"] is False
+        and paper_protocol["forward_log_written"] is False
+        and paper_protocol["live_or_paper_order_sent"] is False
+        and paper_protocol["blocked"] is True
+        and paper_protocol["tradingview_parity_passed"] is False
+        and paper_protocol["combined_v10_v11_arm_allowed"] is False
+        and all(
+            arm["minimum_fresh_trades_for_formal_read"] == 100
+            for arm in paper_protocol["arms"].values()
+        )
+    )
+    actual_variants = actual_timeframe["variants"]
+    checks["actual_10m_short_window_warning_is_exact_and_visible"] = bool(
+        actual_timeframe["ten_minute_quality"]["parents_not_exactly_two_5m_bars"] == 0
+        and actual_timeframe["holdout_rows_read"] == 0
+        and actual_timeframe["selection_or_promotion_allowed"] is False
+        and actual_variants["V8_10m"]["summary"]["project_net_bp_per_trade"] > 0.0
+        and actual_variants["V8_15m"]["summary"]["project_net_bp_per_trade"] < 0.0
+        and actual_variants["V9_10m"]["summary"]["project_net_bp_per_trade"] < 0.0
+        and actual_variants["V9_15m"]["summary"]["project_net_bp_per_trade"] < 0.0
+        and all(row["week_signflip"]["p_value"] >= 0.01 for row in actual_variants.values())
+    )
+    checks["chronological_regime_dependence_and_exact_p_failure_visible"] = bool(
+        regime_stability["blocks"] == 9
+        and regime_stability["holdout_rows_read"] == 0
+        and regime_stability["matched_controls_exact"] is True
+        and regime_stability["absolute_net_equal_block_test"]["positive_blocks"] == 7
+        and regime_stability["absolute_net_equal_block_test"]["one_sided_p_value"] >= 0.01
+        and regime_stability["matched_excess_equal_block_test"]["one_sided_p_value"] >= 0.01
+        and {row["period"] for row in regime_stability["recent_failures"]}
+        == {"2025H1", "2026M1M2"}
+    )
+    checks["judgment_capacity_blocks_28_feature_overfit"] = bool(
+        judgment_feasibility["rows"] == 166
+        and judgment_feasibility["positive_events"] == 27
+        and judgment_feasibility["candidate_features"] == 28
+        and judgment_feasibility["overall_positive_events_per_feature"] < 1.0
+        and judgment_feasibility["training_or_scoring_performed"] is False
+        and judgment_feasibility["training_eligible"] is False
+        and judgment_feasibility["stateful_replay_required"] is True
+    )
+    checks["static_gate_bias_requires_dynamic_judgment_replay"] = bool(
+        stateful_gate["holdout_rows_read"] == 0
+        and stateful_gate["training_or_scoring_performed"] is False
+        and stateful_gate["static_top_decile_filtering_valid_for_l2"] is False
+        and stateful_gate["final_summary"]["vol_ratio_mean8_ge1"]["entry_jaccard"] < 0.90
+        and stateful_gate["final_summary"]["vol_ratio_mean8_ge1"]
+        ["static_minus_dynamic_net_bp"]
+        > 0.0
+    )
+    tv_template = EXPERIMENT / "tradingview/trades_normalized.template.csv"
+    checks["pine_static_contract_passes_and_tv_parity_harness_is_pending"] = bool(
+        pine_static["status"] == "pass"
+        and pine_static["check_count"] == 25
+        and not pine_static["failed"]
+        and pine_static["official_pine_compiler_run"] is False
+        and pine_static["tradingview_parity_passed"] is False
+        and tv_template.is_file()
+        and tv_template.read_text(encoding="utf-8").startswith(
+            "direction,entry_time,exit_time,entry_price,exit_price"
+        )
+    )
+    checks["offline_docker_artifact_smoke_passed_without_overclaim"] = bool(
+        docker_smoke["status"] == "pass"
+        and docker_smoke["count"] == 31
+        and docker_smoke["runtime_label"] == "offline-local-label-studio-image"
+        and docker_smoke["pinned_docker_recipe_built"] is False
+        and docker_smoke["tradingview_parity_passed"] is False
     )
     checks["l2_export_exact_and_training_blocked"] = bool(
         len(feature_contract["project_l2_features"]) == 28

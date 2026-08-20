@@ -85,6 +85,7 @@ class Arm:
     use_break_even: bool = True
     use_trailing_stop: bool = False
     opposite_signal_action: str = "reverse"
+    entry_directions: tuple[int, ...] = (-1, 1)
 
 
 @dataclass
@@ -351,6 +352,10 @@ def simulate_symbol(
         raise ValueError("skip_return_basis must be gross|net")
     if arm.opposite_signal_action not in {"reverse", "close_only"}:
         raise ValueError("opposite_signal_action must be reverse|close_only")
+    if not arm.entry_directions or any(
+        direction not in {-1, 1} for direction in arm.entry_directions
+    ):
+        raise ValueError("entry_directions must be a non-empty subset of (-1, 1)")
     start = pd.Timestamp(start)
     end = pd.Timestamp(end)
     if start.tzinfo is None:
@@ -502,6 +507,7 @@ def simulate_symbol(
                 position is None
                 and equity > 0.0
                 and not (closed_opposite and arm.opposite_signal_action == "close_only")
+                and pending_direction in arm.entry_directions
             ):
                 open_position(i, pending_direction, pending_signal_i)
             pending_direction = 0

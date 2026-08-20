@@ -39,6 +39,7 @@ EXPERIMENT = PROJECT / "experiments/active/exp-pine-eth-15m-v1"
 RESULTS = EXPERIMENT / "results"
 CHARTS = RESULTS / "charts"
 CORE_OUTPUT = RESULTS / "core_component_ablation.csv"
+SIDE_OUTPUT = RESULTS / "side_ablation.csv"
 PREQUENTIAL_OUTPUT = RESULTS / "prequential_feature_selection.csv"
 ROBUSTNESS_OUTPUT = RESULTS / "robustness_checks.json"
 DEVELOPMENT_END = pd.Timestamp("2025-01-01T00:00:00Z")
@@ -163,6 +164,47 @@ def core_component_ablation(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[dic
     return pd.DataFrame(rows), aggregate
 
 
+def side_ablation(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[dict[str, Any]]]:
+    """Compare two-sided, long-only, and short-only entry eligibility in development."""
+
+    variants = (
+        Variant("v9_two_sided", "v9_long", "v9_short", entry_directions=(-1, 1)),
+        Variant("v9_long_only", "v9_long", "v9_short", entry_directions=(1,)),
+        Variant("v9_short_only", "v9_long", "v9_short", entry_directions=(-1,)),
+    )
+    rows: list[dict[str, Any]] = []
+    aggregate: list[dict[str, Any]] = []
+    for variant in variants:
+        selected_rows: list[dict[str, Any]] = []
+        for period in DEVELOPMENT_BLOCKS:
+            trades, equity = simulate_period(frame, variant, period)
+            summary = summarize(
+                trades,
+                equity,
+                variant=variant.name,
+                period=period.name,
+                risk_percent=1.0,
+            )
+            selected_rows.append(summary)
+            rows.append(summary)
+        block = pd.DataFrame(selected_rows)
+        aggregate.append(
+            {
+                "variant": variant.name,
+                "entry_directions": list(variant.entry_directions),
+                "trades": int(block["trades"].sum()),
+                "minimum_block_net_bp": float(block["project_net_bp_per_trade"].min()),
+                "weighted_net_bp": float(
+                    np.average(block["project_net_bp_per_trade"], weights=block["trades"])
+                ),
+                "positive_blocks": int(block["project_net_bp_per_trade"].gt(0.0).sum()),
+                "mean_return_percent": float(block["return_percent"].mean()),
+                "worst_drawdown_percent": float(block["max_drawdown_15m_percent"].max()),
+            }
+        )
+    return pd.DataFrame(rows), aggregate
+
+
 def write_core_chart(aggregate: list[dict[str, Any]]) -> None:
     """Render the nested core relationship for the durable HTML report."""
 
@@ -271,6 +313,36 @@ def selection_adjusted_max_signflip(search: pd.DataFrame) -> dict[str, Any]:
     }
 
 
+def selection_adjusted_side_signflip(side_rows: pd.DataFrame) -> dict[str, Any]:
+    """Exact max-stat test for the development-only direction eligibility choice."""
+
+    periods = [period.name for period in DEVELOPMENT_BLOCKS]
+    pivot = side_rows.pivot(
+        index="variant",
+        columns="period",
+        values="project_net_bp_per_trade",
+    ).loc[:, periods]
+    delta = pivot.sub(pivot.loc["v9_two_sided"], axis="columns")
+    observed_by_variant = delta.mean(axis=1)
+    selected = str(observed_by_variant.idxmax())
+    selected_values = delta.loc[selected].to_numpy(dtype=float)
+    observed = float(observed_by_variant.max())
+    null_maxima = []
+    for signs in itertools.product((-1, 1), repeat=len(periods)):
+        signed = delta.mul(np.asarray(signs, dtype=float), axis="columns")
+        null_maxima.append(float(signed.mean(axis=1).max()))
+    null = np.asarray(null_maxima, dtype=float)
+    return {
+        "candidate_direction_policies": int(len(delta)),
+        "selected_policy": selected,
+        "selected_increment_by_block_bp": [float(value) for value in selected_values],
+        "selected_unadjusted": exact_block_signflip(selected_values),
+        "selection_adjusted_p_value": float(np.mean(null >= observed - 1e-12)),
+        "exact_common_sign_patterns": int(len(null)),
+        "verdict": "forward hypothesis only; p<0.01 not attainable with four blocks",
+    }
+
+
 def prequential_feature_replay(search: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, Any]]:
     """Select on past half-years only, then evaluate the immediately next block."""
 
@@ -333,6 +405,9 @@ def main() -> None:
     core, core_aggregate = core_component_ablation(frame)
     core.to_csv(CORE_OUTPUT, index=False)
     write_core_chart(core_aggregate)
+    sides, side_aggregate = side_ablation(frame)
+    sides.to_csv(SIDE_OUTPUT, index=False)
+    side_test = selection_adjusted_side_signflip(sides)
 
     feature_search = pd.read_csv(RESULTS / "feature_filter_search.csv")
     if set(feature_search["period"]) != {period.name for period in DEVELOPMENT_BLOCKS}:
@@ -348,6 +423,8 @@ def main() -> None:
         "holdout_rows_read": 0,
         "execution_or_cost_parameters_changed": False,
         "core_component_aggregate": core_aggregate,
+        "side_ablation_aggregate": side_aggregate,
+        "side_selection_test": side_test,
         "prequential_feature_replay": prequential_summary,
         "selection_adjusted_feature_test": max_test,
         "honest_verdict": (

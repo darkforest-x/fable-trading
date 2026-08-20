@@ -82,6 +82,7 @@ class Variant:
     break_even: bool = True
     trailing: bool = False
     opposite_signal_action: str = "reverse"
+    entry_directions: tuple[int, ...] = (-1, 1)
     params: SignalParameters = SignalParameters()
     final_evaluated: bool = False
     selection_status: str = "development_ablation"
@@ -339,6 +340,7 @@ def _arm(spec: Variant, risk_percent: float) -> Arm:
         use_break_even=spec.break_even,
         use_trailing_stop=spec.trailing,
         opposite_signal_action=spec.opposite_signal_action,
+        entry_directions=spec.entry_directions,
     )
 
 
