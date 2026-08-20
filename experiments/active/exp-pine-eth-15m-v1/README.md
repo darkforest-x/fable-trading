@@ -48,7 +48,7 @@ The Docker recipe is an independent, read-only rerun surface:
 ```bash
 docker build -t fable-pine-eth15m-v1 \
   experiments/active/exp-pine-eth-15m-v1/docker
-docker run --rm -v "$PWD:/workspace:ro" \
+docker run --rm --network none -v "$PWD:/workspace:ro" \
   -v "$PWD/experiments/active/exp-pine-eth-15m-v1/results-docker:/output" \
   fable-pine-eth15m-v1
 ```

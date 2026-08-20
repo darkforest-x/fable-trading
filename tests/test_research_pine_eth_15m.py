@@ -9,6 +9,7 @@ from scripts.research_pine_eth_15m import (
     FEATURE_COLUMNS,
     block_signflip,
     build_feature_frame,
+    concentration_diagnostics,
     control_outcome,
     load_config,
 )
@@ -97,3 +98,19 @@ def test_project_feature_export_has_exact_28_column_contract() -> None:
     featured = add_features(add_project_indicators(_bars()))
     assert len(FEATURE_COLUMNS) == 28
     assert set(FEATURE_COLUMNS).issubset(featured.columns)
+
+
+def test_profit_concentration_exposes_top_trade_dependency() -> None:
+    trades = pd.DataFrame(
+        {
+            "project_net_return": [0.10, -0.02, -0.02],
+            "entry_time": pd.to_datetime(
+                ["2025-01-01", "2025-01-08", "2025-02-01"], utc=True
+            ),
+            "exit_reason": ["reverse", "stop", "stop"],
+        }
+    )
+    result = concentration_diagnostics(trades)
+    assert result["positive_trades"] == 1
+    assert result["top1_share_of_net"] > 1.0
+    assert result["mean_without_top1_bp"] == pytest.approx(-200.0)

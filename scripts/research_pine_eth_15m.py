@@ -19,6 +19,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import subprocess
+import warnings
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Iterable
@@ -29,6 +31,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from pandas.errors import PerformanceWarning
+
+warnings.filterwarnings("ignore", category=PerformanceWarning)
 
 from yoyo.data.indicators import add_indicators as add_project_indicators
 from yoyo.evaluation.permutation import permutation_test
@@ -109,6 +114,17 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def current_commit() -> str:
+    result = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=PROJECT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip() if result.returncode == 0 else "UNAVAILABLE"
 
 
 def load_config(path: Path = CONFIG_PATH) -> dict[str, Any]:
@@ -654,6 +670,49 @@ def pair_controls(trades: pd.DataFrame, controls: pd.DataFrame) -> pd.DataFrame:
     return pairs
 
 
+def concentration_diagnostics(trades: pd.DataFrame) -> dict[str, Any]:
+    """Quantify whether a positive mean depends on a few long-tail trades."""
+
+    values = trades["project_net_return"].sort_values(ascending=False).to_numpy(dtype=float)
+    positives = values[values > 0.0]
+    total = float(values.sum())
+    positive_total = float(positives.sum())
+    monthly = trades.assign(
+        month=(
+            pd.to_datetime(trades["entry_time"], utc=True)
+            .dt.tz_localize(None)
+            .dt.to_period("M")
+            .astype(str)
+        )
+    ).groupby("month")["project_net_return"].mean()
+
+    def share_top(k: int, denominator: float) -> float:
+        return float(values[:k].sum() / denominator) if denominator != 0.0 else np.nan
+
+    reverse = trades.loc[trades["exit_reason"] == "reverse", "project_net_return"]
+    stops = trades.loc[trades["exit_reason"] == "stop", "project_net_return"]
+    return {
+        "trades": int(len(values)),
+        "positive_trades": int((values > 0.0).sum()),
+        "positive_trade_fraction": float((values > 0.0).mean()),
+        "total_unit_net_bp": total * 10_000.0,
+        "top1_share_of_net": share_top(1, total),
+        "top3_share_of_net": share_top(3, total),
+        "top5_share_of_net": share_top(5, total),
+        "top1_share_of_positive_sum": share_top(1, positive_total),
+        "top3_share_of_positive_sum": share_top(3, positive_total),
+        "mean_without_top1_bp": float(values[1:].mean() * 10_000.0) if len(values) > 1 else np.nan,
+        "mean_without_top3_bp": float(values[3:].mean() * 10_000.0) if len(values) > 3 else np.nan,
+        "reverse_trades": int(len(reverse)),
+        "reverse_total_unit_net_bp": float(reverse.sum() * 10_000.0),
+        "stop_trades": int(len(stops)),
+        "stop_total_unit_net_bp": float(stops.sum() * 10_000.0),
+        "positive_months": int((monthly > 0.0).sum()),
+        "months_with_trades": int(len(monthly)),
+        "median_monthly_net_bp": float(monthly.median() * 10_000.0),
+    }
+
+
 def attach_l2_features(featured: pd.DataFrame, trades: pd.DataFrame) -> pd.DataFrame:
     """Export causal Pine-signal feature rows; never fit or score a model."""
 
@@ -1033,6 +1092,7 @@ def run(config_path: Path = CONFIG_PATH, output_dir: Path = RESULTS) -> dict[str
             "n_samples": ranking.n_samples,
             "n_permutations": ranking.n_permutations,
         },
+        "profit_concentration": concentration_diagnostics(final_trades),
     }
 
     selected_summary = summaries.loc[
@@ -1043,7 +1103,7 @@ def run(config_path: Path = CONFIG_PATH, output_dir: Path = RESULTS) -> dict[str
     ].iloc[0].to_dict()
     summary = {
         "experiment_id": config["experiment_id"],
-        "generated_from_commit": "WORKTREE_BUILDER_RECORDED_SEPARATELY",
+        "generated_from_commit": current_commit(),
         "holdout_consumed": False,
         "tradingview_parity_passed": False,
         "research_data": quality,
