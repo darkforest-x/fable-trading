@@ -319,14 +319,24 @@ experiments:
   - experiment_id: exp-p1-gold-label-quality-cleanlab-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "d0450ea6dc49669fce36310c37e29938b905aa34"
-    status: active
+    status: inconclusive
     question: >-
       固定 W10 金标的标签错误率是多少？协议 17.6 要求一个 DIRECT 抽检错误率，
       迁移产出 DIRECT=0，所以这个数至今未知——而它是 training_eligible 卡在
       false 的唯一原因（其余门全过）。用 confident learning 从已训分类器的
       样本外预测里估计它，而不是靠人工抽样猜。
     single_variable: n/a —— 测量，不是实验臂
-    result: in_progress
+    result: >-
+      test（450，从未评估过）疑似错标 28 个 = **6.22%**；val（350，被早停用过）
+      3.14%，偏乐观且刻意不合池。零假设对照：标签打乱后同一方法标出 50.6%，
+      真实标签只有其 **1/8**，说明这个数是真的不是方法产物。模型对给定标签
+      直接判错 48 个（10.67%），cleanlab 只取其中最有把握的 28 个。
+      **负例疑似错标率是正例的两倍**（8.0% vs 4.0%），与 2026-08-13
+      「1,395 个负例批量收进、不再一张张标」的建库过程吻合。
+      顺带产出本项目第一个 test 数字：准确率 89.33%（此前 HANDOFF 记「test 没跑」）。
+      结论为 inconclusive 而非 accepted：这是**模型相关的筛查上界**
+      （被标记 = 标签错 ∪ 模型错），不是协议 17.6 要的 DIRECT 抽检结果。
+      正确用法是把那 28 张当复审队列，让 owner 用同样的时间得到紧得多的估计。
     holdout_consumed: false
     training_eligible: false
     production_eligible: false

@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-p1-gold-label-quality-cleanlab-v1",
+  "generated_at": "2026-08-20T03:56:10+00:00",
+  "generated_by": "tools/datasets/score_gold_label_quality.py --stage audit",
+  "inference_meta": {
+    "val": {
+      "split": "val",
+      "split_status": "used_for_early_stopping",
+      "out_of_sample": false,
+      "weights_sha256": "18bcb5988e6dd36bdf2fc8a1a22d3ad66ab78b777a1d02c88080c937e98d0541",
+      "device": "mps",
+      "imgsz": 960,
+      "classes": [
+        "NO_SIGNAL",
+        "SIGNAL"
+      ],
+      "generated_at": "2026-08-20T03:55:51+00:00",
+      "holdout_read": false,
+      "training_performed": false
+    },
+    "test": {
+      "split": "test",
+      "split_status": "never_evaluated_until_now",
+      "out_of_sample": true,
+      "weights_sha256": "18bcb5988e6dd36bdf2fc8a1a22d3ad66ab78b777a1d02c88080c937e98d0541",
+      "device": "mps",
+      "imgsz": 960,
+      "classes": [
+        "NO_SIGNAL",
+        "SIGNAL"
+      ],
+      "generated_at": "2026-08-20T03:55:59+00:00",
+      "holdout_read": false,
+      "training_performed": false
+    }
+  },
+  "holdout_read": false,
+  "training_performed": false,
+  "training_eligible_changed": false,
+  "note": "val and test are never pooled: the run early-stopped on val, so only test is genuinely out of sample. The headline number is test's.",
+  "splits": {
+    "val": {
+      "n": 350,
+      "n_flagged": 11,
+      "estimated_label_error_rate": 0.031429,
+      "model_accuracy_on_given_labels": 0.911429,
+      "label_quality_score_mean": 0.670999,
+      "label_quality_score_p05": 0.433483,
+      "flagged_indices": [
+        175,
+        94,
+        107,
+        87,
+        46,
+        24,
+        307,
+        112,
+        83,
+        123,
+        286
+      ],
+      "per_class_flagged": {
+        "NO_SIGNAL": 8,
+        "SIGNAL": 3
+      },
+      "per_class_n": {
+        "NO_SIGNAL": 171,
+        "SIGNAL": 179
+      },
+      "split_status": "used_for_early_stopping",
+      "out_of_sample": false
+    },
+    "test": {
+      "n": 450,
+      "n_flagged": 28,
+      "estimated_label_error_rate": 0.062222,
+      "model_accuracy_on_given_labels": 0.893333,
+      "label_quality_score_mean": 0.664138,
+      "label_quality_score_p05": 0.330145,
+      "flagged_indices": [
+        238,
+        202,
+        205,
+        210,
+        162,
+        212,
+        7,
+        152,
+        110,
+        261,
+        224,
+        420,
+        186,
+        340,
+        156,
+        40,
+        191,
+        168,
+        268,
+        192,
+        215,
+        236,
+        218,
+        395,
+        106,
+        294,
+        379,
+        269
+      ],
+      "per_class_flagged": {
+        "NO_SIGNAL": 20,
+        "SIGNAL": 8
+      },
+      "per_class_n": {
+        "NO_SIGNAL": 251,
+        "SIGNAL": 199
+      },
+      "split_status": "never_evaluated_until_now",
+      "out_of_sample": true
+    }
+  }
+}
