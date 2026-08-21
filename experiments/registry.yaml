@@ -838,6 +838,65 @@ experiments:
       filtering, so any future approved model must score all 335 raw candidates
       and run a full dynamic replay.
 
+  - experiment_id: exp-pine-eth-15m-forward-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d63542af59613c5b78ad025c14888ade8080c8ab"
+    status: active
+    question: >-
+      Can a new prospective, log-only ETH 15m shadow protocol compare only the
+      frozen V9 and frozen V12F without rewriting the obsolete historical
+      V9/V10/V11 protocol or reusing the consumed repository holdout?
+    single_variable: >-
+      protocol roster and gate contract only: frozen V9 versus frozen V12F;
+      no strategy parameter, barrier, risk, cost, model or threshold changes
+    result: >-
+      preregistered_but_not_started. The successor protocol is deliberately
+      blocked: V12F has no official compiler receipt, neither arm has exact
+      TradingView price/time/commission/net-profit ledger parity, the exact
+      venue and funding/slippage semantics are not owner-locked, and no new
+      prospective paper approval or activation timestamp exists. No scanner,
+      forward log, paper order, model training or holdout read occurred.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_pine_eth_15m_forward_lr_contract_20260821.md
+    reuse_allowed: false
+    notes: >-
+      Builder and fail-closed tests landed before protocol artifact generation.
+      Historical V1 remains immutable. Formal reading is forbidden until both
+      arms each have 100 genuinely fresh trades; interim data may be inspected
+      only for data quality and latency, never for parameter selection.
+
+  - experiment_id: exp-pine-eth-15m-state-lr-contract-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d63542af59613c5b78ad025c14888ade8080c8ab"
+    status: active
+    question: >-
+      What is the smallest causal, state-aware LR interface that could later
+      judge ETH 15m V9 entry permission without training during P0/P1 or
+      confusing the baseline trade path with the gated policy path?
+    single_variable: >-
+      interface architecture only: static causal market features plus online
+      policy-state recomputation; no labels materialized, model fit, feature
+      selection, threshold, strategy parameter or economic evaluation
+    result: >-
+      interface_preregistered_but_not_trainable. All 335 raw candidates must
+      receive one finite timely score, while position, stop, cooldown and equity
+      state are recomputed inside each dynamic replay. Phase A may control only
+      flat opens and post-close opposite reopens; it cannot suppress V9's
+      opposite close. The current 27 positive rows and 4--8 validation positives
+      per fold fail the frozen capacity gate, and P0/P1 remain incomplete.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_pine_eth_15m_forward_lr_contract_20260821.md
+    reuse_allowed: false
+    notes: >-
+      The rejected path-efficiency feature is explicitly forbidden. A future
+      close-versus-hold model is a separate Phase B counterfactual experiment,
+      not an extension of the entry label. No repository holdout or final
+      preholdout market bars were read by this interface builder.
+
   - experiment_id: exp-consolidation-single-repo-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "59e13a61c43e1e72f397f38985fd8c700533550b"
