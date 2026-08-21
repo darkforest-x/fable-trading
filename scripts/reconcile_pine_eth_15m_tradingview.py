@@ -4,8 +4,12 @@
 The user must choose the exact venue, compile the canonical Pine on a 15m
 chart, and normalize the Strategy Tester export according to the experiment
 template.  This tool compares the export to the bounded canonical Python
-ledger.  It never reads market data, never evaluates holdout, and cannot alter
-production or forward eligibility.
+ledger.  Price/time identity alone is insufficient: per-trade TradingView
+commission and net profit must also reproduce the frozen Pine accounting so a
+later evaluator cannot subtract the project's 20 bp comparison cost a second
+time.  Funding and venue slippage remain a separate owner-reviewed forward
+gate.  This tool never reads market data, never evaluates holdout, and cannot
+alter production or forward eligibility.
 """
 from __future__ import annotations
 
@@ -23,6 +27,8 @@ EXPERIMENT = PROJECT / "experiments/active/exp-pine-eth-15m-v1"
 RESULTS = EXPERIMENT / "results"
 SAFE_END = pd.Timestamp("2026-03-01T00:00:00Z")
 HOLDOUT_START = pd.Timestamp("2026-05-04T00:00:00Z")
+COMMISSION_PER_SIDE = 0.001
+ACCOUNT_CURRENCY_TOLERANCE = 0.02
 VARIANT_SPECS = {
     "v9": {
         "source": RESULTS / "trades.csv",
@@ -107,6 +113,7 @@ def reconcile_frames(
     *,
     variant: str = "v9",
     tick_tolerance: float = 0.01,
+    account_currency_tolerance: float = ACCOUNT_CURRENCY_TOLERANCE,
 ) -> dict[str, Any]:
     spec = get_variant_spec(variant)
     expected_trades = int(spec["expected_trades"])
@@ -116,9 +123,12 @@ def reconcile_frames(
         frame["entry_time"] = pd.to_datetime(frame["entry_time"], utc=True)
         frame["exit_time"] = pd.to_datetime(frame["exit_time"], utc=True)
         frame["direction"] = frame["direction"].astype(str).str.lower()
+    identity = ["entry_time", "direction"]
+    canonical_identity_unique = bool(~left.duplicated(identity, keep=False).any())
+    tradingview_identity_unique = bool(~right.duplicated(identity, keep=False).any())
     joined = left.merge(
         right,
-        on=["entry_time", "direction"],
+        on=identity,
         how="outer",
         suffixes=("_python", "_tradingview"),
         indicator=True,
@@ -131,13 +141,53 @@ def reconcile_frames(
     exit_error = (
         common["exit_price_python"] - common["exit_price_tradingview"]
     ).abs()
-    passed = bool(
+    direction_sign = np.where(common["direction"].eq("long"), 1.0, -1.0)
+    expected_gross_profit = (
+        common["quantity"].to_numpy(dtype=float)
+        * direction_sign
+        * (
+            common["exit_price_python"].to_numpy(dtype=float)
+            - common["entry_price_python"].to_numpy(dtype=float)
+        )
+    )
+    expected_commission = (
+        common["quantity"].to_numpy(dtype=float)
+        * (
+            common["entry_price_python"].to_numpy(dtype=float)
+            + common["exit_price_python"].to_numpy(dtype=float)
+        )
+        * COMMISSION_PER_SIDE
+    )
+    expected_net_profit = expected_gross_profit - expected_commission
+    commission_error = np.abs(
+        common["commission_total"].to_numpy(dtype=float) - expected_commission
+    )
+    net_profit_error = np.abs(
+        common["net_profit"].to_numpy(dtype=float) - expected_net_profit
+    )
+    canonical_net_error = np.abs(
+        common["pnl"].to_numpy(dtype=float) - expected_net_profit
+    )
+    price_time_parity_passed = bool(
         len(left) == len(right) == expected_trades
         and len(common) == expected_trades
+        and canonical_identity_unique
+        and tradingview_identity_unique
         and exit_matches.all()
         and entry_error.le(tick_tolerance + 1e-12).all()
         and exit_error.le(tick_tolerance + 1e-12).all()
     )
+    fee_semantics_verified = bool(
+        len(common) == expected_trades
+        and np.all(commission_error <= account_currency_tolerance + 1e-12)
+        and np.all(net_profit_error <= account_currency_tolerance + 1e-12)
+        and np.all(canonical_net_error <= account_currency_tolerance + 1e-12)
+    )
+    passed = bool(price_time_parity_passed and fee_semantics_verified)
+
+    def maximum(values: np.ndarray) -> float | None:
+        return float(np.max(values)) if len(values) else None
+
     return {
         "variant": variant,
         "expected_trades": expected_trades,
@@ -147,12 +197,24 @@ def reconcile_frames(
         "entry_time_direction_matches": int(len(common)),
         "python_only_entries": int(joined["_merge"].eq("left_only").sum()),
         "tradingview_only_entries": int(joined["_merge"].eq("right_only").sum()),
+        "canonical_entry_identity_unique": canonical_identity_unique,
+        "tradingview_entry_identity_unique": tradingview_identity_unique,
         "exit_time_matches": int(exit_matches.sum()),
         "maximum_entry_price_error": float(entry_error.max()) if len(common) else None,
         "maximum_exit_price_error": float(exit_error.max()) if len(common) else None,
         "tick_tolerance": tick_tolerance,
+        "price_time_parity_passed": price_time_parity_passed,
         "fee_and_net_profit_columns_present": True,
+        "commission_per_side": COMMISSION_PER_SIDE,
+        "account_currency_tolerance": account_currency_tolerance,
+        "maximum_commission_error": maximum(commission_error),
+        "maximum_net_profit_error": maximum(net_profit_error),
+        "maximum_canonical_net_profit_error": maximum(canonical_net_error),
+        "tradingview_net_profit_includes_commission": fee_semantics_verified,
+        "project_20bp_cost_rededucted": False,
+        "fee_semantics_verified": fee_semantics_verified,
         "fee_accounting_manually_reviewed": False,
+        "funding_and_venue_slippage_reviewed": False,
         "tradingview_parity_passed": passed,
         "production_eligible": False,
         "forward_eligible": False,

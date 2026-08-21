@@ -28,6 +28,8 @@ direction,entry_time,exit_time,entry_price,exit_price,commission_total,net_profi
 - prices and P&L: plain decimal numbers; no currency symbols or thousands
   separators.
 - `commission_total`: entry plus exit commission in account currency.
+- `net_profit`: TradingView's per-trade net profit after that commission. Do
+  not subtract the project's 20 bp comparison cost again.
 - one row per closed trade, ordered or unordered.
 
 Run:
@@ -47,9 +49,11 @@ PYTHONPATH=. .venv/bin/python scripts/reconcile_pine_eth_15m_tradingview.py \
 ```
 
 The tool fails closed unless all 110 canonical V9 trades, or all 97 canonical
-V12F trades, match entry time, direction, exit time, and prices within one
-research tick.  Fee and P&L columns are retained for manual venue accounting;
-passing the OHLC ledger does not waive funding, slippage, or eligibility gates.
+V12F trades, have unique entry identities and match entry time, direction,
+exit time, prices within one research tick, commission, and net profit. Money
+fields may differ by at most 0.02 account-currency units to tolerate export
+display rounding. Passing this historical ledger still does not waive funding,
+venue slippage, owner approval, or eligibility gates.
 
 Do not put post-2026-05-04 exports here without owner approval.  The reconciler
 rejects any row at or after repository holdout.
