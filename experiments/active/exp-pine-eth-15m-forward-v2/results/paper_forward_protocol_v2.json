@@ -22,9 +22,21 @@
   "compact_exposed_final_ledger_rows_read": 207,
   "holdout_rows_read": 0,
   "proposed_exact_venue": "OKX:ETHUSDT.P",
-  "venue_owner_confirmed": false,
+  "venue_owner_confirmed": true,
+  "venue_confirmation": {
+    "receipt_present": true,
+    "confirmed": true,
+    "schema_matches": true,
+    "symbol_matches": true,
+    "timeframe_matches": true,
+    "compile_only": true,
+    "paper_activation_approved": false,
+    "receipt_path": "experiments/active/exp-pine-eth-15m-forward-v2/owner_venue_confirmation.json",
+    "receipt_sha256": "7cf637944bfce86f4a026260d415aec1be5a3ffea2ecbed6532a91d5929367dc",
+    "recorded_at_utc": "2026-08-21T16:42:45Z"
+  },
   "venue_lock": {
-    "owner_selected_symbol": null,
+    "owner_selected_symbol": "OKX:ETHUSDT.P",
     "proposed_symbol": "OKX:ETHUSDT.P",
     "timeframe": "15m",
     "tick_size": 0.01
@@ -74,14 +86,15 @@
       "historical_rate_is_forecast": false,
       "minimum_fresh_trades_for_formal_read": 100,
       "compile_gate": {
-        "receipt_present": false,
-        "official_compiler_passed": false,
-        "source_hash_matches": false,
-        "venue_matches": false,
-        "timeframe_matches": false,
-        "pine_version_matches": false,
+        "receipt_present": true,
+        "official_compiler_passed": true,
+        "source_hash_matches": true,
+        "venue_matches": true,
+        "timeframe_matches": true,
+        "pine_version_matches": true,
         "parity_window_matches": false,
-        "input_values_match_frozen_contract": false
+        "input_values_match_frozen_contract": false,
+        "receipt_path": "experiments/active/exp-pine-eth-15m-v1/results/tradingview_compile_receipt_v12f.json"
       },
       "ledger_gate": {
         "receipt_present": false,
@@ -106,7 +119,6 @@
     "V12F official compiler/source/venue/timeframe/window/input receipt",
     "V12F exact 97-trade ledger parity",
     "project P0 semantic stability and P1 Gold Dataset gates pass",
-    "owner confirms exact venue OKX:ETHUSDT.P for both arms",
     "venue-exact commission, slippage and funding review for both arms",
     "owner explicitly approves prospective log-only paper collection",
     "activation timestamp is recorded after all approvals; no backfill"
@@ -183,7 +195,6 @@
     "parameter_selection_from_interim_data_allowed": false
   },
   "owner_decisions_required_before_start": [
-    "confirm OKX:ETHUSDT.P as the exact venue",
     "provide/export V9 and V12F bounded historical TradingView ledgers",
     "approve prospective log-only collection after every gate passes",
     "approve any barrier, break-even, ATR, cost or risk change separately"

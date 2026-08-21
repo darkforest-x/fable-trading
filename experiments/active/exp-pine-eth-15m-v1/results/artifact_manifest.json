@@ -1,9 +1,9 @@
 {
   "artifact": "ETH 15m Pine complete research artifact manifest",
   "format_version": 1,
-  "source_commit": "6d6873a0e84312b7c5a9ecf5dddeb0c8e07ebc9f",
-  "artifact_count": 96,
-  "total_bytes": 114287310,
+  "source_commit": "14377c6be63c1fea88bdf9df6af2836220e6e36b",
+  "artifact_count": 133,
+  "total_bytes": 127474505,
   "files": [
     {
       "path": "analysis/html/p0_pine_eth_15m_v1_20260821.html",
@@ -17,8 +17,8 @@
     },
     {
       "path": "experiments/active/exp-pine-eth-15m-v1/README.md",
-      "bytes": 16814,
-      "sha256": "dbe03fe8bd7e214801ce7a59b7ff7cec9eaeef3e83051b80eb64e90e7b56b9bc"
+      "bytes": 18639,
+      "sha256": "7db7b3405d7a9c70718deacddbb6e4962e22a5f1b8d7d4f72d07b2b5cc0cf2cd"
     },
     {
       "path": "experiments/active/exp-pine-eth-15m-v1/config.json",
@@ -126,6 +126,11 @@
       "sha256": "47b1c5e56b75cc5b016e2f1744b1faeedc914e41d7a7b62896b0fdc247044abf"
     },
     {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/charts/cross_tbsl_annual_return_drawdown.png",
+      "bytes": 90879,
+      "sha256": "3dc695f4b15ebe5b944a9605f921e5081ffe7c90720dc5d8ae956d84d51c8638"
+    },
+    {
       "path": "experiments/active/exp-pine-eth-15m-v1/results/charts/final_equity_v8_vs_v9.png",
       "bytes": 127528,
       "sha256": "4c38488424dc9db8815fe49e20ef5baec045a48c5ce12feaa93325146eb8ea66"
@@ -139,6 +144,21 @@
       "path": "experiments/active/exp-pine-eth-15m-v1/results/charts/path_risk_bootstrap.png",
       "bytes": 72320,
       "sha256": "fb5ce75a053f6c554c54863e23879b2d8c239228d7077453178c5f3d15354b05"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/charts/six_ma_cross_window_stability.png",
+      "bytes": 59951,
+      "sha256": "87e7fabf8f74b2682e8917aacf9d6b6550d3dd622210ec193aa2bb56a543b3c8"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/charts/trend_tp_grid_worst_2023_half.png",
+      "bytes": 45668,
+      "sha256": "4e2699bef05a14d1f43154f1288c903cadb4eb82432cbc1e023f3363d4cc6e3a"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/charts/v12f_holdout1_recent6m_equity_monthly.png",
+      "bytes": 148231,
+      "sha256": "da561b7ae552a9ba483ac3b8e514a5d2c67e1ecc0d446ab28bd71d4c26c6f31d"
     },
     {
       "path": "experiments/active/exp-pine-eth-15m-v1/results/charts/v9_monthly_net_bp.png",
@@ -169,6 +189,46 @@
       "path": "experiments/active/exp-pine-eth-15m-v1/results/cost_sensitivity.csv",
       "bytes": 1063,
       "sha256": "d265c3137d28b33236ca0e969e10fc0595897a3f5626c7b21da381b922516780"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/cross_count_candidate_features.csv",
+      "bytes": 102512,
+      "sha256": "0c30310addc3c580870f548631a85410265a3fea041d90e5a9e457e68f2b0dcc"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/cross_count_gate_search.csv",
+      "bytes": 55142,
+      "sha256": "4b84eb7100d1819d22e91d790a2b54da7087fe51d61f70b6bf35ec554c34e9c1"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/cross_count_tbsl_control_sensitivity.csv",
+      "bytes": 20012,
+      "sha256": "dbc7a07af99b9a644f83db9da6917489c022076303fed434ca1a013e7ad1739e"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/cross_count_tbsl_final_controls.csv",
+      "bytes": 628158,
+      "sha256": "0b8e7a19c8afb5a25b47591dadfb781e1e0159c598800571c8d4b3aeaf896c41"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/cross_count_tbsl_final_pairs.csv",
+      "bytes": 120647,
+      "sha256": "e20af391e4c2642921c00ee370f70c1f7538cdc578488d806eaeee1549b6b31a"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/cross_count_tbsl_final_trades.csv",
+      "bytes": 319531,
+      "sha256": "ece547b5a25dc4685ea6068a53dd8af16cb1abe98cf46fbadc32a1260c163a9b"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/cross_count_tbsl_optimization.json",
+      "bytes": 25308,
+      "sha256": "1437fa5560dfae176109d6da29928227c15c3b81fa5901a340e4f27a07f43431"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/cross_count_tbsl_trade_ledger_notion.csv",
+      "bytes": 165294,
+      "sha256": "8fd59ffbed42fcb2561fbc67b08ad2ac1b9f28bacb01b9f104c0254edb171d65"
     },
     {
       "path": "experiments/active/exp-pine-eth-15m-v1/results/data_quality.json",
@@ -256,6 +316,31 @@
       "sha256": "90c1ba27d7b2ab7ad5920961de70c8c97ea4bd79c0114cb0477ad0c618e181cf"
     },
     {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/judgment_atr_expansion_gate.json",
+      "bytes": 5972,
+      "sha256": "0cdcca21ad19d69df73998821267395dc04757de49dd64ba13bd01aba774939f"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/judgment_atr_expansion_gate_control_sensitivity.csv",
+      "bytes": 15691,
+      "sha256": "9e05615d64a5504a332bed739fc77d773ecb2f319110158babb6971c12cae9de"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/judgment_atr_expansion_gate_controls.csv",
+      "bytes": 201595,
+      "sha256": "7393f835745d8481584a4afe43d3b59fd4f989406581cf96771c7260b8ad9120"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/judgment_atr_expansion_gate_pairs.csv",
+      "bytes": 41783,
+      "sha256": "f8c904fbf022db8f2c290403c1060ac2e9a2e02805c924ab1c48aa4dc70086ca"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/judgment_atr_expansion_gate_trades.csv",
+      "bytes": 112806,
+      "sha256": "99b16176ea74af57e47d448f7a31ee5ee0022b12915fe84c49a9cc200edff953"
+    },
+    {
       "path": "experiments/active/exp-pine-eth-15m-v1/results/judgment_feasibility.json",
       "bytes": 5780,
       "sha256": "716607f827e627c074417ff77cb65130346018375e719ff9948796ac3bdc9d1c"
@@ -286,6 +371,26 @@
       "sha256": "cad8312e194ef51e559224902e5ddfafec74236fa4b27b5283db1faf6633dbbf"
     },
     {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/judgment_start_label_audit.json",
+      "bytes": 6224,
+      "sha256": "969110fa9b04c985f41ac88ddd3544b2c64f30f5f678b5e3f6f9e5117642a1e5"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/judgment_start_label_feature_audit.csv",
+      "bytes": 2918,
+      "sha256": "7c4961475d12ed22f943e91fc511e14d81d8ed208d580478e821e1c47e06e1ad"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/judgment_start_label_matched_controls.csv",
+      "bytes": 233724,
+      "sha256": "7c00f3ab4177f4e1c7843ae0244a8391c4c6e42c2a2542695220faf47895b198"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/judgment_start_label_rows.csv",
+      "bytes": 330163,
+      "sha256": "4aa3f0de992ef665d7b98f1979bfccb95379ca1cd2b4abf209e2aed0dc4856e2"
+    },
+    {
       "path": "experiments/active/exp-pine-eth-15m-v1/results/matched_controls.csv",
       "bytes": 91514,
       "sha256": "917b5f21d6830525e1ba8398ba50f80a9f6ee8dd8749b2009bfaeece96574106"
@@ -299,6 +404,36 @@
       "path": "experiments/active/exp-pine-eth-15m-v1/results/migration_audit.json",
       "bytes": 2529,
       "sha256": "09ce61a6fd897921c600ddc3a3cd614228506223b3bf37433bdde3e7826d3600"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/optimized_pine_variants_preholdout.json",
+      "bytes": 58198,
+      "sha256": "910297bbb88d8380f2724136d3eb995815177a58cec1cf5e08ac6b3c2e2e3ea8"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/optimized_pine_variants_preholdout_controls.csv",
+      "bytes": 1491344,
+      "sha256": "fffec1f21950160016235abd83a070014a8a73093e8fe0254df7bcc6dcd31ac2"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/optimized_pine_variants_preholdout_pairs.csv",
+      "bytes": 337800,
+      "sha256": "5cbbd4e00aabc2943e3ba4990530d78a59eabeee68d4ff53b500e413620fb5c8"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/optimized_pine_variants_preholdout_trades.csv",
+      "bytes": 749349,
+      "sha256": "73b18584428557a34b1ded9c151f8a52a3ab7c2bc58750ab736e1348302f3b9b"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/optimized_pine_variants_primary_trades.csv",
+      "bytes": 525979,
+      "sha256": "a77ae9a32a18d9f7905b843557e8b32459b4758d8bfeaddf9cefa33a78a23186"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/optimized_pine_variants_recent_safe_trades.csv",
+      "bytes": 6633,
+      "sha256": "b092cc9a0e181aa02dd15d10c51de84ab79fece9e1790d98fd9bd974d935b926"
     },
     {
       "path": "experiments/active/exp-pine-eth-15m-v1/results/paper_forward_protocol.json",
@@ -431,9 +566,19 @@
       "sha256": "8bcac04360d9c332071fbf39734339bbe45fd89cc0a531b5975b4b8d4ae01a5b"
     },
     {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/tradingview_compile_receipt_v12f.json",
+      "bytes": 2448,
+      "sha256": "a4e4c7253ab53f91d2f92c4a7cedbaa466e399b0b509529b2722af8dfc758c9d"
+    },
+    {
       "path": "experiments/active/exp-pine-eth-15m-v1/results/trailing_search.csv",
       "bytes": 25864,
       "sha256": "370fd16c9df53877d6ba7b8b833825741427677749648b4b860918f1e8706281"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/trend_tbsl_staged_search.csv",
+      "bytes": 30045,
+      "sha256": "de8eb68c21ce1bec6f4706bac2c541233f489e56561e3a58d6a9d0aa997772fc"
     },
     {
       "path": "experiments/active/exp-pine-eth-15m-v1/results/v10_matched_controls.csv",
@@ -471,14 +616,54 @@
       "sha256": "5eb30b557f79468b0d78f58ea26925908f6619d2a16a99f9836ba376a07efa39"
     },
     {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_consumption.json",
+      "bytes": 2483,
+      "sha256": "1f20d1ae78bcbb0606d69768fcf5d7b3f83192f977b470c5b20919618974f04e"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_control_sensitivity.csv",
+      "bytes": 20332,
+      "sha256": "10ed05a5812bd6d346f201e5d8ad18b5658b80957bf6836e821ddf15437d2bb3"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_controls.csv",
+      "bytes": 185538,
+      "sha256": "295165c3b3cbf75e4f040949374b796381d5137d29b3a653d4c96166fef536d6"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_equity.csv",
+      "bytes": 6883227,
+      "sha256": "3d842bfddd2fbfb4ed8af57bc427b68228084f3d5fcf22e8df3444b35d0f32cc"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_monthly.csv",
+      "bytes": 2194,
+      "sha256": "05ffea23b11918914cf05d510d873013d5dfc8224bf797ca3a5cb12683aac7c9"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_pairs.csv",
+      "bytes": 42301,
+      "sha256": "9638bae9a40e9ffc408571298fe4b6dd28351e7c9cfb7784adb1109bfab86238"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_summary.json",
+      "bytes": 23246,
+      "sha256": "3b727e1ae61a3cbd8931c4e884c0d243857d3e4cc5e8c973ab0fa89ba86e5676"
+    },
+    {
+      "path": "experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_trades.csv",
+      "bytes": 91276,
+      "sha256": "8e8da9dbbcf6a2c3920c6ba2fc5ff1bf193a04b311309b28a2416cf7f066514b"
+    },
+    {
       "path": "experiments/active/exp-pine-eth-15m-v1/results/validation.json",
       "bytes": 3435,
       "sha256": "11d321a1312dbb45f5b432e178bb5d57c8da2c97fb515c6d1b548408f52ea3e9"
     },
     {
       "path": "experiments/active/exp-pine-eth-15m-v1/tradingview/README.md",
-      "bytes": 1763,
-      "sha256": "448097d3e9f09b0c6bb8df4d0dd2a98409bcbdfc9cf6134a9450df48cfdc8b45"
+      "bytes": 2531,
+      "sha256": "6e92effbae9c1b0ec637021091906c37a3abe3220de77476c79f7908296da98c"
     },
     {
       "path": "experiments/active/exp-pine-eth-15m-v1/tradingview/trades_normalized.template.csv",
