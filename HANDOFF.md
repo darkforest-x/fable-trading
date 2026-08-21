@@ -2,7 +2,7 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-21 — 改为精筛旧训练实际使用的 1,345 个 Owner 正例）
+## ⚡ 当前真相（2026-08-21 — 六均线绳结预筛已落地，但只能排序、不能自动删图）
 
 Owner 已明确纠正任务：不是审核 fixed-W10 的 2,649 行混合 Gold，而是把**旧模型实际训练过的
 Owner 人工正例原图重新过滤一遍**，只留下现在仍认可的最佳形态，再构建新版本训练集。此前
@@ -11,19 +11,31 @@ Owner 人工正例原图重新过滤一遍**，只留下现在仍认可的最佳
 
 正确母池是 `datasets/owner_short_gold_center_v1/positive_manifest.jsonl`：Owner 当年亲自判为
 `short` 的 1,361 个框，15 个重复别名合并、1 个时间切分 purge 后，形成旧训练实际使用的
-**1,345 张正例（train 1,143 / val 202）**。新包已将 1,345/1,345 精确回连到 Owner 当时看的
-900×521 原始长图预览；一次只显示一张，只判断绿色框，不再有左右图或 `R`。正式入口：
-`datasets/owner_short_gold_center_v1/review/owner_positive_refilter_v1/public/index.html`；报告：
-`analysis/html/p1_owner_short_positive_refilter_20260821.html`。
+**1,345 张正例（train 1,143 / val 202）**。它确实来自原来一万多张人工工作：15 份 canonical
+Label Studio export 合计 12,565 张唯一图 / 12,684 个 completed annotation / 6,291 个框；随后
+有效 OHLC 对齐、方向复核和 short-only 才收窄到 1,345。Owner 新参考图是向上启动，所以本轮
+同时评分完整 2,525 个方向框（long 1,152 / short 1,361 / skip 12），不能只处理 short。
 
-新包逐条核验 Owner side、原预览、旧训练图片与旧标签 SHA；审核图物理独立且不含训练 labels。
-长图可含绿色框后的走势，只用于 Owner 人工语义复核，绝不能直接作为模型输入。页面只做
-KEEP/REMOVE/UNCERTAIN，带快捷键、自动下一张、撤销、断点保存、进度导入/导出。
+Luna Max 可见本机任务直接实现了因果六均线绳结分数：窄带 0.35、交叉换序 0.30、K 线实体
+触碰/穿束 0.25、持续 0.05、收紧 0.05；斜率一致性权重 0。1,345/1,345 与 2,525/2,525
+全部评分。旧 manifest 有 1,339 条行数后缀路径过期，均经 symbol + decision index/time 精确
+闭合找回；不得按旧文件名判数据丢失。
 
-**下一条允许的动作**：Owner 完成 1,345 张精筛并导出 JSON。随后精确回连旧 positive manifest，
-不覆盖旧数据地生成新版本，重新检查时间 split、依赖隔离、匹配负例、图片/标签 SHA，并对
-decision-time 可学习性做门检。Owner 明确批准前 `training_eligible=false`；当前禁止训练、禁止读
-既有 holdout。
+104 个 exact ⭐ 标杆只用于固定分档：旧 1,345 为 A=385 / B=575 / C=385；完整 2,525 为
+A=744 / B=1,067 / C=714。独立 390 条 Owner keep/drop 反证未通过：AUC 0.489、置换 p=0.635、
+A+B precision 18.21% 等于 base rate。因此分数**只允许改变人工审核顺序**，不允许自动
+keep/remove。两个正式入口：
+
+- 旧训练 1,345：`datasets/owner_short_gold_center_v1/review/ma_rope_prefilter_v1/public/index.html`
+- 完整方向池 2,525：`datasets/owner_short_gold_center_v1/review/ma_rope_prefilter_v1/public/owner_2525.html`
+
+报告：`analysis/html/p1_ma_rope_prefilter_20260821.html`。页面每次只显示一张 Owner 原图，快捷键
+`K/X/?/J/L/U/Z`，默认 A 档；不存在左右两张不同 K 线，也没有 `R`。
+
+**下一条允许的动作**：Owner 先审 1,345 页面默认 A 档的 385 张并导出 JSON，再决定是否审 B。
+不覆盖旧数据地生成新 manifest 预览后，仍需 Owner 明确批准 `training_eligible=true`；此前禁止
+3060 训练。Owner 要求查看的 2026-08-16～21 BTC/ETH 已登记为设计示例 view #1，不能再冒充
+未见 holdout 或最终验收。
 
 仍需 Owner 独立裁决：两个 ATR 实现的 warmup 分歧，三选项见
 `docs/consolidation/DUPLICATE_SEMANTICS.md` §4。

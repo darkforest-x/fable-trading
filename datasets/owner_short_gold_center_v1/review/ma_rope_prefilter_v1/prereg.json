@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "pack_id": "owner_short_gold_center_v1_ma_rope_prefilter_v1",
+  "config": {
+    "persistence_window": 12,
+    "interaction_window": 12,
+    "slope_window": 5,
+    "bandwidth_threshold": 0.0055,
+    "cross_density_score_reference": 0.08,
+    "body_touch_tolerance": 0.0005,
+    "body_touch_rate_reference": 0.5,
+    "body_cross_rate_reference": 0.2,
+    "body_touch_weight": 0.7,
+    "body_cross_weight": 0.3,
+    "slope_zero_tolerance": 1e-06,
+    "weight_bandwidth": 0.35,
+    "weight_cross_density": 0.3,
+    "weight_body_interaction": 0.25,
+    "weight_persistence": 0.05,
+    "weight_tightening": 0.05,
+    "weight_slope_consistency": 0.0
+  },
+  "queue_contract": {
+    "A_CORE": "score >= exact-star lower median; review first",
+    "B_BROAD": "exact-star lower p10 <= score < lower median; review second",
+    "C_REST": "score < exact-star lower p10; do not auto-delete"
+  },
+  "selection_policy": "ranking_only_no_auto_delete_no_auto_keep",
+  "countercheck_is_independent_of_fitting": true,
+  "holdout_read": false,
+  "training_performed": false,
+  "training_eligible_changed": false
+}

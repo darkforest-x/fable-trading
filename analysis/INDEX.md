@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **237** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **238** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -11,6 +11,7 @@
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
 | 2026-08-21 | [`p0_pine_eth_15m_v1_20260821.md`](p0_pine_eth_15m_v1_20260821.md) | ETHUSDT.P / ETH-USDT-SWAP 15m Pine 定型与回测审计（V1） | 15 分钟已经定死为本轮唯一研究周期：本地数据契约是 **OKX `ETH-USDT-SWAP` 15m**， |
+| 2026-08-21 | [`p1_ma_rope_prefilter_20260821.md`](p1_ma_rope_prefilter_20260821.md) | P1 · 六均线“拧成一股绳”代码预筛与数据扩充入口（2026-08-21） | 代码预筛已完成，但独立 390 条反证未通过；分数只允许排序人工审核，不得自动删图或留图。 |
 | 2026-08-21 | [`p1_fixed_w10_canonical_ohlc_triage_v2_20260821.md`](p1_fixed_w10_canonical_ohlc_triage_v2_20260821.md) | P1 统一原始 OHLC 全量筛选包 v2（2026-08-21） | Owner 指出“这些图完全不统一”是正确的。上一版 |
 | 2026-08-21 | [`p1_fixed_w10_original_source_triage_20260821.md`](p1_fixed_w10_original_source_triage_20260821.md) | P1 fixed-W10 原始来源图全量筛选包（2026-08-21） | Owner 指出得对：此前 448 项盲审包展示的是统一迁移后的 W10 图，不是原始视觉证据。 |
 | 2026-08-21 | [`p1_owner_short_positive_refilter_20260821.md`](p1_owner_short_positive_refilter_20260821.md) | P1 Owner 旧训练正例原图精筛包（2026-08-21） | Owner 对当前页面的质疑完全成立：目标不是核对 fixed-W10 的 2,649 行数据谱系，而是重新筛选 |
@@ -295,6 +296,7 @@
 - [`p1_local_signal_v2_stagea_gap_to_owner_target_20260811.md`](p1_local_signal_v2_stagea_gap_to_owner_target_20260811.md) — Local Signal V2：昨晚 3060 Stage A 与 Owner 最终目标差距复盘
 - [`p1_local_signal_v2_stagea_position_eval_20260811.md`](p1_local_signal_v2_stagea_position_eval_20260811.md) — Local Signal V2 Stage A 训练与分位置诊断（2026-08-11）
 - [`p1_local_signal_v2_stageb_cold_report.md`](p1_local_signal_v2_stageb_cold_report.md) — P1 — Local Signal V2 Stage B 冷启动（owner_lsv2_stageb_cold）
+- [`p1_ma_rope_prefilter_20260821.md`](p1_ma_rope_prefilter_20260821.md) — P1 · 六均线“拧成一股绳”代码预筛与数据扩充入口（2026-08-21）
 - [`p1_owner_eth_perfect_platform_semantic_audit_20260811.md`](p1_owner_eth_perfect_platform_semantic_audit_20260811.md) — ETH 完美平台语义审查：短延迟、多位置、不自动贴标签
 - [`p1_owner_eth_shortdelay_boundary_contract_20260811.md`](p1_owner_eth_shortdelay_boundary_contract_20260811.md) — ETH完美平台：竖线内核心与3–5根短延迟合同
 - [`p1_owner_eth_shortdelay_calibration30_20260811.md`](p1_owner_eth_shortdelay_calibration30_20260811.md) — P1 Owner ETH 短延迟动态窗口 30 张校准报告（2026-08-11）

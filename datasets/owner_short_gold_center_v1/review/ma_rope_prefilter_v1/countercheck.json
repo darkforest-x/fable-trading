@@ -1,0 +1,46 @@
+{
+  "population": "owner_short_tip_v1b reviewed keep/drop only",
+  "n": 390,
+  "n_keep": 71,
+  "n_drop": 319,
+  "base_keep_rate": 0.18205128205128204,
+  "auc": 0.4887191487482891,
+  "mean_score_keep": 0.38513868779606586,
+  "mean_score_drop": 0.3915509469762009,
+  "mean_difference_keep_minus_drop": -0.006412259180135049,
+  "permutation_null": {
+    "hypothesis": "Owner keep/drop labels are exchangeable with respect to rope_score",
+    "tail": "one_sided_keep_score_greater",
+    "seed": 20260821,
+    "n_permutations": 10000,
+    "p_value": 0.6352364763523648
+  },
+  "selections": {
+    "A_CORE": {
+      "threshold": 0.4301308626562468,
+      "n_selected": 132,
+      "n_keep": 21,
+      "precision": 0.1590909090909091,
+      "precision_wilson95": [
+        0.10647288808477345,
+        0.23099005745973233
+      ],
+      "recall": 0.29577464788732394,
+      "lift_vs_base": 0.8738796414852753
+    },
+    "A_OR_B_BROAD": {
+      "threshold": 0.2950651630507836,
+      "n_selected": 291,
+      "n_keep": 53,
+      "precision": 0.18213058419243985,
+      "precision_wilson95": [
+        0.14202363972403245,
+        0.23052050403389632
+      ],
+      "recall": 0.7464788732394366,
+      "lift_vs_base": 1.0004356033105852
+    }
+  },
+  "auto_filter_supported": false,
+  "verdict": "ranking aid only; do not auto-delete or auto-keep"
+}

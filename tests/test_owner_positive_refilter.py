@@ -169,7 +169,7 @@ def test_formal_refilter_registry_points_to_exact_manifest() -> None:
         for row in registries.experiments
         if row.experiment_id == "exp-p1-owner-short-positive-refilter-v1"
     )
-    assert experiment.status == "active"
+    assert experiment.status == "superseded"
     assert experiment.artifacts == ["owner-short-positive-refilter-v1"]
     assert experiment.holdout_consumed is False
     assert experiment.training_eligible is False

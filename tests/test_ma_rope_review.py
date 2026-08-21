@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import hashlib
+from pathlib import Path
+
 import pytest
 
+from yoyo.artifacts import load_registries
 from yoyo.datasets.ma_rope_review import (
     evaluate_countercheck,
     lower_quantile,
@@ -12,6 +16,13 @@ from yoyo.datasets.ma_rope_review import (
     wilson_interval,
     yolo_iou,
 )
+
+
+PROJECT = Path(__file__).resolve().parents[1]
+
+
+def _sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def test_lower_quantile_and_tiers_are_deterministic() -> None:
@@ -67,3 +78,25 @@ def test_render_page_uses_population_specific_identity() -> None:
     assert "测试合同" in page
     assert 'packId="population-specific-pack"' in page
     assert "__TITLE__" not in page
+
+
+def test_formal_rope_registry_points_to_exact_manifest() -> None:
+    registries = load_registries(root=PROJECT)
+    artifact = registries.artifact("owner-ma-rope-prefilter-v1")
+    path = PROJECT / artifact.source_path
+    assert path.is_file()
+    assert artifact.sha256 == _sha(path)
+    assert artifact.size_bytes == path.stat().st_size
+    assert artifact.training_eligible is False
+    assert artifact.production_eligible is False
+
+    experiment = next(
+        row
+        for row in registries.experiments
+        if row.experiment_id == "exp-p1-owner-ma-rope-prefilter-v1"
+    )
+    assert experiment.status == "rejected"
+    assert experiment.artifacts == ["owner-ma-rope-prefilter-v1"]
+    assert experiment.holdout_consumed is False
+    assert experiment.training_eligible is False
+    assert experiment.production_eligible is False

@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>P1 · 六均线“拧成一股绳”代码预筛与数据扩充入口（2026-08-21）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P1 · 六均线“拧成一股绳”代码预筛与数据扩充入口（2026-08-21）</h1>
+<h2>先说结论</h2>
+<p>代码预筛已经完成，并生成了两个可操作入口：</p>
+<ol>
+<li><strong>旧训练实际使用的 1,345 张</strong>：A 核心 385、B 扩展 575、C 其余 385；页面默认只看 A 核心，先把最像 Owner 参考图的 385 张快速过一遍。</li>
+<li><strong>完整方向复核池 2,525 个框</strong>：A 核心 744、B 扩展 1,067、C 其余 714；保留 long 1,152 / short 1,361 / skip 12，可作为“更多数据”的现成候选池。</li>
+</ol>
+<p>但这套代码<strong>不能自动替 Owner 删除或保留</strong>。在独立的 390 条人工 keep/drop 反证集上， <code>rope_score</code> AUC <strong>0.489</strong>、单侧标签置换 <strong>p=0.635</strong>；A+B 的 precision <strong>18.21%</strong>，与 不筛时的 keep base rate <strong>18.21%</strong> 几乎完全相同。正确用法是<strong>排序、减少第一轮工作量</strong>， 不是把低分图直接删掉。</p>
+<p>本轮未训练、未改 split/label、未改 <code>training_eligible</code>、未 promote。正式评分、阈值校准与 390 条 反证全部停在 <code>&lt;2026-05-04</code>；Owner 另行明确要求查看的最近 BTC/ETH 被单列为已消费的设计示例， 不冒充未见 holdout 或最终验收。</p>
+<h2>1. Owner 参考图到底定义了什么</h2>
+<p>截图左上角明确是“20 / 60 / 120”双均线，仓库渲染合同对应六条线：</p>
+<ul>
+<li>SMA20 / SMA60 / SMA120；</li>
+<li>EMA20 / EMA60 / EMA120。</li>
+</ul>
+<p>需要同时满足的视觉因素不是“六条线距离近”一个变量，而是：</p>
+<ol>
+<li>六线带宽窄：<code>(max(MA)-min(MA))/close</code>；</li>
+<li>六条线在近 12 根内反复换序/交叉；</li>
+<li>K 线实体近 12 根内反复接触、完整穿过均线束；</li>
+<li>密集具有持续性，而不是偶然一根重合；</li>
+<li>当前在收紧或尚未大幅散开。</li>
+</ol>
+<p>全部特征只使用当前决策 bar 及以前数据，方向无关，不读取上涨/下跌结果。最终显式权重为：</p>
+<table><thead><tr>
+<th>分量</th>
+<th>权重</th>
+</tr></thead><tbody>
+<tr><td>六线窄带</td><td>0.35</td></tr>
+<tr><td>六线交叉/换序</td><td>0.30</td></tr>
+<tr><td>K 线实体与均线束交互</td><td>0.25</td></tr>
+<tr><td>密集持续率</td><td>0.05</td></tr>
+<tr><td>继续收紧</td><td>0.05</td></tr>
+</tbody></table>
+<p>斜率一致性只保留为诊断，权重固定为 0，避免“六线平行上涨/下跌”反而拿高分。</p>
+<h2>2. 这 1,345 张从哪里来</h2>
+<p>“它是不是以前一万多张里手动标出来的？”——<strong>是，但 1,345 是层层收窄后的空头训练子集， 不是最初全部人工正例。</strong></p>
+<p>本轮重新读取 15 份 canonical Label Studio export，谱系闭合如下：</p>
+<table><thead><tr>
+<th>层级</th>
+<th>数量</th>
+<th>含义</th>
+</tr></thead><tbody>
+<tr><td>Label Studio task rows</td><td>13,621</td><td>round1–9 canonical exports 的任务行</td></tr>
+<tr><td>完成人工 annotation</td><td>12,684</td><td>全部 <code>completed_by=2</code>，同一个 Owner 账号</td></tr>
+<tr><td>唯一人工看过的图</td><td>12,565</td><td>去除 export 间重复 stem</td></tr>
+<tr><td>人工矩形框</td><td>6,291</td><td>所有 completed rectangle</td></tr>
+<tr><td>唯一有正框的图</td><td>5,946</td><td>其余 6,619 张为背景</td></tr>
+<tr><td><code>dense_owner_v11</code></td><td>11,730 图 / 5,831 框</td><td>后续旧检测训练主源</td></tr>
+<tr><td>可重新对齐到 OHLC 的有效框</td><td>3,318</td><td><code>&lt;2026-05-04</code>，见旧 feature verdict</td></tr>
+<tr><td>Owner 方向复核框</td><td>2,525</td><td>long 1,152 / short 1,361 / skip 12</td></tr>
+<tr><td>实际旧 short 训练正例</td><td>1,345</td><td>1,361 short − 15 alias − 1 time-split purge</td></tr>
+</tbody></table>
+<p>因此：这 1,345 张确实来自当年一万多张人工工作，但又经过“有效 OHLC 对齐 → 方向复核 → 只取 short → 去重与时间门”四次收窄。Owner 新参考图是<strong>向上启动</strong>，所以这轮不能只处理 1,345 个 short；完整 2,525 方向池也必须评分并保留 long/short 字段。</p>
+<h2>3. 数据质量与路径修复</h2>
+<p><code>positive_manifest.jsonl</code> 中 1,345 行里有 <strong>1,339 条 <code>source_csv</code> 文件名已经过期</strong>：系统重装和 继续 fetch 后，文件尾部的行数后缀变了。代码没有相信旧路径，也没有按币名随便选文件，而是：</p>
+<ol>
+<li>枚举该 symbol 唯一的 <code>okx_{symbol}_15m_*.csv</code>；</li>
+<li>在原 <code>source_owner_global[1]</code> 索引处读取时间；</li>
+<li>必须与 <code>source_owner_cut_time</code> 完全相等才接受；</li>
+<li>0 个或多个匹配都 fail closed。</li>
+</ol>
+<p>结果：1,345/1,345 全部评分；215 个 symbol 只计算 215 次时间序列。1,339 条 stale name 全部通过 索引时间一致性找回，另 6 条原文件名直接匹配。完整 2,525 也达到 2,525/2,525。</p>
+<h2>4. 分档结果</h2>
+<p>阈值只从 104 个 exact ⭐ Owner 标杆框校准，不看收益、不看未来走势，也不看 390 条反证标签：</p>
+<ul>
+<li>A 核心：<code>score &gt;= 0.4301308627</code>（⭐ lower median，标杆 recall 50.96%）；</li>
+<li>A+B 宽松：<code>score &gt;= 0.2950651631</code>（⭐ lower p10，标杆 recall 90.38%）；</li>
+<li>C 其余：低于宽松门，<strong>仍不得自动删除</strong>。</li>
+</ul>
+<table><thead><tr>
+<th>母池</th>
+<th>A 核心</th>
+<th>B 扩展</th>
+<th>C 其余</th>
+<th>总计</th>
+</tr></thead><tbody>
+<tr><td>旧训练实际正例</td><td>385</td><td>575</td><td>385</td><td>1,345</td></tr>
+<tr><td>完整方向复核框</td><td>744</td><td>1,067</td><td>714</td><td>2,525</td></tr>
+</tbody></table>
+<p>完整方向池的 A+B 共 1,811 个框，其中 long <strong>825</strong>、short <strong>976</strong>、skip <strong>10</strong>。去除 skip 后， 这是当前最直接的 <strong>1,801 个“更多数据”候选框</strong>；它们仍只是 Owner 旧方向裁决 + 代码排序， 不是已经批准的新训练集。</p>
+<h2>5. 独立反证：代码能不能代替人工</h2>
+<p>反证集是 <code>owner_side_short_tip_v1b_detect1000</code> 中已完成人工判断的 390 条：keep 71、drop 319。 它与 104 个 ⭐ 阈值校准集分开，且没有用于拟合分数或门限。</p>
+<table><thead><tr>
+<th>方法</th>
+<th>选中 n</th>
+<th>keep</th>
+<th>precision</th>
+<th>recall</th>
+<th>相对 18.21% base rate</th>
+</tr></thead><tbody>
+<tr><td>不筛（对照）</td><td>390</td><td>71</td><td>18.21%</td><td>100%</td><td>1.000×</td></tr>
+<tr><td>旧 expanded 密度门</td><td>172</td><td>22</td><td>12.79%</td><td>30.99%</td><td>0.703×</td></tr>
+<tr><td>新 A 核心</td><td>132</td><td>21</td><td>15.91%</td><td>29.58%</td><td>0.874×</td></tr>
+<tr><td>新 A+B 宽松</td><td>291</td><td>53</td><td>18.21%</td><td>74.65%</td><td>1.000×</td></tr>
+</tbody></table>
+<p>其他必报诊断：</p>
+<ul>
+<li>keep/drop AUC：<strong>0.4887</strong>；</li>
+<li>keep 平均分 − drop 平均分：<strong>−0.00641</strong>；</li>
+<li>标签置换零假设：keep/drop 与分数可交换，10,000 次，seed=20260821；</li>
+<li>单侧 <code>keep score &gt; drop score</code>：<strong>p=0.6352</strong>；</li>
+<li>A+B precision Wilson 95% CI：<strong>[14.20%, 23.05%]</strong>，下界没有超过 base rate。</li>
+</ul>
+<p>结论：旧“只看带宽”的规则会反向筛选；新分数在标杆视觉上更合理，但跨到独立 short-tip proposal 后仍没有区分力。<strong>允许做排序页面，不允许做自动删图门。</strong></p>
+<p>本实验是标签/形态质量审计，不是方向收益实验，因此 val AUC、top-decile 收益、成本、胜率和 匹配随机入场对照按字面均不适用；不得编造。上述标签置换是同等严格的零假设对照。</p>
+<h2>6. 最近 BTC / ETH 只作示例，不作验收</h2>
+<p>Owner 明确要求查看最近行情，本轮通过 OKX 无鉴权公共 <code>GET /api/v5/market/candles</code> 读取 15m 已收 K 线；OKX 文档说明该接口每次最多 300 根，字段为 <code>[ts,o,h,l,c,...,confirm]</code>： <a href="https://app.okx.com/docs-v5/en/#rest-api-market-data-get-candlesticks">OKX Market Data API</a>。</p>
+<p>截至 <strong>2026-08-21 04:30 UTC</strong>：</p>
+<table><thead><tr>
+<th>合约</th>
+<th>起点（2026-08-18 02:00 UTC）</th>
+<th>终点</th>
+<th>涨幅</th>
+</tr></thead><tbody>
+<tr><td>BTC-USDT-SWAP</td><td>64,152.0</td><td>74,929.8</td><td>+16.80%</td></tr>
+<tr><td>ETH-USDT-SWAP</td><td>1,898.84</td><td>2,349.76</td><td>+23.75%</td></tr>
+</tbody></table>
+<p>所以 Owner 所说“ETH 几天约涨二十个点”与官方公共 K 线一致。冻结分数后，按截图红框的大致时段 检查：BTC 最高 <code>0.764</code>（A），ETH <code>0.641</code>（A），说明参考形态没有被代码漏掉。</p>
+<p>但从 2026-08-16 00:00 到 08-18 12:00 UTC 的 241 根 bar 中，BTC 有 <strong>119</strong> 根、ETH 有 <strong>146</strong> 根落入 A 档。它会在横盘密集区连续命中，因此<strong>绝不是开仓信号，也不能一根 bar 生成 一张新训练图</strong>。</p>
+<p>这次最近行情是 Owner 授权的<strong>设计示例 view #1</strong>，已经失去“从未看过的最终验收”资格；没有用它 改任何权重或阈值，报告也不把上涨当策略 alpha。最终交易验收仍需另一个预注册、未读取的连续块。</p>
+<h2>7. 怎么把数据做多，而不是把重复 bar 做多</h2>
+<p>正确扩充顺序：</p>
+<ol>
+<li><strong>先处理现成 2,525</strong>：A 744 先审，再审 B 1,067；按 long/short 保持方向隔离，skip 不训练。</li>
+<li><strong>再回收约 793 个旧有效框</strong>：旧 OHLC 对齐有 3,318 个有效框，方向复核只覆盖 2,525；差额需 重新生成同一原图页面，让 Owner 补方向/保留裁决。</li>
+<li><strong>最后才从 456 币历史扫描新候选</strong>：使用冻结分数找局部峰值，先按同币连续事件合并并设置 冷却窗，再抽样人工审；禁止把每个连续 A bar 当独立样本。</li>
+<li>新候选只进 <code>candidate_review</code>，不直接当正例；方向和核心边界仍由 Owner 确认。</li>
+<li>生成新版本 manifest，不覆盖旧数据；重验 split 依赖、图像/标签 SHA、无未来和类别比例。</li>
+<li>只有 Owner 明确批准后，才能把新版本 <code>training_eligible</code> 改为 true，再讨论 3060 单变量训练。</li>
+</ol>
+<h2>8. 快捷页面</h2>
+<ul>
+<li>旧训练 1,345： <code>datasets/owner_short_gold_center_v1/review/ma_rope_prefilter_v1/public/index.html</code></li>
+<li>完整方向池 2,525： <code>datasets/owner_short_gold_center_v1/review/ma_rope_prefilter_v1/public/owner_2525.html</code></li>
+</ul>
+<p>两页默认 A 核心档，快捷键一致：<code>K/1</code> 保留、<code>X/2</code> 去掉、<code>?/3</code> 待定、<code>J/L</code> 前后、<code>U</code> 撤销、 <code>Z</code> 原尺寸；浏览器 localStorage 断点保存并可导出/导入 JSON。每次只显示一张 Owner 原图， 不存在左右两张不同 K 线，也不再使用无反应的 <code>R</code>。</p>
+<h2>9. 复现命令</h2>
+<p>生成器已先提交为 <code>7af88a8295d12664759a96330c748889c7ac980f</code>，再构建正式产物：</p>
+<pre><code>
+git branch --show-current  # 必须是 main
+.venv/bin/python -m pytest -q \
+  tests/test_ma_rope_filter.py \
+  tests/test_ma_rope_review.py \
+  tests/boundaries/test_layer_imports.py
+
+.venv/bin/python tools/datasets/ma_rope_review.py build \
+  --generator-commit 7af88a8295d12664759a96330c748889c7ac980f
+.venv/bin/python tools/datasets/ma_rope_review.py verify
+</code></pre>
+<p>测试结果：<strong>71 passed</strong>。MA 与检测渲染合同独立 parity 检查最大绝对差 <strong>0.0</strong>。</p>
+<p>正式身份：</p>
+<ul>
+<li>primary public manifest SHA256： <code>aee393d1abc2077999920fa14506ddb6159c973a51f00c9d19ea3783a8219712</code>；</li>
+<li>2,525 public manifest SHA256： <code>ae65f868256632b32e627927fa7443b128cfe03492d52d6a1d055dcb8dd75e69</code>；</li>
+<li>1,345 score rows SHA256： <code>b129206b51e396cacd13d36ade1bf2225f7cf2c4e4fce5dde09456fc1aae1150</code>；</li>
+<li>2,525 score rows SHA256： <code>0752df544308e6c26f647fc1a520375a551ed003e234d12f3e50dd8a05deef0b</code>。</li>
+</ul>
+<h2>10. 风险与诚实声明</h2>
+<ol>
+<li>单张截图不足以唯一确定决策 bar、触碰容差和窗口长度；当前参数由仓库六均线合同、旧严格带宽 和 pre-holdout ⭐ 标杆确定，后续不能因上涨结果随意修改。</li>
+<li>390 条反证来自 short-tip detector proposal，与 1,345 个旧 Owner box 不是完全同分布；失败足以 否决“自动过滤”，但不能证明排序对旧框毫无辅助价值。</li>
+<li>104 个 ⭐ 用来定阈值，所以 ⭐ recall 是校准描述，不是独立泛化指标。</li>
+<li>当前行情只证明“参考时段会得高分”，不证明“高分必涨”、方向可判或扣成本后能赚钱。</li>
+<li>2,525 中 long/short 是方向协议裁决，不等于这次重新确认每个样本质量；页面仍需 Owner 决定。</li>
+<li>本轮没有生成新训练版本；原 1,345、原标签和 eligibility 全部保持不变。</li>
+</ol>
+<h2>11. 下一步（Owner 决策）</h2>
+<p>建议现在只做一件事：先打开 <strong>1,345 页面默认 A 档的 385 张</strong>，用快捷键完成第一轮。A 审完导出 JSON；再决定是否审 B。任何结果都先生成新 manifest 预览，Owner 明确批准后才进入 3060。</p>
+</body>
+</html>

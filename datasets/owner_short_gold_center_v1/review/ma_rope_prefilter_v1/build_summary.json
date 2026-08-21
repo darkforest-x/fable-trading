@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "pack_id": "owner_short_gold_center_v1_ma_rope_prefilter_v1",
+  "generated_at": "2026-08-21T04:50:39+00:00",
+  "generator_commit": "7af88a8295d12664759a96330c748889c7ac980f",
+  "positive_population": 1345,
+  "owner_direction_population": 2525,
+  "countercheck_population": 1000,
+  "positive_tier_counts": {
+    "A_CORE": 385,
+    "B_BROAD": 575,
+    "C_REST": 385
+  },
+  "owner_2525_tier_counts": {
+    "A_CORE": 744,
+    "B_BROAD": 1067,
+    "C_REST": 714
+  },
+  "positive_symbol_groups": 215,
+  "positive_series_computations": 215,
+  "stale_positive_source_names": 1339,
+  "calibration": {
+    "schema_version": 1,
+    "source": "104 exact pre-holdout Owner-star boxes from the 2,525-box direction sheet",
+    "n_exact_star_rows": 104,
+    "core_threshold_star_p50_lower": 0.4301308626562468,
+    "broad_threshold_star_p10_lower": 0.2950651630507836,
+    "star_recall_core": 0.5096153846153846,
+    "star_recall_broad": 0.9038461538461539,
+    "outcome_or_return_used": false,
+    "short_tip_keep_drop_used_to_fit": false
+  },
+  "countercheck": {
+    "population": "owner_short_tip_v1b reviewed keep/drop only",
+    "n": 390,
+    "n_keep": 71,
+    "n_drop": 319,
+    "base_keep_rate": 0.18205128205128204,
+    "auc": 0.4887191487482891,
+    "mean_score_keep": 0.38513868779606586,
+    "mean_score_drop": 0.3915509469762009,
+    "mean_difference_keep_minus_drop": -0.006412259180135049,
+    "permutation_null": {
+      "hypothesis": "Owner keep/drop labels are exchangeable with respect to rope_score",
+      "tail": "one_sided_keep_score_greater",
+      "seed": 20260821,
+      "n_permutations": 10000,
+      "p_value": 0.6352364763523648
+    },
+    "selections": {
+      "A_CORE": {
+        "threshold": 0.4301308626562468,
+        "n_selected": 132,
+        "n_keep": 21,
+        "precision": 0.1590909090909091,
+        "precision_wilson95": [
+          0.10647288808477345,
+          0.23099005745973233
+        ],
+        "recall": 0.29577464788732394,
+        "lift_vs_base": 0.8738796414852753
+      },
+      "A_OR_B_BROAD": {
+        "threshold": 0.2950651630507836,
+        "n_selected": 291,
+        "n_keep": 53,
+        "precision": 0.18213058419243985,
+        "precision_wilson95": [
+          0.14202363972403245,
+          0.23052050403389632
+        ],
+        "recall": 0.7464788732394366,
+        "lift_vs_base": 1.0004356033105852
+      }
+    },
+    "auto_filter_supported": false,
+    "verdict": "ranking aid only; do not auto-delete or auto-keep"
+  },
+  "positive_manifest_sha256": "8f4119fbf634ec976077e8eb50b36e57ae3aa0471759cad04f2eaeaeacd6d21b",
+  "owner_review_sheet_sha256": "bb7081e7e1821c5f791486fae0f29caf18307b104bbb07156c35883781071c9a",
+  "short_tip_review_sha256": "398912904993208b9ca9d61e742f679e5c4b1240c8d34cf8042f888a4ee4aaf5",
+  "star_registry_sha256": "5acc5d8f68d2671ecd9351bcfc417bc1d27fa7f201d8cd83ec1293b7b231a762",
+  "source_pack_truth_sha256": "0dc4609c7b627518a30b48d0d1f0f84794b5943bafe517df273642dc5c39c296",
+  "public_manifest_sha256": "aee393d1abc2077999920fa14506ddb6159c973a51f00c9d19ea3783a8219712",
+  "owner_2525_public_manifest_sha256": "ae65f868256632b32e627927fa7443b128cfe03492d52d6a1d055dcb8dd75e69",
+  "page_sha256": "ff62ab63eeafefda3e0ed52288edf2713b0da1587ae2507750a76444b830c4a0",
+  "owner_2525_page_sha256": "0f3fa206ebbc99de85b6aa88f656ce0df2bf949ec6019d6856c97661cdee7240",
+  "positive_scores_sha256": "b129206b51e396cacd13d36ade1bf2225f7cf2c4e4fce5dde09456fc1aae1150",
+  "owner_scores_sha256": "0752df544308e6c26f647fc1a520375a551ed003e234d12f3e50dd8a05deef0b",
+  "counter_scores_sha256": "979bc77cd9f824ddd29329684aa35f2d0f63f70bcf0149740fa0d798ccac5a92",
+  "holdout_read": false,
+  "training_performed": false,
+  "training_eligible_changed": false,
+  "automatic_filter_supported": false
+}

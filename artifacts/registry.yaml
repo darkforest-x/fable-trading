@@ -200,6 +200,30 @@ artifacts:
       green-box morphology should survive into a new dataset version. Review
       images are physically separate from training images and labels.
 
+  - artifact_id: owner-ma-rope-prefilter-v1
+    artifact_type: manifest
+    role: owner_training_positive_prefilter
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7af88a8295d12664759a96330c748889c7ac980f"
+    source_path: datasets/owner_short_gold_center_v1/review/ma_rope_prefilter_v1/public/manifest.json
+    sha256: "aee393d1abc2077999920fa14506ddb6159c973a51f00c9d19ea3783a8219712"
+    size_bytes: 588041
+    storage_uri: "file://datasets/owner_short_gold_center_v1/review/ma_rope_prefilter_v1"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7af88a8295d12664759a96330c748889c7ac980f"
+    config_hash: "e28216fe791923545c8146530fe6e1ad0b673e6cf1aa37c1600487b158442ba5"
+    data_cutoff: "2026-05-03T11:30:00+00:00"
+    notes: >-
+      Ranking-only six-MA rope review artifact. The primary manifest covers all
+      1,345 positives used by owner_short_gold_center_v1; the companion
+      owner_2525_manifest.json covers all 2,525 Owner direction boxes and has
+      SHA256 ae65f868256632b32e627927fa7443b128cfe03492d52d6a1d055dcb8dd75e69.
+      Exact-star calibration yields A/B/C = 385/575/385 on the old training
+      pool. An independent 390-label countercheck fails as an automatic gate
+      (AUC 0.489, permutation p=0.635), so no tier may auto-keep or auto-delete.
+
   - artifact_id: yoyo-trading-dataset-v3-gold-core
     artifact_type: annotation_set
     role: gold_labels

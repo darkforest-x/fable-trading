@@ -443,18 +443,17 @@ experiments:
   - experiment_id: exp-p1-owner-short-positive-refilter-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "b7ad3569527b0a460c4c91dd9fd010860f059ec1"
-    status: active
+    status: superseded
     question: >-
       Which of the 1,345 Owner-confirmed short positives actually used by the
       previous model still match the Owner's best morphology and should survive
       into a new positive training set?
     single_variable: n/a —— Owner curation of the frozen positive population only
     result: >-
-      pending_owner_full_refilter. The actual training-positive manifest maps
-      1,345/1,345 rows to the 900x521 long-chart preview the Owner originally
-      judged. The page displays exactly one image and one green target per item,
-      with no canonical re-render, second reference image or R toggle. Owner
-      side, source preview, training image and training label SHA checks pass.
+      superseded_by_ranked_review_queue. The lineage result remains valid: the
+      actual training-positive manifest maps 1,345/1,345 rows to the 900x521
+      long-chart preview the Owner originally judged. The unranked page is now
+      replaced by exp-p1-owner-ma-rope-prefilter-v1 for faster human review.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
@@ -468,7 +467,35 @@ experiments:
       The frozen old dataset is never overwritten and no training begins before
       post-review lineage, split and learnability gates plus Owner approval.
 
-  # ==========================================================================
+  - experiment_id: exp-p1-owner-ma-rope-prefilter-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7af88a8295d12664759a96330c748889c7ac980f"
+    status: rejected
+    question: >-
+      Can a causal, direction-neutral six-MA rope score safely auto-filter the
+      Owner's old training positives to the tight, repeatedly crossing bundle
+      shown in the new reference screenshot?
+    single_variable: six-MA rope morphology ranking versus the unranked Owner pool
+    result: >-
+      rejected_as_automatic_gate_but_delivered_as_review_order. All 1,345 old
+      training positives and all 2,525 direction boxes were scored. Fixed
+      exact-star thresholds produce A/B/C = 385/575/385 on the old pool, but an
+      independent 390-label countercheck gives AUC 0.489, one-sided permutation
+      p=0.635 and A+B precision 18.21%, indistinguishable from the 18.21% base
+      rate. Scores may order manual review only; they may not auto-delete data.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_ma_rope_prefilter_20260821.md
+    artifacts:
+      - owner-ma-rope-prefilter-v1
+    reuse_allowed: true
+    notes: >-
+      The formal score, calibration and countercheck stop before 2026-05-04.
+      The Owner-authorized 2026-08-16 through 2026-08-21 BTC/ETH inspection is
+      separately logged as contaminated design example view #1, not as a fair
+      holdout evaluation and not as evidence for threshold or weight selection.
+
   - experiment_id: exp-pine-eth-15m-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "764f80d89f49313791df096e932825c88e3011f5"
