@@ -1,0 +1,60 @@
+{
+  "surface": "analysis/p0_pine_eth_15m_trend_ensemble_20260821.md",
+  "charts": [
+    {
+      "section": "阈值只在 2023 选择一次",
+      "question": "Which preregistered threshold maximizes the worst 2023 half-year matched-control excess without collapsing net expectancy?",
+      "family": "comparison",
+      "type": "highlighted bar plus ordered line",
+      "fields": [
+        "profile_id",
+        "worst_half_matched_excess_bp_per_trade",
+        "worst_half_net_bp_per_trade"
+      ],
+      "takeaway": "soft_l2 at 0.55 wins the locked primary ranking; stricter thresholds are not monotonically better.",
+      "palette_policy": "hard two-root cap plus neutrals",
+      "artifact": "charts/trend_ensemble_profile_selection.png",
+      "source": "trend_ensemble_profile_search.csv"
+    },
+    {
+      "section": "主回测：开发和 2024 小幅改善，最终段退化",
+      "question": "How do V9, V12F and V15E account-equity paths differ within each disjoint primary period?",
+      "family": "trend",
+      "type": "faceted multi-series line",
+      "fields": [
+        "time",
+        "normalized_equity",
+        "variant",
+        "period"
+      ],
+      "takeaway": "V15E follows V12F closely until the February 2026 path divergence caused by the missed runner.",
+      "palette_policy": "relaxed three-category roots with direct legend",
+      "artifact": "charts/trend_ensemble_equity.png",
+      "source": "trend_ensemble_equity.csv.gz"
+    },
+    {
+      "section": "主回测：开发和 2024 小幅改善，最终段退化",
+      "question": "Do the return, drawdown and net-win-rate comparisons support a stable V15E improvement?",
+      "family": "comparison",
+      "type": "three grouped bar panels",
+      "fields": [
+        "period",
+        "variant",
+        "return_percent",
+        "max_drawdown_15m_percent",
+        "win_rate"
+      ],
+      "takeaway": "V15E improves 2023 and 2024 point estimates but loses return and win rate in final pre-holdout.",
+      "palette_policy": "relaxed three-category roots with shared legend",
+      "artifact": "charts/trend_ensemble_mechanism_comparison.png",
+      "source": "trend_ensemble_summary.json"
+    }
+  ],
+  "qa": {
+    "inspected_in_final_context": true,
+    "labels_clipped": false,
+    "scales_honest": true,
+    "color_only_dependency": "Legends and line/bar positions supplement color.",
+    "notes": "The equity chart contains enough 15-minute observations for a trend view; the three-period result comparison uses grouped bars rather than an underpowered line."
+  }
+}
