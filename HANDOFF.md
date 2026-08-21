@@ -2,33 +2,28 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-21 — 2,649 张已统一重绘，等待 Owner 全量裁决）
+## ⚡ 当前真相（2026-08-21 — 改为精筛旧训练实际使用的 1,345 个 Owner 正例）
 
-**fixed-W10 的工程门禁与数据谱系已修正，但 P0/P1 仍未通过。** 旧 acceptance 把
-迁移前 `DIRECT=0` 的 rows 与最终 Gold SHA 混在一起，并让 0 DIRECT 空通过 15% 比例门；
-最终 2,649 行 Gold 实际有 **1,251 DIRECT**。新 acceptance 只接受逐条盲审结果按
-`gold_id` 回连同一最终快照，并重新计算错误率；裸错误率、非 DIRECT 冒充抽检、快照混用均
-fail-closed。当前正确状态仍为 `training_eligible=false`。
+Owner 已明确纠正任务：不是审核 fixed-W10 的 2,649 行混合 Gold，而是把**旧模型实际训练过的
+Owner 人工正例原图重新过滤一遍**，只留下现在仍认可的最佳形态，再构建新版本训练集。此前
+`original_source_triage_v1` 混合六种来源；`canonical_ohlc_triage_v2` 又把当前 OHLC W200 与历史
+长图并排，两张本来就不是同一裁剪窗口。二者均已停用为当前审核入口，只保留作谱系证据。
 
-2,649 张图片已逐张重算 SHA，独立 artifact 为
-`fixed-w10-core4-confirm1-v1-2649`，不再把 fixed-W10 实验指向旧 3,453 张 W12–19 V3 或
-另一个 2,599 张 v2 manifest。Owner 进一步指出：先前 448 项包展示的是迁移后 W10 图，不是
-原始标注图，因此**当前执行顺序已改为先全量审核原图**。旧 448 包和 Cleanlab 28 包保留为
-历史产物，但在新集合出来前不得继续作为当前审核入口。
+正确母池是 `datasets/owner_short_gold_center_v1/positive_manifest.jsonl`：Owner 当年亲自判为
+`short` 的 1,361 个框，15 个重复别名合并、1 个时间切分 purge 后，形成旧训练实际使用的
+**1,345 张正例（train 1,143 / val 202）**。新包已将 1,345/1,345 精确回连到 Owner 当时看的
+900×521 原始长图预览；一次只显示一张，只判断绿色框，不再有左右图或 `R`。正式入口：
+`datasets/owner_short_gold_center_v1/review/owner_positive_refilter_v1/public/index.html`；报告：
+`analysis/html/p1_owner_short_positive_refilter_20260821.html`。
 
-原始来源 v1 页经 Owner 指出并由 Luna Max 独立复核，确认混有六类历史审核面、三套画布以及
-因果/未来语义，**只能作来源证据，已停用为最终裁决入口**。替代的 v2 已将 2,649/2,649
-条按精确 `decision_time` 回连 215 份当前 pre-holdout OHLC，统一重绘为 200 根因果 K 线、
-1280×742 RGB PNG、最右青色 decision 线、未来 0 根；历史原文件逐条保留但默认隐藏。
-全量快捷页只做 KEEP/REMOVE/UNCERTAIN，带键盘、自动下一张、撤销、断点保存、进度导入/导出：
-`datasets/fixed_w10_core4_confirm1_v1/review/canonical_ohlc_triage_v2/public/index.html`；报告：
-`analysis/html/p1_fixed_w10_canonical_ohlc_triage_v2_20260821.html`。全量像素/SHA/端点验收与真实
-Chromium 流程已通过；stored `decision_bar` 未用于重绘（1,125 条当前行号已漂移）。
+新包逐条核验 Owner side、原预览、旧训练图片与旧标签 SHA；审核图物理独立且不含训练 labels。
+长图可含绿色框后的走势，只用于 Owner 人工语义复核，绝不能直接作为模型输入。页面只做
+KEEP/REMOVE/UNCERTAIN，带快捷键、自动下一张、撤销、断点保存、进度导入/导出。
 
-**下一条允许的动作**：Owner 完成 2,649 张原图筛选并导出 JSON。随后只生成**新版本**：
-REMOVE 进入 exclusions，UNCERTAIN 进入独立仲裁队列，KEEP 重新构建 Gold/图片/split/依赖与 SHA；
-不覆盖当前快照。新集合完成后重新生成随机重复盲审包。最终错误率等门通过且 Owner 明确批准前，
-`training_eligible=false`；当前禁止训练、禁止读既有 fixed-W10 holdout。
+**下一条允许的动作**：Owner 完成 1,345 张精筛并导出 JSON。随后精确回连旧 positive manifest，
+不覆盖旧数据地生成新版本，重新检查时间 split、依赖隔离、匹配负例、图片/标签 SHA，并对
+decision-time 可学习性做门检。Owner 明确批准前 `training_eligible=false`；当前禁止训练、禁止读
+既有 holdout。
 
 仍需 Owner 独立裁决：两个 ATR 实现的 warmup 分歧，三选项见
 `docs/consolidation/DUPLICATE_SEMANTICS.md` §4。

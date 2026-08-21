@@ -3,12 +3,18 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
 from PIL import Image
 
+from yoyo.artifacts import load_registries
 from yoyo.datasets import owner_positive_refilter as mod
+
+
+PROJECT = Path(__file__).resolve().parents[1]
 
 
 def _sha(path: Path) -> str:
@@ -146,3 +152,37 @@ def test_summarize_answers_joins_private_lineage(
     assert result["counts"] == {"KEEP": 1, "REMOVE": 0, "UNCERTAIN": 0}
     assert result["joined"][0]["sample_id"] in {"s1", "s2"}
     assert result["training_eligible_changed"] is False
+
+
+def test_formal_refilter_registry_points_to_exact_manifest() -> None:
+    registries = load_registries(root=PROJECT)
+    artifact = registries.artifact("owner-short-positive-refilter-v1")
+    path = PROJECT / artifact.source_path
+    assert path.is_file()
+    assert artifact.sha256 == _sha(path)
+    assert artifact.size_bytes == path.stat().st_size
+    assert artifact.training_eligible is False
+    assert artifact.production_eligible is False
+
+    experiment = next(
+        row
+        for row in registries.experiments
+        if row.experiment_id == "exp-p1-owner-short-positive-refilter-v1"
+    )
+    assert experiment.status == "active"
+    assert experiment.artifacts == ["owner-short-positive-refilter-v1"]
+    assert experiment.holdout_consumed is False
+    assert experiment.training_eligible is False
+    assert experiment.production_eligible is False
+
+
+def test_cli_can_be_invoked_outside_repository(tmp_path: Path) -> None:
+    result = subprocess.run(
+        [sys.executable, str(PROJECT / "tools/datasets/owner_positive_refilter.py"), "--help"],
+        cwd=tmp_path,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "build" in result.stdout and "summarize" in result.stdout

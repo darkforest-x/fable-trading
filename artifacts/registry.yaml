@@ -178,6 +178,28 @@ artifacts:
       source images are present but hidden by default. Stored row indices and
       migrated W10/Core4 geometry are audit-only and were not used to render.
 
+  - artifact_id: owner-short-positive-refilter-v1
+    artifact_type: manifest
+    role: owner_training_positive_refilter
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b7ad3569527b0a460c4c91dd9fd010860f059ec1"
+    source_path: datasets/owner_short_gold_center_v1/review/owner_positive_refilter_v1/public/manifest.json
+    sha256: "b079376be80ae04dc9e5eca57e7c33871bc34cdc3ad1d90938943a5417db9865"
+    size_bytes: 149379
+    storage_uri: "file://datasets/owner_short_gold_center_v1/review/owner_positive_refilter_v1"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b7ad3569527b0a460c4c91dd9fd010860f059ec1"
+    config_hash: "48fc27a15724825c361b1fcec79d906a88ab3320442655d67fb90fddec0bfa18"
+    data_cutoff: "2026-05-02T23:45:00+00:00"
+    notes: >-
+      Review manifest for the 1,345 Owner-confirmed positives actually used by
+      owner_short_gold_center_v1 (1,143 train, 202 val). Each item shows exactly
+      one 900x521 original Owner long-chart preview and asks only whether the
+      green-box morphology should survive into a new dataset version. Review
+      images are physically separate from training images and labels.
+
   - artifact_id: yoyo-trading-dataset-v3-gold-core
     artifact_type: annotation_set
     role: gold_labels

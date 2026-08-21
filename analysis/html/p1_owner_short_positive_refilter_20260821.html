@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>P1 Owner 旧训练正例原图精筛包（2026-08-21）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P1 Owner 旧训练正例原图精筛包（2026-08-21）</h1>
+<h2>结论</h2>
+<p>Owner 对当前页面的质疑完全成立：目标不是核对 fixed-W10 的 2,649 行数据谱系，而是重新筛选 <strong>旧模型实际使用过的 Owner 人工正例</strong>，只留下现在仍认可的最佳形态，再生成新版本训练集。</p>
+<p>此前两版页面均已停用：</p>
+<ul>
+<li><code>original_source_triage_v1</code> 混合了六种来源和正负样本，画布、标签语义与未来可见性不一致；</li>
+<li><code>canonical_ohlc_triage_v2</code> 左侧是按当前 OHLC 重新锚定的因果 W200，右侧是历史长图，两者本来 就不是同一个裁剪窗口，因此 K 线不会一致。它适合查谱系，不适合 Owner 快速精筛形态；</li>
+<li>v2 的 <code>R</code> 键在焦点位于任意 <code>INPUT / SELECT / TEXTAREA</code> 时会被全局键盘处理器忽略，Owner 在跳转框、筛选框或自动下一张控件上操作后会感觉“按 R 没反应”。但根本问题不是快捷键， 而是本任务根本不该存在左右对照和 <code>R</code>。</li>
+</ul>
+<p>正确母池已经锁定为 <code>datasets/owner_short_gold_center_v1/positive_manifest.jsonl</code> 的 <strong>1,345 张</strong>。 它们来自 Owner 亲自判为 <code>short</code> 的 1,361 个框；15 个历史重复别名先合并为 1,346 个独立目标， 再有 1 个因时间切分 purge，因此旧训练实际使用 1,345 个正例（train 1,143 / val 202）。新页面 逐条回到 Owner 当时看过的 900×521 原始长图预览，<strong>一次只显示一张，只判断绿色框</strong>。</p>
+<p>正式入口：</p>
+<p><code>datasets/owner_short_gold_center_v1/review/owner_positive_refilter_v1/public/index.html</code></p>
+<h2>Owner 现在要做什么</h2>
+<ul>
+<li><code>KEEP / K / 1</code>：该绿色框形态进入新正例候选；</li>
+<li><code>REMOVE / X / 2</code>：从新版本正例排除；</li>
+<li><code>UNCERTAIN / ? / 3</code>：进入单独二次仲裁；</li>
+<li><code>J / ←</code>、<code>L / → / 空格</code>：前后翻页；</li>
+<li><code>U</code>：撤销；<code>Z</code>：原尺寸；</li>
+<li>页面自动保存到浏览器本地，可随时导出或导入 JSON。</li>
+</ul>
+<p>旧训练集不会被覆盖。Owner 完成前不训练、不改 <code>training_eligible</code>。</p>
+<h2>数据谱系</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>数量 / 结果</th>
+</tr></thead><tbody>
+<tr><td><code>owner_side_review/review_sheet.csv</code> 全部 Owner 框</td><td>2,525</td></tr>
+<tr><td>Owner 亲自判为 <code>short</code></td><td>1,361</td></tr>
+<tr><td>重复别名合并</td><td>15</td></tr>
+<tr><td>独立 short 目标</td><td>1,346</td></tr>
+<tr><td>时间切分 purge</td><td>1</td></tr>
+<tr><td>旧训练实际正例</td><td><strong>1,345</strong></td></tr>
+<tr><td>train / val</td><td>1,143 / 202</td></tr>
+<tr><td>Owner 原始预览成功回连</td><td>1,345 / 1,345</td></tr>
+<tr><td>Owner side 错配</td><td>0</td></tr>
+<tr><td>原图缺失</td><td>0</td></tr>
+<tr><td>旧训练图片 SHA 错配</td><td>0</td></tr>
+<tr><td>旧训练标签 SHA 错配</td><td>0</td></tr>
+<tr><td>审核图画布 / 格式</td><td>900×521 / JPEG，1,345 / 1,345</td></tr>
+<tr><td>审核图总字节</td><td>54,002,545</td></tr>
+</tbody></table>
+<p>关键输入与产物 SHA-256：</p>
+<table><thead><tr>
+<th>对象</th>
+<th>SHA-256</th>
+</tr></thead><tbody>
+<tr><td>旧训练 positive manifest</td><td><code>8f4119fbf634ec976077e8eb50b36e57ae3aa0471759cad04f2eaeaeacd6d21b</code></td></tr>
+<tr><td>Owner review sheet</td><td><code>bb7081e7e1821c5f791486fae0f29caf18307b104bbb07156c35883781071c9a</code></td></tr>
+<tr><td>新 public manifest</td><td><code>b079376be80ae04dc9e5eca57e7c33871bc34cdc3ad1d90938943a5417db9865</code></td></tr>
+<tr><td>私有 truth</td><td><code>0dc4609c7b627518a30b48d0d1f0f84794b5943bafe517df273642dc5c39c296</code></td></tr>
+<tr><td>页面</td><td><code>2bf8ad252f57a054dc2b4a35aca462c297cf082c898bae329086afcfc960907b</code></td></tr>
+<tr><td>审核图集合</td><td><code>6c671c261eefebc06917f5c1fdbf1d42bbfbce4280fb0fade07663a7eaf04882</code></td></tr>
+<tr><td>prereg</td><td><code>48fc27a15724825c361b1fcec79d906a88ab3320442655d67fb90fddec0bfa18</code></td></tr>
+</tbody></table>
+<h2>与错误页面的对照</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>fixed-W10 v2（停用）</th>
+<th>Owner positive refilter v1（当前）</th>
+</tr></thead><tbody>
+<tr><td>母池</td><td>2,649 行混合 Gold</td><td>旧训练实际 1,345 个正例</td></tr>
+<tr><td>正负构成</td><td>1,247 SIGNAL + 1,402 NO_SIGNAL</td><td>1,345 Owner-confirmed positive</td></tr>
+<tr><td>主要问题</td><td>数据谱系 / 全量 Gold 迁移</td><td>训练正例语义纯度</td></tr>
+<tr><td>主图</td><td>当前 OHLC 重绘 W200</td><td>Owner 当时看过的原始长图预览</td></tr>
+<tr><td>第二张图</td><td>历史来源图</td><td><strong>没有</strong></td></tr>
+<tr><td>绿色框</td><td>只在部分历史图出现</td><td>每张都指向本轮唯一目标</td></tr>
+<tr><td><code>R</code></td><td>显示/隐藏历史图</td><td><strong>已删除</strong></td></tr>
+<tr><td>结果用途</td><td>mixed-Gold 来源审核</td><td>新训练正例候选筛选</td></tr>
+</tbody></table>
+<h2>审核图和训练图的边界</h2>
+<p>Owner 原始长图会显示绿色框之后的走势，这是本轮人工复核形态语义所需的历史证据，不能冒充 decision-time 因果输入。新包将 1,345 张审核图放在独立 <code>public/images/</code>，没有复制任何 YOLO 标签；旧训练短图和标签继续留在原数据集，逐 SHA 锁定。本轮导出的 KEEP 只代表“新版本正例 候选”，后续训练仍必须从冻结的短窗训练输入重建/筛选，不能把长图或未来走势直接喂给模型。</p>
+<h2>工程验收与零假设对照</h2>
+<p>这是数据筛选工具，不是方向性收益实验，因此 val AUC、置换收益 p、top-decile 收益、胜率、 单特征基线和匹配随机交易对照均不适用，也没有编造这些数字。</p>
+<p>同等严格的工程零假设对照是 fail-closed lineage test：</p>
+<ul>
+<li>把任一映射目标从 <code>owner_side=short</code> 改成 <code>long</code>，构建必须失败；</li>
+<li>修改任一已物化审核图的一个字节，验收必须因 SHA 不一致失败；</li>
+<li>public manifest 每项只允许 <code>review_id + image</code>，不得泄漏 train/val、样本 ID 或预选答案；</li>
+<li>页面必须恰好一个审核 <code>&lt;img&gt;</code>，出现 <code>historical_image</code>、<code>toggleReference</code>、<code>R ·</code> 或“左右” 任一旧双图契约即失败。</li>
+</ul>
+<p>已通过：新模块 6 个针对性测试；1,345 张正式图片的尺寸、格式、SHA 与私有 truth 一一联结； <code>PYTHONPATH=. .venv/bin/pytest -q tests</code> 为 <strong>1,402 passed、4 skipped、14 warnings</strong>。</p>
+<h2>复现命令</h2>
+<p>构建器已先以 commit <code>b7ad3569527b0a460c4c91dd9fd010860f059ec1</code> 入库，再生成正式产物：</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+
+PYTHONPATH=. .venv/bin/python tools/datasets/owner_positive_refilter.py build \
+  --generator-commit b7ad3569527b0a460c4c91dd9fd010860f059ec1
+
+PYTHONPATH=. .venv/bin/python tools/datasets/owner_positive_refilter.py verify
+
+PYTHONPATH=. .venv/bin/pytest -q tests/test_owner_positive_refilter.py
+
+python3 scripts/md_to_html.py \
+  analysis/p1_owner_short_positive_refilter_20260821.md \
+  --out-dir analysis/html
+</code></pre>
+<p>Owner 导出后汇总：</p>
+<pre><code>
+PYTHONPATH=. .venv/bin/python tools/datasets/owner_positive_refilter.py summarize \
+  /path/to/owner_short_gold_center_v1_positive_refilter_v1_answers.json \
+  --joined-out datasets/owner_short_gold_center_v1/review/owner_positive_refilter_v1/review_results/joined.jsonl
+</code></pre>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>这 1,345 张是旧训练实际正例，不是 fixed-W10 的 2,649 行，也不是全部 2,525 个多空框；</li>
+<li>绿色框来自 Owner 当年的原始裁决，但旧训练框曾按“原框中心一半、限制 4–7 根”机械派生， 完成 KEEP/REMOVE 仍不等于每个新短窗几何已经重新逐框确认；</li>
+<li>只保留事后走势最漂亮的样本可能制造“结果已知才成立”的不可学习目标。筛完后必须另测 decision-time 可辨识性，不能把 Owner 纯度直接当模型能学会的证据；</li>
+<li>当前页面结果尚为空，不能提前声称数据已经优化成功；</li>
+<li>未读 holdout、未训练、未 promote、未部署，<code>training_eligible=false</code>。</li>
+</ul>
+<h2>下一步</h2>
+<ol>
+<li>Owner 完成 1,345 张精筛并导出 JSON；</li>
+<li>KEEP / REMOVE / UNCERTAIN 精确回连旧 positive manifest；</li>
+<li>生成不覆盖旧数据的新版本，重新做时间 split、依赖隔离、图片/标签 SHA 和匹配负例；</li>
+<li>对新版本做盲重复与 decision-time 可学习性门检；</li>
+<li>门通过后由 Owner 明确批准 <code>training_eligible=true</code>，3060 第一轮只改变“正例集合”这一变量。</li>
+</ol>
+</body>
+</html>

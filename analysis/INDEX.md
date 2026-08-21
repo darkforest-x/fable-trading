@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **236** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **237** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -13,6 +13,7 @@
 | 2026-08-21 | [`p0_pine_eth_15m_v1_20260821.md`](p0_pine_eth_15m_v1_20260821.md) | ETHUSDT.P / ETH-USDT-SWAP 15m Pine 定型与回测审计（V1） | 15 分钟已经定死为本轮唯一研究周期：本地数据契约是 **OKX `ETH-USDT-SWAP` 15m**， |
 | 2026-08-21 | [`p1_fixed_w10_canonical_ohlc_triage_v2_20260821.md`](p1_fixed_w10_canonical_ohlc_triage_v2_20260821.md) | P1 统一原始 OHLC 全量筛选包 v2（2026-08-21） | Owner 指出“这些图完全不统一”是正确的。上一版 |
 | 2026-08-21 | [`p1_fixed_w10_original_source_triage_20260821.md`](p1_fixed_w10_original_source_triage_20260821.md) | P1 fixed-W10 原始来源图全量筛选包（2026-08-21） | Owner 指出得对：此前 448 项盲审包展示的是统一迁移后的 W10 图，不是原始视觉证据。 |
+| 2026-08-21 | [`p1_owner_short_positive_refilter_20260821.md`](p1_owner_short_positive_refilter_20260821.md) | P1 Owner 旧训练正例原图精筛包（2026-08-21） | Owner 对当前页面的质疑完全成立：目标不是核对 fixed-W10 的 2,649 行数据谱系，而是重新筛选 |
 | 2026-08-20 | [`p1_fixed_w10_blind_audit_pack_20260820.md`](p1_fixed_w10_blind_audit_pack_20260820.md) | P1 fixed-W10 门禁修复、artifact 谱系与盲审包（2026-08-20） | 工程交付完成，标签验收仍待 Owner 盲审。** 已修复旧 acceptance 把迁移前 |
 | 2026-08-20 | [`p1_gold_label_quality_20260820.md`](p1_gold_label_quality_20260820.md) | P1 — 固定 W10 金标的标签错误率（2026-08-20） |  |
 | 2026-08-20 | [`p_model_inventory_20260820.md`](p_model_inventory_20260820.md) | 模型清单 — 我们到底训出了什么（2026-08-20） |  |
@@ -302,6 +303,7 @@
 - [`p1_owner_gold_center_crop_review_20260811.md`](p1_owner_gold_center_crop_review_20260811.md) — P1 原始空头金标中心裁切审核
 - [`p1_owner_short_gold_center_dataset_20260811.md`](p1_owner_short_gold_center_dataset_20260811.md) — P1 Owner空头金标中心裁切全量数据集
 - [`p1_owner_short_gold_center_recent2d_holdout_20260811.md`](p1_owner_short_gold_center_recent2d_holdout_20260811.md) — Owner-short compact YOLO 最近2天全市场回放（2026-08-11）
+- [`p1_owner_short_positive_refilter_20260821.md`](p1_owner_short_positive_refilter_20260821.md) — P1 Owner 旧训练正例原图精筛包（2026-08-21）
 - [`p1_preholdout_dataset_rebuild_20260803.md`](p1_preholdout_dataset_rebuild_20260803.md) — P1-DATA：pre-holdout immutable short L2 dataset 重建验收
 - [`p25_daily_workflow_acceptance_20260710.md`](p25_daily_workflow_acceptance_20260710.md) — MA206 每日安全链验收（2026-07-10）
 - [`p25_local_acceptance_20260710.md`](p25_local_acceptance_20260710.md) — P2.5 本地验收（2026-07-10）

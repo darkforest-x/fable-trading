@@ -389,21 +389,17 @@ experiments:
   - experiment_id: exp-p1-fixed-w10-original-source-triage-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "b6a48a02986a75b6a7dfa6c7ec12856794151bec"
-    status: active
+    status: superseded
     question: >-
       Which rows of the mixed 2,649-row fixed-W10 snapshot should survive when
       the owner reviews the exact pre-migration visual evidence rather than the
       derived W10/Core4/Confirm1 render?
     single_variable: n/a —— full-population source-evidence curation, no model training
     result: >-
-      pending_owner_full_triage. Final Gold source_dataset + source_record_id
-      resolves 2,649/2,649 original primary images with zero missing rows:
-      1,091 Owner long-chart previews, 1,256 easy-negative source renders, 190
-      reviewed V3.2 images, 23 8768 context/local pairs, 88 Owner semantic-review
-      pairs and one hard-negative review pair. The page exposes only opaque IDs
-      and original evidence, supports KEEP/REMOVE/UNCERTAIN, keyboard auto-next,
-      undo, resume, import and export. No W10 image, OHLC, holdout or training was
-      used; the frozen dataset and training_eligible remain unchanged.
+      superseded_after_owner_clarification. The 2,649-row population mixes
+      positives, easy negatives and six historical review surfaces; it is a
+      valid source-lineage artifact but not the requested curation surface for
+      filtering the positives that the previous model actually trained on.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
@@ -420,19 +416,18 @@ experiments:
   - experiment_id: exp-p1-fixed-w10-canonical-ohlc-triage-v2
     source_repo: darkforest-x/fable-trading
     source_commit: "8b8d9d331f86eff04fda5ebdcbbfc418f1fb24de"
-    status: active
+    status: superseded
     question: >-
       Which of the 2,649 frozen Gold rows should survive when every item is
       judged on the same label-blind, causal raw-OHLC surface rather than six
       visually and semantically different historical review surfaces?
     single_variable: n/a —— full-population label triage on one frozen render contract
     result: >-
-      pending_owner_full_triage. Every event was re-anchored by exact
-      decision_time in one of 215 current pre-holdout OHLC sources. All 2,649
-      primary images are 1280x742 RGB PNG, show exactly 200 bars ending at the
-      decision candle, and contain zero future bars. Historical original files
-      are default-hidden references. Pixel/SHA/marker checks and real Chromium
-      KEEP/REMOVE/UNCERTAIN, undo, resume and export flows passed.
+      superseded_after_owner_clarification. The causal W200 primary and the
+      historical long-chart reference intentionally use different windows, so
+      their candles do not align visually. Pairing them answers a lineage audit
+      question, not the Owner's actual request to filter the 1,345 positives
+      used by the previous training run.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
@@ -442,10 +437,38 @@ experiments:
       - fixed-w10-canonical-ohlc-triage-v2
     reuse_allowed: true
     notes: >-
-      This v2 replaces v1 as the Owner's active full-population triage page.
-      KEEP is only a candidate for a new dataset version; no decision mutates
-      the frozen snapshot or changes training_eligible.
+      Retained as reproducible lineage evidence only. It is no longer an active
+      Owner review entry and must not be resumed for positive-shape filtering.
 
+  - experiment_id: exp-p1-owner-short-positive-refilter-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b7ad3569527b0a460c4c91dd9fd010860f059ec1"
+    status: active
+    question: >-
+      Which of the 1,345 Owner-confirmed short positives actually used by the
+      previous model still match the Owner's best morphology and should survive
+      into a new positive training set?
+    single_variable: n/a —— Owner curation of the frozen positive population only
+    result: >-
+      pending_owner_full_refilter. The actual training-positive manifest maps
+      1,345/1,345 rows to the 900x521 long-chart preview the Owner originally
+      judged. The page displays exactly one image and one green target per item,
+      with no canonical re-render, second reference image or R toggle. Owner
+      side, source preview, training image and training label SHA checks pass.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_owner_short_positive_refilter_20260821.md
+    artifacts:
+      - owner-short-positive-refilter-v1
+    reuse_allowed: true
+    notes: >-
+      KEEP creates a candidate for a new dataset version; REMOVE excludes it
+      from that new version and UNCERTAIN enters a separate adjudication queue.
+      The frozen old dataset is never overwritten and no training begins before
+      post-review lineage, split and learnability gates plus Owner approval.
+
+  # ==========================================================================
   - experiment_id: exp-pine-eth-15m-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "764f80d89f49313791df096e932825c88e3011f5"
