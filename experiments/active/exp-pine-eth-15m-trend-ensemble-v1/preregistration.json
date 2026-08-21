@@ -1,0 +1,93 @@
+{
+  "artifact": "ETH 15m V15E multi-speed trend ensemble preregistration",
+  "experiment_id": "exp-pine-eth-15m-trend-ensemble-v1",
+  "created_at": "2026-08-21T20:46:00+08:00",
+  "source_commit_before_builder": "784afaf6d053dcd71505cf555d02add73cd93f2a",
+  "owner_approval": "2026-08-21 conversation: after receiving the industry/GitHub review and proposed V12F -> multi-speed EWMAC/Donchian -> six-MA soft score design, owner explicitly replied '去实现吧'. This authorizes this composite research experiment. It does not authorize holdout reuse, barrier changes, model training, promotion, deployment or live trading.",
+  "question": "Can a causal multi-speed trend ensemble rank/filter V12F ETH 15m candidates better without repeating the V13 hard-density-gate failure?",
+  "exposure_warning": "All repository pre-holdout periods have already been viewed by the analyst in predecessor studies. This experiment is mechanism research and robustness evidence, not unseen OOS or confirmation-grade evidence.",
+  "scope": {
+    "instrument": "OKX ETH-USDT-SWAP research proxy",
+    "bar_minutes": 15,
+    "safe_end_exclusive": "2026-03-01T00:00:00Z",
+    "repository_holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_rows_allowed": 0,
+    "training_allowed": false,
+    "barrier_change_allowed": false,
+    "round_trip_cost": 0.002
+  },
+  "single_composite_variable": {
+    "baseline": "frozen V12F full-state MA6-W8 candidate stream",
+    "candidate": "V15E V12F candidates filtered by one continuous trend-quality threshold",
+    "unchanged": [
+      "V9 raw SMA10/SMA60 signal",
+      "EMA100 regime and EMA200 slope-12 direction",
+      "oscillator threshold 0.1",
+      "V12F six-MA W8 net-cross gate",
+      "ATR14 x4 initial stop capped at 3 percent",
+      "1.5 percent break-even trigger and 0.1 percent offset",
+      "1 percent risk sizing and 13x leverage cap",
+      "calendar filters, cooldown, reversal semantics and 20bp cost"
+    ]
+  },
+  "feature_contract": {
+    "ewmac_speed_pairs": [[8, 32], [16, 64], [32, 128]],
+    "ewmac_formula": "tanh(((EMA_fast[t] - EMA_slow[t]) / ATR14[t]) / 2.0)",
+    "ewmac_saturation_atr": 2.0,
+    "donchian_windows": [24, 48, 96],
+    "donchian_formula": "clip((close[t] - midpoint(prior highest high, prior lowest low)) / prior half-range, -1, 1)",
+    "donchian_right_edge": "t-1",
+    "trend_forecast": "equal-weight mean of the three EWMAC and three Donchian forecasts",
+    "side_trend_support": "(1 + side_sign * trend_forecast) / 2",
+    "dense_soft_feature": "existing causal dense_start_score for the candidate side; never a standalone boolean gate",
+    "quality_score": "0.80 * side_trend_support + 0.20 * dense_start_score_side",
+    "feature_visibility": "every value at decision bar t uses bars <= t; entry remains open[t+1]",
+    "future_feature_bars": 0,
+    "external_code_policy": "formula independently implemented; no GPL source copied"
+  },
+  "ordered_threshold_profiles": [
+    {"profile_id": "soft_l0", "minimum_quality": 0.45},
+    {"profile_id": "soft_l1", "minimum_quality": 0.50},
+    {"profile_id": "soft_l2", "minimum_quality": 0.55},
+    {"profile_id": "soft_l3", "minimum_quality": 0.60}
+  ],
+  "selection_contract": {
+    "selection_rows": ["2023H1", "2023H2"],
+    "minimum_trades_per_half": 10,
+    "ranking": [
+      "maximize the worse 2023 half-year matched-control excess bp per trade",
+      "then maximize the worse 2023 half-year project-net bp per trade",
+      "then maximize the worse 2023 half-year compounded return",
+      "then minimize maximum 2023 half-year drawdown",
+      "then prefer the lower threshold"
+    ],
+    "fail_closed": "if no profile has at least 10 trades in each 2023 half, select no V15 profile",
+    "forbidden_selection_rows": ["2024H1", "2024H2", "2025-01 through 2026-02", "repository holdout"]
+  },
+  "locked_evaluation_order": [
+    "select exactly once on 2023H1/2023H2",
+    "evaluate the locked threshold on 2024H1/2024H2 and calendar 2024",
+    "only then describe the already-consumed final-preholdout 2025-01 through 2026-02 segment",
+    "never evaluate the repository holdout"
+  ],
+  "diagnostic_baselines": [
+    "trend-only score without dense contribution",
+    "EWMAC-only side support",
+    "Donchian-only side support",
+    "dense-only score"
+  ],
+  "acceptance": {
+    "economic_gate": "selected V15 must have positive matched-control excess in every primary period and positive composite top-decile net return with permutation p < 0.01; otherwise rejected/paper-only",
+    "mechanism_checks": [
+      "does not reduce the count of V12F gross >=10 percent runners by more than half in any primary period",
+      "early-stop rate does not worsen in every primary period",
+      "drawdown does not worsen in every primary period"
+    ],
+    "regardless_of_result": [
+      "training_eligible=false",
+      "forward_eligible=false",
+      "production_eligible=false",
+      "official TradingView trade-export parity remains required"
+    ]
+  }
+}
