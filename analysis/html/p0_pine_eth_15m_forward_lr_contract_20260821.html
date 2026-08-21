@@ -163,6 +163,22 @@ t 开盘：执行 t-1 提交的订单
 <tr><td>cooldown_consume</td><td>是</td><td>否</td><td>cooldown 减 1，且只减一次</td></tr>
 <tr><td>calendar/volatility 未成 raw candidate</td><td>否</td><td>否</td><td>维持 V9 原顺序</td></tr>
 </tbody></table>
+<h3>为什么不把全局 close-only 当成下一版 Pine</h3>
+<p>2026-08-22 的 Luna Max 查重确认，V9 已经在 2023–2024 development 做过 <code>opposite_signal_action=close_only</code> 消融，不应重复：</p>
+<table><thead><tr>
+<th>时段</th>
+<th>V9 reverse 净 bp/笔</th>
+<th>V9 close-only 净 bp/笔</th>
+<th>close-only 增量</th>
+<th>总收益增量</th>
+<th>胜率增量</th>
+<th>PF 增量</th>
+</tr></thead><tbody>
+<tr><td>2023 discovery</td><td>+52.01</td><td>+30.29</td><td>-21.72</td><td>-13.87pp</td><td>-1.80pp</td><td>-0.083</td></tr>
+<tr><td>2024 confirmation</td><td>+141.35</td><td>+146.77</td><td>+5.41</td><td>-15.05pp</td><td>-1.22pp</td><td>-0.130</td></tr>
+</tbody></table>
+<p>2024 的每笔均值略高，但交易数从 83 降至 72，胜率、PF 和总收益仍更低；2023 又明确退化。V12F 没有同语义的完整实验，但现有证据不足以把它升级为新的经济假设， 也不允许进入 V2 forward roster。<code>allow_none_opposite</code> 只保留为动态 simulator 的 边界控制，不是候选策略。</p>
+<p>查重还发现历史 simulator 在 close-only 平仓时仍把 <code>exit_reason</code> 写成 <code>reverse</code>。 现在已拆成：只有“同一反向信号平仓并立即重开”才记 <code>reverse</code>；只平仓不重开记 <code>opposite_signal_close_only</code>。该修正不改变成交、手续费、收益、cooldown 或订单时点， 只修复未来状态标签的语义。</p>
 <p>Phase B 的 <code>close versus hold</code> 会改变一笔已在运行的交易，不能复用开仓标签。它必须比较“现在平仓”和“继续持有”两条成对反事实净效用，另立实验、另获 Owner 批准。</p>
 <h3>标签与模型门</h3>
 <p>当前只冻结词汇，不生成标签：<code>target / initial_stop / break_even_stop / opposite_signal_exit / period_timeout / intrabar_ambiguous / censored</code>。<code>ambiguous</code> 与 <code>censored</code> 必须为空值/排除并记录原因，不能偷偷当负类；“先到 +1.5%”不等于真实策略盈利。</p>

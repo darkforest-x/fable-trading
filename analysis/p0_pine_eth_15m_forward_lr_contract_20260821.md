@@ -119,6 +119,26 @@ t 开盘：执行 t-1 提交的订单
 | cooldown_consume | 是 | 否 | cooldown 减 1，且只减一次 |
 | calendar/volatility 未成 raw candidate | 否 | 否 | 维持 V9 原顺序 |
 
+### 为什么不把全局 close-only 当成下一版 Pine
+
+2026-08-22 的 Luna Max 查重确认，V9 已经在 2023–2024 development
+做过 `opposite_signal_action=close_only` 消融，不应重复：
+
+| 时段 | V9 reverse 净 bp/笔 | V9 close-only 净 bp/笔 | close-only 增量 | 总收益增量 | 胜率增量 | PF 增量 |
+|---|---:|---:|---:|---:|---:|---:|
+| 2023 discovery | +52.01 | +30.29 | -21.72 | -13.87pp | -1.80pp | -0.083 |
+| 2024 confirmation | +141.35 | +146.77 | +5.41 | -15.05pp | -1.22pp | -0.130 |
+
+2024 的每笔均值略高，但交易数从 83 降至 72，胜率、PF 和总收益仍更低；2023
+又明确退化。V12F 没有同语义的完整实验，但现有证据不足以把它升级为新的经济假设，
+也不允许进入 V2 forward roster。`allow_none_opposite` 只保留为动态 simulator 的
+边界控制，不是候选策略。
+
+查重还发现历史 simulator 在 close-only 平仓时仍把 `exit_reason` 写成 `reverse`。
+现在已拆成：只有“同一反向信号平仓并立即重开”才记 `reverse`；只平仓不重开记
+`opposite_signal_close_only`。该修正不改变成交、手续费、收益、cooldown 或订单时点，
+只修复未来状态标签的语义。
+
 Phase B 的 `close versus hold` 会改变一笔已在运行的交易，不能复用开仓标签。它必须比较“现在平仓”和“继续持有”两条成对反事实净效用，另立实验、另获 Owner 批准。
 
 ### 标签与模型门
