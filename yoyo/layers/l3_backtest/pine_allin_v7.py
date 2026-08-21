@@ -617,7 +617,12 @@ def simulate_symbol(
         if pending_direction and pending_signal_i == i - 1:
             closed_opposite = False
             if position is not None and position.direction != pending_direction:
-                close_position(i, float(open_[i]), "reverse")
+                exit_reason = (
+                    "opposite_signal_close_only"
+                    if arm.opposite_signal_action == "close_only"
+                    else "reverse"
+                )
+                close_position(i, float(open_[i]), exit_reason)
                 closed_opposite = True
             if (
                 position is None

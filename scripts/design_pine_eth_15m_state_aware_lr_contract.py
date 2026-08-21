@@ -139,6 +139,17 @@ def build_contract() -> dict[str, Any]:
                 "action": "preserve_existing_V9_state_transition_order",
             },
         },
+        "exit_reason_contract": {
+            "reverse": (
+                "an accepted opposite signal closes the current position and "
+                "reopens the new side at the same next-open event"
+            ),
+            "opposite_signal_close_only": (
+                "an accepted opposite signal closes the current position but "
+                "does not reopen from that same signal"
+            ),
+            "labels_may_merge_these_reasons": False,
+        },
         "online_state_context": {
             "computed_inside_each_dynamic_replay": True,
             "right_edge": "confirmed signal bar t close",

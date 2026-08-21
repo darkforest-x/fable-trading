@@ -371,7 +371,7 @@ def test_close_only_opposite_signal_does_not_open_the_reverse_side() -> None:
     )
     assert reversed_trades["direction"].tolist() == ["long", "short"]
     assert close_only_trades["direction"].tolist() == ["long"]
-    assert close_only_trades.iloc[0]["exit_reason"] == "reverse"
+    assert close_only_trades.iloc[0]["exit_reason"] == "opposite_signal_close_only"
 
 
 def test_entry_direction_gate_keeps_opposite_signal_as_an_exit() -> None:

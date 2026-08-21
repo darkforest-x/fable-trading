@@ -33,6 +33,10 @@ def test_phase_a_controls_entry_but_never_suppresses_baseline_close() -> None:
     assert contexts["cooldown_consume"]["score_logged"] is True
     assert contexts["cooldown_consume"]["model_action_applied"] is False
     assert payload["phase_b_close_policy"]["status"].startswith("no_go")
+    reasons = payload["exit_reason_contract"]
+    assert reasons["labels_may_merge_these_reasons"] is False
+    assert "reopens" in reasons["reverse"]
+    assert "does not reopen" in reasons["opposite_signal_close_only"]
 
 
 def test_failed_path_factor_and_full_lightgbm_cannot_sneak_into_phase_a() -> None:
