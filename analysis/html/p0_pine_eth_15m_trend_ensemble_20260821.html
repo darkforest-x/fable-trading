@@ -324,7 +324,7 @@ trend_quality  = 0.80 * side_support + 0.20 * dense_start_score_side
 <li>动态路径差异按 <code>signal_i + direction</code> 审计；</li>
 <li>safe end 早于 holdout。</li>
 </ul>
-<p>本轮新增专项为 <strong>15 passed</strong>；此前连同相关 boundary/causality/parity 与 V13/V14 测试为 <strong>389 passed</strong>。最终交付前还会再次运行项目守门测试与 registry 校验。</p>
+<p>本轮新增专项为 <strong>15 passed</strong>；最终把 V13/V14/V15、boundary、causality、parity 与 registry 守门集合合并重跑为 <strong>505 passed / 2 skipped</strong>。两个 skip 都来自实验目录当前没有 Python 模块可供 隔离扫描，不是测试失败；另有 14 条既有 matplotlib/pyparsing deprecation warning。</p>
 <p>从当前仓库复现：</p>
 <pre><code>
 git branch --show-current  # 必须是 main

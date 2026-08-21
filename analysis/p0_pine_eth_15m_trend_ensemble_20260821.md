@@ -330,8 +330,9 @@ V15E 只能保留为 causal feature experiment 与 TradingView paper 对照，�
 - 动态路径差异按 `signal_i + direction` 审计；
 - safe end 早于 holdout。
 
-本轮新增专项为 **15 passed**；此前连同相关 boundary/causality/parity 与 V13/V14 测试为
-**389 passed**。最终交付前还会再次运行项目守门测试与 registry 校验。
+本轮新增专项为 **15 passed**；最终把 V13/V14/V15、boundary、causality、parity 与 registry
+守门集合合并重跑为 **505 passed / 2 skipped**。两个 skip 都来自实验目录当前没有 Python 模块可供
+隔离扫描，不是测试失败；另有 14 条既有 matplotlib/pyparsing deprecation warning。
 
 从当前仓库复现：
 
