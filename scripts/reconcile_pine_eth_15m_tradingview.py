@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reconcile a normalized TradingView V9 trade export fail-closed.
+"""Reconcile a normalized TradingView V9 or V12F trade export fail-closed.
 
 The user must choose the exact venue, compile the canonical Pine on a 15m
 chart, and normalize the Strategy Tester export according to the experiment
@@ -21,9 +21,26 @@ import pandas as pd
 PROJECT = Path(__file__).resolve().parents[1]
 EXPERIMENT = PROJECT / "experiments/active/exp-pine-eth-15m-v1"
 RESULTS = EXPERIMENT / "results"
-DEFAULT_OUTPUT = RESULTS / "tradingview_reconciliation.json"
 SAFE_END = pd.Timestamp("2026-03-01T00:00:00Z")
 HOLDOUT_START = pd.Timestamp("2026-05-04T00:00:00Z")
+VARIANT_SPECS = {
+    "v9": {
+        "source": RESULTS / "trades.csv",
+        "variant": "v9_locked",
+        "period_column": "split",
+        "period": "final_preholdout_2025_202602",
+        "expected_trades": 110,
+        "output": RESULTS / "tradingview_reconciliation.json",
+    },
+    "v12f": {
+        "source": RESULTS / "optimized_pine_variants_primary_trades.csv",
+        "variant": "v12f_ma6_w8_full_gate",
+        "period_column": "period",
+        "period": "final_preholdout_2025_202602",
+        "expected_trades": 97,
+        "output": RESULTS / "tradingview_reconciliation_v12f.json",
+    },
+}
 REQUIRED_COLUMNS = {
     "direction",
     "entry_time",
@@ -35,17 +52,30 @@ REQUIRED_COLUMNS = {
 }
 
 
-def load_canonical() -> pd.DataFrame:
+def get_variant_spec(variant: str) -> dict[str, Any]:
+    try:
+        return VARIANT_SPECS[variant]
+    except KeyError as error:
+        choices = ", ".join(sorted(VARIANT_SPECS))
+        raise ValueError(f"unknown variant {variant!r}; choose one of: {choices}") from error
+
+
+def load_canonical(variant: str = "v9") -> pd.DataFrame:
+    spec = get_variant_spec(variant)
     trades = pd.read_csv(
-        RESULTS / "trades.csv",
+        spec["source"],
         parse_dates=["entry_time", "exit_time"],
     )
     selected = trades.loc[
-        trades["variant"].eq("v9_locked")
-        & trades["split"].eq("final_preholdout_2025_202602")
+        trades["variant"].eq(spec["variant"])
+        & trades[spec["period_column"]].eq(spec["period"])
     ].copy()
-    if len(selected) != 110:
-        raise RuntimeError(f"canonical V9 ledger must contain 110 trades, found {len(selected)}")
+    expected = int(spec["expected_trades"])
+    if len(selected) != expected:
+        raise RuntimeError(
+            f"canonical {variant.upper()} ledger must contain {expected} trades, "
+            f"found {len(selected)}"
+        )
     return selected
 
 
@@ -75,8 +105,11 @@ def reconcile_frames(
     canonical: pd.DataFrame,
     tradingview: pd.DataFrame,
     *,
+    variant: str = "v9",
     tick_tolerance: float = 0.01,
 ) -> dict[str, Any]:
+    spec = get_variant_spec(variant)
+    expected_trades = int(spec["expected_trades"])
     left = canonical.copy()
     right = tradingview.copy()
     for frame in (left, right):
@@ -99,13 +132,15 @@ def reconcile_frames(
         common["exit_price_python"] - common["exit_price_tradingview"]
     ).abs()
     passed = bool(
-        len(left) == len(right) == 110
-        and len(common) == 110
+        len(left) == len(right) == expected_trades
+        and len(common) == expected_trades
         and exit_matches.all()
         and entry_error.le(tick_tolerance + 1e-12).all()
         and exit_error.le(tick_tolerance + 1e-12).all()
     )
     return {
+        "variant": variant,
+        "expected_trades": expected_trades,
         "status": "pass" if passed else "fail",
         "canonical_trades": int(len(left)),
         "tradingview_trades": int(len(right)),
@@ -127,14 +162,17 @@ def reconcile_frames(
 
 def main() -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--variant", choices=sorted(VARIANT_SPECS), default="v9")
     parser.add_argument("--input", type=Path, required=True)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
-    canonical = load_canonical()
+    spec = get_variant_spec(args.variant)
+    output = args.output or spec["output"]
+    canonical = load_canonical(args.variant)
     tradingview = load_normalized(args.input)
-    payload = reconcile_frames(canonical, tradingview)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    payload = reconcile_frames(canonical, tradingview, variant=args.variant)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(payload, indent=2))
     return 0 if payload["status"] == "pass" else 1
 
