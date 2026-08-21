@@ -840,7 +840,7 @@ experiments:
 
   - experiment_id: exp-pine-eth-15m-forward-v2
     source_repo: darkforest-x/fable-trading
-    source_commit: "d63542af59613c5b78ad025c14888ade8080c8ab"
+    source_commit: "e4024353299f836b1ee467c2e6cbbf9c9d409553"
     status: active
     question: >-
       Can a new prospective, log-only ETH 15m shadow protocol compare only the
@@ -850,26 +850,33 @@ experiments:
       protocol roster and gate contract only: frozen V9 versus frozen V12F;
       no strategy parameter, barrier, risk, cost, model or threshold changes
     result: >-
-      preregistered_but_not_started. The successor protocol is deliberately
-      blocked: V12F has no official compiler receipt, neither arm has exact
-      TradingView price/time/commission/net-profit ledger parity, the exact
-      venue and funding/slippage semantics are not owner-locked, and no new
-      prospective paper approval or activation timestamp exists. No scanner,
-      forward log, paper order, model training or holdout read occurred.
+      venue_locked_and_v12f_compile_smoke_passed_but_not_started. Owner locked
+      OKX:ETHUSDT.P at 15m and frozen V12F passed the official Pine v6 compiler
+      with zero errors and exact source hash. This was compile-only approval:
+      neither arm has the required 2025-01 to 2026-03 exact-input receipt or
+      TradingView price/time/commission/net-profit ledger parity, funding and
+      slippage remain unreviewed, P0/P1 remain open, and no prospective paper
+      approval or activation timestamp exists. No scanner, forward log, order,
+      model training, parameter change or repository holdout read occurred.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: analysis/p0_pine_eth_15m_forward_lr_contract_20260821.md
+    canonical_report: analysis/p0_pine_eth_15m_v12f_compile_venue_lock_20260822.md
     artifacts:
       - pine-eth-15m-forward-v2-protocol
+      - pine-eth-15m-forward-v2-owner-venue-confirmation
+      - pine-eth-15m-v12f-official-compile-receipt
       - pine-eth-15m-forward-lr-contract-report
       - pine-eth-15m-forward-lr-contract-html
+      - pine-eth-15m-v12f-compile-venue-report
+      - pine-eth-15m-v12f-compile-venue-html
     reuse_allowed: false
     notes: >-
       Builder and fail-closed tests landed before protocol artifact generation.
-      Historical V1 remains immutable. Formal reading is forbidden until both
-      arms each have 100 genuinely fresh trades; interim data may be inspected
-      only for data quality and latency, never for parameter selection.
+      Historical V1 remains immutable. Venue confirmation is a narrow input and
+      explicitly does not approve paper activation. Formal reading is forbidden
+      until both arms each have 100 genuinely fresh trades; interim data may be
+      inspected only for data quality and latency, never for parameter selection.
 
   - experiment_id: exp-pine-eth-15m-state-lr-contract-v1
     source_repo: darkforest-x/fable-trading
