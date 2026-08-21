@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>ETH 15m Pine：335 候选自动先达标签与判断门优化审计</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>ETH 15m Pine：335 候选自动先达标签与判断门优化审计</h1>
+<p>生成日期：2026-08-21</p>
+<p>实验：<code>exp-pine-eth-15m-v1</code></p>
+<p>范围：2023-01-01 至 2024-12-31 开发区间；15 分钟固定 状态：<strong>标签审计完成；ATR 扩张门淘汰；未训练 LR/LightGBM；不可 forward / production</strong></p>
+<h2>技术结论</h2>
+<ol>
+<li><strong>335 个候选已经全部自动标完，不需要人工审核。</strong> 184 个正例、151 个负例，正例率 <strong>54.93%</strong>；0 个 ambiguous、0 个 censored。所谓“标签审计”只是让程序核对未来价格路径， 不是让人逐张判断。</li>
+<li>正例定义固定为：信号 <code>t</code> 确认、<code>t+1</code> 开盘入场后，方向调整的 <strong>+1.5%</strong> 先于 冻结 V9 初始止损或下一反向 guarded signal 的次根开盘到达。止损仍为 <code>min(4×signal ATR14, signal close×3%)</code>，0.01 tick；没有改 TP/SL/成本。</li>
+<li>54.93% 不能解释成“交易胜率”。<code>+1.5%</code> 在 V9 里只会让下一根 bar 起启用 <code>+0.1%</code> break-even stop；扣 20bp 往返成本后，BE 退出仍亏 10bp。实际开发账本的净胜率只有 <strong>14.46%（2023）/ 19.28%（2024）</strong>，两者衡量的是不同事件。</li>
+<li>28 个现有 L2 特征对该标签的单特征信号偏弱：最强 <code>atr_pct</code> 全样本 AUC <strong>0.5666</strong>， 28 特征 family-wise 标签置换 <code>p=0.3723</code>。这不证明多变量 LR 一定无效，但不支持现在就把 旧 LR/LightGBM 接进来。</li>
+<li>Pine 候选的先达率比严格匹配随机入场高 <strong>4.78 个百分点</strong>（54.93% vs 50.15%）， 但 103 个周区块 sign-flip <code>p=0.0970</code>，未达到项目 <code>p&lt;0.01</code> 门槛。</li>
+<li>已实跑一个不训练模型的单变量优化：<code>atr_pct_ratio96 &gt;= 1.0</code>（当前 ATR 高于过去 96 根均值）。 它把 2023 资金收益从 <strong>+70.50% 降到 -2.24%</strong>，把 2024 从 <strong>+109.26% 降到 +60.59%</strong>， 且 2024 回撤由 12.22% 升到 15.66%。<strong>淘汰的是它作为当前组合的 entry gate，不是否定 ATR expansion 特征在其他目标中的全部价值；本轮不写入 Pine。</strong></li>
+</ol>
+<p>因此，这一轮真正的优化结果是：标签管线已从“待人工”变成 335/335 自动、因果、可复算；同时反证了 “用波动扩张直接过滤入场”这一条看似合理的改法。下一步应先改善目标与特征的可学性，再做动态 LR， 不能为提高表面胜率直接改止损或堆 gate。</p>
+<h2>335 个候选全部有确定路径</h2>
+<p>候选总体是 2023–2024 所有通过日历与 ATR guard 的 V9 raw signals，不是基线账本里已经执行的 166 笔。拒绝某一候选会改变持仓、反转和 cooldown，因此判断层必须覆盖完整 335 行。</p>
+<table><thead><tr>
+<th>切分</th>
+<th>候选</th>
+<th>正例</th>
+<th>负例</th>
+<th>正例率</th>
+<th>Ambiguous</th>
+<th>Censored</th>
+</tr></thead><tbody>
+<tr><td>全部</td><td>335</td><td>184</td><td>151</td><td>54.93%</td><td>0</td><td>0</td></tr>
+<tr><td>Long</td><td>170</td><td>92</td><td>78</td><td>54.12%</td><td>0</td><td>0</td></tr>
+<tr><td>Short</td><td>165</td><td>92</td><td>73</td><td>55.76%</td><td>0</td><td>0</td></tr>
+<tr><td>2023</td><td>167</td><td>83</td><td>84</td><td>49.70%</td><td>0</td><td>0</td></tr>
+<tr><td>2024</td><td>168</td><td>101</td><td>67</td><td>60.12%</td><td>0</td><td>0</td></tr>
+</tbody></table>
+<p>事件拆分为 184 次 target first、148 次 initial stop first、3 次 opposite signal exit first。 事件中位发生于入场后 22 根 15m bar（约 5.5 小时），P90 为 104.6 根（约 26.2 小时）。</p>
+<h3>为什么没有人工审核</h3>
+<p>解析器按如下顺序自动工作：</p>
+<ol>
+<li>先处理 bar open gap；</li>
+<li>15m 只触碰一边时直接定序；</li>
+<li>同一 15m 同时触碰目标与止损时，下钻按时间排序的 3m 子柱；</li>
+<li>同一 3m 仍双触碰时标记 ambiguous 并排除，绝不猜固定 OHLC 路径。</li>
+</ol>
+<p>本轮 335 个真实候选没有发生任何 15m 双触碰，所以全部由 15m 唯一事件解析。3m 文件在开发范围内有 249,376 行、49,875 个完整 15m parent；聚合后 open/high/low/close 与主 15m 源的误差和错配均为 0。 匹配随机对照里有 3 个发生在 3m 覆盖起点之前的双触碰；程序自动拒绝并从同一严格分层补选，仍然不需要人。</p>
+<h2>“先达率”只比随机高 4.78pp，证据尚不够强</h2>
+<p>每个 Pine 候选匹配 3 个不复用随机入场，共 1,005 行。匹配条件固定为同一 ETH、同 UTC 月、同香港 6 小时时段、用<strong>前一个月</strong> ATR 分布形成的同五分位、相同方向与相同前瞻 horizon；目标、止损完全一致。</p>
+<table><thead><tr>
+<th>指标</th>
+<th>Pine 候选</th>
+<th>匹配随机</th>
+<th>差值</th>
+</tr></thead><tbody>
+<tr><td>+1.5% 先达率</td><td>54.93%</td><td>50.15%</td><td>+4.78pp</td></tr>
+<tr><td>等权周区块差值</td><td>—</td><td>—</td><td>+4.70pp</td></tr>
+<tr><td>周 sign-flip 单侧 p</td><td>—</td><td>—</td><td>0.0970</td></tr>
+</tbody></table>
+<p>这属于“方向正确但未过证据门”：点估计支持双均线启动候选比随机稍好，但 <code>p=0.0970</code> 不能排除制度与 样本波动。first-touch 是非收益标签，因此这里没有伪造成本后净收益；同障碍/同 horizon 是适用的严格零假设。</p>
+<h2>现有 28 特征还不足以可靠挑出正例</h2>
+<p>下面是描述性单特征结果。特征全部在信号 bar <code>t</code> 及以前计算；未来只进入标签。<code>oriented AUC</code> 把 低值更好的特征翻转到 0.5 以上，便于比较强度，不能当成已经验证的模型表现。</p>
+<table><thead><tr>
+<th>特征</th>
+<th>全部 AUC</th>
+<th>Oriented AUC</th>
+<th>2023 AUC</th>
+<th>2024 AUC</th>
+<th>稳定方向</th>
+</tr></thead><tbody>
+<tr><td><code>atr_pct</code></td><td>0.5666</td><td>0.5666</td><td>0.5211</td><td>0.5747</td><td>高值较好</td></tr>
+<tr><td><code>atr_pct_ratio96</code></td><td>0.5556</td><td>0.5556</td><td>0.5377</td><td>0.5704</td><td>高值较好</td></tr>
+<tr><td><code>drawdown24</code></td><td>0.5424</td><td>0.5424</td><td>0.5211</td><td>0.5602</td><td>高值较好</td></tr>
+<tr><td><code>order_score</code></td><td>0.4601</td><td>0.5399</td><td>0.4753</td><td>0.4371</td><td>低值较好</td></tr>
+<tr><td><code>volume_ratio</code></td><td>0.4680</td><td>0.5320</td><td>0.4604</td><td>0.4568</td><td>低值较好</td></tr>
+</tbody></table>
+<p>28 特征中最大 <code>|AUC-0.5|=0.0666</code>；对标签做 2,000 次确定性 shuffle、每次重新取 28 特征最大值后， family-wise <code>p=0.3723</code>。这说明目前看到的最好 AUC 在多重比较下并不稀有。</p>
+<p>项目规定的 val AUC、top-decile 毛/净收益和模型置换检验在这里<strong>不适用</strong>：本轮没有训练模型、没有分数、 没有阈值，也没有 top-decile。为避免留空冒充，我们用逐年单特征 AUC、family-wise 标签 shuffle 和 匹配随机先达率作为同等严格的零假设审计。</p>
+<h2>单变量 ATR 扩张门动态回放失败</h2>
+<p>为了验证“高波动启动更容易到 +1.5%，是否就能提高收益”，仅增加一个自然规则： <code>atr_pct_ratio96 &gt;= 1.0</code>。阈值 1.0 表示当前 ATR% 不低于过去 96 根均值，没有跑阈值网格；信号、止损、 BE、反向、cooldown、1% 风险仓位和 20bp 成本全部不变。</p>
+<table><thead><tr>
+<th>时段 / Arm</th>
+<th>Raw/接受</th>
+<th>交易</th>
+<th>净 bp/笔</th>
+<th>资金收益</th>
+<th>PF</th>
+<th>净胜率</th>
+<th>DD</th>
+<th>对照 bp</th>
+<th>超额 bp</th>
+<th>周 p</th>
+<th>去 top1 bp</th>
+</tr></thead><tbody>
+<tr><td>2023 Allow-all</td><td>167/167</td><td>83</td><td>+52.01</td><td>+70.50%</td><td>1.921</td><td>14.46%</td><td>26.48%</td><td>+13.19</td><td>+38.82</td><td>0.0496</td><td>+22.39</td></tr>
+<tr><td>2023 ATR expansion</td><td>167/78</td><td>47</td><td>+21.05</td><td><strong>-2.24%</strong></td><td>0.910</td><td>12.77%</td><td>15.41%</td><td>+4.50</td><td>+16.54</td><td>0.5184</td><td><strong>-26.49</strong></td></tr>
+<tr><td>2024 Allow-all</td><td>168/168</td><td>83</td><td>+141.35</td><td>+109.26%</td><td>2.748</td><td>19.28%</td><td>12.22%</td><td>+32.55</td><td>+108.81</td><td>0.0097</td><td>+110.68</td></tr>
+<tr><td>2024 ATR expansion</td><td>168/77</td><td>49</td><td>+150.87</td><td><strong>+60.59%</strong></td><td>2.867</td><td>8.16%</td><td><strong>15.66%</strong></td><td>+50.88</td><td>+99.99</td><td>0.1390</td><td>+28.39</td></tr>
+</tbody></table>
+<p>门控相对 allow-all：2023 资金收益少 <strong>72.74 个百分点</strong>；2024 少 <strong>48.67 个百分点</strong>，且回撤增加 3.44 个百分点。2023 的“平均 project net bp/笔为正而资金收益为负”不是计算矛盾：前者是未按资金权重 平均的单位收益，后者包含随止损距离变化的实际仓位与按名义本金计费，盈利/亏损交易权重不同。</p>
+<p>该门还把尾部依赖放大：2023 最大一笔占净和 223.2%，去掉后 -26.49bp/笔；2024 最大一笔占 81.57%， 去掉后只剩 +28.39bp/笔。标签先达率改善没有转化成稳定经济改善。</p>
+<h3>64 个匹配对照分配种子</h3>
+<p>单个匹配随机分配会波动，因此对四个 arm×时期各跑 64 个确定性种子。超额 bp/笔的中位与 P05–P95：</p>
+<table><thead><tr>
+<th>时段 / Arm</th>
+<th>中位超额 bp</th>
+<th>P05</th>
+<th>P95</th>
+<th>超额为正种子占比</th>
+</tr></thead><tbody>
+<tr><td>2023 Allow-all</td><td>+49.50</td><td>+30.75</td><td>+67.89</td><td>100.00%</td></tr>
+<tr><td>2023 ATR expansion</td><td>+25.88</td><td>-4.67</td><td>+55.43</td><td>89.06%</td></tr>
+<tr><td>2024 Allow-all</td><td>+117.56</td><td>+81.37</td><td>+139.01</td><td>100.00%</td></tr>
+<tr><td>2024 ATR expansion</td><td>+96.70</td><td>+10.51</td><td>+154.10</td><td>96.88%</td></tr>
+</tbody></table>
+<p>ATR 门的匹配超额点估计大多仍为正，但比 allow-all 更低，锚定周检验也不显著；更重要的是资金收益和 尾部稳健性直接恶化。因此淘汰结论不依赖挑选某个“坏”对照种子。</p>
+<p>这里的 64 个种子只是 <strong>matched-control assignment sensitivity</strong>，不是 64 次独立策略回测，更不是 64 个 OOS 时段；它只检验结论是否依赖某一次随机对照分配。</p>
+<h2>为什么脚本实际胜率仍然很低</h2>
+<p>当前退出结构决定了低胜率并不等于均线信号完全随机：</p>
+<ul>
+<li>很多候选确实先涨/跌到 +1.5%，所以 start label 为 1；</li>
+<li>但目标并不止盈，只在该 15m bar 结束后把下一 bar 的 stop 提到 +0.1%；</li>
+<li>20bp 往返成本把 +0.1% 毛锁盈变成 -0.1% 净收益；</li>
+<li>真正的大额盈利主要来自少数一直持有到反向信号的长趋势交易；</li>
+<li>任意 entry gate 都可能删掉这些长尾赢家或改变随后反转链，因此分类胜率与最终收益必须分开验收。</li>
+</ul>
+<p>这也是本轮不能“为了提高胜率”直接把 +1.5% 改成 take-profit、把 BE 提到更高或缩窄止损的原因：这些都 会改变 owner-controlled 障碍/执行参数，且需要独立单变量实验和明确批准。</p>
+<h2>数据边界与稳健性</h2>
+<table><thead><tr>
+<th>审计项</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>15m 加载</td><td>104,962 行；2022-01-03 15:30 → 2024-12-31 23:45 UTC</td></tr>
+<tr><td>15m cadence</td><td>重复 0；非递增 0；非 15m gap 0</td></tr>
+<tr><td>候选范围</td><td>2023–2024，335 行，28 特征无缺失</td></tr>
+<tr><td>3m 加载</td><td>249,376 行；2023-07-31 11:12 → 2024-12-31 23:57 UTC</td></tr>
+<tr><td>完整 3m parent</td><td>49,875；与 15m OHLC 错配 0</td></tr>
+<tr><td>Consumed-final 行进入分析帧</td><td>0</td></tr>
+<tr><td>边界 chunk 的物理 I/O</td><td>15m 解析后排除 38 行 final；3m 解析后排除 624 行 final；均未进入特征/标签</td></tr>
+<tr><td>Holdout 行读取</td><td>0；未评估、未消耗</td></tr>
+<tr><td>模型/阈值</td><td>未训练、未评分、未选择</td></tr>
+<tr><td>资格</td><td>training / forward / production 均为 false</td></tr>
+</tbody></table>
+<p>Luna Max 做了两轮只读独立复核。第一轮正确指出需要补 15m cadence 断言，但把“旧 3m 审计函数过滤到 2025”误读为“源文件 2025 才开始”；本线程通过 bounded raw loader 核实真实起点为 2023-07-31，并以 49,875 个 parent 的逐 OHLC 对账纠正。第二轮独立重算确认：335/335 标签逐字段一致、1,005 条控制匹配 契约全通过、四组 64-seed 摘要误差小于 <code>1e-12</code>，并指出两个已修正/披露事项：标签目标不能借用可变的 BE 参数，以及 loader 会物理解析边界 chunk 后再排除 final 行。子线程意见只作为复核，不替代本地证据。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>335 个标签全部自动解析，不代表标签就是最优经济目标；它只衡量启动后先到 +1.5%。</li>
+<li>2024 已在本轮特征审计中被查看，因此 ATR 门的 2024 结果是探索性反证，不是新鲜 confirmation。</li>
+<li>标签路径高度重叠，普通逐行 shuffle 只用于 feature encoding 的描述性 family-wise null；不能代替 动态账本、时间区块检验或真正前向样本。</li>
+<li>3m 数据不覆盖 2023-01 至 2023-07；真实候选未在该段发生 15m 双触碰，因此不影响 335 标签； 对照样本的 3 个歧义已 fail-closed 替换。</li>
+<li>本轮没有让任何 final-preholdout 行进入分析，但 CSV chunk loader 为识别 2025-01-01 边界，物理解析后 排除了 38 条 15m 与 624 条 3m final 行；这些行没有进入特征、标签、收益或选参。holdout 完全未触碰。 历史 V9 final 结果仍是已消耗证据，不得用它继续选标签、特征或阈值。</li>
+<li>未做 TradingView 逐笔导出 parity；本地数据是 OKX <code>ETH-USDT-SWAP</code>，不能把 <code>ETHUSDT.P</code> 显示名 当成交易所一致性证明。</li>
+</ul>
+<h2>下一步</h2>
+<ol>
+<li><strong>保留自动标签管线，淘汰 ATR 扩张 entry gate。</strong> 不修改当前 V9 Pine。</li>
+<li><strong>在 P0/P1 内先做标签经济性审计。</strong> 把 start-positive 细分成最终 BE-stop、reverse winner、initial stop， 检查判断层究竟应预测“启动”还是“能覆盖成本的结算结果”。</li>
+<li><strong>新增一个真正针对假启动的因果特征，单变量验证。</strong> 优先考虑交叉前趋势效率/震荡度，而不是再用 ATR level；选择只能在更早时间块完成，随后必须动态回放。</li>
+<li><strong>LR/LightGBM 暂不训练。</strong> 当前 family-wise <code>p=0.3723</code> 且项目 P0/P1 未放行；通过标签目标与 Gold Dataset 门后，再以 2023 calibration → 2024 evaluation 的时间切分训练，并对 335 raw surface 全量 next-open 评分。</li>
+<li>任何 TP/SL、BE 触发/偏移、成本或 ATR floor 改动都需要 owner 明确逐项批准；本轮没有偷改。</li>
+</ol>
+<p>进一步需要回答的问题是：低胜率主要来自 entry 假启动，还是来自“+1.5% 后不止盈、只锁 +0.1%”的退出 结构？当前证据显示两者都有，但后者足以让 first-touch 正例变成净亏交易。下一轮应先做结算目标拆分， 再决定 LR 预测什么。</p>
+<h2>复现命令与产物</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+
+PYTHONPATH=. .venv/bin/pytest -q \
+  tests/test_pine_eth_15m_start_labels.py \
+  tests/test_pine_eth_15m_start_label_artifacts.py \
+  tests/test_prepare_pine_eth_15m_gate_surface.py \
+  tests/test_replay_pine_eth_15m_judgment_gate.py
+
+PYTHONPATH=. .venv/bin/python scripts/audit_pine_eth_15m_start_labels.py
+PYTHONPATH=. .venv/bin/python scripts/evaluate_pine_eth_15m_atr_expansion_gate.py
+
+python3 scripts/md_to_html.py \
+  analysis/p0_pine_eth_15m_start_label_audit_20260821.md \
+  --out-dir analysis/html
+</code></pre>
+<p>主要逐笔/逐候选产物：</p>
+<ul>
+<li><code>experiments/active/exp-pine-eth-15m-v1/results/judgment_start_label_rows.csv</code>（335 行）</li>
+<li><code>experiments/active/exp-pine-eth-15m-v1/results/judgment_start_label_matched_controls.csv</code>（1,005 行）</li>
+<li><code>experiments/active/exp-pine-eth-15m-v1/results/judgment_start_label_feature_audit.csv</code></li>
+<li><code>experiments/active/exp-pine-eth-15m-v1/results/judgment_atr_expansion_gate_trades.csv</code></li>
+<li><code>experiments/active/exp-pine-eth-15m-v1/results/judgment_atr_expansion_gate_controls.csv</code></li>
+<li><code>experiments/active/exp-pine-eth-15m-v1/results/judgment_atr_expansion_gate_pairs.csv</code></li>
+<li><code>experiments/active/exp-pine-eth-15m-v1/results/judgment_atr_expansion_gate_control_sensitivity.csv</code>（256 行）</li>
+<li><code>experiments/active/exp-pine-eth-15m-v1/results/judgment_start_label_audit.json</code></li>
+<li><code>experiments/active/exp-pine-eth-15m-v1/results/judgment_atr_expansion_gate.json</code></li>
+</ul>
+<p>本报告未放图：核心证据只有两个年度切片和精确审计表，柱图不会增加信息，表格更适合逐项核对。</p>
+</body>
+</html>

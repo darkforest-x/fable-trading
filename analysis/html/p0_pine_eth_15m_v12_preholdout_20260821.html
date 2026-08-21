@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>ETH 15m Pine V12 优化与最近半年回测前置报告（2026-08-21）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>ETH 15m Pine V12 优化与最近半年回测前置报告（2026-08-21）</h1>
+<blockquote><strong>当前结论</strong>：已把优化落实成 3 个彼此隔离的 Pine v6 paper 版本。按尚未触碰 repository holdout 的证据，当前应冻结 <strong>V12F：六均线 W8 全状态门</strong>，而不是 TBSL。 2025-01～2026-02 的已消费 preholdout 区间里，V12F 为 <strong>+31.41% / DD 18.22%</strong>， 对照 V9 的 <strong>+22.82% / DD 20.03%</strong>；2026 年 1–2 月小样本为 <strong>+3.26% / DD 6.62%</strong>， 对照 V9 的 <strong>-4.62% / DD 11.40%</strong>。但它的最终匹配超额 <code>p=0.3100</code>，没有通过项目 <code>p&lt;0.01</code> 门槛，仍只能叫 paper hypothesis。</blockquote>
+<blockquote><strong>最近半年尚未完成</strong>：按报告日期 2026-08-21，最近半年定义为 <code>2026-02-21T00:00:00Z</code> 至 <code>2026-08-21T00:00:00Z</code>。本轮只评价了安全重叠 <code>2026-02-21</code> 至 <code>2026-03-01</code>；<code>2026-05-04</code> 以后是 repository holdout，未获 owner 专项批准前没有读取、哈希、绘图或评分。安全重叠只有 3 笔且全部亏损，不能冒充半年结果。</blockquote>
+<h2>一、落地了什么 Pine</h2>
+<table><thead><tr>
+<th>版本</th>
+<th>唯一改动</th>
+<th>反向信号语义</th>
+<th>当前资格</th>
+</tr></thead><tbody>
+<tr><td>V9</td><td>冻结基线</td><td>下一开盘反手</td><td>research comparator</td></tr>
+<tr><td>V12F</td><td>六线 W8 净交叉门控完整状态转换</td><td>W8 拒绝的 guarded signal 不平仓、不反手、也不消耗 cooldown</td><td><strong>当前冻结候选；paper only</strong></td></tr>
+<tr><td>V12E</td><td>同一个 W8 只控制新开仓</td><td>W8 拒绝时仍平反向旧仓，但不新开</td><td>机制拆解；paper only</td></tr>
+<tr><td>V12T</td><td>V9 信号不变；分阶段预选的 TP30 + ATR3 composite，SL cap 仍 3%</td><td>与 V9 相同</td><td>高回撤趋势备选；paper only</td></tr>
+</tbody></table>
+<p>W8 与 TBSL 没有组合。V12F/V12E 各是相对 V9 的一个 gate 变量；V12T 内部则是此前先选 TP、 再选 ATR 的已冻结 barrier composite，不冒充严格单变量。这样仍可把 W8、反转语义和 TBSL 效果分开，不把三项打包后失去归因。</p>
+<p>Pine 文件：</p>
+<ul>
+<li><code>allin_eth_15m_v12f_ma6_w8_full_gate_paper.pine</code>，SHA-256 <code>9e03c2959e403632a8db06c66ee43487d7388e0dfdaf31abe5ae32218c7567de</code>；</li>
+<li><code>allin_eth_15m_v12e_ma6_w8_entry_only_paper.pine</code>，SHA-256 <code>593f7b3ae9da0832073edd57b96f631a63bc450def95f786d17ea2e2c219e6e9</code>；</li>
+<li><code>allin_eth_15m_v12t_tbsl_paper.pine</code>，SHA-256 <code>1fb6731f6ff96ed12429a71eecfb0dffe8e238be8f880215c1f170388f6da457</code>。</li>
+</ul>
+<p>所有新脚本都 fail-closed 到 ETH base、15 分钟、确认 bar、next-open 成交；没有 <code>request.security</code> 或 lookahead。Pine 标题、HUD 和 alerts 均写明 <code>PAPER ONLY</code>。</p>
+<h2>二、六均线 W8 到底是什么</h2>
+<p>六条线严格使用 <code>close</code>：SMA20、EMA20、SMA60、EMA60、SMA120、EMA120。只计算有明确 快慢方向的 12 对：20×60、20×120、60×120，每组四个 SMA/EMA 组合。同周期 SMA/EMA 没有天然快慢方向，因此排除。</p>
+<p>对多头，bar <code>t</code> 的金叉事件是 <code>fast[t] &gt; slow[t]</code> 且 <code>fast[t-1] &lt;= slow[t-1]</code>；空头为 相反条件。W8 在 <code>[t-7, t]</code> 统计方向一致交叉数减方向相反交叉数。阈值是 <code>&gt;=0</code>。</p>
+<p>必须把语义说准确：<strong>这不是“至少出现 N 次交叉”的密集度门</strong>。阈值 0 意味着“最近 8 根里， 相反方向交叉不能多于本方向交叉”；如果 8 根内完全没有交叉，也会通过。因此它目前更像 “拒绝近期方向冲突”因子。2023 / 2024 / 2025-至2026-02 分别拒绝 32/167、21/168、16/168 个 guarded candidates。此前时间开发选择了 W16 第一名，但它锁定后 2024 明显失稳；W8 是 开发期第二名，也是唯一同时改善 2023/2024 收益与回撤的版本，因此被固定成新的 forward hypothesis。本轮不再围绕 6/7/9 根或新的 churn 下限挖已消费数据。</p>
+<h2>三、主回测结果</h2>
+<p>共同条件：OKX ETH-USDT-SWAP 15m、本金 500、每单止损风险 1%、最大 13x、往返成本 0.20%、 Hong Kong 日历过滤、原 cooldown、break-even 和 next-open 反转均保持。收益为策略资金曲线复利 收益，不是 ETH 价格涨跌幅。DD 是 15m mark-to-market 最大回撤。</p>
+<table><thead><tr>
+<th>区间</th>
+<th>版本</th>
+<th>交易</th>
+<th>收益</th>
+<th>DD</th>
+<th>胜率</th>
+<th>PF</th>
+<th>净 bp/笔</th>
+</tr></thead><tbody>
+<tr><td>2023</td><td>V9</td><td>83</td><td>+70.50%</td><td>26.48%</td><td>14.46%</td><td>1.921</td><td>+52.01</td></tr>
+<tr><td>2023</td><td>V12F W8 full</td><td>59</td><td><strong>+117.84%</strong></td><td><strong>22.55%</strong></td><td>16.95%</td><td><strong>3.353</strong></td><td><strong>+119.21</strong></td></tr>
+<tr><td>2023</td><td>V12E W8 entry</td><td>65</td><td>+97.07%</td><td>22.55%</td><td>16.92%</td><td>2.810</td><td>+87.08</td></tr>
+<tr><td>2023</td><td>V12T TP30/ATR3</td><td>93</td><td>+119.14%</td><td>35.09%</td><td>12.90%</td><td>1.960</td><td>+59.43</td></tr>
+<tr><td>2024</td><td>V9</td><td>83</td><td>+109.26%</td><td>12.22%</td><td>19.28%</td><td>2.748</td><td>+141.35</td></tr>
+<tr><td>2024</td><td>V12F W8 full</td><td>70</td><td><strong>+110.61%</strong></td><td><strong>10.49%</strong></td><td>18.57%</td><td><strong>3.160</strong></td><td><strong>+179.15</strong></td></tr>
+<tr><td>2024</td><td>V12E W8 entry</td><td>77</td><td>+107.78%</td><td>11.52%</td><td>19.48%</td><td>2.855</td><td>+152.70</td></tr>
+<tr><td>2024</td><td>V12T TP30/ATR3</td><td>89</td><td>+133.91%</td><td>14.23%</td><td>16.85%</td><td>2.393</td><td>+122.89</td></tr>
+<tr><td>2025-01～2026-02</td><td>V9</td><td>110</td><td>+22.82%</td><td>20.03%</td><td>10.00%</td><td>1.366</td><td>+30.22</td></tr>
+<tr><td>2025-01～2026-02</td><td>V12F W8 full</td><td>97</td><td><strong>+31.41%</strong></td><td><strong>18.22%</strong></td><td>11.34%</td><td><strong>1.589</strong></td><td><strong>+57.63</strong></td></tr>
+<tr><td>2025-01～2026-02</td><td>V12E W8 entry</td><td>102</td><td>+26.75%</td><td>18.22%</td><td>10.78%</td><td>1.458</td><td>+43.06</td></tr>
+<tr><td>2025-01～2026-02</td><td>V12T TP30/ATR3</td><td>114</td><td>+27.59%</td><td>24.92%</td><td>8.77%</td><td>1.354</td><td>+24.99</td></tr>
+</tbody></table>
+<p>相对 V9，最终已消费区间的隔离变化如下；V12T 是分阶段预选 composite，不属于严格单变量：</p>
+<table><thead><tr>
+<th>版本</th>
+<th>收益变化</th>
+<th>DD 变化</th>
+<th>解释</th>
+</tr></thead><tbody>
+<tr><td>V12F W8 full</td><td><strong>+8.59 个百分点</strong></td><td><strong>-1.81 个百分点</strong></td><td>点估计最佳，且收益/回撤同向改善</td></tr>
+<tr><td>V12E W8 entry</td><td>+3.93 个百分点</td><td>-1.81 个百分点</td><td>只删坏开仓有帮助，但弱于 full-state</td></tr>
+<tr><td>V12T TP30/ATR3</td><td>+4.77 个百分点</td><td><strong>+4.89 个百分点</strong></td><td>收益增加但回撤显著恶化，不适合作为当前默认</td></tr>
+</tbody></table>
+<p>V12F 高于 V12E，说明 W8 的历史改善不只来自过滤新开仓，也来自拒绝某些过早反转。判断层以后 接入时，必须分别定义“是否消耗 cooldown / 是否关闭反向仓 / 是否允许开新仓”，不能简单把模型 布尔值 AND 到 signal 上。</p>
+<h2>四、最近的安全诊断</h2>
+<h3>2026 年 1–2 月</h3>
+<table><thead><tr>
+<th>版本</th>
+<th>交易</th>
+<th>收益</th>
+<th>DD</th>
+<th>胜率</th>
+<th>PF</th>
+<th>净 bp/笔</th>
+<th>对 V9 收益变化</th>
+</tr></thead><tbody>
+<tr><td>V9</td><td>21</td><td>-4.62%</td><td>11.40%</td><td>9.52%</td><td>0.634</td><td>-61.78</td><td>—</td></tr>
+<tr><td>V12F W8 full</td><td>13</td><td><strong>+3.26%</strong></td><td><strong>6.62%</strong></td><td>15.38%</td><td><strong>1.455</strong></td><td><strong>+51.01</strong></td><td><strong>+7.88pp</strong></td></tr>
+<tr><td>V12E W8 entry</td><td>18</td><td>-2.42%</td><td>10.43%</td><td>11.11%</td><td>0.770</td><td>-47.22</td><td>+2.20pp</td></tr>
+<tr><td>V12T TP30/ATR3</td><td>21</td><td>-5.20%</td><td>13.24%</td><td>9.52%</td><td>0.661</td><td>-55.86</td><td>-0.58pp</td></tr>
+</tbody></table>
+<p>这支持 full-state 而不是 entry-only，但只有 13 笔，不能独立证明稳定性。</p>
+<h3>最近半年安全重叠：2026-02-21～2026-03-01</h3>
+<table><thead><tr>
+<th>版本</th>
+<th>交易</th>
+<th>收益</th>
+<th>DD</th>
+<th>胜率</th>
+<th>结论</th>
+</tr></thead><tbody>
+<tr><td>V9</td><td>3</td><td>-2.40%</td><td>3.39%</td><td>0%</td><td>三笔全亏</td></tr>
+<tr><td>V12F W8 full</td><td>3</td><td>-2.40%</td><td>3.39%</td><td>0%</td><td>三个 signal 全通过 W8，因此与 V9 相同</td></tr>
+<tr><td>V12E W8 entry</td><td>3</td><td>-2.40%</td><td>3.39%</td><td>0%</td><td>同上</td></tr>
+<tr><td>V12T TP30/ATR3</td><td>3</td><td>-2.54%</td><td>3.85%</td><td>0%</td><td>未改善</td></tr>
+</tbody></table>
+<p>这 8 天的结果是明确的坏消息，但样本量不允许外推到半年。</p>
+<h2>五、匹配随机对照与统计门</h2>
+<p>对照严格匹配 ETH × UTC 月 × 香港 6 小时时段 × <strong>前一个月</strong> ATR 五分位，并复制候选持仓 时长、方向、障碍和成本；每笔 3 个不复用 controls。<code>p</code> 为 UTC 周区块单侧 sign-flip，项目门槛 是 <code>&lt;0.01</code>。</p>
+<table><thead><tr>
+<th>区间</th>
+<th>版本</th>
+<th>候选净 bp/笔</th>
+<th>对照净 bp/笔</th>
+<th>候选−对照 bp/笔</th>
+<th>p</th>
+</tr></thead><tbody>
+<tr><td>2025-01～2026-02</td><td>V9</td><td>+30.22</td><td>+58.61</td><td>-28.39</td><td>0.3901</td></tr>
+<tr><td>2025-01～2026-02</td><td>V12F W8 full</td><td>+57.63</td><td>+43.19</td><td><strong>+14.44</strong></td><td>0.3100</td></tr>
+<tr><td>2025-01～2026-02</td><td>V12E W8 entry</td><td>+43.06</td><td>+14.05</td><td>+29.01</td><td>0.2156</td></tr>
+<tr><td>2025-01～2026-02</td><td>V12T TP30/ATR3</td><td>+24.99</td><td>+25.05</td><td>-0.06</td><td>0.4073</td></tr>
+<tr><td>2026-01～02</td><td>V9</td><td>-61.78</td><td>-29.36</td><td>-32.42</td><td>0.4742</td></tr>
+<tr><td>2026-01～02</td><td>V12F W8 full</td><td>+51.01</td><td>+3.39</td><td><strong>+47.62</strong></td><td>0.2350</td></tr>
+<tr><td>2026-01～02</td><td>V12E W8 entry</td><td>-47.22</td><td>-35.08</td><td>-12.15</td><td>0.4425</td></tr>
+<tr><td>2026-01～02</td><td>V12T TP30/ATR3</td><td>-55.86</td><td>-17.93</td><td>-37.93</td><td>0.4852</td></tr>
+</tbody></table>
+<p>点估计支持 V12F，但没有一个最终/近期结果通过 <code>p&lt;0.01</code>。所以“历史收益更高”成立， “已证明存在稳定 alpha”不成立。</p>
+<h2>六、AUC 与 top-decile</h2>
+<p>这些 Pine 版本不是训练模型。为满足统一评价口径，只把原 V9 振荡器绝对值当作单特征排序分数； AUC 的标签是该笔扣成本后是否盈利。它只是诊断，不是新 gate。</p>
+<table><thead><tr>
+<th>最终已消费区间</th>
+<th>AUC</th>
+<th>top 10% 笔数</th>
+<th>top 10% 净 bp/笔</th>
+<th>排序置换 p</th>
+</tr></thead><tbody>
+<tr><td>V9</td><td>0.517</td><td>11</td><td>+202.97</td><td>0.1586</td></tr>
+<tr><td>V12F W8 full</td><td>0.415</td><td>10</td><td>+224.27</td><td>0.1823</td></tr>
+<tr><td>V12E W8 entry</td><td>0.469</td><td>11</td><td>+186.20</td><td>0.2031</td></tr>
+<tr><td>V12T TP30/ATR3</td><td>0.510</td><td>12</td><td>+202.60</td><td>0.1266</td></tr>
+</tbody></table>
+<p>全部未过 <code>p&lt;0.01</code>，因此当前振荡器强度不能承担 LR 层的替代品。池内排序也不能替代上面的随机 入场对照。</p>
+<h2>七、为什么胜率仍然低</h2>
+<p>这是典型低胜率、高盈亏比趋势策略。最终已消费区间中，V12F 97 笔只有 11 笔净盈利，平均盈利 <code>+13.21%</code>，平均亏损 <code>-1.04%</code>，平均盈亏幅度约 <strong>12.7:1</strong>，最大单笔净盈利 <code>+38.44%</code>。 因此 11.34% 胜率仍能得到 PF 1.589 和正收益。</p>
+<p>代价也很明确：没有大趋势时连续小止损会非常难看。2026-02-21 后可见的 3 笔全部亏损；如果未来 半年没有足够长的 runner，低胜率结构不会自动变好。优化目标不应是机械提高胜率，而是减少震荡 假启动，同时保留少数大趋势。</p>
+<h2>八、TBSL 的真实作用</h2>
+<p>V12T 把 TP30 距离在信号收盘冻结成 tick，与 entry 一起提交初始 stop+TP，因此 TP 从入场 bar 起就存在。成交后再用平均成交价加减冻结 tick 维护绝对 limit。Python replay 和随机对照使用相同 <code>take_profit_distance_basis=&quot;signal_close&quot;</code>。</p>
+<p>最终 114 笔里只有 3 笔真正达到 30% TP，104 笔止损、7 笔反转；same-15m stop/TP 双触为 0。 它确实允许极少数大趋势跑远，但最终匹配超额约 0，DD 升至 24.92%，2026 年 1–2 月也弱于 V9。 因此当前不把 TBSL 放进 V12F，更不能宣称“TP30 已优化完成”。</p>
+<h2>九、数据统计与边界</h2>
+<ul>
+<li>有界读取 145,666 根 15m bar，<code>2022-01-03T15:30:00Z</code> 至 <code>2026-02-28T23:45:00Z</code>；bounded-prefix SHA-256 <code>17f091b5e9b88f35feb5560c5a774a9277a21b64444d6ee2ea963cfacfc09159</code>。</li>
+<li>本轮在 git commit <code>a5fd22a764fa3a96924c73cb5500fb20618e28c2</code> 的 dirty working tree 执行；摘要另存 backtest script、Pine generator、execution engine 与 cross-feature 文件的内容 SHA-256，复现身份以内容 hash 为准，不能只靠 commit。</li>
+<li>重复时间、空 OHLCV、非 15m 间隔、K 线体约束错误均为 0。</li>
+<li>主时序 2023 / 2024 / 2025-至2026-02 有 167 / 168 / 168 个 guarded raw candidates； V9 实际执行 83 / 83 / 110 笔。</li>
+<li>W8 full 通过 135 / 147 / 152 个 candidates，最终实际执行 59 / 70 / 97 笔。</li>
+<li><code>holdout_rows_read=0</code>。但本实验家族历史上已有未经批准的 EOF 字节访问事故，所以不能把本轮 写成“项目从未看过 holdout”；只能写本次 bounded replay 没有读取 holdout 行或字节。</li>
+<li>研究源是 OKX swap proxy，不证明等于 TradingView 上未指定 venue 的 <code>ETHUSDT.P</code>。</li>
+</ul>
+<h2>十、测试与 Luna Max 复核</h2>
+<p>本地 <code>41 passed</code>：覆盖生成文件 hash/equality、12 对交叉、W8 因果窗口、六线 MA warmup ready、 15m guard、full-state cooldown、entry-only 反向平仓、signal-close TP tick、matched-control TP 语义和 holdout-safe periods。</p>
+<p>可见 Codex 任务使用 <code>gpt-5.6-luna</code>、<code>thinking=max</code> 做两轮只读语义复核。第一轮在新 Pine 落盘前 指出两个需要显式处理的风险：entry-only 尚未迁移，以及依赖成交价的 TP 无法天然保证入场当根 保护。本轮实现分别增加独立 V12E 状态路径和信号收盘冻结 tick。第二轮确认 12 对交叉、W8 <code>[t-7,t]</code>、full-state、entry-only 和 TP 设计基本成立，同时发现 Python 缺少 Pine 的六线 ready 门，并指出 V12T 不能叫严格单变量；两处都已修正。其最终裁决仍是 <strong>LIMITED / Pine parity FAIL</strong>： 新 Pine 没有官方 trade export，对 same-bar stop/TP 路径也没有 Pine 侧 stop-first 保证。Luna 不修改 文件、不读取 holdout。</p>
+<h2>十一、风险与诚实声明</h2>
+<ul>
+<li>V12F 是 post-selection paper hypothesis；2025-至2026-02 也已被查看，不能再叫 unseen OOS。</li>
+<li>W8 阈值 0 会让“零交叉”通过，它不是严格的六线密集度因子。</li>
+<li>最终匹配超额和 top-decile 排序都未过 <code>p&lt;0.01</code>；收益仍高度依赖少数大 runner。</li>
+<li>V12T 的 Python stop-first 只在同 bar 双障碍触发时与 TradingView emulator 路径有关；本轮该事件 为 0，但这不等于未来永远没有。</li>
+<li>三个新 Pine 尚未在 TradingView 官方编译器逐个编译，也没有 trade-export parity；V9 编译通过 不能自动外推到 V12。</li>
+<li>20 bp 成本已扣；滑点、资金费、强平、最小下单量仍未进入资金曲线。</li>
+<li>没有训练 LR/LightGBM，没有 promote、deploy、改 ACTIVE、写 forward_log 或操作真金。</li>
+<li>完整最近半年尚未跑；任何把本报告的 8 天结果写成半年结果都属于错误陈述。</li>
+</ul>
+<h2>十二、下一步：先锁配置，再只消费一次 holdout</h2>
+<p>建议在 owner 明确批准后，只对以下<strong>已冻结配置</strong>做一次完整最近半年最终验收：</p>
+<ol>
+<li>候选：V12F，SHA-256 <code>9e03c295...</code>；</li>
+<li>对照：冻结 V9，不参与再选参；</li>
+<li>区间：<code>2026-02-21T00:00:00Z</code> 至 <code>2026-08-21T00:00:00Z</code>；</li>
+<li>固定 15m、20 bp、1% risk、13x cap、原 BE/cooldown/reversal；</li>
+<li>输出逐笔 trades、匹配随机 controls、资金曲线、月度分解，并同步 Notion；</li>
+<li>记录“V12F 配置第 1 次消耗 holdout”；看完后不再用该 holdout 调 W8、阈值或 TBSL。</li>
+</ol>
+<p>不建议把 V12E、V12T 或 V12F+TBSL 一起送入 holdout 后择优；那会把最终集重新变成调参集。</p>
+<h2>十三、复现命令</h2>
+<pre><code>
+git branch --show-current  # 必须是 main
+
+PYTHONPATH=. .venv/bin/python \
+  scripts/generate_pine_eth_15m_optimized_variants.py
+
+PYTHONPATH=. .venv/bin/python \
+  scripts/backtest_pine_eth_15m_v12_preholdout.py
+
+PYTHONPATH=. .venv/bin/pytest -q \
+  tests/test_backtest_pine_eth_15m_v12_preholdout.py \
+  tests/test_generate_pine_eth_15m_optimized_variants.py \
+  tests/test_pine_allin_v7_backtest.py \
+  tests/test_pine_cross_features.py \
+  tests/test_research_pine_eth_15m.py
+
+python3 scripts/md_to_html.py \
+  analysis/p0_pine_eth_15m_v12_preholdout_20260821.md \
+  --out-dir analysis/html
+</code></pre>
+<p>逐笔产物：</p>
+<ul>
+<li><code>optimized_pine_variants_primary_trades.csv</code>：三个不重叠主区间、四个版本的 1,042 笔记录；</li>
+<li><code>optimized_pine_variants_recent_safe_trades.csv</code>：最近半年安全重叠的 12 笔版本化记录；</li>
+<li><code>optimized_pine_variants_preholdout_controls.csv</code>：逐笔 3 个匹配 controls；</li>
+<li><code>optimized_pine_variants_preholdout_pairs.csv</code>：候选与 control mean 的成对差；</li>
+<li><code>optimized_pine_variants_preholdout.json</code>：全部配置、hash、边界和汇总指标。</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,578 @@
+{
+  "artifact": "ETH 15m V12F owner-approved holdout consumption #1",
+  "status": "completed research replay; paper-only",
+  "approval": {
+    "approved": true,
+    "conversation_thread_id": "01a01fb5-7d9d-7511-9184-cdf0ce4db62e",
+    "approval_date_asia_shanghai": "2026-08-21",
+    "request_text": "批准 V12F 配置第 1 次消耗 holdout，区间 2026-02-21 至 2026-08-21",
+    "owner_reply": "批准",
+    "consumption_number": 1,
+    "scope": "V12F frozen configuration with frozen V9 comparator only"
+  },
+  "frozen_config": {
+    "artifact": "ETH 15m V12F holdout consumption #1",
+    "approval": {
+      "approved": true,
+      "conversation_thread_id": "01a01fb5-7d9d-7511-9184-cdf0ce4db62e",
+      "approval_date_asia_shanghai": "2026-08-21",
+      "request_text": "批准 V12F 配置第 1 次消耗 holdout，区间 2026-02-21 至 2026-08-21",
+      "owner_reply": "批准",
+      "consumption_number": 1,
+      "scope": "V12F frozen configuration with frozen V9 comparator only"
+    },
+    "instrument": {
+      "research_source": "OKX",
+      "symbol": "ETH-USDT-SWAP",
+      "bar_minutes": 15,
+      "venue_note": "research proxy; not claimed bar-identical to TradingView ETHUSDT.P",
+      "data_contract": "immutable local deep prefix plus bounded OKX history-candles tail fetched in memory with after=end_exclusive; no kline file is written",
+      "local_prefix": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+      "tail_endpoint": "https://www.okx.com/api/v5/market/history-candles",
+      "minimum_warmup_bars_before_requested_start": 400
+    },
+    "periods": [
+      {
+        "name": "requested_recent_6m",
+        "start_inclusive": "2026-02-21T00:00:00+00:00",
+        "end_exclusive": "2026-08-21T00:00:00+00:00"
+      },
+      {
+        "name": "protected_holdout_fresh_start",
+        "start_inclusive": "2026-05-04T00:00:00+00:00",
+        "end_exclusive": "2026-08-21T00:00:00+00:00"
+      }
+    ],
+    "arms": [
+      {
+        "name": "v9_frozen_baseline",
+        "pine_sha256": "6465fa80f89907b2ed584085960f355f331de62e3c38ebf65f3065c57873dfe9",
+        "role": "frozen comparator"
+      },
+      {
+        "name": "v12f_ma6_w8_full_gate",
+        "pine_sha256": "9e03c2959e403632a8db06c66ee43487d7388e0dfdaf31abe5ae32218c7567de",
+        "role": "single frozen candidate"
+      }
+    ],
+    "execution": {
+      "entry": "confirmed signal t; market fill at open t+1",
+      "round_trip_cost": 0.002,
+      "commission_per_side": 0.001,
+      "risk_per_trade_percent": 1.0,
+      "max_leverage": 13.0,
+      "atr_mult": 4.0,
+      "max_sl_percent": 3.0,
+      "break_even_trigger_percent": 1.5,
+      "break_even_offset_percent": 0.1,
+      "take_profit_percent": null,
+      "cooldown": true,
+      "opposite_signal": "reverse",
+      "force_close_at_period_end": true
+    },
+    "runtime_versions": {
+      "numpy": "2.0.2",
+      "pandas": "2.3.3",
+      "matplotlib": "3.9.4",
+      "scipy": "1.13.1"
+    },
+    "v12f_gate": {
+      "bundle": [
+        "SMA20",
+        "EMA20",
+        "SMA60",
+        "EMA60",
+        "SMA120",
+        "EMA120"
+      ],
+      "source": "close",
+      "directional_pairs": 12,
+      "window_bars": 8,
+      "window": "[t-7,t]",
+      "threshold": 0,
+      "future_bars": 0,
+      "scope": "full guarded state transition"
+    },
+    "tradingview_inputs_required": {
+      "start_utc": "2026-02-21T00:00:00+00:00",
+      "end_exclusive_utc": "2026-08-21T00:00:00+00:00",
+      "note": "the frozen Pine file keeps its preholdout defaults; these two inputs must be set explicitly for the approved replay"
+    },
+    "matched_control": {
+      "controls_per_trade": 3,
+      "strata": "ETH x UTC month x HK 6h x previous-month ATR quintile",
+      "copied": "direction x holding horizon x stop x break-even x cost",
+      "assignment_seeds": 32,
+      "week_block_signflip_resamples": 20000
+    },
+    "forbidden": [
+      "V12E",
+      "V12T/TBSL",
+      "parameter search",
+      "feature selection",
+      "training",
+      "promotion",
+      "deployment",
+      "live trading"
+    ],
+    "protected_segment_semantics": {
+      "independent_verdict": "fresh equity, position and cooldown state at holdout start",
+      "continuous_diagnostic": "slice of the requested six-month equity path retaining pre-holdout state; reported separately and not used for candidate selection"
+    }
+  },
+  "frozen_config_sha256": "97cb40d4b8dfd792771f000fbd0356922dac9c136e45b79219e85548f1b42eb4",
+  "data_quality": {
+    "data_path": "/Users/zhangzc/fable-trading/data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+    "data_source": "local immutable prefix + bounded OKX in-memory tail",
+    "bounded_prefix_sha256": "7bccd1fc8ef264a8c474d7b7d8e442dbe53bfe24531995da0efc0197c4b5cfb7",
+    "hash_scope": "in-memory OHLCV rows through 2026-08-20 23:45 UTC only",
+    "rows_read": 162274,
+    "first_bar": "2022-01-03T15:30:00+00:00",
+    "last_bar": "2026-08-20T23:45:00+00:00",
+    "approved_end_exclusive": "2026-08-21T00:00:00+00:00",
+    "terminal_bar_expected": "2026-08-20T23:45:00+00:00",
+    "local_rows_materialized": 158499,
+    "local_boundary_timestamp_rows_inspected": 0,
+    "local_ohlcv_rows_at_or_after_approved_end_materialized": 0,
+    "api_tail": {
+      "api": "https://www.okx.com/api/v5/market/history-candles",
+      "pagination_contract": "after=end_exclusive; every returned ts must be earlier",
+      "requests": 38,
+      "response_rows_received": 3800,
+      "rows_materialized_after_local_prefix": 3775,
+      "response_rows_at_or_after_approved_end": 0,
+      "duplicate_response_timestamps": 0,
+      "unconfirmed_rows_inside_approved_tail": 0,
+      "raw_kline_rows_written_to_disk": 0,
+      "first_tail_bar": "2026-07-12T16:15:00+00:00",
+      "last_tail_bar": "2026-08-20T23:45:00+00:00",
+      "tail_sha256": "f554aea128d8212fd82b51512a9558e95bd165eb02b9baf1d0801ec104740544"
+    },
+    "holdout_start": "2026-05-04T00:00:00+00:00",
+    "holdout_rows_read": 10464,
+    "duplicate_timestamps": 0,
+    "null_ohlcv_cells": 0,
+    "non_15m_gaps": 0,
+    "nonpositive_ohlc_cells": 0,
+    "ohlc_body_violations": 0,
+    "warmup_bars_available_before_requested_start": 144898
+  },
+  "code_provenance": {
+    "git_commit_at_run": "7b859dabe07f27c1e1f2523c4652622b975f381d",
+    "runtime_paths_committed_and_clean": true,
+    "unrelated_worktree_changes_may_exist": true,
+    "runner_sha256": "8b46914fc2b5172d76e2531a0660ef03e864762efb537a54959943e3f6d7b944",
+    "execution_engine_sha256": "0561923599f021ade68e159fe823bbb92d50d02d26a53183be896485b7d1b934",
+    "cross_feature_sha256": "9df52f0b3018775c557e649480c80b4a23df44989e61153f8e278c48d3e95ff9"
+  },
+  "results": [
+    {
+      "variant": "v9_frozen_baseline",
+      "period": "requested_recent_6m",
+      "risk_percent": 1.0,
+      "trades": 61,
+      "gross_bp_per_trade": -25.44386963582734,
+      "project_net_bp_per_trade": -45.44386963582736,
+      "pine_net_bp_per_trade": -45.44364064541839,
+      "win_rate": 0.08196721311475409,
+      "monetary_profit_factor": 0.8349020060670782,
+      "unit_profit_factor": 0.6459511762743742,
+      "return_percent": -6.934194270639093,
+      "max_drawdown_15m_percent": 27.446326302357747,
+      "max_drawdown_daily_percent": 26.555223374725824,
+      "median_holding_bars": 41.0,
+      "mean_leverage": 0.7047605351981591,
+      "max_leverage": 1.754900877447535,
+      "long_trades": 34,
+      "short_trades": 27,
+      "period_end_exits": 1,
+      "raw_guarded_candidates": 94,
+      "entry_gate_pass_candidates": 94,
+      "entry_gate_rejected_candidates": 0,
+      "auc_positive_trade": 0.475,
+      "top_decile_trades": 7,
+      "top_decile_gross_bp_per_trade": 135.93703575835448,
+      "top_decile_net_bp_per_trade": 115.93703575835445,
+      "top_decile_win_rate": 0.14285714285714285,
+      "top_decile_permutation_p": 0.19568043195680432,
+      "ranking_note": "oscillator magnitude ranks trades; ranking does not validate pool beta",
+      "change_contract": "none (frozen comparator)",
+      "strict_single_variable": true,
+      "pine_path": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v9_research.pine",
+      "pine_sha256": "6465fa80f89907b2ed584085960f355f331de62e3c38ebf65f3065c57873dfe9",
+      "take_profit_percent": null,
+      "atr_mult": 4.0,
+      "max_sl_percent": 3.0,
+      "intrabar_barrier_collisions": 0,
+      "trade_anatomy": {
+        "trades": 61,
+        "winner_count": 5,
+        "loser_count": 56,
+        "average_winner_net_bp": 1011.5134771224136,
+        "average_loser_net_bp": -139.81506131067033,
+        "payoff_ratio_average_win_to_loss": 7.23465317427299,
+        "largest_winner_net_percent": 21.26922747543105,
+        "largest_loser_net_percent": -3.2001641997607466,
+        "median_trade_net_bp": -140.19847919749415,
+        "mean_holding_bars": 114.21311475409836,
+        "median_holding_bars": 41.0,
+        "long": {
+          "trades": 34,
+          "mean_net_bp": -43.030065628415564
+        },
+        "short": {
+          "trades": 27,
+          "mean_net_bp": -48.48347468219777
+        },
+        "exit_reason_counts": {
+          "stop": 55,
+          "reverse": 5,
+          "period_end": 1
+        }
+      },
+      "matched_control": {
+        "status": "complete_exact_3_per_trade",
+        "control_net_bp_per_trade": 1.0290951289461938,
+        "candidate_minus_control_bp_per_trade": -46.47296476477354,
+        "week_block_signflip_p_one_sided": 0.4204289785510724,
+        "week_blocks": 26,
+        "week_block_signflip": {
+          "statistic_mean_excess_bp": 16.001775735165655,
+          "p_value": 0.4204289785510724,
+          "n_blocks": 26,
+          "n_resamples": 20000,
+          "null_mean_bp": -0.3188923154568539,
+          "null_std_bp": 68.98406070605952
+        }
+      },
+      "control_assignment_sensitivity": {
+        "status": "complete",
+        "assignment_seeds": 32,
+        "median_excess_bp_per_trade": -40.25767403870337,
+        "p05_excess_bp_per_trade": -68.85659784057535,
+        "p95_excess_bp_per_trade": -14.396320544313149,
+        "positive_assignment_fraction": 0.0
+      },
+      "return_delta_vs_v9_percentage_points": 0.0,
+      "drawdown_delta_vs_v9_percentage_points": 0.0,
+      "net_bp_delta_vs_v9_per_trade": 0.0
+    },
+    {
+      "variant": "v9_frozen_baseline",
+      "period": "protected_holdout_fresh_start",
+      "risk_percent": 1.0,
+      "trades": 33,
+      "gross_bp_per_trade": 40.8317705066113,
+      "project_net_bp_per_trade": 20.831770506611285,
+      "pine_net_bp_per_trade": 20.849490072948257,
+      "win_rate": 0.12121212121212122,
+      "monetary_profit_factor": 1.4164998306942083,
+      "unit_profit_factor": 1.1701181181293236,
+      "return_percent": 11.60308965013106,
+      "max_drawdown_15m_percent": 21.68579942883432,
+      "max_drawdown_daily_percent": 20.77943670248481,
+      "median_holding_bars": 41.0,
+      "mean_leverage": 0.7974982130781729,
+      "max_leverage": 1.754900877447535,
+      "long_trades": 20,
+      "short_trades": 13,
+      "period_end_exits": 1,
+      "raw_guarded_candidates": 59,
+      "entry_gate_pass_candidates": 59,
+      "entry_gate_rejected_candidates": 0,
+      "auc_positive_trade": 0.3879310344827586,
+      "top_decile_trades": 4,
+      "top_decile_gross_bp_per_trade": 359.84618207374945,
+      "top_decile_net_bp_per_trade": 339.84618207374945,
+      "top_decile_win_rate": 0.25,
+      "top_decile_permutation_p": 0.18698130186981302,
+      "ranking_note": "oscillator magnitude ranks trades; ranking does not validate pool beta",
+      "change_contract": "none (frozen comparator)",
+      "strict_single_variable": true,
+      "pine_path": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v9_research.pine",
+      "pine_sha256": "6465fa80f89907b2ed584085960f355f331de62e3c38ebf65f3065c57873dfe9",
+      "take_profit_percent": null,
+      "atr_mult": 4.0,
+      "max_sl_percent": 3.0,
+      "intrabar_barrier_collisions": 0,
+      "trade_anatomy": {
+        "trades": 33,
+        "winner_count": 4,
+        "loser_count": 29,
+        "average_winner_net_bp": 1182.1137398941414,
+        "average_loser_net_bp": -139.34505285718598,
+        "payoff_ratio_average_win_to_loss": 8.483356356437596,
+        "largest_winner_net_percent": 21.26922747543105,
+        "largest_loser_net_percent": -3.2001641997607466,
+        "median_trade_net_bp": -140.19847919749415,
+        "mean_holding_bars": 152.03030303030303,
+        "median_holding_bars": 41.0,
+        "long": {
+          "trades": 20,
+          "mean_net_bp": -0.9324315600356958
+        },
+        "short": {
+          "trades": 13,
+          "mean_net_bp": 54.3151583014528
+        },
+        "exit_reason_counts": {
+          "stop": 29,
+          "reverse": 3,
+          "period_end": 1
+        }
+      },
+      "matched_control": {
+        "status": "complete_exact_3_per_trade",
+        "control_net_bp_per_trade": -32.03691882010547,
+        "candidate_minus_control_bp_per_trade": 52.86868932671677,
+        "week_block_signflip_p_one_sided": 0.24603769811509424,
+        "week_blocks": 15,
+        "week_block_signflip": {
+          "statistic_mean_excess_bp": 181.10675184655045,
+          "p_value": 0.24603769811509424,
+          "n_blocks": 15,
+          "n_resamples": 20000,
+          "null_mean_bp": 0.22848722430386914,
+          "null_std_bp": 176.444339632623
+        }
+      },
+      "control_assignment_sensitivity": {
+        "status": "complete",
+        "assignment_seeds": 32,
+        "median_excess_bp_per_trade": 26.48533513676808,
+        "p05_excess_bp_per_trade": -3.4661435966176004,
+        "p95_excess_bp_per_trade": 60.63909528477867,
+        "positive_assignment_fraction": 0.90625
+      },
+      "return_delta_vs_v9_percentage_points": 0.0,
+      "drawdown_delta_vs_v9_percentage_points": 0.0,
+      "net_bp_delta_vs_v9_per_trade": 0.0
+    },
+    {
+      "variant": "v12f_ma6_w8_full_gate",
+      "period": "requested_recent_6m",
+      "risk_percent": 1.0,
+      "trades": 58,
+      "gross_bp_per_trade": -21.385347949547423,
+      "project_net_bp_per_trade": -41.38534794954744,
+      "pine_net_bp_per_trade": -41.38776668318336,
+      "win_rate": 0.08620689655172414,
+      "monetary_profit_factor": 0.9117787920010602,
+      "unit_profit_factor": 0.6781473970970118,
+      "return_percent": -3.4634800061053572,
+      "max_drawdown_15m_percent": 24.740573439926038,
+      "max_drawdown_daily_percent": 23.816238503847377,
+      "median_holding_bars": 38.0,
+      "mean_leverage": 0.6871801982558015,
+      "max_leverage": 1.754900877447535,
+      "long_trades": 32,
+      "short_trades": 26,
+      "period_end_exits": 1,
+      "raw_guarded_candidates": 94,
+      "entry_gate_pass_candidates": 83,
+      "entry_gate_rejected_candidates": 11,
+      "auc_positive_trade": 0.4867924528301887,
+      "top_decile_trades": 6,
+      "top_decile_gross_bp_per_trade": 156.92654171808041,
+      "top_decile_net_bp_per_trade": 136.9265417180804,
+      "top_decile_win_rate": 0.16666666666666666,
+      "top_decile_permutation_p": 0.18758124187581243,
+      "ranking_note": "oscillator magnitude ranks trades; ranking does not validate pool beta",
+      "change_contract": "MA6 W8 cross imbalance >= 0 gates the full guarded state transition",
+      "strict_single_variable": true,
+      "pine_path": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v12f_ma6_w8_full_gate_paper.pine",
+      "pine_sha256": "9e03c2959e403632a8db06c66ee43487d7388e0dfdaf31abe5ae32218c7567de",
+      "take_profit_percent": null,
+      "atr_mult": 4.0,
+      "max_sl_percent": 3.0,
+      "intrabar_barrier_collisions": 0,
+      "trade_anatomy": {
+        "trades": 58,
+        "winner_count": 5,
+        "loser_count": 53,
+        "average_winner_net_bp": 1011.5134771224136,
+        "average_loser_net_bp": -140.7154257865249,
+        "payoff_ratio_average_win_to_loss": 7.188362409228325,
+        "largest_winner_net_percent": 21.26922747543105,
+        "largest_loser_net_percent": -3.2001641997607466,
+        "median_trade_net_bp": -138.45855924853933,
+        "mean_holding_bars": 109.36206896551724,
+        "median_holding_bars": 38.0,
+        "long": {
+          "trades": 32,
+          "mean_net_bp": -37.18849422171422
+        },
+        "short": {
+          "trades": 26,
+          "mean_net_bp": -46.5507063838037
+        },
+        "exit_reason_counts": {
+          "stop": 52,
+          "reverse": 5,
+          "period_end": 1
+        }
+      },
+      "matched_control": {
+        "status": "complete_exact_3_per_trade",
+        "control_net_bp_per_trade": -10.758328519140644,
+        "candidate_minus_control_bp_per_trade": -30.62701943040679,
+        "week_block_signflip_p_one_sided": 0.37303134843257835,
+        "week_blocks": 26,
+        "week_block_signflip": {
+          "statistic_mean_excess_bp": 23.874732970971873,
+          "p_value": 0.37303134843257835,
+          "n_blocks": 26,
+          "n_resamples": 20000,
+          "null_mean_bp": -0.6252413766885858,
+          "null_std_bp": 81.21548081500829
+        }
+      },
+      "control_assignment_sensitivity": {
+        "status": "complete",
+        "assignment_seeds": 32,
+        "median_excess_bp_per_trade": -36.892214256351366,
+        "p05_excess_bp_per_trade": -68.07881396458059,
+        "p95_excess_bp_per_trade": -13.71492677093236,
+        "positive_assignment_fraction": 0.0
+      },
+      "return_delta_vs_v9_percentage_points": 3.470714264533736,
+      "drawdown_delta_vs_v9_percentage_points": -2.7057528624317086,
+      "net_bp_delta_vs_v9_per_trade": 4.058521686279924
+    },
+    {
+      "variant": "v12f_ma6_w8_full_gate",
+      "period": "protected_holdout_fresh_start",
+      "risk_percent": 1.0,
+      "trades": 30,
+      "gross_bp_per_trade": 55.30580978099634,
+      "project_net_bp_per_trade": 35.30580978099633,
+      "pine_net_bp_per_trade": 35.32015947177263,
+      "win_rate": 0.13333333333333333,
+      "monetary_profit_factor": 1.6416126187393565,
+      "unit_profit_factor": 1.2886599281439515,
+      "return_percent": 15.765117069107637,
+      "max_drawdown_15m_percent": 18.740508340967942,
+      "max_drawdown_daily_percent": 17.800058539211637,
+      "median_holding_bars": 38.0,
+      "mean_leverage": 0.7727833294442827,
+      "max_leverage": 1.754900877447535,
+      "long_trades": 18,
+      "short_trades": 12,
+      "period_end_exits": 1,
+      "raw_guarded_candidates": 59,
+      "entry_gate_pass_candidates": 49,
+      "entry_gate_rejected_candidates": 10,
+      "auc_positive_trade": 0.40384615384615385,
+      "top_decile_trades": 3,
+      "top_decile_gross_bp_per_trade": 476.46157609833296,
+      "top_decile_net_bp_per_trade": 456.46157609833296,
+      "top_decile_win_rate": 0.3333333333333333,
+      "top_decile_permutation_p": 0.1837816218378162,
+      "ranking_note": "oscillator magnitude ranks trades; ranking does not validate pool beta",
+      "change_contract": "MA6 W8 cross imbalance >= 0 gates the full guarded state transition",
+      "strict_single_variable": true,
+      "pine_path": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v12f_ma6_w8_full_gate_paper.pine",
+      "pine_sha256": "9e03c2959e403632a8db06c66ee43487d7388e0dfdaf31abe5ae32218c7567de",
+      "take_profit_percent": null,
+      "atr_mult": 4.0,
+      "max_sl_percent": 3.0,
+      "intrabar_barrier_collisions": 0,
+      "trade_anatomy": {
+        "trades": 30,
+        "winner_count": 4,
+        "loser_count": 26,
+        "average_winner_net_bp": 1182.1137398941414,
+        "average_loser_net_bp": -141.12617946717984,
+        "payoff_ratio_average_win_to_loss": 8.376289532935685,
+        "largest_winner_net_percent": 21.26922747543105,
+        "largest_loser_net_percent": -3.2001641997607466,
+        "median_trade_net_bp": -138.45855924853933,
+        "mean_holding_bars": 146.43333333333334,
+        "median_holding_bars": 38.0,
+        "long": {
+          "trades": 18,
+          "mean_net_bp": 14.130099170586657
+        },
+        "short": {
+          "trades": 12,
+          "mean_net_bp": 67.06937569661083
+        },
+        "exit_reason_counts": {
+          "stop": 26,
+          "reverse": 3,
+          "period_end": 1
+        }
+      },
+      "matched_control": {
+        "status": "complete_exact_3_per_trade",
+        "control_net_bp_per_trade": -6.424708749419707,
+        "candidate_minus_control_bp_per_trade": 41.730518530416056,
+        "week_block_signflip_p_one_sided": 0.25663716814159293,
+        "week_blocks": 15,
+        "week_block_signflip": {
+          "statistic_mean_excess_bp": 154.54838546315125,
+          "p_value": 0.25663716814159293,
+          "n_blocks": 15,
+          "n_resamples": 20000,
+          "null_mean_bp": 2.9845810120538507,
+          "null_std_bp": 170.59815858673565
+        }
+      },
+      "control_assignment_sensitivity": {
+        "status": "complete",
+        "assignment_seeds": 32,
+        "median_excess_bp_per_trade": 34.1630973492571,
+        "p05_excess_bp_per_trade": -2.844604943328971,
+        "p95_excess_bp_per_trade": 63.449064068990346,
+        "positive_assignment_fraction": 0.9375
+      },
+      "return_delta_vs_v9_percentage_points": 4.162027418976576,
+      "drawdown_delta_vs_v9_percentage_points": -2.9452910878663765,
+      "net_bp_delta_vs_v9_per_trade": 14.474039274385042
+    }
+  ],
+  "continuous_protected_segment": [
+    {
+      "variant": "v9_frozen_baseline",
+      "period": "protected_holdout_continuous_state_diagnostic",
+      "start": "2026-05-04T00:00:00+00:00",
+      "end_exclusive": "2026-08-21T00:00:00+00:00",
+      "start_equity_multiple": 0.8338999038567535,
+      "end_equity_multiple": 0.9306580572936091,
+      "return_percent": 11.603089650131038,
+      "max_drawdown_percent": 21.68579942883433,
+      "entries_in_segment": 33,
+      "exits_in_segment": 33,
+      "carry_positions_crossing_holdout_start": 0,
+      "inference_note": "state-retaining equity diagnostic only; matched-control and ranking tests belong to protected_holdout_fresh_start"
+    },
+    {
+      "variant": "v12f_ma6_w8_full_gate",
+      "period": "protected_holdout_continuous_state_diagnostic",
+      "start": "2026-05-04T00:00:00+00:00",
+      "end_exclusive": "2026-08-21T00:00:00+00:00",
+      "start_equity_multiple": 0.8338999038567535,
+      "end_equity_multiple": 0.9653651999389464,
+      "return_percent": 15.765117069107593,
+      "max_drawdown_percent": 18.74050834096799,
+      "entries_in_segment": 30,
+      "exits_in_segment": 30,
+      "carry_positions_crossing_holdout_start": 0,
+      "inference_note": "state-retaining equity diagnostic only; matched-control and ranking tests belong to protected_holdout_fresh_start"
+    }
+  ],
+  "result_keys": [
+    "requested_recent_6m is the user's full window",
+    "protected_holdout_fresh_start is the independent repository holdout verdict with state reset",
+    "protected_holdout_continuous_state_diagnostic retains the six-month path's pre-May-4 position/equity/cooldown state"
+  ],
+  "selection_after_holdout": false,
+  "parameter_search_on_holdout": false,
+  "v12e_evaluated": false,
+  "tbsl_evaluated": false,
+  "model_trained_or_scored": false,
+  "official_tradingview_parity_passed": false,
+  "training_eligible": false,
+  "forward_eligible": false,
+  "production_eligible": false
+}

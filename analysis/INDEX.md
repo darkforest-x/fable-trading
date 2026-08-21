@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **238** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **242** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,11 +10,16 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-08-21 | [`p0_pine_eth_15m_v12f_holdout1_recent6m_20260821.md`](p0_pine_eth_15m_v12f_holdout1_recent6m_20260821.md) | ETH 15m Pine V12F：最近半年 holdout 第 1 次正式验收 | V12F 最近半年 -3.46% / DD 24.74%，优于 V9 的 -6.93% / 27.45%；纯受保护段 +15.77%，但匹配对照 p=0.2566、top-decile p=0.1838，严格项目门 FAIL，不得 promote。 |
+| 2026-08-21 | [`p0_pine_eth_15m_cross_tbsl_optimization_20260821.md`](p0_pine_eth_15m_cross_tbsl_optimization_20260821.md) | ETH 15m Pine：六均线交叉因子与趋势 TP/SL 优化 | 1. **兼顾收益与回撤的当前研究候选是六线 W8 gate，不是 TBSL。** 它要求最近 8 根内， |
+| 2026-08-21 | [`p0_pine_eth_15m_start_label_audit_20260821.md`](p0_pine_eth_15m_start_label_audit_20260821.md) | ETH 15m Pine：335 候选自动先达标签与判断门优化审计 | 1. **335 个候选已经全部自动标完，不需要人工审核。** 184 个正例、151 个负例，正例率 |
+| 2026-08-21 | [`p0_pine_eth_15m_v12_preholdout_20260821.md`](p0_pine_eth_15m_v12_preholdout_20260821.md) | ETH 15m Pine V12 优化与最近半年回测前置报告（2026-08-21） |  |
 | 2026-08-21 | [`p0_pine_eth_15m_v1_20260821.md`](p0_pine_eth_15m_v1_20260821.md) | ETHUSDT.P / ETH-USDT-SWAP 15m Pine 定型与回测审计（V1） | 15 分钟已经定死为本轮唯一研究周期：本地数据契约是 **OKX `ETH-USDT-SWAP` 15m**， |
-| 2026-08-21 | [`p1_ma_rope_prefilter_20260821.md`](p1_ma_rope_prefilter_20260821.md) | P1 · 六均线“拧成一股绳”代码预筛与数据扩充入口（2026-08-21） | 代码预筛已完成，但独立 390 条反证未通过；分数只允许排序人工审核，不得自动删图或留图。 |
 | 2026-08-21 | [`p1_fixed_w10_canonical_ohlc_triage_v2_20260821.md`](p1_fixed_w10_canonical_ohlc_triage_v2_20260821.md) | P1 统一原始 OHLC 全量筛选包 v2（2026-08-21） | Owner 指出“这些图完全不统一”是正确的。上一版 |
 | 2026-08-21 | [`p1_fixed_w10_original_source_triage_20260821.md`](p1_fixed_w10_original_source_triage_20260821.md) | P1 fixed-W10 原始来源图全量筛选包（2026-08-21） | Owner 指出得对：此前 448 项盲审包展示的是统一迁移后的 W10 图，不是原始视觉证据。 |
+| 2026-08-21 | [`p1_ma_rope_prefilter_20260821.md`](p1_ma_rope_prefilter_20260821.md) | P1 · 六均线“拧成一股绳”代码预筛与数据扩充入口（2026-08-21） | 代码预筛已经完成，并生成了两个可操作入口： |
 | 2026-08-21 | [`p1_owner_short_positive_refilter_20260821.md`](p1_owner_short_positive_refilter_20260821.md) | P1 Owner 旧训练正例原图精筛包（2026-08-21） | Owner 对当前页面的质疑完全成立：目标不是核对 fixed-W10 的 2,649 行数据谱系，而是重新筛选 |
+| 2026-08-20 | [`p0_pine_allin_v7_preholdout_20260820.md`](p0_pine_allin_v7_preholdout_20260820.md) | P0 — Pine ALLIN-V7.2 优化与预留验证回放（2026-08-20） |  |
 | 2026-08-20 | [`p1_fixed_w10_blind_audit_pack_20260820.md`](p1_fixed_w10_blind_audit_pack_20260820.md) | P1 fixed-W10 门禁修复、artifact 谱系与盲审包（2026-08-20） | 工程交付完成，标签验收仍待 Owner 盲审。** 已修复旧 acceptance 把迁移前 |
 | 2026-08-20 | [`p1_gold_label_quality_20260820.md`](p1_gold_label_quality_20260820.md) | P1 — 固定 W10 金标的标签错误率（2026-08-20） |  |
 | 2026-08-20 | [`p_model_inventory_20260820.md`](p_model_inventory_20260820.md) | 模型清单 — 我们到底训出了什么（2026-08-20） |  |
@@ -276,6 +281,11 @@
 - [`p0_local_signal_v2_stageb_from_stagea_v1_report_20260811.md`](p0_local_signal_v2_stageb_from_stagea_v1_report_20260811.md) — Local Signal V2 Stage B-from-A 数据验收报告（2026-08-11）
 - [`p0_local_signal_v2_stageb_report.md`](p0_local_signal_v2_stageb_report.md) — P0 — Local Signal V2 Stage B：因果数据集重建与硬门槛通过
 - [`p0_local_signal_v2_stageb_strictneg_v2_report.md`](p0_local_signal_v2_stageb_strictneg_v2_report.md) — P0 修复 — Local Signal V2 Stage B strict-negative V2
+- [`p0_pine_allin_v7_preholdout_20260820.md`](p0_pine_allin_v7_preholdout_20260820.md) — P0 — Pine ALLIN-V7.2 优化与预留验证回放（2026-08-20）
+- [`p0_pine_eth_15m_cross_tbsl_optimization_20260821.md`](p0_pine_eth_15m_cross_tbsl_optimization_20260821.md) — ETH 15m Pine：六均线交叉因子与趋势 TP/SL 优化
+- [`p0_pine_eth_15m_start_label_audit_20260821.md`](p0_pine_eth_15m_start_label_audit_20260821.md) — ETH 15m Pine：335 候选自动先达标签与判断门优化审计
+- [`p0_pine_eth_15m_v12_preholdout_20260821.md`](p0_pine_eth_15m_v12_preholdout_20260821.md) — ETH 15m Pine V12 优化与最近半年回测前置报告（2026-08-21）
+- [`p0_pine_eth_15m_v12f_holdout1_recent6m_20260821.md`](p0_pine_eth_15m_v12f_holdout1_recent6m_20260821.md) — ETH 15m Pine V12F：最近半年 holdout 第 1 次正式验收（2026-08-21）
 - [`p0_pine_eth_15m_v1_20260821.md`](p0_pine_eth_15m_v1_20260821.md) — ETHUSDT.P / ETH-USDT-SWAP 15m Pine 定型与回测审计（V1）
 - [`p0_runtime_parity_audit_20260803.md`](p0_runtime_parity_audit_20260803.md) — P0 Runtime Parity 审计（2026-08-03）
 - [`p0_safety_protocol_repair_20260803.md`](p0_safety_protocol_repair_20260803.md) — P0-SAFETY short 协议修复报告（2026-08-03）

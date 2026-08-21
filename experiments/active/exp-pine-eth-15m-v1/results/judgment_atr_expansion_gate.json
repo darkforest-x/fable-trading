@@ -1,0 +1,151 @@
+{
+  "artifact": "single-variable ATR expansion dynamic gate rejection test",
+  "decision": "reject atr_pct_ratio96 >= 1.0 as a Pine entry gate",
+  "reason": "it collapses 2023 compounded return and cuts 2024 return while increasing drawdown; improved first-touch prevalence did not survive the stateful ledger",
+  "single_variable": "atr_pct_ratio96 >= 1.0",
+  "threshold_selection": "semantic expansion boundary; no threshold grid",
+  "data_quality": {
+    "rows": 104962,
+    "last_bar": "2024-12-31T23:45:00+00:00",
+    "development_end_exclusive": "2025-01-01T00:00:00+00:00",
+    "consumed_final_rows_read": 0,
+    "holdout_rows_read": 0,
+    "cadence": {
+      "duplicate_timestamps": 0,
+      "non_increasing_timestamps": 0,
+      "non_15m_gaps": 0
+    }
+  },
+  "round_trip_cost": 0.002,
+  "risk_per_trade_percent": 1.0,
+  "matched_control": {
+    "contract": "ETH x UTC month x HK 6h x prior-month ATR quintile x copied holding horizon",
+    "controls_per_trade": 3,
+    "assignment_seeds": 64,
+    "resamples": 20000
+  },
+  "results": [
+    {
+      "arm": "allow_all",
+      "period": "2023",
+      "raw_candidates": 167,
+      "accepted_candidates": 167,
+      "trades": 83,
+      "project_net_bp_per_trade": 52.00767399572545,
+      "compounded_return_percent": 70.50224835236978,
+      "monetary_profit_factor": 1.9208668114845022,
+      "net_win_rate": 0.14457831325301204,
+      "max_drawdown_percent": 26.482608251140917,
+      "matched_control_net_bp_per_trade": 13.190016127234939,
+      "candidate_minus_control_bp_per_trade": 38.81765786849052,
+      "week_block_signflip_p_one_sided": 0.049647517624118793,
+      "week_blocks": 40,
+      "largest_trade_share_of_total_project_net": 0.5746119271930229,
+      "without_largest_trade_net_bp_per_trade": 22.393242312364155,
+      "control_seed_sensitivity": {
+        "seeds": 64,
+        "excess_bp_median": 49.50355604979414,
+        "excess_bp_p05": 30.74835427193182,
+        "excess_bp_p95": 67.89417945822545,
+        "positive_excess_seed_fraction": 1.0
+      }
+    },
+    {
+      "arm": "allow_all",
+      "period": "2024",
+      "raw_candidates": 168,
+      "accepted_candidates": 168,
+      "trades": 83,
+      "project_net_bp_per_trade": 141.35497552548352,
+      "compounded_return_percent": 109.2569377673425,
+      "monetary_profit_factor": 2.7477051759224977,
+      "net_win_rate": 0.1927710843373494,
+      "max_drawdown_percent": 12.215369521910757,
+      "matched_control_net_bp_per_trade": 32.54616574104266,
+      "candidate_minus_control_bp_per_trade": 108.80880978444081,
+      "week_block_signflip_p_one_sided": 0.009699515024248788,
+      "week_blocks": 44,
+      "largest_trade_share_of_total_project_net": 0.22642944139490515,
+      "without_largest_trade_net_bp_per_trade": 110.68156015177068,
+      "control_seed_sensitivity": {
+        "seeds": 64,
+        "excess_bp_median": 117.5555892262498,
+        "excess_bp_p05": 81.36616786303792,
+        "excess_bp_p95": 139.01285408504563,
+        "positive_excess_seed_fraction": 1.0
+      }
+    },
+    {
+      "arm": "atr_pct_ratio96_gte_1",
+      "period": "2023",
+      "raw_candidates": 167,
+      "accepted_candidates": 78,
+      "trades": 47,
+      "project_net_bp_per_trade": 21.046961921967494,
+      "compounded_return_percent": -2.2373679571184746,
+      "monetary_profit_factor": 0.9097189765621857,
+      "net_win_rate": 0.1276595744680851,
+      "max_drawdown_percent": 15.405157241992306,
+      "matched_control_net_bp_per_trade": 4.502211331975106,
+      "candidate_minus_control_bp_per_trade": 16.54475058999241,
+      "week_block_signflip_p_one_sided": 0.5184240787960602,
+      "week_blocks": 32,
+      "largest_trade_share_of_total_project_net": 2.232002636589509,
+      "without_largest_trade_net_bp_per_trade": -26.49360633180345,
+      "control_seed_sensitivity": {
+        "seeds": 64,
+        "excess_bp_median": 25.88096581650452,
+        "excess_bp_p05": -4.6702985433654245,
+        "excess_bp_p95": 55.432120577505145,
+        "positive_excess_seed_fraction": 0.890625
+      }
+    },
+    {
+      "arm": "atr_pct_ratio96_gte_1",
+      "period": "2024",
+      "raw_candidates": 168,
+      "accepted_candidates": 77,
+      "trades": 49,
+      "project_net_bp_per_trade": 150.87245943402652,
+      "compounded_return_percent": 60.58820312811897,
+      "monetary_profit_factor": 2.8665013030340503,
+      "net_win_rate": 0.08163265306122448,
+      "max_drawdown_percent": 15.658666459793913,
+      "matched_control_net_bp_per_trade": 50.8833583319795,
+      "candidate_minus_control_bp_per_trade": 99.98910110204703,
+      "week_block_signflip_p_one_sided": 0.13899305034748263,
+      "week_blocks": 32,
+      "largest_trade_share_of_total_project_net": 0.8156979752342245,
+      "without_largest_trade_net_bp_per_trade": 28.38539349998099,
+      "control_seed_sensitivity": {
+        "seeds": 64,
+        "excess_bp_median": 96.70408503373925,
+        "excess_bp_p05": 10.506796021310564,
+        "excess_bp_p95": 154.09668433080859,
+        "positive_excess_seed_fraction": 0.96875
+      }
+    }
+  ],
+  "gate_minus_allow_all": {
+    "2023": {
+      "return_delta_percentage_points": -72.73961630948826,
+      "drawdown_delta_percentage_points": -11.07745100914861,
+      "net_bp_per_trade_delta": -30.960712073757954,
+      "matched_excess_bp_delta": -22.27290727849811
+    },
+    "2024": {
+      "return_delta_percentage_points": -48.66873463922354,
+      "drawdown_delta_percentage_points": 3.443296937883156,
+      "net_bp_per_trade_delta": 9.517483908543,
+      "matched_excess_bp_delta": -8.819708682393781
+    }
+  },
+  "confirmation_status": "exploratory only: 2024 labels/features were already inspected in the preceding audit, so this is not a fresh confirmatory result",
+  "model_trained_or_scored": false,
+  "barrier_parameters_changed": false,
+  "consumed_final_rows_read": 0,
+  "holdout_rows_read": 0,
+  "training_eligible": false,
+  "forward_eligible": false,
+  "production_eligible": false
+}

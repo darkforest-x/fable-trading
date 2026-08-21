@@ -1,0 +1,110 @@
+{
+  "artifact": "ETH 15m V12F holdout consumption #1",
+  "approval": {
+    "approved": true,
+    "conversation_thread_id": "01a01fb5-7d9d-7511-9184-cdf0ce4db62e",
+    "approval_date_asia_shanghai": "2026-08-21",
+    "request_text": "批准 V12F 配置第 1 次消耗 holdout，区间 2026-02-21 至 2026-08-21",
+    "owner_reply": "批准",
+    "consumption_number": 1,
+    "scope": "V12F frozen configuration with frozen V9 comparator only"
+  },
+  "instrument": {
+    "research_source": "OKX",
+    "symbol": "ETH-USDT-SWAP",
+    "bar_minutes": 15,
+    "venue_note": "research proxy; not claimed bar-identical to TradingView ETHUSDT.P",
+    "data_contract": "immutable local deep prefix plus bounded OKX history-candles tail fetched in memory with after=end_exclusive; no kline file is written",
+    "local_prefix": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+    "tail_endpoint": "https://www.okx.com/api/v5/market/history-candles",
+    "minimum_warmup_bars_before_requested_start": 400
+  },
+  "periods": [
+    {
+      "name": "requested_recent_6m",
+      "start_inclusive": "2026-02-21T00:00:00+00:00",
+      "end_exclusive": "2026-08-21T00:00:00+00:00"
+    },
+    {
+      "name": "protected_holdout_fresh_start",
+      "start_inclusive": "2026-05-04T00:00:00+00:00",
+      "end_exclusive": "2026-08-21T00:00:00+00:00"
+    }
+  ],
+  "arms": [
+    {
+      "name": "v9_frozen_baseline",
+      "pine_sha256": "6465fa80f89907b2ed584085960f355f331de62e3c38ebf65f3065c57873dfe9",
+      "role": "frozen comparator"
+    },
+    {
+      "name": "v12f_ma6_w8_full_gate",
+      "pine_sha256": "9e03c2959e403632a8db06c66ee43487d7388e0dfdaf31abe5ae32218c7567de",
+      "role": "single frozen candidate"
+    }
+  ],
+  "execution": {
+    "entry": "confirmed signal t; market fill at open t+1",
+    "round_trip_cost": 0.002,
+    "commission_per_side": 0.001,
+    "risk_per_trade_percent": 1.0,
+    "max_leverage": 13.0,
+    "atr_mult": 4.0,
+    "max_sl_percent": 3.0,
+    "break_even_trigger_percent": 1.5,
+    "break_even_offset_percent": 0.1,
+    "take_profit_percent": null,
+    "cooldown": true,
+    "opposite_signal": "reverse",
+    "force_close_at_period_end": true
+  },
+  "runtime_versions": {
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "matplotlib": "3.9.4",
+    "scipy": "1.13.1"
+  },
+  "v12f_gate": {
+    "bundle": [
+      "SMA20",
+      "EMA20",
+      "SMA60",
+      "EMA60",
+      "SMA120",
+      "EMA120"
+    ],
+    "source": "close",
+    "directional_pairs": 12,
+    "window_bars": 8,
+    "window": "[t-7,t]",
+    "threshold": 0,
+    "future_bars": 0,
+    "scope": "full guarded state transition"
+  },
+  "tradingview_inputs_required": {
+    "start_utc": "2026-02-21T00:00:00+00:00",
+    "end_exclusive_utc": "2026-08-21T00:00:00+00:00",
+    "note": "the frozen Pine file keeps its preholdout defaults; these two inputs must be set explicitly for the approved replay"
+  },
+  "matched_control": {
+    "controls_per_trade": 3,
+    "strata": "ETH x UTC month x HK 6h x previous-month ATR quintile",
+    "copied": "direction x holding horizon x stop x break-even x cost",
+    "assignment_seeds": 32,
+    "week_block_signflip_resamples": 20000
+  },
+  "forbidden": [
+    "V12E",
+    "V12T/TBSL",
+    "parameter search",
+    "feature selection",
+    "training",
+    "promotion",
+    "deployment",
+    "live trading"
+  ],
+  "protected_segment_semantics": {
+    "independent_verdict": "fresh equity, position and cooldown state at holdout start",
+    "continuous_diagnostic": "slice of the requested six-month equity path retaining pre-holdout state; reported separately and not used for candidate selection"
+  }
+}

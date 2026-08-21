@@ -1,0 +1,186 @@
+{
+  "artifact": "automatic Pine ETH 15m V9 raw-candidate +1.5% first-touch labels",
+  "status": "complete development-only path audit; still training-ineligible under P0/P1",
+  "label_contract": {
+    "entry": "confirmed signal t -> t+1 open",
+    "positive": "+1.5% side-adjusted target touched first",
+    "negative": "frozen initial V9 stop or next guarded opposite V9 signal's following open first",
+    "initial_stop": "min(4 * signal-bar ATR14, 3% * signal close), rounded to 0.01 tick",
+    "15m_double_touch": "ordered gap-safe 3m path",
+    "3m_double_touch": "ambiguous and excluded; never manually guessed",
+    "right_boundary": "2025-01-01T00:00:00+00:00"
+  },
+  "feature_data_quality": {
+    "rows": 104962,
+    "last_bar": "2024-12-31T23:45:00+00:00",
+    "development_end_exclusive": "2025-01-01T00:00:00+00:00",
+    "consumed_final_rows_read": 0,
+    "holdout_rows_read": 0,
+    "cadence": {
+      "duplicate_timestamps": 0,
+      "non_increasing_timestamps": 0,
+      "non_15m_gaps": 0
+    }
+  },
+  "lower_timeframe_quality": {
+    "source_path": "data/kline_deep/okx_ETH_USDT_SWAP_3m_525599.csv",
+    "rows": 249376,
+    "first_bar": "2023-07-31T11:12:00+00:00",
+    "last_bar": "2024-12-31T23:57:00+00:00",
+    "development_end_exclusive": "2025-01-01T00:00:00+00:00",
+    "consumed_final_rows_read": 0,
+    "holdout_rows_read": 0,
+    "duplicate_timestamps": 0,
+    "non_3m_gaps": 0,
+    "null_ohlcv_cells": 0,
+    "full_15m_parents": 49875,
+    "joined_full_parents": 49875,
+    "parent_ohlc_mismatches": {
+      "open": 0,
+      "high": 0,
+      "low": 0,
+      "close": 0
+    }
+  },
+  "candidates": 335,
+  "resolved": 335,
+  "positive": 184,
+  "negative": 151,
+  "positive_rate": 0.5492537313432836,
+  "ambiguous": 0,
+  "censored": 0,
+  "fifteen_minute_double_touches": 0,
+  "double_touches_resolved_by_3m": 0,
+  "remaining_lower_path_ambiguity": 0,
+  "double_touch_without_3m": 0,
+  "outcomes": {
+    "target": 184,
+    "initial_stop": 148,
+    "opposite_signal_exit": 3
+  },
+  "by_side": {
+    "long": {
+      "candidates": 170,
+      "resolved": 170,
+      "positive": 92,
+      "positive_rate": 0.5411764705882353,
+      "ambiguous": 0,
+      "censored": 0
+    },
+    "short": {
+      "candidates": 165,
+      "resolved": 165,
+      "positive": 92,
+      "positive_rate": 0.5575757575757576,
+      "ambiguous": 0,
+      "censored": 0
+    }
+  },
+  "by_year": {
+    "2023": {
+      "candidates": 167,
+      "resolved": 167,
+      "positive": 83,
+      "positive_rate": 0.49700598802395207,
+      "ambiguous": 0,
+      "censored": 0
+    },
+    "2024": {
+      "candidates": 168,
+      "resolved": 168,
+      "positive": 101,
+      "positive_rate": 0.6011904761904762,
+      "ambiguous": 0,
+      "censored": 0
+    }
+  },
+  "median_bars_to_event_resolved": 22.0,
+  "p90_bars_to_event_resolved": 104.60000000000002,
+  "features_available_before_every_label": true,
+  "feature_audit": {
+    "top_five": [
+      {
+        "feature": "atr_pct",
+        "auc_all": 0.5666210768787792,
+        "oriented_auc_all": 0.5666210768787792,
+        "preferred_direction": "higher",
+        "auc_2023": 0.5210843373493976,
+        "auc_2024": 0.5747007536574553,
+        "same_direction_both_years": true
+      },
+      {
+        "feature": "atr_pct_ratio96",
+        "auc_all": 0.5556435358479701,
+        "oriented_auc_all": 0.5556435358479701,
+        "preferred_direction": "higher",
+        "auc_2023": 0.5377223178427998,
+        "auc_2024": 0.5704152504802719,
+        "same_direction_both_years": true
+      },
+      {
+        "feature": "drawdown24",
+        "auc_all": 0.5423625107975814,
+        "oriented_auc_all": 0.5423625107975814,
+        "preferred_direction": "higher",
+        "auc_2023": 0.5210843373493976,
+        "auc_2024": 0.560218708438008,
+        "same_direction_both_years": true
+      },
+      {
+        "feature": "order_score",
+        "auc_all": 0.46006694500431905,
+        "oriented_auc_all": 0.5399330549956809,
+        "preferred_direction": "lower",
+        "auc_2023": 0.4753298909925416,
+        "auc_2024": 0.43712132407270576,
+        "same_direction_both_years": true
+      },
+      {
+        "feature": "volume_ratio",
+        "auc_all": 0.46803915922833284,
+        "oriented_auc_all": 0.5319608407716672,
+        "preferred_direction": "lower",
+        "auc_2023": 0.4604130808950086,
+        "auc_2024": 0.45677552829909857,
+        "same_direction_both_years": true
+      }
+    ],
+    "shuffled_label_null": {
+      "method": "shuffle resolved start labels; recompute maximum absolute AUC deviation across 28 features",
+      "permutations": 2000,
+      "seed": 15335,
+      "observed_max_abs_auc_minus_half": 0.06662107687877916,
+      "familywise_permutation_p": 0.37231384307846077,
+      "note": "exploratory encoding audit only; overlapping future paths are not an iid training evaluation"
+    }
+  },
+  "matched_random_control": {
+    "contract": "same ETH x UTC month x HK 6h block x prior-month ATR quintile x copied horizon",
+    "controls_per_candidate": 3,
+    "candidate_coverage": 335,
+    "control_rows": 1005,
+    "duplicate_control_signal_indices": 0,
+    "ambiguous_controls_automatically_rejected_and_replaced": 3,
+    "candidate_positive_rate": 0.5492537313432836,
+    "matched_control_positive_rate": 0.5014925373134328,
+    "candidate_minus_control_percentage_points": 4.776119402985078,
+    "equal_week_excess_percentage_points": 4.69563877330868,
+    "week_block_signflip_p_one_sided": 0.09704514774261287,
+    "weeks": 103,
+    "resamples": 20000,
+    "seed": "pine-eth15m-start-label-control-v1",
+    "cost_note": "first-touch label comparison has no realized-return cost metric; both sides use identical barriers and horizon"
+  },
+  "model_trained_or_scored": false,
+  "threshold_selected": false,
+  "consumed_final_rows_read": 0,
+  "holdout_rows_read": 0,
+  "training_eligible": false,
+  "forward_eligible": false,
+  "production_eligible": false,
+  "outputs": [
+    "experiments/active/exp-pine-eth-15m-v1/results/judgment_start_label_rows.csv",
+    "experiments/active/exp-pine-eth-15m-v1/results/judgment_start_label_feature_audit.csv",
+    "experiments/active/exp-pine-eth-15m-v1/results/judgment_start_label_matched_controls.csv"
+  ]
+}

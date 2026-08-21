@@ -1,9 +1,11 @@
 # ETH perpetual 15m Pine research v1
 
 This directory freezes the first ETH-only 15-minute research contract derived
-from the user-supplied ALLIN-V7.2 script.  It uses the bounded OKX
-`ETH-USDT-SWAP` 15m series as the local research proxy and stops at
-`2026-03-01T00:00:00Z`, 64 days before the repository holdout.
+from the user-supplied ALLIN-V7.2 script.  Its development and original V9
+evaluation use the bounded OKX `ETH-USDT-SWAP` 15m proxy ending at
+`2026-03-01T00:00:00Z`. A later, separately frozen V12F configuration consumed
+the owner-approved `2026-02-21` through `2026-08-21` window exactly once; that
+terminal result is rejected by the strict economic gate and remains paper-only.
 
 The supplied V7.2 attachment is hash-verified in `migration_audit.json`.
 Sixteen static migration checks record the execution fixes: explicit cost and
@@ -151,7 +153,30 @@ p=0.25.  This ledger cannot recover every code iteration or human choice, so
 it is a lower bound on selection pressure.  More 2023/2024 mining is stopped;
 V10/V11 require fresh forward evidence.
 
-The three Pine files are now hashed into a blocked paper-forward protocol.
+The owner-requested six-line cross-count and trend-barrier follow-up is now
+implemented as three additional, mechanically generated Pine v6 paper arms.
+V12F uses the renderer-contract close-based SMA/EMA 20/60/120 bundle, 12
+cross-period directional pairs and a causal W8 net-cross gate over `[t-7,t]`.
+V12E applies that same gate only to opening while preserving raw opposite-signal
+closes. V12T leaves V9 signals unchanged and submits an entry-bar TP30/ATR3
+bracket using target distance ticks frozen at the confirmed signal close. The
+arms remain physically separate. On the consumed 2025-01 through 2026-02
+surface, V12F is the best point estimate (+31.41%, 18.22% drawdown), but its
+matched excess p=0.3100 does not pass the project gate. The requested
+2026-02-21 through 2026-08-21 run was subsequently approved and consumed once
+for the frozen V12F hash against frozen V9 only. The full-window result is
+negative for both arms: V9 -6.93% / 27.45% drawdown, V12F -3.46% / 24.74%.
+The independent 2026-05-04 through 2026-08-21 fresh-start holdout is favorable
+in point estimate (V9 +11.60% / 21.69%, V12F +15.77% / 18.74%), but V12F has
+only 30 trades / 4 winners, matched-control p=0.2566 and ranking permutation
+p=0.1838. The strict project gate therefore fails and the experiment is not
+eligible for training, forward, promotion or production. The canonical report
+is `analysis/p0_pine_eth_15m_v12f_holdout1_recent6m_20260821.md`; the completed
+one-shot ledger is `results/v12f_holdout1_consumption.json`. Do not rerun the
+data path; use the runner's `--verify-existing` mode to verify the nine hashes
+without reopening holdout.
+
+The original three Pine files are hashed into a blocked paper-forward protocol.
 No collection, log, paper order, or live order was started.  Historical arrival
 rates imply roughly 12.7, 18.1, and 24.9 months for V9/V10/V11 respectively to
 reach 100 fresh trades.  A TradingView normalized-export template and
