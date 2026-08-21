@@ -1,0 +1,187 @@
+{
+  "schema_version": "pine-eth-15m-state-aware-lr-v1",
+  "artifact": "blocked interface for a future state-conditioned entry LR",
+  "status": "interface_only_p0_p1_and_sample_size_blocked",
+  "data_boundary": {
+    "source_surface": "experiments/active/exp-pine-eth-15m-v1/results/judgment_gate_surface_manifest.json",
+    "source_surface_sha256": "6ed6da1324315fc1c7d15437f44a2474a394fa5357a27af8da2987f2cd7a566f",
+    "raw_guarded_candidates": 335,
+    "raw_long_candidates": 170,
+    "raw_short_candidates": 165,
+    "base_market_feature_count": 28,
+    "baseline_on_policy_rows": 166,
+    "baseline_net_positive_rows": 27,
+    "baseline_coverage_of_raw_surface": 0.4955223880597015,
+    "consumed_final_rows_read": 0,
+    "holdout_rows_read": 0
+  },
+  "why_static_scores_are_insufficient": "A prior gate changes later position, stop, cooldown and equity state. The 335 market-feature rows are static, but every state feature and action event must be recomputed online on the policy path being replayed.",
+  "runtime_order_at_signal_bar_t": [
+    "execute any order submitted by t-1 at open[t]",
+    "resolve stop/target on bar t",
+    "apply confirmed-bar break-even update for t+1",
+    "detect the raw guarded candidate and snapshot causal pre-signal state at close[t]",
+    "verify one finite score for every raw candidate no later than open[t+1]",
+    "consume cooldown or apply the scored entry permission without suppressing an opposite close"
+  ],
+  "score_coverage_contract": {
+    "required_rows": 335,
+    "required_long_rows": 170,
+    "required_short_rows": 165,
+    "one_finite_timely_score_per_raw_candidate": true,
+    "baseline_executed_rows_only_allowed": false,
+    "missing_duplicate_late_or_non_finite": "fail closed"
+  },
+  "action_contexts": {
+    "flat_open": {
+      "score_logged": true,
+      "model_action_applied": true,
+      "allowed_actions": [
+        "open",
+        "stay_flat"
+      ]
+    },
+    "opposite_reopen": {
+      "score_logged": true,
+      "model_action_applied": true,
+      "baseline_close_remains_unconditional": true,
+      "allowed_actions_after_close": [
+        "reopen_new_side",
+        "stay_flat"
+      ]
+    },
+    "same_side_noop": {
+      "score_logged": true,
+      "model_action_applied": false,
+      "action": "preserve_current_position"
+    },
+    "cooldown_consume": {
+      "score_logged": true,
+      "model_action_applied": false,
+      "action": "decrement_trades_to_skip_exactly_once"
+    },
+    "calendar_or_volatility_reject": {
+      "score_logged": false,
+      "model_action_applied": false,
+      "action": "preserve_existing_V9_state_transition_order"
+    }
+  },
+  "online_state_context": {
+    "computed_inside_each_dynamic_replay": true,
+    "right_edge": "confirmed signal bar t close",
+    "fields_logged_but_not_automatically_selected": [
+      "policy_path_hash",
+      "position_relation_to_signal",
+      "current_position_side",
+      "position_age_bars",
+      "unrealized_gross_return_at_t_close",
+      "stop_stage_none_initial_or_be_offset",
+      "distance_to_active_stop_atr",
+      "trades_to_skip_before_signal",
+      "equity_fraction_of_initial"
+    ],
+    "action_event_identity": [
+      "candidate_id",
+      "policy_path_hash",
+      "state_before_hash",
+      "action_context"
+    ],
+    "score_availability": "after close[t] and no later than open[t+1]",
+    "static_baseline_state_reuse_allowed": false
+  },
+  "future_label_vocabulary": {
+    "status": "vocabulary_only_not_materialized_or_selected",
+    "outcome_events": [
+      "target",
+      "initial_stop",
+      "break_even_stop",
+      "opposite_signal_exit",
+      "period_timeout",
+      "intrabar_ambiguous",
+      "censored"
+    ],
+    "continuous_target": "project_net_return_after_exact_total_cost",
+    "label_end": "exit_time plus one 15m bar for conservative purging",
+    "required_provenance_fields": [
+      "label_available_at",
+      "resolution_source",
+      "tick_rounding_contract_sha256",
+      "target_stop_basis_contract_sha256"
+    ],
+    "ambiguous_and_censored_are_nullable_not_negative": true,
+    "first_touch_plus_1p5_is_trade_win": false,
+    "ambiguous_15m_double_touch": "resolve with ordered 3m path or exclude with reason",
+    "target_selected": false
+  },
+  "phase_a_model_contract": {
+    "scope": "entry permission for flat_open and opposite_reopen only",
+    "model_family": "L2-regularized LogisticRegression",
+    "standardization": "fit StandardScaler on each training fold only",
+    "penalty": "l2",
+    "solver": "liblinear",
+    "class_weight": null,
+    "regularization_strength_C": null,
+    "market_feature_selection": null,
+    "initial_max_effective_coefficients": 3,
+    "required_context_indicator": "is_opposite_reopen",
+    "path_efficiency_feature_allowed": false,
+    "path_efficiency_rejection_evidence": {
+      "auc": 0.4990674127364774,
+      "top_decile_permutation_p": 0.9671016449177541
+    },
+    "full_28_feature_lightgbm_allowed": false,
+    "probability_threshold": null,
+    "threshold_selected": false,
+    "model_fitted": false
+  },
+  "phase_b_close_policy": {
+    "status": "no_go_until_separate_counterfactual_contract",
+    "reason": "Close-versus-hold changes the current trade path and cannot reuse an entry label. It needs paired keep/close counterfactual utilities, separate owner approval and a new experiment."
+  },
+  "time_split_and_capacity_gates": {
+    "random_split_allowed": false,
+    "expanding_time_folds_only": true,
+    "purge_train_rows_whose_label_end_overlaps_validation": true,
+    "threshold_uses_evaluation_outcomes": false,
+    "current_positive_rows": 27,
+    "current_validation_positive_range": "4-8 per fold",
+    "minimum_train_positives_per_effective_coefficient": 10,
+    "minimum_validation_positives_per_fold": 20,
+    "current_capacity_passed": false
+  },
+  "dynamic_replay_acceptance": {
+    "allow_all": "exact V9 ledger identity",
+    "allow_none_flat": "no flat entries",
+    "allow_none_opposite": "close opposite at next open but do not reopen",
+    "score_coverage": "exactly one finite timely score for all 335 raw candidates",
+    "missing_duplicate_early_late_or_hash_mismatch": "fail closed",
+    "same_side_cooldown_stop_be_reverse_and_cost_semantics": "unchanged",
+    "evaluation": [
+      "full dynamic trade/equity path",
+      "venue-exact net expectancy",
+      "matched random control",
+      "week-block inference",
+      "leave-largest-winner-out"
+    ]
+  },
+  "gates_before_any_fit": [
+    "P0 semantic stability passed",
+    "P1 Gold Dataset passed and relevant rows explicitly training_eligible",
+    "label target and feature subset preregistered before outcomes",
+    "capacity gates pass in every time fold",
+    "owner explicitly approves the one model experiment"
+  ],
+  "gates_before_forward_use": [
+    "all fit gates passed",
+    "dynamic replay acceptance passed",
+    "V9/V12F TradingView parity passed on exact venue",
+    "new prospective paper protocol owner-approved and activated"
+  ],
+  "lr_fitted": false,
+  "lightgbm_fitted": false,
+  "threshold_selected": false,
+  "labels_materialized": false,
+  "training_eligible": false,
+  "forward_eligible": false,
+  "production_eligible": false
+}

@@ -1,0 +1,211 @@
+{
+  "schema_version": "pine-eth-15m-paper-forward-v2",
+  "protocol": "ETH 15m frozen V9 versus V12F prospective shadow comparison",
+  "status": "blocked",
+  "supersedes_for_future_planning_only": "experiments/active/exp-pine-eth-15m-v1/results/paper_forward_protocol.json",
+  "predecessor_preserved_sha256": "4513ef3de18e4bb91263ed5839812eaeabd89419a1afb610fc7cce920e1c40a5",
+  "comparison_scope": {
+    "arms": [
+      "V9",
+      "V12F"
+    ],
+    "forbidden": [
+      "V10",
+      "V11",
+      "V12E",
+      "V12T",
+      "L2_model"
+    ]
+  },
+  "created_from_compact_preholdout_artifacts_only": true,
+  "market_bar_rows_read": 0,
+  "compact_exposed_final_ledger_rows_read": 207,
+  "holdout_rows_read": 0,
+  "proposed_exact_venue": "OKX:ETHUSDT.P",
+  "venue_owner_confirmed": false,
+  "venue_lock": {
+    "owner_selected_symbol": null,
+    "proposed_symbol": "OKX:ETHUSDT.P",
+    "timeframe": "15m",
+    "tick_size": 0.01
+  },
+  "windows": {
+    "parity_start": "2025-01-01T00:00:00+00:00",
+    "parity_end_exclusive": "2026-03-01T00:00:00+00:00",
+    "repository_holdout_start": "2026-05-04T00:00:00+00:00"
+  },
+  "bar_minutes": 15,
+  "arms": {
+    "V9": {
+      "source": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v9_research.pine",
+      "source_sha256": "6465fa80f89907b2ed584085960f355f331de62e3c38ebf65f3065c57873dfe9",
+      "change_contract": "frozen V9 baseline",
+      "canonical_preholdout_trades": 110,
+      "historical_trades_per_30p44_days": 7.89635908018868,
+      "planning_months_to_100_fresh_trades": 12.66406441050684,
+      "historical_rate_is_forecast": false,
+      "minimum_fresh_trades_for_formal_read": 100,
+      "compile_gate": {
+        "receipt_present": true,
+        "official_compiler_passed": true,
+        "source_hash_matches": true,
+        "venue_matches": true,
+        "timeframe_matches": true,
+        "pine_version_matches": true,
+        "parity_window_matches": false,
+        "input_values_match_frozen_contract": false,
+        "receipt_path": "experiments/active/exp-pine-eth-15m-v1/results/tradingview_compile_receipt.json"
+      },
+      "ledger_gate": {
+        "receipt_present": false,
+        "exact_ledger_parity_passed": false,
+        "price_time_parity_passed": false,
+        "fee_semantics_verified": false,
+        "expected_trades": 110
+      }
+    },
+    "V12F": {
+      "source": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v12f_ma6_w8_full_gate_paper.pine",
+      "source_sha256": "9e03c2959e403632a8db06c66ee43487d7388e0dfdaf31abe5ae32218c7567de",
+      "change_contract": "exactly V9 plus frozen MA6 W8 full-state gate",
+      "canonical_preholdout_trades": 97,
+      "historical_trades_per_30p44_days": 6.963153007075472,
+      "planning_months_to_100_fresh_trades": 14.361310156244873,
+      "historical_rate_is_forecast": false,
+      "minimum_fresh_trades_for_formal_read": 100,
+      "compile_gate": {
+        "receipt_present": false,
+        "official_compiler_passed": false,
+        "source_hash_matches": false,
+        "venue_matches": false,
+        "timeframe_matches": false,
+        "pine_version_matches": false,
+        "parity_window_matches": false,
+        "input_values_match_frozen_contract": false
+      },
+      "ledger_gate": {
+        "receipt_present": false,
+        "exact_ledger_parity_passed": false,
+        "price_time_parity_passed": false,
+        "fee_semantics_verified": false,
+        "expected_trades": 97
+      }
+    }
+  },
+  "combined_arm_allowed": false,
+  "formal_collection_started": false,
+  "activation_time": null,
+  "backfill_before_activation_allowed": false,
+  "forward_log_written": false,
+  "scanner_started": false,
+  "paper_or_live_order_sent": false,
+  "blocked": true,
+  "blocking_gates": [
+    "V9 official compiler/source/venue/timeframe/window/input receipt",
+    "V9 exact 110-trade ledger parity",
+    "V12F official compiler/source/venue/timeframe/window/input receipt",
+    "V12F exact 97-trade ledger parity",
+    "project P0 semantic stability and P1 Gold Dataset gates pass",
+    "owner confirms exact venue OKX:ETHUSDT.P for both arms",
+    "venue-exact commission, slippage and funding review for both arms",
+    "owner explicitly approves prospective log-only paper collection",
+    "activation timestamp is recorded after all approvals; no backfill"
+  ],
+  "parity_gate": {
+    "both_compiler_receipts_exact": false,
+    "both_exact_ledgers_passed": false,
+    "fee_semantics_verified_for_both": false,
+    "funding_and_venue_slippage_reviewed": false,
+    "exact_parity_passed": false
+  },
+  "shadow_accounting": {
+    "execution": "next 15m open after confirmed signal",
+    "comparison_risk_per_trade_percent": 1.0,
+    "damage_control_view_percent": 0.5,
+    "damage_control_is_derived_display_only": true,
+    "round_trip_cost_floor": 0.002,
+    "historical_pine_commission_per_side": 0.001,
+    "tradingview_net_profit_must_include_commission": true,
+    "project_20bp_cost_may_be_deducted_from_tradingview_net_again": false,
+    "exact_cost_fields_required": [
+      "entry_commission",
+      "exit_commission",
+      "slippage",
+      "funding"
+    ],
+    "no_broker_order": true
+  },
+  "append_only_log_contract": {
+    "one_row_per_event_per_arm": true,
+    "identity_fields": [
+      "protocol_version",
+      "arm",
+      "source_sha256",
+      "venue_symbol",
+      "signal_time",
+      "side"
+    ],
+    "causal_fields": [
+      "signal_observed_at",
+      "next_open_time",
+      "next_open_price",
+      "data_freshness_seconds"
+    ],
+    "outcome_fields": [
+      "exit_time",
+      "exit_price",
+      "exit_reason",
+      "entry_commission",
+      "exit_commission",
+      "slippage",
+      "funding",
+      "net_return"
+    ],
+    "writes_before_activation": false
+  },
+  "formal_evaluation": {
+    "timing": "one formal read only after both arms each reach 100 genuinely fresh trades; interim views are data-quality/latency only",
+    "time_ordered": true,
+    "primary_hypotheses": [
+      "V9 minus matched random control",
+      "V12F minus matched random control",
+      "V12F minus V9 by prospective calendar block"
+    ],
+    "multiple_testing": "Holm correction across the three primary hypotheses",
+    "familywise_alpha": 0.01,
+    "success_requires_all": [
+      "venue-exact net expectancy is positive",
+      "matched-control excess is positive with Holm-adjusted p < 0.01",
+      "week-block absolute-return 95% interval lower bound is above zero",
+      "leave-largest-winner-out expectancy remains positive",
+      "both TradingView parity receipts remain exact"
+    ],
+    "parameter_selection_from_interim_data_allowed": false
+  },
+  "owner_decisions_required_before_start": [
+    "confirm OKX:ETHUSDT.P as the exact venue",
+    "provide/export V9 and V12F bounded historical TradingView ledgers",
+    "approve prospective log-only collection after every gate passes",
+    "approve any barrier, break-even, ATR, cost or risk change separately"
+  ],
+  "project_stage_gate": {
+    "current_stage": "P0_to_P1",
+    "p0_passed": false,
+    "p1_passed": false,
+    "paper_forward_stage": "P4",
+    "paper_may_start_before_p0_p1_pass": false
+  },
+  "owner_approval": {
+    "required": true,
+    "reference": null,
+    "scope": [
+      "V9",
+      "V12F",
+      "venue",
+      "fresh_forward"
+    ]
+  },
+  "training_eligible": false,
+  "forward_eligible": false,
+  "production_eligible": false
+}
