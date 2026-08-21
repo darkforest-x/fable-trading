@@ -594,3 +594,331 @@ artifacts:
     data_cutoff: "2026-08-21T00:00:00Z"
     notes: >-
       Full recent-window diagnostic only; not the independent fresh-start chart.
+
+  # ---- ETH 15m causal dense-start / literal-release negative results -------
+  - artifact_id: pine-eth-15m-dense-report
+    artifact_type: report
+    role: canonical_negative_research_verdict
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: analysis/p0_pine_eth_15m_dense_start_release_20260821.md
+    sha256: "cc9e7f42699bdb162ae59fc911b5d90a74beb58a073bd97d0673815b81a5264e"
+    size_bytes: 20733
+    storage_uri: "repo://analysis/p0_pine_eth_15m_dense_start_release_20260821.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: >-
+      Canonical joint V13/V14 verdict. Both hard gates are rejected; V14 is
+      retained only as a causal feature definition. The predecessor holdout was
+      not reopened and no new configuration received a holdout score.
+
+  - artifact_id: pine-eth-15m-dense-html
+    artifact_type: report
+    role: owner_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: analysis/html/p0_pine_eth_15m_dense_start_release_20260821.html
+    sha256: "cf6935396c0240ea758c742fcecfd4767527e7c9795a17e4a3e9e478996b6ebb"
+    size_bytes: 354068
+    storage_uri: "repo://analysis/html/p0_pine_eth_15m_dense_start_release_20260821.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v13-pine
+    artifact_type: config
+    role: rejected_paper_strategy_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-start-v1/pine/allin_eth_15m_v13d_dense_start_dense_l1_paper.pine
+    sha256: "370f4a53174cbb4b24f22c29b69aced7e534b582df4ee5f8ce4086d1d0b3a570"
+    size_bytes: 17688
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-start-v1/pine/allin_eth_15m_v13d_dense_start_dense_l1_paper.pine"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de37f9266fe5e3306e3f268f085c4fc4b726cc96"
+    config_hash: "193ad74334237180891ea4ddf22d331d677226c939823966991b5287e196442f"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v13-manifest
+    artifact_type: manifest
+    role: paper_strategy_hash_manifest
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-start-v1/pine/dense_start_pine_manifest.json
+    sha256: "4f6dfedaabf3d63e710fe011047f323b53280cb77c37c060226899564e8f74a8"
+    size_bytes: 732
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-start-v1/pine/dense_start_pine_manifest.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de37f9266fe5e3306e3f268f085c4fc4b726cc96"
+    config_hash: "193ad74334237180891ea4ddf22d331d677226c939823966991b5287e196442f"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v13-summary
+    artifact_type: manifest
+    role: rejected_preholdout_result_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-start-v1/results/dense_start_summary.json
+    sha256: "1866b716184ef46319b35079d6f0d5da62c1fe5f912489aa02ee1423cdc40b25"
+    size_bytes: 80271
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-start-v1/results/dense_start_summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de37f9266fe5e3306e3f268f085c4fc4b726cc96"
+    config_hash: "193ad74334237180891ea4ddf22d331d677226c939823966991b5287e196442f"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v13-profile-search
+    artifact_type: dataset
+    role: preregistered_2023_profile_selection
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-start-v1/results/dense_start_profile_search.csv
+    sha256: "5b43506f42db9f0afffe96d1d935e0ca307f1c0e2ea5b1593b0168e96b889559"
+    size_bytes: 7028
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-start-v1/results/dense_start_profile_search.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de37f9266fe5e3306e3f268f085c4fc4b726cc96"
+    config_hash: "193ad74334237180891ea4ddf22d331d677226c939823966991b5287e196442f"
+    data_cutoff: "2024-01-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v13-trades
+    artifact_type: dataset
+    role: versioned_dynamic_trade_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-start-v1/results/dense_start_trades.csv
+    sha256: "6b699e54440dd7f8009394b36e6eb788d9cae8c9fb2fa9537b34f86d75247180"
+    size_bytes: 700671
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-start-v1/results/dense_start_trades.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de37f9266fe5e3306e3f268f085c4fc4b726cc96"
+    config_hash: "193ad74334237180891ea4ddf22d331d677226c939823966991b5287e196442f"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: 1,022 rows include overlapping annual and half-year views; 645 rows are the three disjoint primary-period arm ledgers.
+
+  - artifact_id: pine-eth-15m-v13-controls
+    artifact_type: dataset
+    role: matched_random_controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-start-v1/results/dense_start_controls.csv
+    sha256: "c69d320136bed19c1bb245e2546cf7eddf0abe1232b3a8142a517dc0ef68fb56"
+    size_bytes: 1114696
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-start-v1/results/dense_start_controls.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de37f9266fe5e3306e3f268f085c4fc4b726cc96"
+    config_hash: "193ad74334237180891ea4ddf22d331d677226c939823966991b5287e196442f"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v13-pairs
+    artifact_type: dataset
+    role: candidate_control_pairs
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-start-v1/results/dense_start_pairs.csv
+    sha256: "a9fafc527c54fa9d3ce4f79b29b154b4cac40206e4c6072ac06d5d87b23f69a4"
+    size_bytes: 253257
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-start-v1/results/dense_start_pairs.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de37f9266fe5e3306e3f268f085c4fc4b726cc96"
+    config_hash: "193ad74334237180891ea4ddf22d331d677226c939823966991b5287e196442f"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v13-features
+    artifact_type: dataset
+    role: causal_judgment_feature_interface
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-start-v1/results/dense_start_feature_rows.csv
+    sha256: "6b92e2363b2e78a91863dbbb263caca8fdba09e971bc1eac299757c261e962db"
+    size_bytes: 179051
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-start-v1/results/dense_start_feature_rows.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de37f9266fe5e3306e3f268f085c4fc4b726cc96"
+    config_hash: "193ad74334237180891ea4ddf22d331d677226c939823966991b5287e196442f"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: 661 causal raw-candidate rows; outcome labels are intentionally absent and training_eligible is false.
+
+  - artifact_id: pine-eth-15m-v14-pine
+    artifact_type: config
+    role: rejected_paper_strategy_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-release-v2/pine/allin_eth_15m_v14r_dense_release_paper.pine
+    sha256: "65f8d6ab17334e33767ac34b3f6e3efbd563fbf5467ceffde1dff35a0eb8094d"
+    size_bytes: 18669
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-release-v2/pine/allin_eth_15m_v14r_dense_release_paper.pine"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f6e392469db71f5d580b87075c6e713a196e110f"
+    config_hash: "b41ce644ff6f7a4b674d9415f9abb6e05b0e4929ef84baf92c33c419ab806673"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v14-manifest
+    artifact_type: manifest
+    role: paper_strategy_hash_manifest
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-release-v2/pine/dense_release_pine_manifest.json
+    sha256: "92c512e8391c9f2b68dcd81ef395aa211c6de9b0e3f6358c33bc1e32970ca785"
+    size_bytes: 729
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-release-v2/pine/dense_release_pine_manifest.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f6e392469db71f5d580b87075c6e713a196e110f"
+    config_hash: "b41ce644ff6f7a4b674d9415f9abb6e05b0e4929ef84baf92c33c419ab806673"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v14-summary
+    artifact_type: manifest
+    role: rejected_preholdout_result_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-release-v2/results/dense_release_summary.json
+    sha256: "0f73e86712bc60dc1b8ba4ff94d5ffbb5017ebbb17a0cf9b35c0cd617661687b"
+    size_bytes: 56092
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-release-v2/results/dense_release_summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f6e392469db71f5d580b87075c6e713a196e110f"
+    config_hash: "b41ce644ff6f7a4b674d9415f9abb6e05b0e4929ef84baf92c33c419ab806673"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v14-trades
+    artifact_type: dataset
+    role: versioned_dynamic_trade_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-release-v2/results/dense_release_trades.csv
+    sha256: "8d35e310099cadca73bed309f9c798b9586d7e76253597ea33ac8d682db8fa26"
+    size_bytes: 530350
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-release-v2/results/dense_release_trades.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f6e392469db71f5d580b87075c6e713a196e110f"
+    config_hash: "b41ce644ff6f7a4b674d9415f9abb6e05b0e4929ef84baf92c33c419ab806673"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: 684 rows include overlapping annual and half-year views; 433 rows are the three disjoint primary-period arm ledgers.
+
+  - artifact_id: pine-eth-15m-v14-controls
+    artifact_type: dataset
+    role: matched_random_controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-release-v2/results/dense_release_controls.csv
+    sha256: "aaec3c3c11b8486c3347f6a5c294caeff8890c6a42422c499e5a94537149956e"
+    size_bytes: 708881
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-release-v2/results/dense_release_controls.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f6e392469db71f5d580b87075c6e713a196e110f"
+    config_hash: "b41ce644ff6f7a4b674d9415f9abb6e05b0e4929ef84baf92c33c419ab806673"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v14-pairs
+    artifact_type: dataset
+    role: candidate_control_pairs
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-release-v2/results/dense_release_pairs.csv
+    sha256: "ed3aa2c5b2305260d6d0933cbed8f83733b2b6be5462cb33ab5c4b6809fac6ab"
+    size_bytes: 164694
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-release-v2/results/dense_release_pairs.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f6e392469db71f5d580b87075c6e713a196e110f"
+    config_hash: "b41ce644ff6f7a4b674d9415f9abb6e05b0e4929ef84baf92c33c419ab806673"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v14-control-sensitivity
+    artifact_type: dataset
+    role: matched_control_assignment_sensitivity
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-release-v2/results/dense_release_control_sensitivity.csv
+    sha256: "478efa5a546c4eb76defd38f1ef59beb948b199e4834a933cff17d9eb84117b8"
+    size_bytes: 1741
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-release-v2/results/dense_release_control_sensitivity.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f6e392469db71f5d580b87075c6e713a196e110f"
+    config_hash: "b41ce644ff6f7a4b674d9415f9abb6e05b0e4929ef84baf92c33c419ab806673"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: 24 rows; V14 final-preholdout candidate-minus-control is negative under all eight assignment seeds.
+
+  - artifact_id: pine-eth-15m-v14-features
+    artifact_type: dataset
+    role: causal_judgment_feature_interface
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-release-v2/results/dense_release_feature_rows.csv
+    sha256: "078da4aaa2efc6fe65068968f93e8164abcd41214d9d11b277d550ec0ae86b0b"
+    size_bytes: 221045
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-release-v2/results/dense_release_feature_rows.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f6e392469db71f5d580b87075c6e713a196e110f"
+    config_hash: "b41ce644ff6f7a4b674d9415f9abb6e05b0e4929ef84baf92c33c419ab806673"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: 661 causal raw-candidate rows with literal release features; outcome labels are absent and training_eligible is false.
+
+  - artifact_id: pine-eth-15m-v14-mechanism-chart
+    artifact_type: report
+    role: mechanism_diagnostic_chart
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-release-v2/results/charts/dense_release_mechanism_comparison.png
+    sha256: "b6d65726b8fee233da99176ead3aef959c06fa16c0b83ac082fca9a0987c0ecf"
+    size_bytes: 69383
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-release-v2/results/charts/dense_release_mechanism_comparison.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f6e392469db71f5d580b87075c6e713a196e110f"
+    config_hash: "b41ce644ff6f7a4b674d9415f9abb6e05b0e4929ef84baf92c33c419ab806673"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v14-equity-chart
+    artifact_type: report
+    role: marked_equity_diagnostic_chart
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    source_path: experiments/active/exp-pine-eth-15m-dense-release-v2/results/charts/dense_release_equity.png
+    sha256: "2f63db46a42b08d8dcc24cbc58025d533d47caeda38a9bbc3f672c5277bc627a"
+    size_bytes: 175454
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-dense-release-v2/results/charts/dense_release_equity.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f6e392469db71f5d580b87075c6e713a196e110f"
+    config_hash: "b41ce644ff6f7a4b674d9415f9abb6e05b0e4929ef84baf92c33c419ab806673"
+    data_cutoff: "2026-03-01T00:00:00Z"

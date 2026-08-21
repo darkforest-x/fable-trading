@@ -658,6 +658,90 @@ experiments:
       incidents remain disclosed in the predecessor report and are not erased by
       this later owner-approved consumption.
 
+  - experiment_id: exp-pine-eth-15m-dense-start-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    status: rejected
+    question: >-
+      Does replacing V12F's zero-cross-permitting net-direction gate with an
+      owner-approved causal dense -> compression -> direction -> release
+      composite reduce ETH 15m false starts while preserving trend runners?
+    single_variable: >-
+      owner-approved composite V13 full-state dense-start gate versus frozen
+      V12F; barriers, cost, risk, cooldown, reversal and 15m remain fixed
+    result: >-
+      rejected_after_locked_time_validation. Four ordinal profiles were selected
+      only on 2023H1/H2 and dense_l1 locked. It returned +45.37% in 2023 and
+      +48.97% in analyst-exposed 2024, but reversed to -11.29% with 23.07%
+      drawdown and 3 winners in 63 trades on final-preholdout. The final pool
+      lost 49.53bp/trade to exact matched random entries (week-block p=0.9944),
+      while the hard gate removed multiple V12F trend runners above +20%.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_pine_eth_15m_dense_start_release_20260821.md
+    artifacts:
+      - pine-eth-15m-dense-report
+      - pine-eth-15m-dense-html
+      - pine-eth-15m-v13-pine
+      - pine-eth-15m-v13-manifest
+      - pine-eth-15m-v13-summary
+      - pine-eth-15m-v13-profile-search
+      - pine-eth-15m-v13-trades
+      - pine-eth-15m-v13-controls
+      - pine-eth-15m-v13-pairs
+      - pine-eth-15m-v13-features
+    reuse_allowed: false
+    notes: >-
+      Builder/preregistration landed at de37f9266fe5e3306e3f268f085c4fc4b726cc96
+      before outcome artifacts were generated. The bounded loader reported zero
+      holdout rows. The predecessor V12F holdout is already consumed and was not
+      reopened or used to choose a V13 profile. TradingView trade-export parity
+      is false and no model was trained.
+
+  - experiment_id: exp-pine-eth-15m-dense-release-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9421a524af4e68c6029b97815679013ae321ef"
+    status: rejected
+    question: >-
+      Holding V13 dense_l1 and every execution setting fixed, does requiring a
+      literal release bar -- TR[t]/ATR[t-1] >= 1 and increasing side-signed
+      rope distance -- reduce early stops and restore stable economic edge?
+    single_variable: >-
+      V14 literal release confirmation versus V13 release confirmation; every
+      formation, compression, direction, barrier and state parameter is fixed
+    result: >-
+      rejected_as_entry_quality_gate. The fixed pre-outcome Luna-review formula
+      repaired final-preholdout return from V13 -11.29% to +8.30% and drawdown
+      from 23.07% to 12.96%, but early-stop rate rose to 86.96%, only 2 of 23
+      trades won, and matched-control excess was -108.70bp/trade (p=0.9219).
+      All eight deterministic control assignments were negative. The release
+      measurements may be reused only as judgment-layer features, not as a gate.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_pine_eth_15m_dense_start_release_20260821.md
+    artifacts:
+      - pine-eth-15m-dense-report
+      - pine-eth-15m-dense-html
+      - pine-eth-15m-v14-pine
+      - pine-eth-15m-v14-manifest
+      - pine-eth-15m-v14-summary
+      - pine-eth-15m-v14-trades
+      - pine-eth-15m-v14-controls
+      - pine-eth-15m-v14-pairs
+      - pine-eth-15m-v14-control-sensitivity
+      - pine-eth-15m-v14-features
+      - pine-eth-15m-v14-mechanism-chart
+      - pine-eth-15m-v14-equity-chart
+    reuse_allowed: false
+    notes: >-
+      Builder/preregistration landed at f6e392469db71f5d580b87075c6e713a196e110f
+      before V14 output generation. The formula came from visible Luna Max task
+      01a02379-1c18-78a0-990b-9219510e65d0 before V13 replay, but V14 execution
+      remains analyst-exposed because the researcher had already seen 2024 and
+      final-preholdout. Repository holdout was not read and cannot be reused.
+
   - experiment_id: exp-consolidation-single-repo-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "59e13a61c43e1e72f397f38985fd8c700533550b"
