@@ -742,6 +742,61 @@ experiments:
       remains analyst-exposed because the researcher had already seen 2024 and
       final-preholdout. Repository holdout was not read and cannot be reused.
 
+  - experiment_id: exp-pine-eth-15m-trend-ensemble-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    status: rejected
+    question: >-
+      Can a causal multi-speed EWMAC plus prior-channel Donchian ensemble,
+      with the six-MA dense-start score contributing softly, rank/filter frozen
+      V12F ETH 15m candidates without deleting the rare trend runners that pay
+      for the strategy's low win rate?
+    single_variable: >-
+      owner-approved composite V15E entry-quality threshold versus frozen V12F;
+      V9 signals, V12F W8 guard, barriers, cost, risk, cooldown, reversal and
+      15-minute execution remain fixed
+    result: >-
+      rejected_after_locked_time_validation. Threshold 0.55 was selected only
+      on 2023H1/H2. V15E improved V12F return by 5.47pp in 2023 and 2.56pp in
+      analyst-exposed 2024, but underperformed by 7.56pp in final-preholdout
+      (23.84% versus 31.41%), lowered win rate to 10.20% and raised the early
+      stop rate to 76.53%. Composite top-decile permutation p was
+      0.2674/0.0380/0.0489, never below the required 0.01. The final matched
+      excess was assignment-sensitive (6/8 positive), and the gate rejected a
+      +11.47% net runner before creating six later losing trades on the changed
+      state path.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_pine_eth_15m_trend_ensemble_20260821.md
+    artifacts:
+      - pine-eth-15m-v15-report
+      - pine-eth-15m-v15-html
+      - pine-eth-15m-v15-pine
+      - pine-eth-15m-v15-manifest
+      - pine-eth-15m-v15-summary
+      - pine-eth-15m-v15-profile-search
+      - pine-eth-15m-v15-trades
+      - pine-eth-15m-v15-controls
+      - pine-eth-15m-v15-pairs
+      - pine-eth-15m-v15-control-sensitivity
+      - pine-eth-15m-v15-features
+      - pine-eth-15m-v15-path-differences
+      - pine-eth-15m-v15-profile-chart
+      - pine-eth-15m-v15-equity-chart
+      - pine-eth-15m-v15-mechanism-chart
+    reuse_allowed: false
+    notes: >-
+      Owner explicitly approved implementation in the 2026-08-21 conversation.
+      Preregistration and the causal builder landed at
+      7e6e80360f7ac25b5c378702d8e617256cf22a32 before any V15 outcome was
+      generated; the path-difference audit landed at
+      255832fdbb175d75f91ff58c84114e66e4f92048 before the final artifact run.
+      The bounded loader reported holdout_rows_read=0. No model was trained and
+      TradingView official compile/trade-export parity remains false. The
+      continuous features may be reconsidered only in a future stage-approved
+      judgment-layer experiment; this rejected threshold is not reusable.
+
   - experiment_id: exp-consolidation-single-repo-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "59e13a61c43e1e72f397f38985fd8c700533550b"

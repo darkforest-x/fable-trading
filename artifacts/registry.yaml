@@ -922,3 +922,257 @@ artifacts:
     generator_commit: "f6e392469db71f5d580b87075c6e713a196e110f"
     config_hash: "b41ce644ff6f7a4b674d9415f9abb6e05b0e4929ef84baf92c33c419ab806673"
     data_cutoff: "2026-03-01T00:00:00Z"
+
+  # ---- ETH 15m V15E multi-speed trend ensemble negative result ------------
+  - artifact_id: pine-eth-15m-v15-report
+    artifact_type: report
+    role: canonical_negative_research_verdict
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    source_path: analysis/p0_pine_eth_15m_trend_ensemble_20260821.md
+    sha256: "b41be46ed68e35aeea06b5ef32f7d9148aedb6a9bb6bf16014f922cd6b0a19b2"
+    size_bytes: 19795
+    storage_uri: "repo://analysis/p0_pine_eth_15m_trend_ensemble_20260821.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: >-
+      Canonical V15E verdict. The locked soft trend ensemble is rejected; the
+      repository holdout was not read and no eligibility flag changed.
+
+  - artifact_id: pine-eth-15m-v15-html
+    artifact_type: report
+    role: owner_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    source_path: analysis/html/p0_pine_eth_15m_trend_ensemble_20260821.html
+    sha256: "66734f109221c7067561883341ed26a513eb9df6107b971bf59c38c9b8ebf366"
+    size_bytes: 431923
+    storage_uri: "repo://analysis/html/p0_pine_eth_15m_trend_ensemble_20260821.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v15-pine
+    artifact_type: config
+    role: rejected_paper_strategy_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    source_path: experiments/active/exp-pine-eth-15m-trend-ensemble-v1/pine/allin_eth_15m_v15e_trend_ensemble_soft_l2_paper.pine
+    sha256: "866ed92929a59213810fe338582b53df2431cfa86906458a9be68edfcb85d243"
+    size_bytes: 20744
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-trend-ensemble-v1/pine/allin_eth_15m_v15e_trend_ensemble_soft_l2_paper.pine"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "255832fdbb175d75f91ff58c84114e66e4f92048"
+    config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v15-manifest
+    artifact_type: manifest
+    role: paper_strategy_hash_manifest
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    source_path: experiments/active/exp-pine-eth-15m-trend-ensemble-v1/pine/trend_ensemble_pine_manifest.json
+    sha256: "31b20a7c055a140e4ef71f7b6f261e737aec29f5bca5d48be537ba49a4f19ef8"
+    size_bytes: 988
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-trend-ensemble-v1/pine/trend_ensemble_pine_manifest.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "255832fdbb175d75f91ff58c84114e66e4f92048"
+    config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v15-summary
+    artifact_type: manifest
+    role: rejected_preholdout_result_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    source_path: experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_summary.json
+    sha256: "2ba3dc11b71b10ddd81daa80d6cda2d96eea7f69cf920c346197f84ea21e49c5"
+    size_bytes: 91241
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "255832fdbb175d75f91ff58c84114e66e4f92048"
+    config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v15-profile-search
+    artifact_type: dataset
+    role: preregistered_2023_profile_selection
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    source_path: experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_profile_search.csv
+    sha256: "65fbdbaa2cbc1d55929c9e4c191f1940414f13f80d85dc4a7b6dbdc5c1c5d1e4"
+    size_bytes: 10549
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_profile_search.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "255832fdbb175d75f91ff58c84114e66e4f92048"
+    config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
+    data_cutoff: "2024-01-01T00:00:00Z"
+    notes: >-
+      Eight rows cover four preregistered thresholds by 2023 half-year;
+      soft_l2 at 0.55 was selected once.
+
+  - artifact_id: pine-eth-15m-v15-trades
+    artifact_type: dataset
+    role: versioned_dynamic_trade_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    source_path: experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_trades.csv
+    sha256: "2900e1e15d3e5611ce7e0a8e104ec78c0e6a5790a31e2d5cf69784d1669437bc"
+    size_bytes: 996610
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_trades.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "255832fdbb175d75f91ff58c84114e66e4f92048"
+    config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: 1,142 rows include overlapping half-year and annual views; 722 rows are the three disjoint primary-period arm ledgers.
+
+  - artifact_id: pine-eth-15m-v15-controls
+    artifact_type: dataset
+    role: matched_random_controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    source_path: experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_controls.csv
+    sha256: "5cf230c7cf0b42e410f443b4e45da3420382ff93d25b301c2b58983c2228baa2"
+    size_bytes: 1369815
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_controls.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "255832fdbb175d75f91ff58c84114e66e4f92048"
+    config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: 4,107 matched-control rows across the overlapping evaluation views.
+
+  - artifact_id: pine-eth-15m-v15-pairs
+    artifact_type: dataset
+    role: candidate_control_pairs
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    source_path: experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_pairs.csv
+    sha256: "b3e4805bac28300b693f6f621deaa49ec038bd9989a8f3c6c42a663904a2a4e2"
+    size_bytes: 313524
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_pairs.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "255832fdbb175d75f91ff58c84114e66e4f92048"
+    config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v15-control-sensitivity
+    artifact_type: dataset
+    role: matched_control_assignment_sensitivity
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    source_path: experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_control_sensitivity.csv
+    sha256: "4ef45fdab028d342b1f437e69d9ff75d7ca89418525c578c30785b75e0e27658"
+    size_bytes: 1595
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_control_sensitivity.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "255832fdbb175d75f91ff58c84114e66e4f92048"
+    config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: 24 rows; final-preholdout matched excess is positive in only six of eight deterministic assignments.
+
+  - artifact_id: pine-eth-15m-v15-features
+    artifact_type: dataset
+    role: causal_judgment_feature_interface
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    source_path: experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_feature_rows.csv
+    sha256: "09ee4511cc524bca581dbd6a654aa95d85e0a0c631f7e64a358a04447bcf6c30"
+    size_bytes: 146417
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_feature_rows.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "255832fdbb175d75f91ff58c84114e66e4f92048"
+    config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: 559 causal V12F-candidate rows; outcome labels are absent and training_eligible is false.
+
+  - artifact_id: pine-eth-15m-v15-path-differences
+    artifact_type: dataset
+    role: dynamic_state_path_difference_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    source_path: experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_path_differences.csv
+    sha256: "264147171ba107992f2ce66a601dda522c51c0ef4f1f120e2b4e1498a8f5777d"
+    size_bytes: 6011
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/trend_ensemble_path_differences.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "255832fdbb175d75f91ff58c84114e66e4f92048"
+    config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: >-
+      Twenty path-only trades prove the entry gate changes later reversal,
+      cooldown and stop state. The decisive V12F-only runner netted +11.47%.
+
+  - artifact_id: pine-eth-15m-v15-profile-chart
+    artifact_type: report
+    role: preregistered_profile_selection_chart
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    source_path: experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/charts/trend_ensemble_profile_selection.png
+    sha256: "63ca8557bc4bd4f75967750d0358b6506c37f49f79dccb6fe7f57403c2b1ffab"
+    size_bytes: 59919
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/charts/trend_ensemble_profile_selection.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "255832fdbb175d75f91ff58c84114e66e4f92048"
+    config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
+    data_cutoff: "2024-01-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v15-equity-chart
+    artifact_type: report
+    role: marked_equity_diagnostic_chart
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    source_path: experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/charts/trend_ensemble_equity.png
+    sha256: "c6f6f84dc195628aa9e87a48237bf95409ff5986c54bb3ba9d95c7650ed7d759"
+    size_bytes: 171496
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/charts/trend_ensemble_equity.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "255832fdbb175d75f91ff58c84114e66e4f92048"
+    config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v15-mechanism-chart
+    artifact_type: report
+    role: mechanism_diagnostic_chart
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1730012034391be7a392ddcc94f25fdbe2e6a8ce"
+    source_path: experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/charts/trend_ensemble_mechanism_comparison.png
+    sha256: "d8e75672153a67aca62792aaa8b6bbe5cda7d9b2b869f79cb8035cd9aa268b94"
+    size_bytes: 71828
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-trend-ensemble-v1/results/charts/trend_ensemble_mechanism_comparison.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "255832fdbb175d75f91ff58c84114e66e4f92048"
+    config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
+    data_cutoff: "2026-03-01T00:00:00Z"
