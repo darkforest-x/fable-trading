@@ -203,6 +203,7 @@ def build_protocol() -> dict[str, Any]:
 
     blocking_gates.extend(
         [
+            "project P0 semantic stability and P1 Gold Dataset gates pass",
             "owner confirms exact venue OKX:ETHUSDT.P for both arms",
             "venue-exact commission, slippage and funding review for both arms",
             "owner explicitly approves prospective log-only paper collection",
@@ -349,6 +350,13 @@ def build_protocol() -> dict[str, Any]:
             "approve prospective log-only collection after every gate passes",
             "approve any barrier, break-even, ATR, cost or risk change separately",
         ],
+        "project_stage_gate": {
+            "current_stage": "P0_to_P1",
+            "p0_passed": False,
+            "p1_passed": False,
+            "paper_forward_stage": "P4",
+            "paper_may_start_before_p0_p1_pass": False,
+        },
         "owner_approval": {
             "required": True,
             "reference": None,

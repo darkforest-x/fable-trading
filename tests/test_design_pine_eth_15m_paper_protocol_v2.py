@@ -48,6 +48,8 @@ def test_v2_requires_each_external_gate_and_forbids_interim_selection() -> None:
     assert "V12F official compiler" in blockers
     assert "V12F exact 97-trade ledger parity" in blockers
     assert "owner explicitly approves" in blockers
+    assert "P0 semantic stability and P1 Gold Dataset" in blockers
+    assert payload["project_stage_gate"]["paper_may_start_before_p0_p1_pass"] is False
     assert payload["arms"]["V9"]["compile_gate"]["parity_window_matches"] is False
     assert (
         payload["arms"]["V9"]["compile_gate"][
