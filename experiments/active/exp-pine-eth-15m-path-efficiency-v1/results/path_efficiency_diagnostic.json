@@ -1,0 +1,99 @@
+{
+  "artifact": "Pine pre-cross path-efficiency single-feature diagnostic",
+  "feature_contract": {
+    "column": "pre_cross_path_efficiency_32",
+    "lookback_price_changes": 32,
+    "right_edge": "t-1",
+    "formula": "abs(close[t-1]-close[t-33]) / sum(abs(diff(close[t-33:t-1])))",
+    "orientation_fixed_before_outcomes": "higher means more one-way / less choppy"
+  },
+  "data_quality": {
+    "rows": 104962,
+    "last_bar": "2024-12-31T23:45:00+00:00",
+    "development_end_exclusive": "2025-01-01T00:00:00+00:00",
+    "consumed_final_rows_read": 0,
+    "holdout_rows_read": 0
+  },
+  "raw_surface": {
+    "rows": 335,
+    "long_rows": 170,
+    "short_rows": 165,
+    "missing_feature_cells": 0
+  },
+  "on_policy_diagnostic": {
+    "rows": 166,
+    "positive_rows": 27,
+    "positive_rate": 0.16265060240963855,
+    "feature_min": 0.00024807740015050136,
+    "feature_q10": 0.011194701589428759,
+    "feature_median": 0.0960971415355879,
+    "feature_q90": 0.22838063840046122,
+    "feature_max": 0.3606474456246858,
+    "spearman_return": -0.0047291607444987244,
+    "spearman_p_two_sided": 0.9517805955201578,
+    "auc_net_positive": 0.4990674127364774,
+    "top_decile_rows": 17,
+    "top_decile_net_bp_per_trade": -80.05186034945973,
+    "top_decile_win_rate": 0.058823529411764705,
+    "unconditional_net_bp_per_trade": 96.42524028674949,
+    "top_decile_excess_bp_per_trade": -176.4771006362092,
+    "top_decile_permutation_p_one_sided": 0.9671016449177541,
+    "permutations": 20000,
+    "seed": 20260821
+  },
+  "half_year_point_estimates": [
+    {
+      "period": "2023H1",
+      "rows": 42,
+      "positive_rows": 7,
+      "spearman_return": -0.17866492558210734,
+      "auc_net_positive": 0.5591836734693878,
+      "top_decile_rows": 5,
+      "top_decile_net_bp_per_trade": -154.44687592310592,
+      "unconditional_net_bp_per_trade": 61.045952816144364
+    },
+    {
+      "period": "2023H2",
+      "rows": 41,
+      "positive_rows": 4,
+      "spearman_return": 0.11864277261655119,
+      "auc_net_positive": 0.6216216216216216,
+      "top_decile_rows": 5,
+      "top_decile_net_bp_per_trade": 33.177682569639046,
+      "unconditional_net_bp_per_trade": 41.71211952944443
+    },
+    {
+      "period": "2024H1",
+      "rows": 38,
+      "positive_rows": 8,
+      "spearman_return": 0.11015965478354421,
+      "auc_net_positive": 0.5249999999999999,
+      "top_decile_rows": 4,
+      "top_decile_net_bp_per_trade": -87.4569713600884,
+      "unconditional_net_bp_per_trade": 199.75929700700925
+    },
+    {
+      "period": "2024H2",
+      "rows": 45,
+      "positive_rows": 8,
+      "spearman_return": -0.08979842140512193,
+      "auc_net_positive": 0.36824324324324326,
+      "top_decile_rows": 5,
+      "top_decile_net_bp_per_trade": -67.49971106478058,
+      "unconditional_net_bp_per_trade": 92.03577071886176
+    }
+  ],
+  "matched_random_control": {
+    "applicable": false,
+    "reason": "No entry rule or strategy arm changed; this is a continuous-feature ranking audit on one frozen on-policy ledger. The explicit null is outcome permutation."
+  },
+  "counterfactual_limit": "The 166 executed rows cover only part of the 335 raw candidate surface. Top-decile diagnostics cannot be interpreted as gate returns; any future threshold must score all candidates and replay the state machine.",
+  "threshold_selected": false,
+  "model_fitted": false,
+  "pine_changed": false,
+  "training_eligible": false,
+  "forward_eligible": false,
+  "production_eligible": false,
+  "consumed_final_rows_read": 0,
+  "holdout_rows_read": 0
+}

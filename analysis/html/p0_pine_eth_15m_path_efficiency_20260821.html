@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>ETH 15m Pine：交叉前路径效率单变量审计（2026-08-21）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>ETH 15m Pine：交叉前路径效率单变量审计（2026-08-21）</h1>
+<h2>结论先行</h2>
+<p>固定的 <code>pre_cross_path_efficiency_32</code> <strong>不能提高当前 Pine 信号质量，单特征假设拒绝</strong>。在 2023–2024 冻结 V9 动态账本的 166 笔交易上，它与成本后收益的 Spearman 为 <code>-0.0047</code>（双侧 <code>p=0.9518</code>），盈利分类 AUC 为 <code>0.4991</code>。按预注册方向取“路径最单向”的最高十分位，17 笔只有 1 笔盈利，净收益 <code>-80.05 bp/笔</code>；全池为 <code>+96.43 bp/笔</code>，最高十分位反而低 <code>176.48 bp/笔</code>，20,000 次单侧置换 <code>p=0.9671</code>。</p>
+<p>因此：</p>
+<ul>
+<li>不把该特征写成 Pine 硬门；</li>
+<li>不训练 LR/LightGBM；</li>
+<li>不事后把方向翻成“效率越低越好”；</li>
+<li>不扫描 8/16/24/48 等窗口寻找偶然赢家；</li>
+<li>V12F 继续只作冻结历史 comparator，当前优先级仍是 TradingView 逐笔 parity 和项目 P0/P1。</li>
+</ul>
+<h2>单变量与因果合同</h2>
+<p>唯一变化是增加一个连续测量，没有改策略：</p>
+<pre><code>
+decision bar = t
+lookback = 32 个价格变化（ETH 15m 即 8 小时）
+right edge = t-1
+efficiency = abs(close[t-1] - close[t-33])
+             / sum(abs(diff(close[t-33:t-1])))
+</code></pre>
+<p>取值接近 1 表示这 8 小时价格更单向，接近 0 表示频繁折返。信号 bar <code>t</code>、入场 bar <code>t+1</code> 和未来数据均不参与。完全平坦路径返回缺失并 fail closed；真实 335 个候选没有缺失。</p>
+<p>公式与右端先在提交 <code>9d5a30a</code> 冻结，诊断方法和预注册在提交 <code>809ec18</code> 冻结，实验注册在提交 <code>373ee2b</code> 完成，之后才运行结果。没有根据收益改窗口、方向或统计量。</p>
+<h2>数据统计</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>数值</th>
+</tr></thead><tbody>
+<tr><td>市场代理</td><td>OKX ETH-USDT-SWAP</td></tr>
+<tr><td>周期</td><td>15m</td></tr>
+<tr><td>市场数据范围</td><td>2023-01-01 至 2024-12-31</td></tr>
+<tr><td>市场 bar</td><td>104,962</td></tr>
+<tr><td>raw guarded candidates</td><td>335</td></tr>
+<tr><td>多 / 空候选</td><td>170 / 165</td></tr>
+<tr><td>特征缺失</td><td>0</td></tr>
+<tr><td>V9 on-policy 执行交易</td><td>166</td></tr>
+<tr><td>成本后盈利交易</td><td>27</td></tr>
+<tr><td>正类率</td><td>16.27%</td></tr>
+<tr><td>consumed-final rows read</td><td>0</td></tr>
+<tr><td>repository holdout rows read</td><td>0</td></tr>
+</tbody></table>
+<p>335 行 feature-only surface 是未来状态机评分必须覆盖的完整候选面；166 行只是在冻结 V9 路径上实际执行的交易。后者可以检查特征是否有基本排序迹象，但不能静态删行冒充一个新 gate 的收益。</p>
+<h2>主结果</h2>
+<h3>全开发段单特征诊断</h3>
+<table><thead><tr>
+<th>指标</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>Spearman（特征 vs 成本后收益）</td><td>-0.0047</td></tr>
+<tr><td>Spearman 双侧 p</td><td>0.9518</td></tr>
+<tr><td>盈利分类 AUC</td><td>0.4991</td></tr>
+<tr><td>全池净收益</td><td>+96.43 bp/笔</td></tr>
+<tr><td>最高十分位交易数</td><td>17</td></tr>
+<tr><td>最高十分位胜率</td><td>5.88%</td></tr>
+<tr><td>最高十分位净收益</td><td>-80.05 bp/笔</td></tr>
+<tr><td>最高十分位相对全池</td><td>-176.48 bp/笔</td></tr>
+<tr><td>20,000 次单侧置换 p</td><td>0.9671</td></tr>
+</tbody></table>
+<p>这里没有模型，所以字面上的“val AUC”不适用；<code>0.4991</code> 是预注册单特征在整个 analyst-exposed development 上的描述性 AUC，不能充当验证成绩。项目的 <code>p&lt;0.01</code> 成功门不仅没过，观测方向还与假设相反。</p>
+<h3>固定半年切片</h3>
+<table><thead><tr>
+<th>时段</th>
+<th>交易</th>
+<th>正收益</th>
+<th>Spearman</th>
+<th>AUC</th>
+<th>高十分位 bp/笔</th>
+<th>全池 bp/笔</th>
+</tr></thead><tbody>
+<tr><td>2023H1</td><td>42</td><td>7</td><td>-0.179</td><td>0.559</td><td>-154.45</td><td>+61.05</td></tr>
+<tr><td>2023H2</td><td>41</td><td>4</td><td>+0.119</td><td>0.622</td><td>+33.18</td><td>+41.71</td></tr>
+<tr><td>2024H1</td><td>38</td><td>8</td><td>+0.110</td><td>0.525</td><td>-87.46</td><td>+199.76</td></tr>
+<tr><td>2024H2</td><td>45</td><td>8</td><td>-0.090</td><td>0.368</td><td>-67.50</td><td>+92.04</td></tr>
+</tbody></table>
+<p>只有 2023H2 的高十分位为正，但仍低于本期全池；另外三个半年均为负。Spearman 正负翻转，说明它不是一个跨制度稳定的单调因子。</p>
+<h2>零假设与对照说明</h2>
+<p>本轮没有改变方向、入场、退出、仓位、TBSL 或成本，也没有生成一个可交易策略臂，所以“同币 × 同时间块 × 同波动桶随机入场”的匹配策略对照在字面上不适用；编造一个对照收益会暗示已运行反事实 gate。</p>
+<p>同等严格的零假设是：在固定 166 笔账本中，收益与预先冻结的特征排名可交换。每次随机打乱收益并抽取相同 17 笔，重复 20,000 次；真实最高十分位的均值优于随机的单侧概率仅对应 <code>p=0.9671</code>。这项检验只评价排序，不评价完整动态 gate。</p>
+<h2>为什么这个直觉没有奏效</h2>
+<p>“交叉前更单向”并不等于“交叉后还能继续形成大趋势”。当前 V9/V12F 信号已经由快慢均线交叉、EMA 方向、斜率和振荡器共同筛过；在这个条件池里，高路径效率可能同时包含：</p>
+<ol>
+<li>尚在延续的早期趋势；</li>
+<li>已经走完一段、在交叉附近接近衰竭的趋势；</li>
+<li>与交易方向相反的单向路径，因为本特征刻意保持方向中性。</li>
+</ol>
+<p>单一比值无法区分这三种状态。更重要的是，失败结果不能成为现在试“低效率才好”或扫描更多窗口的理由；那会把同一开发段变成参数搜索场。</p>
+<h2>对 Pine 和 LR 的影响</h2>
+<ul>
+<li><strong>Pine 当前不改。</strong> 新特征只是研究模块，不在 V12F 源码、不在任何准入 <code>AND</code> 中。</li>
+<li><strong>冻结 28 特征合同不改。</strong> <code>judgment_28_v1</code> 仍保持原样，避免暗中改变现有模型坐标系。</li>
+<li><strong>LR 暂不训练。</strong> P0/P1 未放行，而且这一个新特征本身已无单调排序价值。</li>
+<li><strong>未来判断层仍需要状态拆分。</strong> 等阶段允许后，目标应分别表达 initial-stop、成本下 BE-stop、reverse runner，以及空仓开仓 / 同向持有 / 反向关闭或反手；不能用一个“高效率”门替代状态决策。</li>
+</ul>
+<h2>下一步裁决</h2>
+<table><thead><tr>
+<th>动作</th>
+<th>裁决</th>
+</tr></thead><tbody>
+<tr><td>把路径效率加入 V12F Pine 硬门</td><td><strong>NO-GO</strong></td></tr>
+<tr><td>反转方向或扫描多个 lookback</td><td><strong>NO-GO</strong>，属于看结果后找参数</td></tr>
+<tr><td>用它单独训练 LR</td><td><strong>NO-GO</strong></td></tr>
+<tr><td>保留因果实现和失败记录</td><td><strong>GO</strong>，防止重复试验</td></tr>
+<tr><td>完成 V12F TradingView 97 笔 parity</td><td><strong>GO，最高优先级</strong></td></tr>
+<tr><td>继续 P0/P1 标签语义与 Gold Dataset</td><td><strong>GO</strong></td></tr>
+<tr><td>P0/P1 后预注册状态感知小模型</td><td><strong>条件 GO</strong>，需新鲜数据与完整 335-row 动态回放</td></tr>
+</tbody></table>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>结果只来自 analyst-exposed 2023–2024 development，不能被包装成新鲜验证；它足以淘汰当前单调假设，不足以证明所有可能的路径形态都无用。</li>
+<li>166 笔 on-policy 交易不是完整反事实候选集。最高十分位只作机制诊断，绝不是“如果过滤就能得到”的回测。</li>
+<li>未读取 2025–2026 final-preholdout，也未读取 repository holdout；没有重复消费最近半年。</li>
+<li>没有训练、阈值选择、Pine 改动、paper 启动、promote、deploy、ACTIVE 切换或真金操作。</li>
+<li>V12F 的 TradingView trade-export parity 仍未完成；本地 OKX 代理结果不能代替官方 broker emulator 账本。</li>
+</ul>
+<h2>复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+PYTHONPATH=. .venv/bin/python -m pytest -q \
+  tests/test_pine_path_efficiency.py \
+  tests/test_analyze_pine_eth_15m_path_efficiency.py \
+  tests/boundaries/test_layer_imports.py
+
+PYTHONPATH=. .venv/bin/python \
+  scripts/analyze_pine_eth_15m_path_efficiency.py
+
+python3 scripts/md_to_html.py \
+  analysis/p0_pine_eth_15m_path_efficiency_20260821.md \
+  --out-dir analysis/html
+</code></pre>
+</body>
+</html>
