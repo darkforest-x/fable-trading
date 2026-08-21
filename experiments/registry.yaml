@@ -800,7 +800,7 @@ experiments:
   - experiment_id: exp-pine-eth-15m-path-efficiency-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "809ec18996f1eae10fd84d184b713906e8212d62"
-    status: active
+    status: rejected
     question: >-
       Without changing V9/V12F execution or fitting a model, does one causal
       pre-cross path-efficiency measurement provide a defensible continuous
@@ -810,19 +810,33 @@ experiments:
       add pre_cross_path_efficiency_32, fixed before outcome diagnostics; no
       threshold, gate, model, barrier or Pine parameter changes
     result: >-
-      preregistered_not_yet_evaluated. The 32-change formula, t-1 right edge,
-      high-is-one-way orientation, development-only window, permutation null
-      and descriptive outputs were committed before the outcome runner executes.
+      rejected_as_a_monotonic_entry_quality_feature. On the 166-row frozen V9
+      2023--2024 on-policy ledger, Spearman with costed return was -0.0047
+      (p=0.9518) and net-positive AUC was 0.4991. The preregistered high-feature
+      decile contained 17 trades / 1 winner and returned -80.05bp per trade,
+      176.48bp below the full pool, with one-sided 20,000-shuffle p=0.9671.
+      All 335 raw candidates had finite causal values, but no gate or dynamic
+      counterfactual was run because the descriptive ranking failed first.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p0_pine_eth_15m_path_efficiency_20260821.md
+    artifacts:
+      - pine-eth-15m-path-efficiency-prereg
+      - pine-eth-15m-path-efficiency-surface
+      - pine-eth-15m-path-efficiency-on-policy
+      - pine-eth-15m-path-efficiency-summary
+      - pine-eth-15m-path-efficiency-report
+      - pine-eth-15m-path-efficiency-html
     reuse_allowed: false
     notes: >-
-      This experiment may define and audit a feature contract inside P0/P1, but
-      may not train LR/LightGBM or select a gate. The 166-row on-policy ledger is
-      incomplete for counterfactual entry filtering; any future approved model
-      must score all 335 raw candidates and run a full dynamic replay.
+      The formula, 32-change window, t-1 edge, high-is-one-way orientation and
+      permutation test were committed before result generation. No consumed
+      final or repository holdout row was read. Do not reverse the feature
+      direction or scan alternate windows after this result; those are new
+      hypotheses. The 166-row on-policy ledger is incomplete for counterfactual
+      filtering, so any future approved model must score all 335 raw candidates
+      and run a full dynamic replay.
 
   - experiment_id: exp-consolidation-single-repo-v1
     source_repo: darkforest-x/fable-trading

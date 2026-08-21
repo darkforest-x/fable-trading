@@ -1176,3 +1176,101 @@ artifacts:
     generator_commit: "255832fdbb175d75f91ff58c84114e66e4f92048"
     config_hash: "e3f5ca28e44776bc34a44f02aeb848cf272bf5a62d26b9a28f0a05747939d108"
     data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-path-efficiency-prereg
+    artifact_type: config
+    role: frozen_single_feature_preregistration
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b7f440f40c8f7e0ef066cf080d9ead417b246533"
+    source_path: experiments/active/exp-pine-eth-15m-path-efficiency-v1/preregistration.json
+    sha256: "1eaef0b5b62a263f002beba0ea24649058fb5bb8d5f825949225dde386b27092"
+    size_bytes: 1664
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-path-efficiency-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "809ec18996f1eae10fd84d184b713906e8212d62"
+    config_hash: "1eaef0b5b62a263f002beba0ea24649058fb5bb8d5f825949225dde386b27092"
+    data_cutoff: "2025-01-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-path-efficiency-surface
+    artifact_type: dataset
+    role: causal_single_feature_raw_candidate_surface
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b7f440f40c8f7e0ef066cf080d9ead417b246533"
+    source_path: experiments/active/exp-pine-eth-15m-path-efficiency-v1/results/candidate_path_efficiency.csv
+    sha256: "7371b1f54c93f96fa9ffb379bd5b5d497356fdfb5cb958664d26607e83ce1965"
+    size_bytes: 79260
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-path-efficiency-v1/results/candidate_path_efficiency.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "809ec18996f1eae10fd84d184b713906e8212d62"
+    config_hash: "1eaef0b5b62a263f002beba0ea24649058fb5bb8d5f825949225dde386b27092"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: 335 guarded V9 candidates, 170 long and 165 short; feature-only with no outcome labels.
+
+  - artifact_id: pine-eth-15m-path-efficiency-on-policy
+    artifact_type: dataset
+    role: rejected_single_feature_on_policy_diagnostic
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b7f440f40c8f7e0ef066cf080d9ead417b246533"
+    source_path: experiments/active/exp-pine-eth-15m-path-efficiency-v1/results/on_policy_path_efficiency_outcomes.csv
+    sha256: "018cd17b7e92e3d0b4923a8381f5ec1533e8564244cb4fa3929296d3acbda0f1"
+    size_bytes: 45346
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-path-efficiency-v1/results/on_policy_path_efficiency_outcomes.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "809ec18996f1eae10fd84d184b713906e8212d62"
+    config_hash: "1eaef0b5b62a263f002beba0ea24649058fb5bb8d5f825949225dde386b27092"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: 166 frozen V9 on-policy rows; not a counterfactual gate ledger.
+
+  - artifact_id: pine-eth-15m-path-efficiency-summary
+    artifact_type: manifest
+    role: rejected_single_feature_result_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b7f440f40c8f7e0ef066cf080d9ead417b246533"
+    source_path: experiments/active/exp-pine-eth-15m-path-efficiency-v1/results/path_efficiency_diagnostic.json
+    sha256: "9bc840804b6d957bdc94728310631c78a07776b9a33fb7bbe8164278bc24337f"
+    size_bytes: 3539
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-path-efficiency-v1/results/path_efficiency_diagnostic.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "809ec18996f1eae10fd84d184b713906e8212d62"
+    config_hash: "1eaef0b5b62a263f002beba0ea24649058fb5bb8d5f825949225dde386b27092"
+    data_cutoff: "2025-01-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-path-efficiency-report
+    artifact_type: report
+    role: canonical_rejected_single_feature_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b7f440f40c8f7e0ef066cf080d9ead417b246533"
+    source_path: analysis/p0_pine_eth_15m_path_efficiency_20260821.md
+    sha256: "853555aafb121b589985b8c4dfa9087479d2760d9979c9b6a339a8ce60339125"
+    size_bytes: 7107
+    storage_uri: "repo://analysis/p0_pine_eth_15m_path_efficiency_20260821.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "809ec18996f1eae10fd84d184b713906e8212d62"
+    config_hash: "1eaef0b5b62a263f002beba0ea24649058fb5bb8d5f825949225dde386b27092"
+    data_cutoff: "2025-01-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-path-efficiency-html
+    artifact_type: report
+    role: owner_facing_rejected_single_feature_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b7f440f40c8f7e0ef066cf080d9ead417b246533"
+    source_path: analysis/html/p0_pine_eth_15m_path_efficiency_20260821.html
+    sha256: "9655b952f06d1a368ee0215818a7d185f4155a290bfdff3d65392ff25a91ad7b"
+    size_bytes: 11105
+    storage_uri: "repo://analysis/html/p0_pine_eth_15m_path_efficiency_20260821.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "809ec18996f1eae10fd84d184b713906e8212d62"
+    config_hash: "1eaef0b5b62a263f002beba0ea24649058fb5bb8d5f825949225dde386b27092"
+    data_cutoff: "2025-01-01T00:00:00Z"
