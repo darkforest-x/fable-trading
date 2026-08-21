@@ -1,0 +1,57 @@
+{
+  "artifact": "TradingView official Pine compiler receipt for frozen V12F",
+  "status": "compiler_passed_exact_parity_not_run",
+  "recorded_at_utc": "2026-08-21T16:42:45Z",
+  "source_path": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v12f_ma6_w8_full_gate_paper.pine",
+  "source_sha256": "9e03c2959e403632a8db06c66ee43487d7388e0dfdaf31abe5ae32218c7567de",
+  "source_bytes": 12447,
+  "source_lines": 243,
+  "pine_version": 6,
+  "venue_symbol": "OKX:ETHUSDT.P",
+  "chart_interval": "15m",
+  "chart_type": "Candles",
+  "script_title_observed": "ALLIN ETH 15m V12F Paper",
+  "active_strategy_observed_after_compile": true,
+  "pine_compile_error_count": 0,
+  "pine_editor_diagnostic_error_observed": false,
+  "official_pine_compiler_run": true,
+  "strategy_research_window": [
+    "2023-01-01T00:00:00Z",
+    "2026-03-01T00:00:00Z"
+  ],
+  "input_values_observed_in_settings_dialog": false,
+  "input_values_match_frozen_contract": false,
+  "tradingview_loaded_chart_range": [
+    "2026-06-01",
+    "2026-08-22"
+  ],
+  "loaded_range_is_after_research_end": true,
+  "strategy_report_trade_data_present": false,
+  "strategy_report_message": "The strategy report appears after the script makes even one trade.",
+  "deep_backtesting_attempted": false,
+  "trade_export_obtained": false,
+  "ledger_reconciliation_run": false,
+  "tradingview_parity_passed": false,
+  "blocking_reason": "This was an official compiler smoke only. The required 2025-01-01 through 2026-03-01 exact input receipt and 97-trade TradingView export were not produced.",
+  "operational_observation": {
+    "post_holdout_chart_was_visible": true,
+    "post_holdout_trades_entered_or_scored": 0,
+    "post_holdout_metrics_read": 0,
+    "used_for_parameter_selection": false,
+    "used_for_return_evaluation": false,
+    "note": "The already-open current chart was visible while compiling. The frozen source date gate ended before the loaded range, so no strategy trade or performance result existed or was read."
+  },
+  "external_state_cleanup": {
+    "temporary_strategy_removed_from_chart": true,
+    "base_indicator_preserved": true,
+    "editor_contains_unsaved_v12f_after_compile": true,
+    "layout_saved": false,
+    "script_saved": false,
+    "script_published": false,
+    "browser_tab_closed": false
+  },
+  "training_or_model_scoring_performed": false,
+  "forward_collector_started": false,
+  "forward_or_live_order_sent": false,
+  "production_eligible": false
+}

@@ -26,6 +26,7 @@ PINE = BASE_EXPERIMENT / "pine"
 EXPERIMENT = PROJECT / "experiments/active/exp-pine-eth-15m-forward-v2"
 RESULTS = EXPERIMENT / "results"
 OUTPUT = RESULTS / "paper_forward_protocol_v2.json"
+OWNER_VENUE_CONFIRMATION = EXPERIMENT / "owner_venue_confirmation.json"
 PREDECESSOR = BASE_RESULTS / "paper_forward_protocol.json"
 FINAL_START = pd.Timestamp("2025-01-01T00:00:00Z")
 FINAL_END = pd.Timestamp("2026-03-01T00:00:00Z")
@@ -86,6 +87,55 @@ def _canonical_count(spec: dict[str, Any]) -> int:
             f"expected {spec['expected_trades']}, found {count}"
         )
     return count
+
+
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(PROJECT))
+    except ValueError:
+        return str(path)
+
+
+def _venue_confirmation_gate() -> dict[str, Any]:
+    """Validate the narrow owner approval for venue and compile smoke only."""
+    path = OWNER_VENUE_CONFIRMATION
+    if not path.exists():
+        return {
+            "receipt_present": False,
+            "confirmed": False,
+            "symbol_matches": False,
+            "timeframe_matches": False,
+            "paper_activation_approved": False,
+        }
+    receipt = json.loads(path.read_text(encoding="utf-8"))
+    schema_matches = (
+        receipt.get("schema_version")
+        == "pine-eth-15m-owner-venue-confirmation-v1"
+    )
+    symbol_matches = receipt.get("confirmed_symbol") == PROPOSED_VENUE
+    timeframe_matches = receipt.get("confirmed_timeframe") == "15m"
+    confirmed = bool(
+        schema_matches
+        and receipt.get("confirmed") is True
+        and symbol_matches
+        and timeframe_matches
+        and receipt.get("compile_only") is True
+        and receipt.get("paper_forward_activation_approved") is False
+    )
+    return {
+        "receipt_present": True,
+        "confirmed": confirmed,
+        "schema_matches": schema_matches,
+        "symbol_matches": symbol_matches,
+        "timeframe_matches": timeframe_matches,
+        "compile_only": receipt.get("compile_only") is True,
+        "paper_activation_approved": bool(
+            receipt.get("paper_forward_activation_approved") is True
+        ),
+        "receipt_path": _display_path(path),
+        "receipt_sha256": sha256_file(path),
+        "recorded_at_utc": receipt.get("recorded_at_utc"),
+    }
 
 
 def _compile_gate(spec: dict[str, Any], source_hash: str) -> dict[str, Any]:
@@ -166,6 +216,7 @@ def _ledger_gate(arm: str, spec: dict[str, Any]) -> dict[str, Any]:
 def build_protocol() -> dict[str, Any]:
     arms: dict[str, Any] = {}
     blocking_gates: list[str] = []
+    venue_confirmation = _venue_confirmation_gate()
     for arm, spec in ARM_SPECS.items():
         source_hash = sha256_file(spec["source"])
         canonical_count = _canonical_count(spec)
@@ -201,10 +252,15 @@ def build_protocol() -> dict[str, Any]:
             "ledger_gate": ledger_gate,
         }
 
+    blocking_gates.append(
+        "project P0 semantic stability and P1 Gold Dataset gates pass"
+    )
+    if not venue_confirmation["confirmed"]:
+        blocking_gates.append(
+            "owner confirms exact venue OKX:ETHUSDT.P for both arms"
+        )
     blocking_gates.extend(
         [
-            "project P0 semantic stability and P1 Gold Dataset gates pass",
-            "owner confirms exact venue OKX:ETHUSDT.P for both arms",
             "venue-exact commission, slippage and funding review for both arms",
             "owner explicitly approves prospective log-only paper collection",
             "activation timestamp is recorded after all approvals; no backfill",
@@ -227,9 +283,12 @@ def build_protocol() -> dict[str, Any]:
         ),
         "holdout_rows_read": 0,
         "proposed_exact_venue": PROPOSED_VENUE,
-        "venue_owner_confirmed": False,
+        "venue_owner_confirmed": venue_confirmation["confirmed"],
+        "venue_confirmation": venue_confirmation,
         "venue_lock": {
-            "owner_selected_symbol": None,
+            "owner_selected_symbol": (
+                PROPOSED_VENUE if venue_confirmation["confirmed"] else None
+            ),
             "proposed_symbol": PROPOSED_VENUE,
             "timeframe": "15m",
             "tick_size": 0.01,
@@ -345,7 +404,6 @@ def build_protocol() -> dict[str, Any]:
             "parameter_selection_from_interim_data_allowed": False,
         },
         "owner_decisions_required_before_start": [
-            "confirm OKX:ETHUSDT.P as the exact venue",
             "provide/export V9 and V12F bounded historical TradingView ledgers",
             "approve prospective log-only collection after every gate passes",
             "approve any barrier, break-even, ATR, cost or risk change separately",

@@ -1,6 +1,9 @@
 """Tests for the blocked V9/V12F prospective shadow protocol."""
 from __future__ import annotations
 
+import json
+
+import scripts.design_pine_eth_15m_paper_protocol_v2 as protocol_module
 from scripts.design_pine_eth_15m_paper_protocol_v2 import build_protocol
 
 
@@ -28,6 +31,9 @@ def test_v2_keeps_only_frozen_v9_and_v12f_and_starts_nothing() -> None:
     assert payload["compact_exposed_final_ledger_rows_read"] == 207
     assert payload["holdout_rows_read"] == 0
     assert payload["owner_approval"]["reference"] is None
+    assert payload["venue_owner_confirmed"] is True
+    assert payload["venue_lock"]["owner_selected_symbol"] == "OKX:ETHUSDT.P"
+    assert payload["venue_confirmation"]["paper_activation_approved"] is False
 
 
 def test_v2_binds_both_canonical_ledgers_and_exact_sources() -> None:
@@ -49,6 +55,7 @@ def test_v2_requires_each_external_gate_and_forbids_interim_selection() -> None:
     assert "V12F exact 97-trade ledger parity" in blockers
     assert "owner explicitly approves" in blockers
     assert "P0 semantic stability and P1 Gold Dataset" in blockers
+    assert "owner confirms exact venue" not in blockers
     assert payload["project_stage_gate"]["paper_may_start_before_p0_p1_pass"] is False
     assert payload["arms"]["V9"]["compile_gate"]["parity_window_matches"] is False
     assert (
@@ -70,3 +77,29 @@ def test_v2_requires_each_external_gate_and_forbids_interim_selection() -> None:
     assert payload["training_eligible"] is False
     assert payload["forward_eligible"] is False
     assert payload["production_eligible"] is False
+
+
+def test_v2_venue_confirmation_is_narrow_and_fail_closed(
+    tmp_path, monkeypatch
+) -> None:
+    invalid_confirmation = tmp_path / "owner_venue_confirmation.json"
+    invalid_confirmation.write_text(
+        json.dumps(
+            {
+                "schema_version": "pine-eth-15m-owner-venue-confirmation-v1",
+                "confirmed": True,
+                "confirmed_symbol": "BINANCE:ETHUSDT.P",
+                "confirmed_timeframe": "15m",
+                "compile_only": True,
+                "paper_forward_activation_approved": False,
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        protocol_module, "OWNER_VENUE_CONFIRMATION", invalid_confirmation
+    )
+    payload = protocol_module.build_protocol()
+    assert payload["venue_owner_confirmed"] is False
+    assert payload["venue_lock"]["owner_selected_symbol"] is None
+    assert "owner confirms exact venue" in " | ".join(payload["blocking_gates"])
