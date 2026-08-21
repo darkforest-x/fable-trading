@@ -13,6 +13,7 @@ from scripts.research_pine_eth_15m_dense_start import (
 )
 from scripts.research_pine_eth_15m_trend_ensemble import (
     add_profile_columns,
+    build_path_differences,
     load_preregistration,
 )
 from yoyo.layers.l3_backtest.pine_allin_v7 import SignalParameters
@@ -79,3 +80,36 @@ def test_barriers_cost_and_execution_remain_frozen() -> None:
     assert execution.take_profit_percent is None
     assert execution.stop_distance_basis == "signal_close"
     assert execution.signal_bar_duration.total_seconds() == 900
+
+
+def test_path_difference_audit_uses_dynamic_signal_identity() -> None:
+    rows = []
+    for variant, signals in (
+        ("v12f_ma6_w8_full_gate", [(10, "long"), (20, "short")]),
+        ("v15e_soft_l2", [(10, "long"), (30, "short")]),
+    ):
+        for signal_i, direction in signals:
+            rows.append(
+                {
+                    "variant": variant,
+                    "period": "discovery_2023",
+                    "signal_i": signal_i,
+                    "signal_time": pd.Timestamp("2023-01-01", tz="UTC")
+                    + pd.Timedelta(minutes=15 * signal_i),
+                    "direction": direction,
+                    "entry_time": pd.Timestamp("2023-01-01", tz="UTC"),
+                    "exit_time": pd.Timestamp("2023-01-02", tz="UTC"),
+                    "exit_reason": "stop",
+                    "holding_bars": 2,
+                    "gross_return": -0.01,
+                    "project_net_return": -0.012,
+                    "trend_quality": 0.5,
+                    "trend_only_score": 0.5,
+                    "ewmac_only_score": 0.5,
+                    "donchian_only_score": 0.5,
+                    "dense_only_score": 0.5,
+                }
+            )
+    result = build_path_differences(pd.DataFrame(rows), "v15e_soft_l2")
+    assert set(result["signal_i"]) == {20, 30}
+    assert set(result["path_membership"]) == {"v12f_only", "v15_only"}

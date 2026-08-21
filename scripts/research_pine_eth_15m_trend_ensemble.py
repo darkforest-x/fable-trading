@@ -69,6 +69,7 @@ PAIRS_OUTPUT = RESULTS / "trend_ensemble_pairs.csv"
 CONTROL_SENSITIVITY_OUTPUT = RESULTS / "trend_ensemble_control_sensitivity.csv"
 FEATURE_ROWS_OUTPUT = RESULTS / "trend_ensemble_feature_rows.csv"
 EQUITY_OUTPUT = RESULTS / "trend_ensemble_equity.csv.gz"
+PATH_DIFFERENCES_OUTPUT = RESULTS / "trend_ensemble_path_differences.csv"
 
 
 def _sha256(path: Path) -> str:
@@ -441,6 +442,74 @@ def control_sensitivity(
     return pd.DataFrame(rows)
 
 
+def build_path_differences(
+    trades: pd.DataFrame,
+    selected_variant: str,
+) -> pd.DataFrame:
+    """Return primary-period trades present on only one dynamic state path.
+
+    A rejected signal can change the position held at later raw signals and
+    therefore alter reversals, stops and cooldown.  This ledger intentionally
+    compares dynamic paths by ``signal_i`` plus direction; it is descriptive
+    post-outcome evidence and never feeds profile selection.
+    """
+
+    rows: list[pd.DataFrame] = []
+    for period_name in sorted(PRIMARY_PERIOD_NAMES):
+        baseline = trades.loc[
+            trades["variant"].eq("v12f_ma6_w8_full_gate")
+            & trades["period"].eq(period_name)
+        ].copy()
+        candidate = trades.loc[
+            trades["variant"].eq(selected_variant)
+            & trades["period"].eq(period_name)
+        ].copy()
+        baseline_keys = set(
+            zip(baseline["signal_i"].astype(int), baseline["direction"].astype(str))
+        )
+        candidate_keys = set(
+            zip(candidate["signal_i"].astype(int), candidate["direction"].astype(str))
+        )
+        for source, other_keys, membership in (
+            (baseline, candidate_keys, "v12f_only"),
+            (candidate, baseline_keys, "v15_only"),
+        ):
+            mask = [
+                (int(signal_i), str(direction)) not in other_keys
+                for signal_i, direction in zip(source["signal_i"], source["direction"])
+            ]
+            difference = source.loc[mask].copy()
+            if difference.empty:
+                continue
+            difference["path_membership"] = membership
+            rows.append(difference)
+    output = _concat(rows)
+    if output.empty:
+        return output
+    columns = [
+        "period",
+        "path_membership",
+        "variant",
+        "signal_i",
+        "signal_time",
+        "direction",
+        "entry_time",
+        "exit_time",
+        "exit_reason",
+        "holding_bars",
+        "gross_return",
+        "project_net_return",
+        "trend_quality",
+        "trend_only_score",
+        "ewmac_only_score",
+        "donchian_only_score",
+        "dense_only_score",
+    ]
+    return output.loc[:, columns].sort_values(
+        ["period", "signal_time", "path_membership"], kind="stable"
+    )
+
+
 def make_charts(
     search: pd.DataFrame,
     summary: pd.DataFrame,
@@ -611,6 +680,7 @@ def main() -> None:
     pairs_output = _concat(pairs_all)
     features = export_feature_rows(frame, profiles, selected)
     sensitivity = control_sensitivity(frame, trades_output, selected_variant.name)
+    path_differences = build_path_differences(trades_output, selected_variant.name)
     make_charts(search, summary, equity_output, selected_variant.name)
 
     primary = summary.loc[summary["period"].isin(PRIMARY_PERIOD_NAMES)].copy()
@@ -664,7 +734,7 @@ def main() -> None:
         ),
         "drawdown_not_worse_every_primary_period": bool(
             v15["max_drawdown_15m_percent"].le(
-                v12["max_drawdown_15m_percent"]
+                v12["max_drawdown_15m_percent"] + 1e-9
             ).all()
         ),
     }
@@ -678,6 +748,7 @@ def main() -> None:
     equity_output.to_csv(EQUITY_OUTPUT, index=False, compression="gzip")
     features.to_csv(FEATURE_ROWS_OUTPUT, index=False)
     sensitivity.to_csv(CONTROL_SENSITIVITY_OUTPUT, index=False)
+    path_differences.to_csv(PATH_DIFFERENCES_OUTPUT, index=False)
 
     payload = {
         "artifact": "ETH 15m V15E multi-speed soft trend-ensemble analyst-exposed study",
@@ -716,6 +787,7 @@ def main() -> None:
             "control_sensitivity": str(
                 CONTROL_SENSITIVITY_OUTPUT.relative_to(PROJECT)
             ),
+            "path_differences": str(PATH_DIFFERENCES_OUTPUT.relative_to(PROJECT)),
         },
         "holdout_rows_read": 0,
         "model_trained_or_scored": False,
