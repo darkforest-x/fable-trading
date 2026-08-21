@@ -1,0 +1,140 @@
+{
+  "artifact": "ETH 15m dense-start V13 preregistration",
+  "experiment_id": "exp-pine-eth-15m-dense-start-v1",
+  "created_at": "2026-08-21T18:10:00+08:00",
+  "source_commit_before_builder": "bff72893727b4be2aa4f68d05bf066531b47514b",
+  "owner_approval": "2026-08-21 conversation: after receiving the proposed dense -> compression -> direction -> release redesign, owner explicitly replied '去做啊'. This authorizes the four-component factor as one recorded composite research variable. It does not authorize holdout reuse, barrier changes, model training, promotion, deployment or live trading.",
+  "question": "Can a causal six-MA dense-start gate remove short-lived false starts while preserving the rare ETH 15m trend runners better than frozen V12F?",
+  "scope": {
+    "instrument": "OKX ETH-USDT-SWAP research proxy",
+    "bar_minutes": 15,
+    "pine_display_contract": "ETH-base instrument on 15-minute bars",
+    "safe_end_exclusive": "2026-03-01T00:00:00Z",
+    "repository_holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_rows_allowed": 0,
+    "training_allowed": false,
+    "barrier_change_allowed": false,
+    "round_trip_cost": 0.002
+  },
+  "single_composite_variable": {
+    "baseline": "frozen V12F full-state MA6-W8 net-cross gate",
+    "candidate": "V13 full-state dense-start gate",
+    "unchanged": [
+      "V9 raw SMA10/SMA60 signal",
+      "EMA100 regime and EMA200 slope-12 direction",
+      "oscillator threshold 0.1",
+      "ATR14 x4 initial stop capped at 3 percent",
+      "1.5 percent break-even trigger and 0.1 percent offset",
+      "1 percent risk sizing and 13x leverage cap",
+      "calendar filters, cooldown, reversal semantics and 20bp cost"
+    ]
+  },
+  "causal_sequence": {
+    "bundle": ["SMA20", "EMA20", "SMA60", "EMA60", "SMA120", "EMA120"],
+    "density": "all 15 unordered pair order flips summed over [t-12,t-1]; the release bar t is excluded",
+    "compression": "mean over [t-12,t-1] of (max six MA - min six MA) / ATR14",
+    "direction": "side-aligned 12 cross-period net crosses over [t-12,t-1] plus current t fast-vs-slow alignment out of 12; same-period SMA/EMA pairs have no invented direction",
+    "release": "close[t] outside the current six-MA rope, side-aligned mean six-MA slope over t-3..t positive, and either slope coherence or ATR14 expansion passes",
+    "feature_visibility": "every feature at t uses bars <= t; entry remains open[t+1]",
+    "future_bars_used_by_features": 0
+  },
+  "fixed_windows": {
+    "density_and_compression_bars": 12,
+    "atr_release_reference_bars": 8,
+    "slope_lag_bars": 3
+  },
+  "ordered_strictness_profiles": [
+    {
+      "profile_id": "dense_l0",
+      "min_pre_pairwise_crosses": 1,
+      "max_pre_bandwidth_atr_mean": 3.5,
+      "min_current_alignment": 6,
+      "min_pre_cross_imbalance": -1,
+      "min_slope_coherence": 0.6666666666666666,
+      "min_atr_release_ratio": 1.0
+    },
+    {
+      "profile_id": "dense_l1",
+      "min_pre_pairwise_crosses": 2,
+      "max_pre_bandwidth_atr_mean": 3.0,
+      "min_current_alignment": 6,
+      "min_pre_cross_imbalance": -1,
+      "min_slope_coherence": 0.6666666666666666,
+      "min_atr_release_ratio": 1.0
+    },
+    {
+      "profile_id": "dense_l2",
+      "min_pre_pairwise_crosses": 2,
+      "max_pre_bandwidth_atr_mean": 2.5,
+      "min_current_alignment": 8,
+      "min_pre_cross_imbalance": 0,
+      "min_slope_coherence": 0.8333333333333334,
+      "min_atr_release_ratio": 1.05
+    },
+    {
+      "profile_id": "dense_l3",
+      "min_pre_pairwise_crosses": 3,
+      "max_pre_bandwidth_atr_mean": 2.0,
+      "min_current_alignment": 9,
+      "min_pre_cross_imbalance": 0,
+      "min_slope_coherence": 0.8333333333333334,
+      "min_atr_release_ratio": 1.05
+    }
+  ],
+  "release_boolean": "price_breakout AND signed_mean_slope_atr > 0 AND (slope_coherence >= profile minimum OR atr_release_ratio >= profile minimum)",
+  "selection_contract": {
+    "selection_rows": ["2023H1", "2023H2"],
+    "minimum_trades_per_half": 10,
+    "ranking": [
+      "maximize the worse 2023 half-year compounded return",
+      "then maximize the worse 2023 half-year project-net bp per trade",
+      "then maximize the worse 2023 half-year win rate",
+      "then minimize the maximum 2023 half-year drawdown",
+      "then prefer the less strict profile by profile order"
+    ],
+    "fail_closed": "if no profile has at least 10 trades in each 2023 half, select no V13 profile",
+    "forbidden_selection_rows": ["2024H1", "2024H2", "2025-01 through 2026-02", "repository holdout"]
+  },
+  "locked_evaluation_order": [
+    "select exactly once on 2023H1/2023H2",
+    "evaluate the locked profile on 2024H1/2024H2 and calendar 2024",
+    "only then describe the already-consumed final-preholdout 2025-01 through 2026-02 segment",
+    "never evaluate the repository holdout"
+  ],
+  "acceptance": {
+    "economic_gate": "selected V13 must have positive top-decile net return with permutation p < 0.01 and positive matched-control excess; otherwise it remains rejected/paper-only",
+    "mechanism_checks": [
+      "fewer stop exits within 24 hours than V12F",
+      "higher net win rate than V12F",
+      "rare multi-day trend winners are not all removed",
+      "drawdown does not worsen"
+    ],
+    "regardless_of_result": [
+      "training_eligible=false",
+      "forward_eligible=false until a genuinely new forward protocol is separately approved",
+      "production_eligible=false",
+      "official TradingView trade-export parity remains required"
+    ]
+  },
+  "future_lr_interface": {
+    "export_features_only": true,
+    "fit_model": false,
+    "features": [
+      "pre_pairwise_cross_count",
+      "pre_pairwise_cross_breadth",
+      "pre_bandwidth_atr_mean",
+      "pre_bandwidth_atr_max",
+      "pre_directional_cross_count",
+      "pre_opposite_cross_count",
+      "pre_cross_imbalance",
+      "current_alignment",
+      "directional_order_entropy",
+      "breakout_distance_atr",
+      "slope_coherence",
+      "signed_mean_slope_atr",
+      "atr_release_ratio",
+      "dense_start_score"
+    ],
+    "blocker": "repository P0/P1 gate forbids new LR/LightGBM training"
+  }
+}

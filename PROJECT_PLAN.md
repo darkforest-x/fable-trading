@@ -1,3 +1,12 @@
+> **Owner 授权的 ETH 15m V13 密集启动组合实验（2026-08-21）**：Owner 在收到“密集阶段六线
+> 总交叉、压缩阶段六线跨度/ATR、方向阶段净交叉与排序一致性、释放阶段价格突破及斜率/波动扩张”
+> 的完整方案后明确回复“去做啊”。该回复批准把四段逻辑作为一个有记录的 composite research
+> variable，相对冻结 V12F 只替换 gate；15m、原 V9 信号、ATR4/3% 止损、break-even、仓位、成本、
+> cooldown 与反转全部不动。阈值只允许按预注册顺序在 2023H1/H2 选一次，2024 只验证，
+> 2025-01～2026-02 只能作为已看过的 final-preholdout 描述；已消费的 `>=2026-05-04` holdout
+> 不得读取、评分或调参。P0/P1 前不训练 LR/LightGBM，只落 Pine 可计算特征合同与 paper 结果。
+> 预注册：`experiments/active/exp-pine-eth-15m-dense-start-v1/preregistration.json`。
+
 > **注**(2026-07-20 更新):本文件是 07-07 定稿的路线图,按历史阅读。三阶段已全部走完:
 > 2b 验收通过(07-08)→ 阶段 3 v11 池 accept 回测通过(07-18,holdout 第 5 次消耗)→
 > **当前处于实盘阶段**(VPS 执行层 + 前向 100 笔新鲜裁决 + H-TIP v12 检测层实验)。
