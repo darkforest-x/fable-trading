@@ -1,0 +1,338 @@
+//@version=6
+// ALLIN ETH 15m V14R dense-release correction — fixed post-review paper hypothesis.
+// Paper only: V13 setup plus literal TR/distance release gates the full state transition.
+strategy(
+     "ALLIN ETH 15m V14R dense_l1 Paper",
+     overlay = true,
+     initial_capital = 500,
+     pyramiding = 0,
+     default_qty_type = strategy.fixed,
+     calc_on_every_tick = false,
+     calc_on_order_fills = false,
+     process_orders_on_close = false,
+     use_bar_magnifier = false,
+     commission_type = strategy.commission.percent,
+     commission_value = 0.10,
+     slippage = 0,
+     margin_long = 7.69,
+     margin_short = 7.69,
+     alert_message = "{{strategy.order.alert_message}}")
+
+// Fixed research contract. Only the bounded dates are inputs; changing any
+// constant below creates a different strategy version and invalidates V14R's
+// recorded selection history.
+string GROUP_SCOPE = "Research scope"
+int researchStart = input.time(timestamp("2023-01-01T00:00:00+00:00"), "Start (UTC)", group = GROUP_SCOPE)
+int researchEnd = input.time(timestamp("2026-03-01T00:00:00+00:00"), "End, exclusive (UTC)", group = GROUP_SCOPE)
+
+const int FAST_LEN = 10
+const int SLOW_LEN = 60
+const int REGIME_LEN = 100
+const int ATR_LEN = 14
+const float ATR_MULT = 4.0
+const float MAX_SL_PERCENT = 3.0
+const int OSC_BASIS_LEN = 40
+const int OSC_PERCENTILE_LEN = 200
+const float OSC_PERCENTILE = 99.0
+const int OSC_CHANGE_LAG = 10
+const int OSC_HMA_LEN = 10
+const float OSC_THRESHOLD = 0.1
+const int SLOW_SLOPE_LAG = 12
+const int DENSE_WINDOW = 12
+const int DENSE_ATR_RELEASE_WINDOW = 8
+const int DENSE_SLOPE_LAG = 3
+const int DENSE_MIN_PAIRWISE_CROSSES = 2
+const float DENSE_MAX_BANDWIDTH_ATR_MEAN = 3
+const int DENSE_MIN_CURRENT_ALIGNMENT = 6
+const int DENSE_MIN_PRE_CROSS_IMBALANCE = -1
+const float DENSE_MIN_SLOPE_COHERENCE = 0.6666666666666666
+const float DENSE_MIN_ATR_RELEASE_RATIO = 1
+const float DENSE_MIN_TRUE_RANGE_ATR_RATIO = 1.0
+const float DENSE_MIN_BREAKOUT_EXPANSION_ATR = 0.0
+const float MIN_ATR_PERCENT = 0.1
+const float MAX_ATR_PERCENT = 10.0
+const float RISK_PER_TRADE_PERCENT = 1.0
+const float MAX_LEVERAGE = 13.0
+const float BREAK_EVEN_TRIGGER_PERCENT = 1.5
+const float BREAK_EVEN_OFFSET_PERCENT = 0.1
+const float SKIP_THRESHOLD_PERCENT = 2.0
+const int SKIP_COUNT = 1
+const float BIG_SKIP_THRESHOLD_PERCENT = 20.0
+const int BIG_SKIP_COUNT = 7
+
+if barstate.isfirst
+    if timeframe.in_seconds() != 900
+        runtime.error("ALLIN ETH V14R is frozen to 15-minute bars.")
+    if syminfo.basecurrency != "ETH"
+        runtime.error("ALLIN ETH V14R requires an ETH-base instrument.")
+
+f_crossAnyEvent(float left, float right) =>
+    (ta.crossover(left, right) or ta.crossunder(left, right)) ? 1.0 : 0.0
+
+f_crossUpEvent(float fast, float slow) =>
+    ta.crossover(fast, slow) ? 1.0 : 0.0
+
+f_crossDownEvent(float fast, float slow) =>
+    ta.crossunder(fast, slow) ? 1.0 : 0.0
+
+float source = hl2
+float fastMa = ta.sma(source, FAST_LEN)
+float slowMa = ta.sma(source, SLOW_LEN)
+float regimeMa = ta.ema(close, REGIME_LEN)
+float ema200 = ta.ema(close, 200)
+float slowSlope12 = ema200 / ema200[SLOW_SLOPE_LAG] - 1.0
+float atr = ta.atr(ATR_LEN)
+float ropeSma20 = ta.sma(close, 20)
+float ropeEma20 = ta.ema(close, 20)
+float ropeSma60 = ta.sma(close, 60)
+float ropeEma60 = ta.ema(close, 60)
+float ropeSma120 = ta.sma(close, 120)
+float ropeEma120 = ta.ema(close, 120)
+float densePairwiseCrossEvents =
+     f_crossAnyEvent(ropeSma20, ropeEma20) +
+     f_crossAnyEvent(ropeSma20, ropeSma60) +
+     f_crossAnyEvent(ropeSma20, ropeEma60) +
+     f_crossAnyEvent(ropeSma20, ropeSma120) +
+     f_crossAnyEvent(ropeSma20, ropeEma120) +
+     f_crossAnyEvent(ropeEma20, ropeSma60) +
+     f_crossAnyEvent(ropeEma20, ropeEma60) +
+     f_crossAnyEvent(ropeEma20, ropeSma120) +
+     f_crossAnyEvent(ropeEma20, ropeEma120) +
+     f_crossAnyEvent(ropeSma60, ropeEma60) +
+     f_crossAnyEvent(ropeSma60, ropeSma120) +
+     f_crossAnyEvent(ropeSma60, ropeEma120) +
+     f_crossAnyEvent(ropeEma60, ropeSma120) +
+     f_crossAnyEvent(ropeEma60, ropeEma120) +
+     f_crossAnyEvent(ropeSma120, ropeEma120)
+float denseCrossUpEvents =
+     f_crossUpEvent(ropeSma20, ropeSma60) +
+     f_crossUpEvent(ropeSma20, ropeEma60) +
+     f_crossUpEvent(ropeEma20, ropeSma60) +
+     f_crossUpEvent(ropeEma20, ropeEma60) +
+     f_crossUpEvent(ropeSma20, ropeSma120) +
+     f_crossUpEvent(ropeSma20, ropeEma120) +
+     f_crossUpEvent(ropeEma20, ropeSma120) +
+     f_crossUpEvent(ropeEma20, ropeEma120) +
+     f_crossUpEvent(ropeSma60, ropeSma120) +
+     f_crossUpEvent(ropeSma60, ropeEma120) +
+     f_crossUpEvent(ropeEma60, ropeSma120) +
+     f_crossUpEvent(ropeEma60, ropeEma120)
+float denseCrossDownEvents =
+     f_crossDownEvent(ropeSma20, ropeSma60) +
+     f_crossDownEvent(ropeSma20, ropeEma60) +
+     f_crossDownEvent(ropeEma20, ropeSma60) +
+     f_crossDownEvent(ropeEma20, ropeEma60) +
+     f_crossDownEvent(ropeSma20, ropeSma120) +
+     f_crossDownEvent(ropeSma20, ropeEma120) +
+     f_crossDownEvent(ropeEma20, ropeSma120) +
+     f_crossDownEvent(ropeEma20, ropeEma120) +
+     f_crossDownEvent(ropeSma60, ropeSma120) +
+     f_crossDownEvent(ropeSma60, ropeEma120) +
+     f_crossDownEvent(ropeEma60, ropeSma120) +
+     f_crossDownEvent(ropeEma60, ropeEma120)
+// Formation excludes release bar t: source[1] makes the sum [t-12,t-1].
+float densePrePairwiseCrossCount = math.sum(densePairwiseCrossEvents[1], DENSE_WINDOW)
+float densePreCrossUpCount = math.sum(denseCrossUpEvents[1], DENSE_WINDOW)
+float densePreCrossDownCount = math.sum(denseCrossDownEvents[1], DENSE_WINDOW)
+float denseRopeUpper = math.max(math.max(math.max(ropeSma20, ropeEma20), math.max(ropeSma60, ropeEma60)), math.max(ropeSma120, ropeEma120))
+float denseRopeLower = math.min(math.min(math.min(ropeSma20, ropeEma20), math.min(ropeSma60, ropeEma60)), math.min(ropeSma120, ropeEma120))
+float denseBandwidthAtr = (denseRopeUpper - denseRopeLower) / atr
+float densePreBandwidthAtrMean = math.sum(denseBandwidthAtr[1], DENSE_WINDOW) / DENSE_WINDOW
+float denseLongAlignment =
+     (ropeSma20 >= ropeSma60 ? 1.0 : 0.0) +
+     (ropeSma20 >= ropeEma60 ? 1.0 : 0.0) +
+     (ropeEma20 >= ropeSma60 ? 1.0 : 0.0) +
+     (ropeEma20 >= ropeEma60 ? 1.0 : 0.0) +
+     (ropeSma20 >= ropeSma120 ? 1.0 : 0.0) +
+     (ropeSma20 >= ropeEma120 ? 1.0 : 0.0) +
+     (ropeEma20 >= ropeSma120 ? 1.0 : 0.0) +
+     (ropeEma20 >= ropeEma120 ? 1.0 : 0.0) +
+     (ropeSma60 >= ropeSma120 ? 1.0 : 0.0) +
+     (ropeSma60 >= ropeEma120 ? 1.0 : 0.0) +
+     (ropeEma60 >= ropeSma120 ? 1.0 : 0.0) +
+     (ropeEma60 >= ropeEma120 ? 1.0 : 0.0)
+float denseShortAlignment =
+     (ropeSma20 <= ropeSma60 ? 1.0 : 0.0) +
+     (ropeSma20 <= ropeEma60 ? 1.0 : 0.0) +
+     (ropeEma20 <= ropeSma60 ? 1.0 : 0.0) +
+     (ropeEma20 <= ropeEma60 ? 1.0 : 0.0) +
+     (ropeSma20 <= ropeSma120 ? 1.0 : 0.0) +
+     (ropeSma20 <= ropeEma120 ? 1.0 : 0.0) +
+     (ropeEma20 <= ropeSma120 ? 1.0 : 0.0) +
+     (ropeEma20 <= ropeEma120 ? 1.0 : 0.0) +
+     (ropeSma60 <= ropeSma120 ? 1.0 : 0.0) +
+     (ropeSma60 <= ropeEma120 ? 1.0 : 0.0) +
+     (ropeEma60 <= ropeSma120 ? 1.0 : 0.0) +
+     (ropeEma60 <= ropeEma120 ? 1.0 : 0.0)
+float ropeSma20SlopeAtr = (ropeSma20 - ropeSma20[DENSE_SLOPE_LAG]) / atr / DENSE_SLOPE_LAG
+float ropeEma20SlopeAtr = (ropeEma20 - ropeEma20[DENSE_SLOPE_LAG]) / atr / DENSE_SLOPE_LAG
+float ropeSma60SlopeAtr = (ropeSma60 - ropeSma60[DENSE_SLOPE_LAG]) / atr / DENSE_SLOPE_LAG
+float ropeEma60SlopeAtr = (ropeEma60 - ropeEma60[DENSE_SLOPE_LAG]) / atr / DENSE_SLOPE_LAG
+float ropeSma120SlopeAtr = (ropeSma120 - ropeSma120[DENSE_SLOPE_LAG]) / atr / DENSE_SLOPE_LAG
+float ropeEma120SlopeAtr = (ropeEma120 - ropeEma120[DENSE_SLOPE_LAG]) / atr / DENSE_SLOPE_LAG
+float denseLongSlopeCoherence = (
+     (ropeSma20SlopeAtr > 0.0 ? 1.0 : 0.0) +
+     (ropeEma20SlopeAtr > 0.0 ? 1.0 : 0.0) +
+     (ropeSma60SlopeAtr > 0.0 ? 1.0 : 0.0) +
+     (ropeEma60SlopeAtr > 0.0 ? 1.0 : 0.0) +
+     (ropeSma120SlopeAtr > 0.0 ? 1.0 : 0.0) +
+     (ropeEma120SlopeAtr > 0.0 ? 1.0 : 0.0)
+     ) / 6.0
+float denseShortSlopeCoherence = (
+     (ropeSma20SlopeAtr < 0.0 ? 1.0 : 0.0) +
+     (ropeEma20SlopeAtr < 0.0 ? 1.0 : 0.0) +
+     (ropeSma60SlopeAtr < 0.0 ? 1.0 : 0.0) +
+     (ropeEma60SlopeAtr < 0.0 ? 1.0 : 0.0) +
+     (ropeSma120SlopeAtr < 0.0 ? 1.0 : 0.0) +
+     (ropeEma120SlopeAtr < 0.0 ? 1.0 : 0.0)
+     ) / 6.0
+float denseLongMeanSlopeAtr = (ropeSma20SlopeAtr + ropeEma20SlopeAtr + ropeSma60SlopeAtr + ropeEma60SlopeAtr + ropeSma120SlopeAtr + ropeEma120SlopeAtr) / 6.0
+float denseShortMeanSlopeAtr = -denseLongMeanSlopeAtr
+float denseAtrReleaseRatio = atr / (math.sum(atr[1], DENSE_ATR_RELEASE_WINDOW) / DENSE_ATR_RELEASE_WINDOW)
+float denseTrueRange = math.max(high - low, math.max(math.abs(high - close[1]), math.abs(low - close[1])))
+float denseTrueRangeAtrRatio = denseTrueRange / atr[1]
+float denseLongBreakoutDistanceAtr = (close - denseRopeUpper) / atr
+float denseShortBreakoutDistanceAtr = (denseRopeLower - close) / atr
+float densePriorLongDistanceAtr = (close[1] - denseRopeUpper[1]) / atr[1]
+float densePriorShortDistanceAtr = (denseRopeLower[1] - close[1]) / atr[1]
+float denseLongBreakoutExpansionAtr = denseLongBreakoutDistanceAtr - densePriorLongDistanceAtr
+float denseShortBreakoutExpansionAtr = denseShortBreakoutDistanceAtr - densePriorShortDistanceAtr
+float denseLongCrossImbalance = densePreCrossUpCount - densePreCrossDownCount
+float denseShortCrossImbalance = -denseLongCrossImbalance
+bool denseReady = not na(ropeSma120) and not na(ropeEma120) and not na(densePrePairwiseCrossCount) and not na(densePreBandwidthAtrMean) and not na(denseAtrReleaseRatio) and not na(denseLongMeanSlopeAtr)
+// Literal confirmed-bar release: true range expands and price moves farther outside the rope.
+bool denseLongRelease = close > denseRopeUpper and denseLongMeanSlopeAtr > 0.0 and denseLongSlopeCoherence >= DENSE_MIN_SLOPE_COHERENCE and denseTrueRangeAtrRatio >= DENSE_MIN_TRUE_RANGE_ATR_RATIO and denseLongBreakoutExpansionAtr > DENSE_MIN_BREAKOUT_EXPANSION_ATR
+bool denseShortRelease = close < denseRopeLower and denseShortMeanSlopeAtr > 0.0 and denseShortSlopeCoherence >= DENSE_MIN_SLOPE_COHERENCE and denseTrueRangeAtrRatio >= DENSE_MIN_TRUE_RANGE_ATR_RATIO and denseShortBreakoutExpansionAtr > DENSE_MIN_BREAKOUT_EXPANSION_ATR
+bool denseLongPass = denseReady and densePrePairwiseCrossCount >= DENSE_MIN_PAIRWISE_CROSSES and densePreBandwidthAtrMean <= DENSE_MAX_BANDWIDTH_ATR_MEAN and denseLongAlignment >= DENSE_MIN_CURRENT_ALIGNMENT and denseLongCrossImbalance >= DENSE_MIN_PRE_CROSS_IMBALANCE and denseLongRelease
+bool denseShortPass = denseReady and densePrePairwiseCrossCount >= DENSE_MIN_PAIRWISE_CROSSES and densePreBandwidthAtrMean <= DENSE_MAX_BANDWIDTH_ATR_MEAN and denseShortAlignment >= DENSE_MIN_CURRENT_ALIGNMENT and denseShortCrossImbalance >= DENSE_MIN_PRE_CROSS_IMBALANCE and denseShortRelease
+// Selected preregistered profile: dense_l1.
+
+float oscillatorBasis = ta.sma(source, OSC_BASIS_LEN)
+float difference = source - oscillatorBasis
+float percentile99 = ta.percentile_linear_interpolation(difference, OSC_PERCENTILE_LEN, OSC_PERCENTILE)
+bool percentileSafe = not na(percentile99) and percentile99 > 0.0
+float ratio = percentileSafe ? difference / percentile99 : 0.0
+float changeRatio = ratio - ratio[OSC_CHANGE_LAG]
+float oscillator = ta.hma(changeRatio, OSC_HMA_LEN)
+
+bool crossUp = ta.crossover(fastMa, slowMa)
+bool crossDown = ta.crossunder(fastMa, slowMa)
+bool oscillatorRising = oscillator > OSC_THRESHOLD and oscillator > oscillator[1]
+bool oscillatorFalling = oscillator < -OSC_THRESHOLD and oscillator < oscillator[1]
+bool rawLong = percentileSafe and crossUp and close > slowMa and close > regimeMa and slowSlope12 > 0.0 and oscillatorRising
+bool rawShort = percentileSafe and crossDown and close < slowMa and close < regimeMa and slowSlope12 < 0.0 and oscillatorFalling
+
+f_inWindow(int value, int startValue, int endValue) =>
+    startValue == endValue ? false :
+     startValue < endValue ? value >= startValue and value < endValue :
+     value >= startValue or value < endValue
+
+int hourHk = hour(time, "Asia/Hong_Kong")
+int weekdayHk = dayofweek(time, "Asia/Hong_Kong")
+bool timeAllowed = not f_inWindow(hourHk, 21, 23)
+bool dayAllowed = weekdayHk != dayofweek.sunday
+float atrPercent = atr / close * 100.0
+bool volatilityAllowed = atrPercent >= MIN_ATR_PERCENT and atrPercent <= MAX_ATR_PERCENT
+bool dateAllowed = time >= researchStart and time_close < researchEnd
+
+// `profit_percent()` is used so the cooldown contract is percentage-based and
+// follows the broker emulator's closed-trade accounting instead of reconstructing
+// notional from a potentially reversed order.
+var int tradesToSkip = 0
+bool justClosed = strategy.closedtrades > nz(strategy.closedtrades[1])
+if justClosed
+    int tradeIndex = strategy.closedtrades - 1
+    float tradeReturnPercent = strategy.closedtrades.profit_percent(tradeIndex)
+    if tradeReturnPercent > BIG_SKIP_THRESHOLD_PERCENT
+        tradesToSkip := BIG_SKIP_COUNT
+    else if tradeReturnPercent > SKIP_THRESHOLD_PERCENT
+        tradesToSkip := SKIP_COUNT
+
+// Match V12F full-state semantics: a guarded rejection neither reverses
+// nor consumes cooldown; out-of-guard raw signals preserve V9 state.
+bool gateCandidateEligible = dateAllowed and timeAllowed and dayAllowed and volatilityAllowed
+bool gatedRawLong = rawLong and (not gateCandidateEligible or denseLongPass)
+bool gatedRawShort = rawShort and (not gateCandidateEligible or denseShortPass)
+bool rawSignal = gatedRawLong or gatedRawShort
+bool skippedSignal = rawSignal and tradesToSkip > 0
+if skippedSignal
+    tradesToSkip -= 1
+
+bool commonAllowed = barstate.isconfirmed and dateAllowed and timeAllowed and dayAllowed and volatilityAllowed and not skippedSignal
+bool longSignal = gatedRawLong and commonAllowed
+bool shortSignal = gatedRawShort and commonAllowed
+
+float signalStopDistance = math.min(atr * ATR_MULT, close * MAX_SL_PERCENT / 100.0)
+int signalStopTicks = math.max(1, int(math.round(signalStopDistance / syminfo.mintick)))
+float stopFraction = signalStopDistance / close
+float targetLeverage = stopFraction > 0.0 ? math.min(RISK_PER_TRADE_PERCENT / 100.0 / stopFraction, MAX_LEVERAGE) : 0.0
+float targetQuantity = strategy.equity > 0.0 and close > 0.0 ? strategy.equity * targetLeverage / close : 0.0
+
+string longEntryAlert = "PAPER ONLY | ALLIN ETH 15m V14R | OPEN LONG | {{ticker}} | {{strategy.order.price}}"
+string shortEntryAlert = "PAPER ONLY | ALLIN ETH 15m V14R | OPEN SHORT | {{ticker}} | {{strategy.order.price}}"
+string longExitAlert = "PAPER ONLY | ALLIN ETH 15m V14R | CLOSE LONG | {{ticker}} | {{strategy.order.price}}"
+string shortExitAlert = "PAPER ONLY | ALLIN ETH 15m V14R | CLOSE SHORT | {{ticker}} | {{strategy.order.price}}"
+
+var int pendingLongStopTicks = na
+var int pendingShortStopTicks = na
+if longSignal and strategy.position_size <= 0.0 and targetQuantity > 0.0
+    pendingLongStopTicks := signalStopTicks
+    strategy.entry("Long", strategy.long, qty = targetQuantity, comment = "V14R confirmed long", alert_message = longEntryAlert)
+    strategy.exit("Exit Long", "Long", loss = signalStopTicks, comment = "Initial stop", alert_message = longExitAlert)
+
+if shortSignal and strategy.position_size >= 0.0 and targetQuantity > 0.0
+    pendingShortStopTicks := signalStopTicks
+    strategy.entry("Short", strategy.short, qty = targetQuantity, comment = "V14R confirmed short", alert_message = shortEntryAlert)
+    strategy.exit("Exit Short", "Short", loss = signalStopTicks, comment = "Initial stop", alert_message = shortExitAlert)
+
+bool newLongPosition = strategy.position_size > 0.0 and nz(strategy.position_size[1]) <= 0.0
+bool newShortPosition = strategy.position_size < 0.0 and nz(strategy.position_size[1]) >= 0.0
+var float stopPrice = na
+if newLongPosition
+    stopPrice := strategy.position_avg_price - nz(pendingLongStopTicks, signalStopTicks) * syminfo.mintick
+if newShortPosition
+    stopPrice := strategy.position_avg_price + nz(pendingShortStopTicks, signalStopTicks) * syminfo.mintick
+if strategy.position_size == 0.0 and nz(strategy.position_size[1]) != 0.0
+    stopPrice := na
+
+if strategy.position_size > 0.0 and not na(stopPrice)
+    float entryPrice = strategy.position_avg_price
+    if high >= entryPrice * (1.0 + BREAK_EVEN_TRIGGER_PERCENT / 100.0)
+        stopPrice := math.max(stopPrice, entryPrice * (1.0 + BREAK_EVEN_OFFSET_PERCENT / 100.0))
+    strategy.exit("Exit Long", "Long", stop = stopPrice, comment = "Managed stop", alert_message = longExitAlert)
+
+if strategy.position_size < 0.0 and not na(stopPrice)
+    float entryPrice = strategy.position_avg_price
+    if low <= entryPrice * (1.0 - BREAK_EVEN_TRIGGER_PERCENT / 100.0)
+        stopPrice := math.min(stopPrice, entryPrice * (1.0 - BREAK_EVEN_OFFSET_PERCENT / 100.0))
+    strategy.exit("Exit Short", "Short", stop = stopPrice, comment = "Managed stop", alert_message = shortExitAlert)
+
+bool finalResearchBar = time < researchEnd and time_close >= researchEnd
+if barstate.isconfirmed and finalResearchBar and strategy.position_size != 0.0
+    strategy.close_all(comment = "Research end", alert_message = "PAPER ONLY | V14R | PERIOD END", immediately = true)
+
+color longColor = #2563EB
+color shortColor = #D97706
+plot(regimeMa, "EMA100 regime", color = color.new(#64748B, 35))
+plot(ema200, "EMA200 judgment direction", color = color.new(#6B8E23, 45))
+fastPlot = plot(fastMa, "SMA10", color = color.new(longColor, 65), display = display.none)
+slowPlot = plot(slowMa, "SMA60", color = color.new(shortColor, 65), display = display.none)
+fill(fastPlot, slowPlot, color = color.new(fastMa >= slowMa ? longColor : shortColor, 88), title = "SMA cloud")
+plot(strategy.position_size != 0.0 ? stopPrice : na, "Managed stop", color = shortColor, style = plot.style_linebr)
+plotshape(longSignal, "V14R long", shape.triangleup, location.belowbar, longColor, size = size.tiny, text = "L")
+plotshape(shortSignal, "V14R short", shape.triangledown, location.abovebar, shortColor, size = size.tiny, text = "S")
+
+var table hud = table.new(position.bottom_right, 2, 6, bgcolor = color.new(#FFFFFF, 8), frame_color = #CBD5E1, frame_width = 1)
+if barstate.islast
+    table.cell(hud, 0, 0, "Contract")
+    table.cell(hud, 1, 0, "ETH · 15m · V14R")
+    table.cell(hud, 0, 1, "Ticker")
+    table.cell(hud, 1, 1, syminfo.tickerid)
+    table.cell(hud, 0, 2, "Risk")
+    table.cell(hud, 1, 2, "1.0%")
+    table.cell(hud, 0, 3, "Target lev")
+    table.cell(hud, 1, 3, str.tostring(targetLeverage, "#.##") + "x")
+    table.cell(hud, 0, 4, "Cooldown")
+    table.cell(hud, 1, 4, str.tostring(tradesToSkip))
+    table.cell(hud, 0, 5, "Status")
+    table.cell(hud, 1, 5, "PAPER DENSE DENSE_L1 / PARITY REQUIRED", text_color = #C2417A)
