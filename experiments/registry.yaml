@@ -860,6 +860,10 @@ experiments:
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p0_pine_eth_15m_forward_lr_contract_20260821.md
+    artifacts:
+      - pine-eth-15m-forward-v2-protocol
+      - pine-eth-15m-forward-lr-contract-report
+      - pine-eth-15m-forward-lr-contract-html
     reuse_allowed: false
     notes: >-
       Builder and fail-closed tests landed before protocol artifact generation.
@@ -890,6 +894,10 @@ experiments:
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p0_pine_eth_15m_forward_lr_contract_20260821.md
+    artifacts:
+      - pine-eth-15m-state-lr-contract
+      - pine-eth-15m-forward-lr-contract-report
+      - pine-eth-15m-forward-lr-contract-html
     reuse_allowed: false
     notes: >-
       The rejected path-efficiency feature is explicitly forbidden. A future

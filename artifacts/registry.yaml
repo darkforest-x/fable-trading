@@ -1274,3 +1274,73 @@ artifacts:
     generator_commit: "809ec18996f1eae10fd84d184b713906e8212d62"
     config_hash: "1eaef0b5b62a263f002beba0ea24649058fb5bb8d5f825949225dde386b27092"
     data_cutoff: "2025-01-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-forward-v2-protocol
+    artifact_type: manifest
+    role: blocked_prospective_shadow_protocol
+    source_repo: darkforest-x/fable-trading
+    source_commit: "696a64ea857102227cc6928c16832d9fe9a0df5f"
+    source_path: experiments/active/exp-pine-eth-15m-forward-v2/results/paper_forward_protocol_v2.json
+    sha256: "946ac34aa51698296b5aef8a429311ea78574a490bd60626cf7a6cdbf51b3239"
+    size_bytes: 7401
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-forward-v2/results/paper_forward_protocol_v2.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5ea3823a89facf277ed9df046713626688caa29f"
+    config_hash: "946ac34aa51698296b5aef8a429311ea78574a490bd60626cf7a6cdbf51b3239"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: >-
+      Frozen V9/V12F interface only. The artifact records 207 compact ledger
+      identities, zero market bars and zero holdout rows; all forward gates are
+      closed and no collection or order was started.
+
+  - artifact_id: pine-eth-15m-state-lr-contract
+    artifact_type: config
+    role: blocked_state_aware_judgment_interface
+    source_repo: darkforest-x/fable-trading
+    source_commit: "696a64ea857102227cc6928c16832d9fe9a0df5f"
+    source_path: experiments/active/exp-pine-eth-15m-state-lr-contract-v1/results/state_aware_lr_contract_v1.json
+    sha256: "21d48446a9d056aaad6154b94b45f25e7cc5976bba2675505b78a4449d605f88"
+    size_bytes: 7203
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-state-lr-contract-v1/results/state_aware_lr_contract_v1.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d63542af59613c5b78ad025c14888ade8080c8ab"
+    config_hash: "21d48446a9d056aaad6154b94b45f25e7cc5976bba2675505b78a4449d605f88"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: >-
+      Interface only: 335 raw candidates, no materialized labels, no fitted
+      model and no selected threshold. Online policy state must be recomputed
+      inside each future dynamic replay.
+
+  - artifact_id: pine-eth-15m-forward-lr-contract-report
+    artifact_type: report
+    role: canonical_blocked_forward_and_lr_contract_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "696a64ea857102227cc6928c16832d9fe9a0df5f"
+    source_path: analysis/p0_pine_eth_15m_forward_lr_contract_20260821.md
+    sha256: "1293d47d69df6cedbf17cfcf388f442586ae2e83bb280339120fb76a8759fc77"
+    size_bytes: 12161
+    storage_uri: "repo://analysis/p0_pine_eth_15m_forward_lr_contract_20260821.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "696a64ea857102227cc6928c16832d9fe9a0df5f"
+    data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-forward-lr-contract-html
+    artifact_type: report
+    role: owner_facing_blocked_forward_and_lr_contract_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "696a64ea857102227cc6928c16832d9fe9a0df5f"
+    source_path: analysis/html/p0_pine_eth_15m_forward_lr_contract_20260821.html
+    sha256: "a5c950ae39172d028524815cf665d9228038294438643cc7cc4fc2e2ebdb198c"
+    size_bytes: 16702
+    storage_uri: "repo://analysis/html/p0_pine_eth_15m_forward_lr_contract_20260821.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "696a64ea857102227cc6928c16832d9fe9a0df5f"
+    data_cutoff: "2026-03-01T00:00:00Z"
