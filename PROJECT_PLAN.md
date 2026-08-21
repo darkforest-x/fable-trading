@@ -7,6 +7,13 @@
 > 不得读取、评分或调参。P0/P1 前不训练 LR/LightGBM，只落 Pine 可计算特征合同与 paper 结果。
 > 预注册：`experiments/active/exp-pine-eth-15m-dense-start-v1/preregistration.json`。
 
+> **V14 单变量释放修正（2026-08-21）**：V13 首轮明确失败后，仅把释放确认由
+> `ATR[t] / prior-ATR-mean OR slope-coherence` 收紧为已在结果前由 Luna Max 独立复核提出的
+> `TR[t] / ATR[t-1] >= 1 AND side breakout distance expands`；V13 选中的 `dense_l1` 密集、压缩、
+> 方向阈值以及全部执行/风险参数保持不变，不做新的阈值搜索。由于 2024 与 final-preholdout 已被
+> 分析者看过，V14 只能称为 analyst-exposed robustness evidence，不能称 unseen OOS。
+> 预注册：`experiments/active/exp-pine-eth-15m-dense-release-v2/preregistration.json`。
+
 > **注**(2026-07-20 更新):本文件是 07-07 定稿的路线图,按历史阅读。三阶段已全部走完:
 > 2b 验收通过(07-08)→ 阶段 3 v11 池 accept 回测通过(07-18,holdout 第 5 次消耗)→
 > **当前处于实盘阶段**(VPS 执行层 + 前向 100 笔新鲜裁决 + H-TIP v12 检测层实验)。

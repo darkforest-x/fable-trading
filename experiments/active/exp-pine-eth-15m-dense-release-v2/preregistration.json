@@ -1,0 +1,67 @@
+{
+  "artifact": "ETH 15m V14 dense-release correction preregistration",
+  "experiment_id": "exp-pine-eth-15m-dense-release-v2",
+  "created_at": "2026-08-21T19:35:00+08:00",
+  "source_builder_commit": "de37f92",
+  "owner_authority": "Owner's 2026-08-21 '去做啊' authorizes continued optimization of the approved dense -> compression -> direction -> release composite. It does not authorize holdout access, barrier changes, training, promotion or live trading.",
+  "independent_pre_outcome_basis": {
+    "thread_id": "01a02379-1c18-78a0-990b-9219510e65d0",
+    "model_and_effort": "gpt-5.6-luna, thinking=max",
+    "review_completed_before_v13_replay": true,
+    "recommendation": "Release must use confirmed price breakout plus current true range / prior ATR; current ATR / trailing mean alone is too weak. The prior-vs-current rope distance prevents an MA-only apparent crossing."
+  },
+  "exposure_warning": "V13 outcomes for 2023, 2024 and final-preholdout were observed before V14 execution. V14 thresholds are fixed from the pre-outcome independent formula and feature units, not selected from V14 outcomes, but all V14 results remain analyst-exposed robustness evidence rather than unseen OOS.",
+  "scope": {
+    "instrument": "OKX ETH-USDT-SWAP research proxy",
+    "bar_minutes": 15,
+    "safe_end_exclusive": "2026-03-01T00:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_rows_allowed": 0,
+    "round_trip_cost": 0.002
+  },
+  "single_changed_variable": {
+    "baseline": "selected V13 dense_l1 full-state gate",
+    "candidate": "V14R full-state gate with literal release-bar expansion",
+    "unchanged": [
+      "V9 raw signal and full-state integration",
+      "density window 12 and minimum 2 all-pair flips",
+      "mean bandwidth/ATR maximum 3.0",
+      "current alignment minimum 6/12",
+      "pre directional imbalance minimum -1",
+      "six-MA side slope coherence minimum 2/3",
+      "SMA/EMA 20/60/120 bundle",
+      "ATR14 x4 initial stop capped at 3 percent",
+      "1.5 percent break-even trigger and 0.1 percent offset",
+      "1 percent risk, 13x cap, cooldown, reversal and 20bp cost"
+    ]
+  },
+  "release_v2": {
+    "true_range": "max(high[t]-low[t], abs(high[t]-close[t-1]), abs(low[t]-close[t-1]))",
+    "true_range_atr_ratio": "true_range[t] / ATR14[t-1]",
+    "minimum_true_range_atr_ratio": 1.0,
+    "long_distance": "(close[t]-rope_upper[t]) / ATR14[t]",
+    "short_distance": "(rope_lower[t]-close[t]) / ATR14[t]",
+    "distance_expansion": "side_distance[t] - side_distance[t-1]",
+    "minimum_distance_expansion_atr": 0.0,
+    "boolean": "V13_dense_l1 AND side_slope_coherence >= 2/3 AND true_range_atr_ratio >= 1.0 AND distance_expansion > 0",
+    "decision_bar": "completed t",
+    "entry_bar": "t+1 open",
+    "future_feature_bars": 0
+  },
+  "selection_contract": {
+    "profile_or_threshold_search": false,
+    "fixed_before_any_v14_outcome": true,
+    "no_2024_or_final_preholdout_selection": true,
+    "no_repository_holdout_evaluation": true
+  },
+  "acceptance": {
+    "mechanism": "early-stop rate must fall versus V13 in every primary period without removing all multi-day winners",
+    "economics": "net return, matched-control excess and top-decile net must be positive in every primary period; ranking p must be <0.01 for a ranking claim",
+    "honest_default": "failure leaves V14 rejected and V12F remains the best paper comparator, not production"
+  },
+  "eligibility": {
+    "training_eligible": false,
+    "forward_eligible": false,
+    "production_eligible": false
+  }
+}
