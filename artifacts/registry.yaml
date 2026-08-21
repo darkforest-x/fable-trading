@@ -224,6 +224,25 @@ artifacts:
       pool. An independent 390-label countercheck fails as an automatic gate
       (AUC 0.489, permutation p=0.635), so no tier may auto-keep or auto-delete.
 
+  - artifact_id: pine-allin-v7-preholdout-report-v1
+    artifact_type: report
+    role: preholdout_strategy_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "24630a358fb3d651977981c68227d86570fc2d35"
+    source_path: analysis/p0_pine_allin_v7_preholdout_20260820.md
+    sha256: "12beaab07ccf080ad12c47775aca429252fd9ddc6cc613cd69003c95dac02b66"
+    size_bytes: 18173
+    storage_uri: "repo://analysis/p0_pine_allin_v7_preholdout_20260820.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: >-
+      User-supplied Pine V7.2 static audit plus a causal 54-symbol pre-holdout
+      replay. The strategy's economic hypothesis is rejected; the 2% risk
+      budget is accepted only as a research drawdown overlay. The source commit
+      contains both the Markdown and browser-ready HTML delivery.
+
   - artifact_id: yoyo-trading-dataset-v3-gold-core
     artifact_type: annotation_set
     role: gold_labels
@@ -363,3 +382,215 @@ artifacts:
       verifier passes; some generated result tables remain local/ignored by
       repository policy and are not claimed portable without regeneration. It
       records holdout_safe=false and the unapproved byte-access incident.
+
+  # ---- owner-approved ETH 15m V12F holdout consumption #1 -----------------
+  - artifact_id: pine-eth-15m-v12f-holdout1-report
+    artifact_type: report
+    role: canonical_holdout_verdict
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d602d5d61ce616f5fc56bd906e22ef550259e566"
+    source_path: analysis/p0_pine_eth_15m_v12f_holdout1_recent6m_20260821.md
+    sha256: "5fd2ac811768ba789955f814a7cacc6f8fadf58499e8ae641b4c6293549a44c1"
+    size_bytes: 17197
+    storage_uri: "repo://analysis/p0_pine_eth_15m_v12f_holdout1_recent6m_20260821.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d602d5d61ce616f5fc56bd906e22ef550259e566"
+    config_hash: "97cb40d4b8dfd792771f000fbd0356922dac9c136e45b79219e85548f1b42eb4"
+    data_cutoff: "2026-08-21T00:00:00Z"
+    notes: >-
+      Canonical verdict for owner-approved V12F holdout consumption #1. Full
+      recent-six-month return is -3.46%; protected fresh-start is +15.77%, but
+      matched-control p=0.2566 and ranking p=0.1838 fail the strict p<0.01 gate.
+
+  - artifact_id: pine-eth-15m-v12f-holdout1-html
+    artifact_type: report
+    role: owner_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d602d5d61ce616f5fc56bd906e22ef550259e566"
+    source_path: analysis/html/p0_pine_eth_15m_v12f_holdout1_recent6m_20260821.html
+    sha256: "fbdb834be30adbeb5b9a9d5e33ac2fa25bd953295b5f66623115b35f28a80393"
+    size_bytes: 220884
+    storage_uri: "repo://analysis/html/p0_pine_eth_15m_v12f_holdout1_recent6m_20260821.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d602d5d61ce616f5fc56bd906e22ef550259e566"
+    config_hash: "97cb40d4b8dfd792771f000fbd0356922dac9c136e45b79219e85548f1b42eb4"
+    data_cutoff: "2026-08-21T00:00:00Z"
+    notes: Browser-ready rendering of the canonical Markdown verdict.
+
+  - artifact_id: pine-eth-15m-v12f-holdout1-ledger
+    artifact_type: manifest
+    role: atomic_holdout_consumption_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d602d5d61ce616f5fc56bd906e22ef550259e566"
+    source_path: experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_consumption.json
+    sha256: "1f20d1ae78bcbb0606d69768fcf5d7b3f83192f977b470c5b20919618974f04e"
+    size_bytes: 2483
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_consumption.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7b859dabe07f27c1e1f2523c4652622b975f381d"
+    config_hash: "97cb40d4b8dfd792771f000fbd0356922dac9c136e45b79219e85548f1b42eb4"
+    data_cutoff: "2026-08-21T00:00:00Z"
+    notes: >-
+      Atomic O_EXCL ledger for completed consumption #1; records the bounded
+      source hash and all nine material output hashes. Reverification must use
+      --verify-existing without reopening holdout.
+
+  - artifact_id: pine-eth-15m-v12f-holdout1-config
+    artifact_type: config
+    role: frozen_holdout_configuration
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d602d5d61ce616f5fc56bd906e22ef550259e566"
+    source_path: experiments/active/exp-pine-eth-15m-v1/v12f_holdout1_config.json
+    sha256: "cd7c7a84d5e85af20ad122b6f24f30e6e1c2fa5a34718f6164a2ab42546a2abb"
+    size_bytes: 3616
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-v1/v12f_holdout1_config.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7b859dabe07f27c1e1f2523c4652622b975f381d"
+    config_hash: "97cb40d4b8dfd792771f000fbd0356922dac9c136e45b79219e85548f1b42eb4"
+    data_cutoff: "2026-08-21T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v12f-holdout1-summary
+    artifact_type: manifest
+    role: holdout_result_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d602d5d61ce616f5fc56bd906e22ef550259e566"
+    source_path: experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_summary.json
+    sha256: "3b727e1ae61a3cbd8931c4e884c0d243857d3e4cc5e8c973ab0fa89ba86e5676"
+    size_bytes: 23246
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7b859dabe07f27c1e1f2523c4652622b975f381d"
+    config_hash: "97cb40d4b8dfd792771f000fbd0356922dac9c136e45b79219e85548f1b42eb4"
+    data_cutoff: "2026-08-21T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v12f-holdout1-trades
+    artifact_type: dataset
+    role: versioned_trade_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d602d5d61ce616f5fc56bd906e22ef550259e566"
+    source_path: experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_trades.csv
+    sha256: "8e8da9dbbcf6a2c3920c6ba2fc5ff1bf193a04b311309b28a2416cf7f066514b"
+    size_bytes: 91276
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_trades.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7b859dabe07f27c1e1f2523c4652622b975f381d"
+    config_hash: "97cb40d4b8dfd792771f000fbd0356922dac9c136e45b79219e85548f1b42eb4"
+    data_cutoff: "2026-08-21T00:00:00Z"
+    notes: >-
+      182 versioned rows: full-window V9 61 + V12F 58 and independent protected
+      fresh-start V9 33 + V12F 30. The 119 full-window rows populate Notion.
+
+  - artifact_id: pine-eth-15m-v12f-holdout1-controls
+    artifact_type: dataset
+    role: matched_random_controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d602d5d61ce616f5fc56bd906e22ef550259e566"
+    source_path: experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_controls.csv
+    sha256: "295165c3b3cbf75e4f040949374b796381d5137d29b3a653d4c96166fef536d6"
+    size_bytes: 185538
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_controls.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7b859dabe07f27c1e1f2523c4652622b975f381d"
+    config_hash: "97cb40d4b8dfd792771f000fbd0356922dac9c136e45b79219e85548f1b42eb4"
+    data_cutoff: "2026-08-21T00:00:00Z"
+    notes: 546 rows, exactly three anchor controls per versioned trade.
+
+  - artifact_id: pine-eth-15m-v12f-holdout1-pairs
+    artifact_type: dataset
+    role: candidate_control_pairs
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d602d5d61ce616f5fc56bd906e22ef550259e566"
+    source_path: experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_pairs.csv
+    sha256: "9638bae9a40e9ffc408571298fe4b6dd28351e7c9cfb7784adb1109bfab86238"
+    size_bytes: 42301
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_pairs.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7b859dabe07f27c1e1f2523c4652622b975f381d"
+    config_hash: "97cb40d4b8dfd792771f000fbd0356922dac9c136e45b79219e85548f1b42eb4"
+    data_cutoff: "2026-08-21T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v12f-holdout1-control-sensitivity
+    artifact_type: dataset
+    role: matched_control_assignment_sensitivity
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d602d5d61ce616f5fc56bd906e22ef550259e566"
+    source_path: experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_control_sensitivity.csv
+    sha256: "10ed05a5812bd6d346f201e5d8ad18b5658b80957bf6836e821ddf15437d2bb3"
+    size_bytes: 20332
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_control_sensitivity.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7b859dabe07f27c1e1f2523c4652622b975f381d"
+    config_hash: "97cb40d4b8dfd792771f000fbd0356922dac9c136e45b79219e85548f1b42eb4"
+    data_cutoff: "2026-08-21T00:00:00Z"
+    notes: "128 rows: four arm-period groups times 32 preregistered seeds."
+
+  - artifact_id: pine-eth-15m-v12f-holdout1-monthly
+    artifact_type: dataset
+    role: monthly_return_decomposition
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d602d5d61ce616f5fc56bd906e22ef550259e566"
+    source_path: experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_monthly.csv
+    sha256: "05ffea23b11918914cf05d510d873013d5dfc8224bf797ca3a5cb12683aac7c9"
+    size_bytes: 2194
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_monthly.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7b859dabe07f27c1e1f2523c4652622b975f381d"
+    config_hash: "97cb40d4b8dfd792771f000fbd0356922dac9c136e45b79219e85548f1b42eb4"
+    data_cutoff: "2026-08-21T00:00:00Z"
+
+  - artifact_id: pine-eth-15m-v12f-holdout1-equity
+    artifact_type: dataset
+    role: marked_equity_path
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d602d5d61ce616f5fc56bd906e22ef550259e566"
+    source_path: experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_equity.csv
+    sha256: "3d842bfddd2fbfb4ed8af57bc427b68228084f3d5fcf22e8df3444b35d0f32cc"
+    size_bytes: 6883227
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-v1/results/v12f_holdout1_recent6m_equity.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7b859dabe07f27c1e1f2523c4652622b975f381d"
+    config_hash: "97cb40d4b8dfd792771f000fbd0356922dac9c136e45b79219e85548f1b42eb4"
+    data_cutoff: "2026-08-21T00:00:00Z"
+    notes: >-
+      Each arm-period has two terminal-state rows at the final timestamp. Numeric
+      summaries deduplicate keep-last; the diagnostic chart does not.
+
+  - artifact_id: pine-eth-15m-v12f-holdout1-chart
+    artifact_type: report
+    role: diagnostic_equity_and_monthly_chart
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d602d5d61ce616f5fc56bd906e22ef550259e566"
+    source_path: experiments/active/exp-pine-eth-15m-v1/results/charts/v12f_holdout1_recent6m_equity_monthly.png
+    sha256: "da561b7ae552a9ba483ac3b8e514a5d2c67e1ecc0d446ab28bd71d4c26c6f31d"
+    size_bytes: 148231
+    storage_uri: "repo://experiments/active/exp-pine-eth-15m-v1/results/charts/v12f_holdout1_recent6m_equity_monthly.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7b859dabe07f27c1e1f2523c4652622b975f381d"
+    config_hash: "97cb40d4b8dfd792771f000fbd0356922dac9c136e45b79219e85548f1b42eb4"
+    data_cutoff: "2026-08-21T00:00:00Z"
+    notes: >-
+      Full recent-window diagnostic only; not the independent fresh-start chart.

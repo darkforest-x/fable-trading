@@ -172,7 +172,10 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
     """The count has to survive the merge, so it is asserted, not narrated."""
     registries = load_registries(root=REPO)
     consumers = {e.experiment_id for e in registries.experiments if e.holdout_consumed}
-    assert consumers == {"exp-yoyo-trading-fixed-w10-classifier-holdout3d"}, (
+    assert consumers == {
+        "exp-pine-eth-15m-v1",
+        "exp-yoyo-trading-fixed-w10-classifier-holdout3d",
+    }, (
         "the set of experiments declaring holdout consumption changed: "
         f"{sorted(consumers)}. Every entry needs an owner authorisation recorded "
         "with it (CLAUDE.md rule 1)."

@@ -496,51 +496,167 @@ experiments:
       separately logged as contaminated design example view #1, not as a fair
       holdout evaluation and not as evidence for threshold or weight selection.
 
+  # ==========================================================================
+  # Pine ALLIN-V7.2 — isolated pre-holdout audit; no production integration
+  # ==========================================================================
+  - experiment_id: exp-pine-allin-v7-signal-filter-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "24630a358fb3d651977981c68227d86570fc2d35"
+    status: rejected
+    question: >-
+      Does the supplied V7 regime-plus-oscillator signal turn the SMA10/60
+      cross-only baseline into a positive-cost strategy on causal pre-holdout
+      validation data?
+    single_variable: signal definition -- V7 filters versus SMA10/60 cross-only
+    result: >-
+      rejected_after_cost. Validation net return improved from -12.29 bp/trade
+      for the cross-only baseline to -1.63 bp/trade for V7, and V7 beat exact
+      matched random entries by +16.89 bp (sign-flip p=0.0001). Gross return was
+      only +18.37 bp against the frozen 20 bp round trip, so absolute expectancy
+      remained negative. No production or holdout claim follows.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_pine_allin_v7_preholdout_20260820.md
+    artifacts:
+      - pine-allin-v7-preholdout-report-v1
+    reuse_allowed: true
+
+  - experiment_id: exp-pine-allin-v7-risk-sizing-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "24630a358fb3d651977981c68227d86570fc2d35"
+    status: accepted
+    question: >-
+      Holding V7 entries and exits fixed, does 2% stop-risk sizing reduce the
+      capital-path damage of fixed 4x plus calendar leverage?
+    single_variable: position sizing -- fixed leverage versus 2% stop-risk budget
+    result: >-
+      accepted_as_research_risk_overlay_only. Validation maximum drawdown fell
+      from 67.66% to 19.20%, portfolio return from -61.22% to -1.97%, and mean
+      leverage from 4.74x to 0.90x. Unit net expectancy stayed -1.63 bp/trade;
+      this is survival engineering, not alpha and not production approval.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_pine_allin_v7_preholdout_20260820.md
+    artifacts:
+      - pine-allin-v7-preholdout-report-v1
+    reuse_allowed: true
+
+  - experiment_id: exp-pine-allin-v7-time-boost-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "24630a358fb3d651977981c68227d86570fc2d35"
+    status: rejected
+    question: >-
+      Holding signals, exits, cost, and base leverage fixed, do the supplied
+      03:00 Hong Kong and Thursday leverage multipliers improve the capital path?
+    single_variable: legacy calendar leverage boosts on versus off
+    result: >-
+      unstable_and_rejected. Boosts worsened development return/drawdown
+      (-84.63%/97.57% versus -74.05%/91.67%) but slightly improved validation
+      (-61.22%/67.66% versus -63.64%/70.10%). Multiplier subgroup signs also
+      reversed across time. The optimized Pine keeps boosts off by default.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_pine_allin_v7_preholdout_20260820.md
+    artifacts:
+      - pine-allin-v7-preholdout-report-v1
+    reuse_allowed: true
+
+  - experiment_id: exp-pine-allin-v7-skip-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "24630a358fb3d651977981c68227d86570fc2d35"
+    status: accepted
+    question: >-
+      Holding V7 signal, 2% risk sizing, barriers, and cost fixed, does the
+      supplied post-win signal skip reduce harmful turnover?
+    single_variable: post-win skip logic on versus off
+    result: >-
+      accepted_as_research_overlay_only. Trades admitted only when skip was off
+      lost -26.20 bp/trade in development and -15.10 bp/trade in validation.
+      Keeping skip improved validation portfolio return from -4.14% to -1.97%
+      and drawdown from 20.00% to 19.20%, but did not make the strategy positive.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_pine_allin_v7_preholdout_20260820.md
+    artifacts:
+      - pine-allin-v7-preholdout-report-v1
+    reuse_allowed: true
+
+  - experiment_id: exp-pine-allin-v7-osc-ranking-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "24630a358fb3d651977981c68227d86570fc2d35"
+    status: rejected
+    question: >-
+      Holding the V7 trade pool fixed, can absolute oscillator strength rank a
+      top decile whose net return is positive with permutation p below 0.01?
+    single_variable: rank by V7 absolute oscillator score versus no ranking
+    result: >-
+      rejected_and_reversed_oos. Development top-decile net was +25.57 bp/trade
+      with p=0.0258, already above the 0.01 gate; validation top-decile net was
+      -32.00 bp/trade with p=0.9972. AUC was only 0.5112. Score-threshold tuning
+      is prohibited as a response to this failed pre-holdout validation.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_pine_allin_v7_preholdout_20260820.md
+    artifacts:
+      - pine-allin-v7-preholdout-report-v1
+    reuse_allowed: true
+
   - experiment_id: exp-pine-eth-15m-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "764f80d89f49313791df096e932825c88e3011f5"
-    status: inconclusive
+    source_commit: "d602d5d61ce616f5fc56bd906e22ef550259e566"
+    status: rejected
     question: >-
       Can the user-supplied ALLIN-V7.2 strategy be frozen as a causal
       ETH-USDT perpetual 15-minute research contract with positive net
       expectancy, tolerable drawdown and a valid path to the project's
       judgment layer?
     single_variable: >-
-      umbrella registration only; every optimization inside the canonical
-      report is a time-ordered single-variable comparison, while V10 volume
-      and V11 long-only remain separate paper hypotheses
+      frozen V12F six-MA W8 full-state gate versus frozen V9 comparator; no
+      V12E, TBSL, LR, LightGBM or post-holdout parameter selection was reachable
     result: >-
-      research_candidate_with_material_statistical_caveats. Frozen V9 has 110
-      final-preholdout trades, +30.22 bp/trade after 20 bp cost, PF 1.366,
-      +22.82% return and 20.03% bar-close drawdown at 1% stop risk. It fails the
-      p<0.01 gate (matched excess +7.64 bp/trade; weekly p=0.2761) and becomes
-      negative without its largest winner. V10 improves
-      the historical point estimate to +41.22 bp/trade and 13.56% drawdown;
-      V11 reaches +63.39 bp/trade, but both are post-selection, tail-dependent
-      and forward-only. Actual short-window 10m/15m comparison is adverse to V9;
-      the two 10m arms lack enough exact causal controls and remain descriptive.
-      Only 4/276 V9 entries satisfy project strict density semantics, so the
-      old LightGBM cannot be reused. No LR/LightGBM was trained or scored.
-    holdout_consumed: false
+      strict_holdout_gate_failed. Owner-approved consumption #1 evaluated only
+      frozen V12F against frozen V9 over 2026-02-21 through 2026-08-21. The full
+      recent-six-month path is negative for both: V9 -6.93% / 27.45% drawdown,
+      V12F -3.46% / 24.74%. The independent protected fresh-start segment is
+      favorable in point estimate (V9 +11.60%, V12F +15.77%), but V12F has only
+      30 trades / 4 winners, matched-control week-block p=0.2566 and top-decile
+      permutation p=0.1838, failing the required p<0.01 gate. No model was
+      trained or scored and every eligibility flag remains false.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    canonical_report: analysis/p0_pine_eth_15m_v1_20260821.md
+    canonical_report: analysis/p0_pine_eth_15m_v12f_holdout1_recent6m_20260821.md
     artifacts:
       - pine-eth-15m-v1-report
       - pine-eth-15m-v1-html
       - pine-eth-15m-v1-manifest
-    reuse_allowed: true
+      - pine-eth-15m-v12f-holdout1-report
+      - pine-eth-15m-v12f-holdout1-html
+      - pine-eth-15m-v12f-holdout1-ledger
+      - pine-eth-15m-v12f-holdout1-summary
+      - pine-eth-15m-v12f-holdout1-trades
+      - pine-eth-15m-v12f-holdout1-controls
+      - pine-eth-15m-v12f-holdout1-pairs
+      - pine-eth-15m-v12f-holdout1-control-sensitivity
+      - pine-eth-15m-v12f-holdout1-monthly
+      - pine-eth-15m-v12f-holdout1-equity
+      - pine-eth-15m-v12f-holdout1-chart
+      - pine-eth-15m-v12f-holdout1-config
+    reuse_allowed: false
     notes: >-
-      V9 is frozen to 15m as the last pre-final-selected research baseline.
-      V10 and V11 must stay separate and require TradingView parity plus fresh
-      paper A/B. The +0.1% break-even lock is -10 bp after frozen cost. A full
-      335-row raw-candidate feature surface exists for a future authorized
-      dynamic LR gate, but P0/P1 blocks training and all eligibility flags stay
-      false. The exact V9 hash passes TradingView's official Pine v6 compiler;
-      historical trade-export parity remains blocked by the available Basic plan.
-      holdout_consumed=false means no formal/economic holdout evaluation; it does
-      not erase four disclosed unapproved access incidents, including older
-      whole-file hashing beyond the cutoff. This delivery is holdout_safe=false.
+      The holdout is consumed and cannot be reused to choose W8, cross-count,
+      TBSL, LR features or another arm. V12F may only remain a frozen paper
+      candidate for genuinely new forward collection. OKX is a research proxy;
+      TradingView trade-export parity is false. The completed atomic ledger
+      hashes nine material outputs and --verify-existing is the only allowed
+      replay command that does not reopen holdout. Earlier unapproved byte-access
+      incidents remain disclosed in the predecessor report and are not erased by
+      this later owner-approved consumption.
 
   - experiment_id: exp-consolidation-single-repo-v1
     source_repo: darkforest-x/fable-trading
