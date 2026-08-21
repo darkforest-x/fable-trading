@@ -797,6 +797,33 @@ experiments:
       continuous features may be reconsidered only in a future stage-approved
       judgment-layer experiment; this rejected threshold is not reusable.
 
+  - experiment_id: exp-pine-eth-15m-path-efficiency-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "809ec18996f1eae10fd84d184b713906e8212d62"
+    status: active
+    question: >-
+      Without changing V9/V12F execution or fitting a model, does one causal
+      pre-cross path-efficiency measurement provide a defensible continuous
+      description of one-way versus retracing price paths on the complete Pine
+      raw-candidate surface?
+    single_variable: >-
+      add pre_cross_path_efficiency_32, fixed before outcome diagnostics; no
+      threshold, gate, model, barrier or Pine parameter changes
+    result: >-
+      preregistered_not_yet_evaluated. The 32-change formula, t-1 right edge,
+      high-is-one-way orientation, development-only window, permutation null
+      and descriptive outputs were committed before the outcome runner executes.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_pine_eth_15m_path_efficiency_20260821.md
+    reuse_allowed: false
+    notes: >-
+      This experiment may define and audit a feature contract inside P0/P1, but
+      may not train LR/LightGBM or select a gate. The 166-row on-policy ledger is
+      incomplete for counterfactual entry filtering; any future approved model
+      must score all 335 raw candidates and run a full dynamic replay.
+
   - experiment_id: exp-consolidation-single-repo-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "59e13a61c43e1e72f397f38985fd8c700533550b"
