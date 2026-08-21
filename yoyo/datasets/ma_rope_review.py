@@ -20,6 +20,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 from collections import Counter
 from dataclasses import asdict
 from datetime import datetime, timezone
@@ -57,6 +58,7 @@ DEFAULT_SOURCE_PACK = (
     / "review"
     / "owner_positive_refilter_v1"
 )
+DEFAULT_OWNER_REVIEW_ROOT = PROJECT_ROOT / "analysis" / "output" / "owner_side_review"
 DEFAULT_OUTPUT = (
     PROJECT_ROOT
     / "datasets"
@@ -266,11 +268,11 @@ def evaluate_countercheck(
 
 
 PAGE_TEMPLATE = """<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>六均线绳结 · 1,345 张代码预筛</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>__TITLE__</title>
 <style>
 :root{color-scheme:dark;--bg:#0d1110;--panel:#171d1a;--ink:#eef4f0;--muted:#aab4ad;--line:#39443d;--a:#46d995;--b:#d8a93e;--c:#78847c;--red:#c64b43}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header{padding:10px 16px 8px;border-bottom:1px solid var(--line)}h1{font-size:19px;margin:0 0 5px}.contract{font-size:13px;color:#eadca8}.hint,.metrics{font-size:12px;color:var(--muted);margin-top:4px}.top{position:absolute;right:16px;top:13px;font-size:13px}.progress{height:5px;background:#28302b;margin-top:7px;border-radius:4px;overflow:hidden}.bar{height:100%;background:var(--a);width:0}main{padding:10px}.panel{max-width:1500px;margin:auto;padding:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px}.controls,.nav{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.viewer{height:calc(100vh - 320px);min-height:390px;background:#fff;border-radius:8px;overflow:auto;display:flex;align-items:center;justify-content:center;margin-top:8px}.viewer img{display:block;max-width:100%;max-height:100%;object-fit:contain}.viewer.zoom img{max-width:none;max-height:none}.position{font-weight:700}.tier{padding:2px 8px;border-radius:10px;color:#101713}.tier.A_CORE{background:var(--a)}.tier.B_BROAD{background:var(--b)}.tier.C_REST{background:var(--c);color:white}.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.actions button{padding:11px;font-size:16px;font-weight:750}.keep{background:#167a58}.remove{background:var(--red)}.maybe{background:#8d6d1c}.actions button.active{outline:3px solid white;outline-offset:-4px}.nav{margin-top:8px}.nav>div{display:flex;gap:7px;flex-wrap:wrap}button,select,input{font:inherit;color:var(--ink);background:#252c28;border:1px solid var(--line);border-radius:7px;padding:7px 10px}button{cursor:pointer}.primary{background:#d8f2e4;color:#102319}.note{width:min(480px,100%)}kbd{border:1px solid #667169;border-bottom-width:2px;border-radius:4px;padding:1px 5px;background:#252c28}.warning{color:#ffcf7b}.hidden{display:none!important}@media(max-width:760px){.top{position:static;margin-top:4px}.viewer{height:53vh}.actions button{font-size:14px}}
-</style></head><body><header><h1>六均线绳结 · 1,345 张旧训练正例代码预筛</h1><div class="top"><span id="done"></span>　<span id="counts"></span></div>
-<div class="contract">默认先看 A 核心档：六线更窄、交叉更多、K 线实体更常穿过线束。<span class="warning">代码只负责排序，不能自动删图</span>；390 条独立反证未证明它能替代你的判断。</div>
+</style></head><body><header><h1>__TITLE__</h1><div class="top"><span id="done"></span>　<span id="counts"></span></div>
+<div class="contract">__CONTRACT__ <span class="warning">代码只负责排序，不能自动删图</span>；390 条独立反证未证明它能替代你的判断。</div>
 <div class="hint"><kbd>K</kbd>/<kbd>1</kbd> 保留　<kbd>X</kbd>/<kbd>2</kbd> 去掉　<kbd>?</kbd>/<kbd>3</kbd> 待定　<kbd>J</kbd>/<kbd>←</kbd> 上一张　<kbd>L</kbd>/<kbd>→</kbd>/<kbd>空格</kbd> 下一张　<kbd>U</kbd> 撤销　<kbd>Z</kbd> 原尺寸</div><div class="progress"><div class="bar" id="bar"></div></div></header>
 <main><section class="panel"><div class="controls"><div class="position"><span id="position"></span> <span id="tier"></span> <span id="decision"></span></div><div><select id="tierFilter"><option value="A_CORE" selected>A 核心档</option><option value="B_BROAD">B 扩展档</option><option value="C_REST">C 其余</option><option value="ALL">全部 1,345</option></select> <select id="answerFilter"><option value="ALL">全部状态</option><option value="UNREVIEWED" selected>只看未审核</option><option value="KEEP">只看保留</option><option value="REMOVE">只看去掉</option><option value="UNCERTAIN">只看待定</option></select> <label>跳到 <input id="jump" type="number" min="1" step="1"></label> <label><input id="autoNext" type="checkbox" checked> 自动下一张</label></div></div>
 <div class="viewer" id="viewer"><img id="chart" alt="Owner 原始手标正例图"></div><div class="metrics" id="metrics"></div>
@@ -279,16 +281,25 @@ PAGE_TEMPLATE = """<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"
 <script>
 const items=__ITEMS__,packId=__PACK_ID__,key=__STORAGE_KEY__,allowed=new Set(['KEEP','REMOVE','UNCERTAIN']);let index=0,answers={},undoStack=[];try{answers=JSON.parse(localStorage.getItem(key+'::answers')||'{}')}catch(_){answers={}}index=Number(localStorage.getItem(key+'::index')||0);if(index<0||index>=items.length)index=0;const $=id=>document.getElementById(id),tierFilter=$('tierFilter'),answerFilter=$('answerFilter'),note=$('note'),chart=$('chart'),viewer=$('viewer'),jump=$('jump');
 function save(){localStorage.setItem(key+'::answers',JSON.stringify(answers));localStorage.setItem(key+'::index',String(index))}function answered(id){return answers[id]&&allowed.has(answers[id].decision)}function matches(i){const x=items[i],a=answers[x.review_id];if(tierFilter.value!=='ALL'&&x.tier!==tierFilter.value)return false;if(answerFilter.value==='UNREVIEWED')return !answered(x.review_id);if(answerFilter.value!=='ALL')return a&&a.decision===answerFilter.value;return true}function findStep(d){for(let n=1;n<=items.length;n++){const i=(index+d*n+items.length)%items.length;if(matches(i))return i}return index}function step(d){index=findStep(d);save();render()}function decide(value){const id=items[index].review_id,old=answers[id]?{...answers[id]}:null;undoStack.push({index,old});answers[id]={review_id:id,sample_id:items[index].sample_id,decision:value,note:note.value||'',decided_at:new Date().toISOString()};save();if($('autoNext').checked)step(1);else render()}function undo(){const x=undoStack.pop();if(!x)return;index=x.index;const id=items[index].review_id;if(x.old)answers[id]=x.old;else delete answers[id];save();render()}
-function stats(){const c={KEEP:0,REMOVE:0,UNCERTAIN:0};Object.values(answers).forEach(a=>{if(a&&allowed.has(a.decision))c[a.decision]++});const n=c.KEEP+c.REMOVE+c.UNCERTAIN;$('done').textContent=`已审 ${n} / ${items.length}`;$('counts').textContent=`保留 ${c.KEEP} · 去掉 ${c.REMOVE} · 待定 ${c.UNCERTAIN}`;$('bar').style.width=`${100*n/items.length}%`}function render(){const x=items[index],a=answers[x.review_id]||{};$('position').textContent=`${index+1} / ${items.length} · ${x.sample_id}`;$('tier').textContent=x.tier==='A_CORE'?'A 核心':x.tier==='B_BROAD'?'B 扩展':'C 其余';$('tier').className='tier '+x.tier;$('decision').textContent=a.decision?`· 当前 ${a.decision}`:'· 未审核';chart.src=x.image;note.value=a.note||'';jump.value=String(index+1);$('metrics').textContent=`绳结分 ${x.score.toFixed(3)} · 六线带宽 ${(x.bandwidth*10000).toFixed(1)}bp · 交叉 ${(x.cross_density*100).toFixed(1)}% · 实体接触 ${(x.body_touch*100).toFixed(1)}% · 实体穿束 ${(x.body_cross*100).toFixed(1)}% · 密集持续 ${(x.persistence*100).toFixed(1)}%`;document.querySelectorAll('[data-decision]').forEach(b=>b.classList.toggle('active',b.dataset.decision===a.decision));stats()}document.querySelectorAll('[data-decision]').forEach(b=>b.onclick=()=>decide(b.dataset.decision));$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('undo').onclick=undo;$('zoom').onclick=()=>viewer.classList.toggle('zoom');for(const f of [tierFilter,answerFilter])f.onchange=()=>{if(!matches(index))index=findStep(1);f.blur();save();render()};jump.onchange=()=>{const n=Number(jump.value);if(Number.isInteger(n)&&n>=1&&n<=items.length){index=n-1;save();render()}jump.blur()};note.oninput=()=>{const id=items[index].review_id;if(answers[id]){answers[id].note=note.value||'';save()}};
+function stats(){const c={KEEP:0,REMOVE:0,UNCERTAIN:0};Object.values(answers).forEach(a=>{if(a&&allowed.has(a.decision))c[a.decision]++});const n=c.KEEP+c.REMOVE+c.UNCERTAIN;$('done').textContent=`已审 ${n} / ${items.length}`;$('counts').textContent=`保留 ${c.KEEP} · 去掉 ${c.REMOVE} · 待定 ${c.UNCERTAIN}`;$('bar').style.width=`${100*n/items.length}%`}function render(){const x=items[index],a=answers[x.review_id]||{};$('position').textContent=`${index+1} / ${items.length} · ${x.sample_id}`;$('tier').textContent=x.tier==='A_CORE'?'A 核心':x.tier==='B_BROAD'?'B 扩展':'C 其余';$('tier').className='tier '+x.tier;$('decision').textContent=a.decision?`· 当前 ${a.decision}`:'· 未审核';chart.src=x.image;note.value=a.note||'';jump.value=String(index+1);const side=x.side?` · 方向 ${x.side}`:'';$('metrics').textContent=`绳结分 ${x.score.toFixed(3)}${side} · 六线带宽 ${(x.bandwidth*10000).toFixed(1)}bp · 交叉 ${(x.cross_density*100).toFixed(1)}% · 实体接触 ${(x.body_touch*100).toFixed(1)}% · 实体穿束 ${(x.body_cross*100).toFixed(1)}% · 密集持续 ${(x.persistence*100).toFixed(1)}%`;document.querySelectorAll('[data-decision]').forEach(b=>b.classList.toggle('active',b.dataset.decision===a.decision));stats()}document.querySelectorAll('[data-decision]').forEach(b=>b.onclick=()=>decide(b.dataset.decision));$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('undo').onclick=undo;$('zoom').onclick=()=>viewer.classList.toggle('zoom');for(const f of [tierFilter,answerFilter])f.onchange=()=>{if(!matches(index))index=findStep(1);f.blur();save();render()};jump.onchange=()=>{const n=Number(jump.value);if(Number.isInteger(n)&&n>=1&&n<=items.length){index=n-1;save();render()}jump.blur()};note.oninput=()=>{const id=items[index].review_id;if(answers[id]){answers[id].note=note.value||'';save()}};
 $('export').onclick=()=>{const rows=items.map(x=>answers[x.review_id]).filter(Boolean),out={schema_version:1,pack_id:packId,exported_at:new Date().toISOString(),n_total:items.length,n_answered:rows.length,complete:rows.length===items.length,answers:rows},blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ma_rope_prefilter_v1_answers.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),0)};$('import').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(x.pack_id!==packId||!Array.isArray(x.answers))throw new Error('审核包不匹配');const known=new Set(items.map(i=>i.review_id));for(const a of x.answers){if(known.has(a.review_id)&&allowed.has(a.decision))answers[a.review_id]=a}save();render()}catch(err){alert('导入失败：'+err.message)}e.target.value=''};document.addEventListener('keydown',e=>{if(e.target===note){if(e.key==='Escape')note.blur();return}const k=e.key.toLowerCase();if(k==='k'||e.key==='1'){e.preventDefault();decide('KEEP')}else if(k==='x'||e.key==='2'){e.preventDefault();decide('REMOVE')}else if(e.key==='?'||e.key==='3'){e.preventDefault();decide('UNCERTAIN')}else if(k==='j'||e.key==='ArrowLeft'){e.preventDefault();step(-1)}else if(k==='l'||e.key==='ArrowRight'||e.key===' '){e.preventDefault();step(1)}else if(k==='u')undo();else if(k==='z')$('zoom').click()});if(!matches(index))index=findStep(1);render();
 </script></body></html>"""
 
 
-def render_page(items: Sequence[Mapping[str, Any]], storage_key: str) -> str:
+def render_page(
+    items: Sequence[Mapping[str, Any]],
+    storage_key: str,
+    *,
+    pack_id: str,
+    title: str,
+    contract: str,
+) -> str:
     return (
         PAGE_TEMPLATE.replace("__ITEMS__", json.dumps(list(items), ensure_ascii=False, separators=(",", ":")))
-        .replace("__PACK_ID__", json.dumps(PACK_ID))
+        .replace("__PACK_ID__", json.dumps(pack_id))
         .replace("__STORAGE_KEY__", json.dumps(storage_key))
+        .replace("__TITLE__", title)
+        .replace("__CONTRACT__", contract)
     )
 
 
@@ -308,6 +319,7 @@ def build_pack(
     config = RopeFilterConfig()
     positives = read_positive_manifest(positive_manifest)
     owner_rows = read_review_sheet(owner_review_sheet)
+    owner_metadata = pd.read_csv(owner_review_sheet).set_index("box_id", drop=False)
     counter_rows = read_review_sheet(short_tip_review)
     if len(positives) != EXPECTED_POSITIVES or len(owner_rows) != EXPECTED_OWNER_BOXES:
         raise RopeReviewBuildError("fixed population count changed")
@@ -378,6 +390,35 @@ def build_pack(
         private_rows.append({**score_row, "review_id": review_id, "tier": tier})
     public_items.sort(key=lambda row: (-float(row["score"]), str(row["sample_id"])))
 
+    owner_public_items: list[dict[str, Any]] = []
+    for score_row in owner_report["rows"]:
+        box_id = str(score_row["sample_id"])
+        if box_id not in owner_metadata.index:
+            raise RopeReviewBuildError(f"missing 2,525-row preview metadata for {box_id}")
+        metadata = owner_metadata.loc[box_id]
+        preview_path = DEFAULT_OWNER_REVIEW_ROOT / str(metadata["preview_path"])
+        if not preview_path.is_file():
+            raise RopeReviewBuildError(f"missing 2,525-row preview image: {preview_path}")
+        score = float(score_row["rope_score"])
+        tier = tier_for_score(score, core_threshold=core_threshold, broad_threshold=broad_threshold)
+        review_id = "mb_" + hashlib.sha256(f"{PACK_ID}\0{box_id}".encode()).hexdigest()[:20]
+        owner_public_items.append(
+            {
+                "review_id": review_id,
+                "sample_id": box_id,
+                "image": Path(os.path.relpath(preview_path, output_dir / "public")).as_posix(),
+                "tier": tier,
+                "side": str(score_row.get("owner_side") or ""),
+                "score": score,
+                "bandwidth": float(score_row["six_ma_bandwidth"]),
+                "cross_density": float(score_row["pairwise_cross_density"]),
+                "body_touch": float(score_row["body_bundle_touch_rate"]),
+                "body_cross": float(score_row["body_bundle_cross_rate"]),
+                "persistence": float(score_row["rope_persistence_rate"]),
+            }
+        )
+    owner_public_items.sort(key=lambda row: (-float(row["score"]), str(row["sample_id"])))
+
     public_dir = output_dir / "public"
     admin_dir = output_dir / "admin"
     public_dir.mkdir(parents=True, exist_ok=True)
@@ -414,7 +455,30 @@ def build_pack(
         (sha256_file(positive_manifest) + json.dumps(asdict(config), sort_keys=True)).encode()
     ).hexdigest()
     write_json(public_dir / "manifest.json", {"pack_id": PACK_ID, "items": public_items})
-    (public_dir / "index.html").write_text(render_page(public_items, storage_key), encoding="utf-8")
+    write_json(
+        public_dir / "owner_2525_manifest.json",
+        {"pack_id": PACK_ID + "_owner_2525", "items": owner_public_items},
+    )
+    (public_dir / "index.html").write_text(
+        render_page(
+            public_items,
+            storage_key,
+            pack_id=PACK_ID,
+            title="六均线绳结 · 1,345 张旧训练正例代码预筛",
+            contract="默认先看 A 核心档：六线更窄、交叉更多、K 线实体更常穿过线束。",
+        ),
+        encoding="utf-8",
+    )
+    (public_dir / "owner_2525.html").write_text(
+        render_page(
+            owner_public_items,
+            storage_key + "::owner2525",
+            pack_id=PACK_ID + "_owner_2525",
+            title="六均线绳结 · 2,525 个 Owner 方向复核框代码预筛",
+            contract="这是扩数据入口，包含 long 1,152、short 1,361、skip 12；默认先看 A 核心档。",
+        ),
+        encoding="utf-8",
+    )
     write_jsonl(admin_dir / "positive_1345_scores.jsonl", private_rows)
     write_jsonl(admin_dir / "owner_2525_scores.jsonl", owner_report["rows"])
     write_jsonl(admin_dir / "short_tip_1000_scores.jsonl", counter_report["rows"])
@@ -453,7 +517,11 @@ def build_pack(
         "star_registry_sha256": sha256_file(star_registry),
         "source_pack_truth_sha256": sha256_file(source_pack / "admin" / "truth.jsonl"),
         "public_manifest_sha256": sha256_file(public_dir / "manifest.json"),
+        "owner_2525_public_manifest_sha256": sha256_file(
+            public_dir / "owner_2525_manifest.json"
+        ),
         "page_sha256": sha256_file(public_dir / "index.html"),
+        "owner_2525_page_sha256": sha256_file(public_dir / "owner_2525.html"),
         "positive_scores_sha256": sha256_file(admin_dir / "positive_1345_scores.jsonl"),
         "owner_scores_sha256": sha256_file(admin_dir / "owner_2525_scores.jsonl"),
         "counter_scores_sha256": sha256_file(admin_dir / "short_tip_1000_scores.jsonl"),
@@ -477,6 +545,16 @@ def verify_pack(output_dir: Path = DEFAULT_OUTPUT, source_pack: Path = DEFAULT_S
         image = source_pack / "public" / "images" / f"{row['review_id']}.jpg"
         if not image.is_file():
             raise RopeReviewBuildError(f"missing linked review image: {image}")
+    owner_manifest = json.loads(
+        (output_dir / "public" / "owner_2525_manifest.json").read_text(encoding="utf-8")
+    )
+    owner_items = owner_manifest.get("items") or []
+    if len(owner_items) != EXPECTED_OWNER_BOXES:
+        raise RopeReviewBuildError("2,525-row public manifest population mismatch")
+    for row in owner_items:
+        image = (output_dir / "public" / str(row["image"])).resolve()
+        if not image.is_file():
+            raise RopeReviewBuildError(f"missing linked 2,525-row preview: {image}")
     page = (output_dir / "public" / "index.html").read_text(encoding="utf-8")
     for token in ("K / 1", "X / 2", "? / 3", "A 核心档", "代码只负责排序"):
         if token not in page:
@@ -484,7 +562,12 @@ def verify_pack(output_dir: Path = DEFAULT_OUTPUT, source_pack: Path = DEFAULT_S
     summary = json.loads((output_dir / "build_summary.json").read_text(encoding="utf-8"))
     if summary.get("automatic_filter_supported") is not False:
         raise RopeReviewBuildError("current countercheck must not be represented as an automatic gate")
-    return {"ok": True, "pack_id": PACK_ID, "n_items": len(items)}
+    return {
+        "ok": True,
+        "pack_id": PACK_ID,
+        "n_items": len(items),
+        "n_owner_2525_items": len(owner_items),
+    }
 
 
 def build_parser() -> argparse.ArgumentParser:

@@ -7,6 +7,7 @@ import pytest
 from yoyo.datasets.ma_rope_review import (
     evaluate_countercheck,
     lower_quantile,
+    render_page,
     tier_for_score,
     wilson_interval,
     yolo_iou,
@@ -52,3 +53,17 @@ def test_countercheck_rejects_uninformative_ranking(monkeypatch: pytest.MonkeyPa
     assert result["auc"] == pytest.approx(0.5)
     assert result["auto_filter_supported"] is False
     assert "do not auto-delete" in result["verdict"]
+
+
+def test_render_page_uses_population_specific_identity() -> None:
+    page = render_page(
+        [],
+        "storage-key",
+        pack_id="population-specific-pack",
+        title="测试标题",
+        contract="测试合同",
+    )
+    assert "测试标题" in page
+    assert "测试合同" in page
+    assert 'packId="population-specific-pack"' in page
+    assert "__TITLE__" not in page
