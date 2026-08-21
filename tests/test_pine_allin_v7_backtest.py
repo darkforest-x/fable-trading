@@ -98,6 +98,95 @@ def test_initial_stop_is_active_on_the_entry_bar_and_cost_is_round_trip() -> Non
     assert trade["leverage"] == pytest.approx(2.0 / 3.0)
 
 
+def test_optional_fixed_take_profit_is_live_from_entry_bar() -> None:
+    frame = _frame_for_stop()
+    frame.loc[241, "open"] = 100.03
+    frame.loc[241, "low"] = 99.0
+    frame.loc[241, "high"] = 106.0
+    trades, _ = simulate_symbol(
+        frame,
+        symbol="TEST_USDT_SWAP",
+        arm=Arm(name="risk", signal_kind="v7", sizing_kind="risk"),
+        start=pd.Timestamp("2025-01-01T00:00:00Z"),
+        end=pd.Timestamp("2025-01-04T00:00:00Z"),
+        params=SignalParameters(),
+        round_trip_cost=0.002,
+        execution=ExecutionParameters(
+            stop_distance_basis="signal_close",
+            sizing_price_basis="signal_close",
+            sizing_equity_basis="signal_marked",
+            leverage_stop_distance_basis="raw",
+            tick_size=0.01,
+            commission_per_side=0.001,
+            skip_return_basis="net",
+            take_profit_percent=5.0,
+        ),
+    )
+    trade = trades.iloc[0]
+    assert trade["exit_reason"] == "take_profit"
+    assert trade["exit_price"] == pytest.approx(105.03)
+    expected_gross = 105.03 / 100.03 - 1.0
+    assert trade["project_net_return"] == pytest.approx(expected_gross - 0.002)
+    assert not trade["intrabar_barrier_collision"]
+
+
+def test_fixed_target_stop_collision_is_marked_and_conservative() -> None:
+    frame = _frame_for_stop()
+    frame.loc[241, "high"] = 106.0
+    trades, _ = simulate_symbol(
+        frame,
+        symbol="TEST_USDT_SWAP",
+        arm=Arm(name="risk", signal_kind="v7", sizing_kind="risk"),
+        start=pd.Timestamp("2025-01-01T00:00:00Z"),
+        end=pd.Timestamp("2025-01-04T00:00:00Z"),
+        params=SignalParameters(),
+        round_trip_cost=0.002,
+        execution=ExecutionParameters(take_profit_percent=5.0),
+    )
+    trade = trades.iloc[0]
+    assert trade["exit_reason"] == "stop"
+    assert trade["exit_price"] == pytest.approx(97.0)
+    assert trade["intrabar_barrier_collision"]
+
+
+def test_fixed_target_can_freeze_pine_ticks_from_signal_close() -> None:
+    frame = _frame_for_stop()
+    frame.loc[240, "close"] = 100.0
+    frame.loc[241, ["open", "high", "low", "close"]] = [110.0, 122.0, 109.0, 111.0]
+    common = dict(
+        frame=frame,
+        symbol="TEST_USDT_SWAP",
+        arm=Arm(name="risk", signal_kind="v7", sizing_kind="risk"),
+        start=pd.Timestamp("2025-01-01T00:00:00Z"),
+        end=pd.Timestamp("2025-01-04T00:00:00Z"),
+        params=SignalParameters(),
+        round_trip_cost=0.002,
+    )
+    entry_based, _ = simulate_symbol(
+        execution=ExecutionParameters(
+            stop_distance_basis="signal_close",
+            tick_size=0.01,
+            take_profit_percent=10.0,
+            take_profit_distance_basis="entry",
+        ),
+        **common,
+    )
+    signal_based, _ = simulate_symbol(
+        execution=ExecutionParameters(
+            stop_distance_basis="signal_close",
+            tick_size=0.01,
+            take_profit_percent=10.0,
+            take_profit_distance_basis="signal_close",
+        ),
+        **common,
+    )
+    assert entry_based.iloc[0]["exit_reason"] == "take_profit"
+    assert signal_based.iloc[0]["exit_reason"] == "take_profit"
+    assert entry_based.iloc[0]["exit_price"] == pytest.approx(121.0)
+    assert signal_based.iloc[0]["exit_price"] == pytest.approx(120.0)
+
+
+
 def test_pine_v8_execution_freezes_signal_close_ticks_quantity_and_fill_fees() -> None:
     frame = _frame_for_stop()
     frame.loc[240, "close"] = 100.13
@@ -309,6 +398,40 @@ def test_entry_direction_gate_keeps_opposite_signal_as_an_exit() -> None:
     assert trades["direction"].tolist() == ["long"]
     assert trades.iloc[0]["exit_reason"] == "reverse"
     assert trades.iloc[0]["exit_i"] == 243
+
+
+def test_entry_only_gate_closes_opposite_without_opening_rejected_side() -> None:
+    frame = _frame_for_stop()
+    frame.loc[241:, ["open", "high", "low", "close"]] = [100.0, 100.2, 99.8, 100.0]
+    frame.loc[242, "v7_short"] = True
+    frame.loc[242, "entry_allowed"] = True
+    frame.loc[242, "atr"] = 1.0
+    frame.loc[242, "v7_score"] = 1.0
+    frame["gate_long"] = True
+    frame["gate_short"] = True
+    frame.loc[242, "gate_short"] = False
+    common = dict(
+        frame=frame,
+        symbol="TEST_USDT_SWAP",
+        arm=Arm(
+            name="entry_only",
+            signal_kind="v7",
+            sizing_kind="risk",
+            use_break_even=False,
+        ),
+        start=pd.Timestamp("2025-01-01T00:00:00Z"),
+        end=pd.Timestamp("2025-01-04T00:00:00Z"),
+        params=SignalParameters(),
+        round_trip_cost=0.002,
+        entry_gate_columns=("gate_long", "gate_short"),
+    )
+    rejected, _ = simulate_symbol(**common)
+    frame.loc[242, "gate_short"] = True
+    accepted, _ = simulate_symbol(**common)
+    assert rejected["direction"].tolist() == ["long"]
+    assert rejected.iloc[0]["exit_reason"] == "reverse"
+    assert rejected.iloc[0]["exit_i"] == 243
+    assert accepted["direction"].tolist() == ["long", "short"]
 
 
 def test_deterministic_controls_do_not_depend_on_input_order() -> None:

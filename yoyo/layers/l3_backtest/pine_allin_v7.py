@@ -76,6 +76,9 @@ class ExecutionParameters:
     force_close_at_end: bool = True
     equity_frequency: str | None = "1D"
     signal_bar_duration: pd.Timedelta | None = None
+    take_profit_percent: float | None = None
+    take_profit_distance_basis: str = "entry"
+    barrier_collision_policy: str = "stop_first"
 
 
 @dataclass(frozen=True)
@@ -111,6 +114,7 @@ class Position:
     stop_price: float
     initial_stop_price: float
     initial_stop_distance: float
+    take_profit_price: float | None
     score: float
 
 
@@ -340,8 +344,28 @@ def simulate_symbol(
     initial_capital: float = 500.0,
     execution: ExecutionParameters | None = None,
     signal_columns: tuple[str, str, str] | None = None,
+    entry_gate_columns: tuple[str, str] | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Simulate one symbol and return trades plus daily marked equity."""
+    """Simulate one symbol and return trades plus daily marked equity.
+
+    An optional fixed take-profit is live from the entry fill.  It uses only
+    the entry price and the frozen percentage.  When a 15-minute bar touches
+    both stop and target and no ordered lower-timeframe path is supplied, the
+    only supported policy is conservative ``stop_first``; the trade row marks
+    that collision explicitly.  Default ``take_profit_percent=None`` preserves
+    the historical V9 replay byte-for-byte at the semantic level.
+
+    ``take_profit_distance_basis`` makes the Pine timing choice explicit:
+    ``entry`` uses a percentage of the next-open fill, while ``signal_close``
+    freezes target ticks on the confirmed signal bar so the protective order
+    can be submitted before that fill exists.
+
+    ``entry_gate_columns`` is an optional causal entry-only overlay. Raw
+    signals still consume cooldown and close an opposite position, but a new
+    position opens only when the matching gate column is true. Passing already
+    gated ``signal_columns`` is deliberately different: it suppresses a
+    rejected signal's reversal and state transition too.
+    """
 
     if not 0.0 <= round_trip_cost < 1.0:
         raise ValueError("round_trip_cost must be a fraction")
@@ -362,6 +386,12 @@ def simulate_symbol(
         raise ValueError("commission_per_side must be a fraction")
     if execution.skip_return_basis not in {"gross", "net"}:
         raise ValueError("skip_return_basis must be gross|net")
+    if execution.take_profit_percent is not None and execution.take_profit_percent <= 0.0:
+        raise ValueError("take_profit_percent must be positive when supplied")
+    if execution.take_profit_distance_basis not in {"entry", "signal_close"}:
+        raise ValueError("take_profit_distance_basis must be entry|signal_close")
+    if execution.barrier_collision_policy != "stop_first":
+        raise ValueError("barrier_collision_policy must be stop_first")
     if arm.opposite_signal_action not in {"reverse", "close_only"}:
         raise ValueError("opposite_signal_action must be reverse|close_only")
     if not arm.entry_directions or any(
@@ -400,17 +430,40 @@ def simulate_symbol(
     raw_long = frame[long_col].fillna(False).to_numpy(dtype=bool)
     raw_short = frame[short_col].fillna(False).to_numpy(dtype=bool)
     scores = frame[score_col].fillna(0.0).to_numpy(dtype=float)
+    if entry_gate_columns is None:
+        entry_long_allowed = np.ones(len(frame), dtype=bool)
+        entry_short_allowed = np.ones(len(frame), dtype=bool)
+    else:
+        entry_long_col, entry_short_col = entry_gate_columns
+        missing_entry_gates = sorted(
+            {entry_long_col, entry_short_col} - set(frame.columns)
+        )
+        if missing_entry_gates:
+            raise ValueError(f"missing entry gate columns: {missing_entry_gates}")
+        entry_long_allowed = (
+            frame[entry_long_col].fillna(False).to_numpy(dtype=bool)
+        )
+        entry_short_allowed = (
+            frame[entry_short_col].fillna(False).to_numpy(dtype=bool)
+        )
 
     equity = float(initial_capital)
     position: Position | None = None
     pending_direction = 0
     pending_signal_i = -1
     pending_sizing_equity = float("nan")
+    pending_entry_allowed = True
     trades_to_skip = 0
     trade_rows: list[dict[str, Any]] = []
     equity_rows: list[dict[str, Any]] = []
 
-    def close_position(exit_i: int, exit_price: float, reason: str) -> float:
+    def close_position(
+        exit_i: int,
+        exit_price: float,
+        reason: str,
+        *,
+        intrabar_collision: bool = False,
+    ) -> float:
         nonlocal equity, position, trades_to_skip
         assert position is not None
         exit_price = float(exit_price)
@@ -443,8 +496,10 @@ def simulate_symbol(
             "quantity": position.quantity,
             "initial_stop_price": position.initial_stop_price,
             "initial_stop_distance": position.initial_stop_distance,
+            "take_profit_price": position.take_profit_price,
             "holding_bars": int(exit_i - position.entry_i),
             "exit_reason": reason,
+            "intrabar_barrier_collision": bool(intrabar_collision),
             "score": position.score,
             "leverage": position.leverage,
             "gross_return": gross,
@@ -524,6 +579,20 @@ def simulate_symbol(
         notional = quantity * entry_price
         leverage = notional / equity
         stop_price = entry_price - direction * stop_distance
+        take_profit_reference = (
+            signal_price
+            if execution.take_profit_distance_basis == "signal_close"
+            else entry_price
+        )
+        take_profit_price = None
+        if execution.take_profit_percent is not None:
+            take_profit_distance = (
+                take_profit_reference * execution.take_profit_percent / 100.0
+            )
+            take_profit_price = entry_price + direction * take_profit_distance
+        if take_profit_price is not None and execution.tick_size is not None:
+            target_ticks = max(1, int(round(take_profit_price / execution.tick_size)))
+            take_profit_price = target_ticks * execution.tick_size
         position = Position(
             direction=direction,
             signal_i=signal_i,
@@ -538,6 +607,7 @@ def simulate_symbol(
             stop_price=stop_price,
             initial_stop_price=stop_price,
             initial_stop_distance=stop_distance,
+            take_profit_price=take_profit_price,
             score=float(scores[signal_i]),
         )
 
@@ -554,6 +624,7 @@ def simulate_symbol(
                 and equity > 0.0
                 and not (closed_opposite and arm.opposite_signal_action == "close_only")
                 and pending_direction in arm.entry_directions
+                and pending_entry_allowed
             ):
                 open_position(
                     i,
@@ -564,16 +635,42 @@ def simulate_symbol(
             pending_direction = 0
             pending_signal_i = -1
             pending_sizing_equity = float("nan")
+            pending_entry_allowed = True
 
-        # The initial protective stop is live from the entry fill.  Gaps beyond
-        # the stop fill at the bar open; otherwise the stop fills at its price.
+        # Stop and optional fixed target are live from the entry fill.  Gaps
+        # fill at the open (a target limit may improve); an unresolved 15m
+        # double touch is marked and conservatively resolved stop-first.
         if position is not None:
-            if position.direction > 0 and low[i] <= position.stop_price:
-                fill = min(float(open_[i]), position.stop_price)
-                close_position(i, fill, "stop")
-            elif position is not None and position.direction < 0 and high[i] >= position.stop_price:
-                fill = max(float(open_[i]), position.stop_price)
-                close_position(i, fill, "stop")
+            direction = position.direction
+            target = position.take_profit_price
+            stop_gap = (
+                float(open_[i]) <= position.stop_price
+                if direction > 0
+                else float(open_[i]) >= position.stop_price
+            )
+            target_gap = target is not None and (
+                float(open_[i]) >= target if direction > 0 else float(open_[i]) <= target
+            )
+            stop_touch = low[i] <= position.stop_price if direction > 0 else high[i] >= position.stop_price
+            target_touch = target is not None and (
+                high[i] >= target if direction > 0 else low[i] <= target
+            )
+            if stop_gap:
+                close_position(i, float(open_[i]), "stop")
+            elif target_gap:
+                close_position(i, float(open_[i]), "take_profit")
+            elif stop_touch and target_touch:
+                close_position(
+                    i,
+                    position.stop_price,
+                    "stop",
+                    intrabar_collision=True,
+                )
+            elif stop_touch:
+                close_position(i, position.stop_price, "stop")
+            elif target_touch:
+                assert target is not None
+                close_position(i, target, "take_profit")
 
         # A break-even trigger seen on a completed bar can protect only the next
         # bar in this confirmed-bar replay.  This avoids historical intrabar
@@ -619,15 +716,26 @@ def simulate_symbol(
                 trades_to_skip -= 1
             elif allowed[i] and signal_date_allowed[i] and equity > 0.0:
                 if position is None or position.direction != raw_direction:
+                    candidate_entry_allowed = (
+                        bool(entry_long_allowed[i])
+                        if raw_direction > 0
+                        else bool(entry_short_allowed[i])
+                    )
                     candidate_sizing_equity = (
                         signal_marked_equity(i)
                         if execution.sizing_equity_basis == "signal_marked"
                         else equity
                     )
-                    if candidate_sizing_equity > 0.0:
+                    should_close_opposite = (
+                        position is not None and position.direction != raw_direction
+                    )
+                    if candidate_sizing_equity > 0.0 and (
+                        candidate_entry_allowed or should_close_opposite
+                    ):
                         pending_direction = raw_direction
                         pending_signal_i = i
                         pending_sizing_equity = candidate_sizing_equity
+                        pending_entry_allowed = candidate_entry_allowed
 
         if position is None:
             marked = equity
@@ -645,6 +753,7 @@ def simulate_symbol(
         if equity <= 0.0:
             pending_direction = 0
             pending_sizing_equity = float("nan")
+            pending_entry_allowed = True
             break
 
     if position is not None and execution.force_close_at_end:

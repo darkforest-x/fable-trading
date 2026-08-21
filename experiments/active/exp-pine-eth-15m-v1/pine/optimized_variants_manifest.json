@@ -1,0 +1,53 @@
+{
+  "artifact": "ETH 15m optimized Pine paper variants",
+  "source": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v9_research.pine",
+  "source_sha256": "6465fa80f89907b2ed584085960f355f331de62e3c38ebf65f3065c57873dfe9",
+  "six_ma_contract": {
+    "bundle": [
+      "SMA20",
+      "EMA20",
+      "SMA60",
+      "EMA60",
+      "SMA120",
+      "EMA120"
+    ],
+    "source": "close",
+    "directional_pairs": 12,
+    "window_bars": 8,
+    "threshold": 0.0,
+    "future_bars": 0
+  },
+  "variants": [
+    {
+      "version": "V12F",
+      "path": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v12f_ma6_w8_full_gate_paper.pine",
+      "sha256": "9e03c2959e403632a8db06c66ee43487d7388e0dfdaf31abe5ae32218c7567de",
+      "change_contract": "MA6 W8 full-state gate",
+      "strict_single_variable": true,
+      "reversal_semantics": "rejected guarded signals do not reverse"
+    },
+    {
+      "version": "V12E",
+      "path": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v12e_ma6_w8_entry_only_paper.pine",
+      "sha256": "593f7b3ae9da0832073edd57b96f631a63bc450def95f786d17ea2e2c219e6e9",
+      "change_contract": "MA6 W8 entry-only gate",
+      "strict_single_variable": true,
+      "reversal_semantics": "rejected opposite signal closes but does not reopen"
+    },
+    {
+      "version": "V12T",
+      "path": "experiments/active/exp-pine-eth-15m-v1/pine/allin_eth_15m_v12t_tbsl_paper.pine",
+      "sha256": "1fb6731f6ff96ed12429a71eecfb0dffe8e238be8f880215c1f170388f6da457",
+      "change_contract": "staged-selected TP30 plus ATR3 composite; stop cap stays 3%",
+      "strict_single_variable": false,
+      "selection_history": "TP selected first, then ATR multiple; replayed as one pre-frozen TBSL composite",
+      "take_profit_distance_basis": "signal_close"
+    }
+  ],
+  "combined_variant_generated": false,
+  "official_pine_compiler_run": false,
+  "tradingview_parity_passed": false,
+  "holdout_rows_read": 0,
+  "forward_eligible": false,
+  "production_eligible": false
+}

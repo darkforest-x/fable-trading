@@ -490,8 +490,16 @@ def control_outcome(
     direction: int,
     holding_bars: int,
     params: SignalParameters,
+    take_profit_percent: float | None = None,
+    take_profit_distance_basis: str = "entry",
 ) -> dict[str, Any]:
-    """Replay a matched entry under the exact V9 stop/BE/cost contract."""
+    """Replay a matched entry under the exact V9 stop/BE/cost contract.
+
+    ``take_profit_percent`` is optional and, when supplied, uses the same
+    conservative stop-first rule as :func:`simulate_symbol` for unresolved
+    same-15m-bar barrier collisions.  Inputs use the control signal bar and
+    later path only; the copied horizon remains unchanged.
+    """
 
     entry_i = signal_i + 1
     horizon_exit_i = entry_i + int(holding_bars)
@@ -507,19 +515,56 @@ def control_outcome(
     )
     distance = max(1, int(round(distance / 0.01))) * 0.01
     stop = entry_price - direction * distance
+    if take_profit_distance_basis not in {"entry", "signal_close"}:
+        raise ValueError("take_profit_distance_basis must be entry|signal_close")
+    target_reference = (
+        signal_close if take_profit_distance_basis == "signal_close" else entry_price
+    )
+    target = None
+    if take_profit_percent is not None:
+        target_distance = target_reference * take_profit_percent / 100.0
+        target = entry_price + direction * target_distance
+    if target is not None:
+        target = max(1, int(round(target / 0.01))) * 0.01
     exit_i = horizon_exit_i
     exit_price = float(close[exit_i])
     reason = "copied_horizon"
+    intrabar_collision = False
     for i in range(entry_i, horizon_exit_i + 1):
-        if direction > 0 and low[i] <= stop:
+        stop_gap = float(open_[i]) <= stop if direction > 0 else float(open_[i]) >= stop
+        target_gap = target is not None and (
+            float(open_[i]) >= target if direction > 0 else float(open_[i]) <= target
+        )
+        stop_touch = low[i] <= stop if direction > 0 else high[i] >= stop
+        target_touch = target is not None and (
+            high[i] >= target if direction > 0 else low[i] <= target
+        )
+        if stop_gap:
             exit_i = i
-            exit_price = min(float(open_[i]), stop)
+            exit_price = float(open_[i])
             reason = "stop"
             break
-        if direction < 0 and high[i] >= stop:
+        if target_gap:
             exit_i = i
-            exit_price = max(float(open_[i]), stop)
+            exit_price = float(open_[i])
+            reason = "take_profit"
+            break
+        if stop_touch and target_touch:
+            exit_i = i
+            exit_price = stop
             reason = "stop"
+            intrabar_collision = True
+            break
+        if stop_touch:
+            exit_i = i
+            exit_price = stop
+            reason = "stop"
+            break
+        if target_touch:
+            assert target is not None
+            exit_i = i
+            exit_price = target
+            reason = "take_profit"
             break
         if direction > 0 and high[i] >= entry_price * (
             1.0 + params.break_even_trigger_percent / 100.0
@@ -538,6 +583,8 @@ def control_outcome(
         "control_entry_price": entry_price,
         "control_exit_price": exit_price,
         "control_exit_reason": reason,
+        "control_take_profit_price": target,
+        "control_intrabar_barrier_collision": intrabar_collision,
         "control_gross_return": gross,
         "control_project_net_return": gross - 0.002,
         "control_pine_net_return": gross - commission,
@@ -551,11 +598,15 @@ def build_matched_controls(
     *,
     controls_per_trade: int = 3,
     seed: str = "pine-eth15m-v9-controls-v1",
+    params: SignalParameters | None = None,
+    take_profit_percent: float | None = None,
+    take_profit_distance_basis: str = "entry",
 ) -> pd.DataFrame:
     """Build non-reused, split-contained controls from exact causal strata."""
 
     if trades.empty:
         return pd.DataFrame()
+    params = params or SignalParameters(osc_threshold=0.1)
     times = pd.to_datetime(frame["open_time"], utc=True)
     mask = _period_mask(frame, period)
     active = np.flatnonzero(mask)
@@ -600,7 +651,9 @@ def build_matched_controls(
                 signal_i=control_i,
                 direction=direction,
                 holding_bars=horizon,
-                params=SignalParameters(osc_threshold=0.1),
+                params=params,
+                take_profit_percent=take_profit_percent,
+                take_profit_distance_basis=take_profit_distance_basis,
             )
             rows.append(
                 {

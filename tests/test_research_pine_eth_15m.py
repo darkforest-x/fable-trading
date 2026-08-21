@@ -83,6 +83,47 @@ def test_control_outcome_uses_signal_close_tick_stop_and_two_cost_views() -> Non
     )
 
 
+def test_control_take_profit_is_rounded_to_the_eth_tick() -> None:
+    frame = _bars(10)
+    frame[["open", "high", "low", "close"]] = 100.0
+    frame["atr"] = 1.0
+    frame.loc[1, "open"] = 100.03
+    frame.loc[1, "high"] = 106.0
+    frame.loc[1, "low"] = 99.0
+    outcome = control_outcome(
+        frame,
+        signal_i=0,
+        direction=1,
+        holding_bars=2,
+        params=SignalParameters(),
+        take_profit_percent=5.0,
+    )
+    assert outcome["control_exit_reason"] == "take_profit"
+    assert outcome["control_take_profit_price"] == pytest.approx(105.03)
+    assert outcome["control_exit_price"] == pytest.approx(105.03)
+
+
+def test_control_take_profit_can_freeze_signal_close_tick_distance() -> None:
+    frame = _bars(10)
+    frame[["open", "high", "low", "close"]] = 100.0
+    frame["atr"] = 1.0
+    frame.loc[1, "open"] = 110.0
+    frame.loc[1, "high"] = 122.0
+    frame.loc[1, "low"] = 109.0
+    outcome = control_outcome(
+        frame,
+        signal_i=0,
+        direction=1,
+        holding_bars=2,
+        params=SignalParameters(),
+        take_profit_percent=10.0,
+        take_profit_distance_basis="signal_close",
+    )
+    assert outcome["control_exit_reason"] == "take_profit"
+    assert outcome["control_take_profit_price"] == pytest.approx(120.0)
+    assert outcome["control_exit_price"] == pytest.approx(120.0)
+
+
 def test_week_signflip_is_clustered_and_deterministic() -> None:
     pairs = pd.DataFrame(
         {
