@@ -1,0 +1,42 @@
+{
+  "experiment_id": "exp-pine-eth-15m-path-efficiency-v1",
+  "registered_at": "2026-08-21",
+  "single_variable": "add one continuous pre-cross path-efficiency feature; no gate or model",
+  "feature": {
+    "column": "pre_cross_path_efficiency_32",
+    "input": "close",
+    "lookback_price_changes": 32,
+    "decision_bar": "t",
+    "right_edge": "t-1",
+    "formula": "abs(close[t-1]-close[t-33]) / sum(abs(diff(close[t-33:t-1])))",
+    "orientation": "higher means a more one-way, less retracing path"
+  },
+  "data": {
+    "instrument": "OKX ETH-USDT-SWAP research proxy",
+    "timeframe": "15m",
+    "development_start": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2025-01-01T00:00:00Z",
+    "consumed_final_allowed": false,
+    "repository_holdout_allowed": false
+  },
+  "outputs": {
+    "raw_candidate_surface": "feature-only on all 335 guarded V9 signals",
+    "on_policy_diagnostic": "descriptive ranking on frozen V9 executed rows only"
+  },
+  "primary_diagnostic": "Spearman correlation with project_net_return",
+  "secondary_diagnostics": [
+    "AUC for net_positive",
+    "fixed high-feature top-decile net bp per trade",
+    "one-sided 20000-shuffle top-decile permutation p",
+    "fixed calendar-half point estimates"
+  ],
+  "explicit_null": "outcomes are exchangeable relative to the fixed feature ranking",
+  "matched_random_control_applicable": false,
+  "matched_random_control_reason": "No strategy arm or entry rule changes in this feature-contract audit.",
+  "threshold_selected": false,
+  "model_fitted": false,
+  "pine_changed": false,
+  "training_eligible": false,
+  "forward_eligible": false,
+  "production_eligible": false
+}
