@@ -183,7 +183,9 @@ def build_protocol() -> dict[str, Any]:
                 compile_gate["input_values_match_frozen_contract"],
             )
         ):
-            blocking_gates.append(f"{arm} official compiler/source/venue receipt")
+            blocking_gates.append(
+                f"{arm} official compiler/source/venue/timeframe/window/input receipt"
+            )
         if not ledger_gate["exact_ledger_parity_passed"]:
             blocking_gates.append(f"{arm} exact {canonical_count}-trade ledger parity")
         arms[arm] = {
