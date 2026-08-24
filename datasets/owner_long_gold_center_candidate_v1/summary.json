@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "candidate_id": "owner_long_gold_center_candidate_v1",
+  "generated_at": "2026-08-24T13:29:59+00:00",
+  "generator_commit": "eeaafc87b3776dbb8ede0643cb4f3394289dd82a",
+  "source": {
+    "owner_direction_sheet": "analysis/output/owner_side_review/review_sheet.csv",
+    "owner_direction_sheet_sha256": "bb7081e7e1821c5f791486fae0f29caf18307b104bbb07156c35883781071c9a",
+    "rope_scores": "datasets/owner_short_gold_center_v1/review/ma_rope_prefilter_v1/admin/owner_2525_scores.jsonl",
+    "rope_scores_sha256": "0752df544308e6c26f647fc1a520375a551ed003e234d12f3e50dd8a05deef0b",
+    "calibration": "datasets/owner_short_gold_center_v1/review/ma_rope_prefilter_v1/calibration.json",
+    "calibration_sha256": "bd09185267353a4f7381969784d2824b0e128fe85e08b3d53a212227458fadb2"
+  },
+  "raw_owner_long_annotations": 1152,
+  "deduplication": {
+    "duplicate_target_groups": 8,
+    "duplicate_annotation_aliases_removed": 8,
+    "unique_targets": 1144
+  },
+  "unique_targets": 1144,
+  "rope_tier_counts_unique": {
+    "A_CORE": 339,
+    "B_BROAD": 480,
+    "C_REST": 325
+  },
+  "split": {
+    "dependency_blocks": 1097,
+    "dependency_block_counts": {
+      "drop": 10,
+      "train": 922,
+      "val": 165
+    },
+    "row_counts": {
+      "drop": 10,
+      "train": 963,
+      "val": 171
+    },
+    "train_end_max": "2026-03-28T08:00:00+00:00",
+    "val_start_min": "2026-03-29T23:30:00+00:00",
+    "purge_bars": 150,
+    "actual_gap_bars": 158.0,
+    "dependency_cross_split": 0
+  },
+  "data_cutoff": "2026-05-03T11:30:00+00:00",
+  "manifest_sha256": "5f9707e23e291382a2e595af274ebb0273ccb5aad132590ac1bb3e7b382c2687",
+  "manifest_size_bytes": 1782582,
+  "review_status_counts": {
+    "PENDING": 1144
+  },
+  "source_ohlc_opened": false,
+  "holdout_read": false,
+  "future_outcome_used": false,
+  "labels_created": 0,
+  "images_created": 0,
+  "training_eligible": false,
+  "production_eligible": false,
+  "quality_gates": {
+    "source_join_one_to_one": true,
+    "unique_target_count_frozen": true,
+    "strictly_pre_holdout": true,
+    "dependency_cross_split_zero": true,
+    "purge_at_least_150_bars": true,
+    "all_pending_review": true,
+    "nothing_training_eligible": true
+  }
+}
