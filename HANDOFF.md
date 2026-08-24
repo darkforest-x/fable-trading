@@ -2,6 +2,26 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-24 — Owner-long v2 ledger 已冻结，仍不可训练）
+
+Owner 当前选择继续整理数据集。做多方向没有复用 short R1 中 916 个空标签，而是回到
+`analysis/output/owner_side_review/review_sheet.csv` 的 1,152 个 Owner-long 原框。8 个重复 alias
+合并后得到 1,144 个稳定唯一 event；每个 alias 的 Owner 原行、原始 bar/YOLO 几何和原图均已
+逐项锁 SHA。唯一 event 的审核顺序 A/B/C=339/480/325（页面去重前 long A=343）。正式 v2：
+`datasets/owner_long_gold_center_candidate_v2/candidate_manifest.jsonl`，SHA256
+`0b342a75e55d66a99d84e3d6a5be2be90c4e2f3e9de436aef37939cc1d31e929`。
+
+依赖块预切分为 train 963 / val 171 / drop 10，跨 split dependency/event 都是 0；train→val 当前
+只证明相隔 158 个名义 15m 时间格，`actual_ohlc_gap_bars=null`，必须在 bounded pre-holdout
+物化后再验。构建器没有打开 OHLC、生成图片/label 或读取 holdout；1,144/1,144 都是 PENDING，
+`training_eligible=false / production_eligible=false`。v1 保留为历史但已 superseded，禁止复用。
+报告：`analysis/html/p1_owner_long_candidate_manifest_v2_20260824.html`。
+
+**下一条允许的动作**：Owner 在 `owner_2525.html` 默认 `A + long + 未审核` 完成 343 个原始框并
+导出 JSON（`K/1` 保留、`X/2` 去掉、`?/3` 待定）；先 join 成 339 个唯一 target 的结果。同一
+target 的 alias 必须全部有一致答案，否则保持 PENDING 或 fail closed。没有回执前不得生成 long
+训练图、YOLO label、negative 或启动训练；旧 short 1,345 refilter 也不能被新 long ledger 覆盖。
+
 ## ⚡ 当前真相（2026-08-21 — 六均线绳结预筛已落地，但只能排序、不能自动删图）
 
 Owner 已明确纠正任务：不是审核 fixed-W10 的 2,649 行混合 Gold，而是把**旧模型实际训练过的

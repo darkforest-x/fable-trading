@@ -1414,3 +1414,104 @@ artifacts:
     generator_commit: "14377c6be63c1fea88bdf9df6af2836220e6e36b"
     config_hash: "7c860311b305f911bfd6e87207182f87c0f7edb485a4f1cb222b99d997194ba6"
     data_cutoff: "2026-03-01T00:00:00Z"
+
+  - artifact_id: owner-long-gold-center-candidate-v1
+    artifact_type: manifest
+    role: superseded_review_gated_owner_long_candidate_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f244510bd6337d69d76d04765ebe0c3b714b1f63"
+    source_path: datasets/owner_long_gold_center_candidate_v1/candidate_manifest.jsonl
+    sha256: "5f9707e23e291382a2e595af274ebb0273ccb5aad132590ac1bb3e7b382c2687"
+    size_bytes: 1782582
+    storage_uri: "file://datasets/owner_long_gold_center_candidate_v1"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "eeaafc87b3776dbb8ede0643cb4f3394289dd82a"
+    config_hash: "b368c26e6d278ed087d0bc4a378dfb19b8195cbd0f0706360379b742d4f0196c"
+    data_cutoff: "2026-05-03T11:30:00+00:00"
+    notes: >-
+      Superseded by owner-long-gold-center-candidate-v2. V1 preserved the right
+      1,144-target population but overclaimed a nominal timestamp-grid gap as an
+      actual OHLC bar gap and did not freeze original alias geometry or the
+      public review-manifest identity. Never materialize or train from V1.
+
+  - artifact_id: owner-long-gold-center-candidate-v2
+    artifact_type: manifest
+    role: review_gated_owner_long_candidate_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "53804b66b9d2f27aa18837b5697acf1e25b0a0dd"
+    source_path: datasets/owner_long_gold_center_candidate_v2/candidate_manifest.jsonl
+    sha256: "0b342a75e55d66a99d84e3d6a5be2be90c4e2f3e9de436aef37939cc1d31e929"
+    size_bytes: 3241092
+    storage_uri: "file://datasets/owner_long_gold_center_candidate_v2"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "47f7557bc9f0cb3a35d08440c8d090e107d7c9e2"
+    config_hash: "48ab3759e1ae0ad9411f3eef7276adae2c8382fe2a7e8b3545db9b293d47afba"
+    data_cutoff: "2026-05-03T11:30:00+00:00"
+    notes: >-
+      Immutable review-pending ledger: 1,152 exact Owner-long aliases close to
+      1,144 stable unique events, split 963 train / 171 val / 10 drop. All
+      aliases, original geometry, source rows and review-public identity are
+      hashed. The 158 interval is nominal timestamp-grid evidence only; actual
+      OHLC gap, windows, images and labels remain deferred. Eligibility is false.
+
+  - artifact_id: owner-long-gold-center-candidate-v2-source-contract
+    artifact_type: config
+    role: bounded_causal_materialization_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "53804b66b9d2f27aa18837b5697acf1e25b0a0dd"
+    source_path: datasets/owner_long_gold_center_candidate_v2/source_contract.json
+    sha256: "48ab3759e1ae0ad9411f3eef7276adae2c8382fe2a7e8b3545db9b293d47afba"
+    size_bytes: 906
+    storage_uri: "file://datasets/owner_long_gold_center_candidate_v2/source_contract.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "47f7557bc9f0cb3a35d08440c8d090e107d7c9e2"
+    data_cutoff: "2026-05-03T11:30:00+00:00"
+
+  - artifact_id: owner-long-gold-center-candidate-v2-summary
+    artifact_type: manifest
+    role: owner_long_candidate_build_audit_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "53804b66b9d2f27aa18837b5697acf1e25b0a0dd"
+    source_path: datasets/owner_long_gold_center_candidate_v2/summary.json
+    sha256: "7b3b233bd6e984b770b8490fa8f8151071744525a36dbf65df6e7f7f754fe6be"
+    size_bytes: 2679
+    storage_uri: "file://datasets/owner_long_gold_center_candidate_v2/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "47f7557bc9f0cb3a35d08440c8d090e107d7c9e2"
+    data_cutoff: "2026-05-03T11:30:00+00:00"
+
+  - artifact_id: owner-long-gold-center-candidate-v2-report
+    artifact_type: report
+    role: canonical_owner_long_candidate_lineage_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "53804b66b9d2f27aa18837b5697acf1e25b0a0dd"
+    source_path: analysis/p1_owner_long_candidate_manifest_v2_20260824.md
+    sha256: "0598c9d2929637cb8c4d1caca295b5b559ab7406beedc089079073567582969a"
+    size_bytes: 10606
+    storage_uri: "repo://analysis/p1_owner_long_candidate_manifest_v2_20260824.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2026-05-03T11:30:00+00:00"
+
+  - artifact_id: owner-long-gold-center-candidate-v2-html
+    artifact_type: report
+    role: owner_facing_owner_long_candidate_lineage_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "53804b66b9d2f27aa18837b5697acf1e25b0a0dd"
+    source_path: analysis/html/p1_owner_long_candidate_manifest_v2_20260824.html
+    sha256: "06755d913a388bc161eb9c95c1ee9767504c458b5a82f2c3dcfef91d6378f45d"
+    size_bytes: 15058
+    storage_uri: "repo://analysis/html/p1_owner_long_candidate_manifest_v2_20260824.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2026-05-03T11:30:00+00:00"

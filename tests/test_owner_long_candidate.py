@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
 
+from yoyo.artifacts import load_registries
 from yoyo.contracts.holdout import HoldoutBoundaryError
 from yoyo.datasets import owner_long_candidate as mod
+
+
+PROJECT = Path(__file__).resolve().parents[1]
 
 
 def _candidate(sample_id: str, start: int, end: int, *, tier: str = "A_CORE") -> dict:
@@ -297,3 +303,41 @@ def test_event_id_is_stable_and_output_overwrite_is_refused(tmp_path: Path) -> N
     (occupied / "receipt.json").write_text("{}")
     with pytest.raises(FileExistsError, match="refusing to overwrite"):
         mod._ensure_output_is_new(occupied, role="test artifact")
+
+
+def test_registered_v2_artifacts_are_exact_and_v1_is_superseded() -> None:
+    registries = load_registries(root=PROJECT)
+    artifact_ids = [
+        "owner-long-gold-center-candidate-v2",
+        "owner-long-gold-center-candidate-v2-source-contract",
+        "owner-long-gold-center-candidate-v2-summary",
+        "owner-long-gold-center-candidate-v2-report",
+        "owner-long-gold-center-candidate-v2-html",
+    ]
+    for artifact_id in artifact_ids:
+        artifact = registries.artifact(artifact_id)
+        path = PROJECT / artifact.source_path
+        assert path.is_file()
+        assert artifact.sha256 == hashlib.sha256(path.read_bytes()).hexdigest()
+        assert artifact.size_bytes == path.stat().st_size
+        committed = subprocess.run(
+            ["git", "show", f"{artifact.source_commit}:{artifact.source_path}"],
+            cwd=PROJECT,
+            check=True,
+            capture_output=True,
+        ).stdout
+        assert artifact.sha256 == hashlib.sha256(committed).hexdigest()
+        assert artifact.holdout_status == "pre_holdout"
+        assert artifact.training_eligible is False
+        assert artifact.production_eligible is False
+
+    experiments = {row.experiment_id: row for row in registries.experiments}
+    old = experiments["exp-p1-owner-long-gold-center-candidate-v1"]
+    assert old.status == "superseded"
+    assert old.reuse_allowed is False
+    current = experiments["exp-p1-owner-long-gold-center-candidate-v2"]
+    assert current.status == "active"
+    assert current.holdout_consumed is False
+    assert current.training_eligible is False
+    assert current.production_eligible is False
+    assert current.artifacts == artifact_ids

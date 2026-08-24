@@ -927,3 +927,68 @@ experiments:
     production_eligible: false
     canonical_report: reports/consolidation/FINAL_ACCEPTANCE.md
     reuse_allowed: true
+
+  - experiment_id: exp-p1-owner-long-gold-center-candidate-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f244510bd6337d69d76d04765ebe0c3b714b1f63"
+    status: superseded
+    question: >-
+      Can the Owner-long direction population be frozen as an exact,
+      review-gated and dependency-split candidate ledger without reusing the
+      short detector's empty Owner-long hard-negative labels or creating
+      premature training data?
+    single_variable: >-
+      data-lineage materialization stage only: freeze target identity,
+      mechanical core geometry and time split before Owner filtering; no model,
+      renderer, threshold, label, negative ratio or training change
+    result: >-
+      superseded_by_v2_before_review_or_materialization. The target population
+      was correct, but V1 called a nominal timestamp-grid interval an actual bar
+      gap and did not freeze alias geometry or public review-manifest identity.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_owner_long_candidate_manifest_20260824.md
+    artifacts:
+      - owner-long-gold-center-candidate-v1
+    reuse_allowed: false
+    notes: >-
+      Preserved for history only. Never join an Owner receipt to V1, materialize
+      its candidates, generate labels from it or cite its 158 interval as actual
+      OHLC bars. Use exp-p1-owner-long-gold-center-candidate-v2.
+
+  - experiment_id: exp-p1-owner-long-gold-center-candidate-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "53804b66b9d2f27aa18837b5697acf1e25b0a0dd"
+    status: active
+    question: >-
+      Can the exact Owner-long population be frozen as an immutable,
+      review-gated candidate ledger with stable event identity, complete alias
+      lineage and honest deferred OHLC proof before any training image exists?
+    single_variable: >-
+      candidate-ledger evidence contract only: add stable event IDs, original
+      alias geometry and hashes, public review-manifest locking and deferred
+      actual-bar proof; no model, threshold, renderer, label, split target,
+      negative ratio or training change
+    result: >-
+      candidate_ledger_v2_frozen_pending_owner_review. The 1,152 exact
+      Owner-long aliases close to 1,144 stable unique events (A/B/C
+      339/480/325) and split 963 train / 171 val / 10 drop with zero dependency
+      or event crossing. All decisions and actual OHLC proofs remain pending;
+      no OHLC, holdout, outcome, image or label was read or created.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_owner_long_candidate_manifest_v2_20260824.md
+    artifacts:
+      - owner-long-gold-center-candidate-v2
+      - owner-long-gold-center-candidate-v2-source-contract
+      - owner-long-gold-center-candidate-v2-summary
+      - owner-long-gold-center-candidate-v2-report
+      - owner-long-gold-center-candidate-v2-html
+    reuse_allowed: false
+    notes: >-
+      Six-MA A/B/C controls review order only. The 158 interval is nominal
+      timestamp-grid evidence, while actual OHLC gap and causal hashes are
+      deferred to bounded KEEP-only materialization. The next legal action is
+      an Owner page export joined through the fail-closed receipt gate.
