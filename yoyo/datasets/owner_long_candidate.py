@@ -19,6 +19,7 @@ import argparse
 import csv
 import hashlib
 import json
+import math
 import subprocess
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
@@ -27,17 +28,20 @@ from typing import Any, Iterable, Mapping, Sequence
 
 import pandas as pd
 
+from yoyo.contracts.holdout import HOLDOUT_START_ISO, assert_pre_holdout, is_pre_holdout
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-HOLDOUT_START = pd.Timestamp("2026-05-04T00:00:00Z")
 BAR_MINUTES = 15
 PURGE_BARS = 150
 VAL_FRACTION = 0.15
+YOLO_ROUNDING_TOLERANCE = 1e-6
 EXPECTED_DIRECTION_ROWS = 2525
 EXPECTED_LONG_ROWS = 1152
 EXPECTED_UNIQUE_LONG = 1144
 EXPECTED_SPLITS = {"train": 963, "val": 171, "drop": 10}
 PACK_ID = "owner_short_gold_center_v1_ma_rope_prefilter_v1_owner_2525"
+CANDIDATE_ID = "owner_long_gold_center_candidate_v2"
 ALLOWED_DECISIONS = {"KEEP", "REMOVE", "UNCERTAIN"}
 
 DEFAULT_REVIEW_SHEET = (
@@ -70,7 +74,7 @@ DEFAULT_PUBLIC_MANIFEST = (
     / "public"
     / "owner_2525_manifest.json"
 )
-DEFAULT_OUTPUT = PROJECT_ROOT / "datasets" / "owner_long_gold_center_candidate_v1"
+DEFAULT_OUTPUT = PROJECT_ROOT / "datasets" / CANDIDATE_ID
 
 
 class OwnerLongCandidateError(RuntimeError):
@@ -122,6 +126,39 @@ def current_commit() -> str:
     return result.stdout.strip()
 
 
+def canonical_sha256(payload: Mapping[str, Any]) -> str:
+    encoded = json.dumps(
+        dict(payload), ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def stable_event_id(
+    *,
+    symbol: str,
+    source_csv: str,
+    win_start: int,
+    win_end: int,
+    core_start: int,
+    core_end: int,
+) -> str:
+    payload = {
+        "schema": "owner_long_target_v2",
+        "symbol": symbol,
+        "source_csv": source_csv,
+        "win_start": win_start,
+        "win_end": win_end,
+        "core_start": core_start,
+        "core_end": core_end,
+    }
+    return "olt_" + canonical_sha256(payload)[:24]
+
+
+def _ensure_output_is_new(output_dir: Path, *, role: str) -> None:
+    if output_dir.exists() and any(output_dir.iterdir()):
+        raise FileExistsError(f"refusing to overwrite existing {role}: {output_dir}")
+
+
 def central_core(source_start: int, source_end: int) -> tuple[int, int]:
     """Return a 4--7 bar central core derived only from the Owner box."""
     source_width = source_end - source_start + 1
@@ -155,6 +192,42 @@ def tier_for_score(score: float, calibration: Mapping[str, Any]) -> str:
 def _read_sheet(path: Path) -> list[dict[str, str]]:
     with path.open(newline="", encoding="utf-8-sig") as handle:
         return list(csv.DictReader(handle))
+
+
+def _validate_review_public_manifest(
+    path: Path,
+    *,
+    expected_rows: int,
+    expected_sample_ids: set[str] | None = None,
+) -> tuple[dict[str, Mapping[str, Any]], dict[str, Mapping[str, Any]]]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if payload.get("pack_id") != PACK_ID:
+        raise OwnerLongCandidateError("review public manifest pack id mismatch")
+    items = payload.get("items") or []
+    if len(items) != expected_rows:
+        raise OwnerLongCandidateError(
+            f"review public item count changed: {len(items)} != {expected_rows}"
+        )
+    by_review: dict[str, Mapping[str, Any]] = {}
+    by_sample: dict[str, Mapping[str, Any]] = {}
+    for item in items:
+        review_id = str(item.get("review_id") or "")
+        sample_id = str(item.get("sample_id") or "")
+        if not review_id or review_id in by_review:
+            raise OwnerLongCandidateError(
+                f"blank or duplicate review_id in public manifest: {review_id!r}"
+            )
+        if not sample_id or sample_id in by_sample:
+            raise OwnerLongCandidateError(
+                f"blank or duplicate sample_id in public manifest: {sample_id!r}"
+            )
+        by_review[review_id] = item
+        by_sample[sample_id] = item
+    if expected_sample_ids is not None and set(by_sample) != expected_sample_ids:
+        raise OwnerLongCandidateError(
+            "review public sample_id population does not equal direction sheet"
+        )
+    return by_review, by_sample
 
 
 def _validate_source_join(
@@ -201,6 +274,40 @@ def _validate_source_join(
             raise OwnerLongCandidateError(f"{sample_id}: decision time mismatch")
         if not str(score.get("resolved_source_csv") or ""):
             raise OwnerLongCandidateError(f"{sample_id}: unresolved source path")
+        bar_b0 = int(sheet.get("bar_b0"))
+        bar_b1 = int(sheet.get("bar_b1"))
+        width_bars = int(sheet.get("width_bars"))
+        if not (0 <= bar_b0 <= bar_b1 < 200):
+            raise OwnerLongCandidateError(f"{sample_id}: invalid original bar_b0/bar_b1")
+        if bar_b1 - bar_b0 + 1 != width_bars:
+            raise OwnerLongCandidateError(f"{sample_id}: original box width mismatch")
+        box_index = int(sheet.get("box_index"))
+        n_boxes = int(sheet.get("n_boxes_on_image"))
+        if n_boxes < 1 or not 0 <= box_index < n_boxes:
+            raise OwnerLongCandidateError(f"{sample_id}: invalid box index/count")
+        yolo = [
+            float(sheet.get("yolo_xc")),
+            float(sheet.get("yolo_yc")),
+            float(sheet.get("yolo_w")),
+            float(sheet.get("yolo_h")),
+        ]
+        if not all(math.isfinite(value) for value in yolo):
+            raise OwnerLongCandidateError(f"{sample_id}: non-finite original YOLO geometry")
+        xc, yc, width, height = yolo
+        if not (
+            0 <= xc <= 1
+            and 0 <= yc <= 1
+            and 0 < width <= 1
+            and 0 < height <= 1
+            and xc - width / 2 >= -YOLO_ROUNDING_TOLERANCE
+            and xc + width / 2 <= 1 + YOLO_ROUNDING_TOLERANCE
+            and yc - height / 2 >= -YOLO_ROUNDING_TOLERANCE
+            and yc + height / 2 <= 1 + YOLO_ROUNDING_TOLERANCE
+        ):
+            raise OwnerLongCandidateError(f"{sample_id}: original YOLO box outside canvas")
+        source_path = PROJECT_ROOT / str(score["resolved_source_csv"])
+        if not source_path.is_file():
+            raise OwnerLongCandidateError(f"{sample_id}: resolved source path is missing")
     return sheet_by_id, score_by_id
 
 
@@ -232,18 +339,32 @@ def _derive_long_rows(
         end_time = cut_time + timedelta(
             minutes=(win_end - source_end) * BAR_MINUTES
         )
-        if start_time >= HOLDOUT_START or end_time >= HOLDOUT_START:
-            raise OwnerLongCandidateError(f"{sample_id}: visible window touches holdout")
+        assert_pre_holdout(start_time, what=f"{sample_id} visible window start")
+        assert_pre_holdout(end_time, what=f"{sample_id} visible window end")
         preview_path = review_root / str(sheet["preview_path"])
         if not preview_path.is_file():
             raise OwnerLongCandidateError(f"{sample_id}: missing Owner preview {preview_path}")
         rope_score = float(score["rope_score"])
+        owner_row = {str(key): value for key, value in sheet.items()}
+        owner_row_sha256 = canonical_sha256(owner_row)
+        source_csv = str(score["resolved_source_csv"])
+        event_id = stable_event_id(
+            symbol=str(sheet["symbol"]),
+            source_csv=source_csv,
+            win_start=win_start,
+            win_end=win_end,
+            core_start=core_start,
+            core_end=core_end,
+        )
         plans.append(
             {
+                "event_id": event_id,
                 "sample_id": sample_id,
                 "symbol": str(sheet["symbol"]),
                 "owner_side": "long",
-                "source_csv": str(score["resolved_source_csv"]),
+                "source_csv": source_csv,
+                "source_csv_sha256": None,
+                "source_csv_hash_status": "forbidden_eof_hash_defer_preholdout_prefix_hash",
                 "source_owner_global": [source_start, source_end],
                 "source_owner_bars": int(sheet["width_bars"]),
                 "source_owner_cut_time": cut_time.isoformat(),
@@ -260,10 +381,27 @@ def _derive_long_rows(
                 "rope_tier": tier_for_score(rope_score, calibration),
                 "owner_preview_path": str(preview_path.relative_to(PROJECT_ROOT)),
                 "owner_preview_sha256": sha256_file(preview_path),
+                "owner_row_sha256": owner_row_sha256,
+                "owner_original_geometry": {
+                    "bar_b0": int(sheet["bar_b0"]),
+                    "bar_b1": int(sheet["bar_b1"]),
+                    "width_bars": int(sheet["width_bars"]),
+                    "yolo_box": [
+                        float(sheet["yolo_xc"]),
+                        float(sheet["yolo_yc"]),
+                        float(sheet["yolo_w"]),
+                        float(sheet["yolo_h"]),
+                    ],
+                    "box_index": int(sheet["box_index"]),
+                    "n_boxes_on_image": int(sheet["n_boxes_on_image"]),
+                },
                 "direction_confirmation": "owner_sample_level",
                 "core_boundary_confirmation": "mechanical_contract_not_sample_level",
                 "source_window_sha256": None,
                 "source_window_hash_status": "deferred_until_causal_materialization",
+                "max_materialized_time": None,
+                "holdout_rows_materialized": None,
+                "actual_ohlc_gap_bars": None,
                 "future_outcome_used": False,
                 "model_score_used_for_label": False,
                 "review_image_used_as_model_input": False,
@@ -299,11 +437,28 @@ def deduplicate_targets(
         if len(tiers) != 1:
             raise OwnerLongCandidateError("duplicate target aliases disagree on rope tier")
         canonical = dict(ordered[0])
+        event_ids = {str(row["event_id"]) for row in ordered}
+        source_paths = {str(row["source_csv"]) for row in ordered}
+        decision_times = {str(row["source_owner_cut_time"]) for row in ordered}
+        if len(event_ids) != 1 or len(source_paths) != 1 or len(decision_times) != 1:
+            raise OwnerLongCandidateError("target aliases disagree on event lineage")
         canonical["owner_annotation_ids"] = [str(row["sample_id"]) for row in ordered]
         canonical["owner_annotation_count"] = len(ordered)
         canonical["owner_preview_paths"] = [str(row["owner_preview_path"]) for row in ordered]
         canonical["owner_preview_sha256s"] = [
             str(row["owner_preview_sha256"]) for row in ordered
+        ]
+        canonical["owner_annotation_lineage"] = [
+            {
+                "annotation_id": str(row["sample_id"]),
+                "owner_row_sha256": str(row["owner_row_sha256"]),
+                "source_owner_global": list(row["source_owner_global"]),
+                "source_owner_bars": int(row["source_owner_bars"]),
+                "owner_original_geometry": dict(row["owner_original_geometry"]),
+                "owner_preview_path": str(row["owner_preview_path"]),
+                "owner_preview_sha256": str(row["owner_preview_sha256"]),
+            }
+            for row in ordered
         ]
         unique.append(canonical)
         if len(ordered) > 1:
@@ -415,6 +570,12 @@ def assign_time_splits(
     dependency_cross_split = len(train_dependencies & val_dependencies)
     if actual_gap_bars < purge_bars or dependency_cross_split:
         raise OwnerLongCandidateError("time purge or dependency isolation failed")
+    event_splits: dict[str, set[str]] = defaultdict(set)
+    for row in rows:
+        event_splits[str(row["event_id"])].add(str(row["split"]))
+    event_cross_split = sum(len(splits) > 1 for splits in event_splits.values())
+    if event_cross_split:
+        raise OwnerLongCandidateError("one event_id appears in more than one split")
     return {
         "dependency_blocks": len(blocks),
         "dependency_block_counts": dict(sorted(block_counts.items())),
@@ -422,8 +583,11 @@ def assign_time_splits(
         "train_end_max": train_end.isoformat(),
         "val_start_min": val_start_actual.isoformat(),
         "purge_bars": purge_bars,
-        "actual_gap_bars": actual_gap_bars,
+        "nominal_timestamp_grid_gap_bars": actual_gap_bars,
+        "actual_ohlc_gap_bars": None,
+        "purge_proof_status": "pending_bounded_ohlc_materialization",
         "dependency_cross_split": dependency_cross_split,
+        "event_cross_split": event_cross_split,
     }
 
 
@@ -432,6 +596,7 @@ def build_pending_manifest(
     review_sheet: Path = DEFAULT_REVIEW_SHEET,
     score_rows_path: Path = DEFAULT_SCORES,
     calibration_path: Path = DEFAULT_CALIBRATION,
+    public_manifest_path: Path = DEFAULT_PUBLIC_MANIFEST,
     review_root: Path = DEFAULT_REVIEW_ROOT,
     output_dir: Path = DEFAULT_OUTPUT,
     generator_commit: str,
@@ -441,6 +606,7 @@ def build_pending_manifest(
     expected_splits: Mapping[str, int] | None = EXPECTED_SPLITS,
 ) -> dict[str, Any]:
     """Write the deterministic, review-pending Owner-long target ledger."""
+    _ensure_output_is_new(output_dir, role=CANDIDATE_ID)
     sheet_rows = _read_sheet(review_sheet)
     score_rows = read_jsonl(score_rows_path)
     calibration = json.loads(calibration_path.read_text(encoding="utf-8"))
@@ -450,6 +616,12 @@ def build_pending_manifest(
         expected_direction_rows=expected_direction_rows,
         expected_long_rows=expected_long_rows,
     )
+    _public_by_review, public_by_sample = _validate_review_public_manifest(
+        public_manifest_path,
+        expected_rows=expected_direction_rows,
+        expected_sample_ids=set(sheet_by_id),
+    )
+    public_manifest_sha256 = sha256_file(public_manifest_path)
     raw_long = _derive_long_rows(
         sheet_by_id, score_by_id, calibration, review_root=review_root
     )
@@ -465,20 +637,43 @@ def build_pending_manifest(
         )
     if any(row["training_eligible"] or row["production_eligible"] for row in unique):
         raise OwnerLongCandidateError("pending targets must not be eligible")
-    if any(pd.Timestamp(row["end_time"]) >= HOLDOUT_START for row in unique):
+    if any(not is_pre_holdout(row["end_time"]) for row in unique):
         raise OwnerLongCandidateError("pending target touches holdout")
+    if len({str(row["event_id"]) for row in unique}) != len(unique):
+        raise OwnerLongCandidateError("stable event_id collision")
+    for row in unique:
+        aliases = {str(value) for value in row["owner_annotation_ids"]}
+        if not aliases.issubset(public_by_sample):
+            raise OwnerLongCandidateError(
+                f"{row['event_id']}: Owner aliases missing from review public manifest"
+            )
+        row["review_pack_id"] = PACK_ID
+        row["review_public_manifest_sha256"] = public_manifest_sha256
 
     output_dir.mkdir(parents=True, exist_ok=True)
     manifest_path = output_dir / "candidate_manifest.jsonl"
     write_jsonl(manifest_path, unique)
     source_contract = {
         "schema_version": 1,
-        "candidate_id": "owner_long_gold_center_candidate_v1",
+        "candidate_id": CANDIDATE_ID,
         "class_fact": "Owner per-box long direction",
         "geometry": "central half of original Owner box, clamped to 4--7 bars",
         "review_order_only": "six-MA rope A/B/C",
         "causal_materialization": "deferred until Owner filter receipt is validated",
-        "holdout_start": HOLDOUT_START.isoformat(),
+        "holdout_start": HOLDOUT_START_ISO,
+        "materialization_loader": (
+            "scripts.build_owner_eth_shortdelay_calibration.load_preholdout_prefix"
+        ),
+        "required_materialization_receipt_fields": [
+            "source_preholdout_prefix_sha256",
+            "source_window_sha256",
+            "rendered_image_sha256",
+            "label_sha256",
+            "max_materialized_time",
+            "holdout_rows_materialized",
+            "actual_ohlc_gap_bars",
+        ],
+        "full_source_csv_eof_hash_forbidden": True,
         "training_eligible": False,
         "production_eligible": False,
         "owner_approval_required_to_change_training_eligible": True,
@@ -487,7 +682,7 @@ def build_pending_manifest(
     tier_counts = Counter(str(row["rope_tier"]) for row in unique)
     summary = {
         "schema_version": 1,
-        "candidate_id": "owner_long_gold_center_candidate_v1",
+        "candidate_id": CANDIDATE_ID,
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "generator_commit": generator_commit,
         "source": {
@@ -497,6 +692,8 @@ def build_pending_manifest(
             "rope_scores_sha256": sha256_file(score_rows_path),
             "calibration": str(calibration_path.relative_to(PROJECT_ROOT)),
             "calibration_sha256": sha256_file(calibration_path),
+            "review_public_manifest": str(public_manifest_path.relative_to(PROJECT_ROOT)),
+            "review_public_manifest_sha256": public_manifest_sha256,
         },
         "raw_owner_long_annotations": len(raw_long),
         "deduplication": dedup,
@@ -518,10 +715,15 @@ def build_pending_manifest(
             "source_join_one_to_one": True,
             "unique_target_count_frozen": len(unique) == expected_unique_long,
             "strictly_pre_holdout": all(
-                pd.Timestamp(row["end_time"]) < HOLDOUT_START for row in unique
+                is_pre_holdout(row["end_time"]) for row in unique
             ),
             "dependency_cross_split_zero": split["dependency_cross_split"] == 0,
-            "purge_at_least_150_bars": split["actual_gap_bars"] >= PURGE_BARS,
+            "nominal_grid_purge_at_least_150_bars": split[
+                "nominal_timestamp_grid_gap_bars"
+            ]
+            >= PURGE_BARS,
+            "actual_ohlc_purge_deferred": split["actual_ohlc_gap_bars"] is None,
+            "event_cross_split_zero": split["event_cross_split"] == 0,
             "all_pending_review": all(
                 row["owner_filter_decision"] == "PENDING" for row in unique
             ),
@@ -537,17 +739,23 @@ def build_pending_manifest(
 
 
 def _load_review_answers(
-    review_export: Path, public_manifest: Path
-) -> tuple[dict[str, str], dict[str, Any]]:
+    review_export: Path,
+    public_manifest: Path,
+    *,
+    expected_public_rows: int,
+) -> tuple[dict[str, str], dict[str, Any], dict[str, Mapping[str, Any]]]:
     payload = json.loads(review_export.read_text(encoding="utf-8"))
-    public = json.loads(public_manifest.read_text(encoding="utf-8"))
-    if payload.get("pack_id") != PACK_ID or public.get("pack_id") != PACK_ID:
+    if payload.get("pack_id") != PACK_ID:
         raise OwnerLongCandidateError("review pack id mismatch")
-    public_by_review = {
-        str(item["review_id"]): item for item in public.get("items") or []
-    }
-    if len(public_by_review) != len(public.get("items") or []):
-        raise OwnerLongCandidateError("duplicate review_id in public manifest")
+    exported_at = payload.get("exported_at")
+    if not exported_at:
+        raise OwnerLongCandidateError("review export is missing exported_at")
+    exported_stamp = pd.Timestamp(exported_at)
+    if exported_stamp.tzinfo is None:
+        raise OwnerLongCandidateError("review exported_at must be timezone-aware")
+    public_by_review, public_by_sample = _validate_review_public_manifest(
+        public_manifest, expected_rows=expected_public_rows
+    )
     decisions: dict[str, str] = {}
     answer_ids: set[str] = set()
     for answer in payload.get("answers") or []:
@@ -564,8 +772,12 @@ def _load_review_answers(
         decision = str(answer.get("decision") or "")
         if decision not in ALLOWED_DECISIONS:
             raise OwnerLongCandidateError(f"{review_id}: invalid decision {decision!r}")
+        if sample_id in decisions:
+            raise OwnerLongCandidateError(
+                f"duplicate sample_id across review answers: {sample_id}"
+            )
         decisions[sample_id] = decision
-    return decisions, payload
+    return decisions, payload, public_by_sample
 
 
 def join_review_export(
@@ -574,10 +786,34 @@ def join_review_export(
     pending_manifest: Path = DEFAULT_OUTPUT / "candidate_manifest.jsonl",
     public_manifest: Path = DEFAULT_PUBLIC_MANIFEST,
     output_dir: Path,
+    reviewer: str,
+    expected_public_rows: int = EXPECTED_DIRECTION_ROWS,
 ) -> dict[str, Any]:
     """Join Owner decisions without granting training eligibility or rendering."""
+    if not reviewer.strip():
+        raise OwnerLongCandidateError("reviewer identity is required")
+    _ensure_output_is_new(output_dir, role="Owner-long review receipt")
     candidates = read_jsonl(pending_manifest)
-    decisions, payload = _load_review_answers(review_export, public_manifest)
+    decisions, payload, public_by_sample = _load_review_answers(
+        review_export,
+        public_manifest,
+        expected_public_rows=expected_public_rows,
+    )
+    candidate_aliases = {
+        str(alias)
+        for candidate in candidates
+        for alias in candidate["owner_annotation_ids"]
+    }
+    if not candidate_aliases.issubset(public_by_sample):
+        raise OwnerLongCandidateError("pending Owner aliases are missing from public manifest")
+    expected_public_hashes = {
+        str(candidate.get("review_public_manifest_sha256") or "")
+        for candidate in candidates
+    }
+    if expected_public_hashes != {sha256_file(public_manifest)}:
+        raise OwnerLongCandidateError("public review manifest SHA differs from pending ledger")
+    if len({str(row["event_id"]) for row in candidates}) != len(candidates):
+        raise OwnerLongCandidateError("pending manifest has duplicate event_id")
     joined: list[dict[str, Any]] = []
     for candidate in candidates:
         alias_ids = [str(value) for value in candidate["owner_annotation_ids"]]
@@ -586,14 +822,17 @@ def join_review_export(
             raise OwnerLongCandidateError(
                 f"{candidate['sample_id']}: duplicate aliases have conflicting decisions"
             )
-        decision = next(iter(observed), "PENDING")
+        reviewed_aliases = sum(alias in decisions for alias in alias_ids)
+        review_complete = reviewed_aliases == len(alias_ids)
+        decision = next(iter(observed)) if review_complete and observed else "PENDING"
         row = dict(candidate)
         row["owner_filter_decision"] = decision
-        row["owner_filter_reviewed_aliases"] = sum(alias in decisions for alias in alias_ids)
-        row["owner_filter_unreviewed_aliases"] = sum(
-            alias not in decisions for alias in alias_ids
-        )
+        row["owner_filter_review_complete"] = review_complete
+        row["owner_filter_reviewed_aliases"] = reviewed_aliases
+        row["owner_filter_unreviewed_aliases"] = len(alias_ids) - reviewed_aliases
         row["owner_filter_receipt_sha256"] = sha256_file(review_export)
+        row["owner_filter_reviewer"] = reviewer.strip()
+        row["owner_filter_exported_at"] = str(payload["exported_at"])
         row["class"] = "candidate_positive" if decision == "KEEP" else "excluded_or_pending"
         row["training_eligible"] = False
         row["production_eligible"] = False
@@ -619,12 +858,15 @@ def join_review_export(
     }
     summary = {
         "schema_version": 1,
-        "candidate_id": "owner_long_gold_center_candidate_v1",
+        "candidate_id": CANDIDATE_ID,
         "review_pack_id": payload.get("pack_id"),
         "review_export_sha256": sha256_file(review_export),
         "pending_manifest_sha256": sha256_file(pending_manifest),
         "public_manifest_sha256": sha256_file(public_manifest),
         "answers_in_full_page_export": len(payload.get("answers") or []),
+        "long_alias_answers": sum(alias in decisions for alias in candidate_aliases),
+        "reviewer": reviewer.strip(),
+        "exported_at": payload["exported_at"],
         "long_unique_targets": len(joined),
         "status_counts": dict(sorted(status_counts.items())),
         "tier_status_counts": tier_status,
@@ -649,6 +891,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     build.add_argument("--review-sheet", type=Path, default=DEFAULT_REVIEW_SHEET)
     build.add_argument("--scores", type=Path, default=DEFAULT_SCORES)
     build.add_argument("--calibration", type=Path, default=DEFAULT_CALIBRATION)
+    build.add_argument("--public-manifest", type=Path, default=DEFAULT_PUBLIC_MANIFEST)
     build.add_argument("--review-root", type=Path, default=DEFAULT_REVIEW_ROOT)
     build.add_argument("--out", type=Path, default=DEFAULT_OUTPUT)
     build.add_argument("--generator-commit", default=None)
@@ -660,6 +903,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         default=DEFAULT_OUTPUT / "candidate_manifest.jsonl",
     )
     join.add_argument("--public-manifest", type=Path, default=DEFAULT_PUBLIC_MANIFEST)
+    join.add_argument("--reviewer", required=True)
     join.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
     if args.command == "build-pending":
@@ -667,6 +911,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             review_sheet=args.review_sheet,
             score_rows_path=args.scores,
             calibration_path=args.calibration,
+            public_manifest_path=args.public_manifest,
             review_root=args.review_root,
             output_dir=args.out,
             generator_commit=args.generator_commit or current_commit(),
@@ -677,6 +922,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             pending_manifest=args.pending_manifest,
             public_manifest=args.public_manifest,
             output_dir=args.out,
+            reviewer=args.reviewer,
         )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
