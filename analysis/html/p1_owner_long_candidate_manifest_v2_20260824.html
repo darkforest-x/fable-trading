@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>P1 Owner-long 待审核候选 manifest v2</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P1 Owner-long 待审核候选 manifest v2</h1>
+<p>日期：2026-08-24</p>
+<h2>结论先行</h2>
+<p>做多数据集已经从“来源混杂”推进到一份可复核、不可覆盖的 <strong>v2 待审核账本</strong>，但它仍然不是训练集。</p>
+<ul>
+<li>唯一类别事实来自 Owner 逐框方向表：2,525 个原框中有 1,152 个 <code>long</code>；合并 8 个重复别名后为 <strong>1,144 个唯一做多候选</strong>。</li>
+<li>唯一候选的审核顺序为 A=339、B=480、C=325。A/B/C 只决定人工审核先后，不自动改变标签。</li>
+<li>v2 为每个唯一目标增加稳定 <code>event_id</code>，并保存每个 Owner alias 的原行 SHA、原始 bar 几何、原始 YOLO 几何、审核图路径与 SHA。</li>
+<li>v2 把审核页面 public manifest 的完整样本集合及 SHA 锁进每条候选；同一目标的所有 alias 必须全部审核且结论一致，才能从 <code>PENDING</code> 变为 KEEP/REMOVE/UNCERTAIN。</li>
+<li>time split 仍为 train=963 / val=171 / drop=10。当前只证明 train→val 相隔 <strong>158 个名义 15 分钟时间格</strong>；真实 OHLC bar gap 必须等 KEEP 物化时用受限前缀读取器重验，当前明确为 <code>null</code>，不再提前宣称通过。</li>
+<li>构建过程没有打开 OHLC、没有读取 holdout、没有渲染图片或标签。1,144/1,144 均为 <code>PENDING</code>，且 <code>training_eligible=false</code>、<code>production_eligible=false</code>。</li>
+</ul>
+<p>正式 v2 候选 manifest： <code>datasets/owner_long_gold_center_candidate_v2/candidate_manifest.jsonl</code></p>
+<p>SHA256： <code>0b342a75e55d66a99d84e3d6a5be2be90c4e2f3e9de436aef37939cc1d31e929</code></p>
+<p>大小：3,241,092 bytes。</p>
+<p>旧 v1 保留为历史记录，但已被本报告取代，禁止继续注册为 active 或拿去物化训练数据。</p>
+<h2>v1 为什么必须被取代</h2>
+<p>Luna Max 复核发现 v1 有四个证据缺口：</p>
+<ol>
+<li>v1 把时间戳差换算出的 158 写成了“实际 158 bars”；源 OHLC 尚未读取，无法证明中间没有缺 bar。</li>
+<li>v1 没有逐 alias 保存 Owner 原始几何与原行哈希，重复目标虽然合并了，但原始标注谱系不够完整。</li>
+<li>v1 的 partial review 逻辑允许一个 alias 已审、另一个未审时提前解析唯一目标。</li>
+<li>v1 没有把审核页面的完整样本集合和文件 SHA 锁进候选账本，页面漂移时无法 fail closed。</li>
+</ol>
+<p>v2 不覆盖 v1，而是生成新目录、新 candidate ID 和新 manifest SHA；这使复核结论和历史产物都可追踪。</p>
+<h2>冻结来源</h2>
+<table><thead><tr>
+<th>来源</th>
+<th>作用</th>
+<th>SHA256</th>
+</tr></thead><tbody>
+<tr><td><code>analysis/output/owner_side_review/review_sheet.csv</code></td><td>Owner 逐框方向及原始几何</td><td><code>bb7081e7e1821c5f791486fae0f29caf18307b104bbb07156c35883781071c9a</code></td></tr>
+<tr><td><code>datasets/owner_short_gold_center_v1/review/ma_rope_prefilter_v1/admin/owner_2525_scores.jsonl</code></td><td>仅用于 A/B/C 审核排序</td><td><code>0752df544308e6c26f647fc1a520375a551ed003e234d12f3e50dd8a05deef0b</code></td></tr>
+<tr><td><code>datasets/owner_short_gold_center_v1/review/ma_rope_prefilter_v1/calibration.json</code></td><td>A/B/C 冻结阈值</td><td><code>bd09185267353a4f7381969784d2824b0e128fe85e08b3d53a212227458fadb2</code></td></tr>
+<tr><td><code>datasets/owner_short_gold_center_v1/review/ma_rope_prefilter_v1/public/owner_2525_manifest.json</code></td><td>审核 ID 与完整样本集合</td><td><code>ae65f868256632b32e627927fa7443b128cfe03492d52d6a1d055dcb8dd75e69</code></td></tr>
+</tbody></table>
+<p>以下来源明确禁止混入做多正例：</p>
+<ul>
+<li>short R1 的 916 个 <code>owner_long</code> 空标签 hard negative：只表示“不是 short”，不是 long Gold；</li>
+<li>R1 的 2,286 个 hard negative：不是 Owner-long 正例；</li>
+<li>fixed-W10 旧 triage 包：口径已被 Owner 原始方向表取代；</li>
+<li>public review manifest：它是审核队列，不是训练 manifest。</li>
+</ul>
+<h2>数据谱系与统计</h2>
+<table><thead><tr>
+<th>层级</th>
+<th>数量</th>
+<th>当前含义</th>
+</tr></thead><tbody>
+<tr><td>Owner 方向表原框</td><td>2,525</td><td>long 1,152 / short 1,361 / skip 12</td></tr>
+<tr><td>Owner-long 原始框</td><td>1,152</td><td>类别逐框确认</td></tr>
+<tr><td>重复 target groups</td><td>8</td><td>保留全部 alias 谱系，只生成一个唯一目标</td></tr>
+<tr><td>唯一 long 候选</td><td>1,144</td><td>待第二遍形态过滤</td></tr>
+<tr><td>A / B / C 唯一候选</td><td>339 / 480 / 325</td><td>只控制审核顺序</td></tr>
+<tr><td>KEEP</td><td>0</td><td>尚无本轮 Owner 导出回执</td></tr>
+<tr><td>新图片 / 新标签</td><td>0 / 0</td><td>审核前禁止物化</td></tr>
+<tr><td>可训练样本</td><td>0</td><td>eligibility 仍关闭</td></tr>
+</tbody></table>
+<p>manifest 独立复核闭合了以下关系：</p>
+<ul>
+<li>1,144 个 <code>event_id</code> 全部唯一，且可从 symbol、源路径、窗口和核心边界稳定重算；</li>
+<li>1,152 个 alias 的集合与方向表中的 1,152 个 long 原框完全相等；</li>
+<li>1,152 个 Owner 原行 SHA 全部重算一致；</li>
+<li>1,152 个审核图 SHA 全部重算一致；</li>
+<li>全部候选严格早于 <code>2026-05-04T00:00:00Z</code>；最晚可见窗口结束于 <code>2026-05-03T11:30:00Z</code>；</li>
+<li>manifest 目录只有账本、来源合同和摘要，没有训练图片或标签。</li>
+</ul>
+<h2>时间切分与 purge 证据等级</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>v1 写法</th>
+<th>v2 当前证据</th>
+</tr></thead><tbody>
+<tr><td>train / val / drop</td><td>963 / 171 / 10</td><td>963 / 171 / 10</td></tr>
+<tr><td>dependency blocks</td><td>1,097</td><td>1,097</td></tr>
+<tr><td>cross-split dependency</td><td>0</td><td>0</td></tr>
+<tr><td>cross-split event</td><td>未登记</td><td>0</td></tr>
+<tr><td>train→val 间隔</td><td>“实际 158 bars”</td><td>158 个名义 15m 时间格</td></tr>
+<tr><td>真实 OHLC bar gap</td><td>被提前当作已证明</td><td><code>null</code>，等待受限物化</td></tr>
+</tbody></table>
+<p><code>split</code> 仍按同币重叠可见窗口组成不可拆依赖块，再按时间选最后 15% block 为 val，并留 150 个名义时间格的 purge。这个预切分可以冻结审核前的归属，但删除样本、读取真实 OHLC 后仍必须重验。</p>
+<p>后续物化只能调用 bounded pre-holdout prefix loader，并为每条 KEEP 记录：</p>
+<ul>
+<li><code>source_preholdout_prefix_sha256</code>；</li>
+<li><code>source_window_sha256</code>；</li>
+<li><code>rendered_image_sha256</code>；</li>
+<li><code>label_sha256</code>；</li>
+<li><code>max_materialized_time</code>；</li>
+<li><code>holdout_rows_materialized=0</code>；</li>
+<li><code>actual_ohlc_gap_bars</code>。</li>
+</ul>
+<p>整个仍在增长的 CSV 的 EOF SHA 被明确禁止拿来代替因果前缀或样本窗口 SHA。</p>
+<h2>审核回执门</h2>
+<p>现有快捷页面默认选择 <code>A 核心档 + long + 未审核</code>，展示 Owner 原审核图，而不是重新绘制的左右对照图。</p>
+<p>回执联结器会：</p>
+<ol>
+<li>校验 pack ID、public manifest SHA、2,525 个唯一 review/sample ID 和完整样本集合；</li>
+<li>要求导出时间带时区，并显式登记 reviewer；</li>
+<li>拒绝未知、空白或重复答案；</li>
+<li>同一唯一目标若有多个 alias，必须全部审核且结论相同；部分完成继续保持 <code>PENDING</code>，冲突直接失败；</li>
+<li>输出新的、不可覆盖的 review receipt 目录；</li>
+<li>即使 KEEP，也继续保持 <code>training_eligible=false</code>，不自动渲染、不自动训练。</li>
+</ol>
+<h2>质量门</h2>
+<table><thead><tr>
+<th>门</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>方向表 / 排序表 / public manifest 样本集合闭合</td><td>PASS</td></tr>
+<tr><td>Owner 原始 bar 与 YOLO 几何合法</td><td>PASS</td></tr>
+<tr><td>long 1,152 → unique 1,144</td><td>PASS</td></tr>
+<tr><td>稳定 event ID 唯一</td><td>PASS（1,144/1,144）</td></tr>
+<tr><td>Owner 原行 SHA 重算</td><td>PASS（1,152/1,152）</td></tr>
+<tr><td>Owner 审核图 SHA 重算</td><td>PASS（1,152/1,152）</td></tr>
+<tr><td>严格 pre-holdout</td><td>PASS（1,144/1,144）</td></tr>
+<tr><td>名义时间格 purge ≥150</td><td>PASS（158）</td></tr>
+<tr><td>真实 OHLC purge</td><td>DEFERRED，不冒充 PASS</td></tr>
+<tr><td>打开 OHLC / 读取 holdout</td><td>0 / 0</td></tr>
+<tr><td>新训练图片 / 标签</td><td>0 / 0</td></tr>
+<tr><td>training / production eligible</td><td>0 / 0</td></tr>
+<tr><td>相关自动测试</td><td>183 passed / 2 skipped</td></tr>
+</tbody></table>
+<h2>非方向性零假设对照</h2>
+<p>本轮只做数据谱系、审核合同和切分门禁，没有模型训练、阈值选择或交易回测。因此 val AUC、top-decile 毛/净收益、胜率、0.2% 成本和匹配随机入场对照均不适用；不能用旧模型结果填充。</p>
+<p>同等严格的零假设仍是：如果六均线排序分与 Owner keep/drop 无关，打乱裁决后结果应与真实裁决相当。冻结的 390 条人工 keep/drop 对照得到 AUC=0.489、10,000 次置换 <code>p=0.635</code>，不能拒绝“排序无效”的零假设。因此 A/B/C 只能帮 Owner 先看更可能的样本，不能自动产生 KEEP/REMOVE。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li><code>owner_side=long</code> 是逐样本方向确认；机械派生的 4–7 根核心不是逐样本边界确认。</li>
+<li>用户口径“A 档基本都能保留”说明 A 应优先审核，不等价于 339 个唯一目标已经逐样本确认。</li>
+<li>1,144 是旧人工池的候选上限，不是最终正样本数；最终数量由 KEEP 回执决定。</li>
+<li>当前没有真实 OHLC gap、因果窗口、图片或 label 哈希，故绝不能启动训练。</li>
+<li>未审和 <code>UNCERTAIN</code> 都不能进入正例；重复 alias 不能靠一个答案代替全部答案。</li>
+<li>没有读取 holdout、没有训练、没有 promote、没有部署、没有下单。</li>
+</ul>
+<h2>下一步</h2>
+<ol>
+<li>Owner 先审核 A 档 long：页面上是 343 个原始框，对应 339 个唯一目标；快捷键 <code>K/1=保留</code>、<code>X/2=去掉</code>、<code>?/3=待定</code>。</li>
+<li>导出 JSON 后，用 <code>join-review</code> 生成独立回执；只要 alias 不完整或冲突就停止。</li>
+<li>A 档结果稳定后再决定是否审核 B；C 不自动删除。</li>
+<li>仅对 KEEP 运行 bounded causal materialization，记录前缀/窗口/图片/标签 SHA，重验实际 bar purge、图片标签 parity 和 split 依赖。</li>
+<li>生成新的 Gold dataset 版本，仍默认 <code>training_eligible=false</code>；由 Owner 看最终统计与抽查结果后单独批准训练。</li>
+<li>旧人工池冻结后，再用 short 模型式的主动学习循环扩充做多候选；模型提议只进审核池，不自动进 Gold。</li>
+</ol>
+<h2>复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+
+# 构建器必须先落库；正式 v2 由这个 commit 生成。
+git show --stat 47f7557bc9f0cb3a35d08440c8d090e107d7c9e2
+
+# 不覆盖正式工件，重建到新的审计临时目录。
+owner_long_audit_dir=&quot;$(mktemp -d)&quot;
+.venv/bin/python tools/datasets/owner_long_candidate.py build-pending \
+  --generator-commit 47f7557bc9f0cb3a35d08440c8d090e107d7c9e2 \
+  --out &quot;$owner_long_audit_dir/owner_long_gold_center_candidate_v2&quot;
+
+.venv/bin/python -m pytest -q \
+  tests/test_owner_long_candidate.py \
+  tests/causality/test_holdout_boundary_is_single_valued.py \
+  tests/boundaries
+
+# 收到 Owner 页面导出后才运行；每次输出必须是新目录。
+.venv/bin/python tools/datasets/owner_long_candidate.py join-review \
+  /path/to/ma_rope_prefilter_v1_answers.json \
+  --reviewer owner \
+  --out datasets/owner_long_gold_center_candidate_v2/review_receipts/owner_export_YYYYMMDD_v1
+
+python3 scripts/md_to_html.py \
+  analysis/p1_owner_long_candidate_manifest_v2_20260824.md \
+  --out-dir analysis/html
+</code></pre>
+<h2>产物</h2>
+<ul>
+<li>候选 manifest：<code>datasets/owner_long_gold_center_candidate_v2/candidate_manifest.jsonl</code></li>
+<li>构建摘要：<code>datasets/owner_long_gold_center_candidate_v2/summary.json</code></li>
+<li>来源合同：<code>datasets/owner_long_gold_center_candidate_v2/source_contract.json</code></li>
+<li>构建器：<code>yoyo/datasets/owner_long_candidate.py</code></li>
+<li>CLI：<code>tools/datasets/owner_long_candidate.py</code></li>
+<li>测试：<code>tests/test_owner_long_candidate.py</code></li>
+</ul>
+</body>
+</html>

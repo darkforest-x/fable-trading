@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "candidate_id": "owner_long_gold_center_candidate_v2",
+  "class_fact": "Owner per-box long direction",
+  "geometry": "central half of original Owner box, clamped to 4--7 bars",
+  "review_order_only": "six-MA rope A/B/C",
+  "causal_materialization": "deferred until Owner filter receipt is validated",
+  "holdout_start": "2026-05-04T00:00:00+00:00",
+  "materialization_loader": "scripts.build_owner_eth_shortdelay_calibration.load_preholdout_prefix",
+  "required_materialization_receipt_fields": [
+    "source_preholdout_prefix_sha256",
+    "source_window_sha256",
+    "rendered_image_sha256",
+    "label_sha256",
+    "max_materialized_time",
+    "holdout_rows_materialized",
+    "actual_ohlc_gap_bars"
+  ],
+  "full_source_csv_eof_hash_forbidden": true,
+  "training_eligible": false,
+  "production_eligible": false,
+  "owner_approval_required_to_change_training_eligible": true
+}
