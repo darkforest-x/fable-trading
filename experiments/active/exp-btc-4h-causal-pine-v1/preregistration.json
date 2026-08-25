@@ -1,0 +1,84 @@
+{
+  "experiment_id": "exp-btc-4h-causal-pine-v1",
+  "frozen_at": "2026-08-25T11:28:09Z",
+  "question": "Can the observable prefix of the Owner-supplied BTC 4h six-MA compression launch be expressed as a non-repainting Pine v6 indicator that alerts only on a confirmed current bar and never reads beyond tip/tip-1/tip-2?",
+  "relationship_to_completed_shape_v1": {
+    "parent_experiment": "exp-btc-4h-ma-launch-similarity-v1",
+    "reused_without_change": [
+      "SMA/EMA periods 20, 60 and 120",
+      "30 completed pre-anchor bars",
+      "reference-derived compression, anchor-proximity and pre-range gates",
+      "exact LONG/SHORT sign mirror",
+      "reference-derived first-three-bar and twelve-bar movement floors",
+      "reference-derived twelve-bar favorable-ATR floor"
+    ],
+    "removed_as_unobservable": [
+      "bars after the current confirmed bar",
+      "42-bar completed-shape RMSE",
+      "12-bar release DTW",
+      "completed-release phase-scramble significance"
+    ],
+    "why_new_configuration": "The decision timestamp moves from release bar 12 back to the current confirmed bar, so the observable tensor and claim change even though the class definition and structural gates are inherited."
+  },
+  "causal_contract": {
+    "timeframe_seconds": 14400,
+    "pre_bars": 30,
+    "candidate_anchor_lags": [0, 1, 2],
+    "signal_timestamp": "current confirmed bar close",
+    "plot_offset": 0,
+    "future_bars": 0,
+    "cross_symbol_requests": 0,
+    "orders": false,
+    "alert_only": true,
+    "same_side_dedupe_bars": 3
+  },
+  "frozen_gates": {
+    "ma_spread_before_max_pct": 1.3330854020159224,
+    "anchor_to_bundle_max_pct": 2.0,
+    "pre_range_max_pct": 8.0,
+    "first3_close_min_pct": 1.0835936596902802,
+    "release12_close_min_pct": 4.359047154607722,
+    "release12_favorable_atr_min": 5.046559476334984,
+    "early_move_floor": "observed_bars * max(first3_close_min_pct / 3, release12_close_min_pct / 12)",
+    "early_favorable_atr_floor": "observed_bars * release12_favorable_atr_min / 12",
+    "long_release": "current close above the current six-MA upper rope",
+    "short_release": "current close below the current six-MA lower rope"
+  },
+  "diagnostic_score": {
+    "claim": "ranking and display only; never a probability and not an additional pass gate",
+    "components": {
+      "signed_close_progress": 0.4,
+      "signed_ma_center_release": 0.2,
+      "compression_quality": 0.15,
+      "signed_body_atr_progress": 0.1,
+      "log_volume_ratio": 0.15
+    },
+    "range": [0, 100]
+  },
+  "single_variable": "Candidate direction only: LONG versus exact signed SHORT mirror. All causal lags, inherited gates, early-floor arithmetic, score weights, deduplication and confirmed-bar semantics remain identical.",
+  "validation_plan": {
+    "static_contract": [
+      "Pine v6 indicator, never strategy",
+      "barstate.isconfirmed gates every alert",
+      "no request.* or lookahead",
+      "no negative history offsets or backward plotting",
+      "only lags 0, 1 and 2",
+      "all frozen constants match this preregistration"
+    ],
+    "venue_compile": "Compile in the official TradingView Pine editor and record the visible compiler result and source SHA-256.",
+    "historical_or_holdout_evaluation": false
+  },
+  "holdout": {
+    "read": false,
+    "consumption_number": 0,
+    "post_compile_rule": "Do not inspect or score historical/holdout signals in this task. Any evaluation or semantic threshold change needs an explicit Owner decision and a separately recorded configuration."
+  },
+  "safety": {
+    "research_only": true,
+    "training_eligible": false,
+    "production_eligible": false,
+    "active_or_frozen_change": false,
+    "forward_or_order_state_change": false,
+    "telegram_or_webhook_send": false
+  }
+}
