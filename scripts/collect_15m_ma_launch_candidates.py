@@ -99,8 +99,11 @@ def validate_preregistration(
     """Load the exact committed contract, dependency hashes and eval symbols."""
 
     payload = json.loads(path.read_text(encoding="utf-8"))
-    if payload.get("experiment_id") != EXPERIMENT_ID:
+    experiment_id = str(payload.get("experiment_id", ""))
+    if not experiment_id.startswith("exp-15m-ma-launch-candidate"):
         raise CandidateCollectionError("unexpected experiment_id")
+    if path.parent.name != experiment_id:
+        raise CandidateCollectionError("preregistration directory does not match experiment_id")
     spec = CandidateSpec.from_preregistration(payload)
     selection = payload["selection"]
     per_side = selection["per_side"]
@@ -154,6 +157,49 @@ def validate_preregistration(
     return payload, spec, profile, eval_symbols
 
 
+def candidate_identity(row: Mapping[str, Any]) -> tuple[str, str, str]:
+    """Return the stable cross-experiment identity of one candidate anchor."""
+
+    return (
+        str(row["symbol"]),
+        str(row["direction"]),
+        utc(row["anchor_time"]).isoformat(),
+    )
+
+
+def load_existing_candidate_rows(prereg: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Load a hash-pinned prior PENDING pool used only for expansion exclusion."""
+
+    contract = prereg.get("existing_candidate_exclusion")
+    if contract is None:
+        return []
+    path = repo_path(contract["path"])
+    if sha256_file(path) != str(contract["sha256"]):
+        raise CandidateCollectionError("existing candidate exclusion hash drifted")
+    rows = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    if len(rows) != int(contract["rows"]):
+        raise CandidateCollectionError("existing candidate exclusion row count drifted")
+    identities = [candidate_identity(row) for row in rows]
+    if len(identities) != len(set(identities)):
+        raise CandidateCollectionError("existing candidate exclusion contains duplicates")
+    side_counts = Counter(str(row["direction"]) for row in rows)
+    expected_sides = {
+        str(side): int(count) for side, count in contract["per_side"].items()
+    }
+    if dict(side_counts) != expected_sides:
+        raise CandidateCollectionError("existing candidate exclusion side counts drifted")
+    for row in rows:
+        if row.get("training_eligible") is not False:
+            raise CandidateCollectionError("existing candidate unexpectedly training eligible")
+        if row.get("owner_verdict") != "PENDING":
+            raise CandidateCollectionError("existing candidate verdict is not PENDING")
+    return rows
+
+
 def merge_counts(target: Counter[str], values: Mapping[str, int]) -> None:
     """Accumulate integer scan counters without losing zero-valued fields."""
 
@@ -178,23 +224,32 @@ def deterministic_audit_ids(
 
 
 def selection_audit(
-    selected: Mapping[str, Sequence[Mapping[str, Any]]], *, spec: CandidateSpec
+    selected: Mapping[str, Sequence[Mapping[str, Any]]],
+    *,
+    spec: CandidateSpec,
+    existing_rows: Iterable[Mapping[str, Any]] = (),
 ) -> dict[str, Any]:
-    """Verify exact counts, dedupe distance and frozen diversity quotas."""
+    """Verify additions and the combined prior-plus-new diversity contract."""
 
+    existing = [dict(row) for row in existing_rows]
     sides: dict[str, Any] = {}
     for side in ("LONG", "SHORT"):
         rows = list(selected[side])
         if len(rows) != spec.target_per_side:
             raise CandidateCollectionError(f"{side} selected count drifted")
-        symbols = Counter(str(row["symbol"]) for row in rows)
-        days = Counter(utc(row["anchor_time"]).strftime("%Y-%m-%d") for row in rows)
+        prior = [row for row in existing if str(row["direction"]) == side]
+        combined = [*prior, *rows]
+        identities = [candidate_identity(row) for row in combined]
+        if len(identities) != len(set(identities)):
+            raise CandidateCollectionError(f"{side} combined candidate identity duplicate")
+        symbols = Counter(str(row["symbol"]) for row in combined)
+        days = Counter(utc(row["anchor_time"]).strftime("%Y-%m-%d") for row in combined)
         if max(symbols.values()) > spec.max_per_symbol_per_side:
             raise CandidateCollectionError(f"{side} symbol quota failed")
         if max(days.values()) > spec.max_per_day_per_side:
             raise CandidateCollectionError(f"{side} UTC-day quota failed")
         by_symbol: dict[str, list[Any]] = defaultdict(list)
-        for row in rows:
+        for row in combined:
             by_symbol[str(row["symbol"])].append(utc(row["anchor_time"]))
         closest_bars: int | None = None
         for stamps in by_symbol.values():
@@ -209,6 +264,8 @@ def selection_audit(
         scores = np.asarray([float(row["completed_score"]) for row in rows])
         sides[side] = {
             "selected": len(rows),
+            "seeded_existing": len(prior),
+            "combined_rows": len(combined),
             "unique_symbols": len(symbols),
             "unique_utc_days": len(days),
             "max_per_symbol": max(symbols.values()),
@@ -251,6 +308,8 @@ def main() -> int:
         raise FileExistsError(f"refusing to overwrite build path: {build_output}")
 
     prereg, spec, profile, eval_symbols = validate_preregistration(prereg_path)
+    experiment_id = str(prereg["experiment_id"])
+    existing_rows = load_existing_candidate_rows(prereg)
     builder_commit = verify_builder_committed([*BUILDER_PATHS, prereg_path])
     roots = [repo_path(value) for value in prereg["scope"]["source_roots"]]
     universe, universe_audit = discover_universe(roots, eval_symbols=eval_symbols)
@@ -321,8 +380,16 @@ def main() -> int:
         raise AssertionError("a holdout OHLCV row was materialized")
     deduplicated = deduplicate_candidates(candidates, spec=spec)
     deduplicated_counts = Counter(str(row["direction"]) for row in deduplicated)
-    selected = select_balanced_candidates(deduplicated, spec=spec)
-    selected_audit = selection_audit(selected, spec=spec)
+    selected = select_balanced_candidates(
+        deduplicated,
+        spec=spec,
+        existing_rows=existing_rows,
+    )
+    selected_audit = selection_audit(
+        selected,
+        spec=spec,
+        existing_rows=existing_rows,
+    )
     all_selected = [*selected["LONG"], *selected["SHORT"]]
     causality_ids = deterministic_audit_ids(
         all_selected,
@@ -335,6 +402,7 @@ def main() -> int:
     grouped = selected_by_source(selected)
     causality_rows: list[dict[str, Any]] = []
     rendered = 0
+    rank_width = max(3, len(str(spec.target_per_side)))
     for source_number, source_key in enumerate(sorted(grouped), 1):
         source_path = repo_path(source_key)
         frame, render_source_audit = read_preholdout_prefix(
@@ -357,7 +425,7 @@ def main() -> int:
             raw_segment, segment = segment_cache[segment_key]
             stamp = utc(row["anchor_time"]).strftime("%Y%m%d_%H%M")
             name = (
-                f"{str(row['direction']).lower()}_{int(row['rank']):03d}_"
+                f"{str(row['direction']).lower()}_{int(row['rank']):0{rank_width}d}_"
                 f"{row['symbol']}_{stamp}.png"
             )
             build_path = chart_dir / name
@@ -375,7 +443,7 @@ def main() -> int:
         if source_number == 1 or source_number % 10 == 0 or source_number == len(grouped):
             print(
                 f"render {source_number:03d}/{len(grouped)} sources "
-                f"charts={rendered:04d}/1000",
+                f"charts={rendered:0{rank_width + 1}d}/{2 * spec.target_per_side}",
                 flush=True,
             )
 
@@ -406,7 +474,7 @@ def main() -> int:
         str(row["last_time"]) for row in source_audits if row.get("last_time") is not None
     ]
     summary = {
-        "experiment_id": EXPERIMENT_ID,
+        "experiment_id": experiment_id,
         "protocol": spec.protocol,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": "success_pending_owner_review",
@@ -437,6 +505,20 @@ def main() -> int:
             "threshold_tuned_after_scan": False,
         },
         "selection_audit": selected_audit,
+        "existing_candidate_exclusion": {
+            "rows_seeded": len(existing_rows),
+            "path": (
+                str(prereg["existing_candidate_exclusion"]["path"])
+                if existing_rows
+                else None
+            ),
+            "sha256": (
+                str(prereg["existing_candidate_exclusion"]["sha256"])
+                if existing_rows
+                else None
+            ),
+            "used_for_identity_dedupe_and_union_quotas": bool(existing_rows),
+        },
         "causality_null": {
             "method": "multiply every OHLC row after t by 7 and volume by 13 then recompute",
             "sample_rows": len(causality_rows),
@@ -477,7 +559,7 @@ def main() -> int:
             "gallery_path": relative_to_root(output / "index.html"),
             "gallery_sha256": sha256_file(gallery_path),
         },
-        "existing_pack": prereg["existing_pack_audit"],
+        "existing_pack": prereg.get("existing_pack_audit"),
         "model_trained": False,
         "economic_evaluation_run": False,
         "raw_klines_written": 0,
@@ -485,20 +567,23 @@ def main() -> int:
         "forward_or_order_state_changed": False,
     }
     write_json(build_output / "scan_summary.json", summary)
-    readme = f"""# {EXPERIMENT_ID} results
+    readme = f"""# {experiment_id} results
 
 - status: **success, PENDING Owner review**
 - scan: **{spec.scan_start_ts.isoformat()}** to **{spec.scan_end_ts.isoformat()}** (exclusive)
 - selected: **{len(selected['LONG'])} LONG + {len(selected['SHORT'])} SHORT**
+- prior candidates seeded for exclusion/union quotas: **{len(existing_rows)}**
 - proposal gate: inherited **{profile.profile_id}**, causal through completed bar t
 - completed-path ranking: **12 bars**, plus **6 review-only bars**
 - holdout OHLCV materialized: **0 rows**
 - training images / labels / models: **0 / 0 / 0**
 - training / production eligible: **false / false**
 
-Open `index.html` for the searchable 1,000-chart gallery.  Blue marks completed
-bar t and gray marks the end of the 12-bar completed path.  These are machine
-proposals, not automatically accepted positives.
+Open `index.html` for the searchable {2 * spec.target_per_side}-chart gallery.
+Blue marks the requested review position ({spec.review_marker_offset_bars:+d} bars
+relative to selection t); an orange dash preserves t when the offset is nonzero.
+Gray marks the end of the 12-bar completed path.  These are machine proposals,
+not automatically accepted positives or training boxes.
 """
     (build_output / "README.md").write_text(readme, encoding="utf-8")
     build_output.rename(output)

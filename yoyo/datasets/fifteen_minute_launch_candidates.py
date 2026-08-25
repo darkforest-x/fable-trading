@@ -61,6 +61,7 @@ class CandidateSpec:
     pre_bars: int = 30
     release_bars: int = 12
     review_extra_bars: int = 6
+    review_marker_offset_bars: int = 0
     dedupe_bars: int = 224
     target_per_side: int = 500
     max_per_symbol_per_side: int = 8
@@ -97,6 +98,13 @@ class CandidateSpec:
                 raise CandidateCollectionError(f"{name} must be a positive integer")
         if self.causal_input_bars < self.pre_bars:
             raise CandidateCollectionError("causal input must cover the review prelude")
+        if not isinstance(self.review_marker_offset_bars, int) or isinstance(
+            self.review_marker_offset_bars, bool
+        ):
+            raise CandidateCollectionError("review_marker_offset_bars must be an integer")
+        marker_index = self.pre_bars + self.review_marker_offset_bars
+        if marker_index < 0 or marker_index >= self.review_bars:
+            raise CandidateCollectionError("review marker falls outside the rendered window")
         if not math.isclose(self.formation_weight + self.future_weight, 1.0, abs_tol=1e-12):
             raise CandidateCollectionError("completed score weights must sum to one")
         if not math.isclose(
@@ -152,6 +160,7 @@ class CandidateSpec:
             pre_bars=int(shape["review_pre_bars"]),
             release_bars=int(shape["completed_release_bars"]),
             review_extra_bars=int(shape["review_extra_bars"]),
+            review_marker_offset_bars=int(shape.get("review_marker_offset_bars", 0)),
             dedupe_bars=int(selection["same_symbol_side_dedupe_bars"]),
             target_per_side=int(selection["per_side"]["LONG"]),
             max_per_symbol_per_side=int(selection["max_per_symbol_per_side"]),
@@ -513,9 +522,16 @@ def select_balanced_candidates(
     rows: Iterable[dict[str, Any]],
     *,
     spec: CandidateSpec,
+    existing_rows: Iterable[Mapping[str, Any]] = (),
 ) -> dict[str, list[dict[str, Any]]]:
-    """Select exact balanced sides under frozen symbol and market-day quotas."""
+    """Select exact balanced additions under frozen union-pool quotas.
 
+    ``existing_rows`` are immutable prior selections.  They seed symbol/day
+    quotas and same-symbol/side exclusion intervals, so an expansion cannot
+    silently duplicate or overcrowd the already delivered pool.
+    """
+
+    existing = [dict(row) for row in existing_rows]
     selected: dict[str, list[dict[str, Any]]] = {}
     for side in ("LONG", "SHORT"):
         side_rows = sorted(
@@ -526,19 +542,34 @@ def select_balanced_candidates(
                 str(row["anchor_time"]),
             ),
         )
-        symbol_counts: Counter[str] = Counter()
-        day_counts: Counter[str] = Counter()
+        seeded = [row for row in existing if str(row["direction"]) == side]
+        symbol_counts: Counter[str] = Counter(str(row["symbol"]) for row in seeded)
+        day_counts: Counter[str] = Counter(
+            utc(row["anchor_time"]).strftime("%Y-%m-%d") for row in seeded
+        )
+        occupied: dict[str, list[pd.Timestamp]] = defaultdict(list)
+        for row in seeded:
+            occupied[str(row["symbol"])].append(utc(row["anchor_time"]))
+        for stamps in occupied.values():
+            stamps.sort()
         chosen: list[dict[str, Any]] = []
         for row in side_rows:
             symbol = str(row["symbol"])
+            stamp = utc(row["anchor_time"])
             day = utc(row["anchor_time"]).strftime("%Y-%m-%d")
             if symbol_counts[symbol] >= spec.max_per_symbol_per_side:
                 continue
             if day_counts[day] >= spec.max_per_day_per_side:
                 continue
+            stamps = occupied[symbol]
+            insert_at = bisect_left(stamps, stamp)
+            neighbors = stamps[max(0, insert_at - 1) : insert_at + 1]
+            if any(abs(stamp - prior) <= spec.dedupe_timedelta for prior in neighbors):
+                continue
             chosen.append(dict(row))
             symbol_counts[symbol] += 1
             day_counts[day] += 1
+            stamps.insert(insert_at, stamp)
             if len(chosen) == spec.target_per_side:
                 break
         if len(chosen) != spec.target_per_side:
@@ -684,14 +715,27 @@ def render_review_chart(
     chart, transform = render_chart(review, width=1280, height=680)
     canvas = np.full((770, 1280, 3), 255, dtype=np.uint8)
     canvas[70:750] = chart
+    marker_local_i = spec.pre_bars + spec.review_marker_offset_bars
+    marker_x = transform.x_at(marker_local_i)
     anchor_x = transform.x_at(spec.pre_bars)
     release_end_x = transform.x_at(spec.pre_bars + spec.release_bars - 1)
-    cv2.line(canvas, (anchor_x, 70), (anchor_x, 750), (210, 115, 32), 2, cv2.LINE_AA)
+    cv2.line(canvas, (marker_x, 70), (marker_x, 750), (210, 115, 32), 2, cv2.LINE_AA)
+    if spec.review_marker_offset_bars != 0:
+        for top in range(70, 750, 14):
+            cv2.line(
+                canvas,
+                (anchor_x, top),
+                (anchor_x, min(top + 7, 750)),
+                (0, 145, 235),
+                1,
+                cv2.LINE_AA,
+            )
     cv2.line(canvas, (release_end_x, 70), (release_end_x, 750), (100, 100, 100), 1, cv2.LINE_AA)
     side = str(row["direction"])
     color = (170, 92, 25) if side == "LONG" else (70, 70, 190)
+    rank_width = max(3, len(str(spec.target_per_side)))
     title = (
-        f"{side} #{int(row['rank']):03d}  {row['symbol']}  15m  "
+        f"{side} #{int(row['rank']):0{rank_width}d}  {row['symbol']}  15m  "
         f"{utc(row['anchor_time']).strftime('%Y-%m-%d %H:%M UTC')}"
     )
     metrics = (
@@ -701,9 +745,14 @@ def render_review_chart(
     )
     cv2.putText(canvas, title, (18, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.72, color, 2, cv2.LINE_AA)
     cv2.putText(canvas, metrics, (18, 58), cv2.FONT_HERSHEY_SIMPLEX, 0.53, (55, 62, 69), 1, cv2.LINE_AA)
+    marker_note = (
+        "blue = completed release bar t"
+        if spec.review_marker_offset_bars == 0
+        else f"blue = requested review marker t{spec.review_marker_offset_bars:+d} | orange dash = selection bar t"
+    )
     cv2.putText(
         canvas,
-        "blue = completed release bar t | gray = 12-bar path end | all future is REVIEW ONLY; no training image/label generated",
+        f"{marker_note} | gray = 12-bar path end | REVIEW ONLY; no training image/label generated",
         (18, 767),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.43,
@@ -721,6 +770,11 @@ def render_review_chart(
         "causal_input_sha256": canonical_window_sha256(causal),
         "review_bars": len(review),
         "causal_input_bars": len(causal),
+        "review_marker_offset_bars": spec.review_marker_offset_bars,
+        "review_marker_time": utc(review["open_time"].iloc[marker_local_i]).isoformat(),
+        "review_marker_source_i": int(row["source_anchor_i"])
+        + spec.review_marker_offset_bars,
+        "review_marker_is_training_label": False,
     }
 
 
@@ -764,6 +818,7 @@ def build_gallery(rows: Sequence[Mapping[str, Any]], *, output: Path) -> None:
     """Write a local lazy-loading gallery for all PENDING review candidates."""
 
     cards: list[str] = []
+    rank_width = max(3, len(str(max((int(row["rank"]) for row in rows), default=0))))
     for row in rows:
         # The public manifest stores repository-relative paths.  The gallery
         # sits beside ``review_charts/``, so it must not depend on the caller's
@@ -774,21 +829,21 @@ def build_gallery(rows: Sequence[Mapping[str, Any]], *, output: Path) -> None:
         cards.append(
             f'''<article class="card" data-side="{side}" data-text="{symbol.lower()} {side.lower()}">
   <img loading="lazy" src="{html.escape(relative_image.as_posix())}" alt="{side} {symbol}">
-  <div class="meta"><b>{side} #{int(row['rank']):03d} · {symbol}</b><br>
+  <div class="meta"><b>{side} #{int(row['rank']):0{rank_width}d} · {symbol}</b><br>
   {html.escape(str(row['anchor_time']))}<br>
   score {float(row['completed_score']):.3f} · close {float(row['release_close_signed_atr']):+.2f} ATR · MFE {float(row['release_favorable_atr']):.2f} ATR<br>
   <span>PENDING · candidate, not positive label</span></div>
 </article>'''
         )
     document = f'''<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>15m MA launch candidate 1000</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>15m MA launch candidates {len(rows)}</title>
 <style>body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#f5f7fa;color:#18212b}}
 header{{position:sticky;top:0;z-index:2;background:#fff;padding:14px 20px;border-bottom:1px solid #dfe5ec}}h1{{margin:0 0 8px;font-size:22px}}
 .note{{font-size:13px;color:#5b6673}}.filters{{display:flex;gap:8px;margin-top:10px}}button,input{{padding:8px 12px;border:1px solid #cbd5df;border-radius:8px;background:#fff}}
 main{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:14px}}.card{{background:#fff;border:1px solid #dfe5ec;border-radius:10px;overflow:hidden}}
 .card img{{display:block;width:100%;height:auto}}.meta{{padding:9px 11px;font-size:12px;line-height:1.5}}.meta span{{color:#a04416}}.hidden{{display:none}}
 @media(max-width:1000px){{main{{grid-template-columns:1fr}}}}</style></head><body>
-<header><h1>15m 六均线密集启动候选池 · 1000</h1><div class="note">500 LONG + 500 SHORT；全部 PENDING。蓝线是完成 bar t，灰线是 12 根路径结束；未来仅供审核，没有生成训练图或标签。</div>
+<header><h1>15m 六均线密集启动候选池 · {len(rows)}</h1><div class="note">LONG {sum(str(row['direction']) == 'LONG' for row in rows)} + SHORT {sum(str(row['direction']) == 'SHORT' for row in rows)}；全部 PENDING。蓝线是审核标记，灰线是 12 根路径结束；未来仅供审核，没有生成训练图或标签。</div>
 <div class="filters"><button onclick="filterSide('ALL')">全部</button><button onclick="filterSide('LONG')">LONG</button><button onclick="filterSide('SHORT')">SHORT</button><input id="q" placeholder="搜索币种" oninput="apply()"></div></header>
 <main>{''.join(cards)}</main><script>let side='ALL';function filterSide(v){{side=v;apply()}}function apply(){{const q=document.getElementById('q').value.toLowerCase();document.querySelectorAll('.card').forEach(c=>c.classList.toggle('hidden',(side!=='ALL'&&c.dataset.side!==side)||(q&&!c.dataset.text.includes(q))))}}</script>
 </body></html>'''

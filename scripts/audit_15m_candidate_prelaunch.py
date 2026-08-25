@@ -108,16 +108,25 @@ def prelaunch_metrics(
     return result
 
 
-def summarize(rows: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
+def summarize(
+    rows: Iterable[Mapping[str, Any]],
+    *,
+    expected_total: int = 1000,
+    expected_per_side: int = 500,
+) -> dict[str, Any]:
     """Summarize all rows by direction with explicit counts and rates."""
 
     frame = pd.DataFrame(list(rows))
-    if len(frame) != 1000:
-        raise CandidateCollectionError(f"prelaunch audit expected 1000 rows, got {len(frame)}")
+    if len(frame) != expected_total:
+        raise CandidateCollectionError(
+            f"prelaunch audit expected {expected_total} rows, got {len(frame)}"
+        )
     output: dict[str, Any] = {"rows": len(frame), "sides": {}}
     for side, group in frame.groupby("direction", sort=True):
-        if len(group) != 500:
-            raise CandidateCollectionError(f"{side} expected 500 rows, got {len(group)}")
+        if len(group) != expected_per_side:
+            raise CandidateCollectionError(
+                f"{side} expected {expected_per_side} rows, got {len(group)}"
+            )
         side_result: dict[str, Any] = {"rows": len(group)}
         for lag in (3, 6, 12):
             field = f"pre{lag}_open_signed_atr"
@@ -150,6 +159,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--expected-total", type=int, default=1000)
+    parser.add_argument("--expected-per-side", type=int, default=500)
     args = parser.parse_args()
     manifest = args.manifest.resolve()
     output = args.out.resolve()
@@ -193,7 +204,11 @@ def main() -> int:
             "boundary_timestamp_rows_inspected": boundary_timestamps,
             "read": False,
         },
-        "summary": summarize(audited),
+        "summary": summarize(
+            audited,
+            expected_total=args.expected_total,
+            expected_per_side=args.expected_per_side,
+        ),
         "rows": sorted(audited, key=lambda row: (row["direction"], row["rank"])),
     }
     write_json(output, payload)

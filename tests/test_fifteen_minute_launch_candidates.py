@@ -10,6 +10,11 @@ import pandas as pd
 import pytest
 
 from scripts.audit_15m_candidate_prelaunch import prelaunch_metrics, summarize
+from scripts.collect_15m_ma_launch_candidates import (
+    load_existing_candidate_rows,
+    selection_audit,
+    validate_preregistration,
+)
 
 from yoyo.datasets.fifteen_minute_launch_candidates import (
     CandidateCollectionError,
@@ -19,6 +24,7 @@ from yoyo.datasets.fifteen_minute_launch_candidates import (
     deduplicate_candidates,
     discover_universe,
     read_preholdout_prefix,
+    render_review_chart,
     select_balanced_candidates,
 )
 from yoyo.layers.l2_judgment.pine_dense_start import DenseStartProfile
@@ -30,6 +36,13 @@ PREREG = (
     / "experiments"
     / "active"
     / "exp-15m-ma-launch-candidate1000-v1"
+    / "preregistration.json"
+)
+EXPANSION_PREREG = (
+    ROOT
+    / "experiments"
+    / "active"
+    / "exp-15m-ma-launch-candidate9000-v1"
     / "preregistration.json"
 )
 
@@ -92,6 +105,26 @@ def test_preregistration_maps_to_exact_executable_spec() -> None:
     assert spec.release_bars - 1 == 11
     assert payload["scope"]["holdout_ohlcv_rows_allowed"] == 0
     assert payload["delivery"]["training_eligible"] is False
+
+
+def test_expansion_preregistration_preserves_shape_and_seeds_prior_pool() -> None:
+    payload, spec, profile, eval_symbols = validate_preregistration(
+        EXPANSION_PREREG
+    )
+    prior = load_existing_candidate_rows(payload)
+    assert spec.scan_start_ts == pd.Timestamp("2022-01-03T00:00:00Z")
+    assert spec.scan_end_ts == pd.Timestamp("2026-05-04T00:00:00Z")
+    assert spec.target_per_side == 4500
+    assert spec.dedupe_bars == 224
+    assert spec.review_marker_offset_bars == -3
+    assert spec.max_per_symbol_per_side == 80
+    assert spec.max_per_day_per_side == 80
+    assert spec.review_bars == 48
+    assert profile.profile_id == "dense_l1"
+    assert len(eval_symbols) == 47
+    assert len(prior) == 1000
+    assert {row["owner_verdict"] for row in prior} == {"PENDING"}
+    assert payload["authorized_multi_variable_bundle"]["training_authorization"] is False
 
 
 def test_prefix_reader_never_converts_boundary_ohlcv(tmp_path: Path) -> None:
@@ -191,6 +224,36 @@ def test_selection_fails_closed_when_one_side_is_short() -> None:
         select_balanced_candidates(rows, spec=spec)
 
 
+def test_expansion_selection_seeds_prior_dedupe_and_union_quotas() -> None:
+    spec = replace(
+        CandidateSpec(),
+        dedupe_bars=4,
+        target_per_side=2,
+        max_per_symbol_per_side=2,
+        max_per_day_per_side=3,
+    )
+    existing = [
+        candidate("old-l", "LONG", "AAA", "2025-01-01T00:00:00Z", 0.7),
+        candidate("old-s", "SHORT", "AAA", "2025-01-02T00:00:00Z", 0.7),
+    ]
+    rows = [
+        candidate("l-near", "LONG", "AAA", "2025-01-01T00:30:00Z", 0.99),
+        candidate("l-far", "LONG", "AAA", "2025-01-01T03:00:00Z", 0.90),
+        candidate("l-capped", "LONG", "AAA", "2025-01-01T06:00:00Z", 0.89),
+        candidate("l-other", "LONG", "BBB", "2025-01-01T01:00:00Z", 0.80),
+        candidate("s-near", "SHORT", "AAA", "2025-01-02T00:30:00Z", 0.99),
+        candidate("s-other", "SHORT", "BBB", "2025-01-02T01:00:00Z", 0.90),
+        candidate("s-third", "SHORT", "CCC", "2025-01-02T02:00:00Z", 0.80),
+    ]
+    selected = select_balanced_candidates(rows, spec=spec, existing_rows=existing)
+    assert [row["event_id"] for row in selected["LONG"]] == ["l-far", "l-other"]
+    assert [row["event_id"] for row in selected["SHORT"]] == ["s-other", "s-third"]
+    audit = selection_audit(selected, spec=spec, existing_rows=existing)
+    assert audit["sides"]["LONG"]["seeded_existing"] == 1
+    assert audit["sides"]["LONG"]["combined_rows"] == 3
+    assert audit["sides"]["LONG"]["max_per_symbol"] == 2
+
+
 def test_future_mutation_leaves_every_causal_feature_exactly_unchanged() -> None:
     frame = synthetic_frame()
     row = {
@@ -224,6 +287,36 @@ def test_gallery_uses_path_relative_to_its_review_chart_sibling(tmp_path: Path) 
     assert "candidate, not positive label" in document
 
 
+def test_review_marker_can_move_without_changing_selection_anchor(tmp_path: Path) -> None:
+    frame = synthetic_frame()
+    anchor_i = 230
+    row = {
+        "event_id": "review-shift",
+        "direction": "SHORT",
+        "symbol": "AAA_USDT_SWAP",
+        "rank": 1,
+        "anchor_time": frame["open_time"].iloc[anchor_i].isoformat(),
+        "source_anchor_i": anchor_i,
+        "completed_score": 0.9,
+        "formation_score": 0.8,
+        "release_close_signed_atr": 4.0,
+        "release_favorable_atr": 6.0,
+        "ma_spread_before_pct": 0.5,
+    }
+    output = tmp_path / "shifted.png"
+    meta = render_review_chart(
+        frame,
+        row,
+        spec=replace(CandidateSpec(), review_marker_offset_bars=-3),
+        output=output,
+    )
+    assert output.is_file()
+    assert meta["review_marker_offset_bars"] == -3
+    assert meta["review_marker_source_i"] == anchor_i - 3
+    assert meta["review_marker_time"] == frame["open_time"].iloc[anchor_i - 3].isoformat()
+    assert meta["review_marker_is_training_label"] is False
+
+
 def test_prelaunch_audit_uses_only_fixed_prior_rows_and_anchor_body() -> None:
     frame = synthetic_frame(40)
     row = {
@@ -251,3 +344,19 @@ def test_prelaunch_audit_uses_only_fixed_prior_rows_and_anchor_body() -> None:
 def test_prelaunch_summary_requires_exact_balanced_thousand() -> None:
     with pytest.raises(CandidateCollectionError, match="expected 1000"):
         summarize([])
+
+
+def test_prelaunch_summary_supports_a_preregistered_expansion_size() -> None:
+    rows = [
+        {
+            "direction": side,
+            "pre3_open_signed_atr": 0.5,
+            "pre6_open_signed_atr": 1.5,
+            "pre12_open_signed_atr": 2.5,
+            "anchor_body_signed_atr": 1.2,
+        }
+        for side in ("LONG", "SHORT")
+    ]
+    result = summarize(rows, expected_total=2, expected_per_side=1)
+    assert result["rows"] == 2
+    assert result["sides"]["LONG"]["anchor_body_gt_1_atr"] == 1
