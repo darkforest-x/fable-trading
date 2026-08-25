@@ -995,7 +995,7 @@ experiments:
 
   - experiment_id: exp-btc-4h-ma-launch-similarity-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "d0fd226fbd52e4683d5a6ac429776477a781909e"
+    source_commit: "4835a60190a8e443deb2fa0c64eedd6218aac118"
     status: active
     question: >-
       Across the most recent two years of the 54-symbol long-history OKX USDT
@@ -1007,17 +1007,33 @@ experiments:
       price-axis mirror; universe, 30+12 bar window, broad gates, five-channel
       weights, RMSE, constrained DTW, 18-bar deduplication, top-N and null
       control remain fixed
-    result: preregistered_before_scan
+    result: >-
+      gallery_ready_pending_owner_review. Across 224,585 closed 4h symbol-bars,
+      the frozen search returned 8 LONG and 8 exact-mirror SHORT candidates;
+      each side represents 6 distinct 24h market-time clusters after a separate
+      cross-sectional dependence audit. The real release order beat all 200
+      phase-scramble controls on both sides (one-sided p=1/201=0.00498). This is
+      retrospective completed-shape retrieval, not economic or causal evidence.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p0_btc_4h_ma_launch_similarity_20260825.md
+    artifacts:
+      - btc-4h-ma-launch-similarity-v1-prereg
+      - btc-4h-ma-launch-similarity-v1-review-manifest
+      - btc-4h-ma-launch-similarity-v1-scan-summary
+      - btc-4h-ma-launch-similarity-v1-source-audit
+      - btc-4h-ma-launch-similarity-v1-overview
+      - btc-4h-ma-launch-similarity-v1-report
+      - btc-4h-ma-launch-similarity-v1-html
     reuse_allowed: false
     notes: >-
       The Owner's request explicitly scopes the latest two years and supplies a
       2026-08-19 reference, so this completed-shape configuration records its
       first authorized holdout use. It is descriptive retrieval with 12
       post-onset bars plus six review-only bars, not a tip detector, trading
-      strategy, label, model evaluation or production candidate. All thresholds,
-      distance weights, time-warp radius, deduplication and phase-scramble null
-      were frozen before the multi-symbol scan.
+      strategy, label, model evaluation or production candidate. Builder commit
+      d0fd226fbd52e4683d5a6ac429776477a781909e landed before the only scan. All
+      thresholds, distance weights, time-warp radius, deduplication and
+      phase-scramble null were frozen before that scan; 36,720 holdout 4h
+      symbol-rows were read under configuration consumption #1.

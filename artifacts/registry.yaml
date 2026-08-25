@@ -1515,3 +1515,135 @@ artifacts:
     training_eligible: false
     production_eligible: false
     data_cutoff: "2026-05-03T11:30:00+00:00"
+
+  # ---- BTC 4h completed-shape similarity retrieval, holdout use #1 --------
+  - artifact_id: btc-4h-ma-launch-similarity-v1-prereg
+    artifact_type: config
+    role: frozen_completed_shape_retrieval_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d0fd226fbd52e4683d5a6ac429776477a781909e"
+    source_path: experiments/active/exp-btc-4h-ma-launch-similarity-v1/preregistration.json
+    sha256: "11daa5ff2a919955d120aa6bc7bfdf90d7fe0398300880cc051fa35987ad0b8c"
+    size_bytes: 4480
+    storage_uri: "repo://experiments/active/exp-btc-4h-ma-launch-similarity-v1/preregistration.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d0fd226fbd52e4683d5a6ac429776477a781909e"
+    config_hash: "11daa5ff2a919955d120aa6bc7bfdf90d7fe0398300880cc051fa35987ad0b8c"
+    data_cutoff: "2026-08-25T04:00:00Z"
+    notes: >-
+      Frozen before the only official scan. Re-execution reads the same holdout
+      and requires renewed Owner authorization plus consumption #2.
+
+  - artifact_id: btc-4h-ma-launch-similarity-v1-review-manifest
+    artifact_type: manifest
+    role: owner_review_candidate_and_chart_hash_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4835a60190a8e443deb2fa0c64eedd6218aac118"
+    source_path: experiments/active/exp-btc-4h-ma-launch-similarity-v1/results/review_manifest.jsonl
+    sha256: "75003abe48128ac3a59134adcafe3bce7377a041fdbbbde6110d25f27ec191e3"
+    size_bytes: 23001
+    storage_uri: "repo://experiments/active/exp-btc-4h-ma-launch-similarity-v1/results/review_manifest.jsonl"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d0fd226fbd52e4683d5a6ac429776477a781909e"
+    config_hash: "11daa5ff2a919955d120aa6bc7bfdf90d7fe0398300880cc051fa35987ad0b8c"
+    data_cutoff: "2026-08-25T04:00:00Z"
+    notes: >-
+      Seventeen rows: the Owner reference plus 8 LONG and 8 SHORT candidates.
+      Every candidate remains Owner PENDING and every rendered chart hash is
+      recorded here; the manifest is not a label set.
+
+  - artifact_id: btc-4h-ma-launch-similarity-v1-scan-summary
+    artifact_type: manifest
+    role: completed_shape_scan_result_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4835a60190a8e443deb2fa0c64eedd6218aac118"
+    source_path: experiments/active/exp-btc-4h-ma-launch-similarity-v1/results/scan_summary.json
+    sha256: "cc00c69b745e75fadccf7f21caf55d83d9dfdc0b69d5065f0de1c3a964a943d2"
+    size_bytes: 32250
+    storage_uri: "repo://experiments/active/exp-btc-4h-ma-launch-similarity-v1/results/scan_summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d0fd226fbd52e4683d5a6ac429776477a781909e"
+    config_hash: "11daa5ff2a919955d120aa6bc7bfdf90d7fe0398300880cc051fa35987ad0b8c"
+    data_cutoff: "2026-08-25T04:00:00Z"
+    notes: >-
+      Exact metrics, null-control results, review paths and holdout ledger for
+      the 8 LONG plus 8 SHORT frozen candidates. No economic evaluation ran.
+
+  - artifact_id: btc-4h-ma-launch-similarity-v1-source-audit
+    artifact_type: manifest
+    role: okx_local_api_ohlc_parity_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4835a60190a8e443deb2fa0c64eedd6218aac118"
+    source_path: experiments/active/exp-btc-4h-ma-launch-similarity-v1/results/source_audit.json
+    sha256: "8264517d6984b4db2a379bf41f6fdaa6d31569899a7b16882159eb643b6eb0d7"
+    size_bytes: 73202
+    storage_uri: "repo://experiments/active/exp-btc-4h-ma-launch-similarity-v1/results/source_audit.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d0fd226fbd52e4683d5a6ac429776477a781909e"
+    config_hash: "11daa5ff2a919955d120aa6bc7bfdf90d7fe0398300880cc051fa35987ad0b8c"
+    data_cutoff: "2026-08-25T04:00:00Z"
+    notes: >-
+      Per-symbol local snapshot hashes, 15m-to-4h completeness and exact OHLC
+      overlap parity against one bounded public OKX 4H suffix per symbol.
+
+  - artifact_id: btc-4h-ma-launch-similarity-v1-overview
+    artifact_type: report
+    role: owner_review_contact_sheet
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4835a60190a8e443deb2fa0c64eedd6218aac118"
+    source_path: experiments/active/exp-btc-4h-ma-launch-similarity-v1/results/overview.png
+    sha256: "b60e2d62d3dd1e608f42f3d795cdca9abc2168f22cc758cc33d508e5f47573fd"
+    size_bytes: 948902
+    storage_uri: "repo://experiments/active/exp-btc-4h-ma-launch-similarity-v1/results/overview.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d0fd226fbd52e4683d5a6ac429776477a781909e"
+    config_hash: "11daa5ff2a919955d120aa6bc7bfdf90d7fe0398300880cc051fa35987ad0b8c"
+    data_cutoff: "2026-08-25T04:00:00Z"
+    notes: >-
+      Contact sheet for the reference and all 16 candidates. Blue is release
+      onset; gray is the end of the 12-bar matched release.
+
+  - artifact_id: btc-4h-ma-launch-similarity-v1-report
+    artifact_type: report
+    role: canonical_completed_shape_retrieval_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4835a60190a8e443deb2fa0c64eedd6218aac118"
+    source_path: analysis/p0_btc_4h_ma_launch_similarity_20260825.md
+    sha256: "dc5840945f5eab12213c77c8aa6759f5210a61e00c14cd01dbbac46778eb1712"
+    size_bytes: 18271
+    storage_uri: "repo://analysis/p0_btc_4h_ma_launch_similarity_20260825.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4835a60190a8e443deb2fa0c64eedd6218aac118"
+    config_hash: "11daa5ff2a919955d120aa6bc7bfdf90d7fe0398300880cc051fa35987ad0b8c"
+    data_cutoff: "2026-08-25T04:00:00Z"
+
+  - artifact_id: btc-4h-ma-launch-similarity-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_gallery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4835a60190a8e443deb2fa0c64eedd6218aac118"
+    source_path: analysis/html/p0_btc_4h_ma_launch_similarity_20260825.html
+    sha256: "c3a9b51f8c939906287f6d544587267001305598b2e82422c2ae6655d121b862"
+    size_bytes: 4517230
+    storage_uri: "repo://analysis/html/p0_btc_4h_ma_launch_similarity_20260825.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4835a60190a8e443deb2fa0c64eedd6218aac118"
+    config_hash: "11daa5ff2a919955d120aa6bc7bfdf90d7fe0398300880cc051fa35987ad0b8c"
+    data_cutoff: "2026-08-25T04:00:00Z"
+    notes: >-
+      Browser-tested self-contained HTML with 18 embedded images; desktop and
+      390px mobile Chromium loaded all images with no console error or overflow.
