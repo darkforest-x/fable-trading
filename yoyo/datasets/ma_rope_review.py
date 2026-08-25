@@ -270,19 +270,19 @@ def evaluate_countercheck(
 PAGE_TEMPLATE = """<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>__TITLE__</title>
 <style>
-:root{color-scheme:dark;--bg:#0d1110;--panel:#171d1a;--ink:#eef4f0;--muted:#aab4ad;--line:#39443d;--a:#46d995;--b:#d8a93e;--c:#78847c;--red:#c64b43}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header{padding:10px 16px 8px;border-bottom:1px solid var(--line)}h1{font-size:19px;margin:0 0 5px}.contract{font-size:13px;color:#eadca8}.hint,.metrics{font-size:12px;color:var(--muted);margin-top:4px}.top{position:absolute;right:16px;top:13px;font-size:13px}.progress{height:5px;background:#28302b;margin-top:7px;border-radius:4px;overflow:hidden}.bar{height:100%;background:var(--a);width:0}main{padding:10px}.panel{max-width:1500px;margin:auto;padding:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px}.controls,.nav{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.viewer{height:calc(100vh - 320px);min-height:390px;background:#fff;border-radius:8px;overflow:auto;display:flex;align-items:center;justify-content:center;margin-top:8px}.viewer img{display:block;max-width:100%;max-height:100%;object-fit:contain}.viewer.zoom img{max-width:none;max-height:none}.position{font-weight:700}.tier{padding:2px 8px;border-radius:10px;color:#101713}.tier.A_CORE{background:var(--a)}.tier.B_BROAD{background:var(--b)}.tier.C_REST{background:var(--c);color:white}.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.actions button{padding:11px;font-size:16px;font-weight:750}.keep{background:#167a58}.remove{background:var(--red)}.maybe{background:#8d6d1c}.actions button.active{outline:3px solid white;outline-offset:-4px}.nav{margin-top:8px}.nav>div{display:flex;gap:7px;flex-wrap:wrap}button,select,input{font:inherit;color:var(--ink);background:#252c28;border:1px solid var(--line);border-radius:7px;padding:7px 10px}button{cursor:pointer}.primary{background:#d8f2e4;color:#102319}.note{width:min(480px,100%)}kbd{border:1px solid #667169;border-bottom-width:2px;border-radius:4px;padding:1px 5px;background:#252c28}.warning{color:#ffcf7b}.hidden{display:none!important}@media(max-width:760px){.top{position:static;margin-top:4px}.viewer{height:53vh}.actions button{font-size:14px}}
+:root{color-scheme:dark;--bg:#0d1110;--panel:#171d1a;--ink:#eef4f0;--muted:#aab4ad;--line:#39443d;--a:#46d995;--b:#d8a93e;--c:#78847c;--red:#c64b43}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header{padding:10px 16px 8px;border-bottom:1px solid var(--line)}h1{font-size:19px;margin:0 0 5px}.contract{font-size:13px;color:#eadca8}.hint,.metrics{font-size:12px;color:var(--muted);margin-top:4px}.top{position:absolute;right:16px;top:13px;font-size:13px}.progress{height:5px;background:#28302b;margin-top:7px;border-radius:4px;overflow:hidden}.bar{height:100%;background:var(--a);width:0}main{padding:10px}.panel{max-width:1500px;margin:auto;padding:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px}.controls,.nav{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.viewer{height:calc(100vh - 306px);min-height:430px;background:#fff;border-radius:8px;overflow:hidden;position:relative;margin-top:8px}.viewer canvas{display:block;width:100%;height:100%}.viewhint{position:absolute;right:10px;top:9px;padding:4px 8px;border-radius:6px;background:rgba(15,25,20,.72);color:#d9e8de;font-size:12px;pointer-events:none}.position{font-weight:700}.tier{padding:2px 8px;border-radius:10px;color:#101713}.tier.A_CORE{background:var(--a)}.tier.B_BROAD{background:var(--b)}.tier.C_REST{background:var(--c);color:white}.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.actions button{padding:11px;font-size:16px;font-weight:750}.keep{background:#167a58}.remove{background:var(--red)}.maybe{background:#8d6d1c}.actions button.active{outline:3px solid white;outline-offset:-4px}.nav{margin-top:8px}.nav>div{display:flex;gap:7px;flex-wrap:wrap}button,select,input{font:inherit;color:var(--ink);background:#252c28;border:1px solid var(--line);border-radius:7px;padding:7px 10px}button{cursor:pointer}.primary{background:#d8f2e4;color:#102319}.note{width:min(480px,100%)}kbd{border:1px solid #667169;border-bottom-width:2px;border-radius:4px;padding:1px 5px;background:#252c28}.warning{color:#ffcf7b}.hidden{display:none!important}@media(max-width:760px){.top{position:static;margin-top:4px}.viewer{height:53vh;min-height:360px}.actions button{font-size:14px}}
 </style></head><body><header><h1>__TITLE__</h1><div class="top"><span id="done"></span>　<span id="counts"></span></div>
 <div class="contract">__CONTRACT__ <span class="warning">代码只负责排序，不能自动删图</span>；390 条独立反证未证明它能替代你的判断。</div>
-<div class="hint"><kbd>K</kbd>/<kbd>1</kbd> 保留　<kbd>X</kbd>/<kbd>2</kbd> 去掉　<kbd>?</kbd>/<kbd>3</kbd> 待定　<kbd>J</kbd>/<kbd>←</kbd> 上一张　<kbd>L</kbd>/<kbd>→</kbd>/<kbd>空格</kbd> 下一张　<kbd>U</kbd> 撤销　<kbd>Z</kbd> 原尺寸</div><div class="progress"><div class="bar" id="bar"></div></div></header>
-<main><section class="panel"><div class="controls"><div class="position"><span id="position"></span> <span id="tier"></span> <span id="decision"></span></div><div><select id="tierFilter"><option value="A_CORE" selected>A 核心档</option><option value="B_BROAD">B 扩展档</option><option value="C_REST">C 其余</option><option value="ALL">全部 1,345</option></select> <select id="answerFilter"><option value="ALL">全部状态</option><option value="UNREVIEWED" selected>只看未审核</option><option value="KEEP">只看保留</option><option value="REMOVE">只看去掉</option><option value="UNCERTAIN">只看待定</option></select> <label>跳到 <input id="jump" type="number" min="1" step="1"></label> <label><input id="autoNext" type="checkbox" checked> 自动下一张</label></div></div>
-<div class="viewer" id="viewer"><img id="chart" alt="Owner 原始手标正例图"></div><div class="metrics" id="metrics"></div>
+<div class="hint"><kbd>K</kbd>/<kbd>1</kbd> 保留　<kbd>X</kbd>/<kbd>2</kbd> 去掉　<kbd>?</kbd>/<kbd>3</kbd> 待定　<kbd>J</kbd>/<kbd>←</kbd> 上一张　<kbd>L</kbd>/<kbd>→</kbd>/<kbd>空格</kbd> 下一张　<kbd>U</kbd> 撤销</div><div class="progress"><div class="bar" id="bar"></div></div></header>
+<main><section class="panel"><div class="controls"><div class="position"><span id="position"></span> <span id="tier"></span> <span id="decision"></span></div><div><select id="tierFilter"><option value="A_CORE" selected>A 核心档</option><option value="B_BROAD">B 扩展档</option><option value="C_REST">C 其余</option><option value="ALL">全部档位</option></select> <select id="sideFilter"><option value="ALL" __SIDE_ALL__>全部方向</option><option value="long" __SIDE_LONG__>只看 long</option><option value="short" __SIDE_SHORT__>只看 short</option><option value="skip" __SIDE_SKIP__>只看 skip</option></select> <select id="answerFilter"><option value="ALL">全部状态</option><option value="UNREVIEWED" selected>只看未审核</option><option value="KEEP">只看保留</option><option value="REMOVE">只看去掉</option><option value="UNCERTAIN">只看待定</option></select> <label>跳到 <input id="jump" type="number" min="1" step="1"></label> <label><input id="autoNext" type="checkbox" checked> 自动下一张</label></div></div>
+<div class="viewer" id="viewer"><canvas id="chart" aria-label="绿色框附近的K线局部放大图"></canvas><img id="sourceChart" class="hidden" alt=""><div class="viewhint">绿色框附近 · 自动放大</div></div><div class="metrics" id="metrics"></div>
 <div class="actions"><button class="keep" data-decision="KEEP">K / 1 · 保留</button><button class="remove" data-decision="REMOVE">X / 2 · 去掉</button><button class="maybe" data-decision="UNCERTAIN">? / 3 · 待定</button></div>
-<div class="nav"><div><button id="prev">J / ← 上一张</button><button id="next">L / → 下一张</button><button id="undo">U · 撤销</button><button id="zoom">Z · 原尺寸</button></div><div><input id="note" class="note" placeholder="备注（可空）"><button id="import">导入进度</button><input id="importFile" class="hidden" type="file" accept="application/json"><button id="export" class="primary">导出 JSON</button></div></div></section></main>
+<div class="nav"><div><button id="prev">J / ← 上一张</button><button id="next">L / → 下一张</button><button id="undo">U · 撤销</button></div><div><input id="note" class="note" placeholder="备注（可空）"><button id="import">导入进度</button><input id="importFile" class="hidden" type="file" accept="application/json"><button id="export" class="primary">导出 JSON</button></div></div></section></main>
 <script>
-const items=__ITEMS__,packId=__PACK_ID__,key=__STORAGE_KEY__,allowed=new Set(['KEEP','REMOVE','UNCERTAIN']);let index=0,answers={},undoStack=[];try{answers=JSON.parse(localStorage.getItem(key+'::answers')||'{}')}catch(_){answers={}}index=Number(localStorage.getItem(key+'::index')||0);if(index<0||index>=items.length)index=0;const $=id=>document.getElementById(id),tierFilter=$('tierFilter'),answerFilter=$('answerFilter'),note=$('note'),chart=$('chart'),viewer=$('viewer'),jump=$('jump');
-function save(){localStorage.setItem(key+'::answers',JSON.stringify(answers));localStorage.setItem(key+'::index',String(index))}function answered(id){return answers[id]&&allowed.has(answers[id].decision)}function matches(i){const x=items[i],a=answers[x.review_id];if(tierFilter.value!=='ALL'&&x.tier!==tierFilter.value)return false;if(answerFilter.value==='UNREVIEWED')return !answered(x.review_id);if(answerFilter.value!=='ALL')return a&&a.decision===answerFilter.value;return true}function findStep(d){for(let n=1;n<=items.length;n++){const i=(index+d*n+items.length)%items.length;if(matches(i))return i}return index}function step(d){index=findStep(d);save();render()}function decide(value){const id=items[index].review_id,old=answers[id]?{...answers[id]}:null;undoStack.push({index,old});answers[id]={review_id:id,sample_id:items[index].sample_id,decision:value,note:note.value||'',decided_at:new Date().toISOString()};save();if($('autoNext').checked)step(1);else render()}function undo(){const x=undoStack.pop();if(!x)return;index=x.index;const id=items[index].review_id;if(x.old)answers[id]=x.old;else delete answers[id];save();render()}
-function stats(){const c={KEEP:0,REMOVE:0,UNCERTAIN:0};Object.values(answers).forEach(a=>{if(a&&allowed.has(a.decision))c[a.decision]++});const n=c.KEEP+c.REMOVE+c.UNCERTAIN;$('done').textContent=`已审 ${n} / ${items.length}`;$('counts').textContent=`保留 ${c.KEEP} · 去掉 ${c.REMOVE} · 待定 ${c.UNCERTAIN}`;$('bar').style.width=`${100*n/items.length}%`}function render(){const x=items[index],a=answers[x.review_id]||{};$('position').textContent=`${index+1} / ${items.length} · ${x.sample_id}`;$('tier').textContent=x.tier==='A_CORE'?'A 核心':x.tier==='B_BROAD'?'B 扩展':'C 其余';$('tier').className='tier '+x.tier;$('decision').textContent=a.decision?`· 当前 ${a.decision}`:'· 未审核';chart.src=x.image;note.value=a.note||'';jump.value=String(index+1);const side=x.side?` · 方向 ${x.side}`:'';$('metrics').textContent=`绳结分 ${x.score.toFixed(3)}${side} · 六线带宽 ${(x.bandwidth*10000).toFixed(1)}bp · 交叉 ${(x.cross_density*100).toFixed(1)}% · 实体接触 ${(x.body_touch*100).toFixed(1)}% · 实体穿束 ${(x.body_cross*100).toFixed(1)}% · 密集持续 ${(x.persistence*100).toFixed(1)}%`;document.querySelectorAll('[data-decision]').forEach(b=>b.classList.toggle('active',b.dataset.decision===a.decision));stats()}document.querySelectorAll('[data-decision]').forEach(b=>b.onclick=()=>decide(b.dataset.decision));$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('undo').onclick=undo;$('zoom').onclick=()=>viewer.classList.toggle('zoom');for(const f of [tierFilter,answerFilter])f.onchange=()=>{if(!matches(index))index=findStep(1);f.blur();save();render()};jump.onchange=()=>{const n=Number(jump.value);if(Number.isInteger(n)&&n>=1&&n<=items.length){index=n-1;save();render()}jump.blur()};note.oninput=()=>{const id=items[index].review_id;if(answers[id]){answers[id].note=note.value||'';save()}};
-$('export').onclick=()=>{const rows=items.map(x=>answers[x.review_id]).filter(Boolean),out={schema_version:1,pack_id:packId,exported_at:new Date().toISOString(),n_total:items.length,n_answered:rows.length,complete:rows.length===items.length,answers:rows},blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ma_rope_prefilter_v1_answers.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),0)};$('import').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(x.pack_id!==packId||!Array.isArray(x.answers))throw new Error('审核包不匹配');const known=new Set(items.map(i=>i.review_id));for(const a of x.answers){if(known.has(a.review_id)&&allowed.has(a.decision))answers[a.review_id]=a}save();render()}catch(err){alert('导入失败：'+err.message)}e.target.value=''};document.addEventListener('keydown',e=>{if(e.target===note){if(e.key==='Escape')note.blur();return}const k=e.key.toLowerCase();if(k==='k'||e.key==='1'){e.preventDefault();decide('KEEP')}else if(k==='x'||e.key==='2'){e.preventDefault();decide('REMOVE')}else if(e.key==='?'||e.key==='3'){e.preventDefault();decide('UNCERTAIN')}else if(k==='j'||e.key==='ArrowLeft'){e.preventDefault();step(-1)}else if(k==='l'||e.key==='ArrowRight'||e.key===' '){e.preventDefault();step(1)}else if(k==='u')undo();else if(k==='z')$('zoom').click()});if(!matches(index))index=findStep(1);render();
+const items=__ITEMS__,packId=__PACK_ID__,key=__STORAGE_KEY__,allowed=new Set(['KEEP','REMOVE','UNCERTAIN']);let index=0,answers={},undoStack=[];try{answers=JSON.parse(localStorage.getItem(key+'::answers')||'{}')}catch(_){answers={}}index=Number(localStorage.getItem(key+'::index')||0);if(index<0||index>=items.length)index=0;const $=id=>document.getElementById(id),tierFilter=$('tierFilter'),sideFilter=$('sideFilter'),answerFilter=$('answerFilter'),note=$('note'),chart=$('chart'),sourceChart=$('sourceChart'),viewer=$('viewer'),jump=$('jump'),ctx=chart.getContext('2d');
+function save(){localStorage.setItem(key+'::answers',JSON.stringify(answers));localStorage.setItem(key+'::index',String(index))}function answered(id){return answers[id]&&allowed.has(answers[id].decision)}function matches(i){const x=items[i],a=answers[x.review_id];if(tierFilter.value!=='ALL'&&x.tier!==tierFilter.value)return false;if(sideFilter.value!=='ALL'&&x.side!==sideFilter.value)return false;if(answerFilter.value==='UNREVIEWED')return !answered(x.review_id);if(answerFilter.value!=='ALL')return a&&a.decision===answerFilter.value;return true}function findStep(d){for(let n=1;n<=items.length;n++){const i=(index+d*n+items.length)%items.length;if(matches(i))return i}return index}function step(d){index=findStep(d);save();render()}function decide(value){const id=items[index].review_id,old=answers[id]?{...answers[id]}:null;undoStack.push({index,old});answers[id]={review_id:id,sample_id:items[index].sample_id,decision:value,note:note.value||'',decided_at:new Date().toISOString()};save();if($('autoNext').checked)step(1);else render()}function undo(){const x=undoStack.pop();if(!x)return;index=x.index;const id=items[index].review_id;if(x.old)answers[id]=x.old;else delete answers[id];save();render()}
+function stats(){const c={KEEP:0,REMOVE:0,UNCERTAIN:0};Object.values(answers).forEach(a=>{if(a&&allowed.has(a.decision))c[a.decision]++});const n=c.KEEP+c.REMOVE+c.UNCERTAIN;$('done').textContent=`已审 ${n} / ${items.length}`;$('counts').textContent=`保留 ${c.KEEP} · 去掉 ${c.REMOVE} · 待定 ${c.UNCERTAIN}`;$('bar').style.width=`${100*n/items.length}%`}function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v))}function drawFocused(){if(!sourceChart.naturalWidth)return;const x=items[index],vw=Math.max(1,viewer.clientWidth),vh=Math.max(1,viewer.clientHeight),dpr=Math.min(window.devicePixelRatio||1,2),iw=sourceChart.naturalWidth,ih=sourceChart.naturalHeight,bw=Number(x.focus_w),bh=Number(x.focus_h),cx=Number(x.focus_x)*iw,cy=Number(x.focus_y)*ih;chart.width=Math.round(vw*dpr);chart.height=Math.round(vh*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='#fff';ctx.fillRect(0,0,vw,vh);let sh=Math.min(ih,Math.max(ih*.34,ih*bh*3.2)),sw=Math.min(iw,Math.max(iw*.46,iw*bw*8,sh*(vw/vh))),sx=clamp(cx-sw/2,0,iw-sw),sy=clamp(cy-sh/2,0,ih-sh),scale=Math.min(vw/sw,vh/sh),dw=sw*scale,dh=sh*scale;ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(sourceChart,sx,sy,sw,sh,(vw-dw)/2,(vh-dh)/2,dw,dh)}function render(){const x=items[index],a=answers[x.review_id]||{};$('position').textContent=`${index+1} / ${items.length} · ${x.sample_id}`;$('tier').textContent=x.tier==='A_CORE'?'A 核心':x.tier==='B_BROAD'?'B 扩展':'C 其余';$('tier').className='tier '+x.tier;$('decision').textContent=a.decision?`· 当前 ${a.decision}`:'· 未审核';sourceChart.onload=drawFocused;sourceChart.src=x.image;note.value=a.note||'';jump.value=String(index+1);const side=x.side?` · 方向 ${x.side}`:'';$('metrics').textContent=`绳结分 ${x.score.toFixed(3)}${side} · 六线带宽 ${(x.bandwidth*10000).toFixed(1)}bp · 交叉 ${(x.cross_density*100).toFixed(1)}% · 实体接触 ${(x.body_touch*100).toFixed(1)}% · 实体穿束 ${(x.body_cross*100).toFixed(1)}% · 密集持续 ${(x.persistence*100).toFixed(1)}%`;document.querySelectorAll('[data-decision]').forEach(b=>b.classList.toggle('active',b.dataset.decision===a.decision));stats()}sourceChart.onerror=()=>{ctx.fillStyle='#fff';ctx.fillRect(0,0,chart.width,chart.height);ctx.fillStyle='#b42318';ctx.font='16px sans-serif';ctx.fillText('原始审核图加载失败，请停止审核并报告编号。',20,35)};new ResizeObserver(drawFocused).observe(viewer);document.querySelectorAll('[data-decision]').forEach(b=>b.onclick=()=>decide(b.dataset.decision));$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('undo').onclick=undo;for(const f of [tierFilter,sideFilter,answerFilter])f.onchange=()=>{if(!matches(index))index=findStep(1);f.blur();save();render()};jump.onchange=()=>{const n=Number(jump.value);if(Number.isInteger(n)&&n>=1&&n<=items.length){index=n-1;save();render()}jump.blur()};note.oninput=()=>{const id=items[index].review_id;if(answers[id]){answers[id].note=note.value||'';save()}};
+$('export').onclick=()=>{const rows=items.map(x=>answers[x.review_id]).filter(Boolean),out={schema_version:1,pack_id:packId,exported_at:new Date().toISOString(),n_total:items.length,n_answered:rows.length,complete:rows.length===items.length,answers:rows},blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ma_rope_prefilter_v1_answers.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),0)};$('import').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(x.pack_id!==packId||!Array.isArray(x.answers))throw new Error('审核包不匹配');const known=new Set(items.map(i=>i.review_id));for(const a of x.answers){if(known.has(a.review_id)&&allowed.has(a.decision))answers[a.review_id]=a}save();render()}catch(err){alert('导入失败：'+err.message)}e.target.value=''};document.addEventListener('keydown',e=>{if(e.target===note){if(e.key==='Escape')note.blur();return}const k=e.key.toLowerCase();if(k==='k'||e.key==='1'){e.preventDefault();decide('KEEP')}else if(k==='x'||e.key==='2'){e.preventDefault();decide('REMOVE')}else if(e.key==='?'||e.key==='3'){e.preventDefault();decide('UNCERTAIN')}else if(k==='j'||e.key==='ArrowLeft'){e.preventDefault();step(-1)}else if(k==='l'||e.key==='ArrowRight'||e.key===' '){e.preventDefault();step(1)}else if(k==='u')undo()});if(!matches(index))index=findStep(1);render();
 </script></body></html>"""
 
 
@@ -293,14 +293,52 @@ def render_page(
     pack_id: str,
     title: str,
     contract: str,
+    default_side: str = "ALL",
 ) -> str:
+    if default_side not in {"ALL", "long", "short", "skip"}:
+        raise ValueError(f"unsupported default side: {default_side}")
     return (
         PAGE_TEMPLATE.replace("__ITEMS__", json.dumps(list(items), ensure_ascii=False, separators=(",", ":")))
         .replace("__PACK_ID__", json.dumps(pack_id))
         .replace("__STORAGE_KEY__", json.dumps(storage_key))
         .replace("__TITLE__", title)
         .replace("__CONTRACT__", contract)
+        .replace("__SIDE_ALL__", "selected" if default_side == "ALL" else "")
+        .replace("__SIDE_LONG__", "selected" if default_side == "long" else "")
+        .replace("__SIDE_SHORT__", "selected" if default_side == "short" else "")
+        .replace("__SIDE_SKIP__", "selected" if default_side == "skip" else "")
     )
+
+
+def _focus_geometry(row: Mapping[str, Any]) -> dict[str, float]:
+    values = {
+        "focus_x": float(row["yolo_xc"]),
+        "focus_y": float(row["yolo_yc"]),
+        "focus_w": float(row["yolo_w"]),
+        "focus_h": float(row["yolo_h"]),
+    }
+    if not 0.0 <= values["focus_x"] <= 1.0 or not 0.0 <= values["focus_y"] <= 1.0:
+        raise RopeReviewBuildError("review focus center is outside the source image")
+    if not 0.0 < values["focus_w"] <= 1.0 or not 0.0 < values["focus_h"] <= 1.0:
+        raise RopeReviewBuildError("review focus size is outside the source image")
+    return values
+
+
+def attach_focus_geometry(
+    items: Sequence[Mapping[str, Any]], owner_metadata: pd.DataFrame
+) -> list[dict[str, Any]]:
+    """Attach original Owner-box coordinates for review-only canvas cropping."""
+
+    page_items: list[dict[str, Any]] = []
+    for item in items:
+        sample_id = str(item.get("sample_id") or "")
+        if not sample_id or sample_id not in owner_metadata.index:
+            raise RopeReviewBuildError(f"missing review focus geometry for {sample_id!r}")
+        metadata = owner_metadata.loc[sample_id]
+        if isinstance(metadata, pd.DataFrame):
+            raise RopeReviewBuildError(f"duplicate review focus geometry for {sample_id}")
+        page_items.append({**dict(item), **_focus_geometry(metadata)})
+    return page_items
 
 
 def build_pack(
@@ -389,6 +427,7 @@ def build_pack(
         )
         private_rows.append({**score_row, "review_id": review_id, "tier": tier})
     public_items.sort(key=lambda row: (-float(row["score"]), str(row["sample_id"])))
+    public_page_items = attach_focus_geometry(public_items, owner_metadata)
 
     owner_public_items: list[dict[str, Any]] = []
     for score_row in owner_report["rows"]:
@@ -418,6 +457,7 @@ def build_pack(
             }
         )
     owner_public_items.sort(key=lambda row: (-float(row["score"]), str(row["sample_id"])))
+    owner_page_items = attach_focus_geometry(owner_public_items, owner_metadata)
 
     public_dir = output_dir / "public"
     admin_dir = output_dir / "admin"
@@ -461,7 +501,7 @@ def build_pack(
     )
     (public_dir / "index.html").write_text(
         render_page(
-            public_items,
+            public_page_items,
             storage_key,
             pack_id=PACK_ID,
             title="六均线绳结 · 1,345 张旧训练正例代码预筛",
@@ -471,11 +511,12 @@ def build_pack(
     )
     (public_dir / "owner_2525.html").write_text(
         render_page(
-            owner_public_items,
+            owner_page_items,
             storage_key + "::owner2525",
             pack_id=PACK_ID + "_owner_2525",
             title="六均线绳结 · 2,525 个 Owner 方向复核框代码预筛",
             contract="这是扩数据入口，包含 long 1,152、short 1,361、skip 12；默认先看 A 核心档。",
+            default_side="long",
         ),
         encoding="utf-8",
     )
@@ -534,6 +575,92 @@ def build_pack(
     return summary
 
 
+def rerender_review_pages(
+    *,
+    positive_manifest: Path = DEFAULT_POSITIVE_MANIFEST,
+    owner_review_sheet: Path = DEFAULT_REVIEW_SHEET,
+    output_dir: Path = DEFAULT_OUTPUT,
+    generator_commit: str,
+) -> dict[str, Any]:
+    """Replace only the review UI with an Owner-box-focused canvas view."""
+
+    summary_path = output_dir / "build_summary.json"
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    public_manifest_path = output_dir / "public" / "manifest.json"
+    owner_manifest_path = output_dir / "public" / "owner_2525_manifest.json"
+    expected_hashes = {
+        "positive_manifest_sha256": positive_manifest,
+        "owner_review_sheet_sha256": owner_review_sheet,
+        "public_manifest_sha256": public_manifest_path,
+        "owner_2525_public_manifest_sha256": owner_manifest_path,
+    }
+    for field, path in expected_hashes.items():
+        if summary.get(field) != sha256_file(path):
+            raise RopeReviewBuildError(f"refusing UI rerender after {field} drift")
+
+    public_payload = json.loads(public_manifest_path.read_text(encoding="utf-8"))
+    owner_payload = json.loads(owner_manifest_path.read_text(encoding="utf-8"))
+    public_items = public_payload.get("items") or []
+    owner_items = owner_payload.get("items") or []
+    if public_payload.get("pack_id") != PACK_ID or len(public_items) != EXPECTED_POSITIVES:
+        raise RopeReviewBuildError("primary review manifest identity changed")
+    if len(owner_items) != EXPECTED_OWNER_BOXES:
+        raise RopeReviewBuildError("Owner direction review manifest population changed")
+
+    owner_metadata = pd.read_csv(owner_review_sheet).set_index("box_id", drop=False)
+    public_page_items = attach_focus_geometry(public_items, owner_metadata)
+    owner_page_items = attach_focus_geometry(owner_items, owner_metadata)
+    storage_key = hashlib.sha256(
+        (sha256_file(positive_manifest) + json.dumps(asdict(RopeFilterConfig()), sort_keys=True)).encode()
+    ).hexdigest()
+    public_dir = output_dir / "public"
+    (public_dir / "index.html").write_text(
+        render_page(
+            public_page_items,
+            storage_key,
+            pack_id=PACK_ID,
+            title="六均线绳结 · 1,345 张旧训练正例局部放大精筛",
+            contract="默认只放大绿色 Owner 框附近，直接判断这段 K 线和六条均线是否是目标形态。",
+        ),
+        encoding="utf-8",
+    )
+    (public_dir / "owner_2525.html").write_text(
+        render_page(
+            owner_page_items,
+            storage_key + "::owner2525",
+            pack_id=PACK_ID + "_owner_2525",
+            title="六均线绳结 · 2,525 个 Owner 方向框局部放大精筛",
+            contract="扩数据入口也只放大绿色 Owner 框附近；默认仍按 A 核心档排序。",
+            default_side="short",
+        ),
+        encoding="utf-8",
+    )
+    summary.update(
+        {
+            "ui_generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "ui_generator_commit": generator_commit,
+            "ui_mode": "owner_box_focused_canvas_no_full_image_toggle",
+            "page_sha256": sha256_file(public_dir / "index.html"),
+            "owner_2525_page_sha256": sha256_file(public_dir / "owner_2525.html"),
+            "holdout_read": False,
+            "training_performed": False,
+            "training_eligible_changed": False,
+        }
+    )
+    write_json(summary_path, summary)
+    return {
+        "ok": True,
+        "pack_id": PACK_ID,
+        "n_items": len(public_page_items),
+        "n_owner_2525_items": len(owner_page_items),
+        "ui_mode": summary["ui_mode"],
+        "page_sha256": summary["page_sha256"],
+        "owner_2525_page_sha256": summary["owner_2525_page_sha256"],
+        "holdout_read": False,
+        "training_eligible_changed": False,
+    }
+
+
 def verify_pack(output_dir: Path = DEFAULT_OUTPUT, source_pack: Path = DEFAULT_SOURCE_PACK) -> dict[str, Any]:
     manifest = json.loads((output_dir / "public" / "manifest.json").read_text(encoding="utf-8"))
     items = manifest.get("items") or []
@@ -556,7 +683,15 @@ def verify_pack(output_dir: Path = DEFAULT_OUTPUT, source_pack: Path = DEFAULT_S
         if not image.is_file():
             raise RopeReviewBuildError(f"missing linked 2,525-row preview: {image}")
     page = (output_dir / "public" / "index.html").read_text(encoding="utf-8")
-    for token in ("K / 1", "X / 2", "? / 3", "A 核心档", "代码只负责排序"):
+    for token in (
+        "K / 1",
+        "X / 2",
+        "? / 3",
+        "A 核心档",
+        "代码只负责排序",
+        "绿色框附近 · 自动放大",
+        '<canvas id="chart"',
+    ):
         if token not in page:
             raise RopeReviewBuildError(f"review page missing contract token: {token}")
     summary = json.loads((output_dir / "build_summary.json").read_text(encoding="utf-8"))
@@ -568,6 +703,173 @@ def verify_pack(output_dir: Path = DEFAULT_OUTPUT, source_pack: Path = DEFAULT_S
         "n_items": len(items),
         "n_owner_2525_items": len(owner_items),
     }
+
+
+def summarize_answers(
+    answer_path: Path,
+    *,
+    output_dir: Path = DEFAULT_OUTPUT,
+    positive_manifest: Path = DEFAULT_POSITIVE_MANIFEST,
+    source_pack: Path = DEFAULT_SOURCE_PACK,
+) -> dict[str, Any]:
+    """Validate a review export and join it to the frozen short-positive lineage.
+
+    This is deliberately a receipt builder, not a dataset builder.  Review-only
+    images may contain future context, so the joined rows retain the frozen
+    training image/label paths and hashes from ``positive_manifest``.  Every row
+    remains fail-closed until the owner separately approves a new materialized
+    dataset version.
+    """
+
+    build_summary = json.loads((output_dir / "build_summary.json").read_text(encoding="utf-8"))
+    lineage_paths = {
+        "public_manifest_sha256": output_dir / "public" / "manifest.json",
+        "positive_manifest_sha256": positive_manifest,
+        "source_pack_truth_sha256": source_pack / "admin" / "truth.jsonl",
+        "positive_scores_sha256": output_dir / "admin" / "positive_1345_scores.jsonl",
+    }
+    for field, path in lineage_paths.items():
+        recorded = str(build_summary.get(field) or "")
+        actual = sha256_file(path)
+        if not recorded or recorded != actual:
+            raise RopeReviewBuildError(f"{field} lineage SHA mismatch")
+
+    public_payload = json.loads(lineage_paths["public_manifest_sha256"].read_text(encoding="utf-8"))
+    public_items = public_payload.get("items") or []
+    positives = read_jsonl(positive_manifest)
+    truth = read_jsonl(lineage_paths["source_pack_truth_sha256"])
+    scores = read_jsonl(lineage_paths["positive_scores_sha256"])
+    populations = {
+        "public review manifest": public_items,
+        "positive manifest": positives,
+        "source review truth": truth,
+        "rope scores": scores,
+    }
+    for name, rows in populations.items():
+        if len(rows) != EXPECTED_POSITIVES:
+            raise RopeReviewBuildError(
+                f"{name} population changed: {len(rows)} != {EXPECTED_POSITIVES}"
+            )
+    if public_payload.get("pack_id") != PACK_ID:
+        raise RopeReviewBuildError("public manifest pack_id mismatch")
+
+    def unique_by(
+        rows: Sequence[Mapping[str, Any]], field: str, name: str
+    ) -> dict[str, Mapping[str, Any]]:
+        result = {str(row.get(field) or ""): row for row in rows}
+        if "" in result or len(result) != len(rows):
+            raise RopeReviewBuildError(f"{name} has missing or duplicate {field}")
+        return result
+
+    public_by_review = unique_by(public_items, "review_id", "public manifest")
+    positive_by_sample = unique_by(positives, "sample_id", "positive manifest")
+    truth_by_review = unique_by(truth, "review_id", "source review truth")
+    score_by_review = unique_by(scores, "review_id", "rope scores")
+    public_samples = {str(row["sample_id"]) for row in public_items}
+    if public_samples != set(positive_by_sample):
+        raise RopeReviewBuildError("public and positive-manifest sample sets differ")
+    if set(public_by_review) != set(truth_by_review) or set(public_by_review) != set(score_by_review):
+        raise RopeReviewBuildError("review-id sets differ across public, truth, and score ledgers")
+    for review_id, item in public_by_review.items():
+        sample_id = str(item["sample_id"])
+        if str(truth_by_review[review_id].get("sample_id")) != sample_id:
+            raise RopeReviewBuildError(f"{review_id}: source-truth sample mismatch")
+        if str(score_by_review[review_id].get("sample_id")) != sample_id:
+            raise RopeReviewBuildError(f"{review_id}: score sample mismatch")
+
+    payload = json.loads(answer_path.read_text(encoding="utf-8"))
+    answers = payload.get("answers")
+    if payload.get("schema_version") != 1 or payload.get("pack_id") != PACK_ID:
+        raise RopeReviewBuildError("answer export does not belong to this pack")
+    if not isinstance(answers, list):
+        raise RopeReviewBuildError("answer export has no answers list")
+    if payload.get("n_total") != EXPECTED_POSITIVES:
+        raise RopeReviewBuildError("answer export n_total mismatch")
+    if payload.get("n_answered") != len(answers):
+        raise RopeReviewBuildError("answer export n_answered mismatch")
+    if bool(payload.get("complete")) != (len(answers) == EXPECTED_POSITIVES):
+        raise RopeReviewBuildError("answer export complete flag mismatch")
+
+    answer_by_review: dict[str, Mapping[str, Any]] = {}
+    for answer in answers:
+        if not isinstance(answer, Mapping):
+            raise RopeReviewBuildError("answer rows must be objects")
+        review_id = str(answer.get("review_id") or "")
+        if review_id in answer_by_review or review_id not in public_by_review:
+            raise RopeReviewBuildError(f"unknown or duplicate review_id: {review_id}")
+        expected_sample = str(public_by_review[review_id]["sample_id"])
+        if str(answer.get("sample_id") or "") != expected_sample:
+            raise RopeReviewBuildError(f"{review_id}: answer sample_id mismatch")
+        decision = str(answer.get("decision") or "")
+        if decision not in ALLOWED_DECISIONS:
+            raise RopeReviewBuildError(f"{review_id}: invalid decision {decision}")
+        if answer.get("note") is not None and not isinstance(answer.get("note"), str):
+            raise RopeReviewBuildError(f"{review_id}: note must be text or null")
+        if answer.get("decided_at") is not None and not isinstance(answer.get("decided_at"), str):
+            raise RopeReviewBuildError(f"{review_id}: decided_at must be text or null")
+        answer_by_review[review_id] = answer
+
+    counts: Counter[str] = Counter()
+    joined_rows: list[dict[str, Any]] = []
+    for rank, item in enumerate(public_items, start=1):
+        review_id = str(item["review_id"])
+        sample_id = str(item["sample_id"])
+        answer = answer_by_review.get(review_id)
+        decision = str(answer["decision"]) if answer else "PENDING"
+        counts[decision] += 1
+        source = truth_by_review[review_id]
+        positive = dict(positive_by_sample[sample_id])
+        if positive.get("image_sha256") != source.get("training_image_sha256"):
+            raise RopeReviewBuildError(f"{review_id}: training image SHA lineage mismatch")
+        if positive.get("label_sha256") != source.get("training_label_sha256"):
+            raise RopeReviewBuildError(f"{review_id}: training label SHA lineage mismatch")
+        joined_rows.append(
+            {
+                **positive,
+                "review_pack_id": PACK_ID,
+                "review_id": review_id,
+                "review_rank": rank,
+                "review_tier": item["tier"],
+                "ma_rope_score": item["score"],
+                "owner_refilter_decision": decision,
+                "owner_refilter_note": answer.get("note") if answer else None,
+                "owner_refilter_decided_at": answer.get("decided_at") if answer else None,
+                "review_image_used_as_model_input": False,
+                "training_eligible": False,
+                "production_eligible": False,
+            }
+        )
+
+    return {
+        "schema_version": 1,
+        "pack_id": PACK_ID,
+        "review_export_path": str(answer_path),
+        "review_export_sha256": sha256_file(answer_path),
+        "n_total": EXPECTED_POSITIVES,
+        "n_answered": len(answer_by_review),
+        "owner_review_complete": len(answer_by_review) == EXPECTED_POSITIVES,
+        "counts": {
+            key: counts.get(key, 0)
+            for key in ("KEEP", "REMOVE", "UNCERTAIN", "PENDING")
+        },
+        "lineage_sha256": {
+            field: sha256_file(path) for field, path in lineage_paths.items()
+        },
+        "holdout_read": False,
+        "training_performed": False,
+        "new_dataset_materialized": False,
+        "training_eligible_changed": False,
+        "joined_rows": joined_rows,
+    }
+
+
+def _ensure_new_outputs(paths: Sequence[Path | None]) -> None:
+    concrete = [path for path in paths if path is not None]
+    if len({path.resolve() for path in concrete}) != len(concrete):
+        raise RopeReviewBuildError("receipt and joined outputs must be different files")
+    existing = [str(path) for path in concrete if path.exists()]
+    if existing:
+        raise RopeReviewBuildError(f"refusing to overwrite review receipt: {existing}")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -585,6 +887,18 @@ def build_parser() -> argparse.ArgumentParser:
     verify = sub.add_parser("verify")
     verify.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT)
     verify.add_argument("--source-pack", type=Path, default=DEFAULT_SOURCE_PACK)
+    rerender = sub.add_parser("rerender")
+    rerender.add_argument("--positive-manifest", type=Path, default=DEFAULT_POSITIVE_MANIFEST)
+    rerender.add_argument("--owner-review-sheet", type=Path, default=DEFAULT_REVIEW_SHEET)
+    rerender.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT)
+    rerender.add_argument("--generator-commit", required=True)
+    summarize = sub.add_parser("summarize")
+    summarize.add_argument("answers", type=Path)
+    summarize.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT)
+    summarize.add_argument("--positive-manifest", type=Path, default=DEFAULT_POSITIVE_MANIFEST)
+    summarize.add_argument("--source-pack", type=Path, default=DEFAULT_SOURCE_PACK)
+    summarize.add_argument("--joined-out", type=Path)
+    summarize.add_argument("--receipt-out", type=Path)
     return parser
 
 
@@ -601,8 +915,30 @@ def main(argv: Sequence[str] | None = None) -> int:
             output_dir=args.output_dir,
             generator_commit=args.generator_commit,
         )
-    else:
+    elif args.command == "verify":
         result = verify_pack(args.output_dir, args.source_pack)
+    elif args.command == "rerender":
+        result = rerender_review_pages(
+            positive_manifest=args.positive_manifest,
+            owner_review_sheet=args.owner_review_sheet,
+            output_dir=args.output_dir,
+            generator_commit=args.generator_commit,
+        )
+    else:
+        result = summarize_answers(
+            args.answers,
+            output_dir=args.output_dir,
+            positive_manifest=args.positive_manifest,
+            source_pack=args.source_pack,
+        )
+        joined_rows = result.pop("joined_rows")
+        _ensure_new_outputs((args.joined_out, args.receipt_out))
+        if args.joined_out:
+            write_jsonl(args.joined_out, joined_rows)
+            result["joined_output"] = str(args.joined_out)
+            result["joined_output_sha256"] = sha256_file(args.joined_out)
+        if args.receipt_out:
+            write_json(args.receipt_out, result)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
