@@ -6,7 +6,7 @@
 
 这版与刚才找币的完成形态检索**属于同一类形态、共享冻结结构参数，但不是同一个决策配置**。找币版必须看启动后 12 根 4h K 线，约 48 小时后才能确认；本 Pine 只允许看当前已收盘 bar 以及最多前 2 根启动 bar，信号画在真实确认时刻，不回填到过去。因此它能用于实时观察，但完成形态检索的相似度、p 值和候选质量结论不能移植给它。
 
-本轮证明的是“源码满足已冻结的因果合同，并能通过官方 Pine 编译器”，**没有证明信号赚钱、命中率高或可上生产**。没有读取或评分 repository holdout，没有训练、回测、forward、promote 或交易动作。
+本轮证明的是“源码满足已冻结的因果合同，并能通过官方 Pine 编译器”，**没有证明信号赚钱、命中率高或可上生产**。没有新增读取或评分 repository holdout，没有训练、回测、forward、promote 或交易动作。不过，本配置继承了完成形态父配置中由边界后 Owner 参考形态冻结的门槛，所以这些产物在注册表中继承 `holdout_consumed` 血缘；“本轮零新增读取”不等于“独立 pre-holdout 证据”。
 
 ## Pine 做了什么
 
@@ -124,6 +124,7 @@ PYTHONPATH=. .venv/bin/python -m pytest -q \
 - 因果 V1 尚未做任何历史候选审核，信号可能过密、过少或误报很高；官方编译通过不改善这一事实。
 - 1–3 根线性折算门是冻结的设计假设，不是经 pre-holdout 或前向数据验证的统计最优解。
 - 找币版完成形态的 RMSE、DTW、phase-scramble p 值和 8 多 + 8 空候选不能拿来给本 Pine 背书。
+- 本配置继承父配置的边界后参考阈值，不能通过倒放到旧数据就恢复成独立 pre-holdout 试验；任何旧数据 replay 只能作描述性调试。
 - 当前脚本已作为私有指标留在 TradingView 图表上，便于 Owner 直接查看；没有创建 alert。Owner 如不想保留，可在图表和私有脚本列表中手动移除。
 - 本轮没有消费该配置的 holdout，没有变更模型、阈值预设、ACTIVE/frozen、forward log、新鲜度门或真金状态；training/production eligibility 均为 false。
 
@@ -137,7 +138,7 @@ PYTHONPATH=. .venv/bin/python -m pytest -q \
 
 ## 下一步选项
 
-下一条合法且不消耗 holdout 的研究动作，是给本 V1 写完全相同语义的 Python causal replay，只在 **2026-05-04 之前**的数据上统计候选密度、逐例渲染和匹配随机对照，并先冻结经济标签与成本合同。它只能验证 pre-holdout 行为，不能替代真正前向样本。
+下一条合法且不新增消耗 holdout 的研究动作，是给本 V1 写完全相同语义的 Python causal replay，只在 **2026-05-04 之前**的数据上统计候选密度、逐例渲染和匹配随机对照，并先冻结经济标签与成本合同。由于阈值已继承边界后参考信息，该 replay 只能作描述性调试，不能冒充无偏验证；确认级仍需版本冻结后的真正前向样本。
 
 任何 holdout 读取、tip-smoke、forward、Telegram/webhook 自动发送、ACTIVE 接入或实盘动作，都需要 Owner 另行明确批准；本轮没有越过这些门。
 

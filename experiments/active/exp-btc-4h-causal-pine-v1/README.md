@@ -32,6 +32,7 @@
 - 私有脚本：已保存并添加到一个 4h Candles 图表。
 - alert / webhook / order：均未创建或发送。
 - 历史、holdout、收益或 forward 评价：均未运行。
+- 血缘：本轮零新增 holdout 读取，但结构门继承完成形态父配置的边界后参考，不能称为独立 pre-holdout 证据。
 
 编译证据见 `results/tradingview_compile_receipt.json`，完整边界与复现命令见
 `analysis/p0_btc_4h_causal_pine_v1_20260825.md`。
