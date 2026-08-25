@@ -1648,6 +1648,129 @@ artifacts:
       Browser-tested self-contained HTML with 18 embedded images; desktop and
       390px mobile Chromium loaded all images with no console error or overflow.
 
+  # ---- BTC 4h Top-20 expansion, failed holdout use #2 --------------------
+  - artifact_id: btc-4h-ma-launch-similarity-top20-v2-prereg
+    artifact_type: config
+    role: frozen_top20_completed_shape_expansion_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4979e1871a0f883405d76fc5e357fe63b8bf0daf"
+    source_path: experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/preregistration.json
+    sha256: "be3263772f1ee30a28be68daa624afa0ea37d144ec87f2357f1c2f23a861730f"
+    size_bytes: 5747
+    storage_uri: "repo://experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/preregistration.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4979e1871a0f883405d76fc5e357fe63b8bf0daf"
+    config_hash: "be3263772f1ee30a28be68daa624afa0ea37d144ec87f2357f1c2f23a861730f"
+    data_cutoff: "2026-08-25T04:00:00Z"
+    notes: >-
+      Frozen before authorized holdout use #2. The only spec change from v1 is
+      top_per_side 8 to 20; the scan later failed the final SHORT capacity gate.
+
+  - artifact_id: btc-4h-ma-launch-similarity-top20-v2-failure-receipt
+    artifact_type: manifest
+    role: failed_scan_and_holdout_consumption_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "066840c69460179aef060de431b54dc7b9ebe8b3"
+    source_path: experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/results/failure_receipt.json
+    sha256: "2e2ea3623f1d56898f3d08a29082d1e3ba20aeaf77f6f413f5ee52d8a938feb4"
+    size_bytes: 2178
+    storage_uri: "repo://experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/results/failure_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "066840c69460179aef060de431b54dc7b9ebe8b3"
+    config_hash: "be3263772f1ee30a28be68daa624afa0ea37d144ec87f2357f1c2f23a861730f"
+    data_cutoff: "2026-08-25T04:00:00Z"
+    notes: >-
+      Full 54-symbol read completed; SHORT had 15 candidates after the fixed
+      18-bar deduplication, below requested Top-20. Records exit code 1, zero
+      charts, and 36,720 holdout 4h symbol-rows as consumption #2.
+
+  - artifact_id: btc-4h-ma-launch-similarity-top20-v2-report-artifact
+    artifact_type: report
+    role: canonical_portable_failure_report_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: "066840c69460179aef060de431b54dc7b9ebe8b3"
+    source_path: experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/report/artifact.json
+    sha256: "636238e319971b655e3b1c363ed184c5a6805bfb9dd5390405a4fa6609d117c2"
+    size_bytes: 13253
+    storage_uri: "repo://experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/report/artifact.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "066840c69460179aef060de431b54dc7b9ebe8b3"
+    config_hash: "be3263772f1ee30a28be68daa624afa0ea37d144ec87f2357f1c2f23a861730f"
+    data_cutoff: "2026-08-25T04:00:00Z"
+
+  - artifact_id: btc-4h-ma-launch-similarity-top20-v2-report
+    artifact_type: report
+    role: canonical_failed_top20_expansion_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "066840c69460179aef060de431b54dc7b9ebe8b3"
+    source_path: analysis/p0_btc_4h_ma_launch_similarity_top20_v2_failure_20260825.md
+    sha256: "6f141c1d4d063d07cd64b3f0dbe93fcc5b3c35abf3a8a23dc85d67e924df162b"
+    size_bytes: 6998
+    storage_uri: "repo://analysis/p0_btc_4h_ma_launch_similarity_top20_v2_failure_20260825.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "066840c69460179aef060de431b54dc7b9ebe8b3"
+    config_hash: "be3263772f1ee30a28be68daa624afa0ea37d144ec87f2357f1c2f23a861730f"
+    data_cutoff: "2026-08-25T04:00:00Z"
+
+  - artifact_id: btc-4h-ma-launch-similarity-top20-v2-html
+    artifact_type: report
+    role: owner_facing_self_contained_failure_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "066840c69460179aef060de431b54dc7b9ebe8b3"
+    source_path: analysis/html/p0_btc_4h_ma_launch_similarity_top20_v2_failure_20260825.html
+    sha256: "7d09f3ccbf5a321fcadc4129b6dc57fc6650976871d892b6eb1f89f208789f56"
+    size_bytes: 415994
+    storage_uri: "repo://analysis/html/p0_btc_4h_ma_launch_similarity_top20_v2_failure_20260825.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "066840c69460179aef060de431b54dc7b9ebe8b3"
+    config_hash: "be3263772f1ee30a28be68daa624afa0ea37d144ec87f2357f1c2f23a861730f"
+    data_cutoff: "2026-08-25T04:00:00Z"
+    notes: >-
+      Portable HTML with four metric cards, one capacity chart and three tables.
+      This report intentionally contains zero candidate K-line charts.
+
+  - artifact_id: btc-4h-ma-launch-similarity-top20-v2-render-preview
+    artifact_type: report
+    role: chrome_rendered_failure_report_preview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "066840c69460179aef060de431b54dc7b9ebe8b3"
+    source_path: experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/report/report_preview.png
+    sha256: "c166ed64a1996689fc40dfa04107eeb6f0fa270ee1e3a7dad13259c3b6df163a"
+    size_bytes: 300254
+    storage_uri: "repo://experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/report/report_preview.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "066840c69460179aef060de431b54dc7b9ebe8b3"
+    config_hash: "be3263772f1ee30a28be68daa624afa0ea37d144ec87f2357f1c2f23a861730f"
+    data_cutoff: "2026-08-25T04:00:00Z"
+
+  - artifact_id: btc-4h-ma-launch-similarity-top20-v2-render-verification
+    artifact_type: manifest
+    role: portable_structure_and_chrome_visual_qa_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "066840c69460179aef060de431b54dc7b9ebe8b3"
+    source_path: experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/report/render_verification.json
+    sha256: "1f22a1a0528af64d7b889949c97acc25c8bb4a082be3c2896983fe5fcceaa232"
+    size_bytes: 1068
+    storage_uri: "repo://experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/report/render_verification.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "066840c69460179aef060de431b54dc7b9ebe8b3"
+    config_hash: "be3263772f1ee30a28be68daa624afa0ea37d144ec87f2357f1c2f23a861730f"
+    data_cutoff: "2026-08-25T04:00:00Z"
+
   # ---- causal-prefix Pine sibling of completed 4h shape -------------------
   - artifact_id: btc-4h-causal-pine-v1-prereg
     artifact_type: config

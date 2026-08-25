@@ -1040,8 +1040,8 @@ experiments:
 
   - experiment_id: exp-btc-4h-ma-launch-similarity-top20-v2
     source_repo: darkforest-x/fable-trading
-    source_commit: "4979e1871a0f883405d76fc5e357fe63b8bf0daf"
-    status: active
+    source_commit: "066840c69460179aef060de431b54dc7b9ebe8b3"
+    status: rejected
     question: >-
       When the frozen two-year BTC 4h completed-shape retrieval is expanded
       from Top-8 to Top-20 per side, which additional ranks 9-20 should the
@@ -1050,19 +1050,35 @@ experiments:
       top_per_side changes from 8 to 20; protocol, universe, dates, reference,
       30+12+6 window, gates, feature scales, weights, RMSE, constrained DTW,
       shortlist, 18-bar deduplication and random seed remain unchanged
-    result: preregistered_and_authorized_before_holdout_scan
-    holdout_consumed: false
+    result: >-
+      failed_closed_after_complete_scan: the unchanged broad gates produced
+      64 LONG and 30 SHORT anchors, but the unchanged 18-bar same-symbol
+      deduplication left only 15 SHORT candidates, below the frozen Top-20
+      requirement; exit code 1, zero candidates persisted, zero charts rendered
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
+    canonical_report: analysis/p0_btc_4h_ma_launch_similarity_top20_v2_failure_20260825.md
+    artifacts:
+      - btc-4h-ma-launch-similarity-top20-v2-prereg
+      - btc-4h-ma-launch-similarity-top20-v2-failure-receipt
+      - btc-4h-ma-launch-similarity-top20-v2-report-artifact
+      - btc-4h-ma-launch-similarity-top20-v2-report
+      - btc-4h-ma-launch-similarity-top20-v2-html
+      - btc-4h-ma-launch-similarity-top20-v2-render-preview
+      - btc-4h-ma-launch-similarity-top20-v2-render-verification
     reuse_allowed: false
     notes: >-
       The Owner was told that ranks beyond 8 were not persisted and that this
       exact expansion would reread about 36,720 holdout 4h symbol-rows as
       configuration consumption #2, then replied "继续" on 2026-08-25. The
-      builder must prove Top-N is the only changed spec field and must reproduce
-      the old Top-8 identity and distances before any rank 9-20 chart is valid.
-      No scan, training, economic evaluation, forward, promotion or order has
-      occurred at this preregistration state.
+      complete 54-symbol scan read exactly that fixed 54 x 680 grid, so #2 is
+      consumed even though selection failed before the in-process counter and
+      successful summary could be serialized. Top-N-only validation passed;
+      the old Top-8 prefix and Top-20 phase-scramble gates were not reached.
+      No training, economic evaluation, forward, promotion or order occurred.
+      Any smaller or asymmetric Top-N is a new configuration requiring fresh
+      Owner authorization and holdout consumption #3.
 
   - experiment_id: exp-btc-4h-causal-pine-v1
     source_repo: darkforest-x/fable-trading

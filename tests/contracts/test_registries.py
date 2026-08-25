@@ -173,6 +173,7 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
     registries = load_registries(root=REPO)
     consumers = {e.experiment_id for e in registries.experiments if e.holdout_consumed}
     assert consumers == {
+        "exp-btc-4h-ma-launch-similarity-top20-v2",
         "exp-btc-4h-ma-launch-similarity-v1",
         "exp-pine-eth-15m-v1",
         "exp-yoyo-trading-fixed-w10-classifier-holdout3d",
