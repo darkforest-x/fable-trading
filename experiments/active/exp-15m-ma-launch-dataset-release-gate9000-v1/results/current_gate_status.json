@@ -1,0 +1,48 @@
+{
+  "counts": {
+    "epochs": 0,
+    "guard_intervals": 0,
+    "negative_rows": 0,
+    "repository_formal_owner_answers": 0,
+    "short_positive_plans": 0,
+    "training_images": 0,
+    "weights": 0,
+    "yolo_labels": 0
+  },
+  "eligibility": {
+    "dataset_materialization_eligible": false,
+    "dataset_plan_eligible": false,
+    "production_eligible": false,
+    "training_eligible": false
+  },
+  "experiment_id": "exp-15m-ma-launch-dataset-release-gate9000-v1",
+  "generated_at": "2026-08-25T19:46:33.514365+00:00",
+  "holdout": {
+    "ohlcv_rows_materialized": 0,
+    "read": false,
+    "source_ohlcv_files_opened": 0
+  },
+  "inputs": {
+    "owner_release_path": "/Users/zhangzc/fable-trading/experiments/active/exp-15m-ma-launch-dataset-release-gate9000-v1/owner_dataset_release.json",
+    "owner_release_present": false,
+    "pinned_source_hashes": {
+      "candidate_manifest": "3b4faa197ebd08bfd24ea662c30b8360200f29e172dbc5d68639eb880a71d731",
+      "local_signal_v2_protocol": "9f81dbc867fca9b772d6e2cbd0fe0ecb2d451e1b69652057208f68aad3f09e3e",
+      "review_preregistration": "3d90f2f8da67a00c0bfb0e1653b8f5b6b19b6f925bc3b16aa4b84a681e92ad87",
+      "review_qa_receipt": "b80a83f7ede2f341853ceaf1fe8f4a8071b7349b04a9459d1871a45f90f6e1e3"
+    },
+    "required_review_files_present": false,
+    "review_summary_dir": "/Users/zhangzc/fable-trading/experiments/active/exp-15m-ma-launch-boundary-review9000-v1/results/owner_review_summary"
+  },
+  "missing_requirements": [
+    "complete_owner_review_summary",
+    "explicit_hash_bound_owner_short_release"
+  ],
+  "planner_commit": "16ed6dc2903b91df589bd3b66bb68d456962bf1c",
+  "preregistration_sha256": "3b6d1854114a23f24c419b2e7e22d7837c98d69d37a40eade8a6ecd114196aa6",
+  "remote": {
+    "training_started": false,
+    "writes": 0
+  },
+  "status": "blocked_pending_complete_owner_review_and_explicit_release"
+}

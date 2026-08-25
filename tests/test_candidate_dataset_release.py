@@ -232,6 +232,21 @@ def test_position_audit_failure_blocks_release() -> None:
         )
 
 
+def test_incomplete_review_summary_blocks_release() -> None:
+    prereg, summary, joined, preview, receipt, summary_hash, preview_hash = _fixture()
+    summary["complete"] = False
+    with pytest.raises(DatasetReleaseError, match="complete is not release-ready"):
+        plan_dataset_release(
+            review_summary=summary,
+            joined_rows=joined,
+            preview_rows=preview,
+            release_receipt=receipt,
+            review_summary_sha256=summary_hash,
+            preview_sha256=preview_hash,
+            prereg=prereg,
+        )
+
+
 def test_release_preview_flag_is_recomputed_not_trusted() -> None:
     prereg, summary, joined, preview, receipt, summary_hash, preview_hash = _fixture()
     joined[0]["eligible_for_later_owner_release_preview"] = False

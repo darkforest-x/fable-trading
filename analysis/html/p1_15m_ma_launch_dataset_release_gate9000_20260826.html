@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>15m 六均线 9000 候选 P1 数据集 release 门</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>15m 六均线 9000 候选 P1 数据集 release 门</h1>
+<h2>技术结论</h2>
+<p>P1 前置 release planner 已完成并通过回归：它把完整 Owner 审核、精确 SHORT KEEP preview 和 Owner 显式 release 固定为三个不可替代的事实源；只有三者哈希一致，才会生成<strong>时间切分与保护区 计划</strong>。即使规划成功，训练图、YOLO label、负样本、epoch 和 weights 仍全部为 0， <code>training_eligible=false / production_eligible=false</code>。</p>
+<p>当前真实状态仍是阻断：仓库内没有 9,000 / 9,000 完整审核汇总，也没有绑定精确 preview hash 的 Owner release，因此 planner 没有生成正例计划或保护区，更没有连接 3060。阻断不是工具缺失， 而是 P0/P1 所需的两项 Owner 事实尚未出现。</p>
+<p>逐样本审核入口： <a href="http://127.0.0.1:8769/exp-15m-ma-launch-boundary-review9000-v1/results/public/index.html"><code>exp-15m-ma-launch-boundary-review9000-v1/results/public/index.html</code></a></p>
+<h2>当前闸门只缺两项外部事实</h2>
+<p>以下数字来自提交后的 <code>--status-only</code> 正式回执。它重新核对四个上游 SHA，并明确把“请求训练”与 “释放精确数据集成员”分开；前者不能代替后者。</p>
+<table><thead><tr>
+<th>闸门</th>
+<th>当前证据</th>
+<th>是否满足</th>
+<th>失败时动作</th>
+</tr></thead><tbody>
+<tr><td>完整逐样本审核</td><td>正式答案 0 / 9,000</td><td>否</td><td>不生成 release plan</td></tr>
+<tr><td>精确 SHORT release</td><td>release receipt 不存在</td><td>否</td><td>不推导数据集成员</td></tr>
+<tr><td>上游四项 SHA</td><td>4 / 4 一致</td><td>是</td><td>任一漂移立即拒绝</td></tr>
+<tr><td>P1 planner 代码</td><td>已提交</td><td>是</td><td>非 main / dirty builder 拒绝运行</td></tr>
+<tr><td>正例 split plan</td><td>0 行</td><td>未到此门</td><td>不读取 OHLCV</td></tr>
+<tr><td>新 KEEP guard ledger</td><td>0 行</td><td>未到此门</td><td>不收集负例</td></tr>
+<tr><td>训练图片 / label / negative</td><td>0 / 0 / 0</td><td>未授权</td><td>不连接 3060 写入</td></tr>
+<tr><td>epoch / weights</td><td>0 / 0</td><td>未授权</td><td>不训练、不 promote</td></tr>
+</tbody></table>
+<p>状态回执固定的两个缺口是 <code>complete_owner_review_summary</code> 与 <code>explicit_hash_bound_owner_short_release</code>。第二次用同一路径运行 <code>--status-only</code> 得到 exit 1 的 <code>refusing to overwrite</code>，证明状态回执不会被静默覆盖。</p>
+<h2>小窗口、小框与位置变化现在进入可执行合同</h2>
+<p>本轮没有改 Owner 参数，只把上一轮恢复的训练方法推进到 fail-closed 规划层。</p>
+<table><thead><tr>
+<th>合同</th>
+<th>冻结值</th>
+<th>planner 如何使用</th>
+</tr></thead><tbody>
+<tr><td>时间粒度</td><td>15 分钟</td><td>仅用 <code>anchor_time</code> 做整数 bar 时间算术</td></tr>
+<tr><td>输入窗口</td><td>W14–22</td><td>从 Owner 每张选择推导 input start/end</td></tr>
+<tr><td>核心框</td><td>4–7 根</td><td>从 Owner 每张选择推导 core start/end</td></tr>
+<tr><td>确认延迟</td><td>3 / 4 / 5 根</td><td>3 优先、5 封顶；不读核心之后收益</td></tr>
+<tr><td>框位置</td><td>自然变化</td><td>重算 W/core/delay 与 center ratio；退化审计失败即停</td></tr>
+<tr><td>依赖块</td><td>同币输入窗重叠或相接</td><td>整块只能落在一个 split</td></tr>
+<tr><td>validation</td><td>时间上最新 15% 依赖块</td><td>禁止随机切分</td></tr>
+<tr><td>purge</td><td>150 根 15m bar</td><td>train 最晚输入端到 val 最早输入端必须达标</td></tr>
+<tr><td>新正框保护</td><td>核心两侧各 12 根</td><td>SHORT 与 LONG KEEP 都进入保护 ledger</td></tr>
+<tr><td>easy negative</td><td>train 正例 1×</td><td>仅输出软目标，不选样本</td></tr>
+<tr><td>hard negative</td><td>train 正例 2×</td><td>仅输出软目标，不用模型分数选样本</td></tr>
+</tbody></table>
+<p>SHORT KEEP 才能进入正例 split plan；LONG KEEP 仍是 <code>mirror_unconfirmed</code>，不进正例也不进负例， 但其 Owner 确认核心会进入<strong>保护区</strong>，防止后续背景采样踩到一张尚未获镜像协议批准的形态。</p>
+<h2>release planner 重算事实而不相信派生布尔值</h2>
+<p>planner 先逐行从原子事实重算：<code>direction=SHORT AND decision=KEEP</code> 才是 SHORT release preview 成员；KEEP 必须有 Owner 几何，非 KEEP 必须无几何；SHORT/LONG 的协议状态也重新推导。上游的 <code>eligible_for_later_owner_release_preview</code>、<code>geometry_owner_confirmed</code> 等字段只作为一致性断言， 不能决定成员。</p>
+<p>这样做修复了一个审计中发现的风险：若上游布尔值错误，一条 SHORT KEEP 可能静默漏出，或一条 LONG/非 KEEP 可能混入。现在任一不一致都 fail closed。解决思路记录在 <code>docs/learnings/release-preview-membership-must-be-recomputed-from-owner-facts.md</code>。</p>
+<p>通过成员门后，planner 才执行以下纯时间步骤：</p>
+<ol>
+<li>从 <code>anchor_time</code>、W、core、confirmation 推导 input/core/guard 时间；</li>
+<li>拒绝任一源时间、input/core 时间或 guard 右端触及 <code>2026-05-04 00:00 UTC</code>；</li>
+<li>将同币重叠或相接的输入窗合成不可拆依赖块；</li>
+<li>按全局时间排序，把最新 15% 依赖块给 val；</li>
+<li>val 最早输入之前不足 150 根的中间块全部 drop；</li>
+<li>输出 planning-only 正例、全 KEEP 保护区与按 W 分层的 1×/2×负样本软目标。</li>
+</ol>
+<p>全过程不打开 OHLCV，因此它只能证明 split/guard 计划的逻辑完整，不能证明未来市场数据可物化、 图片可渲染或安全负例一定足额。</p>
+<h2>故障注入证明错误输入不会越过门</h2>
+<p>本轮是非方向性的数据谱系与切分守门，没有模型、入场、退出、成本或收益，因此 val AUC、置换 <code>p</code>、top-decile 毛/净收益、胜率、单特征基线、匹配随机交易对照与 YOLO mAP 均不适用。对应的 严格零假设是：不完整、漂移或越权的 release 输入不得产生任何训练资产。</p>
+<table><thead><tr>
+<th>故障 / 对照</th>
+<th>预期</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>review summary 未完成</td><td>拒绝</td><td>通过</td></tr>
+<tr><td>位置去捷径审计失败</td><td>拒绝</td><td>通过</td></tr>
+<tr><td>release 未绑定 exact summary SHA</td><td>拒绝</td><td>通过</td></tr>
+<tr><td>release 把 <code>training_authorized</code> 设 true</td><td>拒绝</td><td>通过</td></tr>
+<tr><td>LONG 行混进 SHORT preview</td><td>拒绝</td><td>通过</td></tr>
+<tr><td>上游 preview eligibility 布尔值与原子事实不符</td><td>重算后拒绝</td><td>通过</td></tr>
+<tr><td>core + 12 根 guard 触及 holdout</td><td>拒绝</td><td>通过</td></tr>
+<tr><td>同币相接输入窗</td><td>合并为同一 dependency</td><td>通过</td></tr>
+<tr><td>train/val 依赖块交叉</td><td>拒绝</td><td>通过</td></tr>
+<tr><td>第二次写同一路径状态回执</td><td>拒绝覆盖</td><td>exit 1</td></tr>
+</tbody></table>
+<p>10 个新定向测试通过；连同层间边界测试为 68 passed。全仓为 <strong>1,598 passed、4 skipped</strong>，仅有 既有 matplotlib/pyparsing 的 14 条弃用 warning。</p>
+<p>最终 HTML 在 headed Chromium 的 1440×1000 与 390×844 两种视口均可读；标题、三张表、列表与 审核入口链接存在，HTTP 200，console error 0。</p>
+<p>测试里的 20 行合成 review 只用于机械故障注入：16 个 SHORT KEEP、2 个 LONG KEEP 与 2 个 DROP 验证了 split、touch dependency 和 LONG 保护逻辑；它们没有保存在数据集目录，不计入候选、金标 或训练样本。</p>
+<h2>当前没有可诚实绘制的数据集分布图</h2>
+<p>本报告不新增 W/core/delay、split 或负样本分布图，因为正式 release plan 仍为 0 行。用合成测试 分布代替真实 Owner 审核结果会把 QA fixture 冒充数据证据；因此使用精确表格呈现当前门状态， 等真实完整审核与 release 后再绘制实际位置、split 和负样本短缺分布。</p>
+<h2>完整复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+
+# 定向合同与边界
+PYTHONPATH=. .venv/bin/pytest -q \
+  tests/test_candidate_dataset_release.py \
+  tests/boundaries/test_layer_imports.py
+
+# 当前真实门状态；正式回执已存在时会拒绝覆盖
+PYTHONPATH=. .venv/bin/python \
+  scripts/plan_15m_candidate_dataset_release.py --status-only
+
+# 完整审核与 Owner release 到位后才允许规划；仍不读 OHLCV、不产图
+PYTHONPATH=. .venv/bin/python \
+  scripts/plan_15m_candidate_dataset_release.py \
+  --review-dir /absolute/path/to/complete_review_summary \
+  --release /absolute/path/to/owner_dataset_release.json \
+  --out /absolute/path/to/new_release_plan
+
+# 全仓回归
+PYTHONPATH=. .venv/bin/pytest -q tests
+
+# 项目规定的 HTML 交付
+python3 scripts/md_to_html.py \
+  analysis/p1_15m_ma_launch_dataset_release_gate9000_20260826.md \
+  --out-dir analysis/html
+</code></pre>
+<h2>限制、风险与诚实声明</h2>
+<ul>
+<li>P1 planner 不是 Gold Dataset builder；它不检查 OHLC 连续性、不渲染图、不生成纵向 YOLO 坐标。</li>
+<li>新 KEEP guard ledger 只是必要集合。正式负样本 builder 必须再 union 全部历史 Owner 原框保护区； 在该 union 逐字节验收前，<code>historical_owner_guard_union_complete=false</code>，负样本选择继续阻断。</li>
+<li>3:1 是软目标。若同币、同 split、同 W 且避开所有保护区的背景不足，必须诚实缺样，不能缩保护区、 跨币、跨 split 或复用窗口凑比例。</li>
+<li>latest-15%-blocks 与 150-bar purge 是继承的冻结合同，不代表当前 9,000 样本已经得到可用 train/val； 实际计数只有完整审核和 release 后才可计算。</li>
+<li>本轮未读取 holdout OHLCV，未写 raw kline，未生成训练资产，未连接 3060 写入，未训练、promote、 改 ACTIVE、部署或改变 forward/order 状态。</li>
+</ul>
+<h2>下一步只有审核与精确 release</h2>
+<p>Owner 先在审核页完成 9,000 张并导出 JSON；summarizer 生成完整 review summary 与精确 SHORT KEEP preview。Codex 交付真实类别、W/core/delay、位置退化和方向分布后，Owner 再明确释放该 preview hash 用于 <strong>P1 planning only</strong>。</p>
+<p>planner 随后才会计算真实 split 与新保护区。再下一轮必须单独预注册：合并全部历史 Owner guard、 读取 bounded pre-holdout OHLC、物化正例、收集安全 easy/hard negative、逐字节验收训练包。只有该 Gold Dataset 质量门通过，才准备并在 3060 启动训练；训练完成也不自动 promote、部署或交易。</p>
+<p>仍需 Owner 回答的唯一当前问题是：完成逐样本审核后，是否释放<strong>精确 hash 绑定的 SHORT KEEP preview</strong>进入 P1 规划。现有“之后训练”的总体请求不被解释为这项样本级 release。</p>
+</body>
+</html>

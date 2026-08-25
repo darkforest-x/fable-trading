@@ -1,0 +1,81 @@
+{
+  "checked_at": "2026-08-26T03:53:00+08:00",
+  "experiment_id": "exp-15m-ma-launch-dataset-release-gate9000-v1",
+  "planner_commit": "16ed6dc2903b91df589bd3b66bb68d456962bf1c",
+  "status": "passed_currently_blocked_on_owner_facts",
+  "current_gate": {
+    "receipt_path": "experiments/active/exp-15m-ma-launch-dataset-release-gate9000-v1/results/current_gate_status.json",
+    "receipt_sha256": "0a475447c8bb1f182bcfc4b8e4462ebc6edeebb85f6f621f941ceebe1944d7c2",
+    "formal_owner_answers": 0,
+    "complete_review_summary_present": false,
+    "owner_release_present": false,
+    "missing_requirements": [
+      "complete_owner_review_summary",
+      "explicit_hash_bound_owner_short_release"
+    ],
+    "pinned_source_hashes_passed": 4,
+    "short_positive_plans": 0,
+    "guard_intervals": 0,
+    "training_images": 0,
+    "yolo_labels": 0,
+    "negative_rows": 0,
+    "epochs": 0,
+    "weights": 0,
+    "second_same_path_status_exit_code": 1,
+    "second_same_path_error": "refusing to overwrite"
+  },
+  "synthetic_contract_tests": {
+    "fixture_rows": 20,
+    "short_keep_rows": 16,
+    "long_keep_guard_rows": 2,
+    "drop_rows": 2,
+    "touching_same_symbol_windows_merged": true,
+    "chronological_latest_block_validation": true,
+    "purge_minimum_bars": 150,
+    "training_assets_retained": 0,
+    "fixture_files_retained_in_dataset_directories": 0,
+    "faults_rejected": [
+      "incomplete review summary",
+      "position-degeneracy failure",
+      "review-summary hash drift",
+      "training authorization in planning receipt",
+      "LONG row in SHORT preview",
+      "upstream preview flag drift",
+      "guard interval touching holdout"
+    ]
+  },
+  "tests": {
+    "new_targeted": "10 passed",
+    "targeted_plus_layer_boundaries": "68 passed",
+    "full_repository": "1598 passed, 4 skipped, 14 warnings",
+    "warnings": "existing matplotlib/pyparsing deprecations only"
+  },
+  "report_html": {
+    "path": "analysis/html/p1_15m_ma_launch_dataset_release_gate9000_20260826.html",
+    "sha256": "c2f8ec13f7c3776769439b60f9eb81f3e1ca4ac31443b46946301d7e69795eb8",
+    "size_bytes": 13569,
+    "desktop_viewport": [
+      1440,
+      1000
+    ],
+    "narrow_viewport": [
+      390,
+      844
+    ],
+    "page_title": "15m 六均线 9000 候选 P1 数据集 release 门",
+    "tables": 3,
+    "browser_http_status": 200,
+    "console_errors": 0,
+    "render_passed": true
+  },
+  "safety": {
+    "holdout_read": false,
+    "ohlcv_rows_materialized": 0,
+    "source_ohlcv_files_opened": 0,
+    "remote_writes": 0,
+    "training_started": false,
+    "promote": false,
+    "deployment": false,
+    "forward_or_order_state_changed": false
+  }
+}
