@@ -93,6 +93,7 @@ def test_render_page_uses_population_specific_identity() -> None:
     assert "完整原图" not in page
     assert "原尺寸" not in page
     assert "__TITLE__" not in page
+    assert "__VIEW_HINT__" not in page
 
 
 def test_render_page_can_default_to_owner_long_without_dropping_other_sides() -> None:
@@ -103,10 +104,13 @@ def test_render_page_can_default_to_owner_long_without_dropping_other_sides() ->
         title="方向复核",
         contract="测试合同",
         default_side="long",
+        view_hint="900×521 原始预览 · 轻度聚焦",
     )
     assert '<option value="long" selected>只看 long</option>' in page
     assert '<option value="short" >只看 short</option>' in page
     assert "sideFilter.value!=='ALL'&&x.side!==sideFilter.value" in page
+    assert "900×521 原始预览 · 轻度聚焦" in page
+    assert "1280×742 无损原图 · 轻度聚焦" not in page
 
 
 def test_attach_focus_geometry_uses_original_owner_box_coordinates() -> None:

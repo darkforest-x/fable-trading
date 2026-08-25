@@ -279,7 +279,7 @@ PAGE_TEMPLATE = """<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"
 <div class="contract">__CONTRACT__ <span class="warning">代码只负责排序，不能自动删图</span>；390 条独立反证未证明它能替代你的判断。</div>
 <div class="hint"><kbd>K</kbd>/<kbd>1</kbd> 保留　<kbd>X</kbd>/<kbd>2</kbd> 去掉　<kbd>?</kbd>/<kbd>3</kbd> 待定　<kbd>J</kbd>/<kbd>←</kbd> 上一张　<kbd>L</kbd>/<kbd>→</kbd>/<kbd>空格</kbd> 下一张　<kbd>U</kbd> 撤销</div><div class="progress"><div class="bar" id="bar"></div></div></header>
 <main><section class="panel"><div class="controls"><div class="position"><span id="position"></span> <span id="tier"></span> <span id="decision"></span></div><div><select id="tierFilter"><option value="A_CORE" selected>A 核心档</option><option value="B_BROAD">B 扩展档</option><option value="C_REST">C 其余</option><option value="ALL">全部档位</option></select> <select id="sideFilter"><option value="ALL" __SIDE_ALL__>全部方向</option><option value="long" __SIDE_LONG__>只看 long</option><option value="short" __SIDE_SHORT__>只看 short</option><option value="skip" __SIDE_SKIP__>只看 skip</option></select> <select id="answerFilter"><option value="ALL">全部状态</option><option value="UNREVIEWED" selected>只看未审核</option><option value="KEEP">只看保留</option><option value="REMOVE">只看去掉</option><option value="UNCERTAIN">只看待定</option></select> <label>跳到 <input id="jump" type="number" min="1" step="1"></label> <label><input id="autoNext" type="checkbox" checked> 自动下一张</label></div></div>
-<div class="viewer" id="viewer"><canvas id="chart" aria-label="高清原始K线的绿色框附近视图"></canvas><img id="sourceChart" class="hidden" alt=""><div class="viewhint">1280×742 无损原图 · 轻度聚焦</div></div><div class="metrics" id="metrics"></div>
+<div class="viewer" id="viewer"><canvas id="chart" aria-label="原始K线的绿色框附近视图"></canvas><img id="sourceChart" class="hidden" alt=""><div class="viewhint">__VIEW_HINT__</div></div><div class="metrics" id="metrics"></div>
 <div class="actions"><button class="keep" data-decision="KEEP">K / 1 · 保留</button><button class="remove" data-decision="REMOVE">X / 2 · 去掉</button><button class="maybe" data-decision="UNCERTAIN">? / 3 · 待定</button></div>
 <div class="nav"><div><button id="prev">J / ← 上一张</button><button id="next">L / → 下一张</button><button id="undo">U · 撤销</button></div><div><input id="note" class="note" placeholder="备注（可空）"><button id="import">导入进度</button><input id="importFile" class="hidden" type="file" accept="application/json"><button id="export" class="primary">导出 JSON</button></div></div></section></main>
 <script>
@@ -298,6 +298,7 @@ def render_page(
     title: str,
     contract: str,
     default_side: str = "ALL",
+    view_hint: str = "1280×742 无损原图 · 轻度聚焦",
 ) -> str:
     if default_side not in {"ALL", "long", "short", "skip"}:
         raise ValueError(f"unsupported default side: {default_side}")
@@ -307,6 +308,7 @@ def render_page(
         .replace("__STORAGE_KEY__", json.dumps(storage_key))
         .replace("__TITLE__", title)
         .replace("__CONTRACT__", contract)
+        .replace("__VIEW_HINT__", view_hint)
         .replace("__SIDE_ALL__", "selected" if default_side == "ALL" else "")
         .replace("__SIDE_LONG__", "selected" if default_side == "long" else "")
         .replace("__SIDE_SHORT__", "selected" if default_side == "short" else "")
@@ -579,6 +581,7 @@ def build_pack(
             title="六均线绳结 · 2,525 个 Owner 方向复核框代码预筛",
             contract="这是扩数据入口，包含 long 1,152、short 1,361、skip 12；默认先看 A 核心档。",
             default_side="long",
+            view_hint="900×521 原始预览 · 轻度聚焦",
         ),
         encoding="utf-8",
     )
@@ -699,6 +702,7 @@ def rerender_review_pages(
             title="六均线绳结 · 2,525 个 Owner 方向框局部放大精筛",
             contract="扩数据入口也只放大绿色 Owner 框附近；默认仍按 A 核心档排序。",
             default_side="short",
+            view_hint="900×521 原始预览 · 轻度聚焦",
         ),
         encoding="utf-8",
     )
