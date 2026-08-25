@@ -1647,3 +1647,105 @@ artifacts:
     notes: >-
       Browser-tested self-contained HTML with 18 embedded images; desktop and
       390px mobile Chromium loaded all images with no console error or overflow.
+
+  # ---- causal-prefix Pine sibling of completed 4h shape -------------------
+  - artifact_id: btc-4h-causal-pine-v1-prereg
+    artifact_type: config
+    role: frozen_causal_prefix_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c578136739023879d4ed8175af37a36328e135eb"
+    source_path: experiments/active/exp-btc-4h-causal-pine-v1/preregistration.json
+    sha256: "7f14f70c5773bd58701d398894f8dda41237ff22764d32a77ef2ce15965fb173"
+    size_bytes: 3774
+    storage_uri: "repo://experiments/active/exp-btc-4h-causal-pine-v1/preregistration.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c578136739023879d4ed8175af37a36328e135eb"
+    config_hash: "7f14f70c5773bd58701d398894f8dda41237ff22764d32a77ef2ce15965fb173"
+    data_cutoff: "2026-08-25T04:00:00Z"
+    notes: >-
+      Frozen before implementation and official compilation. This task made no
+      new holdout read, but the structural gates inherit the parent completed-
+      shape configuration's post-boundary Owner reference; therefore this is
+      deliberately not registered as independent pre_holdout evidence.
+
+  - artifact_id: btc-4h-causal-pine-v1-source
+    artifact_type: config
+    role: causal_research_indicator_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8c0ed05c3108c33071247c00ee8984822935228f"
+    source_path: experiments/active/exp-btc-4h-causal-pine-v1/pine/fable_4h_ma_launch_causal_v1.pine
+    sha256: "55512e102b148550d052fab431c0bdc191f99967d9f43805790a79c35932c8be"
+    size_bytes: 18483
+    storage_uri: "repo://experiments/active/exp-btc-4h-causal-pine-v1/pine/fable_4h_ma_launch_causal_v1.pine"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8c0ed05c3108c33071247c00ee8984822935228f"
+    config_hash: "7f14f70c5773bd58701d398894f8dda41237ff22764d32a77ef2ce15965fb173"
+    data_cutoff: "2026-08-25T04:00:00Z"
+    notes: >-
+      Pine v6 indicator-only source: confirmed current bar, candidate anchors at
+      tip/tip-1/tip-2, offset zero, no request.*, strategy, order or automatic
+      alert side effect. Inherited holdout status records lineage, not a new read.
+
+  - artifact_id: btc-4h-causal-pine-v1-compile-receipt
+    artifact_type: manifest
+    role: official_pine_v6_compile_smoke_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ef41429cb7cc44353903cb2aa932ea7ded1feaa0"
+    source_path: experiments/active/exp-btc-4h-causal-pine-v1/results/tradingview_compile_receipt.json
+    sha256: "ab79b7af58edccb6a6bde562140b624c31038b5b0f373d1231f46b61deb8b177"
+    size_bytes: 2058
+    storage_uri: "repo://experiments/active/exp-btc-4h-causal-pine-v1/results/tradingview_compile_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ef41429cb7cc44353903cb2aa932ea7ded1feaa0"
+    config_hash: "7f14f70c5773bd58701d398894f8dda41237ff22764d32a77ef2ce15965fb173"
+    data_cutoff: "2026-08-25T04:00:00Z"
+    notes: >-
+      TradingView official Pine v6 compiler passed with zero errors and exact
+      local/editor source hash on a 4h Candles chart. The already-open current
+      chart was visible, but no marker, candidate count, score or performance
+      value was inspected; no alert, webhook, strategy or order was created.
+
+  - artifact_id: btc-4h-causal-pine-v1-report
+    artifact_type: report
+    role: canonical_causal_indicator_implementation_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8331cd8d03a8311f4a0e2432d34b09d1c895b14d"
+    source_path: analysis/p0_btc_4h_causal_pine_v1_20260825.md
+    sha256: "0182166d31bb1b46207539667e2a374d8d7db76818db454ba5afb3afc829a0c1"
+    size_bytes: 10163
+    storage_uri: "repo://analysis/p0_btc_4h_causal_pine_v1_20260825.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8331cd8d03a8311f4a0e2432d34b09d1c895b14d"
+    config_hash: "7f14f70c5773bd58701d398894f8dda41237ff22764d32a77ef2ce15965fb173"
+    data_cutoff: "2026-08-25T04:00:00Z"
+    notes: >-
+      Canonical implementation and compiler report. All economic metrics and
+      matched controls are explicitly not applicable because no historical or
+      forward signal evaluation ran; compilation is not a performance claim.
+
+  - artifact_id: btc-4h-causal-pine-v1-html
+    artifact_type: report
+    role: owner_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8331cd8d03a8311f4a0e2432d34b09d1c895b14d"
+    source_path: analysis/html/p0_btc_4h_causal_pine_v1_20260825.html
+    sha256: "a138d11e5c9661b47d70a7e4bf057cbbaf1c2d515f5d544c85d429b9f0a77f2e"
+    size_bytes: 14489
+    storage_uri: "repo://analysis/html/p0_btc_4h_causal_pine_v1_20260825.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8331cd8d03a8311f4a0e2432d34b09d1c895b14d"
+    config_hash: "7f14f70c5773bd58701d398894f8dda41237ff22764d32a77ef2ce15965fb173"
+    data_cutoff: "2026-08-25T04:00:00Z"
+    notes: >-
+      Self-contained browser-ready HTML. Chromium loaded all six tables with no
+      document-level horizontal overflow at a 1280px viewport.

@@ -1040,7 +1040,7 @@ experiments:
 
   - experiment_id: exp-btc-4h-causal-pine-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "c578136739023879d4ed8175af37a36328e135eb"
+    source_commit: "8331cd8d03a8311f4a0e2432d34b09d1c895b14d"
     status: active
     question: >-
       Can the observable prefix of the Owner-supplied BTC 4h six-MA compression
@@ -1050,13 +1050,28 @@ experiments:
       candidate direction only: direct LONG versus exact signed SHORT mirror;
       inherited structural gates, causal lag set, early-floor arithmetic,
       diagnostic weights, deduplication and confirmed-bar semantics stay fixed
-    result: preregistered_before_implementation_and_compile
+    result: >-
+      causal_pine_v6_implemented_and_official_compiler_passed_with_exact_source_hash;
+      historical signal quality, economic value, forward behavior and production
+      fitness were not evaluated
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
+    canonical_report: analysis/p0_btc_4h_causal_pine_v1_20260825.md
+    artifacts:
+      - btc-4h-causal-pine-v1-prereg
+      - btc-4h-causal-pine-v1-source
+      - btc-4h-causal-pine-v1-compile-receipt
+      - btc-4h-causal-pine-v1-report
+      - btc-4h-causal-pine-v1-html
     reuse_allowed: false
     notes: >-
       This is the causal-prefix sibling of the completed-shape retrieval, not a
-      rename of its 12-future-bar result. The current task permits source and
-      official compiler validation only: no historical signal inspection,
-      holdout scoring, order logic, webhook, forward integration or deployment.
+      rename of its 12-future-bar result. Static contracts passed 26 tests with
+      2 environment skips; TradingView Pine v6 compiled with zero errors and
+      exact local/editor source hash. No candidate marker, count, score or
+      performance surface was inspected, and no alert, webhook, forward or order
+      was created. This experiment performed zero new repository holdout reads,
+      so holdout_consumed remains false; its artifacts still inherit
+      holdout_consumed provenance from the parent post-boundary reference gates
+      and are not independent pre-holdout evidence.
