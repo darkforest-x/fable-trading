@@ -2452,3 +2452,104 @@ artifacts:
       Self-contained owner delivery with the Top-40 contact sheet embedded as a
       data URI, four result/contract tables and a link to the local review
       surface. Desktop 1440x1000 and narrow 390x844 browser QA passed.
+
+  # ---- pre-holdout 15m dataset release gate -----------------------------
+  - artifact_id: 15m-ma-launch-dataset-release-gate9000-v1-prereg
+    artifact_type: config
+    role: frozen_hash_bound_short_only_dataset_release_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "20c0baaf3a62f9b417422dc343e70adfff62cd45"
+    source_path: experiments/active/exp-15m-ma-launch-dataset-release-gate9000-v1/preregistration.json
+    sha256: "3b6d1854114a23f24c419b2e7e22d7837c98d69d37a40eade8a6ecd114196aa6"
+    size_bytes: 6970
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-dataset-release-gate9000-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "20c0baaf3a62f9b417422dc343e70adfff62cd45"
+    config_hash: "3b6d1854114a23f24c419b2e7e22d7837c98d69d37a40eade8a6ecd114196aa6"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Freezes exact Owner-release hashes, SHORT-only membership, same-symbol
+      dependency blocks, latest-15-percent validation, a 150-bar purge,
+      core-plus/minus-12-bar protection guards and soft 1x easy plus 2x hard
+      negative targets. It authorizes plans only, never dataset materialization.
+
+  - artifact_id: 15m-ma-launch-dataset-release-gate9000-v1-current-status
+    artifact_type: manifest
+    role: current_fail_closed_release_gate_status
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b77654f4f5d3ee0c0b99ddf37d770f115f39d618"
+    source_path: experiments/active/exp-15m-ma-launch-dataset-release-gate9000-v1/results/current_gate_status.json
+    sha256: "0a475447c8bb1f182bcfc4b8e4462ebc6edeebb85f6f621f941ceebe1944d7c2"
+    size_bytes: 1869
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-dataset-release-gate9000-v1/results/current_gate_status.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "16ed6dc2903b91df589bd3b66bb68d456962bf1c"
+    config_hash: "3b6d1854114a23f24c419b2e7e22d7837c98d69d37a40eade8a6ecd114196aa6"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Four pinned source hashes pass, but formal Owner answers are zero and an
+      exact release receipt is absent. It records zero plans, guards, negatives,
+      images, labels, epochs, weights, holdout reads and remote writes.
+
+  - artifact_id: 15m-ma-launch-dataset-release-gate9000-v1-qa-receipt
+    artifact_type: manifest
+    role: planner_tests_safety_and_report_render_qa_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b77654f4f5d3ee0c0b99ddf37d770f115f39d618"
+    source_path: experiments/active/exp-15m-ma-launch-dataset-release-gate9000-v1/results/qa_receipt.json
+    sha256: "a78c5b612069b45ea5e34885667d8e93dee214a6dea2bf824936cae07c25a79a"
+    size_bytes: 2660
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-dataset-release-gate9000-v1/results/qa_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b77654f4f5d3ee0c0b99ddf37d770f115f39d618"
+    config_hash: "3b6d1854114a23f24c419b2e7e22d7837c98d69d37a40eade8a6ecd114196aa6"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Ten focused planner tests, 68 focused-plus-boundary tests and the full
+      1,598-pass suite succeeded. The final report rendered at 1440x1000 and
+      390x844 with three tables and zero browser console errors.
+
+  - artifact_id: 15m-ma-launch-dataset-release-gate9000-v1-report
+    artifact_type: report
+    role: canonical_preholdout_dataset_release_gate_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b77654f4f5d3ee0c0b99ddf37d770f115f39d618"
+    source_path: analysis/p1_15m_ma_launch_dataset_release_gate9000_20260826.md
+    sha256: "6b23fd6a87d52480c8c5fac6c8ad992a88ae7fd4bf0044ae5eb84f642b104dbc"
+    size_bytes: 9742
+    storage_uri: "repo://analysis/p1_15m_ma_launch_dataset_release_gate9000_20260826.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b77654f4f5d3ee0c0b99ddf37d770f115f39d618"
+    config_hash: "3b6d1854114a23f24c419b2e7e22d7837c98d69d37a40eade8a6ecd114196aa6"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Answer-first technical report with the exact blockers, frozen planning
+      contract, strict non-economic nulls, test and browser evidence,
+      reproducible commands, risks and required Owner release sequence.
+
+  - artifact_id: 15m-ma-launch-dataset-release-gate9000-v1-html
+    artifact_type: report
+    role: owner_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b77654f4f5d3ee0c0b99ddf37d770f115f39d618"
+    source_path: analysis/html/p1_15m_ma_launch_dataset_release_gate9000_20260826.html
+    sha256: "c2f8ec13f7c3776769439b60f9eb81f3e1ca4ac31443b46946301d7e69795eb8"
+    size_bytes: 13569
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_dataset_release_gate9000_20260826.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b77654f4f5d3ee0c0b99ddf37d770f115f39d618"
+    config_hash: "3b6d1854114a23f24c419b2e7e22d7837c98d69d37a40eade8a6ecd114196aa6"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Owner-delivery HTML with three result/contract tables. Desktop 1440x1000
+      and narrow 390x844 Chromium rendering passed with zero console errors.

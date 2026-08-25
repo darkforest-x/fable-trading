@@ -1263,3 +1263,41 @@ experiments:
       a degenerate distribution blocks training instead of being repaired with
       jitter. No holdout OHLCV, remote write, training, promote, deployment,
       forward state, ACTIVE bundle or order state was touched.
+
+  - experiment_id: exp-15m-ma-launch-dataset-release-gate9000-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b77654f4f5d3ee0c0b99ddf37d770f115f39d618"
+    status: active
+    question: >-
+      Can the completed Owner review be converted into a hash-bound,
+      time-split SHORT-only dataset release plan without reading OHLCV,
+      materializing labels or negatives, or treating LONG mirrors as positives?
+    single_variable: >-
+      Dataset-release planning only: consume the frozen review facts after a
+      complete Owner review and exact release receipt; candidate membership,
+      geometry, holdout boundary and training authorization remain unchanged.
+    result: >-
+      planner_ready_but_release_blocked: four pinned source hashes pass, while
+      formal Owner answers remain 0/9,000 and no exact release receipt exists.
+      The fail-closed planner recomputes SHORT KEEP membership, derives
+      same-symbol temporal blocks, applies a 150-bar purge and protection guards,
+      and leaves plans, labels, negatives, images, epochs and weights at zero.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_dataset_release_gate9000_20260826.md
+    artifacts:
+      - 15m-ma-launch-dataset-release-gate9000-v1-prereg
+      - 15m-ma-launch-dataset-release-gate9000-v1-current-status
+      - 15m-ma-launch-dataset-release-gate9000-v1-qa-receipt
+      - 15m-ma-launch-dataset-release-gate9000-v1-report
+      - 15m-ma-launch-dataset-release-gate9000-v1-html
+    reuse_allowed: false
+    notes: >-
+      Only explicit SHORT KEEP rows can enter a later plan; LONG KEEP rows are
+      protection-only mirror_unconfirmed guards, and DROP/UNCERTAIN rows are not
+      automatic negatives. Easy 1x plus hard 2x negatives are soft targets only
+      until accepted positive exclusion zones exist. Status-only execution read
+      no OHLCV, made zero remote writes and created no trainable asset. Release
+      still requires a complete review export and an Owner receipt bound to the
+      exact review-summary and SHORT-preview hashes.
