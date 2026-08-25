@@ -24,3 +24,14 @@
 - 本轮只允许静态契约与官方编译验证；没有历史/holdout 评分、参数选择、forward 或部署。
 
 冻结规格见 `preregistration.json`。任何门槛、窗口、lag、分数权重或去重修改都会产生新版本。
+
+## 当前验收状态
+
+- TradingView 官方 Pine v6 编译：通过，0 error。
+- 编辑器源码与仓库文件 SHA-256：完全一致，`55512e102b148550d052fab431c0bdc191f99967d9f43805790a79c35932c8be`。
+- 私有脚本：已保存并添加到一个 4h Candles 图表。
+- alert / webhook / order：均未创建或发送。
+- 历史、holdout、收益或 forward 评价：均未运行。
+
+编译证据见 `results/tradingview_compile_receipt.json`，完整边界与复现命令见
+`analysis/p0_btc_4h_causal_pine_v1_20260825.md`。
