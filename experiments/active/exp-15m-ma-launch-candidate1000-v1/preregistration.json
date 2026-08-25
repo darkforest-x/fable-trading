@@ -1,0 +1,101 @@
+{
+  "experiment_id": "exp-15m-ma-launch-candidate1000-v1",
+  "frozen_at": "2026-08-25T14:18:00Z",
+  "owner_request": "2026-08-25 conversation: Owner asked '换成15min跑吧 先跑出1000个收集一下？'. This authorizes a new 15-minute candidate collection. It does not authorize holdout access, model training, automatic positive labels, promotion, deployment or trading.",
+  "question": "Can the already-defined six-MA dense-start morphology produce a balanced, diverse pool of 1,000 pre-holdout 15-minute completed-shape candidates for Owner review?",
+  "candidate_not_label_contract": "Every row is PENDING. A machine proposal plus a favorable completed path is not an Owner-confirmed positive and is not training eligible.",
+  "existing_pack_audit": {
+    "path": "datasets/label_live_tip_1000/manifest.json",
+    "sha256": "f8b5c529f7f32bff95a184950b064e1822ae821c3a57cbac8bd76daa19dd97cf",
+    "count": 1000,
+    "tip_dense_rule_hits": 162,
+    "near_miss_or_exploration_rows": 838,
+    "reason_not_reused": "It is an unlabeled causal-tip identifiability pack without balanced direction or completed release ranking. It remains unchanged and is not evidence of 1,000 positive shapes."
+  },
+  "scope": {
+    "bar_minutes": 15,
+    "scan_start": "2024-05-04T00:00:00Z",
+    "scan_end_exclusive": "2026-05-04T00:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0,
+    "source_roots": ["data/kline_deep", "data/kline_fetched"],
+    "universe_rule": "Choose the largest declared-row okx_*_USDT_SWAP_15m_*.csv per symbol across both roots; on equal row counts prefer kline_deep; exclude BLOCKED_BASES, stockish symbols and the frozen eval-symbol manifest.",
+    "expected_discovered_symbols": 401,
+    "expected_eligible_filename_symbols": 311,
+    "expected_deep_sources": 45,
+    "expected_fetched_sources": 266,
+    "boundary_read_rule": "Read chronological CSV lines only until the first timestamp at or after holdout_start. The boundary timestamp may be inspected, but its OHLCV cells must never be converted, materialized, hashed, charted or scored."
+  },
+  "frozen_dependencies": {
+    "dense_start_preregistration_path": "experiments/active/exp-pine-eth-15m-dense-start-v1/preregistration.json",
+    "dense_start_preregistration_sha256": "193ad74334237180891ea4ddf22d331d677226c939823966991b5287e196442f",
+    "dense_profile_id": "dense_l1",
+    "dense_profile": {
+      "profile_id": "dense_l1",
+      "min_pre_pairwise_crosses": 2,
+      "max_pre_bandwidth_atr_mean": 3.0,
+      "min_current_alignment": 6,
+      "min_pre_cross_imbalance": -1,
+      "min_slope_coherence": 0.6666666666666666,
+      "min_atr_release_ratio": 1.0
+    },
+    "profile_reuse_limit": "The profile was selected in an ETH pre-holdout paper experiment and is reused only as a broad proposal gate. Its prior economic result is not transferred to this cross-symbol pool.",
+    "atr_semantics": "Pine/Wilder RMA14 with SMA seed, matching the inherited dense-start experiment. This descriptive use does not resolve or change the repository's separate execution-ATR dispute.",
+    "eval_manifest_path": "datasets/owner_eval_frozen/MANIFEST.json",
+    "eval_manifest_sha256": "d18257ad5d5ed29d0c57b86e64be1413e73aeccbd787c84d4d4abf599132d00d"
+  },
+  "shape_contract": {
+    "six_mas": ["SMA20", "EMA20", "SMA60", "EMA60", "SMA120", "EMA120"],
+    "causal_proposal_bar": "At completed bar t, formation features use [t-12,t-1]; release features may use t; no proposal feature reads t+1 or later.",
+    "causal_input_bars": 200,
+    "review_pre_bars": 30,
+    "completed_release_bars": 12,
+    "selection_future_rows_beyond_t": 11,
+    "review_extra_bars": 6,
+    "review_window_bars": 48,
+    "review_only_future_physical_separation": "Only results/review_charts is generated. No training image or YOLO label is generated in this run."
+  },
+  "ranking": {
+    "formation_score": "Inherited dense_start_score_side in [0,1].",
+    "future_first3_reference_atr": 1.5,
+    "future_close12_reference_atr": 4.0,
+    "future_mfe_reference_atr": 6.0,
+    "future_score_weights": {"first3": 0.25, "close12": 0.45, "mfe12": 0.3},
+    "completed_score_weights": {"causal_formation": 0.65, "future_release": 0.35},
+    "clipping": "Each future component is direction-signed, divided by its fixed ATR reference and clipped to [0,1]. No post-scan threshold fitting is permitted.",
+    "tie_break": "completed_score descending, then symbol ascending, then anchor_time ascending"
+  },
+  "selection": {
+    "total": 1000,
+    "per_side": {"LONG": 500, "SHORT": 500},
+    "same_symbol_side_dedupe_bars": 224,
+    "same_symbol_side_dedupe_hours": 56,
+    "max_per_symbol_per_side": 8,
+    "max_per_utc_day_per_side": 8,
+    "fail_closed": "If either direction cannot supply 500 rows after all exclusions, deduplication and quotas, write no candidate gallery and do not relax any rule."
+  },
+  "controls": {
+    "causality_audit_rows": 32,
+    "causality_null": "For a deterministic sample of selected rows, mutate every row after t and recompute. Every causal proposal feature and gate decision through t must remain exactly identical.",
+    "duplicate_null": "No selected pair on the same symbol and side may be within 224 bars.",
+    "existing_label_manifest_read": "Forbidden in this run. Existing Owner manifests may contain post-holdout label metadata. Candidate-to-existing-label lineage deduplication is deferred until a separately authorized dataset-construction stage.",
+    "economic_metrics": "Not applicable: this run defines no entry, exit, cost, TP/SL or model score."
+  },
+  "delivery": {
+    "review_manifest": "results/review_manifest.jsonl",
+    "review_charts": "results/review_charts/*.png",
+    "overview": "results/overview_top40.png",
+    "gallery": "results/index.html",
+    "owner_verdict_default": "PENDING",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "safety": {
+    "model_training": false,
+    "economic_evaluation": false,
+    "raw_kline_write": false,
+    "active_or_frozen_change": false,
+    "forward_or_order_state_change": false,
+    "holdout_read": false
+  }
+}
