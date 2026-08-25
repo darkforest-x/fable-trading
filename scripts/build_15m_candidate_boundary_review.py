@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Build the offline Owner category-and-geometry review page for 9,000 candidates.
 
 Inputs are a hash-pinned PENDING candidate manifest, its already-rendered
