@@ -1,0 +1,91 @@
+{
+  "causality": {
+    "deterministic_rows": 32,
+    "max_abs_difference": 0.0,
+    "rows_passed": 32
+  },
+  "counts": {
+    "gallery_articles": 9000,
+    "gallery_image_refs": 9000,
+    "manifest_rows": 9000,
+    "owner_verdict_counts": {
+      "PENDING": 9000
+    },
+    "side_counts": {
+      "LONG": 4500,
+      "SHORT": 4500
+    },
+    "unique_event_ids": 9000
+  },
+  "eligibility": {
+    "production_eligible_true": 0,
+    "training_directories_present": 0,
+    "training_eligible_true": 0
+  },
+  "errors": [],
+  "generated_at": "2026-08-25T18:43:04.492996+00:00",
+  "holdout": {
+    "boundary_timestamp_rows_inspected": 311,
+    "existing_owner_label_manifests_read": 0,
+    "latest_materialized_time": "2026-05-03T23:45:00+00:00",
+    "ohlcv_rows_materialized": 0,
+    "read": false,
+    "start_exclusive": "2026-05-04T00:00:00+00:00"
+  },
+  "images": {
+    "decoded_dimensions": {
+      "1280x770": 9000
+    },
+    "disk_pngs": 9000,
+    "hashes_verified": 9000,
+    "manifest_paths": 9000,
+    "passed": true
+  },
+  "inputs": {
+    "manifest_path": "experiments/active/exp-15m-ma-launch-candidate9000-v1/results/review_manifest.jsonl",
+    "manifest_sha256": "3b4faa197ebd08bfd24ea662c30b8360200f29e172dbc5d68639eb880a71d731",
+    "preregistration_path": "experiments/active/exp-15m-ma-launch-candidate9000-v1/preregistration.json",
+    "preregistration_sha256": "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26"
+  },
+  "review_marker": {
+    "offset_bars": -3,
+    "offset_minutes": -45,
+    "passed": true,
+    "rows": 9000,
+    "training_label_true": 0
+  },
+  "status": "passed",
+  "union_pool_quota_recheck": {
+    "passed": true,
+    "sides": {
+      "LONG": {
+        "combined_rows": 5000,
+        "max_per_symbol": 80,
+        "max_per_utc_day": 80,
+        "minimum_same_symbol_gap_bars": 225,
+        "score_max": 0.9716906740537633,
+        "score_median": 0.9040242564667027,
+        "score_min": 0.8794610053366436,
+        "seeded_existing": 500,
+        "selected": 4500,
+        "unique_symbols": 228,
+        "unique_utc_days": 955
+      },
+      "SHORT": {
+        "combined_rows": 5000,
+        "max_per_symbol": 80,
+        "max_per_utc_day": 80,
+        "minimum_same_symbol_gap_bars": 225,
+        "score_max": 0.9806095353075701,
+        "score_median": 0.9042162938662172,
+        "score_min": 0.8818598202678654,
+        "seeded_existing": 500,
+        "selected": 4500,
+        "unique_symbols": 225,
+        "unique_utc_days": 730
+      }
+    }
+  },
+  "verification_scope": "static artifact integrity, marker arithmetic, union-pool quota, eligibility, and causality checks",
+  "verifier_commit": "7169521a0d9e6729bc8cb2daeeaa91f16333a7da"
+}

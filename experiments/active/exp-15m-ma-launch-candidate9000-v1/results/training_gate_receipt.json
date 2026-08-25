@@ -1,0 +1,122 @@
+{
+  "generated_at": "2026-08-25T18:46:46Z",
+  "experiment_id": "exp-15m-ma-launch-candidate9000-v1",
+  "status": "blocked_before_dataset_materialization_and_training",
+  "owner_request_scope": "Owner requested candidate expansion, a uniform visual t-3 shift, recovery of the prior small-window/small-box/position-spread/negative-sampling method, and downstream 3060 training. The request authorizes preparation and training once the repository's sample-level Gold Dataset gates are satisfied; it does not make machine candidates into Owner-confirmed labels.",
+  "candidate_collection": {
+    "new_candidates": 9000,
+    "long": 4500,
+    "short": 4500,
+    "existing_candidates": 1000,
+    "combined_unique_candidates": 10000,
+    "manifest_sha256": "3b4faa197ebd08bfd24ea662c30b8360200f29e172dbc5d68639eb880a71d731",
+    "verification_receipt_sha256": "380749c258de5a93f6f1ed93c3a67a80cffc41ed380d57e46f1b9540f7c6b1ce",
+    "holdout_ohlcv_rows": 0
+  },
+  "gold_dataset_gate": {
+    "owner_verdict_pending": 9000,
+    "sample_owner_confirmed": 0,
+    "training_eligible_true": 0,
+    "owner_approved_positive_boxes": 0,
+    "yolo_labels_materialized": 0,
+    "training_images_materialized": 0,
+    "review_marker_training_label_true": 0,
+    "direction_blocker": "Local Signal V2 currently freezes only the Owner-confirmed SHORT semantic. LONG mirror candidates remain mirror_unconfirmed and are neither positive nor negative.",
+    "timing_evidence": {
+      "pre3_gt_1_atr": 2358,
+      "pre3_gt_1_atr_rate": 0.262,
+      "anchor_body_gt_1_atr": 4925,
+      "anchor_body_gt_1_atr_rate": 0.5472222222222223,
+      "interpretation": "A uniform t-3 review marker does not recover a verified per-sample core boundary."
+    },
+    "prelaunch_audit_sha256": "cf349e2a996a8431929c7b6dcdad273657daaf7eb121df61b3a2fd725e11a00c"
+  },
+  "recovered_training_contract": {
+    "local_signal_v2_source": {
+      "path": "docs/protocol/local_signal_v2.md",
+      "sha256": "9f81dbc867fca9b772d6e2cbd0fe0ecb2d451e1b69652057208f68aad3f09e3e"
+    },
+    "input_context": "Shortest sufficient context, first round approximately 14-22 bars. The actual frozen R1/R2 baseline used dynamic W12-19.",
+    "core_box": "4-7 bars; original Owner geometry or an Owner-approved geometry derivation only.",
+    "confirmation": "3 bars preferred, 5 bars maximum after core; 6-10 bars excluded.",
+    "box_position": "Must vary naturally with shortest sufficient context; fixed-right, fixed-center and one global delta are forbidden.",
+    "frozen_r1_r2_source": {
+      "path": "datasets/manifests/frozen_baseline_r1_r2_v1.json",
+      "sha256": "2258566017153390c7aa1fe52410518ef58c4aa5780618bef0af6219e5cb65bf"
+    },
+    "prior_training_recipe": {
+      "epochs": 40,
+      "patience": 10,
+      "batch": 8,
+      "imgsz": 960,
+      "optimizer": "AdamW",
+      "lr0": 0.0001,
+      "warmup_epochs": 0.5,
+      "seed": 0,
+      "deterministic": true,
+      "rect": true,
+      "augmentation": "HSV, flip, mosaic, mixup, cutmix, copy-paste and erasing disabled"
+    },
+    "prior_train_negative_ratio": {
+      "train_positive": 1143,
+      "easy_negative": 1143,
+      "hard_negative": 2286,
+      "total_negative": 3429,
+      "negative_to_positive": "3:1"
+    },
+    "position_spread_reference": {
+      "path": "datasets/manifests/dataset_v3_1_position_spread_v1.json",
+      "sha256": "f47b37ea68217236e01d596a6b7631c07c1e93d5a7e3f0c47d13267822bc0eb1",
+      "left": 72,
+      "middle": 636,
+      "right": 637,
+      "warning": "This historical position-spread artifact itself is training_eligible=false and its quality gate says not_first_round; counts are lineage evidence, not an approved target quota."
+    }
+  },
+  "negative_dataset": {
+    "status": "not_materialized",
+    "rows": 0,
+    "reason": "Safe easy/hard negative selection requires accepted positive classes and exact Owner-box exclusion zones. Creating negatives before those exist can label unconfirmed mirror shapes as negatives or place backgrounds near future gold boxes.",
+    "required_controls": [
+      "same-symbol and same-time-block matching",
+      "full Owner-box exclusion zones take priority over the 3:1 soft ratio",
+      "dependency-component time split before materialization",
+      "zero cross-split temporal overlap",
+      "easy and hard negatives tracked separately"
+    ]
+  },
+  "rtx3060_environment_check": {
+    "checked_at": "2026-08-25T18:45:00Z",
+    "host": "Administrator@192.168.1.5",
+    "hostname": "win-zzc",
+    "gpu": "NVIDIA GeForce RTX 3060 12GB",
+    "torch": "2.8.0",
+    "torchvision": "0.23.0",
+    "ultralytics": "8.4.89",
+    "numpy": "2.0.2",
+    "cuda_available": true,
+    "cuda_nms": true,
+    "trainer_sha256_mac": "92b58d629e78cae261b7ab5d5ad50db35f9c10535577f95642bc7c703e2204c6",
+    "trainer_sha256_3060": "92b58d629e78cae261b7ab5d5ad50db35f9c10535577f95642bc7c703e2204c6",
+    "environment_status": "passed",
+    "reproducibility_warning": "scripts/train_on_3060.sh and scripts/windows/train_dense.py were not committed in the shared working tree during this run, so they were not adopted or committed by this experiment. Training remains blocked independently by the Gold Dataset gate."
+  },
+  "training": {
+    "started": false,
+    "dataset_uploaded": false,
+    "epochs_run": 0,
+    "weights_created": 0,
+    "model_promoted": false,
+    "active_or_frozen_changed": false,
+    "forward_or_order_state_changed": false
+  },
+  "required_to_unblock": [
+    "Owner confirms whether this expansion is SHORT-only or explicitly approves LONG mirror semantics.",
+    "Owner provides per-sample keep/drop/uncertain verdicts; protocol approval alone is insufficient.",
+    "Accepted samples receive per-sample core geometry from original Owner boxes or an explicitly approved derivation.",
+    "A time/dependency split is frozen before images, labels or negatives are materialized.",
+    "Negative exclusions are built from the accepted gold geometry; the 3:1 ratio remains a soft target.",
+    "Owner explicitly approves the resulting dataset manifest as training_eligible.",
+    "The exact 3060 training entry and dependency contract are committed before launch."
+  ]
+}
