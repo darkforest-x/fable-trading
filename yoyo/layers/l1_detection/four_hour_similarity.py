@@ -115,6 +115,18 @@ class SimilaritySpec:
         )
         return payload
 
+    @classmethod
+    def from_jsonable(cls, payload: dict[str, Any]) -> "SimilaritySpec":
+        """Load a committed preregistration without accepting channel drift."""
+
+        values = dict(payload)
+        for field in ("channel_weights", "channel_scale_floors"):
+            mapping = values.get(field)
+            if not isinstance(mapping, dict) or set(mapping) != set(CHANNELS):
+                raise ValueError(f"{field} must map exactly the frozen CHANNELS")
+            values[field] = tuple(float(mapping[channel]) for channel in CHANNELS)
+        return cls(**values)
+
 
 @dataclass(frozen=True)
 class ReferenceContract:

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import subprocess
 from dataclasses import asdict
 from datetime import datetime, timezone
@@ -54,13 +55,11 @@ from yoyo.layers.l1_detection.four_hour_similarity import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPERIMENT_ID = "exp-btc-4h-ma-launch-similarity-v1"
+DEFAULT_EXPERIMENT_ID = "exp-btc-4h-ma-launch-similarity-v1"
 DEFAULT_SOURCE_DIR = ROOT / "data/kline_deep"
-DEFAULT_EXPERIMENT_DIR = ROOT / "experiments/active" / EXPERIMENT_ID
+DEFAULT_EXPERIMENT_DIR = ROOT / "experiments/active" / DEFAULT_EXPERIMENT_ID
 DEFAULT_PREREG = DEFAULT_EXPERIMENT_DIR / "preregistration.json"
 DEFAULT_OUTPUT = DEFAULT_EXPERIMENT_DIR / "results"
-EXPECTED_UNIVERSE_SIZE = 54
-HOLDOUT_USE_NUMBER = 1
 
 
 def git_output(*args: str) -> str:
@@ -84,22 +83,135 @@ def verify_builder_committed(paths: list[Path]) -> str:
     return commit
 
 
-def validate_preregistration(path: Path, spec: SimilaritySpec) -> dict[str, Any]:
-    """Require exact equality between the committed JSON and executable spec."""
+def validate_preregistration(
+    path: Path,
+) -> tuple[dict[str, Any], SimilaritySpec, str, int, int]:
+    """Load the exact committed run identity, spec, universe and holdout use."""
 
     payload = json.loads(path.read_text(encoding="utf-8"))
-    if payload.get("experiment_id") != EXPERIMENT_ID:
-        raise ValueError("preregistration experiment_id drifted")
+    experiment_id = str(payload.get("experiment_id", ""))
+    if not experiment_id.startswith("exp-"):
+        raise ValueError("preregistration experiment_id is missing or invalid")
+    raw_spec = payload.get("spec")
+    if not isinstance(raw_spec, dict):
+        raise ValueError("preregistration spec is missing or invalid")
+    spec = SimilaritySpec.from_jsonable(raw_spec)
     if payload.get("spec") != spec.to_jsonable():
         raise ValueError("preregistration spec does not match executable constants")
-    if int(payload.get("expected_universe_size", -1)) != EXPECTED_UNIVERSE_SIZE:
-        raise ValueError("preregistration universe size drifted")
+    expected_universe_size = int(payload.get("expected_universe_size", -1))
+    if expected_universe_size <= 0:
+        raise ValueError("preregistration universe size is invalid")
     holdout = payload.get("holdout", {})
-    if int(holdout.get("use_number_for_this_configuration", -1)) != HOLDOUT_USE_NUMBER:
-        raise ValueError("holdout use number drifted")
+    holdout_use_number = int(holdout.get("use_number_for_this_configuration", -1))
+    if holdout_use_number <= 0 or holdout.get("read") is not True:
+        raise ValueError("holdout read/use number is not frozen")
     if holdout.get("owner_authorized_in_conversation") is not True:
         raise ValueError("holdout authorization is not recorded")
-    return payload
+    if not str(holdout.get("authorization_scope", "")).strip():
+        raise ValueError("holdout authorization scope is empty")
+    return (
+        payload,
+        spec,
+        experiment_id,
+        expected_universe_size,
+        holdout_use_number,
+    )
+
+
+def repo_path(value: object) -> Path:
+    """Resolve a preregistered repository path without allowing parent escape."""
+
+    path = (ROOT / str(value)).resolve()
+    try:
+        path.relative_to(ROOT)
+    except ValueError as exc:
+        raise ValueError(f"path escapes repository: {value}") from exc
+    return path
+
+
+def validate_expansion_contract(
+    prereg: dict[str, Any], spec: SimilaritySpec
+) -> dict[str, Any]:
+    """Prove an optional expansion changes only the frozen Top-N field."""
+
+    contract = prereg.get("expansion_contract")
+    if contract is None:
+        return {"enabled": False}
+    if not isinstance(contract, dict):
+        raise ValueError("expansion_contract must be a mapping")
+    baseline_prereg = repo_path(contract.get("baseline_preregistration_path"))
+    baseline_summary = repo_path(contract.get("baseline_summary_path"))
+    expected_prereg_hash = str(contract.get("baseline_preregistration_sha256", ""))
+    expected_summary_hash = str(contract.get("baseline_summary_sha256", ""))
+    if sha256_file(baseline_prereg) != expected_prereg_hash:
+        raise ValueError("baseline preregistration hash drifted")
+    if sha256_file(baseline_summary) != expected_summary_hash:
+        raise ValueError("baseline summary hash drifted")
+    baseline_payload = json.loads(baseline_prereg.read_text(encoding="utf-8"))
+    baseline_spec = SimilaritySpec.from_jsonable(baseline_payload["spec"])
+    baseline_json = baseline_spec.to_jsonable()
+    current_json = spec.to_jsonable()
+    changed_fields = sorted(
+        key
+        for key in set(baseline_json) | set(current_json)
+        if baseline_json.get(key) != current_json.get(key)
+    )
+    if changed_fields != ["top_per_side"]:
+        raise ValueError(
+            f"expansion must change only top_per_side, got {changed_fields}"
+        )
+    previous_top = int(contract.get("previous_top_per_side", -1))
+    expanded_top = int(contract.get("expanded_top_per_side", -1))
+    if baseline_spec.top_per_side != previous_top or spec.top_per_side != expanded_top:
+        raise ValueError("expansion Top-N values do not match preregistration")
+    if expanded_top <= previous_top:
+        raise ValueError("expanded Top-N must exceed the baseline")
+    return {
+        "enabled": True,
+        "single_changed_field": "top_per_side",
+        "previous_top_per_side": previous_top,
+        "expanded_top_per_side": expanded_top,
+        "baseline_preregistration_path": str(baseline_prereg.relative_to(ROOT)),
+        "baseline_preregistration_sha256": expected_prereg_hash,
+        "baseline_summary_path": str(baseline_summary.relative_to(ROOT)),
+        "baseline_summary_sha256": expected_summary_hash,
+    }
+
+
+def audit_expansion_rank_prefix(
+    prereg: dict[str, Any], selected: dict[str, list[dict[str, Any]]]
+) -> dict[str, Any]:
+    """Fail closed unless the expanded ranking begins with the old exact Top-N."""
+
+    contract = prereg.get("expansion_contract")
+    if contract is None:
+        return {"required": False}
+    baseline_path = repo_path(contract["baseline_summary_path"])
+    baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
+    previous_top = int(contract["previous_top_per_side"])
+    exact_fields = ("event_id", "symbol", "direction", "anchor_time")
+    numeric_fields = ("coarse_distance", "dtw_distance", "final_distance")
+    side_audit: dict[str, Any] = {}
+    for side in ("LONG", "SHORT"):
+        expected = baseline["selected"][side]
+        actual = selected[side][:previous_top]
+        if len(expected) != previous_top or len(actual) != previous_top:
+            raise ValueError(f"{side} baseline prefix length drifted")
+        for rank, (old, new) in enumerate(zip(expected, actual), 1):
+            for field in exact_fields:
+                if old[field] != new[field]:
+                    raise ValueError(f"{side} rank {rank} {field} drifted")
+            for field in numeric_fields:
+                if not math.isclose(
+                    float(old[field]), float(new[field]), rel_tol=0.0, abs_tol=1e-12
+                ):
+                    raise ValueError(f"{side} rank {rank} {field} drifted")
+        side_audit[side] = {
+            "prefix_count": previous_top,
+            "event_ids": [row["event_id"] for row in actual],
+            "exact_identity_and_distance_match": True,
+        }
+    return {"required": True, "passed": True, "sides": side_audit}
 
 
 def load_symbol(
@@ -257,13 +369,19 @@ def main() -> int:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
 
-    spec = SimilaritySpec()
     source_dir = args.source_dir.resolve()
     prereg_path = args.prereg.resolve()
     output = args.out.resolve()
     if output.exists() and any(output.iterdir()):
         raise FileExistsError(f"refusing to overwrite non-empty output: {output}")
-    prereg = validate_preregistration(prereg_path, spec)
+    (
+        prereg,
+        spec,
+        experiment_id,
+        expected_universe_size,
+        holdout_use_number,
+    ) = validate_preregistration(prereg_path)
+    expansion_contract_audit = validate_expansion_contract(prereg, spec)
     builder_commit = verify_builder_committed(
         [
             ROOT / "yoyo/layers/l1_detection/four_hour_similarity.py",
@@ -273,9 +391,9 @@ def main() -> int:
         ]
     )
     paths = discover_universe(source_dir)
-    if len(paths) != EXPECTED_UNIVERSE_SIZE:
+    if len(paths) != expected_universe_size:
         raise ValueError(
-            f"universe size drifted: {len(paths)} != {EXPECTED_UNIVERSE_SIZE}"
+            f"universe size drifted: {len(paths)} != {expected_universe_size}"
         )
     symbol_paths = {symbol_from_path(path): path for path in paths}
     if spec.reference_symbol not in symbol_paths:
@@ -431,6 +549,7 @@ def main() -> int:
             candidates[side],
             spec=spec,
         )
+    expansion_prefix_audit = audit_expansion_rank_prefix(prereg, selected)
 
     output.mkdir(parents=True, exist_ok=True)
     chart_dir = output / "charts"
@@ -480,7 +599,7 @@ def main() -> int:
     write_json(output / "reference_contract.json", reference_payload)
     review_manifest_sha = sha256_file(output / "review_manifest.jsonl")
     summary = {
-        "experiment_id": EXPERIMENT_ID,
+        "experiment_id": experiment_id,
         "protocol": spec.protocol,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "builder_commit": builder_commit,
@@ -519,10 +638,12 @@ def main() -> int:
             "deduplicated_selected_short": len(selected["SHORT"]),
         },
         "null_controls": null_controls,
+        "expansion_contract_audit": expansion_contract_audit,
+        "expansion_rank_prefix_audit": expansion_prefix_audit,
         "holdout": {
             "read": True,
             "four_hour_symbol_rows_read": holdout_rows_read,
-            "use_number_for_this_configuration": HOLDOUT_USE_NUMBER,
+            "use_number_for_this_configuration": holdout_use_number,
             "owner_authorized_in_conversation": True,
             "authorization_scope": prereg["holdout"]["authorization_scope"],
         },
@@ -549,12 +670,12 @@ def main() -> int:
         },
     }
     write_json(output / "scan_summary.json", summary)
-    readme = f"""# BTC 4h MA-launch similarity v1 results
+    readme = f"""# {experiment_id} results
 
 - universe: **{len(symbol_paths)}** long-history OKX USDT perpetuals
 - scan: **{spec.scan_start_ts.isoformat()}** to **{spec.scan_end_ts.isoformat()}**
 - selected: **{len(selected['LONG'])} LONG + {len(selected['SHORT'])} SHORT**
-- holdout: this configuration use **#{HOLDOUT_USE_NUMBER}**, authorized by the Owner's two-year request
+- holdout: this configuration use **#{holdout_use_number}**, authorized by the Owner's informed continuation
 - model/economic evaluation: **none / none**
 - training/production eligible: **false / false**
 

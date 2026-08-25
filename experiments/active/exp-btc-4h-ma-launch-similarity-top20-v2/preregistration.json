@@ -1,0 +1,100 @@
+{
+  "experiment_id": "exp-btc-4h-ma-launch-similarity-top20-v2",
+  "frozen_at": "2026-08-25T13:28:27Z",
+  "question": "When the already-frozen two-year BTC 4h completed-shape retrieval is expanded from Top-8 to Top-20 per side, which additional ranks 9-20 should the Owner review?",
+  "expected_universe_size": 54,
+  "universe_rule": "Exactly the baseline v1 rule: for each okx_*_USDT_SWAP_15m_*.csv in data/kline_deep, choose the longest declared-row snapshot; require exactly 54 unique symbols; resample only complete 16x15m UTC buckets and merge one bounded public OKX 4H page after exact OHLC overlap parity.",
+  "single_variable": "top_per_side changes from 8 to 20. Protocol, universe, dates, reference, 30+12+6 window, gates, feature scales, weights, RMSE, DTW, deduplication, shortlist and null random seed remain byte-for-byte equivalent to baseline v1.",
+  "spec": {
+    "protocol": "btc_4h_ma_launch_similarity_v1_20260825",
+    "scan_start": "2024-08-25T04:00:00+00:00",
+    "scan_end": "2026-08-25T04:00:00+00:00",
+    "reference_symbol": "BTC_USDT_SWAP",
+    "reference_anchor": "2026-08-19T12:00:00+00:00",
+    "pre_bars": 30,
+    "release_bars": 12,
+    "review_extra_bars": 6,
+    "dedupe_bars": 18,
+    "shortlist_per_side": 400,
+    "top_per_side": 20,
+    "dtw_radius": 2,
+    "coarse_weight": 0.45,
+    "dtw_weight": 0.55,
+    "null_permutations": 200,
+    "random_seed": 20260825,
+    "api_limit": 300,
+    "api_pause_seconds": 0.12,
+    "spread_reference_mult": 3.0,
+    "release_close_reference_mult": 0.25,
+    "release_close_hard_min_pct": 3.0,
+    "first3_reference_mult": 0.15,
+    "first3_hard_min_pct": 0.75,
+    "release_atr_reference_mult": 0.15,
+    "release_atr_hard_min": 4.0,
+    "pre_range_reference_mult": 2.0,
+    "pre_range_hard_max_pct": 8.0,
+    "anchor_to_bundle_reference_mult": 3.0,
+    "anchor_to_bundle_hard_max_pct": 2.0,
+    "channel_weights": {
+      "signed_close_path_pct": 0.4,
+      "signed_ma_center_path_pct": 0.2,
+      "ma_spread_pct": 0.15,
+      "signed_body_pct": 0.1,
+      "log_volume_ratio": 0.15
+    },
+    "channel_scale_floors": {
+      "signed_close_path_pct": 1.0,
+      "signed_ma_center_path_pct": 1.0,
+      "ma_spread_pct": 0.25,
+      "signed_body_pct": 0.5,
+      "log_volume_ratio": 0.5
+    }
+  },
+  "expansion_contract": {
+    "baseline_experiment_id": "exp-btc-4h-ma-launch-similarity-v1",
+    "baseline_preregistration_path": "experiments/active/exp-btc-4h-ma-launch-similarity-v1/preregistration.json",
+    "baseline_preregistration_sha256": "11daa5ff2a919955d120aa6bc7bfdf90d7fe0398300880cc051fa35987ad0b8c",
+    "baseline_summary_path": "experiments/active/exp-btc-4h-ma-launch-similarity-v1/results/scan_summary.json",
+    "baseline_summary_sha256": "cc00c69b745e75fadccf7f21caf55d83d9dfdc0b69d5065f0de1c3a964a943d2",
+    "previous_top_per_side": 8,
+    "expanded_top_per_side": 20,
+    "required_post_scan_gate": "Ranks 1-8 on each side must retain exact event identity and coarse/DTW/final distances within absolute tolerance 1e-12 before any new rank is delivered."
+  },
+  "ranking_contract": {
+    "coarse_stage": "Reference-scaled weighted RMSE over 42x5 values.",
+    "rerank_stage": "Exact multivariate DTW with Sakoe-Chiba radius 2, computed separately on the 30-bar prelude and 12-bar release; 35% prelude plus 65% release.",
+    "final_distance": "45% coarse plus 55% split-DTW; lower is more similar and is not a probability.",
+    "exclusion_zone": "Within one symbol and direction, anchors within 18 bars are one event neighborhood; keep the lowest final distance.",
+    "selection": "Return exactly twenty non-overlapping LONG and twenty non-overlapping SHORT candidates if available. Ranks 9-20 are the new Owner-facing review batch; ranks 1-8 are retained only for exact prefix parity."
+  },
+  "null_control": {
+    "method": "Keep the exact 30-bar reference prelude and the same multivariate set of 12 release rows, but randomly permute the release-row order 200 times. Compare each null query's deduplicated Top-20 coarse mean distance with the real query.",
+    "null_hypothesis": "The temporal ordering of the supplied release is no more retrievable than the same amplitudes and channel values in random release order.",
+    "p_value": "One-sided lower-is-better randomization p with plus-one correction. This changed Top-20 estimand is descriptive and does not overwrite the baseline Top-8 p-value."
+  },
+  "holdout": {
+    "read": true,
+    "use_number_for_this_configuration": 2,
+    "owner_authorized_in_conversation": true,
+    "authorization_scope": "After being told that ranks beyond 8 were not persisted and that regenerating ranks 9-20 would reread about 36,720 holdout 4h symbol-rows as configuration use #2, the Owner replied '继续' on 2026-08-25.",
+    "post_result_rule": "Do not tune gates, weights, windows, DTW radius, deduplication, shortlist or Top-N after seeing this scan. Any further expansion or changed configuration requires a new Owner authorization and consumption number."
+  },
+  "delivery_contract": {
+    "primary_rows": "LONG ranks 9-20 and SHORT ranks 9-20",
+    "visual": "One 48-bar candle-plus-six-MA chart per row, with a blue release-start line, gray 12-bar match-end line and six review-only bars, plus a contact sheet and HTML gallery.",
+    "owner_verdict_default": "PENDING",
+    "cross_symbol_independence_claim": false
+  },
+  "safety": {
+    "retrospective_completed_shape": true,
+    "historical_future_bars_used": 12,
+    "review_only_extra_bars": 6,
+    "model_training": false,
+    "economic_evaluation": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "active_or_frozen_change": false,
+    "forward_or_order_state_change": false,
+    "raw_kline_write": false
+  }
+}

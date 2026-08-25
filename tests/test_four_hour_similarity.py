@@ -158,3 +158,17 @@ def test_all_ma_columns_exist_after_enrichment() -> None:
     frame = synthetic_4h()
     assert set(ALL_MA_COLS).issubset(frame.columns)
     assert np.isfinite(frame.iloc[-1][list(ALL_MA_COLS)].to_numpy(dtype=float)).all()
+
+
+def test_similarity_spec_round_trips_committed_json_shape() -> None:
+    spec = SimilaritySpec(top_per_side=20)
+    restored = SimilaritySpec.from_jsonable(spec.to_jsonable())
+    assert restored == spec
+    assert restored.to_jsonable() == spec.to_jsonable()
+
+
+def test_similarity_spec_refuses_missing_channel() -> None:
+    payload = SimilaritySpec().to_jsonable()
+    del payload["channel_weights"]["log_volume_ratio"]
+    with pytest.raises(ValueError, match="channel_weights"):
+        SimilaritySpec.from_jsonable(payload)
