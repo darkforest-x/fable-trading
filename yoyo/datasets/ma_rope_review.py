@@ -9,9 +9,10 @@ score, weights, or thresholds.
 
 This builder creates a ranking and a manual review page.  It never deletes a
 sample, changes a label or split, reads the trading holdout, trains a model, or
-changes ``training_eligible``.  The page reuses the already hashed original
-Owner preview images from ``owner_positive_refilter_v1`` rather than copying
-another 54 MB of review-only pixels.
+changes ``training_eligible``.  The primary page recovers the exact 1280x742
+archived chart pixels from ``dense_owner_side_short`` NPY files and writes
+lossless review-only PNGs.  The old 900x521 JPEG remains a fail-closed fallback,
+but is no longer enlarged for the normal Owner-positive review path.
 """
 
 from __future__ import annotations
@@ -29,6 +30,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 import numpy as np
 import pandas as pd
+from PIL import Image
 
 from yoyo.datasets.ma_rope_filter import (
     DEFAULT_DATA_ROOT,
@@ -59,6 +61,7 @@ DEFAULT_SOURCE_PACK = (
     / "owner_positive_refilter_v1"
 )
 DEFAULT_OWNER_REVIEW_ROOT = PROJECT_ROOT / "analysis" / "output" / "owner_side_review"
+DEFAULT_HIRES_SOURCE = PROJECT_ROOT / "datasets" / "dense_owner_side_short"
 DEFAULT_OUTPUT = (
     PROJECT_ROOT
     / "datasets"
@@ -75,6 +78,7 @@ EXPECTED_COUNTERCHECK_REVIEWED = 390
 PERMUTATION_SEED = 20260821
 PERMUTATIONS = 10_000
 ALLOWED_DECISIONS = {"KEEP", "REMOVE", "UNCERTAIN"}
+HIRES_CANVAS = (1280, 742)
 
 
 class RopeReviewBuildError(RuntimeError):
@@ -270,18 +274,18 @@ def evaluate_countercheck(
 PAGE_TEMPLATE = """<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>__TITLE__</title>
 <style>
-:root{color-scheme:dark;--bg:#0d1110;--panel:#171d1a;--ink:#eef4f0;--muted:#aab4ad;--line:#39443d;--a:#46d995;--b:#d8a93e;--c:#78847c;--red:#c64b43}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header{padding:10px 16px 8px;border-bottom:1px solid var(--line)}h1{font-size:19px;margin:0 0 5px}.contract{font-size:13px;color:#eadca8}.hint,.metrics{font-size:12px;color:var(--muted);margin-top:4px}.top{position:absolute;right:16px;top:13px;font-size:13px}.progress{height:5px;background:#28302b;margin-top:7px;border-radius:4px;overflow:hidden}.bar{height:100%;background:var(--a);width:0}main{padding:10px}.panel{max-width:1500px;margin:auto;padding:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px}.controls,.nav{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.viewer{height:calc(100vh - 306px);min-height:430px;background:#fff;border-radius:8px;overflow:hidden;position:relative;margin-top:8px}.viewer canvas{display:block;width:100%;height:100%}.viewhint{position:absolute;right:10px;top:9px;padding:4px 8px;border-radius:6px;background:rgba(15,25,20,.72);color:#d9e8de;font-size:12px;pointer-events:none}.position{font-weight:700}.tier{padding:2px 8px;border-radius:10px;color:#101713}.tier.A_CORE{background:var(--a)}.tier.B_BROAD{background:var(--b)}.tier.C_REST{background:var(--c);color:white}.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.actions button{padding:11px;font-size:16px;font-weight:750}.keep{background:#167a58}.remove{background:var(--red)}.maybe{background:#8d6d1c}.actions button.active{outline:3px solid white;outline-offset:-4px}.nav{margin-top:8px}.nav>div{display:flex;gap:7px;flex-wrap:wrap}button,select,input{font:inherit;color:var(--ink);background:#252c28;border:1px solid var(--line);border-radius:7px;padding:7px 10px}button{cursor:pointer}.primary{background:#d8f2e4;color:#102319}.note{width:min(480px,100%)}kbd{border:1px solid #667169;border-bottom-width:2px;border-radius:4px;padding:1px 5px;background:#252c28}.warning{color:#ffcf7b}.hidden{display:none!important}@media(max-width:760px){.top{position:static;margin-top:4px}.viewer{height:53vh;min-height:360px}.actions button{font-size:14px}}
+:root{color-scheme:dark;--bg:#0d1110;--panel:#171d1a;--ink:#eef4f0;--muted:#aab4ad;--line:#39443d;--a:#46d995;--b:#d8a93e;--c:#78847c;--red:#c64b43}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header{padding:10px 16px 8px;border-bottom:1px solid var(--line)}h1{font-size:19px;margin:0 0 5px}.contract{font-size:13px;color:#eadca8}.hint,.metrics{font-size:12px;color:var(--muted);margin-top:4px}.top{position:absolute;right:16px;top:13px;font-size:13px}.progress{height:5px;background:#28302b;margin-top:7px;border-radius:4px;overflow:hidden}.bar{height:100%;background:var(--a);width:0}main{padding:10px}.panel{max-width:1200px;margin:auto;padding:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px}.controls,.nav{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.viewer{height:calc(100vh - 306px);min-height:430px;background:#fff;border-radius:8px;overflow:hidden;position:relative;margin-top:8px}.viewer canvas{display:block;width:100%;height:100%}.viewhint{position:absolute;right:10px;top:9px;padding:4px 8px;border-radius:6px;background:rgba(15,25,20,.72);color:#d9e8de;font-size:12px;pointer-events:none}.position{font-weight:700}.tier{padding:2px 8px;border-radius:10px;color:#101713}.tier.A_CORE{background:var(--a)}.tier.B_BROAD{background:var(--b)}.tier.C_REST{background:var(--c);color:white}.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.actions button{padding:11px;font-size:16px;font-weight:750}.keep{background:#167a58}.remove{background:var(--red)}.maybe{background:#8d6d1c}.actions button.active{outline:3px solid white;outline-offset:-4px}.nav{margin-top:8px}.nav>div{display:flex;gap:7px;flex-wrap:wrap}button,select,input{font:inherit;color:var(--ink);background:#252c28;border:1px solid var(--line);border-radius:7px;padding:7px 10px}button{cursor:pointer}.primary{background:#d8f2e4;color:#102319}.note{width:min(480px,100%)}kbd{border:1px solid #667169;border-bottom-width:2px;border-radius:4px;padding:1px 5px;background:#252c28}.warning{color:#ffcf7b}.hidden{display:none!important}@media(max-width:760px){.top{position:static;margin-top:4px}.viewer{height:53vh;min-height:360px}.actions button{font-size:14px}}
 </style></head><body><header><h1>__TITLE__</h1><div class="top"><span id="done"></span>　<span id="counts"></span></div>
 <div class="contract">__CONTRACT__ <span class="warning">代码只负责排序，不能自动删图</span>；390 条独立反证未证明它能替代你的判断。</div>
 <div class="hint"><kbd>K</kbd>/<kbd>1</kbd> 保留　<kbd>X</kbd>/<kbd>2</kbd> 去掉　<kbd>?</kbd>/<kbd>3</kbd> 待定　<kbd>J</kbd>/<kbd>←</kbd> 上一张　<kbd>L</kbd>/<kbd>→</kbd>/<kbd>空格</kbd> 下一张　<kbd>U</kbd> 撤销</div><div class="progress"><div class="bar" id="bar"></div></div></header>
 <main><section class="panel"><div class="controls"><div class="position"><span id="position"></span> <span id="tier"></span> <span id="decision"></span></div><div><select id="tierFilter"><option value="A_CORE" selected>A 核心档</option><option value="B_BROAD">B 扩展档</option><option value="C_REST">C 其余</option><option value="ALL">全部档位</option></select> <select id="sideFilter"><option value="ALL" __SIDE_ALL__>全部方向</option><option value="long" __SIDE_LONG__>只看 long</option><option value="short" __SIDE_SHORT__>只看 short</option><option value="skip" __SIDE_SKIP__>只看 skip</option></select> <select id="answerFilter"><option value="ALL">全部状态</option><option value="UNREVIEWED" selected>只看未审核</option><option value="KEEP">只看保留</option><option value="REMOVE">只看去掉</option><option value="UNCERTAIN">只看待定</option></select> <label>跳到 <input id="jump" type="number" min="1" step="1"></label> <label><input id="autoNext" type="checkbox" checked> 自动下一张</label></div></div>
-<div class="viewer" id="viewer"><canvas id="chart" aria-label="绿色框附近的K线局部放大图"></canvas><img id="sourceChart" class="hidden" alt=""><div class="viewhint">绿色框附近 · 自动放大</div></div><div class="metrics" id="metrics"></div>
+<div class="viewer" id="viewer"><canvas id="chart" aria-label="高清原始K线的绿色框附近视图"></canvas><img id="sourceChart" class="hidden" alt=""><div class="viewhint">1280×742 无损原图 · 轻度聚焦</div></div><div class="metrics" id="metrics"></div>
 <div class="actions"><button class="keep" data-decision="KEEP">K / 1 · 保留</button><button class="remove" data-decision="REMOVE">X / 2 · 去掉</button><button class="maybe" data-decision="UNCERTAIN">? / 3 · 待定</button></div>
 <div class="nav"><div><button id="prev">J / ← 上一张</button><button id="next">L / → 下一张</button><button id="undo">U · 撤销</button></div><div><input id="note" class="note" placeholder="备注（可空）"><button id="import">导入进度</button><input id="importFile" class="hidden" type="file" accept="application/json"><button id="export" class="primary">导出 JSON</button></div></div></section></main>
 <script>
 const items=__ITEMS__,packId=__PACK_ID__,key=__STORAGE_KEY__,allowed=new Set(['KEEP','REMOVE','UNCERTAIN']);let index=0,answers={},undoStack=[];try{answers=JSON.parse(localStorage.getItem(key+'::answers')||'{}')}catch(_){answers={}}index=Number(localStorage.getItem(key+'::index')||0);if(index<0||index>=items.length)index=0;const $=id=>document.getElementById(id),tierFilter=$('tierFilter'),sideFilter=$('sideFilter'),answerFilter=$('answerFilter'),note=$('note'),chart=$('chart'),sourceChart=$('sourceChart'),viewer=$('viewer'),jump=$('jump'),ctx=chart.getContext('2d');
 function save(){localStorage.setItem(key+'::answers',JSON.stringify(answers));localStorage.setItem(key+'::index',String(index))}function answered(id){return answers[id]&&allowed.has(answers[id].decision)}function matches(i){const x=items[i],a=answers[x.review_id];if(tierFilter.value!=='ALL'&&x.tier!==tierFilter.value)return false;if(sideFilter.value!=='ALL'&&x.side!==sideFilter.value)return false;if(answerFilter.value==='UNREVIEWED')return !answered(x.review_id);if(answerFilter.value!=='ALL')return a&&a.decision===answerFilter.value;return true}function findStep(d){for(let n=1;n<=items.length;n++){const i=(index+d*n+items.length)%items.length;if(matches(i))return i}return index}function step(d){index=findStep(d);save();render()}function decide(value){const id=items[index].review_id,old=answers[id]?{...answers[id]}:null;undoStack.push({index,old});answers[id]={review_id:id,sample_id:items[index].sample_id,decision:value,note:note.value||'',decided_at:new Date().toISOString()};save();if($('autoNext').checked)step(1);else render()}function undo(){const x=undoStack.pop();if(!x)return;index=x.index;const id=items[index].review_id;if(x.old)answers[id]=x.old;else delete answers[id];save();render()}
-function stats(){const c={KEEP:0,REMOVE:0,UNCERTAIN:0};Object.values(answers).forEach(a=>{if(a&&allowed.has(a.decision))c[a.decision]++});const n=c.KEEP+c.REMOVE+c.UNCERTAIN;$('done').textContent=`已审 ${n} / ${items.length}`;$('counts').textContent=`保留 ${c.KEEP} · 去掉 ${c.REMOVE} · 待定 ${c.UNCERTAIN}`;$('bar').style.width=`${100*n/items.length}%`}function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v))}function drawFocused(){if(!sourceChart.naturalWidth)return;const x=items[index],vw=Math.max(1,viewer.clientWidth),vh=Math.max(1,viewer.clientHeight),dpr=Math.min(window.devicePixelRatio||1,2),iw=sourceChart.naturalWidth,ih=sourceChart.naturalHeight,bw=Number(x.focus_w),bh=Number(x.focus_h),cx=Number(x.focus_x)*iw,cy=Number(x.focus_y)*ih;chart.width=Math.round(vw*dpr);chart.height=Math.round(vh*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='#fff';ctx.fillRect(0,0,vw,vh);let sh=Math.min(ih,Math.max(ih*.34,ih*bh*3.2)),sw=Math.min(iw,Math.max(iw*.46,iw*bw*8,sh*(vw/vh))),sx=clamp(cx-sw/2,0,iw-sw),sy=clamp(cy-sh/2,0,ih-sh),scale=Math.min(vw/sw,vh/sh),dw=sw*scale,dh=sh*scale;ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(sourceChart,sx,sy,sw,sh,(vw-dw)/2,(vh-dh)/2,dw,dh)}function render(){const x=items[index],a=answers[x.review_id]||{};$('position').textContent=`${index+1} / ${items.length} · ${x.sample_id}`;$('tier').textContent=x.tier==='A_CORE'?'A 核心':x.tier==='B_BROAD'?'B 扩展':'C 其余';$('tier').className='tier '+x.tier;$('decision').textContent=a.decision?`· 当前 ${a.decision}`:'· 未审核';sourceChart.onload=drawFocused;sourceChart.src=x.image;note.value=a.note||'';jump.value=String(index+1);const side=x.side?` · 方向 ${x.side}`:'';$('metrics').textContent=`绳结分 ${x.score.toFixed(3)}${side} · 六线带宽 ${(x.bandwidth*10000).toFixed(1)}bp · 交叉 ${(x.cross_density*100).toFixed(1)}% · 实体接触 ${(x.body_touch*100).toFixed(1)}% · 实体穿束 ${(x.body_cross*100).toFixed(1)}% · 密集持续 ${(x.persistence*100).toFixed(1)}%`;document.querySelectorAll('[data-decision]').forEach(b=>b.classList.toggle('active',b.dataset.decision===a.decision));stats()}sourceChart.onerror=()=>{ctx.fillStyle='#fff';ctx.fillRect(0,0,chart.width,chart.height);ctx.fillStyle='#b42318';ctx.font='16px sans-serif';ctx.fillText('原始审核图加载失败，请停止审核并报告编号。',20,35)};new ResizeObserver(drawFocused).observe(viewer);document.querySelectorAll('[data-decision]').forEach(b=>b.onclick=()=>decide(b.dataset.decision));$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('undo').onclick=undo;for(const f of [tierFilter,sideFilter,answerFilter])f.onchange=()=>{if(!matches(index))index=findStep(1);f.blur();save();render()};jump.onchange=()=>{const n=Number(jump.value);if(Number.isInteger(n)&&n>=1&&n<=items.length){index=n-1;save();render()}jump.blur()};note.oninput=()=>{const id=items[index].review_id;if(answers[id]){answers[id].note=note.value||'';save()}};
+function stats(){const c={KEEP:0,REMOVE:0,UNCERTAIN:0};Object.values(answers).forEach(a=>{if(a&&allowed.has(a.decision))c[a.decision]++});const n=c.KEEP+c.REMOVE+c.UNCERTAIN;$('done').textContent=`已审 ${n} / ${items.length}`;$('counts').textContent=`保留 ${c.KEEP} · 去掉 ${c.REMOVE} · 待定 ${c.UNCERTAIN}`;$('bar').style.width=`${100*n/items.length}%`}function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v))}function drawFocused(){if(!sourceChart.naturalWidth)return;const x=items[index],vw=Math.max(1,viewer.clientWidth),vh=Math.max(1,viewer.clientHeight),dpr=Math.min(window.devicePixelRatio||1,2),iw=sourceChart.naturalWidth,ih=sourceChart.naturalHeight,bw=Number(x.focus_w),bh=Number(x.focus_h),cx=Number(x.focus_x)*iw,cy=Number(x.focus_y)*ih;chart.width=Math.round(vw*dpr);chart.height=Math.round(vh*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='#fff';ctx.fillRect(0,0,vw,vh);let sh=Math.min(ih,Math.max(ih*.48,ih*bh*4)),sw=Math.min(iw,Math.max(iw*.72,iw*bw*10,sh*(vw/vh))),sx=clamp(cx-sw/2,0,iw-sw),sy=clamp(cy-sh/2,0,ih-sh),scale=Math.min(vw/sw,vh/sh),dw=sw*scale,dh=sh*scale,dx=(vw-dw)/2,dy=(vh-dh)/2;ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(sourceChart,sx,sy,sw,sh,dx,dy,dw,dh);const bx=dx+(cx-iw*bw/2-sx)*scale,by=dy+(cy-ih*bh/2-sy)*scale,bww=iw*bw*scale,bhh=ih*bh*scale;ctx.strokeStyle='#28dc50';ctx.lineWidth=3;ctx.strokeRect(Math.round(bx)+.5,Math.round(by)+.5,Math.max(1,Math.round(bww)),Math.max(1,Math.round(bhh)))}function render(){const x=items[index],a=answers[x.review_id]||{};$('position').textContent=`${index+1} / ${items.length} · ${x.sample_id}`;$('tier').textContent=x.tier==='A_CORE'?'A 核心':x.tier==='B_BROAD'?'B 扩展':'C 其余';$('tier').className='tier '+x.tier;$('decision').textContent=a.decision?`· 当前 ${a.decision}`:'· 未审核';sourceChart.onload=drawFocused;sourceChart.dataset.fallback=x.image;sourceChart.dataset.usedFallback=x.hires_image?'0':'1';sourceChart.src=x.hires_image||x.image;note.value=a.note||'';jump.value=String(index+1);const side=x.side?` · 方向 ${x.side}`:'';$('metrics').textContent=`绳结分 ${x.score.toFixed(3)}${side} · 六线带宽 ${(x.bandwidth*10000).toFixed(1)}bp · 交叉 ${(x.cross_density*100).toFixed(1)}% · 实体接触 ${(x.body_touch*100).toFixed(1)}% · 实体穿束 ${(x.body_cross*100).toFixed(1)}% · 密集持续 ${(x.persistence*100).toFixed(1)}%`;document.querySelectorAll('[data-decision]').forEach(b=>b.classList.toggle('active',b.dataset.decision===a.decision));stats()}sourceChart.onerror=()=>{if(sourceChart.dataset.usedFallback==='0'&&sourceChart.dataset.fallback&&sourceChart.src!==sourceChart.dataset.fallback){sourceChart.dataset.usedFallback='1';sourceChart.src=sourceChart.dataset.fallback;return}ctx.fillStyle='#fff';ctx.fillRect(0,0,chart.width,chart.height);ctx.fillStyle='#b42318';ctx.font='16px sans-serif';ctx.fillText('原始审核图加载失败，请停止审核并报告编号。',20,35)};new ResizeObserver(drawFocused).observe(viewer);document.querySelectorAll('[data-decision]').forEach(b=>b.onclick=()=>decide(b.dataset.decision));$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('undo').onclick=undo;for(const f of [tierFilter,sideFilter,answerFilter])f.onchange=()=>{if(!matches(index))index=findStep(1);f.blur();save();render()};jump.onchange=()=>{const n=Number(jump.value);if(Number.isInteger(n)&&n>=1&&n<=items.length){index=n-1;save();render()}jump.blur()};note.oninput=()=>{const id=items[index].review_id;if(answers[id]){answers[id].note=note.value||'';save()}};
 $('export').onclick=()=>{const rows=items.map(x=>answers[x.review_id]).filter(Boolean),out={schema_version:1,pack_id:packId,exported_at:new Date().toISOString(),n_total:items.length,n_answered:rows.length,complete:rows.length===items.length,answers:rows},blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ma_rope_prefilter_v1_answers.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),0)};$('import').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(x.pack_id!==packId||!Array.isArray(x.answers))throw new Error('审核包不匹配');const known=new Set(items.map(i=>i.review_id));for(const a of x.answers){if(known.has(a.review_id)&&allowed.has(a.decision))answers[a.review_id]=a}save();render()}catch(err){alert('导入失败：'+err.message)}e.target.value=''};document.addEventListener('keydown',e=>{if(e.target===note){if(e.key==='Escape')note.blur();return}const k=e.key.toLowerCase();if(k==='k'||e.key==='1'){e.preventDefault();decide('KEEP')}else if(k==='x'||e.key==='2'){e.preventDefault();decide('REMOVE')}else if(e.key==='?'||e.key==='3'){e.preventDefault();decide('UNCERTAIN')}else if(k==='j'||e.key==='ArrowLeft'){e.preventDefault();step(-1)}else if(k==='l'||e.key==='ArrowRight'||e.key===' '){e.preventDefault();step(1)}else if(k==='u')undo()});if(!matches(index))index=findStep(1);render();
 </script></body></html>"""
 
@@ -339,6 +343,62 @@ def attach_focus_geometry(
             raise RopeReviewBuildError(f"duplicate review focus geometry for {sample_id}")
         page_items.append({**dict(item), **_focus_geometry(metadata)})
     return page_items
+
+
+def materialize_hires_review_images(
+    items: Sequence[Mapping[str, Any]],
+    *,
+    public_dir: Path,
+    source_root: Path = DEFAULT_HIRES_SOURCE,
+) -> dict[str, Any]:
+    """Recover exact archived chart pixels as lossless review-only PNGs.
+
+    ``dense_owner_side_short`` preserved the original 1280x742 BGR canvas as
+    NPY even when its PNG symlink later became stale.  This function reads only
+    those frozen pixels; it does not load OHLC rows, future context, or holdout.
+    The public ranking manifest is intentionally unchanged because these files
+    alter only the review view, never sample identity or training lineage.
+    """
+
+    image_dir = public_dir / "hires"
+    image_dir.mkdir(parents=True, exist_ok=True)
+    page_items: list[dict[str, Any]] = []
+    receipts: list[str] = []
+    for item in items:
+        sample_id = str(item.get("sample_id") or "")
+        review_id = str(item.get("review_id") or "")
+        stem, marker, box_index = sample_id.rpartition("__b")
+        if not review_id or not marker or not stem or not box_index.isdigit():
+            raise RopeReviewBuildError(f"invalid high-resolution review identity: {sample_id!r}")
+        sources = sorted((source_root / "images").glob(f"*/{stem}.npy"))
+        if len(sources) != 1:
+            raise RopeReviewBuildError(
+                f"{sample_id}: expected one archived NPY source, found {len(sources)}"
+            )
+        pixels = np.load(sources[0], allow_pickle=False)
+        if pixels.dtype != np.uint8 or pixels.shape != (HIRES_CANVAS[1], HIRES_CANVAS[0], 3):
+            raise RopeReviewBuildError(
+                f"{sample_id}: archived canvas {pixels.shape}/{pixels.dtype} != "
+                f"{HIRES_CANVAS[0]}x{HIRES_CANVAS[1]} uint8 BGR"
+            )
+        target = image_dir / f"{review_id}.png"
+        rgb = np.ascontiguousarray(pixels[:, :, ::-1])
+        Image.fromarray(rgb).save(
+            target, format="PNG", optimize=False, compress_level=4
+        )
+        with Image.open(target) as written:
+            if written.size != HIRES_CANVAS or written.format != "PNG":
+                raise RopeReviewBuildError(f"{sample_id}: lossless review PNG validation failed")
+        target_sha = sha256_file(target)
+        receipts.append(f"{review_id} {target_sha}")
+        page_items.append({**dict(item), "hires_image": f"hires/{review_id}.png"})
+    return {
+        "items": page_items,
+        "count": len(page_items),
+        "set_sha256": hashlib.sha256("\n".join(receipts).encode()).hexdigest(),
+        "canvas": list(HIRES_CANVAS),
+        "holdout_read": False,
+    }
 
 
 def build_pack(
@@ -464,6 +524,8 @@ def build_pack(
     public_dir.mkdir(parents=True, exist_ok=True)
     admin_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "review_results").mkdir(parents=True, exist_ok=True)
+    hires = materialize_hires_review_images(public_page_items, public_dir=public_dir)
+    public_page_items = hires["items"]
 
     calibration = {
         "schema_version": 1,
@@ -563,6 +625,9 @@ def build_pack(
         ),
         "page_sha256": sha256_file(public_dir / "index.html"),
         "owner_2525_page_sha256": sha256_file(public_dir / "owner_2525.html"),
+        "hires_review_image_count": hires["count"],
+        "hires_review_set_sha256": hires["set_sha256"],
+        "hires_review_canvas": hires["canvas"],
         "positive_scores_sha256": sha256_file(admin_dir / "positive_1345_scores.jsonl"),
         "owner_scores_sha256": sha256_file(admin_dir / "owner_2525_scores.jsonl"),
         "counter_scores_sha256": sha256_file(admin_dir / "short_tip_1000_scores.jsonl"),
@@ -614,6 +679,8 @@ def rerender_review_pages(
         (sha256_file(positive_manifest) + json.dumps(asdict(RopeFilterConfig()), sort_keys=True)).encode()
     ).hexdigest()
     public_dir = output_dir / "public"
+    hires = materialize_hires_review_images(public_page_items, public_dir=public_dir)
+    public_page_items = hires["items"]
     (public_dir / "index.html").write_text(
         render_page(
             public_page_items,
@@ -639,7 +706,10 @@ def rerender_review_pages(
         {
             "ui_generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "ui_generator_commit": generator_commit,
-            "ui_mode": "owner_box_focused_canvas_no_full_image_toggle",
+            "ui_mode": "owner_box_focused_hires_png_no_full_image_toggle",
+            "hires_review_image_count": hires["count"],
+            "hires_review_set_sha256": hires["set_sha256"],
+            "hires_review_canvas": hires["canvas"],
             "page_sha256": sha256_file(public_dir / "index.html"),
             "owner_2525_page_sha256": sha256_file(public_dir / "owner_2525.html"),
             "holdout_read": False,
@@ -689,7 +759,7 @@ def verify_pack(output_dir: Path = DEFAULT_OUTPUT, source_pack: Path = DEFAULT_S
         "? / 3",
         "A 核心档",
         "代码只负责排序",
-        "绿色框附近 · 自动放大",
+        "1280×742 无损原图 · 轻度聚焦",
         '<canvas id="chart"',
     ):
         if token not in page:

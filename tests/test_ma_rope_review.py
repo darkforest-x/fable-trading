@@ -6,8 +6,10 @@ import hashlib
 import json
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pytest
+from PIL import Image
 
 from yoyo.artifacts import load_registries
 from yoyo.datasets.ma_rope_review import (
@@ -15,6 +17,7 @@ from yoyo.datasets.ma_rope_review import (
     attach_focus_geometry,
     evaluate_countercheck,
     lower_quantile,
+    materialize_hires_review_images,
     render_page,
     summarize_answers,
     tier_for_score,
@@ -84,7 +87,9 @@ def test_render_page_uses_population_specific_identity() -> None:
     assert 'packId="population-specific-pack"' in page
     assert '<option value="ALL" selected>全部方向</option>' in page
     assert '<canvas id="chart"' in page
-    assert "绿色框附近 · 自动放大" in page
+    assert "1280×742 无损原图 · 轻度聚焦" in page
+    assert "x.hires_image||x.image" in page
+    assert "strokeRect" in page
     assert "完整原图" not in page
     assert "原尺寸" not in page
     assert "__TITLE__" not in page
@@ -135,6 +140,26 @@ def test_attach_focus_geometry_fails_closed_on_missing_sample() -> None:
     ).set_index("box_id", drop=False)
     with pytest.raises(RopeReviewBuildError, match="missing review focus geometry"):
         attach_focus_geometry([{"sample_id": "missing"}], metadata)
+
+
+def test_materialize_hires_review_image_recovers_lossless_bgr_canvas(tmp_path: Path) -> None:
+    source = tmp_path / "source" / "images" / "train"
+    source.mkdir(parents=True)
+    pixels = np.zeros((742, 1280, 3), dtype=np.uint8)
+    pixels[0, 0] = [11, 22, 33]
+    np.save(source / "sample.npy", pixels, allow_pickle=False)
+    result = materialize_hires_review_images(
+        [{"review_id": "r1", "sample_id": "sample__b0", "image": "fallback.jpg"}],
+        public_dir=tmp_path / "public",
+        source_root=tmp_path / "source",
+    )
+    assert result["count"] == 1
+    assert result["canvas"] == [1280, 742]
+    assert result["holdout_read"] is False
+    assert result["items"][0]["hires_image"] == "hires/r1.png"
+    with Image.open(tmp_path / "public" / "hires" / "r1.png") as image:
+        assert image.size == (1280, 742)
+        assert image.getpixel((0, 0)) == (33, 22, 11)
 
 
 def _write_json(path: Path, payload: object) -> None:
