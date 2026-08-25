@@ -2330,3 +2330,125 @@ artifacts:
       Self-contained owner delivery with seven embedded key visuals and seven
       result/contract tables. Browser file-URL QA was policy-blocked and is
       disclosed; static HTML structure and source-render visuals passed.
+
+  # ---- pre-holdout 15m per-sample boundary review -----------------------
+  - artifact_id: 15m-ma-launch-boundary-review9000-v1-prereg
+    artifact_type: config
+    role: frozen_owner_category_and_geometry_review_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2342983f5baed5c2c52d2b43f780338f2790b0f9"
+    source_path: experiments/active/exp-15m-ma-launch-boundary-review9000-v1/preregistration.json
+    sha256: "3d90f2f8da67a00c0bfb0e1653b8f5b6b19b6f925bc3b16aa4b84a681e92ad87"
+    size_bytes: 7115
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-boundary-review9000-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2342983f5baed5c2c52d2b43f780338f2790b0f9"
+    config_hash: "3d90f2f8da67a00c0bfb0e1653b8f5b6b19b6f925bc3b16aa4b84a681e92ad87"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Freezes one-sample-at-a-time KEEP/DROP/UNCERTAIN review, explicit W14-22,
+      core4-7 and confirmation3-5 geometry, zero default answers, no batch shift
+      and no training or negative generation before a later Owner release.
+
+  - artifact_id: 15m-ma-launch-boundary-review9000-v1-review-surface
+    artifact_type: report
+    role: local_owner_category_and_geometry_review_surface
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a3bdeb6cd970ca9bfcdcab717fa481bf353d5577"
+    source_path: experiments/active/exp-15m-ma-launch-boundary-review9000-v1/results/public/index.html
+    sha256: "97f11c70d5182892232ce19c02dccb9d5518377c6165b4bc9c8984bdc7cb8c3a"
+    size_bytes: 3231794
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-boundary-review9000-v1/results/public/index.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f117631dd53c5f42ce43055156cef01a8ec85cb5"
+    config_hash: "3d90f2f8da67a00c0bfb0e1653b8f5b6b19b6f925bc3b16aa4b84a681e92ad87"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Embeds 9,000 unique identity-bound review rows while dynamically loading
+      the hash-pinned source PNG sidecars. It saves only local browser progress,
+      requires explicit geometry for KEEP and has no bulk-accept control.
+
+  - artifact_id: 15m-ma-launch-boundary-review9000-v1-build-receipt
+    artifact_type: manifest
+    role: source_image_integrity_and_zero_training_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a3bdeb6cd970ca9bfcdcab717fa481bf353d5577"
+    source_path: experiments/active/exp-15m-ma-launch-boundary-review9000-v1/results/build_receipt.json
+    sha256: "0e45d275104d1f5da175c829c0b2c2e83274c33bd130b2b6277ccbed6f43452f"
+    size_bytes: 2064
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-boundary-review9000-v1/results/build_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f117631dd53c5f42ce43055156cef01a8ec85cb5"
+    config_hash: "3d90f2f8da67a00c0bfb0e1653b8f5b6b19b6f925bc3b16aa4b84a681e92ad87"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Records 9,000/9,000 source identities, 1,393,089,371 bytes rehashed with
+      zero mismatch, zero preselected answers and zero images, labels,
+      negatives, models, remote writes or holdout rows.
+
+  - artifact_id: 15m-ma-launch-boundary-review9000-v1-qa-receipt
+    artifact_type: manifest
+    role: browser_summarizer_and_report_render_qa_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a3bdeb6cd970ca9bfcdcab717fa481bf353d5577"
+    source_path: experiments/active/exp-15m-ma-launch-boundary-review9000-v1/results/qa_receipt.json
+    sha256: "b80a83f7ede2f341853ceaf1fe8f4a8071b7349b04a9459d1871a45f90f6e1e3"
+    size_bytes: 2475
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-boundary-review9000-v1/results/qa_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a3bdeb6cd970ca9bfcdcab717fa481bf353d5577"
+    config_hash: "3d90f2f8da67a00c0bfb0e1653b8f5b6b19b6f925bc3b16aa4b84a681e92ad87"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Real Chromium passed candidate-image loading, explicit overlay geometry,
+      PENDING-filter auto-advance and undo with zero console errors. Synthetic
+      diverse geometry passed partial validation while strict incomplete review
+      failed closed; the final report passed desktop and narrow render checks.
+
+  - artifact_id: 15m-ma-launch-boundary-review9000-v1-report
+    artifact_type: report
+    role: canonical_preholdout_boundary_review_and_training_gate_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a3bdeb6cd970ca9bfcdcab717fa481bf353d5577"
+    source_path: analysis/p1_15m_ma_launch_boundary_review9000_20260826.md
+    sha256: "9075cffa153419e575cbcb7c4b30a928bb78216cc8a6149aa0c7aa6dcf64d17a"
+    size_bytes: 9599
+    storage_uri: "repo://analysis/p1_15m_ma_launch_boundary_review9000_20260826.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a3bdeb6cd970ca9bfcdcab717fa481bf353d5577"
+    config_hash: "3d90f2f8da67a00c0bfb0e1653b8f5b6b19b6f925bc3b16aa4b84a681e92ad87"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Answer-first technical report covering exact geometry, zero formal labels,
+      lineage, strict null controls, browser QA, reproducible commands, risks
+      and the Owner decision required before dataset construction or training.
+
+  - artifact_id: 15m-ma-launch-boundary-review9000-v1-html
+    artifact_type: report
+    role: owner_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a3bdeb6cd970ca9bfcdcab717fa481bf353d5577"
+    source_path: analysis/html/p1_15m_ma_launch_boundary_review9000_20260826.html
+    sha256: "450807989422d5f3d32a4c31f1bf7a5971123e4cac68c6f2d00845fc02c2026f"
+    size_bytes: 1558773
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_boundary_review9000_20260826.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a3bdeb6cd970ca9bfcdcab717fa481bf353d5577"
+    config_hash: "3d90f2f8da67a00c0bfb0e1653b8f5b6b19b6f925bc3b16aa4b84a681e92ad87"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Self-contained owner delivery with the Top-40 contact sheet embedded as a
+      data URI, four result/contract tables and a link to the local review
+      surface. Desktop 1440x1000 and narrow 390x844 browser QA passed.

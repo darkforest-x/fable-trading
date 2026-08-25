@@ -1220,3 +1220,46 @@ experiments:
       environment at 192.168.1.5 passed a read-only version/CUDA/NMS/hash check;
       no dataset was uploaded and no training, promote, forward, deployment or
       order action occurred.
+
+  - experiment_id: exp-15m-ma-launch-boundary-review9000-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a3bdeb6cd970ca9bfcdcab717fa481bf353d5577"
+    status: active
+    question: >-
+      Can every one of the 9,000 new pre-holdout candidates be reviewed against
+      one explicit Local Signal V2 category and geometry schema without turning
+      the t-3 display marker or completed future path into an automatic label?
+    single_variable: >-
+      Review representation only: replace an unlabeled PENDING candidate card
+      with a fail-closed Owner category plus per-sample W14-22, core4-7 and
+      confirmation3-5 geometry receipt; candidate membership, ranking, source
+      pixels and eligibility remain unchanged.
+    result: >-
+      review_surface_ready_pending_owner_answers: the builder rehashed all 9,000
+      source PNGs totaling 1,393,089,371 bytes with zero mismatch and produced a
+      one-sample-at-a-time browser surface with zero preselected answers, no bulk
+      accept and strict JSON import/export. Real-browser navigation, geometry,
+      filtered auto-advance, undo and desktop/narrow report rendering passed;
+      strict summarization rejects incomplete or identity-drifted exports. Formal
+      Owner answers, Gold boxes, training images, labels, negatives, epochs and
+      weights all remain zero.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_boundary_review9000_20260826.md
+    artifacts:
+      - 15m-ma-launch-boundary-review9000-v1-prereg
+      - 15m-ma-launch-boundary-review9000-v1-review-surface
+      - 15m-ma-launch-boundary-review9000-v1-build-receipt
+      - 15m-ma-launch-boundary-review9000-v1-qa-receipt
+      - 15m-ma-launch-boundary-review9000-v1-report
+      - 15m-ma-launch-boundary-review9000-v1-html
+    reuse_allowed: false
+    notes: >-
+      The blue t-3 line remains review-only. KEEP requires an explicit geometry
+      for every sample; DROP and UNCERTAIN forbid geometry and are not automatic
+      negatives. SHORT KEEP remains a later Owner-release preview and LONG stays
+      mirror_unconfirmed. Position diversity is audited after a complete review;
+      a degenerate distribution blocks training instead of being repaired with
+      jitter. No holdout OHLCV, remote write, training, promote, deployment,
+      forward state, ACTIVE bundle or order state was touched.
