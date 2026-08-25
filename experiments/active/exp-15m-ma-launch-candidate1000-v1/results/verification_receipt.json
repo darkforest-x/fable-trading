@@ -1,0 +1,58 @@
+{
+  "generated_at": "2026-08-25T15:44:26Z",
+  "verification_scope": "static artifact integrity, quota, eligibility, and causality checks",
+  "status": "passed",
+  "browser_qa": {
+    "status": "blocked",
+    "reason": "in-app browser rejected local file:// navigation by URL security policy",
+    "fallback": "static HTML structure, every referenced image, and six rendered rank samples were verified"
+  },
+  "counts": {
+    "manifest_rows": 1000,
+    "unique_event_ids": 1000,
+    "unique_review_paths": 1000,
+    "gallery_articles": 1000,
+    "gallery_image_refs": 1000,
+    "images_hash_verified": 1000,
+    "images_dimension_1280x770": 1000,
+    "side_counts": {
+      "LONG": 500,
+      "SHORT": 500
+    },
+    "owner_verdict_counts": {
+      "PENDING": 1000
+    }
+  },
+  "eligibility": {
+    "training_eligible_true": 0,
+    "production_eligible_true": 0,
+    "training_directories_present": 0
+  },
+  "quota_recheck": {
+    "LONG": {
+      "unique_symbols": 185,
+      "unique_days": 255,
+      "max_per_symbol": 8,
+      "max_per_day": 8,
+      "min_same_symbol_gap_bars": 225
+    },
+    "SHORT": {
+      "unique_symbols": 181,
+      "unique_days": 166,
+      "max_per_symbol": 8,
+      "max_per_day": 8,
+      "min_same_symbol_gap_bars": 260
+    }
+  },
+  "causality": {
+    "deterministic_rows": 32,
+    "rows_passed": 32,
+    "max_abs_difference": 0.0
+  },
+  "holdout": {
+    "start_exclusive": "2026-05-04T00:00:00+00:00",
+    "latest_materialized_time": "2026-05-03T23:45:00+00:00",
+    "ohlcv_rows_materialized": 0
+  },
+  "errors": []
+}
