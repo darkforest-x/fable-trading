@@ -15,6 +15,7 @@ from scripts.collect_15m_ma_launch_candidates import (
     selection_audit,
     validate_preregistration,
 )
+from scripts.verify_15m_candidate_pool import verify_marker_contract
 
 from yoyo.datasets.fifteen_minute_launch_candidates import (
     CandidateCollectionError,
@@ -315,6 +316,23 @@ def test_review_marker_can_move_without_changing_selection_anchor(tmp_path: Path
     assert meta["review_marker_source_i"] == anchor_i - 3
     assert meta["review_marker_time"] == frame["open_time"].iloc[anchor_i - 3].isoformat()
     assert meta["review_marker_is_training_label"] is False
+
+
+def test_review_marker_verifier_rejects_a_uniform_shift_as_a_label() -> None:
+    spec = replace(CandidateSpec(), review_marker_offset_bars=-3)
+    row = {
+        "review_marker_offset_bars": -3,
+        "review_marker_is_training_label": False,
+        "review_marker_source_i": 97,
+        "source_anchor_i": 100,
+        "review_marker_time": "2025-01-01T00:00:00Z",
+        "anchor_time": "2025-01-01T00:45:00Z",
+    }
+    result = verify_marker_contract([row], spec=spec)
+    assert result["offset_minutes"] == -45
+    row["review_marker_is_training_label"] = True
+    with pytest.raises(CandidateCollectionError, match="became a training label"):
+        verify_marker_contract([row], spec=spec)
 
 
 def test_prelaunch_audit_uses_only_fixed_prior_rows_and_anchor_body() -> None:
