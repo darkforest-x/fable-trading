@@ -1872,3 +1872,25 @@ artifacts:
     notes: >-
       Self-contained browser-ready HTML. Chromium loaded all six tables with no
       document-level horizontal overflow at a 1280px viewport.
+
+  # ---- pre-holdout 15m six-MA review-candidate collection -----------------
+  - artifact_id: 15m-ma-launch-candidate1000-v1-prereg
+    artifact_type: config
+    role: frozen_preholdout_15m_candidate_collection_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a1656ece2487e59e3664bace80f42253e9a0be3a"
+    source_path: experiments/active/exp-15m-ma-launch-candidate1000-v1/preregistration.json
+    sha256: "4ca56f61f35f42b9374320ff9c0af9cf6603e8f5a55453f06030b6c26daf4a01"
+    size_bytes: 6128
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate1000-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a1656ece2487e59e3664bace80f42253e9a0be3a"
+    config_hash: "4ca56f61f35f42b9374320ff9c0af9cf6603e8f5a55453f06030b6c26daf4a01"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Frozen before the only official candidate scan. Requires zero holdout
+      OHLCV materialization, zero existing Owner-label manifest reads and exact
+      500 LONG plus 500 SHORT PENDING proposals. No training image, label,
+      model, economic evaluation or production eligibility is created.

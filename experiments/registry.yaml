@@ -1117,3 +1117,34 @@ experiments:
       so holdout_consumed remains false; its artifacts still inherit
       holdout_consumed provenance from the parent post-boundary reference gates
       and are not independent pre-holdout evidence.
+
+  - experiment_id: exp-15m-ma-launch-candidate1000-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a1656ece2487e59e3664bace80f42253e9a0be3a"
+    status: active
+    question: >-
+      Can the inherited six-MA dense-start morphology produce a balanced,
+      diverse pool of 1,000 completed 15-minute pre-holdout candidates for
+      Owner review without reading holdout OHLCV or creating labels?
+    single_variable: >-
+      collection timeframe and scale: 15-minute cross-symbol completed-shape
+      candidate collection with 500 LONG plus 500 SHORT; inherited dense_l1
+      gate, 12-bar completed-path ranking, 6 review-only bars, 224-bar
+      same-symbol/side deduplication and diversity quotas are frozen
+    result: >-
+      preregistered_pending_single_official_scan; builder, causal boundary
+      reader, exact 1,000-row fail-closed selection and future-mutation null
+      landed before any candidate scan
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts:
+      - 15m-ma-launch-candidate1000-v1-prereg
+    reuse_allowed: false
+    notes: >-
+      All rows will remain PENDING and retrospective completed-path ranking is
+      not a live-signal or economic claim. Existing Owner label manifests are
+      intentionally not read because they may contain post-boundary metadata;
+      lineage deduplication is deferred to a separately authorized dataset
+      construction stage. No training, promote, forward, deployment or order
+      action is authorized.
