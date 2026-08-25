@@ -2,7 +2,26 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-24 — Owner-long v2 ledger 已冻结，仍不可训练）
+## ⚡ 当前真相（2026-08-24 — 做空优先；Owner-long v2 已冻结暂停）
+
+**Owner 最新选择已覆盖执行优先级：先继续做空，做多暂停但不删除。** 做多 v2 的 1,144 个
+唯一 event、SHA 与预切分继续冻结，仍全部 PENDING / `training_eligible=false`；本轮不得继续
+生成 long 图片、label、negative 或训练。
+
+当前唯一人工入口切回旧 short 模型实际训练过的 1,345 张正例：
+`datasets/owner_short_gold_center_v1/review/ma_rope_prefilter_v1/public/index.html`。先审默认 A 档
+385 张（`K/1` 保留、`X/2` 去掉、`?/3` 待定），不是当前 `owner_2525.html` 的 long 扩数据页。
+2026-08-25 起该入口不再缩放整张 900×521 长图，而是按每张原始 Owner 绿色框坐标直接显示
+局部放大 canvas；没有“完整原图”切换，不改原图、框、manifest、答案格式或本地进度 key。
+1,345 行已复核为 1,345 个唯一 sample、train 1,143 / val 202、跨 split dependency 0；训练图片
+与标签 2,690 个文件全部存在且 SHA 通过。未找到已落盘的 `ma_rope_prefilter_v1_answers.json`，
+所以不能假装已有人工结果。
+
+排序版审核包现已补齐 fail-closed `summarize` 接回门：必须同时锁定 public manifest、short
+positive manifest、review-only truth 与 rope score ledger 的 SHA，并核对答案的 review/sample
+双身份；未审行保持 PENDING，未来辅助审核图永不进入模型输入，接回后仍不会修改
+`training_eligible`。下一条允许动作是 Owner 审核并导出 JSON；随后只生成回执和新版 manifest
+预览，不训练、不读 holdout，等待 Owner 单独批准是否物化与开训。
 
 Owner 当前选择继续整理数据集。做多方向没有复用 short R1 中 916 个空标签，而是回到
 `analysis/output/owner_side_review/review_sheet.csv` 的 1,152 个 Owner-long 原框。8 个重复 alias
