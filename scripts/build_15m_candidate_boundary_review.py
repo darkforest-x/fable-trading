@@ -132,6 +132,7 @@ HTML_TEMPLATE = r"""<!doctype html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light">
+  <link rel="icon" href="data:,">
   <title>15m 候选逐样本边界审核</title>
   <style>
     :root{--ink:#16222d;--muted:#627283;--line:#d4dde5;--bg:#eef2f5;--card:#fff;--blue:#1776b6;--orange:#dc7a16;--green:#16865a;--red:#c8444d;--amber:#b77a12}
@@ -325,10 +326,11 @@ def build(prereg_path: Path, output_dir: Path | None = None) -> dict[str, Any]:
 若浏览器限制本地文件，可在仓库根目录运行：
 
 ```bash
-python3 -m http.server 8769 --directory {final_dir.relative_to(ROOT)}
+python3 -m http.server 8769 --directory experiments/active
 ```
 
-然后打开 `http://127.0.0.1:8769/public/index.html`。
+然后打开
+`http://127.0.0.1:8769/{prereg_path.parent.name}/results/public/index.html`。
 
 每张 KEEP 必须明确选择：完整输入 W14–22、核心 4–7 根、确认 3–5 根。
 蓝色 t-3 竖线不等于答案。LONG 仍为 `mirror_unconfirmed`。完整导出返回后，运行
