@@ -1,0 +1,217 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "BTC 4h Top-20 扩展：失败关闭报告",
+    "description": "54 币完整扫描后，SHORT 侧 18 根去重只剩 15 个，冻结的对称 Top-20 无法交付；holdout #2 已消费。",
+    "generatedAt": "2026-08-25T13:36:25Z",
+    "cards": [
+      {
+        "id": "holdout_use",
+        "description": "完整读取后才在选择阶段失败；无成功产物仍计一次。",
+        "dataset": "headline",
+        "sourceId": "failure_receipt",
+        "metrics": [{"label": "Holdout 消耗", "field": "holdout_use", "format": "number"}]
+      },
+      {
+        "id": "requested_top",
+        "description": "预注册要求 LONG/SHORT 每边恰好 20 个。",
+        "dataset": "headline",
+        "sourceId": "preregistration",
+        "metrics": [{"label": "请求 Top-N / 边", "field": "requested_top", "format": "number"}]
+      },
+      {
+        "id": "short_capacity",
+        "description": "宽门 30 个 SHORT 在固定 18 根事件去重后仅余 15 个。",
+        "dataset": "headline",
+        "sourceId": "failure_receipt",
+        "metrics": [{"label": "SHORT 去重容量", "field": "short_capacity", "format": "number"}]
+      },
+      {
+        "id": "charts_written",
+        "description": "双边选择完成前不渲染，避免半成品被误用。",
+        "dataset": "headline",
+        "sourceId": "failure_receipt",
+        "metrics": [{"label": "新渲染图", "field": "charts_written", "format": "number"}]
+      }
+    ],
+    "charts": [
+      {
+        "id": "short_capacity_gate",
+        "title": "SHORT：宽门、最终去重容量与请求数量",
+        "subtitle": "去重后的 15 个低于预注册请求 20 个，因此失败关闭。",
+        "type": "bar",
+        "dataset": "short_capacity_gate",
+        "sourceId": "failure_receipt",
+        "valueFormat": "number",
+        "encodings": {
+          "x": {"field": "stage", "type": "nominal", "label": "阶段"},
+          "y": {"field": "count", "type": "quantitative", "label": "候选数"},
+          "color": {"field": "kind", "type": "nominal", "label": "性质"},
+          "tooltip": [
+            {"field": "count", "type": "quantitative", "label": "数量", "format": "number"},
+            {"field": "meaning", "type": "nominal", "label": "解释"}
+          ]
+        }
+      }
+    ],
+    "tables": [
+      {
+        "id": "capacity",
+        "title": "请求数量与最终容量",
+        "subtitle": "门前计数不等于 18 根同币同方向去重后的独立事件容量。",
+        "dataset": "capacity",
+        "sourceId": "failure_receipt",
+        "defaultSort": {"field": "order", "direction": "asc"},
+        "columns": [
+          {"field": "order", "label": "顺序", "format": "number"},
+          {"field": "stage", "label": "阶段", "type": "text"},
+          {"field": "long", "label": "LONG", "type": "text"},
+          {"field": "short", "label": "SHORT", "type": "text"},
+          {"field": "verdict", "label": "结论", "type": "text"}
+        ]
+      },
+      {
+        "id": "comparison",
+        "title": "v1 与 Top-20 v2 对照",
+        "subtitle": "v2 唯一变量是每边 Top-N 从 8 变为 20。",
+        "dataset": "comparison",
+        "sourceId": "preregistration",
+        "defaultSort": {"field": "order", "direction": "asc"},
+        "columns": [
+          {"field": "order", "label": "顺序", "format": "number"},
+          {"field": "config", "label": "配置", "type": "text"},
+          {"field": "top_n", "label": "Top-N/边", "format": "number"},
+          {"field": "status", "label": "状态", "type": "text"},
+          {"field": "charts", "label": "图数", "format": "number"},
+          {"field": "holdout_use", "label": "Holdout 消耗", "format": "number"}
+        ]
+      },
+      {
+        "id": "next_steps",
+        "title": "下一步选项",
+        "subtitle": "任何重跑都需要新的冻结配置和 Owner 对 holdout #3 的明确授权。",
+        "dataset": "next_steps",
+        "sourceId": "canonical_report",
+        "defaultSort": {"field": "order", "direction": "asc"},
+        "columns": [
+          {"field": "order", "label": "顺序", "format": "number"},
+          {"field": "option", "label": "选项", "type": "text"},
+          {"field": "new_holdout", "label": "新 Holdout", "type": "text"},
+          {"field": "deliverable", "label": "可交付", "type": "text"},
+          {"field": "recommendation", "label": "建议", "type": "text"}
+        ]
+      }
+    ],
+    "sources": [
+      {"id": "failure_receipt", "label": "Top-20 失败回执", "path": "experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/results/failure_receipt.json"},
+      {"id": "preregistration", "label": "Top-20 冻结预注册", "path": "experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/preregistration.json"},
+      {"id": "baseline_summary", "label": "v1 Top-8 成功扫描摘要", "path": "experiments/active/exp-btc-4h-ma-launch-similarity-v1/results/scan_summary.json"},
+      {"id": "canonical_report", "label": "本轮技术报告", "path": "analysis/p0_btc_4h_ma_launch_similarity_top20_v2_failure_20260825.md"}
+    ],
+    "blocks": [
+      {"id": "title", "type": "markdown", "body": "# BTC 4h Top-20 扩展：失败关闭报告"},
+      {"id": "answer_first", "type": "markdown", "sourceId": "failure_receipt", "body": "## 结论先说\n\n**本轮没有新的 4h 图可以诚实交付。** 冻结配置完整读取 54 个币和 36,720 个 holdout 4h 币种行后，SHORT 从宽门 30 个降至最终去重 15 个，低于每边 20 个的预注册要求。程序在渲染前失败关闭，holdout 配置消耗 #2 仍然成立。"},
+      {"id": "metrics", "type": "metric-strip", "cardIds": ["holdout_use", "requested_top", "short_capacity", "charts_written"]},
+      {"id": "short_capacity_chart", "type": "chart", "chartId": "short_capacity_gate"},
+      {"id": "capacity_block", "type": "table", "tableId": "capacity"},
+      {"id": "comparison_block", "type": "table", "tableId": "comparison"},
+      {"id": "interpretation", "type": "markdown", "body": "## 为什么 30 个还是不够\n\n宽门计数包含同一币在相邻 4h 锚点上的重复命中。冻结规则把同币同方向 18 根以内的锚点视为一个事件邻域，只保留距离最低者，因此 30 个 SHORT 最终只代表 15 个可交付事件。看到结果后缩短去重、改成不对称 Top-N 或拿相邻锚点凑图都会改变估计量。"},
+      {"id": "null_and_metrics", "type": "markdown", "body": "## 零假设与不适用指标\n\n这是配置可行性审计，没有模型或交易定义，所以 AUC、top-decile 毛/净收益、胜率、0.2% 成本和匹配随机入场对照均不适用。等价的严格零假设是除 `top_per_side` 外所有冻结字段必须逐值等于 v1；自动契约测试通过。Top-20 的 phase-scramble 因容量门先失败而未执行，不能借用 v1 的 p 值。"},
+      {"id": "next_steps_block", "type": "table", "tableId": "next_steps"},
+      {"id": "limitations", "type": "markdown", "body": "## 风险与诚实声明\n\n失败前没有持久化逐行候选，因而不猜测第 9–15 名身份；LONG 虽已至少选出 20 个，也不是正式双边结果。所有形态仍使用启动后 12 根未来 4h K 线，只能回看，不能作为 tip 信号、训练金标或生产候选。任何新配置都需要 Owner 重新授权。"},
+      {"id": "visual_omission", "type": "markdown", "body": "## 为什么报告没有 K 线图\n\n预注册要求双边各 20 个。SHORT 容量不足时，渲染任何 LONG 半成品都会制造一个看似正式但不满足合同的榜单，因此程序在画图前停止；新图数量严格为 0。"}
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-08-25T13:36:25Z",
+    "status": "ready",
+    "datasets": {
+      "headline": [{"holdout_use": 2, "requested_top": 20, "short_capacity": 15, "charts_written": 0}],
+      "short_capacity_gate": [
+        {"stage": "宽门", "count": 30, "kind": "观测容量", "meaning": "包含相邻重复锚点"},
+        {"stage": "18 根去重", "count": 15, "kind": "观测容量", "meaning": "最终独立候选容量"},
+        {"stage": "预注册请求", "count": 20, "kind": "合同门槛", "meaning": "每边必须交付 20 个"}
+      ],
+      "capacity": [
+        {"order": 1, "stage": "宽门", "long": "64", "short": "30", "verdict": "只是重叠锚点"},
+        {"order": 2, "stage": "18 根去重", "long": "至少 20", "short": "15", "verdict": "SHORT 容量不足"},
+        {"order": 3, "stage": "预注册请求", "long": "20", "short": "20", "verdict": "失败关闭"}
+      ],
+      "comparison": [
+        {"order": 1, "config": "v1", "top_n": 8, "status": "成功，待 Owner 审图", "charts": 16, "holdout_use": 1},
+        {"order": 2, "config": "Top-20 v2", "top_n": 20, "status": "SHORT 去重容量不足", "charts": 0, "holdout_use": 2}
+      ],
+      "next_steps": [
+        {"order": 1, "option": "停在 v1", "new_holdout": "0", "deliverable": "现有 16 张图", "recommendation": "安全但不扩样"},
+        {"order": 2, "option": "对称 Top-15", "new_holdout": "#3", "deliverable": "最多 14 张新增图", "recommendation": "建议，需明确授权"},
+        {"order": 3, "option": "LONG20 / SHORT15", "new_holdout": "#3", "deliverable": "最多 19 张新增图", "recommendation": "口径不对称，不优先"},
+        {"order": 4, "option": "改去重或宽门", "new_holdout": "#3 或更多", "deliverable": "不确定", "recommendation": "事后调规则风险高"}
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "failure_receipt",
+      "label": "Top-20 失败回执",
+      "path": "experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/results/failure_receipt.json",
+      "query": {
+        "engine": "repository-artifact",
+        "language": "json",
+        "description": "记录完整扫描、最终去重容量错误、退出码和 holdout #2 消耗。",
+        "sql": "SELECT status, error, scan_scope, deduplicated_capacity, holdout, candidate_chart_count FROM read_json_auto('experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/results/failure_receipt.json');",
+        "tables_used": ["experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/results/failure_receipt.json"],
+        "filters": ["frozen 54-symbol universe", "2024-08-25T04:00:00Z through 2026-08-25T04:00:00Z"],
+        "metric_definitions": ["deduplicated capacity = candidate count after fixed 18-bar same-symbol same-side exclusion", "holdout rows = 54 symbols * 680 rows on or after 2026-05-04"]
+      }
+    },
+    {
+      "id": "preregistration",
+      "label": "Top-20 冻结预注册",
+      "path": "experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/preregistration.json",
+      "query": {
+        "engine": "repository-artifact",
+        "language": "json",
+        "description": "扫描前冻结的唯一变量、规格、失败条件与 Owner 授权范围。",
+        "sql": "SELECT single_variable, spec, expansion_contract, holdout, delivery_contract FROM read_json_auto('experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/preregistration.json');",
+        "tables_used": ["experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/preregistration.json"],
+        "filters": ["top_per_side changed from 8 to 20 only"],
+        "metric_definitions": ["requested Top-N = exact required candidate count per side"]
+      }
+    },
+    {
+      "id": "baseline_summary",
+      "label": "v1 Top-8 成功扫描摘要",
+      "path": "experiments/active/exp-btc-4h-ma-launch-similarity-v1/results/scan_summary.json",
+      "query": {
+        "engine": "repository-artifact",
+        "language": "json",
+        "description": "旧 Top-8 的成功基线、宽门数量和 holdout #1 账本。",
+        "sql": "SELECT scan_counts, selected, null_controls, holdout FROM read_json_auto('experiments/active/exp-btc-4h-ma-launch-similarity-v1/results/scan_summary.json');",
+        "tables_used": ["experiments/active/exp-btc-4h-ma-launch-similarity-v1/results/scan_summary.json"],
+        "filters": ["baseline v1 only"],
+        "metric_definitions": ["v1 charts = 8 LONG + 8 SHORT"]
+      }
+    },
+    {
+      "id": "canonical_report",
+      "label": "本轮技术报告",
+      "path": "analysis/p0_btc_4h_ma_launch_similarity_top20_v2_failure_20260825.md",
+      "query": {
+        "engine": "repository-report",
+        "language": "markdown",
+        "description": "失败原因、方法、不适用指标、限制和 Owner 决策点。",
+        "sql": "SELECT * FROM repository_report('analysis/p0_btc_4h_ma_launch_similarity_top20_v2_failure_20260825.md');",
+        "tables_used": ["analysis/p0_btc_4h_ma_launch_similarity_top20_v2_failure_20260825.md"],
+        "filters": ["no new holdout read", "no model or economic claim"],
+        "metric_definitions": ["new chart count = charts successfully written by the frozen v2 run"]
+      }
+    }
+  ],
+  "package_info": {
+    "originUrl": "artifact://btc-4h-ma-launch-similarity-top20-v2-failure-20260825",
+    "controls": {"edit": false, "refresh": false}
+  }
+}

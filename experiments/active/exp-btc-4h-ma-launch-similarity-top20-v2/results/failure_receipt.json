@@ -1,0 +1,41 @@
+{
+  "artifact": "btc_4h_ma_launch_similarity_top20_v2_failure_receipt",
+  "builder_commit": "4979e1871a0f883405d76fc5e357fe63b8bf0daf",
+  "candidate_chart_count": 0,
+  "command": "PYTHONPATH=. .venv/bin/python scripts/find_four_hour_ma_launch_similarity.py --prereg experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/preregistration.json --out experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/results",
+  "deduplicated_capacity": {
+    "LONG": "at_least_20",
+    "SHORT": 15
+  },
+  "error": "ValueError: SHORT has only 15 deduplicated candidates",
+  "exit_code": 1,
+  "experiment_id": "exp-btc-4h-ma-launch-similarity-top20-v2",
+  "failed_at_utc": "2026-08-25T13:34:31Z",
+  "holdout": {
+    "authorization_scope": "After being told that expanding ranks 9-20 would reread about 36,720 holdout 4h symbol-rows as configuration consumption #2, the Owner replied '继续' on 2026-08-25.",
+    "counter_serialized_by_failed_process": false,
+    "four_hour_symbol_rows_read": 36720,
+    "four_hour_symbol_rows_read_derivation": "The process completed the identical fixed 54-symbol grid through 2026-08-25T04:00:00Z. Each symbol contributed the same 680 holdout 4h rows as baseline v1, so 54 * 680 = 36,720. The in-process counter was not serialized because selection failed before summary writing.",
+    "owner_authorized_in_conversation": true,
+    "read": true,
+    "symbols_read": 54,
+    "use_number_for_this_configuration": 2
+  },
+  "model_trained": false,
+  "next_action_requires_new_owner_authorization": true,
+  "preregistration_path": "experiments/active/exp-btc-4h-ma-launch-similarity-top20-v2/preregistration.json",
+  "preregistration_sha256": "be3263772f1ee30a28be68daa624afa0ea37d144ec87f2357f1c2f23a861730f",
+  "production_eligible": false,
+  "requested_top_per_side": 20,
+  "retrieval_output_created_before_failure": false,
+  "scan_completed_all_symbols": true,
+  "scan_scope": {
+    "broad_gate_long": 64,
+    "broad_gate_short": 30,
+    "scan_end": "2026-08-25T04:00:00Z",
+    "scan_start": "2024-08-25T04:00:00Z",
+    "universe_size": 54
+  },
+  "status": "failed_closed_insufficient_deduplicated_short_candidates",
+  "training_eligible": false
+}
