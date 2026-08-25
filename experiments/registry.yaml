@@ -992,3 +992,32 @@ experiments:
       timestamp-grid evidence, while actual OHLC gap and causal hashes are
       deferred to bounded KEEP-only materialization. The next legal action is
       an Owner page export joined through the fail-closed receipt gate.
+
+  - experiment_id: exp-btc-4h-ma-launch-similarity-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c73d794289d201bea6ca017ddb2adca79eca50a2"
+    status: active
+    question: >-
+      Across the most recent two years of the 54-symbol long-history OKX USDT
+      perpetual universe, which completed 4h windows most resemble the Owner's
+      supplied BTC 2026-08-19 six-MA compression launch, including an exact
+      price-axis SHORT mirror?
+    single_variable: >-
+      direction orientation only: direct LONG reference versus exact SHORT
+      price-axis mirror; universe, 30+12 bar window, broad gates, five-channel
+      weights, RMSE, constrained DTW, 18-bar deduplication, top-N and null
+      control remain fixed
+    result: preregistered_before_scan
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_btc_4h_ma_launch_similarity_20260825.md
+    reuse_allowed: false
+    notes: >-
+      The Owner's request explicitly scopes the latest two years and supplies a
+      2026-08-19 reference, so this completed-shape configuration records its
+      first authorized holdout use. It is descriptive retrieval with 12
+      post-onset bars plus six review-only bars, not a tip detector, trading
+      strategy, label, model evaluation or production candidate. All thresholds,
+      distance weights, time-warp radius, deduplication and phase-scramble null
+      were frozen before the multi-symbol scan.

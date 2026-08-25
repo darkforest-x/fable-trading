@@ -1,0 +1,84 @@
+{
+  "experiment_id": "exp-btc-4h-ma-launch-similarity-v1",
+  "frozen_at": "2026-08-25T10:45:20+00:00",
+  "question": "Across the last two years of the repository's 54-symbol long-history OKX USDT perpetual universe, which completed 4h windows most resemble the Owner-supplied BTC 2026-08-19 MA-compression launch, including an exact price-axis SHORT mirror?",
+  "expected_universe_size": 54,
+  "universe_rule": "For each okx_*_USDT_SWAP_15m_*.csv in data/kline_deep, choose the longest declared-row snapshot; require exactly 54 unique symbols. Resample only complete 16x15m UTC buckets and merge one bounded public OKX 4H page after exact OHLC overlap parity.",
+  "single_variable": "Direction orientation only: the same frozen LONG reference tensor is evaluated directly and after an exact price-axis SHORT mirror; universe, window, gates, feature scales, weights, distance, DTW, deduplication, top-N and null control stay identical.",
+  "spec": {
+    "protocol": "btc_4h_ma_launch_similarity_v1_20260825",
+    "scan_start": "2024-08-25T04:00:00+00:00",
+    "scan_end": "2026-08-25T04:00:00+00:00",
+    "reference_symbol": "BTC_USDT_SWAP",
+    "reference_anchor": "2026-08-19T12:00:00+00:00",
+    "pre_bars": 30,
+    "release_bars": 12,
+    "review_extra_bars": 6,
+    "dedupe_bars": 18,
+    "shortlist_per_side": 400,
+    "top_per_side": 8,
+    "dtw_radius": 2,
+    "coarse_weight": 0.45,
+    "dtw_weight": 0.55,
+    "null_permutations": 200,
+    "random_seed": 20260825,
+    "api_limit": 300,
+    "api_pause_seconds": 0.12,
+    "spread_reference_mult": 3.0,
+    "release_close_reference_mult": 0.25,
+    "release_close_hard_min_pct": 3.0,
+    "first3_reference_mult": 0.15,
+    "first3_hard_min_pct": 0.75,
+    "release_atr_reference_mult": 0.15,
+    "release_atr_hard_min": 4.0,
+    "pre_range_reference_mult": 2.0,
+    "pre_range_hard_max_pct": 8.0,
+    "anchor_to_bundle_reference_mult": 3.0,
+    "anchor_to_bundle_hard_max_pct": 2.0,
+    "channel_weights": {
+      "signed_close_path_pct": 0.4,
+      "signed_ma_center_path_pct": 0.2,
+      "ma_spread_pct": 0.15,
+      "signed_body_pct": 0.1,
+      "log_volume_ratio": 0.15
+    },
+    "channel_scale_floors": {
+      "signed_close_path_pct": 1.0,
+      "signed_ma_center_path_pct": 1.0,
+      "ma_spread_pct": 0.25,
+      "signed_body_pct": 0.5,
+      "log_volume_ratio": 0.5
+    }
+  },
+  "ranking_contract": {
+    "coarse_stage": "Reference-scaled weighted RMSE over 42x5 values.",
+    "rerank_stage": "Exact multivariate DTW with Sakoe-Chiba radius 2, computed separately on the 30-bar prelude and 12-bar release; 35% prelude plus 65% release.",
+    "final_distance": "45% coarse plus 55% split-DTW; lower is more similar and is not a probability.",
+    "exclusion_zone": "Within one symbol and direction, anchors within 18 bars are one event neighborhood; keep the lowest final distance.",
+    "selection": "Return exactly eight non-overlapping LONG and eight non-overlapping SHORT candidates if available. The supplied BTC reference is shown separately and excluded from ranking and null-control top-N."
+  },
+  "null_control": {
+    "method": "Keep the exact 30-bar reference prelude and the same multivariate set of 12 release rows, but randomly permute the release-row order 200 times. Compare each null query's deduplicated top-eight coarse mean distance with the real query.",
+    "null_hypothesis": "The temporal ordering of the supplied release is no more retrievable than the same amplitudes and channel values in random release order.",
+    "p_value": "One-sided lower-is-better randomization p with plus-one correction."
+  },
+  "holdout": {
+    "read": true,
+    "use_number_for_this_configuration": 1,
+    "owner_authorized_in_conversation": true,
+    "authorization_scope": "Owner explicitly requested similar 4h long or short shapes from the most recent two years, anchored by the attached 2026-08-19 BTC screenshot.",
+    "post_result_rule": "Do not tune gates, weights, windows, DTW radius, deduplication or top-N after seeing the scan. A changed configuration needs fresh Owner authorization and a new consumption number."
+  },
+  "safety": {
+    "retrospective_completed_shape": true,
+    "historical_future_bars_used": 12,
+    "review_only_extra_bars": 6,
+    "model_training": false,
+    "economic_evaluation": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "active_or_frozen_change": false,
+    "forward_or_order_state_change": false,
+    "raw_kline_write": false
+  }
+}
