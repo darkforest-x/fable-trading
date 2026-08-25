@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from scripts.audit_15m_candidate_prelaunch import prelaunch_metrics, summarize
+
 from yoyo.datasets.fifteen_minute_launch_candidates import (
     CandidateCollectionError,
     CandidateSpec,
@@ -220,3 +222,32 @@ def test_gallery_uses_path_relative_to_its_review_chart_sibling(tmp_path: Path) 
     document = output.read_text(encoding="utf-8")
     assert 'src="review_charts/one.png"' in document
     assert "candidate, not positive label" in document
+
+
+def test_prelaunch_audit_uses_only_fixed_prior_rows_and_anchor_body() -> None:
+    frame = synthetic_frame(40)
+    row = {
+        "event_id": "prelaunch",
+        "direction": "LONG",
+        "symbol": "AAA_USDT_SWAP",
+        "rank": 1,
+        "anchor_time": frame["open_time"].iloc[20].isoformat(),
+        "source_anchor_i": 20,
+        "anchor_open": float(frame["open"].iloc[20]),
+        "atr14_signal": 2.0,
+    }
+    metrics = prelaunch_metrics(frame, row)
+    assert metrics["pre3_open_signed_atr"] == pytest.approx(
+        (frame["open"].iloc[20] - frame["close"].iloc[17]) / 2.0
+    )
+    assert metrics["pre12_open_signed_atr"] == pytest.approx(
+        (frame["open"].iloc[20] - frame["close"].iloc[8]) / 2.0
+    )
+    assert metrics["anchor_body_signed_atr"] == pytest.approx(
+        (frame["close"].iloc[20] - frame["open"].iloc[20]) / 2.0
+    )
+
+
+def test_prelaunch_summary_requires_exact_balanced_thousand() -> None:
+    with pytest.raises(CandidateCollectionError, match="expected 1000"):
+        summarize([])
