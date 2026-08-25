@@ -1038,6 +1038,32 @@ experiments:
       phase-scramble null were frozen before that scan; 36,720 holdout 4h
       symbol-rows were read under configuration consumption #1.
 
+  - experiment_id: exp-btc-4h-ma-launch-similarity-top20-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4979e1871a0f883405d76fc5e357fe63b8bf0daf"
+    status: active
+    question: >-
+      When the frozen two-year BTC 4h completed-shape retrieval is expanded
+      from Top-8 to Top-20 per side, which additional ranks 9-20 should the
+      Owner review?
+    single_variable: >-
+      top_per_side changes from 8 to 20; protocol, universe, dates, reference,
+      30+12+6 window, gates, feature scales, weights, RMSE, constrained DTW,
+      shortlist, 18-bar deduplication and random seed remain unchanged
+    result: preregistered_and_authorized_before_holdout_scan
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: >-
+      The Owner was told that ranks beyond 8 were not persisted and that this
+      exact expansion would reread about 36,720 holdout 4h symbol-rows as
+      configuration consumption #2, then replied "继续" on 2026-08-25. The
+      builder must prove Top-N is the only changed spec field and must reproduce
+      the old Top-8 identity and distances before any rank 9-20 chart is valid.
+      No scan, training, economic evaluation, forward, promotion or order has
+      occurred at this preregistration state.
+
   - experiment_id: exp-btc-4h-causal-pine-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "8331cd8d03a8311f4a0e2432d34b09d1c895b14d"
