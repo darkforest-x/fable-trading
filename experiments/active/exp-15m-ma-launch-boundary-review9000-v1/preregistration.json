@@ -1,0 +1,105 @@
+{
+  "experiment_id": "exp-15m-ma-launch-boundary-review9000-v1",
+  "frozen_at": "2026-08-26T00:00:00Z",
+  "owner_request": "2026-08-26 conversation: after collecting 9,000 additional 15-minute six-MA launch candidates, Owner asked to move the displayed line three bars earlier, recover the previous small detection-window and small signal-box logic, avoid a fixed box position, collect safe negatives and train on the RTX 3060. Repository Gold Dataset gates forbid treating candidate ranking or a uniform line shift as sample labels. This preregistration therefore freezes an Owner review surface that records an exact per-sample category and geometry while generating no training image, YOLO label, negative, model or remote training job.",
+  "question": "Can every one of the 9,000 new candidates be reviewed against one explicit Local Signal V2 geometry schema without converting the t-3 display marker or completed future path into an automatic label?",
+  "single_variable": "Review representation only: replace an unlabeled PENDING candidate card with a fail-closed Owner category plus per-sample W14-22 / core4-7 / confirmation3-5 geometry receipt; candidate membership, ranking and pixels stay unchanged.",
+  "source": {
+    "candidate_experiment_id": "exp-15m-ma-launch-candidate9000-v1",
+    "candidate_preregistration_path": "experiments/active/exp-15m-ma-launch-candidate9000-v1/preregistration.json",
+    "candidate_preregistration_sha256": "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26",
+    "candidate_manifest_path": "experiments/active/exp-15m-ma-launch-candidate9000-v1/results/review_manifest.jsonl",
+    "candidate_manifest_sha256": "3b4faa197ebd08bfd24ea662c30b8360200f29e172dbc5d68639eb880a71d731",
+    "candidate_rows": 9000,
+    "per_side": {"LONG": 4500, "SHORT": 4500},
+    "required_owner_verdict": "PENDING",
+    "required_training_eligible": false,
+    "required_production_eligible": false,
+    "training_gate_receipt_path": "experiments/active/exp-15m-ma-launch-candidate9000-v1/results/training_gate_receipt.json",
+    "training_gate_receipt_sha256": "7de4f204fc364f0093cff0b52839470e092bb7f048814d7b76047e2f2f78135c"
+  },
+  "protocol": {
+    "path": "docs/protocol/local_signal_v2.md",
+    "sha256": "9f81dbc867fca9b772d6e2cbd0fe0ecb2d451e1b69652057208f68aad3f09e3e",
+    "timeframe": "15m",
+    "review_bars": 48,
+    "selection_bar_review_i": 30,
+    "requested_marker_review_i": 27,
+    "requested_marker_offset_bars": -3,
+    "marker_semantics": "The blue t-3 line is a review reference only. It is neither a class verdict nor a box boundary and it supplies no default geometry answer.",
+    "decisions": ["KEEP", "DROP", "UNCERTAIN"],
+    "keep_geometry": {
+      "input_end_review_i": 30,
+      "input_window_bars_min": 14,
+      "input_window_bars_max": 22,
+      "core_bars_min": 4,
+      "core_bars_max": 7,
+      "confirmation_bars_allowed": [3, 4, 5],
+      "core_end_formula": "selection_bar_review_i - confirmation_bars",
+      "core_start_formula": "core_end_review_i - core_width_bars + 1",
+      "input_start_formula": "input_end_review_i - input_window_bars + 1",
+      "vertical_box_rule": "full_wicks_plus_six_ma_over_owner_selected_core",
+      "future_in_training_input": false
+    },
+    "drop_or_uncertain_geometry": "All geometry fields must be null. A rejected proposal is not automatically a safe negative, and an uncertain proposal enters neither class.",
+    "position_contract": "Owner selects input length, core width and confirmation delay per sample. No batch shift, fixed center, fixed right edge, geometry quota or automatic box placement is allowed.",
+    "position_degeneracy_audit_after_complete_review": {
+      "minimum_distinct_geometry_triples": 5,
+      "minimum_distinct_input_lengths": 2,
+      "minimum_distinct_core_widths": 2,
+      "minimum_distinct_confirmation_delays": 2,
+      "minimum_distinct_box_center_ratios": 2,
+      "action_on_failure": "Keep training_eligible=false and return to Owner review; never jitter or rebalance geometry mechanically."
+    }
+  },
+  "direction_contract": {
+    "SHORT": "Owner protocol direction is frozen, but each KEEP and its geometry still require this per-sample review and a later explicit dataset release.",
+    "LONG": "mirror_unconfirmed: a LONG KEEP may preserve an Owner sample observation, but it remains excluded from positive and negative training roles until Owner separately approves the mirror protocol.",
+    "batch_direction_inference": false
+  },
+  "review_surface": {
+    "one_sample_at_a_time": true,
+    "answers_preselected": 0,
+    "bulk_accept": false,
+    "offline_local_storage": true,
+    "json_import_export": true,
+    "source_identity_fields": ["event_id", "symbol", "direction", "anchor_time", "review_sha256"],
+    "keep_requires_explicit_geometry": true,
+    "displayed_future_is_review_only": true,
+    "writes_repository_answers": false,
+    "starts_training": false
+  },
+  "downstream_gates": {
+    "owner_export": "A complete JSON export must contain exactly one identity-bound decision for every source event. KEEP requires exact valid geometry; DROP and UNCERTAIN forbid geometry.",
+    "summary": "The committed summarizer may produce an eligibility preview, but every output row remains training_eligible=false and production_eligible=false.",
+    "gold_dataset": "Only after the Owner returns the export and explicitly releases the audited SHORT KEEP set may a separate preregistered builder materialize short training images and labels.",
+    "negatives": "Only after accepted positive exclusion zones exist: collect same-symbol and same-time-block isolated easy and hard negatives, preserve full Owner-box exclusion, time split with purge, and treat the previous 3:1 train negative ratio as a soft target rather than permission to weaken exclusions.",
+    "training": "No RTX 3060 training until category, geometry, direction, split, negative and byte-level dataset gates pass. Training completion will stop at artifacts; no promote, ACTIVE change, deployment or trading."
+  },
+  "controls": {
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0,
+    "source_ohlcv_read": false,
+    "training_images_generated": 0,
+    "training_labels_generated": 0,
+    "negatives_generated": 0,
+    "models_trained": 0,
+    "economic_metrics": "Not applicable: this is an annotation-surface integrity task with no model, entry, exit, cost, return or score.",
+    "null_control": "A synthetic export test must reject unknown IDs, duplicated IDs, identity drift, incomplete default exports, invalid W/core/delay arithmetic and geometry attached to DROP or UNCERTAIN."
+  },
+  "delivery": {
+    "review_html": "results/public/index.html",
+    "build_receipt": "results/build_receipt.json",
+    "readme": "results/README.md",
+    "owner_answers_in_repository": false,
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "safety": {
+    "holdout_read": false,
+    "model_training": false,
+    "active_or_frozen_change": false,
+    "forward_or_order_state_change": false,
+    "remote_write": false
+  }
+}
