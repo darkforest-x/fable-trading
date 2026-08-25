@@ -1894,3 +1894,199 @@ artifacts:
       OHLCV materialization, zero existing Owner-label manifest reads and exact
       500 LONG plus 500 SHORT PENDING proposals. No training image, label,
       model, economic evaluation or production eligibility is created.
+
+  - artifact_id: 15m-ma-launch-candidate1000-v1-manifest
+    artifact_type: manifest
+    role: owner_review_candidate_and_chart_hash_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "582ea4dc7006581ccd3c3d10f982c50c1392111c"
+    source_path: experiments/active/exp-15m-ma-launch-candidate1000-v1/results/review_manifest.jsonl
+    sha256: "b58ddf0e9808ac5c006c69d42b18f69f19a7a0ed1af0f2cda7ac41b9fa9b3e6c"
+    size_bytes: 1449150
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate1000-v1/results/review_manifest.jsonl"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d4f982919d9fae7a0847597c8fedab4aeb4cdaf5"
+    config_hash: "4ca56f61f35f42b9374320ff9c0af9cf6603e8f5a55453f06030b6c26daf4a01"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Exactly 1,000 PENDING rows, 500 per side, with the individual SHA-256 of
+      every local review PNG. This manifest inventories the 143,579,704-byte
+      review_charts sidecar directory; it is not an Owner label set.
+
+  - artifact_id: 15m-ma-launch-candidate1000-v1-scan-summary
+    artifact_type: manifest
+    role: preholdout_completed_candidate_scan_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "582ea4dc7006581ccd3c3d10f982c50c1392111c"
+    source_path: experiments/active/exp-15m-ma-launch-candidate1000-v1/results/scan_summary.json
+    sha256: "bd5c8e9e210043d2ba5435489fb31f7b68ebc3ea4c01b578e0ab73ec792689a0"
+    size_bytes: 12166
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate1000-v1/results/scan_summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d4f982919d9fae7a0847597c8fedab4aeb4cdaf5"
+    config_hash: "4ca56f61f35f42b9374320ff9c0af9cf6603e8f5a55453f06030b6c26daf4a01"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Records 10,147,779 materialized pre-holdout bars, 1,980,928 raw
+      candidates, 43,526 exact same-key deduplicated candidates, 1,000 final
+      rows and zero holdout OHLCV rows.
+
+  - artifact_id: 15m-ma-launch-candidate1000-v1-source-audit
+    artifact_type: manifest
+    role: bounded_preholdout_source_read_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "582ea4dc7006581ccd3c3d10f982c50c1392111c"
+    source_path: experiments/active/exp-15m-ma-launch-candidate1000-v1/results/source_audit.json
+    sha256: "558bf047efdb0e1c206fedc42d6b9965354d4fb540d6cb9948deeab950b8af99"
+    size_bytes: 134376
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate1000-v1/results/source_audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d4f982919d9fae7a0847597c8fedab4aeb4cdaf5"
+    config_hash: "4ca56f61f35f42b9374320ff9c0af9cf6603e8f5a55453f06030b6c26daf4a01"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Per-source file identity, boundary timestamp inspection and materialized
+      range ledger for all 311 eligible filename symbols.
+
+  - artifact_id: 15m-ma-launch-candidate1000-v1-causality-audit
+    artifact_type: manifest
+    role: post_anchor_mutation_null_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "582ea4dc7006581ccd3c3d10f982c50c1392111c"
+    source_path: experiments/active/exp-15m-ma-launch-candidate1000-v1/results/causality_audit.json
+    sha256: "4064bd95d76314464c93a2583dcb613e45289279579c7b5d5358aa75f78a59bc"
+    size_bytes: 9443
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate1000-v1/results/causality_audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d4f982919d9fae7a0847597c8fedab4aeb4cdaf5"
+    config_hash: "4ca56f61f35f42b9374320ff9c0af9cf6603e8f5a55453f06030b6c26daf4a01"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Thirty-two deterministic candidates passed after every row later than t
+      had OHLC multiplied by seven and volume by thirteen; maximum causal
+      proposal difference was exactly zero.
+
+  - artifact_id: 15m-ma-launch-candidate1000-v1-prelaunch-audit
+    artifact_type: manifest
+    role: causal_anchor_timing_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "582ea4dc7006581ccd3c3d10f982c50c1392111c"
+    source_path: experiments/active/exp-15m-ma-launch-candidate1000-v1/results/prelaunch_audit.json
+    sha256: "3ad93efabb7148371ece052f2fac776e5adce75ceffbad2a3aed02daaf169dfc"
+    size_bytes: 388195
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate1000-v1/results/prelaunch_audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f30cf6deda4566812509dbe09251dd51e0feff53"
+    config_hash: "4ca56f61f35f42b9374320ff9c0af9cf6603e8f5a55453f06030b6c26daf4a01"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Reads t-12 through completed t only. It found 404/1,000 candidates had
+      already moved more than one ATR in the three bars before t and 673/1,000
+      had an anchor body above one ATR, blocking automatic training use.
+
+  - artifact_id: 15m-ma-launch-candidate1000-v1-verification-receipt
+    artifact_type: manifest
+    role: static_integrity_and_eligibility_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "582ea4dc7006581ccd3c3d10f982c50c1392111c"
+    source_path: experiments/active/exp-15m-ma-launch-candidate1000-v1/results/verification_receipt.json
+    sha256: "800e671413690613b2ff9bac190185dc1ee6b56180c06fd1ddffa89dbe2f7317"
+    size_bytes: 1549
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate1000-v1/results/verification_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "582ea4dc7006581ccd3c3d10f982c50c1392111c"
+    config_hash: "4ca56f61f35f42b9374320ff9c0af9cf6603e8f5a55453f06030b6c26daf4a01"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Verifies 1,000 unique events, paths, PNG hashes and 1280x770 dimensions,
+      quota invariants, false training/production eligibility and zero holdout
+      materialization. Browser file-URL automation was blocked and is recorded.
+
+  - artifact_id: 15m-ma-launch-candidate1000-v1-overview
+    artifact_type: report
+    role: owner_review_top40_contact_sheet
+    source_repo: darkforest-x/fable-trading
+    source_commit: "582ea4dc7006581ccd3c3d10f982c50c1392111c"
+    source_path: experiments/active/exp-15m-ma-launch-candidate1000-v1/results/overview_top40.png
+    sha256: "e83fac8921364fcadeaea4b7522a6f810a13474a5f414584b28706b9ac074911"
+    size_bytes: 1097347
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate1000-v1/results/overview_top40.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d4f982919d9fae7a0847597c8fedab4aeb4cdaf5"
+    config_hash: "4ca56f61f35f42b9374320ff9c0af9cf6603e8f5a55453f06030b6c26daf4a01"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Top twenty LONG plus top twenty SHORT contact sheet. Blue marks t; gray
+      marks the completed 12-bar selection window end.
+
+  - artifact_id: 15m-ma-launch-candidate1000-v1-gallery
+    artifact_type: report
+    role: local_owner_review_gallery_index
+    source_repo: darkforest-x/fable-trading
+    source_commit: "582ea4dc7006581ccd3c3d10f982c50c1392111c"
+    source_path: experiments/active/exp-15m-ma-launch-candidate1000-v1/results/index.html
+    sha256: "09bb81d4b7ba57c7660851b1c4bcee8c70b4f5c905ff252f729a0ea3add1a77b"
+    size_bytes: 402356
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate1000-v1/results/index.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d4f982919d9fae7a0847597c8fedab4aeb4cdaf5"
+    config_hash: "4ca56f61f35f42b9374320ff9c0af9cf6603e8f5a55453f06030b6c26daf4a01"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Tracked index for the 1,000 local review_charts PNG sidecars. The index is
+      not self-contained; every sidecar path and content hash is pinned by the
+      review manifest. The canonical HTML report embeds its seven key visuals.
+
+  - artifact_id: 15m-ma-launch-candidate1000-v1-report
+    artifact_type: report
+    role: canonical_preholdout_candidate_collection_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "582ea4dc7006581ccd3c3d10f982c50c1392111c"
+    source_path: analysis/p0_15m_ma_launch_candidate1000_20260825.md
+    sha256: "29debc75e259f3d78c490e865196dac925143414d45252191c294505fa1e2210"
+    size_bytes: 12010
+    storage_uri: "repo://analysis/p0_15m_ma_launch_candidate1000_20260825.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "582ea4dc7006581ccd3c3d10f982c50c1392111c"
+    config_hash: "4ca56f61f35f42b9374320ff9c0af9cf6603e8f5a55453f06030b6c26daf4a01"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Canonical answer-first report with data coverage, exact selection counts,
+      anchor-timing audit, non-economic null controls, risks and reproduction.
+
+  - artifact_id: 15m-ma-launch-candidate1000-v1-html
+    artifact_type: report
+    role: owner_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "582ea4dc7006581ccd3c3d10f982c50c1392111c"
+    source_path: analysis/html/p0_15m_ma_launch_candidate1000_20260825.html
+    sha256: "5b6278403f43fb07196635963a2443e8977271595eec01db9c1c083fa542ad8d"
+    size_bytes: 2556088
+    storage_uri: "repo://analysis/html/p0_15m_ma_launch_candidate1000_20260825.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "582ea4dc7006581ccd3c3d10f982c50c1392111c"
+    config_hash: "4ca56f61f35f42b9374320ff9c0af9cf6603e8f5a55453f06030b6c26daf4a01"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Self-contained browser-ready owner delivery with the Top-40 contact sheet
+      and rank 1/250/500 samples for both directions embedded as data URIs.

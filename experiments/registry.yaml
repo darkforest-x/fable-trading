@@ -1120,7 +1120,7 @@ experiments:
 
   - experiment_id: exp-15m-ma-launch-candidate1000-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "a1656ece2487e59e3664bace80f42253e9a0be3a"
+    source_commit: "582ea4dc7006581ccd3c3d10f982c50c1392111c"
     status: active
     question: >-
       Can the inherited six-MA dense-start morphology produce a balanced,
@@ -1132,19 +1132,35 @@ experiments:
       gate, 12-bar completed-path ranking, 6 review-only bars, 224-bar
       same-symbol/side deduplication and diversity quotas are frozen
     result: >-
-      preregistered_pending_single_official_scan; builder, causal boundary
-      reader, exact 1,000-row fail-closed selection and future-mutation null
-      landed before any candidate scan
+      success_pending_owner_review: the only official scan collected exactly
+      500 LONG plus 500 SHORT PENDING candidates across 212 unique symbols,
+      rendered 1,000 review PNGs, materialized 10,147,779 pre-holdout bars and
+      zero holdout OHLCV rows. A causal prelaunch audit found 40.4% already
+      moved more than 1 ATR in the three bars before t and 67.3% had an anchor
+      body above 1 ATR, so this is a review pool rather than a training set.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
+    canonical_report: analysis/p0_15m_ma_launch_candidate1000_20260825.md
     artifacts:
       - 15m-ma-launch-candidate1000-v1-prereg
+      - 15m-ma-launch-candidate1000-v1-manifest
+      - 15m-ma-launch-candidate1000-v1-scan-summary
+      - 15m-ma-launch-candidate1000-v1-source-audit
+      - 15m-ma-launch-candidate1000-v1-causality-audit
+      - 15m-ma-launch-candidate1000-v1-prelaunch-audit
+      - 15m-ma-launch-candidate1000-v1-verification-receipt
+      - 15m-ma-launch-candidate1000-v1-overview
+      - 15m-ma-launch-candidate1000-v1-gallery
+      - 15m-ma-launch-candidate1000-v1-report
+      - 15m-ma-launch-candidate1000-v1-html
     reuse_allowed: false
     notes: >-
-      All rows will remain PENDING and retrospective completed-path ranking is
-      not a live-signal or economic claim. Existing Owner label manifests are
-      intentionally not read because they may contain post-boundary metadata;
-      lineage deduplication is deferred to a separately authorized dataset
-      construction stage. No training, promote, forward, deployment or order
-      action is authorized.
+      All rows remain PENDING and retrospective completed-path ranking is not a
+      live-signal or economic claim. The future-score component saturated at
+      one for 780/1,000 selected rows, so it has limited resolution inside this
+      pool and was not retuned after inspection. Existing Owner label manifests
+      were intentionally not read because they may contain post-boundary
+      metadata; lineage deduplication is deferred to a separately authorized
+      dataset-construction stage. No training, promote, forward, deployment or
+      order action occurred.
