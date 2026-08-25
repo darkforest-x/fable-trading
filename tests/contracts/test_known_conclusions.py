@@ -178,9 +178,13 @@ def test_the_one_holdout_consumption_is_still_recorded(registries):
     assert "31.9%" in row.result
 
 
-def test_no_other_experiment_claims_a_holdout_read(registries):
+def test_every_authorized_holdout_consumer_remains_explicit(registries):
     consumers = {e.experiment_id for e in registries.experiments if e.holdout_consumed}
-    assert consumers == {"exp-yoyo-trading-fixed-w10-classifier-holdout3d"}
+    assert consumers == {
+        "exp-btc-4h-ma-launch-similarity-v1",
+        "exp-pine-eth-15m-v1",
+        "exp-yoyo-trading-fixed-w10-classifier-holdout3d",
+    }
 
 
 # -- the historical tree itself -------------------------------------------
