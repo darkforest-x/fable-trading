@@ -182,6 +182,7 @@ def test_every_authorized_holdout_consumer_remains_explicit(registries):
     consumers = {e.experiment_id for e in registries.experiments if e.holdout_consumed}
     assert consumers == {
         "exp-btc-4h-ma-launch-similarity-v1",
+        "exp-btc-4h-ma-launch-similarity-top20-v2",
         "exp-pine-eth-15m-v1",
         "exp-yoyo-trading-fixed-w10-classifier-holdout3d",
     }
