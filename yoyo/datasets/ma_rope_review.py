@@ -395,7 +395,7 @@ def materialize_hires_review_images(
     return {
         "items": page_items,
         "count": len(page_items),
-        "set_sha256": hashlib.sha256("\n".join(receipts).encode()).hexdigest(),
+        "set_sha256": hashlib.sha256("\n".join(sorted(receipts)).encode()).hexdigest(),
         "canvas": list(HIRES_CANVAS),
         "holdout_read": False,
     }

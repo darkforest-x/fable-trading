@@ -148,18 +148,30 @@ def test_materialize_hires_review_image_recovers_lossless_bgr_canvas(tmp_path: P
     pixels = np.zeros((742, 1280, 3), dtype=np.uint8)
     pixels[0, 0] = [11, 22, 33]
     np.save(source / "sample.npy", pixels, allow_pickle=False)
+    np.save(source / "sample2.npy", pixels + 1, allow_pickle=False)
+    items = [
+        {"review_id": "r1", "sample_id": "sample__b0", "image": "fallback.jpg"},
+        {"review_id": "r2", "sample_id": "sample2__b0", "image": "fallback2.jpg"},
+    ]
     result = materialize_hires_review_images(
-        [{"review_id": "r1", "sample_id": "sample__b0", "image": "fallback.jpg"}],
+        items,
         public_dir=tmp_path / "public",
         source_root=tmp_path / "source",
     )
-    assert result["count"] == 1
+    assert result["count"] == 2
     assert result["canvas"] == [1280, 742]
     assert result["holdout_read"] is False
     assert result["items"][0]["hires_image"] == "hires/r1.png"
     with Image.open(tmp_path / "public" / "hires" / "r1.png") as image:
         assert image.size == (1280, 742)
         assert image.getpixel((0, 0)) == (33, 22, 11)
+
+    second = materialize_hires_review_images(
+        list(reversed(items)),
+        public_dir=tmp_path / "public-second",
+        source_root=tmp_path / "source",
+    )
+    assert second["set_sha256"] == result["set_sha256"]
 
 
 def _write_json(path: Path, payload: object) -> None:
