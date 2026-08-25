@@ -1164,3 +1164,59 @@ experiments:
       metadata; lineage deduplication is deferred to a separately authorized
       dataset-construction stage. No training, promote, forward, deployment or
       order action occurred.
+
+  - experiment_id: exp-15m-ma-launch-candidate9000-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7bd8eea53b2598dd42061d7bc2048af56d939958"
+    status: active
+    question: >-
+      Can the frozen six-MA dense-start morphology add 9,000 balanced,
+      diverse, non-overlapping pre-holdout 15-minute completed-shape
+      candidates to the existing 1,000-candidate review pool without changing
+      what qualifies as a candidate?
+    single_variable: >-
+      Owner-authorized expansion bundle: add 4,500 LONG plus 4,500 SHORT,
+      extend the scan start from 2024-05-04 to 2022-01-03, and display a
+      review-only marker at t-3 while preserving original selection t;
+      dense_l1 morphology, completed-path scoring, 224-bar exclusion and
+      candidate-not-label semantics remain frozen
+    result: >-
+      candidate_collection_succeeded_but_training_gate_blocked: the official
+      run added exactly 4,500 LONG plus 4,500 SHORT PENDING candidates, rendered
+      9,000 review PNGs across 228 symbols, and formed a 10,000-row union pool
+      with zero identity overlap, minimum same-symbol/side gap 225 bars and zero
+      holdout OHLCV. Static integrity passed 9,000/9,000 and the causal future
+      mutation null passed 32/32 with maximum difference zero. However 2,358
+      rows had already moved above 1 ATR between t-3 and t and 4,925 had a t
+      body above 1 ATR; no row has Owner category or geometry confirmation, so
+      zero labels, negatives, training images, epochs or weights were created.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_15m_ma_launch_candidate9000_20260826.md
+    artifacts:
+      - 15m-ma-launch-candidate9000-v1-prereg
+      - 15m-ma-launch-candidate9000-v1-manifest
+      - 15m-ma-launch-candidate9000-v1-scan-summary
+      - 15m-ma-launch-candidate9000-v1-source-audit
+      - 15m-ma-launch-candidate9000-v1-causality-audit
+      - 15m-ma-launch-candidate9000-v1-prelaunch-audit
+      - 15m-ma-launch-candidate9000-v1-verification-receipt
+      - 15m-ma-launch-candidate9000-v1-training-gate
+      - 15m-ma-launch-candidate9000-v1-overview
+      - 15m-ma-launch-candidate9000-v1-gallery
+      - 15m-ma-launch-candidate9000-v1-report
+      - 15m-ma-launch-candidate9000-v1-html
+    reuse_allowed: false
+    notes: >-
+      The blue line is a t-3 review annotation and the orange dash preserves
+      selection t; 9,000/9,000 rows explicitly say the review marker is not a
+      training label. The Local Signal V2 protocol currently confirms only the
+      SHORT reference, so LONG mirror candidates are neither positives nor
+      negatives. The prior small-window contract was recovered as W12-19
+      baseline / approximately 14-22 target context, 4-7 core bars, 3 preferred
+      and 5 maximum confirmation bars, variable position, and 3:1 train
+      negatives, but it was not applied without Gold geometry. The RTX 3060
+      environment at 192.168.1.5 passed a read-only version/CUDA/NMS/hash check;
+      no dataset was uploaded and no training, promote, forward, deployment or
+      order action occurred.

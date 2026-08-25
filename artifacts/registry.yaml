@@ -2090,3 +2090,243 @@ artifacts:
     notes: >-
       Self-contained browser-ready owner delivery with the Top-40 contact sheet
       and rank 1/250/500 samples for both directions embedded as data URIs.
+
+  # ---- pre-holdout 15m candidate-pool expansion --------------------------
+  - artifact_id: 15m-ma-launch-candidate9000-v1-prereg
+    artifact_type: config
+    role: frozen_preholdout_15m_candidate_expansion_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7802d94c379c3ceca702a606c26217a6a20b5bd7"
+    source_path: experiments/active/exp-15m-ma-launch-candidate9000-v1/preregistration.json
+    sha256: "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26"
+    size_bytes: 8816
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate9000-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7802d94c379c3ceca702a606c26217a6a20b5bd7"
+    config_hash: "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Frozen before the official expansion scan. Authorizes 4,500 additions
+      per side, a 2022-01-03 scan start and a review-only t-3 marker while
+      preserving the original candidate anchor and zero training eligibility.
+
+  - artifact_id: 15m-ma-launch-candidate9000-v1-manifest
+    artifact_type: manifest
+    role: owner_review_candidate_and_chart_hash_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7bd8eea53b2598dd42061d7bc2048af56d939958"
+    source_path: experiments/active/exp-15m-ma-launch-candidate9000-v1/results/review_manifest.jsonl
+    sha256: "3b4faa197ebd08bfd24ea662c30b8360200f29e172dbc5d68639eb880a71d731"
+    size_bytes: 14516217
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate9000-v1/results/review_manifest.jsonl"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7802d94c379c3ceca702a606c26217a6a20b5bd7"
+    config_hash: "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Exactly 9,000 PENDING rows, 4,500 per side, with every local review PNG
+      hash and explicit t-3 review-marker metadata. It inventories 9,000 local
+      PNG sidecars totaling 1,393,089,371 bytes and is not an Owner label set.
+
+  - artifact_id: 15m-ma-launch-candidate9000-v1-scan-summary
+    artifact_type: manifest
+    role: preholdout_completed_candidate_expansion_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7bd8eea53b2598dd42061d7bc2048af56d939958"
+    source_path: experiments/active/exp-15m-ma-launch-candidate9000-v1/results/scan_summary.json
+    sha256: "91521e97e271a562fc7ef31297757f3180a7d839446e09b73e1ae360835907e9"
+    size_bytes: 12131
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate9000-v1/results/scan_summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7802d94c379c3ceca702a606c26217a6a20b5bd7"
+    config_hash: "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Records 10,147,779 materialized pre-holdout bars, 2,642,708 raw
+      candidates, 57,744 exact same-key deduplicated candidates, 9,000 final
+      additions and zero holdout OHLCV rows.
+
+  - artifact_id: 15m-ma-launch-candidate9000-v1-source-audit
+    artifact_type: manifest
+    role: bounded_preholdout_source_read_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7bd8eea53b2598dd42061d7bc2048af56d939958"
+    source_path: experiments/active/exp-15m-ma-launch-candidate9000-v1/results/source_audit.json
+    sha256: "558bf047efdb0e1c206fedc42d6b9965354d4fb540d6cb9948deeab950b8af99"
+    size_bytes: 134376
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate9000-v1/results/source_audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7802d94c379c3ceca702a606c26217a6a20b5bd7"
+    config_hash: "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Per-source file identity, bounded prefix, boundary timestamp and
+      materialized range ledger for all 311 eligible filename symbols.
+
+  - artifact_id: 15m-ma-launch-candidate9000-v1-causality-audit
+    artifact_type: manifest
+    role: post_anchor_mutation_null_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7bd8eea53b2598dd42061d7bc2048af56d939958"
+    source_path: experiments/active/exp-15m-ma-launch-candidate9000-v1/results/causality_audit.json
+    sha256: "7428d3157a66937d80723d0d4064327774d8378413978970fbcf2dc19a786ec2"
+    size_bytes: 9439
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate9000-v1/results/causality_audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7802d94c379c3ceca702a606c26217a6a20b5bd7"
+    config_hash: "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Thirty-two deterministic candidates passed after every row later than t
+      had OHLC multiplied by seven and volume by thirteen; maximum causal
+      proposal difference was exactly zero.
+
+  - artifact_id: 15m-ma-launch-candidate9000-v1-prelaunch-audit
+    artifact_type: manifest
+    role: causal_anchor_timing_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7bd8eea53b2598dd42061d7bc2048af56d939958"
+    source_path: experiments/active/exp-15m-ma-launch-candidate9000-v1/results/prelaunch_audit.json
+    sha256: "cf349e2a996a8431929c7b6dcdad273657daaf7eb121df61b3a2fd725e11a00c"
+    size_bytes: 3489382
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate9000-v1/results/prelaunch_audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7802d94c379c3ceca702a606c26217a6a20b5bd7"
+    config_hash: "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Reads t-12 through completed t only. It found 2,358/9,000 candidates had
+      already moved above one ATR in the three bars before t and 4,925/9,000
+      had an anchor body above one ATR, blocking automatic training use.
+
+  - artifact_id: 15m-ma-launch-candidate9000-v1-verification-receipt
+    artifact_type: manifest
+    role: static_integrity_marker_and_eligibility_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7bd8eea53b2598dd42061d7bc2048af56d939958"
+    source_path: experiments/active/exp-15m-ma-launch-candidate9000-v1/results/verification_receipt.json
+    sha256: "380749c258de5a93f6f1ed93c3a67a80cffc41ed380d57e46f1b9540f7c6b1ce"
+    size_bytes: 2695
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate9000-v1/results/verification_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7169521a0d9e6729bc8cb2daeeaa91f16333a7da"
+    config_hash: "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Rehashed and decoded all 9,000 PNGs, checked exact path parity, contiguous
+      ranks, t-3 equals minus 45 minutes, union-pool quotas, PENDING eligibility
+      and 32-row causality. Every check passed; review-marker training labels 0.
+
+  - artifact_id: 15m-ma-launch-candidate9000-v1-training-gate
+    artifact_type: manifest
+    role: gold_dataset_and_gpu_training_block_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7bd8eea53b2598dd42061d7bc2048af56d939958"
+    source_path: experiments/active/exp-15m-ma-launch-candidate9000-v1/results/training_gate_receipt.json
+    sha256: "7de4f204fc364f0093cff0b52839470e092bb7f048814d7b76047e2f2f78135c"
+    size_bytes: 6167
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate9000-v1/results/training_gate_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7bd8eea53b2598dd42061d7bc2048af56d939958"
+    config_hash: "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Records zero sample-confirmed classes, boxes, labels, negatives, images,
+      epochs and weights; recovers the W12-19 / 4-7-bar / variable-position /
+      3:1-negative lineage and records a passed read-only RTX 3060 environment
+      check without claiming authorization or starting training.
+
+  - artifact_id: 15m-ma-launch-candidate9000-v1-overview
+    artifact_type: report
+    role: owner_review_top40_contact_sheet
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7bd8eea53b2598dd42061d7bc2048af56d939958"
+    source_path: experiments/active/exp-15m-ma-launch-candidate9000-v1/results/overview_top40.png
+    sha256: "b822ed9e73d12643fd44f99169fbfed52e8e585be0c85c79f8a4f1ce8805642c"
+    size_bytes: 1158676
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate9000-v1/results/overview_top40.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7802d94c379c3ceca702a606c26217a6a20b5bd7"
+    config_hash: "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Top twenty LONG plus top twenty SHORT contact sheet. Blue marks the
+      review-only t-3 position, orange dash preserves t and gray marks t+11.
+
+  - artifact_id: 15m-ma-launch-candidate9000-v1-gallery
+    artifact_type: report
+    role: local_owner_review_gallery_index
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7bd8eea53b2598dd42061d7bc2048af56d939958"
+    source_path: experiments/active/exp-15m-ma-launch-candidate9000-v1/results/index.html
+    sha256: "903e31b61ab447cdc9b9f7aa861f6e26a47e981ede5c4c3c70dd6c748883eae5"
+    size_bytes: 3619096
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-candidate9000-v1/results/index.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7802d94c379c3ceca702a606c26217a6a20b5bd7"
+    config_hash: "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Tracked searchable index for 9,000 local review PNG sidecars. Every
+      sidecar path and hash is pinned by the candidate manifest; the canonical
+      HTML report embeds seven key visuals.
+
+  - artifact_id: 15m-ma-launch-candidate9000-v1-report
+    artifact_type: report
+    role: canonical_preholdout_candidate_expansion_and_training_gate_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7bd8eea53b2598dd42061d7bc2048af56d939958"
+    source_path: analysis/p0_15m_ma_launch_candidate9000_20260826.md
+    sha256: "9f1fc4be564fffe756d5e470834adf544193f8274f9c972a0cbea296fd7ef04d"
+    size_bytes: 14910
+    storage_uri: "repo://analysis/p0_15m_ma_launch_candidate9000_20260826.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7bd8eea53b2598dd42061d7bc2048af56d939958"
+    config_hash: "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Answer-first report with exact collection counts, t-3 semantics, timing
+      audit, strict non-economic nulls, recovered training contract, negative
+      blocker, RTX 3060 check, risks and reproducible commands.
+
+  - artifact_id: 15m-ma-launch-candidate9000-v1-html
+    artifact_type: report
+    role: owner_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7bd8eea53b2598dd42061d7bc2048af56d939958"
+    source_path: analysis/html/p0_15m_ma_launch_candidate9000_20260826.html
+    sha256: "676dde2032d92cd37b68d442c877830f3cbcc926547654fd04014b3f35d84626"
+    size_bytes: 2816682
+    storage_uri: "repo://analysis/html/p0_15m_ma_launch_candidate9000_20260826.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7bd8eea53b2598dd42061d7bc2048af56d939958"
+    config_hash: "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Self-contained owner delivery with seven embedded key visuals and seven
+      result/contract tables. Browser file-URL QA was policy-blocked and is
+      disclosed; static HTML structure and source-render visuals passed.
