@@ -1037,3 +1037,26 @@ experiments:
       thresholds, distance weights, time-warp radius, deduplication and
       phase-scramble null were frozen before that scan; 36,720 holdout 4h
       symbol-rows were read under configuration consumption #1.
+
+  - experiment_id: exp-btc-4h-causal-pine-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c578136739023879d4ed8175af37a36328e135eb"
+    status: active
+    question: >-
+      Can the observable prefix of the Owner-supplied BTC 4h six-MA compression
+      launch be expressed as a non-repainting Pine v6 indicator that alerts only
+      on a confirmed current bar and never reads beyond tip/tip-1/tip-2?
+    single_variable: >-
+      candidate direction only: direct LONG versus exact signed SHORT mirror;
+      inherited structural gates, causal lag set, early-floor arithmetic,
+      diagnostic weights, deduplication and confirmed-bar semantics stay fixed
+    result: preregistered_before_implementation_and_compile
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: >-
+      This is the causal-prefix sibling of the completed-shape retrieval, not a
+      rename of its 12-future-bar result. The current task permits source and
+      official compiler validation only: no historical signal inspection,
+      holdout scoring, order logic, webhook, forward integration or deployment.
