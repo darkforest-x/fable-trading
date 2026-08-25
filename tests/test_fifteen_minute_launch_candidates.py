@@ -154,6 +154,30 @@ def test_dedupe_and_balanced_selection_obey_frozen_quotas() -> None:
     assert [row["rank"] for row in selected["SHORT"]] == [1, 2]
 
 
+def test_per_symbol_streaming_dedupe_is_identical_to_one_global_batch() -> None:
+    spec = replace(CandidateSpec(), dedupe_bars=4)
+    rows = [
+        candidate("a1", "LONG", "AAA", "2025-01-01T00:00:00Z", 0.90),
+        candidate("a2", "LONG", "AAA", "2025-01-01T00:30:00Z", 0.80),
+        candidate("a3", "LONG", "AAA", "2025-01-01T03:00:00Z", 0.70),
+        candidate("b1", "LONG", "BBB", "2025-01-01T00:15:00Z", 0.95),
+        candidate("b2", "LONG", "BBB", "2025-01-01T00:45:00Z", 0.85),
+        candidate("b3", "SHORT", "BBB", "2025-01-01T00:45:00Z", 0.75),
+    ]
+    global_ids = {
+        str(row["event_id"]) for row in deduplicate_candidates(rows, spec=spec)
+    }
+    streamed: list[dict[str, object]] = []
+    for symbol in ("AAA", "BBB"):
+        streamed.extend(
+            deduplicate_candidates(
+                [row for row in rows if row["symbol"] == symbol], spec=spec
+            )
+        )
+    streamed_ids = {str(row["event_id"]) for row in streamed}
+    assert streamed_ids == global_ids
+
+
 def test_selection_fails_closed_when_one_side_is_short() -> None:
     spec = replace(CandidateSpec(), target_per_side=2)
     rows = [

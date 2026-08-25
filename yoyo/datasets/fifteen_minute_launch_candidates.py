@@ -18,6 +18,7 @@ import html
 import json
 import math
 import re
+from bisect import bisect_left
 from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -261,22 +262,40 @@ def read_preholdout_prefix(
             raise CandidateCollectionError(f"empty source file: {path}")
         header = next(csv.reader([header_line]))
         indexes = {name: i for i, name in enumerate(header)}
-        time_name = "open_time" if "open_time" in indexes else "ts" if "ts" in indexes else None
+        # Prefer epoch milliseconds when both representations exist.  This
+        # lets the hot loop compare an integer boundary and vectorize the
+        # approved-prefix conversion after reading, while still never touching
+        # boundary-row OHLCV cells.
+        time_name = (
+            "ts"
+            if "ts" in indexes
+            else "open_time"
+            if "open_time" in indexes
+            else None
+        )
         missing = [name for name in ("open", "high", "low", "close", "volume") if name not in indexes]
         if time_name is None or missing:
             raise CandidateCollectionError(f"source schema missing time/OHLCV: {path} {missing}")
         digest.update(header_line.encode("utf-8"))
+        is_epoch_ms = time_name == "ts"
+        boundary_epoch_ms = int(end_exclusive.value // 1_000_000)
         for raw_line in handle:
             values = next(csv.reader([raw_line]))
             if len(values) != len(header):
                 raise CandidateCollectionError(f"malformed CSV row in {path}")
-            stamp = _parse_source_time(values[indexes[time_name]], is_epoch_ms=time_name == "ts")
-            if stamp >= end_exclusive:
+            raw_time = values[indexes[time_name]]
+            if is_epoch_ms:
+                approved_time: Any = int(raw_time)
+                at_or_after_boundary = approved_time >= boundary_epoch_ms
+            else:
+                approved_time = _parse_source_time(raw_time, is_epoch_ms=False)
+                at_or_after_boundary = approved_time >= end_exclusive
+            if at_or_after_boundary:
                 boundary_timestamps_inspected += 1
                 break
             rows.append(
                 {
-                    "open_time": stamp,
+                    "open_time": approved_time,
                     "open": float(values[indexes["open"]]),
                     "high": float(values[indexes["high"]]),
                     "low": float(values[indexes["low"]]),
@@ -287,6 +306,8 @@ def read_preholdout_prefix(
             digest.update(raw_line.encode("utf-8"))
 
     frame = pd.DataFrame(rows, columns=OHLCV)
+    if is_epoch_ms and not frame.empty:
+        frame["open_time"] = pd.to_datetime(frame["open_time"], unit="ms", utc=True)
     audit: dict[str, Any] = {
         "source_path": str(path),
         "bounded_prefix_sha256": digest.hexdigest(),
@@ -478,9 +499,12 @@ def deduplicate_candidates(
     for row in ordered:
         key = (str(row["symbol"]), str(row["direction"]))
         stamp = utc(row["anchor_time"])
-        if any(abs(stamp - prior) <= spec.dedupe_timedelta for prior in occupied[key]):
+        stamps = occupied[key]
+        insert_at = bisect_left(stamps, stamp)
+        neighbors = stamps[max(0, insert_at - 1) : insert_at + 1]
+        if any(abs(stamp - prior) <= spec.dedupe_timedelta for prior in neighbors):
             continue
-        occupied[key].append(stamp)
+        stamps.insert(insert_at, stamp)
         kept.append(row)
     return kept
 

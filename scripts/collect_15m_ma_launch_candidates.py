@@ -294,7 +294,7 @@ def main() -> int:
             continue
         materialized_symbols += 1
         relative_source = Path(relative_to_root(source_path))
-        symbol_before = len(candidates)
+        symbol_candidates: list[dict[str, Any]] = []
         for _, segment in frame.groupby("_segment_id", sort=True):
             rows, counts = collect_segment_candidates(
                 segment,
@@ -303,14 +303,17 @@ def main() -> int:
                 profile=profile,
                 spec=spec,
             )
-            candidates.extend(rows)
+            symbol_candidates.extend(rows)
             merge_counts(scan_counts, counts)
             scan_counts["segments_scanned"] += 1
+        symbol_deduplicated = deduplicate_candidates(symbol_candidates, spec=spec)
+        candidates.extend(symbol_deduplicated)
+        scan_counts["retained_after_per_symbol_dedupe"] += len(symbol_deduplicated)
         if number == 1 or number % 10 == 0 or number == total:
             print(
                 f"scan {number:03d}/{total} {symbol:<22} "
-                f"rows={len(frame):>7} candidates+={len(candidates)-symbol_before:>4} "
-                f"total={len(candidates):>7}",
+                f"rows={len(frame):>7} raw+={len(symbol_candidates):>5} "
+                f"dedup+={len(symbol_deduplicated):>4} retained={len(candidates):>6}",
                 flush=True,
             )
 
@@ -418,12 +421,15 @@ def main() -> int:
         },
         "scan": {
             **dict(sorted(scan_counts.items())),
-            "eligible_before_dedupe_total": len(candidates),
-            "eligible_before_dedupe_long": sum(
-                row["direction"] == "LONG" for row in candidates
+            "eligible_before_dedupe_total": int(
+                scan_counts["long_eligible_before_dedupe"]
+                + scan_counts["short_eligible_before_dedupe"]
             ),
-            "eligible_before_dedupe_short": sum(
-                row["direction"] == "SHORT" for row in candidates
+            "eligible_before_dedupe_long": int(
+                scan_counts["long_eligible_before_dedupe"]
+            ),
+            "eligible_before_dedupe_short": int(
+                scan_counts["short_eligible_before_dedupe"]
             ),
             "deduplicated_total": len(deduplicated),
             "deduplicated_long": int(deduplicated_counts["LONG"]),
