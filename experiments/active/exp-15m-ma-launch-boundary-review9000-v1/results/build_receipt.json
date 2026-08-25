@@ -1,0 +1,57 @@
+{
+  "builder_commit": "f117631dd53c5f42ce43055156cef01a8ec85cb5",
+  "counts": {
+    "answers_preselected": 0,
+    "models_trained": 0,
+    "negatives_generated": 0,
+    "side_counts": {
+      "LONG": 4500,
+      "SHORT": 4500
+    },
+    "source_rows": 9000,
+    "training_images_generated": 0,
+    "unique_event_ids": 9000,
+    "yolo_labels_generated": 0
+  },
+  "eligibility": {
+    "long_direction_status": "mirror_unconfirmed",
+    "production_eligible": false,
+    "training_eligible": false
+  },
+  "errors": [],
+  "experiment_id": "exp-15m-ma-launch-boundary-review9000-v1",
+  "generated_at": "2026-08-25T19:19:02.402895+00:00",
+  "holdout": {
+    "ohlcv_rows_materialized": 0,
+    "read": false,
+    "source_ohlcv_files_opened": 0
+  },
+  "image_audit": {
+    "bytes_rehashed": 1393089371,
+    "files_rehashed": 9000,
+    "hash_mismatches": 0
+  },
+  "inputs": {
+    "preregistration_path": "experiments/active/exp-15m-ma-launch-boundary-review9000-v1/preregistration.json",
+    "preregistration_sha256": "3d90f2f8da67a00c0bfb0e1653b8f5b6b19b6f925bc3b16aa4b84a681e92ad87",
+    "protocol_path": "docs/protocol/local_signal_v2.md",
+    "protocol_sha256": "9f81dbc867fca9b772d6e2cbd0fe0ecb2d451e1b69652057208f68aad3f09e3e",
+    "source_manifest_path": "experiments/active/exp-15m-ma-launch-candidate9000-v1/results/review_manifest.jsonl",
+    "source_manifest_sha256": "3b4faa197ebd08bfd24ea662c30b8360200f29e172dbc5d68639eb880a71d731",
+    "training_gate_receipt_sha256": "7de4f204fc364f0093cff0b52839470e092bb7f048814d7b76047e2f2f78135c"
+  },
+  "remote": {
+    "training_started": false,
+    "writes": 0
+  },
+  "review_surface": {
+    "bulk_accept": false,
+    "html_path": "experiments/active/exp-15m-ma-launch-boundary-review9000-v1/results/public/index.html",
+    "html_sha256": "97f11c70d5182892232ce19c02dccb9d5518377c6165b4bc9c8984bdc7cb8c3a",
+    "html_size_bytes": 3231794,
+    "json_import_export": true,
+    "keep_requires_explicit_geometry": true,
+    "writes_repository_answers": false
+  },
+  "status": "review_surface_ready_pending_owner_answers"
+}

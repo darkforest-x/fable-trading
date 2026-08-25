@@ -1,0 +1,83 @@
+{
+  "checked_at": "2026-08-26T03:20:30+08:00",
+  "experiment_id": "exp-15m-ma-launch-boundary-review9000-v1",
+  "status": "passed_pending_owner_answers",
+  "static_checks": {
+    "embedded_items": 9000,
+    "unique_event_ids": 9000,
+    "directions": ["LONG", "SHORT"],
+    "representative_relative_image_paths_resolved": 4,
+    "javascript_node_check": "passed",
+    "answers_preselected": 0
+  },
+  "real_browser": {
+    "tool": "playwright-cli headed Chromium",
+    "url": "http://127.0.0.1:8769/exp-15m-ma-launch-boundary-review9000-v1/results/public/index.html",
+    "document_root": "experiments/active",
+    "page_title": "15m 候选逐样本边界审核",
+    "page_http_status": 200,
+    "candidate_image_http_status": 200,
+    "console_errors": 0,
+    "initial_progress": "0/9000",
+    "geometry_scenario": {
+      "confirmation_bars": 3,
+      "core_width_bars": 5,
+      "input_window_bars": 18,
+      "input_indices": [13, 30],
+      "core_indices": [23, 27],
+      "box_center_ratio": 0.705882,
+      "overlay_visible": true
+    },
+    "pending_filter_auto_advance": {
+      "before_global_index": 4501,
+      "after_global_index": 4502,
+      "skipped_rows": 0,
+      "passed": true
+    },
+    "undo": {
+      "progress_after_keep": "1/9000",
+      "progress_after_undo": "0/9000",
+      "passed": true
+    },
+    "repository_answer_files_written": 0
+  },
+  "synthetic_summarizer": {
+    "synthetic_answers": 5,
+    "geometry_triples": 5,
+    "input_lengths": [14, 16, 18, 20, 22],
+    "core_widths": [4, 5, 6, 7],
+    "confirmation_delays": [3, 4, 5],
+    "allow_incomplete_status": "incomplete_validated",
+    "strict_incomplete_exit_code": 1,
+    "strict_incomplete_error": "review is incomplete: 5/9000",
+    "training_images": 0,
+    "yolo_labels": 0,
+    "negatives": 0,
+    "models": 0,
+    "training_eligible_true": 0,
+    "production_eligible_true": 0,
+    "synthetic_files_retained_in_repository": 0
+  },
+  "report_html": {
+    "path": "analysis/html/p1_15m_ma_launch_boundary_review9000_20260826.html",
+    "sha256": "450807989422d5f3d32a4c31f1bf7a5971123e4cac68c6f2d00845fc02c2026f",
+    "size_bytes": 1558773,
+    "desktop_viewport": [
+      1440,
+      1000
+    ],
+    "narrow_viewport": [
+      390,
+      844
+    ],
+    "title_present": true,
+    "embedded_overview_visible": true,
+    "tables_readable": true,
+    "console_errors": 0,
+    "browser_http_status": 200
+  },
+  "holdout": {
+    "read": false,
+    "ohlcv_rows_materialized": 0
+  }
+}
