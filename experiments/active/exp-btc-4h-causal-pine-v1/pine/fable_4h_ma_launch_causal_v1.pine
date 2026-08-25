@@ -1,0 +1,365 @@
+//@version=6
+// Fable 4H MA Launch Causal V1.
+// Research-only indicator. It never places orders and never back-plots a signal.
+// Every candidate uses 30 completed formation bars plus only the current closed
+// bar and, at most, the preceding two release bars. No post-decision bar is read.
+indicator(
+     "Fable 4H MA Launch Causal V1 · Research Only",
+     shorttitle = "Fable 4H Launch Causal V1",
+     overlay = true,
+     max_labels_count = 300)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Frozen contract. Changing a constant creates a different research version.
+// The structural values come directly from exp-btc-4h-ma-launch-similarity-v1.
+// Early movement floors are deterministic pro-rata prefixes of that completed-
+// shape contract; they were frozen before this source was implemented.
+// ─────────────────────────────────────────────────────────────────────────────
+const int TIMEFRAME_SECONDS = 14400
+const int PRE_BARS = 30
+const int ATR_LEN = 14
+const int SAME_SIDE_DEDUPE_BARS = 3
+
+const float MA_SPREAD_BEFORE_MAX_PCT = 1.3330854020159224
+const float ANCHOR_TO_BUNDLE_MAX_PCT = 2.0
+const float PRE_RANGE_MAX_PCT = 8.0
+const float FIRST3_CLOSE_MIN_PCT = 1.0835936596902802
+const float RELEASE12_CLOSE_MIN_PCT = 4.359047154607722
+const float RELEASE12_FAVORABLE_ATR_MIN = 5.046559476334984
+
+const float WEIGHT_CLOSE_PROGRESS = 0.40
+const float WEIGHT_MA_RELEASE = 0.20
+const float WEIGHT_COMPRESSION = 0.15
+const float WEIGHT_BODY_ATR = 0.10
+const float WEIGHT_VOLUME = 0.15
+
+string GROUP_SCOPE = "1 · Frozen scope"
+string GROUP_DISPLAY = "2 · Display"
+string sideMode = input.string(
+     "Both", "Direction", options = ["Both", "Long only", "Short only"],
+     group = GROUP_SCOPE)
+bool showMAs = input.bool(true, "Show SMA/EMA 20·60·120", group = GROUP_DISPLAY)
+bool showSignals = input.bool(true, "Show confirmed candidates", group = GROUP_DISPLAY)
+bool showLabels = input.bool(true, "Show score and anchor age", group = GROUP_DISPLAY)
+bool showHud = input.bool(true, "Show research HUD", group = GROUP_DISPLAY)
+
+f_clamp01(float value) =>
+    math.max(0.0, math.min(1.0, nz(value, 0.0)))
+
+f_minMovePct(int observedBars) =>
+    float perBar = math.max(
+         FIRST3_CLOSE_MIN_PCT / 3.0,
+         RELEASE12_CLOSE_MIN_PCT / 12.0)
+    observedBars * perBar
+
+f_minFavorableAtr(int observedBars) =>
+    observedBars * RELEASE12_FAVORABLE_ATR_MIN / 12.0
+
+f_signedMovePct(int direction, float currentClose, float anchorOpen) =>
+    direction * 100.0 * math.log(currentClose / anchorOpen)
+
+f_favorableAtr(
+     int direction,
+     float anchorOpen,
+     float releaseHigh,
+     float releaseLow,
+     float atrBefore) =>
+    direction == 1 ?
+     (releaseHigh - anchorOpen) / atrBefore :
+     (anchorOpen - releaseLow) / atrBefore
+
+f_candidatePass(
+     int direction,
+     int observedBars,
+     float maSpreadBeforePct,
+     float anchorToBundlePct,
+     float preRangePct,
+     float signedMovePct,
+     float favorableAtr,
+     float currentClose,
+     float ropeUpper,
+     float ropeLower) =>
+    bool ready =
+         observedBars >= 1 and observedBars <= 3 and
+         not na(maSpreadBeforePct) and
+         not na(anchorToBundlePct) and
+         not na(preRangePct) and
+         not na(signedMovePct) and
+         not na(favorableAtr) and
+         not na(ropeUpper) and
+         not na(ropeLower)
+    bool structural =
+         maSpreadBeforePct <= MA_SPREAD_BEFORE_MAX_PCT and
+         anchorToBundlePct <= ANCHOR_TO_BUNDLE_MAX_PCT and
+         preRangePct <= PRE_RANGE_MAX_PCT
+    bool earlyRelease =
+         signedMovePct >= f_minMovePct(observedBars) and
+         favorableAtr >= f_minFavorableAtr(observedBars)
+    bool outsideRope = direction == 1 ? currentClose > ropeUpper : currentClose < ropeLower
+    ready and structural and earlyRelease and outsideRope
+
+// The score preserves the completed-shape channel weights but uses only causal
+// prefix proxies. It ranks and explains passing candidates; it is not a pass
+// threshold, probability, expected return, or production confidence.
+f_candidateScore(
+     int direction,
+     int observedBars,
+     float maSpreadBeforePct,
+     float anchorToBundlePct,
+     float preRangePct,
+     float signedMovePct,
+     float currentClose,
+     float anchorOpen,
+     float ropeCenter,
+     float atrBefore,
+     float releaseVolumeMean,
+     float preVolumeMean) =>
+    float moveFloor = f_minMovePct(observedBars)
+    float favorableFloor = f_minFavorableAtr(observedBars)
+    float closeProgress = f_clamp01(signedMovePct / moveFloor)
+    float signedMaReleasePct = direction * 100.0 * math.log(currentClose / ropeCenter)
+    float maRelease = f_clamp01(signedMaReleasePct / moveFloor)
+    float spreadQuality = f_clamp01(1.0 - maSpreadBeforePct / MA_SPREAD_BEFORE_MAX_PCT)
+    float proximityQuality = f_clamp01(1.0 - anchorToBundlePct / ANCHOR_TO_BUNDLE_MAX_PCT)
+    float rangeQuality = f_clamp01(1.0 - preRangePct / PRE_RANGE_MAX_PCT)
+    float compression = (spreadQuality + proximityQuality + rangeQuality) / 3.0
+    float signedBodyAtr = direction * (currentClose - anchorOpen) / atrBefore
+    float bodyProgress = f_clamp01(signedBodyAtr / favorableFloor)
+    float volumeRatio =
+         not na(releaseVolumeMean) and not na(preVolumeMean) and preVolumeMean > 0.0 ?
+         releaseVolumeMean / preVolumeMean : 0.0
+    float volumeProgress =
+         volumeRatio > 0.0 ?
+         f_clamp01(math.log(volumeRatio) / math.log(2.0)) : 0.0
+    100.0 * (
+         WEIGHT_CLOSE_PROGRESS * closeProgress +
+         WEIGHT_MA_RELEASE * maRelease +
+         WEIGHT_COMPRESSION * compression +
+         WEIGHT_BODY_ATR * bodyProgress +
+         WEIGHT_VOLUME * volumeProgress)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Six-MA rope. All moving averages use the current chart symbol and 4h bars;
+// there are deliberately no request.* calls or cross-symbol data dependencies.
+// ─────────────────────────────────────────────────────────────────────────────
+float sma20 = ta.sma(close, 20)
+float ema20 = ta.ema(close, 20)
+float sma60 = ta.sma(close, 60)
+float ema60 = ta.ema(close, 60)
+float sma120 = ta.sma(close, 120)
+float ema120 = ta.ema(close, 120)
+float atr14 = ta.atr(ATR_LEN)
+
+float ropeUpper = math.max(
+     math.max(math.max(sma20, ema20), math.max(sma60, ema60)),
+     math.max(sma120, ema120))
+float ropeLower = math.min(
+     math.min(math.min(sma20, ema20), math.min(sma60, ema60)),
+     math.min(sma120, ema120))
+float ropeCenter = (sma20 + ema20 + sma60 + ema60 + sma120 + ema120) / 6.0
+float ropeSpreadPct = (ropeUpper - ropeLower) / close * 100.0
+
+// Candidate lag 0: the current confirmed bar is the proposed launch anchor.
+float anchorOpen0 = open
+float spreadBefore0 = ropeSpreadPct[1]
+float anchorDistance0 = math.abs(anchorOpen0 / ropeCenter[1] - 1.0) * 100.0
+float preHigh0 = ta.highest(high[1], PRE_BARS)
+float preLow0 = ta.lowest(low[1], PRE_BARS)
+float preRange0 = (preHigh0 / preLow0 - 1.0) * 100.0
+float atrBefore0 = atr14[1]
+float releaseHigh0 = high
+float releaseLow0 = low
+float releaseVolume0 = volume
+float preVolume0 = ta.sma(volume[1], PRE_BARS)
+
+// Candidate lag 1: the proposed anchor is one bar old; current close is the
+// second and final observable release bar. The signal still appears now.
+float anchorOpen1 = open[1]
+float spreadBefore1 = ropeSpreadPct[2]
+float anchorDistance1 = math.abs(anchorOpen1 / ropeCenter[2] - 1.0) * 100.0
+float preHigh1 = ta.highest(high[2], PRE_BARS)
+float preLow1 = ta.lowest(low[2], PRE_BARS)
+float preRange1 = (preHigh1 / preLow1 - 1.0) * 100.0
+float atrBefore1 = atr14[2]
+float releaseHigh1 = math.max(high, high[1])
+float releaseLow1 = math.min(low, low[1])
+float releaseVolume1 = (volume + volume[1]) / 2.0
+float preVolume1 = ta.sma(volume[2], PRE_BARS)
+
+// Candidate lag 2: the proposed anchor is two bars old; current close is the
+// third and final observable release bar. No fourth or later bar is accessed.
+float anchorOpen2 = open[2]
+float spreadBefore2 = ropeSpreadPct[3]
+float anchorDistance2 = math.abs(anchorOpen2 / ropeCenter[3] - 1.0) * 100.0
+float preHigh2 = ta.highest(high[3], PRE_BARS)
+float preLow2 = ta.lowest(low[3], PRE_BARS)
+float preRange2 = (preHigh2 / preLow2 - 1.0) * 100.0
+float atrBefore2 = atr14[3]
+float releaseHigh2 = math.max(high, math.max(high[1], high[2]))
+float releaseLow2 = math.min(low, math.min(low[1], low[2]))
+float releaseVolume2 = (volume + volume[1] + volume[2]) / 3.0
+float preVolume2 = ta.sma(volume[3], PRE_BARS)
+
+float longMove0 = f_signedMovePct(1, close, anchorOpen0)
+float longMove1 = f_signedMovePct(1, close, anchorOpen1)
+float longMove2 = f_signedMovePct(1, close, anchorOpen2)
+float shortMove0 = f_signedMovePct(-1, close, anchorOpen0)
+float shortMove1 = f_signedMovePct(-1, close, anchorOpen1)
+float shortMove2 = f_signedMovePct(-1, close, anchorOpen2)
+
+float longFavorable0 = f_favorableAtr(1, anchorOpen0, releaseHigh0, releaseLow0, atrBefore0)
+float longFavorable1 = f_favorableAtr(1, anchorOpen1, releaseHigh1, releaseLow1, atrBefore1)
+float longFavorable2 = f_favorableAtr(1, anchorOpen2, releaseHigh2, releaseLow2, atrBefore2)
+float shortFavorable0 = f_favorableAtr(-1, anchorOpen0, releaseHigh0, releaseLow0, atrBefore0)
+float shortFavorable1 = f_favorableAtr(-1, anchorOpen1, releaseHigh1, releaseLow1, atrBefore1)
+float shortFavorable2 = f_favorableAtr(-1, anchorOpen2, releaseHigh2, releaseLow2, atrBefore2)
+
+bool longPass0 = f_candidatePass(1, 1, spreadBefore0, anchorDistance0, preRange0, longMove0, longFavorable0, close, ropeUpper, ropeLower)
+bool longPass1 = f_candidatePass(1, 2, spreadBefore1, anchorDistance1, preRange1, longMove1, longFavorable1, close, ropeUpper, ropeLower)
+bool longPass2 = f_candidatePass(1, 3, spreadBefore2, anchorDistance2, preRange2, longMove2, longFavorable2, close, ropeUpper, ropeLower)
+bool shortPass0 = f_candidatePass(-1, 1, spreadBefore0, anchorDistance0, preRange0, shortMove0, shortFavorable0, close, ropeUpper, ropeLower)
+bool shortPass1 = f_candidatePass(-1, 2, spreadBefore1, anchorDistance1, preRange1, shortMove1, shortFavorable1, close, ropeUpper, ropeLower)
+bool shortPass2 = f_candidatePass(-1, 3, spreadBefore2, anchorDistance2, preRange2, shortMove2, shortFavorable2, close, ropeUpper, ropeLower)
+
+float longScore0 = f_candidateScore(1, 1, spreadBefore0, anchorDistance0, preRange0, longMove0, close, anchorOpen0, ropeCenter, atrBefore0, releaseVolume0, preVolume0)
+float longScore1 = f_candidateScore(1, 2, spreadBefore1, anchorDistance1, preRange1, longMove1, close, anchorOpen1, ropeCenter, atrBefore1, releaseVolume1, preVolume1)
+float longScore2 = f_candidateScore(1, 3, spreadBefore2, anchorDistance2, preRange2, longMove2, close, anchorOpen2, ropeCenter, atrBefore2, releaseVolume2, preVolume2)
+float shortScore0 = f_candidateScore(-1, 1, spreadBefore0, anchorDistance0, preRange0, shortMove0, close, anchorOpen0, ropeCenter, atrBefore0, releaseVolume0, preVolume0)
+float shortScore1 = f_candidateScore(-1, 2, spreadBefore1, anchorDistance1, preRange1, shortMove1, close, anchorOpen1, ropeCenter, atrBefore1, releaseVolume1, preVolume1)
+float shortScore2 = f_candidateScore(-1, 3, spreadBefore2, anchorDistance2, preRange2, shortMove2, close, anchorOpen2, ropeCenter, atrBefore2, releaseVolume2, preVolume2)
+
+float longBestScore = na
+int longAnchorLag = na
+if longPass0
+    longBestScore := longScore0
+    longAnchorLag := 0
+if longPass1 and (na(longBestScore) or longScore1 > longBestScore)
+    longBestScore := longScore1
+    longAnchorLag := 1
+if longPass2 and (na(longBestScore) or longScore2 > longBestScore)
+    longBestScore := longScore2
+    longAnchorLag := 2
+
+float shortBestScore = na
+int shortAnchorLag = na
+if shortPass0
+    shortBestScore := shortScore0
+    shortAnchorLag := 0
+if shortPass1 and (na(shortBestScore) or shortScore1 > shortBestScore)
+    shortBestScore := shortScore1
+    shortAnchorLag := 1
+if shortPass2 and (na(shortBestScore) or shortScore2 > shortBestScore)
+    shortBestScore := shortScore2
+    shortAnchorLag := 2
+
+bool timeframeOk = timeframe.in_seconds() == TIMEFRAME_SECONDS
+bool longSideAllowed = sideMode != "Short only"
+bool shortSideAllowed = sideMode != "Long only"
+bool longRaw = timeframeOk and longSideAllowed and not na(longBestScore)
+bool shortRaw = timeframeOk and shortSideAllowed and not na(shortBestScore)
+
+var int lastLongAlertBar = na
+var int lastShortAlertBar = na
+bool longDedupeReady = na(lastLongAlertBar) or bar_index - lastLongAlertBar > SAME_SIDE_DEDUPE_BARS
+bool shortDedupeReady = na(lastShortAlertBar) or bar_index - lastShortAlertBar > SAME_SIDE_DEDUPE_BARS
+bool longSignal = barstate.isconfirmed and longRaw and longDedupeReady
+bool shortSignal = barstate.isconfirmed and shortRaw and shortDedupeReady
+if longSignal
+    lastLongAlertBar := bar_index
+if shortSignal
+    lastShortAlertBar := bar_index
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Current-bar output only. No negative offset, pivot relocation, strategy order,
+// alert() side effect, request.security(), or webhook is present in this source.
+// Creating a TradingView alert remains a deliberate manual Owner action.
+// ─────────────────────────────────────────────────────────────────────────────
+color longColor = #0F9D76
+color shortColor = #E04F5F
+color neutralColor = #64748B
+
+plot(sma20, "SMA20", color = showMAs ? color.new(#0EA5E9, 0) : na, linewidth = 2)
+plot(ema20, "EMA20", color = showMAs ? color.new(#38BDF8, 25) : na, linewidth = 1)
+plot(sma60, "SMA60", color = showMAs ? color.new(#F59E0B, 0) : na, linewidth = 2)
+plot(ema60, "EMA60", color = showMAs ? color.new(#FBBF24, 25) : na, linewidth = 1)
+plot(sma120, "SMA120", color = showMAs ? color.new(#8B5CF6, 0) : na, linewidth = 2)
+plot(ema120, "EMA120", color = showMAs ? color.new(#A78BFA, 25) : na, linewidth = 1)
+
+plotshape(
+     showSignals and longSignal,
+     title = "Confirmed causal LONG candidate",
+     style = shape.triangleup,
+     location = location.belowbar,
+     color = longColor,
+     size = size.small,
+     text = "L")
+plotshape(
+     showSignals and shortSignal,
+     title = "Confirmed causal SHORT candidate",
+     style = shape.triangledown,
+     location = location.abovebar,
+     color = shortColor,
+     size = size.small,
+     text = "S")
+
+if showLabels and longSignal
+    label.new(
+         bar_index,
+         low,
+         "LONG · research\nscore " + str.tostring(longBestScore, "#.0") +
+         "\nanchor -" + str.tostring(longAnchorLag) + " bar",
+         style = label.style_label_up,
+         color = longColor,
+         textcolor = color.white,
+         size = size.tiny)
+if showLabels and shortSignal
+    label.new(
+         bar_index,
+         high,
+         "SHORT · research\nscore " + str.tostring(shortBestScore, "#.0") +
+         "\nanchor -" + str.tostring(shortAnchorLag) + " bar",
+         style = label.style_label_down,
+         color = shortColor,
+         textcolor = color.white,
+         size = size.tiny)
+
+plot(longBestScore, "Long diagnostic score", color = color.new(longColor, 100), display = display.data_window)
+plot(shortBestScore, "Short diagnostic score", color = color.new(shortColor, 100), display = display.data_window)
+plot(longAnchorLag, "Long anchor lag", color = color.new(longColor, 100), display = display.data_window)
+plot(shortAnchorLag, "Short anchor lag", color = color.new(shortColor, 100), display = display.data_window)
+
+alertcondition(
+     longSignal,
+     title = "Fable 4H causal LONG candidate",
+     message = "RESEARCH ONLY | Fable 4H Causal V1 | LONG candidate | {{ticker}} | {{interval}} | confirmed close={{close}}")
+alertcondition(
+     shortSignal,
+     title = "Fable 4H causal SHORT candidate",
+     message = "RESEARCH ONLY | Fable 4H Causal V1 | SHORT candidate | {{ticker}} | {{interval}} | confirmed close={{close}}")
+
+var table hud = table.new(
+     position.bottom_right,
+     2,
+     9,
+     bgcolor = color.new(#FFFFFF, 5),
+     frame_color = #CBD5E1,
+     frame_width = 1)
+if barstate.islast and showHud
+    table.cell(hud, 0, 0, "Contract", text_color = neutralColor)
+    table.cell(hud, 1, 0, "4h · causal · v1", text_color = #111827)
+    table.cell(hud, 0, 1, "Chart", text_color = neutralColor)
+    table.cell(hud, 1, 1, syminfo.tickerid + " · " + timeframe.period, text_color = #111827)
+    table.cell(hud, 0, 2, "Timeframe", text_color = neutralColor)
+    table.cell(hud, 1, 2, timeframeOk ? "OK" : "SWITCH TO 4H", text_color = timeframeOk ? longColor : shortColor)
+    table.cell(hud, 0, 3, "Pre spread", text_color = neutralColor)
+    table.cell(hud, 1, 3, str.tostring(spreadBefore0, "#.###") + "%", text_color = #111827)
+    table.cell(hud, 0, 4, "Anchor distance", text_color = neutralColor)
+    table.cell(hud, 1, 4, str.tostring(anchorDistance0, "#.###") + "%", text_color = #111827)
+    table.cell(hud, 0, 5, "Pre range", text_color = neutralColor)
+    table.cell(hud, 1, 5, str.tostring(preRange0, "#.##") + "%", text_color = #111827)
+    table.cell(hud, 0, 6, "LONG", text_color = neutralColor)
+    table.cell(hud, 1, 6, na(longBestScore) ? "—" : str.tostring(longBestScore, "#.0") + " · anchor -" + str.tostring(longAnchorLag), text_color = longColor)
+    table.cell(hud, 0, 7, "SHORT", text_color = neutralColor)
+    table.cell(hud, 1, 7, na(shortBestScore) ? "—" : str.tostring(shortBestScore, "#.0") + " · anchor -" + str.tostring(shortAnchorLag), text_color = shortColor)
+    table.cell(hud, 0, 8, "Status", text_color = neutralColor)
+    table.cell(hud, 1, 8, "RESEARCH ONLY · NO ORDERS", text_color = shortColor)
