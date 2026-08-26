@@ -40,3 +40,9 @@ def test_launcher_requires_explicit_dhcp_target() -> None:
     text = source()
     assert 'HOST="${FABLE_3060_HOST:-}"' in text
     assert "DHCP addresses are never guessed" in text
+
+
+def test_fetch_keeps_the_full_remote_training_log() -> None:
+    text = source()
+    assert '"$HOST:/C:/fable/logs/$NAME.log" "$local_run/train.log"' in text
+    assert "remote_training_receipt.txt" in text

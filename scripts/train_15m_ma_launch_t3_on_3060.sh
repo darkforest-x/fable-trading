@@ -138,6 +138,7 @@ PS
   for file in args.yaml results.csv; do
     "${SCP[@]}" "$HOST:$remote_scp/$file" "$local_run/$file"
   done
+  "${SCP[@]}" "$HOST:/C:/fable/logs/$NAME.log" "$local_run/train.log"
   remote_ps >"$local_run/remote_training_receipt.txt" <<PS
 \$files = @(
   '$remote_run/weights/best.pt',
