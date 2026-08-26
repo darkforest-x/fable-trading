@@ -1,0 +1,75 @@
+{
+  "experiment_id": "exp-15m-ma-launch-t3-review-parity-v2",
+  "created_at": "2026-08-26T23:30:00+08:00",
+  "owner_request": {
+    "conversation_date": "2026-08-26",
+    "scope": "Redo the visual-scale comparison and make the first 1,000 review markers match the requested t-3 position, without retraining or leaking future bars into model input."
+  },
+  "sources": {
+    "candidate_rows": 10000,
+    "candidate_manifests": [
+      {
+        "pool": "candidate1000",
+        "path": "experiments/active/exp-15m-ma-launch-candidate1000-v1/results/review_manifest.jsonl",
+        "sha256": "b58ddf0e9808ac5c006c69d42b18f69f19a7a0ed1af0f2cda7ac41b9fa9b3e6c",
+        "rows": 1000,
+        "preregistration_path": "experiments/active/exp-15m-ma-launch-candidate1000-v1/preregistration.json",
+        "preregistration_sha256": "4ca56f61f35f42b9374320ff9c0af9cf6603e8f5a55453f06030b6c26daf4a01"
+      },
+      {
+        "pool": "candidate9000",
+        "path": "experiments/active/exp-15m-ma-launch-candidate9000-v1/results/review_manifest.jsonl",
+        "sha256": "3b4faa197ebd08bfd24ea662c30b8360200f29e172dbc5d68639eb880a71d731",
+        "rows": 9000,
+        "preregistration_path": "experiments/active/exp-15m-ma-launch-candidate9000-v1/preregistration.json",
+        "preregistration_sha256": "b89a0be792f31867dc4120a080780c310276a98c31fe7d797b5ae2870ce7ef26"
+      }
+    ],
+    "training_manifest": {
+      "path": "datasets/ma_launch_t3_10000_v1/manifest.jsonl",
+      "sha256": "dd55246938b03c4b2013d159cdfee94b4e9db56ecb298ad30145eb5d1bc2bc3a",
+      "rows": 36812,
+      "positive_rows": 9938,
+      "dataset_root": "datasets/ma_launch_t3_10000_v1"
+    },
+    "holdout_start": "2026-05-04T00:00:00Z"
+  },
+  "view_contract": {
+    "review_marker_offset_bars": -3,
+    "rerender_pool": "candidate1000",
+    "reuse_pool_already_at_t_minus_3": "candidate9000",
+    "causal_panel_source": "canonical_training_png",
+    "causal_label_overlay": "Browser CSS derived from the exact same-name YOLO txt; never painted into the canonical PNG.",
+    "future_panel": "The separate 48-bar t-30..t+17 human-review PNG.",
+    "future_panel_training_eligible": false,
+    "historical_artifacts_overwritten": false,
+    "gallery_page_size": 250
+  },
+  "expected_counts": {
+    "candidate_rows": 10000,
+    "training_positive": 9938,
+    "purged": 62,
+    "first1000_rerendered": 1000,
+    "later9000_reused": 9000
+  },
+  "outputs": {
+    "directory": "experiments/active/exp-15m-ma-launch-t3-review-parity-v2/results",
+    "manifest": "results/parity_manifest.jsonl",
+    "gallery": "results/index.html",
+    "overview": "results/comparison_overview.png",
+    "receipt": "results/verification_receipt.json",
+    "canonical_report": "analysis/p1_15m_ma_launch_review_parity_v2_20260826.md",
+    "canonical_html": "analysis/html/p1_15m_ma_launch_review_parity_v2_20260826.html"
+  },
+  "safety": {
+    "holdout_read": false,
+    "training_dataset_change": false,
+    "model_training": false,
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deployment": false,
+    "forward_or_order_state_change": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
