@@ -1,4 +1,6 @@
 import copy
+import json
+from pathlib import Path
 
 import pytest
 
@@ -6,6 +8,7 @@ from scripts.render_15m_ma_launch_t3_imgsz1280_comparison import (
     BASELINE_WEIGHT_SHA256,
     ComparisonRenderError,
     EXPERIMENT_ID,
+    render,
     validate_payloads,
 )
 
@@ -90,3 +93,30 @@ def test_validate_payloads_rejects_holdout_receipt() -> None:
     treatment["holdout_consumed"] = True
     with pytest.raises(ComparisonRenderError, match="pre-holdout"):
         validate_payloads(grid, baseline, treatment)
+
+
+def test_render_writes_hash_bound_png_and_receipt(tmp_path: Path) -> None:
+    grid, baseline, treatment = payloads()
+    paths = {
+        "grid": tmp_path / "grid.json",
+        "baseline": tmp_path / "baseline.json",
+        "treatment": tmp_path / "treatment.json",
+    }
+    for key, payload in (
+        ("grid", grid),
+        ("baseline", baseline),
+        ("treatment", treatment),
+    ):
+        paths[key].write_text(json.dumps(payload), encoding="utf-8")
+    out = tmp_path / "comparison.png"
+    receipt = tmp_path / "comparison_receipt.json"
+    result = render(
+        grid_path=paths["grid"],
+        baseline_hard_path=paths["baseline"],
+        treatment_hard_path=paths["treatment"],
+        out=out,
+        receipt=receipt,
+    )
+    assert out.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
+    assert result["output"]["size_bytes"] == out.stat().st_size
+    assert json.loads(receipt.read_text(encoding="utf-8"))["output"]["sha256"] == result["output"]["sha256"]
