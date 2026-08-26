@@ -47,11 +47,12 @@ from yoyo.layers.l1_detection.render import ChartTransform, render_chart
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPERIMENT_ID = "exp-15m-ma-launch-t3-daily-movers3d-v1"
+EXPERIMENT_ID = "exp-15m-ma-launch-t3-daily-movers3d-v2"
 DEFAULT_PREREG = ROOT / "experiments" / "active" / EXPERIMENT_ID / "preregistration.json"
-DEFAULT_OUT = ROOT / "analysis" / "output" / "ma_launch_t3_daily_movers3d_v1"
+DEFAULT_OUT = ROOT / "analysis" / "output" / "ma_launch_t3_daily_movers3d_v2"
 DEFAULT_RESULTS = ROOT / "experiments" / "active" / EXPERIMENT_ID / "results"
 TICKERS_URL = "https://www.okx.com/api/v5/market/tickers?instType=SWAP"
+INSTRUMENTS_URL = "https://www.okx.com/api/v5/public/instruments?instType=SWAP"
 CANDLES_URL = "https://www.okx.com/api/v5/market/candles"
 HISTORY_URL = "https://www.okx.com/api/v5/market/history-candles"
 BAR_DELTA = pd.Timedelta(minutes=15)
@@ -148,14 +149,22 @@ def _request(url: str) -> dict[str, Any]:
     return payload
 
 
-def eligible_instruments(ticker_rows: Sequence[Mapping[str, Any]]) -> list[str]:
-    """Return current crypto USDT swaps after the frozen project exclusions."""
+def eligible_instruments(
+    ticker_rows: Sequence[Mapping[str, Any]],
+    instrument_rows: Sequence[Mapping[str, Any]],
+) -> list[str]:
+    """Return live instCategory=1 crypto USDT swaps with a current ticker."""
 
     instruments: set[str] = set()
     blocked = set(BLOCKED_BASES) | set(STOCKISH_BASES)
+    crypto_live = {
+        str(row.get("instId") or "")
+        for row in instrument_rows
+        if str(row.get("state")) == "live" and str(row.get("instCategory")) == "1"
+    }
     for row in ticker_rows:
         inst_id = str(row.get("instId") or "")
-        if not inst_id.endswith("-USDT-SWAP"):
+        if not inst_id.endswith("-USDT-SWAP") or inst_id not in crypto_live:
             continue
         base = inst_id.split("-", 1)[0]
         if base in blocked:
@@ -330,8 +339,10 @@ def fetch_and_rank(
     started = time.perf_counter()
 
     ticker_payload = _request(TICKERS_URL)
+    instrument_payload = _request(INSTRUMENTS_URL)
     ticker_rows = list(ticker_payload.get("data") or [])
-    instruments = eligible_instruments(ticker_rows)
+    instrument_rows = list(instrument_payload.get("data") or [])
+    instruments = eligible_instruments(ticker_rows, instrument_rows)
     if not instruments:
         raise MoversScanError("active ticker universe is empty")
     print(f"active eligible USDT swaps: {len(instruments)}", flush=True)
@@ -449,6 +460,7 @@ def fetch_and_rank(
                 "fetched_at": datetime.now(timezone.utc).isoformat(),
                 "eligible_instruments": instruments,
                 "selected_instruments": selected,
+                "instrument_filter": "state=live and instCategory=1",
                 "daily_failures": daily_failures,
             },
             ensure_ascii=False,
@@ -470,6 +482,8 @@ def fetch_and_rank(
         "complete_days": [day.isoformat() for day in days],
         "ranking_causality": prereg["ranking"]["causality"],
         "ticker_rows_received": len(ticker_rows),
+        "instrument_metadata_rows_received": len(instrument_rows),
+        "instrument_filter": "state=live and instCategory=1",
         "eligible_instruments": len(instruments),
         "daily_raw_rows_received": daily_raw_rows,
         "daily_api_failures": len(daily_failures),

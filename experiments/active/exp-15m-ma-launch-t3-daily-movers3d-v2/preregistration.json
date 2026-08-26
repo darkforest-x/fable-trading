@@ -1,0 +1,91 @@
+{
+  "protocol": "ma6_launch_t3_daily_abs_crypto_movers3d_v2_20260826",
+  "experiment_id": "exp-15m-ma-launch-t3-daily-movers3d-v2",
+  "created_at": "2026-08-26T18:42:43+08:00",
+  "owner_authorization": {
+    "request": "跑一下最近3天的每天涨跌幅top20的币种试试 然后给我图",
+    "authorized_holdout_scope": "Exactly the three most recent complete UTC days available on 2026-08-26: 2026-08-23, 2026-08-24 and 2026-08-25; current live OKX instCategory=1 crypto USDT swaps for daily ranking, then only the selected union for 15m inference context.",
+    "holdout_consumption_number_for_this_configuration": 1,
+    "prior_failed_configuration": "exp-15m-ma-launch-t3-daily-movers3d-v1 consumed its own holdout use #1 but failed closed before inference because static name lists admitted instCategory=3 instruments.",
+    "training_or_tuning_authorized": false,
+    "production_or_promotion_authorized": false
+  },
+  "calendar": {
+    "timezone": "UTC",
+    "complete_days": [
+      "2026-08-23T00:00:00Z",
+      "2026-08-24T00:00:00Z",
+      "2026-08-25T00:00:00Z"
+    ],
+    "current_partial_day_excluded": true
+  },
+  "ranking": {
+    "venue": "OKX",
+    "instrument_type": "USDT-SWAP",
+    "universe_snapshot": "intersection of current tickers and public instruments at official fetch time",
+    "required_instrument_metadata": "state=live and instCategory=1",
+    "exclude": "all instCategory!=1 or state!=live instruments, then yoyo.data.loader.BLOCKED_BASES plus yoyo.data.universe.STOCKISH_BASES",
+    "bar": "1Dutc",
+    "return": "confirmed daily close / confirmed daily open - 1",
+    "sort": "descending absolute return; symbol ascending is the deterministic tie break",
+    "top_per_day": 20,
+    "minimum_volume_filter": null,
+    "minimum_daily_bars": 1,
+    "causality": "post_hoc_same_day_ranking_not_live_selection"
+  },
+  "detector": {
+    "weights": "analysis/output/ma_launch_t3_10000_v1/ma_launch_t3_10000_v1_y11s_ft/weights/best.pt",
+    "weights_sha256": "8b2e393ffa887b8284a5580f68df290963fccc08fb94cdc4e0fec0c2b1e40e10",
+    "class_names": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "bar": "15m",
+    "window_lengths": [14, 18, 22],
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "imgsz": 960,
+    "mapped_core_length_bars_allowed": [4, 5, 6, 7],
+    "mapped_confirmation_bars_allowed": [3, 4, 5],
+    "scan_endpoint_extension_after_day_bars": 5,
+    "event_attribution": "mapped core-end bar must fall inside the ranked UTC day",
+    "same_symbol_event_gap_bars": 5,
+    "future_bars_rendered_into_inference": 0,
+    "threshold_or_window_retuning_after_results": false
+  },
+  "data": {
+    "instrument_metadata_source": "OKX public/instruments?instType=SWAP",
+    "daily_source": "OKX public market/candles, 1Dutc, confirmed rows only",
+    "inference_source": "OKX public candles/history-candles, 15m, confirmed rows only",
+    "snapshot_location": "analysis/output/ma_launch_t3_daily_movers3d_v2/kline_snapshot",
+    "canonical_data_written": false,
+    "minimum_context_before_first_day_hours": 48,
+    "selected_day_required_15m_bars": 96,
+    "selected_day_gaps_allowed": 0
+  },
+  "outputs": {
+    "local_output": "analysis/output/ma_launch_t3_daily_movers3d_v2",
+    "committed_results": "experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results",
+    "report": "analysis/p1_15m_ma_launch_t3_daily_movers3d_20260826.md",
+    "html": "analysis/html/p1_15m_ma_launch_t3_daily_movers3d_20260826.html"
+  },
+  "interpretation": {
+    "economic_backtest": false,
+    "holdout_final_acceptance": false,
+    "purpose": "retrospective visual model probe on high-movement crypto symbol-days",
+    "must_disclose": [
+      "same-day Top20 membership is known only after each day closes",
+      "the detector was trained on completed-path weak labels rather than Gold",
+      "detections are not live signals or evidence of profitability",
+      "the current-live universe introduces listing and survivorship bias"
+    ]
+  },
+  "safety": {
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "production_eligible": false
+  }
+}

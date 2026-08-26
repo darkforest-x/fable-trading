@@ -39,7 +39,28 @@ def test_universe_excludes_project_blocked_and_stockish() -> None:
         {"instId": "ETH-USDC-SWAP", "last": "10"},
         {"instId": "BAD-USDT-SWAP", "last": "0"},
     ]
-    assert eligible_instruments(rows) == ["BTC-USDT-SWAP"]
+    metadata = [
+        {"instId": "BTC-USDT-SWAP", "state": "live", "instCategory": "1"},
+        {"instId": "USDC-USDT-SWAP", "state": "live", "instCategory": "1"},
+        {"instId": "NVDA-USDT-SWAP", "state": "live", "instCategory": "3"},
+        {"instId": "BAD-USDT-SWAP", "state": "live", "instCategory": "1"},
+    ]
+    assert eligible_instruments(rows, metadata) == ["BTC-USDT-SWAP"]
+
+
+def test_exchange_category_excludes_unlisted_and_equity_style_swaps() -> None:
+    tickers = [
+        {"instId": "BTC-USDT-SWAP", "last": "100"},
+        {"instId": "MRNA-USDT-SWAP", "last": "50"},
+        {"instId": "DEAD-USDT-SWAP", "last": "10"},
+        {"instId": "MISSING-USDT-SWAP", "last": "10"},
+    ]
+    metadata = [
+        {"instId": "BTC-USDT-SWAP", "state": "live", "instCategory": "1"},
+        {"instId": "MRNA-USDT-SWAP", "state": "live", "instCategory": "3"},
+        {"instId": "DEAD-USDT-SWAP", "state": "suspend", "instCategory": "1"},
+    ]
+    assert eligible_instruments(tickers, metadata) == ["BTC-USDT-SWAP"]
 
 
 def test_daily_ranking_uses_absolute_return_and_symbol_tie_break() -> None:
