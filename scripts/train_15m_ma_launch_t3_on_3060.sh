@@ -80,7 +80,7 @@ PS
   printf '  Mac : %s\n  3060: %s\n' "$local_v" "$remote_v"
   [[ "$local_v" == "$remote_v" ]] || die "version mismatch; results would not be comparable"
   cuda_info="$(remote_ps <<PS | tr -d '\r\n'
-& '$REMOTE_PY' -c 'import torch,torchvision;b=torch.tensor([[0.,0.,10.,10.],[1.,1.,9.,9.]],device="cuda");s=torch.tensor([.9,.8],device="cuda");print(torch.cuda.is_available(),torch.cuda.get_device_name(0),round(torch.cuda.get_device_properties(0).total_memory/1024**3,1),torchvision.ops.nms(b,s,.5).cpu().tolist()==[0],sep=chr(124))'
+& '$REMOTE_PY' -c 'import torch,torchvision;b=torch.tensor([[0.,0.,10.,10.],[1.,1.,9.,9.]]).cuda();s=torch.tensor([.9,.8]).cuda();print(torch.cuda.is_available(),torch.cuda.get_device_name(0),round(torch.cuda.get_device_properties(0).total_memory/1024**3,1),torchvision.ops.nms(b,s,.5).cpu().tolist()==[0],sep=chr(124))'
 if (\$LASTEXITCODE -ne 0) { exit \$LASTEXITCODE }
 PS
 )"
