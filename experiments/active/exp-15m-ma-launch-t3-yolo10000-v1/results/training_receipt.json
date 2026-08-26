@@ -1,0 +1,119 @@
+{
+  "experiment_id": "exp-15m-ma-launch-t3-yolo10000-v1",
+  "summarizer_commit": "885f476be2b8d5cdcee6e1fa63f43bd401210600",
+  "run_name": "ma_launch_t3_10000_v1_y11s_ft",
+  "remote_host": "Administrator@192.168.1.5",
+  "gpu": "NVIDIA GeForce RTX 3060 12GB",
+  "epochs_requested": 40,
+  "epochs_completed": 27,
+  "early_stopped": true,
+  "first": {
+    "epoch": 1,
+    "precision": 0.34206,
+    "recall": 0.45455,
+    "map50": 0.3704,
+    "map50_95": 0.17314,
+    "train_box_loss": 1.4911,
+    "train_cls_loss": 2.88712,
+    "train_dfl_loss": 1.54939,
+    "val_box_loss": 0.66486,
+    "val_cls_loss": 1.69845,
+    "val_dfl_loss": 0.76058
+  },
+  "best": {
+    "epoch": 17,
+    "precision": 0.53285,
+    "recall": 0.60868,
+    "map50": 0.58874,
+    "map50_95": 0.33118,
+    "train_box_loss": 0.4549,
+    "train_cls_loss": 1.53346,
+    "train_dfl_loss": 0.96353,
+    "val_box_loss": 0.24903,
+    "val_cls_loss": 1.30193,
+    "val_dfl_loss": 0.55259
+  },
+  "final": {
+    "epoch": 27,
+    "precision": 0.50005,
+    "recall": 0.63118,
+    "map50": 0.54838,
+    "map50_95": 0.31438,
+    "train_box_loss": 0.36227,
+    "train_cls_loss": 1.37698,
+    "train_dfl_loss": 0.90523,
+    "val_box_loss": 0.24006,
+    "val_cls_loss": 1.22833,
+    "val_dfl_loss": 0.56152
+  },
+  "best_model_final_validation": {
+    "precision": 0.5341051096421747,
+    "recall": 0.60730377579526,
+    "map50": 0.5887420435848747,
+    "map50_95": 0.3318891704049788,
+    "fitness": 0.3318891704049788
+  },
+  "per_class_best_model_final_validation": {
+    "dense_long": {
+      "images": 822,
+      "instances": 822,
+      "precision": 0.546,
+      "recall": 0.597,
+      "map50": 0.573,
+      "map50_95": 0.327
+    },
+    "dense_short": {
+      "images": 648,
+      "instances": 648,
+      "precision": 0.522,
+      "recall": 0.617,
+      "map50": 0.605,
+      "map50_95": 0.337
+    }
+  },
+  "class_names": {
+    "0": "dense_long",
+    "1": "dense_short"
+  },
+  "fetched_files": {
+    "best.pt": {
+      "size_bytes": 19190554,
+      "sha256": "8b2e393ffa887b8284a5580f68df290963fccc08fb94cdc4e0fec0c2b1e40e10",
+      "remote_path": "C:/fable/runs/detect/ma_launch_t3_10000_v1_y11s_ft/weights/best.pt",
+      "remote_mtime_utc": "2026-08-26T06:10:07.7717617Z"
+    },
+    "args.yaml": {
+      "size_bytes": 1878,
+      "sha256": "b903a1607969f20ecb8a6c07165391ee43e68efd63e9b2bf709571c3dc32825d",
+      "remote_path": "C:/fable/runs/detect/ma_launch_t3_10000_v1_y11s_ft/args.yaml",
+      "remote_mtime_utc": "2026-08-26T01:07:39.0748909Z"
+    },
+    "results.csv": {
+      "size_bytes": 3456,
+      "sha256": "695100ff4b894b32b4ca490e8fd3a02cf7af92ad5fc73c3ed9aced2af32b69ef",
+      "remote_path": "C:/fable/runs/detect/ma_launch_t3_10000_v1_y11s_ft/results.csv",
+      "remote_mtime_utc": "2026-08-26T06:10:06.5022660Z"
+    },
+    "ma_launch_t3_10000_v1_y11s_ft.log": {
+      "size_bytes": 18051069,
+      "sha256": "21919987d3be9810c6d408e87db6236167aa24097596dbbabdd25f1906f26bba",
+      "remote_path": "C:/fable/logs/ma_launch_t3_10000_v1_y11s_ft.log",
+      "remote_mtime_utc": "2026-08-26T06:10:36.6606512Z"
+    }
+  },
+  "remote_exit": {
+    "remote_path": "C:/fable/logs/ma_launch_t3_10000_v1_y11s_ft.exit_code",
+    "size_bytes": 3,
+    "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "remote_mtime_utc": "2026-08-26T06:10:36.6606512Z"
+  },
+  "curve_sha256": "27f128e5ce145c78e97dd85f26cd3057aaebecf604615fcbda5a2d92daca7cea",
+  "curve_size_bytes": 177801,
+  "args_contract_passed": true,
+  "remote_hash_match": true,
+  "holdout_consumed": false,
+  "active_or_frozen_changed": false,
+  "promoted": false,
+  "deployed": false,
+  "production_eligible": false
+}
