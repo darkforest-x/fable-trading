@@ -7,6 +7,7 @@ import argparse
 import bisect
 import hashlib
 import json
+import subprocess
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable, Mapping
@@ -311,7 +312,10 @@ def main() -> int:
     parser.add_argument("--results", type=Path, default=DEFAULT_RESULTS)
     parser.add_argument("--decode-sample", type=int, default=512)
     args = parser.parse_args()
-    commit = verify_builder_committed((*BUILDER_PATHS[:-1], args.prereg.resolve()))
+    verify_builder_committed((*BUILDER_PATHS[:-1], args.prereg.resolve()))
+    commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+    ).strip()
     receipt = verify_dataset(
         dataset=args.dataset.resolve(),
         prereg_path=args.prereg.resolve(),
