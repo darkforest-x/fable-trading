@@ -1,0 +1,183 @@
+{
+  "protocol": "ma6_launch_t3_owner_authorized_weak_yolo10000_v1_20260826",
+  "experiment_id": "exp-15m-ma-launch-t3-yolo10000-v1",
+  "created_at": "2026-08-26T13:20:00+08:00",
+  "owner_authorization": {
+    "conversation_date": "2026-08-26",
+    "scope": "Owner explicitly instructed Codex to finish without per-sample Owner review: use the 1,000 plus 9,000 collected candidates, move the marked anchor three 15m bars earlier, restore the prior small-window/small-box/position-spread/negative-sampling method, and train on the RTX 3060.",
+    "review_waiver": true,
+    "long_and_short_machine_labels_authorized": true,
+    "classification": "owner_authorized_weak_labels_not_gold",
+    "training_authorized": true,
+    "production_or_promotion_authorized": false
+  },
+  "sources": {
+    "candidate_manifests": [
+      {
+        "path": "experiments/active/exp-15m-ma-launch-candidate1000-v1/results/review_manifest.jsonl",
+        "sha256": "b58ddf0e9808ac5c006c69d42b18f69f19a7a0ed1af0f2cda7ac41b9fa9b3e6c",
+        "rows": 1000,
+        "long": 500,
+        "short": 500
+      },
+      {
+        "path": "experiments/active/exp-15m-ma-launch-candidate9000-v1/results/review_manifest.jsonl",
+        "sha256": "3b4faa197ebd08bfd24ea662c30b8360200f29e172dbc5d68639eb880a71d731",
+        "rows": 9000,
+        "long": 4500,
+        "short": 4500
+      }
+    ],
+    "expected_union_rows": 10000,
+    "expected_union_long": 5000,
+    "expected_union_short": 5000,
+    "bar_minutes": 15,
+    "source_policy": "Read each manifest-pinned source CSV only through the first timestamp before 2026-05-04T00:00:00Z; the boundary row's OHLCV must never be materialized.",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0
+  },
+  "positive_geometry": {
+    "class_names": [
+      "dense_long",
+      "dense_short"
+    ],
+    "source_selection_anchor": "t",
+    "core_end_offset_from_t_bars": -3,
+    "core_length_choices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "input_window_length_choices": [
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22
+    ],
+    "confirmation_bars_choices": [
+      3,
+      4,
+      5
+    ],
+    "window_end_formula": "core_end + confirmation_bars",
+    "maximum_window_end_offset_from_t_bars": 2,
+    "assignment": "Stable SHA256 ordering over all legal (window_length, core_length, confirmation_bars) combinations; no pixel jitter and no single fixed box position.",
+    "box_vertical_extent": "high-to-low of the exact 4-7 core bars with two-pixel clipping-safe padding",
+    "position_bins": {
+      "left": "center_fraction < 1/3",
+      "middle": "1/3 <= center_fraction < 2/3",
+      "right": "center_fraction >= 2/3"
+    },
+    "position_gate": {
+      "required_nonempty_bins": [
+        "middle",
+        "right"
+      ],
+      "maximum_single_bin_share": 0.7,
+      "minimum_center_fraction_std": 0.07,
+      "minimum_unique_center_fractions_rounded_4dp": 20
+    }
+  },
+  "split": {
+    "method": "global chronological cutoff with symmetric purge; never random",
+    "cutoff": "2026-03-01T00:00:00Z",
+    "purge_bars": 150,
+    "train_rule": "all rendered source rows end at or before cutoff minus 150 bars",
+    "val_rule": "all rendered source rows start at or after cutoff plus 150 bars",
+    "between_rules": "drop",
+    "same_symbol_cross_split_overlap_allowed": false
+  },
+  "negative_sampling": {
+    "train_easy_per_positive": 1,
+    "train_hard_per_positive": 2,
+    "val_easy_per_positive": 1,
+    "val_hard_per_positive": 0,
+    "easy_definition": "Deterministic random same-source background matched to split and window-length distribution.",
+    "hard_definition": {
+      "same_source_and_split": true,
+      "six_ma_bandwidth_pct_max": 1.243218,
+      "pseudo_t_close_abs_atr_max_over_12_bars": 1.5,
+      "pseudo_t_two_sided_favorable_abs_atr_max_over_12_bars": 2.0,
+      "purpose": "Dense six-MA rope without a completed launch in either direction. Future rows define the negative label only; they are not rendered as input."
+    },
+    "positive_guard": {
+      "before_core_bars": 12,
+      "after_latest_possible_window_end_bars": 12,
+      "protect_purged_candidates": true,
+      "same_symbol_only": true
+    },
+    "negative_window_overlap": "Negative windows may not overlap any positive guard or another selected negative window on the same symbol.",
+    "ratio_policy": "Exact target unless source capacity fails; never weaken guards to reach a ratio."
+  },
+  "renderer": {
+    "entry": "yoyo.layers.l1_detection.render.render_chart",
+    "width": 1280,
+    "height": 742,
+    "moving_averages": [
+      "SMA20",
+      "EMA20",
+      "SMA60",
+      "EMA60",
+      "SMA120",
+      "EMA120"
+    ],
+    "positive_and_negative_pipeline_identical": true,
+    "annotations_drawn_into_training_images": false
+  },
+  "training": {
+    "remote_host": "Administrator@192.168.1.5",
+    "gpu": "NVIDIA GeForce RTX 3060 12GB",
+    "base_model": "models/yolo11s.pt",
+    "base_model_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+    "trainer": "src/detection/train.py",
+    "epochs": 40,
+    "patience": 10,
+    "batch": 8,
+    "imgsz": 960,
+    "optimizer": "AdamW",
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "warmup_epochs": 0.5,
+    "seed": 0,
+    "deterministic": true,
+    "rect": true,
+    "cache": false,
+    "workers": 2,
+    "run_name": "ma_launch_t3_10000_v1_y11s_ft",
+    "augmentations": {
+      "fliplr": 0.0,
+      "flipud": 0.0,
+      "mosaic": 0.0,
+      "mixup": 0.0,
+      "copy_paste": 0.0,
+      "hsv_h": 0.0,
+      "hsv_s": 0.0,
+      "hsv_v": 0.0,
+      "degrees": 0.0,
+      "shear": 0.0,
+      "perspective": 0.0,
+      "erasing": 0.0
+    }
+  },
+  "outputs": {
+    "dataset_dir": "datasets/ma_launch_t3_10000_v1",
+    "experiment_results": "experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results",
+    "canonical_report": "analysis/p1_15m_ma_launch_t3_yolo10000_20260826.md",
+    "canonical_html": "analysis/html/p1_15m_ma_launch_t3_yolo10000_20260826.html"
+  },
+  "safety": {
+    "holdout_read": false,
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "production_eligible": false
+  }
+}
