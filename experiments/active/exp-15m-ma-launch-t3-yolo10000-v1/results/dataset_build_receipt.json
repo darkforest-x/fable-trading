@@ -1,0 +1,95 @@
+{
+  "build_summary_sha256_before_dataset_rename": "d452268adf16fa1244b5ae14f702e89a7e2b9da756a1472eb29ce6116d643bf6",
+  "builder_commit": "b5676ebf5ae2dddda03f6d995819f4923a3229da",
+  "candidate_union_per_side": {
+    "LONG": 5000,
+    "SHORT": 5000
+  },
+  "candidate_union_rows": 10000,
+  "counts": {
+    "train/negative": 25404,
+    "train/negative/easy": 8468,
+    "train/negative/hard": 16936,
+    "train/positive": 8468,
+    "train/positive/long": 4143,
+    "train/positive/short": 4325,
+    "val/negative": 1470,
+    "val/negative/easy": 1470,
+    "val/positive": 1470,
+    "val/positive/long": 822,
+    "val/positive/short": 648
+  },
+  "data_yaml_sha256": "aa7237ba9abae5381709272c2af172192956fa153680765d6e47a35663530594",
+  "dataset_bytes": 1595383625,
+  "dataset_path": "/Users/zhangzc/fable-trading/datasets/ma_launch_t3_10000_v1",
+  "experiment_id": "exp-15m-ma-launch-t3-yolo10000-v1",
+  "manifest_rows": 36812,
+  "manifest_sha256": "dd55246938b03c4b2013d159cdfee94b4e9db56ecb298ad30145eb5d1bc2bc3a",
+  "mode": "materialized",
+  "owner_label_classification": "owner_authorized_weak_labels_not_gold",
+  "position_audit": {
+    "center_fraction_max": 0.7857142857142857,
+    "center_fraction_median": 0.6333333333333333,
+    "center_fraction_min": 0.38461538461538464,
+    "center_fraction_std": 0.08356780128425545,
+    "confirmation_bars": {
+      "3": 3322,
+      "4": 3334,
+      "5": 3282
+    },
+    "core_lengths": {
+      "4": 2387,
+      "5": 2561,
+      "6": 2477,
+      "7": 2513
+    },
+    "maximum_single_bin_share": 0.6387603139464682,
+    "passed": true,
+    "position_bins": {
+      "middle": 6348,
+      "right": 3590
+    },
+    "rows": 9938,
+    "unique_center_fractions_rounded_4dp": 62,
+    "window_lengths": {
+      "14": 1106,
+      "15": 1089,
+      "16": 1057,
+      "17": 1085,
+      "18": 1076,
+      "19": 1127,
+      "20": 1147,
+      "21": 1180,
+      "22": 1071
+    }
+  },
+  "positive_split": {
+    "purged": 62,
+    "train": 8468,
+    "val": 1470
+  },
+  "preview_contact_sheet_sha256": "837ac8bdaced84c7a2c8f3a99b5b2cf6d495527e0eeb5a4890bd26de75ef5acc",
+  "protocol": "ma6_launch_t3_owner_authorized_weak_yolo10000_v1_20260826",
+  "ratio_checks": {
+    "train_easy": true,
+    "train_hard": true,
+    "val_easy": true,
+    "val_hard_zero": true
+  },
+  "safety": {
+    "active_or_frozen_changed": false,
+    "labels_materialized": 36812,
+    "models_created": 0,
+    "production_eligible": false,
+    "promoted": false,
+    "remote_writes": 0,
+    "training_images_materialized": 36812
+  },
+  "source_audit_sha256": "d669a7d0fcdb0b42c4e987451366e526b543897fc9618e4c3b1962a768068601",
+  "sources": {
+    "boundary_timestamp_rows_inspected": 228,
+    "files": 228,
+    "holdout_ohlcv_rows_materialized": 0,
+    "rows_materialized": 10139450
+  }
+}

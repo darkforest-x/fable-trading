@@ -1,0 +1,45 @@
+{
+  "all_asset_hashes_match": true,
+  "asset_counts": {
+    "by_kind": {
+      "train/negative_easy": 8468,
+      "train/negative_hard": 16936,
+      "train/positive_weak": 8468,
+      "val/negative_easy": 1470,
+      "val/positive_weak": 1470
+    },
+    "images": 36812,
+    "labels": 36812
+  },
+  "build_summary_sha256": "3e16331836cad20fb62c27b73b8506353ec3bc75b7df846de815fc06eab16142",
+  "center_fraction_std": 0.08356780128425545,
+  "data_yaml_sha256": "aa7237ba9abae5381709272c2af172192956fa153680765d6e47a35663530594",
+  "dataset_path": "/Users/zhangzc/fable-trading/datasets/ma_launch_t3_10000_v1",
+  "decoded_sample_images": 512,
+  "decoded_shape": [
+    742,
+    1280,
+    3
+  ],
+  "experiment_id": "exp-15m-ma-launch-t3-yolo10000-v1",
+  "holdout_ohlcv_rows_materialized_by_builder": 0,
+  "holdout_touched_by_any_sample_dependency": false,
+  "manifest_rows": 36812,
+  "manifest_sha256": "dd55246938b03c4b2013d159cdfee94b4e9db56ecb298ad30145eb5d1bc2bc3a",
+  "maximum_position_bin_share": 0.6387603139464682,
+  "negative_positive_guard_overlaps": 0,
+  "negative_windows_pairwise_disjoint": true,
+  "passed": true,
+  "position_bins": {
+    "middle": 6348,
+    "right": 3590
+  },
+  "production_eligible": false,
+  "protocol": "ma6_launch_t3_owner_authorized_weak_yolo10000_v1_20260826",
+  "purge_bars": 150,
+  "split_cutoff": "2026-03-01T00:00:00+00:00",
+  "train_dependency_end_max": "2026-02-27T09:30:00+00:00",
+  "ultralytics_dataset_parser_passed": true,
+  "val_dependency_start_min": "2026-03-02T13:45:00+00:00",
+  "verifier_commit": "57499b82fad5925d51767e766458fb2e746b61ee"
+}
