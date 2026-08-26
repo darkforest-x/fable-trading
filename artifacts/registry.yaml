@@ -2759,6 +2759,176 @@ artifacts:
       browser-QA HTML document at 2026-08-26T06:40:18Z. The receipt contains no
       credential material and keeps holdout and production flags false.
 
+  # ---- pre-holdout 15m t-3 hard-negative validation sidecar ------------
+  - artifact_id: 15m-ma-launch-t3-hardval-v1-prereg
+    artifact_type: config
+    role: frozen_hard_negative_validation_sidecar_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e3eff23816e2503e3f4acbdf80e07050e9ee8160"
+    source_path: experiments/active/exp-15m-ma-launch-t3-hardval-v1/preregistration.json
+    sha256: "c957c62e26bb825adb7d947a0245818b8889b0f40521010fae01b24bc574df29"
+    size_bytes: 3719
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-hardval-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "3b5de03f131714340b08b42693b397e3dd072024"
+    config_hash: "c957c62e26bb825adb7d947a0245818b8889b0f40521010fae01b24bc574df29"
+    data_cutoff: "2026-05-03T22:45:00+00:00"
+    notes: >-
+      Freezes the one-variable easy-val versus hard-val false-fire diagnostic,
+      exact base manifest/weight hashes, 1x soft target, full candidate and old
+      negative exclusions, pre-holdout boundary, frozen conf=0.25 and zero
+      training/promotion authority.
+
+  - artifact_id: 15m-ma-launch-t3-hardval-v1-dataset
+    artifact_type: dataset
+    role: evaluation_only_dense_rope_no_launch_sidecar
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e3eff23816e2503e3f4acbdf80e07050e9ee8160"
+    source_path: datasets/ma_launch_t3_hardval_v1/manifest.jsonl
+    sha256: "35633debc85d843b06fa0e9e52688c9d8f0cfc98ca23bd122def24e277031605"
+    size_bytes: 1578801
+    storage_uri: "file://datasets/ma_launch_t3_hardval_v1"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "3b5de03f131714340b08b42693b397e3dd072024"
+    config_hash: "c957c62e26bb825adb7d947a0245818b8889b0f40521010fae01b24bc574df29"
+    data_cutoff: "2026-05-03T22:45:00+00:00"
+    notes: >-
+      Manifest identity for 1,469 empty-label val hard negatives covering 228
+      sources. Target was 1,470; one BSB template is an explicit safe-capacity
+      shortfall. Sidecar does not mutate the frozen 36,812-image base dataset.
+
+  - artifact_id: 15m-ma-launch-t3-hardval-v1-build-receipt
+    artifact_type: manifest
+    role: hard_val_build_count_geometry_and_safety_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e3eff23816e2503e3f4acbdf80e07050e9ee8160"
+    source_path: experiments/active/exp-15m-ma-launch-t3-hardval-v1/results/build_receipt.json
+    sha256: "61c2e988bd83067820273aaf45dd1d6038c77114a3928b02ffb1b145945b7584"
+    size_bytes: 1646
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-hardval-v1/results/build_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "3b5de03f131714340b08b42693b397e3dd072024"
+    config_hash: "c957c62e26bb825adb7d947a0245818b8889b0f40521010fae01b24bc574df29"
+    data_cutoff: "2026-05-03T22:45:00+00:00"
+
+  - artifact_id: 15m-ma-launch-t3-hardval-v1-qa
+    artifact_type: manifest
+    role: exhaustive_hard_val_asset_time_and_exclusion_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e3eff23816e2503e3f4acbdf80e07050e9ee8160"
+    source_path: experiments/active/exp-15m-ma-launch-t3-hardval-v1/results/qa_receipt.json
+    sha256: "ea34d4395c94a1f5832868536043ef0f6390f2648fd71d5fa16d9044afd863d1"
+    size_bytes: 995
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-hardval-v1/results/qa_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e3eff23816e2503e3f4acbdf80e07050e9ee8160"
+    config_hash: "c957c62e26bb825adb7d947a0245818b8889b0f40521010fae01b24bc574df29"
+    data_cutoff: "2026-05-03T22:45:00+00:00"
+    notes: >-
+      Rehashed and decoded all 1,469 images, confirmed 1,469 empty labels,
+      max input t+2, label dependency t+11, zero guard/old-negative/new-window
+      overlap and zero holdout rows. Static HTML QA resolved 1,469 cards; real
+      file:// browser QA was policy-blocked and not bypassed.
+
+  - artifact_id: 15m-ma-launch-t3-hardval-v1-evaluation
+    artifact_type: manifest
+    role: frozen_weight_easy_vs_hard_false_fire_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e3eff23816e2503e3f4acbdf80e07050e9ee8160"
+    source_path: experiments/active/exp-15m-ma-launch-t3-hardval-v1/results/hard_val_evaluation.json
+    sha256: "8975c69e75b946200f93c4a9ad54034501d734908d55240e0274bf169603708d"
+    size_bytes: 3014
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-hardval-v1/results/hard_val_evaluation.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e3eff23816e2503e3f4acbdf80e07050e9ee8160"
+    config_hash: "c957c62e26bb825adb7d947a0245818b8889b0f40521010fae01b24bc574df29"
+    data_cutoff: "2026-05-03T22:45:00+00:00"
+    notes: >-
+      Frozen best.pt at conf=0.25 and imgsz=960 fired on 4/1,470 easy-val and
+      4/1,469 hard-val images (Fisher p=1.0). This is an FP diagnostic, not a
+      threshold selection or evidence of equivalence, Gold quality or recall.
+
+  - artifact_id: 15m-ma-launch-t3-hardval-v1-preview
+    artifact_type: report
+    role: deterministic_hard_val_contact_sheet
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e3eff23816e2503e3f4acbdf80e07050e9ee8160"
+    source_path: experiments/active/exp-15m-ma-launch-t3-hardval-v1/results/hard_val_contact_sheet.png
+    sha256: "6a2d4a1ab011913f7db4a599c667bf810cb863fdb3677980c9ad066b3a35318b"
+    size_bytes: 246359
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-hardval-v1/results/hard_val_contact_sheet.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "3b5de03f131714340b08b42693b397e3dd072024"
+    config_hash: "c957c62e26bb825adb7d947a0245818b8889b0f40521010fae01b24bc574df29"
+    data_cutoff: "2026-05-03T22:45:00+00:00"
+
+  - artifact_id: 15m-ma-launch-t3-hardval-v1-gallery
+    artifact_type: report
+    role: review_only_full_hard_val_gallery_index
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e3eff23816e2503e3f4acbdf80e07050e9ee8160"
+    source_path: experiments/active/exp-15m-ma-launch-t3-hardval-v1/results/gallery/index.html
+    sha256: "6cf01bf95854e14bcab7d28b67a292a103cf5299b59223c57039045664c625c8"
+    size_bytes: 1811
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-hardval-v1/results/gallery/index.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "3b5de03f131714340b08b42693b397e3dd072024"
+    config_hash: "c957c62e26bb825adb7d947a0245818b8889b0f40521010fae01b24bc574df29"
+    data_cutoff: "2026-05-03T22:45:00+00:00"
+    notes: >-
+      Index into fifteen committed pages. QA resolves exactly 1,469 cards and
+      image references. Gallery is review-only and never a model input source.
+
+  - artifact_id: 15m-ma-launch-t3-hardval-v1-report
+    artifact_type: report
+    role: canonical_negative_parity_and_hard_val_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e3eff23816e2503e3f4acbdf80e07050e9ee8160"
+    source_path: analysis/p1_15m_ma_launch_negative_parity_hardval_20260827.md
+    sha256: "4242e11631410fed9636c142bb938dbc1bc47b995d4d1ccec2970a5f22425952"
+    size_bytes: 7101
+    storage_uri: "repo://analysis/p1_15m_ma_launch_negative_parity_hardval_20260827.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e3eff23816e2503e3f4acbdf80e07050e9ee8160"
+    config_hash: "c957c62e26bb825adb7d947a0245818b8889b0f40521010fae01b24bc574df29"
+    data_cutoff: "2026-05-03T22:45:00+00:00"
+
+  - artifact_id: 15m-ma-launch-t3-hardval-v1-html
+    artifact_type: report
+    role: owner_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e3eff23816e2503e3f4acbdf80e07050e9ee8160"
+    source_path: analysis/html/p1_15m_ma_launch_negative_parity_hardval_20260827.html
+    sha256: "968850b0d4db5001778a0def67b0584dd5a24260ef427d05bd66c9e28f7a4b15"
+    size_bytes: 339486
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_negative_parity_hardval_20260827.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e3eff23816e2503e3f4acbdf80e07050e9ee8160"
+    config_hash: "c957c62e26bb825adb7d947a0245818b8889b0f40521010fae01b24bc574df29"
+    data_cutoff: "2026-05-03T22:45:00+00:00"
+    notes: >-
+      Self-contained owner HTML embedding the deterministic hard-val contact
+      sheet, exact parity audit, capacity shortfall, FP comparison, reproduction
+      commands and risks.
+
   # ---- bounded holdout visual probe: recent daily absolute movers ---------
   - artifact_id: 15m-ma-launch-t3-daily-movers3d-v1-prereg
     artifact_type: config
