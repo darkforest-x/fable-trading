@@ -2738,3 +2738,23 @@ artifacts:
       Real Chromium passed 1440x1000 and 390x844 rendering with ten tables,
       three loaded embedded images, local table scrolling, no document-level
       horizontal overflow and zero console errors or warnings.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-v1-telegram-delivery
+    artifact_type: manifest
+    role: owner_group_preview_and_html_delivery_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "dbb0542fb3228b73add490de8e0e79f0850d89ea"
+    source_path: experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/telegram_delivery_receipt.json
+    sha256: "6c394913b57f52f2766d01e395b2068a09b9466a8a2bdc52867d4c0d138207d7"
+    size_bytes: 794
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/telegram_delivery_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f166703e843b5cfe597a3c0d8976a986bc64ad80"
+    config_hash: "813af93cc65abafd4ce60de1bf668ac8f25dbd653f13f151fa9662ab8f51af37"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Telegram accepted the hash-bound validation preview photo and the exact
+      browser-QA HTML document at 2026-08-26T06:40:18Z. The receipt contains no
+      credential material and keeps holdout and production flags false.
