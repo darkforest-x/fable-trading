@@ -98,13 +98,16 @@
     "train_hard_per_positive": 2,
     "val_easy_per_positive": 1,
     "val_hard_per_positive": 0,
-    "easy_definition": "Deterministic random same-source background matched to split and window-length distribution.",
+    "easy_definition": "Deterministic random same-source background matched to split and window-length distribution, restricted to the shared completed-no-launch condition.",
+    "completed_no_launch_condition": {
+      "pseudo_t_close_abs_atr_max_over_12_bars": 1.5,
+      "pseudo_t_two_sided_favorable_abs_atr_max_over_12_bars": 2.0,
+      "purpose": "Prevent an unselected completed launch from being sampled as easy or hard background. Future rows define the negative label only; they are not rendered as input."
+    },
     "hard_definition": {
       "same_source_and_split": true,
       "six_ma_bandwidth_pct_max": 1.243218,
-      "pseudo_t_close_abs_atr_max_over_12_bars": 1.5,
-      "pseudo_t_two_sided_favorable_abs_atr_max_over_12_bars": 2.0,
-      "purpose": "Dense six-MA rope without a completed launch in either direction. Future rows define the negative label only; they are not rendered as input."
+      "purpose": "Dense six-MA rope satisfying the shared completed-no-launch condition."
     },
     "positive_guard": {
       "before_core_bars": 12,
