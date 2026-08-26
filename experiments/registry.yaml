@@ -1301,3 +1301,54 @@ experiments:
       no OHLCV, made zero remote writes and created no trainable asset. Release
       still requires a complete review export and an Owner receipt bound to the
       exact review-summary and SHORT-preview hashes.
+
+  - experiment_id: exp-15m-ma-launch-t3-yolo10000-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bcb4c6c1ad032bd1223164d830146ce8b1bc7fb4"
+    status: accepted
+    question: >-
+      Under the Owner-authorized one-off weak-label release, can the frozen
+      10,000-candidate 15m pool be converted into a time-split t-3 small-window
+      YOLO dataset with matched no-launch negatives and variable box positions,
+      then trained reproducibly on the RTX 3060?
+    single_variable: >-
+      Owner-authorized execution bundle versus the prior zero-dataset blocked
+      state: candidate membership and retrieval thresholds stay frozen while
+      the declared t-3 geometry, matched negatives, chronological split and
+      YOLO11s training recipe are materialized exactly once.
+    result: >-
+      completed_preholdout_weak_label_training: 10,000 unique candidates
+      produced 9,938 positives after the 150-bar time purge, 9,938 matched easy
+      no-launch negatives and 16,936 train-only hard no-launch negatives, for
+      36,812 images. All 9,938 positive cores end exactly at t-3; core width is
+      4-7 bars, input width 14-22 bars, and 62 distinct rounded center positions
+      prevent one fixed-position shortcut. The RTX 3060 run early-stopped at
+      epoch 27 with best epoch 17; reloaded best.pt gives overall P 0.5341,
+      R 0.6073, mAP50 0.5887 and mAP50-95 0.33189 on 2,940 chronological val
+      images. This accepts completion and reproducibility only, not Gold label
+      quality, live-edge validity, economic value or production fitness.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_t3_yolo10000_20260826.md
+    artifacts:
+      - 15m-ma-launch-t3-yolo10000-v1-prereg
+      - 15m-ma-launch-t3-yolo10000-v1-dataset
+      - 15m-ma-launch-t3-yolo10000-v1-dataset-qa
+      - 15m-ma-launch-t3-yolo10000-v1-best-weights
+      - 15m-ma-launch-t3-yolo10000-v1-training-receipt
+      - 15m-ma-launch-t3-yolo10000-v1-validation-preview
+      - 15m-ma-launch-t3-yolo10000-v1-report
+      - 15m-ma-launch-t3-yolo10000-v1-html
+      - 15m-ma-launch-t3-yolo10000-v1-html-qa
+    reuse_allowed: false
+    notes: >-
+      The Owner explicitly overrode the wait-for-per-image-review stop and
+      instructed this whole collection/dataset/training bundle to finish. The
+      resulting positives remain owner_authorized_weak_labels_not_gold: labels
+      use completed paths through t+11 while pixels end no later than t+2, so
+      the model must not enter tip-smoke, forward, ACTIVE or deployment. The
+      dataset and weights are recorded training_eligible=false for any future
+      reuse because the one-off authorization does not silently become a Gold
+      release. Zero holdout OHLCV was read; no promote, forward, deployment,
+      ACTIVE/frozen or order state changed.

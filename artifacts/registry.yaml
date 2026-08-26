@@ -2553,3 +2553,188 @@ artifacts:
     notes: >-
       Owner-delivery HTML with three result/contract tables. Desktop 1440x1000
       and narrow 390x844 Chromium rendering passed with zero console errors.
+
+  # ---- pre-holdout 15m t-3 weak-label YOLO training --------------------
+  - artifact_id: 15m-ma-launch-t3-yolo10000-v1-prereg
+    artifact_type: config
+    role: frozen_owner_authorized_one_off_weak_label_training_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "63c6b47a81ec88450ab23a12d0e37e5ca4103d8e"
+    source_path: experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/preregistration.json
+    sha256: "813af93cc65abafd4ce60de1bf668ac8f25dbd653f13f151fa9662ab8f51af37"
+    size_bytes: 6575
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "63c6b47a81ec88450ab23a12d0e37e5ca4103d8e"
+    config_hash: "813af93cc65abafd4ce60de1bf668ac8f25dbd653f13f151fa9662ab8f51af37"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Freezes the exact 10,000 source identities, t-3 core right edge, W14-22,
+      core4-7, confirmation3-5, stable position distribution, chronological
+      split, 150-bar purge, easy1x plus hard2x train negatives and YOLO11s
+      recipe. It records a one-off weak-label authorization, never Gold or
+      production release.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-v1-dataset
+    artifact_type: dataset
+    role: owner_authorized_weak_label_detection_dataset
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b5676ebf5ae2dddda03f6d995819f4923a3229da"
+    source_path: datasets/ma_launch_t3_10000_v1/manifest.jsonl
+    sha256: "dd55246938b03c4b2013d159cdfee94b4e9db56ecb298ad30145eb5d1bc2bc3a"
+    size_bytes: 38401592
+    storage_uri: "file://datasets/ma_launch_t3_10000_v1"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b5676ebf5ae2dddda03f6d995819f4923a3229da"
+    config_hash: "813af93cc65abafd4ce60de1bf668ac8f25dbd653f13f151fa9662ab8f51af37"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Manifest identity for 36,812 image/label pairs: train 33,872 and val
+      2,940; positives 9,938, easy no-launch 9,938 and train-only hard
+      no-launch 16,936. The full directory is 1,595,383,625 bytes. Its one-off
+      completed training does not grant future training or Gold eligibility.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-v1-dataset-qa
+    artifact_type: manifest
+    role: exhaustive_dataset_identity_geometry_and_causality_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "57499b82fad5925d51767e766458fb2e746b61ee"
+    source_path: experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/dataset_qa_receipt.json
+    sha256: "0be647a44dd357c6f023bb84ecf58222f6e9ff8e75debf013099a0f196d9394e"
+    size_bytes: 1591
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/dataset_qa_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "57499b82fad5925d51767e766458fb2e746b61ee"
+    config_hash: "813af93cc65abafd4ce60de1bf668ac8f25dbd653f13f151fa9662ab8f51af37"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Exhaustively rehashed all 36,812 images and labels, checked exact t-3
+      geometry, split/purge boundaries, candidate guards and pairwise negative
+      isolation, decoded 512 deterministic samples, and passed the Ultralytics
+      dataset parser with zero holdout dependency.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-v1-best-weights
+    artifact_type: weights
+    role: completed_shape_weak_label_research_weights
+    source_repo: darkforest-x/fable-trading
+    source_commit: "51586e8421d895eb5fc5c01c81d101954d77c60d"
+    source_path: analysis/output/ma_launch_t3_10000_v1/ma_launch_t3_10000_v1_y11s_ft/weights/best.pt
+    sha256: "8b2e393ffa887b8284a5580f68df290963fccc08fb94cdc4e0fec0c2b1e40e10"
+    size_bytes: 19190554
+    storage_uri: "file://analysis/output/ma_launch_t3_10000_v1/ma_launch_t3_10000_v1_y11s_ft/weights/best.pt"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "51586e8421d895eb5fc5c01c81d101954d77c60d"
+    config_hash: "813af93cc65abafd4ce60de1bf668ac8f25dbd653f13f151fa9662ab8f51af37"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      RTX 3060 YOLO11s best epoch 17 after an epoch-27 patience stop. Reloaded
+      validation: P 0.5341, R 0.6073, mAP50 0.5887 and mAP50-95 0.33189.
+      Class names are dense_long and dense_short. Completed-path weak-label
+      research only; forbidden from ACTIVE, forward and deployment.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-v1-training-receipt
+    artifact_type: manifest
+    role: remote_environment_hash_and_final_validation_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8a8c7f92f42a54df204624427d1d6f38f1e6a54e"
+    source_path: experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/training_receipt.json
+    sha256: "8ab9f69bffe4cf81468e8f5088abd44d4f5c6107c5cfd7957dcbb17e6bf0aa74"
+    size_bytes: 3667
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/training_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "885f476be2b8d5cdcee6e1fa63f43bd401210600"
+    config_hash: "813af93cc65abafd4ce60de1bf668ac8f25dbd653f13f151fa9662ab8f51af37"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Binds exact RTX 3060 package versions, dataset staging hashes, remote exit
+      code zero, early-stop history, fetched best.pt/args/results/log byte hashes
+      and the final best.pt two-class validation metrics.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-v1-validation-preview
+    artifact_type: report
+    role: deterministic_best_weight_render_preview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8a8c7f92f42a54df204624427d1d6f38f1e6a54e"
+    source_path: experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/validation_preview.png
+    sha256: "5e005b63f130c599730cb74704eb878f23429d875313f6b30865fae82122fded"
+    size_bytes: 219096
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/validation_preview.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bca45cc6f7220ea65a14aa5adaff58937528a6b3"
+    config_hash: "813af93cc65abafd4ce60de1bf668ac8f25dbd653f13f151fa9662ab8f51af37"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Stable SHA selection of four LONG, four SHORT and eight matched easy
+      backgrounds at confidence 0.25. Three of eight positives render a box and
+      zero of eight backgrounds do; this is a chain/render check, not a metric.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-v1-report
+    artifact_type: report
+    role: canonical_preholdout_weak_label_training_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bcb4c6c1ad032bd1223164d830146ce8b1bc7fb4"
+    source_path: analysis/p1_15m_ma_launch_t3_yolo10000_20260826.md
+    sha256: "fdb4848a05e80c37eea679829dd49dd4b003f5cd6b85f1a80c44467bbe46519f"
+    size_bytes: 15732
+    storage_uri: "repo://analysis/p1_15m_ma_launch_t3_yolo10000_20260826.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bcb4c6c1ad032bd1223164d830146ce8b1bc7fb4"
+    config_hash: "813af93cc65abafd4ce60de1bf668ac8f25dbd653f13f151fa9662ab8f51af37"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Answer-first report with exact candidate/dataset counts, geometry and
+      negative contracts, time split, 3060 recipe, full val metrics, strict
+      non-economic controls, artifact hashes, reproducible commands and risks.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-v1-html
+    artifact_type: report
+    role: owner_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bcb4c6c1ad032bd1223164d830146ce8b1bc7fb4"
+    source_path: analysis/html/p1_15m_ma_launch_t3_yolo10000_20260826.html
+    sha256: "3880b3ac2722cd61689a08cc5e9e4f176945e6b7812c7a3c2f6a8c3f3a061d9e"
+    size_bytes: 940122
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_t3_yolo10000_20260826.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bcb4c6c1ad032bd1223164d830146ce8b1bc7fb4"
+    config_hash: "813af93cc65abafd4ce60de1bf668ac8f25dbd653f13f151fa9662ab8f51af37"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Self-contained owner HTML embedding the t-3 geometry contact sheet,
+      27-epoch training curves and fixed validation prediction preview.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-v1-html-qa
+    artifact_type: manifest
+    role: desktop_and_narrow_chromium_render_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bcb4c6c1ad032bd1223164d830146ce8b1bc7fb4"
+    source_path: experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/html_qa_receipt.json
+    sha256: "7e136d313889e7b438dce105f7aa7f0def070d96607b7042034da4a73a85ffec"
+    size_bytes: 1663
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/html_qa_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bcb4c6c1ad032bd1223164d830146ce8b1bc7fb4"
+    config_hash: "813af93cc65abafd4ce60de1bf668ac8f25dbd653f13f151fa9662ab8f51af37"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Real Chromium passed 1440x1000 and 390x844 rendering with ten tables,
+      three loaded embedded images, local table scrolling, no document-level
+      horizontal overflow and zero console errors or warnings.
