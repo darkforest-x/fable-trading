@@ -88,7 +88,7 @@
     "method": "global chronological cutoff with symmetric purge; never random",
     "cutoff": "2026-03-01T00:00:00Z",
     "purge_bars": 150,
-    "train_rule": "all rendered source rows end at or before cutoff minus 150 bars",
+    "train_rule": "all rendered input rows and all label-dependency rows through t+11 end at or before cutoff minus 150 bars",
     "val_rule": "all rendered source rows start at or after cutoff plus 150 bars",
     "between_rules": "drop",
     "same_symbol_cross_split_overlap_allowed": false
