@@ -7,6 +7,7 @@ from scripts.summarize_15m_ma_launch_t3_training import (
     EXPECTED_ARGS,
     TrainingSummaryError,
     best_metric_row,
+    parse_final_results_dict,
     parse_per_class,
     validate_args,
 )
@@ -56,3 +57,14 @@ def test_parse_per_class_takes_last_clean_or_ansi_row() -> None:
     parsed = parse_per_class(log)
     assert parsed["dense_long"]["map50_95"] == pytest.approx(0.74)
     assert parsed["dense_short"]["instances"] == 648
+
+
+def test_parse_final_results_dict_uses_reloaded_best_validation() -> None:
+    log = """
+    results_dict: {'metrics/precision(B)': 0.1, 'metrics/recall(B)': 0.2,
+    'metrics/mAP50(B)': 0.3, 'metrics/mAP50-95(B)': 0.4, 'fitness': 0.4}
+    results_dict: {'metrics/precision(B)': 0.53, 'metrics/recall(B)': 0.61, 'metrics/mAP50(B)': 0.59, 'metrics/mAP50-95(B)': 0.332, 'fitness': 0.332}
+    """.replace("\n    'metrics", " 'metrics")
+    parsed = parse_final_results_dict(log)
+    assert parsed["precision"] == pytest.approx(0.53)
+    assert parsed["map50_95"] == pytest.approx(0.332)

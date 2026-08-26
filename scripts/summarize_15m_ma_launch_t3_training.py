@@ -11,6 +11,7 @@ training curves.  All output remains research-only and production-ineligible.
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import re
@@ -154,6 +155,28 @@ def parse_per_class(log_text: str) -> dict[str, dict[str, Any]]:
     return output
 
 
+def parse_final_results_dict(log_text: str) -> dict[str, float]:
+    """Parse the final reloaded-best ``results_dict`` from the remote log."""
+
+    matches = re.findall(r"results_dict:\s*(\{[^\n]+\})", strip_ansi(log_text))
+    if not matches:
+        raise TrainingSummaryError("remote log has no final results_dict")
+    try:
+        raw = ast.literal_eval(matches[-1])
+    except (SyntaxError, ValueError) as exc:
+        raise TrainingSummaryError("final results_dict is not a Python literal") from exc
+    required = {
+        "metrics/precision(B)": "precision",
+        "metrics/recall(B)": "recall",
+        "metrics/mAP50(B)": "map50",
+        "metrics/mAP50-95(B)": "map50_95",
+        "fitness": "fitness",
+    }
+    if not set(required).issubset(raw):
+        raise TrainingSummaryError("final results_dict is missing detection metrics")
+    return {target: float(raw[source]) for source, target in required.items()}
+
+
 def metric_row(row: pd.Series) -> dict[str, float | int]:
     """Project one results.csv row into report metrics."""
 
@@ -266,6 +289,10 @@ def summarize(run: Path, out: Path, curve: Path) -> dict[str, Any]:
     for name, expected in expected_instances.items():
         if int(per_class[name]["instances"]) != expected:
             raise TrainingSummaryError(f"per-class instance count drifted for {name}")
+    best_model_final = parse_final_results_dict(log_text)
+    class_mean_map = sum(float(row["map50_95"]) for row in per_class.values()) / len(per_class)
+    if abs(best_model_final["map50_95"] - class_mean_map) > 0.001:
+        raise TrainingSummaryError("overall and per-class final mAP50-95 disagree")
 
     render_curves(frame, curve)
     payload: dict[str, Any] = {
@@ -279,6 +306,7 @@ def summarize(run: Path, out: Path, curve: Path) -> dict[str, Any]:
         "first": metric_row(frame.iloc[0]),
         "best": metric_row(best),
         "final": metric_row(frame.iloc[-1]),
+        "best_model_final_validation": best_model_final,
         "per_class_best_model_final_validation": per_class,
         "class_names": names,
         "fetched_files": file_receipts,

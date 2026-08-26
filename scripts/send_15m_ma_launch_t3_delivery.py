@@ -67,10 +67,11 @@ def deliver(
         raise DeliveryError("training receipt safety flags drifted")
     if sha256_file(preview) != preview_meta.get("preview_sha256"):
         raise DeliveryError("validation preview hash differs from its receipt")
-    best = training["best"]
+    best_epoch = training["best"]
+    best = training["best_model_final_validation"]
     caption = (
         "15m 六均线 t-3 弱标签 YOLO（研究用，未上线）\n"
-        f"best epoch {best['epoch']} | mAP50 {best['map50']:.4f} | "
+        f"best epoch {best_epoch['epoch']} | mAP50 {best['map50']:.4f} | "
         f"mAP50-95 {best['map50_95']:.4f}\n"
         "图中黄框=GT，绿/红框=模型预测。"
     )
@@ -94,7 +95,7 @@ def deliver(
         "preview_sha256": sha256_file(preview),
         "html_path": str(html),
         "html_sha256": sha256_file(html),
-        "caption_best_epoch": int(best["epoch"]),
+        "caption_best_epoch": int(best_epoch["epoch"]),
         "caption_map50": float(best["map50"]),
         "caption_map50_95": float(best["map50_95"]),
         "credentials_read_or_echoed_by_entrypoint": False,

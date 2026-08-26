@@ -24,6 +24,7 @@ def fixture_files(tmp_path: Path) -> dict[str, Path]:
                 "production_eligible": False,
                 "holdout_consumed": False,
                 "best": {"epoch": 7, "map50": 0.8, "map50_95": 0.6},
+                "best_model_final_validation": {"map50": 0.81, "map50_95": 0.61},
             }
         ),
         encoding="utf-8",
