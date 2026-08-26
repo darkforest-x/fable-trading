@@ -3034,3 +3034,167 @@ artifacts:
       Real Chromium passed 1440x1000 and 390x844 rendering with all four
       embedded images loaded, eight tables scrolling locally on narrow width,
       no document-level horizontal overflow and zero console errors/warnings.
+
+  # ---- 15m t-3 causal/review parity repair -------------------------------
+  - artifact_id: 15m-ma-launch-t3-review-parity-v2-prereg
+    artifact_type: config
+    role: frozen_non_destructive_review_parity_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a552a7762bebfd201c34061e3fecc30611da520e"
+    source_path: experiments/active/exp-15m-ma-launch-t3-review-parity-v2/preregistration.json
+    sha256: "f3926d8ba00f0b89f6ee2e3f437a4de4387cb8485c4359ef88c669de6aa68d3c"
+    size_bytes: 3178
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-review-parity-v2/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a552a7762bebfd201c34061e3fecc30611da520e"
+    config_hash: "f3926d8ba00f0b89f6ee2e3f437a4de4387cb8485c4359ef88c669de6aa68d3c"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Freezes exact source-manifest hashes, t-3 review marker semantics,
+      canonical training-pixel reuse, physical future-panel isolation and zero
+      authorization for dataset changes, training, holdout, promotion or runtime
+      state changes.
+
+  - artifact_id: 15m-ma-launch-t3-review-parity-v2-manifest
+    artifact_type: manifest
+    role: event_level_causal_review_lineage_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a552a7762bebfd201c34061e3fecc30611da520e"
+    source_path: experiments/active/exp-15m-ma-launch-t3-review-parity-v2/results/parity_manifest.jsonl
+    sha256: "f61cc05dd905fa563acffac49cb1e98973ff82dba8c00e2b32f8b00dd199106d"
+    size_bytes: 25958197
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-t3-review-parity-v2/results/parity_manifest.jsonl"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a552a7762bebfd201c34061e3fecc30611da520e"
+    config_hash: "f3926d8ba00f0b89f6ee2e3f437a4de4387cb8485c4359ef88c669de6aa68d3c"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Ten thousand event rows with explicit pool, t-3 marker index/time,
+      review-only PNG identity and canonical causal image/label identity where
+      present. 9,938 link training positives and 62 explicitly record purge
+      without a fabricated training image.
+
+  - artifact_id: 15m-ma-launch-t3-review-parity-v2-build-receipt
+    artifact_type: manifest
+    role: exhaustive_marker_pixel_lineage_and_safety_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a552a7762bebfd201c34061e3fecc30611da520e"
+    source_path: experiments/active/exp-15m-ma-launch-t3-review-parity-v2/results/verification_receipt.json
+    sha256: "97afac92b4ae48241997677f56b49d0308064098111cea587e99cd1526c8140d"
+    size_bytes: 1667
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-t3-review-parity-v2/results/verification_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a552a7762bebfd201c34061e3fecc30611da520e"
+    config_hash: "f3926d8ba00f0b89f6ee2e3f437a4de4387cb8485c4359ef88c669de6aa68d3c"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Records 10,000/10,000 exact t-3 review markers, first-1,000 re-render,
+      later-9,000 hash reuse, 9,938 byte-identical training-pixel links, zero
+      future-to-training use, zero holdout and zero model or dataset change.
+
+  - artifact_id: 15m-ma-launch-t3-review-parity-v2-html-qa
+    artifact_type: manifest
+    role: exhaustive_static_gallery_path_and_box_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2363fc3fc6773a4eea4d91edc03fc7cf13b7e7fa"
+    source_path: experiments/active/exp-15m-ma-launch-t3-review-parity-v2/results/html_qa_receipt.json
+    sha256: "8314c124d9c1fc6936ad472993017b6457fb59753ed4da2bc707d116a06c2fc6"
+    size_bytes: 525
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-t3-review-parity-v2/results/html_qa_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2363fc3fc6773a4eea4d91edc03fc7cf13b7e7fa"
+    config_hash: "f3926d8ba00f0b89f6ee2e3f437a4de4387cb8485c4359ef88c669de6aa68d3c"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Statically parses forty pages and verifies 10,000 cards, 19,938 image
+      references, 9,938 CSS label overlays, zero missing paths and zero invalid
+      box styles. Browser file-URL policy blocked navigation and no bypass was
+      attempted; overview visual inspection passed separately.
+
+  - artifact_id: 15m-ma-launch-t3-review-parity-v2-overview
+    artifact_type: report
+    role: owner_stratified_causal_and_completed_view_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a552a7762bebfd201c34061e3fecc30611da520e"
+    source_path: experiments/active/exp-15m-ma-launch-t3-review-parity-v2/results/comparison_overview.png
+    sha256: "34682728f188dda828a74424b5bad489e4d8e3f3ffa26a04c20a6e5a274d471f"
+    size_bytes: 646722
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-t3-review-parity-v2/results/comparison_overview.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a552a7762bebfd201c34061e3fecc30611da520e"
+    config_hash: "f3926d8ba00f0b89f6ee2e3f437a4de4387cb8485c4359ef88c669de6aa68d3c"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Twelve head/middle/tail examples across both pools and both directions.
+      Each cell stacks the exact causal training image plus label overlay over
+      the separate 48-bar t-3/original-t completed-path review image.
+
+  - artifact_id: 15m-ma-launch-t3-review-parity-v2-gallery
+    artifact_type: report
+    role: owner_full_causal_and_completed_view_gallery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a552a7762bebfd201c34061e3fecc30611da520e"
+    source_path: experiments/active/exp-15m-ma-launch-t3-review-parity-v2/results/index.html
+    sha256: "d3dc91d64d2838bcb87908c5c0b24c1c4590ef8dcd4c6e8e74c699776fd7b62e"
+    size_bytes: 4297
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-t3-review-parity-v2/results"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a552a7762bebfd201c34061e3fecc30611da520e"
+    config_hash: "f3926d8ba00f0b89f6ee2e3f437a4de4387cb8485c4359ef88c669de6aa68d3c"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Forty lazy-loading pages. Left panels directly reference canonical model
+      inputs with CSS-only YOLO overlays; right panels are physically separate
+      future-assisted human review images.
+
+  - artifact_id: 15m-ma-launch-t3-review-parity-v2-report
+    artifact_type: report
+    role: canonical_non_directional_review_lineage_repair_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5415426f92e1f6354ae3c551a068b892b614f642"
+    source_path: analysis/p1_15m_ma_launch_review_parity_v2_20260826.md
+    sha256: "e9615b715353c6952bcd1469e206f00eb5bcdde2614f3f4e5cfbb6be8cc9b752"
+    size_bytes: 8331
+    storage_uri: "repo://analysis/p1_15m_ma_launch_review_parity_v2_20260826.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5415426f92e1f6354ae3c551a068b892b614f642"
+    config_hash: "f3926d8ba00f0b89f6ee2e3f437a4de4387cb8485c4359ef88c669de6aa68d3c"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Answer-first Chinese report with exact source/output counts, old-versus-v2
+      comparison, non-economic null controls, browser-policy limitation,
+      reproducible commands and risks.
+
+  - artifact_id: 15m-ma-launch-t3-review-parity-v2-html
+    artifact_type: report
+    role: owner_delivery_self_contained_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5415426f92e1f6354ae3c551a068b892b614f642"
+    source_path: analysis/html/p1_15m_ma_launch_review_parity_v2_20260826.html
+    sha256: "d8ff8036af3580984f8a4bb42caddda375efbb27a00eb6f7a1c631b8b2b50794"
+    size_bytes: 874414
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_review_parity_v2_20260826.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5415426f92e1f6354ae3c551a068b892b614f642"
+    config_hash: "f3926d8ba00f0b89f6ee2e3f437a4de4387cb8485c4359ef88c669de6aa68d3c"
+    data_cutoff: "2026-05-03T23:45:00Z"
+    notes: >-
+      Self-contained owner-delivery HTML embedding the stratified comparison
+      overview and all audit tables; full 10,000-card gallery remains a local
+      sidecar to avoid embedding nearly twenty thousand images.

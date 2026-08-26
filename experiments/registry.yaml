@@ -1433,3 +1433,47 @@ experiments:
       production_eligible=false. V2 consumed its own exact configuration read
       #1; v1 separately consumed one failed taxonomy read. No tuning, training,
       promote, ACTIVE/frozen, forward, deployment or order state changed.
+
+  - experiment_id: exp-15m-ma-launch-t3-review-parity-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5415426f92e1f6354ae3c551a068b892b614f642"
+    status: accepted
+    question: >-
+      Can the first 1,000 review markers be corrected to t-3 and all 10,000
+      candidate reviews show the exact causal training pixels beside physically
+      isolated completed-path evidence without changing the dataset or model?
+    single_variable: >-
+      review representation only: re-render the first 1,000 review-only charts
+      at t-3, reuse the already-correct later 9,000, and pair each event with
+      its canonical training PNG plus CSS label overlay; candidate membership,
+      training pixels, labels, splits, weights and thresholds remain frozen
+    result: >-
+      accepted_review_lineage_repair: 10,000/10,000 rows now show a review
+      marker exactly three bars before selection t. The first 1,000 were
+      re-rendered from bounded pre-holdout OHLCV; 9,000 hash-verified t-3
+      charts were reused. 9,938 rows link byte-identical canonical training
+      PNGs and labels, while 62 purged events honestly have no causal panel.
+      Forty static pages contain 10,000 cards, 19,938 resolved image references
+      and 9,938 CSS boxes with zero missing references or invalid box styles.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_review_parity_v2_20260826.md
+    artifacts:
+      - 15m-ma-launch-t3-review-parity-v2-prereg
+      - 15m-ma-launch-t3-review-parity-v2-manifest
+      - 15m-ma-launch-t3-review-parity-v2-build-receipt
+      - 15m-ma-launch-t3-review-parity-v2-html-qa
+      - 15m-ma-launch-t3-review-parity-v2-overview
+      - 15m-ma-launch-t3-review-parity-v2-gallery
+      - 15m-ma-launch-t3-review-parity-v2-report
+      - 15m-ma-launch-t3-review-parity-v2-html
+    reuse_allowed: false
+    notes: >-
+      Accepted means the requested visual and lineage correction completed, not
+      that the weak t-3 labels became Gold or that the existing model improved.
+      Future t+1..t+17 remains review-only and never shares the causal image
+      coordinate system. Browser automation was blocked by the file-URL safety
+      policy; no bypass was attempted, and exhaustive static HTML/path/box QA
+      plus local overview inspection is recorded instead. No training, promote,
+      ACTIVE/frozen, forward, deployment or order state changed.
