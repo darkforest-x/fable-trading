@@ -1353,3 +1353,83 @@ experiments:
       reuse because the one-off authorization does not silently become a Gold
       release. Zero holdout OHLCV was read; no promote, forward, deployment,
       ACTIVE/frozen or order state changed.
+
+  - experiment_id: exp-15m-ma-launch-t3-daily-movers3d-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "18c76e39ff98a6a99afe83e30fdc4ffd0fff2f0f"
+    status: rejected
+    question: >-
+      On the three most recent complete UTC days, can the frozen t-3 detector
+      render the absolute daily-mover Top20 under the project's existing static
+      blocked/stockish name filters?
+    single_variable: >-
+      bounded recent-day visual probe under the legacy static asset exclusion;
+      detector weights, confidence, windows, geometry and deduplication frozen
+    result: >-
+      failed_closed_before_inference: the static filter admitted fourteen OKX
+      instCategory=3 equity/pre-IPO style instruments into the selected boards.
+      The configuration consumed its authorized holdout read #1, but scored
+      zero model windows, read zero predictions and rendered zero images.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_t3_daily_movers3d_20260826.md
+    artifacts:
+      - 15m-ma-launch-t3-daily-movers3d-v1-prereg
+      - 15m-ma-launch-t3-daily-movers3d-v1-fetch-receipt
+      - 15m-ma-launch-t3-daily-movers3d-v1-failure-receipt
+      - 15m-ma-launch-t3-daily-movers3d-v2-report
+    reuse_allowed: false
+    notes: >-
+      This is a recorded negative result, not a partial official board. The
+      contaminated rankings were discarded before inference and were not
+      repaired in place. V2 was separately preregistered with the sole semantic
+      change of intersecting current tickers with state=live, instCategory=1
+      exchange metadata.
+
+  - experiment_id: exp-15m-ma-launch-t3-daily-movers3d-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "180623f759742631058983ec4f3d906c1f776e67"
+    status: accepted
+    question: >-
+      Across the three most recent complete UTC days, where does the frozen
+      15m t-3 completed-shape detector fire inside each day's absolute crypto
+      mover Top20, and can the result be rendered and independently verified?
+    single_variable: >-
+      relative to rejected v1, only asset eligibility changes to the current
+      ticker/public-instrument intersection with state=live and instCategory=1;
+      weights, confidence 0.25, W14/18/22, core4-7, confirmation3-5 and five-bar
+      deduplication remain frozen
+    result: >-
+      completed_visual_probe_as_preregistered: 60 ranked symbol-days across 50
+      crypto instruments had exact 96-bar continuity. 18,180 windows produced
+      500 raw boxes, 495 structurally valid boxes and 96 five-bar-deduplicated
+      events: 72 LONG and 24 SHORT, with day counts 39/22/35 and 48/60 boards
+      containing at least one event. All snapshots, coordinates and four PNGs
+      passed independent offline verification and real-browser HTML QA.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_t3_daily_movers3d_20260826.md
+    artifacts:
+      - 15m-ma-launch-t3-daily-movers3d-v2-prereg
+      - 15m-ma-launch-t3-daily-movers3d-v2-fetch-receipt
+      - 15m-ma-launch-t3-daily-movers3d-v2-scan-receipt
+      - 15m-ma-launch-t3-daily-movers3d-v2-qa-receipt
+      - 15m-ma-launch-t3-daily-movers3d-v2-overview
+      - 15m-ma-launch-t3-daily-movers3d-v2-day-20260823
+      - 15m-ma-launch-t3-daily-movers3d-v2-day-20260824
+      - 15m-ma-launch-t3-daily-movers3d-v2-day-20260825
+      - 15m-ma-launch-t3-daily-movers3d-v2-report
+      - 15m-ma-launch-t3-daily-movers3d-v2-html
+      - 15m-ma-launch-t3-daily-movers3d-v2-html-qa
+    reuse_allowed: false
+    notes: >-
+      Accepted means the bounded visual scan and artifact contract completed,
+      not that trading edge passed. Same-day Top20 membership is post-hoc;
+      85/96 events agree with the already known final day direction, which is
+      descriptive completed-path behavior rather than live selection skill.
+      The frozen weights remain weak-label, training_eligible=false and
+      production_eligible=false. V2 consumed its own exact configuration read
+      #1; v1 separately consumed one failed taxonomy read. No tuning, training,
+      promote, ACTIVE/frozen, forward, deployment or order state changed.

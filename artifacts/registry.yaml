@@ -2758,3 +2758,279 @@ artifacts:
       Telegram accepted the hash-bound validation preview photo and the exact
       browser-QA HTML document at 2026-08-26T06:40:18Z. The receipt contains no
       credential material and keeps holdout and production flags false.
+
+  # ---- bounded holdout visual probe: recent daily absolute movers ---------
+  - artifact_id: 15m-ma-launch-t3-daily-movers3d-v1-prereg
+    artifact_type: config
+    role: rejected_static_asset_filter_holdout_scan_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "3f855cd7e563477c42f3d3ff16fb4bd112326b2e"
+    source_path: experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v1/preregistration.json
+    sha256: "35250c732e717d099a21b7e1035396ffe9e6122ac17c3bf061a4cd24b163caf4"
+    size_bytes: 3670
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v1/preregistration.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "3f855cd7e563477c42f3d3ff16fb4bd112326b2e"
+    config_hash: "35250c732e717d099a21b7e1035396ffe9e6122ac17c3bf061a4cd24b163caf4"
+    data_cutoff: "2026-08-25T23:45:00Z"
+    notes: >-
+      Exact v1 bounded holdout contract. Its static blocked/stockish name filter
+      admitted instCategory=3 instruments, so the configuration was rejected
+      before model inference and must not be reused.
+
+  - artifact_id: 15m-ma-launch-t3-daily-movers3d-v1-fetch-receipt
+    artifact_type: manifest
+    role: rejected_taxonomy_contaminated_fetch_identity
+    source_repo: darkforest-x/fable-trading
+    source_commit: "18c76e39ff98a6a99afe83e30fdc4ffd0fff2f0f"
+    source_path: experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v1/results/fetch_receipt.json
+    sha256: "fce31b79eb650ebea072eae81614aa375dfbfb143e81bc7494c65d6f13ab9ec5"
+    size_bytes: 44300
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v1/results/fetch_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "3f855cd7e563477c42f3d3ff16fb4bd112326b2e"
+    config_hash: "35250c732e717d099a21b7e1035396ffe9e6122ac17c3bf061a4cd24b163caf4"
+    data_cutoff: "2026-08-25T23:45:00Z"
+    notes: >-
+      Hash-bound evidence of the discarded v1 ranking and snapshots. It is
+      retained only to prove the failed holdout read and taxonomy diagnosis;
+      no inference or official image was derived from it.
+
+  - artifact_id: 15m-ma-launch-t3-daily-movers3d-v1-failure-receipt
+    artifact_type: manifest
+    role: fail_closed_asset_taxonomy_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "18c76e39ff98a6a99afe83e30fdc4ffd0fff2f0f"
+    source_path: experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v1/results/failure_receipt.json
+    sha256: "0aa4641b38e5492ee5428e3966244a1ba676f761272618d758214b380913fdff"
+    size_bytes: 1740
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v1/results/failure_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "18c76e39ff98a6a99afe83e30fdc4ffd0fff2f0f"
+    config_hash: "35250c732e717d099a21b7e1035396ffe9e6122ac17c3bf061a4cd24b163caf4"
+    data_cutoff: "2026-08-25T23:45:00Z"
+    notes: >-
+      Names all fourteen selected instCategory=3 instruments and records model
+      windows, predictions and renders as zero. V1 holdout consumption is not
+      erased by its fail-closed outcome.
+
+  - artifact_id: 15m-ma-launch-t3-daily-movers3d-v2-prereg
+    artifact_type: config
+    role: frozen_crypto_only_recent_daily_mover_scan_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "18c76e39ff98a6a99afe83e30fdc4ffd0fff2f0f"
+    source_path: experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/preregistration.json
+    sha256: "221a4a2981d913d96af60bc2a672414b7f356b4ed1a493392d29cb2c50f6e031"
+    size_bytes: 4199
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/preregistration.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "18c76e39ff98a6a99afe83e30fdc4ffd0fff2f0f"
+    config_hash: "221a4a2981d913d96af60bc2a672414b7f356b4ed1a493392d29cb2c50f6e031"
+    data_cutoff: "2026-08-25T23:45:00Z"
+    notes: >-
+      Freezes three complete UTC days, absolute-return Top20, exchange
+      state=live plus instCategory=1 eligibility, confidence 0.25, W14/18/22,
+      core4-7, confirmation3-5 and five-bar event deduplication.
+
+  - artifact_id: 15m-ma-launch-t3-daily-movers3d-v2-fetch-receipt
+    artifact_type: manifest
+    role: crypto_universe_ranking_and_15m_snapshot_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "180623f759742631058983ec4f3d906c1f776e67"
+    source_path: experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/fetch_receipt.json
+    sha256: "d84f1c898958d9e9b4ea217fd87bca7d7caf05adc85830647d53e93d143f7856"
+    size_bytes: 43432
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/fetch_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "18c76e39ff98a6a99afe83e30fdc4ffd0fff2f0f"
+    config_hash: "221a4a2981d913d96af60bc2a672414b7f356b4ed1a493392d29cb2c50f6e031"
+    data_cutoff: "2026-08-25T23:45:00Z"
+    notes: >-
+      Binds 274 eligible live crypto swaps, 60 ranked symbol-days, 50 unique
+      selected instruments, 24,250 disposable context bars and 60/60 exact
+      96-bar ranked days with zero gaps.
+
+  - artifact_id: 15m-ma-launch-t3-daily-movers3d-v2-scan-receipt
+    artifact_type: manifest
+    role: frozen_detector_window_event_and_render_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "180623f759742631058983ec4f3d906c1f776e67"
+    source_path: experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/scan_receipt.json
+    sha256: "e098246868e9e71bdd352235b625a69ad27b8c89945179f83a95d3a3720bc106"
+    size_bytes: 23687
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/scan_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "18c76e39ff98a6a99afe83e30fdc4ffd0fff2f0f"
+    config_hash: "221a4a2981d913d96af60bc2a672414b7f356b4ed1a493392d29cb2c50f6e031"
+    data_cutoff: "2026-08-25T23:45:00Z"
+    notes: >-
+      Binds weight SHA 8b2e393f...e40e10, 18,180 scored windows, 500 raw
+      boxes, 495 structural boxes, 399 dedup removals and 96 final events with
+      exact signal/stats and four-render identities.
+
+  - artifact_id: 15m-ma-launch-t3-daily-movers3d-v2-qa-receipt
+    artifact_type: manifest
+    role: offline_snapshot_geometry_hash_and_safety_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "180623f759742631058983ec4f3d906c1f776e67"
+    source_path: experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/qa_receipt.json
+    sha256: "352ea61624cb3260983f43e3fe7dffb395edf7cb40bccae0bcd143c9ccd6dbee"
+    size_bytes: 2730
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/qa_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7c407163c8908b3359f9cace5cdb874478b750af"
+    config_hash: "221a4a2981d913d96af60bc2a672414b7f356b4ed1a493392d29cb2c50f6e031"
+    data_cutoff: "2026-08-25T23:45:00Z"
+    notes: >-
+      Network-free verifier rehashed all fifty OHLCV snapshots, checked all
+      sixty ranked-day continuity contracts, all ninety-six event coordinates
+      and dedup gaps, class/count reconciliation and all four PNGs.
+
+  - artifact_id: 15m-ma-launch-t3-daily-movers3d-v2-overview
+    artifact_type: report
+    role: owner_three_day_rank_and_detection_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "180623f759742631058983ec4f3d906c1f776e67"
+    source_path: experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/overview.png
+    sha256: "749b5213f8164e1f76583071e32a4e698e7a0d097fe6a0c756193e43a6495f96"
+    size_bytes: 189294
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/overview.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "18c76e39ff98a6a99afe83e30fdc4ffd0fff2f0f"
+    config_hash: "221a4a2981d913d96af60bc2a672414b7f356b4ed1a493392d29cb2c50f6e031"
+    data_cutoff: "2026-08-25T23:45:00Z"
+    notes: >-
+      1800x1100 compact summary of all sixty rank/return rows and per-symbol
+      LONG/SHORT detection counts; explicitly marked post-hoc.
+
+  - artifact_id: 15m-ma-launch-t3-daily-movers3d-v2-day-20260823
+    artifact_type: report
+    role: owner_full_day_top20_detection_render
+    source_repo: darkforest-x/fable-trading
+    source_commit: "180623f759742631058983ec4f3d906c1f776e67"
+    source_path: experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/day_20260823_top20.png
+    sha256: "5fc4d71caed08479f888fc23e88cdec2c3befb2f37f68e36f2760c91174d22c9"
+    size_bytes: 842630
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/day_20260823_top20.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "18c76e39ff98a6a99afe83e30fdc4ffd0fff2f0f"
+    config_hash: "221a4a2981d913d96af60bc2a672414b7f356b4ed1a493392d29cb2c50f6e031"
+    data_cutoff: "2026-08-23T23:45:00Z"
+    notes: >-
+      1520x4824 full 20-panel UTC-day render with 39 deduplicated events:
+      36 LONG and 3 SHORT.
+
+  - artifact_id: 15m-ma-launch-t3-daily-movers3d-v2-day-20260824
+    artifact_type: report
+    role: owner_full_day_top20_detection_render
+    source_repo: darkforest-x/fable-trading
+    source_commit: "180623f759742631058983ec4f3d906c1f776e67"
+    source_path: experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/day_20260824_top20.png
+    sha256: "c8d3175c7a9f02bd4eaa11125ce9a9526c459fdaf176e0042ed8bdbf5c17646d"
+    size_bytes: 912399
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/day_20260824_top20.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "18c76e39ff98a6a99afe83e30fdc4ffd0fff2f0f"
+    config_hash: "221a4a2981d913d96af60bc2a672414b7f356b4ed1a493392d29cb2c50f6e031"
+    data_cutoff: "2026-08-24T23:45:00Z"
+    notes: >-
+      1520x4824 full 20-panel UTC-day render with 22 deduplicated events:
+      12 LONG and 10 SHORT.
+
+  - artifact_id: 15m-ma-launch-t3-daily-movers3d-v2-day-20260825
+    artifact_type: report
+    role: owner_full_day_top20_detection_render
+    source_repo: darkforest-x/fable-trading
+    source_commit: "180623f759742631058983ec4f3d906c1f776e67"
+    source_path: experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/day_20260825_top20.png
+    sha256: "484f5c05248eab82eb531c0dcb2ea5b139efba57f690630508f2d78b98a10d4c"
+    size_bytes: 899585
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/day_20260825_top20.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "18c76e39ff98a6a99afe83e30fdc4ffd0fff2f0f"
+    config_hash: "221a4a2981d913d96af60bc2a672414b7f356b4ed1a493392d29cb2c50f6e031"
+    data_cutoff: "2026-08-25T23:45:00Z"
+    notes: >-
+      1520x4824 full 20-panel UTC-day render with 35 deduplicated events:
+      24 LONG and 11 SHORT.
+
+  - artifact_id: 15m-ma-launch-t3-daily-movers3d-v2-report
+    artifact_type: report
+    role: canonical_bounded_holdout_visual_probe_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "180623f759742631058983ec4f3d906c1f776e67"
+    source_path: analysis/p1_15m_ma_launch_t3_daily_movers3d_20260826.md
+    sha256: "60991b96068109c5d803bd32d91fcc3ccf14e93b708e7c40630373f64225af63"
+    size_bytes: 13894
+    storage_uri: "repo://analysis/p1_15m_ma_launch_t3_daily_movers3d_20260826.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "180623f759742631058983ec4f3d906c1f776e67"
+    config_hash: "221a4a2981d913d96af60bc2a672414b7f356b4ed1a493392d29cb2c50f6e031"
+    data_cutoff: "2026-08-25T23:45:00Z"
+    notes: >-
+      Answer-first Chinese report with all sixty board rows, four renders,
+      detector/geometry counts, v1 failure closure, exact dual configuration
+      holdout usage, non-economic controls, reproducible commands and risks.
+
+  - artifact_id: 15m-ma-launch-t3-daily-movers3d-v2-html
+    artifact_type: report
+    role: owner_delivery_self_contained_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "180623f759742631058983ec4f3d906c1f776e67"
+    source_path: analysis/html/p1_15m_ma_launch_t3_daily_movers3d_20260826.html
+    sha256: "7aae87953275ea3fda97b4ceb2d225c429009adc5829a39d2bf322a08974708c"
+    size_bytes: 3812345
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_t3_daily_movers3d_20260826.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "180623f759742631058983ec4f3d906c1f776e67"
+    config_hash: "221a4a2981d913d96af60bc2a672414b7f356b4ed1a493392d29cb2c50f6e031"
+    data_cutoff: "2026-08-25T23:45:00Z"
+    notes: >-
+      Self-contained 3.81 MB HTML embedding the overview and all three tall
+      daily panels; no external image dependency.
+
+  - artifact_id: 15m-ma-launch-t3-daily-movers3d-v2-html-qa
+    artifact_type: manifest
+    role: desktop_and_narrow_chromium_render_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "180623f759742631058983ec4f3d906c1f776e67"
+    source_path: experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/html_qa_receipt.json
+    sha256: "a1f92abee25e9d7016968b7a7f443fc67f9cb173f5e05598b12e0d7ee19638df"
+    size_bytes: 2343
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/html_qa_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "180623f759742631058983ec4f3d906c1f776e67"
+    config_hash: "221a4a2981d913d96af60bc2a672414b7f356b4ed1a493392d29cb2c50f6e031"
+    data_cutoff: "2026-08-25T23:45:00Z"
+    notes: >-
+      Real Chromium passed 1440x1000 and 390x844 rendering with all four
+      embedded images loaded, eight tables scrolling locally on narrow width,
+      no document-level horizontal overflow and zero console errors/warnings.
