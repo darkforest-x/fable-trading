@@ -1,0 +1,80 @@
+{
+  "protocol": "ma6_launch_t3_daily_abs_crypto_movers3d_v2_20260826",
+  "experiment_id": "exp-15m-ma-launch-t3-daily-movers3d-v2",
+  "verifier_commit": "7c407163c8908b3359f9cace5cdb874478b750af",
+  "generated_at": "2026-08-26T11:04:12.574947+00:00",
+  "holdout_consumption_number_for_this_configuration": 1,
+  "network_reads_during_verification": 0,
+  "fetch_receipt_sha256": "d84f1c898958d9e9b4ea217fd87bca7d7caf05adc85830647d53e93d143f7856",
+  "scan_receipt_sha256": "e098246868e9e71bdd352235b625a69ad27b8c89945179f83a95d3a3720bc106",
+  "ranked_symbol_days": 60,
+  "ranked_days": [
+    "2026-08-23T00:00:00+00:00",
+    "2026-08-24T00:00:00+00:00",
+    "2026-08-25T00:00:00+00:00"
+  ],
+  "snapshot_summary": {
+    "snapshot_files": 50,
+    "snapshot_rows": 24250,
+    "exact_days": 60
+  },
+  "signal_summary": {
+    "signals": 96,
+    "class_counts": {
+      "dense_long": 72,
+      "dense_short": 24
+    },
+    "direction_aligned": 85,
+    "direction_aligned_rate": 0.885417,
+    "confidence_mean": 0.327072,
+    "confidence_median": 0.317006
+  },
+  "scan_totals": {
+    "windows_scored": 18180,
+    "raw_boxes": 500,
+    "accepted_before_dedup": 495,
+    "dedup_removed": 399,
+    "deduplicated_events": 96
+  },
+  "verified_pngs": [
+    {
+      "path": "experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/overview.png",
+      "sha256": "749b5213f8164e1f76583071e32a4e698e7a0d097fe6a0c756193e43a6495f96",
+      "width": 1800,
+      "height": 1100
+    },
+    {
+      "path": "experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/day_20260823_top20.png",
+      "sha256": "5fc4d71caed08479f888fc23e88cdec2c3befb2f37f68e36f2760c91174d22c9",
+      "width": 1520,
+      "height": 4824
+    },
+    {
+      "path": "experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/day_20260824_top20.png",
+      "sha256": "c8d3175c7a9f02bd4eaa11125ce9a9526c459fdaf176e0042ed8bdbf5c17646d",
+      "width": 1520,
+      "height": 4824
+    },
+    {
+      "path": "experiments/active/exp-15m-ma-launch-t3-daily-movers3d-v2/results/day_20260825_top20.png",
+      "sha256": "484f5c05248eab82eb531c0dcb2ea5b139efba57f690630508f2d78b98a10d4c",
+      "width": 1520,
+      "height": 4824
+    }
+  ],
+  "checks_passed": [
+    "artifact_hashes",
+    "three_complete_utc_top20_boards",
+    "live_crypto_instcategory1_universe_receipt",
+    "fifty_snapshot_hashes",
+    "sixty_exact_96_bar_contiguous_symbol_days",
+    "ohlcv_invariants",
+    "core4_to_7_and_confirmation3_to_5_geometry",
+    "five_bar_event_deduplication",
+    "class_and_count_reconciliation",
+    "four_png_decode_dimensions_and_hashes",
+    "post_hoc_and_non_production_disclosures"
+  ],
+  "training_or_tuning": false,
+  "production_eligible": false
+}
