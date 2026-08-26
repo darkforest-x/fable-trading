@@ -122,6 +122,12 @@ def main() -> None:
     parser.add_argument("--results", type=Path, default=DEFAULT_RESULTS)
     parser.add_argument("--device", default="mps")
     parser.add_argument("--batch", type=int, default=16)
+    parser.add_argument("--weights", type=Path)
+    parser.add_argument("--weights-sha256")
+    parser.add_argument("--imgsz", type=int)
+    parser.add_argument("--confidence", type=float)
+    parser.add_argument("--experiment-id")
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     contract, _ = load_contract(args.prereg.resolve())
     base_rows = load_base_manifest(contract)
@@ -139,8 +145,19 @@ def main() -> None:
     ]
     easy_paths, easy_ids = _paths(easy_rows, root=base_root)
     hard_paths, hard_ids = _paths(hard_rows, root=hard_root)
-    weights = Path(contract["sources"]["weights"]["path"]).resolve()
-    if sha256_file(weights) != str(contract["sources"]["weights"]["sha256"]):
+    weights = (
+        args.weights.resolve()
+        if args.weights is not None
+        else Path(contract["sources"]["weights"]["path"]).resolve()
+    )
+    if args.weights is not None and not args.weights_sha256:
+        raise ValueError("--weights requires --weights-sha256")
+    expected_weights_sha256 = (
+        str(args.weights_sha256)
+        if args.weights_sha256
+        else str(contract["sources"]["weights"]["sha256"])
+    )
+    if sha256_file(weights) != expected_weights_sha256:
         raise RuntimeError("frozen weight hash drifted")
 
     import torch
@@ -148,8 +165,12 @@ def main() -> None:
     from ultralytics import YOLO
 
     config = contract["evaluation"]
-    confidence = float(config["confidence_threshold"])
-    imgsz = int(config["imgsz"])
+    confidence = (
+        float(args.confidence)
+        if args.confidence is not None
+        else float(config["confidence_threshold"])
+    )
+    imgsz = int(args.imgsz) if args.imgsz is not None else int(config["imgsz"])
     model = YOLO(str(weights))
     easy = _evaluate(
         model,
@@ -170,7 +191,7 @@ def main() -> None:
         batch=args.batch,
     )
     receipt = {
-        "experiment_id": contract["experiment_id"],
+        "experiment_id": args.experiment_id or contract["experiment_id"],
         "weights_path": str(weights),
         "weights_sha256": sha256_file(weights),
         "device": args.device,
@@ -201,7 +222,12 @@ def main() -> None:
         "promoted": False,
         "production_eligible": False,
     }
-    output = args.results.resolve() / "hard_val_evaluation.json"
+    output = (
+        args.output.resolve()
+        if args.output is not None
+        else args.results.resolve() / "hard_val_evaluation.json"
+    )
+    output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
         json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
