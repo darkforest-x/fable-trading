@@ -15,6 +15,7 @@ import ast
 import hashlib
 import json
 import re
+import subprocess
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -75,6 +76,28 @@ EXPECTED_ARGS: dict[str, Any] = {
 
 class TrainingSummaryError(ValueError):
     """Fail-closed fetched-training verification error."""
+
+
+def committed_generator() -> str:
+    """Bind the receipt to the committed summarizer actually executing it."""
+
+    branch = subprocess.check_output(
+        ["git", "branch", "--show-current"], cwd=ROOT, text=True
+    ).strip()
+    if branch != "main":
+        raise TrainingSummaryError("training summarizer must run on main")
+    relative = str(Path(__file__).resolve().relative_to(ROOT))
+    dirty = subprocess.check_output(
+        ["git", "status", "--short", "--", relative], cwd=ROOT, text=True
+    ).strip()
+    if dirty:
+        raise TrainingSummaryError(f"training summarizer is not committed: {dirty}")
+    commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+    ).strip()
+    if not re.fullmatch(r"[0-9a-f]{40}", commit):
+        raise TrainingSummaryError("could not resolve summarizer commit")
+    return commit
 
 
 def sha256_file(path: Path) -> str:
@@ -242,6 +265,7 @@ def render_curves(frame: pd.DataFrame, out: Path) -> None:
 def summarize(run: Path, out: Path, curve: Path) -> dict[str, Any]:
     """Verify fetched identity, parse metrics, load weights and write evidence."""
 
+    summarizer_commit = committed_generator()
     paths = {
         "best.pt": run / "weights" / "best.pt",
         "args.yaml": run / "args.yaml",
@@ -297,6 +321,7 @@ def summarize(run: Path, out: Path, curve: Path) -> dict[str, Any]:
     render_curves(frame, curve)
     payload: dict[str, Any] = {
         "experiment_id": "exp-15m-ma-launch-t3-yolo10000-v1",
+        "summarizer_commit": summarizer_commit,
         "run_name": RUN_NAME,
         "remote_host": "Administrator@192.168.1.5",
         "gpu": "NVIDIA GeForce RTX 3060 12GB",
