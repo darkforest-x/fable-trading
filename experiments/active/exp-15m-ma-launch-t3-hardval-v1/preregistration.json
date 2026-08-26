@@ -1,0 +1,92 @@
+{
+  "experiment_id": "exp-15m-ma-launch-t3-hardval-v1",
+  "protocol": "ma6_launch_t3_hardval_sidecar_v1_20260827",
+  "created_at": "2026-08-27T00:30:00+08:00",
+  "owner_authorization": {
+    "conversation_date": "2026-08-27",
+    "scope": "Add a hard-negative validation surface and audit whether the negative images share the earlier review-scale or t-3 marker defects.",
+    "existing_dataset_mutation_authorized": false,
+    "model_training_authorized": false,
+    "diagnostic_evaluation_authorized": true,
+    "production_or_promotion_authorized": false
+  },
+  "sources": {
+    "base_preregistration": {
+      "path": "experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/preregistration.json",
+      "sha256": "813af93cc65abafd4ce60de1bf668ac8f25dbd653f13f151fa9662ab8f51af37"
+    },
+    "base_dataset": {
+      "root": "datasets/ma_launch_t3_10000_v1",
+      "manifest": "datasets/ma_launch_t3_10000_v1/manifest.jsonl",
+      "manifest_sha256": "dd55246938b03c4b2013d159cdfee94b4e9db56ecb298ad30145eb5d1bc2bc3a",
+      "manifest_rows": 36812,
+      "val_positive_rows": 1470,
+      "existing_negative_rows": 26874
+    },
+    "weights": {
+      "path": "analysis/output/ma_launch_t3_10000_v1/ma_launch_t3_10000_v1_y11s_ft/weights/best.pt",
+      "sha256": "8b2e393ffa887b8284a5580f68df290963fccc08fb94cdc4e0fec0c2b1e40e10"
+    },
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0
+  },
+  "single_variable": "negative validation type: existing easy no-launch backgrounds versus newly sampled dense-rope no-launch backgrounds; model, renderer, time split, W14-22 and confirmation 3-5 remain frozen",
+  "hard_validation_contract": {
+    "target_per_val_positive": 1,
+    "ratio_is_soft": true,
+    "minimum_acceptable_rows": 1400,
+    "same_source_and_val_split": true,
+    "match_each_source_positive_window_length_and_confirmation": true,
+    "exclude_every_candidate_guard": true,
+    "exclude_every_existing_negative_window": true,
+    "new_windows_pairwise_disjoint": true,
+    "six_ma_bandwidth_pct_max": 1.243218,
+    "pseudo_t_close_abs_atr_max_over_12_bars": 1.5,
+    "pseudo_t_two_sided_favorable_abs_atr_max_over_12_bars": 2.0,
+    "future_label_latest_offset_from_pseudo_t": 11,
+    "input_latest_offset_from_pseudo_t_choices": [
+      0,
+      1,
+      2
+    ],
+    "capacity_policy": "Keep every exclusion and split rule. If exact 1:1 capacity fails, record the unmatched positive; never cross symbols, reuse windows, shrink guards or read holdout."
+  },
+  "renderer": {
+    "entry": "yoyo.layers.l1_detection.render.render_chart",
+    "width": 1280,
+    "height": 742,
+    "training_pixels_contain_annotations": false,
+    "labels_are_empty_yolo_txt": true,
+    "gallery_is_review_only": true
+  },
+  "evaluation": {
+    "comparison": "all existing val easy negatives versus all new val hard negatives",
+    "confidence_threshold": 0.25,
+    "imgsz": 960,
+    "primary_metrics": [
+      "fired_images",
+      "fire_rate",
+      "boxes",
+      "false_boxes_per_1000_images"
+    ],
+    "threshold_tuning": false
+  },
+  "outputs": {
+    "dataset": "datasets/ma_launch_t3_hardval_v1",
+    "results": "experiments/active/exp-15m-ma-launch-t3-hardval-v1/results",
+    "canonical_report": "analysis/p1_15m_ma_launch_negative_parity_hardval_20260827.md",
+    "canonical_html": "analysis/html/p1_15m_ma_launch_negative_parity_hardval_20260827.html"
+  },
+  "safety": {
+    "holdout_read": false,
+    "base_dataset_change": false,
+    "model_training": false,
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
