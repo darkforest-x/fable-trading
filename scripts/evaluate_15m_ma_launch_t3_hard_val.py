@@ -52,37 +52,47 @@ def _evaluate(
     class_counts: Counter[int] = Counter()
     confidences: list[float] = []
     fired_rows: list[dict[str, Any]] = []
-    predictions = model.predict(
-        source=[str(path) for path in paths],
-        imgsz=imgsz,
-        conf=confidence,
-        batch=batch,
-        device=device,
-        stream=True,
-        verbose=False,
-        save=False,
-    )
     seen = 0
-    for sample_id, result in zip(sample_ids, predictions):
-        seen += 1
-        boxes = result.boxes
-        count = 0 if boxes is None else len(boxes)
-        if count == 0:
-            continue
-        fired += 1
-        boxes_total += count
-        confs = boxes.conf.detach().cpu().numpy().astype(float).tolist()
-        classes = boxes.cls.detach().cpu().numpy().astype(int).tolist()
-        confidences.extend(confs)
-        class_counts.update(classes)
-        fired_rows.append(
-            {
-                "sample_id": sample_id,
-                "boxes": count,
-                "max_confidence": max(confs),
-                "classes": classes,
-            }
+    # A single list with thousands of paths is interpreted by Ultralytics as
+    # one in-memory source batch before its own batch iterator runs.  Explicit
+    # fixed-size chunks prevent a multi-GiB preprocessing buffer on MPS.
+    for start in range(0, len(paths), batch):
+        chunk_paths = paths[start : start + batch]
+        chunk_ids = sample_ids[start : start + batch]
+        predictions = model.predict(
+            source=[str(path) for path in chunk_paths],
+            imgsz=imgsz,
+            conf=confidence,
+            batch=batch,
+            device=device,
+            stream=False,
+            verbose=False,
+            save=False,
         )
+        if len(predictions) != len(chunk_paths):
+            raise RuntimeError(
+                f"prediction chunk ended early: {len(predictions)}/{len(chunk_paths)}"
+            )
+        for sample_id, result in zip(chunk_ids, predictions):
+            seen += 1
+            boxes = result.boxes
+            count = 0 if boxes is None else len(boxes)
+            if count == 0:
+                continue
+            fired += 1
+            boxes_total += count
+            confs = boxes.conf.detach().cpu().numpy().astype(float).tolist()
+            classes = boxes.cls.detach().cpu().numpy().astype(int).tolist()
+            confidences.extend(confs)
+            class_counts.update(classes)
+            fired_rows.append(
+                {
+                    "sample_id": sample_id,
+                    "boxes": count,
+                    "max_confidence": max(confs),
+                    "classes": classes,
+                }
+            )
     if seen != len(paths):
         raise RuntimeError(f"prediction stream ended early: {seen}/{len(paths)}")
     values = np.asarray(confidences, dtype=float)

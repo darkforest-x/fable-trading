@@ -1354,6 +1354,54 @@ experiments:
       release. Zero holdout OHLCV was read; no promote, forward, deployment,
       ACTIVE/frozen or order state changed.
 
+  - experiment_id: exp-15m-ma-launch-t3-hardval-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "3b5de03f131714340b08b42693b397e3dd072024"
+    status: accepted
+    question: >-
+      Do the original 26,874 negative images share the review-scale or t-3
+      marker defects found in the positive review surface, and can the missing
+      hard-negative validation surface be added without mutating the frozen
+      dataset or weakening source/time/exclusion rules?
+    single_variable: >-
+      negative validation type only: existing easy no-launch backgrounds versus
+      newly sampled dense-rope no-launch backgrounds; frozen weights, conf=0.25,
+      renderer, W14-22, confirmation3-5, time split and holdout boundary unchanged
+    result: >-
+      negative_marker_defect_absent_and_hardval_sidecar_completed. Original
+      negatives have zero marker/core/box fields and all 26,874 labels are empty.
+      Their short-window scale differs from 48-bar review charts only across
+      purposes; positive/easy/hard use the identical renderer and exactly matched
+      W/C distributions, so there is no negative-only scale shortcut. A separate
+      1,469-row hard-val sidecar was built against a 1,470 target; the sole BSB
+      shortfall is a proven safe-capacity limit. All images/labels hash, all
+      1,469 images decode 1280x742, and overlap with candidate guards, existing
+      negatives and each other is zero. Frozen-model fires were 4/1470 easy
+      versus 4/1469 hard (Fisher p=1.0); this is a false-fire diagnostic, not
+      Gold validation or production evidence.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_negative_parity_hardval_20260827.md
+    artifacts:
+      - 15m-ma-launch-t3-hardval-v1-prereg
+      - 15m-ma-launch-t3-hardval-v1-dataset
+      - 15m-ma-launch-t3-hardval-v1-build-receipt
+      - 15m-ma-launch-t3-hardval-v1-qa
+      - 15m-ma-launch-t3-hardval-v1-evaluation
+      - 15m-ma-launch-t3-hardval-v1-preview
+      - 15m-ma-launch-t3-hardval-v1-gallery
+      - 15m-ma-launch-t3-hardval-v1-report
+      - 15m-ma-launch-t3-hardval-v1-html
+    reuse_allowed: true
+    notes: >-
+      Reuse is limited to the exact pre-holdout false-positive diagnostic. The
+      sidecar remains machine-rule weak labels, contains only empty labels and
+      cannot supply recall/mAP, threshold tuning, training authorization, Gold
+      status, ACTIVE/forward eligibility or promotion evidence. Browser QA of
+      file:// was policy-blocked and not bypassed; static QA resolved all 1,469
+      cards and image references, and the contact sheet passed local visual QA.
+
   - experiment_id: exp-15m-ma-launch-t3-daily-movers3d-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "18c76e39ff98a6a99afe83e30fdc4ffd0fff2f0f"

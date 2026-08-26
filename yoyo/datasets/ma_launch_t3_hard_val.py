@@ -581,4 +581,3 @@ def build_hard_val(
     }
     _write_json(results_path / "build_receipt.json", receipt)
     return receipt
-

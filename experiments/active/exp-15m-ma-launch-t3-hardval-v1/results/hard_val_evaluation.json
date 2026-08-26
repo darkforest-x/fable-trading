@@ -1,0 +1,124 @@
+{
+  "active_or_frozen_changed": false,
+  "batch": 16,
+  "confidence_threshold": 0.25,
+  "device": "mps",
+  "easy_val": {
+    "boxes": 5,
+    "class_box_counts": {
+      "0": 5
+    },
+    "confidence": {
+      "max": 0.3279463052749634,
+      "median": 0.26147380471229553,
+      "min": 0.2527432143688202,
+      "p90": 0.3191249370574951
+    },
+    "false_boxes_per_1000_images": 3.401360544217687,
+    "fire_rate": 0.0027210884353741495,
+    "fired_images": 4,
+    "fired_samples": [
+      {
+        "boxes": 2,
+        "classes": [
+          0,
+          0
+        ],
+        "max_confidence": 0.3279463052749634,
+        "sample_id": "786da4ad0b9ac47419185968"
+      },
+      {
+        "boxes": 1,
+        "classes": [
+          0
+        ],
+        "max_confidence": 0.3058928847312927,
+        "sample_id": "4cceebdeaf48d20adce6af33"
+      },
+      {
+        "boxes": 1,
+        "classes": [
+          0
+        ],
+        "max_confidence": 0.26147380471229553,
+        "sample_id": "f85e082cb243e998d63998ee"
+      },
+      {
+        "boxes": 1,
+        "classes": [
+          0
+        ],
+        "max_confidence": 0.25584736466407776,
+        "sample_id": "cd2bf9e4cda9ae617055747b"
+      }
+    ],
+    "images": 1470
+  },
+  "environment": {
+    "numpy": "2.0.2",
+    "python": "3.9.6",
+    "torch": "2.8.0",
+    "ultralytics": "8.4.89"
+  },
+  "experiment_id": "exp-15m-ma-launch-t3-hardval-v1",
+  "hard_minus_easy_fire_rate_pp": 0.0001852340663971528,
+  "hard_to_easy_false_boxes_per_1000_ratio": 0.8005445881552076,
+  "hard_val": {
+    "boxes": 4,
+    "class_box_counts": {
+      "0": 4
+    },
+    "confidence": {
+      "max": 0.32677674293518066,
+      "median": 0.27845636010169983,
+      "min": 0.25123071670532227,
+      "p90": 0.3186085134744644
+    },
+    "false_boxes_per_1000_images": 2.722940776038121,
+    "fire_rate": 0.002722940776038121,
+    "fired_images": 4,
+    "fired_samples": [
+      {
+        "boxes": 1,
+        "classes": [
+          0
+        ],
+        "max_confidence": 0.32677674293518066,
+        "sample_id": "160a96bbeeb7a18ef13a0c45"
+      },
+      {
+        "boxes": 1,
+        "classes": [
+          0
+        ],
+        "max_confidence": 0.29954931139945984,
+        "sample_id": "0691d9f38555c43e2b3e6bf2"
+      },
+      {
+        "boxes": 1,
+        "classes": [
+          0
+        ],
+        "max_confidence": 0.2573634088039398,
+        "sample_id": "8b8e37b3965d56ee0466cc5f"
+      },
+      {
+        "boxes": 1,
+        "classes": [
+          0
+        ],
+        "max_confidence": 0.25123071670532227,
+        "sample_id": "8da4a86313b238e1bf97cb37"
+      }
+    ],
+    "images": 1469
+  },
+  "holdout_consumed": false,
+  "imgsz": 960,
+  "model_trained": false,
+  "production_eligible": false,
+  "promoted": false,
+  "threshold_tuned": false,
+  "weights_path": "/Users/zhangzc/fable-trading/analysis/output/ma_launch_t3_10000_v1/ma_launch_t3_10000_v1_y11s_ft/weights/best.pt",
+  "weights_sha256": "8b2e393ffa887b8284a5580f68df290963fccc08fb94cdc4e0fec0c2b1e40e10"
+}
