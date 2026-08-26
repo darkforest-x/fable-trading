@@ -26,6 +26,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 RUN_NAME = "ma_launch_t3_10000_v1_y11s_ft"
+EXPERIMENT_ID = "exp-15m-ma-launch-t3-yolo10000-v1"
+REMOTE_DATASET_NAME = "ma_launch_t3_10000_v1"
 DEFAULT_RUN = ROOT / "analysis" / "output" / "ma_launch_t3_10000_v1" / RUN_NAME
 DEFAULT_RESULTS = (
     ROOT
@@ -116,24 +118,34 @@ def strip_ansi(value: str) -> str:
     return re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", value).replace("\r", "\n")
 
 
-def validate_args(args: Mapping[str, Any]) -> None:
+def validate_args(
+    args: Mapping[str, Any],
+    *,
+    expected_imgsz: int = 960,
+    run_name: str = RUN_NAME,
+    remote_dataset_name: str = REMOTE_DATASET_NAME,
+) -> None:
     """Require the exact preregistered training and safe-augmentation recipe."""
 
+    expected_args = dict(EXPECTED_ARGS)
+    expected_args["imgsz"] = int(expected_imgsz)
     drift = {
         key: {"expected": expected, "actual": args.get(key)}
-        for key, expected in EXPECTED_ARGS.items()
+        for key, expected in expected_args.items()
         if args.get(key) != expected
     }
     if drift:
         raise TrainingSummaryError(f"remote args drifted: {drift}")
-    if Path(str(args.get("name", ""))).name != RUN_NAME:
+    if Path(str(args.get("name", ""))).name != run_name:
         raise TrainingSummaryError("unexpected remote run name")
     normalized_data = str(args.get("data", "")).replace("\\", "/")
-    if not normalized_data.endswith("/datasets/ma_launch_t3_10000_v1/data.yaml"):
+    if not normalized_data.endswith(f"/datasets/{remote_dataset_name}/data.yaml"):
         raise TrainingSummaryError("remote data path is not the frozen t-3 dataset")
 
 
-def read_remote_hashes(path: Path) -> dict[str, dict[str, Any]]:
+def read_remote_hashes(
+    path: Path, *, run_name: str = RUN_NAME
+) -> dict[str, dict[str, Any]]:
     """Parse PowerShell ``path|size|sha|mtime`` lines from the fetch receipt."""
 
     rows: dict[str, dict[str, Any]] = {}
@@ -148,7 +160,13 @@ def read_remote_hashes(path: Path) -> dict[str, dict[str, Any]]:
             "sha256": parts[2],
             "remote_mtime_utc": parts[3],
         }
-    required = {"best.pt", "args.yaml", "results.csv", f"{RUN_NAME}.log", f"{RUN_NAME}.exit_code"}
+    required = {
+        "best.pt",
+        "args.yaml",
+        "results.csv",
+        f"{run_name}.log",
+        f"{run_name}.exit_code",
+    }
     if not required.issubset(rows):
         raise TrainingSummaryError(
             f"remote hash receipt is incomplete: missing {sorted(required - set(rows))}"
@@ -262,7 +280,17 @@ def render_curves(frame: pd.DataFrame, out: Path) -> None:
     plt.close(figure)
 
 
-def summarize(run: Path, out: Path, curve: Path) -> dict[str, Any]:
+def summarize(
+    run: Path,
+    out: Path,
+    curve: Path,
+    *,
+    run_name: str = RUN_NAME,
+    experiment_id: str = EXPERIMENT_ID,
+    expected_imgsz: int = 960,
+    remote_dataset_name: str = REMOTE_DATASET_NAME,
+    remote_host: str = "Administrator@192.168.1.5",
+) -> dict[str, Any]:
     """Verify fetched identity, parse metrics, load weights and write evidence."""
 
     summarizer_commit = committed_generator()
@@ -270,7 +298,7 @@ def summarize(run: Path, out: Path, curve: Path) -> dict[str, Any]:
         "best.pt": run / "weights" / "best.pt",
         "args.yaml": run / "args.yaml",
         "results.csv": run / "results.csv",
-        f"{RUN_NAME}.log": run / "train.log",
+        f"{run_name}.log": run / "train.log",
         "remote_training_receipt.txt": run / "remote_training_receipt.txt",
     }
     for name, path in paths.items():
@@ -278,15 +306,22 @@ def summarize(run: Path, out: Path, curve: Path) -> dict[str, Any]:
             raise FileNotFoundError(f"missing fetched artifact {name}: {path}")
 
     args = yaml.safe_load(paths["args.yaml"].read_text(encoding="utf-8"))
-    validate_args(args)
+    validate_args(
+        args,
+        expected_imgsz=expected_imgsz,
+        run_name=run_name,
+        remote_dataset_name=remote_dataset_name,
+    )
     frame = pd.read_csv(paths["results.csv"])
     best = best_metric_row(frame)
-    remote = read_remote_hashes(paths["remote_training_receipt.txt"])
+    remote = read_remote_hashes(
+        paths["remote_training_receipt.txt"], run_name=run_name
+    )
     local_remote_names = {
         "best.pt": "best.pt",
         "args.yaml": "args.yaml",
         "results.csv": "results.csv",
-        f"{RUN_NAME}.log": f"{RUN_NAME}.log",
+        f"{run_name}.log": f"{run_name}.log",
     }
     file_receipts: dict[str, dict[str, Any]] = {}
     for local_name, remote_name in local_remote_names.items():
@@ -303,7 +338,9 @@ def summarize(run: Path, out: Path, curve: Path) -> dict[str, Any]:
     if names != {0: "dense_long", 1: "dense_short"}:
         raise TrainingSummaryError(f"unexpected model classes: {names}")
 
-    log_text = paths[f"{RUN_NAME}.log"].read_text(encoding="utf-8", errors="replace")
+    log_text = paths[f"{run_name}.log"].read_text(
+        encoding="utf-8", errors="replace"
+    )
     if "[launcher] exit_code=0" not in log_text:
         raise TrainingSummaryError("remote log has no successful launcher exit")
     per_class = parse_per_class(log_text)
@@ -320,10 +357,10 @@ def summarize(run: Path, out: Path, curve: Path) -> dict[str, Any]:
 
     render_curves(frame, curve)
     payload: dict[str, Any] = {
-        "experiment_id": "exp-15m-ma-launch-t3-yolo10000-v1",
+        "experiment_id": experiment_id,
         "summarizer_commit": summarizer_commit,
-        "run_name": RUN_NAME,
-        "remote_host": "Administrator@192.168.1.5",
+        "run_name": run_name,
+        "remote_host": remote_host,
         "gpu": "NVIDIA GeForce RTX 3060 12GB",
         "epochs_requested": 40,
         "epochs_completed": len(frame),
@@ -335,7 +372,7 @@ def summarize(run: Path, out: Path, curve: Path) -> dict[str, Any]:
         "per_class_best_model_final_validation": per_class,
         "class_names": names,
         "fetched_files": file_receipts,
-        "remote_exit": remote[f"{RUN_NAME}.exit_code"],
+        "remote_exit": remote[f"{run_name}.exit_code"],
         "curve_sha256": sha256_file(curve),
         "curve_size_bytes": curve.stat().st_size,
         "args_contract_passed": True,
@@ -356,8 +393,22 @@ def main() -> None:
     parser.add_argument("--run", type=Path, default=DEFAULT_RUN)
     parser.add_argument("--out", type=Path, default=DEFAULT_RESULTS / "training_receipt.json")
     parser.add_argument("--curve", type=Path, default=DEFAULT_RESULTS / "training_curves.png")
+    parser.add_argument("--run-name", default=RUN_NAME)
+    parser.add_argument("--experiment-id", default=EXPERIMENT_ID)
+    parser.add_argument("--expected-imgsz", type=int, default=960)
+    parser.add_argument("--remote-dataset-name", default=REMOTE_DATASET_NAME)
+    parser.add_argument("--remote-host", default="Administrator@192.168.1.5")
     args = parser.parse_args()
-    payload = summarize(args.run.resolve(), args.out.resolve(), args.curve.resolve())
+    payload = summarize(
+        args.run.resolve(),
+        args.out.resolve(),
+        args.curve.resolve(),
+        run_name=args.run_name,
+        experiment_id=args.experiment_id,
+        expected_imgsz=args.expected_imgsz,
+        remote_dataset_name=args.remote_dataset_name,
+        remote_host=args.remote_host,
+    )
     print(json.dumps(payload, ensure_ascii=False, indent=2))
 
 

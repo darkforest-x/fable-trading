@@ -1,0 +1,124 @@
+{
+  "protocol": "ma6_launch_t3_owner_authorized_weak_yolo10000_imgsz1280_v1_20260827",
+  "experiment_id": "exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1",
+  "created_at": "2026-08-27T00:44:44+08:00",
+  "question": "Holding the frozen weak-label dataset and the complete YOLO recipe fixed, does using the source PNG width as imgsz=1280 improve the pre-holdout validation behavior relative to imgsz=960?",
+  "owner_authorization": {
+    "conversation_date": "2026-08-27",
+    "owner_exact_words": "ok 重新去训练吧",
+    "context": "Owner first inspected deterministic samples of the exact 1280x742 training PNGs, then explicitly authorized retraining with the original-resolution setup discussed immediately before this instruction.",
+    "classification": "owner_authorized_weak_labels_not_gold",
+    "training_authorized": true,
+    "production_or_promotion_authorized": false
+  },
+  "baseline": {
+    "experiment_id": "exp-15m-ma-launch-t3-yolo10000-v1",
+    "preregistration": {
+      "path": "experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/preregistration.json",
+      "sha256": "813af93cc65abafd4ce60de1bf668ac8f25dbd653f13f151fa9662ab8f51af37"
+    },
+    "training_receipt": {
+      "path": "experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/training_receipt.json",
+      "sha256": "8ab9f69bffe4cf81468e8f5088abd44d4f5c6107c5cfd7957dcbb17e6bf0aa74"
+    },
+    "imgsz": 960,
+    "best_model_final_validation": {
+      "precision": 0.5341051096421747,
+      "recall": 0.60730377579526,
+      "map50": 0.5887420435848747,
+      "map50_95": 0.3318891704049788
+    }
+  },
+  "single_variable": {
+    "name": "native training and validation imgsz",
+    "baseline": 960,
+    "treatment": 1280,
+    "all_other_training_arguments_identical": true,
+    "source_pngs_rebuilt": false,
+    "source_png_dimensions": [1280, 742]
+  },
+  "immutable_inputs": {
+    "dataset": "datasets/ma_launch_t3_10000_v1",
+    "manifest_sha256": "dd55246938b03c4b2013d159cdfee94b4e9db56ecb298ad30145eb5d1bc2bc3a",
+    "build_summary_sha256": "3e16331836cad20fb62c27b73b8506353ec3bc75b7df846de815fc06eab16142",
+    "dataset_build_receipt_sha256": "28c597c396b8edbc3dc7cfa978276b0ea3d1eda935f33c8340b2a842567fe9ef",
+    "dataset_qa_receipt_sha256": "0be647a44dd357c6f023bb84ecf58222f6e9ff8e75debf013099a0f196d9394e",
+    "images": 36812,
+    "labels": 36812,
+    "train_images": 33872,
+    "val_images": 2940,
+    "positive_weak": 9938,
+    "negative_easy": 9938,
+    "negative_hard_train": 16936,
+    "split": "unchanged global chronological split with 150-bar purge",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_rows_allowed": 0
+  },
+  "training": {
+    "remote_host_discovery_required": true,
+    "gpu": "NVIDIA GeForce RTX 3060 12GB",
+    "base_model": "models/yolo11s.pt",
+    "base_model_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+    "trainer": "src/detection/train.py",
+    "trainer_sha256": "4ec54f1ee956c2d17ef9d5a2877a7872310ad886636fd08003159d8c143d2aa5",
+    "epochs": 40,
+    "patience": 10,
+    "batch": 8,
+    "imgsz": 1280,
+    "optimizer": "AdamW",
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "warmup_epochs": 0.5,
+    "seed": 0,
+    "deterministic": true,
+    "rect": true,
+    "cache": false,
+    "workers": 2,
+    "run_name": "ma_launch_t3_10000_v1_y11s_ft_imgsz1280",
+    "augmentations": {
+      "fliplr": 0.0,
+      "flipud": 0.0,
+      "mosaic": 0.0,
+      "mixup": 0.0,
+      "copy_paste": 0.0,
+      "hsv_h": 0.0,
+      "hsv_s": 0.0,
+      "hsv_v": 0.0,
+      "degrees": 0.0,
+      "translate": 0.02,
+      "scale": 0.1,
+      "shear": 0.0,
+      "perspective": 0.0,
+      "erasing": 0.0
+    }
+  },
+  "evaluation": {
+    "primary": "same frozen pre-holdout chronological val split; compare native-resolution best-model precision, recall, mAP50 and mAP50-95 against the preregistered 960 baseline",
+    "resolution_crosscheck": "After training, evaluate both the 960 and 1280 weights at imgsz 960 and 1280 without tuning to separate training-resolution and inference-resolution effects.",
+    "negative_surfaces": [
+      "original easy-val negatives",
+      "evaluation-only ma_launch_t3_hardval_v1 sidecar"
+    ],
+    "confidence_threshold": 0.25,
+    "threshold_tuning": false,
+    "holdout": false,
+    "production_decision": false
+  },
+  "outputs": {
+    "experiment_results": "experiments/active/exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1/results",
+    "local_run": "analysis/output/ma_launch_t3_10000_v1/ma_launch_t3_10000_v1_y11s_ft_imgsz1280",
+    "canonical_report": "analysis/p1_15m_ma_launch_t3_yolo10000_imgsz1280_20260827.md",
+    "canonical_html": "analysis/html/p1_15m_ma_launch_t3_yolo10000_imgsz1280_20260827.html"
+  },
+  "safety": {
+    "weak_labels_are_gold": false,
+    "holdout_read": false,
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}

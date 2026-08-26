@@ -15,10 +15,13 @@ REMOTE_PY="$REMOTE/.venv/Scripts/python.exe"
 DATASET="datasets/ma_launch_t3_10000_v1"
 MODEL="models/yolo11s.pt"
 TRAINER="src/detection/train.py"
-PREREG="experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/preregistration.json"
+EXPERIMENT_ID="${FABLE_T3_EXPERIMENT_ID:-exp-15m-ma-launch-t3-yolo10000-v1}"
+PREREG="${FABLE_T3_PREREG:-experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/preregistration.json}"
 BUILD_RECEIPT="experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/dataset_build_receipt.json"
 QA_RECEIPT="experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/dataset_qa_receipt.json"
-NAME="ma_launch_t3_10000_v1_y11s_ft"
+NAME="${FABLE_T3_RUN_NAME:-ma_launch_t3_10000_v1_y11s_ft}"
+IMGSZ="${FABLE_T3_IMGSZ:-960}"
+REMOTE_DATASET_NAME="${FABLE_T3_REMOTE_DATASET_NAME:-ma_launch_t3_10000_v1}"
 MODE="run"
 SSH=(ssh -o BatchMode=yes -o ConnectTimeout=15)
 SCP=(scp -o BatchMode=yes -o ConnectTimeout=15 -q)
@@ -170,15 +173,44 @@ for path in "$MODEL" "$TRAINER" "$PREREG" "$BUILD_RECEIPT" "$QA_RECEIPT" \
 done
 QA_PASSED="$("$LOCAL_PY" -c 'import json;print(json.load(open("experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/dataset_qa_receipt.json"))["passed"])')"
 [[ "$QA_PASSED" == True ]] || die "dataset QA receipt is not passed"
+PREREG_GATE="$("$LOCAL_PY" -c '
+import json,sys
+p=json.load(open(sys.argv[1], encoding="utf-8"))
+assert p["experiment_id"] == sys.argv[2], "experiment_id mismatch"
+assert p["training"]["run_name"] == sys.argv[3], "run_name mismatch"
+assert int(p["training"]["imgsz"]) == int(sys.argv[4]), "imgsz mismatch"
+assert p["owner_authorization"]["training_authorized"] is True, "training not authorized"
+assert p["safety"]["holdout_read"] is False, "holdout must stay sealed"
+assert p["safety"]["promote"] is False, "promotion must stay disabled"
+print("PREREG_OK")
+' "$PREREG" "$EXPERIMENT_ID" "$NAME" "$IMGSZ")" || die "preregistration gate failed"
+[[ "$PREREG_GATE" == PREREG_OK ]] || die "preregistration gate returned no exact sentinel"
 
 DATASET_BASE="$(basename "$DATASET")"
 MODEL_SHA="$(shasum -a 256 "$MODEL" | awk '{print $1}')"
 TRAINER_SHA="$(shasum -a 256 "$TRAINER" | awk '{print $1}')"
 PREREG_SHA="$(shasum -a 256 "$PREREG" | awk '{print $1}')"
+BUILD_SHA="$(shasum -a 256 "$BUILD_RECEIPT" | awk '{print $1}')"
+QA_SHA="$(shasum -a 256 "$QA_RECEIPT" | awk '{print $1}')"
 MANIFEST_SHA="$(shasum -a 256 "$DATASET/manifest.jsonl" | awk '{print $1}')"
 SUMMARY_SHA="$(shasum -a 256 "$DATASET/build_summary.json" | awk '{print $1}')"
 YAML_SHA="$(shasum -a 256 "$DATASET/data.yaml" | awk '{print $1}')"
-REMOTE_DATASET="$REMOTE/datasets/$DATASET_BASE"
+INPUT_GATE="$("$LOCAL_PY" -c '
+import json,sys
+p=json.load(open(sys.argv[1], encoding="utf-8"))
+f=p.get("immutable_inputs")
+if f is not None:
+    assert f["manifest_sha256"] == sys.argv[2], "manifest hash mismatch"
+    assert f["build_summary_sha256"] == sys.argv[3], "build summary hash mismatch"
+    assert f["dataset_build_receipt_sha256"] == sys.argv[4], "build receipt hash mismatch"
+    assert f["dataset_qa_receipt_sha256"] == sys.argv[5], "QA receipt hash mismatch"
+assert p["training"]["base_model_sha256"] == sys.argv[6], "model hash mismatch"
+if "trainer_sha256" in p["training"]:
+    assert p["training"]["trainer_sha256"] == sys.argv[7], "trainer hash mismatch"
+print("INPUTS_OK")
+' "$PREREG" "$MANIFEST_SHA" "$SUMMARY_SHA" "$BUILD_SHA" "$QA_SHA" "$MODEL_SHA" "$TRAINER_SHA")" || die "immutable input gate failed"
+[[ "$INPUT_GATE" == INPUTS_OK ]] || die "immutable input gate returned no exact sentinel"
+REMOTE_DATASET="$REMOTE/datasets/$REMOTE_DATASET_NAME"
 REMOTE_MODEL="$REMOTE/inputs/$MODEL_SHA/yolo11s.pt"
 REMOTE_TRAINER="$REMOTE/train_t3_$TRAINER_SHA.py"
 REMOTE_PREREG="$REMOTE/experiments/$NAME/preregistration.json"
@@ -196,8 +228,8 @@ TMP_CMD="$(mktemp -t fable_t3_cmd)"
   printf '@echo off\r\nsetlocal\r\n'
   printf '> C:\\fable\\logs\\%s.log echo [launcher] started %%DATE%% %%TIME%%\r\n' "$NAME"
   printf 'cd /d C:\\fable\r\n'
-  printf 'C:\\fable\\.venv\\Scripts\\python.exe -u C:\\fable\\train_t3_%s.py --name %s --model C:/fable/inputs/%s/yolo11s.pt --data C:/fable/datasets/%s/data.yaml --epochs 40 --patience 10 --batch 8 --seed 0 --finetune --cache false --workers 2 >> C:\\fable\\logs\\%s.log 2>&1\r\n' \
-    "$TRAINER_SHA" "$NAME" "$MODEL_SHA" "$DATASET_BASE" "$NAME"
+  printf 'C:\\fable\\.venv\\Scripts\\python.exe -u C:\\fable\\train_t3_%s.py --name %s --model C:/fable/inputs/%s/yolo11s.pt --data C:/fable/datasets/%s/data.yaml --epochs 40 --patience 10 --batch 8 --imgsz %s --seed 0 --finetune --cache false --workers 2 >> C:\\fable\\logs\\%s.log 2>&1\r\n' \
+    "$TRAINER_SHA" "$NAME" "$MODEL_SHA" "$REMOTE_DATASET_NAME" "$IMGSZ" "$NAME"
   printf 'set RC=%%ERRORLEVEL%%\r\n'
   printf '>> C:\\fable\\logs\\%s.log echo [launcher] exit_code=%%RC%% %%DATE%% %%TIME%%\r\n' "$NAME"
   printf '> C:\\fable\\logs\\%s.exit_code echo %%RC%%\r\n' "$NAME"
@@ -248,11 +280,24 @@ try {
   Remove-Item -LiteralPath '$REMOTE/incoming_$NAME.tar' -Force -ErrorAction SilentlyContinue
 }
 Assert-Hash '$REMOTE/incoming_${NAME}_model.pt' '$MODEL_SHA' 'model'
-Move-Item -LiteralPath '$REMOTE/incoming_${NAME}_model.pt' -Destination '$REMOTE_MODEL'
+if (Test-Path -LiteralPath '$REMOTE_MODEL') {
+  Assert-Hash '$REMOTE_MODEL' '$MODEL_SHA' 'existing model'
+  Remove-Item -LiteralPath '$REMOTE/incoming_${NAME}_model.pt' -Force
+} else {
+  Move-Item -LiteralPath '$REMOTE/incoming_${NAME}_model.pt' -Destination '$REMOTE_MODEL'
+}
 Assert-Hash '$REMOTE/incoming_${NAME}_trainer.py' '$TRAINER_SHA' 'trainer'
-Move-Item -LiteralPath '$REMOTE/incoming_${NAME}_trainer.py' -Destination '$REMOTE_TRAINER'
+if (Test-Path -LiteralPath '$REMOTE_TRAINER') {
+  Assert-Hash '$REMOTE_TRAINER' '$TRAINER_SHA' 'existing trainer'
+  Remove-Item -LiteralPath '$REMOTE/incoming_${NAME}_trainer.py' -Force
+} else {
+  Move-Item -LiteralPath '$REMOTE/incoming_${NAME}_trainer.py' -Destination '$REMOTE_TRAINER'
+}
+Assert-Hash '$REMOTE/incoming_${NAME}_prereg.json' '$PREREG_SHA' 'preregistration'
 Move-Item -LiteralPath '$REMOTE/incoming_${NAME}_prereg.json' -Destination '$REMOTE_PREREG'
+Assert-Hash '$REMOTE/incoming_${NAME}_build.json' '$BUILD_SHA' 'dataset build receipt'
 Move-Item -LiteralPath '$REMOTE/incoming_${NAME}_build.json' -Destination '$REMOTE_BUILD'
+Assert-Hash '$REMOTE/incoming_${NAME}_qa.json' '$QA_SHA' 'dataset QA receipt'
 Move-Item -LiteralPath '$REMOTE/incoming_${NAME}_qa.json' -Destination '$REMOTE_QA'
 Assert-Hash '$REMOTE/incoming_${NAME}.cmd' '$BATCH_SHA' 'launcher'
 Move-Item -LiteralPath '$REMOTE/incoming_${NAME}.cmd' -Destination '$REMOTE_BATCH'

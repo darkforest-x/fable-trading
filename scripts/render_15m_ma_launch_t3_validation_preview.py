@@ -142,6 +142,8 @@ def render(
     receipt: Path,
     device: str | None,
     conf: float,
+    imgsz: int = 960,
+    experiment_id: str = "exp-15m-ma-launch-t3-yolo10000-v1",
 ) -> dict[str, Any]:
     """Predict the deterministic preview set and write image/hash evidence."""
 
@@ -173,7 +175,7 @@ def render(
         raise PreviewError("weight class names drifted")
     predictions = model.predict(
         source=[str(path) for path in image_paths],
-        imgsz=960,
+        imgsz=int(imgsz),
         conf=float(conf),
         iou=0.7,
         device=device,
@@ -245,9 +247,10 @@ def render(
     if not ok:
         raise OSError(f"OpenCV failed to write {out}")
     payload = {
-        "experiment_id": "exp-15m-ma-launch-t3-yolo10000-v1",
+        "experiment_id": experiment_id,
         "selection": {"dense_long": 4, "dense_short": 4, "negative_easy": 8},
         "confidence_threshold": float(conf),
+        "imgsz": int(imgsz),
         "device": device,
         "weight_sha256": sha256_file(weight_path),
         "manifest_sha256": sha256_file(manifest_path),
@@ -270,6 +273,10 @@ def main() -> None:
     parser.add_argument("--receipt", type=Path, default=DEFAULT_RESULTS / "validation_preview_receipt.json")
     parser.add_argument("--device", default=None)
     parser.add_argument("--conf", type=float, default=0.25)
+    parser.add_argument("--imgsz", type=int, default=960)
+    parser.add_argument(
+        "--experiment-id", default="exp-15m-ma-launch-t3-yolo10000-v1"
+    )
     args = parser.parse_args()
     payload = render(
         run=args.run.resolve(),
@@ -278,6 +285,8 @@ def main() -> None:
         receipt=args.receipt.resolve(),
         device=args.device,
         conf=args.conf,
+        imgsz=args.imgsz,
+        experiment_id=args.experiment_id,
     )
     print(json.dumps(payload, ensure_ascii=False, indent=2))
 

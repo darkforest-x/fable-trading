@@ -3,6 +3,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "train_15m_ma_launch_t3_on_3060.sh"
+IMGSZ1280_SCRIPT = ROOT / "scripts" / "train_15m_ma_launch_t3_imgsz1280_on_3060.sh"
+IMGSZ1280_PREREG = (
+    ROOT
+    / "experiments"
+    / "active"
+    / "exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1"
+    / "preregistration.json"
+)
 
 
 def source() -> str:
@@ -46,3 +54,82 @@ def test_fetch_keeps_the_full_remote_training_log() -> None:
     text = source()
     assert '"$HOST:/C:/fable/logs/$NAME.log" "$local_run/train.log"' in text
     assert "remote_training_receipt.txt" in text
+
+
+def test_shared_launcher_binds_dynamic_contract_before_start() -> None:
+    text = source()
+    for token in (
+        "FABLE_T3_EXPERIMENT_ID",
+        "FABLE_T3_PREREG",
+        "FABLE_T3_RUN_NAME",
+        "FABLE_T3_IMGSZ",
+        "PREREG_OK",
+        "INPUTS_OK",
+        'training_authorized"] is True',
+        'safety"]["holdout_read"] is False',
+        'safety"]["promote"] is False',
+        "--imgsz %s",
+    ):
+        assert token in text
+    assert text.index("PREREG_GATE=") < text.index("package 36,812-image immutable dataset")
+
+
+def test_shared_launcher_verifies_content_addressed_remote_reuse() -> None:
+    text = source()
+    assert "Assert-Hash '$REMOTE_MODEL' '$MODEL_SHA' 'existing model'" in text
+    assert "Assert-Hash '$REMOTE_TRAINER' '$TRAINER_SHA' 'existing trainer'" in text
+    assert "Assert-Hash '$REMOTE/incoming_${NAME}_prereg.json' '$PREREG_SHA'" in text
+    assert "Assert-Hash '$REMOTE/incoming_${NAME}_build.json' '$BUILD_SHA'" in text
+    assert "Assert-Hash '$REMOTE/incoming_${NAME}_qa.json' '$QA_SHA'" in text
+
+
+def test_imgsz1280_wrapper_selects_only_the_preregistered_treatment() -> None:
+    text = IMGSZ1280_SCRIPT.read_text(encoding="utf-8")
+    assert 'FABLE_T3_IMGSZ="1280"' in text
+    assert 'FABLE_T3_RUN_NAME="ma_launch_t3_10000_v1_y11s_ft_imgsz1280"' in text
+    assert 'FABLE_T3_REMOTE_DATASET_NAME="ma_launch_t3_10000_v1_imgsz1280_input"' in text
+    assert text.rstrip().endswith(
+        'exec bash scripts/train_15m_ma_launch_t3_on_3060.sh "$@"'
+    )
+    forbidden = ("promote_owner_best.py", "active_bundle.json", "forward_log.csv")
+    assert all(token not in text for token in forbidden)
+
+
+def test_imgsz1280_prereg_is_a_true_single_variable_contract() -> None:
+    import json
+
+    treatment = json.loads(IMGSZ1280_PREREG.read_text(encoding="utf-8"))
+    baseline = json.loads(
+        (
+            ROOT
+            / "experiments"
+            / "active"
+            / "exp-15m-ma-launch-t3-yolo10000-v1"
+            / "preregistration.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert treatment["single_variable"] == {
+        "name": "native training and validation imgsz",
+        "baseline": 960,
+        "treatment": 1280,
+        "all_other_training_arguments_identical": True,
+        "source_pngs_rebuilt": False,
+        "source_png_dimensions": [1280, 742],
+    }
+    excluded = {
+        "imgsz",
+        "run_name",
+        "remote_host",
+        "remote_host_discovery_required",
+        "trainer_sha256",
+    }
+    treatment_recipe = {
+        key: value for key, value in treatment["training"].items() if key not in excluded
+    }
+    baseline_recipe = {
+        key: value for key, value in baseline["training"].items() if key not in excluded
+    }
+    assert treatment_recipe == baseline_recipe
+    assert treatment["safety"]["holdout_read"] is False
+    assert treatment["safety"]["promote"] is False
+    assert treatment["safety"]["production_eligible"] is False

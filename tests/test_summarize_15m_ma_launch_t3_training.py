@@ -28,6 +28,23 @@ def test_validate_args_accepts_exact_windows_recipe() -> None:
     validate_args(frozen_args())
 
 
+def test_validate_args_accepts_preregistered_imgsz1280_treatment() -> None:
+    values = frozen_args()
+    values.update(
+        {
+            "name": "ma_launch_t3_10000_v1_y11s_ft_imgsz1280",
+            "data": r"C:\fable\datasets\ma_launch_t3_10000_v1_imgsz1280_input\data.yaml",
+            "imgsz": 1280,
+        }
+    )
+    validate_args(
+        values,
+        expected_imgsz=1280,
+        run_name="ma_launch_t3_10000_v1_y11s_ft_imgsz1280",
+        remote_dataset_name="ma_launch_t3_10000_v1_imgsz1280_input",
+    )
+
+
 def test_validate_args_rejects_unsafe_flip() -> None:
     values = frozen_args()
     values["fliplr"] = 0.5
