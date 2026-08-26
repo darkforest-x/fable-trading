@@ -19,6 +19,10 @@ from yoyo.datasets.ma_launch_t3_training import (
     position_bin,
     split_for_interval,
 )
+from scripts.verify_15m_ma_launch_t3_dataset import (
+    intervals_disjoint,
+    overlaps_sorted_guards,
+)
 
 
 def prereg() -> dict:
@@ -202,3 +206,16 @@ def test_positive_guard_protects_max_core_and_latest_window() -> None:
     assert occupied[79:115].all()
     assert not occupied[78]
     assert not occupied[115]
+
+
+def test_closed_interval_disjoint_audit() -> None:
+    assert intervals_disjoint([(0, 4), (5, 9), (20, 25)])
+    assert not intervals_disjoint([(0, 4), (4, 9)])
+
+
+def test_sorted_guard_overlap_lookup() -> None:
+    guards = [(10, 20), (40, 50), (70, 80)]
+    starts = [start for start, _ in guards]
+    assert overlaps_sorted_guards(15, 16, guards, starts)
+    assert overlaps_sorted_guards(21, 40, guards, starts)
+    assert not overlaps_sorted_guards(21, 39, guards, starts)
