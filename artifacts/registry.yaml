@@ -4402,3 +4402,242 @@ artifacts:
     config_hash: "3e9690837450e16698851247f0413d4b6eacca3e12b2663d58ef35cd5d195472"
     data_cutoff: "2026-05-02T14:00:00Z"
     notes: Self-contained HTML delivered after all 50 image documents completed.
+
+  # ---- internal autofill v6 failure + fully boxed autofill v7 ---------
+  - artifact_id: 15m-ma-launch-owner-autofill50-v6-prereg
+    artifact_type: config
+    role: internal_refill_contract_before_freshness_tightening
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a3a4b6f27787233359d39a28395aa3e337a9d336"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill50-v6/preregistration.json
+    sha256: "7d7cd93be5eaa280ceb033b25eac30ff4d32b87b67038a2e5cd8909c01d35160"
+    size_bytes: 4328
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-autofill50-v6/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a3a4b6f27787233359d39a28395aa3e337a9d336"
+    config_hash: "7d7cd93be5eaa280ceb033b25eac30ff4d32b87b67038a2e5cd8909c01d35160"
+    data_cutoff: "2026-04-21T06:00:00Z"
+    notes: Rejected internally before any Telegram delivery.
+
+  - artifact_id: 15m-ma-launch-owner-autofill50-v6-build-receipt
+    artifact_type: manifest
+    role: rejected_v6_build_lineage
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a3a4b6f27787233359d39a28395aa3e337a9d336"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill50-v6/results/build_receipt.json
+    sha256: "af2842eb20045aca575725f5920a0669e2c0e421936d5fdc0843371d2950bcbb"
+    size_bytes: 647
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-autofill50-v6/results/build_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a3a4b6f27787233359d39a28395aa3e337a9d336"
+    config_hash: "7d7cd93be5eaa280ceb033b25eac30ff4d32b87b67038a2e5cd8909c01d35160"
+    data_cutoff: "2026-04-21T06:00:00Z"
+    notes: Records 50 boxed images, zero labels/training and zero holdout rows.
+
+  - artifact_id: 15m-ma-launch-owner-autofill50-v6-summary
+    artifact_type: manifest
+    role: rejected_v6_internal_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a3a4b6f27787233359d39a28395aa3e337a9d336"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill50-v6/results/summary.json
+    sha256: "b81177672e5daf2e4ae2bbfbeb84bbf5cb0822aeba463fcd07470d35a9502ada"
+    size_bytes: 821
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-autofill50-v6/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a3a4b6f27787233359d39a28395aa3e337a9d336"
+    config_hash: "7d7cd93be5eaa280ceb033b25eac30ff4d32b87b67038a2e5cd8909c01d35160"
+    data_cutoff: "2026-04-21T06:00:00Z"
+    notes: Internal surface failed semantic visual QA; do not deliver or reuse.
+
+  - artifact_id: 15m-ma-launch-owner-autofill50-v6-contact-sheet
+    artifact_type: annotation_set
+    role: rejected_v6_internal_contact_sheet
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a3a4b6f27787233359d39a28395aa3e337a9d336"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill50-v6/results/contact_sheet_50.png
+    sha256: "0fc9efbe440df2e77f041e32ef7c779bc70e8fd212fc69c3132560e925550cea"
+    size_bytes: 644459
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-autofill50-v6/results/contact_sheet_50.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a3a4b6f27787233359d39a28395aa3e337a9d336"
+    config_hash: "7d7cd93be5eaa280ceb033b25eac30ff4d32b87b67038a2e5cd8909c01d35160"
+    data_cutoff: "2026-04-21T06:00:00Z"
+    notes: Failed internal QA evidence; never sent to Telegram.
+
+  - artifact_id: 15m-ma-launch-owner-autofill50-v7-prereg
+    artifact_type: config
+    role: frozen_fully_boxed_internal_refill_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "382a948b259727bcde738912b6ca2ffe028dcc97"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill50-v7/preregistration.json
+    sha256: "1a5d95cfefb01d909c9440738060b96fd50d61652858cd9d2dadef2ea0d8343d"
+    size_bytes: 5210
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-autofill50-v7/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "382a948b259727bcde738912b6ca2ffe028dcc97"
+    config_hash: "1a5d95cfefb01d909c9440738060b96fd50d61652858cd9d2dadef2ea0d8343d"
+    data_cutoff: "2026-04-13T22:15:00Z"
+    notes: Freezes strict morphology, similarity, diversity and safety gates.
+
+  - artifact_id: 15m-ma-launch-owner-autofill50-v7-build-receipt
+    artifact_type: manifest
+    role: v7_build_lineage_and_safety_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "382a948b259727bcde738912b6ca2ffe028dcc97"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/build_receipt.json
+    sha256: "e22eea4ea5bc682d03f54568088e094fea10d7f5382b40905c635aa9c2fe3f1c"
+    size_bytes: 647
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/build_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "382a948b259727bcde738912b6ca2ffe028dcc97"
+    config_hash: "1a5d95cfefb01d909c9440738060b96fd50d61652858cd9d2dadef2ea0d8343d"
+    data_cutoff: "2026-04-13T22:15:00Z"
+    notes: Records 50 fully boxed renders and zero holdout/labels/training.
+
+  - artifact_id: 15m-ma-launch-owner-autofill50-v7-summary
+    artifact_type: manifest
+    role: final_fully_boxed_pack_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "382a948b259727bcde738912b6ca2ffe028dcc97"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/summary.json
+    sha256: "45e3500c5d4ac0804b118d5432e88cf82055b66376003a5f5f5ca555907567a3"
+    size_bytes: 842
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "382a948b259727bcde738912b6ca2ffe028dcc97"
+    config_hash: "1a5d95cfefb01d909c9440738060b96fd50d61652858cd9d2dadef2ea0d8343d"
+    data_cutoff: "2026-04-13T22:15:00Z"
+    notes: 25 LONG / 25 SHORT, 47 symbols, 50 one-box images.
+
+  - artifact_id: 15m-ma-launch-owner-autofill50-v7-manifest
+    artifact_type: annotation_set
+    role: exact_50_fully_boxed_example_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "382a948b259727bcde738912b6ca2ffe028dcc97"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/review_manifest.jsonl
+    sha256: "bc93d37fa598146b20f8cad961a17c149ea81520153574a3df57296c0aadcdce"
+    size_bytes: 99101
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/review_manifest.jsonl"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "382a948b259727bcde738912b6ca2ffe028dcc97"
+    config_hash: "1a5d95cfefb01d909c9440738060b96fd50d61652858cd9d2dadef2ea0d8343d"
+    data_cutoff: "2026-04-13T22:15:00Z"
+    notes: P0 examples only; rows are not Gold or YOLO labels.
+
+  - artifact_id: 15m-ma-launch-owner-autofill50-v7-gallery
+    artifact_type: annotation_set
+    role: owner_delivered_fully_boxed_gallery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "382a948b259727bcde738912b6ca2ffe028dcc97"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/public/index.html
+    sha256: "2e55dbe304df1a472fa7cc6cfb2648b34e1623fe133b77fc1ae6a37a2b7c3692"
+    size_bytes: 10645
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/public"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "382a948b259727bcde738912b6ca2ffe028dcc97"
+    config_hash: "1a5d95cfefb01d909c9440738060b96fd50d61652858cd9d2dadef2ea0d8343d"
+    data_cutoff: "2026-04-13T22:15:00Z"
+    notes: Fifty cards, all exactly one red core box and no Owner action form.
+
+  - artifact_id: 15m-ma-launch-owner-autofill50-v7-contact-sheet
+    artifact_type: annotation_set
+    role: final_50_internal_visual_qa_surface
+    source_repo: darkforest-x/fable-trading
+    source_commit: "382a948b259727bcde738912b6ca2ffe028dcc97"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/contact_sheet_50.png
+    sha256: "fbf44be0835c40b17cec0e877817916adbd11bea83be0c379e651d23cdb15d1a"
+    size_bytes: 642253
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/contact_sheet_50.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "382a948b259727bcde738912b6ca2ffe028dcc97"
+    config_hash: "1a5d95cfefb01d909c9440738060b96fd50d61652858cd9d2dadef2ea0d8343d"
+    data_cutoff: "2026-04-13T22:15:00Z"
+    notes: Internal visual QA contact sheet; not a training image.
+
+  - artifact_id: 15m-ma-launch-owner-autofill50-v7-visual-qa
+    artifact_type: manifest
+    role: decoded_pixel_and_one_box_delivery_qa_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "10bf35cdee0903df1036af9d3ead8ef7dd21e9a4"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/visual_qa_receipt.json
+    sha256: "882afbacdb7378c29d2b544a5237510eb978795b586c3436165dfb91ae06c8ae"
+    size_bytes: 690
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/visual_qa_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "10bf35cdee0903df1036af9d3ead8ef7dd21e9a4"
+    config_hash: "1a5d95cfefb01d909c9440738060b96fd50d61652858cd9d2dadef2ea0d8343d"
+    data_cutoff: "2026-04-13T22:15:00Z"
+    notes: Decodes 50/50 PNGs and proves red pixels, dimensions and zero labels.
+
+  - artifact_id: 15m-ma-launch-owner-autofill50-v7-telegram-receipt
+    artifact_type: manifest
+    role: hash_bound_50_document_plus_html_delivery_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "10bf35cdee0903df1036af9d3ead8ef7dd21e9a4"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/telegram_delivery_receipt.json
+    sha256: "966b7ddff8fcd98758ef8902a2c7e7c8509557e7abf4ec8cbee59efcb4acea66"
+    size_bytes: 24105
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/telegram_delivery_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "10bf35cdee0903df1036af9d3ead8ef7dd21e9a4"
+    config_hash: "1a5d95cfefb01d909c9440738060b96fd50d61652858cd9d2dadef2ea0d8343d"
+    data_cutoff: "2026-04-13T22:15:00Z"
+    notes: Fifty original PNG documents and final HTML delivered without duplicates.
+
+  - artifact_id: 15m-ma-launch-owner-autofill50-v7-report
+    artifact_type: report
+    role: canonical_scope_correction_and_delivery_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "10bf35cdee0903df1036af9d3ead8ef7dd21e9a4"
+    source_path: analysis/p0_15m_ma_launch_owner_autofill50_20260827.md
+    sha256: "3424127578fe52cce542ca6f9b82a80a4544bc4594fe173ebb2e4412a9db7d16"
+    size_bytes: 5878
+    storage_uri: "repo://analysis/p0_15m_ma_launch_owner_autofill50_20260827.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "10bf35cdee0903df1036af9d3ead8ef7dd21e9a4"
+    config_hash: "1a5d95cfefb01d909c9440738060b96fd50d61652858cd9d2dadef2ea0d8343d"
+    data_cutoff: "2026-04-13T22:15:00Z"
+    notes: Answer-first Chinese P0 report with null control and risk disclosure.
+
+  - artifact_id: 15m-ma-launch-owner-autofill50-v7-html
+    artifact_type: report
+    role: owner_delivered_self_contained_autofill_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "10bf35cdee0903df1036af9d3ead8ef7dd21e9a4"
+    source_path: analysis/html/p0_15m_ma_launch_owner_autofill50_20260827.html
+    sha256: "ddc74f1ac8bda9350b7e4dcc9679c33865f19583be635096c206e262202f8c85"
+    size_bytes: 865457
+    storage_uri: "repo://analysis/html/p0_15m_ma_launch_owner_autofill50_20260827.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "10bf35cdee0903df1036af9d3ead8ef7dd21e9a4"
+    config_hash: "1a5d95cfefb01d909c9440738060b96fd50d61652858cd9d2dadef2ea0d8343d"
+    data_cutoff: "2026-04-13T22:15:00Z"
+    notes: Self-contained HTML sent after all 50 image documents completed.

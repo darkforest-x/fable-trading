@@ -1770,7 +1770,7 @@ experiments:
   - experiment_id: exp-15m-ma-launch-owner-strict-review50-v5
     source_repo: darkforest-x/fable-trading
     source_commit: "d70e64938c498674dda2b75ac1a584c681ae16be"
-    status: active
+    status: rejected
     question: >-
       After resolving the attached screenshot as source #40 GRT, which of the
       frozen 50 identities still merit exactly one fresh MA-knot proposal when
@@ -1781,12 +1781,10 @@ experiments:
       Owner decisions and keep core/core+0..2 model windows separate from future
       +5 human review
     result: >-
-      ready_pending_owner_sample_review. Twenty single-box proposals remain and
-      thirty rows return no box (six Owner rejects plus twenty-four strict visual
-      rejects). Core-to-model-right gap is median 0.5 bar and max 2; all images
-      are 1280x742, clean inputs have zero overlay-red pixels, future review has
-      zero labels, and all 50 decision PNGs were sent one-by-one to Telegram as
-      documents with a hash-bound receipt.
+      rejected_scope_error_after_delivery. The 20-box / 30-no-box ledger was
+      technically receipted, but the Owner never requested a fixed-identity
+      adjudication workflow or KEEP/ADJUST/REJECT work. It is superseded by the
+      fully boxed autofill v7 and must not be used as labels or an active review.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
@@ -1803,6 +1801,67 @@ experiments:
       - 15m-ma-launch-owner-strict-review50-v5-html
     reuse_allowed: false
     notes: >-
-      Active means waiting for per-sample Owner KEEP/ADJUST/REJECT, not training
-      permission. No proposal is Gold yet; do not create labels, negatives,
-      training jobs, promote or production changes until Owner closes geometry.
+      Historical delivery only. The later correction message in Telegram marks
+      this workflow void; do not ask the Owner to complete it.
+
+  - experiment_id: exp-15m-ma-launch-owner-autofill50-v6
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a3a4b6f27787233359d39a28395aa3e337a9d336"
+    status: rejected
+    question: >-
+      Can internal rejection plus refill from the frozen 10,000-candidate pool
+      produce 50 fully boxed examples without creating Owner review work?
+    single_variable: >-
+      replace v5's fixed-identity box/no-box delivery with automatic refill,
+      keeping 25 LONG, 25 SHORT, one 4-5 bar box and zero labels/training
+    result: >-
+      rejected_before_delivery. Structural counts passed, but internal contact
+      sheet QA still found boxes containing too much already-completed movement.
+      No v6 image or report was sent to Telegram.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: null
+    artifacts:
+      - 15m-ma-launch-owner-autofill50-v6-prereg
+      - 15m-ma-launch-owner-autofill50-v6-build-receipt
+      - 15m-ma-launch-owner-autofill50-v6-summary
+      - 15m-ma-launch-owner-autofill50-v6-contact-sheet
+    reuse_allowed: false
+    notes: Internal failed QA surface only; zero Telegram, labels and training.
+
+  - experiment_id: exp-15m-ma-launch-owner-autofill50-v7
+    source_repo: darkforest-x/fable-trading
+    source_commit: "382a948b259727bcde738912b6ca2ffe028dcc97"
+    status: accepted
+    question: >-
+      Can stricter MA-proximity and immediate-release gates deliver 50 boxed
+      examples while all rejections and replacements remain internal?
+    single_variable: >-
+      relative to v6, apply the Owner-approved related core-body, core-progress,
+      MA-envelope and +1/+2 freshness gate bundle; keep all safety gates frozen
+    result: >-
+      delivered. From 10,000 pre-holdout candidates, 3,217 passed morphology,
+      106 also passed distance and 50 were selected: 25 LONG / 25 SHORT, every
+      image exactly one 4-5 bar red box, 47 unique symbols, one per UTC hour.
+      All 50 original PNG documents and the HTML were sent to Telegram without
+      any Owner adjudication request.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_15m_ma_launch_owner_autofill50_20260827.md
+    artifacts:
+      - 15m-ma-launch-owner-autofill50-v7-prereg
+      - 15m-ma-launch-owner-autofill50-v7-build-receipt
+      - 15m-ma-launch-owner-autofill50-v7-summary
+      - 15m-ma-launch-owner-autofill50-v7-manifest
+      - 15m-ma-launch-owner-autofill50-v7-gallery
+      - 15m-ma-launch-owner-autofill50-v7-contact-sheet
+      - 15m-ma-launch-owner-autofill50-v7-visual-qa
+      - 15m-ma-launch-owner-autofill50-v7-telegram-receipt
+      - 15m-ma-launch-owner-autofill50-v7-report
+      - 15m-ma-launch-owner-autofill50-v7-html
+    reuse_allowed: false
+    notes: >-
+      P0 example pack only. Post-core bars make this completed-pattern retrieval,
+      not a causal detector; no direct conversion to YOLO labels is allowed.

@@ -2,26 +2,26 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-27 — 严格 Review50 v5 已逐张发 TG，待 Owner 复审）
+## ⚡ 当前真相（2026-08-27 — 自动补齐 v7 已逐张发 TG，无 Owner 审核任务）
 
-v3 的“每张必选相对最窄 5 根”已按 Owner 反馈废止。v4 只把模型窗裁到核心后 0–2 根，虽然修复
-时效，却没有修复平行均线、框内已启动和无新鲜释放等语义问题，因此作为未发送失败中间版保留。
-v5 同时允许无框：冻结 50 个身份中只保留 20 个单框提案，30 个严格无框（Owner 明确拒绝 6，
-Codex 联系表严格淘汰 24）。来源 01/05/09/10/14/18/19/25/26/29/32/35/40/42/43/44/46/47/48/50
-有框；其余无框。
+Owner 明确指出此前“20 张有框 + 30 张无框，再请人工复审”不是其要求。strict Review50 v5
+因此改判为**任务类型错误并作废**：检索固定数量合格样例时，淘汰必须留在内部并从大池补位，
+不能把无框候选和 KEEP / ADJUST / REJECT 工作转嫁给 Owner。
 
-附件身份已按 `40/50 | GRT_USDT_SWAP | SHORT` 联结：第 40 张从 `t-11..t-7` 提议改为
-`t-9..t-5`，不是误改第 01 张。20 个模型窗的核心到右端距离中位 0.5 根、最大 2 根；人工用未来
-+5 图物理隔离且无 labels。2026-08-27 17:25，50 个原编号已全部作为 1280×742 Telegram document
-逐张送达：20 张各一个红框、30 张无框，50/50 成功，SHA 逐张入回执。
+正式 v7 从冻结的 10,000 个 pre-holdout 候选自动补齐 50 张：25 LONG + 25 SHORT，22 个 4 根框、
+28 个 5 根框，50/50 每张恰好一个红框，覆盖 47 个币、每 UTC 小时最多 1 张、每天最多 2 张。
+核心/释放硬门通过 3,217，连同 Owner #42/#44 方向归一化距离门通过 106，再按时间与币种约束
+求解 50 张。2026-08-27 18:42 CST，50 个 1280×742 原始 PNG 已作为 Telegram document 逐张发送，
+并于 18:45 CST 发送 HTML；SHA 逐张入回执。开场消息已明确旧 v5 人工审核口径作废。
 
-入口：`experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/public/index.html`；报告：
-`analysis/html/p0_15m_ma_launch_owner_strict_review50_20260827.html`。holdout OHLCV 读取 0，YOLO
-label/训练/3060 作业均为 0，ACTIVE/frozen、forward、部署与交易状态未改。
+入口：`experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/public/index.html`；报告：
+`analysis/html/p0_15m_ma_launch_owner_autofill50_20260827.html`。holdout OHLCV 读取 0，YOLO label、
+训练、3060 作业均为 0，ACTIVE/frozen、forward、部署与交易状态未改。v6 作为“框内仍含过多已走
+行情”的未发送内部失败保留，不得混用。
 
-**下一条允许动作**：Owner 只需按原编号复审 20 个有框提案（KEEP / ADJUST / REJECT）；ADJUST
-必须逐图给 START/END，禁止统一 delta。逐样本 Gold 闭合前禁止生成 labels、重建训练集、3060
-训练、promote 或生产切换。
+**下一条允许动作**：本轮允许停在“50 张示例已交付”，Owner 不需要填审核表。若以后要升级为
+训练集，必须另走 P0/P1 Gold 类别与逐样本核心边界门，并取得单独训练授权；禁止直接把 v7 PNG
+转成 labels、开 3060、promote 或生产切换。
 
 ## ⚡ 当前真相（2026-08-27 — 原图 imgsz=1280 重训完成，但不替换 960）
 
