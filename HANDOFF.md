@@ -2,6 +2,27 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-27 — K线框语义已改成六均线框 Review50，等待 Owner 审协议）
+
+Owner 指出旧信号框全围在 K 线上后，全量审计确认 9,938/9,938 个正标签的纵向确实来自核心 K 的
+high-low，不是均线密集带。经 Owner 授权“按照建议全部去做”，现已完成新的**非训练**协议小样：
+底图固定原生 1280×742 / W20，候选横向只在 `t-12..t-1` 比较 L4/L5/L6/L7 六均线最密连续段，
+纵向只包六均线并对比 imgsz=960 下 16/24/32px 最小高度；没有用 K 线极值定框。
+
+全量 36,812 个冻结身份已核算；9,938 个正例全部能生成 L5/min24 框且六均线完整在框内。旧负样本
+26,874 个中 26,802 个可计算，72 个在 SMA120 预热前或 W20 源边界处，明确记为 unavailable，
+没有补值/换样。hard negatives 有 29.04% 的均线包络不宽于正例中位数，证明下一版不能只改正框后
+机械复用旧 hard 空标签，必须先裁决 L1 是“任何密集结”还是“即将启动的密集结”。
+
+Owner 唯一当前入口：
+`experiments/active/exp-15m-ma-launch-ma-box-review50-v1/results/public/index.html`。50 张为 LONG/SHORT
+25/25、train/val 40/10、5 个时间桶各 10，答案预选 0；页面只能导出 JSON，不能训练。
+报告：`analysis/html/p1_15m_ma_launch_ma_box_review50_20260827.html`。
+
+**下一条允许动作**：Owner 审完 50 张并导出 JSON，明确一个全局 L/最小高度和 L1 类定义；随后才可
+逐样本构建 Gold 正框并同步处理 hard negatives。协议确认不等于 9,938 张样本确认；此前禁止生成新
+YOLO 标签、启动 3060、promote 或改 ACTIVE/frozen。holdout 读取 0，生产与交易状态未改。
+
 ## ⚡ 当前真相（2026-08-27 — 原图 imgsz=1280 重训完成，但不替换 960）
 
 Owner 在抽查同一批 1280×742 训练 PNG 后明确回复“ok 重新去训练吧”，授权单变量重训。RTX 3060

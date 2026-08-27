@@ -1,0 +1,163 @@
+{
+  "audit_id": "ma_launch_t3_label_semantics_audit_20260827",
+  "current_label_reconstruction": {
+    "iou_at_least_0_9999": 9938,
+    "max_pixel_delta_at_most_0_001": 9938,
+    "meaning": "stored box follows core-candle high/low geometry",
+    "stored_vs_candle_formula_iou": {
+      "max": 0.9999998481012751,
+      "mean": 0.9999948617417931,
+      "median": 0.9999955898177669,
+      "min": 0.999946204725496,
+      "p10": 0.9999911866648409,
+      "p25": 0.9999936422680622,
+      "p75": 0.9999969467893242,
+      "p90": 0.9999978412107261
+    }
+  },
+  "current_vs_local_ma_knot": {
+    "horizontal_iou": {
+      "max": 1.0,
+      "mean": 0.3744591017870963,
+      "median": 0.3801771548618652,
+      "min": 0.0,
+      "p10": 0.0,
+      "p25": 0.10017826107863431,
+      "p75": 0.5722557893695158,
+      "p90": 0.7412013192224063
+    },
+    "local_end_not_t_minus_3": 9018,
+    "local_end_not_t_minus_3_share": 0.9074260414570336,
+    "local_end_offsets": {
+      "-9": 789,
+      "-8": 1182,
+      "-7": 1541,
+      "-6": 1898,
+      "-5": 934,
+      "-4": 943,
+      "-3": 920,
+      "-2": 747,
+      "-1": 984
+    },
+    "local_start_offsets": {
+      "-12": 4010,
+      "-11": 1035,
+      "-10": 973,
+      "-9": 865,
+      "-8": 873,
+      "-7": 953,
+      "-6": 641,
+      "-5": 407,
+      "-4": 181
+    },
+    "two_dimensional_iou": {
+      "max": 0.6757792140886081,
+      "mean": 0.07760427622947078,
+      "median": 0.021548781380053186,
+      "min": 0.0,
+      "p10": 0.0,
+      "p25": 0.0,
+      "p75": 0.13190781339834498,
+      "p90": 0.2355440463581102
+    }
+  },
+  "current_vs_same_x_ma": {
+    "candle_to_ma_price_span_ratio": {
+      "max": 17.682985942802166,
+      "mean": 2.1548141784320487,
+      "median": 1.8170749793886145,
+      "min": 0.16619839230634237,
+      "p10": 0.9246774344247258,
+      "p25": 1.25478240095878,
+      "p75": 2.694967853250762,
+      "p90": 3.7848801419608473
+    },
+    "ma_envelope_vertically_contained_by_stored": 2155,
+    "ma_envelope_vertically_contained_share": 0.21684443550010063,
+    "vertical_iou": {
+      "max": 0.9066646400000006,
+      "mean": 0.169741016045751,
+      "median": 0.15199958006473926,
+      "min": 0.0,
+      "p10": 0.0,
+      "p25": 0.02068896768164476,
+      "p75": 0.2675301332069202,
+      "p90": 0.37272721851240476
+    },
+    "vertical_iou_below_0_10": 3915,
+    "vertical_iou_below_0_10_share": 0.3939424431475146,
+    "zero_vertical_overlap": 2176,
+    "zero_vertical_overlap_share": 0.21895753672771182
+  },
+  "dataset_manifest_sha256": "dd55246938b03c4b2013d159cdfee94b4e9db56ecb298ad30145eb5d1bc2bc3a",
+  "dataset_path": "datasets/ma_launch_t3_10000_v1",
+  "input_coverage": {
+    "full_prior_12_density_window_visible": 9587,
+    "full_prior_12_density_window_visible_share": 0.9646810223384987,
+    "missing_earliest_density_bar": 351
+  },
+  "null_control": {
+    "actual_stored_vs_candle_iou": {
+      "max": 0.9999998481012751,
+      "mean": 0.9999948617417931,
+      "median": 0.9999955898177669,
+      "min": 0.999946204725496,
+      "p10": 0.9999911866648409,
+      "p25": 0.9999936422680622,
+      "p75": 0.9999969467893242,
+      "p90": 0.9999978412107261
+    },
+    "method": "cyclically permute stored labels within identical window/core/confirmation geometry",
+    "shuffled_label_vs_candle_iou": {
+      "max": 0.9909491142290483,
+      "mean": 0.269550523183345,
+      "median": 0.2413796057478193,
+      "min": 0.0,
+      "p10": 0.0,
+      "p25": 0.0,
+      "p75": 0.4476957396730964,
+      "p90": 0.620580772445918
+    }
+  },
+  "positive_by_direction": {
+    "LONG": 4965,
+    "SHORT": 4973
+  },
+  "positive_by_split": {
+    "train": 8468,
+    "val": 1470
+  },
+  "positive_rows": 9938,
+  "safety": {
+    "active_or_frozen_modified": false,
+    "dataset_modified": false,
+    "holdout_read": false,
+    "labels_modified": false,
+    "production_eligible": false,
+    "training_started": false,
+    "weights_modified": false
+  },
+  "sources": {
+    "files": 228,
+    "holdout_ohlcv_rows_materialized": 0,
+    "rows_materialized": 10139450
+  },
+  "status": "confirmed_semantic_mismatch",
+  "visuals": {
+    "contact_sheet_path": "experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/label_semantics_audit_20260827/label_semantics_comparison.png",
+    "contact_sheet_sha256": "edec330434f0790a51ace928b864b7538fa66297b7853f92082cb577b1cf920c",
+    "distribution_path": "experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/label_semantics_audit_20260827/label_geometry_distributions.png",
+    "distribution_sha256": "2c1ed92f810f0f0a0eff17ade98b0090675416adb538e4bc2d0e408b1558d013",
+    "representative_path": "experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/label_semantics_audit_20260827/representative_full_resolution_overlay.png",
+    "selected_render_parity_exact": 6,
+    "selected_render_parity_total": 6,
+    "selected_sample_ids": [
+      "2edfb8d4b8c8d2adac94e81c",
+      "519644544a9abd302b69d9bd",
+      "c9ea92621624a1e868bc5a8b",
+      "b10e9d8b8f31cc192dbfe2f8",
+      "ab8ba7561124f2d3d99aa39d",
+      "d27177842fa5c5c073495c07"
+    ]
+  }
+}
