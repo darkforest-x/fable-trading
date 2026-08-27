@@ -290,6 +290,8 @@ def summarize(
     expected_imgsz: int = 960,
     remote_dataset_name: str = REMOTE_DATASET_NAME,
     remote_host: str = "Administrator@192.168.1.5",
+    expected_long_instances: int = 822,
+    expected_short_instances: int = 648,
 ) -> dict[str, Any]:
     """Verify fetched identity, parse metrics, load weights and write evidence."""
 
@@ -344,7 +346,10 @@ def summarize(
     if "[launcher] exit_code=0" not in log_text:
         raise TrainingSummaryError("remote log has no successful launcher exit")
     per_class = parse_per_class(log_text)
-    expected_instances = {"dense_long": 822, "dense_short": 648}
+    expected_instances = {
+        "dense_long": int(expected_long_instances),
+        "dense_short": int(expected_short_instances),
+    }
     if set(per_class) != set(expected_instances):
         raise TrainingSummaryError(f"final per-class validation rows missing: {per_class}")
     for name, expected in expected_instances.items():
@@ -398,6 +403,8 @@ def main() -> None:
     parser.add_argument("--expected-imgsz", type=int, default=960)
     parser.add_argument("--remote-dataset-name", default=REMOTE_DATASET_NAME)
     parser.add_argument("--remote-host", default="Administrator@192.168.1.5")
+    parser.add_argument("--expected-long-instances", type=int, default=822)
+    parser.add_argument("--expected-short-instances", type=int, default=648)
     args = parser.parse_args()
     payload = summarize(
         args.run.resolve(),
@@ -408,6 +415,8 @@ def main() -> None:
         expected_imgsz=args.expected_imgsz,
         remote_dataset_name=args.remote_dataset_name,
         remote_host=args.remote_host,
+        expected_long_instances=args.expected_long_instances,
+        expected_short_instances=args.expected_short_instances,
     )
     print(json.dumps(payload, ensure_ascii=False, indent=2))
 

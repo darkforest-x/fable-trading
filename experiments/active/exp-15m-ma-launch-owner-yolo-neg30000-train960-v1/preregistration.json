@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "protocol": "ma6_owner_autofill10000_yolo_neg30000_train960_weak_v1_20260828",
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-neg30000-train960-v1",
+  "created_at": "2026-08-28T00:38:38+08:00",
+  "question": "How does the Owner-approved weak-label dataset with 10,000 positives and 30,000 negatives behave under the previously successful frozen imgsz=960 YOLO recipe on the RTX 3060?",
+  "owner_authorization": {
+    "conversation_date": "2026-08-28",
+    "owner_exact_words": "去训练吧",
+    "context": "The immediately preceding exchange completed and audited the 10,000-positive plus 30,000-negative v2 dataset. The Owner then explicitly instructed Codex to train it.",
+    "classification": "owner_authorized_weak_labels_not_gold",
+    "training_authorized": true,
+    "production_or_promotion_authorized": false
+  },
+  "dataset_treatment": {
+    "path": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2",
+    "source_experiment_id": "exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2",
+    "manifest_sha256": "6e601034ab15765a74b788cc6d094e9326c3044c1fb615c908ef9de897d6e0af",
+    "build_summary_sha256": "5d47ed2ddfa9355b32abf1dbccad05354ebd37d8471abef3367832eec29d1c2a",
+    "data_yaml_sha256": "94376651f00a7dc5be3192f181109d9b67d4fed92931c5af8c70cf0b5787ef25",
+    "dataset_build_receipt": {
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/results/dataset_build_receipt.json",
+      "sha256": "1deeebc93c94902a67ef1dcdcad0c4593a53b7e7627db3778b7541d2ceb8766a"
+    },
+    "dataset_qa_receipt": {
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/results/negative_expansion_audit.json",
+      "sha256": "347343455e14872e23c410292a97b0dd5915be9f9217137a1a0e2ab748349d5d"
+    },
+    "images_total": 40000,
+    "labels_total": 40000,
+    "data_yaml_images": 39904,
+    "train": {
+      "positive": 8161,
+      "negative": 24483,
+      "dense_long_instances": 4096,
+      "dense_short_instances": 4065
+    },
+    "val": {
+      "positive": 1815,
+      "negative": 5445,
+      "dense_long_instances": 896,
+      "dense_short_instances": 919
+    },
+    "excluded": {
+      "positive": 24,
+      "negative": 72
+    },
+    "negative_kinds_total": {
+      "hard": 19922,
+      "easy": 10078
+    },
+    "source_dimensions": [
+      1280,
+      742
+    ],
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_materialized": 0
+  },
+  "dataset_lineage_control": {
+    "predecessor_path": "datasets/ma_launch_owner_autofill10000_yolo_v1",
+    "predecessor_manifest_sha256": "d15f78cf651073ef1bf5aa4381f136ba11d6d3dca6513f48ed596251e181413b",
+    "predecessor_rows": 20000,
+    "treatment_change": "Keep all 10,000 positive images and labels and all 10,000 seed-negative images and labels byte-identical; add 20,000 new safe negatives.",
+    "verified_image_and_label_sha_matches": 20000,
+    "strict_single_variable_training_comparison_available": false,
+    "reason": "The byte-identical 10,000-positive plus 10,000-negative predecessor was not trained under this recipe. Historical 960 metrics come from an older 36,812-image dataset, so they are context only and cannot isolate the effect of negative count."
+  },
+  "historical_context_only": {
+    "experiment_id": "exp-15m-ma-launch-t3-yolo10000-v1",
+    "dataset_images": 36812,
+    "imgsz": 960,
+    "best_model_final_validation": {
+      "precision": 0.5341051096421747,
+      "recall": 0.60730377579526,
+      "map50": 0.5887420435848747,
+      "map50_95": 0.3318891704049788
+    },
+    "causal_comparison": false
+  },
+  "immutable_inputs": {
+    "dataset": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2",
+    "manifest_sha256": "6e601034ab15765a74b788cc6d094e9326c3044c1fb615c908ef9de897d6e0af",
+    "build_summary_sha256": "5d47ed2ddfa9355b32abf1dbccad05354ebd37d8471abef3367832eec29d1c2a",
+    "dataset_build_receipt_sha256": "1deeebc93c94902a67ef1dcdcad0c4593a53b7e7627db3778b7541d2ceb8766a",
+    "dataset_qa_receipt_sha256": "347343455e14872e23c410292a97b0dd5915be9f9217137a1a0e2ab748349d5d",
+    "images": 40000,
+    "labels": 40000,
+    "train_images": 32644,
+    "val_images": 7260,
+    "split": "unchanged global chronological split with 150-bar purge; excluded rows are not exposed by data.yaml",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_rows_allowed": 0
+  },
+  "training": {
+    "remote_host_discovery_required": true,
+    "remote_host": "Administrator@192.168.1.5",
+    "gpu": "NVIDIA GeForce RTX 3060 12GB",
+    "base_model": "models/yolo11s.pt",
+    "base_model_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+    "trainer": "src/detection/train.py",
+    "trainer_sha256": "4ec54f1ee956c2d17ef9d5a2877a7872310ad886636fd08003159d8c143d2aa5",
+    "epochs": 40,
+    "patience": 10,
+    "batch": 8,
+    "imgsz": 960,
+    "optimizer": "AdamW",
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "warmup_epochs": 0.5,
+    "seed": 0,
+    "deterministic": true,
+    "rect": true,
+    "cache": false,
+    "workers": 2,
+    "run_name": "ma_launch_owner_yolo_neg30000_v2_y11s_ft960",
+    "augmentations": {
+      "fliplr": 0.0,
+      "flipud": 0.0,
+      "mosaic": 0.0,
+      "mixup": 0.0,
+      "copy_paste": 0.0,
+      "hsv_h": 0.0,
+      "hsv_s": 0.0,
+      "hsv_v": 0.0,
+      "degrees": 0.0,
+      "translate": 0.02,
+      "scale": 0.1,
+      "shear": 0.0,
+      "perspective": 0.0,
+      "erasing": 0.0
+    }
+  },
+  "evaluation": {
+    "primary": "Reload best.pt and evaluate once on the frozen pre-holdout chronological v2 val split at imgsz=960; report overall and per-class precision, recall, mAP50 and mAP50-95.",
+    "negative_surface": "Report prediction behavior on the 5,445 actual empty-label val images without changing confidence thresholds.",
+    "threshold_tuning": false,
+    "holdout": false,
+    "production_decision": false,
+    "financial_metrics_not_applicable": "This is a detector/label experiment, not a direction or execution backtest."
+  },
+  "outputs": {
+    "experiment_results": "experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results",
+    "local_run": "analysis/output/ma_launch_owner_yolo_neg30000_v2/ma_launch_owner_yolo_neg30000_v2_y11s_ft960",
+    "canonical_report": "analysis/p1_15m_ma_launch_owner_yolo_neg30000_train960_20260828.md",
+    "canonical_html": "analysis/html/p1_15m_ma_launch_owner_yolo_neg30000_train960_20260828.html"
+  },
+  "safety": {
+    "weak_labels_are_gold": false,
+    "holdout_read": false,
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}

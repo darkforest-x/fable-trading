@@ -76,6 +76,16 @@ def test_parse_per_class_takes_last_clean_or_ansi_row() -> None:
     assert parsed["dense_short"]["instances"] == 648
 
 
+def test_new_dataset_validation_instance_contract_is_explicit() -> None:
+    log = """
+      dense_long 896 896 0.71 0.72 0.73 0.74
+      dense_short 919 919 0.81 0.82 0.83 0.84
+    """
+    parsed = parse_per_class(log)
+    assert parsed["dense_long"]["instances"] == 896
+    assert parsed["dense_short"]["instances"] == 919
+
+
 def test_parse_final_results_dict_uses_reloaded_best_validation() -> None:
     log = """
     results_dict: {'metrics/precision(B)': 0.1, 'metrics/recall(B)': 0.2,

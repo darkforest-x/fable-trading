@@ -12,16 +12,18 @@ HOST="${FABLE_3060_HOST:-}"
 REMOTE="${FABLE_3060_REMOTE:-C:/fable}"
 LOCAL_PY=".venv/bin/python"
 REMOTE_PY="$REMOTE/.venv/Scripts/python.exe"
-DATASET="datasets/ma_launch_t3_10000_v1"
+DATASET="${FABLE_T3_DATASET:-datasets/ma_launch_t3_10000_v1}"
 MODEL="models/yolo11s.pt"
 TRAINER="src/detection/train.py"
 EXPERIMENT_ID="${FABLE_T3_EXPERIMENT_ID:-exp-15m-ma-launch-t3-yolo10000-v1}"
 PREREG="${FABLE_T3_PREREG:-experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/preregistration.json}"
-BUILD_RECEIPT="experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/dataset_build_receipt.json"
-QA_RECEIPT="experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/dataset_qa_receipt.json"
+BUILD_RECEIPT="${FABLE_T3_BUILD_RECEIPT:-experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/dataset_build_receipt.json}"
+QA_RECEIPT="${FABLE_T3_QA_RECEIPT:-experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/dataset_qa_receipt.json}"
 NAME="${FABLE_T3_RUN_NAME:-ma_launch_t3_10000_v1_y11s_ft}"
 IMGSZ="${FABLE_T3_IMGSZ:-960}"
 REMOTE_DATASET_NAME="${FABLE_T3_REMOTE_DATASET_NAME:-ma_launch_t3_10000_v1}"
+LOCAL_OUTPUT_ROOT="${FABLE_T3_LOCAL_OUTPUT_ROOT:-analysis/output/ma_launch_t3_10000_v1}"
+DATASET_IMAGE_COUNT="${FABLE_T3_DATASET_IMAGE_COUNT:-36812}"
 MODE="run"
 SSH=(ssh -o BatchMode=yes -o ConnectTimeout=15)
 SCP=(scp -o BatchMode=yes -o ConnectTimeout=15 -q)
@@ -126,7 +128,7 @@ PS
 
 fetch_run() {
   local local_run remote_run remote_scp exit_code
-  local_run="analysis/output/ma_launch_t3_10000_v1/$NAME"
+  local_run="$LOCAL_OUTPUT_ROOT/$NAME"
   remote_run="$REMOTE/runs/detect/$NAME"
   remote_scp="/C:/fable/runs/detect/$NAME"
   exit_code="$(remote_ps <<PS | tr -d '\r\n '
@@ -171,7 +173,7 @@ for path in "$MODEL" "$TRAINER" "$PREREG" "$BUILD_RECEIPT" "$QA_RECEIPT" \
   "$DATASET/manifest.jsonl" "$DATASET/build_summary.json" "$DATASET/data.yaml"; do
   [[ -s "$path" ]] || die "missing required input: $path"
 done
-QA_PASSED="$("$LOCAL_PY" -c 'import json;print(json.load(open("experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/dataset_qa_receipt.json"))["passed"])')"
+QA_PASSED="$("$LOCAL_PY" -c 'import json,sys;print(json.load(open(sys.argv[1], encoding="utf-8"))["passed"])' "$QA_RECEIPT")"
 [[ "$QA_PASSED" == True ]] || die "dataset QA receipt is not passed"
 PREREG_GATE="$("$LOCAL_PY" -c '
 import json,sys
@@ -218,7 +220,7 @@ REMOTE_BUILD="$REMOTE/experiments/$NAME/dataset_build_receipt.json"
 REMOTE_QA="$REMOTE/experiments/$NAME/dataset_qa_receipt.json"
 REMOTE_BATCH="$REMOTE/launch_$NAME.cmd"
 
-say "package 36,812-image immutable dataset"
+say "package ${DATASET_IMAGE_COUNT}-image immutable dataset"
 TMP_TAR="$(mktemp -t fable_t3_dataset)"
 COPYFILE_DISABLE=1 tar -cf "$TMP_TAR" --exclude='*.cache' --exclude='*.npy' --exclude='._*' \
   -C "$(dirname "$DATASET")" "$DATASET_BASE"

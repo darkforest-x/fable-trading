@@ -4,6 +4,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "train_15m_ma_launch_t3_on_3060.sh"
 IMGSZ1280_SCRIPT = ROOT / "scripts" / "train_15m_ma_launch_t3_imgsz1280_on_3060.sh"
+NEG30000_SCRIPT = (
+    ROOT / "scripts" / "train_15m_ma_launch_owner_neg30000_on_3060.sh"
+)
 IMGSZ1280_PREREG = (
     ROOT
     / "experiments"
@@ -63,6 +66,10 @@ def test_shared_launcher_binds_dynamic_contract_before_start() -> None:
         "FABLE_T3_PREREG",
         "FABLE_T3_RUN_NAME",
         "FABLE_T3_IMGSZ",
+        "FABLE_T3_DATASET",
+        "FABLE_T3_BUILD_RECEIPT",
+        "FABLE_T3_QA_RECEIPT",
+        "FABLE_T3_LOCAL_OUTPUT_ROOT",
         "PREREG_OK",
         "INPUTS_OK",
         'training_authorized"] is True',
@@ -71,7 +78,24 @@ def test_shared_launcher_binds_dynamic_contract_before_start() -> None:
         "--imgsz %s",
     ):
         assert token in text
-    assert text.index("PREREG_GATE=") < text.index("package 36,812-image immutable dataset")
+    assert text.index("PREREG_GATE=") < text.index("package ${DATASET_IMAGE_COUNT}-image immutable dataset")
+
+
+def test_neg30000_wrapper_selects_only_the_preregistered_dataset() -> None:
+    text = NEG30000_SCRIPT.read_text(encoding="utf-8")
+    assert 'FABLE_T3_IMGSZ="960"' in text
+    assert (
+        'FABLE_T3_DATASET="datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2"'
+        in text
+    )
+    assert 'FABLE_T3_DATASET_IMAGE_COUNT="40000"' in text
+    assert 'FABLE_T3_RUN_NAME="ma_launch_owner_yolo_neg30000_v2_y11s_ft960"' in text
+    assert 'FABLE_T3_REMOTE_DATASET_NAME="ma_launch_owner_yolo_neg30000_v2_input"' in text
+    assert text.rstrip().endswith(
+        'exec bash scripts/train_15m_ma_launch_t3_on_3060.sh "$@"'
+    )
+    forbidden = ("promote_owner_best.py", "active_bundle.json", "forward_log.csv")
+    assert all(token not in text for token in forbidden)
 
 
 def test_shared_launcher_verifies_content_addressed_remote_reuse() -> None:
