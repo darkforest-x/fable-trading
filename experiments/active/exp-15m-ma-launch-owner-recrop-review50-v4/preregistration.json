@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-recrop-review50-v4",
+  "created_at": "2026-08-27T15:05:00+08:00",
+  "stage": "P0_shape_definition",
+  "purpose": "Apply the Owner's per-image feedback to the frozen Review50, allow honest no-box rejects, and recrop every surviving model-input proposal so the core ends at tip/tip-1/tip-2.",
+  "source": {
+    "review_manifest": "experiments/active/exp-15m-ma-launch-ma-box-review50-v1/results/review_manifest.jsonl",
+    "review_manifest_sha256": "cc852cb9da838056a8c95e80ba60270fa1537860973437b35638cff1efe63c66",
+    "n_rows": 50,
+    "identity_policy": "Exact same 50 sample IDs and pre-holdout sources as v1-v3; no reselection and no holdout OHLCV."
+  },
+  "owner_feedback": {
+    "received_at": "2026-08-27T14:42:00+08:00",
+    "verbatim_summary": "Some boxes are still wrong; 01/14/32/35 should move right, 18 only the rightmost four bars, 03/08/20/21/22/34 are wrong, 44 is perfect, 42 is good, 48 is acceptable but detection is too late. Prefer fewer strict samples over forced labels.",
+    "interpretation_policy": "Explicit reject is final for this proposal. Explicit directional feedback creates a new per-image proposal, not a claimed Gold coordinate. Unmentioned rows remain pending and retain their v1 L5 span only for review."
+  },
+  "owner_decisions": [
+    {"source_order": 1, "sample_id": "346f01e4ae63623fe488123f", "action": "rebox", "core_start_offset": -6, "core_end_offset": -2, "reason": "Owner requested a rightward boundary; v4 proposes a one-bar shift while keeping five pre-launch bars."},
+    {"source_order": 3, "sample_id": "872de8d2642e9e871a4a2035", "action": "reject", "reason": "Owner explicitly judged sample 03 incorrect."},
+    {"source_order": 8, "sample_id": "37f9c326853c3d8aebae269e", "action": "reject", "reason": "Owner explicitly judged sample 08 incorrect."},
+    {"source_order": 14, "sample_id": "5de0dd06a74bd3d156a51bbc", "action": "rebox", "core_start_offset": -10, "core_end_offset": -6, "reason": "Owner requested a rightward boundary; v4 proposes the closer five-bar convergence segment."},
+    {"source_order": 18, "sample_id": "a8079908f501a92e573b87cd", "action": "rebox", "core_start_offset": -11, "core_end_offset": -8, "reason": "Owner specified that only the rightmost four bars of the old five-bar box look dense."},
+    {"source_order": 20, "sample_id": "28aff3d9037db73f28a0e97d", "action": "reject", "reason": "Owner explicitly judged sample 20 incorrect."},
+    {"source_order": 21, "sample_id": "8848f3a02114a3beb69784e5", "action": "reject", "reason": "Owner explicitly judged sample 21 incorrect."},
+    {"source_order": 22, "sample_id": "7fd6ab8d8f1bebf3cc981d4a", "action": "reject", "reason": "Owner judged sample 22 flat and not visibly MA-dense."},
+    {"source_order": 32, "sample_id": "9782cd6e3344064fa0b7d216", "action": "rebox", "core_start_offset": -10, "core_end_offset": -6, "reason": "Owner requested a rightward boundary; v4 proposes the closer five-bar convergence segment."},
+    {"source_order": 34, "sample_id": "a0ca16c213bef139246c945b", "action": "reject", "reason": "Owner explicitly judged sample 34 not MA-dense despite its right-side position."},
+    {"source_order": 35, "sample_id": "e1d6b8c70518b4785aced64d", "action": "rebox", "core_start_offset": -9, "core_end_offset": -5, "reason": "Owner requested a rightward boundary; v4 proposes the closer five-bar convergence segment."},
+    {"source_order": 42, "sample_id": "4e86ddc32a5401c49bf4aeb3", "action": "keep_reference", "core_start_offset": -6, "core_end_offset": -2, "reason": "Owner judged sample 42 good; retain its semantic core and only recrop the input."},
+    {"source_order": 44, "sample_id": "a20a0a4e50a94b1a017d38a0", "action": "keep_reference", "core_start_offset": -6, "core_end_offset": -2, "reason": "Owner judged sample 44 the perfect reference; retain its semantic core and only recrop the input."},
+    {"source_order": 48, "sample_id": "0846b4f53090c2980df602b9", "action": "keep_reference", "core_start_offset": -10, "core_end_offset": -6, "reason": "Owner judged the morphology acceptable but late; retain the core and make it the model-input tip instead of showing eight later bars."}
+  ],
+  "geometry": {
+    "accepted_core_bars": [4, 5, 6, 7],
+    "default_unmentioned_proposal": "v1 variants.L5_min24.span",
+    "vertical_inputs": ["core high", "core low", "sma20", "ema20", "sma60", "ema60", "sma120", "ema120"],
+    "vertical_padding_fraction_of_core_range": 0.04,
+    "pre_core_context_bars": [10, 11, 12],
+    "post_core_model_visible_bars": [0, 1, 2],
+    "future_review_bars_after_core": 5,
+    "render": {"width": 1280, "height": 742, "format": "PNG", "review_overlay": "single red rectangle", "model_input": "clean PNG without rectangle"}
+  },
+  "separation_contract": {
+    "model_input_directory": "results/model_inputs_clean",
+    "future_review_directory": "results/future_review_only",
+    "future_review_label_files_allowed": 0,
+    "model_input_right_end": "core/core+1/core+2 only",
+    "sample_owner_geometry_confirmed": false
+  },
+  "safety": {
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0,
+    "write_yolo_labels": false,
+    "write_training_images": false,
+    "start_training": false,
+    "modify_active_or_frozen": false,
+    "modify_forward_or_deployment": false,
+    "place_orders": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
