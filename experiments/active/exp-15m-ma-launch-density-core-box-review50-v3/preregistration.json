@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-density-core-box-review50-v3",
+  "created_at": "2026-08-27T14:30:00+08:00",
+  "stage": "P0_shape_definition",
+  "purpose": "Correct the Owner-rejected v2 review by restoring each sample's own five-bar six-MA-density anchor and drawing one high-resolution red core box with no confirmation bars.",
+  "owner_correction": {
+    "received_at": "2026-08-27T14:00:00+08:00",
+    "verbatim_summary": "Every image should contain one box; the red boxes are too far right and should contain fewer K bars.",
+    "rejected_experiment": "exp-15m-ma-launch-transition-box-review50-v2",
+    "rejected_features": [
+      "four alternatives on every image",
+      "three confirmation bars inside the red horizontal extent",
+      "global core end fixed at t-3 instead of the per-image density anchor"
+    ]
+  },
+  "source": {
+    "review_manifest": "experiments/active/exp-15m-ma-launch-ma-box-review50-v1/results/review_manifest.jsonl",
+    "review_manifest_sha256": "cc852cb9da838056a8c95e80ba60270fa1537860973437b35638cff1efe63c66",
+    "n_rows": 50,
+    "identity_policy": "Exact same 50 sample IDs, source windows and clean-image hashes as v1/v2; no reselection."
+  },
+  "geometry": {
+    "one_box_per_image": true,
+    "core_variant_source": "v1 variants.L5_min24.span",
+    "core_bars": 5,
+    "confirmation_bars": 0,
+    "horizontal_bounds": "candle outer edges of the frozen per-image five-bar tightest six-MA span",
+    "vertical_inputs": [
+      "core high",
+      "core low",
+      "sma20",
+      "ema20",
+      "sma60",
+      "ema60",
+      "sma120",
+      "ema120"
+    ],
+    "vertical_padding_fraction_of_core_range": 0.04,
+    "bars_after_core_used_for_any_box_coordinate": false,
+    "render": {
+      "width": 1280,
+      "height": 742,
+      "format": "PNG",
+      "overlay": "single red rectangle only",
+      "telegram_delivery_mode": "one PNG at a time as document to preserve original bytes"
+    }
+  },
+  "null_controls": {
+    "post_core_intervention": "Mutating every OHLC and six-MA value after the core must leave x0/y0/x1/y1 unchanged.",
+    "clean_image_parity": "The clean render SHA must equal the frozen v1 SHA for all 50 rows.",
+    "core_containment": "All five core candle wicks and all six MA points must lie inside the red box."
+  },
+  "safety": {
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0,
+    "owner_reference_screenshots_are_pixel_only": true,
+    "write_yolo_labels": false,
+    "write_training_images": false,
+    "start_training": false,
+    "modify_active_or_frozen": false,
+    "modify_forward_or_deployment": false,
+    "place_orders": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
