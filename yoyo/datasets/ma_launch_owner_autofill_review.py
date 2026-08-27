@@ -302,6 +302,9 @@ def select_diverse(
 
     target_per_side = int(selection["target_per_side"])
     bins_count = int(selection["time_bins_per_side"])
+    max_per_symbol = int(selection["max_per_symbol_across_pack"])
+    max_per_direction_symbol = int(selection["max_per_symbol_per_direction"])
+    min_unique_symbols = int(selection["min_unique_symbols"])
     per_bin = target_per_side // bins_count
     if target_per_side % bins_count:
         raise OwnerAutofillError("target_per_side must divide evenly across time bins")
@@ -352,7 +355,8 @@ def select_diverse(
     def solve(
         remaining: tuple[tuple[str, int], ...],
         chosen: list[dict[str, Any]],
-        used_symbols: set[str],
+        symbol_counts: Counter[str],
+        direction_symbol_counts: Counter[tuple[str, str]],
         used_hours: set[str],
         day_counts: Counter[str],
     ) -> bool:
@@ -361,6 +365,8 @@ def select_diverse(
         if search_nodes > 250_000:
             raise OwnerAutofillError("diversity search exceeded deterministic node budget")
         if not remaining:
+            if len(symbol_counts) < min_unique_symbols:
+                return False
             solution = list(chosen)
             return True
         compatible_by_group: list[
@@ -370,11 +376,22 @@ def select_diverse(
             compatible = []
             for item in group_options[key]:
                 option = item[1]
-                option_symbols = {str(row["symbol"]) for row in option}
+                option_symbols = Counter(str(row["symbol"]) for row in option)
                 option_stamps = [pd.Timestamp(row["anchor_time"]) for row in option]
                 option_hours = {stamp.floor("h").isoformat() for stamp in option_stamps}
                 option_days = Counter(stamp.strftime("%Y-%m-%d") for stamp in option_stamps)
-                if option_symbols & used_symbols or option_hours & used_hours:
+                if option_hours & used_hours:
+                    continue
+                if any(
+                    symbol_counts[symbol] + count > max_per_symbol
+                    for symbol, count in option_symbols.items()
+                ):
+                    continue
+                if any(
+                    direction_symbol_counts[(key[0], symbol)] + count
+                    > max_per_direction_symbol
+                    for symbol, count in option_symbols.items()
+                ):
                     continue
                 if any(day_counts[day] + count > max_per_day for day, count in option_days.items()):
                     continue
@@ -389,16 +406,23 @@ def select_diverse(
         next_remaining = tuple(item for item in remaining if item != key)
         for _, option in compatible:
             option_rows = list(option)
-            option_symbols = {str(row["symbol"]) for row in option_rows}
+            option_symbols = Counter(str(row["symbol"]) for row in option_rows)
             option_stamps = [pd.Timestamp(row["anchor_time"]) for row in option_rows]
             option_hours = {stamp.floor("h").isoformat() for stamp in option_stamps}
             option_days = Counter(stamp.strftime("%Y-%m-%d") for stamp in option_stamps)
             next_day_counts = day_counts.copy()
             next_day_counts.update(option_days)
+            next_symbol_counts = symbol_counts.copy()
+            next_symbol_counts.update(option_symbols)
+            next_direction_symbol_counts = direction_symbol_counts.copy()
+            next_direction_symbol_counts.update(
+                {(key[0], symbol): count for symbol, count in option_symbols.items()}
+            )
             if solve(
                 next_remaining,
                 chosen + option_rows,
-                used_symbols | option_symbols,
+                next_symbol_counts,
+                next_direction_symbol_counts,
                 used_hours | option_hours,
                 next_day_counts,
             ):
@@ -406,13 +430,13 @@ def select_diverse(
         return False
 
     keys = tuple(sorted(group_options, key=lambda key: (len(group_options[key]), key)))
-    if not solve(keys, [], set(), set(), Counter()):
+    if not solve(keys, [], Counter(), Counter(), set(), Counter()):
         raise OwnerAutofillError("could not solve strict cross-pack diversity constraints")
     assert solution is not None
     selected = solution
     used_symbols = {str(row["symbol"]) for row in selected}
-    if len(selected) != 2 * target_per_side or len(used_symbols) != len(selected):
-        raise OwnerAutofillError("strict selection is not 50 unique-symbol rows")
+    if len(selected) != 2 * target_per_side or len(used_symbols) < min_unique_symbols:
+        raise OwnerAutofillError("strict selection count or symbol diversity drift")
     return sorted(selected, key=lambda row: (row["direction"], row["time_bin"], row["anchor_time"]))
 
 
@@ -654,6 +678,7 @@ def build(prereg_path: Path = DEFAULT_PREREG, output_dir: Path | None = None) ->
         "direction_counts": dict(Counter(row["direction"] for row in output_rows)),
         "core_bars_counts": dict(Counter(str(row["core_bars"]) for row in output_rows)),
         "unique_symbols": len({row["symbol"] for row in output_rows}),
+        "max_per_symbol": max(Counter(row["symbol"] for row in output_rows).values()),
         "max_per_utc_day": max(Counter(days).values()),
         "max_per_utc_hour": max(Counter(hours).values()),
         "boxes_per_image_min": 1,
@@ -670,7 +695,12 @@ def build(prereg_path: Path = DEFAULT_PREREG, output_dir: Path | None = None) ->
     }
     if summary["direction_counts"] != {"LONG": 25, "SHORT": 25}:
         raise OwnerAutofillError("direction balance drift")
-    if summary["unique_symbols"] != 50 or summary["max_per_utc_day"] > 2 or summary["max_per_utc_hour"] > 1:
+    if (
+        summary["unique_symbols"] < int(prereg["selection"]["min_unique_symbols"])
+        or summary["max_per_symbol"] > int(prereg["selection"]["max_per_symbol_across_pack"])
+        or summary["max_per_utc_day"] > int(prereg["selection"]["max_per_utc_day"])
+        or summary["max_per_utc_hour"] > int(prereg["selection"]["max_per_utc_hour"])
+    ):
         raise OwnerAutofillError("selection diversity drift")
     if summary["holdout_ohlcv_rows_materialized"] != 0:
         raise OwnerAutofillError("holdout rows materialized")

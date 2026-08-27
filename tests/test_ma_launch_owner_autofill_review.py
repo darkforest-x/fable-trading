@@ -136,6 +136,9 @@ def test_diverse_selection_fills_25_per_side_without_repeated_symbols() -> None:
             "time_bins_per_side": 5,
             "max_per_utc_day": 2,
             "max_per_utc_hour": 1,
+            "max_per_symbol_across_pack": 2,
+            "max_per_symbol_per_direction": 1,
+            "min_unique_symbols": 45,
         },
     )
     assert Counter(row["direction"] for row in chosen) == {"LONG": 25, "SHORT": 25}

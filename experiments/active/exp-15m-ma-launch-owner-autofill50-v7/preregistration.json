@@ -101,8 +101,10 @@
     "time_bins_per_side": 5,
     "max_per_utc_day": 2,
     "max_per_utc_hour": 1,
-    "max_per_symbol_across_pack": 1,
-    "reason": "Prevent one symbol, market-wide burst, hour, date or regime from filling the pack."
+    "max_per_symbol_across_pack": 2,
+    "max_per_symbol_per_direction": 1,
+    "min_unique_symbols": 45,
+    "reason": "Exact feasibility audit found that 50 globally unique symbols is impossible under the other frozen quotas. Permit at most one LONG and one SHORT for a repeated symbol while retaining at least 45 unique symbols, one event per hour and two per day. This changes diversity only, not the morphology gate."
   },
   "render": {
     "width": 1280,
