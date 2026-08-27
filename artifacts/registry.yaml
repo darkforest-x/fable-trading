@@ -2759,6 +2759,207 @@ artifacts:
       browser-QA HTML document at 2026-08-26T06:40:18Z. The receipt contains no
       credential material and keeps holdout and production flags false.
 
+  # ---- pre-holdout 15m t-3 imgsz=1280 single-variable retrain ----------
+  - artifact_id: 15m-ma-launch-t3-yolo10000-imgsz1280-v1-prereg
+    artifact_type: config
+    role: frozen_owner_authorized_single_variable_resolution_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "97ff14394b6e012a9296d4ac567b407eaae50b30"
+    source_path: experiments/active/exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1/preregistration.json
+    sha256: "d1f248b51b07d423468581e7899ac4e4f8452fce6668904181aabb7a8cfba245"
+    size_bytes: 5001
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "97ff14394b6e012a9296d4ac567b407eaae50b30"
+    config_hash: "d1f248b51b07d423468581e7899ac4e4f8452fce6668904181aabb7a8cfba245"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Binds the exact reused 36,812-image manifest and complete baseline recipe,
+      with native imgsz 960 to 1280 as the only variable. Records the Owner's
+      one-off retraining authorization but no Gold, holdout or promotion grant.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-imgsz1280-v1-best-weights
+    artifact_type: weights
+    role: rejected_resolution_treatment_research_weights
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ea6c6743bca48035778749aa137e57d2dfa30742"
+    source_path: analysis/output/ma_launch_t3_10000_v1/ma_launch_t3_10000_v1_y11s_ft_imgsz1280/weights/best.pt
+    sha256: "a9fae2ef64489e24f39bd51714d96b43cf680bf80d5c536537f03a4402e9f9c0"
+    size_bytes: 19244762
+    storage_uri: "repo://analysis/output/ma_launch_t3_10000_v1/ma_launch_t3_10000_v1_y11s_ft_imgsz1280/weights/best.pt"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "97ff14394b6e012a9296d4ac567b407eaae50b30"
+    config_hash: "d1f248b51b07d423468581e7899ac4e4f8452fce6668904181aabb7a8cfba245"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      RTX 3060 best epoch 21 after an epoch-31 patience stop. Native MPS val
+      mAP50-95 is 0.31104 versus 0.33128 for the imgsz=960 baseline, so this
+      weight preserves the negative result only and is forbidden from ACTIVE,
+      forward, deployment and future training reuse.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-imgsz1280-v1-training-receipt
+    artifact_type: manifest
+    role: remote_environment_hash_and_final_validation_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ea6c6743bca48035778749aa137e57d2dfa30742"
+    source_path: experiments/active/exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1/results/training_receipt.json
+    sha256: "99dcd85234137d033029f38715eff854b64c6ad6f0ede9ed85cadcb7b4bba6ba"
+    size_bytes: 3749
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1/results/training_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "97ff14394b6e012a9296d4ac567b407eaae50b30"
+    config_hash: "d1f248b51b07d423468581e7899ac4e4f8452fce6668904181aabb7a8cfba245"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Verifies exit code zero, exact args, Mac/3060 dependency parity, fetched
+      byte hashes, best epoch 21, final reloaded-best metrics, both class rows
+      and the 31-epoch rendered training curves.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-imgsz1280-v1-resolution-grid
+    artifact_type: manifest
+    role: frozen_two_by_two_train_and_eval_resolution_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ea6c6743bca48035778749aa137e57d2dfa30742"
+    source_path: experiments/active/exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1/results/resolution_grid.json
+    sha256: "c0181ba649c1983cfa6c8ccc65e1efba9d10b14407d52eb63302fcac4759efc6"
+    size_bytes: 4925
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1/results/resolution_grid.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "22a389c10a43a281c857f9ccb4e4340192b52337"
+    config_hash: "d1f248b51b07d423468581e7899ac4e4f8452fce6668904181aabb7a8cfba245"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Same 2,940-image MPS val at confidence 0.001 for train960/eval960,
+      train960/eval1280, train1280/eval960 and train1280/eval1280. Native
+      treatment-minus-baseline mAP50-95 is -0.020242 with no threshold tuning.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-imgsz1280-v1-hard-val
+    artifact_type: manifest
+    role: fixed_easy_and_hard_negative_false_fire_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ea6c6743bca48035778749aa137e57d2dfa30742"
+    source_path: experiments/active/exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1/results/hard_val_evaluation_native1280.json
+    sha256: "5542970d845b8a1cbc6cc52e209daffb6959d944b2902ed8730e4f8865b0eed3"
+    size_bytes: 3372
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1/results/hard_val_evaluation_native1280.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "22a389c10a43a281c857f9ccb4e4340192b52337"
+    config_hash: "d1f248b51b07d423468581e7899ac4e4f8452fce6668904181aabb7a8cfba245"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Confidence 0.25 on 1,470 easy and 1,469 hard backgrounds. Treatment fires
+      6 easy and 4 hard boxes, or 4.082 and 2.723 per 1,000 images; threshold,
+      sample membership and holdout state remain frozen.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-imgsz1280-v1-validation-preview
+    artifact_type: report
+    role: deterministic_native_source_png_prediction_preview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ea6c6743bca48035778749aa137e57d2dfa30742"
+    source_path: experiments/active/exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1/results/validation_preview.png
+    sha256: "6b6b20b755b8c9af3080804e32196d0323d06dd54663e58453326ad621a4b258"
+    size_bytes: 220568
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1/results/validation_preview.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "97ff14394b6e012a9296d4ac567b407eaae50b30"
+    config_hash: "d1f248b51b07d423468581e7899ac4e4f8452fce6668904181aabb7a8cfba245"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Stable four LONG, four SHORT and eight easy-background sample identities.
+      It overlays GT and confidence-0.25 predictions on copies of the exact
+      1280x742 training PNGs; five positives and zero backgrounds render boxes.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-imgsz1280-v1-comparison
+    artifact_type: report
+    role: native_metrics_cross_resolution_and_negative_comparison_figure
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ea6c6743bca48035778749aa137e57d2dfa30742"
+    source_path: experiments/active/exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1/results/resolution_comparison.png
+    sha256: "f5dfd8ffb65c3bb6796be3b25d70649378c432381a8991a384c8f7a30d8bb22e"
+    size_bytes: 121398
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1/results/resolution_comparison.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c97647523a49bb532d0aafee4e49906e4e9169dd"
+    config_hash: "d1f248b51b07d423468581e7899ac4e4f8452fce6668904181aabb7a8cfba245"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Hash-bound three-panel Owner figure comparing native metrics,
+      cross-resolution mAP50-95 and fixed-confidence easy/hard false boxes.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-imgsz1280-v1-report
+    artifact_type: report
+    role: canonical_preholdout_negative_resolution_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ea6c6743bca48035778749aa137e57d2dfa30742"
+    source_path: analysis/p1_15m_ma_launch_t3_yolo10000_imgsz1280_20260827.md
+    sha256: "3826421937268a4ca2bd08f29892cebd4dcaec3164d985b3ad71d7f15e67361e"
+    size_bytes: 14536
+    storage_uri: "repo://analysis/p1_15m_ma_launch_t3_yolo10000_imgsz1280_20260827.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ea6c6743bca48035778749aa137e57d2dfa30742"
+    config_hash: "d1f248b51b07d423468581e7899ac4e4f8452fce6668904181aabb7a8cfba245"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Answer-first single-variable report with exact train identity, 3060
+      contract, 2x2 resolution grid, negative controls, rendered predictions,
+      non-economic null, reproducible commands and explicit rejection.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-imgsz1280-v1-html
+    artifact_type: report
+    role: owner_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ea6c6743bca48035778749aa137e57d2dfa30742"
+    source_path: analysis/html/p1_15m_ma_launch_t3_yolo10000_imgsz1280_20260827.html
+    sha256: "8426f397d012b397c5a4e8cc8c85587285dcaf838d08b63be62d1e4fd29245a9"
+    size_bytes: 699261
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_t3_yolo10000_imgsz1280_20260827.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ea6c6743bca48035778749aa137e57d2dfa30742"
+    config_hash: "d1f248b51b07d423468581e7899ac4e4f8452fce6668904181aabb7a8cfba245"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Self-contained Owner HTML embedding the comparison, training curves and
+      fixed native-source prediction preview. Desktop and narrow Chromium QA
+      passed with no document overflow or console errors.
+
+  - artifact_id: 15m-ma-launch-t3-yolo10000-imgsz1280-v1-html-qa
+    artifact_type: manifest
+    role: desktop_and_narrow_chromium_render_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ea6c6743bca48035778749aa137e57d2dfa30742"
+    source_path: experiments/active/exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1/results/html_qa_receipt.json
+    sha256: "e20de8bf3011d677a2ae2c4bc89137baba2291d1c03fb93f6f9a158e029f6330"
+    size_bytes: 1738
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1/results/html_qa_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ea6c6743bca48035778749aa137e57d2dfa30742"
+    config_hash: "d1f248b51b07d423468581e7899ac4e4f8452fce6668904181aabb7a8cfba245"
+    data_cutoff: "2026-05-03T14:45:00Z"
+    notes: >-
+      Real in-app Chromium passed 1440x1000 and 390x844 rendering; eight tables
+      scroll locally on narrow view, all three images load, unresolved
+      placeholders are zero and console errors/warnings are zero.
+
   # ---- pre-holdout 15m t-3 hard-negative validation sidecar ------------
   - artifact_id: 15m-ma-launch-t3-hardval-v1-prereg
     artifact_type: config

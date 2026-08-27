@@ -1354,6 +1354,57 @@ experiments:
       release. Zero holdout OHLCV was read; no promote, forward, deployment,
       ACTIVE/frozen or order state changed.
 
+  - experiment_id: exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ea6c6743bca48035778749aa137e57d2dfa30742"
+    status: rejected
+    question: >-
+      Holding the exact Owner-authorized weak-label PNGs, labels, split, seed
+      and YOLO recipe fixed, does training and validating at imgsz=1280 improve
+      the pre-holdout behavior relative to the imgsz=960 baseline?
+    single_variable: >-
+      native training and validation imgsz changes from 960 to 1280; the same
+      36,812 source PNGs and labels are reused byte-for-byte, and every other
+      training argument including rect, translate=0.02 and scale=0.1 remains
+      frozen
+    result: >-
+      completed_negative_resolution_result: the RTX 3060 run exited zero after
+      an epoch-31 patience stop with best epoch 21. On the same 2,940-image MPS
+      val, native 1280 versus native 960 changed P/R/mAP50/mAP50-95 by
+      -0.0414/-0.0049/-0.0337/-0.0202; the exact native scores were 0.4921,
+      0.6058, 0.5543 and 0.3110. Cross-resolution mAP50-95 was 0.2672 for the
+      960 weight at eval1280 and 0.2187 for the 1280 weight at eval960, showing
+      resolution matching but no 1280 advantage. Easy false boxes rose from
+      3.401 to 4.082 per 1,000 images; hard stayed 2.723. Reject imgsz=1280 as
+      a replacement for the 960 weak-label research baseline.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_t3_yolo10000_imgsz1280_20260827.md
+    artifacts:
+      - 15m-ma-launch-t3-yolo10000-imgsz1280-v1-prereg
+      - 15m-ma-launch-t3-yolo10000-v1-dataset
+      - 15m-ma-launch-t3-yolo10000-v1-dataset-qa
+      - 15m-ma-launch-t3-yolo10000-imgsz1280-v1-best-weights
+      - 15m-ma-launch-t3-yolo10000-imgsz1280-v1-training-receipt
+      - 15m-ma-launch-t3-yolo10000-imgsz1280-v1-resolution-grid
+      - 15m-ma-launch-t3-yolo10000-imgsz1280-v1-hard-val
+      - 15m-ma-launch-t3-yolo10000-imgsz1280-v1-validation-preview
+      - 15m-ma-launch-t3-yolo10000-imgsz1280-v1-comparison
+      - 15m-ma-launch-t3-yolo10000-imgsz1280-v1-report
+      - 15m-ma-launch-t3-yolo10000-imgsz1280-v1-html
+      - 15m-ma-launch-t3-yolo10000-imgsz1280-v1-html-qa
+    reuse_allowed: false
+    notes: >-
+      Owner authorization was the exact 2026-08-27 instruction "ok
+      重新去训练吧" after reviewing original 1280x742 samples. It authorized
+      this single-variable run only, not Gold status or later reuse. Source PNGs
+      were not offline resized or re-encoded, although the unchanged in-memory
+      letterbox/translate/scale path still applies. Weight SHA256 is
+      a9fae2ef64489e24f39bd51714d96b43cf680bf80d5c536537f03a4402e9f9c0.
+      Zero holdout rows were read and no threshold, ACTIVE/frozen, promote,
+      forward, deployment or order state changed.
+
   - experiment_id: exp-15m-ma-launch-t3-hardval-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "3b5de03f131714340b08b42693b397e3dd072024"
