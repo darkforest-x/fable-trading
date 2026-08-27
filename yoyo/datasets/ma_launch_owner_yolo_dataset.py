@@ -364,7 +364,10 @@ def plan_positives(
         )
     kinds = Counter(plan.negative_kind for plan in plans)
     expected = prereg["negative_sampling"]
-    if kinds != Counter(hard=int(expected["hard_total"]), easy=int(expected["easy_total"])):
+    if kinds != Counter(
+        hard=int(expected["preferred_hard_total"]),
+        easy=int(expected["preferred_easy_total"]),
+    ):
         raise OwnerYoloDatasetError(f"negative kind assignment drift: {kinds}")
     for split in ("train", "val"):
         subset = [plan for plan in plans if plan.split == split]
@@ -582,85 +585,93 @@ def select_source_negatives(
             pools[key] = rng.permutation(indices)
         return pools[key]
 
+    fallback_counts: Counter[str] = Counter()
     for template in sorted(positives, key=lambda plan: plan.source_order):
-        key = (template.core_bars, template.negative_kind, template.time_block)
-        pool = pool_for(*key)
         found: NegativePlan | None = None
-        while cursors[key] < len(pool):
-            core_end = int(pool[cursors[key]])
-            cursors[key] += 1
-            core_start = core_end - template.core_bars + 1
-            window_start = core_start - template.pre_core_context_bars
-            window_end = core_end + template.post_core_context_bars
-            dependency_end = max(window_end, core_end + 5)
-            if not _contiguous(segment, window_start, dependency_end):
-                pool_rejections["source_gap_or_bounds"] += 1
-                continue
-            assigned = interval_split(
-                times.iloc[window_start],
-                times.iloc[dependency_end],
-                cutoff=split_cfg["cutoff"],
-                purge_bars=int(split_cfg["purge_bars_each_side"]),
-                bar_minutes=int(split_cfg["bar_minutes"]),
-            )
-            if template.split != "excluded" and assigned != template.split:
-                pool_rejections["split_mismatch"] += 1
-                continue
-            guarded_start = max(0, window_start - separation)
-            guarded_end = min(len(occupied) - 1, dependency_end + separation)
-            if occupied[guarded_start : guarded_end + 1].any():
-                pool_rejections["protected_or_reused"] += 1
-                continue
-            features = masks[template.core_bars]
-            sample_id = stable_id(
-                prereg["protocol"],
-                source_path,
-                core_end,
-                template.core_bars,
-                template.pre_core_context_bars,
-                template.post_core_context_bars,
-                template.negative_kind,
-            )
-            found = NegativePlan(
-                sample_id=sample_id,
-                paired_positive_sample_id=template.sample_id,
-                paired_positive_source_order=template.source_order,
-                paired_direction=template.direction,
-                symbol=symbol,
-                source_path=source_path,
-                split=template.split,
-                negative_kind=template.negative_kind,
-                core_bars=template.core_bars,
-                core_end_i=core_end,
-                pre_core_context_bars=template.pre_core_context_bars,
-                post_core_context_bars=template.post_core_context_bars,
-                window_start_i=window_start,
-                window_end_i=window_end,
-                dependency_end_i=dependency_end,
-                core_end_time=times.iloc[core_end].isoformat(),
-                window_start_time=times.iloc[window_start].isoformat(),
-                window_end_time=times.iloc[window_end].isoformat(),
-                dependency_end_time=times.iloc[dependency_end].isoformat(),
-                time_block=template.time_block,
-                ma_envelope_atr=float(features["ma_envelope_atr"][core_end]),
-                ma_spread_end_atr=float(features["ma_spread_end_atr"][core_end]),
-                max_body_atr=float(features["max_body_atr"][core_end]),
-                candle_envelope_atr=float(features["candle_envelope_atr"][core_end]),
-                minimum_close_to_ma_atr=float(features["minimum_close_to_ma_atr"][core_end]),
-                abs_close_progress_atr_core_plus_2=float(features["close2"][core_end]),
-                abs_close_progress_atr_core_plus_3=float(features["close3"][core_end]),
-                abs_close_progress_atr_core_plus_5=float(features["close5"][core_end]),
-                two_sided_excursion_atr_core_plus_1_to_5=float(
-                    features["excursion"][core_end]
-                ),
-            )
-            _mark_interval(occupied, guarded_start, guarded_end)
-            break
+        attempted: list[tuple[tuple[int, str, str], int]] = []
+        alternate = "easy" if template.negative_kind == "hard" else "hard"
+        for actual_kind in (template.negative_kind, alternate):
+            key = (template.core_bars, actual_kind, template.time_block)
+            pool = pool_for(*key)
+            attempted.append((key, len(pool)))
+            while cursors[key] < len(pool):
+                core_end = int(pool[cursors[key]])
+                cursors[key] += 1
+                core_start = core_end - template.core_bars + 1
+                window_start = core_start - template.pre_core_context_bars
+                window_end = core_end + template.post_core_context_bars
+                dependency_end = max(window_end, core_end + 5)
+                if not _contiguous(segment, window_start, dependency_end):
+                    pool_rejections["source_gap_or_bounds"] += 1
+                    continue
+                assigned = interval_split(
+                    times.iloc[window_start],
+                    times.iloc[dependency_end],
+                    cutoff=split_cfg["cutoff"],
+                    purge_bars=int(split_cfg["purge_bars_each_side"]),
+                    bar_minutes=int(split_cfg["bar_minutes"]),
+                )
+                if template.split != "excluded" and assigned != template.split:
+                    pool_rejections["split_mismatch"] += 1
+                    continue
+                guarded_start = max(0, window_start - separation)
+                guarded_end = min(len(occupied) - 1, dependency_end + separation)
+                if occupied[guarded_start : guarded_end + 1].any():
+                    pool_rejections["protected_or_reused"] += 1
+                    continue
+                features = masks[template.core_bars]
+                sample_id = stable_id(
+                    prereg["protocol"],
+                    source_path,
+                    core_end,
+                    template.core_bars,
+                    template.pre_core_context_bars,
+                    template.post_core_context_bars,
+                    actual_kind,
+                )
+                found = NegativePlan(
+                    sample_id=sample_id,
+                    paired_positive_sample_id=template.sample_id,
+                    paired_positive_source_order=template.source_order,
+                    paired_direction=template.direction,
+                    symbol=symbol,
+                    source_path=source_path,
+                    split=template.split,
+                    negative_kind=actual_kind,
+                    core_bars=template.core_bars,
+                    core_end_i=core_end,
+                    pre_core_context_bars=template.pre_core_context_bars,
+                    post_core_context_bars=template.post_core_context_bars,
+                    window_start_i=window_start,
+                    window_end_i=window_end,
+                    dependency_end_i=dependency_end,
+                    core_end_time=times.iloc[core_end].isoformat(),
+                    window_start_time=times.iloc[window_start].isoformat(),
+                    window_end_time=times.iloc[window_end].isoformat(),
+                    dependency_end_time=times.iloc[dependency_end].isoformat(),
+                    time_block=template.time_block,
+                    ma_envelope_atr=float(features["ma_envelope_atr"][core_end]),
+                    ma_spread_end_atr=float(features["ma_spread_end_atr"][core_end]),
+                    max_body_atr=float(features["max_body_atr"][core_end]),
+                    candle_envelope_atr=float(features["candle_envelope_atr"][core_end]),
+                    minimum_close_to_ma_atr=float(features["minimum_close_to_ma_atr"][core_end]),
+                    abs_close_progress_atr_core_plus_2=float(features["close2"][core_end]),
+                    abs_close_progress_atr_core_plus_3=float(features["close3"][core_end]),
+                    abs_close_progress_atr_core_plus_5=float(features["close5"][core_end]),
+                    two_sided_excursion_atr_core_plus_1_to_5=float(
+                        features["excursion"][core_end]
+                    ),
+                )
+                _mark_interval(occupied, guarded_start, guarded_end)
+                if actual_kind != template.negative_kind:
+                    fallback_counts[f"{template.negative_kind}_to_{actual_kind}"] += 1
+                break
+            if found is not None:
+                break
         if found is None:
             raise OwnerYoloDatasetError(
                 "insufficient negative capacity without relaxing constraints: "
-                f"{source_path} {key} positive={template.sample_id} pool={len(pool)} "
-                f"used={cursors[key]}"
+                f"{source_path} attempted={attempted} positive={template.sample_id}"
             )
         selected.append(found)
 
@@ -673,6 +684,7 @@ def select_source_negatives(
         "negative_kinds": dict(Counter(plan.negative_kind for plan in selected)),
         "splits": dict(Counter(plan.split for plan in selected)),
         "pool_rejections": dict(pool_rejections),
+        "safe_kind_fallbacks": dict(fallback_counts),
         "pool_keys": len(pools),
         "pool_rows_total": sum(len(values) for values in pools.values()),
     }
@@ -778,6 +790,21 @@ def plan_dataset(
     negative_ids = [plan.sample_id for plan in negatives]
     if len(negative_ids) != len(set(negative_ids)):
         raise OwnerYoloDatasetError("duplicate negative identities")
+    negative_cfg = prereg["negative_sampling"]
+    actual_kinds = Counter(plan.negative_kind for plan in negatives)
+    if actual_kinds["hard"] / len(negatives) < float(
+        negative_cfg["minimum_hard_share_overall"]
+    ):
+        raise OwnerYoloDatasetError(f"overall hard-negative share too low: {actual_kinds}")
+    for split in ("train", "val"):
+        split_kinds = Counter(
+            plan.negative_kind for plan in negatives if plan.split == split
+        )
+        minimum = float(negative_cfg[f"minimum_hard_share_{split}"])
+        if not split_kinds or split_kinds["hard"] / sum(split_kinds.values()) < minimum:
+            raise OwnerYoloDatasetError(
+                f"{split} hard-negative share too low: {split_kinds}"
+            )
 
     write_jsonl(positive_plan_path, (asdict(plan) for plan in positives))
     write_jsonl(negative_plan_path, (asdict(plan) for plan in negatives))

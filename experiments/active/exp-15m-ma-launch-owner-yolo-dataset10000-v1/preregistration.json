@@ -10,6 +10,13 @@
       "trigger": "The first fail-closed plan stopped on INJ_USDT_SWAP: 2026Q2 contained only five admissible hard negatives after strict no-launch, positive guards and non-overlap, so quarter-level pairing could not fill every accepted positive.",
       "change": "Broaden only the same-symbol time block from calendar quarter to calendar half-year. Keep the exact source file, symbol, split, core/window geometry, no-launch thresholds, hard/easy definitions, positive guards, non-overlap and 5,000/5,000 hard/easy totals unchanged.",
       "failed_plan_artifacts_written": 0
+    },
+    {
+      "created_at": "2026-08-28T00:31:00+08:00",
+      "trigger": "The half-year plan later stopped on ENJ_USDT_SWAP because 2023H2 had only two admissible hard negatives, despite safe easy negatives remaining in the exact same source, symbol, half-year and split.",
+      "change": "Apply the repository's ratio-is-soft rule: odd/even remains the deterministic 50% preferred mix, but if the preferred kind is exhausted the paired row may use the other already-frozen safe kind inside the same source/symbol/half-year/split. Require at least 40% hard in train, val and overall; keep total negatives exactly 10,000.",
+      "unchanged": "No-launch thresholds, hard/easy definitions, all positive guards, non-overlap, exact window geometry, source/symbol/time-block/split matching and zero-holdout rules remain unchanged.",
+      "failed_plan_artifacts_written": 0
     }
   ],
   "owner_authorization": {
@@ -61,9 +68,12 @@
   "negative_sampling": {
     "target": 10000,
     "negative_per_positive": 1,
-    "hard_total": 5000,
-    "easy_total": 5000,
-    "kind_assignment": "Odd positive source_order -> easy; even -> hard, yielding exact 5000/5000 without looking at market outcomes.",
+    "preferred_hard_total": 5000,
+    "preferred_easy_total": 5000,
+    "minimum_hard_share_overall": 0.40,
+    "minimum_hard_share_train": 0.40,
+    "minimum_hard_share_val": 0.40,
+    "kind_assignment": "Odd positive source_order prefers easy; even prefers hard, yielding an outcome-blind 5000/5000 target. If that kind has no remaining safe capacity, use the other frozen kind inside the exact same matching block; ratios never weaken safety gates.",
     "pairing": {
       "same_source_file": true,
       "same_symbol": true,
@@ -104,7 +114,7 @@
       "strict_candidate_source": "Re-run the hash-pinned accepted-family gate on each used source and guard every hit before negative selection."
     },
     "negative_separation_bars": 2,
-    "capacity_policy": "Fail closed if any same-source/same-halfyear/same-split pair cannot be filled; never cross symbols, reuse windows, approach a protected positive, or relax no-launch thresholds."
+    "capacity_policy": "Try the deterministic preferred kind, then the other frozen safe kind inside the same source/symbol/halfyear/split. Fail closed if neither can fill the pair; never cross symbols, reuse windows, approach a protected positive, or relax no-launch thresholds."
   },
   "sources": {
     "bar_minutes": 15,
