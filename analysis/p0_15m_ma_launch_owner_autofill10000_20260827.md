@@ -81,6 +81,7 @@ OKX 月档文件名按 UTC+8 月历解释，再按 UTC 15 分钟边界聚合。�
 | 实际唯一图片 SHA | 10,000 |
 | 实际尺寸 1280×742 | 10,000 / 10,000 |
 | 实际红框像素与 manifest 一致 | 10,000 / 10,000 |
+| 锁定 `.venv` 等距重渲染逐字节一致 | 100 / 100 |
 | 每图恰好一个框 | 10,000 / 10,000 |
 | 框包含核心 wick 与六条 MA | 10,000 / 10,000 |
 | HTML 分页 | 100 |
@@ -89,6 +90,8 @@ OKX 月档文件名按 UTC+8 月历解释，再按 UTC 15 分钟边界聚合。�
 | 输出体积 | 526 MB |
 
 抽样总览为 2,560×1,800 JPEG，SHA256 `61388f5e0a7b94a7ce3f1ace791bdfa99dcf11d0ff3e476ac6e779a9de5d6f4e`。全量索引 SHA256 `29c468fd6ff161a38d1bec7cd57975e7ed8b6d0879d83ab86c3335176297e906`。
+
+批量构建最初由系统 Python 的 OpenCV `4.12.0.88` 完成；仓库锁定 `.venv` 是 OpenCV `5.0.0.93`。为排除颜色通道、缩放和编码差异，已在 `.venv` 对 manifest 的 100 个等距样本从 OHLCV 重新渲染并编码，**100/100 PNG SHA 逐字节相同**。后续复现命令统一使用 `.venv/bin/python`。
 
 ## 零假设对照
 
@@ -108,7 +111,7 @@ OKX 月档文件名按 UTC+8 月历解释，再按 UTC 15 分钟边界聚合。�
 
 ```bash
 # 1) 官方安全月档：UTC+8 月历 -> UTC 15m，全部早于 2025-06-01
-python3 -m src.data.fetch_okx \
+.venv/bin/python -m src.data.fetch_okx \
   --archive-monthly-start 2023-07 \
   --archive-monthly-end 2025-05 \
   --archive-max-exclusive 2025-06-01T00:00:00Z \
@@ -116,7 +119,7 @@ python3 -m src.data.fetch_okx \
   --out-dir data/kline_preholdout_archive15m \
   --workers 12
 
-python3 -m src.data.fetch_okx \
+.venv/bin/python -m src.data.fetch_okx \
   --archive-monthly-start 2021-09 \
   --archive-monthly-end 2023-06 \
   --archive-max-exclusive 2025-06-01T00:00:00Z \
@@ -125,16 +128,16 @@ python3 -m src.data.fetch_okx \
   --workers 12
 
 # 2) 扫描、NMS、平衡选择、可断点渲染、QA、HTML
-python3 -m scripts.build_15m_ma_launch_owner_autofill10000
+.venv/bin/python -m scripts.build_15m_ma_launch_owner_autofill10000
 
 # 3) 单元/回归测试
-python3 -m pytest -q \
+.venv/bin/python -m pytest -q \
   tests/test_ma_launch_owner_autofill10000.py \
   tests/test_fetch_okx_archives.py \
   tests/test_ma_launch_owner_autofill_review.py
 
 # 4) 报告 HTML
-python3 scripts/md_to_html.py \
+.venv/bin/python scripts/md_to_html.py \
   analysis/p0_15m_ma_launch_owner_autofill10000_20260827.md \
   --out-dir analysis/html
 ```

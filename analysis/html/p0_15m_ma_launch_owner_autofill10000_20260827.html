@@ -127,6 +127,7 @@ li { margin: .25rem 0; }
 <tr><td>实际唯一图片 SHA</td><td>10,000</td></tr>
 <tr><td>实际尺寸 1280×742</td><td>10,000 / 10,000</td></tr>
 <tr><td>实际红框像素与 manifest 一致</td><td>10,000 / 10,000</td></tr>
+<tr><td>锁定 <code>.venv</code> 等距重渲染逐字节一致</td><td>100 / 100</td></tr>
 <tr><td>每图恰好一个框</td><td>10,000 / 10,000</td></tr>
 <tr><td>框包含核心 wick 与六条 MA</td><td>10,000 / 10,000</td></tr>
 <tr><td>HTML 分页</td><td>100</td></tr>
@@ -135,6 +136,7 @@ li { margin: .25rem 0; }
 <tr><td>输出体积</td><td>526 MB</td></tr>
 </tbody></table>
 <p>抽样总览为 2,560×1,800 JPEG，SHA256 <code>61388f5e0a7b94a7ce3f1ace791bdfa99dcf11d0ff3e476ac6e779a9de5d6f4e</code>。全量索引 SHA256 <code>29c468fd6ff161a38d1bec7cd57975e7ed8b6d0879d83ab86c3335176297e906</code>。</p>
+<p>批量构建最初由系统 Python 的 OpenCV <code>4.12.0.88</code> 完成；仓库锁定 <code>.venv</code> 是 OpenCV <code>5.0.0.93</code>。为排除颜色通道、缩放和编码差异，已在 <code>.venv</code> 对 manifest 的 100 个等距样本从 OHLCV 重新渲染并编码，<strong>100/100 PNG SHA 逐字节相同</strong>。后续复现命令统一使用 <code>.venv/bin/python</code>。</p>
 <h2>零假设对照</h2>
 <p>本轮是 P0 形态检索和渲染审计，没有入场、出场、TP/SL、成本或模型分数，因此 val AUC、top-decile 毛/净收益、胜率、单特征收益基线、匹配随机入场对照和收益置换检验都<strong>不适用</strong>；不能为了填表编造经济指标。</p>
 <p>同等严格的非方向性零假设是：对同一核心使用相反方向归一化，再计算到同一 50 张参考族的距离。结果为 <strong>10,000/10,000 正确方向距离都更小</strong>，双侧精确 sign-test <code>p = 1.00247455E-3010</code>。这证明方向字段不是随意附加，但不能证明交易收益或实盘优势。</p>
@@ -149,7 +151,7 @@ li { margin: .25rem 0; }
 <h2>复现命令</h2>
 <pre><code>
 # 1) 官方安全月档：UTC+8 月历 -&gt; UTC 15m，全部早于 2025-06-01
-python3 -m src.data.fetch_okx \
+.venv/bin/python -m src.data.fetch_okx \
   --archive-monthly-start 2023-07 \
   --archive-monthly-end 2025-05 \
   --archive-max-exclusive 2025-06-01T00:00:00Z \
@@ -157,7 +159,7 @@ python3 -m src.data.fetch_okx \
   --out-dir data/kline_preholdout_archive15m \
   --workers 12
 
-python3 -m src.data.fetch_okx \
+.venv/bin/python -m src.data.fetch_okx \
   --archive-monthly-start 2021-09 \
   --archive-monthly-end 2023-06 \
   --archive-max-exclusive 2025-06-01T00:00:00Z \
@@ -166,16 +168,16 @@ python3 -m src.data.fetch_okx \
   --workers 12
 
 # 2) 扫描、NMS、平衡选择、可断点渲染、QA、HTML
-python3 -m scripts.build_15m_ma_launch_owner_autofill10000
+.venv/bin/python -m scripts.build_15m_ma_launch_owner_autofill10000
 
 # 3) 单元/回归测试
-python3 -m pytest -q \
+.venv/bin/python -m pytest -q \
   tests/test_ma_launch_owner_autofill10000.py \
   tests/test_fetch_okx_archives.py \
   tests/test_ma_launch_owner_autofill_review.py
 
 # 4) 报告 HTML
-python3 scripts/md_to_html.py \
+.venv/bin/python scripts/md_to_html.py \
   analysis/p0_15m_ma_launch_owner_autofill10000_20260827.md \
   --out-dir analysis/html
 </code></pre>

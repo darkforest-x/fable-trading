@@ -13,7 +13,7 @@ Owner 接受 autofill v7 五十张后要求按同样标准扩到 10,000。正式
 17,186,076 根 pre-holdout 15m K 扫出 14,117 个严格唯一核心；同币同方向一小时事件 NMS 后
 LONG 5,146 / SHORT 6,235，最终各取 5,000。最大距离 0.4954（冻结门 0.5），核心时间严格止于
 2026-05-03 18:15Z。全量独立复核已逐张重算 SHA/尺寸/红框像素，100 个 HTML 页的 10,000 条
-图片链接也全部解析；holdout OHLCV、label、训练、3060、ACTIVE/frozen、forward、部署和交易
+图片链接也全部解析；锁定 `.venv` 等距重渲染 100/100 PNG 字节一致。holdout OHLCV、label、训练、3060、ACTIVE/frozen、forward、部署和交易
 变更均为 0。
 
 这仍是 completed-history P0 shape retrieval：检索用到核心后 +1/+2/+3/+5，且 Owner 只接受了
