@@ -4,6 +4,14 @@
   "experiment_id": "exp-15m-ma-launch-owner-yolo-dataset10000-v1",
   "created_at": "2026-08-27T23:58:00+08:00",
   "stage": "P1_owner_batch_approved_weak_dataset",
+  "preregistration_amendments": [
+    {
+      "created_at": "2026-08-28T00:18:00+08:00",
+      "trigger": "The first fail-closed plan stopped on INJ_USDT_SWAP: 2026Q2 contained only five admissible hard negatives after strict no-launch, positive guards and non-overlap, so quarter-level pairing could not fill every accepted positive.",
+      "change": "Broaden only the same-symbol time block from calendar quarter to calendar half-year. Keep the exact source file, symbol, split, core/window geometry, no-launch thresholds, hard/easy definitions, positive guards, non-overlap and 5,000/5,000 hard/easy totals unchanged.",
+      "failed_plan_artifacts_written": 0
+    }
+  ],
   "owner_authorization": {
     "conversation_date": "2026-08-27",
     "quote": "刚刚的10000张不错 弄成训练数据集 同时弄好负样本",
@@ -59,7 +67,7 @@
     "pairing": {
       "same_source_file": true,
       "same_symbol": true,
-      "same_calendar_quarter": true,
+      "same_calendar_halfyear": true,
       "same_split_for_train_and_val": true,
       "same_core_bars": true,
       "same_pre_core_context_bars": true,
@@ -96,7 +104,7 @@
       "strict_candidate_source": "Re-run the hash-pinned accepted-family gate on each used source and guard every hit before negative selection."
     },
     "negative_separation_bars": 2,
-    "capacity_policy": "Fail closed if any same-source/same-quarter/same-split pair cannot be filled; never cross symbols, reuse windows, approach a protected positive, or relax no-launch thresholds."
+    "capacity_policy": "Fail closed if any same-source/same-halfyear/same-split pair cannot be filled; never cross symbols, reuse windows, approach a protected positive, or relax no-launch thresholds."
   },
   "sources": {
     "bar_minutes": 15,

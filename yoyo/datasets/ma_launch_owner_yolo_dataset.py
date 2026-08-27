@@ -6,7 +6,7 @@ For lineage, drawing that box back onto the clean re-render must reproduce the
 delivered boxed PNG byte-for-byte.
 
 Negative images are paired to positives by source file, symbol, calendar
-quarter, split and exact window geometry.  A negative label may inspect prices
+half-year, split and exact window geometry.  A negative label may inspect prices
 through pseudo core ``+5`` to prove no completed launch; model pixels contain
 only the matched render window.  Every strict accepted-family candidate is
 guarded before sampling.  No source row at or after the repository holdout is
@@ -189,9 +189,9 @@ def stable_id(*parts: object, length: int = 24) -> str:
     return hashlib.sha256(raw).hexdigest()[:length]
 
 
-def calendar_quarter(value: object) -> str:
+def calendar_halfyear(value: object) -> str:
     stamp = utc(value)
-    return f"{stamp.year:04d}Q{(stamp.month - 1) // 3 + 1}"
+    return f"{stamp.year:04d}H{1 if stamp.month <= 6 else 2}"
 
 
 def interval_split(
@@ -356,7 +356,7 @@ def plan_positives(
                 window_start_time=start_time.isoformat(),
                 window_end_time=end_time.isoformat(),
                 dependency_end_time=dependency_end_time.isoformat(),
-                time_block=calendar_quarter(core_end_time),
+                time_block=calendar_halfyear(core_end_time),
                 box=dict(row["box"]),
                 accepted_image_path=str(row["image_path"]),
                 accepted_image_sha256=str(row["image_sha256"]),
@@ -570,10 +570,10 @@ def select_source_negatives(
         key = (core_len, kind, block)
         if key not in pools:
             year = int(block[:4])
-            quarter = int(block[-1])
-            month = (quarter - 1) * 3 + 1
+            half = int(block[-1])
+            month = 1 if half == 1 else 7
             start = pd.Timestamp(year=year, month=month, day=1, tz="UTC")
-            end = start + pd.DateOffset(months=3)
+            end = start + pd.DateOffset(months=6)
             in_block = (times >= start) & (times < end)
             indices = np.flatnonzero(masks[core_len][kind] & in_block.to_numpy(dtype=bool))
             rng = np.random.default_rng(

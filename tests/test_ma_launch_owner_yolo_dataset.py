@@ -7,7 +7,7 @@ import pandas as pd
 
 from yoyo.datasets.ma_launch_owner_yolo_dataset import (
     _label_text,
-    calendar_quarter,
+    calendar_halfyear,
     interval_split,
     negative_feature_masks,
     plan_positives,
@@ -90,9 +90,9 @@ def test_interval_split_uses_full_dependency_and_purge() -> None:
     assert interval_split("2025-11-30T23:45Z", "2025-12-01T00:15Z", **kwargs) == "excluded"
 
 
-def test_calendar_quarter_is_stable() -> None:
-    assert calendar_quarter("2025-01-01T00:00:00Z") == "2025Q1"
-    assert calendar_quarter("2025-12-31T23:45:00Z") == "2025Q4"
+def test_calendar_halfyear_is_stable() -> None:
+    assert calendar_halfyear("2025-01-01T00:00:00Z") == "2025H1"
+    assert calendar_halfyear("2025-12-31T23:45:00Z") == "2025H2"
 
 
 def test_positive_plan_keeps_exact_box_and_assigns_equal_negative_kinds() -> None:
