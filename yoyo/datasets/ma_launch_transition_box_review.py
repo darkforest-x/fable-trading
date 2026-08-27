@@ -321,11 +321,23 @@ def build_metric(row: Mapping[str, Any], window: pd.DataFrame) -> tuple[dict[str
     for core_len in CORE_LENGTHS:
         span = transition_span(anchor_local, core_len, len(window))
         box = transition_box_for_span(transform, window, span)
+        mutated = window.copy()
+        confirmation_rows = list(range(span.core_end_local + 1, span.confirmation_end_local + 1))
+        mutated.loc[confirmation_rows, "high"] *= 1.70
+        mutated.loc[confirmation_rows, "low"] *= 0.60
+        mutated.loc[confirmation_rows, list(SIX_MA_COLUMNS)] *= 1.40
+        mutation_box = transition_box_for_span(transform, mutated, span)
+        vertical_keys = (
+            "y0", "y1", "core_price_high_raw", "core_price_low_raw",
+            "box_price_high", "box_price_low",
+        )
+        mutation_delta = max(abs(float(box[key]) - float(mutation_box[key])) for key in vertical_keys)
         variants[f"L{core_len}_C3"] = {
             "span": span.__dict__,
             "box": box,
             "core_end_x_px": int(transform.x_at(span.core_end_local)),
             "confirmation_end_x_px": int(transform.x_at(span.confirmation_end_local)),
+            "confirmation_mutation_vertical_max_abs_delta": float(mutation_delta),
         }
     return {
         "sample_id": str(row["sample_id"]),
@@ -479,6 +491,10 @@ def summarize(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
                 int(box["confirmation_extremes_outside_vertical_zone"]) for box in boxes
             ),
             "all_core_wicks_and_six_mas_contained": sum(bool(box["contains_core_wicks_and_six_mas"]) for box in boxes),
+            "confirmation_mutation_vertical_zero_delta": sum(
+                float(row["variants"][f"L{length}_C3"]["confirmation_mutation_vertical_max_abs_delta"]) == 0.0
+                for row in rows
+            ),
         }
     return result
 
@@ -626,6 +642,10 @@ def build(prereg_path: Path = DEFAULT_PREREG, output_dir: Path | None = None) ->
             ),
             "all_total_box_bars_7_to_10": all(
                 7 <= int(variant["span"]["total_box_bars"]) <= 10
+                for row in metrics for variant in row["variants"].values()
+            ),
+            "all_confirmation_mutation_vertical_deltas_zero": all(
+                float(variant["confirmation_mutation_vertical_max_abs_delta"]) == 0.0
                 for row in metrics for variant in row["variants"].values()
             ),
             "answers_preselected": 0,

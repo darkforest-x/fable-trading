@@ -106,6 +106,7 @@ def test_review_metric_records_exact_core_divider_pixel() -> None:
     variant = metric["variants"]["L5_C3"]
     assert variant["core_end_x_px"] == transform.x_at(14)
     assert variant["confirmation_end_x_px"] == transform.x_at(17)
+    assert variant["confirmation_mutation_vertical_max_abs_delta"] == 0.0
 
 
 def test_extreme_core_wick_fails_closed() -> None:
