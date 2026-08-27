@@ -2,26 +2,26 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-27 — K线框语义已改成六均线框 Review50，等待 Owner 审协议）
+## ⚡ 当前真相（2026-08-27 — MA-only 细框被 Owner 否决；两段式启动源区 Review50 v2 待审）
 
-Owner 指出旧信号框全围在 K 线上后，全量审计确认 9,938/9,938 个正标签的纵向确实来自核心 K 的
-high-low，不是均线密集带。经 Owner 授权“按照建议全部去做”，现已完成新的**非训练**协议小样：
-底图固定原生 1280×742 / W20，候选横向只在 `t-12..t-1` 比较 L4/L5/L6/L7 六均线最密连续段，
-纵向只包六均线并对比 imgsz=960 下 16/24/32px 最小高度；没有用 K 线极值定框。
+Owner 用三张红框明确指出上一版仍然“太窄”。放大原始截图后确认：红框横向保留启动确认过程，
+但确认大 K 会从框顶/框底穿出；因此 x/y 不能再共用一个 bar span。v1 的“另找最密 L4–7、只包
+六均线、再加 16/24/32px 下限”已标为错误基线，不能继续审核、更不能转标签。
 
-全量 36,812 个冻结身份已核算；9,938 个正例全部能生成 L5/min24 框且六均线完整在框内。旧负样本
-26,874 个中 26,802 个可计算，72 个在 SMA120 预热前或 W20 源边界处，明确记为 unavailable，
-没有补值/换样。hard negatives 有 29.04% 的均线包络不宽于正例中位数，证明下一版不能只改正框后
-机械复用旧 hard 空标签，必须先裁决 L1 是“任何密集结”还是“即将启动的密集结”。
+独立 v2 保留 v1 同一批 50 个身份、W20 底图和 clean PNG SHA，只改提议框：核心固定结束于 `t-3`，
+Core4/5/6/7 的 full-wick + 六均线决定纵向，上下各加 4% 价格跨度；随后 3 根只扩展横向到 `t`，
+总宽 7/8/9/10 根。页面红框为 v2、青虚线为被否决 v1、黄线分隔核心/确认段，答案预选 0。
+50/50 clean SHA parity；200/200 框包含核心影线+六均线；强改确认段 high/low/MA 后，200/200
+纵向坐标 delta=0。Core5 下 38/50 张至少一个确认极值穿框，证明两段式不是装饰。
 
-Owner 唯一当前入口：
-`experiments/active/exp-15m-ma-launch-ma-box-review50-v1/results/public/index.html`。50 张为 LONG/SHORT
-25/25、train/val 40/10、5 个时间桶各 10，答案预选 0；页面只能导出 JSON，不能训练。
-报告：`analysis/html/p1_15m_ma_launch_ma_box_review50_20260827.html`。
+Owner 当前入口：
+`experiments/active/exp-15m-ma-launch-transition-box-review50-v2/results/public/index.html`；报告：
+`analysis/html/p1_15m_ma_launch_transition_box_review50_20260827.html`。holdout OHLCV 读取 0，
+YOLO label/训练图/训练均为 0，ACTIVE/frozen、forward、部署与交易状态未改。
 
-**下一条允许动作**：Owner 审完 50 张并导出 JSON，明确一个全局 L/最小高度和 L1 类定义；随后才可
-逐样本构建 Gold 正框并同步处理 hard negatives。协议确认不等于 9,938 张样本确认；此前禁止生成新
-YOLO 标签、启动 3060、promote 或改 ACTIVE/frozen。holdout 读取 0，生产与交易状态未改。
+**下一条允许动作**：Owner 先抽看 v2 红框是否接近参考。即使协议通过，也必须给 K 线编号后逐图确认
+START/END；禁止统一 delta 或哈希随机 Core 长度。逐样本 Gold 闭合后才能重建禁入区、重新审 hard
+negatives 与 split/parity；此前禁止全量 relabel、3060 训练、promote 或生产切换。
 
 ## ⚡ 当前真相（2026-08-27 — 原图 imgsz=1280 重训完成，但不替换 960）
 

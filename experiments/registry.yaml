@@ -1614,7 +1614,7 @@ experiments:
   - experiment_id: exp-15m-ma-launch-ma-box-review50-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "029f38407eeeba7905737c018e0c0f4334ae8e4d"
-    status: active
+    status: rejected
     question: >-
       Can a fixed-W20, six-MA-derived geometry protocol remove candle-high/low
       supervision, protect thin targets at model-input scale and expose the
@@ -1624,13 +1624,11 @@ experiments:
       experiment: compare L4/L5/L6/L7 causal MA spans and exact/16/24/32 model-
       pixel vertical floors on one frozen renderer; write no labels or models
     result: >-
-      review50_ready_pending_owner: all 36,812 frozen identities accounted.
-      All 9,938 positives have valid L5/min24 geometry with all six MAs inside;
-      26,802/26,874 negatives have comparable metrics and 72 are explicitly
-      unavailable without imputation. Hard negatives overlap the target:
-      29.04% are at least as MA-dense as the positive median versus 0.22% of
-      easy negatives. Fifty positive and 24 negative visuals are ready with
-      zero preselected answers. No full relabel or training has occurred.
+      rejected_by_owner_as_too_narrow. The exhaustive accounting remains valid,
+      but the proposed object semantics do not: an MA-only span omits the candle
+      price zone and the early confirmation context visible in all three Owner
+      red references. Pixel-height floors only thicken the wrong object. No full
+      relabel or training occurred from this review.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
@@ -1650,10 +1648,49 @@ experiments:
       - 15m-ma-launch-ma-box-review50-v1-html
     reuse_allowed: false
     notes: >-
-      Active means waiting for Owner protocol decisions and sample review, not
-      waiting for a training run. Display-only t/t+1/t+2 crops cannot enter a
-      fresh-tip model unchanged. Protocol confirmation will still not confirm
-      all 9,938 samples. Browser file-URL policy blocked interaction and no
-      bypass was attempted; exhaustive static/hash QA passed. Holdout read 0;
-      no YOLO labels, training images, models, ACTIVE/frozen, forward,
-      deployment or trading state changed.
+      Owner rejection on 2026-08-27 supersedes the prior pending-review status.
+      Keep the artifacts as a falsified baseline and density audit; do not use
+      them as Gold proposals. Display-only t/t+1/t+2 crops cannot enter a fresh-
+      tip model unchanged. Holdout read 0; no YOLO labels, training images,
+      models, ACTIVE/frozen, forward, deployment or trading state changed.
+
+  - experiment_id: exp-15m-ma-launch-transition-box-review50-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "46dcfa857b36ae9a617faf8566c30f8171f71c06"
+    status: active
+    question: >-
+      Does a two-span launch-origin box—pre-release core for vertical price
+      bounds and three early confirmation bars for horizontal context—match the
+      Owner's red references better than the rejected MA-only box?
+    single_variable: >-
+      Owner-directed bundled geometry correction on the exact same 50 W20 clean
+      PNGs: core4-7 ending t-3 supplies full-wick plus six-MA y bounds, while
+      three confirmation bars extend x through t without entering y bounds
+    result: >-
+      review50_v2_ready_pending_owner. All 50 clean image hashes equal v1 and
+      all 200 proposed boxes contain their core wicks plus six MAs. A strong
+      confirmation-only intervention produced exactly zero vertical-coordinate
+      change for 200/200 boxes. Core5+Confirm3 expands the median model-input
+      width from 248.3px to 381.0px and median height from 52.1px to 172.1px;
+      38/50 rows have at least one confirmation extreme outside the vertical
+      zone, matching the Owner references' breakout-through-box behavior.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_transition_box_review50_20260827.md
+    artifacts:
+      - 15m-ma-launch-transition-box-review50-v2-prereg
+      - 15m-ma-launch-transition-box-review50-v2-build-receipt
+      - 15m-ma-launch-transition-box-review50-v2-summary
+      - 15m-ma-launch-transition-box-review50-v2-manifest
+      - 15m-ma-launch-transition-box-review50-v2-gallery
+      - 15m-ma-launch-transition-box-review50-v2-html-qa
+      - 15m-ma-launch-transition-box-review50-v2-report
+      - 15m-ma-launch-transition-box-review50-v2-html
+    reuse_allowed: false
+    notes: >-
+      Active means waiting for Owner visual protocol review, not permission to
+      relabel or train. The three 2026-08 Owner screenshots were used only as
+      pixel-level design references; no underlying holdout OHLCV was fetched or
+      read. Even an accepted protocol still requires indexed per-image START/END
+      confirmation; batch offsets and hash-random core lengths are forbidden.
