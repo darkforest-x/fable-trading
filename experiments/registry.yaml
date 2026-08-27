@@ -1865,3 +1865,39 @@ experiments:
     notes: >-
       P0 example pack only. Post-core bars make this completed-pattern retrieval,
       not a causal detector; no direct conversion to YOLO labels is allowed.
+
+  - experiment_id: exp-15m-ma-launch-owner-autofill10000-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c0e64d8145b11f2ff10a9c901657c6addb3a5b7d"
+    status: active
+    question: >-
+      Can the Owner-accepted v7 fifty-example family be expanded to 10,000
+      distinct strict 15m examples without relaxing morphology, similarity,
+      one-hour same-symbol event NMS or any safety gate?
+    single_variable: >-
+      expand historical coverage and automatic selection capacity while
+      freezing the accepted 50-profile family, max_distance=0.5, v7 morphology,
+      4-5 bar one-box rendering and zero-label/zero-training scope
+    result: >-
+      built_and_delivered_locally. The final pack contains 5,000 LONG plus
+      5,000 SHORT, 10,000 unique events and image hashes, 229 symbols and
+      exactly one 4-5 bar box per 1280x742 PNG. Event-NMS pools were LONG 5,146
+      and SHORT 6,235; all actual image/hash/HTML-link QA passed.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_15m_ma_launch_owner_autofill10000_20260827.md
+    artifacts:
+      - 15m-ma-launch-owner-autofill10000-v1-prereg
+      - 15m-ma-launch-owner-autofill10000-v1-build-receipt
+      - 15m-ma-launch-owner-autofill10000-v1-summary
+      - 15m-ma-launch-owner-autofill10000-v1-manifest
+      - 15m-ma-launch-owner-autofill10000-v1-gallery
+      - 15m-ma-launch-owner-autofill10000-v1-contact-sheet
+      - 15m-ma-launch-owner-autofill10000-v1-visual-qa
+      - 15m-ma-launch-owner-autofill10000-v1-report
+      - 15m-ma-launch-owner-autofill10000-v1-html
+    reuse_allowed: false
+    notes: >-
+      P0 completed-history examples only. The Owner accepted the predecessor
+      family, not every new sample boundary; no direct labels or training.

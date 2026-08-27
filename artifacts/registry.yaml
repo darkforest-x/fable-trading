@@ -4641,3 +4641,156 @@ artifacts:
     config_hash: "1a5d95cfefb01d909c9440738060b96fd50d61652858cd9d2dadef2ea0d8343d"
     data_cutoff: "2026-04-13T22:15:00Z"
     notes: Self-contained HTML sent after all 50 image documents completed.
+
+  - artifact_id: 15m-ma-launch-owner-autofill10000-v1-prereg
+    artifact_type: config
+    role: frozen_strict_10000_build_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8a15006052e6c31320e7439a771abd71926a6435"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/preregistration.json
+    sha256: "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
+    size_bytes: 9122
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8a15006052e6c31320e7439a771abd71926a6435"
+    config_hash: "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
+    data_cutoff: "2026-05-03T18:15:00Z"
+    notes: Three capacity amendments are explicit; no shape gate was relaxed.
+
+  - artifact_id: 15m-ma-launch-owner-autofill10000-v1-build-receipt
+    artifact_type: manifest
+    role: hash_bound_build_and_safety_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c0e64d8145b11f2ff10a9c901657c6addb3a5b7d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/build_receipt.json
+    sha256: "33252ff636ab78b59b20f339fbf0e4c56bfc961fe9dd6f37f4e1f649ad4718b6"
+    size_bytes: 1983
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/build_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8a15006052e6c31320e7439a771abd71926a6435"
+    config_hash: "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
+    data_cutoff: "2026-05-03T18:15:00Z"
+    notes: Proves zero holdout, labels, training and runtime state changes.
+
+  - artifact_id: 15m-ma-launch-owner-autofill10000-v1-summary
+    artifact_type: manifest
+    role: strict_pool_selection_and_output_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c0e64d8145b11f2ff10a9c901657c6addb3a5b7d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/summary.json
+    sha256: "227540b59cb60e44d564b7f8f32174431e38455035b08486f8db246bbdfd4e33"
+    size_bytes: 1271
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8a15006052e6c31320e7439a771abd71926a6435"
+    config_hash: "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
+    data_cutoff: "2026-05-03T18:15:00Z"
+    notes: 5,000 per side, 10,000 unique images/events, 229 symbols.
+
+  - artifact_id: 15m-ma-launch-owner-autofill10000-v1-manifest
+    artifact_type: annotation_set
+    role: exact_10000_p0_example_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8a15006052e6c31320e7439a771abd71926a6435"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/review_manifest.jsonl
+    sha256: "60bb7350c446ee1a406efbd48a4d7e7426ac4838e35b901bee3073019b327e76"
+    size_bytes: 22767324
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/review_manifest.jsonl"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8a15006052e6c31320e7439a771abd71926a6435"
+    config_hash: "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
+    data_cutoff: "2026-05-03T18:15:00Z"
+    notes: Local row-heavy ledger; P0 examples, not Gold annotations.
+
+  - artifact_id: 15m-ma-launch-owner-autofill10000-v1-gallery
+    artifact_type: annotation_set
+    role: paginated_10000_example_gallery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c0e64d8145b11f2ff10a9c901657c6addb3a5b7d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/public/index.html
+    sha256: "29c468fd6ff161a38d1bec7cd57975e7ed8b6d0879d83ab86c3335176297e906"
+    size_bytes: 9406
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/public"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8a15006052e6c31320e7439a771abd71926a6435"
+    config_hash: "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
+    data_cutoff: "2026-05-03T18:15:00Z"
+    notes: Local 100-page gallery; all 10,000 image links were resolved.
+
+  - artifact_id: 15m-ma-launch-owner-autofill10000-v1-contact-sheet
+    artifact_type: annotation_set
+    role: equidistant_100_image_visual_qa_surface
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c0e64d8145b11f2ff10a9c901657c6addb3a5b7d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/contact_sheet_sample100.jpg
+    sha256: "61388f5e0a7b94a7ce3f1ace791bdfa99dcf11d0ff3e476ac6e779a9de5d6f4e"
+    size_bytes: 690326
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/contact_sheet_sample100.jpg"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8a15006052e6c31320e7439a771abd71926a6435"
+    config_hash: "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
+    data_cutoff: "2026-05-03T18:15:00Z"
+    notes: 2560x1800 visual QA contact sheet; not a training image.
+
+  - artifact_id: 15m-ma-launch-owner-autofill10000-v1-visual-qa
+    artifact_type: manifest
+    role: full_actual_pixel_and_html_link_qa_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c0e64d8145b11f2ff10a9c901657c6addb3a5b7d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/visual_qa_receipt.json
+    sha256: "9769b602254558d9f5ae7ddedb919cdf18d237157ec3a71ec09cea89bdb35b96"
+    size_bytes: 249
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/visual_qa_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8a15006052e6c31320e7439a771abd71926a6435"
+    config_hash: "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
+    data_cutoff: "2026-05-03T18:15:00Z"
+    notes: Full post-build audit additionally re-read all 10,000 local PNGs.
+
+  - artifact_id: 15m-ma-launch-owner-autofill10000-v1-report
+    artifact_type: report
+    role: canonical_strict_10000_build_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c0e64d8145b11f2ff10a9c901657c6addb3a5b7d"
+    source_path: analysis/p0_15m_ma_launch_owner_autofill10000_20260827.md
+    sha256: "673e8789cea362b1fa551b5c55d917ff1630d345ee89d6f3ee2e34c4497246e3"
+    size_bytes: 9801
+    storage_uri: "repo://analysis/p0_15m_ma_launch_owner_autofill10000_20260827.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c0e64d8145b11f2ff10a9c901657c6addb3a5b7d"
+    config_hash: "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
+    data_cutoff: "2026-05-03T18:15:00Z"
+    notes: Answer-first P0 report with null control and risk disclosure.
+
+  - artifact_id: 15m-ma-launch-owner-autofill10000-v1-html
+    artifact_type: report
+    role: owner_facing_strict_10000_html_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c0e64d8145b11f2ff10a9c901657c6addb3a5b7d"
+    source_path: analysis/html/p0_15m_ma_launch_owner_autofill10000_20260827.html
+    sha256: "6d9cbdd26f67c7ab27c8d08d09f58a92560bb5fb5eddc8a80e8dd2aaf23adbed"
+    size_bytes: 13885
+    storage_uri: "repo://analysis/html/p0_15m_ma_launch_owner_autofill10000_20260827.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c0e64d8145b11f2ff10a9c901657c6addb3a5b7d"
+    config_hash: "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
+    data_cutoff: "2026-05-03T18:15:00Z"
+    notes: Owner-facing HTML generated immediately from the canonical Markdown.
