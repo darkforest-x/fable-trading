@@ -1576,3 +1576,84 @@ experiments:
       policy; no bypass was attempted, and exhaustive static HTML/path/box QA
       plus local overview inspection is recorded instead. No training, promote,
       ACTIVE/frozen, forward, deployment or order state changed.
+
+  - experiment_id: exp-15m-ma-launch-t3-label-semantics-audit-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "029f38407eeeba7905737c018e0c0f4334ae8e4d"
+    status: accepted
+    question: >-
+      Do the 9,938 positive YOLO labels actually localize the six-MA knot the
+      Owner intends, or do they localize candle high-low geometry despite the
+      candidate selector using MA-density features?
+    single_variable: >-
+      non-mutating geometry audit only: reconstruct the stored label, candle
+      high-low formula, same-x six-MA envelope and causal local six-MA knot on
+      the frozen pre-holdout manifest
+    result: >-
+      accepted_root_cause_audit: 9,938/9,938 stored labels match the candle
+      high-low formula at IoU >=0.9999. Stored-vs-same-x MA vertical IoU has
+      median 0.152; 2,176 are zero and 3,915 are below 0.10. The causal local
+      MA knot ends somewhere other than t-3 in 9,018/9,938. The defect is label
+      ontology before training, not 1280/960 scaling, RGB/BGR, letterbox or
+      augmentation.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_t3_label_semantics_audit_20260827.md
+    artifacts:
+      - 15m-ma-launch-t3-label-semantics-audit-summary
+      - 15m-ma-launch-t3-label-semantics-audit-ledger
+      - 15m-ma-launch-t3-label-semantics-audit-report
+      - 15m-ma-launch-t3-label-semantics-audit-html
+    reuse_allowed: false
+    notes: >-
+      Accepted means the diagnosis and non-economic null control completed; it
+      does not upgrade the cyan/yellow counterfactual boxes to Gold. No dataset,
+      label, weight, training, holdout, runtime or trading state changed.
+
+  - experiment_id: exp-15m-ma-launch-ma-box-review50-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "029f38407eeeba7905737c018e0c0f4334ae8e4d"
+    status: active
+    question: >-
+      Can a fixed-W20, six-MA-derived geometry protocol remove candle-high/low
+      supervision, protect thin targets at model-input scale and expose the
+      resulting positive/negative ontology conflicts before Gold relabeling?
+    single_variable: >-
+      explicitly Owner-authorized bundled protocol review, not a performance
+      experiment: compare L4/L5/L6/L7 causal MA spans and exact/16/24/32 model-
+      pixel vertical floors on one frozen renderer; write no labels or models
+    result: >-
+      review50_ready_pending_owner: all 36,812 frozen identities accounted.
+      All 9,938 positives have valid L5/min24 geometry with all six MAs inside;
+      26,802/26,874 negatives have comparable metrics and 72 are explicitly
+      unavailable without imputation. Hard negatives overlap the target:
+      29.04% are at least as MA-dense as the positive median versus 0.22% of
+      easy negatives. Fifty positive and 24 negative visuals are ready with
+      zero preselected answers. No full relabel or training has occurred.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_ma_box_review50_20260827.md
+    artifacts:
+      - 15m-ma-launch-ma-box-review50-v1-prereg
+      - 15m-ma-launch-ma-box-review50-v1-amendment
+      - 15m-ma-launch-ma-box-review50-v1-build-receipt
+      - 15m-ma-launch-ma-box-review50-v1-summary
+      - 15m-ma-launch-ma-box-review50-v1-manifest
+      - 15m-ma-launch-ma-box-review50-v1-gallery
+      - 15m-ma-launch-ma-box-review50-v1-negative-review
+      - 15m-ma-launch-ma-box-review50-v1-unavailable-negatives
+      - 15m-ma-launch-ma-box-review50-v1-html-qa
+      - 15m-ma-launch-ma-box-review50-v1-distributions
+      - 15m-ma-launch-ma-box-review50-v1-report
+      - 15m-ma-launch-ma-box-review50-v1-html
+    reuse_allowed: false
+    notes: >-
+      Active means waiting for Owner protocol decisions and sample review, not
+      waiting for a training run. Display-only t/t+1/t+2 crops cannot enter a
+      fresh-tip model unchanged. Protocol confirmation will still not confirm
+      all 9,938 samples. Browser file-URL policy blocked interaction and no
+      bypass was attempted; exhaustive static/hash QA passed. Holdout read 0;
+      no YOLO labels, training images, models, ACTIVE/frozen, forward,
+      deployment or trading state changed.
