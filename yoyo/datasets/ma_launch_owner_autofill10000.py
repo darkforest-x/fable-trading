@@ -391,7 +391,7 @@ def event_nms(
 def select_balanced(
     candidates: Sequence[Mapping[str, Any]], selection: Mapping[str, Any]
 ) -> list[dict[str, Any]]:
-    """Select balanced chronological quantiles under symbol/day/hour quotas."""
+    """Select balanced chronological quantiles under symbol/day quotas."""
 
     target = int(selection["target_per_side"])
     bins_count = int(selection["time_bins_per_side"])
@@ -400,7 +400,6 @@ def select_balanced(
         raise OwnerAutofill10000Error("selection time-bin arithmetic drift")
     max_symbol = int(selection["max_per_symbol_per_side"])
     max_day = int(selection["max_per_utc_day_per_side"])
-    max_hour = int(selection["max_per_utc_hour_per_side"])
     selected: list[dict[str, Any]] = []
 
     for direction in ("LONG", "SHORT"):
@@ -412,10 +411,6 @@ def select_balanced(
         unique_hours = sorted(
             {pd.Timestamp(row["core_end_time"]).floor("h") for row in rows}
         )
-        if len(unique_hours) < target:
-            raise OwnerAutofill10000Error(
-                f"strict {direction} pool has only {len(unique_hours)} unique hours"
-            )
         hour_bins = {
             hour: min(bins_count - 1, rank * bins_count // len(unique_hours))
             for rank, hour in enumerate(unique_hours)
@@ -438,7 +433,6 @@ def select_balanced(
         bin_counts = [0] * bins_count
         symbol_counts: Counter[str] = Counter()
         day_counts: Counter[str] = Counter()
-        hour_counts: Counter[str] = Counter()
         side_selected: list[dict[str, Any]] = []
         while len(side_selected) < target:
             progress = False
@@ -451,18 +445,15 @@ def select_balanced(
                     stamp = pd.Timestamp(row["core_end_time"])
                     symbol = str(row["symbol"])
                     day = stamp.strftime("%Y-%m-%d")
-                    hour = stamp.floor("h").isoformat()
                     if (
                         symbol_counts[symbol] >= max_symbol
                         or day_counts[day] >= max_day
-                        or hour_counts[hour] >= max_hour
                     ):
                         continue
                     side_selected.append(row)
                     bin_counts[bin_index] += 1
                     symbol_counts[symbol] += 1
                     day_counts[day] += 1
-                    hour_counts[hour] += 1
                     progress = True
                     break
             if not progress:

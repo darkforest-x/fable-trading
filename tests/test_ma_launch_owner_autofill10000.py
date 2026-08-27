@@ -66,7 +66,6 @@ def test_balanced_selection_fills_quantiles_and_quotas() -> None:
         "target_per_time_bin": 500,
         "max_per_symbol_per_side": 80,
         "max_per_utc_day_per_side": 80,
-        "max_per_utc_hour_per_side": 1,
     }
     selected = select_balanced(rows, contract)
     assert len(selected) == 10_000
@@ -75,16 +74,42 @@ def test_balanced_selection_fills_quantiles_and_quotas() -> None:
         side = [row for row in selected if row["direction"] == direction]
         assert Counter(row["time_bin"] for row in side) == {index: 500 for index in range(10)}
         assert max(Counter(row["symbol"] for row in side).values()) <= 80
-        assert (
-            max(
-                Counter(
-                    pd.Timestamp(row["core_end_time"]).floor("h").isoformat()
-                    for row in side
-                ).values()
-            )
-            == 1
-        )
 
 
 def test_sign_test_formats_tiny_exact_probability() -> None:
     assert _sign_test_p_string(10, 10) == "1.95312500E-3"
+
+
+def test_balanced_selection_keeps_distinct_symbols_in_same_hour() -> None:
+    start = pd.Timestamp("2022-01-01T00:00:00Z")
+    rows = []
+    for direction in ("LONG", "SHORT"):
+        for hour in range(2):
+            for symbol_index in range(2):
+                rows.append(
+                    _row(
+                        symbol=f"S{symbol_index}_USDT_SWAP",
+                        direction=direction,
+                        stamp=start + pd.Timedelta(hours=hour),
+                        distance=0.1 + symbol_index / 100,
+                        event_id=f"{direction}-{hour}-{symbol_index}",
+                    )
+                )
+    selected = select_balanced(
+        rows,
+        {
+            "total": 8,
+            "target_per_side": 4,
+            "time_bins_per_side": 2,
+            "target_per_time_bin": 2,
+            "max_per_symbol_per_side": 4,
+            "max_per_utc_day_per_side": 8,
+        },
+    )
+    assert len(selected) == 8
+    assert max(
+        Counter(
+            (row["direction"], pd.Timestamp(row["core_end_time"]).floor("h"))
+            for row in selected
+        ).values()
+    ) == 2

@@ -58,6 +58,12 @@
       "trigger": "The first fail-closed full scan yielded only 4,494 LONG events after frozen one-hour event NMS, 506 short of the 5,000-per-side contract.",
       "change": "Add the earliest continuous official monthly archive range available for BTC-USDT-SWAP, 2021-09 through 2023-06, for the identical frozen symbol universe.",
       "unchanged": "Accepted v7 reference family, max_distance=0.5, morphology gate, 4-5 bar core, direction balance, one-hour NMS, render contract, zero-holdout rule and all safety switches."
+    },
+    {
+      "created_at": "2026-08-27T23:28:00+08:00",
+      "trigger": "The supplemented strict LONG pool passed the 5,000-event count, but the self-added global one-sample-per-UTC-hour quota found only 2,965 signal hours and made the target mathematically impossible.",
+      "change": "Remove the cross-symbol UTC-hour quota. Different symbols in the same hour remain distinct events; chronological bins plus per-symbol and per-day caps still enforce coverage diversity.",
+      "unchanged": "Same-symbol, same-direction one-hour event NMS remains frozen. No morphology, similarity, core-width, render, holdout or safety contract changed."
     }
   ],
   "reference_family": {
@@ -118,7 +124,6 @@
     "target_per_time_bin": 500,
     "max_per_symbol_per_side": 80,
     "max_per_utc_day_per_side": 80,
-    "max_per_utc_hour_per_side": 1,
     "fail_closed": "If either side cannot supply 5,000 after exact-core collapse, one-hour event NMS and diversity quotas, render nothing and do not relax a threshold."
   },
   "render": {
