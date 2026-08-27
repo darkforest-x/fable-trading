@@ -2,26 +2,26 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-27 — MA-only 细框被 Owner 否决；两段式启动源区 Review50 v2 待审）
+## ⚡ 当前真相（2026-08-27 — 严格 Review50 v5 已逐张发 TG，待 Owner 复审）
 
-Owner 用三张红框明确指出上一版仍然“太窄”。放大原始截图后确认：红框横向保留启动确认过程，
-但确认大 K 会从框顶/框底穿出；因此 x/y 不能再共用一个 bar span。v1 的“另找最密 L4–7、只包
-六均线、再加 16/24/32px 下限”已标为错误基线，不能继续审核、更不能转标签。
+v3 的“每张必选相对最窄 5 根”已按 Owner 反馈废止。v4 只把模型窗裁到核心后 0–2 根，虽然修复
+时效，却没有修复平行均线、框内已启动和无新鲜释放等语义问题，因此作为未发送失败中间版保留。
+v5 同时允许无框：冻结 50 个身份中只保留 20 个单框提案，30 个严格无框（Owner 明确拒绝 6，
+Codex 联系表严格淘汰 24）。来源 01/05/09/10/14/18/19/25/26/29/32/35/40/42/43/44/46/47/48/50
+有框；其余无框。
 
-独立 v2 保留 v1 同一批 50 个身份、W20 底图和 clean PNG SHA，只改提议框：核心固定结束于 `t-3`，
-Core4/5/6/7 的 full-wick + 六均线决定纵向，上下各加 4% 价格跨度；随后 3 根只扩展横向到 `t`，
-总宽 7/8/9/10 根。页面红框为 v2、青虚线为被否决 v1、黄线分隔核心/确认段，答案预选 0。
-50/50 clean SHA parity；200/200 框包含核心影线+六均线；强改确认段 high/low/MA 后，200/200
-纵向坐标 delta=0。Core5 下 38/50 张至少一个确认极值穿框，证明两段式不是装饰。
+附件身份已按 `40/50 | GRT_USDT_SWAP | SHORT` 联结：第 40 张从 `t-11..t-7` 提议改为
+`t-9..t-5`，不是误改第 01 张。20 个模型窗的核心到右端距离中位 0.5 根、最大 2 根；人工用未来
++5 图物理隔离且无 labels。2026-08-27 17:25，50 个原编号已全部作为 1280×742 Telegram document
+逐张送达：20 张各一个红框、30 张无框，50/50 成功，SHA 逐张入回执。
 
-Owner 当前入口：
-`experiments/active/exp-15m-ma-launch-transition-box-review50-v2/results/public/index.html`；报告：
-`analysis/html/p1_15m_ma_launch_transition_box_review50_20260827.html`。holdout OHLCV 读取 0，
-YOLO label/训练图/训练均为 0，ACTIVE/frozen、forward、部署与交易状态未改。
+入口：`experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/public/index.html`；报告：
+`analysis/html/p0_15m_ma_launch_owner_strict_review50_20260827.html`。holdout OHLCV 读取 0，YOLO
+label/训练/3060 作业均为 0，ACTIVE/frozen、forward、部署与交易状态未改。
 
-**下一条允许动作**：Owner 先抽看 v2 红框是否接近参考。即使协议通过，也必须给 K 线编号后逐图确认
-START/END；禁止统一 delta 或哈希随机 Core 长度。逐样本 Gold 闭合后才能重建禁入区、重新审 hard
-negatives 与 split/parity；此前禁止全量 relabel、3060 训练、promote 或生产切换。
+**下一条允许动作**：Owner 只需按原编号复审 20 个有框提案（KEEP / ADJUST / REJECT）；ADJUST
+必须逐图给 START/END，禁止统一 delta。逐样本 Gold 闭合前禁止生成 labels、重建训练集、3060
+训练、promote 或生产切换。
 
 ## ⚡ 当前真相（2026-08-27 — 原图 imgsz=1280 重训完成，但不替换 960）
 

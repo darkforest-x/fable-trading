@@ -4042,3 +4042,363 @@ artifacts:
     notes: >-
       Self-contained HTML embeds representative LONG/SHORT comparison figures
       and links to the local 50-sample interactive review surface.
+
+  # ---- one-box relative-density Review50 v3 (Owner rejected) -------------
+  - artifact_id: 15m-ma-launch-density-core-box-review50-v3-prereg
+    artifact_type: config
+    role: frozen_one_box_relative_density_review_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8a753653c2d2c480419e320023cb063441f291ce"
+    source_path: experiments/active/exp-15m-ma-launch-density-core-box-review50-v3/preregistration.json
+    sha256: "accb1515cb39cca80f364a11c79d1afa37a1ba5d810274ae7983ad916cab885b"
+    size_bytes: 2745
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-density-core-box-review50-v3/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "594c60ca91262a4eee6826d4c303321b30cc2eb9"
+    config_hash: "accb1515cb39cca80f364a11c79d1afa37a1ba5d810274ae7983ad916cab885b"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Frozen rejected one-box geometry contract; no labels or training.
+
+  - artifact_id: 15m-ma-launch-density-core-box-review50-v3-build-receipt
+    artifact_type: manifest
+    role: v3_build_lineage_and_safety_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8a753653c2d2c480419e320023cb063441f291ce"
+    source_path: experiments/active/exp-15m-ma-launch-density-core-box-review50-v3/results/build_receipt.json
+    sha256: "d0e878d416a055ab675619ef6b176c0f38871cd09197809dd9bac70b107ef969"
+    size_bytes: 667
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-density-core-box-review50-v3/results/build_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8a753653c2d2c480419e320023cb063441f291ce"
+    config_hash: "accb1515cb39cca80f364a11c79d1afa37a1ba5d810274ae7983ad916cab885b"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Records 50 rows, zero holdout rows, labels and training.
+
+  - artifact_id: 15m-ma-launch-density-core-box-review50-v3-summary
+    artifact_type: manifest
+    role: v3_geometry_and_freshness_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8a753653c2d2c480419e320023cb063441f291ce"
+    source_path: experiments/active/exp-15m-ma-launch-density-core-box-review50-v3/results/summary.json
+    sha256: "761a8f32cd3e9327546af6f2752cc52af73a9c002dfba30e52ee8de9456455b2"
+    size_bytes: 1035
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-density-core-box-review50-v3/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8a753653c2d2c480419e320023cb063441f291ce"
+    config_hash: "accb1515cb39cca80f364a11c79d1afa37a1ba5d810274ae7983ad916cab885b"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Valid accounting for the semantically rejected v3 baseline.
+
+  - artifact_id: 15m-ma-launch-density-core-box-review50-v3-manifest
+    artifact_type: annotation_set
+    role: rejected_v3_exact_50_review_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8a753653c2d2c480419e320023cb063441f291ce"
+    source_path: experiments/active/exp-15m-ma-launch-density-core-box-review50-v3/results/review_manifest.jsonl
+    sha256: "edebf12fdbbecaa4208c23a1c36bfad523a2dacea988ee5c824d3dba58198d8f"
+    size_bytes: 71032
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-density-core-box-review50-v3/results/review_manifest.jsonl"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8a753653c2d2c480419e320023cb063441f291ce"
+    config_hash: "accb1515cb39cca80f364a11c79d1afa37a1ba5d810274ae7983ad916cab885b"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Exact 50 identities; every proposed geometry remains rejected.
+
+  - artifact_id: 15m-ma-launch-density-core-box-review50-v3-gallery
+    artifact_type: annotation_set
+    role: rejected_v3_owner_review_surface
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8a753653c2d2c480419e320023cb063441f291ce"
+    source_path: experiments/active/exp-15m-ma-launch-density-core-box-review50-v3/results/public/index.html
+    sha256: "9eea8343d64e658ab7330e8dd6d8fcd52f45704816d562a8b40e80fbad5d4978"
+    size_bytes: 14136
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-density-core-box-review50-v3/results/public"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8a753653c2d2c480419e320023cb063441f291ce"
+    config_hash: "accb1515cb39cca80f364a11c79d1afa37a1ba5d810274ae7983ad916cab885b"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: One-box review surface retained only as falsified evidence.
+
+  - artifact_id: 15m-ma-launch-density-core-box-review50-v3-report
+    artifact_type: report
+    role: canonical_rejected_v3_diagnosis_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8a753653c2d2c480419e320023cb063441f291ce"
+    source_path: analysis/p0_15m_ma_launch_density_core_box_review50_20260827.md
+    sha256: "91245a0cf84c8da47f34137505a13bf270b9505af4f33b018ca854216d55b0af"
+    size_bytes: 8287
+    storage_uri: "repo://analysis/p0_15m_ma_launch_density_core_box_review50_20260827.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8a753653c2d2c480419e320023cb063441f291ce"
+    config_hash: "accb1515cb39cca80f364a11c79d1afa37a1ba5d810274ae7983ad916cab885b"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Records Owner rejection and the forced-argmin root cause.
+
+  - artifact_id: 15m-ma-launch-density-core-box-review50-v3-html
+    artifact_type: report
+    role: self_contained_rejected_v3_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8a753653c2d2c480419e320023cb063441f291ce"
+    source_path: analysis/html/p0_15m_ma_launch_density_core_box_review50_20260827.html
+    sha256: "ab4908375f360871fc4ced2da26dd9dc1071bd569bc746dd9a6bf301aa9561e3"
+    size_bytes: 198848
+    storage_uri: "repo://analysis/html/p0_15m_ma_launch_density_core_box_review50_20260827.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8a753653c2d2c480419e320023cb063441f291ce"
+    config_hash: "accb1515cb39cca80f364a11c79d1afa37a1ba5d810274ae7983ad916cab885b"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Browser-ready rejected-v3 evidence, not a training artifact.
+
+  # ---- short-recrop Review50 v4 (not delivered; rejected internally) -----
+  - artifact_id: 15m-ma-launch-owner-recrop-review50-v4-prereg
+    artifact_type: config
+    role: frozen_owner_recrop_intermediate_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "27039ffdbffe81d0c9df5e9bf15721d296e8ddf0"
+    source_path: experiments/active/exp-15m-ma-launch-owner-recrop-review50-v4/preregistration.json
+    sha256: "9b6b443843a76ff469827928bc7f9f81c114ec57602fd57517b9852968b72a47"
+    size_bytes: 5470
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-recrop-review50-v4/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "27039ffdbffe81d0c9df5e9bf15721d296e8ddf0"
+    config_hash: "9b6b443843a76ff469827928bc7f9f81c114ec57602fd57517b9852968b72a47"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Frozen intermediate testing whether short recrop alone repairs v3.
+
+  - artifact_id: 15m-ma-launch-owner-recrop-review50-v4-build-receipt
+    artifact_type: manifest
+    role: v4_build_lineage_and_safety_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "27039ffdbffe81d0c9df5e9bf15721d296e8ddf0"
+    source_path: experiments/active/exp-15m-ma-launch-owner-recrop-review50-v4/results/build_receipt.json
+    sha256: "74507dc6218338becee51622ddda34b628d3e863eab8f049fff35b8972ae7efa"
+    size_bytes: 732
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-recrop-review50-v4/results/build_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "27039ffdbffe81d0c9df5e9bf15721d296e8ddf0"
+    config_hash: "9b6b443843a76ff469827928bc7f9f81c114ec57602fd57517b9852968b72a47"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Records 44 proposals, 6 no-box rows and zero training/holdout.
+
+  - artifact_id: 15m-ma-launch-owner-recrop-review50-v4-summary
+    artifact_type: manifest
+    role: v4_short_recrop_latency_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "27039ffdbffe81d0c9df5e9bf15721d296e8ddf0"
+    source_path: experiments/active/exp-15m-ma-launch-owner-recrop-review50-v4/results/summary.json
+    sha256: "3858d4d5c601bd85da09efbb8825f4d3cd25e33df099a794ef0b55c5d54779b9"
+    size_bytes: 1297
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-recrop-review50-v4/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "27039ffdbffe81d0c9df5e9bf15721d296e8ddf0"
+    config_hash: "9b6b443843a76ff469827928bc7f9f81c114ec57602fd57517b9852968b72a47"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Shows freshness repair without semantic-label repair.
+
+  - artifact_id: 15m-ma-launch-owner-recrop-review50-v4-manifest
+    artifact_type: annotation_set
+    role: rejected_v4_exact_50_recrop_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "27039ffdbffe81d0c9df5e9bf15721d296e8ddf0"
+    source_path: experiments/active/exp-15m-ma-launch-owner-recrop-review50-v4/results/review_manifest.jsonl
+    sha256: "68746fd7032feb2f0de96f68e59b69e94eac943551ce6d67072692fbb4db6832"
+    size_bytes: 139917
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-recrop-review50-v4/results/review_manifest.jsonl"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "27039ffdbffe81d0c9df5e9bf15721d296e8ddf0"
+    config_hash: "9b6b443843a76ff469827928bc7f9f81c114ec57602fd57517b9852968b72a47"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Undelivered intermediate ledger; never use as labels.
+
+  - artifact_id: 15m-ma-launch-owner-recrop-review50-v4-gallery
+    artifact_type: annotation_set
+    role: rejected_v4_internal_contact_sheet_surface
+    source_repo: darkforest-x/fable-trading
+    source_commit: "27039ffdbffe81d0c9df5e9bf15721d296e8ddf0"
+    source_path: experiments/active/exp-15m-ma-launch-owner-recrop-review50-v4/results/public/index.html
+    sha256: "bfa10b54e389b27d7231ade20d1b6ede8e740b5d4079a40ba1e14e5c5897c270"
+    size_bytes: 35158
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-recrop-review50-v4/results/public"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "27039ffdbffe81d0c9df5e9bf15721d296e8ddf0"
+    config_hash: "9b6b443843a76ff469827928bc7f9f81c114ec57602fd57517b9852968b72a47"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Internal failed QA surface; it was not sent to Telegram.
+
+  # ---- strict owner shortlist Review50 v5 -------------------------------
+  - artifact_id: 15m-ma-launch-owner-strict-review50-v5-prereg
+    artifact_type: config
+    role: frozen_strict_no_box_review_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d70e64938c498674dda2b75ac1a584c681ae16be"
+    source_path: experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/preregistration.json
+    sha256: "3e9690837450e16698851247f0413d4b6eacca3e12b2663d58ef35cd5d195472"
+    size_bytes: 6787
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d70e64938c498674dda2b75ac1a584c681ae16be"
+    config_hash: "3e9690837450e16698851247f0413d4b6eacca3e12b2663d58ef35cd5d195472"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Freezes #40 identity correction and strict pass/no-box decisions.
+
+  - artifact_id: 15m-ma-launch-owner-strict-review50-v5-build-receipt
+    artifact_type: manifest
+    role: v5_build_lineage_and_safety_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d70e64938c498674dda2b75ac1a584c681ae16be"
+    source_path: experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/build_receipt.json
+    sha256: "aa41f17168125aeb0e9fd54e983726f7f5ca8b786aa6409988e98d4b08bd1969"
+    size_bytes: 725
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/build_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d70e64938c498674dda2b75ac1a584c681ae16be"
+    config_hash: "3e9690837450e16698851247f0413d4b6eacca3e12b2663d58ef35cd5d195472"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Records 20 proposals, 30 no-box rows and zero labels/training.
+
+  - artifact_id: 15m-ma-launch-owner-strict-review50-v5-summary
+    artifact_type: manifest
+    role: strict_shortlist_geometry_freshness_and_safety_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d70e64938c498674dda2b75ac1a584c681ae16be"
+    source_path: experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/summary.json
+    sha256: "a59f77e81c45b4f6a12d9b05a400d28cb72ad47a9fd516a45ebe83bc83e2afad"
+    size_bytes: 1386
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d70e64938c498674dda2b75ac1a584c681ae16be"
+    config_hash: "3e9690837450e16698851247f0413d4b6eacca3e12b2663d58ef35cd5d195472"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Core-right gap median 0.5 and max 2 bars; no training eligibility.
+
+  - artifact_id: 15m-ma-launch-owner-strict-review50-v5-manifest
+    artifact_type: annotation_set
+    role: exact_50_strict_box_or_no_box_review_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d70e64938c498674dda2b75ac1a584c681ae16be"
+    source_path: experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/review_manifest.jsonl
+    sha256: "239eab3eae9f7ff635e6e755b7dc934cd29152b5665cbdb7f934739ea189a00c"
+    size_bytes: 98253
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/review_manifest.jsonl"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d70e64938c498674dda2b75ac1a584c681ae16be"
+    config_hash: "3e9690837450e16698851247f0413d4b6eacca3e12b2663d58ef35cd5d195472"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Twenty pending single-box proposals and thirty explicit no-box rows.
+
+  - artifact_id: 15m-ma-launch-owner-strict-review50-v5-gallery
+    artifact_type: annotation_set
+    role: owner_strict_review50_box_and_no_box_surface
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d70e64938c498674dda2b75ac1a584c681ae16be"
+    source_path: experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/public/index.html
+    sha256: "2746cafc188abdc0de50342b4f0316b47af2cd15e130287a600160c6f268891f"
+    size_bytes: 25342
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/public"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d70e64938c498674dda2b75ac1a584c681ae16be"
+    config_hash: "3e9690837450e16698851247f0413d4b6eacca3e12b2663d58ef35cd5d195472"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: "Fifty-card surface: 20 one-box proposals and 30 no-box decisions."
+
+  - artifact_id: 15m-ma-launch-owner-strict-review50-v5-visual-qa
+    artifact_type: manifest
+    role: pixel_overlay_separation_and_delivery_qa_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fe86dbdb8612ffa6cdd5826c728cd67b9e0ab097"
+    source_path: experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/visual_qa_receipt.json
+    sha256: "e97680418cf3bdb429bdbbe4833d6d589cc72bad69e6a0e0b19af5980e155f59"
+    size_bytes: 1093
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/visual_qa_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fe86dbdb8612ffa6cdd5826c728cd67b9e0ab097"
+    config_hash: "3e9690837450e16698851247f0413d4b6eacca3e12b2663d58ef35cd5d195472"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Confirms clean/review pixel separation, dimensions and TG completion.
+
+  - artifact_id: 15m-ma-launch-owner-strict-review50-v5-telegram-receipt
+    artifact_type: manifest
+    role: hash_bound_one_by_one_telegram_delivery_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fe86dbdb8612ffa6cdd5826c728cd67b9e0ab097"
+    source_path: experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/telegram_delivery_receipt.json
+    sha256: "99c3c2021f1465991b4464a6406dead9c95bd8c31b9f0997bfc763e0a8b9488d"
+    size_bytes: 29766
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/telegram_delivery_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fe86dbdb8612ffa6cdd5826c728cd67b9e0ab097"
+    config_hash: "3e9690837450e16698851247f0413d4b6eacca3e12b2663d58ef35cd5d195472"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Fifty PNG documents plus final HTML sent successfully without duplicates.
+
+  - artifact_id: 15m-ma-launch-owner-strict-review50-v5-report
+    artifact_type: report
+    role: canonical_strict_shortlist_review_and_delivery_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fe86dbdb8612ffa6cdd5826c728cd67b9e0ab097"
+    source_path: analysis/p0_15m_ma_launch_owner_strict_review50_20260827.md
+    sha256: "5a393e5fdf8e4f0bb4c3186d564baf2d09f75414ebcc6b6e2320ff67c0233fbc"
+    size_bytes: 11176
+    storage_uri: "repo://analysis/p0_15m_ma_launch_owner_strict_review50_20260827.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fe86dbdb8612ffa6cdd5826c728cd67b9e0ab097"
+    config_hash: "3e9690837450e16698851247f0413d4b6eacca3e12b2663d58ef35cd5d195472"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Chinese answer-first P0 report with null control, risk and exact gates.
+
+  - artifact_id: 15m-ma-launch-owner-strict-review50-v5-html
+    artifact_type: report
+    role: owner_delivered_self_contained_strict_review_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fe86dbdb8612ffa6cdd5826c728cd67b9e0ab097"
+    source_path: analysis/html/p0_15m_ma_launch_owner_strict_review50_20260827.html
+    sha256: "82b1ea838f83b144c4a5e031d7ba1cbcd67ed482af930d51ab7385b1b9ca5bc5"
+    size_bytes: 366516
+    storage_uri: "repo://analysis/html/p0_15m_ma_launch_owner_strict_review50_20260827.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fe86dbdb8612ffa6cdd5826c728cd67b9e0ab097"
+    config_hash: "3e9690837450e16698851247f0413d4b6eacca3e12b2663d58ef35cd5d195472"
+    data_cutoff: "2026-05-02T14:00:00Z"
+    notes: Self-contained HTML delivered after all 50 image documents completed.

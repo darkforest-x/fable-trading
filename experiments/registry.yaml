@@ -1657,7 +1657,7 @@ experiments:
   - experiment_id: exp-15m-ma-launch-transition-box-review50-v2
     source_repo: darkforest-x/fable-trading
     source_commit: "46dcfa857b36ae9a617faf8566c30f8171f71c06"
-    status: active
+    status: rejected
     question: >-
       Does a two-span launch-origin box—pre-release core for vertical price
       bounds and three early confirmation bars for horizontal context—match the
@@ -1667,13 +1667,12 @@ experiments:
       PNGs: core4-7 ending t-3 supplies full-wick plus six-MA y bounds, while
       three confirmation bars extend x through t without entering y bounds
     result: >-
-      review50_v2_ready_pending_owner. All 50 clean image hashes equal v1 and
-      all 200 proposed boxes contain their core wicks plus six MAs. A strong
-      confirmation-only intervention produced exactly zero vertical-coordinate
-      change for 200/200 boxes. Core5+Confirm3 expands the median model-input
-      width from 248.3px to 381.0px and median height from 52.1px to 172.1px;
-      38/50 rows have at least one confirmation extreme outside the vertical
-      zone, matching the Owner references' breakout-through-box behavior.
+      rejected_by_owner_on_telegram_delivery. Showing four alternatives per
+      image confused a parameter grid with a target label; fixing every core end
+      at t-3 and appending three confirmation bars moved the red boxes too far
+      right and made them contain too many K bars. The 200/200 intervention null
+      remains a valid code check for the rejected proposal, not evidence that
+      its object semantics were correct.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
@@ -1689,8 +1688,121 @@ experiments:
       - 15m-ma-launch-transition-box-review50-v2-html
     reuse_allowed: false
     notes: >-
-      Active means waiting for Owner visual protocol review, not permission to
-      relabel or train. The three 2026-08 Owner screenshots were used only as
-      pixel-level design references; no underlying holdout OHLCV was fetched or
-      read. Even an accepted protocol still requires indexed per-image START/END
-      confirmation; batch offsets and hash-random core lengths are forbidden.
+      Owner rejection on 2026-08-27 supersedes pending review. Keep v2 as the
+      falsified two-span baseline; do not send, label or train it. The three
+      screenshots were pixel references only and holdout OHLCV read stayed zero.
+
+  - experiment_id: exp-15m-ma-launch-density-core-box-review50-v3
+    source_repo: darkforest-x/fable-trading
+    source_commit: "594c60ca91262a4eee6826d4c303321b30cc2eb9"
+    status: rejected
+    question: >-
+      Does one red box on each sample, restored to that sample's own five-bar
+      six-MA density span with zero confirmation bars, correct v2's right shift
+      and excessive K count while containing the local candle price zone?
+    single_variable: >-
+      Owner-directed geometry correction on the exact same 50 W20 identities:
+      replace four Core4-7+Confirm3 boxes ending at global t-3 with one frozen
+      per-sample v1 L5 density span; retain full-wick plus six-MA vertical bounds
+    result: >-
+      rejected_by_owner_after_telegram_review. The one-box geometry and byte
+      delivery checks passed, but the selector forced every weak candidate to
+      take the relatively tightest five-bar MA envelope in t-12..t-1. It had no
+      reject/ignore state, convergence/interleaving gate, launch-boundary anchor
+      or freshness gate. Owner rejected 03/08/20/21/22/34, requested per-image
+      right shifts for 01/14/18/32/35, accepted 44 as the perfect reference and
+      42 as good, and judged 48 morphologically usable but late. Core-to-visible-
+      tip delay was median 8 bars and only 3/50 were within two bars.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_15m_ma_launch_density_core_box_review50_20260827.md
+    artifacts:
+      - 15m-ma-launch-density-core-box-review50-v3-prereg
+      - 15m-ma-launch-density-core-box-review50-v3-build-receipt
+      - 15m-ma-launch-density-core-box-review50-v3-summary
+      - 15m-ma-launch-density-core-box-review50-v3-manifest
+      - 15m-ma-launch-density-core-box-review50-v3-gallery
+      - 15m-ma-launch-density-core-box-review50-v3-report
+      - 15m-ma-launch-density-core-box-review50-v3-html
+    reuse_allowed: false
+    notes: >-
+      Do not salvage v3 with a global shift or train from it. The next proposal
+      must anchor each 4-7 bar core to the per-image launch boundary, allow an
+      empty/reject result, separate review confirmation from model input, and
+      enforce tip/tip-1/tip-2 for any live-path claim. Geometry parity remains
+      valid implementation evidence for a semantically rejected proposal only.
+
+  - experiment_id: exp-15m-ma-launch-owner-recrop-review50-v4
+    source_repo: darkforest-x/fable-trading
+    source_commit: "27039ffdbffe81d0c9df5e9bf15721d296e8ddf0"
+    status: rejected
+    question: >-
+      Does applying the explicit Owner reject/rebox decisions and recropping the
+      model-visible right edge to core/core+1/core+2 repair v3?
+    single_variable: >-
+      exact same 50 identities and proposed cores, with six Owner rejects plus
+      the first interpretation of per-image shifts; replace old W20 context by
+      short causal windows and keep future +5 review physically separate
+    result: >-
+      rejected_before_owner_delivery. The 44 remaining proposals all passed the
+      causal right-edge check, but full contact-sheet inspection still found
+      parallel/wide MAs, breakout candles already inside the core and rows with
+      no fresh release. Short recropping repaired latency only; it did not repair
+      weak-label semantics. This intermediate was never sent to Telegram and
+      never became labels or training data.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: null
+    artifacts:
+      - 15m-ma-launch-owner-recrop-review50-v4-prereg
+      - 15m-ma-launch-owner-recrop-review50-v4-build-receipt
+      - 15m-ma-launch-owner-recrop-review50-v4-summary
+      - 15m-ma-launch-owner-recrop-review50-v4-manifest
+      - 15m-ma-launch-owner-recrop-review50-v4-gallery
+    reuse_allowed: false
+    notes: >-
+      Preserve only as the direct counterexample to "shorter window equals
+      correct label". Holdout rows, labels, training, production changes and TG
+      documents were all zero.
+
+  - experiment_id: exp-15m-ma-launch-owner-strict-review50-v5
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d70e64938c498674dda2b75ac1a584c681ae16be"
+    status: active
+    question: >-
+      After resolving the attached screenshot as source #40 GRT, which of the
+      frozen 50 identities still merit exactly one fresh MA-knot proposal when
+      the review is allowed to return no box?
+    single_variable: >-
+      replace v4's forced 44-row remainder with a strict contact-sheet gate on
+      the same frozen identities, apply #40's per-image right shift, preserve all
+      Owner decisions and keep core/core+0..2 model windows separate from future
+      +5 human review
+    result: >-
+      ready_pending_owner_sample_review. Twenty single-box proposals remain and
+      thirty rows return no box (six Owner rejects plus twenty-four strict visual
+      rejects). Core-to-model-right gap is median 0.5 bar and max 2; all images
+      are 1280x742, clean inputs have zero overlay-red pixels, future review has
+      zero labels, and all 50 decision PNGs were sent one-by-one to Telegram as
+      documents with a hash-bound receipt.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_15m_ma_launch_owner_strict_review50_20260827.md
+    artifacts:
+      - 15m-ma-launch-owner-strict-review50-v5-prereg
+      - 15m-ma-launch-owner-strict-review50-v5-build-receipt
+      - 15m-ma-launch-owner-strict-review50-v5-summary
+      - 15m-ma-launch-owner-strict-review50-v5-manifest
+      - 15m-ma-launch-owner-strict-review50-v5-gallery
+      - 15m-ma-launch-owner-strict-review50-v5-visual-qa
+      - 15m-ma-launch-owner-strict-review50-v5-telegram-receipt
+      - 15m-ma-launch-owner-strict-review50-v5-report
+      - 15m-ma-launch-owner-strict-review50-v5-html
+    reuse_allowed: false
+    notes: >-
+      Active means waiting for per-sample Owner KEEP/ADJUST/REJECT, not training
+      permission. No proposal is Gold yet; do not create labels, negatives,
+      training jobs, promote or production changes until Owner closes geometry.
