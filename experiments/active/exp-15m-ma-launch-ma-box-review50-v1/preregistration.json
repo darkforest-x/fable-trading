@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-ma-box-review50-v1",
+  "created_at": "2026-08-27T13:00:00+08:00",
+  "owner_authorization": {
+    "quote": "按照你的这些建议全部去做吧。",
+    "scope": "Implement the proposed fixed-scale MA-box review and QA sequence; protocol/sample review remains required before full relabeling or training."
+  },
+  "question": "Can a fixed-scale, MA-derived box protocol eliminate candle-high/low supervision while keeping the visual target large and consistently defined enough for a later YOLO Gold dataset?",
+  "single_variable_statement": "This is a non-training bundled protocol-design review explicitly authorized by the Owner: fixed W20 replaces W14-22, horizontal candidates become data-derived L4/L5/L6/L7 MA segments, and vertical candidates compare exact-plus-padding against 16/24/32 model-pixel minimum heights. No performance or economic claim is made.",
+  "source": {
+    "dataset_manifest_path": "datasets/ma_launch_t3_10000_v1/manifest.jsonl",
+    "dataset_manifest_sha256": "dd55246938b03c4b2013d159cdfee94b4e9db56ecb298ad30145eb5d1bc2bc3a",
+    "dataset_preregistration_path": "experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/preregistration.json",
+    "dataset_preregistration_sha256": "813af93cc65abafd4ce60de1bf668ac8f25dbd653f13f151fa9662ab8f51af37",
+    "expected_rows": 36812,
+    "expected_positive_rows": 9938,
+    "expected_negative_rows": 26874,
+    "holdout_start_exclusive": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0
+  },
+  "review_selection": {
+    "positive_rows": 50,
+    "allocation": {
+      "LONG_train": 20,
+      "LONG_val": 5,
+      "SHORT_train": 20,
+      "SHORT_val": 5
+    },
+    "temporal_bins_per_stratum": 5,
+    "ordering": "Stable SHA256 ordering within each direction/split/time bin, preferring unused symbols before deterministic fill.",
+    "answers_preselected": 0,
+    "negative_visual_rows": {
+      "easy": 12,
+      "hard": 12,
+      "selection": "Twelve deterministic L5-density quantiles per kind."
+    }
+  },
+  "render_contract": {
+    "source_shape": [742, 1280, 3],
+    "window_bars": 20,
+    "window_end_offsets_from_t": [0, 1, 2],
+    "window_end_assignment": "Stable SHA256 display-only assignment; it cannot alter box source bars.",
+    "density_search_start_offset_from_t": -12,
+    "density_search_end_offset_from_t": -1,
+    "horizontal_core_lengths": [4, 5, 6, 7],
+    "horizontal_score": "For each length independently, minimize (max of all six MA values across the segment - min) / mean close; exact ties choose the later end.",
+    "vertical_source": "Only SMA/EMA 20/60/120 values inside the selected segment; candle open/high/low/close never set y bounds.",
+    "base_vertical_padding_source_px_each_side": 4,
+    "baseline_imgsz": 960,
+    "model_minimum_height_variants_px": [16, 24, 32],
+    "minimum_height_expansion": "Symmetric around the MA-envelope center, preserving all six MA points.",
+    "review_horizontal_control": "L4/L5/L6/L7 all use minimum 24 model pixels.",
+    "review_vertical_control": "L5 compares exact-plus-padding, 16, 24 and 32 model pixels."
+  },
+  "negative_audit": {
+    "scope": "All 26,874 frozen empty-label negatives.",
+    "question": "How much does L5 MA-density overlap between weak positives, hard no-launch negatives and easy no-launch negatives under the same W20 renderer?",
+    "interpretation_guard": "A dense knot in a negative does not automatically become a positive; it proves that the eventual class must include launch/release semantics rather than density alone."
+  },
+  "gates": {
+    "full_relabel_before_owner_review": false,
+    "yolo_labels_allowed": 0,
+    "training_images_allowed": 0,
+    "training_allowed": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "holdout_read": false,
+    "remote_write": false,
+    "active_or_frozen_change": false,
+    "next_gate": "Owner reviews all 50 protocol samples and confirms one global horizontal/vertical rule; protocol confirmation still does not silently confirm all 9,938 samples."
+  }
+}
