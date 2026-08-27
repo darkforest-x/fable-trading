@@ -139,6 +139,13 @@ external/Kronos/
 /reports/unmatched_review/img/
 /reports/phase_pilot/img/
 
+# Local Review50 raster packs are deterministically rebuilt from tracked
+# manifests/configs. Keep compact manifests/pages in git, not hundreds of PNGs.
+/experiments/active/exp-15m-ma-launch-ma-box-review50-v1/results/public/images/
+/experiments/active/exp-15m-ma-launch-ma-box-review50-v1/results/*.png
+/experiments/active/exp-15m-ma-launch-transition-box-review50-v2/results/public/images/
+/experiments/active/exp-15m-ma-launch-transition-box-review50-v2/results/*.png
+
 # ---- 单仓收敛回迁的大体积产物（2026-08-20，owner 指示"全部迁移过来，大文件不提交"）----
 # archive/consolidated/<repo>/ 下是四个来源仓的 20.5 GB / 300k 个产物，
 # 用 APFS 写时复制克隆进来（占用增量 ~0），源仓保持完好。

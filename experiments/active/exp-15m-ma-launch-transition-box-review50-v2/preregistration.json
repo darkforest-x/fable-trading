@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-transition-box-review50-v2",
+  "created_at": "2026-08-27T13:28:17+08:00",
+  "owner_authorization": {
+    "quote": "还是标的不对  太窄了 我给你几个样例",
+    "scope": "Replace the rejected thin MA-only proposal with a review-only geometry that reflects the three Owner-drawn red reference boxes. No full relabeling or training is authorized by this correction alone."
+  },
+  "question": "Does a two-span box—pre-release core for vertical price bounds and three early confirmation bars for horizontal context—match the Owner's red launch-origin boxes better than the rejected MA-only box?",
+  "single_variable_statement": "This is an explicitly Owner-directed bundled protocol correction, not a model-performance experiment. It preserves the exact 50 identities, W20 crops and pixels from v1, while changing only the proposed overlay semantics: fixed t-3 core end, core wick plus six-MA vertical bounds, and horizontal extension through three confirmation bars.",
+  "source": {
+    "review_manifest_path": "experiments/active/exp-15m-ma-launch-ma-box-review50-v1/results/review_manifest.jsonl",
+    "review_manifest_sha256": "cc852cb9da838056a8c95e80ba60270fa1537860973437b35638cff1efe63c66",
+    "rejected_preregistration_path": "experiments/active/exp-15m-ma-launch-ma-box-review50-v1/preregistration.json",
+    "rejected_preregistration_sha256": "f14ce65fc958f3672806d0af22d61d8136f470bd03368129159aef1d4ccbb099",
+    "expected_rows": 50,
+    "expected_direction_counts": {"LONG": 25, "SHORT": 25},
+    "expected_split_counts": {"train": 40, "val": 10},
+    "holdout_start_exclusive": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0
+  },
+  "owner_reference_measurements": [
+    {
+      "reference": "BTC long 2026-08-19",
+      "input_sha256": "ca348330fc5ce0d353cda9598d320044c502bc1643fb2b5079aeeba2aa8f1be7",
+      "image_shape_hwc": [1696, 2940, 3],
+      "red_box_xyxy_px_approx": [1671, 1148, 1745, 1268],
+      "estimated_horizontal_bars": "7-8",
+      "observation": "The first expansion candle leaves the box vertically while the box retains its horizontal launch context."
+    },
+    {
+      "reference": "BTC short 2026-08-10/11",
+      "input_sha256": "81a88e718a75d6805d26ecade38f8d0bd4a37718ca9d9f9d88cf711318813ab0",
+      "image_shape_hwc": [1696, 2940, 3],
+      "red_box_xyxy_px_approx": [1159, 410, 1221, 546],
+      "estimated_horizontal_bars": "6-7",
+      "observation": "The early dump continues below the red price zone; its later lows do not enlarge the vertical box."
+    },
+    {
+      "reference": "FARTCOIN long 2026-08-19/20",
+      "input_sha256": "f6ee4875bcbf2c58a943f8db64aaad2efa06ef26a77e0337cc9c6b840f86fb36",
+      "image_shape_hwc": [1696, 2940, 3],
+      "red_box_xyxy_px_approx": [1951, 1256, 2052, 1386],
+      "estimated_horizontal_bars": "9-10",
+      "observation": "The box covers the launch-origin zone and early rise, while later expansion leaves through the top."
+    }
+  ],
+  "reference_use_guard": "The three Owner-provided screenshot pixels are protocol-design references only. Their underlying OHLCV was not fetched or read, they are not holdout evaluation rows, and they cannot enter training inputs or labels.",
+  "geometry": {
+    "window_bars": 20,
+    "source_selection_anchor": "t",
+    "core_end_offset_from_t_bars": -3,
+    "core_length_candidates": [4, 5, 6, 7],
+    "confirmation_bars_after_core": 3,
+    "horizontal_extent": "From the first core candle through anchor t inclusive, producing 7/8/9/10 total bars.",
+    "vertical_extent": "Max/min union of core candle full wicks and SMA/EMA 20/60/120 only; confirmation values are excluded.",
+    "vertical_padding_fraction_each_side": 0.04,
+    "extreme_wick_policy": "If max core candle range / median core candle range is at least 8, mark unavailable/IGNORE; never clip or winsorize.",
+    "old_overlay": "Rejected v1 L5/min24 MA-only box remains visible as a cyan dashed audit baseline.",
+    "new_overlay": "Red rectangle is the two-span proposal; yellow divider marks the last core candle before the three confirmation bars."
+  },
+  "review": {
+    "rows": 50,
+    "answers_preselected": 0,
+    "preferred_core_length_must_be_per_sample": true,
+    "hash_or_random_core_length_assignment_allowed": false,
+    "protocol_confirmation_is_sample_confirmation": false
+  },
+  "gates": {
+    "full_relabel_allowed": false,
+    "yolo_labels_allowed": 0,
+    "training_images_allowed": 0,
+    "training_allowed": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "holdout_read": false,
+    "remote_write": false,
+    "active_or_frozen_change": false,
+    "next_gate": "Owner first checks the rendered v2 samples. If the semantics are accepted, use indexed per-image START/END annotation; do not assign all 9,938 boxes with a batch offset or random length."
+  }
+}
