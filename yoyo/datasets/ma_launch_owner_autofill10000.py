@@ -557,13 +557,18 @@ def _sample_contact_sheet(rows: Sequence[Mapping[str, Any]], final_dir: Path) ->
     for slot, index in enumerate(indices):
         row = rows[int(index)]
         image_path = ROOT / str(row["image_path"])
-        image = cv2.imread(str(image_path), cv2.IMREAD_COLOR)
-        if image is None:
-            # During .building the final path does not exist yet.
-            image = cv2.imread(
-                str(final_dir.with_name(f"{final_dir.name}.building") / "public" / "images" / image_path.name),
-                cv2.IMREAD_COLOR,
+        # During atomic publication the manifest already names the final path,
+        # but only its .building counterpart exists.  Resolve before imread so
+        # OpenCV does not emit one false missing-file warning per sampled tile.
+        readable_path = image_path
+        if not readable_path.exists():
+            readable_path = (
+                final_dir.with_name(f"{final_dir.name}.building")
+                / "public"
+                / "images"
+                / image_path.name
             )
+        image = cv2.imread(str(readable_path), cv2.IMREAD_COLOR)
         if image is None:
             raise OwnerAutofill10000Error(f"contact sheet image is unreadable: {image_path}")
         preview = cv2.resize(image, (tile_w, tile_h - 24), interpolation=cv2.INTER_AREA)

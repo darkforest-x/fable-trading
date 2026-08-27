@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from collections import Counter
 
+import cv2
+import numpy as np
 import pandas as pd
 
+import yoyo.datasets.ma_launch_owner_autofill10000 as autofill
 from yoyo.datasets.ma_launch_owner_autofill10000 import (
     _sign_test_p_string,
     event_nms,
@@ -80,6 +83,37 @@ def test_balanced_selection_fills_quantiles_and_quotas() -> None:
 
 def test_sign_test_formats_tiny_exact_probability() -> None:
     assert _sign_test_p_string(10, 10) == "1.95312500E-3"
+
+
+def test_contact_sheet_reads_atomic_building_path_without_final_file(
+    tmp_path, monkeypatch
+) -> None:
+    monkeypatch.setattr(autofill, "ROOT", tmp_path)
+    final_dir = tmp_path / "experiment" / "results"
+    building_image = (
+        tmp_path
+        / "experiment"
+        / "results.building"
+        / "public"
+        / "images"
+        / "sample.png"
+    )
+    building_image.parent.mkdir(parents=True)
+    source = np.full((90, 160, 3), 255, dtype=np.uint8)
+    cv2.rectangle(source, (60, 25), (100, 70), (0, 0, 255), 2)
+    assert cv2.imwrite(str(building_image), source)
+    contact = autofill._sample_contact_sheet(
+        [
+            {
+                "image_path": "experiment/results/public/images/sample.png",
+                "source_order": 1,
+                "symbol": "BTC_USDT_SWAP",
+                "direction": "LONG",
+            }
+        ],
+        final_dir,
+    )
+    assert contact.shape == (1800, 2560, 3)
 
 
 def test_balanced_selection_keeps_distinct_symbols_in_same_hour() -> None:
