@@ -48,7 +48,7 @@ from yoyo.datasets.ma_rope_filter import SIX_MA_COLUMNS
 from yoyo.layers.l1_detection.render import render_chart
 
 
-EXPERIMENT_ID = "exp-15m-ma-launch-owner-autofill50-v6"
+EXPERIMENT_ID = "exp-15m-ma-launch-owner-autofill50-v7"
 DEFAULT_PREREG = ROOT / "experiments" / "active" / EXPERIMENT_ID / "preregistration.json"
 FEATURE_NAMES = (
     "ma_envelope_atr",
@@ -56,11 +56,15 @@ FEATURE_NAMES = (
     "candle_envelope_atr",
     "max_body_atr",
     "core_progress_atr",
+    "post1_progress_atr",
+    "post2_progress_atr",
     "post3_progress_atr",
     "post5_progress_atr",
     "aligned_ma_slope_atr",
     "ma_slope_std_atr",
     "minimum_close_to_ma_atr",
+    "max_close_to_ma_envelope_atr",
+    "max_body_to_ma_envelope_atr",
 )
 
 
@@ -157,6 +161,18 @@ def morphology_profile(
     minimum_close_to_ma = float(
         np.abs(arrays["close"][start_i : end_i + 1, None] - ma_core).min() / atr
     )
+    ma_low = ma_core.min(axis=1)
+    ma_high = ma_core.max(axis=1)
+    core_close = arrays["close"][start_i : end_i + 1]
+    core_open = arrays["open"][start_i : end_i + 1]
+    body_low = np.minimum(core_open, core_close)
+    body_high = np.maximum(core_open, core_close)
+    close_to_envelope = np.maximum(
+        np.maximum(ma_low - core_close, core_close - ma_high), 0.0
+    )
+    body_to_envelope = np.maximum(
+        np.maximum(ma_low - body_high, body_low - ma_high), 0.0
+    )
     features = np.asarray(
         [
             (ma_core.max() - ma_core.min()) / atr,
@@ -172,11 +188,15 @@ def morphology_profile(
             ).max()
             / atr,
             sign * (arrays["close"][end_i] - arrays["close"][start_i]) / atr,
+            sign * (arrays["close"][end_i + 1] - arrays["close"][end_i]) / atr,
+            sign * (arrays["close"][end_i + 2] - arrays["close"][end_i]) / atr,
             sign * (arrays["close"][end_i + 3] - arrays["close"][end_i]) / atr,
             sign * (arrays["close"][end_i + 5] - arrays["close"][end_i]) / atr,
             sign * float(slopes.mean()),
             float(slopes.std()),
             minimum_close_to_ma,
+            float(close_to_envelope.max() / atr),
+            float(body_to_envelope.max() / atr),
         ],
         dtype=float,
     )
@@ -192,10 +212,16 @@ def passes_gate(profile: Profile, gates: Mapping[str, float]) -> bool:
         and gates["min_core_progress_atr"]
         <= values["core_progress_atr"]
         <= gates["max_core_progress_atr"]
+        and values["post1_progress_atr"] >= gates["min_post1_progress_atr"]
+        and values["post2_progress_atr"] >= gates["min_post2_progress_atr"]
         and values["post3_progress_atr"] >= gates["min_post3_progress_atr"]
         and values["post5_progress_atr"] >= gates["min_post5_progress_atr"]
         and values["aligned_ma_slope_atr"] >= gates["min_aligned_ma_slope_atr"]
         and values["minimum_close_to_ma_atr"] <= gates["max_minimum_close_to_ma_atr"]
+        and values["max_close_to_ma_envelope_atr"]
+        <= gates["max_close_to_ma_envelope_atr"]
+        and values["max_body_to_ma_envelope_atr"]
+        <= gates["max_body_to_ma_envelope_atr"]
     )
 
 

@@ -19,13 +19,17 @@ from yoyo.datasets.ma_rope_filter import SIX_MA_COLUMNS
 GATES = {
     "max_ma_envelope_atr": 1.5,
     "max_ma_spread_end_atr": 1.1,
-    "max_core_body_atr": 1.5,
+    "max_core_body_atr": 1.2,
     "min_core_progress_atr": -0.6,
-    "max_core_progress_atr": 2.5,
+    "max_core_progress_atr": 1.3,
+    "min_post1_progress_atr": 0.0,
+    "min_post2_progress_atr": 1.0,
     "min_post3_progress_atr": 1.25,
     "min_post5_progress_atr": 1.75,
     "min_aligned_ma_slope_atr": 0.03,
     "max_minimum_close_to_ma_atr": 1.0,
+    "max_close_to_ma_envelope_atr": 1.9,
+    "max_body_to_ma_envelope_atr": 1.5,
 }
 
 
@@ -68,20 +72,44 @@ def test_direction_normalization_mirrors_long_and_short() -> None:
 
 
 def test_gate_requires_fresh_post_core_release() -> None:
-    values = np.asarray([1.0, 0.8, 2.0, 1.0, 0.5, 1.5, 2.0, 0.1, 0.1, 0.2])
+    values_by_name = {
+        "ma_envelope_atr": 1.0,
+        "ma_spread_end_atr": 0.8,
+        "candle_envelope_atr": 2.0,
+        "max_body_atr": 1.0,
+        "core_progress_atr": 0.5,
+        "post1_progress_atr": 0.2,
+        "post2_progress_atr": 1.1,
+        "post3_progress_atr": 1.5,
+        "post5_progress_atr": 2.0,
+        "aligned_ma_slope_atr": 0.1,
+        "ma_slope_std_atr": 0.1,
+        "minimum_close_to_ma_atr": 0.2,
+        "max_close_to_ma_envelope_atr": 1.0,
+        "max_body_to_ma_envelope_atr": 0.8,
+    }
+    values = np.asarray([values_by_name[name] for name in FEATURE_NAMES])
     profile = Profile(features=values, sequence=np.zeros((4, 10)))
     assert passes_gate(profile, GATES)
     stale = values.copy()
     stale[FEATURE_NAMES.index("post3_progress_atr")] = 0.2
     assert not passes_gate(Profile(stale, profile.sequence), GATES)
 
+    late = values.copy()
+    late[FEATURE_NAMES.index("post2_progress_atr")] = 0.4
+    assert not passes_gate(Profile(late, profile.sequence), GATES)
+
+    escaped_core = values.copy()
+    escaped_core[FEATURE_NAMES.index("max_body_to_ma_envelope_atr")] = 1.6
+    assert not passes_gate(Profile(escaped_core, profile.sequence), GATES)
+
 
 def test_profile_distance_is_zero_for_reference_identity() -> None:
-    profile = Profile(np.ones(10), np.ones((4, 10)))
+    profile = Profile(np.ones(len(FEATURE_NAMES)), np.ones((4, 10)))
     assert profile_distance(
         profile,
         [profile],
-        feature_scales=np.ones(10),
+        feature_scales=np.ones(len(FEATURE_NAMES)),
         feature_weight=0.45,
         sequence_weight=0.55,
     ) == 0.0
