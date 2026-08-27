@@ -11,6 +11,7 @@ from yoyo.datasets.ma_launch_transition_box_review import (
     CORE_LENGTHS,
     PAD_FRACTION,
     TransitionBoxReviewError,
+    build_metric,
     transition_box_for_span,
     transition_span,
 )
@@ -80,6 +81,31 @@ def test_confirmation_is_horizontal_context_not_vertical_union() -> None:
     box = transition_box_for_span(make_chart_transform(data), data, span)
     assert box["confirmation_extremes_outside_vertical_zone"] >= 1
     assert box["box_price_high"] < 150.0
+
+
+def test_review_metric_records_exact_core_divider_pixel() -> None:
+    data = frame()
+    source_anchor = 100
+    window_start = source_anchor - 17
+    row = {
+        "sample_id": "demo",
+        "symbol": "BTC_USDT_SWAP",
+        "direction": "LONG",
+        "split": "train",
+        "anchor_time": "2026-01-01T00:00:00+00:00",
+        "source_path": "data/demo.csv",
+        "source_anchor_i": source_anchor,
+        "window_start_i": window_start,
+        "window_end_i": window_start + 19,
+        "window_end_offset": 2,
+        "time_bin": 0,
+        "image_sha256": "a" * 64,
+        "variants": {"L5_min24": {"box": {"x0": 1, "y0": 2, "x1": 3, "y1": 4}}},
+    }
+    metric, transform = build_metric(row, data)
+    variant = metric["variants"]["L5_C3"]
+    assert variant["core_end_x_px"] == transform.x_at(14)
+    assert variant["confirmation_end_x_px"] == transform.x_at(17)
 
 
 def test_extreme_core_wick_fails_closed() -> None:

@@ -321,7 +321,12 @@ def build_metric(row: Mapping[str, Any], window: pd.DataFrame) -> tuple[dict[str
     for core_len in CORE_LENGTHS:
         span = transition_span(anchor_local, core_len, len(window))
         box = transition_box_for_span(transform, window, span)
-        variants[f"L{core_len}_C3"] = {"span": span.__dict__, "box": box}
+        variants[f"L{core_len}_C3"] = {
+            "span": span.__dict__,
+            "box": box,
+            "core_end_x_px": int(transform.x_at(span.core_end_local)),
+            "confirmation_end_x_px": int(transform.x_at(span.confirmation_end_local)),
+        }
     return {
         "sample_id": str(row["sample_id"]),
         "symbol": str(row["symbol"]),
@@ -406,10 +411,8 @@ def _box_style(box: Mapping[str, Any]) -> str:
 
 def _core_divider_style(row: Mapping[str, Any], core_len: int) -> str:
     variant = row["variants"][f"L{core_len}_C3"]
-    span = variant["span"]
     box = variant["box"]
-    step = (float(box["x1"]) - float(box["x0"])) / max(int(span["total_box_bars"]), 1)
-    divider = float(box["x1"]) - CONFIRMATION_BARS * step
+    divider = float(variant["core_end_x_px"])
     return f"left:{100 * divider / SOURCE_WIDTH:.6f}%;top:{100 * float(box['y0']) / SOURCE_HEIGHT:.6f}%;height:{100 * (float(box['y1']) - float(box['y0'])) / SOURCE_HEIGHT:.6f}%"
 
 
