@@ -1,0 +1,154 @@
+{
+  "schema_version": 2,
+  "protocol": "ma6_owner_autofill10000_yolo_neg30000_weak_v2_20260827",
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2",
+  "created_at": "2026-08-27T22:42:23+08:00",
+  "stage": "P1_owner_batch_approved_weak_dataset_negative_expansion",
+  "single_variable": "Keep all 10,000 positive images and labels byte-identical and expand only the paired negative count from 10,000 to 30,000.",
+  "owner_authorization": {
+    "conversation_date": "2026-08-27",
+    "quote": "对啊 那你应该搞3w张啊",
+    "interpretation": "Build a replacement dataset version containing the unchanged 10,000 accepted weak positives plus 30,000 automatically mined negatives. This authorizes dataset materialization only, not training, holdout access, promotion or production use.",
+    "positive_label_materialization_authorized": true,
+    "automatic_negative_materialization_authorized": true,
+    "training_run_authorized": false,
+    "production_or_promotion_authorized": false
+  },
+  "positive_source": {
+    "experiment_id": "exp-15m-ma-launch-owner-autofill10000-v1",
+    "preregistration_path": "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/preregistration.json",
+    "preregistration_sha256": "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da",
+    "manifest_path": "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/review_manifest.jsonl",
+    "manifest_sha256": "60bb7350c446ee1a406efbd48a4d7e7426ac4838e35b901bee3073019b327e76",
+    "build_receipt_path": "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/build_receipt.json",
+    "build_receipt_sha256": "33252ff636ab78b59b20f339fbf0e4c56bfc961fe9dd6f37f4e1f649ad4718b6",
+    "rows": 10000,
+    "long": 5000,
+    "short": 5000,
+    "positive_contract": "Use every accepted source window and exact accepted box unchanged. Re-render a clean chart from pinned OHLCV and require drawing the accepted red box to recreate the delivered review PNG byte-for-byte.",
+    "label_classification": "owner_batch_approved_weak_not_per_sample_gold"
+  },
+  "lineage_baseline": {
+    "dataset_path": "datasets/ma_launch_owner_autofill10000_yolo_v1",
+    "manifest_path": "datasets/ma_launch_owner_autofill10000_yolo_v1/manifest.jsonl",
+    "manifest_sha256": "d15f78cf651073ef1bf5aa4381f136ba11d6d3dca6513f48ed596251e181413b",
+    "rows": 20000,
+    "required_matches": "All 10,000 predecessor positives and all 10,000 seed negatives must retain exact image SHA and label SHA in v2. The additional 20,000 negatives are new rows."
+  },
+  "renderer": {
+    "entry": "yoyo.layers.l1_detection.render.render_chart",
+    "width": 1280,
+    "height": 742,
+    "format": "lossless PNG",
+    "classes": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "positive_and_negative_pipeline_identical": true,
+    "annotations_drawn_into_training_images": false,
+    "positive_box_source": "exact x/y geometry from the accepted review manifest; no shift, reboxing or resizing"
+  },
+  "split": {
+    "method": "global chronological cutoff over complete render-plus-label dependency intervals; never random",
+    "cutoff": "2025-12-01T00:00:00Z",
+    "purge_bars_each_side": 150,
+    "bar_minutes": 15,
+    "train_rule": "dependency end <= cutoff - 150 bars",
+    "val_rule": "dependency start >= cutoff + 150 bars",
+    "between_rules": "materialize under excluded/ for lineage, but data.yaml must not expose it",
+    "dependency_end": "max(render end, core end + 5 completed-history label bars)"
+  },
+  "negative_sampling": {
+    "target": 30000,
+    "negative_per_positive": 3,
+    "target_kinds_per_positive": [
+      "hard",
+      "hard",
+      "easy"
+    ],
+    "preferred_hard_total": 20000,
+    "preferred_easy_total": 10000,
+    "minimum_hard_share_overall": 0.60,
+    "minimum_hard_share_train": 0.60,
+    "minimum_hard_share_val": 0.60,
+    "kind_assignment": "Each positive targets two hard and one easy negative. The pinned v1 negative is retained as slot 1; two additional disjoint slots fill the remaining target kinds. If one preferred kind has no safe capacity, the other frozen safe kind may fill that slot only if the 60% hard floor still passes overall, train and val.",
+    "seed_plan": {
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/negative_plan.jsonl",
+      "sha256": "32d9de2752c5764e42a6014dd8497ebfd180e8455fe78f4670c6bebaa48ef7dc",
+      "rows": 10000,
+      "per_positive": 1,
+      "contract": "Retain every v1 negative and revalidate its feature kind, split, geometry, positive guards and non-overlap before selecting new rows."
+    },
+    "pairing": {
+      "same_source_file": true,
+      "same_symbol": true,
+      "same_calendar_halfyear": true,
+      "same_split_for_train_and_val": true,
+      "same_core_bars": true,
+      "same_pre_core_context_bars": true,
+      "same_post_core_context_bars": true,
+      "reuse_allowed": false
+    },
+    "completed_no_launch_condition": {
+      "abs_close_progress_atr_max_core_plus_2": 0.85,
+      "abs_close_progress_atr_max_core_plus_3": 1.10,
+      "abs_close_progress_atr_max_core_plus_5": 1.35,
+      "two_sided_high_low_excursion_atr_max_core_plus_1_to_5": 1.75,
+      "atr_anchor": "core_end + 2, matching the accepted retrieval family",
+      "purpose": "Future bars define only the safe negative label; rendered pixels remain the matched completed-history window and never cross holdout."
+    },
+    "hard_definition": {
+      "ma_envelope_atr_max": 1.5,
+      "ma_spread_end_atr_max": 1.1,
+      "max_body_atr_max": 1.2,
+      "candle_envelope_atr_max": 2.8,
+      "minimum_close_to_ma_atr_max": 1.0,
+      "meaning": "The six MAs are visually dense, but the completed move fails the launch thresholds."
+    },
+    "easy_definition": {
+      "ma_envelope_atr_min_any": 2.2,
+      "ma_spread_end_atr_min_any": 1.6,
+      "minimum_close_to_ma_atr_min_any": 1.8,
+      "candle_envelope_atr_min_any": 4.0,
+      "meaning": "Clearly non-dense background satisfying the same strict no-launch label."
+    },
+    "positive_guard": {
+      "before_core_bars": 12,
+      "after_dependency_end_bars": 12,
+      "protect_all_strict_candidates_not_only_selected_10000": true,
+      "strict_candidate_source": "Re-run the hash-pinned accepted-family gate on every used source and guard every hit before negative selection."
+    },
+    "negative_separation_bars": 2,
+    "capacity_policy": "Keep same source, symbol, calendar half-year, split, geometry, all strict-candidate guards, strict no-launch thresholds, non-overlap and no reuse. Kind ratio is soft only above the frozen 60% hard floor. Fail closed instead of crossing blocks, duplicating windows or approaching a protected positive."
+  },
+  "sources": {
+    "bar_minutes": 15,
+    "holdout_start_exclusive": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0,
+    "source_policy": "Read only manifest-pinned source prefixes strictly before holdout. No fallback data source is permitted."
+  },
+  "outputs": {
+    "dataset_dir": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2",
+    "experiment_results": "experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/results",
+    "report": "analysis/p1_15m_ma_launch_owner_yolo_neg30000_20260827.md",
+    "html": "analysis/html/p1_15m_ma_launch_owner_yolo_neg30000_20260827.html"
+  },
+  "controls": {
+    "positive_overlay_parity": "10,000/10,000 clean re-renders must recreate accepted boxed PNGs byte-for-byte after drawing the separate accepted rectangle.",
+    "predecessor_byte_parity": "The 10,000 positive and 10,000 seed-negative image and label SHAs must match v1 exactly.",
+    "shifted_box_null": "On a deterministic sample, cyclically use the next positive box; expected byte matches are zero.",
+    "full_file_qa": "Decode and hash every actual image; parse every positive label; require every negative label byte-empty and every input free of exact overlay-red pixels."
+  },
+  "safety": {
+    "holdout_read": false,
+    "training_started": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "remote_write": false
+  }
+}

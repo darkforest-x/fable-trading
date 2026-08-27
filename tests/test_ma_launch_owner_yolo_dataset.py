@@ -25,6 +25,7 @@ def prereg() -> dict:
             "bar_minutes": 15,
         },
         "negative_sampling": {
+            "negative_per_positive": 1,
             "preferred_hard_total": 1,
             "preferred_easy_total": 1,
             "completed_no_launch_condition": {
@@ -215,4 +216,86 @@ def test_safe_kind_fallback_uses_easy_when_hard_pool_is_empty() -> None:
         prereg=config,
     )
     assert selected[0].negative_kind == "easy"
+    assert selected[0].pair_slot == 1
     assert audit["safe_kind_fallbacks"] == {"hard_to_easy": 1}
+
+
+def test_seeded_expansion_keeps_seed_and_adds_unique_pair_slots() -> None:
+    config = prereg()
+    config["positive_source"]["rows"] = 4
+    config["negative_sampling"].update(
+        {
+            "negative_per_positive": 3,
+            "target_kinds_per_positive": ["hard", "hard", "easy"],
+            "preferred_hard_total": 8,
+            "preferred_easy_total": 4,
+        }
+    )
+    template = plan_positives(
+        [
+            row(1, "2025-10-01T00:00:00Z"),
+            row(2, "2025-10-02T00:00:00Z"),
+            row(3, "2026-01-01T00:00:00Z"),
+            row(4, "2026-01-02T00:00:00Z"),
+        ],
+        config,
+    )[0]
+    n = 720
+    times = pd.date_range("2025-07-01T00:00:00Z", periods=n, freq="15min")
+    close = np.full(n, 100.0)
+    dense = pd.DataFrame(
+        {
+            "open_time": times,
+            "open": close,
+            "high": close + 0.1,
+            "low": close - 0.1,
+            "close": close,
+            "atr": np.ones(n),
+            "sma20": close,
+            "ema20": close,
+            "sma60": close,
+            "ema60": close,
+            "sma120": close,
+            "ema120": close,
+            "_segment_id": np.zeros(n, dtype=int),
+        }
+    )
+    first, _ = select_source_negatives(
+        dense,
+        source_path="data/x.csv",
+        symbol="BTC_USDT_SWAP",
+        positives=[template],
+        strict_candidates=[
+            {
+                "source_core_start_i": template.core_start_i,
+                "source_core_end_i": template.core_end_i,
+            }
+        ],
+        prereg={
+            **config,
+            "negative_sampling": {
+                **config["negative_sampling"],
+                "negative_per_positive": 1,
+                "target_kinds_per_positive": ["hard"],
+            },
+        },
+    )
+    expanded, audit = select_source_negatives(
+        dense,
+        source_path="data/x.csv",
+        symbol="BTC_USDT_SWAP",
+        positives=[template],
+        strict_candidates=[
+            {
+                "source_core_start_i": template.core_start_i,
+                "source_core_end_i": template.core_end_i,
+            }
+        ],
+        prereg=config,
+        seed_negatives=first,
+    )
+    assert len(expanded) == 3
+    assert expanded[0].sample_id == first[0].sample_id
+    assert {item.pair_slot for item in expanded} == {1, 2, 3}
+    assert len({item.core_end_i for item in expanded}) == 3
+    assert audit["seed_negative_rows"] == 1

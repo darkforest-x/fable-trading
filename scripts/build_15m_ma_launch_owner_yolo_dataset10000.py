@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Plan or materialize the Owner-approved 10k-positive YOLO dataset."""
+"""Plan or materialize an Owner-approved 10k-positive YOLO dataset version."""
 
 from __future__ import annotations
 

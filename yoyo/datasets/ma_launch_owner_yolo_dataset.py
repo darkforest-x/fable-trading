@@ -5,13 +5,15 @@ box is written to a separate YOLO label and is never burned into model input.
 For lineage, drawing that box back onto the clean re-render must reproduce the
 delivered boxed PNG byte-for-byte.
 
-Negative images are paired to positives by source file, symbol, calendar
-half-year, split and exact window geometry.  A negative label may inspect prices
-through pseudo core ``+5`` to prove no completed launch; model pixels contain
-only the matched render window.  Every strict accepted-family candidate is
-guarded before sampling.  No source row at or after the repository holdout is
-materialized, and this module never trains, promotes, deploys or changes live
-state.
+One or more negative images are paired to each positive by source file, symbol,
+calendar half-year, split and exact window geometry.  A negative label may
+inspect prices through pseudo core ``+5`` to prove no completed launch; model
+pixels contain only the matched render window.  Every strict accepted-family
+candidate is guarded before sampling.  A pinned predecessor plan may seed an
+additive expansion, but every seed is revalidated against the same guards and
+feature masks before reuse.  No source row at or after the repository holdout
+is materialized, and this module never trains, promotes, deploys or changes
+live state.
 """
 
 from __future__ import annotations
@@ -23,7 +25,7 @@ import math
 import os
 import subprocess
 from collections import Counter, defaultdict
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
@@ -105,6 +107,7 @@ class NegativePlan:
     sample_id: str
     paired_positive_sample_id: str
     paired_positive_source_order: int
+    pair_slot: int
     paired_direction: str
     symbol: str
     source_path: str
@@ -241,8 +244,9 @@ def verify_builder_committed(paths: Sequence[Path]) -> str:
 
 def load_preregistration(path: Path = DEFAULT_PREREG) -> dict[str, Any]:
     payload = read_json(path)
-    if payload.get("experiment_id") != EXPERIMENT_ID:
-        raise OwnerYoloDatasetError("unexpected experiment_id")
+    experiment_id = str(payload.get("experiment_id", ""))
+    if not experiment_id or path.resolve().parent.name != experiment_id:
+        raise OwnerYoloDatasetError("experiment_id must match preregistration directory")
     auth = payload["owner_authorization"]
     if auth.get("positive_label_materialization_authorized") is not True:
         raise OwnerYoloDatasetError("positive label materialization is not authorized")
@@ -267,10 +271,29 @@ def load_preregistration(path: Path = DEFAULT_PREREG) -> dict[str, Any]:
             raise OwnerYoloDatasetError(f"safety switch must remain false: {field}")
     if int(payload["sources"]["holdout_ohlcv_rows_allowed"]) != 0:
         raise OwnerYoloDatasetError("holdout row allowance must be zero")
-    if int(payload["negative_sampling"]["target"]) != int(
-        payload["positive_source"]["rows"]
-    ):
+    negative_cfg = payload["negative_sampling"]
+    rows = int(payload["positive_source"]["rows"])
+    per_positive = int(negative_cfg["negative_per_positive"])
+    if per_positive < 1:
+        raise OwnerYoloDatasetError("negative_per_positive must be positive")
+    if int(negative_cfg["target"]) != rows * per_positive:
         raise OwnerYoloDatasetError("positive/negative target drift")
+    target_kinds = negative_cfg.get("target_kinds_per_positive")
+    if target_kinds is not None:
+        normalized = [str(value) for value in target_kinds]
+        if len(normalized) != per_positive or set(normalized) - {"hard", "easy"}:
+            raise OwnerYoloDatasetError("invalid target_kinds_per_positive")
+        preferred = Counter(normalized)
+        expected = Counter(
+            hard=int(negative_cfg["preferred_hard_total"]) // rows,
+            easy=int(negative_cfg["preferred_easy_total"]) // rows,
+        )
+        if (
+            int(negative_cfg["preferred_hard_total"]) % rows
+            or int(negative_cfg["preferred_easy_total"]) % rows
+            or preferred != expected
+        ):
+            raise OwnerYoloDatasetError("preferred negative totals drift from per-pair target")
     return payload
 
 
@@ -364,7 +387,7 @@ def plan_positives(
         )
     kinds = Counter(plan.negative_kind for plan in plans)
     expected = prereg["negative_sampling"]
-    if kinds != Counter(
+    if int(expected["negative_per_positive"]) == 1 and kinds != Counter(
         hard=int(expected["preferred_hard_total"]),
         easy=int(expected["preferred_easy_total"]),
     ):
@@ -536,8 +559,15 @@ def select_source_negatives(
     positives: Sequence[PositivePlan],
     strict_candidates: Sequence[Mapping[str, Any]],
     prereg: Mapping[str, Any],
+    seed_negatives: Sequence[NegativePlan] = (),
 ) -> tuple[list[NegativePlan], dict[str, Any]]:
-    """Select exact paired negatives without weakening any hard constraint."""
+    """Select exact paired negatives without weakening any hard constraint.
+
+    A pinned predecessor plan can seed slot 1 of an additive expansion.  Seed
+    rows are not trusted merely because their JSON hash matches: this function
+    recomputes the hard/easy masks, split, geometry and every occupied interval
+    before marking them.  New slots are then selected without overlap.
+    """
 
     times = pd.to_datetime(enriched["open_time"], utc=True)
     segment = enriched["_segment_id"].to_numpy(dtype=int)
@@ -566,6 +596,7 @@ def select_source_negatives(
     cursors: Counter[tuple[int, str, str]] = Counter()
     selected: list[NegativePlan] = []
     split_cfg = prereg["split"]
+    negative_cfg = prereg["negative_sampling"]
     separation = int(prereg["negative_sampling"]["negative_separation_bars"])
     pool_rejections: Counter[str] = Counter()
 
@@ -585,95 +616,183 @@ def select_source_negatives(
             pools[key] = rng.permutation(indices)
         return pools[key]
 
+    template_by_id = {plan.sample_id: plan for plan in positives}
+    seed_by_positive: dict[str, list[NegativePlan]] = defaultdict(list)
+    seed_ids: set[str] = set()
+    for raw_seed in sorted(
+        seed_negatives,
+        key=lambda value: (value.paired_positive_source_order, value.sample_id),
+    ):
+        if raw_seed.sample_id in seed_ids:
+            raise OwnerYoloDatasetError(f"duplicate seed negative: {raw_seed.sample_id}")
+        seed_ids.add(raw_seed.sample_id)
+        template = template_by_id.get(raw_seed.paired_positive_sample_id)
+        if template is None:
+            raise OwnerYoloDatasetError(
+                f"seed has no positive in source: {raw_seed.paired_positive_sample_id}"
+            )
+        required_equal = (
+            raw_seed.paired_positive_source_order == template.source_order
+            and raw_seed.paired_direction == template.direction
+            and raw_seed.symbol == symbol
+            and raw_seed.source_path == source_path
+            and raw_seed.split == template.split
+            and raw_seed.core_bars == template.core_bars
+            and raw_seed.pre_core_context_bars == template.pre_core_context_bars
+            and raw_seed.post_core_context_bars == template.post_core_context_bars
+            and raw_seed.time_block == template.time_block
+        )
+        if not required_equal:
+            raise OwnerYoloDatasetError(f"seed pairing contract drift: {raw_seed.sample_id}")
+        core_end = int(raw_seed.core_end_i)
+        core_start = core_end - template.core_bars + 1
+        window_start = core_start - template.pre_core_context_bars
+        window_end = core_end + template.post_core_context_bars
+        dependency_end = max(window_end, core_end + 5)
+        if (
+            window_start != raw_seed.window_start_i
+            or window_end != raw_seed.window_end_i
+            or dependency_end != raw_seed.dependency_end_i
+            or not _contiguous(segment, window_start, dependency_end)
+        ):
+            raise OwnerYoloDatasetError(f"seed geometry drift: {raw_seed.sample_id}")
+        if not bool(masks[template.core_bars][raw_seed.negative_kind][core_end]):
+            raise OwnerYoloDatasetError(f"seed feature mask drift: {raw_seed.sample_id}")
+        assigned = interval_split(
+            times.iloc[window_start],
+            times.iloc[dependency_end],
+            cutoff=split_cfg["cutoff"],
+            purge_bars=int(split_cfg["purge_bars_each_side"]),
+            bar_minutes=int(split_cfg["bar_minutes"]),
+        )
+        if template.split != "excluded" and assigned != template.split:
+            raise OwnerYoloDatasetError(f"seed split drift: {raw_seed.sample_id}")
+        guarded_start = max(0, window_start - separation)
+        guarded_end = min(len(occupied) - 1, dependency_end + separation)
+        if occupied[guarded_start : guarded_end + 1].any():
+            raise OwnerYoloDatasetError(f"seed overlaps protected interval: {raw_seed.sample_id}")
+        normalized = replace(raw_seed, pair_slot=len(seed_by_positive[template.sample_id]) + 1)
+        seed_by_positive[template.sample_id].append(normalized)
+        selected.append(normalized)
+        _mark_interval(occupied, guarded_start, guarded_end)
+
     fallback_counts: Counter[str] = Counter()
     for template in sorted(positives, key=lambda plan: plan.source_order):
-        found: NegativePlan | None = None
-        attempted: list[tuple[tuple[int, str, str], int]] = []
-        alternate = "easy" if template.negative_kind == "hard" else "hard"
-        for actual_kind in (template.negative_kind, alternate):
-            key = (template.core_bars, actual_kind, template.time_block)
-            pool = pool_for(*key)
-            attempted.append((key, len(pool)))
-            while cursors[key] < len(pool):
-                core_end = int(pool[cursors[key]])
-                cursors[key] += 1
-                core_start = core_end - template.core_bars + 1
-                window_start = core_start - template.pre_core_context_bars
-                window_end = core_end + template.post_core_context_bars
-                dependency_end = max(window_end, core_end + 5)
-                if not _contiguous(segment, window_start, dependency_end):
-                    pool_rejections["source_gap_or_bounds"] += 1
-                    continue
-                assigned = interval_split(
-                    times.iloc[window_start],
-                    times.iloc[dependency_end],
-                    cutoff=split_cfg["cutoff"],
-                    purge_bars=int(split_cfg["purge_bars_each_side"]),
-                    bar_minutes=int(split_cfg["bar_minutes"]),
-                )
-                if template.split != "excluded" and assigned != template.split:
-                    pool_rejections["split_mismatch"] += 1
-                    continue
-                guarded_start = max(0, window_start - separation)
-                guarded_end = min(len(occupied) - 1, dependency_end + separation)
-                if occupied[guarded_start : guarded_end + 1].any():
-                    pool_rejections["protected_or_reused"] += 1
-                    continue
-                features = masks[template.core_bars]
-                sample_id = stable_id(
-                    prereg["protocol"],
-                    source_path,
-                    core_end,
-                    template.core_bars,
-                    template.pre_core_context_bars,
-                    template.post_core_context_bars,
-                    actual_kind,
-                )
-                found = NegativePlan(
-                    sample_id=sample_id,
-                    paired_positive_sample_id=template.sample_id,
-                    paired_positive_source_order=template.source_order,
-                    paired_direction=template.direction,
-                    symbol=symbol,
-                    source_path=source_path,
-                    split=template.split,
-                    negative_kind=actual_kind,
-                    core_bars=template.core_bars,
-                    core_end_i=core_end,
-                    pre_core_context_bars=template.pre_core_context_bars,
-                    post_core_context_bars=template.post_core_context_bars,
-                    window_start_i=window_start,
-                    window_end_i=window_end,
-                    dependency_end_i=dependency_end,
-                    core_end_time=times.iloc[core_end].isoformat(),
-                    window_start_time=times.iloc[window_start].isoformat(),
-                    window_end_time=times.iloc[window_end].isoformat(),
-                    dependency_end_time=times.iloc[dependency_end].isoformat(),
-                    time_block=template.time_block,
-                    ma_envelope_atr=float(features["ma_envelope_atr"][core_end]),
-                    ma_spread_end_atr=float(features["ma_spread_end_atr"][core_end]),
-                    max_body_atr=float(features["max_body_atr"][core_end]),
-                    candle_envelope_atr=float(features["candle_envelope_atr"][core_end]),
-                    minimum_close_to_ma_atr=float(features["minimum_close_to_ma_atr"][core_end]),
-                    abs_close_progress_atr_core_plus_2=float(features["close2"][core_end]),
-                    abs_close_progress_atr_core_plus_3=float(features["close3"][core_end]),
-                    abs_close_progress_atr_core_plus_5=float(features["close5"][core_end]),
-                    two_sided_excursion_atr_core_plus_1_to_5=float(
-                        features["excursion"][core_end]
-                    ),
-                )
-                _mark_interval(occupied, guarded_start, guarded_end)
-                if actual_kind != template.negative_kind:
-                    fallback_counts[f"{template.negative_kind}_to_{actual_kind}"] += 1
-                break
-            if found is not None:
-                break
-        if found is None:
-            raise OwnerYoloDatasetError(
-                "insufficient negative capacity without relaxing constraints: "
-                f"{source_path} attempted={attempted} positive={template.sample_id}"
+        target_kinds = [
+            str(value)
+            for value in negative_cfg.get(
+                "target_kinds_per_positive", [template.negative_kind]
             )
-        selected.append(found)
+        ]
+        seeded = seed_by_positive.get(template.sample_id, [])
+        remaining = list(target_kinds)
+        for seed in seeded:
+            try:
+                remaining.remove(seed.negative_kind)
+            except ValueError as exc:
+                raise OwnerYoloDatasetError(
+                    f"seed kind exceeds per-pair target: {seed.sample_id}"
+                ) from exc
+        for pair_slot, preferred_kind in enumerate(remaining, start=len(seeded) + 1):
+            found: NegativePlan | None = None
+            attempted: list[tuple[tuple[int, str, str], int]] = []
+            alternate = "easy" if preferred_kind == "hard" else "hard"
+            for actual_kind in (preferred_kind, alternate):
+                key = (template.core_bars, actual_kind, template.time_block)
+                pool = pool_for(*key)
+                attempted.append((key, len(pool)))
+                while cursors[key] < len(pool):
+                    core_end = int(pool[cursors[key]])
+                    cursors[key] += 1
+                    core_start = core_end - template.core_bars + 1
+                    window_start = core_start - template.pre_core_context_bars
+                    window_end = core_end + template.post_core_context_bars
+                    dependency_end = max(window_end, core_end + 5)
+                    if not _contiguous(segment, window_start, dependency_end):
+                        pool_rejections["source_gap_or_bounds"] += 1
+                        continue
+                    assigned = interval_split(
+                        times.iloc[window_start],
+                        times.iloc[dependency_end],
+                        cutoff=split_cfg["cutoff"],
+                        purge_bars=int(split_cfg["purge_bars_each_side"]),
+                        bar_minutes=int(split_cfg["bar_minutes"]),
+                    )
+                    if template.split != "excluded" and assigned != template.split:
+                        pool_rejections["split_mismatch"] += 1
+                        continue
+                    guarded_start = max(0, window_start - separation)
+                    guarded_end = min(len(occupied) - 1, dependency_end + separation)
+                    if occupied[guarded_start : guarded_end + 1].any():
+                        pool_rejections["protected_or_reused"] += 1
+                        continue
+                    features = masks[template.core_bars]
+                    sample_id = stable_id(
+                        prereg["protocol"],
+                        source_path,
+                        template.sample_id,
+                        pair_slot,
+                        core_end,
+                        template.core_bars,
+                        template.pre_core_context_bars,
+                        template.post_core_context_bars,
+                        actual_kind,
+                    )
+                    found = NegativePlan(
+                        sample_id=sample_id,
+                        paired_positive_sample_id=template.sample_id,
+                        paired_positive_source_order=template.source_order,
+                        pair_slot=pair_slot,
+                        paired_direction=template.direction,
+                        symbol=symbol,
+                        source_path=source_path,
+                        split=template.split,
+                        negative_kind=actual_kind,
+                        core_bars=template.core_bars,
+                        core_end_i=core_end,
+                        pre_core_context_bars=template.pre_core_context_bars,
+                        post_core_context_bars=template.post_core_context_bars,
+                        window_start_i=window_start,
+                        window_end_i=window_end,
+                        dependency_end_i=dependency_end,
+                        core_end_time=times.iloc[core_end].isoformat(),
+                        window_start_time=times.iloc[window_start].isoformat(),
+                        window_end_time=times.iloc[window_end].isoformat(),
+                        dependency_end_time=times.iloc[dependency_end].isoformat(),
+                        time_block=template.time_block,
+                        ma_envelope_atr=float(features["ma_envelope_atr"][core_end]),
+                        ma_spread_end_atr=float(features["ma_spread_end_atr"][core_end]),
+                        max_body_atr=float(features["max_body_atr"][core_end]),
+                        candle_envelope_atr=float(features["candle_envelope_atr"][core_end]),
+                        minimum_close_to_ma_atr=float(
+                            features["minimum_close_to_ma_atr"][core_end]
+                        ),
+                        abs_close_progress_atr_core_plus_2=float(
+                            features["close2"][core_end]
+                        ),
+                        abs_close_progress_atr_core_plus_3=float(
+                            features["close3"][core_end]
+                        ),
+                        abs_close_progress_atr_core_plus_5=float(
+                            features["close5"][core_end]
+                        ),
+                        two_sided_excursion_atr_core_plus_1_to_5=float(
+                            features["excursion"][core_end]
+                        ),
+                    )
+                    _mark_interval(occupied, guarded_start, guarded_end)
+                    if actual_kind != preferred_kind:
+                        fallback_counts[f"{preferred_kind}_to_{actual_kind}"] += 1
+                    break
+                if found is not None:
+                    break
+            if found is None:
+                raise OwnerYoloDatasetError(
+                    "insufficient negative capacity without relaxing constraints: "
+                    f"{source_path} attempted={attempted} positive={template.sample_id} "
+                    f"slot={pair_slot} preferred={preferred_kind}"
+                )
+            selected.append(found)
 
     return selected, {
         "source_path": source_path,
@@ -681,6 +800,7 @@ def select_source_negatives(
         "positive_rows": len(positives),
         "strict_candidates_guarded": len(strict_candidates),
         "negative_rows": len(selected),
+        "seed_negative_rows": len(seed_negatives),
         "negative_kinds": dict(Counter(plan.negative_kind for plan in selected)),
         "splits": dict(Counter(plan.split for plan in selected)),
         "pool_rejections": dict(pool_rejections),
@@ -722,6 +842,22 @@ def plan_dataset(
     by_source: dict[str, list[PositivePlan]] = defaultdict(list)
     for plan in positives:
         by_source[plan.source_path].append(plan)
+    seed_by_source: dict[str, list[NegativePlan]] = defaultdict(list)
+    seed_cfg = prereg["negative_sampling"].get("seed_plan")
+    seed_rows_total = 0
+    seed_plan_sha256: str | None = None
+    if seed_cfg:
+        seed_path = _repo_path(seed_cfg["path"])
+        _verify_pinned(seed_path, str(seed_cfg["sha256"]), "negative seed plan")
+        seed_plan_sha256 = sha256_file(seed_path)
+        seed_rows = [_negative_from_dict(row) for row in read_jsonl(seed_path)]
+        seed_rows_total = len(seed_rows)
+        if seed_rows_total != int(seed_cfg["rows"]):
+            raise OwnerYoloDatasetError("negative seed row count drift")
+        for seed in seed_rows:
+            seed_by_source[seed.source_path].append(seed)
+        if set(seed_by_source) - set(by_source):
+            raise OwnerYoloDatasetError("negative seed plan contains an unknown source")
     negatives: list[NegativePlan] = []
     source_audits: list[dict[str, Any]] = []
     holdout_rows = 0
@@ -758,6 +894,7 @@ def plan_dataset(
             positives=source_positives,
             strict_candidates=strict,
             prereg=prereg,
+            seed_negatives=seed_by_source.get(source_path, ()),
         )
         negatives.extend(selected)
         source_audits.append(
@@ -780,17 +917,27 @@ def plan_dataset(
 
     if holdout_rows != 0:
         raise AssertionError("negative planning materialized holdout OHLCV")
-    if len(negatives) != len(positives):
-        raise OwnerYoloDatasetError("negative plan did not pair every positive")
-    pair_ids = [plan.paired_positive_sample_id for plan in negatives]
-    if len(pair_ids) != len(set(pair_ids)) or set(pair_ids) != {
-        plan.sample_id for plan in positives
-    }:
-        raise OwnerYoloDatasetError("negative pairing is not one-to-one")
+    negative_cfg = prereg["negative_sampling"]
+    target = int(negative_cfg["target"])
+    per_positive = int(negative_cfg["negative_per_positive"])
+    if len(negatives) != target:
+        raise OwnerYoloDatasetError(
+            f"negative plan row target drift: {len(negatives)} != {target}"
+        )
+    pair_counts = Counter(plan.paired_positive_sample_id for plan in negatives)
+    if set(pair_counts) != {plan.sample_id for plan in positives} or set(
+        pair_counts.values()
+    ) != {per_positive}:
+        raise OwnerYoloDatasetError("negative pairing multiplicity drift")
+    slots_by_pair: dict[str, set[int]] = defaultdict(set)
+    for plan in negatives:
+        slots_by_pair[plan.paired_positive_sample_id].add(int(plan.pair_slot))
+    expected_slots = set(range(1, per_positive + 1))
+    if any(slots != expected_slots for slots in slots_by_pair.values()):
+        raise OwnerYoloDatasetError("negative pair-slot coverage drift")
     negative_ids = [plan.sample_id for plan in negatives]
     if len(negative_ids) != len(set(negative_ids)):
         raise OwnerYoloDatasetError("duplicate negative identities")
-    negative_cfg = prereg["negative_sampling"]
     actual_kinds = Counter(plan.negative_kind for plan in negatives)
     if actual_kinds["hard"] / len(negatives) < float(
         negative_cfg["minimum_hard_share_overall"]
@@ -813,13 +960,16 @@ def plan_dataset(
     negative_splits = Counter(plan.split for plan in negatives)
     receipt = {
         "schema_version": 1,
-        "experiment_id": EXPERIMENT_ID,
+        "experiment_id": prereg["experiment_id"],
         "protocol": prereg["protocol"],
         "builder_commit": builder_commit,
         "preregistration_sha256": sha256_file(prereg_path),
         "positive_source_manifest_sha256": prereg["positive_source"]["manifest_sha256"],
         "positive_rows": len(positives),
         "negative_rows": len(negatives),
+        "negative_per_positive": per_positive,
+        "seed_negative_rows": seed_rows_total,
+        "seed_negative_plan_sha256": seed_plan_sha256,
         "positive_splits": dict(positive_splits),
         "negative_splits": dict(negative_splits),
         "positive_directions": dict(Counter(plan.direction for plan in positives)),
@@ -855,7 +1005,9 @@ def _positive_from_dict(row: Mapping[str, Any]) -> PositivePlan:
 
 
 def _negative_from_dict(row: Mapping[str, Any]) -> NegativePlan:
-    return NegativePlan(**dict(row))
+    payload = dict(row)
+    payload.setdefault("pair_slot", 0)
+    return NegativePlan(**payload)
 
 
 def _label_text(direction: str, box: Mapping[str, Any]) -> str:
@@ -1022,6 +1174,56 @@ def _verify_full_dataset(
     }
 
 
+def _verify_lineage_baseline(
+    prereg: Mapping[str, Any], rows: Sequence[Mapping[str, Any]]
+) -> dict[str, Any]:
+    """Require predecessor positive and seed-negative bytes to remain exact."""
+
+    cfg = prereg.get("lineage_baseline")
+    if not cfg:
+        return {"configured": False, "rows_matched": 0, "passed": True}
+    manifest_path = _repo_path(cfg["manifest_path"])
+    _verify_pinned(manifest_path, str(cfg["manifest_sha256"]), "lineage baseline manifest")
+    baseline_rows = read_jsonl(manifest_path)
+    if len(baseline_rows) != int(cfg["rows"]):
+        raise OwnerYoloDatasetError("lineage baseline row count drift")
+    baseline = {
+        (str(row["sample_kind"]), str(row["source_sample_id"])): row
+        for row in baseline_rows
+    }
+    if len(baseline) != len(baseline_rows):
+        raise OwnerYoloDatasetError("duplicate lineage baseline identity")
+    current = {
+        (str(row["sample_kind"]), str(row["source_sample_id"])): row for row in rows
+    }
+    missing = set(baseline) - set(current)
+    if missing:
+        raise OwnerYoloDatasetError(f"lineage baseline rows missing: {list(missing)[:3]}")
+    mismatches: list[tuple[str, str]] = []
+    for key, old in baseline.items():
+        new = current[key]
+        if (
+            str(old["image_sha256"]) != str(new["image_sha256"])
+            or str(old["label_sha256"]) != str(new["label_sha256"])
+        ):
+            mismatches.append(key)
+    if mismatches:
+        raise OwnerYoloDatasetError(
+            f"lineage baseline image/label bytes drift: {mismatches[:3]}"
+        )
+    kinds = Counter(key[0] for key in baseline)
+    return {
+        "configured": True,
+        "manifest_path": _relative(manifest_path),
+        "manifest_sha256": sha256_file(manifest_path),
+        "rows_matched": len(baseline),
+        "positive_rows_matched": int(kinds["positive"]),
+        "negative_rows_matched": int(kinds["negative"]),
+        "image_and_label_sha_matches": len(baseline),
+        "passed": True,
+    }
+
+
 def build_dataset(
     *,
     prereg_path: Path = DEFAULT_PREREG,
@@ -1158,7 +1360,7 @@ def build_dataset(
                     raise OwnerYoloDatasetError(f"clean negative contains overlay red: {plan.sample_id}")
                 stem = (
                     f"neg_{plan.negative_kind[0]}_{plan.paired_positive_source_order:05d}_"
-                    f"{plan.sample_id}"
+                    f"s{plan.pair_slot}_{plan.sample_id}"
                 )
                 image_rel, label_rel, image_sha, label_sha = _write_sample(
                     building,
@@ -1189,17 +1391,18 @@ def build_dataset(
             if source_number == 1 or source_number % 10 == 0 or source_number == len(source_paths):
                 print(
                     f"render {source_number:03d}/{len(source_paths)} {source_path:<75} "
-                    f"complete={len(rendered_by_id):>5}/20000",
+                    f"complete={len(rendered_by_id):>5}/{len(positives) + len(negatives)}",
                     flush=True,
                 )
 
     if len(rendered_by_id) != len(positives) + len(negatives):
-        raise OwnerYoloDatasetError("materialization did not produce 20,000 rows")
+        raise OwnerYoloDatasetError("materialization row count drift")
     rows = sorted(
         rendered_by_id.values(),
         key=lambda row: (
             int(row.get("source_order", row.get("paired_positive_source_order", 0))),
             str(row["sample_kind"]),
+            int(row.get("pair_slot", 0)),
         ),
     )
     manifest_path = building / "manifest.jsonl"
@@ -1216,7 +1419,7 @@ def build_dataset(
     )
     dataset_summary = {
         "schema_version": 1,
-        "experiment_id": EXPERIMENT_ID,
+        "experiment_id": prereg["experiment_id"],
         "protocol": prereg["protocol"],
         "builder_commit": builder_commit,
         "positive_rows_total": len(positives),
@@ -1261,6 +1464,7 @@ def build_dataset(
 
     final_rows = read_jsonl(final_dataset / "manifest.jsonl")
     full_qa = _verify_full_dataset(final_dataset, final_rows)
+    lineage_baseline = _verify_lineage_baseline(prereg, final_rows)
     results_path.mkdir(parents=True, exist_ok=True)
 
     positive_final = [row for row in final_rows if row["sample_kind"] == "positive"]
@@ -1325,6 +1529,7 @@ def build_dataset(
             path.stat().st_size for path in final_dataset.rglob("*") if path.is_file()
         ),
         "full_qa": full_qa,
+        "lineage_baseline": lineage_baseline,
         "shifted_box_null": {
             "rows": len(null_rows),
             "cyclic_next_box_overlay_sha_matches": int(shifted_matches),
