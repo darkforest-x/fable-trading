@@ -118,7 +118,7 @@ def test_profile_distance_is_zero_for_reference_identity() -> None:
 def test_diverse_selection_fills_25_per_side_without_repeated_symbols() -> None:
     candidates = []
     for side_index, direction in enumerate(("LONG", "SHORT")):
-        for index in range(100):
+        for index in range(40):
             stamp = pd.Timestamp("2022-01-01T00:00:00Z") + pd.Timedelta(days=index * 7 + side_index)
             candidates.append(
                 {

@@ -22,6 +22,7 @@ import json
 import os
 from collections import Counter, defaultdict
 from dataclasses import dataclass
+from itertools import combinations
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
@@ -297,52 +298,119 @@ def best_span(
 def select_diverse(
     candidates: Sequence[Mapping[str, Any]], selection: Mapping[str, Any]
 ) -> list[dict[str, Any]]:
-    """Select 25 per side with time bins, unique symbols and event-day caps."""
+    """Select 25 per side without turning clustered bursts into fake diversity."""
 
     target_per_side = int(selection["target_per_side"])
     bins_count = int(selection["time_bins_per_side"])
     per_bin = target_per_side // bins_count
     if target_per_side % bins_count:
         raise OwnerAutofillError("target_per_side must divide evenly across time bins")
-    selected: list[dict[str, Any]] = []
-    used_symbols: set[str] = set()
-    day_counts: Counter[str] = Counter()
-    hour_counts: Counter[str] = Counter()
+    grouped: dict[tuple[str, int], list[dict[str, Any]]] = {}
     for direction in ("LONG", "SHORT"):
         group = [dict(row) for row in candidates if row["direction"] == direction]
         group.sort(key=lambda row: (pd.Timestamp(row["anchor_time"]), row["event_id"]))
         if len(group) < target_per_side:
             raise OwnerAutofillError(f"insufficient strict {direction} candidates")
+        unique_hours = sorted({pd.Timestamp(row["anchor_time"]).floor("h") for row in group})
+        if len(unique_hours) < target_per_side:
+            raise OwnerAutofillError(f"insufficient independent {direction} event hours")
+        hour_bin = {
+            hour: min(bins_count - 1, (rank * bins_count) // len(unique_hours))
+            for rank, hour in enumerate(unique_hours)
+        }
         buckets: list[list[dict[str, Any]]] = [[] for _ in range(bins_count)]
-        for rank, row in enumerate(group):
-            bin_index = min(bins_count - 1, (rank * bins_count) // len(group))
+        for row in group:
+            bin_index = hour_bin[pd.Timestamp(row["anchor_time"]).floor("h")]
             row["time_bin"] = bin_index
             buckets[bin_index].append(row)
         for bin_index, bucket in enumerate(buckets):
-            ordered = sorted(bucket, key=lambda row: (row["similarity_distance"], row["event_id"]))
-            chosen: list[dict[str, Any]] = []
-            for row in ordered:
-                stamp = pd.Timestamp(row["anchor_time"])
-                day = stamp.strftime("%Y-%m-%d")
-                hour = stamp.floor("h").isoformat()
-                symbol = str(row["symbol"])
-                if symbol in used_symbols:
+            grouped[(direction, bin_index)] = bucket
+
+    group_options: dict[tuple[str, int], list[tuple[float, tuple[dict[str, Any], ...]]]] = {}
+    max_per_day = int(selection["max_per_utc_day"])
+    for key, rows in grouped.items():
+        options: list[tuple[float, tuple[dict[str, Any], ...]]] = []
+        ordered = sorted(rows, key=lambda row: (row["similarity_distance"], row["event_id"]))
+        for option in combinations(ordered, per_bin):
+            symbols = [str(row["symbol"]) for row in option]
+            stamps = [pd.Timestamp(row["anchor_time"]) for row in option]
+            hours = [stamp.floor("h").isoformat() for stamp in stamps]
+            days = [stamp.strftime("%Y-%m-%d") for stamp in stamps]
+            if len(set(symbols)) != per_bin or len(set(hours)) != per_bin:
+                continue
+            if max(Counter(days).values()) > max_per_day:
+                continue
+            options.append((sum(float(row["similarity_distance"]) for row in option), option))
+        options.sort(key=lambda item: (item[0], tuple(row["event_id"] for row in item[1])))
+        if not options:
+            raise OwnerAutofillError(f"no internally diverse combination for {key}")
+        group_options[key] = options
+
+    solution: list[dict[str, Any]] | None = None
+    search_nodes = 0
+
+    def solve(
+        remaining: tuple[tuple[str, int], ...],
+        chosen: list[dict[str, Any]],
+        used_symbols: set[str],
+        used_hours: set[str],
+        day_counts: Counter[str],
+    ) -> bool:
+        nonlocal search_nodes, solution
+        search_nodes += 1
+        if search_nodes > 250_000:
+            raise OwnerAutofillError("diversity search exceeded deterministic node budget")
+        if not remaining:
+            solution = list(chosen)
+            return True
+        compatible_by_group: list[
+            tuple[tuple[str, int], list[tuple[float, tuple[dict[str, Any], ...]]]]
+        ] = []
+        for key in remaining:
+            compatible = []
+            for item in group_options[key]:
+                option = item[1]
+                option_symbols = {str(row["symbol"]) for row in option}
+                option_stamps = [pd.Timestamp(row["anchor_time"]) for row in option]
+                option_hours = {stamp.floor("h").isoformat() for stamp in option_stamps}
+                option_days = Counter(stamp.strftime("%Y-%m-%d") for stamp in option_stamps)
+                if option_symbols & used_symbols or option_hours & used_hours:
                     continue
-                if day_counts[day] >= int(selection["max_per_utc_day"]):
+                if any(day_counts[day] + count > max_per_day for day, count in option_days.items()):
                     continue
-                if hour_counts[hour] >= int(selection["max_per_utc_hour"]):
-                    continue
-                chosen.append(row)
-                used_symbols.add(symbol)
-                day_counts[day] += 1
-                hour_counts[hour] += 1
-                if len(chosen) == per_bin:
-                    break
-            if len(chosen) != per_bin:
-                raise OwnerAutofillError(
-                    f"could not fill {direction} time bin {bin_index}: {len(chosen)}/{per_bin}"
-                )
-            selected.extend(chosen)
+                compatible.append(item)
+            if not compatible:
+                return False
+            compatible_by_group.append((key, compatible))
+        key, compatible = min(
+            compatible_by_group,
+            key=lambda item: (len(item[1]), item[0][0], item[0][1]),
+        )
+        next_remaining = tuple(item for item in remaining if item != key)
+        for _, option in compatible:
+            option_rows = list(option)
+            option_symbols = {str(row["symbol"]) for row in option_rows}
+            option_stamps = [pd.Timestamp(row["anchor_time"]) for row in option_rows]
+            option_hours = {stamp.floor("h").isoformat() for stamp in option_stamps}
+            option_days = Counter(stamp.strftime("%Y-%m-%d") for stamp in option_stamps)
+            next_day_counts = day_counts.copy()
+            next_day_counts.update(option_days)
+            if solve(
+                next_remaining,
+                chosen + option_rows,
+                used_symbols | option_symbols,
+                used_hours | option_hours,
+                next_day_counts,
+            ):
+                return True
+        return False
+
+    keys = tuple(sorted(group_options, key=lambda key: (len(group_options[key]), key)))
+    if not solve(keys, [], set(), set(), Counter()):
+        raise OwnerAutofillError("could not solve strict cross-pack diversity constraints")
+    assert solution is not None
+    selected = solution
+    used_symbols = {str(row["symbol"]) for row in selected}
     if len(selected) != 2 * target_per_side or len(used_symbols) != len(selected):
         raise OwnerAutofillError("strict selection is not 50 unique-symbol rows")
     return sorted(selected, key=lambda row: (row["direction"], row["time_bin"], row["anchor_time"]))
