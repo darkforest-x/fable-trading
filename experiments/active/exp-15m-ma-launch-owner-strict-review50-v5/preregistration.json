@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-strict-review50-v5",
+  "created_at": "2026-08-27T16:55:00+08:00",
+  "stage": "P0_shape_definition",
+  "purpose": "Replace the undelivered 44-row recrop intermediate with a strict 20-row shortlist that applies the attached GRT #40 correction, permits no-box results, and keeps model-input right edges at core/core+1/core+2.",
+  "source": {
+    "review_manifest": "experiments/active/exp-15m-ma-launch-ma-box-review50-v1/results/review_manifest.jsonl",
+    "review_manifest_sha256": "cc852cb9da838056a8c95e80ba60270fa1537860973437b35638cff1efe63c66",
+    "n_rows": 50
+  },
+  "owner_feedback": {
+    "received_at": "2026-08-27T14:42:00+08:00",
+    "interpretation_correction": "The attached image is Telegram item 40/50 GRT_USDT_SWAP_SHORT. 'The first image should move right' is applied to source order 40, not source order 01.",
+    "strictness": "Prefer no result over forcing a weak candidate to have a box."
+  },
+  "owner_decisions": [
+    {"source_order": 3, "sample_id": "872de8d2642e9e871a4a2035", "action": "reject", "reason": "Owner explicitly judged sample 03 incorrect."},
+    {"source_order": 8, "sample_id": "37f9c326853c3d8aebae269e", "action": "reject", "reason": "Owner explicitly judged sample 08 incorrect."},
+    {"source_order": 14, "sample_id": "5de0dd06a74bd3d156a51bbc", "action": "rebox", "core_start_offset": -10, "core_end_offset": -6, "reason": "Owner requested a rightward boundary; proposed five-bar convergence segment pending review."},
+    {"source_order": 18, "sample_id": "a8079908f501a92e573b87cd", "action": "rebox", "core_start_offset": -11, "core_end_offset": -8, "reason": "Owner specified only the rightmost four bars of the old box look dense."},
+    {"source_order": 20, "sample_id": "28aff3d9037db73f28a0e97d", "action": "reject", "reason": "Owner explicitly judged sample 20 incorrect."},
+    {"source_order": 21, "sample_id": "8848f3a02114a3beb69784e5", "action": "reject", "reason": "Owner explicitly judged sample 21 incorrect."},
+    {"source_order": 22, "sample_id": "7fd6ab8d8f1bebf3cc981d4a", "action": "reject", "reason": "Owner judged sample 22 flat and not visibly MA-dense."},
+    {"source_order": 32, "sample_id": "9782cd6e3344064fa0b7d216", "action": "rebox", "core_start_offset": -10, "core_end_offset": -6, "reason": "Owner requested a rightward boundary; proposed closer five-bar convergence segment pending review."},
+    {"source_order": 34, "sample_id": "a0ca16c213bef139246c945b", "action": "reject", "reason": "Owner explicitly judged sample 34 not MA-dense despite its right-side position."},
+    {"source_order": 35, "sample_id": "e1d6b8c70518b4785aced64d", "action": "rebox", "core_start_offset": -9, "core_end_offset": -5, "reason": "Owner requested a rightward boundary; proposed closer five-bar convergence segment pending review."},
+    {"source_order": 40, "sample_id": "e9578d1f834c6c5e2fa33fe3", "action": "rebox", "core_start_offset": -9, "core_end_offset": -5, "reason": "Attached Telegram item 40 was explicitly requested to move right; shift its old -11..-7 core two bars to -9..-5."},
+    {"source_order": 42, "sample_id": "4e86ddc32a5401c49bf4aeb3", "action": "keep_reference", "core_start_offset": -6, "core_end_offset": -2, "reason": "Owner judged sample 42 good; retain its semantic core and recrop only."},
+    {"source_order": 44, "sample_id": "a20a0a4e50a94b1a017d38a0", "action": "keep_reference", "core_start_offset": -6, "core_end_offset": -2, "reason": "Owner judged sample 44 the perfect reference; retain its semantic core and recrop only."},
+    {"source_order": 48, "sample_id": "0846b4f53090c2980df602b9", "action": "keep_reference", "core_start_offset": -10, "core_end_offset": -6, "reason": "Owner judged morphology acceptable but late; retain core and make it the model-input tip."}
+  ],
+  "strict_contact_sheet_review": {
+    "pass_orders": [1, 5, 9, 10, 14, 18, 19, 25, 26, 29, 32, 35, 40, 42, 43, 44, 46, 47, 48, 50],
+    "reject_reasons_by_order": {
+      "2": "Parallel/weak continuation; no clear fresh launch immediately after the proposed knot.",
+      "4": "Flat structure with no meaningful fresh release in the separated review bars.",
+      "6": "Price is already elevated and the six-line bundle is not compact enough at the proposed core.",
+      "7": "Separated, mostly parallel moving averages rather than a compact convergence knot.",
+      "11": "MA bundle is too wide; relative narrowing alone is insufficient.",
+      "12": "Price is already trending while the following bars do not provide a fresh release.",
+      "13": "No fresh directional launch follows the proposed core.",
+      "15": "Core sits after prior expansion and does not isolate a new launch origin.",
+      "16": "A breakout candle is already inside the proposed core.",
+      "17": "Price is detached above the MA bundle; this is not a dense launch knot.",
+      "23": "Plateau/parallel structure with no fresh release in the review-only bars.",
+      "24": "Noisy candles and a wide bundle do not form a compact MA knot.",
+      "27": "No fresh bearish release follows the proposed short core.",
+      "28": "Directional expansion is already inside the core and the later bars do not confirm a fresh launch.",
+      "30": "The move is already drifting and no new bearish release follows the core.",
+      "31": "The first large bearish release candle is already inside the box.",
+      "33": "Flat/parallel bundle with no fresh immediate release.",
+      "36": "Mostly parallel lines and weak continuation; reject under the strict gate.",
+      "37": "Breakdown candles are already inside the proposed core.",
+      "38": "Price is detached below the MA bundle and the continuation is weak.",
+      "39": "A large breakdown candle is already inside the proposed core.",
+      "41": "Very wide separated MAs; not a dense knot.",
+      "45": "Bundle expands through the core and the later bars do not produce a fresh release.",
+      "49": "Price is already declining and the separated future bars do not add a fresh bearish release."
+    },
+    "decision_level": "Codex strict visual proposal only; pass and reject rows remain pending Owner confirmation except explicit Owner verdicts."
+  },
+  "geometry": {
+    "pre_core_context_bars": [10, 11, 12],
+    "post_core_model_visible_bars": [0, 1, 2],
+    "future_review_bars_after_core": 5,
+    "render": {"width": 1280, "height": 742, "format": "PNG", "review_overlay": "one red box", "model_input": "clean PNG"}
+  },
+  "safety": {
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0,
+    "write_yolo_labels": false,
+    "start_training": false,
+    "modify_active_or_frozen": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
