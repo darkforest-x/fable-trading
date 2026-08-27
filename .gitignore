@@ -165,6 +165,15 @@ external/Kronos/
 /experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/selection_manifest.jsonl
 /experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/render_manifest.partial.jsonl
 
+# Owner-approved 10k+10k YOLO dataset: pixels/labels and row-heavy plans stay
+# local and are fully receipted by SHA; compact receipt/summary/data.yaml/HTML
+# remain trackable.
+/datasets/ma_launch_owner_autofill10000_yolo_v1/manifest.jsonl
+/experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/positive_plan.jsonl
+/experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/negative_plan.jsonl
+/experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/negative_source_audit.jsonl
+/experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/*.jpg
+
 # ---- 单仓收敛回迁的大体积产物（2026-08-20，owner 指示"全部迁移过来，大文件不提交"）----
 # archive/consolidated/<repo>/ 下是四个来源仓的 20.5 GB / 300k 个产物，
 # 用 APFS 写时复制克隆进来（占用增量 ~0），源仓保持完好。

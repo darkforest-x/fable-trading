@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "protocol": "ma6_owner_autofill10000_yolo_weak_v1_20260827",
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-dataset10000-v1",
+  "created_at": "2026-08-27T23:58:00+08:00",
+  "stage": "P1_owner_batch_approved_weak_dataset",
+  "owner_authorization": {
+    "conversation_date": "2026-08-27",
+    "quote": "刚刚的10000张不错 弄成训练数据集 同时弄好负样本",
+    "interpretation": "The delivered 10,000-example family may be materialized as clean YOLO images and labels, and an automatically mined negative set may be added. This is a batch-level weak-label authorization, not a claim that every boundary received a separate Gold verdict.",
+    "positive_label_materialization_authorized": true,
+    "automatic_negative_materialization_authorized": true,
+    "training_run_authorized": false,
+    "production_or_promotion_authorized": false
+  },
+  "positive_source": {
+    "experiment_id": "exp-15m-ma-launch-owner-autofill10000-v1",
+    "preregistration_path": "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/preregistration.json",
+    "preregistration_sha256": "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da",
+    "manifest_path": "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/review_manifest.jsonl",
+    "manifest_sha256": "60bb7350c446ee1a406efbd48a4d7e7426ac4838e35b901bee3073019b327e76",
+    "build_receipt_path": "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/build_receipt.json",
+    "build_receipt_sha256": "33252ff636ab78b59b20f339fbf0e4c56bfc961fe9dd6f37f4e1f649ad4718b6",
+    "rows": 10000,
+    "long": 5000,
+    "short": 5000,
+    "positive_contract": "Use every accepted source window and exact accepted box unchanged. Re-render a clean chart from the pinned OHLCV, then require that drawing the accepted red box recreates the delivered review PNG byte-for-byte.",
+    "label_classification": "owner_batch_approved_weak_not_per_sample_gold"
+  },
+  "renderer": {
+    "entry": "yoyo.layers.l1_detection.render.render_chart",
+    "width": 1280,
+    "height": 742,
+    "format": "lossless PNG",
+    "classes": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "positive_and_negative_pipeline_identical": true,
+    "annotations_drawn_into_training_images": false,
+    "positive_box_source": "exact x/y geometry from the accepted review manifest; no global shift, reboxing or resizing"
+  },
+  "split": {
+    "method": "global chronological cutoff over complete render-plus-label dependency intervals; never random",
+    "cutoff": "2025-12-01T00:00:00Z",
+    "purge_bars_each_side": 150,
+    "bar_minutes": 15,
+    "train_rule": "dependency end <= cutoff - 150 bars",
+    "val_rule": "dependency start >= cutoff + 150 bars",
+    "between_rules": "materialize under excluded/ for lineage, but data.yaml must not expose it",
+    "dependency_end": "max(render end, core end + 5 completed-history label bars)"
+  },
+  "negative_sampling": {
+    "target": 10000,
+    "negative_per_positive": 1,
+    "hard_total": 5000,
+    "easy_total": 5000,
+    "kind_assignment": "Odd positive source_order -> easy; even -> hard, yielding exact 5000/5000 without looking at market outcomes.",
+    "pairing": {
+      "same_source_file": true,
+      "same_symbol": true,
+      "same_calendar_quarter": true,
+      "same_split_for_train_and_val": true,
+      "same_core_bars": true,
+      "same_pre_core_context_bars": true,
+      "same_post_core_context_bars": true,
+      "reuse_allowed": false
+    },
+    "completed_no_launch_condition": {
+      "abs_close_progress_atr_max_core_plus_2": 0.85,
+      "abs_close_progress_atr_max_core_plus_3": 1.10,
+      "abs_close_progress_atr_max_core_plus_5": 1.35,
+      "two_sided_high_low_excursion_atr_max_core_plus_1_to_5": 1.75,
+      "atr_anchor": "core_end + 2, matching the accepted retrieval family",
+      "purpose": "Use future only to define a safe negative label. Rendered pixels remain the exact matched window and never touch repository holdout."
+    },
+    "hard_definition": {
+      "ma_envelope_atr_max": 1.5,
+      "ma_spread_end_atr_max": 1.1,
+      "max_body_atr_max": 1.2,
+      "candle_envelope_atr_max": 2.8,
+      "minimum_close_to_ma_atr_max": 1.0,
+      "meaning": "The six MAs are visually dense, but the completed move fails the strict no-launch condition. These are model-relevant hard backgrounds."
+    },
+    "easy_definition": {
+      "ma_envelope_atr_min_any": 2.2,
+      "ma_spread_end_atr_min_any": 1.6,
+      "minimum_close_to_ma_atr_min_any": 1.8,
+      "candle_envelope_atr_min_any": 4.0,
+      "meaning": "Clearly non-dense background satisfying the same strict no-launch label."
+    },
+    "positive_guard": {
+      "before_core_bars": 12,
+      "after_dependency_end_bars": 12,
+      "protect_all_strict_candidates_not_only_selected_10000": true,
+      "strict_candidate_source": "Re-run the hash-pinned accepted-family gate on each used source and guard every hit before negative selection."
+    },
+    "negative_separation_bars": 2,
+    "capacity_policy": "Fail closed if any same-source/same-quarter/same-split pair cannot be filled; never cross symbols, reuse windows, approach a protected positive, or relax no-launch thresholds."
+  },
+  "sources": {
+    "bar_minutes": 15,
+    "holdout_start_exclusive": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0,
+    "source_policy": "Read only the manifest-pinned source prefixes strictly before holdout. No fallback data source is permitted."
+  },
+  "outputs": {
+    "dataset_dir": "datasets/ma_launch_owner_autofill10000_yolo_v1",
+    "experiment_results": "experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results",
+    "report": "analysis/p1_15m_ma_launch_owner_yolo_dataset10000_20260828.md",
+    "html": "analysis/html/p1_15m_ma_launch_owner_yolo_dataset10000_20260828.html"
+  },
+  "controls": {
+    "positive_overlay_parity": "10,000/10,000 clean re-renders must recreate the accepted boxed PNG byte-for-byte after the accepted rectangle is drawn.",
+    "shifted_box_null": "On a deterministic sample, cyclically use the next positive's box. Expected byte match is zero; this proves parity is geometry-specific rather than a renderer-only tautology.",
+    "full_file_qa": "Decode and hash every actual image; parse every positive label; require every negative label to be byte-empty and every input to contain zero exact overlay-red pixels."
+  },
+  "safety": {
+    "holdout_read": false,
+    "training_started": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "remote_write": false
+  }
+}
