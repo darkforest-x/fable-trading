@@ -4748,10 +4748,10 @@ artifacts:
     artifact_type: manifest
     role: full_actual_pixel_and_html_link_qa_receipt
     source_repo: darkforest-x/fable-trading
-    source_commit: "c0e64d8145b11f2ff10a9c901657c6addb3a5b7d"
+    source_commit: "c4514f76faf11e574389d696de3d0e723a1c380e"
     source_path: experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/visual_qa_receipt.json
-    sha256: "9769b602254558d9f5ae7ddedb919cdf18d237157ec3a71ec09cea89bdb35b96"
-    size_bytes: 249
+    sha256: "a976856e03ca03056f03676cfe8dda0104c31f94e8ec89f61ca8fb981d063f7d"
+    size_bytes: 488
     storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/visual_qa_receipt.json"
     holdout_status: pre_holdout
     training_eligible: false
@@ -4759,21 +4759,21 @@ artifacts:
     generator_commit: "8a15006052e6c31320e7439a771abd71926a6435"
     config_hash: "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
     data_cutoff: "2026-05-03T18:15:00Z"
-    notes: Full post-build audit additionally re-read all 10,000 local PNGs.
+    notes: Full post-build audit re-read 10,000 PNGs; locked venv rerender matched 100/100 bytes.
 
   - artifact_id: 15m-ma-launch-owner-autofill10000-v1-report
     artifact_type: report
     role: canonical_strict_10000_build_report
     source_repo: darkforest-x/fable-trading
-    source_commit: "c0e64d8145b11f2ff10a9c901657c6addb3a5b7d"
+    source_commit: "c4514f76faf11e574389d696de3d0e723a1c380e"
     source_path: analysis/p0_15m_ma_launch_owner_autofill10000_20260827.md
-    sha256: "673e8789cea362b1fa551b5c55d917ff1630d345ee89d6f3ee2e34c4497246e3"
-    size_bytes: 9801
+    sha256: "b132f56928d544a8286c07f82c4e2325b1dcbdd3599f353b4b979db43d6ef9c8"
+    size_bytes: 10245
     storage_uri: "repo://analysis/p0_15m_ma_launch_owner_autofill10000_20260827.md"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "c0e64d8145b11f2ff10a9c901657c6addb3a5b7d"
+    generator_commit: "c4514f76faf11e574389d696de3d0e723a1c380e"
     config_hash: "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
     data_cutoff: "2026-05-03T18:15:00Z"
     notes: Answer-first P0 report with null control and risk disclosure.
@@ -4782,15 +4782,15 @@ artifacts:
     artifact_type: report
     role: owner_facing_strict_10000_html_report
     source_repo: darkforest-x/fable-trading
-    source_commit: "c0e64d8145b11f2ff10a9c901657c6addb3a5b7d"
+    source_commit: "c4514f76faf11e574389d696de3d0e723a1c380e"
     source_path: analysis/html/p0_15m_ma_launch_owner_autofill10000_20260827.html
-    sha256: "6d9cbdd26f67c7ab27c8d08d09f58a92560bb5fb5eddc8a80e8dd2aaf23adbed"
-    size_bytes: 13885
+    sha256: "43da31056a5fb8b97f4f394a37f84669448e8426ff0fa2e69ab681db2b46f6da"
+    size_bytes: 14434
     storage_uri: "repo://analysis/html/p0_15m_ma_launch_owner_autofill10000_20260827.html"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "c0e64d8145b11f2ff10a9c901657c6addb3a5b7d"
+    generator_commit: "c4514f76faf11e574389d696de3d0e723a1c380e"
     config_hash: "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
     data_cutoff: "2026-05-03T18:15:00Z"
     notes: Owner-facing HTML generated immediately from the canonical Markdown.
