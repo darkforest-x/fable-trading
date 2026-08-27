@@ -200,6 +200,10 @@ def load_source_specs(prereg: Mapping[str, Any]) -> list[dict[str, Any]]:
             pd.Timestamp(archive_contract["archive_max_exclusive"]).isoformat()
         ):
             raise OwnerAutofill10000Error("archive max-exclusive contract drift")
+        if str(contract.get("archive_calendar_timezone")) != str(
+            archive_contract["archive_calendar_timezone"]
+        ):
+            raise OwnerAutofill10000Error("archive calendar timezone contract drift")
         path = _repo_path(row["output_path"])
         if sha256_file(path) != str(row["output_sha256"]):
             raise OwnerAutofill10000Error(f"archive output SHA drift: {path}")

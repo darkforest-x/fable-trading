@@ -106,7 +106,7 @@ def archive_months(
     *,
     max_exclusive: object,
 ) -> list[pd.Timestamp]:
-    """Return complete UTC archive months without crossing ``max_exclusive``."""
+    """Return complete OKX UTC+8 archive months below ``max_exclusive``."""
 
     first = _month(start)
     last = _month(end)
@@ -117,7 +117,8 @@ def archive_months(
     cursor = first
     while cursor <= last:
         next_month = cursor + pd.offsets.MonthBegin(1)
-        if next_month > boundary:
+        archive_end_utc = next_month - pd.Timedelta(hours=8)
+        if archive_end_utc > boundary:
             raise ArchiveFetchError(
                 f"archive month {cursor:%Y-%m} crosses exclusive boundary {boundary.isoformat()}"
             )
@@ -149,7 +150,11 @@ def aggregate_archive_bytes(
     """Aggregate one official monthly 1m ZIP into complete UTC 15m candles."""
 
     month = _utc(month)
-    month_end = month + pd.offsets.MonthBegin(1)
+    # Official monthly files use the exchange's UTC+8 calendar.  For example,
+    # the file named 2024-01 spans 2023-12-31 16:00Z through
+    # 2024-01-31 15:59Z.  Output candles remain aligned to UTC 15-minute bins.
+    archive_start = month - pd.Timedelta(hours=8)
+    archive_end = month + pd.offsets.MonthBegin(1) - pd.Timedelta(hours=8)
     expected_instrument = symbol.replace("_", "-")
     try:
         with zipfile.ZipFile(io.BytesIO(payload)) as archive:
@@ -189,10 +194,13 @@ def aggregate_archive_bytes(
     frame = frame.sort_values("open_time", kind="mergesort").reset_index(drop=True)
     if frame["open_time"].duplicated().any():
         raise ArchiveFetchError("archive contains duplicate one-minute timestamps")
-    month_ms = int(month.value // 1_000_000)
-    month_end_ms = int(month_end.value // 1_000_000)
-    if int(frame["open_time"].min()) < month_ms or int(frame["open_time"].max()) >= month_end_ms:
-        raise ArchiveFetchError("archive contains a timestamp outside its named UTC month")
+    archive_start_ms = int(archive_start.value // 1_000_000)
+    archive_end_ms = int(archive_end.value // 1_000_000)
+    if (
+        int(frame["open_time"].min()) < archive_start_ms
+        or int(frame["open_time"].max()) >= archive_end_ms
+    ):
+        raise ArchiveFetchError("archive contains a timestamp outside its named UTC+8 month")
     if bool((frame[["open", "high", "low", "close"]] <= 0.0).any().any()):
         raise ArchiveFetchError("archive contains non-positive OHLC")
     if bool((frame["high"] < frame[["open", "close"]].max(axis=1)).any()):
@@ -224,6 +232,9 @@ def aggregate_archive_bytes(
     aggregated = aggregated[["ts", "open", "high", "low", "close", "volume", "open_time"]]
     audit: dict[str, object] = {
         "month": month.strftime("%Y-%m"),
+        "archive_calendar_timezone": "UTC+08:00",
+        "archive_window_start_utc": archive_start.isoformat(),
+        "archive_window_end_exclusive_utc": archive_end.isoformat(),
         "zip_sha256": _sha256_bytes(payload),
         "csv_member": member,
         "csv_sha256": _sha256_bytes(csv_bytes),
@@ -278,10 +289,27 @@ def fetch_archive_symbol(
         "symbol": symbol,
         "months_requested": [month.strftime("%Y-%m") for month in months],
         "max_exclusive": _utc(max_exclusive).isoformat(),
+        "archive_calendar_timezone": "UTC+08:00",
     }
     audit_path = output_dir / f"archive_{symbol}.json"
     if audit_path.exists():
         prior = json.loads(audit_path.read_text(encoding="utf-8"))
+        legacy_contract = dict(contract)
+        legacy_contract.pop("archive_calendar_timezone")
+        if prior.get("contract") == legacy_contract:
+            # Early task-local receipts were written before the official
+            # archive's UTC+8 calendar boundary was made explicit.  Their
+            # output rows are already UTC-aligned and strictly pre-boundary;
+            # promote only the receipt schema after verifying the file below.
+            prior["contract"] = contract
+            output = prior.get("output_path")
+            if output is not None:
+                output_path = output_dir / Path(str(output)).name
+                if not output_path.exists() or hashlib.sha256(output_path.read_bytes()).hexdigest() != str(
+                    prior.get("output_sha256")
+                ):
+                    raise ArchiveFetchError(f"legacy archive output drift for {symbol}")
+            _write_json(audit_path, prior)
         if prior.get("contract") == contract and prior.get("status") in {"complete", "no_data"}:
             output = prior.get("output_path")
             if output is None or (output_dir / Path(str(output)).name).exists():

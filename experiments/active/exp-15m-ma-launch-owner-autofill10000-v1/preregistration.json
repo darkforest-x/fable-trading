@@ -24,6 +24,7 @@
     "official_archive": {
       "provider": "OKX official historical market data monthly candlestick archives",
       "source_granularity": "1m",
+      "archive_calendar_timezone": "UTC+08:00",
       "output_granularity": "15m UTC OHLC aggregation",
       "month_start": "2023-07",
       "month_end": "2025-05",
@@ -31,7 +32,7 @@
       "output_dir": "data/kline_preholdout_archive15m",
       "summary_path": "data/kline_preholdout_archive15m/archive_fetch_summary.json",
       "symbol_rule": "Every non-empty, non-deep symbol already admitted by the hash-pinned candidate9000 source audit; unavailable monthly archives are recorded as 404 and not substituted.",
-      "boundary_rule": "Only complete UTC months whose end is no later than 2025-06-01 are requested. This is strictly before the repository holdout and no archive at/after 2026-05-04 is requested or read."
+      "boundary_rule": "OKX archive filenames use UTC+8 calendar months. Only complete archive months whose UTC end is no later than 2025-06-01 are requested; candles are then aggregated on UTC 15-minute boundaries. This is strictly before the repository holdout and no archive at/after 2026-05-04 is requested or read."
     },
     "holdout_start_exclusive": "2026-05-04T00:00:00Z",
     "holdout_ohlcv_rows_allowed": 0

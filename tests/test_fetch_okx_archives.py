@@ -18,7 +18,7 @@ def _archive_payload(*, missing_minute: int | None = None) -> bytes:
     rows = [
         "instrument_name,open,high,low,close,vol,vol_ccy,vol_quote,open_time,confirm"
     ]
-    start = int(pd.Timestamp("2024-01-01T00:00:00Z").timestamp() * 1_000)
+    start = int(pd.Timestamp("2023-12-31T16:00:00Z").timestamp() * 1_000)
     for minute in range(30):
         if minute == missing_minute:
             continue
@@ -49,7 +49,7 @@ def test_archive_months_are_complete_and_exclusive() -> None:
         archive_months(
             "2023-07",
             "2023-10",
-            max_exclusive="2023-10-15T00:00:00Z",
+        max_exclusive="2023-10-15T00:00:00Z",
         )
 
 
@@ -69,18 +69,20 @@ def test_archive_aggregation_keeps_only_complete_utc_15m_groups() -> None:
     )
     assert len(frame) == 1
     assert frame.iloc[0].to_dict() == {
-        "ts": 1704067200000,
+        "ts": 1704038400000,
         "open": 100.0,
         "high": 116.0,
         "low": 98.0,
         "close": 115.0,
         "volume": 120,
-        "open_time": pd.Timestamp("2024-01-01T00:00:00Z"),
+        "open_time": pd.Timestamp("2023-12-31T16:00:00Z"),
     }
     assert audit["raw_1m_rows"] == 29
     assert audit["complete_15m_rows"] == 1
     assert audit["incomplete_15m_groups_dropped"] == 1
     assert audit["confirm_values"] == ["0"]
+    assert audit["archive_calendar_timezone"] == "UTC+08:00"
+    assert audit["archive_window_start_utc"] == "2023-12-31T16:00:00+00:00"
 
 
 def test_archive_aggregation_rejects_wrong_instrument() -> None:
