@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-neg30000-train960-v1",
+  "run_name": "ma_launch_owner_yolo_neg30000_v2_y11s_ft960",
+  "launched_at": "2026-08-28T00:43:13+08:00",
+  "launching_repo_head": "fa3e02eb74c83669409c06495bd8b4a9fb87e139",
+  "launcher_commit": "cd5ef48d2cdd23c5689263fec8014431e32c6b68",
+  "remote": {
+    "hostname": "win-zzc",
+    "host": "Administrator@192.168.1.5",
+    "host_discovery": "Local DNS/DHCP name resolution replaced the timed-out historical 192.168.1.3 address; SSH identity and locked environment were then verified before any upload.",
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "gpu_memory_gib": 12.0,
+    "cuda_available": true,
+    "torchvision_cuda_nms": true,
+    "detached_wmi_pid": 6320,
+    "python_pid_at_first_status": 6916,
+    "stage_sentinel": "STAGE_OK|ma_launch_owner_yolo_neg30000_v2_y11s_ft960|6e601034ab15765a74b788cc6d094e9326c3044c1fb615c908ef9de897d6e0af|98d54320ce362219b8745e9c0a65c8010fef257f461b8ac53425500870f0653c",
+    "generated_batch_sha256": "98d54320ce362219b8745e9c0a65c8010fef257f461b8ac53425500870f0653c"
+  },
+  "environment": {
+    "mac": {
+      "torch": "2.8.0",
+      "torchvision": "0.23.0",
+      "ultralytics": "8.4.89",
+      "numpy": "2.0.2"
+    },
+    "remote_3060": {
+      "torch": "2.8.0",
+      "torchvision": "0.23.0",
+      "ultralytics": "8.4.89",
+      "numpy": "2.0.2"
+    },
+    "exact_version_parity": true
+  },
+  "immutable_inputs": {
+    "dataset_manifest_sha256": "6e601034ab15765a74b788cc6d094e9326c3044c1fb615c908ef9de897d6e0af",
+    "dataset_build_summary_sha256": "5d47ed2ddfa9355b32abf1dbccad05354ebd37d8471abef3367832eec29d1c2a",
+    "data_yaml_sha256_before_remote_path_rewrite": "94376651f00a7dc5be3192f181109d9b67d4fed92931c5af8c70cf0b5787ef25",
+    "dataset_build_receipt_sha256": "1deeebc93c94902a67ef1dcdcad0c4593a53b7e7627db3778b7541d2ceb8766a",
+    "dataset_qa_receipt_sha256": "347343455e14872e23c410292a97b0dd5915be9f9217137a1a0e2ab748349d5d",
+    "preregistration_sha256": "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c",
+    "base_model_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+    "trainer_sha256": "4ec54f1ee956c2d17ef9d5a2877a7872310ad886636fd08003159d8c143d2aa5",
+    "shared_launcher_sha256": "1b2285a53cd75d8b10dd7047bd2831f39ddf7e15e1989c3f2dec8dc393e94d64",
+    "treatment_wrapper_sha256": "c8781ab132ce3363454ed0b9e91d72830ad2232c244cba2537a5ecfa466200fb"
+  },
+  "remote_dataset_scan": {
+    "train_images": 32644,
+    "train_backgrounds": 24483,
+    "val_images": 7260,
+    "val_backgrounds": 5445,
+    "corrupt_images": 0,
+    "matches_preregistration": true
+  },
+  "training": {
+    "status_at_receipt": "running_epoch_1",
+    "epochs": 40,
+    "patience": 10,
+    "batch": 8,
+    "imgsz": 960,
+    "seed": 0,
+    "deterministic": true,
+    "optimizer": "AdamW",
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "warmup_epochs": 0.5,
+    "rect": true,
+    "cache": false,
+    "workers": 2,
+    "unsafe_augmentations_zero": true,
+    "translate": 0.02,
+    "scale": 0.1
+  },
+  "safety": {
+    "holdout_consumed": false,
+    "active_or_frozen_changed": false,
+    "promoted": false,
+    "deployed": false,
+    "forward_state_changed": false,
+    "order_state_changed": false,
+    "production_eligible": false
+  }
+}
