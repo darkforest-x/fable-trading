@@ -51,6 +51,7 @@ from yoyo.layers.l1_detection.render import make_chart_transform, render_chart
 ROOT = Path(__file__).resolve().parents[2]
 EXPERIMENT_ID = "exp-15m-ma-launch-ma-box-review50-v1"
 DEFAULT_PREREG = ROOT / "experiments" / "active" / EXPERIMENT_ID / "preregistration.json"
+DEFAULT_AMENDMENT = ROOT / "experiments" / "active" / EXPERIMENT_ID / "amendment_20260827.json"
 HOLDOUT_START = pd.Timestamp("2026-05-04T00:00:00Z")
 WINDOW_BARS = 20
 DENSITY_BARS = 12
@@ -758,7 +759,18 @@ def build(prereg_path: Path = DEFAULT_PREREG, output_dir: Path | None = None) ->
     prereg = read_json(prereg_path)
     if prereg.get("experiment_id") != EXPERIMENT_ID:
         raise MABoxReviewError("unexpected review experiment id")
-    builder_commit = verify_builder_committed([Path(__file__).resolve(), prereg_path, ROOT / "scripts" / "build_15m_ma_launch_ma_box_review50.py"])
+    amendment_path = DEFAULT_AMENDMENT.resolve()
+    amendment = read_json(amendment_path)
+    if amendment.get("experiment_id") != EXPERIMENT_ID:
+        raise MABoxReviewError("unexpected review amendment experiment id")
+    builder_commit = verify_builder_committed(
+        [
+            Path(__file__).resolve(),
+            prereg_path,
+            amendment_path,
+            ROOT / "scripts" / "build_15m_ma_launch_ma_box_review50.py",
+        ]
+    )
     source_manifest = (ROOT / prereg["source"]["dataset_manifest_path"]).resolve()
     source_prereg = (ROOT / prereg["source"]["dataset_preregistration_path"]).resolve()
     for path, expected in ((source_manifest, prereg["source"]["dataset_manifest_sha256"]), (source_prereg, prereg["source"]["dataset_preregistration_sha256"])):
@@ -792,6 +804,7 @@ def build(prereg_path: Path = DEFAULT_PREREG, output_dir: Path | None = None) ->
     all_metrics: list[dict[str, Any]] = []
     review_metrics: list[dict[str, Any]] = []
     source_audits: list[dict[str, Any]] = []
+    unavailable_negatives: list[dict[str, Any]] = []
     for ordinal, (source_path, source_rows) in enumerate(sorted(grouped.items()), start=1):
         frame, source_audit = read_preholdout_prefix(ROOT / source_path, end_exclusive=HOLDOUT_START)
         if int(source_audit["holdout_ohlcv_rows_materialized"]) != 0:
@@ -800,12 +813,30 @@ def build(prereg_path: Path = DEFAULT_PREREG, output_dir: Path | None = None) ->
         source_audits.append(source_audit)
         for source_row in source_rows:
             is_positive = source_row.get("sample_kind") == "positive_weak"
-            metric, window, _ = metric_row(
-                source_row,
-                enriched,
-                sample_kind="positive" if is_positive else "negative",
-                all_variants=str(source_row["sample_id"]) in selected_ids,
-            )
+            try:
+                metric, window, _ = metric_row(
+                    source_row,
+                    enriched,
+                    sample_kind="positive" if is_positive else "negative",
+                    all_variants=str(source_row["sample_id"]) in selected_ids,
+                )
+            except MABoxReviewError as exc:
+                if is_positive:
+                    raise
+                unavailable_negatives.append(
+                    {
+                        "sample_id": str(source_row["sample_id"]),
+                        "sample_kind": str(source_row["sample_kind"]),
+                        "negative_kind": str(source_row["negative_kind"]),
+                        "symbol": str(source_row["symbol"]),
+                        "split": str(source_row["split"]),
+                        "pseudo_t_i": int(source_row["pseudo_t_i"]),
+                        "pseudo_t_time": str(source_row["pseudo_t_time"]),
+                        "source_path": str(source_row["source_path"]),
+                        "reason": str(exc),
+                    }
+                )
+                continue
             all_metrics.append({key: value for key, value in metric.items() if key != "variants"})
             if str(source_row["sample_id"]) in selected_ids:
                 selected_source = next(row for row in selected_positive_source if str(row["sample_id"]) == str(source_row["sample_id"]))
@@ -820,9 +851,13 @@ def build(prereg_path: Path = DEFAULT_PREREG, output_dir: Path | None = None) ->
                 metric.update(assets)
                 review_metrics.append(metric)
         if ordinal == 1 or ordinal % 20 == 0 or ordinal == len(grouped):
-            print(f"review50 audited sources {ordinal}/{len(grouped)}; rows {len(all_metrics)}/{len(manifest)}")
+            accounted = len(all_metrics) + len(unavailable_negatives)
+            print(f"review50 audited sources {ordinal}/{len(grouped)}; rows {accounted}/{len(manifest)}")
 
     all_metrics.sort(key=lambda row: (str(row["sample_kind"]), str(row["sample_id"])))
+    unavailable_negatives.sort(key=lambda row: (str(row["negative_kind"]), str(row["sample_id"])))
+    if len(all_metrics) + len(unavailable_negatives) != len(manifest):
+        raise MABoxReviewError("valid plus unavailable metric rows do not account for the frozen manifest")
     review_metrics.sort(key=lambda row: (str(row["direction"]), str(row["split"]), int(row["time_bin"]), str(row["anchor_time"]), str(row["sample_id"])))
     negative_review_source = choose_negative_review_rows(all_metrics)
     negative_review: list[dict[str, Any]] = []
@@ -860,10 +895,12 @@ def build(prereg_path: Path = DEFAULT_PREREG, output_dir: Path | None = None) ->
     write_jsonl(manifest_path_building, review_metrics)
     review_manifest_sha = sha256_file(manifest_path_building)
     prereg_sha = sha256_file(prereg_path)
+    amendment_sha = sha256_file(amendment_path)
     html_text = build_review_html(review_metrics, prereg_sha, review_manifest_sha)
     html_path = public / "index.html"
     html_path.write_text(html_text, encoding="utf-8")
     write_jsonl(building / "negative_review_manifest.jsonl", negative_review)
+    write_jsonl(building / "unavailable_negative_audit.jsonl", unavailable_negatives)
     write_jsonl(building / "source_audit.jsonl", source_audits)
 
     distribution_path = building / "box_and_negative_distributions.png"
@@ -881,6 +918,7 @@ def build(prereg_path: Path = DEFAULT_PREREG, output_dir: Path | None = None) ->
             "experiment_id": EXPERIMENT_ID,
             "status": "review50_ready_pending_owner_protocol_and_sample_confirmation",
             "builder_commit": builder_commit,
+            "amendment_sha256": amendment_sha,
             "source_manifest_sha256": sha256_file(source_manifest),
             "review_rows": 50,
             "review_unique_symbols": len({row["symbol"] for row in review_metrics}),
@@ -889,6 +927,19 @@ def build(prereg_path: Path = DEFAULT_PREREG, output_dir: Path | None = None) ->
             "review_time_bins": dict(sorted(Counter(int(row["time_bin"]) for row in review_metrics).items())),
             "review_answers_preselected": 0,
             "negative_review_rows": len(negative_review),
+            "data_availability": {
+                "manifest_rows_accounted": len(all_metrics) + len(unavailable_negatives),
+                "positive_metric_rows": sum(row["sample_kind"] == "positive" for row in all_metrics),
+                "negative_metric_rows": sum(row["sample_kind"] == "negative" for row in all_metrics),
+                "negative_unavailable_rows": len(unavailable_negatives),
+                "negative_unavailable_by_kind": dict(
+                    sorted(Counter(str(row["negative_kind"]) for row in unavailable_negatives).items())
+                ),
+                "negative_unavailable_by_reason": dict(
+                    sorted(Counter(str(row["reason"]) for row in unavailable_negatives).items())
+                ),
+                "policy": "Every frozen negative is accounted for; rows without a complete six-MA causal W20 are excluded from density estimates rather than imputed.",
+            },
             "render_contract": {
                 "source_shape": [SOURCE_HEIGHT, SOURCE_WIDTH, 3],
                 "window_bars": WINDOW_BARS,
@@ -905,6 +956,7 @@ def build(prereg_path: Path = DEFAULT_PREREG, output_dir: Path | None = None) ->
                 "review_html_sha256": sha256_file(html_path),
                 "review_manifest": str((final_dir / "review_manifest.jsonl").relative_to(ROOT)),
                 "review_manifest_sha256": review_manifest_sha,
+                "unavailable_negative_audit": str((final_dir / "unavailable_negative_audit.jsonl").relative_to(ROOT)),
                 "distribution_chart": str((final_dir / distribution_path.name).relative_to(ROOT)),
             },
             "holdout": {"read": False, "ohlcv_rows_materialized": 0},
@@ -925,11 +977,13 @@ def build(prereg_path: Path = DEFAULT_PREREG, output_dir: Path | None = None) ->
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "builder_commit": builder_commit,
         "preregistration_sha256": prereg_sha,
+        "amendment_sha256": amendment_sha,
         "source_manifest_sha256": sha256_file(source_manifest),
         "counts": {
-            "manifest_rows_audited": len(all_metrics),
-            "positive_rows_audited": len(positives),
-            "negative_rows_audited": len(negatives),
+            "manifest_rows_accounted": len(all_metrics) + len(unavailable_negatives),
+            "positive_metric_rows": sum(row["sample_kind"] == "positive" for row in all_metrics),
+            "negative_metric_rows": sum(row["sample_kind"] == "negative" for row in all_metrics),
+            "negative_unavailable_rows": len(unavailable_negatives),
             "review_positive_images": len(review_metrics),
             "review_negative_images": len(negative_review),
             "review_answers_preselected": 0,
@@ -938,6 +992,8 @@ def build(prereg_path: Path = DEFAULT_PREREG, output_dir: Path | None = None) ->
             "fixed_w20": all(int(row["window_bars"]) == WINDOW_BARS for row in all_metrics),
             "box_search_ends_before_t": all(int(row["density_search_end_offset"]) == -1 for row in all_metrics),
             "all_six_ma_inside_l5_min24": all(bool(row["all_six_ma_inside_l5_min24"]) for row in all_metrics),
+            "manifest_accounting": len(all_metrics) + len(unavailable_negatives) == len(manifest),
+            "negative_accounting": sum(row["sample_kind"] == "negative" for row in all_metrics) + len(unavailable_negatives) == len(negatives),
             "review_unique_sample_ids": len({row["sample_id"] for row in review_metrics}) == 50,
             "review_images_exist": all(
                 _materialized_asset_path(str(row["image_path"]), building=building, final_dir=final_dir).is_file()
@@ -949,6 +1005,7 @@ def build(prereg_path: Path = DEFAULT_PREREG, output_dir: Path | None = None) ->
             "summary_sha256": sha256_file(building / "summary.json"),
             "review_manifest_sha256": review_manifest_sha,
             "negative_review_manifest_sha256": sha256_file(building / "negative_review_manifest.jsonl"),
+            "unavailable_negative_audit_sha256": sha256_file(building / "unavailable_negative_audit.jsonl"),
             "source_audit_sha256": sha256_file(building / "source_audit.jsonl"),
             "review_html_sha256": sha256_file(html_path),
             "distribution_chart_sha256": sha256_file(distribution_path),

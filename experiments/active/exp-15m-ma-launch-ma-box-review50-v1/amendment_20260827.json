@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-ma-box-review50-v1",
+  "created_at": "2026-08-27T15:15:00+08:00",
+  "trigger": {
+    "event": "The first committed official build stopped fail-closed after 560 accounted rows because a negative sample had no finite six-MA segment.",
+    "diagnostic_scope": "All 36,812 frozen manifest identities, using only each source prefix before 2026-05-04.",
+    "observed": {
+      "positive_unavailable": 0,
+      "negative_unavailable": 72,
+      "no_finite_six_ma_span": 70,
+      "fixed_w20_out_of_source_bounds": 2,
+      "negative_hard_unavailable": 50,
+      "negative_easy_unavailable": 22
+    }
+  },
+  "decision_before_rerun": {
+    "account_for_every_frozen_identity": true,
+    "impute_missing_ma_values": false,
+    "replace_unavailable_negatives": false,
+    "include_unavailable_rows_in_density_estimates": false,
+    "write_explicit_unavailable_audit": true,
+    "positive_review_selection_changed": false,
+    "negative_visual_review_selection": "Choose the preregistered 12 density quantiles per kind from valid negative metrics only.",
+    "reason": "A six-MA box is undefined before all six MAs are finite. Imputation or replacement would silently change the frozen negative population and make density statistics look more complete than the data allow."
+  },
+  "safety": {
+    "holdout_read": false,
+    "training_allowed": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "active_or_frozen_change": false
+  }
+}

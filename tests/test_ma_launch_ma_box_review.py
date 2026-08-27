@@ -63,6 +63,13 @@ def test_tight_span_is_invariant_to_t_and_future_mutation() -> None:
         assert left.end_local - left.start_local + 1 == length
 
 
+def test_tight_span_rejects_unwarmed_six_ma_rows_instead_of_imputing() -> None:
+    data = frame()
+    data.loc[:, "sma120"] = np.nan
+    with pytest.raises(MABoxReviewError, match="no finite MA span candidate"):
+        select_tightest_span(data, anchor_local=17, core_len=5)
+
+
 def test_ma_box_contains_all_ma_points_and_never_uses_candle_extremes() -> None:
     data = frame()
     anchor_local = 17
