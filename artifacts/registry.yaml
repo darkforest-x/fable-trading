@@ -5151,3 +5151,20 @@ artifacts:
     config_hash: "9bed16a1b58462f0442687d623f08601fa3e07f102e9ee3ce038784468376952"
     data_cutoff: "2026-05-03T19:45:00Z"
     notes: Owner-facing HTML generated immediately from the canonical Markdown.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-train960-v1-prereg
+    artifact_type: config
+    role: owner_authorized_weak_label_3060_training_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cd5ef48d2cdd23c5689263fec8014431e32c6b68"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/preregistration.json
+    sha256: "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c"
+    size_bytes: 6742
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "cd5ef48d2cdd23c5689263fec8014431e32c6b68"
+    config_hash: "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Freezes the exact 40,000-image dataset, 960 recipe, Owner authorization and all no-holdout/no-promotion gates.

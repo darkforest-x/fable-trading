@@ -1983,3 +1983,28 @@ experiments:
       hard slots safely fell back to easy inside the exact matching block; no
       threshold or guard was relaxed. Completed-history data only: no training,
       remote write, weight, promote, deployment, forward or runtime change.
+
+  - experiment_id: exp-15m-ma-launch-owner-yolo-neg30000-train960-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cd5ef48d2cdd23c5689263fec8014431e32c6b68"
+    status: active
+    question: >-
+      How does the Owner-approved weak-label dataset with 10,000 positives and
+      30,000 negatives behave under the frozen imgsz=960 YOLO recipe on the
+      RTX 3060?
+    single_variable: >-
+      freeze the prior successful 960 recipe and train only the immutable v2
+      dataset; historical model metrics are context rather than a causal
+      negative-count control because the 20,000-row predecessor was not trained
+    result: preregistered_owner_authorized_training_not_yet_started
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_owner_yolo_neg30000_train960_20260828.md
+    artifacts:
+      - 15m-ma-launch-owner-yolo-neg30000-train960-v1-prereg
+    reuse_allowed: false
+    notes: >-
+      Owner-authorized weak-label research training only. The completed-history
+      windows cannot enter tip/forward/ACTIVE; no holdout, promotion, deployment
+      or trading-state mutation is authorized.
