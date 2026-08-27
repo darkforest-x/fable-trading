@@ -46,3 +46,32 @@ def test_preview_selection_is_balanced_and_order_independent() -> None:
 def test_yolo_geometry_converts_and_clips() -> None:
     assert yolo_xywhn_to_xyxy((0.5, 0.5, 0.25, 0.5), 100, 80) == (38, 20, 62, 60)
     assert yolo_xywhn_to_xyxy((0.0, 0.0, 0.5, 0.5), 100, 80) == (0, 0, 25, 20)
+
+
+def test_preview_selection_accepts_owner_v2_manifest_vocabulary() -> None:
+    source = []
+    for class_id in (0, 1):
+        for index in range(8):
+            source.append(
+                {
+                    "sample_id": f"v2-p{class_id}-{index}",
+                    "split": "val",
+                    "sample_kind": "positive",
+                    "class_id": class_id,
+                }
+            )
+    for index in range(12):
+        source.append(
+            {
+                "sample_id": f"v2-n-{index}",
+                "split": "val",
+                "sample_kind": "negative",
+                "negative_kind": "easy",
+                "class_id": None,
+            }
+        )
+    selected = select_preview_rows(source)
+    assert len(selected) == 16
+    assert sum(row.get("class_id") == 0 for row in selected) == 4
+    assert sum(row.get("class_id") == 1 for row in selected) == 4
+    assert sum(row.get("negative_kind") == "easy" for row in selected) == 8

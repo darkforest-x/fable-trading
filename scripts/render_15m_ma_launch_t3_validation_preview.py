@@ -57,24 +57,33 @@ def select_preview_rows(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any
     """Return the frozen 4 LONG + 4 SHORT + 8 background preview mix."""
 
     val = [row for row in rows if row.get("split") == "val"]
+    def is_positive(row: Mapping[str, Any]) -> bool:
+        return row.get("sample_kind") in {"positive", "positive_weak"}
+
+    def is_easy_negative(row: Mapping[str, Any]) -> bool:
+        return row.get("sample_kind") == "negative_easy" or (
+            row.get("sample_kind") == "negative"
+            and row.get("negative_kind") == "easy"
+        )
+
     selected = []
     selected.extend(
         stable_rows(
-            (row for row in val if row.get("sample_kind") == "positive_weak" and row.get("class_id") == 0),
+            (row for row in val if is_positive(row) and row.get("class_id") == 0),
             4,
             "preview-long",
         )
     )
     selected.extend(
         stable_rows(
-            (row for row in val if row.get("sample_kind") == "positive_weak" and row.get("class_id") == 1),
+            (row for row in val if is_positive(row) and row.get("class_id") == 1),
             4,
             "preview-short",
         )
     )
     selected.extend(
         stable_rows(
-            (row for row in val if row.get("sample_kind") == "negative_easy"),
+            (row for row in val if is_easy_negative(row)),
             8,
             "preview-background",
         )
