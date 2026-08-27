@@ -184,7 +184,7 @@ def _render_html(rows: Sequence[Mapping[str, Any]], manifest_sha: str) -> str:
             + "</h2><p>"
             + f"{html.escape(str(row['anchor_time']))} · core offsets {row['core_start_offset']}…{row['core_end_offset']}"
             + f" · width {row['box']['source_width_px']:.1f}px</p>"
-            + f"<img loading='lazy' src='{Path(str(row['image_path'])).name}' alt='{html.escape(str(row['sample_id']))}'>"
+            + f"<img loading='lazy' src='images/{Path(str(row['image_path'])).name}' alt='{html.escape(str(row['sample_id']))}'>"
             + "</article>"
         )
     return """<!doctype html><html lang='zh-CN'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>15m 密集核心单框 Review50 v3</title><style>
@@ -349,4 +349,3 @@ def build(prereg_path: Path = DEFAULT_PREREG, output_dir: Path | None = None) ->
     write_json(building / "build_receipt.json", receipt)
     os.replace(building, final_dir)
     return receipt
-

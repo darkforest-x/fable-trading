@@ -7,6 +7,7 @@ import pytest
 from yoyo.datasets.ma_launch_density_core_box_review import (
     CORE_BARS,
     DensityCoreReviewError,
+    _render_html,
     density_core_box,
 )
 from yoyo.datasets.ma_rope_filter import SIX_MA_COLUMNS
@@ -58,3 +59,21 @@ def test_core_length_other_than_five_fails_closed() -> None:
     with pytest.raises(DensityCoreReviewError, match="exactly five"):
         density_core_box(make_chart_transform(data), data, start_local=9, end_local=12)
 
+
+def test_review_html_points_into_public_images_subdirectory() -> None:
+    html = _render_html(
+        [
+            {
+                "symbol": "BTC_USDT_SWAP",
+                "direction": "LONG",
+                "anchor_time": "2026-05-01T00:00:00Z",
+                "core_start_offset": -7,
+                "core_end_offset": -3,
+                "box": {"source_width_px": 311.0},
+                "image_path": "experiments/x/results/public/images/01_sample.png",
+                "sample_id": "sample",
+            }
+        ],
+        "abc",
+    )
+    assert "src='images/01_sample.png'" in html
