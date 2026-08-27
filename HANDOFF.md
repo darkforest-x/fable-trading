@@ -2,6 +2,26 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-27 — 原图 imgsz=1280 重训完成，但不替换 960）
+
+Owner 在抽查同一批 1280×742 训练 PNG 后明确回复“ok 重新去训练吧”，授权单变量重训。RTX 3060
+直接读取原来的 36,812 张 PNG 和标签；manifest、train/val、框、正负样本、seed、优化器与全部
+增强配方未变，唯一变量是训练 `imgsz 960 → 1280`。源 PNG 未离线缩图或重编码；训练仍保留与
+基线相同的内存 `translate=0.02 / scale=0.1`。运行在第 31 轮 patience 早停，最佳第 21 轮，
+exit_code=0，远端/本地文件 SHA 一致，best.pt SHA 为
+`a9fae2ef64489e24f39bd51714d96b43cf680bf80d5c536537f03a4402e9f9c0`。
+
+固定 pre-holdout 2,940 张时间 val 的同设备 2×2 网格给出：960/960 mAP50-95 0.3313，
+960/1280 0.2672，1280/960 0.2187，1280/1280 0.3110。原生对原生的 P/R/mAP50/mAP50-95
+分别下降 0.0414/0.0049/0.0337/0.0202；easy 负样本从 3.401 升到 4.082 框/千图，hard 维持
+2.723。因此 **拒绝用 1280 替代 960**。1280 权重只保留为可复现负结果，仍是完成态弱标签、
+`training_eligible=false / production_eligible=false`；holdout 消费 0，ACTIVE、frozen、forward、
+部署和交易状态均未改。报告：
+`analysis/html/p1_15m_ma_launch_t3_yolo10000_imgsz1280_20260827.html`。
+
+**下一条允许动作**：回到 Owner 逐样本 Gold 类别与核心边界审核；不要继续按源图像素猜训练尺寸，
+也不要 promote 两个弱标签权重。若以后再改分辨率，必须先冻结单变量并跑 train×eval 2×2 网格。
+
 ## ⚡ 当前真相（2026-08-26 — 15m t-3 审核/训练视图已纠偏，模型未变）
 
 Owner 指出的两个视觉矛盾已修复为独立 v2 产物：首批 1,000 张审核图从原 OHLCV 重新渲染，

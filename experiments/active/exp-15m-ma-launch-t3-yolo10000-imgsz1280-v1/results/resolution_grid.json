@@ -1,0 +1,157 @@
+{
+  "active_or_frozen_changed": false,
+  "cells": [
+    {
+      "inference_imgsz": 960,
+      "overall": {
+        "fitness": 0.33128323346804434,
+        "map50": 0.5880454751616652,
+        "map50_95": 0.33128323346804434,
+        "precision": 0.533420297674684,
+        "recall": 0.6106718031900513
+      },
+      "per_class": {
+        "dense_long": {
+          "map50": 0.5714998645892092,
+          "map50_95": 0.32632246013531796,
+          "precision": 0.5443368767123937,
+          "recall": 0.6009732360097324
+        },
+        "dense_short": {
+          "map50": 0.6045910857341211,
+          "map50_95": 0.33624400680077066,
+          "precision": 0.5225037186369743,
+          "recall": 0.6203703703703703
+        }
+      },
+      "training_imgsz": 960,
+      "weight": "trained_960",
+      "weight_sha256": "8b2e393ffa887b8284a5580f68df290963fccc08fb94cdc4e0fec0c2b1e40e10"
+    },
+    {
+      "inference_imgsz": 1280,
+      "overall": {
+        "fitness": 0.2672090922841555,
+        "map50": 0.5036014619861955,
+        "map50_95": 0.2672090922841555,
+        "precision": 0.4791998477921322,
+        "recall": 0.5484590429845904
+      },
+      "per_class": {
+        "dense_long": {
+          "map50": 0.47329717472028776,
+          "map50_95": 0.2473373905287441,
+          "precision": 0.47343989332201875,
+          "recall": 0.5413625304136253
+        },
+        "dense_short": {
+          "map50": 0.5339057492521033,
+          "map50_95": 0.2870807940395669,
+          "precision": 0.4849598022622457,
+          "recall": 0.5555555555555556
+        }
+      },
+      "training_imgsz": 960,
+      "weight": "trained_960",
+      "weight_sha256": "8b2e393ffa887b8284a5580f68df290963fccc08fb94cdc4e0fec0c2b1e40e10"
+    },
+    {
+      "inference_imgsz": 960,
+      "overall": {
+        "fitness": 0.21868271997242986,
+        "map50": 0.4351458388603222,
+        "map50_95": 0.21868271997242986,
+        "precision": 0.3882292959636192,
+        "recall": 0.5579999098855546
+      },
+      "per_class": {
+        "dense_long": {
+          "map50": 0.4239156658682579,
+          "map50_95": 0.2126510840147926,
+          "precision": 0.39185234946546105,
+          "recall": 0.5450121654501217
+        },
+        "dense_short": {
+          "map50": 0.44637601185238657,
+          "map50_95": 0.22471435593006714,
+          "precision": 0.3846062424617774,
+          "recall": 0.5709876543209876
+        }
+      },
+      "training_imgsz": 1280,
+      "weight": "trained_1280",
+      "weight_sha256": "a9fae2ef64489e24f39bd51714d96b43cf680bf80d5c536537f03a4402e9f9c0"
+    },
+    {
+      "inference_imgsz": 1280,
+      "overall": {
+        "fitness": 0.31104101315848504,
+        "map50": 0.5543005751273231,
+        "map50_95": 0.31104101315848504,
+        "precision": 0.4920636278413212,
+        "recall": 0.6058056231413895
+      },
+      "per_class": {
+        "dense_long": {
+          "map50": 0.53606690540448,
+          "map50_95": 0.29881409612022497,
+          "precision": 0.5017619317453889,
+          "recall": 0.5912408759124088
+        },
+        "dense_short": {
+          "map50": 0.5725342448501662,
+          "map50_95": 0.323267930196745,
+          "precision": 0.48236532393725357,
+          "recall": 0.6203703703703703
+        }
+      },
+      "training_imgsz": 1280,
+      "weight": "trained_1280",
+      "weight_sha256": "a9fae2ef64489e24f39bd51714d96b43cf680bf80d5c536537f03a4402e9f9c0"
+    }
+  ],
+  "dataset": "/Users/zhangzc/fable-trading/datasets/ma_launch_t3_10000_v1",
+  "environment": {
+    "batch": 8,
+    "device": "mps",
+    "numpy": "2.0.2",
+    "python": "3.9.6",
+    "torch": "2.8.0",
+    "ultralytics": "8.4.89"
+  },
+  "evaluation_contract": {
+    "confidence": 0.001,
+    "iou": 0.7,
+    "rect": true,
+    "threshold_tuned": false,
+    "weight_or_dataset_changed": false
+  },
+  "experiment_id": "exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1",
+  "holdout_consumed": false,
+  "manifest_sha256": "dd55246938b03c4b2013d159cdfee94b4e9db56ecb298ad30145eb5d1bc2bc3a",
+  "native_treatment_minus_baseline": {
+    "map50": -0.03374490003434205,
+    "map50_95": -0.0202422203095593,
+    "precision": -0.041356669833362836,
+    "recall": -0.0048661800486617945
+  },
+  "production_eligible": false,
+  "promoted": false,
+  "val_images": 2940,
+  "val_instances": {
+    "dense_long": 822,
+    "dense_short": 648
+  },
+  "weights": {
+    "trained_1280": {
+      "path": "/Users/zhangzc/fable-trading/analysis/output/ma_launch_t3_10000_v1/ma_launch_t3_10000_v1_y11s_ft_imgsz1280/weights/best.pt",
+      "sha256": "a9fae2ef64489e24f39bd51714d96b43cf680bf80d5c536537f03a4402e9f9c0",
+      "training_imgsz": 1280
+    },
+    "trained_960": {
+      "path": "/Users/zhangzc/fable-trading/analysis/output/ma_launch_t3_10000_v1/ma_launch_t3_10000_v1_y11s_ft/weights/best.pt",
+      "sha256": "8b2e393ffa887b8284a5580f68df290963fccc08fb94cdc4e0fec0c2b1e40e10",
+      "training_imgsz": 960
+    }
+  }
+}
