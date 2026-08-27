@@ -1,0 +1,56 @@
+{
+  "builder_commit": "a4315a6952a50ccd555dd365ae585ff988bee504",
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2",
+  "holdout_ohlcv_rows_materialized": 0,
+  "negative_kinds": {
+    "easy": 10078,
+    "hard": 19922
+  },
+  "negative_kinds_by_split": {
+    "excluded": {
+      "easy": 25,
+      "hard": 47
+    },
+    "train": {
+      "easy": 8180,
+      "hard": 16303
+    },
+    "val": {
+      "easy": 1873,
+      "hard": 3572
+    }
+  },
+  "negative_per_positive": 3,
+  "negative_plan_sha256": "4c2a48174636f02998f65f8d53ca9bd986375ddd668144401c1d667a8fb2cb86",
+  "negative_rows": 30000,
+  "negative_source_audit_sha256": "44cef279bb5fa4592a872212581b984764a6a7772b87ddfaff0b5ce35364ddca",
+  "negative_splits": {
+    "excluded": 72,
+    "train": 24483,
+    "val": 5445
+  },
+  "positive_directions": {
+    "LONG": 5000,
+    "SHORT": 5000
+  },
+  "positive_plan_sha256": "755f2152efbce950208d06050c8d61a183e2e4ceb3ce4f180e1ab4de6c1ce7cf",
+  "positive_rows": 10000,
+  "positive_source_manifest_sha256": "60bb7350c446ee1a406efbd48a4d7e7426ac4838e35b901bee3073019b327e76",
+  "positive_splits": {
+    "excluded": 24,
+    "train": 8161,
+    "val": 1815
+  },
+  "preregistration_sha256": "9bed16a1b58462f0442687d623f08601fa3e07f102e9ee3ce038784468376952",
+  "production_eligible": false,
+  "protocol": "ma6_owner_autofill10000_yolo_neg30000_weak_v2_20260827",
+  "schema_version": 1,
+  "seed_negative_plan_sha256": "32d9de2752c5764e42a6014dd8497ebfd180e8455fe78f4670c6bebaa48ef7dc",
+  "seed_negative_rows": 10000,
+  "source_rows_materialized": 17176555,
+  "strict_candidates_guarded": 14117,
+  "training_eligible": false,
+  "training_started": false,
+  "unique_sources": 378,
+  "unique_symbols": 229
+}
