@@ -1901,3 +1901,44 @@ experiments:
     notes: >-
       P0 completed-history examples only. The Owner accepted the predecessor
       family, not every new sample boundary; no direct labels or training.
+
+  - experiment_id: exp-15m-ma-launch-owner-yolo-dataset10000-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    status: active
+    question: >-
+      Can the Owner-approved 10,000-example pack be converted without pixel or
+      box drift into clean YOLO inputs and paired with 10,000 safe same-source
+      negatives, while preserving time isolation and zero holdout access?
+    single_variable: >-
+      materialize the exact accepted positive windows/boxes as clean PNG plus
+      separate labels, and add one same-symbol/source/halfyear/split/geometry
+      no-launch negative per positive; do not change the positive boxes
+    result: >-
+      built_and_fully_audited_locally. 10,000 positives plus 10,000 negatives
+      were written at 1280x742; train is 8,161+8,161 and val 1,815+1,815, with
+      24+24 purge rows excluded. All 20,000 images and 40,000 files passed full
+      QA; accepted overlay parity was 10,000/10,000, exact overlay-red leakage
+      was zero, and the shifted-box null matched 0/1,000. Negatives are hard
+      4,999/easy 5,001 and guard all 14,117 strict candidates.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_owner_yolo_dataset10000_20260827.md
+    artifacts:
+      - 15m-ma-launch-owner-yolo-dataset10000-v1-prereg
+      - 15m-ma-launch-owner-yolo-dataset10000-v1-plan-receipt
+      - 15m-ma-launch-owner-yolo-dataset10000-v1-build-receipt
+      - 15m-ma-launch-owner-yolo-dataset10000-v1-manifest
+      - 15m-ma-launch-owner-yolo-dataset10000-v1-data-yaml
+      - 15m-ma-launch-owner-yolo-dataset10000-v1-input-preview
+      - 15m-ma-launch-owner-yolo-dataset10000-v1-positive-contact
+      - 15m-ma-launch-owner-yolo-dataset10000-v1-negative-contact
+      - 15m-ma-launch-owner-yolo-dataset10000-v1-time-correction
+      - 15m-ma-launch-owner-yolo-dataset10000-v1-report
+      - 15m-ma-launch-owner-yolo-dataset10000-v1-html
+    reuse_allowed: false
+    notes: >-
+      Owner batch-authorized weak labels, not per-sample Gold. Completed-history
+      windows include 4-6 post-core bars and cannot enter tip/forward/ACTIVE.
+      No training, remote write, weight, promote, deployment or runtime change.

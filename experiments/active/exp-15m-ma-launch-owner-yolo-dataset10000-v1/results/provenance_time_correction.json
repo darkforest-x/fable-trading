@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-dataset10000-v1",
+  "scope": "timestamp_metadata_only",
+  "frozen_preregistration_sha256": "78eb369108f0c6b4574dfe2345f95419cf12cc794451158c08d0737f1bd43f84",
+  "incorrect_fields": [
+    "preregistration.created_at",
+    "preregistration.preregistration_amendments[*].created_at",
+    "preregistration.outputs.report/html date suffix"
+  ],
+  "cause": "The author typed future wall-clock labels while composing the preregistration. These strings were not used by selection, splitting, rendering or holdout gates.",
+  "authoritative_timeline": {
+    "initial_builder_commit": "2026-08-27T21:27:31+08:00",
+    "direct_entry_fix_commit": "2026-08-27T21:28:06+08:00",
+    "time_block_amendment_commit": "2026-08-27T21:30:23+08:00",
+    "soft_ratio_amendment_commit": "2026-08-27T21:39:15+08:00",
+    "plan_receipt_written": "2026-08-27T21:47:26+08:00",
+    "dataset_build_receipt_written": "2026-08-27T22:06:53+08:00"
+  },
+  "data_or_label_impact": "none",
+  "holdout_impact": "none; materialized holdout OHLCV rows remained zero",
+  "correction_policy": "Do not rewrite the already hash-pinned preregistration after artifact generation. Keep this additive correction beside the build receipts and use Git/file timestamps as authoritative.",
+  "canonical_report_date": "2026-08-27"
+}

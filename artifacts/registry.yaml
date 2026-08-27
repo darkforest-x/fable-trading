@@ -4794,3 +4794,190 @@ artifacts:
     config_hash: "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
     data_cutoff: "2026-05-03T18:15:00Z"
     notes: Owner-facing HTML generated immediately from the canonical Markdown.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-dataset10000-v1-prereg
+    artifact_type: config
+    role: owner_authorized_10k_positive_plus_negative_dataset_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/preregistration.json
+    sha256: "78eb369108f0c6b4574dfe2345f95419cf12cc794451158c08d0737f1bd43f84"
+    size_bytes: 8652
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    config_hash: "78eb369108f0c6b4574dfe2345f95419cf12cc794451158c08d0737f1bd43f84"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Two fail-closed capacity amendments are explicit; safety gates were not weakened.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-dataset10000-v1-plan-receipt
+    artifact_type: manifest
+    role: negative_capacity_time_isolation_and_pairing_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/plan_receipt.json
+    sha256: "63332b4cf3f55356d767d4e0e53c114527a3718daf207a86e897acf8991b7a2b"
+    size_bytes: 1531
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/plan_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    config_hash: "78eb369108f0c6b4574dfe2345f95419cf12cc794451158c08d0737f1bd43f84"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: 10,000 pairs planned; hard/easy 4,999/5,001 with hard present in train and val.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-dataset10000-v1-build-receipt
+    artifact_type: manifest
+    role: full_actual_file_pixel_label_and_null_control_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/dataset_build_receipt.json
+    sha256: "6a2135fcea51a1cf218435e293862d190180f647f47d581f950c3954472ab797"
+    size_bytes: 2536
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/dataset_build_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    config_hash: "78eb369108f0c6b4574dfe2345f95419cf12cc794451158c08d0737f1bd43f84"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: 20,000 decoded images, 40,000 file hashes, zero burned boxes and 0/1,000 shifted-box null matches.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-dataset10000-v1-manifest
+    artifact_type: dataset
+    role: exact_local_10000_positive_10000_negative_yolo_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    source_path: datasets/ma_launch_owner_autofill10000_yolo_v1/manifest.jsonl
+    sha256: "d15f78cf651073ef1bf5aa4381f136ba11d6d3dca6513f48ed596251e181413b"
+    size_bytes: 37677102
+    storage_uri: "file://datasets/ma_launch_owner_autofill10000_yolo_v1"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    config_hash: "78eb369108f0c6b4574dfe2345f95419cf12cc794451158c08d0737f1bd43f84"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Local 951,638,666-byte dataset; images and labels are regenerable and ignored by git.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-dataset10000-v1-data-yaml
+    artifact_type: config
+    role: yolo_train_val_entry_excluding_purge_rows
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    source_path: datasets/ma_launch_owner_autofill10000_yolo_v1/data.yaml
+    sha256: "a31357948c48f0803afb8c69abe3e23e59d031b61934769c7aa839d9b8792e72"
+    size_bytes: 158
+    storage_uri: "repo://datasets/ma_launch_owner_autofill10000_yolo_v1/data.yaml"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    config_hash: "78eb369108f0c6b4574dfe2345f95419cf12cc794451158c08d0737f1bd43f84"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Exposes 19,952 train/val images; 48 purge-lineage images remain physically excluded.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-dataset10000-v1-input-preview
+    artifact_type: annotation_set
+    role: actual_clean_model_inputs_50_positive_50_negative_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/actual_model_inputs_sample100.html
+    sha256: "af91d700c62a75637cd1541aa561b84273fce43a1221f8fedf5c3cbf238c053c"
+    size_bytes: 30387
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/actual_model_inputs_sample100.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    config_hash: "78eb369108f0c6b4574dfe2345f95419cf12cc794451158c08d0737f1bd43f84"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Positive boxes are CSS overlays from labels; every underlying PNG is the actual clean model input.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-dataset10000-v1-positive-contact
+    artifact_type: annotation_set
+    role: equidistant_50_positive_actual_input_contact_sheet
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/actual_positive_inputs_sample50_with_label_overlay.jpg
+    sha256: "451a4e06e7eb5ec902ee5ac65e6edcd9ecf0bffbec705349009835a5ddcd925b"
+    size_bytes: 954765
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/actual_positive_inputs_sample50_with_label_overlay.jpg"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    config_hash: "78eb369108f0c6b4574dfe2345f95419cf12cc794451158c08d0737f1bd43f84"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Review-only red overlays on copies; these pixels are not in the dataset inputs.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-dataset10000-v1-negative-contact
+    artifact_type: annotation_set
+    role: equidistant_50_negative_actual_input_contact_sheet
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/actual_negative_inputs_sample50.jpg
+    sha256: "3f22f8037efa85529eb74da58e8273cabdf5c2fed0142cfccd88ba5978a7e97e"
+    size_bytes: 985930
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/actual_negative_inputs_sample50.jpg"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    config_hash: "78eb369108f0c6b4574dfe2345f95419cf12cc794451158c08d0737f1bd43f84"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Actual clean negative inputs with no boxes and byte-empty labels.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-dataset10000-v1-time-correction
+    artifact_type: manifest
+    role: additive_preregistration_wall_clock_metadata_correction
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/provenance_time_correction.json
+    sha256: "74988b2bed12f1c9d701038b85543794111546dca14e0024d89f1f5cf074bb02"
+    size_bytes: 1353
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/provenance_time_correction.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    config_hash: "78eb369108f0c6b4574dfe2345f95419cf12cc794451158c08d0737f1bd43f84"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Corrects only wall-clock labels; frozen preregistration bytes remain untouched.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-dataset10000-v1-report
+    artifact_type: report
+    role: canonical_dataset_lineage_negative_sampling_and_qa_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    source_path: analysis/p1_15m_ma_launch_owner_yolo_dataset10000_20260827.md
+    sha256: "72f95b3604803df3bbd7d58e750efb8129c38a24905ccff412ed4fff27ea51c7"
+    size_bytes: 10107
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_yolo_dataset10000_20260827.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    config_hash: "78eb369108f0c6b4574dfe2345f95419cf12cc794451158c08d0737f1bd43f84"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Answer-first Chinese P1 dataset report with equivalent null and full risk disclosure.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-dataset10000-v1-html
+    artifact_type: report
+    role: owner_facing_dataset_html_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    source_path: analysis/html/p1_15m_ma_launch_owner_yolo_dataset10000_20260827.html
+    sha256: "2c001063bf631e23aa45329f7cdd96dbb653e1e664d4c0cf7ca4a93d506e142f"
+    size_bytes: 14311
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_yolo_dataset10000_20260827.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de1e31052b6bb50e8bb4297d6b4279599881a43b"
+    config_hash: "78eb369108f0c6b4574dfe2345f95419cf12cc794451158c08d0737f1bd43f84"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Owner-facing HTML generated immediately from the canonical Markdown.

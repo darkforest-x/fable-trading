@@ -2,6 +2,31 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-27 — Owner 认可的 10,000 张已转成 10k+10k YOLO 数据集）
+
+Owner 明确回复“刚刚的10000张不错，弄成训练数据集，同时弄好负样本”。本轮已经物化本地
+`datasets/ma_launch_owner_autofill10000_yolo_v1/`：10,000 正例（LONG/SHORT 各 5,000）+
+10,000 一一配对负例（hard 4,999 / easy 5,001），全部是 1280×742 无框 PNG；正例每图一个
+独立 YOLO label，负例 label 字节为空。`data.yaml` 暴露 train 8,161+8,161、val 1,815+1,815；
+切点 purge 内正负各 24 张只放 `excluded/`，训练看不到。
+
+正例不是从红框图擦框：从锁定 OHLCV 重渲染干净底图，再把旧框临时叠回做 SHA 对照，
+10,000/10,000 与 Owner 刚认可的审核 PNG 逐字节一致。全量复核解码 20,000/20,000 图片、
+40,000/40,000 图片/标签文件；20,000 个图 SHA 全唯一，模型输入精确红框像素 0，正标签
+10,000/10,000 可解析，负标签 10,000/10,000 为空。错框零假设 0/1,000 匹配。负样本保护了
+同源全部 14,117 个严格候选，同币、同源、同半年、同 split、同窗口几何，不复用；train hard
+4,079，val hard 908。holdout OHLCV 读取 0。
+
+模型实际输入抽样：
+`experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-v1/results/actual_model_inputs_sample100.html`；
+报告：`analysis/html/p1_15m_ma_launch_owner_yolo_dataset10000_20260827.html`。预注册的手写时间标签
+晚于真实墙钟，冻结字节未被事后重写；权威时间线见同目录 `provenance_time_correction.json`。
+
+这仍是 completed-history、Owner 整批授权的 weak labels，不是逐样本 Gold，也不是 tip 检测器。
+`training_eligible=false / production_eligible=false`；训练、3060、权重、ACTIVE/frozen、forward、
+部署与交易变更均为 0。**下一条允许动作**：Owner 可先看实际输入 HTML；若另行要求训练，必须
+单独登记训练实验，且先决定是否审查 136 个 `h_norm>0.5` 的纵向大框，不得自动 promote 或读 holdout。
+
 ## ⚡ 当前真相（2026-08-27 — 严格 15m 自动样例已扩到 10,000 张，仍非训练集）
 
 Owner 接受 autofill v7 五十张后要求按同样标准扩到 10,000。正式 v1 已完成：5,000 LONG +
