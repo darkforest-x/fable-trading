@@ -24,19 +24,26 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
+import io
 import json
+import os
 import threading
 import time
 import urllib.error
 import urllib.request
+import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+import pandas as pd
 
 from src.data.bars import BAR_CHOICES, normalize_bar
 
 FETCH_DIR = Path(__file__).resolve().parents[2] / "data" / "kline_fetched"
 API = "https://www.okx.com/api/v5/market/history-candles"
+ARCHIVE_BASE = "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly"
 DEFAULT_BAR = "15m"
 PAGE_LIMIT = 100
 MAX_RETRIES = 5
@@ -70,6 +77,306 @@ REQUEST_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
     "Accept": "application/json",
 }
+
+
+class ArchiveFetchError(RuntimeError):
+    """Raised when an official archive violates the frozen time/schema contract."""
+
+
+def _utc(value: object) -> pd.Timestamp:
+    stamp = pd.Timestamp(value)
+    return stamp.tz_localize("UTC") if stamp.tzinfo is None else stamp.tz_convert("UTC")
+
+
+def _month(value: str) -> pd.Timestamp:
+    """Parse one YYYY-MM token as an inclusive UTC month start."""
+
+    try:
+        stamp = pd.Timestamp(f"{value}-01T00:00:00Z")
+    except ValueError as exc:
+        raise ArchiveFetchError(f"invalid archive month: {value}") from exc
+    if stamp.strftime("%Y-%m") != value:
+        raise ArchiveFetchError(f"invalid archive month: {value}")
+    return stamp
+
+
+def archive_months(
+    start: str,
+    end: str,
+    *,
+    max_exclusive: object,
+) -> list[pd.Timestamp]:
+    """Return complete UTC archive months without crossing ``max_exclusive``."""
+
+    first = _month(start)
+    last = _month(end)
+    boundary = _utc(max_exclusive)
+    if last < first:
+        raise ArchiveFetchError("archive month range is descending")
+    months: list[pd.Timestamp] = []
+    cursor = first
+    while cursor <= last:
+        next_month = cursor + pd.offsets.MonthBegin(1)
+        if next_month > boundary:
+            raise ArchiveFetchError(
+                f"archive month {cursor:%Y-%m} crosses exclusive boundary {boundary.isoformat()}"
+            )
+        months.append(cursor)
+        cursor = next_month
+    return months
+
+
+def archive_url(symbol: str, month: pd.Timestamp) -> str:
+    """Return the official OKX monthly 1m-candlestick archive URL."""
+
+    instrument = symbol.replace("_", "-")
+    ym = month.strftime("%Y%m")
+    label = month.strftime("%Y-%m")
+    filename = f"{instrument}-candlesticks-{label}.zip"
+    return f"{ARCHIVE_BASE}/{ym}/{filename}?v=999"
+
+
+def _sha256_bytes(value: bytes) -> str:
+    return hashlib.sha256(value).hexdigest()
+
+
+def aggregate_archive_bytes(
+    payload: bytes,
+    *,
+    symbol: str,
+    month: pd.Timestamp,
+) -> tuple[pd.DataFrame, dict[str, object]]:
+    """Aggregate one official monthly 1m ZIP into complete UTC 15m candles."""
+
+    month = _utc(month)
+    month_end = month + pd.offsets.MonthBegin(1)
+    expected_instrument = symbol.replace("_", "-")
+    try:
+        with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+            members = [name for name in archive.namelist() if name.lower().endswith(".csv")]
+            if len(members) != 1:
+                raise ArchiveFetchError("monthly archive must contain exactly one CSV")
+            member = members[0]
+            csv_bytes = archive.read(member)
+    except zipfile.BadZipFile as exc:
+        raise ArchiveFetchError("official archive is not a valid ZIP") from exc
+
+    frame = pd.read_csv(io.BytesIO(csv_bytes))
+    required = {
+        "instrument_name",
+        "open",
+        "high",
+        "low",
+        "close",
+        "vol",
+        "open_time",
+        "confirm",
+    }
+    missing = sorted(required - set(frame.columns))
+    if missing:
+        raise ArchiveFetchError(f"archive schema missing columns: {missing}")
+    if frame.empty:
+        raise ArchiveFetchError("archive CSV is empty")
+    instruments = set(frame["instrument_name"].astype(str))
+    if instruments != {expected_instrument}:
+        raise ArchiveFetchError(
+            f"archive instrument drift: expected {expected_instrument}, got {sorted(instruments)}"
+        )
+
+    numeric_columns = ("open", "high", "low", "close", "vol", "open_time")
+    for column in numeric_columns:
+        frame[column] = pd.to_numeric(frame[column], errors="raise")
+    frame = frame.sort_values("open_time", kind="mergesort").reset_index(drop=True)
+    if frame["open_time"].duplicated().any():
+        raise ArchiveFetchError("archive contains duplicate one-minute timestamps")
+    month_ms = int(month.value // 1_000_000)
+    month_end_ms = int(month_end.value // 1_000_000)
+    if int(frame["open_time"].min()) < month_ms or int(frame["open_time"].max()) >= month_end_ms:
+        raise ArchiveFetchError("archive contains a timestamp outside its named UTC month")
+    if bool((frame[["open", "high", "low", "close"]] <= 0.0).any().any()):
+        raise ArchiveFetchError("archive contains non-positive OHLC")
+    if bool((frame["high"] < frame[["open", "close"]].max(axis=1)).any()):
+        raise ArchiveFetchError("archive high is below a candle body")
+    if bool((frame["low"] > frame[["open", "close"]].min(axis=1)).any()):
+        raise ArchiveFetchError("archive low is above a candle body")
+
+    frame["bucket_ms"] = (frame["open_time"].astype("int64") // 900_000) * 900_000
+    grouped = frame.groupby("bucket_ms", sort=True)
+    counts = grouped.size()
+    first_ts = grouped["open_time"].min()
+    last_ts = grouped["open_time"].max()
+    complete = (counts == 15) & ((last_ts - first_ts) == 14 * 60_000)
+    complete_buckets = set(int(value) for value in counts.index[complete])
+    kept = frame[frame["bucket_ms"].isin(complete_buckets)]
+    aggregated = (
+        kept.groupby("bucket_ms", sort=True)
+        .agg(
+            open=("open", "first"),
+            high=("high", "max"),
+            low=("low", "min"),
+            close=("close", "last"),
+            volume=("vol", "sum"),
+        )
+        .reset_index()
+        .rename(columns={"bucket_ms": "ts"})
+    )
+    aggregated["open_time"] = pd.to_datetime(aggregated["ts"], unit="ms", utc=True)
+    aggregated = aggregated[["ts", "open", "high", "low", "close", "volume", "open_time"]]
+    audit: dict[str, object] = {
+        "month": month.strftime("%Y-%m"),
+        "zip_sha256": _sha256_bytes(payload),
+        "csv_member": member,
+        "csv_sha256": _sha256_bytes(csv_bytes),
+        "raw_1m_rows": int(len(frame)),
+        "complete_15m_rows": int(len(aggregated)),
+        "incomplete_15m_groups_dropped": int((~complete).sum()),
+        "confirm_values": sorted(str(value) for value in frame["confirm"].unique()),
+        "first_raw_ts": int(frame["open_time"].min()),
+        "last_raw_ts": int(frame["open_time"].max()),
+    }
+    return aggregated, audit
+
+
+def _request_archive(url: str) -> bytes | None:
+    """Download one public archive; return ``None`` only for a real 404."""
+
+    for attempt in range(MAX_RETRIES):
+        try:
+            request = urllib.request.Request(url, headers=REQUEST_HEADERS)
+            with urllib.request.urlopen(request, timeout=60) as response:
+                return response.read()
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                return None
+            if attempt + 1 == MAX_RETRIES:
+                raise ArchiveFetchError(f"archive HTTP {exc.code}: {url}") from exc
+        except (urllib.error.URLError, TimeoutError) as exc:
+            if attempt + 1 == MAX_RETRIES:
+                raise ArchiveFetchError(f"archive download failed: {url}") from exc
+        time.sleep(2**attempt)
+    raise AssertionError("unreachable archive retry state")
+
+
+def _write_json(path: Path, value: object) -> None:
+    path.write_text(
+        json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def fetch_archive_symbol(
+    symbol: str,
+    *,
+    months: list[pd.Timestamp],
+    output_dir: Path,
+    max_exclusive: object,
+) -> dict[str, object]:
+    """Fetch, aggregate and atomically publish one symbol's safe monthly prefix."""
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    contract = {
+        "symbol": symbol,
+        "months_requested": [month.strftime("%Y-%m") for month in months],
+        "max_exclusive": _utc(max_exclusive).isoformat(),
+    }
+    audit_path = output_dir / f"archive_{symbol}.json"
+    if audit_path.exists():
+        prior = json.loads(audit_path.read_text(encoding="utf-8"))
+        if prior.get("contract") == contract and prior.get("status") in {"complete", "no_data"}:
+            output = prior.get("output_path")
+            if output is None or (output_dir / Path(str(output)).name).exists():
+                return prior
+        raise ArchiveFetchError(f"archive resume contract drift for {symbol}")
+
+    monthly_frames: list[pd.DataFrame] = []
+    monthly_audits: list[dict[str, object]] = []
+    missing_months: list[str] = []
+    for month in months:
+        url = archive_url(symbol, month)
+        payload = _request_archive(url)
+        if payload is None:
+            missing_months.append(month.strftime("%Y-%m"))
+            continue
+        frame, audit = aggregate_archive_bytes(payload, symbol=symbol, month=month)
+        audit["url"] = url
+        monthly_frames.append(frame)
+        monthly_audits.append(audit)
+
+    result: dict[str, object] = {
+        "contract": contract,
+        "status": "no_data" if not monthly_frames else "complete",
+        "months_available": [str(row["month"]) for row in monthly_audits],
+        "months_missing": missing_months,
+        "monthly_audits": monthly_audits,
+        "holdout_ohlcv_rows_materialized": 0,
+        "output_path": None,
+    }
+    if monthly_frames:
+        combined = pd.concat(monthly_frames, ignore_index=True)
+        combined = combined.sort_values("ts", kind="mergesort").drop_duplicates("ts", keep="first")
+        boundary_ms = int(_utc(max_exclusive).value // 1_000_000)
+        if int(combined["ts"].max()) >= boundary_ms:
+            raise ArchiveFetchError(f"aggregated archive crossed exclusive boundary for {symbol}")
+        filename = f"okx_{symbol}_15m_{len(combined)}.csv"
+        output_path = output_dir / filename
+        temporary = output_path.with_suffix(".csv.part")
+        combined.to_csv(temporary, index=False)
+        os.replace(temporary, output_path)
+        result.update(
+            {
+                "output_path": str(output_path),
+                "output_sha256": hashlib.sha256(output_path.read_bytes()).hexdigest(),
+                "rows": int(len(combined)),
+                "first_time": str(combined["open_time"].iloc[0]),
+                "last_time": str(combined["open_time"].iloc[-1]),
+            }
+        )
+    _write_json(audit_path, result)
+    return result
+
+
+def fetch_archive_universe(
+    symbols: list[str],
+    *,
+    months: list[pd.Timestamp],
+    output_dir: Path,
+    max_exclusive: object,
+    workers: int,
+) -> dict[str, object]:
+    """Fetch multiple symbols with symbol-level resumability."""
+
+    results: list[dict[str, object]] = []
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = {
+            pool.submit(
+                fetch_archive_symbol,
+                symbol,
+                months=months,
+                output_dir=output_dir,
+                max_exclusive=max_exclusive,
+            ): symbol
+            for symbol in symbols
+        }
+        for index, future in enumerate(as_completed(futures), 1):
+            symbol = futures[future]
+            result = future.result()
+            results.append(result)
+            print(
+                f"archive [{index}/{len(futures)}] {symbol}: "
+                f"{result['status']} rows={result.get('rows', 0)}",
+                flush=True,
+            )
+    summary = {
+        "symbols_requested": len(symbols),
+        "symbols_complete": sum(row["status"] == "complete" for row in results),
+        "symbols_no_data": sum(row["status"] == "no_data" for row in results),
+        "rows": sum(int(row.get("rows", 0)) for row in results),
+        "months_downloaded": sum(len(row["months_available"]) for row in results),
+        "holdout_ohlcv_rows_materialized": 0,
+        "results": sorted(results, key=lambda row: str(row["contract"]["symbol"])),
+    }
+    _write_json(output_dir / "archive_fetch_summary.json", summary)
+    return summary
 
 
 _rate_lock = threading.Lock()
@@ -166,7 +473,7 @@ def fetch_symbol(symbol: str, start_ms: int, bar: str = DEFAULT_BAR) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--symbols", nargs="*", default=DEFAULT_SYMBOLS)
+    parser.add_argument("--symbols", nargs="*", default=None)
     parser.add_argument("--days", type=int, default=400)
     parser.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
     parser.add_argument("--bar", default=DEFAULT_BAR, choices=BAR_CHOICES,
@@ -174,15 +481,68 @@ def main() -> int:
     parser.add_argument("--out-dir", type=Path, default=None,
                         help="write to a different directory (e.g. data/kline_deep for "
                              "deep-history pulls kept apart from the live universe)")
+    parser.add_argument(
+        "--archive-monthly-start",
+        help="inclusive YYYY-MM; enables official monthly 1m archive aggregation to 15m",
+    )
+    parser.add_argument("--archive-monthly-end", help="inclusive YYYY-MM")
+    parser.add_argument(
+        "--archive-max-exclusive",
+        help="hard UTC timestamp boundary; every requested archive month must end before it",
+    )
+    parser.add_argument(
+        "--archive-source-audit",
+        type=Path,
+        help="derive non-deep, non-empty symbols from a frozen candidate source_audit.json",
+    )
     args = parser.parse_args()
     bar = normalize_bar(args.bar)
+    archive_mode = args.archive_monthly_start is not None
+    if archive_mode:
+        if bar != "15m":
+            parser.error("official monthly archive mode is fixed to 15m output")
+        if not args.archive_monthly_end or not args.archive_max_exclusive:
+            parser.error(
+                "archive mode requires --archive-monthly-end and --archive-max-exclusive"
+            )
+        if args.out_dir is None:
+            parser.error("archive mode requires an explicit --out-dir")
+        symbols = list(args.symbols or [])
+        if args.archive_source_audit is not None:
+            source_rows = json.loads(args.archive_source_audit.read_text(encoding="utf-8"))
+            derived = [
+                str(row["symbol"])
+                for row in source_rows
+                if int(row.get("rows_materialized", 0)) > 0
+                and "/kline_deep/" not in str(row.get("source_path", ""))
+            ]
+            symbols.extend(derived)
+        symbols = sorted(set(symbols))
+        if not symbols:
+            parser.error("archive mode requires --symbols or --archive-source-audit")
+        months = archive_months(
+            args.archive_monthly_start,
+            args.archive_monthly_end,
+            max_exclusive=args.archive_max_exclusive,
+        )
+        summary = fetch_archive_universe(
+            symbols,
+            months=months,
+            output_dir=args.out_dir.resolve(),
+            max_exclusive=args.archive_max_exclusive,
+            workers=args.workers,
+        )
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        return 0
+
+    symbols = list(args.symbols or DEFAULT_SYMBOLS)
     if args.out_dir is not None:
         global FETCH_DIR
         FETCH_DIR = args.out_dir
     FETCH_DIR.mkdir(parents=True, exist_ok=True)
     start_ms = int((datetime.now(timezone.utc) - timedelta(days=args.days)).timestamp() * 1000)
     pending: list[str] = []
-    for symbol in args.symbols:
+    for symbol in symbols:
         done = _finished_file(symbol, bar)
         if done is not None:
             print(f"{symbol}: already fetched ({done.name})", flush=True)
