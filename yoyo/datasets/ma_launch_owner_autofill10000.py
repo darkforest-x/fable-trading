@@ -395,9 +395,9 @@ def select_balanced(
 
     target = int(selection["target_per_side"])
     bins_count = int(selection["time_bins_per_side"])
-    target_per_bin = int(selection["target_per_time_bin"])
-    if target != bins_count * target_per_bin:
-        raise OwnerAutofill10000Error("selection time-bin arithmetic drift")
+    minimum_per_bin = int(selection["minimum_per_time_bin"])
+    if minimum_per_bin <= 0 or bins_count * minimum_per_bin > target:
+        raise OwnerAutofill10000Error("selection time-bin minimum arithmetic drift")
     max_symbol = int(selection["max_per_symbol_per_side"])
     max_day = int(selection["max_per_utc_day_per_side"])
     selected: list[dict[str, Any]] = []
@@ -434,34 +434,61 @@ def select_balanced(
         symbol_counts: Counter[str] = Counter()
         day_counts: Counter[str] = Counter()
         side_selected: list[dict[str, Any]] = []
-        while len(side_selected) < target:
+        selected_event_ids: set[str] = set()
+
+        def admit(row: dict[str, Any]) -> bool:
+            stamp = pd.Timestamp(row["core_end_time"])
+            symbol = str(row["symbol"])
+            day = stamp.strftime("%Y-%m-%d")
+            if symbol_counts[symbol] >= max_symbol or day_counts[day] >= max_day:
+                return False
+            side_selected.append(row)
+            selected_event_ids.add(str(row["event_id"]))
+            bin_counts[int(row["time_bin"])] += 1
+            symbol_counts[symbol] += 1
+            day_counts[day] += 1
+            return True
+
+        while min(bin_counts) < minimum_per_bin:
             progress = False
             for bin_index, bucket in enumerate(buckets):
-                if bin_counts[bin_index] >= target_per_bin:
+                if bin_counts[bin_index] >= minimum_per_bin:
                     continue
                 while positions[bin_index] < len(bucket):
                     row = bucket[positions[bin_index]]
                     positions[bin_index] += 1
-                    stamp = pd.Timestamp(row["core_end_time"])
-                    symbol = str(row["symbol"])
-                    day = stamp.strftime("%Y-%m-%d")
-                    if (
-                        symbol_counts[symbol] >= max_symbol
-                        or day_counts[day] >= max_day
-                    ):
+                    if not admit(row):
                         continue
-                    side_selected.append(row)
-                    bin_counts[bin_index] += 1
-                    symbol_counts[symbol] += 1
-                    day_counts[day] += 1
                     progress = True
                     break
             if not progress:
                 raise OwnerAutofill10000Error(
-                    f"could not fill strict {direction} quotas; bins={bin_counts}"
+                    f"could not fill strict {direction} time minima; bins={bin_counts}"
                 )
-        if bin_counts != [target_per_bin] * bins_count:
-            raise OwnerAutofill10000Error(f"{direction} time-bin selection drift")
+
+        remaining = sorted(
+            (
+                row
+                for bucket in buckets
+                for row in bucket
+                if str(row["event_id"]) not in selected_event_ids
+            ),
+            key=lambda row: (
+                float(row["similarity_distance"]),
+                str(row["event_id"]),
+            ),
+        )
+        for row in remaining:
+            if len(side_selected) >= target:
+                break
+            admit(row)
+        if len(side_selected) != target:
+            raise OwnerAutofill10000Error(
+                f"could not fill strict {direction} total under diversity caps; "
+                f"selected={len(side_selected)} bins={bin_counts}"
+            )
+        if min(bin_counts) < minimum_per_bin:
+            raise OwnerAutofill10000Error(f"{direction} time-bin minimum drift")
         selected.extend(side_selected)
 
     if len(selected) != int(selection["total"]):

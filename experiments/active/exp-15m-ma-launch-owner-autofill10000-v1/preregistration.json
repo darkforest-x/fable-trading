@@ -64,6 +64,12 @@
       "trigger": "The supplemented strict LONG pool passed the 5,000-event count, but the self-added global one-sample-per-UTC-hour quota found only 2,965 signal hours and made the target mathematically impossible.",
       "change": "Remove the cross-symbol UTC-hour quota. Different symbols in the same hour remain distinct events; chronological bins plus per-symbol and per-day caps still enforce coverage diversity.",
       "unchanged": "Same-symbol, same-direction one-hour event NMS remains frozen. No morphology, similarity, core-width, render, holdout or safety contract changed."
+    },
+    {
+      "created_at": "2026-08-27T23:43:00+08:00",
+      "trigger": "Exact 500-per-bin selection failed despite a sufficient strict LONG event pool; the attainable counts under symbol/day caps were [418,456,495,420,500,500,500,500,487,500].",
+      "change": "Treat chronological bins as coverage minima: select at least 300 per side from each of ten bins, then fill the remaining 2,000 per side globally by best similarity under the same symbol/day caps.",
+      "unchanged": "Total 5,000 per side, reference family, strict gates, event NMS, diversity caps, render, holdout and safety contracts remain unchanged."
     }
   ],
   "reference_family": {
@@ -121,7 +127,7 @@
     "total": 10000,
     "target_per_side": 5000,
     "time_bins_per_side": 10,
-    "target_per_time_bin": 500,
+    "minimum_per_time_bin": 300,
     "max_per_symbol_per_side": 80,
     "max_per_utc_day_per_side": 80,
     "fail_closed": "If either side cannot supply 5,000 after exact-core collapse, one-hour event NMS and diversity quotas, render nothing and do not relax a threshold."

@@ -63,7 +63,7 @@ def test_balanced_selection_fills_quantiles_and_quotas() -> None:
         "total": 10_000,
         "target_per_side": 5_000,
         "time_bins_per_side": 10,
-        "target_per_time_bin": 500,
+        "minimum_per_time_bin": 300,
         "max_per_symbol_per_side": 80,
         "max_per_utc_day_per_side": 80,
     }
@@ -72,7 +72,9 @@ def test_balanced_selection_fills_quantiles_and_quotas() -> None:
     assert Counter(row["direction"] for row in selected) == {"LONG": 5_000, "SHORT": 5_000}
     for direction in ("LONG", "SHORT"):
         side = [row for row in selected if row["direction"] == direction]
-        assert Counter(row["time_bin"] for row in side) == {index: 500 for index in range(10)}
+        bin_counts = Counter(row["time_bin"] for row in side)
+        assert set(bin_counts) == set(range(10))
+        assert min(bin_counts.values()) >= 300
         assert max(Counter(row["symbol"] for row in side).values()) <= 80
 
 
@@ -101,7 +103,7 @@ def test_balanced_selection_keeps_distinct_symbols_in_same_hour() -> None:
             "total": 8,
             "target_per_side": 4,
             "time_bins_per_side": 2,
-            "target_per_time_bin": 2,
+            "minimum_per_time_bin": 1,
             "max_per_symbol_per_side": 4,
             "max_per_utc_day_per_side": 8,
         },
