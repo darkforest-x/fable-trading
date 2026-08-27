@@ -2,6 +2,25 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-27 — 严格 15m 自动样例已扩到 10,000 张，仍非训练集）
+
+Owner 接受 autofill v7 五十张后要求按同样标准扩到 10,000。正式 v1 已完成：5,000 LONG +
+5,000 SHORT，5,153 个 4 根框 + 4,847 个 5 根框；10,000 个 1280×742 PNG 每张恰好一个
+红框，事件和图片 SHA 全唯一，覆盖 229 个币。完整画廊 100 页、每页 100 张，另有 100 张等距
+总览。入口：`experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/public/index.html`；
+报告：`analysis/html/p0_15m_ma_launch_owner_autofill10000_20260827.html`。
+
+17,186,076 根 pre-holdout 15m K 扫出 14,117 个严格唯一核心；同币同方向一小时事件 NMS 后
+LONG 5,146 / SHORT 6,235，最终各取 5,000。最大距离 0.4954（冻结门 0.5），核心时间严格止于
+2026-05-03 18:15Z。全量独立复核已逐张重算 SHA/尺寸/红框像素，100 个 HTML 页的 10,000 条
+图片链接也全部解析；holdout OHLCV、label、训练、3060、ACTIVE/frozen、forward、部署和交易
+变更均为 0。
+
+这仍是 completed-history P0 shape retrieval：检索用到核心后 +1/+2/+3/+5，且 Owner 只接受了
+参考族，不是逐样本确认新增 10,000 个 Gold 边界。`training_eligible=false / production_eligible=false`。
+**下一条允许动作**：允许停在本地 10,000 张和 HTML；不得直接生成 labels/负样本或开训。若 Owner
+以后另行要求训练，必须先走逐样本 Gold 类别/边界、负样本排除、时间 group split 和训练授权门。
+
 ## ⚡ 当前真相（2026-08-27 — 自动补齐 v7 已逐张发 TG，无 Owner 审核任务）
 
 Owner 明确指出此前“20 张有框 + 30 张无框，再请人工复审”不是其要求。strict Review50 v5

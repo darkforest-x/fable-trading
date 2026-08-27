@@ -156,6 +156,15 @@ external/Kronos/
 /experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/model_inputs_clean/
 /experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/future_review_only/
 
+# 10k P0 example pack: keep receipts/index/contact sheet in git, but the
+# deterministic 526 MB raster gallery and row-heavy rebuild ledgers stay local.
+# File-level globs preserve traversal for the compact receipts beside them.
+/experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/public/images/*.png
+/experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/public/pages/*.html
+/experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/review_manifest.jsonl
+/experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/selection_manifest.jsonl
+/experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/render_manifest.partial.jsonl
+
 # ---- 单仓收敛回迁的大体积产物（2026-08-20，owner 指示"全部迁移过来，大文件不提交"）----
 # archive/consolidated/<repo>/ 下是四个来源仓的 20.5 GB / 300k 个产物，
 # 用 APFS 写时复制克隆进来（占用增量 ~0），源仓保持完好。
