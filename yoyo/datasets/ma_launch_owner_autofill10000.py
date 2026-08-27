@@ -183,39 +183,60 @@ def load_source_specs(prereg: Mapping[str, Any]) -> list[dict[str, Any]]:
             }
         )
 
-    archive_contract = sources["official_archive"]
-    archive_summary_path = _repo_path(archive_contract["summary_path"])
-    if not archive_summary_path.exists():
-        raise OwnerAutofill10000Error(
-            f"official archive fetch summary is missing: {archive_summary_path}"
-        )
-    archive_summary = read_json(archive_summary_path)
-    if int(archive_summary.get("holdout_ohlcv_rows_materialized", -1)) != 0:
-        raise OwnerAutofill10000Error("archive summary does not prove zero holdout rows")
-    for row in archive_summary["results"]:
-        if row.get("status") != "complete":
-            continue
-        contract = row["contract"]
-        if str(contract["max_exclusive"]) != str(
-            pd.Timestamp(archive_contract["archive_max_exclusive"]).isoformat()
-        ):
-            raise OwnerAutofill10000Error("archive max-exclusive contract drift")
-        if str(contract.get("archive_calendar_timezone")) != str(
-            archive_contract["archive_calendar_timezone"]
-        ):
-            raise OwnerAutofill10000Error("archive calendar timezone contract drift")
-        path = _repo_path(row["output_path"])
-        if sha256_file(path) != str(row["output_sha256"]):
-            raise OwnerAutofill10000Error(f"archive output SHA drift: {path}")
-        specs.append(
-            {
-                "kind": "official_archive_1m_aggregated_15m",
-                "symbol": str(contract["symbol"]),
-                "source_path": _relative(path),
-                "expected_file_sha256": str(row["output_sha256"]),
-                "expected_rows": int(row["rows"]),
-            }
-        )
+    archive_contracts = [
+        sources["official_archive"],
+        *sources.get("official_archive_supplements", []),
+    ]
+    admitted_archive_months: set[str] = set()
+    for archive_contract in archive_contracts:
+        expected_months = [
+            str(period)
+            for period in pd.period_range(
+                str(archive_contract["month_start"]),
+                str(archive_contract["month_end"]),
+                freq="M",
+            )
+        ]
+        overlap = admitted_archive_months.intersection(expected_months)
+        if overlap:
+            raise OwnerAutofill10000Error(
+                f"official archive month ranges overlap: {sorted(overlap)[:3]}"
+            )
+        admitted_archive_months.update(expected_months)
+        archive_summary_path = _repo_path(archive_contract["summary_path"])
+        if not archive_summary_path.exists():
+            raise OwnerAutofill10000Error(
+                f"official archive fetch summary is missing: {archive_summary_path}"
+            )
+        archive_summary = read_json(archive_summary_path)
+        if int(archive_summary.get("holdout_ohlcv_rows_materialized", -1)) != 0:
+            raise OwnerAutofill10000Error("archive summary does not prove zero holdout rows")
+        for row in archive_summary["results"]:
+            if row.get("status") != "complete":
+                continue
+            contract = row["contract"]
+            if list(contract.get("months_requested", [])) != expected_months:
+                raise OwnerAutofill10000Error("archive requested-month contract drift")
+            if str(contract["max_exclusive"]) != str(
+                pd.Timestamp(archive_contract["archive_max_exclusive"]).isoformat()
+            ):
+                raise OwnerAutofill10000Error("archive max-exclusive contract drift")
+            if str(contract.get("archive_calendar_timezone")) != str(
+                archive_contract["archive_calendar_timezone"]
+            ):
+                raise OwnerAutofill10000Error("archive calendar timezone contract drift")
+            path = _repo_path(row["output_path"])
+            if sha256_file(path) != str(row["output_sha256"]):
+                raise OwnerAutofill10000Error(f"archive output SHA drift: {path}")
+            specs.append(
+                {
+                    "kind": "official_archive_1m_aggregated_15m",
+                    "symbol": str(contract["symbol"]),
+                    "source_path": _relative(path),
+                    "expected_file_sha256": str(row["output_sha256"]),
+                    "expected_rows": int(row["rows"]),
+                }
+            )
     paths = [str(row["source_path"]) for row in specs]
     if len(paths) != len(set(paths)):
         raise OwnerAutofill10000Error("duplicate resolved source path")

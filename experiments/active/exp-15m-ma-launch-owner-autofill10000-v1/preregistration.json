@@ -34,9 +34,32 @@
       "symbol_rule": "Every non-empty, non-deep symbol already admitted by the hash-pinned candidate9000 source audit; unavailable monthly archives are recorded as 404 and not substituted.",
       "boundary_rule": "OKX archive filenames use UTC+8 calendar months. Only complete archive months whose UTC end is no later than 2025-06-01 are requested; candles are then aggregated on UTC 15-minute boundaries. This is strictly before the repository holdout and no archive at/after 2026-05-04 is requested or read."
     },
+    "official_archive_supplements": [
+      {
+        "provider": "OKX official historical market data monthly candlestick archives",
+        "source_granularity": "1m",
+        "archive_calendar_timezone": "UTC+08:00",
+        "output_granularity": "15m UTC OHLC aggregation",
+        "month_start": "2021-09",
+        "month_end": "2023-06",
+        "archive_max_exclusive": "2025-06-01T00:00:00Z",
+        "output_dir": "data/kline_preholdout_archive15m_202109_202306",
+        "summary_path": "data/kline_preholdout_archive15m_202109_202306/archive_fetch_summary.json",
+        "symbol_rule": "The identical frozen 192-symbol non-deep source-audit universe used by the primary archive pull; real 404 months are recorded and never substituted.",
+        "boundary_rule": "A disjoint earlier UTC+8 archive-month range. Output candles remain UTC 15-minute bars and are strictly before the same 2025-06-01 ceiling."
+      }
+    ],
     "holdout_start_exclusive": "2026-05-04T00:00:00Z",
     "holdout_ohlcv_rows_allowed": 0
   },
+  "preregistration_amendments": [
+    {
+      "created_at": "2026-08-27T23:05:00+08:00",
+      "trigger": "The first fail-closed full scan yielded only 4,494 LONG events after frozen one-hour event NMS, 506 short of the 5,000-per-side contract.",
+      "change": "Add the earliest continuous official monthly archive range available for BTC-USDT-SWAP, 2021-09 through 2023-06, for the identical frozen symbol universe.",
+      "unchanged": "Accepted v7 reference family, max_distance=0.5, morphology gate, 4-5 bar core, direction balance, one-hour NMS, render contract, zero-holdout rule and all safety switches."
+    }
+  ],
   "reference_family": {
     "method": "Nearest of all 50 Owner-accepted v7 examples. Direction is normalized but time is never reversed.",
     "reason": "The Owner explicitly accepted the delivered fifty as a family. Using all fifty adds accepted modes without relaxing the frozen morphology gate or distance threshold.",
