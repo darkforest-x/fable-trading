@@ -14,7 +14,12 @@ from src.data.fetch_okx import (
 )
 
 
-def _archive_payload(*, missing_minute: int | None = None) -> bytes:
+def _archive_payload(
+    *,
+    missing_minute: int | None = None,
+    duplicate_minute: int | None = None,
+    conflicting_duplicate: bool = False,
+) -> bytes:
     rows = [
         "instrument_name,open,high,low,close,vol,vol_ccy,vol_quote,open_time,confirm"
     ]
@@ -23,10 +28,24 @@ def _archive_payload(*, missing_minute: int | None = None) -> bytes:
         if minute == missing_minute:
             continue
         price = 100.0 + minute
-        rows.append(
-            f"BTC-USDT-SWAP,{price},{price + 2},{price - 2},{price + 1},"
-            f"{minute + 1},0,0,{start + minute * 60_000},0"
-        )
+        fields = [
+            "BTC-USDT-SWAP",
+            str(price),
+            str(price + 2),
+            str(price - 2),
+            str(price + 1),
+            str(minute + 1),
+            "0",
+            "0",
+            str(start + minute * 60_000),
+            "0",
+        ]
+        rows.append(",".join(fields))
+        if minute == duplicate_minute:
+            duplicate = list(fields)
+            if conflicting_duplicate:
+                duplicate[5] = str(minute + 2)
+            rows.append(",".join(duplicate))
     raw = ("\n".join(rows) + "\n").encode()
     target = io.BytesIO()
     with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as archive:
@@ -90,5 +109,26 @@ def test_archive_aggregation_rejects_wrong_instrument() -> None:
         aggregate_archive_bytes(
             _archive_payload(),
             symbol="ETH_USDT_SWAP",
+            month=pd.Timestamp("2024-01-01T00:00:00Z"),
+        )
+
+
+def test_archive_aggregation_audits_exact_duplicate_rows() -> None:
+    frame, audit = aggregate_archive_bytes(
+        _archive_payload(duplicate_minute=5),
+        symbol="BTC_USDT_SWAP",
+        month=pd.Timestamp("2024-01-01T00:00:00Z"),
+    )
+    assert len(frame) == 2
+    assert audit["raw_1m_rows_before_exact_dedupe"] == 31
+    assert audit["raw_1m_rows"] == 30
+    assert audit["exact_duplicate_rows_dropped"] == 1
+
+
+def test_archive_aggregation_rejects_conflicting_duplicate_rows() -> None:
+    with pytest.raises(ArchiveFetchError, match="conflicting duplicate"):
+        aggregate_archive_bytes(
+            _archive_payload(duplicate_minute=5, conflicting_duplicate=True),
+            symbol="BTC_USDT_SWAP",
             month=pd.Timestamp("2024-01-01T00:00:00Z"),
         )

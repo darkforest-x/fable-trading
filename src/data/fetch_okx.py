@@ -192,8 +192,24 @@ def aggregate_archive_bytes(
     for column in numeric_columns:
         frame[column] = pd.to_numeric(frame[column], errors="raise")
     frame = frame.sort_values("open_time", kind="mergesort").reset_index(drop=True)
-    if frame["open_time"].duplicated().any():
-        raise ArchiveFetchError("archive contains duplicate one-minute timestamps")
+    raw_rows_before_exact_dedupe = len(frame)
+    duplicate_mask = frame["open_time"].duplicated(keep=False)
+    exact_duplicate_rows_dropped = 0
+    if duplicate_mask.any():
+        duplicate_rows = frame[duplicate_mask]
+        conflicting = [
+            int(timestamp)
+            for timestamp, group in duplicate_rows.groupby("open_time", sort=True)
+            if len(group.drop_duplicates()) != 1
+        ]
+        if conflicting:
+            raise ArchiveFetchError(
+                "archive contains conflicting duplicate one-minute timestamps: "
+                f"{conflicting[:5]}"
+            )
+        before = len(frame)
+        frame = frame.drop_duplicates(keep="first").reset_index(drop=True)
+        exact_duplicate_rows_dropped = before - len(frame)
     archive_start_ms = int(archive_start.value // 1_000_000)
     archive_end_ms = int(archive_end.value // 1_000_000)
     if (
@@ -238,7 +254,9 @@ def aggregate_archive_bytes(
         "zip_sha256": _sha256_bytes(payload),
         "csv_member": member,
         "csv_sha256": _sha256_bytes(csv_bytes),
+        "raw_1m_rows_before_exact_dedupe": int(raw_rows_before_exact_dedupe),
         "raw_1m_rows": int(len(frame)),
+        "exact_duplicate_rows_dropped": exact_duplicate_rows_dropped,
         "complete_15m_rows": int(len(aggregated)),
         "incomplete_15m_groups_dropped": int((~complete).sum()),
         "confirm_values": sorted(str(value) for value in frame["confirm"].unique()),
@@ -325,7 +343,12 @@ def fetch_archive_symbol(
         if payload is None:
             missing_months.append(month.strftime("%Y-%m"))
             continue
-        frame, audit = aggregate_archive_bytes(payload, symbol=symbol, month=month)
+        try:
+            frame, audit = aggregate_archive_bytes(payload, symbol=symbol, month=month)
+        except ArchiveFetchError as exc:
+            raise ArchiveFetchError(
+                f"{symbol} {month:%Y-%m}: {exc}"
+            ) from exc
         audit["url"] = url
         monthly_frames.append(frame)
         monthly_audits.append(audit)
