@@ -5,6 +5,7 @@ from collections import Counter
 import numpy as np
 import pandas as pd
 
+from scripts.audit_15m_ma_launch_owner_yolo_neg30000 import evenly_spaced
 from yoyo.datasets.ma_launch_owner_yolo_dataset import (
     _label_text,
     calendar_halfyear,
@@ -299,3 +300,16 @@ def test_seeded_expansion_keeps_seed_and_adds_unique_pair_slots() -> None:
     assert {item.pair_slot for item in expanded} == {1, 2, 3}
     assert len({item.core_end_i for item in expanded}) == 3
     assert audit["seed_negative_rows"] == 1
+
+
+def test_negative_audit_sampling_is_deterministic_and_covers_endpoints() -> None:
+    rows = [
+        {
+            "paired_positive_source_order": order,
+            "pair_slot": 2,
+            "source_sample_id": f"n{order}",
+        }
+        for order in range(10)
+    ]
+    sampled = evenly_spaced(list(reversed(rows)), 3)
+    assert [row["paired_positive_source_order"] for row in sampled] == [0, 4, 9]
