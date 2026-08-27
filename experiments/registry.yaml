@@ -1996,15 +1996,19 @@ experiments:
       freeze the prior successful 960 recipe and train only the immutable v2
       dataset; historical model metrics are context rather than a causal
       negative-count control because the 20,000-row predecessor was not trained
-    result: preregistered_owner_authorized_training_not_yet_started
+    result: >-
+      running_on_rtx3060. Remote staging reverified every immutable input;
+      train scan found 32,644 images / 24,483 backgrounds, val found 7,260 /
+      5,445, corrupt 0, and epoch 1 began at 2026-08-28 00:43 +08.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_15m_ma_launch_owner_yolo_neg30000_train960_20260828.md
     artifacts:
       - 15m-ma-launch-owner-yolo-neg30000-train960-v1-prereg
+      - 15m-ma-launch-owner-yolo-neg30000-train960-v1-launch
     reuse_allowed: false
     notes: >-
       Owner-authorized weak-label research training only. The completed-history
-      windows cannot enter tip/forward/ACTIVE; no holdout, promotion, deployment
-      or trading-state mutation is authorized.
+      windows cannot enter tip/forward/ACTIVE; the running job has no holdout,
+      promotion, deployment or trading-state mutation authority.

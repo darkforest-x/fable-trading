@@ -5168,3 +5168,20 @@ artifacts:
     config_hash: "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c"
     data_cutoff: "2026-05-03T19:45:00Z"
     notes: Freezes the exact 40,000-image dataset, 960 recipe, Owner authorization and all no-holdout/no-promotion gates.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-train960-v1-launch
+    artifact_type: manifest
+    role: remote_staging_dependency_scan_and_running_job_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b900daf94ef5ecc634010ad2f6d380165e717c10"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/launch_receipt.json
+    sha256: "cf571e9cf2da01491e65a1e8f83b0ab09ad9368eb8ab9982a28c7d2c74e603a6"
+    size_bytes: 3316
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/launch_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b900daf94ef5ecc634010ad2f6d380165e717c10"
+    config_hash: "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Records exact version parity, staging sentinel, WMI PID, train/val scan counts and all safety gates at launch.
