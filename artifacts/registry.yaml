@@ -4981,3 +4981,173 @@ artifacts:
     config_hash: "78eb369108f0c6b4574dfe2345f95419cf12cc794451158c08d0737f1bd43f84"
     data_cutoff: "2026-05-03T19:45:00Z"
     notes: Owner-facing HTML generated immediately from the canonical Markdown.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-v2-prereg
+    artifact_type: config
+    role: owner_authorized_additive_10000_positive_30000_negative_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a4315a6952a50ccd555dd365ae585ff988bee504"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/preregistration.json
+    sha256: "9bed16a1b58462f0442687d623f08601fa3e07f102e9ee3ce038784468376952"
+    size_bytes: 8305
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a4315a6952a50ccd555dd365ae585ff988bee504"
+    config_hash: "9bed16a1b58462f0442687d623f08601fa3e07f102e9ee3ce038784468376952"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Freezes one retained seed plus two additive slots per positive; all v1 bytes are a required baseline.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-v2-plan-receipt
+    artifact_type: manifest
+    role: additive_negative_capacity_time_isolation_and_pairing_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a4315a6952a50ccd555dd365ae585ff988bee504"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/results/plan_receipt.json
+    sha256: "603343ec49a043fc2cf4019e5d940598c14f03c59e8fea1d1a273263ffaecbb0"
+    size_bytes: 1715
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/results/plan_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a4315a6952a50ccd555dd365ae585ff988bee504"
+    config_hash: "9bed16a1b58462f0442687d623f08601fa3e07f102e9ee3ce038784468376952"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Plans exactly 30,000 negatives; hard/easy 19,922/10,078 with hard above 60% in train and val.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-v2-build-receipt
+    artifact_type: manifest
+    role: full_40000_image_pixel_label_baseline_and_null_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a4315a6952a50ccd555dd365ae585ff988bee504"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/results/dataset_build_receipt.json
+    sha256: "1deeebc93c94902a67ef1dcdcad0c4593a53b7e7627db3778b7541d2ceb8766a"
+    size_bytes: 2985
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/results/dataset_build_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a4315a6952a50ccd555dd365ae585ff988bee504"
+    config_hash: "9bed16a1b58462f0442687d623f08601fa3e07f102e9ee3ce038784468376952"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: 40,000 decoded images, 80,000 files, 20,000 v1 byte matches, zero burned boxes and 0/1,000 shifted-box null matches.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-v2-expansion-audit
+    artifact_type: manifest
+    role: independent_three_slot_seed_additive_and_interval_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e76bc7d43ea48297f5b48d117b067f273a03372e"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/results/negative_expansion_audit.json
+    sha256: "347343455e14872e23c410292a97b0dd5915be9f9217137a1a0e2ab748349d5d"
+    size_bytes: 1803
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/results/negative_expansion_audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e76bc7d43ea48297f5b48d117b067f273a03372e"
+    config_hash: "9bed16a1b58462f0442687d623f08601fa3e07f102e9ee3ce038784468376952"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Confirms 10,000 seed plus 20,000 added rows, slots 1/2/3 for every positive and disjoint intervals in all 378 sources.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-v2-manifest
+    artifact_type: dataset
+    role: exact_local_10000_positive_30000_negative_yolo_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a4315a6952a50ccd555dd365ae585ff988bee504"
+    source_path: datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2/manifest.jsonl
+    sha256: "6e601034ab15765a74b788cc6d094e9326c3044c1fb615c908ef9de897d6e0af"
+    size_bytes: 72455685
+    storage_uri: "file://datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a4315a6952a50ccd555dd365ae585ff988bee504"
+    config_hash: "9bed16a1b58462f0442687d623f08601fa3e07f102e9ee3ce038784468376952"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Local 1,873,726,866-byte dataset; 40,000 lossless images and labels are regenerable and ignored by git.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-v2-data-yaml
+    artifact_type: config
+    role: yolo_train_val_entry_excluding_96_purge_rows
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a4315a6952a50ccd555dd365ae585ff988bee504"
+    source_path: datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2/data.yaml
+    sha256: "94376651f00a7dc5be3192f181109d9b67d4fed92931c5af8c70cf0b5787ef25"
+    size_bytes: 167
+    storage_uri: "repo://datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2/data.yaml"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a4315a6952a50ccd555dd365ae585ff988bee504"
+    config_hash: "9bed16a1b58462f0442687d623f08601fa3e07f102e9ee3ce038784468376952"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Exposes 39,904 train/val images; 96 purge-lineage images remain physically excluded.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-v2-negative-preview
+    artifact_type: annotation_set
+    role: actual_negative_inputs_50_seed_50_added_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e76bc7d43ea48297f5b48d117b067f273a03372e"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/results/actual_negative_inputs_seed50_added50.html
+    sha256: "0a4eac842f52cde24657730cd28d921d24c1d543784e3c2676b0c3b7137a69ea"
+    size_bytes: 24774
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/results/actual_negative_inputs_seed50_added50.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e76bc7d43ea48297f5b48d117b067f273a03372e"
+    config_hash: "9bed16a1b58462f0442687d623f08601fa3e07f102e9ee3ce038784468376952"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Direct links to actual clean PNGs; seed and newly added groups each contain 25 hard plus 25 easy samples.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-v2-added-contact
+    artifact_type: annotation_set
+    role: deterministic_50_added_negative_actual_input_contact_sheet
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e76bc7d43ea48297f5b48d117b067f273a03372e"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/results/actual_added_negative_inputs_sample50.jpg
+    sha256: "ac8a16ef3c78746ee8a6e873df820f696019efc33c840f139d9365c0a52a3079"
+    size_bytes: 969884
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/results/actual_added_negative_inputs_sample50.jpg"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e76bc7d43ea48297f5b48d117b067f273a03372e"
+    config_hash: "9bed16a1b58462f0442687d623f08601fa3e07f102e9ee3ce038784468376952"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Review-only JPEG contact sheet; the underlying 50 model inputs remain separate lossless PNGs with empty labels.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-v2-report
+    artifact_type: report
+    role: canonical_additive_negative_dataset_lineage_and_qa_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "3b57556f049c03c8f4f7f0d83271459527ca660e"
+    source_path: analysis/p1_15m_ma_launch_owner_yolo_neg30000_20260827.md
+    sha256: "fbfaa9d89847a232484ede8d10fa5f3623b9638776ed96a6450b194ec1137aad"
+    size_bytes: 11811
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_yolo_neg30000_20260827.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "3b57556f049c03c8f4f7f0d83271459527ca660e"
+    config_hash: "9bed16a1b58462f0442687d623f08601fa3e07f102e9ee3ce038784468376952"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Answer-first Chinese P1 report with v1 byte baseline, equivalent null controls and complete risk disclosure.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-v2-html
+    artifact_type: report
+    role: owner_facing_additive_negative_dataset_html_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "3b57556f049c03c8f4f7f0d83271459527ca660e"
+    source_path: analysis/html/p1_15m_ma_launch_owner_yolo_neg30000_20260827.html
+    sha256: "9868f24b91377c0fb1400e2f024f9f9914c65af2e16cd4f2a0fe8df63772027d"
+    size_bytes: 16085
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_yolo_neg30000_20260827.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "3b57556f049c03c8f4f7f0d83271459527ca660e"
+    config_hash: "9bed16a1b58462f0442687d623f08601fa3e07f102e9ee3ce038784468376952"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Owner-facing HTML generated immediately from the canonical Markdown.

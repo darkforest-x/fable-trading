@@ -1942,3 +1942,44 @@ experiments:
       Owner batch-authorized weak labels, not per-sample Gold. Completed-history
       windows include 4-6 post-core bars and cannot enter tip/forward/ACTIVE.
       No training, remote write, weight, promote, deployment or runtime change.
+
+  - experiment_id: exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "3b57556f049c03c8f4f7f0d83271459527ca660e"
+    status: active
+    question: >-
+      Can the v1 dataset keep every positive and seed-negative byte unchanged
+      while expanding from 10,000 to 30,000 safe same-source negatives without
+      weakening time isolation, positive guards or zero-holdout discipline?
+    single_variable: >-
+      increase negative_per_positive from one to three; retain the exact v1
+      10,000 positives and 10,000 seed negatives, and change no positive pixel,
+      label, box, split, renderer or negative safety threshold
+    result: >-
+      built_and_fully_audited_locally. The v2 dataset contains 10,000 positives
+      plus 30,000 negatives at 1280x742. All 40,000 images and 80,000 files
+      passed full QA; 20,000 predecessor image/label pairs matched v1 SHA
+      exactly. Negatives are hard 19,922/easy 10,078, every positive has three
+      disjoint paired slots, all 378 source files passed interval-isolation QA,
+      all 14,117 strict candidates remain guarded, and holdout access was zero.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_owner_yolo_neg30000_20260827.md
+    artifacts:
+      - 15m-ma-launch-owner-yolo-neg30000-v2-prereg
+      - 15m-ma-launch-owner-yolo-neg30000-v2-plan-receipt
+      - 15m-ma-launch-owner-yolo-neg30000-v2-build-receipt
+      - 15m-ma-launch-owner-yolo-neg30000-v2-expansion-audit
+      - 15m-ma-launch-owner-yolo-neg30000-v2-manifest
+      - 15m-ma-launch-owner-yolo-neg30000-v2-data-yaml
+      - 15m-ma-launch-owner-yolo-neg30000-v2-negative-preview
+      - 15m-ma-launch-owner-yolo-neg30000-v2-added-contact
+      - 15m-ma-launch-owner-yolo-neg30000-v2-report
+      - 15m-ma-launch-owner-yolo-neg30000-v2-html
+    reuse_allowed: false
+    notes: >-
+      Owner batch-authorized weak labels, not per-sample Gold. Seventy-eight
+      hard slots safely fell back to easy inside the exact matching block; no
+      threshold or guard was relaxed. Completed-history data only: no training,
+      remote write, weight, promote, deployment, forward or runtime change.

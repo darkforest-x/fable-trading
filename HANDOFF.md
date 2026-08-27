@@ -2,6 +2,28 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-27 — 负样本已从 10,000 扩为 30,000，旧数据逐字节保留）
+
+Owner 纠正“负样本为什么只有 10,000”并明确“应该搞 3w 张”。新 v2 已在本地完成：
+`datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2/` 包含 10,000 正例 + 30,000 负例，
+全部 1280×742 无框 PNG；hard 19,922 / easy 10,078。每个正例有 slot 1/2/3 三个不同负窗，
+旧 v1 的 10,000 正例与 10,000 负例全部保留，图片 SHA 和标签 SHA 20,000/20,000 一致；新增
+20,000 负例 hard 14,923 / easy 5,077。
+
+全量 QA 解码 40,000 张图片并核验 80,000 个文件：图片 SHA 40,000/40,000 唯一，正标签
+10,000/10,000 可解析，负标签 30,000/30,000 字节为空，底图精确红框像素 0。30,000/30,000
+同币、同源、同半年、同 split、同窗口几何；378/378 个源文件内负依赖区间互斥，全部 14,117
+个严格正候选继续受保护。train 为正 8,161 + 负 24,483，val 为正 1,815 + 负 5,445；purge
+内正 24 + 负 72 仅留 `excluded/`。holdout OHLCV 读取 0。
+
+实际负输入抽样：
+`experiments/active/exp-15m-ma-launch-owner-yolo-dataset10000-neg30000-v2/results/actual_negative_inputs_seed50_added50.html`；
+报告：`analysis/html/p1_15m_ma_launch_owner_yolo_neg30000_20260827.html`。78 个局部 hard 配额在
+相同安全匹配块内回退 easy，未放松阈值、禁入区或时间隔离。数据仍是 completed-history 的整批
+授权 weak labels，`training_eligible=false / production_eligible=false`；训练、3060、权重、
+ACTIVE/frozen、forward、部署与交易变更均为 0。**下一条允许动作**：Owner 可查看抽样 HTML；
+如明确要求训练，另开训练实验，不读 holdout、不自动 promote。
+
 ## ⚡ 当前真相（2026-08-27 — Owner 认可的 10,000 张已转成 10k+10k YOLO 数据集）
 
 Owner 明确回复“刚刚的10000张不错，弄成训练数据集，同时弄好负样本”。本轮已经物化本地
