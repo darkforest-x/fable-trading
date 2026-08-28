@@ -16,7 +16,11 @@ Owner 指出“还有很多框识别的不对，和拿去训练的图对比”�
 CSV、receipt 与独立 verifier 全通过。完整入口：
 `experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/comparison_gallery.html`；
 报告：`analysis/html/p1_15m_ma_launch_owner_yolo_prediction_training_parity_20260828.html`。
-全仓回归 1744 passed、4 skipped。
+发送回执登记后的全仓回归为 1747 passed、4 skipped。
+
+Owner 随后明确要求“发到 tg”。14:23–14:24 CST 已按 Telegram document 无压缩发送 4/4：
+分布总览、代表性并排图、含 43 张高清对照/画廊/CSV/summary 的无损 ZIP、自包含 HTML 报告；
+完成回执 SHA 已登记，`manual_owner_review_required=false`。
 
 本轮**没有 Owner 人工审核任务**：自动结论就是 2 个保留、41 个淘汰，不要求 Owner 逐图打勾、
 改框或填表。这是同配置经授权的 holdout 消费 #4；禁止在 08-23..27 上据此调门。训练、标签、

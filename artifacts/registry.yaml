@@ -6208,3 +6208,42 @@ artifacts:
     notes: >-
       Browser-checked desktop/mobile rendering, two embedded report images and
       an HTTP-200 link to the complete 43-card gallery; no Owner review task.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-training-parity-v1-delivery-archive
+    artifact_type: dataset
+    role: lossless_forty_three_prediction_training_pairs_gallery_and_audit_tables
+    source_repo: darkforest-x/fable-trading
+    source_commit: "08596eb3fc04cfab3bd0815616f13c89edbc61bb"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/actual_prediction_vs_training_43_hq.zip
+    sha256: "33f8f84884e4e76f5af9b627410da7676ca4926eea5e4c380daa9b4456800400"
+    size_bytes: 6167269
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/actual_prediction_vs_training_43_hq.zip"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "08596eb3fc04cfab3bd0815616f13c89edbc61bb"
+    config_hash: "31f257201e621371693506079b713df18ca2f18369742c8959770db96090e0c1"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      Deterministic CRC-verified ZIP containing README, gallery, audit CSV,
+      summary, overview, representative sheet and all 43 unique 2560x946 PNGs.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-training-parity-v1-telegram-receipt
+    artifact_type: manifest
+    role: hash_bound_four_document_telegram_delivery_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "08596eb3fc04cfab3bd0815616f13c89edbc61bb"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/telegram_delivery_receipt.json
+    sha256: "c27b1d7059916f40c1ed4379dd58f601bb8dac87293b92999e1329c4c6ceb996"
+    size_bytes: 2096
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/telegram_delivery_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "08596eb3fc04cfab3bd0815616f13c89edbc61bb"
+    config_hash: "31f257201e621371693506079b713df18ca2f18369742c8959770db96090e0c1"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      Confirms intro, overview, representative sheet, full lossless 43-image
+      archive, self-contained HTML and completion text were delivered as
+      Telegram documents without recompression; no Owner review task.

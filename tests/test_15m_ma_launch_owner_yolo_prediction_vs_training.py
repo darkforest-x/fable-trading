@@ -19,9 +19,12 @@ from scripts.audit_15m_ma_launch_owner_yolo_prediction_vs_training import (
 )
 from scripts.verify_15m_ma_launch_owner_yolo_prediction_vs_training import verify
 from scripts.send_15m_ma_launch_owner_yolo_prediction_training_parity import (
+    ARCHIVE,
     REPORT,
+    RECEIPT,
     artifact_contract,
     deliver,
+    sha256_file,
 )
 
 
@@ -145,3 +148,19 @@ def test_telegram_delivery_is_resumable_and_needs_no_owner_review(tmp_path: Path
     assert receipt["manual_owner_review_required"] is False
     assert len(sent_text) == 2
     assert len(sent_documents) == 4
+
+
+def test_committed_telegram_delivery_is_complete_and_hash_bound() -> None:
+    receipt = json.loads(RECEIPT.read_text(encoding="utf-8"))
+    assert receipt["delivery_complete"] is True
+    assert receipt["manual_owner_review_required"] is False
+    assert receipt["expected_documents"] == 4
+    assert [row["id"] for row in receipt["document_actions"]] == [
+        "overview",
+        "representative_pairs",
+        "full_43_archive",
+        "html_report",
+    ]
+    for row in receipt["document_actions"]:
+        assert sha256_file(Path(row["path"])) == row["sha256"]
+    assert sha256_file(ARCHIVE) == receipt["document_actions"][2]["sha256"]
