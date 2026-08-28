@@ -1,0 +1,60 @@
+{
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3",
+  "protocol": "owner_yolo_20260827_all_events_full_context_v3_20260828",
+  "registered_at_utc": "2026-08-28T05:00:00Z",
+  "amended_at_utc": "2026-08-28T05:05:22Z",
+  "amendment_reason": "Preflight found all 19 frozen snapshots end at 2026-08-28 01:15 UTC, and layout preflight found that 1360px clipped the exact-input inset by 8px. Both failed renders wrote no results. The display contract was narrowed to the maximum common frozen range rather than fetching or fabricating two later bars, and canvas height was raised to 1400px without changing chart geometry.",
+  "owner_authorization": {
+    "request": "先把昨天的所有信号发我看一下，高清一点，不要只给我检测框，要看整体",
+    "holdout_consumption_number_for_this_configuration": 3,
+    "authorized_scope": "Render and review every already-frozen 2026-08-27 board event with full-day context; no new inference or selection.",
+    "training_or_tuning_authorized": false,
+    "threshold_or_weight_change_authorized": false,
+    "production_or_promotion_authorized": false,
+    "telegram_delivery_authorized": true
+  },
+  "source_contract": {
+    "source_experiment_id": "exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2",
+    "events_path": "analysis/output/ma_launch_owner_yolo_recent5d_rawbox_v2/legacy_events.csv",
+    "events_sha256": "0aa011765e0cd4d6a47322d263eb6a3931fccfb18098d58302058ad33cdd8eda",
+    "snapshot_dir": "analysis/output/ma_launch_owner_yolo_recent5d_v1/kline_snapshot",
+    "board_day_utc": "2026-08-27T00:00:00Z",
+    "expected_events": 43,
+    "expected_symbols_with_events": 19,
+    "expected_window_end_on_board_day": 41,
+    "expected_window_end_after_midnight": 2,
+    "event_identity_rule": "Use every row whose frozen board-day field is 2026-08-27; do not suppress, cluster, rerank or rescore any event."
+  },
+  "visual_contract": {
+    "documents": 43,
+    "boxes_per_document": 1,
+    "canvas_width_px": 1920,
+    "canvas_height_px": 1400,
+    "full_context": "2026-08-26 22:00 through 2026-08-28 01:15 UTC (110 contiguous frozen 15m bars)",
+    "full_context_bars": 110,
+    "focal_day_bars": 96,
+    "boundary_context_bars_before": 8,
+    "boundary_context_bars_after": 5,
+    "model_input_inset": "Exact 1280x742 W18-25 inference input with the preserved raw YOLO cx/cy/w/h rectangle.",
+    "main_panel_box": "The same raw rectangle inverse-projected from model-input pixels into absolute fractional bar and price coordinates, then reprojected into the 110-bar context chart.",
+    "decision_marker": "Vertical dashed line at window_end_time, the actual completed detection time.",
+    "timezone_labels": [
+      "UTC",
+      "Asia/Shanghai"
+    ],
+    "telegram_transport": "document"
+  },
+  "safety": {
+    "network_reads": 0,
+    "new_model_inference": false,
+    "threshold_or_weight_changed": false,
+    "training_or_tuning": false,
+    "active_or_frozen_changed": false,
+    "promoted": false,
+    "deployed": false,
+    "forward_state_changed": false,
+    "orders_placed": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}

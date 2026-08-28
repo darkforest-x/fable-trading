@@ -2126,3 +2126,53 @@ experiments:
       compressed day chart. V1 remains valid only for scan counts and event
       identities; v2 supersedes it for box-position review. No tuning, training,
       promotion, ACTIVE/frozen, forward, deployment or order state changed.
+
+  - experiment_id: exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    status: accepted
+    question: >-
+      Can every frozen 2026-08-27 Owner-YOLO event be delivered as a separate
+      high-resolution document that shows the whole available day path and the
+      exact model input, while preserving the original box and true detection
+      completion time?
+    single_variable: >-
+      replace the compressed multi-event review surface with 43 one-event
+      1920x1400 documents containing a 110-bar frozen full-context panel and the
+      exact 1280x742 W18-25 input inset; keep event identities, raw cx/cy/w/h,
+      weights, thresholds, NMS, structural filters and timestamps unchanged
+    result: >-
+      completed_full_context_delivery_and_exploratory_audit. Forty-three of
+      forty-three events, exact model inputs, full-context rerenders, box
+      projection roundtrips and PNG hashes reproduced. Telegram received all 43
+      PNGs as lossless documents. The 43 five-bar events map to 34 overlap
+      episodes across 19 symbols; nine are second events inside an existing
+      episode. Median predicted width is 3.73 bars, only 3.42% of the 110-bar
+      chart, while normalized median height is 43.5% above the 10k training
+      positive labels. Detection completes 60-90 minutes after the core box.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_owner_yolo_20260827_fullcontext_analysis_20260828.md
+    artifacts:
+      - 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-prereg
+      - 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-render-receipt
+      - 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-manifest
+      - 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-qa-receipt
+      - 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-analysis-receipt
+      - 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-overview
+      - 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-telegram-receipt
+      - 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-report
+      - 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-html
+      - 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-html-qa
+    reuse_allowed: false
+    notes: >-
+      Owner-authorized bounded holdout consumption #3. The first two preflights
+      wrote no result and exposed a common frozen cutoff of 01:15 UTC plus an
+      eight-pixel canvas clipping error; the successful contract uses 110 bars
+      and 1400px height without fetching or fabricating data. Descriptive
+      direction/confidence statistics are post-hoc diagnostics, not a
+      preregistered performance test and not permission to tune this holdout.
+      No network market-data read, new inference, training, promotion,
+      ACTIVE/frozen, forward, deployment or order state changed.
+    data_cutoff: "2026-08-28T01:15:00Z"

@@ -176,6 +176,7 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
         "exp-btc-4h-ma-launch-similarity-top20-v2",
         "exp-btc-4h-ma-launch-similarity-v1",
         "exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2",
+        "exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3",
         "exp-15m-ma-launch-owner-yolo-recent5d-v1",
         "exp-15m-ma-launch-t3-daily-movers3d-v1",
         "exp-15m-ma-launch-t3-daily-movers3d-v2",

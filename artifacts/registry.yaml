@@ -5852,3 +5852,191 @@ artifacts:
     notes: >-
       Confirms UTF-8, six embedded images, zero external PNG references, all
       required report sections and equality with the Telegram-delivered HTML.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-prereg
+    artifact_type: config
+    role: owner_authorized_third_holdout_use_and_full_context_display_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/preregistration.json
+    sha256: "ede2bb62bbbd632c1ac0eaf6cd077ed39a417ac0badc39788c39865778cd456c"
+    size_bytes: 3157
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/preregistration.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    config_hash: "ede2bb62bbbd632c1ac0eaf6cd077ed39a417ac0badc39788c39865778cd456c"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      Freezes 43 already-scanned 08-27 events, 110 common frozen context bars,
+      one original box per 1920x1400 document and holdout consumption #3.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-render-receipt
+    artifact_type: manifest
+    role: frozen_source_full_context_render_and_safety_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/render_receipt.json
+    sha256: "2031f8284af94e18f6ae1e74290ae715aa49342a8d2a9b0447213a3a548e2e78"
+    size_bytes: 3314
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/render_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    config_hash: "ede2bb62bbbd632c1ac0eaf6cd077ed39a417ac0badc39788c39865778cd456c"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      Binds 19 snapshot hashes, 43 documents, 37 LONG, six SHORT, two
+      after-midnight completions and zero network/inference/training mutations.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-manifest
+    artifact_type: dataset
+    role: forty_three_lossless_full_context_png_identity_and_geometry_manifest
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/manifest.jsonl
+    sha256: "99488f8aac795b266ab0f214f0b2131796e3e09779f57b3e31c32ca0045a07e3"
+    size_bytes: 55551
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/manifest.jsonl"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    config_hash: "ede2bb62bbbd632c1ac0eaf6cd077ed39a417ac0badc39788c39865778cd456c"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      One row per Telegram-delivered PNG with event identity, source/input/image
+      hashes, absolute time-price projection, context geometry and one-box count.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-qa-receipt
+    artifact_type: manifest
+    role: exact_event_input_projection_and_full_png_rerender_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/qa_receipt.json
+    sha256: "bdfb0a65f3d65a1d82273ea64648f4e1a327eed1d6028b06912062a68c0b3ade"
+    size_bytes: 1048
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/qa_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    config_hash: "ede2bb62bbbd632c1ac0eaf6cd077ed39a417ac0badc39788c39865778cd456c"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      Independently reproduced all 43 exact model inputs, all 43 full PNGs and
+      all box geometry while checking one-box, direction and safety totals.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-analysis-receipt
+    artifact_type: manifest
+    role: exploratory_selectivity_episode_timing_geometry_and_parity_analysis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/detailed_analysis_receipt.json
+    sha256: "7e16eaf8cf0c989d3e36de5df4d889a53ca633b18a56a341e86ddd1d514ae06e"
+    size_bytes: 7878
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/detailed_analysis_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    config_hash: "ede2bb62bbbd632c1ac0eaf6cd077ed39a417ac0badc39788c39865778cd456c"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      Machine-readable exploratory audit of the 16,320-to-43 funnel, 34
+      episodes, nine redundant events, confidence, timing, training/prediction
+      geometry and a deliberately wrong projection negative control.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-overview
+    artifact_type: report
+    role: owner_detailed_funnel_repeat_timing_geometry_diagnostic_png
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/detailed_analysis_overview.png
+    sha256: "c99d40dc81dff501b4f022a2e41f38214ae058cb994b5c5640e882716ce8f08c"
+    size_bytes: 223959
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/detailed_analysis_overview.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    config_hash: "ede2bb62bbbd632c1ac0eaf6cd077ed39a417ac0badc39788c39865778cd456c"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: 1920x1400 six-panel exploratory diagnostic; no trading return metric.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-telegram-receipt
+    artifact_type: manifest
+    role: hash_bound_forty_three_document_telegram_delivery_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/telegram_delivery_receipt.json
+    sha256: "7cb573aaa1d768f8c13f80d706d0dbcbf18e3ee4f93b1a9152bb57b6bb862766"
+    size_bytes: 15874
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/telegram_delivery_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    config_hash: "ede2bb62bbbd632c1ac0eaf6cd077ed39a417ac0badc39788c39865778cd456c"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      Confirms intro, 43 individual lossless PNG documents and completion text;
+      resumable sender refuses a duplicate completed delivery.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-report
+    artifact_type: report
+    role: canonical_full_context_delivery_and_detailed_analysis_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    source_path: analysis/p1_15m_ma_launch_owner_yolo_20260827_fullcontext_analysis_20260828.md
+    sha256: "96cd04565efc527a5786d67d23333c6d0d7024e54de248874166d3718c8fefdd"
+    size_bytes: 15266
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_yolo_20260827_fullcontext_analysis_20260828.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    config_hash: "ede2bb62bbbd632c1ac0eaf6cd077ed39a417ac0badc39788c39865778cd456c"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      Answer-first Chinese report with full-context method, 43-to-34-to-19
+      distinction, training/prediction geometry, timing, parity controls,
+      holdout use #3, risks and exact reproduction commands.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-html
+    artifact_type: report
+    role: owner_delivery_self_contained_full_context_analysis_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    source_path: analysis/html/p1_15m_ma_launch_owner_yolo_20260827_fullcontext_analysis_20260828.html
+    sha256: "286ee9285eb6bc9351888896fa4d804062149e998b0ddaab4af2478e5f631840"
+    size_bytes: 1171004
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_yolo_20260827_fullcontext_analysis_20260828.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    config_hash: "ede2bb62bbbd632c1ac0eaf6cd077ed39a417ac0badc39788c39865778cd456c"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: Self-contained 1.17 MB HTML with four embedded PNG data URIs.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-fullcontext-v3-html-qa
+    artifact_type: manifest
+    role: browser_render_self_contained_html_verification_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/html_qa_receipt.json
+    sha256: "280ccecb1b4fd25daf446ef85890f5b84137a9e781b2f2a87ec4e20597461e45"
+    size_bytes: 975
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/html_qa_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1c43b394265554dad4580426e75b167d9fd28dd3"
+    config_hash: "ede2bb62bbbd632c1ac0eaf6cd077ed39a417ac0badc39788c39865778cd456c"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      Browser HTTP 200, expected title and four embedded images; full-page
+      screenshot recorded with zero missing-image placeholders.

@@ -2,6 +2,27 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-28 — 08-27 的 43 个事件已按高清全景逐张交付）
+
+Owner 先要求详细分析，随后明确要求“先把昨天的所有信号发我看一下，高清一点，不要只给检测框，
+要看整体”。`exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3` 因此冻结复用 rawbox-v2 的 43 个
+08-27 事件，不重推理、不筛选：37 LONG / 6 SHORT、19 个币。每个 1920×1400 PNG 上方为冻结
+快照共同覆盖的 110 根 15m 全景（08-26 22:00..08-28 01:15 UTC），右下为逐像素相同的
+1280×742 W18–25 模型输入；每张只放同一个原始 YOLO 框，虚线标真实 `window_end_time`。
+
+43/43 事件身份、模型输入、全图逐像素重渲染、原框逆投影闭环和 PNG SHA 全通过；43 张均作为
+Telegram document 逐张发送并有断点回执。详细审计显示 43 个 5-bar 事件只有 34 个重叠 episode，
+其中 9 个是已有 episode 的二次触发；Top20 19/20 有信号，选择性仍不足。框中位宽 3.73 根，
+只占 110 根全景 3.42%，与 10k 训练标签中位宽仅 +4.2%；预测中位高度却 +43.5%。检测要在核心
+后再等 4–6 根，即 60–90 分钟。全仓回归 1738 passed、4 skipped。报告：
+`analysis/html/p1_15m_ma_launch_owner_yolo_20260827_fullcontext_analysis_20260828.html`。
+
+这是同一配置 Owner 授权的 holdout 消费 #3；分析为事后探索性展示审计，禁止据此在 08-23..27
+调阈值、episode 预算或框高后继续声称未见。网络、新推理、训练、ACTIVE/frozen、promote、
+forward、部署和订单变化均为 0，`training_eligible=false / production_eligible=false`。
+**下一条允许动作**：等 Owner 看完 43 张后给出逐样本语义判断；若要减少重复或覆盖率，另在
+pre-holdout / 新鲜 tip Gold 上预注册单变量方案。
+
 ## ⚡ 当前真相（2026-08-28 — 最近五日 Top20 已按原始 YOLO 四维框重做）
 
 Owner 指出上一版五日图一张有多个框，而且框位与训练/模型图不一致，随后明确要求“那你重新弄”。
