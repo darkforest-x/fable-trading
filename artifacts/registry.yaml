@@ -5338,3 +5338,23 @@ artifacts:
     config_hash: "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c"
     data_cutoff: "2026-05-03T19:45:00Z"
     notes: Owner-facing standalone HTML with embedded training curves and actual validation prediction preview.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-v1-prereg
+    artifact_type: config
+    role: frozen_owner_completed_history_recent_five_day_visual_probe_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2b95e3290c4a37977876397247a630f69901dae1"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/preregistration.json
+    sha256: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
+    size_bytes: 4880
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2b95e3290c4a37977876397247a630f69901dae1"
+    config_hash: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: >-
+      Committed before any market-data read; freezes five UTC days, crypto-only
+      Top20 selection, delivered weight identity, exact training-supported
+      geometry and all no-tuning/no-production gates.
