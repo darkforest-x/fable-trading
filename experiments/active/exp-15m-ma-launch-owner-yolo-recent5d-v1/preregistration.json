@@ -1,0 +1,100 @@
+{
+  "protocol": "ma6_owner_yolo_neg30000_recent5d_daily_abs_movers_v1_20260828",
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-recent5d-v1",
+  "created_at": "2026-08-28T09:52:42+08:00",
+  "source_commit_before_builder": "d283b35bb7b182e5a7d4fd6a96a9d04618d96b2a",
+  "owner_authorization": {
+    "request": "跑一下最近 5 天的数据",
+    "interpreted_scope": "Continue the prior daily absolute-mover Top20 visual probe, replacing the detector with the newly trained Owner 10,000-positive plus 30,000-negative weight and extending the board from three to five complete UTC days.",
+    "authorized_holdout_scope": "Exactly 2026-08-23 through 2026-08-27 UTC, current live OKX instCategory=1 crypto USDT swaps for post-hoc daily ranking, then only the five Top20 boards' selected union for 15m inference context.",
+    "holdout_consumption_number_for_this_configuration": 1,
+    "training_or_tuning_authorized": false,
+    "production_or_promotion_authorized": false
+  },
+  "calendar": {
+    "timezone": "UTC",
+    "complete_days": [
+      "2026-08-23T00:00:00Z",
+      "2026-08-24T00:00:00Z",
+      "2026-08-25T00:00:00Z",
+      "2026-08-26T00:00:00Z",
+      "2026-08-27T00:00:00Z"
+    ],
+    "current_partial_day_excluded": true
+  },
+  "ranking": {
+    "venue": "OKX",
+    "instrument_type": "USDT-SWAP",
+    "universe_snapshot": "intersection of current tickers and public instruments at official fetch time",
+    "required_instrument_metadata": "state=live and instCategory=1",
+    "exclude": "all instCategory!=1 or state!=live instruments, then yoyo.data.loader.BLOCKED_BASES plus yoyo.data.universe.STOCKISH_BASES",
+    "bar": "1Dutc",
+    "return": "confirmed daily close / confirmed daily open - 1",
+    "sort": "descending absolute return; symbol ascending is the deterministic tie break",
+    "top_per_day": 20,
+    "minimum_volume_filter": null,
+    "causality": "post_hoc_same_day_ranking_not_live_selection"
+  },
+  "detector": {
+    "display_name": "Owner-W18-25",
+    "weights": "analysis/output/ma_launch_owner_yolo_neg30000_v2/ma_launch_owner_yolo_neg30000_v2_y11s_ft960/weights/best.pt",
+    "weights_sha256": "58888f996f7da46d4321316964085e90855d00e4c0a14e18c98b303c6e43c182",
+    "training_manifest": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2/manifest.jsonl",
+    "training_manifest_sha256": "6e601034ab15765a74b788cc6d094e9326c3044c1fb615c908ef9de897d6e0af",
+    "renderer": "yoyo/layers/l1_detection/render.py",
+    "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+    "class_names": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "bar": "15m",
+    "window_lengths": [18, 19, 20, 21, 22, 23, 24, 25],
+    "window_length_source": "exact support of the 10,000 positive training manifest",
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "imgsz": 960,
+    "mapped_core_length_bars_allowed": [4, 5],
+    "mapped_confirmation_bars_allowed": [4, 5, 6],
+    "scan_endpoint_extension_after_day_bars": 6,
+    "event_attribution": "mapped core-end bar must fall inside the ranked UTC day",
+    "same_symbol_event_gap_bars": 5,
+    "future_bars_rendered_into_inference": 0,
+    "threshold_or_window_retuning_after_results": false
+  },
+  "data": {
+    "instrument_metadata_source": "OKX public/instruments?instType=SWAP",
+    "daily_source": "OKX public market/candles, 1Dutc, confirmed rows only",
+    "inference_source": "OKX public candles/history-candles, 15m, confirmed rows only",
+    "snapshot_location": "analysis/output/ma_launch_owner_yolo_recent5d_v1/kline_snapshot",
+    "canonical_data_written": false,
+    "minimum_context_before_first_day_hours": 48,
+    "selected_day_required_15m_bars": 96,
+    "selected_day_gaps_allowed": 0
+  },
+  "outputs": {
+    "local_output": "analysis/output/ma_launch_owner_yolo_recent5d_v1",
+    "committed_results": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results",
+    "report": "analysis/p1_15m_ma_launch_owner_yolo_recent5d_20260828.md",
+    "html": "analysis/html/p1_15m_ma_launch_owner_yolo_recent5d_20260828.html"
+  },
+  "interpretation": {
+    "economic_backtest": false,
+    "holdout_final_acceptance": false,
+    "purpose": "retrospective visual probe of the newly trained completed-history Owner weak-label detector",
+    "must_disclose": [
+      "same-day Top20 membership is known only after each day closes",
+      "the detector requires four to six post-core confirmation bars",
+      "the detector was trained on completed-history weak labels rather than tip Gold",
+      "detections are not live signals or evidence of profitability",
+      "the current-live universe introduces survivorship bias"
+    ]
+  },
+  "safety": {
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "production_eligible": false
+  }
+}

@@ -217,10 +217,14 @@ def parse_confirmed_candles(
 def fetch_daily_rows(
     inst_id: str, days: Sequence[pd.Timestamp]
 ) -> tuple[str, dict[pd.Timestamp, dict[str, Any]], int, str | None]:
-    """Fetch five recent 1Dutc rows and retain the three preregistered days."""
+    """Fetch enough recent 1Dutc rows to cover every preregistered complete day."""
 
     try:
-        url = f"{CANDLES_URL}?instId={inst_id}&bar=1Dutc&limit=5"
+        # One current partial row may precede the requested complete days.  The
+        # extra row also makes the bound robust around the UTC close without
+        # broadening the retained interval.
+        limit = max(5, len(days) + 2)
+        url = f"{CANDLES_URL}?instId={inst_id}&bar=1Dutc&limit={limit}"
         raw = list(_request(url).get("data") or [])
         wanted = set(days)
         found: dict[pd.Timestamp, dict[str, Any]] = {}
@@ -474,7 +478,7 @@ def fetch_and_rank(
     universe_path = out / "universe_snapshot.json"
     payload = {
         "protocol": prereg["protocol"],
-        "experiment_id": EXPERIMENT_ID,
+        "experiment_id": str(prereg["experiment_id"]),
         "source_commit": source_commit,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "holdout_consumption_number_for_this_configuration": 1,
@@ -846,7 +850,12 @@ def render_symbol_day_panel(
 
 
 def contact_sheet(
-    panels: Sequence[np.ndarray], *, day: pd.Timestamp, event_count: int, columns: int = 2
+    panels: Sequence[np.ndarray],
+    *,
+    day: pd.Timestamp,
+    event_count: int,
+    columns: int = 2,
+    model_label: str = "t-3",
 ) -> np.ndarray:
     """Compose all 20 ranked symbol charts into one owner-facing daily PNG."""
 
@@ -859,7 +868,7 @@ def contact_sheet(
     canvas = np.full((banner_h + rows * cell_h, columns * cell_w, 3), 244, dtype=np.uint8)
     _put_text(
         canvas,
-        f"{day:%Y-%m-%d} UTC | post-hoc abs daily mover Top20 | t-3 events {event_count}",
+        f"{day:%Y-%m-%d} UTC | post-hoc abs daily mover Top20 | {model_label} events {event_count}",
         (16, 31),
         scale=0.82,
         thickness=2,
@@ -880,15 +889,21 @@ def contact_sheet(
 
 
 def render_overview(
-    ranked: Sequence[Mapping[str, Any]], signals: Sequence[Mapping[str, Any]], days: Sequence[pd.Timestamp]
+    ranked: Sequence[Mapping[str, Any]],
+    signals: Sequence[Mapping[str, Any]],
+    days: Sequence[pd.Timestamp],
+    *,
+    model_label: str = "t-3",
 ) -> np.ndarray:
-    """Render three compact ranked boards with per-symbol event counts."""
+    """Render compact ranked boards with per-symbol event counts."""
 
-    width, height = 1800, 1100
+    columns = 3
+    rows = max(1, math.ceil(len(days) / columns))
+    width, height = 1800, 100 + rows * 1000
     canvas = np.full((height, width, 3), 248, dtype=np.uint8)
     _put_text(
         canvas,
-        "15m t-3 YOLO | last 3 complete UTC days | daily absolute mover Top20",
+        f"15m {model_label} YOLO | last {len(days)} complete UTC days | daily absolute mover Top20",
         (24, 42),
         scale=0.95,
         thickness=2,
@@ -915,16 +930,18 @@ def render_overview(
         if int(row["class_id"]) == 1
     )
     card_w = 570
-    for column, day in enumerate(days):
+    for index, day in enumerate(days):
+        row_index, column = divmod(index, columns)
         x0 = 20 + column * 590
-        cv2.rectangle(canvas, (x0, 105), (x0 + card_w, 1075), (225, 229, 234), 2)
+        y0 = 105 + row_index * 990
+        cv2.rectangle(canvas, (x0, y0), (x0 + card_w, y0 + 970), (225, 229, 234), 2)
         board = sorted(
             (row for row in ranked if utc(row["day"]) == day), key=lambda row: int(row["rank"])
         )
         day_key = day.isoformat()
         total = sum(count[(day_key, str(row["symbol"]))] for row in board)
-        _put_text(canvas, f"{day:%Y-%m-%d} UTC | events {total}", (x0 + 12, 140), scale=0.68, thickness=2)
-        _put_text(canvas, "#  SYMBOL            RETURN     DET(L/S)", (x0 + 12, 174), scale=0.5, thickness=1)
+        _put_text(canvas, f"{day:%Y-%m-%d} UTC | events {total}", (x0 + 12, y0 + 35), scale=0.68, thickness=2)
+        _put_text(canvas, "#  SYMBOL            RETURN     DET(L/S)", (x0 + 12, y0 + 69), scale=0.5, thickness=1)
         for line, row in enumerate(board):
             symbol = str(row["symbol"]).replace("_USDT_SWAP", "")[:14]
             key = (day_key, str(row["symbol"]))
@@ -934,7 +951,7 @@ def render_overview(
                 f"{count[key]:>2}({long_count[key]}/{short_count[key]})"
             )
             color = (20, 125, 35) if float(row["daily_return"]) >= 0 else (45, 45, 190)
-            _put_text(canvas, text, (x0 + 12, 210 + line * 41), color=color, scale=0.54, thickness=1)
+            _put_text(canvas, text, (x0 + 12, y0 + 105 + line * 41), color=color, scale=0.54, thickness=1)
     return canvas
 
 
@@ -1057,7 +1074,12 @@ def scan_and_render(
             panels.append(
                 render_symbol_day_panel(frames[str(day_row["symbol"])], day_row=day_row, hits=hits)
             )
-        sheet = contact_sheet(panels, day=day, event_count=day_events)
+        sheet = contact_sheet(
+            panels,
+            day=day,
+            event_count=day_events,
+            model_label=str(detector.get("display_name", "t-3")),
+        )
         path = results / f"day_{day:%Y%m%d}_top20.png"
         if path.exists():
             raise FileExistsError(path)
@@ -1076,7 +1098,12 @@ def scan_and_render(
             }
         )
 
-    overview = render_overview(ranked, all_signals, days)
+    overview = render_overview(
+        ranked,
+        all_signals,
+        days,
+        model_label=str(detector.get("display_name", "t-3")),
+    )
     overview_path = results / "overview.png"
     if overview_path.exists():
         raise FileExistsError(overview_path)
@@ -1089,7 +1116,7 @@ def scan_and_render(
     day_counts = Counter(str(row["day"]) for row in all_signals)
     payload = {
         "protocol": prereg["protocol"],
-        "experiment_id": EXPERIMENT_ID,
+        "experiment_id": str(prereg["experiment_id"]),
         "source_commit": source_commit,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "holdout_consumption_number_for_this_configuration": 1,
