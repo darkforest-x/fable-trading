@@ -1,0 +1,182 @@
+{
+  "schema_version": 2,
+  "experiment_id": "exp-15m-ma-launch-owner-perfect-filter10000-v1",
+  "created_at": "2026-08-28T19:45:00+08:00",
+  "stage": "P0_shape_ranking",
+  "owner_request": {
+    "quote": "正样本里面你有没有什么办法帮我再过滤一遍 选出完美的形态图",
+    "interpretation": "Run one deterministic, strict second-pass over all 10,000 weak-positive source examples, while explicitly identifying the 9,976 positives exposed by the current data.yaml. Produce ranked perfect candidates without changing images, labels, splits, eligibility, models, or production state."
+  },
+  "inputs": {
+    "positive_manifest_path": "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/review_manifest.jsonl",
+    "positive_manifest_sha256": "60bb7350c446ee1a406efbd48a4d7e7426ac4838e35b901bee3073019b327e76",
+    "positive_rows": 10000,
+    "training_dataset_manifest_path": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2/manifest.jsonl",
+    "training_dataset_manifest_sha256": "6e601034ab15765a74b788cc6d094e9326c3044c1fb615c908ef9de897d6e0af",
+    "training_dataset_yaml_path": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2/data.yaml",
+    "training_dataset_yaml_sha256": "94376651f00a7dc5be3192f181109d9b67d4fed92931c5af8c70cf0b5787ef25",
+    "training_dataset_summary_path": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2/build_summary.json",
+    "training_dataset_summary_sha256": "5d47ed2ddfa9355b32abf1dbccad05354ebd37d8471abef3367832eec29d1c2a",
+    "training_dataset_positive_rows": 10000,
+    "training_dataset_exposed_positive_rows": 9976,
+    "source_audit_path": "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/source_audit.jsonl",
+    "source_audit_sha256": "be105d266da362fa734a460e9dca11fa0d86b5f4b25f571dfb648c8adad59573",
+    "reference_base_manifest_path": "experiments/active/exp-15m-ma-launch-ma-box-review50-v1/results/review_manifest.jsonl",
+    "reference_base_manifest_sha256": "cc852cb9da838056a8c95e80ba60270fa1537860973437b35638cff1efe63c66",
+    "reference_density_manifest_path": "experiments/active/exp-15m-ma-launch-density-core-box-review50-v3/results/review_manifest.jsonl",
+    "reference_density_manifest_sha256": "edebf12fdbbecaa4208c23a1c36bfad523a2dacea988ee5c824d3dba58198d8f",
+    "reference_owner_manifest_path": "experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/review_manifest.jsonl",
+    "reference_owner_manifest_sha256": "239eab3eae9f7ff635e6e755b7dc934cd29152b5665cbdb7f934739ea189a00c",
+    "reference_family_manifest_path": "experiments/active/exp-15m-ma-launch-owner-autofill50-v7/results/review_manifest.jsonl",
+    "reference_family_manifest_sha256": "bc93d37fa598146b20f8cad961a17c149ea81520153574a3df57296c0aadcdce",
+    "reference_rows_per_manifest": 50,
+    "holdout_start_exclusive": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0
+  },
+  "owner_reference_geometry": {
+    "perfect": [{"source_order": 44, "sample_id": "a20a0a4e50a94b1a017d38a0", "symbol": "NEIRO_USDT_SWAP", "geometry": "owner_v5_-6_-2"}],
+    "good": [{"source_order": 42, "sample_id": "4e86ddc32a5401c49bf4aeb3", "symbol": "FIL_USDT_SWAP", "geometry": "owner_v5_-6_-2"}],
+    "standard_late": [{"source_order": 48, "sample_id": "0846b4f53090c2980df602b9", "symbol": "NMR_USDT_SWAP", "geometry": "owner_v5_-10_-6"}],
+    "semantic_reject": [
+      {"source_order": 3, "sample_id": "872de8d2642e9e871a4a2035"},
+      {"source_order": 8, "sample_id": "37f9c326853c3d8aebae269e"},
+      {"source_order": 20, "sample_id": "28aff3d9037db73f28a0e97d"},
+      {"source_order": 21, "sample_id": "8848f3a02114a3beb69784e5"},
+      {"source_order": 22, "sample_id": "7fd6ab8d8f1bebf3cc981d4a"},
+      {"source_order": 34, "sample_id": "a0ca16c213bef139246c945b"}
+    ],
+    "boundary_wrong_reboxed": [
+      {"source_order": 14, "sample_id": "5de0dd06a74bd3d156a51bbc", "old_geometry": "v3_-12_-8", "proposal_geometry": "v5_-10_-6"},
+      {"source_order": 18, "sample_id": "a8079908f501a92e573b87cd", "old_geometry": "v3_-12_-8", "proposal_geometry": "v5_-11_-8"},
+      {"source_order": 32, "sample_id": "9782cd6e3344064fa0b7d216", "old_geometry": "v3_-12_-8", "proposal_geometry": "v5_-10_-6"},
+      {"source_order": 35, "sample_id": "e1d6b8c70518b4785aced64d", "old_geometry": "v3_-11_-7", "proposal_geometry": "v5_-9_-5"},
+      {"source_order": 40, "sample_id": "e9578d1f834c6c5e2fa33fe3", "old_geometry": "v3_-11_-7", "proposal_geometry": "v5_-9_-5"}
+    ],
+    "interpretation": "#44 and #42 are the only perfect/good calibration anchors. #48 is visually recognizable but deliberately excluded by both pre-release lateness morphology (the move is already inside its core) and dirty post-core release. Semantic rejects use their exact v3 boxes. Boundary-wrong rows are geometry controls only, never whole-event negative labels. The v7 50 are a broad accepted family, not perfect anchors."
+  },
+  "profile": {
+    "pre_core_bars": 12,
+    "core_resampled_bars": 5,
+    "post_core_bars": 5,
+    "channels": [
+      "direction_aligned_close_from_core_ma_origin_atr",
+      "direction_aligned_body_atr",
+      "favourable_wick_atr",
+      "adverse_wick_atr",
+      "direction_aligned_ma_center_from_core_origin_atr",
+      "six_ma_spread_atr",
+      "direction_aligned_close_to_ma_center_atr"
+    ],
+    "direction_normalization": "LONG sign +1; SHORT sign -1; time order is never reversed.",
+    "shape_normalization": "Per-channel z-normalization is used only for sequence shape distance. Absolute amplitude remains in scalar gates."
+  },
+  "hard_gates": {
+    "max_six_ma_end_bandwidth_atr": 0.95,
+    "max_six_ma_core_envelope_atr": 1.50,
+    "min_core_directional_progress_atr": -0.60,
+    "max_core_directional_progress_atr": 1.00,
+    "min_aligned_ma_slope_atr_per_bar": 0.02,
+    "contracting_max_end_start_ratio": 0.90,
+    "contracting_min_decrease_steps": 2,
+    "crossing_max_end_start_ratio": 1.15,
+    "crossing_min_pairwise_order_flips": 3,
+    "min_candle_bundle_touch_rate": 0.40,
+    "max_close_to_bundle_q75_atr": 1.50,
+    "max_pre_body_q90_atr": 1.10,
+    "max_pre_abs_path_atr": 5.50,
+    "max_pre_last3_directional_progress_atr": 1.00,
+    "max_pre_favourable_excursion_atr": 3.00,
+    "min_post1_progress_atr": 0.00,
+    "min_post2_progress_atr": 1.00,
+    "min_post3_progress_atr": 1.25,
+    "min_post5_progress_atr": 1.75,
+    "min_post_progress_floor_atr": 0.00,
+    "min_positive_post_steps_out_of_5": 3,
+    "max_post_retrace_atr": 0.75,
+    "max_post_reverse_body_count": 1,
+    "max_opposite_post_body_atr": 0.80,
+    "max_core_wick_q90_atr": 2.00,
+    "max_core_reverse_body_count": 1,
+    "max_core_body_atr": 1.20,
+    "max_box_height_norm": 0.55,
+    "calibration_contract": "#44 and #42 pass every gate; #48 fails at least one pre-release lateness morphology gate and at least one release gate; each explicit semantic reject fails at least one named gate. Thresholds are frozen before inspecting the 10,000-row output distribution."
+  },
+  "sequence_distance": {
+    "method": "segment-preserving weighted lock-step Euclidean plus Sakoe-Chiba constrained multivariate DTW and derivative-DTW",
+    "segment_slices": {"prelude": [0, 12], "core": [12, 17], "release": [17, 22]},
+    "segment_weights": {"prelude": 0.25, "core": 0.35, "release": 0.40},
+    "nearest_prefilter_lockstep_k": 3,
+    "nearest_prefilter_contract": "For pools larger than three, rank every reference by segment-preserving lock-step distance and run constrained DTW/DDTW on the closest three; this is frozen before the 10,000-row distribution is inspected.",
+    "sakoe_chiba_radius_bars": 2,
+    "sakoe_chiba_window_fraction": 0.20,
+    "window_fraction_scope": "The 0.20 fraction records the isolated aeon full-fixture parity call. Operational segmented comparison uses the frozen radius of two bars independently inside prelude, core, and release; it does not recompute a percentage per segment.",
+    "weights": {"lockstep": 0.35, "dtw": 0.40, "ddtw": 0.25},
+    "implementation_check": "The local implementation must be numerically parity-checked against aeon in an isolated evaluation environment; aeon is never installed into the training venv."
+  },
+  "ranking": {
+    "axis_weights": {
+      "density_topology": 0.25,
+      "prelude_quietness": 0.15,
+      "price_bundle_contact": 0.10,
+      "release_cleanliness": 0.20,
+      "wick_reverse_cleanliness": 0.10,
+      "reference_similarity": 0.20
+    },
+    "worst_axis_weight": 0.25,
+    "perfect_threshold": "minimum leave-one-anchor-out quality score of exact #44 and #42; no 0.90 relaxation",
+    "strong_threshold": "0.90 * perfect threshold",
+    "forced_output_count": null,
+    "fail_closed": "No scalar gate or score threshold may be relaxed to reach a target count."
+  },
+  "reference_gates": {
+    "max_good_combined_distance": "exact #44↔#42 leave-one-anchor-out segmented distance",
+    "max_good_lockstep_distance": "exact #44↔#42 leave-one-anchor-out segment-preserving lock-step distance",
+    "max_accepted_family_distance": "v7 accepted-family leave-one-out P95",
+    "tier_rule": "A scalar hard-pass row that fails any reference gate remains STRICT_PASS and cannot enter PERFECT_CANDIDATE or STRONG_CANDIDATE."
+  },
+  "deduplication": {
+    "same_symbol_direction_event_gap_minutes": 240,
+    "choice": "Greedy quality-ordered non-maximum suppression: keep a row only when its core end is more than four hours from every already-kept row for the same symbol and direction.",
+    "max_shortlist_per_symbol_per_direction_time_block": 2,
+    "max_shortlist_per_symbol_per_direction": 12,
+    "diversity_order": "Greedy round-robin over direction and time_block after quality-preserving event deduplication."
+  },
+  "controls": {
+    "owner_reference_separation": "#44/#42 pass; #48 fails at least one lateness/release gate; each semantic reject fails; boundary-rebox rows are reported before/after and never treated as class negatives.",
+    "boundary_shift_null_offsets_bars": [-3, 3],
+    "boundary_shift_null_metrics": "Report morphology-only (release and box excluded) and full-filter-without-box separately.",
+    "boundary_shift_null_sample_rows": 1000,
+    "boundary_shift_null_seed": 20260828,
+    "direction_flip_null": "On the same frozen 1,000 rows, flip LONG/SHORT only (never reverse time); report morphology-only and full-filter-without-box pass rates separately.",
+    "distance_parity": "Compare local DTW/DDTW with aeon on a frozen deterministic fixture.",
+    "aeon_1_5_parity_fixture": {
+      "environment": "isolated /tmp evaluation venv; aeon==1.5.0; window=0.20; no dependency installed into the repository training environment",
+      "expected_dtw_cost": 1.3172096700811546,
+      "expected_ddtw_cost": 0.34713860704043453,
+      "absolute_tolerance": 1e-12
+    },
+    "economic_metrics": "Not applicable: this is a non-directional P0 morphology ranking with no entry, exit, TP/SL, cost, or model score. Paired boundary-shift and owner-reference separation are the corresponding null controls."
+  },
+  "output": {
+    "reuse_original_png_bytes": true,
+    "reuse_actual_model_input_png_bytes": true,
+    "gallery_pairing": "Each shortlisted sample shows the red-box review image beside the exact clean PNG exposed by the training-dataset manifest.",
+    "shortlist_scope": "Only train/val positives exposed by the current data.yaml may enter the shortlist; all 10,000 source positives remain in ranked_manifest for lineage completeness.",
+    "rerender_or_resize": false,
+    "html_page_size": 100,
+    "contact_sheet_rows": 100,
+    "all_rows_ranked": true,
+    "hard_fail_reasons_recorded": true
+  },
+  "safety": {
+    "write_yolo_labels": false,
+    "mutate_training_dataset": false,
+    "start_training": false,
+    "manual_owner_review_workflow": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "holdout_read": false,
+    "active_or_frozen_change": false,
+    "forward_or_order_state_change": false
+  }
+}
