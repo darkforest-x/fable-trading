@@ -1986,7 +1986,7 @@ experiments:
 
   - experiment_id: exp-15m-ma-launch-owner-yolo-neg30000-train960-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "cd5ef48d2cdd23c5689263fec8014431e32c6b68"
+    source_commit: "f4127b21d6c25b439f2c2419fe860df9adcf0b9f"
     status: active
     question: >-
       How does the Owner-approved weak-label dataset with 10,000 positives and
@@ -1997,9 +1997,12 @@ experiments:
       dataset; historical model metrics are context rather than a causal
       negative-count control because the 20,000-row predecessor was not trained
     result: >-
-      running_on_rtx3060. Remote staging reverified every immutable input;
-      train scan found 32,644 images / 24,483 backgrounds, val found 7,260 /
-      5,445, corrupt 0, and epoch 1 began at 2026-08-28 00:43 +08.
+      completed_research_only. The RTX 3060 job early-stopped after 29 of 40
+      requested epochs and delivered epoch-19 best.pt. Reloaded validation was
+      P 0.8852, R 0.9262, mAP50 0.9462 and mAP50-95 0.7923. At the frozen
+      conf=0.25 threshold, 46 of 5,445 empty-label validation images fired
+      (0.845%). Image/event identities and complete source dependency intervals
+      had zero train/val overlap; no holdout was read.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
@@ -2007,8 +2010,19 @@ experiments:
     artifacts:
       - 15m-ma-launch-owner-yolo-neg30000-train960-v1-prereg
       - 15m-ma-launch-owner-yolo-neg30000-train960-v1-launch
+      - 15m-ma-launch-owner-yolo-neg30000-train960-v1-best-weights
+      - 15m-ma-launch-owner-yolo-neg30000-train960-v1-training-receipt
+      - 15m-ma-launch-owner-yolo-neg30000-train960-v1-training-curves
+      - 15m-ma-launch-owner-yolo-neg30000-train960-v1-negative-val
+      - 15m-ma-launch-owner-yolo-neg30000-train960-v1-split-audit
+      - 15m-ma-launch-owner-yolo-neg30000-train960-v1-validation-preview
+      - 15m-ma-launch-owner-yolo-neg30000-train960-v1-validation-preview-receipt
+      - 15m-ma-launch-owner-yolo-neg30000-train960-v1-report
+      - 15m-ma-launch-owner-yolo-neg30000-train960-v1-html
     reuse_allowed: false
     notes: >-
       Owner-authorized weak-label research training only. The completed-history
-      windows cannot enter tip/forward/ACTIVE; the running job has no holdout,
-      promotion, deployment or trading-state mutation authority.
+      windows cannot enter tip/forward/ACTIVE. The high static score is not a
+      causal estimate of adding negatives because no byte-identical 10k-negative
+      training arm exists; there was no holdout, promotion, deployment or
+      trading-state mutation.

@@ -2,6 +2,26 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-28 — 10,000 正 + 30,000 负的 960 YOLO 已训练完成）
+
+Owner 明确要求“去训练”。RTX 3060 作业已经完成并正常退出：请求 40 轮，实际第 29 轮
+`patience=10` 早停，交付第 19 轮 `best.pt`。冻结时间验证集回载结果为 P 0.8852、R 0.9262、
+mAP50 0.9462、mAP50-95 0.7923；LONG / SHORT mAP50-95 为 0.780 / 0.805。固定
+`conf=0.25` 对全部 5,445 张空标签负例推理，46 张出框，误报图率 0.845%；hard 1.148%，
+easy 0.267%。权重与 3060 现场 SHA 一致。
+
+高分追加了 split 身份与完整依赖区间审计：train/val 图像 SHA、sample ID、source sample ID
+交集均为 0；191 个共用源文件的依赖区间重叠 0，间隔 76 小时。没有发现直接复制或时间交叉，
+但这是 completed-history 的 Owner 批量授权弱标签静态 val，不是 tip 实盘证据；且没有同数据、
+同 split、同配方的 10,000 负例训练 arm，因此不能把提升因果归给“多了 20,000 负例”。
+
+报告：`analysis/html/p1_15m_ma_launch_owner_yolo_neg30000_train960_20260828.html`；实际预测渲染：
+`experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/validation_preview.png`；
+权重：`analysis/output/ma_launch_owner_yolo_neg30000_v2/ma_launch_owner_yolo_neg30000_v2_y11s_ft960/weights/best.pt`。
+holdout 读取 0，ACTIVE/frozen、promote、部署、forward 与交易状态变更均为 0，
+`training_eligible=false / production_eligible=false`。**下一条允许动作**：停在研究结果；若要继续，
+应单独预注册同数据 10k-negative 对照或 Owner 明确批准新的 tip 金标/新鲜前向验收，不能直接上线。
+
 ## ⚡ 当前真相（2026-08-27 — 负样本已从 10,000 扩为 30,000，旧数据逐字节保留）
 
 Owner 纠正“负样本为什么只有 10,000”并明确“应该搞 3w 张”。新 v2 已在本地完成：

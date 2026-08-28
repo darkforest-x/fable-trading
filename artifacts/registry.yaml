@@ -5185,3 +5185,156 @@ artifacts:
     config_hash: "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c"
     data_cutoff: "2026-05-03T19:45:00Z"
     notes: Records exact version parity, staging sentinel, WMI PID, train/val scan counts and all safety gates at launch.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-train960-v1-best-weights
+    artifact_type: weights
+    role: completed_history_owner_weak_label_research_weights
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f4127b21d6c25b439f2c2419fe860df9adcf0b9f"
+    source_path: analysis/output/ma_launch_owner_yolo_neg30000_v2/ma_launch_owner_yolo_neg30000_v2_y11s_ft960/weights/best.pt
+    sha256: "58888f996f7da46d4321316964085e90855d00e4c0a14e18c98b303c6e43c182"
+    size_bytes: 19190874
+    storage_uri: "file://analysis/output/ma_launch_owner_yolo_neg30000_v2/ma_launch_owner_yolo_neg30000_v2_y11s_ft960/weights/best.pt"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "cd5ef48d2cdd23c5689263fec8014431e32c6b68"
+    config_hash: "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Epoch-19 best weight fetched from the RTX 3060 with a matching remote/local SHA; research-only completed-history detector.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-train960-v1-training-receipt
+    artifact_type: manifest
+    role: completed_training_metrics_hashes_and_safety_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f4127b21d6c25b439f2c2419fe860df9adcf0b9f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/training_receipt.json
+    sha256: "1068bf6981e427936937c2e836d50ecfabd530c0bffc051caf6ef65577ead73b"
+    size_bytes: 3784
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/training_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "57bf21f730f26de4a315036c5de0847dd11b1a99"
+    config_hash: "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Records early stop, best and final epochs, reloaded best validation, class metrics and every fetched remote hash.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-train960-v1-training-curves
+    artifact_type: report
+    role: completed_training_and_validation_curve_panel
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f4127b21d6c25b439f2c2419fe860df9adcf0b9f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/training_curves.png
+    sha256: "9809124060908a5addff6703a400e6bc23cd94896ef55e94387aacbb7f776148"
+    size_bytes: 166957
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/training_curves.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "57bf21f730f26de4a315036c5de0847dd11b1a99"
+    config_hash: "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Loss and validation metric curves for all 29 completed epochs.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-train960-v1-negative-val
+    artifact_type: manifest
+    role: frozen_threshold_full_empty_label_validation_false_fire_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f4127b21d6c25b439f2c2419fe860df9adcf0b9f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/negative_val_evaluation.json
+    sha256: "cddc0e3323fc4ce5277c74b4e73fbd6666671e8f8c8b349b1bae28571740874b"
+    size_bytes: 17618
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/negative_val_evaluation.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b2000d27e7e62c058a8cd900425654b8cb8840be"
+    config_hash: "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Full 5,445-negative evaluation at preregistered conf 0.25; overall image false-fire rate 0.845 percent.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-train960-v1-split-audit
+    artifact_type: manifest
+    role: train_val_identity_and_complete_dependency_interval_isolation_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f4127b21d6c25b439f2c2419fe860df9adcf0b9f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/split_isolation_audit.json
+    sha256: "ea04dfc5d1fd7301cd904c9e059b9cf426c2dd4b400f6a0430ce5a35c5f8805b"
+    size_bytes: 875
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/split_isolation_audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "3310e6ddbb47a8506435b4b1b4dc0af373136f59"
+    config_hash: "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Zero train/val image, sample and source-sample identity overlap; zero complete source dependency interval overlap and a 76-hour gap.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-train960-v1-validation-preview
+    artifact_type: annotation_set
+    role: stable_positive_and_negative_actual_prediction_preview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f4127b21d6c25b439f2c2419fe860df9adcf0b9f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/validation_preview.png
+    sha256: "bd1d78998ae267a8bcc2ea4d29be937a4c45ca3e0b356d7d381e2f2102bf2748"
+    size_bytes: 236066
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/validation_preview.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b2000d27e7e62c058a8cd900425654b8cb8840be"
+    config_hash: "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Deterministic 4 LONG, 4 SHORT and 8 easy-negative render using the delivered best weight at conf 0.25.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-train960-v1-validation-preview-receipt
+    artifact_type: manifest
+    role: validation_preview_sample_and_prediction_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f4127b21d6c25b439f2c2419fe860df9adcf0b9f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/validation_preview_receipt.json
+    sha256: "dba3a6f81d9a470597f13038c8130265b62ebd49277e2dca4c91bbbf548ed643"
+    size_bytes: 7672
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/validation_preview_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b2000d27e7e62c058a8cd900425654b8cb8840be"
+    config_hash: "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Binds every preview source image hash, prediction box, confidence, class and delivered-weight hash.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-train960-v1-report
+    artifact_type: report
+    role: canonical_training_negative_false_fire_and_split_audit_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f4127b21d6c25b439f2c2419fe860df9adcf0b9f"
+    source_path: analysis/p1_15m_ma_launch_owner_yolo_neg30000_train960_20260828.md
+    sha256: "0055656b9e5936a136f0bf52a3794598d0c983a896a611fd6463cf38ee665605"
+    size_bytes: 13306
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_yolo_neg30000_train960_20260828.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f4127b21d6c25b439f2c2419fe860df9adcf0b9f"
+    config_hash: "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Answer-first Chinese report with complete reproduction, historical noncausal context, equivalent null controls and risk disclosure.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-neg30000-train960-v1-html
+    artifact_type: report
+    role: owner_facing_completed_training_html_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f4127b21d6c25b439f2c2419fe860df9adcf0b9f"
+    source_path: analysis/html/p1_15m_ma_launch_owner_yolo_neg30000_train960_20260828.html
+    sha256: "1be5e8257227e02dcc6ab046aff806a180536b4db958ae5f0c4f36d2354ce014"
+    size_bytes: 555293
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_yolo_neg30000_train960_20260828.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f4127b21d6c25b439f2c2419fe860df9adcf0b9f"
+    config_hash: "2280f3c41ee51aa2eb81f9589768a5bd6a044d081572282e139d8c1a34af277c"
+    data_cutoff: "2026-05-03T19:45:00Z"
+    notes: Owner-facing standalone HTML with embedded training curves and actual validation prediction preview.
