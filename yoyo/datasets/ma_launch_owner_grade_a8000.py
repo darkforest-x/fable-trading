@@ -40,6 +40,7 @@ from yoyo.datasets.ma_launch_owner_autofill10000 import (
     scan_source,
 )
 from yoyo.datasets.ma_launch_owner_perfect_filter import (
+    PerfectFilterError,
     _load_pinned_rows,
     _profile_key,
     _score_all,
@@ -353,6 +354,39 @@ def _reference_profiles(
     return profiles
 
 
+def extract_scorable_candidate_profiles(
+    enriched: pd.DataFrame,
+    rows: Sequence[Mapping[str, Any]],
+    profiles: dict[str, Any],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Extract candidate profiles while auditing data-invalid windows.
+
+    Reference profiles remain fail-closed. Candidate windows that cannot meet
+    the profile's finite-data, continuity, ATR, direction, or boundary
+    contract are explicit rejects rather than fatal errors. This only removes
+    candidates; it cannot turn a failed candidate into Grade-A.
+    """
+
+    scorable: list[dict[str, Any]] = []
+    rejected: list[dict[str, Any]] = []
+    for row in rows:
+        key = _profile_key(row)
+        try:
+            profiles[key] = extract_profile(enriched, row)
+        except PerfectFilterError as exc:
+            rejected.append(
+                {
+                    **dict(row),
+                    "profile_reject_reason": str(exc),
+                    "training_eligible": False,
+                    "production_eligible": False,
+                }
+            )
+            continue
+        scorable.append(dict(row))
+    return scorable, rejected
+
+
 def _score_binance(
     prereg: Mapping[str, Any],
     candidates: Sequence[Mapping[str, Any]],
@@ -364,6 +398,7 @@ def _score_binance(
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     scored_path = building / "binance_scored.jsonl"
     calibration_path = building / "calibration.json"
+    rejected_path = building / "binance_profile_rejected.jsonl"
     if scored_path.exists() and calibration_path.exists():
         return read_jsonl(scored_path), read_json(calibration_path)
     profiles = _reference_profiles(references, accepted_family)
@@ -371,6 +406,8 @@ def _score_binance(
     for row in candidates:
         grouped[str(row["source_path"])].append(row)
     ceiling = pd.Timestamp(prereg["scope"]["archive_max_exclusive"])
+    scorable: list[dict[str, Any]] = []
+    rejected: list[dict[str, Any]] = []
     for index, (source_path, rows) in enumerate(sorted(grouped.items()), 1):
         frame, audit = read_preholdout_prefix(
             _repo_path(source_path), end_exclusive=ceiling
@@ -378,9 +415,11 @@ def _score_binance(
         if int(audit["holdout_ohlcv_rows_materialized"]) != 0:
             raise GradeA8000Error("score source materialized holdout")
         enriched = add_candidate_features(frame)
-        for row in rows:
-            key = _profile_key(row)
-            profiles[key] = extract_profile(enriched, row)
+        source_scorable, source_rejected = extract_scorable_candidate_profiles(
+            enriched, rows, profiles
+        )
+        scorable.extend(source_scorable)
+        rejected.extend(source_rejected)
         if index == 1 or index % 20 == 0 or index == len(grouped):
             print(
                 f"grade-a profile {index:03d}/{len(grouped):03d} "
@@ -388,13 +427,22 @@ def _score_binance(
                 flush=True,
             )
     scored, calibration = _score_all(
-        candidates,
+        scorable,
         references,
         accepted_family,
         profiles,
         perfect_prereg,
     )
+    calibration = {
+        **calibration,
+        "candidate_profile_scorable_count": len(scorable),
+        "candidate_profile_rejected_count": len(rejected),
+        "candidate_profile_reject_reasons": dict(
+            sorted(Counter(row["profile_reject_reason"] for row in rejected).items())
+        ),
+    }
     write_jsonl(scored_path, scored)
+    write_jsonl(rejected_path, rejected)
     write_json(calibration_path, calibration)
     return scored, calibration
 

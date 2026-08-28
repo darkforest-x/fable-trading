@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import pandas as pd
+
+from yoyo.datasets.ma_launch_owner_perfect_filter import PerfectFilterError
 from yoyo.datasets.ma_launch_owner_grade_a8000 import (
     allocate_variants,
     cap_and_order_events,
     cross_venue_event_nms,
+    extract_scorable_candidate_profiles,
 )
 
 
@@ -69,3 +73,33 @@ def test_allocate_variants_uses_five_or_six_and_exact_target() -> None:
         counts[row["sample_id"]] = counts.get(row["sample_id"], 0) + 1
     assert sorted(counts.values()) == [5, 5, 6, 6]
     assert len({row["dataset_sample_id"] for row in plans}) == 22
+
+
+def test_invalid_candidate_profile_is_audited_not_fatal(monkeypatch) -> None:
+    marker = object()
+
+    def fake_extract(_frame, row):
+        if row["sample_id"] == "bad":
+            raise PerfectFilterError("profile contains non-finite OHLC")
+        return marker
+
+    monkeypatch.setattr(
+        "yoyo.datasets.ma_launch_owner_grade_a8000.extract_profile", fake_extract
+    )
+    profiles = {}
+    scorable, rejected = extract_scorable_candidate_profiles(
+        pd.DataFrame(),
+        [{"sample_id": "good"}, {"sample_id": "bad"}],
+        profiles,
+    )
+
+    assert [row["sample_id"] for row in scorable] == ["good"]
+    assert profiles == {"good": marker}
+    assert rejected == [
+        {
+            "sample_id": "bad",
+            "profile_reject_reason": "profile contains non-finite OHLC",
+            "training_eligible": False,
+            "production_eligible": False,
+        }
+    ]
