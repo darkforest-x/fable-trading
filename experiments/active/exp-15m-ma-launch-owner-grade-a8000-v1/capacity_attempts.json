@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-v1",
+  "generated_at": "2026-08-28T20:55:00+08:00",
+  "holdout_ohlcv_rows_materialized": 0,
+  "attempts": [
+    {
+      "attempt": 1,
+      "window_pre_post_pairs": [[6, 8], [7, 7], [8, 6], [9, 5], [10, 4], [11, 3]],
+      "minimum_variants_per_event": 5,
+      "maximum_variants_per_event": 6,
+      "eligible_independent_events": 1049,
+      "maximum_images_upper_bound": 6294,
+      "target_images": 8000,
+      "result": "fail_closed_below_target"
+    },
+    {
+      "attempt": 2,
+      "window_pre_post_pairs": [[5, 9], [6, 8], [7, 7], [8, 6], [9, 5], [10, 4], [11, 3], [12, 2]],
+      "minimum_variants_per_event": 7,
+      "maximum_variants_per_event": 8,
+      "eligible_independent_events": 1043,
+      "events_with_8_positions": 1035,
+      "events_with_7_positions": 8,
+      "maximum_unique_png_capacity": 8336,
+      "target_images": 8000,
+      "result": "capacity_pass"
+    }
+  ],
+  "single_changed_variable": "number of fixed horizontal context positions for the unchanged 4/5-bar semantic core",
+  "grade_a_gate_changed": false,
+  "semantic_core_changed": false,
+  "render_length_changed": false,
+  "split_changed": false,
+  "training_started": false
+}

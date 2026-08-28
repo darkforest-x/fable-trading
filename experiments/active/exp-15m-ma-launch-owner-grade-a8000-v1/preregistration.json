@@ -2,10 +2,11 @@
   "schema_version": 1,
   "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-v1",
   "created_at": "2026-08-28T18:20:00+08:00",
+  "amended_at": "2026-08-28T20:55:00+08:00",
   "stage": "P1_grade_a_positive_dataset",
   "owner_request": {
     "quote": "a级别完美正样本起码要给我搞7-8000张啊  未必一定要在10000张里面选啊  再去拉点数据选出来",
-    "interpretation": "Expand the pre-holdout historical mother pool beyond the existing 10,000 examples, preserve the exact frozen Grade-A perfect gate, and build 8,000 clean model-input positive PNGs. Do not duplicate identical images or move variants of one event across time splits."
+    "interpretation": "Expand the pre-holdout historical mother pool beyond the existing 10,000 examples, preserve the exact frozen Grade-A perfect gate, and build 8,000 clean model-input positive PNGs. Do not duplicate identical images or move variants of one event across time splits. After the frozen six-position attempt proved an upper bound below 8,000, amend only the number of distinct same-length context positions from six to eight."
   },
   "scope": {
     "bar": "15m",
@@ -55,14 +56,14 @@
   },
   "output": {
     "target_images": 8000,
-    "minimum_unique_events": 1334,
-    "preferred_unique_events": 1600,
-    "minimum_variants_per_event": 5,
-    "maximum_variants_per_event": 6,
-    "window_pre_post_pairs": [[6, 8], [7, 7], [8, 6], [9, 5], [10, 4], [11, 3]],
+    "minimum_unique_events": 1000,
+    "preferred_unique_events": 1043,
+    "minimum_variants_per_event": 7,
+    "maximum_variants_per_event": 8,
+    "window_pre_post_pairs": [[5, 9], [6, 8], [7, 7], [8, 6], [9, 5], [10, 4], [11, 3], [12, 2]],
     "window_bars": "18 for a 4-bar core and 19 for a 5-bar core",
     "box_core_bars": [4, 5],
-    "box_horizontal_distribution": "Six fixed context pairs move the same 4/5-bar core across the image without shifting the semantic boundary.",
+    "box_horizontal_distribution": "Eight fixed context pairs move the same 4/5-bar core across the image without shifting the semantic boundary.",
     "max_box_height_norm": 0.55,
     "width": 1280,
     "height": 742,
@@ -81,6 +82,32 @@
     "grade_a_events_per_million_rows": 27.16685064661632,
     "holdout_ohlcv_rows_materialized": 0,
     "note": "Read-only capacity probe; it did not write dataset artifacts and is not an evaluation score."
+  },
+  "capacity_amendment": {
+    "single_changed_variable": "distinct render context positions per independent Grade-A event",
+    "attempt_1": {
+      "positions": 6,
+      "eligible_independent_events": 1049,
+      "maximum_images_upper_bound": 6294,
+      "result": "fail_closed_below_8000"
+    },
+    "attempt_2_preflight": {
+      "positions": 8,
+      "eligible_independent_events": 1043,
+      "events_with_8_positions": 1035,
+      "events_with_7_positions": 8,
+      "maximum_unique_png_capacity": 8336,
+      "result": "capacity_pass"
+    },
+    "unchanged": [
+      "Grade-A hard gates and reference thresholds",
+      "4/5-bar semantic core boundaries",
+      "18/19-bar total render length",
+      "1280x742 lossless PNG renderer",
+      "chronological split and purge",
+      "cross-venue event deduplication",
+      "zero holdout reads"
+    ]
   },
   "safety": {
     "start_training": false,

@@ -75,6 +75,43 @@ def test_allocate_variants_uses_five_or_six_and_exact_target() -> None:
     assert len({row["dataset_sample_id"] for row in plans}) == 22
 
 
+def test_allocate_variants_uses_seven_or_eight_and_exact_target() -> None:
+    events = []
+    for index in range(4):
+        events.append(
+            {
+                **_row(
+                    f"wide{index}",
+                    stamp=f"2025-02-{index+1:02d}T00:00:00Z",
+                    score=1 - index / 10,
+                ),
+                "valid_variants": [
+                    {
+                        "variant_index": variant,
+                        "pre_bars": 4 + variant,
+                        "post_bars": 10 - variant,
+                    }
+                    for variant in range(1, 9)
+                ],
+            }
+        )
+    plans = allocate_variants(
+        events,
+        target_images=30,
+        minimum_unique_events=4,
+        preferred_unique_events=4,
+        minimum_variants_per_event=7,
+        maximum_variants_per_event=8,
+    )
+    counts = {}
+    for row in plans:
+        counts[row["sample_id"]] = counts.get(row["sample_id"], 0) + 1
+
+    assert len(plans) == 30
+    assert sorted(counts.values()) == [7, 7, 8, 8]
+    assert len({row["dataset_sample_id"] for row in plans}) == 30
+
+
 def test_invalid_candidate_profile_is_audited_not_fatal(monkeypatch) -> None:
     marker = object()
 

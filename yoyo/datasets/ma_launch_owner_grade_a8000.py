@@ -3,7 +3,7 @@
 Grade-A is the exact frozen ``PERFECT_CANDIDATE`` contract from
 ``ma_launch_owner_perfect_filter``.  Capacity is expanded with official
 Binance USD-M perpetual 15m archives; no gate or score is relaxed.  Each
-independent event contributes five or six *different* 18/19-candle render
+independent event contributes seven or eight *different* 18/19-candle render
 windows.  Every variant of an event is forced into the same chronological
 split, so crop diversity cannot leak an event across train and validation.
 
@@ -133,11 +133,15 @@ def _validate_prereg(prereg: Mapping[str, Any]) -> None:
     if int(output["target_images"]) != 8_000:
         raise GradeA8000Error("target image count drift")
     windows = [tuple(map(int, pair)) for pair in output["window_pre_post_pairs"]]
-    if len(windows) != 6 or len(set(windows)) != 6:
-        raise GradeA8000Error("six unique render variants are required")
+    maximum_variants = int(output["maximum_variants_per_event"])
+    minimum_variants = int(output["minimum_variants_per_event"])
+    if len(windows) != maximum_variants or len(set(windows)) != maximum_variants:
+        raise GradeA8000Error("render variants must be unique and match the maximum")
+    if not 1 <= minimum_variants <= maximum_variants:
+        raise GradeA8000Error("invalid per-event variant bounds")
     if any(pre + post != 14 for pre, post in windows):
         raise GradeA8000Error("each render variant must preserve 18/19 total bars")
-    if min(pre for pre, _ in windows) < 6 or min(post for _, post in windows) < 3:
+    if min(pre for pre, _ in windows) < 5 or min(post for _, post in windows) < 2:
         raise GradeA8000Error("render context is too short")
     safety = prereg["safety"]
     forbidden = (
@@ -627,41 +631,62 @@ def allocate_variants(
     target_images: int,
     minimum_unique_events: int,
     preferred_unique_events: int,
+    minimum_variants_per_event: int = 5,
+    maximum_variants_per_event: int = 6,
 ) -> list[dict[str, Any]]:
-    """Allocate exactly ``target_images`` across many events with max six each."""
+    """Allocate an exact image target within frozen per-event variant bounds."""
 
-    eligible = [dict(row) for row in ordered_events if len(row["valid_variants"]) >= 5]
+    minimum_variants = int(minimum_variants_per_event)
+    maximum_variants = int(maximum_variants_per_event)
+    if not 1 <= minimum_variants <= maximum_variants:
+        raise GradeA8000Error("invalid allocation variant bounds")
+    eligible = [
+        dict(row)
+        for row in ordered_events
+        if len(row["valid_variants"]) >= minimum_variants
+    ]
     if len(eligible) < int(minimum_unique_events):
         raise GradeA8000Error(
-            f"only {len(eligible)} events have five valid variants; need {minimum_unique_events}"
+            f"only {len(eligible)} events have {minimum_variants} valid variants; "
+            f"need {minimum_unique_events}"
         )
     n_events = min(int(preferred_unique_events), len(eligible))
     while n_events >= int(minimum_unique_events):
         selected = eligible[:n_events]
-        capacity = sum(min(6, len(row["valid_variants"])) for row in selected)
-        if 5 * n_events <= int(target_images) <= capacity:
+        capacity = sum(
+            min(maximum_variants, len(row["valid_variants"])) for row in selected
+        )
+        if minimum_variants * n_events <= int(target_images) <= capacity:
             break
         n_events -= 1
     else:
-        raise GradeA8000Error("event/variant capacity cannot reach target without >6 variants")
+        raise GradeA8000Error(
+            "event/variant capacity cannot reach target within frozen variant bounds"
+        )
 
     selected = eligible[:n_events]
     plans: list[dict[str, Any]] = []
-    omitted: list[dict[str, Any] | None] = []
+    extras: list[list[dict[str, Any]]] = []
     for event_order, row in enumerate(selected, 1):
-        variants = sorted(row["valid_variants"], key=lambda value: int(value["variant_index"]))
-        if len(variants) < 5:
+        variants = sorted(
+            row["valid_variants"], key=lambda value: int(value["variant_index"])
+        )[:maximum_variants]
+        if len(variants) < minimum_variants:
             raise AssertionError("eligible event lost variant capacity")
-        omit_slot = int(hashlib.sha256(str(row["sample_id"]).encode()).digest()[0]) % len(variants)
-        chosen = [variant for index, variant in enumerate(variants) if index != omit_slot][:5]
-        if len(chosen) != 5:
-            chosen = variants[:5]
-        chosen_ids = {int(value["variant_index"]) for value in chosen}
-        extra = next(
-            (value for value in variants if int(value["variant_index"]) not in chosen_ids),
-            None,
+        rotation = (
+            int(hashlib.sha256(str(row["sample_id"]).encode()).digest()[0])
+            % len(variants)
         )
-        omitted.append(extra)
+        rotated = variants[rotation:] + variants[:rotation]
+        chosen = rotated[:minimum_variants]
+        chosen_ids = {int(value["variant_index"]) for value in chosen}
+        extras.append(
+            [
+                value
+                for value in rotated
+                if int(value["variant_index"]) not in chosen_ids
+            ]
+        )
         for value in chosen:
             plans.append(
                 {
@@ -671,19 +696,22 @@ def allocate_variants(
                 }
             )
     extra_needed = int(target_images) - len(plans)
-    for event_order, (row, extra) in enumerate(zip(selected, omitted), 1):
+    for extra_round in range(maximum_variants - minimum_variants):
+        for event_order, (row, remaining) in enumerate(zip(selected, extras), 1):
+            if extra_needed <= 0:
+                break
+            if extra_round >= len(remaining):
+                continue
+            plans.append(
+                {
+                    **{key: val for key, val in row.items() if key != "valid_variants"},
+                    **remaining[extra_round],
+                    "event_order": event_order,
+                }
+            )
+            extra_needed -= 1
         if extra_needed <= 0:
             break
-        if extra is None:
-            continue
-        plans.append(
-            {
-                **{key: val for key, val in row.items() if key != "valid_variants"},
-                **extra,
-                "event_order": event_order,
-            }
-        )
-        extra_needed -= 1
     if extra_needed != 0 or len(plans) != int(target_images):
         raise GradeA8000Error("exact 8,000-image allocation failed")
     plans.sort(
@@ -935,8 +963,13 @@ def _qa(rows: Sequence[Mapping[str, Any]], prereg: Mapping[str, Any]) -> dict[st
         event_variants[str(row["sample_id"])] += 1
     if any(len(values) != 1 for values in event_splits.values()):
         raise GradeA8000Error("one event crosses train/val")
-    if min(event_variants.values()) < 5 or max(event_variants.values()) > 6:
-        raise GradeA8000Error("event variant count left the 5-6 contract")
+    minimum_variants = int(prereg["output"]["minimum_variants_per_event"])
+    maximum_variants = int(prereg["output"]["maximum_variants_per_event"])
+    if (
+        min(event_variants.values()) < minimum_variants
+        or max(event_variants.values()) > maximum_variants
+    ):
+        raise GradeA8000Error("event variant count left the frozen contract")
     if len(event_splits) < int(prereg["output"]["minimum_unique_events"]):
         raise GradeA8000Error("unique event floor failed")
     image_shas = {str(row["image_sha256"]) for row in rows}
@@ -1065,6 +1098,12 @@ def build(
         target_images=int(prereg["output"]["target_images"]),
         minimum_unique_events=int(prereg["output"]["minimum_unique_events"]),
         preferred_unique_events=int(prereg["output"]["preferred_unique_events"]),
+        minimum_variants_per_event=int(
+            prereg["output"]["minimum_variants_per_event"]
+        ),
+        maximum_variants_per_event=int(
+            prereg["output"]["maximum_variants_per_event"]
+        ),
     )
     write_jsonl(building / "selected_event_variants.jsonl", plans)
     rows = (
