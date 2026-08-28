@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-v1",
+  "created_at": "2026-08-29T10:30:00+08:00",
+  "stage": "P1_matched_negative_dataset_preparation",
+  "owner_authorization": {
+    "conversation_date": "2026-08-29",
+    "quote": "可以那现在准备去训练吧  负样本应该用啥呢",
+    "interpretation": "Prepare a negative cohort for the accepted 8,000-image Grade-A positive set. This authorizes negative-dataset preparation and QA, but does not silently override the repository P0/P1 training gate, permit holdout access, or authorize promotion/production use.",
+    "negative_materialization_authorized": true,
+    "training_run_authorized": false
+  },
+  "single_variable": "Replace the legacy 30,000-negative cohort with a nuisance-matched 24,000-negative cohort for the unchanged Grade-A 8,000 positive images and labels.",
+  "positive_source": {
+    "dataset_dir": "datasets/ma_launch_owner_grade_a8000_v1",
+    "preregistration_path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/preregistration.json",
+    "preregistration_sha256": "6aed7e9b13a224e23724354e0d7e20b18ec543779a3824adbe5eb6aaa6513462",
+    "manifest_path": "datasets/ma_launch_owner_grade_a8000_v1/manifest.jsonl",
+    "manifest_sha256": "efe1eb97c14c6e94dff32bdeb2c420113890c378a6b808d94f5978a887848b40",
+    "build_receipt_path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/results/build_receipt.json",
+    "build_receipt_sha256": "a4e8f4b42e71a0e562223b80b06f750e21124b87ad47a57f1463a48b4308838e",
+    "images": 8000,
+    "events": 1043,
+    "contract": "Copy every clean 1280x742 positive PNG and one-box label byte-for-byte; do not re-render, shift, resize, or redraw positives."
+  },
+  "legacy_negative_audit": {
+    "dataset_dir": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2",
+    "conclusion": "incompatible_as_drop_in_replacement",
+    "reasons": [
+      "Legacy negatives are sourced from the old OKX-only domain while 6,809/8,000 Grade-A positives are Binance USD-M.",
+      "Only 3,834/30,000 legacy negatives use 18/19 bars; the new positives use only 18/19 bars.",
+      "Legacy pre/post geometry is pre 10-14 and post 4-6; the new positive variants span pre 5-12 and post 2-9.",
+      "Legacy guards protect the old 14,117-candidate universe, not the expanded Binance+OKX retrieval universe."
+    ]
+  },
+  "negative_sampling": {
+    "negative_events_per_positive_event": 3,
+    "target_kinds_per_positive_event": ["hard", "hard", "easy"],
+    "easy_to_hard_fallback_allowed": true,
+    "hard_to_easy_fallback_allowed": false,
+    "target_negative_images": 24000,
+    "target_negative_events": 3129,
+    "ratio_by_image": "1 positive : 3 negative",
+    "pairing": {
+      "same_source_file": true,
+      "same_venue": true,
+      "same_symbol": true,
+      "same_calendar_halfyear": true,
+      "same_split": true,
+      "same_core_bars": true,
+      "same_variant_pre_post_pairs": true,
+      "same_window_bars": true,
+      "negative_event_reuse_allowed": false
+    },
+    "completed_no_launch_condition": {
+      "abs_close_progress_atr_max_core_plus_2": 0.85,
+      "abs_close_progress_atr_max_core_plus_3": 1.10,
+      "abs_close_progress_atr_max_core_plus_5": 1.35,
+      "two_sided_high_low_excursion_atr_max_core_plus_1_to_5": 1.75,
+      "atr_anchor": "core_end + 2",
+      "purpose": "Future bars define only the completed-history negative label; they never cross holdout and do not alter the rendered variant window."
+    },
+    "hard_definition": {
+      "ma_envelope_atr_max": 1.5,
+      "ma_spread_end_atr_max": 1.1,
+      "max_body_atr_max": 1.2,
+      "candle_envelope_atr_max": 2.8,
+      "minimum_close_to_ma_atr_max": 1.0,
+      "meaning": "Visually dense six-MA near miss whose completed path fails every launch threshold."
+    },
+    "easy_definition": {
+      "ma_envelope_atr_min_any": 2.2,
+      "ma_spread_end_atr_min_any": 1.6,
+      "minimum_close_to_ma_atr_min_any": 1.8,
+      "candle_envelope_atr_min_any": 4.0,
+      "meaning": "Clearly non-dense background that also satisfies the completed no-launch label."
+    },
+    "positive_guard": {
+      "before_core_bars": 12,
+      "after_dependency_end_bars": 12,
+      "binance_candidates_path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/results/binance_weak_after_nms.jsonl",
+      "binance_candidates_sha256": "bb04ca9356696564a81b5e7e7fe805ebab36f6f48005e6b1ce933f5552799c50",
+      "okx_policy": "Re-run the hash-pinned accepted-family strict scan on every used OKX source and guard every hit, not only the selected Grade-A events."
+    },
+    "negative_separation_bars": 2,
+    "capacity_policy": "Never cross source, symbol, venue, half-year, split, core length or context geometry; never reuse/overlap a negative dependency interval; fail closed if two hard negatives cannot be found. Only the third easy slot may safely fall back to another hard negative."
+  },
+  "split": {
+    "method": "Copy the positive event split and independently verify the widest negative render-plus-label dependency interval against the same chronological cutoff.",
+    "cutoff": "2025-12-01T00:00:00Z",
+    "purge_bars_each_side": 150,
+    "bar_minutes": 15,
+    "random_split": false
+  },
+  "sources": {
+    "holdout_start_exclusive": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0,
+    "autofill_preregistration_path": "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/preregistration.json",
+    "autofill_preregistration_sha256": "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
+  },
+  "renderer": {
+    "entry": "yoyo.layers.l1_detection.render.render_chart",
+    "width": 1280,
+    "height": 742,
+    "format": "lossless PNG",
+    "annotations_drawn_into_training_images": false,
+    "positive_and_negative_pipeline_identical": true,
+    "classes": {"0": "dense_long", "1": "dense_short"}
+  },
+  "outputs": {
+    "dataset_dir": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1",
+    "experiment_results": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results",
+    "report": "analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_20260829.md",
+    "html": "analysis/html/p1_15m_ma_launch_owner_grade_a8000_neg24000_20260829.html"
+  },
+  "safety": {
+    "holdout_read": false,
+    "training_started": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "remote_write": false
+  }
+}

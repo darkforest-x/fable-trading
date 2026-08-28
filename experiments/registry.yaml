@@ -2368,3 +2368,29 @@ experiments:
       per-sample Owner Gold. Core+5 is completed-history evidence and cannot be
       used as a tip/forward detector. No negative set, training, model, ACTIVE,
       frozen, forward, deployment or order state changed.
+
+  - experiment_id: exp-15m-ma-launch-owner-grade-a8000-neg24000-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: active
+    question: >-
+      Can the accepted 8,000 Grade-A positive images be paired with a new
+      nuisance-matched negative cohort without reusing the incompatible old
+      OKX-only 18-25-bar negatives, weakening positive exclusion, touching
+      holdout, or starting training before the P0/P1 gate passes?
+    single_variable: >-
+      replace only the negative cohort: three matched negative events per
+      Grade-A positive event (two dense no-launch hard negatives plus one easy
+      background), rendered through the exact same seven/eight context
+      positions; positive pixels and labels remain byte-identical
+    result: pending_negative_capacity_and_full_file_qa
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_20260829.md
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Dataset preparation only. The owner asked to prepare for training, but
+      the repository remains in P0/P1 and ROADMAP.md forbids a new training
+      run until those gates pass or the owner explicitly changes that rule.
