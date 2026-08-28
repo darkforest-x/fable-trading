@@ -2274,3 +2274,49 @@ experiments:
       Spearman rho 0.859, permutation p=0.00010), so no confidence threshold
       was selected. No tuning, training, promotion, ACTIVE/frozen, forward,
       deployment or order state changed.
+
+  - experiment_id: exp-15m-ma-launch-owner-perfect-filter10000-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "24d87a0186bc4272aa9a984428dd7b7e10206704"
+    status: accepted
+    question: >-
+      Can the existing 10,000 pre-holdout weak-positive 15m examples be ranked
+      and strictly filtered into a small high-purity perfect-shape candidate
+      layer without redrawing images, changing labels, reading holdout or
+      turning automatic candidates into Owner Gold?
+    single_variable: >-
+      add one frozen strict second-pass morphology and reference-similarity
+      filter over the unchanged 10,000-positive ledger; preserve exact source
+      pixels, boxes, model inputs, train/val exposure and all runtime state
+    result: >-
+      completed_high_purity_candidate_filter. All 10,000 rows were ranked;
+      345 passed the absolute morphology gates, 261 also passed the exact
+      reference-distance gates, and 260 remained after training-exposure and
+      quality-ordered four-hour event deduplication. The shortlist is 135 LONG
+      plus 125 SHORT across 129 symbols. Every delivered overlay and clean
+      model input reuses the original 1280x742 PNG bytes, and all 527 gallery
+      references resolve. The frozen 1,000-row null passed 5.1% at the correct
+      morphology boundary versus 3.2% at -3 bars and 0.0% at +3 bars; direction
+      reversal passed 0.0%. These are automatic candidates, not Gold labels.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_15m_ma_launch_owner_perfect_filter10000_20260828.md
+    artifacts:
+      - 15m-ma-launch-owner-perfect-filter10000-v1-prereg
+      - 15m-ma-launch-owner-perfect-filter10000-v1-build-receipt
+      - 15m-ma-launch-owner-perfect-filter10000-v1-source-audit
+      - 15m-ma-launch-owner-perfect-filter10000-v1-summary
+      - 15m-ma-launch-owner-perfect-filter10000-v1-ranked-manifest
+      - 15m-ma-launch-owner-perfect-filter10000-v1-gallery
+      - 15m-ma-launch-owner-perfect-filter10000-v1-contact-sheet
+      - 15m-ma-launch-owner-perfect-filter10000-v1-report
+      - 15m-ma-launch-owner-perfect-filter10000-v1-html
+    reuse_allowed: false
+    notes: >-
+      P0 completed-history retrieval only: post-core bars are intentionally
+      used to assess a clean release, so this filter cannot be a tip or forward
+      detector. It wrote no YOLO labels, did not mutate the 10,000 positives or
+      30,000 negatives, did not start training and did not change ACTIVE,
+      frozen, forward, deployment or order state. Zero rows at or after the
+      2026-05-04 holdout boundary were materialized.
