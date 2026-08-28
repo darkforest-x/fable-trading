@@ -2,7 +2,14 @@
   "schema_version": 1,
   "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1",
   "created_at": "2026-08-29T03:27:24+08:00",
-  "created_while_training_state": "epoch_1_incomplete_no_validation_metric_observed",
+  "created_while_training_state": "epoch_2_running; epoch_1 validation had finished remotely about 23 seconds earlier but its metrics had not been read or used in this evaluator design",
+  "timing_correction": {
+    "recorded_at": "2026-08-29T03:29:00+08:00",
+    "original_inaccurate_claim": "epoch_1_incomplete_no_validation_metric_observed",
+    "authoritative_remote_evidence": "best.pt LastWriteTime 2026-08-29 03:27:01 +08:00 versus preregistration created_at 03:27:24 +08:00",
+    "metric_visibility": "The epoch-1 values were first read only after this contract and evaluator had been written and committed.",
+    "preexisting_contract": "The training preregistration created at 02:56:58 +08:00 had already fixed imgsz=960, conf=0.25, NMS IoU=0.7, hard/easy negative reporting and the post=2/first-hit/any-hit event surface."
+  },
   "question": "How well does the frozen best.pt detect the immutable chronological val labels, reject its actual matched negatives, preserve LONG/SHORT semantics, and fire at the earliest available post-core context?",
   "immutable_inputs": {
     "training_preregistration_sha256": "b28793525d55b03249b7af2b08ef83b806a040e9a8e149354e6df0e8269ab479",
