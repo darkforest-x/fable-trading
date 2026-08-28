@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1",
+  "created_at": "2026-08-28T13:40:00+08:00",
+  "stage": "P0_label_and_prediction_semantics_audit",
+  "owner_authorization": {
+    "request": "还有很多框识别的不对啊   你对比一下我们拿去训练的图",
+    "interpreted_scope": "Compare every frozen 2026-08-27 YOLO event with the exact positive images and labels used to train the delivered Owner 10k-positive/30k-negative research detector. Recompute the frozen positive-retrieval morphology gate and nearest-reference distance on each mapped prediction core, inspect vertical label semantics, and render paired evidence without inference, threshold tuning, relabeling or training.",
+    "holdout_consumption_number_for_this_configuration": 4,
+    "existing_snapshot_read_authorized": true,
+    "new_network_read_authorized": false,
+    "new_model_inference_authorized": false,
+    "threshold_or_weight_change_authorized": false,
+    "label_change_authorized": false,
+    "training_or_tuning_authorized": false,
+    "production_or_promotion_authorized": false
+  },
+  "frozen_inputs": {
+    "training_positive_manifest": {
+      "path": "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/results/review_manifest.jsonl",
+      "sha256": "60bb7350c446ee1a406efbd48a4d7e7426ac4838e35b901bee3073019b327e76",
+      "rows": 10000
+    },
+    "training_dataset_manifest": {
+      "path": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2/manifest.jsonl",
+      "sha256": "6e601034ab15765a74b788cc6d094e9326c3044c1fb615c908ef9de897d6e0af",
+      "positive_rows": 10000,
+      "negative_rows": 30000
+    },
+    "training_dataset_root": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2",
+    "weights": {
+      "path": "analysis/output/ma_launch_owner_yolo_neg30000_v2/ma_launch_owner_yolo_neg30000_v2_y11s_ft960/weights/best.pt",
+      "sha256": "58888f996f7da46d4321316964085e90855d00e4c0a14e18c98b303c6e43c182"
+    },
+    "events": {
+      "path": "analysis/output/ma_launch_owner_yolo_recent5d_rawbox_v2/legacy_events.csv",
+      "sha256": "0aa011765e0cd4d6a47322d263eb6a3931fccfb18098d58302058ad33cdd8eda",
+      "board_day_utc": "2026-08-27T00:00:00Z",
+      "rows_expected": 43
+    },
+    "event_analysis": {
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/detailed_event_analysis.csv",
+      "sha256": "7354c12ad8e4e649571a3e7e922976b6db40877c11c6b9496dc8f11d246103a4"
+    },
+    "fullcontext_manifest": {
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-20260827-fullcontext-v3/results/manifest.jsonl",
+      "sha256": "99488f8aac795b266ab0f214f0b2131796e3e09779f57b3e31c32ca0045a07e3"
+    },
+    "snapshot_receipt": {
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/fetch_receipt.json",
+      "sha256": "497bfb8bfa050ecda11bbc65061608d5cc807a0583ef99ae9c3e5b3e2d53ab75",
+      "snapshot_root": "analysis/output/ma_launch_owner_yolo_recent5d_v1/kline_snapshot"
+    },
+    "renderer": {
+      "path": "yoyo/layers/l1_detection/render.py",
+      "sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+    },
+    "morphology_implementation": {
+      "path": "yoyo/datasets/ma_launch_owner_autofill_review.py",
+      "sha256": "9a1b585857a0e25545acb05de94d61912c3da27d02369fb2d35ec73837376ce9"
+    },
+    "label_geometry_implementation": {
+      "path": "yoyo/datasets/ma_launch_owner_recrop_review.py",
+      "sha256": "368a5fb24724f295b95f8667882f4bb854e2bd621045bc58b24abf9811a54a17"
+    }
+  },
+  "audit_contract": {
+    "current_core": "Use the exact mapped integer core from each preserved raw YOLO x prediction; do not move or resize it.",
+    "training_spec_match": "The mapped core must pass the exact frozen 14-feature morphology gate and have nearest-reference distance <= 0.5, identical to the 10,000-positive retrieval contract.",
+    "same_input_alternative": "Enumerate all 4/5-bar cores ending 4/5/6 bars before the same model-input endpoint. Report whether any different core in that exact input passes the same frozen training contract.",
+    "vertical_semantics": "Compare the preserved raw prediction y interval with the six-MA envelope over its mapped core. Separately prove from the generator and 10,000 manifest rows that the training target includes core full wicks plus six MAs and 4% padding.",
+    "visual_match": "For display only, pair each event with the same-direction training positive having minimum frozen-scale 14-feature RMS distance. This pair is not a Gold label or causal evaluation.",
+    "classification": {
+      "TRAIN_SPEC_MATCH": "current mapped core passes gate and distance",
+      "LOCALIZATION_MISMATCH": "current core fails but another eligible core in the same input passes",
+      "OUT_OF_TRAINING_SPEC": "no eligible core in the exact input passes"
+    }
+  },
+  "outputs": {
+    "results": "experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results",
+    "event_csv": "event_semantic_audit.csv",
+    "training_csv": "training_positive_semantic_profile.csv",
+    "summary": "summary.json",
+    "overview": "training_vs_prediction_overview.png",
+    "paired_comparisons": "comparisons",
+    "gallery": "comparison_gallery.html",
+    "representative_sheet": "representative_comparisons.png"
+  },
+  "interpretation": {
+    "economic_backtest": false,
+    "holdout_final_acceptance": false,
+    "performance_claim": false,
+    "must_disclose": [
+      "This is the fourth Owner-authorized inspection of the same completed 2026-08-23..27 holdout surface for this detector configuration.",
+      "The same-day Top20 universe is post-close and is not a live universe selector.",
+      "The audit can prove agreement or disagreement with the frozen training generator; it cannot create per-event Owner Gold boxes.",
+      "No model inference, threshold search, relabeling, training, promotion, deployment, forward mutation or order action is performed."
+    ]
+  },
+  "safety": {
+    "network_read": false,
+    "new_model_inference": false,
+    "training": false,
+    "threshold_tuning": false,
+    "label_change": false,
+    "weight_change": false,
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
