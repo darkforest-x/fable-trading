@@ -1,0 +1,57 @@
+{
+  "builder_commit": "e8003cd84cb6aaf78abae4f4784aea65617b7104",
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-v1",
+  "fallbacks": {},
+  "holdout_ohlcv_rows_materialized": 0,
+  "legacy_negative_compatibility": {
+    "common_source_paths": 111,
+    "drop_in_compatible": false,
+    "legacy_18_or_19_rows": 3834,
+    "legacy_18_or_19_share": 0.1278,
+    "legacy_negative_rows": 30000,
+    "legacy_negative_sources": 378,
+    "legacy_okx_source_rows": 30000,
+    "legacy_window_bars": {
+      "18": 903,
+      "19": 2931,
+      "20": 4998,
+      "21": 6189,
+      "22": 6006,
+      "23": 5148,
+      "24": 2973,
+      "25": 852
+    },
+    "new_positive_sources": 499,
+    "new_positive_venues": {
+      "binance_um": 6809,
+      "okx": 1191
+    },
+    "new_sources_without_legacy_negatives": 388,
+    "reason": "venue, source, window-length and horizontal-context nuisance distributions differ"
+  },
+  "negative_event_kinds": {
+    "easy": 1043,
+    "hard": 2086
+  },
+  "negative_event_plan_sha256": "143ceaa5802ae343064fb097cab14b364558c4ac923bf48554b12187c2f0005c",
+  "negative_events": 3129,
+  "negative_image_kinds": {
+    "easy": 8000,
+    "hard": 16000
+  },
+  "negative_images": 24000,
+  "negative_source_audit_sha256": "e51019e1246d3719e3593da79cb1c80ca7bcce6281a7ca96f14f8b2013cfaded",
+  "positive_events": 1043,
+  "positive_images": 8000,
+  "preregistration_sha256": "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3",
+  "production_eligible": false,
+  "protected_candidates": 32312,
+  "schema_version": 1,
+  "sources": 499,
+  "training_eligible": false,
+  "training_started": false,
+  "venues": {
+    "binance_um": 894,
+    "okx": 149
+  }
+}
