@@ -2416,7 +2416,7 @@ experiments:
   - experiment_id: exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "d9ac61200a5af8a42220cbe03b3bac206757c60c"
-    status: active
+    status: accepted
     question: >-
       How does the 8,000 Grade-A automatic-positive plus 24,000 same-source
       matched-negative dataset behave under the frozen YOLO11s imgsz=960
@@ -2427,10 +2427,14 @@ experiments:
       retaining the prior 960 training recipe; the positive and negative
       cohort changes are one owner-authorized dataset treatment
     result: >-
-      preregistered_not_yet_completed. Both training classes, every source-file
-      hash, per-sample direction-to-class binding, box geometry, chronological
-      event isolation and local/remote staging parity must pass before the
-      detached 3060 process may start.
+      completed_research_only. The RTX 3060 run early-stopped after 16 of 40
+      requested epochs and delivered the epoch-6 best.pt. Reloaded chronological
+      pre-holdout validation was P 0.8528, R 0.8532, mAP50 0.9116 and mAP50-95
+      0.7775. At frozen conf=0.25, correct-class IoU>=0.5 recall was 86.25%
+      across 1,200 positives; 37 of 3,600 matched empty-label negatives fired
+      (1.028%). At event level, 146/155 had a hit in any post2-9 variant but
+      only 116/155 hit the earliest available variant. Image, sample, event and
+      complete source dependency intervals had zero train/val overlap.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
@@ -2443,15 +2447,24 @@ experiments:
       - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-eval-prereg
       - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-owner-authorization
       - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-split-audit
+      - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-best-weights
+      - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-training-receipt
+      - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-training-curves
+      - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-frozen-val
+      - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-frozen-val-ledger
+      - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-validation-preview
+      - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-validation-preview-receipt
+      - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-report
+      - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-html
     reuse_allowed: false
     notes: >-
       The Owner explicitly overrode the P0/P1 no-training gate on 2026-08-29,
       then explicitly authorized holdout evaluation, promotion and deployment
-      in the current conversation. Authorization removes the permission blocker
-      but does not claim those actions have occurred or that quality gates have
-      passed. The 2-9 post-core completed-history windows can only be promoted
-      or deployed with the same delayed input contract; they cannot enter the
-      causal tip/tip-1/tip-2 path or be represented as fresh live signals.
+      in the current conversation. This experiment used that training permission
+      but consumed no holdout and performed no promotion or deployment. The 2-9
+      post-core completed-history windows can only be promoted or deployed with
+      the same delayed input contract; they cannot enter the causal
+      tip/tip-1/tip-2 path or be represented as fresh live signals.
 
   - experiment_id: exp-15m-right-edge-screenshot-similarity-v1
     source_repo: darkforest-x/fable-trading

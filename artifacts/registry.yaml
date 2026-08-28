@@ -7202,6 +7202,178 @@ artifacts:
       image-level ID, event-ID or complete render-plus-label dependency interval
       overlap; the global chronological dependency gap is 85.25 hours.
 
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-best-weights
+    artifact_type: weights
+    role: completed_history_grade_a_matched_negative_research_weights
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d9ac61200a5af8a42220cbe03b3bac206757c60c"
+    source_path: analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960/weights/best.pt
+    sha256: "0524e78086face6ccba0f2bb220dadada4555a914c64a4e6794f620fa0d9103f"
+    size_bytes: 19189210
+    storage_uri: "repo://analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960/weights/best.pt"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d9ac61200a5af8a42220cbe03b3bac206757c60c"
+    config_hash: "b28793525d55b03249b7af2b08ef83b806a040e9a8e149354e6df0e8269ab479"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Epoch-6 best weight fetched from the RTX 3060 with matching remote and
+      local SHA. It is a completed-history research detector, not a causal tip
+      detector, and no promotion or deployment occurred in this experiment.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-training-receipt
+    artifact_type: manifest
+    role: completed_training_metrics_hashes_and_safety_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6ecc6271123262fa30c00aa2490e3b6ab0083c8f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/training_receipt.json
+    sha256: "1dcdea2d8cf7325c26058c279f189ccb245acd9e7eea54e9684265e0b8c0d7f0"
+    size_bytes: 3835
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/training_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6ecc6271123262fa30c00aa2490e3b6ab0083c8f"
+    config_hash: "b28793525d55b03249b7af2b08ef83b806a040e9a8e149354e6df0e8269ab479"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Records exit code zero, early stop, best/final epochs, reloaded best
+      validation, per-class metrics and hashes for every fetched remote file.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-training-curves
+    artifact_type: report
+    role: completed_training_and_validation_curve_panel
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6ecc6271123262fa30c00aa2490e3b6ab0083c8f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/training_curves.png
+    sha256: "8e2231a28c43bcba8c5cfd1a3b444e87532fd22b8bcf51ead2e859284f4cccf1"
+    size_bytes: 184750
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/training_curves.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6ecc6271123262fa30c00aa2490e3b6ab0083c8f"
+    config_hash: "b28793525d55b03249b7af2b08ef83b806a040e9a8e149354e6df0e8269ab479"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Loss and validation metric curves for all 16 completed epochs.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-frozen-val
+    artifact_type: manifest
+    role: frozen_full_positive_negative_event_and_direction_null_evaluation
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cc1263bef9e8dbb983cd6fa0a04f435ee3f0ca5d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/frozen_val_evaluation.json
+    sha256: "f54e09dcd1b570c3ffee89388e158da04befd4b9fdcabd1990e74b0b0c30a8f1"
+    size_bytes: 22012
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/frozen_val_evaluation.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "cc1263bef9e8dbb983cd6fa0a04f435ee3f0ca5d"
+    config_hash: "b526f48d3989a6fc26deffed42cec8b7ae6367271fadf42837fbda60eff99efb"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Full frozen-threshold evaluation of 1,200 positive and 3,600 matched
+      negative val images, including per-direction, event-delay, multibox,
+      confidence and direction-flip-null results.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-frozen-val-ledger
+    artifact_type: manifest
+    role: immutable_per_image_frozen_validation_prediction_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cc1263bef9e8dbb983cd6fa0a04f435ee3f0ca5d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/frozen_val_predictions.jsonl
+    sha256: "1b1b0bc7c8df06b4bcc6affa7eb9fb8029b2951f4ad8b662c3020de1d3fd9d23"
+    size_bytes: 1465387
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/frozen_val_predictions.jsonl"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "cc1263bef9e8dbb983cd6fa0a04f435ee3f0ca5d"
+    config_hash: "b526f48d3989a6fc26deffed42cec8b7ae6367271fadf42837fbda60eff99efb"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      One immutable JSONL row per val image with GT, all predictions and
+      matching outcomes; 4,800 rows independently recompute every summary.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-validation-preview
+    artifact_type: annotation_set
+    role: stable_positive_and_negative_actual_prediction_preview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e477e8baae9a1901730adecd3c06a49a1635ed6d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/validation_preview.png
+    sha256: "da574d0abffa374bcc5244755ba2b5d8ff78a4d0fff561476588a234646d915f"
+    size_bytes: 249685
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/validation_preview.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e477e8baae9a1901730adecd3c06a49a1635ed6d"
+    config_hash: "b526f48d3989a6fc26deffed42cec8b7ae6367271fadf42837fbda60eff99efb"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Deterministic 4 LONG, 4 SHORT and 8 easy-negative render using the
+      delivered best weight at conf 0.25; visual QA only, not metric evidence.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-validation-preview-receipt
+    artifact_type: manifest
+    role: validation_preview_image_identity_prediction_and_weight_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e477e8baae9a1901730adecd3c06a49a1635ed6d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/validation_preview_receipt.json
+    sha256: "eeac45a4f3a882a1d0012e52522d2612f8112f47813d0d7b9e6a616cb8ffdf26"
+    size_bytes: 7223
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/validation_preview_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e477e8baae9a1901730adecd3c06a49a1635ed6d"
+    config_hash: "b526f48d3989a6fc26deffed42cec8b7ae6367271fadf42837fbda60eff99efb"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Binds every preview source-image hash, stable dataset_sample_id, GT,
+      prediction box, confidence, class and delivered-weight hash.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-report
+    artifact_type: report
+    role: canonical_training_full_validation_and_split_audit_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6ecc6271123262fa30c00aa2490e3b6ab0083c8f"
+    source_path: analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_train960_20260829.md
+    sha256: "dc08cf9a0ea62fcb684b4531eda4bae8216d4796e4eb226cf0b9e2405e25ee37"
+    size_bytes: 17777
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_train960_20260829.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6ecc6271123262fa30c00aa2490e3b6ab0083c8f"
+    config_hash: "b526f48d3989a6fc26deffed42cec8b7ae6367271fadf42837fbda60eff99efb"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Answer-first Chinese technical report with exact data denominators,
+      training outcome, full positive/negative/event metrics, null controls,
+      split isolation, historical noncausal context, risks and reproduction.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-html
+    artifact_type: report
+    role: owner_facing_completed_training_and_validation_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6ecc6271123262fa30c00aa2490e3b6ab0083c8f"
+    source_path: analysis/html/p1_15m_ma_launch_owner_grade_a8000_neg24000_train960_20260829.html
+    sha256: "3bae9dd28c9a1b8217a4a86a9cb19858c2fcca393d7222feff5d0f8532080725"
+    size_bytes: 602549
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_grade_a8000_neg24000_train960_20260829.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6ecc6271123262fa30c00aa2490e3b6ab0083c8f"
+    config_hash: "b526f48d3989a6fc26deffed42cec8b7ae6367271fadf42837fbda60eff99efb"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Owner-facing standalone HTML generated from the canonical Markdown with
+      both PNG figures embedded as base64 and structurally validated offline.
+
   - artifact_id: 15m-right-edge-screenshot-similarity-v1-prereg
     artifact_type: config
     role: frozen_screenshot_pixel_query_and_similarity_contract

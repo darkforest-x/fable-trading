@@ -1,0 +1,119 @@
+{
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1",
+  "summarizer_commit": "6ecc6271123262fa30c00aa2490e3b6ab0083c8f",
+  "run_name": "ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960",
+  "remote_host": "Administrator@192.168.1.5",
+  "gpu": "NVIDIA GeForce RTX 3060 12GB",
+  "epochs_requested": 40,
+  "epochs_completed": 16,
+  "early_stopped": true,
+  "first": {
+    "epoch": 1,
+    "precision": 0.79287,
+    "recall": 0.85095,
+    "map50": 0.89239,
+    "map50_95": 0.69692,
+    "train_box_loss": 0.68533,
+    "train_cls_loss": 2.15492,
+    "train_dfl_loss": 0.93415,
+    "val_box_loss": 0.16051,
+    "val_cls_loss": 2.36585,
+    "val_dfl_loss": 0.25782
+  },
+  "best": {
+    "epoch": 6,
+    "precision": 0.85377,
+    "recall": 0.85228,
+    "map50": 0.91156,
+    "map50_95": 0.77768,
+    "train_box_loss": 0.22495,
+    "train_cls_loss": 0.35394,
+    "train_dfl_loss": 0.71734,
+    "val_box_loss": 0.1165,
+    "val_cls_loss": 0.70251,
+    "val_dfl_loss": 0.26638
+  },
+  "final": {
+    "epoch": 16,
+    "precision": 0.9207,
+    "recall": 0.90949,
+    "map50": 0.93045,
+    "map50_95": 0.73187,
+    "train_box_loss": 0.12406,
+    "train_cls_loss": 0.149,
+    "train_dfl_loss": 0.68171,
+    "val_box_loss": 0.15209,
+    "val_cls_loss": 0.83708,
+    "val_dfl_loss": 0.35019
+  },
+  "best_model_final_validation": {
+    "precision": 0.8528145277631336,
+    "recall": 0.853204462347884,
+    "map50": 0.9116465722051197,
+    "map50_95": 0.7775446206958072,
+    "fitness": 0.7775446206958072
+  },
+  "per_class_best_model_final_validation": {
+    "dense_long": {
+      "images": 531,
+      "instances": 531,
+      "precision": 0.875,
+      "recall": 0.874,
+      "map50": 0.941,
+      "map50_95": 0.793
+    },
+    "dense_short": {
+      "images": 669,
+      "instances": 669,
+      "precision": 0.831,
+      "recall": 0.833,
+      "map50": 0.882,
+      "map50_95": 0.762
+    }
+  },
+  "class_names": {
+    "0": "dense_long",
+    "1": "dense_short"
+  },
+  "fetched_files": {
+    "best.pt": {
+      "size_bytes": 19189210,
+      "sha256": "0524e78086face6ccba0f2bb220dadada4555a914c64a4e6794f620fa0d9103f",
+      "remote_path": "C:/fable/runs/detect/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960/weights/best.pt",
+      "remote_mtime_utc": "2026-08-28T21:44:16.2585510Z"
+    },
+    "args.yaml": {
+      "size_bytes": 1944,
+      "sha256": "3fc585032751ee01cd5ba6e225e63798b68e69ef32ae1924ed21a4500a9e8aa1",
+      "remote_path": "C:/fable/runs/detect/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960/args.yaml",
+      "remote_mtime_utc": "2026-08-28T19:16:52.5647377Z"
+    },
+    "results.csv": {
+      "size_bytes": 2125,
+      "sha256": "9bb57f7b9b3c33cf448fa4ba5ed2ca5e0b26c403ed72531db7b7ce6223bb3654",
+      "remote_path": "C:/fable/runs/detect/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960/results.csv",
+      "remote_mtime_utc": "2026-08-28T21:44:15.0842361Z"
+    },
+    "ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960.log": {
+      "size_bytes": 8810968,
+      "sha256": "fb46e4e63c4921a268bbd2ba85e37264315aa2eab2825e53e9f7d0681be18675",
+      "remote_path": "C:/fable/logs/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960.log",
+      "remote_mtime_utc": "2026-08-28T21:44:49.4649116Z"
+    }
+  },
+  "remote_exit": {
+    "remote_path": "C:/fable/logs/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960.exit_code",
+    "size_bytes": 3,
+    "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "remote_mtime_utc": "2026-08-28T21:44:49.4659134Z"
+  },
+  "curve_sha256": "8e2231a28c43bcba8c5cfd1a3b444e87532fd22b8bcf51ead2e859284f4cccf1",
+  "curve_size_bytes": 184750,
+  "args_contract_passed": true,
+  "remote_hash_match": true,
+  "holdout_consumed": false,
+  "active_or_frozen_changed": false,
+  "promoted": false,
+  "deployed": false,
+  "production_eligible": false
+}
