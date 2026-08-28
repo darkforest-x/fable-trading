@@ -1000,6 +1000,11 @@ def main() -> int:
     parser.add_argument("--device", default=None)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument(
+        "--validate-only",
+        action="store_true",
+        help="verify the frozen contract, inputs and source snapshot without inference or writes",
+    )
+    parser.add_argument(
         "--source-commit",
         help="exact committed source identity for a disposable worker without .git",
     )
@@ -1016,6 +1021,26 @@ def main() -> int:
             char not in "0123456789abcdef" for char in source_commit
         ):
             parser.error("--source-commit must be an exact lowercase 40-char SHA")
+    if args.validate_only:
+        rankings, fetch_receipt = verify_source_snapshot(prereg, args.source_out.resolve())
+        immutable = verify_immutable_inputs(prereg)
+        print(
+            json.dumps(
+                {
+                    "source_commit": source_commit,
+                    "ranked_symbol_days": len(rankings),
+                    "snapshot_files": len(fetch_receipt["snapshot_files"]),
+                    "immutable_inputs": immutable,
+                    "network_reads": 0,
+                    "writes": 0,
+                    "passed": True,
+                },
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return 0
     scan_and_render(
         prereg,
         source_out=args.source_out.resolve(),
