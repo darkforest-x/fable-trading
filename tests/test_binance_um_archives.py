@@ -9,6 +9,7 @@ import pandas as pd
 from yoyo.data.binance_um_archives import (
     admitted_symbols,
     archive_months,
+    archive_urls,
     parse_checksum,
     parse_month_zip,
 )
@@ -27,6 +28,13 @@ def test_archive_months_is_inclusive() -> None:
         "2026-01",
         "2026-02",
     ]
+
+
+def test_archive_urls_percent_encode_non_ascii_symbol() -> None:
+    archive, checksum = archive_urls("币安人生USDT", "2026-04")
+    assert "币安人生" not in archive
+    assert "%E5%B8%81%E5%AE%89%E4%BA%BA%E7%94%9FUSDT" in archive
+    assert checksum == archive + ".CHECKSUM"
 
 
 def test_admitted_symbols_filters_contract_quote_and_boundary() -> None:

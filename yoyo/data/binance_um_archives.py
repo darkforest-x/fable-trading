@@ -19,6 +19,7 @@ import json
 import os
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -96,7 +97,9 @@ def archive_months(start: object, end_inclusive: object) -> list[str]:
 
 def archive_urls(symbol: str, month: str) -> tuple[str, str]:
     filename = f"{symbol}-15m-{month}.zip"
-    url = f"{ARCHIVE_BASE}/{symbol}/15m/{filename}"
+    encoded_symbol = urllib.parse.quote(symbol, safe="")
+    encoded_filename = urllib.parse.quote(filename, safe="")
+    url = f"{ARCHIVE_BASE}/{encoded_symbol}/15m/{encoded_filename}"
     return url, f"{url}.CHECKSUM"
 
 
@@ -256,7 +259,7 @@ def _download_month(
     *, symbol: str, month: str, download_dir: Path
 ) -> tuple[pd.DataFrame | None, dict[str, Any]]:
     zip_url, checksum_url = archive_urls(symbol, month)
-    filename = Path(zip_url).name
+    filename = f"{symbol}-15m-{month}.zip"
     symbol_dir = download_dir / symbol
     symbol_dir.mkdir(parents=True, exist_ok=True)
     zip_path = symbol_dir / filename
