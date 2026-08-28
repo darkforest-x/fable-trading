@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-v1",
+  "created_at": "2026-08-28T18:20:00+08:00",
+  "stage": "P1_grade_a_positive_dataset",
+  "owner_request": {
+    "quote": "a级别完美正样本起码要给我搞7-8000张啊  未必一定要在10000张里面选啊  再去拉点数据选出来",
+    "interpretation": "Expand the pre-holdout historical mother pool beyond the existing 10,000 examples, preserve the exact frozen Grade-A perfect gate, and build 8,000 clean model-input positive PNGs. Do not duplicate identical images or move variants of one event across time splits."
+  },
+  "scope": {
+    "bar": "15m",
+    "holdout_start_exclusive": "2026-05-04T00:00:00Z",
+    "archive_max_exclusive": "2026-05-01T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0,
+    "completed_history_only": true
+  },
+  "sources": {
+    "autofill_preregistration_path": "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/preregistration.json",
+    "autofill_preregistration_sha256": "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da",
+    "perfect_preregistration_path": "experiments/active/exp-15m-ma-launch-owner-perfect-filter10000-v1/preregistration.json",
+    "perfect_preregistration_sha256": "5e96987e61597e650e4a8603ba8bb6bd6bb11802f9ff8cc74b9d94e78fafe0e9",
+    "existing_grade_a": {
+      "ranked_manifest_path": "experiments/active/exp-15m-ma-launch-owner-perfect-filter10000-v1/results/ranked_manifest.jsonl",
+      "ranked_manifest_sha256": "5011966a5fa0d23ea06935348f127261d70126de6a109ac0f55af715d24218a5"
+    },
+    "binance_um": {
+      "provider": "Binance official data.binance.vision USD-M monthly klines",
+      "instrument_rule": "Every USDT PERPETUAL in the saved exchangeInfo snapshot whose onboardDate is before 2026-05-01; TRADING and SETTLING are both retained because immutable pre-holdout archives remain valid.",
+      "archive_start": "2019-09-01T00:00:00Z",
+      "archive_end_inclusive": "2026-04-30T23:59:59Z",
+      "source_granularity": "15m",
+      "checksum": "Every available ZIP must match its official sibling .CHECKSUM SHA-256.",
+      "fetch_summary_path": "data/kline_preholdout_binance_um15m/archive_fetch_summary.json"
+    }
+  },
+  "grade_a_contract": {
+    "definition": "Exact PERFECT_CANDIDATE output of the hash-pinned perfect-filter preregistration: every hard gate, good-anchor combined and lock-step limits, accepted-family p95 limit, and minimum #42/#44 leave-one-out quality score remain unchanged.",
+    "forced_event_count": null,
+    "threshold_relaxation": false,
+    "future_visibility": "Core+5 is used only to retrieve completed historical examples. These labels are not tip or forward signals."
+  },
+  "deduplication": {
+    "same_symbol_direction_event_gap_minutes": 240,
+    "cross_venue": true,
+    "choice": "Greedy by Grade-A quality; a candidate is kept only when it is more than four hours from every already-kept same-symbol/same-direction event, including another venue.",
+    "max_events_per_symbol_direction_time_block": 2,
+    "max_events_per_symbol_direction": 12
+  },
+  "split": {
+    "method": "Global chronological cutoff over the widest render-plus-core+5 dependency interval; all variants of one event share the same split.",
+    "cutoff": "2025-12-01T00:00:00Z",
+    "purge_bars_each_side": 150,
+    "bar_minutes": 15,
+    "between_rules": "excluded and not counted toward the 8,000 exposed images"
+  },
+  "output": {
+    "target_images": 8000,
+    "minimum_unique_events": 1334,
+    "preferred_unique_events": 1600,
+    "minimum_variants_per_event": 5,
+    "maximum_variants_per_event": 6,
+    "window_pre_post_pairs": [[6, 8], [7, 7], [8, 6], [9, 5], [10, 4], [11, 3]],
+    "window_bars": "18 for a 4-bar core and 19 for a 5-bar core",
+    "box_core_bars": [4, 5],
+    "box_horizontal_distribution": "Six fixed context pairs move the same 4/5-bar core across the image without shifting the semantic boundary.",
+    "max_box_height_norm": 0.55,
+    "width": 1280,
+    "height": 742,
+    "format": "lossless PNG",
+    "training_images": "clean renderer output; no red annotation pixels",
+    "labels": "one YOLO box per image; class 0 LONG, class 1 SHORT",
+    "review_gallery": "CSS red overlays over exact clean model inputs; no overlay PNG is substituted for a model input"
+  },
+  "capacity_probe": {
+    "provider": "Binance official USD-M monthly 15m archives",
+    "symbols": ["BTCUSDT", "ETHUSDT", "XRPUSDT", "LINKUSDT", "ADAUSDT"],
+    "rows": 1104287,
+    "weak_after_one_hour_nms": 859,
+    "hard_gate_pass": 36,
+    "grade_a_events": 30,
+    "grade_a_events_per_million_rows": 27.16685064661632,
+    "holdout_ohlcv_rows_materialized": 0,
+    "note": "Read-only capacity probe; it did not write dataset artifacts and is not an evaluation score."
+  },
+  "safety": {
+    "start_training": false,
+    "read_holdout": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "active_or_frozen_change": false,
+    "forward_or_order_state_change": false,
+    "negative_samples_changed": false
+  }
+}
