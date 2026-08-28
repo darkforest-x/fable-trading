@@ -1,0 +1,42 @@
+{
+  "analysis_id": "exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1-confidence-v1",
+  "created_at": "2026-08-28T16:00:00+08:00",
+  "source_commit_before_builder": "381d993f68955b20ff1a2a71aa1106c96e540a58",
+  "owner_request": "按照置信度分析一下",
+  "source": {
+    "archive": "experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/ethusdt_p_30d_all_signal_charts.zip",
+    "archive_sha256": "3a34913a0c7b7d5e07f113434f33ff650a3183095360b16b53cf4f702f27ae18",
+    "episodes": 41,
+    "accepted_candidates": 1057,
+    "existing_holdout_consumption_number": 5,
+    "new_market_data_read": false,
+    "new_model_inference": false
+  },
+  "metric_contract": {
+    "representative_confidence": "confidence of the earliest model-available raw box selected for the Telegram episode chart",
+    "episode_max_confidence": "maximum raw-box confidence observed anywhere later or at the same time inside that already-defined episode",
+    "confidence_is_not": [
+      "Owner visual correctness probability",
+      "future return probability",
+      "trade win probability"
+    ],
+    "threshold_sensitivity": [0.25, 0.30, 0.35, 0.40, 0.50, 0.60, 0.75, 0.80, 0.90, 0.95]
+  },
+  "analysis_questions": [
+    "How are earliest-visible confidence scores distributed?",
+    "How much does confidence rise after the earliest detection within an episode?",
+    "How many episodes remain and how much later do they appear under descriptive confidence cuts?",
+    "Is episode maximum confidence entangled with the number of repeated candidate windows?"
+  ],
+  "null_control": {
+    "method": "permute confidence ranks across the 41 fixed episode candidate counts",
+    "permutations": 10000,
+    "seed": 20260828,
+    "purpose": "test whether the observed confidence-versus-repeat relationship is stronger than random episode pairing"
+  },
+  "forbidden_claims_and_actions": [
+    "No threshold is selected or recommended from this holdout surface",
+    "No Owner Gold, visual correctness, return, PnL or future label is read",
+    "No training, tuning, weight, label, ACTIVE/frozen, forward, deployment or order state changes"
+  ]
+}
