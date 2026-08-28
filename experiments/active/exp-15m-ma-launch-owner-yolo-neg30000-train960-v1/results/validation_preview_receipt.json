@@ -1,0 +1,277 @@
+{
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-neg30000-train960-v1",
+  "selection": {
+    "dense_long": 4,
+    "dense_short": 4,
+    "negative_easy": 8
+  },
+  "confidence_threshold": 0.25,
+  "imgsz": 960,
+  "device": "mps",
+  "weight_sha256": "58888f996f7da46d4321316964085e90855d00e4c0a14e18c98b303c6e43c182",
+  "manifest_sha256": "6e601034ab15765a74b788cc6d094e9326c3044c1fb615c908ef9de897d6e0af",
+  "preview_path": "/Users/zhangzc/fable-trading/experiments/active/exp-15m-ma-launch-owner-yolo-neg30000-train960-v1/results/validation_preview.png",
+  "preview_sha256": "bd1d78998ae267a8bcc2ea4d29be937a4c45ca3e0b356d7d381e2f2102bf2748",
+  "preview_size_bytes": 236066,
+  "samples": [
+    {
+      "sample_id": "p:414a66188bc63f7fb45706fe",
+      "symbol": "DOOD_USDT_SWAP",
+      "sample_kind": "positive",
+      "class_name": "dense_long",
+      "image_sha256": "92fd05241ce25090196be1048a581554da218c544daa4d82e321f4af2aaeb18b",
+      "predictions": [
+        {
+          "class_id": 0,
+          "class_name": "dense_long",
+          "confidence": 0.45090723037719727,
+          "xyxy": [
+            768,
+            413,
+            989,
+            595
+          ]
+        },
+        {
+          "class_id": 0,
+          "class_name": "dense_long",
+          "confidence": 0.3038780391216278,
+          "xyxy": [
+            647,
+            412,
+            931,
+            599
+          ]
+        }
+      ]
+    },
+    {
+      "sample_id": "p:0ce570c1ea4a95aa21b45d02",
+      "symbol": "ZEC_USDT_SWAP",
+      "sample_kind": "positive",
+      "class_name": "dense_long",
+      "image_sha256": "9bd9ad6460636e2c07df1e1967a2e6500c0aaf0d6ffdc51c0fe5598b5ede4e2e",
+      "predictions": [
+        {
+          "class_id": 0,
+          "class_name": "dense_long",
+          "confidence": 0.7445065379142761,
+          "xyxy": [
+            768,
+            567,
+            1050,
+            675
+          ]
+        },
+        {
+          "class_id": 0,
+          "class_name": "dense_long",
+          "confidence": 0.2881285846233368,
+          "xyxy": [
+            708,
+            576,
+            990,
+            676
+          ]
+        }
+      ]
+    },
+    {
+      "sample_id": "p:400974827eb18ee28d365531",
+      "symbol": "SIGN_USDT_SWAP",
+      "sample_kind": "positive",
+      "class_name": "dense_long",
+      "image_sha256": "916249f22bc33dba811b9a39573dd485643dd94cac20033b7e77fe3b1a9863bc",
+      "predictions": [
+        {
+          "class_id": 0,
+          "class_name": "dense_long",
+          "confidence": 0.7531791925430298,
+          "xyxy": [
+            709,
+            363,
+            991,
+            463
+          ]
+        },
+        {
+          "class_id": 0,
+          "class_name": "dense_long",
+          "confidence": 0.2961852550506592,
+          "xyxy": [
+            768,
+            362,
+            1048,
+            464
+          ]
+        }
+      ]
+    },
+    {
+      "sample_id": "p:475a5e900b76296c978b312d",
+      "symbol": "WIF_USDT_SWAP",
+      "sample_kind": "positive",
+      "class_name": "dense_long",
+      "image_sha256": "21f410e2e834248495e0bb5cce09500cbbc8d6dbc976408a10927d599856fce0",
+      "predictions": [
+        {
+          "class_id": 0,
+          "class_name": "dense_long",
+          "confidence": 0.8960587382316589,
+          "xyxy": [
+            767,
+            488,
+            989,
+            603
+          ]
+        }
+      ]
+    },
+    {
+      "sample_id": "p:33d2a60b10add27428731820",
+      "symbol": "ONT_USDT_SWAP",
+      "sample_kind": "positive",
+      "class_name": "dense_short",
+      "image_sha256": "7b8a89409f125c0f5c4eda7c9d69ffbc7213fae7e75afb9e59bb34d507c9e30e",
+      "predictions": [
+        {
+          "class_id": 1,
+          "class_name": "dense_short",
+          "confidence": 0.6317951083183289,
+          "xyxy": [
+            708,
+            256,
+            930,
+            425
+          ]
+        }
+      ]
+    },
+    {
+      "sample_id": "p:3946ebb0d0c0cc0ac47bbfb2",
+      "symbol": "YGG_USDT_SWAP",
+      "sample_kind": "positive",
+      "class_name": "dense_short",
+      "image_sha256": "cf85489ec0995be1560d32b9dc008143381a6de46d5913b56ad8715002cfd54b",
+      "predictions": [
+        {
+          "class_id": 1,
+          "class_name": "dense_short",
+          "confidence": 0.9340331554412842,
+          "xyxy": [
+            744,
+            333,
+            1038,
+            406
+          ]
+        }
+      ]
+    },
+    {
+      "sample_id": "p:c80ebda4f101331f5c997563",
+      "symbol": "NOT_USDT_SWAP",
+      "sample_kind": "positive",
+      "class_name": "dense_short",
+      "image_sha256": "942476d738aaae71787ad35ebadf88d5a73ce39463bc814d2616e260a0c06376",
+      "predictions": [
+        {
+          "class_id": 1,
+          "class_name": "dense_short",
+          "confidence": 0.7887170314788818,
+          "xyxy": [
+            649,
+            114,
+            894,
+            287
+          ]
+        }
+      ]
+    },
+    {
+      "sample_id": "p:3a02f814bc09d3c97adba3cf",
+      "symbol": "NEO_USDT_SWAP",
+      "sample_kind": "positive",
+      "class_name": "dense_short",
+      "image_sha256": "c4b555d24b3a99bed2844770e0a09a6e4ff2e0a809b920452d3f5a0b775b6226",
+      "predictions": [
+        {
+          "class_id": 1,
+          "class_name": "dense_short",
+          "confidence": 0.6143359541893005,
+          "xyxy": [
+            685,
+            301,
+            1013,
+            415
+          ]
+        }
+      ]
+    },
+    {
+      "sample_id": "n:8526ee28fd9b3edc5fc3d93f",
+      "symbol": "AXS_USDT_SWAP",
+      "sample_kind": "negative",
+      "class_name": null,
+      "image_sha256": "f7692f26da062c97da988365d6195dbf930d4c473a277ee0b592a1e39b6e9cd9",
+      "predictions": []
+    },
+    {
+      "sample_id": "n:24ce6649b9be264cb66ff39f",
+      "symbol": "ZBT_USDT_SWAP",
+      "sample_kind": "negative",
+      "class_name": null,
+      "image_sha256": "35e974aafad44c9a9317395db55673cb429aded7f503f221ad9f1d450ac20f02",
+      "predictions": []
+    },
+    {
+      "sample_id": "n:200bf2299d6a60d97a2677c1",
+      "symbol": "AXS_USDT_SWAP",
+      "sample_kind": "negative",
+      "class_name": null,
+      "image_sha256": "6f46cdb570a94d3952808629532a8a20e49cdea12ff6db0661a447c6701f8054",
+      "predictions": []
+    },
+    {
+      "sample_id": "n:6b8216aebfbdcc23f4c2334b",
+      "symbol": "DYDX_USDT_SWAP",
+      "sample_kind": "negative",
+      "class_name": null,
+      "image_sha256": "67a88abd0f5ed360792c4027fe9e97d98e7c3aeab4b8da31358af538022a2774",
+      "predictions": []
+    },
+    {
+      "sample_id": "n:d258295f1aef731f33491550",
+      "symbol": "XLM_USDT_SWAP",
+      "sample_kind": "negative",
+      "class_name": null,
+      "image_sha256": "475df7aad167e45b7cebb64da756e9220706412823b4d3c1565805e18bb0b366",
+      "predictions": []
+    },
+    {
+      "sample_id": "n:037c7e74e311227d4d50e5c7",
+      "symbol": "MANA_USDT_SWAP",
+      "sample_kind": "negative",
+      "class_name": null,
+      "image_sha256": "bba172248b7d2a6dc71e5fd77422e3f34e9402f97c26ca62f83fbad0dd32e9e5",
+      "predictions": []
+    },
+    {
+      "sample_id": "n:58f47e779e4a5afc2ad89b5e",
+      "symbol": "CHZ_USDT_SWAP",
+      "sample_kind": "negative",
+      "class_name": null,
+      "image_sha256": "42c8147cb666a79f5fcd36ea2e97b8116a444f3bb54a18239e53b5ce859a0279",
+      "predictions": []
+    },
+    {
+      "sample_id": "n:cd7a0c85583ed91b859b71ca",
+      "symbol": "MAGIC_USDT_SWAP",
+      "sample_kind": "negative",
+      "class_name": null,
+      "image_sha256": "f3e5778a152ec0d0ee9703e1e638510b39db2181a49e7a4d494b8651802d55be",
+      "predictions": []
+    }
+  ],
+  "holdout_consumed": false,
+  "production_eligible": false
+}
