@@ -2412,3 +2412,34 @@ experiments:
       run until those gates pass or the owner explicitly changes that rule.
       Accepted status applies to the negative-dataset construction claim only;
       training_eligible and production_eligible intentionally remain false.
+
+  - experiment_id: exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d9ac61200a5af8a42220cbe03b3bac206757c60c"
+    status: active
+    question: >-
+      How does the 8,000 Grade-A automatic-positive plus 24,000 same-source
+      matched-negative dataset behave under the frozen YOLO11s imgsz=960
+      recipe on the RTX 3060?
+    single_variable: >-
+      replace the earlier 10,000 weak-positive plus 30,000-negative dataset
+      with the immutable Grade-A 8,000 plus matched 24,000 dataset while
+      retaining the prior 960 training recipe; the positive and negative
+      cohort changes are one owner-authorized dataset treatment
+    result: >-
+      preregistered_not_yet_completed. Both training classes, every source-file
+      hash, per-sample direction-to-class binding, box geometry, chronological
+      event isolation and local/remote staging parity must pass before the
+      detached 3060 process may start.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_train960_20260829.md
+    artifacts:
+      - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-prereg
+    reuse_allowed: false
+    notes: >-
+      The Owner explicitly overrode the P0/P1 no-training gate on 2026-08-29.
+      This launch remains pre-holdout and performs no promotion or deployment.
+      The 2-9 post-core completed-history windows cannot enter the causal
+      tip/tip-1/tip-2 forward path or be represented as fresh live signals.

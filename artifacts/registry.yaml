@@ -7063,3 +7063,24 @@ artifacts:
     config_hash: "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
     data_cutoff: "2026-05-03T20:30:00Z"
     notes: Owner-facing HTML generated from the canonical Markdown and structurally validated.
+
+  # ---- Grade-A 8k + matched 24k YOLO training (2026-08-29) ---------------
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-prereg
+    artifact_type: config
+    role: owner_authorized_grade_a_completed_history_3060_training_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d9ac61200a5af8a42220cbe03b3bac206757c60c"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/preregistration.json
+    sha256: "b28793525d55b03249b7af2b08ef83b806a040e9a8e149354e6df0e8269ab479"
+    size_bytes: 7571
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d9ac61200a5af8a42220cbe03b3bac206757c60c"
+    config_hash: "b28793525d55b03249b7af2b08ef83b806a040e9a8e149354e6df0e8269ab479"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Freezes the Owner's P0/P1 training-gate override, exact 32,000-image
+      dataset, two-class 960 recipe and dual-host full-file preflight. It does
+      not itself consume holdout, promote, deploy or authorize live orders.
