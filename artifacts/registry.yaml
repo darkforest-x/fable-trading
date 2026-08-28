@@ -7084,3 +7084,54 @@ artifacts:
       Freezes the Owner's P0/P1 training-gate override, exact 32,000-image
       dataset, two-class 960 recipe and dual-host full-file preflight. It does
       not itself consume holdout, promote, deploy or authorize live orders.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-local-preflight
+    artifact_type: manifest
+    role: mac_source_full_file_and_semantic_preflight_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d9ac61200a5af8a42220cbe03b3bac206757c60c"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/local_dataset_preflight.json
+    sha256: "8a0fca6162535ca6b8f4724521695efd8c95c172ba8a1b002ae2ea0ea2dc50ae"
+    size_bytes: 1238
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/local_dataset_preflight.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d9ac61200a5af8a42220cbe03b3bac206757c60c"
+    config_hash: "b28793525d55b03249b7af2b08ef83b806a040e9a8e149354e6df0e8269ab479"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Verifies all 64,000 source files, two classes, box bounds, dimensions and event isolation with zero holdout reads.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-remote-preflight
+    artifact_type: manifest
+    role: rtx3060_staged_copy_full_file_and_semantic_preflight_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d9ac61200a5af8a42220cbe03b3bac206757c60c"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/remote_dataset_preflight.json
+    sha256: "2d0d202a986bac0609059f25894a4e47984ae645e75aacf578a44c3b8074c02a"
+    size_bytes: 1222
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/remote_dataset_preflight.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d9ac61200a5af8a42220cbe03b3bac206757c60c"
+    config_hash: "b28793525d55b03249b7af2b08ef83b806a040e9a8e149354e6df0e8269ab479"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Location-neutral JSON is byte-equivalent to the Mac receipt after removing only the absolute dataset path.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-launch
+    artifact_type: manifest
+    role: dual_host_preflight_runtime_and_running_job_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d9ac61200a5af8a42220cbe03b3bac206757c60c"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/launch_receipt.json
+    sha256: "ed270253029e81bdb515b88d21c5e6bf6cf0432118667d2f068826b4ab6be85f"
+    size_bytes: 3170
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/launch_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d9ac61200a5af8a42220cbe03b3bac206757c60c"
+    config_hash: "b28793525d55b03249b7af2b08ef83b806a040e9a8e149354e6df0e8269ab479"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Records exact hashes, staging sentinel, PIDs, nc=2 runtime arguments and first observed CUDA progress; no holdout or runtime trading state changed.

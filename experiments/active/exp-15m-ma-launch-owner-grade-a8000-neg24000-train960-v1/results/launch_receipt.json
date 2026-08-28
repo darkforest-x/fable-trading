@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1",
+  "generated_at": "2026-08-29T03:18:48+08:00",
+  "state_at_receipt": "running_epoch_1",
+  "repository": {
+    "branch": "main",
+    "implementation_commit": "d9ac61200a5af8a42220cbe03b3bac206757c60c",
+    "registry_commit": "44dfd70"
+  },
+  "owner_authorization": {
+    "p0_p1_training_gate_overridden": true,
+    "source": "2026-08-29 conversation: P0/P1禁训门是啥；不读holdout、不promote、不部署。没必要 都可以做"
+  },
+  "runtime": {
+    "host": "Administrator@192.168.1.5",
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "gpu_memory_gib": 12.0,
+    "torch": "2.8.0",
+    "torchvision": "0.23.0",
+    "ultralytics": "8.4.89",
+    "numpy": "2.0.2",
+    "cuda_available": true,
+    "cuda_nms_passed": true,
+    "remote_c_free_gib_before_staging": 140.7
+  },
+  "immutable_inputs": {
+    "manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "base_model_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+    "trainer_sha256": "71445a639996ef8d0199a164aa08c75efa9d037619b8647deb3d5fab366e0562",
+    "preflight_sha256": "a178b20fd43b9a4f992149476a9dfaed029f4540812ddc1a304531baf86d05fd",
+    "launcher_sha256": "de6ac7a88e42974471e1b5279fffb6d2d644cf3e92e7a15e4f41fb6f98043686",
+    "preregistration_sha256": "b28793525d55b03249b7af2b08ef83b806a040e9a8e149354e6df0e8269ab479",
+    "staged_batch_sha256": "6ca118777745f875ebccdceb63729c9ead22b6fc373a2a3309ea04e287cb3643"
+  },
+  "dataset_preflight": {
+    "local_receipt_sha256": "8a0fca6162535ca6b8f4724521695efd8c95c172ba8a1b002ae2ea0ea2dc50ae",
+    "remote_raw_receipt_sha256": "ef85e762dd432c75091d38945fdf2577aceef12b4240a8533436ca419f5c7d2f",
+    "remote_local_lf_copy_sha256": "2d0d202a986bac0609059f25894a4e47984ae645e75aacf578a44c3b8074c02a",
+    "location_neutral_receipt_sha256": "770b7d20efcf0eef369ff61d015c0e3edc0d4fdc9cabf80e44f92995217b11db",
+    "location_neutral_receipts_identical": true,
+    "file_hashes_verified_per_host": 64000,
+    "images": 32000,
+    "positive_labels": 8000,
+    "negative_empty_labels": 24000,
+    "class_names": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "image_dimensions": [1280, 742],
+    "corrupt_files": 0
+  },
+  "training_process": {
+    "launcher_pid": 7388,
+    "venv_python_pid": 11332,
+    "worker_python_pid": 6728,
+    "started_at": "2026-08-29T03:16:48+08:00",
+    "run_name": "ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960",
+    "epochs_requested": 40,
+    "patience": 10,
+    "batch": 8,
+    "imgsz": 960,
+    "seed": 0,
+    "deterministic": true,
+    "optimizer": "AdamW",
+    "lr0": 0.0001,
+    "rect": true,
+    "cache": false,
+    "workers": 2,
+    "model_nc": 2,
+    "first_observed_progress": "epoch 1 batch 96/3400",
+    "first_observed_gpu": "60% utilization, 4183 MiB, 52 C"
+  },
+  "safety": {
+    "holdout_rows_read": 0,
+    "promotion_performed": false,
+    "deployment_performed": false,
+    "active_bundle_changed": false,
+    "forward_state_changed": false,
+    "order_state_changed": false,
+    "completed_history_not_live_tip": true
+  }
+}
