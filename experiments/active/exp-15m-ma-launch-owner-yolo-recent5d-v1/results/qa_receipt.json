@@ -1,0 +1,135 @@
+{
+  "protocol": "ma6_owner_yolo_neg30000_recent5d_daily_abs_movers_v1_20260828",
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-recent5d-v1",
+  "verifier_commit": "d29c703fb336ea43ac5359f6bc21ce17b3f229ae",
+  "generated_at": "2026-08-28T02:42:17.857497+00:00",
+  "holdout_consumption_number_for_this_configuration": 1,
+  "network_reads_during_verification": 0,
+  "immutable_inputs": {
+    "weights": {
+      "path": "analysis/output/ma_launch_owner_yolo_neg30000_v2/ma_launch_owner_yolo_neg30000_v2_y11s_ft960/weights/best.pt",
+      "sha256": "58888f996f7da46d4321316964085e90855d00e4c0a14e18c98b303c6e43c182"
+    },
+    "training_manifest": {
+      "path": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2/manifest.jsonl",
+      "sha256": "6e601034ab15765a74b788cc6d094e9326c3044c1fb615c908ef9de897d6e0af"
+    },
+    "renderer": {
+      "path": "yoyo/layers/l1_detection/render.py",
+      "sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+    },
+    "training_geometry": {
+      "positive_rows": 10000,
+      "window_counts": {
+        "18": 301,
+        "19": 977,
+        "20": 1666,
+        "21": 2063,
+        "22": 2002,
+        "23": 1716,
+        "24": 991,
+        "25": 284
+      },
+      "core_counts": {
+        "4": 5153,
+        "5": 4847
+      },
+      "confirmation_counts": {
+        "4": 3276,
+        "5": 3360,
+        "6": 3364
+      }
+    }
+  },
+  "fetch_receipt_sha256": "497bfb8bfa050ecda11bbc65061608d5cc807a0583ef99ae9c3e5b3e2d53ab75",
+  "scan_receipt_sha256": "ebf13e69494b51ecd126c1385b28e262de555fe40738dd2afdb7ff88956d9cc4",
+  "ranking_summary": {
+    "symbol_days": 100,
+    "unique_symbols": 75,
+    "eligible_universe_by_day": {
+      "2026-08-23T00:00:00+00:00": 274,
+      "2026-08-24T00:00:00+00:00": 274,
+      "2026-08-25T00:00:00+00:00": 274,
+      "2026-08-26T00:00:00+00:00": 274,
+      "2026-08-27T00:00:00+00:00": 274
+    }
+  },
+  "snapshot_summary": {
+    "snapshot_files": 75,
+    "snapshot_rows": 50850,
+    "exact_symbol_days": 100,
+    "minimum_context_bars": 120
+  },
+  "signal_summary": {
+    "signals": 239,
+    "class_counts": {
+      "dense_long": 168,
+      "dense_short": 71
+    },
+    "direction_aligned": 204,
+    "direction_aligned_rate": 0.853556,
+    "confidence_mean": 0.738817,
+    "confidence_median": 0.810223
+  },
+  "scan_totals": {
+    "windows_scored": 81600,
+    "windows_with_any_box": 4976,
+    "raw_boxes": 5632,
+    "accepted_structural_boxes": 4528,
+    "accepted_before_dedup": 4528,
+    "dedup_removed": 4289,
+    "deduplicated_events": 239
+  },
+  "verified_pngs": [
+    {
+      "path": "experiments\\active\\exp-15m-ma-launch-owner-yolo-recent5d-v1\\results\\overview.png",
+      "sha256": "f790a68ac22acae17a2c493bd1b62c5636bd0288e142bcae44683cd80061d12a",
+      "width": 1800,
+      "height": 2100
+    },
+    {
+      "path": "experiments\\active\\exp-15m-ma-launch-owner-yolo-recent5d-v1\\results\\day_20260823_top20.png",
+      "sha256": "1ba011f47dea542344e9f14ab71db5361eb4d3faa1842775e8a18f69ec30d51f",
+      "width": 1520,
+      "height": 4824
+    },
+    {
+      "path": "experiments\\active\\exp-15m-ma-launch-owner-yolo-recent5d-v1\\results\\day_20260824_top20.png",
+      "sha256": "9b7a1edc05d96100149547a8e358f31e6af615c4e16c542b0b14d7da05e1ba3c",
+      "width": 1520,
+      "height": 4824
+    },
+    {
+      "path": "experiments\\active\\exp-15m-ma-launch-owner-yolo-recent5d-v1\\results\\day_20260825_top20.png",
+      "sha256": "3105b7ddcbdede51b3ff74c7912119cb5ac53944cc745295e01922bc010a4144",
+      "width": 1520,
+      "height": 4824
+    },
+    {
+      "path": "experiments\\active\\exp-15m-ma-launch-owner-yolo-recent5d-v1\\results\\day_20260826_top20.png",
+      "sha256": "53bcc186604f781895de7a6333e3ba2d25347bfd1105bf90109c00eb4677f93c",
+      "width": 1520,
+      "height": 4824
+    },
+    {
+      "path": "experiments\\active\\exp-15m-ma-launch-owner-yolo-recent5d-v1\\results\\day_20260827_top20.png",
+      "sha256": "832a3583c7f11ca7cfca6c8f9ab860af810221ff3949898a5667f4fafa3faa7d",
+      "width": 1520,
+      "height": 4824
+    }
+  ],
+  "checks_passed": [
+    "artifact_hashes",
+    "five_complete_utc_top20_boards",
+    "live_crypto_instcategory1_universe",
+    "one_hundred_exact_96_bar_symbol_days",
+    "ma120_precontext",
+    "ohlcv_invariants",
+    "training_supported_w18_to_25_core4_to_5_confirmation4_to_6",
+    "five_bar_event_deduplication",
+    "six_png_hash_and_decode",
+    "post_hoc_and_non_production_disclosures"
+  ],
+  "training_or_tuning": false,
+  "production_eligible": false
+}

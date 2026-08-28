@@ -1,0 +1,2544 @@
+{
+  "protocol": "ma6_owner_yolo_neg30000_recent5d_daily_abs_movers_v1_20260828",
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-recent5d-v1",
+  "source_commit": "0eaf68922be4e30b24cb22f9d5d472dbc819b1d6",
+  "generated_at": "2026-08-28T02:02:05.601628+00:00",
+  "holdout_consumption_number_for_this_configuration": 1,
+  "holdout_read_authorized_by_owner_request": true,
+  "complete_days": [
+    "2026-08-23T00:00:00+00:00",
+    "2026-08-24T00:00:00+00:00",
+    "2026-08-25T00:00:00+00:00",
+    "2026-08-26T00:00:00+00:00",
+    "2026-08-27T00:00:00+00:00"
+  ],
+  "ranking_causality": "post_hoc_same_day_ranking_not_live_selection",
+  "ticker_rows_received": 458,
+  "instrument_metadata_rows_received": 459,
+  "instrument_filter": "state=live and instCategory=1",
+  "eligible_instruments": 274,
+  "daily_raw_rows_received": 1918,
+  "daily_api_failures": 0,
+  "selected_symbol_days": 100,
+  "selected_unique_instruments": 75,
+  "fifteen_minute_raw_rows_received": 52500,
+  "snapshot_rows_materialized": 50850,
+  "exact_96_contiguous_symbol_days": 100,
+  "non_exact_symbol_days": 0,
+  "context_start": "2026-08-21T00:00:00+00:00",
+  "snapshot_end_exclusive": "2026-08-28T01:30:00+00:00",
+  "canonical_data_written": false,
+  "daily_rankings_path": "analysis/output/ma_launch_owner_yolo_recent5d_v1/daily_rankings.csv",
+  "daily_rankings_sha256": "6208881846762aae956165b9aa6b5d4f5fe433f67c6148d4cc6dbd8b8690fbf2",
+  "universe_snapshot_path": "analysis/output/ma_launch_owner_yolo_recent5d_v1/universe_snapshot.json",
+  "universe_snapshot_sha256": "8cbfce880d388b19d5642bf9a7b6adeabdbc155ae8aa2caf8520ce6544e1dc81",
+  "snapshot_files": [
+    {
+      "symbol": "AAVE_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "2b4f3dd4e3bdd933e8720aca528a76bea09a0e43da97e9d0c080f741d053400d"
+    },
+    {
+      "symbol": "ACT_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "6d6695c851c4473ae006d25d943b7a3c882a6a90bfb86fb373966821be4f8067"
+    },
+    {
+      "symbol": "ACU_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "5ce99e501d4e5b33778ff49e10fa75c12bf9cc8740d251b4f06635085321c193"
+    },
+    {
+      "symbol": "AEON_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "cd107bb56ce54cb54d1a7775e4e855c019ecd46dea2ad0dccbdc0907385eeab9"
+    },
+    {
+      "symbol": "AERO_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "d07245cc6729092a991dc0ded75121369299251147169152624e684db65dfe98"
+    },
+    {
+      "symbol": "APR_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "9f84cf0b8a5478405115afdab60f7596a05c351f2738c5ae5ab86fe946f3270c"
+    },
+    {
+      "symbol": "APT_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "ef4d4e8874f4cd72a3e5662bb969573d8de25ba7faa97cc7fa8dac5fe01ff1e5"
+    },
+    {
+      "symbol": "ARX_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "210dcd335346eb5fc97f27a96c115b4eb5581ff359c3f6ab0a65edbd6fdfc81b"
+    },
+    {
+      "symbol": "BICO_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "6456129f8485aae07339552b92680379487b67e06b7b1772496310aabf65210f"
+    },
+    {
+      "symbol": "BOME_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "311a1726a2cb8a52ec7aa700011ddcd44a5fdcd0e90fddd94a330f5e883f3871"
+    },
+    {
+      "symbol": "BRETT_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "237b4de4c43ea93f55c01cd0fc3b78d84d09cf6e0dd08a85c5d9a36744359ad0"
+    },
+    {
+      "symbol": "BSB_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "38e684d8506e602465269032d20e154dbb4ffe99f6546db8148aae19122e9534"
+    },
+    {
+      "symbol": "CAP_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "bd101ee8dbd2f7101adf594e645634456d98841977f694b067d0c94cbfa2dedb"
+    },
+    {
+      "symbol": "CHIP_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "37716f59769fc4108bf52588f818e90902afd1e5f6c9ec66d69c9dd91b0b58d9"
+    },
+    {
+      "symbol": "CVX_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "2074b5717bc1ebb85e0a3404d5c21f6666d193394d8db04b1722678841930777"
+    },
+    {
+      "symbol": "DASH_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "ef1090e7664909b8084d66c1444d02e0d8ce5c9b22887deec777b9e9355ba7fa"
+    },
+    {
+      "symbol": "EDEN_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "217f825603ec0b226bb63c5012e1a9361f6ca5b5f59bbd5f432202225112cb29"
+    },
+    {
+      "symbol": "EIGEN_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "164a03295640bc03171e20fcda662902e97700fd8617d0a0af1abfe705f81300"
+    },
+    {
+      "symbol": "ENA_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "835f318cd56cba39ffd2fcc60ce0d3f2462030f26d7e0c8b0693922cbd564d73"
+    },
+    {
+      "symbol": "ETHFI_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "f0e9b4b5ae389fed4ce82b0c54ae2e2561a2b88213b1d41478380ec176580c55"
+    },
+    {
+      "symbol": "FARTCOIN_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "0d55cb609aae1de7a373f6e26462df6724079fad229229a1d66cbebedde67263"
+    },
+    {
+      "symbol": "GAS_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "a2d726fa82a6ce35ac72fac78fd5c01f258012f34a12655f0f93138558feb946"
+    },
+    {
+      "symbol": "GIGGLE_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "e2ec277433a8a4e2fd0f7269300171442704b0fb3d86e7d356b636f87cda3652"
+    },
+    {
+      "symbol": "GPS_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "05411f55c800bf53c2b95b64e7ecacd2eeef21308d0983c09413a8e73f34c4bd"
+    },
+    {
+      "symbol": "GRASS_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "e6d923d5c1ba7a57d5c8e3e56fec526e9eac679c6c0e73a0b511dd5227b20e1f"
+    },
+    {
+      "symbol": "GRT_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "db16b4df80797e455c00e188e8fd566341473a88f57ea495b1d08619bed10678"
+    },
+    {
+      "symbol": "GRVT_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "9f5e0ff455c90f132c810ba069416fbb69b34ac501cb3ac428f16ca332db1613"
+    },
+    {
+      "symbol": "HUMA_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "05354e6c2012730fbf9ad0aec27ddd4f914d28b4c22105a45b12641f84bd135e"
+    },
+    {
+      "symbol": "H_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "77166f1dd83576571820420192eb56c804bfad31a497cfd64b21e82a89be780b"
+    },
+    {
+      "symbol": "ICX_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "cbd0a1ac5350a3f7de548135aa9e6e1a0b42ccc8da03d806ae045408e158ac8b"
+    },
+    {
+      "symbol": "IMX_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "ac84885cff248592fe83e6485fb50ab3f91777337cb089b8e01bcc16fd6fb95b"
+    },
+    {
+      "symbol": "INJ_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "c491bca6bad7d3b71c80ca569ebe044cef976ea6020c03b51347804908e43bf6"
+    },
+    {
+      "symbol": "JTO_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "a906fb91ef944a328cb2bdd2f621cd2d551248f6189be54ae559725f7164073c"
+    },
+    {
+      "symbol": "JUP_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "bccd535adea29361bb3628b626526a97e16290dda63805b1ecdd201d63b54c3f"
+    },
+    {
+      "symbol": "KITE_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "d5280d146183840c1a538485eb5ca6f21f117badcb6dd9582d306565ff2e60d6"
+    },
+    {
+      "symbol": "KMNO_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "16c3902c101884d3781b25a049dd2e15e1f938d26fbb9d13ae96d4287a48e650"
+    },
+    {
+      "symbol": "LDO_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "e3d4d903b770871010ebd11c8158863abdaabfc7be8f0e74e4a89837e4f3c792"
+    },
+    {
+      "symbol": "LIGHT_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "d41e44cc33756fbc799e61b6878086dfaeec5f5411b45bf8e135f98961c92fbc"
+    },
+    {
+      "symbol": "LIT_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "7097f151461c6671bc786c7db5e5c2280863b4818fa44f48eaa0ae8d92e4e503"
+    },
+    {
+      "symbol": "LQTY_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "f689bc9380eec7a69a6952709c81a4a84008138c7a26dba49eabf5c4ed19aeb0"
+    },
+    {
+      "symbol": "MERL_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "8f9918d155e676962b2f9a720ababa344a50da33df3221fdf4d1c8f8a4d93863"
+    },
+    {
+      "symbol": "MET_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "0801539ac6ccdb98d6a31045441f3a2796aad91c8ae4ac60828f3d876ab3e444"
+    },
+    {
+      "symbol": "MINA_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "1eeeb2a1ad5c5459d5a0696438fa5cb67cef0d81c112e9dca68ae2dd9d88d2fc"
+    },
+    {
+      "symbol": "MON_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "8b1d2cb6d36553d0306af84013d503be558d6009a5f350322833e382c7ef530f"
+    },
+    {
+      "symbol": "MORPHO_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "de44e111c8c2bd4e4b656c3365e990a10eca755ae6d0e4839b84377e18a5a52b"
+    },
+    {
+      "symbol": "MOVE_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "1539c25e444186d5fbdd1dae82fb198234d7d4e6291553362b1eb6138cdb088c"
+    },
+    {
+      "symbol": "MUBARAK_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "12a9d65125fa94c208dad2df93aa53f704b6c718861ac469d2e70b6186c0daa2"
+    },
+    {
+      "symbol": "NES_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "87c3c9020eec9cfa4750cb0cb70bd9b8db33f6de0d5c41adf63ebc5ba2b3383c"
+    },
+    {
+      "symbol": "NIGHT_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "6692d1b4840910015a7318c23655259eb737879a167643b9ee85522ee25d726f"
+    },
+    {
+      "symbol": "ONT_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "b0c7481a563f161ea9a4eac67ded19ff51170f6860e03497d5f14e09ce77cd81"
+    },
+    {
+      "symbol": "PENDLE_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "2e62100a927463ec51b15103fbe38992b02d93498fd02facbf66911a51438b20"
+    },
+    {
+      "symbol": "PENGU_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "afe791f13cf398e135a9d05aa955af0ca7354c03f90fa468b91b232a29b79078"
+    },
+    {
+      "symbol": "PEOPLE_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "752cd37e570a189f89607a5af47848e59a99c3a5ecf8e09ffd74719075a0d704"
+    },
+    {
+      "symbol": "PIEVERSE_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "542424e8ad36917d4d8b267e52580b9666adcb90cd264ed047c1cf486f19624a"
+    },
+    {
+      "symbol": "PROS_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "c0b7539ab11389dda45ff9af874853bcb1f7c24f4ef745099b8c95697335fc89"
+    },
+    {
+      "symbol": "PUMP_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "dfd03d3b00bc61703f17a7f7670bcc77fdc414b8f74c02994e76388f0c266c87"
+    },
+    {
+      "symbol": "RIVER_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "2f2814760ca2aaf632dee5b2256db19955977bc2b5399bd2981e7dcee4651936"
+    },
+    {
+      "symbol": "RLS_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "827ddaf44b6b5abf105c486af105ace92a6e6177bad75380c0e49e21e648ec5a"
+    },
+    {
+      "symbol": "SAND_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "b2fe6cd1bafa5be89e58d318313bb608ee26d6618a811ca600fd3c2bef563992"
+    },
+    {
+      "symbol": "SENT_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "38e9820b38d846139995f97ca057973e95ef538f68da4276115bf69246e611e6"
+    },
+    {
+      "symbol": "SOL_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "dd69a8827f9a943a11f73f238ee065204eaff592218bf3f6405bd9bfec2300bb"
+    },
+    {
+      "symbol": "SPK_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "16ec6d05a49c791cbcf87aea578778b9d84dfdbc9e5131d862fd25764e5bb53c"
+    },
+    {
+      "symbol": "SPX_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "5dd6c7baefffba6a0b2ce60d87c01d75e209cc5dd334f4a140722cb3e12cc76a"
+    },
+    {
+      "symbol": "STX_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "fcdf9e14240a9460effa0039b1cf9b431dd016710d894c394c1fb96c70ddd6d8"
+    },
+    {
+      "symbol": "S_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "f3dad2ced801e1a5c0c1ac0f70087921dec9fb986368c514a74efcb8e067288c"
+    },
+    {
+      "symbol": "TAO_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "52e5743f9c72e023638e969b6bcafafd249b72984570ac2a9a87fc9f7a01405c"
+    },
+    {
+      "symbol": "TRUMP_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "9441ac4e9a9852319a9bd6039dcd0f24c2508743093e93607bafff1f129c971e"
+    },
+    {
+      "symbol": "TURBO_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "466de7ad623869451f0d2bc07aaf85046912cc8fb538229561b48eccbf06f7e3"
+    },
+    {
+      "symbol": "UNI_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "df02be0f7f4d3450c7bf87a85c8d9bc5e7b27cd50ee900694220c4fe24c0fe3a"
+    },
+    {
+      "symbol": "UP_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "371e636a4f376486c85b965837521466b530c7025318e000bb8274b6dcf8b3f8"
+    },
+    {
+      "symbol": "VIRTUAL_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "841baf50b9fc588b2b44317f1b691f6a40969ffb9c52063025984c38a7631122"
+    },
+    {
+      "symbol": "XPL_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "831873ce0cc33add84b467ce9899084a5c7cb699a2073cd6fc64a466396d3dab"
+    },
+    {
+      "symbol": "ZAMA_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "84348883b9aa87ea3e6a9ebf075f7c3ef28679637a11c4d111fc4bf5f78ef5a9"
+    },
+    {
+      "symbol": "ZORA_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "7b65f40b735c9c31303dccca420bff65cb038ad0edb55951f2fc5d29b2e229bc"
+    },
+    {
+      "symbol": "ZRO_USDT_SWAP",
+      "rows": 678,
+      "start": "2026-08-21T00:00:00+00:00",
+      "end": "2026-08-28T01:15:00+00:00",
+      "gap_count": 0,
+      "sha256": "3fb49de2453ba0b903b8abc533846506e2b9b4c5c787187e0f3122069357a746"
+    }
+  ],
+  "day_integrity": [
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 1,
+      "symbol": "SPK_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 2,
+      "symbol": "MORPHO_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 3,
+      "symbol": "GRASS_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 4,
+      "symbol": "ARX_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 5,
+      "symbol": "PENGU_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 6,
+      "symbol": "ZORA_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 7,
+      "symbol": "LIT_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 8,
+      "symbol": "AAVE_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 9,
+      "symbol": "MET_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 10,
+      "symbol": "PENDLE_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 11,
+      "symbol": "AEON_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 12,
+      "symbol": "TRUMP_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 13,
+      "symbol": "IMX_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 14,
+      "symbol": "BRETT_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 15,
+      "symbol": "EIGEN_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 16,
+      "symbol": "TURBO_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 17,
+      "symbol": "GRT_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 18,
+      "symbol": "XPL_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 19,
+      "symbol": "MINA_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "rank": 20,
+      "symbol": "INJ_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 1,
+      "symbol": "NES_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 2,
+      "symbol": "SPK_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 3,
+      "symbol": "AERO_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 4,
+      "symbol": "GRVT_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 5,
+      "symbol": "MORPHO_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 6,
+      "symbol": "PROS_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 7,
+      "symbol": "PUMP_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 8,
+      "symbol": "ARX_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 9,
+      "symbol": "TRUMP_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 10,
+      "symbol": "VIRTUAL_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 11,
+      "symbol": "SAND_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 12,
+      "symbol": "ZRO_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 13,
+      "symbol": "MET_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 14,
+      "symbol": "SENT_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 15,
+      "symbol": "UP_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 16,
+      "symbol": "LDO_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 17,
+      "symbol": "APR_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 18,
+      "symbol": "PIEVERSE_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 19,
+      "symbol": "NIGHT_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "rank": 20,
+      "symbol": "ACT_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 1,
+      "symbol": "PEOPLE_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 2,
+      "symbol": "MUBARAK_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 3,
+      "symbol": "H_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 4,
+      "symbol": "SPX_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 5,
+      "symbol": "STX_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 6,
+      "symbol": "MON_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 7,
+      "symbol": "ZAMA_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 8,
+      "symbol": "APR_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 9,
+      "symbol": "ETHFI_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 10,
+      "symbol": "ACU_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 11,
+      "symbol": "ZRO_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 12,
+      "symbol": "JTO_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 13,
+      "symbol": "TRUMP_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 14,
+      "symbol": "DASH_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 15,
+      "symbol": "UP_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 16,
+      "symbol": "BOME_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 17,
+      "symbol": "GRASS_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 18,
+      "symbol": "CVX_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 19,
+      "symbol": "APT_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "rank": 20,
+      "symbol": "RIVER_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 1,
+      "symbol": "EDEN_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 2,
+      "symbol": "ONT_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 3,
+      "symbol": "RLS_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 4,
+      "symbol": "BICO_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 5,
+      "symbol": "CVX_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 6,
+      "symbol": "SPX_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 7,
+      "symbol": "S_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 8,
+      "symbol": "FARTCOIN_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 9,
+      "symbol": "GPS_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 10,
+      "symbol": "KITE_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 11,
+      "symbol": "GAS_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 12,
+      "symbol": "ACU_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 13,
+      "symbol": "MERL_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 14,
+      "symbol": "LIGHT_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 15,
+      "symbol": "GIGGLE_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 16,
+      "symbol": "CHIP_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 17,
+      "symbol": "GRASS_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 18,
+      "symbol": "KMNO_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 19,
+      "symbol": "HUMA_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "rank": 20,
+      "symbol": "LQTY_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 1,
+      "symbol": "ENA_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 2,
+      "symbol": "ONT_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 3,
+      "symbol": "MOVE_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 4,
+      "symbol": "HUMA_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 5,
+      "symbol": "MERL_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 6,
+      "symbol": "MUBARAK_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 7,
+      "symbol": "CHIP_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 8,
+      "symbol": "EDEN_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 9,
+      "symbol": "TRUMP_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 10,
+      "symbol": "JUP_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 11,
+      "symbol": "KMNO_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 12,
+      "symbol": "TAO_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 13,
+      "symbol": "LIT_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 14,
+      "symbol": "APR_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 15,
+      "symbol": "UNI_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 16,
+      "symbol": "SOL_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 17,
+      "symbol": "BICO_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 18,
+      "symbol": "ICX_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 19,
+      "symbol": "CAP_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "rank": 20,
+      "symbol": "BSB_USDT_SWAP",
+      "bars": 96,
+      "gap_count": 0,
+      "exact_96_contiguous": true
+    }
+  ],
+  "ranked": [
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "SPK-USDT-SWAP",
+      "symbol": "SPK_USDT_SWAP",
+      "open": 0.01789,
+      "close": 0.02315,
+      "daily_return": 0.2940190050307434,
+      "daily_volume": 12433084.0,
+      "rank": 1,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "MORPHO-USDT-SWAP",
+      "symbol": "MORPHO_USDT_SWAP",
+      "open": 2.3106,
+      "close": 2.9066,
+      "daily_return": 0.2579416601748463,
+      "daily_volume": 6674434.0,
+      "rank": 2,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "GRASS-USDT-SWAP",
+      "symbol": "GRASS_USDT_SWAP",
+      "open": 0.2993,
+      "close": 0.3703,
+      "daily_return": 0.23722018042098236,
+      "daily_volume": 17799991.0,
+      "rank": 3,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "ARX-USDT-SWAP",
+      "symbol": "ARX_USDT_SWAP",
+      "open": 0.1241,
+      "close": 0.1468,
+      "daily_return": 0.18291700241740538,
+      "daily_volume": 3218115.0,
+      "rank": 4,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "PENGU-USDT-SWAP",
+      "symbol": "PENGU_USDT_SWAP",
+      "open": 0.008405,
+      "close": 0.0099,
+      "daily_return": 0.17787031528851904,
+      "daily_volume": 90548222.0,
+      "rank": 5,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "ZORA-USDT-SWAP",
+      "symbol": "ZORA_USDT_SWAP",
+      "open": 0.0063,
+      "close": 0.007158,
+      "daily_return": 0.1361904761904762,
+      "daily_volume": 83681411.0,
+      "rank": 6,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "LIT-USDT-SWAP",
+      "symbol": "LIT_USDT_SWAP",
+      "open": 3.1915,
+      "close": 3.5772,
+      "daily_return": 0.12085226382578718,
+      "daily_volume": 15661612.0,
+      "rank": 7,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "AAVE-USDT-SWAP",
+      "symbol": "AAVE_USDT_SWAP",
+      "open": 126.48,
+      "close": 141.55,
+      "daily_return": 0.1191492726122707,
+      "daily_volume": 11553179.7,
+      "rank": 8,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "MET-USDT-SWAP",
+      "symbol": "MET_USDT_SWAP",
+      "open": 0.2206,
+      "close": 0.2456,
+      "daily_return": 0.11332728921124224,
+      "daily_volume": 13706410.0,
+      "rank": 9,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "PENDLE-USDT-SWAP",
+      "symbol": "PENDLE_USDT_SWAP",
+      "open": 1.674,
+      "close": 1.863,
+      "daily_return": 0.11290322580645173,
+      "daily_volume": 6724510.0,
+      "rank": 10,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "AEON-USDT-SWAP",
+      "symbol": "AEON_USDT_SWAP",
+      "open": 0.06662,
+      "close": 0.05958,
+      "daily_return": -0.10567397178024618,
+      "daily_volume": 11948947.0,
+      "rank": 11,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "TRUMP-USDT-SWAP",
+      "symbol": "TRUMP_USDT_SWAP",
+      "open": 2.379,
+      "close": 2.621,
+      "daily_return": 0.10172341319882294,
+      "daily_volume": 3662277195.0,
+      "rank": 12,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "IMX-USDT-SWAP",
+      "symbol": "IMX_USDT_SWAP",
+      "open": 0.1228,
+      "close": 0.1348,
+      "daily_return": 0.09771986970684043,
+      "daily_volume": 9328247.0,
+      "rank": 13,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "BRETT-USDT-SWAP",
+      "symbol": "BRETT_USDT_SWAP",
+      "open": 0.005159,
+      "close": 0.00566,
+      "daily_return": 0.09711184338050005,
+      "daily_volume": 967871.0,
+      "rank": 14,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "EIGEN-USDT-SWAP",
+      "symbol": "EIGEN_USDT_SWAP",
+      "open": 0.21,
+      "close": 0.2301,
+      "daily_return": 0.09571428571428564,
+      "daily_volume": 27720333.0,
+      "rank": 15,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "TURBO-USDT-SWAP",
+      "symbol": "TURBO_USDT_SWAP",
+      "open": 0.0009527,
+      "close": 0.0010431,
+      "daily_return": 0.0948882124488295,
+      "daily_volume": 229345.0,
+      "rank": 16,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "GRT-USDT-SWAP",
+      "symbol": "GRT_USDT_SWAP",
+      "open": 0.01623,
+      "close": 0.01765,
+      "daily_return": 0.08749229821318538,
+      "daily_volume": 4192159.0,
+      "rank": 17,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "XPL-USDT-SWAP",
+      "symbol": "XPL_USDT_SWAP",
+      "open": 0.09362,
+      "close": 0.10175,
+      "daily_return": 0.08684041871394999,
+      "daily_volume": 59536086.0,
+      "rank": 18,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "MINA-USDT-SWAP",
+      "symbol": "MINA_USDT_SWAP",
+      "open": 0.05415,
+      "close": 0.05878,
+      "daily_return": 0.08550323176361951,
+      "daily_volume": 12661479.0,
+      "rank": 19,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-23T00:00:00+00:00",
+      "inst_id": "INJ-USDT-SWAP",
+      "symbol": "INJ_USDT_SWAP",
+      "open": 4.932,
+      "close": 5.351,
+      "daily_return": 0.08495539334955393,
+      "daily_volume": 22148641.0,
+      "rank": 20,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "NES-USDT-SWAP",
+      "symbol": "NES_USDT_SWAP",
+      "open": 0.1954,
+      "close": 0.1304,
+      "daily_return": -0.3326509723643808,
+      "daily_volume": 15146209.0,
+      "rank": 1,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "SPK-USDT-SWAP",
+      "symbol": "SPK_USDT_SWAP",
+      "open": 0.02314,
+      "close": 0.01908,
+      "daily_return": -0.1754537597234227,
+      "daily_volume": 14851511.0,
+      "rank": 2,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "AERO-USDT-SWAP",
+      "symbol": "AERO_USDT_SWAP",
+      "open": 0.4815,
+      "close": 0.5455,
+      "daily_return": 0.13291796469366557,
+      "daily_volume": 1978064.0,
+      "rank": 3,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "GRVT-USDT-SWAP",
+      "symbol": "GRVT_USDT_SWAP",
+      "open": 0.23087,
+      "close": 0.20308,
+      "daily_return": -0.1203707714298089,
+      "daily_volume": 6134015.0,
+      "rank": 4,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "MORPHO-USDT-SWAP",
+      "symbol": "MORPHO_USDT_SWAP",
+      "open": 2.9067,
+      "close": 2.6048,
+      "daily_return": -0.10386348780403887,
+      "daily_volume": 4730595.0,
+      "rank": 5,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "PROS-USDT-SWAP",
+      "symbol": "PROS_USDT_SWAP",
+      "open": 0.406,
+      "close": 0.4471,
+      "daily_return": 0.10123152709359595,
+      "daily_volume": 12093549.0,
+      "rank": 6,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "PUMP-USDT-SWAP",
+      "symbol": "PUMP_USDT_SWAP",
+      "open": 0.005225,
+      "close": 0.004741,
+      "daily_return": -0.09263157894736829,
+      "daily_volume": 46509062.0,
+      "rank": 7,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "ARX-USDT-SWAP",
+      "symbol": "ARX_USDT_SWAP",
+      "open": 0.1468,
+      "close": 0.1339,
+      "daily_return": -0.08787465940054506,
+      "daily_volume": 3135943.0,
+      "rank": 8,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "TRUMP-USDT-SWAP",
+      "symbol": "TRUMP_USDT_SWAP",
+      "open": 2.621,
+      "close": 2.391,
+      "daily_return": -0.08775276611980165,
+      "daily_volume": 2142917595.0,
+      "rank": 9,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "VIRTUAL-USDT-SWAP",
+      "symbol": "VIRTUAL_USDT_SWAP",
+      "open": 0.7318,
+      "close": 0.7929,
+      "daily_return": 0.0834927575840394,
+      "daily_volume": 33522381.0,
+      "rank": 10,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "SAND-USDT-SWAP",
+      "symbol": "SAND_USDT_SWAP",
+      "open": 0.04578,
+      "close": 0.04218,
+      "daily_return": -0.07863695937090431,
+      "daily_volume": 12806857.0,
+      "rank": 11,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "ZRO-USDT-SWAP",
+      "symbol": "ZRO_USDT_SWAP",
+      "open": 1.1816,
+      "close": 1.0899,
+      "daily_return": -0.07760663507109,
+      "daily_volume": 14184236.0,
+      "rank": 12,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "MET-USDT-SWAP",
+      "symbol": "MET_USDT_SWAP",
+      "open": 0.2456,
+      "close": 0.2266,
+      "daily_return": -0.07736156351791534,
+      "daily_volume": 12448167.0,
+      "rank": 13,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "SENT-USDT-SWAP",
+      "symbol": "SENT_USDT_SWAP",
+      "open": 0.01352,
+      "close": 0.01248,
+      "daily_return": -0.07692307692307698,
+      "daily_volume": 1311761.0,
+      "rank": 14,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "UP-USDT-SWAP",
+      "symbol": "UP_USDT_SWAP",
+      "open": 0.4791,
+      "close": 0.4438,
+      "daily_return": -0.07367981632227105,
+      "daily_volume": 407422.0,
+      "rank": 15,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "LDO-USDT-SWAP",
+      "symbol": "LDO_USDT_SWAP",
+      "open": 0.4008,
+      "close": 0.3714,
+      "daily_return": -0.07335329341317365,
+      "daily_volume": 24319693.0,
+      "rank": 16,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "APR-USDT-SWAP",
+      "symbol": "APR_USDT_SWAP",
+      "open": 0.1944,
+      "close": 0.2085,
+      "daily_return": 0.07253086419753085,
+      "daily_volume": 3368587.0,
+      "rank": 17,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "PIEVERSE-USDT-SWAP",
+      "symbol": "PIEVERSE_USDT_SWAP",
+      "open": 0.9555,
+      "close": 1.0242,
+      "daily_return": 0.07189952904238606,
+      "daily_volume": 961998.0,
+      "rank": 18,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "NIGHT-USDT-SWAP",
+      "symbol": "NIGHT_USDT_SWAP",
+      "open": 0.020715,
+      "close": 0.019293,
+      "daily_return": -0.0686459087617668,
+      "daily_volume": 630521.0,
+      "rank": 19,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-24T00:00:00+00:00",
+      "inst_id": "ACT-USDT-SWAP",
+      "symbol": "ACT_USDT_SWAP",
+      "open": 0.011427,
+      "close": 0.010648,
+      "daily_return": -0.06817187363262456,
+      "daily_volume": 139360431.0,
+      "rank": 20,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "PEOPLE-USDT-SWAP",
+      "symbol": "PEOPLE_USDT_SWAP",
+      "open": 0.00992,
+      "close": 0.007814,
+      "daily_return": -0.21229838709677418,
+      "daily_volume": 28220746.0,
+      "rank": 1,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "MUBARAK-USDT-SWAP",
+      "symbol": "MUBARAK_USDT_SWAP",
+      "open": 0.023937,
+      "close": 0.019639,
+      "daily_return": -0.17955466432719225,
+      "daily_volume": 3540738.0,
+      "rank": 2,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "H-USDT-SWAP",
+      "symbol": "H_USDT_SWAP",
+      "open": 0.06964,
+      "close": 0.07979,
+      "daily_return": 0.14574956921309612,
+      "daily_volume": 2550689.7,
+      "rank": 3,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "SPX-USDT-SWAP",
+      "symbol": "SPX_USDT_SWAP",
+      "open": 0.4554,
+      "close": 0.5129,
+      "daily_return": 0.1262626262626263,
+      "daily_volume": 15308118.0,
+      "rank": 4,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "STX-USDT-SWAP",
+      "symbol": "STX_USDT_SWAP",
+      "open": 0.2305,
+      "close": 0.2592,
+      "daily_return": 0.12451193058568322,
+      "daily_volume": 26084661.3,
+      "rank": 5,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "MON-USDT-SWAP",
+      "symbol": "MON_USDT_SWAP",
+      "open": 0.0315,
+      "close": 0.02769,
+      "daily_return": -0.12095238095238103,
+      "daily_volume": 59582939.0,
+      "rank": 6,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "ZAMA-USDT-SWAP",
+      "symbol": "ZAMA_USDT_SWAP",
+      "open": 0.05976,
+      "close": 0.05319,
+      "daily_return": -0.10993975903614461,
+      "daily_volume": 13521164.0,
+      "rank": 7,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "APR-USDT-SWAP",
+      "symbol": "APR_USDT_SWAP",
+      "open": 0.2086,
+      "close": 0.2313,
+      "daily_return": 0.10882070949185052,
+      "daily_volume": 4498914.0,
+      "rank": 8,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "ETHFI-USDT-SWAP",
+      "symbol": "ETHFI_USDT_SWAP",
+      "open": 0.6167,
+      "close": 0.5542,
+      "daily_return": -0.10134587319604349,
+      "daily_volume": 20567657.0,
+      "rank": 9,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "ACU-USDT-SWAP",
+      "symbol": "ACU_USDT_SWAP",
+      "open": 0.11033,
+      "close": 0.12131,
+      "daily_return": 0.09951962294933381,
+      "daily_volume": 1244101.0,
+      "rank": 10,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "ZRO-USDT-SWAP",
+      "symbol": "ZRO_USDT_SWAP",
+      "open": 1.0898,
+      "close": 1.1968,
+      "daily_return": 0.09818315287208668,
+      "daily_volume": 49364885.0,
+      "rank": 11,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "JTO-USDT-SWAP",
+      "symbol": "JTO_USDT_SWAP",
+      "open": 0.5712,
+      "close": 0.5188,
+      "daily_return": -0.09173669467787116,
+      "daily_volume": 23393020.0,
+      "rank": 12,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "TRUMP-USDT-SWAP",
+      "symbol": "TRUMP_USDT_SWAP",
+      "open": 2.391,
+      "close": 2.172,
+      "daily_return": -0.09159347553324959,
+      "daily_volume": 1437509556.0,
+      "rank": 13,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "DASH-USDT-SWAP",
+      "symbol": "DASH_USDT_SWAP",
+      "open": 41.57,
+      "close": 37.9,
+      "daily_return": -0.0882848207842194,
+      "daily_volume": 49120257.0,
+      "rank": 14,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "UP-USDT-SWAP",
+      "symbol": "UP_USDT_SWAP",
+      "open": 0.4439,
+      "close": 0.4825,
+      "daily_return": 0.08695652173913038,
+      "daily_volume": 1036747.0,
+      "rank": 15,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "BOME-USDT-SWAP",
+      "symbol": "BOME_USDT_SWAP",
+      "open": 0.0011494,
+      "close": 0.0010518,
+      "daily_return": -0.08491386810509827,
+      "daily_volume": 9233505.0,
+      "rank": 16,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "GRASS-USDT-SWAP",
+      "symbol": "GRASS_USDT_SWAP",
+      "open": 0.3574,
+      "close": 0.3283,
+      "daily_return": -0.08142137660884163,
+      "daily_volume": 19770807.0,
+      "rank": 17,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "CVX-USDT-SWAP",
+      "symbol": "CVX_USDT_SWAP",
+      "open": 2.206,
+      "close": 2.029,
+      "daily_return": -0.08023572076155938,
+      "daily_volume": 231117.0,
+      "rank": 18,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "APT-USDT-SWAP",
+      "symbol": "APT_USDT_SWAP",
+      "open": 0.6075,
+      "close": 0.5614,
+      "daily_return": -0.07588477366255153,
+      "daily_volume": 19784993.0,
+      "rank": 19,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-25T00:00:00+00:00",
+      "inst_id": "RIVER-USDT-SWAP",
+      "symbol": "RIVER_USDT_SWAP",
+      "open": 2.226,
+      "close": 2.058,
+      "daily_return": -0.07547169811320764,
+      "daily_volume": 21406602.0,
+      "rank": 20,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "EDEN-USDT-SWAP",
+      "symbol": "EDEN_USDT_SWAP",
+      "open": 0.05075,
+      "close": 0.06677,
+      "daily_return": 0.3156650246305417,
+      "daily_volume": 1124705047.0,
+      "rank": 1,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "ONT-USDT-SWAP",
+      "symbol": "ONT_USDT_SWAP",
+      "open": 0.05233,
+      "close": 0.068,
+      "daily_return": 0.2994458245748137,
+      "daily_volume": 57827460.0,
+      "rank": 2,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "RLS-USDT-SWAP",
+      "symbol": "RLS_USDT_SWAP",
+      "open": 0.001721,
+      "close": 0.002168,
+      "daily_return": 0.25973271353864,
+      "daily_volume": 20558429.0,
+      "rank": 3,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "BICO-USDT-SWAP",
+      "symbol": "BICO_USDT_SWAP",
+      "open": 0.01964,
+      "close": 0.02443,
+      "daily_return": 0.2438900203665988,
+      "daily_volume": 4220645480.0,
+      "rank": 4,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "CVX-USDT-SWAP",
+      "symbol": "CVX_USDT_SWAP",
+      "open": 2.027,
+      "close": 2.469,
+      "daily_return": 0.2180562407498765,
+      "daily_volume": 1288943.0,
+      "rank": 5,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "SPX-USDT-SWAP",
+      "symbol": "SPX_USDT_SWAP",
+      "open": 0.513,
+      "close": 0.607,
+      "daily_return": 0.18323586744639364,
+      "daily_volume": 11982225.0,
+      "rank": 6,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "S-USDT-SWAP",
+      "symbol": "S_USDT_SWAP",
+      "open": 0.02734,
+      "close": 0.03196,
+      "daily_return": 0.16898317483540604,
+      "daily_volume": 12083786.0,
+      "rank": 7,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "FARTCOIN-USDT-SWAP",
+      "symbol": "FARTCOIN_USDT_SWAP",
+      "open": 0.1858,
+      "close": 0.2168,
+      "daily_return": 0.16684607104413351,
+      "daily_volume": 249226337.0,
+      "rank": 8,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "GPS-USDT-SWAP",
+      "symbol": "GPS_USDT_SWAP",
+      "open": 0.011241,
+      "close": 0.00943,
+      "daily_return": -0.16110666310826438,
+      "daily_volume": 89650352.0,
+      "rank": 9,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "KITE-USDT-SWAP",
+      "symbol": "KITE_USDT_SWAP",
+      "open": 0.11195,
+      "close": 0.12763,
+      "daily_return": 0.14006252791424734,
+      "daily_volume": 1378600.0,
+      "rank": 10,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "GAS-USDT-SWAP",
+      "symbol": "GAS_USDT_SWAP",
+      "open": 1.2363,
+      "close": 1.4074,
+      "daily_return": 0.13839682924856422,
+      "daily_volume": 1717784.0,
+      "rank": 11,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "ACU-USDT-SWAP",
+      "symbol": "ACU_USDT_SWAP",
+      "open": 0.12126,
+      "close": 0.13637,
+      "daily_return": 0.12460827972950672,
+      "daily_volume": 5712610.0,
+      "rank": 12,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "MERL-USDT-SWAP",
+      "symbol": "MERL_USDT_SWAP",
+      "open": 0.01869,
+      "close": 0.02096,
+      "daily_return": 0.12145532370251488,
+      "daily_volume": 308384756.0,
+      "rank": 13,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "LIGHT-USDT-SWAP",
+      "symbol": "LIGHT_USDT_SWAP",
+      "open": 0.1577,
+      "close": 0.1751,
+      "daily_return": 0.1103360811667724,
+      "daily_volume": 75559463.0,
+      "rank": 14,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "GIGGLE-USDT-SWAP",
+      "symbol": "GIGGLE_USDT_SWAP",
+      "open": 33.85,
+      "close": 37.53,
+      "daily_return": 0.10871491875923178,
+      "daily_volume": 22573884.0,
+      "rank": 15,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "CHIP-USDT-SWAP",
+      "symbol": "CHIP_USDT_SWAP",
+      "open": 0.03199,
+      "close": 0.03545,
+      "daily_return": 0.10815879962488295,
+      "daily_volume": 2758017.0,
+      "rank": 16,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "GRASS-USDT-SWAP",
+      "symbol": "GRASS_USDT_SWAP",
+      "open": 0.3283,
+      "close": 0.3637,
+      "daily_return": 0.10782820590922948,
+      "daily_volume": 21012411.0,
+      "rank": 17,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "KMNO-USDT-SWAP",
+      "symbol": "KMNO_USDT_SWAP",
+      "open": 0.02428,
+      "close": 0.02686,
+      "daily_return": 0.10626029654036229,
+      "daily_volume": 1204787.0,
+      "rank": 18,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "HUMA-USDT-SWAP",
+      "symbol": "HUMA_USDT_SWAP",
+      "open": 0.02181,
+      "close": 0.02409,
+      "daily_return": 0.10453920220082535,
+      "daily_volume": 1039199.0,
+      "rank": 19,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-26T00:00:00+00:00",
+      "inst_id": "LQTY-USDT-SWAP",
+      "symbol": "LQTY_USDT_SWAP",
+      "open": 0.2081,
+      "close": 0.2289,
+      "daily_return": 0.09995194617972114,
+      "daily_volume": 1479109.0,
+      "rank": 20,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "ENA-USDT-SWAP",
+      "symbol": "ENA_USDT_SWAP",
+      "open": 0.1473,
+      "close": 0.17,
+      "daily_return": 0.15410726408689768,
+      "daily_volume": 150036284.0,
+      "rank": 1,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "ONT-USDT-SWAP",
+      "symbol": "ONT_USDT_SWAP",
+      "open": 0.06795,
+      "close": 0.05902,
+      "daily_return": -0.13142016188373795,
+      "daily_volume": 50930535.0,
+      "rank": 2,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "MOVE-USDT-SWAP",
+      "symbol": "MOVE_USDT_SWAP",
+      "open": 0.008439,
+      "close": 0.009401,
+      "daily_return": 0.11399454911719387,
+      "daily_volume": 49338587.0,
+      "rank": 3,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "HUMA-USDT-SWAP",
+      "symbol": "HUMA_USDT_SWAP",
+      "open": 0.02411,
+      "close": 0.02665,
+      "daily_return": 0.10535047698050604,
+      "daily_volume": 1472022.0,
+      "rank": 4,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "MERL-USDT-SWAP",
+      "symbol": "MERL_USDT_SWAP",
+      "open": 0.02096,
+      "close": 0.02314,
+      "daily_return": 0.10400763358778642,
+      "daily_volume": 370051631.0,
+      "rank": 5,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "MUBARAK-USDT-SWAP",
+      "symbol": "MUBARAK_USDT_SWAP",
+      "open": 0.019715,
+      "close": 0.021633,
+      "daily_return": 0.09728633020542721,
+      "daily_volume": 2087811.0,
+      "rank": 6,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "CHIP-USDT-SWAP",
+      "symbol": "CHIP_USDT_SWAP",
+      "open": 0.03547,
+      "close": 0.03891,
+      "daily_return": 0.09698336622497883,
+      "daily_volume": 14224732.0,
+      "rank": 7,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "EDEN-USDT-SWAP",
+      "symbol": "EDEN_USDT_SWAP",
+      "open": 0.06677,
+      "close": 0.06034,
+      "daily_return": -0.09630073386251303,
+      "daily_volume": 298281287.0,
+      "rank": 8,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "TRUMP-USDT-SWAP",
+      "symbol": "TRUMP_USDT_SWAP",
+      "open": 2.323,
+      "close": 2.545,
+      "daily_return": 0.09556607834696518,
+      "daily_volume": 2361429371.0,
+      "rank": 9,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "JUP-USDT-SWAP",
+      "symbol": "JUP_USDT_SWAP",
+      "open": 0.2193,
+      "close": 0.2389,
+      "daily_return": 0.08937528499772007,
+      "daily_volume": 3874851.0,
+      "rank": 10,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "KMNO-USDT-SWAP",
+      "symbol": "KMNO_USDT_SWAP",
+      "open": 0.02686,
+      "close": 0.02921,
+      "daily_return": 0.08749069247952357,
+      "daily_volume": 2582642.0,
+      "rank": 11,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "TAO-USDT-SWAP",
+      "symbol": "TAO_USDT_SWAP",
+      "open": 234.5,
+      "close": 253.8,
+      "daily_return": 0.08230277185501067,
+      "daily_volume": 26238347.0,
+      "rank": 12,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "LIT-USDT-SWAP",
+      "symbol": "LIT_USDT_SWAP",
+      "open": 3.4562,
+      "close": 3.712,
+      "daily_return": 0.07401192060644646,
+      "daily_volume": 16412480.0,
+      "rank": 13,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "APR-USDT-SWAP",
+      "symbol": "APR_USDT_SWAP",
+      "open": 0.2213,
+      "close": 0.2058,
+      "daily_return": -0.07004066877541792,
+      "daily_volume": 4752084.0,
+      "rank": 14,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "UNI-USDT-SWAP",
+      "symbol": "UNI_USDT_SWAP",
+      "open": 4.38,
+      "close": 4.683,
+      "daily_return": 0.0691780821917809,
+      "daily_volume": 9929360.0,
+      "rank": 15,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "SOL-USDT-SWAP",
+      "symbol": "SOL_USDT_SWAP",
+      "open": 102.03,
+      "close": 109.08,
+      "daily_return": 0.0690973243163775,
+      "daily_volume": 21992730.26,
+      "rank": 16,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "BICO-USDT-SWAP",
+      "symbol": "BICO_USDT_SWAP",
+      "open": 0.02442,
+      "close": 0.02603,
+      "daily_return": 0.065929565929566,
+      "daily_volume": 6236119239.0,
+      "rank": 17,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "ICX-USDT-SWAP",
+      "symbol": "ICX_USDT_SWAP",
+      "open": 0.0152,
+      "close": 0.01421,
+      "daily_return": -0.06513157894736843,
+      "daily_volume": 3689192.0,
+      "rank": 18,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "CAP-USDT-SWAP",
+      "symbol": "CAP_USDT_SWAP",
+      "open": 0.07057,
+      "close": 0.06601,
+      "daily_return": -0.0646166926456,
+      "daily_volume": 1882268.0,
+      "rank": 19,
+      "eligible_daily_universe": 274
+    },
+    {
+      "day": "2026-08-27T00:00:00+00:00",
+      "inst_id": "BSB-USDT-SWAP",
+      "symbol": "BSB_USDT_SWAP",
+      "open": 0.098,
+      "close": 0.10417,
+      "daily_return": 0.06295918367346931,
+      "daily_volume": 7455232.0,
+      "rank": 20,
+      "eligible_daily_universe": 274
+    }
+  ],
+  "wall_seconds": 95.309,
+  "training_or_tuning": false,
+  "production_eligible": false
+}

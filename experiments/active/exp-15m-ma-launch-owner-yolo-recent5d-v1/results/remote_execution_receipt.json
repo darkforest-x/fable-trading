@@ -1,0 +1,108 @@
+{
+  "protocol": "ma6_owner_yolo_neg30000_recent5d_daily_abs_movers_v1_20260828",
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-recent5d-v1",
+  "execution_kind": "hash_bound_offline_cuda_inference_only",
+  "source_commit": "8051b7af43ed98a405394987f13eb466ca9a59bf",
+  "started_at": "2026-08-28T02:13:08.127109Z",
+  "finished_at": "2026-08-28T02:37:56.070000Z",
+  "exit_code": 0,
+  "command": "C:/fable/.venv/Scripts/python.exe -u scripts/run_15m_ma_launch_owner_yolo_recent5d_remote.py --source-commit 8051b7af43ed98a405394987f13eb466ca9a59bf --device 0 --batch-size 64",
+  "worker": {
+    "host": "192.168.1.5",
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "driver": "610.88",
+    "python": "3.9.13",
+    "opencv": "5.0.0",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "torch": "2.8.0+cu126",
+    "ultralytics": "8.4.89"
+  },
+  "bundle": {
+    "sha256": "ee466f48a44f276a263750b69f5444cff57d5428467c142eacb1fe9729e41fbc",
+    "size_bytes": 78469120,
+    "remote_transfer_sha_verified_before_execution": true
+  },
+  "offline_dependency_install": {
+    "reason": "the existing 3060 environment lacked pandas",
+    "dry_run_confirmed_numpy_unchanged": true,
+    "pandas_wheel_sha256": "d3e28b3e83862ccf4d85ff19cf8c20b2ae7e503881711ff2d534dc8f761131aa",
+    "pytz_wheel_sha256": "dd95840dd199baea12d9cc096a1d452caa6596a1c1e4b5f3dbd1541855d5e815",
+    "tzdata_wheel_sha256": "dc096730c87af6cab1b171c9d532be840741ff5d459015e7f6947bd7d7e54931"
+  },
+  "result": {
+    "selected_symbol_days": 100,
+    "windows_scored": 81600,
+    "deduplicated_events": 239,
+    "class_counts": {
+      "dense_long": 168,
+      "dense_short": 71
+    },
+    "scan_receipt_sha256": "ebf13e69494b51ecd126c1385b28e262de555fe40738dd2afdb7ff88956d9cc4",
+    "remote_log_sha256": "54270510ca3436d228a6e980584113cc44b91a6818d072359fcea9a19608069d",
+    "remote_exit_file_sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+  },
+  "copied_artifacts": [
+    {
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/scan_receipt.json",
+      "size_bytes": 45508,
+      "sha256": "ebf13e69494b51ecd126c1385b28e262de555fe40738dd2afdb7ff88956d9cc4"
+    },
+    {
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/overview.png",
+      "size_bytes": 318310,
+      "sha256": "f790a68ac22acae17a2c493bd1b62c5636bd0288e142bcae44683cd80061d12a"
+    },
+    {
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/day_20260823_top20.png",
+      "size_bytes": 879345,
+      "sha256": "1ba011f47dea542344e9f14ab71db5361eb4d3faa1842775e8a18f69ec30d51f"
+    },
+    {
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/day_20260824_top20.png",
+      "size_bytes": 932408,
+      "sha256": "9b7a1edc05d96100149547a8e358f31e6af615c4e16c542b0b14d7da05e1ba3c"
+    },
+    {
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/day_20260825_top20.png",
+      "size_bytes": 916282,
+      "sha256": "3105b7ddcbdede51b3ff74c7912119cb5ac53944cc745295e01922bc010a4144"
+    },
+    {
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/day_20260826_top20.png",
+      "size_bytes": 864383,
+      "sha256": "53bcc186604f781895de7a6333e3ba2d25347bfd1105bf90109c00eb4677f93c"
+    },
+    {
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/day_20260827_top20.png",
+      "size_bytes": 867748,
+      "sha256": "832a3583c7f11ca7cfca6c8f9ab860af810221ff3949898a5667f4fafa3faa7d"
+    },
+    {
+      "path": "analysis/output/ma_launch_owner_yolo_recent5d_v1/signals.csv",
+      "size_bytes": 54329,
+      "sha256": "ecbd7687b69bb6534fb6587652252922e02a0976a0cfc4bf9a9f691b1e41595d"
+    },
+    {
+      "path": "analysis/output/ma_launch_owner_yolo_recent5d_v1/scan_stats.csv",
+      "size_bytes": 9925,
+      "sha256": "d704de3d91cbbf58fcf142d9ec78e7c6600dc68c15bff690ad1e40a14a036e76"
+    }
+  ],
+  "local_remote_hash_parity": true,
+  "aborted_attempt_before_official_run": {
+    "occurred": true,
+    "reason": "worker pandas dependency was missing and the provisional launcher provenance string had not been resolved from the repository",
+    "entered_model_inference": false,
+    "created_scan_receipt_csv_or_png": false,
+    "temporary_log_and_launcher_files_removed": true,
+    "included_in_official_result": false
+  },
+  "network_market_data_reads_on_worker": 0,
+  "training_or_tuning": false,
+  "active_or_frozen_changed": false,
+  "promoted": false,
+  "deployed": false,
+  "orders_placed": false,
+  "production_eligible": false
+}

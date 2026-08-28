@@ -2,6 +2,24 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-28 — 新 Owner YOLO 最近五个完整 UTC 日已扫描）
+
+Owner 要求“跑一下最近 5 天的数据”。已按上一轮口径扫描 2026-08-23..27 每日事后绝对涨跌幅
+Top20，共 100 个币种日、75 个唯一币、81,600 个 W18–25 因果窗。新 10k 正 + 30k 负 Owner
+YOLO 在 `conf=0.25`、5-bar 去重后得到 **239 个事件：LONG 168 / SHORT 71**；分日
+57 / 38 / 47 / 54 / 43。97/100 个币种日有框，平均 2.39 个；前三天完全相同榜单比旧模型
+96→142（+47.9%），说明新模型在高波动完成路径上明显更积极，不能包装成更准。
+
+RTX 3060 exit=0，远端/本机 9 个 artifact SHA 一致；独立 verifier 检查五日榜单、100/100
+连续 96 根、训练支持几何、239 个坐标、去重与 6 张 PNG 均通过。跨平台回执反斜杠问题已修为
+writer 统一 POSIX 路径、verifier 安全兼容旧 Windows 路径，没有重跑或改预测。报告：
+`analysis/html/p1_15m_ma_launch_owner_yolo_recent5d_20260828.html`；总览：
+`experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/overview.png`。本配置 holdout
+消费 #1，榜单是收盘后事后信息；没有调参、训练、ACTIVE/frozen、promote、forward、部署或交易
+变更，仍 `training_eligible=false / production_eligible=false`。**下一条允许动作**：停在这组真实
+负面选择性结果；若要减少多框，另开 pre-holdout 或新鲜 tip Gold 实验，不能在这五天上调阈值
+后再冒充未见验收。
+
 ## ⚡ 当前真相（2026-08-28 — 10,000 正 + 30,000 负的 960 YOLO 已训练完成）
 
 Owner 明确要求“去训练”。RTX 3060 作业已经完成并正常退出：请求 40 轮，实际第 29 轮
