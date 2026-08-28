@@ -221,9 +221,9 @@ def verify(
 
     event_splits: dict[str, set[str]] = defaultdict(set)
     for row in positives:
-        event_splits[f"p:{row['event_id']}"] .add(str(row["split"]))
+        event_splits[f"p:{row['event_id']}"].add(str(row["split"]))
     for row in negatives:
-        event_splits[f"n:{row['negative_event_id']}"] .add(str(row["split"]))
+        event_splits[f"n:{row['negative_event_id']}"].add(str(row["split"]))
     if any(len(values) != 1 for values in event_splits.values()):
         raise IndependentQaError("one event crosses train/val")
 
@@ -282,9 +282,10 @@ def verify(
 
     for row in rows:
         start = pd.Timestamp(row["window_start_time"])
-        end = pd.Timestamp(
-            row.get("dependency_end_time", row["window_end_time"])
-        )
+        end = pd.Timestamp(row.get("dependency_end_time", row["window_end_time"]))
+        if row["sample_kind"] == "positive":
+            core_plus_five = pd.Timestamp(row["core_end_time"]) + pd.Timedelta(minutes=75)
+            end = max(end, core_plus_five)
         if start.tzinfo is None:
             start = start.tz_localize("UTC")
         if end.tzinfo is None:
