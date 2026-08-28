@@ -1,0 +1,106 @@
+{
+  "protocol": "ma6_owner_yolo_recent5d_raw_prediction_repair_v2_20260828",
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2",
+  "created_at": "2026-08-28T16:00:00+08:00",
+  "owner_authorization": {
+    "request": "那你重新弄",
+    "interpreted_scope": "Repair the just-delivered five-day Telegram review so each review panel uses the exact W18-25 model input and the preserved raw YOLO cx/cy/w/h rectangle; retain all detections in ledgers while grouping overlapping decision intervals and showing only the earliest episode per symbol-day.",
+    "holdout_consumption_number_for_this_configuration": 2,
+    "rerender_and_geometry_audit_authorized": true,
+    "threshold_or_weight_change_authorized": false,
+    "training_or_tuning_authorized": false,
+    "production_or_promotion_authorized": false
+  },
+  "calendar": {
+    "timezone": "UTC",
+    "complete_days": [
+      "2026-08-23T00:00:00Z",
+      "2026-08-24T00:00:00Z",
+      "2026-08-25T00:00:00Z",
+      "2026-08-26T00:00:00Z",
+      "2026-08-27T00:00:00Z"
+    ],
+    "current_partial_day_excluded": true
+  },
+  "source_snapshot": {
+    "network_read": false,
+    "source_output": "analysis/output/ma_launch_owner_yolo_recent5d_v1",
+    "fetch_receipt": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/fetch_receipt.json",
+    "fetch_receipt_sha256": "497bfb8bfa050ecda11bbc65061608d5cc807a0583ef99ae9c3e5b3e2d53ab75",
+    "daily_rankings_sha256": "6208881846762aae956165b9aa6b5d4f5fe433f67c6148d4cc6dbd8b8690fbf2",
+    "snapshot_files": 75,
+    "symbol_days": 100,
+    "v1_signals": "analysis/output/ma_launch_owner_yolo_recent5d_v1/signals.csv",
+    "v1_signals_sha256": "ecbd7687b69bb6534fb6587652252922e02a0976a0cfc4bf9a9f691b1e41595d",
+    "v1_scan_receipt_sha256": "ebf13e69494b51ecd126c1385b28e262de555fe40738dd2afdb7ff88956d9cc4"
+  },
+  "detector": {
+    "display_name": "Owner-W18-25 rawbox repair",
+    "weights": "analysis/output/ma_launch_owner_yolo_neg30000_v2/ma_launch_owner_yolo_neg30000_v2_y11s_ft960/weights/best.pt",
+    "weights_sha256": "58888f996f7da46d4321316964085e90855d00e4c0a14e18c98b303c6e43c182",
+    "training_manifest": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2/manifest.jsonl",
+    "training_manifest_sha256": "6e601034ab15765a74b788cc6d094e9326c3044c1fb615c908ef9de897d6e0af",
+    "renderer": "yoyo/layers/l1_detection/render.py",
+    "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+    "class_names": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "bar": "15m",
+    "window_lengths": [18, 19, 20, 21, 22, 23, 24, 25],
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "imgsz": 960,
+    "input_width": 1280,
+    "input_height": 742,
+    "mapped_core_length_bars_allowed": [4, 5],
+    "mapped_confirmation_bars_allowed": [4, 5, 6],
+    "scan_endpoint_extension_after_day_bars": 6,
+    "same_symbol_event_gap_bars": 5,
+    "future_bars_rendered_into_inference": 0,
+    "threshold_or_window_retuning_after_results": false
+  },
+  "repair_contract": {
+    "old_display_defect": "v1 preserved predicted cx/w only, discarded predicted cy/h, then drew a candle-high/low rectangle on a compressed 96-bar day chart",
+    "preserved_prediction_coordinates": ["cx", "cy", "w", "h"],
+    "model_input_surface": "exact 1280x742 W18-25 render scored by YOLO",
+    "episode_interval": "mapped_core_start_i..window_end_i_inclusive",
+    "episode_merge": "merge_overlapping_intervals_same_symbol_day_class_agnostic",
+    "episode_representative": "earliest_window_end_then_highest_confidence",
+    "daily_review_selection": "earliest_episode_per_symbol_day",
+    "maximum_boxes_per_review_panel": 1,
+    "full_candidate_ledger_retained": true,
+    "full_episode_ledger_retained": true,
+    "display_selection_is_not_a_model_threshold": true
+  },
+  "outputs": {
+    "local_output": "analysis/output/ma_launch_owner_yolo_recent5d_rawbox_v2",
+    "committed_results": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results",
+    "report": "analysis/p1_15m_ma_launch_owner_yolo_recent5d_rawbox_repair_20260828.md",
+    "html": "analysis/html/p1_15m_ma_launch_owner_yolo_recent5d_rawbox_repair_20260828.html"
+  },
+  "interpretation": {
+    "purpose": "Correct the geometry and one-panel-one-box review contract; do not re-score model quality on a retuned holdout surface.",
+    "economic_backtest": false,
+    "holdout_final_acceptance": false,
+    "must_disclose": [
+      "this is the second authorized use of the same five completed UTC holdout days",
+      "the detector and confidence threshold are unchanged",
+      "daily review keeps only the earliest episode for readability while complete candidate and episode ledgers remain available",
+      "the detector still requires four to six confirmation bars after the mapped core",
+      "same-day Top20 membership is post-hoc and is not a live universe selector"
+    ]
+  },
+  "safety": {
+    "network_read": false,
+    "training": false,
+    "threshold_tuning": false,
+    "weight_change": false,
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "production_eligible": false
+  }
+}

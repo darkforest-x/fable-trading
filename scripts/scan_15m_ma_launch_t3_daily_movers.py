@@ -627,7 +627,7 @@ def _predict_batches(
         )
         if len(predictions) != len(batch):
             raise MoversScanError("prediction count differs from inference task count")
-        for prediction, (_, transform, meta) in zip(predictions, batch):
+        for prediction, (input_image, transform, meta) in zip(predictions, batch):
             stats["windows_scored"] += 1
             boxes = prediction.boxes
             if boxes is None or len(boxes) == 0:
@@ -666,6 +666,22 @@ def _predict_batches(
                 hit = {
                     **meta,
                     **mapped,
+                    # Preserve the detector's exact normalized rectangle.  The
+                    # previous daily-board renderer kept only cx/width, threw
+                    # away cy/height and then rebuilt a candle-only vertical
+                    # box.  That reconstructed rectangle was useful as a core
+                    # marker but was not the model prediction and could not be
+                    # compared with the four-coordinate training label.
+                    "prediction_cx_norm": float(xywhn[0]),
+                    "prediction_cy_norm": float(xywhn[1]),
+                    "prediction_w_norm": float(xywhn[2]),
+                    "prediction_h_norm": float(xywhn[3]),
+                    "input_width": int(transform.width),
+                    "input_height": int(transform.height),
+                    "input_n_bars": int(transform.n_bars),
+                    "input_pixel_sha256": hashlib.sha256(
+                        np.ascontiguousarray(input_image).tobytes()
+                    ).hexdigest(),
                     "class_id": cid,
                     "class_name": CLASS_NAMES[cid],
                     "confidence": float(confidence),
