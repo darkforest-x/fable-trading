@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 from scripts import scan_15m_ma_launch_t3_daily_movers as common
+from scripts.run_15m_ma_launch_owner_yolo_recent5d_remote import commit_sha
 from scripts.scan_15m_ma_launch_owner_yolo_recent5d import (
     DEFAULT_PREREG,
     EXPECTED_DAYS,
@@ -77,6 +78,17 @@ def test_five_day_daily_fetch_requests_room_for_partial_bar(monkeypatch) -> None
     assert len(captured) == 1
     assert "bar=1Dutc" in captured[0]
     assert "limit=7" in captured[0]
+
+
+def test_remote_runner_requires_an_exact_committed_source_identity() -> None:
+    value = "a" * 40
+    assert commit_sha(value) == value
+    for bad in ("a" * 39, "A" * 40, "z" * 40):
+        try:
+            commit_sha(bad)
+        except Exception:
+            continue
+        raise AssertionError(f"invalid source commit accepted: {bad}")
 
 
 def test_dynamic_rank_verifier_accepts_exact_five_top20_boards() -> None:
