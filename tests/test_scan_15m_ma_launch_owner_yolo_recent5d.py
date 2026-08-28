@@ -14,6 +14,8 @@ from scripts.scan_15m_ma_launch_owner_yolo_recent5d import (
     verify_training_geometry,
 )
 from scripts.verify_15m_ma_launch_owner_yolo_recent5d import (
+    OwnerRecent5dVerificationError,
+    resolve_receipt_path,
     verify_rankings,
     verify_signals,
 )
@@ -89,6 +91,18 @@ def test_remote_runner_requires_an_exact_committed_source_identity() -> None:
         except Exception:
             continue
         raise AssertionError(f"invalid source commit accepted: {bad}")
+
+
+def test_receipt_paths_are_cross_platform_and_cannot_escape_repository() -> None:
+    expected = ROOT / "analysis" / "output" / "signals.csv"
+    assert resolve_receipt_path("analysis/output/signals.csv") == expected
+    assert resolve_receipt_path(r"analysis\output\signals.csv") == expected
+    for bad in ("../outside.csv", r"C:\outside.csv", "/outside.csv"):
+        try:
+            resolve_receipt_path(bad)
+        except OwnerRecent5dVerificationError:
+            continue
+        raise AssertionError(f"unsafe receipt path accepted: {bad}")
 
 
 def test_dynamic_rank_verifier_accepts_exact_five_top20_boards() -> None:

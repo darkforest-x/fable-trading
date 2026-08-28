@@ -15,7 +15,7 @@ import json
 import subprocess
 from collections import Counter
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 import cv2
@@ -65,6 +65,28 @@ def load_json(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     require(isinstance(payload, dict), f"{path} must contain a JSON object")
     return payload
+
+
+def resolve_receipt_path(value: object) -> Path:
+    """Resolve a repository-relative receipt path from POSIX or Windows output.
+
+    Official writers now serialize POSIX separators.  The compatibility branch
+    keeps the already completed Windows CUDA receipt verifiable without
+    rewriting its bytes or invalidating the remote/local SHA audit.
+    """
+
+    raw = str(value).replace("\\", "/")
+    relative = PurePosixPath(raw)
+    require(raw and not relative.is_absolute(), f"receipt path must be relative: {value!r}")
+    require(".." not in relative.parts and ":" not in raw, f"unsafe receipt path: {value!r}")
+    resolved = ROOT.joinpath(*relative.parts).resolve()
+    try:
+        resolved.relative_to(ROOT.resolve())
+    except ValueError as error:
+        raise OwnerRecent5dVerificationError(
+            f"receipt path escapes repository: {value!r}"
+        ) from error
+    return resolved
 
 
 def verify_sources_committed(prereg_path: Path) -> str:
@@ -248,7 +270,7 @@ def verify_pngs(scan: dict[str, Any]) -> list[dict[str, Any]]:
     equal(len(records), 6, "rendered PNG count")
     verified = []
     for record in records:
-        path = ROOT / str(record["path"])
+        path = resolve_receipt_path(record["path"])
         require(path.is_file(), f"missing PNG: {path}")
         equal(common.sha256_file(path), record["sha256"], f"{path.name} SHA")
         equal(path.stat().st_size, int(record["size_bytes"]), f"{path.name} bytes")
@@ -276,10 +298,10 @@ def verify(*, prereg_path: Path, out: Path, results: Path, output: Path) -> dict
         equal(int(receipt["holdout_consumption_number_for_this_configuration"]), 1, f"{label} holdout use")
     equal(scan["weights_sha256"], prereg["detector"]["weights_sha256"], "weight identity")
 
-    ranking_path = ROOT / str(fetch["daily_rankings_path"])
-    universe_path = ROOT / str(fetch["universe_snapshot_path"])
-    signals_path = ROOT / str(scan["signals_path"])
-    stats_path = ROOT / str(scan["scan_stats_path"])
+    ranking_path = resolve_receipt_path(fetch["daily_rankings_path"])
+    universe_path = resolve_receipt_path(fetch["universe_snapshot_path"])
+    signals_path = resolve_receipt_path(scan["signals_path"])
+    stats_path = resolve_receipt_path(scan["scan_stats_path"])
     for path in (ranking_path, universe_path, signals_path, stats_path):
         require(path.is_file(), f"missing output: {path}")
     equal(common.sha256_file(ranking_path), fetch["daily_rankings_sha256"], "ranking SHA")

@@ -74,6 +74,16 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def repo_relative_path(path: Path) -> str:
+    """Serialize one repository-relative artifact path with POSIX separators.
+
+    Receipts can be produced on macOS or a Windows CUDA worker, so native
+    ``str(Path)`` output is not a portable artifact identifier.
+    """
+
+    return path.resolve().relative_to(ROOT.resolve()).as_posix()
+
+
 def utc(value: object) -> pd.Timestamp:
     """Normalize one timestamp to UTC."""
 
@@ -500,9 +510,9 @@ def fetch_and_rank(
         "context_start": context_start.isoformat(),
         "snapshot_end_exclusive": snapshot_end.isoformat(),
         "canonical_data_written": False,
-        "daily_rankings_path": str(rankings_path.relative_to(ROOT)),
+        "daily_rankings_path": repo_relative_path(rankings_path),
         "daily_rankings_sha256": sha256_file(rankings_path),
-        "universe_snapshot_path": str(universe_path.relative_to(ROOT)),
+        "universe_snapshot_path": repo_relative_path(universe_path),
         "universe_snapshot_sha256": sha256_file(universe_path),
         "snapshot_files": sorted(snapshot_rows, key=lambda item: item["symbol"]),
         "day_integrity": day_integrity,
@@ -1090,7 +1100,7 @@ def scan_and_render(
             {
                 "day": day.isoformat(),
                 "events": day_events,
-                "path": str(path.relative_to(ROOT)),
+                "path": repo_relative_path(path),
                 "sha256": sha256_file(path),
                 "size_bytes": path.stat().st_size,
                 "width": int(sheet.shape[1]),
@@ -1120,7 +1130,7 @@ def scan_and_render(
         "source_commit": source_commit,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "holdout_consumption_number_for_this_configuration": 1,
-        "weights_path": str(weights.relative_to(ROOT)),
+        "weights_path": repo_relative_path(weights),
         "weights_sha256": sha256_file(weights),
         "device": device,
         "confidence": float(detector["confidence"]),
@@ -1132,12 +1142,12 @@ def scan_and_render(
         "class_counts": dict(sorted(class_counts.items())),
         "day_counts": dict(sorted(day_counts.items())),
         "symbols_with_events": len({(str(row["day"]), str(row["symbol"])) for row in all_signals}),
-        "signals_path": str(signals_path.relative_to(ROOT)),
+        "signals_path": repo_relative_path(signals_path),
         "signals_sha256": sha256_file(signals_path),
-        "scan_stats_path": str(stats_path.relative_to(ROOT)),
+        "scan_stats_path": repo_relative_path(stats_path),
         "scan_stats_sha256": sha256_file(stats_path),
         "overview": {
-            "path": str(overview_path.relative_to(ROOT)),
+            "path": repo_relative_path(overview_path),
             "sha256": sha256_file(overview_path),
             "size_bytes": overview_path.stat().st_size,
             "width": int(overview.shape[1]),
