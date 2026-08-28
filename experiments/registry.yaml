@@ -2441,9 +2441,13 @@ experiments:
       - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-remote-preflight
       - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-launch
       - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-eval-prereg
+      - 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-owner-authorization
     reuse_allowed: false
     notes: >-
-      The Owner explicitly overrode the P0/P1 no-training gate on 2026-08-29.
-      This launch remains pre-holdout and performs no promotion or deployment.
-      The 2-9 post-core completed-history windows cannot enter the causal
-      tip/tip-1/tip-2 forward path or be represented as fresh live signals.
+      The Owner explicitly overrode the P0/P1 no-training gate on 2026-08-29,
+      then explicitly authorized holdout evaluation, promotion and deployment
+      in the current conversation. Authorization removes the permission blocker
+      but does not claim those actions have occurred or that quality gates have
+      passed. The 2-9 post-core completed-history windows can only be promoted
+      or deployed with the same delayed input contract; they cannot enter the
+      causal tip/tip-1/tip-2 path or be represented as fresh live signals.

@@ -7158,3 +7158,25 @@ artifacts:
       had already locked conf=0.25, NMS IoU=0.7, negative strata and event-delay
       surfaces. This contract additionally fixes hit IoU=0.5 and the paired
       LONG/SHORT direction-flip null before any metric was inspected.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-owner-authorization
+    artifact_type: manifest
+    role: owner_override_for_training_holdout_promotion_and_deployment_permissions
+    source_repo: darkforest-x/fable-trading
+    source_commit: "962664bcba261a680fc5b53f132cb0e499fbf642"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/owner_authorization.json
+    sha256: "79b0936af2d8d22e912d1b3390082a2f5bf5d255ba155032c672c15ca2006f4e"
+    size_bytes: 1664
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/owner_authorization.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "962664bcba261a680fc5b53f132cb0e499fbf642"
+    config_hash: "79b0936af2d8d22e912d1b3390082a2f5bf5d255ba155032c672c15ca2006f4e"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Records the Owner's explicit permission to train, consume holdout,
+      promote and deploy this experiment. It also records that none of the
+      latter three actions had occurred at authorization time, that real-money
+      order changes were not authorized, and that deployment must preserve the
+      model's completed-history input contract.

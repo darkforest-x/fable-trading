@@ -2,7 +2,7 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-08-29 — A级 8k 的新 24k 匹配负样本已完成，训练未启动）
+## ⚡ 当前真相（2026-08-29 — A级 8k + 匹配负例 24k 已在 RTX3060 训练）
 
 Owner 问“准备去训练，负样本应该用啥”。结论是**不用旧 30,000 张 OKX-only 负样本**，改用新建
 `ma_launch_owner_grade_a8000_yolo_neg24000_v1`：8,000 张 A 级正图逐字节复用，每个独立正事件
@@ -16,11 +16,19 @@ Owner 问“准备去训练，负样本应该用啥”。结论是**不用旧 30
 报告：`analysis/html/p1_15m_ma_launch_owner_grade_a8000_neg24000_20260829.html`；50 组实际输入：
 `experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results/actual_model_inputs_matched_sample50.html`。
 
-**训练没有启动。** 数据质量实验已 accepted，但自动 `PERFECT_CANDIDATE` 仍是 completed-history
-weak label，当前 `ROADMAP.md` 的 P0/P1 禁训门仍有效，因此登记保持
-`training_eligible=false / production_eligible=false`，holdout、模型、ACTIVE、forward、部署和
-交易状态均未变化。**下一条允许动作**：Owner 明确批准覆盖禁训门、仅训练 completed-history
-研究模型（不读 holdout、不 promote、不部署），或继续按 ROADMAP 先完成 P0/P1。
+Owner 已两次明确覆盖阶段门：先授权这一批 completed-history 数据开训，后于当前对话扩展为
+**可读 holdout、可 promote、可部署**。授权回执：
+`experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/owner_authorization.json`。
+这是权限放行，不是已经消耗 holdout 或已经通过生产指标；记录时 holdout / promote / deploy
+均仍为 0。真金下单、撤单、改仓位不在本次授权内。
+
+`ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960` 于 03:16:48 +08 启动，冻结配置为
+YOLO11s / 960 / batch 8 / 40 epochs / patience 10，双机 64,000 个 image/label 文件的 SHA、尺寸、
+类别绑定与 split 隔离全量验证通过后才启动。当前仍保持
+`training_eligible=false / production_eligible=false`：它们记录客观质量状态，不用来否定 Owner 授权。
+训练完成后先执行已冻结 chronological val，再预注册并执行一次 holdout 验收。若最终进行
+promote / deploy，必须保持其 2–9 根 post-core K 线的 completed-history 输入契约，不冒充
+tip / tip-1 / tip-2 因果即时信号。
 
 本轮相关数据集与 registry 测试 51/51 通过。全仓为 1,769 passed、7 skipped、5 failed；失败来自
 当前工作区另外存在的依赖锁改动与本机环境（FastAPI/OpenCV/PyYAML 版本不符，且缺

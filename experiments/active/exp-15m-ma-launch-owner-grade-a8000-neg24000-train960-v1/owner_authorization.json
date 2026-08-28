@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1",
+  "recorded_at": "2026-08-29T03:39:07+08:00",
+  "owner_statement": "P0/P1禁训门是啥；不读holdout、不promote、不部署没必要，都可以做。",
+  "authorization": {
+    "override_p0_p1_no_training_gate": true,
+    "holdout_evaluation_authorized": true,
+    "promotion_authorized": true,
+    "deployment_authorized": true,
+    "live_order_or_position_change_authorized": false
+  },
+  "scope": {
+    "applies_to": "the current Grade-A 8000 positive plus 24000 matched-negative YOLO11s imgsz=960 experiment and its resulting weights",
+    "authorization_is_not_a_metric_result": true,
+    "model_input_contract_unchanged": "completed-history windows contain 2-9 post-core confirmation bars",
+    "causal_tip_claim_allowed": false,
+    "compatible_deployment_target": "completed-history or delayed-confirmation scanning path"
+  },
+  "state_at_record": {
+    "training": "running_on_rtx3060",
+    "holdout_consumed_by_this_configuration": false,
+    "promoted": false,
+    "deployed": false,
+    "active_or_frozen_pointer_changed": false,
+    "orders_or_positions_changed": false
+  },
+  "execution_policy": {
+    "holdout": "freeze the evaluation contract first, consume once, record the configuration-specific consumption number, and do not tune on that result",
+    "promotion_and_deployment": "authorization removes the owner-approval blocker; eligibility still depends on measured results and deployment input-contract parity",
+    "trading": "deployment authorization does not authorize placing, cancelling, or resizing real-money orders"
+  }
+}
