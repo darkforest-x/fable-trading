@@ -15,6 +15,7 @@ REMOTE_PY="$REMOTE/.venv/Scripts/python.exe"
 DATASET="${FABLE_T3_DATASET:-datasets/ma_launch_t3_10000_v1}"
 MODEL="models/yolo11s.pt"
 TRAINER="src/detection/train.py"
+PREFLIGHT="scripts/windows/verify_yolo_dataset.py"
 EXPERIMENT_ID="${FABLE_T3_EXPERIMENT_ID:-exp-15m-ma-launch-t3-yolo10000-v1}"
 PREREG="${FABLE_T3_PREREG:-experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/preregistration.json}"
 BUILD_RECEIPT="${FABLE_T3_BUILD_RECEIPT:-experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/dataset_build_receipt.json}"
@@ -24,6 +25,8 @@ IMGSZ="${FABLE_T3_IMGSZ:-960}"
 REMOTE_DATASET_NAME="${FABLE_T3_REMOTE_DATASET_NAME:-ma_launch_t3_10000_v1}"
 LOCAL_OUTPUT_ROOT="${FABLE_T3_LOCAL_OUTPUT_ROOT:-analysis/output/ma_launch_t3_10000_v1}"
 DATASET_IMAGE_COUNT="${FABLE_T3_DATASET_IMAGE_COUNT:-36812}"
+STRICT_PREFLIGHT="${FABLE_T3_STRICT_PREFLIGHT:-false}"
+EXPERIMENT_RESULTS="$(dirname "$PREREG")/results"
 MODE="run"
 SSH=(ssh -o BatchMode=yes -o ConnectTimeout=15)
 SCP=(scp -o BatchMode=yes -o ConnectTimeout=15 -q)
@@ -58,6 +61,8 @@ done
 
 [[ -n "$HOST" ]] || die "FABLE_3060_HOST is required; DHCP addresses are never guessed"
 [[ -x "$LOCAL_PY" ]] || die "missing local Python: $LOCAL_PY"
+[[ "$STRICT_PREFLIGHT" == true || "$STRICT_PREFLIGHT" == false ]] \
+  || die "FABLE_T3_STRICT_PREFLIGHT must be true or false"
 
 remote_ps() {
   local encoded
@@ -69,7 +74,7 @@ remote_ps() {
 }
 
 check_remote() {
-  local local_v remote_v cuda_info gpu_jobs
+  local local_v remote_v cuda_info gpu_jobs free_bytes
   say "3060 connectivity, dependency parity, CUDA and current GPU jobs"
   remote_ps >/dev/null <<PS || die "SSH/PowerShell unavailable: $HOST"
 \$ErrorActionPreference = 'Stop'
@@ -91,6 +96,14 @@ PS
 )"
   [[ "$cuda_info" == True\|*\|True ]] || die "CUDA/NMS unavailable: $cuda_info"
   printf '  CUDA: %s\n' "$cuda_info"
+  free_bytes="$(remote_ps <<PS | tr -d '\r\n '
+\$drive = Get-PSDrive -Name C
+Write-Output ([int64]\$drive.Free)
+PS
+)"
+  [[ "$free_bytes" =~ ^[0-9]+$ ]] || die "could not read remote C: free bytes: $free_bytes"
+  (( free_bytes >= 20 * 1024 * 1024 * 1024 )) || die "remote C: has less than 20 GiB free"
+  "$LOCAL_PY" -c 'import sys; print(f"  C: free: {int(sys.argv[1]) / 1024**3:.1f} GiB")' "$free_bytes"
   gpu_jobs="$(remote_ps <<PS | tr -d '\r'
 \$jobs = & nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv,noheader 2>\$null
 if (\$LASTEXITCODE -ne 0) { exit \$LASTEXITCODE }
@@ -144,13 +157,19 @@ PS
     "${SCP[@]}" "$HOST:$remote_scp/$file" "$local_run/$file"
   done
   "${SCP[@]}" "$HOST:/C:/fable/logs/$NAME.log" "$local_run/train.log"
+  if [[ "$STRICT_PREFLIGHT" == true ]]; then
+    mkdir -p "$EXPERIMENT_RESULTS"
+    "${SCP[@]}" "$HOST:/C:/fable/experiments/$NAME/remote_dataset_preflight.json" \
+      "$EXPERIMENT_RESULTS/remote_dataset_preflight.json"
+  fi
   remote_ps >"$local_run/remote_training_receipt.txt" <<PS
 \$files = @(
   '$remote_run/weights/best.pt',
   '$remote_run/args.yaml',
   '$remote_run/results.csv',
   '$REMOTE/logs/$NAME.log',
-  '$REMOTE/logs/$NAME.exit_code'
+  '$REMOTE/logs/$NAME.exit_code',
+  '$REMOTE/experiments/$NAME/remote_dataset_preflight.json'
 )
 foreach (\$p in \$files) {
   if (Test-Path -LiteralPath \$p -PathType Leaf) {
@@ -169,7 +188,7 @@ check_remote
 if [[ "$MODE" == check ]]; then printf '\nCheck passed; nothing was staged or started.\n'; exit 0; fi
 
 say "local immutable-input gates"
-for path in "$MODEL" "$TRAINER" "$PREREG" "$BUILD_RECEIPT" "$QA_RECEIPT" \
+for path in "$MODEL" "$TRAINER" "$PREFLIGHT" "$PREREG" "$BUILD_RECEIPT" "$QA_RECEIPT" \
   "$DATASET/manifest.jsonl" "$DATASET/build_summary.json" "$DATASET/data.yaml"; do
   [[ -s "$path" ]] || die "missing required input: $path"
 done
@@ -189,8 +208,10 @@ print("PREREG_OK")
 [[ "$PREREG_GATE" == PREREG_OK ]] || die "preregistration gate returned no exact sentinel"
 
 DATASET_BASE="$(basename "$DATASET")"
+LAUNCHER_SHA="$(shasum -a 256 "$0" | awk '{print $1}')"
 MODEL_SHA="$(shasum -a 256 "$MODEL" | awk '{print $1}')"
 TRAINER_SHA="$(shasum -a 256 "$TRAINER" | awk '{print $1}')"
+PREFLIGHT_SHA="$(shasum -a 256 "$PREFLIGHT" | awk '{print $1}')"
 PREREG_SHA="$(shasum -a 256 "$PREREG" | awk '{print $1}')"
 BUILD_SHA="$(shasum -a 256 "$BUILD_RECEIPT" | awk '{print $1}')"
 QA_SHA="$(shasum -a 256 "$QA_RECEIPT" | awk '{print $1}')"
@@ -201,20 +222,40 @@ INPUT_GATE="$("$LOCAL_PY" -c '
 import json,sys
 p=json.load(open(sys.argv[1], encoding="utf-8"))
 f=p.get("immutable_inputs")
+strict = sys.argv[11] == "true"
 if f is not None:
     assert f["manifest_sha256"] == sys.argv[2], "manifest hash mismatch"
     assert f["build_summary_sha256"] == sys.argv[3], "build summary hash mismatch"
     assert f["dataset_build_receipt_sha256"] == sys.argv[4], "build receipt hash mismatch"
     assert f["dataset_qa_receipt_sha256"] == sys.argv[5], "QA receipt hash mismatch"
+    if strict or "data_yaml_sha256" in f:
+        assert f["data_yaml_sha256"] == sys.argv[8], "data yaml hash mismatch"
 assert p["training"]["base_model_sha256"] == sys.argv[6], "model hash mismatch"
 if "trainer_sha256" in p["training"]:
     assert p["training"]["trainer_sha256"] == sys.argv[7], "trainer hash mismatch"
+if strict:
+    assert p["preflight"]["script_sha256"] == sys.argv[9], "preflight hash mismatch"
+    assert p["training"]["launcher_sha256"] == sys.argv[10], "launcher hash mismatch"
 print("INPUTS_OK")
-' "$PREREG" "$MANIFEST_SHA" "$SUMMARY_SHA" "$BUILD_SHA" "$QA_SHA" "$MODEL_SHA" "$TRAINER_SHA")" || die "immutable input gate failed"
+' "$PREREG" "$MANIFEST_SHA" "$SUMMARY_SHA" "$BUILD_SHA" "$QA_SHA" "$MODEL_SHA" "$TRAINER_SHA" "$YAML_SHA" "$PREFLIGHT_SHA" "$LAUNCHER_SHA" "$STRICT_PREFLIGHT")" || die "immutable input gate failed"
 [[ "$INPUT_GATE" == INPUTS_OK ]] || die "immutable input gate returned no exact sentinel"
+if [[ "$STRICT_PREFLIGHT" == true ]]; then
+  mkdir -p "$EXPERIMENT_RESULTS"
+  say "full local dataset preflight"
+  LOCAL_PREFLIGHT_OUTPUT="$("$LOCAL_PY" "$PREFLIGHT" \
+    --dataset "$DATASET" \
+    --prereg "$PREREG" \
+    --verify-file-hashes \
+    --output "$EXPERIMENT_RESULTS/local_dataset_preflight.json")" \
+    || die "local dataset preflight failed"
+  printf '%s\n' "$LOCAL_PREFLIGHT_OUTPUT"
+  grep -Fq "PREFLIGHT_OK|$MANIFEST_SHA|$DATASET_IMAGE_COUNT|" <<<"$LOCAL_PREFLIGHT_OUTPUT" \
+    || die "local preflight returned no expected manifest/count sentinel"
+fi
 REMOTE_DATASET="$REMOTE/datasets/$REMOTE_DATASET_NAME"
 REMOTE_MODEL="$REMOTE/inputs/$MODEL_SHA/yolo11s.pt"
 REMOTE_TRAINER="$REMOTE/train_t3_$TRAINER_SHA.py"
+REMOTE_PREFLIGHT="$REMOTE/preflight_yolo_$PREFLIGHT_SHA.py"
 REMOTE_PREREG="$REMOTE/experiments/$NAME/preregistration.json"
 REMOTE_BUILD="$REMOTE/experiments/$NAME/dataset_build_receipt.json"
 REMOTE_QA="$REMOTE/experiments/$NAME/dataset_qa_receipt.json"
@@ -252,6 +293,7 @@ PS
 "${SCP[@]}" "$TMP_TAR" "$HOST:$REMOTE/incoming_$NAME.tar"
 "${SCP[@]}" "$MODEL" "$HOST:$REMOTE/incoming_${NAME}_model.pt"
 "${SCP[@]}" "$TRAINER" "$HOST:$REMOTE/incoming_${NAME}_trainer.py"
+"${SCP[@]}" "$PREFLIGHT" "$HOST:$REMOTE/incoming_${NAME}_preflight.py"
 "${SCP[@]}" "$PREREG" "$HOST:$REMOTE/incoming_${NAME}_prereg.json"
 "${SCP[@]}" "$BUILD_RECEIPT" "$HOST:$REMOTE/incoming_${NAME}_build.json"
 "${SCP[@]}" "$QA_RECEIPT" "$HOST:$REMOTE/incoming_${NAME}_qa.json"
@@ -295,6 +337,13 @@ if (Test-Path -LiteralPath '$REMOTE_TRAINER') {
 } else {
   Move-Item -LiteralPath '$REMOTE/incoming_${NAME}_trainer.py' -Destination '$REMOTE_TRAINER'
 }
+Assert-Hash '$REMOTE/incoming_${NAME}_preflight.py' '$PREFLIGHT_SHA' 'dataset preflight'
+if (Test-Path -LiteralPath '$REMOTE_PREFLIGHT') {
+  Assert-Hash '$REMOTE_PREFLIGHT' '$PREFLIGHT_SHA' 'existing dataset preflight'
+  Remove-Item -LiteralPath '$REMOTE/incoming_${NAME}_preflight.py' -Force
+} else {
+  Move-Item -LiteralPath '$REMOTE/incoming_${NAME}_preflight.py' -Destination '$REMOTE_PREFLIGHT'
+}
 Assert-Hash '$REMOTE/incoming_${NAME}_prereg.json' '$PREREG_SHA' 'preregistration'
 Move-Item -LiteralPath '$REMOTE/incoming_${NAME}_prereg.json' -Destination '$REMOTE_PREREG'
 Assert-Hash '$REMOTE/incoming_${NAME}_build.json' '$BUILD_SHA' 'dataset build receipt'
@@ -306,6 +355,10 @@ Move-Item -LiteralPath '$REMOTE/incoming_${NAME}.cmd' -Destination '$REMOTE_BATC
 \$yaml = '$REMOTE_DATASET/data.yaml'
 (Get-Content -LiteralPath \$yaml) -replace '^path:.*$', 'path: $REMOTE_DATASET' | Set-Content -LiteralPath \$yaml -Encoding ASCII
 Assert-Hash '$REMOTE_DATASET/manifest.jsonl' '$MANIFEST_SHA' 'final dataset manifest'
+if ('$STRICT_PREFLIGHT' -eq 'true') {
+  & '$REMOTE_PY' '$REMOTE_PREFLIGHT' --dataset '$REMOTE_DATASET' --prereg '$REMOTE_PREREG' --verify-file-hashes --output '$REMOTE/experiments/$NAME/remote_dataset_preflight.json'
+  if (\$LASTEXITCODE -ne 0) { throw 'remote full dataset preflight failed' }
+}
 Write-Output '$STAGE_SENTINEL'
 PS
 )"

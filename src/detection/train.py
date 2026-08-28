@@ -176,6 +176,7 @@ def main() -> None:
         imgsz=args.imgsz,
         batch=args.batch,
         seed=args.seed,
+        deterministic=True,
         patience=args.patience,
         device=device,
         workers=args.workers,

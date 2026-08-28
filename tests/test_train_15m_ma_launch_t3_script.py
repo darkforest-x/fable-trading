@@ -7,6 +7,11 @@ IMGSZ1280_SCRIPT = ROOT / "scripts" / "train_15m_ma_launch_t3_imgsz1280_on_3060.
 NEG30000_SCRIPT = (
     ROOT / "scripts" / "train_15m_ma_launch_owner_neg30000_on_3060.sh"
 )
+GRADE_A_NEG24000_SCRIPT = (
+    ROOT
+    / "scripts"
+    / "train_15m_ma_launch_owner_grade_a8000_neg24000_on_3060.sh"
+)
 IMGSZ1280_PREREG = (
     ROOT
     / "experiments"
@@ -36,9 +41,42 @@ def test_launcher_uses_exact_frozen_recipe() -> None:
 
 def test_launcher_hashes_dataset_model_and_trainer_before_wmi() -> None:
     text = source()
-    for token in ("MANIFEST_SHA", "MODEL_SHA", "TRAINER_SHA", "STAGE_SENTINEL"):
+    for token in (
+        "MANIFEST_SHA",
+        "MODEL_SHA",
+        "TRAINER_SHA",
+        "PREFLIGHT_SHA",
+        "LAUNCHER_SHA",
+        "STAGE_SENTINEL",
+    ):
         assert token in text
     assert text.index("STAGE_SENTINEL=") < text.index("start one detached WMI training job")
+
+
+def test_launcher_runs_full_preflight_on_local_and_remote_copies() -> None:
+    text = source()
+    for token in (
+        'PREFLIGHT="scripts/windows/verify_yolo_dataset.py"',
+        "full local dataset preflight",
+        "--verify-file-hashes",
+        "local_dataset_preflight.json",
+        "remote_dataset_preflight.json",
+        "data yaml hash mismatch",
+        "remote full dataset preflight failed",
+    ):
+        assert token in text
+    assert text.index("full local dataset preflight") < text.index(
+        "package ${DATASET_IMAGE_COUNT}-image immutable dataset"
+    )
+    assert text.index("remote full dataset preflight failed") < text.index(
+        "start one detached WMI training job"
+    )
+
+
+def test_launcher_refuses_low_remote_disk_before_staging() -> None:
+    text = source()
+    assert "Get-PSDrive -Name C" in text
+    assert "remote C: has less than 20 GiB free" in text
 
 
 def test_launcher_has_no_promotion_or_trading_mutation() -> None:
@@ -72,6 +110,8 @@ def test_shared_launcher_binds_dynamic_contract_before_start() -> None:
         "FABLE_T3_LOCAL_OUTPUT_ROOT",
         "PREREG_OK",
         "INPUTS_OK",
+        'launcher_sha256"] == sys.argv[10]',
+        'STRICT_PREFLIGHT="${FABLE_T3_STRICT_PREFLIGHT:-false}"',
         'training_authorized"] is True',
         'safety"]["holdout_read"] is False',
         'safety"]["promote"] is False',
@@ -91,6 +131,30 @@ def test_neg30000_wrapper_selects_only_the_preregistered_dataset() -> None:
     assert 'FABLE_T3_DATASET_IMAGE_COUNT="40000"' in text
     assert 'FABLE_T3_RUN_NAME="ma_launch_owner_yolo_neg30000_v2_y11s_ft960"' in text
     assert 'FABLE_T3_REMOTE_DATASET_NAME="ma_launch_owner_yolo_neg30000_v2_input"' in text
+    assert text.rstrip().endswith(
+        'exec bash scripts/train_15m_ma_launch_t3_on_3060.sh "$@"'
+    )
+    forbidden = ("promote_owner_best.py", "active_bundle.json", "forward_log.csv")
+    assert all(token not in text for token in forbidden)
+
+
+def test_grade_a_neg24000_wrapper_selects_only_the_preregistered_dataset() -> None:
+    text = GRADE_A_NEG24000_SCRIPT.read_text(encoding="utf-8")
+    assert 'FABLE_T3_IMGSZ="960"' in text
+    assert (
+        'FABLE_T3_DATASET="datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1"'
+        in text
+    )
+    assert 'FABLE_T3_DATASET_IMAGE_COUNT="32000"' in text
+    assert 'FABLE_T3_STRICT_PREFLIGHT="true"' in text
+    assert (
+        'FABLE_T3_RUN_NAME="ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960"'
+        in text
+    )
+    assert (
+        'FABLE_T3_REMOTE_DATASET_NAME="ma_launch_owner_grade_a8000_neg24000_v1_input"'
+        in text
+    )
     assert text.rstrip().endswith(
         'exec bash scripts/train_15m_ma_launch_t3_on_3060.sh "$@"'
     )

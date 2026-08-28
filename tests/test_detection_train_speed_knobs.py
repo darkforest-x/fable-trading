@@ -51,3 +51,4 @@ def test_training_seed_is_explicitly_forwarded() -> None:
     source = (Path(__file__).resolve().parents[1] / "src" / "detection" / "train.py").read_text()
     assert 'parser.add_argument(\n        "--seed"' in source
     assert "seed=args.seed" in source
+    assert "deterministic=True" in source

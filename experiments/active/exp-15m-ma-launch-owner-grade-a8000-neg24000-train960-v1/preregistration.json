@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "protocol": "ma6_owner_grade_a8000_matched_neg24000_train960_completed_history_v1_20260829",
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1",
+  "created_at": "2026-08-29T02:56:58+08:00",
+  "stage": "owner_authorized_P0_P1_override_completed_history_research_training",
+  "question": "How does the 8,000 Grade-A automatic positive plus 24,000 same-source matched-negative dataset behave under the frozen YOLO11s imgsz=960 recipe, when all image variants remain grouped by event and the result is evaluated as completed-history research rather than a live tip detector?",
+  "owner_authorization": {
+    "conversation_date": "2026-08-29",
+    "immediate_context": [
+      "还有哪些要注意的细节 我们马上要去训练了",
+      "脚本还能优化吗",
+      "P0/P1禁训门是啥  不读holdout、不promote、不部署。没必要 都可以做"
+    ],
+    "interpretation": "The Owner explicitly overrides the repository P0/P1 no-training gate for this completed-history research run and permits later holdout, promotion and deployment actions. Permission is recorded, but this launch itself reads no holdout and performs no promotion or deployment. The model's 2-9 post-core input bars remain incompatible with the causal tip/tip-1/tip-2 production path unless a separate architecture and acceptance decision is made after results exist.",
+    "p0_p1_training_gate_overridden": true,
+    "training_authorized": true,
+    "post_freeze_holdout_consumption_authorized": true,
+    "promotion_authorized_in_principle": true,
+    "deployment_authorized_in_principle": true,
+    "live_order_authorized": false
+  },
+  "single_variable": {
+    "name": "immutable training dataset treatment",
+    "reference_experiment": "exp-15m-ma-launch-owner-yolo-neg30000-train960-v1",
+    "reference_dataset": "10,000 older weak positives plus 30,000 legacy matched negatives",
+    "treatment_dataset": "8,000 Grade-A automatic positives plus 24,000 newly same-source matched negatives",
+    "training_recipe_identical": true,
+    "causal_attribution_limit": "The positive selection, negative cohort and total image count move together as one owner-authorized dataset artifact. Metric differences cannot be attributed to any one component."
+  },
+  "immutable_inputs": {
+    "dataset_path": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1",
+    "dataset_source_experiment": "exp-15m-ma-launch-owner-grade-a8000-neg24000-v1",
+    "manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "build_summary_sha256": "716881a3cdade504fdd00069431b7aba007f1c92c10636d1270d6eb9eb06dc2e",
+    "data_yaml_sha256": "4846b0e9fed8775efdcb375be3184b34fbc39c68de6effd2bc87cac3e849fb82",
+    "dataset_build_receipt_path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results/dataset_build_receipt.json",
+    "dataset_build_receipt_sha256": "716881a3cdade504fdd00069431b7aba007f1c92c10636d1270d6eb9eb06dc2e",
+    "dataset_qa_receipt_path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results/independent_qa_receipt.json",
+    "dataset_qa_receipt_sha256": "364ac95c2ec71427f6062a04edac1d8e2be9d8c7f04e1752a41762171d901473",
+    "source_dimensions": [1280, 742],
+    "counts": {
+      "train": {"images": 27200, "labels": 27200, "positive": 6800, "negative": 20400},
+      "val": {"images": 4800, "labels": 4800, "positive": 1200, "negative": 3600},
+      "total": {"images": 32000, "labels": 32000, "positive": 8000, "negative": 24000}
+    },
+    "class_instances_by_split": {
+      "train": {"0": 3205, "1": 3595},
+      "val": {"0": 531, "1": 669}
+    },
+    "events_by_split": {
+      "train": {"positive": 888, "negative": 2664},
+      "val": {"positive": 155, "negative": 465}
+    },
+    "negative_kinds": {"hard": 16000, "easy": 8000},
+    "split": "global chronological cutoff 2025-12-01T00:00:00Z with 150 15m bars purged on both sides; all variants of one event stay in one split",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_rows_allowed_during_training": 0
+  },
+  "preflight": {
+    "script": "scripts/windows/verify_yolo_dataset.py",
+    "script_sha256": "a178b20fd43b9a4f992149476a9dfaed029f4540812ddc1a304531baf86d05fd",
+    "run_on_local_source": true,
+    "run_on_remote_staged_copy": true,
+    "verify_every_image_and_label_sha256": true,
+    "verify_class_names_counts_and_box_bounds": true,
+    "verify_independent_event_counts_and_split_isolation": true
+  },
+  "training": {
+    "remote_host_runtime": "Administrator@192.168.1.5",
+    "gpu": "NVIDIA GeForce RTX 3060 12GB",
+    "base_model": "models/yolo11s.pt",
+    "base_model_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+    "trainer": "src/detection/train.py",
+    "trainer_sha256": "71445a639996ef8d0199a164aa08c75efa9d037619b8647deb3d5fab366e0562",
+    "launcher": "scripts/train_15m_ma_launch_t3_on_3060.sh",
+    "launcher_sha256": "de6ac7a88e42974471e1b5279fffb6d2d644cf3e92e7a15e4f41fb6f98043686",
+    "classes": {"0": "dense_long", "1": "dense_short"},
+    "epochs": 40,
+    "patience": 10,
+    "batch": 8,
+    "imgsz": 960,
+    "optimizer": "AdamW",
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "warmup_epochs": 0.5,
+    "seed": 0,
+    "deterministic": true,
+    "rect": true,
+    "cache": false,
+    "workers": 2,
+    "run_name": "ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960",
+    "augmentations": {
+      "fliplr": 0.0,
+      "flipud": 0.0,
+      "mosaic": 0.0,
+      "mixup": 0.0,
+      "copy_paste": 0.0,
+      "hsv_h": 0.0,
+      "hsv_s": 0.0,
+      "hsv_v": 0.0,
+      "degrees": 0.0,
+      "translate": 0.02,
+      "scale": 0.1,
+      "shear": 0.0,
+      "perspective": 0.0,
+      "erasing": 0.0
+    }
+  },
+  "evaluation": {
+    "static_val": "Reload best.pt on the unchanged 4,800-image chronological val split at imgsz=960 and report overall plus per-class P/R/mAP50/mAP50-95.",
+    "negative_surface": "At frozen conf=0.25 and IoU=0.7, report false-positive-image rate, boxes per 1,000 images and maximum confidence on all 3,600 empty-label val images, split hard versus easy.",
+    "event_surface": "Group the 1,200 positive val variants into 155 independent events; report earliest post=2 hit rate, first-hit post-bar delay, any-hit event recall and duplicate-box rate.",
+    "threshold_tuning": false,
+    "holdout_during_training": false,
+    "post_freeze_holdout": "Owner authorized a later consumption, but it must be separately recorded after best.pt and the evaluation code are frozen; already viewed recent-five-day and ETH30d surfaces are not clean unseen Gold.",
+    "production_decision": false,
+    "financial_metrics_not_applicable": "This is a completed-history detector experiment, not an execution backtest."
+  },
+  "outputs": {
+    "experiment_results": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results",
+    "local_run": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960",
+    "canonical_report": "analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_train960_20260829.md",
+    "canonical_html": "analysis/html/p1_15m_ma_launch_owner_grade_a8000_neg24000_train960_20260829.html"
+  },
+  "safety": {
+    "weak_labels_are_gold": false,
+    "completed_history_not_live_tip": true,
+    "holdout_read": false,
+    "promote": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "training_eligible_registry_flag": false,
+    "production_eligible": false
+  }
+}
