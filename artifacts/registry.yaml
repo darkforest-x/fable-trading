@@ -6676,3 +6676,205 @@ artifacts:
     config_hash: "5e96987e61597e650e4a8603ba8bb6bd6bb11802f9ff8cc74b9d94e78fafe0e9"
     data_cutoff: "2026-05-03T18:15:00Z"
     notes: Self-contained HTML with embedded top-100 contact sheet and five exact evidence tables; structural QA passed.
+
+  # ---- expanded pre-holdout 15m Grade-A positive dataset ----------------
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-v1-prereg
+    artifact_type: config
+    role: frozen_grade_a_source_geometry_and_safety_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b9fc59488c98552cfa26537ccf22980e6a7c3678"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/preregistration.json
+    sha256: "6aed7e9b13a224e23724354e0d7e20b18ec543779a3824adbe5eb6aaa6513462"
+    size_bytes: 6134
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b9fc59488c98552cfa26537ccf22980e6a7c3678"
+    config_hash: "6aed7e9b13a224e23724354e0d7e20b18ec543779a3824adbe5eb6aaa6513462"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Pins official Binance archive scope, the exact prior perfect-filter
+      contract, cross-venue NMS, chronological split, 4/5-bar core and eight
+      same-length context positions. All training/production safety flags false.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-v1-capacity-attempts
+    artifact_type: manifest
+    role: fail_closed_render_capacity_amendment_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b9fc59488c98552cfa26537ccf22980e6a7c3678"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/capacity_attempts.json
+    sha256: "82b8356488e30f8ab88f3a0ddb523ba53887ac289fca2f3c932f301f7033974e"
+    size_bytes: 1251
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/capacity_attempts.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b9fc59488c98552cfa26537ccf22980e6a7c3678"
+    config_hash: "6aed7e9b13a224e23724354e0d7e20b18ec543779a3824adbe5eb6aaa6513462"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Records the six-position upper bound of 6,294 and the isolated
+      eight-position capacity of 8,336; no shape gate or semantic boundary moved.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-v1-build-receipt
+    artifact_type: manifest
+    role: immutable_dataset_build_lineage_and_safety_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b9fc59488c98552cfa26537ccf22980e6a7c3678"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/results/build_receipt.json
+    sha256: "a4e8f4b42e71a0e562223b80b06f750e21124b87ad47a57f1463a48b4308838e"
+    size_bytes: 2330
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/results/build_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b9fc59488c98552cfa26537ccf22980e6a7c3678"
+    config_hash: "6aed7e9b13a224e23724354e0d7e20b18ec543779a3824adbe5eb6aaa6513462"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Binds the committed builder, amended preregistration and completed 8,000-image summary; records zero holdout and no training/runtime mutation.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-v1-summary
+    artifact_type: manifest
+    role: grade_a_funnel_geometry_split_and_pixel_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b9fc59488c98552cfa26537ccf22980e6a7c3678"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/results/summary.json
+    sha256: "3a1124c00b93cdcd4ab1268652ef53bb8c08ff874b39f9c07d05bb4473578a92"
+    size_bytes: 1707
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b9fc59488c98552cfa26537ccf22980e6a7c3678"
+    config_hash: "6aed7e9b13a224e23724354e0d7e20b18ec543779a3824adbe5eb6aaa6513462"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Records 49,162,351 Binance rows, 966 new Grade-A events, 1,043 final
+      independent events, 8,000 unique PNGs, train/val counts and one-box QA.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-v1-dataset-manifest
+    artifact_type: dataset
+    role: automatic_grade_a_positive_training_candidate_dataset_manifest
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b9fc59488c98552cfa26537ccf22980e6a7c3678"
+    source_path: datasets/ma_launch_owner_grade_a8000_v1/manifest.jsonl
+    sha256: "efe1eb97c14c6e94dff32bdeb2c420113890c378a6b808d94f5978a887848b40"
+    size_bytes: 59662681
+    storage_uri: "file://datasets/ma_launch_owner_grade_a8000_v1/manifest.jsonl"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b9fc59488c98552cfa26537ccf22980e6a7c3678"
+    config_hash: "6aed7e9b13a224e23724354e0d7e20b18ec543779a3824adbe5eb6aaa6513462"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Row-heavy local ledger for 8,000 actual 1280x742 PNGs and one-box labels.
+      It represents 1,043 grouped events, not 8,000 independent events, and is
+      automatic PERFECT_CANDIDATE rather than per-sample Owner Gold.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-v1-data-yaml
+    artifact_type: config
+    role: local_yolo_dataset_pointer
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b9fc59488c98552cfa26537ccf22980e6a7c3678"
+    source_path: datasets/ma_launch_owner_grade_a8000_v1/data.yaml
+    sha256: "eee91403b477a9faaf76c18a94bf7f61a787398b60cdd6a53580abe86722c9b5"
+    size_bytes: 151
+    storage_uri: "file://datasets/ma_launch_owner_grade_a8000_v1/data.yaml"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b9fc59488c98552cfa26537ccf22980e6a7c3678"
+    config_hash: "6aed7e9b13a224e23724354e0d7e20b18ec543779a3824adbe5eb6aaa6513462"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Points Ultralytics at the local train/val image trees; registration does not grant training eligibility.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-v1-gallery
+    artifact_type: annotation_set
+    role: paginated_8000_actual_input_css_box_gallery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b9fc59488c98552cfa26537ccf22980e6a7c3678"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/results/public/index.html
+    sha256: "e6d1de0138d0913a5ad06eeb5ac13913574d5c97755f6b3a055e684649ee2961"
+    size_bytes: 4988
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/results/public"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b9fc59488c98552cfa26537ccf22980e6a7c3678"
+    config_hash: "6aed7e9b13a224e23724354e0d7e20b18ec543779a3824adbe5eb6aaa6513462"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Eighty local pages reference all 8,000 exact clean model PNGs; red boxes are CSS-only overlays and all 8,000 image paths resolve.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-v1-independent-qa
+    artifact_type: manifest
+    role: independent_full_file_hash_label_split_and_null_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "26917a1cc5ed272d6be8c0fb316d63bdd2c77ffe"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/results/qa/independent_qa_receipt.json
+    sha256: "b3661752831b0d11a6d3d10092126911901cc5bd67ad8abcf56db8a084bb99d1"
+    size_bytes: 1981
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/results/qa/independent_qa_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "26917a1cc5ed272d6be8c0fb316d63bdd2c77ffe"
+    config_hash: "6aed7e9b13a224e23724354e0d7e20b18ec543779a3824adbe5eb6aaa6513462"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Independently decoded and rehashed every image and label. Label-pairing
+      and grouped-split permutation nulls each passed at p=0.000999.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-v1-visual-qa
+    artifact_type: annotation_set
+    role: stratified_and_largest_box_height_visual_qa_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "26917a1cc5ed272d6be8c0fb316d63bdd2c77ffe"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/results/qa/visual_qa_receipt.json
+    sha256: "bf7419f9d419a0197fb7a54a8800706042b83b04ac94e5139e1d73dfe8df202c"
+    size_bytes: 14754
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/results/qa"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "26917a1cc5ed272d6be8c0fb316d63bdd2c77ffe"
+    config_hash: "6aed7e9b13a224e23724354e0d7e20b18ec543779a3824adbe5eb6aaa6513462"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Binds 64 variant/split/direction-stratified overlays and 16 largest-box
+      boundary overlays to actual model inputs; overlay copies never replace PNGs.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-v1-report
+    artifact_type: report
+    role: canonical_grade_a_positive_dataset_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5ffe794776dea453e37415e5ebc9a589a678e1a9"
+    source_path: analysis/p1_15m_ma_launch_owner_grade_a8000_20260828.md
+    sha256: "04344f90388d12c3072108194e518d2defd51967699d242027e73ba1656de181"
+    size_bytes: 13200
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_grade_a8000_20260828.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5ffe794776dea453e37415e5ebc9a589a678e1a9"
+    config_hash: "6aed7e9b13a224e23724354e0d7e20b18ec543779a3824adbe5eb6aaa6513462"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Answer-first Chinese report with source expansion, exact funnel, grouped variants, full QA, null controls, risks and reproduction commands.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-v1-html
+    artifact_type: report
+    role: self_contained_owner_grade_a_dataset_report_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5ffe794776dea453e37415e5ebc9a589a678e1a9"
+    source_path: analysis/html/p1_15m_ma_launch_owner_grade_a8000_20260828.html
+    sha256: "63bb863b510602b630755d21397429c07e4d06b4e0c8f2ca10dbb7d142b6005e"
+    size_bytes: 1793537
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_grade_a8000_20260828.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5ffe794776dea453e37415e5ebc9a589a678e1a9"
+    config_hash: "6aed7e9b13a224e23724354e0d7e20b18ec543779a3824adbe5eb6aaa6513462"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Self-contained HTML with two embedded rendered QA figures, seven tables and twelve sections; structural QA passed.

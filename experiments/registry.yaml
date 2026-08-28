@@ -2320,3 +2320,51 @@ experiments:
       30,000 negatives, did not start training and did not change ACTIVE,
       frozen, forward, deployment or order state. Zero rows at or after the
       2026-05-04 holdout boundary were materialized.
+
+  - experiment_id: exp-15m-ma-launch-owner-grade-a8000-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5ffe794776dea453e37415e5ebc9a589a678e1a9"
+    status: accepted
+    question: >-
+      Can the exact frozen PERFECT_CANDIDATE contract be applied beyond the
+      original 10,000 examples to build 8,000 clean 15m positive model-input
+      PNGs without duplicated pixels, event leakage, holdout reads or relaxed
+      shape gates?
+    single_variable: >-
+      expand the pre-holdout mother pool with official Binance USD-M history
+      while preserving the perfect-shape gate; after a recorded six-position
+      capacity failure, one amendment changed only the number of fixed
+      same-length horizontal context positions from six to eight
+    result: >-
+      completed_grade_a_positive_dataset. 49,162,351 pre-holdout Binance bars
+      yielded 966 new Grade-A events; adding 261 existing OKX candidates and
+      applying cross-venue NMS, distribution caps, chronological purge and
+      geometry gates left 1,043 independent events. They produced exactly
+      8,000 unique 1280x742 PNGs and 8,000 one-box labels: 3,736 LONG, 4,264
+      SHORT, train 6,800 and val 1,200. Independent full-file QA found zero
+      duplicate images, zero overlay-red pixels and zero cross-split events;
+      both label-pairing and event-grouping permutation nulls gave p=0.000999.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_owner_grade_a8000_20260828.md
+    artifacts:
+      - 15m-ma-launch-owner-grade-a8000-v1-prereg
+      - 15m-ma-launch-owner-grade-a8000-v1-capacity-attempts
+      - 15m-ma-launch-owner-grade-a8000-v1-build-receipt
+      - 15m-ma-launch-owner-grade-a8000-v1-summary
+      - 15m-ma-launch-owner-grade-a8000-v1-dataset-manifest
+      - 15m-ma-launch-owner-grade-a8000-v1-data-yaml
+      - 15m-ma-launch-owner-grade-a8000-v1-gallery
+      - 15m-ma-launch-owner-grade-a8000-v1-independent-qa
+      - 15m-ma-launch-owner-grade-a8000-v1-visual-qa
+      - 15m-ma-launch-owner-grade-a8000-v1-report
+      - 15m-ma-launch-owner-grade-a8000-v1-html
+    reuse_allowed: false
+    notes: >-
+      8,000 is the model-input image count, not the independent-event count;
+      every event contributes seven or eight real-window position variants and
+      all variants remain in one split. PERFECT_CANDIDATE is automatic, not
+      per-sample Owner Gold. Core+5 is completed-history evidence and cannot be
+      used as a tip/forward detector. No negative set, training, model, ACTIVE,
+      frozen, forward, deployment or order state changed.
