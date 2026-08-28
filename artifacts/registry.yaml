@@ -6040,3 +6040,171 @@ artifacts:
     notes: >-
       Browser HTTP 200, expected title and four embedded images; full-page
       screenshot recorded with zero missing-image placeholders.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-training-parity-v1-prereg
+    artifact_type: config
+    role: owner_authorized_fourth_holdout_use_and_prediction_training_semantic_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/preregistration.json
+    sha256: "31f257201e621371693506079b713df18ca2f18369742c8959770db96090e0c1"
+    size_bytes: 6463
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/preregistration.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    config_hash: "31f257201e621371693506079b713df18ca2f18369742c8959770db96090e0c1"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      Pins the 10,000 training positives, 10k+30k dataset, exact weights,
+      43 frozen events, renderers, morphology implementation and holdout use #4.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-training-parity-v1-receipt
+    artifact_type: manifest
+    role: hash_bound_prediction_training_semantic_audit_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/receipt.json
+    sha256: "71580b51510c8d6564d341e48bb74a0caff6124fad09c013d9089b55344b7cfd"
+    size_bytes: 909
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    config_hash: "31f257201e621371693506079b713df18ca2f18369742c8959770db96090e0c1"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      Binds the 10k training profile, 43-event audit, overview, representative
+      sheet, gallery and 43 unique comparison-image hashes.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-training-parity-v1-qa
+    artifact_type: manifest
+    role: independent_counts_hashes_dimensions_and_gallery_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/qa_receipt.json
+    sha256: "84224e67fc2a9a0fad75d9892d7b9af3fc4043cd879a1746db8ad580e2ba02d2"
+    size_bytes: 581
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/qa_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    config_hash: "31f257201e621371693506079b713df18ca2f18369742c8959770db96090e0c1"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      Independently confirms 10,000 training rows, 43 events, two strict
+      matches, 41 out-of-spec events, no alternative core for any failure and
+      43 unique 2560x946 comparison images.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-training-parity-v1-overview
+    artifact_type: report
+    role: training_prediction_distribution_gate_failure_and_funnel_figure
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/training_vs_prediction_overview.png
+    sha256: "f5984b2aab27f31ef29026532e0cd900c5e67c273a32e6319b5e45e335041d09"
+    size_bytes: 193843
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/training_vs_prediction_overview.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    config_hash: "31f257201e621371693506079b713df18ca2f18369742c8959770db96090e0c1"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: 2244x1598 four-panel semantic parity overview; no economic metric.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-training-parity-v1-representative
+    artifact_type: report
+    role: six_exact_current_input_and_actual_training_positive_pairs
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/representative_comparisons.png
+    sha256: "b6d6749e3b7d1e6236c22e20d82cc7e3ee905372588e05e027686343527c2b37"
+    size_bytes: 415973
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/representative_comparisons.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    config_hash: "31f257201e621371693506079b713df18ca2f18369742c8959770db96090e0c1"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      2440x1374 sheet showing two strict matches and four representative
+      failures; red prediction, orange training label and cyan MA diagnostic.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-training-parity-v1-gallery
+    artifact_type: report
+    role: forty_three_actual_prediction_and_actual_training_image_comparisons
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/comparison_gallery.html
+    sha256: "2f2b0acad90326c9bce702c7a06fc991cd6e06125d05d4a85c5873b73c7a1cdd"
+    size_bytes: 13476
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/comparison_gallery.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    config_hash: "31f257201e621371693506079b713df18ca2f18369742c8959770db96090e0c1"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      Responsive 43-card gallery; every 2560x946 PNG pairs an exact frozen
+      model input with a pixel-exact rerender of an actual training positive.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-training-parity-v1-report
+    artifact_type: report
+    role: canonical_prediction_training_semantic_mismatch_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    source_path: analysis/p1_15m_ma_launch_owner_yolo_prediction_training_parity_20260828.md
+    sha256: "71b5dbb4a9de383fae9044bec55dfe1ab2f1c711e672efbfc9e362a17b9c35bb"
+    size_bytes: 15824
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_yolo_prediction_training_parity_20260828.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    config_hash: "31f257201e621371693506079b713df18ca2f18369742c8959770db96090e0c1"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      Answer-first Chinese report with all 43 events, label-generator semantics,
+      exact null control, holdout use #4, risks and automatic no-owner-review path.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-training-parity-v1-html
+    artifact_type: report
+    role: owner_delivery_self_contained_prediction_training_parity_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    source_path: analysis/html/p1_15m_ma_launch_owner_yolo_prediction_training_parity_20260828.html
+    sha256: "704722492bffa1141c33c82dd989cc50afc376aa86f1b929aa41c7796258fdcd"
+    size_bytes: 834578
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_yolo_prediction_training_parity_20260828.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    config_hash: "31f257201e621371693506079b713df18ca2f18369742c8959770db96090e0c1"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: Self-contained 0.83 MB HTML with two embedded PNG data URIs.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-20260827-training-parity-v1-html-qa
+    artifact_type: manifest
+    role: browser_render_and_gallery_link_verification_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/html_qa_receipt.json
+    sha256: "d5f219616afe5c38877f8a8a462e65af0d9b95bd4718e0bb1e28888a4ee7261d"
+    size_bytes: 1523
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/html_qa_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    config_hash: "31f257201e621371693506079b713df18ca2f18369742c8959770db96090e0c1"
+    data_cutoff: "2026-08-28T01:15:00Z"
+    notes: >-
+      Browser-checked desktop/mobile rendering, two embedded report images and
+      an HTTP-200 link to the complete 43-card gallery; no Owner review task.

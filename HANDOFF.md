@@ -2,6 +2,29 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-28 — 08-27 检测框与实际训练图语义不一致已证实）
+
+Owner 指出“还有很多框识别的不对，和拿去训练的图对比”。本轮冻结复用 08-27 的 43 个原始
+预测和既有快照，不联网、不重推理、不改框；按 10,000 个实际训练正例当时使用的同一套 14 项
+形态门与 Owner-50 距离门逐项复算。**只有 #27 TAO LONG 与 #30 LIT LONG 通过，41/43 不符合
+训练正例标准。** 对 41 个失败输入穷举全部 core4/5 × confirmation4/5/6 后，替代合格核心仍为 0，
+所以主要不是统一左右平移问题，而是整张输入属于训练标准外形态。
+
+根因两层：扫描只验预测框横向几何，没有重跑训练语义门；训练标签本身也不是纯均线窄带，而是
+包住核心完整影线 + 六均线再加 4% 留白。9,578/10,000 个训练正例的 K 线跨度大于均线跨度。
+43/43 当前输入和 29 个不重复实际训练配对均逐像素重渲染一致；43 张 2560×946 对照图、画廊、
+CSV、receipt 与独立 verifier 全通过。完整入口：
+`experiments/active/exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1/results/comparison_gallery.html`；
+报告：`analysis/html/p1_15m_ma_launch_owner_yolo_prediction_training_parity_20260828.html`。
+全仓回归 1744 passed、4 skipped。
+
+本轮**没有 Owner 人工审核任务**：自动结论就是 2 个保留、41 个淘汰，不要求 Owner 逐图打勾、
+改框或填表。这是同配置经授权的 holdout 消费 #4；禁止在 08-23..27 上据此调门。训练、标签、
+权重、ACTIVE/frozen、promote、forward、部署和订单变化均为 0，仍
+`training_eligible=false / production_eligible=false`。**下一条允许动作**：若继续修复，在
+pre-holdout 或新鲜 tip 数据上预注册“推理后自动执行冻结形态门”的单变量方案；自动淘汰与 QA，
+不把审核任务转嫁给 Owner。
+
 ## ⚡ 当前真相（2026-08-28 — 08-27 的 43 个事件已按高清全景逐张交付）
 
 Owner 先要求详细分析，随后明确要求“先把昨天的所有信号发我看一下，高清一点，不要只给检测框，

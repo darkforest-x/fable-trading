@@ -2176,3 +2176,46 @@ experiments:
       No network market-data read, new inference, training, promotion,
       ACTIVE/frozen, forward, deployment or order state changed.
     data_cutoff: "2026-08-28T01:15:00Z"
+
+  - experiment_id: exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ac98f33b63c54e033e07945e71de0eeb02ee0ed9"
+    status: accepted
+    question: >-
+      Do the 43 frozen 2026-08-27 raw Owner-YOLO boxes preserve the exact
+      morphology, reference-distance and vertical label semantics of the actual
+      10,000 positive images used to train the detector?
+    single_variable: >-
+      audit the unchanged frozen predictions with the exact training-positive
+      contract and actual training images; do not rerun inference, move boxes,
+      tune thresholds, change labels or train
+    result: >-
+      confirmed_prediction_training_semantic_mismatch. Only event #27 TAO LONG
+      and #30 LIT LONG passed both the frozen 14-feature morphology gate and
+      Owner-50 distance <=0.5; 41/43 were out of training spec. None of the 41
+      failures had any alternate eligible core in the same exact model input.
+      The scan had enforced x geometry only, while the training label itself
+      encloses full core wicks plus six MAs and padding rather than an MA-only
+      band; candle span exceeded MA span in 9,578/10,000 positives.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_owner_yolo_prediction_training_parity_20260828.md
+    artifacts:
+      - 15m-ma-launch-owner-yolo-20260827-training-parity-v1-prereg
+      - 15m-ma-launch-owner-yolo-20260827-training-parity-v1-receipt
+      - 15m-ma-launch-owner-yolo-20260827-training-parity-v1-qa
+      - 15m-ma-launch-owner-yolo-20260827-training-parity-v1-overview
+      - 15m-ma-launch-owner-yolo-20260827-training-parity-v1-representative
+      - 15m-ma-launch-owner-yolo-20260827-training-parity-v1-gallery
+      - 15m-ma-launch-owner-yolo-20260827-training-parity-v1-report
+      - 15m-ma-launch-owner-yolo-20260827-training-parity-v1-html
+      - 15m-ma-launch-owner-yolo-20260827-training-parity-v1-html-qa
+    reuse_allowed: false
+    notes: >-
+      Owner-authorized bounded holdout consumption #4 on the same 2026-08-23..27
+      surface. The paired training images are actual inputs but illustrative
+      nearest-feature matches, not per-event Gold. The automatic verdict is two
+      retained and 41 rejected; no Owner labeling or review task exists. No
+      network read, new inference, tuning, training, label/weight change,
+      promotion, ACTIVE/frozen, forward, deployment or order state changed.

@@ -17,11 +17,18 @@ from scripts.audit_15m_ma_launch_owner_yolo_prediction_vs_training import (
     verify_preregistration,
     vertical_iou,
 )
+from scripts.verify_15m_ma_launch_owner_yolo_prediction_vs_training import verify
 
 
 ROOT = Path(__file__).resolve().parents[1]
 AUTOFILL_PREREG = (
     ROOT / "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/preregistration.json"
+)
+RESULTS = (
+    ROOT
+    / "experiments/active"
+    / "exp-15m-ma-launch-owner-yolo-20260827-training-parity-audit-v1"
+    / "results"
 )
 
 
@@ -88,3 +95,12 @@ def test_representative_selection_keeps_matches_and_hard_failures() -> None:
     assert len(selected) == 6
     assert {2, 7}.issubset(selected)
     assert len(selected) == len(set(selected))
+
+
+def test_committed_prediction_training_parity_artifacts_verify() -> None:
+    result = verify(RESULTS)
+    assert result["passed"] is True
+    assert result["strict_training_spec_matches"] == 2
+    assert result["out_of_training_spec"] == 41
+    assert result["failing_events_with_alternative_core"] == 0
+    assert result["comparison_images"] == 43
