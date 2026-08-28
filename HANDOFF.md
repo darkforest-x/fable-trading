@@ -2,6 +2,30 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-29 — A级 8k 的新 24k 匹配负样本已完成，训练未启动）
+
+Owner 问“准备去训练，负样本应该用啥”。结论是**不用旧 30,000 张 OKX-only 负样本**，改用新建
+`ma_launch_owner_grade_a8000_yolo_neg24000_v1`：8,000 张 A 级正图逐字节复用，每个独立正事件
+同币、同源、同半年块、同 split、同核心根数与同 7–8 个位置配 2 个 dense-no-launch hard 事件和
+1 个 easy 事件，最终为 16,000 hard + 8,000 easy，train/val 均精确 1:3。
+
+全量 builder 与独立 verifier 均通过：32,000/32,000 实际 PNG 哈希唯一，8,000/8,000 正图与
+标签 parity，24,000/24,000 负标签为空，负事件重叠/活动度/split/holdout 失败均为 0；随机错配
+1,000 次的 exact-pairing 零假设 `p=0.000999`。第一轮发现 4 个停牌后冻结报价事件造成 27 个重复
+像素副本，已保留失败 receipt，并通过源窗口最低活动度门从事件选择阶段完整重建，未事后删样本。
+报告：`analysis/html/p1_15m_ma_launch_owner_grade_a8000_neg24000_20260829.html`；50 组实际输入：
+`experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results/actual_model_inputs_matched_sample50.html`。
+
+**训练没有启动。** 数据质量实验已 accepted，但自动 `PERFECT_CANDIDATE` 仍是 completed-history
+weak label，当前 `ROADMAP.md` 的 P0/P1 禁训门仍有效，因此登记保持
+`training_eligible=false / production_eligible=false`，holdout、模型、ACTIVE、forward、部署和
+交易状态均未变化。**下一条允许动作**：Owner 明确批准覆盖禁训门、仅训练 completed-history
+研究模型（不读 holdout、不 promote、不部署），或继续按 ROADMAP 先完成 P0/P1。
+
+本轮相关数据集与 registry 测试 51/51 通过。全仓为 1,769 passed、7 skipped、5 failed；失败来自
+当前工作区另外存在的依赖锁改动与本机环境（FastAPI/OpenCV/PyYAML 版本不符，且缺
+`ultralytics`/`torchvision`），不是本轮文件。未替 Owner 修改或提交这些外部脏改动。
+
 ## ⚡ 当前真相（2026-08-28 — ETH 30 日 41 个 episode 已完成置信度审计）
 
 Owner 追问“按照置信度分析”。本轮只读取 holdout 消费 #5 已交付 ZIP 内的 41 个 episode / 1,057

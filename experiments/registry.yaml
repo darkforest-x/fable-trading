@@ -2371,8 +2371,8 @@ experiments:
 
   - experiment_id: exp-15m-ma-launch-owner-grade-a8000-neg24000-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
+    source_commit: "6e6d01d71b3a5f76edcae879ce89a1de9cd4fa76"
+    status: accepted
     question: >-
       Can the accepted 8,000 Grade-A positive images be paired with a new
       nuisance-matched negative cohort without reusing the incompatible old
@@ -2383,14 +2383,32 @@ experiments:
       Grade-A positive event (two dense no-launch hard negatives plus one easy
       background), rendered through the exact same seven/eight context
       positions; positive pixels and labels remain byte-identical
-    result: pending_negative_capacity_and_full_file_qa
+    result: >-
+      accepted_for_dataset_quality_only: 8,000 byte-identical Grade-A positive
+      images plus 24,000 newly rendered nuisance-matched negatives; 2 hard and
+      1 easy event per positive event, exact 1:3 train/val and position
+      distributions, 32,000/32,000 unique image hashes, zero overlap/activity/
+      holdout failures, and independent pairing-null p=0.000999. Training remains
+      forbidden by the separate P0/P1 gate.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_20260829.md
-    artifacts: []
+    artifacts:
+      - 15m-ma-launch-owner-grade-a8000-neg24000-v1-prereg
+      - 15m-ma-launch-owner-grade-a8000-neg24000-v1-attempt1-failure
+      - 15m-ma-launch-owner-grade-a8000-neg24000-v1-plan-receipt
+      - 15m-ma-launch-owner-grade-a8000-neg24000-v1-build-receipt
+      - 15m-ma-launch-owner-grade-a8000-neg24000-v1-independent-qa
+      - 15m-ma-launch-owner-grade-a8000-neg24000-v1-dataset-manifest
+      - 15m-ma-launch-owner-grade-a8000-neg24000-v1-data-yaml
+      - 15m-ma-launch-owner-grade-a8000-neg24000-v1-input-preview
+      - 15m-ma-launch-owner-grade-a8000-neg24000-v1-report
+      - 15m-ma-launch-owner-grade-a8000-neg24000-v1-html
     reuse_allowed: false
     notes: >-
       Dataset preparation only. The owner asked to prepare for training, but
       the repository remains in P0/P1 and ROADMAP.md forbids a new training
       run until those gates pass or the owner explicitly changes that rule.
+      Accepted status applies to the negative-dataset construction claim only;
+      training_eligible and production_eligible intentionally remain false.

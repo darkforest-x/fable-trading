@@ -6878,3 +6878,188 @@ artifacts:
     config_hash: "6aed7e9b13a224e23724354e0d7e20b18ec543779a3824adbe5eb6aaa6513462"
     data_cutoff: "2026-05-03T20:30:00Z"
     notes: Self-contained HTML with two embedded rendered QA figures, seven tables and twelve sections; structural QA passed.
+
+  # ---- Grade-A 8k + matched negative 24k dataset (2026-08-29) ------------
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-v1-prereg
+    artifact_type: config
+    role: frozen_matched_negative_dataset_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e8003cd84cb6aaf78abae4f4784aea65617b7104"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/preregistration.json
+    sha256: "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
+    size_bytes: 7687
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e8003cd84cb6aaf78abae4f4784aea65617b7104"
+    config_hash: "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Freezes three same-source negative events per Grade-A positive event,
+      two dense no-launch hard plus one easy background, with no training.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-v1-attempt1-failure
+    artifact_type: manifest
+    role: rejected_duplicate_pixel_materialization_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e8003cd84cb6aaf78abae4f4784aea65617b7104"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results/attempt1_failure_receipt.json
+    sha256: "615dead4701dc43e3727c4e7c13473e37b9a22763d0dc869dc37731979793775"
+    size_bytes: 1147
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results/attempt1_failure_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e8003cd84cb6aaf78abae4f4784aea65617b7104"
+    config_hash: "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Preserves the fail-closed first attempt: 31,973 unique hashes from
+      32,000 images because four inactive easy events produced 27 duplicates.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-v1-plan-receipt
+    artifact_type: manifest
+    role: matched_negative_capacity_and_legacy_compatibility_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6e6d01d71b3a5f76edcae879ce89a1de9cd4fa76"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results/plan_receipt.json
+    sha256: "b48b03b4f2a945e69b556b120dabca58e10a2bf24cb751bf7a8cf9b18d7372ee"
+    size_bytes: 1684
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results/plan_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e8003cd84cb6aaf78abae4f4784aea65617b7104"
+    config_hash: "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Records exact 2,086 hard plus 1,043 easy event capacity and why the old
+      OKX-only 30k negative set is not a drop-in match for the new positives.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-v1-build-receipt
+    artifact_type: manifest
+    role: full_pixel_label_split_and_nuisance_distribution_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6e6d01d71b3a5f76edcae879ce89a1de9cd4fa76"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results/dataset_build_receipt.json
+    sha256: "716881a3cdade504fdd00069431b7aba007f1c92c10636d1270d6eb9eb06dc2e"
+    size_bytes: 1766
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results/dataset_build_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e8003cd84cb6aaf78abae4f4784aea65617b7104"
+    config_hash: "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Full QA over 32,000 actual files: all images unique and decodable, all
+      8,000 positive image/label pairs identical, and all 24,000 negatives empty.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-v1-independent-qa
+    artifact_type: manifest
+    role: independent_source_file_overlap_activity_and_pairing_null_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6e6d01d71b3a5f76edcae879ce89a1de9cd4fa76"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results/independent_qa_receipt.json
+    sha256: "364ac95c2ec71427f6062a04edac1d8e2be9d8c7f04e1752a41762171d901473"
+    size_bytes: 1275
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results/independent_qa_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "138dc669ecef04ea4fdd46a9984ac25ead66e0f4"
+    config_hash: "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Re-read all model files and 499 source CSVs independently; zero overlap,
+      activity, split or holdout failures. Pairing permutation p=0.000999.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-v1-dataset-manifest
+    artifact_type: dataset
+    role: exact_local_8000_positive_24000_matched_negative_yolo_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e8003cd84cb6aaf78abae4f4784aea65617b7104"
+    source_path: datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl
+    sha256: "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2"
+    size_bytes: 110877283
+    storage_uri: "file://datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e8003cd84cb6aaf78abae4f4784aea65617b7104"
+    config_hash: "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Local 1,525,587,565-byte dataset; 32,000 image hashes are unique. The
+      accepted claim is data quality only, not per-sample Owner Gold eligibility.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-v1-data-yaml
+    artifact_type: config
+    role: local_yolo_train_val_pointer_for_matched_dataset
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6e6d01d71b3a5f76edcae879ce89a1de9cd4fa76"
+    source_path: datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/data.yaml
+    sha256: "4846b0e9fed8775efdcb375be3184b34fbc39c68de6effd2bc87cac3e849fb82"
+    size_bytes: 165
+    storage_uri: "repo://datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/data.yaml"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e8003cd84cb6aaf78abae4f4784aea65617b7104"
+    config_hash: "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Registration is a pointer and does not grant training permission.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-v1-input-preview
+    artifact_type: annotation_set
+    role: fifty_matched_groups_of_actual_clean_model_inputs
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6e6d01d71b3a5f76edcae879ce89a1de9cd4fa76"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results/actual_model_inputs_matched_sample50.html
+    sha256: "ffbd9ea9da0599b0bf5d09ab7daad17376299a4e0b47f25985f50bb80393522d"
+    size_bytes: 54564
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results/actual_model_inputs_matched_sample50.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e8003cd84cb6aaf78abae4f4784aea65617b7104"
+    config_hash: "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Each group shows one positive plus its two hard and one easy matched
+      negative; red positive boxes are CSS overlays, never burned into PNGs.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-v1-report
+    artifact_type: report
+    role: canonical_matched_negative_dataset_quality_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6e6d01d71b3a5f76edcae879ce89a1de9cd4fa76"
+    source_path: analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_20260829.md
+    sha256: "bb4fb20f8da2bc23f5a76b94f4f057dfa59bb60e7a872d9f007cb127ecf4f5d0"
+    size_bytes: 11736
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_20260829.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6e6d01d71b3a5f76edcae879ce89a1de9cd4fa76"
+    config_hash: "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Answer-first Chinese report with exact cohort comparison, failure receipt, independent QA, null control, risks and reproduction commands.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-v1-html
+    artifact_type: report
+    role: owner_facing_matched_negative_dataset_quality_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6e6d01d71b3a5f76edcae879ce89a1de9cd4fa76"
+    source_path: analysis/html/p1_15m_ma_launch_owner_grade_a8000_neg24000_20260829.html
+    sha256: "836ee5e7e50765a44a256bd1c949534ecf8e13cf3ed6282971acb5026d442622"
+    size_bytes: 15883
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_grade_a8000_neg24000_20260829.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6e6d01d71b3a5f76edcae879ce89a1de9cd4fa76"
+    config_hash: "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Owner-facing HTML generated from the canonical Markdown and structurally validated.
