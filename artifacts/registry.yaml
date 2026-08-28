@@ -6391,3 +6391,22 @@ artifacts:
     generator_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
     data_cutoff: "2026-08-28T00:00:00Z"
     notes: Self-contained HTML owner report with embedded overview, intended for direct browser and Telegram document delivery.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-telegram-receipt
+    artifact_type: manifest
+    role: hash_bound_forty_four_document_telegram_delivery_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5002dd4cbb8c8744331a71b065e7c0cf2ce3b796"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/telegram_delivery_receipt.json
+    sha256: "3c123410bf6c3ccd9bfd21d3899108c9ce9a265a02082e692fb95e60b0e3560c"
+    size_bytes: 15871
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/telegram_delivery_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5002dd4cbb8c8744331a71b065e7c0cf2ce3b796"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: >-
+      Confirms 44/44 Telegram documents: overview, 41 individual 1920x1400
+      episode charts, lossless ZIP and self-contained HTML; document transport
+      used no image recompression and no Owner review task was created.

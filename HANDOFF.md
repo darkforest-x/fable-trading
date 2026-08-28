@@ -2,6 +2,30 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-28 — ETHUSDT.P 近 30 日原模型扫描已逐图交付）
+
+Owner 要求“用模型再跑一次 ETHUSDT.P 近一个月并发到 TG”。本轮按预注册范围扫描
+`ETH-USDT-SWAP` 2026-07-29..08-27 的 30 个完整 UTC 日，原 Owner 10,000 正例 + 30,000
+负例 YOLO、`conf=0.25`、NMS 0.7、W18–25、core4–5、confirmation4–6 全部未改。
+24,480 个实际输入产生 1,318 个原始框，1,057 个通过冻结结构合同；5-bar 去重后 53 个事件，
+再按跨滑窗连续重叠合为 **41 个 episode：27 LONG / 14 SHORT，覆盖 24/30 日**。
+
+原始候选与四维框全部保留；TG 交付以用户决策单位去重，每个 episode 只画最早可见的一个原始框。
+41/41 张 1920×1400 图均含 128 根整体行情与模型实际输入 inset，模型输入像素、完整重渲染、PNG
+SHA、唯一性均 41/41 通过，循环错配零假设为 0/41。15:24–15:28 CST 已按 Telegram document
+无压缩发送 44/44：总览、41 张逐图、无损 ZIP、HTML；完成回执合同 SHA
+`7c355bf4b8d1e8037bcc5ef10a16a51a4339d84c11478ddb69273c9f9bac3460`，
+`manual_owner_review_required=false`。报告：
+`analysis/html/p1_15m_ma_launch_owner_yolo_eth30d_20260828.html`。最终主项目回归为
+1751 passed、4 skipped；工作区外部实验 `external/Kronos` 因未安装 qlib 不在本仓依赖合同内，
+按正式测试范围排除且未改动。
+
+这是同配置经 Owner 授权的 holdout 消费 #5。41 个 episode 是模型真实提案，不是 Owner Gold；
+历史 14 项样本挖掘门没有被拿来自动冒充视觉真相。没有训练、调参、改标签/权重、ACTIVE/frozen、
+promote、forward、部署或订单变更，仍 `training_eligible=false / production_eligible=false`。
+**下一条允许动作**：Owner 直接看 TG 图；若要改检测规则或减少信号，必须换 pre-holdout 或新鲜
+tip Gold 另行预注册单变量实验，不能继续利用这 30 日调参后声称未见验证。
+
 ## ⚡ 当前真相（2026-08-28 — 08-27 检测框与实际训练图语义不一致已证实）
 
 Owner 指出“还有很多框识别的不对，和拿去训练的图对比”。本轮冻结复用 08-27 的 43 个原始
