@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pandas as pd
+
 from yoyo.datasets.ma_launch_owner_grade_a_negatives import (
     DEFAULT_PREREG,
     group_positive_events,
@@ -12,6 +14,7 @@ from yoyo.datasets.ma_launch_owner_grade_a_negatives import (
     load_positive_rows,
     load_preregistration,
     nuisance_key,
+    window_activity_pass,
 )
 
 
@@ -80,3 +83,26 @@ def test_nuisance_key_excludes_the_label() -> None:
     }
     changed_label = {**base, "class_id": None, "negative_kind": "hard"}
     assert nuisance_key(base) == nuisance_key(changed_label)
+
+
+def test_activity_gate_rejects_frozen_quotes() -> None:
+    flat = pd.DataFrame(
+        {
+            "close": [0.001] * 10,
+            "high": [0.001] * 10,
+            "low": [0.001] * 10,
+        }
+    )
+    active = pd.DataFrame(
+        {
+            "close": [1.00, 1.01, 1.00, 0.99, 1.02, 1.01],
+            "high": [1.01, 1.02, 1.01, 1.00, 1.03, 1.02],
+            "low": [0.99, 1.00, 0.99, 0.98, 1.01, 1.00],
+        }
+    )
+    assert not window_activity_pass(
+        flat, 0, 9, minimum_unique_closes=4, minimum_nonzero_ranges=4
+    )
+    assert window_activity_pass(
+        active, 0, 5, minimum_unique_closes=4, minimum_nonzero_ranges=4
+    )

@@ -368,6 +368,30 @@ def _contiguous(segment: np.ndarray, start: int, end: int) -> bool:
     return 0 <= start <= end < len(segment) and segment[start] == segment[end]
 
 
+def window_activity_pass(
+    enriched: pd.DataFrame,
+    start: int,
+    end: int,
+    *,
+    minimum_unique_closes: int,
+    minimum_nonzero_ranges: int,
+) -> bool:
+    """Reject post-settlement flat spans using only rendered OHLC columns."""
+
+    if not 0 <= int(start) <= int(end) < len(enriched):
+        return False
+    window = enriched.iloc[int(start) : int(end) + 1]
+    closes = pd.to_numeric(window["close"], errors="coerce").to_numpy(dtype=float)
+    highs = pd.to_numeric(window["high"], errors="coerce").to_numpy(dtype=float)
+    lows = pd.to_numeric(window["low"], errors="coerce").to_numpy(dtype=float)
+    if not np.isfinite(np.stack([closes, highs, lows], axis=1)).all():
+        return False
+    return (
+        len(np.unique(closes)) >= int(minimum_unique_closes)
+        and int(np.count_nonzero(highs > lows)) >= int(minimum_nonzero_ranges)
+    )
+
+
 def _block_mask(times: pd.Series, block: str) -> np.ndarray:
     year = int(block[:4])
     month = 1 if int(block[-1]) == 1 else 7
@@ -410,6 +434,7 @@ def select_source_negative_events(
     rejections: Counter[str] = Counter()
     fallbacks: Counter[str] = Counter()
     separation = int(negative_cfg["negative_separation_bars"])
+    activity = negative_cfg["activity_gate"]
 
     def pool_for(core_bars: int, kind: str, block: str) -> np.ndarray:
         key = (core_bars, kind, block)
@@ -445,6 +470,19 @@ def select_source_negative_events(
                     dependency_end = max(window_end, core_end + 5)
                     if not _contiguous(segment, window_start, dependency_end):
                         rejections["gap_or_bounds"] += 1
+                        continue
+                    if not window_activity_pass(
+                        enriched,
+                        window_start,
+                        dependency_end,
+                        minimum_unique_closes=int(
+                            activity["minimum_unique_close_values_in_widest_dependency"]
+                        ),
+                        minimum_nonzero_ranges=int(
+                            activity["minimum_nonzero_high_low_bars_in_widest_dependency"]
+                        ),
+                    ):
+                        rejections["inactive_flat_window"] += 1
                         continue
                     assigned = interval_split(
                         times.iloc[window_start],
@@ -833,7 +871,11 @@ def _render_negative_rows(
                 )
                 rows.append(
                     {
-                        **asdict(event),
+                        **{
+                            key: value
+                            for key, value in asdict(event).items()
+                            if key != "variants"
+                        },
                         "sample_kind": "negative",
                         "dataset_sample_id": stable_id(
                             event.negative_event_id, variant_id, variant_index

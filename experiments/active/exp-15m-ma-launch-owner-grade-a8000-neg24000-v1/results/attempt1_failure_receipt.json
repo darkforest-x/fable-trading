@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-v1",
+  "attempt": 1,
+  "stage": "full_file_qa_after_32000_images",
+  "result": "rejected_duplicate_pixels",
+  "rows": 32000,
+  "unique_image_hashes": 31973,
+  "duplicate_groups": 2,
+  "duplicate_extra_rows": 27,
+  "affected_negative_events": 4,
+  "affected_negative_kinds": {"easy": 4},
+  "positive_or_cross_label_collisions": 0,
+  "root_cause": "Four Binance contracts contained post-settlement spans whose OHLC values were constant for the entire negative dependency interval. Seven/eight distinct context indices therefore rendered as identical normalized horizontal-line images, including one pixel hash shared across three symbols.",
+  "remediation": "Reject a candidate unless its widest dependency interval contains at least four unique close values and four bars with high greater than low. Re-plan every negative event from the amended committed contract; do not edit images or silently drop rows after rendering.",
+  "training_started": false,
+  "holdout_ohlcv_rows_materialized": 0,
+  "training_eligible": false,
+  "production_eligible": false
+}

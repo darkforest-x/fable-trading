@@ -2,6 +2,7 @@
   "schema_version": 1,
   "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-v1",
   "created_at": "2026-08-29T10:30:00+08:00",
+  "amended_at": "2026-08-29T11:15:00+08:00",
   "stage": "P1_matched_negative_dataset_preparation",
   "owner_authorization": {
     "conversation_date": "2026-08-29",
@@ -82,6 +83,11 @@
       "binance_candidates_sha256": "bb04ca9356696564a81b5e7e7fe805ebab36f6f48005e6b1ce933f5552799c50",
       "okx_policy": "Re-run the hash-pinned accepted-family strict scan on every used OKX source and guard every hit, not only the selected Grade-A events."
     },
+    "activity_gate": {
+      "minimum_unique_close_values_in_widest_dependency": 4,
+      "minimum_nonzero_high_low_bars_in_widest_dependency": 4,
+      "reason": "Failed materialization attempt 1 found four post-settlement frozen-price negative events whose OHLC values were constant for the full dependency interval; 29 rows collapsed to two pixel hashes. Reject inactive flat windows before selection."
+    },
     "negative_separation_bars": 2,
     "capacity_policy": "Never cross source, symbol, venue, half-year, split, core length or context geometry; never reuse/overlap a negative dependency interval; fail closed if two hard negatives cannot be found. Only the third easy slot may safely fall back to another hard negative."
   },
@@ -124,5 +130,16 @@
     "forward_state_change": false,
     "order_state_change": false,
     "remote_write": false
+  },
+  "failed_attempts": {
+    "attempt_1": {
+      "stage": "full_file_qa_after_32000_images",
+      "result": "rejected_duplicate_pixels",
+      "unique_image_hashes": 31973,
+      "duplicate_groups": 2,
+      "duplicate_extra_rows": 27,
+      "root_cause": "Four easy negative events were sampled from post-settlement frozen-price spans with constant OHLC. Distinct context indices normalized to identical horizontal-line pixels.",
+      "single_remediation": "Add the frozen minimum activity gate above and rebuild from a newly selected plan; keep all other thresholds, pairing, split and rendering contracts unchanged."
+    }
   }
 }
