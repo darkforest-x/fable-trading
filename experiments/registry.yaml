@@ -2258,9 +2258,19 @@ experiments:
       - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-report
       - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-html
       - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-telegram-receipt
+      - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-confidence-prereg
+      - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-confidence-summary
+      - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-confidence-thresholds
+      - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-confidence-figure
+      - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-confidence-report
+      - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-confidence-html
     reuse_allowed: false
     notes: >-
       Owner-authorized holdout consumption #5 for this unchanged detector.
       The 41 episodes are model proposals, not Owner Gold; no historical mining
-      gate or manual audit was used to relabel them. No tuning, training,
-      promotion, ACTIVE/frozen, forward, deployment or order state changed.
+      gate or manual audit was used to relabel them. A same-output confidence
+      audit found earliest-visible median 0.429 versus episode-maximum median
+      0.790; the maximum is strongly multiplicity-biased (candidate-count
+      Spearman rho 0.859, permutation p=0.00010), so no confidence threshold
+      was selected. No tuning, training, promotion, ACTIVE/frozen, forward,
+      deployment or order state changed.

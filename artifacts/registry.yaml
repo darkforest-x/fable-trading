@@ -6410,3 +6410,101 @@ artifacts:
       Confirms 44/44 Telegram documents: overview, 41 individual 1920x1400
       episode charts, lossless ZIP and self-contained HTML; document transport
       used no image recompression and no Owner review task was created.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-confidence-prereg
+    artifact_type: config
+    role: frozen_output_confidence_analysis_contract_without_new_market_read
+    source_repo: darkforest-x/fable-trading
+    source_commit: "78eaddc831cd102ff941f138fca6341c93863fc9"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/confidence_analysis_preregistration.json
+    sha256: "db5b9581b4306ac8af562e21a94f80cbf767be37f5e60364b3ca7f1eea12eeac"
+    size_bytes: 2140
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/confidence_analysis_preregistration.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "78eaddc831cd102ff941f138fca6341c93863fc9"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: Separates earliest-visible confidence from later episode maximum and forbids correctness, outcome or threshold-selection claims.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-confidence-summary
+    artifact_type: manifest
+    role: confidence_distribution_repeat_bias_and_null_control_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "78eaddc831cd102ff941f138fca6341c93863fc9"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/confidence_analysis/summary.json
+    sha256: "25369de94e3d82e7985285de5439f6a037e5e39e467a58f8e5f8778ea007101a"
+    size_bytes: 7500
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/confidence_analysis/summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "78eaddc831cd102ff941f138fca6341c93863fc9"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: >-
+      Exact 41-episode descriptive summary, threshold sensitivity and 10,000
+      rank-permutation null; no new market read, inference, Gold or outcome label.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-confidence-thresholds
+    artifact_type: dataset
+    role: descriptive_candidate_cut_episode_count_and_delay_sensitivity
+    source_repo: darkforest-x/fable-trading
+    source_commit: "78eaddc831cd102ff941f138fca6341c93863fc9"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/confidence_analysis/threshold_sensitivity.csv
+    sha256: "e3d5c2f87add6158c0aba519bd4d0bb1e211cba063d5fa810f17681afa2a16fa"
+    size_bytes: 820
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/confidence_analysis/threshold_sensitivity.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "78eaddc831cd102ff941f138fca6341c93863fc9"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: Fixed-ledger cuts 0.25 through 0.95 with re-clustered episode counts, directions, detection-day coverage and extra delay.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-confidence-figure
+    artifact_type: report
+    role: four_panel_confidence_distribution_threshold_delay_and_repeat_bias_figure
+    source_repo: darkforest-x/fable-trading
+    source_commit: "78eaddc831cd102ff941f138fca6341c93863fc9"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/confidence_analysis/confidence_analysis.png
+    sha256: "97b3fe7af60be6acf5872a9f981ddea6c4cfe3faaa610c9dabfd1368408b76c6"
+    size_bytes: 217794
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/confidence_analysis/confidence_analysis.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "78eaddc831cd102ff941f138fca6341c93863fc9"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: Visually inspected 2288x1582 evidence figure; confidence is explicitly not presented as calibrated correctness.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-confidence-report
+    artifact_type: report
+    role: technical_confidence_analysis_source_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "78eaddc831cd102ff941f138fca6341c93863fc9"
+    source_path: analysis/p1_15m_ma_launch_owner_yolo_eth30d_confidence_20260828.md
+    sha256: "16c7eedf3efb3dd04618f7f9f2360820128702978d0ce0fa5a7c7e55ba7ccdc1"
+    size_bytes: 8811
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_yolo_eth30d_confidence_20260828.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "78eaddc831cd102ff941f138fca6341c93863fc9"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: Answer-first Chinese technical report defining score timing, multiplicity bias, threshold count-delay tradeoffs, limits and next valid experiment.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-confidence-html
+    artifact_type: report
+    role: self_contained_owner_confidence_analysis_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "78eaddc831cd102ff941f138fca6341c93863fc9"
+    source_path: analysis/html/p1_15m_ma_launch_owner_yolo_eth30d_confidence_20260828.html
+    sha256: "efab0e7ddc241e650c2ddcefc66fe7696fc5389206ae4a88aa669bf6e4ea644c"
+    size_bytes: 303145
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_yolo_eth30d_confidence_20260828.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "78eaddc831cd102ff941f138fca6341c93863fc9"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: Self-contained HTML with one embedded figure, ten visible sections and four exact evidence tables; structural QA passed.

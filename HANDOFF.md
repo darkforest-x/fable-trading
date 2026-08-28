@@ -2,6 +2,25 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-28 — ETH 30 日 41 个 episode 已完成置信度审计）
+
+Owner 追问“按照置信度分析”。本轮只读取 holdout 消费 #5 已交付 ZIP 内的 41 个 episode / 1,057
+个候选，不联网、不重推理、不读未来收益或 Owner 标签。TG 图上的**首次可见框**置信度中位 0.429，
+23/41 低于 0.50，≥0.75 为 8，≥0.90 仅 4（#40、#14、#01、#37）。同 episode 后续最高分
+中位却达 0.790，18/41 最终 ≥0.90；23/41 的最高分出现在首次检测之后，最晚再等 12 根 15m K。
+
+最高分与 episode 候选数的 Spearman `rho=0.859`，10,000 次秩置换 `p=0.00010`；首次分数与
+候选数只有 `rho=0.281, p=0.0761`。结论是 episode 最大 confidence 被重复窗口次数显著抬高，
+不能冒充早期质量。冻结候选敏感度显示 conf 0.50/0.75/0.90 分别仍有 31/22/18 个 episode；
+0.90 的中位/P90 额外延迟为 22.5/94.5 分钟。**本轮不选择、不修改阈值**，因为没有逐 episode
+真值，无法证明高分更标准。完整报告：
+`analysis/html/p1_15m_ma_launch_owner_yolo_eth30d_confidence_20260828.html`。
+
+这是同一已消费输出的描述性切片，`new_holdout_consumption=false`；训练、权重、标签、ACTIVE、
+promote、forward、部署和订单变化均为 0；最终主项目回归 1755 passed、4 skipped。**下一条允许动作**：若要真正选阈值，必须在独立
+pre-holdout 或新鲜因果 tip Gold 上按首次可见分数报告 precision、漏检率与延迟，不能用本月
+41 张继续调门后声称未见验证。
+
 ## ⚡ 当前真相（2026-08-28 — ETHUSDT.P 近 30 日原模型扫描已逐图交付）
 
 Owner 要求“用模型再跑一次 ETHUSDT.P 近一个月并发到 TG”。本轮按预注册范围扫描
