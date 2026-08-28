@@ -18,6 +18,11 @@ from scripts.audit_15m_ma_launch_owner_yolo_prediction_vs_training import (
     vertical_iou,
 )
 from scripts.verify_15m_ma_launch_owner_yolo_prediction_vs_training import verify
+from scripts.send_15m_ma_launch_owner_yolo_prediction_training_parity import (
+    REPORT,
+    artifact_contract,
+    deliver,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -104,3 +109,39 @@ def test_committed_prediction_training_parity_artifacts_verify() -> None:
     assert result["out_of_training_spec"] == 41
     assert result["failing_events_with_alternative_core"] == 0
     assert result["comparison_images"] == 43
+
+
+def test_telegram_contract_builds_complete_lossless_archive(tmp_path: Path) -> None:
+    archive = tmp_path / "all_43.zip"
+    artifacts, contract_sha = artifact_contract(
+        results=RESULTS,
+        report=REPORT,
+        archive=archive,
+    )
+    assert [row["id"] for row in artifacts] == [
+        "overview",
+        "representative_pairs",
+        "full_43_archive",
+        "html_report",
+    ]
+    assert len(contract_sha) == 64
+    assert archive.is_file()
+
+
+def test_telegram_delivery_is_resumable_and_needs_no_owner_review(tmp_path: Path) -> None:
+    sent_text: list[str] = []
+    sent_documents: list[tuple[str, str]] = []
+
+    receipt = deliver(
+        results=RESULTS,
+        report=REPORT,
+        archive=tmp_path / "all_43.zip",
+        receipt_path=tmp_path / "telegram_receipt.json",
+        sleep_seconds=0,
+        send_text=lambda value: sent_text.append(value) is None,
+        send_document=lambda path, caption: sent_documents.append((path.name, caption)) is None,
+    )
+    assert receipt["delivery_complete"] is True
+    assert receipt["manual_owner_review_required"] is False
+    assert len(sent_text) == 2
+    assert len(sent_documents) == 4
