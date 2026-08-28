@@ -7140,18 +7140,21 @@ artifacts:
     artifact_type: config
     role: frozen_chronological_val_event_negative_and_direction_null_contract
     source_repo: darkforest-x/fable-trading
-    source_commit: "cc1263bef9e8dbb983cd6fa0a04f435ee3f0ca5d"
+    source_commit: "81475964363d32477a8449acaaa386ea9871bd89"
     source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/evaluation_preregistration.json
-    sha256: "f44fc4f71dc04eadc8fe49f04f68869f0fabdd8be287ba32278659190f24ae6f"
-    size_bytes: 5529
+    sha256: "b526f48d3989a6fc26deffed42cec8b7ae6367271fadf42837fbda60eff99efb"
+    size_bytes: 6282
     storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/evaluation_preregistration.json"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "cc1263bef9e8dbb983cd6fa0a04f435ee3f0ca5d"
-    config_hash: "f44fc4f71dc04eadc8fe49f04f68869f0fabdd8be287ba32278659190f24ae6f"
+    generator_commit: "81475964363d32477a8449acaaa386ea9871bd89"
+    config_hash: "b526f48d3989a6fc26deffed42cec8b7ae6367271fadf42837fbda60eff99efb"
     data_cutoff: "2026-05-03T20:30:00Z"
     notes: >-
-      Frozen during epoch 1 before any validation metric existed. Locks
-      conf=0.25, NMS IoU=0.7, hit IoU=0.5, event-level delay definitions,
-      hard/easy negative surfaces and a paired LONG/SHORT direction-flip null.
+      Final evaluator contract was committed during epoch 2. Epoch-1 metrics
+      already existed remotely for about 23 seconds but had not been read; the
+      timing correction is explicit in the config. The 02:56 training prereg
+      had already locked conf=0.25, NMS IoU=0.7, negative strata and event-delay
+      surfaces. This contract additionally fixes hit IoU=0.5 and the paired
+      LONG/SHORT direction-flip null before any metric was inspected.
