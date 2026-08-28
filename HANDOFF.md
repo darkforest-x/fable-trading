@@ -2,6 +2,28 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-08-28 — 最近五日 Top20 已按原始 YOLO 四维框重做）
+
+Owner 指出上一版五日图一张有多个框，而且框位与训练/模型图不一致，随后明确要求“那你重新弄”。
+根因已确认：v1 虽用正确的 1280×742 W18–25 输入推理，却只保留预测 `cx/w`，丢掉 `cy/h` 后
+用核心 K 的 high/low 重造纵向框；又把多个滑窗事件叠到压缩的 96 根日图上。v1 因此只可继续
+引用扫描数量和事件身份，**不得再作为模型原框位置证据**。
+
+修正版 `exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2` 完全冻结原权重、conf=0.25、NMS=0.7、
+W18–25、核心 4–5 和确认 4–6。4,528 个结构候选保留完整 `cx/cy/w/h`，按重叠决策区间聚成
+192 个 episode；每币日复核只取最早 episode，100 张为 **97×单框 + 3×无框**。离线 verifier
+重渲染 100/100 实际模型输入、重画 100/100 overlay 均逐像素一致；旧口径 239/239 事件身份
+完全不变，最大置信度差 `1.11e-16`。最终全仓测试 1734 passed、4 skipped。
+
+总览、五张每日高清图、100 输入 + 100 overlay 无损 ZIP 和 HTML 已作为 8 个 Telegram document
+发完并写入回执。报告：
+`analysis/html/p1_15m_ma_launch_owner_yolo_recent5d_rawbox_repair_20260828.html`；总览：
+`experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/overview_rawbox.png`。
+这是该配置经 Owner 授权的 holdout 消费 #2；没有调参、训练、ACTIVE/frozen、promote、forward、
+部署或订单变化，仍 `training_eligible=false / production_eligible=false`。**下一条允许动作**：停在
+诚实的 97/100 过度检出结论；若要减少信号，另开 pre-holdout 或新鲜前向单变量实验，不得继续
+在 2026-08-23..27 上调阈值、挑 episode 或手改框后声称未见验证。
+
 ## ⚡ 当前真相（2026-08-28 — 新 Owner YOLO 最近五个完整 UTC 日已扫描）
 
 Owner 要求“跑一下最近 5 天的数据”。已按上一轮口径扫描 2026-08-23..27 每日事后绝对涨跌幅

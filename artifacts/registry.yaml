@@ -5598,3 +5598,257 @@ artifacts:
     notes: >-
       Static QA confirms six embedded PNG data URIs, zero external image links,
       required result/risk/holdout/reproduction sections and self-contained HTML.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-prereg
+    artifact_type: config
+    role: owner_authorized_second_holdout_use_and_raw_box_repair_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/preregistration.json
+    sha256: "c05c1fb2b33228694c5398091dfc989831fe18dbd398b66b8636c96bc70418a2"
+    size_bytes: 5248
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/preregistration.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    config_hash: "c05c1fb2b33228694c5398091dfc989831fe18dbd398b66b8636c96bc70418a2"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: >-
+      Freezes holdout consumption #2, unchanged detector parameters, complete
+      raw cx/cy/w/h persistence, overlap-episode aggregation and a one-box
+      maximum per Owner review panel.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-scan-receipt
+    artifact_type: manifest
+    role: raw_prediction_episode_review_and_safety_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/scan_receipt.json
+    sha256: "c63b339e443a2ea687c9a65bee3d88e3e666d1475611e2cc3598cd20cc4646a7"
+    size_bytes: 6331
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/scan_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    config_hash: "c05c1fb2b33228694c5398091dfc989831fe18dbd398b66b8636c96bc70418a2"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: >-
+      Binds 4,528 raw-coordinate structural candidates, 239 unchanged legacy
+      events, 192 overlap episodes and 97 one-box plus three zero-box panels.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-qa-receipt
+    artifact_type: manifest
+    role: offline_model_input_raw_overlay_episode_and_archive_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/qa_receipt.json
+    sha256: "4c6736b4835df776c5b3fa3f0399779762b205a7806d52ba45390750f0cde0b2"
+    size_bytes: 2830
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/qa_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    config_hash: "c05c1fb2b33228694c5398091dfc989831fe18dbd398b66b8636c96bc70418a2"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: >-
+      Network-free verifier reproduced all 100 model inputs and all 100
+      overlays pixel-exactly, re-clustered all episodes and checked archive and
+      safety identities.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-overview
+    artifact_type: report
+    role: owner_corrected_five_day_rank_episode_and_review_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/overview_rawbox.png
+    sha256: "bbb6032875c5381fd1cf9cfd040a36067958ee169d87cd938e06ceda581a42df"
+    size_bytes: 304107
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/overview_rawbox.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    config_hash: "c05c1fb2b33228694c5398091dfc989831fe18dbd398b66b8636c96bc70418a2"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: 1800x2100 five-day summary separating candidate, episode and review counts.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-day-20260823
+    artifact_type: report
+    role: owner_exact_model_input_single_raw_box_daily_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/day_20260823_top20_rawbox.png
+    sha256: "bba9fb868802dbb4327fef4049340bb4105c2ac44921d74124367a4b02e10da4"
+    size_bytes: 811667
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/day_20260823_top20_rawbox.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    config_hash: "c05c1fb2b33228694c5398091dfc989831fe18dbd398b66b8636c96bc70418a2"
+    data_cutoff: "2026-08-23T23:45:00Z"
+    notes: 1520x5262 Top20 contact sheet with 19 one-box panels and one zero-box panel.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-day-20260824
+    artifact_type: report
+    role: owner_exact_model_input_single_raw_box_daily_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/day_20260824_top20_rawbox.png
+    sha256: "4758e37f909e6767424fb4e09cb00432100c6a52a438618024bff6d49a4af275"
+    size_bytes: 779146
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/day_20260824_top20_rawbox.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    config_hash: "c05c1fb2b33228694c5398091dfc989831fe18dbd398b66b8636c96bc70418a2"
+    data_cutoff: "2026-08-24T23:45:00Z"
+    notes: 1520x5262 Top20 contact sheet with 19 one-box panels and one zero-box panel.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-day-20260825
+    artifact_type: report
+    role: owner_exact_model_input_single_raw_box_daily_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/day_20260825_top20_rawbox.png
+    sha256: "223821e7e38f6598e8c6be8116cf84cbcbcd723b209bcac1a1e395032d88dcc6"
+    size_bytes: 803229
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/day_20260825_top20_rawbox.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    config_hash: "c05c1fb2b33228694c5398091dfc989831fe18dbd398b66b8636c96bc70418a2"
+    data_cutoff: "2026-08-25T23:45:00Z"
+    notes: 1520x5262 Top20 contact sheet with 20 one-box panels.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-day-20260826
+    artifact_type: report
+    role: owner_exact_model_input_single_raw_box_daily_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/day_20260826_top20_rawbox.png
+    sha256: "67da21bac2c2a1ba880ddae720be30228e8ed9b2842c7d24ab0efdec954bf09a"
+    size_bytes: 749090
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/day_20260826_top20_rawbox.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    config_hash: "c05c1fb2b33228694c5398091dfc989831fe18dbd398b66b8636c96bc70418a2"
+    data_cutoff: "2026-08-26T23:45:00Z"
+    notes: 1520x5262 Top20 contact sheet with 20 one-box panels.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-day-20260827
+    artifact_type: report
+    role: owner_exact_model_input_single_raw_box_daily_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/day_20260827_top20_rawbox.png
+    sha256: "43fe8efdbb049f0105992dbed284cc439e6df6b7936fb9c56dea88c7b6aeaedb"
+    size_bytes: 748568
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/day_20260827_top20_rawbox.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    config_hash: "c05c1fb2b33228694c5398091dfc989831fe18dbd398b66b8636c96bc70418a2"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: 1520x5262 Top20 contact sheet with 19 one-box panels and one zero-box panel.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-review-archive
+    artifact_type: dataset
+    role: lossless_actual_model_inputs_raw_box_overlays_and_review_manifest
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/actual_model_inputs_and_rawbox_overlays.zip
+    sha256: "8d1597188d1e9ee7fac1acf7aad2e6dc04b137bbf28a63e2476f399c18d379bc"
+    size_bytes: 6748341
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/actual_model_inputs_and_rawbox_overlays.zip"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    config_hash: "c05c1fb2b33228694c5398091dfc989831fe18dbd398b66b8636c96bc70418a2"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: >-
+      Local and Telegram-delivered ZIP containing 100 exact model inputs, 100
+      reproducible overlays and the review manifest; not a training dataset.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-telegram-receipt
+    artifact_type: manifest
+    role: hash_bound_eight_document_telegram_delivery_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/telegram_delivery_receipt.json
+    sha256: "d82967d2fe2b16bc9f0276a4fd20184a31e0846017c64ced8c1a52741e79eb3b"
+    size_bytes: 3562
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/telegram_delivery_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    config_hash: "c05c1fb2b33228694c5398091dfc989831fe18dbd398b66b8636c96bc70418a2"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: >-
+      Confirms overview, five daily PNGs, lossless review ZIP and self-contained
+      HTML were sent as Telegram documents without image recompression.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-report
+    artifact_type: report
+    role: canonical_raw_box_evidence_repair_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    source_path: analysis/p1_15m_ma_launch_owner_yolo_recent5d_rawbox_repair_20260828.md
+    sha256: "a30cf983c50f468825859b961320ca5c4c80af767d8c57c08ea5d27214a77aaf"
+    size_bytes: 10872
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_yolo_recent5d_rawbox_repair_20260828.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    config_hash: "c05c1fb2b33228694c5398091dfc989831fe18dbd398b66b8636c96bc70418a2"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: >-
+      Answer-first Chinese repair report with old/new evidence lineage, five
+      corrected boards, exact parity controls, holdout use #2, risks and replay.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-html
+    artifact_type: report
+    role: owner_delivery_self_contained_raw_box_repair_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    source_path: analysis/html/p1_15m_ma_launch_owner_yolo_recent5d_rawbox_repair_20260828.html
+    sha256: "ea02bc7b580eb61e5951e0598c1cd93667425efe5fd60befc612b2177bfa0495"
+    size_bytes: 5609190
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_yolo_recent5d_rawbox_repair_20260828.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    config_hash: "c05c1fb2b33228694c5398091dfc989831fe18dbd398b66b8636c96bc70418a2"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: Self-contained 5.61 MB HTML with six embedded PNG data URIs.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-html-qa
+    artifact_type: manifest
+    role: static_self_contained_html_and_telegram_identity_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/html_qa_receipt.json
+    sha256: "b2126498cf2d6748debd6a98c2f7879323efb380be8dbe035a3e4cb2332eada8"
+    size_bytes: 993
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/html_qa_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    config_hash: "c05c1fb2b33228694c5398091dfc989831fe18dbd398b66b8636c96bc70418a2"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: >-
+      Confirms UTF-8, six embedded images, zero external PNG references, all
+      required report sections and equality with the Telegram-delivered HTML.

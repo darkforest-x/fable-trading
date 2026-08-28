@@ -2077,3 +2077,52 @@ experiments:
       per board is a selectivity warning. This configuration consumed authorized
       holdout read #1 with no result-driven threshold/window change. No training,
       promote, ACTIVE/frozen, forward, deployment or order state changed.
+
+  - experiment_id: exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b98ab3850467e67277f6a8dc5b045be95bb52c4f"
+    status: accepted
+    question: >-
+      Can the already consumed five-day Owner YOLO probe be re-rendered as
+      trustworthy model evidence by preserving all four raw prediction
+      coordinates and showing at most one continuous episode per symbol-day,
+      without changing any detector result or parameter?
+    single_variable: >-
+      replace the v1 compressed multi-event day-board reconstruction with exact
+      1280x742 W18-25 model inputs, raw cx/cy/w/h overlays and earliest-overlap-
+      episode review selection; keep weights, confidence, NMS, windows,
+      structural filters and all v1 event identities frozen
+    result: >-
+      completed_raw_box_evidence_repair. All 4,528 structural candidates retain
+      valid four-coordinate predictions and cluster into 192 overlap episodes.
+      The 100 review panels contain 97 exact one-box overlays and three exact
+      zero-box inputs. An offline verifier reproduced 100/100 model inputs and
+      100/100 overlays pixel-exactly. All 239 v1 five-bar event identities were
+      unchanged, with maximum confidence delta 1.11e-16. The cleaner surface
+      does not cure the detector's 97/100 high-volatility-board coverage.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_owner_yolo_recent5d_rawbox_repair_20260828.md
+    artifacts:
+      - 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-prereg
+      - 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-scan-receipt
+      - 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-qa-receipt
+      - 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-overview
+      - 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-day-20260823
+      - 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-day-20260824
+      - 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-day-20260825
+      - 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-day-20260826
+      - 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-day-20260827
+      - 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-review-archive
+      - 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-telegram-receipt
+      - 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-report
+      - 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-html
+      - 15m-ma-launch-owner-yolo-recent5d-rawbox-v2-html-qa
+    reuse_allowed: false
+    notes: >-
+      Owner-authorized bounded holdout consumption #2 after identifying that v1
+      discarded prediction cy/h and overlaid many independent windows on one
+      compressed day chart. V1 remains valid only for scan counts and event
+      identities; v2 supersedes it for box-position review. No tuning, training,
+      promotion, ACTIVE/frozen, forward, deployment or order state changed.

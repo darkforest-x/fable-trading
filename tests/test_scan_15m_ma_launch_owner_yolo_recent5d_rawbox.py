@@ -21,6 +21,10 @@ from scripts.verify_15m_ma_launch_owner_yolo_recent5d_rawbox import (
     RawBoxVerificationError,
     resolve_repo_path,
 )
+from scripts.send_15m_ma_launch_owner_yolo_recent5d_rawbox import (
+    artifact_contract,
+    deliver,
+)
 from yoyo.layers.l1_detection.data import add_mas
 from yoyo.layers.l1_detection.render import IMG_HEIGHT, IMG_WIDTH, render_chart
 
@@ -233,3 +237,31 @@ def test_raw_overlay_uses_all_four_coordinates_and_exactly_one_rectangle() -> No
     assert ys.min() <= y0 <= ys.max()
     assert ys.min() <= y1 <= ys.max()
     assert not np.array_equal(image, overlay)
+
+
+def test_telegram_sender_validates_and_delivers_eight_hash_bound_documents(
+    tmp_path: Path,
+) -> None:
+    _scan, _qa, artifacts = artifact_contract()
+    assert [item["id"] for item in artifacts] == [
+        "overview",
+        "day_2026-08-23",
+        "day_2026-08-24",
+        "day_2026-08-25",
+        "day_2026-08-26",
+        "day_2026-08-27",
+        "actual_inputs_and_overlays_zip",
+        "html_report",
+    ]
+    texts: list[str] = []
+    documents: list[tuple[Path, str]] = []
+    receipt = deliver(
+        receipt_path=tmp_path / "telegram_receipt.json",
+        sleep_seconds=0,
+        send_text=lambda message: not texts.append(message),
+        send_document=lambda path, caption: not documents.append((path, caption)),
+    )
+    assert receipt["delivery_complete"] is True
+    assert len(texts) == 2
+    assert len(documents) == 8
+    assert all(path.is_file() and caption for path, caption in documents)

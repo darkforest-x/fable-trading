@@ -1,0 +1,177 @@
+{
+  "accepted_candidate_classes": {
+    "dense_long": 3593,
+    "dense_short": 935
+  },
+  "accepted_candidates": 4528,
+  "accepted_candidates_path": "analysis/output/ma_launch_owner_yolo_recent5d_rawbox_v2/accepted_candidates.csv",
+  "active_or_frozen_changed": false,
+  "daily_images": [
+    {
+      "accepted_candidates": 1069,
+      "day": "2026-08-23T00:00:00+00:00",
+      "episodes": 43,
+      "height": 5262,
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/day_20260823_top20_rawbox.png",
+      "review_boxes": 19,
+      "sha256": "bba9fb868802dbb4327fef4049340bb4105c2ac44921d74124367a4b02e10da4",
+      "size_bytes": 811667,
+      "width": 1520
+    },
+    {
+      "accepted_candidates": 620,
+      "day": "2026-08-24T00:00:00+00:00",
+      "episodes": 36,
+      "height": 5262,
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/day_20260824_top20_rawbox.png",
+      "review_boxes": 19,
+      "sha256": "4758e37f909e6767424fb4e09cb00432100c6a52a438618024bff6d49a4af275",
+      "size_bytes": 779146,
+      "width": 1520
+    },
+    {
+      "accepted_candidates": 821,
+      "day": "2026-08-25T00:00:00+00:00",
+      "episodes": 39,
+      "height": 5262,
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/day_20260825_top20_rawbox.png",
+      "review_boxes": 20,
+      "sha256": "223821e7e38f6598e8c6be8116cf84cbcbcd723b209bcac1a1e395032d88dcc6",
+      "size_bytes": 803229,
+      "width": 1520
+    },
+    {
+      "accepted_candidates": 999,
+      "day": "2026-08-26T00:00:00+00:00",
+      "episodes": 40,
+      "height": 5262,
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/day_20260826_top20_rawbox.png",
+      "review_boxes": 20,
+      "sha256": "67da21bac2c2a1ba880ddae720be30228e8ed9b2842c7d24ab0efdec954bf09a",
+      "size_bytes": 749090,
+      "width": 1520
+    },
+    {
+      "accepted_candidates": 1019,
+      "day": "2026-08-27T00:00:00+00:00",
+      "episodes": 34,
+      "height": 5262,
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/day_20260827_top20_rawbox.png",
+      "review_boxes": 19,
+      "sha256": "43fe8efdbb049f0105992dbed284cc439e6df6b7936fb9c56dea88c7b6aeaedb",
+      "size_bytes": 748568,
+      "width": 1520
+    }
+  ],
+  "deployed": false,
+  "device": "0",
+  "episode_classes": {
+    "dense_long": 127,
+    "dense_short": 65
+  },
+  "episodes_path": "analysis/output/ma_launch_owner_yolo_recent5d_rawbox_v2/episodes.csv",
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2",
+  "forward_state_changed": false,
+  "four_coordinate_prediction_fields_preserved": [
+    "prediction_cx_norm",
+    "prediction_cy_norm",
+    "prediction_w_norm",
+    "prediction_h_norm"
+  ],
+  "generated_at": "2026-08-28T04:30:07.864712+00:00",
+  "holdout_consumption_number_for_this_configuration": 2,
+  "immutable_inputs": {
+    "renderer": {
+      "path": "yoyo/layers/l1_detection/render.py",
+      "sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+    },
+    "training_geometry": {
+      "confirmation_counts": {
+        "4": 3276,
+        "5": 3360,
+        "6": 3364
+      },
+      "core_counts": {
+        "4": 5153,
+        "5": 4847
+      },
+      "positive_rows": 10000,
+      "window_counts": {
+        "18": 301,
+        "19": 977,
+        "20": 1666,
+        "21": 2063,
+        "22": 2002,
+        "23": 1716,
+        "24": 991,
+        "25": 284
+      }
+    },
+    "training_manifest": {
+      "path": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2/manifest.jsonl",
+      "sha256": "6e601034ab15765a74b788cc6d094e9326c3044c1fb615c908ef9de897d6e0af"
+    },
+    "weights": {
+      "path": "analysis/output/ma_launch_owner_yolo_neg30000_v2/ma_launch_owner_yolo_neg30000_v2_y11s_ft960/weights/best.pt",
+      "sha256": "58888f996f7da46d4321316964085e90855d00e4c0a14e18c98b303c6e43c182"
+    }
+  },
+  "legacy_event_parity": {
+    "baseline_events": 239,
+    "identity_matches": 239,
+    "maximum_confidence_abs_delta": 1.1102230246251565e-16,
+    "passed": true,
+    "reproduced_events": 239
+  },
+  "legacy_events_path": "analysis/output/ma_launch_owner_yolo_recent5d_rawbox_v2/legacy_events.csv",
+  "legacy_five_bar_events": 239,
+  "maximum_boxes_per_review_panel": 1,
+  "network_reads": 0,
+  "orders_placed": false,
+  "overlap_episodes": 192,
+  "overview": {
+    "height": 2100,
+    "path": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/overview_rawbox.png",
+    "sha256": "bbb6032875c5381fd1cf9cfd040a36067958ee169d87cd938e06ceda581a42df",
+    "size_bytes": 304107,
+    "width": 1800
+  },
+  "production_eligible": false,
+  "promoted": false,
+  "protocol": "ma6_owner_yolo_recent5d_raw_prediction_repair_v2_20260828",
+  "review_archive": {
+    "model_inputs": 100,
+    "path": "experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2/results/actual_model_inputs_and_rawbox_overlays.zip",
+    "rawbox_overlays": 100,
+    "sha256": "8d1597188d1e9ee7fac1acf7aad2e6dc04b137bbf28a63e2476f399c18d379bc",
+    "size_bytes": 6748341
+  },
+  "review_classes": {
+    "dense_long": 64,
+    "dense_short": 33
+  },
+  "review_manifest_path": "analysis/output/ma_launch_owner_yolo_recent5d_rawbox_v2/review_manifest.csv",
+  "review_panels": 100,
+  "review_panels_with_one_box": 97,
+  "review_panels_with_zero_boxes": 3,
+  "review_selection": "earliest_episode_per_symbol_day",
+  "scan_totals": {
+    "accepted_before_dedup": 4528,
+    "accepted_structural_boxes": 4528,
+    "dedup_removed": 4289,
+    "deduplicated_events": 239,
+    "raw_boxes": 5632,
+    "reject_confirmation": 980,
+    "reject_core_length": 32,
+    "reject_core_outside_ranked_day": 92,
+    "windows_scored": 81600,
+    "windows_with_any_box": 4976
+  },
+  "selected_symbol_days": 100,
+  "source_commit": "b98ab3850467e67277f6a8dc5b045be95bb52c4f",
+  "source_fetch_receipt_sha256": "497bfb8bfa050ecda11bbc65061608d5cc807a0583ef99ae9c3e5b3e2d53ab75",
+  "source_snapshot_files": 75,
+  "threshold_or_weight_changed": false,
+  "training_or_tuning": false,
+  "wall_seconds": 1544.699
+}
