@@ -844,26 +844,16 @@ def verify_phase(
     if len(manifest) != int(scan["overlap_episodes"]):
         raise Eth30dError("episode/manifest count drifted")
     enriched = add_mas(frame)
+    episode_rows = pd.read_csv(out / "episodes.csv")
+    if len(episode_rows) != len(manifest):
+        raise Eth30dError("episode source row count drifted")
     exact_rerenders = exact_hashes = exact_inputs = 0
     image_hashes: set[str] = set()
     for order, row in enumerate(manifest, 1):
         if int(row["event_order"]) != order or int(row["boxes_per_document"]) != 1:
             raise Eth30dError("manifest order or box count drifted")
-        episode = {
-            **row,
-            "prediction_cx_norm": (
-                float(row["raw_x0_px"] + row["raw_x1_px"]) / 2.0 / IMG_WIDTH
-            ),
-            "prediction_cy_norm": (
-                float(row["raw_y0_px"] + row["raw_y1_px"]) / 2.0 / IMG_HEIGHT
-            ),
-            "prediction_w_norm": float(row["raw_x1_px"] - row["raw_x0_px"]) / IMG_WIDTH,
-            "prediction_h_norm": float(row["raw_y1_px"] - row["raw_y0_px"]) / IMG_HEIGHT,
-            "input_pixel_sha256": row["model_input_pixel_sha256"],
-        }
         # Use the original episode row for exact normalized coordinates; pixel
         # corners alone lose subpixel precision and are not a valid rerender key.
-        episode_rows = pd.read_csv(out / "episodes.csv")
         source = episode_rows.loc[episode_rows["episode_id"] == row["episode_id"]]
         if len(source) != 1:
             raise Eth30dError("episode source identity drifted")
@@ -889,6 +879,17 @@ def verify_phase(
         exact_inputs += 1
     if len(image_hashes) != len(manifest):
         raise Eth30dError("signal chart PNG hashes are not unique")
+    input_hashes = [str(row["model_input_pixel_sha256"]) for row in manifest]
+    if len(set(input_hashes)) != len(input_hashes):
+        raise Eth30dError("exact model-input hashes are not unique")
+    shifted_input_hash_matches = 0
+    if len(input_hashes) > 1:
+        shifted_input_hash_matches = sum(
+            left == right
+            for left, right in zip(input_hashes, input_hashes[1:] + input_hashes[:1])
+        )
+    if shifted_input_hash_matches != 0:
+        raise Eth30dError("shifted event/input null unexpectedly matched")
     for key in (
         "training_or_tuning",
         "threshold_or_weight_changed",
@@ -913,6 +914,8 @@ def verify_phase(
         "exact_pixel_rerenders": exact_rerenders,
         "exact_png_hash_matches": exact_hashes,
         "exact_model_input_pixel_matches": exact_inputs,
+        "unique_model_input_hashes": len(set(input_hashes)),
+        "shifted_event_input_hash_matches": shifted_input_hash_matches,
         "unique_chart_hashes": len(image_hashes),
         "network_reads_during_verification": 0,
         "training_or_tuning": False,

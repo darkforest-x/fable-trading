@@ -2224,8 +2224,8 @@ experiments:
 
   - experiment_id: exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "a973d6303a6e3f954cda4cd7e421bca2ee7b28de"
-    status: active
+    source_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    status: accepted
     question: >-
       Where does the unchanged Owner 10,000-positive plus 30,000-negative YOLO
       fire on ETH-USDT-SWAP during the 30 complete UTC days 2026-07-29 through
@@ -2237,16 +2237,29 @@ experiments:
       detector, input renderer, confidence, NMS, core4-5 and confirmation4-6
       contract unchanged
     result: >-
-      preregistered_pending_execution. Owner authorized the exact ETHUSDT.P
-      interval, unchanged inference and Telegram delivery. All raw candidates
-      will remain in ledgers; the review surface will merge overlapping windows
-      into continuous episodes and render one preserved raw box per document.
-    holdout_consumed: false
+      The unchanged detector scored 24,480 W18-25 inputs and emitted 1,318 raw
+      boxes; 1,057 passed the frozen structural contract, 53 remained after
+      five-bar deduplication, and continuous-overlap merging yielded 41 honest
+      episodes (27 LONG, 14 SHORT) across 24 of 30 complete UTC days. All 41
+      lossless 1920x1400 single-box charts, their exact model-input insets and
+      the aggregate archive passed independent pixel/hash verification.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_owner_yolo_eth30d_20260828.md
+    artifacts:
+      - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-prereg
+      - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-fetch
+      - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-scan
+      - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-qa
+      - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-manifest
+      - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-overview
+      - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-archive
+      - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-report
+      - 15m-ma-launch-owner-yolo-eth30d-20260828-v1-html
     reuse_allowed: false
     notes: >-
-      Holdout use is authorized as consumption #5 for this detector
-      configuration but remains false here until the frozen market snapshot is
-      actually read. No tuning, training, promotion, ACTIVE/frozen, forward,
-      deployment or order mutation is authorized.
+      Owner-authorized holdout consumption #5 for this unchanged detector.
+      The 41 episodes are model proposals, not Owner Gold; no historical mining
+      gate or manual audit was used to relabel them. No tuning, training,
+      promotion, ACTIVE/frozen, forward, deployment or order state changed.

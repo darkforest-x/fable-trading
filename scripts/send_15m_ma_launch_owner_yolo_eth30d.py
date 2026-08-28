@@ -55,10 +55,13 @@ def build_contract(
         "exact_pixel_rerenders",
         "exact_png_hash_matches",
         "exact_model_input_pixel_matches",
+        "unique_model_input_hashes",
         "unique_chart_hashes",
     ):
         if int(qa.get(key, -1)) != events:
             raise Eth30dDeliveryError(f"QA coverage drifted: {key}")
+    if int(qa.get("shifted_event_input_hash_matches", -1)) != 0:
+        raise Eth30dDeliveryError("shifted event/input null did not remain zero")
     if int(scan.get("holdout_consumption_number_for_this_configuration", -1)) != 5:
         raise Eth30dDeliveryError("holdout consumption identity drifted")
     for key in (

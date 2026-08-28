@@ -6247,3 +6247,147 @@ artifacts:
       Confirms intro, overview, representative sheet, full lossless 43-image
       archive, self-contained HTML and completion text were delivered as
       Telegram documents without recompression; no Owner review task.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-prereg
+    artifact_type: config
+    role: owner_authorized_ethusdt_p_thirty_complete_day_frozen_scan_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/preregistration.json
+    sha256: "ba19490f368007e646b0ba391d95f698b606b68d202ef7cb417e9f6bde5c70dd"
+    size_bytes: 5183
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/preregistration.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: Owner authorization and immutable detector, calendar, rendering and safety contract for holdout use #5.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-fetch
+    artifact_type: manifest
+    role: confirmed_okx_ethusdt_p_snapshot_fetch_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/fetch_receipt.json
+    sha256: "8d596c5f023244ec4cb37a3d24f77b91b746f9da452f3d90c9ffb91efe2681e4"
+    size_bytes: 2507
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/fetch_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: Receipt for 3,078 continuous confirmed 15m bars, including 48-hour MA warmup and bounded confirmation context.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-scan
+    artifact_type: manifest
+    role: frozen_owner_yolo_ethusdt_p_thirty_day_scan_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/scan_receipt.json
+    sha256: "927306dfd36bc4f039e908992a42f3c4fabf1f34e818c949b4ae553411454a4d"
+    size_bytes: 3284
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/scan_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: Frozen conf/NMS/W18-25 scan funnel from 24,480 inputs to 41 continuous-overlap episodes.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-qa
+    artifact_type: manifest
+    role: exact_model_input_chart_and_shifted_null_verification_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/qa_receipt.json
+    sha256: "98ac6c54c58444cb51b2a888cf0f9ca4f8eac93fbb570d62bfe1b9f19a4f3ca1"
+    size_bytes: 729
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/qa_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: All 41 model inputs, one-box charts, rerenders and hashes match; circular event/input null matches 0/41.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-manifest
+    artifact_type: manifest
+    role: forty_one_episode_identity_geometry_and_image_hash_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/manifest.jsonl
+    sha256: "1a952ef40e18111cec69d53614c1a4a3b59459eef89689d7aac2d5f2ce1e5a9b"
+    size_bytes: 58077
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/manifest.jsonl"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: Ordered episode ledger preserving representative raw box geometry, exact inference identity and chart hashes.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-overview
+    artifact_type: report
+    role: ethusdt_p_thirty_day_episode_distribution_overview_png
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/overview.png
+    sha256: "13f93d9b0f252463235b106553fefb1c3fb25eac54ddef3beaf71c6a80163f0b"
+    size_bytes: 142625
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/overview.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: Lossless 1800x1062 summary of daily, class, confidence and episode duplication distributions.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-archive
+    artifact_type: dataset
+    role: lossless_forty_one_single_box_full_context_signal_chart_archive
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/ethusdt_p_30d_all_signal_charts.zip
+    sha256: "3a34913a0c7b7d5e07f113434f33ff650a3183095360b16b53cf4f702f27ae18"
+    size_bytes: 6445584
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/ethusdt_p_30d_all_signal_charts.zip"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: CRC-verified ZIP containing all 41 unique 1920x1400 one-episode documents and the raw candidate/episode audit tables.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-report
+    artifact_type: report
+    role: answer_first_ethusdt_p_thirty_day_model_scan_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    source_path: analysis/p1_15m_ma_launch_owner_yolo_eth30d_20260828.md
+    sha256: "403c4b760087909ae5c209698ab4e13a24befc7dc492e040e561b5073928f9f8"
+    size_bytes: 5893
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_yolo_eth30d_20260828.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: Chinese report with the full inference funnel, temporal episode analysis, exact QA, null control, risks and reproduction commands.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-eth30d-20260828-v1-html
+    artifact_type: report
+    role: owner_delivery_self_contained_ethusdt_p_thirty_day_scan_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    source_path: analysis/html/p1_15m_ma_launch_owner_yolo_eth30d_20260828.html
+    sha256: "679ea25b435832619b8864502b25e58cc2a6a37f0b90b8471ad15bc8795bf40f"
+    size_bytes: 199436
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_yolo_eth30d_20260828.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bad93631c9efe6d74f1be33845cbd3f894772d38"
+    data_cutoff: "2026-08-28T00:00:00Z"
+    notes: Self-contained HTML owner report with embedded overview, intended for direct browser and Telegram document delivery.

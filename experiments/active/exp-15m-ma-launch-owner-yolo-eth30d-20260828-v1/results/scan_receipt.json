@@ -1,0 +1,95 @@
+{
+  "accepted_candidates": 1057,
+  "active_or_frozen_changed": false,
+  "archive": {
+    "charts": 41,
+    "path": "experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/ethusdt_p_30d_all_signal_charts.zip",
+    "sha256": "3a34913a0c7b7d5e07f113434f33ff650a3183095360b16b53cf4f702f27ae18",
+    "size_bytes": 6445584
+  },
+  "complete_days": 30,
+  "deployed": false,
+  "device": "mps",
+  "documents": 41,
+  "documents_with_exactly_one_box": 41,
+  "episode_classes": {
+    "dense_long": 27,
+    "dense_short": 14
+  },
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1",
+  "fetch_receipt_sha256": "8d596c5f023244ec4cb37a3d24f77b91b746f9da452f3d90c9ffb91efe2681e4",
+  "five_bar_events": 53,
+  "forward_state_changed": false,
+  "generated_at": "2026-08-28T07:17:20.692207+00:00",
+  "holdout_consumption_number_for_this_configuration": 5,
+  "immutable_inputs": {
+    "renderer": {
+      "path": "yoyo/layers/l1_detection/render.py",
+      "sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+    },
+    "training_geometry": {
+      "confirmation_counts": {
+        "4": 3276,
+        "5": 3360,
+        "6": 3364
+      },
+      "core_counts": {
+        "4": 5153,
+        "5": 4847
+      },
+      "positive_rows": 10000,
+      "window_counts": {
+        "18": 301,
+        "19": 977,
+        "20": 1666,
+        "21": 2063,
+        "22": 2002,
+        "23": 1716,
+        "24": 991,
+        "25": 284
+      }
+    },
+    "training_manifest": {
+      "path": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2/manifest.jsonl",
+      "sha256": "6e601034ab15765a74b788cc6d094e9326c3044c1fb615c908ef9de897d6e0af"
+    },
+    "weights": {
+      "path": "analysis/output/ma_launch_owner_yolo_neg30000_v2/ma_launch_owner_yolo_neg30000_v2_y11s_ft960/weights/best.pt",
+      "sha256": "58888f996f7da46d4321316964085e90855d00e4c0a14e18c98b303c6e43c182"
+    }
+  },
+  "manifest_path": "experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/manifest.jsonl",
+  "manifest_sha256": "1a952ef40e18111cec69d53614c1a4a3b59459eef89689d7aac2d5f2ce1e5a9b",
+  "orders_placed": false,
+  "overlap_episodes": 41,
+  "overview": {
+    "height": 1062,
+    "path": "experiments/active/exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1/results/overview.png",
+    "sha256": "13f93d9b0f252463235b106553fefb1c3fb25eac54ddef3beaf71c6a80163f0b",
+    "size_bytes": 142625,
+    "width": 1800
+  },
+  "production_eligible": false,
+  "promoted": false,
+  "protocol": "ma6_owner_yolo_neg30000_eth30d_rawbox_v1_20260828",
+  "scan_totals": {
+    "accepted_before_dedup": 1057,
+    "accepted_structural_boxes": 1057,
+    "dedup_removed": 1004,
+    "deduplicated_events": 53,
+    "raw_boxes": 1318,
+    "reject_confirmation": 254,
+    "reject_core_length": 4,
+    "reject_core_outside_ranked_day": 3,
+    "windows_scored": 24480,
+    "windows_with_any_box": 1090
+  },
+  "snapshot_sha256": "d09f82a06945a36b8ed5e6d2445afdc67511f8582d75bda5828bf23b256742b8",
+  "source_commit": "bad93631c9efe6d74f1be33845cbd3f894772d38",
+  "target_end_exclusive": "2026-08-28T00:00:00+00:00",
+  "target_start": "2026-07-29T00:00:00+00:00",
+  "threshold_or_weight_changed": false,
+  "training_eligible": false,
+  "training_or_tuning": false,
+  "wall_seconds": 1604.198
+}
