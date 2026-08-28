@@ -1,6 +1,8 @@
 import random
 
 from scripts.render_15m_ma_launch_t3_validation_preview import (
+    row_class_id,
+    row_identity,
     select_preview_rows,
     yolo_xywhn_to_xyxy,
 )
@@ -74,4 +76,40 @@ def test_preview_selection_accepts_owner_v2_manifest_vocabulary() -> None:
     assert len(selected) == 16
     assert sum(row.get("class_id") == 0 for row in selected) == 4
     assert sum(row.get("class_id") == 1 for row in selected) == 4
+    assert sum(row.get("negative_kind") == "easy" for row in selected) == 8
+
+
+def test_preview_selection_accepts_grade_a_direction_and_image_identity() -> None:
+    source = []
+    for direction in ("LONG", "SHORT"):
+        for event in range(5):
+            for post_bars in (2, 3):
+                source.append(
+                    {
+                        "sample_id": f"event-{direction}-{event}",
+                        "dataset_sample_id": f"image-{direction}-{event}-{post_bars}",
+                        "split": "val",
+                        "sample_kind": "positive",
+                        "direction": direction,
+                        "class_id": None,
+                        "post_bars": post_bars,
+                    }
+                )
+    for index in range(10):
+        source.append(
+            {
+                "sample_id": f"negative-event-{index // 2}",
+                "dataset_sample_id": f"negative-image-{index}",
+                "split": "val",
+                "sample_kind": "negative",
+                "negative_kind": "easy",
+                "class_id": None,
+            }
+        )
+
+    selected = select_preview_rows(source)
+    assert len(selected) == 16
+    assert len({row_identity(row) for row in selected}) == 16
+    assert sum(row_class_id(row) == 0 for row in selected) == 4
+    assert sum(row_class_id(row) == 1 for row in selected) == 4
     assert sum(row.get("negative_kind") == "easy" for row in selected) == 8

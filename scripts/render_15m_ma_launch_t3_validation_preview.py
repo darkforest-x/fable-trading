@@ -39,13 +39,36 @@ class PreviewError(ValueError):
     """Fail-closed validation-preview error."""
 
 
+def row_identity(row: Mapping[str, Any]) -> str:
+    """Return the immutable image-level identity across manifest generations."""
+
+    value = row.get("dataset_sample_id") or row.get("sample_id")
+    if not value:
+        raise PreviewError("preview row has no dataset_sample_id or sample_id")
+    return str(value)
+
+
+def row_class_id(row: Mapping[str, Any]) -> int | None:
+    """Resolve class id from an explicit field or the frozen direction contract."""
+
+    explicit = row.get("class_id")
+    if explicit is not None:
+        return int(explicit)
+    direction = row.get("direction")
+    if direction == "LONG":
+        return 0
+    if direction == "SHORT":
+        return 1
+    return None
+
+
 def stable_rows(rows: Iterable[Mapping[str, Any]], count: int, salt: str) -> list[dict[str, Any]]:
     """Choose a deterministic identity sample independent of manifest order."""
 
     ordered = sorted(
         (dict(row) for row in rows),
         key=lambda row: hashlib.sha256(
-            f"{salt}|{row['sample_id']}".encode("utf-8")
+            f"{salt}|{row_identity(row)}".encode("utf-8")
         ).hexdigest(),
     )
     if len(ordered) < count:
@@ -69,14 +92,14 @@ def select_preview_rows(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any
     selected = []
     selected.extend(
         stable_rows(
-            (row for row in val if is_positive(row) and row.get("class_id") == 0),
+            (row for row in val if is_positive(row) and row_class_id(row) == 0),
             4,
             "preview-long",
         )
     )
     selected.extend(
         stable_rows(
-            (row for row in val if is_positive(row) and row.get("class_id") == 1),
+            (row for row in val if is_positive(row) and row_class_id(row) == 1),
             4,
             "preview-short",
         )
@@ -88,7 +111,7 @@ def select_preview_rows(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any
             "preview-background",
         )
     )
-    if len({row["sample_id"] for row in selected}) != 16:
+    if len({row_identity(row) for row in selected}) != 16:
         raise PreviewError("preview selection contains duplicate identities")
     return selected
 
@@ -241,10 +264,15 @@ def render(
         rendered.append(image)
         sample_receipts.append(
             {
-                "sample_id": row["sample_id"],
+                "sample_id": row.get("sample_id"),
+                "dataset_sample_id": row_identity(row),
                 "symbol": row["symbol"],
                 "sample_kind": row["sample_kind"],
-                "class_name": row.get("class_name"),
+                "class_name": (
+                    None
+                    if row_class_id(row) is None
+                    else str(model.names[row_class_id(row)])
+                ),
                 "image_sha256": row["image_sha256"],
                 "predictions": prediction_rows,
             }
