@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1",
+  "created_at": "2026-08-29T03:27:24+08:00",
+  "created_while_training_state": "epoch_1_incomplete_no_validation_metric_observed",
+  "question": "How well does the frozen best.pt detect the immutable chronological val labels, reject its actual matched negatives, preserve LONG/SHORT semantics, and fire at the earliest available post-core context?",
+  "immutable_inputs": {
+    "training_preregistration_sha256": "b28793525d55b03249b7af2b08ef83b806a040e9a8e149354e6df0e8269ab479",
+    "dataset": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1",
+    "manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "val_images": 4800,
+    "val_positive_images": 1200,
+    "val_negative_images": 3600,
+    "val_long_instances": 531,
+    "val_short_instances": 669,
+    "val_hard_negatives": 2400,
+    "val_easy_negatives": 1200,
+    "val_positive_events": 155,
+    "val_negative_events": 465,
+    "events_with_post2_variant": 149,
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_rows_allowed": 0
+  },
+  "weight_binding": {
+    "selection": "Ultralytics best.pt selected only by the preregistered chronological val fitness during training",
+    "sha256": "unknown_until_training_finishes_then_required_as_evaluator_argument",
+    "threshold_or_epoch_reselection_allowed": false
+  },
+  "implementations": {
+    "training_summary_script": "scripts/summarize_15m_ma_launch_t3_training.py",
+    "training_summary_script_sha256": "1a86ea1f507058d0144dbcda69880c461262f068470372ed9b754f68d069c33d",
+    "fixed_threshold_evaluator": "scripts/evaluate_15m_ma_launch_owner_grade_a8000_val.py",
+    "fixed_threshold_evaluator_sha256": "d10cdd20f6c1648eaba5f62ed54efc73ac33947b15d8c089a2371716a32d7be9"
+  },
+  "standard_detection_metrics": {
+    "source": "Ultralytics final automatic reload and validation of best.pt on the unchanged 4,800-image val split",
+    "report": [
+      "overall precision",
+      "overall recall",
+      "overall mAP50",
+      "overall mAP50-95",
+      "dense_long precision/recall/mAP50/mAP50-95",
+      "dense_short precision/recall/mAP50/mAP50-95"
+    ],
+    "imgsz": 960,
+    "batch": 8,
+    "rect": true
+  },
+  "fixed_threshold_surface": {
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "true_hit_iou": 0.5,
+    "threshold_tuned": false,
+    "positive_hit": "At least one predicted box has the exact ground-truth class and normalized-box IoU >= 0.5.",
+    "negative_fire": "Any predicted box on a byte-empty negative label.",
+    "multiple_box_image": "A positive image with more than one post-NMS prediction at conf >= 0.25.",
+    "extra_prediction_boxes": "All positive-image predictions except one credited correct-class IoU>=0.5 match when present.",
+    "report": [
+      "all/LONG/SHORT positive image recall",
+      "wrong-direction overlap count",
+      "multiple-box image rate and extra-box count",
+      "all/hard/easy negative fire rate",
+      "false boxes per 1,000 negative images",
+      "false-box class and confidence distributions"
+    ]
+  },
+  "event_surface": {
+    "post2_hit_rate": "Correct hits among the 149 events that have an exact post_bars=2 variant; missing post2 events are reported, not silently counted as failures or successes.",
+    "earliest_available_hit_rate": "For every event, whether its minimum available post_bars variant is a correct hit.",
+    "first_hit_delay": "Minimum post_bars among correct variants for each detected event; report min/median/p90/max and exact histogram.",
+    "any_hit_event_recall": "Events with at least one correct variant divided by all 155 independent val positive events.",
+    "variant_recall": "Report each post_bars bucket 2 through 9 without treating variants as independent events."
+  },
+  "null_control": {
+    "name": "paired_direction_flip",
+    "method": "Keep every image, predicted box, confidence and IoU fixed, but swap LONG and SHORT class ids when scoring.",
+    "test": "Two-sided exact paired sign test on actual-only versus flipped-only hits, separately at image and independent-event level.",
+    "purpose": "Test whether the detector learned the intended direction class rather than direction-neutral box geometry."
+  },
+  "outputs": {
+    "training_receipt": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/training_receipt.json",
+    "training_curves": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/training_curves.png",
+    "fixed_threshold_receipt": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/frozen_val_evaluation.json",
+    "prediction_ledger": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/frozen_val_predictions.jsonl",
+    "canonical_report": "analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_train960_20260829.md",
+    "canonical_html": "analysis/html/p1_15m_ma_launch_owner_grade_a8000_neg24000_train960_20260829.html"
+  },
+  "interpretation_limits": {
+    "previous_model_comparison": "Descriptive only because both positive selection and negative cohort changed together.",
+    "financial_metrics": "Not applicable: this experiment evaluates a completed-history object detector, not entries, exits or returns.",
+    "completed_history_not_live_tip": true,
+    "holdout_consumed": false,
+    "promotion_decision": false,
+    "deployment_decision": false,
+    "production_eligible": false
+  }
+}
