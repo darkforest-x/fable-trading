@@ -2451,3 +2451,28 @@ experiments:
       passed. The 2-9 post-core completed-history windows can only be promoted
       or deployed with the same delayed input contract; they cannot enter the
       causal tip/tip-1/tip-2 path or be represented as fresh live signals.
+
+  - experiment_id: exp-15m-right-edge-screenshot-similarity-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "pending-builder-commit"
+    status: active
+    question: >-
+      Which pre-holdout OKX 15m windows in the repository's fixed 54-symbol
+      long-history universe most resemble the right edge of the Owner-supplied
+      cropped chart screenshot?
+    single_variable: >-
+      no arm comparison: apply one screenshot-derived 14-bar SHORT-shock
+      retrieval contract once, with frozen pixel colors, normalization,
+      prelude/edge weights, volume mask, split DTW, deduplication and null
+    result: >-
+      preregistered_not_officially_scanned. The reference image hash and full
+      query/search contract are committed before the official pre-holdout scan.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_15m_right_edge_screenshot_similarity_20260829.md
+    reuse_allowed: false
+    notes: >-
+      The missing timeframe is explicitly assumed to be 15m. This is
+      completed-shape retrieval for Owner review, not a signal, label, model
+      score, threshold decision or trading rule. No holdout OHLCV may be read.

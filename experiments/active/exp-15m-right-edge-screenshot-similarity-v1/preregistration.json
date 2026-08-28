@@ -1,0 +1,65 @@
+{
+  "experiment_id": "exp-15m-right-edge-screenshot-similarity-v1",
+  "frozen_at": "2026-08-29T03:48:00+08:00",
+  "question": "Which pre-holdout OKX 15m windows in the repository's 54-symbol long-history universe most resemble the right edge of the Owner-supplied cropped chart screenshot?",
+  "assumption": "The screenshot is treated as a 15m chart because no symbol, price axis or timeframe label is visible and 15m is the active project surface. If the actual timeframe differs, this retrieval is not transferable and must not be silently relabelled.",
+  "single_variable": "No arm comparison: one frozen screenshot-derived SHORT-shock retrieval contract is applied once. Window, pixel colors, normalization, weights, DTW, shortlist, deduplication, Top-N and null control are fixed before the official scan.",
+  "reference": {
+    "path": "experiments/active/exp-15m-right-edge-screenshot-similarity-v1/reference/owner_reference.png",
+    "sha256": "ebfe78851b4460c4a6e81a906590b5e3f194982e800fbbcdf3eef9e336c4dedf",
+    "dark_green_rgb": [11, 153, 129],
+    "dark_red_rgb": [242, 54, 69],
+    "light_green_rgb": [146, 211, 204],
+    "light_red_rgb": [247, 170, 167],
+    "body_component_min_area": 40,
+    "rightmost_candles": 14,
+    "expected_color_sequence": "GRRGGRRGGRRGRG",
+    "untrusted_volume_tail_bars": 2
+  },
+  "data": {
+    "source_dir": "data/kline_deep",
+    "filename_glob": "okx_*_USDT_SWAP_15m_*.csv",
+    "expected_symbols": 54,
+    "holdout_start_exclusive": "2026-05-04T00:00:00+00:00",
+    "bar_minutes": 15,
+    "holdout_ohlcv_rows_allowed": 0
+  },
+  "similarity": {
+    "window_bars": 14,
+    "prelude_bars": 8,
+    "edge_bars": 6,
+    "review_future_bars": 12,
+    "price_channel_weights": {
+      "open": 0.30,
+      "high": 0.20,
+      "low": 0.20,
+      "close": 0.30
+    },
+    "segment_weights": {
+      "prelude": 0.30,
+      "edge": 0.70
+    },
+    "price_weight": 0.85,
+    "volume_weight": 0.15,
+    "lockstep_weight": 0.45,
+    "dtw_weight": 0.55,
+    "dtw_radius": 1,
+    "shortlist_per_symbol": 150,
+    "same_symbol_dedupe_bars": 24,
+    "cross_symbol_cluster_minutes": 45,
+    "raw_top_n": 30,
+    "diversified_top_n": 10
+  },
+  "null_control": {
+    "method": "Condition on the frozen diversified Top-10, jointly phase-scramble each candidate's six edge OHLCV rows, rerun the identical lockstep-plus-DTW score, and compare the mean distance with the real order.",
+    "permutations": 1000,
+    "seed": 20260829,
+    "limitation": "This tests ordered alignment conditional on the retrieved Top-10; it is not an unconditional market-wide retrieval p-value and does not test returns."
+  },
+  "eligibility": {
+    "training_eligible": false,
+    "production_eligible": false,
+    "tip_eligible": false,
+    "owner_sample_confirmation_required": true
+  }
+}
