@@ -2029,8 +2029,8 @@ experiments:
 
   - experiment_id: exp-15m-ma-launch-owner-yolo-recent5d-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "2b95e3290c4a37977876397247a630f69901dae1"
-    status: active
+    source_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    status: accepted
     question: >-
       On the five complete UTC days 2026-08-23 through 2026-08-27, where does
       the newly trained Owner 10,000-positive plus 30,000-negative completed-
@@ -2040,16 +2040,40 @@ experiments:
       with the newly delivered Owner weight and use its exact training support:
       W18-25, core4-5 and confirmation4-6; extend the requested board to five days
     result: >-
-      preregistered_before_holdout_read. Owner authorized exactly the five
-      complete UTC days. Confidence 0.25, IoU 0.7, imgsz 960, five-bar event
-      deduplication and all no-tuning/no-production gates are frozen.
-    holdout_consumed: false
+      completed_visual_probe_as_preregistered. One hundred ranked symbol-days
+      across 75 crypto instruments had exact 96-bar continuity. 81,600 windows
+      produced 5,632 raw boxes, 4,528 structurally valid boxes and 239 five-bar-
+      deduplicated events: 168 LONG and 71 SHORT, with day counts
+      57/38/47/54/43 and 97/100 boards containing at least one event. All
+      snapshots, mapped geometry, remote/local artifact hashes and six PNGs
+      passed independent offline verification. The exact first-three-day boards
+      produced 142 events versus the predecessor's 96, showing materially lower
+      selectivity rather than proven improvement.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_owner_yolo_recent5d_20260828.md
     artifacts:
       - 15m-ma-launch-owner-yolo-recent5d-v1-prereg
+      - 15m-ma-launch-owner-yolo-recent5d-v1-fetch-receipt
+      - 15m-ma-launch-owner-yolo-recent5d-v1-scan-receipt
+      - 15m-ma-launch-owner-yolo-recent5d-v1-remote-execution
+      - 15m-ma-launch-owner-yolo-recent5d-v1-qa-receipt
+      - 15m-ma-launch-owner-yolo-recent5d-v1-overview
+      - 15m-ma-launch-owner-yolo-recent5d-v1-day-20260823
+      - 15m-ma-launch-owner-yolo-recent5d-v1-day-20260824
+      - 15m-ma-launch-owner-yolo-recent5d-v1-day-20260825
+      - 15m-ma-launch-owner-yolo-recent5d-v1-day-20260826
+      - 15m-ma-launch-owner-yolo-recent5d-v1-day-20260827
+      - 15m-ma-launch-owner-yolo-recent5d-v1-report
+      - 15m-ma-launch-owner-yolo-recent5d-v1-html
+      - 15m-ma-launch-owner-yolo-recent5d-v1-html-qa
     reuse_allowed: false
     notes: >-
-      Same-day Top20 membership is post-hoc and cannot show live selection
-      skill. This is an authorized bounded visual probe, not final holdout
-      acceptance, threshold tuning, ACTIVE/forward eligibility or trading proof.
+      Accepted means the bounded scan and artifact contract completed, not that
+      the detector or trading edge passed. Same-day Top20 membership is post-hoc;
+      204/239 events agree with the already known final direction, while a
+      hindsight sign rule reaches 100%. Coverage of 97/100 boards and 2.39 events
+      per board is a selectivity warning. This configuration consumed authorized
+      holdout read #1 with no result-driven threshold/window change. No training,
+      promote, ACTIVE/frozen, forward, deployment or order state changed.

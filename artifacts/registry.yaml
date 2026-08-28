@@ -5348,7 +5348,7 @@ artifacts:
     sha256: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
     size_bytes: 4880
     storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/preregistration.json"
-    holdout_status: pre_holdout
+    holdout_status: holdout_consumed
     training_eligible: false
     production_eligible: false
     generator_commit: "2b95e3290c4a37977876397247a630f69901dae1"
@@ -5358,3 +5358,243 @@ artifacts:
       Committed before any market-data read; freezes five UTC days, crypto-only
       Top20 selection, delivered weight identity, exact training-supported
       geometry and all no-tuning/no-production gates.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-v1-fetch-receipt
+    artifact_type: manifest
+    role: five_day_crypto_ranking_and_15m_snapshot_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/fetch_receipt.json
+    sha256: "497bfb8bfa050ecda11bbc65061608d5cc807a0583ef99ae9c3e5b3e2d53ab75"
+    size_bytes: 69171
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/fetch_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    config_hash: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: >-
+      Binds 274 eligible live crypto swaps, 100 ranked symbol-days, 75 unique
+      selected instruments, 50,850 disposable context bars and 100/100 exact
+      96-bar ranked days with zero gaps.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-v1-scan-receipt
+    artifact_type: manifest
+    role: frozen_owner_detector_window_event_and_render_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/scan_receipt.json
+    sha256: "ebf13e69494b51ecd126c1385b28e262de555fe40738dd2afdb7ff88956d9cc4"
+    size_bytes: 45508
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/scan_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    config_hash: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: >-
+      Raw Windows-worker receipt binds weight SHA, 81,600 windows, 5,632 raw
+      boxes, 4,528 structural boxes, 4,289 dedup removals and 239 final events.
+      CRLF bytes and backslash paths are preserved exactly for transfer parity.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-v1-remote-execution
+    artifact_type: manifest
+    role: hash_bound_rtx3060_environment_transfer_and_exit_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/remote_execution_receipt.json
+    sha256: "2a45b3421f1067e46760528da1c39df7916a4e7d92954afb0c07c3623185b2fb"
+    size_bytes: 4605
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/remote_execution_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    config_hash: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: >-
+      Records the exact source commit, 78,469,120-byte bundle SHA, RTX 3060
+      dependency versions, offline pandas install identities, exit zero and
+      nine-of-nine remote/local artifact SHA parity.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-v1-qa-receipt
+    artifact_type: manifest
+    role: offline_snapshot_geometry_hash_path_and_safety_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/qa_receipt.json
+    sha256: "fa9579a4fba0309e84989c348d425087a6423363c43bd6fe373c02c3b32ffb1f"
+    size_bytes: 4544
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/qa_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    config_hash: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: >-
+      Network-free verifier rehashed all 75 OHLCV snapshots, checked all 100
+      ranked-day contracts, 239 mapped events, dedup gaps, six PNG identities,
+      cross-platform safe path resolution and every no-production flag.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-v1-overview
+    artifact_type: report
+    role: owner_five_day_rank_and_detection_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/overview.png
+    sha256: "f790a68ac22acae17a2c493bd1b62c5636bd0288e142bcae44683cd80061d12a"
+    size_bytes: 318310
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/overview.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    config_hash: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: >-
+      1800x2100 compact five-day board with all 100 ranks, daily returns and
+      per-symbol LONG/SHORT event counts, explicitly marked post-hoc.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-v1-day-20260823
+    artifact_type: report
+    role: owner_full_day_top20_detection_render
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/day_20260823_top20.png
+    sha256: "1ba011f47dea542344e9f14ab71db5361eb4d3faa1842775e8a18f69ec30d51f"
+    size_bytes: 879345
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/day_20260823_top20.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    config_hash: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
+    data_cutoff: "2026-08-23T23:45:00Z"
+    notes: 1520x4824 full 20-panel UTC-day render with 57 events, 42 LONG and 15 SHORT.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-v1-day-20260824
+    artifact_type: report
+    role: owner_full_day_top20_detection_render
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/day_20260824_top20.png
+    sha256: "9b7a1edc05d96100149547a8e358f31e6af615c4e16c542b0b14d7da05e1ba3c"
+    size_bytes: 932408
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/day_20260824_top20.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    config_hash: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
+    data_cutoff: "2026-08-24T23:45:00Z"
+    notes: 1520x4824 full 20-panel UTC-day render with 38 events, 16 LONG and 22 SHORT.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-v1-day-20260825
+    artifact_type: report
+    role: owner_full_day_top20_detection_render
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/day_20260825_top20.png
+    sha256: "3105b7ddcbdede51b3ff74c7912119cb5ac53944cc745295e01922bc010a4144"
+    size_bytes: 916282
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/day_20260825_top20.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    config_hash: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
+    data_cutoff: "2026-08-25T23:45:00Z"
+    notes: 1520x4824 full 20-panel UTC-day render with 47 events, 23 LONG and 24 SHORT.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-v1-day-20260826
+    artifact_type: report
+    role: owner_full_day_top20_detection_render
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/day_20260826_top20.png
+    sha256: "53bcc186604f781895de7a6333e3ba2d25347bfd1105bf90109c00eb4677f93c"
+    size_bytes: 864383
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/day_20260826_top20.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    config_hash: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
+    data_cutoff: "2026-08-26T23:45:00Z"
+    notes: 1520x4824 full 20-panel UTC-day render with 54 events, 50 LONG and 4 SHORT.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-v1-day-20260827
+    artifact_type: report
+    role: owner_full_day_top20_detection_render
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/day_20260827_top20.png
+    sha256: "832a3583c7f11ca7cfca6c8f9ab860af810221ff3949898a5667f4fafa3faa7d"
+    size_bytes: 867748
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/day_20260827_top20.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    config_hash: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: 1520x4824 full 20-panel UTC-day render with 43 events, 37 LONG and 6 SHORT.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-v1-report
+    artifact_type: report
+    role: canonical_bounded_owner_holdout_visual_probe_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    source_path: analysis/p1_15m_ma_launch_owner_yolo_recent5d_20260828.md
+    sha256: "4449fea39c98455740c5f39e9a2f65bf2dccae054fc8379ecf8ee293451644f0"
+    size_bytes: 14831
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_yolo_recent5d_20260828.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    config_hash: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: >-
+      Answer-first Chinese report with all six renders, exact detector counts,
+      identical-board predecessor comparison, permutation null, holdout usage,
+      complete reproduction, selectivity warning and no-production risks.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-v1-html
+    artifact_type: report
+    role: owner_delivery_self_contained_five_day_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    source_path: analysis/html/p1_15m_ma_launch_owner_yolo_recent5d_20260828.html
+    sha256: "d4243320cea83c982b8ce00ff7a7be8aa1836ba9cf2e4772f077641ec058ce4e"
+    size_bytes: 6390921
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_yolo_recent5d_20260828.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    config_hash: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: Self-contained 6.39 MB HTML embedding the overview and all five daily panels.
+
+  - artifact_id: 15m-ma-launch-owner-yolo-recent5d-v1-html-qa
+    artifact_type: manifest
+    role: static_self_contained_html_content_and_embedding_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    source_path: experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/html_qa_receipt.json
+    sha256: "8f50ae04478b87a3d3e65f4682cba73f770af2701d44d03acc1aeff2616bca62"
+    size_bytes: 1188
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-yolo-recent5d-v1/results/html_qa_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1040052af3ba079e2ad392511ebb473e21a8077f"
+    config_hash: "3b0dd8e1a84f08be96f3a8f8cea146b23ced3787817baeb5e7b9546bcf80e8aa"
+    data_cutoff: "2026-08-27T23:45:00Z"
+    notes: >-
+      Static QA confirms six embedded PNG data URIs, zero external image links,
+      required result/risk/holdout/reproduction sections and self-contained HTML.

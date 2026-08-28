@@ -183,6 +183,7 @@ def test_every_authorized_holdout_consumer_remains_explicit(registries):
     assert consumers == {
         "exp-btc-4h-ma-launch-similarity-v1",
         "exp-btc-4h-ma-launch-similarity-top20-v2",
+        "exp-15m-ma-launch-owner-yolo-recent5d-v1",
         "exp-15m-ma-launch-t3-daily-movers3d-v1",
         "exp-15m-ma-launch-t3-daily-movers3d-v2",
         "exp-pine-eth-15m-v1",
