@@ -7135,3 +7135,23 @@ artifacts:
     config_hash: "b28793525d55b03249b7af2b08ef83b806a040e9a8e149354e6df0e8269ab479"
     data_cutoff: "2026-05-03T20:30:00Z"
     notes: Records exact hashes, staging sentinel, PIDs, nc=2 runtime arguments and first observed CUDA progress; no holdout or runtime trading state changed.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-eval-prereg
+    artifact_type: config
+    role: frozen_chronological_val_event_negative_and_direction_null_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cc1263bef9e8dbb983cd6fa0a04f435ee3f0ca5d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/evaluation_preregistration.json
+    sha256: "f44fc4f71dc04eadc8fe49f04f68869f0fabdd8be287ba32278659190f24ae6f"
+    size_bytes: 5529
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/evaluation_preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "cc1263bef9e8dbb983cd6fa0a04f435ee3f0ca5d"
+    config_hash: "f44fc4f71dc04eadc8fe49f04f68869f0fabdd8be287ba32278659190f24ae6f"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Frozen during epoch 1 before any validation metric existed. Locks
+      conf=0.25, NMS IoU=0.7, hit IoU=0.5, event-level delay definitions,
+      hard/easy negative surfaces and a paired LONG/SHORT direction-flip null.
