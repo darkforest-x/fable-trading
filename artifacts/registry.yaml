@@ -7181,6 +7181,27 @@ artifacts:
       order changes were not authorized, and that deployment must preserve the
       model's completed-history input contract.
 
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-split-audit
+    artifact_type: manifest
+    role: post_high_score_train_val_identity_event_and_dependency_interval_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6faef02c8c9d8eb080ff43fa1e865f039af600e5"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/split_isolation_audit.json
+    sha256: "dd3974ca6bfb9978a8a3ce60f704f60c8c8c1a90890e04627c92a434755cc78d"
+    size_bytes: 1282
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1/results/split_isolation_audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6faef02c8c9d8eb080ff43fa1e865f039af600e5"
+    config_hash: "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Triggered after epoch 6 mAP50-95 exceeded 0.7. The audit reads no model
+      predictions or holdout. Across 65 shared source files it found zero image,
+      image-level ID, event-ID or complete render-plus-label dependency interval
+      overlap; the global chronological dependency gap is 85.25 hours.
+
   - artifact_id: 15m-right-edge-screenshot-similarity-v1-prereg
     artifact_type: config
     role: frozen_screenshot_pixel_query_and_similarity_contract

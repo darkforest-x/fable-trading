@@ -1,0 +1,33 @@
+{
+  "active_or_frozen_changed": false,
+  "audit_inputs": "immutable manifest plus independent QA receipt only",
+  "audit_trigger": "post_epoch6_mAP50_95_exceeded_0.7",
+  "cross_split_gap_hours": 85.25,
+  "cross_split_source_interval_overlaps": 0,
+  "dependency_end_rule": {
+    "negative": "manifest dependency_end_i",
+    "positive": "max(window_end_i, source_core_end_i + 5)"
+  },
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1",
+  "generator_commit": "6faef02c8c9d8eb080ff43fa1e865f039af600e5",
+  "generator_sha256": "b92baccff986b91f4bee34282cc86127a892c2e6fb6181de2fd3dc554ac0c7d1",
+  "holdout_consumed": false,
+  "independent_qa_sha256": "364ac95c2ec71427f6062a04edac1d8e2be9d8c7f04e1752a41762171d901473",
+  "manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+  "model_predictions_read": false,
+  "passed": true,
+  "production_eligible": false,
+  "schema_version": 1,
+  "shared_source_files": 65,
+  "split_counts": {
+    "train": 27200,
+    "val": 4800
+  },
+  "train_latest_dependency_end_time": "2025-11-29T08:45:00+00:00",
+  "train_val_identity_intersections": {
+    "dataset_sample_id": 0,
+    "event_identity": 0,
+    "image_sha256": 0
+  },
+  "val_earliest_window_start_time": "2025-12-02T22:00:00+00:00"
+}
