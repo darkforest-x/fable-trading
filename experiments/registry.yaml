@@ -2465,14 +2465,31 @@ experiments:
       retrieval contract once, with frozen pixel colors, normalization,
       prelude/edge weights, volume mask, split DTW, deduplication and null
     result: >-
-      preregistered_not_officially_scanned. The reference image hash and full
-      query/search contract are committed before the official pre-holdout scan.
+      gallery_ready_pending_owner_review. Across 6,160,332 pre-holdout 15m
+      symbol-bars and 6,158,982 continuous 14+12 review windows, the frozen
+      search ranked 8,100 coarse candidates and delivered 10 market-time-
+      diversified analogues. AVAX at 2026-04-27 16:00 UTC ranked first
+      (distance 0.6985) inside a 20-symbol shock cluster. Conditional edge-row
+      phase scrambling gave p=0.000999; Top-10 forward direction was mixed.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p0_15m_right_edge_screenshot_similarity_20260829.md
+    artifacts:
+      - 15m-right-edge-screenshot-similarity-v1-prereg
+      - 15m-right-edge-screenshot-similarity-v1-query
+      - 15m-right-edge-screenshot-similarity-v1-source-audit
+      - 15m-right-edge-screenshot-similarity-v1-review-manifest
+      - 15m-right-edge-screenshot-similarity-v1-summary
+      - 15m-right-edge-screenshot-similarity-v1-null
+      - 15m-right-edge-screenshot-similarity-v1-overview
+      - 15m-right-edge-screenshot-similarity-v1-qa
+      - 15m-right-edge-screenshot-similarity-v1-report
+      - 15m-right-edge-screenshot-similarity-v1-html
     reuse_allowed: false
     notes: >-
       The missing timeframe is explicitly assumed to be 15m. This is
       completed-shape retrieval for Owner review, not a signal, label, model
-      score, threshold decision or trading rule. No holdout OHLCV may be read.
+      score, threshold decision or trading rule. The official scan ran only
+      after builder commit 4c20cb1; holdout OHLCV reads and all model/trading
+      state changes were zero.

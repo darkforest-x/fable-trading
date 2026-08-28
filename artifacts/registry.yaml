@@ -7180,3 +7180,170 @@ artifacts:
       latter three actions had occurred at authorization time, that real-money
       order changes were not authorized, and that deployment must preserve the
       model's completed-history input contract.
+
+  - artifact_id: 15m-right-edge-screenshot-similarity-v1-prereg
+    artifact_type: config
+    role: frozen_screenshot_pixel_query_and_similarity_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4c20cb11f9f5c7d86e67f17fed67167fcf74f71c"
+    source_path: experiments/active/exp-15m-right-edge-screenshot-similarity-v1/preregistration.json
+    sha256: "c0cd8cdccc1f8ff251699c4fbe9ac0c79e674845d43acd9c74f477080fb55635"
+    size_bytes: 2796
+    storage_uri: "repo://experiments/active/exp-15m-right-edge-screenshot-similarity-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4c20cb11f9f5c7d86e67f17fed67167fcf74f71c"
+    config_hash: "c0cd8cdccc1f8ff251699c4fbe9ac0c79e674845d43acd9c74f477080fb55635"
+    data_cutoff: "2026-05-03T23:45:00+00:00"
+    notes: Freezes the 15m assumption, exact reference hash, 14-bar query, weights, DTW, deduplication and conditional null before the official scan.
+
+  - artifact_id: 15m-right-edge-screenshot-similarity-v1-query
+    artifact_type: manifest
+    role: screenshot_pixel_to_scale_free_ohlcv_query_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fdbd4fbb7f59575b97ef31a1511d64d80505efba"
+    source_path: experiments/active/exp-15m-right-edge-screenshot-similarity-v1/results/query_contract.json
+    sha256: "c9a8989b7cec7d5babbec20803537ad70e460aba897fdbb541fdda6e1f6f7d46"
+    size_bytes: 7594
+    storage_uri: "repo://experiments/active/exp-15m-right-edge-screenshot-similarity-v1/results/query_contract.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4c20cb11f9f5c7d86e67f17fed67167fcf74f71c"
+    config_hash: "c0cd8cdccc1f8ff251699c4fbe9ac0c79e674845d43acd9c74f477080fb55635"
+    data_cutoff: "2026-05-03T23:45:00+00:00"
+    notes: Exact-color connected-component extraction of the rightmost 14 candles; the final two volume bars are masked as preregistered.
+
+  - artifact_id: 15m-right-edge-screenshot-similarity-v1-source-audit
+    artifact_type: manifest
+    role: preholdout_prefix_and_zero_holdout_read_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fdbd4fbb7f59575b97ef31a1511d64d80505efba"
+    source_path: experiments/active/exp-15m-right-edge-screenshot-similarity-v1/results/source_audit.json
+    sha256: "466e7a34f304a39a90168a584b2620694e22c09e1c6c49f5defdb5259a35f08c"
+    size_bytes: 24506
+    storage_uri: "repo://experiments/active/exp-15m-right-edge-screenshot-similarity-v1/results/source_audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4c20cb11f9f5c7d86e67f17fed67167fcf74f71c"
+    config_hash: "c0cd8cdccc1f8ff251699c4fbe9ac0c79e674845d43acd9c74f477080fb55635"
+    data_cutoff: "2026-05-03T23:45:00+00:00"
+    notes: Covers 54 source prefixes and 6,160,332 OHLCV rows; boundary rows expose timestamp metadata only and materialize zero holdout OHLCV.
+
+  - artifact_id: 15m-right-edge-screenshot-similarity-v1-review-manifest
+    artifact_type: manifest
+    role: market_time_diversified_top10_similarity_review_rows
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fdbd4fbb7f59575b97ef31a1511d64d80505efba"
+    source_path: experiments/active/exp-15m-right-edge-screenshot-similarity-v1/results/review_manifest.jsonl
+    sha256: "8d2444c0a11e5981689756ed1afa9606a1c4a226ad4821ac6ae3f98117890c28"
+    size_bytes: 15587
+    storage_uri: "repo://experiments/active/exp-15m-right-edge-screenshot-similarity-v1/results/review_manifest.jsonl"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4c20cb11f9f5c7d86e67f17fed67167fcf74f71c"
+    config_hash: "c0cd8cdccc1f8ff251699c4fbe9ac0c79e674845d43acd9c74f477080fb55635"
+    data_cutoff: "2026-05-03T23:45:00+00:00"
+    notes: Ten numerical proposals with PENDING Owner verdicts, chart hashes, cluster membership and review-only forward descriptors.
+
+  - artifact_id: 15m-right-edge-screenshot-similarity-v1-summary
+    artifact_type: manifest
+    role: official_scan_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fdbd4fbb7f59575b97ef31a1511d64d80505efba"
+    source_path: experiments/active/exp-15m-right-edge-screenshot-similarity-v1/results/scan_summary.json
+    sha256: "7297cf41bf6cacc8c1e4fdeaa2ed45b2db2455534d6bcc59f8611bc0b522110a"
+    size_bytes: 1336
+    storage_uri: "repo://experiments/active/exp-15m-right-edge-screenshot-similarity-v1/results/scan_summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4c20cb11f9f5c7d86e67f17fed67167fcf74f71c"
+    config_hash: "c0cd8cdccc1f8ff251699c4fbe9ac0c79e674845d43acd9c74f477080fb55635"
+    data_cutoff: "2026-05-03T23:45:00+00:00"
+    notes: Records AVAX as the first analogue, zero holdout OHLCV, zero model/trading state changes and the conditional null result.
+
+  - artifact_id: 15m-right-edge-screenshot-similarity-v1-null
+    artifact_type: manifest
+    role: conditional_edge_row_phase_scramble_null
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fdbd4fbb7f59575b97ef31a1511d64d80505efba"
+    source_path: experiments/active/exp-15m-right-edge-screenshot-similarity-v1/results/null_control.json
+    sha256: "e3869b2d51fea82025fa529027704a0398db46154f0c976904b7210e8a6e8ceb"
+    size_bytes: 499
+    storage_uri: "repo://experiments/active/exp-15m-right-edge-screenshot-similarity-v1/results/null_control.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4c20cb11f9f5c7d86e67f17fed67167fcf74f71c"
+    config_hash: "c0cd8cdccc1f8ff251699c4fbe9ac0c79e674845d43acd9c74f477080fb55635"
+    data_cutoff: "2026-05-03T23:45:00+00:00"
+    notes: Top-10 conditional phase-order sanity check only; p=0.000999 is neither an unconditional retrieval p-value nor a return test.
+
+  - artifact_id: 15m-right-edge-screenshot-similarity-v1-overview
+    artifact_type: report
+    role: top6_full_context_similarity_overview_figure
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fdbd4fbb7f59575b97ef31a1511d64d80505efba"
+    source_path: experiments/active/exp-15m-right-edge-screenshot-similarity-v1/results/overview_top6.png
+    sha256: "644c0bde6a01e97087321499faccfd3e5734dab1d582736a0b07b1f6c867d5b6"
+    size_bytes: 403189
+    storage_uri: "repo://experiments/active/exp-15m-right-edge-screenshot-similarity-v1/results/overview_top6.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4c20cb11f9f5c7d86e67f17fed67167fcf74f71c"
+    config_hash: "c0cd8cdccc1f8ff251699c4fbe9ac0c79e674845d43acd9c74f477080fb55635"
+    data_cutoff: "2026-05-03T23:45:00+00:00"
+    notes: Blue spans are ranked inputs; dashed-line right regions are review-only future context and never enter ranking.
+
+  - artifact_id: 15m-right-edge-screenshot-similarity-v1-qa
+    artifact_type: manifest
+    role: independent_source_boundary_rank_and_chart_hash_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fdbd4fbb7f59575b97ef31a1511d64d80505efba"
+    source_path: experiments/active/exp-15m-right-edge-screenshot-similarity-v1/results/qa_receipt.json
+    sha256: "f3d31564b4a792956b15ba677b66cfc0b3479d60f015075fc11b507ac3527cdd"
+    size_bytes: 783
+    storage_uri: "repo://experiments/active/exp-15m-right-edge-screenshot-similarity-v1/results/qa_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    config_hash: "c0cd8cdccc1f8ff251699c4fbe9ac0c79e674845d43acd9c74f477080fb55635"
+    data_cutoff: "2026-05-03T23:45:00+00:00"
+    notes: Independently recomputed 6,158,982 continuous windows and verified all ten unique chart hashes with zero holdout OHLCV.
+
+  - artifact_id: 15m-right-edge-screenshot-similarity-v1-report
+    artifact_type: report
+    role: canonical_markdown_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fdbd4fbb7f59575b97ef31a1511d64d80505efba"
+    source_path: analysis/p0_15m_right_edge_screenshot_similarity_20260829.md
+    sha256: "d0a2049e17b635f23d572997acf7c7a2cc7d673635da7e83a568116ee636c5b3"
+    size_bytes: 10893
+    storage_uri: "repo://analysis/p0_15m_right_edge_screenshot_similarity_20260829.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    config_hash: "c0cd8cdccc1f8ff251699c4fbe9ac0c79e674845d43acd9c74f477080fb55635"
+    data_cutoff: "2026-05-03T23:45:00+00:00"
+    notes: Canonical source report; explicitly records the 15m assumption, market-cluster dependence and mixed forward direction.
+
+  - artifact_id: 15m-right-edge-screenshot-similarity-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fdbd4fbb7f59575b97ef31a1511d64d80505efba"
+    source_path: analysis/html/p0_15m_right_edge_screenshot_similarity_20260829.html
+    sha256: "6b667568979acc3fae236989cc9365f33b41e4d76e936d5a429226ad849cce1e"
+    size_bytes: 1025399
+    storage_uri: "repo://analysis/html/p0_15m_right_edge_screenshot_similarity_20260829.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    config_hash: "c0cd8cdccc1f8ff251699c4fbe9ac0c79e674845d43acd9c74f477080fb55635"
+    data_cutoff: "2026-05-03T23:45:00+00:00"
+    notes: Self-contained owner-facing HTML with five embedded figures and four result/method tables.
