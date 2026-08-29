@@ -1,0 +1,128 @@
+{
+  "accepted_candidates": 278,
+  "active_or_frozen_changed": false,
+  "archive": {
+    "charts": 30,
+    "path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/hot3d_all_signal_charts.zip",
+    "sha256": "7827a276600905fd298dfd2d2c742c78f99423dc49dbdcb61e74b83f35179374",
+    "size_bytes": 5581828
+  },
+  "complete_days": [
+    "2026-08-26T00:00:00+00:00",
+    "2026-08-27T00:00:00+00:00",
+    "2026-08-28T00:00:00+00:00"
+  ],
+  "confidence": 0.25,
+  "daily_rankings_sha256": "60ac5e28e0f7c49d94830a52d9ece1ec202d27837b173e999815fe49c09e13f9",
+  "deployed": false,
+  "detector_display_name": "Grade-A8000+Neg24000 epoch6 imgsz960",
+  "device": "mps",
+  "documents": 30,
+  "documents_with_exactly_one_box": 30,
+  "episode_classes": {
+    "dense_long": 26,
+    "dense_short": 4
+  },
+  "episode_representative_days": {
+    "2026-08-26": 15,
+    "2026-08-27": 8,
+    "2026-08-28": 7
+  },
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1",
+  "fetch_receipt_sha256": "2df199f6305f4b3b233e8034c770df1a953f87c25659b7f65051cccc6ab1a050",
+  "five_bar_events_before_cross_day_episode_merge": 30,
+  "forward_state_changed": false,
+  "generated_at": "2026-08-29T04:20:22.171829+00:00",
+  "holdout_consumption_number_for_this_configuration": 2,
+  "hot_definition": "daily absolute-return mover proxy, not volume or social popularity",
+  "imgsz": 960,
+  "immutable_inputs": {
+    "renderer": {
+      "path": "yoyo/layers/l1_detection/render.py",
+      "sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+    },
+    "training_geometry": {
+      "confirmation_counts": {
+        "2": 989,
+        "3": 1005,
+        "4": 997,
+        "5": 999,
+        "6": 1002,
+        "7": 1006,
+        "8": 1005,
+        "9": 997
+      },
+      "core_counts": {
+        "4": 4346,
+        "5": 3654
+      },
+      "positive_rows": 8000,
+      "window_counts": {
+        "18": 4346,
+        "19": 3654
+      }
+    },
+    "training_manifest": {
+      "path": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+      "sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2"
+    },
+    "weights": {
+      "path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960/weights/best.pt",
+      "sha256": "0524e78086face6ccba0f2bb220dadada4555a914c64a4e6794f620fa0d9103f"
+    }
+  },
+  "manifest_path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/manifest.jsonl",
+  "manifest_sha256": "24614743638a2fedd0807dda6e53fefa605dda3503e5f6c23f8d493f48d8b362",
+  "mapped_confirmation_bars_allowed": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "mapped_core_length_bars_allowed": [
+    4,
+    5
+  ],
+  "nms_iou": 0.7,
+  "orders_placed": false,
+  "overlap_episodes": 30,
+  "overview": {
+    "height": 1160,
+    "path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/overview.png",
+    "sha256": "2db0494f31181d56b5c54aa487f9063ef9ed9c30bfc53884c1b6225d1925e8d3",
+    "size_bytes": 201406,
+    "width": 1920
+  },
+  "production_eligible": false,
+  "promoted": false,
+  "protocol": "ma6_owner_grade_a8000_neg24000_epoch6_hot3d_abs_top20_rawbox_v1_20260829",
+  "ranking_causality": "post_hoc_same_day_ranking_not_live_selection",
+  "scan_totals": {
+    "accepted_before_dedup": 278,
+    "accepted_structural_boxes": 278,
+    "dedup_removed": 248,
+    "deduplicated_events": 30,
+    "raw_boxes": 327,
+    "reject_confirmation": 41,
+    "reject_core_outside_ranked_day": 8,
+    "windows_scored": 12600,
+    "windows_with_any_box": 314
+  },
+  "selected_symbol_days": 60,
+  "selected_unique_symbols": 43,
+  "source_commit": "d5c30f99bb12f46abfe24e1e5e32e32fc12cf5ec",
+  "telegram_sent": false,
+  "threshold_or_weight_changed": false,
+  "training_eligible": false,
+  "training_or_tuning": false,
+  "wall_seconds": 387.441,
+  "weights_sha256": "0524e78086face6ccba0f2bb220dadada4555a914c64a4e6794f620fa0d9103f",
+  "window_lengths": [
+    18,
+    19
+  ]
+}

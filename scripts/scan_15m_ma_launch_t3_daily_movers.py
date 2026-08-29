@@ -93,6 +93,22 @@ def utc(value: object) -> pd.Timestamp:
     return result.tz_convert("UTC")
 
 
+def preregistered_holdout_number(prereg: Mapping[str, Any]) -> int:
+    """Return the positive holdout-use identity frozen by preregistration."""
+
+    try:
+        number = int(
+            prereg["owner_authorization"][
+                "holdout_consumption_number_for_this_configuration"
+            ]
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        raise MoversScanError("missing preregistered holdout consumption number") from exc
+    if number < 1:
+        raise MoversScanError("holdout consumption number must be positive")
+    return number
+
+
 def load_preregistration(path: Path) -> dict[str, Any]:
     """Load and enforce the exact no-tuning/no-production scan contract."""
 
@@ -491,10 +507,8 @@ def fetch_and_rank(
         "experiment_id": str(prereg["experiment_id"]),
         "source_commit": source_commit,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "holdout_consumption_number_for_this_configuration": int(
-            prereg["owner_authorization"][
-                "holdout_consumption_number_for_this_configuration"
-            ]
+        "holdout_consumption_number_for_this_configuration": preregistered_holdout_number(
+            prereg
         ),
         "holdout_read_authorized_by_owner_request": True,
         "complete_days": [day.isoformat() for day in days],

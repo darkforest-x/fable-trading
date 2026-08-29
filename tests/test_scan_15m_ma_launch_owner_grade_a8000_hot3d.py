@@ -8,6 +8,7 @@ from scripts.scan_15m_ma_launch_owner_grade_a8000_hot3d import (
     cluster_symbol_episodes,
     load_preregistration,
 )
+from scripts.scan_15m_ma_launch_t3_daily_movers import preregistered_holdout_number
 
 
 def _candidate(
@@ -38,6 +39,7 @@ def test_preregistration_freezes_latest_three_complete_days_and_training_geometr
     assert tuple(detector["mapped_confirmation_bars_allowed"]) == EXPECTED_CONFIRMATIONS
     assert prereg["ranking"]["top_per_day"] == 20
     assert prereg["owner_authorization"]["telegram_delivery_authorized"] is False
+    assert preregistered_holdout_number(prereg) == 2
 
 
 def test_episode_merge_crosses_day_boundary_but_not_a_real_gap() -> None:
