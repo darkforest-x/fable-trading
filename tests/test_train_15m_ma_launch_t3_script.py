@@ -12,11 +12,35 @@ GRADE_A_NEG24000_SCRIPT = (
     / "scripts"
     / "train_15m_ma_launch_owner_grade_a8000_neg24000_on_3060.sh"
 )
+GRADE_A_FULL40_960_SCRIPT = (
+    ROOT
+    / "scripts"
+    / "train_15m_ma_launch_owner_grade_a8000_neg24000_full40_960_on_3060.sh"
+)
+GRADE_A_FULL40_1280_SCRIPT = (
+    ROOT
+    / "scripts"
+    / "train_15m_ma_launch_owner_grade_a8000_neg24000_full40_1280_on_3060.sh"
+)
 IMGSZ1280_PREREG = (
     ROOT
     / "experiments"
     / "active"
     / "exp-15m-ma-launch-t3-yolo10000-imgsz1280-v1"
+    / "preregistration.json"
+)
+GRADE_A_FULL40_960_PREREG = (
+    ROOT
+    / "experiments"
+    / "active"
+    / "exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1"
+    / "preregistration.json"
+)
+GRADE_A_FULL40_1280_PREREG = (
+    ROOT
+    / "experiments"
+    / "active"
+    / "exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1"
     / "preregistration.json"
 )
 
@@ -28,9 +52,12 @@ def source() -> str:
 def test_launcher_uses_exact_frozen_recipe() -> None:
     text = source()
     for token in (
-        "--epochs 40",
-        "--patience 10",
-        "--batch 8",
+        'EPOCHS="${FABLE_T3_EPOCHS:-40}"',
+        'PATIENCE="${FABLE_T3_PATIENCE:-10}"',
+        'BATCH="${FABLE_T3_BATCH:-8}"',
+        "--epochs %s",
+        "--patience %s",
+        "--batch %s",
         "--seed 0",
         "--finetune",
         "--cache false",
@@ -104,6 +131,10 @@ def test_shared_launcher_binds_dynamic_contract_before_start() -> None:
         "FABLE_T3_PREREG",
         "FABLE_T3_RUN_NAME",
         "FABLE_T3_IMGSZ",
+        "FABLE_T3_EPOCHS",
+        "FABLE_T3_PATIENCE",
+        "FABLE_T3_BATCH",
+        "FABLE_T3_WAIT_FOR_RUN",
         "FABLE_T3_DATASET",
         "FABLE_T3_BUILD_RECEIPT",
         "FABLE_T3_QA_RECEIPT",
@@ -119,6 +150,14 @@ def test_shared_launcher_binds_dynamic_contract_before_start() -> None:
     ):
         assert token in text
     assert text.index("PREREG_GATE=") < text.index("package ${DATASET_IMAGE_COUNT}-image immutable dataset")
+
+
+def test_shared_launcher_serializes_optional_gpu_prerequisite() -> None:
+    text = source()
+    assert "while (-not (Test-Path -LiteralPath $p))" in text
+    assert "if ($rc -ne 0) { exit 98 }" in text
+    assert "prerequisite_ok" in text
+    assert text.index("waiting_for=") < text.index("--epochs %s")
 
 
 def test_neg30000_wrapper_selects_only_the_preregistered_dataset() -> None:
@@ -160,6 +199,50 @@ def test_grade_a_neg24000_wrapper_selects_only_the_preregistered_dataset() -> No
     )
     forbidden = ("promote_owner_best.py", "active_bundle.json", "forward_log.csv")
     assert all(token not in text for token in forbidden)
+
+
+def test_grade_a_full40_wrappers_freeze_pair_and_only_change_imgsz() -> None:
+    arm960 = GRADE_A_FULL40_960_SCRIPT.read_text(encoding="utf-8")
+    arm1280 = GRADE_A_FULL40_1280_SCRIPT.read_text(encoding="utf-8")
+    for text in (arm960, arm1280):
+        assert 'FABLE_T3_EPOCHS="40"' in text
+        assert 'FABLE_T3_PATIENCE="0"' in text
+        assert 'FABLE_T3_BATCH="8"' in text
+        assert 'FABLE_T3_DATASET_IMAGE_COUNT="32000"' in text
+        assert 'FABLE_T3_STRICT_PREFLIGHT="true"' in text
+        assert (
+            'FABLE_T3_DATASET="datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1"'
+            in text
+        )
+        assert text.rstrip().endswith(
+            'exec bash scripts/train_15m_ma_launch_t3_on_3060.sh "$@"'
+        )
+    assert 'FABLE_T3_IMGSZ="960"' in arm960
+    assert 'FABLE_T3_IMGSZ="1280"' in arm1280
+    assert 'FABLE_T3_WAIT_FOR_RUN=' not in arm960
+    assert (
+        'FABLE_T3_WAIT_FOR_RUN="ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960_full40"'
+        in arm1280
+    )
+
+
+def test_grade_a_full40_preregs_bind_exact_40_epoch_resolution_pair() -> None:
+    import json
+
+    arm960 = json.loads(GRADE_A_FULL40_960_PREREG.read_text(encoding="utf-8"))
+    arm1280 = json.loads(GRADE_A_FULL40_1280_PREREG.read_text(encoding="utf-8"))
+    for prereg, imgsz in ((arm960, 960), (arm1280, 1280)):
+        training = prereg["training"]
+        assert training["epochs"] == 40
+        assert training["patience"] == 0
+        assert training["batch"] == 8
+        assert training["imgsz"] == imgsz
+        assert prereg["safety"]["holdout_read"] is False
+        assert prereg["safety"]["promote"] is False
+    excluded = {"imgsz", "run_name", "wait_for_run"}
+    recipe960 = {k: v for k, v in arm960["training"].items() if k not in excluded}
+    recipe1280 = {k: v for k, v in arm1280["training"].items() if k not in excluded}
+    assert recipe960 == recipe1280
 
 
 def test_shared_launcher_verifies_content_addressed_remote_reuse() -> None:

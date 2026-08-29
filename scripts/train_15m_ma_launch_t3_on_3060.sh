@@ -22,6 +22,10 @@ BUILD_RECEIPT="${FABLE_T3_BUILD_RECEIPT:-experiments/active/exp-15m-ma-launch-t3
 QA_RECEIPT="${FABLE_T3_QA_RECEIPT:-experiments/active/exp-15m-ma-launch-t3-yolo10000-v1/results/dataset_qa_receipt.json}"
 NAME="${FABLE_T3_RUN_NAME:-ma_launch_t3_10000_v1_y11s_ft}"
 IMGSZ="${FABLE_T3_IMGSZ:-960}"
+EPOCHS="${FABLE_T3_EPOCHS:-40}"
+PATIENCE="${FABLE_T3_PATIENCE:-10}"
+BATCH="${FABLE_T3_BATCH:-8}"
+WAIT_FOR_RUN="${FABLE_T3_WAIT_FOR_RUN:-}"
 REMOTE_DATASET_NAME="${FABLE_T3_REMOTE_DATASET_NAME:-ma_launch_t3_10000_v1}"
 LOCAL_OUTPUT_ROOT="${FABLE_T3_LOCAL_OUTPUT_ROOT:-analysis/output/ma_launch_t3_10000_v1}"
 DATASET_IMAGE_COUNT="${FABLE_T3_DATASET_IMAGE_COUNT:-36812}"
@@ -63,6 +67,9 @@ done
 [[ -x "$LOCAL_PY" ]] || die "missing local Python: $LOCAL_PY"
 [[ "$STRICT_PREFLIGHT" == true || "$STRICT_PREFLIGHT" == false ]] \
   || die "FABLE_T3_STRICT_PREFLIGHT must be true or false"
+[[ "$EPOCHS" =~ ^[1-9][0-9]*$ ]] || die "FABLE_T3_EPOCHS must be a positive integer"
+[[ "$PATIENCE" =~ ^[0-9]+$ ]] || die "FABLE_T3_PATIENCE must be a non-negative integer"
+[[ "$BATCH" =~ ^[1-9][0-9]*$ ]] || die "FABLE_T3_BATCH must be a positive integer"
 
 remote_ps() {
   local encoded
@@ -200,11 +207,15 @@ p=json.load(open(sys.argv[1], encoding="utf-8"))
 assert p["experiment_id"] == sys.argv[2], "experiment_id mismatch"
 assert p["training"]["run_name"] == sys.argv[3], "run_name mismatch"
 assert int(p["training"]["imgsz"]) == int(sys.argv[4]), "imgsz mismatch"
+assert int(p["training"]["epochs"]) == int(sys.argv[5]), "epochs mismatch"
+assert int(p["training"]["patience"]) == int(sys.argv[6]), "patience mismatch"
+assert int(p["training"]["batch"]) == int(sys.argv[7]), "batch mismatch"
+assert p["training"].get("wait_for_run", "") == sys.argv[8], "wait prerequisite mismatch"
 assert p["owner_authorization"]["training_authorized"] is True, "training not authorized"
 assert p["safety"]["holdout_read"] is False, "holdout must stay sealed"
 assert p["safety"]["promote"] is False, "promotion must stay disabled"
 print("PREREG_OK")
-' "$PREREG" "$EXPERIMENT_ID" "$NAME" "$IMGSZ")" || die "preregistration gate failed"
+' "$PREREG" "$EXPERIMENT_ID" "$NAME" "$IMGSZ" "$EPOCHS" "$PATIENCE" "$BATCH" "$WAIT_FOR_RUN")" || die "preregistration gate failed"
 [[ "$PREREG_GATE" == PREREG_OK ]] || die "preregistration gate returned no exact sentinel"
 
 DATASET_BASE="$(basename "$DATASET")"
@@ -271,9 +282,16 @@ TMP_CMD="$(mktemp -t fable_t3_cmd)"
   printf '@echo off\r\nsetlocal\r\n'
   printf '> C:\\fable\\logs\\%s.log echo [launcher] started %%DATE%% %%TIME%%\r\n' "$NAME"
   printf 'cd /d C:\\fable\r\n'
-  printf 'C:\\fable\\.venv\\Scripts\\python.exe -u C:\\fable\\train_t3_%s.py --name %s --model C:/fable/inputs/%s/yolo11s.pt --data C:/fable/datasets/%s/data.yaml --epochs 40 --patience 10 --batch 8 --imgsz %s --seed 0 --finetune --cache false --workers 2 >> C:\\fable\\logs\\%s.log 2>&1\r\n' \
-    "$TRAINER_SHA" "$NAME" "$MODEL_SHA" "$REMOTE_DATASET_NAME" "$IMGSZ" "$NAME"
+  if [[ -n "$WAIT_FOR_RUN" ]]; then
+    printf '>> C:\\fable\\logs\\%s.log echo [launcher] waiting_for=%s %%DATE%% %%TIME%%\r\n' "$NAME" "$WAIT_FOR_RUN"
+    printf 'powershell.exe -NoLogo -NoProfile -NonInteractive -Command "$p=\x27C:\\fable\\logs\\%s.exit_code\x27; while (-not (Test-Path -LiteralPath $p)) { Start-Sleep -Seconds 60 }; $rc=[int]((Get-Content -LiteralPath $p -Raw).Trim()); if ($rc -ne 0) { exit 98 }"\r\n' "$WAIT_FOR_RUN"
+    printf 'if errorlevel 1 (\r\n  set RC=98\r\n  goto finalize\r\n)\r\n'
+    printf '>> C:\\fable\\logs\\%s.log echo [launcher] prerequisite_ok=%s %%DATE%% %%TIME%%\r\n' "$NAME" "$WAIT_FOR_RUN"
+  fi
+  printf 'C:\\fable\\.venv\\Scripts\\python.exe -u C:\\fable\\train_t3_%s.py --name %s --model C:/fable/inputs/%s/yolo11s.pt --data C:/fable/datasets/%s/data.yaml --epochs %s --patience %s --batch %s --imgsz %s --seed 0 --finetune --cache false --workers 2 >> C:\\fable\\logs\\%s.log 2>&1\r\n' \
+    "$TRAINER_SHA" "$NAME" "$MODEL_SHA" "$REMOTE_DATASET_NAME" "$EPOCHS" "$PATIENCE" "$BATCH" "$IMGSZ" "$NAME"
   printf 'set RC=%%ERRORLEVEL%%\r\n'
+  printf ':finalize\r\n'
   printf '>> C:\\fable\\logs\\%s.log echo [launcher] exit_code=%%RC%% %%DATE%% %%TIME%%\r\n' "$NAME"
   printf '> C:\\fable\\logs\\%s.exit_code echo %%RC%%\r\n' "$NAME"
   printf 'exit /b %%RC%%\r\n'
@@ -379,6 +397,6 @@ PS
 )"
 printf '%s\n' "$START"
 [[ "$START" =~ PID=([0-9]+) ]] || die "WMI returned no PID"
-printf '  run: %s\n  status: FABLE_3060_HOST=%q bash %q --status\n' \
-  "$NAME" "$HOST" "$0"
+printf '  run: %s\n  recipe: epochs=%s patience=%s batch=%s imgsz=%s\n  wait_for: %s\n  status: FABLE_3060_HOST=%q bash %q --status\n' \
+  "$NAME" "$EPOCHS" "$PATIENCE" "$BATCH" "$IMGSZ" "${WAIT_FOR_RUN:-none}" "$HOST" "$0"
 printf '\nStarted only. No holdout, promotion, deployment, ACTIVE or trading action occurred.\n'
