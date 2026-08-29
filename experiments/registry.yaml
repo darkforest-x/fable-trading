@@ -2568,7 +2568,7 @@ experiments:
 
   - experiment_id: exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "ddab0ab68c355babd9bb6f8b454e40c2396f266b"
+    source_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
     status: active
     question: >-
       What does the completed epoch-6 Grade-A 8,000-positive plus 24,000-
@@ -2580,16 +2580,29 @@ experiments:
       immutable W18/W19, core4/5 and post2-9 training geometry; target signal
       days, confidence, NMS, episode merge and rendering remain unchanged
     result: >-
-      preregistered and owner-authorized; no ETH holdout bars or predictions
-      have been read yet for this detector configuration
-    holdout_consumed: false
+      scan_and_pixel_qa_complete_pending_telegram. Across the same 30 complete
+      ETH UTC signal days, 6,300 W18/W19 inputs produced 252 raw boxes, 229
+      structurally legal candidates, 26 five-bar events and 24 overlap episodes
+      (11 LONG / 13 SHORT) across 20 days. All 24 one-box 1920x1400 documents
+      passed exact model-input, pixel-rerender and PNG-hash QA. Eighteen of 24
+      episodes overlap yesterday's old-model episodes with 18/18 same class.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     artifacts:
       - 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-prereg
+      - 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-fetch
+      - 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-scan
+      - 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-manifest
+      - 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-overview
+      - 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-charts
+      - 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-qa
+      - 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-report
+      - 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-html
+    canonical_report: analysis/p1_15m_ma_launch_owner_grade_a8000_eth30d_20260829.md
     reuse_allowed: false
     notes: >-
       This is holdout consumption #1 for the exact epoch-6 Grade-A detector.
-      The same 30 signal days as yesterday are frozen. Three terminal bars are
-      added only to complete the model's post2-9 support at the final boundary;
-      the shared OHLCV prefix must match yesterday exactly before inference.
+      The same 30 signal days as yesterday are frozen. The 3,078-row shared
+      OHLCV prefix matched exactly; three terminal bars only complete the
+      model's post2-9 support. No tuning, promotion, deployment or order occurred.

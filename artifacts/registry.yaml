@@ -7731,3 +7731,139 @@ artifacts:
     notes: >-
       Owner-authorized holdout use #1 for this exact weight and geometry;
       committed before any new ETH market-data read or prediction.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-fetch
+    artifact_type: manifest
+    role: exact_30day_eth_snapshot_and_baseline_prefix_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/results/fetch_receipt.json
+    sha256: "263d51c5d5a5bccbc1f13878b99d18b13b9459ef9c9e7f252e903055ff344b1b"
+    size_bytes: 3012
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/results/fetch_receipt.json"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    config_hash: "4f0b2b9cece8a7170d474a37c4ac6f5917edd74eace470cf8600a823944f9098"
+    data_cutoff: "2026-08-28T02:00:00Z"
+    notes: 3,081 contiguous rows; 30/30 exact 96-bar days; shared 3,078-row OHLCV prefix matched yesterday exactly.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-scan
+    artifact_type: manifest
+    role: frozen_detector_scan_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/results/scan_receipt.json
+    sha256: "381dcb876cbd03778731bf7a25b867554d3a79ce3c183b94b42100aa9fbc566f"
+    size_bytes: 3623
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/results/scan_receipt.json"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    config_hash: "4f0b2b9cece8a7170d474a37c4ac6f5917edd74eace470cf8600a823944f9098"
+    data_cutoff: "2026-08-28T02:00:00Z"
+    notes: 6,300 inputs, 252 raw boxes, 229 accepted candidates and 24 overlap episodes; no tuning or production mutation.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-manifest
+    artifact_type: manifest
+    role: ordered_one_box_episode_delivery_manifest
+    source_repo: darkforest-x/fable-trading
+    source_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/results/manifest.jsonl
+    sha256: "fd7e8de60fc7a2aa4699cdc97d6cfb0c48b68500d0ed9bf372e811dca5d896f4"
+    size_bytes: 34183
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/results/manifest.jsonl"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    config_hash: "4f0b2b9cece8a7170d474a37c4ac6f5917edd74eace470cf8600a823944f9098"
+    data_cutoff: "2026-08-28T02:00:00Z"
+    notes: Ordered 24-document ledger with raw box coordinates, exact input hashes and PNG hashes.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-overview
+    artifact_type: report
+    role: owner_facing_24episode_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/results/overview.png
+    sha256: "cc3a93aa3e1899c61983c966dcdb73ec66e02607099cbdc857e12e2e29b04805"
+    size_bytes: 97241
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/results/overview.png"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    config_hash: "4f0b2b9cece8a7170d474a37c4ac6f5917edd74eace470cf8600a823944f9098"
+    data_cutoff: "2026-08-28T02:00:00Z"
+    notes: Compact 11-LONG and 13-SHORT episode ledger for the frozen scan.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-charts
+    artifact_type: bundle
+    role: lossless_24_high_resolution_one_box_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/results/ethusdt_p_30d_all_signal_charts.zip
+    sha256: "7fc5febb26081b3a4bb0ef9a34930ee311b621531ae0983c5a021e05abf5f0ef"
+    size_bytes: 3625963
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/results/ethusdt_p_30d_all_signal_charts.zip"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    config_hash: "4f0b2b9cece8a7170d474a37c4ac6f5917edd74eace470cf8600a823944f9098"
+    data_cutoff: "2026-08-28T02:00:00Z"
+    notes: Contains all 24 lossless 1920x1400 PNGs plus overview, manifest and candidate/episode ledgers.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-qa
+    artifact_type: manifest
+    role: exact_pixel_rerender_and_pairing_null_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/results/qa_receipt.json
+    sha256: "098019d57bc8cac929d6df9dda46e52c62d85ef8c4bc8ba2e6926732493ea5b9"
+    size_bytes: 750
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/results/qa_receipt.json"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    config_hash: "4f0b2b9cece8a7170d474a37c4ac6f5917edd74eace470cf8600a823944f9098"
+    data_cutoff: "2026-08-28T02:00:00Z"
+    notes: 24/24 exact model inputs, rerenders and PNG hashes; shifted pairing null 0/24.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-report
+    artifact_type: report
+    role: canonical_markdown_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    source_path: analysis/p1_15m_ma_launch_owner_grade_a8000_eth30d_20260829.md
+    sha256: "d1a992f08eb8dcaa9eef333e76f3cc526d9c1a48386b68125370164fda58aa63"
+    size_bytes: 8688
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_grade_a8000_eth30d_20260829.md"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    config_hash: "4f0b2b9cece8a7170d474a37c4ac6f5917edd74eace470cf8600a823944f9098"
+    data_cutoff: "2026-08-28T02:00:00Z"
+    notes: Full detector identity, data-prefix parity, normalized old/new comparison, QA, limitations and reproduction commands.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    source_path: analysis/html/p1_15m_ma_launch_owner_grade_a8000_eth30d_20260829.html
+    sha256: "7f0f8aa4f30ca12af04b1e957c29692a231182cc4da023a4f097255faa97e483"
+    size_bytes: 142676
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_grade_a8000_eth30d_20260829.html"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    config_hash: "4f0b2b9cece8a7170d474a37c4ac6f5917edd74eace470cf8600a823944f9098"
+    data_cutoff: "2026-08-28T02:00:00Z"
+    notes: Self-contained Owner-facing HTML generated immediately after the canonical Markdown report.
