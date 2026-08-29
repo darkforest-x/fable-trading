@@ -7906,3 +7906,139 @@ artifacts:
     notes: >-
       Owner-authorized exact-detector holdout use #2, committed before any new
       daily-universe or selected-symbol 15m read. Telegram is unauthorized.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-fetch
+    artifact_type: manifest
+    role: exact_three_day_daily_board_and_selected_15m_snapshot_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b652817a27f62a25178dcf89a2f9e4dee694f94d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/fetch_receipt.json
+    sha256: "2df199f6305f4b3b233e8034c770df1a953f87c25659b7f65051cccc6ab1a050"
+    size_bytes: 41685
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/fetch_receipt.json"
+    holdout_status: holdout_consumed_2
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d5c30f99bb12f46abfe24e1e5e32e32fc12cf5ec"
+    config_hash: "d6ff30f3b1eee6c69eb191de647b8bcd970049a5e4a7450377e92f62824a8892"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: 274 eligible swaps; 60 Top20 symbol-days, 43 unique selected symbols, 60/60 exact contiguous 96-bar days and zero snapshot gaps.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-scan
+    artifact_type: manifest
+    role: frozen_detector_cross_section_scan_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b652817a27f62a25178dcf89a2f9e4dee694f94d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/scan_receipt.json
+    sha256: "6e9315676f637b892014979231e75969607ca3e88a63792a3fa974f4d61733b6"
+    size_bytes: 4070
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/scan_receipt.json"
+    holdout_status: holdout_consumed_2
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d5c30f99bb12f46abfe24e1e5e32e32fc12cf5ec"
+    config_hash: "d6ff30f3b1eee6c69eb191de647b8bcd970049a5e4a7450377e92f62824a8892"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: 12,600 inputs, 327 raw boxes, 278 legal candidates and 30 overlap episodes; no post-result filtering, tuning or production mutation.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-manifest
+    artifact_type: manifest
+    role: ordered_thirty_document_raw_box_and_pixel_identity_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b652817a27f62a25178dcf89a2f9e4dee694f94d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/manifest.jsonl
+    sha256: "24614743638a2fedd0807dda6e53fefa605dda3503e5f6c23f8d493f48d8b362"
+    size_bytes: 45258
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/manifest.jsonl"
+    holdout_status: holdout_consumed_2
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d5c30f99bb12f46abfe24e1e5e32e32fc12cf5ec"
+    config_hash: "d6ff30f3b1eee6c69eb191de647b8bcd970049a5e4a7450377e92f62824a8892"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: Ordered 30-document ledger with original normalized boxes, exact detector-input pixel hashes and final PNG hashes.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-overview
+    artifact_type: report
+    role: owner_facing_three_board_episode_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b652817a27f62a25178dcf89a2f9e4dee694f94d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/overview.png
+    sha256: "2db0494f31181d56b5c54aa487f9063ef9ed9c30bfc53884c1b6225d1925e8d3"
+    size_bytes: 201406
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/overview.png"
+    holdout_status: holdout_consumed_2
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d5c30f99bb12f46abfe24e1e5e32e32fc12cf5ec"
+    config_hash: "d6ff30f3b1eee6c69eb191de647b8bcd970049a5e4a7450377e92f62824a8892"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: Three daily Top20 boards with 15, 8 and 7 representative episodes respectively.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-charts
+    artifact_type: bundle
+    role: lossless_thirty_high_resolution_one_episode_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b652817a27f62a25178dcf89a2f9e4dee694f94d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/hot3d_all_signal_charts.zip
+    sha256: "7827a276600905fd298dfd2d2c742c78f99423dc49dbdcb61e74b83f35179374"
+    size_bytes: 5581828
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/hot3d_all_signal_charts.zip"
+    holdout_status: holdout_consumed_2
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d5c30f99bb12f46abfe24e1e5e32e32fc12cf5ec"
+    config_hash: "d6ff30f3b1eee6c69eb191de647b8bcd970049a5e4a7450377e92f62824a8892"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: All 30 lossless 1920x1400 PNGs plus overview, manifests, rankings and candidate/episode ledgers; not sent to Telegram.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-qa
+    artifact_type: manifest
+    role: exact_pixel_rerender_and_pairing_null_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b652817a27f62a25178dcf89a2f9e4dee694f94d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/qa_receipt.json
+    sha256: "9bee6c7d7d6c2b776914ac736bfa68727dd74178c27ead4eeb0f78a3f219309e"
+    size_bytes: 818
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/qa_receipt.json"
+    holdout_status: holdout_consumed_2
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d5c30f99bb12f46abfe24e1e5e32e32fc12cf5ec"
+    config_hash: "d6ff30f3b1eee6c69eb191de647b8bcd970049a5e4a7450377e92f62824a8892"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: 30/30 exact inputs, full-document rerenders and PNG hashes; cyclic shifted pairing null matched 0/30.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-report
+    artifact_type: report
+    role: canonical_markdown_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b652817a27f62a25178dcf89a2f9e4dee694f94d"
+    source_path: analysis/p1_15m_ma_launch_owner_grade_a8000_hot3d_20260829.md
+    sha256: "bf02b0e0938384427f38b82ce61365b21f78d60bb903768ee27cb89a47c8cb54"
+    size_bytes: 10496
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_grade_a8000_hot3d_20260829.md"
+    holdout_status: holdout_consumed_2
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b652817a27f62a25178dcf89a2f9e4dee694f94d"
+    config_hash: "d6ff30f3b1eee6c69eb191de647b8bcd970049a5e4a7450377e92f62824a8892"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: Canonical report with frozen detector identity, daily boards, funnel, normalized ETH baseline, QA, null and risk disclosures.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b652817a27f62a25178dcf89a2f9e4dee694f94d"
+    source_path: analysis/html/p1_15m_ma_launch_owner_grade_a8000_hot3d_20260829.html
+    sha256: "0d70453de3d174c2b290ac8883895cbe48e81a9f1f93bd43a3c30e10a0a43bb0"
+    size_bytes: 841882
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_grade_a8000_hot3d_20260829.html"
+    holdout_status: holdout_consumed_2
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b652817a27f62a25178dcf89a2f9e4dee694f94d"
+    config_hash: "d6ff30f3b1eee6c69eb191de647b8bcd970049a5e4a7450377e92f62824a8892"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: Self-contained Owner-facing HTML with embedded overview and LONG/SHORT full-context examples.

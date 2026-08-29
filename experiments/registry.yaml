@@ -2613,8 +2613,8 @@ experiments:
 
   - experiment_id: exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "4ef6feb73cd13122cc3f2dfa017bef7416cf99f4"
-    status: active
+    source_commit: "b652817a27f62a25178dcf89a2f9e4dee694f94d"
+    status: accepted
     question: >-
       What does the completed epoch-6 Grade-A 8,000-positive plus 24,000-
       negative detector find on the latest three complete UTC days' OKX
@@ -2625,17 +2625,31 @@ experiments:
       W18/W19, core4/5, post2-9, confidence, NMS, raw-box preservation,
       overlap-episode merge and high-resolution one-box rendering stay fixed
     result: >-
-      preregistered before any new market-data read; 60 symbol-days are frozen
-      for 2026-08-26 through 2026-08-28 UTC and no result has been read yet
-    holdout_consumed: false
+      completed_locally. The three daily Top20 boards contained 60 symbol-days
+      and 43 unique symbols. Across 12,600 frozen W18/W19 inputs, 327 raw boxes
+      yielded 278 structurally legal candidates and 30 same-symbol overlap
+      episodes (26 LONG / 4 SHORT) across 26 symbol-days and 23 symbols. All
+      30 one-box 1920x1400 documents passed exact model-input, pixel-rerender
+      and PNG-hash QA; cyclic event/input mispairing matched 0/30.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     artifacts:
       - 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-prereg
+      - 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-fetch
+      - 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-scan
+      - 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-manifest
+      - 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-overview
+      - 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-charts
+      - 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-qa
+      - 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-report
+      - 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-html
+    canonical_report: analysis/p1_15m_ma_launch_owner_grade_a8000_hot3d_20260829.md
     reuse_allowed: false
     notes: >-
-      This will be exact-detector holdout use #2 and the first cross-sectional
-      daily-mover use of this weight. "Hot" is explicitly an absolute-return
-      mover proxy, not volume or social popularity. Same-day membership is
-      post-hoc, today is excluded, Telegram is unauthorized, and no tuning,
-      promotion, deployment, forward mutation or order is allowed.
+      This is exact-detector holdout use #2 and the first cross-sectional
+      daily-mover use of this weight. "Hot" is an absolute-return mover proxy,
+      not volume or social popularity; same-day membership is post-hoc and the
+      current live universe has survivorship bias. No signal was manually
+      removed after results. Telegram, training, tuning, promotion, deployment,
+      forward mutation and orders all remained false.
