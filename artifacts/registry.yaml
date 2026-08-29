@@ -7374,6 +7374,44 @@ artifacts:
       Owner-facing standalone HTML generated from the canonical Markdown with
       both PNG figures embedded as base64 and structurally validated offline.
 
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1-prereg
+    artifact_type: config
+    role: frozen_full40_imgsz960_training_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ba1c321adcdbac59a24df414eaf5ff2c5ccc84f6"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1/preregistration.json
+    sha256: "cf014d27d96ae32e1d199fc1084532ee98dc5a92a428484cfbc36817aeb06cb7"
+    size_bytes: 5264
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ba1c321adcdbac59a24df414eaf5ff2c5ccc84f6"
+    config_hash: "cf014d27d96ae32e1d199fc1084532ee98dc5a92a428484cfbc36817aeb06cb7"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Freezes the only change from the prior 960 run as patience=0, requiring
+      all 40 epochs while keeping the same 32,000-image chronological dataset.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1-prereg
+    artifact_type: config
+    role: frozen_full40_imgsz1280_training_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ba1c321adcdbac59a24df414eaf5ff2c5ccc84f6"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1/preregistration.json
+    sha256: "5adc6d4fa1eb5bc4c459f59b0b94a7b71c64dcd49de191ee9f77e01895427090"
+    size_bytes: 5358
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ba1c321adcdbac59a24df414eaf5ff2c5ccc84f6"
+    config_hash: "5adc6d4fa1eb5bc4c459f59b0b94a7b71c64dcd49de191ee9f77e01895427090"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: >-
+      Freezes the matched native 1280 treatment with batch=8 and patience=0;
+      the remote wait prerequisite only serializes the single GPU.
+
   - artifact_id: 15m-right-edge-screenshot-similarity-v1-prereg
     artifact_type: config
     role: frozen_screenshot_pixel_query_and_similarity_contract

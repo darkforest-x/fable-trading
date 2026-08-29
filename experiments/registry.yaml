@@ -2466,6 +2466,56 @@ experiments:
       the same delayed input contract; they cannot enter the causal
       tip/tip-1/tip-2 path or be represented as fresh live signals.
 
+  - experiment_id: exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ba1c321adcdbac59a24df414eaf5ff2c5ccc84f6"
+    status: active
+    question: >-
+      With the immutable Grade-A 8,000-positive plus 24,000-negative dataset
+      and every optimizer argument frozen, does disabling early stopping and
+      completing all 40 epochs improve the imgsz=960 detector?
+    single_variable: >-
+      patience changes from 10 to 0; dataset, source weights, imgsz=960,
+      batch=8, seed=0, optimizer, learning-rate schedule and augmentations stay
+      identical to the prior run
+    result: >-
+      preregistered and queued for the RTX 3060; no result has been read yet
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts:
+      - 15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1-prereg
+    reuse_allowed: false
+    notes: >-
+      Owner authorized this full-40-epoch rerun on 2026-08-29. It remains a
+      completed-history detector using post-core bars and does not become a
+      causal tip/tip-1/tip-2 detector merely by training longer.
+
+  - experiment_id: exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ba1c321adcdbac59a24df414eaf5ff2c5ccc84f6"
+    status: active
+    question: >-
+      Once both arms complete all 40 epochs, does native imgsz=1280 improve
+      the same immutable Grade-A detector over the matched imgsz=960 arm?
+    single_variable: >-
+      native training and validation imgsz changes from 960 to 1280; dataset,
+      source weights, full-40 patience=0 recipe, batch=8, seed=0, optimizer,
+      schedule and augmentations are identical
+    result: >-
+      preregistered and remotely serialized behind the 960 arm; no result has
+      been read yet
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts:
+      - 15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1-prereg
+    reuse_allowed: false
+    notes: >-
+      The wait prerequisite is orchestration only and is not passed to
+      Ultralytics. This is still completed-history research, not a fresh live
+      signal model.
+
   - experiment_id: exp-15m-right-edge-screenshot-similarity-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "4c20cb11f9f5c7d86e67f17fed67167fcf74f71c"
