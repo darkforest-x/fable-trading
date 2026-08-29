@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1",
+  "created_at": "2026-08-29T09:36:51+08:00",
+  "created_while_training_state": "remote dataset scan in progress; epoch 1 training and validation metrics not yet produced or read",
+  "question": "Does completing all 40 epochs at imgsz=960 improve the same detector without increasing matched-negative fires or delaying earliest event detection?",
+  "immutable_inputs": {
+    "training_preregistration_sha256": "cf014d27d96ae32e1d199fc1084532ee98dc5a92a428484cfbc36817aeb06cb7",
+    "dataset": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1",
+    "manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "val_images": 4800,
+    "val_positive_images": 1200,
+    "val_negative_images": 3600,
+    "val_positive_events": 155,
+    "holdout_rows_allowed": 0
+  },
+  "weight_binding": {
+    "selection": "Ultralytics best.pt selected only by chronological val fitness over exactly 40 completed epochs",
+    "threshold_or_epoch_reselection_allowed": false
+  },
+  "implementations": {
+    "training_summary_script": "scripts/summarize_15m_ma_launch_t3_training.py",
+    "training_summary_script_sha256": "1a86ea1f507058d0144dbcda69880c461262f068470372ed9b754f68d069c33d",
+    "fixed_threshold_evaluator": "scripts/evaluate_15m_ma_launch_owner_grade_a8000_val.py",
+    "fixed_threshold_evaluator_sha256": "d10cdd20f6c1648eaba5f62ed54efc73ac33947b15d8c089a2371716a32d7be9"
+  },
+  "standard_detection_metrics": {
+    "imgsz": 960,
+    "batch": 8,
+    "rect": true,
+    "report": ["precision", "recall", "mAP50", "mAP50-95", "per-class metrics"]
+  },
+  "fixed_threshold_surface": {
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "true_hit_iou": 0.5,
+    "threshold_tuned": false,
+    "report": ["positive correct-class hit recall", "multiple-box rate", "hard/easy negative fire rate", "false boxes per 1000 negatives", "event post2 and earliest-available hit rates"]
+  },
+  "comparisons": {
+    "primary_reference": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-v1",
+    "primary_variable": "patience 10 early stop versus patience 0 full 40 epochs",
+    "resolution_pair": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1",
+    "manual_winner_selection": false
+  },
+  "interpretation_limits": {
+    "completed_history_not_live_tip": true,
+    "holdout_consumed": false,
+    "financial_metrics_not_applicable": "Object detection validation has no entry, exit or return series.",
+    "production_decision": false
+  }
+}

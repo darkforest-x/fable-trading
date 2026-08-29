@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1",
+  "launched_at": "2026-08-29T09:28:42+08:00",
+  "remote_host": "Administrator@192.168.1.5",
+  "wmi_pid": 11856,
+  "run_name": "ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40",
+  "stage_sentinel": "STAGE_OK|ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40|22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2|e0fb6de40d6355da8b484385f8a0d31ba82fbd8ac1389768448860a81e35151d",
+  "recipe": {"epochs": 40, "patience": 0, "batch": 8, "imgsz": 1280, "seed": 0},
+  "queue_prerequisite": "ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960_full40.exit_code == 0",
+  "queue_state_at_receipt": "waiting",
+  "runtime_versions": {"torch": "2.8.0", "torchvision": "0.23.0", "ultralytics": "8.4.89", "numpy": "2.0.2"},
+  "gpu": "NVIDIA GeForce RTX 3060 12GB",
+  "holdout_read": false,
+  "promoted": false,
+  "deployed": false
+}

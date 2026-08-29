@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1",
+  "created_at": "2026-08-29T09:36:51+08:00",
+  "created_while_training_state": "queued behind the 960 arm; no 1280 training or validation metric exists",
+  "question": "With the full-40 recipe held fixed, does native imgsz=1280 improve the same detector over imgsz=960?",
+  "immutable_inputs": {
+    "training_preregistration_sha256": "5adc6d4fa1eb5bc4c459f59b0b94a7b71c64dcd49de191ee9f77e01895427090",
+    "dataset": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1",
+    "manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "val_images": 4800,
+    "val_positive_images": 1200,
+    "val_negative_images": 3600,
+    "val_positive_events": 155,
+    "holdout_rows_allowed": 0
+  },
+  "weight_binding": {
+    "selection": "Ultralytics best.pt selected only by chronological val fitness over exactly 40 completed epochs",
+    "threshold_or_epoch_reselection_allowed": false
+  },
+  "implementations": {
+    "training_summary_script": "scripts/summarize_15m_ma_launch_t3_training.py",
+    "training_summary_script_sha256": "1a86ea1f507058d0144dbcda69880c461262f068470372ed9b754f68d069c33d",
+    "fixed_threshold_evaluator": "scripts/evaluate_15m_ma_launch_owner_grade_a8000_val.py",
+    "fixed_threshold_evaluator_sha256": "d10cdd20f6c1648eaba5f62ed54efc73ac33947b15d8c089a2371716a32d7be9",
+    "resolution_grid_script": "scripts/evaluate_15m_ma_launch_t3_resolution_grid.py",
+    "resolution_grid_script_sha256": "6155d1797f583ed732341a95df47b8ce02eb0bf3c25873e74450b6aa438aed0d"
+  },
+  "standard_detection_metrics": {
+    "imgsz": 1280,
+    "batch": 8,
+    "rect": true,
+    "report": ["precision", "recall", "mAP50", "mAP50-95", "per-class metrics"]
+  },
+  "fixed_threshold_surface": {
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "true_hit_iou": 0.5,
+    "threshold_tuned": false,
+    "report": ["positive correct-class hit recall", "multiple-box rate", "hard/easy negative fire rate", "false boxes per 1000 negatives", "event post2 and earliest-available hit rates"]
+  },
+  "comparisons": {
+    "primary_reference": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1",
+    "primary_variable": "native training and validation imgsz 960 versus 1280",
+    "secondary_cross_grid": "Evaluate both delivered weights at both inference sizes 960 and 1280 so training-resolution and inference-resolution effects are not conflated.",
+    "manual_winner_selection": false
+  },
+  "interpretation_limits": {
+    "completed_history_not_live_tip": true,
+    "holdout_consumed": false,
+    "financial_metrics_not_applicable": "Object detection validation has no entry, exit or return series.",
+    "production_decision": false
+  }
+}

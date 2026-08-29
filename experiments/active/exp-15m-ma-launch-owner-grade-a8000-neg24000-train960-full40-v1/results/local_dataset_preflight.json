@@ -1,0 +1,57 @@
+{
+  "class_instances_by_split": {
+    "train": {
+      "0": 3205,
+      "1": 3595
+    },
+    "val": {
+      "0": 531,
+      "1": 669
+    }
+  },
+  "class_names": {
+    "0": "dense_long",
+    "1": "dense_short"
+  },
+  "dataset": "/Users/zhangzc/fable-trading/datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1",
+  "events_by_split": {
+    "train": {
+      "negative": 2664,
+      "positive": 888
+    },
+    "val": {
+      "negative": 465,
+      "positive": 155
+    }
+  },
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1",
+  "file_counts": {
+    "train": {
+      "images": 27200,
+      "labels": 27200,
+      "negative": 20400,
+      "positive": 6800
+    },
+    "val": {
+      "images": 4800,
+      "labels": 4800,
+      "negative": 3600,
+      "positive": 1200
+    }
+  },
+  "file_hash_verification_enabled": true,
+  "file_hashes_verified": 64000,
+  "holdout_rows_read": 0,
+  "manifest_rows": 32000,
+  "manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+  "negative_empty_labels": 24000,
+  "passed": true,
+  "positive_labels": 8000,
+  "schema_version": 1,
+  "source_dimensions": [
+    1280,
+    742
+  ],
+  "unique_actual_image_hashes": 32000,
+  "unique_sample_ids": 32000
+}
