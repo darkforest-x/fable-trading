@@ -7838,15 +7838,15 @@ artifacts:
     artifact_type: report
     role: canonical_markdown_report
     source_repo: darkforest-x/fable-trading
-    source_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    source_commit: "7f214ad535687f677a620aa669a3a15acf0eb584"
     source_path: analysis/p1_15m_ma_launch_owner_grade_a8000_eth30d_20260829.md
-    sha256: "d1a992f08eb8dcaa9eef333e76f3cc526d9c1a48386b68125370164fda58aa63"
-    size_bytes: 8688
+    sha256: "81de8ad4e65890b9b3d6ff24d323c01c9c1c35e012af411fd366a2fcaddec022"
+    size_bytes: 8864
     storage_uri: "repo://analysis/p1_15m_ma_launch_owner_grade_a8000_eth30d_20260829.md"
     holdout_status: holdout_consumed_1
     training_eligible: false
     production_eligible: false
-    generator_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    generator_commit: "7f214ad535687f677a620aa669a3a15acf0eb584"
     config_hash: "4f0b2b9cece8a7170d474a37c4ac6f5917edd74eace470cf8600a823944f9098"
     data_cutoff: "2026-08-28T02:00:00Z"
     notes: Full detector identity, data-prefix parity, normalized old/new comparison, QA, limitations and reproduction commands.
@@ -7855,15 +7855,35 @@ artifacts:
     artifact_type: report
     role: owner_facing_self_contained_html_report
     source_repo: darkforest-x/fable-trading
-    source_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    source_commit: "7f214ad535687f677a620aa669a3a15acf0eb584"
     source_path: analysis/html/p1_15m_ma_launch_owner_grade_a8000_eth30d_20260829.html
-    sha256: "7f0f8aa4f30ca12af04b1e957c29692a231182cc4da023a4f097255faa97e483"
-    size_bytes: 142676
+    sha256: "7531c21c0023bbdae95dfe6af3ed42f2f721a01e42d54731374b0ff1c902c92d"
+    size_bytes: 142852
     storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_grade_a8000_eth30d_20260829.html"
     holdout_status: holdout_consumed_1
     training_eligible: false
     production_eligible: false
-    generator_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
+    generator_commit: "7f214ad535687f677a620aa669a3a15acf0eb584"
     config_hash: "4f0b2b9cece8a7170d474a37c4ac6f5917edd74eace470cf8600a823944f9098"
     data_cutoff: "2026-08-28T02:00:00Z"
     notes: Self-contained Owner-facing HTML generated immediately after the canonical Markdown report.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-telegram-cancelled
+    artifact_type: manifest
+    role: owner_cancelled_partial_telegram_delivery_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7f214ad535687f677a620aa669a3a15acf0eb584"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/results/telegram_delivery_receipt.json
+    sha256: "3308a672e62b85dec20645be8f44c7363bfa764eeee9e28d1c71eb8c9190d984"
+    size_bytes: 3750
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/results/telegram_delivery_receipt.json"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7f214ad535687f677a620aa669a3a15acf0eb584"
+    config_hash: "4f0b2b9cece8a7170d474a37c4ac6f5917edd74eace470cf8600a823944f9098"
+    data_cutoff: "2026-08-28T02:00:00Z"
+    notes: >-
+      Owner cancelled delivery during sending. Overview plus signal_001 through
+      signal_007 were already sent (8 files total); the remaining 19 files were
+      not sent. Receipt is terminal-cancelled and the sender refuses resumption.

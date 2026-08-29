@@ -174,6 +174,8 @@ def deliver(
     events = int(scan["overlap_episodes"])
     if receipt_path.exists():
         receipt = read_json(receipt_path)
+        if receipt.get("delivery_cancelled_by_owner") is True:
+            raise Eth30dDeliveryError("delivery cancelled by Owner; refusing resume")
         if receipt.get("contract_sha256") != contract_sha:
             raise Eth30dDeliveryError("existing Telegram receipt belongs to another contract")
         if receipt.get("delivery_complete") is True:

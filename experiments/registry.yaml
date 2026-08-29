@@ -2569,7 +2569,7 @@ experiments:
   - experiment_id: exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "448a1d131c82fd36d36d7ca2e86d8f3bd7c8e4e1"
-    status: active
+    status: accepted
     question: >-
       What does the completed epoch-6 Grade-A 8,000-positive plus 24,000-
       negative imgsz=960 detector find on the same 30 complete ETHUSDT.P UTC
@@ -2580,12 +2580,14 @@ experiments:
       immutable W18/W19, core4/5 and post2-9 training geometry; target signal
       days, confidence, NMS, episode merge and rendering remain unchanged
     result: >-
-      scan_and_pixel_qa_complete_pending_telegram. Across the same 30 complete
+      completed_locally_owner_cancelled_telegram. Across the same 30 complete
       ETH UTC signal days, 6,300 W18/W19 inputs produced 252 raw boxes, 229
       structurally legal candidates, 26 five-bar events and 24 overlap episodes
       (11 LONG / 13 SHORT) across 20 days. All 24 one-box 1920x1400 documents
       passed exact model-input, pixel-rerender and PNG-hash QA. Eighteen of 24
       episodes overlap yesterday's old-model episodes with 18/18 same class.
+      Owner cancelled Telegram after the overview plus seven signal files had
+      already sent; the remaining 19 documents were stopped and cannot auto-resume.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
@@ -2599,6 +2601,7 @@ experiments:
       - 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-qa
       - 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-report
       - 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-html
+      - 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-telegram-cancelled
     canonical_report: analysis/p1_15m_ma_launch_owner_grade_a8000_eth30d_20260829.md
     reuse_allowed: false
     notes: >-
@@ -2606,3 +2609,4 @@ experiments:
       The same 30 signal days as yesterday are frozen. The 3,078-row shared
       OHLCV prefix matched exactly; three terminal bars only complete the
       model's post2-9 support. No tuning, promotion, deployment or order occurred.
+      Telegram is not part of acceptance; Owner's cancellation is authoritative.

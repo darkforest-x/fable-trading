@@ -89,11 +89,11 @@ li { margin: .25rem 0; }
 <tr><td>核心不属于目标日</td><td>3</td><td>末端延伸窗口的边界保护</td></tr>
 <tr><td>结构合格候选</td><td>229</td><td>未修改置信度或框坐标</td></tr>
 <tr><td>5 根 K 去重事件</td><td>26</td><td>仅作为旧报表兼容指标</td></tr>
-<tr><td>连续重叠 episode</td><td><strong>24</strong></td><td>本轮 Owner 图与 TG 交付单位</td></tr>
+<tr><td>连续重叠 episode</td><td><strong>24</strong></td><td>本轮每张独立整图的交付单位</td></tr>
 <tr><td>LONG / SHORT</td><td><strong>11 / 13</strong></td><td>取 episode 最早可见原始框的类别</td></tr>
 </tbody></table>
 <h2>与昨天旧模型对照</h2>
-<p>昨天使用的是 10,000 弱正样本 + 30,000 负样本模型，支持 W18–25、确认 4–6 根；本轮只替换为 Grade-A epoch-6 权重及它真实训练过的窗口几何。目标信号日、<code>conf</code>、NMS、episode 合并规则、 整图渲染和 TG 传输方式均保持不变。</p>
+<p>昨天使用的是 10,000 弱正样本 + 30,000 负样本模型，支持 W18–25、确认 4–6 根；本轮只替换为 Grade-A epoch-6 权重及它真实训练过的窗口几何。目标信号日、<code>conf</code>、NMS、episode 合并规则和 整图渲染均保持不变。</p>
 <table><thead><tr>
 <th>指标</th>
 <th>昨天旧模型</th>
@@ -178,8 +178,8 @@ PYTHONPATH=. .venv/bin/python -m pytest \
   analysis/p1_15m_ma_launch_owner_grade_a8000_eth30d_20260829.md \
   --out-dir analysis/html
 </code></pre>
-<p>官方构建拒绝覆盖既有快照、扫描结果和 TG 回执。从零复现必须使用新的实验目录，不能删除本轮 证据后冒充第一次运行。</p>
+<p>官方构建拒绝覆盖既有快照、扫描结果和交付回执。从零复现必须使用新的实验目录，不能删除本轮 证据后冒充第一次运行。</p>
 <h2>下一步</h2>
-<p>本轮不需要人工审核才能完成交付；24 张图会按文件逐张发到 TG。Owner 可在收到后直接按自己的 视觉标准查看。若后续要比较 full40-960 或 full40-1280，应继续使用同一批 30 个信号日和相同 渲染/合并规则，单独登记新的 holdout 消费次数。</p>
+<p>本轮不需要人工审核才能完成本地结果。Telegram 发送启动后，Owner 明确改为“不需要发 TG”； 进程已立即中断。中断前已经发送总览和前 7 张信号图，共 8 个文件；剩余 17 张信号图、ZIP 与 HTML 共 19 个文件未发送，回执已标记为 Owner 取消并禁止自动续传。若后续要比较 full40-960 或 full40-1280，应继续使用同一批 30 个信号日和相同渲染/合并规则，单独登记新的 holdout 消费次数。</p>
 </body>
 </html>

@@ -156,3 +156,30 @@ def test_sender_is_resumable_and_delivers_dynamic_document_count(
             send_text=lambda _message: True,
             send_document=lambda _path, _caption: True,
         )
+
+
+def test_sender_refuses_to_resume_owner_cancelled_delivery(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    scan = {"overlap_episodes": 0}
+    monkeypatch.setattr(sender, "build_contract", lambda _results, _report: (scan, [], "contract"))
+    receipt = tmp_path / "telegram.json"
+    receipt.write_text(
+        json.dumps(
+            {
+                "contract_sha256": "superseded-contract",
+                "delivery_cancelled_by_owner": True,
+                "delivery_complete": False,
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(sender.Eth30dDeliveryError, match="cancelled by Owner"):
+        sender.deliver(
+            results=tmp_path,
+            report=tmp_path / "report.html",
+            receipt_path=receipt,
+            sleep_seconds=0,
+            send_text=lambda _message: True,
+            send_document=lambda _path, _caption: True,
+        )
