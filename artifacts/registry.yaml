@@ -7412,6 +7412,140 @@ artifacts:
       Freezes the matched native 1280 treatment with batch=8 and patience=0;
       the remote wait prerequisite only serializes the single GPU.
 
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1-eval-prereg
+    artifact_type: config
+    role: frozen_full40_imgsz960_evaluation_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7a54a3a1d1057aa48e2a75491f8eb5573e60944d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1/evaluation_preregistration.json
+    sha256: "003f37e07edbf80c926d60ae901930a7dff708d05422dd44ad3ff98798293d1a"
+    size_bytes: 2581
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1/evaluation_preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    config_hash: "cf014d27d96ae32e1d199fc1084532ee98dc5a92a428484cfbc36817aeb06cb7"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Fixed before epoch-1 metrics existed; forbids epoch or threshold reselection.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1-local-preflight
+    artifact_type: manifest
+    role: full_local_dataset_byte_preflight
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7a54a3a1d1057aa48e2a75491f8eb5573e60944d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1/results/local_dataset_preflight.json
+    sha256: "37f25bcfad49da1ba9f85ebdde55755c5f280d7ab9f2b84cbdf3d1dd2b9ff416"
+    size_bytes: 1245
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1/results/local_dataset_preflight.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ba1c321adcdbac59a24df414eaf5ff2c5ccc84f6"
+    config_hash: "cf014d27d96ae32e1d199fc1084532ee98dc5a92a428484cfbc36817aeb06cb7"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Verified all 64,000 image and label file hashes before transfer.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1-remote-preflight
+    artifact_type: manifest
+    role: full_remote_dataset_byte_preflight
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7a54a3a1d1057aa48e2a75491f8eb5573e60944d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1/results/remote_dataset_preflight.json
+    sha256: "89e49f7339102a83f939285585bf65bb364fcfa45104da24d36b92872f015061"
+    size_bytes: 1240
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1/results/remote_dataset_preflight.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ba1c321adcdbac59a24df414eaf5ff2c5ccc84f6"
+    config_hash: "cf014d27d96ae32e1d199fc1084532ee98dc5a92a428484cfbc36817aeb06cb7"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Independently verified the staged RTX3060 copy before launch.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1-launch
+    artifact_type: manifest
+    role: detached_rtx3060_launch_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7a54a3a1d1057aa48e2a75491f8eb5573e60944d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1/results/launch_receipt.json
+    sha256: "663363f83b84a87a434d63dd075929a34a83c277c40c2f1ae17f27a95fcd7035"
+    size_bytes: 861
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1/results/launch_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ba1c321adcdbac59a24df414eaf5ff2c5ccc84f6"
+    config_hash: "cf014d27d96ae32e1d199fc1084532ee98dc5a92a428484cfbc36817aeb06cb7"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Binds WMI PID, stage sentinel, dependency versions and actual 960 recipe.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1-eval-prereg
+    artifact_type: config
+    role: frozen_full40_imgsz1280_evaluation_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7a54a3a1d1057aa48e2a75491f8eb5573e60944d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1/evaluation_preregistration.json
+    sha256: "cef9ea3b74ae5efd27e44ca202d775cfc1f74b28726393736248d989615fe7e3"
+    size_bytes: 2788
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1/evaluation_preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    config_hash: "5adc6d4fa1eb5bc4c459f59b0b94a7b71c64dcd49de191ee9f77e01895427090"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Fixed while the arm was queued and before any 1280 metric existed.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1-local-preflight
+    artifact_type: manifest
+    role: full_local_dataset_byte_preflight
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7a54a3a1d1057aa48e2a75491f8eb5573e60944d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1/results/local_dataset_preflight.json
+    sha256: "cf0db6b7651a671784bbb65767671bfac4e52ee5003998c146066afb82f3baaa"
+    size_bytes: 1246
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1/results/local_dataset_preflight.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ba1c321adcdbac59a24df414eaf5ff2c5ccc84f6"
+    config_hash: "5adc6d4fa1eb5bc4c459f59b0b94a7b71c64dcd49de191ee9f77e01895427090"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Verified all 64,000 image and label file hashes before transfer.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1-remote-preflight
+    artifact_type: manifest
+    role: full_remote_dataset_byte_preflight
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7a54a3a1d1057aa48e2a75491f8eb5573e60944d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1/results/remote_dataset_preflight.json
+    sha256: "3a263569a43ca51d9956caf878f39ddf16df2035fa0c4a7d2f29be23a2633855"
+    size_bytes: 1242
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1/results/remote_dataset_preflight.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ba1c321adcdbac59a24df414eaf5ff2c5ccc84f6"
+    config_hash: "5adc6d4fa1eb5bc4c459f59b0b94a7b71c64dcd49de191ee9f77e01895427090"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Independently verified the staged RTX3060 copy before queueing.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1-launch
+    artifact_type: manifest
+    role: detached_serial_rtx3060_launch_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7a54a3a1d1057aa48e2a75491f8eb5573e60944d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1/results/launch_receipt.json
+    sha256: "d4277fb870a3496d233496a655afdf41f5e0c8abc09e3de2aa3751147bfd46d0"
+    size_bytes: 960
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1/results/launch_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ba1c321adcdbac59a24df414eaf5ff2c5ccc84f6"
+    config_hash: "5adc6d4fa1eb5bc4c459f59b0b94a7b71c64dcd49de191ee9f77e01895427090"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Binds WMI PID, stage sentinel, recipe and the successful-960 prerequisite.
+
   - artifact_id: 15m-right-edge-screenshot-similarity-v1-prereg
     artifact_type: config
     role: frozen_screenshot_pixel_query_and_similarity_contract
