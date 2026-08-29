@@ -2610,3 +2610,32 @@ experiments:
       OHLCV prefix matched exactly; three terminal bars only complete the
       model's post2-9 support. No tuning, promotion, deployment or order occurred.
       Telegram is not part of acceptance; Owner's cancellation is authoritative.
+
+  - experiment_id: exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4ef6feb73cd13122cc3f2dfa017bef7416cf99f4"
+    status: active
+    question: >-
+      What does the completed epoch-6 Grade-A 8,000-positive plus 24,000-
+      negative detector find on the latest three complete UTC days' OKX
+      crypto USDT perpetual daily absolute-return Top20 boards?
+    single_variable: >-
+      replace the prior fixed ETH-only universe with three frozen post-hoc
+      daily absolute-mover Top20 boards; the completed epoch-6 weights,
+      W18/W19, core4/5, post2-9, confidence, NMS, raw-box preservation,
+      overlap-episode merge and high-resolution one-box rendering stay fixed
+    result: >-
+      preregistered before any new market-data read; 60 symbol-days are frozen
+      for 2026-08-26 through 2026-08-28 UTC and no result has been read yet
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts:
+      - 15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1-prereg
+    reuse_allowed: false
+    notes: >-
+      This will be exact-detector holdout use #2 and the first cross-sectional
+      daily-mover use of this weight. "Hot" is explicitly an absolute-return
+      mover proxy, not volume or social popularity. Same-day membership is
+      post-hoc, today is excluded, Telegram is unauthorized, and no tuning,
+      promotion, deployment, forward mutation or order is allowed.

@@ -491,7 +491,11 @@ def fetch_and_rank(
         "experiment_id": str(prereg["experiment_id"]),
         "source_commit": source_commit,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "holdout_consumption_number_for_this_configuration": 1,
+        "holdout_consumption_number_for_this_configuration": int(
+            prereg["owner_authorization"][
+                "holdout_consumption_number_for_this_configuration"
+            ]
+        ),
         "holdout_read_authorized_by_owner_request": True,
         "complete_days": [day.isoformat() for day in days],
         "ranking_causality": prereg["ranking"]["causality"],

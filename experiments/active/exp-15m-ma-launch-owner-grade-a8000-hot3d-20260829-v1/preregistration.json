@@ -1,0 +1,123 @@
+{
+  "protocol": "ma6_owner_grade_a8000_neg24000_epoch6_hot3d_abs_top20_rawbox_v1_20260829",
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1",
+  "created_at": "2026-08-29T12:05:09+08:00",
+  "source_commit_before_builder": "4ef6feb73cd13122cc3f2dfa017bef7416cf99f4",
+  "owner_authorization": {
+    "request": "试一下近3天热门的币种",
+    "interpreted_scope": "Use the completed epoch-6 Grade-A 8,000-positive plus 24,000-negative YOLO11s detector on each of the latest three complete UTC days' OKX crypto USDT perpetual absolute-return Top20 boards, preserve all structurally accepted raw predictions, merge overlapping windows into independent same-symbol episodes, and render one high-resolution full-context review image per episode locally without Telegram delivery.",
+    "authorized_holdout_scope": "Confirmed OKX 1Dutc rows for the current-live eligible crypto USDT-SWAP universe on 2026-08-26 through 2026-08-28 UTC, plus confirmed 15m bars only for the union of the 60 selected symbol-days from 2026-08-24T00:00:00Z through 2026-08-29T02:15:00Z. Signal attribution is restricted to cores ending inside 2026-08-26 through 2026-08-28 UTC.",
+    "holdout_consumption_number_for_this_configuration": 2,
+    "new_inference_authorized": true,
+    "telegram_delivery_authorized": false,
+    "training_or_tuning_authorized": false,
+    "threshold_or_weight_change_authorized": false,
+    "production_or_promotion_authorized": false
+  },
+  "calendar": {
+    "timezone": "UTC",
+    "complete_days": [
+      "2026-08-26T00:00:00Z",
+      "2026-08-27T00:00:00Z",
+      "2026-08-28T00:00:00Z"
+    ],
+    "current_partial_day_excluded": true
+  },
+  "ranking": {
+    "venue": "OKX",
+    "instrument_type": "USDT-SWAP",
+    "universe_snapshot": "intersection of current tickers and public instruments at official fetch time",
+    "required_instrument_metadata": "state=live and instCategory=1",
+    "exclude": "all instCategory!=1 or state!=live instruments, then yoyo.data.loader.BLOCKED_BASES plus yoyo.data.universe.STOCKISH_BASES",
+    "bar": "1Dutc",
+    "return": "confirmed daily close / confirmed daily open - 1",
+    "sort": "descending absolute return; symbol ascending is the deterministic tie break",
+    "top_per_day": 20,
+    "minimum_volume_filter": null,
+    "causality": "post_hoc_same_day_ranking_not_live_selection",
+    "hot_definition": "daily absolute-return mover proxy, not volume or social popularity"
+  },
+  "detector": {
+    "display_name": "Grade-A8000+Neg24000 epoch6 imgsz960",
+    "weights": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960/weights/best.pt",
+    "weights_sha256": "0524e78086face6ccba0f2bb220dadada4555a914c64a4e6794f620fa0d9103f",
+    "training_manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+    "training_manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "training_positive_rows": 8000,
+    "renderer": "yoyo/layers/l1_detection/render.py",
+    "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+    "class_names": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "bar": "15m",
+    "window_lengths": [18, 19],
+    "window_length_source": "exact support of the 8,000 positive training manifest",
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "imgsz": 960,
+    "mapped_core_length_bars_allowed": [4, 5],
+    "mapped_confirmation_bars_allowed": [2, 3, 4, 5, 6, 7, 8, 9],
+    "scan_endpoint_extension_after_day_bars": 9,
+    "event_attribution": "mapped core-end bar must fall inside the ranked UTC day",
+    "same_symbol_event_gap_bars": 5,
+    "future_bars_rendered_into_inference": 0,
+    "threshold_or_window_retuning_after_results": false
+  },
+  "review_contract": {
+    "preserve_all_raw_coordinates": ["cx", "cy", "w", "h"],
+    "episode_interval": "mapped_core_start_i..window_end_i_inclusive",
+    "episode_merge": "merge_overlapping_intervals_same_symbol_across_all_three_days_class_agnostic",
+    "episode_representative": "earliest_window_end_then_highest_confidence",
+    "documents": "one_per_overlap_episode",
+    "boxes_per_document": 1,
+    "full_context_bars": 128,
+    "preferred_detection_local_index": 90,
+    "full_context_may_show_post_detection_bars_for_review_only": true,
+    "exact_model_input_inset": true,
+    "canvas_width_px": 1920,
+    "canvas_height_px": 1400,
+    "telegram_delivery": false
+  },
+  "data": {
+    "instrument_metadata_source": "OKX public/instruments?instType=SWAP",
+    "daily_source": "OKX public market/candles, 1Dutc, confirmed rows only",
+    "inference_source": "OKX public candles/history-candles, 15m, confirmed rows only",
+    "snapshot_location": "analysis/output/ma_launch_owner_grade_a8000_hot3d_20260829_v1/kline_snapshot",
+    "canonical_data_written": false,
+    "minimum_context_before_first_day_hours": 48,
+    "selected_day_required_15m_bars": 96,
+    "selected_day_gaps_allowed": 0
+  },
+  "outputs": {
+    "local_output": "analysis/output/ma_launch_owner_grade_a8000_hot3d_20260829_v1",
+    "committed_results": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results",
+    "report": "analysis/p1_15m_ma_launch_owner_grade_a8000_hot3d_20260829.md",
+    "html": "analysis/html/p1_15m_ma_launch_owner_grade_a8000_hot3d_20260829.html"
+  },
+  "interpretation": {
+    "purpose": "retrospective visual probe on three completed daily absolute-mover boards",
+    "economic_backtest": false,
+    "holdout_final_acceptance": false,
+    "must_disclose": [
+      "same-day Top20 membership is known only after each day closes",
+      "hot means absolute daily return rather than volume or social popularity",
+      "the current-live universe introduces survivorship bias",
+      "the detector requires two to nine post-core confirmation bars",
+      "full-context pixels after detection are review-only and never enter inference",
+      "detections are not live signals or evidence of profitability"
+    ]
+  },
+  "safety": {
+    "training_or_tuning": false,
+    "threshold_or_weight_changed": false,
+    "active_or_frozen_changed": false,
+    "promoted": false,
+    "deployed": false,
+    "forward_state_changed": false,
+    "orders_placed": false,
+    "telegram_sent": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
