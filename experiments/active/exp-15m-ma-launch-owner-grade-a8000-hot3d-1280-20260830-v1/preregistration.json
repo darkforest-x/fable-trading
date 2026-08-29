@@ -1,0 +1,131 @@
+{
+  "protocol": "ma6_owner_grade_a8000_neg24000_epoch4_full40_1280_hot3d_frozen_replay_v1_20260830",
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1",
+  "created_at": "2026-08-30T02:30:55+08:00",
+  "source_commit_before_builder": "0569b6db00f07b2c5664de007270dbbcfd6e2fb8",
+  "owner_authorization": {
+    "request": "用刚刚跑完的102、1080的那个模型，再跑一下那个数据，今天960跑的一样的数据。",
+    "interpretation_note": "The Owner's '1080' refers to the just-completed 1280 full40 detector; no 1080 detector exists in this paired run.",
+    "interpreted_scope": "Use the completed 1280 full40 best checkpoint on exactly the previously frozen 60 symbol-days and their 15m OHLCV snapshot from the 960 daily-absolute-mover Top20 scan. Preserve confidence=0.25, NMS IoU=0.7, W18/W19, mapped core4/5, post2-9, raw-box coordinates, episode merge, and high-resolution one-box review documents. Do not fetch, rank, modify, or replace any market-data bytes; do not send Telegram messages.",
+    "authorized_holdout_scope": "A no-network replay of the pre-existing frozen OKX snapshot used by exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1: its 60 ranked symbol-days on 2026-08-26 through 2026-08-28 UTC and the exact confirmed 15m OHLCV prefixes already stored locally. This is holdout use #1 for the 1280 checkpoint configuration; it is not final acceptance.",
+    "holdout_consumption_number_for_this_configuration": 1,
+    "new_inference_authorized": true,
+    "telegram_delivery_authorized": false,
+    "training_or_tuning_authorized": false,
+    "threshold_or_weight_change_authorized": false,
+    "production_or_promotion_authorized": false
+  },
+  "calendar": {
+    "timezone": "UTC",
+    "complete_days": [
+      "2026-08-26T00:00:00Z",
+      "2026-08-27T00:00:00Z",
+      "2026-08-28T00:00:00Z"
+    ],
+    "current_partial_day_excluded": true
+  },
+  "ranking": {
+    "venue": "OKX",
+    "instrument_type": "USDT-SWAP",
+    "universe_snapshot": "exact already-frozen intersection of current tickers and public instruments from the source scan",
+    "required_instrument_metadata": "state=live and instCategory=1 at source-fetch time",
+    "exclude": "same frozen source-board exclusions; no reranking or new universe query",
+    "bar": "1Dutc",
+    "return": "confirmed daily close / confirmed daily open - 1",
+    "sort": "descending absolute return; symbol ascending is the deterministic tie break",
+    "top_per_day": 20,
+    "minimum_volume_filter": null,
+    "causality": "post_hoc_same_day_ranking_not_live_selection",
+    "hot_definition": "daily absolute-return mover proxy, not volume or social popularity"
+  },
+  "detector": {
+    "display_name": "Grade-A8000+Neg24000 epoch4 full40 imgsz1280",
+    "weights": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+    "weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "training_manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+    "training_manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "training_positive_rows": 8000,
+    "renderer": "yoyo/layers/l1_detection/render.py",
+    "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+    "class_names": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "bar": "15m",
+    "window_lengths": [18, 19],
+    "window_length_source": "exact support of the 8,000 positive training manifest",
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "imgsz": 1280,
+    "model_input_native_png": "1280x742; YOLO runs at the checkpoint's native imgsz=1280",
+    "mapped_core_length_bars_allowed": [4, 5],
+    "mapped_confirmation_bars_allowed": [2, 3, 4, 5, 6, 7, 8, 9],
+    "scan_endpoint_extension_after_day_bars": 9,
+    "event_attribution": "mapped core-end bar must fall inside the ranked UTC day",
+    "same_symbol_event_gap_bars": 5,
+    "future_bars_rendered_into_inference": 0,
+    "threshold_or_window_retuning_after_results": false
+  },
+  "review_contract": {
+    "preserve_all_raw_coordinates": ["cx", "cy", "w", "h"],
+    "episode_interval": "mapped_core_start_i..window_end_i_inclusive",
+    "episode_merge": "merge_overlapping_intervals_same_symbol_across_all_three_days_class_agnostic",
+    "episode_representative": "earliest_window_end_then_highest_confidence",
+    "documents": "one_per_overlap_episode",
+    "boxes_per_document": 1,
+    "full_context_bars": 128,
+    "preferred_detection_local_index": 90,
+    "full_context_may_show_post_detection_bars_for_review_only": true,
+    "exact_model_input_inset": true,
+    "canvas_width_px": 1920,
+    "canvas_height_px": 1400,
+    "telegram_delivery": false
+  },
+  "data": {
+    "replay_source": {
+      "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1",
+      "holdout_consumption_number": 2,
+      "fetch_receipt": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/fetch_receipt.json",
+      "fetch_receipt_sha256": "2df199f6305f4b3b233e8034c770df1a953f87c25659b7f65051cccc6ab1a050",
+      "daily_rankings": "analysis/output/ma_launch_owner_grade_a8000_hot3d_20260829_v1/daily_rankings.csv",
+      "daily_rankings_sha256": "60ac5e28e0f7c49d94830a52d9ece1ec202d27837b173e999815fe49c09e13f9",
+      "snapshot_location": "analysis/output/ma_launch_owner_grade_a8000_hot3d_20260829_v1/kline_snapshot"
+    },
+    "network_reads_during_replay": 0,
+    "canonical_data_written": false,
+    "selected_day_required_15m_bars": 96,
+    "selected_day_gaps_allowed": 0
+  },
+  "outputs": {
+    "local_output": "analysis/output/ma_launch_owner_grade_a8000_hot3d_1280_20260830_v1",
+    "committed_results": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/results",
+    "report": "analysis/p1_15m_ma_launch_owner_grade_a8000_hot3d_1280_20260830.md",
+    "html": "analysis/html/p1_15m_ma_launch_owner_grade_a8000_hot3d_1280_20260830.html"
+  },
+  "interpretation": {
+    "purpose": "paired retrospective visual probe that changes the detector checkpoint and its native inference resolution only",
+    "economic_backtest": false,
+    "holdout_final_acceptance": false,
+    "must_disclose": [
+      "same-day Top20 membership is known only after each day closes",
+      "hot means absolute daily return rather than volume or social popularity",
+      "the source current-live universe introduces survivorship bias",
+      "the detector requires two to nine post-core confirmation bars",
+      "full-context pixels after detection are review-only and never enter inference",
+      "detections are not live signals or evidence of profitability",
+      "the OHLCV windows are identical to the 960 replay, while the 1280 model correctly uses native imgsz=1280 preprocessing"
+    ]
+  },
+  "safety": {
+    "training_or_tuning": false,
+    "threshold_or_weight_changed": false,
+    "active_or_frozen_changed": false,
+    "promoted": false,
+    "deployed": false,
+    "forward_state_changed": false,
+    "orders_placed": false,
+    "telegram_sent": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}

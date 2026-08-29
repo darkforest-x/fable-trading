@@ -54,6 +54,7 @@ from yoyo.layers.l1_detection.render import render_chart
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT_ID = "exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1"
+FULL40_1280_EXPERIMENT_ID = "exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1"
 DEFAULT_PREREG = ROOT / "experiments" / "active" / EXPERIMENT_ID / "preregistration.json"
 DEFAULT_OUT = ROOT / "analysis" / "output" / "ma_launch_owner_grade_a8000_hot3d_20260829_v1"
 DEFAULT_RESULTS = ROOT / "experiments" / "active" / EXPERIMENT_ID / "results"
@@ -71,6 +72,21 @@ MAIN_WIDTH = 1880
 MAIN_HEIGHT = 780
 INSET_WIDTH = 700
 INSET_HEIGHT = 406
+
+# A new replay must be deliberately added here with its expected holdout-use
+# counter and native model inference size.  This prevents an arbitrary
+# preregistration file from silently changing image-size semantics or treating
+# a prior model's frozen market snapshot as its own new network fetch.
+SUPPORTED_EXPERIMENTS: Mapping[str, Mapping[str, int]] = {
+    EXPERIMENT_ID: {
+        "holdout_consumption_number": 2,
+        "imgsz": 960,
+    },
+    FULL40_1280_EXPERIMENT_ID: {
+        "holdout_consumption_number": 1,
+        "imgsz": 1280,
+    },
+}
 
 
 class Hot3dError(RuntimeError):
@@ -152,10 +168,15 @@ def load_preregistration(path: Path = DEFAULT_PREREG) -> dict[str, Any]:
     """Load and enforce the exact owner-authorized no-tuning contract."""
 
     payload = read_json(path)
-    if payload.get("experiment_id") != EXPERIMENT_ID:
+    experiment_id = str(payload.get("experiment_id", ""))
+    spec = SUPPORTED_EXPERIMENTS.get(experiment_id)
+    if spec is None:
         raise Hot3dError("unexpected experiment_id")
     auth = payload["owner_authorization"]
-    if holdout_number(payload) != 2 or auth.get("new_inference_authorized") is not True:
+    if (
+        holdout_number(payload) != int(spec["holdout_consumption_number"])
+        or auth.get("new_inference_authorized") is not True
+    ):
         raise Hot3dError("holdout authorization identity drifted")
     if auth.get("telegram_delivery_authorized") is not False:
         raise Hot3dError("Telegram must remain unauthorized")
@@ -191,7 +212,10 @@ def load_preregistration(path: Path = DEFAULT_PREREG) -> dict[str, Any]:
         raise Hot3dError("endpoint extension drifted")
     if float(detector["confidence"]) != 0.25 or float(detector["nms_iou"]) != 0.7:
         raise Hot3dError("threshold or NMS drifted")
-    if int(detector["imgsz"]) != 960 or int(detector["same_symbol_event_gap_bars"]) != 5:
+    if (
+        int(detector["imgsz"]) != int(spec["imgsz"])
+        or int(detector["same_symbol_event_gap_bars"]) != 5
+    ):
         raise Hot3dError("inference geometry drifted")
     if detector.get("future_bars_rendered_into_inference") != 0:
         raise Hot3dError("inference must remain causal")
@@ -213,6 +237,21 @@ def load_preregistration(path: Path = DEFAULT_PREREG) -> dict[str, Any]:
         raise Hot3dError("Telegram review switch drifted")
     if any(value is not False for value in payload["safety"].values()):
         raise Hot3dError("one or more safety switches drifted")
+    replay = payload.get("data", {}).get("replay_source")
+    if experiment_id == FULL40_1280_EXPERIMENT_ID:
+        if not isinstance(replay, Mapping):
+            raise Hot3dError("1280 replay must identify the frozen source snapshot")
+        if replay.get("experiment_id") != EXPERIMENT_ID:
+            raise Hot3dError("1280 replay may only reuse the declared 960 snapshot")
+        if int(replay.get("holdout_consumption_number", -1)) != int(
+            SUPPORTED_EXPERIMENTS[EXPERIMENT_ID]["holdout_consumption_number"]
+        ):
+            raise Hot3dError("1280 replay source holdout identity drifted")
+        for key in ("fetch_receipt", "daily_rankings", "snapshot_location"):
+            if not isinstance(replay.get(key), str) or not str(replay[key]):
+                raise Hot3dError(f"1280 replay source missing {key}")
+    elif replay is not None:
+        raise Hot3dError("base hot3d run must not declare a replay source")
     return payload
 
 
@@ -318,15 +357,45 @@ def validate_rankings(frame: pd.DataFrame) -> None:
 
 def load_frozen_snapshot(
     prereg: Mapping[str, Any], out: Path, results: Path
-) -> tuple[pd.DataFrame, dict[str, pd.DataFrame], dict[str, Any]]:
-    receipt = read_json(results / "fetch_receipt.json")
-    if receipt.get("experiment_id") != EXPERIMENT_ID:
+) -> tuple[pd.DataFrame, dict[str, pd.DataFrame], dict[str, Any], dict[str, str]]:
+    """Read either this run's snapshot or an explicitly frozen prior snapshot.
+
+    The full40-1280 replay intentionally consumes no network data.  Its
+    ``replay_source`` therefore names the exact prior receipt, rankings and
+    OHLCV directory rather than copying or regenerating those bytes.
+    """
+
+    replay = prereg.get("data", {}).get("replay_source")
+    if isinstance(replay, Mapping):
+        receipt_path = resolve_repo_path(replay["fetch_receipt"])
+        rankings_path = resolve_repo_path(replay["daily_rankings"])
+        snapshot_root = resolve_repo_path(replay["snapshot_location"])
+        source_experiment_id = str(replay["experiment_id"])
+        source_holdout_number = int(replay["holdout_consumption_number"])
+        expected_receipt_sha = str(replay.get("fetch_receipt_sha256", ""))
+        expected_rankings_sha = str(replay.get("daily_rankings_sha256", ""))
+        source_kind = "frozen_prior_snapshot"
+    else:
+        receipt_path = results / "fetch_receipt.json"
+        rankings_path = out / "daily_rankings.csv"
+        snapshot_root = out / "kline_snapshot"
+        source_experiment_id = str(prereg["experiment_id"])
+        source_holdout_number = holdout_number(prereg)
+        expected_receipt_sha = ""
+        expected_rankings_sha = ""
+        source_kind = "own_snapshot"
+
+    if expected_receipt_sha and sha256_file(receipt_path) != expected_receipt_sha:
+        raise Hot3dError("replay fetch receipt bytes drifted")
+    receipt = read_json(receipt_path)
+    if receipt.get("experiment_id") != source_experiment_id:
         raise Hot3dError("fetch receipt identity drifted")
-    if int(receipt["holdout_consumption_number_for_this_configuration"]) != holdout_number(prereg):
+    if int(receipt["holdout_consumption_number_for_this_configuration"]) != source_holdout_number:
         raise Hot3dError("fetch holdout counter drifted")
-    rankings_path = out / "daily_rankings.csv"
     if sha256_file(rankings_path) != str(receipt["daily_rankings_sha256"]):
         raise Hot3dError("daily ranking bytes drifted")
+    if expected_rankings_sha and str(receipt["daily_rankings_sha256"]) != expected_rankings_sha:
+        raise Hot3dError("replay ranking identity drifted")
     rankings = pd.read_csv(rankings_path)
     rankings["day"] = pd.to_datetime(rankings["day"], utc=True)
     validate_rankings(rankings)
@@ -336,7 +405,7 @@ def load_frozen_snapshot(
         raise Hot3dError("snapshot/selected-symbol identity drifted")
     frames: dict[str, pd.DataFrame] = {}
     for symbol, identity in snapshots.items():
-        path = out / "kline_snapshot" / f"{symbol}.csv"
+        path = snapshot_root / f"{symbol}.csv"
         if not path.is_file() or sha256_file(path) != str(identity["sha256"]):
             raise Hot3dError(f"snapshot hash drifted: {symbol}")
         frame = pd.read_csv(path)
@@ -355,7 +424,16 @@ def load_frozen_snapshot(
         bars = int(((times >= day) & (times < day + pd.Timedelta(days=1))).sum())
         if bars != 96:
             raise Hot3dError(f"ranked day is not 96 bars: {day} {symbol}")
-    return rankings, frames, receipt
+    source_identity = {
+        "kind": source_kind,
+        "experiment_id": source_experiment_id,
+        "fetch_receipt": repo_relative(receipt_path),
+        "fetch_receipt_sha256": sha256_file(receipt_path),
+        "daily_rankings": repo_relative(rankings_path),
+        "daily_rankings_sha256": str(receipt["daily_rankings_sha256"]),
+        "snapshot_location": repo_relative(snapshot_root),
+    }
+    return rankings, frames, receipt, source_identity
 
 
 def cluster_symbol_episodes(
@@ -634,6 +712,7 @@ def render_overview(
     episodes: Sequence[Mapping[str, Any]],
     *,
     accepted_candidates: int,
+    detector_display_name: str,
 ) -> np.ndarray:
     """Render the frozen three daily boards with per-symbol episode counts."""
 
@@ -641,7 +720,7 @@ def render_overview(
     canvas = np.full((height, width, 3), 248, dtype=np.uint8)
     put_text(
         canvas,
-        f"15m Grade-A epoch6 | 3 complete UTC days | daily absolute-return Top20 | episodes {len(episodes)}",
+        f"15m {detector_display_name} | 3 complete UTC days | daily absolute-return Top20 | episodes {len(episodes)}",
         (24, 42),
         scale=0.88,
         thickness=2,
@@ -702,7 +781,7 @@ def scan_phase(
 ) -> dict[str, Any]:
     if (results / "scan_receipt.json").exists() or (results / "charts").exists():
         raise FileExistsError("refusing to overwrite hot3d scan outputs")
-    rankings, frames, fetch_receipt = load_frozen_snapshot(prereg, out, results)
+    rankings, frames, fetch_receipt, source_identity = load_frozen_snapshot(prereg, out, results)
     immutable = verify_immutable_inputs(prereg)
     detector = prereg["detector"]
     from ultralytics import YOLO
@@ -789,6 +868,7 @@ def scan_phase(
         rankings,
         episodes,
         accepted_candidates=len(annotated),
+        detector_display_name=str(detector["display_name"]),
     )
     overview_path = results / "overview.png"
     write_png(overview_path, overview)
@@ -816,7 +896,7 @@ def scan_phase(
     event_days = Counter(str(row["day"])[:10] for row in episodes)
     payload = {
         "protocol": prereg["protocol"],
-        "experiment_id": EXPERIMENT_ID,
+        "experiment_id": str(prereg["experiment_id"]),
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_commit": source_commit,
         "holdout_consumption_number_for_this_configuration": holdout_number(prereg),
@@ -829,7 +909,8 @@ def scan_phase(
         "mapped_core_length_bars_allowed": list(EXPECTED_CORES),
         "mapped_confirmation_bars_allowed": list(EXPECTED_CONFIRMATIONS),
         "device": device,
-        "fetch_receipt_sha256": sha256_file(results / "fetch_receipt.json"),
+        "snapshot_source": source_identity,
+        "fetch_receipt_sha256": str(source_identity["fetch_receipt_sha256"]),
         "daily_rankings_sha256": str(fetch_receipt["daily_rankings_sha256"]),
         "immutable_inputs": immutable,
         "complete_days": [day.isoformat() for day in EXPECTED_DAYS],
@@ -884,9 +965,9 @@ def scan_phase(
 def verify_phase(
     prereg: Mapping[str, Any], *, out: Path, results: Path
 ) -> dict[str, Any]:
-    rankings, frames, fetch_receipt = load_frozen_snapshot(prereg, out, results)
+    rankings, frames, fetch_receipt, _source_identity = load_frozen_snapshot(prereg, out, results)
     scan = read_json(results / "scan_receipt.json")
-    if scan.get("experiment_id") != EXPERIMENT_ID:
+    if scan.get("experiment_id") != str(prereg["experiment_id"]):
         raise Hot3dError("scan receipt identity drifted")
     if sha256_file(results / "manifest.jsonl") != str(scan["manifest_sha256"]):
         raise Hot3dError("manifest hash drifted")
@@ -959,7 +1040,7 @@ def verify_phase(
             raise Hot3dError(f"unsafe scan flag: {key}")
     payload = {
         "protocol": prereg["protocol"],
-        "experiment_id": EXPERIMENT_ID,
+        "experiment_id": str(prereg["experiment_id"]),
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "holdout_consumption_number_for_this_configuration": holdout_number(prereg),
         "daily_rankings_sha256": str(fetch_receipt["daily_rankings_sha256"]),
@@ -1007,6 +1088,8 @@ def main() -> int:
         return 0
     source_commit = verify_committed_sources(prereg_path)
     if args.fetch:
+        if prereg.get("data", {}).get("replay_source") is not None:
+            raise Hot3dError("frozen replay forbids --fetch; no new network data may be read")
         common.fetch_and_rank(
             prereg,
             out=out,

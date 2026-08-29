@@ -1,10 +1,13 @@
 """Contract tests for the frozen Grade-A three-day daily-mover scan."""
 from __future__ import annotations
 
+from pathlib import Path
+
 from scripts.scan_15m_ma_launch_owner_grade_a8000_hot3d import (
     EXPECTED_CONFIRMATIONS,
     EXPECTED_DAYS,
     EXPECTED_WINDOWS,
+    FULL40_1280_EXPERIMENT_ID,
     cluster_symbol_episodes,
     load_preregistration,
 )
@@ -40,6 +43,24 @@ def test_preregistration_freezes_latest_three_complete_days_and_training_geometr
     assert prereg["ranking"]["top_per_day"] == 20
     assert prereg["owner_authorization"]["telegram_delivery_authorized"] is False
     assert preregistered_holdout_number(prereg) == 2
+
+
+def test_full40_1280_replay_reuses_only_the_frozen_960_snapshot() -> None:
+    root = Path(__file__).resolve().parents[1]
+    prereg = load_preregistration(
+        root
+        / "experiments"
+        / "active"
+        / FULL40_1280_EXPERIMENT_ID
+        / "preregistration.json"
+    )
+    assert prereg["experiment_id"] == FULL40_1280_EXPERIMENT_ID
+    assert preregistered_holdout_number(prereg) == 1
+    assert prereg["detector"]["imgsz"] == 1280
+    replay = prereg["data"]["replay_source"]
+    assert replay["experiment_id"] == "exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1"
+    assert replay["holdout_consumption_number"] == 2
+    assert prereg["owner_authorization"]["telegram_delivery_authorized"] is False
 
 
 def test_episode_merge_crosses_day_boundary_but_not_a_real_gap() -> None:
