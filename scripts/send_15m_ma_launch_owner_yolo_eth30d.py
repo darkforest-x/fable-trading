@@ -12,7 +12,6 @@ from typing import Any, Callable
 
 from scripts.scan_15m_ma_launch_owner_yolo_eth30d import (
     DEFAULT_RESULTS,
-    EXPERIMENT_ID,
     read_json,
     resolve_repo_path,
     sha256_file,
@@ -44,7 +43,8 @@ def build_contract(
 ) -> tuple[dict[str, Any], list[dict[str, str]], str]:
     scan = read_json(results / "scan_receipt.json")
     qa = read_json(results / "qa_receipt.json")
-    if scan.get("experiment_id") != EXPERIMENT_ID or qa.get("experiment_id") != EXPERIMENT_ID:
+    experiment_id = str(scan.get("experiment_id", ""))
+    if not experiment_id or qa.get("experiment_id") != experiment_id:
         raise Eth30dDeliveryError("receipt experiment identity drifted")
     if qa.get("passed") is not True:
         raise Eth30dDeliveryError("independent QA is absent or failed")
@@ -62,7 +62,10 @@ def build_contract(
             raise Eth30dDeliveryError(f"QA coverage drifted: {key}")
     if int(qa.get("shifted_event_input_hash_matches", -1)) != 0:
         raise Eth30dDeliveryError("shifted event/input null did not remain zero")
-    if int(scan.get("holdout_consumption_number_for_this_configuration", -1)) != 5:
+    holdout_number = int(scan.get("holdout_consumption_number_for_this_configuration", -1))
+    if holdout_number < 1 or int(
+        qa.get("holdout_consumption_number_for_this_configuration", -1)
+    ) != holdout_number:
         raise Eth30dDeliveryError("holdout consumption identity drifted")
     for key in (
         "training_or_tuning",
@@ -97,6 +100,7 @@ def build_contract(
             "sha256": str(overview["sha256"]),
             "caption": (
                 f"ETHUSDT.P 15m｜近 30 个完整 UTC 日｜总览\n"
+                f"模型：{scan.get('detector_display_name', 'Owner YOLO')}\n"
                 f"原始框 {int(scan['scan_totals'].get('raw_boxes', 0)):,}｜"
                 f"结构合格 {int(scan['accepted_candidates']):,}｜"
                 f"合并后连续 episode {events}"
@@ -139,7 +143,7 @@ def build_contract(
             "id": "html_report",
             "path": str(report.resolve()),
             "sha256": sha256_file(report.resolve()),
-            "caption": "ETHUSDT.P 近一月原模型扫描｜完整 HTML 报告",
+            "caption": f"ETHUSDT.P 近一月｜{scan.get('detector_display_name', 'Owner YOLO')}｜完整 HTML 报告",
         }
     )
     for item in documents:
@@ -176,7 +180,7 @@ def deliver(
             raise Eth30dDeliveryError("delivery already complete; refusing duplicate resend")
     else:
         receipt = {
-            "experiment_id": EXPERIMENT_ID,
+            "experiment_id": str(scan["experiment_id"]),
             "started_at_utc": utc_now(),
             "contract_sha256": contract_sha,
             "expected_documents": len(documents),
@@ -185,7 +189,9 @@ def deliver(
             "document_actions": [],
             "finish_sent": False,
             "delivery_complete": False,
-            "holdout_consumption_number_for_this_configuration": 5,
+            "holdout_consumption_number_for_this_configuration": int(
+                scan["holdout_consumption_number_for_this_configuration"]
+            ),
             "transport": "telegram_document_no_recompression",
             "manual_owner_review_required": False,
             "training_or_tuning": False,
@@ -193,7 +199,7 @@ def deliver(
         }
     if receipt["intro_sent"] is not True:
         intro = (
-            "<b>ETHUSDT.P 15m｜近一个月原模型扫描</b>\n"
+            f"<b>ETHUSDT.P 15m｜近一个月 {scan.get('detector_display_name', 'Owner YOLO')} 扫描</b>\n"
             f"范围：2026-07-29 至 08-27，共 30 个完整 UTC 日。"
             f"重叠滑窗已按连续行情合并为 {events} 个 episode。\n"
             "每张只有一个原始 YOLO 框；上方看 128 根整体行情，右下看模型实际输入。"
@@ -236,6 +242,7 @@ def deliver(
     if receipt["finish_sent"] is not True:
         if not send_text(
             f"<b>ETHUSDT.P 近一月扫描已发完。</b>\n"
+            f"模型：{scan.get('detector_display_name', 'Owner YOLO')}；"
             f"共 {events} 张逐 episode 高清图，另含总览、无损 ZIP 和 HTML。"
         ):
             raise Eth30dDeliveryError("Telegram completion message failed")

@@ -2565,3 +2565,31 @@ experiments:
       score, threshold decision or trading rule. The official scan ran only
       after builder commit 4c20cb1; holdout OHLCV reads and all model/trading
       state changes were zero.
+
+  - experiment_id: exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ddab0ab68c355babd9bb6f8b454e40c2396f266b"
+    status: active
+    question: >-
+      What does the completed epoch-6 Grade-A 8,000-positive plus 24,000-
+      negative imgsz=960 detector find on the same 30 complete ETHUSDT.P UTC
+      signal days reviewed yesterday?
+    single_variable: >-
+      replace yesterday's 10,000 weak-positive plus 30,000-negative detector
+      with the completed Grade-A epoch-6 detector and use that detector's
+      immutable W18/W19, core4/5 and post2-9 training geometry; target signal
+      days, confidence, NMS, episode merge and rendering remain unchanged
+    result: >-
+      preregistered and owner-authorized; no ETH holdout bars or predictions
+      have been read yet for this detector configuration
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts:
+      - 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-prereg
+    reuse_allowed: false
+    notes: >-
+      This is holdout consumption #1 for the exact epoch-6 Grade-A detector.
+      The same 30 signal days as yesterday are frozen. Three terminal bars are
+      added only to complete the model's post2-9 support at the final boundary;
+      the shared OHLCV prefix must match yesterday exactly before inference.

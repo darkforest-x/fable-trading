@@ -1,0 +1,122 @@
+{
+  "protocol": "ma6_owner_grade_a8000_neg24000_epoch6_eth30d_rawbox_v1_20260829",
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1",
+  "created_at": "2026-08-29T18:30:00+08:00",
+  "source_commit_before_builder": "ddab0ab68c355babd9bb6f8b454e40c2396f266b",
+  "owner_authorization": {
+    "request": "慢慢跑吧。我们刚刚跑完的模型是哪个  用跑完的模型跑一下ethusdt.p近一个月的  跟昨天一样",
+    "interpreted_scope": "Run the completed Grade-A 8,000-positive plus 24,000-negative YOLO11s epoch-6 best weights on the same 30 complete ETH-USDT-SWAP UTC signal days as yesterday, preserve all accepted raw predictions, merge overlapping windows into continuous episodes, render one-box high-resolution full-context documents, and deliver all charts to the existing Telegram group.",
+    "authorized_holdout_scope": "ETH-USDT-SWAP confirmed 15m bars for 2026-07-29T00:00:00Z through 2026-08-28T02:15:00Z, with 48 hours of pre-range MA warmup. Signal attribution is restricted to cores ending in the same 30 complete UTC days 2026-07-29 through 2026-08-27 used yesterday. The final three bars only complete this detector's frozen post2-9 confirmation support and do not add a signal day.",
+    "holdout_consumption_number_for_this_configuration": 1,
+    "new_inference_authorized": true,
+    "telegram_delivery_authorized": true,
+    "training_or_tuning_authorized": false,
+    "threshold_or_weight_change_authorized": false,
+    "production_or_promotion_authorized": false
+  },
+  "calendar": {
+    "timezone": "UTC",
+    "target_start": "2026-07-29T00:00:00Z",
+    "target_end_exclusive": "2026-08-28T00:00:00Z",
+    "complete_days": 30,
+    "warmup_start": "2026-07-27T00:00:00Z",
+    "snapshot_end_exclusive": "2026-08-28T02:15:00Z",
+    "current_partial_day_excluded_from_signal_attribution": true
+  },
+  "instrument": {
+    "user_symbol": "ETHUSDT.P",
+    "venue": "OKX",
+    "inst_id": "ETH-USDT-SWAP",
+    "symbol": "ETH_USDT_SWAP",
+    "bar": "15m"
+  },
+  "detector": {
+    "display_name": "Grade-A8000+Neg24000 epoch6 imgsz960",
+    "weights": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960/weights/best.pt",
+    "weights_sha256": "0524e78086face6ccba0f2bb220dadada4555a914c64a4e6794f620fa0d9103f",
+    "training_manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+    "training_manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "training_positive_rows": 8000,
+    "renderer": "yoyo/layers/l1_detection/render.py",
+    "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+    "class_names": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "window_lengths": [18, 19],
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "imgsz": 960,
+    "mapped_core_length_bars_allowed": [4, 5],
+    "mapped_confirmation_bars_allowed": [2, 3, 4, 5, 6, 7, 8, 9],
+    "scan_endpoint_extension_after_day_bars": 9,
+    "same_symbol_event_gap_bars": 5,
+    "future_bars_rendered_into_inference": 0,
+    "threshold_or_window_retuning_after_results": false
+  },
+  "review_contract": {
+    "preserve_all_raw_coordinates": ["cx", "cy", "w", "h"],
+    "episode_interval": "mapped_core_start_i..window_end_i_inclusive",
+    "episode_merge": "merge_overlapping_intervals_same_symbol_across_all_30_days_class_agnostic",
+    "episode_representative": "earliest_window_end_then_highest_confidence",
+    "documents": "one_per_overlap_episode",
+    "boxes_per_document": 1,
+    "full_context_bars": 128,
+    "preferred_detection_local_index": 90,
+    "full_context_may_show_post_detection_bars_for_review_only": true,
+    "exact_model_input_inset": true,
+    "canvas_width_px": 1920,
+    "canvas_height_px": 1400,
+    "telegram_transport": "document_no_recompression"
+  },
+  "comparison_baseline": {
+    "experiment_id": "exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1",
+    "same_target_days": true,
+    "old_snapshot": "analysis/output/ma_launch_owner_yolo_eth30d_20260828_v1/kline_snapshot/ETH_USDT_SWAP.csv",
+    "old_snapshot_sha256": "d09f82a06945a36b8ed5e6d2445afdc67511f8582d75bda5828bf23b256742b8",
+    "shared_prefix_end_exclusive": "2026-08-28T01:30:00Z",
+    "shared_prefix_must_match_exact_ohlcv_rows": true,
+    "only_intended_detector_changes": [
+      "weights_and_training_dataset",
+      "training_supported_windows_W18_W19",
+      "training_supported_confirmation_post2_post9",
+      "three_additional_terminal_confirmation_bars"
+    ]
+  },
+  "data": {
+    "source": "OKX public candles/history-candles confirmed rows only",
+    "snapshot_location": "analysis/output/ma_launch_owner_grade_a8000_eth30d_20260829_v1/kline_snapshot/ETH_USDT_SWAP.csv",
+    "canonical_data_written": false,
+    "gaps_allowed": 0,
+    "duplicates_allowed": 0
+  },
+  "outputs": {
+    "local_output": "analysis/output/ma_launch_owner_grade_a8000_eth30d_20260829_v1",
+    "committed_results": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/results",
+    "report": "analysis/p1_15m_ma_launch_owner_grade_a8000_eth30d_20260829.md",
+    "html": "analysis/html/p1_15m_ma_launch_owner_grade_a8000_eth30d_20260829.html"
+  },
+  "interpretation": {
+    "purpose": "retrospective visual probe of the completed Grade-A completed-history detector on the same fixed major perpetual interval used yesterday",
+    "visual_quality_claim_from_generator_gate": false,
+    "economic_backtest": false,
+    "holdout_final_acceptance": false,
+    "must_disclose": [
+      "the completed weights are the epoch-6 best.pt from the early-stopped imgsz960 run, not either running full40 job",
+      "the detector requires two to nine post-core confirmation bars",
+      "full-context pixels after detection are review-only and never enter inference",
+      "detections are not live signals or evidence of profitability"
+    ]
+  },
+  "safety": {
+    "training_or_tuning": false,
+    "threshold_or_weight_changed": false,
+    "active_or_frozen_changed": false,
+    "promoted": false,
+    "deployed": false,
+    "forward_state_changed": false,
+    "orders_placed": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}

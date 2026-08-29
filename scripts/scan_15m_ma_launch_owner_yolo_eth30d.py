@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Run the frozen Owner YOLO on ETH-USDT-SWAP for 30 complete UTC days.
+"""Run one preregistered frozen Owner YOLO on 30 complete ETH UTC days.
 
-The model sees only causal W18--25 inputs ending at each scored closed bar.
+The model sees only causal preregistered windows ending at each scored closed bar.
 Every structurally accepted raw ``cx/cy/w/h`` prediction is retained.  For the
 Owner-facing surface, overlapping decision intervals are merged across the
 whole month and the first available prediction represents each episode.  Each
@@ -41,7 +41,6 @@ from scripts.render_15m_ma_launch_owner_yolo_20260827_fullcontext import (
     put_text,
     x_at_float,
 )
-from scripts.scan_15m_ma_launch_owner_yolo_recent5d import verify_training_geometry
 from scripts.scan_15m_ma_launch_owner_yolo_recent5d_rawbox import (
     draw_raw_prediction,
     normalized_box_corners,
@@ -142,11 +141,10 @@ def write_jsonl(path: Path, rows: Iterable[Mapping[str, Any]]) -> None:
 
 def load_preregistration(path: Path = DEFAULT_PREREG) -> dict[str, Any]:
     payload = read_json(path)
-    if payload.get("experiment_id") != EXPERIMENT_ID:
-        raise Eth30dError("unexpected experiment id")
+    configure_profile(payload)
     auth = payload["owner_authorization"]
-    if int(auth["holdout_consumption_number_for_this_configuration"]) != 5:
-        raise Eth30dError("holdout consumption identity drifted")
+    if int(auth["holdout_consumption_number_for_this_configuration"]) < 1:
+        raise Eth30dError("holdout consumption identity must be positive")
     if auth.get("new_inference_authorized") is not True:
         raise Eth30dError("new inference is not authorized")
     if auth.get("telegram_delivery_authorized") is not True:
@@ -160,17 +158,10 @@ def load_preregistration(path: Path = DEFAULT_PREREG) -> dict[str, Any]:
             raise Eth30dError(f"unsafe authorization flag: {key}")
 
     calendar = payload["calendar"]
-    expected = {
-        "target_start": TARGET_START,
-        "target_end_exclusive": TARGET_END,
-        "warmup_start": WARMUP_START,
-        "snapshot_end_exclusive": SNAPSHOT_END,
-    }
-    for key, value in expected.items():
-        if utc(calendar[key]) != value:
-            raise Eth30dError(f"calendar drifted: {key}")
     if int(calendar["complete_days"]) != 30 or len(EXPECTED_DAYS) != 30:
         raise Eth30dError("calendar must contain exactly 30 complete days")
+    if TARGET_END - TARGET_START != pd.Timedelta(days=30):
+        raise Eth30dError("target interval must be exactly 30 complete UTC days")
 
     instrument = payload["instrument"]
     if (instrument["inst_id"], instrument["symbol"], instrument["bar"]) != (
@@ -181,12 +172,17 @@ def load_preregistration(path: Path = DEFAULT_PREREG) -> dict[str, Any]:
         raise Eth30dError("instrument contract drifted")
 
     detector = payload["detector"]
-    if tuple(map(int, detector["window_lengths"])) != EXPECTED_WINDOWS:
-        raise Eth30dError("window support drifted")
-    if tuple(map(int, detector["mapped_core_length_bars_allowed"])) != EXPECTED_CORES:
-        raise Eth30dError("core support drifted")
-    if tuple(map(int, detector["mapped_confirmation_bars_allowed"])) != EXPECTED_CONFIRMATIONS:
-        raise Eth30dError("confirmation support drifted")
+    if not EXPECTED_WINDOWS or tuple(sorted(set(EXPECTED_WINDOWS))) != EXPECTED_WINDOWS:
+        raise Eth30dError("window support must be non-empty, unique and sorted")
+    if not EXPECTED_CORES or tuple(sorted(set(EXPECTED_CORES))) != EXPECTED_CORES:
+        raise Eth30dError("core support must be non-empty, unique and sorted")
+    if not EXPECTED_CONFIRMATIONS or tuple(sorted(set(EXPECTED_CONFIRMATIONS))) != EXPECTED_CONFIRMATIONS:
+        raise Eth30dError("confirmation support must be non-empty, unique and sorted")
+    extension = int(detector["scan_endpoint_extension_after_day_bars"])
+    if extension != max(EXPECTED_CONFIRMATIONS):
+        raise Eth30dError("day extension must equal maximum supported confirmation bars")
+    if SNAPSHOT_END != TARGET_END + extension * pd.Timedelta(minutes=15):
+        raise Eth30dError("snapshot end must complete the final day's confirmation support")
     if float(detector["confidence"]) != 0.25 or float(detector["nms_iou"]) != 0.7:
         raise Eth30dError("threshold or NMS drifted")
     if int(detector["imgsz"]) != 960:
@@ -206,6 +202,99 @@ def load_preregistration(path: Path = DEFAULT_PREREG) -> dict[str, Any]:
     if any(value is not False for value in payload["safety"].values()):
         raise Eth30dError("one or more safety switches drifted")
     return payload
+
+
+def configure_profile(payload: Mapping[str, Any]) -> None:
+    """Bind one preregistered detector/calendar contract to this process.
+
+    The ETH scan is deliberately reusable across immutable detector weights,
+    but every temporal and structural degree of freedom comes from the frozen
+    preregistration before any market-data read. Columns used: calendar UTC
+    bounds and detector window/core/confirmation lists only.
+    """
+
+    global EXPERIMENT_ID, TARGET_START, TARGET_END, WARMUP_START, SNAPSHOT_END
+    global EXPECTED_DAYS, EXPECTED_WINDOWS, EXPECTED_CORES, EXPECTED_CONFIRMATIONS
+    global SYMBOL, INST_ID
+
+    experiment_id = str(payload.get("experiment_id", ""))
+    if not experiment_id.startswith("exp-15m-ma-launch-"):
+        raise Eth30dError("unexpected experiment id")
+    calendar = payload["calendar"]
+    instrument = payload["instrument"]
+    detector = payload["detector"]
+    EXPERIMENT_ID = experiment_id
+    TARGET_START = utc(calendar["target_start"])
+    TARGET_END = utc(calendar["target_end_exclusive"])
+    WARMUP_START = utc(calendar["warmup_start"])
+    SNAPSHOT_END = utc(calendar["snapshot_end_exclusive"])
+    EXPECTED_DAYS = tuple(
+        pd.date_range(TARGET_START, TARGET_END, inclusive="left", freq="1D")
+    )
+    EXPECTED_WINDOWS = tuple(map(int, detector["window_lengths"]))
+    EXPECTED_CORES = tuple(map(int, detector["mapped_core_length_bars_allowed"]))
+    EXPECTED_CONFIRMATIONS = tuple(
+        map(int, detector["mapped_confirmation_bars_allowed"])
+    )
+    SYMBOL = str(instrument["symbol"])
+    INST_ID = str(instrument["inst_id"])
+
+
+def holdout_number(prereg: Mapping[str, Any]) -> int:
+    return int(
+        prereg["owner_authorization"][
+            "holdout_consumption_number_for_this_configuration"
+        ]
+    )
+
+
+def verify_training_geometry(
+    manifest_path: Path, detector: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Prove inference support is exactly present in positive training labels."""
+
+    positives = 0
+    window_counts: Counter[int] = Counter()
+    core_counts: Counter[int] = Counter()
+    confirmation_counts: Counter[int] = Counter()
+    with manifest_path.open(encoding="utf-8") as handle:
+        for line in handle:
+            row = json.loads(line)
+            if row.get("sample_kind") != "positive":
+                continue
+            positives += 1
+            window = row.get("window_bars")
+            if window is None:
+                window = int(row["window_end_i"]) - int(row["window_start_i"]) + 1
+            confirmation = row.get("post_bars")
+            if confirmation is None:
+                confirmation = row["post_core_context_bars"]
+            window_counts[int(window)] += 1
+            core_counts[int(row["core_bars"])] += 1
+            confirmation_counts[int(confirmation)] += 1
+    expected_positives = detector.get("training_positive_rows")
+    if positives < 1 or (
+        expected_positives is not None and positives != int(expected_positives)
+    ):
+        raise Eth30dError(f"positive training rows drifted: {positives}")
+    expected = (
+        (tuple(sorted(window_counts)), EXPECTED_WINDOWS, "window"),
+        (tuple(sorted(core_counts)), EXPECTED_CORES, "core"),
+        (
+            tuple(sorted(confirmation_counts)),
+            EXPECTED_CONFIRMATIONS,
+            "confirmation",
+        ),
+    )
+    for actual, frozen, label in expected:
+        if actual != frozen:
+            raise Eth30dError(f"training {label} support drifted: {actual} != {frozen}")
+    return {
+        "positive_rows": positives,
+        "window_counts": dict(sorted(window_counts.items())),
+        "core_counts": dict(sorted(core_counts.items())),
+        "confirmation_counts": dict(sorted(confirmation_counts.items())),
+    }
 
 
 def verify_committed_sources(prereg_path: Path) -> str:
@@ -245,7 +334,7 @@ def verify_immutable_inputs(prereg: Mapping[str, Any]) -> dict[str, Any]:
             raise Eth30dError(f"immutable input drifted: {key}")
         verified[key] = {"path": repo_relative(path), "sha256": expected}
     verified["training_geometry"] = verify_training_geometry(
-        resolve_repo_path(detector["training_manifest"])
+        resolve_repo_path(detector["training_manifest"]), detector
     )
     return verified
 
@@ -305,6 +394,57 @@ def build_day_rows(frame: pd.DataFrame) -> list[dict[str, Any]]:
     return rows
 
 
+def verify_comparison_prefix(
+    prereg: Mapping[str, Any], frame: pd.DataFrame
+) -> dict[str, Any] | None:
+    """Verify the shared yesterday/new snapshot OHLCV prefix exactly.
+
+    Columns used are ``open_time, open, high, low, close, volume``. This is a
+    data-parity check only; it does not inspect detections or tune the model.
+    """
+
+    baseline = prereg.get("comparison_baseline")
+    if not baseline:
+        return None
+    old_path = resolve_repo_path(baseline["old_snapshot"])
+    old_hash = str(baseline["old_snapshot_sha256"])
+    if not old_path.is_file() or sha256_file(old_path) != old_hash:
+        raise Eth30dError("comparison baseline snapshot drifted")
+    prefix_end = utc(baseline["shared_prefix_end_exclusive"])
+    columns = ["open_time", "open", "high", "low", "close", "volume"]
+    old = pd.read_csv(old_path, usecols=columns)
+    new = frame.loc[:, columns].copy()
+    for candidate in (old, new):
+        candidate["open_time"] = pd.to_datetime(candidate["open_time"], utc=True)
+        for column in columns[1:]:
+            candidate[column] = pd.to_numeric(candidate[column], errors="raise")
+    old = old.loc[old["open_time"] < prefix_end].reset_index(drop=True)
+    new = new.loc[new["open_time"] < prefix_end].reset_index(drop=True)
+    if len(old) == 0 or len(old) != len(new):
+        raise Eth30dError(
+            f"comparison prefix row count drifted: old={len(old)} new={len(new)}"
+        )
+    if not np.array_equal(
+        old["open_time"].astype("int64").to_numpy(),
+        new["open_time"].astype("int64").to_numpy(),
+    ):
+        raise Eth30dError("comparison prefix timestamps drifted")
+    old_values = old[columns[1:]].to_numpy(dtype=np.float64)
+    new_values = new[columns[1:]].to_numpy(dtype=np.float64)
+    if not np.array_equal(old_values, new_values):
+        differing = int(np.count_nonzero(old_values != new_values))
+        raise Eth30dError(f"comparison prefix OHLCV drifted in {differing} cells")
+    return {
+        "baseline_experiment_id": str(baseline["experiment_id"]),
+        "old_snapshot_path": repo_relative(old_path),
+        "old_snapshot_sha256": old_hash,
+        "prefix_end_exclusive": prefix_end.isoformat(),
+        "shared_rows": len(old),
+        "ohlcv_exact_match": True,
+        "additional_terminal_rows": len(frame) - len(new),
+    }
+
+
 def fetch_phase(
     prereg: Mapping[str, Any], *, out: Path, results: Path, source_commit: str
 ) -> dict[str, Any]:
@@ -321,6 +461,7 @@ def fetch_phase(
     for column in ("open", "high", "low", "close", "volume"):
         frame[column] = pd.to_numeric(frame[column], errors="raise")
     integrity = validate_snapshot(frame)
+    comparison_prefix = verify_comparison_prefix(prereg, frame)
     day_rows = build_day_rows(frame)
     snapshot_path.parent.mkdir(parents=True)
     frame.to_csv(snapshot_path, index=False)
@@ -332,7 +473,7 @@ def fetch_phase(
         "experiment_id": EXPERIMENT_ID,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_commit": source_commit,
-        "holdout_consumption_number_for_this_configuration": 5,
+        "holdout_consumption_number_for_this_configuration": holdout_number(prereg),
         "network_reads": True,
         "inst_id": INST_ID,
         "symbol": SYMBOL,
@@ -351,6 +492,7 @@ def fetch_phase(
             "sha256": sha256_file(day_path),
             "rows": len(day_rows),
         },
+        "comparison_prefix": comparison_prefix,
         "canonical_data_written": False,
         "wall_seconds": round(time.perf_counter() - started, 3),
         "training_or_tuning": False,
@@ -582,13 +724,13 @@ def render_episode(
     )
     put_text(
         canvas,
-        "Dashed DETECT is when the model input and 4-6 confirmation bars were fully known.",
+        f"Dashed DETECT is when the model input and {min(EXPECTED_CONFIRMATIONS)}-{max(EXPECTED_CONFIRMATIONS)} confirmation bars were fully known.",
         (28, footer_y + 65),
         scale=0.50,
     )
     put_text(
         canvas,
-        "Right: exact 1280x742 W18-25 detector input. Later grey bars never entered inference.",
+        f"Right: exact 1280x742 W{min(EXPECTED_WINDOWS)}-{max(EXPECTED_WINDOWS)} detector input. Later grey bars never entered inference.",
         (28, footer_y + 95),
         scale=0.50,
     )
@@ -644,7 +786,13 @@ def render_overview(
     rows = max(1, math.ceil(len(episodes) / 3))
     height = 250 + rows * 58
     canvas = np.full((height, 1800, 3), 248, dtype=np.uint8)
-    put_text(canvas, "ETHUSDT.P 15m | frozen Owner YOLO | 2026-07-29..08-27 UTC", (24, 42), scale=0.88, thickness=2)
+    put_text(
+        canvas,
+        f"ETHUSDT.P 15m | frozen Owner YOLO | {TARGET_START:%Y-%m-%d}..{TARGET_END - pd.Timedelta(days=1):%m-%d} UTC",
+        (24, 42),
+        scale=0.88,
+        thickness=2,
+    )
     put_text(
         canvas,
         f"windows {int(scan_totals.get('windows_scored', 0)):,} | raw boxes {int(scan_totals.get('raw_boxes', 0)):,} | structural {int(scan_totals.get('accepted_structural_boxes', 0)):,} | overlap episodes {len(episodes)}",
@@ -777,7 +925,14 @@ def scan_phase(
         "experiment_id": EXPERIMENT_ID,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_commit": source_commit,
-        "holdout_consumption_number_for_this_configuration": 5,
+        "holdout_consumption_number_for_this_configuration": holdout_number(prereg),
+        "detector_display_name": str(detector.get("display_name", "Owner YOLO")),
+        "confidence": float(detector["confidence"]),
+        "nms_iou": float(detector["nms_iou"]),
+        "imgsz": int(detector["imgsz"]),
+        "window_lengths": list(EXPECTED_WINDOWS),
+        "mapped_core_length_bars_allowed": list(EXPECTED_CORES),
+        "mapped_confirmation_bars_allowed": list(EXPECTED_CONFIRMATIONS),
         "device": device,
         "fetch_receipt_sha256": sha256_file(results / "fetch_receipt.json"),
         "snapshot_sha256": str(fetch_receipt["snapshot"]["sha256"]),
@@ -907,7 +1062,7 @@ def verify_phase(
         "protocol": prereg["protocol"],
         "experiment_id": EXPERIMENT_ID,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "holdout_consumption_number_for_this_configuration": 5,
+        "holdout_consumption_number_for_this_configuration": holdout_number(prereg),
         "snapshot_sha256": str(fetch_receipt["snapshot"]["sha256"]),
         "events": len(manifest),
         "documents_with_exactly_one_box": len(manifest),

@@ -2,11 +2,14 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from scripts import send_15m_ma_launch_owner_yolo_eth30d as sender
+from scripts import scan_15m_ma_launch_owner_yolo_eth30d as ethscan
 from scripts.scan_15m_ma_launch_owner_yolo_eth30d import (
     CONTEXT_BARS,
     DEFAULT_PREREG,
@@ -67,6 +70,46 @@ def test_context_bounds_prefers_detection_at_90_and_clips_at_snapshot_end() -> N
     assert context_bounds(400, 40) == (0, 127)
 
 
+def test_grade_a_profile_uses_exact_positive_training_geometry() -> None:
+    prereg = (
+        Path(__file__).resolve().parents[1]
+        / "experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/preregistration.json"
+    )
+    payload = ethscan.load_preregistration(prereg)
+    try:
+        manifest = Path(__file__).resolve().parents[1] / payload["detector"]["training_manifest"]
+        geometry = ethscan.verify_training_geometry(manifest, payload["detector"])
+        assert geometry["positive_rows"] == 8000
+        assert tuple(geometry["window_counts"]) == (18, 19)
+        assert tuple(geometry["core_counts"]) == (4, 5)
+        assert tuple(geometry["confirmation_counts"]) == tuple(range(2, 10))
+        assert ethscan.SNAPSHOT_END == ethscan.TARGET_END + pd.Timedelta(minutes=135)
+    finally:
+        ethscan.load_preregistration(DEFAULT_PREREG)
+
+
+def test_comparison_prefix_accepts_only_three_extra_terminal_rows() -> None:
+    prereg_path = (
+        Path(__file__).resolve().parents[1]
+        / "experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/preregistration.json"
+    )
+    payload = json.loads(prereg_path.read_text(encoding="utf-8"))
+    old_path = Path(__file__).resolve().parents[1] / payload["comparison_baseline"]["old_snapshot"]
+    old = pd.read_csv(old_path)
+    last = old.iloc[-1].copy()
+    additions = []
+    last_time = pd.to_datetime(last["open_time"], utc=True)
+    for offset in range(1, 4):
+        row = last.copy()
+        row["open_time"] = last_time + offset * pd.Timedelta(minutes=15)
+        additions.append(row)
+    extended = pd.concat([old, pd.DataFrame(additions)], ignore_index=True)
+    comparison = ethscan.verify_comparison_prefix(payload, extended)
+    assert comparison is not None
+    assert comparison["ohlcv_exact_match"] is True
+    assert comparison["additional_terminal_rows"] == 3
+
+
 def test_sender_is_resumable_and_delivers_dynamic_document_count(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -82,7 +125,12 @@ def test_sender_is_resumable_and_delivers_dynamic_document_count(
                 "caption": name,
             }
         )
-    scan = {"overlap_episodes": 2}
+    scan = {
+        "experiment_id": "exp-15m-ma-launch-test",
+        "overlap_episodes": 2,
+        "holdout_consumption_number_for_this_configuration": 1,
+        "detector_display_name": "test detector",
+    }
     monkeypatch.setattr(sender, "build_contract", lambda _results, _report: (scan, documents, "contract"))
     texts: list[str] = []
     sent: list[tuple[Path, str]] = []

@@ -7712,3 +7712,22 @@ artifacts:
     config_hash: "c0cd8cdccc1f8ff251699c4fbe9ac0c79e674845d43acd9c74f477080fb55635"
     data_cutoff: "2026-05-03T23:45:00+00:00"
     notes: Self-contained owner-facing HTML with five embedded figures and four result/method tables.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1-prereg
+    artifact_type: config
+    role: frozen_owner_authorized_eth30d_inference_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ddab0ab68c355babd9bb6f8b454e40c2396f266b"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/preregistration.json
+    sha256: "4f0b2b9cece8a7170d474a37c4ac6f5917edd74eace470cf8600a823944f9098"
+    size_bytes: 6243
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1/preregistration.json"
+    holdout_status: preregistered_before_holdout_read
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ddab0ab68c355babd9bb6f8b454e40c2396f266b"
+    config_hash: "4f0b2b9cece8a7170d474a37c4ac6f5917edd74eace470cf8600a823944f9098"
+    data_cutoff: "2026-08-28T02:00:00Z"
+    notes: >-
+      Owner-authorized holdout use #1 for this exact weight and geometry;
+      committed before any new ETH market-data read or prediction.
