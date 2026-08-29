@@ -1,0 +1,138 @@
+{
+  "accepted_candidates": 286,
+  "active_or_frozen_changed": false,
+  "archive": {
+    "charts": 41,
+    "path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/results/hot3d_all_signal_charts.zip",
+    "sha256": "e4edac51f408d763ea24bf773ac133e2d0b73b7f06d6af53023e94d4fbf7ada6",
+    "size_bytes": 7727388
+  },
+  "complete_days": [
+    "2026-08-26T00:00:00+00:00",
+    "2026-08-27T00:00:00+00:00",
+    "2026-08-28T00:00:00+00:00"
+  ],
+  "confidence": 0.25,
+  "daily_rankings_sha256": "60ac5e28e0f7c49d94830a52d9ece1ec202d27837b173e999815fe49c09e13f9",
+  "deployed": false,
+  "detector_display_name": "Grade-A8000+Neg24000 epoch4 full40 imgsz1280",
+  "device": "mps",
+  "documents": 41,
+  "documents_with_exactly_one_box": 41,
+  "episode_classes": {
+    "dense_long": 28,
+    "dense_short": 13
+  },
+  "episode_representative_days": {
+    "2026-08-26": 16,
+    "2026-08-27": 16,
+    "2026-08-28": 9
+  },
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1",
+  "fetch_receipt_sha256": "2df199f6305f4b3b233e8034c770df1a953f87c25659b7f65051cccc6ab1a050",
+  "five_bar_events_before_cross_day_episode_merge": 41,
+  "forward_state_changed": false,
+  "generated_at": "2026-08-29T19:48:40.800465+00:00",
+  "holdout_consumption_number_for_this_configuration": 1,
+  "hot_definition": "daily absolute-return mover proxy, not volume or social popularity",
+  "imgsz": 1280,
+  "immutable_inputs": {
+    "renderer": {
+      "path": "yoyo/layers/l1_detection/render.py",
+      "sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+    },
+    "training_geometry": {
+      "confirmation_counts": {
+        "2": 989,
+        "3": 1005,
+        "4": 997,
+        "5": 999,
+        "6": 1002,
+        "7": 1006,
+        "8": 1005,
+        "9": 997
+      },
+      "core_counts": {
+        "4": 4346,
+        "5": 3654
+      },
+      "positive_rows": 8000,
+      "window_counts": {
+        "18": 4346,
+        "19": 3654
+      }
+    },
+    "training_manifest": {
+      "path": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+      "sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2"
+    },
+    "weights": {
+      "path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+      "sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838"
+    }
+  },
+  "manifest_path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/results/manifest.jsonl",
+  "manifest_sha256": "4a7c928f0f7aca236420ccbb8aab49fbd41c3cce0dba167f2e87a830d5db6aa3",
+  "mapped_confirmation_bars_allowed": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "mapped_core_length_bars_allowed": [
+    4,
+    5
+  ],
+  "nms_iou": 0.7,
+  "orders_placed": false,
+  "overlap_episodes": 41,
+  "overview": {
+    "height": 1160,
+    "path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/results/overview.png",
+    "sha256": "c9d15cc7fe03ef9567e1e6f0cd5dc171ed84f55036f790dcd402b87c1b9c0c1d",
+    "size_bytes": 203741,
+    "width": 1920
+  },
+  "production_eligible": false,
+  "promoted": false,
+  "protocol": "ma6_owner_grade_a8000_neg24000_epoch4_full40_1280_hot3d_frozen_replay_v1_20260830",
+  "ranking_causality": "post_hoc_same_day_ranking_not_live_selection",
+  "scan_totals": {
+    "accepted_before_dedup": 286,
+    "accepted_structural_boxes": 286,
+    "dedup_removed": 245,
+    "deduplicated_events": 41,
+    "raw_boxes": 354,
+    "reject_confirmation": 57,
+    "reject_core_length": 1,
+    "reject_core_outside_ranked_day": 10,
+    "windows_scored": 12600,
+    "windows_with_any_box": 343
+  },
+  "selected_symbol_days": 60,
+  "selected_unique_symbols": 43,
+  "snapshot_source": {
+    "daily_rankings": "analysis/output/ma_launch_owner_grade_a8000_hot3d_20260829_v1/daily_rankings.csv",
+    "daily_rankings_sha256": "60ac5e28e0f7c49d94830a52d9ece1ec202d27837b173e999815fe49c09e13f9",
+    "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1",
+    "fetch_receipt": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1/results/fetch_receipt.json",
+    "fetch_receipt_sha256": "2df199f6305f4b3b233e8034c770df1a953f87c25659b7f65051cccc6ab1a050",
+    "kind": "frozen_prior_snapshot",
+    "snapshot_location": "analysis/output/ma_launch_owner_grade_a8000_hot3d_20260829_v1/kline_snapshot"
+  },
+  "source_commit": "b4b71e1756eccb46f4bdda02cc9786375cf06875",
+  "telegram_sent": false,
+  "threshold_or_weight_changed": false,
+  "training_eligible": false,
+  "training_or_tuning": false,
+  "wall_seconds": 1011.202,
+  "weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+  "window_lengths": [
+    18,
+    19
+  ]
+}
