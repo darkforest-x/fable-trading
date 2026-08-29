@@ -1,7 +1,8 @@
 """Re-box the Grade-A positives onto the densest MA-crossing block, per image.
 
 Owner observation (2026-08-30), confirmed on all 1,043 events: the frozen box
-ends before the six moving averages actually finish crossing. It captures a
+ends AT the point where the six moving averages converge, instead of centring
+on it. It captures a
 median of 3 pairwise crossings where the best equal-length block in the same
 window holds 6, and only 9.5% of events are already on that best block. The
 owner's spec is that the crossing cluster should sit in the MIDDLE of the box,
@@ -88,20 +89,32 @@ def crossing_counts(enriched: pd.DataFrame, lo: int, hi: int) -> np.ndarray:
 
 
 def densest_block_shift(enriched: pd.DataFrame, core_start: int, core_end: int) -> int:
-    """Bars to move the core so the densest crossing block sits in its middle.
+    """Bars to move the core so the six MAs' convergence point sits in its middle.
 
-    Ties keep the earliest block, which biases towards LESS future rather than
-    more -- the conservative direction for a completed-history contract.
+    Convergence is measured as MINIMUM six-MA bandwidth, not maximum pairwise
+    crossing count. Crossing count was tried first and is wrong: it is sparse
+    (0-3 per bar) and, worse, it keeps firing while the bundle FANS OUT, because
+    a fast MA sweeping down through the slow ones scores crossings all the way
+    through the launch. On NOT_USDT_SWAP the crossing argmax landed on bar 10
+    with bandwidth already expanding 74 -> 89 -> 103 bps, dragging the box
+    entirely into the launch, while the actual convergence sat one bar earlier
+    at 65.9 bps. Bandwidth is the smooth, monotone-into-the-launch measure of
+    "all six lines passing through one point", which is what the eye reads as
+    the densest crossing.
+
+    Ties keep the earliest bar, biasing towards less future.
     """
-    length = core_end - core_start + 1
     lo = core_start - SEARCH_PRE
     hi = min(core_end + SEARCH_POST, len(enriched) - 2)
-    if lo < 1 or hi - lo + 1 < length:
-        raise CrossBoxError("crossing search range does not fit in the source series")
-    counts = crossing_counts(enriched, lo, hi)
-    block = np.array([counts[i : i + length].sum() for i in range(len(counts) - length + 1)])
-    best_start = lo + int(np.argmax(block))
-    return int(round(best_start + (length - 1) / 2 - (core_start + core_end) / 2))
+    if lo < 1 or hi <= lo:
+        raise CrossBoxError("convergence search range does not fit in the source series")
+    seg = enriched[MA_COLS].iloc[lo : hi + 1]
+    close = enriched["close"].iloc[lo : hi + 1]
+    bandwidth = ((seg.max(axis=1) - seg.min(axis=1)) / close).to_numpy(dtype=float)
+    if not np.isfinite(bandwidth).all():
+        raise CrossBoxError("non-finite bandwidth in convergence search range")
+    tightest = lo + int(np.argmin(bandwidth))
+    return int(round(tightest - (core_start + core_end) / 2))
 
 
 def core_box(transform: Any, window: pd.DataFrame, start_local: int, end_local: int) -> dict[str, Any]:
@@ -272,7 +285,7 @@ def main() -> int:
         (DST / "build_receipt.json").write_text(json.dumps({
             "source_dataset": SRC.name,
             "output_dataset": DST.name,
-            "definition": "box centred on the equal-length block with the most pairwise MA crossings",
+            "definition": "box centred on the bar of minimum six-MA bandwidth (the convergence point)",
             "ma_columns": MA_COLS,
             "ma_pairs": len(MA_PAIRS),
             "search_range_bars": [-SEARCH_PRE, SEARCH_POST],
