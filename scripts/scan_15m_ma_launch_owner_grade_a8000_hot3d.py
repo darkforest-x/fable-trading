@@ -878,7 +878,12 @@ def scan_phase(
             results / "manifest.csv",
             results / "manifest.jsonl",
             overview_path,
-            out / "daily_rankings.csv",
+            # Under a frozen-snapshot replay the rankings live in the SOURCE
+            # run's output directory, not this one. Packaging them from `out`
+            # crashed the 1280 replay after all 41 episodes had been rendered,
+            # losing the scan receipt while leaving the charts on disk -- an
+            # interrupted run that looked like a completed one.
+            resolve_repo_path(source_identity["daily_rankings"]),
             out / "accepted_candidates.csv",
             out / "episodes.csv",
             out / "scan_stats.csv",
