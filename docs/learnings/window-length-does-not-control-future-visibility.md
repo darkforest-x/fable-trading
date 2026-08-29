@@ -36,5 +36,6 @@
   `analysis/p0_local_signal_v2_audit_20260807.md`、
   `reports/future_dependency_report_20260805.md`（0/20/99 根未来 → 10%/39%/62% 复现率）。
   同一枚硬币的推理侧：[[full-mode-causality-is-behavioral-not-structural]]。
-  监督目标本身的未来依赖：[[zero-live-edge-labels-means-the-target-is-unverified]]。
+  （相关笔记 zero-live-edge-labels 已于 2026-08-30 撤回删除：它把「框落在固定渲染窗内的位置」
+  当成了前视证据。本条量的是训练输入窗口右端 vs decision bar，是另一回事，不受影响。）
   铁律 12（检测只认盘口）与规范 Stage A 的冲突需 owner 裁决，见报告 §7 C-1。

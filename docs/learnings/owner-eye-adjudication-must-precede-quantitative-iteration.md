@@ -22,5 +22,5 @@
 - **牵连**:`/Users/zhangzc/yoyo-eth/scripts/scan_strict_platforms.py`、
   `reports/platform_v2/review_gallery.html`;呼应 memory
   `owner-instincts-deserve-experiments`(owner 一眼能裁决的事,别排在三轮实验后面)
-  与 `zero-live-edge-labels-means-the-target-is-unverified`(目标未经验证 = 一切
+  与「目标未经验证 = 一切
   下游数字悬空)。
