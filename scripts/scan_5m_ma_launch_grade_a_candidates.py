@@ -30,8 +30,12 @@ sys.path.insert(0, str(ROOT))
 from yoyo.datasets.ma_launch_owner_autofill10000 import (  # noqa: E402
     load_reference_profiles, scan_source,
 )
-from yoyo.datasets.ma_launch_owner_perfect_filter import hard_gate_failures  # noqa: E402
-from yoyo.datasets.fifteen_minute_launch_candidates import read_preholdout_prefix  # noqa: E402
+from yoyo.datasets.ma_launch_owner_perfect_filter import (  # noqa: E402
+    extract_profile, hard_gate_failures,
+)
+from yoyo.datasets.fifteen_minute_launch_candidates import (  # noqa: E402
+    add_candidate_features, read_preholdout_prefix,
+)
 from yoyo.datasets.ma_launch_owner_recrop_review import HOLDOUT_START  # noqa: E402
 
 AUTOFILL_PREREG = ROOT / "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/preregistration.json"
@@ -74,10 +78,20 @@ def main() -> int:
             stats[f"scan failed: {type(exc).__name__}"] += 1
             continue
         stats["scanned"] += 1
+        stats["raw candidates"] += len(rows)
+        # scan_source stops at the coarse morphology stage; the strict metrics
+        # the hard gates read are produced by the perfect-filter profile, so
+        # they must be extracted here rather than looked up on the row.
+        enriched = add_candidate_features(frame)
         for row in rows:
-            metrics = row.get("strict_metrics")
-            if metrics and not hard_gate_failures(metrics, gates):
-                handle.write(json.dumps({**row, "symbol": symbol, "venue": "binance_um",
+            try:
+                metrics = extract_profile(enriched, row, bar_minutes=5).metrics
+            except Exception:  # noqa: BLE001 - a bad row must not stop the sweep
+                stats["profile failed"] += 1
+                continue
+            if not hard_gate_failures(metrics, gates):
+                handle.write(json.dumps({**row, "strict_metrics": metrics,
+                                         "symbol": symbol, "venue": "binance_um",
                                          "timeframe": "5m"}, ensure_ascii=False, default=str) + "\n")
                 kept += 1
         if i % 25 == 0:

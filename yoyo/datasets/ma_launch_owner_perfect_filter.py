@@ -166,6 +166,7 @@ def extract_profile(
     row: Mapping[str, Any],
     *,
     core_shift: int = 0,
+    bar_minutes: int = 15,
 ) -> ShapeProfile:
     """Extract one profile from the exact row geometry.
 
@@ -192,8 +193,12 @@ def extract_profile(
     times = pd.to_datetime(
         frame["open_time"].iloc[start_i - 12 : time_stop + 1], utc=True
     )
-    if len(times) < 2 or not (times.diff().iloc[1:] == pd.Timedelta(minutes=15)).all():
-        raise PerfectFilterError("profile crosses a non-15-minute source gap")
+    # The contiguity requirement is real, but the spacing it checks belongs to
+    # the series, not to the number 15. Hard-coding it rejected every 5m
+    # profile as "gapped" when the series had no gap at all.
+    bar_delta = pd.Timedelta(minutes=int(bar_minutes))
+    if len(times) < 2 or not (times.diff().iloc[1:] == bar_delta).all():
+        raise PerfectFilterError(f"profile crosses a non-{bar_minutes}-minute source gap")
 
     sign = 1.0 if str(row["direction"]) == "LONG" else -1.0
     if str(row["direction"]) not in {"LONG", "SHORT"}:
