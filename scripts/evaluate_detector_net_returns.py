@@ -93,7 +93,24 @@ def main() -> int:
 
     dataset = ROOT / args.dataset
     rows = [json.loads(l) for l in (dataset / "manifest.jsonl").read_text().splitlines() if l.strip()]
-    val = [r for r in rows if r["split"] == "val"]
+    # The 15m and 5m manifests were written by different builders: one carries
+    # image_path/window_end_i, the other a bare name. Normalise instead of
+    # assuming, so a schema difference cannot silently score the wrong images.
+    def normalise(row: dict) -> dict | None:
+        image = row.get("image_path")
+        if image:
+            stem = Path(image).stem
+        elif row.get("name"):
+            stem = str(row["name"])
+        else:
+            return None
+        end = row.get("window_end_i")
+        if end is None:
+            return None
+        return {"stem": stem, "window_end_i": int(end),
+                "symbol": str(row.get("symbol", "")), "source_path": str(row["source_path"])}
+
+    val = [n for n in (normalise(r) for r in rows if r.get("split") == "val") if n]
     print(f"{args.label}: scoring {len(val)} val images", flush=True)
 
     model = YOLO(str(ROOT / args.weights))
@@ -102,7 +119,7 @@ def main() -> int:
     cache: dict[str, pd.DataFrame] = {}
 
     for i, row in enumerate(val, 1):
-        image = dataset / "images" / "val" / f"{row['name']}.png"
+        image = dataset / "images" / "val" / f"{row['stem']}.png"
         result = model.predict(str(image), imgsz=args.imgsz, conf=args.conf, verbose=False)[0]
         if not len(result.boxes):
             stats["no detection"] += 1
@@ -129,7 +146,7 @@ def main() -> int:
             stats["unresolvable"] += 1
             continue
         stats["traded"] += 1
-        fired.append({"name": row["name"], "symbol": row["symbol"], "side": side, "conf": conf,
+        fired.append({"name": row["stem"], "symbol": row["symbol"], "side": side, "conf": conf,
                       "entry_i": int(row["window_end_i"]), "source_path": path,
                       "entry_time": str(frame["open_time"].iloc[int(row["window_end_i"])]), **out})
         if i % 200 == 0:

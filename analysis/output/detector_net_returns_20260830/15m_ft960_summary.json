@@ -1,0 +1,31 @@
+{
+  "label": "15m_ft960",
+  "weights": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960/weights/best.pt",
+  "dataset": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1",
+  "conf": 0.25,
+  "imgsz": 960,
+  "horizon_bars": 72,
+  "bar_minutes": 15,
+  "val_images": 4800,
+  "proposals": 1088,
+  "paired": 1088,
+  "fire_rate": 0.22666666666666666,
+  "tp_rate": 0.26838235294117646,
+  "pool_net_atr": -0.028874962634622088,
+  "control_net_atr": -0.2666012015578275,
+  "edge_atr": 0.2377262389232054,
+  "edge_ci95": [
+    0.05572846180498758,
+    0.4292888571144093
+  ],
+  "outcomes": {
+    "sl": 657,
+    "tp": 292,
+    "timeout": 139
+  },
+  "skipped": {
+    "traded": 1088,
+    "no detection": 3704,
+    "unresolvable": 8
+  }
+}

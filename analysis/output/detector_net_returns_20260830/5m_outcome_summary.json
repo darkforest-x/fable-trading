@@ -1,0 +1,30 @@
+{
+  "label": "5m_outcome",
+  "weights": "analysis/output/ma_launch_5m_outcome_v1/ma_launch_5m_outcome_v1_y11s_ft960/weights/best.pt",
+  "dataset": "datasets/ma_launch_5m_outcome_v1",
+  "conf": 0.25,
+  "imgsz": 960,
+  "horizon_bars": 144,
+  "bar_minutes": 5,
+  "val_images": 575,
+  "proposals": 367,
+  "paired": 367,
+  "fire_rate": 0.6382608695652174,
+  "tp_rate": 0.2724795640326976,
+  "pool_net_atr": -0.6117972477416915,
+  "control_net_atr": -0.5882564694922597,
+  "edge_atr": -0.02354077824943183,
+  "edge_ci95": [
+    -0.3361454378228689,
+    0.30894555716159294
+  ],
+  "outcomes": {
+    "sl": 264,
+    "tp": 100,
+    "timeout": 3
+  },
+  "skipped": {
+    "no detection": 208,
+    "traded": 367
+  }
+}
