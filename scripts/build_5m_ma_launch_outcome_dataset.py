@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import random
 import sys
 from collections import Counter, defaultdict
@@ -47,7 +48,7 @@ from yoyo.layers.l1_detection.render import render_chart  # noqa: E402
 
 CANDIDATES = ROOT / "analysis/output/ma_launch_5m_candidates_20260830/candidates_5m.jsonl"
 OUTCOMES = ROOT / "analysis/output/ma_launch_5m_outcomes_20260830/outcomes_5m.csv"
-DST = ROOT / "datasets/ma_launch_5m_outcome_v1"
+DST = ROOT / os.environ.get("FABLE_5M_OUTCOME_DST", "datasets/ma_launch_5m_outcome_v1")
 MA_COLS = list(ALL_MA_COLS)
 PAD_FRACTION = 0.04
 CLASS_ID = {"LONG": 0, "SHORT": 1}
@@ -56,6 +57,9 @@ SPLIT_CUTOFF = pd.Timestamp("2025-12-01T00:00:00Z")
 PURGE = pd.Timedelta(minutes=5 * 450)                     # 37.5h, matching the 15m isolation
 HORIZON_COL = "outcome_144"                               # 12h: timeouts fall from 358 to 85
 SEED = 20260830
+# One position per pattern by default; FABLE_5M_RENDER_ALL=1 draws all eight so the
+# render-count question can be answered with the label scheme held fixed.
+RENDER_ALL = os.environ.get("FABLE_5M_RENDER_ALL") == "1"
 
 
 def core_box(transform: Any, window: pd.DataFrame, start_local: int, end_local: int) -> dict[str, float]:
@@ -128,32 +132,33 @@ def main() -> int:
                 continue
             split = "train" if core_time < SPLIT_CUTOFF else "val"
 
-            pre, post = POSITIONS[rng.randrange(len(POSITIONS))]
-            ws, we = core_start - pre, core_end + post
-            if ws < 200 or we >= len(enriched) - 1:
-                stats["window out of range"] += 1
-                continue
-            window = enriched.iloc[ws : we + 1]
-            if window[MA_COLS].isna().any().any():
-                stats["MA warmup incomplete"] += 1
-                continue
+            chosen = POSITIONS if RENDER_ALL else (POSITIONS[rng.randrange(len(POSITIONS))],)
+            for pre, post in chosen:
+                ws, we = core_start - pre, core_end + post
+                if ws < 200 or we >= len(enriched) - 1:
+                    stats["window out of range"] += 1
+                    continue
+                window = enriched.iloc[ws : we + 1]
+                if window[MA_COLS].isna().any().any():
+                    stats["MA warmup incomplete"] += 1
+                    continue
 
-            image, transform = render_chart(window, out_path=None)
-            name = f"{kind[0].upper()}_{row['symbol']}_{row['event_id'][:12]}"
-            cv2.imwrite(str(DST / "images" / split / f"{name}.png"), image)
-            if label_class is None:
-                (DST / "labels" / split / f"{name}.txt").write_text("")
-            else:
-                box = core_box(transform, window, core_start - ws, core_end - ws)
-                (DST / "labels" / split / f"{name}.txt").write_text(
-                    f"{CLASS_ID[label_class]} {box['cx']:.6f} {box['cy']:.6f} "
-                    f"{box['w']:.6f} {box['h']:.6f}\n")
-            stats[f"{kind} {split}"] += 1
-            manifest.append({"sample_kind": kind, "barrier_outcome": outcome, "name": name,
-                             "split": split, "symbol": row["symbol"], "direction": row["direction"],
-                             "event_id": row["event_id"], "timeframe": "5m",
-                             "pre_bars": pre, "post_bars": post, "core_bars": int(row["core_bars"]),
-                             "window_start_i": ws, "window_end_i": we, "source_path": source})
+                image, transform = render_chart(window, out_path=None)
+                name = f"{kind[0].upper()}_{row['symbol']}_{row['event_id'][:12]}_p{pre}"
+                cv2.imwrite(str(DST / "images" / split / f"{name}.png"), image)
+                if label_class is None:
+                    (DST / "labels" / split / f"{name}.txt").write_text("")
+                else:
+                    box = core_box(transform, window, core_start - ws, core_end - ws)
+                    (DST / "labels" / split / f"{name}.txt").write_text(
+                        f"{CLASS_ID[label_class]} {box['cx']:.6f} {box['cy']:.6f} "
+                        f"{box['w']:.6f} {box['h']:.6f}\n")
+                stats[f"{kind} {split}"] += 1
+                manifest.append({"sample_kind": kind, "barrier_outcome": outcome, "name": name,
+                                 "split": split, "symbol": row["symbol"], "direction": row["direction"],
+                                 "event_id": row["event_id"], "timeframe": "5m",
+                                 "pre_bars": pre, "post_bars": post, "core_bars": int(row["core_bars"]),
+                                 "window_start_i": ws, "window_end_i": we, "source_path": source})
         if index % 50 == 0:
             print(f"  {index}/{len(sources)} sources, {len(manifest)} images", flush=True)
 
