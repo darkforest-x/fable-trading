@@ -253,6 +253,7 @@ def read_preholdout_prefix(
     path: Path,
     *,
     end_exclusive: pd.Timestamp,
+    bar_minutes: int = 15,
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     """Materialize OHLCV only before ``end_exclusive`` from an ascending CSV.
 
@@ -325,7 +326,7 @@ def read_preholdout_prefix(
         "holdout_ohlcv_rows_materialized": 0,
     }
     if frame.empty:
-        audit.update({"first_time": None, "last_time": None, "non_15m_gaps": 0})
+        audit.update({"first_time": None, "last_time": None, "non_bar_gaps": 0})
         return frame, audit
     times = pd.to_datetime(frame["open_time"], utc=True)
     numeric = frame[["open", "high", "low", "close", "volume"]].to_numpy(dtype=float)
@@ -341,16 +342,22 @@ def read_preholdout_prefix(
         raise CandidateCollectionError(f"low above candle body in {path}")
     if times.max() >= end_exclusive:
         raise AssertionError("holdout boundary truncation failed")
-    gaps = int((times.diff().dropna() != pd.Timedelta(minutes=15)).sum())
+    # Segment boundaries are the bar spacing of THIS series, not a constant.
+    # Reading a 5m file with the 15m spacing marked every bar as a gap, so every
+    # segment had length one and the scanner returned zero candidates while
+    # reporting no error at all.
+    bar_delta = pd.Timedelta(minutes=int(bar_minutes))
+    gaps = int((times.diff().dropna() != bar_delta).sum())
     audit.update(
         {
             "first_time": times.iloc[0].isoformat(),
             "last_time": times.iloc[-1].isoformat(),
-            "non_15m_gaps": gaps,
+            "non_bar_gaps": gaps,
+            "bar_minutes": int(bar_minutes),
         }
     )
     frame["_source_i"] = np.arange(len(frame), dtype=int)
-    frame["_segment_id"] = times.diff().ne(pd.Timedelta(minutes=15)).cumsum().astype(int)
+    frame["_segment_id"] = times.diff().ne(bar_delta).cumsum().astype(int)
     return frame, audit
 
 

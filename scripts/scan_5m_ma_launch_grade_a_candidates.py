@@ -60,7 +60,7 @@ def main() -> int:
     for i, path in enumerate(files, 1):
         symbol = path.name.split("binance_um_")[1].rsplit("_5m_", 1)[0]
         try:
-            frame, _ = read_preholdout_prefix(path, end_exclusive=HOLDOUT_START)
+            frame, _ = read_preholdout_prefix(path, end_exclusive=HOLDOUT_START, bar_minutes=5)
         except Exception as exc:  # noqa: BLE001 - one bad series must not stop the sweep
             stats[f"unreadable: {type(exc).__name__}"] += 1
             continue
