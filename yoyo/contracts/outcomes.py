@@ -177,6 +177,57 @@ def resolve_barrier_outcome(
     )
 
 
+def resolve_barrier_after_close(
+    frame: pd.DataFrame,
+    *,
+    side: str,
+    decision_i: int,
+    atr: float,
+    tp_atr_mult: float,
+    sl_atr_mult: float,
+    horizon_bars: int,
+    same_bar_policy: str,
+    gap_policy: str,
+    return_convention: str,
+    allow_partial: bool,
+    bar_duration: pd.Timedelta,
+) -> BarrierResolution:
+    """Enter at a completed bar's close and resolve from the next bar onward.
+
+    Required columns are ``close`` plus the OHLC columns consumed by
+    :func:`resolve_barrier_outcome`; ``open_time`` remains optional.  The ATR is
+    deliberately supplied from ``decision_i`` by the caller so its indicator
+    implementation stays explicit.  The decision bar's high/low are never
+    eligible exits: they occurred before its close and therefore before entry.
+
+    This wrapper is the causal contract for image-led decisions whose visible
+    right edge is ``decision_i``.  Callers generating labels and callers
+    evaluating trades must share it instead of slicing the frame differently.
+    """
+    index = int(decision_i)
+    if index < 0 or index >= len(frame):
+        raise OutcomeContractError("decision_i is outside the available frame")
+    entry = float(pd.to_numeric(frame["close"], errors="coerce").iloc[index])
+    if not np.isfinite(entry) or entry <= 0:
+        raise OutcomeContractError("decision close must be finite and positive")
+
+    return resolve_barrier_outcome(
+        frame,
+        side=side,
+        entry_i=index + 1,
+        entry_price=entry,
+        atr=atr,
+        tp_atr_mult=tp_atr_mult,
+        sl_atr_mult=sl_atr_mult,
+        horizon_bars=horizon_bars,
+        same_bar_policy=same_bar_policy,
+        gap_policy=gap_policy,
+        return_convention=return_convention,
+        allow_partial=allow_partial,
+        bar_duration=bar_duration,
+    )
+
+
 # Barrier parameters. Owner decisions -- CLAUDE.md forbids code changing them, and
 # they live here rather than in labeling.py because L1's tip gate, L2's labels and
 # L3's replay must all read the same numbers or they are measuring different

@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-5m-ma-launch-outcome-causal-v2",
+  "registered_at": "2026-08-31T00:00:00+08:00",
+  "owner_authorization": {
+    "quote": "把你刚刚讲的方案全部做一遍",
+    "interpretation": "Implement the complete causal repair, rebuild, and audit. This does not authorize holdout access, model training, promotion, deployment, threshold changes, barrier changes, or live-money operations."
+  },
+  "status": "preregistered_infrastructure_repair",
+  "question": "Can the 2026-08-30 5-minute MA-launch proposal pool be rebuilt so every model-visible pixel stops at the close-entry decision bar, every label starts on the following bar, and every split/evaluation unit is one event?",
+  "claim_boundary": "This is a non-directional data-contract audit. Passing proves internal causality and lineage only; it does not prove L1 shape correctness, detector skill, or economic edge.",
+  "owner_approved_repair_bundle": {
+    "reason": "The timing boundary, repeated-view unit, split isolation, and evaluator entry semantics are coupled parts of one invalid data contract; testing them independently would preserve a known-invalid pipeline.",
+    "changes": [
+      "visible_end_i becomes core_end_i + 2 and equals decision_i",
+      "entry uses decision_i close; outcome resolution begins at decision_i + 1",
+      "eight rendered views become one image per event_id",
+      "evaluation and bootstrap change from image rows to event_id",
+      "train/val use a frozen time cutoff and 450-bar purge",
+      "outcome labels are declared L2/diagnostic and cannot become L1 Gold"
+    ],
+    "performance_comparison_allowed": false
+  },
+  "immutable_input": {
+    "path": "analysis/output/ma_launch_5m_candidates_20260830/candidates_5m.jsonl",
+    "sha256": "4002650d2889f22a3e56b89a48912504bd57475598f690b2017741c3adac25fb",
+    "rows": 3940,
+    "unique_event_ids": 3940,
+    "source_files": 575,
+    "core_end_range": [
+      "2020-01-13T13:25:00+00:00",
+      "2026-04-30T18:15:00+00:00"
+    ]
+  },
+  "frozen_contract": {
+    "bar_minutes": 5,
+    "decision_offset_from_core_end_bars": 2,
+    "entry_price": "decision_close",
+    "outcome_starts": "next_bar",
+    "horizon_bars": 144,
+    "tp_atr": 5.0,
+    "sl_atr": 2.0,
+    "same_bar_policy": "conservative_sl",
+    "gap_policy": "barrier_price",
+    "round_trip_cost": 0.002,
+    "split_cutoff": "2025-12-01T00:00:00+00:00",
+    "purge_bars_each_side": 450,
+    "renders_per_event": 1,
+    "holdout_start_exclusive": "2026-05-04T00:00:00+00:00"
+  },
+  "planned_outputs": {
+    "l2_outcome_ledger": "analysis/output/ma_launch_5m_outcomes_causal_v2_20260831/outcomes.jsonl",
+    "diagnostic_dataset": "datasets/ma_launch_5m_outcome_causal_v2",
+    "audit_receipt": "experiments/active/exp-5m-ma-launch-outcome-causal-v2/results/causality_audit.json",
+    "report": "analysis/p0_5m_ma_launch_causal_rebuild_20260831.md",
+    "html": "analysis/html/p0_5m_ma_launch_causal_rebuild_20260831.html"
+  },
+  "success_criteria": {
+    "holdout_rows_read": 0,
+    "visible_future_failures": 0,
+    "source_to_pixel_rerender_failures": 0,
+    "candidate_lineage_failures": 0,
+    "outcome_lineage_failures": 0,
+    "time_split_failures": 0,
+    "event_split_overlap": 0,
+    "duplicate_manifest_event_ids": 0,
+    "duplicate_image_hashes": 0,
+    "yolo_format_failures": 0,
+    "null_control": "Permute outcome kinds across event_ids 1000 times while preserving class balance; the actual deterministic linkage must exceed every shuffled linkage."
+  },
+  "stop_conditions": [
+    "Any audit blocker keeps the artifact rejected and ineligible.",
+    "Any need to read a bar at or after holdout_start stops execution and requires new owner approval.",
+    "No model training starts from this authorization.",
+    "Owner shape adjudication remains mandatory before any L1 Gold release."
+  ],
+  "eligibility": {
+    "training_eligible": false,
+    "production_eligible": false,
+    "holdout_consumed": false
+  },
+  "historical_artifacts_policy": "Do not modify or delete datasets/ma_launch_5m_outcome_v1, datasets/ma_launch_5m_outcome_x8_v1, or their weights/results."
+}

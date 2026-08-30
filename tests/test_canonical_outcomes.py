@@ -12,6 +12,7 @@ from src.judgment.labeling import label_short_candidate
 from src.judgment.outcomes import (
     OutcomeContractError,
     gross_return,
+    resolve_barrier_after_close,
     resolve_barrier_outcome,
 )
 
@@ -174,3 +175,65 @@ def test_forward_protocol_supplies_tp_sl_horizon_explicitly() -> None:
     assert result is not None
     assert result.status == "closed"
     assert result.outcome == "tp"
+
+
+def test_close_entry_excludes_the_decision_bars_earlier_high_and_low() -> None:
+    frame = pd.DataFrame(
+        {
+            "open_time": pd.date_range("2026-04-01", periods=4, freq="5min", tz="UTC"),
+            "open": [100.0] * 4,
+            "high": [106.0, 100.0, 100.0, 100.0],
+            "low": [98.0, 100.0, 100.0, 100.0],
+            "close": [100.0, 100.0, 100.0, 100.0],
+        }
+    )
+
+    result = resolve_barrier_after_close(
+        frame,
+        side="long",
+        decision_i=0,
+        atr=1.0,
+        tp_atr_mult=5.0,
+        sl_atr_mult=2.0,
+        horizon_bars=3,
+        same_bar_policy="conservative_sl",
+        gap_policy="barrier_price",
+        return_convention="linear_long",
+        allow_partial=False,
+        bar_duration=pd.Timedelta(minutes=5),
+    )
+
+    assert result.outcome == "timeout"
+    assert result.entry_price == 100.0
+    assert result.exit_time == "2026-04-01 00:20:00+00:00"
+
+
+def test_close_entry_allows_the_first_bar_after_decision_to_hit() -> None:
+    frame = pd.DataFrame(
+        {
+            "open_time": pd.date_range("2026-04-01", periods=3, freq="5min", tz="UTC"),
+            "open": [100.0] * 3,
+            "high": [100.0, 105.0, 100.0],
+            "low": [100.0] * 3,
+            "close": [100.0] * 3,
+        }
+    )
+
+    result = resolve_barrier_after_close(
+        frame,
+        side="long",
+        decision_i=0,
+        atr=1.0,
+        tp_atr_mult=5.0,
+        sl_atr_mult=2.0,
+        horizon_bars=2,
+        same_bar_policy="conservative_sl",
+        gap_policy="barrier_price",
+        return_convention="linear_long",
+        allow_partial=False,
+        bar_duration=pd.Timedelta(minutes=5),
+    )
+
+    assert result.outcome == "tp"
+    assert result.exit_offset == 1
+    assert result.exit_time == "2026-04-01 00:10:00+00:00"
