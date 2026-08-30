@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-5m-ma-launch-grade-a-neg-v1",
+  "created_at": "2026-08-30T00:00:00+08:00",
+  "amended_at": "2026-08-29T11:15:00+08:00",
+  "stage": "P1",
+  "owner_authorization": {
+    "request": "加入数据源 / 看看小级别5min",
+    "interpreted_scope": "Build a 5m MA-launch dataset from the 3,940 patterns the frozen gates found in the 5m Binance archive, using the same renderer, the same box geometry and the same matched-negative contract as the 15m set so the two differ in timeframe only.",
+    "holdout_read": false,
+    "training_or_tuning_authorized": false,
+    "threshold_or_weight_change_authorized": false,
+    "production_or_promotion_authorized": false
+  },
+  "single_variable": "bar interval 15m -> 5m. Morphology gate, reference family, hard gates, renderer, box geometry, variant positions and negative pairing rules are all unchanged.",
+  "positive_source": {
+    "candidates_path": "analysis/output/ma_launch_5m_candidates_20260830/candidates_5m.jsonl",
+    "patterns": 3940,
+    "symbols": 575,
+    "timeframe": "5m",
+    "gates": "frozen perfect-filter hard_gates, unchanged"
+  },
+  "legacy_negative_audit": {
+    "dataset_dir": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2",
+    "conclusion": "incompatible_as_drop_in_replacement",
+    "reasons": [
+      "Legacy negatives are sourced from the old OKX-only domain while 6,809/8,000 Grade-A positives are Binance USD-M.",
+      "Only 3,834/30,000 legacy negatives use 18/19 bars; the new positives use only 18/19 bars.",
+      "Legacy pre/post geometry is pre 10-14 and post 4-6; the new positive variants span pre 5-12 and post 2-9.",
+      "Legacy guards protect the old 14,117-candidate universe, not the expanded Binance+OKX retrieval universe."
+    ]
+  },
+  "negative_sampling": {
+    "negative_events_per_positive_event": 3,
+    "target_kinds_per_positive_event": [
+      "hard",
+      "hard",
+      "easy"
+    ],
+    "easy_to_hard_fallback_allowed": true,
+    "hard_to_easy_fallback_allowed": false,
+    "target_negative_images": null,
+    "target_negative_events": null,
+    "ratio_by_image": "1 positive : 3 negative",
+    "pairing": {
+      "same_source_file": true,
+      "same_venue": true,
+      "same_symbol": true,
+      "same_calendar_halfyear": true,
+      "same_split": true,
+      "same_core_bars": true,
+      "same_variant_pre_post_pairs": true,
+      "same_window_bars": true,
+      "negative_event_reuse_allowed": false
+    },
+    "completed_no_launch_condition": {
+      "abs_close_progress_atr_max_core_plus_2": 0.85,
+      "abs_close_progress_atr_max_core_plus_3": 1.1,
+      "abs_close_progress_atr_max_core_plus_5": 1.35,
+      "two_sided_high_low_excursion_atr_max_core_plus_1_to_5": 1.75,
+      "atr_anchor": "core_end + 2",
+      "purpose": "Future bars define only the completed-history negative label; they never cross holdout and do not alter the rendered variant window."
+    },
+    "hard_definition": {
+      "ma_envelope_atr_max": 1.5,
+      "ma_spread_end_atr_max": 1.1,
+      "max_body_atr_max": 1.2,
+      "candle_envelope_atr_max": 2.8,
+      "minimum_close_to_ma_atr_max": 1.0,
+      "meaning": "Visually dense six-MA near miss whose completed path fails every launch threshold."
+    },
+    "easy_definition": {
+      "ma_envelope_atr_min_any": 2.2,
+      "ma_spread_end_atr_min_any": 1.6,
+      "minimum_close_to_ma_atr_min_any": 1.8,
+      "candle_envelope_atr_min_any": 4.0,
+      "meaning": "Clearly non-dense background that also satisfies the completed no-launch label."
+    },
+    "positive_guard": {
+      "before_core_bars": 12,
+      "after_dependency_end_bars": 12,
+      "binance_candidates_path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/results/binance_weak_after_nms.jsonl",
+      "binance_candidates_sha256": "bb04ca9356696564a81b5e7e7fe805ebab36f6f48005e6b1ce933f5552799c50",
+      "okx_policy": "Re-run the hash-pinned accepted-family strict scan on every used OKX source and guard every hit, not only the selected Grade-A events."
+    },
+    "activity_gate": {
+      "minimum_unique_close_values_in_widest_dependency": 4,
+      "minimum_nonzero_high_low_bars_in_widest_dependency": 4,
+      "reason": "Failed materialization attempt 1 found four post-settlement frozen-price negative events whose OHLC values were constant for the full dependency interval; 29 rows collapsed to two pixel hashes. Reject inactive flat windows before selection."
+    },
+    "negative_separation_bars": 2,
+    "capacity_policy": "Never cross source, symbol, venue, half-year, split, core length or context geometry; never reuse/overlap a negative dependency interval; fail closed if two hard negatives cannot be found. Only the third easy slot may safely fall back to another hard negative.",
+    "note_on_targets": "The 15m build targeted fixed image counts. Here the count follows from how many positives find three same-source same-half-year partners, so a shortfall is reported rather than back-filled by relaxing the pairing rules."
+  },
+  "split": {
+    "method": "Copy the positive event split and independently verify the widest negative render-plus-label dependency interval against the same chronological cutoff.",
+    "cutoff": "2025-12-01T00:00:00Z",
+    "purge_bars_each_side": 450,
+    "bar_minutes": 5,
+    "random_split": false,
+    "purge_note": "Purge is scaled to keep the 37.5-hour gap the 15m split used. Leaving it at 150 bars would have cut the isolation window to 12.5 hours purely because the bar got shorter."
+  },
+  "sources": {
+    "series_dir": "data/kline_preholdout_binance_um5m/series",
+    "provider": "Binance official USD-M monthly 5m klines, checksum verified",
+    "bars": 147487020,
+    "symbols": 638
+  },
+  "renderer": {
+    "entry": "yoyo.layers.l1_detection.render.render_chart",
+    "width": 1280,
+    "height": 742,
+    "format": "lossless PNG",
+    "annotations_drawn_into_training_images": false,
+    "positive_and_negative_pipeline_identical": true,
+    "classes": {
+      "0": "dense_long",
+      "1": "dense_short"
+    }
+  },
+  "outputs": {
+    "dataset_dir": "datasets/ma_launch_5m_grade_a_neg_v1",
+    "results_dir": "experiments/active/exp-5m-ma-launch-grade-a-neg-v1/results"
+  },
+  "safety": {
+    "holdout_read": false,
+    "training_started": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "remote_write": false
+  },
+  "failed_attempts": {
+    "attempt_1": {
+      "stage": "full_file_qa_after_32000_images",
+      "result": "rejected_duplicate_pixels",
+      "unique_image_hashes": 31973,
+      "duplicate_groups": 2,
+      "duplicate_extra_rows": 27,
+      "root_cause": "Four easy negative events were sampled from post-settlement frozen-price spans with constant OHLC. Distinct context indices normalized to identical horizontal-line pixels.",
+      "single_remediation": "Add the frozen minimum activity gate above and rebuild from a newly selected plan; keep all other thresholds, pairing, split and rendering contracts unchanged."
+    }
+  }
+}
