@@ -306,6 +306,7 @@ def _download_month(
         symbol=symbol,
         month=month,
         expected_sha256=expected_sha,
+        interval=interval,
     )
     audit.update(
         {
@@ -352,6 +353,7 @@ def fetch_symbol(
             symbol=symbol,
             month=month,
             download_dir=output_dir / "downloads",
+            interval=interval,
         )
         month_audits.append(audit)
         if frame is not None:
