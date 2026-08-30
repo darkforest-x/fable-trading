@@ -1,4 +1,10 @@
-"""Fetch checksum-verified Binance USD-M 15m monthly archives before holdout.
+"""Fetch checksum-verified Binance USD-M monthly kline archives before holdout.
+
+The bar interval is a parameter, defaulting to 15m so every existing call site
+keeps its exact behaviour. Only the interval string and the bar duration it
+implies vary; the checksum, epoch-unit and gap validation are identical for
+every interval, and the close-boundary check is derived from the interval
+rather than from a literal 899_999 ms.
 
 The source is Binance's public ``data.binance.vision`` archive.  Only USDT
 perpetual contracts whose exchange-info ``onboardDate`` predates the frozen
@@ -95,11 +101,24 @@ def archive_months(start: object, end_inclusive: object) -> list[str]:
     return [str(value) for value in pd.period_range(start_period, end_period, freq="M")]
 
 
-def archive_urls(symbol: str, month: str) -> tuple[str, str]:
-    filename = f"{symbol}-15m-{month}.zip"
+def interval_delta(interval: str) -> pd.Timedelta:
+    """Bar duration implied by a Binance interval string."""
+    unit = interval[-1]
+    value = int(interval[:-1])
+    if unit == "m":
+        return pd.Timedelta(minutes=value)
+    if unit == "h":
+        return pd.Timedelta(hours=value)
+    if unit == "d":
+        return pd.Timedelta(days=value)
+    raise BinanceArchiveError(f"unsupported interval: {interval}")
+
+
+def archive_urls(symbol: str, month: str, interval: str = "15m") -> tuple[str, str]:
+    filename = f"{symbol}-{interval}-{month}.zip"
     encoded_symbol = urllib.parse.quote(symbol, safe="")
     encoded_filename = urllib.parse.quote(filename, safe="")
-    url = f"{ARCHIVE_BASE}/{encoded_symbol}/15m/{encoded_filename}"
+    url = f"{ARCHIVE_BASE}/{encoded_symbol}/{interval}/{encoded_filename}"
     return url, f"{url}.CHECKSUM"
 
 
@@ -134,15 +153,16 @@ def parse_month_zip(
     symbol: str,
     month: str,
     expected_sha256: str,
+    interval: str = "15m",
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
-    """Parse one official USD-M 15m ZIP and validate every OHLCV row."""
+    """Parse one official USD-M ZIP and validate every OHLCV row."""
 
     actual_sha = sha256_bytes(payload)
     if actual_sha != expected_sha256:
         raise BinanceArchiveError(
             f"archive checksum mismatch for {symbol} {month}: {actual_sha}"
         )
-    expected_filename = f"{symbol}-15m-{month}.csv"
+    expected_filename = f"{symbol}-{interval}-{month}.csv"
     try:
         with zipfile.ZipFile(io.BytesIO(payload)) as archive:
             members = [name for name in archive.namelist() if name.endswith(".csv")]
@@ -169,8 +189,9 @@ def parse_month_zip(
     close_ms, close_unit = _normalise_epoch(frame["close_time"], label="close_time")
     if open_unit != close_unit:
         raise BinanceArchiveError(f"mixed epoch units for {symbol} {month}")
-    if not bool(((close_ms - open_ms) == 899_999).all()):
-        raise BinanceArchiveError(f"non-15m close boundary for {symbol} {month}")
+    expected_span = int(interval_delta(interval).total_seconds() * 1000) - 1
+    if not bool(((close_ms - open_ms) == expected_span).all()):
+        raise BinanceArchiveError(f"non-{interval} close boundary for {symbol} {month}")
 
     numeric_columns = ("open", "high", "low", "close", "volume")
     output = pd.DataFrame({"ts": open_ms})
@@ -204,8 +225,8 @@ def parse_month_zip(
         "csv_sha256": sha256_bytes(csv_payload),
         "first_time": output["open_time"].iloc[0].isoformat(),
         "last_time": output["open_time"].iloc[-1].isoformat(),
-        "non_15m_gaps": int(
-            (output["open_time"].diff().dropna() != pd.Timedelta(minutes=15)).sum()
+        "non_bar_gaps": int(
+            (output["open_time"].diff().dropna() != interval_delta(interval)).sum()
         ),
     }
 
@@ -256,10 +277,10 @@ def _request_bytes(url: str, *, retries: int = 5, timeout: int = 45) -> bytes | 
 
 
 def _download_month(
-    *, symbol: str, month: str, download_dir: Path
+    *, symbol: str, month: str, download_dir: Path, interval: str = "15m"
 ) -> tuple[pd.DataFrame | None, dict[str, Any]]:
-    zip_url, checksum_url = archive_urls(symbol, month)
-    filename = f"{symbol}-15m-{month}.zip"
+    zip_url, checksum_url = archive_urls(symbol, month, interval)
+    filename = f"{symbol}-{interval}-{month}.zip"
     symbol_dir = download_dir / symbol
     symbol_dir.mkdir(parents=True, exist_ok=True)
     zip_path = symbol_dir / filename
@@ -305,6 +326,7 @@ def fetch_symbol(
     archive_start: object,
     archive_end_inclusive: object,
     archive_max_exclusive: object,
+    interval: str = "15m",
 ) -> dict[str, Any]:
     """Fetch one symbol, aggregate its complete monthly bars, and publish atomically."""
 
@@ -358,7 +380,7 @@ def fetch_symbol(
         boundary = _utc(archive_max_exclusive)
         if combined["open_time"].max() >= boundary:
             raise BinanceArchiveError(f"archive ceiling crossed for {symbol}")
-        output_path = output_dir / "series" / f"binance_um_{symbol}_15m_{len(combined)}.csv"
+        output_path = output_dir / "series" / f"binance_um_{symbol}_{interval}_{len(combined)}.csv"
         output_path.parent.mkdir(parents=True, exist_ok=True)
         temporary = output_path.with_suffix(".csv.part")
         combined.to_csv(temporary, index=False)
@@ -370,8 +392,8 @@ def fetch_symbol(
                 "rows": int(len(combined)),
                 "first_time": combined["open_time"].iloc[0].isoformat(),
                 "last_time": combined["open_time"].iloc[-1].isoformat(),
-                "non_15m_gaps": int(
-                    (combined["open_time"].diff().dropna() != pd.Timedelta(minutes=15)).sum()
+                "non_bar_gaps": int(
+                    (combined["open_time"].diff().dropna() != interval_delta(interval)).sum()
                 ),
             }
         )
@@ -387,6 +409,7 @@ def fetch_universe(
     archive_max_exclusive: object,
     holdout_start: object,
     workers: int = 24,
+    interval: str = "15m",
 ) -> dict[str, Any]:
     """Fetch the admitted universe with symbol-level resumability."""
 
@@ -421,6 +444,7 @@ def fetch_universe(
                 archive_start=archive_start,
                 archive_end_inclusive=archive_end_inclusive,
                 archive_max_exclusive=archive_ceiling,
+                interval=interval,
             ): str(row["symbol"])
             for row in symbols
         }
