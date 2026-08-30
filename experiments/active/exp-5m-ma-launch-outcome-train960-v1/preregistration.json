@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-5m-ma-launch-outcome-train960-v1",
+  "created_at": "2026-08-30T00:00:00+08:00",
+  "stage": "P1",
+  "source_commit_before_builder": "7b0493d240bf8bc3f59c3a855f5e46aa51c8651e",
+  "owner_authorization": {
+    "request": "可以试试看 跑吧 / 先跑b",
+    "interpreted_scope": "Train YOLO11s on the outcome-labelled 5m dataset: take-profit patterns are positive, stop-out patterns are negative, one render per pattern. Compare against the frozen 15m recipe.",
+    "holdout_read": false,
+    "training_or_tuning_authorized": true,
+    "threshold_or_weight_change_authorized": false,
+    "production_or_promotion_authorized": false
+  },
+  "question": "With positives and negatives both containing a launch already underway, can the detector separate them from the compression shape alone?",
+  "single_variable": "label semantics: barrier outcome instead of release-gate pass. The recipe (YOLO11s, imgsz 960, 40 epochs, patience 0, batch 8, seed 0) is the frozen 15m one, unchanged.",
+  "falsifiable": "This experiment can fail informatively. If val mAP lands near chance, the compression shape carries no information about which launch pays, and that is the finding. The existing 0.91 mAP proves nothing because its two classes differ by whether price already moved -- something the model can read directly off its own input window.",
+  "dataset": {
+    "path": "datasets/ma_launch_5m_outcome_v1",
+    "images": 3835,
+    "positives": 1597,
+    "negatives": 2238,
+    "ratio": "1:1.40",
+    "timeframe": "5m",
+    "renders_per_pattern": 1,
+    "label_rule": "barrier tp -> positive, sl -> negative, timeout dropped",
+    "barriers": {
+      "tp_atr": 5.0,
+      "sl_atr": 2.0,
+      "horizon_bars": 144,
+      "horizon_hours": 12,
+      "entry": "close of core_end + 2 bars",
+      "cost": 0.002
+    },
+    "split_cutoff": "2025-12-01T00:00:00Z",
+    "purge_bars_each_side": 450
+  },
+  "recipe": {
+    "model": "yolo11s",
+    "imgsz": 960,
+    "epochs": 40,
+    "patience": 0,
+    "batch": 8,
+    "seed": 0
+  },
+  "safety": {
+    "holdout_read": false,
+    "promoted": false,
+    "deployed": false,
+    "orders_placed": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
