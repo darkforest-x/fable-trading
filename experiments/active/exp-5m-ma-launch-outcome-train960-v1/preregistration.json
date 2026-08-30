@@ -10,16 +10,17 @@
     "holdout_read": false,
     "training_or_tuning_authorized": true,
     "threshold_or_weight_change_authorized": false,
-    "production_or_promotion_authorized": false
+    "production_or_promotion_authorized": false,
+    "training_authorized": true
   },
   "question": "With positives and negatives both containing a launch already underway, can the detector separate them from the compression shape alone?",
   "single_variable": "label semantics: barrier outcome instead of release-gate pass. The recipe (YOLO11s, imgsz 960, 40 epochs, patience 0, batch 8, seed 0) is the frozen 15m one, unchanged.",
   "falsifiable": "This experiment can fail informatively. If val mAP lands near chance, the compression shape carries no information about which launch pays, and that is the finding. The existing 0.91 mAP proves nothing because its two classes differ by whether price already moved -- something the model can read directly off its own input window.",
   "dataset": {
     "path": "datasets/ma_launch_5m_outcome_v1",
-    "images": 3835,
-    "positives": 1597,
-    "negatives": 2238,
+    "images": 3812,
+    "positives": 1584,
+    "negatives": 2228,
     "ratio": "1:1.40",
     "timeframe": "5m",
     "renders_per_pattern": 1,
@@ -49,6 +50,76 @@
     "deployed": false,
     "orders_placed": false,
     "training_eligible": false,
-    "production_eligible": false
+    "production_eligible": false,
+    "promote": false
+  },
+  "training": {
+    "run_name": "ma_launch_5m_outcome_v1_y11s_ft960",
+    "model": "yolo11s",
+    "imgsz": 960,
+    "epochs": 40,
+    "patience": 0,
+    "batch": 8,
+    "seed": 0,
+    "wait_for_run": "",
+    "base_model_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+    "trainer_sha256": "71445a639996ef8d0199a164aa08c75efa9d037619b8647deb3d5fab366e0562",
+    "launcher_sha256": "27f7037e4f9a8c66ddbb87e2534ff378b90c7baa506e49634a19b7f5f9c05475",
+    "launcher_note": "base runner; the 5m wrapper exec()s into it so $0 resolves here",
+    "classes": {
+      "0": "dense_long",
+      "1": "dense_short"
+    }
+  },
+  "immutable_inputs": {
+    "manifest_sha256": "fa68a8bb0e24c480f83049ef49ec29123403624f355744cd8a2a58a69a15739e",
+    "build_summary_sha256": "96b04cd5b666afb3842ccc0e2555612e0f66d7ac31b127f3be51c36504fbb241",
+    "dataset_build_receipt_sha256": "e6cf9e7d17ecf6d8c9b8c2f432d55fa3d96c24a02dc233c3e4aef0bd6f44e090",
+    "dataset_qa_receipt_sha256": "752792517f1ccbe2e28b1b14b35095a6475148bbc6ab708c8272854ec34d1023",
+    "data_yaml_sha256": "a3f28457d62b7523725f7885fd746b461ed214ba7f5f7223f52796d108263280",
+    "counts": {
+      "train": {
+        "images": 3237,
+        "labels": 3237,
+        "positive": 1350,
+        "negative": 1887
+      },
+      "val": {
+        "images": 575,
+        "labels": 575,
+        "positive": 234,
+        "negative": 341
+      },
+      "total": {
+        "images": 3812
+      }
+    },
+    "source_dimensions": [
+      1280,
+      742
+    ],
+    "class_instances_by_split": {
+      "train": {
+        "0": 639,
+        "1": 711
+      },
+      "val": {
+        "0": 121,
+        "1": 113
+      }
+    },
+    "events_by_split": {
+      "train": {
+        "positive": 1350,
+        "negative": 1887
+      },
+      "val": {
+        "positive": 234,
+        "negative": 341
+      }
+    }
+  },
+  "preflight": {
+    "script_sha256": "a178b20fd43b9a4f992149476a9dfaed029f4540812ddc1a304531baf86d05fd"
   }
 }

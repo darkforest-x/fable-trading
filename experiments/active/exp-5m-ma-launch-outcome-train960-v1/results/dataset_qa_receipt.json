@@ -1,7 +1,13 @@
 {
-  "images": 3835,
-  "positives": 1597,
-  "negatives": 2238,
+  "passed": true,
+  "images": 3812,
+  "positives": 1584,
+  "negatives": 2228,
   "label_rule": "barrier outcome",
-  "holdout_read": false
+  "holdout_read": false,
+  "checks": {
+    "pixel_uniqueness": "duplicates removed; contradictory-label groups dropped entirely",
+    "split_isolation": "no event in both splits",
+    "holdout": "no window reaches 2026-05-04"
+  }
 }

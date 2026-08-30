@@ -25,6 +25,7 @@ variable: same patterns, same boxes, same split, same labels.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import random
 import sys
@@ -156,6 +157,45 @@ def main() -> int:
         if index % 50 == 0:
             print(f"  {index}/{len(sources)} sources, {len(manifest)} images", flush=True)
 
+    # Two adjacent core detections can land on the same window after the random
+    # position draw, producing byte-identical pixels. Where the duplicates
+    # disagree on the label -- one took profit, the other stopped out -- the
+    # image is evidence for both classes at once and both copies are removed;
+    # keeping either would teach the detector a coin flip. Where they agree,
+    # one survivor is kept.
+    by_pixels: dict[str, list[dict]] = defaultdict(list)
+    for record in manifest:
+        digest = hashlib.sha256(
+            (DST / "images" / record["split"] / f"{record['name']}.png").read_bytes()).hexdigest()
+        record["image_sha256"] = digest
+        by_pixels[digest].append(record)
+
+    kept: list[dict] = []
+    for group in by_pixels.values():
+        if len(group) == 1:
+            kept.append(group[0])
+            continue
+        if len({r["sample_kind"] for r in group}) > 1:
+            stats["dropped: identical pixels, contradictory labels"] += len(group)
+            continue
+        stats["dropped: identical pixels, same label"] += len(group) - 1
+        kept.append(group[0])
+
+    for record in manifest:
+        if record not in kept:
+            for suffix, folder in ((".png", "images"), (".txt", "labels")):
+                (DST / folder / record["split"] / f"{record['name']}{suffix}").unlink(missing_ok=True)
+    manifest = kept
+    for record in manifest:
+        record["dataset_sample_id"] = record["name"]
+        record["image_path"] = f"images/{record['split']}/{record['name']}.png"
+        record["label_path"] = f"labels/{record['split']}/{record['name']}.txt"
+        record["label_sha256"] = hashlib.sha256(
+            (DST / record["label_path"]).read_bytes()).hexdigest()
+        if record["sample_kind"] == "negative":
+            record["negative_event_id"] = record["event_id"]
+            record.pop("direction", None)
+
     (DST / "manifest.jsonl").write_text(
         "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in manifest))
     (DST / "data.yaml").write_text(
@@ -173,8 +213,8 @@ def main() -> int:
     print("\n=== build ===")
     for k, v in sorted(stats.items(), key=lambda kv: -kv[1]):
         print(f"  {k:36} {v}")
-    pos = sum(v for k, v in stats.items() if k.startswith("positive "))
-    neg = sum(v for k, v in stats.items() if k.startswith("negative "))
+    pos = sum(1 for r in manifest if r["sample_kind"] == "positive")
+    neg = sum(1 for r in manifest if r["sample_kind"] == "negative")
     print(f"\n  positives {pos}  negatives {neg}  ratio 1:{neg/max(pos,1):.2f}")
     print(f"wrote {DST}")
     return 0

@@ -24,7 +24,7 @@ export FABLE_T3_PATIENCE="0"
 export FABLE_T3_BATCH="8"
 export FABLE_T3_REMOTE_DATASET_NAME="ma_launch_5m_outcome_v1_input"
 export FABLE_T3_LOCAL_OUTPUT_ROOT="analysis/output/ma_launch_5m_outcome_v1"
-export FABLE_T3_DATASET_IMAGE_COUNT="3835"
+export FABLE_T3_DATASET_IMAGE_COUNT="3812"
 export FABLE_T3_STRICT_PREFLIGHT="true"
 
 exec bash scripts/train_15m_ma_launch_t3_on_3060.sh "$@"
