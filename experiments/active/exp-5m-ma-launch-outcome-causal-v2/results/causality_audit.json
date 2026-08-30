@@ -1,0 +1,122 @@
+{
+  "auditor_commit": "a39f38334a8068ecf4f5b42105115772f2651ee7",
+  "auditor_path": "scripts/audit_5m_ma_launch_outcome_causal_v2.py",
+  "auditor_sha256": "ef3410e0d344b77dcd8b27465f000fda221bbeecf24ee6426034589a20cb99b9",
+  "candidate_lineage_failures": 0,
+  "candidate_sha256": "4002650d2889f22a3e56b89a48912504bd57475598f690b2017741c3adac25fb",
+  "candidates": "analysis/output/ma_launch_5m_candidates_20260830/candidates_5m.jsonl",
+  "causal_failures": 0,
+  "contract": "ma_launch_5m_close_entry_next_bar_v2",
+  "dataset": "datasets/ma_launch_5m_outcome_causal_v2",
+  "duplicate_image_hashes": 0,
+  "duplicate_manifest_events": 0,
+  "event_split_overlap": 0,
+  "findings": {
+    "confirmed_blocker": [],
+    "expected_by_contract": [
+      {
+        "check": "empty_negative_labels",
+        "count": 2109,
+        "reason": "SL outcome images are declared background negatives"
+      },
+      {
+        "check": "eligibility",
+        "production_eligible": false,
+        "reason": "rule-proposed diagnostic outcomes are not Owner Gold",
+        "training_eligible": false
+      }
+    ],
+    "review_queue": [
+      {
+        "check": "owner_shape_adjudication",
+        "reason": "TP/SL is an outcome label, not proof that the rule-proposed core is Owner-confirmed L1 Gold; this dataset remains ineligible for training",
+        "status": "pending"
+      }
+    ],
+    "tool_limitation": []
+  },
+  "format_receipt": {
+    "class_instances_by_split": {
+      "train": {
+        "0": 696,
+        "1": 764
+      },
+      "val": {
+        "0": 133,
+        "1": 127
+      }
+    },
+    "class_names": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "dataset": "/Users/zhangzc/fable-trading/datasets/ma_launch_5m_outcome_causal_v2",
+    "events_by_split": {
+      "train": {
+        "negative": 1791,
+        "positive": 1460
+      },
+      "val": {
+        "negative": 318,
+        "positive": 260
+      }
+    },
+    "experiment_id": "exp-5m-ma-launch-outcome-causal-v2",
+    "file_counts": {
+      "train": {
+        "images": 3251,
+        "labels": 3251,
+        "negative": 1791,
+        "positive": 1460
+      },
+      "val": {
+        "images": 578,
+        "labels": 578,
+        "negative": 318,
+        "positive": 260
+      }
+    },
+    "file_hash_verification_enabled": true,
+    "file_hashes_verified": 7658,
+    "holdout_rows_read": 0,
+    "manifest_rows": 3829,
+    "manifest_sha256": "c84df475ce4247b1f169601cbc542b6ae9e706e901192fefabb1ca4d44ed4c58",
+    "negative_empty_labels": 2109,
+    "passed": true,
+    "positive_labels": 1720,
+    "schema_version": 1,
+    "source_dimensions": [
+      1280,
+      742
+    ],
+    "unique_actual_image_hashes": 3829,
+    "unique_sample_ids": 3829
+  },
+  "generated_at": "2026-08-30T18:17:02.808925+00:00",
+  "holdout_rows_read": 0,
+  "image_hash_split_overlap": 0,
+  "negative": 2109,
+  "null_control": {
+    "actual_matches": 3829,
+    "method": "permute outcome kinds across event ids while preserving class balance",
+    "null_max_matches": 2035,
+    "null_mean_matches": 1934.018,
+    "p_value": 0.000999000999000999,
+    "permutations": 1000,
+    "seed": 20260831
+  },
+  "outcome_lineage_failures": 0,
+  "outcomes": "analysis/output/ma_launch_5m_outcomes_causal_v2_20260831/outcomes.jsonl",
+  "passed": true,
+  "positive": 1720,
+  "production_eligible": false,
+  "rows": 3829,
+  "schema_version": 1,
+  "source_lineage_failures": 0,
+  "source_to_pixel_failures": 0,
+  "source_to_pixel_rerendered": 3829,
+  "split_failures": 0,
+  "train_events": 3251,
+  "training_eligible": false,
+  "val_events": 578
+}

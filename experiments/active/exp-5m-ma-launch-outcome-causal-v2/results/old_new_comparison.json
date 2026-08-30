@@ -1,0 +1,126 @@
+{
+  "changed_outcome_directions": {
+    "negative->positive": 124,
+    "positive->negative": 2
+  },
+  "changed_outcome_label_rate": 0.03310562270099842,
+  "changed_outcome_labels_after_timing_repair": 126,
+  "generated_at": "2026-08-30T18:22:42.174021+00:00",
+  "generator_commit": "aa4cc06decb58afe5983548c19b4485a1d8e6b12",
+  "generator_path": "scripts/compare_5m_ma_launch_dataset_contracts.py",
+  "generator_sha256": "e15ea5ad74c7633244104b141b4abcb33422e8e80af1e7de55096324664fcac7",
+  "historical_one_view_economic_evaluation": {
+    "bar_minutes": 5,
+    "conf": 0.25,
+    "control_net_atr": -0.5882564694922597,
+    "dataset": "datasets/ma_launch_5m_outcome_v1",
+    "edge_atr": -0.02354077824943183,
+    "edge_ci95": [
+      -0.3361454378228689,
+      0.30894555716159294
+    ],
+    "fire_rate": 0.6382608695652174,
+    "horizon_bars": 144,
+    "imgsz": 960,
+    "label": "5m_outcome",
+    "outcomes": {
+      "sl": 264,
+      "timeout": 3,
+      "tp": 100
+    },
+    "paired": 367,
+    "pool_net_atr": -0.6117972477416915,
+    "proposals": 367,
+    "skipped": {
+      "no detection": 208,
+      "traded": 367
+    },
+    "tp_rate": 0.2724795640326976,
+    "val_images": 575,
+    "weights": "analysis/output/ma_launch_5m_outcome_v1/ma_launch_5m_outcome_v1_y11s_ft960/weights/best.pt"
+  },
+  "historical_one_view_training": {
+    "best_map50": 0.40725,
+    "best_map50_95": 0.34178,
+    "best_map50_95_epoch": 16,
+    "best_map50_epoch": 10,
+    "curve_path": "analysis/output/ma_launch_5m_outcome_v1/ma_launch_5m_outcome_v1_y11s_ft960/results.csv",
+    "curve_sha256": "c7fdcd86e24028fca60620c94f2891826c3e3ae41c08677089a6c975784c6c4c"
+  },
+  "holdout_rows_read": 0,
+  "manifests": {
+    "causal_v2": {
+      "duplicate_image_hash_groups": 0,
+      "event_split_overlap": 0,
+      "events_with_multiple_rows": 0,
+      "max_rows_per_event": 1,
+      "mean_rows_per_event": 1.0,
+      "min_rows_per_event": 1,
+      "path": "datasets/ma_launch_5m_outcome_causal_v2/manifest.jsonl",
+      "rows": 3829,
+      "rows_from_multirow_events": 0,
+      "sample_kinds": {
+        "negative": 2109,
+        "positive": 1720
+      },
+      "sha256": "c84df475ce4247b1f169601cbc542b6ae9e706e901192fefabb1ca4d44ed4c58",
+      "splits": {
+        "train": 3251,
+        "val": 578
+      },
+      "unique_events": 3829,
+      "visible_future_rate": 0.0,
+      "visible_future_rows": 0
+    },
+    "historical_eight_view": {
+      "duplicate_image_hash_groups": 0,
+      "event_split_overlap": 0,
+      "events_with_multiple_rows": 3687,
+      "max_rows_per_event": 8,
+      "mean_rows_per_event": 7.725352112676056,
+      "min_rows_per_event": 1,
+      "path": "datasets/ma_launch_5m_outcome_x8_v1/manifest.jsonl",
+      "rows": 29619,
+      "rows_from_multirow_events": 29472,
+      "sample_kinds": {
+        "negative": 17275,
+        "positive": 12344
+      },
+      "sha256": "849f41dd481400b920dc1d4fc30ccb8f373f9d486d2264067ff01c7bf3f3b73e",
+      "splits": {
+        "train": 25142,
+        "val": 4477
+      },
+      "unique_events": 3834,
+      "visible_future_rate": 0.873999797427327,
+      "visible_future_rows": 25887
+    },
+    "historical_one_view": {
+      "duplicate_image_hash_groups": 0,
+      "event_split_overlap": 0,
+      "events_with_multiple_rows": 0,
+      "max_rows_per_event": 1,
+      "mean_rows_per_event": 1.0,
+      "min_rows_per_event": 1,
+      "path": "datasets/ma_launch_5m_outcome_v1/manifest.jsonl",
+      "rows": 3812,
+      "rows_from_multirow_events": 0,
+      "sample_kinds": {
+        "negative": 2228,
+        "positive": 1584
+      },
+      "sha256": "fa68a8bb0e24c480f83049ef49ec29123403624f355744cd8a2a58a69a15739e",
+      "splits": {
+        "train": 3237,
+        "val": 575
+      },
+      "unique_events": 3812,
+      "visible_future_rate": 0.883788037775446,
+      "visible_future_rows": 3369
+    }
+  },
+  "overlapping_one_view_events": 3806,
+  "production_eligible": false,
+  "schema_version": 1,
+  "training_eligible": false
+}

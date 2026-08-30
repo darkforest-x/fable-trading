@@ -1,0 +1,83 @@
+{
+  "candidate_sha256": "4002650d2889f22a3e56b89a48912504bd57475598f690b2017741c3adac25fb",
+  "class_instances_by_split": {
+    "train": {
+      "0": 696,
+      "1": 764
+    },
+    "val": {
+      "0": 133,
+      "1": 127
+    }
+  },
+  "contract": "ma_launch_5m_close_entry_next_bar_v2",
+  "counts": {
+    "total": {
+      "images": 3829,
+      "labels": 3829,
+      "negative": 2109,
+      "positive": 1720
+    },
+    "train": {
+      "images": 3251,
+      "labels": 3251,
+      "negative": 1791,
+      "positive": 1460
+    },
+    "val": {
+      "images": 578,
+      "labels": 578,
+      "negative": 318,
+      "positive": 260
+    }
+  },
+  "dataset": "datasets/ma_launch_5m_outcome_causal_v2",
+  "events_by_split": {
+    "train": {
+      "negative": 1791,
+      "positive": 1460
+    },
+    "val": {
+      "negative": 318,
+      "positive": 260
+    }
+  },
+  "generated_at": "2026-08-30T18:08:36.757605+00:00",
+  "generator_commit": "a39f38334a8068ecf4f5b42105115772f2651ee7",
+  "generator_path": "scripts/build_5m_ma_launch_outcome_causal_v2.py",
+  "generator_sha256": "ef60c09071d8a9aeef8777f8f464ebcd00ee43c4ad0e332a84333ccbcd5ede7a",
+  "holdout_rows_read": 0,
+  "label_contract": {
+    "entry": "decision_close",
+    "horizon_bars": 144,
+    "outcome_starts": "next_bar",
+    "sl_atr": 2.0,
+    "sl_is_empty_label_negative": true,
+    "tp_atr": 5.0,
+    "tp_is_positive": true
+  },
+  "outcomes_sha256": "cd669b1caa8d3403b6db965dfa5b42ea0fd4b159ca049711e2beae93508d705e",
+  "passed": true,
+  "production_eligible": false,
+  "render_contract": {
+    "post_core_bars": 2,
+    "pre_core_bars": 12,
+    "renders_per_event": 1,
+    "visible_end_equals_decision": true
+  },
+  "role": "diagnostic_outcome_image_dataset_not_owner_gold",
+  "schema_version": 2,
+  "source_dimensions": [
+    1280,
+    742
+  ],
+  "stats": {
+    "dropped in purge band": 15,
+    "dropped outcome: timeout": 92,
+    "negative train": 1791,
+    "negative val": 318,
+    "positive train": 1460,
+    "positive val": 260
+  },
+  "training_eligible": false
+}

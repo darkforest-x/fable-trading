@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>P0：5m MA Launch 因果重建与全量审计（2026-08-31）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P0：5m MA Launch 因果重建与全量审计（2026-08-31）</h1>
+<h2>结论先行</h2>
+<p>今天训练用的 5m 原始 K 线没有证据表明损坏；有问题的是<strong>训练输入、标签时间线和评估单位的契约</strong>。</p>
+<ul>
+<li>历史单视图数据集有 3,369 / 3,812（88.38%）张图看到了声明入场点之后的 K 线；8 视图数据集为 25,887 / 29,619（87.40%）。</li>
+<li>旧 outcome 逻辑以 <code>core_end+2</code> 的 close 入场，却允许同一根已经走完的 high/low 触发 TP/SL；这是收盘入场后的同 bar hindsight。</li>
+<li>8 视图包实际是 3,834 个事件扩成 29,619 张图，平均 7.73 张/事件；旧 <code>build_summary.json</code> 把 29,619 误写成 <code>unique_events</code>。</li>
+<li>修复时间边界后，共同事件中 126 / 3,806（3.31%）的 TP/SL 类别翻转，说明这不是文档措辞问题，而是会改标签的实质错误。</li>
+<li>全新的 <code>causal_v2</code> 已生成并通过全量审计：3,829 张图逐张从源 K 线重渲染，3,829 / 3,829 像素一致；7,658 个图/标签文件哈希通过；未来可见、候选/结果联结、时间 split、重复事件、重复像素、跨 split 重叠均为 0。</li>
+</ul>
+<p>但 <code>causal_v2</code> 仍然不是 Gold：TP 只能说明未来结果，不能证明画面上的规则 proposal 就是 Owner 认可的 L1 形态；SL 也不能证明形态不存在。因此本轮没有训练、没有读 holdout、没有 promote、没有部署。已额外生成 200 张 outcome-blind Owner 复核包，作为下一道人工语义门。</p>
+<h2>本轮授权与边界</h2>
+<p>Owner 本轮授权：“把你刚刚讲的方案全部做一遍”。预注册将其解释为：完成因果契约修复、数据重建、全量审计和人工复核入口；不包含新训练、holdout 读取、阈值/TP/SL/成本调整、promote、部署或真金操作。</p>
+<p>架构决定记录在 <code>docs/decisions/0001-separate-causal-l1-detection-from-l2-outcomes.md</code>：</p>
+<ul>
+<li>L1 只回答“现在是否看得到 Owner 定义的形态、框在哪里”；</li>
+<li>L2 outcome ledger 才允许读取未来 TP/SL/timeout；</li>
+<li>outcome-conditioned YOLO 包只能作为诊断产物，不能冒充 Owner Gold。</li>
+</ul>
+<h2>旧数据集具体错在哪里</h2>
+<h3>1. 模型输入看到了入场之后</h3>
+<p>历史预注册声明在 <code>core_end+2</code> 收盘入场。旧 manifest 的 <code>post_bars</code> 却在 2–9 之间变化；只要 <code>post_bars&gt;2</code>，图里就包含入场之后的 K 线。缩短总窗口并不能修复这个问题，决定前视的是窗口<strong>右端</strong>落在哪根。</p>
+<h3>2. 收盘入场却复用了该 bar 的盘中极值</h3>
+<p>旧 outcome slice 从 entry bar 自身开始。若在该 bar close 才入场，它此前的 high/low 已经发生，不能再作为入场后的 TP/SL。新契约固定为：</p>
+<pre><code>
+core_end_i
+    └─ +2 = decision_i = visible_end_i
+                      └─ 该 bar close 入场
+                         decision_i + 1 开始判 TP/SL
+</code></pre>
+<p>标签生成和经济评估现在都调用同一个 <code>resolve_barrier_after_close()</code>，并由反例单测钉住：decision bar 即使已经越过 TP，也不能成为入场后成交。</p>
+<h3>3. 把未来盈利当成视觉真值</h3>
+<p>TP 图画框、SL 图写空标签，回答的是“这次以后赚没赚”，不是“这一刻有没有密集启动形态”。这类标签可以用于 L2 结果研究，却没有资格自动成为 L1 Gold。新数据集保留它仅为诊断，manifest、receipt 和注册表都固定 <code>training_eligible=false</code>、<code>production_eligible=false</code>。</p>
+<h3>4. 8 视图把图片数当成了独立样本数</h3>
+<p>8 视图不是 29,619 个独立事件，而是 3,834 个事件的相关视图。即使事件不跨 train/val，按图片 bootstrap、计算 fire rate，或用最高 confidence 选较晚视图，仍会重复加权并改变 entry。新构建默认一事件一图；未来若保留多视图，评估器会先按 <code>event_id</code> 取最早可见 proposal，再做 matched control 和 bootstrap。</p>
+<h3>5. 旧 QA 为什么没有拦住</h3>
+<p>旧 QA 检查了文件存在、像素重复、split 和 holdout，但没有从源 K 线重建每张图，因此只能证明“文件与自己写出的 manifest 自洽”，不能证明“像素真的截止在 manifest 声明的 decision”。本轮审计把 source-to-pixel 全量重渲染设为硬门。</p>
+<h2>数据与构建统计</h2>
+<h3>L2 因果 outcome ledger</h3>
+<table><thead><tr>
+<th>项目</th>
+<th>数值</th>
+</tr></thead><tbody>
+<tr><td>输入规则 proposals</td><td>3,940</td></tr>
+<tr><td>唯一 event_id</td><td>3,940</td></tr>
+<tr><td>源文件</td><td>575</td></tr>
+<tr><td>core_end 范围</td><td>2020-01-13 13:25 UTC ～ 2026-04-30 18:15 UTC</td></tr>
+<tr><td>完整 144-bar outcome</td><td>3,936</td></tr>
+<tr><td>因临近边界缺完整 horizon 而拒绝</td><td>4</td></tr>
+<tr><td>TP</td><td>1,729</td></tr>
+<tr><td>SL</td><td>2,115</td></tr>
+<tr><td>timeout</td><td>92</td></tr>
+<tr><td>最晚 label horizon 右端</td><td>2026-04-30 03:20 UTC</td></tr>
+<tr><td>holdout 行读取</td><td>0</td></tr>
+</tbody></table>
+<p>固定参数没有调整：5m、<code>decision=core_end+2</code>、decision close 入场、下一根开始、TP5/SL2、144 bars、same-bar conservative SL、barrier-price gap、0.2% 往返成本。</p>
+<h3><code>causal_v2</code> 诊断图像集</h3>
+<table><thead><tr>
+<th>split</th>
+<th>图/事件</th>
+<th>TP 正例</th>
+<th>SL 空标签负例</th>
+<th>LONG 框</th>
+<th>SHORT 框</th>
+</tr></thead><tbody>
+<tr><td>train</td><td>3,251</td><td>1,460</td><td>1,791</td><td>696</td><td>764</td></tr>
+<tr><td>val</td><td>578</td><td>260</td><td>318</td><td>133</td><td>127</td></tr>
+<tr><td>合计</td><td>3,829</td><td>1,720</td><td>2,109</td><td>829</td><td>891</td></tr>
+</tbody></table>
+<p>另有 92 个 timeout 明确排除，没有强塞成负类；15 个事件落在 2025-12-01 切点两侧 450-bar purge 带内而排除。每个 event 只保留一张 1280×742 图，窗口右端固定等于 decision。</p>
+<h2>旧版与新版同表对照</h2>
+<table><thead><tr>
+<th>指标</th>
+<th>历史 1-view v1</th>
+<th>历史 8-view v1</th>
+<th>causal_v2</th>
+</tr></thead><tbody>
+<tr><td>manifest 行数</td><td>3,812</td><td>29,619</td><td>3,829</td></tr>
+<tr><td>唯一事件</td><td>3,812</td><td>3,834</td><td>3,829</td></tr>
+<tr><td>平均行/事件</td><td>1.00</td><td>7.73</td><td>1.00</td></tr>
+<tr><td>多行事件数</td><td>0</td><td>3,687</td><td>0</td></tr>
+<tr><td>含入场后 bar 的图</td><td>3,369</td><td>25,887</td><td>0</td></tr>
+<tr><td>含入场后 bar 比例</td><td>88.38%</td><td>87.40%</td><td>0.00%</td></tr>
+<tr><td>event 跨 split</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>完全相同像素 hash 组</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>统计单位可直接按图使用</td><td>是</td><td>否</td><td>是</td></tr>
+<tr><td>entry 与 label/eval 共用 resolver</td><td>否</td><td>否</td><td>是</td></tr>
+<tr><td>训练资格</td><td>历史、撤销解释权</td><td>历史、撤销解释权</td><td>否，等待 Owner 语义裁决</td></tr>
+</tbody></table>
+<p>共同的 3,806 个 1-view 事件里，126 个标签改变：124 个由 negative 变 positive，2 个由 positive 变 negative。主要不对称来自旧逻辑把 entry bar 已发生的 SL 极值计入结果；修复后这些事件不再被提前判输。</p>
+<h2>全量审计结果</h2>
+<table><thead><tr>
+<th>硬门</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>YOLO 图/标签配对</td><td>PASS</td></tr>
+<tr><td>实际文件 hash</td><td>7,658 / 7,658 通过</td></tr>
+<tr><td>源 K 线逐图重渲染</td><td>3,829 / 3,829 像素一致</td></tr>
+<tr><td>visible/decision/outcome-start 因果错误</td><td>0</td></tr>
+<tr><td>candidate lineage 错误</td><td>0</td></tr>
+<tr><td>outcome lineage 错误</td><td>0</td></tr>
+<tr><td>time split / purge 错误</td><td>0</td></tr>
+<tr><td>event 跨 split</td><td>0</td></tr>
+<tr><td>image hash 跨 split</td><td>0</td></tr>
+<tr><td>重复 event_id</td><td>0</td></tr>
+<tr><td>重复 image hash</td><td>0</td></tr>
+<tr><td>holdout 行读取</td><td>0</td></tr>
+</tbody></table>
+<p>这是非方向性数据审计，因此 val AUC、置换排名 p、top-decile 毛/净收益、胜率和 matched-random economic control 按字面不适用；本轮没有模型分数可报告，也没有编造空值。</p>
+<p>同等严格的零假设是：保持正负类数量不变，把 outcome kind 在 event_id 间随机置换 1,000 次，再检查图像标签与 outcome ledger 的联结。真实联结匹配 3,829 / 3,829；置换均值 1,934.018、最大 2,035，经验 <code>p=0.000999</code>。这证明新 manifest 按声明联结到 outcome；它<strong>不证明</strong> TP/SL 标签具备 L1 视觉语义。</p>
+<h2>历史模型结果应怎样解释</h2>
+<p>历史 1-view 模型的最佳 val <code>mAP50=0.40725</code>（epoch 10），最佳 <code>mAP50-95=0.34178</code>（epoch 16）。更重要的是，其旧经济评估在 367 个 proposal 上：</p>
+<ul>
+<li>模型池净收益：-0.6118 ATR；</li>
+<li>同月 × 同波动桶 matched control：-0.5883 ATR；</li>
+<li>模型相对对照：-0.0235 ATR；</li>
+<li>95% bootstrap CI：[-0.3361, +0.3089] ATR。</li>
+</ul>
+<p>即使暂不考虑本报告发现的时间契约问题，旧 1-view 模型也没有证明经济 edge。发现前视并不意味着“原来其实有好模型”，而是旧视觉指标和旧经济入口都不再有资格支撑 promotion。8-view 运行同理必须留作历史记录，不能用图片量或自家 val 当生产裁决。</p>
+<h2>Outcome-blind Owner 复核包</h2>
+<p>已生成 <code>datasets/ma_launch_5m_shape_blind_review_v1/</code>：</p>
+<ul>
+<li>200 张，按 train/val × 隐藏 TP/SL × LONG/SHORT 共 8 层，每层 25 张；</li>
+<li>公开图片统一改名 <code>R0001</code>…<code>R0200</code>，公开 manifest / Label Studio tasks 不含 event、outcome、split、source；</li>
+<li>200 / 200 图像保持源 causal PNG 的逐字节 hash，公开标签均为空；</li>
+<li>私有 <code>admin/truth.jsonl</code> 单独保存真实联结、分层总体数、抽样概率和估计权重；</li>
+<li>Owner verdict 为 <code>KEEP_LONG</code>、<code>KEEP_SHORT</code>、<code>REMOVE</code>、<code>UNCERTAIN</code>；KEEP 时再画一个 tight <code>dense_cluster</code> 框；REMOVE/UNCERTAIN 不会自动变训练负例。</li>
+</ul>
+<p>该包是语义审计入口，不是已完成标注，也不是 Gold。</p>
+<h2>复现命令</h2>
+<p>以下命令从同一候选 ledger 生成一套新的临时产物，不覆盖正式数据集：</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+git show a39f383 --stat
+
+REPRO_DIR=&quot;$(mktemp -d analysis/output/causal-v2-repro.XXXXXX)&quot;
+
+python3 scripts/simulate_5m_ma_launch_outcomes_causal_v2.py \
+  --out &quot;$REPRO_DIR/outcomes&quot;
+
+python3 scripts/build_5m_ma_launch_outcome_causal_v2.py \
+  --outcomes &quot;$REPRO_DIR/outcomes/outcomes.jsonl&quot; \
+  --dst &quot;$REPRO_DIR/dataset&quot; \
+  --receipt-dir &quot;$REPRO_DIR/receipts&quot;
+
+python3 scripts/audit_5m_ma_launch_outcome_causal_v2.py \
+  --dataset &quot;$REPRO_DIR/dataset&quot; \
+  --outcomes &quot;$REPRO_DIR/outcomes/outcomes.jsonl&quot; \
+  --out &quot;$REPRO_DIR/causality_audit.json&quot;
+
+python3 scripts/build_5m_ma_launch_shape_blind_review_v1.py \
+  --dataset &quot;$REPRO_DIR/dataset&quot; \
+  --audit &quot;$REPRO_DIR/causality_audit.json&quot; \
+  --dst &quot;$REPRO_DIR/blind_review&quot; \
+  --receipt &quot;$REPRO_DIR/blind_review_receipt.json&quot;
+
+python3 scripts/compare_5m_ma_launch_dataset_contracts.py \
+  --new &quot;$REPRO_DIR/dataset&quot; \
+  --out &quot;$REPRO_DIR/old_new_comparison.json&quot;
+
+python3 -m pytest -q \
+  tests/test_canonical_outcomes.py \
+  tests/test_ma_launch_5m_causal_contract.py \
+  tests/test_evaluate_detector_net_returns_causal.py \
+  tests/test_build_5m_ma_launch_shape_blind_review_v1.py \
+  tests/test_compare_5m_ma_launch_dataset_contracts.py
+</code></pre>
+<p>正式报告 HTML：</p>
+<pre><code>
+python3 scripts/md_to_html.py \
+  analysis/p0_5m_ma_launch_causal_rebuild_20260831.md \
+  --out-dir analysis/html
+</code></pre>
+<h2>测试与仓库级红灯</h2>
+<p>本轮目标测试 23 / 23 通过。<code>tests/boundaries + tests/causality</code> 的扩展运行结果为 276 passed、4 skipped、8 failed；8 个失败均可在本轮修改前的 HEAD 中复现，与 causal_v2 代码无关：</p>
+<ol>
+<li>本机 <code>fastapi/opencv-python/pyyaml</code> 分别为 0.128.0 / 4.12.0.88 / 5.3.1，而仓库 pin 为 0.128.8 / 5.0.0.93 / 6.0.3，共 3 个跨机依赖契约失败；</li>
+<li>现有 <code>artifacts/registry.yaml</code> 使用了 schema 不接受的 <code>preregistered_before_holdout_read</code> 等 holdout 状态，导致 5 个 teacher registry 测试在加载阶段失败。</li>
+</ol>
+<p>本轮没有顺手修改依赖契约或历史 holdout 登记；前者必须三机一致，后者涉及历史 holdout 语义，应该作为独立修复处理。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>通过的是因果、格式、像素和 lineage，不是形态语义，也不是经济有效性。</li>
+<li>TP/SL outcome-conditioned 图像集仍可能学习结果相关的视觉 shortcut；因此资格保持 false。</li>
+<li>200 张盲审尚未由 Owner 完成；没有逐样本确认，就没有新的 L1 Gold。</li>
+<li>本轮没有训练 causal_v2。任何“修完就重训”的动作都需要 Owner 新授权，并且仍受项目 P0/P1 gate 约束。</li>
+<li>本轮没有读取 2026-05-04 及之后的 holdout；<code>holdout_rows_read=0</code>。</li>
+<li>没有修改旧数据集、旧权重、ACTIVE、forward_log、阈值、TP/SL、成本或实盘配置。</li>
+<li>工作树里仍有 Claude/用户的其他未提交文件；本轮提交均显式逐文件 staging，没有夹带它们。当前本地 main 还领先 origin，未 push，避免把 25 个既有/本轮本地提交一并推送。</li>
+</ul>
+<h2>下一步选项（需要 Owner 决策）</h2>
+<ol>
+<li><strong>先做 200 张 outcome-blind 复核（推荐）</strong>：这是判断 rule proposal 能否成为 L1 Gold 候选的唯一直接证据。</li>
+<li>若加权 KEEP/方向一致率与重复标注稳定性达到 Owner 门槛，再建立真正的 L1 Gold；不要从 TP/SL 自动回填。</li>
+<li>Gold 释放后，由 Owner 单独批准是否训练一个全新的 causal detector；训练前再次跑 dataset gate，且禁止 holdout。</li>
+<li>独立处理当前 8 个仓库级红灯：先裁决跨机依赖版本，再迁移非法 holdout status；不要把这两项混进模型实验。</li>
+</ol>
+<h2>主要产物与身份</h2>
+<ul>
+<li>因果 outcome ledger：<code>analysis/output/ma_launch_5m_outcomes_causal_v2_20260831/outcomes.jsonl</code>，SHA-256 <code>cd669b1c...d705e</code>；</li>
+<li>causal_v2 manifest：<code>datasets/ma_launch_5m_outcome_causal_v2/manifest.jsonl</code>，SHA-256 <code>c84df475...d4c58</code>；</li>
+<li>全量审计：<code>experiments/active/exp-5m-ma-launch-outcome-causal-v2/results/causality_audit.json</code>，SHA-256 <code>dcd6762c...f198</code>；</li>
+<li>旧新对照：<code>experiments/active/exp-5m-ma-launch-outcome-causal-v2/results/old_new_comparison.json</code>，SHA-256 <code>fd7c3d35...358c</code>；</li>
+<li>盲审 public manifest：<code>datasets/ma_launch_5m_shape_blind_review_v1/public/manifest.jsonl</code>，SHA-256 <code>a22fb3f9...ff5</code>。</li>
+</ul>
+<p>生成器先于正式产物提交：核心契约/构建/审计 commit <code>a39f383</code>，盲审构建器 <code>89383e9</code>，旧新对照与 learnings <code>aa4cc06</code>。</p>
+</body>
+</html>

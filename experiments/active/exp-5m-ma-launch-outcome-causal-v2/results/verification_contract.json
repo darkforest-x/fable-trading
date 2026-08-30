@@ -1,0 +1,58 @@
+{
+  "experiment_id": "exp-5m-ma-launch-outcome-causal-v2",
+  "immutable_inputs": {
+    "build_summary_sha256": "acc720d28bccdef732db8afc1ee118b1aa6fffcfb897e93c9459768d785b9ec1",
+    "class_instances_by_split": {
+      "train": {
+        "0": 696,
+        "1": 764
+      },
+      "val": {
+        "0": 133,
+        "1": 127
+      }
+    },
+    "counts": {
+      "total": {
+        "images": 3829,
+        "labels": 3829,
+        "negative": 2109,
+        "positive": 1720
+      },
+      "train": {
+        "images": 3251,
+        "labels": 3251,
+        "negative": 1791,
+        "positive": 1460
+      },
+      "val": {
+        "images": 578,
+        "labels": 578,
+        "negative": 318,
+        "positive": 260
+      }
+    },
+    "events_by_split": {
+      "train": {
+        "negative": 1791,
+        "positive": 1460
+      },
+      "val": {
+        "negative": 318,
+        "positive": 260
+      }
+    },
+    "manifest_sha256": "c84df475ce4247b1f169601cbc542b6ae9e706e901192fefabb1ca4d44ed4c58",
+    "source_dimensions": [
+      1280,
+      742
+    ]
+  },
+  "schema_version": 1,
+  "training": {
+    "classes": {
+      "0": "dense_long",
+      "1": "dense_short"
+    }
+  }
+}
