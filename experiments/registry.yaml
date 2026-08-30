@@ -2653,3 +2653,45 @@ experiments:
       current live universe has survivorship bias. No signal was manually
       removed after results. Telegram, training, tuning, promotion, deployment,
       forward mutation and orders all remained false.
+
+  - experiment_id: exp-5m-ma-launch-outcome-causal-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5a171279a5de995464b0c62e762f4cab443c8897"
+    status: accepted
+    question: >-
+      Can the 2026-08-30 5-minute MA-launch proposal pool be rebuilt so every
+      model-visible pixel stops at the close-entry decision bar, every label
+      starts on the following bar, and every split/evaluation unit is one event?
+    single_variable: >-
+      n/a -- Owner-approved coupled repair of one invalid data contract: visible
+      right edge, close-entry outcome start, one-event sampling, time purge and
+      event-unit evaluation move together; no model-performance arm was run
+    result: >-
+      causal_contract_passed_not_owner_gold. The historical one-view and
+      eight-view datasets exposed post-entry bars in 88.38% and 87.40% of rows.
+      The rebuilt diagnostic has 3,829 unique events and zero visible-future,
+      duplicate-event, duplicate-pixel, cross-split, causal, candidate-lineage,
+      outcome-lineage or split failures. All 7,658 image/label hashes passed and
+      all 3,829 images exactly matched independent source-to-pixel rerenders.
+      Timing repair changed 126/3,806 overlapping outcome labels. A 200-image
+      outcome-blinded Owner review queue is ready, but no row is yet Owner Gold.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_5m_ma_launch_causal_rebuild_20260831.md
+    artifacts:
+      - 5m-ma-launch-outcome-causal-v2-prereg
+      - 5m-ma-launch-causal-outcomes-v2
+      - 5m-ma-launch-outcome-causal-v2-dataset
+      - 5m-ma-launch-outcome-causal-v2-audit
+      - 5m-ma-launch-outcome-causal-v2-comparison
+      - 5m-ma-launch-shape-blind-review-v1
+      - 5m-ma-launch-causal-rebuild-report
+      - 5m-ma-launch-causal-rebuild-report-html
+    reuse_allowed: true
+    notes: >-
+      Reuse is limited to the causal timing resolver, lineage evidence and
+      outcome-blinded review protocol. The outcome-conditioned YOLO labels are
+      diagnostic only and cannot be used to train or promote an L1 detector.
+      No holdout, training, threshold/barrier/cost change, promotion, deployment,
+      forward mutation or order occurred.

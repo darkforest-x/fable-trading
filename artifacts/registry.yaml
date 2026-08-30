@@ -8042,3 +8042,161 @@ artifacts:
     config_hash: "d6ff30f3b1eee6c69eb191de647b8bcd970049a5e4a7450377e92f62824a8892"
     data_cutoff: "2026-08-29T02:00:00Z"
     notes: Self-contained Owner-facing HTML with embedded overview and LONG/SHORT full-context examples.
+
+  # ---- 5m causal outcome-contract repair (2026-08-31) --------------------
+  - artifact_id: 5m-ma-launch-outcome-causal-v2-prereg
+    artifact_type: config
+    role: frozen_causal_rebuild_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a39f38334a8068ecf4f5b42105115772f2651ee7"
+    source_path: experiments/active/exp-5m-ma-launch-outcome-causal-v2/preregistration.json
+    sha256: "2adeb6a65a0eb51a3c28deea76fad30efddce161e2f2c79a574bfe164c004222"
+    size_bytes: 4144
+    storage_uri: "repo://experiments/active/exp-5m-ma-launch-outcome-causal-v2/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a39f38334a8068ecf4f5b42105115772f2651ee7"
+    config_hash: "2adeb6a65a0eb51a3c28deea76fad30efddce161e2f2c79a574bfe164c004222"
+    data_cutoff: "2026-04-30T03:20:00Z"
+    notes: >-
+      Owner-authorized coupled repair for close-entry timing, one-event sampling,
+      time split/purge and event-unit evaluation. It explicitly excludes training,
+      holdout access, parameter changes, promotion and deployment.
+
+  - artifact_id: 5m-ma-launch-causal-outcomes-v2
+    artifact_type: manifest
+    role: l2_causal_outcome_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a39f38334a8068ecf4f5b42105115772f2651ee7"
+    source_path: analysis/output/ma_launch_5m_outcomes_causal_v2_20260831/outcomes.jsonl
+    sha256: "cd669b1caa8d3403b6db965dfa5b42ea0fd4b159ca049711e2beae93508d705e"
+    size_bytes: 3630905
+    storage_uri: "file://analysis/output/ma_launch_5m_outcomes_causal_v2_20260831"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a39f38334a8068ecf4f5b42105115772f2651ee7"
+    config_hash: "2adeb6a65a0eb51a3c28deea76fad30efddce161e2f2c79a574bfe164c004222"
+    data_cutoff: "2026-04-30T03:20:00Z"
+    notes: >-
+      3,936 unique pre-holdout events under decision-close entry and next-bar
+      resolution: TP 1,729, SL 2,115, timeout 92. Four proposals without a full
+      144-bar pre-holdout label horizon were rejected.
+
+  - artifact_id: 5m-ma-launch-outcome-causal-v2-dataset
+    artifact_type: dataset
+    role: diagnostic_outcome_image_dataset_not_owner_gold
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a39f38334a8068ecf4f5b42105115772f2651ee7"
+    source_path: datasets/ma_launch_5m_outcome_causal_v2/manifest.jsonl
+    sha256: "c84df475ce4247b1f169601cbc542b6ae9e706e901192fefabb1ca4d44ed4c58"
+    size_bytes: 5089471
+    storage_uri: "file://datasets/ma_launch_5m_outcome_causal_v2"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a39f38334a8068ecf4f5b42105115772f2651ee7"
+    config_hash: "2adeb6a65a0eb51a3c28deea76fad30efddce161e2f2c79a574bfe164c004222"
+    data_cutoff: "2026-04-30T03:20:00Z"
+    notes: >-
+      One causal 1280x742 render per event: train 3,251, val 578, TP-positive
+      1,720 and SL-empty-negative 2,109. Timeout and purge-band events are
+      excluded. This is outcome-conditioned diagnostic data, not L1 Gold.
+
+  - artifact_id: 5m-ma-launch-outcome-causal-v2-audit
+    artifact_type: manifest
+    role: full_source_to_pixel_causality_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7a3d9d5b05da06c7cec87eb712f737ec5dfdaa29"
+    source_path: experiments/active/exp-5m-ma-launch-outcome-causal-v2/results/causality_audit.json
+    sha256: "dcd6762c9880d4af1b2ef34922d475ca720335bc114dd8bb8d5dd17bc8a7f198"
+    size_bytes: 3579
+    storage_uri: "repo://experiments/active/exp-5m-ma-launch-outcome-causal-v2/results/causality_audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a39f38334a8068ecf4f5b42105115772f2651ee7"
+    config_hash: "2adeb6a65a0eb51a3c28deea76fad30efddce161e2f2c79a574bfe164c004222"
+    data_cutoff: "2026-04-30T03:20:00Z"
+    notes: >-
+      PASS: 7,658 file hashes and 3,829/3,829 independent source-to-pixel
+      rerenders; zero causal, lineage, split, event-duplicate, pixel-duplicate
+      or cross-split failures. Outcome-linkage permutation p=0.000999.
+
+  - artifact_id: 5m-ma-launch-outcome-causal-v2-comparison
+    artifact_type: manifest
+    role: historical_vs_causal_contract_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7a3d9d5b05da06c7cec87eb712f737ec5dfdaa29"
+    source_path: experiments/active/exp-5m-ma-launch-outcome-causal-v2/results/old_new_comparison.json
+    sha256: "fd7c3d35e6ff3f62b50d834ddcc8906cd1e565a4acf29d1cfc9d53d8aebc358c"
+    size_bytes: 3972
+    storage_uri: "repo://experiments/active/exp-5m-ma-launch-outcome-causal-v2/results/old_new_comparison.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "aa4cc06decb58afe5983548c19b4485a1d8e6b12"
+    config_hash: "2adeb6a65a0eb51a3c28deea76fad30efddce161e2f2c79a574bfe164c004222"
+    data_cutoff: "2026-04-30T03:20:00Z"
+    notes: >-
+      Historical visible-future rates were 88.38% (one-view) and 87.40%
+      (eight-view); causal-v2 is 0%. Timing repair flips 126/3,806 overlapping
+      outcome labels. The eight-view pack has 29,619 rows but 3,834 events.
+
+  - artifact_id: 5m-ma-launch-shape-blind-review-v1
+    artifact_type: manifest
+    role: owner_shape_blind_review_queue
+    source_repo: darkforest-x/fable-trading
+    source_commit: "89383e944d3d6d44019e77d0f0c5a7bf60df906f"
+    source_path: datasets/ma_launch_5m_shape_blind_review_v1/public/manifest.jsonl
+    sha256: "a22fb3f9c7a7dd800aed2781d0cc2695e2c9dc05dcd6820436c2ce6d47e95ff5"
+    size_bytes: 79600
+    storage_uri: "file://datasets/ma_launch_5m_shape_blind_review_v1"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "89383e944d3d6d44019e77d0f0c5a7bf60df906f"
+    config_hash: "2adeb6a65a0eb51a3c28deea76fad30efddce161e2f2c79a574bfe164c004222"
+    data_cutoff: "2026-04-30T03:20:00Z"
+    notes: >-
+      Outcome-blinded 200-image Owner review surface, 25 per split x hidden
+      TP/SL x LONG/SHORT stratum. Public files contain no event/outcome/split/
+      source fields; private truth preserves weights and lineage. Unlabelled.
+
+  - artifact_id: 5m-ma-launch-causal-rebuild-report
+    artifact_type: report
+    role: canonical_markdown_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5a171279a5de995464b0c62e762f4cab443c8897"
+    source_path: analysis/p0_5m_ma_launch_causal_rebuild_20260831.md
+    sha256: "92975b09b1d34f38d07f84c2ad29f8067a195fd6684ef509f9505b50236b888c"
+    size_bytes: 13392
+    storage_uri: "repo://analysis/p0_5m_ma_launch_causal_rebuild_20260831.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5a171279a5de995464b0c62e762f4cab443c8897"
+    config_hash: "2adeb6a65a0eb51a3c28deea76fad30efddce161e2f2c79a574bfe164c004222"
+    data_cutoff: "2026-04-30T03:20:00Z"
+    notes: >-
+      Canonical Chinese report with old/new comparison, full audit evidence,
+      historical matched-control interpretation, reproduction commands, risks
+      and the remaining Owner semantic gate.
+
+  - artifact_id: 5m-ma-launch-causal-rebuild-report-html
+    artifact_type: report
+    role: owner_facing_html_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5a171279a5de995464b0c62e762f4cab443c8897"
+    source_path: analysis/html/p0_5m_ma_launch_causal_rebuild_20260831.html
+    sha256: "5a3f9579b2c483a6fce0f1f74adb7102e6235cf96ba64ec0c0471b1da52ac1da"
+    size_bytes: 18185
+    storage_uri: "repo://analysis/html/p0_5m_ma_launch_causal_rebuild_20260831.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5a171279a5de995464b0c62e762f4cab443c8897"
+    config_hash: "2adeb6a65a0eb51a3c28deea76fad30efddce161e2f2c79a574bfe164c004222"
+    data_cutoff: "2026-04-30T03:20:00Z"
+    notes: Owner-facing HTML generated immediately from the canonical Markdown report.
