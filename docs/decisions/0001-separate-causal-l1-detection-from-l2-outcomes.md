@@ -1,9 +1,16 @@
 # ADR 0001: Separate causal L1 detection from future L2 outcomes
 
-- Status: Accepted
-- Date: 2026-08-31
-- Owner authorization: “把你刚刚讲的方案全部做一遍”
-- Scope: 5-minute MA-launch repair only
+## Status
+
+Accepted
+
+## Date
+
+2026-08-31
+
+## Owner authorization
+
+“把你刚刚讲的方案全部做一遍”。Scope is the 5-minute MA-launch repair only.
 
 ## Context
 
@@ -74,7 +81,7 @@ K-line source is corrupt, and it does not authorize reading the frozen holdout.
 - A full audit must re-render every image from its pre-holdout K-line prefix and
   compare pixels, rather than trusting manifest timestamps alone.
 
-## Rejected alternatives
+## Alternatives considered
 
 - Cropping old images in place: rejected because it preserves ambiguous
   label/entry lineage and destroys historical evidence.
