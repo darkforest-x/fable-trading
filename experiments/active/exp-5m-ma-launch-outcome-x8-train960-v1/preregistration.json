@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-5m-ma-launch-outcome-x8-train960-v1",
+  "created_at": "2026-08-30T00:00:00+08:00",
+  "stage": "P1",
+  "source_commit_before_builder": "37b24a86dc3af73361dd7e935a5df99a7ee13d29",
+  "owner_authorization": {
+    "request": "还有8张图的那个数据集还没去跑模型吧 / 推",
+    "interpreted_scope": "Train YOLO11s on the outcome-labelled 5m dataset: take-profit patterns are positive, stop-out patterns are negative, one render per pattern. Compare against the frozen 15m recipe.",
+    "holdout_read": false,
+    "training_or_tuning_authorized": true,
+    "threshold_or_weight_change_authorized": false,
+    "production_or_promotion_authorized": false,
+    "training_authorized": true
+  },
+  "question": "Does rendering every pattern at all eight horizontal positions help, hurt, or do nothing, with the label scheme held fixed?",
+  "single_variable": "renders per pattern: 8 instead of 1. Labels, patterns, boxes, split, purge and the YOLO11s / 960 / 40 epoch / patience 0 / batch 8 recipe are identical to exp-5m-ma-launch-outcome-train960-v1.",
+  "falsifiable": "The one-render run scored mAP50 0.400 and its proposals showed no edge over a matched control (-0.024 ATR, CI crossing zero). If eight renders land in the same place, the position augmentation is inert and the earlier 8x image counts were never information.",
+  "dataset": {
+    "path": "datasets/ma_launch_5m_outcome_x8_v1",
+    "images": 29619,
+    "positives": 12344,
+    "negatives": 17275,
+    "ratio": "1:1.40",
+    "timeframe": "5m",
+    "renders_per_pattern": 8,
+    "label_rule": "barrier tp -> positive, sl -> negative, timeout dropped",
+    "barriers": {
+      "tp_atr": 5.0,
+      "sl_atr": 2.0,
+      "horizon_bars": 144,
+      "horizon_hours": 12,
+      "entry": "close of core_end + 2 bars",
+      "cost": 0.002
+    },
+    "split_cutoff": "2025-12-01T00:00:00Z",
+    "purge_bars_each_side": 450
+  },
+  "recipe": {
+    "model": "yolo11s",
+    "imgsz": 960,
+    "epochs": 40,
+    "patience": 0,
+    "batch": 8,
+    "seed": 0
+  },
+  "safety": {
+    "holdout_read": false,
+    "promoted": false,
+    "deployed": false,
+    "orders_placed": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "promote": false
+  },
+  "training": {
+    "run_name": "ma_launch_5m_outcome_x8_v1_y11s_ft960",
+    "model": "yolo11s",
+    "imgsz": 960,
+    "epochs": 40,
+    "patience": 0,
+    "batch": 8,
+    "seed": 0,
+    "wait_for_run": "",
+    "base_model_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+    "trainer_sha256": "71445a639996ef8d0199a164aa08c75efa9d037619b8647deb3d5fab366e0562",
+    "launcher_sha256": "27f7037e4f9a8c66ddbb87e2534ff378b90c7baa506e49634a19b7f5f9c05475",
+    "launcher_note": "base runner; the 5m wrapper exec()s into it so $0 resolves here",
+    "classes": {
+      "0": "dense_long",
+      "1": "dense_short"
+    }
+  },
+  "immutable_inputs": {
+    "manifest_sha256": "849f41dd481400b920dc1d4fc30ccb8f373f9d486d2264067ff01c7bf3f3b73e",
+    "build_summary_sha256": "5beda0531bf822bba143d3947c951f981323ab94de9098b61de1990dbd208077",
+    "dataset_build_receipt_sha256": "9f9dac02ece7b25e92ee8cbaa288c9991b8d84ddb943e34e7db38b2940663005",
+    "dataset_qa_receipt_sha256": "39d265fc1acda1f73021397bbdb570f382d005b1a85d6974d8383f2223097479",
+    "data_yaml_sha256": "ec45c5ad43734800b2664c87299e1b084fb782dae2542911cc66ffbf5270802d",
+    "counts": {
+      "train": {
+        "images": 25142,
+        "labels": 25142,
+        "positive": 10527,
+        "negative": 14615
+      },
+      "val": {
+        "images": 4477,
+        "labels": 4477,
+        "positive": 1817,
+        "negative": 2660
+      },
+      "total": {
+        "images": 29619
+      }
+    },
+    "source_dimensions": [
+      1280,
+      742
+    ],
+    "class_instances_by_split": {
+      "train": {
+        "0": 4952,
+        "1": 5575
+      },
+      "val": {
+        "0": 940,
+        "1": 877
+      }
+    },
+    "events_by_split": {
+      "train": {
+        "positive": 1361,
+        "negative": 1895
+      },
+      "val": {
+        "positive": 235,
+        "negative": 343
+      }
+    }
+  },
+  "preflight": {
+    "script_sha256": "a178b20fd43b9a4f992149476a9dfaed029f4540812ddc1a304531baf86d05fd"
+  }
+}

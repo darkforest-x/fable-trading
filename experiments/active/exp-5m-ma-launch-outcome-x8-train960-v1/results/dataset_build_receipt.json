@@ -1,0 +1,58 @@
+{
+  "rule": "barrier tp -> positive, sl -> negative, timeout -> dropped",
+  "horizon_bars": 144,
+  "horizon_hours": 12,
+  "renders_per_pattern": 1,
+  "positions_available": [
+    [
+      5,
+      9
+    ],
+    [
+      6,
+      8
+    ],
+    [
+      7,
+      7
+    ],
+    [
+      8,
+      6
+    ],
+    [
+      9,
+      5
+    ],
+    [
+      10,
+      4
+    ],
+    [
+      11,
+      3
+    ],
+    [
+      12,
+      2
+    ]
+  ],
+  "seed": 20260830,
+  "split_cutoff": "2025-12-01 00:00:00+00:00",
+  "purge_bars_each_side": 450,
+  "stats": {
+    "negative train": 15160,
+    "negative val": 2744,
+    "positive train": 10896,
+    "positive val": 1880,
+    "dropped (timeout)": 85,
+    "dropped (unsimulated)": 4,
+    "dropped (sl_ambiguous)": 1,
+    "dropped in purge band": 15,
+    "dropped: identical pixels, same label": 693,
+    "dropped: identical pixels, contradictory labels": 368
+  },
+  "holdout_read": false,
+  "training_eligible": false,
+  "production_eligible": false
+}
