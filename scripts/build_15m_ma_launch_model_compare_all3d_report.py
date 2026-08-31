@@ -35,6 +35,11 @@ DEFAULT_OUT = ROOT / "analysis" / "output" / "ma_launch_model_compare_all3d_2026
 DEFAULT_RESULTS = ROOT / "experiments" / "active" / EXPERIMENT_ID / "results"
 DEFAULT_REPORT = ROOT / "analysis" / "p1_15m_ma_launch_five_model_alluniverse_20260831.md"
 
+# The report is Chinese-first.  Prefer fonts present on the Mac/Windows pair,
+# while retaining DejaVu as a portable fallback for Latin model identifiers.
+plt.rcParams["font.sans-serif"] = ["PingFang SC", "Microsoft YaHei", "Arial Unicode MS", "DejaVu Sans"]
+plt.rcParams["axes.unicode_minus"] = False
+
 SHORT_NAMES = {
     "legacy_t3_10k_960": "旧 t-3\n960",
     "legacy_t3_10k_1280": "旧 t-3\n1280",
