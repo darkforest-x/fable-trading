@@ -1,12 +1,17 @@
 """Contracts for the frozen five-checkpoint all-universe comparison."""
 from __future__ import annotations
 
+import numpy as np
+import pandas as pd
+
 from scripts.scan_15m_ma_launch_model_compare_all3d import (
     EXPECTED_DAYS,
     EXPECTED_MODEL_KEYS,
     _pairwise_overlap,
+    build_task_batches,
     cluster_episodes,
     load_preregistration,
+    utc,
 )
 
 
@@ -102,3 +107,36 @@ def test_pairwise_overlap_reports_direction_flips_instead_of_suppressing_them() 
     assert comparison["same_direction_matches"] == 0
     assert comparison["direction_flip_matches"] == 1
     assert comparison["proposal_jaccard"] == 1 / 3
+
+
+def test_task_generation_is_bounded_per_batch_while_preserving_every_window() -> None:
+    """The old W18..25 contract must not retain a multi-GiB symbol-day list."""
+    day = utc("2026-08-28T00:00:00Z")
+    times = pd.date_range(day - pd.Timedelta(minutes=15 * 160), periods=257, freq="15min")
+    close = np.linspace(100.0, 102.0, len(times))
+    frame = pd.DataFrame(
+        {
+            "open_time": times,
+            "open": close - 0.1,
+            "high": close + 0.2,
+            "low": close - 0.2,
+            "close": close,
+            "volume": np.ones(len(times)),
+        }
+    )
+    detector = {
+        "window_lengths": list(range(18, 26)),
+        "scan_endpoint_extension_after_day_bars": 1,
+    }
+    _enriched, batches, stats = build_task_batches(
+        frame,
+        day=day,
+        symbol="AAA_USDT_SWAP",
+        inst_id="AAA-USDT-SWAP",
+        detector=detector,
+        batch_size=8,
+    )
+    sizes = [len(batch) for batch in batches]
+    assert sum(sizes) == 97 * 8
+    assert max(sizes) == 8
+    assert stats == {}

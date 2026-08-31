@@ -538,15 +538,28 @@ def load_snapshot(
     return frames, receipt
 
 
-def build_tasks(
+def build_task_batches(
     frame: pd.DataFrame,
     *,
     day: pd.Timestamp,
     symbol: str,
     inst_id: str,
     detector: Mapping[str, Any],
-) -> tuple[pd.DataFrame, list[tuple[np.ndarray, ChartTransform, dict[str, Any]]], Counter[str]]:
-    """Render causal inputs once for every model sharing one geometry group."""
+    batch_size: int,
+) -> tuple[
+    pd.DataFrame,
+    Iterable[list[tuple[np.ndarray, ChartTransform, dict[str, Any]]]],
+    Counter[str],
+]:
+    """Yield bounded causal input batches shared by one geometry-equivalent group.
+
+    A complete all-universe pass has up to 816 input windows for one
+    symbol-day under the oldest detector.  Retaining that many 1280x742 BGR
+    arrays consumes more than two GiB of host RAM and turns a normal scan into
+    an avoidable memory-pressure failure.  This generator keeps just one
+    inference batch in memory, then presents the *same exact pixel arrays* to
+    all checkpoints that share the window contract before releasing them.
+    """
 
     enriched = add_mas(frame)
     times = pd.to_datetime(enriched["open_time"], utc=True)
@@ -555,37 +568,46 @@ def build_tasks(
     endpoint_indices = np.flatnonzero((times >= day) & (times < endpoint_end))
     daily_return = _daily_return(frame, day)
     stats: Counter[str] = Counter()
-    tasks: list[tuple[np.ndarray, ChartTransform, dict[str, Any]]] = []
-    for endpoint in endpoint_indices:
-        end_i = int(endpoint)
-        for window_len in map(int, detector["window_lengths"]):
-            start_i = end_i - window_len + 1
-            if start_i < 0:
-                stats["skip_insufficient_rows"] += 1
-                continue
-            window = enriched.iloc[start_i : end_i + 1]
-            if window.loc[:, list(ALL_MA_COLS)].isna().any().any():
-                stats["skip_ma_warmup"] += 1
-                continue
-            image, transform = render_chart(window, out_path=None)
-            tasks.append(
-                (
-                    image,
-                    transform,
-                    {
-                        "day": day.isoformat(),
-                        "rank": 0,
-                        "symbol": symbol,
-                        "inst_id": inst_id,
-                        "daily_return": daily_return,
-                        "window_len": window_len,
-                        "window_start_i": start_i,
-                        "window_end_i": end_i,
-                        "window_end_time": utc(times.iloc[end_i]).isoformat(),
-                    },
+    def batches() -> Iterable[list[tuple[np.ndarray, ChartTransform, dict[str, Any]]]]:
+        tasks: list[tuple[np.ndarray, ChartTransform, dict[str, Any]]] = []
+        for endpoint in endpoint_indices:
+            end_i = int(endpoint)
+            for window_len in map(int, detector["window_lengths"]):
+                start_i = end_i - window_len + 1
+                if start_i < 0:
+                    stats["skip_insufficient_rows"] += 1
+                    continue
+                window = enriched.iloc[start_i : end_i + 1]
+                if window.loc[:, list(ALL_MA_COLS)].isna().any().any():
+                    stats["skip_ma_warmup"] += 1
+                    continue
+                image, transform = render_chart(window, out_path=None)
+                tasks.append(
+                    (
+                        image,
+                        transform,
+                        {
+                            "day": day.isoformat(),
+                            "rank": 0,
+                            "symbol": symbol,
+                            "inst_id": inst_id,
+                            "daily_return": daily_return,
+                            "window_len": window_len,
+                            "window_start_i": start_i,
+                            "window_end_i": end_i,
+                            "window_end_time": utc(times.iloc[end_i]).isoformat(),
+                        },
+                    )
                 )
-            )
-    return enriched, tasks, stats
+                if len(tasks) == batch_size:
+                    yield tasks
+                    tasks = []
+        if tasks:
+            yield tasks
+
+    if batch_size <= 0:
+        raise ValueError("batch_size must be positive")
+    return enriched, batches(), stats
 
 
 def _group_models(models: Sequence[Mapping[str, Any]]) -> list[list[Mapping[str, Any]]]:
@@ -727,32 +749,47 @@ def scan_phase(
             for symbol, frame in sorted(frames.items()):
                 number += 1
                 inst_id = symbol.replace("_", "-")
-                enriched, tasks, prep_stats = build_tasks(
+                enriched, task_batches, prep_stats = build_task_batches(
                     frame,
                     day=day,
                     symbol=symbol,
                     inst_id=inst_id,
                     detector=group_detector,
+                    batch_size=batch_size,
                 )
+                per_model_candidates: dict[str, list[dict[str, Any]]] = {
+                    str(spec["key"]): [] for spec in group
+                }
+                prediction_stats: dict[str, Counter[str]] = {
+                    str(spec["key"]): Counter() for spec in group
+                }
+                for tasks in task_batches:
+                    for spec in group:
+                        key = str(spec["key"])
+                        detector = spec["detector"]
+                        candidates = common._predict_batches(  # noqa: SLF001 - shared audited mapper
+                            models[key],
+                            tasks,
+                            batch_size=batch_size,
+                            conf=float(detector["confidence"]),
+                            iou=float(detector["nms_iou"]),
+                            imgsz=int(detector["imgsz"]),
+                            device=device,
+                            day=day,
+                            frame=enriched,
+                            allowed_cores=set(map(int, detector["mapped_core_length_bars_allowed"])),
+                            allowed_confirmations=set(map(int, detector["mapped_confirmation_bars_allowed"])),
+                            stats=prediction_stats[key],
+                        )
+                        per_model_candidates[key].extend(
+                            {**row, "model_key": key} for row in candidates
+                        )
                 for spec in group:
                     key = str(spec["key"])
                     detector = spec["detector"]
                     stats = Counter(prep_stats)
-                    candidates = common._predict_batches(  # noqa: SLF001 - shared audited mapper
-                        models[key],
-                        tasks,
-                        batch_size=batch_size,
-                        conf=float(detector["confidence"]),
-                        iou=float(detector["nms_iou"]),
-                        imgsz=int(detector["imgsz"]),
-                        device=device,
-                        day=day,
-                        frame=enriched,
-                        allowed_cores=set(map(int, detector["mapped_core_length_bars_allowed"])),
-                        allowed_confirmations=set(map(int, detector["mapped_confirmation_bars_allowed"])),
-                        stats=stats,
-                    )
-                    candidates = [{**row, "model_key": key} for row in candidates]
+                    stats.update(prediction_stats[key])
+                    candidates = per_model_candidates[key]
                     events = common.deduplicate_hits(
                         candidates, gap_bars=int(detector["same_symbol_event_gap_bars"])
                     )
