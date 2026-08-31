@@ -89,6 +89,7 @@ stage() {
     scripts/scan_15m_ma_launch_t3_daily_movers.py \
     scripts/windows/run_model_compare_all3d_scan.ps1 \
     yoyo/__init__.py yoyo/layers/__init__.py yoyo/layers/l1_detection/__init__.py \
+    yoyo/data/__init__.py yoyo/data/bars.py yoyo/data/loader.py yoyo/data/universe.py \
     yoyo/layers/l1_detection/data.py yoyo/layers/l1_detection/render.py \
     "experiments/active/$EXPERIMENT_ID/preregistration.json" \
     "$OUT" "$RESULTS/fetch_receipt.json" \
