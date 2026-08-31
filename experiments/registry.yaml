@@ -2654,6 +2654,52 @@ experiments:
       removed after results. Telegram, training, tuning, promotion, deployment,
       forward mutation and orders all remained false.
 
+  - experiment_id: exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b4b71e1756eccb46f4bdda02cc9786375cf06875"
+    status: accepted
+    question: >-
+      On exactly the frozen three-day daily-absolute-return Top20 snapshot
+      previously scored by the Grade-A imgsz=960 detector, what does the
+      completed full40 native-imgsz=1280 best checkpoint emit?
+    single_variable: >-
+      replace the completed 960 epoch-6 checkpoint and its native inference
+      resolution with the completed 1280 epoch-4 checkpoint and native
+      imgsz=1280; the 60 frozen symbol-days, source OHLCV bytes, W18/W19,
+      core4/5, post2-9, confidence, NMS, raw-box preservation, overlap merge
+      and high-resolution one-box rendering remain fixed
+    result: >-
+      completed_locally. Across the byte-identical 12,600 inputs, 354 raw
+      boxes yielded 286 structurally legal candidates and 41 same-symbol
+      overlap episodes (28 LONG / 13 SHORT). The prior 960 arm emitted 30;
+      only 19 of the 52 combined physical episodes linked by same-symbol core
+      interval (18 same-direction, one TRIA direction flip). All 41 documents
+      passed exact input, rerender and PNG-hash QA; shifted event/input pairing
+      matched 0/41. This is a disagreement finding, not a 1280-win verdict.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    artifacts:
+      - 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-prereg
+      - 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-scan
+      - 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-manifest
+      - 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-overview
+      - 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-charts
+      - 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-qa
+      - 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-report
+      - 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-html
+    canonical_report: analysis/p1_15m_ma_launch_owner_grade_a8000_hot3d_1280_20260830.md
+    reuse_allowed: false
+    notes: >-
+      This is the new 1280 configuration's explicit Owner-authorized holdout
+      use #1, but it made zero network reads by replaying the earlier frozen
+      snapshot. The 41-vs-30 count cannot establish model quality: both
+      completed-history arms need 2-9 post-core bars, same-day Top20 membership
+      is post-hoc, the live universe is survivorship-biased, and confidence
+      scales are not cross-model probabilities. No human deletion, threshold
+      tuning, retraining, promotion, deployment, forward mutation, Telegram or
+      order occurred.
+
   - experiment_id: exp-5m-ma-launch-outcome-causal-v2
     source_repo: darkforest-x/fable-trading
     source_commit: "5a171279a5de995464b0c62e762f4cab443c8897"

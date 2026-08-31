@@ -8043,6 +8043,147 @@ artifacts:
     data_cutoff: "2026-08-29T02:00:00Z"
     notes: Self-contained Owner-facing HTML with embedded overview and LONG/SHORT full-context examples.
 
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-prereg
+    artifact_type: config
+    role: frozen_owner_authorized_1280_replay_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6569cf8c6e2d1386f487db6dba50971699b0cd1d"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/preregistration.json
+    sha256: "dfce1c565ff664b89af3976e486844f82a16dbfaee791b619bafd767599dcf0e"
+    size_bytes: 7252
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/preregistration.json"
+    holdout_status: holdout_replay_authorized_before_1280_inference
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6569cf8c6e2d1386f487db6dba50971699b0cd1d"
+    config_hash: "dfce1c565ff664b89af3976e486844f82a16dbfaee791b619bafd767599dcf0e"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: >-
+      Pins the same 960-arm OHLCV snapshot and ranking hashes, with no fetch
+      allowed; the only changed detector variable is native imgsz=1280 full40
+      best.pt. Owner explicitly authorized configuration-specific holdout use #1.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-scan
+    artifact_type: manifest
+    role: frozen_1280_detector_cross_section_scan_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b4b71e1756eccb46f4bdda02cc9786375cf06875"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/results/scan_receipt.json
+    sha256: "d2bfb4de72e0c55d580733d1d1746552df4b07ce148c1622806d6832b65ffa0f"
+    size_bytes: 4819
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/results/scan_receipt.json"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b4b71e1756eccb46f4bdda02cc9786375cf06875"
+    config_hash: "dfce1c565ff664b89af3976e486844f82a16dbfaee791b619bafd767599dcf0e"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: 12,600 replay inputs, 354 raw boxes, 286 legal candidates and 41 episodes; zero network reads and no post-result filtering or production mutation.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-manifest
+    artifact_type: manifest
+    role: ordered_forty_one_document_raw_box_and_pixel_identity_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b4b71e1756eccb46f4bdda02cc9786375cf06875"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/results/manifest.jsonl
+    sha256: "4a7c928f0f7aca236420ccbb8aab49fbd41c3cce0dba167f2e87a830d5db6aa3"
+    size_bytes: 62058
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/results/manifest.jsonl"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b4b71e1756eccb46f4bdda02cc9786375cf06875"
+    config_hash: "dfce1c565ff664b89af3976e486844f82a16dbfaee791b619bafd767599dcf0e"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: Ordered 41-document ledger with original normalized boxes, exact detector-input pixel hashes and final PNG hashes.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-overview
+    artifact_type: report
+    role: owner_facing_three_board_1280_episode_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b4b71e1756eccb46f4bdda02cc9786375cf06875"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/results/overview.png
+    sha256: "c9d15cc7fe03ef9567e1e6f0cd5dc171ed84f55036f790dcd402b87c1b9c0c1d"
+    size_bytes: 203741
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/results/overview.png"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b4b71e1756eccb46f4bdda02cc9786375cf06875"
+    config_hash: "dfce1c565ff664b89af3976e486844f82a16dbfaee791b619bafd767599dcf0e"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: Three frozen daily Top20 boards with 16, 16 and 9 representative episodes respectively.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-charts
+    artifact_type: bundle
+    role: lossless_forty_one_high_resolution_one_episode_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b4b71e1756eccb46f4bdda02cc9786375cf06875"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/results/hot3d_all_signal_charts.zip
+    sha256: "e4edac51f408d763ea24bf773ac133e2d0b73b7f06d6af53023e94d4fbf7ada6"
+    size_bytes: 7727388
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/results/hot3d_all_signal_charts.zip"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b4b71e1756eccb46f4bdda02cc9786375cf06875"
+    config_hash: "dfce1c565ff664b89af3976e486844f82a16dbfaee791b619bafd767599dcf0e"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: All 41 lossless 1920x1400 PNGs plus overview and episode ledger; not sent to Telegram.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-qa
+    artifact_type: manifest
+    role: exact_pixel_rerender_and_pairing_null_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b4b71e1756eccb46f4bdda02cc9786375cf06875"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/results/qa_receipt.json
+    sha256: "0158d591a4a38b303c2fb7bdd32870df353eeac5f2a49deba20f63f47f7db0ed"
+    size_bytes: 832
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1/results/qa_receipt.json"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b4b71e1756eccb46f4bdda02cc9786375cf06875"
+    config_hash: "dfce1c565ff664b89af3976e486844f82a16dbfaee791b619bafd767599dcf0e"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: 41/41 exact inputs, full-document rerenders and PNG hashes; cyclic shifted pairing null matched 0/41; verification used zero network reads.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-report
+    artifact_type: report
+    role: canonical_markdown_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b4b71e1756eccb46f4bdda02cc9786375cf06875"
+    source_path: analysis/p1_15m_ma_launch_owner_grade_a8000_hot3d_1280_20260830.md
+    sha256: "039d37cf92078994b226a376fcd1e627a7847b14ae4c8000efd1779d9d98d1f0"
+    size_bytes: 9102
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_grade_a8000_hot3d_1280_20260830.md"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b4b71e1756eccb46f4bdda02cc9786375cf06875"
+    config_hash: "dfce1c565ff664b89af3976e486844f82a16dbfaee791b619bafd767599dcf0e"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: >-
+      Canonical comparison report: matched frozen source, detection funnel,
+      960/1280 episode identity overlap, resolution caveat, QA and risk disclosures.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b4b71e1756eccb46f4bdda02cc9786375cf06875"
+    source_path: analysis/html/p1_15m_ma_launch_owner_grade_a8000_hot3d_1280_20260830.html
+    sha256: "39befd9644d2e5532ebef98d0d490e220245c43ca6c3ff470fff3bf489b71334"
+    size_bytes: 284639
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_grade_a8000_hot3d_1280_20260830.html"
+    holdout_status: holdout_consumed_1
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b4b71e1756eccb46f4bdda02cc9786375cf06875"
+    config_hash: "dfce1c565ff664b89af3976e486844f82a16dbfaee791b619bafd767599dcf0e"
+    data_cutoff: "2026-08-29T02:00:00Z"
+    notes: Self-contained Owner-facing HTML with embedded 1280 overview and the full 960-vs-1280 proposal-stability comparison.
+
   # ---- 5m causal outcome-contract repair (2026-08-31) --------------------
   - artifact_id: 5m-ma-launch-outcome-causal-v2-prereg
     artifact_type: config
