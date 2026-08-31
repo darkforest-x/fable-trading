@@ -29,6 +29,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import time
 import zipfile
 from collections import Counter, defaultdict
@@ -41,6 +42,13 @@ import cv2
 import numpy as np
 import pandas as pd
 
+# A checked-in scanner must work both as ``python -m`` and as the explicit
+# executable command recorded in its report.  Python otherwise puts only the
+# ``scripts/`` directory on sys.path when this file is invoked directly.
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
+
 from scripts import scan_15m_ma_launch_t3_daily_movers as common
 from yoyo.layers.l1_detection.data import ALL_MA_COLS, WARMUP_BARS, add_mas
 from yoyo.layers.l1_detection.render import (
@@ -51,7 +59,7 @@ from yoyo.layers.l1_detection.render import (
 )
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = REPOSITORY_ROOT
 EXPERIMENT_ID = "exp-15m-ma-launch-model-compare-all3d-20260831-v1"
 DEFAULT_PREREG = ROOT / "experiments" / "active" / EXPERIMENT_ID / "preregistration.json"
 DEFAULT_OUT = ROOT / "analysis" / "output" / "ma_launch_model_compare_all3d_20260831_v1"
