@@ -24,6 +24,7 @@ $scanner = Join-Path $Root 'scripts/scan_15m_ma_launch_model_compare_all3d.py'
 $out = Join-Path $Root 'analysis/output/ma_launch_model_compare_all3d_20260831_v1'
 $results = Join-Path $Root 'experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results'
 $exitPath = Join-Path $Root 'scan.exit'
+$scanReceipt = Join-Path $results 'scan_receipt.json'
 
 if (-not (Test-Path -LiteralPath $python -PathType Leaf)) {
     throw "missing controlled 3060 Python: $python"
@@ -38,5 +39,13 @@ if (Test-Path -LiteralPath $exitPath) {
 Set-Location -LiteralPath $Root
 & $python -u $scanner --scan --out $out --results $results --device 0 --batch-size $BatchSize --worker-source-commit $SourceCommit
 $code = $LASTEXITCODE
+# A killed child can leave PowerShell's $LASTEXITCODE at zero on this Windows
+# host.  A zero marker is valid only when the scanner's atomic terminal receipt
+# exists; otherwise a collector could mistake a partial log for completed
+# inference and contaminate the frozen comparison.
+if ($code -eq 0 -and -not (Test-Path -LiteralPath $scanReceipt -PathType Leaf)) {
+    [Console]::Error.WriteLine("scanner exited zero without terminal receipt: $scanReceipt")
+    $code = 97
+}
 [System.IO.File]::WriteAllText($exitPath, ("{0}`n" -f $code), [System.Text.Encoding]::ASCII)
 exit $code
