@@ -13,6 +13,7 @@ from scripts.scan_15m_ma_launch_model_compare_all3d import (
     load_preregistration,
     utc,
 )
+from scripts.build_15m_ma_launch_model_compare_all3d_report import alignment_null
 
 
 def _candidate(
@@ -140,3 +141,17 @@ def test_task_generation_is_bounded_per_batch_while_preserving_every_window() ->
     assert sum(sizes) == 97 * 8
     assert max(sizes) == 8
     assert stats == {}
+
+
+def test_alignment_null_rotates_within_day_without_changing_episode_identity_fields() -> None:
+    day = "2026-08-28"
+    row = {
+        **_candidate(core_start=106, core_end=110, window_end=115, confidence=0.8),
+        "episode_sequence": 1,
+        "core_end_time": f"{day}T02:30:00+00:00",
+    }
+    result = alignment_null([row], [row])
+    assert result["actual_matches"] == 1
+    assert result["actual_jaccard"] == 1.0
+    assert result["null_max_matches"] == 1
+    assert result["alignment_p_ge_actual"] == 3 / 96
