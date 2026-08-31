@@ -23,8 +23,11 @@ host="$1"; shift
 deadline="${FABLE_SSH_DEADLINE:-60}"
 tag="ps_$$_$RANDOM"
 remote_dir="C:/fable/_rpc"
+remote_sftp_dir="/C:/fable/_rpc"
 remote_ps1="$remote_dir/$tag.ps1"
 remote_out="$remote_dir/$tag.out"
+remote_ps1_sftp="$remote_sftp_dir/$tag.ps1"
+remote_out_sftp="$remote_sftp_dir/$tag.out"
 local_script=$(mktemp -t "$tag")
 local_out=$(mktemp -t "${tag}_out")
 
@@ -76,19 +79,24 @@ SSH=(ssh -o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=5 -o Serve
 # Ensure rpc dir exists (ignore hang; scp will prove it)
 bounded "${SSH[@]}" "$host" "powershell -NoProfile -NonInteractive -Command \"New-Item -ItemType Directory -Force $remote_dir | Out-Null\"" || true
 
-bounded "${SCP[@]}" "$local_script" "$host:$remote_ps1" \
+# Modern scp uses SFTP.  Windows' drive root must be /C:/ for transfer paths,
+# whereas PowerShell commands above correctly use C:/.
+bounded "${SCP[@]}" "$local_script" "$host:$remote_ps1_sftp" \
   || { echo "ssh_ps: shipping command failed" >&2; exit 1; }
 
 # Run; hang after remote completion is OK if the out file is fetchable.
 exec_rc=0
-bounded "${SSH[@]}" "$host" "powershell -NoProfile -NonInteractive -File $remote_ps1" || exec_rc=$?
+# This LAN worker has PowerShell's script policy enabled.  The command file is
+# transient, transferred over the authenticated SSH channel, and must be run
+# under the explicit non-persistent bypass or it never reaches its own receipt.
+bounded "${SSH[@]}" "$host" "powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $remote_ps1" || exec_rc=$?
 
 fetch_rc=0
-bounded "${SCP[@]}" "$host:$remote_out" "$local_out" || fetch_rc=$?
+bounded "${SCP[@]}" "$host:$remote_out_sftp" "$local_out" || fetch_rc=$?
 if [[ "$fetch_rc" -ne 0 || ! -s "$local_out" ]]; then
   # One retry after a short wait — remote may still be flushing.
   sleep 2
-  bounded "${SCP[@]}" "$host:$remote_out" "$local_out" || fetch_rc=$?
+  bounded "${SCP[@]}" "$host:$remote_out_sftp" "$local_out" || fetch_rc=$?
 fi
 
 if [[ ! -s "$local_out" ]]; then
