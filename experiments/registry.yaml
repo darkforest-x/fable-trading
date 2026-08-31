@@ -2741,3 +2741,36 @@ experiments:
       diagnostic only and cannot be used to train or promote an L1 detector.
       No holdout, training, threshold/barrier/cost change, promotion, deployment,
       forward mutation or order occurred.
+
+  - experiment_id: exp-15m-ma-launch-model-compare-all3d-20260831-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "84c98f84db96f528e0d23732d64edd9f732462d9"
+    status: active
+    question: >-
+      On one frozen snapshot of every usable current-live OKX crypto USDT
+      perpetual instrument for 2026-08-28 through 2026-08-30 UTC, how do the
+      five explicitly discussed, frozen 15-minute MA-launch YOLO checkpoints
+      differ in emitted proposal count, direction and same-symbol episode
+      overlap when each retains its historical inference contract?
+    single_variable: >-
+      observational multi-checkpoint comparison explicitly requested by the
+      Owner; no checkpoint, threshold, window, source bytes or training input
+      is modified. Each detector keeps its own original supported geometry,
+      which is a declared comparison confound rather than a tuned variable.
+    result: >-
+      preregistered_pending_frozen_snapshot_and_offline_inference. The Owner
+      explicitly authorized one recent-three-complete-day holdout use for the
+      five named configurations. No result, selection, economic claim or model
+      quality verdict exists until the same snapshot has been scanned, rendered
+      and independently pixel-verified.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_five_model_alluniverse_20260831.md
+    reuse_allowed: false
+    notes: >-
+      This is descriptive retrospective inference only. It must use a single
+      byte-hashed source snapshot; it does not authorize training, tuning,
+      threshold changes, promotion, deployment, Telegram delivery, forward
+      state mutation or orders. The report will record per-checkpoint holdout
+      consumption numbers and the all-current-live-universe survivorship bias.

@@ -1,0 +1,232 @@
+{
+  "protocol": "five_frozen_15m_ma_launch_detectors_all_current_live_okx_usdt_swap_complete_days_20260828_20260830_v1",
+  "experiment_id": "exp-15m-ma-launch-model-compare-all3d-20260831-v1",
+  "created_at": "2026-08-31T15:51:06Z",
+  "source_commit_before_builder": "84c98f84db96f528e0d23732d64edd9f732462d9",
+  "owner_authorization": {
+    "request": "这几个模型都去跑一下 最近三天的所有币种 我要看看",
+    "interpreted_scope": "Run the five explicitly discussed frozen YOLO checkpoints on one new, current-live OKX crypto USDT-SWAP universe snapshot for the three complete UTC days 2026-08-28 through 2026-08-30. Preserve each checkpoint's historical window/core/post-core contract, confidence=0.25, NMS IoU=0.7, native inference size, raw coordinates, and one-raw-box high-resolution review rendering. Do not rank symbols, train, tune, alter a checkpoint, promote, deploy, mutate forward state, send Telegram, or place orders.",
+    "authorized_holdout_scope": "The Owner's request authorizes this one descriptive retrospective read of the latest three complete UTC days for each named checkpoint configuration. This is not final acceptance, an economic backtest, or permission to tune on the result.",
+    "new_inference_authorized": true,
+    "telegram_delivery_authorized": false,
+    "training_or_tuning_authorized": false,
+    "threshold_or_weight_change_authorized": false,
+    "production_or_promotion_authorized": false
+  },
+  "calendar": {
+    "timezone": "UTC",
+    "complete_days": [
+      "2026-08-28T00:00:00Z",
+      "2026-08-29T00:00:00Z",
+      "2026-08-30T00:00:00Z"
+    ],
+    "current_partial_day_excluded": true
+  },
+  "universe": {
+    "venue": "OKX",
+    "instrument_type": "USDT-SWAP",
+    "instrument_metadata_required": "state=live and instCategory=1 when the single source snapshot is fetched",
+    "ticker_required": "a current ticker with a valid last price at source-fetch time",
+    "exclusions": "the scanner's fixed crypto-only blocked-base and stock-like-base exclusions",
+    "ranking": null,
+    "selection": "all eligible current-live instruments that provide the exact contiguous confirmed 15m source range",
+    "causality": "the current-live universe has survivorship bias and the completed historical windows contain post-core confirmation bars; neither is a live-trading selection protocol"
+  },
+  "snapshot": {
+    "bar": "15m",
+    "ma_warmup_bars": 160,
+    "source": "OKX public instruments/tickers plus bounded confirmed 15m candles",
+    "fetch_once_then_read_only": true,
+    "one_shared_snapshot_for_all_models": true,
+    "gaps_allowed": 0,
+    "future_bars_rendered_into_inference": 0
+  },
+  "models": [
+    {
+      "key": "legacy_t3_10k_960",
+      "display_name": "Legacy t-3 weak-label 10k · native 960",
+      "weights": "analysis/output/ma_launch_t3_10000_v1/ma_launch_t3_10000_v1_y11s_ft/weights/best.pt",
+      "weights_sha256": "8b2e393ffa887b8284a5580f68df290963fccc08fb94cdc4e0fec0c2b1e40e10",
+      "training_manifest": "datasets/ma_launch_t3_10000_v1/manifest.jsonl",
+      "training_manifest_sha256": "dd55246938b03c4b2013d159cdfee94b4e9db56ecb298ad30145eb5d1bc2bc3a",
+      "training_positive_rows": 9938,
+      "renderer": "yoyo/layers/l1_detection/render.py",
+      "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+      "holdout_consumption_number_for_this_configuration": 2,
+      "prior_holdout_scope": "One previous recent-three-day daily-mover scan; this is the second documented holdout use of this checkpoint configuration.",
+      "detector": {
+        "class_names": {"0": "dense_long", "1": "dense_short"},
+        "bar": "15m",
+        "window_lengths": [14, 18, 22],
+        "confidence": 0.25,
+        "nms_iou": 0.7,
+        "imgsz": 960,
+        "model_input_native_png": "1280x742 rendered chart, YOLO inference at native imgsz=960",
+        "mapped_core_length_bars_allowed": [4, 5, 6, 7],
+        "mapped_confirmation_bars_allowed": [3, 4, 5],
+        "scan_endpoint_extension_after_day_bars": 5,
+        "same_symbol_event_gap_bars": 5,
+        "future_bars_rendered_into_inference": 0,
+        "threshold_or_window_retuning_after_results": false
+      }
+    },
+    {
+      "key": "legacy_t3_10k_1280",
+      "display_name": "Legacy t-3 weak-label 10k · native 1280",
+      "weights": "analysis/output/ma_launch_t3_10000_v1/ma_launch_t3_10000_v1_y11s_ft_imgsz1280/weights/best.pt",
+      "weights_sha256": "a9fae2ef64489e24f39bd51714d96b43cf680bf80d5c536537f03a4402e9f9c0",
+      "training_manifest": "datasets/ma_launch_t3_10000_v1/manifest.jsonl",
+      "training_manifest_sha256": "dd55246938b03c4b2013d159cdfee94b4e9db56ecb298ad30145eb5d1bc2bc3a",
+      "training_positive_rows": 9938,
+      "renderer": "yoyo/layers/l1_detection/render.py",
+      "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+      "holdout_consumption_number_for_this_configuration": 1,
+      "prior_holdout_scope": "No previously documented actual recent-holdout inference for this native-1280 checkpoint; this is use #1.",
+      "detector": {
+        "class_names": {"0": "dense_long", "1": "dense_short"},
+        "bar": "15m",
+        "window_lengths": [14, 18, 22],
+        "confidence": 0.25,
+        "nms_iou": 0.7,
+        "imgsz": 1280,
+        "model_input_native_png": "1280x742 rendered chart, YOLO inference at native imgsz=1280",
+        "mapped_core_length_bars_allowed": [4, 5, 6, 7],
+        "mapped_confirmation_bars_allowed": [3, 4, 5],
+        "scan_endpoint_extension_after_day_bars": 5,
+        "same_symbol_event_gap_bars": 5,
+        "future_bars_rendered_into_inference": 0,
+        "threshold_or_window_retuning_after_results": false
+      }
+    },
+    {
+      "key": "legacy_owner_10k_neg30k_960",
+      "display_name": "Owner 10k + 30k negatives · native 960",
+      "weights": "analysis/output/ma_launch_owner_yolo_neg30000_v2/ma_launch_owner_yolo_neg30000_v2_y11s_ft960/weights/best.pt",
+      "weights_sha256": "58888f996f7da46d4321316964085e90855d00e4c0a14e18c98b303c6e43c182",
+      "training_manifest": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2/manifest.jsonl",
+      "training_manifest_sha256": "6e601034ab15765a74b788cc6d094e9326c3044c1fb615c908ef9de897d6e0af",
+      "training_positive_rows": 10000,
+      "renderer": "yoyo/layers/l1_detection/render.py",
+      "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+      "holdout_consumption_number_for_this_configuration": 6,
+      "prior_holdout_scope": "Five prior documented recent-holdout probes/replays for this exact checkpoint configuration; this new all-universe snapshot is use #6.",
+      "detector": {
+        "class_names": {"0": "dense_long", "1": "dense_short"},
+        "bar": "15m",
+        "window_lengths": [18, 19, 20, 21, 22, 23, 24, 25],
+        "confidence": 0.25,
+        "nms_iou": 0.7,
+        "imgsz": 960,
+        "model_input_native_png": "1280x742 rendered chart, YOLO inference at native imgsz=960",
+        "mapped_core_length_bars_allowed": [4, 5],
+        "mapped_confirmation_bars_allowed": [4, 5, 6],
+        "scan_endpoint_extension_after_day_bars": 6,
+        "same_symbol_event_gap_bars": 5,
+        "future_bars_rendered_into_inference": 0,
+        "threshold_or_window_retuning_after_results": false
+      }
+    },
+    {
+      "key": "grade_a8k_neg24k_epoch6_960",
+      "display_name": "Grade-A 8k + 24k negatives · epoch 6 · native 960",
+      "weights": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960/weights/best.pt",
+      "weights_sha256": "0524e78086face6ccba0f2bb220dadada4555a914c64a4e6794f620fa0d9103f",
+      "training_manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+      "training_manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+      "training_positive_rows": 8000,
+      "renderer": "yoyo/layers/l1_detection/render.py",
+      "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+      "holdout_consumption_number_for_this_configuration": 3,
+      "prior_holdout_scope": "Two prior documented recent-three-day hot-universe probes for this exact epoch-6 native-960 configuration; this is use #3.",
+      "detector": {
+        "class_names": {"0": "dense_long", "1": "dense_short"},
+        "bar": "15m",
+        "window_lengths": [18, 19],
+        "confidence": 0.25,
+        "nms_iou": 0.7,
+        "imgsz": 960,
+        "model_input_native_png": "1280x742 rendered chart, YOLO inference at native imgsz=960",
+        "mapped_core_length_bars_allowed": [4, 5],
+        "mapped_confirmation_bars_allowed": [2, 3, 4, 5, 6, 7, 8, 9],
+        "scan_endpoint_extension_after_day_bars": 9,
+        "same_symbol_event_gap_bars": 5,
+        "future_bars_rendered_into_inference": 0,
+        "threshold_or_window_retuning_after_results": false
+      }
+    },
+    {
+      "key": "grade_a8k_neg24k_full40_1280",
+      "display_name": "Grade-A 8k + 24k negatives · full40 · native 1280",
+      "weights": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+      "weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+      "training_manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+      "training_manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+      "training_positive_rows": 8000,
+      "renderer": "yoyo/layers/l1_detection/render.py",
+      "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+      "holdout_consumption_number_for_this_configuration": 2,
+      "prior_holdout_scope": "One prior documented native-1280 replay on a frozen three-day hot-universe snapshot; this new all-universe snapshot is use #2.",
+      "detector": {
+        "class_names": {"0": "dense_long", "1": "dense_short"},
+        "bar": "15m",
+        "window_lengths": [18, 19],
+        "confidence": 0.25,
+        "nms_iou": 0.7,
+        "imgsz": 1280,
+        "model_input_native_png": "1280x742 rendered chart, YOLO inference at native imgsz=1280",
+        "mapped_core_length_bars_allowed": [4, 5],
+        "mapped_confirmation_bars_allowed": [2, 3, 4, 5, 6, 7, 8, 9],
+        "scan_endpoint_extension_after_day_bars": 9,
+        "same_symbol_event_gap_bars": 5,
+        "future_bars_rendered_into_inference": 0,
+        "threshold_or_window_retuning_after_results": false
+      }
+    }
+  ],
+  "review_contract": {
+    "preserve_all_raw_coordinates": ["cx", "cy", "w", "h"],
+    "episode_interval": "mapped_core_start_i through window_end_i inclusive",
+    "episode_merge": "merge overlapping candidate intervals only within the same model, same symbol and same UTC day; do not merge across models",
+    "episode_representative": "earliest window end, then highest confidence",
+    "documents": "one full-context, high-resolution document per overlap episode per model",
+    "boxes_per_document": 1,
+    "full_context_bars": 128,
+    "preferred_detection_local_index": 90,
+    "full_context_may_show_post_detection_bars_for_review_only": true,
+    "exact_model_input_inset": true,
+    "canvas_width_px": 1920,
+    "canvas_height_px": 1400
+  },
+  "outputs": {
+    "local_output": "analysis/output/ma_launch_model_compare_all3d_20260831_v1",
+    "committed_results": "experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results",
+    "report": "analysis/p1_15m_ma_launch_five_model_alluniverse_20260831.md",
+    "html": "analysis/html/p1_15m_ma_launch_five_model_alluniverse_20260831.html"
+  },
+  "interpretation": {
+    "purpose": "descriptive frozen-checkpoint proposal comparison on byte-identical OHLCV source files",
+    "economic_backtest": false,
+    "holdout_final_acceptance": false,
+    "must_disclose": [
+      "model contracts are intentionally not normalized: legacy checkpoints use different supported window/core/post-core geometry from the Grade-A checkpoints",
+      "confidence values are within-model detector scores, not calibrated probabilities across checkpoints",
+      "same source bytes do not make raw signal counts a quality ranking",
+      "the current-live instrument universe is survivorship-biased",
+      "completed-shape checkpoint outputs require post-core confirmation bars and are not causal tip/tip-1/tip-2 trade signals",
+      "full-context pixels after a detection are review-only and never enter inference",
+      "no human post-result deletion is allowed"
+    ]
+  },
+  "safety": {
+    "training_or_tuning": false,
+    "threshold_or_weight_changed": false,
+    "active_or_frozen_changed": false,
+    "promoted": false,
+    "deployed": false,
+    "forward_state_changed": false,
+    "orders_placed": false,
+    "telegram_sent": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
