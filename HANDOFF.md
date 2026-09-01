@@ -2,6 +2,21 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-01 — L1.5 已从默认研究链物理旁路）
+
+Owner 决定去掉未通过的 L1.5。新入口只执行 `冻结 L1 候选 → dependency episode 合并 →
+LONG/SHORT 独立 L2`，从原始 3,779 行 L1 ledger 用明确 `usecols` 读取 27 个字段，读取的
+`l15_*` 字段为 **0**，且 runner 不导入 global-shape 或 L1.5 实验模块。历史 L1.5 代码、
+prereg、失败模型和报告保留为不可改写的失败证据。
+
+独立重训已证明旁路不是文字开关：新旧 LONG / SHORT 模型 SHA-256 完全相同，两个阈值差均为
+0，逐事件最大分数差均为 0，入选 ID 完全一致，仍为 34 个。经济裁决没有因此变好：整体
+q90 净均值 +38.88bp，但置换 `p=0.192081`；LONG 17 个净均值 -50.94bp，SHORT 17 个
++128.69bp，所以 L2 仍 `rejected`、`production_eligible=false`。没有读取 holdout，没有
+promote、部署、改 ACTIVE/frozen/forward、发 Telegram 或下单。交付报告：
+`analysis/html/p3_15m_ma_launch_l1_l2_bypass_l15_20260901.html`；架构决定：
+`docs/decisions/0003-bypass-l15-until-shape-supervision-is-valid.md`。
+
 ## ⚡ 当前真相（2026-09-01 — 因果 L1.5 + 多空 L2 全链路已跑完并否决）
 
 Owner 授权把 L1.5 与 L2 正确路径全部落地。第一版 L1.5 虽只看检测时已经收盘的 K 线，

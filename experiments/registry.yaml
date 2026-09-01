@@ -2969,6 +2969,44 @@ experiments:
       only as failure evidence. No holdout, promotion, deployment, ACTIVE or
       forward mutation, Telegram send or order occurred.
 
+  - experiment_id: exp-15m-ma-launch-l1-l2-bypass-l15-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "be1f887002fe19671bcce5ef3af8c98b0d4e9842"
+    status: accepted
+    question: >-
+      Can the L1-to-L2 path be rebuilt with no L1.5 import, field, score,
+      threshold, model or filter dependency while reproducing the prior
+      L2-only arm exactly?
+    single_variable: >-
+      Pipeline topology only: bypass L1.5 while freezing the L1 ledger,
+      dependency representatives, LONG/SHORT split, 17 L2 features,
+      deterministic learner, tune-q90 rule, outcomes, costs and controls.
+    result: >-
+      bypass_verified_l2_still_rejected. The runner read 27 allow-listed
+      columns and zero L1.5 columns. New and prior LONG/SHORT model hashes,
+      thresholds, per-event scores and selected IDs were exactly equal. The
+      same 34 events returned +38.88 bp net but p=0.1921; LONG returned
+      -50.94 bp, so the economic gate remained failed.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p3_15m_ma_launch_l1_l2_bypass_l15_20260901.md
+    artifacts:
+      - 15m-ma-launch-l1-l2-bypass-l15-v1-prereg
+      - 15m-ma-launch-l1-l2-bypass-l15-v1-training-receipt
+      - 15m-ma-launch-l1-l2-bypass-l15-v1-verify-receipt
+      - 15m-ma-launch-l1-l2-bypass-l15-v1-long-model
+      - 15m-ma-launch-l1-l2-bypass-l15-v1-short-model
+      - 15m-ma-launch-l1-l2-bypass-l15-v1-report
+      - 15m-ma-launch-l1-l2-bypass-l15-v1-html
+    reuse_allowed: false
+    notes: >-
+      Acceptance applies only to the topology/parity question. L2 remains a
+      rejected research model. L1.5 historical evidence is retained but the
+      default research runner no longer imports or reads it. No holdout,
+      promotion, deployment, ACTIVE/frozen/forward mutation, Telegram send or
+      order action occurred.
+
   - experiment_id: exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2
     source_repo: darkforest-x/fable-trading
     source_commit: "09f3b588b25ec465904644b361078c28246ffa1b"

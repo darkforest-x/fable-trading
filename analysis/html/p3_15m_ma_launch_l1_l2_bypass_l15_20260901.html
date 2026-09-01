@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>15m 均线密集启动：移除 L1.5 后的 L1→L2 旁路验证</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>15m 均线密集启动：移除 L1.5 后的 L1→L2 旁路验证</h1>
+<h2>结论先行</h2>
+<p>L1.5 已从默认研究链中<strong>物理旁路</strong>。新入口只执行：</p>
+<p><code>冻结 L1 候选 → dependency episode 合并 → LONG/SHORT 独立 L2 收益回归</code></p>
+<p>旁路验证通过：新 LONG/SHORT 模型字节、逐事件分数、tune-q90 阈值和 34 个最终入选事件 都与旧 factorial 实验的 L2-only 臂一致。训练和评分读取的 27 个 CSV 字段中 L1.5 字段为 <strong>0</strong>。</p>
+<p>这不改变经济裁决：L2-only 仍为 <strong>REJECTED</strong>，没有生产资格。</p>
+<h2>旁路证明</h2>
+<table><thead><tr>
+<th>检查</th>
+<th>LONG</th>
+<th>SHORT</th>
+</tr></thead><tbody>
+<tr><td>模型字节一致</td><td>True</td><td>True</td></tr>
+<tr><td>最大逐分数误差</td><td>0.000e+00</td><td>0.000e+00</td></tr>
+<tr><td>阈值绝对误差</td><td>0.000e+00</td><td>0.000e+00</td></tr>
+<tr><td>入选集合一致</td><td>True</td><td>True</td></tr>
+</tbody></table>
+<h2>数据统计</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>数值</th>
+</tr></thead><tbody>
+<tr><td>原始 L1 ledger 行数</td><td>3,779</td></tr>
+<tr><td>final 独立事件</td><td>242</td></tr>
+<tr><td>L2 q90 入选</td><td>34</td></tr>
+<tr><td>特征数</td><td>17</td></tr>
+<tr><td>L1.5 字段读取数</td><td>0</td></tr>
+<tr><td>数据截止</td><td>2026-05-03T23:45:00+00:00</td></tr>
+</tbody></table>
+<h2>经济结果与上一版本同表对照</h2>
+<table><thead><tr>
+<th>配置</th>
+<th>入选 n</th>
+<th>净均值</th>
+<th>胜率</th>
+<th>置换 p</th>
+<th>裁决</th>
+</tr></thead><tbody>
+<tr><td>旧 factorial L2-only</td><td>34</td><td>0.389%</td><td>35.294%</td><td>0.192081</td><td>REJECT</td></tr>
+<tr><td>新 L1→L2 bypass</td><td>34</td><td>0.389%</td><td>35.294%</td><td>0.192081</td><td>REJECT</td></tr>
+<tr><td>bypass LONG</td><td>17</td><td>-0.509%</td><td>23.529%</td><td>0.865413</td><td>FAIL</td></tr>
+<tr><td>bypass SHORT</td><td>17</td><td>1.287%</td><td>47.059%</td><td>0.050395</td><td>exploratory only</td></tr>
+</tbody></table>
+<p>Top-decile 毛/净收益分别为 0.597% / 0.397%；AUC=0.4634， Spearman=0.0327。这些分类指标仅作诊断，生产裁决仍以 扣成本收益、置换检验和匹配随机对照为准。</p>
+<h2>匹配随机对照</h2>
+<p>34 个入选事件全部具有 8/8 组同币、同时间块、同波动桶、同方向对照；事件相对对照的平均 超额为 0.768%，8 组方向均为正。但主检验 <code>p=0.192081</code> 未过 0.01，且 LONG q90 净均值为 -0.509%， 因此不能用对照组的单项通过覆盖总门失败。</p>
+<h2>解读</h2>
+<p>本轮只回答“L1.5 是否真的被拿掉”：答案是<strong>是</strong>。新模型与旧 L2-only 完全一致，证明此前 L2-only 的计算没有受 L1.5 过滤影响。它也证明移除 L1.5 不会自动修好 L2：聚合收益由 SHORT 贡献，LONG 为负，统计显著性不足。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>final 时间段已在前序实验中使用，本轮仅做确定性旁路复现，不是新验证。</li>
+<li>没有读取 <code>&gt;=2026-05-04</code> holdout。</li>
+<li>没有调模型、特征、阈值、障碍或成本。</li>
+<li>没有 promote、部署、改 ACTIVE/frozen/forward、发 Telegram 或下单。</li>
+<li>L1.5 历史代码与结果保留，但默认链路不再调用。</li>
+</ul>
+<h2>下一步选项</h2>
+<ol>
+<li>保持当前简化拓扑，另开单变量 L2 改进实验；必须使用新的未见 pre-holdout 时间段。</li>
+<li>在 LONG/SHORT 两侧都过经济门之前，不申请 holdout，也不接生产。</li>
+<li>只有获得有效全局形态真值并另行授权时，才考虑重新引入 L1.5。</li>
+</ol>
+<h2>复现命令</h2>
+<pre><code>
+PYTHONPATH=. .venv/bin/python -m scripts.research_15m_ma_launch_l1_l2_bypass_l15 --train
+PYTHONPATH=. .venv/bin/python -m scripts.research_15m_ma_launch_l1_l2_bypass_l15 --verify
+PYTHONPATH=. .venv/bin/python -m scripts.research_15m_ma_launch_l1_l2_bypass_l15 --report
+python3 scripts/md_to_html.py analysis/p3_15m_ma_launch_l1_l2_bypass_l15_20260901.md --out-dir analysis/html
+</code></pre>
+</body>
+</html>

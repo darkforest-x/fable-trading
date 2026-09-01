@@ -9400,3 +9400,123 @@ artifacts:
     config_hash: "c301ad21f3040e05ff64add366c1084761850490902fd2f39710a888d3ed6ac5"
     data_cutoff: "2026-05-04T00:00:00Z"
     notes: Signed net-return comparison with zero lines, fixed 20 bp cost and explicit side split.
+
+  # ---- 15m L1 -> side-split L2 explicit L1.5 bypass (2026-09-01) ------
+  - artifact_id: 15m-ma-launch-l1-l2-bypass-l15-v1-prereg
+    artifact_type: config
+    role: frozen_explicit_l15_bypass_and_parity_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "be1f887002fe19671bcce5ef3af8c98b0d4e9842"
+    source_path: experiments/active/exp-15m-ma-launch-l1-l2-bypass-l15-v1/preregistration.json
+    sha256: "0244c74183515f05f2d186e14943a8975ebf5d05fbb0f8f1d7d19474bb3ece28"
+    size_bytes: 5093
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l1-l2-bypass-l15-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "be1f887002fe19671bcce5ef3af8c98b0d4e9842"
+    config_hash: "0244c74183515f05f2d186e14943a8975ebf5d05fbb0f8f1d7d19474bb3ece28"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Freezes a three-stage L1, dependency-collapse and side-specific L2 topology with L1.5 disabled.
+
+  - artifact_id: 15m-ma-launch-l1-l2-bypass-l15-v1-training-receipt
+    artifact_type: manifest
+    role: independent_l1_to_l2_retraining_parity_and_economic_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "be1f887002fe19671bcce5ef3af8c98b0d4e9842"
+    source_path: experiments/active/exp-15m-ma-launch-l1-l2-bypass-l15-v1/results/training_receipt.json
+    sha256: "aa26f68ccd19ac34f88e9e34be7c72a23b5bcf23db5efc43f44114a29cc7bf50"
+    size_bytes: 9725
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l1-l2-bypass-l15-v1/results/training_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "be1f887002fe19671bcce5ef3af8c98b0d4e9842"
+    config_hash: "0244c74183515f05f2d186e14943a8975ebf5d05fbb0f8f1d7d19474bb3ece28"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Zero L1.5 columns read; both model hashes, thresholds, scores and selected IDs exactly reproduce the prior L2-only arm.
+
+  - artifact_id: 15m-ma-launch-l1-l2-bypass-l15-v1-verify-receipt
+    artifact_type: manifest
+    role: terminal_topology_lineage_model_and_safety_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "be1f887002fe19671bcce5ef3af8c98b0d4e9842"
+    source_path: experiments/active/exp-15m-ma-launch-l1-l2-bypass-l15-v1/results/verify_receipt.json
+    sha256: "0f0002fc7e877a5472db4d7a754860aba7145c8865650d2328621b14d7b88168"
+    size_bytes: 573
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l1-l2-bypass-l15-v1/results/verify_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "be1f887002fe19671bcce5ef3af8c98b0d4e9842"
+    config_hash: "0244c74183515f05f2d186e14943a8975ebf5d05fbb0f8f1d7d19474bb3ece28"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: All topology, lineage, parity, model-hash and production-safety checks passed.
+
+  - artifact_id: 15m-ma-launch-l1-l2-bypass-l15-v1-long-model
+    artifact_type: model
+    role: rejected_side_specific_long_return_regressor_without_l15
+    source_repo: darkforest-x/fable-trading
+    source_commit: "be1f887002fe19671bcce5ef3af8c98b0d4e9842"
+    source_path: analysis/output/ma_launch_l1_l2_bypass_l15_v1/models/l2_long.txt
+    sha256: "8479e1f93482e882fa62547954b712e68ddc8c0236936d784c373034ccd3e377"
+    size_bytes: 4604
+    storage_uri: "repo://analysis/output/ma_launch_l1_l2_bypass_l15_v1/models/l2_long.txt"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "be1f887002fe19671bcce5ef3af8c98b0d4e9842"
+    config_hash: "0244c74183515f05f2d186e14943a8975ebf5d05fbb0f8f1d7d19474bb3ece28"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Byte-identical to the prior L2-only LONG arm; retained only as bypass evidence because LONG q90 net is negative.
+
+  - artifact_id: 15m-ma-launch-l1-l2-bypass-l15-v1-short-model
+    artifact_type: model
+    role: rejected_side_specific_short_return_regressor_without_l15
+    source_repo: darkforest-x/fable-trading
+    source_commit: "be1f887002fe19671bcce5ef3af8c98b0d4e9842"
+    source_path: analysis/output/ma_launch_l1_l2_bypass_l15_v1/models/l2_short.txt
+    sha256: "4e4c0eb32ccc291d8014d307c12d944a0a5e59195ae013d49b6fe086d948fa59"
+    size_bytes: 10010
+    storage_uri: "repo://analysis/output/ma_launch_l1_l2_bypass_l15_v1/models/l2_short.txt"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "be1f887002fe19671bcce5ef3af8c98b0d4e9842"
+    config_hash: "0244c74183515f05f2d186e14943a8975ebf5d05fbb0f8f1d7d19474bb3ece28"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Byte-identical to the prior L2-only SHORT arm; aggregate evidence still fails the frozen permutation gate.
+
+  - artifact_id: 15m-ma-launch-l1-l2-bypass-l15-v1-report
+    artifact_type: report
+    role: canonical_l15_bypass_parity_and_economic_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "be1f887002fe19671bcce5ef3af8c98b0d4e9842"
+    source_path: analysis/p3_15m_ma_launch_l1_l2_bypass_l15_20260901.md
+    sha256: "1899deb2ce5fa52bf5e39035e9ab9e0d3911d99a6123096a7fae697b34adc364"
+    size_bytes: 3343
+    storage_uri: "repo://analysis/p3_15m_ma_launch_l1_l2_bypass_l15_20260901.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "be1f887002fe19671bcce5ef3af8c98b0d4e9842"
+    config_hash: "0244c74183515f05f2d186e14943a8975ebf5d05fbb0f8f1d7d19474bb3ece28"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Records exact bypass parity, matched controls, economic rejection, risks and reproduction commands.
+
+  - artifact_id: 15m-ma-launch-l1-l2-bypass-l15-v1-html
+    artifact_type: report
+    role: owner_facing_html_l15_bypass_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "be1f887002fe19671bcce5ef3af8c98b0d4e9842"
+    source_path: analysis/html/p3_15m_ma_launch_l1_l2_bypass_l15_20260901.html
+    sha256: "aa0ebd86e9c1701742cacdce648ed0cd0a5cd1bf6468f7cff82389beb989152d"
+    size_bytes: 6513
+    storage_uri: "repo://analysis/html/p3_15m_ma_launch_l1_l2_bypass_l15_20260901.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "be1f887002fe19671bcce5ef3af8c98b0d4e9842"
+    config_hash: "0244c74183515f05f2d186e14943a8975ebf5d05fbb0f8f1d7d19474bb3ece28"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: HTML generated from the canonical Markdown after terminal verification passed.
