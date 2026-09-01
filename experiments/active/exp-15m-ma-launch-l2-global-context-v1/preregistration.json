@@ -1,0 +1,163 @@
+{
+  "protocol": "15m_grade_a_full40_1280_l1_proposals_causal_global_context_l2_v1",
+  "experiment_id": "exp-15m-ma-launch-l2-global-context-v1",
+  "created_at": "2026-09-01T00:52:00Z",
+  "source_commit_before_builder": "c5a4398518030dbcab6aec28fb13bb31d1394eca",
+  "owner_authorization": {
+    "request": "我觉得模型检测出来的看起来还不错 但是看全局图却不咋样 你觉得应该怎么办 开启L2判断层？开启目标模式去做吧",
+    "interpreted_scope": "Build and validate a research-only L2 judgment layer that receives frozen L1 proposals and uses only globally contextual numeric features available at the detector window close. Train and select the score gate on pre-holdout data only, compare L1-only versus L1-plus-L2 on a final pre-holdout validation period, and render kept/rejected full-context charts. Do not promote, deploy, mutate ACTIVE/frozen/forward state, send Telegram, or place orders.",
+    "p0_p1_training_gate_override_for_this_research_run": true,
+    "barrier_cost_or_detector_threshold_change_authorized": false,
+    "holdout_read_authorized": false,
+    "production_or_promotion_authorized": false
+  },
+  "question": "Can a causal L2 ranker remove L1 proposals whose local box looks right but whose 168-bar global context is poor, while retaining economically useful proposals out of time?",
+  "single_variable": "L1-only proposal pool versus the same frozen L1 pool filtered by one preregistered L2 score threshold; L1 weights, L1 inference geometry, outcome contract and trading cost remain fixed.",
+  "l1": {
+    "key": "grade_a8k_neg24k_full40_1280",
+    "weights": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+    "weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "training_manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+    "training_manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "renderer": "yoyo/layers/l1_detection/render.py",
+    "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+    "bar": "15m",
+    "window_lengths": [18, 19],
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "imgsz": 1280,
+    "mapped_core_length_bars_allowed": [4, 5],
+    "mapped_confirmation_bars_allowed": [2, 3, 4, 5, 6, 7, 8, 9],
+    "same_symbol_event_gap_bars": 5,
+    "future_bars_rendered_into_inference": 0,
+    "threshold_or_window_retuning_after_results": false
+  },
+  "source": {
+    "files_glob": "data/kline_deep/okx_*_USDT_SWAP_15m_*.csv",
+    "required_file_count": 54,
+    "snapshot_start": "2025-12-24T00:00:00Z",
+    "snapshot_end_exclusive": "2026-05-04T00:00:00Z",
+    "candidate_available_at_start": "2026-01-01T00:00:00Z",
+    "candidate_available_at_end_exclusive": "2026-05-03T06:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "exact_frequency": "15min",
+    "gaps_allowed": 0,
+    "duplicates_allowed": 0,
+    "read_holdout": false,
+    "l1_training_interval_overlap_policy": "Exclude a proposal when its visible input interval intersects any positive or negative image interval in the frozen L1 training manifest for the same symbol.",
+    "survivorship_disclosure": "The 54 long-history symbols are a current available-file cohort, not a point-in-time exchange universe. The matched control and all comparisons use this identical cohort."
+  },
+  "decision_clock": {
+    "window_end_time_semantics": "open timestamp of the final 15m bar visible to L1",
+    "available_at": "window_end_time plus 15 minutes, after the final visible bar closes",
+    "l2_feature_row": "the final visible bar at window_end_time",
+    "entry": "open of the bar at available_at",
+    "feature_lookback_bars_max": 168,
+    "future_bars_visible_to_l1_or_l2": 0,
+    "completed_shape_research_only": "L1 already consumes 2-9 bars after the mapped core. This experiment evaluates its existing completed-shape contract and is not a tip/tip-1/tip-2 production signal."
+  },
+  "outcome": {
+    "side": "use frozen L1 class; dense_long=long and dense_short=short",
+    "tp_atr_multiple": 5.0,
+    "sl_atr_multiple": 2.0,
+    "horizon_bars": 72,
+    "decision_atr_pct_min": 0.0015,
+    "entry": "next_open",
+    "same_bar_policy": "conservative_sl",
+    "gap_policy": "barrier_price",
+    "return_convention": "linear_long or linear_short by side",
+    "round_trip_cost_fraction": 0.002,
+    "barrier_or_cost_tuning": false
+  },
+  "l2": {
+    "feature_semantics": "side_aligned_v1",
+    "feature_builder": "yoyo/layers/l2_judgment/features.py",
+    "feature_builder_sha256": "2fed40ed52440d4c76c0f74c5638a707449c2d6c1f56f91bb2030c914a1cddfa",
+    "label_builder": "yoyo/layers/l2_judgment/labeling.py",
+    "label_builder_sha256": "18c90468c9e6a75de1fb486934295bd3c45b0ca92229d6d9bfb7cd30c288994a",
+    "feature_count": 28,
+    "feature_columns_source": "FEATURE_COLUMNS",
+    "objective": "LightGBM regression on gross realized_ret",
+    "seed": 42,
+    "score_gate": "90th percentile of tune scores; freeze before final validation",
+    "missing_values": "native LightGBM missing-value handling; no future fill",
+    "single_feature_baseline": "same LightGBM regression protocol using ma_spread_pct only"
+  },
+  "splits": {
+    "train": {
+      "available_at_start": "2026-01-01T00:00:00Z",
+      "available_at_end_exclusive": "2026-02-28T06:00:00Z"
+    },
+    "purge_train_tune": {
+      "start": "2026-02-28T06:00:00Z",
+      "end_exclusive": "2026-03-01T00:00:00Z",
+      "duration_hours": 18
+    },
+    "tune": {
+      "available_at_start": "2026-03-01T00:00:00Z",
+      "available_at_end_exclusive": "2026-03-31T06:00:00Z"
+    },
+    "purge_tune_validation": {
+      "start": "2026-03-31T06:00:00Z",
+      "end_exclusive": "2026-04-01T00:00:00Z",
+      "duration_hours": 18
+    },
+    "final_preholdout_validation": {
+      "available_at_start": "2026-04-01T00:00:00Z",
+      "available_at_end_exclusive": "2026-05-03T06:00:00Z"
+    },
+    "random_split": false,
+    "grouping_unit": "deduplicated same-symbol L1 episode",
+    "cross_split_event_allowed": false
+  },
+  "matched_control": {
+    "required": true,
+    "matching": [
+      "same symbol",
+      "same calendar month",
+      "same UTC 8-hour bucket",
+      "same causal ATR-percent quintile",
+      "same side",
+      "same outcome horizon, barriers, entry and cost"
+    ],
+    "exclusion": "control decision bar must be at least 72 bars from every L1 episode for that symbol",
+    "deterministic_assignments": 8,
+    "replacement": "false_within_each_assignment",
+    "fallback": "Unmatched L1 rows are reported and excluded from paired-control inference; matching rules never relax."
+  },
+  "primary_gate": {
+    "final_validation_l2_top_decile_net_mean_gt_zero": true,
+    "final_validation_frozen_tune_q90_net_mean_gt_zero": true,
+    "outcome_permutation_p_lt": 0.01,
+    "l2_minus_matched_control_net_mean_gt_zero": true,
+    "minimum_final_validation_selected_events": 30,
+    "auc_role": "diagnostic only; never a pass condition"
+  },
+  "review": {
+    "full_context_bars": 168,
+    "render_groups": ["L2_KEPT", "L2_REJECTED_HIGH_L1_CONFIDENCE"],
+    "one_raw_l1_box_per_chart": true,
+    "show_only_information_available_at_decision": true,
+    "future_outcome_panels": "physically separate and never used as model input",
+    "manual_deletion_after_results": false
+  },
+  "outputs": {
+    "local_output": "analysis/output/ma_launch_l2_global_context_v1",
+    "committed_results": "experiments/active/exp-15m-ma-launch-l2-global-context-v1/results",
+    "report": "analysis/p3_15m_ma_launch_l2_global_context_20260901.md",
+    "html": "analysis/html/p3_15m_ma_launch_l2_global_context_20260901.html"
+  },
+  "safety": {
+    "holdout_read": false,
+    "detector_threshold_or_weight_changed": false,
+    "barrier_or_cost_changed": false,
+    "active_or_frozen_changed": false,
+    "promoted": false,
+    "deployed": false,
+    "forward_state_changed": false,
+    "orders_placed": false,
+    "telegram_sent": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}

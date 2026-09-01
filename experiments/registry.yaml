@@ -2793,3 +2793,29 @@ experiments:
       mutate forward state or place orders. The all-current-live universe has
       survivorship bias and every detector retains its completed-history
       post-core contract, so none is a tip/tip-1/tip-2 production detector.
+
+  - experiment_id: exp-15m-ma-launch-l2-global-context-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c5a4398518030dbcab6aec28fb13bb31d1394eca"
+    status: active
+    question: >-
+      Can a causal L2 ranker remove frozen Grade-A full40 native-1280 YOLO
+      proposals whose local box looks plausible but whose 168-bar global
+      context is poor, while retaining economically useful proposals out of
+      time?
+    single_variable: >-
+      L1-only proposal pool versus the same frozen L1 pool filtered by one
+      preregistered L2 score threshold; L1 weights, inference geometry,
+      TP5/SL2/72 next-open outcome and 0.2% round-trip cost stay fixed.
+    result: preregistered_and_pending_preholdout_scan
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p3_15m_ma_launch_l2_global_context_20260901.md
+    reuse_allowed: false
+    notes: >-
+      Owner explicitly authorized this research L2 run and the otherwise
+      closed P0/P1 training gate for this run only. The primary experiment is
+      confined to 2026-01-01 through 2026-05-03 06:00 UTC available-at times,
+      with 18-hour purges and no holdout read. No promotion, deployment,
+      ACTIVE/frozen/forward mutation, Telegram or order action is authorized.
