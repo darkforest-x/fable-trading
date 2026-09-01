@@ -1,0 +1,106 @@
+{
+  "augmented_representatives_by_morphology_kind": {
+    "negative": 6755,
+    "not_applicable": 391,
+    "positive": 6721
+  },
+  "augmented_representatives_by_side": {
+    "long": 6856,
+    "short": 7011
+  },
+  "augmented_representatives_by_source": {
+    "real_l1": 391,
+    "reference_window": 13476
+  },
+  "augmented_train_dependency_blocks": 13867,
+  "augmented_train_representatives": 13867,
+  "augmented_train_rows": 19848,
+  "dataset_path": "analysis/output/ma_launch_l2_reference_augmentation_v1/augmented_train_pool.csv",
+  "dataset_sha256": "fbaa0cc3765971b8f9fc1d38848bc07107e6cc28c3c788220882c3b8591b025a",
+  "experiment_id": "exp-15m-ma-launch-l2-reference-augmentation-v1",
+  "feature_columns": [
+    "ma_spread_pct",
+    "full_spread",
+    "fast_slow_gap",
+    "full_ratio_min48",
+    "spread_mean8",
+    "spread_mean24",
+    "spread_chg8",
+    "spread_chg24",
+    "spread_pos96",
+    "dense_run_len",
+    "dense_frac48",
+    "ext_up",
+    "close_vs_ema55",
+    "close_vs_ema200",
+    "order_score",
+    "slow_slope_12",
+    "volume_ratio",
+    "volume_z",
+    "vol_ratio_mean8",
+    "atr_pct",
+    "atr_pct_ratio96",
+    "pre_range48",
+    "pre_range168",
+    "drawdown24",
+    "ret_4",
+    "ret_12",
+    "ret_24",
+    "ret_48"
+  ],
+  "generated_at": "2026-09-01T16:27:47.345539+00:00",
+  "holdout_rows_opened": 0,
+  "morphology_kind_used_as_feature": false,
+  "production_eligible": false,
+  "protocol": "15m_l1_candidate_side_l2_reference_outcome_augmentation_v1",
+  "real_l1_original_train_representatives": 417,
+  "real_l1_original_train_rows": 1779,
+  "real_l1_rows": 3779,
+  "real_representatives_collapsed_by_reference_bridges": 26,
+  "real_representatives_retained_after_union": 391,
+  "reference": {
+    "economic_outcomes": {
+      "sl": 11730,
+      "sl_ambiguous": 4,
+      "timeout": 1814,
+      "tp": 4521
+    },
+    "economic_rows": 18069,
+    "economic_rows_by_morphology_kind": {
+      "negative": 9026,
+      "positive": 9043
+    },
+    "economic_rows_by_side": {
+      "long": 8933,
+      "short": 9136
+    },
+    "eligible_manifest_rows": 18364,
+    "holdout_rows_opened": 0,
+    "manifest_rows": 20000,
+    "maximum_available_at": "2026-02-26T09:45:00+00:00",
+    "maximum_exposure_end_exclusive": "2026-02-27T03:45:00+00:00",
+    "prefix_receipt_path": "analysis/output/ma_launch_l2_reference_augmentation_v1/reference_source_prefixes.json",
+    "prefix_receipt_sha256": "70a92a3c3242cf5d5b0ef73123781a4b34d98878430898971d7fd9d10fd5e270",
+    "reference_path": "analysis/output/ma_launch_l2_reference_augmentation_v1/reference_event_rows.csv",
+    "reference_sha256": "03451a056b483c5eaffe8e1c1133a0bb6516d8e474fd5a4757527ba4a42d70b8",
+    "rejected": {
+      "nonfinite_feature": 16,
+      "outcome_unavailable_or_atr_floor": 45,
+      "source_prefix_too_short_events": 234
+    },
+    "selection_stats": {
+      "eligible_negative": 9188,
+      "eligible_positive": 9176,
+      "excluded_at_or_after_train_cutoff": 1588,
+      "excluded_manifest_split:excluded": 48
+    },
+    "source_count": 359
+  },
+  "representative_path": "analysis/output/ma_launch_l2_reference_augmentation_v1/augmented_train_representatives.csv",
+  "representative_sha256": "fb6c40652c6869cf98d088371fa5f82475581535d4399525f3d039799bcc7cc5",
+  "schema_version": 1,
+  "source_commit": "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936",
+  "source_indicator_used_as_feature": false,
+  "unchanged_real_l1_final_representatives": 242,
+  "unchanged_real_l1_tune_representatives": 229
+}

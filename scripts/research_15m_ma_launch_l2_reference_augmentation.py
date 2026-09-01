@@ -1065,6 +1065,24 @@ def build_report(prereg: Mapping[str, Any]) -> Path:
     aug = training["augmented_metrics"]
     one = training["augmented_single_feature_metrics"]
     ref = dataset["reference"]
+    reference = pd.read_csv(repo_path(ref["reference_path"]), low_memory=False)
+    scored = pd.read_csv(repo_path(training["scored_validation_path"]), low_memory=False)
+
+    def reference_tp_rate(side: str, morphology: str) -> float:
+        rows = reference[
+            (reference["side"] == side)
+            & (reference["reference_morphology_kind"] == morphology)
+        ]
+        return float(rows["label"].mean())
+
+    reference_training_rows = int(
+        dataset["augmented_representatives_by_source"]["reference_window"]
+    )
+    reference_training_share = reference_training_rows / int(
+        dataset["augmented_train_representatives"]
+    )
+    final_start = pd.to_datetime(scored["available_at"], utc=True).min()
+    final_end = pd.to_datetime(scored["available_at"], utc=True).max()
     lines = [
         "# 15m L2 历史参考事件扩充实验（2026-09-02）",
         "",
@@ -1079,13 +1097,35 @@ def build_report(prereg: Mapping[str, Any]) -> Path:
         f"| 原始参考 manifest | {ref['manifest_rows']:,} |",
         f"| 训练截止前可用参考窗口 | {ref['eligible_manifest_rows']:,} |",
         f"| 成功生成经济标签 | {ref['economic_rows']:,} |",
+        f"| 参考数据源 | {ref['source_count']:,} 个 CSV |",
+        f"| 参考事件时间 | {str(reference['feature_bar_time'].min())[:10]} 至 {str(reference['feature_bar_time'].max())[:10]} |",
         f"| 原真实 L1 独立训练块 | {dataset['real_l1_original_train_representatives']:,} |",
         f"| 扩充后独立训练块 | {dataset['augmented_train_representatives']:,} |",
+        f"| 其中参考事件 | {reference_training_rows:,}（{reference_training_share:.2%}） |",
+        f"| 因跨来源依赖桥合并的原 L1 代表 | {dataset['real_representatives_collapsed_by_reference_bridges']:,} |",
         f"| 固定 tune 独立事件 | {dataset['unchanged_real_l1_tune_representatives']:,} |",
         f"| 固定 final 独立事件 | {dataset['unchanged_real_l1_final_representatives']:,} |",
+        f"| final 时间 | {final_start:%Y-%m-%d} 至 {final_end:%Y-%m-%d} |",
         f"| holdout 读取 | {dataset['holdout_rows_opened']} |",
         "",
         "图片数不是独立事件数：最新 Grade-A 8,000 图只有 1,043 个事件的 7–8 个位置变体；本轮使用的是旧 10,000 个正事件和 10,000 个匹配负事件的唯一血缘，并再次按完整输入＋标签暴露合并依赖块。",
+        "",
+        "## 上万图片与 Gold 到底用在哪里",
+        "",
+        "YOLO 图片回答的是“这里有没有目标形态”，L2 回答的是“冻结 L1 真正报出这个候选后，按下一根开盘进入，未来 72 根能否先碰 5ATR 止盈而不是 2ATR 止损”。两者的目标不同，所以图片不能直接按张数变成 L2 盈亏样本。",
+        "",
+        "仓库另有 1,345 条 short-only 训练正例资产，但完整 1,345 张尚未逐样本重新确认，70 个独立⭐框才是最高质量子集；LONG 对应的逐样本 Owner Gold 仍不完整。本轮没有把不同方向、不同几何语义或未确认镜像静默拼成收益标签。",
+        "",
+        "这次不是没有使用旧图，而是把每张图重新联结 K 线并计算收益。结果显示形态正负与经济 TP 并不等价：",
+        "",
+        "| 方向 | 形态正图 TP率 | 形态负图 TP率 | 差值 |",
+        "|---|---:|---:|---:|",
+        f"| LONG | {reference_tp_rate('long', 'positive'):.2%} | {reference_tp_rate('long', 'negative'):.2%} | {reference_tp_rate('long', 'positive') - reference_tp_rate('long', 'negative'):+.2%} |",
+        f"| SHORT | {reference_tp_rate('short', 'positive'):.2%} | {reference_tp_rate('short', 'negative'):.2%} | {reference_tp_rate('short', 'positive') - reference_tp_rate('short', 'negative'):+.2%} |",
+        "",
+        "SHORT 甚至是形态负图的 TP 率更高。这不否定这些图片对 YOLO 的价值，只说明它们不能代替真实 L1 候选上的 L2 收益监督。",
+        "",
+        "![参考扩充数据与结果诊断](output/ma_launch_l2_reference_augmentation_v1/reference_augmentation_diagnostics.png)",
         "",
         "## 与原模型同表对照",
         "",
@@ -1096,6 +1136,8 @@ def build_report(prereg: Mapping[str, Any]) -> Path:
         f"| 扩充单特征 ma_spread | {pct(one['final_validation']['top_decile']['net_mean'])} | {one['frozen_q90']['n']} | {pct(one['frozen_q90']['net_mean'])} | {one['frozen_q90']['win_rate']:.2%} | {one['outcome_permutation_p']:.6f} |",
         "",
         f"全特征参考扩充 AUC={aug['final_validation']['roc_auc']:.4f}，PR-AUC={aug['final_validation']['pr_auc']:.4f}，Spearman={aug['final_validation']['spearman_score_vs_return']:.4f}。AUC 仅作诊断，裁决仍看扣成本收益、置换检验与匹配随机对照。",
+        "",
+        f"扩充全特征模型的 LONG/SHORT 最佳迭代分别只有 {training['augmented_models']['long']['best_iteration']} / {training['augmented_models']['short']['best_iteration']}；固定 q90 门在 final 上分别放过 {aug['by_side']['long']['frozen_q90']['pass_rate']:.2%} / {aug['by_side']['short']['frozen_q90']['pass_rate']:.2%}。尤其 SHORT 从理论上的 tune 约 10% 漂到 final 的 95.29%，是明显的目标域校准失效，不是“轮数没跑够”。",
         "",
         "## LONG / SHORT",
         "",
@@ -1123,17 +1165,28 @@ def build_report(prereg: Mapping[str, Any]) -> Path:
             "",
             "本实验只回答：把历史参考窗口按真实收益重新标注后加入 L2 训练，能否改善真实 L1 候选的时间外排序。它不把形态负图当亏损，也不拿参考图片自身做最终验收。若结果失败，含义是这些自动参考事件与真实 L1 提案分布不一致或经济信息不足，不能继续靠堆图片数量解决。",
             "",
+            "正确的数据路径应是：继续让 Owner Gold、正图和 hard negative 服务 L1 形态检测；L2 则用同一个冻结 L1 在更长历史、更多币种上真实扫描出的候选逐事件打 TP/SL/timeout 标签，并保留同币时间依赖、时间切分和 LONG/SHORT 分训。这样扩大的才是 L2 的目标域样本，而不是另一个分布的漂亮形态图。",
+            "",
+            "## 实际 final 输入图核查",
+            "",
+            "下图是 24 张模型实际评分的 final-validation 输入：固定包含 KEEP 中的赢家、KEEP 中的非 TP、DROP 中的赢家，再用未重复高分事件补齐；无人工删图。每张仅显示决策时已闭合的 168 根 K 线，图外 outcome 文本只用于事后审计。",
+            "",
+            "![24 张实际 final 输入总览](output/ma_launch_l2_reference_augmentation_v1/diagnostic_chart_overview.png)",
+            "",
+            "高清逐图浏览：[24 张实际 final 输入](p3_15m_ma_launch_l2_reference_augmentation_diagnostic_gallery_20260902.html)。",
+            "",
             "## 风险与诚实声明",
             "",
             "- 10,000 正例来自 Owner 接受的自动参考族，不是 10,000 个逐张手工 Gold；来源字段保留但未作为模型特征。",
             "- 参考正例的筛选曾使用 completed-history 形态证据，因此可能存在样本选择偏差；最终指标只在未改动的真实 L1 候选上计算。",
-            "- 当前 L1 仍是使用 post-core 2–9 根的 completed-history 棑测器，不得冒充 tip 实盘信号。",
+            "- 当前 L1 仍是使用 post-core 2–9 根的 completed-history 检测器，不得冒充 tip 实盘信号。",
             "- 未读取 holdout，未 promote、部署、改 ACTIVE/frozen/forward、发 Telegram 或下单。",
             "",
             "## 复现命令",
             "",
             "```bash",
             "PYTHONPATH=. .venv/bin/python -m scripts.research_15m_ma_launch_l2_reference_augmentation --all",
+            "PYTHONPATH=. .venv/bin/python -m scripts.render_15m_ma_launch_l2_reference_augmentation_diagnostics",
             "python3 scripts/md_to_html.py analysis/p3_15m_ma_launch_l2_reference_augmentation_20260902.md --out-dir analysis/html",
             "```",
             "",

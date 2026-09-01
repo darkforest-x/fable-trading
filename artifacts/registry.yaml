@@ -9520,3 +9520,208 @@ artifacts:
     config_hash: "0244c74183515f05f2d186e14943a8975ebf5d05fbb0f8f1d7d19474bb3ece28"
     data_cutoff: "2026-05-04T00:00:00Z"
     notes: HTML generated from the canonical Markdown after terminal verification passed.
+
+  # ---- 15m L2 reference-event augmentation rejection (2026-09-02) ----
+  - artifact_id: 15m-ma-launch-l2-reference-augmentation-v1-prereg
+    artifact_type: config
+    role: frozen_reference_event_l2_augmentation_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    source_path: experiments/active/exp-15m-ma-launch-l2-reference-augmentation-v1/preregistration.json
+    sha256: "529123398567f10690b8442d1e519b961fd6688a259fd6a0238062f1a551b013"
+    size_bytes: 7713
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-reference-augmentation-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "78fd02224cdb9e3a8d1bcc59b6485b8759532283"
+    config_hash: "529123398567f10690b8442d1e519b961fd6688a259fd6a0238062f1a551b013"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Freezes one training-data addition while keeping real-L1 tune/final, outcome, features, model and score gate unchanged.
+
+  - artifact_id: 15m-ma-launch-l2-reference-augmentation-v1-dataset-receipt
+    artifact_type: manifest
+    role: reference_lineage_causal_outcome_and_dependency_collapse_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    source_path: experiments/active/exp-15m-ma-launch-l2-reference-augmentation-v1/results/dataset_receipt.json
+    sha256: "0e9a0dd05248ea181c754208fc20e1c4a7b2855e5ac5d348c696ddc7c32f6c36"
+    size_bytes: 3488
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-reference-augmentation-v1/results/dataset_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    config_hash: "529123398567f10690b8442d1e519b961fd6688a259fd6a0238062f1a551b013"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Records 18,069 recomputed reference outcomes, 13,867 independent train blocks and zero opened holdout rows.
+
+  - artifact_id: 15m-ma-launch-l2-reference-augmentation-v1-training-receipt
+    artifact_type: manifest
+    role: side_specific_baseline_parity_training_and_economic_rejection_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    source_path: experiments/active/exp-15m-ma-launch-l2-reference-augmentation-v1/results/training_receipt.json
+    sha256: "23fcc15ba97de98189498828fc5c1b1a87e5f454a58f72e90e94888f6294a7cf"
+    size_bytes: 31815
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-reference-augmentation-v1/results/training_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    config_hash: "529123398567f10690b8442d1e519b961fd6688a259fd6a0238062f1a551b013"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Baseline parity passed exactly; augmented 28-feature final AUC 0.4864, top-decile net -0.165% and p=0.6689.
+
+  - artifact_id: 15m-ma-launch-l2-reference-augmentation-v1-verify-receipt
+    artifact_type: manifest
+    role: terminal_lineage_model_hash_baseline_parity_and_safety_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    source_path: experiments/active/exp-15m-ma-launch-l2-reference-augmentation-v1/results/verify_receipt.json
+    sha256: "e4ce5ac7a65b28bc8c7a285d1d318f6625b9898a13d1cee4f9ae3e8264d2ca6e"
+    size_bytes: 1397
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-reference-augmentation-v1/results/verify_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    config_hash: "529123398567f10690b8442d1e519b961fd6688a259fd6a0238062f1a551b013"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Every declared dataset, model, score-ledger and safety check passed.
+
+  - artifact_id: 15m-ma-launch-l2-reference-augmentation-v1-diagnostic-receipt
+    artifact_type: manifest
+    role: deterministic_target_domain_and_actual_input_visual_audit_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    source_path: experiments/active/exp-15m-ma-launch-l2-reference-augmentation-v1/results/diagnostic_receipt.json
+    sha256: "b945be515526176ca0292460962a620b8333194152067c7dab368d8ef67e2dbd"
+    size_bytes: 1630
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-reference-augmentation-v1/results/diagnostic_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    config_hash: "529123398567f10690b8442d1e519b961fd6688a259fd6a0238062f1a551b013"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Covers 24 deterministic actual final inputs, aggregate diagnostics and zero future candles in rendered plots.
+
+  - artifact_id: 15m-ma-launch-l2-reference-augmentation-v1-long-model
+    artifact_type: model
+    role: rejected_reference_augmented_long_return_regressor
+    source_repo: darkforest-x/fable-trading
+    source_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    source_path: analysis/output/ma_launch_l2_reference_augmentation_v1/models/augmented_long_28f.txt
+    sha256: "d00d48115cbbed1ceb7bbfdd567ce5e8dac0644e8841f69502fd15fbdd1bd679"
+    size_bytes: 8919
+    storage_uri: "file://analysis/output/ma_launch_l2_reference_augmentation_v1/models/augmented_long_28f.txt"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    config_hash: "529123398567f10690b8442d1e519b961fd6688a259fd6a0238062f1a551b013"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Research evidence only; LONG q90 net was -0.184% and the model must not be promoted.
+
+  - artifact_id: 15m-ma-launch-l2-reference-augmentation-v1-short-model
+    artifact_type: model
+    role: rejected_reference_augmented_short_return_regressor
+    source_repo: darkforest-x/fable-trading
+    source_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    source_path: analysis/output/ma_launch_l2_reference_augmentation_v1/models/augmented_short_28f.txt
+    sha256: "e228e85f0f9fcb6a9ea1cacbeb2bc742ebb2e9816c854c2857216285a0099aca"
+    size_bytes: 5799
+    storage_uri: "file://analysis/output/ma_launch_l2_reference_augmentation_v1/models/augmented_short_28f.txt"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    config_hash: "529123398567f10690b8442d1e519b961fd6688a259fd6a0238062f1a551b013"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Research evidence only; the fixed tune-q90 gate passed 95.29% of final SHORT rows, proving calibration failure.
+
+  - artifact_id: 15m-ma-launch-l2-reference-augmentation-v1-diagnostic-chart
+    artifact_type: report
+    role: image_event_target_domain_and_economic_metric_diagnostic
+    source_repo: darkforest-x/fable-trading
+    source_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    source_path: analysis/output/ma_launch_l2_reference_augmentation_v1/reference_augmentation_diagnostics.png
+    sha256: "28e3e71e342f3aa3f953662812253b584ad5f0e5952c44bdb966684b8811bf5b"
+    size_bytes: 236552
+    storage_uri: "file://analysis/output/ma_launch_l2_reference_augmentation_v1/reference_augmentation_diagnostics.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    config_hash: "529123398567f10690b8442d1e519b961fd6688a259fd6a0238062f1a551b013"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Visualizes the count funnel, morphology/economic mismatch, source-domain shift and frozen metric comparison.
+
+  - artifact_id: 15m-ma-launch-l2-reference-augmentation-v1-overview
+    artifact_type: report
+    role: deterministic_24_case_actual_final_input_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    source_path: analysis/output/ma_launch_l2_reference_augmentation_v1/diagnostic_chart_overview.png
+    sha256: "e441e0a2b2210b3b9cd79ef45f873d52abaf0460b8629137c9acd45ec1befb20"
+    size_bytes: 795652
+    storage_uri: "file://analysis/output/ma_launch_l2_reference_augmentation_v1/diagnostic_chart_overview.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    config_hash: "529123398567f10690b8442d1e519b961fd6688a259fd6a0238062f1a551b013"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Four-column contact sheet of actual final-validation model inputs with preserved L1 boxes and no future candles.
+
+  - artifact_id: 15m-ma-launch-l2-reference-augmentation-v1-gallery
+    artifact_type: report
+    role: owner_facing_high_resolution_actual_final_input_gallery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    source_path: analysis/html/p3_15m_ma_launch_l2_reference_augmentation_diagnostic_gallery_20260902.html
+    sha256: "4eb0925951a5ff5dd3f0788022e134502479c543f0ce80fadad7d7f347b25061"
+    size_bytes: 10257
+    storage_uri: "repo://analysis/html/p3_15m_ma_launch_l2_reference_augmentation_diagnostic_gallery_20260902.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    config_hash: "529123398567f10690b8442d1e519b961fd6688a259fd6a0238062f1a551b013"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Links 24 deterministic 1920x1250 decision-only charts; no manual deletion or use in model selection.
+
+  - artifact_id: 15m-ma-launch-l2-reference-augmentation-v1-report
+    artifact_type: report
+    role: canonical_reference_augmentation_data_quality_and_economic_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    source_path: analysis/p3_15m_ma_launch_l2_reference_augmentation_20260902.md
+    sha256: "c26d789048ae20fbebece5efe5295fb7da3fb3d98a0f6688d7f6d199d6b9d2fd"
+    size_bytes: 6380
+    storage_uri: "repo://analysis/p3_15m_ma_launch_l2_reference_augmentation_20260902.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    config_hash: "529123398567f10690b8442d1e519b961fd6688a259fd6a0238062f1a551b013"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Explains why thousands of L1 images do not become target-domain L2 economic rows and records the rejection.
+
+  - artifact_id: 15m-ma-launch-l2-reference-augmentation-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_reference_augmentation_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    source_path: analysis/html/p3_15m_ma_launch_l2_reference_augmentation_20260902.html
+    sha256: "7c451a17e3b99eb712333e96ab68a5c0e75f1f42791f292b7ac029d47fb1dba4"
+    size_bytes: 1385947
+    storage_uri: "repo://analysis/html/p3_15m_ma_launch_l2_reference_augmentation_20260902.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "45fd18d4b6340c5bd0b3e314ac1a1d2ef8cc1936"
+    config_hash: "529123398567f10690b8442d1e519b961fd6688a259fd6a0238062f1a551b013"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Self-contained HTML with embedded diagnostic and actual-input overview images.

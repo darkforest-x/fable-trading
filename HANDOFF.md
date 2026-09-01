@@ -2,6 +2,28 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-02 — 上万参考图已接入 L2，但目标域错配导致否决）
+
+Owner 追问“不是有上万个训练图、还有很多 Gold 吗”，并授权实际接入验证。本轮没有把形态正负
+冒充盈亏：旧 10,000 正图 + 10,000 配对负图逐事件联回原 K 线，在各自 `window_end_i` 只取
+已收盘特征，从下一根开盘重算固定 TP5/SL2/72 收益。18,364 个训练截止前窗口中 18,069 个
+成功生成经济标签；按同币完整 168 根输入 +72 根标签暴露合并后，L2 独立训练块由 417 增到
+13,867。真实 L1 的 229 个 tune 与 242 个 final 独立事件完全不变，原多空模型、阈值、分数和
+KEEP 决策均精确复现，`holdout_rows_opened=0`。
+
+数量增加没有带来目标域提升：参考事件占扩充训练代表 97.18%；LONG 形态正/负 TP 率仅
+25.32%/22.90%，SHORT 为 25.20%/26.65%，说明 L1 形态标签不是 L2 收益标签。扩充 28 特征
+模型在固定真实 L1 final 上 AUC 0.4864、top-decile 扣 0.2% 成本后 -16.54bp、置换
+`p=0.668933`；SHORT tune-q90 在 final 放过 95.29%，校准明显塌缩。单特征对照 top-decile
++90.73bp，但 `p=0.072293` 且匹配对照门仍失败。实验登记为 `rejected`，模型不得 promote。
+
+正确下一条数据路径不是继续堆挑选出来的漂亮图片，而是用同一个冻结 L1 在更长 pre-holdout
+历史、更多币种上真实扫描提案，再逐事件生成 L2 经济标签、依赖去重、按时间切分和多空分训。
+Owner Gold / 正图 / hard negative 继续服务 L1 形态检测；它们不能按图片数替代 L2 目标域样本。
+交付报告：`analysis/html/p3_15m_ma_launch_l2_reference_augmentation_20260902.html`；24 张实际
+final 输入高清页：`analysis/html/p3_15m_ma_launch_l2_reference_augmentation_diagnostic_gallery_20260902.html`。
+没有读取 holdout、promote、部署、改 ACTIVE/frozen/forward、发 Telegram 或下单。
+
 ## ⚡ 当前真相（2026-09-01 — L1.5 已从默认研究链物理旁路）
 
 Owner 决定去掉未通过的 L1.5。新入口只执行 `冻结 L1 候选 → dependency episode 合并 →
