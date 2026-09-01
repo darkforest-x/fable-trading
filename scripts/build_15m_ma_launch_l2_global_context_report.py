@@ -296,8 +296,12 @@ Outcome permutation（固定分数、打乱收益 10,000 次）单尾 `p={traini
 ```bash
 git checkout {training['source_commit']}
 PYTHONPATH=. .venv/bin/python scripts/research_15m_ma_launch_l2_global_context.py --freeze-snapshot
-# 3060 上读取同一冻结包：
-PYTHONPATH=. C:/fable/.venv/Scripts/python.exe scripts/research_15m_ma_launch_l2_global_context.py --scan --device 0 --batch 32 --replicated-source-commit {scan['source_commit']}
+bash scripts/run_15m_ma_launch_l2_global_context_on_3060.sh --check --batch-size 32
+bash scripts/run_15m_ma_launch_l2_global_context_on_3060.sh --stage --batch-size 32
+bash scripts/run_15m_ma_launch_l2_global_context_on_3060.sh --start --batch-size 32
+bash scripts/run_15m_ma_launch_l2_global_context_on_3060.sh --status
+# 仅在远端 scan.exit=0 且原子终态回执存在后收集候选账本：
+bash scripts/run_15m_ma_launch_l2_global_context_on_3060.sh --collect
 PYTHONPATH=. .venv/bin/python scripts/research_15m_ma_launch_l2_global_context.py --build-dataset
 PYTHONPATH=. .venv/bin/python scripts/research_15m_ma_launch_l2_global_context.py --train-evaluate
 PYTHONPATH=. .venv/bin/python scripts/research_15m_ma_launch_l2_global_context.py --render
