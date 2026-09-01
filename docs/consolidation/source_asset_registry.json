@@ -2151,19 +2151,20 @@
       ]
     },
     {
-      "decision": "DIRECT_PORT",
+      "decision": "ADAPT_AND_PORT",
       "destination_path": "yoyo/contracts/outcomes.py",
-      "destination_sha256": "14f84f3ebaf44fa9b8f8d3bbc89c63d878a2b5665202186c35ad44760fd128e9",
+      "destination_sha256": "9617a2fada30d13dd5763f936075808639eb01374b4ae480e5ed0727b4c1f26c",
       "holdout_consumed": false,
-      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
-      "recorded_at": "2026-08-19T12:36:05+00:00",
-      "size_bytes": 8368,
+      "reason": "Originally ported byte-identical, then intentionally adapted in fable-trading commit a39f383 to add the causal resolve_barrier_after_close contract: entry uses the completed decision bar close and barrier resolution begins on the next bar, so the decision bar cannot become a pre-entry exit.",
+      "recorded_at": "2026-09-01T02:00:00+00:00",
+      "size_bytes": 10202,
       "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
       "source_path": "yoyo/contracts/outcomes.py",
       "source_repo": "darkforest-x/yoyo-trading",
       "source_sha256": "14f84f3ebaf44fa9b8f8d3bbc89c63d878a2b5665202186c35ad44760fd128e9",
       "status": "accepted",
       "tests": [
+        "tests/test_canonical_outcomes.py",
         "tests/boundaries/test_layer_imports.py",
         "tests/boundaries/test_yoyo_package_is_local.py"
       ]
@@ -2835,19 +2836,20 @@
       ]
     },
     {
-      "decision": "DIRECT_PORT",
+      "decision": "ADAPT_AND_PORT",
       "destination_path": "yoyo/layers/l2_judgment/train.py",
-      "destination_sha256": "bde2886abba645238fa60d773d1be9bd18756aa239a649c43433d720b9492112",
+      "destination_sha256": "30ebb563e07e6adbc21725efa4817df56a73106a8cec583cba17dea46c3d89dc",
       "holdout_consumed": false,
-      "reason": "The canonical yoyo package left fable-trading in commit d472a05 and development continued in yoyo-trading. fable-trading has imported it back across 63 files via an editable install ever since, so archiving yoyo-trading without this port would break the ACTIVE repository. Ported byte-identical: the detector is bound to render.py's exact pixels and CLAUDE.md rule 14's layer contract is defined in terms of this tree.",
-      "recorded_at": "2026-08-19T12:36:05+00:00",
-      "size_bytes": 17025,
+      "reason": "Originally ported byte-identical, then intentionally adapted for the preregistered 15m L2 experiment so callers can inject a frozen deterministic LightGBM parameter contract while the requested binary or regression objective remains authoritative. Tests verify parameter propagation and exact repeated predictions under the frozen runtime.",
+      "recorded_at": "2026-09-01T02:00:00+00:00",
+      "size_bytes": 17172,
       "source_commit": "784766de45a3b876c986d3ba672779124b46a66f",
       "source_path": "yoyo/layers/l2_judgment/train.py",
       "source_repo": "darkforest-x/yoyo-trading",
       "source_sha256": "bde2886abba645238fa60d773d1be9bd18756aa239a649c43433d720b9492112",
       "status": "accepted",
       "tests": [
+        "tests/test_research_15m_ma_launch_l2_global_context.py",
         "tests/boundaries/test_layer_imports.py",
         "tests/boundaries/test_yoyo_package_is_local.py"
       ]
