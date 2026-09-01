@@ -187,6 +187,7 @@ def build_markdown(
     selected = training["final_validation_frozen_threshold"]
     baseline = training["single_feature_baseline"]
     matched = training["matched_control"]
+    runtime = training["runtime"]
     verdict = "通过研究门" if gate["passed"] else "未通过研究门"
     overview_rel = Path(overview["path"]).relative_to("analysis").as_posix()
     control_rows = [row for row in matched["assignments"] if int(row.get("n", 0)) > 0]
@@ -238,11 +239,15 @@ def build_markdown(
 | train / tune / final val episode | {split.get('train', 0):,} / {split.get('tune', 0):,} / {split.get('final_validation', 0):,} |
 | train / tune / final val 独立块 | {split_blocks.get('train', 0):,} / {split_blocks.get('tune', 0):,} / {split_blocks.get('final_validation', 0):,} |
 | matched-control 行 | {dataset['matched_controls']:,}（{matched['usable_assignment_count']} / {matched['required_assignment_count']} 个分配可用） |
+| LightGBM / NumPy / pandas | {runtime['packages']['lightgbm']} / {runtime['packages']['numpy']} / {runtime['packages']['pandas']} |
+| 确定性训练 | CPU · deterministic=true · force_col_wise=true · num_threads=1 |
 | holdout 读取 | 0 |
 
 信号时钟固定为：`window_end_time` 是 L1 最后一根可见 K 的开盘时间；`available_at = window_end_time + 15min`；L2 特征只到该收盘；TP5/SL2/72 标签从 `available_at` 对应的下一根开盘开始。每个事件的完整暴露区间是 `[available_at-42h, available_at+18h)`，train→tune 与 tune→final val 各留 60 小时 purge。直接或传递重叠的同币区间属于同一依赖块；只有每块最早事件进入训练、早停、阈值选择和最终指标，后续事件只用于评分与全局图复盘。
 
 这项 60 小时/依赖块规则是在扫描期间的代码审计中、**任何 L2 outcome、score 或收益结果生成之前**写入预注册 integrity amendment；它修复原 18 小时 label-only purge 的证据隔离缺口，没有改变 L1 权重/阈值、TP/SL、期限或成本。
+
+LightGBM 4.6.0 的官方参数说明要求 `deterministic=true` 时同时固定 `force_col_wise` 或 `force_row_wise`，以避免潜在数值不稳定。本轮固定 CPU、`force_col_wise=true`、单线程及全部抽样 seed，并把实际 Python/平台/包版本写入训练回执。来源：https://lightgbm.readthedocs.io/en/v4.6.0/Parameters.html#deterministic
 
 ## 最终验证结果
 

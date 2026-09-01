@@ -30,9 +30,12 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.metadata
 import json
+import platform
 import shutil
 import subprocess
+import sys
 import time
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
@@ -55,6 +58,21 @@ CLASS_COLORS = {0: (35, 165, 45), 1: (45, 45, 220)}
 L2_CONTEXT_BARS = 168
 ATR_BUCKET_LOOKBACK = 672
 SEED = 42
+# LightGBM 4.6.0 documents that deterministic CPU training should also force
+# one histogram mode to avoid numerical instability.  ``force_col_wise`` is
+# fixed here and every specific sampling seed is explicit; num_threads=1 makes
+# the execution contract easy to reproduce across repeated local runs.
+# Source: https://lightgbm.readthedocs.io/en/v4.6.0/Parameters.html#deterministic
+L2_DETERMINISTIC_PARAMS: dict[str, Any] = {
+    "device_type": "cpu",
+    "deterministic": True,
+    "force_col_wise": True,
+    "num_threads": 1,
+    "data_random_seed": SEED,
+    "feature_fraction_seed": SEED,
+    "bagging_seed": SEED,
+    "extra_seed": SEED,
+}
 
 
 class L2ExperimentError(RuntimeError):
@@ -112,6 +130,19 @@ def pixel_sha256(image: np.ndarray) -> str:
     return hashlib.sha256(np.ascontiguousarray(image).tobytes()).hexdigest()
 
 
+def runtime_versions() -> dict[str, Any]:
+    """Return the exact CPU training runtime recorded in the result receipt."""
+
+    packages = ("lightgbm", "numpy", "pandas", "scikit-learn", "scipy")
+    return {
+        "python": sys.version.split()[0],
+        "platform": platform.platform(),
+        "packages": {
+            package: importlib.metadata.version(package) for package in packages
+        },
+    }
+
+
 def repo_relative(path: Path) -> str:
     """Return a portable repository-relative path."""
 
@@ -147,6 +178,15 @@ def load_preregistration(path: Path) -> dict[str, Any]:
         raise L2ExperimentError("five-model lineage does not select the frozen L1")
     if lineage.get("other_models_used_as_l2_features") is not False:
         raise L2ExperimentError("v1 must not mix incompatible detector contracts")
+    l2 = payload["l2"]
+    if l2.get("deterministic_params") != L2_DETERMINISTIC_PARAMS:
+        raise L2ExperimentError("deterministic LightGBM parameters drifted")
+    for package, expected_version in l2["runtime_contract"].items():
+        observed_version = importlib.metadata.version(package)
+        if observed_version != str(expected_version):
+            raise L2ExperimentError(
+                f"{package} version drifted: {observed_version} != {expected_version}"
+            )
     outcome = payload["outcome"]
     expected = (5.0, 2.0, 72, 0.0015, 0.002)
     observed = (
@@ -228,6 +268,11 @@ def verify_immutable_inputs(prereg: Mapping[str, Any]) -> dict[str, Any]:
             resolve_repo_path(l2["label_builder"]),
             str(l2["label_builder_sha256"]),
             "L2 label builder",
+        ),
+        (
+            resolve_repo_path(l2["training_builder"]),
+            str(l2["training_builder_sha256"]),
+            "L2 training builder",
         ),
         (
             resolve_repo_path(lineage["comparison_preregistration"]),
@@ -1391,10 +1436,22 @@ def train_evaluate(
     if min(len(train), len(tune), len(validation)) == 0:
         raise L2ExperimentError("one or more preregistered splits are empty")
     from yoyo.layers.l2_judgment.features import FEATURE_COLUMNS
-    from yoyo.layers.l2_judgment.train import train_model
+    from yoyo.layers.l2_judgment.train import LGB_PARAMS, train_model
 
-    model = train_model(train, tune, feature_columns=FEATURE_COLUMNS, objective="regression")
-    baseline = train_model(train, tune, feature_columns=["ma_spread_pct"], objective="regression")
+    model = train_model(
+        train,
+        tune,
+        feature_columns=FEATURE_COLUMNS,
+        objective="regression",
+        params_override=L2_DETERMINISTIC_PARAMS,
+    )
+    baseline = train_model(
+        train,
+        tune,
+        feature_columns=["ma_spread_pct"],
+        objective="regression",
+        params_override=L2_DETERMINISTIC_PARAMS,
+    )
     tune_score = model.predict(tune[FEATURE_COLUMNS], num_iteration=model.best_iteration)
     threshold = float(np.quantile(tune_score, 0.9))
     validation_event_score = model.predict(
@@ -1465,6 +1522,9 @@ def train_evaluate(
         ),
     }
     gate["passed"] = all(gate.values())
+    effective_params = dict(LGB_PARAMS)
+    effective_params.update(L2_DETERMINISTIC_PARAMS)
+    effective_params["objective"] = "regression"
     payload = {
         "protocol": prereg["protocol"],
         "experiment_id": EXPERIMENT_ID,
@@ -1472,6 +1532,8 @@ def train_evaluate(
         "source_commit": source_commit,
         "dataset_sha256": dataset_receipt["dataset_sha256"],
         "objective": "regression_gross_realized_ret",
+        "training_params": effective_params,
+        "runtime": runtime_versions(),
         "feature_semantics": prereg["l2"]["feature_semantics"],
         "feature_columns": list(FEATURE_COLUMNS),
         "splits": {

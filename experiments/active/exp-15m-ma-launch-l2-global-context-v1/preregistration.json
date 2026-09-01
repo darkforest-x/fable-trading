@@ -96,10 +96,27 @@
     "feature_builder_sha256": "2fed40ed52440d4c76c0f74c5638a707449c2d6c1f56f91bb2030c914a1cddfa",
     "label_builder": "yoyo/layers/l2_judgment/labeling.py",
     "label_builder_sha256": "18c90468c9e6a75de1fb486934295bd3c45b0ca92229d6d9bfb7cd30c288994a",
+    "training_builder": "yoyo/layers/l2_judgment/train.py",
+    "training_builder_sha256": "30ebb563e07e6adbc21725efa4817df56a73106a8cec583cba17dea46c3d89dc",
     "feature_count": 28,
     "feature_columns_source": "FEATURE_COLUMNS",
     "objective": "LightGBM regression on gross realized_ret",
     "seed": 42,
+    "deterministic_params": {
+      "device_type": "cpu",
+      "deterministic": true,
+      "force_col_wise": true,
+      "num_threads": 1,
+      "data_random_seed": 42,
+      "feature_fraction_seed": 42,
+      "bagging_seed": 42,
+      "extra_seed": 42
+    },
+    "runtime_contract": {
+      "lightgbm": "4.6.0",
+      "numpy": "2.0.2",
+      "pandas": "2.3.3"
+    },
     "score_gate": "90th percentile of tune scores; freeze before final validation",
     "missing_values": "native LightGBM missing-value handling; no future fill",
     "single_feature_baseline": "same LightGBM regression protocol using ma_spread_pct only"

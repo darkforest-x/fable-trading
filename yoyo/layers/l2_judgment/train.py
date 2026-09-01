@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 import lightgbm as lgb
@@ -225,6 +225,7 @@ def train_model(
     *,
     feature_columns: Sequence[str] = FEATURE_COLUMNS,
     objective: str = "binary",
+    params_override: Mapping[str, object] | None = None,
 ) -> lgb.Booster:
     """Train judgment model.
 
@@ -234,6 +235,8 @@ def train_model(
     """
     cols = list(feature_columns)
     params = dict(LGB_PARAMS)
+    if params_override is not None:
+        params.update(dict(params_override))
     if objective == "regression":
         params["objective"] = "regression"
         y_train, y_val = train["realized_ret"], val["realized_ret"]

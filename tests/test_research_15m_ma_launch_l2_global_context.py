@@ -11,6 +11,7 @@ from scripts.research_15m_ma_launch_l2_global_context import (
     BAR_DELTA,
     EXPERIMENT_ID,
     L2ExperimentError,
+    L2_DETERMINISTIC_PARAMS,
     assign_dependency_blocks,
     causal_atr_quintile,
     cluster_symbol_episodes,
@@ -21,6 +22,7 @@ from scripts.research_15m_ma_launch_l2_global_context import (
     overlaps_any_interval,
     pixel_sha256,
     render_global_chart,
+    runtime_versions,
     split_name,
     utc,
 )
@@ -89,6 +91,10 @@ def test_preregistration_freezes_no_holdout_and_owner_safety() -> None:
     assert prereg["splits"]["purge_tune_validation"]["duration_hours"] == 60
     assert prereg["five_model_lineage"]["selected_l1_key"] == prereg["l1"]["key"]
     assert prereg["five_model_lineage"]["other_models_used_as_l2_features"] is False
+    assert prereg["l2"]["deterministic_params"] == L2_DETERMINISTIC_PARAMS
+    observed = runtime_versions()["packages"]
+    for package, expected in prereg["l2"]["runtime_contract"].items():
+        assert observed[package] == expected
 
 
 def test_split_boundaries_leave_exact_18_hour_purges() -> None:
@@ -360,3 +366,78 @@ def test_global_chart_recreates_exact_l1_pixels_before_reprojecting_box() -> Non
     row["input_pixel_sha256"] = "0" * 64
     with pytest.raises(L2ExperimentError, match="pixel parity failed"):
         render_global_chart(row, frame)
+
+
+def test_train_model_accepts_frozen_deterministic_parameter_overrides(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from yoyo.layers.l2_judgment import train as train_module
+
+    rows = 80
+    frame = pd.DataFrame(
+        {
+            column: np.linspace(0, 1, rows) + index / 100
+            for index, column in enumerate(FEATURE_COLUMNS)
+        }
+    )
+    frame["realized_ret"] = np.linspace(-0.02, 0.03, rows)
+    frame["label"] = (frame["realized_ret"] > 0).astype(int)
+    captured: dict[str, object] = {}
+    sentinel = object()
+
+    def fake_train(params: dict[str, object], *args: object, **kwargs: object) -> object:
+        captured.update(params)
+        return sentinel
+
+    monkeypatch.setattr(train_module.lgb, "train", fake_train)
+    result = train_module.train_model(
+        frame.iloc[:60],
+        frame.iloc[60:],
+        objective="regression",
+        params_override=L2_DETERMINISTIC_PARAMS,
+    )
+    assert result is sentinel
+    assert captured["objective"] == "regression"
+    for key, value in L2_DETERMINISTIC_PARAMS.items():
+        assert captured[key] == value
+
+
+def test_frozen_lightgbm_contract_repeats_predictions_exactly() -> None:
+    from yoyo.layers.l2_judgment.train import train_model
+
+    rng = np.random.default_rng(42)
+    rows = 180
+    frame = pd.DataFrame(
+        {
+            column: rng.normal(loc=index / 100, scale=1.0, size=rows)
+            for index, column in enumerate(FEATURE_COLUMNS)
+        }
+    )
+    frame["realized_ret"] = (
+        0.01 * frame[FEATURE_COLUMNS[0]]
+        - 0.006 * frame[FEATURE_COLUMNS[1]]
+        + rng.normal(0, 0.002, rows)
+    )
+    frame["label"] = (frame["realized_ret"] > 0).astype(int)
+    train, tune = frame.iloc[:135], frame.iloc[135:]
+
+    first = train_model(
+        train,
+        tune,
+        objective="regression",
+        params_override=L2_DETERMINISTIC_PARAMS,
+    )
+    second = train_model(
+        train,
+        tune,
+        objective="regression",
+        params_override=L2_DETERMINISTIC_PARAMS,
+    )
+    first_score = first.predict(
+        tune[FEATURE_COLUMNS], num_iteration=first.best_iteration
+    )
+    second_score = second.predict(
+        tune[FEATURE_COLUMNS], num_iteration=second.best_iteration
+    )
+    np.testing.assert_array_equal(first_score, second_score)
+    assert first.best_iteration == second.best_iteration
