@@ -1,0 +1,108 @@
+{
+  "protocol": "15m_grade_a_l2_regression_side_split_v1",
+  "experiment_id": "exp-15m-ma-launch-l2-side-split-v1",
+  "created_at": "2026-09-01T11:03:36Z",
+  "owner_authorization": {
+    "request": "L1.5应该怎么做？多空应该分开训练 那你之前的训练集帮忙区分开 再拿去训练一遍呗",
+    "interpreted_scope": "Partition the already-built pre-holdout L2 dataset by its frozen LONG/SHORT side, train one otherwise-identical LightGBM gross-return regressor per side, and compare the union of side-specific tune-q90 decisions with the prior mixed-side regressor. Explain but do not train an L1.5 visual-context model in this experiment.",
+    "training_authorized": true,
+    "holdout_read_authorized": false,
+    "barrier_cost_or_feature_change_authorized": false,
+    "promotion_or_production_authorized": false
+  },
+  "question": "Does separating LONG and SHORT regressors improve the frozen L2 economic filter without changing candidates, labels, features, time splits, costs, or thresholds?",
+  "single_variable": "One mixed-side LightGBM regressor versus two side-specific LightGBM regressors. Every other input and evaluation rule is frozen.",
+  "source": {
+    "dataset_path": "analysis/output/ma_launch_l2_global_context_v1/l2_dataset.csv",
+    "dataset_sha256": "e7b6f94cf59493c1f33e46c2f08fe5252a0a6e80406ab43a061fd112fc70f798",
+    "dataset_rows": 3779,
+    "matched_controls_path": "analysis/output/ma_launch_l2_global_context_v1/matched_controls.csv",
+    "matched_controls_sha256": "e4b654a45f72a337bc58e7f97d19044218c9521a5341ed0293199384de98d1ec",
+    "prior_training_receipt": "experiments/active/exp-15m-ma-launch-l2-global-context-v1/results/training_receipt.json",
+    "prior_training_receipt_sha256": "d5968bcc5886db9fa3940393a7a5f1432f558164ab9e5591a70c3c11ea5f6426",
+    "prior_scored_validation": "analysis/output/ma_launch_l2_global_context_v1/final_validation_scored.csv",
+    "prior_scored_validation_sha256": "b8050ffeb86b41910ecea46d495efaf88437db3ecd6bcc3af50004545116d030",
+    "source_experiment": "exp-15m-ma-launch-l2-global-context-v1",
+    "source_commit": "058977365adf8e2a7c668cedd1c9797c019382df",
+    "holdout_rows": 0
+  },
+  "frozen_contract": {
+    "candidate_pool": "grade_a8k_neg24k_full40_1280 L1 episodes already present in the source dataset",
+    "sides": ["long", "short"],
+    "feature_semantics": "side_aligned_v1 already materialized in the source rows",
+    "feature_builder": "yoyo/layers/l2_judgment/features.py",
+    "feature_builder_sha256": "2fed40ed52440d4c76c0f74c5638a707449c2d6c1f56f91bb2030c914a1cddfa",
+    "feature_count": 28,
+    "objective": "LightGBM regression on gross realized_ret",
+    "tp_atr_multiple": 5.0,
+    "sl_atr_multiple": 2.0,
+    "horizon_bars": 72,
+    "round_trip_cost_fraction": 0.002,
+    "splits": ["train", "purge", "tune", "final_validation"],
+    "fit_tune_evaluation_rows": "dependency_representative=true only",
+    "threshold": "separate 90th percentile of LONG and SHORT tune scores",
+    "aggregate_score": "empirical percentile of each prediction within its own side tune-score distribution",
+    "random_split": false,
+    "holdout_read": false
+  },
+  "model": {
+    "training_builder": "yoyo/layers/l2_judgment/train.py",
+    "training_builder_sha256": "30ebb563e07e6adbc21725efa4817df56a73106a8cec583cba17dea46c3d89dc",
+    "seed": 42,
+    "deterministic_params": {
+      "device_type": "cpu",
+      "deterministic": true,
+      "force_col_wise": true,
+      "num_threads": 1,
+      "data_random_seed": 42,
+      "feature_fraction_seed": 42,
+      "bagging_seed": 42,
+      "extra_seed": 42
+    },
+    "single_feature_baseline": "ma_spread_pct-only regression for mixed, LONG, and SHORT arms",
+    "hyperparameter_search": false
+  },
+  "comparison": {
+    "mixed_reproduction_required": true,
+    "prior_mixed_threshold": -0.0005042364096652352,
+    "prior_mixed_best_iteration": 2,
+    "score_absolute_tolerance": 1e-12,
+    "primary_gate": {
+      "aggregate_frozen_threshold_net_strictly_better_than_mixed": true,
+      "aggregate_top_decile_net_positive": true,
+      "aggregate_outcome_permutation_p_lt": 0.01,
+      "aggregate_minimum_selected_dependency_blocks": 30,
+      "aggregate_beats_matched_controls_every_assignment": true,
+      "each_side_minimum_selected_dependency_blocks": 10,
+      "neither_side_frozen_threshold_net_negative": true
+    },
+    "final_validation_used_for_training_threshold_or_model_selection": false
+  },
+  "l1_5_boundary": {
+    "trained_here": false,
+    "role": "Visual morphology filter over a long causal chart window; it must learn owner-approved full-context shape quality, not future return.",
+    "future_outcome_as_label": false,
+    "economic_l2_replacement": false
+  },
+  "outputs": {
+    "local_output": "analysis/output/ma_launch_l2_side_split_v1",
+    "committed_results": "experiments/active/exp-15m-ma-launch-l2-side-split-v1/results",
+    "report": "analysis/p3_15m_ma_launch_l2_side_split_20260901.md",
+    "html": "analysis/html/p3_15m_ma_launch_l2_side_split_20260901.html"
+  },
+  "safety": {
+    "holdout_read": false,
+    "l1_rescanned": false,
+    "features_changed": false,
+    "labels_changed": false,
+    "barriers_or_cost_changed": false,
+    "threshold_tuned_on_final_validation": false,
+    "promoted": false,
+    "deployed": false,
+    "active_or_frozen_changed": false,
+    "forward_state_changed": false,
+    "orders_placed": false,
+    "telegram_sent": false,
+    "production_eligible": false
+  }
+}
