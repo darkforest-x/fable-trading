@@ -2844,3 +2844,47 @@ experiments:
       mixing five checkpoints with incompatible label and geometry semantics.
       No holdout, promotion, deployment, ACTIVE/frozen/forward mutation,
       Telegram or order action occurred.
+
+  - experiment_id: exp-15m-ma-launch-l2-side-split-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
+    status: rejected
+    question: >-
+      Does separating the same frozen Grade-A L2 dataset into one LONG and one
+      SHORT gross-return regressor improve the time-out-of-sample economic gate
+      without changing candidates, features, labels, barriers, costs or splits?
+    single_variable: >-
+      One mixed-side LightGBM regression model versus two side-specific models;
+      each side keeps the same 28 causal features, TP5/SL2/72 outcome, 0.2%
+      round-trip cost, dependency representatives and tune-q90 policy.
+    result: >-
+      rejected_but_promising_small_sample. The mixed model reproduced to a
+      maximum score delta of 9.90e-17 with all 41 KEEP decisions identical.
+      Side-specific q90 gates selected 13 LONG and 7 SHORT independent events;
+      their union returned +123.11 bp net versus +3.39 bp for the mixed model,
+      and beat all eight matched-control assignments. However aggregate
+      outcome-permutation p=0.072093 failed the 0.01 gate, only 20 events were
+      selected versus the preregistered 30, and SHORT had only seven. The
+      configuration therefore remains rejected and must not be enabled.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p3_15m_ma_launch_l2_side_split_20260901.md
+    artifacts:
+      - 15m-ma-launch-l2-side-split-v1-prereg
+      - 15m-ma-launch-l2-side-split-v1-training-receipt
+      - 15m-ma-launch-l2-side-split-v1-verify-receipt
+      - 15m-ma-launch-l2-side-split-v1-long-dataset
+      - 15m-ma-launch-l2-side-split-v1-short-dataset
+      - 15m-ma-launch-l2-side-split-v1-long-model
+      - 15m-ma-launch-l2-side-split-v1-short-model
+      - 15m-ma-launch-l2-side-split-v1-scored-validation
+      - 15m-ma-launch-l2-side-split-v1-report
+      - 15m-ma-launch-l2-side-split-v1-html
+    reuse_allowed: false
+    notes: >-
+      This experiment does not train L1.5. L1.5 remains a separate causal
+      global-shape labeling/classification task and cannot use future return as
+      morphology truth. No holdout, L1 rescan, feature/label/barrier/cost change,
+      threshold tuning on final validation, promotion, deployment,
+      ACTIVE/frozen/forward mutation, Telegram send or order occurred.

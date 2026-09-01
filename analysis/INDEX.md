@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **243** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **244** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -251,6 +251,7 @@
 | — | [`p2b_eth_micro_channel.md`](p2b_eth_micro_channel.md) | ETH Micro 通道（1/2/3/5m） |  |
 | — | [`p2b_factor_ic_report.md`](p2b_factor_ic_report.md) | H19 外部 alpha 因子 IC 筛选（SWAP池, train/val, 未碰holdout） |  |
 | — | [`p2b_ma206_comparison.md`](p2b_ma206_comparison.md) | P0-3 均线 20/60/120 对比实验（val only） | 1. **推荐：判断层主线暂时保持 8-55。** 理由是本项目成功标准看净收益， |
+| — | [`p3_15m_ma_launch_l2_side_split_20260901.md`](p3_15m_ma_launch_l2_side_split_20260901.md) | 15m 均线密集启动：L2 多空拆分回归 v1 | 多空拆分方向明显改善，但合并置换 p=0.072093、选择 n=20，预注册总门 FAIL。 |
 | — | [`p_prereg_holdout9_midvol.md`](p_prereg_holdout9_midvol.md) | 预注册卡 — holdout 第 9 次消耗:中波动带 × 高置信 |  |
 | — | [`p_v14_windows_train.md`](p_v14_windows_train.md) | v14 pad200 → Windows（3060）训练交接 |  |
 | — | [`short_tf_side_channel.md`](short_tf_side_channel.md) | 短周期支线（1m / 5m） |  |
@@ -386,6 +387,7 @@
 - [`p2r_readonly_root_cause_audit_20260803.md`](p2r_readonly_root_cause_audit_20260803.md) — P2-R：P1 immutable 上的只读根因审计
 - [`p3_backtest_report.md`](p3_backtest_report.md) — 阶段 3 报告：事件驱动回测（第一轮）
 - [`p3_15m_ma_launch_l2_global_context_20260901.md`](p3_15m_ma_launch_l2_global_context_20260901.md) — 15m 均线密集启动：L2 全局上下文判断层 v1
+- [`p3_15m_ma_launch_l2_side_split_20260901.md`](p3_15m_ma_launch_l2_side_split_20260901.md) — 15m 均线密集启动：L2 多空拆分回归 v1
 - [`p3_ml_opt_backtest_compare.md`](p3_ml_opt_backtest_compare.md) — 回测对照：二分类 vs 回归收益（YOLO 主线池）
 - [`p3_v11_pool_cutover.md`](p3_v11_pool_cutover.md) — p3 — v11 池判断层切换 ACTIVE
 - [`p3_v8_pool_cutover.md`](p3_v8_pool_cutover.md) — p3 — 干净池(v8_chain)判断层切换 ACTIVE

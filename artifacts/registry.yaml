@@ -8775,3 +8775,174 @@ artifacts:
     config_hash: "4f60d5c3016870d48f6991b7f345404462b24ef1fa4161e3a709e1a2726d019e"
     data_cutoff: "2026-05-04T00:00:00Z"
     notes: 100 cards link directly to full-resolution PNG files in the ordinary local chart folders.
+
+  # ---- 15m L2 LONG/SHORT regression split (2026-09-01) ----------------
+  - artifact_id: 15m-ma-launch-l2-side-split-v1-prereg
+    artifact_type: config
+    role: frozen_single_variable_side_split_regression_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
+    source_path: experiments/active/exp-15m-ma-launch-l2-side-split-v1/preregistration.json
+    sha256: "20e4f13e15a834f65e64c517df1f90eeeb7000a6acd32fb7a77a2654ada3f749"
+    size_bytes: 5498
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-side-split-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
+    config_hash: "20e4f13e15a834f65e64c517df1f90eeeb7000a6acd32fb7a77a2654ada3f749"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Freezes the source hashes, side-only variable, deterministic regressors, tune-only calibration and rejection gates.
+
+  - artifact_id: 15m-ma-launch-l2-side-split-v1-training-receipt
+    artifact_type: manifest
+    role: deterministic_mixed_reproduction_and_side_split_evaluation_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
+    source_path: experiments/active/exp-15m-ma-launch-l2-side-split-v1/results/training_receipt.json
+    sha256: "16296133ccbe181df1a0a255245685810ac1ecdba877a55f1a524a699175198f"
+    size_bytes: 35086
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-side-split-v1/results/training_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
+    config_hash: "20e4f13e15a834f65e64c517df1f90eeeb7000a6acd32fb7a77a2654ada3f749"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Records exact mixed-model reproduction, LONG/SHORT models, baselines, matched controls, permutation inference and final FAIL.
+
+  - artifact_id: 15m-ma-launch-l2-side-split-v1-verify-receipt
+    artifact_type: manifest
+    role: partition_model_score_hash_and_safety_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a7273888798dca8e6cc5e904aa7a04e347e9ce63"
+    source_path: experiments/active/exp-15m-ma-launch-l2-side-split-v1/results/verify_receipt.json
+    sha256: "410c74750aa990b93542a9ee2dd113e608f6e9d4ccaf88f7bfcb13f5dfdec074"
+    size_bytes: 658
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-side-split-v1/results/verify_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a7273888798dca8e6cc5e904aa7a04e347e9ce63"
+    config_hash: "20e4f13e15a834f65e64c517df1f90eeeb7000a6acd32fb7a77a2654ada3f749"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Twelve of twelve integrity and no-mutation checks passed.
+
+  - artifact_id: 15m-ma-launch-l2-side-split-v1-long-dataset
+    artifact_type: dataset
+    role: exact_long_partition_of_frozen_l2_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
+    source_path: analysis/output/ma_launch_l2_side_split_v1/l2_dataset_long.csv
+    sha256: "6a0fa83d8f2b4614fb0b8fed7c4ee6e9c54aa6eb4cffdf468f03dfbe469d57bc"
+    size_bytes: 1831958
+    storage_uri: "file://analysis/output/ma_launch_l2_side_split_v1/l2_dataset_long.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
+    config_hash: "20e4f13e15a834f65e64c517df1f90eeeb7000a6acd32fb7a77a2654ada3f749"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: 1,801 LONG rows; exact disjoint partition, no labels/features/splits recomputed.
+
+  - artifact_id: 15m-ma-launch-l2-side-split-v1-short-dataset
+    artifact_type: dataset
+    role: exact_short_partition_of_frozen_l2_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
+    source_path: analysis/output/ma_launch_l2_side_split_v1/l2_dataset_short.csv
+    sha256: "134ebcfa9ab7d39ff7163d07c42d9340c7601a4e857e6cf4b5312f6a9555c7d3"
+    size_bytes: 2006394
+    storage_uri: "file://analysis/output/ma_launch_l2_side_split_v1/l2_dataset_short.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
+    config_hash: "20e4f13e15a834f65e64c517df1f90eeeb7000a6acd32fb7a77a2654ada3f749"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: 1,978 SHORT rows; exact disjoint partition, no labels/features/splits recomputed.
+
+  - artifact_id: 15m-ma-launch-l2-side-split-v1-long-model
+    artifact_type: model
+    role: rejected_research_only_long_gross_return_regressor
+    source_repo: darkforest-x/fable-trading
+    source_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
+    source_path: analysis/output/ma_launch_l2_side_split_v1/models/l2_long_28f.txt
+    sha256: "6bb0f00bc3584c13972473fc662d4c368f7fa2785a3581c6e7e5ae1e5366b0d0"
+    size_bytes: 13072
+    storage_uri: "file://analysis/output/ma_launch_l2_side_split_v1/models/l2_long_28f.txt"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
+    config_hash: "20e4f13e15a834f65e64c517df1f90eeeb7000a6acd32fb7a77a2654ada3f749"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Best iteration 17; q90 selected 13 final blocks at +126.13 bp net, but side p=0.0966.
+
+  - artifact_id: 15m-ma-launch-l2-side-split-v1-short-model
+    artifact_type: model
+    role: rejected_research_only_short_gross_return_regressor
+    source_repo: darkforest-x/fable-trading
+    source_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
+    source_path: analysis/output/ma_launch_l2_side_split_v1/models/l2_short_28f.txt
+    sha256: "c20f836b844b6aedfb33494ef1e13e716da5644bf4bf4ee21ac3d1d737d2e767"
+    size_bytes: 14076
+    storage_uri: "file://analysis/output/ma_launch_l2_side_split_v1/models/l2_short_28f.txt"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
+    config_hash: "20e4f13e15a834f65e64c517df1f90eeeb7000a6acd32fb7a77a2654ada3f749"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Best iteration 17; q90 selected only 7 final blocks at +117.51 bp net, side p=0.1186.
+
+  - artifact_id: 15m-ma-launch-l2-side-split-v1-scored-validation
+    artifact_type: dataset
+    role: final_preholdout_side_scores_thresholds_and_decisions
+    source_repo: darkforest-x/fable-trading
+    source_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
+    source_path: analysis/output/ma_launch_l2_side_split_v1/final_validation_side_split_scored.csv
+    sha256: "5b63941e21fe56930c2aec78c54fe93430cdab6576bfff5dbb50d743e4134c25"
+    size_bytes: 1127015
+    storage_uri: "file://analysis/output/ma_launch_l2_side_split_v1/final_validation_side_split_scored.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
+    config_hash: "20e4f13e15a834f65e64c517df1f90eeeb7000a6acd32fb7a77a2654ada3f749"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: All 1,021 final events retain side model score, side-tune percentile, threshold and KEEP decision; 242 dependency representatives drive metrics.
+
+  - artifact_id: 15m-ma-launch-l2-side-split-v1-report
+    artifact_type: report
+    role: canonical_markdown_side_split_negative_result_and_l1_5_design
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f87819df34114f4b7eb6a5ace1489ff3f1f0a164"
+    source_path: analysis/p3_15m_ma_launch_l2_side_split_20260901.md
+    sha256: "0adac8a2e3ea82770ae457ed0b216ea7899f414a11b600a0fe0cd90df64c93e2"
+    size_bytes: 7175
+    storage_uri: "repo://analysis/p3_15m_ma_launch_l2_side_split_20260901.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f87819df34114f4b7eb6a5ace1489ff3f1f0a164"
+    config_hash: "20e4f13e15a834f65e64c517df1f90eeeb7000a6acd32fb7a77a2654ada3f749"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Chinese report with mixed reproduction, side results, baselines, controls, rejection gates, risks, and a separate causal L1.5 design.
+
+  - artifact_id: 15m-ma-launch-l2-side-split-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_side_split_result_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f87819df34114f4b7eb6a5ace1489ff3f1f0a164"
+    source_path: analysis/html/p3_15m_ma_launch_l2_side_split_20260901.html
+    sha256: "a8b8fa6e9f9ce5699ea3dc01911f2d84ab626246ade4f2afac2d0658d415ea45"
+    size_bytes: 10762
+    storage_uri: "repo://analysis/html/p3_15m_ma_launch_l2_side_split_20260901.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f87819df34114f4b7eb6a5ace1489ff3f1f0a164"
+    config_hash: "20e4f13e15a834f65e64c517df1f90eeeb7000a6acd32fb7a77a2654ada3f749"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Self-contained HTML counterpart of the rejected side-split report.

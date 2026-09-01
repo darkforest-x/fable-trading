@@ -2,6 +2,24 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-01 — L2 多空拆分回归有提升但预注册拒绝）
+
+Owner 要求说明 L1.5，并把既有 15m L2 训练集按 LONG / SHORT 分开重训。实验严格复用冻结的
+3,779 条数据、28 个因果特征、TP5/SL2/72、0.2% 往返成本、时间切分和 dependency blocks；
+唯一变量是“混合回归器”改为“多空两个回归器”。混合模型在 242 个最终独立事件上逐分数复现，
+最大差 `9.90e-17`，41 个 KEEP 决策完全一致。
+
+多空模型的 tune-q90 在最终时间段合计保留 20 个独立事件，净均值 **+123.11bp**，高于混合模型
+的 **+3.39bp**，并跑赢 8/8 组同币 × 同月 × 同 UTC 时段 × 同 ATR 桶 × 同方向随机对照；但
+合并置换 `p=0.072093` 未过 0.01，合计 n=20 未达 30，SHORT n=7 未达每侧 10，因此预注册总门
+**FAIL**。两个权重只保留为 rejected research artifacts，不启用、不 promote、不部署，也未读取
+`>=2026-05-04` holdout。
+
+L1.5 的正确职责是“局部 YOLO 之后、经济 L2 之前”的因果全局形态分类：输入固定 168 根已收盘
+K 线，LONG / SHORT 分开建 Owner-confirmed `global_shape_good` Gold 和局部像但全局错的 hard
+negatives；不得拿未来收益自动生成形态标签。报告：
+`analysis/html/p3_15m_ma_launch_l2_side_split_20260901.html`。
+
 ## ⚡ 当前真相（2026-08-29 — A级 8k + 匹配负例 24k 已在 RTX3060 训练）
 
 Owner 问“准备去训练，负样本应该用啥”。结论是**不用旧 30,000 张 OKX-only 负样本**，改用新建
