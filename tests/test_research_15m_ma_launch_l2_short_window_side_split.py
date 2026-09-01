@@ -11,9 +11,12 @@ import pytest
 from scripts.research_15m_ma_launch_l2_short_window_side_split import (
     EXPERIMENT_ID,
     ShortWindowL2Error,
+    _control_pool,
     assign_short_dependency_blocks,
     build_side_homogeneous_episodes,
+    label_preholdout_candidate,
     load_preregistration,
+    strict_matched_control_metrics,
     validated_outcome_exposure_end,
 )
 from yoyo.layers.l1_detection.data import add_mas
@@ -174,6 +177,38 @@ def test_short_features_do_not_change_when_future_bars_are_mutated() -> None:
             assert left == right
 
 
+def test_pre_window_close_changes_only_the_disclosed_l1_ma_state() -> None:
+    signal_i = 250
+    start = signal_i - 18
+    base = ohlcv(360)
+    mutated = base.copy()
+    mutated.loc[start - 1, "close"] *= 1.04
+    np.testing.assert_array_equal(
+        base.loc[start:signal_i, ["open", "high", "low", "close"]].to_numpy(),
+        mutated.loc[start:signal_i, ["open", "high", "low", "close"]].to_numpy(),
+    )
+
+    observed = []
+    for frame in (base, mutated):
+        enriched = add_mas(frame)
+        window = enriched.iloc[start : signal_i + 1]
+        image, transform = render_chart(window)
+        features = extract_short_window_features(
+            window,
+            detection(
+                start=start,
+                end=signal_i,
+                core_start=signal_i - 7,
+                core_end=signal_i - 4,
+            ),
+            price_min=transform.price_min,
+            price_max=transform.price_max,
+        )
+        observed.append((image, features))
+    assert not np.array_equal(observed[0][0], observed[1][0])
+    assert observed[0][1]["t00_sma20_y"] != observed[1][1]["t00_sma20_y"]
+
+
 def test_feature_builder_rejects_core_outside_visible_window() -> None:
     enriched = add_mas(ohlcv())
     start, end = 232, 250
@@ -236,6 +271,71 @@ def test_dependency_blocks_refuse_cross_split_exposure() -> None:
         assign_short_dependency_blocks(frame)
 
 
+def test_dependency_blocks_are_transitive_across_long_and_short() -> None:
+    base = pd.Timestamp("2026-04-01T00:00:00Z")
+    rows = []
+    for name, side, offset in (
+        ("a", "long", 0),
+        ("b", "short", 20),
+        ("c", "long", 40),
+    ):
+        available = base + pd.Timedelta(hours=offset)
+        rows.append(
+            {
+                "episode_id": name,
+                "symbol": "BTC_USDT_SWAP",
+                "side": side,
+                "split": "final_validation",
+                "available_at": available.isoformat(),
+                "exposure_start_time": (available - pd.Timedelta(hours=4.5)).isoformat(),
+                "exposure_end_exclusive": (available + pd.Timedelta(hours=18)).isoformat(),
+            }
+        )
+    blocked = assign_short_dependency_blocks(pd.DataFrame(rows)).set_index("episode_id")
+    assert blocked["dependency_block_id"].nunique() == 1
+
+
+def test_control_pool_cannot_offer_a_path_that_crosses_holdout() -> None:
+    prereg = load_preregistration(PREREG)
+    frame = ohlcv(400)
+    frame["open_time"] = pd.date_range(
+        "2026-05-01T00:00:00Z", periods=len(frame), freq="15min", tz="UTC"
+    )
+    frame["atr_pct"] = 0.01
+    frame["atr_quintile"] = 2
+    pools = _control_pool(frame, [], prereg)
+    indices = [index for values in pools.values() for index in values]
+    holdout = pd.Timestamp(prereg["source"]["holdout_start"])
+    horizon = int(prereg["outcome"]["horizon_bars"])
+    for index in indices:
+        available = frame["open_time"].iloc[index] + pd.Timedelta(minutes=15)
+        assert available + horizon * pd.Timedelta(minutes=15) <= holdout
+
+
+def test_selected_event_without_all_controls_fails_strict_control_gate() -> None:
+    validation = pd.DataFrame(
+        [
+            {"episode_id": "e1", "net_ret": 0.02},
+            {"episode_id": "e2", "net_ret": 0.02},
+        ]
+    )
+    controls = pd.DataFrame(
+        [
+            {"assignment": 0, "episode_id": "e1", "control_net_ret": 0.0},
+            {"assignment": 1, "episode_id": "e1", "control_net_ret": 0.0},
+        ]
+    )
+    result = strict_matched_control_metrics(
+        validation,
+        controls,
+        {"e1", "e2"},
+        required_assignments=2,
+    )
+    assert result["selected_event_complete_coverage"] is False
+    assert result["selected_event_missing_controls"] == ["e2"]
+    assert result["all_assignments_positive"] is False
+
+
 def test_holdout_exposure_is_rejected_before_labeling_can_run() -> None:
     prereg = load_preregistration(PREREG)
     assert validated_outcome_exposure_end(
@@ -245,3 +345,26 @@ def test_holdout_exposure_is_rejected_before_labeling_can_run() -> None:
         validated_outcome_exposure_end(
             pd.Timestamp("2026-05-03T06:15:00Z"), prereg
         )
+
+
+def test_holdout_guard_runs_before_labeler(monkeypatch: pytest.MonkeyPatch) -> None:
+    prereg = load_preregistration(PREREG)
+    called = False
+
+    def forbidden_labeler(*args, **kwargs):
+        nonlocal called
+        called = True
+        raise AssertionError("labeler must not run")
+
+    monkeypatch.setattr(
+        "yoyo.layers.l2_judgment.labeling.label_candidate", forbidden_labeler
+    )
+    with pytest.raises(ShortWindowL2Error, match="crosses holdout"):
+        label_preholdout_candidate(
+            pd.DataFrame(),
+            0,
+            "long",
+            pd.Timestamp("2026-05-03T06:15:00Z"),
+            prereg,
+        )
+    assert called is False

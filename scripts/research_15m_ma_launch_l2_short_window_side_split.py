@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Train and audit LONG/SHORT L2 regressors on exact L1 short windows.
 
-This owner-corrected experiment starts from the frozen 3,779 pre-holdout L1
-episodes.  For every row it recreates the original 1280x742 W18/W19 image,
+This owner-corrected experiment starts from the frozen 25,911 pre-holdout L1
+boxes and reclusters them into side-homogeneous episodes.  For every episode it
+recreates the original 1280x742 W18/W19 image,
 requires the pixel hash to match, and derives model features only from the OHLC
 and SMA/EMA 20/60/120 values visible in that image plus the current raw YOLO
 box/confidence.  The future TP5/SL2/72 outcome is a label only.
@@ -171,9 +172,30 @@ def load_preregistration(path: Path = PREREG_PATH) -> dict[str, Any]:
             )
     if any(payload["safety"].values()):
         raise ShortWindowL2Error("one or more safety switches drifted true")
+    outcome = payload["outcome"]
+    frozen_outcome = (
+        float(outcome["tp_atr_multiple"]),
+        float(outcome["sl_atr_multiple"]),
+        int(outcome["horizon_bars"]),
+        float(outcome["decision_atr_pct_min"]),
+        str(outcome["entry"]),
+        float(outcome["round_trip_cost_fraction"]),
+    )
+    if frozen_outcome != (5.0, 2.0, 72, 0.0015, "next_open", 0.002):
+        raise ShortWindowL2Error(f"outcome/cost contract drifted: {frozen_outcome}")
     holdout = utc(payload["source"]["holdout_start"])
+    if int(payload["source"].get("holdout_rows", -1)) != 0:
+        raise ShortWindowL2Error("source contract does not prove zero holdout rows")
+    if payload["source"].get("network_fetch") is not False:
+        raise ShortWindowL2Error("source contract does not prove zero network fetches")
+    if utc(payload["source"]["snapshot_end_exclusive"]) > holdout:
+        raise ShortWindowL2Error("snapshot reaches beyond holdout boundary")
     if utc(payload["source"]["maximum_available_at_exclusive"]) > holdout:
         raise ShortWindowL2Error("source contract reaches holdout")
+    if utc(payload["source"]["maximum_available_at_exclusive"]) + int(
+        outcome["horizon_bars"]
+    ) * BAR_DELTA > holdout:
+        raise ShortWindowL2Error("maximum outcome exposure reaches beyond holdout")
     return payload
 
 
@@ -185,6 +207,50 @@ def verify_declared_inputs(prereg: Mapping[str, Any]) -> dict[str, dict[str, str
         verify_file(path, str(spec["sha256"]), label)
         verified[label] = {"path": repo_relative(path), "sha256": sha256_file(path)}
     return verified
+
+
+def validate_dataset_receipt(prereg: Mapping[str, Any]) -> dict[str, Any]:
+    """Revalidate every immutable input and output before reusing a dataset."""
+
+    terminal = RESULTS_DIR / "dataset_receipt.json"
+    if not terminal.is_file():
+        raise ShortWindowL2Error("dataset receipt is missing")
+    payload = read_json(terminal)
+    immutable = verify_declared_inputs(prereg)
+    if payload.get("protocol") != prereg["protocol"]:
+        raise ShortWindowL2Error("dataset receipt protocol drifted")
+    if payload.get("experiment_id") != EXPERIMENT_ID:
+        raise ShortWindowL2Error("dataset receipt experiment_id drifted")
+    if payload.get("immutable_inputs") != immutable:
+        raise ShortWindowL2Error("dataset receipt was built from stale immutable inputs")
+    if int(payload.get("holdout_rows_read", -1)) != 0:
+        raise ShortWindowL2Error("dataset receipt reports holdout rows")
+    if int(payload.get("network_reads", -1)) != 0:
+        raise ShortWindowL2Error("dataset receipt reports network reads")
+    if payload.get("production_eligible") is not False:
+        raise ShortWindowL2Error("dataset receipt is not research-only")
+    if payload.get("feature_columns") != list(SHORT_WINDOW_FEATURE_COLUMNS):
+        raise ShortWindowL2Error("dataset receipt feature order drifted")
+    source_path = repo_path(prereg["source"]["dataset_path"])
+    verify_file(source_path, prereg["source"]["dataset_sha256"], "candidate ledger")
+    if payload.get("candidate_ledger_sha256") != prereg["source"]["dataset_sha256"]:
+        raise ShortWindowL2Error("dataset receipt candidate lineage drifted")
+    dataset_path = repo_path(payload["dataset_path"])
+    controls_path = repo_path(payload["matched_controls_path"])
+    verify_file(dataset_path, payload["dataset_sha256"], "short-window dataset")
+    verify_file(controls_path, payload["matched_controls_sha256"], "matched controls")
+    frame = pd.read_csv(
+        dataset_path,
+        usecols=["available_at", "exposure_end_exclusive", "episode_id"],
+    )
+    if len(frame) != int(payload["rows_out"]) or frame["episode_id"].duplicated().any():
+        raise ShortWindowL2Error("dataset receipt row identity drifted")
+    holdout = utc(prereg["source"]["holdout_start"])
+    if (pd.to_datetime(frame["available_at"], utc=True) >= holdout).any():
+        raise ShortWindowL2Error("reused dataset contains holdout decisions")
+    if (pd.to_datetime(frame["exposure_end_exclusive"], utc=True) > holdout).any():
+        raise ShortWindowL2Error("reused dataset labels cross holdout")
+    return payload
 
 
 def validate_candidate_ledger(frame: pd.DataFrame, prereg: Mapping[str, Any]) -> pd.DataFrame:
@@ -308,11 +374,31 @@ def snapshot_specs(prereg: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
         raise ShortWindowL2Error("snapshot receipt reports network reads")
     specs: dict[str, Mapping[str, Any]] = {}
     base = repo_path(prereg["source"]["snapshot_root"])
+    holdout = utc(prereg["source"]["holdout_start"])
+    expected_start = utc(prereg["source"]["snapshot_start"])
+    expected_end = utc(prereg["source"]["snapshot_end_exclusive"])
     for item in receipt["files"]:
         symbol = str(item["symbol"])
+        if symbol in specs:
+            raise ShortWindowL2Error(f"duplicate snapshot symbol: {symbol}")
         path = base / Path(str(item["snapshot_path"])).name
         verify_file(path, str(item["sha256"]), f"snapshot {symbol}")
-        specs[symbol] = {**item, "resolved_path": path}
+        clock = pd.to_datetime(pd.read_csv(path, usecols=["open_time"])["open_time"], utc=True)
+        if len(clock) != int(item["rows"]):
+            raise ShortWindowL2Error(f"snapshot row count drifted for {symbol}")
+        if clock.empty or clock.iloc[0] != expected_start:
+            raise ShortWindowL2Error(f"snapshot start drifted for {symbol}")
+        actual_end = utc(clock.iloc[-1]) + BAR_DELTA
+        if actual_end != expected_end or actual_end > holdout:
+            raise ShortWindowL2Error(
+                f"snapshot end drifted for {symbol}: {actual_end.isoformat()}"
+            )
+        specs[symbol] = {
+            **item,
+            "resolved_path": path,
+            "actual_start": clock.iloc[0].isoformat(),
+            "actual_end_exclusive": actual_end.isoformat(),
+        }
     return specs
 
 
@@ -405,13 +491,40 @@ def validated_outcome_exposure_end(
     return exposure_end
 
 
+def label_preholdout_candidate(
+    frame: pd.DataFrame,
+    signal_i: int,
+    side: str,
+    available_at: pd.Timestamp,
+    prereg: Mapping[str, Any],
+) -> tuple[pd.Timestamp, Any]:
+    """Guard the complete future interval before invoking either labeler."""
+
+    exposure_end = validated_outcome_exposure_end(available_at, prereg)
+    if side not in SIDES:
+        raise ShortWindowL2Error(f"unknown side before labeling: {side}")
+    from yoyo.layers.l2_judgment.labeling import label_candidate, label_short_candidate
+
+    labeler = label_candidate if side == "long" else label_short_candidate
+    outcome = prereg["outcome"]
+    result = labeler(
+        frame,
+        signal_i,
+        tp_mult=float(outcome["tp_atr_multiple"]),
+        sl_mult=float(outcome["sl_atr_multiple"]),
+        horizon=int(outcome["horizon_bars"]),
+        entry="next_open",
+    )
+    return exposure_end, result
+
+
 def build_short_window_dataset(prereg: Mapping[str, Any]) -> dict[str, Any]:
     """Recluster by side, recreate exact L1 inputs, and label future outcomes."""
 
     terminal = RESULTS_DIR / "dataset_receipt.json"
-    if terminal.exists():
-        return read_json(terminal)
     immutable = verify_declared_inputs(prereg)
+    if terminal.exists():
+        return validate_dataset_receipt(prereg)
     source_path = repo_path(prereg["source"]["dataset_path"])
     candidates = validate_candidate_ledger(pd.read_csv(source_path), prereg)
     episodes = build_side_homogeneous_episodes(candidates)
@@ -419,7 +532,6 @@ def build_short_window_dataset(prereg: Mapping[str, Any]) -> dict[str, Any]:
     from yoyo.layers.l1_detection.data import add_mas
     from yoyo.layers.l1_detection.render import render_chart
     from yoyo.data.indicators import add_indicators
-    from yoyo.layers.l2_judgment.labeling import label_candidate, label_short_candidate
     from scripts.research_15m_ma_launch_l2_global_context import split_name
 
     outcome_spec = prereg["outcome"]
@@ -450,17 +562,13 @@ def build_short_window_dataset(prereg: Mapping[str, Any]) -> dict[str, Any]:
             available_at = end_time + BAR_DELTA
             if available_at != utc(row["available_at"]):
                 raise ShortWindowL2Error(f"available_at mismatch for {row['episode_id']}")
-            # This guard intentionally runs before the future-reading labeler.
-            exposure_end = validated_outcome_exposure_end(available_at, prereg)
             side = str(row["side"])
-            labeler = label_candidate if side == "long" else label_short_candidate
-            outcome = labeler(
+            exposure_end, outcome = label_preholdout_candidate(
                 labeled,
                 end,
-                tp_mult=float(outcome_spec["tp_atr_multiple"]),
-                sl_mult=float(outcome_spec["sl_atr_multiple"]),
-                horizon=int(outcome_spec["horizon_bars"]),
-                entry="next_open",
+                side,
+                available_at,
+                prereg,
             )
             if outcome is None:
                 rejected["outcome_unavailable"] += 1
@@ -564,9 +672,29 @@ def build_short_window_dataset(prereg: Mapping[str, Any]) -> dict[str, Any]:
     dataset_path = OUTPUT_DIR / "l2_short_window_dataset.csv"
     dataset.to_csv(dataset_path, index=False)
     controls = build_matched_controls(dataset, prereg, specs)
+    assignments = int(prereg["matched_control"]["deterministic_assignments"])
+    control_frame = pd.DataFrame(controls)
+    if control_frame.empty:
+        raise ShortWindowL2Error("no complete matched-control assignments")
+    assignment_counts = control_frame.groupby("episode_id")["assignment"].nunique()
+    if not (assignment_counts == assignments).all():
+        raise ShortWindowL2Error("matched controls lack complete assignment coverage")
+    exclusion = int(
+        prereg["matched_control"]["dependency_exclusion_bars_within_assignment"]
+    )
+    for (_, symbol), group in control_frame.groupby(["assignment", "symbol"]):
+        ordered = np.sort(group["control_feature_bar_i"].to_numpy(dtype=int))
+        if len(ordered) > 1 and (np.diff(ordered) < exclusion).any():
+            raise ShortWindowL2Error(
+                f"matched controls overlap dependency paths for {symbol}"
+            )
     controls_path = OUTPUT_DIR / "matched_controls.csv"
-    pd.DataFrame(controls).to_csv(controls_path, index=False)
+    control_frame.to_csv(controls_path, index=False)
     representatives = dataset[dataset["dependency_representative"]]
+    final_representatives = representatives[
+        representatives["split"] == "final_validation"
+    ]
+    matched_ids = set(control_frame.get("episode_id", pd.Series(dtype=str)).astype(str))
     payload = {
         "protocol": prereg["protocol"],
         "experiment_id": EXPERIMENT_ID,
@@ -606,7 +734,13 @@ def build_short_window_dataset(prereg: Mapping[str, Any]) -> dict[str, Any]:
         "dataset_path": repo_relative(dataset_path),
         "dataset_sha256": sha256_file(dataset_path),
         "matched_controls": len(controls),
-        "matched_events": len({str(row["episode_id"]) for row in controls}),
+        "matched_events": len(matched_ids),
+        "matched_control_eligible_events": len(final_representatives),
+        "matched_control_unmatched_events": len(final_representatives) - len(matched_ids),
+        "matched_control_complete_assignment_coverage": True,
+        "matched_control_dependency_exclusion_bars": int(
+            prereg["matched_control"]["dependency_exclusion_bars_within_assignment"]
+        ),
         "matched_controls_path": repo_relative(controls_path),
         "matched_controls_sha256": sha256_file(controls_path),
         "holdout_rows_read": 0,
@@ -629,6 +763,7 @@ def _control_pool(
     split = prereg["splits"]["final_preholdout_validation"]
     start = utc(split["available_at_start"])
     end = utc(split["available_at_end_exclusive"])
+    holdout = utc(prereg["source"]["holdout_start"])
     horizon = int(prereg["outcome"]["horizon_bars"])
     prohibited = np.zeros(len(featured), dtype=bool)
     for index in episode_indices:
@@ -639,6 +774,7 @@ def _control_pool(
     valid = (
         (available >= start).to_numpy()
         & (available < end).to_numpy()
+        & ((available + horizon * BAR_DELTA) <= holdout).to_numpy()
         & np.isfinite(atr)
         & (atr >= float(ATR_PCT_MIN))
         & bucket.notna().to_numpy()
@@ -661,8 +797,6 @@ def build_matched_controls(
     """Build eight exact-match control assignments for new dependency reps."""
 
     from yoyo.data.indicators import add_indicators
-    from yoyo.layers.l2_judgment.labeling import label_candidate, label_short_candidate
-
     final = dataset[
         (dataset["split"] == "final_validation") & dataset["dependency_representative"]
     ].copy()
@@ -680,9 +814,13 @@ def build_matched_controls(
 
     outcome = prereg["outcome"]
     assignments = int(prereg["matched_control"]["deterministic_assignments"])
+    dependency_exclusion = int(
+        prereg["matched_control"]["dependency_exclusion_bars_within_assignment"]
+    )
     rows: list[dict[str, Any]] = []
     for assignment in range(assignments):
         used: set[tuple[str, int]] = set()
+        used_by_symbol: dict[str, list[int]] = defaultdict(list)
         order = sorted(
             final.to_dict("records"),
             key=lambda row: hashlib.sha256(
@@ -699,23 +837,33 @@ def build_matched_controls(
                     f"control:{SEED}:{assignment}:{event['episode_id']}:{index}".encode()
                 ).hexdigest(),
             )
-            chosen = next((index for index in ranked if (symbol, index) not in used), None)
+            chosen = next(
+                (
+                    index
+                    for index in ranked
+                    if (symbol, index) not in used
+                    and all(
+                        abs(index - previous) >= dependency_exclusion
+                        for previous in used_by_symbol[symbol]
+                    )
+                ),
+                None,
+            )
             if chosen is None:
                 continue
             side = str(event["side"])
-            labeler = label_candidate if side == "long" else label_short_candidate
-            result = labeler(
+            control_available = utc(frames[symbol]["open_time"].iloc[chosen]) + BAR_DELTA
+            _, result = label_preholdout_candidate(
                 frames[symbol],
                 chosen,
-                tp_mult=float(outcome["tp_atr_multiple"]),
-                sl_mult=float(outcome["sl_atr_multiple"]),
-                horizon=int(outcome["horizon_bars"]),
-                entry="next_open",
+                side,
+                control_available,
+                prereg,
             )
             if result is None:
                 continue
             used.add((symbol, chosen))
-            control_available = utc(frames[symbol]["open_time"].iloc[chosen]) + BAR_DELTA
+            used_by_symbol[symbol].append(chosen)
             rows.append(
                 {
                     "assignment": assignment,
@@ -735,11 +883,56 @@ def build_matched_controls(
                     - float(outcome["round_trip_cost_fraction"]),
                 }
             )
-    return rows
+    if not rows:
+        return rows
+    controls = pd.DataFrame(rows)
+    assignment_sets = controls.groupby("episode_id")["assignment"].agg(
+        lambda values: frozenset(int(value) for value in values)
+    )
+    required = frozenset(range(assignments))
+    complete_ids = set(assignment_sets[assignment_sets == required].index.astype(str))
+    complete = controls[controls["episode_id"].astype(str).isin(complete_ids)].copy()
+    return complete.sort_values(["assignment", "episode_id"]).to_dict("records")
 
 
 def _learning_rows(data: pd.DataFrame, split: str) -> pd.DataFrame:
     return data[(data["split"] == split) & data["dependency_representative"]].copy()
+
+
+def strict_matched_control_metrics(
+    validation: pd.DataFrame,
+    controls: pd.DataFrame,
+    selected_ids: set[str],
+    *,
+    required_assignments: int,
+) -> dict[str, Any]:
+    """Require every selected event to have all independent assignments."""
+
+    metrics = matched_control_metrics(
+        validation,
+        controls,
+        selected_ids,
+        required_assignments=required_assignments,
+    )
+    selected = {str(value) for value in selected_ids}
+    covered = set(
+        controls.loc[
+            controls["episode_id"].astype(str).isin(selected), "episode_id"
+        ].astype(str)
+    )
+    complete = covered == selected
+    metrics.update(
+        {
+            "selected_event_count": len(selected),
+            "selected_event_complete_control_count": len(covered),
+            "selected_event_complete_coverage": complete,
+            "selected_event_missing_controls": sorted(selected - covered),
+        }
+    )
+    metrics["all_assignments_positive"] = bool(
+        metrics["all_assignments_positive"] and complete
+    )
+    return metrics
 
 
 def _train_side(
@@ -845,7 +1038,7 @@ def _metric_bundle(
         "final_validation": safe_metrics(labels, score, returns, cost),
         "frozen_threshold": selected_metrics(final, keep, cost),
         "outcome_permutation_p": outcome_permutation_pvalue(score, returns),
-        "matched_control": matched_control_metrics(
+        "matched_control": strict_matched_control_metrics(
             final,
             controls,
             selected_ids,
@@ -856,11 +1049,68 @@ def _metric_bundle(
     }
 
 
+def validate_training_receipt(
+    prereg: Mapping[str, Any], dataset_receipt: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Fail closed instead of silently reusing a stale training terminal."""
+
+    terminal = RESULTS_DIR / "training_receipt.json"
+    if not terminal.is_file():
+        raise ShortWindowL2Error("training receipt is missing")
+    payload = read_json(terminal)
+    if payload.get("protocol") != prereg["protocol"]:
+        raise ShortWindowL2Error("training receipt protocol drifted")
+    if payload.get("experiment_id") != EXPERIMENT_ID:
+        raise ShortWindowL2Error("training receipt experiment_id drifted")
+    if payload.get("feature_columns") != list(SHORT_WINDOW_FEATURE_COLUMNS):
+        raise ShortWindowL2Error("training receipt feature order drifted")
+    if payload.get("dataset_sha256") != dataset_receipt["dataset_sha256"]:
+        raise ShortWindowL2Error("training receipt dataset lineage drifted")
+    if payload.get("dataset_receipt_sha256") != sha256_file(
+        RESULTS_DIR / "dataset_receipt.json"
+    ):
+        raise ShortWindowL2Error("training receipt dataset receipt drifted")
+    if payload.get("experiment_runner_sha256") != prereg["immutable_inputs"][
+        "experiment runner"
+    ]["sha256"]:
+        raise ShortWindowL2Error("training receipt runner lineage drifted")
+    if set(payload.get("models", {})) != set(SIDES):
+        raise ShortWindowL2Error("training receipt main side models drifted")
+    if set(payload.get("single_feature_baseline_models", {})) != set(SIDES):
+        raise ShortWindowL2Error("training receipt baseline side models drifted")
+    for family in ("models", "single_feature_baseline_models"):
+        for side, spec in payload[family].items():
+            verify_file(repo_path(spec["model_path"]), spec["model_sha256"], f"{family} {side}")
+            verify_file(
+                repo_path(spec["importance_path"]),
+                spec["importance_sha256"],
+                f"{family} importance {side}",
+            )
+    verify_file(
+        repo_path(payload["scored_validation_path"]),
+        payload["scored_validation_sha256"],
+        "scored validation",
+    )
+    forbidden_true = (
+        "holdout_consumed",
+        "promoted",
+        "deployed",
+        "active_or_frozen_changed",
+        "forward_state_changed",
+        "orders_placed",
+        "telegram_sent",
+        "production_eligible",
+    )
+    if any(bool(payload.get(key)) for key in forbidden_true):
+        raise ShortWindowL2Error("training receipt crossed a safety boundary")
+    return payload
+
+
 def train_evaluate(prereg: Mapping[str, Any]) -> dict[str, Any]:
     terminal = RESULTS_DIR / "training_receipt.json"
+    dataset_receipt = validate_dataset_receipt(prereg)
     if terminal.exists():
-        return read_json(terminal)
-    dataset_receipt = read_json(RESULTS_DIR / "dataset_receipt.json")
+        return validate_training_receipt(prereg, dataset_receipt)
     dataset_path = repo_path(dataset_receipt["dataset_path"])
     controls_path = repo_path(dataset_receipt["matched_controls_path"])
     verify_file(dataset_path, dataset_receipt["dataset_sha256"], "short-window dataset")
@@ -917,6 +1167,9 @@ def train_evaluate(prereg: Mapping[str, Any]) -> dict[str, Any]:
         "beats_matched_controls_every_assignment": bool(
             main["matched_control"]["all_assignments_positive"]
         ),
+        "matched_controls_cover_every_selected_event": bool(
+            main["matched_control"]["selected_event_complete_coverage"]
+        ),
         "each_side_minimum_10_selected_dependency_blocks": all(
             main["by_side"][side]["frozen_threshold"]["n"] >= 10 for side in SIDES
         ),
@@ -935,6 +1188,10 @@ def train_evaluate(prereg: Mapping[str, Any]) -> dict[str, Any]:
         "objective": "separate_long_short_regression_on_gross_realized_ret",
         "dataset_path": repo_relative(dataset_path),
         "dataset_sha256": sha256_file(dataset_path),
+        "dataset_receipt_sha256": sha256_file(RESULTS_DIR / "dataset_receipt.json"),
+        "experiment_runner_sha256": prereg["immutable_inputs"]["experiment runner"][
+            "sha256"
+        ],
         "feature_columns": feature_columns,
         "feature_count": len(feature_columns),
         "runtime": runtime_versions(),
@@ -973,10 +1230,20 @@ def _box_corners(row: Mapping[str, Any], width: int, height: int) -> tuple[int, 
 
 def render_review(prereg: Mapping[str, Any]) -> dict[str, Any]:
     terminal = RESULTS_DIR / "render_receipt.json"
+    dataset_receipt = validate_dataset_receipt(prereg)
+    training = validate_training_receipt(prereg, dataset_receipt)
     if terminal.exists():
-        return read_json(terminal)
-    dataset_receipt = read_json(RESULTS_DIR / "dataset_receipt.json")
-    training = read_json(RESULTS_DIR / "training_receipt.json")
+        payload = read_json(terminal)
+        if payload.get("dataset_receipt_sha256") != sha256_file(
+            RESULTS_DIR / "dataset_receipt.json"
+        ) or payload.get("training_receipt_sha256") != sha256_file(
+            RESULTS_DIR / "training_receipt.json"
+        ):
+            raise ShortWindowL2Error("render receipt lineage drifted")
+        verify_file(
+            repo_path(payload["manifest_path"]), payload["manifest_sha256"], "render manifest"
+        )
+        return payload
     data = pd.read_csv(repo_path(dataset_receipt["dataset_path"]))
     scored = pd.read_csv(repo_path(training["scored_validation_path"]))
     scored["dependency_representative"] = bool_series(scored["dependency_representative"])
@@ -1049,6 +1316,8 @@ def render_review(prereg: Mapping[str, Any]) -> dict[str, Any]:
         "future_bars_rendered": 0,
         "manifest_path": repo_relative(manifest_path),
         "manifest_sha256": sha256_file(manifest_path),
+        "dataset_receipt_sha256": sha256_file(RESULTS_DIR / "dataset_receipt.json"),
+        "training_receipt_sha256": sha256_file(RESULTS_DIR / "training_receipt.json"),
         "review_root": repo_relative(review_root),
         "holdout_consumed": False,
     }
@@ -1057,8 +1326,8 @@ def render_review(prereg: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def verify_outputs(prereg: Mapping[str, Any]) -> dict[str, Any]:
-    dataset = read_json(RESULTS_DIR / "dataset_receipt.json")
-    training = read_json(RESULTS_DIR / "training_receipt.json")
+    dataset = validate_dataset_receipt(prereg)
+    training = validate_training_receipt(prereg, dataset)
     render = read_json(RESULTS_DIR / "render_receipt.json")
     rejected = sum(int(value) for value in dataset["reject_reasons"].values())
     checks = {
@@ -1079,6 +1348,10 @@ def verify_outputs(prereg: Mapping[str, Any]) -> dict[str, Any]:
         "model_hashes": all(
             sha256_file(repo_path(spec["model_path"])) == spec["model_sha256"]
             for spec in training["models"].values()
+        ),
+        "baseline_model_hashes": all(
+            sha256_file(repo_path(spec["model_path"])) == spec["model_sha256"]
+            for spec in training["single_feature_baseline_models"].values()
         ),
         "render_manifest_hash": sha256_file(repo_path(render["manifest_path"]))
         == render["manifest_sha256"],

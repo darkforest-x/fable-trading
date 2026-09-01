@@ -39,6 +39,8 @@
     "snapshot_root": "analysis/output/ma_launch_l2_global_context_v1/snapshot",
     "snapshot_receipt_path": "experiments/active/exp-15m-ma-launch-l2-global-context-v1/results/snapshot_receipt.json",
     "snapshot_receipt_sha256": "39dd984da59b259b50025e3736308fba94958e3445eab94c2670a5835a88ab3c",
+    "snapshot_start": "2025-12-24T00:00:00Z",
+    "snapshot_end_exclusive": "2026-05-04T00:00:00Z",
     "maximum_available_at_exclusive": "2026-05-03T06:00:00Z",
     "holdout_start": "2026-05-04T00:00:00Z",
     "holdout_rows": 0,
@@ -75,7 +77,7 @@
     },
     "experiment runner": {
       "path": "scripts/research_15m_ma_launch_l2_short_window_side_split.py",
-      "sha256": "c3e8d64c5fe74dc87f71efeaec064204a958c5be53a3e04703d230865963c423"
+      "sha256": "f71b34a2d7db38abe0f02527567fdf2852c9d9decf8bd1ba4cd801a7ebe2a4e1"
     }
   },
   "short_window_contract": {
@@ -159,9 +161,11 @@
       "same horizon, barriers, entry and cost"
     ],
     "exclusion_bars_around_any_l1_episode": 72,
+    "dependency_exclusion_bars_within_assignment": 72,
     "deterministic_assignments": 8,
     "replacement_within_assignment": false,
-    "fallback": "never relax; report unmatched events"
+    "complete_assignment_policy": "retain an event only when all 8 assignments are available",
+    "fallback": "never relax; report unmatched events and fail the matched-control gate when any selected event is unmatched"
   },
   "model": {
     "sides": ["long", "short"],
