@@ -19,6 +19,7 @@ from scripts.research_15m_ma_launch_l2_global_context import (
     feature_outcome_row,
     load_preregistration,
     matched_control_metrics,
+    outcome_permutation_pvalue,
     overlaps_any_interval,
     pixel_sha256,
     render_global_chart,
@@ -101,7 +102,7 @@ def test_preregistration_freezes_no_holdout_and_owner_safety() -> None:
         assert observed[package] == expected
 
 
-def test_split_boundaries_leave_exact_18_hour_purges() -> None:
+def test_split_boundaries_leave_exact_60_hour_full_exposure_purges() -> None:
     prereg = _prereg()
     assert split_name(utc("2026-02-26T11:45:00Z"), prereg) == "train"
     assert split_name(utc("2026-02-26T12:00:00Z"), prereg) == "purge"
@@ -351,6 +352,18 @@ def test_matched_control_gate_fails_when_one_required_assignment_is_empty() -> N
     assert metrics["missing_assignments"] == [1]
     assert metrics["complete_assignment_coverage"] is False
     assert metrics["all_assignments_positive"] is False
+
+
+def test_outcome_permutation_is_deterministic_and_conservative_under_ties() -> None:
+    scores = np.arange(100, dtype=float)
+    aligned_returns = np.concatenate([np.zeros(90), np.ones(10)])
+    first = outcome_permutation_pvalue(scores, aligned_returns, n_perm=999)
+    second = outcome_permutation_pvalue(scores, aligned_returns, n_perm=999)
+    assert first == second
+    assert first < 0.01
+
+    tied_returns = np.ones(100)
+    assert outcome_permutation_pvalue(scores, tied_returns, n_perm=999) == 1.0
 
 
 def test_global_chart_recreates_exact_l1_pixels_before_reprojecting_box() -> None:
