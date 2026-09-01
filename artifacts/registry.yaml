@@ -9917,3 +9917,173 @@ artifacts:
       Written and committed before semantic scoring. Freezes source hashes,
       exact inherited thresholds, paired direction-flip null, no-retuning rule,
       full-future delivery contract and checkpoint holdout consumption #7.
+
+  - artifact_id: 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-summary
+    artifact_type: manifest
+    role: locked_4h_holdout_semantic_gate_result_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1462abe6b576ba40e3b811b4b5d9949a5e3cff6c"
+    source_path: experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/summary.json
+    sha256: "ef1220a2d62fc48248776873ddd9fd69737728f3048ede6f17ac78d0f39ce97f"
+    size_bytes: 113764
+    storage_uri: "file://experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1462abe6b576ba40e3b811b4b5d9949a5e3cff6c"
+    config_hash: "fda9ee213c08ed7d7202ae3c990ded155133ef08154d245d79fbfb81e03634ce"
+    data_cutoff: "2026-09-01T12:00:00Z"
+    notes: Records the locked 1,764-to-256 box and 221-to-34 event funnel, failure reasons and paired direction-flip null.
+
+  - artifact_id: 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-decisions
+    artifact_type: manifest
+    role: all_causal_semantic_features_predicates_and_decisions
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1462abe6b576ba40e3b811b4b5d9949a5e3cff6c"
+    source_path: experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/semantic_boxes.jsonl
+    sha256: "a6685e20ad719309e19270ead158bf6a266b2fc9cd5a7eb91231d096084c03e6"
+    size_bytes: 5306228
+    storage_uri: "file://experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/semantic_boxes.jsonl"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1462abe6b576ba40e3b811b4b5d9949a5e3cff6c"
+    config_hash: "fda9ee213c08ed7d7202ae3c990ded155133ef08154d245d79fbfb81e03634ce"
+    data_cutoff: "2026-09-01T12:00:00Z"
+    notes: One immutable record per structural box; every feature frame ends at the model-input endpoint and uses zero future bars.
+
+  - artifact_id: 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-verification
+    artifact_type: manifest
+    role: independent_recomputation_and_lineage_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1462abe6b576ba40e3b811b4b5d9949a5e3cff6c"
+    source_path: experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/verification.json
+    sha256: "a07fa0ea4d929b0c00b0a72ca62ca38372ee3210745a616fd4d945535fd09a9f"
+    size_bytes: 589
+    storage_uri: "file://experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/verification.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1462abe6b576ba40e3b811b4b5d9949a5e3cff6c"
+    config_hash: "fda9ee213c08ed7d7202ae3c990ded155133ef08154d245d79fbfb81e03634ce"
+    data_cutoff: "2026-09-01T12:00:00Z"
+    notes: Independently recomputed 1,764 decisions and input pixels, 221 pairs, 34 events and 34 chart hashes.
+
+  - artifact_id: 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-overview
+    artifact_type: report
+    role: paired_control_treatment_funnel_and_failure_reason_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1462abe6b576ba40e3b811b4b5d9949a5e3cff6c"
+    source_path: experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/paired_gate_overview.png
+    sha256: "e48874dadc588bd17bb94ec569ee94e784b93faf957136b28010266fb960135c"
+    size_bytes: 84936
+    storage_uri: "file://experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/paired_gate_overview.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1462abe6b576ba40e3b811b4b5d9949a5e3cff6c"
+    config_hash: "fda9ee213c08ed7d7202ae3c990ded155133ef08154d245d79fbfb81e03634ce"
+    data_cutoff: "2026-09-01T12:00:00Z"
+    notes: Paired descriptive chart; it does not score returns or use future candles in the gate.
+
+  - artifact_id: 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-gallery-receipt
+    artifact_type: manifest
+    role: full_future_chart_sha_and_render_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "08a01552972fa086ffdb029db9069ab572eb1ade"
+    source_path: experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/global_future_gallery_receipt.json
+    sha256: "0ccf3c7a531908b9acbfa5b460a3bfd318fa80aa2dac8b030c9bf4ae3de11b6f"
+    size_bytes: 19642
+    storage_uri: "file://experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/global_future_gallery_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "08a01552972fa086ffdb029db9069ab572eb1ade"
+    config_hash: "fda9ee213c08ed7d7202ae3c990ded155133ef08154d245d79fbfb81e03634ce"
+    data_cutoff: "2026-09-01T12:00:00Z"
+    notes: Hashes all 34 1920x1400 charts, each containing the complete frozen future after first signal.
+
+  - artifact_id: 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-gallery
+    artifact_type: report
+    role: owner_facing_all_global_future_kline_originals
+    source_repo: darkforest-x/fable-trading
+    source_commit: "08a01552972fa086ffdb029db9069ab572eb1ade"
+    source_path: experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/all_global_future_charts.html
+    sha256: "7a1d73c93d01d44961c8f24065ec993c4579f865757a1e36df69f06c9a004ea4"
+    size_bytes: 24589
+    storage_uri: "file://experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/all_global_future_charts.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "08a01552972fa086ffdb029db9069ab572eb1ade"
+    config_hash: "fda9ee213c08ed7d7202ae3c990ded155133ef08154d245d79fbfb81e03634ce"
+    data_cutoff: "2026-09-01T12:00:00Z"
+    notes: Interactive index for all 34 full-global-future originals; review-only future is physically separate from model and gate inputs.
+
+  - artifact_id: 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-code-audit
+    artifact_type: manifest
+    role: preregistered_scoring_code_identity_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "08a01552972fa086ffdb029db9069ab572eb1ade"
+    source_path: experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/code_identity_audit.json
+    sha256: "7086fe4571340caee56658de0bf9ff42d13559acd009721aa8a9ee5426982bb4"
+    size_bytes: 2091
+    storage_uri: "file://experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/code_identity_audit.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "08a01552972fa086ffdb029db9069ab572eb1ade"
+    config_hash: "fda9ee213c08ed7d7202ae3c990ded155133ef08154d245d79fbfb81e03634ce"
+    data_cutoff: "2026-09-01T12:00:00Z"
+    notes: Confirms every scoring code hash matches preregistration; only the documented delivery filename fallback changed.
+
+  - artifact_id: 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-delivery-fix
+    artifact_type: manifest
+    role: delivery_only_gallery_filename_fix_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "08a01552972fa086ffdb029db9069ab572eb1ade"
+    source_path: experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/delivery_builder_fix.json
+    sha256: "7e2a59a127544fbf6f37b2bffdce503631cfc40ef4b9a4ee2f915c6e4f9cf3e9"
+    size_bytes: 890
+    storage_uri: "file://experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/delivery_builder_fix.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "08a01552972fa086ffdb029db9069ab572eb1ade"
+    config_hash: "fda9ee213c08ed7d7202ae3c990ded155133ef08154d245d79fbfb81e03634ce"
+    data_cutoff: "2026-09-01T12:00:00Z"
+    notes: The first gallery attempt wrote no chart; this records the filename-only repair and unchanged event hashes.
+
+  - artifact_id: 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-report
+    artifact_type: report
+    role: canonical_holdout_semantic_gate_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8af624a70e9190efd1037183e168ea3aac889af1"
+    source_path: analysis/p1_4h_ma_launch_yolo_halfmonth_semantic_gate_20260902.md
+    sha256: "592937c59f10ecabc9d7f594e58f039247804b8eb9ddf95e268a131e426c93e9"
+    size_bytes: 11942
+    storage_uri: "repo://analysis/p1_4h_ma_launch_yolo_halfmonth_semantic_gate_20260902.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8af624a70e9190efd1037183e168ea3aac889af1"
+    config_hash: "fda9ee213c08ed7d7202ae3c990ded155133ef08154d245d79fbfb81e03634ce"
+    data_cutoff: "2026-09-01T12:00:00Z"
+    notes: Canonical report including control comparison, null, limits, risks and full reproduction commands.
+
+  - artifact_id: 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_holdout_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8af624a70e9190efd1037183e168ea3aac889af1"
+    source_path: analysis/html/p1_4h_ma_launch_yolo_halfmonth_semantic_gate_20260902.html
+    sha256: "512106fc5ae5510441d54736db622f9ec09b1de02888b38b2d5c189d2caf203a"
+    size_bytes: 130707
+    storage_uri: "repo://analysis/html/p1_4h_ma_launch_yolo_halfmonth_semantic_gate_20260902.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8af624a70e9190efd1037183e168ea3aac889af1"
+    config_hash: "fda9ee213c08ed7d7202ae3c990ded155133ef08154d245d79fbfb81e03634ce"
+    data_cutoff: "2026-09-01T12:00:00Z"
+    notes: Self-contained HTML report with the paired overview embedded and direct link to the complete-future gallery.
