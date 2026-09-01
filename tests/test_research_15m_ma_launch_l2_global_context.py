@@ -19,6 +19,8 @@ from scripts.research_15m_ma_launch_l2_global_context import (
     load_preregistration,
     matched_control_metrics,
     overlaps_any_interval,
+    pixel_sha256,
+    render_global_chart,
     split_name,
     utc,
 )
@@ -58,6 +60,21 @@ def _featured_frame(rows: int = 3_000) -> pd.DataFrame:
         if column not in frame:
             frame[column] = 0.1
     return frame
+
+
+def _ohlcv_frame(rows: int = 400) -> pd.DataFrame:
+    times = pd.date_range("2026-03-20", periods=rows, freq="15min", tz="UTC")
+    close = 100 + np.linspace(0, 4, rows) + np.sin(np.arange(rows) / 11) * 0.4
+    return pd.DataFrame(
+        {
+            "open_time": times,
+            "open": close - 0.05,
+            "high": close + 0.25,
+            "low": close - 0.25,
+            "close": close,
+            "volume": 1_000 + np.arange(rows),
+        }
+    )
 
 
 def test_preregistration_freezes_no_holdout_and_owner_safety() -> None:
@@ -304,3 +321,42 @@ def test_matched_control_gate_fails_when_one_required_assignment_is_empty() -> N
     assert metrics["missing_assignments"] == [1]
     assert metrics["complete_assignment_coverage"] is False
     assert metrics["all_assignments_positive"] is False
+
+
+def test_global_chart_recreates_exact_l1_pixels_before_reprojecting_box() -> None:
+    from yoyo.layers.l1_detection.data import add_mas
+    from yoyo.layers.l1_detection.render import render_chart
+
+    frame = _ohlcv_frame()
+    signal_i = 300
+    window_start_i = signal_i - 17
+    exact_input, _ = render_chart(
+        add_mas(frame).iloc[window_start_i : signal_i + 1], out_path=None
+    )
+    row = {
+        "episode_id": "render_parity",
+        "symbol": "BTC_USDT_SWAP",
+        "side": "long",
+        "class_id": 0,
+        "feature_bar_i": signal_i,
+        "window_start_i": window_start_i,
+        "prediction_cx_norm": 0.5,
+        "prediction_cy_norm": 0.5,
+        "prediction_w_norm": 0.2,
+        "prediction_h_norm": 0.2,
+        "input_pixel_sha256": pixel_sha256(exact_input),
+        "l2_keep": True,
+        "l2_score": 0.02,
+        "l2_threshold": 0.01,
+        "l1_confidence": 0.8,
+        "available_at": (
+            utc(frame.loc[signal_i, "open_time"]) + BAR_DELTA
+        ).isoformat(),
+    }
+    rendered = render_global_chart(row, frame)
+    assert rendered.shape == (1250, 1920, 3)
+    assert np.any(np.all(rendered == np.array([35, 165, 45]), axis=2))
+
+    row["input_pixel_sha256"] = "0" * 64
+    with pytest.raises(L2ExperimentError, match="pixel parity failed"):
+        render_global_chart(row, frame)
