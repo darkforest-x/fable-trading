@@ -1,0 +1,123 @@
+{
+  "protocol": "15m_grade_a_l2_feature_group_ablation_v1",
+  "experiment_id": "exp-15m-ma-launch-l2-feature-group-ablation-v1",
+  "created_at": "2026-09-02T00:00:00Z",
+  "owner_authorization": {
+    "request": "为什么只有28个 或者为啥是这28个？那你去试试啊",
+    "interpreted_scope": "Run a preregistered feature-subset ablation on the existing real YOLO-candidate L2 dataset, select LONG and SHORT feature sets on tune only, then evaluate the frozen selections on the pre-holdout final-validation interval.",
+    "training_authorized": true,
+    "holdout_read_authorized": false,
+    "promotion_or_production_authorized": false
+  },
+  "question": "Which causal feature groups add time-out-of-sample economic ranking value beyond MA-density structure for the current real YOLO candidate distribution?",
+  "single_variable": "Only the ordered feature-column subset changes. Data, labels, side split, dependency representatives, model parameters, tune q90 rule, costs, and evaluation intervals stay fixed.",
+  "source": {
+    "dataset_path": "analysis/output/ma_launch_l2_global_context_v1/l2_dataset.csv",
+    "dataset_sha256": "e7b6f94cf59493c1f33e46c2f08fe5252a0a6e80406ab43a061fd112fc70f798",
+    "dataset_rows": 3779,
+    "matched_controls_path": "analysis/output/ma_launch_l2_global_context_v1/matched_controls.csv",
+    "matched_controls_sha256": "e4b654a45f72a337bc58e7f97d19044218c9521a5341ed0293199384de98d1ec",
+    "prior_side_split_receipt": "experiments/active/exp-15m-ma-launch-l2-side-split-v1/results/training_receipt.json",
+    "prior_side_split_receipt_sha256": "16296133ccbe181df1a0a255245685810ac1ecdba877a55f1a524a699175198f",
+    "prior_side_split_scores": "analysis/output/ma_launch_l2_side_split_v1/final_validation_side_split_scored.csv",
+    "prior_side_split_scores_sha256": "5b63941e21fe56930c2aec78c54fe93430cdab6576bfff5dbb50d743e4134c25",
+    "holdout_rows": 0
+  },
+  "frozen_contract": {
+    "sides": ["long", "short"],
+    "feature_semantics": "side_aligned_v1 already materialized in source rows",
+    "feature_builder": "yoyo/layers/l2_judgment/features.py",
+    "feature_builder_sha256": "2fed40ed52440d4c76c0f74c5638a707449c2d6c1f56f91bb2030c914a1cddfa",
+    "training_builder": "yoyo/layers/l2_judgment/train.py",
+    "training_builder_sha256": "30ebb563e07e6adbc21725efa4817df56a73106a8cec583cba17dea46c3d89dc",
+    "objective": "LightGBM regression on gross realized_ret",
+    "tp_atr_multiple": 5.0,
+    "sl_atr_multiple": 2.0,
+    "horizon_bars": 72,
+    "round_trip_cost_fraction": 0.002,
+    "fit_tune_evaluation_rows": "dependency_representative=true only",
+    "split_order": ["train", "purge", "tune", "final_validation"],
+    "threshold": "separate 90th percentile of each side's tune scores",
+    "aggregate_score": "empirical percentile within the matching side's tune-score distribution",
+    "random_split": false,
+    "holdout_read": false
+  },
+  "feature_groups": {
+    "ma_structure": ["ma_spread_pct", "full_spread", "fast_slow_gap", "full_ratio_min48", "spread_mean8", "spread_mean24", "spread_chg8", "spread_chg24", "spread_pos96", "dense_run_len", "dense_frac48"],
+    "price_trend": ["ext_up", "close_vs_ema55", "close_vs_ema200", "order_score", "slow_slope_12"],
+    "volume": ["volume_ratio", "volume_z", "vol_ratio_mean8"],
+    "volatility": ["atr_pct", "atr_pct_ratio96", "pre_range48", "pre_range168", "drawdown24"],
+    "momentum": ["ret_4", "ret_12", "ret_24", "ret_48"]
+  },
+  "arms_in_fixed_order": [
+    {"name": "ma_spread_only", "groups": [], "columns": ["ma_spread_pct"]},
+    {"name": "ma_structure", "groups": ["ma_structure"]},
+    {"name": "context_only", "groups": ["price_trend", "volume", "volatility", "momentum"]},
+    {"name": "ma_plus_trend", "groups": ["ma_structure", "price_trend"]},
+    {"name": "ma_plus_trend_volume", "groups": ["ma_structure", "price_trend", "volume"]},
+    {"name": "ma_plus_trend_volume_volatility", "groups": ["ma_structure", "price_trend", "volume", "volatility"]},
+    {"name": "full_28", "groups": ["ma_structure", "price_trend", "volume", "volatility", "momentum"]}
+  ],
+  "selection": {
+    "performed_separately_by_side": true,
+    "interval": "tune only",
+    "primary_metric": "fractional tie-aware top-decile net mean",
+    "tie_breakers": ["Spearman score-vs-return descending", "feature count ascending", "fixed arm order"],
+    "health_requirements": {
+      "best_iteration_minimum": 2,
+      "distinct_tune_scores_minimum": 10,
+      "tune_q90_pass_rate_maximum": 0.25
+    },
+    "fallback_if_no_healthy_arm": "full_28",
+    "final_validation_used_for_selection": false
+  },
+  "final_evaluation": {
+    "eligible_configuration": "one tune-selected arm per side only",
+    "diagnostic_baselines": ["full_28", "ma_spread_only"],
+    "primary_gate": {
+      "baseline_reproduction_required": true,
+      "aggregate_selected_q90_net_strictly_better_than_full_28": true,
+      "aggregate_selected_top_decile_net_positive": true,
+      "aggregate_outcome_permutation_p_lt": 0.01,
+      "aggregate_minimum_selected_dependency_blocks": 30,
+      "aggregate_beats_matched_controls_every_assignment": true,
+      "each_side_minimum_selected_dependency_blocks": 10,
+      "neither_side_selected_q90_net_negative": true
+    }
+  },
+  "model": {
+    "seed": 42,
+    "deterministic_params": {
+      "device_type": "cpu",
+      "deterministic": true,
+      "force_col_wise": true,
+      "num_threads": 1,
+      "data_random_seed": 42,
+      "feature_fraction_seed": 42,
+      "bagging_seed": 42,
+      "extra_seed": 42
+    },
+    "hyperparameter_search": false
+  },
+  "outputs": {
+    "local_output": "analysis/output/ma_launch_l2_feature_group_ablation_v1",
+    "committed_results": "experiments/active/exp-15m-ma-launch-l2-feature-group-ablation-v1/results",
+    "report": "analysis/p3_15m_ma_launch_l2_feature_group_ablation_20260902.md",
+    "html": "analysis/html/p3_15m_ma_launch_l2_feature_group_ablation_20260902.html"
+  },
+  "safety": {
+    "holdout_read": false,
+    "l1_rescanned": false,
+    "features_recomputed": false,
+    "labels_changed": false,
+    "barriers_or_cost_changed": false,
+    "threshold_tuned_on_final_validation": false,
+    "promoted": false,
+    "deployed": false,
+    "active_or_frozen_changed": false,
+    "forward_state_changed": false,
+    "orders_placed": false,
+    "telegram_sent": false,
+    "production_eligible": false
+  }
+}
