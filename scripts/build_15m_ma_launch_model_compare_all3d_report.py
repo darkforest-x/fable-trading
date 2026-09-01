@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -20,6 +21,13 @@ from typing import Any, Iterable, Mapping, Sequence
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+# This file is part of the owner-facing reproduction command and must work
+# when invoked directly.  In that mode Python otherwise exposes only the
+# ``scripts/`` directory, so the package import below cannot resolve.
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from scripts.scan_15m_ma_launch_model_compare_all3d import (
     EXPECTED_MODEL_KEYS,
@@ -30,7 +38,6 @@ from scripts.scan_15m_ma_launch_model_compare_all3d import (
 )
 
 
-ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT = ROOT / "analysis" / "output" / "ma_launch_model_compare_all3d_20260831_v1"
 DEFAULT_RESULTS = ROOT / "experiments" / "active" / EXPERIMENT_ID / "results"
 DEFAULT_REPORT = ROOT / "analysis" / "p1_15m_ma_launch_five_model_alluniverse_20260831.md"

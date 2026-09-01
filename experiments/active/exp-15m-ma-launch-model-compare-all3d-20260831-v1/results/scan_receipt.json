@@ -1,0 +1,537 @@
+{
+  "active_or_frozen_changed": false,
+  "batch_size": 32,
+  "complete_days": [
+    "2026-08-28T00:00:00+00:00",
+    "2026-08-29T00:00:00+00:00",
+    "2026-08-30T00:00:00+00:00"
+  ],
+  "deployed": false,
+  "device": "0",
+  "experiment_id": "exp-15m-ma-launch-model-compare-all3d-20260831-v1",
+  "forward_state_changed": false,
+  "generated_at": "2026-08-31T23:41:38.664706+00:00",
+  "models": {
+    "grade_a8k_neg24k_epoch6_960": {
+      "candidate_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/grade_a8k_neg24k_epoch6_960/accepted_candidates.csv",
+      "candidate_csv_sha256": "5fcb51dd331af047ed4a73d3bfae34a76a2f0093e7de39e3c58c3542942d24b7",
+      "detector_contract": {
+        "bar": "15m",
+        "class_names": {
+          "0": "dense_long",
+          "1": "dense_short"
+        },
+        "confidence": 0.25,
+        "future_bars_rendered_into_inference": 0,
+        "imgsz": 960,
+        "mapped_confirmation_bars_allowed": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "mapped_core_length_bars_allowed": [
+          4,
+          5
+        ],
+        "model_input_native_png": "1280x742 rendered chart, YOLO inference at native imgsz=960",
+        "nms_iou": 0.7,
+        "same_symbol_event_gap_bars": 5,
+        "scan_endpoint_extension_after_day_bars": 9,
+        "threshold_or_window_retuning_after_results": false,
+        "window_lengths": [
+          18,
+          19
+        ]
+      },
+      "display_name": "Grade-A 8k + 24k negatives · epoch 6 · native 960",
+      "episode_classes": {
+        "dense_long": 276,
+        "dense_short": 251
+      },
+      "episodes_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/grade_a8k_neg24k_epoch6_960/episodes.csv",
+      "episodes_csv_sha256": "2a41113e0628db75c20180904408c6fed8145f351fed09aa387a452cd51703e7",
+      "five_bar_events": 535,
+      "five_bar_events_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/grade_a8k_neg24k_epoch6_960/five_bar_events.csv",
+      "five_bar_events_csv_sha256": "02085509d8e1349767eb61d26c01e35a0290ba0dd526e2b52c9f231f7f89b1a4",
+      "holdout_consumption_number_for_this_configuration": 3,
+      "immutable_inputs": {
+        "renderer": {
+          "path": "yoyo/layers/l1_detection/render.py",
+          "sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+        },
+        "training_support": {
+          "manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+          "manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+          "positive_confirmations_observed": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "positive_cores_observed": [
+            4,
+            5
+          ],
+          "positive_rows": 8000,
+          "positive_windows_observed": [
+            18,
+            19
+          ]
+        },
+        "weights": {
+          "path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960/weights/best.pt",
+          "sha256": "0524e78086face6ccba0f2bb220dadada4555a914c64a4e6794f620fa0d9103f"
+        }
+      },
+      "model_key": "grade_a8k_neg24k_epoch6_960",
+      "native_imgsz": 960,
+      "overlap_episodes": 527,
+      "raw_candidates": 3958,
+      "scan_stats_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/grade_a8k_neg24k_epoch6_960/scan_stats.csv",
+      "scan_stats_csv_sha256": "becf5f164859bb0a87b1cb750c8a92740e189f3a6f166b01b6bb1bb43648419d",
+      "scan_totals": {
+        "accepted_before_dedup": 3958,
+        "accepted_structural_boxes": 3958,
+        "dedup_removed": 3423,
+        "deduplicated_events": 535,
+        "raw_boxes": 4623,
+        "reject_confirmation": 369,
+        "reject_core_length": 25,
+        "reject_core_outside_ranked_day": 271,
+        "windows_scored": 172620,
+        "windows_with_any_box": 4396
+      },
+      "weights_sha256": "0524e78086face6ccba0f2bb220dadada4555a914c64a4e6794f620fa0d9103f"
+    },
+    "grade_a8k_neg24k_full40_1280": {
+      "candidate_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/grade_a8k_neg24k_full40_1280/accepted_candidates.csv",
+      "candidate_csv_sha256": "2604106e1a0a6c0b57a171b7c49edac7ab23844c4b6096442e2c26e40df65c66",
+      "detector_contract": {
+        "bar": "15m",
+        "class_names": {
+          "0": "dense_long",
+          "1": "dense_short"
+        },
+        "confidence": 0.25,
+        "future_bars_rendered_into_inference": 0,
+        "imgsz": 1280,
+        "mapped_confirmation_bars_allowed": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "mapped_core_length_bars_allowed": [
+          4,
+          5
+        ],
+        "model_input_native_png": "1280x742 rendered chart, YOLO inference at native imgsz=1280",
+        "nms_iou": 0.7,
+        "same_symbol_event_gap_bars": 5,
+        "scan_endpoint_extension_after_day_bars": 9,
+        "threshold_or_window_retuning_after_results": false,
+        "window_lengths": [
+          18,
+          19
+        ]
+      },
+      "display_name": "Grade-A 8k + 24k negatives · full40 · native 1280",
+      "episode_classes": {
+        "dense_long": 226,
+        "dense_short": 293
+      },
+      "episodes_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/grade_a8k_neg24k_full40_1280/episodes.csv",
+      "episodes_csv_sha256": "edaea15746e131c4cc78b02d7b437acca9e0e947834870938193d5ba40f08516",
+      "five_bar_events": 522,
+      "five_bar_events_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/grade_a8k_neg24k_full40_1280/five_bar_events.csv",
+      "five_bar_events_csv_sha256": "6705f4c36e76608a9c29bd9364bf9207eedeeff9e8ceb56cfb8ce0bb8ea56efd",
+      "holdout_consumption_number_for_this_configuration": 2,
+      "immutable_inputs": {
+        "renderer": {
+          "path": "yoyo/layers/l1_detection/render.py",
+          "sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+        },
+        "training_support": {
+          "manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+          "manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+          "positive_confirmations_observed": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "positive_cores_observed": [
+            4,
+            5
+          ],
+          "positive_rows": 8000,
+          "positive_windows_observed": [
+            18,
+            19
+          ]
+        },
+        "weights": {
+          "path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+          "sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838"
+        }
+      },
+      "model_key": "grade_a8k_neg24k_full40_1280",
+      "native_imgsz": 1280,
+      "overlap_episodes": 519,
+      "raw_candidates": 3759,
+      "scan_stats_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/grade_a8k_neg24k_full40_1280/scan_stats.csv",
+      "scan_stats_csv_sha256": "96fa871a4ccbc3dcf6a93f9c0d26cdd66fecd50807ad68fb3fed5b3fb44da7e5",
+      "scan_totals": {
+        "accepted_before_dedup": 3759,
+        "accepted_structural_boxes": 3759,
+        "dedup_removed": 3237,
+        "deduplicated_events": 522,
+        "raw_boxes": 4345,
+        "reject_confirmation": 421,
+        "reject_core_length": 10,
+        "reject_core_outside_ranked_day": 155,
+        "windows_scored": 172620,
+        "windows_with_any_box": 4228
+      },
+      "weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838"
+    },
+    "legacy_owner_10k_neg30k_960": {
+      "candidate_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/legacy_owner_10k_neg30k_960/accepted_candidates.csv",
+      "candidate_csv_sha256": "2e6142a01795b69bad3b6d9672611178e9a83408e5bd7461b82aa34747d345b8",
+      "detector_contract": {
+        "bar": "15m",
+        "class_names": {
+          "0": "dense_long",
+          "1": "dense_short"
+        },
+        "confidence": 0.25,
+        "future_bars_rendered_into_inference": 0,
+        "imgsz": 960,
+        "mapped_confirmation_bars_allowed": [
+          4,
+          5,
+          6
+        ],
+        "mapped_core_length_bars_allowed": [
+          4,
+          5
+        ],
+        "model_input_native_png": "1280x742 rendered chart, YOLO inference at native imgsz=960",
+        "nms_iou": 0.7,
+        "same_symbol_event_gap_bars": 5,
+        "scan_endpoint_extension_after_day_bars": 6,
+        "threshold_or_window_retuning_after_results": false,
+        "window_lengths": [
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25
+        ]
+      },
+      "display_name": "Owner 10k + 30k negatives · native 960",
+      "episode_classes": {
+        "dense_long": 664,
+        "dense_short": 707
+      },
+      "episodes_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/legacy_owner_10k_neg30k_960/episodes.csv",
+      "episodes_csv_sha256": "d8b65b8d81c29afe8106c5bf1a43e92838f0a33ad8fe55023e7c61e13d7d46a9",
+      "five_bar_events": 1642,
+      "five_bar_events_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/legacy_owner_10k_neg30k_960/five_bar_events.csv",
+      "five_bar_events_csv_sha256": "79c2dcfad7d0706df5a48366208b14c27d7d56252f4926ba13f136dc891298cf",
+      "holdout_consumption_number_for_this_configuration": 6,
+      "immutable_inputs": {
+        "renderer": {
+          "path": "yoyo/layers/l1_detection/render.py",
+          "sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+        },
+        "training_support": {
+          "manifest": "datasets/ma_launch_owner_autofill10000_yolo_neg30000_v2/manifest.jsonl",
+          "manifest_sha256": "6e601034ab15765a74b788cc6d094e9326c3044c1fb615c908ef9de897d6e0af",
+          "positive_confirmations_observed": [
+            4,
+            5,
+            6
+          ],
+          "positive_cores_observed": [
+            4,
+            5
+          ],
+          "positive_rows": 10000,
+          "positive_windows_observed": [
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25
+          ]
+        },
+        "weights": {
+          "path": "analysis/output/ma_launch_owner_yolo_neg30000_v2/ma_launch_owner_yolo_neg30000_v2_y11s_ft960/weights/best.pt",
+          "sha256": "58888f996f7da46d4321316964085e90855d00e4c0a14e18c98b303c6e43c182"
+        }
+      },
+      "model_key": "legacy_owner_10k_neg30k_960",
+      "native_imgsz": 960,
+      "overlap_episodes": 1371,
+      "raw_candidates": 29954,
+      "scan_stats_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/legacy_owner_10k_neg30k_960/scan_stats.csv",
+      "scan_stats_csv_sha256": "a8d2f6245788827eccf0c9a78173ba1117c18b84675d8baa6e1b732e222a4ec3",
+      "scan_totals": {
+        "accepted_before_dedup": 29954,
+        "accepted_structural_boxes": 29954,
+        "dedup_removed": 28312,
+        "deduplicated_events": 1642,
+        "raw_boxes": 38390,
+        "reject_confirmation": 7443,
+        "reject_core_length": 128,
+        "reject_core_outside_ranked_day": 865,
+        "windows_scored": 670752,
+        "windows_with_any_box": 34178
+      },
+      "weights_sha256": "58888f996f7da46d4321316964085e90855d00e4c0a14e18c98b303c6e43c182"
+    },
+    "legacy_t3_10k_1280": {
+      "candidate_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/legacy_t3_10k_1280/accepted_candidates.csv",
+      "candidate_csv_sha256": "aeda3055f95cc252ccf0641097c0a8098899ceaab13dc00779cf9dc62fd9ce19",
+      "detector_contract": {
+        "bar": "15m",
+        "class_names": {
+          "0": "dense_long",
+          "1": "dense_short"
+        },
+        "confidence": 0.25,
+        "future_bars_rendered_into_inference": 0,
+        "imgsz": 1280,
+        "mapped_confirmation_bars_allowed": [
+          3,
+          4,
+          5
+        ],
+        "mapped_core_length_bars_allowed": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "model_input_native_png": "1280x742 rendered chart, YOLO inference at native imgsz=1280",
+        "nms_iou": 0.7,
+        "same_symbol_event_gap_bars": 5,
+        "scan_endpoint_extension_after_day_bars": 5,
+        "threshold_or_window_retuning_after_results": false,
+        "window_lengths": [
+          14,
+          18,
+          22
+        ]
+      },
+      "display_name": "Legacy t-3 weak-label 10k · native 1280",
+      "episode_classes": {
+        "dense_long": 364,
+        "dense_short": 414
+      },
+      "episodes_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/legacy_t3_10k_1280/episodes.csv",
+      "episodes_csv_sha256": "ff6654ce953ea1dde581778f9f1c35ccd460fb774bbc66ef581fa6ef308c9301",
+      "five_bar_events": 1010,
+      "five_bar_events_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/legacy_t3_10k_1280/five_bar_events.csv",
+      "five_bar_events_csv_sha256": "75602928224b4fced10b6edd997ecf4a9429a991cf4742995ff74102fc816018",
+      "holdout_consumption_number_for_this_configuration": 1,
+      "immutable_inputs": {
+        "renderer": {
+          "path": "yoyo/layers/l1_detection/render.py",
+          "sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+        },
+        "training_support": {
+          "manifest": "datasets/ma_launch_t3_10000_v1/manifest.jsonl",
+          "manifest_sha256": "dd55246938b03c4b2013d159cdfee94b4e9db56ecb298ad30145eb5d1bc2bc3a",
+          "positive_confirmations_observed": [
+            3,
+            4,
+            5
+          ],
+          "positive_cores_observed": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "positive_rows": 9938,
+          "positive_windows_observed": [
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22
+          ]
+        },
+        "weights": {
+          "path": "analysis/output/ma_launch_t3_10000_v1/ma_launch_t3_10000_v1_y11s_ft_imgsz1280/weights/best.pt",
+          "sha256": "a9fae2ef64489e24f39bd51714d96b43cf680bf80d5c536537f03a4402e9f9c0"
+        }
+      },
+      "model_key": "legacy_t3_10k_1280",
+      "native_imgsz": 1280,
+      "overlap_episodes": 778,
+      "raw_candidates": 5007,
+      "scan_stats_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/legacy_t3_10k_1280/scan_stats.csv",
+      "scan_stats_csv_sha256": "107613206161be8bbee1f2918a2f37e3939f838b70f820624d89140492832145",
+      "scan_totals": {
+        "accepted_before_dedup": 5007,
+        "accepted_structural_boxes": 5007,
+        "dedup_removed": 3997,
+        "deduplicated_events": 1010,
+        "raw_boxes": 5261,
+        "reject_confirmation": 15,
+        "reject_core_length": 15,
+        "reject_core_outside_ranked_day": 224,
+        "windows_scored": 249066,
+        "windows_with_any_box": 4651
+      },
+      "weights_sha256": "a9fae2ef64489e24f39bd51714d96b43cf680bf80d5c536537f03a4402e9f9c0"
+    },
+    "legacy_t3_10k_960": {
+      "candidate_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/legacy_t3_10k_960/accepted_candidates.csv",
+      "candidate_csv_sha256": "41e1b9f0516fbfd440698e2d0c17ac51de19ea54864f35fe0f07023cbc7b00f4",
+      "detector_contract": {
+        "bar": "15m",
+        "class_names": {
+          "0": "dense_long",
+          "1": "dense_short"
+        },
+        "confidence": 0.25,
+        "future_bars_rendered_into_inference": 0,
+        "imgsz": 960,
+        "mapped_confirmation_bars_allowed": [
+          3,
+          4,
+          5
+        ],
+        "mapped_core_length_bars_allowed": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "model_input_native_png": "1280x742 rendered chart, YOLO inference at native imgsz=960",
+        "nms_iou": 0.7,
+        "same_symbol_event_gap_bars": 5,
+        "scan_endpoint_extension_after_day_bars": 5,
+        "threshold_or_window_retuning_after_results": false,
+        "window_lengths": [
+          14,
+          18,
+          22
+        ]
+      },
+      "display_name": "Legacy t-3 weak-label 10k · native 960",
+      "episode_classes": {
+        "dense_long": 391,
+        "dense_short": 400
+      },
+      "episodes_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/legacy_t3_10k_960/episodes.csv",
+      "episodes_csv_sha256": "08a196b40e50fcb544d630f345720f50e2d6c380b9a6e80573401cb062db80f5",
+      "five_bar_events": 1074,
+      "five_bar_events_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/legacy_t3_10k_960/five_bar_events.csv",
+      "five_bar_events_csv_sha256": "eb4af3bf857902197d54711a0618c83917878e129922829c7f72e3c24df8a0b0",
+      "holdout_consumption_number_for_this_configuration": 2,
+      "immutable_inputs": {
+        "renderer": {
+          "path": "yoyo/layers/l1_detection/render.py",
+          "sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+        },
+        "training_support": {
+          "manifest": "datasets/ma_launch_t3_10000_v1/manifest.jsonl",
+          "manifest_sha256": "dd55246938b03c4b2013d159cdfee94b4e9db56ecb298ad30145eb5d1bc2bc3a",
+          "positive_confirmations_observed": [
+            3,
+            4,
+            5
+          ],
+          "positive_cores_observed": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "positive_rows": 9938,
+          "positive_windows_observed": [
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22
+          ]
+        },
+        "weights": {
+          "path": "analysis/output/ma_launch_t3_10000_v1/ma_launch_t3_10000_v1_y11s_ft/weights/best.pt",
+          "sha256": "8b2e393ffa887b8284a5580f68df290963fccc08fb94cdc4e0fec0c2b1e40e10"
+        }
+      },
+      "model_key": "legacy_t3_10k_960",
+      "native_imgsz": 960,
+      "overlap_episodes": 791,
+      "raw_candidates": 4909,
+      "scan_stats_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/legacy_t3_10k_960/scan_stats.csv",
+      "scan_stats_csv_sha256": "cfe27291f8f3998e4cb06774c9f0c7a94117a22b666574b9255240ca2a690f41",
+      "scan_totals": {
+        "accepted_before_dedup": 4909,
+        "accepted_structural_boxes": 4909,
+        "dedup_removed": 3835,
+        "deduplicated_events": 1074,
+        "raw_boxes": 5134,
+        "reject_confirmation": 11,
+        "reject_core_length": 1,
+        "reject_core_outside_ranked_day": 213,
+        "windows_scored": 249066,
+        "windows_with_any_box": 4765
+      },
+      "weights_sha256": "8b2e393ffa887b8284a5580f68df290963fccc08fb94cdc4e0fec0c2b1e40e10"
+    }
+  },
+  "network_reads_during_scan": 0,
+  "orders_placed": false,
+  "production_eligible": false,
+  "promoted": false,
+  "protocol": "five_frozen_15m_ma_launch_detectors_all_current_live_okx_usdt_swap_complete_days_20260828_20260830_v1",
+  "snapshot_fetch_receipt": "experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/fetch_receipt.json",
+  "snapshot_fetch_receipt_sha256": "28f5d6248dd831dd5a858a83c824f107ee2eed060b94ece2bc0b2e6c3ed34806",
+  "source_commit": "177a4b8b91d95e27f4cdf617c1471463fd5c5bac",
+  "telegram_sent": false,
+  "threshold_or_weight_changed": false,
+  "training_eligible": false,
+  "training_or_tuning": false,
+  "usable_symbol_days": 822,
+  "usable_unique_symbols": 274,
+  "wall_seconds": 26591.332
+}

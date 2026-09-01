@@ -8341,3 +8341,234 @@ artifacts:
     config_hash: "2adeb6a65a0eb51a3c28deea76fad30efddce161e2f2c79a574bfe164c004222"
     data_cutoff: "2026-04-30T03:20:00Z"
     notes: Owner-facing HTML generated immediately from the canonical Markdown report.
+
+  # ---- Five frozen 15m detector all-universe comparison (2026-09-01) ----
+  - artifact_id: 15m-ma-launch-five-model-all3d-20260831-v1-prereg
+    artifact_type: config
+    role: frozen_five_checkpoint_all_universe_holdout_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "802b9819dad33445afcc63ae8d51c2e0067de03c"
+    source_path: experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/preregistration.json
+    sha256: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
+    size_bytes: 12988
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "802b9819dad33445afcc63ae8d51c2e0067de03c"
+    config_hash: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
+    data_cutoff: "2026-08-31T02:00:00Z"
+    notes: >-
+      Owner-authorized comparison of five immutable checkpoints on one frozen
+      2026-08-28..30 UTC current-live OKX USDT-SWAP snapshot; no training,
+      tuning, selection, promotion, deployment, Telegram or order authority.
+
+  - artifact_id: 15m-ma-launch-five-model-all3d-20260831-v1-fetch-receipt
+    artifact_type: manifest
+    role: frozen_274_symbol_snapshot_lineage_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "184ab2697557a4111acbacb7b92f74b41d3c9cb1"
+    source_path: experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/fetch_receipt.json
+    sha256: "28f5d6248dd831dd5a858a83c824f107ee2eed060b94ece2bc0b2e6c3ed34806"
+    size_bytes: 63527
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/fetch_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "184ab2697557a4111acbacb7b92f74b41d3c9cb1"
+    config_hash: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
+    data_cutoff: "2026-08-31T02:00:00Z"
+    notes: >-
+      PASS: 274 eligible and 274 usable instruments, each with 482 contiguous
+      confirmed 15m bars; all five models reuse the same byte-hashed source.
+
+  - artifact_id: 15m-ma-launch-five-model-all3d-20260831-v1-scan-receipt
+    artifact_type: manifest
+    role: terminal_cuda_scan_and_candidate_ledger_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    source_path: experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/scan_receipt.json
+    sha256: "c6d2d7b37d86deb65d185c50478d435f144d05350b9e5ef466ca73f8c78dfb9f"
+    size_bytes: 20561
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/scan_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    config_hash: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
+    data_cutoff: "2026-08-31T02:00:00Z"
+    notes: >-
+      RTX3060 terminal receipt for all 822 symbol-days and five checkpoints;
+      records candidate/episode hashes, immutable weights and detector contracts.
+
+  - artifact_id: 15m-ma-launch-five-model-all3d-20260831-v1-render-receipt
+    artifact_type: manifest
+    role: lossless_one_raw_box_render_and_archive_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    source_path: experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/render_receipt.json
+    sha256: "a51e98449bdfb940bd1aa943d61af3e05e42cf9f3f23192e2fea362241ee2e94"
+    size_bytes: 3715
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/render_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    config_hash: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
+    data_cutoff: "2026-08-31T02:00:00Z"
+    notes: 3,986 unfiltered 1920x1400 one-episode/one-raw-box documents in five lossless ZIPs.
+
+  - artifact_id: 15m-ma-launch-five-model-all3d-20260831-v1-qa
+    artifact_type: manifest
+    role: full_exact_input_and_output_pixel_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    source_path: experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/qa_receipt.json
+    sha256: "fba5f0983c3fe3e9d49f5aad81784326df830621d0737585ba0f575a2a862a6c"
+    size_bytes: 1529
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/qa_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    config_hash: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
+    data_cutoff: "2026-08-31T02:00:00Z"
+    notes: >-
+      PASS: 3,986/3,986 exact model inputs, full-context pixel rerenders and
+      final PNG hashes; no network read or model inference during verification.
+
+  - artifact_id: 15m-ma-launch-five-model-all3d-20260831-v1-overview
+    artifact_type: report
+    role: five_model_episode_density_and_identity_overlap_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c6c483bed278231b5e9cf853fa7125f35402d56e"
+    source_path: experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/overview.png
+    sha256: "a71c68b0d2ba3755bf724f2ee8ca8ef0a013fb73adc879ae02eeef69ed21ae72"
+    size_bytes: 254813
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/overview.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c6c483bed278231b5e9cf853fa7125f35402d56e"
+    config_hash: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
+    data_cutoff: "2026-08-31T02:00:00Z"
+    notes: Episode counts, LONG/SHORT composition, candidate funnel and pairwise proposal Jaccard; not a quality ranking.
+
+  - artifact_id: 15m-ma-launch-five-model-all3d-20260831-v1-legacy-t3-960-charts
+    artifact_type: dataset
+    role: lossless_791_high_resolution_one_episode_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    source_path: experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/models/legacy_t3_10k_960/all_signal_charts.zip
+    sha256: "0f894a311089bf2f380288660eb066187c2d90eb2a16f6a75c5f2e761cfa4e25"
+    size_bytes: 137198577
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/models/legacy_t3_10k_960/all_signal_charts.zip"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    config_hash: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
+    data_cutoff: "2026-08-31T02:00:00Z"
+    notes: Legacy t-3 weak-label 10k native-960 full unfiltered episode chart pack.
+
+  - artifact_id: 15m-ma-launch-five-model-all3d-20260831-v1-legacy-t3-1280-charts
+    artifact_type: dataset
+    role: lossless_778_high_resolution_one_episode_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    source_path: experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/models/legacy_t3_10k_1280/all_signal_charts.zip
+    sha256: "44d18d3f9ed43ecba3075d1e865a4efbe49bd6f2b7d988121491beab3232e801"
+    size_bytes: 133939624
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/models/legacy_t3_10k_1280/all_signal_charts.zip"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    config_hash: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
+    data_cutoff: "2026-08-31T02:00:00Z"
+    notes: Legacy t-3 weak-label 10k native-1280 full unfiltered episode chart pack.
+
+  - artifact_id: 15m-ma-launch-five-model-all3d-20260831-v1-legacy-owner-960-charts
+    artifact_type: dataset
+    role: lossless_1371_high_resolution_one_episode_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    source_path: experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/models/legacy_owner_10k_neg30k_960/all_signal_charts.zip
+    sha256: "0c3c65132a66befd54c41ae17fe5b5f676713bd9db620810ed0e7b589d636ccc"
+    size_bytes: 243687639
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/models/legacy_owner_10k_neg30k_960/all_signal_charts.zip"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    config_hash: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
+    data_cutoff: "2026-08-31T02:00:00Z"
+    notes: Owner 10k-positive plus 30k-negative native-960 full unfiltered episode chart pack.
+
+  - artifact_id: 15m-ma-launch-five-model-all3d-20260831-v1-grade-a-epoch6-960-charts
+    artifact_type: dataset
+    role: lossless_527_high_resolution_one_episode_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    source_path: experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/models/grade_a8k_neg24k_epoch6_960/all_signal_charts.zip
+    sha256: "4bed5f4dae3eccbbf4ecd949d716bbf145c28c5f884e9162ca86280474eee295"
+    size_bytes: 90195206
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/models/grade_a8k_neg24k_epoch6_960/all_signal_charts.zip"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    config_hash: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
+    data_cutoff: "2026-08-31T02:00:00Z"
+    notes: Grade-A 8k-positive plus 24k-negative epoch-6 native-960 full unfiltered episode chart pack.
+
+  - artifact_id: 15m-ma-launch-five-model-all3d-20260831-v1-grade-a-full40-1280-charts
+    artifact_type: dataset
+    role: lossless_519_high_resolution_one_episode_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    source_path: experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/models/grade_a8k_neg24k_full40_1280/all_signal_charts.zip
+    sha256: "aa79a216a1ef58037debcb0654bc195d98afc9aebaf6895b12e1940223e6a647"
+    size_bytes: 90137527
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/models/grade_a8k_neg24k_full40_1280/all_signal_charts.zip"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    config_hash: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
+    data_cutoff: "2026-08-31T02:00:00Z"
+    notes: Grade-A 8k-positive plus 24k-negative full40 native-1280 full unfiltered episode chart pack.
+
+  - artifact_id: 15m-ma-launch-five-model-all3d-20260831-v1-report
+    artifact_type: report
+    role: canonical_markdown_detector_output_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c6c483bed278231b5e9cf853fa7125f35402d56e"
+    source_path: analysis/p1_15m_ma_launch_five_model_alluniverse_20260831.md
+    sha256: "af4cba6598196ebd826424470b5e70016b470314431664819f574d977cc3bc69"
+    size_bytes: 8563
+    storage_uri: "repo://analysis/p1_15m_ma_launch_five_model_alluniverse_20260831.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c6c483bed278231b5e9cf853fa7125f35402d56e"
+    config_hash: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
+    data_cutoff: "2026-08-31T02:00:00Z"
+    notes: Chinese canonical report with full counts, identity overlap, rotation null, QA, risks and reproduction commands.
+
+  - artifact_id: 15m-ma-launch-five-model-all3d-20260831-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c6c483bed278231b5e9cf853fa7125f35402d56e"
+    source_path: analysis/html/p1_15m_ma_launch_five_model_alluniverse_20260831.html
+    sha256: "6889da599849098ab57c02d50f8007d1114e8cbdc4845c988eae3a5c4bc3153c"
+    size_bytes: 352569
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_five_model_alluniverse_20260831.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c6c483bed278231b5e9cf853fa7125f35402d56e"
+    config_hash: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
+    data_cutoff: "2026-08-31T02:00:00Z"
+    notes: Self-contained Owner-facing HTML with embedded overview and direct local chart-pack paths.

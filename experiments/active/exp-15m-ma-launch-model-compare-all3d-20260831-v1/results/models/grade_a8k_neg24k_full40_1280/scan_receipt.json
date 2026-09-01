@@ -1,0 +1,100 @@
+{
+  "candidate_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/grade_a8k_neg24k_full40_1280/accepted_candidates.csv",
+  "candidate_csv_sha256": "2604106e1a0a6c0b57a171b7c49edac7ab23844c4b6096442e2c26e40df65c66",
+  "detector_contract": {
+    "bar": "15m",
+    "class_names": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "confidence": 0.25,
+    "future_bars_rendered_into_inference": 0,
+    "imgsz": 1280,
+    "mapped_confirmation_bars_allowed": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "mapped_core_length_bars_allowed": [
+      4,
+      5
+    ],
+    "model_input_native_png": "1280x742 rendered chart, YOLO inference at native imgsz=1280",
+    "nms_iou": 0.7,
+    "same_symbol_event_gap_bars": 5,
+    "scan_endpoint_extension_after_day_bars": 9,
+    "threshold_or_window_retuning_after_results": false,
+    "window_lengths": [
+      18,
+      19
+    ]
+  },
+  "display_name": "Grade-A 8k + 24k negatives · full40 · native 1280",
+  "episode_classes": {
+    "dense_long": 226,
+    "dense_short": 293
+  },
+  "episodes_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/grade_a8k_neg24k_full40_1280/episodes.csv",
+  "episodes_csv_sha256": "edaea15746e131c4cc78b02d7b437acca9e0e947834870938193d5ba40f08516",
+  "five_bar_events": 522,
+  "five_bar_events_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/grade_a8k_neg24k_full40_1280/five_bar_events.csv",
+  "five_bar_events_csv_sha256": "6705f4c36e76608a9c29bd9364bf9207eedeeff9e8ceb56cfb8ce0bb8ea56efd",
+  "holdout_consumption_number_for_this_configuration": 2,
+  "immutable_inputs": {
+    "renderer": {
+      "path": "yoyo/layers/l1_detection/render.py",
+      "sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+    },
+    "training_support": {
+      "manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+      "manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+      "positive_confirmations_observed": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "positive_cores_observed": [
+        4,
+        5
+      ],
+      "positive_rows": 8000,
+      "positive_windows_observed": [
+        18,
+        19
+      ]
+    },
+    "weights": {
+      "path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+      "sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838"
+    }
+  },
+  "model_key": "grade_a8k_neg24k_full40_1280",
+  "native_imgsz": 1280,
+  "overlap_episodes": 519,
+  "raw_candidates": 3759,
+  "scan_stats_csv": "analysis/output/ma_launch_model_compare_all3d_20260831_v1/models/grade_a8k_neg24k_full40_1280/scan_stats.csv",
+  "scan_stats_csv_sha256": "96fa871a4ccbc3dcf6a93f9c0d26cdd66fecd50807ad68fb3fed5b3fb44da7e5",
+  "scan_totals": {
+    "accepted_before_dedup": 3759,
+    "accepted_structural_boxes": 3759,
+    "dedup_removed": 3237,
+    "deduplicated_events": 522,
+    "raw_boxes": 4345,
+    "reject_confirmation": 421,
+    "reject_core_length": 10,
+    "reject_core_outside_ranked_day": 155,
+    "windows_scored": 172620,
+    "windows_with_any_box": 4228
+  },
+  "weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838"
+}

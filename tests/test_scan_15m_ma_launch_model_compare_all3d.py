@@ -1,6 +1,10 @@
 """Contracts for the frozen five-checkpoint all-universe comparison."""
 from __future__ import annotations
 
+import subprocess
+import sys
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
@@ -14,6 +18,9 @@ from scripts.scan_15m_ma_launch_model_compare_all3d import (
     utc,
 )
 from scripts.build_15m_ma_launch_model_compare_all3d_report import alignment_null
+
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _candidate(
@@ -155,3 +162,15 @@ def test_alignment_null_rotates_within_day_without_changing_episode_identity_fie
     assert result["actual_jaccard"] == 1.0
     assert result["null_max_matches"] == 1
     assert result["alignment_p_ge_actual"] == 3 / 96
+
+
+def test_report_builder_is_directly_executable() -> None:
+    completed = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "build_15m_ma_launch_model_compare_all3d_report.py"), "--help"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert "usage:" in completed.stdout

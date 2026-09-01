@@ -2744,8 +2744,8 @@ experiments:
 
   - experiment_id: exp-15m-ma-launch-model-compare-all3d-20260831-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "84c98f84db96f528e0d23732d64edd9f732462d9"
-    status: active
+    source_commit: "177a4b8b91d95e27f4cdf617c1471463fd5c5bac"
+    status: accepted
     question: >-
       On one frozen snapshot of every usable current-live OKX crypto USDT
       perpetual instrument for 2026-08-28 through 2026-08-30 UTC, how do the
@@ -2758,19 +2758,38 @@ experiments:
       is modified. Each detector keeps its own original supported geometry,
       which is a declared comparison confound rather than a tuned variable.
     result: >-
-      preregistered_pending_frozen_snapshot_and_offline_inference. The Owner
-      explicitly authorized one recent-three-complete-day holdout use for the
-      five named configurations. No result, selection, economic claim or model
-      quality verdict exists until the same snapshot has been scanned, rendered
-      and independently pixel-verified.
+      Completed on one byte-frozen snapshot: 274 current-live instruments,
+      822 symbol-days and 482 contiguous confirmed 15m bars per instrument.
+      The five checkpoints emitted 791, 778, 1371, 527 and 519 overlap episodes
+      in preregistered order. Same-family 960/1280 proposal Jaccard was 0.514
+      for legacy t-3 and 0.427 for Grade-A; cross-family Jaccard ranged
+      0.079-0.224. All 3,986 exact model inputs, full-context rerenders and PNG
+      hashes passed. These are proposal counts and identity overlaps, not a
+      precision, profitability or model-selection verdict.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_15m_ma_launch_five_model_alluniverse_20260831.md
+    artifacts:
+      - 15m-ma-launch-five-model-all3d-20260831-v1-prereg
+      - 15m-ma-launch-five-model-all3d-20260831-v1-fetch-receipt
+      - 15m-ma-launch-five-model-all3d-20260831-v1-scan-receipt
+      - 15m-ma-launch-five-model-all3d-20260831-v1-render-receipt
+      - 15m-ma-launch-five-model-all3d-20260831-v1-qa
+      - 15m-ma-launch-five-model-all3d-20260831-v1-overview
+      - 15m-ma-launch-five-model-all3d-20260831-v1-legacy-t3-960-charts
+      - 15m-ma-launch-five-model-all3d-20260831-v1-legacy-t3-1280-charts
+      - 15m-ma-launch-five-model-all3d-20260831-v1-legacy-owner-960-charts
+      - 15m-ma-launch-five-model-all3d-20260831-v1-grade-a-epoch6-960-charts
+      - 15m-ma-launch-five-model-all3d-20260831-v1-grade-a-full40-1280-charts
+      - 15m-ma-launch-five-model-all3d-20260831-v1-report
+      - 15m-ma-launch-five-model-all3d-20260831-v1-html
     reuse_allowed: false
     notes: >-
-      This is descriptive retrospective inference only. It must use a single
-      byte-hashed source snapshot; it does not authorize training, tuning,
-      threshold changes, promotion, deployment, Telegram delivery, forward
-      state mutation or orders. The report will record per-checkpoint holdout
-      consumption numbers and the all-current-live-universe survivorship bias.
+      Descriptive retrospective inference only. Per-configuration holdout use
+      numbers are 2, 1, 6, 3 and 2 in preregistered model order. The scan used
+      no network reads after snapshot freeze and did not train, tune, change
+      thresholds or weights, select a model, promote, deploy, send Telegram,
+      mutate forward state or place orders. The all-current-live universe has
+      survivorship bias and every detector retains its completed-history
+      post-core contract, so none is a tip/tip-1/tip-2 production detector.

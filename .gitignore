@@ -217,3 +217,12 @@ experiments/active/exp-pine-eth-15m-v1/results/matched_controls.csv
 experiments/active/exp-pine-eth-15m-v1/results/v10_matched_controls.csv
 experiments/active/exp-pine-eth-15m-v1/results/backtesting_trades.csv
 experiments/active/exp-pine-eth-15m-v1/results-docker/**
+
+# Five-model all-universe comparison: retain compact receipts, summaries and
+# overview in git; 3,986 deterministic PNGs, five 90-244 MB ZIPs and their
+# row-heavy manifests remain local and are hash-addressed in the registries.
+/experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/charts/**
+/experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/models/*/all_signal_charts.zip
+/experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/models/*/render_manifest.csv
+/experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/models/*/render_manifest.jsonl
+/analysis/output/ma_launch_model_compare_all3d_20260831_v1/**

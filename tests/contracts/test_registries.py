@@ -182,6 +182,7 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
         "exp-15m-ma-launch-owner-yolo-recent5d-v1",
         "exp-15m-ma-launch-t3-daily-movers3d-v1",
         "exp-15m-ma-launch-t3-daily-movers3d-v2",
+        "exp-15m-ma-launch-model-compare-all3d-20260831-v1",
         "exp-pine-eth-15m-v1",
         "exp-yoyo-trading-fixed-w10-classifier-holdout3d",
     }, (
