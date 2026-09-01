@@ -1,0 +1,1060 @@
+{
+  "accepted_candidates_path": "analysis/output/ma_launch_l2_global_context_v1/accepted_candidates.csv",
+  "accepted_candidates_sha256": "430aff683cdd9518a061aa335b6048a5f8d63b269a1af1e98057f8c1a5d00214",
+  "batch_size": 32,
+  "deployed": false,
+  "device": "0",
+  "episode_classes": {
+    "dense_long": 1830,
+    "dense_short": 1978
+  },
+  "episodes_path": "analysis/output/ma_launch_l2_global_context_v1/episodes.csv",
+  "episodes_sha256": "d42479361bbd83320fdeee7a9cc6d8c56cf80c3539a91c939dbd30c9184bd305",
+  "experiment_id": "exp-15m-ma-launch-l2-global-context-v1",
+  "forward_state_changed": false,
+  "generated_at": "2026-09-01T09:10:54.395003+00:00",
+  "holdout_rows_read": 0,
+  "immutable_inputs": {
+    "L1 renderer": {
+      "path": "yoyo/layers/l1_detection/render.py",
+      "sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+    },
+    "L1 training manifest": {
+      "path": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+      "sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2"
+    },
+    "L1 weights": {
+      "path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+      "sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838"
+    },
+    "L2 feature builder": {
+      "path": "yoyo/layers/l2_judgment/features.py",
+      "sha256": "2fed40ed52440d4c76c0f74c5638a707449c2d6c1f56f91bb2030c914a1cddfa"
+    },
+    "L2 label builder": {
+      "path": "yoyo/layers/l2_judgment/labeling.py",
+      "sha256": "18c90468c9e6a75de1fb486934295bd3c45b0ca92229d6d9bfb7cd30c288994a"
+    }
+  },
+  "mixed_class_episodes": 19,
+  "network_reads": 0,
+  "orders_placed": false,
+  "overlap_episodes": 3808,
+  "per_symbol": [
+    {
+      "candidates": 544,
+      "candidates_sha256": "b2753d67b2b84e7c9ad40c38b9a5cf48c223f4389315323e0b72fd751cb69b31",
+      "episodes": 81,
+      "episodes_sha256": "35603119570173bcf633b79448b1e9f7a03257bb4110a3337b5d814dc2d55948",
+      "source_sha256": "bba45b624fd76b76976b89ae2e68697a3928b9d814eeb11f2f2bb4e322ad965f",
+      "stats": {
+        "accepted_candidates": 544,
+        "accepted_structural_boxes": 544,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 81,
+        "raw_boxes": 594,
+        "reject_confirmation": 50,
+        "windows_scored": 23472,
+        "windows_with_any_box": 577
+      },
+      "symbol": "AAVE_USDT_SWAP"
+    },
+    {
+      "candidates": 511,
+      "candidates_sha256": "476b73f5168cb66c50f696b795f63c4d1fd26e55415bd70d0079af575d129eb6",
+      "episodes": 76,
+      "episodes_sha256": "da7947ec371bfa30fba7847709d3404d6cb0b3488d5e90cba8210ba92f61d1a7",
+      "source_sha256": "f65be958f71a1a8f582d064cd97a3f739ec86de3bce8e5921cdbcf2843adba80",
+      "stats": {
+        "accepted_candidates": 511,
+        "accepted_structural_boxes": 511,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 76,
+        "raw_boxes": 554,
+        "reject_confirmation": 42,
+        "reject_core_length": 1,
+        "windows_scored": 23472,
+        "windows_with_any_box": 544
+      },
+      "symbol": "ADA_USDT_SWAP"
+    },
+    {
+      "candidates": 459,
+      "candidates_sha256": "7c0ce772dff962f3a2218858fd94f31d3dc03cc881ea6d627ad59b3cc8b0a13e",
+      "episodes": 80,
+      "episodes_sha256": "2faea5caebec8d2e65addb736930cef78267d51b21f93ac84d76a67eb4706195",
+      "source_sha256": "8a6e3c6e5f63a409503ec3124d018929d5b9029399c330c0ae5c04d7a3ca0a9d",
+      "stats": {
+        "accepted_candidates": 459,
+        "accepted_structural_boxes": 459,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 80,
+        "raw_boxes": 498,
+        "reject_confirmation": 39,
+        "windows_scored": 23472,
+        "windows_with_any_box": 489
+      },
+      "symbol": "APE_USDT_SWAP"
+    },
+    {
+      "candidates": 630,
+      "candidates_sha256": "54b347b0eb12e044748d11337f5964b4111be2c69151254544285e81edb7f483",
+      "episodes": 76,
+      "episodes_sha256": "913a7164f0f76b60d264d3b3f61ad16f415a9ab16233e7c4dd6c8cdd027a1edf",
+      "source_sha256": "d61312887ebaf4ff6f60c4b4cd6b53d097f1d47fd33c46b05e66cc48896cb6f4",
+      "stats": {
+        "accepted_candidates": 630,
+        "accepted_structural_boxes": 630,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 76,
+        "raw_boxes": 693,
+        "reject_confirmation": 63,
+        "windows_scored": 23472,
+        "windows_with_any_box": 652
+      },
+      "symbol": "APT_USDT_SWAP"
+    },
+    {
+      "candidates": 543,
+      "candidates_sha256": "c81a0500953d6758707e9a05d8e72bc09360ffe7326fd61c8b89fc7cef0addd9",
+      "episodes": 74,
+      "episodes_sha256": "447043c261346bd4291d9856d4076a0c82b8575aacbb086a2c5cd418472ce5cf",
+      "source_sha256": "e3af8cacb3cb7a65da96419426f4ce3a9b3718735f8c2e805891891c382d0e62",
+      "stats": {
+        "accepted_candidates": 543,
+        "accepted_structural_boxes": 543,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 74,
+        "raw_boxes": 593,
+        "reject_confirmation": 50,
+        "windows_scored": 23472,
+        "windows_with_any_box": 568
+      },
+      "symbol": "ARB_USDT_SWAP"
+    },
+    {
+      "candidates": 432,
+      "candidates_sha256": "d223f0dba2c4fae6f399e8555f98c9072cc9c8f55e751416d7c766c9c291f836",
+      "episodes": 62,
+      "episodes_sha256": "676774648f6948c980142d610d21eafdb2a20b1cfebc244c8f1f85ca5db6bf6f",
+      "source_sha256": "9222240d39abdf65034638403ab18a9622a99a7458e8d7ff812ad7859f5ac6bb",
+      "stats": {
+        "accepted_candidates": 432,
+        "accepted_structural_boxes": 432,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 62,
+        "raw_boxes": 480,
+        "reject_confirmation": 28,
+        "reject_l1_training_interval_overlap": 20,
+        "windows_scored": 23472,
+        "windows_with_any_box": 453
+      },
+      "symbol": "ATOM_USDT_SWAP"
+    },
+    {
+      "candidates": 451,
+      "candidates_sha256": "04b5e1c088a7f958221c21b4aba422cdc3cca8c1df62ec5e48d345ea845b2ac3",
+      "episodes": 79,
+      "episodes_sha256": "b25d221f95cd081c7069e55f7b30b729b4bc48139cce0702c72079ff444329cf",
+      "source_sha256": "3402615afe54b971d763d82786756bf963f39f360e9639b7195c3d38d9f074c5",
+      "stats": {
+        "accepted_candidates": 451,
+        "accepted_structural_boxes": 451,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 79,
+        "raw_boxes": 501,
+        "reject_confirmation": 50,
+        "windows_scored": 23472,
+        "windows_with_any_box": 489
+      },
+      "symbol": "AVAX_USDT_SWAP"
+    },
+    {
+      "candidates": 395,
+      "candidates_sha256": "6344e74c0b9750a03aa7b08d7e6ce3d0ed4f4e60348063ad4d900282783716df",
+      "episodes": 56,
+      "episodes_sha256": "82d77e1da82d0ff595674b02f25eba7484438f81d73d2a8662c6466fe40684ed",
+      "source_sha256": "0b972a01a7a0848a172ac86c8d3ab5bf7ec094a8be35ba19d41f7095927092b5",
+      "stats": {
+        "accepted_candidates": 395,
+        "accepted_structural_boxes": 395,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 56,
+        "raw_boxes": 453,
+        "reject_confirmation": 41,
+        "reject_core_length": 1,
+        "reject_l1_training_interval_overlap": 16,
+        "windows_scored": 23472,
+        "windows_with_any_box": 431
+      },
+      "symbol": "BCH_USDT_SWAP"
+    },
+    {
+      "candidates": 407,
+      "candidates_sha256": "802ac55cb693e19ef0148c71e4d0bc6ab0fb42ecc4724da58e1ef74fdd997651",
+      "episodes": 59,
+      "episodes_sha256": "00669d629103c0421a7258714ed1a73b9d619ea802b990f68e0da53465ddec1a",
+      "source_sha256": "a15dbf8ee55bdb3e83791aab3091bfda524c4424b7712f30aa74a13293b47865",
+      "stats": {
+        "accepted_candidates": 407,
+        "accepted_structural_boxes": 407,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 59,
+        "raw_boxes": 439,
+        "reject_confirmation": 32,
+        "windows_scored": 23472,
+        "windows_with_any_box": 429
+      },
+      "symbol": "BNB_USDT_SWAP"
+    },
+    {
+      "candidates": 376,
+      "candidates_sha256": "f6c4df26bf2d3d4257791e5189421cbe1fc12c6c2c0c44e73b20e1603600a863",
+      "episodes": 73,
+      "episodes_sha256": "c1925c265167787799bca9acee8a35cbdbaffae278b2e894ff3a39b029052648",
+      "source_sha256": "3738526c649eec233ff9b99310daf81f8bb1773938792d9c9413ed4e7971eeb5",
+      "stats": {
+        "accepted_candidates": 376,
+        "accepted_structural_boxes": 376,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 73,
+        "raw_boxes": 414,
+        "reject_confirmation": 38,
+        "windows_scored": 23472,
+        "windows_with_any_box": 400
+      },
+      "symbol": "BTC_USDT_SWAP"
+    },
+    {
+      "candidates": 469,
+      "candidates_sha256": "fa4e71b1aa50107743d149c09726a08312420d7f1701729a05e65a0eedf05108",
+      "episodes": 65,
+      "episodes_sha256": "3bf583198386afa51480dbee2671caca20b6df303a75d8e45daad1433c6c2ac3",
+      "source_sha256": "0d303fd9046822f3b4f0a583093f8ec681bbdef006d75f5da145e4d2ef872444",
+      "stats": {
+        "accepted_candidates": 469,
+        "accepted_structural_boxes": 469,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 65,
+        "raw_boxes": 502,
+        "reject_confirmation": 33,
+        "windows_scored": 23472,
+        "windows_with_any_box": 487
+      },
+      "symbol": "CFX_USDT_SWAP"
+    },
+    {
+      "candidates": 524,
+      "candidates_sha256": "ebba388411afb99c1baf23a5d40460b5f605c73669df5194d2c53db5682d02a1",
+      "episodes": 70,
+      "episodes_sha256": "6fdd1c7abdc660b0a8e8783560d4ba94f38b91f84956e285bbb901f325f56f86",
+      "source_sha256": "b5239b914354c471823516d2eb1c9013aacba7892a06081f29aa3bbed76f1721",
+      "stats": {
+        "accepted_candidates": 524,
+        "accepted_structural_boxes": 524,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 70,
+        "raw_boxes": 593,
+        "reject_confirmation": 69,
+        "windows_scored": 23472,
+        "windows_with_any_box": 568
+      },
+      "symbol": "CHZ_USDT_SWAP"
+    },
+    {
+      "candidates": 585,
+      "candidates_sha256": "3603cf7e5a6901a7fca8a3755fe9c85ead758b2708441377206443727630f0e1",
+      "episodes": 75,
+      "episodes_sha256": "99ce5533c5d9ef292821a2da51162a22b9aadfaf44a809c4d7a57adbe5402776",
+      "source_sha256": "474b39ede5c5608a564ea132fa7ebb2c0e99317f490377a9af4f2e91150b9e76",
+      "stats": {
+        "accepted_candidates": 585,
+        "accepted_structural_boxes": 585,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 75,
+        "raw_boxes": 639,
+        "reject_confirmation": 54,
+        "windows_scored": 23472,
+        "windows_with_any_box": 589
+      },
+      "symbol": "CRV_USDT_SWAP"
+    },
+    {
+      "candidates": 456,
+      "candidates_sha256": "f4c0e4af6389007106cf33c9e6dbb0ff15e58d333bbe062bd2ad00c134cd253d",
+      "episodes": 73,
+      "episodes_sha256": "f5a86f54fdf915f05bd5297e936d8b48c25ae3eac800399184bdd08e1659c6d8",
+      "source_sha256": "d3b17226002b31c76bd1916aff100099a736133db03849611bbe95a19ac5f42e",
+      "stats": {
+        "accepted_candidates": 456,
+        "accepted_structural_boxes": 456,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 73,
+        "raw_boxes": 489,
+        "reject_confirmation": 33,
+        "windows_scored": 23472,
+        "windows_with_any_box": 479
+      },
+      "symbol": "DOGE_USDT_SWAP"
+    },
+    {
+      "candidates": 470,
+      "candidates_sha256": "c3b192aac166ebd719a2818d889169977d0a6b732cabfdbb0f4884e6910c9961",
+      "episodes": 69,
+      "episodes_sha256": "ac6ce96a54693faa84df67e48f855887d46652ed0657a08de09aacde2a6dfa24",
+      "source_sha256": "22b680bbb94dd3eae40ca554d812cddf8f5594bff10d042ce8b996740b2ac425",
+      "stats": {
+        "accepted_candidates": 470,
+        "accepted_structural_boxes": 470,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 69,
+        "raw_boxes": 506,
+        "reject_confirmation": 36,
+        "windows_scored": 23472,
+        "windows_with_any_box": 488
+      },
+      "symbol": "DOT_USDT_SWAP"
+    },
+    {
+      "candidates": 470,
+      "candidates_sha256": "48ff56ceead977acdfcf5feea9f28c8aec546d4698e291d103e360f4846ba2ab",
+      "episodes": 69,
+      "episodes_sha256": "bc4e51d0cb452cbc385cb8b8aef6171290c1c05be487c55ec5efab7204d61d7e",
+      "source_sha256": "70cb11e8c2392aa1f98330f6f79146edfd9c3c5cec363e752486087e01dc9ac3",
+      "stats": {
+        "accepted_candidates": 470,
+        "accepted_structural_boxes": 470,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 69,
+        "raw_boxes": 539,
+        "reject_confirmation": 44,
+        "reject_l1_training_interval_overlap": 25,
+        "windows_scored": 23472,
+        "windows_with_any_box": 521
+      },
+      "symbol": "EIGEN_USDT_SWAP"
+    },
+    {
+      "candidates": 419,
+      "candidates_sha256": "c9c8a1063ea9527685428c702c271d7f867f7b1aef5d69617a39b22e38a0ef3b",
+      "episodes": 66,
+      "episodes_sha256": "498122614e084b93db01777513a75d514d77fa95b01f0e08f1ed6ccbff94e874",
+      "source_sha256": "9cd773516cf2b6fefe78c9a5cc71025ab97f33991647c006d1c6eaa5b5491011",
+      "stats": {
+        "accepted_candidates": 419,
+        "accepted_structural_boxes": 419,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 66,
+        "raw_boxes": 506,
+        "reject_confirmation": 58,
+        "reject_core_length": 12,
+        "reject_l1_training_interval_overlap": 17,
+        "windows_scored": 23472,
+        "windows_with_any_box": 504
+      },
+      "symbol": "ENA_USDT_SWAP"
+    },
+    {
+      "candidates": 533,
+      "candidates_sha256": "5badad8eee2ff029661cbe73d54a84c0b50197702c86dcccb19ac781a322d240",
+      "episodes": 71,
+      "episodes_sha256": "0e8e3fdf1993fb72688a9fcf082b4b51d3a36fac0c348ce4ed470a0a551355a9",
+      "source_sha256": "39d49abbc0ba65d8559f3b08823ec7beb9c79d739a0aa258deeb2b8b760929a2",
+      "stats": {
+        "accepted_candidates": 533,
+        "accepted_structural_boxes": 533,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 71,
+        "raw_boxes": 579,
+        "reject_confirmation": 46,
+        "windows_scored": 23472,
+        "windows_with_any_box": 556
+      },
+      "symbol": "ETC_USDT_SWAP"
+    },
+    {
+      "candidates": 577,
+      "candidates_sha256": "a9c82a752f668af26d6701d33dcd0346e1f026a62817c88da4b1a6c3710c0b65",
+      "episodes": 76,
+      "episodes_sha256": "dbd0a30863c4040b0e6fa6a827ea218790fa1d9cfa0aae31bfc5429bad2c5b64",
+      "source_sha256": "ca80af70d7ab7ce0c1c87585f846152bbb2ac813073dff352dd2747671344fd7",
+      "stats": {
+        "accepted_candidates": 577,
+        "accepted_structural_boxes": 577,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 76,
+        "raw_boxes": 630,
+        "reject_confirmation": 52,
+        "reject_core_length": 1,
+        "windows_scored": 23472,
+        "windows_with_any_box": 605
+      },
+      "symbol": "ETHFI_USDT_SWAP"
+    },
+    {
+      "candidates": 529,
+      "candidates_sha256": "4000f88afe326ea6184e16b182061c200aeef245c861a5b63504f3822d96478a",
+      "episodes": 68,
+      "episodes_sha256": "1b2f6f2476fdd56ce7525f82aa49c6a76928ef7be8a753288c246c35cc7bc2a5",
+      "source_sha256": "a8162531a6574a8d5deef273c40579dcceeace1efd527523ce57ba85fae2232c",
+      "stats": {
+        "accepted_candidates": 529,
+        "accepted_structural_boxes": 529,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 68,
+        "raw_boxes": 586,
+        "reject_confirmation": 55,
+        "reject_core_length": 2,
+        "windows_scored": 23472,
+        "windows_with_any_box": 560
+      },
+      "symbol": "ETH_USDT_SWAP"
+    },
+    {
+      "candidates": 672,
+      "candidates_sha256": "a9ee9c192b4acaf335fdf3cb81ca7821c736e191db3934fdbc6f1a1519b01d10",
+      "episodes": 87,
+      "episodes_sha256": "1f42f64d0d8652e641ab6ed3da99e3abe3ed8b49d9e15552c1e6286f38efa7e8",
+      "source_sha256": "c2bea60b68c4b67f7f8ecea918eea1645d106f1712253a1fa321f7ea1d729467",
+      "stats": {
+        "accepted_candidates": 672,
+        "accepted_structural_boxes": 672,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 87,
+        "raw_boxes": 739,
+        "reject_confirmation": 67,
+        "windows_scored": 23472,
+        "windows_with_any_box": 704
+      },
+      "symbol": "FIL_USDT_SWAP"
+    },
+    {
+      "candidates": 451,
+      "candidates_sha256": "6506bd65f66a32c0a224ffbdd8832bac1607eefe4ce32efa3ed6881616b56d47",
+      "episodes": 79,
+      "episodes_sha256": "9e300b437bc7be7e6934424e1c17b7327ff3af573510c8315b898e19bff88ef9",
+      "source_sha256": "ee0828b4c0c29b82ef5d9b7d6f0615ab38c53604aaeba4cb06594c77b9ac0caa",
+      "stats": {
+        "accepted_candidates": 451,
+        "accepted_structural_boxes": 451,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 79,
+        "raw_boxes": 493,
+        "reject_confirmation": 42,
+        "windows_scored": 23472,
+        "windows_with_any_box": 476
+      },
+      "symbol": "GALA_USDT_SWAP"
+    },
+    {
+      "candidates": 497,
+      "candidates_sha256": "f754fedb6b435c218cbc2d38d6021428320e2184f4a55110dfcd106a15ecfc8c",
+      "episodes": 74,
+      "episodes_sha256": "eaf80ba9cf96d35d67a934e2f32799e57d19015890511c97d8cf77f61f53b947",
+      "source_sha256": "ef7368c136895d85e3f010d826aa335b3f0f7d90aa328b7e72714a9ddd96a845",
+      "stats": {
+        "accepted_candidates": 497,
+        "accepted_structural_boxes": 497,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 74,
+        "raw_boxes": 539,
+        "reject_confirmation": 42,
+        "windows_scored": 23472,
+        "windows_with_any_box": 521
+      },
+      "symbol": "GRT_USDT_SWAP"
+    },
+    {
+      "candidates": 426,
+      "candidates_sha256": "7b9b40d6e7db7a080d46ee68da22173743028d25f6d09e127103ba056914163a",
+      "episodes": 61,
+      "episodes_sha256": "241318ae30d88ee1663b70da0ec094c31275223712d2a1ada39a7f9f09965aec",
+      "source_sha256": "67c8517f839e45abde16cba2c7aaa9f18eab8312bb827e18ea43f86b09ba3840",
+      "stats": {
+        "accepted_candidates": 426,
+        "accepted_structural_boxes": 426,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 61,
+        "raw_boxes": 477,
+        "reject_confirmation": 49,
+        "reject_core_length": 2,
+        "windows_scored": 23472,
+        "windows_with_any_box": 470
+      },
+      "symbol": "HBAR_USDT_SWAP"
+    },
+    {
+      "candidates": 501,
+      "candidates_sha256": "0aca7549efc03ba5d4bbf6552038692457e32ad6fd6a946cebc46f36df1f7fa3",
+      "episodes": 69,
+      "episodes_sha256": "eaab7400e46f9c18232868b5a00c436289e5d856ad2496822ef9dda3a36c3876",
+      "source_sha256": "ba16d5749ea6176ff50981daeda26bbae47e0a3699a7596077c3c37abf31ea60",
+      "stats": {
+        "accepted_candidates": 501,
+        "accepted_structural_boxes": 501,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 69,
+        "raw_boxes": 569,
+        "reject_confirmation": 64,
+        "reject_core_length": 4,
+        "windows_scored": 23472,
+        "windows_with_any_box": 555
+      },
+      "symbol": "HYPE_USDT_SWAP"
+    },
+    {
+      "candidates": 514,
+      "candidates_sha256": "52dcebbbc0aaa35a7418de7dc5e69a62b5201c36a689120df90e63a2e83c9925",
+      "episodes": 71,
+      "episodes_sha256": "e952957807fe0ffccdd589372a25ee7c3a21ea9040d95731e1d747fce427ad5e",
+      "source_sha256": "6f8a30abdc14a4b2b214d5443d94120e1b4b6c437932564982381775220f437a",
+      "stats": {
+        "accepted_candidates": 514,
+        "accepted_structural_boxes": 514,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 71,
+        "raw_boxes": 608,
+        "reject_confirmation": 76,
+        "reject_l1_training_interval_overlap": 18,
+        "windows_scored": 23472,
+        "windows_with_any_box": 575
+      },
+      "symbol": "ICP_USDT_SWAP"
+    },
+    {
+      "candidates": 453,
+      "candidates_sha256": "d08e0010609436671a10b04e01b254fed8289abcf1efae8320ef35dcb36f4d6a",
+      "episodes": 72,
+      "episodes_sha256": "0b1f80f1b5a001b000251f2e35cd24579236ca6e2f53db0c166f57523f00c968",
+      "source_sha256": "f85e4490d4aa890a3c293c081d11d4f974b45b8ff32f346c28abcbcca7a23372",
+      "stats": {
+        "accepted_candidates": 453,
+        "accepted_structural_boxes": 453,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 72,
+        "raw_boxes": 515,
+        "reject_confirmation": 47,
+        "reject_l1_training_interval_overlap": 15,
+        "windows_scored": 23472,
+        "windows_with_any_box": 495
+      },
+      "symbol": "INJ_USDT_SWAP"
+    },
+    {
+      "candidates": 414,
+      "candidates_sha256": "10fc58e80961798555404bfc2e71fb75edb1ce4d0c301cfb4be514d984a5577c",
+      "episodes": 62,
+      "episodes_sha256": "a370d7f6bac89d075bb08849609f18b06254dbfd6460a3fa8ce9a28996782f40",
+      "source_sha256": "d83907120860d76accfc8fba69040b4e10283f4d97519b2962a7038de7de16c8",
+      "stats": {
+        "accepted_candidates": 414,
+        "accepted_structural_boxes": 414,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 62,
+        "raw_boxes": 449,
+        "reject_confirmation": 35,
+        "windows_scored": 23472,
+        "windows_with_any_box": 440
+      },
+      "symbol": "JTO_USDT_SWAP"
+    },
+    {
+      "candidates": 433,
+      "candidates_sha256": "99e039a4d18493cf407238c209181eb676f83c5d86e73a13fb10d545b05c94f7",
+      "episodes": 69,
+      "episodes_sha256": "36c13797cadeb2622ee2cb0f7331280e0a3bcd83b9ecafe49e2266ecc16c029d",
+      "source_sha256": "d4678494625269e2c32e922285e7c8b24f0b123baf7581de9d41240d0c0e64c3",
+      "stats": {
+        "accepted_candidates": 433,
+        "accepted_structural_boxes": 433,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 69,
+        "raw_boxes": 468,
+        "reject_confirmation": 34,
+        "reject_core_length": 1,
+        "windows_scored": 23472,
+        "windows_with_any_box": 457
+      },
+      "symbol": "LINK_USDT_SWAP"
+    },
+    {
+      "candidates": 455,
+      "candidates_sha256": "7f7623113315490935d95c2d90ff61322edc95a802cfab4f9ff164dc343f4044",
+      "episodes": 73,
+      "episodes_sha256": "09022e1d0ffb1ad4641acca1e0e6b88c8ddcae186bb2ecf58b8a9685f179848d",
+      "source_sha256": "1b47cb38de6889b089675c9f6540492a6130882315b2dc56d876622effb5d465",
+      "stats": {
+        "accepted_candidates": 455,
+        "accepted_structural_boxes": 455,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 73,
+        "raw_boxes": 490,
+        "reject_confirmation": 34,
+        "reject_core_length": 1,
+        "windows_scored": 23472,
+        "windows_with_any_box": 484
+      },
+      "symbol": "LTC_USDT_SWAP"
+    },
+    {
+      "candidates": 384,
+      "candidates_sha256": "97de820aaa4959d5f398ca063132a8cbfaf7a4a6fadabbb6371e42472cbbfc96",
+      "episodes": 62,
+      "episodes_sha256": "1b46db5dcb1a633c31622110aa6973affc2804d3cde8423772c5d756fb374479",
+      "source_sha256": "56a7c76e208a159f580ba01159569b99afa02db893ef5431188b558bc34447c9",
+      "stats": {
+        "accepted_candidates": 384,
+        "accepted_structural_boxes": 384,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 62,
+        "raw_boxes": 413,
+        "reject_confirmation": 29,
+        "windows_scored": 23472,
+        "windows_with_any_box": 395
+      },
+      "symbol": "NEAR_USDT_SWAP"
+    },
+    {
+      "candidates": 539,
+      "candidates_sha256": "d8dfe02a00cd028c51a39a0d5cb09396180a377288141551f8c8451421ab5e3d",
+      "episodes": 78,
+      "episodes_sha256": "f382b170e9d4d65d003010445da92b0eebd617c3bb6fe458c678835ad685808d",
+      "source_sha256": "482702a6c2c928a0ceec673f2679f9f74fb343b580cdcd75abbe7d4efe248cd2",
+      "stats": {
+        "accepted_candidates": 539,
+        "accepted_structural_boxes": 539,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 78,
+        "raw_boxes": 589,
+        "reject_confirmation": 50,
+        "windows_scored": 23472,
+        "windows_with_any_box": 557
+      },
+      "symbol": "OKB_USDT_SWAP"
+    },
+    {
+      "candidates": 485,
+      "candidates_sha256": "ff2f8ee176bc7efd39686bc3800e0e00582cf7ddbe3107be1a78b51d8c1ab094",
+      "episodes": 71,
+      "episodes_sha256": "724dfddae35c82375d845d8639d3d4f8c5d596ce8191efb38eab3b14c4486a0a",
+      "source_sha256": "ae7c72b3face0c92d7931820aa5b51bee983a3f2d6c399647edb53c9acdfc114",
+      "stats": {
+        "accepted_candidates": 485,
+        "accepted_structural_boxes": 485,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 71,
+        "raw_boxes": 523,
+        "reject_confirmation": 38,
+        "windows_scored": 23472,
+        "windows_with_any_box": 499
+      },
+      "symbol": "ONDO_USDT_SWAP"
+    },
+    {
+      "candidates": 517,
+      "candidates_sha256": "1ac00d6a5b7f810a633ea9b68377ce9b243f60a18565c70bf8fb81e9a1a50154",
+      "episodes": 71,
+      "episodes_sha256": "b761f0ffb5fe095964dd61a59753194cf79e57e5061eb8af883960c1ec88dfef",
+      "source_sha256": "3e7e744e4fefe07653932c9ca4f0a6c8ad6398970927b8567a45cdbcc6101528",
+      "stats": {
+        "accepted_candidates": 517,
+        "accepted_structural_boxes": 517,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 71,
+        "raw_boxes": 587,
+        "reject_confirmation": 55,
+        "reject_l1_training_interval_overlap": 15,
+        "windows_scored": 23472,
+        "windows_with_any_box": 554
+      },
+      "symbol": "OP_USDT_SWAP"
+    },
+    {
+      "candidates": 515,
+      "candidates_sha256": "88830f2dda9a38b27c360f4d47d22e7be5a48b4121950719b8921d1e5d643d8f",
+      "episodes": 77,
+      "episodes_sha256": "257673fb6d2da2797ed9a602c301fc03ae64c3dd2b1e0cc2349564eddda22d66",
+      "source_sha256": "df40d86db3513dfbad91bde720a0d91b053db3ecf78d9db0e21dbe7c964bdf62",
+      "stats": {
+        "accepted_candidates": 515,
+        "accepted_structural_boxes": 515,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 77,
+        "raw_boxes": 567,
+        "reject_confirmation": 52,
+        "windows_scored": 23472,
+        "windows_with_any_box": 557
+      },
+      "symbol": "ORDI_USDT_SWAP"
+    },
+    {
+      "candidates": 530,
+      "candidates_sha256": "5bcee91f307c77f2dbae90e3ddec88410a08472883a8add4cd1a3c6528a5ec6b",
+      "episodes": 83,
+      "episodes_sha256": "58e0e902ee3824bca8690380b034cb5f3a88588801de01e4093fc7a889eb4b83",
+      "source_sha256": "e6abfdb3a7b16ff3c3455c42f1b83d2ddd4475fcc61ecda71f4b694d351aa265",
+      "stats": {
+        "accepted_candidates": 530,
+        "accepted_structural_boxes": 530,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 83,
+        "raw_boxes": 571,
+        "reject_confirmation": 41,
+        "windows_scored": 23472,
+        "windows_with_any_box": 542
+      },
+      "symbol": "PENGU_USDT_SWAP"
+    },
+    {
+      "candidates": 563,
+      "candidates_sha256": "defbfd8622df958677f8eba30630e824cc347ed25a46ad24fcb0229994565d3e",
+      "episodes": 82,
+      "episodes_sha256": "35878dc7593ca84671a97b768692456ef5ef632e251a6d786cea92ac838b44e8",
+      "source_sha256": "0cbf769fcbc7067f3af524f2620d36df11884f25924d7cb6e7454b4f7800569c",
+      "stats": {
+        "accepted_candidates": 563,
+        "accepted_structural_boxes": 563,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 82,
+        "raw_boxes": 630,
+        "reject_confirmation": 67,
+        "windows_scored": 23472,
+        "windows_with_any_box": 610
+      },
+      "symbol": "PEPE_USDT_SWAP"
+    },
+    {
+      "candidates": 391,
+      "candidates_sha256": "c4580cb6ed4107e4093694d6403ce3cae573bab9fe67b36eb97a22b345e8b421",
+      "episodes": 57,
+      "episodes_sha256": "a575ee4058b66c4e56b57f1329fb6c032733b213b5f597cc656962e9810ab70a",
+      "source_sha256": "9ea640e8ee51c5c82b0488f1be3503f89a3c571a18962f977892c47234cef950",
+      "stats": {
+        "accepted_candidates": 391,
+        "accepted_structural_boxes": 391,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 57,
+        "raw_boxes": 438,
+        "reject_confirmation": 46,
+        "reject_core_length": 1,
+        "windows_scored": 23472,
+        "windows_with_any_box": 418
+      },
+      "symbol": "PI_USDT_SWAP"
+    },
+    {
+      "candidates": 491,
+      "candidates_sha256": "90adcb877d46ccdf2ecde590035d20b4605a20defe33b45cd15cbf22c7c13a1a",
+      "episodes": 76,
+      "episodes_sha256": "fa0196b4d4aea07ba0c1b00a76339b7019ec1166058b4a4eaec348c139a629ab",
+      "source_sha256": "af5e2ee6d0dd7b62a6bf4fa63a5658882a9650d2097604d5df151ff67e86fcc8",
+      "stats": {
+        "accepted_candidates": 491,
+        "accepted_structural_boxes": 491,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 76,
+        "raw_boxes": 563,
+        "reject_confirmation": 48,
+        "reject_l1_training_interval_overlap": 24,
+        "windows_scored": 23472,
+        "windows_with_any_box": 546
+      },
+      "symbol": "POL_USDT_SWAP"
+    },
+    {
+      "candidates": 594,
+      "candidates_sha256": "ea0f364f9c6d61c2b953f32d4a3a4e56f35c2aa185e5e8159d413af333fe8249",
+      "episodes": 75,
+      "episodes_sha256": "1a676b24e3fc7b0fb9cff0b8409d7b0d6c16344ac30848e0b7ba5590c5b6b476",
+      "source_sha256": "9e342e5a3f4e13b2ccddb6b5a1295bf379c776618f3873e48866245c1bea4211",
+      "stats": {
+        "accepted_candidates": 594,
+        "accepted_structural_boxes": 594,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 75,
+        "raw_boxes": 668,
+        "reject_confirmation": 74,
+        "windows_scored": 23472,
+        "windows_with_any_box": 649
+      },
+      "symbol": "SAND_USDT_SWAP"
+    },
+    {
+      "candidates": 391,
+      "candidates_sha256": "af150210ccee9759e3971e98470e1f388bd3dba9b8a9ed475c50b9ff6898ea12",
+      "episodes": 59,
+      "episodes_sha256": "bf41ec6062bc487dc72e5dc3f9007d017c03513b3911e2261482ec68ecca0368",
+      "source_sha256": "f3b2acf1c7a63e736dbff6bbe554031712aa7a67237a135966ca089a688f4709",
+      "stats": {
+        "accepted_candidates": 391,
+        "accepted_structural_boxes": 391,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 59,
+        "raw_boxes": 430,
+        "reject_confirmation": 39,
+        "windows_scored": 23472,
+        "windows_with_any_box": 414
+      },
+      "symbol": "SHIB_USDT_SWAP"
+    },
+    {
+      "candidates": 430,
+      "candidates_sha256": "93d1c81e69b2aea4326aad987e1546552bd0d977dc1292362c35ded245517e84",
+      "episodes": 67,
+      "episodes_sha256": "fd4710ba483ff900f236c8572021aec448929aebb8eaa0433ea976d218cd10e3",
+      "source_sha256": "6687d47f9b9835a2545b06ee68ce6f5d683d51fb648962c9e689d9902799c034",
+      "stats": {
+        "accepted_candidates": 430,
+        "accepted_structural_boxes": 430,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 67,
+        "raw_boxes": 475,
+        "reject_confirmation": 45,
+        "windows_scored": 23472,
+        "windows_with_any_box": 449
+      },
+      "symbol": "SOL_USDT_SWAP"
+    },
+    {
+      "candidates": 497,
+      "candidates_sha256": "50f5af0941077a5fd404a91ed12a4446c057084cd84862659818fe6782be9368",
+      "episodes": 79,
+      "episodes_sha256": "88e47c57f61d8fc00fbca4f6e7b3ff508751bce4627b4552d6818aa6363d9f67",
+      "source_sha256": "91ba017eb447bcb56ab9726a33bff6e65aa4718013c36cb7a5871b7768c88212",
+      "stats": {
+        "accepted_candidates": 497,
+        "accepted_structural_boxes": 497,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 79,
+        "raw_boxes": 535,
+        "reject_confirmation": 37,
+        "reject_core_length": 1,
+        "windows_scored": 23472,
+        "windows_with_any_box": 525
+      },
+      "symbol": "SUI_USDT_SWAP"
+    },
+    {
+      "candidates": 532,
+      "candidates_sha256": "3825584908e98e5d61f51ed0afcdf570fb031daab0e6aa545cc6609a6ac49ad0",
+      "episodes": 79,
+      "episodes_sha256": "b144dde21ece6a4abe860fed1fa69360bf9991c67bc5f8ad0c9d8c234e062be2",
+      "source_sha256": "b1bcc86326ff571294b624f862f5be323d5bb213d2d1e8701fbac8179d48af80",
+      "stats": {
+        "accepted_candidates": 532,
+        "accepted_structural_boxes": 532,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 79,
+        "raw_boxes": 585,
+        "reject_confirmation": 53,
+        "windows_scored": 23472,
+        "windows_with_any_box": 573
+      },
+      "symbol": "TIA_USDT_SWAP"
+    },
+    {
+      "candidates": 371,
+      "candidates_sha256": "4e5adf730fb7e7bbe0a3490256261d033364e627d47a776da77ae42315102d70",
+      "episodes": 60,
+      "episodes_sha256": "892409877d9dca938e2db8ed1fc7ba2e871b5f288be92949c6b6d5d126e9d19d",
+      "source_sha256": "c2a77515ac93253c91823ef58c20221890c5235aff181c94ae4817dd3d4bb32a",
+      "stats": {
+        "accepted_candidates": 371,
+        "accepted_structural_boxes": 371,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 60,
+        "raw_boxes": 404,
+        "reject_confirmation": 33,
+        "windows_scored": 23472,
+        "windows_with_any_box": 389
+      },
+      "symbol": "TRUMP_USDT_SWAP"
+    },
+    {
+      "candidates": 357,
+      "candidates_sha256": "3b081d789d3d36b0b9518ae3af2c969cdd52c77a4486687838f921f92bc5d64a",
+      "episodes": 51,
+      "episodes_sha256": "fcca0bbf0f0c1e02b8bbb4d4646e7a7f5da550920b4dad6ddee7c4694082225f",
+      "source_sha256": "70548058f4bc659d401f6ba73af93b937f533bfcc8298f97872a9eabc33978ec",
+      "stats": {
+        "accepted_candidates": 357,
+        "accepted_structural_boxes": 357,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 51,
+        "raw_boxes": 389,
+        "reject_confirmation": 29,
+        "reject_core_length": 3,
+        "windows_scored": 23472,
+        "windows_with_any_box": 374
+      },
+      "symbol": "TRX_USDT_SWAP"
+    },
+    {
+      "candidates": 447,
+      "candidates_sha256": "b9e59f88042e356d710688946e256472ddb13af961cb8f480fe9ed7797b978b7",
+      "episodes": 69,
+      "episodes_sha256": "aad5c0bacbdb79e401bdae48c3fb157d7f94d79d092cd3dd8f88f1712ef010ad",
+      "source_sha256": "01a78738bb220b6a68bd70adbe31ed93b15a224efd84cacc1b342794b50956f4",
+      "stats": {
+        "accepted_candidates": 447,
+        "accepted_structural_boxes": 447,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 69,
+        "raw_boxes": 486,
+        "reject_confirmation": 39,
+        "windows_scored": 23472,
+        "windows_with_any_box": 479
+      },
+      "symbol": "UNI_USDT_SWAP"
+    },
+    {
+      "candidates": 573,
+      "candidates_sha256": "1adaa1d28af4f63a403434babeab0981cb4c7d55957f9a75e5de218a1a423ce9",
+      "episodes": 75,
+      "episodes_sha256": "bcddb0190bd9175a41ef5c0e2e77b16a2e8fa5ad5f251960422a98699e4505ae",
+      "source_sha256": "ad434586e40965a047db96074c0b9e9d49b9409cd03c17a6963d02a298a6002d",
+      "stats": {
+        "accepted_candidates": 573,
+        "accepted_structural_boxes": 573,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 75,
+        "raw_boxes": 632,
+        "reject_confirmation": 59,
+        "windows_scored": 23472,
+        "windows_with_any_box": 604
+      },
+      "symbol": "VIRTUAL_USDT_SWAP"
+    },
+    {
+      "candidates": 491,
+      "candidates_sha256": "1567d334e843a3c06cb9b1444757ded108d10a56919adba53661388ac793c4eb",
+      "episodes": 63,
+      "episodes_sha256": "f68da4880e86a27bd5473e6e1b6b079dfb4851dc9d6d0005ca50f1bf9ec09c8e",
+      "source_sha256": "2b0f94e08f33b654909e422c85f45f65c175c2baa4afdf69b1968009df958723",
+      "stats": {
+        "accepted_candidates": 491,
+        "accepted_structural_boxes": 491,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 63,
+        "raw_boxes": 568,
+        "reject_confirmation": 61,
+        "reject_l1_training_interval_overlap": 16,
+        "windows_scored": 23472,
+        "windows_with_any_box": 537
+      },
+      "symbol": "WLD_USDT_SWAP"
+    },
+    {
+      "candidates": 410,
+      "candidates_sha256": "c4aafd131cc0e9381ecca3fe26f0c1864455f36e251d7c38f135de702ab5a309",
+      "episodes": 58,
+      "episodes_sha256": "ec1e3ff12a170aa2f6ba394a79c85f427c7775168a87579fb64a0ee36afb005a",
+      "source_sha256": "57d8f8a8674efa00d3da71ea103340f4fcf9a41b8203bdeb58431432456ddc87",
+      "stats": {
+        "accepted_candidates": 410,
+        "accepted_structural_boxes": 410,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 58,
+        "raw_boxes": 450,
+        "reject_confirmation": 40,
+        "windows_scored": 23472,
+        "windows_with_any_box": 427
+      },
+      "symbol": "XLM_USDT_SWAP"
+    },
+    {
+      "candidates": 442,
+      "candidates_sha256": "58a97b6aa026080744f135f6870c163fbee993f2fb3354f2a6e95a53aec671c0",
+      "episodes": 65,
+      "episodes_sha256": "1c673a7bb7a7ce08c31e579f89d809dd6e6455afbceb48a5cc5dbb706c6a89d6",
+      "source_sha256": "9e5209bfb52c22b18120659a47a82054352a185c72371737a182a3369a2056c9",
+      "stats": {
+        "accepted_candidates": 442,
+        "accepted_structural_boxes": 442,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 65,
+        "raw_boxes": 490,
+        "reject_confirmation": 46,
+        "reject_core_length": 2,
+        "windows_scored": 23472,
+        "windows_with_any_box": 471
+      },
+      "symbol": "XRP_USDT_SWAP"
+    },
+    {
+      "candidates": 557,
+      "candidates_sha256": "2563f0b485411fd6a2db2f226c75d4329115500d90bd3db33924b2ade58deadf",
+      "episodes": 85,
+      "episodes_sha256": "e5c6c474311f25476e8d96d1d144883a31611f938e85181f3d73eeddede05b27",
+      "source_sha256": "c468f7493481777a78ac3b48feb4e01b1cf1f089d49920581cd9d8a9c3ebbd77",
+      "stats": {
+        "accepted_candidates": 557,
+        "accepted_structural_boxes": 557,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 85,
+        "raw_boxes": 609,
+        "reject_confirmation": 52,
+        "windows_scored": 23472,
+        "windows_with_any_box": 584
+      },
+      "symbol": "ZEC_USDT_SWAP"
+    },
+    {
+      "candidates": 456,
+      "candidates_sha256": "3fae2700188661853563ea8a33f53c10ee078d39197800b00b32c762de5c02e0",
+      "episodes": 62,
+      "episodes_sha256": "f528f31565118dbc81200a52c878ffe2cf53af2f8746a5dd82c088a17a885041",
+      "source_sha256": "eec634dbe97f47a4ee186f02aa96e588964d73a0fdb39600344a8d67282f1dbd",
+      "stats": {
+        "accepted_candidates": 456,
+        "accepted_structural_boxes": 456,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 62,
+        "raw_boxes": 496,
+        "reject_confirmation": 40,
+        "windows_scored": 23472,
+        "windows_with_any_box": 477
+      },
+      "symbol": "ZK_USDT_SWAP"
+    },
+    {
+      "candidates": 352,
+      "candidates_sha256": "c3f2203e413f9c5c021a7bf469e729eea776abc7e7bf151399cefa6551b53e28",
+      "episodes": 69,
+      "episodes_sha256": "53210a74c5fb6784d26cb00f7fe24fe6b5a3ca44c9379869dffd3d50ae7df21f",
+      "source_sha256": "5f5e2d7ab811755d5f05ed74ad3cca0907a39d80f804ec475e30a97ac6f14015",
+      "stats": {
+        "accepted_candidates": 352,
+        "accepted_structural_boxes": 352,
+        "candidate_available_endpoints": 11736,
+        "overlap_episodes": 69,
+        "raw_boxes": 387,
+        "reject_confirmation": 35,
+        "windows_scored": 23472,
+        "windows_with_any_box": 362
+      },
+      "symbol": "ZRO_USDT_SWAP"
+    }
+  ],
+  "production_eligible": false,
+  "promoted": false,
+  "protocol": "15m_grade_a_full40_1280_l1_proposals_causal_global_context_l2_v1",
+  "raw_accepted_candidates": 25911,
+  "scan_totals": {
+    "accepted_candidates": 25911,
+    "accepted_structural_boxes": 25911,
+    "candidate_available_endpoints": 633744,
+    "overlap_episodes": 3808,
+    "raw_boxes": 28620,
+    "reject_confirmation": 2511,
+    "reject_core_length": 32,
+    "reject_l1_training_interval_overlap": 166,
+    "windows_scored": 1267488,
+    "windows_with_any_box": 27558
+  },
+  "source_commit": "a735c14788671da6784ada1c8eaa6cad139d04bd",
+  "symbols": 54,
+  "telegram_sent": false,
+  "training_or_tuning": false,
+  "wall_seconds": 28475.038
+}

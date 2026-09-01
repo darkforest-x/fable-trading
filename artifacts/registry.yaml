@@ -8572,3 +8572,206 @@ artifacts:
     config_hash: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
     data_cutoff: "2026-08-31T02:00:00Z"
     notes: Self-contained Owner-facing HTML with embedded overview and direct local chart-pack paths.
+  # ---- 15m L2 causal global-context rejection (2026-09-01) ------------
+  - artifact_id: 15m-ma-launch-l2-global-context-v1-prereg
+    artifact_type: config
+    role: frozen_l1_and_l2_causal_evaluation_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "761583bef90de6734a6b1462a26ab3fe0735adcf"
+    source_path: experiments/active/exp-15m-ma-launch-l2-global-context-v1/preregistration.json
+    sha256: "4f60d5c3016870d48f6991b7f345404462b24ef1fa4161e3a709e1a2726d019e"
+    size_bytes: 11564
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-global-context-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "761583bef90de6734a6b1462a26ab3fe0735adcf"
+    config_hash: "4f60d5c3016870d48f6991b7f345404462b24ef1fa4161e3a709e1a2726d019e"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: >-
+      Freezes the single current Grade-A native-1280 L1 input, 168-bar causal
+      feature clock, 60-hour full-exposure purges, dependency blocks, LightGBM
+      parameters, tune-q90 gate, matched controls, costs and rejection gates.
+
+  - artifact_id: 15m-ma-launch-l2-global-context-v1-scan-receipt
+    artifact_type: manifest
+    role: terminal_54_symbol_frozen_l1_candidate_scan_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a735c14788671da6784ada1c8eaa6cad139d04bd"
+    source_path: experiments/active/exp-15m-ma-launch-l2-global-context-v1/results/scan_receipt.json
+    sha256: "0694f5beb2a9a455fd073f973be881a83781b451618f0791d9b22322bdfe5c91"
+    size_bytes: 41482
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-global-context-v1/results/scan_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a735c14788671da6784ada1c8eaa6cad139d04bd"
+    config_hash: "4f60d5c3016870d48f6991b7f345404462b24ef1fa4161e3a709e1a2726d019e"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: >-
+      Atomic scan success for 54/54 symbols, 25,911 accepted boxes and 3,808
+      overlap episodes; records zero holdout rows, network reads, training,
+      tuning, promotion, deployment, forward mutation, Telegram and orders.
+
+  - artifact_id: 15m-ma-launch-l2-global-context-v1-dataset
+    artifact_type: dataset
+    role: causal_28_feature_l2_episode_ledger_with_time_split
+    source_repo: darkforest-x/fable-trading
+    source_commit: "058977365adf8e2a7c668cedd1c9797c019382df"
+    source_path: analysis/output/ma_launch_l2_global_context_v1/l2_dataset.csv
+    sha256: "e7b6f94cf59493c1f33e46c2f08fe5252a0a6e80406ab43a061fd112fc70f798"
+    size_bytes: 3996619
+    storage_uri: "file://analysis/output/ma_launch_l2_global_context_v1/l2_dataset.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "058977365adf8e2a7c668cedd1c9797c019382df"
+    config_hash: "4f60d5c3016870d48f6991b7f345404462b24ef1fa4161e3a709e1a2726d019e"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: >-
+      3,779 causal pre-holdout episodes, 28 side-aligned features and frozen
+      train/tune/final-validation blocks. Large bytes remain outside git and
+      are identity-pinned here; failed-model data is not approved for reuse.
+
+  - artifact_id: 15m-ma-launch-l2-global-context-v1-model
+    artifact_type: model
+    role: rejected_lightgbm_global_context_ranker
+    source_repo: darkforest-x/fable-trading
+    source_commit: "058977365adf8e2a7c668cedd1c9797c019382df"
+    source_path: analysis/output/ma_launch_l2_global_context_v1/models/l2_global_context_v1.txt
+    sha256: "7324252dbdb2054c077dec86120040e9af9ff794dfea849a60ef88b606ba5e1a"
+    size_bytes: 5921
+    storage_uri: "file://analysis/output/ma_launch_l2_global_context_v1/models/l2_global_context_v1.txt"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "058977365adf8e2a7c668cedd1c9797c019382df"
+    config_hash: "4f60d5c3016870d48f6991b7f345404462b24ef1fa4161e3a709e1a2726d019e"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: >-
+      Deterministic CPU LightGBM best iteration 2. Rejected because it reduced
+      L1 net value and failed the top-decile, permutation and matched-control
+      gates; this row is evidence, not an activation candidate.
+
+  - artifact_id: 15m-ma-launch-l2-global-context-v1-training-receipt
+    artifact_type: manifest
+    role: deterministic_time_split_training_and_primary_gate_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "058977365adf8e2a7c668cedd1c9797c019382df"
+    source_path: experiments/active/exp-15m-ma-launch-l2-global-context-v1/results/training_receipt.json
+    sha256: "d5968bcc5886db9fa3940393a7a5f1432f558164ab9e5591a70c3c11ea5f6426"
+    size_bytes: 7494
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-global-context-v1/results/training_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "058977365adf8e2a7c668cedd1c9797c019382df"
+    config_hash: "4f60d5c3016870d48f6991b7f345404462b24ef1fa4161e3a709e1a2726d019e"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: >-
+      Records L1 +7.35 bp net, L2 top-decile -15.00 bp, frozen-gate +3.39 bp,
+      AUC 0.5646, permutation p=0.656434 and primary gate failure.
+
+  - artifact_id: 15m-ma-launch-l2-global-context-v1-chart-manifest
+    artifact_type: manifest
+    role: hash_pinned_100_chart_keep_reject_visual_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "058977365adf8e2a7c668cedd1c9797c019382df"
+    source_path: analysis/output/ma_launch_l2_global_context_v1/chart_manifest.csv
+    sha256: "8daf60ff87bbbc82f9373abeca0df0bbf4979ba73ac79903b165fc803b11a80a"
+    size_bytes: 42394
+    storage_uri: "file://analysis/output/ma_launch_l2_global_context_v1/chart_manifest.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "058977365adf8e2a7c668cedd1c9797c019382df"
+    config_hash: "4f60d5c3016870d48f6991b7f345404462b24ef1fa4161e3a709e1a2726d019e"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: >-
+      Fifty frozen-gate KEEP and fifty high-L1 REJECT charts in ordinary
+      uncompressed folders, with source and PNG hashes and zero future pixels.
+
+  - artifact_id: 15m-ma-launch-l2-global-context-v1-qa-receipt
+    artifact_type: manifest
+    role: causal_render_and_hash_verification_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "058977365adf8e2a7c668cedd1c9797c019382df"
+    source_path: experiments/active/exp-15m-ma-launch-l2-global-context-v1/results/qa_receipt.json
+    sha256: "9d448bac46938cfcee2eb4390269c786cff24add70c7b26f3aa1bbfe961c5f81"
+    size_bytes: 319
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-global-context-v1/results/qa_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "058977365adf8e2a7c668cedd1c9797c019382df"
+    config_hash: "4f60d5c3016870d48f6991b7f345404462b24ef1fa4161e3a709e1a2726d019e"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: PASS for 100/100 charts, zero failures, zero holdout rows and production_eligible=false.
+
+  - artifact_id: 15m-ma-launch-l2-global-context-v1-overview
+    artifact_type: report
+    role: high_resolution_keep_vs_reject_visual_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9e58ace3721553ba92834382c054ace8932ac1c8"
+    source_path: analysis/output/ma_launch_l2_global_context_v1/l2_kept_vs_rejected_overview.png
+    sha256: "dcfc4deb530b1d37f46183370fc69a53c2b804e377c014a51a5107c41ae8ab00"
+    size_bytes: 585911
+    storage_uri: "file://analysis/output/ma_launch_l2_global_context_v1/l2_kept_vs_rejected_overview.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "9e58ace3721553ba92834382c054ace8932ac1c8"
+    config_hash: "4f60d5c3016870d48f6991b7f345404462b24ef1fa4161e3a709e1a2726d019e"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: 1920x1726 lossless overview of six KEEP and six REJECT source charts.
+
+  - artifact_id: 15m-ma-launch-l2-global-context-v1-report
+    artifact_type: report
+    role: canonical_markdown_negative_result_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9e58ace3721553ba92834382c054ace8932ac1c8"
+    source_path: analysis/p3_15m_ma_launch_l2_global_context_20260901.md
+    sha256: "11ddf58606d78e78aeb2db2faf8f471f7f4d193a95074fb768769774792b9e0a"
+    size_bytes: 9601
+    storage_uri: "repo://analysis/p3_15m_ma_launch_l2_global_context_20260901.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "9e58ace3721553ba92834382c054ace8932ac1c8"
+    config_hash: "4f60d5c3016870d48f6991b7f345404462b24ef1fa4161e3a709e1a2726d019e"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Chinese answer-first report with lineage, time discipline, controls, risks and reproduction commands.
+
+  - artifact_id: 15m-ma-launch-l2-global-context-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_negative_result_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9e58ace3721553ba92834382c054ace8932ac1c8"
+    source_path: analysis/html/p3_15m_ma_launch_l2_global_context_20260901.html
+    sha256: "0f0dc74e42afa8fe4c3ccfa667db98c27961ff971b935c9060d959ea773525e4"
+    size_bytes: 794880
+    storage_uri: "repo://analysis/html/p3_15m_ma_launch_l2_global_context_20260901.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "9e58ace3721553ba92834382c054ace8932ac1c8"
+    config_hash: "4f60d5c3016870d48f6991b7f345404462b24ef1fa4161e3a709e1a2726d019e"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Self-contained HTML with embedded overview and a direct gallery link.
+
+  - artifact_id: 15m-ma-launch-l2-global-context-v1-gallery
+    artifact_type: report
+    role: owner_facing_100_chart_uncompressed_folder_gallery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9e58ace3721553ba92834382c054ace8932ac1c8"
+    source_path: analysis/html/p3_15m_ma_launch_l2_global_context_gallery_20260901.html
+    sha256: "4feb5e705cb174c17feefa3ab1345408516756911cb65d03b8be1dcb60858c4b"
+    size_bytes: 47714
+    storage_uri: "repo://analysis/html/p3_15m_ma_launch_l2_global_context_gallery_20260901.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "9e58ace3721553ba92834382c054ace8932ac1c8"
+    config_hash: "4f60d5c3016870d48f6991b7f345404462b24ef1fa4161e3a709e1a2726d019e"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: 100 cards link directly to full-resolution PNG files in the ordinary local chart folders.

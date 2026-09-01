@@ -1,0 +1,132 @@
+{
+  "dataset_path": "analysis/output/ma_launch_l2_global_context_v1/l2_dataset.csv",
+  "dataset_sha256": "e7b6f94cf59493c1f33e46c2f08fe5252a0a6e80406ab43a061fd112fc70f798",
+  "dependency_blocks": 974,
+  "dependency_representatives": 974,
+  "episodes_in": 3808,
+  "experiment_id": "exp-15m-ma-launch-l2-global-context-v1",
+  "feature_columns": [
+    "ma_spread_pct",
+    "full_spread",
+    "fast_slow_gap",
+    "full_ratio_min48",
+    "spread_mean8",
+    "spread_mean24",
+    "spread_chg8",
+    "spread_chg24",
+    "spread_pos96",
+    "dense_run_len",
+    "dense_frac48",
+    "ext_up",
+    "close_vs_ema55",
+    "close_vs_ema200",
+    "order_score",
+    "slow_slope_12",
+    "volume_ratio",
+    "volume_z",
+    "vol_ratio_mean8",
+    "atr_pct",
+    "atr_pct_ratio96",
+    "pre_range48",
+    "pre_range168",
+    "drawdown24",
+    "ret_4",
+    "ret_12",
+    "ret_24",
+    "ret_48"
+  ],
+  "feature_count": 28,
+  "feature_semantics": "side_aligned_v1",
+  "generated_at": "2026-09-01T09:12:19.517404+00:00",
+  "holdout_rows_read": 0,
+  "immutable_inputs": {
+    "L1 renderer": {
+      "path": "yoyo/layers/l1_detection/render.py",
+      "sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+    },
+    "L1 training manifest": {
+      "path": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+      "sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2"
+    },
+    "L1 weights": {
+      "path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+      "sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838"
+    },
+    "L2 feature builder": {
+      "path": "yoyo/layers/l2_judgment/features.py",
+      "sha256": "2fed40ed52440d4c76c0f74c5638a707449c2d6c1f56f91bb2030c914a1cddfa"
+    },
+    "L2 label builder": {
+      "path": "yoyo/layers/l2_judgment/labeling.py",
+      "sha256": "18c90468c9e6a75de1fb486934295bd3c45b0ca92229d6d9bfb7cd30c288994a"
+    },
+    "L2 training builder": {
+      "path": "yoyo/layers/l2_judgment/train.py",
+      "sha256": "30ebb563e07e6adbc21725efa4817df56a73106a8cec583cba17dea46c3d89dc"
+    },
+    "five-model comparison preregistration": {
+      "path": "experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/preregistration.json",
+      "sha256": "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
+    },
+    "five-model comparison summary": {
+      "path": "experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/comparison_summary.json",
+      "sha256": "3920e8e6c0f920dc1006380c2f822a475cd9f63ffe560b6eb738a6ed4288b1d0"
+    },
+    "five-model model summary": {
+      "path": "experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/model_summary.csv",
+      "sha256": "12b1e3c1c32540948b383d023066ba689475f68f6a980418b7491dad145a4301"
+    }
+  },
+  "label_rate": 0.24715533209843873,
+  "matched_controls": 1824,
+  "matched_controls_path": "analysis/output/ma_launch_l2_global_context_v1/matched_controls.csv",
+  "matched_controls_sha256": "e4b654a45f72a337bc58e7f97d19044218c9521a5341ed0293199384de98d1ec",
+  "matched_events": 228,
+  "maximum_dependency_block_events": 22,
+  "production_eligible": false,
+  "protocol": "15m_grade_a_full40_1280_l1_proposals_causal_global_context_l2_v1",
+  "reject_reasons": {
+    "feature_or_outcome_unavailable": 29
+  },
+  "rows_out": 3779,
+  "scan_receipt_sha256": "0694f5beb2a9a455fd073f973be881a83781b451618f0791d9b22322bdfe5c91",
+  "side_counts": {
+    "long": 1801,
+    "short": 1978
+  },
+  "source_commit": "058977365adf8e2a7c668cedd1c9797c019382df",
+  "split_counts": {
+    "final_validation": 1021,
+    "purge": 158,
+    "train": 1779,
+    "tune": 821
+  },
+  "split_dependency_block_counts": {
+    "final_validation": 242,
+    "purge": 86,
+    "train": 417,
+    "tune": 229
+  },
+  "split_ranges": {
+    "final_validation": {
+      "end": "2026-05-03T05:45:00+00:00",
+      "n": 1021,
+      "start": "2026-04-01T00:15:00+00:00"
+    },
+    "purge": {
+      "end": "2026-03-31T19:45:00+00:00",
+      "n": 158,
+      "start": "2026-02-26T14:15:00+00:00"
+    },
+    "train": {
+      "end": "2026-02-26T11:30:00+00:00",
+      "n": 1779,
+      "start": "2026-01-01T01:30:00+00:00"
+    },
+    "tune": {
+      "end": "2026-03-29T10:45:00+00:00",
+      "n": 821,
+      "start": "2026-03-01T02:15:00+00:00"
+    }
+  }
+}

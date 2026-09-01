@@ -2796,8 +2796,8 @@ experiments:
 
   - experiment_id: exp-15m-ma-launch-l2-global-context-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "c5a4398518030dbcab6aec28fb13bb31d1394eca"
-    status: active
+    source_commit: "9e58ace3721553ba92834382c054ace8932ac1c8"
+    status: rejected
     question: >-
       Can a causal L2 ranker remove frozen Grade-A full40 native-1280 YOLO
       proposals whose local box looks plausible but whose 168-bar global
@@ -2807,11 +2807,29 @@ experiments:
       L1-only proposal pool versus the same frozen L1 pool filtered by one
       preregistered L2 score threshold; L1 weights, inference geometry,
       TP5/SL2/72 next-open outcome and 0.2% round-trip cost stay fixed.
-    result: preregistered_and_pending_preholdout_scan
+    result: >-
+      rejected_on_independent_preholdout_time_blocks. The unfiltered L1 pool
+      returned +7.35 bp net after 0.2% cost, while L2 final top-decile returned
+      -15.00 bp and the tune-q90 frozen gate returned only +3.39 bp. ROC AUC was
+      0.5646, outcome-permutation p=0.656434 and the selected events did not
+      beat all eight matched-control assignments. The preregistered primary
+      gate therefore failed and this L2 must not be enabled.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p3_15m_ma_launch_l2_global_context_20260901.md
+    artifacts:
+      - 15m-ma-launch-l2-global-context-v1-prereg
+      - 15m-ma-launch-l2-global-context-v1-scan-receipt
+      - 15m-ma-launch-l2-global-context-v1-dataset
+      - 15m-ma-launch-l2-global-context-v1-model
+      - 15m-ma-launch-l2-global-context-v1-training-receipt
+      - 15m-ma-launch-l2-global-context-v1-chart-manifest
+      - 15m-ma-launch-l2-global-context-v1-qa-receipt
+      - 15m-ma-launch-l2-global-context-v1-overview
+      - 15m-ma-launch-l2-global-context-v1-report
+      - 15m-ma-launch-l2-global-context-v1-html
+      - 15m-ma-launch-l2-global-context-v1-gallery
     reuse_allowed: false
     notes: >-
       Owner explicitly authorized this research L2 run and the otherwise
@@ -2820,5 +2838,9 @@ experiments:
       Before any L2 outcomes/scores were generated, the integrity amendment
       expanded both purges from label-only 18 hours to full-exposure 60 hours
       and made connected input-plus-label dependency blocks the fit/evaluation
-      unit. No holdout, promotion, deployment, ACTIVE/frozen/forward mutation,
-      Telegram or order action is authorized.
+      unit. The 54-symbol scan produced 25,911 structurally legal boxes and
+      3,808 overlap episodes; 3,779 causal rows yielded 242 independent final
+      blocks. One current Grade-A native-1280 L1 checkpoint was used instead of
+      mixing five checkpoints with incompatible label and geometry semantics.
+      No holdout, promotion, deployment, ACTIVE/frozen/forward mutation,
+      Telegram or order action occurred.

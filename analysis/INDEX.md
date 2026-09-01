@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **242** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **243** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,6 +10,7 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-09-01 | [`p3_15m_ma_launch_l2_global_context_20260901.md`](p3_15m_ma_launch_l2_global_context_20260901.md) | 15m 均线密集启动：L2 全局上下文判断层 v1 | 本轮结论是：**未通过研究门**。L2 冻结门没有改善 L1 扣成本后的净价值，不得开启。 |
 | 2026-08-21 | [`p0_pine_eth_15m_v12f_holdout1_recent6m_20260821.md`](p0_pine_eth_15m_v12f_holdout1_recent6m_20260821.md) | ETH 15m Pine V12F：最近半年 holdout 第 1 次正式验收 | V12F 最近半年 -3.46% / DD 24.74%，优于 V9 的 -6.93% / 27.45%；纯受保护段 +15.77%，但匹配对照 p=0.2566、top-decile p=0.1838，严格项目门 FAIL，不得 promote。 |
 | 2026-08-21 | [`p0_pine_eth_15m_cross_tbsl_optimization_20260821.md`](p0_pine_eth_15m_cross_tbsl_optimization_20260821.md) | ETH 15m Pine：六均线交叉因子与趋势 TP/SL 优化 | 1. **兼顾收益与回撤的当前研究候选是六线 W8 gate，不是 TBSL。** 它要求最近 8 根内， |
 | 2026-08-21 | [`p0_pine_eth_15m_start_label_audit_20260821.md`](p0_pine_eth_15m_start_label_audit_20260821.md) | ETH 15m Pine：335 候选自动先达标签与判断门优化审计 | 1. **335 个候选已经全部自动标完，不需要人工审核。** 184 个正例、151 个负例，正例率 |
@@ -384,6 +385,7 @@
 - [`p2m_readonly_mechanism_audit_20260803.md`](p2m_readonly_mechanism_audit_20260803.md) — P2-M：ATR 尺度与形态关联的只读机制审计
 - [`p2r_readonly_root_cause_audit_20260803.md`](p2r_readonly_root_cause_audit_20260803.md) — P2-R：P1 immutable 上的只读根因审计
 - [`p3_backtest_report.md`](p3_backtest_report.md) — 阶段 3 报告：事件驱动回测（第一轮）
+- [`p3_15m_ma_launch_l2_global_context_20260901.md`](p3_15m_ma_launch_l2_global_context_20260901.md) — 15m 均线密集启动：L2 全局上下文判断层 v1
 - [`p3_ml_opt_backtest_compare.md`](p3_ml_opt_backtest_compare.md) — 回测对照：二分类 vs 回归收益（YOLO 主线池）
 - [`p3_v11_pool_cutover.md`](p3_v11_pool_cutover.md) — p3 — v11 池判断层切换 ACTIVE
 - [`p3_v8_pool_cutover.md`](p3_v8_pool_cutover.md) — p3 — 干净池(v8_chain)判断层切换 ACTIVE
