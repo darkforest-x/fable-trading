@@ -1128,8 +1128,8 @@ def build_report(prereg: Mapping[str, Any]) -> Path:
             "",
             "## April final 同表对照",
             "",
-            "| 配置 | LONG/SHORT 特征 | top-10% 净收益 | q90 n | q90 净收益 | 胜率 | 置换 p |",
-            "|---|---|---:|---:|---:|---:|---:|",
+            "| 配置 | LONG/SHORT 特征 | top-10% 净收益 | q90 n | q90 净收益 | 胜率 | 置换 p | 事件减匹配对照 | 8/8 对照均跑赢 |",
+            "|---|---|---:|---:|---:|---:|---:|---:|---|",
         ]
     )
     for label, key in (
@@ -1145,7 +1145,9 @@ def build_report(prereg: Mapping[str, Any]) -> Path:
             f"{item['frozen_q90']['n']} | "
             f"{pct(item['frozen_q90']['net_mean'])} | "
             f"{item['frozen_q90']['win_rate']:.2%} | "
-            f"{item['outcome_permutation_p']:.6f} |"
+            f"{item['outcome_permutation_p']:.6f} | "
+            f"{pct(item['matched_control']['mean_event_minus_control'])} | "
+            f"{item['matched_control']['all_assignments_positive']} |"
         )
     lines.extend(
         [
