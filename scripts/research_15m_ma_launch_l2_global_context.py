@@ -9,6 +9,9 @@ the existing 28 causal L2 features at the last bar actually visible to L1 and
 labels from the next bar only; ``--train-evaluate`` selects one tune-q90 score
 gate and evaluates it once on the final pre-holdout period; ``--render`` creates
 decision-only 168-bar global charts; and ``--verify`` reproduces every chart.
+Split embargoes cover the complete 168-bar input plus 72-bar label exposure
+(60 hours).  Directly or transitively overlapping same-symbol exposures form a
+dependency block; only its earliest event participates in fit/tune/evaluation.
 
 Inputs used by the L2 feature row are documented by
 ``yoyo.layers.l2_judgment.features``.  The latest possible feature input is the
@@ -161,6 +164,30 @@ def load_preregistration(path: Path) -> dict[str, Any]:
         minutes=15 * int(outcome["horizon_bars"])
     ) > holdout:
         raise L2ExperimentError("candidate horizon may cross into holdout")
+    exposure_hours = (
+        L2_CONTEXT_BARS * BAR_DELTA
+        + int(outcome["horizon_bars"]) * BAR_DELTA
+    ) / pd.Timedelta(hours=1)
+    split_links = (
+        ("train", "purge_train_tune", "tune"),
+        ("tune", "purge_tune_validation", "final_preholdout_validation"),
+    )
+    for left_key, key, right_key in split_links:
+        purge = payload["splits"][key]
+        observed_hours = (
+            utc(purge["end_exclusive"]) - utc(purge["start"])
+        ) / pd.Timedelta(hours=1)
+        if observed_hours != exposure_hours or float(purge["duration_hours"]) != exposure_hours:
+            raise L2ExperimentError(
+                f"{key} must cover the full input+label exposure: "
+                f"{observed_hours}h != {exposure_hours}h"
+            )
+        if utc(payload["splits"][left_key]["available_at_end_exclusive"]) != utc(
+            purge["start"]
+        ) or utc(purge["end_exclusive"]) != utc(
+            payload["splits"][right_key]["available_at_start"]
+        ):
+            raise L2ExperimentError(f"{key} is not contiguous with its learning splits")
     return payload
 
 
@@ -826,6 +853,11 @@ def feature_outcome_row(
         return None
     feature_time = utc(featured["open_time"].iloc[signal_i])
     available_at = feature_time + BAR_DELTA
+    input_start_i = signal_i - L2_CONTEXT_BARS + 1
+    if input_start_i < 0:
+        return None
+    exposure_start = utc(featured["open_time"].iloc[input_start_i])
+    exposure_end_exclusive = available_at + int(outcome_spec["horizon_bars"]) * BAR_DELTA
     declared_available = utc(episode["available_at"])
     if available_at != declared_available:
         raise L2ExperimentError("available_at differs from final visible bar close")
@@ -838,6 +870,8 @@ def feature_outcome_row(
         "feature_bar_time": feature_time.isoformat(),
         "available_at": available_at.isoformat(),
         "signal_time": available_at.isoformat(),
+        "exposure_start_time": exposure_start.isoformat(),
+        "exposure_end_exclusive": exposure_end_exclusive.isoformat(),
         "split": split_name(available_at, prereg),
         "l1_confidence": float(episode["confidence"]),
         "l1_episode_max_confidence": float(episode["episode_max_confidence"]),
@@ -862,6 +896,89 @@ def feature_outcome_row(
     }
     row.update({column: float(features[column]) for column in FEATURE_COLUMNS})
     return row
+
+
+def assign_dependency_blocks(events: pd.DataFrame) -> pd.DataFrame:
+    """Assign connected full input-plus-label exposure blocks per symbol.
+
+    Each event occupies the half-open interval from the first 168-bar context
+    timestamp through the close of its 72-bar outcome path.  Directly or
+    transitively overlapping intervals share a block.  Only the earliest
+    available event is an independent fit/tune/evaluation representative;
+    later events remain scoreable and renderable.
+    """
+
+    required = {
+        "symbol",
+        "episode_id",
+        "available_at",
+        "exposure_start_time",
+        "exposure_end_exclusive",
+        "split",
+    }
+    missing = sorted(required - set(events.columns))
+    if missing:
+        raise L2ExperimentError(f"dependency inputs missing columns: {missing}")
+    out = events.copy()
+    out["_exposure_start"] = pd.to_datetime(out["exposure_start_time"], utc=True)
+    out["_exposure_end"] = pd.to_datetime(out["exposure_end_exclusive"], utc=True)
+    out["_available"] = pd.to_datetime(out["available_at"], utc=True)
+    out = out.sort_values(
+        ["symbol", "_exposure_start", "_exposure_end", "_available", "episode_id"]
+    )
+    block_ids: dict[int, str] = {}
+    learning = out[out["split"] != "purge"].sort_values(
+        ["symbol", "_exposure_start", "_exposure_end"]
+    )
+    for symbol, group in learning.groupby("symbol", sort=True):
+        active_end: pd.Timestamp | None = None
+        active_split: str | None = None
+        for _, row in group.iterrows():
+            start = row["_exposure_start"]
+            if active_end is not None and str(row["split"]) != active_split and start < active_end:
+                raise L2ExperimentError(
+                    f"full exposure crosses splits for {symbol}: "
+                    f"{active_split} -> {row['split']}"
+                )
+            active_end = row["_exposure_end"] if active_end is None else max(
+                active_end, row["_exposure_end"]
+            )
+            active_split = str(row["split"])
+
+    for (symbol, split), group in out.groupby(["symbol", "split"], sort=True):
+        sequence = 0
+        active_end: pd.Timestamp | None = None
+        active_id = ""
+        for index, row in group.iterrows():
+            start = row["_exposure_start"]
+            end = row["_exposure_end"]
+            if active_end is None or start >= active_end:
+                sequence += 1
+                active_id = f"{symbol}_{split}_dependency_{sequence:06d}"
+                active_end = end
+            else:
+                active_end = max(active_end, end)
+            block_ids[int(index)] = active_id
+    out["dependency_block_id"] = pd.Series(block_ids)
+    out["dependency_block_size"] = out.groupby("dependency_block_id")[
+        "episode_id"
+    ].transform("size").astype(int)
+    first_indices = (
+        out.sort_values(["_available", "episode_id"])
+        .groupby("dependency_block_id", sort=False)
+        .head(1)
+        .index
+    )
+    out["dependency_representative"] = out.index.isin(first_indices)
+    split_span = out.groupby("dependency_block_id")["split"].nunique()
+    crossing = split_span[split_span > 1]
+    if not crossing.empty:
+        raise L2ExperimentError(
+            f"dependency blocks cross time splits: {crossing.index[:10].tolist()}"
+        )
+    return out.drop(columns=["_exposure_start", "_exposure_end", "_available"]).sort_values(
+        ["available_at", "symbol", "episode_id"]
+    )
 
 
 def candidate_control_pool(
@@ -916,7 +1033,12 @@ def deterministic_control_rows(
 
     from yoyo.layers.l2_judgment.labeling import label_candidate, label_short_candidate
 
-    final_events = events[events["split"] == "final_validation"].copy()
+    if "dependency_representative" not in events:
+        raise L2ExperimentError("matched controls require dependency representatives")
+    final_events = events[
+        (events["split"] == "final_validation")
+        & events["dependency_representative"].astype(bool)
+    ].copy()
     pools_by_symbol = {
         symbol: candidate_control_pool(
             featured_by_symbol[symbol],
@@ -1028,6 +1150,9 @@ def build_dataset(
             rows.append(row)
         print(f"dataset [{number:02d}/{len(frames):02d}] {symbol} rows={len(rows):,}", flush=True)
     dataset = pd.DataFrame(rows).sort_values(["available_at", "symbol", "episode_id"])
+    if dataset.empty:
+        raise L2ExperimentError("no causal L2 rows were built")
+    dataset = assign_dependency_blocks(dataset)
     if dataset["episode_id"].duplicated().any():
         raise L2ExperimentError("dataset contains duplicate episodes")
     if (pd.to_datetime(dataset["feature_bar_time"], utc=True) + BAR_DELTA != pd.to_datetime(
@@ -1047,6 +1172,8 @@ def build_dataset(
     controls_path = out / "matched_controls.csv"
     write_rows(controls_path, controls, ("assignment", "episode_id", "control_net_ret"))
     counts = Counter(dataset["split"])
+    representative = dataset[dataset["dependency_representative"].astype(bool)]
+    block_counts = Counter(representative["split"])
     split_ranges = {}
     for name, group in dataset.groupby("split"):
         times = pd.to_datetime(group["available_at"], utc=True)
@@ -1064,6 +1191,12 @@ def build_dataset(
         "episodes_in": len(episodes),
         "rows_out": len(dataset),
         "split_counts": dict(sorted((str(key), int(value)) for key, value in counts.items())),
+        "split_dependency_block_counts": dict(
+            sorted((str(key), int(value)) for key, value in block_counts.items())
+        ),
+        "dependency_blocks": int(dataset["dependency_block_id"].nunique()),
+        "dependency_representatives": int(dataset["dependency_representative"].sum()),
+        "maximum_dependency_block_events": int(dataset["dependency_block_size"].max()),
         "split_ranges": split_ranges,
         "side_counts": dict(sorted(Counter(dataset["side"]).items())),
         "label_rate": float(dataset["label"].mean()),
@@ -1221,9 +1354,17 @@ def train_evaluate(
     )
     data = pd.read_csv(dataset_path)
     controls = pd.read_csv(controls_path)
-    train = data[data["split"] == "train"].copy()
-    tune = data[data["split"] == "tune"].copy()
-    validation = data[data["split"] == "final_validation"].copy()
+    data["dependency_representative"] = (
+        data["dependency_representative"].astype(str).str.lower() == "true"
+    )
+    train_events = data[data["split"] == "train"].copy()
+    tune_events = data[data["split"] == "tune"].copy()
+    validation_events = data[data["split"] == "final_validation"].copy()
+    train = train_events[train_events["dependency_representative"]].copy()
+    tune = tune_events[tune_events["dependency_representative"]].copy()
+    validation = validation_events[
+        validation_events["dependency_representative"]
+    ].copy()
     if min(len(train), len(tune), len(validation)) == 0:
         raise L2ExperimentError("one or more preregistered splits are empty")
     from yoyo.layers.l2_judgment.features import FEATURE_COLUMNS
@@ -1233,9 +1374,13 @@ def train_evaluate(
     baseline = train_model(train, tune, feature_columns=["ma_spread_pct"], objective="regression")
     tune_score = model.predict(tune[FEATURE_COLUMNS], num_iteration=model.best_iteration)
     threshold = float(np.quantile(tune_score, 0.9))
-    validation_score = model.predict(
-        validation[FEATURE_COLUMNS], num_iteration=model.best_iteration
+    validation_event_score = model.predict(
+        validation_events[FEATURE_COLUMNS], num_iteration=model.best_iteration
     )
+    scored = validation_events.copy()
+    scored["l2_score"] = validation_event_score
+    validation = scored[scored["dependency_representative"]].copy()
+    validation_score = validation["l2_score"].to_numpy(dtype=float)
     baseline_score = baseline.predict(
         validation[["ma_spread_pct"]], num_iteration=baseline.best_iteration
     )
@@ -1266,10 +1411,8 @@ def train_evaluate(
     pvalue = outcome_permutation_pvalue(
         validation_score, validation["realized_ret"].to_numpy(dtype=float)
     )
-    scored = validation.copy()
-    scored["l2_score"] = validation_score
     scored["l2_threshold"] = threshold
-    scored["l2_keep"] = selection
+    scored["l2_keep"] = scored["l2_score"].to_numpy(dtype=float) >= threshold
     scored_path = out / "final_validation_scored.csv"
     scored.to_csv(scored_path, index=False)
     models_dir = out / "models"
@@ -1293,7 +1436,7 @@ def train_evaluate(
         "frozen_threshold_net_positive": bool(
             selection_metrics["net_mean"] is not None and selection_metrics["net_mean"] > 0
         ),
-        "minimum_30_selected": bool(selection_metrics["n"] >= 30),
+        "minimum_30_selected_dependency_blocks": bool(selection_metrics["n"] >= 30),
         "beats_matched_controls_every_assignment": bool(
             control_metrics["all_assignments_positive"]
         ),
@@ -1308,7 +1451,16 @@ def train_evaluate(
         "objective": "regression_gross_realized_ret",
         "feature_semantics": prereg["l2"]["feature_semantics"],
         "feature_columns": list(FEATURE_COLUMNS),
-        "splits": {"train": len(train), "tune": len(tune), "final_validation": len(validation)},
+        "splits": {
+            "train": len(train),
+            "tune": len(tune),
+            "final_validation": len(validation),
+        },
+        "split_event_counts": {
+            "train": len(train_events),
+            "tune": len(tune_events),
+            "final_validation": len(validation_events),
+        },
         "best_iteration": int(model.best_iteration),
         "baseline_best_iteration": int(baseline.best_iteration),
         "tune_score_q90_threshold": threshold,

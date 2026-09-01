@@ -4,6 +4,13 @@ This active experiment tests one question: can a causal LightGBM judgment
 layer remove frozen Grade-A YOLO proposals that look locally plausible but are
 poor in their 168-bar global context?
 
+Before any L2 outcomes or scores were generated, the split audit found that an
+18-hour label-only purge did not isolate the 168-bar input history.  The frozen
+integrity amendment in `preregistration.json` therefore uses a 60-hour
+input-plus-label embargo and fits/evaluates only the earliest event in each
+connected full-exposure dependency block.  Later overlapping events remain
+available for scoring and visual review, but never count as independent rows.
+
 The immutable contract is in `preregistration.json`.  This experiment is
 research-only.  It does not read the holdout, promote or deploy a model, mutate
 forward state, send Telegram messages, or place orders.

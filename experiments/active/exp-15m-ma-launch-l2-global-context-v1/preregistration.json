@@ -2,6 +2,14 @@
   "protocol": "15m_grade_a_full40_1280_l1_proposals_causal_global_context_l2_v1",
   "experiment_id": "exp-15m-ma-launch-l2-global-context-v1",
   "created_at": "2026-09-01T00:52:00Z",
+  "integrity_amendments": [
+    {
+      "amended_at": "2026-09-01T01:23:40Z",
+      "before_l2_outcomes_or_scores_generated": true,
+      "reason": "The original 18-hour purge covered only the future outcome horizon. Strict split independence must cover the complete 168-bar causal input plus the 72-bar label horizon, so the embargo is 60 hours and evaluation uses the earliest event from each connected full-exposure dependency block.",
+      "outcome_or_detector_contract_changed": false
+    }
+  ],
   "source_commit_before_builder": "c5a4398518030dbcab6aec28fb13bb31d1394eca",
   "owner_authorization": {
     "request": "我觉得模型检测出来的看起来还不错 但是看全局图却不咋样 你觉得应该怎么办 开启L2判断层？开启目标模式去做吧",
@@ -86,29 +94,37 @@
   "splits": {
     "train": {
       "available_at_start": "2026-01-01T00:00:00Z",
-      "available_at_end_exclusive": "2026-02-28T06:00:00Z"
+      "available_at_end_exclusive": "2026-02-26T12:00:00Z"
     },
     "purge_train_tune": {
-      "start": "2026-02-28T06:00:00Z",
+      "start": "2026-02-26T12:00:00Z",
       "end_exclusive": "2026-03-01T00:00:00Z",
-      "duration_hours": 18
+      "duration_hours": 60
     },
     "tune": {
       "available_at_start": "2026-03-01T00:00:00Z",
-      "available_at_end_exclusive": "2026-03-31T06:00:00Z"
+      "available_at_end_exclusive": "2026-03-29T12:00:00Z"
     },
     "purge_tune_validation": {
-      "start": "2026-03-31T06:00:00Z",
+      "start": "2026-03-29T12:00:00Z",
       "end_exclusive": "2026-04-01T00:00:00Z",
-      "duration_hours": 18
+      "duration_hours": 60
     },
     "final_preholdout_validation": {
       "available_at_start": "2026-04-01T00:00:00Z",
       "available_at_end_exclusive": "2026-05-03T06:00:00Z"
     },
     "random_split": false,
-    "grouping_unit": "deduplicated same-symbol L1 episode",
+    "grouping_unit": "earliest event in each connected same-symbol full-exposure dependency block",
     "cross_split_event_allowed": false
+  },
+  "dependency_contract": {
+    "event_exposure_start": "available_at minus 168 bars (42 hours), covering the first open timestamp visible to the 168-bar L2 context",
+    "event_exposure_end_exclusive": "available_at plus 72 bars (18 hours), covering the complete label path",
+    "connected_component_rule": "within each same-symbol learning split, half-open exposure intervals that overlap directly or transitively share one dependency_block_id; purge rows are isolated from learning splits and can never bridge them",
+    "fit_tune_evaluation_row": "earliest available event in each dependency block",
+    "later_overlapping_events": "scored and renderable but excluded from fitting, early stopping, threshold selection, final metrics, permutation inference and matched controls",
+    "cross_split_dependency_blocks_allowed": false
   },
   "matched_control": {
     "required": true,
@@ -130,7 +146,7 @@
     "final_validation_frozen_tune_q90_net_mean_gt_zero": true,
     "outcome_permutation_p_lt": 0.01,
     "l2_minus_matched_control_net_mean_gt_zero": true,
-    "minimum_final_validation_selected_events": 30,
+    "minimum_final_validation_selected_dependency_blocks": 30,
     "auc_role": "diagnostic only; never a pass condition"
   },
   "review": {

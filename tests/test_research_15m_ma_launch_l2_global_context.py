@@ -5,10 +5,13 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from scripts.research_15m_ma_launch_l2_global_context import (
     BAR_DELTA,
     EXPERIMENT_ID,
+    L2ExperimentError,
+    assign_dependency_blocks,
     causal_atr_quintile,
     cluster_symbol_episodes,
     deterministic_control_rows,
@@ -65,15 +68,17 @@ def test_preregistration_freezes_no_holdout_and_owner_safety() -> None:
     assert utc(prereg["source"]["candidate_available_at_end_exclusive"]) + pd.Timedelta(
         hours=18
     ) <= utc(prereg["source"]["holdout_start"])
+    assert prereg["splits"]["purge_train_tune"]["duration_hours"] == 60
+    assert prereg["splits"]["purge_tune_validation"]["duration_hours"] == 60
 
 
 def test_split_boundaries_leave_exact_18_hour_purges() -> None:
     prereg = _prereg()
-    assert split_name(utc("2026-02-28T05:45:00Z"), prereg) == "train"
-    assert split_name(utc("2026-02-28T06:00:00Z"), prereg) == "purge"
+    assert split_name(utc("2026-02-26T11:45:00Z"), prereg) == "train"
+    assert split_name(utc("2026-02-26T12:00:00Z"), prereg) == "purge"
     assert split_name(utc("2026-02-28T23:45:00Z"), prereg) == "purge"
     assert split_name(utc("2026-03-01T00:00:00Z"), prereg) == "tune"
-    assert split_name(utc("2026-03-31T06:00:00Z"), prereg) == "purge"
+    assert split_name(utc("2026-03-29T12:00:00Z"), prereg) == "purge"
     assert split_name(utc("2026-04-01T00:00:00Z"), prereg) == "final_validation"
 
 
@@ -199,6 +204,7 @@ def test_control_assignments_are_deterministic_and_no_replacement() -> None:
                 "symbol": "BTC_USDT_SWAP",
                 "side": "long" if n % 2 == 0 else "short",
                 "split": "final_validation",
+                "dependency_representative": True,
                 "available_at": (utc(featured.loc[index, "open_time"]) + BAR_DELTA).isoformat(),
                 "atr_quintile": 3,
             }
@@ -218,6 +224,60 @@ def test_control_assignments_are_deterministic_and_no_replacement() -> None:
     for _, group in table.groupby("assignment"):
         assert not group[["symbol", "control_feature_bar_i"]].duplicated().any()
         assert (group["month"] == "2026-04").all()
+
+
+def test_dependency_blocks_merge_transitively_and_keep_only_earliest_event() -> None:
+    base = utc("2026-04-01T00:00:00Z")
+    events = pd.DataFrame(
+        [
+            {
+                "symbol": "BTC_USDT_SWAP",
+                "episode_id": episode_id,
+                "available_at": (base + pd.Timedelta(hours=offset)).isoformat(),
+                "exposure_start_time": (
+                    base + pd.Timedelta(hours=offset - 42)
+                ).isoformat(),
+                "exposure_end_exclusive": (
+                    base + pd.Timedelta(hours=offset + 18)
+                ).isoformat(),
+                "split": "final_validation",
+            }
+            for episode_id, offset in (("e1", 0), ("e2", 50), ("e3", 100), ("e4", 170))
+        ]
+    )
+    blocked = assign_dependency_blocks(events)
+    by_id = blocked.set_index("episode_id")
+    assert by_id.loc["e1", "dependency_block_id"] == by_id.loc["e3", "dependency_block_id"]
+    assert by_id.loc["e4", "dependency_block_id"] != by_id.loc["e3", "dependency_block_id"]
+    assert bool(by_id.loc["e1", "dependency_representative"])
+    assert not bool(by_id.loc["e2", "dependency_representative"])
+    assert not bool(by_id.loc["e3", "dependency_representative"])
+    assert bool(by_id.loc["e4", "dependency_representative"])
+
+
+def test_dependency_blocks_reject_cross_split_full_exposure_overlap() -> None:
+    events = pd.DataFrame(
+        [
+            {
+                "symbol": "BTC_USDT_SWAP",
+                "episode_id": "train_event",
+                "available_at": "2026-02-28T12:00:00Z",
+                "exposure_start_time": "2026-02-26T18:00:00Z",
+                "exposure_end_exclusive": "2026-03-01T06:00:00Z",
+                "split": "train",
+            },
+            {
+                "symbol": "BTC_USDT_SWAP",
+                "episode_id": "tune_event",
+                "available_at": "2026-03-01T00:00:00Z",
+                "exposure_start_time": "2026-02-27T06:00:00Z",
+                "exposure_end_exclusive": "2026-03-01T18:00:00Z",
+                "split": "tune",
+            },
+        ]
+    )
+    with pytest.raises(L2ExperimentError, match="full exposure crosses splits"):
+        assign_dependency_blocks(events)
 
 
 def test_matched_control_gate_fails_when_one_required_assignment_is_empty() -> None:

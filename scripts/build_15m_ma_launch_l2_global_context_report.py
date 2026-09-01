@@ -195,6 +195,7 @@ def build_markdown(
     )
     control_diff = matched["mean_event_minus_control"]
     split = dataset["split_counts"]
+    split_blocks = dataset["split_dependency_block_counts"]
     importance = training["feature_importance_top10"]
     importance_table = "\n".join(
         f"| {index} | {row['feature']} | {float(row['gain']):.1f} |"
@@ -227,17 +228,21 @@ def build_markdown(
 | L1 原始结构合法框 | {scan['raw_accepted_candidates']:,} |
 | 跨午夜重叠 episode | {scan['overlap_episodes']:,} |
 | L2 可用 episode | {dataset['rows_out']:,} |
-| train / tune / final val | {split.get('train', 0):,} / {split.get('tune', 0):,} / {split.get('final_validation', 0):,} |
+| 完整暴露依赖块 | {dataset['dependency_blocks']:,}（最大块 {dataset['maximum_dependency_block_events']:,} 个 episode） |
+| train / tune / final val episode | {split.get('train', 0):,} / {split.get('tune', 0):,} / {split.get('final_validation', 0):,} |
+| train / tune / final val 独立块 | {split_blocks.get('train', 0):,} / {split_blocks.get('tune', 0):,} / {split_blocks.get('final_validation', 0):,} |
 | matched-control 行 | {dataset['matched_controls']:,}（{matched['usable_assignment_count']} / {matched['required_assignment_count']} 个分配可用） |
 | holdout 读取 | 0 |
 
-信号时钟固定为：`window_end_time` 是 L1 最后一根可见 K 的开盘时间；`available_at = window_end_time + 15min`；L2 特征只到该收盘；TP5/SL2/72 标签从 `available_at` 对应的下一根开盘开始。train→tune 与 tune→final val 各留 18 小时 purge，任何标签路径都不跨切点。
+信号时钟固定为：`window_end_time` 是 L1 最后一根可见 K 的开盘时间；`available_at = window_end_time + 15min`；L2 特征只到该收盘；TP5/SL2/72 标签从 `available_at` 对应的下一根开盘开始。每个事件的完整暴露区间是 `[available_at-42h, available_at+18h)`，train→tune 与 tune→final val 各留 60 小时 purge。直接或传递重叠的同币区间属于同一依赖块；只有每块最早事件进入训练、早停、阈值选择和最终指标，后续事件只用于评分与全局图复盘。
+
+这项 60 小时/依赖块规则是在扫描期间的代码审计中、**任何 L2 outcome、score 或收益结果生成之前**写入预注册 integrity amendment；它修复原 18 小时 label-only purge 的证据隔离缺口，没有改变 L1 权重/阈值、TP/SL、期限或成本。
 
 ## 最终验证结果
 
 | 口径 | n | 毛收益 | 扣 0.2% 净收益 | 胜率 | AUC | Spearman |
 |---|---:|---:|---:|---:|---:|---:|
-| L1 全候选池 | {validation['n']} | {bp(validation['pool_gross_mean'])} | {bp(validation['pool_net_mean'])} | {pct(validation['positive_rate'])} | {number(validation['roc_auc'])} | {number(validation['spearman_score_vs_return'])} |
+| L1 独立块首个候选 | {validation['n']} | {bp(validation['pool_gross_mean'])} | {bp(validation['pool_net_mean'])} | {pct(validation['positive_rate'])} | {number(validation['roc_auc'])} | {number(validation['spearman_score_vs_return'])} |
 | L2 final top-decile | {validation['top_decile']['n']} | {bp(validation['top_decile']['gross_mean'])} | {bp(validation['top_decile']['net_mean'])} | {pct(validation['top_decile']['win_rate'])} | — | — |
 | L2 冻结 tune-q90 门 | {selected['n']} | {bp(selected['gross_mean'])} | {bp(selected['net_mean'])} | {pct(selected['win_rate'])} | — | — |
 | 单特征 ma_spread baseline top-decile | {baseline['top_decile']['n']} | {bp(baseline['top_decile']['gross_mean'])} | {bp(baseline['top_decile']['net_mean'])} | {pct(baseline['top_decile']['win_rate'])} | {number(baseline['roc_auc'])} | {number(baseline['spearman_score_vs_return'])} |
@@ -263,7 +268,7 @@ Outcome permutation（固定分数、打乱收益 10,000 次）单尾 `p={traini
 
 ## 如何理解数字变化
 
-- 如果 L2 通过，说明“局部框像”与“全局值得做”确实可以分层：L1 保持召回，L2 用历史波动、均线间距/收敛、位置、趋势、量能和近端动量筛掉一部分全局不协调候选。
+- 如果 L2 通过，说明“局部框像”与“全局值得做”确实可以分层：L1 保持召回，L2 用历史波动、均线间距/收敛、位置、趋势、量能和近端动量筛掉一部分全局不协调候选。结论只按完整暴露依赖块的首个因果事件计数，不把重叠行情重复算成证据。
 - 如果 L2 未通过，不能靠调低阈值把结果救回来；本配置应记录为负结果。下一轮只能预注册一个新变量，例如固定 epoch 的 L1 checkpoint、不同 L2 表征或真正的新鲜前向数据。
 - 匹配随机对照与 L1 候选使用相同币、月份、UTC 8 小时时段、因果 ATR 五分位、方向、障碍、期限与成本；每个控制点离任何 L1 episode 至少 72 根 K。
 
