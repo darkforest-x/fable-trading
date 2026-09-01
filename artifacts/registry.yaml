@@ -8968,3 +8968,23 @@ artifacts:
       48/96/168-bar model inputs, unchanged TP5/SL2/72 economics, chronological
       splits, conservative purges, fail-closed pre-label holdout exposure and
       complete independent matched-control assignments.
+
+  - artifact_id: 15m-ma-launch-l2-short-window-side-split-v1-dataset-receipt
+    artifact_type: manifest
+    role: exact_l1_short_window_side_split_dataset_and_control_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7ac0455d2cfd3ffc2d5e1c98b2448846a71a5673"
+    source_path: experiments/active/exp-15m-ma-launch-l2-short-window-side-split-v1/results/dataset_receipt.json
+    sha256: "94677319d33238ae08d8f62935ebf53e6cfe23523d2bb4f065c4b8e4cd31ca0f"
+    size_bytes: 8148
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-l2-short-window-side-split-v1/results/dataset_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7ac0455d2cfd3ffc2d5e1c98b2448846a71a5673"
+    config_hash: "0c2e8349c803ec8ee310fb8c4bbaa17bd65e09d75afd983040abef18f91170d3"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: >-
+      Records 3,827/3,827 exact pixel parity, 3,798 labeled rows, zero holdout
+      or network reads, and 354 events with eight complete non-overlapping
+      matched-control assignments; 319 unmatched events were not relaxed.
