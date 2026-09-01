@@ -2,6 +2,26 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-02 — 28 特征分组消融已否决）
+
+Owner 问为什么 L2 是 28 个特征并授权实际试验。本轮确认这 28 个是 2026-07-07 为旧
+strict-rule 候选人工设计的基线，不是当前 YOLO 候选上自动选出的最优集合。实验冻结真实
+Grade-A L1 候选、side-aligned 语义、TP5/SL2/72、0.2% 成本、dependency representatives、
+时间切分、LightGBM 参数和 tune-q90，只在七个预注册特征子集之间变化，LONG/SHORT 分开选。
+
+3 月 tune 的七个方案扣成本 top-decile 全部为负；仍按预注册规则冻结的“最不差”组合是
+LONG 24 特征（去动量）与 SHORT 16 特征（MA 结构 + 价格趋势）。打开未参与选择的 April
+final 后，两者合并 top-decile 净值 -69.05bp，冻结 q90 18 个事件净值 -76.27bp，
+置换 p=0.972603，LONG/SHORT 均为负且匹配对照失败，实验登记为 rejected。
+
+旧 28 特征基线的 1,021 个 final 分数、side percentile、阈值和 KEEP 决策全部复现，最大差
+1.11e-16；其 q90 仍为 20 个、+123.11bp，但 p=0.072093、n<30、SHORT n=7，历史
+拒绝不变。正确结论不是“删到 16/24 个”，而是当前 417 train +229 tune 独立事件不足以
+稳定选组；后续要增加同一冻结 L1 的目标域候选，并把 early-stop 与 feature-selection
+拆成两个时间窗。报告：
+analysis/html/p3_15m_ma_launch_l2_feature_group_ablation_20260902.html。
+未读 holdout，未 promote、部署、改 ACTIVE/frozen/forward、发 Telegram 或下单。
+
 ## ⚡ 当前真相（2026-09-02 — 上万参考图已接入 L2，但目标域错配导致否决）
 
 Owner 追问“不是有上万个训练图、还有很多 Gold 吗”，并授权实际接入验证。本轮没有把形态正负

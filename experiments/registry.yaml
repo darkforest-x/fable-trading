@@ -3107,6 +3107,54 @@ experiments:
       direct L2 target-domain augmentation. No holdout, promotion, deployment,
       ACTIVE/frozen/forward mutation, Telegram send or order occurred.
 
+  - experiment_id: exp-15m-ma-launch-l2-feature-group-ablation-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e7e7ecd93a2826f53583ec7f25fcae71b780ae0f"
+    status: rejected
+    question: >-
+      Which of the legacy 28 causal L2 features add stable time-out-of-sample
+      economic ranking value on the current real Grade-A YOLO candidate
+      distribution when LONG and SHORT are selected separately?
+    single_variable: >-
+      Feature-column subset only. Seven preregistered arms share the same real
+      L1 candidates, side-aligned values, TP5/SL2/72 target, 0.2% cost,
+      dependency representatives, chronological train/tune/final intervals,
+      deterministic LightGBM parameters and tune-q90 policy.
+    result: >-
+      rejected_unstable_feature_selection. Tune selected 24 features for LONG
+      (all groups except momentum) and 16 for SHORT (MA structure plus price
+      trend), but every tune arm already had negative top-decile net return.
+      On the untouched April final interval the selected union reversed to
+      -69.05 bp exact top-decile net and -76.27 bp frozen-q90 net over 18
+      events, with permutation p=0.972603. Both sides were negative and the
+      matched-control gate failed. The old 28-feature baseline reproduced all
+      1,021 event scores, percentiles, thresholds and KEEP decisions within
+      1.11e-16 and retained +123.11 bp q90 net, but itself remains rejected
+      because p=0.072093 and only 20 events passed.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p3_15m_ma_launch_l2_feature_group_ablation_20260902.md
+    artifacts:
+      - 15m-ma-launch-l2-feature-group-ablation-v1-prereg
+      - 15m-ma-launch-l2-feature-group-ablation-v1-selection-receipt
+      - 15m-ma-launch-l2-feature-group-ablation-v1-training-receipt
+      - 15m-ma-launch-l2-feature-group-ablation-v1-verify-receipt
+      - 15m-ma-launch-l2-feature-group-ablation-v1-long-selected-model
+      - 15m-ma-launch-l2-feature-group-ablation-v1-short-selected-model
+      - 15m-ma-launch-l2-feature-group-ablation-v1-scored-final
+      - 15m-ma-launch-l2-feature-group-ablation-v1-diagnostic
+      - 15m-ma-launch-l2-feature-group-ablation-v1-report
+      - 15m-ma-launch-l2-feature-group-ablation-v1-html
+    reuse_allowed: false
+    notes: >-
+      The tune interval served both early stopping and seven-arm selection, so
+      the winner has explicit multiple-comparison risk. The experiment froze
+      its selection receipt before final evaluation and did not reselect after
+      seeing April. No holdout, L1 rescan, feature recomputation, label,
+      barrier, cost or threshold change, promotion, deployment,
+      ACTIVE/frozen/forward mutation, Telegram send or order occurred.
+
   - experiment_id: exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "ac891c02e6b8f89b6464796514758c71b48f8c72"
