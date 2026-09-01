@@ -8988,3 +8988,159 @@ artifacts:
       Records 3,827/3,827 exact pixel parity, 3,798 labeled rows, zero holdout
       or network reads, and 354 events with eight complete non-overlapping
       matched-control assignments; 319 unmatched events were not relaxed.
+
+  - artifact_id: 15m-ma-launch-l2-short-window-side-split-v1-training-receipt
+    artifact_type: manifest
+    role: rejected_exact_short_window_side_split_economic_evaluation
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e518469503b32fdbbabb07502db61afe570706cc"
+    source_path: experiments/active/exp-15m-ma-launch-l2-short-window-side-split-v1/results/training_receipt.json
+    sha256: "cb5eb074ad164d0b681e48799dd99cce53b6f5edea83fd2bdc6697fbc22edfbd"
+    size_bytes: 37826
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-short-window-side-split-v1/results/training_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e518469503b32fdbbabb07502db61afe570706cc"
+    config_hash: "0c2e8349c803ec8ee310fb8c4bbaa17bd65e09d75afd983040abef18f91170d3"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: >-
+      Frozen final evaluation: 673 independent events, -4.7 bp top-decile net,
+      p=0.377162, AUC=0.4519, and failed controls/side gates. No holdout,
+      promotion or deployment occurred.
+
+  - artifact_id: 15m-ma-launch-l2-short-window-side-split-v1-render-receipt
+    artifact_type: manifest
+    role: actual_model_input_review_render_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e518469503b32fdbbabb07502db61afe570706cc"
+    source_path: experiments/active/exp-15m-ma-launch-l2-short-window-side-split-v1/results/render_receipt.json
+    sha256: "54df1bd54fd0f18ed523dfb3541c850fa2a81bd5c028e5324406714368cf635c"
+    size_bytes: 767
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-short-window-side-split-v1/results/render_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e518469503b32fdbbabb07502db61afe570706cc"
+    config_hash: "0c2e8349c803ec8ee310fb8c4bbaa17bd65e09d75afd983040abef18f91170d3"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Forty actual W18/W19 inputs, 40/40 pixel parity, zero future bars.
+
+  - artifact_id: 15m-ma-launch-l2-short-window-side-split-v1-verify-receipt
+    artifact_type: manifest
+    role: exact_short_window_side_split_final_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e518469503b32fdbbabb07502db61afe570706cc"
+    source_path: experiments/active/exp-15m-ma-launch-l2-short-window-side-split-v1/results/verify_receipt.json
+    sha256: "d3e82fcd26eaf5158a75f05ac2ea7ad4e02443d7d0de4f75b9da6bd635cadc01"
+    size_bytes: 767
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-short-window-side-split-v1/results/verify_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e518469503b32fdbbabb07502db61afe570706cc"
+    config_hash: "0c2e8349c803ec8ee310fb8c4bbaa17bd65e09d75afd983040abef18f91170d3"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: All 15 lineage, parity, feature, model-hash and safety checks passed.
+
+  - artifact_id: 15m-ma-launch-l2-short-window-side-split-v1-report-receipt
+    artifact_type: manifest
+    role: report_lineage_and_visual_contract_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6bf17fdeaaafb36957a566b26a1e08bdb8e55d90"
+    source_path: experiments/active/exp-15m-ma-launch-l2-short-window-side-split-v1/results/report_receipt.json
+    sha256: "ca3d1a4591811b09c4689d76d0725c944fe01c9039112bea33cf1725089e91f7"
+    size_bytes: 6954
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-short-window-side-split-v1/results/report_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6bf17fdeaaafb36957a566b26a1e08bdb8e55d90"
+    config_hash: "0c2e8349c803ec8ee310fb8c4bbaa17bd65e09d75afd983040abef18f91170d3"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Hashes every report input and records two embedded figures plus the 40-image gallery.
+
+  - artifact_id: 15m-ma-launch-l2-short-window-side-split-v1-report
+    artifact_type: report
+    role: canonical_exact_short_window_l2_negative_result
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6bf17fdeaaafb36957a566b26a1e08bdb8e55d90"
+    source_path: analysis/p3_15m_ma_launch_l2_short_window_side_split_20260901.md
+    sha256: "2ce9e5042e3ff0025ec519cff44ba31ae7260e60ec8e482a02b2cead3b1907f1"
+    size_bytes: 12026
+    storage_uri: "repo://analysis/p3_15m_ma_launch_l2_short_window_side_split_20260901.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6bf17fdeaaafb36957a566b26a1e08bdb8e55d90"
+    config_hash: "0c2e8349c803ec8ee310fb8c4bbaa17bd65e09d75afd983040abef18f91170d3"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Full Chinese technical report with results, controls, risks and reproduction commands.
+
+  - artifact_id: 15m-ma-launch-l2-short-window-side-split-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_exact_short_window_l2_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6bf17fdeaaafb36957a566b26a1e08bdb8e55d90"
+    source_path: analysis/html/p3_15m_ma_launch_l2_short_window_side_split_20260901.html
+    sha256: "c672b9691e5cda054dffc603bcd2b48f82192b1ab9e40d8b08398fbfd3c248e2"
+    size_bytes: 437703
+    storage_uri: "repo://analysis/html/p3_15m_ma_launch_l2_short_window_side_split_20260901.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6bf17fdeaaafb36957a566b26a1e08bdb8e55d90"
+    config_hash: "0c2e8349c803ec8ee310fb8c4bbaa17bd65e09d75afd983040abef18f91170d3"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Self-contained HTML with two embedded verified figures.
+
+  - artifact_id: 15m-ma-launch-l2-short-window-side-split-v1-gallery
+    artifact_type: report
+    role: actual_model_input_40_image_gallery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6bf17fdeaaafb36957a566b26a1e08bdb8e55d90"
+    source_path: analysis/html/p3_15m_ma_launch_l2_short_window_side_split_gallery_20260901.html
+    sha256: "1ddc5e9a54f45811d3d0607afa1e7cb9e22cb8433c88eb62a64191067fa2f978"
+    size_bytes: 22289
+    storage_uri: "repo://analysis/html/p3_15m_ma_launch_l2_short_window_side_split_gallery_20260901.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6bf17fdeaaafb36957a566b26a1e08bdb8e55d90"
+    config_hash: "0c2e8349c803ec8ee310fb8c4bbaa17bd65e09d75afd983040abef18f91170d3"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Links every verified overlay to its raw model input; no future bars.
+
+  - artifact_id: 15m-ma-launch-l2-short-window-side-split-v1-overview
+    artifact_type: report
+    role: selected_vs_rejected_actual_input_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6bf17fdeaaafb36957a566b26a1e08bdb8e55d90"
+    source_path: analysis/output/ma_launch_l2_short_window_side_split_v1/short_window_l2_review_overview.png
+    sha256: "a793d996c3d90a9afe72bbc557c6f54bcafde4cc16070361fddfa3192f51f1a3"
+    size_bytes: 237322
+    storage_uri: "repo://analysis/output/ma_launch_l2_short_window_side_split_v1/short_window_l2_review_overview.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6bf17fdeaaafb36957a566b26a1e08bdb8e55d90"
+    config_hash: "0c2e8349c803ec8ee310fb8c4bbaa17bd65e09d75afd983040abef18f91170d3"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Twelve verified native overlays, three per selected/rejected and side cell.
+
+  - artifact_id: 15m-ma-launch-l2-short-window-side-split-v1-metric-chart
+    artifact_type: report
+    role: exact_window_l2_economic_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6bf17fdeaaafb36957a566b26a1e08bdb8e55d90"
+    source_path: analysis/output/ma_launch_l2_short_window_side_split_v1/short_window_l2_economic_comparison.png
+    sha256: "549d83438bd356a5eb723f274a434cd8ad917d3841aaaab12f6d522f16277248"
+    size_bytes: 78449
+    storage_uri: "repo://analysis/output/ma_launch_l2_short_window_side_split_v1/short_window_l2_economic_comparison.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6bf17fdeaaafb36957a566b26a1e08bdb8e55d90"
+    config_hash: "0c2e8349c803ec8ee310fb8c4bbaa17bd65e09d75afd983040abef18f91170d3"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Signed net-return comparison with zero line, fixed 20 bp cost and separate side panel.

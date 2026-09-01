@@ -16,3 +16,20 @@ feature, and keeps only events with all eight non-overlapping assignments.
 No holdout, promotion, deployment, ACTIVE/frozen/forward mutation, Telegram,
 or order action is authorized.  The old global-context and side-split reports
 remain immutable historical negative results.
+
+## Final result
+
+The preregistered gate failed on 673 independent final pre-holdout events.
+Overall top-decile net return was -4.7 bp after the fixed 20 bp round-trip
+cost, permutation p was 0.377162, AUC was 0.4519, and Spearman was -0.1201.
+The frozen tune-q90 selection was +4.7 bp overall, but matched controls covered
+only 32/61 selected events; the covered subset was -49.0 bp while the unmatched
+subset was +63.9 bp.  LONG was negative and nearly degenerate (best iteration
+1, ten unique final scores); SHORT was exploratory-positive but nonsignificant
+and cannot be promoted after inspecting the same final period.
+
+The experiment is therefore rejected.  Pixel parity and the 15 verification
+checks passed, so the result isolates weak economic predictability rather than
+a rendering or lineage failure.  See
+`analysis/p3_15m_ma_launch_l2_short_window_side_split_20260901.md` and its HTML
+counterpart for the full evidence and 40-image actual-input gallery.

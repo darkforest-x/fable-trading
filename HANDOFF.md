@@ -2,6 +2,29 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-01 — 与 L1 完全同窗的 L2 多空回归已否决）
+
+Owner 纠正上一版 168 根全局上下文 L2：判断层必须只针对 L1 实际看到的 18/19 根
+1280×742 原图和当前原框，并继续使用未来实际收益回归，多空分开训练。本轮在冻结的
+25,911 个 L1 原始框上按 `symbol + side` 重聚为 3,827 个 episode；3,827/3,827 原图逐像素
+校验通过，3,798 个完整标签样本产生 673 个最终独立事件。模型只读图中可见 OHLC、
+SMA/EMA 20/60/120、当前框和当前 confidence，没有旧 48/96/168 根原始上下文、volume、symbol、
+后续 episode 最高分或 holdout。
+
+预注册经济门 **FAIL**：总体 top-decile 扣 0.2% 成本后 **-4.7bp**，置换
+`p=0.377162`，AUC `0.4519`，Spearman `-0.1201`。tune-q90 总体虽为 +4.7bp，但仅
+32/61 个入选事件有完整 8/8 随机对照；覆盖组为 -49.0bp，缺配组为 +63.9bp。LONG
+best iteration=1、最终仅 10 个不同分数且 q90 为 -16.9bp；SHORT q90 +70.7bp 是已经看过
+final 后的探索性结果，不能事后删 LONG 再冒充独立成功。15 项 lineage/parity/safety 校验全过，
+所以结论是经济预测弱，不是图、框或数据链坏掉。
+
+实验已登记为 `rejected`；没有读取 `>=2026-05-04` holdout，没有 promote、部署、改
+ACTIVE/frozen/forward、发 Telegram 或下单。交付报告：
+`analysis/html/p3_15m_ma_launch_l2_short_window_side_split_20260901.html`；40 张模型实际输入：
+`analysis/html/p3_15m_ma_launch_l2_short_window_side_split_gallery_20260901.html`。
+下一条若做经济 L2，必须新预注册、单变量降维并用新的未见时间段；若要判断“全局形态好坏”，
+那是另一个需要 Owner 全局好/坏 Gold 的 L1.5 分类任务，不能用未来收益代替形态真值。
+
 ## ⚡ 当前真相（2026-09-01 — L2 多空拆分回归有提升但预注册拒绝）
 
 Owner 要求说明 L1.5，并把既有 15m L2 训练集按 LONG / SHORT 分开重训。实验严格复用冻结的

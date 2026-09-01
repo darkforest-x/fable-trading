@@ -2891,8 +2891,8 @@ experiments:
 
   - experiment_id: exp-15m-ma-launch-l2-short-window-side-split-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "9549cb47159d674d67442b56023ff8f1bba3224c"
-    status: active
+    source_commit: "6bf17fdeaaafb36957a566b26a1e08bdb8e55d90"
+    status: rejected
     question: >-
       Can separate LONG/SHORT regressors rank the frozen L1 proposals using
       only the exact 18/19-bar 1280x742 image content and current raw box,
@@ -2903,11 +2903,12 @@ experiments:
       parameters and tune-q90 rule stay fixed; only L2 inputs and the matching
       actual-input dependency exposure replace the rejected 168-bar contract.
     result: >-
-      preflight_hardened_dataset_rebuild_pending. The initial deterministic
-      build established 3,827/3,827 exact pixel parity, then an independent
-      Luna Max audit required fail-closed receipt reuse and complete,
-      non-overlapping matched-control assignments before training. Economic
-      results are not yet available.
+      rejected. All 3,827 L1 inputs passed exact pixel parity and all 15
+      verification checks passed, but 673 independent final events produced
+      -4.7 bp top-decile net return, permutation p=0.377162, AUC=0.4519 and
+      Spearman=-0.1201. Frozen q90 was +4.7 bp overall, yet matched controls
+      covered only 32/61 selected events; the covered subset was -49.0 bp and
+      LONG was negative. SHORT's positive final result is exploratory only.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
@@ -2915,6 +2916,15 @@ experiments:
     artifacts:
       - 15m-ma-launch-l2-short-window-side-split-v1-prereg
       - 15m-ma-launch-l2-short-window-side-split-v1-dataset-receipt
+      - 15m-ma-launch-l2-short-window-side-split-v1-training-receipt
+      - 15m-ma-launch-l2-short-window-side-split-v1-render-receipt
+      - 15m-ma-launch-l2-short-window-side-split-v1-verify-receipt
+      - 15m-ma-launch-l2-short-window-side-split-v1-report-receipt
+      - 15m-ma-launch-l2-short-window-side-split-v1-report
+      - 15m-ma-launch-l2-short-window-side-split-v1-html
+      - 15m-ma-launch-l2-short-window-side-split-v1-gallery
+      - 15m-ma-launch-l2-short-window-side-split-v1-overview
+      - 15m-ma-launch-l2-short-window-side-split-v1-metric-chart
     reuse_allowed: false
     notes: >-
       Owner explicitly overrode the P0/P1 training gate for this research run
@@ -2922,5 +2932,7 @@ experiments:
       visible SMA/EMA 20/60/120 line values still causally summarize earlier
       closes by definition; no earlier raw bars, volume, symbol, later episode
       confidence, old long-context feature, holdout row or future outcome is a
-      model input. No promote, deploy, ACTIVE/frozen/forward mutation,
-      Telegram send or order action is authorized.
+      model input. The completed negative result does not consume holdout and
+      is not reusable for post-hoc LONG removal or SHORT-only promotion. No
+      promote, deploy, ACTIVE/frozen/forward mutation, Telegram send or order
+      action occurred.
