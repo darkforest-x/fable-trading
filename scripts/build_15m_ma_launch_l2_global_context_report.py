@@ -77,6 +77,12 @@ def number(value: float | None, digits: int = 4) -> str:
     return "—" if value is None else f"{float(value):.{digits}f}"
 
 
+def gain_number(value: float | None) -> str:
+    """Keep small non-zero LightGBM gains visible in the report."""
+
+    return "—" if value is None else f"{float(value):.6g}"
+
+
 def phase_commit_lineage(
     snapshot: Mapping[str, Any],
     scan: Mapping[str, Any],
@@ -233,7 +239,7 @@ def build_markdown(
     split_blocks = dataset["split_dependency_block_counts"]
     importance = training["feature_importance_top10"]
     importance_table = "\n".join(
-        f"| {index} | {row['feature']} | {float(row['gain']):.1f} |"
+        f"| {index} | {row['feature']} | {gain_number(row['gain'])} |"
         for index, row in enumerate(importance, 1)
     )
     gate_table = "\n".join(

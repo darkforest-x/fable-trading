@@ -80,6 +80,12 @@ def test_phase_commit_lineage_discloses_every_phase_and_rejects_invalid_identity
         )
 
 
+def test_gain_number_keeps_small_nonzero_importance_visible() -> None:
+    assert report.gain_number(0.013939329888671637) == "0.0139393"
+    assert report.gain_number(0.0) == "0"
+    assert report.gain_number(None) == "—"
+
+
 def test_overview_delivers_sparse_threshold_outcome_without_inventing_charts(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
