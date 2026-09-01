@@ -228,7 +228,7 @@ def build_markdown(
 | 跨午夜重叠 episode | {scan['overlap_episodes']:,} |
 | L2 可用 episode | {dataset['rows_out']:,} |
 | train / tune / final val | {split.get('train', 0):,} / {split.get('tune', 0):,} / {split.get('final_validation', 0):,} |
-| matched-control 行 | {dataset['matched_controls']:,}（8 个确定性分配） |
+| matched-control 行 | {dataset['matched_controls']:,}（{matched['usable_assignment_count']} / {matched['required_assignment_count']} 个分配可用） |
 | holdout 读取 | 0 |
 
 信号时钟固定为：`window_end_time` 是 L1 最后一根可见 K 的开盘时间；`available_at = window_end_time + 15min`；L2 特征只到该收盘；TP5/SL2/72 标签从 `available_at` 对应的下一根开盘开始。train→tune 与 tune→final val 各留 18 小时 purge，任何标签路径都不跨切点。
@@ -245,6 +245,7 @@ def build_markdown(
 | L2 减匹配对照 | — | — | {bp(control_diff)} | — | — | — |
 
 Outcome permutation（固定分数、打乱收益 10,000 次）单尾 `p={training['outcome_permutation_p']:.6f}`。AUC 只作诊断，不进入成功裁决。
+匹配对照若缺少任何一个预注册分配（本轮缺失：`{matched['missing_assignments']}`），会直接判门失败，不把“没有配到样本”当成胜出。
 
 ## 预注册门
 

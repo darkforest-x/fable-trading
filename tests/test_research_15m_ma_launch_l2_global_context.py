@@ -14,6 +14,7 @@ from scripts.research_15m_ma_launch_l2_global_context import (
     deterministic_control_rows,
     feature_outcome_row,
     load_preregistration,
+    matched_control_metrics,
     overlaps_any_interval,
     split_name,
     utc,
@@ -217,3 +218,27 @@ def test_control_assignments_are_deterministic_and_no_replacement() -> None:
     for _, group in table.groupby("assignment"):
         assert not group[["symbol", "control_feature_bar_i"]].duplicated().any()
         assert (group["month"] == "2026-04").all()
+
+
+def test_matched_control_gate_fails_when_one_required_assignment_is_empty() -> None:
+    validation = pd.DataFrame(
+        [
+            {"episode_id": "e1", "net_ret": 0.02},
+            {"episode_id": "e2", "net_ret": 0.03},
+        ]
+    )
+    controls = pd.DataFrame(
+        [
+            {"assignment": 0, "episode_id": "e1", "control_net_ret": -0.01},
+            {"assignment": 0, "episode_id": "e2", "control_net_ret": -0.01},
+        ]
+    )
+    metrics = matched_control_metrics(
+        validation,
+        controls,
+        {"e1", "e2"},
+        required_assignments=2,
+    )
+    assert metrics["missing_assignments"] == [1]
+    assert metrics["complete_assignment_coverage"] is False
+    assert metrics["all_assignments_positive"] is False

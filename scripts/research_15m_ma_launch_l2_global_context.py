@@ -1146,23 +1146,39 @@ def selected_metrics(frame: pd.DataFrame, mask: np.ndarray, cost: float) -> dict
 
 
 def matched_control_metrics(
-    validation: pd.DataFrame, controls: pd.DataFrame, selected_ids: set[str]
+    validation: pd.DataFrame,
+    controls: pd.DataFrame,
+    selected_ids: set[str],
+    *,
+    required_assignments: int,
 ) -> dict[str, Any]:
-    """Compare frozen L2 selections with eight exact-match control assignments."""
+    """Compare frozen L2 selections with every preregistered control assignment.
+
+    An assignment with zero matched selected events is missing evidence, not a
+    vacuous win.  The aggregate pass flag therefore requires all assignment IDs
+    ``0..required_assignments-1`` to be present and usable before checking that
+    every paired excess return is positive.
+    """
 
     event = validation.set_index("episode_id")
     rows: list[dict[str, Any]] = []
-    for assignment, group in controls.groupby("assignment"):
+    grouped = {
+        int(assignment): group
+        for assignment, group in controls.groupby("assignment")
+    }
+    required_ids = set(range(int(required_assignments)))
+    for assignment in sorted(required_ids):
+        group = grouped.get(assignment, controls.iloc[0:0])
         paired = group[group["episode_id"].isin(selected_ids)].copy()
         paired = paired[paired["episode_id"].isin(event.index)]
         if paired.empty:
-            rows.append({"assignment": int(assignment), "n": 0})
+            rows.append({"assignment": assignment, "n": 0})
             continue
         event_net = event.loc[paired["episode_id"], "net_ret"].to_numpy(dtype=float)
         control_net = paired["control_net_ret"].to_numpy(dtype=float)
         rows.append(
             {
-                "assignment": int(assignment),
+                "assignment": assignment,
                 "n": len(paired),
                 "event_net_mean": float(event_net.mean()),
                 "control_net_mean": float(control_net.mean()),
@@ -1170,9 +1186,15 @@ def matched_control_metrics(
             }
         )
     usable = [row for row in rows if int(row.get("n", 0)) > 0]
+    usable_ids = {int(row["assignment"]) for row in usable}
+    complete = usable_ids == required_ids
     return {
         "assignments": rows,
-        "all_assignments_positive": bool(usable) and all(
+        "required_assignment_count": int(required_assignments),
+        "usable_assignment_count": len(usable_ids),
+        "missing_assignments": sorted(required_ids - usable_ids),
+        "complete_assignment_coverage": complete,
+        "all_assignments_positive": complete and all(
             float(row["event_minus_control_mean"]) > 0 for row in usable
         ),
         "mean_event_minus_control": (
@@ -1233,7 +1255,14 @@ def train_evaluate(
     selection = validation_score >= threshold
     selection_metrics = selected_metrics(validation, selection, cost)
     selected_ids = set(validation.loc[selection, "episode_id"].astype(str))
-    control_metrics = matched_control_metrics(validation, controls, selected_ids)
+    control_metrics = matched_control_metrics(
+        validation,
+        controls,
+        selected_ids,
+        required_assignments=int(
+            prereg["matched_control"]["deterministic_assignments"]
+        ),
+    )
     pvalue = outcome_permutation_pvalue(
         validation_score, validation["realized_ret"].to_numpy(dtype=float)
     )
