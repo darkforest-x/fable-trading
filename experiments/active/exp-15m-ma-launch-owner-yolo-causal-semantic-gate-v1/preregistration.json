@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1",
+  "created_at": "2026-09-02T00:22:25+08:00",
+  "stage": "P1_completed_history_detector_semantic_revalidation",
+  "question": "On the frozen chronological pre-holdout validation split, does treating YOLO as a proposal generator and adding the causal prefix of the original numeric training semantics remove empty-label fires without materially destroying event recall?",
+  "owner_authorization": {
+    "conversation_date": "2026-09-02",
+    "verbatim": [
+      "那怎么办呢  模型白训练了？怎么调整",
+      "你去做啊"
+    ],
+    "interpreted_action": "Implement and evaluate the first safe repair: retain the existing YOLO checkpoint as a proposal layer, add deterministic six-MA density, candle-to-MA proximity, core-shape and already-visible confirmation checks, and compare before/after on pre-holdout validation only.",
+    "new_training_authorized": false,
+    "holdout_read_authorized": false,
+    "production_or_promotion_authorized": false
+  },
+  "single_variable": "The treatment adds one deterministic causal semantic-gate decision after the existing structural YOLO proposal filter. Images, weights, raw predictions, confidence=0.25, NMS=0.70, box-to-core mapping, ground truth and IoU=0.50 are paired and identical.",
+  "frozen_inputs": {
+    "weights": {
+      "path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+      "sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838"
+    },
+    "dataset_manifest": {
+      "path": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+      "sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2"
+    },
+    "training_semantics": {
+      "path": "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/preregistration.json",
+      "sha256": "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da"
+    },
+    "raw_evaluator": {
+      "path": "scripts/evaluate_15m_ma_launch_owner_grade_a8000_val.py",
+      "sha256": "d10cdd20f6c1648eaba5f62ed54efc73ac33947b15d8c089a2371716a32d7be9"
+    },
+    "semantic_gate_module": {
+      "path": "yoyo/layers/l1_detection/semantic_gate.py",
+      "sha256": "eda78c7a2a548bb7485aa1c7ca1f6a8ce6ee7805846aa6ba2e8e09789130fe5f"
+    },
+    "paired_evaluator": {
+      "path": "scripts/evaluate_15m_ma_launch_owner_yolo_semantic_gate.py",
+      "sha256": "e649ecbacd757b37d26a8b1e6ce71301342ec6bceec0611d8288ed0ab5275a9d"
+    }
+  },
+  "dataset": {
+    "path": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1",
+    "manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "split": "chronological val",
+    "images": 4800,
+    "positive_images": 1200,
+    "positive_events": 155,
+    "negative_images": 3600,
+    "negative_events": 465,
+    "time_min": "2025-12-02T22:00:00+00:00",
+    "time_max": "2026-05-03T20:30:00+00:00",
+    "latest_allowed_candle_exclusive": "2026-05-04T00:00:00Z",
+    "source_read_contract": "Use read_preholdout_prefix. It may inspect only the boundary timestamp and must materialize zero OHLCV fields at or after the boundary."
+  },
+  "raw_inference": {
+    "weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "imgsz": 1280,
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "match_iou": 0.5,
+    "device_selection": "MPS when available, otherwise CPU",
+    "threshold_tuned": false
+  },
+  "structural_control": {
+    "core_lengths": [4, 5],
+    "confirmation_bars": [2, 3, 4, 5, 6, 7, 8, 9],
+    "mapping": "Map each raw normalized x edge to the nearest exact renderer candle center. y center and height do not participate.",
+    "reason": "This reproduces the completed-history structural filter that allowed the visibly sparse 4h boxes."
+  },
+  "treatment": {
+    "description": "Keep a structural YOLO box only when it passes every original training-semantic predicate whose required candle is already visible at the image endpoint.",
+    "atr_anchor": "core_end + 2",
+    "always_checked": [
+      "ma_envelope",
+      "ma_spread_end",
+      "max_body",
+      "core_progress",
+      "post1",
+      "post2",
+      "ma_slope",
+      "minimum_close_to_ma",
+      "close_to_ma_envelope",
+      "body_to_ma_envelope"
+    ],
+    "conditional_checks": {
+      "post3": "only when confirmation_bars >= 3",
+      "post5": "only when confirmation_bars >= 5"
+    },
+    "frozen_morphology_gate": {
+      "core_lengths": [4, 5],
+      "max_ma_envelope_atr": 1.5,
+      "max_ma_spread_end_atr": 1.1,
+      "max_core_body_atr": 1.2,
+      "min_core_progress_atr": -0.6,
+      "max_core_progress_atr": 1.3,
+      "min_post1_progress_atr": 0.0,
+      "min_post2_progress_atr": 1.0,
+      "min_post3_progress_atr": 1.25,
+      "min_post5_progress_atr": 1.75,
+      "min_aligned_ma_slope_atr": 0.03,
+      "max_minimum_close_to_ma_atr": 1.0,
+      "max_close_to_ma_envelope_atr": 1.9,
+      "max_body_to_ma_envelope_atr": 1.5,
+      "unchanged_from_v7": true
+    },
+    "raw_box_vertical_coverage_is_gate": false,
+    "vertical_diagnostic_reason": "The training labels declare full core wicks plus six MAs, but a new tolerance for imperfect predicted y geometry would be a tunable threshold. v1 records coverage and does not invent one after seeing results."
+  },
+  "experimental_design": {
+    "assignment": "Every image and every raw prediction receives both conditions; no random assignment is needed because the treatment is a strict deterministic subset of control.",
+    "pairing_units": [
+      "dataset image",
+      "positive event after collapsing its post2-post9 variants",
+      "negative event after collapsing its three matched variants"
+    ],
+    "blocking": ["direction", "post_bars", "negative_kind", "time_block"],
+    "primary_metrics": [
+      "positive any-hit event recall retention",
+      "empty-label negative box reduction",
+      "empty-label image fire-rate change"
+    ],
+    "null_control": "Keep image, box, predicted class, confidence and IoU fixed; invert only LONG/SHORT inside the semantic calculation. Actual-direction hit survival must beat flipped-direction survival.",
+    "no_threshold_grid": true,
+    "no_post_result_retuning": true
+  },
+  "decision_rule": {
+    "min_positive_event_recall_retention": 0.9,
+    "min_negative_box_reduction": 0.25,
+    "direction_flip_p_max": 0.01,
+    "all_required": true,
+    "failure_action": "Report failure unchanged. Do not relax a predicate, rerun a threshold grid, inspect 4h holdout to choose a threshold, train, promote or deploy."
+  },
+  "outputs": {
+    "raw_evaluation": "experiments/active/exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1/results/raw/frozen_val_evaluation.json",
+    "raw_predictions": "experiments/active/exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1/results/raw/frozen_val_predictions.jsonl",
+    "semantic_results": "experiments/active/exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1/results/semantic_gate",
+    "report": "analysis/p1_15m_ma_launch_owner_yolo_causal_semantic_gate_20260902.md",
+    "html": "analysis/html/p1_15m_ma_launch_owner_yolo_causal_semantic_gate_20260902.html"
+  },
+  "safety": {
+    "holdout_read": false,
+    "new_training": false,
+    "weight_change": false,
+    "confidence_or_nms_change": false,
+    "label_change": false,
+    "active_or_frozen_change": false,
+    "promotion": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
