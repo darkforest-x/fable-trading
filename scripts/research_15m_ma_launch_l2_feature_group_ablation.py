@@ -619,8 +619,12 @@ def score_final_arm(
     model = lgb.Booster(
         model_file=str(repo_path(record["model_path"]))
     )
+    # Score plateaus are common in small LightGBM models. The default pandas
+    # parser can move a serialized float by one ULP, turning an equality at a
+    # plateau into < or > and shifting the empirical CDF by one full rank.
     tune_scores = pd.read_csv(
-        repo_path(record["tune_scores_path"])
+        repo_path(record["tune_scores_path"]),
+        float_precision="round_trip",
     )["score"].to_numpy(dtype=float)
     final_events = data[
         (data["side"].astype(str) == side)
@@ -724,12 +728,14 @@ def baseline_reproduction(
     deltas: list[float] = []
     decisions: list[bool] = []
     threshold_deltas: list[float] = []
+    percentile_deltas: list[float] = []
     rows = 0
     for side in SIDES:
         current = scored[side][
             [
                 "episode_id",
                 f"full_28_{side}_score",
+                f"full_28_{side}_percentile",
                 f"full_28_{side}_threshold",
                 f"full_28_{side}_keep",
             ]
@@ -740,6 +746,7 @@ def baseline_reproduction(
             [
                 "episode_id",
                 "l2_score",
+                "side_percentile_score",
                 "l2_threshold",
                 "l2_keep",
             ]
@@ -763,6 +770,12 @@ def baseline_reproduction(
                 - merged["l2_threshold"]
             ).tolist()
         )
+        percentile_deltas.extend(
+            np.abs(
+                merged[f"full_28_{side}_percentile"]
+                - merged["side_percentile_score"]
+            ).tolist()
+        )
         decisions.extend(
             (
                 merged[f"full_28_{side}_keep"].astype(bool)
@@ -774,15 +787,20 @@ def baseline_reproduction(
     maximum_threshold_delta = max(
         threshold_deltas, default=0.0
     )
+    maximum_percentile_delta = max(
+        percentile_deltas, default=0.0
+    )
     passed = (
         maximum_score_delta <= 1e-12
         and maximum_threshold_delta <= 1e-12
+        and maximum_percentile_delta <= 1e-12
         and all(decisions)
     )
     return {
         "rows": rows,
         "maximum_absolute_score_delta": maximum_score_delta,
         "maximum_absolute_threshold_delta": maximum_threshold_delta,
+        "maximum_absolute_percentile_delta": maximum_percentile_delta,
         "score_tolerance": 1e-12,
         "keep_decisions_exact": all(decisions),
         "passed": passed,

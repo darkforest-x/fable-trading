@@ -114,3 +114,20 @@ def test_selection_falls_back_to_full28_if_all_arms_unhealthy() -> None:
         ),
     ]
     assert select_best_arm(records)["arm"] == "full_28"
+
+
+def test_round_trip_float_parser_preserves_score_plateau(tmp_path) -> None:
+    import pandas as pd
+
+    values = np.array(
+        [
+            0.00417856492785575,
+            np.nextafter(0.00417856492785575, np.inf),
+        ]
+    )
+    path = tmp_path / "scores.csv"
+    pd.DataFrame({"score": values}).to_csv(path, index=False)
+    loaded = pd.read_csv(
+        path, float_precision="round_trip"
+    )["score"].to_numpy(dtype=float)
+    assert np.array_equal(values, loaded)
