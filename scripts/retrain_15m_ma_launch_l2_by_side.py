@@ -506,10 +506,17 @@ def verify_outputs(prereg: Mapping[str, Any]) -> dict[str, Any]:
         checks[f"{side}_model_hash"] = model.is_file() and sha256_file(model) == receipt["sides"][side]["model_sha256"]
     scored = repo_path(receipt["scored_validation_path"])
     checks["scored_hash"] = scored.is_file() and sha256_file(scored) == receipt["scored_validation_sha256"]
+    training_generated_at = str(receipt.get("generated_at", ""))
+    if not training_generated_at:
+        raise SideSplitError("training receipt is missing generated_at")
     payload = {
         "protocol": prereg["protocol"],
         "experiment_id": EXPERIMENT_ID,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        # Verification is a pure integrity check.  Anchor its receipt to the
+        # immutable training receipt so rerunning --verify does not silently
+        # change the registered artifact hash.
+        "generated_at": training_generated_at,
+        "training_receipt_sha256": sha256_file(receipt_path),
         "checks": checks,
         "passed": all(checks.values()),
     }

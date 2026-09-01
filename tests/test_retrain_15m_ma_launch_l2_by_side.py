@@ -1,6 +1,7 @@
 """Contract tests for the frozen LONG/SHORT L2 regression comparison."""
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import numpy as np
@@ -15,6 +16,7 @@ from scripts.retrain_15m_ma_launch_l2_by_side import (
     load_preregistration,
     split_dataset_by_side,
     validate_source_dataset,
+    verify_outputs,
 )
 from yoyo.layers.l2_judgment.features import FEATURE_COLUMNS
 
@@ -97,3 +99,73 @@ def test_prior_score_comparison_requires_exact_episode_identity() -> None:
     assert observed["scores_within_tolerance"] is True
     assert observed["keep_decisions_exact"] is True
     assert observed["maximum_absolute_score_delta"] == 0.0
+
+
+def test_verify_receipt_is_stable_across_repeated_integrity_checks(monkeypatch, tmp_path: Path) -> None:
+    import scripts.retrain_15m_ma_launch_l2_by_side as module
+
+    results = tmp_path / "results"
+    output = tmp_path / "output"
+    models = output / "models"
+    results.mkdir()
+    models.mkdir(parents=True)
+
+    long_data = output / "l2_dataset_long.csv"
+    short_data = output / "l2_dataset_short.csv"
+    scored = output / "final_validation_side_split_scored.csv"
+    long_model = models / "l2_long_28f.txt"
+    short_model = models / "l2_short_28f.txt"
+    for path, body in (
+        (long_data, "long\n"),
+        (short_data, "short\n"),
+        (scored, "scores\n"),
+        (long_model, "long-model\n"),
+        (short_model, "short-model\n"),
+    ):
+        path.write_text(body, encoding="utf-8")
+
+    def rel(path: Path) -> str:
+        return path.relative_to(tmp_path).as_posix()
+
+    receipt = {
+        "protocol": "test-protocol",
+        "generated_at": "2026-09-01T00:00:00+00:00",
+        "source_dataset_sha256": "source-sha",
+        "source_rows": 2,
+        "partition_rows": {"long": 1, "short": 1},
+        "mixed_reproduction": {"scores_within_tolerance": True, "keep_decisions_exact": True},
+        "holdout_consumed": False,
+        "promoted": False,
+        "deployed": False,
+        "active_or_frozen_changed": False,
+        "forward_state_changed": False,
+        "orders_placed": False,
+        "telegram_sent": False,
+        "production_eligible": False,
+        "partition_paths": {
+            "long": {"path": rel(long_data), "sha256": module.sha256_file(long_data)},
+            "short": {"path": rel(short_data), "sha256": module.sha256_file(short_data)},
+        },
+        "sides": {
+            "long": {"model_path": rel(long_model), "model_sha256": module.sha256_file(long_model)},
+            "short": {"model_path": rel(short_model), "model_sha256": module.sha256_file(short_model)},
+        },
+        "scored_validation_path": rel(scored),
+        "scored_validation_sha256": module.sha256_file(scored),
+    }
+    (results / "training_receipt.json").write_text(json.dumps(receipt), encoding="utf-8")
+    prereg = {
+        "protocol": "test-protocol",
+        "source": {"dataset_sha256": "source-sha"},
+    }
+
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    monkeypatch.setattr(module, "RESULTS_DIR", results)
+    first = verify_outputs(prereg)
+    first_bytes = (results / "verify_receipt.json").read_bytes()
+    second = verify_outputs(prereg)
+
+    assert first == second
+    assert first["generated_at"] == receipt["generated_at"]
+    assert first["training_receipt_sha256"] == module.sha256_file(results / "training_receipt.json")
+    assert (results / "verify_receipt.json").read_bytes() == first_bytes
