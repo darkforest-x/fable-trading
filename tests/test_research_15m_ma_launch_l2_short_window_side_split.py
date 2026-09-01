@@ -14,6 +14,7 @@ from scripts.research_15m_ma_launch_l2_short_window_side_split import (
     assign_short_dependency_blocks,
     build_side_homogeneous_episodes,
     load_preregistration,
+    validated_outcome_exposure_end,
 )
 from yoyo.layers.l1_detection.data import add_mas
 from yoyo.layers.l1_detection.render import render_chart
@@ -233,3 +234,14 @@ def test_dependency_blocks_refuse_cross_split_exposure() -> None:
     )
     with pytest.raises(ShortWindowL2Error, match="crosses splits"):
         assign_short_dependency_blocks(frame)
+
+
+def test_holdout_exposure_is_rejected_before_labeling_can_run() -> None:
+    prereg = load_preregistration(PREREG)
+    assert validated_outcome_exposure_end(
+        pd.Timestamp("2026-05-03T06:00:00Z"), prereg
+    ) == pd.Timestamp("2026-05-04T00:00:00Z")
+    with pytest.raises(ShortWindowL2Error, match="crosses holdout"):
+        validated_outcome_exposure_end(
+            pd.Timestamp("2026-05-03T06:15:00Z"), prereg
+        )

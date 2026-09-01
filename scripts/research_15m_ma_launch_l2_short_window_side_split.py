@@ -391,6 +391,20 @@ def _snapshot_frame(path: Path) -> pd.DataFrame:
     return frame.reset_index(drop=True)
 
 
+def validated_outcome_exposure_end(
+    available_at: pd.Timestamp, prereg: Mapping[str, Any]
+) -> pd.Timestamp:
+    """Return label exposure end only after proving it cannot enter holdout."""
+
+    exposure_end = utc(available_at) + int(prereg["outcome"]["horizon_bars"]) * BAR_DELTA
+    holdout = utc(prereg["source"]["holdout_start"])
+    if exposure_end > holdout:
+        raise ShortWindowL2Error(
+            f"outcome exposure {exposure_end.isoformat()} crosses holdout {holdout.isoformat()}"
+        )
+    return exposure_end
+
+
 def build_short_window_dataset(prereg: Mapping[str, Any]) -> dict[str, Any]:
     """Recluster by side, recreate exact L1 inputs, and label future outcomes."""
 
@@ -436,6 +450,8 @@ def build_short_window_dataset(prereg: Mapping[str, Any]) -> dict[str, Any]:
             available_at = end_time + BAR_DELTA
             if available_at != utc(row["available_at"]):
                 raise ShortWindowL2Error(f"available_at mismatch for {row['episode_id']}")
+            # This guard intentionally runs before the future-reading labeler.
+            exposure_end = validated_outcome_exposure_end(available_at, prereg)
             side = str(row["side"])
             labeler = label_candidate if side == "long" else label_short_candidate
             outcome = labeler(
@@ -465,9 +481,6 @@ def build_short_window_dataset(prereg: Mapping[str, Any]) -> dict[str, Any]:
                 price_min=transform.price_min,
                 price_max=transform.price_max,
             )
-            exposure_end = available_at + int(outcome_spec["horizon_bars"]) * BAR_DELTA
-            if exposure_end > utc(prereg["source"]["holdout_start"]):
-                raise ShortWindowL2Error(f"outcome exposure crosses holdout for {row['episode_id']}")
             input_start = utc(window["open_time"].iloc[0])
             record = {
                 "episode_id": str(row["episode_id"]),
