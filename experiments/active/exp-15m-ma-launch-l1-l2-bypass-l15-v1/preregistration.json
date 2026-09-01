@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "protocol": "15m_grade_a_l1_episode_collapse_side_split_l2_bypass_l15_v1",
+  "experiment_id": "exp-15m-ma-launch-l1-l2-bypass-l15-v1",
+  "created_at": "2026-09-01T15:43:07Z",
+  "source_commit_before_builder": "efd8ec552703c568af1e222a8ff2d53ba7764aab",
+  "owner_authorization": {
+    "quote": "去做",
+    "interpreted_scope": "Remove L1.5 from the research pipeline, retain its historical failure artifacts, and rebuild the same side-specific L2 directly from the frozen L1 episode ledger.",
+    "training_authorized": true,
+    "holdout_read_authorized": false,
+    "promotion_deployment_or_trading_authorized": false
+  },
+  "question": "Can the L1-to-L2 path be rebuilt with no L1.5 import, feature, score, threshold, model, or filtering dependency while exactly reproducing the prior L2-only arm?",
+  "single_variable": "Pipeline topology only: bypass L1.5. The frozen L1 episode ledger, dependency representatives, LONG/SHORT split, 17 L2 features, LightGBM parameters, tune-q90 thresholds, final period, outcomes, costs, matched controls and economic gates stay unchanged.",
+  "pipeline": {
+    "enabled_stages": [
+      "l1_frozen_yolo_candidates",
+      "episode_dependency_collapse",
+      "side_specific_l2_return_regression"
+    ],
+    "disabled_stages": [
+      "l15_global_shape_classifier"
+    ],
+    "candidate_flow": "L1 frozen candidate ledger -> dependency_representative episode collapse -> LONG/SHORT L2",
+    "l15_policy": "historical research only; not imported, read, scored or gated by this runner"
+  },
+  "inputs": {
+    "candidate_dataset": {
+      "path": "analysis/output/ma_launch_l2_global_context_v1/l2_dataset.csv",
+      "sha256": "e7b6f94cf59493c1f33e46c2f08fe5252a0a6e80406ab43a061fd112fc70f798",
+      "rows": 3779
+    },
+    "matched_controls": {
+      "path": "analysis/output/ma_launch_l2_global_context_v1/matched_controls.csv",
+      "sha256": "e4b654a45f72a337bc58e7f97d19044218c9521a5341ed0293199384de98d1ec"
+    },
+    "prior_l2_only_receipt": {
+      "path": "experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results/l2_training_receipt.json",
+      "sha256": "9bc175f4b3a8907d4541bf0bfdb53180ad919aad8db37e239e2fadb235571ca3"
+    },
+    "holdout_start": "2026-05-04T00:00:00Z"
+  },
+  "l2": {
+    "objective": "side-specific LightGBM regression on gross realized_ret",
+    "feature_columns": [
+      "l1_confidence",
+      "ma_spread_pct",
+      "spread_chg8",
+      "spread_chg24",
+      "dense_frac48",
+      "close_vs_ema55",
+      "close_vs_ema200",
+      "slow_slope_12",
+      "volume_ratio",
+      "atr_pct",
+      "atr_pct_ratio96",
+      "pre_range48",
+      "drawdown24",
+      "ret_4",
+      "ret_12",
+      "ret_24",
+      "ret_48"
+    ],
+    "feature_count": 17,
+    "models": "separate LONG and SHORT regressors",
+    "score_gate": "per-side tune q90, frozen before final",
+    "deterministic_params": {
+      "device_type": "cpu",
+      "deterministic": true,
+      "force_col_wise": true,
+      "num_threads": 1,
+      "data_random_seed": 42,
+      "feature_fraction_seed": 42,
+      "bagging_seed": 42,
+      "extra_seed": 42
+    }
+  },
+  "outcome": {
+    "tp_atr_multiple": 5.0,
+    "sl_atr_multiple": 2.0,
+    "horizon_bars": 72,
+    "entry": "next_open",
+    "same_bar_policy": "conservative_sl",
+    "round_trip_cost_fraction": 0.002,
+    "changed": false
+  },
+  "matched_control": {
+    "deterministic_assignments": 8,
+    "changed": false
+  },
+  "acceptance": {
+    "bypass_parity": [
+      "runner imports no L1.5 or global-shape module",
+      "candidate CSV is read with an explicit column allow-list containing no l15 field",
+      "new LONG and SHORT model SHA-256 values equal the prior L2-only arm",
+      "new and prior per-event scores differ by at most 1e-12",
+      "tune-q90 thresholds and selected episode IDs are identical"
+    ],
+    "economic_gate": [
+      "top-decile and frozen-q90 net mean > 0",
+      "minimum 30 selected independent events",
+      "outcome permutation p < 0.01",
+      "complete matched-control coverage and beat all eight assignments",
+      "neither side frozen-q90 net mean negative"
+    ],
+    "decision_rule": "Topology bypass may pass while the L2 economic gate remains rejected. Bypass parity does not make the model production eligible."
+  },
+  "outputs": {
+    "output_dir": "analysis/output/ma_launch_l1_l2_bypass_l15_v1",
+    "results_dir": "experiments/active/exp-15m-ma-launch-l1-l2-bypass-l15-v1/results",
+    "report": "analysis/p3_15m_ma_launch_l1_l2_bypass_l15_20260901.md",
+    "html": "analysis/html/p3_15m_ma_launch_l1_l2_bypass_l15_20260901.html"
+  },
+  "safety": {
+    "holdout_read": false,
+    "l1_rescan": false,
+    "features_labels_splits_threshold_barrier_or_cost_changed": false,
+    "l15_artifacts_read_for_training_or_scoring": false,
+    "prior_l2_only_artifacts_read_for_parity_only": true,
+    "promote": false,
+    "deploy": false,
+    "active_or_frozen_change": false,
+    "forward_state_change": false,
+    "telegram_send": false,
+    "orders": false,
+    "production_eligible": false
+  }
+}
