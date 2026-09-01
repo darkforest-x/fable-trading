@@ -3106,3 +3106,80 @@ experiments:
       reference rows therefore remain useful L1 evidence but are rejected as
       direct L2 target-domain augmentation. No holdout, promotion, deployment,
       ACTIVE/frozen/forward mutation, Telegram send or order occurred.
+
+  - experiment_id: exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ac891c02e6b8f89b6464796514758c71b48f8c72"
+    status: accepted
+    question: >-
+      On the frozen chronological pre-holdout validation split, does retaining
+      the full40 native-1280 YOLO as a proposal layer and adding the causally
+      visible prefix of its original numeric training semantics materially
+      reduce empty-label fires without destroying positive-event recall?
+    single_variable: >-
+      The treatment adds one deterministic semantic-gate decision after the
+      existing core4/5 plus post2-9 structural filter. Images, weights, raw
+      predictions, confidence 0.25, NMS 0.70, box mapping, labels and IoU 0.50
+      remain exactly paired.
+    result: >-
+      accepted_for_completed_history_preholdout_research. Empty-label boxes
+      fell from 35 to 10 (-71.43%, paired image p=5.96e-8), while positive
+      events with any hit fell from 142 to 141, retaining 99.30% of the
+      control's event hits. All frozen decision checks passed; actual-direction
+      semantic survival beat the direction-flip null 141 to 0 events
+      (p=7.17e-43).
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_owner_yolo_causal_semantic_gate_20260902.md
+    artifacts:
+      - 15m-ma-launch-owner-yolo-causal-semantic-gate-v1-prereg
+      - 15m-ma-launch-owner-yolo-causal-semantic-gate-v1-raw-eval
+      - 15m-ma-launch-owner-yolo-causal-semantic-gate-v1-raw-predictions
+      - 15m-ma-launch-owner-yolo-causal-semantic-gate-v1-summary
+      - 15m-ma-launch-owner-yolo-causal-semantic-gate-v1-result-receipt
+      - 15m-ma-launch-owner-yolo-causal-semantic-gate-v1-verification
+      - 15m-ma-launch-owner-yolo-causal-semantic-gate-v1-overview
+      - 15m-ma-launch-owner-yolo-causal-semantic-gate-v1-gallery
+      - 15m-ma-launch-owner-yolo-causal-semantic-gate-v1-report
+      - 15m-ma-launch-owner-yolo-causal-semantic-gate-v1-html
+    reuse_allowed: true
+    notes: >-
+      Reuse is limited to the same completed-history research contract with the
+      identical frozen semantic thresholds and causal visibility rules. This is
+      not a tip detector and does not authorize a 4h holdout read, threshold
+      adjustment, training, promotion, deployment, ACTIVE/frozen/forward
+      mutation or order action. One of 142 control-hit positive events was lost
+      because box-to-discrete-core localization shifted its post2/post3
+      semantics; any localization rescue is a separate preregistered variable.
+
+  - experiment_id: exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1462abe6b576ba40e3b811b4b5d9949a5e3cff6c"
+    status: active
+    question: >-
+      On the frozen all-universe 15-day 4h snapshot, which of the 1,764
+      structurally legal boxes and 221 control events survive the exact causal
+      semantic gate already accepted on chronological pre-holdout 15m data?
+    single_variable: >-
+      Add the locked semantic-gate decision after the structural YOLO filter;
+      candle bytes, universe, source boxes, checkpoint, conf/NMS, W18/W19,
+      core4/5, post2-9 and five-bar event spacing remain paired and unchanged.
+    result: >-
+      owner_authorized_holdout_use_7_registered_before_semantic_scoring. The
+      locked result will be delivered unchanged without threshold relaxation,
+      retraining, promotion or deployment.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_4h_ma_launch_yolo_halfmonth_semantic_gate_20260902.md
+    artifacts:
+      - 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-prereg
+    reuse_allowed: false
+    notes: >-
+      Owner replied "批准" immediately after the explicit request to approve
+      one 4h holdout consumption for this configuration and rescan the prior
+      half-month snapshot. This is checkpoint holdout use #7. It authorizes
+      only the frozen offline semantic replay and complete-future review
+      gallery; no training, threshold tuning, ACTIVE/frozen/forward mutation,
+      promotion, deployment, Telegram send or order action is authorized.
