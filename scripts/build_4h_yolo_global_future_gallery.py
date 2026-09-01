@@ -63,6 +63,23 @@ def future_bar_count(frame: pd.DataFrame, event: Mapping[str, Any]) -> int:
     return len(frame) - bar_index(frame, event["first_detection_bar_open_time"]) - 1
 
 
+def event_chart_filename(event: Mapping[str, Any], order: int) -> str:
+    """Keep a source filename when present, otherwise derive a stable one.
+
+    Semantic-gate results are created directly from the accepted-candidate
+    ledger and intentionally have no canonical ``charts/`` artifact.  Their
+    delivery-only global-future filename therefore comes from event order,
+    symbol, and side without mutating the frozen scan summary.
+    """
+
+    source = str(event.get("chart") or "").strip()
+    if source:
+        return Path(source).name
+    symbol = str(event["symbol"]).replace("_USDT_SWAP", "")
+    side = "LONG" if int(event["class_id"]) == 0 else "SHORT"
+    return f"{int(order):03d}_{symbol}_{side}.png"
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -429,7 +446,7 @@ def main() -> int:
                 order=order,
                 total=len(events),
             )
-            filename = Path(str(event["chart"])).name
+            filename = event_chart_filename(event, order)
             path = building / filename
             if not cv2.imwrite(str(path), image, [cv2.IMWRITE_PNG_COMPRESSION, 3]):
                 raise base.FourHourYoloError(f"could not write global-future chart: {path}")

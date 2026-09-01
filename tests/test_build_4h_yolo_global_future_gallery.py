@@ -7,6 +7,7 @@ import pandas as pd
 from scripts.build_4h_yolo_global_future_gallery import (
     _gallery_document,
     bar_index,
+    event_chart_filename,
     future_bar_count,
 )
 
@@ -54,3 +55,9 @@ def test_gallery_labels_semantic_gate_survivors() -> None:
     assert "4h YOLO + 因果语义门" in document
     assert "GATED" in document
     assert "只展示通过冻结因果语义门" in document
+
+
+def test_semantic_result_without_source_chart_gets_stable_filename() -> None:
+    event = {"symbol": "TEST_USDT_SWAP", "class_id": 1}
+
+    assert event_chart_filename(event, 7) == "007_TEST_SHORT.png"
