@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>15m 均线密集启动：L2 多空拆分回归 v1</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>15m 均线密集启动：L2 多空拆分回归 v1</h1>
+<h2>结论</h2>
+<p>本轮按 Owner 要求把上一轮 <strong>3,779 条完全相同的 L2 数据</strong>拆成 LONG 1,801 条与 SHORT 1,978 条，并分别训练收益回归模型。混合模型已逐分数复现：242 个最终独立事件的 最大分数差 <code>9.9e-17</code>，41 个 KEEP 决策完全一致。因此结果变化只来自“一个混合模型”改为“多空两个模型”。</p>
+<p><strong>多空拆分的方向明显更好，但预注册门仍为 FAIL。</strong> 两个 tune-q90 门在最终时间段合计保留 20 个独立事件，扣 0.2% 往返成本后平均 +1.231%； 混合模型保留 41 个，净均值仅 +0.034%。但合并置换检验 <code>p=0.072093</code>，未达到 0.01；SHORT 仅保留 7 个，合计也低于预注册的30个独立事件门。 这只能作为“应继续积累同合同新样本”的发现，不能 promote、部署或用于下单。</p>
+<h2>冻结实验合同</h2>
+<ul>
+<li>来源数据 SHA-256：<code>e7b6f94cf59493c1f33e46c2f08fe5252a0a6e80406ab43a061fd112fc70f798</code>；候选、特征、TP5/SL2/72 标签与 0.2% 成本均未重算或修改。</li>
+<li>28 个输入特征已在 L1 最后一根可见 K 线收盘时因果生成；未来只用于训练 outcome。</li>
+<li>train / tune / final_validation 原时间段及完整暴露 dependency block 原样保留；训练、早停、 tune-q90 与最终指标只使用每个 block 的首个事件。</li>
+<li>LONG 和 SHORT 各自在自己的 tune 分数上固定 q90；合并排序使用各自 tune 分布的经验百分位， 防止某一方向仅因原始分数尺度不同而占据榜首。</li>
+<li>没有参数搜索、没有在 final validation 调阈值、没有读取 ≥2026-05-04 holdout。</li>
+</ul>
+<h2>数据统计</h2>
+<table><thead><tr>
+<th>方向</th>
+<th>全量行</th>
+<th>train</th>
+<th>purge</th>
+<th>tune</th>
+<th>final validation</th>
+</tr></thead><tbody>
+<tr><td>LONG</td><td>1801</td><td>705</td><td>59</td><td>414</td><td>623</td></tr>
+<tr><td>SHORT</td><td>1978</td><td>1074</td><td>99</td><td>407</td><td>398</td></tr>
+<tr><td>合计</td><td>3779</td><td>1779</td><td>158</td><td>821</td><td>1021</td></tr>
+</tbody></table>
+<h2>时间外结果</h2>
+<table><thead><tr>
+<th>模型</th>
+<th>独立 train/tune/final</th>
+<th>best iter</th>
+<th>q90保留n</th>
+<th>q90净收益</th>
+<th>q90胜率</th>
+<th>top-decile净收益</th>
+<th>置换p</th>
+<th>AUC</th>
+</tr></thead><tbody>
+<tr><td>混合回归（复现基线）</td><td>417 / 229 / 242</td><td>2</td><td>41</td><td>+0.034%</td><td>29.27%</td><td>-0.150%</td><td>0.6564</td><td>0.5646</td></tr>
+<tr><td>LONG 独立回归</td><td>190 / 118 / 157</td><td>17</td><td>13</td><td>+1.261%</td><td>30.77%</td><td>+0.887%</td><td>0.0966</td><td>0.5354</td></tr>
+<tr><td>SHORT 独立回归</td><td>227 / 111 / 85</td><td>17</td><td>7</td><td>+1.175%</td><td>57.14%</td><td>+1.086%</td><td>0.1186</td><td>0.4350</td></tr>
+<tr><td>多空独立后合并</td><td>— / — / 242</td><td>—</td><td>20</td><td>+1.231%</td><td>40.00%</td><td>+0.939%</td><td>0.0721</td><td>0.4972</td></tr>
+</tbody></table>
+<p>LONG 的最终 top-decile 比同方向 <code>ma_spread_pct</code> 单特征基线高 +0.548%；SHORT 高 +1.556%。这说明改善不只是把数据按方向切开后的单特征分桶，但样本量仍不足以证明 稳定性。AUC 只作诊断：收益回归按幅度排序，不能用 TP-first 分类 AUC 作为成功裁决。</p>
+<h2>匹配随机对照</h2>
+<p>合并后的20个 q90 事件在8个固定分配上全部跑赢同币 × 同月 × 同UTC时段 × 同ATR桶 × 同方向 的随机候选；平均净超额 +1.134%，每个分配有 20 对。LONG 与 SHORT 单独也均为8/8正，但SHORT每个分配 只有7对，不能用“大数值”掩盖小样本不确定性。置换检验没有通过，故随机对照通过不能单独放行。</p>
+<h2>预注册门</h2>
+<table><thead><tr>
+<th>门</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td><code>mixed_reproduction</code></td><td>PASS</td></tr>
+<tr><td><code>aggregate_frozen_threshold_net_strictly_better_than_mixed</code></td><td>PASS</td></tr>
+<tr><td><code>aggregate_top_decile_net_positive</code></td><td>PASS</td></tr>
+<tr><td><code>aggregate_outcome_permutation_p_lt_0_01</code></td><td>FAIL</td></tr>
+<tr><td><code>aggregate_minimum_30_selected_dependency_blocks</code></td><td>FAIL</td></tr>
+<tr><td><code>aggregate_beats_matched_controls_every_assignment</code></td><td>PASS</td></tr>
+<tr><td><code>each_side_minimum_10_selected_dependency_blocks</code></td><td>FAIL</td></tr>
+<tr><td><code>neither_side_frozen_threshold_net_negative</code></td><td>PASS</td></tr>
+</tbody></table>
+<p>总判定：<strong>FAIL</strong>。</p>
+<h2>L1.5 应该怎么做</h2>
+<p>L1.5 不是收益模型，而是 <strong>全局形态质量分类器</strong>。它应放在局部 YOLO 与经济 L2 之间：</p>
+<pre><code>
+L1 局部检测 → L1.5 全局形态过滤 → LONG/SHORT 独立收益回归 L2 → 回测
+</code></pre>
+<ol>
+<li><strong>输入</strong>：固定168根已收盘15m K线，右端严格停在L1可用时刻；使用与实扫一致的渲染器、 原生宽高比和颜色。未来K线、收益、TP/SL结果不得进入像素。</li>
+<li><strong>候选定位</strong>：不把红框烧进RGB图，避免模型学习框颜色/位置捷径；L1核心起止与确认根数作为 独立数值元数据，或作为单独mask通道输入。</li>
+<li><strong>标签</strong>：<code>global_shape_good</code>只表达Owner认可的全局结构，例如启动前是否已经走完、是否只是 长时间平盘、均线是否真正收拢、候选是否位于合理阶段。不能用“后来赚了”自动当正例。</li>
+<li><strong>多空分开</strong>：LONG、SHORT分别建Gold与hard negatives，禁止时间翻转、左右翻转或交换红绿语义。</li>
+<li><strong>样本来源</strong>：以现有8,000个Grade-A事件作为正例种子重新渲染168根上下文；负例优先使用 “局部像、全局不对”的L1 hard proposals，而不是大量一眼就不像的easy negatives。现有24,000 负例只能作为候选来源，不能自动宣称拥有全局语义。</li>
+<li><strong>训练顺序</strong>：先做可解释的全局数值规则/LightGBM基线，再训练图像分类器；图像模型必须在 同一时间外Gold上显著提高precision，才证明它看到了规则没有表达的视觉结构。</li>
+<li><strong>验收</strong>：以Owner确认的独立全局Gold集报告LONG/SHORT precision、recall、误杀率，以及 L1→L1.5前后的候选变化；这是标签质量实验，不用收益替代形态真值。经济效果留给后面的L2。</li>
+</ol>
+<p>不建议直接把8,000张局部正图换成长图就开训：这些标签只证明局部形态，尚未证明整张168根图 符合全局标准。应先构建小而可靠的全局Gold和hard-negative门，再扩成训练集。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>最终独立事件只有242个，拆分后LONG/SHORT分别157/85；q90保留13/7，方差很大。</li>
+<li>本轮 final validation 已用于一次预注册裁决；不得在这里继续调阈值后再次宣称独立验证。</li>
+<li>原L1是看过核心后2–9根确认K的完成形态检测器，本轮没有把它变成tip实时信号。</li>
+<li>本轮未读取holdout、未重扫L1、未改标签/特征/障碍/成本、未promote、未部署、未改 ACTIVE/frozen/forward、未发Telegram、未下单。</li>
+<li>校验回执：<code>verify.passed=true</code>，全部 12 项为真。</li>
+</ul>
+<h2>复现命令</h2>
+<pre><code>
+git checkout 976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0
+PYTHONPATH=. .venv/bin/python scripts/retrain_15m_ma_launch_l2_by_side.py --train-evaluate
+PYTHONPATH=. .venv/bin/python scripts/retrain_15m_ma_launch_l2_by_side.py --verify
+PYTHONPATH=. .venv/bin/python scripts/build_15m_ma_launch_l2_side_split_report.py
+python3 scripts/md_to_html.py analysis/p3_15m_ma_launch_l2_side_split_20260901.md --out-dir analysis/html
+</code></pre>
+<h2>下一步</h2>
+<ol>
+<li>保留多空独立回归作为研究候选，但不启用；用相同冻结合同积累新的时间外事件，至少补足 SHORT和总选择数后再做一次预注册确认。</li>
+<li>L1.5另立实验，先产出因果168根全局Gold/hard-negative预览及直接质量统计；不与本轮收益 回归一起改，避免无法归因。</li>
+</ol>
+</body>
+</html>
