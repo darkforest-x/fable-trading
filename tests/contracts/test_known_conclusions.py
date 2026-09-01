@@ -190,6 +190,7 @@ def test_every_authorized_holdout_consumer_remains_explicit(registries):
         "exp-15m-ma-launch-owner-yolo-eth30d-20260828-v1",
         "exp-15m-ma-launch-t3-daily-movers3d-v1",
         "exp-15m-ma-launch-t3-daily-movers3d-v2",
+        "exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1",
         "exp-pine-eth-15m-v1",
         "exp-yoyo-trading-fixed-w10-classifier-holdout3d",
     }
