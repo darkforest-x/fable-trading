@@ -58,6 +58,28 @@ def test_overview_and_gallery_preserve_all_source_hashes(
     assert gallery["sha256"] == report.sha256_file(gallery_path)
 
 
+def test_phase_commit_lineage_discloses_every_phase_and_rejects_invalid_identity() -> None:
+    commits = report.phase_commit_lineage(
+        {"source_commit": "1" * 40},
+        {"source_commit": "2" * 40},
+        {"source_commit": "a" * 40},
+        {"source_commit": "f" * 40},
+    )
+    assert commits == {
+        "snapshot": "1" * 40,
+        "scan": "2" * 40,
+        "dataset": "a" * 40,
+        "training": "f" * 40,
+    }
+    with pytest.raises(report.ReportError, match="invalid phase source commit"):
+        report.phase_commit_lineage(
+            {"source_commit": "1" * 40},
+            {"source_commit": "not-a-commit"},
+            {"source_commit": "a" * 40},
+            {"source_commit": "f" * 40},
+        )
+
+
 def test_overview_delivers_sparse_threshold_outcome_without_inventing_charts(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

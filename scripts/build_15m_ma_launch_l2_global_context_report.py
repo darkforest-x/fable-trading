@@ -77,6 +77,30 @@ def number(value: float | None, digits: int = 4) -> str:
     return "—" if value is None else f"{float(value):.{digits}f}"
 
 
+def phase_commit_lineage(
+    snapshot: Mapping[str, Any],
+    scan: Mapping[str, Any],
+    dataset: Mapping[str, Any],
+    training: Mapping[str, Any],
+) -> dict[str, str]:
+    """Return and validate the committed identity of every experiment phase."""
+
+    commits = {
+        "snapshot": str(snapshot.get("source_commit", "")),
+        "scan": str(scan.get("source_commit", "")),
+        "dataset": str(dataset.get("source_commit", "")),
+        "training": str(training.get("source_commit", "")),
+    }
+    invalid = {
+        phase: commit
+        for phase, commit in commits.items()
+        if len(commit) != 40 or any(character not in "0123456789abcdef" for character in commit)
+    }
+    if invalid:
+        raise ReportError(f"invalid phase source commit identities: {invalid}")
+    return commits
+
+
 def make_overview(manifest: pd.DataFrame, output: Path) -> dict[str, Any]:
     """Compose up to six views per decision group without altering sources.
 
@@ -197,6 +221,7 @@ def build_markdown(
     baseline = training["single_feature_baseline"]
     matched = training["matched_control"]
     runtime = training["runtime"]
+    commits = phase_commit_lineage(snapshot, scan, dataset, training)
     verdict = "通过研究门" if gate["passed"] else "未通过研究门"
     overview_rel = Path(overview["path"]).relative_to("analysis").as_posix()
     control_rows = [row for row in matched["assignments"] if int(row.get("n", 0)) > 0]
@@ -250,9 +275,15 @@ def build_markdown(
 | matched-control 行 | {dataset['matched_controls']:,}（{matched['usable_assignment_count']} / {matched['required_assignment_count']} 个分配可用） |
 | LightGBM / NumPy / pandas | {runtime['packages']['lightgbm']} / {runtime['packages']['numpy']} / {runtime['packages']['pandas']} |
 | 确定性训练 | CPU · deterministic=true · force_col_wise=true · num_threads=1 |
+| 冻结快照 commit | `{commits['snapshot']}` |
+| 远端 L1 扫描 commit | `{commits['scan']}` |
+| L2 数据集 commit | `{commits['dataset']}` |
+| L2 训练评估 commit | `{commits['training']}` |
 | holdout 读取 | 0 |
 
 信号时钟固定为：`window_end_time` 是 L1 最后一根可见 K 的开盘时间；`available_at = window_end_time + 15min`；L2 特征只到该收盘；TP5/SL2/72 标签从 `available_at` 对应的下一根开盘开始。每个事件的完整暴露区间是 `[available_at-42h, available_at+18h)`，train→tune 与 tune→final val 各留 60 小时 purge。直接或传递重叠的同币区间属于同一依赖块；只有每块最早事件进入训练、早停、阈值选择和最终指标，后续事件只用于评分与全局图复盘。
+
+本轮是显式多阶段血缘，不把不同提交伪装成同一个二进制：快照和远端 L1 扫描固定在上表对应 commit；完整暴露隔离、确定性训练、收据守门与报告修复随后落在数据集/训练 commit。远端回执逐项固定 L1 权重、训练 manifest、renderer、L2 feature/label builder 及候选账本 SHA-256；本地阶段重新校验这些哈希后才读取候选。扫描之后的改动不重算、筛选或调节 L1 候选。
 
 这项 60 小时/依赖块规则是在扫描期间的代码审计中、**任何 L2 outcome、score 或收益结果生成之前**写入预注册 integrity amendment；它修复原 18 小时 label-only purge 的证据隔离缺口，没有改变 L1 权重/阈值、TP/SL、期限或成本。
 
