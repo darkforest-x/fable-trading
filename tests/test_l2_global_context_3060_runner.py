@@ -43,6 +43,7 @@ def test_status_finds_the_actual_python_workload_not_only_launcher_pid() -> None
     assert "Name -like 'python*'" in status
     assert "research_15m_ma_launch_l2_global_context.py" in status
     assert "workload_running=" in status
+    assert "worker_cpu_seconds=" in status
     assert "workload_identity=fallback_script_only" in status
     assert "launcher_pid_record=" in status
     assert "scan.source_commit" in text
