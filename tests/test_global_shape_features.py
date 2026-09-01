@@ -7,9 +7,11 @@ import pandas as pd
 
 from yoyo.layers.l2_judgment.global_shape import (
     GLOBAL_CONTEXT_BARS,
+    GLOBAL_PRECORE_FEATURE_COLUMNS,
     GLOBAL_SHAPE_FEATURE_COLUMNS,
     add_global_shape_indicators,
     extract_global_shape_features,
+    extract_precore_global_shape_features,
 )
 
 
@@ -82,3 +84,21 @@ def test_directional_returns_and_slopes_mirror_between_sides() -> None:
     for column in directional:
         assert np.isclose(long[column], -short[column])
 
+
+def test_precore_view_is_invariant_to_confirmation_and_future_mutation() -> None:
+    core_end_i = 292
+    original = _frame()
+    mutated = original.copy()
+    after_core = mutated.index > core_end_i
+    mutated.loc[after_core, ["open", "high", "low", "close"]] *= 80.0
+    mutated.loc[after_core, "volume"] *= 500.0
+    before = extract_precore_global_shape_features(
+        add_global_shape_indicators(original), core_end_i=core_end_i, side="long"
+    )
+    after = extract_precore_global_shape_features(
+        add_global_shape_indicators(mutated), core_end_i=core_end_i, side="long"
+    )
+    assert tuple(before) == GLOBAL_PRECORE_FEATURE_COLUMNS
+    assert "confirmation_bars" not in before
+    assert "aligned_core_to_decision_atr" not in before
+    assert before == after

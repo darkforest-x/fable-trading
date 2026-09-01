@@ -66,6 +66,15 @@ GLOBAL_SHAPE_FEATURE_COLUMNS = (
     "max_body24_atr",
 )
 
+# Pure morphology view used by the v2 L1.5 layer.  The two excluded columns
+# disclose post-core confirmation timing or displacement and therefore allow a
+# completed-launch label to be recovered after the move has already started.
+GLOBAL_PRECORE_FEATURE_COLUMNS = tuple(
+    column
+    for column in GLOBAL_SHAPE_FEATURE_COLUMNS
+    if column not in {"confirmation_bars", "aligned_core_to_decision_atr"}
+)
+
 
 def add_global_shape_indicators(frame: pd.DataFrame) -> pd.DataFrame:
     """Add only causal columns required by :func:`extract_global_shape_features`.
@@ -248,3 +257,29 @@ def extract_global_shape_features(
         raise ValueError(f"non-finite global-shape features: {bad}")
     return result
 
+
+def extract_precore_global_shape_features(
+    enriched: pd.DataFrame,
+    *,
+    core_end_i: int,
+    side: str,
+) -> dict[str, float]:
+    """Return global morphology features ending exactly at the mapped core.
+
+    This stricter L1.5 contract intentionally ignores every post-core
+    confirmation candle even though L1 has already seen it.  It prevents the
+    classifier from reconstructing the existing launch/no-launch weak label
+    from the move that the label itself used to define success.
+    """
+
+    full = extract_global_shape_features(
+        enriched,
+        decision_i=int(core_end_i),
+        core_end_i=int(core_end_i),
+        side=side,
+        confirmation_bars=0,
+    )
+    result = {column: full[column] for column in GLOBAL_PRECORE_FEATURE_COLUMNS}
+    if tuple(result) != GLOBAL_PRECORE_FEATURE_COLUMNS:
+        raise AssertionError("pre-core global-shape feature order drifted")
+    return result

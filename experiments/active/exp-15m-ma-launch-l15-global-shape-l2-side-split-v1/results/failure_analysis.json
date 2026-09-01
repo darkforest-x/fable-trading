@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp-15m-ma-launch-l15-global-shape-l2-side-split-v1",
+  "status": "rejected_label_reconstruction_shortcut",
+  "observed_at": "2026-09-01T14:29:00Z",
+  "long_final_auc": 1.0,
+  "short_final_auc": 1.0,
+  "diagnosis": {
+    "feature": "aligned_core_to_decision_atr",
+    "long_single_feature_auc": 1.0,
+    "short_single_feature_auc": 1.0,
+    "long_positive_min_vs_negative_max": [1.0275796340947092, 0.8735874413015445],
+    "short_positive_min_vs_negative_max": [1.004344648517146, 0.839070603042754],
+    "root_cause": "The positive/negative event contract used post-core progress to define launch/no-launch, and v1 supplied the same post-core displacement as a feature. This is causal at the delayed decision time but it is not evidence of global pre-launch morphology learning."
+  },
+  "disposition": "Do not apply v1 to L1 candidates or train downstream L2. Preserve artifacts as a failed attempt. V2 moves the L1.5 right edge to core_end_i and excludes every post-core candle.",
+  "holdout_consumed": false,
+  "promoted": false,
+  "deployed": false,
+  "production_eligible": false
+}

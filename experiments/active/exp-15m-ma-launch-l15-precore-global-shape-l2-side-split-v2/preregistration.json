@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "protocol": "15m_grade_a_l1_causal_precore_128bar_l15_side_split_l2_factorial_v2",
+  "experiment_id": "exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2",
+  "created_at": "2026-09-01T14:31:00Z",
+  "source_commit_before_builder": "6651057bda1d05f0833d61675dae6485b72f8aee",
+  "owner_authorization": {
+    "quote": "都去做吧",
+    "approved_bundle": "Frozen L1, causal global filter, LONG/SHORT separation, actual-return L2 and four-arm comparison.",
+    "p0_p1_training_gate_override_for_this_research_run": true,
+    "holdout_read_authorized": false,
+    "barrier_cost_l1_threshold_or_geometry_change_authorized": false,
+    "promotion_deployment_or_trading_authorized": false
+  },
+  "attempt_lineage": {
+    "rejected_attempt": "exp-15m-ma-launch-l15-global-shape-l2-side-split-v1",
+    "observed_before_v2_preregistration": {
+      "long_auc": 1.0,
+      "short_auc": 1.0,
+      "single_feature_aligned_core_to_decision_auc_long": 1.0,
+      "single_feature_aligned_core_to_decision_auc_short": 1.0
+    },
+    "root_cause": "The old launch/no-launch weak label used post-core progress, while v1 exposed the same confirmation move as L1.5 input. The classifier recovered label construction instead of global pre-launch morphology.",
+    "single_changed_variable": "Move the L1.5 feature right edge from the complete L1 decision bar to the mapped core end and remove confirmation_bars plus aligned_core_to_decision_atr. Every post-core candle is physically excluded from L1.5.",
+    "unchanged": [
+      "frozen L1 candidate and episode ledger",
+      "LONG/SHORT separation",
+      "128-bar context length",
+      "source events and weak labels",
+      "time splits and purges",
+      "LightGBM recipe and strict threshold rule",
+      "17-feature L2 recipe",
+      "TP5/SL2/72 and 0.2% cost",
+      "matched controls and economic evaluation splits"
+    ]
+  },
+  "question": "After physically excluding all post-core confirmation bars, can 128 bars ending at the core distinguish Grade-A launch setups from matched dense-no-launch hard negatives and improve the downstream economic pipeline?",
+  "design": {
+    "type": "single-remediation L1.5 experiment followed by the already-preregistered four-arm L1/L1.5/L2/L1.5+L2 diagnostic",
+    "random_split": false,
+    "economic_final_status": "retrospective development only; fresh confirmation remains mandatory"
+  },
+  "inputs": {
+    "source_manifest": {
+      "path": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+      "sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2"
+    },
+    "candidate_dataset": {
+      "path": "analysis/output/ma_launch_l2_global_context_v1/l2_dataset.csv",
+      "sha256": "e7b6f94cf59493c1f33e46c2f08fe5252a0a6e80406ab43a061fd112fc70f798",
+      "rows": 3779
+    },
+    "matched_controls": {
+      "path": "analysis/output/ma_launch_l2_global_context_v1/matched_controls.csv",
+      "sha256": "e4b654a45f72a337bc58e7f97d19044218c9521a5341ed0293199384de98d1ec"
+    },
+    "snapshot_dir": "analysis/output/ma_launch_l2_global_context_v1/snapshot",
+    "holdout_start": "2026-05-04T00:00:00Z"
+  },
+  "l1": {
+    "checkpoint_key": "grade_a8k_neg24k_full40_1280",
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "window_lengths": [18, 19],
+    "episode_policy": "reuse frozen cross-direction overlap episodes and earliest model-available representative",
+    "changed": false
+  },
+  "l15": {
+    "task_name": "pre-core causal global launch-quality classification",
+    "label_semantics": "Existing protocol-derived Grade-A positive versus matched dense-no-launch hard negative; not new owner-confirmed global morphology Gold.",
+    "positive_events": 1043,
+    "hard_negative_events": 2086,
+    "expected_event_rows": 3129,
+    "replication_unit": "one row per independent event; position variants collapse because every view has the same pre-core feature endpoint",
+    "context_bars": 128,
+    "right_edge": "mapped core_end_i",
+    "post_core_bars_visible": 0,
+    "feature_columns": [
+      "ma_spread_atr_end",
+      "ma_spread_atr_mean12",
+      "ma_spread_atr_mean24",
+      "ma_spread_atr_mean48",
+      "ma_spread_atr_min24",
+      "ma_spread_atr_change8",
+      "ma_spread_atr_change24",
+      "dense_fraction24",
+      "dense_fraction48",
+      "price_bundle_gap_atr",
+      "atr_pct",
+      "atr_ratio96",
+      "range_atr24",
+      "range_atr48",
+      "range_atr96",
+      "path_efficiency24",
+      "path_efficiency48",
+      "volume_ratio4",
+      "volume_ratio24",
+      "aligned_ret2",
+      "aligned_ret4",
+      "aligned_ret8",
+      "aligned_ret12",
+      "aligned_ret24",
+      "aligned_ret48",
+      "aligned_ret96",
+      "aligned_ma_slope12_atr",
+      "aligned_ma_slope24_atr",
+      "aligned_ma_slope48_atr",
+      "aligned_position24",
+      "aligned_position48",
+      "aligned_ma_order_score",
+      "max_body24_atr"
+    ],
+    "feature_builder": "yoyo/layers/l2_judgment/global_shape.py::extract_precore_global_shape_features",
+    "models": "separate LONG and SHORT LightGBM binary classifiers",
+    "train_tune_cutoff": "2025-06-01T00:00:00Z",
+    "purge_hours_each_side": 36,
+    "final_validation": "existing manifest val split after the 2025-12-01 cutoff and 150-bar purge",
+    "tune_max_false_positive_rate": 0.1,
+    "tune_minimum_true_positives_per_side": 20,
+    "threshold_rule": "Maximize event-level tune recall subject to FPR <= 10% and >=20 true positives; ties use precision then higher threshold.",
+    "final_max_false_positive_rate": 0.12,
+    "final_minimum_recall": 0.3,
+    "primary_gate": [
+      "each side final FPR <= 12%",
+      "each side final recall >= 30%",
+      "each side label-permutation p < 0.01",
+      "each side ROC AUC beats ma_spread_atr_end"
+    ]
+  },
+  "l2": {
+    "objective": "side-specific LightGBM regression on gross realized_ret",
+    "feature_columns": [
+      "l1_confidence",
+      "ma_spread_pct",
+      "spread_chg8",
+      "spread_chg24",
+      "dense_frac48",
+      "close_vs_ema55",
+      "close_vs_ema200",
+      "slow_slope_12",
+      "volume_ratio",
+      "atr_pct",
+      "atr_pct_ratio96",
+      "pre_range48",
+      "drawdown24",
+      "ret_4",
+      "ret_12",
+      "ret_24",
+      "ret_48"
+    ],
+    "feature_count": 17,
+    "score_gate": "per-side tune q90, frozen before final",
+    "primary_gate": [
+      "top-decile and frozen-q90 net mean > 0",
+      "minimum 30 selected independent events",
+      "outcome permutation p < 0.01",
+      "complete matched-control coverage and beat all eight assignments",
+      "neither side frozen-q90 net mean negative"
+    ]
+  },
+  "outcome": {
+    "tp_atr_multiple": 5.0,
+    "sl_atr_multiple": 2.0,
+    "horizon_bars": 72,
+    "entry": "next_open",
+    "same_bar_policy": "conservative_sl",
+    "round_trip_cost_fraction": 0.002,
+    "changed": false
+  },
+  "matched_control": {
+    "deterministic_assignments": 8,
+    "changed": false
+  },
+  "outputs": {
+    "output_dir": "analysis/output/ma_launch_l15_precore_l2_pipeline_v2",
+    "results_dir": "experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results",
+    "report": "analysis/p3_15m_ma_launch_l15_precore_l2_pipeline_20260901.md",
+    "html": "analysis/html/p3_15m_ma_launch_l15_precore_l2_pipeline_20260901.html"
+  },
+  "safety": {
+    "holdout_read": false,
+    "l1_rescan": false,
+    "l1_weight_threshold_or_geometry_change": false,
+    "barrier_or_cost_change": false,
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deploy": false,
+    "forward_state_change": false,
+    "telegram_send": false,
+    "orders": false,
+    "production_eligible": false
+  }
+}
