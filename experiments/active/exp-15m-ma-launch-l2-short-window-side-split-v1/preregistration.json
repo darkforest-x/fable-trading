@@ -1,0 +1,224 @@
+{
+  "protocol": "15m_ma_launch_exact_l1_short_window_l2_side_split_v1",
+  "experiment_id": "exp-15m-ma-launch-l2-short-window-side-split-v1",
+  "created_at": "2026-09-01T17:55:00Z",
+  "owner_authorization": {
+    "requests": [
+      "L1.5应该怎么做？多空应该分开训练 那你之前的训练集帮忙区分开 再拿去训练一遍呗",
+      "那L2也应该是针对这些k啊",
+      "继续"
+    ],
+    "interpreted_scope": "Correct the existing research L2 so its model inputs are restricted to the exact W18/W19 L1 image content and current raw detection box, retain separate LONG/SHORT regressors and the frozen future-return objective, and rerun the pre-holdout experiment end to end.",
+    "p0_p1_training_gate_override_for_this_research_run": true,
+    "training_authorized": true,
+    "holdout_read_authorized": false,
+    "promotion_or_production_authorized": false
+  },
+  "question": "Can separate LONG/SHORT regressors rank economic outcomes using only the exact 18/19 bars and raw detection box already visible to L1?",
+  "owner_correction_bundle": {
+    "reason": "The prior implementation answered a different question by feeding 48/96/168-bar statistics. Correcting the input contract also requires dependency exposure to begin at the actual W18/W19 window start.",
+    "changed_together": [
+      "replace 28 long-context features with exact W18/W19 visual-coordinate features and current raw box metadata",
+      "recompute same-symbol dependency blocks from W18/W19 input exposure plus the unchanged 72-bar outcome exposure"
+    ],
+    "frozen": [
+      "25,911 frozen source L1 candidate boxes and their exact input hashes",
+      "L1 pixel hashes and boxes",
+      "LONG/SHORT class",
+      "future labels and gross realized returns",
+      "TP5/SL2/72 and 0.2% round-trip cost",
+      "chronological split boundaries and conservative 60-hour purges",
+      "LightGBM parameters, tune-q90 threshold rule, controls and acceptance gates"
+    ]
+  },
+  "source": {
+    "dataset_path": "analysis/output/ma_launch_l2_global_context_v1/accepted_candidates.csv",
+    "dataset_sha256": "430aff683cdd9518a061aa335b6048a5f8d63b269a1af1e98057f8c1a5d00214",
+    "candidate_rows": 25911,
+    "expected_side_homogeneous_episodes_before_outcome_availability": 3827,
+    "snapshot_root": "analysis/output/ma_launch_l2_global_context_v1/snapshot",
+    "snapshot_receipt_path": "experiments/active/exp-15m-ma-launch-l2-global-context-v1/results/snapshot_receipt.json",
+    "snapshot_receipt_sha256": "39dd984da59b259b50025e3736308fba94958e3445eab94c2670a5835a88ab3c",
+    "maximum_available_at_exclusive": "2026-05-03T06:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_rows": 0,
+    "network_fetch": false
+  },
+  "immutable_inputs": {
+    "frozen accepted L1 candidate ledger": {
+      "path": "analysis/output/ma_launch_l2_global_context_v1/accepted_candidates.csv",
+      "sha256": "430aff683cdd9518a061aa335b6048a5f8d63b269a1af1e98057f8c1a5d00214"
+    },
+    "source snapshot receipt": {
+      "path": "experiments/active/exp-15m-ma-launch-l2-global-context-v1/results/snapshot_receipt.json",
+      "sha256": "39dd984da59b259b50025e3736308fba94958e3445eab94c2670a5835a88ab3c"
+    },
+    "L1 MA builder": {
+      "path": "yoyo/layers/l1_detection/data.py",
+      "sha256": "bce9af28b00d1deb8346cafb19654e18d4987d42b3849b420a9739b5e9aeb265"
+    },
+    "L1 renderer": {
+      "path": "yoyo/layers/l1_detection/render.py",
+      "sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+    },
+    "L2 label builder": {
+      "path": "yoyo/layers/l2_judgment/labeling.py",
+      "sha256": "18c90468c9e6a75de1fb486934295bd3c45b0ca92229d6d9bfb7cd30c288994a"
+    },
+    "L2 LightGBM trainer": {
+      "path": "yoyo/layers/l2_judgment/train.py",
+      "sha256": "30ebb563e07e6adbc21725efa4817df56a73106a8cec583cba17dea46c3d89dc"
+    },
+    "short-window feature builder": {
+      "path": "yoyo/layers/l2_judgment/short_window_features.py",
+      "sha256": "8648253bcfdf9fd8c8bf9c0ea2c5df9c6f0dc9101e399c59447db2a8e119024b"
+    },
+    "experiment runner": {
+      "path": "scripts/research_15m_ma_launch_l2_short_window_side_split.py",
+      "sha256": "926e54573955d3a76aa6ae998c79ba64d8226251aaa82a1ff2a3b1153a3dacd8"
+    }
+  },
+  "short_window_contract": {
+    "window_lengths": [18, 19],
+    "image_width": 1280,
+    "image_height": 742,
+    "image_pixel_sha256_must_match_source": true,
+    "visible_values": [
+      "OHLC for each visible bar",
+      "SMA 20/60/120 values drawn at each visible bar",
+      "EMA 20/60/120 values drawn at each visible bar",
+      "current raw L1 box geometry and confidence"
+    ],
+    "moving_average_disclosure": "The six visible line values causally summarize earlier closes by definition, but no earlier raw bar or separate rolling context statistic is exposed to L2.",
+    "right_alignment": "decision bar is t00; W18 leaves only t18 missing and never resizes or invents a candle",
+    "feature_count": 238,
+    "feature_columns_sha256": "6951bac9bd0910cd3e88bca86c13e2138cfd675f4a96cd0559b9700817536b10",
+    "forbidden_model_inputs": [
+      "volume because it is not drawn in the frozen L1 image",
+      "symbol identity",
+      "bars outside W18/W19",
+      "full_ratio_min48, spread_pos96, dense_frac48, EMA200 distance, ATR96 ratio, pre_range48, pre_range168, ret24, ret48",
+      "episode maximum confidence because it can come from a later overlapping window",
+      "future outcome bars or labels"
+    ]
+  },
+  "outcome": {
+    "objective": "LightGBM regression on gross realized_ret",
+    "side": "use frozen L1 class; dense_long=long and dense_short=short",
+    "tp_atr_multiple": 5.0,
+    "sl_atr_multiple": 2.0,
+    "horizon_bars": 72,
+    "decision_atr_pct_min": 0.0015,
+    "entry": "next_open",
+    "same_bar_policy": "conservative_sl",
+    "gap_policy": "barrier_price",
+    "round_trip_cost_fraction": 0.002,
+    "changed": false
+  },
+  "splits": {
+    "train": {
+      "available_at_start": "2026-01-01T00:00:00Z",
+      "available_at_end_exclusive": "2026-02-26T12:00:00Z"
+    },
+    "purge_train_tune": {
+      "start": "2026-02-26T12:00:00Z",
+      "end_exclusive": "2026-03-01T00:00:00Z",
+      "duration_hours": 60
+    },
+    "tune": {
+      "available_at_start": "2026-03-01T00:00:00Z",
+      "available_at_end_exclusive": "2026-03-29T12:00:00Z"
+    },
+    "purge_tune_validation": {
+      "start": "2026-03-29T12:00:00Z",
+      "end_exclusive": "2026-04-01T00:00:00Z",
+      "duration_hours": 60
+    },
+    "final_preholdout_validation": {
+      "available_at_start": "2026-04-01T00:00:00Z",
+      "available_at_end_exclusive": "2026-05-03T06:00:00Z"
+    },
+    "random_split": false,
+    "purge_policy": "retain the source 60-hour purges even though W19 plus H72 requires only 22.75 hours"
+  },
+  "dependency_contract": {
+    "event_exposure_start": "open timestamp of the first actual W18/W19 input bar",
+    "event_exposure_end_exclusive": "available_at plus the unchanged 72-bar outcome horizon",
+    "connected_component_rule": "same-symbol overlapping half-open exposures within one frozen split share one block",
+    "representative": "earliest available episode in each block",
+    "cross_split_allowed": false
+  },
+  "matched_control": {
+    "required": true,
+    "matching": [
+      "same symbol",
+      "same calendar month",
+      "same UTC 8-hour bucket",
+      "same causal ATR-percent quintile",
+      "same side",
+      "same horizon, barriers, entry and cost"
+    ],
+    "exclusion_bars_around_any_l1_episode": 72,
+    "deterministic_assignments": 8,
+    "replacement_within_assignment": false,
+    "fallback": "never relax; report unmatched events"
+  },
+  "model": {
+    "sides": ["long", "short"],
+    "mixed_model": false,
+    "seed": 42,
+    "hyperparameter_search": false,
+    "threshold": "separate tune-score q90 per side",
+    "aggregate_score": "empirical percentile within each side tune distribution",
+    "single_feature_baseline": "otherwise-identical separate regressors using only current-window l1_confidence",
+    "deterministic_params": {
+      "device_type": "cpu",
+      "deterministic": true,
+      "force_col_wise": true,
+      "num_threads": 1,
+      "data_random_seed": 42,
+      "feature_fraction_seed": 42,
+      "bagging_seed": 42,
+      "extra_seed": 42
+    },
+    "runtime_contract": {
+      "lightgbm": "4.6.0",
+      "numpy": "2.0.2",
+      "pandas": "2.3.3",
+      "scikit-learn": "1.6.1",
+      "scipy": "1.13.1"
+    }
+  },
+  "primary_gate": {
+    "aggregate_top_decile_net_mean_gt_zero": true,
+    "aggregate_frozen_tune_q90_net_mean_gt_zero": true,
+    "aggregate_outcome_permutation_p_lt": 0.01,
+    "minimum_selected_dependency_blocks": 30,
+    "beats_all_eight_matched_control_assignments": true,
+    "each_side_minimum_selected_dependency_blocks": 10,
+    "neither_side_frozen_threshold_net_negative": true,
+    "auc_role": "diagnostic only"
+  },
+  "outputs": {
+    "local_output": "analysis/output/ma_launch_l2_short_window_side_split_v1",
+    "committed_results": "experiments/active/exp-15m-ma-launch-l2-short-window-side-split-v1/results",
+    "report": "analysis/p3_15m_ma_launch_l2_short_window_side_split_20260901.md",
+    "html": "analysis/html/p3_15m_ma_launch_l2_short_window_side_split_20260901.html"
+  },
+  "safety": {
+    "holdout_read": false,
+    "network_fetch": false,
+    "l1_rescanned": false,
+    "l1_weight_or_threshold_changed": false,
+    "labels_changed": false,
+    "barriers_or_cost_changed": false,
+    "threshold_tuned_on_final_validation": false,
+    "promoted": false,
+    "deployed": false,
+    "active_or_frozen_changed": false,
+    "forward_state_changed": false,
+    "orders_placed": false,
+    "telegram_sent": false,
+    "production_eligible": false
+  }
+}
