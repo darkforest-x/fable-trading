@@ -22,6 +22,7 @@ import json
 import math
 import os
 import shutil
+import sys
 import tempfile
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -34,6 +35,10 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from scripts.evaluate_15m_ma_launch_owner_grade_a8000_val import (
     CLASS_NAMES,
@@ -66,7 +71,6 @@ from yoyo.layers.l1_detection.semantic_gate import (
 )
 
 
-ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT_ID = "exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1"
 DEFAULT_PREREG = ROOT / "experiments" / "active" / EXPERIMENT_ID / "preregistration.json"
 DEFAULT_RESULTS = DEFAULT_PREREG.parent / "results" / "semantic_gate"
