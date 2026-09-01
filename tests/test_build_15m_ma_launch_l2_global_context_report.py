@@ -58,11 +58,29 @@ def test_overview_and_gallery_preserve_all_source_hashes(
     assert gallery["sha256"] == report.sha256_file(gallery_path)
 
 
-def test_overview_fails_closed_when_either_group_has_fewer_than_six(
+def test_overview_delivers_sparse_threshold_outcome_without_inventing_charts(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(report, "ROOT", tmp_path)
     manifest = _manifest(tmp_path)
-    manifest = manifest[manifest["episode_id"] != "episode_11"]
-    with pytest.raises(report.ReportError, match="six kept and six rejected"):
-        report.make_overview(manifest, tmp_path / "overview.png")
+    manifest = manifest[
+        manifest["episode_id"].isin(["episode_00", "episode_06", "episode_07"])
+    ]
+    overview_path = tmp_path / "overview.png"
+    overview = report.make_overview(manifest, overview_path)
+    assert overview["width"] == 1920
+    assert overview["height"] == 475
+    assert [row["episode_id"] for row in overview["sources"]] == [
+        "episode_00",
+        "episode_06",
+        "episode_07",
+    ]
+    assert overview["sha256"] == report.sha256_file(overview_path)
+
+
+def test_overview_fails_closed_when_manifest_has_no_delivered_chart(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(report, "ROOT", tmp_path)
+    with pytest.raises(report.ReportError, match="at least one delivered chart"):
+        report.make_overview(pd.DataFrame(columns=["group"]), tmp_path / "overview.png")

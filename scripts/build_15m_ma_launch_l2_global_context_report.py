@@ -78,23 +78,32 @@ def number(value: float | None, digits: int = 4) -> str:
 
 
 def make_overview(manifest: pd.DataFrame, output: Path) -> dict[str, Any]:
-    """Compose six kept and six rejected global views without altering sources."""
+    """Compose up to six views per decision group without altering sources.
 
-    selected = pd.concat(
-        [
-            manifest[manifest["group"] == "kept"].head(6),
-            manifest[manifest["group"] == "rejected_high_l1"].head(6),
-        ],
-        ignore_index=True,
-    )
-    if len(selected) != 12:
-        raise ReportError("overview requires six kept and six rejected charts")
+    A failed frozen threshold can legitimately leave fewer than six KEEP rows
+    (or, in the opposite extreme, fewer than six REJECT rows).  The report is
+    evidence for that outcome, so sparse groups must shrink the overview rather
+    than make the failure impossible to deliver.
+    """
+
+    kept = manifest[manifest["group"] == "kept"].head(6)
+    rejected = manifest[manifest["group"] == "rejected_high_l1"].head(6)
+    selected = pd.concat([kept, rejected], ignore_index=True)
+    if selected.empty:
+        raise ReportError("overview requires at least one delivered chart")
     tile_w, tile_h = 640, 417
     header_h = 58
-    canvas = np.full((header_h + tile_h * 4, tile_w * 3, 3), 245, dtype=np.uint8)
+    columns = min(3, len(selected))
+    tile_rows = (len(selected) + columns - 1) // columns
+    canvas = np.full(
+        (header_h + tile_h * tile_rows, tile_w * columns, 3),
+        245,
+        dtype=np.uint8,
+    )
+    summary = f"KEEP {len(kept)} | REJECT {len(rejected)}"
     cv2.putText(
         canvas,
-        "L2 global-context decision views: KEEP first 6 | REJECT next 6",
+        f"L2 global-context decision views: {summary}",
         (22, 38),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.85,
@@ -110,7 +119,7 @@ def make_overview(manifest: pd.DataFrame, output: Path) -> dict[str, Any]:
         if image is None:
             raise ReportError(f"could not decode chart: {path}")
         tile = cv2.resize(image, (tile_w, tile_h), interpolation=cv2.INTER_AREA)
-        y, x = header_h + (index // 3) * tile_h, (index % 3) * tile_w
+        y, x = header_h + (index // columns) * tile_h, (index % columns) * tile_w
         canvas[y : y + tile_h, x : x + tile_w] = tile
         cv2.rectangle(canvas, (x, y), (x + tile_w - 1, y + tile_h - 1), (90, 90, 90), 1)
         rows.append(
