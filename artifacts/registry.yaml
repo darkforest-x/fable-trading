@@ -8952,18 +8952,19 @@ artifacts:
     artifact_type: config
     role: owner_authorized_exact_l1_short_window_side_split_contract
     source_repo: darkforest-x/fable-trading
-    source_commit: "394655711d1051cd4fa1102873058c190b6dc5da"
+    source_commit: "9549cb47159d674d67442b56023ff8f1bba3224c"
     source_path: experiments/active/exp-15m-ma-launch-l2-short-window-side-split-v1/preregistration.json
-    sha256: "db30a4fadb1742ff9e47a49ac41362412c11ba0f09aa4fe4d23b9eab6576d799"
-    size_bytes: 9763
+    sha256: "0c2e8349c803ec8ee310fb8c4bbaa17bd65e09d75afd983040abef18f91170d3"
+    size_bytes: 10084
     storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-short-window-side-split-v1/preregistration.json"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "394655711d1051cd4fa1102873058c190b6dc5da"
-    config_hash: "db30a4fadb1742ff9e47a49ac41362412c11ba0f09aa4fe4d23b9eab6576d799"
+    generator_commit: "9549cb47159d674d67442b56023ff8f1bba3224c"
+    config_hash: "0c2e8349c803ec8ee310fb8c4bbaa17bd65e09d75afd983040abef18f91170d3"
     data_cutoff: "2026-05-04T00:00:00Z"
     notes: >-
       Freezes exact W18/W19 pixel parity, per-side episode clustering, no
       48/96/168-bar model inputs, unchanged TP5/SL2/72 economics, chronological
-      splits, conservative purges and fail-closed pre-label holdout exposure.
+      splits, conservative purges, fail-closed pre-label holdout exposure and
+      complete independent matched-control assignments.

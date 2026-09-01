@@ -2891,7 +2891,7 @@ experiments:
 
   - experiment_id: exp-15m-ma-launch-l2-short-window-side-split-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "394655711d1051cd4fa1102873058c190b6dc5da"
+    source_commit: "9549cb47159d674d67442b56023ff8f1bba3224c"
     status: active
     question: >-
       Can separate LONG/SHORT regressors rank the frozen L1 proposals using
@@ -2903,11 +2903,11 @@ experiments:
       parameters and tune-q90 rule stay fixed; only L2 inputs and the matching
       actual-input dependency exposure replace the rejected 168-bar contract.
     result: >-
-      dataset_built_training_not_started. The 25,911 frozen boxes were
-      independently reclustered into 3,827 side-homogeneous episodes; 3,827
-      exact 1280x742 pixel hashes passed, 29 outcomes were unavailable by the
-      frozen label contract, and 3,798 rows formed 2,496 short-window
-      dependency blocks. Economic results are not yet available.
+      preflight_hardened_dataset_rebuild_pending. The initial deterministic
+      build established 3,827/3,827 exact pixel parity, then an independent
+      Luna Max audit required fail-closed receipt reuse and complete,
+      non-overlapping matched-control assignments before training. Economic
+      results are not yet available.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
