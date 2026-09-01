@@ -70,6 +70,8 @@ def test_preregistration_freezes_no_holdout_and_owner_safety() -> None:
     ) <= utc(prereg["source"]["holdout_start"])
     assert prereg["splits"]["purge_train_tune"]["duration_hours"] == 60
     assert prereg["splits"]["purge_tune_validation"]["duration_hours"] == 60
+    assert prereg["five_model_lineage"]["selected_l1_key"] == prereg["l1"]["key"]
+    assert prereg["five_model_lineage"]["other_models_used_as_l2_features"] is False
 
 
 def test_split_boundaries_leave_exact_18_hour_purges() -> None:

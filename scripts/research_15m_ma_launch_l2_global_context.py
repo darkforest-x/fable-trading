@@ -142,6 +142,11 @@ def load_preregistration(path: Path) -> dict[str, Any]:
         raise L2ExperimentError("L1 confidence/NMS drifted")
     if int(l1["imgsz"]) != 1280:
         raise L2ExperimentError("native inference size drifted")
+    lineage = payload["five_model_lineage"]
+    if lineage.get("selected_l1_key") != l1.get("key"):
+        raise L2ExperimentError("five-model lineage does not select the frozen L1")
+    if lineage.get("other_models_used_as_l2_features") is not False:
+        raise L2ExperimentError("v1 must not mix incompatible detector contracts")
     outcome = payload["outcome"]
     expected = (5.0, 2.0, 72, 0.0015, 0.002)
     observed = (
@@ -205,6 +210,7 @@ def verify_immutable_inputs(prereg: Mapping[str, Any]) -> dict[str, Any]:
     """Verify the frozen detector, renderer, L1 manifest and L2 builders."""
 
     l1, l2 = prereg["l1"], prereg["l2"]
+    lineage = prereg["five_model_lineage"]
     declared = (
         (resolve_repo_path(l1["weights"]), str(l1["weights_sha256"]), "L1 weights"),
         (
@@ -222,6 +228,21 @@ def verify_immutable_inputs(prereg: Mapping[str, Any]) -> dict[str, Any]:
             resolve_repo_path(l2["label_builder"]),
             str(l2["label_builder_sha256"]),
             "L2 label builder",
+        ),
+        (
+            resolve_repo_path(lineage["comparison_preregistration"]),
+            str(lineage["comparison_preregistration_sha256"]),
+            "five-model comparison preregistration",
+        ),
+        (
+            resolve_repo_path(lineage["comparison_summary"]),
+            str(lineage["comparison_summary_sha256"]),
+            "five-model comparison summary",
+        ),
+        (
+            resolve_repo_path(lineage["model_summary"]),
+            str(lineage["model_summary_sha256"]),
+            "five-model model summary",
         ),
     )
     for path, expected, label in declared:
@@ -1118,6 +1139,7 @@ def build_dataset(
     terminal = results / "dataset_receipt.json"
     if terminal.exists():
         return read_json(terminal)
+    immutable = verify_immutable_inputs(prereg)
     scan_receipt = read_json(results / "scan_receipt.json")
     episodes_path = resolve_repo_path(scan_receipt["episodes_path"])
     verify_declared_file(episodes_path, str(scan_receipt["episodes_sha256"]), "episode ledger")
@@ -1187,6 +1209,7 @@ def build_dataset(
         "experiment_id": EXPERIMENT_ID,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_commit": source_commit,
+        "immutable_inputs": immutable,
         "scan_receipt_sha256": sha256_file(results / "scan_receipt.json"),
         "episodes_in": len(episodes),
         "rows_out": len(dataset),

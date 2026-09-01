@@ -19,6 +19,19 @@
     "holdout_read_authorized": false,
     "production_or_promotion_authorized": false
   },
+  "five_model_lineage": {
+    "comparison_experiment": "exp-15m-ma-launch-model-compare-all3d-20260831-v1",
+    "comparison_preregistration": "experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/preregistration.json",
+    "comparison_preregistration_sha256": "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35",
+    "comparison_summary": "experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/comparison_summary.json",
+    "comparison_summary_sha256": "3920e8e6c0f920dc1006380c2f822a475cd9f63ffe560b6eb738a6ed4288b1d0",
+    "model_summary": "experiments/active/exp-15m-ma-launch-model-compare-all3d-20260831-v1/results/model_summary.csv",
+    "model_summary_sha256": "12b1e3c1c32540948b383d023066ba689475f68f6a980418b7491dad145a4301",
+    "selected_l1_key": "grade_a8k_neg24k_full40_1280",
+    "selection_basis": "Current Owner Grade-A positive/negative geometry and native 1280 inference contract. The prior three-day comparison supplied checkpoint lineage and visual context only; no recent signal count, confidence or holdout outcome was used to select or tune this L2 experiment.",
+    "candidate_pooling_policy": "Do not pool the other four legacy/current arms: their training labels, native resolution, window lengths, core lengths, confirmation lengths and confidence calibration differ. Pooling would change several variables and make one L2 threshold semantically invalid.",
+    "other_models_used_as_l2_features": false
+  },
   "question": "Can a causal L2 ranker remove L1 proposals whose local box looks right but whose 168-bar global context is poor, while retaining economically useful proposals out of time?",
   "single_variable": "L1-only proposal pool versus the same frozen L1 pool filtered by one preregistered L2 score threshold; L1 weights, L1 inference geometry, outcome contract and trading cost remain fixed.",
   "l1": {

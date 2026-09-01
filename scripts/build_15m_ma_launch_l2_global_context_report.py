@@ -218,6 +218,12 @@ def build_markdown(
 
 高清单图浏览：[{gallery['charts']} 张 L2 KEEP / REJECT 全局图]({Path(gallery['path']).name})。
 
+## 五模型候选血缘与本轮输入
+
+本轮不是把五个 checkpoint 的框直接混在一起。上游冻结对照是 `{prereg['five_model_lineage']['comparison_experiment']}`；其预注册、汇总和模型表均以 SHA-256 固定。本轮选择其中 `{prereg['five_model_lineage']['selected_l1_key']}` 作为唯一 L1 输入，因为它对应当前 Owner Grade-A 正负样本几何与原生 1280 合同。
+
+另外四个模型的弱/强标签、原生分辨率、窗口、核心和确认长度、confidence 标定均不同；混池后同一个 L2 threshold 没有统一语义，也会同时改变多个变量。因此五模型结果只提供 checkpoint 血缘与视觉对照，**没有把近三日候选数量、confidence 或 holdout 表现用于选模/调参，其他四臂也没有作为 L2 特征**。
+
 ## 数据与时间纪律
 
 | 项目 | 数值 |
