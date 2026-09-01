@@ -26,7 +26,11 @@ from scripts.research_15m_ma_launch_l2_global_context import (
     split_name,
     utc,
 )
-from yoyo.layers.l2_judgment.features import FEATURE_COLUMNS
+from yoyo.layers.l2_judgment.features import (
+    FEATURE_COLUMNS,
+    add_features,
+    extract_feature_rows_for_side,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -147,6 +151,26 @@ def test_causal_atr_bucket_prefix_does_not_change_when_future_is_appended() -> N
     before = causal_atr_quintile(prefix)
     after = causal_atr_quintile(pd.concat([prefix, future], ignore_index=True)).iloc[: len(prefix)]
     pd.testing.assert_series_equal(before.reset_index(drop=True), after.reset_index(drop=True))
+
+
+@pytest.mark.parametrize("side", ["long", "short"])
+def test_l2_feature_vector_is_invariant_to_extreme_future_mutation(side: str) -> None:
+    from yoyo.data.indicators import add_indicators
+
+    signal_i = 350
+    original = _ohlcv_frame(600)
+    mutated = original.copy()
+    future = mutated.index > signal_i
+    multiplier = np.linspace(3.0, 30.0, int(future.sum()))
+    for column in ("open", "high", "low", "close"):
+        mutated.loc[future, column] = mutated.loc[future, column].to_numpy() * multiplier
+    mutated.loc[future, "volume"] = mutated.loc[future, "volume"].to_numpy() * 1000
+
+    before = add_features(add_indicators(original))
+    after = add_features(add_indicators(mutated))
+    before_row = extract_feature_rows_for_side(before, [signal_i], side)
+    after_row = extract_feature_rows_for_side(after, [signal_i], side)
+    pd.testing.assert_frame_equal(before_row, after_row, check_exact=True)
 
 
 def test_training_interval_overlap_is_closed_and_exact() -> None:
