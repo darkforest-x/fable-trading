@@ -2936,3 +2936,84 @@ experiments:
       is not reusable for post-hoc LONG removal or SHORT-only promotion. No
       promote, deploy, ACTIVE/frozen/forward mutation, Telegram send or order
       action occurred.
+
+  - experiment_id: exp-15m-ma-launch-l15-global-shape-l2-side-split-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6651057bda1d05f0833d61675dae6485b72f8aee"
+    status: rejected
+    question: >-
+      Can a 128-bar decision-time L1.5 classifier distinguish the existing
+      Grade-A launch events from dense-no-launch hard negatives before a
+      side-specific return L2 is trained?
+    single_variable: >-
+      Added a causal-at-L1-decision 128-bar global feature layer before the
+      frozen side-split L2 while preserving candidates, labels, splits,
+      barriers, costs and thresholds.
+    result: >-
+      rejected_label_reconstruction_shortcut. LONG and SHORT final AUC were
+      both 1.0, and aligned_core_to_decision_atr alone also achieved AUC 1.0.
+      Positive and negative value ranges did not overlap because both the weak
+      label and this feature used the same post-core confirmation progress.
+      No candidate filtering or downstream L2 training was allowed from v1.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p3_15m_ma_launch_l15_precore_l2_pipeline_20260901.md
+    artifacts:
+      - 15m-ma-launch-l15-global-shape-l2-side-split-v1-prereg
+      - 15m-ma-launch-l15-global-shape-l2-side-split-v1-failure
+    reuse_allowed: false
+    notes: >-
+      Causal relative to a delayed detector decision is insufficient when the
+      same post-core evidence defines the weak label. This attempt is retained
+      only as failure evidence. No holdout, promotion, deployment, ACTIVE or
+      forward mutation, Telegram send or order occurred.
+
+  - experiment_id: exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    status: rejected
+    question: >-
+      After physically excluding every post-core candle from L1.5, can a
+      128-bar pre-core global morphology filter plus side-specific return L2
+      improve the same frozen L1 candidate pool?
+    single_variable: >-
+      Relative to rejected v1, the L1.5 right edge moved from the complete L1
+      decision bar to each event's mapped core_end and the two confirmation
+      fields were removed. L1 candidates, weak labels, time splits, L2
+      features, outcomes, costs, controls and threshold rules stayed frozen.
+    result: >-
+      rejected. L1.5 LONG passed with final AUC 0.9505, recall 82.61% and FPR
+      7.25%, but SHORT FPR was 15.70% versus the preregistered 12% maximum.
+      L1.5-only reduced 242 independent candidates to 146 and changed pool net
+      mean from +7.35 bp to -7.43 bp. L2-only q90 selected 34 at +38.88 bp but
+      failed permutation p=0.1921 and LONG was -50.94 bp. The full pipeline
+      selected only 18 at +15.66 bp, failed p=0.2304 and SHORT was -12.03 bp.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p3_15m_ma_launch_l15_precore_l2_pipeline_20260901.md
+    artifacts:
+      - 15m-ma-launch-l15-precore-l2-v2-prereg
+      - 15m-ma-launch-l15-precore-l2-v2-l15-dataset-receipt
+      - 15m-ma-launch-l15-precore-l2-v2-l15-training-receipt
+      - 15m-ma-launch-l15-precore-l2-v2-candidate-receipt
+      - 15m-ma-launch-l15-precore-l2-v2-l2-training-receipt
+      - 15m-ma-launch-l15-precore-l2-v2-render-receipt
+      - 15m-ma-launch-l15-precore-l2-v2-verify-receipt
+      - 15m-ma-launch-l15-precore-l2-v2-report-receipt
+      - 15m-ma-launch-l15-precore-l2-v2-report
+      - 15m-ma-launch-l15-precore-l2-v2-html
+      - 15m-ma-launch-l15-precore-l2-v2-gallery
+      - 15m-ma-launch-l15-precore-l2-v2-overview
+      - 15m-ma-launch-l15-precore-l2-v2-metric-chart
+    reuse_allowed: false
+    notes: >-
+      Owner explicitly authorized the research bundle and P0/P1 training-gate
+      override with "都去做吧", but did not authorize holdout. L1.5 uses one
+      independent event per row, 128 bars ending at core_end and zero post-core
+      bars. Labels remain protocol-derived weak morphology labels rather than
+      Owner-confirmed global-shape Gold. Economic final is previously consumed
+      development evidence and requires fresh confirmation. No threshold was
+      retuned after final; no holdout, promotion, deployment, ACTIVE/frozen or
+      forward mutation, Telegram send or order occurred.

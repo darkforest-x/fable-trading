@@ -9144,3 +9144,259 @@ artifacts:
     config_hash: "0c2e8349c803ec8ee310fb8c4bbaa17bd65e09d75afd983040abef18f91170d3"
     data_cutoff: "2026-05-04T00:00:00Z"
     notes: Signed net-return comparison with zero line, fixed 20 bp cost and separate side panel.
+
+  # ---- 15m causal pre-core L1.5 + side-split L2 (2026-09-01) ----------
+  - artifact_id: 15m-ma-launch-l15-global-shape-l2-side-split-v1-prereg
+    artifact_type: config
+    role: rejected_decision_time_global_shape_l15_preregistration
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6651057bda1d05f0833d61675dae6485b72f8aee"
+    source_path: experiments/active/exp-15m-ma-launch-l15-global-shape-l2-side-split-v1/preregistration.json
+    sha256: "e5cacdaee2451206e9f3d6599ca3fc451636805e09780d58edd769c116cb9401"
+    size_bytes: 8155
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l15-global-shape-l2-side-split-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6651057bda1d05f0833d61675dae6485b72f8aee"
+    config_hash: "e5cacdaee2451206e9f3d6599ca3fc451636805e09780d58edd769c116cb9401"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Frozen before observing the post-core label-reconstruction shortcut.
+
+  - artifact_id: 15m-ma-launch-l15-global-shape-l2-side-split-v1-failure
+    artifact_type: manifest
+    role: label_reconstruction_shortcut_failure_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4f08ae8d4a4f0d77804f04ae0d869e6df992ab26"
+    source_path: experiments/active/exp-15m-ma-launch-l15-global-shape-l2-side-split-v1/results/failure_analysis.json
+    sha256: "19a82d25694378541d829812f9c7823f532819e74c6c352688af05a617eb89a5"
+    size_bytes: 1110
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l15-global-shape-l2-side-split-v1/results/failure_analysis.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4f08ae8d4a4f0d77804f04ae0d869e6df992ab26"
+    config_hash: "e5cacdaee2451206e9f3d6599ca3fc451636805e09780d58edd769c116cb9401"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Both directions and one post-core progress feature alone achieved AUC 1.0; downstream use was stopped.
+
+  - artifact_id: 15m-ma-launch-l15-precore-l2-v2-prereg
+    artifact_type: config
+    role: causal_precore_global_shape_and_side_split_l2_preregistration
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4f08ae8d4a4f0d77804f04ae0d869e6df992ab26"
+    source_path: experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/preregistration.json
+    sha256: "c301ad21f3040e05ff64add366c1084761850490902fd2f39710a888d3ed6ac5"
+    size_bytes: 7677
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4f08ae8d4a4f0d77804f04ae0d869e6df992ab26"
+    config_hash: "c301ad21f3040e05ff64add366c1084761850490902fd2f39710a888d3ed6ac5"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Moves only L1.5's right edge to core_end and physically excludes every post-core candle.
+
+  - artifact_id: 15m-ma-launch-l15-precore-l2-v2-l15-dataset-receipt
+    artifact_type: manifest
+    role: independent_event_precore_l15_dataset_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    source_path: experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results/l15_dataset_receipt.json
+    sha256: "21ad25baab2e8f45f5d8747bd1fd3e9edbc7c5d37bcceaf1720c0fa1e8e3bdfe"
+    size_bytes: 2808
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results/l15_dataset_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    config_hash: "c301ad21f3040e05ff64add366c1084761850490902fd2f39710a888d3ed6ac5"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: 3129 independent events, zero cross-split events and zero post-core bars visible.
+
+  - artifact_id: 15m-ma-launch-l15-precore-l2-v2-l15-training-receipt
+    artifact_type: manifest
+    role: separate_long_short_precore_l15_training_result
+    source_repo: darkforest-x/fable-trading
+    source_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    source_path: experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results/l15_training_receipt.json
+    sha256: "c7f450010f646b18d4e9b753c0ad02cdf9549cbe9affd9edfa40274f64189302"
+    size_bytes: 4948
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results/l15_training_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    config_hash: "c301ad21f3040e05ff64add366c1084761850490902fd2f39710a888d3ed6ac5"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: LONG passed the morphology gate; SHORT failed final FPR 15.70% versus 12% maximum.
+
+  - artifact_id: 15m-ma-launch-l15-precore-l2-v2-candidate-receipt
+    artifact_type: manifest
+    role: frozen_l1_candidates_with_causal_precore_l15_scores
+    source_repo: darkforest-x/fable-trading
+    source_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    source_path: experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results/candidate_l15_receipt.json
+    sha256: "c900291104ff1f5dccb618ef56cbe327d97f6e9f5b137fc628be5f79d4a8d0cf"
+    size_bytes: 5134
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results/candidate_l15_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    config_hash: "c301ad21f3040e05ff64add366c1084761850490902fd2f39710a888d3ed6ac5"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Scores all 3779 frozen candidates; final independent keep counts are 100 LONG and 46 SHORT.
+
+  - artifact_id: 15m-ma-launch-l15-precore-l2-v2-l2-training-receipt
+    artifact_type: manifest
+    role: four_arm_economic_training_and_evaluation_result
+    source_repo: darkforest-x/fable-trading
+    source_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    source_path: experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results/l2_training_receipt.json
+    sha256: "9bc175f4b3a8907d4541bf0bfdb53180ad919aad8db37e239e2fadb235571ca3"
+    size_bytes: 18070
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results/l2_training_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    config_hash: "c301ad21f3040e05ff64add366c1084761850490902fd2f39710a888d3ed6ac5"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: L2-only and L1.5-plus-L2 both fail the frozen primary gate; final is retrospective development evidence.
+
+  - artifact_id: 15m-ma-launch-l15-precore-l2-v2-render-receipt
+    artifact_type: manifest
+    role: actual_128bar_input_render_and_pixel_parity_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    source_path: experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results/render_receipt.json
+    sha256: "c8d8a8737b526ebe052816977707422188b9cf387bf2731d1011890e4d14477c"
+    size_bytes: 592
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results/render_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    config_hash: "c301ad21f3040e05ff64add366c1084761850490902fd2f39710a888d3ed6ac5"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: 38 high-resolution global charts and zero L1 input pixel-parity failures.
+
+  - artifact_id: 15m-ma-launch-l15-precore-l2-v2-verify-receipt
+    artifact_type: manifest
+    role: terminal_lineage_feature_model_and_safety_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    source_path: experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results/verify_receipt.json
+    sha256: "2cc2a24e0bafeb4df6d297cfb59e72bb081b4b5cb0c8d0aa1dd50afeaa095ad2"
+    size_bytes: 689
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results/verify_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    config_hash: "c301ad21f3040e05ff64add366c1084761850490902fd2f39710a888d3ed6ac5"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: All terminal lineage, model, causal-input, render and production-safety checks passed.
+
+  - artifact_id: 15m-ma-launch-l15-precore-l2-v2-report-receipt
+    artifact_type: manifest
+    role: technical_report_lineage_and_delivery_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    source_path: experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results/report_receipt.json
+    sha256: "ebc1dbc98129b57367f1283e3dc2ee1c1616e061b15df603050d6aba13b7ca21"
+    size_bytes: 2657
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2/results/report_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    config_hash: "c301ad21f3040e05ff64add366c1084761850490902fd2f39710a888d3ed6ac5"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Hashes the Markdown, portable HTML, Markdown HTML, gallery, SQLite evidence snapshot and figures.
+
+  - artifact_id: 15m-ma-launch-l15-precore-l2-v2-report
+    artifact_type: report
+    role: canonical_causal_l15_and_l2_negative_result
+    source_repo: darkforest-x/fable-trading
+    source_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    source_path: analysis/p3_15m_ma_launch_l15_precore_l2_pipeline_20260901.md
+    sha256: "aef6ab9e63382ea22e3648f35566812228565cfd6f07c8069d2e996b07fc44b0"
+    size_bytes: 8393
+    storage_uri: "repo://analysis/p3_15m_ma_launch_l15_precore_l2_pipeline_20260901.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    config_hash: "c301ad21f3040e05ff64add366c1084761850490902fd2f39710a888d3ed6ac5"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Chinese technical report with four-arm economics, matched controls, weak-label caveat and reproduction commands.
+
+  - artifact_id: 15m-ma-launch-l15-precore-l2-v2-html
+    artifact_type: report
+    role: owner_facing_portable_causal_l15_and_l2_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    source_path: analysis/html/p3_15m_ma_launch_l15_precore_l2_pipeline_20260901.html
+    sha256: "8f1dc1c0489391df6811a62a9bf53454b0dbf7479daeb619d146d2b2cbe61092"
+    size_bytes: 450537
+    storage_uri: "repo://analysis/html/p3_15m_ma_launch_l15_precore_l2_pipeline_20260901.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    config_hash: "c301ad21f3040e05ff64add366c1084761850490902fd2f39710a888d3ed6ac5"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Canonical portable HTML passed artifact validation and structural verification; browser QA was unavailable locally.
+
+  - artifact_id: 15m-ma-launch-l15-precore-l2-v2-gallery
+    artifact_type: report
+    role: local_38_image_global_context_review_gallery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    source_path: analysis/html/p3_15m_ma_launch_l15_precore_l2_pipeline_gallery_20260901.html
+    sha256: "08d86e83224e10c6b833b337fb9f5dda5f1e89515b9d22dd063bfa971cddc050"
+    size_bytes: 21736
+    storage_uri: "file://analysis/html/p3_15m_ma_launch_l15_precore_l2_pipeline_gallery_20260901.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    config_hash: "c301ad21f3040e05ff64add366c1084761850490902fd2f39710a888d3ed6ac5"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Local gallery links 38 original 1920x1250 PNGs; the image pack remains out of git by policy.
+
+  - artifact_id: 15m-ma-launch-l15-precore-l2-v2-overview
+    artifact_type: report
+    role: pipeline_keep_and_l15_reject_global_context_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    source_path: analysis/output/ma_launch_l15_precore_l2_pipeline_v2/pipeline_review_overview.png
+    sha256: "3014845de7ea6fc1241869e179098840b8507e737dd16c5ecbebc2420550189e"
+    size_bytes: 959386
+    storage_uri: "repo://analysis/output/ma_launch_l15_precore_l2_pipeline_v2/pipeline_review_overview.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    config_hash: "c301ad21f3040e05ff64add366c1084761850490902fd2f39710a888d3ed6ac5"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: First 24 of 38 verified global charts; frozen raw L1 boxes and no future outcomes.
+
+  - artifact_id: 15m-ma-launch-l15-precore-l2-v2-metric-chart
+    artifact_type: report
+    role: four_arm_and_directional_economic_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    source_path: analysis/output/ma_launch_l15_precore_l2_pipeline_v2/factorial_economic_comparison.png
+    sha256: "3b5f7f7683f5161767c0c8dd4277ff6df0ea9dabb5a61585f206cba827ab2a2c"
+    size_bytes: 77572
+    storage_uri: "repo://analysis/output/ma_launch_l15_precore_l2_pipeline_v2/factorial_economic_comparison.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "09f3b588b25ec465904644b361078c28246ffa1b"
+    config_hash: "c301ad21f3040e05ff64add366c1084761850490902fd2f39710a888d3ed6ac5"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Signed net-return comparison with zero lines, fixed 20 bp cost and explicit side split.

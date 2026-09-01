@@ -1,0 +1,122 @@
+{
+  "experiment_id": "exp-15m-ma-launch-l15-precore-global-shape-l2-side-split-v2",
+  "generated_at": "2026-09-01T14:57:48.243893+00:00",
+  "builder_commit": "09f3b588b25ec465904644b361078c28246ffa1b",
+  "dataset_path": "analysis/output/ma_launch_l15_precore_l2_pipeline_v2/l15_precore_dataset.csv",
+  "dataset_sha256": "264f6b0822c695a5735fe17f2e90c101727713f7d72c91cc896b34185062a723",
+  "rows": 3129,
+  "events": 3129,
+  "counts": [
+    {
+      "split": "final_validation",
+      "side": "long",
+      "sample_kind": "hard_negative",
+      "rows": 138
+    },
+    {
+      "split": "final_validation",
+      "side": "long",
+      "sample_kind": "positive",
+      "rows": 69
+    },
+    {
+      "split": "final_validation",
+      "side": "short",
+      "sample_kind": "hard_negative",
+      "rows": 172
+    },
+    {
+      "split": "final_validation",
+      "side": "short",
+      "sample_kind": "positive",
+      "rows": 86
+    },
+    {
+      "split": "train",
+      "side": "long",
+      "sample_kind": "hard_negative",
+      "rows": 659
+    },
+    {
+      "split": "train",
+      "side": "long",
+      "sample_kind": "positive",
+      "rows": 335
+    },
+    {
+      "split": "train",
+      "side": "short",
+      "sample_kind": "hard_negative",
+      "rows": 700
+    },
+    {
+      "split": "train",
+      "side": "short",
+      "sample_kind": "positive",
+      "rows": 356
+    },
+    {
+      "split": "tune",
+      "side": "long",
+      "sample_kind": "hard_negative",
+      "rows": 179
+    },
+    {
+      "split": "tune",
+      "side": "long",
+      "sample_kind": "positive",
+      "rows": 84
+    },
+    {
+      "split": "tune",
+      "side": "short",
+      "sample_kind": "hard_negative",
+      "rows": 238
+    },
+    {
+      "split": "tune",
+      "side": "short",
+      "sample_kind": "positive",
+      "rows": 113
+    }
+  ],
+  "feature_columns": [
+    "ma_spread_atr_end",
+    "ma_spread_atr_mean12",
+    "ma_spread_atr_mean24",
+    "ma_spread_atr_mean48",
+    "ma_spread_atr_min24",
+    "ma_spread_atr_change8",
+    "ma_spread_atr_change24",
+    "dense_fraction24",
+    "dense_fraction48",
+    "price_bundle_gap_atr",
+    "atr_pct",
+    "atr_ratio96",
+    "range_atr24",
+    "range_atr48",
+    "range_atr96",
+    "path_efficiency24",
+    "path_efficiency48",
+    "volume_ratio4",
+    "volume_ratio24",
+    "aligned_ret2",
+    "aligned_ret4",
+    "aligned_ret8",
+    "aligned_ret12",
+    "aligned_ret24",
+    "aligned_ret48",
+    "aligned_ret96",
+    "aligned_ma_slope12_atr",
+    "aligned_ma_slope24_atr",
+    "aligned_ma_slope48_atr",
+    "aligned_position24",
+    "aligned_position48",
+    "aligned_ma_order_score",
+    "max_body24_atr"
+  ],
+  "post_core_bars_visible_to_l15": 0,
+  "event_cross_split_failures": 0,
+  "max_core_end_time": "2026-05-03T18:15:00+00:00",
+  "holdout_consumed": false
+}

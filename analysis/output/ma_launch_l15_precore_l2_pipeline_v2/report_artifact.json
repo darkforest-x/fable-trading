@@ -1,0 +1,500 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "15m 均线密集启动：因果 L1.5 + 多空 L2 全链路审计",
+    "description": "四组冻结对照显示：形态弱标签可分类，但全链路经济门未通过，不能开启。",
+    "generatedAt": "2026-09-01T14:59:16.362857+00:00",
+    "cards": [
+      {
+        "id": "short_fpr",
+        "description": "SHORT L1.5 最终误报率；预注册上限为 12%。",
+        "dataset": "headline",
+        "sourceId": "pipeline_receipts",
+        "metrics": [
+          {
+            "label": "SHORT L1.5 误报率",
+            "field": "short_fpr",
+            "format": "percent"
+          }
+        ]
+      },
+      {
+        "id": "l2_net",
+        "description": "L2-only tune-q90 选中 34 个事件后的平均净收益；未通过置换与双边门。",
+        "dataset": "headline",
+        "sourceId": "pipeline_receipts",
+        "metrics": [
+          {
+            "label": "L2-only q90 净均值",
+            "field": "l2_net",
+            "format": "percent"
+          }
+        ]
+      },
+      {
+        "id": "pipeline_n",
+        "description": "完整 L1.5+L2 最终入选事件数；预注册最低为 30。",
+        "dataset": "headline",
+        "sourceId": "pipeline_receipts",
+        "metrics": [
+          {
+            "label": "完整链路入选",
+            "field": "pipeline_n",
+            "format": "number",
+            "unit": "个"
+          }
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "factorial_chart",
+        "title": "四组冻结配置的入选集合净收益",
+        "subtitle": "最终 pre-holdout 开发段；扣 20 bp 往返成本，正值不覆盖样本量与显著性门",
+        "showDescription": true,
+        "intent": "comparison",
+        "question": "L1.5 和 L2 单独或联合加入后，入选集合净收益如何变化？",
+        "rationale": "四个预注册 arm 是离散类别，排序柱图直接显示方向与幅度，并保留样本量和 p 值。",
+        "comparisonContext": {
+          "grain": "配置的最终入选集合",
+          "unit": "bp",
+          "denominator": "每组独立事件"
+        },
+        "type": "horizontalBar",
+        "dataset": "economic",
+        "sourceId": "pipeline_receipts",
+        "encodings": {
+          "x": {
+            "field": "arm",
+            "type": "ordinal",
+            "label": "配置"
+          },
+          "y": {
+            "field": "net_mean_bp",
+            "type": "quantitative",
+            "label": "净均值（bp）"
+          },
+          "tooltip": [
+            {
+              "field": "selected_n",
+              "type": "quantitative",
+              "label": "独立事件"
+            },
+            {
+              "field": "permutation_p",
+              "type": "quantitative",
+              "label": "置换 p"
+            },
+            {
+              "field": "matched_excess_bp",
+              "type": "quantitative",
+              "label": "减匹配对照（bp）"
+            },
+            {
+              "field": "gate",
+              "type": "nominal",
+              "label": "裁决"
+            }
+          ]
+        },
+        "valueFormat": "number",
+        "unit": "bp",
+        "layout": "full",
+        "labels": {
+          "values": "all"
+        },
+        "palette": {
+          "kind": "sequential",
+          "name": "blue"
+        },
+        "settings": {
+          "sort": "custom",
+          "showValues": true
+        },
+        "surface": {
+          "surface": "card",
+          "viewMode": "both"
+        }
+      }
+    ],
+    "tables": [
+      {
+        "id": "classifier_table",
+        "title": "L1.5 最终分类指标",
+        "subtitle": "协议弱标签；误报门 12%，LONG/SHORT 分开",
+        "dataset": "classifiers",
+        "sourceId": "pipeline_receipts",
+        "density": "spacious",
+        "defaultSort": {
+          "field": "side",
+          "direction": "asc"
+        },
+        "columns": [
+          {
+            "field": "side",
+            "label": "方向",
+            "type": "text"
+          },
+          {
+            "field": "final_n",
+            "label": "n",
+            "format": "number"
+          },
+          {
+            "field": "roc_auc",
+            "label": "AUC",
+            "format": "number"
+          },
+          {
+            "field": "baseline_auc",
+            "label": "单特征AUC",
+            "format": "number"
+          },
+          {
+            "field": "precision",
+            "label": "精确率",
+            "format": "percent"
+          },
+          {
+            "field": "recall",
+            "label": "召回率",
+            "format": "percent"
+          },
+          {
+            "field": "false_positive_rate",
+            "label": "误报率",
+            "format": "percent"
+          },
+          {
+            "field": "gate",
+            "label": "裁决",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "id": "side_table",
+        "title": "L2 冻结 q90 多空结果",
+        "subtitle": "固定 TP5/SL2/72、next-open 与 20 bp 成本",
+        "dataset": "sides",
+        "sourceId": "pipeline_receipts",
+        "density": "spacious",
+        "defaultSort": {
+          "field": "net_mean_bp",
+          "direction": "desc"
+        },
+        "columns": [
+          {
+            "field": "arm",
+            "label": "配置",
+            "type": "text"
+          },
+          {
+            "field": "side",
+            "label": "方向",
+            "type": "text"
+          },
+          {
+            "field": "selected_n",
+            "label": "n",
+            "format": "number"
+          },
+          {
+            "field": "net_mean_bp",
+            "label": "q90净均值(bp)",
+            "format": "number",
+            "role": "movement"
+          },
+          {
+            "field": "top_decile_bp",
+            "label": "top10%净均值(bp)",
+            "format": "number",
+            "role": "movement"
+          },
+          {
+            "field": "roc_auc",
+            "label": "AUC",
+            "format": "number"
+          },
+          {
+            "field": "permutation_p",
+            "label": "置换p",
+            "format": "number"
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "pipeline_receipts",
+        "label": "Causal pre-core L1.5 and side-split L2 frozen receipts",
+        "path": "analysis/output/ma_launch_l15_precore_l2_pipeline_v2/report_evidence.sqlite",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "executed_at": "2026-09-01T14:59:16.362857+00:00",
+          "description": "Reads the deterministic SQLite snapshot built from the frozen preregistration and terminal receipts.",
+          "tables_used": [
+            "report_evidence.headline",
+            "report_evidence.economic",
+            "report_evidence.sides",
+            "report_evidence.classifiers"
+          ],
+          "filters": [
+            "all outcome exposure ends before 2026-05-04T00:00:00Z",
+            "dependency representatives only for economic final metrics",
+            "L1.5 inputs physically end at core_end with zero post-core bars",
+            "LONG and SHORT models and tune-q90 thresholds remain separate"
+          ],
+          "metric_definitions": [
+            "net mean = mean realized gross return - 0.002 round-trip cost",
+            "L1.5 false-positive rate = accepted hard negatives / all hard negatives",
+            "L2 frozen q90 = score threshold fitted separately by side on tune only",
+            "matched excess = selected-event net return - same assignment matched-control net return",
+            "permutation p = preregistered event/block-level permutation test reported by the terminal receipt"
+          ],
+          "sql": "SELECT 'headline' AS dataset,\n       json_object('short_fpr', short_fpr, 'l2_net', l2_net,\n                   'pipeline_n', pipeline_n) AS row_json\nFROM headline\nUNION ALL\nSELECT 'economic' AS dataset,\n       json_object('arm_order', arm_order, 'arm', arm,\n                   'selected_n', selected_n, 'net_mean_bp', net_mean_bp,\n                   'permutation_p', permutation_p,\n                   'matched_excess_bp', matched_excess_bp, 'gate', gate) AS row_json\nFROM economic\nUNION ALL\nSELECT 'sides' AS dataset,\n       json_object('row_order', row_order, 'arm', arm, 'side', side,\n                   'selected_n', selected_n, 'net_mean_bp', net_mean_bp,\n                   'top_decile_bp', top_decile_bp, 'roc_auc', roc_auc,\n                   'permutation_p', permutation_p) AS row_json\nFROM sides\nUNION ALL\nSELECT 'classifiers' AS dataset,\n       json_object('side_order', side_order, 'side', side,\n                   'final_n', final_n, 'roc_auc', roc_auc,\n                   'baseline_auc', baseline_auc, 'precision', precision,\n                   'recall', recall, 'false_positive_rate', false_positive_rate,\n                   'fpr_limit', fpr_limit,\n                   'label_permutation_p', label_permutation_p, 'gate', gate) AS row_json\nFROM classifiers\nORDER BY dataset, row_json;"
+        }
+      }
+    ],
+    "blocks": [
+      {
+        "id": "title",
+        "type": "markdown",
+        "body": "# 15m 均线密集启动：因果 L1.5 + 多空 L2 全链路审计"
+      },
+      {
+        "id": "summary",
+        "type": "markdown",
+        "sourceId": "pipeline_receipts",
+        "body": "## 技术结论：整条链路未通过，不能开启\n\n- **L1.5 不是整体合格。** LONG 误报率 7.2%，SHORT 为 15.7%，后者超过 12% 预注册上限。\n- **完整链路样本不足且不显著。** L1.5+L2 只留 18 个，净均值 0.157%，置换 p=0.230。\n- **不能把高形态 AUC 当收益证据。** L1.5 学的是协议弱标签；L2 的方向结果在不同过滤下翻转。\n- **本轮裁决是 REJECT。** 未读 holdout，未 promote、部署或写入实盘状态。"
+      },
+      {
+        "id": "headline",
+        "type": "metric-strip",
+        "cardIds": [
+          "short_fpr",
+          "l2_net",
+          "pipeline_n"
+        ]
+      },
+      {
+        "id": "factorial_text",
+        "type": "markdown",
+        "sourceId": "pipeline_receipts",
+        "body": "## 四组对照：加层没有产生稳定提升\n\nL1.5 单独过滤后净均值转负；L2-only 虽然均值为正，但 p=0.192 且 LONG 为负；完整链路只有 18 个事件。柱图展示的是实际入选集合，不能脱离样本量和门禁单看正负。"
+      },
+      {
+        "id": "factorial_chart_block",
+        "type": "chart",
+        "chartId": "factorial_chart",
+        "layout": "full"
+      },
+      {
+        "id": "classifier_text",
+        "type": "markdown",
+        "sourceId": "pipeline_receipts",
+        "body": "## L1.5 只能证明复现弱标签\n\n输入使用 128 根历史并严格截止 core_end，确认段可见 K 为 0；一事件一行，LONG/SHORT 分开。分类明显优于单一均线密集度，但正负来自自动协议而非 Owner 全局金标，因此不能把 AUC 解释成‘完美形态准确率’。"
+      },
+      {
+        "id": "classifier_table_block",
+        "type": "table",
+        "tableId": "classifier_table"
+      },
+      {
+        "id": "side_text",
+        "type": "markdown",
+        "sourceId": "pipeline_receipts",
+        "body": "## 多空结果翻转说明排序不稳定\n\nL2-only 的 SHORT 为正、LONG 为负；加 L1.5 后方向翻转。看完 final 后再选择方向会产生新的过拟合，必须重新预注册并用未见时期验证。"
+      },
+      {
+        "id": "side_table_block",
+        "type": "table",
+        "tableId": "side_table"
+      },
+      {
+        "id": "scope",
+        "type": "markdown",
+        "body": "## 范围、方法与可视证据\n\nL1.5 数据为 3,129 个独立事件（1,043 正、2,086 hard 负）；经济 final 为 242 个依赖去重事件。结果固定 TP5/SL2/72、next-open、同根先 SL、20 bp 成本及 8 组匹配随机对照。38 张 128-bar 高清图全部通过像素和框坐标校验；逐图画廊与总览随报告交付。"
+      },
+      {
+        "id": "shortcut",
+        "type": "markdown",
+        "body": "## 第一版 AUC=1.0 是标签捷径，已作废\n\n第一版同时让标签和特征使用核心后的确认推进，单一距离特征即可完美还原标签。v2 在训练前预注册为物理截断全部 post-core K；这个失败不会被包装成成功结果。"
+      },
+      {
+        "id": "limitations",
+        "type": "markdown",
+        "sourceId": "pipeline_receipts",
+        "body": "## 限制与稳健性\n\n- 经济 final 已用于此前开发，只能作回顾诊断。\n- L1.5 是协议弱标签，不是 Owner 全局金标。\n- 完整链路 n=18，均值极不稳定。\n- 未读取 holdout；配置不具 production eligibility。"
+      },
+      {
+        "id": "next",
+        "type": "markdown",
+        "body": "## 下一步：先修监督目标，再谈收益层\n\n1. 冻结本轮为失败基线，不调阈值。\n2. LONG/SHORT 分开建立真正的 `global_shape_good` 标签，重点覆盖 L1.5 保留/拒绝分歧样本。\n3. L1.5 永远截止 core_end，只判断形态；L2 才预测实际收益。\n4. 在新的未见时期同时通过形态门、经济门和随机对照后，才申请一次 holdout。"
+      },
+      {
+        "id": "questions",
+        "type": "markdown",
+        "body": "## 仍待确认的问题\n\n如果完全不做 Owner 全局形态校准，后续只能诚实称为协议分类或无监督聚类，不能称为‘完美形态判断’。L2-only SHORT 的探索性正值也必须由新时期单独复验。"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-01T14:59:16.362857+00:00",
+    "status": "ready",
+    "datasets": {
+      "headline": [
+        {
+          "short_fpr": 0.1569767441860465,
+          "l2_net": 0.003887527594913465,
+          "pipeline_n": 18
+        }
+      ],
+      "economic": [
+        {
+          "arm_order": 1,
+          "arm": "L1 候选池",
+          "selected_n": 242,
+          "net_mean_bp": 7.35091881748441,
+          "permutation_p": null,
+          "matched_excess_bp": null,
+          "gate": "基线"
+        },
+        {
+          "arm_order": 2,
+          "arm": "L1 + L1.5",
+          "selected_n": 146,
+          "net_mean_bp": -7.425490133680145,
+          "permutation_p": null,
+          "matched_excess_bp": 19.490737247846777,
+          "gate": "FAIL"
+        },
+        {
+          "arm_order": 3,
+          "arm": "L1 + L2 q90",
+          "selected_n": 34,
+          "net_mean_bp": 38.87527594913465,
+          "permutation_p": 0.19208079192080793,
+          "matched_excess_bp": 76.76369269939148,
+          "gate": "FAIL"
+        },
+        {
+          "arm_order": 4,
+          "arm": "L1 + L1.5 + L2 q90",
+          "selected_n": 18,
+          "net_mean_bp": 15.664401942289494,
+          "permutation_p": 0.2303769623037696,
+          "matched_excess_bp": 50.799456566804366,
+          "gate": "FAIL"
+        }
+      ],
+      "sides": [
+        {
+          "row_order": 1,
+          "arm": "L2 q90",
+          "side": "LONG",
+          "selected_n": 17,
+          "net_mean_bp": -50.93866702239788,
+          "top_decile_bp": -65.9298258847482,
+          "roc_auc": 0.47933803368585975,
+          "permutation_p": 0.8654134586541345
+        },
+        {
+          "row_order": 2,
+          "arm": "L2 q90",
+          "side": "SHORT",
+          "selected_n": 17,
+          "net_mean_bp": 128.68921892066717,
+          "top_decile_bp": 143.774529077673,
+          "roc_auc": 0.49000000000000005,
+          "permutation_p": 0.05039496050394961
+        },
+        {
+          "row_order": 3,
+          "arm": "L1.5 + L2 q90",
+          "side": "LONG",
+          "selected_n": 5,
+          "net_mean_bp": 87.6761448711688,
+          "top_decile_bp": 28.785751349103098,
+          "roc_auc": 0.6031709558823529,
+          "permutation_p": 0.20307969203079693
+        },
+        {
+          "row_order": 4,
+          "arm": "L1.5 + L2 q90",
+          "side": "SHORT",
+          "selected_n": 13,
+          "net_mean_bp": -12.032422261125623,
+          "top_decile_bp": -9.133659294162,
+          "roc_auc": 0.4118303571428572,
+          "permutation_p": 0.5745425457454254
+        }
+      ],
+      "classifiers": [
+        {
+          "side_order": 1,
+          "side": "LONG",
+          "final_n": 207,
+          "roc_auc": 0.9505356017643352,
+          "baseline_auc": 0.5751942869145138,
+          "precision": 0.8507462686567164,
+          "recall": 0.8260869565217391,
+          "false_positive_rate": 0.07246376811594203,
+          "fpr_limit": 0.12,
+          "label_permutation_p": 9.999000099990002e-05,
+          "gate": "PASS"
+        },
+        {
+          "side_order": 2,
+          "side": "SHORT",
+          "final_n": 258,
+          "roc_auc": 0.8906165494862087,
+          "baseline_auc": 0.539717414818821,
+          "precision": 0.7,
+          "recall": 0.7325581395348837,
+          "false_positive_rate": 0.1569767441860465,
+          "fpr_limit": 0.12,
+          "label_permutation_p": 9.999000099990002e-05,
+          "gate": "FAIL"
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "pipeline_receipts",
+      "label": "Causal pre-core L1.5 and side-split L2 frozen receipts",
+      "path": "analysis/output/ma_launch_l15_precore_l2_pipeline_v2/report_evidence.sqlite",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "executed_at": "2026-09-01T14:59:16.362857+00:00",
+        "description": "Reads the deterministic SQLite snapshot built from the frozen preregistration and terminal receipts.",
+        "tables_used": [
+          "report_evidence.headline",
+          "report_evidence.economic",
+          "report_evidence.sides",
+          "report_evidence.classifiers"
+        ],
+        "filters": [
+          "all outcome exposure ends before 2026-05-04T00:00:00Z",
+          "dependency representatives only for economic final metrics",
+          "L1.5 inputs physically end at core_end with zero post-core bars",
+          "LONG and SHORT models and tune-q90 thresholds remain separate"
+        ],
+        "metric_definitions": [
+          "net mean = mean realized gross return - 0.002 round-trip cost",
+          "L1.5 false-positive rate = accepted hard negatives / all hard negatives",
+          "L2 frozen q90 = score threshold fitted separately by side on tune only",
+          "matched excess = selected-event net return - same assignment matched-control net return",
+          "permutation p = preregistered event/block-level permutation test reported by the terminal receipt"
+        ],
+        "sql": "SELECT 'headline' AS dataset,\n       json_object('short_fpr', short_fpr, 'l2_net', l2_net,\n                   'pipeline_n', pipeline_n) AS row_json\nFROM headline\nUNION ALL\nSELECT 'economic' AS dataset,\n       json_object('arm_order', arm_order, 'arm', arm,\n                   'selected_n', selected_n, 'net_mean_bp', net_mean_bp,\n                   'permutation_p', permutation_p,\n                   'matched_excess_bp', matched_excess_bp, 'gate', gate) AS row_json\nFROM economic\nUNION ALL\nSELECT 'sides' AS dataset,\n       json_object('row_order', row_order, 'arm', arm, 'side', side,\n                   'selected_n', selected_n, 'net_mean_bp', net_mean_bp,\n                   'top_decile_bp', top_decile_bp, 'roc_auc', roc_auc,\n                   'permutation_p', permutation_p) AS row_json\nFROM sides\nUNION ALL\nSELECT 'classifiers' AS dataset,\n       json_object('side_order', side_order, 'side', side,\n                   'final_n', final_n, 'roc_auc', roc_auc,\n                   'baseline_auc', baseline_auc, 'precision', precision,\n                   'recall', recall, 'false_positive_rate', false_positive_rate,\n                   'fpr_limit', fpr_limit,\n                   'label_permutation_p', label_permutation_p, 'gate', gate) AS row_json\nFROM classifiers\nORDER BY dataset, row_json;"
+      }
+    }
+  ]
+}

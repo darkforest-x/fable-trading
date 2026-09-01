@@ -1,0 +1,44 @@
+{
+  "audience": "technical",
+  "delivery_mode": "html",
+  "report_spine": {
+    "question": "Can causal global morphology filtering and side-split return ranking fix globally poor L1 detections?",
+    "answer": "No. The full chain fails morphology FPR, sample-size, side-consistency and permutation gates.",
+    "comparison": "Frozen four-arm L1/L1.5/L2 factorial on the same pre-holdout candidate snapshot."
+  },
+  "chart_map": [
+    {
+      "section": "四组对照",
+      "question": "How does selected-set net return differ across the four frozen arms?",
+      "family": "comparison",
+      "type": "horizontalBar in portable artifact; two-panel signed bars in Markdown archive",
+      "fields": [
+        "arm",
+        "net_mean_bp",
+        "selected_n",
+        "permutation_p"
+      ],
+      "palette": "hard two-root cap plus neutral",
+      "claim": "No arm passes all preregistered gates despite positive means in two small selections."
+    },
+    {
+      "section": "全局图审核",
+      "question": "Do actual 128-bar inputs explain the disagreement between weak-label classification and economics?",
+      "family": "small-multiple contact sheet",
+      "type": "static review overview plus 38-image gallery",
+      "fields": [
+        "state",
+        "side",
+        "raw L1 box",
+        "L1.5 score"
+      ],
+      "palette": "semantic frozen L1 red/green boxes",
+      "claim": "Rendering is parity-clean, while weak-label visual semantics remain imperfect."
+    }
+  ],
+  "omissions": [
+    "No holdout score because the owner did not authorize a holdout read for this configuration.",
+    "No production recommendation because every primary gate failed.",
+    "The portable artifact links rather than embeds the 38 large PNGs; the adjacent gallery is the visual-review surface."
+  ]
+}

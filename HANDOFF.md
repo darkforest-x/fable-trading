@@ -2,6 +2,24 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-01 — 因果 L1.5 + 多空 L2 全链路已跑完并否决）
+
+Owner 授权把 L1.5 与 L2 正确路径全部落地。第一版 L1.5 虽只看检测时已经收盘的 K 线，
+但弱标签与特征都包含同一段 post-core 确认进度，LONG / SHORT AUC 及单特征 AUC 都为
+1.0，属于标签重建捷径，已在进入候选筛选和 L2 前停止。第二版把 L1.5 输入物理截断到
+每个事件的 `core_end`：固定 128 根、0 根 post-core，3,129 个独立事件按时间切分并分别训练
+LONG / SHORT。LONG 最终 AUC 0.9505、召回 82.61%、FPR 7.25% 通过；SHORT AUC 0.8906、
+FPR 15.70% 超过预注册 12% 上限，因此 L1.5 总门失败。
+
+同一冻结最终段的 242 个独立 L1 候选做四臂对照：L1 池净均值 +7.35bp；L1.5-only
+筛到 146 个后反降至 -7.43bp；L2-only q90 为 34 个、+38.88bp，但置换 p=0.1921 且
+LONG -50.94bp；完整 L1.5+L2 仅 18 个、+15.66bp，p=0.2304，SHORT -12.03bp。
+所以正确结构已经实现并验证，但当前弱形态标签和收益 L2 不能组成可用生产门，实验登记为
+`rejected`。38 张实际 128 根输入像素校验失败为 0；没有读取 `>=2026-05-04` holdout，
+没有 promote、部署、改 ACTIVE/frozen/forward、发 Telegram 或下单。交付报告：
+`analysis/html/p3_15m_ma_launch_l15_precore_l2_pipeline_20260901.html`；本地高清图库：
+`analysis/html/p3_15m_ma_launch_l15_precore_l2_pipeline_gallery_20260901.html`。
+
 ## ⚡ 当前真相（2026-09-01 — 与 L1 完全同窗的 L2 多空回归已否决）
 
 Owner 纠正上一版 168 根全局上下文 L2：判断层必须只针对 L1 实际看到的 18/19 根
