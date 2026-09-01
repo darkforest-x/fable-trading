@@ -3055,3 +3055,33 @@ experiments:
       development evidence and requires fresh confirmation. No threshold was
       retuned after final; no holdout, promotion, deployment, ACTIVE/frozen or
       forward mutation, Telegram send or order occurred.
+
+  - experiment_id: exp-15m-ma-launch-l2-reference-augmentation-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "78fd02224cdb9e3a8d1bcc59b6485b8759532283"
+    status: active
+    question: >-
+      Does adding independently reconstructed, outcome-labelled reference
+      events to L2 training improve the frozen side-specific L2 on unchanged
+      real-L1 tune and final candidate ledgers?
+    single_variable: >-
+      Training rows only: add one row per eligible owner-accepted reference
+      event before the train cutoff. The 28 causal features, TP5/SL2/72-bar
+      economic target, 0.2% cost, dependency collapse, LONG/SHORT learners,
+      q90 tune threshold and real-L1 tune/final rows remain frozen.
+    result: pending_official_build_and_evaluation
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p3_15m_ma_launch_l2_reference_augmentation_20260902.md
+    artifacts:
+      - 15m-ma-launch-l2-reference-augmentation-v1-prereg
+    reuse_allowed: false
+    notes: >-
+      The 10,000 accepted positive images represent 10,000 distinct reference
+      events; image morphology is metadata only and never the economic target.
+      Reference outcomes are recomputed causally at each window end, with
+      source-prefix reads capped before holdout. Formal short-only Owner Gold
+      and the 1,043-event multi-crop Grade-A set are not silently mixed into
+      this single-variable experiment. No holdout, promotion, deployment,
+      ACTIVE/frozen/forward mutation, Telegram send or order is authorized.
