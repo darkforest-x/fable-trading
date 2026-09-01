@@ -247,6 +247,10 @@ def make_metric_chart(training: Mapping[str, Any], output: Path) -> dict[str, An
         axis.grid(axis="y", color="#D9DEE3", linewidth=0.7, alpha=0.8)
         axis.set_axisbelow(True)
         pad = max(4.0, float(np.ptp(values)) * 0.08)
+        axis.set_ylim(
+            min(0.0, float(values.min())) - 1.55 * pad,
+            max(0.0, float(values.max())) + 1.55 * pad,
+        )
         for bar, value in zip(bars, values):
             axis.text(
                 bar.get_x() + bar.get_width() / 2,
@@ -304,10 +308,10 @@ def make_overview(manifest: pd.DataFrame, output: Path) -> dict[str, Any]:
     """Compose 12 verified native overlays: three per decision/side cell."""
 
     groups = (
-        ("selected", "long", "L2 SELECTED · LONG"),
-        ("selected", "short", "L2 SELECTED · SHORT"),
-        ("rejected_high_l1", "long", "HIGH-L1 REJECTED · LONG"),
-        ("rejected_high_l1", "short", "HIGH-L1 REJECTED · SHORT"),
+        ("selected", "long", "L2 SELECTED - LONG"),
+        ("selected", "short", "L2 SELECTED - SHORT"),
+        ("rejected_high_l1", "long", "HIGH-L1 REJECTED - LONG"),
+        ("rejected_high_l1", "short", "HIGH-L1 REJECTED - SHORT"),
     )
     tile_width, tile_height, label_height = 480, 278, 38
     title_height, columns = 58, 3
