@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1",
+  "created_at": "2026-09-02T00:55:22+08:00",
+  "stage": "P1_owner_authorized_4h_holdout_semantic_transfer",
+  "question": "On the already frozen all-universe 15-day 4h snapshot, which of the 1,764 structurally legal YOLO boxes and 221 deduplicated control events survive the exact causal semantic gate accepted on chronological pre-holdout 15m validation?",
+  "single_variable": "Add the already frozen deterministic causal semantic-gate decision after the existing structural YOLO filter. Frozen candle bytes, universe, 1,764 source boxes, weights, confidence=0.25, NMS=0.70, W18/W19, box-to-core mapping, core4/5, post2-9 and five-bar event gap remain identical.",
+  "holdout_consumption_number_for_checkpoint": 7,
+  "owner_authorization": {
+    "conversation_date": "2026-09-02",
+    "holdout_read_authorized": true,
+    "new_training_authorized": false,
+    "production_or_promotion_authorized": false,
+    "verbatim": "批准",
+    "prompt_scope_immediately_preceding_authorization": "批准本配置消费一次 4h holdout，并重扫最近半个月。",
+    "interpreted_scope": "Apply the locked semantic gate once to the previously frozen 4h recent-half-month scan and redraw every surviving event with the complete frozen future visible."
+  },
+  "frozen_source": {
+    "path": "analysis/output/ma_launch_4h_yolo_halfmonth_20260901_v1",
+    "source_experiment_id": "p1_4h_yolo_alluniverse_halfmonth_20260901_v1",
+    "source_holdout_consumption_number_for_checkpoint": 6,
+    "universe_symbols": 274,
+    "usable_symbols": 273,
+    "lookback_confirmed_4h_bars": 90,
+    "scan_first_endpoint_available_at": "2026-08-17T16:00:00+00:00",
+    "scan_last_endpoint_available_at": "2026-09-01T12:00:00+00:00",
+    "structural_boxes": 1764,
+    "control_events": 221,
+    "candle_hash_contract": "Verify all 273 per-symbol CSV hashes against summary.fetch_audits before scoring; materialize OHLCV only for symbols with structural candidates.",
+    "artifacts": {
+      "summary": {
+        "path": "summary.json",
+        "sha256": "ffadef6a3b93031c295308dad65d65036def2b0c16804bcec2107d4d315b6abf"
+      },
+      "accepted_candidates": {
+        "path": "accepted_candidates.csv",
+        "sha256": "ecd45920f4d9841b25118ecd2e41c2fc2a04ec5c05b6255329b56541bdd3ac42"
+      },
+      "universe": {
+        "path": "universe.json",
+        "sha256": "b4bf0e75bf6414859d47b1bc0f43b19ab1f8acd4aeddd1d2c4052984e69b7be6"
+      },
+      "verification": {
+        "path": "verification.json",
+        "sha256": "59e9f2250e2722e71580d9fb497cf97e4b5abc1330411b6b0a5bea142f43d193"
+      }
+    }
+  },
+  "frozen_model": {
+    "name": "Grade-A 8k + 24k negatives, full40, native 1280",
+    "source_timeframe": "15m",
+    "inference_timeframe": "4h",
+    "out_of_distribution": true,
+    "weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "imgsz": 1280,
+    "window_lengths": [18, 19],
+    "core_lengths": [4, 5],
+    "confirmation_bars": [2, 3, 4, 5, 6, 7, 8, 9],
+    "same_symbol_gap_bars": 5
+  },
+  "treatment": {
+    "description": "Keep a structural 4h box only when it passes every original training-semantic predicate whose required candle is already visible at the exact saved W18/W19 endpoint.",
+    "atr_anchor": "core_end + 2",
+    "always_checked": [
+      "ma_envelope",
+      "ma_spread_end",
+      "max_body",
+      "core_progress",
+      "post1",
+      "post2",
+      "ma_slope",
+      "minimum_close_to_ma",
+      "close_to_ma_envelope",
+      "body_to_ma_envelope"
+    ],
+    "conditional_checks": {
+      "post3": "only when confirmation_bars >= 3",
+      "post5": "only when confirmation_bars >= 5"
+    },
+    "frozen_morphology_gate": {
+      "core_lengths": [4, 5],
+      "max_body_to_ma_envelope_atr": 1.5,
+      "max_close_to_ma_envelope_atr": 1.9,
+      "max_core_body_atr": 1.2,
+      "max_core_progress_atr": 1.3,
+      "max_ma_envelope_atr": 1.5,
+      "max_ma_spread_end_atr": 1.1,
+      "max_minimum_close_to_ma_atr": 1.0,
+      "min_aligned_ma_slope_atr": 0.03,
+      "min_core_progress_atr": -0.6,
+      "min_post1_progress_atr": 0.0,
+      "min_post2_progress_atr": 1.0,
+      "min_post3_progress_atr": 1.25,
+      "min_post5_progress_atr": 1.75,
+      "unchanged_from_v7": true
+    },
+    "future_visibility_rule": "Physically slice each numeric gate input at window_end_i. Candles after window_end_i may be rendered later in the review-only gallery but cannot enter a gate feature.",
+    "raw_box_vertical_coverage_is_gate": false
+  },
+  "experimental_design": {
+    "assignment": "Every frozen structural box receives both actual-direction and direction-flipped semantic calculations; no random assignment is required because both are deterministic paired views of the same box.",
+    "pairing_units": [
+      "each of 1,764 frozen structural boxes",
+      "each of 221 source control events with exhaustive non-overlapping candidate membership"
+    ],
+    "primary_outputs": [
+      "actual-direction box survival and predicate failures",
+      "control-event survival",
+      "treatment re-deduplicated event count and full event list",
+      "all surviving events rendered with complete frozen future K-lines"
+    ],
+    "null_control": "Keep candle bytes, box geometry, class, confidence, W endpoint and event membership fixed; invert only LONG/SHORT inside the semantic calculation.",
+    "no_threshold_grid": true,
+    "no_post_result_retuning": true,
+    "pseudoreplication_control": "Report both box and source-event levels; do not treat W18/W19 and adjacent endpoints from one event as independent signals."
+  },
+  "decision_rule": {
+    "execution_pass": "All frozen hashes, exact input pixels, 1,764 gate rows, 221 control-event memberships and output receipts replay without drift.",
+    "semantic_direction_coherence": "Actual-direction box survival must exceed direction-flipped survival with paired exact two-sided p < 0.01.",
+    "direction_flip_p_max": 0.01,
+    "count_handling": "Deliver the locked result unchanged whether zero, few or many events survive; no minimum count and no threshold relaxation.",
+    "failure_action": "Report failure unchanged. Do not inspect charts to alter any threshold, retrain, promote, deploy, or rerun a variant on this holdout."
+  },
+  "frozen_code": {
+    "apply_semantic_gate": {
+      "path": "scripts/apply_4h_ma_launch_yolo_semantic_gate.py",
+      "sha256": "d5ef1a773bcd80a1184abe37bd24235a5128a178eb94995ee074ccb3458d298f"
+    },
+    "verify_semantic_gate": {
+      "path": "scripts/verify_4h_ma_launch_yolo_semantic_gate.py",
+      "sha256": "ca2af416394446ddeaa959b29cb1eb4a6ab276469b81023c1e2b1ac9c445a551"
+    },
+    "source_scanner": {
+      "path": "scripts/scan_4h_ma_launch_yolo_latest.py",
+      "sha256": "327666000d2f71560f7f31fc10d26b059cc74b0b032dd71cdca066c314363eaf"
+    },
+    "source_halfmonth_scanner": {
+      "path": "scripts/scan_4h_ma_launch_yolo_half_month.py",
+      "sha256": "1c878261d53d1fc40b985c0e82310890de1e387ee655dcbc8a0c64f37362952f"
+    },
+    "global_future_gallery": {
+      "path": "scripts/build_4h_yolo_global_future_gallery.py",
+      "sha256": "08545b8cb9e3abd792221335d5c9ec41ef2547f09bbcacc93c4d4fb919bd56e0"
+    },
+    "semantic_gate_module": {
+      "path": "yoyo/layers/l1_detection/semantic_gate.py",
+      "sha256": "eda78c7a2a548bb7485aa1c7ca1f6a8ce6ee7805846aa6ba2e8e09789130fe5f"
+    },
+    "accepted_parent_preregistration": {
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1/preregistration.json",
+      "sha256": "55e13144b0dae5e41a54d3a8c413eb094a54a4db87e6a963f1c8269165d085a4"
+    }
+  },
+  "outputs": {
+    "result_directory": "experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate",
+    "gallery": "experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/all_global_future_charts.html",
+    "report": "analysis/p1_4h_ma_launch_yolo_halfmonth_semantic_gate_20260902.md",
+    "html": "analysis/html/p1_4h_ma_launch_yolo_halfmonth_semantic_gate_20260902.html"
+  },
+  "safety": {
+    "holdout_read": true,
+    "new_training": false,
+    "weight_change": false,
+    "confidence_or_nms_change": false,
+    "label_change": false,
+    "promotion": false,
+    "deployment": false,
+    "active_or_frozen_change": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
