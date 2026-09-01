@@ -18,4 +18,5 @@ PYTHONPATH=. .venv/bin/python scripts/research_15m_ma_launch_l2_global_context.p
 PYTHONPATH=. .venv/bin/python scripts/research_15m_ma_launch_l2_global_context.py --train-evaluate
 PYTHONPATH=. .venv/bin/python scripts/research_15m_ma_launch_l2_global_context.py --render
 PYTHONPATH=. .venv/bin/python scripts/research_15m_ma_launch_l2_global_context.py --verify
+PYTHONPATH=. .venv/bin/python scripts/build_15m_ma_launch_l2_global_context_report.py
 ```
