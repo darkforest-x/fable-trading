@@ -2888,3 +2888,43 @@ experiments:
       morphology truth. No holdout, L1 rescan, feature/label/barrier/cost change,
       threshold tuning on final validation, promotion, deployment,
       ACTIVE/frozen/forward mutation, Telegram send or order occurred.
+
+  - experiment_id: exp-15m-ma-launch-l2-short-window-side-split-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "394655711d1051cd4fa1102873058c190b6dc5da"
+    status: active
+    question: >-
+      Can separate LONG/SHORT regressors rank the frozen L1 proposals using
+      only the exact 18/19-bar 1280x742 image content and current raw box,
+      without the prior 48/96/168-bar global-context feature set?
+    single_variable: >-
+      Owner-corrected input contract: frozen L1 candidate ledger, outcome,
+      cost, chronological split boundaries, conservative purges, LightGBM
+      parameters and tune-q90 rule stay fixed; only L2 inputs and the matching
+      actual-input dependency exposure replace the rejected 168-bar contract.
+    result: >-
+      dataset_built_training_not_started. The 25,911 frozen boxes were
+      independently reclustered into 3,827 side-homogeneous episodes; 3,827
+      exact 1280x742 pixel hashes passed, 29 outcomes were unavailable by the
+      frozen label contract, and 3,798 rows formed 2,496 short-window
+      dependency blocks. Economic results are not yet available.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p3_15m_ma_launch_l2_short_window_side_split_20260901.md
+    artifacts:
+      - 15m-ma-launch-l2-short-window-side-split-v1-prereg
+      - 15m-ma-launch-l2-short-window-side-split-v1-dataset-receipt
+      - 15m-ma-launch-l2-short-window-side-split-v1-training-receipt
+      - 15m-ma-launch-l2-short-window-side-split-v1-verify-receipt
+      - 15m-ma-launch-l2-short-window-side-split-v1-report
+      - 15m-ma-launch-l2-short-window-side-split-v1-html
+    reuse_allowed: false
+    notes: >-
+      Owner explicitly overrode the P0/P1 training gate for this research run
+      and then clarified that L2 must target the same K bars as L1. The six
+      visible SMA/EMA 20/60/120 line values still causally summarize earlier
+      closes by definition; no earlier raw bars, volume, symbol, later episode
+      confidence, old long-context feature, holdout row or future outcome is a
+      model input. No promote, deploy, ACTIVE/frozen/forward mutation,
+      Telegram send or order action is authorized.
