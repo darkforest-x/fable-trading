@@ -278,8 +278,15 @@ def build_l15_dataset(prereg: Mapping[str, Any]) -> dict[str, Any]:
 def _event_representatives(data: pd.DataFrame, split: str) -> pd.DataFrame:
     subset = data[data["split"] == split].copy()
     subset["decision_time"] = pd.to_datetime(subset["decision_time"], utc=True)
+    # V1 has 7-8 causal position views per event; the leakage-resistant V2 is
+    # already one row per event and therefore has no variant metadata.
+    sort_columns = [
+        column
+        for column in ("decision_time", "confirmation_bars", "variant_id")
+        if column in subset.columns
+    ]
     return (
-        subset.sort_values(["decision_time", "confirmation_bars", "variant_id"])
+        subset.sort_values(sort_columns)
         .groupby("event_id", as_index=False)
         .first()
     )
@@ -892,4 +899,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

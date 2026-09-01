@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import numpy as np
+import pandas as pd
 
 from scripts.research_15m_ma_launch_l15_l2_pipeline import (
     EXPERIMENT_ID,
     GLOBAL_SHAPE_FEATURE_COLUMNS,
     L2_REDUCED_FEATURES,
+    _event_representatives,
     choose_strict_threshold,
     load_preregistration,
 )
@@ -47,3 +49,13 @@ def test_strict_threshold_respects_fpr_cap_and_is_deterministic() -> None:
     assert first["false_positive_rate"] <= 0.10
     assert first["tp"] >= 20
 
+
+def test_event_representatives_accept_already_collapsed_precore_rows() -> None:
+    frame = pd.DataFrame(
+        [
+            {"event_id": "b", "split": "tune", "decision_time": "2025-07-02T00:00:00Z"},
+            {"event_id": "a", "split": "tune", "decision_time": "2025-07-01T00:00:00Z"},
+        ]
+    )
+    result = _event_representatives(frame, "tune")
+    assert set(result["event_id"]) == {"a", "b"}
