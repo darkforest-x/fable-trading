@@ -59,7 +59,7 @@
 
 ## April final：基线、单特征与冻结入选组合
 
-| 配置 | LONG / SHORT | top-10% 净收益 | q90 n | q90 净收益 | 胜率 | p | 事件减匹配对照 | 8/8 均跑赢 |
+| 配置 | LONG / SHORT | top-10% 净收益 | q90 n | q90 净收益 | TP 标签率 | p | 事件减匹配对照 | 8/8 均跑赢 |
 |---|---|---:|---:|---:|---:|---:|---:|---|
 | 单特征基线 | ma_spread_only / ma_spread_only | +0.578% | 48 | +0.578% | 35.42% | 0.075392 | +0.744% | False |
 | 旧 28 列基线 | baseline_28 / baseline_28 | +0.898% | 20 | +1.231% | 40.00% | 0.072093 | +1.134% | True |
@@ -67,9 +67,19 @@
 
 入选组合诊断：AUC=0.4503，PR-AUC=0.3124，Spearman=-0.0320。AUC 不作成功裁决；裁决看扣成本收益、p、样本量及匹配对照。
 
+## 31 个 q90 独立信号的真实结果与高清图
+
+`31` 不是 YOLO 原始框数。April final 共有 1,021 个滑窗命中，依照同币重叠暴露块只保留 242 个独立代表事件，L2 冻结 q90 门再保留 31 个：LONG 21、SHORT 10。信号时间为 2026-04-01 00:15 至 2026-05-03 01:30 UTC，约 32 天。
+
+必须区分两种口径：结果表里的 `TP 标签率=41.94%` 是 13/31 个先到 TP，不等于“只有 13 个赚钱”。真实结果是 TP 13、SL 14、TIMEOUT 4；4 个 TIMEOUT 中 3 个扣 0.2% 成本后仍为正、1 个为负。因此实际扣成本净盈利 **16/31（51.61%）**、净亏损 **15/31（48.39%）**，平均净收益仍是 **+0.987%**。
+
+![31 个 q90 信号总览第一页](output/ma_launch_l2_feature_addition_v1/selected_q90_signal_gallery/overview_page_01.png)
+
+[逐张查看 31 张 1920×1320 高清原图](output/ma_launch_l2_feature_addition_v1/selected_q90_signal_gallery/gallery.html)。每张图左侧 168 根是模型当时可见的因果输入；蓝色虚线右侧浅色区域是审计用未来 72 根，只用于展示已冻结结果，不是模型输入。红框逐张复原原 L1 检测坐标；橙点是下一根开盘进场，绿/红点是实际退出。8 张 overview 覆盖全部 31 图，未人工删图或只挑盈利图。
+
 ## 分方向 final
 
-| 方向 | 入选方案 | 总列 | 新增 | final n | q90 n | q90 净收益 | 胜率 | p |
+| 方向 | 入选方案 | 总列 | 新增 | final n | q90 n | q90 净收益 | TP 标签率 | p |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
 | LONG | full_110 | 110 | 82 | 157 | 21 | +0.682% | 33.33% | 0.089591 |
 | SHORT | plus_ma_family | 54 | 26 | 85 | 10 | +1.627% | 60.00% | 0.046395 |
@@ -135,6 +145,8 @@
     # 提交 selection receipt 后：
     PYTHONPATH=. .venv/bin/python -m scripts.research_15m_ma_launch_l2_feature_addition --evaluate-final
     PYTHONPATH=. .venv/bin/python -m scripts.research_15m_ma_launch_l2_feature_addition --render --verify --report
+    PYTHONPATH=. .venv/bin/python scripts/render_15m_ma_launch_l2_feature_addition_signals.py --render
+    PYTHONPATH=. .venv/bin/python scripts/render_15m_ma_launch_l2_feature_addition_signals.py --verify
     python3 scripts/md_to_html.py analysis/p3_15m_ma_launch_l2_feature_addition_20260902.md --out-dir analysis/html
 
 ## 下一步
