@@ -79,6 +79,9 @@ CACHED_PARITY_AUTHORIZATION = (
     / EXPERIMENT_ID
     / "cached_parity_authorization.json"
 )
+QFQ_PARSER_RECOVERY = (
+    ROOT / "experiments" / "active" / EXPERIMENT_ID / "qfq_parser_recovery.json"
+)
 DEFAULT_OUT = ROOT / "analysis/output/ashare_1h4h_long_sina_20260902_v2"
 DEFAULT_RESULTS = ROOT / "experiments" / "active" / EXPERIMENT_ID / "results"
 SINA_PARSER = ROOT / "yoyo/data/sina_ashare.py"
@@ -91,7 +94,7 @@ WEIGHTS = base.WEIGHTS
 AUTOFILL_PREREG = base.AUTOFILL_PREREG
 
 EXPECTED_SINA_PARSER_SHA256 = (
-    "89a86728211128fc1b07b3c53b87e047b4c0464254c81f381176259a4f774f35"
+    "77a430c6a131023e26f068b6166a20d52b97a535bf3d624206de5cd09d55aa21"
 )
 EXPECTED_SESSION_AGGREGATOR_SHA256 = (
     "78d1801d4a46052c2ce63e85dda044299ac5c06a27e79dd54770922a2dabfdec"
@@ -110,6 +113,9 @@ EXPECTED_TRANSPORT_RECOVERY_SHA256 = (
 )
 EXPECTED_CACHED_PARITY_AUTHORIZATION_SHA256 = (
     "02a6de34d2aa0c5da49f6e32572acab41bf37b6215ea9e89e3faa158bc5b7baa"
+)
+EXPECTED_QFQ_PARSER_RECOVERY_SHA256 = (
+    "f0c8d76727d65f01be00ada1fc7e50063df94ffefc8144a33975ceec76a9a756"
 )
 
 SINA_MINUTE_URL = (
@@ -173,6 +179,7 @@ def require_builder_committed() -> str:
         str(PREREG.relative_to(ROOT)),
         str(TRANSPORT_RECOVERY.relative_to(ROOT)),
         str(CACHED_PARITY_AUTHORIZATION.relative_to(ROOT)),
+        str(QFQ_PARSER_RECOVERY.relative_to(ROOT)),
         str(SINA_PARSER.relative_to(ROOT)),
         str(SESSION_AGGREGATOR.relative_to(ROOT)),
         str(SHARED_ORCHESTRATION.relative_to(ROOT)),
@@ -217,6 +224,16 @@ def verify_frozen_contract() -> tuple[dict[str, Any], dict[str, Any]]:
         "new_holdout_configuration_created"
     ) is not False:
         raise AShareSinaScanError("cached parity created an unauthorized configuration")
+    parser_recovery = read_json(QFQ_PARSER_RECOVERY)
+    if (
+        parser_recovery.get("experiment_id") != EXPERIMENT_ID
+        or sha256_file(QFQ_PARSER_RECOVERY)
+        != EXPECTED_QFQ_PARSER_RECOVERY_SHA256
+    ):
+        raise AShareSinaScanError("QFQ parser recovery identity drifted")
+    parser_invariants = parser_recovery.get("frozen_invariants") or {}
+    if any(value is not False for value in parser_invariants.values()):
+        raise AShareSinaScanError("QFQ parser recovery changed a frozen invariant")
     configs = prereg.get("configuration_consumptions") or []
     actual = [
         (
@@ -1136,6 +1153,8 @@ def run_source_preflight(building: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
         "cached_parity_authorization_sha256": (
             EXPECTED_CACHED_PARITY_AUTHORIZATION_SHA256
         ),
+        "qfq_parser_recovery_path": str(QFQ_PARSER_RECOVERY.relative_to(ROOT)),
+        "qfq_parser_recovery_sha256": EXPECTED_QFQ_PARSER_RECOVERY_SHA256,
         "reference_symbol": REFERENCE_SINA_SYMBOL,
         "reference_rows_1h": len(reference),
         "reference_rows_4h": len(reference_4h),
@@ -1235,6 +1254,12 @@ def fetch_snapshot(out: Path, *, workers: int) -> dict[str, Any]:
             plan["cached_parity_authorization_sha256"] = (
                 EXPECTED_CACHED_PARITY_AUTHORIZATION_SHA256
             )
+            plan["qfq_parser_recovery_path"] = str(
+                QFQ_PARSER_RECOVERY.relative_to(ROOT)
+            )
+            plan["qfq_parser_recovery_sha256"] = (
+                EXPECTED_QFQ_PARSER_RECOVERY_SHA256
+            )
             write_json(plan_path, plan)
     if len(universe) != shared.EXPECTED_UNIVERSE_ROWS:
         raise AShareSinaScanError("standard-retail universe count drifted")
@@ -1274,6 +1299,12 @@ def fetch_snapshot(out: Path, *, workers: int) -> dict[str, Any]:
             )
             consumption["cached_parity_authorization_sha256"] = (
                 EXPECTED_CACHED_PARITY_AUTHORIZATION_SHA256
+            )
+            consumption["qfq_parser_recovery_path"] = str(
+                QFQ_PARSER_RECOVERY.relative_to(ROOT)
+            )
+            consumption["qfq_parser_recovery_sha256"] = (
+                EXPECTED_QFQ_PARSER_RECOVERY_SHA256
             )
             write_json(consumption_path, consumption)
 
@@ -1475,6 +1506,8 @@ def fetch_snapshot(out: Path, *, workers: int) -> dict[str, Any]:
         "cached_parity_authorization_sha256": (
             EXPECTED_CACHED_PARITY_AUTHORIZATION_SHA256
         ),
+        "qfq_parser_recovery_path": str(QFQ_PARSER_RECOVERY.relative_to(ROOT)),
+        "qfq_parser_recovery_sha256": EXPECTED_QFQ_PARSER_RECOVERY_SHA256,
         "owner_authorized_holdout_read": True,
         "holdout_consumption_numbers_for_checkpoint": {"1h": 11, "4h": 12},
         "prior_failed_consumptions": [9, 10],

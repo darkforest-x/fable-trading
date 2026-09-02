@@ -76,6 +76,21 @@ def test_qfq_factor_parser_never_needs_javascript_eval():
     assert factors["qfq_factor"].tolist() == [2.0, 4.0]
 
 
+def test_qfq_factor_parser_accepts_observed_mapping_rows_and_trailing_comment():
+    text = (
+        'var sh600000qfq={"total":2,"data":'
+        '[{"d":"2026-07-16","f":"1.0"},'
+        '{"d":"2025-07-16","f":"1.0472440944882"}]}\n'
+        "/* opaque provider comment */"
+    )
+    factors = parse_sina_qfq_factor_js(text, symbol="sh600000")
+    assert factors["factor_date"].dt.strftime("%Y-%m-%d").tolist() == [
+        "2025-07-16",
+        "2026-07-16",
+    ]
+    assert factors["qfq_factor"].tolist() == [1.0472440944882, 1.0]
+
+
 def test_qfq_factor_alignment_uses_same_or_earlier_date_only():
     closes = pd.to_datetime(
         ["2026-05-29 15:00", "2026-06-01 15:00"],

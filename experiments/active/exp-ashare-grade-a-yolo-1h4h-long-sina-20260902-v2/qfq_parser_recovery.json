@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-ashare-grade-a-yolo-1h4h-long-sina-20260902-v2",
+  "recorded_at": "2026-09-02T16:29:30+08:00",
+  "classification": "source-schema parser repair before individual-symbol fanout and before model load",
+  "holdout_consumption_numbers_for_checkpoint": {
+    "1h": 11,
+    "4h": 12
+  },
+  "failure": {
+    "failed_at": "2026-09-02T08:28:24.486551+00:00",
+    "source_commit": "e53fd51679a175770d51a6fe7e6270dcdb276f41",
+    "stage": "Parse the fixed SH600000 Sina qfq.js sentinel",
+    "error": "SinaAShareDataError: Sina response is not strict JSON/JSONP",
+    "individual_universe_fanout_started": false,
+    "model_loaded": false,
+    "signals_computed": false
+  },
+  "observed_payload": {
+    "url": "https://finance.sina.com.cn/realstock/company/sh600000/qfq.js",
+    "response_chars": 1628,
+    "response_sha256": "86f86a46c58b35796d5a3a2ed921fb3ae4851e47a54f020fc047c402d7324e28",
+    "wrapper": "var sh600000qfq=<strict JSON object> followed by a newline block comment",
+    "factor_rows": "JSON data entries are objects with d/f keys rather than two-element arrays"
+  },
+  "repair_contract": {
+    "wrapper_parser": "After the first equals sign, parse only the strict JSON first line; never evaluate JavaScript and never parse the trailing comment.",
+    "factor_row_parser": "Accept exactly the documented/observed d and f mapping fields in addition to the already-tested two-element representation.",
+    "factor_semantics": "Unchanged: sort by factor date, select the latest factor date not later than each bar date, divide raw OHLC by the positive factor and round to cents.",
+    "sentinel_gate": "The repaired output still must pass the frozen SH600000 and SZ000001 parity thresholds before any individual-symbol fanout."
+  },
+  "frozen_invariants": {
+    "source_url_changed": false,
+    "source_bytes_modified": false,
+    "factor_arithmetic_changed": false,
+    "parity_thresholds_changed": false,
+    "cutoff_changed": false,
+    "universe_changed": false,
+    "model_or_threshold_changed": false,
+    "new_holdout_configuration_created": false
+  },
+  "safety": {
+    "javascript_eval_used": false,
+    "training": false,
+    "promotion": false,
+    "deployment": false,
+    "telegram_send": false,
+    "order_action": false
+  }
+}

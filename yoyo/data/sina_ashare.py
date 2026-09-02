@@ -50,7 +50,11 @@ def _unwrap_jsonp(text: str) -> Any:
         candidates.insert(0, source[marker + 2 : end])
     equal = source.find("=")
     if equal >= 0:
-        body = source[equal + 1 :].strip().rstrip(";").strip()
+        raw_body = source[equal + 1 :].strip()
+        first_line = raw_body.splitlines()[0].strip().rstrip(";").strip()
+        if first_line:
+            candidates.append(first_line)
+        body = raw_body.rstrip(";").strip()
         if body.startswith("(") and body.endswith(")"):
             body = body[1:-1]
         candidates.append(body)
@@ -159,11 +163,21 @@ def parse_sina_qfq_factor_js(text: str, *, symbol: str) -> pd.DataFrame:
         raise SinaAShareDataError(f"invalid Sina QFQ factor payload:{symbol}")
     parsed: list[tuple[pd.Timestamp, float]] = []
     for raw in payload["data"]:
-        if not isinstance(raw, Sequence) or isinstance(raw, (str, bytes)) or len(raw) < 2:
+        if isinstance(raw, Mapping):
+            if "d" not in raw or "f" not in raw:
+                raise SinaAShareDataError(f"invalid Sina QFQ factor row:{symbol}")
+            raw_date, raw_factor = raw["d"], raw["f"]
+        elif (
+            isinstance(raw, Sequence)
+            and not isinstance(raw, (str, bytes))
+            and len(raw) >= 2
+        ):
+            raw_date, raw_factor = raw[0], raw[1]
+        else:
             raise SinaAShareDataError(f"invalid Sina QFQ factor row:{symbol}")
         try:
-            factor_date = pd.Timestamp(str(raw[0])).normalize()
-            factor = float(raw[1])
+            factor_date = pd.Timestamp(str(raw_date)).normalize()
+            factor = float(raw_factor)
         except (TypeError, ValueError) as exc:
             raise SinaAShareDataError(f"invalid Sina QFQ factor row:{symbol}") from exc
         if not np.isfinite(factor) or factor <= 0:
