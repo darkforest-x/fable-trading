@@ -10463,3 +10463,57 @@ artifacts:
     config_hash: "fda9ee213c08ed7d7202ae3c990ded155133ef08154d245d79fbfb81e03634ce"
     data_cutoff: "2026-09-01T12:00:00Z"
     notes: Self-contained HTML report with the paired overview embedded and direct link to the complete-future gallery.
+
+  - artifact_id: 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-owner-verdict
+    artifact_type: manifest
+    role: owner_batch_review_final_rejection_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e2c65e1f98780a9f7e9a1331597f555ad680b315"
+    source_path: experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/owner_review_verdict.json
+    sha256: "9b916c8ac698aecc95d88a0c688a675a8f489eea37954c99625cd104e2041952"
+    size_bytes: 1689
+    storage_uri: "repo://experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/owner_review_verdict.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e2c65e1f98780a9f7e9a1331597f555ad680b315"
+    config_hash: "9b916c8ac698aecc95d88a0c688a675a8f489eea37954c99625cd104e2041952"
+    data_cutoff: "2026-09-01T12:00:00Z"
+    notes: >-
+      Records the Owner's verbatim batch verdict "都不太行" after reviewing all
+      34 global-future charts. It explicitly does not convert that verdict into
+      structured per-image boundaries, precision or return labels.
+
+  - artifact_id: 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-rejection-report
+    artifact_type: report
+    role: canonical_owner_rejection_and_failure_diagnosis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e2c65e1f98780a9f7e9a1331597f555ad680b315"
+    source_path: analysis/p1_4h_ma_launch_yolo_halfmonth_owner_rejection_20260902.md
+    sha256: "c500c2bea501661b89f4703bbe634c6834944abac614e85180f84b1849eb1267"
+    size_bytes: 6726
+    storage_uri: "repo://analysis/p1_4h_ma_launch_yolo_halfmonth_owner_rejection_20260902.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e2c65e1f98780a9f7e9a1331597f555ad680b315"
+    config_hash: "9b916c8ac698aecc95d88a0c688a675a8f489eea37954c99625cd104e2041952"
+    data_cutoff: "2026-09-01T12:00:00Z"
+    notes: Final report rejecting 15m-generator semantic survival as evidence of acceptable 4h morphology and forbidding post-holdout retuning.
+
+  - artifact_id: 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-rejection-html
+    artifact_type: report
+    role: owner_facing_html_final_rejection_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e2c65e1f98780a9f7e9a1331597f555ad680b315"
+    source_path: analysis/html/p1_4h_ma_launch_yolo_halfmonth_owner_rejection_20260902.html
+    sha256: "8bf7b16ed20492c8fb290d507b11a61fd26071d59f52ea143ff8deea4d63d960"
+    size_bytes: 10116
+    storage_uri: "repo://analysis/html/p1_4h_ma_launch_yolo_halfmonth_owner_rejection_20260902.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e2c65e1f98780a9f7e9a1331597f555ad680b315"
+    config_hash: "9b916c8ac698aecc95d88a0c688a675a8f489eea37954c99625cd104e2041952"
+    data_cutoff: "2026-09-01T12:00:00Z"
+    notes: Direct browser delivery of the Owner rejection, existing-feature diagnosis, risks and next allowed P0/P1 action.

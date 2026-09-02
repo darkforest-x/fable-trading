@@ -3255,7 +3255,7 @@ experiments:
   - experiment_id: exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "1462abe6b576ba40e3b811b4b5d9949a5e3cff6c"
-    status: accepted
+    status: rejected
     question: >-
       On the frozen all-universe 15-day 4h snapshot, which of the 1,764
       structurally legal boxes and 221 control events survive the exact causal
@@ -3265,17 +3265,17 @@ experiments:
       candle bytes, universe, source boxes, checkpoint, conf/NMS, W18/W19,
       core4/5, post2-9 and five-bar event spacing remain paired and unchanged.
     result: >-
-      Completed unchanged as holdout use #7. The locked causal semantic gate
-      reduced 1,764 structural boxes to 256 (-85.49%) and 221 control events to
-      34 treatment events (-84.62%; 28 LONG / 6 SHORT across 33 symbols). The
-      paired direction-flip null passed at box p=2.04e-70 and event p=2.33e-10;
-      two latest-tip research candidates remain (SOON SHORT and 0G LONG). This
-      accepts the gate only as an offline 4h research filter, not as evidence of
-      4h precision, return, tip validity or production eligibility.
+      REJECTED by the Owner after full-image review. The locked gate executed
+      unchanged and reduced 1,764 structural boxes to 256 and 221 events to 34,
+      but after reviewing all 34 global-future charts the Owner's batch verdict
+      was "都不太行". Therefore technical predicate survival is not accepted as
+      4h semantic validity. This is a batch-level surface rejection, not 34
+      structured per-image boundary labels or a precision/return estimate.
+      Holdout use #7 is spent and may not be reused to tighten thresholds.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    canonical_report: analysis/p1_4h_ma_launch_yolo_halfmonth_semantic_gate_20260902.md
+    canonical_report: analysis/p1_4h_ma_launch_yolo_halfmonth_owner_rejection_20260902.md
     artifacts:
       - 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-prereg
       - 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-summary
@@ -3288,6 +3288,9 @@ experiments:
       - 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-delivery-fix
       - 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-report
       - 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-html
+      - 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-owner-verdict
+      - 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-rejection-report
+      - 4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1-rejection-html
     reuse_allowed: false
     notes: >-
       Owner replied "批准" immediately after the explicit request to approve
@@ -3295,4 +3298,7 @@ experiments:
       half-month snapshot. This is checkpoint holdout use #7. It authorizes
       only the frozen offline semantic replay and complete-future review
       gallery; no training, threshold tuning, ACTIVE/frozen/forward mutation,
-      promotion, deployment, Telegram send or order action is authorized.
+      promotion, deployment, Telegram send or order action is authorized. The
+      later Owner verdict rejects the entire delivered 4h signal surface; it
+      does not authorize treating the 34 images as individually labeled
+      negatives or tuning another gate on this spent holdout.
