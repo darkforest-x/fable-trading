@@ -10072,35 +10072,120 @@ artifacts:
     artifact_type: report
     role: canonical_causal_feature_addition_and_rejection_report
     source_repo: darkforest-x/fable-trading
-    source_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    source_commit: "7305980665f781340e197a7e7960f23a0fcaffe5"
     source_path: analysis/p3_15m_ma_launch_l2_feature_addition_20260902.md
-    sha256: "e92544e1ea8e862cf749ab6419f4a731a4a662a758f0bdfd03164f5ddc3a029c"
-    size_bytes: 7993
+    sha256: "c6d93e15dcc96e1cf40df4ff5bf2dcde5437ace551c03be4581576ea73dd6d1e"
+    size_bytes: 9510
     storage_uri: "repo://analysis/p3_15m_ma_launch_l2_feature_addition_20260902.md"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    generator_commit: "7305980665f781340e197a7e7960f23a0fcaffe5"
     config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
     data_cutoff: "2026-05-04T00:00:00Z"
-    notes: Chinese answer-first report with causal rebuild, tune selection, final baselines, matched controls, gates, risks and reproduction commands.
+    notes: Chinese answer-first report with causal rebuild, tune selection, final baselines, matched controls, exact 31-signal outcome semantics, gallery, gates, risks and reproduction commands.
 
   - artifact_id: 15m-ma-launch-l2-feature-addition-v1-html
     artifact_type: report
     role: owner_facing_self_contained_feature_addition_report
     source_repo: darkforest-x/fable-trading
-    source_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    source_commit: "7305980665f781340e197a7e7960f23a0fcaffe5"
     source_path: analysis/html/p3_15m_ma_launch_l2_feature_addition_20260902.html
-    sha256: "b1998034d6d3a7a11f2ae68eab99270ed87485bb88ee5199d334322f1a335bef"
-    size_bytes: 182703
+    sha256: "762b24a21a56c2ff7593c22728b47eaba914ac7310638880fb2ab0cb58f423f6"
+    size_bytes: 696765
     storage_uri: "repo://analysis/html/p3_15m_ma_launch_l2_feature_addition_20260902.html"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    generator_commit: "7305980665f781340e197a7e7960f23a0fcaffe5"
     config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
     data_cutoff: "2026-05-04T00:00:00Z"
-    notes: Self-contained HTML with the diagnostic chart embedded and all exact metrics.
+    notes: Self-contained HTML with the diagnostic and selected-signal overview embedded, all exact metrics, and a link to the 31-image local gallery.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-signal-gallery-render-receipt
+    artifact_type: manifest
+    role: owner_requested_all_31_selected_outcomes_render_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4a152cd0321e6ce7e3b04b313a08a488fef36b36"
+    source_path: analysis/output/ma_launch_l2_feature_addition_v1/selected_q90_signal_gallery/render_receipt.json
+    sha256: "ac4525499a98df1a375a77799f57d0b5774067addcffca1c11377300e4657598"
+    size_bytes: 10365
+    storage_uri: "file://analysis/output/ma_launch_l2_feature_addition_v1/selected_q90_signal_gallery/render_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4a152cd0321e6ce7e3b04b313a08a488fef36b36"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Records all 31 independent q90 charts, eight overview pages, 13 TP / 14 SL / 4 timeout, 16 after-cost profitable outcomes and zero future-feature or holdout reads.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-signal-gallery-verify-receipt
+    artifact_type: manifest
+    role: all_chart_pixel_l1_input_geometry_and_outcome_semantics_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1bb8520c87d6ea7f81519ecb1f1e66314cc060b4"
+    source_path: analysis/output/ma_launch_l2_feature_addition_v1/selected_q90_signal_gallery/verify_receipt.json
+    sha256: "28f996d525533faeb63eefacdca447fbbf899b1b4ab8f325a357a4885b2ae4b2"
+    size_bytes: 659
+    storage_uri: "file://analysis/output/ma_launch_l2_feature_addition_v1/selected_q90_signal_gallery/verify_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1bb8520c87d6ea7f81519ecb1f1e66314cc060b4"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Re-renders and passes 31/31 chart pixels and exact L1 input pixels while independently checking net-profit and barrier-outcome counts.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-signal-gallery-manifest
+    artifact_type: manifest
+    role: one_row_per_selected_independent_signal_chart_and_realized_outcome
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4a152cd0321e6ce7e3b04b313a08a488fef36b36"
+    source_path: analysis/output/ma_launch_l2_feature_addition_v1/selected_q90_signal_gallery/signal_manifest.csv
+    sha256: "993de04d166832bcae9da1253359d9560438c5372b071799fcdd0f714e5ddb5f"
+    size_bytes: 14815
+    storage_uri: "file://analysis/output/ma_launch_l2_feature_addition_v1/selected_q90_signal_gallery/signal_manifest.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4a152cd0321e6ce7e3b04b313a08a488fef36b36"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Contains all 31 selected representatives with score, side percentile, TP/SL/timeout, gross and net return, chart bytes and pixel hashes.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-signal-gallery-html
+    artifact_type: report
+    role: browseable_uncompressed_all_31_high_resolution_signal_gallery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4a152cd0321e6ce7e3b04b313a08a488fef36b36"
+    source_path: analysis/output/ma_launch_l2_feature_addition_v1/selected_q90_signal_gallery/gallery.html
+    sha256: "8bc16770c57c48a3de3c863af1a81c78a496587e06d112ebc35fda19f167054a"
+    size_bytes: 11657
+    storage_uri: "file://analysis/output/ma_launch_l2_feature_addition_v1/selected_q90_signal_gallery/gallery.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4a152cd0321e6ce7e3b04b313a08a488fef36b36"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Ordinary local folder gallery; every card links the original 1920x1320 PNG and labels net profitability separately from barrier outcome.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-signal-gallery-overview
+    artifact_type: report
+    role: first_of_eight_four_up_overview_pages_covering_all_31_signals
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4a152cd0321e6ce7e3b04b313a08a488fef36b36"
+    source_path: analysis/output/ma_launch_l2_feature_addition_v1/selected_q90_signal_gallery/overview_page_01.png
+    sha256: "d97ca65d754f4675878013119fb61170b0793c30be1de856a20488a7b99137fb"
+    size_bytes: 384378
+    storage_uri: "file://analysis/output/ma_launch_l2_feature_addition_v1/selected_q90_signal_gallery/overview_page_01.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4a152cd0321e6ce7e3b04b313a08a488fef36b36"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Page one of eight; render receipt pins all eight overview hashes and all 31 source chart hashes.
 
   - artifact_id: 15m-ma-launch-owner-yolo-causal-semantic-gate-v1-prereg
     artifact_type: config

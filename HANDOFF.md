@@ -49,6 +49,13 @@ March tune 独立选择 LONG/SHORT：LONG 选 full_110，SHORT 只选 baseline_2
 单笔质量由 +123.11bp 降到 +98.70bp，且置换 p=0.046395 未达到预注册 p<0.01。因此实验登记
 为 rejected：这是值得保留的正向迹象，不是可 promote 的升级。
 
+Owner 追问“31 个是否都赚钱、有没有图”后，逐事件联结 outcome ledger 纠正了一个命名陷阱：
+receipt 的 `win_rate=41.94%` 是 **13/31 个 TP 标签率**，不是净盈利率。真实为 13 TP、
+14 SL、4 timeout；其中 3 个 timeout 扣 0.2% 成本后仍为正，因此是 **16/31 净盈利、
+15/31 净亏损**。已逐张生成并复算 31 张 1920×1320 图，全部保留，没有只挑盈利样本：
+`analysis/output/ma_launch_l2_feature_addition_v1/selected_q90_signal_gallery/gallery.html`。
+图中蓝虚线左侧是因果输入，浅色右侧是审计用未来结果，31/31 原 L1 输入像素与框坐标复现。
+
 完整报告：analysis/html/p3_15m_ma_launch_l2_feature_addition_20260902.html。正确下一步是增加
 同一冻结 L1 目标域的独立经济事件后做一次预注册确认，不在本轮 final 上继续调组，也不提前
 消耗 holdout。未 promote、部署、改 ACTIVE/frozen/forward、发 Telegram 或下单。

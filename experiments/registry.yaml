@@ -3177,7 +3177,9 @@ experiments:
       +89.79 bp and increased frozen-q90 events from 20 to 31, but q90 net
       return fell to +98.70 bp from +123.11 bp and permutation p=0.046395
       missed the preregistered p<0.01 gate. Matched event-minus-control was
-      +92.21 bp with 8/8 assignments positive.
+      +92.21 bp with 8/8 assignments positive. The reported 41.94% win_rate
+      is the TP-label rate: actual after-cost profitability was 16/31 because
+      three of four timeout exits remained net-positive.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
@@ -3195,6 +3197,11 @@ experiments:
       - 15m-ma-launch-l2-feature-addition-v1-diagnostic
       - 15m-ma-launch-l2-feature-addition-v1-report
       - 15m-ma-launch-l2-feature-addition-v1-html
+      - 15m-ma-launch-l2-feature-addition-v1-signal-gallery-render-receipt
+      - 15m-ma-launch-l2-feature-addition-v1-signal-gallery-verify-receipt
+      - 15m-ma-launch-l2-feature-addition-v1-signal-gallery-manifest
+      - 15m-ma-launch-l2-feature-addition-v1-signal-gallery-html
+      - 15m-ma-launch-l2-feature-addition-v1-signal-gallery-overview
     reuse_allowed: false
     notes: >-
       The source feature builder was reused only after six semantic duplicate
@@ -3202,9 +3209,12 @@ experiments:
       feature-time mismatch, nonfinite value, future-feature row or holdout
       row; the legacy 28 columns reproduced within 3.553e-15. The selection
       receipt was committed before April final was opened. The positive trace
-      is preserved for an independently powered confirmation, but these
-      models must not be promoted, deployed or used to mutate ACTIVE/frozen,
-      forward, Telegram or orders.
+      is preserved for an independently powered confirmation. A later
+      Owner-requested review rendered all 31 selected independent outcomes,
+      separated the 13/31 TP-label rate from the 16/31 after-cost profitable
+      rate and reproduced every L1 input pixel. These models must not be
+      promoted, deployed or used to mutate ACTIVE/frozen, forward, Telegram
+      or orders.
 
   - experiment_id: exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1
     source_repo: darkforest-x/fable-trading
