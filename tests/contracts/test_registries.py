@@ -173,6 +173,7 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
     registries = load_registries(root=REPO)
     consumers = {e.experiment_id for e in registries.experiments if e.holdout_consumed}
     assert consumers == {
+        "exp-ashare-grade-a-yolo-1h4h-long-sina-20260902-v2",
         "exp-btc-4h-ma-launch-similarity-top20-v2",
         "exp-btc-4h-ma-launch-similarity-v1",
         "exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2",

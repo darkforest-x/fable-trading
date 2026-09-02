@@ -3369,3 +3369,55 @@ experiments:
       Direction-flip event survivors were 31 actual versus 0 flipped (two-sided
       exact p=9.313225746e-10); this checks semantic direction only and is not a
       return or precision test.
+
+  - experiment_id: exp-ashare-grade-a-yolo-1h4h-long-sina-20260902-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cb2700467bcdd064522e0cc7bb12fe33dfa613ae"
+    status: accepted
+    question: >-
+      On a frozen ordinary-account SH/SZ main-board universe through the
+      completed 2026-09-02 close, which 1h latest-endpoint and session-4h
+      recent-five-endpoint Grade-A proposals survive the already frozen causal
+      semantic gate, when delivery is restricted to LONG?
+    single_variable: >-
+      n/a -- Owner approved a bundled two-timeframe OOD scan with separately
+      numbered 1h and session-4h holdout configurations. Within each
+      configuration the checkpoint, native-1280 renderer, W18/W19, conf=0.25,
+      NMS=0.70, core4/5, confirmation2-9, semantic gate and event spacing were
+      frozen before data fanout and never changed after seeing results.
+    result: >-
+      completed_research_snapshot_only. The frozen ordinary-main-board
+      universe contained 3,111 identities; 3,021 passed the 1h schedule and
+      freshness contract and 2,903 passed the session-4h contract. A total of
+      35,072 windows produced 373 raw boxes, 346 structurally valid boxes, 52
+      semantic boxes and 20 deduplicated audit events. LONG-only delivery
+      retained 12 1h and 4 session-4h events; four SHORT events were excluded.
+      Independent offline replay passed 3,021 candle SHA/schedule checks,
+      5,892,102 date-causal QFQ arithmetic rows, 346 input-pixel checks, 346
+      semantic decisions, 16 LONG selections and 16 chart pixel/SHA checks with
+      zero network reads and zero inference. Accepted means the preregistered
+      artifact chain completed, not that the OOD candidates are profitable.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_ashare_grade_a_yolo_1h4h_long_sina_20260902.md
+    artifacts:
+      - ashare-grade-a-yolo-1h4h-long-sina-20260902-v2-prereg
+      - ashare-grade-a-yolo-1h4h-long-sina-20260902-v2-source-preflight
+      - ashare-grade-a-yolo-1h4h-long-sina-20260902-v2-fetch-receipt
+      - ashare-grade-a-yolo-1h4h-long-sina-20260902-v2-signals
+      - ashare-grade-a-yolo-1h4h-long-sina-20260902-v2-summary
+      - ashare-grade-a-yolo-1h4h-long-sina-20260902-v2-verification
+      - ashare-grade-a-yolo-1h4h-long-sina-20260902-v2-chart-pack
+      - ashare-grade-a-yolo-1h4h-long-sina-20260902-v2-report
+      - ashare-grade-a-yolo-1h4h-long-sina-20260902-v2-html
+    reuse_allowed: false
+    notes: >-
+      These are this Grade-A full40 native-1280 checkpoint's holdout uses #11
+      for 1h and #12 for session-4h; failed Eastmoney source configurations
+      #9/#10 remain spent. Owner explicitly approved Sina and the frozen
+      Eastmoney-cache parity fallback before individual fanout. The detector
+      was trained on crypto 15m and is out-of-distribution here, so confidence
+      is neither probability nor return evidence. No training, threshold or
+      weight change, promotion, deployment, ACTIVE/frozen/forward mutation,
+      Telegram send or order action occurred.
