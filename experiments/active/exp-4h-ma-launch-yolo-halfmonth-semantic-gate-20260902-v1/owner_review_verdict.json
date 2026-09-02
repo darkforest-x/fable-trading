@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1",
+  "recorded_at": "2026-09-02T12:10:22+08:00",
+  "review_surface": {
+    "path": "experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/all_global_future_charts.html",
+    "delivered_event_images": 34,
+    "image_contract": "1920x1400 full frozen 4h history and all observed future after first signal"
+  },
+  "owner_feedback_verbatim": [
+    "都不太行"
+  ],
+  "interpretation": {
+    "level": "batch_review_verdict",
+    "decision": "reject_all_delivered_candidates_as_an_acceptable_4h_signal_surface",
+    "not_claimed": [
+      "per-box boundary annotations",
+      "per-image structured rejection reasons",
+      "4h precision estimate",
+      "return or profitability judgment"
+    ]
+  },
+  "frozen_result_context": {
+    "source_signals_path": "experiments/active/exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1/results/semantic_gate/signals.csv",
+    "source_signals_sha256": "882ba38a23cf303e5ca30c4fb507ba1195a8e3f7f3237d8ce2c21e4576fc8464",
+    "technical_gate_pass_events": 34,
+    "technical_gate_pass_boxes": 256,
+    "control_events": 221,
+    "checkpoint_holdout_consumption_number": 7
+  },
+  "final_decision": {
+    "experiment_status": "rejected",
+    "reason": "A gate derived from the 15m automatic generator did not preserve the Owner's 4h visual target; technical predicate pass is not 4h semantic acceptance.",
+    "reuse_this_holdout_to_tune_thresholds": false,
+    "training_started": false,
+    "thresholds_modified": false,
+    "promotion_or_deployment": false,
+    "production_eligible": false
+  }
+}
