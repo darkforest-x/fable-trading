@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-ashare-grade-a-yolo-1h4h-long-sina-20260902-v2",
+  "created_at": "2026-09-02T15:29:37+08:00",
+  "stage": "P1_cross_timeframe_cross_market_completed_history_research",
+  "question": "After the Eastmoney 60m source failed holdout #9/#10 for insufficient history, does the separately authorized and pinned Sina 60m source provide enough exact standard-retail A-share history to run unchanged Grade-A YOLO 1h latest-endpoint and recent session-4h LONG-only delivery configurations?",
+  "owner_authorization": {
+    "conversation_date": "2026-09-02",
+    "preceding_request": "同意 #11/#12 用新浪 60m 继续",
+    "verbatim": "同意",
+    "interpreted_action": "Authorize new holdout configurations #11 and #12 using the proposed AKShare-documented Sina 60m long-history source, after #9/#10 failed before model inference.",
+    "authorization_received_at_market_state": "2026-09-02T15:29:37+08:00; the cash market had completed its 15:00 close, so both new configurations freeze at that completed endpoint.",
+    "holdout_read_authorized": true,
+    "new_training_authorized": false,
+    "promotion_or_production_authorized": false,
+    "telegram_send_authorized": false,
+    "order_action_authorized": false
+  },
+  "prior_failed_consumptions": {
+    "experiment_id": "exp-ashare-grade-a-yolo-1h4h-long-20260902-v1",
+    "holdout_consumption_numbers": [9, 10],
+    "failure_receipt": "experiments/active/exp-ashare-grade-a-yolo-1h4h-long-20260902-v1/source_preflight_failure.json",
+    "reuse": false
+  },
+  "configuration_consumptions": [
+    {
+      "configuration": "sina_qfq_mainland_A_share_1h_latest_completed_endpoint",
+      "holdout_consumption_number_for_checkpoint": 11,
+      "cutoff_close_cst": "2026-09-02T15:00:00+08:00",
+      "latest_endpoints_per_symbol": 1
+    },
+    {
+      "configuration": "sina_qfq_mainland_A_share_session_4h_recent_five_complete_days",
+      "holdout_consumption_number_for_checkpoint": 12,
+      "cutoff_close_cst": "2026-09-02T15:00:00+08:00",
+      "latest_endpoints_per_symbol": 5
+    }
+  ],
+  "single_variable_bundle": "Owner explicitly authorized the two replacement configurations together. Relative to failed #9/#10, change the market-data provider/request and completed cutoff only: Sina 60m long history through the now-complete 15:00 close replaces insufficient Eastmoney 60m history. Universe, checkpoint, renderer, image size, W18/W19, confidence, NMS, structural mapping, semantic thresholds, LONG-only delivery and five-session 4h lookback remain fixed. No #9/#10 model result existed.",
+  "source_contract": {
+    "library_reference": {
+      "project": "akfamily/akshare",
+      "documentation": "https://akshare.akfamily.xyz/data/stock/stock.html",
+      "commit": "8e95744b79ae22326308ccd2b4e62650c5b53c55",
+      "minute_source_path": "akshare/stock/stock_zh_a_sina.py",
+      "minute_source_url": "https://github.com/akfamily/akshare/blob/8e95744b79ae22326308ccd2b4e62650c5b53c55/akshare/stock/stock_zh_a_sina.py",
+      "minute_source_sha256": "80c9d622a9e8cab5324605d63ccce589d4c3e771d259692c5d93cf7da8e99547",
+      "constants_source_path": "akshare/stock/cons.py",
+      "constants_source_sha256": "435bf1763531d0eb33d9a8ba25fbc9ab3c5bcc11bbd7834978cbdfdec4c0bbb9",
+      "local_parser_path": "yoyo/data/sina_ashare.py",
+      "local_parser_sha256": "89a86728211128fc1b07b3c53b87e047b4c0464254c81f381176259a4f774f35",
+      "shared_orchestration_path": "scripts/scan_ashare_yolo_1h4h_long.py",
+      "shared_orchestration_sha256": "951a1777ed7fc0443389d42d6f01f2dde8d51cf42ea73ba8b847ab00e12d842b"
+    },
+    "universe": {
+      "source_path": "analysis/output/ashare_15m_yolo_latest_20260902_v1/universe.csv",
+      "source_sha256": "9c4bda359560c64f756a9a6079e748a9b0ff46b9a3a21028009050b14c158508",
+      "source_fetch_receipt_path": "analysis/output/ashare_15m_yolo_latest_20260902_v1/fetch_receipt.json",
+      "source_fetch_receipt_sha256": "eeb07cd1d364ffb2587ba28bfb87705a16750ecd1a990512e08b23926b891089",
+      "filter_module_path": "scripts/filter_ashare_signals_for_standard_retail.py",
+      "filter_module_sha256": "9acb475c271e22fcb6199803fdd8f0cc7ace9ffb633b322219d3d5a42adeabaa",
+      "rule": "Keep only SH_MAIN/SZ_MAIN and exclude ST/*ST/S*ST/SST, PT, delisting-marker names and every extra-permission/unknown board.",
+      "expected_rows": 3111,
+      "expected_board_counts": {
+        "SH_MAIN": 1666,
+        "SZ_MAIN": 1445
+      }
+    },
+    "minute_bars": {
+      "endpoint": "https://quotes.sina.cn/cn/api/jsonp_v2.php/=/CN_MarketDataService.getKLineData",
+      "fallback_endpoint_shape": "https://quotes.sina.cn/cn/api/jsonp_v2.php/var%20_{symbol}_60_1658852984203=/CN_MarketDataService.getKLineData",
+      "params": {
+        "scale": "60",
+        "ma": "no",
+        "datalen": "1970"
+      },
+      "raw_timestamp_semantics": "Must prove close-labelled 60m slots exactly at 10:30, 11:30, 14:00 and 15:00 Asia/Shanghai; source open_time is the close-label minus one hour.",
+      "cutoff_close_cst": "2026-09-02T15:00:00+08:00",
+      "reference_symbol": "sh000001",
+      "minimum_reference_60m_rows": 640,
+      "minimum_reference_complete_sessions": 160
+    },
+    "qfq": {
+      "factor_endpoint": "https://finance.sina.com.cn/realstock/company/{symbol}/qfq.js",
+      "algorithm": "Parse strict factor data without eval; for each session select the latest factor_date not later than the bar date, divide raw OHLC by qfq_factor, round to two decimals, and leave volume/amount unchanged.",
+      "causality": "No later-dated factor row may be selected for a bar. The snapshot remains the byte authority because QFQ history can revise after later corporate actions.",
+      "missing_factor": "Fail that symbol closed; never substitute factor 1.0."
+    },
+    "session_4h": {
+      "aggregator_path": "yoyo/data/ashare_sessions.py",
+      "aggregator_sha256": "78d1801d4a46052c2ce63e85dda044299ac5c06a27e79dd54770922a2dabfdec",
+      "definition": "Aggregate exactly the four same-date 60m rows at 10:30, 11:30, 14:00 and 15:00 into one four-trading-hour session bar with open_time=09:30 and available_at=15:00; never build a partial day or a continuous wall-clock 4h bucket."
+    },
+    "preflight": {
+      "sequence": "Write #11/#12 consumption-start ledger, fetch Sina sh000001 only, verify at least 640 exact rows and 160 complete sessions through 15:00, then fetch two fixed QFQ sentinels and their Eastmoney overlap. Only after every check passes may the 3,111-name fanout begin.",
+      "sentinels": ["sh600000", "sz000001"],
+      "reference_eastmoney_overlap": "At least 100 exact shared close labels; median absolute close relative difference <=0.001 and p99 <=0.005.",
+      "qfq_sentinel_eastmoney_overlap": "For each sentinel, at least 100 exact shared close labels; median absolute OHLC relative difference <=0.003 and p99 <=0.02.",
+      "failure_rule": "Any failure is a consumed #11/#12 source failure, not zero signals. Do not switch provider, relax parity, or request individual symbols."
+    },
+    "eligibility": {
+      "1h": "Latest close must be 2026-09-02 15:00 CST and the trailing 160 1h close labels must exactly match the frozen Sina reference schedule.",
+      "4h": "Latest complete session must close 2026-09-02 15:00 CST and the trailing 160 session closes must exactly match the aggregated frozen Sina reference dates.",
+      "snapshot_gate": "Each timeframe needs >=80% coverage of the 3,111-name universe; same-source minute/factor network failures must not exceed max(10, 1%). No missing bar is filled."
+    },
+    "phase_separation": "Freeze reference, parity evidence, universe and all QFQ hourly CSV bytes before model load. Scan and verification have zero network reads."
+  },
+  "model_contract": {
+    "name": "Grade-A 8k positives + 24k negatives, full40, native 1280",
+    "weights_path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+    "weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "renderer_path": "yoyo/layers/l1_detection/render.py",
+    "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+    "ma_builder_path": "yoyo/layers/l1_detection/data.py",
+    "ma_builder_sha256": "bce9af28b00d1deb8346cafb19654e18d4987d42b3849b420a9739b5e9aeb265",
+    "imgsz": 1280,
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "window_lengths": [18, 19],
+    "allowed_core_lengths": [4, 5],
+    "allowed_confirmation_bars": [2, 3, 4, 5, 6, 7, 8, 9],
+    "same_symbol_event_gap_bars": 5,
+    "class_map": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "causality": "For every endpoint, features, exact W18/W19 pixels and semantic decisions use only rows whose close/availability is at or before that endpoint."
+  },
+  "semantic_gate_contract": {
+    "module_path": "yoyo/layers/l1_detection/semantic_gate.py",
+    "module_sha256": "eda78c7a2a548bb7485aa1c7ca1f6a8ce6ee7805846aa6ba2e8e09789130fe5f",
+    "threshold_source_path": "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/preregistration.json",
+    "threshold_source_sha256": "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da",
+    "reuse": "Exact frozen causal-prefix gate; no grid, tuning or post-result change.",
+    "direction_flip_null": "Hold box/time/confidence fixed and recompute each structural proposal with LONG/SHORT inverted."
+  },
+  "delivery_contract": {
+    "direction": "LONG only",
+    "audit": "Run/count both detector classes, retain SHORT audit rows, never chart or deliver SHORT.",
+    "identifier": "Every delivered row/chart contains six-digit code plus SHxxxxxx or SZxxxxxx search key.",
+    "four_hour_age": "Exactly the five latest complete Sina-reference trading sessions through 2026-09-02; deduplicate under the frozen five-bar gap and record first/latest availability.",
+    "zero_survivor_rule": "Report zero honestly without changing thresholds, source parity, history, access filters or endpoints."
+  },
+  "outputs": {
+    "snapshot": "analysis/output/ashare_1h4h_long_sina_20260902_v2",
+    "results": "experiments/active/exp-ashare-grade-a-yolo-1h4h-long-sina-20260902-v2/results",
+    "report": "analysis/p1_ashare_grade_a_yolo_1h4h_long_sina_20260902.md",
+    "html": "analysis/html/p1_ashare_grade_a_yolo_1h4h_long_sina_20260902.html"
+  },
+  "decision_and_reporting": {
+    "economic_metrics": "Not applicable: OOD detection snapshot without future A-share outcome labels, execution simulation, matched random entries or owner-confirmed A-share Gold. Use the frozen direction-flip semantic null.",
+    "no_retuning": true,
+    "no_cross_timeframe_selection": true
+  },
+  "risk_contract": {
+    "out_of_distribution": true,
+    "reasons": [
+      "Crypto-15m checkpoint applied to A-share 1h and session-4h images.",
+      "Provider, adjustment, market microstructure, session gaps and price limits differ from training.",
+      "The detector requires 2-9 post-core confirmation bars, so outputs are completed-history proposals."
+    ],
+    "language": "OOD research proposals/model hits only; never recommendations, expected returns or profit probabilities."
+  },
+  "safety": {
+    "holdout_consumed": true,
+    "holdout_consumption_numbers_for_checkpoint": {
+      "1h": 11,
+      "4h": 12
+    },
+    "training": false,
+    "threshold_or_weight_change": false,
+    "active_or_frozen_change": false,
+    "promotion": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "telegram_send": false,
+    "order_action": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}

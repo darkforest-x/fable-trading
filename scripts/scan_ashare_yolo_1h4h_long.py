@@ -1034,7 +1034,7 @@ def render_event(
     footer_y = 926
     _put_text(canvas, "HOW TO READ", (28, footer_y), scale=0.64, thickness=2)
     bar_definition = (
-        "one completed Eastmoney 60m row"
+        f"one completed {row.get('source_provider', 'Eastmoney')} 60m row"
         if timeframe == "1h"
         else "one complete 09:30-15:00 session aggregated from four 60m rows"
     )
