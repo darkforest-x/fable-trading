@@ -10660,3 +10660,146 @@ artifacts:
     config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
     data_cutoff: "2026-09-02T03:30:00Z"
     notes: Self-contained HTML with all four overview pages embedded as base64 and UTF-8 verified.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-signals
+    artifact_type: manifest
+    role: standard_retail_sh_sz_main_board_delivery_ledger_18_events
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7a432b5c988f2e2439b4e2f929e89e03077a7ba7"
+    source_path: experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/signals.csv
+    sha256: "5a05e66df2abaa8583408216e6717a27f83e415fd68662826d01d1c7d786767c"
+    size_bytes: 28874
+    storage_uri: "file://experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/signals.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7a432b5c988f2e2439b4e2f929e89e03077a7ba7"
+    config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: >-
+      Deterministic post-filter of the frozen 31-event ledger: 18 SH/SZ
+      main-board rows retained (1 LONG / 17 SHORT). Board access is not proof
+      of account-specific tradability or model validity.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-excluded
+    artifact_type: manifest
+    role: extra_board_permission_exclusion_ledger_13_events
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7a432b5c988f2e2439b4e2f929e89e03077a7ba7"
+    source_path: experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/excluded.csv
+    sha256: "5d62ab451f10c4d45ecd41ebf3183e89e1b8535524e274439e5d7335cb701821"
+    size_bytes: 20953
+    storage_uri: "file://experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/excluded.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7a432b5c988f2e2439b4e2f929e89e03077a7ba7"
+    config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: BSE 7, STAR 4 and ChiNext 2 excluded because a basic SH/SZ account does not imply those additional board permissions.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-summary
+    artifact_type: manifest
+    role: standard_retail_filter_scope_counts_sources_and_safety_flags
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7a432b5c988f2e2439b4e2f929e89e03077a7ba7"
+    source_path: experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/summary.json
+    sha256: "35509448bda8c86a8331e08e4322f01aa37e1fde972a811b53924ccbb0cfb802"
+    size_bytes: 1890
+    storage_uri: "file://experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7a432b5c988f2e2439b4e2f929e89e03077a7ba7"
+    config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: No network read, model inference, threshold change or additional holdout consumption; production_eligible=false and tradability_proven=false.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-verification
+    artifact_type: manifest
+    role: independent_standard_retail_derivative_integrity_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7a432b5c988f2e2439b4e2f929e89e03077a7ba7"
+    source_path: experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/verification.json
+    sha256: "0968e315e65eec408afffdf9964cc60f61c6d693916b1252f836b63aece1490c"
+    size_bytes: 394
+    storage_uri: "file://experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/verification.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7a432b5c988f2e2439b4e2f929e89e03077a7ba7"
+    config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: Passed 18 chart SHA checks, two overview pixel checks and archive CRC with zero inference/network reads.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-chart-pack
+    artifact_type: manifest
+    role: standard_retail_original_chart_bundle_18_events
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7a432b5c988f2e2439b4e2f929e89e03077a7ba7"
+    source_path: experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/standard_retail_mainboard_charts_18.zip
+    sha256: "c87d3a743347befb197aacb07ad279c1a452d13377e3ea2088f674c7d499ffe8"
+    size_bytes: 4434976
+    storage_uri: "file://experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/standard_retail_mainboard_charts_18.zip"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7a432b5c988f2e2439b4e2f929e89e03077a7ba7"
+    config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: Eighteen original per-event PNGs plus the filtered ledgers, summary, verification and two overview pages; archive CRC passed.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-report
+    artifact_type: report
+    role: canonical_standard_retail_filter_and_telegram_delivery_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a1a211a7af5659de8f3d200b1bb3fa2153943bab"
+    source_path: analysis/p1_15m_ashare_grade_a_yolo_latest_standard_retail_20260902.md
+    sha256: "240aa037883f50c09209e204b3dff23a954d6baa1ba6def9eb4d4b0f9831951e"
+    size_bytes: 8462
+    storage_uri: "repo://analysis/p1_15m_ashare_grade_a_yolo_latest_standard_retail_20260902.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a1a211a7af5659de8f3d200b1bb3fa2153943bab"
+    config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: Chinese source report covering official board-access rules, all retained/excluded identities, risks, reproducibility and completed Telegram delivery.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-html
+    artifact_type: report
+    role: owner_facing_self_contained_standard_retail_delivery_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a1a211a7af5659de8f3d200b1bb3fa2153943bab"
+    source_path: analysis/html/p1_15m_ashare_grade_a_yolo_latest_standard_retail_20260902.html
+    sha256: "7f4bf29a0febb0c2caa7e00c087062768df7c6bc9c29ecd7c6f039a5590b3f1a"
+    size_bytes: 1216017
+    storage_uri: "repo://analysis/html/p1_15m_ashare_grade_a_yolo_latest_standard_retail_20260902.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a1a211a7af5659de8f3d200b1bb3fa2153943bab"
+    config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: Self-contained UTF-8 HTML with both standard-retail overview pages embedded and Telegram 18/18 receipt evidence.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-telegram-receipt
+    artifact_type: manifest
+    role: owner_authorized_resumable_telegram_document_delivery_receipt_18_of_18
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a1a211a7af5659de8f3d200b1bb3fa2153943bab"
+    source_path: experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/telegram_delivery_receipt.json
+    sha256: "76bca704414455613169834e2e646da01e5e1a3f04d4ac6d379cc40e41fc4122"
+    size_bytes: 10802
+    storage_uri: "repo://experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/telegram_delivery_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f7ed7398c60468f9b9d28be8be37d01e0c681625"
+    config_hash: "5d8002ff8bd94cf60a7c441ca01489dd5b07c03b366a33f8294ed5d6658c78ad"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: >-
+      Owner authorized only the retained detection-original delivery. Telegram
+      sendDocument completed 18/18 with one local SHA identity per action, no
+      token/chat-id material in the receipt, no additional holdout read and no
+      trading or production mutation.

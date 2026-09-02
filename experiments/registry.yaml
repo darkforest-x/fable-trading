@@ -3327,7 +3327,12 @@ experiments:
       chart pixel/SHA checks with zero network reads and zero model inference.
       Accepted means the frozen snapshot and evidence chain completed as
       preregistered; the cross-market model remains unvalidated and ineligible
-      for production.
+      for production. A later deterministic board-permission delivery filter
+      retained 18 SH/SZ main-board rows (1 LONG / 17 SHORT) and excluded 13
+      rows (BSE 7 / STAR 4 / ChiNext 2). Owner then explicitly authorized
+      Telegram delivery of those 18 retained original PNGs; the resumable
+      document receipt completed 18/18 without reading market data or rerunning
+      inference.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
@@ -3341,16 +3346,26 @@ experiments:
       - 15m-ashare-grade-a-yolo-latest-20260902-v1-chart-pack
       - 15m-ashare-grade-a-yolo-latest-20260902-v1-report
       - 15m-ashare-grade-a-yolo-latest-20260902-v1-html
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-signals
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-excluded
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-summary
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-verification
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-chart-pack
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-report
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-html
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-retail-telegram-receipt
     reuse_allowed: false
     notes: >-
       This is the Grade-A full40 native-1280 checkpoint's holdout use #8. The
       checkpoint was trained on crypto, so every A-share output is explicitly
       out-of-distribution completed-history research, not a validated signal.
       No threshold may be changed after seeing results. No training, promotion,
-      deployment, ACTIVE/frozen/forward mutation, Telegram send or order action
-      occurred or is authorized; regular A-share cash positions also cannot
-      generally execute the detector's SHORT class. Seven of eight LONG events
-      came from the 333-symbol BSE subset, an explicit domain-shift warning, not
-      alpha evidence. Direction-flip event survivors were 31 actual versus 0
-      flipped (two-sided exact p=9.313225746e-10); this checks semantic direction
-      only and is not a return or precision test.
+      deployment, ACTIVE/frozen/forward mutation or order action occurred or is
+      authorized. The later Owner message "把检测原图发到 tg" authorized only
+      the 18-chart standard-retail Telegram delivery recorded above. Regular
+      A-share cash positions also cannot generally execute the detector's SHORT
+      class. Seven of eight original LONG events came from the 333-symbol BSE
+      subset, an explicit domain-shift warning, not alpha evidence.
+      Direction-flip event survivors were 31 actual versus 0 flipped (two-sided
+      exact p=9.313225746e-10); this checks semantic direction only and is not a
+      return or precision test.
