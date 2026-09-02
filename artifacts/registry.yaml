@@ -10517,3 +10517,146 @@ artifacts:
     config_hash: "9b916c8ac698aecc95d88a0c688a675a8f489eea37954c99625cd104e2041952"
     data_cutoff: "2026-09-01T12:00:00Z"
     notes: Direct browser delivery of the Owner rejection, existing-feature diagnosis, risks and next allowed P0/P1 action.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-prereg
+    artifact_type: config
+    role: owner_authorized_holdout_use_8_cross_market_scan_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "062956425cff065cc430b164796c8c2741b7ea45"
+    source_path: experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/preregistration.json
+    sha256: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    size_bytes: 7883
+    storage_uri: "repo://experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/preregistration.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "062956425cff065cc430b164796c8c2741b7ea45"
+    config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: >-
+      Written and committed before opening the latest A-share bars. Freezes
+      full沪深京 universe, 11:30 CST cutoff, QFQ snapshot, native-1280
+      checkpoint, W18/W19, conf/NMS, structural and semantic gates, direction
+      flip null, no-retuning rule and checkpoint holdout consumption #8.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-fetch-receipt
+    artifact_type: manifest
+    role: frozen_all_ashare_qfq_15m_snapshot_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "062956425cff065cc430b164796c8c2741b7ea45"
+    source_path: analysis/output/ashare_15m_yolo_latest_20260902_v1/fetch_receipt.json
+    sha256: "eeb07cd1d364ffb2587ba28bfb87705a16750ecd1a990512e08b23926b891089"
+    size_bytes: 2358247
+    storage_uri: "file://analysis/output/ashare_15m_yolo_latest_20260902_v1/fetch_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "062956425cff065cc430b164796c8c2741b7ea45"
+    config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: >-
+      Frozen Eastmoney-via-pinned-AKShare request lineage, 5,908-row universe,
+      5,494 per-symbol CSV SHA receipts, exact same-source schedule checks and
+      all 414 exclusions. Raw snapshot bytes stay local and are not git assets.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-signals
+    artifact_type: manifest
+    role: deduped_cross_market_research_event_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "062956425cff065cc430b164796c8c2741b7ea45"
+    source_path: experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/signals.csv
+    sha256: "8d8db040ee634714257d03097fbd6add2c7699ea55df1d2804d52fb8495ec541"
+    size_bytes: 47835
+    storage_uri: "file://experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/signals.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "062956425cff065cc430b164796c8c2741b7ea45"
+    config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: Thirty-one deduped OOD completed-history proposals, 8 LONG and 23 SHORT; not validated A-share signals or recommendations.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-summary
+    artifact_type: manifest
+    role: frozen_scan_summary_and_full_event_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: "062956425cff065cc430b164796c8c2741b7ea45"
+    source_path: experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/summary.json
+    sha256: "d65578e6b678d4c526f4e6e5fb713c06ca34fcbb358fdb5889e54df411a25e20"
+    size_bytes: 93703
+    storage_uri: "file://experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "062956425cff065cc430b164796c8c2741b7ea45"
+    config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: Full funnel, immutable model contract, event evidence and semantic-failure counts; holdout use #8.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-verification
+    artifact_type: manifest
+    role: independent_offline_replay_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "062956425cff065cc430b164796c8c2741b7ea45"
+    source_path: experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/verification.json
+    sha256: "996177571b9a18fe5bb2b21b6ce72cca68095baf7120691a8577dc2e4dea5a00"
+    size_bytes: 699
+    storage_uri: "file://experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/verification.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "062956425cff065cc430b164796c8c2741b7ea45"
+    config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: Passed 5,494 candle SHA, 281 input-pixel, 281 semantic-decision and 31 chart pixel/SHA checks without network or inference.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-chart-pack
+    artifact_type: manifest
+    role: owner_review_chart_bundle_31_events
+    source_repo: darkforest-x/fable-trading
+    source_commit: "062956425cff065cc430b164796c8c2741b7ea45"
+    source_path: experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/ashare_signal_charts_31.zip
+    sha256: "8b628f93588d6d6e90a6589081d689c995556dc25f5f6b3fbf13946aadc442ed"
+    size_bytes: 7201639
+    storage_uri: "file://experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/ashare_signal_charts_31.zip"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "062956425cff065cc430b164796c8c2741b7ea45"
+    config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: Thirty-one individual evidence charts, four overview pages, signals.csv, summary.json and verification.json; archive integrity passed unzip -t.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-report
+    artifact_type: report
+    role: canonical_cross_market_scan_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "033c363a356ad71a32ab75e7ee3a9443c57512a3"
+    source_path: analysis/p1_15m_ashare_grade_a_yolo_latest_20260902.md
+    sha256: "4f322181292279a2efc3a1a65f57927d2e65e6e29fa23fbb0cdb004752bea4ea"
+    size_bytes: 14456
+    storage_uri: "repo://analysis/p1_15m_ashare_grade_a_yolo_latest_20260902.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "033c363a356ad71a32ab75e7ee3a9443c57512a3"
+    config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: Canonical Chinese report with all 31 names, data lineage, null control, limitations, source options, risks and reproduction commands.
+
+  - artifact_id: 15m-ashare-grade-a-yolo-latest-20260902-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_report_with_four_overviews
+    source_repo: darkforest-x/fable-trading
+    source_commit: "033c363a356ad71a32ab75e7ee3a9443c57512a3"
+    source_path: analysis/html/p1_15m_ashare_grade_a_yolo_latest_20260902.html
+    sha256: "607190417d2bd82e33048fd64df6ab95e987f9b62d073676a584ce985f43f50c"
+    size_bytes: 3062361
+    storage_uri: "repo://analysis/html/p1_15m_ashare_grade_a_yolo_latest_20260902.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "033c363a356ad71a32ab75e7ee3a9443c57512a3"
+    config_hash: "77fbdf4ee334b8d0a7b9b56e1d39e7c380b9c814c2d20cb4af2ac7fdf8094e7e"
+    data_cutoff: "2026-09-02T03:30:00Z"
+    notes: Self-contained HTML with all four overview pages embedded as base64 and UTF-8 verified.

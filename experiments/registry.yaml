@@ -3302,3 +3302,55 @@ experiments:
       later Owner verdict rejects the entire delivered 4h signal surface; it
       does not authorize treating the 34 images as individually labeled
       negatives or tuning another gate on this spent holdout.
+
+  - experiment_id: exp-15m-ashare-grade-a-yolo-latest-20260902-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "062956425cff065cc430b164796c8c2741b7ea45"
+    status: accepted
+    question: >-
+      On one frozen all-A-share 15-minute market snapshot ending at the latest
+      completed 2026-09-02 morning bar, which latest-endpoint windows produce
+      structurally legal Grade-A YOLO proposals and which survive the already
+      frozen causal semantic gate?
+    single_variable: >-
+      Change only the inference market domain from crypto 15m to mainland
+      A-share 15m. The checkpoint, renderer, native 1280 input, W18/W19,
+      conf=0.25, NMS=0.70, core4/5, post2-9, latest-endpoint rule and frozen
+      semantic thresholds remain unchanged.
+    result: >-
+      completed_research_snapshot_only. The frozen 2026-09-02 11:30 CST
+      all-A-share universe contained 5,908 rows; 5,494 (92.99%) passed exact
+      freshness and last-160-bar schedule parity. W18/W19 produced 288 raw
+      boxes, 281 structurally legal boxes, 47 semantic boxes and 31 deduped
+      completed-history events (8 LONG / 23 SHORT). Independent replay passed
+      all 5,494 candle SHA, 281 structural-pixel, 281 semantic-decision and 31
+      chart pixel/SHA checks with zero network reads and zero model inference.
+      Accepted means the frozen snapshot and evidence chain completed as
+      preregistered; the cross-market model remains unvalidated and ineligible
+      for production.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ashare_grade_a_yolo_latest_20260902.md
+    artifacts:
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-prereg
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-fetch-receipt
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-signals
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-summary
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-verification
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-chart-pack
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-report
+      - 15m-ashare-grade-a-yolo-latest-20260902-v1-html
+    reuse_allowed: false
+    notes: >-
+      This is the Grade-A full40 native-1280 checkpoint's holdout use #8. The
+      checkpoint was trained on crypto, so every A-share output is explicitly
+      out-of-distribution completed-history research, not a validated signal.
+      No threshold may be changed after seeing results. No training, promotion,
+      deployment, ACTIVE/frozen/forward mutation, Telegram send or order action
+      occurred or is authorized; regular A-share cash positions also cannot
+      generally execute the detector's SHORT class. Seven of eight LONG events
+      came from the 333-symbol BSE subset, an explicit domain-shift warning, not
+      alpha evidence. Direction-flip event survivors were 31 actual versus 0
+      flipped (two-sided exact p=9.313225746e-10); this checks semantic direction
+      only and is not a return or precision test.

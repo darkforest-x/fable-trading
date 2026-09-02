@@ -2,6 +2,25 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-02 — 最新全 A 股扫描已完成，仅作 OOD 图册）
+
+Owner 要求用现有模型扫描“最新大 A”并给出命中图。本轮先在 main 提交预注册与 builder
+`062956425c`，随后冻结 2026-09-02 11:30 CST 已完成的沪深京 15m 前复权快照。5,908 只
+宇宙中 5,494 只通过最新尾根与 last-160 同源日程 parity（92.99%），414 只 fail-closed；
+W18/W19 共 10,988 张输入，经 288 原框 → 281 结构框 → 47 语义框 → 31 去重事件，最终
+**8 LONG / 23 SHORT**。独立 replay 的 K 线 SHA、像素、语义决定与 31 张图全部通过。
+
+这批是 crypto checkpoint 迁移到 A 股的**分布外 completed-history 研究提案**，不是交易
+信号：全部需要 post7–9，7/8 LONG 又集中在仅占池 6.1% 的北交所，明显有市场 shortcut
+风险。A 股普通现货也不能把 SHORT 当直接卖空指令。完整自包含交付：
+`analysis/html/p1_15m_ashare_grade_a_yolo_latest_20260902.html`；31 张原图包：
+`experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/ashare_signal_charts_31.zip`。
+
+这是 Grade-A full40 native-1280 checkpoint holdout 使用 **#8**。未训练、调参、promote、
+部署、改 ACTIVE/frozen/forward、发 Telegram 或下单，`production_eligible=false`。后续若
+要继续，正确入口是 Owner 先审 31 张形态或另建 A 股时间切分 Gold；不得拿这次已消费的
+快照看结果调门重扫。
+
 ## ⚡ 当前真相（2026-09-02 — 新增因果特征有改善迹象，但未过升级门）
 
 Owner 问 28 个 L2 特征能否继续增加并授权实际试验。本轮冻结真实 Grade-A L1 候选、
