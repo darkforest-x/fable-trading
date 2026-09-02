@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ashare-grade-a-yolo-latest-20260902-v1",
+  "created_at": "2026-09-02T13:08:00+08:00",
+  "stage": "P1_cross_market_completed_history_research",
+  "question": "On one frozen all-A-share 15-minute market snapshot ending at the latest completed 2026-09-02 morning bar, which latest-endpoint windows produce structurally legal Grade-A YOLO proposals and which of those survive the already frozen causal semantic gate?",
+  "owner_authorization": {
+    "conversation_date": "2026-09-02",
+    "verbatim": "用模型跑一下最新大 A 数据，那哪些有信号给图给我看，数据怎么获取，有现成来源热门项目？",
+    "interpreted_action": "Read the latest completed mainland A-share 15-minute bars, run the existing frozen model without tuning, render every surviving proposal, and explain reproducible data-source options.",
+    "holdout_read_authorized": true,
+    "new_training_authorized": false,
+    "promotion_or_production_authorized": false,
+    "order_action_authorized": false
+  },
+  "single_variable": "Change only the inference market domain from the model's crypto 15-minute source domain to mainland A-share 15-minute bars. Keep checkpoint, renderer, image size, W18/W19, confidence, NMS, structural mapping, semantic thresholds and latest-endpoint rule fixed.",
+  "source_contract": {
+    "library_reference": {
+      "project": "akfamily/akshare",
+      "main_commit": "8e95744b79ae22326308ccd2b4e62650c5b53c55",
+      "stock_source_url": "https://github.com/akfamily/akshare/blob/8e95744b79ae22326308ccd2b4e62650c5b53c55/akshare/stock_feature/stock_hist_em.py",
+      "stock_source_sha256": "d2a4c09d55d9362c8c7e58ec82f78d198cf6d2c2daf004033eef42ded915050d",
+      "pagination_source_url": "https://github.com/akfamily/akshare/blob/8e95744b79ae22326308ccd2b4e62650c5b53c55/akshare/utils/func.py",
+      "pagination_source_sha256": "8aa20090f2ba45c7f5407480824209d178957ec7d00434e439bdc4d9001feee7",
+      "note": "The scan uses the documented AKShare request shape with the repository's already pinned requests/pandas stack; it does not install AKShare into the model environment. Eastmoney does not publish a supported public API contract for these endpoints, so availability and field semantics remain an explicitly unverified upstream dependency."
+    },
+    "universe": {
+      "endpoint": "https://82.push2.eastmoney.com/api/qt/clist/get",
+      "fs": "m:0 t:6,m:0 t:80,m:1 t:2,m:1 t:23,m:0 t:81 s:2048",
+      "meaning": "Every Shanghai, Shenzhen and Beijing A-share row returned by the AKShare stock_zh_a_spot_em universe filter at freeze time; no liquidity, name, ST or outcome filter.",
+      "pagination_page_size": 100,
+      "sort_field": "f12"
+    },
+    "bars": {
+      "endpoint": "https://push2his.eastmoney.com/api/qt/stock/kline/get",
+      "period": "15",
+      "adjust": "qfq",
+      "fqt": "1",
+      "requested_rows": 512,
+      "raw_timestamp_semantics": "Expected to be bar-close labels. The fetch must fail closed unless all retained intraday labels match the A-share 15-minute close slots; each label is converted to open_time by subtracting 15 minutes.",
+      "latest_completed_close_time": "2026-09-02T11:30:00+08:00",
+      "latest_completed_open_time": "2026-09-02T11:15:00+08:00",
+      "latest_available_at": "2026-09-02T11:30:00+08:00",
+      "reference_schedule": "SSE Composite secid=1.000001 from the same endpoint and freeze, unadjusted",
+      "eligibility": "A symbol is scorable only when its latest bar equals the frozen cutoff and its last 160 raw close timestamps exactly match the reference schedule. This excludes stale, suspended and irregular histories instead of silently filling bars.",
+      "corporate_action_note": "QFQ is frozen for this snapshot to remove split/dividend discontinuities from the MA geometry. Historical QFQ values can revise after future corporate actions, so exact CSV bytes are the reproducibility authority."
+    },
+    "phase_separation": "Freeze universe and all candle CSV bytes before loading the model. The scan phase has zero network reads."
+  },
+  "model_contract": {
+    "name": "Grade-A 8k positives + 24k negatives, full40, native 1280",
+    "weights_path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+    "weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "renderer_path": "yoyo/layers/l1_detection/render.py",
+    "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+    "ma_builder_path": "yoyo/layers/l1_detection/data.py",
+    "ma_builder_sha256": "bce9af28b00d1deb8346cafb19654e18d4987d42b3849b420a9739b5e9aeb265",
+    "imgsz": 1280,
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "window_lengths": [18, 19],
+    "latest_endpoints_per_symbol": 1,
+    "allowed_core_lengths": [4, 5],
+    "allowed_confirmation_bars": [2, 3, 4, 5, 6, 7, 8, 9],
+    "class_map": {
+      "0": "dense_long",
+      "1": "dense_short"
+    }
+  },
+  "semantic_gate_contract": {
+    "module_path": "yoyo/layers/l1_detection/semantic_gate.py",
+    "module_sha256": "eda78c7a2a548bb7485aa1c7ca1f6a8ce6ee7805846aa6ba2e8e09789130fe5f",
+    "threshold_source_path": "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/preregistration.json",
+    "threshold_source_sha256": "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da",
+    "reuse": "Apply the exact accepted completed-history causal-prefix gate without threshold grids or post-result changes.",
+    "direction_flip_null": "For every structurally legal proposal, hold box/time/confidence fixed and recompute the same gate with LONG and SHORT inverted. Report actual and flipped survival; this is a semantic-direction null, not a return test."
+  },
+  "outputs": {
+    "snapshot": "analysis/output/ashare_15m_yolo_latest_20260902_v1",
+    "results": "experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results",
+    "report": "analysis/p1_15m_ashare_grade_a_yolo_latest_20260902.md",
+    "html": "analysis/html/p1_15m_ashare_grade_a_yolo_latest_20260902.html"
+  },
+  "decision_and_reporting": {
+    "primary_output": "All semantic-gate survivors at the one frozen latest endpoint, sorted by confidence within LONG/SHORT, with one chart per proposal and exact raw-box overlay.",
+    "secondary_output": "Full structural-proposal ledger and rejection reasons; raw YOLO confidence is not a probability of profit.",
+    "economic_metrics": "Not applicable: there are no future A-share outcome labels, execution simulation, matched random entries or owner-confirmed A-share Gold in this snapshot.",
+    "no_retuning": true,
+    "zero_survivor_rule": "Report zero honestly and provide a zero-result overview; do not lower confidence or semantic thresholds."
+  },
+  "risk_contract": {
+    "out_of_distribution": true,
+    "reasons": [
+      "The checkpoint was trained on crypto 15-minute charts, not A shares.",
+      "A shares have session breaks, price limits, corporate actions and different volatility/microstructure.",
+      "Regular A-share cash positions cannot generally execute the model's SHORT class.",
+      "The detector requires 2-9 post-core confirmation bars, so survivors are completed-history proposals rather than fresh onset signals."
+    ],
+    "language": "Call outputs research proposals or model hits, never validated trade signals or recommendations."
+  },
+  "safety": {
+    "holdout_consumed": true,
+    "holdout_consumption_number_for_checkpoint": 8,
+    "training": false,
+    "threshold_or_weight_change": false,
+    "active_or_frozen_change": false,
+    "promotion": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "telegram_send": false,
+    "order_action": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
