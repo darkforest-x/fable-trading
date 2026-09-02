@@ -72,6 +72,13 @@ PREREG = ROOT / "experiments" / "active" / EXPERIMENT_ID / "preregistration.json
 TRANSPORT_RECOVERY = (
     ROOT / "experiments" / "active" / EXPERIMENT_ID / "transport_recovery.json"
 )
+CACHED_PARITY_AUTHORIZATION = (
+    ROOT
+    / "experiments"
+    / "active"
+    / EXPERIMENT_ID
+    / "cached_parity_authorization.json"
+)
 DEFAULT_OUT = ROOT / "analysis/output/ashare_1h4h_long_sina_20260902_v2"
 DEFAULT_RESULTS = ROOT / "experiments" / "active" / EXPERIMENT_ID / "results"
 SINA_PARSER = ROOT / "yoyo/data/sina_ashare.py"
@@ -100,6 +107,9 @@ EXPECTED_AKSHARE_CONS_SHA256 = (
 )
 EXPECTED_TRANSPORT_RECOVERY_SHA256 = (
     "3a4ce5750267c010b75db6671d0679325ce56c0c1a44afe7e172d419a7c3a2c9"
+)
+EXPECTED_CACHED_PARITY_AUTHORIZATION_SHA256 = (
+    "02a6de34d2aa0c5da49f6e32572acab41bf37b6215ea9e89e3faa158bc5b7baa"
 )
 
 SINA_MINUTE_URL = (
@@ -162,6 +172,7 @@ def require_builder_committed() -> str:
         str(Path(__file__).resolve().relative_to(ROOT)),
         str(PREREG.relative_to(ROOT)),
         str(TRANSPORT_RECOVERY.relative_to(ROOT)),
+        str(CACHED_PARITY_AUTHORIZATION.relative_to(ROOT)),
         str(SINA_PARSER.relative_to(ROOT)),
         str(SESSION_AGGREGATOR.relative_to(ROOT)),
         str(SHARED_ORCHESTRATION.relative_to(ROOT)),
@@ -192,6 +203,20 @@ def verify_frozen_contract() -> tuple[dict[str, Any], dict[str, Any]]:
     invariants = recovery.get("frozen_invariants") or {}
     if any(value is not False for value in invariants.values()):
         raise AShareSinaScanError("transport recovery changed a frozen invariant")
+    cached_authorization = read_json(CACHED_PARITY_AUTHORIZATION)
+    if (
+        cached_authorization.get("experiment_id") != EXPERIMENT_ID
+        or sha256_file(CACHED_PARITY_AUTHORIZATION)
+        != EXPECTED_CACHED_PARITY_AUTHORIZATION_SHA256
+    ):
+        raise AShareSinaScanError("cached parity authorization identity drifted")
+    cached_invariants = cached_authorization.get("frozen_invariants") or {}
+    if any(value is not False for value in cached_invariants.values()):
+        raise AShareSinaScanError("cached parity changed a frozen invariant")
+    if cached_authorization["owner_authorization"].get(
+        "new_holdout_configuration_created"
+    ) is not False:
+        raise AShareSinaScanError("cached parity created an unauthorized configuration")
     configs = prereg.get("configuration_consumptions") or []
     actual = [
         (
@@ -634,6 +659,189 @@ def load_hourly(path: Path) -> pd.DataFrame:
     return frame
 
 
+_CACHED_15M_GROUPS: dict[str, tuple[str, ...]] = {
+    "10:30": ("09:45", "10:00", "10:15", "10:30"),
+    "11:30": ("10:45", "11:00", "11:15", "11:30"),
+    "14:00": ("13:15", "13:30", "13:45", "14:00"),
+    "15:00": ("14:15", "14:30", "14:45", "15:00"),
+}
+
+
+def _cached_input(
+    authorization: Mapping[str, Any], key: str
+) -> tuple[Path, Mapping[str, Any]]:
+    item = authorization["cached_inputs"][key]
+    path = (ROOT / str(item["path"])).resolve()
+    if ROOT not in path.parents or not path.is_file():
+        raise AShareSinaScanError(f"cached parity input missing:{key}")
+    if sha256_file(path) != str(item["sha256"]):
+        raise AShareSinaScanError(f"cached parity input SHA drift:{key}")
+    return path, item
+
+
+def _aggregate_cached_eastmoney_15m(
+    path: Path,
+    *,
+    secid: str,
+    expected_rows: int,
+) -> pd.DataFrame:
+    """Aggregate exact four-row A-share 15m groups into parity-only 60m rows."""
+
+    source = pd.read_csv(path, dtype={"secid": str, "adjustment": str})
+    required = {
+        "raw_close_time",
+        "open_time",
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "amount",
+        "adjustment",
+    }
+    if len(source) != expected_rows or not required.issubset(source.columns):
+        raise AShareSinaScanError(f"cached 15m schema/row drift:{secid}")
+    source["raw_close_time"] = pd.to_datetime(
+        source["raw_close_time"], utc=True
+    ).dt.tz_convert("Asia/Shanghai")
+    source["open_time"] = pd.to_datetime(source["open_time"], utc=True)
+    for column in ("open", "high", "low", "close", "volume", "amount"):
+        source[column] = pd.to_numeric(source[column], errors="raise")
+    if source["raw_close_time"].duplicated().any():
+        raise AShareSinaScanError(f"duplicate cached 15m close-label:{secid}")
+    if set(source["adjustment"].astype(str)) != {"qfq"}:
+        raise AShareSinaScanError(f"cached sentinel is not QFQ:{secid}")
+    source.sort_values("raw_close_time", inplace=True, ignore_index=True)
+    source_to_target = {
+        source_slot: target_slot
+        for target_slot, source_slots in _CACHED_15M_GROUPS.items()
+        for source_slot in source_slots
+    }
+    source["source_slot"] = source["raw_close_time"].dt.strftime("%H:%M")
+    unexpected = sorted(set(source["source_slot"]) - set(source_to_target))
+    if unexpected:
+        raise AShareSinaScanError(
+            f"unexpected cached 15m close labels {unexpected}:{secid}"
+        )
+    source["target_slot"] = source["source_slot"].map(source_to_target)
+    source["session_date"] = source["raw_close_time"].dt.date
+    rows: list[dict[str, Any]] = []
+    for (session_date, target_slot), group in source.groupby(
+        ["session_date", "target_slot"], sort=True
+    ):
+        group = group.sort_values("raw_close_time")
+        actual = tuple(group["source_slot"])
+        if actual != _CACHED_15M_GROUPS[str(target_slot)]:
+            continue
+        close_time = pd.Timestamp(group.iloc[-1]["raw_close_time"])
+        first_open = pd.Timestamp(group.iloc[0]["open_time"])
+        if (
+            close_time.strftime("%H:%M") != str(target_slot)
+            or first_open != (close_time - pd.Timedelta(hours=1)).tz_convert("UTC")
+        ):
+            raise AShareSinaScanError(f"cached 15m time semantics drift:{secid}")
+        rows.append(
+            {
+                "raw_close_time": close_time,
+                "open_time": first_open,
+                "open": float(group.iloc[0]["open"]),
+                "high": float(group["high"].max()),
+                "low": float(group["low"].min()),
+                "close": float(group.iloc[-1]["close"]),
+                "volume": float(group["volume"].sum()),
+                "amount": float(group["amount"].sum()),
+                "secid": secid,
+                "adjustment": "qfq",
+            }
+        )
+    result = pd.DataFrame(rows)
+    if len(result) < QFQ_PARITY_MIN_SHARED:
+        raise AShareSinaScanError(
+            f"cached 15m aggregation too short:{secid}:{len(result)}"
+        )
+    result.sort_values("raw_close_time", inplace=True, ignore_index=True)
+    numeric = result[
+        ["open", "high", "low", "close", "volume", "amount"]
+    ].to_numpy(dtype=float)
+    if not np.isfinite(numeric).all():
+        raise AShareSinaScanError(f"non-finite cached 60m OHLCVA:{secid}")
+    body_high = result[["open", "close"]].max(axis=1)
+    body_low = result[["open", "close"]].min(axis=1)
+    if bool((result["high"] < body_high).any()) or bool(
+        (result["low"] > body_low).any()
+    ):
+        raise AShareSinaScanError(f"invalid cached 60m candle bounds:{secid}")
+    return result
+
+
+def _authorized_cached_eastmoney_overlap(
+    secid: str, *, fqt: str, adjustment: str
+) -> pd.DataFrame:
+    """Load the owner-authorized, hash-pinned Eastmoney parity fallback."""
+
+    authorization = read_json(CACHED_PARITY_AUTHORIZATION)
+    if sha256_file(CACHED_PARITY_AUTHORIZATION) != (
+        EXPECTED_CACHED_PARITY_AUTHORIZATION_SHA256
+    ):
+        raise AShareSinaScanError("cached parity authorization SHA drifted")
+    parent_path, parent = _cached_input(
+        authorization, "qfq_parent_fetch_receipt"
+    )
+    mapping = {
+        "1.600000": "qfq_sh600000_15m",
+        "0.000001": "qfq_sz000001_15m",
+    }
+    if secid == REFERENCE_SECID and fqt == "0" and adjustment == "none":
+        path, item = _cached_input(authorization, "unadjusted_reference_60m")
+        frame = load_hourly(path)
+        if len(frame) != int(item["rows"]):
+            raise AShareSinaScanError("cached reference 60m row count drifted")
+        frame["secid"] = secid
+        frame["adjustment"] = "none"
+        derivation = "direct_frozen_60m_bytes"
+    elif secid in mapping and fqt == "1" and adjustment == "qfq":
+        key = mapping[secid]
+        path, item = _cached_input(authorization, key)
+        frame = _aggregate_cached_eastmoney_15m(
+            path, secid=secid, expected_rows=int(item["rows"])
+        )
+        derivation = "exact_four_by_15m_to_60m"
+    else:
+        raise AShareSinaScanError(
+            f"cached parity request outside owner authorization:{secid}:{fqt}"
+        )
+    frame.attrs["transport_receipt"] = {
+        "mode": "owner_authorized_frozen_eastmoney_cache",
+        "source_path": str(path.relative_to(ROOT)),
+        "source_sha256": str(item["sha256"]),
+        "source_rows": int(item["rows"]),
+        "derived_rows_60m": len(frame),
+        "derivation": derivation,
+        "parent_fetch_receipt_path": str(parent_path.relative_to(ROOT)),
+        "parent_fetch_receipt_sha256": str(parent["sha256"]),
+        "authorization_path": str(CACHED_PARITY_AUTHORIZATION.relative_to(ROOT)),
+        "authorization_sha256": EXPECTED_CACHED_PARITY_AUTHORIZATION_SHA256,
+    }
+    return frame
+
+
+def fetch_eastmoney_overlap_with_authorized_cache(
+    secid: str, *, fqt: str, adjustment: str
+) -> pd.DataFrame:
+    """Use online Eastmoney first, then the explicitly authorized frozen cache."""
+
+    try:
+        return fetch_eastmoney_overlap(secid, fqt=fqt, adjustment=adjustment)
+    except Exception as exc:  # noqa: BLE001 - the fallback reason is receipted
+        frame = _authorized_cached_eastmoney_overlap(
+            secid, fqt=fqt, adjustment=adjustment
+        )
+        transport = dict(frame.attrs["transport_receipt"])
+        transport["online_transport_error"] = f"{type(exc).__name__}:{exc}"
+        frame.attrs["transport_receipt"] = transport
+        return frame
+
+
 def aggregate_4h(frame: pd.DataFrame) -> pd.DataFrame:
     """Build exact complete four-trading-hour sessions through the new cutoff."""
 
@@ -825,7 +1033,7 @@ def run_source_preflight(building: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
         east_reference = load_hourly(paths["reference_eastmoney"])
         east_reference_transport = read_json(paths["reference_eastmoney_meta"])
     else:
-        east_reference = fetch_eastmoney_overlap(
+        east_reference = fetch_eastmoney_overlap_with_authorized_cache(
             REFERENCE_SECID, fqt="0", adjustment="none"
         )
         east_reference_transport = dict(
@@ -878,7 +1086,7 @@ def run_source_preflight(building: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
             east = load_hourly(east_path)
             east_transport = read_json(east_meta_path)
         else:
-            east = fetch_eastmoney_overlap(
+            east = fetch_eastmoney_overlap_with_authorized_cache(
                 identity["secid"], fqt="1", adjustment="qfq"
             )
             east_transport = dict(east.attrs.get("transport_receipt") or {})
@@ -922,6 +1130,12 @@ def run_source_preflight(building: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
         "holdout_consumption_numbers_for_checkpoint": {"1h": 11, "4h": 12},
         "transport_recovery_path": str(TRANSPORT_RECOVERY.relative_to(ROOT)),
         "transport_recovery_sha256": EXPECTED_TRANSPORT_RECOVERY_SHA256,
+        "cached_parity_authorization_path": str(
+            CACHED_PARITY_AUTHORIZATION.relative_to(ROOT)
+        ),
+        "cached_parity_authorization_sha256": (
+            EXPECTED_CACHED_PARITY_AUTHORIZATION_SHA256
+        ),
         "reference_symbol": REFERENCE_SINA_SYMBOL,
         "reference_rows_1h": len(reference),
         "reference_rows_4h": len(reference_4h),
@@ -1015,6 +1229,12 @@ def fetch_snapshot(out: Path, *, workers: int) -> dict[str, Any]:
                 TRANSPORT_RECOVERY.relative_to(ROOT)
             )
             plan["transport_recovery_sha256"] = EXPECTED_TRANSPORT_RECOVERY_SHA256
+            plan["cached_parity_authorization_path"] = str(
+                CACHED_PARITY_AUTHORIZATION.relative_to(ROOT)
+            )
+            plan["cached_parity_authorization_sha256"] = (
+                EXPECTED_CACHED_PARITY_AUTHORIZATION_SHA256
+            )
             write_json(plan_path, plan)
     if len(universe) != shared.EXPECTED_UNIVERSE_ROWS:
         raise AShareSinaScanError("standard-retail universe count drifted")
@@ -1049,6 +1269,12 @@ def fetch_snapshot(out: Path, *, workers: int) -> dict[str, Any]:
             consumption[
                 "transport_recovery_sha256"
             ] = EXPECTED_TRANSPORT_RECOVERY_SHA256
+            consumption["cached_parity_authorization_path"] = str(
+                CACHED_PARITY_AUTHORIZATION.relative_to(ROOT)
+            )
+            consumption["cached_parity_authorization_sha256"] = (
+                EXPECTED_CACHED_PARITY_AUTHORIZATION_SHA256
+            )
             write_json(consumption_path, consumption)
 
     try:
@@ -1243,6 +1469,12 @@ def fetch_snapshot(out: Path, *, workers: int) -> dict[str, Any]:
         "resume_source_commits": list(plan.get("resume_source_commits", [])),
         "transport_recovery_path": str(TRANSPORT_RECOVERY.relative_to(ROOT)),
         "transport_recovery_sha256": EXPECTED_TRANSPORT_RECOVERY_SHA256,
+        "cached_parity_authorization_path": str(
+            CACHED_PARITY_AUTHORIZATION.relative_to(ROOT)
+        ),
+        "cached_parity_authorization_sha256": (
+            EXPECTED_CACHED_PARITY_AUTHORIZATION_SHA256
+        ),
         "owner_authorized_holdout_read": True,
         "holdout_consumption_numbers_for_checkpoint": {"1h": 11, "4h": 12},
         "prior_failed_consumptions": [9, 10],

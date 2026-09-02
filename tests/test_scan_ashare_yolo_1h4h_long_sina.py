@@ -9,6 +9,7 @@ from scripts.scan_ashare_yolo_1h4h_long_sina import (
     CUTOFF_CST,
     PREREG,
     AShareSinaScanError,
+    _authorized_cached_eastmoney_overlap,
     _endpoints,
     _parity_stats,
     _parse_eastmoney_overlap,
@@ -150,6 +151,38 @@ def test_eastmoney_transport_recovery_preserves_same_endpoint(monkeypatch):
     assert "push2his.eastmoney.com:443:[2001:4860:4860::8888]" in curl_command
     assert "fqt=1" in curl_command
     assert "secid=1.600000" in curl_command
+
+
+def test_owner_authorized_cached_parity_inputs_are_hash_pinned_and_long_enough():
+    reference = _authorized_cached_eastmoney_overlap(
+        "1.000001", fqt="0", adjustment="none"
+    )
+    shanghai = _authorized_cached_eastmoney_overlap(
+        "1.600000", fqt="1", adjustment="qfq"
+    )
+    shenzhen = _authorized_cached_eastmoney_overlap(
+        "0.000001", fqt="1", adjustment="qfq"
+    )
+    assert len(reference) == 127
+    assert len(shanghai) == len(shenzhen) == 126
+    assert set(shanghai["raw_close_time"].dt.strftime("%H:%M")) == {
+        "10:30",
+        "11:30",
+        "14:00",
+        "15:00",
+    }
+    assert set(shenzhen["raw_close_time"].dt.strftime("%H:%M")) == {
+        "10:30",
+        "11:30",
+        "14:00",
+        "15:00",
+    }
+    assert reference.attrs["transport_receipt"]["derivation"] == (
+        "direct_frozen_60m_bytes"
+    )
+    assert shanghai.attrs["transport_receipt"]["derivation"] == (
+        "exact_four_by_15m_to_60m"
+    )
 
 
 def test_all_frozen_local_inputs_match_preregistration_without_network():
