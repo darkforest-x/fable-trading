@@ -1,8 +1,10 @@
 import json
+from types import SimpleNamespace
 
 import pandas as pd
 import pytest
 
+from scripts import scan_ashare_yolo_1h4h_long_sina as scanner
 from scripts.scan_ashare_yolo_1h4h_long_sina import (
     CUTOFF_CST,
     PREREG,
@@ -104,6 +106,50 @@ def test_endpoint_contract_is_latest_1h_and_recent_five_sessions():
     frame = pd.DataFrame({"close": range(200)})
     assert _endpoints(frame, "1h") == [199]
     assert _endpoints(frame, "4h") == [195, 196, 197, 198, 199]
+
+
+def test_eastmoney_transport_recovery_preserves_same_endpoint(monkeypatch):
+    payload = {
+        "data": {
+            "klines": [
+                "2026-09-02 10:30,10,10.1,10.3,9.9,100,1000",
+                "2026-09-02 15:00,10.1,10.2,10.4,10.0,200,2000",
+            ]
+        }
+    }
+    commands = []
+
+    def fail_primary(*args, **kwargs):
+        raise ConnectionError("fake-IP route closed")
+
+    def fake_run(command, **kwargs):
+        commands.append(command)
+        if command[0] == "dig":
+            return SimpleNamespace(
+                returncode=0,
+                stdout="push2hisipv6.trafficmanager.cn.\n2001:4860:4860::8888\n",
+                stderr="",
+            )
+        return SimpleNamespace(
+            returncode=0,
+            stdout=json.dumps(payload),
+            stderr="",
+        )
+
+    monkeypatch.setattr(scanner.base, "request_json", fail_primary)
+    monkeypatch.setattr(scanner.subprocess, "run", fake_run)
+    frame = scanner.fetch_eastmoney_overlap(
+        "1.600000", fqt="1", adjustment="qfq"
+    )
+    transport = frame.attrs["transport_receipt"]
+    assert transport["mode"] == "public_ipv6_same_https_endpoint"
+    assert transport["hostname"] == "push2his.eastmoney.com"
+    assert "fake-IP route closed" in transport["primary_transport_error"]
+    curl_command = next(command for command in commands if command[0] == "curl")
+    assert scanner.base.KLINE_URL in curl_command
+    assert "push2his.eastmoney.com:443:[2001:4860:4860::8888]" in curl_command
+    assert "fqt=1" in curl_command
+    assert "secid=1.600000" in curl_command
 
 
 def test_all_frozen_local_inputs_match_preregistration_without_network():

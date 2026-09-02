@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-ashare-grade-a-yolo-1h4h-long-sina-20260902-v2",
+  "recorded_at": "2026-09-02T15:47:30+08:00",
+  "classification": "transport-only recovery before individual-symbol fanout and before model load",
+  "holdout_consumption_numbers_for_checkpoint": {
+    "1h": 11,
+    "4h": 12
+  },
+  "initial_source_commit": "cad046948ce92728caccccac152539739ca0a9c3",
+  "observed_failures": [
+    {
+      "failed_at": "2026-09-02T07:43:58.371049+00:00",
+      "stage": "Eastmoney unadjusted reference overlap",
+      "attempts_inside_request": 6,
+      "error": "ConnectionError: RemoteDisconnected: remote end closed connection without response"
+    },
+    {
+      "failed_at": "2026-09-02T07:44:44.493373+00:00",
+      "stage": "unchanged Eastmoney unadjusted reference overlap resume",
+      "attempts_inside_request": 6,
+      "error": "ConnectionError: RemoteDisconnected: remote end closed connection without response"
+    }
+  ],
+  "state_at_recovery": {
+    "sina_reference_rows": 1970,
+    "sina_reference_first_close_cst": "2024-08-21T14:00:00+08:00",
+    "sina_reference_last_close_cst": "2026-09-02T15:00:00+08:00",
+    "sina_reference_csv_sha256": "0216579f5332637702a8d7ae81415fff5979e6fa29237dd44849c27b7061191c",
+    "individual_universe_fanout_started": false,
+    "model_loaded": false,
+    "signals_computed": false
+  },
+  "diagnosis": {
+    "system_resolution": "push2his.eastmoney.com resolved through the local network layer to an IPv4 fake-IP route that returned an empty reply",
+    "public_dns_aaaa_check": "The same hostname had a public AAAA record",
+    "same_endpoint_ipv6_probe": "HTTP 200 with a 12,712-byte JSON body while preserving HTTPS hostname, SNI, path, headers and query parameters"
+  },
+  "recovery_contract": {
+    "sequence": "Try the preregistered requests transport first. Only after its six bounded attempts fail, resolve a public AAAA record and retry the exact same HTTPS hostname/path/parameters over IPv6 with certificate and hostname verification intact.",
+    "allowed_host": "push2his.eastmoney.com",
+    "allowed_path": "/api/qt/stock/kline/get",
+    "public_dns_server": "1.1.1.1",
+    "transport_fallback": "curl --ipv6 --noproxy '*' --resolve host:443:[validated-public-AAAA]",
+    "persist_transport_receipt": true,
+    "reuse_frozen_sina_reference_sha256": "0216579f5332637702a8d7ae81415fff5979e6fa29237dd44849c27b7061191c"
+  },
+  "frozen_invariants": {
+    "provider_changed": false,
+    "hostname_changed": false,
+    "endpoint_path_changed": false,
+    "request_parameters_changed": false,
+    "cutoff_changed": false,
+    "universe_changed": false,
+    "qfq_algorithm_changed": false,
+    "parity_thresholds_changed": false,
+    "model_or_threshold_changed": false,
+    "new_holdout_configuration_created": false
+  },
+  "safety": {
+    "training": false,
+    "promotion": false,
+    "deployment": false,
+    "telegram_send": false,
+    "order_action": false
+  }
+}

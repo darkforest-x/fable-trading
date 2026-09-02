@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import ipaddress
 import json
 import os
 import shutil
@@ -41,6 +42,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 import cv2
 import numpy as np
@@ -67,6 +69,9 @@ from yoyo.layers.l1_detection.render import ChartTransform, render_chart
 
 EXPERIMENT_ID = "exp-ashare-grade-a-yolo-1h4h-long-sina-20260902-v2"
 PREREG = ROOT / "experiments" / "active" / EXPERIMENT_ID / "preregistration.json"
+TRANSPORT_RECOVERY = (
+    ROOT / "experiments" / "active" / EXPERIMENT_ID / "transport_recovery.json"
+)
 DEFAULT_OUT = ROOT / "analysis/output/ashare_1h4h_long_sina_20260902_v2"
 DEFAULT_RESULTS = ROOT / "experiments" / "active" / EXPERIMENT_ID / "results"
 SINA_PARSER = ROOT / "yoyo/data/sina_ashare.py"
@@ -92,6 +97,9 @@ EXPECTED_AKSHARE_SINA_SHA256 = (
 )
 EXPECTED_AKSHARE_CONS_SHA256 = (
     "435bf1763531d0eb33d9a8ba25fbc9ab3c5bcc11bbd7834978cbdfdec4c0bbb9"
+)
+EXPECTED_TRANSPORT_RECOVERY_SHA256 = (
+    "3a4ce5750267c010b75db6671d0679325ce56c0c1a44afe7e172d419a7c3a2c9"
 )
 
 SINA_MINUTE_URL = (
@@ -153,6 +161,7 @@ def require_builder_committed() -> str:
     relative = [
         str(Path(__file__).resolve().relative_to(ROOT)),
         str(PREREG.relative_to(ROOT)),
+        str(TRANSPORT_RECOVERY.relative_to(ROOT)),
         str(SINA_PARSER.relative_to(ROOT)),
         str(SESSION_AGGREGATOR.relative_to(ROOT)),
         str(SHARED_ORCHESTRATION.relative_to(ROOT)),
@@ -174,6 +183,15 @@ def verify_frozen_contract() -> tuple[dict[str, Any], dict[str, Any]]:
     prereg = read_json(PREREG)
     if prereg.get("experiment_id") != EXPERIMENT_ID:
         raise AShareSinaScanError("preregistration experiment identity drifted")
+    recovery = read_json(TRANSPORT_RECOVERY)
+    if (
+        recovery.get("experiment_id") != EXPERIMENT_ID
+        or sha256_file(TRANSPORT_RECOVERY) != EXPECTED_TRANSPORT_RECOVERY_SHA256
+    ):
+        raise AShareSinaScanError("transport recovery identity drifted")
+    invariants = recovery.get("frozen_invariants") or {}
+    if any(value is not False for value in invariants.values()):
+        raise AShareSinaScanError("transport recovery changed a frozen invariant")
     configs = prereg.get("configuration_consumptions") or []
     actual = [
         (
@@ -308,6 +326,126 @@ def _text_sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def _public_ipv6_addresses(host: str) -> list[str]:
+    """Resolve globally routable AAAA records without the local fake-IP DNS layer."""
+
+    if host != "push2his.eastmoney.com":
+        raise AShareSinaScanError(f"IPv6 transport host is not allowlisted:{host}")
+    completed = subprocess.run(
+        ["dig", "+short", "@1.1.1.1", host, "AAAA"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=15,
+    )
+    if completed.returncode != 0:
+        raise AShareSinaScanError(
+            f"public AAAA lookup failed:{completed.stderr.strip()}"
+        )
+    addresses: list[str] = []
+    for line in completed.stdout.splitlines():
+        candidate = line.strip().rstrip(".")
+        try:
+            address = ipaddress.IPv6Address(candidate)
+        except ipaddress.AddressValueError:
+            continue
+        if address.is_global:
+            addresses.append(str(address))
+    if not addresses:
+        raise AShareSinaScanError(f"no public AAAA record:{host}")
+    return list(dict.fromkeys(addresses))
+
+
+def _request_json_via_public_ipv6(
+    url: str, params: Mapping[str, Any]
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Retry the identical Eastmoney request over validated public IPv6."""
+
+    parsed = urlsplit(url)
+    host = parsed.hostname or ""
+    if (
+        parsed.scheme != "https"
+        or host != "push2his.eastmoney.com"
+        or parsed.path != "/api/qt/stock/kline/get"
+        or parsed.query
+    ):
+        raise AShareSinaScanError("Eastmoney IPv6 URL is outside recovery contract")
+    errors: list[str] = []
+    for address in _public_ipv6_addresses(host):
+        command = [
+            "curl",
+            "--ipv6",
+            "--noproxy",
+            "*",
+            "--resolve",
+            f"{host}:443:[{address}]",
+            "--proto",
+            "=https",
+            "--tlsv1.2",
+            "--connect-timeout",
+            "5",
+            "--max-time",
+            "25",
+            "--retry",
+            "2",
+            "--retry-all-errors",
+            "--retry-delay",
+            "1",
+            "--silent",
+            "--show-error",
+            "--fail-with-body",
+            "--get",
+            "--header",
+            "Accept: application/json,text/plain,*/*",
+            "--header",
+            "Referer: https://quote.eastmoney.com/",
+            "--user-agent",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+            url,
+        ]
+        for key, value in params.items():
+            command.extend(["--data-urlencode", f"{key}={value}"])
+        try:
+            completed = subprocess.run(
+                command,
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=90,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            errors.append(f"{address}:{type(exc).__name__}:{exc}")
+            continue
+        if completed.returncode != 0:
+            errors.append(
+                f"{address}:curl_exit_{completed.returncode}:{completed.stderr.strip()}"
+            )
+            continue
+        try:
+            payload = json.loads(completed.stdout)
+        except json.JSONDecodeError as exc:
+            errors.append(f"{address}:JSONDecodeError:{exc}")
+            continue
+        if not isinstance(payload, dict):
+            errors.append(f"{address}:non_object_JSON")
+            continue
+        return payload, {
+            "mode": "public_ipv6_same_https_endpoint",
+            "hostname": host,
+            "path": parsed.path,
+            "resolved_ipv6": address,
+            "public_dns_server": "1.1.1.1",
+            "certificate_verification": True,
+            "response_sha256": _text_sha256(completed.stdout),
+            "response_chars": len(completed.stdout),
+        }
+    raise AShareSinaScanError(
+        "Eastmoney public-IPv6 transport failed:" + " | ".join(errors)
+    )
+
+
 def fetch_sina_raw(symbol: str) -> tuple[pd.DataFrame, dict[str, Any]]:
     """Fetch one 1970-row Sina 60m JSONP payload, with pinned URL fallback."""
 
@@ -423,21 +561,34 @@ def _parse_eastmoney_overlap(
 def fetch_eastmoney_overlap(secid: str, *, fqt: str, adjustment: str) -> pd.DataFrame:
     """Fetch the frozen short Eastmoney overlap; never use it as model input."""
 
-    payload = base.request_json(
-        base.KLINE_URL,
-        {
-            "fields1": "f1,f2,f3,f4,f5,f6",
-            "fields2": "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61",
-            "ut": "7eea3edcaed734bea9cbfc24409ed989",
-            "klt": "60",
-            "fqt": fqt,
-            "secid": secid,
-            "beg": "0",
-            "end": "20500000",
-            "lmt": "512",
-        },
+    params = {
+        "fields1": "f1,f2,f3,f4,f5,f6",
+        "fields2": "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61",
+        "ut": "7eea3edcaed734bea9cbfc24409ed989",
+        "klt": "60",
+        "fqt": fqt,
+        "secid": secid,
+        "beg": "0",
+        "end": "20500000",
+        "lmt": "512",
+    }
+    primary_error = ""
+    try:
+        payload = base.request_json(base.KLINE_URL, params)
+        transport = {
+            "mode": "repository_requests_default",
+            "hostname": "push2his.eastmoney.com",
+            "path": "/api/qt/stock/kline/get",
+        }
+    except Exception as exc:  # noqa: BLE001 - exact recovery reason is receipted
+        primary_error = f"{type(exc).__name__}:{exc}"
+        payload, transport = _request_json_via_public_ipv6(base.KLINE_URL, params)
+        transport["primary_transport_error"] = primary_error
+    frame = _parse_eastmoney_overlap(
+        payload, secid=secid, adjustment=adjustment
     )
-    return _parse_eastmoney_overlap(payload, secid=secid, adjustment=adjustment)
+    frame.attrs["transport_receipt"] = transport
+    return frame
 
 
 def load_hourly(path: Path) -> pd.DataFrame:
@@ -624,6 +775,7 @@ def _preflight_paths(building: Path) -> dict[str, Path]:
         "dir": preflight,
         "reference_sina": preflight / "reference_sina_60m.csv",
         "reference_eastmoney": preflight / "reference_eastmoney_60m.csv",
+        "reference_eastmoney_meta": preflight / "reference_eastmoney_meta.json",
         "receipt": preflight / "source_preflight.json",
     }
 
@@ -662,13 +814,25 @@ def run_source_preflight(building: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
     reference_4h = aggregate_4h(reference)
     validate_4h(reference_4h, reference_4h, secid=REFERENCE_SECID)
 
-    if paths["reference_eastmoney"].is_file():
+    if paths["reference_eastmoney"].is_file() or paths[
+        "reference_eastmoney_meta"
+    ].is_file():
+        if not (
+            paths["reference_eastmoney"].is_file()
+            and paths["reference_eastmoney_meta"].is_file()
+        ):
+            raise AShareSinaScanError("partial Eastmoney reference parity artifact")
         east_reference = load_hourly(paths["reference_eastmoney"])
+        east_reference_transport = read_json(paths["reference_eastmoney_meta"])
     else:
         east_reference = fetch_eastmoney_overlap(
             REFERENCE_SECID, fqt="0", adjustment="none"
         )
+        east_reference_transport = dict(
+            east_reference.attrs.get("transport_receipt") or {}
+        )
         east_reference.to_csv(paths["reference_eastmoney"], index=False)
+        write_json(paths["reference_eastmoney_meta"], east_reference_transport)
     reference_parity = _parity_stats(
         reference,
         east_reference,
@@ -678,6 +842,7 @@ def run_source_preflight(building: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
         p99_max=REFERENCE_PARITY_P99_MAX,
         label="Sina_vs_Eastmoney_unadjusted_reference",
     )
+    reference_parity["transport_receipt"] = east_reference_transport
 
     sentinel_receipts: list[dict[str, Any]] = []
     sentinel_identities = {
@@ -695,6 +860,7 @@ def run_source_preflight(building: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
         sina_path = paths["dir"] / f"{symbol}_sina_qfq.csv"
         meta_path = paths["dir"] / f"{symbol}_sina_qfq_meta.json"
         east_path = paths["dir"] / f"{symbol}_eastmoney_qfq.csv"
+        east_meta_path = paths["dir"] / f"{symbol}_eastmoney_qfq_meta.json"
         if sina_path.is_file() and meta_path.is_file():
             sina = load_hourly(sina_path)
             meta = read_json(meta_path)
@@ -704,13 +870,20 @@ def run_source_preflight(building: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
             write_json(meta_path, meta)
         validate_1h(sina, reference, secid=identity["secid"])
         validate_4h(aggregate_4h(sina), reference_4h, secid=identity["secid"])
-        if east_path.is_file():
+        if east_path.is_file() or east_meta_path.is_file():
+            if not (east_path.is_file() and east_meta_path.is_file()):
+                raise AShareSinaScanError(
+                    f"partial Eastmoney sentinel parity artifact:{symbol}"
+                )
             east = load_hourly(east_path)
+            east_transport = read_json(east_meta_path)
         else:
             east = fetch_eastmoney_overlap(
                 identity["secid"], fqt="1", adjustment="qfq"
             )
+            east_transport = dict(east.attrs.get("transport_receipt") or {})
             east.to_csv(east_path, index=False)
+            write_json(east_meta_path, east_transport)
         parity = _parity_stats(
             sina,
             east,
@@ -720,6 +893,7 @@ def run_source_preflight(building: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
             p99_max=QFQ_PARITY_P99_MAX,
             label=f"Sina_factor_QFQ_vs_Eastmoney_QFQ_{symbol}",
         )
+        parity["transport_receipt"] = east_transport
         sentinel_receipts.append(
             {
                 "sina_symbol": symbol,
@@ -746,6 +920,8 @@ def run_source_preflight(building: Path) -> tuple[pd.DataFrame, dict[str, Any]]:
         "experiment_id": EXPERIMENT_ID,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "holdout_consumption_numbers_for_checkpoint": {"1h": 11, "4h": 12},
+        "transport_recovery_path": str(TRANSPORT_RECOVERY.relative_to(ROOT)),
+        "transport_recovery_sha256": EXPECTED_TRANSPORT_RECOVERY_SHA256,
         "reference_symbol": REFERENCE_SINA_SYMBOL,
         "reference_rows_1h": len(reference),
         "reference_rows_4h": len(reference_4h),
@@ -786,6 +962,8 @@ def fetch_snapshot(out: Path, *, workers: int) -> dict[str, Any]:
     universe_path = building / "universe.csv"
     plan_path = building / "fetch_plan.json"
     consumption_path = building / "holdout_consumption_started.json"
+    if plan_path.is_file() != universe_path.is_file():
+        raise AShareSinaScanError("partial resumed fetch plan/universe artifact")
     if plan_path.is_file() and universe_path.is_file():
         plan = read_json(plan_path)
         universe = pd.read_csv(universe_path, dtype={"code": str, "secid": str})
@@ -804,6 +982,40 @@ def fetch_snapshot(out: Path, *, workers: int) -> dict[str, Any]:
             "holdout_consumption_numbers_for_checkpoint": {"1h": 11, "4h": 12},
         }
         write_json(plan_path, plan)
+    if (
+        plan.get("experiment_id") != EXPERIMENT_ID
+        or plan.get("cutoff_close_cst") != CUTOFF_CST.isoformat()
+        or plan.get("holdout_consumption_numbers_for_checkpoint")
+        != {"1h": 11, "4h": 12}
+    ):
+        raise AShareSinaScanError("resumed fetch plan identity drifted")
+    initial_source_commit = str(plan["source_commit"])
+    if source_commit != initial_source_commit:
+        recovery = read_json(TRANSPORT_RECOVERY)
+        resume_commits = [str(value) for value in plan.get("resume_source_commits", [])]
+        if source_commit not in resume_commits:
+            preflight_receipt = building / "preflight/source_preflight.json"
+            if any(hourly_dir.glob("*.csv")) or preflight_receipt.is_file():
+                raise AShareSinaScanError(
+                    "new source commit cannot enter after individual fanout authorization"
+                )
+            reference_path = building / "preflight/reference_sina_60m.csv"
+            expected_reference_hash = recovery["recovery_contract"][
+                "reuse_frozen_sina_reference_sha256"
+            ]
+            if (
+                initial_source_commit != recovery["initial_source_commit"]
+                or not reference_path.is_file()
+                or sha256_file(reference_path) != expected_reference_hash
+            ):
+                raise AShareSinaScanError("transport-only resume evidence drifted")
+            resume_commits.append(source_commit)
+            plan["resume_source_commits"] = resume_commits
+            plan["transport_recovery_path"] = str(
+                TRANSPORT_RECOVERY.relative_to(ROOT)
+            )
+            plan["transport_recovery_sha256"] = EXPECTED_TRANSPORT_RECOVERY_SHA256
+            write_json(plan_path, plan)
     if len(universe) != shared.EXPECTED_UNIVERSE_ROWS:
         raise AShareSinaScanError("standard-retail universe count drifted")
     if not consumption_path.is_file():
@@ -818,10 +1030,26 @@ def fetch_snapshot(out: Path, *, workers: int) -> dict[str, Any]:
                 "warning": "A failed source/preflight/model run still consumes #11/#12.",
             },
         )
-    elif read_json(consumption_path).get(
-        "holdout_consumption_numbers_for_checkpoint"
-    ) != {"1h": 11, "4h": 12}:
-        raise AShareSinaScanError("resumed consumption ledger drifted")
+    else:
+        consumption = read_json(consumption_path)
+        if consumption.get("holdout_consumption_numbers_for_checkpoint") != {
+            "1h": 11,
+            "4h": 12,
+        }:
+            raise AShareSinaScanError("resumed consumption ledger drifted")
+        if source_commit != str(consumption.get("source_commit")):
+            if source_commit not in plan.get("resume_source_commits", []):
+                raise AShareSinaScanError("unrecorded source commit entered resume")
+            consumption["resume_source_commits"] = list(
+                plan["resume_source_commits"]
+            )
+            consumption["transport_recovery_path"] = str(
+                TRANSPORT_RECOVERY.relative_to(ROOT)
+            )
+            consumption[
+                "transport_recovery_sha256"
+            ] = EXPECTED_TRANSPORT_RECOVERY_SHA256
+            write_json(consumption_path, consumption)
 
     try:
         reference_1h, preflight = run_source_preflight(building)
@@ -1011,6 +1239,10 @@ def fetch_snapshot(out: Path, *, workers: int) -> dict[str, Any]:
         "experiment_id": EXPERIMENT_ID,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_commit": source_commit,
+        "initial_source_commit": initial_source_commit,
+        "resume_source_commits": list(plan.get("resume_source_commits", [])),
+        "transport_recovery_path": str(TRANSPORT_RECOVERY.relative_to(ROOT)),
+        "transport_recovery_sha256": EXPECTED_TRANSPORT_RECOVERY_SHA256,
         "owner_authorized_holdout_read": True,
         "holdout_consumption_numbers_for_checkpoint": {"1h": 11, "4h": 12},
         "prior_failed_consumptions": [9, 10],
