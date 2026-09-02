@@ -1,0 +1,600 @@
+{
+  "active_or_frozen_changed": false,
+  "baseline_reproduction": {
+    "keep_decisions_exact": true,
+    "maximum_absolute_percentile_delta": 1.1102230246251565e-16,
+    "maximum_absolute_score_delta": 9.974659986866641e-17,
+    "maximum_absolute_threshold_delta": 8.304988641238964e-17,
+    "passed": true,
+    "rows": 1021,
+    "tolerance": 1e-12
+  },
+  "decision": "reject",
+  "deployed": false,
+  "experiment_id": "exp-15m-ma-launch-l2-feature-addition-v1",
+  "final_validation_rows_used_for_selection": 0,
+  "forward_state_changed": false,
+  "generated_at": "2026-09-02T00:14:21.843436+00:00",
+  "holdout_rows_read": 0,
+  "metrics": {
+    "baseline_28": {
+      "arms_by_side": {
+        "long": "baseline_28",
+        "short": "baseline_28"
+      },
+      "by_side": {
+        "long": {
+          "added_feature_count": 0,
+          "arm": "baseline_28",
+          "feature_count": 28,
+          "final_validation": {
+            "n": 157,
+            "pool_gross_mean": 0.001494787363670562,
+            "pool_net_mean": -0.000505212636329438,
+            "positive_rate": 0.2929936305732484,
+            "pr_auc": 0.3451905760093202,
+            "roc_auc": 0.5353505679592636,
+            "spearman_score_vs_return": 0.08313311772102366,
+            "top_decile": {
+              "gross_mean": 0.010870123745785085,
+              "n": 15,
+              "net_mean": 0.008870123745785085,
+              "win_rate": 0.26666666666666666
+            }
+          },
+          "fractional_top_decile": {
+            "boundary_fraction": 0.7000000000000011,
+            "boundary_score": 0.003996371673032726,
+            "effective_n": 15.700000000000001,
+            "gross_mean": 0.009983143276244876,
+            "net_mean": 0.007983143276244876,
+            "win_rate": 0.25477707006369427
+          },
+          "frozen_q90": {
+            "gross_mean": 0.014613081292587232,
+            "n": 13,
+            "net_mean": 0.012613081292587232,
+            "pass_rate": 0.08280254777070063,
+            "win_rate": 0.3076923076923077
+          },
+          "outcome_permutation_p": 0.09659034096590341
+        },
+        "short": {
+          "added_feature_count": 0,
+          "arm": "baseline_28",
+          "feature_count": 28,
+          "final_validation": {
+            "n": 85,
+            "pool_gross_mean": 0.005026007285727583,
+            "pool_net_mean": 0.003026007285727583,
+            "positive_rate": 0.29411764705882354,
+            "pr_auc": 0.37541565404266913,
+            "roc_auc": 0.435,
+            "spearman_score_vs_return": 0.10287679807733618,
+            "top_decile": {
+              "gross_mean": 0.012859408258655013,
+              "n": 8,
+              "net_mean": 0.010859408258655013,
+              "win_rate": 0.5
+            }
+          },
+          "fractional_top_decile": {
+            "boundary_fraction": 0.5,
+            "boundary_score": 0.001556039966111348,
+            "effective_n": 8.5,
+            "gross_mean": 0.011848505175688783,
+            "net_mean": 0.009848505175688783,
+            "win_rate": 0.47058823529411764
+          },
+          "frozen_q90": {
+            "gross_mean": 0.0137508102958579,
+            "n": 7,
+            "net_mean": 0.0117508102958579,
+            "pass_rate": 0.08235294117647059,
+            "win_rate": 0.5714285714285714
+          },
+          "outcome_permutation_p": 0.11858814118588142
+        }
+      },
+      "final_validation": {
+        "n": 242,
+        "pool_gross_mean": 0.0027350918817484414,
+        "pool_net_mean": 0.0007350918817484414,
+        "positive_rate": 0.29338842975206614,
+        "pr_auc": 0.3122224925420651,
+        "roc_auc": 0.4972407544683305,
+        "spearman_score_vs_return": 0.10356785450357345,
+        "top_decile": {
+          "gross_mean": 0.011391481969628739,
+          "n": 24,
+          "net_mean": 0.009391481969628739,
+          "win_rate": 0.3333333333333333
+        }
+      },
+      "fractional_top_decile": {
+        "boundary_fraction": 0.44000000000000056,
+        "boundary_score": 0.8738738738738738,
+        "effective_n": 24.200000000000003,
+        "gross_mean": 0.010978862598725941,
+        "net_mean": 0.008978862598725941,
+        "win_rate": 0.33057851239669417
+      },
+      "frozen_q90": {
+        "gross_mean": 0.014311286443731964,
+        "n": 20,
+        "net_mean": 0.012311286443731964,
+        "pass_rate": 0.08264462809917356,
+        "win_rate": 0.4
+      },
+      "matched_control": {
+        "all_assignments_positive": true,
+        "assignments": [
+          {
+            "assignment": 0,
+            "control_net_mean": 0.003015635267474335,
+            "event_minus_control_mean": 0.009295651176257629,
+            "event_net_mean": 0.012311286443731969,
+            "n": 20
+          },
+          {
+            "assignment": 1,
+            "control_net_mean": 0.005459809394533372,
+            "event_minus_control_mean": 0.006851477049198594,
+            "event_net_mean": 0.012311286443731964,
+            "n": 20
+          },
+          {
+            "assignment": 2,
+            "control_net_mean": 0.0007614834786481599,
+            "event_minus_control_mean": 0.011549802965083802,
+            "event_net_mean": 0.012311286443731964,
+            "n": 20
+          },
+          {
+            "assignment": 3,
+            "control_net_mean": -0.003483793856227975,
+            "event_minus_control_mean": 0.015795080299959942,
+            "event_net_mean": 0.01231128644373196,
+            "n": 20
+          },
+          {
+            "assignment": 4,
+            "control_net_mean": -0.001395659341777705,
+            "event_minus_control_mean": 0.013706945785509666,
+            "event_net_mean": 0.012311286443731966,
+            "n": 20
+          },
+          {
+            "assignment": 5,
+            "control_net_mean": -0.002893618698115894,
+            "event_minus_control_mean": 0.015204905141847861,
+            "event_net_mean": 0.012311286443731966,
+            "n": 20
+          },
+          {
+            "assignment": 6,
+            "control_net_mean": 0.0029255870811320155,
+            "event_minus_control_mean": 0.009385699362599951,
+            "event_net_mean": 0.012311286443731962,
+            "n": 20
+          },
+          {
+            "assignment": 7,
+            "control_net_mean": 0.0033922605630450895,
+            "event_minus_control_mean": 0.008919025880686873,
+            "event_net_mean": 0.012311286443731966,
+            "n": 20
+          }
+        ],
+        "complete_assignment_coverage": true,
+        "mean_event_minus_control": 0.01133857345764304,
+        "minimum_pairs_per_assignment": 20,
+        "missing_assignments": [],
+        "required_assignment_count": 8,
+        "selected_event_complete_control_count": 20,
+        "selected_event_complete_coverage": true,
+        "selected_event_count": 20,
+        "selected_event_missing_controls": [],
+        "usable_assignment_count": 8
+      },
+      "outcome_permutation_p": 0.0720927907209279,
+      "representative_rows": 242
+    },
+    "ma_spread_only": {
+      "arms_by_side": {
+        "long": "ma_spread_only",
+        "short": "ma_spread_only"
+      },
+      "by_side": {
+        "long": {
+          "added_feature_count": 0,
+          "arm": "ma_spread_only",
+          "feature_count": 1,
+          "final_validation": {
+            "n": 157,
+            "pool_gross_mean": 0.001494787363670562,
+            "pool_net_mean": -0.000505212636329438,
+            "positive_rate": 0.2929936305732484,
+            "pr_auc": 0.32968636930719536,
+            "roc_auc": 0.5499412455934195,
+            "spearman_score_vs_return": 0.011530947810027503,
+            "top_decile": {
+              "gross_mean": 0.005388921505676359,
+              "n": 15,
+              "net_mean": 0.003388921505676359,
+              "win_rate": 0.5333333333333333
+            }
+          },
+          "fractional_top_decile": {
+            "boundary_fraction": 0.4361111111111111,
+            "boundary_score": 0.0022259171419937397,
+            "effective_n": 15.7,
+            "gross_mean": 0.009934446338572723,
+            "net_mean": 0.007934446338572723,
+            "win_rate": 0.38888888888888895
+          },
+          "frozen_q90": {
+            "gross_mean": 0.009934446338572721,
+            "n": 36,
+            "net_mean": 0.007934446338572721,
+            "pass_rate": 0.22929936305732485,
+            "win_rate": 0.3888888888888889
+          },
+          "outcome_permutation_p": 0.17428257174282571
+        },
+        "short": {
+          "added_feature_count": 0,
+          "arm": "ma_spread_only",
+          "feature_count": 1,
+          "final_validation": {
+            "n": 85,
+            "pool_gross_mean": 0.005026007285727583,
+            "pool_net_mean": 0.003026007285727583,
+            "positive_rate": 0.29411764705882354,
+            "pr_auc": 0.3181412028163262,
+            "roc_auc": 0.5326666666666667,
+            "spearman_score_vs_return": -0.019033772217452442,
+            "top_decile": {
+              "gross_mean": -0.0027015033990080506,
+              "n": 8,
+              "net_mean": -0.004701503399008051,
+              "win_rate": 0.125
+            }
+          },
+          "fractional_top_decile": {
+            "boundary_fraction": 0.7083333333333334,
+            "boundary_score": -0.0009877508844949316,
+            "effective_n": 8.500000000000002,
+            "gross_mean": 0.0012980082430592995,
+            "net_mean": -0.0007019917569407006,
+            "win_rate": 0.24999999999999994
+          },
+          "frozen_q90": {
+            "gross_mean": 0.0012980082430593,
+            "n": 12,
+            "net_mean": -0.0007019917569407001,
+            "pass_rate": 0.1411764705882353,
+            "win_rate": 0.25
+          },
+          "outcome_permutation_p": 0.886011398860114
+        }
+      },
+      "final_validation": {
+        "n": 242,
+        "pool_gross_mean": 0.0027350918817484414,
+        "pool_net_mean": 0.0007350918817484414,
+        "positive_rate": 0.29338842975206614,
+        "pr_auc": 0.3264232526117165,
+        "roc_auc": 0.537723416522527,
+        "spearman_score_vs_return": 0.010044151892400344,
+        "top_decile": {
+          "gross_mean": 0.011004602397095796,
+          "n": 24,
+          "net_mean": 0.009004602397095796,
+          "win_rate": 0.3333333333333333
+        }
+      },
+      "fractional_top_decile": {
+        "boundary_fraction": 0.5041666666666668,
+        "boundary_score": 1.0,
+        "effective_n": 24.200000000000003,
+        "gross_mean": 0.007775336814694366,
+        "net_mean": 0.005775336814694366,
+        "win_rate": 0.3541666666666667
+      },
+      "frozen_q90": {
+        "gross_mean": 0.007775336814694366,
+        "n": 48,
+        "net_mean": 0.005775336814694366,
+        "pass_rate": 0.19834710743801653,
+        "win_rate": 0.3541666666666667
+      },
+      "matched_control": {
+        "all_assignments_positive": false,
+        "assignments": [
+          {
+            "assignment": 0,
+            "control_net_mean": -0.001994635315641928,
+            "event_minus_control_mean": 0.0074664740219761595,
+            "event_net_mean": 0.005471838706334233,
+            "n": 46
+          },
+          {
+            "assignment": 1,
+            "control_net_mean": -0.002142115730376654,
+            "event_minus_control_mean": 0.007613954436710886,
+            "event_net_mean": 0.005471838706334232,
+            "n": 46
+          },
+          {
+            "assignment": 2,
+            "control_net_mean": -0.0037034851155302658,
+            "event_minus_control_mean": 0.0091753238218645,
+            "event_net_mean": 0.005471838706334232,
+            "n": 46
+          },
+          {
+            "assignment": 3,
+            "control_net_mean": -0.003535197221344119,
+            "event_minus_control_mean": 0.009007035927678349,
+            "event_net_mean": 0.005471838706334235,
+            "n": 46
+          },
+          {
+            "assignment": 4,
+            "control_net_mean": -0.0039420085532116955,
+            "event_minus_control_mean": 0.00941384725954593,
+            "event_net_mean": 0.005471838706334233,
+            "n": 46
+          },
+          {
+            "assignment": 5,
+            "control_net_mean": -0.0009296890445839155,
+            "event_minus_control_mean": 0.006401527750918148,
+            "event_net_mean": 0.005471838706334232,
+            "n": 46
+          },
+          {
+            "assignment": 6,
+            "control_net_mean": -0.0003064289822026654,
+            "event_minus_control_mean": 0.005778267688536895,
+            "event_net_mean": 0.005471838706334233,
+            "n": 46
+          },
+          {
+            "assignment": 7,
+            "control_net_mean": 0.0008229807005051351,
+            "event_minus_control_mean": 0.004648858005829098,
+            "event_net_mean": 0.005471838706334232,
+            "n": 46
+          }
+        ],
+        "complete_assignment_coverage": true,
+        "mean_event_minus_control": 0.0074381611141324955,
+        "minimum_pairs_per_assignment": 46,
+        "missing_assignments": [],
+        "required_assignment_count": 8,
+        "selected_event_complete_control_count": 46,
+        "selected_event_complete_coverage": false,
+        "selected_event_count": 48,
+        "selected_event_missing_controls": [
+          "grade_a8k_neg24k_full40_1280_INJ_20260426T0600_0067",
+          "grade_a8k_neg24k_full40_1280_ZEC_20260501T1700_0084"
+        ],
+        "usable_assignment_count": 8
+      },
+      "outcome_permutation_p": 0.07539246075392461,
+      "representative_rows": 242
+    },
+    "selected": {
+      "arms_by_side": {
+        "long": "full_110",
+        "short": "plus_ma_family"
+      },
+      "by_side": {
+        "long": {
+          "added_feature_count": 82,
+          "arm": "full_110",
+          "feature_count": 110,
+          "final_validation": {
+            "n": 157,
+            "pool_gross_mean": 0.001494787363670562,
+            "pool_net_mean": -0.000505212636329438,
+            "positive_rate": 0.2929936305732484,
+            "pr_auc": 0.30784977057081014,
+            "roc_auc": 0.43987465726596164,
+            "spearman_score_vs_return": -0.13919709251483822,
+            "top_decile": {
+              "gross_mean": 0.012629482143326393,
+              "n": 15,
+              "net_mean": 0.010629482143326393,
+              "win_rate": 0.3333333333333333
+            }
+          },
+          "fractional_top_decile": {
+            "boundary_fraction": 0.7000000000000011,
+            "boundary_score": 0.007394568053865728,
+            "effective_n": 15.700000000000001,
+            "gross_mean": 0.011577271170993102,
+            "net_mean": 0.009577271170993102,
+            "win_rate": 0.3184713375796178
+          },
+          "frozen_q90": {
+            "gross_mean": 0.008824279500364593,
+            "n": 21,
+            "net_mean": 0.006824279500364593,
+            "pass_rate": 0.1337579617834395,
+            "win_rate": 0.3333333333333333
+          },
+          "outcome_permutation_p": 0.08959104089591041
+        },
+        "short": {
+          "added_feature_count": 26,
+          "arm": "plus_ma_family",
+          "feature_count": 54,
+          "final_validation": {
+            "n": 85,
+            "pool_gross_mean": 0.005026007285727583,
+            "pool_net_mean": 0.003026007285727583,
+            "positive_rate": 0.29411764705882354,
+            "pr_auc": 0.41962600289175506,
+            "roc_auc": 0.4713333333333333,
+            "spearman_score_vs_return": 0.14160217334143985,
+            "top_decile": {
+              "gross_mean": 0.01677773369707255,
+              "n": 8,
+              "net_mean": 0.014777733697072548,
+              "win_rate": 0.625
+            }
+          },
+          "fractional_top_decile": {
+            "boundary_fraction": 0.5,
+            "boundary_score": 0.001219106211817245,
+            "effective_n": 8.5,
+            "gross_mean": 0.016595472685087292,
+            "net_mean": 0.014595472685087292,
+            "win_rate": 0.5882352941176471
+          },
+          "frozen_q90": {
+            "gross_mean": 0.01826625006001971,
+            "n": 10,
+            "net_mean": 0.016266250060019707,
+            "pass_rate": 0.11764705882352941,
+            "win_rate": 0.6
+          },
+          "outcome_permutation_p": 0.0463953604639536
+        }
+      },
+      "final_validation": {
+        "n": 242,
+        "pool_gross_mean": 0.0027350918817484414,
+        "pool_net_mean": 0.0007350918817484414,
+        "positive_rate": 0.29338842975206614,
+        "pr_auc": 0.3123762459701116,
+        "roc_auc": 0.4503335804299481,
+        "spearman_score_vs_return": -0.031994611060211536,
+        "top_decile": {
+          "gross_mean": 0.013289584855115874,
+          "n": 24,
+          "net_mean": 0.011289584855115874,
+          "win_rate": 0.4166666666666667
+        }
+      },
+      "fractional_top_decile": {
+        "boundary_fraction": 0.20000000000000284,
+        "boundary_score": 0.9152542372881356,
+        "effective_n": 24.200000000000003,
+        "gross_mean": 0.013077764389202507,
+        "net_mean": 0.011077764389202507,
+        "win_rate": 0.4132231404958677
+      },
+      "frozen_q90": {
+        "gross_mean": 0.011870076455092053,
+        "n": 31,
+        "net_mean": 0.009870076455092053,
+        "pass_rate": 0.128099173553719,
+        "win_rate": 0.41935483870967744
+      },
+      "matched_control": {
+        "all_assignments_positive": true,
+        "assignments": [
+          {
+            "assignment": 0,
+            "control_net_mean": 0.0017604095736614936,
+            "event_minus_control_mean": 0.008109666881430558,
+            "event_net_mean": 0.009870076455092051,
+            "n": 31
+          },
+          {
+            "assignment": 1,
+            "control_net_mean": -0.001577098044552035,
+            "event_minus_control_mean": 0.011447174499644086,
+            "event_net_mean": 0.009870076455092051,
+            "n": 31
+          },
+          {
+            "assignment": 2,
+            "control_net_mean": 0.001628616991991393,
+            "event_minus_control_mean": 0.008241459463100656,
+            "event_net_mean": 0.009870076455092051,
+            "n": 31
+          },
+          {
+            "assignment": 3,
+            "control_net_mean": -0.002225953091842929,
+            "event_minus_control_mean": 0.012096029546934985,
+            "event_net_mean": 0.009870076455092046,
+            "n": 31
+          },
+          {
+            "assignment": 4,
+            "control_net_mean": -0.006089941015752319,
+            "event_minus_control_mean": 0.01596001747084437,
+            "event_net_mean": 0.009870076455092048,
+            "n": 31
+          },
+          {
+            "assignment": 5,
+            "control_net_mean": 0.002560992837094858,
+            "event_minus_control_mean": 0.007309083617997192,
+            "event_net_mean": 0.009870076455092051,
+            "n": 31
+          },
+          {
+            "assignment": 6,
+            "control_net_mean": 0.004453269044422771,
+            "event_minus_control_mean": 0.00541680741066928,
+            "event_net_mean": 0.00987007645509205,
+            "n": 31
+          },
+          {
+            "assignment": 7,
+            "control_net_mean": 0.004685392860504114,
+            "event_minus_control_mean": 0.005184683594587938,
+            "event_net_mean": 0.00987007645509205,
+            "n": 31
+          }
+        ],
+        "complete_assignment_coverage": true,
+        "mean_event_minus_control": 0.009220615310651133,
+        "minimum_pairs_per_assignment": 31,
+        "missing_assignments": [],
+        "required_assignment_count": 8,
+        "selected_event_complete_control_count": 31,
+        "selected_event_complete_coverage": true,
+        "selected_event_count": 31,
+        "selected_event_missing_controls": [],
+        "usable_assignment_count": 8
+      },
+      "outcome_permutation_p": 0.0463953604639536,
+      "representative_rows": 242
+    }
+  },
+  "orders_placed": false,
+  "phase": "final_validation",
+  "primary_gate": {
+    "aggregate_beats_matched_controls_every_assignment": true,
+    "aggregate_minimum_30_selected_dependency_blocks": true,
+    "aggregate_outcome_permutation_p_lt_0_01": false,
+    "aggregate_selected_q90_net_strictly_better_than_baseline_28": false,
+    "aggregate_selected_top_decile_net_positive": true,
+    "at_least_one_side_selected_an_addition": true,
+    "baseline_reproduction_required": true,
+    "each_side_minimum_10_selected_dependency_blocks": true,
+    "neither_side_selected_q90_net_negative": true,
+    "passed": false
+  },
+  "production_eligible": false,
+  "promoted": false,
+  "protocol": "15m_grade_a_l2_causal_feature_addition_v1",
+  "scored_path": "analysis/output/ma_launch_l2_feature_addition_v1/final_validation_feature_addition_scored.csv",
+  "scored_sha256": "80eb00b3217f3b483de4fec990389675f6d56f884efc97f7c3c54b6b25e10e19",
+  "selected_arms": {
+    "long": "full_110",
+    "short": "plus_ma_family"
+  },
+  "selection_receipt_path": "experiments/active/exp-15m-ma-launch-l2-feature-addition-v1/results/selection_receipt.json",
+  "selection_receipt_sha256": "838a11afa9126c87baee059588a98b38a6c03edb491697c83b5d8fb6cd5cf4fa",
+  "source_commit": "213d626e97962c70ba4c9f4da3ed05af5397fd12",
+  "telegram_sent": false
+}
