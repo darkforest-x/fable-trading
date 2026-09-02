@@ -3,6 +3,7 @@
 > **过滤完成：31 条原始模型命中保留 18 条，剔除 13 条需要额外板块权限的股票。**
 > 本报告把“普通用户”保守定义为：已有基础沪深 A 股交易账户，但不假设已开通科创板、
 > 创业板或北交所权限。原始扫描与图册均未覆盖、未重跑模型。
+> **Telegram 原图交付完成：18/18，均以 PNG document 无压缩发送。**
 
 在保留的 18 条中只有 **1 条 LONG：600336 澳柯玛**；其余 17 条是模型的 SHORT 形态类，
 不能理解为“可以买入”。所有条目仍是 crypto 模型跨市场到 A 股的 OOD 完成态研究提案，
@@ -60,6 +61,23 @@
 
 ![普通沪深主板账户过滤总览第 2 页](../experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/overview_page_02.png)
 
+## Telegram 原图交付
+
+Owner 在本轮明确要求“把检测原图发到 tg”。2026-09-02 14:17 北京时间完成发送：
+
+- 只发送过滤后保留的 18 张逐事件原始 PNG，没有发送被剔除的科创板、创业板或北交所图片；
+- 每张均调用 Telegram document 通道，避免图片通道重压缩；LONG 1 张、SHORT 17 张；
+- 发送前逐张核对冻结清单 SHA256，发送后回执覆盖 18/18，18 个图像哈希互不重复；
+- 交付合同 SHA256 为
+  `5d8002ff8bd94cf60a7c441ca01489dd5b07c03b366a33f8294ed5d6658c78ad`；
+- 回执为
+  `experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/telegram_delivery_receipt.json`，
+  SHA256 为 `76bca704414455613169834e2e646da01e5e1a3f04d4ac6d379cc40e41fc4122`；
+- 回执不保存 bot token 或 chat id；完整交付再次执行会 fail closed，中断时只续发尚无回执的图片。
+
+本次外部动作仅限 Owner 已授权的图片交付；没有下单、模型推理、追加 holdout 读取、阈值/权重
+变更、ACTIVE/frozen/forward 切换、promote 或部署。
+
 ## 被剔除的 13 条
 
 | 原排名 | 代码 | 名称 | 板块 | 类别 | 原因 |
@@ -99,6 +117,12 @@
 python3 scripts/filter_ashare_signals_for_standard_retail.py --build
 python3 scripts/filter_ashare_signals_for_standard_retail.py --verify
 
+# 只校验 Telegram 交付合同，不产生外部动作
+python3 -m scripts.send_15m_ashare_standard_retail_to_telegram
+
+# 只有取得 Owner 对本批文件的明确发送授权后才可执行；完整回执会拒绝重复发送
+python3 -m scripts.send_15m_ashare_standard_retail_to_telegram --send
+
 python3 scripts/md_to_html.py \
   analysis/p1_15m_ashare_grade_a_yolo_latest_standard_retail_20260902.md \
   --out-dir analysis/html
@@ -114,3 +138,4 @@ python3 scripts/md_to_html.py \
 - `experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/excluded.csv`
 - `experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/standard_retail_mainboard_charts_18.zip`
 - `experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/verification.json`
+- `experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/standard_retail_mainboard/telegram_delivery_receipt.json`
