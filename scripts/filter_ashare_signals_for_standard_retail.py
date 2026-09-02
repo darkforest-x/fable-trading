@@ -106,7 +106,9 @@ def restricted_name_reason(name: object) -> str:
     """Return a conservative name-based restriction reason, or an empty string."""
 
     compact = str(name).upper().replace(" ", "")
-    if compact.startswith(("ST", "*ST")):
+    if compact.startswith("PT"):
+        return "particular_transfer_name"
+    if compact.startswith(("ST", "*ST", "S*ST", "SST")):
         return "risk_warning_name"
     if "退" in compact:
         return "delisting_name"

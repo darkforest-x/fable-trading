@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-ashare-grade-a-yolo-1h4h-long-20260902-v1",
+  "created_at": "2026-09-02T14:47:27+08:00",
+  "stage": "P1_cross_timeframe_cross_market_completed_history_research",
+  "question": "On one frozen standard-retail Shanghai/Shenzhen main-board universe, which completed 1h latest-endpoint and recent session-4h windows produce LONG proposals under the unchanged Grade-A YOLO detector and unchanged causal semantic gate?",
+  "owner_authorization": {
+    "conversation_date": "2026-09-02",
+    "verbatim": "给我跑 4h  1h 周期的  只保留多头，  4h 周期可以接受信号已经出来几天的",
+    "interpreted_action": "Run the already frozen detector on completed A-share 1h bars and on completed session-aware 4h bars, retain only LONG semantic survivors for delivery, and allow the 4h scan to look back over the last five complete trading days.",
+    "holdout_read_authorized": true,
+    "new_training_authorized": false,
+    "promotion_or_production_authorized": false,
+    "telegram_send_authorized": false,
+    "order_action_authorized": false
+  },
+  "configuration_consumptions": [
+    {
+      "configuration": "mainland_A_share_1h_latest_completed_endpoint",
+      "holdout_consumption_number_for_checkpoint": 9,
+      "cutoff_close_cst": "2026-09-02T14:00:00+08:00",
+      "latest_endpoints_per_symbol": 1
+    },
+    {
+      "configuration": "mainland_A_share_session_4h_recent_five_complete_days",
+      "holdout_consumption_number_for_checkpoint": 10,
+      "cutoff_close_cst": "2026-09-01T15:00:00+08:00",
+      "latest_endpoints_per_symbol": 5
+    }
+  ],
+  "single_variable_bundle": "Owner explicitly requested two inference timeframes together. For each configuration, change only the inference timeframe and endpoint policy relative to the preceding A-share 15m snapshot. Checkpoint, renderer, image size, W18/W19, confidence, NMS, structural mapping and semantic thresholds remain fixed. The 1h and 4h results are reported separately and are not used to tune one another.",
+  "source_contract": {
+    "library_reference": {
+      "project": "akfamily/akshare",
+      "documentation": "https://akshare.akfamily.xyz/data/stock/stock.html",
+      "main_commit": "8e95744b79ae22326308ccd2b4e62650c5b53c55",
+      "stock_source_url": "https://github.com/akfamily/akshare/blob/8e95744b79ae22326308ccd2b4e62650c5b53c55/akshare/stock_feature/stock_hist_em.py",
+      "stock_source_sha256": "d2a4c09d55d9362c8c7e58ec82f78d198cf6d2c2daf004033eef42ded915050d",
+      "note": "The scan uses the documented AKShare 60-minute request shape with the repository's pinned requests/pandas stack. Eastmoney does not publish a supported public API contract for this endpoint, so returned field semantics and availability remain an explicit upstream limitation."
+    },
+    "universe": {
+      "source_path": "analysis/output/ashare_15m_yolo_latest_20260902_v1/universe.csv",
+      "source_sha256": "9c4bda359560c64f756a9a6079e748a9b0ff46b9a3a21028009050b14c158508",
+      "source_fetch_receipt_path": "analysis/output/ashare_15m_yolo_latest_20260902_v1/fetch_receipt.json",
+      "source_fetch_receipt_sha256": "eeb07cd1d364ffb2587ba28bfb87705a16750ecd1a990512e08b23926b891089",
+      "freeze_time_cst": "2026-09-02T11:30:00+08:00",
+      "filter_module_path": "scripts/filter_ashare_signals_for_standard_retail.py",
+      "filter_module_sha256": "9acb475c271e22fcb6199803fdd8f0cc7ace9ffb633b322219d3d5a42adeabaa",
+      "rule": "Keep only SH_MAIN and SZ_MAIN identities; exclude STAR, ChiNext, BSE, unknown boards, ST/*ST/S*ST/SST, PT and names containing the delisting marker 退.",
+      "expected_rows": 3111,
+      "expected_board_counts": {
+        "SH_MAIN": 1666,
+        "SZ_MAIN": 1445
+      },
+      "note": "This is a conservative board/name eligibility screen for a basic mainland cash-equity account, not proof that a specific broker account can fill an order. Suspensions and stale histories are removed by schedule checks."
+    },
+    "bars": {
+      "endpoint": "https://push2his.eastmoney.com/api/qt/stock/kline/get",
+      "period": "60",
+      "adjust": "qfq",
+      "fqt": "1",
+      "requested_rows": 1024,
+      "raw_timestamp_semantics": "Expected to be 60-minute bar-close labels. Retained labels must be exactly one of 10:30, 11:30, 14:00 and 15:00 Asia/Shanghai. The source row open_time is its close-label minus one hour.",
+      "latest_completed_1h_close_time": "2026-09-02T14:00:00+08:00",
+      "latest_completed_1h_open_time": "2026-09-02T13:00:00+08:00",
+      "latest_completed_session_4h_close_time": "2026-09-01T15:00:00+08:00",
+      "latest_completed_session_4h_open_time": "2026-09-01T09:30:00+08:00",
+      "reference_schedule": "SSE Composite secid=1.000001 from the same endpoint and freeze, unadjusted",
+      "eligibility_1h": "Latest close-label must equal 2026-09-02 14:00 CST and the trailing 160 1h close-labels must exactly match the reference schedule.",
+      "eligibility_4h": "One session-aware 4h bar is exactly four same-date 60m rows at 10:30, 11:30, 14:00 and 15:00 CST, with open=09:30, close/available_at=15:00 and OHLCV aggregated in order. The latest 160 complete session bars must exactly match reference dates through 2026-09-01. Incomplete 2026-09-02 is excluded.",
+      "session_aggregator_path": "yoyo/data/ashare_sessions.py",
+      "session_aggregator_sha256": "78d1801d4a46052c2ce63e85dda044299ac5c06a27e79dd54770922a2dabfdec",
+      "snapshot_gate": "Fail closed unless each timeframe has at least 80% coverage of the 3,111-name frozen universe and same-source network failures do not exceed max(10, 1% of the universe). No alternate provider is allowed after the result is visible.",
+      "session_sources": {
+        "sse": "https://english.sse.com.cn/start/trading/schedule/",
+        "szse": "https://www.szse.cn/www/investor/knowledge/stock/deal/t20191204_572383.html"
+      },
+      "corporate_action_note": "QFQ is frozen for this snapshot. Future corporate actions can revise historical QFQ values, so the saved CSV bytes are the reproducibility authority."
+    },
+    "phase_separation": "Write the holdout-consumption-start ledger before the first current-bar network request; freeze all 60m CSV bytes before loading the model. Scan and verification phases perform zero network reads."
+  },
+  "model_contract": {
+    "name": "Grade-A 8k positives + 24k negatives, full40, native 1280",
+    "weights_path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+    "weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "renderer_path": "yoyo/layers/l1_detection/render.py",
+    "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+    "ma_builder_path": "yoyo/layers/l1_detection/data.py",
+    "ma_builder_sha256": "bce9af28b00d1deb8346cafb19654e18d4987d42b3849b420a9739b5e9aeb265",
+    "feature_causality": "For each endpoint, add_candidate_features uses only OHLCV rows at or before that endpoint; W18/W19 render only those trailing bars. No later bar enters the model image or semantic gate.",
+    "imgsz": 1280,
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "window_lengths": [18, 19],
+    "allowed_core_lengths": [4, 5],
+    "allowed_confirmation_bars": [2, 3, 4, 5, 6, 7, 8, 9],
+    "same_symbol_event_gap_bars": 5,
+    "class_map": {
+      "0": "dense_long",
+      "1": "dense_short"
+    }
+  },
+  "semantic_gate_contract": {
+    "module_path": "yoyo/layers/l1_detection/semantic_gate.py",
+    "module_sha256": "eda78c7a2a548bb7485aa1c7ca1f6a8ce6ee7805846aa6ba2e8e09789130fe5f",
+    "threshold_source_path": "experiments/active/exp-15m-ma-launch-owner-autofill10000-v1/preregistration.json",
+    "threshold_source_sha256": "09523b1a9b9ba3847d974bea36608418060c1534b63bc1f06a3d4976c4bda4da",
+    "reuse": "Apply the exact accepted completed-history causal-prefix gate without threshold grids or post-result changes.",
+    "direction_flip_null": "For each structurally legal proposal, hold box/time/confidence fixed and recompute the gate with LONG and SHORT inverted. Report actual and flipped survival as a semantic-direction null, not a return test."
+  },
+  "delivery_contract": {
+    "direction": "LONG only",
+    "audit": "Run and count both detector classes internally. Do not render or deliver SHORT charts; retain SHORT audit rows and counts so direction filtering is inspectable.",
+    "identifier": "Every delivered row and chart must include the six-digit code and venue-qualified search key SHxxxxxx or SZxxxxxx.",
+    "four_hour_age": "Scan exactly the last five complete reference trading-day endpoints through 2026-09-01. Deduplicate detections within the frozen five-bar same-symbol gap and report first/latest availability.",
+    "zero_survivor_rule": "Report zero honestly and produce a zero-result overview. Do not lower confidence, semantic thresholds, board filters or history requirements."
+  },
+  "outputs": {
+    "snapshot": "analysis/output/ashare_1h4h_long_20260902_v1",
+    "results": "experiments/active/exp-ashare-grade-a-yolo-1h4h-long-20260902-v1/results",
+    "report": "analysis/p1_ashare_grade_a_yolo_1h4h_long_20260902.md",
+    "html": "analysis/html/p1_ashare_grade_a_yolo_1h4h_long_20260902.html"
+  },
+  "decision_and_reporting": {
+    "economic_metrics": "Not applicable: this is an OOD detection snapshot without future A-share outcome labels, execution simulation, matched random entries or owner-confirmed A-share Gold. Use the frozen direction-flip semantic null as the non-directional control.",
+    "no_retuning": true,
+    "no_cross_timeframe_selection": true
+  },
+  "risk_contract": {
+    "out_of_distribution": true,
+    "reasons": [
+      "The checkpoint was trained on crypto 15-minute charts, not A shares or 1h/4h charts.",
+      "Changing timeframe changes candle-shape and moving-average distributions; these are research proposals, not validated trade signals.",
+      "A shares have session breaks, price limits, corporate actions and different volatility/microstructure.",
+      "The detector requires 2-9 post-core confirmation bars, so all survivors are completed-history proposals rather than fresh onset signals."
+    ],
+    "language": "Call outputs OOD research proposals or model hits, never recommendations or profit probabilities."
+  },
+  "safety": {
+    "holdout_consumed": true,
+    "holdout_consumption_numbers_for_checkpoint": {
+      "1h": 9,
+      "4h": 10
+    },
+    "training": false,
+    "threshold_or_weight_change": false,
+    "active_or_frozen_change": false,
+    "promotion": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "telegram_send": false,
+    "order_action": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}

@@ -27,8 +27,10 @@ def test_code_normalization_preserves_leading_zeroes():
 
 
 def test_restricted_names_are_not_presented_as_basic_account_eligible():
+    assert restricted_name_reason("PT 金田A") == "particular_transfer_name"
     assert restricted_name_reason("*ST 示例") == "risk_warning_name"
     assert restricted_name_reason("ST示例") == "risk_warning_name"
+    assert restricted_name_reason("S*ST 示例") == "risk_warning_name"
     assert restricted_name_reason("示例退") == "delisting_name"
     assert restricted_name_reason("澳柯玛") == ""
 
