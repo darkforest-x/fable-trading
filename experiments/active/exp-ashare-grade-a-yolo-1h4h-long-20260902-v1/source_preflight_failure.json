@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-ashare-grade-a-yolo-1h4h-long-20260902-v1",
+  "status": "failed_closed_before_individual_fetch_and_model_load",
+  "attempted_at": "2026-09-02T15:02:05+08:00",
+  "source_commit": "770f5f99556244c688169f53c6874066d06b5667",
+  "holdout_consumed": true,
+  "holdout_consumption_numbers_for_checkpoint": {
+    "1h": 9,
+    "4h": 10
+  },
+  "source": {
+    "provider": "Eastmoney",
+    "endpoint": "https://push2his.eastmoney.com/api/qt/stock/kline/get",
+    "secid": "1.000001",
+    "period": "60",
+    "adjustment": "none_reference",
+    "requested_rows": 1024,
+    "returned_rows_after_frozen_cutoff": 127,
+    "first_close_cst": "2026-07-21T10:30:00+08:00",
+    "last_close_cst": "2026-09-02T14:00:00+08:00",
+    "reference_snapshot_path": "analysis/output/ashare_1h4h_long_20260902_v1.building/reference_60m.csv",
+    "reference_snapshot_sha256": "e5a20ff3d8f63bd0301dab6c778abf811f66fa323cc135f181ca4afb012dc3e5"
+  },
+  "requirements": {
+    "minimum_1h_rows_for_ma120_plus_w19": 138,
+    "preregistered_1h_schedule_rows": 160,
+    "preregistered_complete_4h_sessions": 160,
+    "minimum_60m_source_rows_for_160_complete_4h_sessions": 640
+  },
+  "diagnosis": "The upstream accepted lmt=1024 but exposed only about 32 trading days of 60m history. AKShare documentation characterizes the Eastmoney intraday interface as recent-data-only. Same-endpoint probes using an older end date were disconnected, so pagination was not assumed.",
+  "effects": {
+    "individual_symbols_requested": 0,
+    "model_loaded": false,
+    "model_inference_windows": 0,
+    "signals_computed": false,
+    "threshold_or_weight_changed": false,
+    "alternate_provider_used": false,
+    "active_or_frozen_changed": false,
+    "promoted": false,
+    "deployed": false,
+    "telegram_sent": false,
+    "orders_placed": false
+  },
+  "next_authority_needed": "A new owner-approved holdout configuration is required to use a longer-history provider such as AKShare's Sina 60m source (datalen=1970) or another explicitly frozen source. Do not reinterpret this failure as zero LONG signals."
+}

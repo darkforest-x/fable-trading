@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>A 股 1h / 会话 4h 多头扫描：数据源预检失败（2026-09-02）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>A 股 1h / 会话 4h 多头扫描：数据源预检失败（2026-09-02）</h1>
+<h2>结论先行</h2>
+<p>本轮<strong>没有产生信号结果，也不能解释为“零多头”</strong>。冻结的 Eastmoney 60m 接口虽然接受 <code>lmt=1024</code>，上证综指参考请求实际仅返回 <strong>127 根</strong>（2026-07-21 10:30 至 2026-09-02 14:00 CST）。它低于 1h 完整模型图的最低 warmup <strong>138 根</strong>，更远低于 预注册的 160 个完整 4h 交易日所需 <strong>640 根 60m 源 bar</strong>。管道因此在请求任何个股、 加载模型、运行推理之前 fail-closed。</p>
+<p>实验：<code>exp-ashare-grade-a-yolo-1h4h-long-20260902-v1</code>。这是该 Grade-A checkpoint 的 1h 配置 <strong>holdout 使用 #9</strong>、会话 4h 配置 <strong>holdout 使用 #10</strong>；失败仍计消费。</p>
+<h2>Owner 口径与冻结定义</h2>
+<p>Owner 原话：</p>
+<blockquote>给我跑 4h  1h 周期的  只保留多头，  4h 周期可以接受信号已经出来几天的</blockquote>
+<p>预注册后才发起网络请求：</p>
+<ul>
+<li>普通账户池：冻结 A 股身份表中的沪深主板，排除科创板、创业板、北交所、未知板块、 <code>ST/*ST/S*ST/SST</code>、<code>PT</code> 与名称含“退”的证券，共 <strong>3,111</strong> 只；SH 主板 1,666， SZ 主板 1,445。</li>
+<li>1h：只看 2026-09-02 14:00 CST 已完成端点。</li>
+<li>会话 4h：同一交易日严格聚合 10:30、11:30、14:00、15:00 四根 60m bar， <code>open_time=09:30</code>、<code>available_at=15:00</code>；当前未收盘日不拼部分 4h，回看最近 5 个 完整交易日。</li>
+<li>模型：Grade-A full40 native-1280，权重 SHA <code>862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838</code>； conf 0.25、NMS 0.70、W18/W19、core4/5、post2–9 与语义门全部不变。</li>
+<li>内部原计划审计 LONG/SHORT，交付只保留 LONG；本轮没有进入模型阶段。</li>
+</ul>
+<h2>数据预检结果</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>上一轮 A 股 15m #8</th>
+<th>本轮 60m #9/#10</th>
+<th>冻结要求</th>
+<th>裁决</th>
+</tr></thead><tbody>
+<tr><td>参考请求目标根数</td><td>512</td><td>1,024</td><td>按配置</td><td>—</td></tr>
+<tr><td>参考实际保留根数</td><td>504</td><td><strong>127</strong></td><td>1h 至少 138；预注册 160</td><td><strong>失败</strong></td></tr>
+<tr><td>完整交易日等价数</td><td>31.5</td><td><strong>31 + 当日 3 根</strong></td><td>4h 160 日</td><td><strong>失败</strong></td></tr>
+<tr><td>普通账户候选身份</td><td>后处理口径</td><td>3,111</td><td>3,111</td><td>通过</td></tr>
+<tr><td>已请求个股</td><td>5,908</td><td><strong>0</strong></td><td>先参考预检</td><td>正确止损</td></tr>
+<tr><td>模型窗口</td><td>10,988</td><td><strong>0</strong></td><td>数据通过后才允许</td><td>未运行</td></tr>
+<tr><td>多头/空头事件</td><td>8 / 23（全市场 OOD）</td><td><strong>未计算 / 未计算</strong></td><td>不得写成 0 / 0</td><td>未运行</td></tr>
+</tbody></table>
+<p>127 根只覆盖预注册 1h 时序门的 79.4%；完整 4h 交易日只覆盖 160 日要求的 19.4%。 最长均线为 MA120，而 W19 图要求窗口内每个位置均有完整均线，因此最少需要 <code>120 + 19 - 1 = 138</code> 根 1h bar。降低时序门、容忍图中均线缺失或把日线冒充连续墙钟 4h 都会改变已冻结输入合同，本轮没有这样做。</p>
+<p>保存的参考 CSV： <code>analysis/output/ashare_1h4h_long_20260902_v1.building/reference_60m.csv</code>，SHA-256： <code>e5a20ff3d8f63bd0301dab6c778abf811f66fa323cc135f181ca4afb012dc3e5</code>。</p>
+<p>失败凭据： <code>experiments/active/exp-ashare-grade-a-yolo-1h4h-long-20260902-v1/source_preflight_failure.json</code>。</p>
+<h2>指标与零假设对照</h2>
+<p>这是数据能力预检，不是方向性收益实验。没有未来 A 股标签、入场、障碍或模型推理，因此 val AUC、置换检验 p、top-decile 毛/净收益、胜率、单特征基线和匹配随机入场对照均<strong>不适用</strong>； 编造这些指标会把“未运行”伪装成模型结论。</p>
+<p>同等严格的确定性零假设是：<strong>同源参考响应满足预注册的实际根数与精确时序门</strong>。验收直接比较 保存响应，而不是相信请求参数：<code>127 &lt; 138 &lt; 160</code>，且仅 31 个完整会话日 <code>&lt; 160</code>，所以零假设 被确定性拒绝，不需要也不存在随机 p 值。方向翻转语义对照只有在结构框存在后才有定义，本轮 结构框为“未计算”，不是零。</p>
+<h2>复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+git show --stat 770f5f99556244c688169f53c6874066d06b5667
+python3 -m pytest -q \
+  tests/test_scan_ashare_yolo_1h4h_long.py \
+  tests/test_filter_ashare_signals_for_standard_retail.py \
+  tests/boundaries/test_layer_imports.py
+python3 scripts/scan_ashare_yolo_1h4h_long.py --fetch --workers 12
+</code></pre>
+<p>最后一条会复用已保存参考文件，并在 <code>1h_insufficient_history:127</code> 处再次 fail-closed；它不会 请求个股或加载模型。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li><a href="https://akshare.akfamily.xyz/data/stock/stock.html">AKShare 股票数据文档</a>将 Eastmoney 分时接口描述为只能获取近期数据；<code>lmt</code> 是请求参数，不是上游历史 覆盖承诺。本地同源旧 <code>end</code> 探测被断开连接，不能假设可向前分页。</li>
+<li>即使换成长历史源，模型仍是 crypto-15m → A 股 1h/4h 的双重 OOD，只能叫研究命中， 不能叫经过验证的买入信号；置信度不是胜率。</li>
+<li>本轮没有训练、调阈值、改 ACTIVE/frozen、promote、部署、Telegram 发送或下单。</li>
+<li>两个消费已经发生；换供应商或改 warmup 是新数据配置，不能沿用 #9/#10 冒充原配置成功。</li>
+</ul>
+<h2>下一步选项（需要 Owner 决策）</h2>
+<ol>
+<li><strong>建议：授权 #11/#12，改用 AKShare 已文档化的新浪 60m 源。</strong> 其实现请求 <code>datalen=1970</code>，理论上足够 1h warmup 和 160 个 4h 交易日；仍需先只对参考指数做实际根数、 时段、QFQ 与 Eastmoney 重叠区 parity 预检，通过后才扇出 3,111 只票。</li>
+<li>停止，不再消费 holdout。#9/#10 仅保留为数据源失败记录。</li>
+</ol>
+<p>若选 1，必须重新冻结来源实现 SHA、QFQ 方法、参考时序、覆盖门和消费编号；不会在看过模型结果 后改阈值或回退到更宽板块。</p>
+</body>
+</html>
