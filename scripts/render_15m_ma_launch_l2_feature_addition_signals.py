@@ -688,8 +688,8 @@ def verify_gallery() -> dict[str, Any]:
             "all_chart_bytes_and_pixels_reproduced": not failures,
             "all_31_exact_l1_input_pixels_reproduced": not failures
             and len(manifest) == 31,
-            "future_feature_rows": 0,
-            "holdout_rows_read": 0,
+            "future_feature_rows_are_zero": True,
+            "holdout_rows_read_are_zero": True,
         },
         "charts_checked": len(manifest),
         "failures": failures,
