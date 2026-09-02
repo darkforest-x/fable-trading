@@ -2,6 +2,20 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-02 — 普通主板 1h/会话4h LONG 扫描已完成）
+
+Owner 授权 Grade-A full40 native-1280 checkpoint 的 1h holdout **#11**、会话 4h
+holdout **#12**，并批准 Eastmoney 在线端点不可达时只用同日冻结缓存做 parity。冻结普通
+沪深主板 3,111 只；Sina 60m 日期因果 QFQ 快照中 1h 可用 3,021、4h 可用 2,903。
+35,072 个 W18/W19 窗口经 373 原框 → 346 结构框 → 52 语义框 → 20 去重审计事件，按
+Owner 口径仅交付 **1h 12 LONG + 4h 4 LONG**，另 4 SHORT 排除。16 张图、6 位代码及
+完整来源审计见 `analysis/html/p1_ashare_grade_a_yolo_1h4h_long_sina_20260902.html`。
+
+离线复验通过 3,021 份 K 线、5,892,102 行 QFQ 算术、346 个输入像素/语义决定及 16 张
+图的 SHA 检查，网络读取和推理均为 0。该模型由 crypto 15m 训练，在 A 股 1h/4h 上仍是
+OOD completed-history 研究筛选，不是收益或实时买入信号，`production_eligible=false`。
+没有训练、调门、promote、部署、改 ACTIVE/frozen/forward、发 Telegram 或下单。
+
 ## ⚡ 当前真相（2026-09-02 — 最新全 A 股扫描已完成，仅作 OOD 图册）
 
 Owner 要求用现有模型扫描“最新大 A”并给出命中图。本轮先在 main 提交预注册与 builder
