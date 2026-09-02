@@ -2,6 +2,24 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-02 — 新增因果特征有改善迹象，但未过升级门）
+
+Owner 问 28 个 L2 特征能否继续增加并授权实际试验。本轮冻结真实 Grade-A L1 候选、
+side-aligned 语义、TP5/SL2/72、0.2% 成本、dependency representatives、时间切分、模型参数
+和匹配对照，只增加因果特征列。旧 rich builder 的 116 个候选先剔除 6 个语义重复列，最终从
+28 列扩为 110 列（新增 82）；3,779 行复算的旧 28 列最大误差 3.553e-15，未来特征、非有限值、
+时间错位和 holdout 行均为 0。
+
+March tune 独立选择 LONG/SHORT：LONG 选 full_110，SHORT 只选 baseline_28 + 26 个 MA family
+列。selection receipt 提交后才打开 April final。冻结入选组合的 exact top-decile 净收益由旧
+28 列的 +89.79bp 升到 +110.78bp，q90 数量由 20 增到 31，匹配对照 8/8 为正；但固定 q90
+单笔质量由 +123.11bp 降到 +98.70bp，且置换 p=0.046395 未达到预注册 p<0.01。因此实验登记
+为 rejected：这是值得保留的正向迹象，不是可 promote 的升级。
+
+完整报告：analysis/html/p3_15m_ma_launch_l2_feature_addition_20260902.html。正确下一步是增加
+同一冻结 L1 目标域的独立经济事件后做一次预注册确认，不在本轮 final 上继续调组，也不提前
+消耗 holdout。未 promote、部署、改 ACTIVE/frozen/forward、发 Telegram 或下单。
+
 ## ⚡ 当前真相（2026-09-02 — 28 特征分组消融已否决）
 
 Owner 问为什么 L2 是 28 个特征并授权实际试验。本轮确认这 28 个是 2026-07-07 为旧

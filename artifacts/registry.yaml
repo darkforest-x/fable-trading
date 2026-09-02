@@ -9897,6 +9897,211 @@ artifacts:
     data_cutoff: "2026-05-04T00:00:00Z"
     notes: Self-contained HTML with the diagnostic chart embedded and all exact metrics.
 
+  # ---- 15m L2 causal feature addition rejection (2026-09-02) ----------
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-prereg
+    artifact_type: config
+    role: frozen_add_only_causal_feature_group_selection_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b9ac53e4bf0bf02752d7e581a78b145f08c0c1d7"
+    source_path: experiments/active/exp-15m-ma-launch-l2-feature-addition-v1/preregistration.json
+    sha256: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    size_bytes: 16895
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-feature-addition-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b9ac53e4bf0bf02752d7e581a78b145f08c0c1d7"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Freezes ten add-only feature arms, side-specific tune selection, final gates, duplicate removal and zero holdout use before feature rebuilding.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-feature-dataset-receipt
+    artifact_type: manifest
+    role: causal_feature_rebuild_lineage_parity_and_safety_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "213d626e97962c70ba4c9f4da3ed05af5397fd12"
+    source_path: experiments/active/exp-15m-ma-launch-l2-feature-addition-v1/results/feature_dataset_receipt.json
+    sha256: "d5fbbb68eb872c1767ff70cdce36fb15249753d2018b5a4eb3d8c7efad520c3f"
+    size_bytes: 1134
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-feature-addition-v1/results/feature_dataset_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b9ac53e4bf0bf02752d7e581a78b145f08c0c1d7"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Records 3,779 causal rows, 28-column parity within 3.553e-15, 82 nonduplicate additions and zero future, nonfinite or holdout rows.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-selection-receipt
+    artifact_type: manifest
+    role: tune_only_arm_training_health_ranking_and_frozen_selection
+    source_repo: darkforest-x/fable-trading
+    source_commit: "213d626e97962c70ba4c9f4da3ed05af5397fd12"
+    source_path: experiments/active/exp-15m-ma-launch-l2-feature-addition-v1/results/selection_receipt.json
+    sha256: "838a11afa9126c87baee059588a98b38a6c03edb491697c83b5d8fb6cd5cf4fa"
+    size_bytes: 130396
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-feature-addition-v1/results/selection_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b9ac53e4bf0bf02752d7e581a78b145f08c0c1d7"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-03-29T12:00:00Z"
+    notes: March tune selected full_110 for LONG and plus_ma_family for SHORT; April rows used for selection were zero and the receipt was committed before final evaluation.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-training-receipt
+    artifact_type: manifest
+    role: final_baseline_parity_economic_metrics_matched_controls_and_rejection
+    source_repo: darkforest-x/fable-trading
+    source_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    source_path: experiments/active/exp-15m-ma-launch-l2-feature-addition-v1/results/training_receipt.json
+    sha256: "c66418e0c7a990d9a24460113e83343c5ff03ddc9916465e733832bda67e49be"
+    size_bytes: 21298
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-feature-addition-v1/results/training_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Selected final top-decile net was +110.78 bp and q90 net +98.70 bp over 31 events; rejected because q90 trailed the 28-feature baseline and p=0.046395 missed p<0.01.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-verify-receipt
+    artifact_type: manifest
+    role: terminal_input_model_score_baseline_parity_and_safety_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    source_path: experiments/active/exp-15m-ma-launch-l2-feature-addition-v1/results/verify_receipt.json
+    sha256: "8e4af4ad7d37316b3ba37ece2a911e1fbbca9fb95dc7d9e465e38777105812d2"
+    size_bytes: 1096
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-l2-feature-addition-v1/results/verify_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Verifies all 22 models, complete score ledger, exact legacy score/percentile/threshold/KEEP parity, committed selection and zero holdout or future-feature rows.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-expanded-dataset
+    artifact_type: dataset
+    role: causal_28_plus_82_feature_event_dataset
+    source_repo: darkforest-x/fable-trading
+    source_commit: "213d626e97962c70ba4c9f4da3ed05af5397fd12"
+    source_path: analysis/output/ma_launch_l2_feature_addition_v1/l2_dataset_feature_addition.csv
+    sha256: "85de9f059d89c5337e3c935b0c996e9c14d2d8a46fea752ccbcb823368d7bd30"
+    size_bytes: 9310684
+    storage_uri: "file://analysis/output/ma_launch_l2_feature_addition_v1/l2_dataset_feature_addition.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b9ac53e4bf0bf02752d7e581a78b145f08c0c1d7"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Research-only 3,779-row dataset with 110 unique causal features; not eligible for training or production reuse because the experiment was rejected.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-long-selected-model
+    artifact_type: model
+    role: rejected_tune_selected_long_110_feature_return_regressor
+    source_repo: darkforest-x/fable-trading
+    source_commit: "213d626e97962c70ba4c9f4da3ed05af5397fd12"
+    source_path: analysis/output/ma_launch_l2_feature_addition_v1/models/long_full_110.txt
+    sha256: "167096d47d052f7fd1d90e2a8e5529eabd6708af799ffd75850e62154f07c4c6"
+    size_bytes: 39860
+    storage_uri: "file://analysis/output/ma_launch_l2_feature_addition_v1/models/long_full_110.txt"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b9ac53e4bf0bf02752d7e581a78b145f08c0c1d7"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-03-29T12:00:00Z"
+    notes: Research evidence only; April LONG q90 net was +68.24 bp over 21 events and the model must not be promoted.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-short-selected-model
+    artifact_type: model
+    role: rejected_tune_selected_short_54_feature_return_regressor
+    source_repo: darkforest-x/fable-trading
+    source_commit: "213d626e97962c70ba4c9f4da3ed05af5397fd12"
+    source_path: analysis/output/ma_launch_l2_feature_addition_v1/models/short_plus_ma_family.txt
+    sha256: "c24b1b10e5216f7210d3afebeb07cbbe5819a025a550a8949b80f32e43af38cb"
+    size_bytes: 16071
+    storage_uri: "file://analysis/output/ma_launch_l2_feature_addition_v1/models/short_plus_ma_family.txt"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b9ac53e4bf0bf02752d7e581a78b145f08c0c1d7"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-03-29T12:00:00Z"
+    notes: Research evidence only; April SHORT q90 net was +162.66 bp over 10 events and the model must not be promoted.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-scored-final
+    artifact_type: manifest
+    role: selected_full28_and_single_feature_april_score_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    source_path: analysis/output/ma_launch_l2_feature_addition_v1/final_validation_feature_addition_scored.csv
+    sha256: "80eb00b3217f3b483de4fec990389675f6d56f884efc97f7c3c54b6b25e10e19"
+    size_bytes: 443055
+    storage_uri: "file://analysis/output/ma_launch_l2_feature_addition_v1/final_validation_feature_addition_scored.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: All 1,021 April event rows with selected, full-28 and one-feature scores, side percentiles, frozen thresholds and KEEP decisions.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-diagnostic
+    artifact_type: report
+    role: tune_arm_and_april_final_economic_comparison_chart
+    source_repo: darkforest-x/fable-trading
+    source_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    source_path: analysis/output/ma_launch_l2_feature_addition_v1/feature_addition_diagnostics.png
+    sha256: "9cb031921627635d09c3bfdb8dcbfdb650ddd81a1ce21355c03564d41b0d3418"
+    size_bytes: 126601
+    storage_uri: "file://analysis/output/ma_launch_l2_feature_addition_v1/feature_addition_diagnostics.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Shows every March tune arm by side and the one-feature, full-28 and selected April top-decile and frozen-q90 comparisons.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-report
+    artifact_type: report
+    role: canonical_causal_feature_addition_and_rejection_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    source_path: analysis/p3_15m_ma_launch_l2_feature_addition_20260902.md
+    sha256: "e92544e1ea8e862cf749ab6419f4a731a4a662a758f0bdfd03164f5ddc3a029c"
+    size_bytes: 7993
+    storage_uri: "repo://analysis/p3_15m_ma_launch_l2_feature_addition_20260902.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Chinese answer-first report with causal rebuild, tune selection, final baselines, matched controls, gates, risks and reproduction commands.
+
+  - artifact_id: 15m-ma-launch-l2-feature-addition-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_feature_addition_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    source_path: analysis/html/p3_15m_ma_launch_l2_feature_addition_20260902.html
+    sha256: "b1998034d6d3a7a11f2ae68eab99270ed87485bb88ee5199d334322f1a335bef"
+    size_bytes: 182703
+    storage_uri: "repo://analysis/html/p3_15m_ma_launch_l2_feature_addition_20260902.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    config_hash: "7554577c6dccaf145711d864f28c9d5477d70c97874ce5569d8e33f6f1d4c389"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Self-contained HTML with the diagnostic chart embedded and all exact metrics.
+
   - artifact_id: 15m-ma-launch-owner-yolo-causal-semantic-gate-v1-prereg
     artifact_type: config
     role: frozen_causal_semantic_gate_paired_ab_contract

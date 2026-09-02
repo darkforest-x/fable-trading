@@ -3155,6 +3155,57 @@ experiments:
       barrier, cost or threshold change, promotion, deployment,
       ACTIVE/frozen/forward mutation, Telegram send or order occurred.
 
+  - experiment_id: exp-15m-ma-launch-l2-feature-addition-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "282e75136d3ae25468a3353f1c01e3e074309856"
+    status: rejected
+    question: >-
+      Do 82 nonduplicate causal OHLCV additions improve time-out-of-sample
+      economic ranking beyond the legacy 28-feature L2 baseline on the
+      current real Grade-A YOLO candidate distribution when LONG and SHORT
+      are selected separately?
+    single_variable: >-
+      Additional feature columns only. The real L1 candidates, side-aligned
+      semantics, TP5/SL2/72 target, 0.2% cost, dependency representatives,
+      chronological train/tune/final intervals, deterministic LightGBM
+      parameters, matched controls and tune-q90 selection policy are frozen.
+    result: >-
+      rejected_partial_rank_tail_lift_without_frozen_gate_improvement. March
+      tune selected full_110 for LONG and plus_ma_family (54 columns) for
+      SHORT. On untouched April final, the selected pair improved exact
+      top-decile net return to +110.78 bp from the 28-feature baseline's
+      +89.79 bp and increased frozen-q90 events from 20 to 31, but q90 net
+      return fell to +98.70 bp from +123.11 bp and permutation p=0.046395
+      missed the preregistered p<0.01 gate. Matched event-minus-control was
+      +92.21 bp with 8/8 assignments positive.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p3_15m_ma_launch_l2_feature_addition_20260902.md
+    artifacts:
+      - 15m-ma-launch-l2-feature-addition-v1-prereg
+      - 15m-ma-launch-l2-feature-addition-v1-feature-dataset-receipt
+      - 15m-ma-launch-l2-feature-addition-v1-selection-receipt
+      - 15m-ma-launch-l2-feature-addition-v1-training-receipt
+      - 15m-ma-launch-l2-feature-addition-v1-verify-receipt
+      - 15m-ma-launch-l2-feature-addition-v1-expanded-dataset
+      - 15m-ma-launch-l2-feature-addition-v1-long-selected-model
+      - 15m-ma-launch-l2-feature-addition-v1-short-selected-model
+      - 15m-ma-launch-l2-feature-addition-v1-scored-final
+      - 15m-ma-launch-l2-feature-addition-v1-diagnostic
+      - 15m-ma-launch-l2-feature-addition-v1-report
+      - 15m-ma-launch-l2-feature-addition-v1-html
+    reuse_allowed: false
+    notes: >-
+      The source feature builder was reused only after six semantic duplicate
+      columns were removed. All 3,779 rows were rebuilt causally with zero
+      feature-time mismatch, nonfinite value, future-feature row or holdout
+      row; the legacy 28 columns reproduced within 3.553e-15. The selection
+      receipt was committed before April final was opened. The positive trace
+      is preserved for an independently powered confirmation, but these
+      models must not be promoted, deployed or used to mutate ACTIVE/frozen,
+      forward, Telegram or orders.
+
   - experiment_id: exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "ac891c02e6b8f89b6464796514758c71b48f8c72"
