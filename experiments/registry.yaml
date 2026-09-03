@@ -2524,6 +2524,72 @@ experiments:
       Ultralytics. This is still completed-history research, not a fresh live
       signal model.
 
+  - experiment_id: exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "94da33fa8b6105755550f48dcaca89e7e91dbefc"
+    status: active
+    question: >-
+      With the exact 32,000 Grade-A sample identities, chronological split,
+      candle geometry, palette, line width and training recipe frozen, does
+      changing only the six plotted MA price source from close to HL2 improve
+      the current full40 native-1280 detector?
+    single_variable: >-
+      six SMA/EMA 20/60/120 inputs change from close to (high+low)/2. The
+      baseline close chart transform is reused so candle pixels do not move;
+      the same core/full-wick/six-MA/4%-padding rule mechanically re-derives
+      positive vertical boxes while class, core start/end and horizontal box
+      geometry remain fixed.
+    result: >-
+      dataset_built_and_independently_verified; 32000/32000 close replay null
+      matches, 32000/32000 unique HL2 images, zero holdout rows; matched training
+      preregistered but not yet started
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts:
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1-prereg
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1-build-receipt
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1-independent-qa
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1-dataset-manifest
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1-data-yaml
+    reuse_allowed: false
+    notes: >-
+      Owner explicitly requested a rerun using the recommended representation.
+      This overrides the P0/P1 no-training gate for this one completed-history
+      research comparison only. It does not authorize holdout access,
+      threshold tuning, promotion, deployment, ACTIVE/frozen/forward mutation
+      or orders. A pre-build audit found 515/8,000 HL2 positive cores escape
+      the old close-derived price box, so copying old positive labels would be
+      invalid; vertical labels follow the unchanged box rule instead.
+
+  - experiment_id: exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "537e7c091bec705c464383439b060a00ea521299"
+    status: active
+    question: >-
+      With the exact paired Grade-A population, candles, chart transform,
+      palette, line width, base weight and full40 native-1280 recipe frozen,
+      does changing the six MA source from close to HL2 improve detection?
+    single_variable: >-
+      SMA/EMA 20/60/120 source changes from close to (high+low)/2; positive
+      vertical labels mechanically follow the unchanged full-wick plus six-MA
+      box rule while every class and horizontal boundary stays fixed
+    result: >-
+      preregistered and awaiting the existing 5000-event GPU inference queue;
+      no training or validation result has been read
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts:
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-prereg
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-local-preflight
+    reuse_allowed: false
+    notes: >-
+      Owner explicitly authorized this one completed-history research rerun.
+      It starts from the same official yolo11s.pt rather than the old best.pt,
+      uses seed 0 and the exact full40 1280 recipe, and does not authorize
+      threshold tuning, holdout, promotion, deployment or live trading.
+
   - experiment_id: exp-15m-right-edge-screenshot-similarity-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "4c20cb11f9f5c7d86e67f17fed67167fcf74f71c"

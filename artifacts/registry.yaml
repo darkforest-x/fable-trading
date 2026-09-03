@@ -11398,3 +11398,122 @@ artifacts:
     config_hash: "4776dcec982f9677dc47431a0f659ba3d6bd4bccb62996aee76a8b77f68f1294"
     data_cutoff: "2025-11-01T00:00:00Z"
     notes: Freezes the Owner-requested minimum 5,000 novel review-event stopping rule, full-month search order, daily Top5+Top5 board, W18 causal-envelope discovery sampler, unchanged Grade-A model/gates, CUDA identity and zero-holdout/no-mutation safety contract.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1-prereg
+    artifact_type: config
+    role: owner_authorized_close_to_hl2_paired_render_and_training_preregistration
+    source_repo: darkforest-x/fable-trading
+    source_commit: "94da33fa8b6105755550f48dcaca89e7e91dbefc"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1/preregistration.json
+    sha256: "f672a670bef54b7d0063f353c0adf70138e6fcee568a1ee6d2f3d94386259a33"
+    size_bytes: 5545
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "94da33fa8b6105755550f48dcaca89e7e91dbefc"
+    config_hash: "f672a670bef54b7d0063f353c0adf70138e6fcee568a1ee6d2f3d94386259a33"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Freezes one paired MA-source treatment, the exact baseline dataset identity, close replay null, baseline chart transform, same core/box rule and zero-holdout/no-promotion safety boundary.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1-build-receipt
+    artifact_type: manifest
+    role: paired_hl2_render_full_file_qa_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "94da33fa8b6105755550f48dcaca89e7e91dbefc"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1/results/dataset_build_receipt.json
+    sha256: "48871b45a2bb76011440790cc43fef0bd6712e67a28e8ced11dd5705847fb597"
+    size_bytes: 3062
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1/results/dataset_build_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "94da33fa8b6105755550f48dcaca89e7e91dbefc"
+    config_hash: "f672a670bef54b7d0063f353c0adf70138e6fcee568a1ee6d2f3d94386259a33"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: All 32,000 paired close replays matched, all HL2 images changed and remained unique, all 24,000 negative labels retained byte parity, and no holdout OHLCV was materialized.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1-independent-qa
+    artifact_type: manifest
+    role: independent_paired_pixel_label_identity_and_holdout_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "50cc310af699cfe2064374be6abdeced2afea843"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1/results/independent_qa_receipt.json
+    sha256: "65cf992f2c03b2e329a97392860c102659840e76c6bd16494cb80a3be87b770d"
+    size_bytes: 1570
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1/results/independent_qa_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "50cc310af699cfe2064374be6abdeced2afea843"
+    config_hash: "f672a670bef54b7d0063f353c0adf70138e6fcee568a1ee6d2f3d94386259a33"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Independently re-read and decoded both 32,000-image arms; ordered identity, close replay, horizontal boxes, class counts, negative bytes and pre-holdout boundaries all passed.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1-dataset-manifest
+    artifact_type: dataset
+    role: exact_local_8000_positive_24000_negative_paired_hl2_yolo_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "94da33fa8b6105755550f48dcaca89e7e91dbefc"
+    source_path: datasets/ma_launch_owner_grade_a8000_yolo_neg24000_hl2_v1/manifest.jsonl
+    sha256: "ec93d6bfd04cc84a24a34cd745af2c74943f9a75e664831060619511ba60f6d7"
+    size_bytes: 140770359
+    storage_uri: "file://datasets/ma_launch_owner_grade_a8000_yolo_neg24000_hl2_v1"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "94da33fa8b6105755550f48dcaca89e7e91dbefc"
+    config_hash: "f672a670bef54b7d0063f353c0adf70138e6fcee568a1ee6d2f3d94386259a33"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Local 1.5 GiB paired HL2 treatment; the dataset preserves all sample/event/split/window identities and is not a fresh-tip or production-eligible detector input.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1-data-yaml
+    artifact_type: config
+    role: local_yolo_train_val_pointer_for_paired_hl2_dataset
+    source_repo: darkforest-x/fable-trading
+    source_commit: "94da33fa8b6105755550f48dcaca89e7e91dbefc"
+    source_path: datasets/ma_launch_owner_grade_a8000_yolo_neg24000_hl2_v1/data.yaml
+    sha256: "b822741e2277b8a60420cd0175da734dd91e8a1f2a0ce839e61b93ef04d6c07c"
+    size_bytes: 169
+    storage_uri: "repo://datasets/ma_launch_owner_grade_a8000_yolo_neg24000_hl2_v1/data.yaml"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "94da33fa8b6105755550f48dcaca89e7e91dbefc"
+    config_hash: "f672a670bef54b7d0063f353c0adf70138e6fcee568a1ee6d2f3d94386259a33"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Registration is a pointer; the current conversation separately authorizes one research training and does not grant production eligibility.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-prereg
+    artifact_type: config
+    role: frozen_close_to_hl2_full40_native1280_training_and_evaluation_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "537e7c091bec705c464383439b060a00ea521299"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/preregistration.json
+    sha256: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
+    size_bytes: 9077
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/preregistration.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "537e7c091bec705c464383439b060a00ea521299"
+    config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Freezes the exact official base weight, seed-zero full40 1280 recipe, paired validation surfaces, no-threshold-tuning rule and zero-holdout/no-promotion boundary before training.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-local-preflight
+    artifact_type: manifest
+    role: local_full_hash_training_input_preflight
+    source_repo: darkforest-x/fable-trading
+    source_commit: "537e7c091bec705c464383439b060a00ea521299"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/local_dataset_preflight.json
+    sha256: "39ed5608964e607d2a37b413eb46e3603681d9b028a41cb0ffbe3d92a06d661c"
+    size_bytes: 1254
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/local_dataset_preflight.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "537e7c091bec705c464383439b060a00ea521299"
+    config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Verified all 64,000 image/label files, 32,000 unique images, split/event/class counts and zero holdout rows before remote staging.
