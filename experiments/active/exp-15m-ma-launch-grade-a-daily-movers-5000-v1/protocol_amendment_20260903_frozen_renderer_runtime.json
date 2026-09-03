@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-grade-a-daily-movers-5000-v1",
+  "created_at": "2026-09-03T19:24:00+08:00",
+  "reason": "While the scan was paused at the sign-tail edge case, another main-branch task committed an additive paired-ablation option to the shared renderer. Its default path is pixel-equivalent, but the worktree SHA no longer satisfies this experiment's preregistration. The scan must not revert that owner work or silently adopt a different source identity.",
+  "parent_protocol_amendment": "experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/protocol_amendment_20260903_sign_tail_underflow.json",
+  "parent_protocol_amendment_sha256": "95caa8b30781df2d5004bc21a0c0378a52c2b38d891a4d4ffde531e4c0202333",
+  "implementation_commit": "PENDING_FIRST_COMMIT",
+  "coordinator_sha256": "PENDING_FIRST_COMMIT",
+  "trigger_observation": {
+    "working_tree_renderer_sha256": "def5b7317c13e37fc43657243a7cc900bc3fafee71bdf2e405e0336a1a3c0eea",
+    "renderer_change_commit": "5b782fb2ee3b7b535120391300b1d7cf5d39ce71",
+    "change_scope": "Adds an optional fixed_transform argument; the omitted/default rendering path remains unchanged.",
+    "original_preregistered_renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
+  },
+  "frozen_runtime": {
+    "git_commit": "7931541abf9ac1edd8985924fb31db93bb617609",
+    "renderer_path": "yoyo/layers/l1_detection/render.py",
+    "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+    "mac_load": "execute_hash_verified_git_blob",
+    "cuda_load": "copy_hash_verified_git_blobs_to_commit_addressed_runtime"
+  },
+  "effect": "Mac mapping, parity checks, final charts and offline verification load the exact preregistered renderer blob from Git. CUDA assets come from the same commit-addressed blobs. Shared worktree renderer edits are neither reverted nor consumed.",
+  "completed_shard_compatibility": "The original process imported the preregistered renderer before the concurrent file edit, and every admitted remote-box task passed exact decoded-BGR pixel SHA plus ChartTransform parity. Existing shard inputs therefore remain bound to the same frozen blob.",
+  "workspace_default_path_compatibility_audit": {
+    "completed_months": 11,
+    "unique_detected_tasks_replayed": 4964,
+    "decoded_bgr_pixel_sha_matches": 4964,
+    "chart_transform_matches": 4964,
+    "mismatches": 0
+  },
+  "detector_or_protocol_threshold_changed": false,
+  "holdout_or_training_scope_changed": false,
+  "production_eligible": false,
+  "training_eligible": false
+}

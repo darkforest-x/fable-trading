@@ -25,7 +25,6 @@ from scripts import mine_15m_ma_launch_grade_a_daily_movers_5000 as mine
 from scripts import scan_15m_ma_launch_grade_a_daily_movers as prior
 from scripts import scan_crypto_grade_a_yolo_mtf_latest as latest
 from yoyo.layers.l1_detection.data import ALL_MA_COLS
-from yoyo.layers.l1_detection.render import render_chart
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -160,7 +159,7 @@ def verify_month(
         ):
             raise VerificationError(f"prefilter value drift: {task_id}")
         if task_id not in unique_tasks:
-            image, _ = render_chart(window, out_path=None)
+            image, _ = mine.render_chart(window, out_path=None)
             digest = mine.pixel_sha256(image)
             assert_equal(digest, str(row["input_pixel_sha256"]), f"input pixels {task_id}")
             unique_tasks[task_id] = digest

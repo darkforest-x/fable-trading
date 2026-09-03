@@ -36,6 +36,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import types
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -58,7 +59,6 @@ from yoyo.datasets.fifteen_minute_launch_candidates import (  # noqa: E402
     add_candidate_features,
 )
 from yoyo.layers.l1_detection.data import ALL_MA_COLS  # noqa: E402
-from yoyo.layers.l1_detection.render import ChartTransform, render_chart  # noqa: E402
 
 
 EXPERIMENT_ID = "exp-15m-ma-launch-grade-a-daily-movers-5000-v1"
@@ -70,8 +70,18 @@ DEFAULT_AMENDMENT = (
     / EXPERIMENT_ID
     / "protocol_amendment_20260903_sign_tail_underflow.json"
 )
+DEFAULT_RUNTIME_AMENDMENT = (
+    ROOT
+    / "experiments"
+    / "active"
+    / EXPERIMENT_ID
+    / "protocol_amendment_20260903_frozen_renderer_runtime.json"
+)
 DEFAULT_OUT = ROOT / "experiments" / "active" / EXPERIMENT_ID / "results"
 REMOTE_WORKER = ROOT / "scripts/remote_infer_15m_ma_launch_grade_a_taskpack.py"
+PINNED_RUNTIME_COMMIT = "7931541abf9ac1edd8985924fb31db93bb617609"
+PINNED_RENDER_PATH = "yoyo/layers/l1_detection/render.py"
+PINNED_RENDER_SHA256 = "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7"
 PARENT_GATE_PREREG = (
     ROOT
     / "experiments/active/exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1"
@@ -112,6 +122,49 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def sha256_bytes(value: bytes) -> str:
+    """Return SHA-256 for an in-memory immutable source blob."""
+
+    return hashlib.sha256(value).hexdigest()
+
+
+def git_blob_bytes(commit: str, relative_path: str) -> bytes:
+    """Read one committed repository blob without consulting the working tree."""
+
+    try:
+        return subprocess.check_output(
+            ["git", "show", f"{commit}:{relative_path}"], cwd=ROOT
+        )
+    except subprocess.CalledProcessError as exc:
+        raise Mover5000Error(
+            f"could not load immutable Git blob: {commit}:{relative_path}"
+        ) from exc
+
+
+def load_frozen_renderer() -> types.ModuleType:
+    """Load the preregistered renderer from Git so concurrent edits cannot alter pixels."""
+
+    raw = git_blob_bytes(PINNED_RUNTIME_COMMIT, PINNED_RENDER_PATH)
+    if sha256_bytes(raw) != PINNED_RENDER_SHA256:
+        raise Mover5000Error("committed frozen renderer SHA drifted")
+    source = raw.decode("utf-8").replace(
+        "from .data import ALL_MA_COLS",
+        "from yoyo.layers.l1_detection.data import ALL_MA_COLS",
+    )
+    name = "_fable_frozen_renderer_0962812f"
+    module = types.ModuleType(name)
+    module.__file__ = f"<git:{PINNED_RUNTIME_COMMIT}:{PINNED_RENDER_PATH}>"
+    module.__package__ = "yoyo.layers.l1_detection"
+    sys.modules[name] = module
+    exec(compile(source, module.__file__, "exec"), module.__dict__)
+    return module
+
+
+_FROZEN_RENDERER = load_frozen_renderer()
+ChartTransform = _FROZEN_RENDERER.ChartTransform
+render_chart = _FROZEN_RENDERER.render_chart
 
 
 def pixel_sha256(image: np.ndarray) -> str:
@@ -203,11 +256,13 @@ def search_months(prereg: Mapping[str, Any]) -> list[str]:
 
 
 def effective_protocol_metadata(prereg_path: Path) -> dict[str, Any]:
-    """Load the append-only sign-tail amendment and bind it to its parent preregistration."""
+    """Load the append-only amendments and bind their complete protocol chain."""
 
     amendment = json.loads(DEFAULT_AMENDMENT.read_text(encoding="utf-8"))
+    runtime_amendment = json.loads(DEFAULT_RUNTIME_AMENDMENT.read_text(encoding="utf-8"))
     parent_sha = sha256_file(prereg_path)
     amendment_sha = sha256_file(DEFAULT_AMENDMENT)
+    runtime_amendment_sha = sha256_file(DEFAULT_RUNTIME_AMENDMENT)
     if amendment.get("experiment_id") != EXPERIMENT_ID:
         raise Mover5000Error("protocol amendment experiment_id drifted")
     if amendment.get("parent_preregistration_sha256") != parent_sha:
@@ -222,13 +277,33 @@ def effective_protocol_metadata(prereg_path: Path) -> dict[str, Any]:
     }
     if policy != expected:
         raise Mover5000Error("protocol amendment underflow policy drifted")
+    if runtime_amendment.get("experiment_id") != EXPERIMENT_ID:
+        raise Mover5000Error("runtime amendment experiment_id drifted")
+    if runtime_amendment.get("parent_protocol_amendment_sha256") != amendment_sha:
+        raise Mover5000Error("runtime amendment parent SHA drifted")
+    frozen = runtime_amendment.get("frozen_runtime", {})
+    expected_frozen = {
+        "git_commit": PINNED_RUNTIME_COMMIT,
+        "renderer_path": PINNED_RENDER_PATH,
+        "renderer_sha256": PINNED_RENDER_SHA256,
+        "mac_load": "execute_hash_verified_git_blob",
+        "cuda_load": "copy_hash_verified_git_blobs_to_commit_addressed_runtime",
+    }
+    if frozen != expected_frozen:
+        raise Mover5000Error("runtime amendment frozen source drifted")
     effective_sha = hashlib.sha256(
-        f"{parent_sha}\n{amendment_sha}\n".encode()
+        f"{parent_sha}\n{amendment_sha}\n{runtime_amendment_sha}\n".encode()
     ).hexdigest()
     return {
         **amendment,
         "path": repo_relative(DEFAULT_AMENDMENT),
         "sha256": amendment_sha,
+        "runtime_isolation": {
+            **runtime_amendment,
+            "path": repo_relative(DEFAULT_RUNTIME_AMENDMENT),
+            "sha256": runtime_amendment_sha,
+        },
+        "amendment_sha256s": [amendment_sha, runtime_amendment_sha],
         "effective_protocol_sha256": effective_sha,
     }
 
@@ -311,7 +386,12 @@ def verify_immutable_sources(prereg_path: Path, prereg: Mapping[str, Any]) -> st
     sources = [coordinator, REMOTE_WORKER.resolve()]
     tracked = [
         path.relative_to(ROOT)
-        for path in [*sources, prereg_path.resolve(), DEFAULT_AMENDMENT.resolve()]
+        for path in [
+            *sources,
+            prereg_path.resolve(),
+            DEFAULT_AMENDMENT.resolve(),
+            DEFAULT_RUNTIME_AMENDMENT.resolve(),
+        ]
     ]
     dirty = subprocess.check_output(
         ["git", "status", "--short", "--", *map(str, tracked)], cwd=ROOT, text=True
@@ -327,12 +407,13 @@ def verify_immutable_sources(prereg_path: Path, prereg: Mapping[str, Any]) -> st
         for path in sources
     }
     amendment = prereg["_protocol_amendment"]
-    coordinator_commit = str(amendment["implementation_commit"])
+    runtime_amendment = amendment["runtime_isolation"]
+    coordinator_commit = str(runtime_amendment["implementation_commit"])
     if commits[coordinator] != coordinator_commit:
         raise Mover5000Error("coordinator commit differs from protocol amendment")
     if commits[REMOTE_WORKER.resolve()] != str(prereg["source_commit"]):
         raise Mover5000Error("remote worker commit differs from parent preregistration")
-    if sha256_file(coordinator) != str(amendment["coordinator_sha256"]):
+    if sha256_file(coordinator) != str(runtime_amendment["coordinator_sha256"]):
         raise Mover5000Error("coordinator SHA differs from protocol amendment")
 
     pinned = [
@@ -342,7 +423,6 @@ def verify_immutable_sources(prereg_path: Path, prereg: Mapping[str, Any]) -> st
         (ROOT / prereg["semantic_gate"]["parent"], prereg["semantic_gate"]["parent_sha256"]),
         (ROOT / prereg["detector"]["weights"], prereg["detector"]["weights_sha256"]),
         (ROOT / prereg["remote_cuda"]["worker"], prereg["remote_cuda"]["worker_sha256"]),
-        (ROOT / prereg["remote_cuda"]["renderer"], prereg["remote_cuda"]["renderer_sha256"]),
         (ROOT / prereg["remote_cuda"]["renderer_data"], prereg["remote_cuda"]["renderer_data_sha256"]),
     ]
     for path, expected in pinned:
@@ -351,6 +431,9 @@ def verify_immutable_sources(prereg_path: Path, prereg: Mapping[str, Any]) -> st
         actual = sha256_file(path)
         if actual != str(expected):
             raise Mover5000Error(f"pinned source SHA drift: {path}")
+    frozen_render = git_blob_bytes(PINNED_RUNTIME_COMMIT, PINNED_RENDER_PATH)
+    if sha256_bytes(frozen_render) != str(prereg["remote_cuda"]["renderer_sha256"]):
+        raise Mover5000Error("frozen Git renderer differs from preregistration")
     return coordinator_commit
 
 
@@ -776,27 +859,43 @@ def prepare_remote_runtime(
     run_command([*ssh_args(prereg, host), mkdir])
 
     assets = [
-        (ROOT / prereg["remote_cuda"]["worker"], f"{runtime_root}/worker.py"),
-        (ROOT / "yoyo/__init__.py", f"{runtime_root}/yoyo/__init__.py"),
-        (ROOT / "yoyo/layers/__init__.py", f"{runtime_root}/yoyo/layers/__init__.py"),
+        (str(prereg["remote_cuda"]["worker"]), f"{runtime_root}/worker.py"),
+        ("yoyo/__init__.py", f"{runtime_root}/yoyo/__init__.py"),
+        ("yoyo/layers/__init__.py", f"{runtime_root}/yoyo/layers/__init__.py"),
         (
-            ROOT / "yoyo/layers/l1_detection/__init__.py",
+            "yoyo/layers/l1_detection/__init__.py",
             f"{runtime_root}/yoyo/layers/l1_detection/__init__.py",
         ),
-        (ROOT / prereg["remote_cuda"]["renderer"], f"{runtime_root}/yoyo/layers/l1_detection/render.py"),
+        (str(prereg["remote_cuda"]["renderer"]), f"{runtime_root}/yoyo/layers/l1_detection/render.py"),
         (
-            ROOT / prereg["remote_cuda"]["renderer_data"],
+            str(prereg["remote_cuda"]["renderer_data"]),
             f"{runtime_root}/yoyo/layers/l1_detection/data.py",
         ),
     ]
-    for local, remote in assets:
-        expected = sha256_file(local)
+    for relative, remote in assets:
+        blob = git_blob_bytes(source_commit, relative)
+        expected = sha256_bytes(blob)
+        if relative == str(prereg["remote_cuda"]["worker"]):
+            pinned_expected = str(prereg["remote_cuda"]["worker_sha256"])
+        elif relative == str(prereg["remote_cuda"]["renderer"]):
+            pinned_expected = str(prereg["remote_cuda"]["renderer_sha256"])
+        elif relative == str(prereg["remote_cuda"]["renderer_data"]):
+            pinned_expected = str(prereg["remote_cuda"]["renderer_data_sha256"])
+        else:
+            pinned_expected = expected
+        if expected != pinned_expected:
+            raise Mover5000Error(f"committed remote runtime SHA drift: {relative}")
         actual = remote_sha(prereg, host, remote)
         if actual == expected:
             continue
         if actual != "missing":
             raise Mover5000Error(f"remote immutable runtime collision: {remote}")
-        run_command([*scp_args(prereg), str(local), remote_sftp_path(host, remote)])
+        with tempfile.NamedTemporaryFile() as handle:
+            handle.write(blob)
+            handle.flush()
+            run_command(
+                [*scp_args(prereg), handle.name, remote_sftp_path(host, remote)]
+            )
         if remote_sha(prereg, host, remote) != expected:
             raise Mover5000Error(f"remote runtime copy failed: {remote}")
 
@@ -1563,9 +1662,14 @@ def finalize(
         "source_commit": source_commit,
         "config_hash": config_hash,
         "source_commits_used": sorted(shard_source_commits),
+        "protocol_amendments": [
+            {"path": amendment["path"], "sha256": amendment["sha256"]},
+            {
+                "path": amendment["runtime_isolation"]["path"],
+                "sha256": amendment["runtime_isolation"]["sha256"],
+            },
+        ],
         "protocol_amendment": {
-            "path": amendment["path"],
-            "sha256": amendment["sha256"],
             "effective_protocol_sha256": amendment["effective_protocol_sha256"],
             "trigger_day": amendment["trigger_observation"]["day"],
         },
@@ -1658,7 +1762,7 @@ def run_scan(
     amendment = prereg["_protocol_amendment"]
     training = prior.load_training_index(prereg)
     remote_runtime = prepare_remote_runtime(
-        prereg, host=remote_host, source_commit=source_commit
+        prereg, host=remote_host, source_commit=str(prereg["source_commit"])
     )
     completed: list[str] = []
     target = int(prereg["detector"]["target_novel_review_events_minimum"])
@@ -1688,7 +1792,7 @@ def run_scan(
                 "experiment_id": EXPERIMENT_ID,
                 "source_commit": source_commit,
                 "config_hash": config_hash,
-                "protocol_amendment_sha256": amendment["sha256"],
+                "protocol_amendment_sha256s": amendment["amendment_sha256s"],
                 "effective_protocol_sha256": amendment["effective_protocol_sha256"],
                 "months_newest_first": completed,
                 "global_review_events": len(global_events),
