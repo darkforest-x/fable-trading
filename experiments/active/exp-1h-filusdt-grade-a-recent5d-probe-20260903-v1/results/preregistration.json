@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1",
+  "created_at": "2026-09-03T23:58:00+08:00",
+  "stage": "P1_owner_requested_single_symbol_holdout_probe",
+  "question": "Does the frozen Grade-A full40 native-1280 detector emit a causal LONG candidate on FIL-USDT-SWAP 1h during the latest five complete days, near the Owner's profitable descending-trendline-breakout trade?",
+  "owner_authorization": {
+    "conversation_date": "2026-09-03",
+    "verbatim": "你先用模型跑一下filusdt.p 1h周期的 最近5天的数据 我看一下我手动开的盈利的这单能正常识别出来吗",
+    "interpreted_action": "Read the current OKX FIL-USDT-SWAP 1h holdout, score every fully closed hourly endpoint in the latest 120-bar interval with the unchanged frozen checkpoint and gates, and deliver causal model inputs plus separated review context. No training, tuning, promotion, deployment, messaging, or order action is authorized.",
+    "holdout_read_authorized": true,
+    "holdout_consumption_number_for_checkpoint": 17,
+    "training_or_tuning_authorized": false,
+    "threshold_or_weight_change_authorized": false,
+    "production_or_promotion_authorized": false,
+    "orders_authorized": false
+  },
+  "scope": {
+    "venue": "OKX",
+    "instrument": "FIL-USDT-SWAP",
+    "display_symbol": "FILUSDT.P",
+    "bar": "1H",
+    "endpoint_policy": "the latest 120 fully closed hourly bars at run freeze time",
+    "endpoint_count": 120,
+    "calendar_duration_hours": 120,
+    "fetch_limit": 300,
+    "incomplete_current_bar_excluded": true,
+    "review_history_bars": 240,
+    "review_future_policy": "for each historical detection, show every later frozen bar through the run tip; these bars are physically absent from model_inputs"
+  },
+  "reference_screenshot": {
+    "intake_path": "/var/folders/fr/fq9wwmwx3xn63_cdk_v8nvt00000gn/T/codex-clipboard-0bdf6467-6faf-4059-8faa-22267879f420.png",
+    "sha256": "ecd394496f2e478ee6f59c5d93f294cbd877a25dc7ccdd9c711ad532cda42ed4",
+    "width": 2940,
+    "height": 1696,
+    "owner_entry_timestamp_known": false,
+    "interpretation_limit": "The screenshot shows the setup and a manually drawn descending line but no machine-readable entry marker. The run can establish model detections and their availability times, but cannot prove execution identity without the Owner's entry timestamp or price."
+  },
+  "detector": {
+    "display_name": "Grade-A 8000 positives + 24000 negatives full40 native-1280",
+    "weights": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+    "weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "imgsz": 1280,
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "window_lengths": [18, 19],
+    "mapped_core_length_bars_allowed": [4, 5],
+    "mapped_confirmation_bars_allowed": [2, 3, 4, 5, 6, 7, 8, 9],
+    "same_symbol_event_gap_bars": 5,
+    "class_names": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "training_clock": "15m",
+    "probe_clock": "1h",
+    "domain_status": "out_of_distribution_completed_history_research_probe"
+  },
+  "semantic_gate": {
+    "source": "experiments/active/exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1/preregistration.json",
+    "source_sha256": "55e13144b0dae5e41a54d3a8c413eb094a54a4db87e6a963f1c8269165d085a4",
+    "policy": "unchanged frozen causal morphology gate; actual and direction-flipped decisions both retained"
+  },
+  "implementation_dependencies": {
+    "base_scanner": {
+      "path": "scripts/scan_4h_ma_launch_yolo_latest.py",
+      "sha256": "327666000d2f71560f7f31fc10d26b059cc74b0b032dd71cdca066c314363eaf"
+    },
+    "semantic_scan_adapter": {
+      "path": "scripts/scan_crypto_grade_a_yolo_mtf_latest.py",
+      "sha256": "c3cbf75b9a5716a85d96b24ab1c7bb02913d06620610f3b06618ba861abe4a63"
+    },
+    "renderer": {
+      "path": "yoyo/layers/l1_detection/render.py",
+      "sha256": "def5b7317c13e37fc43657243a7cc900bc3fafee71bdf2e405e0336a1a3c0eea"
+    },
+    "semantic_gate_module": {
+      "path": "yoyo/layers/l1_detection/semantic_gate.py",
+      "sha256": "eda78c7a2a548bb7485aa1c7ca1f6a8ce6ee7805846aa6ba2e8e09789130fe5f"
+    }
+  },
+  "single_variable": "Relative to the checkpoint's already-consumed 1h latest-endpoint probe #14, this Owner-requested diagnostic fixes the universe to FIL-USDT-SWAP and extends the endpoint range from one closed bar to the latest 120 closed bars. Model bytes, image renderer, W18/W19, thresholds, box mapping, semantic gate, and event spacing remain unchanged. This is a targeted detection replay, not a comparative performance claim.",
+  "null_control": {
+    "method": "For every structurally accepted YOLO box, keep pixels, box, confidence, endpoint and all OHLC fixed, and invert only LONG/SHORT inside the causal semantic calculation.",
+    "interpretation": "This tests whether any semantic survival is tied to the predicted direction; it does not estimate trading profitability from one Owner-selected winner."
+  },
+  "decision_contract": {
+    "raw_box": "reported whenever YOLO confidence is at least 0.25 before structural filtering",
+    "structural_candidate": "reported only after frozen core4/5 and confirmation2-9 mapping",
+    "pipeline_candidate": "reported only after the unchanged causal semantic gate passes",
+    "recognition_answer": "normal full-pipeline recognition requires at least one dense_long pipeline event whose complete availability time falls inside the frozen five-day interval; exact identity with the Owner trade remains unresolved when entry timestamp and price are absent",
+    "no_post_result_retuning": true
+  },
+  "outputs": {
+    "directory": "experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results",
+    "summary": "experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/summary.json",
+    "structural_candidates": "experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/structural_candidates.csv",
+    "semantic_decisions": "experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/semantic_decisions.jsonl",
+    "review_chart": "experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/review/FILUSDT_P_1h_recent5d_global.png",
+    "gallery": "experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/review/gallery.html",
+    "report": "analysis/p1_1h_filusdt_grade_a_recent5d_probe_20260903.md",
+    "html": "analysis/html/p1_1h_filusdt_grade_a_recent5d_probe_20260903.html"
+  },
+  "safety": {
+    "new_training": false,
+    "threshold_or_weight_change": false,
+    "label_or_dataset_mutation": false,
+    "active_or_frozen_change": false,
+    "promotion": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "telegram_send": false,
+    "order_action": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
