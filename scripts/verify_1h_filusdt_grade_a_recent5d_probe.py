@@ -130,6 +130,12 @@ def main() -> int:
             raise FilProbeVerificationError("actual-direction semantic decision drifted")
         for key, value in actual_features.to_dict().items():
             stored = float(row[f"semantic_{key}"])
+            if value is None or pd.isna(value):
+                if not pd.isna(stored):
+                    raise FilProbeVerificationError(
+                        f"semantic_{key} missingness mismatch: actual={value} stored={stored}"
+                    )
+                continue
             delta = abs(float(value) - stored)
             feature_max_delta = max(feature_max_delta, delta)
             assert_close(value, stored, atol=1e-12, field=f"semantic_{key}")
