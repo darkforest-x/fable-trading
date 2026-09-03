@@ -20,7 +20,13 @@
     "list_or_tuple": "serialize_as_json_array_without_dict_coercion",
     "scalar": "leave_as_csv_scalar"
   },
-  "resume_policy": "Revalidate all 52 completed monthly shards, recompute the same global queue, deterministically rerender/overwrite the same 5,083 chart paths, and finish CSV plus aggregate artifacts. No detector inference month is rerun.",
+  "resume_policy": "Preserve the first-pass 5,083-chart tree and JSONL under results/failures, revalidate all 52 completed monthly shards, recompute the same global queue, deterministically rerender fresh chart paths, and finish CSV plus aggregate artifacts. No detector inference month is rerun.",
+  "first_resume_observation": {
+    "result": "stopped_before_any_rerender",
+    "error": "FileExistsError: results/model_inputs/2025-10 already exists",
+    "cause": "render_review_inputs intentionally creates each month directory without exist_ok",
+    "recovery": "move the complete first-pass tree instead of overwriting it"
+  },
   "candidate_selection_changed": false,
   "image_pixels_or_boxes_changed": false,
   "model_or_threshold_changed": false,
