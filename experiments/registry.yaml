@@ -2565,7 +2565,7 @@ experiments:
   - experiment_id: exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "537e7c091bec705c464383439b060a00ea521299"
-    status: active
+    status: rejected
     question: >-
       With the exact paired Grade-A population, candles, chart transform,
       palette, line width, base weight and full40 native-1280 recipe frozen,
@@ -2575,20 +2575,39 @@ experiments:
       vertical labels mechanically follow the unchanged full-wick plus six-MA
       box rule while every class and horizontal boundary stays fixed
     result: >-
-      preregistered and awaiting the existing 5000-event GPU inference queue;
-      no training or validation result has been read
+      completed 40/40 seed-zero epochs on RTX 3060. HL2 raised earliest-event
+      recall from 81.29% to 87.10% and post2 recall from 81.88% to 87.25%,
+      but neither positive primary survived Holm correction (p=0.1471 and
+      0.1536), while negative fired-image rate increased from 1.139% to
+      1.417%. The preregistered joint gate rejected demonstrated HL2
+      improvement; keep close as baseline and do not promote.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     artifacts:
       - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-prereg
       - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-local-preflight
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-remote-preflight
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-launch-receipt
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-best-weight
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-training-receipt
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-frozen-val
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-predictions
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-paired-comparison
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-environment-correction
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-cuda-eval-supplemental
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-cuda-predictions-supplemental
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-report
+      - 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-html
+    canonical_report: analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.md
     reuse_allowed: false
     notes: >-
       Owner explicitly authorized this one completed-history research rerun.
       It starts from the same official yolo11s.pt rather than the old best.pt,
       uses seed 0 and the exact full40 1280 recipe, and does not authorize
-      threshold tuning, holdout, promotion, deployment or live trading.
+      threshold tuning, holdout, promotion, deployment or live trading. The
+      conclusion is limited to one training seed and includes the mechanically
+      required HL2 vertical-label update, so it is not a pure pixel-only effect.
 
   - experiment_id: exp-15m-right-edge-screenshot-similarity-v1
     source_repo: darkforest-x/fable-trading

@@ -12269,3 +12269,208 @@ artifacts:
     config_hash: "9c040fe906cb53c95d97abdc2b0405334f3d13ed84faba40c51ddd2f119c91e2"
     data_cutoff: "2026-09-03T16:00:00Z"
     notes: Self-contained Owner-facing HTML with the ten-chart contact sheet embedded.
+
+  # ---- Grade-A 15m close -> HL2 paired retraining (2026-09-03/04) ----
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-remote-preflight
+    artifact_type: manifest
+    role: remote_full_hash_training_input_preflight
+    source_repo: darkforest-x/fable-trading
+    source_commit: "dee65c1ffa9e9012d59c4e20ad0ef21d6b5e538a"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/remote_dataset_preflight.json
+    sha256: "1645ad278369431db195400da39f5d62ec0681b890f5e8b1b68eeaa974a09af8"
+    size_bytes: 1307
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/remote_dataset_preflight.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "42fc454d472c2bdc47a5717e9ab167644b23cfd9"
+    config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Remote copy matched the local 32,000-image dataset and all 64,000 image/label hashes before launch.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-launch-receipt
+    artifact_type: manifest
+    role: safe_queue_release_and_remote_wmi_launch_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "dee65c1ffa9e9012d59c4e20ad0ef21d6b5e538a"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/launch_receipt.json
+    sha256: "ffe790c96750d026e5804ee89671addbc76b9f6328b0b691d0ce29170a01951b"
+    size_bytes: 1848
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/launch_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "dee65c1ffa9e9012d59c4e20ad0ef21d6b5e538a"
+    config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Records queue release, staged dataset sentinel, WMI PID, runtime versions and first verified epoch progress without interrupting the prior job.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-best-weight
+    artifact_type: weights
+    role: seed_zero_hl2_full40_native1280_best_checkpoint
+    source_repo: darkforest-x/fable-trading
+    source_commit: "dee65c1ffa9e9012d59c4e20ad0ef21d6b5e538a"
+    source_path: analysis/output/ma_launch_owner_grade_a8000_neg24000_hl2_v1/ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40/weights/best.pt
+    sha256: "0533d48f209bfeb73b10f147a38f245de1765599ad222770af394c4f0f68ab52"
+    size_bytes: 19245978
+    storage_uri: "file://analysis/output/ma_launch_owner_grade_a8000_neg24000_hl2_v1/ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40/weights/best.pt"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "dee65c1ffa9e9012d59c4e20ad0ef21d6b5e538a"
+    config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: One-seed treatment checkpoint only; the paired joint gate rejected demonstrated improvement and this weight is not promotable.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-training-receipt
+    artifact_type: manifest
+    role: completed_40_epoch_recipe_hash_and_metric_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a87706a76ac7cdabc4b76c37fbedb2de1b8fc2fb"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/training_receipt.json
+    sha256: "c8a6fb302ae2b626807a66c3b157260a62093e18d594938ceb978bb994dd0ccb"
+    size_bytes: 6129
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/training_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a87706a76ac7cdabc4b76c37fbedb2de1b8fc2fb"
+    config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Exit code zero, 40/40 rows, no early stop, exact fetched-file hashes and frozen args contract.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-frozen-val
+    artifact_type: manifest
+    role: canonical_fixed_threshold_mps_pre_holdout_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cb9140148b41b3d8906bcf869f3fa666024d3139"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_evaluation.json
+    sha256: "5a4e4f3b8dd926ff95be16027338263a3a35f016652cf800a0a8a074a685d42b"
+    size_bytes: 26620
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_evaluation.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "cb9140148b41b3d8906bcf869f3fa666024d3139"
+    config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Canonical treatment inference matched the archived baseline Mac MPS runtime at imgsz 1280, conf 0.25, NMS IoU 0.7 and true-hit IoU 0.5.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-predictions
+    artifact_type: manifest
+    role: canonical_ordered_per_image_mps_prediction_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cb9140148b41b3d8906bcf869f3fa666024d3139"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_predictions.jsonl
+    sha256: "cbe466feaa67b7b3e93694f4886ea1a5bb8c56614802c7a39255ed5c3b26256a"
+    size_bytes: 1469557
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_predictions.jsonl"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "cb9140148b41b3d8906bcf869f3fa666024d3139"
+    config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: All 4,800 chronological val images in frozen order for independent paired recomputation.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-paired-comparison
+    artifact_type: manifest
+    role: preregistered_paired_event_cluster_holm_and_bootstrap_decision
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fbbe06440930636f1c01add921c15189a9be6455"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/paired_val_comparison.json
+    sha256: "649eb0fb4f23e951353b152300f402ed1524ad99cade923fce2b07ab03b3c005"
+    size_bytes: 9273
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/paired_val_comparison.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fbbe06440930636f1c01add921c15189a9be6455"
+    config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Joint decision false; no positive primary survived Holm correction and observed negative fire increased.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-environment-correction
+    artifact_type: manifest
+    role: cuda_to_mps_paired_inference_correction_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a87706a76ac7cdabc4b76c37fbedb2de1b8fc2fb"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/evaluation_environment_correction_receipt.json
+    sha256: "9eeee4532686af87c33f9f739c7f97bc3869ed9c10436e22e1e547f97b0674a4"
+    size_bytes: 3564
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/evaluation_environment_correction_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a87706a76ac7cdabc4b76c37fbedb2de1b8fc2fb"
+    config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Records the comparator refusal of CUDA-vs-MPS pairing and the canonical matched MPS rerun; CUDA remains supplemental only.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-cuda-eval-supplemental
+    artifact_type: manifest
+    role: non_decisional_cuda_cross_runtime_validation_supplement
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cb9140148b41b3d8906bcf869f3fa666024d3139"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_evaluation_cuda_supplemental.json
+    sha256: "ce4dc231c7eb0626d15acb985d747dfcd3e75e554bc07bcb13e217ce4d7bd9cf"
+    size_bytes: 27418
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_evaluation_cuda_supplemental.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "cb9140148b41b3d8906bcf869f3fa666024d3139"
+    config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: RTX 3060 CUDA inference retained only for cross-runtime diagnosis; excluded from the formal paired decision.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-cuda-predictions-supplemental
+    artifact_type: manifest
+    role: non_decisional_cuda_ordered_prediction_ledger_supplement
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cb9140148b41b3d8906bcf869f3fa666024d3139"
+    source_path: experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_predictions_cuda_supplemental.jsonl
+    sha256: "f120e9f684eb6c084f3970d099e4f2953f235486920f50702b1de4f93986b52d"
+    size_bytes: 1474292
+    storage_uri: "repo://experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_predictions_cuda_supplemental.jsonl"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "cb9140148b41b3d8906bcf869f3fa666024d3139"
+    config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Supplemental 4,800-image CUDA ledger; discrete outcomes matched MPS but 1,257 confidence values differed.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-report
+    artifact_type: report
+    role: canonical_chinese_close_to_hl2_training_and_paired_validation_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a87706a76ac7cdabc4b76c37fbedb2de1b8fc2fb"
+    source_path: analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.md
+    sha256: "90bbe1d88542c36b16813a0ec1f4cf0d1a38b4a0e190481484a774ea01a47b03"
+    size_bytes: 17277
+    storage_uri: "repo://analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a87706a76ac7cdabc4b76c37fbedb2de1b8fc2fb"
+    config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Canonical report documents the failed joint gate, non-directional null, full reproduction commands, one-seed limitation and no-production boundary.
+
+  - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-html
+    artifact_type: report
+    role: owner_facing_html_close_to_hl2_training_and_paired_validation_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a87706a76ac7cdabc4b76c37fbedb2de1b8fc2fb"
+    source_path: analysis/html/p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.html
+    sha256: "79052e4aff1054681d37b2449b43dca53bc4cfba01b5b502137d34e9c2022721"
+    size_bytes: 22640
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a87706a76ac7cdabc4b76c37fbedb2de1b8fc2fb"
+    config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
+    data_cutoff: "2026-05-03T20:30:00Z"
+    notes: Owner-facing HTML generated from the canonical Markdown immediately after report completion.

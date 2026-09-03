@@ -1,0 +1,882 @@
+{
+  "active_or_frozen_changed": false,
+  "class_names": {
+    "0": "dense_long",
+    "1": "dense_short"
+  },
+  "completed_history_not_live_tip": true,
+  "confidence_threshold": 0.25,
+  "dataset": "C:\\fable\\datasets\\ma_launch_owner_grade_a8000_neg24000_hl2_v1_full40_1280_input",
+  "deployed": false,
+  "direction_flip_null": {
+    "event_level": {
+      "actual_correct_class_any_hit_events": 149,
+      "actual_correct_class_any_hit_recall": 0.9612903225806452,
+      "actual_only": 149,
+      "both": 0,
+      "events": 155,
+      "flipped_class_any_hit_events": 0,
+      "flipped_class_any_hit_recall": 0.0,
+      "flipped_only": 0,
+      "neither": 6,
+      "paired_exact_two_sided_p": 2.802596928649634e-45,
+      "recall_delta": 0.9612903225806452
+    },
+    "image_level": {
+      "actual_correct_class_hits": 1079,
+      "actual_correct_class_recall": 0.8991666666666667,
+      "actual_only": 1079,
+      "both": 0,
+      "flipped_class_hits": 0,
+      "flipped_class_recall": 0.0,
+      "flipped_only": 0,
+      "images": 1200,
+      "neither": 121,
+      "paired_exact_two_sided_p": 0.0,
+      "recall_delta": 0.8991666666666667
+    },
+    "null_hypothesis": "Swap LONG and SHORT class ids while keeping every predicted box, confidence, image and IoU unchanged."
+  },
+  "environment": {
+    "batch": 8,
+    "device": "0",
+    "numpy": "2.0.2",
+    "python": "3.9.13",
+    "torch": "2.8.0+cu126",
+    "ultralytics": "8.4.89"
+  },
+  "event_surface": {
+    "any_hit_event_recall": 0.9612903225806452,
+    "any_hit_events": 149,
+    "earliest_available_true_hit_events": 135,
+    "earliest_available_true_hit_rate": 0.8709677419354839,
+    "events": 155,
+    "events_with_post2_variant": 149,
+    "first_hit_post_bars": {
+      "histogram": {
+        "2": 130,
+        "3": 8,
+        "4": 2,
+        "5": 2,
+        "6": 5,
+        "7": 1,
+        "8": 1
+      },
+      "max": 8,
+      "median": 2.0,
+      "min": 2,
+      "p90": 3.0
+    },
+    "no_hit_events": 6,
+    "post2_true_hit_events": 130,
+    "post2_true_hit_rate": 0.87248322147651,
+    "variant_recall_by_post_bars": {
+      "2": {
+        "recall": 0.87248322147651,
+        "true_hits": 130,
+        "variants": 149
+      },
+      "3": {
+        "recall": 0.8758169934640523,
+        "true_hits": 134,
+        "variants": 153
+      },
+      "4": {
+        "recall": 0.8843537414965986,
+        "true_hits": 130,
+        "variants": 147
+      },
+      "5": {
+        "recall": 0.8940397350993378,
+        "true_hits": 135,
+        "variants": 151
+      },
+      "6": {
+        "recall": 0.92,
+        "true_hits": 138,
+        "variants": 150
+      },
+      "7": {
+        "recall": 0.9271523178807947,
+        "true_hits": 140,
+        "variants": 151
+      },
+      "8": {
+        "recall": 0.9115646258503401,
+        "true_hits": 134,
+        "variants": 147
+      },
+      "9": {
+        "recall": 0.9078947368421053,
+        "true_hits": 138,
+        "variants": 152
+      }
+    }
+  },
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1",
+  "generator_commit": "cb9140148b41b3d8906bcf869f3fa666024d3139",
+  "generator_sha256": "12f022f9eac3accc0a036f1ae60ac0aa6a9392414c281c219663820023edece4",
+  "holdout_consumed": false,
+  "imgsz": 1280,
+  "manifest_sha256": "ec93d6bfd04cc84a24a34cd745af2c74943f9a75e664831060619511ba60f6d7",
+  "negative_images": {
+    "all": {
+      "boxes": 51,
+      "class_box_counts": {
+        "dense_long": 19,
+        "dense_short": 32
+      },
+      "confidence": {
+        "max": 0.9637150168418884,
+        "median": 0.6955069899559021,
+        "min": 0.28044477105140686,
+        "p90": 0.9311513900756836
+      },
+      "false_boxes_per_1000_images": 14.166666666666666,
+      "fire_rate": 0.014166666666666666,
+      "fired_images": 51,
+      "images": 3600,
+      "top_fired_samples": [
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8ba36bafadc2c5b80d1a5599",
+          "max_confidence": 0.9637150168418884,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "572b387c6cabcbbcc5445f28",
+          "max_confidence": 0.9516645669937134,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "9ee54f34396395b5d291f817",
+          "max_confidence": 0.9416733384132385,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f1484b5d1e16f5a6db9d9d1a",
+          "max_confidence": 0.9387533664703369,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "d735732f68d6a7cb539e797b",
+          "max_confidence": 0.9349797964096069,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "082dc4603dcf82f8e987e4ea",
+          "max_confidence": 0.9311513900756836,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "97501ef92a17f4289d4b0e76",
+          "max_confidence": 0.9137716889381409,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "a2380de89ec2cfb157fc477c",
+          "max_confidence": 0.9110816121101379,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "4002fc67c2224324a457b8ae",
+          "max_confidence": 0.9025287628173828,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "05f0f4b95961b5493767bee9",
+          "max_confidence": 0.8869749307632446,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f4560b5f9b52be2daf54a2a1",
+          "max_confidence": 0.8759423494338989,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "35c26579857794a7d0a9cfca",
+          "max_confidence": 0.8746825456619263,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "c155e6657684dd362a853274",
+          "max_confidence": 0.8569998741149902,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "5ec81ec69861dda4e87a1029",
+          "max_confidence": 0.8461476564407349,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "18c1f0776fb73e482a034a33",
+          "max_confidence": 0.8406025171279907,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "c4768b0d6b0457834659f1e0",
+          "max_confidence": 0.8232629299163818,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "645cd9481697449f14933f79",
+          "max_confidence": 0.8080760836601257,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "374fb2d6091caeffbbedbe31",
+          "max_confidence": 0.7927621006965637,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8b1ecbe45d8e6d57c7f4c9ca",
+          "max_confidence": 0.7894233465194702,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8aff98d820eade98bf94221c",
+          "max_confidence": 0.778704047203064,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "513ac1745c34ab64a0dc165c",
+          "max_confidence": 0.7769190669059753,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "26b3e8db604c9b411cf7d390",
+          "max_confidence": 0.7641540169715881,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f12e4db27eda76962fdbde3a",
+          "max_confidence": 0.7580692768096924,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "96327a694eee0c2462b34a29",
+          "max_confidence": 0.7012413740158081,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "37915e866c3c76b5c9586338",
+          "max_confidence": 0.6958820223808289,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "0d0db1ee9a89cd23d5ca4eee",
+          "max_confidence": 0.6955069899559021,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "2520d636fe203b3355681416",
+          "max_confidence": 0.6880500316619873,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "6a0f0fd5d5af1ba13bf515df",
+          "max_confidence": 0.6865502595901489,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "919ac13d883c76e193d65f8f",
+          "max_confidence": 0.6772187352180481,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "23571cb21eaeedbe4c29a3e6",
+          "max_confidence": 0.5496386885643005,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "386b28dcf20ec30885a0e0df",
+          "max_confidence": 0.5150681734085083,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "6700244e71fb440a91346a42",
+          "max_confidence": 0.5117527842521667,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "3f82926044ca60205c7256b5",
+          "max_confidence": 0.4941888153553009,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "c6e193a3f13eea1c86ae4c8f",
+          "max_confidence": 0.4826374650001526,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "dbdfbf99dfca07dc6d07efa5",
+          "max_confidence": 0.45009395480155945,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "87878c06b3224da4c15fd76b",
+          "max_confidence": 0.44914665818214417,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8d37b0bce1a035100272a31a",
+          "max_confidence": 0.4488093852996826,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "6224254efef70ebaa6ee598e",
+          "max_confidence": 0.4361601173877716,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "2a40a82d085aac307ec136a5",
+          "max_confidence": 0.417320191860199,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "d95371e55b49f507fc26a8bd",
+          "max_confidence": 0.3881353437900543,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "815b8112e961a01beede56af",
+          "max_confidence": 0.38501158356666565,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "e227c43cc923e602f7381201",
+          "max_confidence": 0.36173108220100403,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "998e73b50278259cc1f1796b",
+          "max_confidence": 0.34162378311157227,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f02e7c96b1296eaf2814eb6a",
+          "max_confidence": 0.34119147062301636,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "bdd130e3b5c43b05821b9aee",
+          "max_confidence": 0.33743515610694885,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "d6afd17670a79017a96d0a16",
+          "max_confidence": 0.31245726346969604,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "19e931e64ff0a458b3179407",
+          "max_confidence": 0.3075478971004486,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "b27fc9dc6ea37a7d9f7d43db",
+          "max_confidence": 0.3023967146873474,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "fb523a43a5895f7b210351a1",
+          "max_confidence": 0.2989298701286316,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "9c716bd525796536b7390442",
+          "max_confidence": 0.28572651743888855,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "bb8b500fe2dbeefb15c2dbd8",
+          "max_confidence": 0.28044477105140686,
+          "negative_kind": "hard"
+        }
+      ]
+    },
+    "easy": {
+      "boxes": 11,
+      "class_box_counts": {
+        "dense_long": 3,
+        "dense_short": 8
+      },
+      "confidence": {
+        "max": 0.9416733384132385,
+        "median": 0.8406025171279907,
+        "min": 0.28572651743888855,
+        "p90": 0.9387533664703369
+      },
+      "false_boxes_per_1000_images": 9.166666666666666,
+      "fire_rate": 0.009166666666666667,
+      "fired_images": 11,
+      "images": 1200,
+      "top_fired_samples": [
+        {
+          "boxes": 1,
+          "dataset_sample_id": "9ee54f34396395b5d291f817",
+          "max_confidence": 0.9416733384132385,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f1484b5d1e16f5a6db9d9d1a",
+          "max_confidence": 0.9387533664703369,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "d735732f68d6a7cb539e797b",
+          "max_confidence": 0.9349797964096069,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "082dc4603dcf82f8e987e4ea",
+          "max_confidence": 0.9311513900756836,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "c155e6657684dd362a853274",
+          "max_confidence": 0.8569998741149902,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "18c1f0776fb73e482a034a33",
+          "max_confidence": 0.8406025171279907,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "37915e866c3c76b5c9586338",
+          "max_confidence": 0.6958820223808289,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "dbdfbf99dfca07dc6d07efa5",
+          "max_confidence": 0.45009395480155945,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "6224254efef70ebaa6ee598e",
+          "max_confidence": 0.4361601173877716,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "e227c43cc923e602f7381201",
+          "max_confidence": 0.36173108220100403,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "9c716bd525796536b7390442",
+          "max_confidence": 0.28572651743888855,
+          "negative_kind": "easy"
+        }
+      ]
+    },
+    "hard": {
+      "boxes": 40,
+      "class_box_counts": {
+        "dense_long": 16,
+        "dense_short": 24
+      },
+      "confidence": {
+        "max": 0.9637150168418884,
+        "median": 0.6873001456260681,
+        "min": 0.28044477105140686,
+        "p90": 0.9033840477466584
+      },
+      "false_boxes_per_1000_images": 16.666666666666668,
+      "fire_rate": 0.016666666666666666,
+      "fired_images": 40,
+      "images": 2400,
+      "top_fired_samples": [
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8ba36bafadc2c5b80d1a5599",
+          "max_confidence": 0.9637150168418884,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "572b387c6cabcbbcc5445f28",
+          "max_confidence": 0.9516645669937134,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "97501ef92a17f4289d4b0e76",
+          "max_confidence": 0.9137716889381409,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "a2380de89ec2cfb157fc477c",
+          "max_confidence": 0.9110816121101379,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "4002fc67c2224324a457b8ae",
+          "max_confidence": 0.9025287628173828,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "05f0f4b95961b5493767bee9",
+          "max_confidence": 0.8869749307632446,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f4560b5f9b52be2daf54a2a1",
+          "max_confidence": 0.8759423494338989,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "35c26579857794a7d0a9cfca",
+          "max_confidence": 0.8746825456619263,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "5ec81ec69861dda4e87a1029",
+          "max_confidence": 0.8461476564407349,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "c4768b0d6b0457834659f1e0",
+          "max_confidence": 0.8232629299163818,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "645cd9481697449f14933f79",
+          "max_confidence": 0.8080760836601257,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "374fb2d6091caeffbbedbe31",
+          "max_confidence": 0.7927621006965637,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8b1ecbe45d8e6d57c7f4c9ca",
+          "max_confidence": 0.7894233465194702,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8aff98d820eade98bf94221c",
+          "max_confidence": 0.778704047203064,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "513ac1745c34ab64a0dc165c",
+          "max_confidence": 0.7769190669059753,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "26b3e8db604c9b411cf7d390",
+          "max_confidence": 0.7641540169715881,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f12e4db27eda76962fdbde3a",
+          "max_confidence": 0.7580692768096924,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "96327a694eee0c2462b34a29",
+          "max_confidence": 0.7012413740158081,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "0d0db1ee9a89cd23d5ca4eee",
+          "max_confidence": 0.6955069899559021,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "2520d636fe203b3355681416",
+          "max_confidence": 0.6880500316619873,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "6a0f0fd5d5af1ba13bf515df",
+          "max_confidence": 0.6865502595901489,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "919ac13d883c76e193d65f8f",
+          "max_confidence": 0.6772187352180481,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "23571cb21eaeedbe4c29a3e6",
+          "max_confidence": 0.5496386885643005,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "386b28dcf20ec30885a0e0df",
+          "max_confidence": 0.5150681734085083,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "6700244e71fb440a91346a42",
+          "max_confidence": 0.5117527842521667,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "3f82926044ca60205c7256b5",
+          "max_confidence": 0.4941888153553009,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "c6e193a3f13eea1c86ae4c8f",
+          "max_confidence": 0.4826374650001526,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "87878c06b3224da4c15fd76b",
+          "max_confidence": 0.44914665818214417,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8d37b0bce1a035100272a31a",
+          "max_confidence": 0.4488093852996826,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "2a40a82d085aac307ec136a5",
+          "max_confidence": 0.417320191860199,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "d95371e55b49f507fc26a8bd",
+          "max_confidence": 0.3881353437900543,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "815b8112e961a01beede56af",
+          "max_confidence": 0.38501158356666565,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "998e73b50278259cc1f1796b",
+          "max_confidence": 0.34162378311157227,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f02e7c96b1296eaf2814eb6a",
+          "max_confidence": 0.34119147062301636,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "bdd130e3b5c43b05821b9aee",
+          "max_confidence": 0.33743515610694885,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "d6afd17670a79017a96d0a16",
+          "max_confidence": 0.31245726346969604,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "19e931e64ff0a458b3179407",
+          "max_confidence": 0.3075478971004486,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "b27fc9dc6ea37a7d9f7d43db",
+          "max_confidence": 0.3023967146873474,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "fb523a43a5895f7b210351a1",
+          "max_confidence": 0.2989298701286316,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "bb8b500fe2dbeefb15c2dbd8",
+          "max_confidence": 0.28044477105140686,
+          "negative_kind": "hard"
+        }
+      ]
+    }
+  },
+  "nms_iou": 0.7,
+  "positive_images": {
+    "all": {
+      "best_same_class_iou": {
+        "max": 0.9969279541149653,
+        "median": 0.9702949785505999,
+        "min": 0.0,
+        "p90": 0.9875494792391086
+      },
+      "extra_prediction_boxes": 128,
+      "fixed_threshold_image_recall": 0.8991666666666667,
+      "hit_confidence": {
+        "max": 0.9823158383369446,
+        "median": 0.9321320652961731,
+        "min": 0.25335490703582764,
+        "p90": 0.9694133996963501
+      },
+      "images": 1200,
+      "images_with_multiple_boxes": 84,
+      "multiple_box_image_rate": 0.07,
+      "prediction_boxes": 1207,
+      "true_hit_images": 1079,
+      "wrong_direction_overlap_images": 0
+    },
+    "dense_long": {
+      "best_same_class_iou": {
+        "max": 0.9969279541149653,
+        "median": 0.9701379828114826,
+        "min": 0.0,
+        "p90": 0.9875496531600756
+      },
+      "extra_prediction_boxes": 59,
+      "fixed_threshold_image_recall": 0.8926553672316384,
+      "hit_confidence": {
+        "max": 0.9742937684059143,
+        "median": 0.9114356338977814,
+        "min": 0.25335490703582764,
+        "p90": 0.9534020900726319
+      },
+      "images": 531,
+      "images_with_multiple_boxes": 34,
+      "multiple_box_image_rate": 0.064030131826742,
+      "prediction_boxes": 533,
+      "true_hit_images": 474,
+      "wrong_direction_overlap_images": 0
+    },
+    "dense_short": {
+      "best_same_class_iou": {
+        "max": 0.9948902358414262,
+        "median": 0.9704734673786651,
+        "min": 0.0,
+        "p90": 0.9874355512097635
+      },
+      "extra_prediction_boxes": 69,
+      "fixed_threshold_image_recall": 0.9043348281016442,
+      "hit_confidence": {
+        "max": 0.9823158383369446,
+        "median": 0.9477951526641846,
+        "min": 0.255006343126297,
+        "p90": 0.9720084309577942
+      },
+      "images": 669,
+      "images_with_multiple_boxes": 50,
+      "multiple_box_image_rate": 0.07473841554559044,
+      "prediction_boxes": 674,
+      "true_hit_images": 605,
+      "wrong_direction_overlap_images": 0
+    }
+  },
+  "predictions_jsonl": "C:\\fable\\evaluations\\ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40\\frozen_val_predictions.jsonl",
+  "predictions_sha256": "f120e9f684eb6c084f3970d099e4f2953f235486920f50702b1de4f93986b52d",
+  "predictions_size_bytes": 1474292,
+  "production_eligible": false,
+  "promoted": false,
+  "schema_version": 1,
+  "threshold_tuned": false,
+  "true_hit_iou": 0.5,
+  "validation_counts": {
+    "negative": 3600,
+    "negative_easy": 1200,
+    "negative_events": 465,
+    "negative_hard": 2400,
+    "positive": 1200,
+    "positive_events": 155,
+    "positive_long": 531,
+    "positive_short": 669
+  },
+  "weights_path": "C:\\fable\\runs\\detect\\ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40\\weights\\best.pt",
+  "weights_sha256": "0533d48f209bfeb73b10f147a38f245de1765599ad222770af394c4f0f68ab52"
+}

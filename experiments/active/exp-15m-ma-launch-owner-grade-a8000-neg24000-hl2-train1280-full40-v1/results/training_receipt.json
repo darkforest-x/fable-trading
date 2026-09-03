@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1",
+  "generated_at": "2026-09-04T07:39:48+08:00",
+  "summarizer_commit": "a87706a76ac7cdabc4b76c37fbedb2de1b8fc2fb",
+  "run_name": "ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40",
+  "remote_host": "Administrator@192.168.1.2",
+  "gpu": "NVIDIA GeForce RTX 3060 12GB",
+  "started_at": "2026-09-03T20:56:01+08:00",
+  "completed_at": "2026-09-04T07:00:54+08:00",
+  "elapsed_hours_reported_by_ultralytics": 10.058,
+  "remote_exit_code": 0,
+  "epochs_requested": 40,
+  "epochs_completed": 40,
+  "early_stopped": false,
+  "first": {
+    "epoch": 1,
+    "precision": 0.77416,
+    "recall": 0.86,
+    "map50": 0.88266,
+    "map50_95": 0.6841,
+    "train_box_loss": 0.53747,
+    "train_cls_loss": 2.99194,
+    "train_dfl_loss": 0.91496,
+    "val_box_loss": 0.13694,
+    "val_cls_loss": 1.41932,
+    "val_dfl_loss": 0.25144
+  },
+  "best": {
+    "selection": "maximum metrics/mAP50-95(B) in the immutable 40-row results.csv",
+    "epoch": 6,
+    "precision": 0.89665,
+    "recall": 0.87151,
+    "map50": 0.93799,
+    "map50_95": 0.77609,
+    "train_box_loss": 0.19236,
+    "train_cls_loss": 0.33527,
+    "train_dfl_loss": 0.71795,
+    "val_box_loss": 0.12361,
+    "val_cls_loss": 0.85467,
+    "val_dfl_loss": 0.29541
+  },
+  "final": {
+    "epoch": 40,
+    "precision": 0.91099,
+    "recall": 0.87449,
+    "map50": 0.87721,
+    "map50_95": 0.67569,
+    "train_box_loss": 0.05168,
+    "train_cls_loss": 0.05556,
+    "train_dfl_loss": 0.68068,
+    "val_box_loss": 0.16412,
+    "val_cls_loss": 1.09802,
+    "val_dfl_loss": 0.4627
+  },
+  "best_model_final_validation": {
+    "precision": 0.8956555,
+    "recall": 0.8711011,
+    "map50": 0.9381125,
+    "map50_95": 0.7762496062943962,
+    "fitness": 0.7762496062943962
+  },
+  "per_class_best_model_final_validation": {
+    "dense_long": {
+      "images": 531,
+      "instances": 531,
+      "precision_log_rounded": 0.901,
+      "recall_log_rounded": 0.853,
+      "map50_log_rounded": 0.946,
+      "map50_95": 0.75531
+    },
+    "dense_short": {
+      "images": 669,
+      "instances": 669,
+      "precision_log_rounded": 0.891,
+      "recall_log_rounded": 0.889,
+      "map50_log_rounded": 0.93,
+      "map50_95": 0.79719
+    }
+  },
+  "class_names": {
+    "0": "dense_long",
+    "1": "dense_short"
+  },
+  "recipe": {
+    "base_model": "models/yolo11s.pt",
+    "epochs": 40,
+    "patience": 0,
+    "batch": 8,
+    "imgsz": 1280,
+    "optimizer": "AdamW",
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "warmup_epochs": 0.5,
+    "seed": 0,
+    "deterministic": true,
+    "rect": true,
+    "cache": false,
+    "workers": 2,
+    "fliplr": 0.0,
+    "flipud": 0.0,
+    "mosaic": 0.0,
+    "mixup": 0.0,
+    "hsv_h": 0.0,
+    "hsv_s": 0.0,
+    "hsv_v": 0.0,
+    "degrees": 0.0,
+    "translate": 0.02,
+    "scale": 0.1,
+    "shear": 0.0,
+    "perspective": 0.0,
+    "erasing": 0.0
+  },
+  "runtime_versions": {
+    "python": "3.9.13",
+    "torch": "2.8.0+cu126",
+    "torchvision": "0.23.0",
+    "ultralytics": "8.4.89",
+    "numpy": "2.0.2"
+  },
+  "fetched_files": {
+    "best.pt": {
+      "local_path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_hl2_v1/ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40/weights/best.pt",
+      "size_bytes": 19245978,
+      "sha256": "0533d48f209bfeb73b10f147a38f245de1765599ad222770af394c4f0f68ab52",
+      "remote_path": "C:/fable/runs/detect/ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40/weights/best.pt",
+      "remote_mtime_utc": "2026-09-03T23:00:07.3163336Z"
+    },
+    "args.yaml": {
+      "local_path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_hl2_v1/ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40/args.yaml",
+      "size_bytes": 1984,
+      "sha256": "2a7a2c43729fe931c30192f54e631e63372317dacfb853de80b02a5683b270b0",
+      "remote_path": "C:/fable/runs/detect/ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40/args.yaml",
+      "remote_mtime_utc": "2026-09-03T12:56:05.4316703Z"
+    },
+    "results.csv": {
+      "local_path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_hl2_v1/ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40/results.csv",
+      "size_bytes": 5019,
+      "sha256": "c98ad6476ef153bc2315b6cb9893217fc8da151df1497a2bbb71ad14133b13e5",
+      "remote_path": "C:/fable/runs/detect/ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40/results.csv",
+      "remote_mtime_utc": "2026-09-03T23:00:05.9843216Z"
+    },
+    "train.log": {
+      "local_path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_hl2_v1/ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40/train.log",
+      "size_bytes": 22651375,
+      "sha256": "11a56c11c2406ecebce5cc9891b235ba9762b9ff367fa6d767f9e6d085b60809",
+      "remote_path": "C:/fable/logs/ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40.log",
+      "remote_mtime_utc": "2026-09-03T23:00:54.4509050Z"
+    }
+  },
+  "remote_exit": {
+    "remote_path": "C:/fable/logs/ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40.exit_code",
+    "size_bytes": 3,
+    "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+    "remote_mtime_utc": "2026-09-03T23:00:54.4509050Z"
+  },
+  "remote_dataset_preflight": {
+    "path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/remote_dataset_preflight.json",
+    "size_bytes": 1307,
+    "sha256": "1645ad278369431db195400da39f5d62ec0681b890f5e8b1b68eeaa974a09af8",
+    "remote_path": "C:/fable/experiments/ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40/remote_dataset_preflight.json",
+    "remote_mtime_utc": "2026-09-03T12:56:00.0006477Z"
+  },
+  "args_contract_passed": true,
+  "results_rows_and_epochs_passed": true,
+  "remote_hash_match": true,
+  "single_training_seed": 0,
+  "holdout_consumed": false,
+  "threshold_tuned": false,
+  "active_or_frozen_changed": false,
+  "forward_state_changed": false,
+  "order_state_changed": false,
+  "promoted": false,
+  "deployed": false,
+  "production_eligible": false
+}

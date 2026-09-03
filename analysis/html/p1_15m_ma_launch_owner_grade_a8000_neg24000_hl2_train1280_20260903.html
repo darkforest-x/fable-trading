@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>15m Grade-A 六均线 close→HL2 单变量复训（2026-09-03/04）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>15m Grade-A 六均线 close→HL2 单变量复训（2026-09-03/04）</h1>
+<p>性质：P1 完成历史图像检测表示消融；Owner 明确授权的一次例外训练。 结论等级：<strong>pre-holdout、单 seed、非生产</strong>。 边界：<strong>未读取 <code>2026-05-04</code> 起 holdout，未调阈值，未 promote、未部署，未改 ACTIVE/frozen/forward，未下单。</strong></p>
+<h2>结论先行</h2>
+<p><strong>HL2 有“正例更容易被检出”的迹象，但没有证明整体优于 close，本轮不建议替换现有表示。</strong></p>
+<ul>
+<li>最早可用窗事件召回由 <code>126/155 = 81.29%</code> 升至 <code>135/155 = 87.10%</code>，增加 <strong>5.81pp</strong>；原始配对 <code>p=0.0490</code>，但三项主检验 Holm 校正后为 <code>p=0.1471</code>，没有过 <code>0.05</code>。</li>
+<li>post2 事件召回由 <code>122/149 = 81.88%</code> 升至 <code>130/149 = 87.25%</code>，增加 <strong>5.37pp</strong>；Holm <code>p=0.1536</code>，同样没有过门。</li>
+<li>空标签负样本开火由 <code>41/3600 = 1.139%</code> 增至 <code>51/3600 = 1.417%</code>，增加 <strong>0.278pp / 10 张</strong>。事件簇检验 <code>p=0.4446</code>，无法确认差异非随机，但预注册规则要求的是“观察值不得增加”，因此这一门也失败。</li>
+<li>所以预注册联合裁决是 <code>demonstrated_hl2_improvement=false</code>：<strong>正例主门没有校正后显著改善，负例误触观察值又上升。</strong> mAP 或次级指标不能覆盖这两道失败。</li>
+<li>单轮训练的最佳 epoch 仍为 6。相对 close，HL2 的 <code>P</code>、<code>R</code>、<code>mAP50</code> 上升，但 <code>mAP50-95</code> 从 <code>0.78602</code> 降至 <code>0.77609</code>，说明“较松 IoU 下更容易找到”与“更严格框定位质量”并未同向改善。</li>
+</ul>
+<p>这不等于 HL2 没价值。结果更像：<strong>HL2 让模型整体更愿意开火，尤其 SHORT 正例受益，但同时多报了负样本；在当前单 seed 下还不能区分这是稳定的表示收益，还是训练波动／更激进的检测倾向。</strong></p>
+<h2>1. 实验问题与唯一变量</h2>
+<p>问题是：在样本、时间切分、K 线、坐标变换、颜色、线宽、六线顺序、基础权重与训练配方全部冻结时，把六条均线的数据源从 <code>close</code> 改成</p>
+<pre><code>
+hl2 = (high + low) / 2
+</code></pre>
+<p>是否能提高 Grade-A <code>dense_long / dense_short</code> 检测。</p>
+<p>六条线仍然是：</p>
+<pre><code>
+SMA20 / EMA20 / SMA60 / EMA60 / SMA120 / EMA120
+</code></pre>
+<p>没有改成 RMA、HMA、WMA，没有改周期，没有改 K 线颜色，也没有改 1px 线宽。这保证本轮只研究 <strong>close→HL2 这一套完整视觉表示</strong>。</p>
+<p>但这里有一个必须诚实写出的细节：旧框的纵向范围按“核心完整影线 + 六条均线 + 4% padding”定义。HL2 改变了线的位置，若强行复制旧纵框，<code>515/8000</code> 个正例核心会有新均线落在框外。因此本轮按原规则机械重算纵框：</p>
+<ul>
+<li>类别、核心起止、横向框完全不变；</li>
+<li><code>5325/8000</code> 个正例纵框有变化；</li>
+<li>纵边最大变化中位数 <code>1px</code>、P95 <code>7px</code>、最大 <code>25px</code>。</li>
+</ul>
+<p>所以本轮估计的是“<strong>HL2 像素 + 为保持同一标注语义而必需的纵框更新</strong>”的整体效果，不是纯像素源的实验。完整冻结契约见 <a href="../experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/preregistration.json">preregistration.json</a>。</p>
+<h2>2. 数据与完整性</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>train</th>
+<th>chronological val</th>
+<th>合计</th>
+</tr></thead><tbody>
+<tr><td>正例图</td><td>6,800</td><td>1,200</td><td>8,000</td></tr>
+<tr><td>负例图</td><td>20,400</td><td>3,600</td><td>24,000</td></tr>
+<tr><td>总图数</td><td>27,200</td><td>4,800</td><td>32,000</td></tr>
+<tr><td>正例事件</td><td>888</td><td>155</td><td>1,043</td></tr>
+<tr><td>负例事件</td><td>2,664</td><td>465</td><td>3,129</td></tr>
+</tbody></table>
+<p>val 正例方向为 LONG <code>531</code>、SHORT <code>669</code>；负例为 hard <code>2,400</code>、easy <code>1,200</code>。全部窗口时间为 <code>2020-02-07 09:45Z</code> 至 <code>2026-05-03 20:30Z</code>，最大窗口右端严格早于 holdout 起点 <code>2026-05-04 00:00Z</code>。</p>
+<p>数据集完整性结果：</p>
+<ul>
+<li>manifest SHA-256：<code>ec93d6bfd04cc84a24a34cd745af2c74943f9a75e664831060619511ba60f6d7</code>；</li>
+<li><code>32,000/32,000</code> 图像可解码且图像哈希唯一；</li>
+<li>close 回放零假设 <code>32,000/32,000</code> PNG 逐字节复现 baseline，说明 builder 在 source=close 时没有引入额外渲染漂移；</li>
+<li>HL2 相对 close 为 <code>32,000/32,000</code> 图像变化，中位变化像素占比 <code>3.286%</code>；</li>
+<li>24,000 个负标签逐字节不变，正例横向框变化为 0；</li>
+<li>本地与 3060 远端均全量核验 64,000 个图像／标签文件。</li>
+</ul>
+<p>证据：<a href="../experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1/results/dataset_build_receipt.json">dataset_build_receipt.json</a>、<a href="../experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1/results/independent_qa_receipt.json">independent_qa_receipt.json</a>、<a href="../experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/remote_dataset_preflight.json">remote_dataset_preflight.json</a>。</p>
+<h2>3. 训练执行与冻结配方</h2>
+<p>训练于 <code>2026-09-03 20:56:01 CST</code> 在 RTX 3060 12GB 启动，于 <code>2026-09-04 07:00:54 CST</code> 正常结束；远端 exit code 为 0，<code>results.csv</code> 有连续 <code>1–40</code> 共 40 行，没有 early stop。训练耗时约 <code>10.058h</code>。</p>
+<p>冻结配方为官方 <code>yolo11s.pt</code>、<code>imgsz=1280</code>、epochs 40、patience 0、batch 8、AdamW、<code>lr0=1e-4</code>、<code>lrf=.01</code>、warmup <code>.5</code>、seed 0、deterministic、rect；flip/mosaic/mixup/HSV 全关，translate <code>.02</code>、scale <code>.1</code>。取回的 <code>args.yaml</code> 与预注册逐项一致。</p>
+<p>关键 SHA-256：</p>
+<table><thead><tr>
+<th>产物</th>
+<th>SHA-256</th>
+</tr></thead><tbody>
+<tr><td>treatment <code>best.pt</code></td><td><code>0533d48f209bfeb73b10f147a38f245de1765599ad222770af394c4f0f68ab52</code></td></tr>
+<tr><td><code>args.yaml</code></td><td><code>2a7a2c43729fe931c30192f54e631e63372317dacfb853de80b02a5683b270b0</code></td></tr>
+<tr><td><code>results.csv</code></td><td><code>c98ad6476ef153bc2315b6cb9893217fc8da151df1497a2bbb71ad14133b13e5</code></td></tr>
+<tr><td><code>train.log</code></td><td><code>11a56c11c2406ecebce5cc9891b235ba9762b9ff367fa6d767f9e6d085b60809</code></td></tr>
+</tbody></table>
+<p>完整收据见 <a href="../experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/training_receipt.json">training_receipt.json</a>。</p>
+<h3>3.1 Ultralytics val 曲线对照</h3>
+<p>下表比较各自 <code>results.csv</code> 中由冻结 fitness 选出的最佳 checkpoint；两臂最佳都在 epoch 6。</p>
+<table><thead><tr>
+<th>指标</th>
+<th>close baseline</th>
+<th>HL2 treatment</th>
+<th>HL2 − close</th>
+</tr></thead><tbody>
+<tr><td>Precision</td><td>0.85199</td><td>0.89665</td><td><strong>+0.04466</strong></td></tr>
+<tr><td>Recall</td><td>0.86705</td><td>0.87151</td><td><strong>+0.00446</strong></td></tr>
+<tr><td>mAP50</td><td>0.92236</td><td>0.93799</td><td><strong>+0.01563</strong></td></tr>
+<tr><td>mAP50-95</td><td><strong>0.78602</strong></td><td>0.77609</td><td><strong>−0.00993</strong></td></tr>
+</tbody></table>
+<p>这些训练期指标是 secondary：它们有助于理解优化曲线，但不是本轮固定阈值的主裁判。</p>
+<h2>4. 冻结 val 配对结果</h2>
+<p>两臂都只在冻结 chronological pre-holdout val 上，以同一环境与固定参数推理：Mac <code>.venv</code>、Python 3.9.6、Torch 2.8.0、Ultralytics 8.4.89、NumPy 2.0.2、MPS、batch 8、<code>imgsz=1280</code>、<code>conf=0.25</code>、NMS IoU <code>0.7</code>、真命中 IoU <code>0.5</code>。阈值未搜索。</p>
+<h3>4.1 预注册主指标</h3>
+<table><thead><tr>
+<th>主表面</th>
+<th>close</th>
+<th>HL2</th>
+<th>差值</th>
+<th>95% 事件块 bootstrap CI</th>
+<th>原始 p</th>
+<th>Holm p</th>
+<th>通过？</th>
+</tr></thead><tbody>
+<tr><td>最早可用窗事件召回</td><td>126/155 = 81.29%</td><td>135/155 = 87.10%</td><td><strong>+5.81pp</strong></td><td>[+0.65pp, +10.97pp]</td><td>0.0490</td><td>0.1471</td><td>否</td></tr>
+<tr><td>post2 事件召回</td><td>122/149 = 81.88%</td><td>130/149 = 87.25%</td><td><strong>+5.37pp</strong></td><td>[0.00pp, +10.74pp]</td><td>0.0768</td><td>0.1536</td><td>否</td></tr>
+<tr><td>负样本开火率</td><td>41/3600 = 1.139%</td><td>51/3600 = 1.417%</td><td><strong>+0.278pp</strong></td><td>[−0.361pp, +0.893pp]</td><td>0.4446¹</td><td>0.4446</td><td>否</td></tr>
+</tbody></table>
+<p>¹ 负例主 p 值按 465 个 <code>negative_event_id</code> 做事件簇 Monte Carlo sign-flip；单图 McNemar <code>p=0.2026</code> 仅作描述，不能把同事件变体当独立样本。</p>
+<p>discordant pair 也支持同一解释：最早窗为 control-only 4、HL2-only 13；post2 为 4 对 12；负例为 20 对 30。HL2 在正例上赢得更多，但也在负例上新增更多开火。</p>
+<h3>4.2 次级诊断</h3>
+<table><thead><tr>
+<th>次级表面</th>
+<th>close</th>
+<th>HL2</th>
+<th>差值</th>
+<th>未校正配对 p / CI</th>
+</tr></thead><tbody>
+<tr><td>任一变体事件召回</td><td>142/155 = 91.61%</td><td>149/155 = 96.13%</td><td>+4.52pp</td><td>p=0.0391；CI [+1.29pp, +8.39pp]</td></tr>
+<tr><td>正例图召回</td><td>1020/1200 = 85.00%</td><td>1079/1200 = 89.92%</td><td>+4.92pp</td><td>p=2.56e-7；CI [+1.41pp, +8.66pp]</td></tr>
+<tr><td>LONG 图召回</td><td>457/531 = 86.06%</td><td>474/531 = 89.27%</td><td>+3.20pp</td><td>p=0.0640；CI [−3.01pp, +9.36pp]</td></tr>
+<tr><td>SHORT 图召回</td><td>563/669 = 84.16%</td><td>605/669 = 90.43%</td><td>+6.28pp</td><td>p=7.46e-9；CI [+2.39pp, +10.81pp]</td></tr>
+<tr><td>负例框 / 1000 图</td><td>11.39</td><td>14.17</td><td>+2.78</td><td>CI [−3.61, +8.96]</td></tr>
+</tbody></table>
+<p>这些是诊断，不进入预注册通过规则。尤其 SHORT 改善很强，但它是在看过结果后的次级分层，不能单独授权切换表示。</p>
+<h3>4.3 非方向性实验的零假设对照</h3>
+<p>本轮是检测表示实验，不读交易 outcome，因此 val AUC、置换检验 p、top-decile 毛／净收益、胜率、成本和“同币×同时间块×同波动桶随机入场”在字面上都不适用；硬填这些指标会制造不存在的交易结论。</p>
+<p>同等严格的零假设对照有两层：</p>
+<ol>
+<li><strong>方向翻转 null</strong>：保持所有框、置信度和 IoU 不变，只交换 LONG/SHORT 类别。真实方向事件命中 <code>149/155</code>，翻转后 <code>0/155</code>，配对 <code>p=2.80e-45</code>；真实方向图命中 <code>1079/1200</code>，翻转后 0。说明模型不是靠不分方向的任意重叠拿到这些召回。</li>
+<li><strong>配对表示 null</strong>：同一 sample/event 顺序逐项比较 close 与 HL2，用 exact discordance test、事件簇 sign-flip、Holm family correction 和 20,000 次事件块 bootstrap。正式结果保存在 <a href="../experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/paired_val_comparison.json">paired_val_comparison.json</a>。</li>
+</ol>
+<h2>5. 推理环境纠偏</h2>
+<p>首次 treatment 推理在 RTX 3060 CUDA 上运行，但归档 baseline 账本实际来自 Mac MPS。比较器在写正式结果前拒绝了这次跨环境配对。随后 treatment 在 baseline 的完整 MPS 环境重跑，正式比较只使用 MPS 账本；CUDA 账本保留为 supplemental。</p>
+<p>两套 treatment 账本的 4,800 个 sample ID 与所有离散框／类别／命中结果恰好一致，但 <code>1,257</code> 个置信度浮点值不同，最大绝对差 <code>0.003553</code>。这证明“聚合计数碰巧一样”仍不能替代运行时一致性。纠偏证据见 <a href="../experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/evaluation_environment_correction_receipt.json">evaluation_environment_correction_receipt.json</a>。</p>
+<h2>6. 解读</h2>
+<ol>
+<li><strong>关于“HL2 会不会更平滑”</strong>：HL2 确实削弱了收盘价相对当根高低区间的端点噪声，但它不等价于把 MA 算法改成更强平滑器。周期与 SMA/EMA 递推完全没变；本轮只能说明这种输入表示让该次模型更容易检出正例。</li>
+<li><strong>关于为什么 mAP50 上升、mAP50-95 下降</strong>：HL2 的框在较松 IoU 上更容易被找到，但严格定位质量稍差；机械重算的纵框也使 estimand 包含轻微几何变化。不能把 mAP50 单独解释成“线更好”。</li>
+<li><strong>关于模型是否真的更准</strong>：如果“准”只指召回，HL2 的数字有希望；如果“准”要求正例检出与空背景误触共同改善，本轮没有通过。</li>
+<li><strong>关于颜色和线宽</strong>：本轮没有触碰它们，不能从这里推断单色 K 线或同色均线会更好。颜色承载 LONG/SHORT 与不同周期身份，贸然同色可能去掉有用语义。线宽应作为下一条独立变量另测，不能与 HL2 打包。</li>
+</ol>
+<h2>7. 风险与诚实声明</h2>
+<ul>
+<li><strong>只有一个训练 seed（0）</strong>：配对推理的 p 值衡量这两个已训练模型在冻结 val 上的样本差异，不包含跨 seed 训练方差。它不能证明 +5–6pp 会在重训后稳定复现。</li>
+<li><strong>不是纯像素实验</strong>：为遵守相同标注语义，5,325 个正例纵框机械变化；因此无法把效应全部归因给 HL2 线条本身。</li>
+<li><strong>同一历史事件有多个图</strong>：正式不确定性已按事件分块；单图级极小 p 值仅为次级描述。</li>
+<li><strong>completed-history ≠ live tip</strong>：本轮窗口包含形态后的确认上下文，不能冒充 tip/tip-1/tip-2 实盘新鲜检测器，也不具生产资格。</li>
+<li><strong>没有交易收益结论</strong>：未加载未来收益与障碍标签，不能从检测 recall 推导 PF 或净收益。</li>
+<li><strong>没有消费 holdout</strong>：本配置仍为 0 次 holdout；不得把这份报告当最终泛化验收。</li>
+<li><strong>没有状态变更</strong>：ACTIVE、frozen、forward、部署和下单均未改变。</li>
+</ul>
+<h2>8. 裁决与下一步选项</h2>
+<p>当前裁决：<strong>保留 close 作为基准；HL2 记为“有希望但未证实”，不 promote、不部署。</strong></p>
+<p>需要 Owner 决策的后续选项：</p>
+<ol>
+<li><strong>推荐：先停在这里。</strong> 结果已回答“值得不值得直接换”：不值得直接换。</li>
+<li>若要验证它是不是训练随机性，另行批准 <strong>3 个或更多独立 seed 的同配方 paired replication</strong>；提前冻结 seed 列表，并以事件级汇总的联合召回／误触门裁决。该动作属于新训练，当前授权不自动覆盖。</li>
+<li>若目标仍是像素可见度，单独做 <code>1px → 2px</code> 六线线宽实验；保持 source=close，不与 HL2、颜色或 MA 类型打包。</li>
+<li>不建议把所有 K 线和六条均线改成同色后直接训练。先做无训练的信息损失／可见度审计，再决定是否值得占用训练预算。</li>
+</ol>
+<h2>9. 从零复现命令</h2>
+<p>以下命令只面向冻结 pre-holdout 数据。不要添加任何 holdout 路径或改阈值。</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+
+# 1) 从冻结 baseline manifest 重建 HL2 treatment，并独立核验
+PYTHONPATH=. .venv/bin/python scripts/build_15m_ma_launch_owner_grade_a_hl2.py
+PYTHONPATH=. .venv/bin/python scripts/verify_15m_ma_launch_owner_grade_a_hl2.py
+
+# 2) 在已核验 RTX 3060 上执行冻结 full40/native-1280 配方；完成后取回四项核心产物
+bash scripts/train_15m_ma_launch_owner_grade_a8000_neg24000_hl2_full40_1280_on_3060.sh
+bash scripts/train_15m_ma_launch_owner_grade_a8000_neg24000_hl2_full40_1280_on_3060.sh --fetch
+
+# 3) 在与 baseline 相同的 Mac MPS 环境做固定阈值 treatment 推理
+PYTHONPATH=. .venv/bin/python scripts/evaluate_15m_ma_launch_owner_grade_a8000_val.py \
+  --weights analysis/output/ma_launch_owner_grade_a8000_neg24000_hl2_v1/ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40/weights/best.pt \
+  --weights-sha256 0533d48f209bfeb73b10f147a38f245de1765599ad222770af394c4f0f68ab52 \
+  --expected-manifest-sha256 ec93d6bfd04cc84a24a34cd745af2c74943f9a75e664831060619511ba60f6d7 \
+  --dataset datasets/ma_launch_owner_grade_a8000_yolo_neg24000_hl2_v1 \
+  --output experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_evaluation.json \
+  --predictions-output experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_predictions.jsonl \
+  --experiment-id exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1 \
+  --generator-commit cb9140148b41b3d8906bcf869f3fa666024d3139 \
+  --device mps --batch 8 --imgsz 1280 --confidence 0.25 --nms-iou 0.7 --match-iou 0.5
+
+# 4) 与归档 baseline 账本逐样本、逐事件配对比较
+PYTHONPATH=. .venv/bin/python scripts/compare_15m_ma_launch_paired_val.py \
+  --control-evaluation experiments/active/exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1/results/raw/frozen_val_evaluation.json \
+  --control-predictions experiments/active/exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1/results/raw/frozen_val_predictions.jsonl \
+  --treatment-evaluation experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_evaluation.json \
+  --treatment-predictions experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_predictions.jsonl \
+  --control-manifest-sha256 22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2 \
+  --treatment-manifest-sha256 ec93d6bfd04cc84a24a34cd745af2c74943f9a75e664831060619511ba60f6d7 \
+  --control-weights-sha256 862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838 \
+  --treatment-weights-sha256 0533d48f209bfeb73b10f147a38f245de1765599ad222770af394c4f0f68ab52 \
+  --output experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/paired_val_comparison.json \
+  --generator-commit fbbe06440930636f1c01add921c15189a9be6455 \
+  --bootstrap-reps 20000 --permutation-reps 100000 --seed 20260903
+
+# 5) 报告转 HTML
+python3 scripts/md_to_html.py \
+  analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.md \
+  --out-dir analysis/html
+</code></pre>
+<h2>10. 关键产物</h2>
+<ul>
+<li>treatment 固定阈值评估：<a href="../experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_evaluation.json">frozen_val_evaluation.json</a></li>
+<li>treatment 逐图预测账本：<a href="../experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_predictions.jsonl">frozen_val_predictions.jsonl</a></li>
+<li>正式配对裁决：<a href="../experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/paired_val_comparison.json">paired_val_comparison.json</a></li>
+<li>训练完整收据：<a href="../experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/training_receipt.json">training_receipt.json</a></li>
+<li>推理环境纠偏：<a href="../experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/evaluation_environment_correction_receipt.json">evaluation_environment_correction_receipt.json</a></li>
+</ul>
+</body>
+</html>

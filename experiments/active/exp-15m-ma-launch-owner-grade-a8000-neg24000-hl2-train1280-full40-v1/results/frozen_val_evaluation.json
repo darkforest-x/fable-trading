@@ -1,0 +1,882 @@
+{
+  "active_or_frozen_changed": false,
+  "class_names": {
+    "0": "dense_long",
+    "1": "dense_short"
+  },
+  "completed_history_not_live_tip": true,
+  "confidence_threshold": 0.25,
+  "dataset": "/Users/zhangzc/fable-trading/datasets/ma_launch_owner_grade_a8000_yolo_neg24000_hl2_v1",
+  "deployed": false,
+  "direction_flip_null": {
+    "event_level": {
+      "actual_correct_class_any_hit_events": 149,
+      "actual_correct_class_any_hit_recall": 0.9612903225806452,
+      "actual_only": 149,
+      "both": 0,
+      "events": 155,
+      "flipped_class_any_hit_events": 0,
+      "flipped_class_any_hit_recall": 0.0,
+      "flipped_only": 0,
+      "neither": 6,
+      "paired_exact_two_sided_p": 2.802596928649634e-45,
+      "recall_delta": 0.9612903225806452
+    },
+    "image_level": {
+      "actual_correct_class_hits": 1079,
+      "actual_correct_class_recall": 0.8991666666666667,
+      "actual_only": 1079,
+      "both": 0,
+      "flipped_class_hits": 0,
+      "flipped_class_recall": 0.0,
+      "flipped_only": 0,
+      "images": 1200,
+      "neither": 121,
+      "paired_exact_two_sided_p": 0.0,
+      "recall_delta": 0.8991666666666667
+    },
+    "null_hypothesis": "Swap LONG and SHORT class ids while keeping every predicted box, confidence, image and IoU unchanged."
+  },
+  "environment": {
+    "batch": 8,
+    "device": "mps",
+    "numpy": "2.0.2",
+    "python": "3.9.6",
+    "torch": "2.8.0",
+    "ultralytics": "8.4.89"
+  },
+  "event_surface": {
+    "any_hit_event_recall": 0.9612903225806452,
+    "any_hit_events": 149,
+    "earliest_available_true_hit_events": 135,
+    "earliest_available_true_hit_rate": 0.8709677419354839,
+    "events": 155,
+    "events_with_post2_variant": 149,
+    "first_hit_post_bars": {
+      "histogram": {
+        "2": 130,
+        "3": 8,
+        "4": 2,
+        "5": 2,
+        "6": 5,
+        "7": 1,
+        "8": 1
+      },
+      "max": 8,
+      "median": 2.0,
+      "min": 2,
+      "p90": 3.0
+    },
+    "no_hit_events": 6,
+    "post2_true_hit_events": 130,
+    "post2_true_hit_rate": 0.87248322147651,
+    "variant_recall_by_post_bars": {
+      "2": {
+        "recall": 0.87248322147651,
+        "true_hits": 130,
+        "variants": 149
+      },
+      "3": {
+        "recall": 0.8758169934640523,
+        "true_hits": 134,
+        "variants": 153
+      },
+      "4": {
+        "recall": 0.8843537414965986,
+        "true_hits": 130,
+        "variants": 147
+      },
+      "5": {
+        "recall": 0.8940397350993378,
+        "true_hits": 135,
+        "variants": 151
+      },
+      "6": {
+        "recall": 0.92,
+        "true_hits": 138,
+        "variants": 150
+      },
+      "7": {
+        "recall": 0.9271523178807947,
+        "true_hits": 140,
+        "variants": 151
+      },
+      "8": {
+        "recall": 0.9115646258503401,
+        "true_hits": 134,
+        "variants": 147
+      },
+      "9": {
+        "recall": 0.9078947368421053,
+        "true_hits": 138,
+        "variants": 152
+      }
+    }
+  },
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1",
+  "generator_commit": "cb9140148b41b3d8906bcf869f3fa666024d3139",
+  "generator_sha256": "12f022f9eac3accc0a036f1ae60ac0aa6a9392414c281c219663820023edece4",
+  "holdout_consumed": false,
+  "imgsz": 1280,
+  "manifest_sha256": "ec93d6bfd04cc84a24a34cd745af2c74943f9a75e664831060619511ba60f6d7",
+  "negative_images": {
+    "all": {
+      "boxes": 51,
+      "class_box_counts": {
+        "dense_long": 19,
+        "dense_short": 32
+      },
+      "confidence": {
+        "max": 0.9636709094047546,
+        "median": 0.6937727928161621,
+        "min": 0.2797977328300476,
+        "p90": 0.9310839176177979
+      },
+      "false_boxes_per_1000_images": 14.166666666666666,
+      "fire_rate": 0.014166666666666666,
+      "fired_images": 51,
+      "images": 3600,
+      "top_fired_samples": [
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8ba36bafadc2c5b80d1a5599",
+          "max_confidence": 0.9636709094047546,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "572b387c6cabcbbcc5445f28",
+          "max_confidence": 0.9516414403915405,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "9ee54f34396395b5d291f817",
+          "max_confidence": 0.9416542053222656,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f1484b5d1e16f5a6db9d9d1a",
+          "max_confidence": 0.9386941194534302,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "d735732f68d6a7cb539e797b",
+          "max_confidence": 0.9349974393844604,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "082dc4603dcf82f8e987e4ea",
+          "max_confidence": 0.9310839176177979,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "97501ef92a17f4289d4b0e76",
+          "max_confidence": 0.9138150215148926,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "a2380de89ec2cfb157fc477c",
+          "max_confidence": 0.9111456274986267,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "4002fc67c2224324a457b8ae",
+          "max_confidence": 0.9025555849075317,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "05f0f4b95961b5493767bee9",
+          "max_confidence": 0.8865442276000977,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f4560b5f9b52be2daf54a2a1",
+          "max_confidence": 0.8761280179023743,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "35c26579857794a7d0a9cfca",
+          "max_confidence": 0.8748959302902222,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "c155e6657684dd362a853274",
+          "max_confidence": 0.8567949533462524,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "5ec81ec69861dda4e87a1029",
+          "max_confidence": 0.8458579182624817,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "18c1f0776fb73e482a034a33",
+          "max_confidence": 0.840442955493927,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "c4768b0d6b0457834659f1e0",
+          "max_confidence": 0.822834312915802,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "645cd9481697449f14933f79",
+          "max_confidence": 0.8067395091056824,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "374fb2d6091caeffbbedbe31",
+          "max_confidence": 0.7920768857002258,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8b1ecbe45d8e6d57c7f4c9ca",
+          "max_confidence": 0.7895007133483887,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8aff98d820eade98bf94221c",
+          "max_confidence": 0.7787607312202454,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "513ac1745c34ab64a0dc165c",
+          "max_confidence": 0.7760043740272522,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "26b3e8db604c9b411cf7d390",
+          "max_confidence": 0.7640039324760437,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f12e4db27eda76962fdbde3a",
+          "max_confidence": 0.7575305104255676,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "96327a694eee0c2462b34a29",
+          "max_confidence": 0.7003991603851318,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "37915e866c3c76b5c9586338",
+          "max_confidence": 0.6960118412971497,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "0d0db1ee9a89cd23d5ca4eee",
+          "max_confidence": 0.6937727928161621,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "2520d636fe203b3355681416",
+          "max_confidence": 0.6878788471221924,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "6a0f0fd5d5af1ba13bf515df",
+          "max_confidence": 0.6851851344108582,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "919ac13d883c76e193d65f8f",
+          "max_confidence": 0.676970362663269,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "23571cb21eaeedbe4c29a3e6",
+          "max_confidence": 0.5495708584785461,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "386b28dcf20ec30885a0e0df",
+          "max_confidence": 0.5144809484481812,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "6700244e71fb440a91346a42",
+          "max_confidence": 0.5108832120895386,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "3f82926044ca60205c7256b5",
+          "max_confidence": 0.4938806891441345,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "c6e193a3f13eea1c86ae4c8f",
+          "max_confidence": 0.4835602641105652,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "dbdfbf99dfca07dc6d07efa5",
+          "max_confidence": 0.44974285364151,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "87878c06b3224da4c15fd76b",
+          "max_confidence": 0.44974133372306824,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8d37b0bce1a035100272a31a",
+          "max_confidence": 0.44814416766166687,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "6224254efef70ebaa6ee598e",
+          "max_confidence": 0.43433886766433716,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "2a40a82d085aac307ec136a5",
+          "max_confidence": 0.4162266254425049,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "d95371e55b49f507fc26a8bd",
+          "max_confidence": 0.3862491846084595,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "815b8112e961a01beede56af",
+          "max_confidence": 0.3851625621318817,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "e227c43cc923e602f7381201",
+          "max_confidence": 0.36049631237983704,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "998e73b50278259cc1f1796b",
+          "max_confidence": 0.34194281697273254,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f02e7c96b1296eaf2814eb6a",
+          "max_confidence": 0.34013843536376953,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "bdd130e3b5c43b05821b9aee",
+          "max_confidence": 0.3375290036201477,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "d6afd17670a79017a96d0a16",
+          "max_confidence": 0.312612384557724,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "19e931e64ff0a458b3179407",
+          "max_confidence": 0.30777040123939514,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "b27fc9dc6ea37a7d9f7d43db",
+          "max_confidence": 0.30303674936294556,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "fb523a43a5895f7b210351a1",
+          "max_confidence": 0.3004547357559204,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "9c716bd525796536b7390442",
+          "max_confidence": 0.28564897179603577,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "bb8b500fe2dbeefb15c2dbd8",
+          "max_confidence": 0.2797977328300476,
+          "negative_kind": "hard"
+        }
+      ]
+    },
+    "easy": {
+      "boxes": 11,
+      "class_box_counts": {
+        "dense_long": 3,
+        "dense_short": 8
+      },
+      "confidence": {
+        "max": 0.9416542053222656,
+        "median": 0.840442955493927,
+        "min": 0.28564897179603577,
+        "p90": 0.9386941194534302
+      },
+      "false_boxes_per_1000_images": 9.166666666666666,
+      "fire_rate": 0.009166666666666667,
+      "fired_images": 11,
+      "images": 1200,
+      "top_fired_samples": [
+        {
+          "boxes": 1,
+          "dataset_sample_id": "9ee54f34396395b5d291f817",
+          "max_confidence": 0.9416542053222656,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f1484b5d1e16f5a6db9d9d1a",
+          "max_confidence": 0.9386941194534302,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "d735732f68d6a7cb539e797b",
+          "max_confidence": 0.9349974393844604,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "082dc4603dcf82f8e987e4ea",
+          "max_confidence": 0.9310839176177979,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "c155e6657684dd362a853274",
+          "max_confidence": 0.8567949533462524,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "18c1f0776fb73e482a034a33",
+          "max_confidence": 0.840442955493927,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "37915e866c3c76b5c9586338",
+          "max_confidence": 0.6960118412971497,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "dbdfbf99dfca07dc6d07efa5",
+          "max_confidence": 0.44974285364151,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "6224254efef70ebaa6ee598e",
+          "max_confidence": 0.43433886766433716,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "e227c43cc923e602f7381201",
+          "max_confidence": 0.36049631237983704,
+          "negative_kind": "easy"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "9c716bd525796536b7390442",
+          "max_confidence": 0.28564897179603577,
+          "negative_kind": "easy"
+        }
+      ]
+    },
+    "hard": {
+      "boxes": 40,
+      "class_box_counts": {
+        "dense_long": 16,
+        "dense_short": 24
+      },
+      "confidence": {
+        "max": 0.9636709094047546,
+        "median": 0.6865319907665253,
+        "min": 0.2797977328300476,
+        "p90": 0.9034145891666413
+      },
+      "false_boxes_per_1000_images": 16.666666666666668,
+      "fire_rate": 0.016666666666666666,
+      "fired_images": 40,
+      "images": 2400,
+      "top_fired_samples": [
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8ba36bafadc2c5b80d1a5599",
+          "max_confidence": 0.9636709094047546,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "572b387c6cabcbbcc5445f28",
+          "max_confidence": 0.9516414403915405,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "97501ef92a17f4289d4b0e76",
+          "max_confidence": 0.9138150215148926,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "a2380de89ec2cfb157fc477c",
+          "max_confidence": 0.9111456274986267,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "4002fc67c2224324a457b8ae",
+          "max_confidence": 0.9025555849075317,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "05f0f4b95961b5493767bee9",
+          "max_confidence": 0.8865442276000977,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f4560b5f9b52be2daf54a2a1",
+          "max_confidence": 0.8761280179023743,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "35c26579857794a7d0a9cfca",
+          "max_confidence": 0.8748959302902222,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "5ec81ec69861dda4e87a1029",
+          "max_confidence": 0.8458579182624817,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "c4768b0d6b0457834659f1e0",
+          "max_confidence": 0.822834312915802,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "645cd9481697449f14933f79",
+          "max_confidence": 0.8067395091056824,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "374fb2d6091caeffbbedbe31",
+          "max_confidence": 0.7920768857002258,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8b1ecbe45d8e6d57c7f4c9ca",
+          "max_confidence": 0.7895007133483887,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8aff98d820eade98bf94221c",
+          "max_confidence": 0.7787607312202454,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "513ac1745c34ab64a0dc165c",
+          "max_confidence": 0.7760043740272522,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "26b3e8db604c9b411cf7d390",
+          "max_confidence": 0.7640039324760437,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f12e4db27eda76962fdbde3a",
+          "max_confidence": 0.7575305104255676,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "96327a694eee0c2462b34a29",
+          "max_confidence": 0.7003991603851318,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "0d0db1ee9a89cd23d5ca4eee",
+          "max_confidence": 0.6937727928161621,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "2520d636fe203b3355681416",
+          "max_confidence": 0.6878788471221924,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "6a0f0fd5d5af1ba13bf515df",
+          "max_confidence": 0.6851851344108582,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "919ac13d883c76e193d65f8f",
+          "max_confidence": 0.676970362663269,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "23571cb21eaeedbe4c29a3e6",
+          "max_confidence": 0.5495708584785461,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "386b28dcf20ec30885a0e0df",
+          "max_confidence": 0.5144809484481812,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "6700244e71fb440a91346a42",
+          "max_confidence": 0.5108832120895386,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "3f82926044ca60205c7256b5",
+          "max_confidence": 0.4938806891441345,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "c6e193a3f13eea1c86ae4c8f",
+          "max_confidence": 0.4835602641105652,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "87878c06b3224da4c15fd76b",
+          "max_confidence": 0.44974133372306824,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "8d37b0bce1a035100272a31a",
+          "max_confidence": 0.44814416766166687,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "2a40a82d085aac307ec136a5",
+          "max_confidence": 0.4162266254425049,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "d95371e55b49f507fc26a8bd",
+          "max_confidence": 0.3862491846084595,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "815b8112e961a01beede56af",
+          "max_confidence": 0.3851625621318817,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "998e73b50278259cc1f1796b",
+          "max_confidence": 0.34194281697273254,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "f02e7c96b1296eaf2814eb6a",
+          "max_confidence": 0.34013843536376953,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "bdd130e3b5c43b05821b9aee",
+          "max_confidence": 0.3375290036201477,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "d6afd17670a79017a96d0a16",
+          "max_confidence": 0.312612384557724,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "19e931e64ff0a458b3179407",
+          "max_confidence": 0.30777040123939514,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "b27fc9dc6ea37a7d9f7d43db",
+          "max_confidence": 0.30303674936294556,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "fb523a43a5895f7b210351a1",
+          "max_confidence": 0.3004547357559204,
+          "negative_kind": "hard"
+        },
+        {
+          "boxes": 1,
+          "dataset_sample_id": "bb8b500fe2dbeefb15c2dbd8",
+          "max_confidence": 0.2797977328300476,
+          "negative_kind": "hard"
+        }
+      ]
+    }
+  },
+  "nms_iou": 0.7,
+  "positive_images": {
+    "all": {
+      "best_same_class_iou": {
+        "max": 0.9969521583804504,
+        "median": 0.9703061652355814,
+        "min": 0.0,
+        "p90": 0.9875638509869643
+      },
+      "extra_prediction_boxes": 128,
+      "fixed_threshold_image_recall": 0.8991666666666667,
+      "hit_confidence": {
+        "max": 0.9823005795478821,
+        "median": 0.9321223497390747,
+        "min": 0.2526583671569824,
+        "p90": 0.9694123983383178
+      },
+      "images": 1200,
+      "images_with_multiple_boxes": 84,
+      "multiple_box_image_rate": 0.07,
+      "prediction_boxes": 1207,
+      "true_hit_images": 1079,
+      "wrong_direction_overlap_images": 0
+    },
+    "dense_long": {
+      "best_same_class_iou": {
+        "max": 0.9969521583804504,
+        "median": 0.9701389228593528,
+        "min": 0.0,
+        "p90": 0.9875562374001656
+      },
+      "extra_prediction_boxes": 59,
+      "fixed_threshold_image_recall": 0.8926553672316384,
+      "hit_confidence": {
+        "max": 0.9742996692657471,
+        "median": 0.9114630222320557,
+        "min": 0.2526583671569824,
+        "p90": 0.953408670425415
+      },
+      "images": 531,
+      "images_with_multiple_boxes": 34,
+      "multiple_box_image_rate": 0.064030131826742,
+      "prediction_boxes": 533,
+      "true_hit_images": 474,
+      "wrong_direction_overlap_images": 0
+    },
+    "dense_short": {
+      "best_same_class_iou": {
+        "max": 0.9949148314100416,
+        "median": 0.9704683319498508,
+        "min": 0.0,
+        "p90": 0.9875177831190785
+      },
+      "extra_prediction_boxes": 69,
+      "fixed_threshold_image_recall": 0.9043348281016442,
+      "hit_confidence": {
+        "max": 0.9823005795478821,
+        "median": 0.9477799534797668,
+        "min": 0.25431424379348755,
+        "p90": 0.9719909071922302
+      },
+      "images": 669,
+      "images_with_multiple_boxes": 50,
+      "multiple_box_image_rate": 0.07473841554559044,
+      "prediction_boxes": 674,
+      "true_hit_images": 605,
+      "wrong_direction_overlap_images": 0
+    }
+  },
+  "predictions_jsonl": "/Users/zhangzc/fable-trading/experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_predictions.jsonl",
+  "predictions_sha256": "cbe466feaa67b7b3e93694f4886ea1a5bb8c56614802c7a39255ed5c3b26256a",
+  "predictions_size_bytes": 1469557,
+  "production_eligible": false,
+  "promoted": false,
+  "schema_version": 1,
+  "threshold_tuned": false,
+  "true_hit_iou": 0.5,
+  "validation_counts": {
+    "negative": 3600,
+    "negative_easy": 1200,
+    "negative_events": 465,
+    "negative_hard": 2400,
+    "positive": 1200,
+    "positive_events": 155,
+    "positive_long": 531,
+    "positive_short": 669
+  },
+  "weights_path": "/Users/zhangzc/fable-trading/analysis/output/ma_launch_owner_grade_a8000_neg24000_hl2_v1/ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40/weights/best.pt",
+  "weights_sha256": "0533d48f209bfeb73b10f147a38f245de1765599ad222770af394c4f0f68ab52"
+}

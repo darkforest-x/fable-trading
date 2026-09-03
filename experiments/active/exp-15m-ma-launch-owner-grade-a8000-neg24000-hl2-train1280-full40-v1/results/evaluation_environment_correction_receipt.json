@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1",
+  "generated_at": "2026-09-04T07:39:48+08:00",
+  "issue": "The archived baseline prediction ledger was generated on Mac MPS, while the first treatment inference was run on RTX 3060 CUDA. The paired comparator refused the mismatched environments before writing a comparison result.",
+  "resolution": "Preserve the CUDA treatment inference as supplemental evidence, rerun treatment inference in the exact archived baseline Mac MPS runtime, and use only that matched MPS ledger for the canonical paired comparison.",
+  "baseline_environment": {
+    "python": "3.9.6",
+    "torch": "2.8.0",
+    "ultralytics": "8.4.89",
+    "numpy": "2.0.2",
+    "device": "mps",
+    "batch": 8
+  },
+  "first_treatment_environment": {
+    "python": "3.9.13",
+    "torch": "2.8.0+cu126",
+    "ultralytics": "8.4.89",
+    "numpy": "2.0.2",
+    "device": "0",
+    "batch": 8
+  },
+  "canonical_treatment_environment": {
+    "python": "3.9.6",
+    "torch": "2.8.0",
+    "ultralytics": "8.4.89",
+    "numpy": "2.0.2",
+    "device": "mps",
+    "batch": 8
+  },
+  "fixed_inference_parameters": {
+    "imgsz": 1280,
+    "confidence_threshold": 0.25,
+    "nms_iou": 0.7,
+    "true_hit_iou": 0.5,
+    "threshold_tuned": false
+  },
+  "cuda_supplemental": {
+    "evaluation_path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_evaluation_cuda_supplemental.json",
+    "evaluation_sha256": "ce4dc231c7eb0626d15acb985d747dfcd3e75e554bc07bcb13e217ce4d7bd9cf",
+    "evaluation_size_bytes": 27418,
+    "predictions_path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_predictions_cuda_supplemental.jsonl",
+    "predictions_sha256": "f120e9f684eb6c084f3970d099e4f2953f235486920f50702b1de4f93986b52d",
+    "predictions_size_bytes": 1474292,
+    "eligible_for_paired_decision": false
+  },
+  "canonical_mps": {
+    "evaluation_path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_evaluation.json",
+    "evaluation_sha256": "5a4e4f3b8dd926ff95be16027338263a3a35f016652cf800a0a8a074a685d42b",
+    "evaluation_size_bytes": 26620,
+    "predictions_path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/frozen_val_predictions.jsonl",
+    "predictions_sha256": "cbe466feaa67b7b3e93694f4886ea1a5bb8c56614802c7a39255ed5c3b26256a",
+    "predictions_size_bytes": 1469557,
+    "eligible_for_paired_decision": true
+  },
+  "cross_runtime_diagnostic": {
+    "same_ordered_sample_ids": true,
+    "sample_count": 4800,
+    "discrete_prediction_differing_samples": 0,
+    "confidence_values_differing": 1257,
+    "maximum_confidence_absolute_difference": 0.0035529732704162598,
+    "interpretation": "The discrete outcomes happened to match at the frozen threshold, but confidence values did not; this does not waive the matched-runtime requirement."
+  },
+  "paired_comparison": {
+    "path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results/paired_val_comparison.json",
+    "sha256": "649eb0fb4f23e951353b152300f402ed1524ad99cade923fce2b07ab03b3c005",
+    "size_bytes": 9273,
+    "uses_canonical_mps_treatment": true
+  },
+  "holdout_consumed": false,
+  "threshold_tuned": false,
+  "promoted": false,
+  "deployed": false,
+  "active_or_frozen_changed": false,
+  "forward_state_changed": false,
+  "order_state_changed": false
+}
