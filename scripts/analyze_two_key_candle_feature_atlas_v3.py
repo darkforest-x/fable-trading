@@ -179,6 +179,11 @@ def add_time_split(frame: pd.DataFrame, config: dict[str, Any]) -> pd.DataFrame:
             f"source row outside declared splits: {times_outside.min()} .. {times_outside.max()}"
         )
     out["half"] = half_label(out["k2_time"])
+    out["analysis_period"] = np.select(
+        [out["analysis_split"].eq("bridge"), out["analysis_split"].eq("fresh_preholdout")],
+        ["2026 Jan-Feb bridge", "2026 Mar-Apr fresh"],
+        default=out["half"],
+    )
     return out
 
 
@@ -309,7 +314,7 @@ def build_atlas(
                             **basic_metrics(split_group, horizon),
                         }
                     )
-            for half, half_group in group.groupby("half", sort=True):
+            for half, half_group in group.groupby("analysis_period", sort=True):
                 half_rows.append(
                     {
                         "dimension": dimension,
@@ -471,17 +476,14 @@ def select_and_replay(
     return selection, replay
 
 
-def fixed_target_sensitivity(frame: pd.DataFrame, config: dict[str, Any]) -> pd.DataFrame:
+def fixed_target_sensitivity(
+    profiles: dict[str, pd.DataFrame],
+    config: dict[str, Any],
+) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
-    profiles = {
-        "SMA40 core": pd.Series(True, index=frame.index),
-        "anchor score >=70": frame["anchor_score"].ge(70),
-        "anchor score >=80": frame["anchor_score"].ge(80),
-    }
     cost = float(config["round_trip_cost"])
     horizons = [int(config["primary_horizon_bars"]), *map(int, config["sensitivity_horizon_bars"])]
-    for profile, mask in profiles.items():
-        current = frame[mask]
+    for profile, current in profiles.items():
         for split, group in current.groupby("analysis_split", sort=False):
             for horizon in horizons:
                 risk_pct = (
@@ -514,15 +516,13 @@ def fixed_target_sensitivity(frame: pd.DataFrame, config: dict[str, Any]) -> pd.
     return pd.DataFrame(rows)
 
 
-def cost_sensitivity(frame: pd.DataFrame, config: dict[str, Any]) -> pd.DataFrame:
+def cost_sensitivity(
+    profiles: dict[str, pd.DataFrame],
+    config: dict[str, Any],
+) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
-    profiles = {
-        "SMA40 core": pd.Series(True, index=frame.index),
-        "anchor score >=70": frame["anchor_score"].ge(70),
-        "anchor score >=80": frame["anchor_score"].ge(80),
-    }
-    for profile, mask in profiles.items():
-        for split, group in frame[mask].groupby("analysis_split", sort=False):
+    for profile, current in profiles.items():
+        for split, group in current.groupby("analysis_split", sort=False):
             for cost_bp in map(float, config["cost_sensitivity_bp"]):
                 net = group["gross_return_24"] - cost_bp / 1e4
                 rows.append(
@@ -539,16 +539,10 @@ def cost_sensitivity(frame: pd.DataFrame, config: dict[str, Any]) -> pd.DataFram
     return pd.DataFrame(rows)
 
 
-def btc_summary(frame: pd.DataFrame) -> pd.DataFrame:
+def btc_summary(profiles: dict[str, pd.DataFrame]) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
-    profiles = {
-        "SMA40 core": pd.Series(True, index=frame.index),
-        "anchor score >=70": frame["anchor_score"].ge(70),
-        "anchor score >=80": frame["anchor_score"].ge(80),
-    }
-    btc = frame["symbol"].eq("BTC")
-    for profile, mask in profiles.items():
-        for split, group in frame[btc & mask].groupby("analysis_split", sort=False):
+    for profile, current in profiles.items():
+        for split, group in current[current["symbol"].eq("BTC")].groupby("analysis_split", sort=False):
             for horizon in (12, 24, 48):
                 rows.append(
                     {
@@ -563,7 +557,7 @@ def btc_summary(frame: pd.DataFrame) -> pd.DataFrame:
 
 def base_by_half(frame: pd.DataFrame) -> pd.DataFrame:
     rows = []
-    for half, group in frame.groupby("half", sort=True):
+    for half, group in frame.groupby("analysis_period", sort=True):
         rows.append(
             {
                 "half": str(half),
@@ -703,6 +697,18 @@ def main() -> int:
     frame["k2_time"] = pd.to_datetime(frame["k2_time"], utc=True)
     source_receipt = validate_source(frame, config)
     frame = add_time_split(frame, config)
+    exact_profile_names = {
+        "SMA40 core": "single_sma40_core_2_8",
+        "anchor score >=70": "sma40_anchor_score_70",
+        "anchor score >=80": "sma40_anchor_score_80",
+    }
+    exact_profiles: dict[str, pd.DataFrame] = {}
+    profile_receipts: dict[str, dict[str, Any]] = {}
+    for label, profile_name in exact_profile_names.items():
+        current = all_rows[all_rows["profile"].eq(profile_name)].copy()
+        current["k2_time"] = pd.to_datetime(current["k2_time"], utc=True)
+        profile_receipts[profile_name] = validate_source(current, config)
+        exact_profiles[label] = add_time_split(current, config)
     dimensions = make_dimensions(frame)
     if list(dimensions) != list(config["feature_families"]):
         raise ValueError("implemented feature family order differs from preregistered config")
@@ -710,9 +716,9 @@ def main() -> int:
     horizons = [int(config["primary_horizon_bars"]), *map(int, config["sensitivity_horizon_bars"])]
     atlas, half_metrics = build_atlas(frame, dimensions, horizons)
     selection, replay = select_and_replay(frame, dimensions, config)
-    fixed_targets = fixed_target_sensitivity(frame, config)
-    costs = cost_sensitivity(frame, config)
-    btc = btc_summary(frame)
+    fixed_targets = fixed_target_sensitivity(exact_profiles, config)
+    costs = cost_sensitivity(exact_profiles, config)
+    btc = btc_summary(exact_profiles)
     base_half = base_by_half(frame)
     maps = chart_map()
 
@@ -748,6 +754,7 @@ def main() -> int:
             "profile": source_profile,
             **source_receipt,
         },
+        "exact_profile_receipts": profile_receipts,
         "script": {"path": str(Path(__file__).resolve().relative_to(PROJECT)), "sha256": sha256_file(Path(__file__).resolve())},
         "config": {"path": str(args.config.resolve().relative_to(PROJECT)), "sha256": sha256_file(args.config)},
         "counts_by_split": {key: int(value) for key, value in frame["analysis_split"].value_counts().to_dict().items()},
