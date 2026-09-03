@@ -130,6 +130,23 @@ def test_headerless_binance_archive_gets_canonical_columns(tmp_path: Path) -> No
     assert frame.iloc[1]["close"] == 8.35
 
 
+def test_csv_ready_serializes_nested_mappings_and_sequences_without_coercion() -> None:
+    frame = mine.csv_ready(
+        [
+            {
+                "sample": "one",
+                "checks": {"dense": True, "slope": False},
+                "failures": ["slope"],
+                "classes": (0, 1),
+            }
+        ]
+    )
+
+    assert frame.iloc[0]["checks"] == '{"dense":true,"slope":false}'
+    assert frame.iloc[0]["failures"] == '["slope"]'
+    assert frame.iloc[0]["classes"] == "[0,1]"
+
+
 def test_visible_w18_prefilter_accepts_dense_and_rejects_wide() -> None:
     dense, _, dense_stats = mine.build_tasks(
         _prereg(), frames={"TESTUSDT": _frame(spread=0.1)}, rankings=[_board()]

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-grade-a-daily-movers-5000-v1",
+  "created_at": "2026-09-03T22:12:00+08:00",
+  "reason": "After all 52 model months and 5,083 final charts completed, CSV delivery failed because the generic deterministic JSON helper coerced every nested list/tuple through dict(value). Event decisions legitimately contain arrays such as classes_observed and semantic_failed_checks.",
+  "parent_protocol_amendment": "experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/protocol_amendment_20260903_binance_headerless_klines.json",
+  "parent_protocol_amendment_sha256": "477f3e7335cba1250ade090d31a3cb355ca45ebd08197d34095c3ec201640e22",
+  "implementation_commit": "PENDING_FIRST_COMMIT",
+  "coordinator_sha256": "PENDING_FIRST_COMMIT",
+  "trigger_observation": {
+    "global_review_events": 5083,
+    "global_novel_events": 5053,
+    "model_input_charts_already_written": 5083,
+    "review_queue_jsonl_rows_already_written": 5083,
+    "summary_written": false,
+    "failure": "ValueError: dictionary update sequence element #0 has length 11; 2 is required"
+  },
+  "serialization_policy": {
+    "mapping": "serialize_as_json_object",
+    "list_or_tuple": "serialize_as_json_array_without_dict_coercion",
+    "scalar": "leave_as_csv_scalar"
+  },
+  "resume_policy": "Revalidate all 52 completed monthly shards, recompute the same global queue, deterministically rerender/overwrite the same 5,083 chart paths, and finish CSV plus aggregate artifacts. No detector inference month is rerun.",
+  "candidate_selection_changed": false,
+  "image_pixels_or_boxes_changed": false,
+  "model_or_threshold_changed": false,
+  "holdout_or_training_scope_changed": false,
+  "production_eligible": false,
+  "training_eligible": false
+}

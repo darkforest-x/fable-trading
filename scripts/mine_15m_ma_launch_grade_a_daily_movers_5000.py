@@ -85,6 +85,13 @@ DEFAULT_ARCHIVE_AMENDMENT = (
     / EXPERIMENT_ID
     / "protocol_amendment_20260903_binance_headerless_klines.json"
 )
+DEFAULT_DELIVERY_AMENDMENT = (
+    ROOT
+    / "experiments"
+    / "active"
+    / EXPERIMENT_ID
+    / "protocol_amendment_20260903_csv_nested_values.json"
+)
 DEFAULT_OUT = ROOT / "experiments" / "active" / EXPERIMENT_ID / "results"
 REMOTE_WORKER = ROOT / "scripts/remote_infer_15m_ma_launch_grade_a_taskpack.py"
 PINNED_RUNTIME_COMMIT = "7931541abf9ac1edd8985924fb31db93bb617609"
@@ -195,10 +202,10 @@ def pixel_sha256(image: np.ndarray) -> str:
     return hashlib.sha256(np.ascontiguousarray(image).tobytes()).hexdigest()
 
 
-def stable_json(value: Mapping[str, Any]) -> str:
-    """Serialize deterministic JSON."""
+def stable_json(value: Any) -> str:
+    """Serialize any mapping or sequence as deterministic JSON without coercion."""
 
-    return json.dumps(dict(value), ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
 def write_json(path: Path, value: Mapping[str, Any]) -> None:
@@ -283,10 +290,12 @@ def effective_protocol_metadata(prereg_path: Path) -> dict[str, Any]:
     amendment = json.loads(DEFAULT_AMENDMENT.read_text(encoding="utf-8"))
     runtime_amendment = json.loads(DEFAULT_RUNTIME_AMENDMENT.read_text(encoding="utf-8"))
     archive_amendment = json.loads(DEFAULT_ARCHIVE_AMENDMENT.read_text(encoding="utf-8"))
+    delivery_amendment = json.loads(DEFAULT_DELIVERY_AMENDMENT.read_text(encoding="utf-8"))
     parent_sha = sha256_file(prereg_path)
     amendment_sha = sha256_file(DEFAULT_AMENDMENT)
     runtime_amendment_sha = sha256_file(DEFAULT_RUNTIME_AMENDMENT)
     archive_amendment_sha = sha256_file(DEFAULT_ARCHIVE_AMENDMENT)
+    delivery_amendment_sha = sha256_file(DEFAULT_DELIVERY_AMENDMENT)
     if amendment.get("experiment_id") != EXPERIMENT_ID:
         raise Mover5000Error("protocol amendment experiment_id drifted")
     if amendment.get("parent_preregistration_sha256") != parent_sha:
@@ -327,10 +336,21 @@ def effective_protocol_metadata(prereg_path: Path) -> dict[str, Any]:
     }
     if archive_amendment.get("format_policy") != expected_formats:
         raise Mover5000Error("archive amendment format policy drifted")
+    if delivery_amendment.get("experiment_id") != EXPERIMENT_ID:
+        raise Mover5000Error("delivery amendment experiment_id drifted")
+    if delivery_amendment.get("parent_protocol_amendment_sha256") != archive_amendment_sha:
+        raise Mover5000Error("delivery amendment parent SHA drifted")
+    expected_serialization = {
+        "mapping": "serialize_as_json_object",
+        "list_or_tuple": "serialize_as_json_array_without_dict_coercion",
+        "scalar": "leave_as_csv_scalar",
+    }
+    if delivery_amendment.get("serialization_policy") != expected_serialization:
+        raise Mover5000Error("delivery amendment serialization policy drifted")
     effective_sha = hashlib.sha256(
         (
             f"{parent_sha}\n{amendment_sha}\n{runtime_amendment_sha}\n"
-            f"{archive_amendment_sha}\n"
+            f"{archive_amendment_sha}\n{delivery_amendment_sha}\n"
         ).encode()
     ).hexdigest()
     return {
@@ -347,10 +367,16 @@ def effective_protocol_metadata(prereg_path: Path) -> dict[str, Any]:
             "path": repo_relative(DEFAULT_ARCHIVE_AMENDMENT),
             "sha256": archive_amendment_sha,
         },
+        "delivery_recovery": {
+            **delivery_amendment,
+            "path": repo_relative(DEFAULT_DELIVERY_AMENDMENT),
+            "sha256": delivery_amendment_sha,
+        },
         "amendment_sha256s": [
             amendment_sha,
             runtime_amendment_sha,
             archive_amendment_sha,
+            delivery_amendment_sha,
         ],
         "effective_protocol_sha256": effective_sha,
     }
@@ -440,6 +466,7 @@ def verify_immutable_sources(prereg_path: Path, prereg: Mapping[str, Any]) -> st
             DEFAULT_AMENDMENT.resolve(),
             DEFAULT_RUNTIME_AMENDMENT.resolve(),
             DEFAULT_ARCHIVE_AMENDMENT.resolve(),
+            DEFAULT_DELIVERY_AMENDMENT.resolve(),
         ]
     ]
     dirty = subprocess.check_output(
@@ -456,13 +483,13 @@ def verify_immutable_sources(prereg_path: Path, prereg: Mapping[str, Any]) -> st
         for path in sources
     }
     amendment = prereg["_protocol_amendment"]
-    archive_amendment = amendment["archive_compatibility"]
-    coordinator_commit = str(archive_amendment["implementation_commit"])
+    delivery_amendment = amendment["delivery_recovery"]
+    coordinator_commit = str(delivery_amendment["implementation_commit"])
     if commits[coordinator] != coordinator_commit:
         raise Mover5000Error("coordinator commit differs from protocol amendment")
     if commits[REMOTE_WORKER.resolve()] != str(prereg["source_commit"]):
         raise Mover5000Error("remote worker commit differs from parent preregistration")
-    if sha256_file(coordinator) != str(archive_amendment["coordinator_sha256"]):
+    if sha256_file(coordinator) != str(delivery_amendment["coordinator_sha256"]):
         raise Mover5000Error("coordinator SHA differs from protocol amendment")
 
     pinned = [
@@ -1774,6 +1801,10 @@ def finalize(
             {
                 "path": amendment["archive_compatibility"]["path"],
                 "sha256": amendment["archive_compatibility"]["sha256"],
+            },
+            {
+                "path": amendment["delivery_recovery"]["path"],
+                "sha256": amendment["delivery_recovery"]["sha256"],
             },
         ],
         "protocol_amendment": {
