@@ -1,0 +1,78 @@
+{
+  "baseline_dataset": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1",
+  "baseline_manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+  "builder_commit": "94da33fa8b6105755550f48dcaca89e7e91dbefc",
+  "builder_sha256": "a9fefa7dd0f3f4b183319f1b2940dedbeae08989b5208400cb73a401b8972dfc",
+  "canvas_transform_source": "baseline_close_transform",
+  "counts": {
+    "train/negative": 20400,
+    "train/positive": 6800,
+    "val/negative": 3600,
+    "val/positive": 1200
+  },
+  "data_yaml_sha256": "b822741e2277b8a60420cd0175da734dd91e8a1f2a0ce839e61b93ef04d6c07c",
+  "dataset_path": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_hl2_v1",
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1",
+  "full_qa": {
+    "baseline_replay_pixel_parity": 32000,
+    "images_decoded": 32000,
+    "negative_label_byte_parity": 24000,
+    "passed": true,
+    "positive_labels_changed": 5325,
+    "positive_labels_unchanged": 2675,
+    "rows": 32000,
+    "split_counts": {
+      "train/negative": 20400,
+      "train/positive": 6800,
+      "val/negative": 3600,
+      "val/positive": 1200
+    },
+    "unchanged_image_hashes_vs_baseline": 0,
+    "unique_image_hashes": 32000
+  },
+  "holdout_ohlcv_rows_materialized": 0,
+  "implementation_sha256": {
+    "box_and_png": "368a5fb24724f295b95f8667882f4bb854e2bd621045bc58b24abf9811a54a17",
+    "ma_calculation": "13881d859f80b8e3ed95df883afba16b467e68e43b4a99de354d0f3d26ec435d",
+    "prefix_loader": "b31fe35bfeff8626889691bf404a87223fb18dedcf7b52841f1c618821de976e",
+    "renderer": "def5b7317c13e37fc43657243a7cc900bc3fafee71bdf2e405e0336a1a3c0eea"
+  },
+  "label_contract": "same_core_full_wick_plus_six_ma_with_4pct_padding",
+  "line_width_px": 1,
+  "manifest_sha256": "ec93d6bfd04cc84a24a34cd745af2c74943f9a75e664831060619511ba60f6d7",
+  "moving_average_price_source": "hl2",
+  "moving_average_price_source_formula": "(high + low) / 2",
+  "negative_events": 3129,
+  "negative_images": 24000,
+  "null_control": {
+    "exact_png_sha_matches": 32000,
+    "failures": 0,
+    "images_tested": 32000,
+    "name": "close_source_exact_replay"
+  },
+  "pixel_difference_vs_baseline": {
+    "images_changed": 32000,
+    "images_unchanged": 0,
+    "mean_absolute_channel_delta_per_image": 4978821.693125,
+    "mean_changed_pixel_fraction": 0.03264047292210664,
+    "median_changed_pixel_fraction": 0.03286356553234501,
+    "p95_changed_pixel_fraction": 0.04302350067385445
+  },
+  "positive_events": 1043,
+  "positive_images": 8000,
+  "positive_label_geometry_vs_baseline": {
+    "horizontal_geometry_changed": 0,
+    "labels_changed": 5325,
+    "labels_unchanged": 2675,
+    "max_vertical_edge_delta_px": 25.0,
+    "median_max_vertical_edge_delta_px": 1.0,
+    "p95_max_vertical_edge_delta_px": 7.0
+  },
+  "preregistration_sha256": "f672a670bef54b7d0063f353c0adf70138e6fcee568a1ee6d2f3d94386259a33",
+  "production_eligible": false,
+  "schema_version": 1,
+  "source_audit_rows_written": 499,
+  "source_files": 499,
+  "training_eligible": false,
+  "training_started": false
+}
