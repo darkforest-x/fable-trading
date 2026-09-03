@@ -3485,3 +3485,33 @@ experiments:
       research candidates, not allowed trades. No training, threshold or
       weight change, promotion, deployment, ACTIVE/frozen/forward mutation,
       Telegram send or order action occurred.
+
+  - experiment_id: exp-15m-ma-launch-grade-a-daily-movers-202510-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cf5e81d8f86af70db6714217d5f44c04ef2d610b"
+    status: active
+    question: >-
+      Across every complete UTC day in October 2025, which current Grade-A
+      full40 native-1280 model proposals appear inside the five largest
+      gainers and five largest losers, and which proposals are not already
+      represented by the frozen training dataset?
+    single_variable: >-
+      bounded P1 candidate-mining stratum only: fixed 2025-10 calendar and
+      daily Top5 positive plus Top5 negative return tails; checkpoint,
+      conf=0.25, NMS=0.70, W18/W19, core4/5, confirmation2-9, causal semantic
+      gate and five-bar deduplication remain frozen
+    result: >-
+      pending committed-builder execution; no result has been observed yet
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_grade_a_daily_movers_202510_20260903.md
+    artifacts:
+      - 15m-ma-launch-grade-a-daily-movers-202510-v1-prereg
+    reuse_allowed: false
+    notes: >-
+      Same-day completed return is explicitly post-hoc and may only define a
+      human-review mining stratum. October 2025 ends before the current
+      detector's December validation windows and the 2026-05-04 holdout. The
+      run cannot relabel, train, tune, promote, deploy, change ACTIVE/frozen or
+      forward state, send Telegram, or place orders.
