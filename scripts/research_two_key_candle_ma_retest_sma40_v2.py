@@ -186,7 +186,7 @@ def evaluate_profiles(
         events["segment"] = segment_prefix
         events_by_profile[profile] = events
         summary = extended_summary(events, f"{segment_prefix}:{profile}", 2026090500 + index)
-        rows.append({"profile": profile, "segment": segment_prefix, **summary})
+        rows.append({**summary, "profile": profile, "segment": segment_prefix})
         if len(events):
             local = events.assign(fold=half_label(events["k2_time"]))
             for fold, group in local.groupby("fold"):
