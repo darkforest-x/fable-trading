@@ -2,6 +2,29 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-04 — OKX 全市场 1h 模型先检、代码后检 Top-10 已交付）
+
+Owner 明确取消“只看已经冻结的非 holdout 历史候选”限制。本轮重新冻结当时全部合资格 OKX
+USDT 永续 1h 原始 K 线：277 个合约中 274 个具备 396 根完整 K 线，CASHCAT、CP、DGAI
+因上市过短显式排除。流水线保持 **YOLO 先提案 → 当前 bar 六均线站位代码门 → 同币同方向
+5-bar 去重 → 模型置信度 Top-10**；不读取 `t-1`，不要求首次站上/站下。
+
+完整漏斗：**65,760 个 W18/W19 输入 → 2,294 raw boxes → 2,008 个合法结构框 →
+1,928 个当前站位通过 → 248 个事件 → 10 张全局图**。Top-10 恰好全是 SHORT，没有人为
+补多空比例。未来 96 根在模型任务构建前物理移除，Top-10 身份冻结后才接回审核；每张图含
+180 根历史、信号点、96 根未来及 exact model input inset。
+
+这十个不是都赚钱：SHORT 方向收盘变化在 24h 仅 2/10 为正、48h 仅 1/10、96h 为 8/10；
+FLOKI 与 IRYS 到 96h 仍为负，CAP 期间 MAE 为 -11.72%。没有入场、成本、止盈止损口径，
+这些不是交易收益。逐张画廊：
+`experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/review/gallery.html`；
+Owner 报告：`analysis/html/p1_1h_okx_model_first_standing_top10_20260904.html`。
+
+本轮登记为 checkpoint holdout 使用 **#20**。独立 verifier 复验 274 个源哈希、2,008 个代码门、
+248-event 排序、10 个像素、10 次 Future Mutation、10 个结果与 10 张图，全部 PASS。该权重
+原生为 15m，1h 属于 OOD 图审；未训练、调参、promote、部署、改 ACTIVE/frozen/forward、
+发消息或下单，`training_eligible=false`、`production_eligible=false`。
+
 ## ⚡ 当前真相（2026-09-04 — 已按 Owner 要求去掉前一根首次穿越条件）
 
 Owner 选中“本根首次站上六线”并要求去掉。本轮保留模型先、代码后的顺序，只把第二层改为

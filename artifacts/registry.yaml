@@ -12064,3 +12064,208 @@ artifacts:
     config_hash: "672422c82f422d5e0006338967f12b201f68e0977f0c0708f50d3bd8140efe2d"
     data_cutoff: "2026-09-03T16:00:00Z"
     notes: Self-contained Owner delivery with the v2 global timing figure embedded.
+
+  # ---- OKX all-eligible 1h model-first Top-10 review (2026-09-04) ------
+  - artifact_id: 1h-okx-model-first-standing-top10-20260904-v1-prereg
+    artifact_type: config
+    role: frozen_all_eligible_universe_causal_scan_and_top10_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7197ad9a796b03ae56f3abb8a0eae111f757811f"
+    source_path: experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/preregistration.json
+    sha256: "9c040fe906cb53c95d97abdc2b0405334f3d13ed84faba40c51ddd2f119c91e2"
+    size_bytes: 6959
+    storage_uri: "repo://experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/preregistration.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7197ad9a796b03ae56f3abb8a0eae111f757811f"
+    config_hash: "9c040fe906cb53c95d97abdc2b0405334f3d13ed84faba40c51ddd2f119c91e2"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Freezes checkpoint holdout use #20, the all-eligible universe, causal suffix reservation, gate, deduplication and Top-10 order before inference.
+
+  - artifact_id: 1h-okx-model-first-standing-top10-20260904-v1-recovery
+    artifact_type: config
+    role: zero_market_read_batch_size_only_recovery_amendment
+    source_repo: darkforest-x/fable-trading
+    source_commit: "22317f36cf67fc7333a1fcbade55ab47513ba991"
+    source_path: experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/recovery_batch_size_20260904.json
+    sha256: "c7d9ef5fe5cc210d8d32a8f0b16a14804115b371e58b075d8634c2ac378ca3fe"
+    size_bytes: 1796
+    storage_uri: "repo://experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/recovery_batch_size_20260904.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "22317f36cf67fc7333a1fcbade55ab47513ba991"
+    config_hash: "9c040fe906cb53c95d97abdc2b0405334f3d13ed84faba40c51ddd2f119c91e2"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Changes only runtime batch size from 8 to 32 after the interrupted attempt; recovery reused the exact SHA-addressed snapshot with zero new market reads.
+
+  - artifact_id: 1h-okx-model-first-standing-top10-20260904-v1-fetch-audit
+    artifact_type: manifest
+    role: complete_universe_fetch_status_and_274_candle_hash_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "22317f36cf67fc7333a1fcbade55ab47513ba991"
+    source_path: experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/fetch_audit.json
+    sha256: "3dc682b9e3c0fc3840522964559fc29fb026d8972a93ce081b7ff1d1811d22ee"
+    size_bytes: 94889
+    storage_uri: "repo://experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/fetch_audit.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "22317f36cf67fc7333a1fcbade55ab47513ba991"
+    config_hash: "9c040fe906cb53c95d97abdc2b0405334f3d13ed84faba40c51ddd2f119c91e2"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Records 277 eligible contracts, 274 usable snapshots and three explicit short-history exclusions; raw candle bytes remain local under the scoped gitignore rule.
+
+  - artifact_id: 1h-okx-model-first-standing-top10-20260904-v1-decisions
+    artifact_type: dataset
+    role: complete_structural_and_actual_flipped_six_ma_gate_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "22317f36cf67fc7333a1fcbade55ab47513ba991"
+    source_path: experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/standing_decisions.csv
+    sha256: "c51b983de411b8112f45361f9c503cedcb743621ccd2550e1d9476cbe6869791"
+    size_bytes: 806290
+    storage_uri: "repo://experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/standing_decisions.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "22317f36cf67fc7333a1fcbade55ab47513ba991"
+    config_hash: "9c040fe906cb53c95d97abdc2b0405334f3d13ed84faba40c51ddd2f119c91e2"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Complete 2,008-row accepted-proposal ledger with 1,928 actual-direction and nine flipped-direction standing passes.
+
+  - artifact_id: 1h-okx-model-first-standing-top10-20260904-v1-events
+    artifact_type: dataset
+    role: causal_deduplicated_event_ledger_before_future_outcomes
+    source_repo: darkforest-x/fable-trading
+    source_commit: "22317f36cf67fc7333a1fcbade55ab47513ba991"
+    source_path: experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/deduplicated_events.csv
+    sha256: "0e7b7034f3a436ef09376c6c466c1ec2982b45f09944cffc7245cee57bff2a0c"
+    size_bytes: 144104
+    storage_uri: "repo://experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/deduplicated_events.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "22317f36cf67fc7333a1fcbade55ab47513ba991"
+    config_hash: "9c040fe906cb53c95d97abdc2b0405334f3d13ed84faba40c51ddd2f119c91e2"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: All 248 causal events; future, return, MFE, MAE and review fields are absent by contract.
+
+  - artifact_id: 1h-okx-model-first-standing-top10-20260904-v1-selected
+    artifact_type: dataset
+    role: frozen_top10_identity_order_and_post_selection_review_moves
+    source_repo: darkforest-x/fable-trading
+    source_commit: "22317f36cf67fc7333a1fcbade55ab47513ba991"
+    source_path: experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/selected_top10.csv
+    sha256: "e2ce3236aca471bab61a47216be553a9a91aa49cdff811e7b9bbd5fe4663d99d"
+    size_bytes: 9326
+    storage_uri: "repo://experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/selected_top10.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "22317f36cf67fc7333a1fcbade55ab47513ba991"
+    config_hash: "9c040fe906cb53c95d97abdc2b0405334f3d13ed84faba40c51ddd2f119c91e2"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Model-ranked all-SHORT review queue; future moves were attached only after identities and order were frozen and are not profit labels.
+
+  - artifact_id: 1h-okx-model-first-standing-top10-20260904-v1-summary
+    artifact_type: manifest
+    role: complete_scan_funnel_safety_and_recovery_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "22317f36cf67fc7333a1fcbade55ab47513ba991"
+    source_path: experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/summary.json
+    sha256: "4faa633aeb200cc83f96f3f9d9bcc79d47c889217ae49f858af200706c8b1996"
+    size_bytes: 2573
+    storage_uri: "repo://experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "22317f36cf67fc7333a1fcbade55ab47513ba991"
+    config_hash: "9c040fe906cb53c95d97abdc2b0405334f3d13ed84faba40c51ddd2f119c91e2"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Complete 65,760-input funnel, holdout #20, zero-read recovery, causal suffix count and non-production safety receipt.
+
+  - artifact_id: 1h-okx-model-first-standing-top10-20260904-v1-verification
+    artifact_type: manifest
+    role: independent_hash_gate_ranking_pixel_future_mutation_and_chart_replay
+    source_repo: darkforest-x/fable-trading
+    source_commit: "19fe71fe80bb0ad3cea7bee1179335c93b94dc26"
+    source_path: experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/verification.json
+    sha256: "c356483352212314df710a16f4b7bc8569bf1232518f49e027f740dec17fd756"
+    size_bytes: 1788
+    storage_uri: "repo://experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/verification.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "19fe71fe80bb0ad3cea7bee1179335c93b94dc26"
+    config_hash: "9c040fe906cb53c95d97abdc2b0405334f3d13ed84faba40c51ddd2f119c91e2"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: PASS for 274 source hashes, 2,008 gates, 248-event Top-10 reconstruction, ten pixel replays, ten future mutations, ten outcomes and ten chart hashes.
+
+  - artifact_id: 1h-okx-model-first-standing-top10-20260904-v1-contact-sheet
+    artifact_type: report
+    role: owner_facing_top10_global_context_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a43586132580287e13d932d96955e1b776295a4a"
+    source_path: experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/review/contact_sheet_top10.png
+    sha256: "f05904e7325adbbcc410a96ad97486e4a34c0c060fbf8d78cb802daf55bf9111"
+    size_bytes: 901575
+    storage_uri: "repo://experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/review/contact_sheet_top10.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a43586132580287e13d932d96955e1b776295a4a"
+    config_hash: "9c040fe906cb53c95d97abdc2b0405334f3d13ed84faba40c51ddd2f119c91e2"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Ten global charts in one overview; every panel includes 180 historical bars, the signal marker, 96 future review bars and the exact model input inset.
+
+  - artifact_id: 1h-okx-model-first-standing-top10-20260904-v1-gallery
+    artifact_type: report
+    role: owner_facing_individual_full_resolution_top10_review_entry
+    source_repo: darkforest-x/fable-trading
+    source_commit: "22317f36cf67fc7333a1fcbade55ab47513ba991"
+    source_path: experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/review/gallery.html
+    sha256: "71d509ac5b3738f272ba47e34ee3878776bd883f33a6b83f8382e566f6e36684"
+    size_bytes: 3548
+    storage_uri: "repo://experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/review/gallery.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "22317f36cf67fc7333a1fcbade55ab47513ba991"
+    config_hash: "9c040fe906cb53c95d97abdc2b0405334f3d13ed84faba40c51ddd2f119c91e2"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Local gallery linking each full-resolution 180-history plus 96-future chart.
+
+  - artifact_id: 1h-okx-model-first-standing-top10-20260904-v1-report
+    artifact_type: report
+    role: canonical_markdown_all_eligible_1h_top10_scan_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a43586132580287e13d932d96955e1b776295a4a"
+    source_path: analysis/p1_1h_okx_model_first_standing_top10_20260904.md
+    sha256: "489c5333ecd14ecb8b7d3c4be436c92caf3af534154def57af6747a4590e3111"
+    size_bytes: 9487
+    storage_uri: "repo://analysis/p1_1h_okx_model_first_standing_top10_20260904.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a43586132580287e13d932d96955e1b776295a4a"
+    config_hash: "9c040fe906cb53c95d97abdc2b0405334f3d13ed84faba40c51ddd2f119c91e2"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Chinese report with exact funnel, Top-10 table, FIL comparison, causal audit, risks and reproduction commands.
+
+  - artifact_id: 1h-okx-model-first-standing-top10-20260904-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_all_eligible_1h_top10_scan
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a43586132580287e13d932d96955e1b776295a4a"
+    source_path: analysis/html/p1_1h_okx_model_first_standing_top10_20260904.html
+    sha256: "5c808e5398101bc2db869d090d102eab0abe3b1602a1d223d03028cce9cdbdee"
+    size_bytes: 1215599
+    storage_uri: "repo://analysis/html/p1_1h_okx_model_first_standing_top10_20260904.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a43586132580287e13d932d96955e1b776295a4a"
+    config_hash: "9c040fe906cb53c95d97abdc2b0405334f3d13ed84faba40c51ddd2f119c91e2"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Self-contained Owner-facing HTML with the ten-chart contact sheet embedded.

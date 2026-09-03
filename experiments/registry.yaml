@@ -3867,3 +3867,51 @@ experiments:
       specification. It does not authorize an interaction search, model fit,
       holdout read, promotion or live execution. The 13 amended families are
       diagnostic because 2025 had already been opened before they were listed.
+
+  - experiment_id: exp-1h-okx-model-first-standing-top10-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a43586132580287e13d932d96955e1b776295a4a"
+    status: accepted
+    question: >-
+      Can the frozen Grade-A checkpoint, followed by the current-bar six-MA
+      standing gate, produce ten inspectable 1h signals from the current full
+      eligible OKX USDT perpetual universe rather than an old candidate pool?
+    single_variable: >-
+      Expand only the scan population to all eligible OKX USDT perpetuals and
+      rank deduplicated model-first events by the preregistered causal keys;
+      retain the checkpoint, confidence, NMS, W18/W19 geometry and one-bar
+      standing predicate unchanged.
+    result: >-
+      top10_review_queue_delivered. Of 277 eligible contracts, 274 had 396
+      confirmed bars. The scan evaluated 65,760 model inputs, emitted 2,294 raw
+      boxes, accepted 2,008 structural proposals, passed 1,928 through the
+      standing gate and deduplicated them to 248 events. The model-ranked Top-10
+      were all SHORT. Review-only directional closes were positive for 2/10 at
+      24h, 1/10 at 48h and 8/10 at 96h; these are not trading returns.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_1h_okx_model_first_standing_top10_20260904.md
+    artifacts:
+      - 1h-okx-model-first-standing-top10-20260904-v1-prereg
+      - 1h-okx-model-first-standing-top10-20260904-v1-recovery
+      - 1h-okx-model-first-standing-top10-20260904-v1-fetch-audit
+      - 1h-okx-model-first-standing-top10-20260904-v1-decisions
+      - 1h-okx-model-first-standing-top10-20260904-v1-events
+      - 1h-okx-model-first-standing-top10-20260904-v1-selected
+      - 1h-okx-model-first-standing-top10-20260904-v1-summary
+      - 1h-okx-model-first-standing-top10-20260904-v1-verification
+      - 1h-okx-model-first-standing-top10-20260904-v1-contact-sheet
+      - 1h-okx-model-first-standing-top10-20260904-v1-gallery
+      - 1h-okx-model-first-standing-top10-20260904-v1-report
+      - 1h-okx-model-first-standing-top10-20260904-v1-html
+    reuse_allowed: false
+    notes: >-
+      Owner explicitly removed the frozen/pre-holdout-candidate restriction;
+      this is Grade-A checkpoint holdout use #20. The last 96 bars per symbol
+      were physically removed before model-task construction and ranking, then
+      reattached only after Top-10 identities were frozen. Independent replay
+      verified 274 candle hashes, 2,008 gates, 248-event ranking, 10 pixels,
+      10 future mutations and 10 charts. The checkpoint is 15m-native, so this
+      1h use is OOD and only a review queue. No training, tuning, promotion,
+      deployment, ACTIVE/frozen/forward mutation, messaging or order occurred.
