@@ -166,8 +166,8 @@ def repo_relative(path: Path) -> str:
 def month_start(value: str | pd.Timestamp) -> pd.Timestamp:
     """Normalize a month identity to its UTC first instant."""
 
-    stamp = utc(value)
-    return stamp.to_period("M").start_time.tz_localize("UTC")
+    stamp = utc(value).tz_localize(None)
+    return pd.Period(stamp, freq="M").start_time.tz_localize("UTC")
 
 
 def month_id(value: str | pd.Timestamp) -> str:
@@ -576,8 +576,8 @@ def create_task_pack(
     for index, symbol in enumerate(sorted(task_symbols)):
         key = f"f{index:04d}"
         values = frames[symbol].loc[:, list(FRAME_COLUMNS)].to_numpy(dtype=np.float64)
-        if not bool(np.isfinite(values).all()):
-            raise Mover5000Error(f"non-finite packed frame: {month} {symbol}")
+        if bool(np.isinf(values).any()):
+            raise Mover5000Error(f"infinite packed frame: {month} {symbol}")
         frame_index[symbol] = key
         arrays[key] = values
         frame_rows[symbol] = len(values)

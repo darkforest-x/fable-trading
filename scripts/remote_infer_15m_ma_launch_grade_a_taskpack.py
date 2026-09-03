@@ -147,8 +147,8 @@ def load_pack(
             values = np.asarray(archive[str(key)], dtype=np.float64)
             if values.ndim != 2 or values.shape[1] != len(FRAME_COLUMNS):
                 raise TaskPackError(f"invalid frame shape for {symbol}: {values.shape}")
-            if not bool(np.isfinite(values).all()):
-                raise TaskPackError(f"non-finite frame values for {symbol}")
+            if bool(np.isinf(values).any()):
+                raise TaskPackError(f"infinite frame values for {symbol}")
             frames[str(symbol)] = pd.DataFrame(values, columns=FRAME_COLUMNS)
     if set(frames) != {str(row["symbol"]) for row in tasks}:
         raise TaskPackError("task symbols differ from packed frames")
@@ -208,7 +208,10 @@ def run(
             end_i = int(task["window_end_i"])
             if end_i - start_i + 1 != 18:
                 raise TaskPackError("task is not exactly W18")
-            image, transform = render_chart(frame.iloc[start_i : end_i + 1], out_path=None)
+            window = frame.iloc[start_i : end_i + 1]
+            if len(window) != 18 or not bool(np.isfinite(window.to_numpy(dtype=float)).all()):
+                raise TaskPackError(f"task window contains non-finite values: {task['task_id']}")
+            image, transform = render_chart(window, out_path=None)
             meta = {
                 "task_id": str(task["task_id"]),
                 "input_pixel_sha256": pixel_sha256(image),

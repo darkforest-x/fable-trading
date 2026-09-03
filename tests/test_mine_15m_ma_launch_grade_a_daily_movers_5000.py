@@ -132,6 +132,7 @@ def test_global_dedup_collapses_midnight_cluster_and_keeps_semantic() -> None:
 
 def test_task_pack_round_trip_is_hash_checked(tmp_path: Path) -> None:
     frame = _frame(spread=0.1)
+    frame.loc[:118, "sma120"] = np.nan
     specs, _, _ = mine.build_tasks(
         _prereg(), frames={"TESTUSDT": frame}, rankings=[_board()]
     )
@@ -152,6 +153,7 @@ def test_task_pack_round_trip_is_hash_checked(tmp_path: Path) -> None:
     assert len(tasks) == 3
     assert receipt["config_hash"] == "config"
     assert tuple(frames["TESTUSDT"].columns) == worker.FRAME_COLUMNS
+    assert np.isnan(frames["TESTUSDT"].iloc[0]["sma120"])
 
 
 def test_task_pack_rejects_receipt_tamper(tmp_path: Path) -> None:
