@@ -3,10 +3,12 @@
 
 The search walks complete calendar months newest-first, ending at October 2025
 so every scored input remains before the current detector's December validation
-block and the 2026-05-04 holdout.  Each UTC day contributes the frozen Top5
-gainers and Top5 losers by completed-day open-to-close return.  The completed
-day rank is therefore a post-hoc P1 mining stratum, never a causal selector,
-feature, backtest, or trading signal.
+block and the 2026-05-04 holdout.  Each UTC day contributes up to the frozen
+Top5 strictly positive gainers and Top5 strictly negative losers by completed-
+day open-to-close return.  A one-sided day keeps every available member of the
+scarce tail without zero/opposite-sign backfill.  The completed-day rank is
+therefore a post-hoc P1 mining stratum, never a causal selector, feature,
+backtest, or trading signal.
 
 For compute efficiency this owner-requested scale-up uses one frozen W18 view
 per endpoint and a causal prefilter: the minimum six-MA envelope inside the
@@ -61,6 +63,13 @@ from yoyo.layers.l1_detection.render import ChartTransform, render_chart  # noqa
 
 EXPERIMENT_ID = "exp-15m-ma-launch-grade-a-daily-movers-5000-v1"
 DEFAULT_PREREG = ROOT / "experiments" / "active" / EXPERIMENT_ID / "preregistration.json"
+DEFAULT_AMENDMENT = (
+    ROOT
+    / "experiments"
+    / "active"
+    / EXPERIMENT_ID
+    / "protocol_amendment_20260903_sign_tail_underflow.json"
+)
 DEFAULT_OUT = ROOT / "experiments" / "active" / EXPERIMENT_ID / "results"
 REMOTE_WORKER = ROOT / "scripts/remote_infer_15m_ma_launch_grade_a_taskpack.py"
 PARENT_GATE_PREREG = (
@@ -193,6 +202,37 @@ def search_months(prereg: Mapping[str, Any]) -> list[str]:
     return [str(period) for period in reversed(pd.period_range(earliest, latest_month, freq="M"))]
 
 
+def effective_protocol_metadata(prereg_path: Path) -> dict[str, Any]:
+    """Load the append-only sign-tail amendment and bind it to its parent preregistration."""
+
+    amendment = json.loads(DEFAULT_AMENDMENT.read_text(encoding="utf-8"))
+    parent_sha = sha256_file(prereg_path)
+    amendment_sha = sha256_file(DEFAULT_AMENDMENT)
+    if amendment.get("experiment_id") != EXPERIMENT_ID:
+        raise Mover5000Error("protocol amendment experiment_id drifted")
+    if amendment.get("parent_preregistration_sha256") != parent_sha:
+        raise Mover5000Error("protocol amendment parent SHA drifted")
+    policy = amendment.get("underflow_policy", {})
+    expected = {
+        "positive_tail": "take_up_to_5_strictly_positive_returns",
+        "negative_tail": "take_up_to_5_strictly_negative_returns",
+        "zero_return_backfill": False,
+        "opposite_sign_backfill": False,
+        "skip_underflow_day": False,
+    }
+    if policy != expected:
+        raise Mover5000Error("protocol amendment underflow policy drifted")
+    effective_sha = hashlib.sha256(
+        f"{parent_sha}\n{amendment_sha}\n".encode()
+    ).hexdigest()
+    return {
+        **amendment,
+        "path": repo_relative(DEFAULT_AMENDMENT),
+        "sha256": amendment_sha,
+        "effective_protocol_sha256": effective_sha,
+    }
+
+
 def load_preregistration(path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     """Load and enforce the exact pre-holdout 5,000-candidate contract."""
 
@@ -255,6 +295,7 @@ def load_preregistration(path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     gates = dict(parent["treatment"]["frozen_morphology_gate"])
     if gates != dict(payload["semantic_gate"]["frozen_morphology_gate"]):
         raise Mover5000Error("semantic gate differs from frozen parent")
+    payload["_protocol_amendment"] = effective_protocol_metadata(path)
     return payload, gates
 
 
@@ -266,23 +307,33 @@ def verify_immutable_sources(prereg_path: Path, prereg: Mapping[str, Any]) -> st
     ).strip()
     if branch != "main":
         raise Mover5000Error("official scan must run on main")
-    sources = [Path(__file__).resolve(), REMOTE_WORKER.resolve()]
-    tracked = [path.relative_to(ROOT) for path in [*sources, prereg_path.resolve()]]
+    coordinator = Path(__file__).resolve()
+    sources = [coordinator, REMOTE_WORKER.resolve()]
+    tracked = [
+        path.relative_to(ROOT)
+        for path in [*sources, prereg_path.resolve(), DEFAULT_AMENDMENT.resolve()]
+    ]
     dirty = subprocess.check_output(
         ["git", "status", "--short", "--", *map(str, tracked)], cwd=ROOT, text=True
     ).strip()
     if dirty:
         raise Mover5000Error(f"builders and preregistration must be committed:\n{dirty}")
     commits = {
-        subprocess.check_output(
+        path: subprocess.check_output(
             ["git", "log", "-1", "--format=%H", "--", str(path.relative_to(ROOT))],
             cwd=ROOT,
             text=True,
         ).strip()
         for path in sources
     }
-    if commits != {str(prereg["source_commit"])}:
-        raise Mover5000Error(f"builder commits differ from preregistration: {sorted(commits)}")
+    amendment = prereg["_protocol_amendment"]
+    coordinator_commit = str(amendment["implementation_commit"])
+    if commits[coordinator] != coordinator_commit:
+        raise Mover5000Error("coordinator commit differs from protocol amendment")
+    if commits[REMOTE_WORKER.resolve()] != str(prereg["source_commit"]):
+        raise Mover5000Error("remote worker commit differs from parent preregistration")
+    if sha256_file(coordinator) != str(amendment["coordinator_sha256"]):
+        raise Mover5000Error("coordinator SHA differs from protocol amendment")
 
     pinned = [
         (ROOT / prereg["data"]["archive_fetch_summary"], prereg["data"]["archive_fetch_summary_sha256"]),
@@ -300,7 +351,39 @@ def verify_immutable_sources(prereg_path: Path, prereg: Mapping[str, Any]) -> st
         actual = sha256_file(path)
         if actual != str(expected):
             raise Mover5000Error(f"pinned source SHA drift: {path}")
-    return str(prereg["source_commit"])
+    return coordinator_commit
+
+
+def build_daily_tail_rows(
+    prereg: Mapping[str, Any],
+    *,
+    month: str,
+    day: pd.Timestamp,
+    pool: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Build one deterministic strict-sign board without synthetic tail backfill."""
+
+    if not pool:
+        raise Mover5000Error(f"{day:%Y-%m-%d} has no complete symbol-days")
+    gain_n = int(prereg["ranking"]["top_gainers_per_day"])
+    loss_n = int(prereg["ranking"]["top_losers_per_day"])
+    gainers, losers = prior.select_daily_board(pool, gainers=gain_n, losers=loss_n)
+    rows: list[dict[str, Any]] = []
+    for bucket, selected in (("gainer", gainers), ("loser", losers)):
+        for bucket_rank, source in enumerate(selected, 1):
+            row = dict(source)
+            row.update(
+                {
+                    "source_month": month,
+                    "mover_bucket": bucket,
+                    "bucket_rank": bucket_rank,
+                    "rank_label": f"{'G' if bucket == 'gainer' else 'L'}{bucket_rank}",
+                    "board_order": bucket_rank if bucket == "gainer" else gain_n + bucket_rank,
+                    "eligible_symbol_days": len(pool),
+                }
+            )
+            rows.append(row)
+    return rows
 
 
 def build_month_rankings(
@@ -359,29 +442,17 @@ def build_month_rankings(
     by_day: defaultdict[pd.Timestamp, list[dict[str, Any]]] = defaultdict(list)
     for row in universe_rows:
         by_day[utc(row["day"])].append(row)
-    gain_n = int(prereg["ranking"]["top_gainers_per_day"])
-    loss_n = int(prereg["ranking"]["top_losers_per_day"])
     rankings: list[dict[str, Any]] = []
     for day in days:
         pool = by_day.get(utc(day), [])
-        gainers, losers = prior.select_daily_board(pool, gainers=gain_n, losers=loss_n)
-        if len(gainers) != gain_n or len(losers) != loss_n:
-            raise Mover5000Error(f"{day:%Y-%m-%d} lacks Top5 gainers or losers")
-        for bucket, selected in (("gainer", gainers), ("loser", losers)):
-            for bucket_rank, source in enumerate(selected, 1):
-                row = dict(source)
-                row.update(
-                    {
-                        "source_month": month,
-                        "mover_bucket": bucket,
-                        "bucket_rank": bucket_rank,
-                        "rank_label": f"{'G' if bucket == 'gainer' else 'L'}{bucket_rank}",
-                        "board_order": bucket_rank if bucket == "gainer" else gain_n + bucket_rank,
-                        "eligible_symbol_days": len(pool),
-                    }
-                )
-                rankings.append(row)
-    expected = len(days) * (gain_n + loss_n)
+        rankings.extend(build_daily_tail_rows(prereg, month=month, day=day, pool=pool))
+    gain_n = int(prereg["ranking"]["top_gainers_per_day"])
+    loss_n = int(prereg["ranking"]["top_losers_per_day"])
+    expected = sum(
+        min(gain_n, sum(float(row["daily_return"]) > 0 for row in by_day[utc(day)]))
+        + min(loss_n, sum(float(row["daily_return"]) < 0 for row in by_day[utc(day)]))
+        for day in days
+    )
     if len(rankings) != expected:
         raise Mover5000Error(f"ranking count drifted for {month}: {len(rankings)} != {expected}")
     universe_rows.sort(key=lambda row: (str(row["day"]), str(row["exchange_symbol"])))
@@ -1405,12 +1476,15 @@ def finalize(
 
     decisions: list[dict[str, Any]] = []
     source_archives: dict[str, dict[str, Any]] = {}
+    shard_source_commits: set[str] = set()
+    underflow_days: list[dict[str, Any]] = []
     windows = raw_boxes = structural = semantic_boxes = ranked = universe = pixel_checks = 0
     remote_seconds = 0.0
     for month in months:
         shard = shard_root / month
         month_summary = json.loads((shard / "summary.json").read_text(encoding="utf-8"))
         month_counts = month_summary["counts"]
+        shard_source_commits.add(str(month_summary["source_commit"]))
         windows += int(month_counts["prefilter_pass_windows"])
         raw_boxes += int(month_counts["raw_boxes"])
         structural += int(month_counts["structural_boxes"])
@@ -1420,6 +1494,24 @@ def finalize(
         pixel_checks += int(month_counts["mac_cuda_pixel_parity_tasks"])
         remote_seconds += float(month_summary["remote_wall_seconds"])
         decisions.extend(read_jsonl(shard / "semantic_decisions.jsonl"))
+        universe_frame = pd.read_csv(shard / "universe_daily_returns.csv")
+        for day, part in universe_frame.groupby("day", sort=True):
+            positive = int((part["daily_return"] > 0).sum())
+            negative = int((part["daily_return"] < 0).sum())
+            missing_gainers = max(0, 5 - positive)
+            missing_losers = max(0, 5 - negative)
+            if missing_gainers or missing_losers:
+                underflow_days.append(
+                    {
+                        "day": str(day),
+                        "complete_symbol_days": len(part),
+                        "positive_returns": positive,
+                        "negative_returns": negative,
+                        "zero_returns": int((part["daily_return"] == 0).sum()),
+                        "missing_gainer_slots": missing_gainers,
+                        "missing_loser_slots": missing_losers,
+                    }
+                )
         manifest = json.loads((shard / "source_manifest.json").read_text(encoding="utf-8"))
         for row in manifest["archives"]:
             key = str(row["path"])
@@ -1459,13 +1551,25 @@ def finalize(
         "training_overlap_events": exact_overlap + near_overlap,
         "long_events": sum(row["model_direction"] == "LONG" for row in events),
         "short_events": sum(row["model_direction"] == "SHORT" for row in events),
+        "sign_tail_underflow_days": len(underflow_days),
+        "missing_gainer_slots": sum(row["missing_gainer_slots"] for row in underflow_days),
+        "missing_loser_slots": sum(row["missing_loser_slots"] for row in underflow_days),
     }
+    amendment = prereg["_protocol_amendment"]
     summary = {
         "schema_version": 1,
         "experiment_id": EXPERIMENT_ID,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_commit": source_commit,
         "config_hash": config_hash,
+        "source_commits_used": sorted(shard_source_commits),
+        "protocol_amendment": {
+            "path": amendment["path"],
+            "sha256": amendment["sha256"],
+            "effective_protocol_sha256": amendment["effective_protocol_sha256"],
+            "trigger_day": amendment["trigger_observation"]["day"],
+        },
+        "sign_tail_underflow_days": underflow_days,
         "model": prereg["detector"]["display_name"],
         "weights_sha256": prereg["detector"]["weights_sha256"],
         "remote_host_runtime_address": remote_host,
@@ -1551,6 +1655,7 @@ def run_scan(
     shard_root.mkdir(exist_ok=True)
     started = time.perf_counter()
     config_hash = sha256_file(DEFAULT_PREREG)
+    amendment = prereg["_protocol_amendment"]
     training = prior.load_training_index(prereg)
     remote_runtime = prepare_remote_runtime(
         prereg, host=remote_host, source_commit=source_commit
@@ -1583,6 +1688,8 @@ def run_scan(
                 "experiment_id": EXPERIMENT_ID,
                 "source_commit": source_commit,
                 "config_hash": config_hash,
+                "protocol_amendment_sha256": amendment["sha256"],
+                "effective_protocol_sha256": amendment["effective_protocol_sha256"],
                 "months_newest_first": completed,
                 "global_review_events": len(global_events),
                 "global_novel_events": novel,

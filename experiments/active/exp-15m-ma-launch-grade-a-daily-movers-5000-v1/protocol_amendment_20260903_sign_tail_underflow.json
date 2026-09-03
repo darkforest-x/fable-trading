@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-grade-a-daily-movers-5000-v1",
+  "created_at": "2026-09-03T19:10:00+08:00",
+  "reason": "The preregistered strict-sign Top5+Top5 implementation encountered a legitimate one-sided market day. Failing the run, skipping the day, or backfilling zeros/opposite signs would respectively block the owner target, cherry-pick the calendar, or change the mover meaning.",
+  "parent_preregistration": "experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/preregistration.json",
+  "parent_preregistration_sha256": "4776dcec982f9677dc47431a0f659ba3d6bd4bccb62996aee76a8b77f68f1294",
+  "parent_source_commit": "7931541abf9ac1edd8985924fb31db93bb617609",
+  "implementation_commit": "PENDING_FIRST_COMMIT",
+  "coordinator_sha256": "PENDING_FIRST_COMMIT",
+  "trigger_observation": {
+    "day": "2024-11-06",
+    "complete_symbol_days": 314,
+    "positive_returns": 295,
+    "negative_returns": 3,
+    "zero_returns": 16,
+    "original_failure": "Mover5000Error: 2024-11-06 lacks Top5 gainers or losers",
+    "completed_months_before_failure": 11,
+    "completed_months_all_had_full_strict_sign_top5_plus_top5": true,
+    "global_novel_events_before_failure": 1021
+  },
+  "underflow_policy": {
+    "positive_tail": "take_up_to_5_strictly_positive_returns",
+    "negative_tail": "take_up_to_5_strictly_negative_returns",
+    "zero_return_backfill": false,
+    "opposite_sign_backfill": false,
+    "skip_underflow_day": false
+  },
+  "unchanged": [
+    "calendar search order and full-month stopping boundary",
+    "strict positive/negative mover meaning and deterministic sort",
+    "model checkpoint, W18 sampler, causal prefilter and all thresholds",
+    "semantic gate, training-overlap audit and five-bar global deduplication",
+    "5000 novel-event target",
+    "no holdout, training, label mutation, promotion, deployment or trading state change"
+  ],
+  "resume_policy": "Reuse the 11 hash-verified completed month shards because an offline audit found no strict-sign tail underflow in any of their 334 calendar days; apply this amendment beginning with the failed 2024-11 month and preserve the failure receipt.",
+  "post_result_tuning": false,
+  "production_eligible": false,
+  "training_eligible": false
+}

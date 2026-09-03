@@ -71,7 +71,45 @@ def test_official_preregistration_freezes_5000_without_holdout() -> None:
     assert payload["owner_authorization"]["holdout_read_authorized"] is False
     assert payload["safety"]["training"] is False
     assert payload["safety"]["label_or_dataset_mutation"] is False
+    assert payload["_protocol_amendment"]["underflow_policy"] == {
+        "positive_tail": "take_up_to_5_strictly_positive_returns",
+        "negative_tail": "take_up_to_5_strictly_negative_returns",
+        "zero_return_backfill": False,
+        "opposite_sign_backfill": False,
+        "skip_underflow_day": False,
+    }
     assert gates == payload["semantic_gate"]["frozen_morphology_gate"]
+
+
+def test_sign_tail_underflow_keeps_available_strict_signs_without_backfill() -> None:
+    day = pd.Timestamp("2024-11-06T00:00:00Z")
+    rows = [
+        {"exchange_symbol": f"P{index}USDT", "daily_return": value, "day": day.isoformat()}
+        for index, value in enumerate([0.5, 0.4, 0.3, 0.2, 0.1, 0.05])
+    ]
+    rows.extend(
+        [
+            {"exchange_symbol": "N1USDT", "daily_return": -0.03, "day": day.isoformat()},
+            {"exchange_symbol": "N2USDT", "daily_return": -0.01, "day": day.isoformat()},
+            {"exchange_symbol": "Z1USDT", "daily_return": 0.0, "day": day.isoformat()},
+            {"exchange_symbol": "Z2USDT", "daily_return": 0.0, "day": day.isoformat()},
+        ]
+    )
+    prereg = {"ranking": {"top_gainers_per_day": 5, "top_losers_per_day": 5}}
+
+    selected = mine.build_daily_tail_rows(prereg, month="2024-11", day=day, pool=rows)
+
+    assert [row["rank_label"] for row in selected] == [
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G5",
+        "L1",
+        "L2",
+    ]
+    assert all(float(row["daily_return"]) != 0.0 for row in selected)
+    assert len({row["exchange_symbol"] for row in selected}) == 7
 
 
 def test_visible_w18_prefilter_accepts_dense_and_rejects_wide() -> None:
