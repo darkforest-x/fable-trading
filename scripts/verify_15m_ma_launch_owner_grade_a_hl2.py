@@ -146,9 +146,7 @@ def verify(
     absolute_deltas: list[int] = []
     max_window_end = ""
     max_dependency_end = ""
-    for number, (source, row) in enumerate(
-        zip(baseline_rows, treatment_rows, strict=True), 1
-    ):
+    for number, (source, row) in enumerate(zip(baseline_rows, treatment_rows), 1):
         if not _same_identity(source, row):
             drift = {
                 field: {"baseline": source.get(field), "treatment": row.get(field)}
