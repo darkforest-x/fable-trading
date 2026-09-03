@@ -61,6 +61,13 @@ from yoyo.layers.l1_detection.render import render_chart  # noqa: E402
 EXPERIMENT_ID = "exp-1h-okx-model-first-standing-top10-20260904-v1"
 DEFAULT_PREREG = ROOT / "experiments" / "active" / EXPERIMENT_ID / "preregistration.json"
 DEFAULT_OUT = ROOT / "experiments" / "active" / EXPERIMENT_ID / "results"
+DEFAULT_RECOVERY_AMENDMENT = (
+    ROOT
+    / "experiments"
+    / "active"
+    / EXPERIMENT_ID
+    / "recovery_batch_size_20260904.json"
+)
 BAR = "1H"
 BAR_DELTA = pd.Timedelta(hours=1)
 FETCH_ROWS = 396
@@ -217,7 +224,11 @@ def load_preregistration(path: Path) -> dict[str, Any]:
     return payload
 
 
-def verify_committed_sources(prereg_path: Path, payload: Mapping[str, Any]) -> str:
+def verify_committed_sources(
+    prereg_path: Path,
+    payload: Mapping[str, Any],
+    recovery_path: Path | None = None,
+) -> str:
     """Require main plus committed builder and prereg before any market read."""
 
     branch = subprocess.check_output(
@@ -226,6 +237,8 @@ def verify_committed_sources(prereg_path: Path, payload: Mapping[str, Any]) -> s
     if branch != "main":
         raise TopTenScanError("official scan must run on main")
     paths = [Path(__file__).resolve(), prereg_path.resolve()]
+    if recovery_path is not None:
+        paths.append(recovery_path.resolve())
     paths.extend(ROOT / str(item["path"]) for item in payload["implementation_dependencies"].values())
     relative = sorted({str(item.relative_to(ROOT)) for item in paths})
     dirty = subprocess.check_output(
@@ -236,6 +249,84 @@ def verify_committed_sources(prereg_path: Path, payload: Mapping[str, Any]) -> s
     return subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
     ).strip()
+
+
+def load_recovery_amendment(path: Path, snapshot: Path) -> dict[str, Any]:
+    """Bind an implementation-only retry to the interrupted frozen snapshot."""
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if payload.get("experiment_id") != EXPERIMENT_ID:
+        raise TopTenScanError("recovery experiment identity drifted")
+    if payload.get("holdout_consumption_number_for_checkpoint") != HOLDOUT_NUMBER:
+        raise TopTenScanError("recovery holdout number drifted")
+    if payload.get("new_market_read_authorized") is not False:
+        raise TopTenScanError("recovery must forbid another market read")
+    if payload.get("semantic_or_selection_change") is not False:
+        raise TopTenScanError("recovery cannot change signal semantics or selection")
+    if any(bool(value) for value in (payload.get("safety") or {}).values()):
+        raise TopTenScanError("recovery safety mutation is enabled")
+    declared = payload.get("frozen_snapshot") or {}
+    for filename in (
+        "holdout_consumption_started.json",
+        "universe.json",
+        "fetch_audit.json",
+    ):
+        source = snapshot / filename
+        if not source.is_file() or sha256_file(source) != str(declared.get(filename)):
+            raise TopTenScanError(f"recovery snapshot drifted: {filename}")
+    return payload
+
+
+def load_frozen_snapshot(
+    snapshot: Path, *, candle_dir: Path
+) -> tuple[
+    pd.Timestamp,
+    list[str],
+    dict[str, pd.DataFrame],
+    list[dict[str, Any]],
+    list[dict[str, str]],
+]:
+    """Load and copy the originally frozen holdout bytes without networking."""
+
+    started = json.loads(
+        (snapshot / "holdout_consumption_started.json").read_text(encoding="utf-8")
+    )
+    if started.get("experiment_id") != EXPERIMENT_ID:
+        raise TopTenScanError("snapshot experiment identity drifted")
+    if int(started.get("holdout_consumption_number_for_checkpoint", -1)) != HOLDOUT_NUMBER:
+        raise TopTenScanError("snapshot holdout number drifted")
+    frozen_at = utc(started["started_at"])
+    if started.get("latest_closed_bar_open") != latest_closed_open(frozen_at).isoformat():
+        raise TopTenScanError("snapshot frozen endpoint drifted")
+
+    universe = json.loads((snapshot / "universe.json").read_text(encoding="utf-8"))
+    instruments = list(map(str, universe.get("eligible_instruments") or []))
+    if not instruments or instruments != sorted(set(instruments)):
+        raise TopTenScanError("snapshot universe is empty, duplicated, or unsorted")
+    audit_payload = json.loads((snapshot / "fetch_audit.json").read_text(encoding="utf-8"))
+    audits = [dict(row) for row in audit_payload.get("usable") or []]
+    failures = [dict(row) for row in audit_payload.get("failures") or []]
+    if len(audits) + len(failures) != len(instruments):
+        raise TopTenScanError("snapshot fetch ledger does not cover the universe")
+
+    frames: dict[str, pd.DataFrame] = {}
+    for audit in audits:
+        symbol = str(audit["symbol"])
+        source = snapshot / "candles" / f"{symbol}.csv"
+        if not source.is_file() or sha256_file(source) != str(audit["sha256"]):
+            raise TopTenScanError(f"snapshot candle drifted: {symbol}")
+        destination = candle_dir / source.name
+        shutil.copy2(source, destination)
+        frame = pd.read_csv(destination)
+        frame["open_time"] = pd.to_datetime(frame["open_time"], utc=True)
+        if len(frame) != FETCH_ROWS:
+            raise TopTenScanError(f"snapshot row count drifted: {symbol}")
+        if utc(frame.iloc[-1]["open_time"]) != latest_closed_open(frozen_at):
+            raise TopTenScanError(f"snapshot latest bar drifted: {symbol}")
+        if not bool((frame["open_time"].diff().iloc[1:] == BAR_DELTA).all()):
+            raise TopTenScanError(f"snapshot candle gaps: {symbol}")
+        frames[symbol] = frame
+    return frozen_at, instruments, dict(sorted(frames.items())), audits, failures
 
 
 def _parse_confirmed_rows(rows: Sequence[Sequence[Any]]) -> pd.DataFrame:
@@ -822,6 +913,18 @@ def main() -> int:
     parser.add_argument("--device", default=None)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--workers", type=int, default=6)
+    parser.add_argument(
+        "--resume-frozen",
+        type=Path,
+        default=None,
+        help="Resume from an interrupted, fully receipted market snapshot without networking.",
+    )
+    parser.add_argument(
+        "--recovery-amendment",
+        type=Path,
+        default=None,
+        help="Committed amendment binding the exact implementation-only recovery.",
+    )
     args = parser.parse_args()
 
     prereg_path = args.prereg.resolve()
@@ -829,14 +932,42 @@ def main() -> int:
     building = out.with_name(out.name + ".building")
     if out.exists() or building.exists():
         raise FileExistsError(f"refusing to overwrite output: {out}")
+    resume_source = args.resume_frozen.resolve() if args.resume_frozen is not None else None
+    recovery_path = (
+        args.recovery_amendment.resolve()
+        if args.recovery_amendment is not None
+        else None
+    )
+    if (resume_source is None) != (recovery_path is None):
+        raise TopTenScanError(
+            "--resume-frozen and --recovery-amendment must be supplied together"
+        )
     payload = load_preregistration(prereg_path)
-    source_commit = verify_committed_sources(prereg_path, payload)
+    recovery = (
+        load_recovery_amendment(recovery_path, resume_source)
+        if recovery_path is not None and resume_source is not None
+        else None
+    )
+    if recovery is not None and int(args.batch_size) != int(
+        recovery["runtime_only_change"]["recovery_batch_size"]
+    ):
+        raise TopTenScanError("runtime batch size differs from recovery amendment")
+    source_commit = verify_committed_sources(prereg_path, payload, recovery_path)
     weights = ROOT / str(payload["detector"]["weights"])
     if sha256_file(weights) != base.EXPECTED_WEIGHT_SHA256:
         raise TopTenScanError("frozen checkpoint bytes drifted")
 
     started = time.perf_counter()
-    frozen_at = utc(datetime.now(timezone.utc))
+    if resume_source is None:
+        frozen_at = utc(datetime.now(timezone.utc))
+    else:
+        frozen_at = utc(
+            json.loads(
+                (resume_source / "holdout_consumption_started.json").read_text(
+                    encoding="utf-8"
+                )
+            )["started_at"]
+        )
     building.mkdir(parents=True)
     candle_dir = building / "candles"
     chart_dir = building / "review" / "charts"
@@ -845,47 +976,81 @@ def main() -> int:
     chart_dir.mkdir(parents=True)
     model_input_dir.mkdir()
     shutil.copy2(prereg_path, building / "preregistration.json")
-    write_json(
-        building / "holdout_consumption_started.json",
-        {
-            "experiment_id": EXPERIMENT_ID,
-            "started_at": frozen_at.isoformat(),
-            "source_commit": source_commit,
-            "holdout_consumption_number_for_checkpoint": HOLDOUT_NUMBER,
-            "latest_closed_bar_open": latest_closed_open(frozen_at).isoformat(),
-            "failure_still_consumes_holdout": True,
-            "network_read_not_yet_started_at_receipt_write": True,
-        },
-    )
-
-    try:
-        ticker_rows = list(common._request(common.TICKERS_URL).get("data") or [])  # noqa: SLF001
-        instrument_rows = list(common._request(common.INSTRUMENTS_URL).get("data") or [])  # noqa: SLF001
-        instruments = common.eligible_instruments(ticker_rows, instrument_rows)
-        if not instruments:
-            raise TopTenScanError("eligible OKX universe is empty")
+    if resume_source is None:
         write_json(
-            building / "universe.json",
+            building / "holdout_consumption_started.json",
             {
-                "frozen_at": frozen_at.isoformat(),
-                "rule": (
-                    "all current live OKX instCategory=1 crypto USDT swaps with positive "
-                    "ticker; project blocked and stockish bases excluded; no return or volume ranking"
-                ),
-                "eligible_instruments": instruments,
-                "eligible_count": len(instruments),
+                "experiment_id": EXPERIMENT_ID,
+                "started_at": frozen_at.isoformat(),
+                "source_commit": source_commit,
+                "holdout_consumption_number_for_checkpoint": HOLDOUT_NUMBER,
+                "latest_closed_bar_open": latest_closed_open(frozen_at).isoformat(),
+                "failure_still_consumes_holdout": True,
+                "network_read_not_yet_started_at_receipt_write": True,
+            },
+        )
+    else:
+        assert recovery_path is not None
+        shutil.copy2(
+            resume_source / "holdout_consumption_started.json",
+            building / "holdout_consumption_started.json",
+        )
+        shutil.copy2(recovery_path, building / "recovery_amendment.json")
+        write_json(
+            building / "recovery_started.json",
+            {
+                "experiment_id": EXPERIMENT_ID,
+                "recovery_started_at": datetime.now(timezone.utc).isoformat(),
+                "original_frozen_at": frozen_at.isoformat(),
+                "source_commit": source_commit,
+                "new_market_reads": 0,
+                "recovery_batch_size": int(args.batch_size),
             },
         )
 
-        full_frames, fetch_audits, failures = fetch_market(
-            instruments,
-            frozen_at=frozen_at,
-            candle_dir=candle_dir,
-            workers=args.workers,
-        )
+    try:
+        if resume_source is None:
+            ticker_rows = list(common._request(common.TICKERS_URL).get("data") or [])  # noqa: SLF001
+            instrument_rows = list(common._request(common.INSTRUMENTS_URL).get("data") or [])  # noqa: SLF001
+            instruments = common.eligible_instruments(ticker_rows, instrument_rows)
+            if not instruments:
+                raise TopTenScanError("eligible OKX universe is empty")
+            write_json(
+                building / "universe.json",
+                {
+                    "frozen_at": frozen_at.isoformat(),
+                    "rule": (
+                        "all current live OKX instCategory=1 crypto USDT swaps with positive "
+                        "ticker; project blocked and stockish bases excluded; no return or volume ranking"
+                    ),
+                    "eligible_instruments": instruments,
+                    "eligible_count": len(instruments),
+                },
+            )
+            full_frames, fetch_audits, failures = fetch_market(
+                instruments,
+                frozen_at=frozen_at,
+                candle_dir=candle_dir,
+                workers=args.workers,
+            )
+            write_json(
+                building / "fetch_audit.json",
+                {"usable": fetch_audits, "failures": failures},
+            )
+        else:
+            (
+                recovered_frozen_at,
+                instruments,
+                full_frames,
+                fetch_audits,
+                failures,
+            ) = load_frozen_snapshot(resume_source, candle_dir=candle_dir)
+            if recovered_frozen_at != frozen_at:
+                raise TopTenScanError("recovered frozen_at drifted")
+            shutil.copy2(resume_source / "universe.json", building / "universe.json")
+            shutil.copy2(resume_source / "fetch_audit.json", building / "fetch_audit.json")
         if not full_frames:
             raise TopTenScanError("all market fetches failed")
-        write_json(building / "fetch_audit.json", {"usable": fetch_audits, "failures": failures})
 
         raw_decision_frames = {
             symbol: decision_prefix(frame) for symbol, frame in full_frames.items()
@@ -972,8 +1137,30 @@ def main() -> int:
             "experiment_id": EXPERIMENT_ID,
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "source_commit": source_commit,
+            "original_prereg_source_commit": (
+                json.loads(
+                    (resume_source / "holdout_consumption_started.json").read_text(
+                        encoding="utf-8"
+                    )
+                )["source_commit"]
+                if resume_source is not None
+                else source_commit
+            ),
             "frozen_at": frozen_at.isoformat(),
             "holdout_consumption_number_for_checkpoint": HOLDOUT_NUMBER,
+            "recovery": {
+                "used": resume_source is not None,
+                "new_market_reads": 0 if resume_source is not None else None,
+                "amendment": (
+                    str(recovery_path.relative_to(ROOT)) if recovery_path is not None else None
+                ),
+                "runtime_batch_size": int(args.batch_size),
+                "semantic_or_selection_change": (
+                    bool(recovery["semantic_or_selection_change"])
+                    if recovery is not None
+                    else False
+                ),
+            },
             "source": {
                 "venue": "OKX",
                 "bar": BAR,
