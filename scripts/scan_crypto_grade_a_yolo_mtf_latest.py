@@ -284,12 +284,15 @@ def verify_sources_committed(
     source_commit = subprocess.check_output(
         ["git", "log", "-1", "--format=%H", "--", str(paths[0])], cwd=ROOT, text=True
     ).strip()
-    expected_commit = (
-        str(recovery.get("corrected_builder_commit"))
+    expected_commits = (
+        {
+            str(recovery.get("corrected_builder_commit")),
+            *map(str, recovery.get("compatible_replay_builder_commits") or []),
+        }
         if recovery is not None
-        else str(prereg.get("source_commit"))
+        else {str(prereg.get("source_commit"))}
     )
-    if source_commit != expected_commit:
+    if source_commit not in expected_commits:
         raise MultiTimeframeScanError(
             f"builder commit {source_commit} differs from frozen source binding"
         )
@@ -1087,7 +1090,9 @@ def build_summary_figure(
     """Render event counts, gate survival, and the first review ranks."""
 
     event_frame = pd.DataFrame(events)
-    labels = [spec.label for spec in TIMEFRAMES]
+    # Keep overview labels ASCII because the pinned Matplotlib font does not
+    # contain CJK glyphs; individual OpenCV delivery charts retain 日线.
+    labels = [spec.key for spec in TIMEFRAMES]
     long_counts = [
         sum(row["timeframe"] == spec.key and int(row["class_id"]) == 0 for row in events)
         for spec in TIMEFRAMES

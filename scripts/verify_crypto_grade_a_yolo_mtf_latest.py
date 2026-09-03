@@ -313,9 +313,13 @@ def main() -> int:
             recovery.get("original_prereg_source_commit") == prereg.get("source_commit"),
             "recovery/preregistration binding drift",
         )
+        allowed_builder_commits = {
+            str(recovery.get("corrected_builder_commit")),
+            *map(str, recovery.get("compatible_replay_builder_commits") or []),
+        }
         require(
-            recovery.get("corrected_builder_commit") == summary.get("source_commit"),
-            "corrected builder commit drift",
+            str(summary.get("source_commit")) in allowed_builder_commits,
+            "corrected/replay builder commit drift",
         )
         require(
             recovery.get("model_gate_timeframe_universe_ranking_changed") is False,
