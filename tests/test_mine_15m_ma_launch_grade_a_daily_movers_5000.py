@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import zipfile
 from pathlib import Path
 
 import numpy as np
@@ -110,6 +111,23 @@ def test_sign_tail_underflow_keeps_available_strict_signs_without_backfill() -> 
     ]
     assert all(float(row["daily_return"]) != 0.0 for row in selected)
     assert len({row["exchange_symbol"] for row in selected}) == 7
+
+
+def test_headerless_binance_archive_gets_canonical_columns(tmp_path: Path) -> None:
+    path = tmp_path / "TESTUSDT-15m-2022-06.zip"
+    rows = [
+        "1654041600000,8.26,8.33,8.20,8.26,90006.25,1654042499999,744256.0,2497,47567.75,393143.1,0",
+        "1654042500000,8.26,8.40,8.21,8.35,80000.00,1654043399999,664000.0,2200,40000.00,332000.0,0",
+    ]
+    with zipfile.ZipFile(path, "w") as bundle:
+        bundle.writestr("TESTUSDT-15m-2022-06.csv", "\n".join(rows) + "\n")
+
+    frame = mine.read_month_archive(path, symbol="TESTUSDT", month="2022-06")
+
+    assert list(frame.columns) == [*mine.prior.CSV_COLUMNS, "exchange_symbol"]
+    assert len(frame) == 2
+    assert frame.iloc[0]["open_time"] == pd.Timestamp("2022-06-01T00:00:00Z")
+    assert frame.iloc[1]["close"] == 8.35
 
 
 def test_visible_w18_prefilter_accepts_dense_and_rejects_wide() -> None:

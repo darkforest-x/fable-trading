@@ -37,6 +37,7 @@ import sys
 import tempfile
 import time
 import types
+import zipfile
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -77,6 +78,13 @@ DEFAULT_RUNTIME_AMENDMENT = (
     / EXPERIMENT_ID
     / "protocol_amendment_20260903_frozen_renderer_runtime.json"
 )
+DEFAULT_ARCHIVE_AMENDMENT = (
+    ROOT
+    / "experiments"
+    / "active"
+    / EXPERIMENT_ID
+    / "protocol_amendment_20260903_binance_headerless_klines.json"
+)
 DEFAULT_OUT = ROOT / "experiments" / "active" / EXPERIMENT_ID / "results"
 REMOTE_WORKER = ROOT / "scripts/remote_infer_15m_ma_launch_grade_a_taskpack.py"
 PINNED_RUNTIME_COMMIT = "7931541abf9ac1edd8985924fb31db93bb617609"
@@ -100,6 +108,20 @@ FRAME_COLUMNS = (
     "ema20",
     "ema60",
     "ema120",
+)
+BINANCE_KLINE_COLUMNS = (
+    "open_time",
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "close_time",
+    "quote_volume",
+    "count",
+    "taker_buy_volume",
+    "taker_buy_quote_volume",
+    "ignore",
 )
 
 
@@ -260,9 +282,11 @@ def effective_protocol_metadata(prereg_path: Path) -> dict[str, Any]:
 
     amendment = json.loads(DEFAULT_AMENDMENT.read_text(encoding="utf-8"))
     runtime_amendment = json.loads(DEFAULT_RUNTIME_AMENDMENT.read_text(encoding="utf-8"))
+    archive_amendment = json.loads(DEFAULT_ARCHIVE_AMENDMENT.read_text(encoding="utf-8"))
     parent_sha = sha256_file(prereg_path)
     amendment_sha = sha256_file(DEFAULT_AMENDMENT)
     runtime_amendment_sha = sha256_file(DEFAULT_RUNTIME_AMENDMENT)
+    archive_amendment_sha = sha256_file(DEFAULT_ARCHIVE_AMENDMENT)
     if amendment.get("experiment_id") != EXPERIMENT_ID:
         raise Mover5000Error("protocol amendment experiment_id drifted")
     if amendment.get("parent_preregistration_sha256") != parent_sha:
@@ -291,8 +315,23 @@ def effective_protocol_metadata(prereg_path: Path) -> dict[str, Any]:
     }
     if frozen != expected_frozen:
         raise Mover5000Error("runtime amendment frozen source drifted")
+    if archive_amendment.get("experiment_id") != EXPERIMENT_ID:
+        raise Mover5000Error("archive amendment experiment_id drifted")
+    if archive_amendment.get("parent_protocol_amendment_sha256") != runtime_amendment_sha:
+        raise Mover5000Error("archive amendment parent SHA drifted")
+    expected_formats = {
+        "headered_12_columns": "read_by_canonical_header_names",
+        "headerless_12_columns": "assign_canonical_binance_kline_names",
+        "other_shapes": "fail_closed",
+        "post_parse_validation": "unchanged",
+    }
+    if archive_amendment.get("format_policy") != expected_formats:
+        raise Mover5000Error("archive amendment format policy drifted")
     effective_sha = hashlib.sha256(
-        f"{parent_sha}\n{amendment_sha}\n{runtime_amendment_sha}\n".encode()
+        (
+            f"{parent_sha}\n{amendment_sha}\n{runtime_amendment_sha}\n"
+            f"{archive_amendment_sha}\n"
+        ).encode()
     ).hexdigest()
     return {
         **amendment,
@@ -303,7 +342,16 @@ def effective_protocol_metadata(prereg_path: Path) -> dict[str, Any]:
             "path": repo_relative(DEFAULT_RUNTIME_AMENDMENT),
             "sha256": runtime_amendment_sha,
         },
-        "amendment_sha256s": [amendment_sha, runtime_amendment_sha],
+        "archive_compatibility": {
+            **archive_amendment,
+            "path": repo_relative(DEFAULT_ARCHIVE_AMENDMENT),
+            "sha256": archive_amendment_sha,
+        },
+        "amendment_sha256s": [
+            amendment_sha,
+            runtime_amendment_sha,
+            archive_amendment_sha,
+        ],
         "effective_protocol_sha256": effective_sha,
     }
 
@@ -391,6 +439,7 @@ def verify_immutable_sources(prereg_path: Path, prereg: Mapping[str, Any]) -> st
             prereg_path.resolve(),
             DEFAULT_AMENDMENT.resolve(),
             DEFAULT_RUNTIME_AMENDMENT.resolve(),
+            DEFAULT_ARCHIVE_AMENDMENT.resolve(),
         ]
     ]
     dirty = subprocess.check_output(
@@ -407,13 +456,13 @@ def verify_immutable_sources(prereg_path: Path, prereg: Mapping[str, Any]) -> st
         for path in sources
     }
     amendment = prereg["_protocol_amendment"]
-    runtime_amendment = amendment["runtime_isolation"]
-    coordinator_commit = str(runtime_amendment["implementation_commit"])
+    archive_amendment = amendment["archive_compatibility"]
+    coordinator_commit = str(archive_amendment["implementation_commit"])
     if commits[coordinator] != coordinator_commit:
         raise Mover5000Error("coordinator commit differs from protocol amendment")
     if commits[REMOTE_WORKER.resolve()] != str(prereg["source_commit"]):
         raise Mover5000Error("remote worker commit differs from parent preregistration")
-    if sha256_file(coordinator) != str(runtime_amendment["coordinator_sha256"]):
+    if sha256_file(coordinator) != str(archive_amendment["coordinator_sha256"]):
         raise Mover5000Error("coordinator SHA differs from protocol amendment")
 
     pinned = [
@@ -469,6 +518,60 @@ def build_daily_tail_rows(
     return rows
 
 
+def read_month_archive(path: Path, *, symbol: str, month: str) -> pd.DataFrame:
+    """Read either official Binance 12-column K-line encoding, then validate identically."""
+
+    if not path.is_file():
+        raise FileNotFoundError(path)
+    with zipfile.ZipFile(path) as bundle:
+        names = [name for name in bundle.namelist() if name.lower().endswith(".csv")]
+        if len(names) != 1:
+            raise Mover5000Error(f"{path} must contain exactly one CSV")
+        with bundle.open(names[0]) as handle:
+            first_fields = handle.readline().decode("utf-8").strip().split(",")
+        headered = tuple(first_fields) == BINANCE_KLINE_COLUMNS
+        headerless = len(first_fields) == len(BINANCE_KLINE_COLUMNS) and first_fields[0].isdigit()
+        if not headered and not headerless:
+            raise Mover5000Error(f"unsupported Binance K-line CSV shape: {path}")
+        with bundle.open(names[0]) as handle:
+            if headered:
+                frame = pd.read_csv(handle, usecols=list(prior.CSV_COLUMNS))
+            else:
+                frame = pd.read_csv(
+                    handle,
+                    header=None,
+                    names=list(BINANCE_KLINE_COLUMNS),
+                    usecols=list(prior.CSV_COLUMNS),
+                )
+    if frame.empty:
+        raise Mover5000Error(f"empty archive: {path}")
+    raw_time = pd.to_numeric(frame["open_time"], errors="raise")
+    epoch_unit = "us" if float(raw_time.max()) >= 1e14 else "ms"
+    frame["open_time"] = pd.to_datetime(raw_time.astype("int64"), unit=epoch_unit, utc=True)
+    for column in ("open", "high", "low", "close", "volume"):
+        frame[column] = pd.to_numeric(frame[column], errors="raise")
+    numeric = frame[["open", "high", "low", "close", "volume"]].to_numpy(dtype=float)
+    if not bool(np.isfinite(numeric).all()):
+        raise Mover5000Error(f"non-finite OHLCV: {path}")
+    if bool((frame[["open", "high", "low", "close"]] <= 0.0).any().any()):
+        raise Mover5000Error(f"non-positive OHLC: {path}")
+    if bool((frame["high"] < frame[["open", "close"]].max(axis=1)).any()):
+        raise Mover5000Error(f"high below candle body: {path}")
+    if bool((frame["low"] > frame[["open", "close"]].min(axis=1)).any()):
+        raise Mover5000Error(f"low above candle body: {path}")
+    times = frame["open_time"]
+    if times.duplicated().any() or not times.is_monotonic_increasing:
+        raise Mover5000Error(f"duplicate or descending timestamps: {path}")
+    expected_month = pd.Period(month, freq="M")
+    actual_months = set(times.dt.tz_localize(None).dt.to_period("M"))
+    if actual_months != {expected_month}:
+        raise Mover5000Error(f"archive month drift for {symbol}: {actual_months}")
+    if utc(times.iloc[-1]) >= HOLDOUT_START:
+        raise Mover5000Error(f"archive reached holdout: {path}")
+    frame["exchange_symbol"] = symbol
+    return frame.loc[:, [*prior.CSV_COLUMNS, "exchange_symbol"]]
+
+
 def build_month_rankings(
     prereg: Mapping[str, Any],
     *,
@@ -488,7 +591,7 @@ def build_month_rankings(
         path = prior.month_archive_path(archive_root, symbol, month)
         if not path.is_file():
             continue
-        frame = prior.read_month_archive(path, symbol=symbol, month=month)
+        frame = read_month_archive(path, symbol=symbol, month=month)
         source_sha = sha256_file(path)
         archive_rows.append(
             {
@@ -564,7 +667,7 @@ def load_selected_frames(
             path = prior.month_archive_path(archive_root, symbol, context_month)
             if not path.is_file():
                 continue
-            piece = prior.read_month_archive(path, symbol=symbol, month=context_month)
+            piece = read_month_archive(path, symbol=symbol, month=context_month)
             pieces.append(piece)
             audits.append(
                 {
@@ -1667,6 +1770,10 @@ def finalize(
             {
                 "path": amendment["runtime_isolation"]["path"],
                 "sha256": amendment["runtime_isolation"]["sha256"],
+            },
+            {
+                "path": amendment["archive_compatibility"]["path"],
+                "sha256": amendment["archive_compatibility"]["sha256"],
             },
         ],
         "protocol_amendment": {

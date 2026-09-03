@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-grade-a-daily-movers-5000-v1",
+  "created_at": "2026-09-03T20:55:00+08:00",
+  "reason": "At 2022-06 the frozen official Binance USD-M archive set first exposed a legacy CSV without a header row. The 12 numeric fields are the canonical Binance K-line schema; treating the first data row as a header makes named usecols fail and would block the preregistered calendar search.",
+  "parent_protocol_amendment": "experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/protocol_amendment_20260903_frozen_renderer_runtime.json",
+  "parent_protocol_amendment_sha256": "5fc2939e89aa670136ed3545c59fea8197723e74fb3b51bed019dc59a39b79e5",
+  "implementation_commit": "PENDING_FIRST_COMMIT",
+  "coordinator_sha256": "PENDING_FIRST_COMMIT",
+  "trigger_observation": {
+    "month": "2022-06",
+    "symbol": "ICPUSDT",
+    "archive": "data/kline_preholdout_binance_um15m/downloads/ICPUSDT/ICPUSDT-15m-2022-06.zip",
+    "first_row_field_count": 12,
+    "first_row_open_time": 1654041600000,
+    "original_failure": "ValueError: Usecols do not match columns"
+  },
+  "frozen_archive_format_audit": {
+    "months": 58,
+    "range": "2021-01 through 2025-10",
+    "archives": 13014,
+    "headered_12_columns": 11780,
+    "headerless_12_columns": 1234,
+    "other_shapes": 0,
+    "first_mixed_month_encountered_newest_first": "2022-06",
+    "all_headerless_from_month": "2021-12"
+  },
+  "canonical_columns": [
+    "open_time",
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "close_time",
+    "quote_volume",
+    "count",
+    "taker_buy_volume",
+    "taker_buy_quote_volume",
+    "ignore"
+  ],
+  "format_policy": {
+    "headered_12_columns": "read_by_canonical_header_names",
+    "headerless_12_columns": "assign_canonical_binance_kline_names",
+    "other_shapes": "fail_closed",
+    "post_parse_validation": "unchanged"
+  },
+  "unchanged_post_parse_gates": [
+    "numeric conversion and finite OHLCV",
+    "strictly positive OHLC and valid high/low candle body",
+    "unique monotonically increasing timestamp",
+    "declared calendar month identity",
+    "pre-holdout ceiling",
+    "exact 96-bar UTC day eligibility"
+  ],
+  "completed_shard_compatibility": "All first 40 completed months were parsed from standard headered archives before this trigger. Their hash-verified shards are reused unchanged; the legacy parser applies starting with the failed 2022-06 month.",
+  "data_source_or_archive_changed": false,
+  "detector_or_threshold_changed": false,
+  "holdout_or_training_scope_changed": false,
+  "production_eligible": false,
+  "training_eligible": false
+}
