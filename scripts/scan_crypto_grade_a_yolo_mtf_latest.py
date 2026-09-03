@@ -1392,6 +1392,10 @@ def main() -> int:
                 resume_source / "failure_receipt.json",
                 recovery_dir / "original_failure_receipt.json",
             )
+            shutil.copy2(
+                resume_source / "universe.json",
+                recovery_dir / "original_universe.json",
+            )
         write_json(
             building / "universe.json",
             {

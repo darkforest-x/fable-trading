@@ -299,7 +299,46 @@ def main() -> int:
         require(summary.get(field) is False, f"unsafe summary flag: {field}")
 
     prereg, gates = scan.load_preregistration(out / "preregistration.json")
-    require(prereg.get("source_commit") == summary.get("source_commit"), "source commit drift")
+    if summary.get("resumed_from_receipted_failure") is True:
+        require(
+            summary.get("original_prereg_source_commit") == prereg.get("source_commit"),
+            "original preregistration commit drift",
+        )
+        require(
+            summary.get("additional_market_read_during_recovery") is False,
+            "recovery performed an additional market read",
+        )
+        recovery = read_json(out / "recovery_amendment.json")
+        require(
+            recovery.get("original_prereg_source_commit") == prereg.get("source_commit"),
+            "recovery/preregistration binding drift",
+        )
+        require(
+            recovery.get("corrected_builder_commit") == summary.get("source_commit"),
+            "corrected builder commit drift",
+        )
+        require(
+            recovery.get("model_gate_timeframe_universe_ranking_changed") is False,
+            "recovery changed an analytical contract",
+        )
+        original_receipts = {
+            "holdout_consumption_started.json": out
+            / "recovery"
+            / "original_holdout_consumption_started.json",
+            "universe.json": out / "recovery" / "original_universe.json",
+            "failure_receipt.json": out / "recovery" / "original_failure_receipt.json",
+        }
+        for name, path in original_receipts.items():
+            require(path.is_file(), f"missing original recovery receipt: {name}")
+            require(
+                scan.sha256_file(path) == str(recovery["frozen_receipts"][name]),
+                f"original recovery receipt SHA drift: {name}",
+            )
+    else:
+        require(
+            prereg.get("source_commit") == summary.get("source_commit"),
+            "source commit drift",
+        )
     frames, candle_files = verify_candles(out, summary)
     decisions, pixels, semantic = verify_semantic_decisions(out, frames, gates)
     events, event_count = verify_events_and_ranks(out, summary, frames, decisions)
