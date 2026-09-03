@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "protocol": "ma6_owner_grade_a8000_neg24000_hl2_train1280_full40_v1_20260903",
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1",
+  "created_at": "2026-09-03T19:43:56+08:00",
+  "stage": "owner_authorized_completed_history_representation_ablation",
+  "question": "With sample membership, chronological split, candles, chart coordinates, palette, line width, base weight and training recipe frozen, does deriving SMA/EMA 20/60/120 from HL2 instead of close improve the matched Grade-A detector?",
+  "owner_authorization": {
+    "conversation_date": "2026-09-03",
+    "verbatim": "你去试试看 用之前最好的模型对应的数据集改成你建议的 再跑一次训练",
+    "interpreted_action": "Re-render the exact dataset used by the current best Grade-A full40 native-1280 checkpoint with the close-to-HL2 treatment and run one otherwise matched research training.",
+    "p0_p1_training_gate_overridden": true,
+    "training_authorized": true,
+    "holdout_authorized": false,
+    "threshold_tuning_authorized": false,
+    "promotion_or_deployment_authorized": false,
+    "live_order_authorized": false
+  },
+  "single_variable": {
+    "name": "six_moving_average_price_source",
+    "baseline": "close",
+    "treatment": "hl2",
+    "formula": "(high + low) / 2",
+    "periods": [20, 60, 120],
+    "families": ["SMA", "EMA"],
+    "line_width_px": 1,
+    "canvas_transform": "baseline_close_transform",
+    "candles_identical": true,
+    "palette_and_MA_order_identical": true,
+    "sample_event_split_and_window_identity_identical": true,
+    "positive_class_and_horizontal_box_identity_identical": true,
+    "positive_vertical_box_rule": "mechanically recompute the same core full-wick plus six-MA envelope with 4 percent padding on the frozen baseline axis",
+    "positive_vertical_labels_changed": 5325,
+    "positive_vertical_label_delta_px": {"median_max_edge": 1.0, "p95_max_edge": 7.0, "max_edge": 25.0},
+    "estimand": "The complete causal HL2 visual representation contract, including the mechanically required vertical-label update; it is not a pure pixel-only estimand."
+  },
+  "baseline_reference": {
+    "training_experiment": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1",
+    "dataset": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1",
+    "manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "run": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40",
+    "best_weight_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "results_csv_sha256": "371848011fe8d186e9f969f4f9adb2ddd2c2426b56f2771ef5bbd1defc7b7f5b",
+    "train_log_sha256": "d02667251bb79d39a90b24e26c67e4e5d08a14d94e03e9f7e3e1f93aacf5fe23",
+    "best_validation": {
+      "precision": 0.8519939040454414,
+      "recall": 0.8670458480065534,
+      "mAP50": 0.9223618558293507,
+      "mAP50_95": 0.7860204399061262
+    }
+  },
+  "immutable_inputs": {
+    "dataset_path": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_hl2_v1",
+    "dataset_source_experiment": "exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1",
+    "manifest_sha256": "ec93d6bfd04cc84a24a34cd745af2c74943f9a75e664831060619511ba60f6d7",
+    "build_summary_sha256": "48871b45a2bb76011440790cc43fef0bd6712e67a28e8ced11dd5705847fb597",
+    "data_yaml_sha256": "b822741e2277b8a60420cd0175da734dd91e8a1f2a0ce839e61b93ef04d6c07c",
+    "dataset_build_receipt_sha256": "48871b45a2bb76011440790cc43fef0bd6712e67a28e8ced11dd5705847fb597",
+    "dataset_qa_receipt_sha256": "65cf992f2c03b2e329a97392860c102659840e76c6bd16494cb80a3be87b770d",
+    "dataset_qa_script": "scripts/verify_15m_ma_launch_owner_grade_a_hl2.py",
+    "dataset_qa_script_sha256": "5df02a500c4d5a387ce3b5f5641fdf5a96207781b2e57ad61f6dd286793cf50d",
+    "source_dimensions": [1280, 742],
+    "counts": {
+      "train": {"images": 27200, "labels": 27200, "positive": 6800, "negative": 20400},
+      "val": {"images": 4800, "labels": 4800, "positive": 1200, "negative": 3600},
+      "total": {"images": 32000, "labels": 32000, "positive": 8000, "negative": 24000}
+    },
+    "class_instances_by_split": {
+      "train": {"0": 3205, "1": 3595},
+      "val": {"0": 531, "1": 669}
+    },
+    "events_by_split": {
+      "train": {"positive": 888, "negative": 2664},
+      "val": {"positive": 155, "negative": 465}
+    },
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_rows_allowed_during_training": 0
+  },
+  "preflight": {
+    "script": "scripts/windows/verify_yolo_dataset.py",
+    "script_sha256": "a178b20fd43b9a4f992149476a9dfaed029f4540812ddc1a304531baf86d05fd",
+    "run_on_local_source": true,
+    "run_on_remote_staged_copy": true,
+    "verify_every_image_and_label_sha256": true
+  },
+  "training": {
+    "remote_host": "runtime FABLE_3060_HOST; 192.168.1.2 verified at preregistration",
+    "host_key_fingerprint": "SHA256:fQTPIk3nUVNYmPuRzt7DhZfZaRjKukRP9fHJn19karY",
+    "gpu": "NVIDIA GeForce RTX 3060 12GB",
+    "base_model": "models/yolo11s.pt",
+    "base_model_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+    "trainer": "src/detection/train.py",
+    "trainer_sha256": "71445a639996ef8d0199a164aa08c75efa9d037619b8647deb3d5fab366e0562",
+    "launcher": "scripts/train_15m_ma_launch_t3_on_3060.sh",
+    "launcher_sha256": "27f7037e4f9a8c66ddbb87e2534ff378b90c7baa506e49634a19b7f5f9c05475",
+    "orchestration_wrapper": "scripts/train_15m_ma_launch_owner_grade_a8000_neg24000_hl2_full40_1280_on_3060.sh",
+    "orchestration_wrapper_sha256": "276b9300e9b6a0c828880c88a31e1e19def9754480701e8ab1e16c300c772999",
+    "classes": {"0": "dense_long", "1": "dense_short"},
+    "epochs": 40,
+    "patience": 0,
+    "batch": 8,
+    "imgsz": 1280,
+    "optimizer": "AdamW",
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "warmup_epochs": 0.5,
+    "seed": 0,
+    "deterministic": true,
+    "rect": true,
+    "cache": false,
+    "workers": 2,
+    "wait_for_run": "",
+    "external_gpu_queue": "Wait until the existing exp-15m-ma-launch-grade-a-daily-movers-5000-v1 coordinator and all remote Python workers have exited; this scheduling gate is not passed to Ultralytics.",
+    "run_name": "ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40",
+    "augmentations": {
+      "fliplr": 0.0,
+      "flipud": 0.0,
+      "mosaic": 0.0,
+      "mixup": 0.0,
+      "copy_paste": 0.0,
+      "hsv_h": 0.0,
+      "hsv_s": 0.0,
+      "hsv_v": 0.0,
+      "degrees": 0.0,
+      "translate": 0.02,
+      "scale": 0.1,
+      "shear": 0.0,
+      "perspective": 0.0,
+      "erasing": 0.0
+    }
+  },
+  "evaluation": {
+    "selection": "Ultralytics best.pt selected only by chronological validation fitness over exactly 40 completed epochs; no manual epoch selection",
+    "matched_arms": "baseline weight on frozen close dataset versus treatment weight on paired HL2 dataset",
+    "native_imgsz": 1280,
+    "fixed_confidence": 0.25,
+    "nms_iou": 0.7,
+    "true_hit_iou": 0.5,
+    "threshold_tuned": false,
+    "primary_surfaces": [
+      "earliest-available positive event recall",
+      "post2 positive event recall",
+      "empty-label negative fired-image rate"
+    ],
+    "secondary_surfaces": [
+      "positive image recall",
+      "LONG and SHORT recall",
+      "any-variant event recall",
+      "multiple-box rate",
+      "false boxes per 1000 negatives",
+      "precision",
+      "recall",
+      "mAP50",
+      "mAP50-95"
+    ],
+    "paired_inference": "Use identical ordered sample IDs, fixed thresholds and the same CUDA runtime; preserve one prediction ledger per arm.",
+    "uncertainty": "Use exact paired discordance tests and 95 percent event-block bootstrap intervals; variants from one positive event are never treated as independent.",
+    "decision_rule": "Call HL2 a demonstrated improvement only if a prespecified primary positive-event surface improves with Holm-adjusted two-sided p below 0.05 and the negative fired-image rate does not increase; mAP alone cannot overturn this rule.",
+    "seed_limit": "One matched seed measures this realized training run but not across-seed training variance.",
+    "holdout_during_evaluation": false
+  },
+  "outputs": {
+    "experiment_results": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/results",
+    "local_run": "analysis/output/ma_launch_owner_grade_a8000_neg24000_hl2_v1/ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40",
+    "canonical_report": "analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.md",
+    "canonical_html": "analysis/html/p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.html"
+  },
+  "safety": {
+    "completed_history_not_live_tip": true,
+    "holdout_read": false,
+    "threshold_tuning": false,
+    "promote": false,
+    "deployment": false,
+    "active_or_frozen_change": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
