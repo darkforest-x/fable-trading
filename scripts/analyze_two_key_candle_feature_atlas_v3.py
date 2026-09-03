@@ -424,6 +424,7 @@ def select_and_replay(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     selection_rows: list[dict[str, Any]] = []
     replay_rows: list[dict[str, Any]] = []
+    amended = set(config.get("completeness_amendment", {}).get("added_families", []))
     discovery = frame[frame["analysis_split"].eq("discovery")]
     for dimension, values in dimensions.items():
         local = frame.assign(_level=values)
@@ -435,6 +436,7 @@ def select_and_replay(
             selection_rows.append(
                 {
                     "dimension": dimension,
+                    "family_status": "diagnostic_amendment" if dimension in amended else "original_preregistered",
                     "level": level_name,
                     "eligible": eligible,
                     "selected": False,
@@ -462,6 +464,7 @@ def select_and_replay(
             replay_rows.append(
                 {
                     "dimension": dimension,
+                    "family_status": "diagnostic_amendment" if dimension in amended else "original_preregistered",
                     "selected_level": selected_level,
                     "discovery_score": score,
                     "split": split,
@@ -472,11 +475,13 @@ def select_and_replay(
     selection = pd.DataFrame(selection_rows)
     replay = pd.DataFrame(replay_rows)
     validation = replay["split"].eq("validation")
-    replay.loc[validation, "net_fdr_q"] = bh_adjust(replay.loc[validation, "net_signflip_p"])
-    replay.loc[validation, "excess_fdr_q"] = bh_adjust(replay.loc[validation, "excess_signflip_p"])
+    for status in ("original_preregistered", "diagnostic_amendment"):
+        current = validation & replay["family_status"].eq(status)
+        replay.loc[current, "net_fdr_q"] = bh_adjust(replay.loc[current, "net_signflip_p"])
+        replay.loc[current, "excess_fdr_q"] = bh_adjust(replay.loc[current, "excess_signflip_p"])
     required_n = int(config["selection"]["minimum_validation_events"])
-    replay["passes_validation_gate"] = False
-    replay.loc[validation, "passes_validation_gate"] = (
+    replay["passes_statistical_screen"] = False
+    replay.loc[validation, "passes_statistical_screen"] = (
         replay.loc[validation, "n"].ge(required_n)
         & replay.loc[validation, "net_bp"].gt(0)
         & replay.loc[validation, "paired_excess_bp"].gt(0)
@@ -485,6 +490,14 @@ def select_and_replay(
         & replay.loc[validation, "excess_fdr_q"].lt(0.05)
         & replay.loc[validation, "net_ci95_low_bp"].gt(0)
         & replay.loc[validation, "excess_ci95_low_bp"].gt(0)
+    )
+    replay["passes_validation_gate"] = (
+        replay["passes_statistical_screen"]
+        & replay["family_status"].eq("original_preregistered")
+    )
+    replay["passes_diagnostic_screen"] = (
+        replay["passes_statistical_screen"]
+        & replay["family_status"].eq("diagnostic_amendment")
     )
     return selection, replay
 
@@ -767,6 +780,13 @@ def main() -> int:
     horizons = [int(config["primary_horizon_bars"]), *map(int, config["sensitivity_horizon_bars"])]
     atlas, half_metrics = build_atlas(frame, dimensions, horizons)
     selection, replay = select_and_replay(frame, dimensions, config)
+    amended = set(config.get("completeness_amendment", {}).get("added_families", []))
+    for table in (atlas, half_metrics):
+        table.insert(
+            1,
+            "family_status",
+            np.where(table["dimension"].isin(amended), "diagnostic_amendment", "original_preregistered"),
+        )
     fixed_targets = fixed_target_sensitivity(exact_profiles, config)
     costs = cost_sensitivity(exact_profiles, config)
     btc = btc_summary(exact_profiles)
@@ -811,9 +831,12 @@ def main() -> int:
         "config": {"path": str(args.config.resolve().relative_to(PROJECT)), "sha256": sha256_file(args.config)},
         "counts_by_split": {key: int(value) for key, value in frame["analysis_split"].value_counts().to_dict().items()},
         "feature_families": len(dimensions),
+        "original_preregistered_families": int(len(dimensions) - len(amended)),
+        "diagnostic_amendment_families": int(len(amended)),
         "discovery_selected_families": int(selection["selected"].sum()),
         "validation_pass_count": int(validation["passes_validation_gate"].sum()),
-        "best_validation_joint_rows": best_rows[["dimension", "selected_level", "n", "net_bp", "control_net_bp", "paired_excess_bp", "profit_factor", "net_fdr_q", "excess_fdr_q", "joint_metric_bp"]].to_dict("records"),
+        "diagnostic_screen_pass_count": int(validation["passes_diagnostic_screen"].sum()),
+        "best_validation_joint_rows": best_rows[["dimension", "family_status", "selected_level", "n", "net_bp", "control_net_bp", "paired_excess_bp", "profit_factor", "net_fdr_q", "excess_fdr_q", "joint_metric_bp"]].to_dict("records"),
         "limitations": [
             "The current 54-symbol cache is a survivor universe, not a point-in-time listing universe.",
             "V3 reuses V2 events and controls; it audits features but does not independently reconstruct the market data.",
