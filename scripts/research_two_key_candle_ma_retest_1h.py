@@ -682,6 +682,10 @@ def attach_event_outcomes(
                 pool,
                 int(config["matched_control"]["n_per_event"]),
             )
+            if len(controls) != int(config["matched_control"]["n_per_event"]):
+                # Exact matching is a hard contract. Do not silently widen a
+                # sparse symbol×month×time-block×ATR stratum.
+                continue
             control_payload: dict[str, Any] = {"n_controls": int(len(controls))}
             control_detail: list[dict[str, Any]] = []
             for horizon in HORIZONS:
