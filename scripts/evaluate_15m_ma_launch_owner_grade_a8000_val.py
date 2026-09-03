@@ -14,11 +14,11 @@ import json
 import math
 import platform
 from collections import Counter, defaultdict
+from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any
 
 import numpy as np
-
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_MANIFEST_SHA256 = (
@@ -83,11 +83,18 @@ def _read_yolo_label(path: Path) -> tuple[int, list[float]] | None:
     return class_id, xyxy
 
 
-def load_val_rows(dataset: Path) -> tuple[Path, list[dict[str, Any]]]:
+def load_val_rows(
+    dataset: Path,
+    *,
+    expected_manifest_sha256: str = EXPECTED_MANIFEST_SHA256,
+) -> tuple[Path, list[dict[str, Any]]]:
     """Verify every frozen val file and return deterministic manifest rows."""
 
     manifest = dataset / "manifest.jsonl"
-    if not manifest.is_file() or sha256_file(manifest) != EXPECTED_MANIFEST_SHA256:
+    if (
+        not manifest.is_file()
+        or sha256_file(manifest) != expected_manifest_sha256
+    ):
         raise GradeAValError("Grade-A manifest identity drifted")
     rows = [
         json.loads(line)
@@ -468,6 +475,7 @@ def evaluate(
     confidence: float,
     nms_iou: float,
     match_iou: float,
+    expected_manifest_sha256: str = EXPECTED_MANIFEST_SHA256,
 ) -> dict[str, Any]:
     """Run the frozen fixed-threshold evaluation over all 4,800 val images."""
 
@@ -477,7 +485,10 @@ def evaluate(
     actual_weights_sha = sha256_file(weights)
     if actual_weights_sha != expected_weights_sha256:
         raise GradeAValError("weight identity drifted")
-    manifest, rows = load_val_rows(dataset)
+    manifest, rows = load_val_rows(
+        dataset,
+        expected_manifest_sha256=expected_manifest_sha256,
+    )
 
     import torch
     import ultralytics
@@ -591,6 +602,11 @@ def main() -> None:
     parser.add_argument("--weights", type=Path, required=True)
     parser.add_argument("--weights-sha256", required=True)
     parser.add_argument(
+        "--expected-manifest-sha256",
+        default=EXPECTED_MANIFEST_SHA256,
+        help="Exact manifest SHA-256 for the dataset being evaluated.",
+    )
+    parser.add_argument(
         "--dataset",
         type=Path,
         default=ROOT / "datasets" / "ma_launch_owner_grade_a8000_yolo_neg24000_v1",
@@ -623,6 +639,7 @@ def main() -> None:
         confidence=args.confidence,
         nms_iou=args.nms_iou,
         match_iou=args.match_iou,
+        expected_manifest_sha256=args.expected_manifest_sha256,
     )
     print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
 
