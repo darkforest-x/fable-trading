@@ -1,0 +1,81 @@
+{
+  "causal_scan": {
+    "deduplicated_events": 248,
+    "direction_flipped_gate_pass_boxes": 9,
+    "future_review_bars_physically_removed_before_inference": 96,
+    "model_tasks": 65760,
+    "raw_boxes": 2294,
+    "scored_endpoints_per_symbol": 120,
+    "standing_gate_pass_boxes": 1928,
+    "structurally_accepted_boxes": 2008,
+    "window_lengths": [
+      18,
+      19
+    ]
+  },
+  "experiment_id": "exp-1h-okx-model-first-standing-top10-20260904-v1",
+  "frozen_at": "2026-09-03T17:23:19.938193+00:00",
+  "generated_at": "2026-09-03T19:00:42.981062+00:00",
+  "holdout_consumption_number_for_checkpoint": 20,
+  "limitations": {
+    "checkpoint_training_clock": "15m",
+    "out_of_distribution": true,
+    "precision_or_profit_claim_allowed": false,
+    "scan_clock": "1h",
+    "top10_is_model_ranked_review_queue_not_winner_selection": true
+  },
+  "original_prereg_source_commit": "7197ad9a796b03ae56f3abb8a0eae111f757811f",
+  "post_selection_review": {
+    "fees_slippage_tp_sl_applied": false,
+    "future_bars_per_chart": 96,
+    "is_profit_measurement": false,
+    "non_positive_directional_move_at_96h": 2,
+    "positive_directional_move_at_96h": 8
+  },
+  "recovery": {
+    "amendment": "experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/recovery_batch_size_20260904.json",
+    "new_market_reads": 0,
+    "runtime_batch_size": 32,
+    "semantic_or_selection_change": false,
+    "used": true
+  },
+  "safety": {
+    "active_or_frozen_change": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "label_or_dataset_mutation": false,
+    "new_training": false,
+    "order_action": false,
+    "production_eligible": false,
+    "promotion": false,
+    "telegram_send": false,
+    "threshold_or_weight_change": false,
+    "training_eligible": false
+  },
+  "schema_version": 1,
+  "selection": {
+    "delivered": 10,
+    "future_or_outcome_fields_used": false,
+    "ranking": "event_peak_confidence_desc_then_first_available_at_desc_then_symbol_asc_then_class_id_asc;future_fields_forbidden",
+    "requested": 10,
+    "side_counts": {
+      "SHORT": 10
+    }
+  },
+  "source": {
+    "bar": "1H",
+    "confirmed_rows_per_usable_symbol": 396,
+    "eligible_instruments": 277,
+    "excluded_instruments": 3,
+    "latest_closed_bar_open": "2026-09-03T16:00:00+00:00",
+    "usable_instruments": 274,
+    "venue": "OKX"
+  },
+  "source_commit": "22317f36cf67fc7333a1fcbade55ab47513ba991",
+  "verification": {
+    "review_charts": 10,
+    "selected_future_mutation_passes": 10,
+    "selected_pixel_replays": 10
+  },
+  "wall_seconds": 5030.737
+}

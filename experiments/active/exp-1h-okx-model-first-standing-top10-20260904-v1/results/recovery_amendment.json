@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-1h-okx-model-first-standing-top10-20260904-v1",
+  "created_at": "2026-09-04T01:36:00+08:00",
+  "holdout_consumption_number_for_checkpoint": 20,
+  "reason": "The first local MPS execution was manually interrupted after 3,240 of 65,760 tasks because batch=8 projected to roughly two hours. The complete market snapshot had already been written and hashed. Resume from those exact bytes with a larger runtime-only batch; do not fetch again and do not alter any model, gate, event, selection, or review rule.",
+  "interrupted_progress": {
+    "tasks_completed": 3240,
+    "tasks_total": 65760,
+    "accepted_structural_boxes_seen_before_interrupt": 123,
+    "partial_predictions_persisted_or_used": false
+  },
+  "runtime_only_change": {
+    "original_batch_size": 8,
+    "recovery_batch_size": 32,
+    "batch_size_affects_signal_contract": false,
+    "benchmark_outputs_used_for_selection": false
+  },
+  "new_market_read_authorized": false,
+  "semantic_or_selection_change": false,
+  "frozen_snapshot": {
+    "holdout_consumption_started.json": "4695373e87ed9836a7d023dbde13f2bbcddc8dde34cd2c47cc136e4eb4a3e1c0",
+    "universe.json": "e9bf6421dc2fddb61d34a6fed2204f2a04c191d81c9157b52c70213b74f58682",
+    "fetch_audit.json": "3dc682b9e3c0fc3840522964559fc29fb026d8972a93ce081b7ff1d1811d22ee"
+  },
+  "frozen_snapshot_directory": "experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results.snapshot_holdout20_batch8_interrupted",
+  "safety": {
+    "new_training": false,
+    "threshold_or_weight_change": false,
+    "label_or_dataset_mutation": false,
+    "active_or_frozen_change": false,
+    "promotion": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "telegram_send": false,
+    "order_action": false
+  }
+}

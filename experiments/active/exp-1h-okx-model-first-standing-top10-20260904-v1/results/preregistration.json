@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-1h-okx-model-first-standing-top10-20260904-v1",
+  "created_at": "2026-09-04T01:20:00+08:00",
+  "stage": "P1_owner_requested_model_first_visual_review",
+  "question": "When the current Grade-A checkpoint scans a newly frozen all-eligible OKX 1h market snapshot and the current-close six-MA standing rule is applied second, which ten distinct model-ranked events should the Owner review?",
+  "owner_authorization": {
+    "conversation_date": "2026-09-04",
+    "verbatim": "测试一下 找到10个信号我看看；不要这个限制",
+    "interpreted_action": "Do not restrict the run to the previously frozen pre-holdout candidate ledger. Fetch a new current all-eligible OKX 1h snapshot, run the unchanged checkpoint first, apply the already-approved current-position code gate second, and deliver ten distinct review signals with separated future context. No training, tuning, promotion, deployment, messaging, or order action is authorized.",
+    "holdout_read_authorized": true,
+    "holdout_consumption_number_for_checkpoint": 20,
+    "training_or_tuning_authorized": false,
+    "threshold_or_weight_change_authorized": false,
+    "production_or_promotion_authorized": false,
+    "orders_authorized": false
+  },
+  "scope": {
+    "venue": "OKX",
+    "instrument_universe": "all current live instCategory=1 crypto USDT swaps with positive ticker after the repository blocked-base and stockish-base exclusions",
+    "instrument_ranking": null,
+    "bar": "1H",
+    "retained_confirmed_rows_per_symbol": 396,
+    "scored_endpoints_per_usable_symbol": 120,
+    "endpoint_policy": "score every one of the 120 completed endpoints immediately before the physically reserved 96-bar review-future suffix",
+    "review_pre_signal_bars": 180,
+    "review_future_bars": 96,
+    "top_k": 10,
+    "incomplete_current_bar_excluded": true,
+    "minimum_result_policy": "If fewer than ten deduplicated passing events exist, deliver every event without changing thresholds, scope, or future reserve."
+  },
+  "detector": {
+    "display_name": "Grade-A 8000 positives + 24000 negatives full40 native-1280",
+    "weights": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+    "weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "imgsz": 1280,
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "window_lengths": [18, 19],
+    "mapped_core_length_bars_allowed": [4, 5],
+    "mapped_confirmation_bars_allowed": [2, 3, 4, 5, 6, 7, 8, 9],
+    "same_symbol_same_direction_event_gap_bars": 5,
+    "class_names": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "training_clock": "15m",
+    "scan_clock": "1h",
+    "domain_status": "out_of_distribution_completed_history_research"
+  },
+  "position_gate": {
+    "pipeline_order": "model_proposal_then_deterministic_bundle_position_gate",
+    "long_current": "close[t] > max(sma20,sma60,sma120,ema20,ema60,ema120)[t]",
+    "short_current": "close[t] < min(sma20,sma60,sma120,ema20,ema60,ema120)[t]",
+    "prior_bar_condition": null,
+    "first_cross_required": false,
+    "epsilon": 0.0,
+    "lookback_rows": 1
+  },
+  "selection": {
+    "unit": "same-symbol same-direction event after the frozen five-bar core-end NMS",
+    "ranking": "event_peak_confidence_desc_then_first_available_at_desc_then_symbol_asc_then_class_id_asc;future_fields_forbidden",
+    "ranking_inputs": [
+      "event_peak_confidence",
+      "first_available_at",
+      "symbol",
+      "class_id"
+    ],
+    "outcome_inputs": [],
+    "no_post_result_retuning": true
+  },
+  "future_separation": {
+    "implementation": "Remove the latest 96 rows from every 396-row source frame before any model task or gate decision is built. Reattach them only after the Top-10 event identities and order are frozen.",
+    "review_only_metrics": [
+      "directional close move at 24h, 48h, and 96h",
+      "96h maximum favorable excursion",
+      "96h maximum adverse excursion"
+    ],
+    "profit_label": false,
+    "fees_slippage_tp_sl": false
+  },
+  "null_and_causality_controls": {
+    "direction_flip": "For each model proposal, keep the endpoint and prices fixed and mirror only LONG/SHORT in the standing gate.",
+    "future_mutation": "For each selected event, multiply every OHLCV row after t by deterministic 7x..70x factors and require the t decision to remain byte-for-byte equivalent within 1e-12.",
+    "pixel_replay": "Re-render every selected exact W18/W19 input and require its decoded-pixel SHA-256 to equal the inference ledger."
+  },
+  "implementation_dependencies": {
+    "base_scanner": {
+      "path": "scripts/scan_4h_ma_launch_yolo_latest.py",
+      "sha256": "327666000d2f71560f7f31fc10d26b059cc74b0b032dd71cdca066c314363eaf"
+    },
+    "universe_reader": {
+      "path": "scripts/scan_15m_ma_launch_t3_daily_movers.py",
+      "sha256": "bd7b4c343bac51b42fb22ecc73ea156517b45921c41118674d86d5e53f061889"
+    },
+    "renderer": {
+      "path": "yoyo/layers/l1_detection/render.py",
+      "sha256": "def5b7317c13e37fc43657243a7cc900bc3fafee71bdf2e405e0336a1a3c0eea"
+    },
+    "standing_gate": {
+      "path": "yoyo/layers/l1_detection/model_first_standing.py",
+      "sha256": "2268b264d79e9523be11ddcd5a1a3d48ac9ecad52b66867603fd895c20e32cc3"
+    }
+  },
+  "single_variable": "Relative to the just-approved FIL 1h model-first/current-standing diagnostic, the model, thresholds, W18/W19 renderer, structural mapping and code gate are unchanged. The requested change is the evaluation surface: replace the old frozen single-symbol proposal ledger with a newly fetched all-eligible OKX 1h snapshot and a preregistered causal Top-10 review queue.",
+  "outputs": {
+    "directory": "experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results",
+    "summary": "experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/summary.json",
+    "all_decisions": "experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/standing_decisions.csv",
+    "all_events": "experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/deduplicated_events.csv",
+    "selected": "experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/selected_top10.csv",
+    "gallery": "experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/review/gallery.html",
+    "report": "analysis/p1_1h_okx_model_first_standing_top10_20260904.md",
+    "html": "analysis/html/p1_1h_okx_model_first_standing_top10_20260904.html"
+  },
+  "safety": {
+    "new_training": false,
+    "threshold_or_weight_change": false,
+    "label_or_dataset_mutation": false,
+    "active_or_frozen_change": false,
+    "promotion": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "telegram_send": false,
+    "order_action": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
