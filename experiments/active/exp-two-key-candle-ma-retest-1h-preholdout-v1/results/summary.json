@@ -1,0 +1,271 @@
+{
+  "experiment_id": "exp-two-key-candle-ma-retest-1h-preholdout-v1",
+  "generated_at": "2026-09-03T18:33:32.039291+00:00",
+  "status": "preholdout_rule_research",
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "script": {
+    "path": "scripts/research_two_key_candle_ma_retest_1h.py",
+    "sha256": "162f4aab3a66ac35034ac226263489dc6fad029e7d865d4a2eb26ee39645e454"
+  },
+  "config": {
+    "path": "experiments/active/exp-two-key-candle-ma-retest-1h-preholdout-v1/config.json",
+    "sha256": "27ca96eb803b83901de855dc05f3e31471fd39ecdabd054197a93b1aa01d1c50"
+  },
+  "data": {
+    "files": 54,
+    "symbols": 54,
+    "hourly_rows": 1457118,
+    "first_hour": "2022-01-03T15:00:00+00:00",
+    "last_hour": "2026-02-28T23:00:00+00:00",
+    "hourly_gap_count": 0,
+    "broad_pairs": 24291,
+    "broad_k2_events": 22000,
+    "safe_end_exclusive": "2026-03-01T00:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z"
+  },
+  "selection": {
+    "selected_arms": [
+      {
+        "family": "k1_body_ratio",
+        "arm": "body_0.75",
+        "description": "K1 body/range ≥ 0.75"
+      },
+      {
+        "family": "k1_range_atr",
+        "arm": "range_1",
+        "description": "K1 range ≥ 1 ATR"
+      },
+      {
+        "family": "k1_volume",
+        "arm": "volume_1.5",
+        "description": "K1 volume / prior20 ≥ 1.5"
+      },
+      {
+        "family": "stop_distance",
+        "arm": "risk_0.15_1.5",
+        "description": "entry-to-K2 stop 0.15–1.50 ATR"
+      },
+      {
+        "family": "pre_retest_extension",
+        "arm": "extension_1",
+        "description": "pre-retest continuation ≤ 1 ATR"
+      },
+      {
+        "family": "rope_slope",
+        "arm": "slope_0",
+        "description": "side-aligned rope slope ≥ 0 ATR/bar"
+      }
+    ],
+    "selection_rows": 12188,
+    "frozen_before_validation": true,
+    "validation_retuning": false
+  },
+  "summary": [
+    {
+      "segment": "development_non_btc",
+      "n_events": 558,
+      "n_long": 305,
+      "n_short": 253,
+      "mean_gross_bp": 45.77864781876458,
+      "mean_net_bp": 25.778647818764572,
+      "control_net_bp": -35.14928473562889,
+      "paired_excess_bp": 60.92793255439346,
+      "win_rate": 0.18996415770609318,
+      "stop_rate": 0.8010752688172043,
+      "profit_factor": 1.3187491236268225,
+      "mean_terminal_r": 0.6289196960090857,
+      "median_mfe_r": 1.341666666666707,
+      "hit_1r_rate": 0.48566308243727596,
+      "hit_2r_rate": 0.34767025089605735,
+      "hit_3r_rate": 0.27060931899641577,
+      "hit_5r_rate": 0.1971326164874552,
+      "robust_score": 42.1040217206876,
+      "worst_fold_excess_bp": 45.45978253464306,
+      "positive_folds": 4,
+      "fold_count": 4,
+      "min_fold_n": 102,
+      "paired_signflip_p": 0.00019998000199980003,
+      "paired_excess_ci95_low_bp": 32.61155085919832,
+      "paired_excess_ci95_high_bp": 89.78683887523074,
+      "quality_auc_net_positive": 0.5625104357989648,
+      "quality_top_decile_n": 56,
+      "quality_top_decile_gross_bp": 95.61405947542578,
+      "quality_top_decile_net_bp": 75.61405947542578,
+      "quality_top_decile_control_net_bp": -34.87894630570623,
+      "quality_top_decile_permutation_p": 0.12768723127687232,
+      "single_feature": "k2_wick_share",
+      "single_feature_top_decile_n": 56,
+      "single_feature_top_decile_gross_bp": -11.648642300203694,
+      "single_feature_top_decile_net_bp": -31.648642300203694,
+      "single_feature_top_decile_permutation_p": 0.9206079392060794
+    },
+    {
+      "segment": "validation_non_btc",
+      "n_events": 388,
+      "n_long": 204,
+      "n_short": 184,
+      "mean_gross_bp": 5.479507358505633,
+      "mean_net_bp": -14.520492641494382,
+      "control_net_bp": -13.144459172048673,
+      "paired_excess_bp": -1.3760334694457033,
+      "win_rate": 0.14948453608247422,
+      "stop_rate": 0.8427835051546392,
+      "profit_factor": 0.8294649636031918,
+      "mean_terminal_r": -0.026233130810722916,
+      "median_mfe_r": 1.0944671086180318,
+      "hit_1r_rate": 0.42783505154639173,
+      "hit_2r_rate": 0.2912371134020619,
+      "hit_3r_rate": 0.20103092783505155,
+      "hit_5r_rate": 0.1211340206185567,
+      "robust_score": -15.234291730096071,
+      "worst_fold_excess_bp": -14.230247844746414,
+      "positive_folds": 1,
+      "fold_count": 3,
+      "min_fold_n": 46,
+      "paired_signflip_p": 0.5353464653534646,
+      "paired_excess_ci95_low_bp": -32.54262016443504,
+      "paired_excess_ci95_high_bp": 32.01570896742942,
+      "quality_auc_net_positive": 0.6458725182863114,
+      "quality_top_decile_n": 39,
+      "quality_top_decile_gross_bp": 48.66809123556905,
+      "quality_top_decile_net_bp": 28.668091235569047,
+      "quality_top_decile_control_net_bp": 15.932674714995347,
+      "quality_top_decile_permutation_p": 0.1523847615238476,
+      "single_feature": "k2_wick_share",
+      "single_feature_top_decile_n": 39,
+      "single_feature_top_decile_gross_bp": 46.06326767020495,
+      "single_feature_top_decile_net_bp": 26.063267670204947,
+      "single_feature_top_decile_permutation_p": 0.1553844615538446
+    },
+    {
+      "segment": "btc_transfer_preholdout",
+      "n_events": 25,
+      "n_long": 14,
+      "n_short": 11,
+      "mean_gross_bp": 6.76422078775758,
+      "mean_net_bp": -13.235779212242418,
+      "control_net_bp": -34.94255487264167,
+      "paired_excess_bp": 21.70677566039925,
+      "win_rate": 0.28,
+      "stop_rate": 0.72,
+      "profit_factor": 0.6631554541294004,
+      "mean_terminal_r": -0.021873541124007724,
+      "median_mfe_r": 1.36864406779661,
+      "hit_1r_rate": 0.6,
+      "hit_2r_rate": 0.4,
+      "hit_3r_rate": 0.4,
+      "hit_5r_rate": 0.24,
+      "robust_score": -10.783863686187601,
+      "worst_fold_excess_bp": -5.867591780078972,
+      "positive_folds": 3,
+      "fold_count": 6,
+      "min_fold_n": 2,
+      "paired_signflip_p": 0.1272872712728727,
+      "paired_excess_ci95_low_bp": -6.222999613738896,
+      "paired_excess_ci95_high_bp": 53.93477604868894,
+      "quality_auc_net_positive": 0.6111111111111112,
+      "quality_top_decile_n": 3,
+      "quality_top_decile_gross_bp": -59.183164124051075,
+      "quality_top_decile_net_bp": -79.18316412405109,
+      "quality_top_decile_control_net_bp": -66.3488825579952,
+      "quality_top_decile_permutation_p": 0.9942005799420058,
+      "single_feature": "k2_wick_share",
+      "single_feature_top_decile_n": 3,
+      "single_feature_top_decile_gross_bp": 44.93342117075268,
+      "single_feature_top_decile_net_bp": 24.933421170752677,
+      "single_feature_top_decile_permutation_p": 0.1855814418558144
+    }
+  ],
+  "horizon_sensitivity": [
+    {
+      "segment": "development_non_btc",
+      "horizon_bars": 12,
+      "n": 558,
+      "gross_bp": 25.88385608184627,
+      "net_bp": 5.883856081846255,
+      "control_net_bp": -28.12220342605954,
+      "paired_excess_bp": 34.00605950790579
+    },
+    {
+      "segment": "development_non_btc",
+      "horizon_bars": 24,
+      "n": 558,
+      "gross_bp": 45.77864781876458,
+      "net_bp": 25.778647818764572,
+      "control_net_bp": -35.14928473562889,
+      "paired_excess_bp": 60.92793255439346
+    },
+    {
+      "segment": "development_non_btc",
+      "horizon_bars": 48,
+      "n": 558,
+      "gross_bp": 48.955714504609176,
+      "net_bp": 28.955714504609166,
+      "control_net_bp": -36.87075190998302,
+      "paired_excess_bp": 65.82646641459219
+    },
+    {
+      "segment": "validation_non_btc",
+      "horizon_bars": 12,
+      "n": 388,
+      "gross_bp": -8.207250988828093,
+      "net_bp": -28.207250988828108,
+      "control_net_bp": -17.773318595717683,
+      "paired_excess_bp": -10.433932393110416
+    },
+    {
+      "segment": "validation_non_btc",
+      "horizon_bars": 24,
+      "n": 388,
+      "gross_bp": 5.479507358505633,
+      "net_bp": -14.520492641494382,
+      "control_net_bp": -13.144459172048673,
+      "paired_excess_bp": -1.3760334694457033
+    },
+    {
+      "segment": "validation_non_btc",
+      "horizon_bars": 48,
+      "n": 388,
+      "gross_bp": 2.403199175270615,
+      "net_bp": -17.5968008247294,
+      "control_net_bp": -12.938678646310965,
+      "paired_excess_bp": -4.658122178418433
+    },
+    {
+      "segment": "btc_transfer_preholdout",
+      "horizon_bars": 12,
+      "n": 25,
+      "gross_bp": -0.05451738139559126,
+      "net_bp": -20.05451738139559,
+      "control_net_bp": -36.765687013675226,
+      "paired_excess_bp": 16.71116963227964
+    },
+    {
+      "segment": "btc_transfer_preholdout",
+      "horizon_bars": 24,
+      "n": 25,
+      "gross_bp": 6.76422078775758,
+      "net_bp": -13.235779212242418,
+      "control_net_bp": -34.94255487264167,
+      "paired_excess_bp": 21.70677566039925
+    },
+    {
+      "segment": "btc_transfer_preholdout",
+      "horizon_bars": 48,
+      "n": 25,
+      "gross_bp": 50.772708960595516,
+      "net_bp": 30.77270896059551,
+      "control_net_bp": -27.63312602955799,
+      "paired_excess_bp": 58.4058349901535
+    }
+  ],
+  "caveats": [
+    "The 54-symbol cache is a current survival universe, not a historical listing snapshot.",
+    "A 1h resample is an auditable OKX reconstruction, not TradingView feed parity.",
+    "Matched controls copy stop distance in ATR; they do not manufacture a random K2 wick.",
+    "The ChartPrime Market Break state is a causal public-formula approximation; indicator plot order can still change visible candle colour.",
+    "Validation is pre-holdout research and BTC transfer, not final holdout or fresh-forward evidence."
+  ]
+}

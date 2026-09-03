@@ -1,0 +1,6 @@
+report_segment,question,family,chart_type,fields,supported_claim,palette,output
+time stability,Does the frozen core beat costs and matched controls through time?,comparison,grouped bar,"half, net_bp, control_net_bp, n",half-year sign stability or failure,blue + gold + neutrals,core_halfyear.png
+feature generalization,Do discovery-selected one-dimensional bins generalize to 2025?,relationship,two-panel scatter,"discovery_score, validation net/excess, n",selection-to-validation decay,single blue root + neutrals,walkforward_generalization.png
+feature ranking,Which selected bins are least bad in 2025 on both absolute and relative outcomes?,comparison,horizontal grouped bar,"dimension, level, net_bp, paired_excess_bp",no dimension passes the joint gate,blue + gold + neutrals,validation_rank.png
+exit sensitivity,Does a fixed 1R/2R/3R/5R target rescue the anchor score?,comparison,grouped bar,"split, target_r, mean_net_bp",fixed targets do or do not fix expectancy,blue + gold + orange + neutral context,fixed_target_sensitivity.png
+distance,Does an exact K1-to-K2 bar count generalize?,trend over ordered parameter,three-panel line,"gap, split, net_bp, paired_excess_bp, n",distance response changes sign across time splits,blue + gold + orange + neutral context,gap_walkforward.png

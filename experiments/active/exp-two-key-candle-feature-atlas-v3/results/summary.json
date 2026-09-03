@@ -1,0 +1,204 @@
+{
+  "experiment_id": "exp-two-key-candle-feature-atlas-v3",
+  "generated_at": "2026-09-03T18:27:23.742547+00:00",
+  "status": "diagnostic_complete_no_model_fit",
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "source": {
+    "path": "experiments/active/exp-two-key-candle-ma-retest-sma40-state-v2/results/profile_events.csv.gz",
+    "sha256": "ab65a885902f407727a0e8fe5aa21015fccef18b8b7d664a09b250a79a443035",
+    "profile": "single_sma40_core_2_8",
+    "rows": 6023,
+    "symbols": 54,
+    "min_k2_time": "2023-01-01T06:00:00+00:00",
+    "max_k2_time": "2026-04-30T09:00:00+00:00",
+    "max_abs_arithmetic_error": 1.97758476261356e-16,
+    "holdout_rows": 0
+  },
+  "exact_profile_receipts": {
+    "single_sma40_core_2_8": {
+      "rows": 6023,
+      "symbols": 54,
+      "min_k2_time": "2023-01-01T06:00:00+00:00",
+      "max_k2_time": "2026-04-30T09:00:00+00:00",
+      "max_abs_arithmetic_error": 1.97758476261356e-16,
+      "holdout_rows": 0
+    },
+    "sma40_anchor_score_70": {
+      "rows": 1070,
+      "symbols": 53,
+      "min_k2_time": "2023-01-02T06:00:00+00:00",
+      "max_k2_time": "2026-04-29T12:00:00+00:00",
+      "max_abs_arithmetic_error": 1.1102230246251565e-16,
+      "holdout_rows": 0
+    },
+    "sma40_anchor_score_80": {
+      "rows": 91,
+      "symbols": 40,
+      "min_k2_time": "2023-01-29T12:00:00+00:00",
+      "max_k2_time": "2026-04-28T12:00:00+00:00",
+      "max_abs_arithmetic_error": 1.0408340855860843e-16,
+      "holdout_rows": 0
+    }
+  },
+  "script": {
+    "path": "scripts/analyze_two_key_candle_feature_atlas_v3.py",
+    "sha256": "6e758eecb898cef92dbc6efc643b8b3777e426d18270a78ada7729101dcd35e3"
+  },
+  "config": {
+    "path": "experiments/active/exp-two-key-candle-feature-atlas-v3/config.json",
+    "sha256": "34505f4449ff9e19f1ca21bbb90321bc581713cf4640c0a717e3def3d3506540"
+  },
+  "counts_by_split": {
+    "discovery": 3192,
+    "validation": 2126,
+    "bridge": 370,
+    "fresh_preholdout": 335
+  },
+  "feature_families": 55,
+  "original_preregistered_families": 42,
+  "diagnostic_amendment_families": 13,
+  "discovery_selected_families": 55,
+  "validation_pass_count": 0,
+  "diagnostic_screen_pass_count": 0,
+  "best_validation_joint_rows": [
+    {
+      "dimension": "k1_quality",
+      "family_status": "diagnostic_amendment",
+      "selected_level": "0.55-0.70",
+      "n": 305,
+      "net_bp": -4.714242615900694,
+      "control_net_bp": -45.27101529230566,
+      "paired_excess_bp": 40.55677267640495,
+      "profit_factor": 0.9526295710496614,
+      "net_fdr_q": 1.0,
+      "excess_fdr_q": 0.2950704929507049,
+      "joint_metric_bp": -4.714242615900694
+    },
+    {
+      "dimension": "intermediate_native_side_share",
+      "family_status": "diagnostic_amendment",
+      "selected_level": "50-99%",
+      "n": 306,
+      "net_bp": -5.338738199925627,
+      "control_net_bp": -2.463671200519007,
+      "paired_excess_bp": -2.875066999406779,
+      "profit_factor": 0.9472557210860472,
+      "net_fdr_q": 1.0,
+      "excess_fdr_q": 1.0,
+      "joint_metric_bp": -5.338738199925627
+    },
+    {
+      "dimension": "intermediate_ma_colour_share",
+      "family_status": "original_preregistered",
+      "selected_level": "50-99%",
+      "n": 239,
+      "net_bp": -8.14715062281245,
+      "control_net_bp": -11.139557919068526,
+      "paired_excess_bp": 2.992407296255989,
+      "profit_factor": 0.9205910233989522,
+      "net_fdr_q": 1.0,
+      "excess_fdr_q": 0.9999000099990001,
+      "joint_metric_bp": -8.14715062281245
+    },
+    {
+      "dimension": "wrong_rope_closes",
+      "family_status": "diagnostic_amendment",
+      "selected_level": "2+",
+      "n": 661,
+      "net_bp": -11.606063125131495,
+      "control_net_bp": -15.284410665775539,
+      "paired_excess_bp": 3.6783475406439523,
+      "profit_factor": 0.8754625050908608,
+      "net_fdr_q": 1.0,
+      "excess_fdr_q": 1.0,
+      "joint_metric_bp": -11.606063125131495
+    },
+    {
+      "dimension": "prior_rope_width",
+      "family_status": "original_preregistered",
+      "selected_level": "1.5-2.5ATR",
+      "n": 636,
+      "net_bp": -11.969038065501326,
+      "control_net_bp": -18.75212904207588,
+      "paired_excess_bp": 6.783090976574473,
+      "profit_factor": 0.879375538665166,
+      "net_fdr_q": 1.0,
+      "excess_fdr_q": 0.9999000099990001,
+      "joint_metric_bp": -11.969038065501326
+    },
+    {
+      "dimension": "utc_session",
+      "family_status": "original_preregistered",
+      "selected_level": "18-23",
+      "n": 617,
+      "net_bp": -16.074084823550642,
+      "control_net_bp": -19.20618911367255,
+      "paired_excess_bp": 3.132104290121841,
+      "profit_factor": 0.839004529608954,
+      "net_fdr_q": 1.0,
+      "excess_fdr_q": 0.9999000099990001,
+      "joint_metric_bp": -16.074084823550642
+    },
+    {
+      "dimension": "six_ma_rope_width",
+      "family_status": "original_preregistered",
+      "selected_level": "1-2ATR",
+      "n": 677,
+      "net_bp": -16.792356948290042,
+      "control_net_bp": -13.663039100726929,
+      "paired_excess_bp": -3.1293178475632013,
+      "profit_factor": 0.8352421389848662,
+      "net_fdr_q": 1.0,
+      "excess_fdr_q": 0.9999000099990001,
+      "joint_metric_bp": -16.792356948290042
+    },
+    {
+      "dimension": "k2_sma40_close_reclaim",
+      "family_status": "original_preregistered",
+      "selected_level": "0.25-0.50",
+      "n": 733,
+      "net_bp": -19.68796128201988,
+      "control_net_bp": -11.67254463456939,
+      "paired_excess_bp": -8.015416647450541,
+      "profit_factor": 0.7949849685847689,
+      "net_fdr_q": 1.0,
+      "excess_fdr_q": 0.9999000099990001,
+      "joint_metric_bp": -19.68796128201988
+    },
+    {
+      "dimension": "retrace_fraction",
+      "family_status": "diagnostic_amendment",
+      "selected_level": "1.5-3",
+      "n": 875,
+      "net_bp": -20.287698195818162,
+      "control_net_bp": -20.771283331260022,
+      "paired_excess_bp": 0.48358513544179843,
+      "profit_factor": 0.805920324320742,
+      "net_fdr_q": 1.0,
+      "excess_fdr_q": 1.0,
+      "joint_metric_bp": -20.287698195818162
+    },
+    {
+      "dimension": "direction",
+      "family_status": "original_preregistered",
+      "selected_level": "long",
+      "n": 1092,
+      "net_bp": -20.428840525895595,
+      "control_net_bp": -11.683591831732127,
+      "paired_excess_bp": -8.745248694163516,
+      "profit_factor": 0.8003775782111762,
+      "net_fdr_q": 1.0,
+      "excess_fdr_q": 0.9999000099990001,
+      "joint_metric_bp": -20.428840525895595
+    }
+  ],
+  "limitations": [
+    "The current 54-symbol cache is a survivor universe, not a point-in-time listing universe.",
+    "V3 reuses V2 events and controls; it audits features but does not independently reconstruct the market data.",
+    "The 2026-03-01..2026-05-03 window was already opened by V2 and is descriptive only for newly selected V3 bins.",
+    "Feature families are examined one at a time; interactions are intentionally not mined after the fresh window was seen.",
+    "No holdout row at or after 2026-05-04 was read."
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-09-03T18:43:54.748381+00:00",
+  "purpose": "qualitative owner-anchor specification replay only; not holdout evaluation",
+  "instrument": "BTC-USDT-SWAP",
+  "bar": "1H",
+  "endpoint": "https://www.okx.com/api/v5/market/history-candles",
+  "request_count": 14,
+  "requested_start": "2026-07-10T00:00:00+00:00",
+  "requested_end_exclusive": "2026-09-04T08:00:00+00:00",
+  "confirmed_rows": 1338,
+  "first_time": "2026-07-10T00:00:00+00:00",
+  "last_time": "2026-09-03T17:00:00+00:00",
+  "csv_path": "experiments/active/exp-two-key-candle-feature-atlas-v3/results/owner_anchor_okx_1h.csv.gz",
+  "csv_sha256": "c42b3675f42b7e1a38a9ea4039efaf0ba53d1b63b93e3d0f3e98ba4ad636c385",
+  "script_path": "scripts/replay_owner_two_key_candle_anchors.py",
+  "script_sha256": "6e70ab66696d4fefce79a5b7f6a40faff33f74ba72e673ef3248b365cbebc706",
+  "anchors": [
+    {
+      "name": "short",
+      "k1_time": "2026-09-01 08:00:00+00:00",
+      "k2_time": "2026-09-01 14:00:00+00:00",
+      "anchor_score": 81.53774243839398
+    },
+    {
+      "name": "long",
+      "k1_time": "2026-09-03 02:00:00+00:00",
+      "k2_time": "2026-09-03 05:00:00+00:00",
+      "anchor_score": 83.4443335039823
+    }
+  ]
+}

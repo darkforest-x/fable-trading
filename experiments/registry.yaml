@@ -3782,3 +3782,88 @@ experiments:
       Mutation passed 8/8. No training, tuning, threshold/weight change,
       promotion, deployment, ACTIVE/frozen/forward mutation, messaging or order
       action occurred.
+
+  - experiment_id: exp-two-key-candle-ma-retest-1h-preholdout-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "09b7b2da739a5fcf33ba020c4497f6c7d3278068"
+    status: rejected
+    question: >-
+      Can a causal two-key-candle launch-and-retest rule built around the
+      SMA/EMA 20/60/120 rope earn positive post-cost returns and beat exact
+      matched random entries outside BTC?
+    single_variable: >-
+      Greedy discovery changes one semantic threshold family at a time, freezes
+      the resulting six gates, and replays that unchanged rule on calendar 2025
+      and BTC transfer data.
+    result: >-
+      discovery_only_edge_failed_validation. Development non-BTC produced
+      +25.8bp net and +60.9bp matched-control excess (n=558, p=0.0002), but the
+      frozen 2025 replay produced -14.5bp net and -1.4bp excess (n=388,
+      p=0.535). BTC transfer remained -13.2bp net on only 25 events.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_two_key_candle_ma_retest_deep_dive_20260904.md
+    reuse_allowed: true
+    notes: >-
+      Reusable only as a negative baseline and as evidence that the six-MA rope
+      is not the visible owner-chart reference. It may not be presented as a
+      profitable strategy. Cost remained 0.2%; no bar at or after 2026-05-04
+      entered the quantitative event set.
+
+  - experiment_id: exp-two-key-candle-ma-retest-sma40-state-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "10e416c1d345db02ee252d8be11f50335367db96"
+    status: rejected
+    question: >-
+      Does replacing the incorrect rope reference with the visible SMA40(HL2),
+      then adding owner-anchor morphology, colour, oscillator and structure
+      fidelity, create a stable post-cost edge?
+    single_variable: >-
+      The reference is changed to SMA40(HL2); all owner-morphology and score
+      profiles are frozen before the March-April 2026 pre-holdout replay.
+    result: >-
+      visual_fidelity_did_not_rank_returns. The broad SMA40 core lost -17.8bp
+      historically and -20.6bp in fresh pre-holdout. Anchor score >=70 lost
+      -31.5bp historically and -54.4bp fresh; score >=80 had four fresh events,
+      all stopped. The strict owner morphology had 14 historical and two fresh
+      events and lost -154.2bp and -111.9bp respectively.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_two_key_candle_ma_retest_deep_dive_20260904.md
+    reuse_allowed: true
+    notes: >-
+      Reusable as the canonical causal candidate surface and a negative
+      profitability result, not as a production signal. The two September 2026
+      owner anchors are separate qualitative specification replays and were not
+      used to score this configuration on holdout outcomes.
+
+  - experiment_id: exp-two-key-candle-feature-atlas-v3
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f4571883567b3b85a428dbab9be1a107335bd8e8"
+    status: rejected
+    question: >-
+      Does any causal one-dimensional bin among candle geometry, exact gap,
+      path, colour, oscillator, structure, volume, rope or regime context retain
+      both absolute and matched-control edge after discovery-only selection?
+    single_variable: >-
+      Evaluate each of 55 families independently; select one bin using only
+      2023-2024, freeze it, and replay unchanged on 2025. The 42 original and 13
+      completeness-amendment families use separate inference groups.
+    result: >-
+      zero_of_55_dimensions_generalized. None passed the 2025 joint gate for
+      positive post-cost net return, positive matched-control excess, temporal
+      stability and multiplicity. Discovery score correlation with 2025 net was
+      Pearson +0.003 / Spearman -0.015; exact gaps 2-8 all had negative 2025
+      net, including the owner-anchor gaps 3 and 6.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_two_key_candle_ma_retest_deep_dive_20260904.md
+    reuse_allowed: true
+    notes: >-
+      Reusable as a feature dictionary, falsification atlas and morphology
+      specification. It does not authorize an interaction search, model fit,
+      holdout read, promotion or live execution. The 13 amended families are
+      diagnostic because 2025 had already been opened before they were listed.
