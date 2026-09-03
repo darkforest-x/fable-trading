@@ -3649,3 +3649,32 @@ experiments:
       selector, model validation, return evidence, or a trading signal. No
       labels, dataset membership, threshold, checkpoint, ACTIVE/frozen,
       forward, deployment or trading state changed.
+
+  - experiment_id: exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5beb6517d700e7a2d9ad286b2f0e3dac607eea31"
+    status: active
+    question: >-
+      Does the frozen Grade-A full40 native-1280 detector emit a causal LONG
+      candidate on FIL-USDT-SWAP 1h during the latest five complete days, near
+      the Owner's profitable descending-trendline-breakout trade?
+    single_variable: >-
+      Relative to the already-consumed 1h latest-endpoint probe #14, fix the
+      universe to FIL-USDT-SWAP and extend the endpoint range from one to 120
+      closed hourly bars. Checkpoint, renderer, W18/W19, confidence, NMS,
+      structural mapping, semantic gate and event spacing remain unchanged.
+    result: >-
+      Active, preregistered Owner-requested holdout probe; no market row has
+      been read under this configuration yet.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      The Owner explicitly authorized the current FILUSDT.P 1h five-day model
+      run. It will be checkpoint holdout use #17. The screenshot contains no
+      machine-readable entry timestamp, so exact trade identity cannot be
+      asserted from detection overlap alone. No training, tuning, promotion,
+      deployment, ACTIVE/frozen/forward mutation, messaging or order action is
+      authorized.
