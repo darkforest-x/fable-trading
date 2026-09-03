@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1",
+  "created_at": "2026-09-03T18:56:04+08:00",
+  "stage": "owner_authorized_completed_history_render_ablation",
+  "question": "With sample membership, candles, chart coordinates, labels and split frozen, does deriving the six plotted SMA/EMA 20/60/120 lines from HL2 instead of close improve the matched Grade-A detector after an otherwise identical training run?",
+  "owner_authorization": {
+    "conversation_date": "2026-09-03",
+    "verbatim": "你去试试看 用之前最好的模型对应的数据集改成你建议的 再跑一次训练",
+    "interpretation": "Re-render the dataset used by the current best Grade-A full40 native-1280 checkpoint with the recommended MA-source treatment and run one matched research training experiment.",
+    "p0_p1_training_gate_overridden_for_this_experiment": true,
+    "dataset_materialization_authorized": true,
+    "training_run_authorized": true,
+    "holdout_authorized": false,
+    "promotion_or_deployment_authorized": false,
+    "live_order_authorized": false
+  },
+  "single_variable": {
+    "name": "moving_average_price_source",
+    "baseline": "close",
+    "treatment": "hl2",
+    "formula": "(high + low) / 2",
+    "periods": [20, 60, 120],
+    "families": ["SMA", "EMA"],
+    "line_width_px": 1,
+    "canvas_transform": "baseline_close_transform",
+    "labels": "recomputed_same_core_contract",
+    "why_axis_is_frozen": "Changing auto-scale would move candle pixels and confound MA-source smoothing with a geometry treatment.",
+    "why_labels_follow_the_source": "A full audit found 515/8,000 positives where at least one HL2-derived core value leaves the old close-derived price box. The same core start/end and 4% full-wick-plus-six-MA rule are therefore recomputed on the frozen baseline axis; horizontal geometry and class stay fixed."
+  },
+  "baseline_dataset": {
+    "dataset_dir": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1",
+    "source_experiment": "exp-15m-ma-launch-owner-grade-a8000-neg24000-v1",
+    "manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "build_summary_sha256": "716881a3cdade504fdd00069431b7aba007f1c92c10636d1270d6eb9eb06dc2e",
+    "data_yaml_sha256": "4846b0e9fed8775efdcb375be3184b34fbc39c68de6effd2bc87cac3e849fb82",
+    "independent_qa_receipt": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/results/independent_qa_receipt.json",
+    "independent_qa_sha256": "364ac95c2ec71427f6062a04edac1d8e2be9d8c7f04e1752a41762171d901473",
+    "images": 32000,
+    "positive_images": 8000,
+    "negative_images": 24000,
+    "positive_events": 1043,
+    "negative_events": 3129,
+    "dimensions": [1280, 742]
+  },
+  "paired_render_contract": {
+    "sample_id_order_identical": true,
+    "event_ids_identical": true,
+    "source_paths_and_window_indices_identical": true,
+    "train_val_assignment_identical": true,
+    "OHLC_candle_pixels_identical_by_fixed_transform": true,
+    "MA_palette_and_order_identical": true,
+    "line_width_identical": true,
+    "positive_class_and_horizontal_geometry_identical": true,
+    "positive_vertical_geometry_recomputed_by_same_box_rule": true,
+    "negative_label_bytes_empty_and_identical": true,
+    "baseline_close_replay_required_for_every_image": true,
+    "HL2_core_must_remain_inside_original_box": true,
+    "unique_treatment_image_hash_required": true
+  },
+  "sources": {
+    "holdout_start_exclusive": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0,
+    "visible_window": "exact baseline manifest window_start_i..window_end_i",
+    "MA_warmup": "same pre-window source prefix as baseline; no within-window reseeding"
+  },
+  "null_control": {
+    "name": "close_source_exact_replay",
+    "method": "Before writing each HL2 image, re-render the same source window with close-derived MAs and require its encoded PNG SHA-256 to equal the baseline manifest SHA exactly.",
+    "required_matches": 32000,
+    "allowed_failures": 0
+  },
+  "outputs": {
+    "dataset_dir": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_hl2_v1",
+    "experiment_results": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1/results",
+    "report": "analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.md",
+    "html": "analysis/html/p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.html"
+  },
+  "safety": {
+    "holdout_read": false,
+    "training_started": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "order_state_change": false,
+    "remote_write": false
+  }
+}

@@ -105,11 +105,24 @@ def render_chart(
     width: int = IMG_WIDTH,
     height: int = IMG_HEIGHT,
     out_path: str | Path | None = None,
+    fixed_transform: ChartTransform | None = None,
 ) -> tuple[np.ndarray, ChartTransform]:
-    """Render one window of candles + 6 MAs. df rows must already contain MA columns."""
+    """Render one window of candles + 6 MAs.
+
+    ``df`` rows must already contain MA columns.  ``fixed_transform`` is only
+    for paired rendering ablations: it keeps every candle at the baseline
+    pixel coordinate while a line-only treatment changes the MA values.
+    """
     df = df.reset_index(drop=True)
     n = len(df)
-    tf = make_chart_transform(df, width=width, height=height)
+    if fixed_transform is None:
+        tf = make_chart_transform(df, width=width, height=height)
+    else:
+        tf = fixed_transform
+        if (tf.n_bars, tf.width, tf.height) != (n, width, height):
+            raise ValueError(
+                "fixed transform does not match the rendered bar count or canvas"
+            )
     candle_half_w = tf.candle_half_w
 
     img = np.full((height, width, 3), BG, dtype=np.uint8)
