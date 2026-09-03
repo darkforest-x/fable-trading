@@ -3652,8 +3652,8 @@ experiments:
 
   - experiment_id: exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "5beb6517d700e7a2d9ad286b2f0e3dac607eea31"
-    status: active
+    source_commit: "cc1ec45629fb47c33c3213384dd7f6bb99dcede5"
+    status: accepted
     question: >-
       Does the frozen Grade-A full40 native-1280 detector emit a causal LONG
       candidate on FIL-USDT-SWAP 1h during the latest five complete days, near
@@ -3664,17 +3664,35 @@ experiments:
       closed hourly bars. Checkpoint, renderer, W18/W19, confidence, NMS,
       structural mapping, semantic gate and event spacing remain unchanged.
     result: >-
-      Active, preregistered Owner-requested holdout probe; no market row has
-      been read under this configuration yet.
-    holdout_consumed: false
+      completed_single_symbol_research_probe_only. The 120 closed hourly
+      endpoints produced 240 W18/W19 inputs, 8 raw/structural/causal-semantic
+      dense_long boxes and one deduplicated LONG episode. The five-bar core
+      spans 2026-09-01 19:00..23:00 CST; the first detection endpoint is the
+      2026-09-02 02:00 CST bar and becomes causally available at 03:00 CST,
+      after the 01:00..02:00 main pump had already closed. This recognizes the
+      same rally as a delayed MA-density launch, not the hand-drawn descending
+      trendline breakout itself.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    canonical_report: analysis/p1_1h_filusdt_grade_a_recent5d_probe_20260903.md
+    artifacts:
+      - 1h-filusdt-grade-a-recent5d-probe-20260903-v1-prereg
+      - 1h-filusdt-grade-a-recent5d-probe-20260903-v1-summary
+      - 1h-filusdt-grade-a-recent5d-probe-20260903-v1-verification
+      - 1h-filusdt-grade-a-recent5d-probe-20260903-v1-global-chart
+      - 1h-filusdt-grade-a-recent5d-probe-20260903-v1-exact-input
+      - 1h-filusdt-grade-a-recent5d-probe-20260903-v1-gallery
+      - 1h-filusdt-grade-a-recent5d-probe-20260903-v1-report
+      - 1h-filusdt-grade-a-recent5d-probe-20260903-v1-html
     reuse_allowed: false
     notes: >-
-      The Owner explicitly authorized the current FILUSDT.P 1h five-day model
-      run. It will be checkpoint holdout use #17. The screenshot contains no
-      machine-readable entry timestamp, so exact trade identity cannot be
-      asserted from detection overlap alone. No training, tuning, promotion,
-      deployment, ACTIVE/frozen/forward mutation, messaging or order action is
-      authorized.
+      This is Grade-A full40 native-1280 checkpoint holdout use #17. The
+      screenshot contains no machine-readable entry timestamp, so exact trade
+      identity remains unresolved. Offline verification replayed 8 input
+      pixels and 16 actual/flipped semantic decisions with zero network reads;
+      CPU/MPS confidence delta was 2.18e-6. The accepted status means the
+      preregistered artifact chain completed, not validation of 1h OOD quality,
+      precision, return or trading eligibility. No training, tuning, promotion,
+      deployment, ACTIVE/frozen/forward mutation, messaging or order action
+      occurred.

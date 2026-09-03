@@ -11653,3 +11653,140 @@ artifacts:
     config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
     data_cutoff: "2026-05-03T20:30:00Z"
     notes: Verified all 64,000 image/label files, 32,000 unique images, split/event/class counts and zero holdout rows before remote staging.
+
+  # ---- FILUSDT.P 1h five-day frozen-model probe (2026-09-03/04) -------
+  - artifact_id: 1h-filusdt-grade-a-recent5d-probe-20260903-v1-prereg
+    artifact_type: config
+    role: frozen_owner_authorized_single_symbol_hourly_probe_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5beb6517d700e7a2d9ad286b2f0e3dac607eea31"
+    source_path: experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/preregistration.json
+    sha256: "7efedc084c8126605cc871911d0ba0acc59f4cb88d11fd980be1ba3650673b23"
+    size_bytes: 6993
+    storage_uri: "repo://experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/preregistration.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5beb6517d700e7a2d9ad286b2f0e3dac607eea31"
+    config_hash: "7efedc084c8126605cc871911d0ba0acc59f4cb88d11fd980be1ba3650673b23"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Freezes checkpoint holdout use #17 before the only market read; no parameter tuning, training or production mutation is authorized.
+
+  - artifact_id: 1h-filusdt-grade-a-recent5d-probe-20260903-v1-summary
+    artifact_type: manifest
+    role: frozen_source_detector_semantic_episode_and_causality_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cc1ec45629fb47c33c3213384dd7f6bb99dcede5"
+    source_path: experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/summary.json
+    sha256: "b1ec3c74817e884a130afcc15a7f9aca1701bf01a75f30d1298f824340bae39a"
+    size_bytes: 7614
+    storage_uri: "repo://experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "baa7884f4fae3bab91bb5aee47369836edb0eb05"
+    config_hash: "7efedc084c8126605cc871911d0ba0acc59f4cb88d11fd980be1ba3650673b23"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Records 240 inputs, eight LONG boxes and one delayed LONG episode; selected future return is descriptive only.
+
+  - artifact_id: 1h-filusdt-grade-a-recent5d-probe-20260903-v1-verification
+    artifact_type: manifest
+    role: offline_pixel_semantic_source_and_cpu_mps_replay_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cc1ec45629fb47c33c3213384dd7f6bb99dcede5"
+    source_path: experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/verification.json
+    sha256: "36e92e1c8082160f339bb14fbe4dbabdafbf48d7e838ffd95251c501a2c464d6"
+    size_bytes: 1030
+    storage_uri: "repo://experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/verification.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "85dab64df3a1f2786d74e489032b8d2f0ba9b6fa"
+    config_hash: "7efedc084c8126605cc871911d0ba0acc59f4cb88d11fd980be1ba3650673b23"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Zero-network replay passed all eight input pixels and actual/flipped semantic decisions; CPU/MPS confidence delta was 2.18e-6.
+
+  - artifact_id: 1h-filusdt-grade-a-recent5d-probe-20260903-v1-global-chart
+    artifact_type: report
+    role: owner_facing_global_price_context_with_causal_event_timing
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cc1ec45629fb47c33c3213384dd7f6bb99dcede5"
+    source_path: experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/review/FILUSDT_P_1h_recent5d_global.png
+    sha256: "1acc9aa03553535fb47aae0fc876a99281056871bcc72f7c0f2eb2b4f4e12169"
+    size_bytes: 149830
+    storage_uri: "repo://experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/review/FILUSDT_P_1h_recent5d_global.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "baa7884f4fae3bab91bb5aee47369836edb0eb05"
+    config_hash: "7efedc084c8126605cc871911d0ba0acc59f4cb88d11fd980be1ba3650673b23"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Ten-day review context separates first structural endpoint from full-pipeline causal availability; future candles are review-only.
+
+  - artifact_id: 1h-filusdt-grade-a-recent5d-probe-20260903-v1-exact-input
+    artifact_type: report
+    role: exact_first_detection_model_input_with_preserved_raw_yolo_box
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cc1ec45629fb47c33c3213384dd7f6bb99dcede5"
+    source_path: experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/model_inputs/01_structural_01_dense_long_box.png
+    sha256: "327c3c368347ce181b869cb45ddbf04a97bc2f9e775140da9c9be8c50e2432fb"
+    size_bytes: 30422
+    storage_uri: "repo://experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/model_inputs/01_structural_01_dense_long_box.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "baa7884f4fae3bab91bb5aee47369836edb0eb05"
+    config_hash: "7efedc084c8126605cc871911d0ba0acc59f4cb88d11fd980be1ba3650673b23"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: The raw normalized YOLO box is overlaid on the actual W19 input; no later review candle exists in the model image.
+
+  - artifact_id: 1h-filusdt-grade-a-recent5d-probe-20260903-v1-gallery
+    artifact_type: report
+    role: local_owner_review_entry_for_global_and_exact_model_input_images
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cc1ec45629fb47c33c3213384dd7f6bb99dcede5"
+    source_path: experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/review/gallery.html
+    sha256: "46615e409a6f66e48ee20fc90d00c041ad1fa84ef3ae298bb348eb386b12cf50"
+    size_bytes: 807
+    storage_uri: "repo://experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/review/gallery.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "baa7884f4fae3bab91bb5aee47369836edb0eb05"
+    config_hash: "7efedc084c8126605cc871911d0ba0acc59f4cb88d11fd980be1ba3650673b23"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Compact local gallery linking the global review context and exact first-detection input.
+
+  - artifact_id: 1h-filusdt-grade-a-recent5d-probe-20260903-v1-report
+    artifact_type: report
+    role: canonical_markdown_single_symbol_hourly_probe_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cc1ec45629fb47c33c3213384dd7f6bb99dcede5"
+    source_path: analysis/p1_1h_filusdt_grade_a_recent5d_probe_20260903.md
+    sha256: "0359d6a621b073928a3b2b21d978701541648b8e41460c3641f3264f31b050a3"
+    size_bytes: 9090
+    storage_uri: "repo://analysis/p1_1h_filusdt_grade_a_recent5d_probe_20260903.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "cc1ec45629fb47c33c3213384dd7f6bb99dcede5"
+    config_hash: "7efedc084c8126605cc871911d0ba0acc59f4cb88d11fd980be1ba3650673b23"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Chinese report separates rally overlap, trendline semantics, causal availability, OOD limits and the absent exact trade identity.
+
+  - artifact_id: 1h-filusdt-grade-a-recent5d-probe-20260903-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_single_symbol_hourly_probe
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cc1ec45629fb47c33c3213384dd7f6bb99dcede5"
+    source_path: analysis/html/p1_1h_filusdt_grade_a_recent5d_probe_20260903.html
+    sha256: "af8437ac6f09bb8904aced76b10c0df5c2fba9a994bb2bee0bbe3b00a2cdc82c"
+    size_bytes: 253610
+    storage_uri: "repo://analysis/html/p1_1h_filusdt_grade_a_recent5d_probe_20260903.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "cc1ec45629fb47c33c3213384dd7f6bb99dcede5"
+    config_hash: "7efedc084c8126605cc871911d0ba0acc59f4cb88d11fd980be1ba3650673b23"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Self-contained Owner delivery with embedded global and exact-input figures.

@@ -2,6 +2,25 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-04 — FILUSDT.P 1h 五日回放命中同一上涨，但信号偏晚）
+
+Owner 要求用现有模型回放 FILUSDT.P 1h 最近五天，检查手工盈利单能否被识别。本轮按冻结
+Grade-A full40 native-1280 checkpoint、W18/W19、`conf=0.25`、NMS `0.70`、core4/5、
+post2–9 与因果语义门运行：120 个完整小时端点、240 张输入，经 8 原框 → 8 结构框 →
+8 语义框，去重后是 **1 个 LONG episode**。
+
+模型核心在 **09-01 19:00～23:00 CST**；01:00～02:00 的主升小时已经上涨 `+6.69%`，
+首次检测标签才落在 02:00 bar，需等它收完，到 **09-02 03:00 CST** 才因果可用（收盘
+`0.7621`，置信度 `0.2966`）。因此它命中了截图里的同一段上涨，但识别的是局部均线密集启动，
+不是手画下降趋势线本身，也不能说在突破当刻提前入场。截图没有成交时间/价格，严格逐笔身份
+仍未解。全局图与报告：
+`analysis/html/p1_1h_filusdt_grade_a_recent5d_probe_20260903.html`。
+
+这是该 checkpoint 的 holdout 使用 **#17**。离线复验通过 8/8 输入像素、8/8 实际方向与
+8/8 反向语义重算，零网络读取；CPU/MPS 置信度差 `2.18e-6`。1h 仍是 15m checkpoint 的
+OOD completed-history 研究回放；没有训练、调参、promote、部署、改 ACTIVE/frozen/forward、
+发消息或下单，`training_eligible=false`、`production_eligible=false`。
+
 ## ⚡ 当前真相（2026-09-03 — 每日涨跌 Top5+Top5 已交付 5,083 张检测图）
 
 Owner 要至少找 5,000 个用于继续优化数据集。本轮按预注册从 2025-10 向前扫描完整月，在

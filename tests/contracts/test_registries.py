@@ -190,6 +190,7 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
         "exp-15m-ashare-grade-a-yolo-latest-20260902-v1",
         "exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1",
         "exp-crypto-grade-a-yolo-mtf-latest-20260903-v1",
+        "exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1",
         "exp-pine-eth-15m-v1",
         "exp-yoyo-trading-fixed-w10-classifier-holdout3d",
     }, (
