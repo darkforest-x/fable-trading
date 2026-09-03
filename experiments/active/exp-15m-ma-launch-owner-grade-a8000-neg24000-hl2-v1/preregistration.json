@@ -70,6 +70,24 @@
     "required_matches": 32000,
     "allowed_failures": 0
   },
+  "implementations": {
+    "renderer": {
+      "path": "yoyo/layers/l1_detection/render.py",
+      "sha256": "def5b7317c13e37fc43657243a7cc900bc3fafee71bdf2e405e0336a1a3c0eea"
+    },
+    "ma_calculation": {
+      "path": "yoyo/datasets/ma_rope_filter.py",
+      "sha256": "13881d859f80b8e3ed95df883afba16b467e68e43b4a99de354d0f3d26ec435d"
+    },
+    "box_and_png": {
+      "path": "yoyo/datasets/ma_launch_owner_recrop_review.py",
+      "sha256": "368a5fb24724f295b95f8667882f4bb854e2bd621045bc58b24abf9811a54a17"
+    },
+    "prefix_loader": {
+      "path": "yoyo/datasets/fifteen_minute_launch_candidates.py",
+      "sha256": "b31fe35bfeff8626889691bf404a87223fb18dedcf7b52841f1c618821de976e"
+    }
+  },
   "outputs": {
     "dataset_dir": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_hl2_v1",
     "experiment_results": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1/results",

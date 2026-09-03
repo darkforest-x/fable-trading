@@ -50,6 +50,15 @@ DEFAULT_PREREG = ROOT / "experiments" / "active" / EXPERIMENT_ID / "preregistrat
 DEFAULT_RESULTS = DEFAULT_PREREG.parent / "results"
 MODULE_PATH = Path(__file__).resolve()
 SCRIPT_PATH = ROOT / "scripts" / "build_15m_ma_launch_owner_grade_a_hl2.py"
+IMPLEMENTATION_PATHS = {
+    "renderer": ROOT / "yoyo" / "layers" / "l1_detection" / "render.py",
+    "ma_calculation": ROOT / "yoyo" / "datasets" / "ma_rope_filter.py",
+    "box_and_png": ROOT / "yoyo" / "datasets" / "ma_launch_owner_recrop_review.py",
+    "prefix_loader": ROOT
+    / "yoyo"
+    / "datasets"
+    / "fifteen_minute_launch_candidates.py",
+}
 EXACT_OVERLAY_RED = np.asarray(RED, dtype=np.uint8)
 
 
@@ -160,6 +169,11 @@ def load_preregistration(path: Path = DEFAULT_PREREG) -> dict[str, Any]:
             raise GradeAHL2Error(f"single-variable contract drift: {key}")
     if int(prereg["sources"]["holdout_ohlcv_rows_allowed"]) != 0:
         raise GradeAHL2Error("holdout allowance must remain zero")
+    implementations = prereg["implementations"]
+    for name, implementation_path in IMPLEMENTATION_PATHS.items():
+        expected_sha = str(implementations[name]["sha256"])
+        if sha256_file(implementation_path) != expected_sha:
+            raise GradeAHL2Error(f"implementation SHA drift: {name}")
     safety = prereg["safety"]
     for key in (
         "holdout_read",
@@ -498,7 +512,9 @@ def build(
     results_dir = results_dir.resolve()
     dataset_dir = dataset_dir.resolve()
     prereg = load_preregistration(prereg_path)
-    builder_commit = _verify_committed((MODULE_PATH, SCRIPT_PATH, prereg_path))
+    builder_commit = _verify_committed(
+        (MODULE_PATH, SCRIPT_PATH, prereg_path, *IMPLEMENTATION_PATHS.values())
+    )
     baseline_dataset = _repo_path(prereg["baseline_dataset"]["dataset_dir"])
     rows = _verify_baseline(prereg)
     if dataset_dir.exists():
@@ -543,9 +559,8 @@ def build(
         encoding="utf-8",
     )
     partial.unlink()
-    os.replace(building, dataset_dir)
     full_qa = _full_file_qa(
-        dataset_dir,
+        building,
         output_rows,
         baseline_dataset=baseline_dataset,
     )
@@ -570,12 +585,15 @@ def build(
         "experiment_id": EXPERIMENT_ID,
         "builder_commit": builder_commit,
         "builder_sha256": sha256_file(MODULE_PATH),
+        "implementation_sha256": {
+            name: sha256_file(path) for name, path in IMPLEMENTATION_PATHS.items()
+        },
         "preregistration_sha256": sha256_file(prereg_path),
         "dataset_path": _relative(dataset_dir),
         "baseline_dataset": _relative(baseline_dataset),
         "baseline_manifest_sha256": prereg["baseline_dataset"]["manifest_sha256"],
-        "manifest_sha256": sha256_file(dataset_dir / "manifest.jsonl"),
-        "data_yaml_sha256": sha256_file(dataset_dir / "data.yaml"),
+        "manifest_sha256": sha256_file(building / "manifest.jsonl"),
+        "data_yaml_sha256": sha256_file(building / "data.yaml"),
         "moving_average_price_source": "hl2",
         "moving_average_price_source_formula": "(high + low) / 2",
         "canvas_transform_source": "baseline_close_transform",
@@ -620,7 +638,8 @@ def build(
         "training_eligible": False,
         "production_eligible": False,
     }
-    write_json(dataset_dir / "build_summary.json", summary)
+    write_json(building / "build_summary.json", summary)
+    os.replace(building, dataset_dir)
     results_dir.mkdir(parents=True, exist_ok=True)
     write_json(results_dir / "dataset_build_receipt.json", summary)
     write_jsonl(results_dir / "source_read_audit.jsonl", source_audits)
