@@ -3741,3 +3741,31 @@ experiments:
       not model validation. No training, threshold/weight change, promotion,
       deployment, ACTIVE/frozen/forward mutation, messaging or order action
       occurred.
+
+  - experiment_id: exp-1h-filusdt-model-first-standing-gate-20260904-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending_preregistration_commit
+    status: active
+    question: >-
+      After each frozen YOLO proposal, does its current close stand beyond the
+      full six-MA bundle when the prior-bar first-cross condition is removed?
+    single_variable: >-
+      Reuse the same 240 inputs and complete 8-row raw-proposal ledger; remove
+      only the t-1 first-cross predicate. The code still runs after the model
+      and requires LONG above all six MAs or SHORT below all six MAs at t.
+    result: >-
+      Active preregistered Owner-directed single-variable diagnosis; frozen
+      holdout bytes have not yet been evaluated under the one-bar position
+      gate.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Owner explicitly said to remove “本根首次站上六线”. Running this
+      configuration is checkpoint holdout use #19 even though it reuses frozen
+      bytes with zero network reads and zero new inference. It cannot make the
+      pipeline earlier than the first raw YOLO proposal. No training, tuning,
+      threshold/weight change, promotion, deployment, ACTIVE/frozen/forward
+      mutation, messaging or order action is authorized.
