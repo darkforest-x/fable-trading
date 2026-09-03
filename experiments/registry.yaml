@@ -3744,8 +3744,8 @@ experiments:
 
   - experiment_id: exp-1h-filusdt-model-first-standing-gate-20260904-v2
     source_repo: darkforest-x/fable-trading
-    source_commit: pending_preregistration_commit
-    status: active
+    source_commit: "0d020afb1a96c8f5847571bf1b2f9a78be609c2e"
+    status: accepted
     question: >-
       After each frozen YOLO proposal, does its current close stand beyond the
       full six-MA bundle when the prior-bar first-cross condition is removed?
@@ -3754,18 +3754,31 @@ experiments:
       only the t-1 first-cross predicate. The code still runs after the model
       and requires LONG above all six MAs or SHORT below all six MAs at t.
     result: >-
-      Active preregistered Owner-directed single-variable diagnosis; frozen
-      holdout bytes have not yet been evaluated under the one-bar position
-      gate.
-    holdout_consumed: false
+      requested_gate_change_confirmed. All 8 exhaustive raw LONG proposals
+      passed the current-bar position gate and all 8 direction-flipped controls
+      failed. Overlapping cores deduplicated to one LONG event. The first full
+      pipeline pass remains the 2026-09-02 02:00 CST bar, available at 03:00
+      CST, exactly the same time as the first raw YOLO proposal.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    canonical_report: analysis/p1_1h_filusdt_model_first_standing_gate_20260904.md
+    artifacts:
+      - 1h-filusdt-model-first-standing-gate-20260904-v2-prereg
+      - 1h-filusdt-model-first-standing-gate-20260904-v2-summary
+      - 1h-filusdt-model-first-standing-gate-20260904-v2-decisions
+      - 1h-filusdt-model-first-standing-gate-20260904-v2-verification
+      - 1h-filusdt-model-first-standing-gate-20260904-v2-global-chart
+      - 1h-filusdt-model-first-standing-gate-20260904-v2-gallery
+      - 1h-filusdt-model-first-standing-gate-20260904-v2-report
+      - 1h-filusdt-model-first-standing-gate-20260904-v2-html
     reuse_allowed: false
     notes: >-
-      Owner explicitly said to remove “本根首次站上六线”. Running this
-      configuration is checkpoint holdout use #19 even though it reuses frozen
-      bytes with zero network reads and zero new inference. It cannot make the
-      pipeline earlier than the first raw YOLO proposal. No training, tuning,
-      threshold/weight change, promotion, deployment, ACTIVE/frozen/forward
-      mutation, messaging or order action is authorized.
+      Owner explicitly said to remove “本根首次站上六线”. This is checkpoint
+      holdout use #19 even though it reused frozen bytes with zero network reads
+      and zero new inference. Accepted means the requested gate behavior and
+      audit chain completed; it is not 1h OOD performance validation and it did
+      not make the pipeline earlier than the first raw YOLO proposal. Future
+      Mutation passed 8/8. No training, tuning, threshold/weight change,
+      promotion, deployment, ACTIVE/frozen/forward mutation, messaging or order
+      action occurred.

@@ -2,6 +2,24 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-04 — 已按 Owner 要求去掉前一根首次穿越条件）
+
+Owner 选中“本根首次站上六线”并要求去掉。本轮保留模型先、代码后的顺序，只把第二层改为
+一根 K 线当前站位门：LONG 在模型提案端点 `t` 收盘高于全部 SMA/EMA 20/60/120 即通过，
+SHORT 镜像；不读取 `t-1`，不再要求首次穿越。
+
+同一冻结账本从 v1 的 **8 raw 提案 → 0 通过**变为 v2 的 **8 raw 提案 → 8 通过**，方向
+翻转 0/8；重合核心去重后是 **1 个 LONG 事件**。Future Mutation 8/8、独立六线复算和
+图像验收全部 PASS。说明前一根限制确实造成了误拒，Owner 的删除要求已经生效。
+
+最早完整可用时间仍是 **2026-09-02 03:00 CST**：首个 YOLO proposal 与首个代码通过在
+同一根 02:00 开盘 K 线上。后级门现在不再额外延迟或误拒，但不能早于上游模型首次提案。
+完整报告：`analysis/html/p1_1h_filusdt_model_first_standing_gate_20260904.html`。
+
+本轮登记为 checkpoint holdout 使用 **#19**；没有联网、重新推理、训练、调参、promote、
+部署、改 ACTIVE/frozen/forward、发消息或下单。该 1h OOD 已知盈利单诊断不证明精度或收益，
+`training_eligible=false`、`production_eligible=false`。
+
 ## ⚡ 当前真相（2026-09-04 — 模型先、代码后已实测，瓶颈仍是 YOLO 晚到）
 
 Owner 纠正流水线顺序应为“模型先检测密集，再由代码检测站上线”，并要求实测。本轮复用
