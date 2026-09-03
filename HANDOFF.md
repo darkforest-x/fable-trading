@@ -2,6 +2,26 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-03 — 2025-10 每日涨跌 Top5+Top5 数据集候选已扫完）
+
+Owner 要继续优化数据集并用模型跑每日涨跌榜。由于未授权读取 holdout、训练或自动改标签，
+本轮冻结在 validation 与 holdout 之前的 2025-10 完整月：Binance USD-M 每个 UTC 日固定
+G1–G5 + L1–L5，31 天共 310 币种日、131 个唯一合约；当前 Grade-A full40 native-1280
+checkpoint 用 W18/W19 扫描 63,098 个窗口，得到 2,137 原框 → 1,903 结构框 → 387
+语义框 → 255 个 5-bar 去重事件。
+
+可用结论必须拆开：**38 个 manifest 外的新正候选、216 个 manifest 外的 hard-negative
+候选、1 个训练正输入重复事件**。所有候选仍需 Owner 逐图确认，254 个“新事件”不能冒充
+254 个新正例。独立 verifier 重建 818 份源归档 SHA、17,472 个完整 universe 币种日、
+1,903 个模型输入像素/语义/训练重合、255 个事件和 31 张逐日图，全部 PASS；网络、推理和
+holdout 读取均为 0。
+
+Owner 入口：`analysis/html/p1_15m_ma_launch_grade_a_daily_movers_202510_20260903.html`；
+可筛图库：`experiments/active/exp-15m-ma-launch-grade-a-daily-movers-202510-v1/results/gallery.html`。
+榜单由完成日收益事后定义，只可用于 P1 人工挖掘，不是验证、回测或实时选币。没有改 label、
+训练、调门、promote、部署、ACTIVE/frozen/forward、Telegram 或订单；生产仍
+`detector=none`，两项 eligibility 均为 false。
+
 ## ⚡ 当前真相（2026-09-03 — Crypto 15m / 1h / 4h / 日线最新扫描完成）
 
 Owner 要求用现有模型扫描最新四周期行情，并允许 4h / 日线回看最近 15 天。本轮冻结 OKX

@@ -3489,7 +3489,7 @@ experiments:
   - experiment_id: exp-15m-ma-launch-grade-a-daily-movers-202510-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "cf5e81d8f86af70db6714217d5f44c04ef2d610b"
-    status: active
+    status: accepted
     question: >-
       Across every complete UTC day in October 2025, which current Grade-A
       full40 native-1280 model proposals appear inside the five largest
@@ -3501,17 +3501,37 @@ experiments:
       conf=0.25, NMS=0.70, W18/W19, core4/5, confirmation2-9, causal semantic
       gate and five-bar deduplication remain frozen
     result: >-
-      pending committed-builder execution; no result has been observed yet
+      completed_research_review_queue_only. Across 31 complete UTC days, the
+      balanced Top5-gainer plus Top5-loser board yielded 310 scannable
+      symbol-days and 63,098 W18/W19 inputs. The frozen checkpoint produced
+      2,137 raw boxes, 1,903 structural boxes, 387 causal-semantic boxes and
+      255 deduplicated review events. Those events separate into 38 novel
+      positive candidates, 216 novel hard-negative candidates and one exact
+      training-positive input event. Independent offline replay passed 818
+      source archive hashes, all 17,472 eligible universe symbol-days, 1,903
+      input-pixel/semantic/training-overlap checks, 255 event/chart checks and
+      31 day-context pixels with zero network, inference or holdout reads.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_15m_ma_launch_grade_a_daily_movers_202510_20260903.md
     artifacts:
       - 15m-ma-launch-grade-a-daily-movers-202510-v1-prereg
+      - 15m-ma-launch-grade-a-daily-movers-202510-v1-source-manifest
+      - 15m-ma-launch-grade-a-daily-movers-202510-v1-summary
+      - 15m-ma-launch-grade-a-daily-movers-202510-v1-review-queue
+      - 15m-ma-launch-grade-a-daily-movers-202510-v1-gallery
+      - 15m-ma-launch-grade-a-daily-movers-202510-v1-verification
+      - 15m-ma-launch-grade-a-daily-movers-202510-v1-overview
+      - 15m-ma-launch-grade-a-daily-movers-202510-v1-review-pack
+      - 15m-ma-launch-grade-a-daily-movers-202510-v1-report
+      - 15m-ma-launch-grade-a-daily-movers-202510-v1-html
     reuse_allowed: false
     notes: >-
       Same-day completed return is explicitly post-hoc and may only define a
       human-review mining stratum. October 2025 ends before the current
       detector's December validation windows and the 2026-05-04 holdout. The
-      run cannot relabel, train, tune, promote, deploy, change ACTIVE/frozen or
-      forward state, send Telegram, or place orders.
+      accepted status means the preregistered artifact chain completed, not
+      that any candidate is Owner-confirmed Gold or that the detector was
+      validated. The run did not relabel, train, tune, promote, deploy, change
+      ACTIVE/frozen or forward state, send Telegram, or place orders.
