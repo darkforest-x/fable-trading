@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-1h-filusdt-model-first-standing-gate-20260904-v2",
+  "registered_at": "2026-09-04T00:45:00+08:00",
+  "question": "After a frozen YOLO proposal, does the current close stand beyond the full six-MA bundle when the prior-bar first-cross condition is removed?",
+  "single_variable": {
+    "changed": "Remove only the t-1 first-cross predicate from the v1 deterministic gate.",
+    "held_constant": [
+      "240 frozen W18/W19 model inputs",
+      "8 exhaustive raw and structural YOLO proposals",
+      "checkpoint and checkpoint SHA",
+      "confidence 0.25 and NMS IoU 0.70",
+      "proposal direction and endpoints",
+      "SMA/EMA 20/60/120 calculations",
+      "zero epsilon",
+      "overlapping-core event deduplication"
+    ]
+  },
+  "owner_authorization": {
+    "conversation_date": "2026-09-04",
+    "selected_text": "本根首次站上六线",
+    "verbatim": "去掉这个",
+    "interpreted_action": "Preserve model-first/code-second ordering and remove the requirement that the proposal bar be the first bar crossing the six-MA bundle. The downstream code checks only whether the proposal endpoint currently closes beyond the full bundle.",
+    "code_gate_change_authorized": true,
+    "holdout_reuse_authorized": true,
+    "holdout_consumption_number_for_checkpoint": 19,
+    "training_or_tuning_authorized": false,
+    "threshold_or_weight_change_authorized": false,
+    "production_or_promotion_authorized": false,
+    "orders_authorized": false
+  },
+  "source_experiment": {
+    "experiment_id": "exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1",
+    "checkpoint_holdout_use": 17,
+    "previous_gate_experiment_id": "exp-1h-filusdt-model-first-breakout-gate-20260904-v1",
+    "previous_gate_checkpoint_holdout_use": 18,
+    "venue": "OKX",
+    "instrument": "FIL-USDT-SWAP",
+    "timeframe": "1h",
+    "model_windows": 240,
+    "raw_model_proposals": 8,
+    "checkpoint_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "window_lengths": [18, 19],
+    "known_profitable_case": true,
+    "validation_status": "latency_diagnostic_only_not_model_validation"
+  },
+  "frozen_inputs": {
+    "source_summary": {
+      "path": "experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/summary.json",
+      "sha256": "b1ec3c74817e884a130afcc15a7f9aca1701bf01a75f30d1298f824340bae39a"
+    },
+    "source_candidates": {
+      "path": "experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/structural_candidates.csv",
+      "sha256": "a834d0ce97080b65bb661a264ecc7eae8005beb6b04e5e56947686cc7e0e5020"
+    },
+    "source_candles": {
+      "path": "experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/candles/FIL_USDT_SWAP.csv",
+      "sha256": "7db5c6579b4fb1370ac9dbb86ecd5d752383afcf6820ea09a145b7e10793f100"
+    },
+    "v1_summary": {
+      "path": "experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/summary.json",
+      "sha256": "fe3a7ad9a3493471f8713fdc52db886627793c14a25da3a94306be6e5f5bc11e"
+    }
+  },
+  "implementation": {
+    "runner": {
+      "path": "scripts/diagnose_1h_filusdt_model_first_standing.py",
+      "sha256": "c34a812826ae71b5d2fbf9b82b34eb739972e7a399bde3745afd2dd232e95987"
+    },
+    "verifier": {
+      "path": "scripts/verify_1h_filusdt_model_first_standing.py",
+      "sha256": "6762c32d12bf268dff193bfa5ce819ebfda6a7354840bb41915497a24079f867"
+    },
+    "gate": {
+      "path": "yoyo/layers/l1_detection/model_first_standing.py",
+      "sha256": "2268b264d79e9523be11ddcd5a1a3d48ac9ecad52b66867603fd895c20e32cc3"
+    },
+    "ma_source": {
+      "path": "yoyo/layers/l1_detection/data.py",
+      "sha256": "bce9af28b00d1deb8346cafb19654e18d4987d42b3849b420a9739b5e9aeb265"
+    },
+    "test": {
+      "path": "tests/test_model_first_standing.py",
+      "sha256": "5c5d6de2abcea4bf77f6934b14a9b7ebf11798baa7be1eacf2a6ed2daa1b8b93"
+    }
+  },
+  "position_gate": {
+    "pipeline_order": "model_proposal_then_deterministic_bundle_position_gate",
+    "long_current": "close[t] > max(sma20,sma60,sma120,ema20,ema60,ema120)[t]",
+    "short_current": "close[t] < min(sma20,sma60,sma120,ema20,ema60,ema120)[t]",
+    "prior_bar_condition": null,
+    "first_cross_required": false,
+    "epsilon": 0.0,
+    "lookback_rows": 1
+  },
+  "causality_checks": {
+    "model_proposal_must_exist_before_code_gate": true,
+    "future_mutation_required_for_every_proposal": true,
+    "future_review_bars_physically_separate_from_model_inputs": true,
+    "direction_flip_null_control": true
+  },
+  "reporting_contract": {
+    "report_all_raw_proposals": true,
+    "report_proposal_row_passes_and_deduplicated_events_separately": true,
+    "compare_with_v1": true,
+    "known_winner_is_not_performance_validation": true,
+    "report_earliest_causal_availability_even_if_gate_passes": true
+  },
+  "safety": {
+    "network_read": false,
+    "model_inference": false,
+    "new_training": false,
+    "threshold_or_weight_change": false,
+    "label_or_dataset_mutation": false,
+    "active_or_frozen_change": false,
+    "promotion": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "telegram_send": false,
+    "order_action": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
