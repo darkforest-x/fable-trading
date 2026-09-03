@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-1h-filusdt-model-first-breakout-gate-20260904-v1",
+  "created_at": "2026-09-04T00:35:00+08:00",
+  "stage": "P1_owner_requested_known_case_architecture_diagnostic",
+  "question": "When the frozen YOLO proposal is evaluated first and deterministic code is applied second, does any FILUSDT.P 1h model proposal occur on the first close above the six-MA bundle?",
+  "owner_authorization": {
+    "conversation_date": "2026-09-04",
+    "verbatim": "试试看 但是我认为 应该是模型先检测 再代码检测",
+    "interpreted_action": "Reuse the already-frozen FILUSDT.P 1h holdout artifacts from checkpoint use #17, preserve the YOLO proposals exactly, and apply a preregistered first-close-beyond-six-MA code gate only after each proposal. No network read, new inference, training, tuning, promotion, deployment, messaging, or order action is authorized.",
+    "holdout_reuse_authorized": true,
+    "holdout_consumption_number_for_checkpoint": 18,
+    "training_or_tuning_authorized": false,
+    "threshold_or_weight_change_authorized": false,
+    "production_or_promotion_authorized": false,
+    "orders_authorized": false
+  },
+  "source_experiment": {
+    "experiment_id": "exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1",
+    "checkpoint_holdout_use": 17,
+    "venue": "OKX",
+    "instrument": "FIL-USDT-SWAP",
+    "timeframe": "1h",
+    "model_windows": 240,
+    "checkpoint_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "window_lengths": [18, 19],
+    "known_profitable_case": true,
+    "validation_status": "latency_diagnostic_only_not_model_validation"
+  },
+  "frozen_inputs": {
+    "source_summary": {
+      "path": "experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/summary.json",
+      "sha256": "b1ec3c74817e884a130afcc15a7f9aca1701bf01a75f30d1298f824340bae39a"
+    },
+    "source_candidates": {
+      "path": "experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/structural_candidates.csv",
+      "sha256": "a834d0ce97080b65bb661a264ecc7eae8005beb6b04e5e56947686cc7e0e5020"
+    },
+    "source_candles": {
+      "path": "experiments/active/exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1/results/candles/FIL_USDT_SWAP.csv",
+      "sha256": "7db5c6579b4fb1370ac9dbb86ecd5d752383afcf6820ea09a145b7e10793f100"
+    }
+  },
+  "source_exhaustiveness_requirement": "The source summary must prove raw_boxes == accepted_structural_boxes == candidate CSV rows, so no raw model proposal is hidden by the old structural gate.",
+  "breakout_gate": {
+    "pipeline_order": "model_proposal_then_deterministic_breakout_gate",
+    "long_current": "close[t] > max(sma20,sma60,sma120,ema20,ema60,ema120)[t]",
+    "long_previous": "close[t-1] <= max(sma20,sma60,sma120,ema20,ema60,ema120)[t-1]",
+    "short_current": "close[t] < min(sma20,sma60,sma120,ema20,ema60,ema120)[t]",
+    "short_previous": "close[t-1] >= min(sma20,sma60,sma120,ema20,ema60,ema120)[t-1]",
+    "epsilon": 0.0,
+    "lookback_rows": 2
+  },
+  "single_variable": "Keep the prior run's model pixels, raw boxes, classes, confidence threshold, NMS and endpoints fixed; replace only the completed-history semantic gate with a deterministic first-close-beyond-the-full-six-MA-bundle gate applied after each model proposal.",
+  "null_controls": {
+    "direction_flip": "At every unchanged model proposal, mirror LONG to SHORT or SHORT to LONG while retaining time, OHLC, MAs, box and confidence.",
+    "future_mutation": "After each proposal endpoint, multiply all later OHLCV rows by deterministic large factors, recompute MAs, and require the gate decision at the endpoint to remain byte-equivalent within 1e-12.",
+    "code_only_reference": "For diagnosis, list first-close-above-bundle bars between the detected core start and first model endpoint. These references are explicitly pipeline_eligible=false because no model proposal existed there."
+  },
+  "decision_contract": {
+    "success": "At least one unchanged YOLO proposal passes the deterministic breakout gate at its own endpoint.",
+    "late_model": "A code-only first-close reference occurs before the first YOLO proposal and no proposal passes; this diagnoses model-stage latency rather than code-stage latency.",
+    "no_backdating": true,
+    "no_post_result_retuning": true
+  },
+  "implementation": {
+    "runner": {
+      "path": "scripts/diagnose_1h_filusdt_model_first_breakout.py",
+      "sha256": "d1b9a96894a3695d2b1c59af85352c49b0979cc237674b89f9bc99a757b56e79"
+    },
+    "gate": {
+      "path": "yoyo/layers/l1_detection/model_first_breakout.py",
+      "sha256": "7393d355fed471cdf66ebf19762c34982c28acd3db4bfba504b2c1302a7a101c"
+    },
+    "ma_source": {
+      "path": "yoyo/layers/l1_detection/data.py",
+      "sha256": "bce9af28b00d1deb8346cafb19654e18d4987d42b3849b420a9739b5e9aeb265"
+    }
+  },
+  "outputs": {
+    "directory": "experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results",
+    "summary": "experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/summary.json",
+    "decisions": "experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/model_first_decisions.csv",
+    "code_only_references": "experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/code_only_references.csv",
+    "global_chart": "experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/review/FILUSDT_P_1h_model_first_breakout_global.png",
+    "gallery": "experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/review/gallery.html",
+    "report": "analysis/p1_1h_filusdt_model_first_breakout_gate_20260904.md",
+    "html": "analysis/html/p1_1h_filusdt_model_first_breakout_gate_20260904.html"
+  },
+  "safety": {
+    "network_read": false,
+    "model_inference": false,
+    "new_training": false,
+    "threshold_or_weight_change": false,
+    "label_or_dataset_mutation": false,
+    "active_or_frozen_change": false,
+    "promotion": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "telegram_send": false,
+    "order_action": false,
+    "training_eligible": false,
+    "production_eligible": false
+  }
+}
