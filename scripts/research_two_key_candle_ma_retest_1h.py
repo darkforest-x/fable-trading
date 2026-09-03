@@ -311,6 +311,7 @@ def direction_columns(frame: pd.DataFrame, direction: int) -> pd.DataFrame:
     out["k1_sma40_cross_depth_atr"] = out[
         ["k1_sma40_entry_depth_atr", "k1_sma40_exit_depth_atr"]
     ].min(axis=1)
+    out["k1_sma40_crossed"] = out["k1_sma40_cross_depth_atr"].ge(0.0)
     out["k1_body_ratio"] = frame["body_ratio"]
     out["k1_range_atr"] = frame["range_atr"]
     out["k1_volume_ratio"] = frame["volume_ratio_20"]
@@ -339,6 +340,12 @@ def direction_columns(frame: pd.DataFrame, direction: int) -> pd.DataFrame:
     out["green_volume_share_20"] = frame["green_volume_share_20"]
     out["ma_shift_osc"] = frame["ma_shift_osc"] * direction
     out["ma_shift_osc_delta"] = frame["ma_shift_osc_delta"] * direction
+    if direction > 0:
+        out["k2_sma40_touch_depth_atr"] = (frame["sma40_hl2"] - low) / atr
+        out["k2_sma40_close_side_atr"] = (close - frame["sma40_hl2"]) / atr
+    else:
+        out["k2_sma40_touch_depth_atr"] = (high - frame["sma40_hl2"]) / atr
+        out["k2_sma40_close_side_atr"] = (frame["sma40_hl2"] - close) / atr
     return out
 
 
@@ -346,20 +353,45 @@ def broad_masks(side: pd.DataFrame, frame: pd.DataFrame, config: dict[str, Any])
     broad = config["broad_candidate"]
     direction = int(side.attrs["direction"])
     directional_body = (frame["close"] - frame["open"]) * direction > 0.0
+    reference = str(config.get("primary_ma_reference", "six_ma_rope"))
+    if reference == "sma40_hl2":
+        k1_coverage = side["k1_sma40_cross_depth_atr"].ge(
+            float(broad["k1_min_entry_depth_atr"])
+        )
+        k1_entry_depth = side["k1_sma40_entry_depth_atr"]
+        k1_exit_depth = side["k1_sma40_exit_depth_atr"]
+        k2_touch_depth = side["k2_sma40_touch_depth_atr"]
+        k2_close_side = side["k2_sma40_close_side_atr"]
+    elif reference == "six_ma_rope":
+        k1_coverage = side["k1_rope_coverage"].ge(float(broad["k1_min_rope_coverage"]))
+        k1_entry_depth = side["k1_entry_depth_atr"]
+        k1_exit_depth = side["k1_exit_depth_atr"]
+        k2_touch_depth = side["k2_touch_depth_atr"]
+        k2_close_side = side["k2_close_side_atr"]
+    else:
+        raise ValueError(f"unsupported primary_ma_reference: {reference}")
     k1 = (
         directional_body
         & side["k1_body_ratio"].ge(float(broad["k1_min_body_ratio"]))
         & side["k1_range_atr"].ge(float(broad["k1_min_range_atr"]))
-        & side["k1_rope_coverage"].ge(float(broad["k1_min_rope_coverage"]))
-        & side["k1_entry_depth_atr"].ge(float(broad["k1_min_entry_depth_atr"]))
-        & side["k1_exit_depth_atr"].ge(float(broad["k1_min_exit_depth_atr"]))
+        & k1_coverage
+        & k1_entry_depth.ge(float(broad["k1_min_entry_depth_atr"]))
+        & k1_exit_depth.ge(float(broad["k1_min_exit_depth_atr"]))
     )
+    if "k1_min_close_location" in broad:
+        k1 &= side["k1_close_location"].ge(float(broad["k1_min_close_location"]))
     k2 = (
         side["k2_wick_share"].ge(float(broad["k2_min_rejection_wick_share"]))
-        & side["k2_touch_depth_atr"].ge(-float(broad["k2_max_touch_miss_atr"]))
-        & side["k2_touch_depth_atr"].le(float(broad["k2_max_touch_depth_atr"]))
-        & side["k2_close_side_atr"].ge(float(broad["k2_min_close_side_atr"]))
+        & k2_touch_depth.ge(-float(broad["k2_max_touch_miss_atr"]))
+        & k2_touch_depth.le(float(broad["k2_max_touch_depth_atr"]))
+        & k2_close_side.ge(float(broad["k2_min_close_side_atr"]))
     )
+    if "k2_max_body_ratio" in broad:
+        k2 &= side["k2_body_ratio"].le(float(broad["k2_max_body_ratio"]))
+    if "k2_min_rejection_close_location" in broad:
+        k2 &= side["k2_rejection_close_location"].ge(
+            float(broad["k2_min_rejection_close_location"])
+        )
     return k1.fillna(False), k2.fillna(False)
 
 
@@ -453,13 +485,16 @@ def path_features(frame: pd.DataFrame, k1_i: int, k2_i: int, direction: int) -> 
         wrong_closes = 0
         side_colour_share = 1.0
         native_side_share = 1.0
+        wrong_sma40_closes = 0
     else:
         if direction > 0:
             extreme_before = max(k1_close, float(middle["high"].max()))
             wrong_closes = int(middle["close"].lt(middle["rope_mid"]).sum())
+            wrong_sma40_closes = int(middle["close"].lt(middle["sma40_hl2"]).sum())
         else:
             extreme_before = min(k1_close, float(middle["low"].min()))
             wrong_closes = int(middle["close"].gt(middle["rope_mid"]).sum())
+            wrong_sma40_closes = int(middle["close"].gt(middle["sma40_hl2"]).sum())
         favourable_extension = direction * (extreme_before - k1_close) / atr
         side_colour_share = float(middle["ma_shift_candle_side"].eq(direction).mean())
         native_side_share = float(middle["native_candle_side"].eq(direction).mean())
@@ -480,6 +515,7 @@ def path_features(frame: pd.DataFrame, k1_i: int, k2_i: int, direction: int) -> 
         "pre_retest_extension_atr": favourable_extension,
         "retrace_fraction": retrace_fraction,
         "wrong_side_close_count": wrong_closes,
+        "wrong_sma40_close_count": wrong_sma40_closes,
         "intermediate_ma_colour_share": side_colour_share,
         "intermediate_native_side_share": native_side_share,
         "k1_k2_body_overlap_share": overlap / body_union if body_union > 0.0 else 0.0,

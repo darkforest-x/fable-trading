@@ -1,0 +1,118 @@
+{
+  "experiment_id": "exp-two-key-candle-ma-retest-sma40-state-v2",
+  "status": "preregistered_before_sealed_window",
+  "purpose": "Replace the incorrect six-rope primary reference with the visible SMA40(HL2) and test an owner-anchor colour/momentum state machine on a fresh pre-holdout window.",
+  "primary_ma_reference": "sma40_hl2",
+  "data_glob": "data/kline_deep/okx_*_USDT_SWAP_15m_*.csv",
+  "source_bar_minutes": 15,
+  "analysis_bar_minutes": 60,
+  "historical_start": "2023-01-01T00:00:00Z",
+  "historical_end_exclusive": "2026-03-01T00:00:00Z",
+  "fresh_warmup_start": "2026-01-01T00:00:00Z",
+  "fresh_test_start": "2026-03-01T00:00:00Z",
+  "fresh_primary_excluded_symbols": ["ETH"],
+  "precommit_preflight": {
+    "symbol": "ETH",
+    "scope": "candidate and profile counts only; no fresh-period return summary inspected",
+    "treatment": "exclude ETH from the sealed-window primary evaluation"
+  },
+  "safe_end_exclusive": "2026-05-04T00:00:00Z",
+  "holdout_start": "2026-05-04T00:00:00Z",
+  "fresh_source": "same local 15m cache, sealed by time until profile commit",
+  "round_trip_cost": 0.002,
+  "entry": "open[k2+1]",
+  "initial_stop": "K2 low for long; K2 high for short; no buffer",
+  "primary_horizon_bars": 24,
+  "sensitivity_horizon_bars": [12, 48],
+  "same_bar_collision": "stop first",
+  "max_k1_k2_gap_bars": 12,
+  "event_cooldown_bars": 6,
+  "broad_candidate": {
+    "k1_min_body_ratio": 0.5,
+    "k1_min_range_atr": 1.0,
+    "k1_min_rope_coverage": 0.0,
+    "k1_min_entry_depth_atr": -0.05,
+    "k1_min_exit_depth_atr": -0.05,
+    "k1_min_close_location": 0.75,
+    "k2_min_rejection_wick_share": 0.45,
+    "k2_max_body_ratio": 0.5,
+    "k2_min_rejection_close_location": 0.65,
+    "k2_max_touch_miss_atr": 0.05,
+    "k2_max_touch_depth_atr": 1.5,
+    "k2_min_close_side_atr": 0.0,
+    "min_stop_distance_atr": 0.15,
+    "max_stop_distance_atr": 2.5
+  },
+  "primary_profile": "sma40_anchor_score_70",
+  "profiles": {
+    "single_sma40_core_2_8": [
+      {"column": "gap_bars", "op": "between", "low": 2, "high": 8},
+      {"column": "k1_sma40_cross_depth_atr", "op": "ge", "value": -0.05},
+      {"column": "k1_body_ratio", "op": "ge", "value": 0.5},
+      {"column": "k1_range_atr", "op": "ge", "value": 1.0},
+      {"column": "k1_close_location", "op": "ge", "value": 0.75},
+      {"column": "k2_wick_share", "op": "ge", "value": 0.45},
+      {"column": "k2_body_ratio", "op": "le", "value": 0.5},
+      {"column": "k2_rejection_close_location", "op": "ge", "value": 0.65},
+      {"column": "k2_sma40_touch_depth_atr", "op": "between", "low": -0.05, "high": 1.5},
+      {"column": "k2_sma40_close_side_atr", "op": "ge", "value": 0.0},
+      {"column": "stop_distance_atr_24", "op": "between", "low": 0.15, "high": 2.5}
+    ],
+    "owner_anchor_morphology_3_6": [
+      {"column": "gap_bars", "op": "between", "low": 3, "high": 6},
+      {"column": "k1_sma40_cross_depth_atr", "op": "ge", "value": -0.05},
+      {"column": "k1_body_ratio", "op": "ge", "value": 0.65},
+      {"column": "k1_range_atr", "op": "ge", "value": 1.25},
+      {"column": "k1_close_location", "op": "ge", "value": 0.85},
+      {"column": "k1_volume_ratio", "op": "ge", "value": 1.25},
+      {"column": "k1_ma_colour_aligned", "op": "true"},
+      {"column": "k2_wick_share", "op": "ge", "value": 0.6},
+      {"column": "k2_body_ratio", "op": "le", "value": 0.35},
+      {"column": "k2_rejection_close_location", "op": "ge", "value": 0.65},
+      {"column": "k2_sma40_touch_depth_atr", "op": "between", "low": 0.1, "high": 1.0},
+      {"column": "k2_sma40_close_side_atr", "op": "ge", "value": 0.25},
+      {"column": "stop_distance_atr_24", "op": "between", "low": 0.25, "high": 2.0},
+      {"column": "close_distance_atr", "op": "abs_le", "value": 0.75},
+      {"column": "pre_retest_extension_atr", "op": "le", "value": 1.0},
+      {"column": "wrong_sma40_close_count", "op": "eq", "value": 0},
+      {"column": "intermediate_ma_colour_share", "op": "ge", "value": 1.0},
+      {"column": "k2_to_k1_volume_ratio", "op": "between", "low": 0.5, "high": 1.5},
+      {"column": "k2_ma_colour_aligned", "op": "true"}
+    ],
+    "owner_anchor_state_3_6": [
+      {"column": "profile_ref", "op": "include", "value": "owner_anchor_morphology_3_6"},
+      {"column": "k1_osc_accel_aligned", "op": "true"},
+      {"column": "k2_osc_sign_aligned", "op": "true"},
+      {"column": "k2_osc_accel_aligned", "op": "false"},
+      {"column": "k2_structure_aligned", "op": "true"}
+    ],
+    "owner_anchor_state_2_8": [
+      {"column": "profile_ref", "op": "include", "value": "owner_anchor_state_3_6"},
+      {"column": "gap_bars", "op": "between_override", "low": 2, "high": 8}
+    ],
+    "sma40_anchor_score_70": [
+      {"column": "profile_ref", "op": "include", "value": "single_sma40_core_2_8"},
+      {"column": "anchor_score", "op": "ge", "value": 70.0}
+    ],
+    "sma40_anchor_score_80": [
+      {"column": "profile_ref", "op": "include", "value": "single_sma40_core_2_8"},
+      {"column": "anchor_score", "op": "ge", "value": 80.0}
+    ],
+    "sma40_anchor_score_90": [
+      {"column": "profile_ref", "op": "include", "value": "single_sma40_core_2_8"},
+      {"column": "anchor_score", "op": "ge", "value": 90.0}
+    ]
+  },
+  "matched_control": {
+    "n_per_event": 3,
+    "strata": ["symbol", "month", "UTC six-hour block", "within-symbol-month ATR quintile"],
+    "copied": ["side", "horizon", "stop distance in ATR", "round-trip cost"],
+    "exclude_broad_signal_bars": true,
+    "seed": "two-key-candle-sma40-state-v2"
+  },
+  "eligibility": {
+    "training_eligible": false,
+    "production_eligible": false,
+    "holdout_consumed": false
+  }
+}
