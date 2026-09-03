@@ -341,7 +341,7 @@ def run(out: Path, prereg_path: Path) -> dict[str, Any]:
         **dict(totals),
         "global_novel_events": novel,
         "prior_month_boundary_novel_events": prior_novel,
-        "delivered_chart_sha_and_dimension_checks": chart_checks,
+        "delivered_chart_sha_and_pixel_replay_checks": chart_checks,
         "model_inference_calls": 0,
         "network_market_reads": 0,
         "holdout_ohlcv_rows_read": 0,
