@@ -3696,3 +3696,32 @@ experiments:
       precision, return or trading eligibility. No training, tuning, promotion,
       deployment, ACTIVE/frozen/forward mutation, messaging or order action
       occurred.
+
+  - experiment_id: exp-1h-filusdt-model-first-breakout-gate-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "52cf5d6f41a6616d3415673a835c45eabe3e7366"
+    status: active
+    question: >-
+      When the frozen YOLO proposal is evaluated first and deterministic code
+      is applied second, does any FILUSDT.P 1h model proposal occur on the
+      first close above the full six-MA bundle?
+    single_variable: >-
+      Reuse the prior run's 240 model inputs and exhaustive raw-box ledger
+      unchanged; replace only the completed-history semantic gate with the
+      preregistered two-bar first-close-beyond-six-MA code gate, applied after
+      each model proposal.
+    result: >-
+      Active, preregistered Owner-requested architecture diagnostic. Frozen
+      holdout artifacts have not yet been evaluated under this code gate.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      The Owner explicitly requested model-first then code-second ordering.
+      This will be checkpoint holdout use #18 even though it reuses frozen
+      bytes with zero network reads and zero new inference. It is a
+      latency-only diagnosis on a known profitable case, not validation or
+      tuning. No training, threshold/weight change, promotion, deployment,
+      ACTIVE/frozen/forward mutation, messaging or order action is authorized.
