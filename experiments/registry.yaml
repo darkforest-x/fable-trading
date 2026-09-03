@@ -3431,3 +3431,32 @@ experiments:
       is neither probability nor return evidence. No training, threshold or
       weight change, promotion, deployment, ACTIVE/frozen/forward mutation,
       Telegram send or order action occurred.
+
+  - experiment_id: exp-crypto-grade-a-yolo-mtf-latest-20260903-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "051414d695a5f3d9bdb35164e6b9b19a75d6405f"
+    status: active
+    question: >-
+      On the latest fully closed OKX crypto USDT-swap market, which frozen
+      Grade-A full40 native-1280 proposals survive the unchanged causal
+      semantic gate at 15m, 1h, 4h and UTC-daily resolution, when 15m/1h use
+      only the latest endpoint and 4h/1d cover the latest 15 days?
+    single_variable: >-
+      n/a -- Owner explicitly requested a bundled four-timeframe research
+      snapshot. Each timeframe is a separately numbered holdout use; within
+      each one the checkpoint, universe, renderer, W18/W19, conf=0.25,
+      NMS=0.70, core4/5, confirmation2-9, semantic gate, event spacing and
+      review-queue ranking were frozen before any market read.
+    result: preregistered_not_started_no_market_data_read
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Reserved holdout uses are #13 for 15m, #14 for 1h, #15 for 4h and #16
+      for 1d for this checkpoint. The prior Owner verdict that the earlier 4h
+      candidates were all semantically poor remains binding; higher-timeframe
+      outputs are OOD research candidates, not allowed trades. No training,
+      threshold or weight change, promotion, deployment, ACTIVE/frozen/forward
+      mutation, Telegram send or order action is authorized.

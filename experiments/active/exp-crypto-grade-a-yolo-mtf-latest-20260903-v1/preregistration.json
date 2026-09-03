@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-crypto-grade-a-yolo-mtf-latest-20260903-v1",
+  "created_at": "2026-09-03T11:30:00+08:00",
+  "stage": "P1_completed_history_multitimeframe_research_scan",
+  "source_commit": "051414d695a5f3d9bdb35164e6b9b19a75d6405f",
+  "question": "On a newly frozen all-eligible OKX crypto USDT-swap snapshot, which unchanged Grade-A YOLO proposals survive the unchanged causal semantic gate on the latest 15m and 1h endpoints and on the latest 15 days of 4h and UTC-daily endpoints, and how should they be ordered for human chart review without treating cross-timeframe confidence as a calibrated probability?",
+  "owner_authorization": {
+    "conversation_date": "2026-09-03",
+    "verbatim": [
+      "用模型跑一下最新的行情 1h 4h 日线 15min 这几个周期的  4h 日线级别的允许信号已经出来15天以内  然后针对结果做排序给我看图"
+    ],
+    "interpreted_action": "Authorize one fresh, read-only OKX crypto completed-history inference configuration for each explicitly named timeframe. Scan only the latest closed endpoint for 15m and 1h; allow 4h and UTC-daily event onsets from the latest 15 days; rank only as a human-review queue; render charts. This is not final acceptance, production activation, a threshold experiment, or an order instruction.",
+    "holdout_read_authorized": true,
+    "holdout_consumption_numbers_for_checkpoint": {
+      "15m": 13,
+      "1h": 14,
+      "4h": 15,
+      "1d": 16
+    },
+    "training_or_tuning_authorized": false,
+    "production_or_promotion_authorized": false,
+    "telegram_or_order_authorized": false
+  },
+  "single_variable_bundle": "Owner explicitly requested the four descriptive timeframe configurations together. Across all four, universe, checkpoint, renderer, W18/W19, confidence, NMS, structural core/post contract, semantic thresholds, five-bar event spacing and no-production status are fixed. Only the market bar clock and the requested endpoint lookback differ: latest-only for 15m/1h and 15 days for 4h/1d.",
+  "universe": {
+    "venue": "OKX public market API",
+    "instrument": "USDT-margined perpetual swaps",
+    "rule": "Freeze every current live instCategory=1 crypto USDT swap with a positive ticker; exclude repository BLOCKED_BASES and STOCKISH_BASES.",
+    "ranking_context_only": "Current 24h price change and estimated quote volume may be displayed but must not enter model inference, semantic acceptance, or primary review ordering.",
+    "missing_or_stale_action": "Fail that symbol-timeframe closed and receipt the exclusion; do not substitute another venue, synthesize bars, forward-fill, or relax continuity."
+  },
+  "timeframes": {
+    "15m": {
+      "okx_bar": "15m",
+      "delta_minutes": 15,
+      "lookback_endpoints": 1,
+      "lookback_interpretation": "latest fully closed endpoint only",
+      "holdout_consumption_number_for_checkpoint": 13
+    },
+    "1h": {
+      "okx_bar": "1H",
+      "delta_minutes": 60,
+      "lookback_endpoints": 1,
+      "lookback_interpretation": "latest fully closed endpoint only",
+      "holdout_consumption_number_for_checkpoint": 14
+    },
+    "4h": {
+      "okx_bar": "4H",
+      "delta_minutes": 240,
+      "lookback_endpoints": 90,
+      "lookback_interpretation": "90 closed 4h endpoints = latest 15 days",
+      "holdout_consumption_number_for_checkpoint": 15
+    },
+    "1d": {
+      "okx_bar": "1Dutc",
+      "delta_minutes": 1440,
+      "lookback_endpoints": 15,
+      "lookback_interpretation": "15 closed UTC-daily endpoints = latest 15 days",
+      "holdout_consumption_number_for_checkpoint": 16
+    }
+  },
+  "source_contract": {
+    "bars_per_request": 300,
+    "minimum_history_rows": 140,
+    "confirmed_rows_only": true,
+    "latest_closed_rule": "floor scan_frozen_at to the timeframe boundary, then subtract one full interval",
+    "continuity": "Every adjacent open_time difference must equal the exact timeframe interval.",
+    "ohlcv": "All open/high/low/close/volume values must be finite; OHLC must be positive.",
+    "freeze_before_fanout": true
+  },
+  "detector": {
+    "name": "Grade-A 8k positives + 24k matched negatives, full40, native 1280",
+    "weights_path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+    "weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "source_training_timeframe": "15m",
+    "image_size": 1280,
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "window_lengths": [18, 19],
+    "allowed_core_lengths": [4, 5],
+    "allowed_confirmation_bars": [2, 3, 4, 5, 6, 7, 8, 9],
+    "same_symbol_event_gap_bars": 5,
+    "threshold_or_window_retuning_after_results": false
+  },
+  "semantic_gate": {
+    "source": "exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1",
+    "causality": "Physically slice each frame at window_end_i before computing features. Future delivery candles never enter acceptance.",
+    "frozen_morphology_gate": {
+      "core_lengths": [4, 5],
+      "max_ma_envelope_atr": 1.5,
+      "max_ma_spread_end_atr": 1.1,
+      "max_core_body_atr": 1.2,
+      "min_core_progress_atr": -0.6,
+      "max_core_progress_atr": 1.3,
+      "min_post1_progress_atr": 0.0,
+      "min_post2_progress_atr": 1.0,
+      "min_post3_progress_atr": 1.25,
+      "min_post5_progress_atr": 1.75,
+      "min_aligned_ma_slope_atr": 0.03,
+      "max_minimum_close_to_ma_atr": 1.0,
+      "max_close_to_ma_envelope_atr": 1.9,
+      "max_body_to_ma_envelope_atr": 1.5,
+      "unchanged_from_v7": true
+    },
+    "null_control": "For every structural box, preserve candles, box, confidence and class ID while flipping only LONG/SHORT inside the semantic calculation; report paired exact sign-test survival.",
+    "no_threshold_grid": true
+  },
+  "ranking": {
+    "purpose": "human chart-review priority only",
+    "policy": "same-direction distinct timeframe count descending; total distinct timeframe count descending; timeframe priority 1d > 4h > 1h > 15m; detector-confidence rank within its own timeframe; recency; stable symbol tie-break",
+    "cross_timeframe_confidence_combined": false,
+    "confidence_semantics": "Detector confidence is neither win probability nor return expectation and is not calibrated across timeframes.",
+    "direction_conflict": "Preserve and visibly flag symbols with both LONG and SHORT events; do not average or silently choose a side."
+  },
+  "limitations": {
+    "prior_4h_owner_verdict": "都不太行",
+    "prior_4h_verdict_remains_in_force": true,
+    "new_snapshot_does_not_rehabilitate_rejected_4h_semantics": true,
+    "15m_model_applied_out_of_distribution": ["1h", "4h", "1d"],
+    "independent_owner_gold_available": {
+      "15m": false,
+      "1h": false,
+      "4h": false,
+      "1d": false
+    },
+    "economic_labels_or_matched_entry_controls": false,
+    "outputs_are_trade_authorizations": false,
+    "active_detector": "none"
+  },
+  "outputs": {
+    "result_directory": "experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan",
+    "summary": "experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/summary.json",
+    "ranked_signals": "experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/ranked_signals.csv",
+    "gallery": "experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/gallery.html",
+    "verification": "experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/verification.json",
+    "report": "analysis/p1_crypto_grade_a_yolo_mtf_latest_20260903.md",
+    "html": "analysis/html/p1_crypto_grade_a_yolo_mtf_latest_20260903.html"
+  },
+  "safety": {
+    "new_training": false,
+    "threshold_or_weight_change": false,
+    "active_or_frozen_change": false,
+    "promotion": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "telegram_send": false,
+    "order_state_change": false
+  }
+}
