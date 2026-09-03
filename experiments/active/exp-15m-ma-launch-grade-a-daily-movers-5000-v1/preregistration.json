@@ -3,7 +3,7 @@
   "protocol": "ma6_grade_a_daily_movers_novel_review5000_v1_20260903",
   "experiment_id": "exp-15m-ma-launch-grade-a-daily-movers-5000-v1",
   "created_at": "2026-09-03T00:00:00+08:00",
-  "source_commit": "dc8e5e67cadc8b2e71872a6a0c710aedc13aef25",
+  "source_commit": "7931541abf9ac1edd8985924fb31db93bb617609",
   "stage": "p1_preholdout_candidate_discovery",
   "question": "How many novel, globally de-duplicated Grade-A model review events can be mined from completed daily Top5-gainer and Top5-loser boards before detector validation and holdout, stopping only after a full-month boundary reaches at least 5,000?",
   "owner_authorization": {
@@ -124,7 +124,7 @@
   "remote_cuda": {
     "role": "inference-only renderer plus raw normalized YOLO box producer; Mac remains authoritative for ranks, mapping, semantic decisions, overlap, deduplication and artifacts",
     "worker": "scripts/remote_infer_15m_ma_launch_grade_a_taskpack.py",
-    "worker_sha256": "8fb7116e71f1eff7cee5156a64ed25cadb5a5c7121eed6a98a78fee944ce24bd",
+    "worker_sha256": "8a68daeb34def0bfc43c1b48c16513ea5ee937c5bba4b1e46e735eaafd293d51",
     "renderer": "yoyo/layers/l1_detection/render.py",
     "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
     "renderer_data": "yoyo/layers/l1_detection/data.py",
@@ -144,7 +144,7 @@
     "model_state_change_allowed": false
   },
   "immutable_inputs": {
-    "coordinator_sha256": "609bf31ad69d3c25a0c63e95cd8e3715964e064500d69e463443fd47bd698924",
+    "coordinator_sha256": "98f6f7cf820e85433711822419d9a2d89215e24af7f017fe61b17ae9d38ebe1e",
     "source_commit_contains_both_workers": true
   },
   "outputs": {
