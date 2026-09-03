@@ -1,0 +1,64 @@
+{
+  "causality": {
+    "future_mutation_checks": 8,
+    "future_mutation_passes": 8,
+    "future_rows_in_gate": 0,
+    "review_chart_physically_separate": true,
+    "rows_read_per_gate": [
+      "t-1",
+      "t"
+    ]
+  },
+  "execution": {
+    "model_inference_calls": 0,
+    "network_reads": 0
+  },
+  "experiment_id": "exp-1h-filusdt-model-first-breakout-gate-20260904-v1",
+  "generated_at": "2026-09-03T16:25:32.711548+00:00",
+  "holdout_consumption_number_for_checkpoint": 18,
+  "interpretation": {
+    "known_profitable_case": true,
+    "one_case_can_diagnose_latency_but_not_precision_or_returns": true,
+    "performance_claim_allowed": false
+  },
+  "pipeline": {
+    "actual_gate_passes": 0,
+    "conclusion": "no_model_proposal_coincided_with_first_close_beyond_bundle",
+    "deduplicated_actionable_events": 0,
+    "flipped_direction_gate_passes": 0,
+    "model_proposals": 8,
+    "order": "model_proposal_then_deterministic_breakout_gate"
+  },
+  "safety": {
+    "active_or_frozen_change": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "label_or_dataset_mutation": false,
+    "model_inference": false,
+    "network_read": false,
+    "new_training": false,
+    "order_action": false,
+    "production_eligible": false,
+    "promotion": false,
+    "telegram_send": false,
+    "threshold_or_weight_change": false,
+    "training_eligible": false
+  },
+  "schema_version": 1,
+  "source_commit": "f3b9197cc401fb35336531b274de972049d58b75",
+  "source_replay": {
+    "accepted_structural_boxes": 8,
+    "candidate_rows": 8,
+    "model_windows": 240,
+    "raw_box_ledger_is_exhaustive": true,
+    "raw_boxes": 8
+  },
+  "timing": {
+    "first_code_only_reference_available_at": null,
+    "first_code_only_reference_endpoint": null,
+    "first_raw_model_available_at": "2026-09-01T19:00:00+00:00",
+    "first_raw_model_confidence": 0.2965770661830902,
+    "first_raw_model_endpoint": "2026-09-01T18:00:00+00:00",
+    "reference_is_not_pipeline_signal": true
+  }
+}
