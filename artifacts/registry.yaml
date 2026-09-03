@@ -11790,3 +11790,140 @@ artifacts:
     config_hash: "7efedc084c8126605cc871911d0ba0acc59f4cb88d11fd980be1ba3650673b23"
     data_cutoff: "2026-09-03T16:00:00Z"
     notes: Self-contained Owner delivery with embedded global and exact-input figures.
+
+  # ---- FILUSDT.P 1h model-first breakout diagnosis (2026-09-04) -------
+  - artifact_id: 1h-filusdt-model-first-breakout-gate-20260904-v1-prereg
+    artifact_type: config
+    role: frozen_owner_authorized_model_first_code_second_diagnostic_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "52cf5d6f41a6616d3415673a835c45eabe3e7366"
+    source_path: experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/preregistration.json
+    sha256: "f08ee71ac732243cae05e2b681c7be68d976915660becb68522c98b85bff77e6"
+    size_bytes: 6273
+    storage_uri: "repo://experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/preregistration.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "52cf5d6f41a6616d3415673a835c45eabe3e7366"
+    config_hash: "f08ee71ac732243cae05e2b681c7be68d976915660becb68522c98b85bff77e6"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Freezes checkpoint holdout use #18, exact two-bar six-MA crossing predicates, unchanged source proposals and zero-network/zero-inference execution.
+
+  - artifact_id: 1h-filusdt-model-first-breakout-gate-20260904-v1-summary
+    artifact_type: manifest
+    role: model_proposal_first_breakout_gate_result_and_causality_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5782d88e670e5c10a26c22b3c5b6d4653de77ade"
+    source_path: experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/summary.json
+    sha256: "fe3a7ad9a3493471f8713fdc52db886627793c14a25da3a94306be6e5f5bc11e"
+    size_bytes: 1984
+    storage_uri: "repo://experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f3b9197cc401fb35336531b274de972049d58b75"
+    config_hash: "f08ee71ac732243cae05e2b681c7be68d976915660becb68522c98b85bff77e6"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Eight exhaustive raw LONG proposals yielded zero first-close-above-six-MA passes; the earliest model proposal remained causally available at 03:00 CST.
+
+  - artifact_id: 1h-filusdt-model-first-breakout-gate-20260904-v1-decisions
+    artifact_type: dataset
+    role: complete_per_proposal_actual_and_flipped_code_gate_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5782d88e670e5c10a26c22b3c5b6d4653de77ade"
+    source_path: experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/model_first_decisions.csv
+    sha256: "83e01f11510764ceb68de6224f98ff459ed46d0363b86526b33b7a20f2b2eaa1"
+    size_bytes: 1940
+    storage_uri: "repo://experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/model_first_decisions.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f3b9197cc401fb35336531b274de972049d58b75"
+    config_hash: "f08ee71ac732243cae05e2b681c7be68d976915660becb68522c98b85bff77e6"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Complete eight-row ledger; every current close is above the six-MA upper edge but every prior close was already above it.
+
+  - artifact_id: 1h-filusdt-model-first-breakout-gate-20260904-v1-verification
+    artifact_type: manifest
+    role: independent_source_hash_ma_predicate_and_review_image_replay
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5782d88e670e5c10a26c22b3c5b6d4653de77ade"
+    source_path: experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/verification.json
+    sha256: "d1c39f2adc9700da41d69db3329adfd21e5bd5f25f2900aef986fdfbcab7f289"
+    size_bytes: 535
+    storage_uri: "repo://experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/verification.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a0e06a7af36964bdd84fa312383c285978edfba8"
+    config_hash: "f08ee71ac732243cae05e2b681c7be68d976915660becb68522c98b85bff77e6"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Independently recomputed six close-based MAs and all eight actual/flipped decisions with zero network or inference calls.
+
+  - artifact_id: 1h-filusdt-model-first-breakout-gate-20260904-v1-global-chart
+    artifact_type: report
+    role: owner_facing_global_context_with_first_raw_model_availability
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5782d88e670e5c10a26c22b3c5b6d4653de77ade"
+    source_path: experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/review/FILUSDT_P_1h_model_first_breakout_global.png
+    sha256: "0e8fcf003fa370d5e2ad534ef4595e4314fe612e1a5f99a71cc5449acf4ec4f1"
+    size_bytes: 145958
+    storage_uri: "repo://experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/review/FILUSDT_P_1h_model_first_breakout_global.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f3b9197cc401fb35336531b274de972049d58b75"
+    config_hash: "f08ee71ac732243cae05e2b681c7be68d976915660becb68522c98b85bff77e6"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Green marker is the earliest raw YOLO availability; no magenta model-plus-code pass exists and future bars are review-only.
+
+  - artifact_id: 1h-filusdt-model-first-breakout-gate-20260904-v1-gallery
+    artifact_type: report
+    role: local_owner_review_entry_for_model_first_latency_diagnosis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5782d88e670e5c10a26c22b3c5b6d4653de77ade"
+    source_path: experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/review/gallery.html
+    sha256: "1d90e2bbc0ff1f5fe0118fc1f195b3f21974d042c5a921733e59190c1eba084b"
+    size_bytes: 579
+    storage_uri: "repo://experiments/active/exp-1h-filusdt-model-first-breakout-gate-20260904-v1/results/review/gallery.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f3b9197cc401fb35336531b274de972049d58b75"
+    config_hash: "f08ee71ac732243cae05e2b681c7be68d976915660becb68522c98b85bff77e6"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Compact local review page for the full global timing chart.
+
+  - artifact_id: 1h-filusdt-model-first-breakout-gate-20260904-v1-report
+    artifact_type: report
+    role: canonical_markdown_model_first_breakout_latency_diagnosis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5782d88e670e5c10a26c22b3c5b6d4653de77ade"
+    source_path: analysis/p1_1h_filusdt_model_first_breakout_gate_20260904.md
+    sha256: "25b7865dcfe3d234c5d448401b13c7911f2c102c655b942cdd422514a466bb6d"
+    size_bytes: 6512
+    storage_uri: "repo://analysis/p1_1h_filusdt_model_first_breakout_gate_20260904.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5782d88e670e5c10a26c22b3c5b6d4653de77ade"
+    config_hash: "f08ee71ac732243cae05e2b681c7be68d976915660becb68522c98b85bff77e6"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Chinese report distinguishes correct pipeline ordering, upstream latency, strict-cross semantic mismatch and known-winner selection.
+
+  - artifact_id: 1h-filusdt-model-first-breakout-gate-20260904-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_model_first_breakout_diagnosis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5782d88e670e5c10a26c22b3c5b6d4653de77ade"
+    source_path: analysis/html/p1_1h_filusdt_model_first_breakout_gate_20260904.html
+    sha256: "0710bb0dbb35da0e7d1fa9afc17428eea392e9cc8d7d39eae2a5eca121f213f7"
+    size_bytes: 204344
+    storage_uri: "repo://analysis/html/p1_1h_filusdt_model_first_breakout_gate_20260904.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5782d88e670e5c10a26c22b3c5b6d4653de77ade"
+    config_hash: "f08ee71ac732243cae05e2b681c7be68d976915660becb68522c98b85bff77e6"
+    data_cutoff: "2026-09-03T16:00:00Z"
+    notes: Self-contained Owner delivery with the global timing figure embedded.

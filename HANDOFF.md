@@ -2,6 +2,28 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-04 — 模型先、代码后已实测，瓶颈仍是 YOLO 晚到）
+
+Owner 纠正流水线顺序应为“模型先检测密集，再由代码检测站上线”，并要求实测。本轮复用
+FILUSDT.P 1h 五日扫描的 240 张冻结输入与完整 raw-box 账本，不联网、不重新推理、不降
+`conf=0.25`；把第二层单变量替换为无阈值的两 bar 规则：当前收盘首次越过六条
+SMA/EMA 20/60/120 的目标侧边缘。
+
+结果是 **8 个原始 LONG 模型提案 → 0 个代码通过 → 0 个事件**。第一个 raw YOLO 提案仍是
+09-02 02:00 bar、**03:00 CST 才完整可用**；当前 `close=0.7621 > 六线上沿 0.709675`，
+但前一根已经 `0.7721 > 0.704157`，所以不是“本根首次站上”。其余 7 个也都晚于首次穿越。
+结论不是模型先的架构错，而是后级代码不可能早于前级首个提案；现有 completed-history YOLO
+才是延迟下界。
+
+同时确认 Owner 的“密集后刚启动”不能简化为第一次穿越完整六线：模型核心开始前，价格已经
+在六线上方。正确目标是模型在当时右端先输出 `dense_active`，代码锁存状态后再判断离开密集
+核心并站稳，禁止把后来框回填到核心时间。完整报告：
+`analysis/html/p1_1h_filusdt_model_first_breakout_gate_20260904.html`。
+
+本轮登记为 checkpoint holdout 使用 **#18**；方向翻转 0/8，Future Mutation 8/8 PASS，
+独立六线复算通过。没有训练、调参、promote、部署、改 ACTIVE/frozen/forward、发消息或下单；
+该 exact gate 登记 rejected，`training_eligible=false`、`production_eligible=false`。
+
 ## ⚡ 当前真相（2026-09-04 — FILUSDT.P 1h 五日回放命中同一上涨，但信号偏晚）
 
 Owner 要求用现有模型回放 FILUSDT.P 1h 最近五天，检查手工盈利单能否被识别。本轮按冻结

@@ -3699,8 +3699,8 @@ experiments:
 
   - experiment_id: exp-1h-filusdt-model-first-breakout-gate-20260904-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "52cf5d6f41a6616d3415673a835c45eabe3e7366"
-    status: active
+    source_commit: "5782d88e670e5c10a26c22b3c5b6d4653de77ade"
+    status: rejected
     question: >-
       When the frozen YOLO proposal is evaluated first and deterministic code
       is applied second, does any FILUSDT.P 1h model proposal occur on the
@@ -3711,17 +3711,33 @@ experiments:
       preregistered two-bar first-close-beyond-six-MA code gate, applied after
       each model proposal.
     result: >-
-      Active, preregistered Owner-requested architecture diagnostic. Frozen
-      holdout artifacts have not yet been evaluated under this code gate.
-    holdout_consumed: false
+      latency_bottleneck_confirmed_at_model_stage. The exhaustive frozen ledger
+      retained all 8 raw LONG YOLO proposals from 240 inputs, but the
+      deterministic first-close-above-six-MA gate passed 0/8. The earliest raw
+      model proposal remained the 2026-09-02 02:00 CST bar, fully available at
+      03:00 CST, after the main pump. Its current close was above the bundle,
+      but the prior close was already above it. Direction-flipped passes were
+      also 0/8 and Future Mutation passed 8/8.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    canonical_report: analysis/p1_1h_filusdt_model_first_breakout_gate_20260904.md
+    artifacts:
+      - 1h-filusdt-model-first-breakout-gate-20260904-v1-prereg
+      - 1h-filusdt-model-first-breakout-gate-20260904-v1-summary
+      - 1h-filusdt-model-first-breakout-gate-20260904-v1-decisions
+      - 1h-filusdt-model-first-breakout-gate-20260904-v1-verification
+      - 1h-filusdt-model-first-breakout-gate-20260904-v1-global-chart
+      - 1h-filusdt-model-first-breakout-gate-20260904-v1-gallery
+      - 1h-filusdt-model-first-breakout-gate-20260904-v1-report
+      - 1h-filusdt-model-first-breakout-gate-20260904-v1-html
     reuse_allowed: false
     notes: >-
-      The Owner explicitly requested model-first then code-second ordering.
-      This will be checkpoint holdout use #18 even though it reuses frozen
-      bytes with zero network reads and zero new inference. It is a
-      latency-only diagnosis on a known profitable case, not validation or
-      tuning. No training, threshold/weight change, promotion, deployment,
-      ACTIVE/frozen/forward mutation, messaging or order action is authorized.
+      This is checkpoint holdout use #18 even though it reused frozen bytes
+      with zero network reads and zero new inference. Rejected means this exact
+      two-bar gate did not produce the desired early pipeline signal; the
+      Owner's model-first architecture remains sound, while the first YOLO
+      proposal is the binding latency floor. The known profitable example is
+      not model validation. No training, threshold/weight change, promotion,
+      deployment, ACTIVE/frozen/forward mutation, messaging or order action
+      occurred.
