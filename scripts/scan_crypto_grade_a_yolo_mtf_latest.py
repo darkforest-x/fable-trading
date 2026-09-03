@@ -59,6 +59,9 @@ from scripts.scan_15m_ma_launch_model_compare_all3d import (  # noqa: E402
     x_at_float,
 )
 from src.scout_mtf.tf_scan import fetch_candles  # noqa: E402
+from yoyo.datasets.fifteen_minute_launch_candidates import (  # noqa: E402
+    add_candidate_features,
+)
 from yoyo.layers.l1_detection.render import render_chart  # noqa: E402
 from yoyo.layers.l1_detection.semantic_gate import (  # noqa: E402
     compute_causal_core_semantics,
@@ -69,6 +72,13 @@ from yoyo.layers.l1_detection.semantic_gate import (  # noqa: E402
 EXPERIMENT_ID = "exp-crypto-grade-a-yolo-mtf-latest-20260903-v1"
 DEFAULT_PREREG = ROOT / "experiments" / "active" / EXPERIMENT_ID / "preregistration.json"
 DEFAULT_OUT = ROOT / "experiments" / "active" / EXPERIMENT_ID / "results" / "scan"
+DEFAULT_RECOVERY_AMENDMENT = (
+    ROOT
+    / "experiments"
+    / "active"
+    / EXPERIMENT_ID
+    / "recovery_atr_column_20260903.json"
+)
 PARENT_GATE_PREREG = (
     ROOT
     / "experiments/active/exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1"
@@ -234,8 +244,17 @@ def load_preregistration(path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     return payload, gates
 
 
-def verify_sources_committed(prereg_path: Path, prereg: Mapping[str, Any]) -> str:
-    """Require main plus committed builder and prereg bytes before market reads."""
+def verify_sources_committed(
+    prereg_path: Path,
+    prereg: Mapping[str, Any],
+    recovery_path: Path | None = None,
+) -> str:
+    """Require main plus committed builder and frozen protocol bytes.
+
+    A recovery amendment may bind one later builder commit after an honestly
+    receipted implementation failure.  It cannot change any model, gate,
+    timeframe, universe, or ranking contract from the original preregistration.
+    """
 
     branch = subprocess.check_output(
         ["git", "branch", "--show-current"], cwd=ROOT, text=True
@@ -244,6 +263,19 @@ def verify_sources_committed(prereg_path: Path, prereg: Mapping[str, Any]) -> st
         raise MultiTimeframeScanError("official scan must run on main")
     script = Path(__file__).resolve()
     paths = [script.relative_to(ROOT), prereg_path.resolve().relative_to(ROOT)]
+    recovery: Mapping[str, Any] | None = None
+    if recovery_path is not None:
+        recovery_path = recovery_path.resolve()
+        paths.append(recovery_path.relative_to(ROOT))
+        recovery = json.loads(recovery_path.read_text(encoding="utf-8"))
+        if recovery.get("experiment_id") != EXPERIMENT_ID:
+            raise MultiTimeframeScanError("recovery experiment identity drifted")
+        if recovery.get("original_prereg_source_commit") != prereg.get("source_commit"):
+            raise MultiTimeframeScanError("recovery does not bind the original preregistration")
+        if recovery.get("change_scope") != "add_missing_inherited_pine_rma_atr14_column_only":
+            raise MultiTimeframeScanError("recovery change scope is not the frozen ATR repair")
+        if recovery.get("model_gate_timeframe_universe_ranking_changed") is not False:
+            raise MultiTimeframeScanError("recovery must preserve every analytical contract")
     dirty = subprocess.check_output(
         ["git", "status", "--short", "--", *map(str, paths)], cwd=ROOT, text=True
     ).strip()
@@ -252,9 +284,14 @@ def verify_sources_committed(prereg_path: Path, prereg: Mapping[str, Any]) -> st
     source_commit = subprocess.check_output(
         ["git", "log", "-1", "--format=%H", "--", str(paths[0])], cwd=ROOT, text=True
     ).strip()
-    if source_commit != str(prereg.get("source_commit")):
+    expected_commit = (
+        str(recovery.get("corrected_builder_commit"))
+        if recovery is not None
+        else str(prereg.get("source_commit"))
+    )
+    if source_commit != expected_commit:
         raise MultiTimeframeScanError(
-            f"builder commit {source_commit} differs from preregistration"
+            f"builder commit {source_commit} differs from frozen source binding"
         )
     return source_commit
 
@@ -394,6 +431,120 @@ def fetch_market(
         audits[key].sort(key=lambda row: str(row["symbol"]))
         failures[key].sort(key=lambda row: str(row["symbol"]))
     return frames, audits, failures
+
+
+def enrich_model_frames(
+    frames: Mapping[str, pd.DataFrame],
+) -> dict[str, pd.DataFrame]:
+    """Add the parent gate's exact causal ATR14 before model-task creation.
+
+    ``base.build_tasks`` supplies the renderer's six moving averages but not
+    the inherited Pine-RMA ATR14 required by the frozen semantic gate.  The
+    parent gate used :func:`add_candidate_features`, so this adapter reuses
+    that exact implementation.  ``base.build_tasks`` subsequently recomputes
+    the same renderer MA columns while preserving ``atr`` unchanged.
+    """
+
+    enriched = {
+        symbol: add_candidate_features(frame)
+        for symbol, frame in sorted(frames.items())
+    }
+    for symbol, frame in enriched.items():
+        if "atr" not in frame.columns:
+            raise MultiTimeframeScanError(f"ATR enrichment missing for {symbol}")
+        finite = pd.to_numeric(frame["atr"], errors="coerce").iloc[MIN_HISTORY_ROWS - 1 :]
+        if finite.empty or not bool(np.isfinite(finite.to_numpy(dtype=float)).all()):
+            raise MultiTimeframeScanError(f"ATR enrichment is non-finite for {symbol}")
+    return enriched
+
+
+def load_frozen_market(
+    source: Path,
+    *,
+    candle_root: Path,
+) -> tuple[
+    pd.Timestamp,
+    dict[str, dict[str, Any]],
+    dict[str, dict[str, pd.DataFrame]],
+    dict[str, list[dict[str, Any]]],
+    dict[str, list[dict[str, str]]],
+]:
+    """Recover the originally frozen candles without another market read."""
+
+    source = source.resolve()
+    start_path = source / "holdout_consumption_started.json"
+    universe_path = source / "universe.json"
+    failure_path = source / "failure_receipt.json"
+    for path in (start_path, universe_path, failure_path):
+        if not path.is_file():
+            raise MultiTimeframeScanError(f"recovery source is missing {path.name}")
+    started = json.loads(start_path.read_text(encoding="utf-8"))
+    failure = json.loads(failure_path.read_text(encoding="utf-8"))
+    if started.get("experiment_id") != EXPERIMENT_ID or failure.get("experiment_id") != EXPERIMENT_ID:
+        raise MultiTimeframeScanError("recovery source experiment identity drifted")
+    expected_numbers = {spec.key: spec.holdout_number for spec in TIMEFRAMES}
+    if started.get("holdout_consumption_numbers_for_checkpoint") != expected_numbers:
+        raise MultiTimeframeScanError("recovery holdout numbers drifted")
+    if "missing columns: ['atr']" not in str(failure.get("error")):
+        raise MultiTimeframeScanError("recovery source is not the receipted ATR failure")
+    frozen_at = utc(started["started_at"])
+    for spec in TIMEFRAMES:
+        declared = started["scope"][spec.key]
+        if declared.get("latest_closed_open") != latest_closed_open(frozen_at, spec).isoformat():
+            raise MultiTimeframeScanError(f"{spec.key} recovery endpoint drifted")
+        if declared.get("earliest_endpoint_open") != earliest_endpoint_open(frozen_at, spec).isoformat():
+            raise MultiTimeframeScanError(f"{spec.key} recovery lookback drifted")
+
+    universe_payload = json.loads(universe_path.read_text(encoding="utf-8"))
+    if utc(universe_payload["frozen_at"]) != frozen_at:
+        raise MultiTimeframeScanError("recovery universe timestamp drifted")
+    universe = {
+        str(row["symbol"]): dict(row) for row in list(universe_payload.get("symbols") or [])
+    }
+    if not universe or len(universe) != len(universe_payload.get("symbols") or []):
+        raise MultiTimeframeScanError("recovery universe is empty or duplicated")
+
+    frames: dict[str, dict[str, pd.DataFrame]] = {spec.key: {} for spec in TIMEFRAMES}
+    audits: dict[str, list[dict[str, Any]]] = {spec.key: [] for spec in TIMEFRAMES}
+    failures: dict[str, list[dict[str, str]]] = {spec.key: [] for spec in TIMEFRAMES}
+    for spec in TIMEFRAMES:
+        destination_dir = candle_root / spec.key
+        destination_dir.mkdir(parents=True)
+        for symbol in sorted(universe):
+            source_path = source / "candles" / spec.key / f"{symbol}.csv"
+            if not source_path.is_file():
+                failures[spec.key].append(
+                    {"symbol": symbol, "error": "preserved_initial_fetch_failure"}
+                )
+                continue
+            destination = destination_dir / source_path.name
+            shutil.copy2(source_path, destination)
+            frame = pd.read_csv(destination)
+            frame["open_time"] = pd.to_datetime(frame["open_time"], utc=True)
+            if len(frame) < MIN_HISTORY_ROWS:
+                raise MultiTimeframeScanError(f"short recovered history: {symbol} {spec.key}")
+            if utc(frame.iloc[-1]["open_time"]) != latest_closed_open(frozen_at, spec):
+                raise MultiTimeframeScanError(f"stale recovered endpoint: {symbol} {spec.key}")
+            diffs = frame["open_time"].diff().iloc[1:]
+            if not bool((diffs == spec.delta).all()):
+                raise MultiTimeframeScanError(f"recovered candle gaps: {symbol} {spec.key}")
+            numeric = frame[["open", "high", "low", "close", "volume"]].to_numpy(dtype=float)
+            if not bool(np.isfinite(numeric).all()):
+                raise MultiTimeframeScanError(f"non-finite recovered OHLCV: {symbol} {spec.key}")
+            if bool((frame[["open", "high", "low", "close"]] <= 0).any().any()):
+                raise MultiTimeframeScanError(f"non-positive recovered OHLC: {symbol} {spec.key}")
+            frames[spec.key][symbol] = frame
+            audits[spec.key].append(
+                {
+                    "symbol": symbol,
+                    "rows": len(frame),
+                    "first_bar_open": utc(frame.iloc[0]["open_time"]).isoformat(),
+                    "last_bar_open": utc(frame.iloc[-1]["open_time"]).isoformat(),
+                    "last_bar_available_at": (utc(frame.iloc[-1]["open_time"]) + spec.delta).isoformat(),
+                    "sha256": sha256_file(destination),
+                }
+            )
+    return frozen_at, universe, frames, audits, failures
 
 
 def evaluate_semantic_candidates(
@@ -1128,6 +1279,18 @@ def main() -> int:
     parser.add_argument("--device", default=None)
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--workers", type=int, default=6)
+    parser.add_argument(
+        "--resume-frozen",
+        type=Path,
+        default=None,
+        help="Recover an honestly receipted failed run without another market read.",
+    )
+    parser.add_argument(
+        "--recovery-amendment",
+        type=Path,
+        default=None,
+        help="Committed amendment binding the exact implementation-only recovery.",
+    )
     args = parser.parse_args()
 
     prereg_path = args.prereg.resolve()
@@ -1135,24 +1298,47 @@ def main() -> int:
     building = out.with_name(out.name + ".building")
     if out.exists() or building.exists():
         raise FileExistsError(f"refusing to overwrite output: {out}")
+    resume_source = args.resume_frozen.resolve() if args.resume_frozen is not None else None
+    recovery_path = (
+        args.recovery_amendment.resolve()
+        if args.recovery_amendment is not None
+        else None
+    )
+    if (resume_source is None) != (recovery_path is None):
+        raise MultiTimeframeScanError(
+            "--resume-frozen and --recovery-amendment must be provided together"
+        )
     prereg, gates = load_preregistration(prereg_path)
-    source_commit = verify_sources_committed(prereg_path, prereg)
+    source_commit = verify_sources_committed(prereg_path, prereg, recovery_path)
     if sha256_file(WEIGHTS) != EXPECTED_WEIGHT_SHA256:
         raise MultiTimeframeScanError("frozen YOLO weight identity drifted")
 
     started = time.perf_counter()
-    frozen_at = utc(datetime.now(timezone.utc))
+    if resume_source is None:
+        frozen_at = utc(datetime.now(timezone.utc))
+    else:
+        prior_start = json.loads(
+            (resume_source / "holdout_consumption_started.json").read_text(encoding="utf-8")
+        )
+        frozen_at = utc(prior_start["started_at"])
     building.mkdir(parents=True)
     candle_root = building / "candles"
     chart_root = building / "charts"
     chart_root.mkdir()
     shutil.copy2(prereg_path, building / "preregistration.json")
+    if recovery_path is not None:
+        shutil.copy2(recovery_path, building / "recovery_amendment.json")
     write_json(
         building / "holdout_consumption_started.json",
         {
             "started_at": frozen_at.isoformat(),
+            "recovery_started_at": (
+                datetime.now(timezone.utc).isoformat() if resume_source is not None else None
+            ),
+            "resumed_from_receipted_failure": resume_source is not None,
             "experiment_id": EXPERIMENT_ID,
             "source_commit": source_commit,
+            "original_prereg_source_commit": prereg["source_commit"],
             "holdout_consumption_numbers_for_checkpoint": {
                 spec.key: spec.holdout_number for spec in TIMEFRAMES
             },
@@ -1168,29 +1354,56 @@ def main() -> int:
     )
 
     try:
-        ticker_rows = list(common._request(common.TICKERS_URL).get("data") or [])  # noqa: SLF001
-        instrument_rows = list(common._request(common.INSTRUMENTS_URL).get("data") or [])  # noqa: SLF001
-        eligible = common.eligible_instruments(ticker_rows, instrument_rows)
-        if not eligible:
-            raise MultiTimeframeScanError("eligible universe is empty")
-        universe = ticker_context(ticker_rows, eligible)
+        if resume_source is None:
+            ticker_rows = list(common._request(common.TICKERS_URL).get("data") or [])  # noqa: SLF001
+            instrument_rows = list(common._request(common.INSTRUMENTS_URL).get("data") or [])  # noqa: SLF001
+            eligible = common.eligible_instruments(ticker_rows, instrument_rows)
+            if not eligible:
+                raise MultiTimeframeScanError("eligible universe is empty")
+            universe = ticker_context(ticker_rows, eligible)
+            frames, fetch_audits, fetch_failures = fetch_market(
+                universe,
+                frozen_at=frozen_at,
+                candle_root=candle_root,
+                workers=args.workers,
+            )
+            universe_rule = (
+                "all current live OKX instCategory=1 crypto USDT swaps with positive "
+                "ticker; project blocked and stockish bases excluded"
+            )
+        else:
+            (
+                recovered_frozen_at,
+                universe,
+                frames,
+                fetch_audits,
+                fetch_failures,
+            ) = load_frozen_market(resume_source, candle_root=candle_root)
+            if recovered_frozen_at != frozen_at:
+                raise MultiTimeframeScanError("recovered freeze timestamp drifted")
+            universe_rule = "preserved from the original frozen OKX snapshot"
+            recovery_dir = building / "recovery"
+            recovery_dir.mkdir()
+            shutil.copy2(
+                resume_source / "holdout_consumption_started.json",
+                recovery_dir / "original_holdout_consumption_started.json",
+            )
+            shutil.copy2(
+                resume_source / "failure_receipt.json",
+                recovery_dir / "original_failure_receipt.json",
+            )
         write_json(
             building / "universe.json",
             {
                 "frozen_at": frozen_at.isoformat(),
-                "rule": (
-                    "all current live OKX instCategory=1 crypto USDT swaps with positive "
-                    "ticker; project blocked and stockish bases excluded"
-                ),
+                "rule": universe_rule,
                 "symbols": [universe[key] for key in sorted(universe)],
             },
         )
-        print(f"frozen universe: {len(universe)} symbols", flush=True)
-        frames, fetch_audits, fetch_failures = fetch_market(
-            universe,
-            frozen_at=frozen_at,
-            candle_root=candle_root,
-            workers=args.workers,
+        print(
+            f"frozen universe: {len(universe)} symbols"
+            f"{' (offline recovery)' if resume_source is not None else ''}",
+            flush=True,
         )
         if any(not frames[spec.key] for spec in TIMEFRAMES):
             raise MultiTimeframeScanError("one or more timeframes have zero usable symbols")
@@ -1213,8 +1426,9 @@ def main() -> int:
                 f"endpoints={spec.lookback_endpoints}",
                 flush=True,
             )
+            semantic_ready = enrich_model_frames(frames[spec.key])
             enriched, tasks = base.build_tasks(
-                frames[spec.key], lookback_endpoints=spec.lookback_endpoints
+                semantic_ready, lookback_endpoints=spec.lookback_endpoints
             )
             candidates, stats = base.infer(
                 model,
@@ -1313,6 +1527,9 @@ def main() -> int:
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "frozen_at": frozen_at.isoformat(),
             "source_commit": source_commit,
+            "original_prereg_source_commit": prereg["source_commit"],
+            "resumed_from_receipted_failure": resume_source is not None,
+            "additional_market_read_during_recovery": False if resume_source is not None else None,
             "model": MODEL_NAME,
             "weights": str(WEIGHTS.relative_to(ROOT)),
             "weights_sha256": EXPECTED_WEIGHT_SHA256,

@@ -106,7 +106,7 @@ def verify_candles(
             require(bool(np.isfinite(numeric).all()), f"non-finite candle: {symbol} {spec.key}")
             tf_frames[symbol] = frame
             checked += 1
-        frames[spec.key] = tf_frames
+        frames[spec.key] = scan.enrich_model_frames(tf_frames)
     return frames, checked
 
 

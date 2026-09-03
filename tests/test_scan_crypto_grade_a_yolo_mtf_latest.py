@@ -2,16 +2,20 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 
+from scripts import scan_4h_ma_launch_yolo_latest as base
 from scripts.scan_crypto_grade_a_yolo_mtf_latest import (
     SPEC_BY_KEY,
     TimeframeSpec,
     deduplicate_events,
     earliest_endpoint_open,
+    enrich_model_frames,
     latest_closed_open,
     rank_events,
 )
+from yoyo.datasets.fifteen_minute_launch_candidates import add_candidate_features
 
 
 def _candidate(
@@ -140,3 +144,25 @@ def test_confidence_is_ranked_within_timeframe_not_combined() -> None:
     assert by_id["a"]["confidence_rank_within_timeframe"] == 2
     assert by_id["c"]["confidence_rank_within_timeframe"] == 1
     assert all("combined" not in row for row in ranked)
+
+
+def test_model_frames_preserve_parent_gate_atr_through_task_building() -> None:
+    rows = 160
+    close = np.linspace(100.0, 132.0, rows) + np.sin(np.arange(rows) / 4.0)
+    raw = pd.DataFrame(
+        {
+            "open_time": pd.date_range("2026-01-01", periods=rows, freq="15min", tz="UTC"),
+            "open": close - 0.15,
+            "high": close + 0.8,
+            "low": close - 0.9,
+            "close": close,
+            "volume": np.linspace(1_000.0, 2_000.0, rows),
+        }
+    )
+    expected = add_candidate_features(raw)
+    semantic_ready = enrich_model_frames({"TEST_USDT_SWAP": raw})
+    enriched, tasks = base.build_tasks(semantic_ready, lookback_endpoints=1)
+    actual = enriched["TEST_USDT_SWAP"]
+    np.testing.assert_allclose(actual["atr"], expected["atr"], equal_nan=True)
+    assert len(tasks) == 2
+    assert np.isfinite(float(actual.iloc[-1]["atr"]))
