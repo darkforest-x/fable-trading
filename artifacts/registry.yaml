@@ -11041,3 +11041,173 @@ artifacts:
     config_hash: "ff3976b06601e34728edacd1eeba67fc0b8c2099d8fdae028ee716db297b8958"
     data_cutoff: "2026-09-02T07:00:00Z"
     notes: Self-contained UTF-8 HTML with three overview pages and all sixteen original charts embedded.
+
+  - artifact_id: crypto-grade-a-yolo-mtf-latest-20260903-v1-prereg
+    artifact_type: config
+    role: owner_authorization_timeframe_holdout_model_gate_and_ranking_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4d38199010a16060309ab53d84295d65f9d59ce6"
+    source_path: experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/preregistration.json
+    sha256: "ab283cf366487e8dec70233eb255e0d78c42b737237a3d85923554b7978393ab"
+    size_bytes: 7956
+    storage_uri: "repo://experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/preregistration.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "051414d695a5f3d9bdb35164e6b9b19a75d6405f"
+    config_hash: "ab283cf366487e8dec70233eb255e0d78c42b737237a3d85923554b7978393ab"
+    data_cutoff: "2026-09-03T03:30:00Z"
+    notes: Holdout uses 15m #13, 1h #14, 4h #15 and 1d #16 were frozen before the market read.
+
+  - artifact_id: crypto-grade-a-yolo-mtf-latest-20260903-v1-recovery-amendment
+    artifact_type: config
+    role: honest_atr_failure_receipt_and_no_new_market_read_recovery_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cc3b42a68ebe34e09b9764a4daed956a0c703d4e"
+    source_path: experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/recovery_atr_column_20260903.json
+    sha256: "8724d4f91eabd2faf97e4590b9df66ae6065d193b6f39e65b07b5e46d94d625e"
+    size_bytes: 3185
+    storage_uri: "repo://experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/recovery_atr_column_20260903.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c8f85bdbcbfc720f033a1d2ca8847430d3bc7c18"
+    config_hash: "ab283cf366487e8dec70233eb255e0d78c42b737237a3d85923554b7978393ab"
+    data_cutoff: "2026-09-03T03:30:00Z"
+    notes: Preserves the failed read as consumed and binds the one-column ATR repair plus frozen-input replay.
+
+  - artifact_id: crypto-grade-a-yolo-mtf-latest-20260903-v1-summary
+    artifact_type: manifest
+    role: four_timeframe_scan_counts_clocks_lineage_and_safety_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "24dbc36b3e964bd3648305c2458fa19f112f5b3c"
+    source_path: experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/summary.json
+    sha256: "7078b56ee8d73f8fef4208fd31a5e596dda53f29a8da54aacc1caabefc1b8c2a"
+    size_bytes: 364040
+    storage_uri: "file://experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "24dbc36b3e964bd3648305c2458fa19f112f5b3c"
+    config_hash: "ab283cf366487e8dec70233eb255e0d78c42b737237a3d85923554b7978393ab"
+    data_cutoff: "2026-09-03T03:30:00Z"
+    notes: 57,770 windows, 1,837 structural boxes, 294 semantic boxes and 41 review events; research only.
+
+  - artifact_id: crypto-grade-a-yolo-mtf-latest-20260903-v1-ranked-signals
+    artifact_type: manifest
+    role: deterministic_cross_timeframe_human_review_queue_with_per_timeframe_confidence_ranks
+    source_repo: darkforest-x/fable-trading
+    source_commit: "24dbc36b3e964bd3648305c2458fa19f112f5b3c"
+    source_path: experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/ranked_signals.jsonl
+    sha256: "804cbbc703fbcbfb6810cc46c00f51ae42bd8f78e7f1fba4a2d2fd3ec33dac16"
+    size_bytes: 133464
+    storage_uri: "file://experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/ranked_signals.jsonl"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "24dbc36b3e964bd3648305c2458fa19f112f5b3c"
+    config_hash: "ab283cf366487e8dec70233eb255e0d78c42b737237a3d85923554b7978393ab"
+    data_cutoff: "2026-09-03T03:30:00Z"
+    notes: ZEC is the only same-direction multi-timeframe symbol; no confidence is combined across timeframes.
+
+  - artifact_id: crypto-grade-a-yolo-mtf-latest-20260903-v1-gallery
+    artifact_type: report
+    role: filterable_owner_review_gallery_for_all_forty_one_original_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: "24dbc36b3e964bd3648305c2458fa19f112f5b3c"
+    source_path: experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/gallery.html
+    sha256: "dadce907ca6798efdcfe1c8a781bf1484cf31e73270d14f048218269686dbde3"
+    size_bytes: 30847
+    storage_uri: "file://experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/gallery.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "24dbc36b3e964bd3648305c2458fa19f112f5b3c"
+    config_hash: "ab283cf366487e8dec70233eb255e0d78c42b737237a3d85923554b7978393ab"
+    data_cutoff: "2026-09-03T03:30:00Z"
+    notes: Filterable by timeframe, direction and symbol; every card links its 1920x1400 original chart.
+
+  - artifact_id: crypto-grade-a-yolo-mtf-latest-20260903-v1-verification
+    artifact_type: manifest
+    role: independent_offline_candle_pixel_semantic_rank_and_chart_replay_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b17c640466aa3f15fe40631f00e5708871c5984f"
+    source_path: experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/verification.json
+    sha256: "4dfa634b931836164c03b6556b41e7afd7c2037c479e4af30126efc3638154e9"
+    size_bytes: 732
+    storage_uri: "file://experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/verification.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b17c640466aa3f15fe40631f00e5708871c5984f"
+    config_hash: "ab283cf366487e8dec70233eb255e0d78c42b737237a3d85923554b7978393ab"
+    data_cutoff: "2026-09-03T03:30:00Z"
+    notes: PASS for 1,075 candle files, 1,837 pixels and semantics, 41 ranks and 41 chart pixels; zero network or inference.
+
+  - artifact_id: crypto-grade-a-yolo-mtf-latest-20260903-v1-summary-figure
+    artifact_type: report
+    role: owner_facing_timeframe_counts_gate_survival_and_top_twenty_overview_png
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c8f85bdbcbfc720f033a1d2ca8847430d3bc7c18"
+    source_path: experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/summary_overview.png
+    sha256: "fa51741aa757050097bc25c7fbe6914dc19acc5d1b694c815e8c2d8b0a2948af"
+    size_bytes: 288323
+    storage_uri: "file://experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/summary_overview.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c8f85bdbcbfc720f033a1d2ca8847430d3bc7c18"
+    config_hash: "ab283cf366487e8dec70233eb255e0d78c42b737237a3d85923554b7978393ab"
+    data_cutoff: "2026-09-03T03:30:00Z"
+    notes: ASCII timeframe labels avoid CJK font loss; no analytical result changed.
+
+  - artifact_id: crypto-grade-a-yolo-mtf-latest-20260903-v1-chart-pack
+    artifact_type: report
+    role: ranked_original_chart_contact_sheet_gallery_and_signal_ledger_zip
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c8f85bdbcbfc720f033a1d2ca8847430d3bc7c18"
+    source_path: experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/crypto_grade_a_yolo_mtf_ranked_charts_20260903.zip
+    sha256: "af74a67c6701324226fd4945b94df41f10f5d922a74afd0ca35386e2e97442ea"
+    size_bytes: 12881703
+    storage_uri: "file://experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/crypto_grade_a_yolo_mtf_ranked_charts_20260903.zip"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c8f85bdbcbfc720f033a1d2ca8847430d3bc7c18"
+    config_hash: "ab283cf366487e8dec70233eb255e0d78c42b737237a3d85923554b7978393ab"
+    data_cutoff: "2026-09-03T03:30:00Z"
+    notes: Contains all 41 original 1920x1400 charts plus combined and per-timeframe overview pages.
+
+  - artifact_id: crypto-grade-a-yolo-mtf-latest-20260903-v1-report
+    artifact_type: report
+    role: canonical_chinese_report_with_full_ranking_null_control_recovery_and_risks
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cc3b42a68ebe34e09b9764a4daed956a0c703d4e"
+    source_path: analysis/p1_crypto_grade_a_yolo_mtf_latest_20260903.md
+    sha256: "5be5c5a15bcb5dee94352c04ab70afaa895402284008c8a1ca3a1413504ce23b"
+    size_bytes: 17619
+    storage_uri: "repo://analysis/p1_crypto_grade_a_yolo_mtf_latest_20260903.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c8f85bdbcbfc720f033a1d2ca8847430d3bc7c18"
+    config_hash: "ab283cf366487e8dec70233eb255e0d78c42b737237a3d85923554b7978393ab"
+    data_cutoff: "2026-09-03T03:30:00Z"
+    notes: Includes all 41 ranks, current-endpoint subset, null control, holdout accounting, failure recovery and safety limits.
+
+  - artifact_id: crypto-grade-a-yolo-mtf-latest-20260903-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_report_with_embedded_summary_figure
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cc3b42a68ebe34e09b9764a4daed956a0c703d4e"
+    source_path: analysis/html/p1_crypto_grade_a_yolo_mtf_latest_20260903.html
+    sha256: "d7531ddb1c7d3b9659a81239706670d35006bce3dc4c69573be27b656d12d5b5"
+    size_bytes: 410202
+    storage_uri: "repo://analysis/html/p1_crypto_grade_a_yolo_mtf_latest_20260903.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c8f85bdbcbfc720f033a1d2ca8847430d3bc7c18"
+    config_hash: "ab283cf366487e8dec70233eb255e0d78c42b737237a3d85923554b7978393ab"
+    data_cutoff: "2026-09-03T03:30:00Z"
+    notes: Self-contained UTF-8 HTML with the summary figure embedded and links to the filterable gallery and chart packs.

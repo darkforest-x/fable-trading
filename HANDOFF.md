@@ -2,6 +2,26 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-03 — Crypto 15m / 1h / 4h / 日线最新扫描完成）
+
+Owner 要求用现有模型扫描最新四周期行情，并允许 4h / 日线回看最近 15 天。本轮冻结 OKX
+USDT 永续 277 币宇宙、Grade-A full40 native-1280 checkpoint、W18/W19、结构门、因果
+语义门与审核排序后执行：57,770 个模型窗口经 2,122 原框 → 1,837 结构框 → 294
+语义框 → **41 个去重研究候选**，分周期为 **15m 0、1h 2、4h 31、日线 8**；其中
+**5 个**仍在各自周期的最新已收盘端点。ZEC 是唯一同方向跨周期币种（4h + 日线），
+但两个事件并不同步，不能解释成实时共振确认。
+
+离线复验通过 1,075 份冻结 K 线、1,837 个模型输入像素、1,837 个语义决定、41 个
+事件/排序与 41 张图，网络读取和模型推理均为 0。首次执行在读完行情后因语义 frame
+缺 ATR 列失败；修复只补回父实现既有的 Pine-RMA ATR14，并复用原冻结字节，没有二次
+读取市场。正式报告：`analysis/html/p1_crypto_grade_a_yolo_mtf_latest_20260903.html`；
+可筛图库：`experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan/gallery.html`。
+
+这是该 checkpoint 的 holdout 使用 **15m #13、1h #14、4h #15、1d #16**。此前 Owner 对
+4h 批次“都不太行”的裁决继续有效；更高周期是 OOD completed-history 审核候选，不是
+允许交易的信号。未训练、调门、promote、部署、改 ACTIVE/frozen/forward、发 Telegram
+或下单，`production_eligible=false`。
+
 ## ⚡ 当前真相（2026-09-02 — 普通主板 1h/会话4h LONG 扫描已完成）
 
 Owner 授权 Grade-A full40 native-1280 checkpoint 的 1h holdout **#11**、会话 4h
