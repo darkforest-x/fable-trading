@@ -10,6 +10,7 @@ import pandas as pd
 
 from scripts import mine_15m_ma_launch_grade_a_daily_movers_5000 as mine
 from scripts import remote_infer_15m_ma_launch_grade_a_taskpack as worker
+from scripts import render_15m_ma_launch_grade_a_daily_movers_5000_overview as overview
 from yoyo.datasets.fifteen_minute_launch_candidates import add_candidate_features
 
 
@@ -62,6 +63,23 @@ def test_search_months_is_newest_first_and_bounded() -> None:
     payload = {"calendar": {"earliest_month": "2025-08", "latest_month": "2025-10"}}
 
     assert mine.search_months(payload) == ["2025-10", "2025-09", "2025-08"]
+
+
+def test_corrected_overview_feeds_legacy_renderer_oldest_first() -> None:
+    rows = [
+        {"month": "2025-10", "global_novel_after_month": 113},
+        {"month": "2025-09", "global_novel_after_month": 193},
+        {"month": "2025-08", "global_novel_after_month": 289},
+    ]
+
+    ordered = overview.legacy_overview_input_order(rows)
+
+    assert [row["month"] for row in ordered] == ["2025-08", "2025-09", "2025-10"]
+    assert [row["global_novel_after_month"] for row in reversed(ordered)] == [
+        113,
+        193,
+        289,
+    ]
 
 
 def test_official_preregistration_freezes_5000_without_holdout() -> None:
