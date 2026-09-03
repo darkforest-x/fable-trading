@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1",
+  "launched_at": "2026-09-03T20:56:01+08:00",
+  "remote_host": "Administrator@192.168.1.2",
+  "wmi_pid": 24324,
+  "trainer_python_pid_at_2026_09_03_21_27_cst": 5948,
+  "run_name": "ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40",
+  "stage_sentinel": "STAGE_OK|ma_launch_owner_grade_a8000_neg24000_hl2_v1_y11s_ft1280_full40|ec93d6bfd04cc84a24a34cd745af2c74943f9a75e664831060619511ba60f6d7|ff6146be0e8d4cfaaa96b7925e4a1d63aa62c9cb0a3df063d00e5d58ff3e02db",
+  "recipe": {
+    "epochs": 40,
+    "patience": 0,
+    "batch": 8,
+    "imgsz": 1280,
+    "seed": 0
+  },
+  "queue_prerequisite": "The original exp-15m-ma-launch-grade-a-daily-movers-5000-v1 coordinator exited and the remote Python process count reached zero before staging and WMI launch.",
+  "queue_state_at_receipt": "released_and_launched",
+  "post_launch_observation": "A separately restarted daily-movers coordinator launched a new remote inference worker after the HL2 training had started. Neither workload was interrupted. At 21:27 CST training was running in epoch 2 while both remote Python processes were present; this may extend wall time but does not alter the frozen recipe.",
+  "runtime_versions": {
+    "torch": "2.8.0",
+    "torchvision": "0.23.0",
+    "ultralytics": "8.4.89",
+    "numpy": "2.0.2"
+  },
+  "gpu": "NVIDIA GeForce RTX 3060 12GB",
+  "first_verified_progress": {
+    "checked_at": "2026-09-03T21:27:05+08:00",
+    "epoch": 2,
+    "epoch_batches_completed": 608,
+    "epoch_batches_total": 3400,
+    "best_pt_present": true,
+    "exit_code_present": false
+  },
+  "holdout_read": false,
+  "promoted": false,
+  "deployed": false,
+  "active_or_frozen_changed": false,
+  "forward_state_changed": false,
+  "order_state_changed": false
+}
