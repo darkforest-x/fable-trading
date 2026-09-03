@@ -24,6 +24,13 @@ The result is a feature atlas and a falsification audit, not a production rule.
 Any apparently positive bin must still satisfy absolute post-cost profitability,
 matched-control excess, time stability, uncertainty and multiplicity checks.
 
+After the first 42-family run, a completeness audit found 13 material causal
+columns that already existed in the frozen V2 table but were absent from the
+atlas (including stop distance, MA ordering, oscillator level/delta and native
+colour continuity). They were declared in `config.json` and committed before
+their results were inspected. Because the first run had already opened 2025,
+these additional families are diagnostic rather than confirmatory.
+
 ## Reproduce
 
 ```bash

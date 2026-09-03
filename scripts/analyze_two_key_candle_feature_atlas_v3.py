@@ -214,11 +214,15 @@ def make_dimensions(frame: pd.DataFrame) -> dict[str, pd.Series]:
         "k1_close_location": cut(frame["k1_close_location"], [0.749, 0.82, 0.88, 0.94, 1.001], ["0.75-0.82", "0.82-0.88", "0.88-0.94", ">0.94"]),
         "k1_volume_ratio": cut(frame["k1_volume_ratio"], [-np.inf, 0.8, 1.2, 1.5, 2.0, np.inf], ["<0.8", "0.8-1.2", "1.2-1.5", "1.5-2.0", ">2.0"]),
         "k1_ma_colour": np.where(k1_ma, "aligned", "opposite"),
+        "k1_oscillator_sign": np.where(bool_series(frame, "k1_osc_sign_aligned"), "aligned", "opposite"),
         "k1_oscillator_acceleration": np.where(k1_accel, "aligned", "opposite"),
         "k1_structure_state": np.where(k1_struct, "aligned", "not aligned"),
+        "k1_quality": cut(frame["k1_quality"], [0.249, 0.40, 0.55, 0.70, 1.001], ["0.25-0.40", "0.40-0.55", "0.55-0.70", ">0.70"]),
         "k2_wick_share": cut(frame["k2_wick_share"], [0.449, 0.60, 0.75, 0.90, 1.001], ["0.45-0.60", "0.60-0.75", "0.75-0.90", ">0.90"]),
         "k2_body_share": cut(frame["k2_body_ratio"], [-0.001, 0.10, 0.25, 0.501], ["0-0.10", "0.10-0.25", "0.25-0.50"]),
         "k2_range_atr": cut(frame["k2_range_atr"], [-np.inf, 0.60, 0.90, 1.30, 1.80, np.inf], ["<0.60", "0.60-0.90", "0.90-1.30", "1.30-1.80", ">1.80"]),
+        "k2_rejection_close_location": cut(frame["k2_rejection_close_location"], [0.649, 0.75, 0.85, 0.95, 1.001], ["0.65-0.75", "0.75-0.85", "0.85-0.95", ">0.95"]),
+        "k2_volume_ratio": cut(frame["k2_volume_ratio"], [-np.inf, 0.60, 1.00, 1.50, 2.50, np.inf], ["<0.60", "0.60-1.00", "1.00-1.50", "1.50-2.50", ">2.50"]),
         "k2_sma40_touch_depth": cut(frame["k2_sma40_touch_depth_atr"], [-0.051, 0.15, 0.40, 0.80, 1.501], ["near line", "0.15-0.40", "0.40-0.80", "0.80-1.50"]),
         "k2_sma40_close_reclaim": cut(frame["k2_sma40_close_side_atr"], [-0.001, 0.25, 0.50, 1.00, np.inf], ["0-0.25", "0.25-0.50", "0.50-1.00", ">1.00"]),
         "k2_native_body_colour": np.where(bool_series(frame, "k2_native_colour_aligned"), "aligned", "opposite"),
@@ -226,6 +230,9 @@ def make_dimensions(frame: pd.DataFrame) -> dict[str, pd.Series]:
         "k2_oscillator_sign": np.where(k2_sign, "aligned", "opposite"),
         "k2_oscillator_acceleration": np.where(k2_accel, "aligned", "opposite/cooling"),
         "k2_structure_state": np.select([k2_struct, k2_not_opposite], ["aligned", "neutral"], default="opposite"),
+        "k2_break_event": np.where(frame["k2_side_break_event"].eq(1), "directional break on K2", "no directional break on K2"),
+        "k2_oscillator_level": cut(frame["ma_shift_osc"], [-np.inf, -0.25, 0.0, 0.25, 0.50, np.inf], ["<-0.25", "-0.25-0", "0-0.25", "0.25-0.50", ">0.50"]),
+        "k2_oscillator_delta": cut(frame["ma_shift_osc_delta"], [-np.inf, -0.05, 0.0, 0.05, np.inf], ["<-0.05", "-0.05-0", "0-0.05", ">0.05"]),
         "oscillator_transition": np.select(
             [
                 k1_accel & k2_sign & ~k2_accel,
@@ -242,14 +249,20 @@ def make_dimensions(frame: pd.DataFrame) -> dict[str, pd.Series]:
         "k2_vs_k1_close": cut(frame["close_distance_atr"], [-np.inf, -0.75, -0.25, 0.25, 0.75, np.inf], ["far retrace", "moderate retrace", "similar close", "extends 0.25-0.75", "extends >0.75"]),
         "k1_k2_body_overlap": cut(frame["k1_k2_body_overlap_share"], [-0.001, 0.001, 0.10, 0.25, 0.50, 1.001], ["none", "0-0.10", "0.10-0.25", "0.25-0.50", ">0.50"]),
         "k2_to_k1_volume": cut(frame["k2_to_k1_volume_ratio"], [-np.inf, 0.50, 0.80, 1.25, 2.00, np.inf], ["<0.50", "0.50-0.80", "0.80-1.25", "1.25-2.00", ">2.00"]),
+        "stop_distance_atr": cut(frame["stop_distance_atr_24"], [0.149, 0.40, 0.70, 1.00, 1.50, 2.501], ["0.15-0.40", "0.40-0.70", "0.70-1.00", "1.00-1.50", "1.50-2.50"]),
         "pre_retest_extension": cut(frame["pre_retest_extension_atr"], [-np.inf, 0.25, 0.50, 1.00, 2.00, np.inf], ["<0.25", "0.25-0.50", "0.50-1.00", "1.00-2.00", ">2.00"]),
+        "retrace_fraction": cut(frame["retrace_fraction"], [-np.inf, 1.0, 1.5, 3.0, 10.0, np.inf], ["<1", "1-1.5", "1.5-3", "3-10", ">10"]),
         "path_variation": cut(frame["path_variation_atr"], [-np.inf, 0.50, 1.00, 2.00, np.inf], ["<0.50", "0.50-1.00", "1.00-2.00", ">2.00"]),
         "path_efficiency": cut(frame["path_efficiency"], [-np.inf, -0.50, 0.0, 0.50, np.inf], ["<-0.50", "-0.50-0", "0-0.50", ">0.50"]),
         "wrong_sma40_closes": cut(frame["wrong_sma40_close_count"], [-0.5, 0.5, 1.5, np.inf], ["0", "1", "2+"]),
+        "wrong_rope_closes": cut(frame["wrong_side_close_count"], [-0.5, 0.5, 1.5, np.inf], ["0", "1", "2+"]),
         "intermediate_ma_colour_share": cut(frame["intermediate_ma_colour_share"], [-0.01, 0.50, 0.999, 1.01], ["<50%", "50-99%", "100%"]),
+        "intermediate_native_side_share": cut(frame["intermediate_native_side_share"], [-0.01, 0.50, 0.999, 1.01], ["<50%", "50-99%", "100%"]),
         "six_ma_rope_width": cut(frame["rope_width_atr"], [-np.inf, 1.00, 2.00, 3.00, np.inf], ["<1ATR", "1-2ATR", "2-3ATR", ">3ATR"]),
         "six_ma_rope_slope": np.where(frame["rope_slope_side_atr"].ge(0), "aligned/nonnegative", "opposite"),
+        "six_ma_order_alignment": cut(frame["side_ma_alignment"], [-0.5, 0.5, 5.5, 11.5, 12.5], ["0/12 pairs", "1-5/12 pairs", "6-11/12 pairs", "12/12 pairs"]),
         "prior_rope_width": cut(frame["prior_rope_width_atr_20"], [-np.inf, 1.50, 2.50, 4.00, np.inf], ["<1.5ATR", "1.5-2.5ATR", "2.5-4ATR", ">4ATR"]),
+        "prior_range_context": cut(frame["prior_range_atr_20"], [-np.inf, 3.0, 4.0, 5.0, np.inf], ["<3ATR", "3-4ATR", "4-5ATR", ">5ATR"]),
         "atr_release": cut(frame["atr_release_24"], [-np.inf, 0.80, 1.00, 1.25, np.inf], ["<0.80", "0.80-1.00", "1.00-1.25", ">1.25"]),
         "atr_percent_of_price": cut(frame["atr_pct"], [-np.inf, 0.006, 0.010, 0.016, 0.025, np.inf], ["<0.6%", "0.6-1.0%", "1.0-1.6%", "1.6-2.5%", ">2.5%"]),
         "side_coloured_volume_share": cut(pd.Series(side_volume, index=frame.index), [0.0, 0.40, 0.50, 0.60, 1.0], ["<40%", "40-50%", "50-60%", ">60%"]),
@@ -583,10 +596,13 @@ def plot_halfyear(data: pd.DataFrame, output: Path) -> None:
     axis.bar(x - width / 2, data["net_bp"], width, color=BLUE, edgecolor=INK, linewidth=0.5, label="signal net")
     axis.bar(x + width / 2, data["control_net_bp"], width, color=GOLD, edgecolor=INK, linewidth=0.5, label="matched control net")
     axis.axhline(0, color=INK, linewidth=1)
-    axis.set_xticks(x, data["half"])
+    display_labels = data["half"].replace(
+        {"2026 Jan-Feb bridge": "2026\nJan-Feb bridge", "2026 Mar-Apr fresh": "2026\nMar-Apr fresh"}
+    )
+    axis.set_xticks(x, display_labels)
     axis.set_ylabel("bp per event after 20bp round-trip cost")
-    axis.set_title("SMA40 core performance by half-year", loc="left", fontsize=15, color=INK)
-    axis.text(0, 1.02, "Exact next-open entry, exact K2-extreme stop; n shown above paired bars", transform=axis.transAxes, color=INK)
+    axis.set_title("SMA40 core performance by half-year", loc="left", y=1.075, fontsize=15, color=INK)
+    axis.text(0, 1.018, "Exact next-open entry, exact K2-extreme stop; n shown above paired bars", transform=axis.transAxes, color=INK, fontsize=9.5)
     for i, n in enumerate(data["n"]):
         top = max(data.loc[i, "net_bp"], data.loc[i, "control_net_bp"], 0)
         axis.text(i, top + 5, f"n={int(n)}", ha="center", va="bottom", fontsize=8, color=INK)
@@ -630,8 +646,8 @@ def plot_validation_rank(replay: pd.DataFrame, output: Path) -> None:
     axis.axvline(0, color=INK, linewidth=1)
     axis.set_yticks(y, [f"{d}: {l}" for d, l in zip(data["dimension"], data["selected_level"])])
     axis.set_xlabel("2025 bp per event")
-    axis.set_title("Best 2023-2024 bin from each dimension: 2025 replay", loc="left", fontsize=15, color=INK)
-    axis.text(0, 1.015, "Top 18 by the weaker of absolute net and matched-control excess; no threshold was refit on 2025", transform=axis.transAxes, color=INK)
+    axis.set_title("Best 2023-2024 bin from each dimension: 2025 replay", loc="left", y=1.065, fontsize=15, color=INK)
+    axis.text(0, 1.012, "Top 18 by the weaker of absolute net and matched-control excess; no threshold was refit on 2025", transform=axis.transAxes, color=INK, fontsize=9.5)
     axis.legend(frameon=False, ncol=2, loc="lower right")
     style_axis(axis)
     fig.savefig(output, dpi=180, facecolor="white")
@@ -655,10 +671,44 @@ def plot_fixed_targets(data: pd.DataFrame, output: Path) -> None:
     axis.axhline(0, color=INK, linewidth=1)
     axis.set_xticks(x, ["1R", "2R", "3R", "5R"])
     axis.set_ylabel("mean net bp per event")
-    axis.set_title("Fixed-target sensitivity for anchor score >=70", loc="left", fontsize=15, color=INK)
-    axis.text(0, 1.02, "24h opportunity window, stop-first intrabar convention, exact K2 stop and 20bp cost", transform=axis.transAxes, color=INK)
+    axis.set_title("Fixed-target sensitivity for anchor score >=70", loc="left", y=1.075, fontsize=15, color=INK)
+    axis.text(0, 1.018, "24h opportunity window, stop-first intrabar convention, exact K2 stop and 20bp cost", transform=axis.transAxes, color=INK, fontsize=9.5)
     axis.legend(frameon=False, ncol=2)
     style_axis(axis)
+    fig.savefig(output, dpi=180, facecolor="white")
+    plt.close(fig)
+
+
+def plot_gap_walkforward(atlas: pd.DataFrame, output: Path) -> None:
+    data = atlas[
+        atlas["dimension"].eq("gap_exact")
+        & atlas["horizon_bars"].eq(24)
+    ].copy()
+    data["gap"] = pd.to_numeric(data["level"], errors="coerce")
+    split_styles = {
+        "discovery": (BLUE, "o", "-"),
+        "validation": (GOLD, "s", "-"),
+        "bridge": (ORANGE, "^", "--"),
+        "fresh_preholdout": (GREY, "D", "--"),
+    }
+    fig, axes = plt.subplots(3, 1, figsize=(11, 11), sharex=True, constrained_layout=True)
+    for split, (colour, marker, line_style) in split_styles.items():
+        group = data[data["split"].eq(split)].sort_values("gap")
+        axes[0].plot(group["gap"], group["net_bp"], color=colour, marker=marker, linestyle=line_style, linewidth=1.8, label=split)
+        axes[1].plot(group["gap"], group["paired_excess_bp"], color=colour, marker=marker, linestyle=line_style, linewidth=1.8)
+        axes[2].plot(group["gap"], group["n"], color=colour, marker=marker, linestyle=line_style, linewidth=1.8)
+    for axis in axes[:2]:
+        axis.axhline(0, color=INK, linewidth=1)
+    axes[0].set_ylabel("net bp/event")
+    axes[1].set_ylabel("excess vs control bp")
+    axes[2].set_ylabel("events")
+    axes[2].set_xlabel("exact completed 1h bars from K1 to K2")
+    axes[0].legend(frameon=False, ncol=2, loc="lower right")
+    for axis in axes:
+        style_axis(axis)
+        axis.set_xticks(range(2, 9))
+    fig.suptitle("Exact K1-to-K2 distance across chronological splits", x=0.01, ha="left", fontsize=15, color=INK)
+    axes[0].set_title("Signal net, matched-control excess and sample support; no distance is monotonic across splits", loc="left", fontsize=10, color=INK, pad=12)
     fig.savefig(output, dpi=180, facecolor="white")
     plt.close(fig)
 
@@ -670,6 +720,7 @@ def chart_map() -> pd.DataFrame:
             {"report_segment": "feature generalization", "question": "Do discovery-selected one-dimensional bins generalize to 2025?", "family": "relationship", "chart_type": "two-panel scatter", "fields": "discovery_score, validation net/excess, n", "supported_claim": "selection-to-validation decay", "palette": "single blue root + neutrals", "output": "walkforward_generalization.png"},
             {"report_segment": "feature ranking", "question": "Which selected bins are least bad in 2025 on both absolute and relative outcomes?", "family": "comparison", "chart_type": "horizontal grouped bar", "fields": "dimension, level, net_bp, paired_excess_bp", "supported_claim": "no dimension passes the joint gate", "palette": "blue + gold + neutrals", "output": "validation_rank.png"},
             {"report_segment": "exit sensitivity", "question": "Does a fixed 1R/2R/3R/5R target rescue the anchor score?", "family": "comparison", "chart_type": "grouped bar", "fields": "split, target_r, mean_net_bp", "supported_claim": "fixed targets do or do not fix expectancy", "palette": "blue + gold + orange + neutral context", "output": "fixed_target_sensitivity.png"},
+            {"report_segment": "distance", "question": "Does an exact K1-to-K2 bar count generalize?", "family": "trend over ordered parameter", "chart_type": "three-panel line", "fields": "gap, split, net_bp, paired_excess_bp, n", "supported_claim": "distance response changes sign across time splits", "palette": "blue + gold + orange + neutral context", "output": "gap_walkforward.png"},
         ]
     )
 
@@ -737,6 +788,7 @@ def main() -> int:
         plot_generalization(replay, output / "walkforward_generalization.png")
         plot_validation_rank(replay, output / "validation_rank.png")
         plot_fixed_targets(fixed_targets, output / "fixed_target_sensitivity.png")
+        plot_gap_walkforward(atlas, output / "gap_walkforward.png")
 
     validation = replay[replay["split"].eq("validation")].copy()
     validation["joint_metric_bp"] = validation[["net_bp", "paired_excess_bp"]].min(axis=1)
