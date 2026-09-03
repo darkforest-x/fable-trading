@@ -1,0 +1,60 @@
+{
+  "experiment_id": "exp-two-key-candle-ma-retest-1h-preholdout-v1",
+  "status": "active_research",
+  "purpose": "Test whether a wick-retest K2 plus K1-to-K2 distance and indicator-state features create a stable directional edge beyond the old dense-start baseline.",
+  "data_glob": "data/kline_deep/okx_*_USDT_SWAP_15m_*.csv",
+  "source_bar_minutes": 15,
+  "analysis_bar_minutes": 60,
+  "resample_contract": "UTC clock hours; require exactly four consecutive 15m bars",
+  "development_start": "2023-01-01T00:00:00Z",
+  "development_end_exclusive": "2025-01-01T00:00:00Z",
+  "validation_start": "2025-01-01T00:00:00Z",
+  "safe_end_exclusive": "2026-03-01T00:00:00Z",
+  "holdout_start": "2026-05-04T00:00:00Z",
+  "selection_symbols": "all available symbols except BTC",
+  "transfer_symbol": "BTC",
+  "round_trip_cost": 0.002,
+  "entry": "open[k2+1]",
+  "initial_stop": "K2 low for long; K2 high for short; no buffer",
+  "primary_horizon_bars": 24,
+  "sensitivity_horizon_bars": [12, 48],
+  "same_bar_collision": "stop first",
+  "max_k1_k2_gap_bars": 12,
+  "event_cooldown_bars": 6,
+  "broad_candidate": {
+    "k1_min_body_ratio": 0.2,
+    "k1_min_range_atr": 0.5,
+    "k1_min_rope_coverage": 0.25,
+    "k1_min_entry_depth_atr": -0.15,
+    "k1_min_exit_depth_atr": -0.15,
+    "k2_min_rejection_wick_share": 0.15,
+    "k2_max_touch_miss_atr": 0.25,
+    "k2_max_touch_depth_atr": 2.0,
+    "k2_min_close_side_atr": 0.0,
+    "min_stop_distance_atr": 0.05,
+    "max_stop_distance_atr": 3.0
+  },
+  "selection": {
+    "folds": ["2023H1", "2023H2", "2024H1", "2024H2"],
+    "method": "preordered greedy, one semantic variable family at a time",
+    "minimum_events_total": 320,
+    "minimum_events_per_fold": 35,
+    "minimum_events_per_side": 80,
+    "minimum_robust_score_improvement_bp": 1.0,
+    "robust_score": "median half-year paired excess bp minus 0.50 times its population standard deviation",
+    "tie_break": "higher worst-fold paired excess, then more events",
+    "validation_retuning": false
+  },
+  "matched_control": {
+    "n_per_event": 3,
+    "strata": ["symbol", "month", "UTC six-hour block", "within-symbol-month ATR quintile"],
+    "copied": ["side", "horizon", "stop distance in ATR", "round-trip cost"],
+    "exclude_broad_signal_bars": true,
+    "seed": "two-key-candle-ma-retest-v1"
+  },
+  "eligibility": {
+    "training_eligible": false,
+    "production_eligible": false,
+    "holdout_consumed": false
+  }
+}
