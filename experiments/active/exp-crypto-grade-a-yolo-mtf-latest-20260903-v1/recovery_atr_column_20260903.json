@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-crypto-grade-a-yolo-mtf-latest-20260903-v1",
+  "recorded_at": "2026-09-03T11:44:00+08:00",
+  "original_prereg_source_commit": "051414d695a5f3d9bdb35164e6b9b19a75d6405f",
+  "corrected_builder_commit": "24dbc36b3e964bd3648305c2458fa19f112f5b3c",
+  "failure_stage": "after 15m YOLO structural inference and before any semantic decision was accepted or ranked",
+  "failure_error": "SemanticGateError:semantic frame is missing columns: ['atr']",
+  "holdout_status": "consumed; the failed read is not erased or renumbered",
+  "change_scope": "add_missing_inherited_pine_rma_atr14_column_only",
+  "change_description": "The original scanner used the renderer-only add_mas adapter, which creates the six MA columns but not the ATR column required by the already frozen semantic gate. The repair reuses the parent gate's add_candidate_features implementation before task construction, preserves its Pine-RMA ATR14, and leaves renderer pixels and all decision thresholds unchanged.",
+  "model_gate_timeframe_universe_ranking_changed": false,
+  "additional_market_read_authorized": false,
+  "recovery_method": "Move the failed build directory aside, then resume from its immutable universe and candle CSVs. Revalidate every file's clock and OHLCV values, copy them into a new build directory, and perform no OKX request during recovery.",
+  "frozen_source_directory": "experiments/active/exp-crypto-grade-a-yolo-mtf-latest-20260903-v1/results/scan.failed_atr_missing_20260903T034004Z",
+  "frozen_receipts": {
+    "holdout_consumption_started.json": "486caf6816e339076c365bbb220c17498a9b1457d56cd345da128714ec333577",
+    "universe.json": "769744b342110311ea0e4da248d747f063044865b623ea9b9478a4bf20950f09",
+    "failure_receipt.json": "e55ca5feb2e5400595441513f31ab2896bddc845096078ad6df6703ac64d2a24"
+  },
+  "frozen_scope": {
+    "universe_symbols": 277,
+    "15m_latest_closed_open": "2026-09-03T03:15:00+00:00",
+    "1h_latest_closed_open": "2026-09-03T02:00:00+00:00",
+    "4h_latest_closed_open": "2026-09-02T20:00:00+00:00",
+    "1d_latest_closed_open": "2026-09-02T00:00:00+00:00",
+    "4h_earliest_endpoint_open": "2026-08-19T00:00:00+00:00",
+    "1d_earliest_endpoint_open": "2026-08-19T00:00:00+00:00"
+  },
+  "holdout_consumption_numbers_for_checkpoint": {
+    "15m": 13,
+    "1h": 14,
+    "4h": 15,
+    "1d": 16
+  },
+  "verification_before_recovery": {
+    "command": ".venv/bin/python -m pytest -q tests/test_scan_crypto_grade_a_yolo_mtf_latest.py tests/test_scan_4h_ma_launch_yolo_latest.py tests/test_ma_launch_yolo_semantic_gate.py tests/boundaries/test_layer_imports.py",
+    "result": "81 passed",
+    "atr_regression": "The test compares recovered ATR byte-for-value against the parent add_candidate_features implementation and checks it survives base.build_tasks."
+  },
+  "safety": {
+    "training": false,
+    "threshold_or_weight_change": false,
+    "promotion": false,
+    "deployment": false,
+    "active_or_frozen_change": false,
+    "forward_state_change": false,
+    "telegram_send": false,
+    "order_state_change": false
+  }
+}
