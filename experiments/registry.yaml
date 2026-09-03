@@ -3535,3 +3535,37 @@ experiments:
       that any candidate is Owner-confirmed Gold or that the detector was
       validated. The run did not relabel, train, tune, promote, deploy, change
       ACTIVE/frozen or forward state, send Telegram, or place orders.
+
+  - experiment_id: exp-15m-ma-launch-grade-a-daily-movers-5000-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "dc8e5e67cadc8b2e71872a6a0c710aedc13aef25"
+    status: active
+    question: >-
+      Can a newest-first sequence of complete pre-validation calendar months,
+      each using the daily Top5 gainers plus Top5 losers, produce at least
+      5,000 globally de-duplicated novel Grade-A review events without reading
+      holdout or changing labels, model weights, thresholds, or production?
+    single_variable: >-
+      n/a -- this is an Owner-requested P1 scale-up and review-queue build, not
+      a performance comparison. Top5+Top5, checkpoint, conf=0.25, NMS=0.70,
+      core4/5, confirmation2-9, semantic gate and five-bar event spacing stay
+      frozen. The preregistered discovery sampler uses W18 and the frozen
+      1.5-ATR six-MA-envelope ceiling to make the 5,000-event search tractable;
+      its prior-October calibration and incompleteness are disclosed.
+    result: pending_owner_requested_5000_novel_review_event_search
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_15m_ma_launch_grade_a_daily_movers_5000_20260903.md
+    artifacts:
+      - 15m-ma-launch-grade-a-daily-movers-5000-v1-prereg
+    reuse_allowed: false
+    notes: >-
+      Full months are scanned newest-first from 2025-10 toward 2021-01 and the
+      run stops only at the first full-month boundary with at least 5,000
+      novelty_status=new_event_review events after global cross-day/month
+      de-duplication. Five thousand does not mean five thousand confirmed
+      positives: candidate-positive, hard-negative, exact-input overlap and
+      near-training-positive identities remain separate. The completed-day
+      rank is post-hoc and cannot be interpreted as a live selector, model
+      validation, return evidence, or a trading signal.

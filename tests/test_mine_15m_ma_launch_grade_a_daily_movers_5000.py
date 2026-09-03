@@ -63,6 +63,17 @@ def test_search_months_is_newest_first_and_bounded() -> None:
     assert mine.search_months(payload) == ["2025-10", "2025-09", "2025-08"]
 
 
+def test_official_preregistration_freezes_5000_without_holdout() -> None:
+    payload, gates = mine.load_preregistration(mine.DEFAULT_PREREG)
+
+    assert payload["detector"]["target_novel_review_events_minimum"] == 5000
+    assert payload["calendar"]["latest_month"] == "2025-10"
+    assert payload["owner_authorization"]["holdout_read_authorized"] is False
+    assert payload["safety"]["training"] is False
+    assert payload["safety"]["label_or_dataset_mutation"] is False
+    assert gates == payload["semantic_gate"]["frozen_morphology_gate"]
+
+
 def test_visible_w18_prefilter_accepts_dense_and_rejects_wide() -> None:
     dense, _, dense_stats = mine.build_tasks(
         _prereg(), frames={"TESTUSDT": _frame(spread=0.1)}, rankings=[_board()]

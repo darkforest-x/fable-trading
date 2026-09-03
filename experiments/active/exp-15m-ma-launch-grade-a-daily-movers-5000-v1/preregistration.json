@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "protocol": "ma6_grade_a_daily_movers_novel_review5000_v1_20260903",
+  "experiment_id": "exp-15m-ma-launch-grade-a-daily-movers-5000-v1",
+  "created_at": "2026-09-03T00:00:00+08:00",
+  "source_commit": "dc8e5e67cadc8b2e71872a6a0c710aedc13aef25",
+  "stage": "p1_preholdout_candidate_discovery",
+  "question": "How many novel, globally de-duplicated Grade-A model review events can be mined from completed daily Top5-gainer and Top5-loser boards before detector validation and holdout, stopping only after a full-month boundary reaches at least 5,000?",
+  "owner_authorization": {
+    "conversation_date": "2026-09-03",
+    "requests": [
+      "为了继续优化我们的模型训练，我们继续优化数据集，用模型 跑每天的涨跌幅排行榜前几的 跑一遍",
+      "多少个？起码要给我找5000个啊"
+    ],
+    "interpreted_action": "Scale the daily-mover P1 mining pool until at least 5,000 globally de-duplicated novel model review events are available; retain candidate-positive, hard-negative and training-overlap identities separately and do not call them confirmed Gold.",
+    "holdout_read_authorized": false,
+    "training_or_tuning_authorized": false,
+    "label_or_dataset_mutation_authorized": false,
+    "production_or_promotion_authorized": false
+  },
+  "calendar": {
+    "timezone": "UTC",
+    "latest_month": "2025-10",
+    "earliest_month": "2021-01",
+    "order": "newest_full_month_first",
+    "stop_rule": "After each complete month, globally de-duplicate all accumulated events and stop at the first month boundary where novelty_status=new_event_review count is at least 5000.",
+    "why_latest_is_2025_10": "October ends before the current detector's first validation input at 2025-12-02T22:00:00Z; the nine post-day endpoint bars can use 2025-11 context without entering validation or holdout.",
+    "partial_months_allowed": false,
+    "cherry_picking_within_month_allowed": false
+  },
+  "ranking": {
+    "venue": "Binance USD-M futures",
+    "source": "frozen official data.binance.vision monthly 15m archives",
+    "bar": "15m",
+    "daily_return": "last confirmed 15m close / first confirmed 15m open - 1",
+    "eligible_symbol_day": "exactly 96 unique contiguous UTC 15m bars",
+    "top_gainers_per_day": 5,
+    "top_losers_per_day": 5,
+    "gainer_sort": "daily_return descending, exchange_symbol ascending tie break",
+    "loser_sort": "daily_return ascending, exchange_symbol ascending tie break",
+    "minimum_volume_filter": null,
+    "replacement_when_selected_symbol_is_unscannable": false,
+    "causality": "post_hoc_same_day_ranking_for_candidate_mining_only",
+    "prohibited_interpretation": "The completed-day board is not a live universe selector, feature, backtest, return baseline or trading signal."
+  },
+  "data": {
+    "archive_root": "data/kline_preholdout_binance_um15m/downloads",
+    "archive_fetch_summary": "data/kline_preholdout_binance_um15m/archive_fetch_summary.json",
+    "archive_fetch_summary_sha256": "de0b6b64550d4a5cc7cd7f61a8f76750e3819bc8fb316d723c9a693befbd6546",
+    "admitted_symbols": "data/kline_preholdout_binance_um15m/admitted_symbols.json",
+    "admitted_symbols_sha256": "62dacec2b65e83e3ded4ff9c9e9b813c221e2317a34eccb7735a3394723f67c9",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_ohlcv_rows_allowed": 0,
+    "network_market_reads_allowed": 0,
+    "canonical_data_written": false
+  },
+  "detector": {
+    "display_name": "Grade-A 8k + 24k negatives · full40 · native 1280",
+    "weights": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+    "weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "training_manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+    "training_manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "existing_validation_first_window_start": "2025-12-02T22:00:00Z",
+    "class_names": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "window_lengths": [18],
+    "discovery_view_reason": "The prior October audit showed W18 alone retained 214/255 de-duplicated events and 36/39 semantic events while halving rendering/inference work. This is a preregistered discovery sampler, not a detector comparison or performance claim; confirmed events can later receive both views under a separately approved dataset build.",
+    "causal_prefilter": {
+      "definition": "minimum over the visible W18 bars of (max of SMA/EMA 20/60/120 minus min of SMA/EMA 20/60/120) divided by causal Pine-RMA ATR14",
+      "max_min_six_ma_envelope_atr": 1.5,
+      "source": "same numeric envelope ceiling as the frozen semantic gate",
+      "october_efficiency_audit": "On the already-completed 2025-10 scan, W18 plus this prefilter retained 114/214 W18 review events and all 36/36 W18 semantic events while retaining 6,987/31,549 W18 endpoints. This retrospective calibration is disclosed and is used only to reduce candidate-mining compute.",
+      "uses_future_bars": false,
+      "uses_completed_day_rank_inside_model": false
+    },
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "imgsz": 1280,
+    "mapped_core_length_bars_allowed": [4, 5],
+    "mapped_confirmation_bars_allowed": [2, 3, 4, 5, 6, 7, 8, 9],
+    "minimum_contiguous_history_bars_at_endpoint": 140,
+    "scan_endpoint_extension_after_day_bars": 9,
+    "event_attribution": "mapped core-end bar must lie inside the ranked UTC day",
+    "same_symbol_event_gap_bars": 5,
+    "target_novel_review_events_minimum": 5000,
+    "threshold_or_window_retuning_after_results": false
+  },
+  "semantic_gate": {
+    "parent": "experiments/active/exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1/preregistration.json",
+    "parent_sha256": "55e13144b0dae5e41a54d3a8c413eb094a54a4db87e6a963f1c8269165d085a4",
+    "frozen_morphology_gate": {
+      "core_lengths": [4, 5],
+      "max_ma_envelope_atr": 1.5,
+      "max_ma_spread_end_atr": 1.1,
+      "max_core_body_atr": 1.2,
+      "min_core_progress_atr": -0.6,
+      "max_core_progress_atr": 1.3,
+      "min_post1_progress_atr": 0.0,
+      "min_post2_progress_atr": 1.0,
+      "min_post3_progress_atr": 1.25,
+      "min_post5_progress_atr": 1.75,
+      "min_aligned_ma_slope_atr": 0.03,
+      "max_minimum_close_to_ma_atr": 1.0,
+      "max_close_to_ma_envelope_atr": 1.9,
+      "max_body_to_ma_envelope_atr": 1.5,
+      "unchanged_from_v7": true
+    },
+    "paired_null": "Recompute every structural box with LONG and SHORT flipped while keeping candles, box, endpoint and thresholds fixed."
+  },
+  "training_overlap_audit": {
+    "exact_input_identity": "same venue, exchange symbol, window start/end and window length, then decoded training-image pixel SHA-256 equals the replayed inference input pixel SHA-256",
+    "same_positive_event": "same Binance symbol and model direction with core-end distance below five 15m bars from an existing positive event",
+    "global_event_dedup": "same exchange symbol with adjacent core-end timestamps less than five bars apart, including UTC-day and month boundaries",
+    "target_counts_only": "novelty_status=new_event_review",
+    "automatic_exclusion_or_label_change": false,
+    "review_statuses": [
+      "exact_training_input",
+      "same_training_positive_event",
+      "new_event_review"
+    ]
+  },
+  "remote_cuda": {
+    "role": "inference-only renderer plus raw normalized YOLO box producer; Mac remains authoritative for ranks, mapping, semantic decisions, overlap, deduplication and artifacts",
+    "worker": "scripts/remote_infer_15m_ma_launch_grade_a_taskpack.py",
+    "worker_sha256": "8fb7116e71f1eff7cee5156a64ed25cadb5a5c7121eed6a98a78fee944ce24bd",
+    "renderer": "yoyo/layers/l1_detection/render.py",
+    "renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+    "renderer_data": "yoyo/layers/l1_detection/data.py",
+    "renderer_data_sha256": "bce9af28b00d1deb8346cafb19654e18d4987d42b3849b420a9739b5e9aeb265",
+    "root": "C:/fable/inference",
+    "python": "C:/fable/.venv/Scripts/python.exe",
+    "known_hosts_alias": "192.168.1.3",
+    "host_key_fingerprint": "SHA256:fQTPIk3nUVNYmPuRzt7DhZfZaRjKukRP9fHJn19karY",
+    "address_is_runtime_input": true,
+    "python_probe": "C:/fable/.venv/Scripts/python.exe -c \"import torch,torchvision,ultralytics,numpy,pandas,cv2;print(torch.__version__.split(chr(43))[0],torchvision.__version__.split(chr(43))[0],ultralytics.__version__,numpy.__version__,pandas.__version__,cv2.__version__,torch.cuda.is_available(),torch.cuda.get_device_name(0),sep=chr(124))\"",
+    "expected_probe": "2.8.0|0.23.0|8.4.89|2.0.2|2.3.3|5.0.0|True|NVIDIA GeForce RTX 3060",
+    "batch_size": 32,
+    "render_workers": 6,
+    "mac_cuda_pixel_parity": "Every remote task with one or more raw boxes is re-rendered on Mac; decoded BGR SHA-256 and ChartTransform must exactly match before the box is admitted.",
+    "temporary_month_inputs_removed_after_verified_pull": true,
+    "training_allowed": false,
+    "model_state_change_allowed": false
+  },
+  "immutable_inputs": {
+    "coordinator_sha256": "609bf31ad69d3c25a0c63e95cd8e3715964e064500d69e463443fd47bd698924",
+    "source_commit_contains_both_workers": true
+  },
+  "outputs": {
+    "result_root": "experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results",
+    "monthly_shards": "shards",
+    "review_queue": "review_queue.csv",
+    "review_queue_jsonl": "review_queue.jsonl",
+    "exact_model_input_directory": "model_inputs",
+    "gallery": "gallery.html",
+    "overview": "overview.png",
+    "report": "analysis/p1_15m_ma_launch_grade_a_daily_movers_5000_20260903.md",
+    "html": "analysis/html/p1_15m_ma_launch_grade_a_daily_movers_5000_20260903.html"
+  },
+  "interpretation": {
+    "purpose": "P1 human-review queue and dataset coverage audit",
+    "economic_backtest": false,
+    "holdout_final_acceptance": false,
+    "automatic_gold": false,
+    "five_thousand_means": "at least 5,000 globally de-duplicated model-proposed events outside exact/near training-positive overlap, not 5,000 confirmed positives",
+    "must_disclose": [
+      "same-day mover membership is known only after the UTC day closes",
+      "the search ends before detector validation and holdout, so this is candidate mining rather than model evaluation",
+      "model boxes and semantic-gate passes are proposals, not Owner-confirmed Gold",
+      "the W18/envelope discovery sampler is calibrated from the prior October audit and is not a completeness claim",
+      "current archive membership may contain survivorship and contract-availability bias"
+    ]
+  },
+  "safety": {
+    "holdout_read": false,
+    "market_network_fetch": false,
+    "label_or_dataset_mutation": false,
+    "training": false,
+    "threshold_tuning": false,
+    "active_or_frozen_change": false,
+    "promote": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "telegram_send": false,
+    "order_state_change": false,
+    "production_eligible": false,
+    "training_eligible": false
+  }
+}
