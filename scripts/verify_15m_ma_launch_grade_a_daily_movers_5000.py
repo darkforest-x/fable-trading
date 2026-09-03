@@ -222,7 +222,11 @@ def verify_month(
     }
 
 
-def verify_final_queue(out: Path, months: Sequence[str]) -> tuple[int, int]:
+def verify_final_queue(
+    out: Path,
+    months: Sequence[str],
+    prereg: Mapping[str, Any],
+) -> tuple[int, int]:
     """Rebuild cross-day/month de-duplication and verify every delivered chart."""
 
     per_day = mine.load_all_events(out / "shards", months)
@@ -240,22 +244,40 @@ def verify_final_queue(out: Path, months: Sequence[str]) -> tuple[int, int]:
         "candidate_count",
         "review_rank",
     )
-    chart_checks = 0
     for index, (left, right) in enumerate(zip(replayed, recorded)):
         for key in keys:
             assert_equal(left[key], right[key], f"global event {index} {key}")
-        chart = out / str(right["model_input_chart"])
-        if not chart.is_file():
-            raise VerificationError(f"delivered chart missing: {chart}")
-        assert_equal(
-            mine.sha256_file(chart),
-            str(right["model_input_chart_sha256"]),
-            f"delivered chart SHA {index}",
+
+    chart_checks = 0
+    archive_root = ROOT / str(prereg["data"]["archive_root"])
+    for month in months:
+        month_rows = [row for row in recorded if str(row["source_month"]) == month]
+        symbols = sorted({str(row["exchange_symbol"]) for row in month_rows})
+        frames, _ = mine.load_selected_frames(
+            prereg,
+            month=month,
+            archive_root=archive_root,
+            symbols=symbols,
         )
-        image = cv2.imread(str(chart), cv2.IMREAD_COLOR)
-        if image is None or image.shape[:2] != (742, 1280):
-            raise VerificationError(f"delivered chart dimensions drifted: {chart}")
-        chart_checks += 1
+        for right in month_rows:
+            index = int(right["review_rank"]) - 1
+            chart = out / str(right["model_input_chart"])
+            if not chart.is_file():
+                raise VerificationError(f"delivered chart missing: {chart}")
+            assert_equal(
+                mine.sha256_file(chart),
+                str(right["model_input_chart_sha256"]),
+                f"delivered chart SHA {index}",
+            )
+            delivered = cv2.imread(str(chart), cv2.IMREAD_COLOR)
+            expected = prior.render_exact_model_input(
+                right,
+                frames[str(right["exchange_symbol"])],
+            )
+            if delivered is None or not np.array_equal(delivered, expected):
+                raise VerificationError(f"delivered chart pixels drifted: {chart}")
+            chart_checks += 1
+        print(f"verified delivered charts {month} count={len(month_rows)}", flush=True)
     novel = sum(row["novelty_status"] == "new_event_review" for row in recorded)
     return novel, chart_checks
 
@@ -291,7 +313,7 @@ def run(out: Path, prereg_path: Path) -> dict[str, Any]:
         )
         print(f"verified month {month}", flush=True)
 
-    novel, chart_checks = verify_final_queue(out, months)
+    novel, chart_checks = verify_final_queue(out, months, prereg)
     target = int(prereg["detector"]["target_novel_review_events_minimum"])
     if novel < target:
         raise VerificationError(f"novel target failed: {novel} < {target}")
