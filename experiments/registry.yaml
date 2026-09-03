@@ -3604,8 +3604,8 @@ experiments:
 
   - experiment_id: exp-15m-ma-launch-grade-a-daily-movers-5000-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "7931541abf9ac1edd8985924fb31db93bb617609"
-    status: active
+    source_commit: "6698209b50004c796601dead8272349998e90b68"
+    status: accepted
     question: >-
       Can a newest-first sequence of complete pre-validation calendar months,
       each using the daily Top5 gainers plus Top5 losers, produce at least
@@ -3618,20 +3618,34 @@ experiments:
       frozen. The preregistered discovery sampler uses W18 and the frozen
       1.5-ATR six-MA-envelope ceiling to make the 5,000-event search tractable;
       its prior-October calibration and incompleteness are disclosed.
-    result: pending_owner_requested_5000_novel_review_event_search
+    result: >-
+      Accepted as a completed P1 review-queue artifact chain: 52 full months
+      (2021-07 through 2025-10), 15,522 ranked symbol-days, 407,748 W18 CUDA
+      inputs, 5,083 globally de-duplicated review events and 5,053 novel events.
+      The novel set is 1,652 semantic-positive proposals plus 3,401 hard-negative
+      proposals; neither bucket is automatically Gold. The previous complete
+      month boundary had 4,969 novel events. Independent replay passed 12,691
+      source archive hashes and all 5,083 delivered chart pixels with zero
+      network, holdout, inference, label, training or production mutation.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_15m_ma_launch_grade_a_daily_movers_5000_20260903.md
     artifacts:
       - 15m-ma-launch-grade-a-daily-movers-5000-v1-prereg
+      - 15m-ma-launch-grade-a-daily-movers-5000-v1-source-manifest
+      - 15m-ma-launch-grade-a-daily-movers-5000-v1-summary
+      - 15m-ma-launch-grade-a-daily-movers-5000-v1-review-queue
+      - 15m-ma-launch-grade-a-daily-movers-5000-v1-gallery
+      - 15m-ma-launch-grade-a-daily-movers-5000-v1-verification
+      - 15m-ma-launch-grade-a-daily-movers-5000-v1-overview-corrected
+      - 15m-ma-launch-grade-a-daily-movers-5000-v1-report
+      - 15m-ma-launch-grade-a-daily-movers-5000-v1-html
     reuse_allowed: false
     notes: >-
-      Full months are scanned newest-first from 2025-10 toward 2021-01 and the
-      run stops only at the first full-month boundary with at least 5,000
-      novelty_status=new_event_review events after global cross-day/month
-      de-duplication. Five thousand does not mean five thousand confirmed
-      positives: candidate-positive, hard-negative, exact-input overlap and
-      near-training-positive identities remain separate. The completed-day
-      rank is post-hoc and cannot be interpreted as a live selector, model
-      validation, return evidence, or a trading signal.
+      Accepted means the preregistered mining and verification chain completed,
+      not that 5,053 samples are confirmed positives or training-ready. The
+      completed-day rank is post-hoc and cannot be interpreted as a live
+      selector, model validation, return evidence, or a trading signal. No
+      labels, dataset membership, threshold, checkpoint, ACTIVE/frozen,
+      forward, deployment or trading state changed.

@@ -2,25 +2,25 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-03 — 2025-10 每日涨跌 Top5+Top5 数据集候选已扫完）
+## ⚡ 当前真相（2026-09-03 — 每日涨跌 Top5+Top5 已交付 5,083 张检测图）
 
-Owner 要继续优化数据集并用模型跑每日涨跌榜。由于未授权读取 holdout、训练或自动改标签，
-本轮冻结在 validation 与 holdout 之前的 2025-10 完整月：Binance USD-M 每个 UTC 日固定
-G1–G5 + L1–L5，31 天共 310 币种日、131 个唯一合约；当前 Grade-A full40 native-1280
-checkpoint 用 W18/W19 扫描 63,098 个窗口，得到 2,137 原框 → 1,903 结构框 → 387
-语义框 → 255 个 5-bar 去重事件。
+Owner 要至少找 5,000 个用于继续优化数据集。本轮按预注册从 2025-10 向前扫描完整月，在
+2021-07 首次过线：52 月、1,584 日、15,522 个 Binance USD-M 榜单币种日，经 1,608,553
+个可见 W18 端点 → 407,748 个因果预筛/CUDA 输入 → 30,398 原框 → 25,932 结构框 →
+8,600 语义框 → **5,083 个全局去重事件和 5,083 张检测图**。前一完整月边界 2021-08
+只有 4,969 个新事件；最终为 **5,053 个新审核事件**，停止边界正确。
 
-可用结论必须拆开：**38 个 manifest 外的新正候选、216 个 manifest 外的 hard-negative
-候选、1 个训练正输入重复事件**。所有候选仍需 Owner 逐图确认，254 个“新事件”不能冒充
-254 个新正例。独立 verifier 重建 818 份源归档 SHA、17,472 个完整 universe 币种日、
-1,903 个模型输入像素/语义/训练重合、255 个事件和 31 张逐日图，全部 PASS；网络、推理和
-holdout 读取均为 0。
+5,053 必须拆成 **1,652 个新语义正候选 + 3,401 个新 hard-negative 候选**，不是 5,053
+个 Gold 正例；另有 15 个精确训练输入和 15 个训练正例近邻，已隔离。独立 verifier 重验
+12,691 份源 ZIP、407,748 个任务、25,932 个语义/重合决定及 5,083 张完整复合图像素，
+全部 PASS；网络、模型推理、holdout OHLCV 均为 0。
 
-Owner 入口：`analysis/html/p1_15m_ma_launch_grade_a_daily_movers_202510_20260903.html`；
-可筛图库：`experiments/active/exp-15m-ma-launch-grade-a-daily-movers-202510-v1/results/gallery.html`。
-榜单由完成日收益事后定义，只可用于 P1 人工挖掘，不是验证、回测或实时选币。没有改 label、
-训练、调门、promote、部署、ACTIVE/frozen/forward、Telegram 或订单；生产仍
-`detector=none`，两项 eligibility 均为 false。
+检测图：`experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/model_inputs/`；
+可筛图库：`experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/gallery.html`；
+Owner HTML：`analysis/html/p1_15m_ma_launch_grade_a_daily_movers_5000_20260903.html`。同日榜单是
+收盘后才知道的事后挖掘层，不能当实时选币、验证、回测或收益证据。未自动改 label/dataset、
+训练、调门、promote、部署、改 ACTIVE/frozen/forward、发消息或下单；两项 eligibility
+仍为 false，生产仍 `detector=none`。
 
 ## ⚡ 当前真相（2026-09-03 — Crypto 15m / 1h / 4h / 日线最新扫描完成）
 

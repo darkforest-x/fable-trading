@@ -11399,6 +11399,142 @@ artifacts:
     data_cutoff: "2025-11-01T00:00:00Z"
     notes: Freezes the Owner-requested minimum 5,000 novel review-event stopping rule, full-month search order, daily Top5+Top5 board, W18 causal-envelope discovery sampler, unchanged Grade-A model/gates, CUDA identity and zero-holdout/no-mutation safety contract.
 
+  - artifact_id: 15m-ma-launch-grade-a-daily-movers-5000-v1-source-manifest
+    artifact_type: manifest
+    role: frozen_archive_hash_time_range_format_and_zero_holdout_lineage_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6698209b50004c796601dead8272349998e90b68"
+    source_path: experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/source_manifest.json
+    sha256: "91ffacdc47f42ca3a965b4cefc34be9c74631d7e132526fd9d07edaef2324db5"
+    size_bytes: 5567619
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/source_manifest.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6698209b50004c796601dead8272349998e90b68"
+    config_hash: "4776dcec982f9677dc47431a0f659ba3d6bd4bccb62996aee76a8b77f68f1294"
+    data_cutoff: "2025-11-01T00:00:00Z"
+    notes: Hash-pins all 12,691 headered or headerless Binance monthly archives actually used; no source reaches validation or holdout.
+
+  - artifact_id: 15m-ma-launch-grade-a-daily-movers-5000-v1-summary
+    artifact_type: manifest
+    role: full_month_stopping_inference_semantic_overlap_event_and_safety_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6698209b50004c796601dead8272349998e90b68"
+    source_path: experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/summary.json
+    sha256: "aab1216b6f478b5007bf41e6a57ebeee4b1cf4ca409df734c62c837547b72b0b"
+    size_bytes: 36922
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6698209b50004c796601dead8272349998e90b68"
+    config_hash: "4776dcec982f9677dc47431a0f659ba3d6bd4bccb62996aee76a8b77f68f1294"
+    data_cutoff: "2025-11-01T00:00:00Z"
+    notes: 52 months, 407,748 W18 inputs, 25,932 structural boxes, 5,083 events and 5,053 novel review events; all mutation flags false.
+
+  - artifact_id: 15m-ma-launch-grade-a-daily-movers-5000-v1-review-queue
+    artifact_type: manifest
+    role: deterministic_5083_event_positive_hard_negative_and_training_overlap_review_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6698209b50004c796601dead8272349998e90b68"
+    source_path: experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/review_queue.csv
+    sha256: "29ecdb20977fd644163c7af38882c4902dc29e99aceaa8994eb3772dd7f8d283"
+    size_bytes: 13898172
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/review_queue.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6698209b50004c796601dead8272349998e90b68"
+    config_hash: "4776dcec982f9677dc47431a0f659ba3d6bd4bccb62996aee76a8b77f68f1294"
+    data_cutoff: "2025-11-01T00:00:00Z"
+    notes: 5,053 novel events are explicitly split into 1,652 semantic-positive and 3,401 hard-negative proposals; 30 training-overlap controls remain separate and nothing is Gold automatically.
+
+  - artifact_id: 15m-ma-launch-grade-a-daily-movers-5000-v1-gallery
+    artifact_type: report
+    role: filterable_all_5083_event_exact_input_review_gallery
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6698209b50004c796601dead8272349998e90b68"
+    source_path: experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/gallery.html
+    sha256: "65f4fdeeeab5245e5997644666c9e876d01eab5db214b7c7d6cf11d9552b654b"
+    size_bytes: 1692975
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/gallery.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6698209b50004c796601dead8272349998e90b68"
+    config_hash: "4776dcec982f9677dc47431a0f659ba3d6bd4bccb62996aee76a8b77f68f1294"
+    data_cutoff: "2025-11-01T00:00:00Z"
+    notes: Filters by semantic status, direction, novelty, symbol and month; every card displays the exact W18 input plus raw model rectangle and emits no label.
+
+  - artifact_id: 15m-ma-launch-grade-a-daily-movers-5000-v1-verification
+    artifact_type: manifest
+    role: independent_offline_archive_ranking_pixel_semantic_overlap_dedup_and_chart_replay
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ab033c0f5441d8c396bed6b50c20712e01404e48"
+    source_path: experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/verification.json
+    sha256: "576eab32049c85b30335447b660425436e14adb7ae89ba8fe0e52ee36f199187"
+    size_bytes: 796
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/verification.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ab033c0f5441d8c396bed6b50c20712e01404e48"
+    config_hash: "4776dcec982f9677dc47431a0f659ba3d6bd4bccb62996aee76a8b77f68f1294"
+    data_cutoff: "2025-11-01T00:00:00Z"
+    notes: PASS for 12,691 source hashes, 407,748 task specs, 25,932 semantic/overlap decisions, 5,083 full composite chart pixel replays and the 4,969-to-5,053 stopping boundary; zero network, inference or holdout.
+
+  - artifact_id: 15m-ma-launch-grade-a-daily-movers-5000-v1-overview-corrected
+    artifact_type: report
+    role: source_bound_newest_first_cumulative_novel_event_stopping_overview_png
+    source_repo: darkforest-x/fable-trading
+    source_commit: "897ec46a7a33da2084c40eeb282abc05fd6ac31e"
+    source_path: experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/overview_scan_order_corrected.png
+    sha256: "774bae836d0fc21b26cfb6885485d6f92a5fd3a08a314af5a65a6eee0e16c22d"
+    size_bytes: 84874
+    storage_uri: "file://experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/overview_scan_order_corrected.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "897ec46a7a33da2084c40eeb282abc05fd6ac31e"
+    config_hash: "4776dcec982f9677dc47431a0f659ba3d6bd4bccb62996aee76a8b77f68f1294"
+    data_cutoff: "2025-11-01T00:00:00Z"
+    notes: Correct scan-order curve rises from 113 at 2025-10 to 5,053 at 2021-07; repair receipt SHA is 0118584742da905ad4972780b8de58ecac67f3fa84873512b41c0dfc2d8b49e9 and no detection artifact changed.
+
+  - artifact_id: 15m-ma-launch-grade-a-daily-movers-5000-v1-report
+    artifact_type: report
+    role: canonical_chinese_scaleup_overlap_null_verification_recovery_and_risk_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "daa5981659978f1c5e425f5a44f7eb9ee9cf4f65"
+    source_path: analysis/p1_15m_ma_launch_grade_a_daily_movers_5000_20260903.md
+    sha256: "8032d042e492b3ca7d1194f2f6643fcde4c4d52de29ce0bb8b76d9edf54b11d5"
+    size_bytes: 17710
+    storage_uri: "repo://analysis/p1_15m_ma_launch_grade_a_daily_movers_5000_20260903.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "daa5981659978f1c5e425f5a44f7eb9ee9cf4f65"
+    config_hash: "4776dcec982f9677dc47431a0f659ba3d6bd4bccb62996aee76a8b77f68f1294"
+    data_cutoff: "2025-11-01T00:00:00Z"
+    notes: Answer-first report with scale funnel, prior-run comparison, paired null, non-economic metric declaration, full failure recovery, repository parity caveats, risks and reproduction commands.
+
+  - artifact_id: 15m-ma-launch-grade-a-daily-movers-5000-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_with_embedded_corrected_stopping_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: "daa5981659978f1c5e425f5a44f7eb9ee9cf4f65"
+    source_path: analysis/html/p1_15m_ma_launch_grade_a_daily_movers_5000_20260903.html
+    sha256: "3769a4cb74b5498ba8eef7b4c98f55a492632450a9ed0649f683b3bb795a65f4"
+    size_bytes: 136835
+    storage_uri: "repo://analysis/html/p1_15m_ma_launch_grade_a_daily_movers_5000_20260903.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "daa5981659978f1c5e425f5a44f7eb9ee9cf4f65"
+    config_hash: "4776dcec982f9677dc47431a0f659ba3d6bd4bccb62996aee76a8b77f68f1294"
+    data_cutoff: "2025-11-01T00:00:00Z"
+    notes: Self-contained UTF-8 HTML with the corrected stopping figure embedded and direct links to the filterable 5,083-event gallery and structured review queue.
+
   - artifact_id: 15m-ma-launch-owner-grade-a8000-neg24000-hl2-v1-prereg
     artifact_type: config
     role: owner_authorized_close_to_hl2_paired_render_and_training_preregistration
