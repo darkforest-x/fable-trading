@@ -36,7 +36,11 @@ from scripts.optimize_btcusdtp_k1k2_intraday_preholdout import (
     BAR_DELTAS,
     load_featured,
 )
-from scripts.research_two_key_candle_ma_retest_1h import profit_factor, sha256_file
+from scripts.research_two_key_candle_ma_retest_1h import (
+    pine_rma,
+    profit_factor,
+    sha256_file,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -1052,8 +1056,26 @@ def owner_diagnostic_phase(config: dict[str, Any]) -> None:
         anchor = utc(example["anchor_time_utc"])
         start = anchor - pd.Timedelta(hours=48)
         end = anchor + pd.Timedelta(hours=12)
-        source = ROOT / str(example["source"])
-        raw = _read_owner_window(source, start, end)
+        sources = {
+            ROOT / str(example["source"]),
+            ROOT / "data/kline_fetched/okx_BTC_USDT_SWAP_15m_42007.csv",
+            ROOT
+            / "analysis/output/owner_short_gold_center_recent15d_top10_20260821"
+            / "kline_snapshot/BTC_USDT_SWAP.csv",
+        }
+        pieces = [
+            _read_owner_window(source, start, end)
+            for source in sorted(sources)
+            if source.exists()
+        ]
+        raw = (
+            pd.concat([piece for piece in pieces if len(piece)], ignore_index=True)
+            .sort_values("open_time", kind="mergesort")
+            .drop_duplicates("open_time", keep="last")
+            .reset_index(drop=True)
+            if any(len(piece) for piece in pieces)
+            else pd.DataFrame()
+        )
         if raw.empty:
             raise RuntimeError(f"owner window missing: {example['id']}")
         raw["segment_id"] = raw["open_time"].diff().ne(BAR_DELTA).cumsum().astype(int)
@@ -1062,7 +1084,7 @@ def owner_diagnostic_phase(config: dict[str, Any]) -> None:
             raw["high"] - raw["low"],
             np.maximum((raw["high"] - previous_close).abs(), (raw["low"] - previous_close).abs()),
         )
-        raw["atr"] = true_range.ewm(alpha=1.0 / 14.0, adjust=False, min_periods=14).mean()
+        raw["atr"] = pine_rma(true_range.to_numpy(dtype=float), 14)
         frame = add_reference_features(raw, params["ma_reference"])
         candidates = build_raw_candidates(frame, config["causal_signal"], "all")
         accepted = accept_candidates(
@@ -1072,7 +1094,11 @@ def owner_diagnostic_phase(config: dict[str, Any]) -> None:
         )
         anchor_i = int(frame.index[frame["open_time"].eq(anchor)][0])
         direction = 1 if example["direction"] == "LONG" else -1
-        same_side = accepted[accepted["direction"].eq(direction)].copy()
+        same_side = (
+            accepted[accepted["direction"].eq(direction)].copy()
+            if "direction" in accepted.columns
+            else pd.DataFrame(columns=["signal_i", "signal_time", "signal_family"])
+        )
         same_side["offset_bars"] = same_side["signal_i"].astype(int) - anchor_i
         visible = same_side[same_side["offset_bars"].between(-8, 24)].copy()
         if len(visible):
