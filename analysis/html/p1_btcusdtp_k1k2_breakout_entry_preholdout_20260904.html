@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>BTCUSDT.P K1→K2：方向突破确认入场（15m / 5m）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>BTCUSDT.P K1→K2：方向突破确认入场（15m / 5m）</h1>
+<p>日期：2026-09-04</p>
+<p>实验：<code>exp-btcusdtp-k1k2-breakout-entry-preholdout-20260904-v1</code></p>
+<p>状态：<strong>REJECTED；全部突破窗口劣于立即入场，audit/holdout 均未打开</strong></p>
+<h2>结论</h2>
+<p>本轮只改变入场：K2 后 15/30/60/120 分钟内，等待第一根方向 K 线收盘突破 K2 方向极值（多头 K2 高、空头 K2 低）且仍在当时均线方向侧，下一根开盘入场。原 K2 对侧极值止损、3R、12 小时、1.5R 保护、6 小时冷却、风险门和 20bp 成本不变。</p>
+<p>结果不是“确认不够强”，而是<strong>突破追价</strong>：15m 四个突破臂毛收益均已为负，5m 最高也只有 +0.50bp；稳健分全部低于立即入场。两个周期均保留基准，不打开 audit。</p>
+<h2>数据与规则</h2>
+<ul>
+<li>数据：OKX BTC-USDT-SWAP；源快照 SHA256 <code>767f67c2…eed5ac</code>，最晚 2026-02-28。</li>
+<li>development：2023–2024，四个连续半年折；15m 形态候选 1,661，5m 9,343。</li>
+<li>15m 信号：SMA120、gap 2–8、score ≥0.40；5m：SMA40、gap 6–24、score ≥0.40。</li>
+<li>选择门：相对立即入场稳健分至少 +2bp，最差折不得恶化 &gt;3bp，并满足样本门；开发成功还要求净均值和稳健分 &gt;0、最差折 &gt;-5bp、每折毛收益 &gt;0。</li>
+<li>audit 读取 0 行；2026-05-04 后 holdout 读取 0 行。</li>
+</ul>
+<h2>全网格结果</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>入场</th>
+<th>成交</th>
+<th>毛 bp</th>
+<th>净 bp</th>
+<th>稳健分</th>
+<th>最差折</th>
+<th>胜率</th>
+<th>PF</th>
+<th>匹配超额 bp</th>
+<th>p</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td><strong>立即</strong></td><td>345</td><td><strong>6.49</strong></td><td><strong>-13.51</strong></td><td><strong>-16.35</strong></td><td><strong>-20.54</strong></td><td>34.49%</td><td>0.580</td><td>+10.31</td><td>0.0074</td></tr>
+<tr><td>15m</td><td>突破 15m</td><td>251</td><td>-1.93</td><td>-21.93</td><td>-24.34</td><td>-33.33</td><td>31.87%</td><td>0.443</td><td>+2.06</td><td>0.3267</td></tr>
+<tr><td>15m</td><td>突破 30m</td><td>307</td><td>-3.19</td><td>-23.19</td><td>-24.74</td><td>-28.50</td><td>30.62%</td><td>0.407</td><td>+0.84</td><td>0.4257</td></tr>
+<tr><td>15m</td><td>突破 60m</td><td>373</td><td>-0.71</td><td>-20.71</td><td>-25.60</td><td>-26.35</td><td>33.51%</td><td>0.457</td><td>+1.86</td><td>0.3135</td></tr>
+<tr><td>15m</td><td>突破 120m</td><td>409</td><td>-1.83</td><td>-21.83</td><td>-25.74</td><td>-28.55</td><td>32.52%</td><td>0.443</td><td>-0.87</td><td>0.5892</td></tr>
+<tr><td>5m</td><td><strong>立即</strong></td><td>755</td><td><strong>2.68</strong></td><td><strong>-17.32</strong></td><td><strong>-17.68</strong></td><td><strong>-21.07</strong></td><td>38.28%</td><td>0.355</td><td>+1.27</td><td>0.2422</td></tr>
+<tr><td>5m</td><td>突破 15m</td><td>1,071</td><td>+0.50</td><td>-19.50</td><td>-20.32</td><td>-20.94</td><td>34.83%</td><td>0.366</td><td>-0.67</td><td>0.6387</td></tr>
+<tr><td>5m</td><td>突破 30m</td><td>1,150</td><td>+0.06</td><td>-19.94</td><td>-20.78</td><td>-21.83</td><td>34.17%</td><td>0.361</td><td>-2.34</td><td>0.8969</td></tr>
+<tr><td>5m</td><td>突破 60m</td><td>1,219</td><td>-0.55</td><td>-20.55</td><td>-21.13</td><td>-23.78</td><td>33.63%</td><td>0.348</td><td>-2.35</td><td>0.8896</td></tr>
+<tr><td>5m</td><td>突破 120m</td><td>1,260</td><td>-0.28</td><td>-20.28</td><td>-20.75</td><td>-23.66</td><td>33.65%</td><td>0.351</td><td>-2.51</td><td>0.9014</td></tr>
+</tbody></table>
+<p>每个窗口、每个周期都没有达到移动门；相邻窗口也没有稳健局部峰值。匹配随机对照仅 15m 立即入场过 p&lt;0.01，但其绝对净收益依然为负，因此只能解释为“相对少亏”，不能当生产 edge。</p>
+<h2>机制：确认导致风险扩张</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>立即入场风险中位 ATR</th>
+<th>突破臂约中位 ATR</th>
+<th>立即成交</th>
+<th>最长窗成交</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>0.826</td><td>1.20</td><td>345</td><td>409</td></tr>
+<tr><td>5m</td><td>1.060</td><td>1.42</td><td>755</td><td>1,260</td></tr>
+</tbody></table>
+<p>突破后价格已经沿方向远离原 K2 对侧止损，风险距离扩大约 34–45%。3R 目标随之更远；与此同时，较大的价格风险降低 <code>fee_to_risk</code>，让更多候选通过经济门并改变冷却占位。成交数增加，但新增交易的毛优势接近零或为负。</p>
+<p>四个半年折也一致支持拒绝：15m 突破臂每折均为负，范围约 -12.91 至 -33.33bp；5m 范围约 -17.69 至 -23.78bp。不存在由单个时期造成的假失败。</p>
+<h2>与扫回入场的对照</h2>
+<p>上一轮 5m “先扫 K2 止损侧、再收回”的 30 分钟臂曾把毛收益提高到 4.51bp；本轮“直接突破方向侧”反而降到 0.06bp。区别说明 K2 后的路径顺序有信息：直接追突破不划算，短时逆向清扫再收复相对更好，但仍远不足以覆盖 20bp。</p>
+<h2>排序基线与下一步</h2>
+<p>形态分未改。立即入场的开发排序仍是：15m AUC 0.549、top-decile 净 -5.29bp、置换 p=0.206；5m AUC 0.489、top-decile 净 -19.09bp、p=0.655。突破规则没有改善这个基本约束。</p>
+<p>连续两种入场族都未过门，按预注册阶梯停止入场打磨。下一轮只改变<strong>盈利保护触发 R</strong>：当前收盘达到 1.5R 后保护会截断部分后来继续走远的交易；测试关闭保护及更早/更晚触发，止损、3R 和信号不变。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>这是 development 内筛选，p 值不是最终确认。</li>
+<li>固定 20bp 未另计 funding；降低成本不能算策略改进。</li>
+<li>数据仅 BTC；不推广到其他标的。</li>
+<li>audit/holdout 均未打开；未修改 Pine、ACTIVE/frozen/forward、部署或真实订单。</li>
+</ul>
+<h2>复现</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+PYTHONPATH=. python3 -m pytest -q \
+  tests/test_research_btcusdtp_k1k2_sweep_reclaim_entry.py
+PYTHONPATH=. python3 -m scripts.research_btcusdtp_k1k2_breakout_entry \
+  --phase development
+python3 scripts/md_to_html.py \
+  analysis/p1_btcusdtp_k1k2_breakout_entry_preholdout_20260904.md \
+  --out-dir analysis/html
+</code></pre>
+<p>冻结选择和逐臂交易账本位于 <code>experiments/active/exp-btcusdtp-k1k2-breakout-entry-preholdout-20260904-v1/results/</code>。</p>
+</body>
+</html>
