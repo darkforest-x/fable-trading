@@ -1,0 +1,123 @@
+{
+  "experiment_id": "exp-btcusdtp-k1k2-15m-gap-min-confirmation-20260904-v1",
+  "status": "preregistered_before_confirmation_outcomes",
+  "predecessor": "exp-btcusdtp-k1k2-causal-failure-map-20260904-v1",
+  "question": "Does raising the 15m K1-to-K2 minimum distance from 2 to 5 bars survive an exact before-cooldown replay on later 2024 data?",
+  "owner_authorization": {
+    "verbatim": "批准\n所有的你自行探索啊，后面的都不需要我批准，直接去执行，开始目标模式",
+    "authorized_on": "2026-09-04",
+    "scope": "autonomous 5min/15min research; this stage changes only the 15m minimum K1-to-K2 gap",
+    "holdout_policy": "one final use only after the candidate clears confirmation and audit gates",
+    "live_or_promotion_authorized": false
+  },
+  "nomination_receipt": {
+    "path": "experiments/active/exp-btcusdtp-k1k2-causal-failure-map-20260904-v1/results/selection_receipt.json",
+    "sha256": "3ee6dc74ab99ee5626e9a85d5338887390260a828013dd8bf655956e81075fde",
+    "source_commit": "1458fb1",
+    "observed_posthoc_2023_net_bp": 5.632318372540872,
+    "observed_stable_improvement_bp": 18.021600050271026,
+    "familywise_permutation_p": 0.03929803509824509,
+    "claim_limit": "hypothesis generation only; these numbers are not executable backtest results"
+  },
+  "instrument": {
+    "tradingview_symbol": "OKX:BTCUSDT.P",
+    "okx_instrument": "BTC-USDT-SWAP",
+    "timezone": "UTC"
+  },
+  "source": {
+    "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+    "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "rows": 341567,
+    "first_time": "2022-11-30T16:00:00Z",
+    "last_time": "2026-02-28T15:55:00Z",
+    "holdout_ohlcv_rows_materialized": 0
+  },
+  "window": {
+    "confirmation_start_inclusive": "2024-01-01T00:00:00Z",
+    "confirmation_end_exclusive": "2025-01-01T00:00:00Z",
+    "confirmation_folds": ["2024H1", "2024H2"],
+    "audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "audit_end_exclusive": "2026-02-28T16:00:00Z",
+    "audit_slices": ["2025H1", "2025H2", "2026P1"],
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "contamination_note": "aggregate 2024 baseline outcomes were seen in predecessor experiments, but the gap>=5 exact replay and its matched controls were not evaluated before this registration"
+  },
+  "signal_frozen": {
+    "core": "K1 directional real body truly crosses SMA(HL2); K2 wick touches it while the full body and close remain on the directional side",
+    "secondary_score": "same twelve-component equal-weight causal score as predecessor",
+    "15m": {
+      "ma_period": 120,
+      "gap_min_bars": 2,
+      "gap_max_bars": 8,
+      "score_floor": 0.40,
+      "maximum_pair_gap_bars": 48
+    }
+  },
+  "factor": {
+    "name": "15m_gap_min_bars",
+    "baseline": 2,
+    "candidate": 5,
+    "gap_max_bars_frozen": 8,
+    "definition": "filter complete K1/K2 pair candidates to gap_bars >= value before same-K2 ranking, risk gates, cooldown, K1 reuse, and outcome resolution"
+  },
+  "timeframe_fixed": {
+    "15m": {
+      "horizon_bars": 48,
+      "cooldown_bars": 24,
+      "minimum_events_total": 60,
+      "minimum_events_per_confirmation_fold": 20
+    }
+  },
+  "execution_frozen": {
+    "entry": "open immediately after completed K2",
+    "k2_stop_buffer_atr": 0.0,
+    "next_open_risk_atr_min": 0.15,
+    "next_open_risk_atr_max": 2.50,
+    "fee_to_risk_max": 1.25,
+    "target_r": 3.0,
+    "horizon_clock_hours": 12,
+    "same_bar_collision": "conservative stop first",
+    "gap_policy": "barrier price",
+    "timeout_exit": "close of final horizon bar",
+    "profit_protection_trigger_close_r": 1.5,
+    "round_trip_cost_fraction": 0.002,
+    "funding": "excluded",
+    "slippage_beyond_round_trip_cost": "excluded"
+  },
+  "confirmation_gate": {
+    "sample": "at least 60 trades total and 20 in each 2024 half",
+    "candidate_mean_net_bp": ">0",
+    "candidate_robust_score_bp": ">0",
+    "candidate_worst_fold_net_bp": ">-5",
+    "candidate_each_half_mean_net_bp": ">0",
+    "candidate_robust_improvement_vs_baseline_bp": ">=5",
+    "matched_control_excess_bp": ">0",
+    "paired_signflip_p_one_sided": "<0.01",
+    "failure_action": "reject candidate, keep audit and holdout closed, and do not change Pine or production"
+  },
+  "matched_control": {
+    "role": "required confirmation negative control; excluded from nomination because the candidate was already frozen from 2023",
+    "controls_per_trade": 3,
+    "strata": ["calendar month", "UTC six-hour block", "within-month ATR14 quintile"],
+    "copied": ["direction", "risk distance in ATR", "exit rule", "horizon", "cost"],
+    "exclude_within_horizon_plus_one_bars_of_any selected signal": true,
+    "insufficient_exact_stratum_policy": "do not relax",
+    "seed": "btcusdtp-k1k2-15m-gap-min-confirmation-20260904-v1"
+  },
+  "audit_gate": {
+    "open_only_if_confirmation_gate_passes": true,
+    "mean_net_bp": ">0",
+    "matched_control_excess_bp": ">0",
+    "paired_signflip_p_one_sided": "<0.01",
+    "2025H1_and_2025H2_mean_net_bp": ">0 each",
+    "holdout_action": "only a passing frozen audit candidate may consume the one owner-authorized final holdout"
+  },
+  "eligibility": {
+    "training_eligible": false,
+    "production_eligible": false,
+    "holdout_consumed": false,
+    "active_or_frozen_mutation_allowed": false,
+    "live_orders_allowed": false
+  }
+}
