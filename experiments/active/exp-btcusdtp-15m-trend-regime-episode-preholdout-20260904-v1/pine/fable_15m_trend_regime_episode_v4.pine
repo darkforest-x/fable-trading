@@ -1,0 +1,389 @@
+//@version=6
+// Sparse BTCUSDT.P 15m trend-continuation episode display.
+//
+// Causal signal contract:
+// - K1 is a directional body crossing EMA30(HL2).
+// - K2 occurs 2--8 completed bars later, touches EMA30 with its rejection
+//   wick, and keeps its body on the trend side of EMA30.
+// - A hidden EMA30/SMA60 regime must already be strong for 12 completed bars:
+//   directional spread >= 1 ATR and directional EMA30 slope >= 0.05 ATR/bar.
+// - One regime can emit only one K1/K2 signal.  A stop or timeout never rearms
+//   it; only an opposite strong regime or eight completed neutral bars can.
+// - Signal is confirmed on K2 close; the research entry is next bar open.
+//
+// This source is research-only.  Pre-holdout audit reduced clustered signals
+// materially but did not establish positive net expectancy after 0.2% cost.
+indicator(
+     "Fable 15m Trend Regime · Episode V4",
+     shorttitle = "Fable 15m Trend V4",
+     overlay = true,
+     behind_chart = false,
+     max_bars_back = 800,
+     max_labels_count = 200,
+     max_lines_count = 400,
+     max_boxes_count = 200)
+
+string GROUP_RULE = "1 · Trend episode"
+string GROUP_RISK = "2 · Trend management"
+string GROUP_DISPLAY = "3 · Display"
+string GROUP_ALERTS = "4 · Alerts"
+
+string sideMode = input.string(
+     "Both", "Direction", options = ["Both", "Long only", "Short only"], group = GROUP_RULE)
+int gapMin = input.int(2, "Minimum K1→K2 bars", minval = 1, maxval = 8, group = GROUP_RULE)
+int gapMax = input.int(8, "Maximum K1→K2 bars", minval = 2, maxval = 16, group = GROUP_RULE)
+float k1BodyAtrMin = input.float(
+     0.20, "K1 directional body / ATR minimum", minval = 0.05, maxval = 2.0, step = 0.05, group = GROUP_RULE)
+float k2WickShareMin = input.float(
+     0.15, "K2 rejection wick share minimum", minval = 0.05, maxval = 0.80, step = 0.05, group = GROUP_RULE)
+float regimeSpreadAtr = input.float(
+     1.00, "Trend spread / ATR minimum", minval = 0.0, maxval = 4.0, step = 0.10, group = GROUP_RULE)
+float regimeSlopeAtr = input.float(
+     0.05, "EMA30 slope / ATR / bar minimum", minval = 0.0, maxval = 0.25, step = 0.005, group = GROUP_RULE)
+int strongDwellBars = input.int(
+     12, "Strong trend confirmation bars", minval = 1, maxval = 48, group = GROUP_RULE)
+int neutralDwellBars = input.int(
+     8, "Neutral bars before rearm", minval = 1, maxval = 96, group = GROUP_RULE)
+
+float disasterStopAtr = input.float(
+     2.0, "Initial stop (ATR)", minval = 0.5, maxval = 6.0, step = 0.25, group = GROUP_RISK)
+float runnerArmAtr = input.float(
+     2.0, "Arm runner after close profit (ATR)", minval = 0.5, maxval = 8.0, step = 0.25, group = GROUP_RISK)
+float runnerBufferAtr = input.float(
+     1.0, "SMA60 stop buffer (ATR)", minval = 0.0, maxval = 4.0, step = 0.25, group = GROUP_RISK)
+int maxHoldBars = input.int(96, "Maximum hold bars", minval = 8, maxval = 400, group = GROUP_RISK)
+float rewardGuideAtr = input.float(
+     5.0,
+     "Reward guide (ATR, visual only)",
+     minval = 1.0,
+     maxval = 20.0,
+     step = 0.5,
+     tooltip = "The green zone is a visual trend guide, not a fixed take-profit order.",
+     group = GROUP_RISK)
+
+bool showMainMa = input.bool(true, "EMA30 · main", group = GROUP_DISPLAY)
+bool colourBars = input.bool(true, "MA Shift candles · source", group = GROUP_DISPLAY)
+bool showKeyPair = input.bool(true, "K1 / K2 pair", group = GROUP_DISPLAY)
+bool showZones = input.bool(true, "Reward / risk zones", group = GROUP_DISPLAY)
+bool showActiveStop = input.bool(true, "Active trend stop", group = GROUP_DISPLAY)
+int zoneProjection = input.int(12, "Fixed zone width", minval = 2, maxval = 96, group = GROUP_DISPLAY)
+bool showPanel = input.bool(false, "Tiny status chip", group = GROUP_DISPLAY)
+bool alertsEnabled = input.bool(true, "K2 close alert", group = GROUP_ALERTS)
+
+float atr14 = ta.atr(14)
+float ema30 = ta.ema(hl2, 30)
+float sma60 = ta.sma(hl2, 60)
+float fastSlowSpreadAtr = atr14 > 0.0 ? (ema30 - sma60) / atr14 : na
+float ema30Slope4AtrPerBar = atr14 > 0.0 ? (ema30 - ema30[4]) / (atr14 * 4.0) : na
+int maSide = hl2 >= ema30 ? 1 : -1
+
+f_clamp01(float value) =>
+    math.max(0.0, math.min(1.0, nz(value, 0.0)))
+
+// Uses only the completed K2 bar and bars at or before it.
+f_findPair(int direction) =>
+    bool found = false
+    int bestGap = na
+    float bestQuality = na
+    float safeAtr = atr14 > 0.0 ? atr14 : na
+    float k2Range = high - low
+    float k2Body = math.abs(close - open)
+    float k2BodyRatio = k2Range > 0.0 ? k2Body / k2Range : na
+    float k2Wick = direction == 1 ? math.min(open, close) - low : high - math.max(open, close)
+    float k2WickShare = k2Range > 0.0 ? k2Wick / k2Range : na
+    float k2CloseSide = direction * (close - ema30) / safeAtr
+    float k2TouchDepth = direction == 1 ? (ema30 - low) / safeAtr : (high - ema30) / safeAtr
+    bool k2BodyTrendSide = direction == 1 ? math.min(open, close) >= ema30 : math.max(open, close) <= ema30
+    bool k2Morphology =
+         not na(k2BodyRatio) and not na(k2WickShare) and not na(k2CloseSide) and
+         not na(k2TouchDepth) and k2WickShare >= k2WickShareMin and
+         k2BodyRatio <= 0.75 and k2CloseSide >= 0.0 and
+         k2TouchDepth >= 0.0 and k2TouchDepth <= 1.50 and k2BodyTrendSide
+
+    if k2Morphology and gapMax >= gapMin
+        for gap = gapMin to gapMax
+            float k1Atr = atr14[gap]
+            float k1Range = high[gap] - low[gap]
+            float k1DirectionalBody = direction * (close[gap] - open[gap])
+            float k1BodyAtr = k1Atr > 0.0 ? k1DirectionalBody / k1Atr : na
+            float k1RangeAtr = k1Atr > 0.0 ? k1Range / k1Atr : na
+            float k1CloseLocation =
+                 k1Range > 0.0 ?
+                 (direction == 1 ? (close[gap] - low[gap]) / k1Range : (high[gap] - close[gap]) / k1Range) : na
+            float k1OpenSide = direction * (open[gap] - ema30[gap]) / k1Atr
+            float k1CloseSide = direction * (close[gap] - ema30[gap]) / k1Atr
+            bool k1CrossesBody =
+                 direction == 1 ? open[gap] <= ema30[gap] and close[gap] >= ema30[gap] :
+                 open[gap] >= ema30[gap] and close[gap] <= ema30[gap]
+            bool k1Morphology =
+                 not na(k1BodyAtr) and not na(k1RangeAtr) and not na(k1CloseLocation) and
+                 not na(k1OpenSide) and not na(k1CloseSide) and k1CrossesBody and
+                 k1BodyAtr >= k1BodyAtrMin and k1RangeAtr >= 0.65 and
+                 k1CloseLocation >= 0.60 and k1OpenSide <= 0.0 and k1CloseSide >= 0.0
+
+            if k1Morphology
+                int wrongSideCloses = 0
+                for step = 1 to gap - 1
+                    float middleAtr = atr14[step]
+                    float middleCloseSide = direction * (close[step] - ema30[step]) / middleAtr
+                    if na(middleCloseSide) or middleCloseSide < -0.05
+                        wrongSideCloses += 1
+                if wrongSideCloses == 0
+                    float quality = (
+                         f_clamp01(k1BodyAtr / 1.25) +
+                         f_clamp01(k1RangeAtr / 2.00) +
+                         f_clamp01(k1CloseLocation) +
+                         f_clamp01(k2WickShare / 0.60)) / 4.0
+                    if not found or quality > bestQuality
+                        found := true
+                        bestGap := gap
+                        bestQuality := quality
+    [found, bestGap, bestQuality]
+
+[longPairFound, longK1Gap, longPairQuality] = f_findPair(1)
+[shortPairFound, shortK1Gap, shortPairQuality] = f_findPair(-1)
+
+bool isFifteenMinute = timeframe.in_seconds() == 900
+bool longAllowed = sideMode != "Short only"
+bool shortAllowed = sideMode != "Long only"
+bool rawLongPair = barstate.isconfirmed and isFifteenMinute and longAllowed and longPairFound
+bool rawShortPair = barstate.isconfirmed and isFifteenMinute and shortAllowed and shortPairFound
+
+color MA_UP = #17A297
+color MA_DOWN = color.orange
+color KEY_LONG = #00D7BD
+color KEY_SHORT = #FFB020
+color REWARD = #089981
+color RISK = #F23645
+color maColour = maSide == 1 ? MA_UP : MA_DOWN
+
+// Exactly one visible moving average.  SMA60 is internal and has no plot.
+plot(showMainMa ? ema30 : na, "EMA30 · main", color = maColour, linewidth = 1)
+barcolor(colourBars and not na(ema30) ? maColour : na, title = "MA Shift bar colour · source")
+plotcandle(
+     colourBars and not na(ema30) ? open : na,
+     colourBars and not na(ema30) ? high : na,
+     colourBars and not na(ema30) ? low : na,
+     colourBars and not na(ema30) ? close : na,
+     title = "MA Shift candles · source",
+     color = maColour,
+     wickcolor = maColour,
+     bordercolor = maColour)
+
+// Trend regime state is independent from position state.
+int strongNow =
+     not na(fastSlowSpreadAtr) and not na(ema30Slope4AtrPerBar) and
+     fastSlowSpreadAtr > 0.0 and ema30Slope4AtrPerBar >= 0.0 and
+     fastSlowSpreadAtr >= regimeSpreadAtr and ema30Slope4AtrPerBar >= regimeSlopeAtr ? 1 :
+     not na(fastSlowSpreadAtr) and not na(ema30Slope4AtrPerBar) and
+     fastSlowSpreadAtr < 0.0 and ema30Slope4AtrPerBar <= 0.0 and
+     -fastSlowSpreadAtr >= regimeSpreadAtr and -ema30Slope4AtrPerBar >= regimeSlopeAtr ? -1 : 0
+
+var int trendRegime = 0
+var int regimeSerial = 0
+var int regimeStartBar = na
+var int strongRunDirection = 0
+var int strongRunBars = 0
+var int neutralRunBars = 0
+var bool regimeConsumed = false
+
+if barstate.isconfirmed
+    if strongNow == 0
+        strongRunDirection := 0
+        strongRunBars := 0
+    else if strongNow == strongRunDirection
+        strongRunBars += 1
+    else
+        strongRunDirection := strongNow
+        strongRunBars := 1
+    int confirmedStrong = strongRunBars >= strongDwellBars ? strongNow : 0
+
+    if trendRegime == 0 and confirmedStrong != 0
+        trendRegime := confirmedStrong
+        regimeSerial += 1
+        regimeStartBar := bar_index
+        regimeConsumed := false
+        neutralRunBars := 0
+    else if trendRegime != 0 and confirmedStrong == -trendRegime
+        trendRegime := confirmedStrong
+        regimeSerial += 1
+        regimeStartBar := bar_index
+        regimeConsumed := false
+        neutralRunBars := 0
+    else if trendRegime != 0
+        bool neutralNow =
+             math.abs(fastSlowSpreadAtr) <= 0.10 and
+             math.abs(ema30Slope4AtrPerBar) <= 0.005
+        neutralRunBars := neutralNow ? neutralRunBars + 1 : 0
+        if neutralRunBars >= neutralDwellBars
+            trendRegime := 0
+            regimeStartBar := na
+            regimeConsumed := false
+            neutralRunBars := 0
+
+// Position state manages the already accepted episode.  Exiting never changes
+// regimeConsumed, so the same market regime cannot immediately fire again.
+var int positionSide = 0
+var int entryBar = na
+var float entryPrice = na
+var float signalAtr = na
+var float activeStop = na
+var bool runnerArmed = false
+var box rewardBox = na
+var box riskBox = na
+varip bool pendingLong = false
+varip bool pendingShort = false
+varip float pendingAtr = na
+
+bool enterLong = barstate.isnew and positionSide == 0 and pendingLong and not pendingShort
+bool enterShort = barstate.isnew and positionSide == 0 and pendingShort and not pendingLong
+
+if barstate.isnew
+    pendingLong := false
+    pendingShort := false
+    if enterLong or enterShort
+        positionSide := enterLong ? 1 : -1
+        entryBar := bar_index
+        entryPrice := open
+        signalAtr := pendingAtr
+        activeStop := entryPrice - positionSide * disasterStopAtr * signalAtr
+        runnerArmed := false
+        if showZones
+            float rewardGuide = entryPrice + positionSide * rewardGuideAtr * signalAtr
+            rewardBox := box.new(
+                 bar_index,
+                 math.max(entryPrice, rewardGuide),
+                 bar_index + zoneProjection,
+                 math.min(entryPrice, rewardGuide),
+                 border_color = color.new(REWARD, 25),
+                 border_width = 1,
+                 bgcolor = color.new(REWARD, 88))
+            riskBox := box.new(
+                 bar_index,
+                 math.max(entryPrice, activeStop),
+                 bar_index + zoneProjection,
+                 math.min(entryPrice, activeStop),
+                 border_color = color.new(RISK, 25),
+                 border_width = 1,
+                 bgcolor = color.new(RISK, 88))
+
+bool stopHit =
+     positionSide == 1 ? low <= activeStop :
+     positionSide == -1 ? high >= activeStop : false
+bool timeExit = positionSide != 0 and bar_index - entryBar + 1 >= maxHoldBars
+
+if barstate.isconfirmed and positionSide != 0
+    if stopHit or timeExit
+        positionSide := 0
+        entryBar := na
+        entryPrice := na
+        signalAtr := na
+        activeStop := na
+        runnerArmed := false
+    else
+        float signedCloseProfitAtr = positionSide * (close - entryPrice) / signalAtr
+        if not runnerArmed and signedCloseProfitAtr >= runnerArmAtr
+            runnerArmed := true
+        if runnerArmed
+            float candidateStop = sma60 - positionSide * runnerBufferAtr * atr14
+            activeStop := positionSide == 1 ? math.max(activeStop, candidateStop) : math.min(activeStop, candidateStop)
+
+bool eventLong = false
+bool eventShort = false
+int eventGap = na
+float eventQuality = na
+
+if barstate.isconfirmed and positionSide == 0 and not pendingLong and not pendingShort and not regimeConsumed
+    bool chooseLong =
+         trendRegime == 1 and rawLongPair and
+         (not rawShortPair or longPairQuality >= shortPairQuality)
+    bool chooseShort = trendRegime == -1 and rawShortPair and not chooseLong
+    if chooseLong
+        eventLong := true
+        eventGap := longK1Gap
+        eventQuality := longPairQuality
+        pendingLong := true
+        pendingAtr := atr14
+        regimeConsumed := true
+    else if chooseShort
+        eventShort := true
+        eventGap := shortK1Gap
+        eventQuality := shortPairQuality
+        pendingShort := true
+        pendingAtr := atr14
+        regimeConsumed := true
+
+if showKeyPair and (eventLong or eventShort)
+    int k1History = eventGap
+    int k1X = bar_index - k1History
+    color keyColour = eventLong ? KEY_LONG : KEY_SHORT
+    line.new(k1X, low[k1History], k1X, high[k1History], color = keyColour, width = 2)
+    line.new(k1X, open[k1History], k1X, close[k1History], color = keyColour, width = 5)
+    line.new(bar_index, low, bar_index, high, color = keyColour, width = 2)
+    line.new(bar_index, open, bar_index, close, color = keyColour, width = 5)
+    label.new(
+         k1X,
+         eventLong ? low[k1History] : high[k1History],
+         "K1",
+         yloc = eventLong ? yloc.belowbar : yloc.abovebar,
+         style = eventLong ? label.style_label_up : label.style_label_down,
+         color = color.new(keyColour, 5),
+         textcolor = #131722,
+         size = size.tiny)
+    label.new(
+         bar_index,
+         eventLong ? high : low,
+         "K2",
+         yloc = eventLong ? yloc.abovebar : yloc.belowbar,
+         style = eventLong ? label.style_label_down : label.style_label_up,
+         color = color.new(keyColour, 5),
+         textcolor = #131722,
+         size = size.tiny)
+
+plot(
+     showActiveStop and positionSide != 0 ? activeStop : na,
+     "Active trend stop",
+     color = runnerArmed ? color.new(REWARD, 0) : color.new(RISK, 0),
+     linewidth = 1,
+     style = plot.style_linebr)
+plot(entryPrice, "Active entry", color = na, display = display.data_window)
+plot(activeStop, "Active stop value", color = na, display = display.data_window)
+plot(eventQuality, "Accepted pair quality", color = na, display = display.data_window)
+plot(trendRegime, "Trend regime", color = na, display = display.data_window)
+plot(fastSlowSpreadAtr, "EMA30-SMA60 spread / ATR", color = na, display = display.data_window)
+plot(ema30Slope4AtrPerBar, "EMA30 slope / ATR / bar", color = na, display = display.data_window)
+
+alertcondition(eventLong, "15m long trend K2 confirmed", "Fable 15m Trend V4 LONG on {{ticker}} {{interval}}")
+alertcondition(eventShort, "15m short trend K2 confirmed", "Fable 15m Trend V4 SHORT on {{ticker}} {{interval}}")
+if alertsEnabled and eventLong
+    alert("Fable 15m Trend V4 | LONG K2 confirmed | next-open research entry", alert.freq_once_per_bar_close)
+else if alertsEnabled and eventShort
+    alert("Fable 15m Trend V4 | SHORT K2 confirmed | next-open research entry", alert.freq_once_per_bar_close)
+
+var table hud = table.new(
+     position.top_right,
+     1,
+     1,
+     bgcolor = color.new(#131722, 35),
+     frame_width = 0,
+     border_width = 0)
+if barstate.islast
+    string status =
+         not isFifteenMinute ? "TF!" :
+         positionSide == 1 ? (runnerArmed ? "L RUN" : "L") :
+         positionSide == -1 ? (runnerArmed ? "S RUN" : "S") :
+         trendRegime == 1 ? (regimeConsumed ? "L USED" : "L READY") :
+         trendRegime == -1 ? (regimeConsumed ? "S USED" : "S READY") : "WAIT"
+    color statusColour =
+         not isFifteenMinute ? RISK : trendRegime == -1 ? KEY_SHORT : KEY_LONG
+    if showPanel
+        table.cell(
+             hud,
+             0,
+             0,
+             status,
+             text_color = statusColour,
+             bgcolor = color.new(#131722, 35),
+             text_size = size.tiny)
+    else
+        table.clear(hud, 0, 0, 0, 0)

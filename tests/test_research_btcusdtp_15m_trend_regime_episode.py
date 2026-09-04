@@ -126,3 +126,22 @@ def test_position_exit_does_not_emit_second_trade_in_same_regime(
 
     assert events["signal_i"].tolist() == [6, 22]
     assert events["regime_id"].nunique() == 2
+
+
+def test_pine_v4_defaults_and_single_ma_surface_match_frozen_contract() -> None:
+    source = (
+        subject.EXPERIMENT / "pine/fable_15m_trend_regime_episode_v4.pine"
+    ).read_text(encoding="utf-8")
+
+    assert '1.00, "Trend spread / ATR minimum"' in source
+    assert '0.05, "EMA30 slope / ATR / bar minimum"' in source
+    assert '12, "Strong trend confirmation bars"' in source
+    assert '8, "Neutral bars before rearm"' in source
+    assert source.count('plot(showMainMa ? ema30 : na, "EMA30 · main"') == 1
+    assert "plot(showRunnerMa" not in source
+    assert "box.set_right" not in source
+    assert "and not regimeConsumed" in source
+    assert "regimeConsumed := true" in source
+    assert "regimeConsumed := false" in source
+    position_exit = source[source.index("if stopHit or timeExit") : source.index("bool eventLong")]
+    assert "regimeConsumed" not in position_exit

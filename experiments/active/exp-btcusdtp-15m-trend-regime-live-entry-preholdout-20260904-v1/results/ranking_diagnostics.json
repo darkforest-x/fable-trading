@@ -1,0 +1,28 @@
+{
+  "definition": "top ceil(10%) by unchanged K1/K2 morphology score",
+  "positive_label_for_auc": "net_return > 0 after 0.2% round-trip cost",
+  "permutation_null": "100,000 random subsets of the same size; one-sided top-minus-pool mean net return",
+  "seed": 90417,
+  "development": {
+    "events": 175,
+    "top_decile_events": 18,
+    "auc": 0.595211161387632,
+    "pool_mean_net_bp": -23.028753615645662,
+    "top_decile_mean_gross_bp": 21.6011642967623,
+    "top_decile_mean_net_bp": 1.6011642967623336,
+    "top_decile_win_rate": 0.3888888888888889,
+    "top_minus_pool_mean_net_bp": 24.629917912407997,
+    "permutation_p": 0.18595814041859582
+  },
+  "audit": {
+    "events": 123,
+    "top_decile_events": 13,
+    "auc": 0.5360902255639097,
+    "pool_mean_net_bp": -10.40721000685663,
+    "top_decile_mean_gross_bp": -33.076677925089385,
+    "top_decile_mean_net_bp": -53.07667792508939,
+    "top_decile_win_rate": 0.15384615384615385,
+    "top_minus_pool_mean_net_bp": -42.66946791823276,
+    "permutation_p": 0.8710812891871081
+  }
+}
