@@ -4799,8 +4799,8 @@ experiments:
 
   - experiment_id: exp-ethusdtp-15m-causal-confluence-preholdout-20260905-v17
     source_repo: darkforest-x/fable-trading
-    source_commit: pending-preregistration
-    status: active
+    source_commit: "80a56ec715a4f7e16ef38634bf1bf23951f2448b"
+    status: rejected
     question: >-
       Can a causal and Pine-portable confluence gate remove false ETHUSDT.P 15m
       V16 launches while preserving its large-winner right tail?
@@ -4810,16 +4810,44 @@ experiments:
       alignment, ETH participation, volatility expansion, and structure quality.
       V16 entry events, exits, stops, bank ladder, cost and sizing remain frozen.
     result: >-
-      preregistered_not_yet_run. Development is limited to the committed
-      2023-2024 V16 ledger and includes max-statistic multiplicity correction,
-      fold stability, sample-size and right-tail gates. The already-seen
-      2025-through-February-2026 transport audit remains physically unopened
-      until a passing selection receipt is committed.
+      rejected_before_audit. The six-axis count was weak (profit AUC 0.532).
+      Plain ETH 1h/4h and BTC alignment were redundant with the V16 trend
+      state. Joint ATR and BB-width expansion was the only arm positive in all
+      four half-years (+56.78bp, PF 1.999), but only 28/182 events passed and it
+      retained 43.75% of top-decile positive PnL, missing the preregistered
+      45-event, 20%-density, and 45%-tail gates. No arm passed every gate.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
     notes: >-
-      Repository holdout begins 2026-05-04 and is out of scope. This experiment
-      cannot change TradingView, ACTIVE/frozen, forward execution, deployment,
-      position sizing, API keys, or live orders.
+      Audit ledger rows read: 0; repository holdout rows read: 0. A future-row
+      mutation test changed every ETH/BTC value after 2024-07-01 and left all
+      22 pre-boundary features bit-equivalent. No TradingView, ACTIVE/frozen,
+      forward, deployment, sizing, API-key, or live-order state changed.
+
+  - experiment_id: exp-ethusdtp-15m-expansion-confluence-preholdout-20260905-v18
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending-preregistration
+    status: active
+    question: >-
+      Does a broader, fixed ETH volatility-expansion floor retain enough V16
+      signals and right-tail PnL while excluding non-expanding range entries?
+    single_variable: >-
+      One frozen threshold: minimum of ATR14/prior-96 median ATR14 and BB20
+      width/prior-96 median width must be at least 0.85. V16 entries, execution,
+      gradual bank ladder, SMA60 runner, stops, horizon, cost and sizing remain
+      unchanged.
+    result: >-
+      preregistered_not_yet_run. The 0.85 threshold is explicitly disclosed as
+      a hypothesis derived after inspecting fourteen V17 development
+      sensitivities. Development can only freeze the candidate; the already-seen
+      2025-through-February-2026 phase can diagnose transport, not confirm edge.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: >-
+      Repository holdout begins 2026-05-04 and remains out of scope. Audit is
+      blocked until the fixed candidate passes every descriptive freeze gate
+      and its receipt is committed. No TradingView or execution state changes.

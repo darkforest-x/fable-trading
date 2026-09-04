@@ -1,0 +1,14 @@
+{
+  "experiment_id": "exp-ethusdtp-15m-expansion-confluence-preholdout-20260905-v18",
+  "registered_at": "2026-09-05T14:05:00+08:00",
+  "fixed_candidate": "min(ETH ATR14 / prior-96 median ATR14, ETH BB20 width / prior-96 median width) >= 0.85",
+  "candidate_count": 1,
+  "derivation_disclosure": "The threshold was selected after inspecting fourteen V17 development sensitivities. Development metrics and corrected familywise p are descriptive; they cannot validate the hypothesis.",
+  "frozen_execution": "V16 entry ledger, next-open fill, 10% gradual bank, 90% SMA60 runner, 2ATR hard stop, 96 bars, 20bp cost",
+  "development_freeze_rule": "The exact candidate must pass every sample, fold, economics, density and right-tail gate before audit opens.",
+  "audit_interpretation": "2025-through-February-2026 is already-seen parent lineage and is a transport diagnostic, not pristine confirmation.",
+  "audit_success_rule": "Every economic, fold, matched-control and right-tail gate must pass; otherwise reject and do not write TradingView or promote anything.",
+  "holdout_start": "2026-05-04T00:00:00Z",
+  "repository_holdout_rows_allowed": 0,
+  "production_claim_allowed": false
+}

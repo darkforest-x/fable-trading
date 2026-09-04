@@ -1,0 +1,93 @@
+{
+  "experiment_id": "exp-ethusdtp-15m-expansion-confluence-preholdout-20260905-v18",
+  "parent_experiment_id": "exp-ethusdtp-15m-causal-confluence-preholdout-20260905-v17",
+  "purpose": "Freeze and transport-test one broader volatility-expansion gate suggested by the rejected V17 screen.",
+  "owner_directive": "Add useful confluence without allowing range-market overtrading or destroying the trend right tail.",
+  "only_selected_variable": "expansion_floor_threshold",
+  "fixed_candidate": {
+    "score": "minimum of ETH ATR14/prior-96-median-ATR14 and ETH BB20-width/prior-96-median-width",
+    "threshold": 0.85,
+    "comparison": ">=",
+    "derivation": "Post-hoc V17 sensitivity: among inspected minimum-score thresholds 0.75/0.80/0.85/0.90/0.95/1.00/1.05 and geometric-score thresholds at the same values, 0.85 was the only minimum-score threshold with >=45 events, >=45% top-decile positive-PnL capture, and positive mean net return.",
+    "interpretation": "retrospective hypothesis freeze; not confirmatory evidence"
+  },
+  "inspected_family_for_multiplicity_receipt": {
+    "scores": ["minimum", "geometric_mean"],
+    "thresholds": [0.75, 0.80, 0.85, 0.90, 0.95, 1.00, 1.05],
+    "resamples": 50000,
+    "seed": 2026090518,
+    "role": "reported diagnostic only; not an audit-opening gate because the family was inspected before this preregistration"
+  },
+  "lineage": {
+    "v17_script_path": "scripts/research_ethusdtp_15m_causal_confluence_v17.py",
+    "v17_script_sha256": "422042fa95ee9c63d32b0db475e302e309e18a783aa921a6580fedd599dbfbc8",
+    "v17_config_path": "experiments/active/exp-ethusdtp-15m-causal-confluence-preholdout-20260905-v17/config.json",
+    "v17_config_sha256": "ea40188a4d174e165a19fc83368af927b4ee54f1ff8dfe331f3b1b3fa00c62b8",
+    "v17_selection_receipt_path": "experiments/active/exp-ethusdtp-15m-causal-confluence-preholdout-20260905-v17/results/selection_receipt.json",
+    "v17_selection_receipt_sha256": "faf59ecb575f30d1f61b81c651a7061625ccf60161573267ff2db5dca40288e4"
+  },
+  "splits": {
+    "development_start_inclusive": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2025-01-01T00:00:00Z",
+    "development_folds": ["2023H1", "2023H2", "2024H1", "2024H2"],
+    "audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "audit_end_exclusive": "2026-03-01T00:00:00Z",
+    "audit_folds": ["2025H1", "2025H2", "2026P1"],
+    "development_reused_after_v17": true,
+    "audit_is_not_pristine": true
+  },
+  "frozen_system": {
+    "contract": "Exact V16 entry events and execution",
+    "bank_levels_signal_atr": [2.0, 4.0, 8.0, 12.0],
+    "bank_fraction_each": 0.025,
+    "runner_fraction": 0.90,
+    "initial_stop_atr": 2.0,
+    "runner_arm_atr": 2.0,
+    "runner_reference": "SMA60(HL2) plus or minus one current ATR",
+    "horizon_bars": 96,
+    "round_trip_cost_fraction": 0.002,
+    "same_bar_priority": "active stop first",
+    "changed_by_this_experiment": false
+  },
+  "selection_freeze_gate": {
+    "minimum_events_total": 45,
+    "minimum_events_per_fold": 10,
+    "selection_rate_min": 0.20,
+    "selection_rate_max": 0.50,
+    "mean_net_bp_gt": 0.0,
+    "profit_factor_gt": 1.0,
+    "positive_folds_min": 2,
+    "folds_beating_v16_min": 3,
+    "baseline_top_decile_positive_pnl_capture_min": 0.45,
+    "candidate_p95_net_retention_min": 0.85,
+    "audit_rule": "Open only after the exact fixed candidate passes every descriptive freeze gate and the receipt is committed."
+  },
+  "audit_gate": {
+    "minimum_events_total": 25,
+    "minimum_events_per_fold": 4,
+    "mean_net_bp_gt": 0.0,
+    "profit_factor_gt": 1.0,
+    "candidate_minus_v16_mean_net_bp_min": 10.0,
+    "positive_folds_min": 2,
+    "matched_random_excess_bp_gt": 0.0,
+    "matched_random_signflip_p_lt": 0.01,
+    "baseline_top_decile_positive_pnl_capture_min": 0.45
+  },
+  "matched_control": {
+    "controls_per_event": 8,
+    "exclude_radius_bars": 96,
+    "strata": ["calendar month", "UTC six-hour block", "within-month ATR14 quintile", "candidate direction"],
+    "seed": "ethusdtp-15m-expansion-confluence-20260905-v18"
+  },
+  "safety": {
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "repository_holdout_rows_allowed": 0,
+    "holdout_consumed": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "automatic_promote": false,
+    "active_or_forward_change": false,
+    "tradingview_change": false,
+    "live_order_change": false
+  }
+}
