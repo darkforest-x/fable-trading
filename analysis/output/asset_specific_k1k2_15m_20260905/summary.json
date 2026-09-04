@@ -1,0 +1,38 @@
+{
+  "figure": "analysis/output/asset_specific_k1k2_15m_20260905/asset_specific_k1k2_diagnosis.png",
+  "postmortem_exit_rows": 90,
+  "postmortem_gate_rows": 78,
+  "production_or_live_changed": false,
+  "registered_candidate_rows": 6,
+  "registered_experiments": {
+    "ETH": "exp-ethusdtp-15m-asset-specific-k1k2-preholdout-20260905-v19",
+    "XAU": "exp-xauusdtp-15m-asset-specific-k1k2-preholdout-20260905-v1"
+  },
+  "repository_holdout_rows_read": 0,
+  "safe_end_exclusive": "2026-05-01T00:00:00+00:00",
+  "sources": {
+    "ETH": {
+      "bounded_end_exclusive": "2026-05-01T00:00:00+00:00",
+      "bounded_prefix_sha256": "2ed5c3215fe5f0be803fcba2cd0647e2334c33f82ac29a217409961bbc60dfac",
+      "first_bar": "2022-01-03T15:30:00+00:00",
+      "holdout_rows_read": 0,
+      "holdout_start": "2026-05-04T00:00:00+00:00",
+      "last_bar": "2026-04-30T23:45:00+00:00",
+      "path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+      "rows_read": 151522,
+      "segments": 1
+    },
+    "XAU": {
+      "bounded_end_exclusive": "2026-05-01T00:00:00+00:00",
+      "bounded_prefix_sha256": "a95c3b7ba80f15aed4dcb150cdae1047e7d674cb293d2a095eea712271b085cc",
+      "first_bar": "2025-06-03T17:45:00+00:00",
+      "holdout_rows_read": 0,
+      "holdout_start": "2026-05-04T00:00:00+00:00",
+      "last_bar": "2026-04-30T23:45:00+00:00",
+      "path": "data/kline_fetched/okx_XAU_USDT_SWAP_15m_41900.csv",
+      "rows_read": 31801,
+      "segments": 1
+    }
+  },
+  "status": "both_profiles_failed_registered_confirmation_gates"
+}
