@@ -4278,6 +4278,30 @@ experiments:
       selection. Audit did not open and holdout_rows_read=0. No Pine,
       ACTIVE/frozen/forward, deployment, messaging or live order changed.
 
+  - experiment_id: exp-btcusdtp-k1k2-partial-runner-preholdout-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "43acd1d"
+    status: active
+    question: >-
+      Can banking part of the position at 3R while retaining an 8R runner
+      monetize the observed winner tail better than either whole-position endpoint?
+    single_variable: >-
+      Runner fraction after 3R only: 0/10/25/50/75/100%; the remainder exits
+      at 3R and the runner targets 8R. Signal, entry, K2 stop, 1.5R protection,
+      horizon, risk gates and one weighted 20bp cost remain frozen.
+    result: preregistered_before_outcomes
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: null
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Development is 2023-2024 in four chronological half-year folds. Both
+      endpoint state machines have unit parity tests. Audit opens only after
+      every gate; no Pine, ACTIVE/frozen/forward, deployment, messaging or
+      live-order mutation is authorized.
+
   - experiment_id: exp-btcusdtp-k1k2-fixed-target-preholdout-20260904-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "a9a967b"
