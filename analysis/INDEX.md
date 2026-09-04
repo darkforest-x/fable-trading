@@ -514,4 +514,5 @@
 - [`p1_btcusdtp_k1k2_sweep_reclaim_entry_preholdout_20260904.md`](p1_btcusdtp_k1k2_sweep_reclaim_entry_preholdout_20260904.md) — K2 极值扫过后收复的延迟入场实验；5m 30 分钟局部改善但未过门，两周期均拒绝。
 - [`p1_btcusdtp_k1k2_breakout_entry_preholdout_20260904.md`](p1_btcusdtp_k1k2_breakout_entry_preholdout_20260904.md) — K2 方向突破确认入场实验；风险与成交池扩张，全部窗口劣于立即入场。
 - [`p1_btcusdtp_k1k2_protection_trigger_preholdout_20260904.md`](p1_btcusdtp_k1k2_protection_trigger_preholdout_20260904.md) — 盈利保护触发点单变量实验；关闭保护仅改善 0.28/0.41bp，两周期均保留 1.5R。
+- [`p1_btcusdtp_k1k2_fixed_target_preholdout_20260904.md`](p1_btcusdtp_k1k2_fixed_target_preholdout_20260904.md) — 固定止盈 2–8R 单变量实验；长尾存在但整单抬目标未过门，两周期保留 3R。
 - [`p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md`](p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md) — 旧 1h 报告的 holdout 读取声明勘误。
