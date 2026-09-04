@@ -943,6 +943,7 @@ def make_charts(
     metrics: pd.DataFrame,
     folds: pd.DataFrame,
     contributions: pd.DataFrame,
+    stop_bars: pd.DataFrame,
     selected_label: str,
 ) -> None:
     RESULTS.mkdir(parents=True, exist_ok=True)
@@ -954,11 +955,16 @@ def make_charts(
     ax.axvline(0.0, color=INK, linewidth=0.9)
     ax.set_yticks(y, ordered["stop_policy"])
     ax.set_xlabel("bp per trade")
-    ax.set_title("BTCUSDT.P 15m stop-manager performance")
-    ax.text(0.0, 1.01, "2023-2024 development; identical 100-entry cohort; 20bp round-trip cost", transform=ax.transAxes, color="#4B5563")
+    fig.suptitle("BTCUSDT.P 15m stop-manager performance", y=0.98)
+    ax.set_title(
+        "2023-2024 development; identical 100-entry cohort; 20bp round-trip cost",
+        fontsize=10,
+        color="#4B5563",
+        pad=10,
+    )
     ax.grid(axis="x", color=GRID, linewidth=0.6, alpha=0.65)
     ax.legend(frameon=False, loc="lower right")
-    fig.tight_layout()
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))
     fig.savefig(RESULTS / "chart_stop_policy_performance.png", dpi=180)
     plt.close(fig)
 
@@ -973,16 +979,18 @@ def make_charts(
         for j in range(len(matrix.columns)):
             value = float(matrix.iloc[i, j])
             ax.text(j, i, f"{value:+.1f}", ha="center", va="center", color=INK, fontsize=9)
-    ax.set_title("BTCUSDT.P 15m stop-manager half-year net expectancy")
-    ax.text(0.0, 1.01, "bp per trade; chronological folds; orange is negative and purple-blue is positive", transform=ax.transAxes, color="#4B5563")
+    fig.suptitle("BTCUSDT.P 15m stop-manager half-year net expectancy", y=0.98)
+    ax.set_title(
+        "bp per trade; chronological folds; orange is negative and purple-blue is positive",
+        fontsize=10,
+        color="#4B5563",
+        pad=10,
+    )
     fig.colorbar(image, ax=ax, shrink=0.78, label="net bp / trade")
-    fig.tight_layout()
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))
     fig.savefig(RESULTS / "chart_policy_halfyear_heatmap.png", dpi=180)
     plt.close(fig)
 
-    base = contributions.loc[
-        contributions["stop_policy"].eq(str(metrics.iloc[0]["stop_policy"]))
-    ]
     # The baseline contribution is identical on every policy row; select one copy.
     base = contributions.drop_duplicates("failure_path")
     candidate = contributions.loc[contributions["stop_policy"].eq(selected_label)]
@@ -1006,6 +1014,31 @@ def make_charts(
     fig.text(0.5, 0.01, "2023-2024; path labels are defined by the baseline outcome; signed values reconcile to each policy mean", ha="center", color="#4B5563")
     fig.tight_layout(rect=(0.0, 0.04, 1.0, 0.95))
     fig.savefig(RESULTS / "chart_failure_contribution_and_rescue.png", dpi=180)
+    plt.close(fig)
+
+    recovered = stop_bars.loc[
+        stop_bars["post_exit_hit_3r"].astype(bool),
+        "required_extra_stop_atr_before_post_exit_3r",
+    ].dropna()
+    fig, ax = plt.subplots(figsize=(10.4, 5.8))
+    bins = np.linspace(0.0, max(4.0, float(recovered.max()) + 0.2), 13)
+    ax.hist(recovered, bins=bins, color=BLUE_LIGHT, edgecolor=BLUE)
+    ax.axvline(0.25, color=ORANGE, linestyle="--", linewidth=1.6, label="tested +0.25 ATR")
+    median = float(recovered.median())
+    ax.axvline(median, color=INK, linestyle=":", linewidth=1.4, label=f"median {median:.3f} ATR")
+    ax.set_xlabel("extra adverse distance beyond original stop before later 3R, ATR")
+    ax.set_ylabel("baseline stop trades")
+    fig.suptitle("Required extra stop distance among post-exit 3R recoveries", y=0.98)
+    ax.set_title(
+        f"n={len(recovered)} baseline stops later reached 3R; stop-first ordering is retained",
+        fontsize=10,
+        color="#4B5563",
+        pad=10,
+    )
+    ax.grid(axis="y", color=GRID, linewidth=0.6, alpha=0.65)
+    ax.legend(frameon=False)
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))
+    fig.savefig(RESULTS / "chart_recovery_buffer_distribution.png", dpi=180)
     plt.close(fig)
 
 
@@ -1130,7 +1163,9 @@ def development_phase(config: dict[str, Any]) -> None:
     predictions, classifier_metrics, coefficients = walkforward_classifier(
         ledgers[baseline_label], frame, config
     )
-    make_charts(metrics_table, folds_table, contributions, best_observed)
+    make_charts(
+        metrics_table, folds_table, contributions, stop_bars, best_observed
+    )
 
     write_csv(metrics_table, RESULTS / "development_policy_metrics.csv")
     write_csv(folds_table, RESULTS / "development_policy_folds.csv")
