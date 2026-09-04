@@ -1,0 +1,187 @@
+{
+  "experiment_id": "exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1",
+  "status": "preregistered_before_development_outcomes",
+  "predecessor": {
+    "experiment_id": "exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v2",
+    "selection_receipt": "experiments/active/exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v2/results/selection_receipt.json",
+    "selection_receipt_sha256": "a3649bad0509db144ec58e0b409c81d3a734c1544a7f83ea4d4c996343844d23",
+    "source_commit": "d4ff6bf"
+  },
+  "question": "Does representing 15m K2 as a causal touch-then-confirm interval repair the missed distributed retest pattern and produce stable net edge versus the frozen same-bar K2 baseline?",
+  "owner_authorization": {
+    "verbatim": [
+      "继续推进吧，开始目标模式啊",
+      "能用 freqtrade 吗",
+      "去掉任何限制！！！"
+    ],
+    "authorized_on": "2026-09-04",
+    "scope": "full Freqtrade research implementation and autonomous pre-holdout exploration",
+    "holdout_reuse_authorized_for_this_new_configuration": false,
+    "live_trading_authorized": false
+  },
+  "hypothesis_origin": {
+    "chart_example": "OKX:BTCUSDT.P 15m around 2026-08-14 11:30--13:00 Asia/Shanghai",
+    "observation": "the mean was touched first and a stronger rejection close arrived two bars later",
+    "contamination_limit": "the chart example is used only to define the candidate and is excluded from all scored data; no claim of pristine post-2026 generalization is allowed"
+  },
+  "instrument": {
+    "tradingview_symbol": "OKX:BTCUSDT.P",
+    "okx_instrument": "BTC-USDT-SWAP",
+    "timeframe": "15m",
+    "timezone": "UTC"
+  },
+  "source": {
+    "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+    "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "rows": 341567,
+    "last_time": "2026-02-28T15:55:00Z",
+    "aggregation": "complete UTC-aligned groups of three contiguous 5m rows",
+    "holdout_ohlcv_rows_materialized": 0
+  },
+  "window": {
+    "development_start_inclusive": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2025-01-01T00:00:00Z",
+    "development_folds": [
+      "2023H1",
+      "2023H2",
+      "2024H1",
+      "2024H2"
+    ],
+    "audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "audit_end_exclusive": "2026-02-28T16:00:00Z",
+    "audit_slices": [
+      "2025H1",
+      "2025H2",
+      "2026P1"
+    ],
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "audit_open_only_after_committed_development_pass": true
+  },
+  "signal_frozen": {
+    "sma": "SMA40(HL2)",
+    "atr": "Pine/Wilder ATR14",
+    "gap_min_bars_k1_to_touch": 2,
+    "gap_max_bars_k1_to_touch": 8,
+    "k1_min_body_ratio": 0.65,
+    "k1_min_range_atr": 0.8,
+    "k1_min_directional_close_location": 0.7,
+    "k1_min_sma40_cross_depth_atr": -0.05,
+    "k1_ma_colour_aligned": true,
+    "intermediate_closes_and_ma_colour_all_direction_aligned": true,
+    "k2_min_rejection_wick_share": 0.25,
+    "k2_max_body_ratio": 0.5,
+    "k2_min_rejection_close_location": 0.65,
+    "k2_touch_depth_atr_min": 0.0,
+    "k2_touch_depth_atr_max": 1.5,
+    "k2_body_and_close_on_direction_side": true,
+    "oscillator_gate": "none",
+    "k1_min_volume_ratio_20": null,
+    "fee_to_risk_max": 1.25
+  },
+  "factor": {
+    "name": "k2_event_representation",
+    "baseline": {
+      "mode": "same_bar",
+      "maximum_confirmation_delay_bars": 0,
+      "stop_anchor": "same K2 candle extreme"
+    },
+    "candidate": {
+      "mode": "touch_then_confirm",
+      "maximum_confirmation_delay_bars": 2,
+      "touch_bar": "passes every frozen K2 condition except minimum rejection close location",
+      "confirmation_bar": "earliest bar at delay 0, 1 or 2 with wick share, body ratio, rejection close, body-side, close-side and MA-colour conditions; physical touch is not repeated",
+      "between_touch_and_confirmation": "every completed bar closes and colours on the intended SMA40 side",
+      "stop_anchor": "lowest low for long or highest high for short across the inclusive touch-to-confirmation interval",
+      "selection_order": "for one touch choose earliest confirmation; for one confirmation and direction prefer shortest delay, then higher K1 quality, then smaller K1-to-touch gap, then later touch",
+      "same_bar_compatibility": "delay zero is identical to the baseline K2 morphology and stop"
+    },
+    "single_variable_claim": "K2 changes from a candle to a causal interval; interval stop is the extreme of that redefined K2, with no numeric stop buffer or barrier change"
+  },
+  "execution_frozen": {
+    "entry": "open immediately after completed confirmation",
+    "next_open_risk_atr_reference": "ATR14 on the confirmation bar",
+    "next_open_risk_atr_min": 0.15,
+    "next_open_risk_atr_max": 2.5,
+    "target_r": 3.0,
+    "horizon_bars": 48,
+    "horizon_clock_hours": 12,
+    "cooldown_bars": 24,
+    "same_bar_collision": "conservative stop first",
+    "gap_policy": "barrier price",
+    "timeout_exit": "close of final horizon bar",
+    "profit_protection_trigger_close_r": 1.5,
+    "profit_protection_effective": "following bar",
+    "round_trip_cost_fraction": 0.002,
+    "funding": "excluded",
+    "slippage_beyond_round_trip_cost": "excluded"
+  },
+  "development_gate": {
+    "minimum_events_total": 80,
+    "minimum_events_per_fold": 12,
+    "candidate_mean_net_bp": ">0",
+    "candidate_robust_score_bp": ">0",
+    "candidate_worst_fold_net_bp": ">-5",
+    "candidate_each_halfyear_mean_net_bp": ">0",
+    "candidate_robust_improvement_vs_baseline_bp": ">=5",
+    "matched_control_excess_bp": ">0",
+    "paired_signflip_p_one_sided": "<0.01",
+    "failure_action": "reject candidate, keep audit and repository holdout closed, and do not replace the TradingView baseline"
+  },
+  "matched_control": {
+    "controls_per_trade": 3,
+    "strata": [
+      "calendar month",
+      "UTC six-hour block",
+      "within-month ATR14 quintile"
+    ],
+    "copied": [
+      "direction",
+      "risk distance in ATR",
+      "exit rule",
+      "horizon",
+      "cost"
+    ],
+    "exclude_within_horizon_plus_one_bars_of_any_arm_signal": true,
+    "insufficient_exact_stratum_policy": "do not relax",
+    "seed": "btcusdtp-k1k2-15m-two-stage-k2-20260904-v1"
+  },
+  "freqtrade": {
+    "role": "full second research implementation, native backtest and lookahead audit",
+    "version": "2026.8",
+    "image": "freqtradeorg/freqtrade@sha256:7031bca43ed7668ebf421725dd5016acade6ef88b0771db3e08c96e6d19a42db",
+    "architecture": "arm64",
+    "data_contract": "convert the exact safe local 15m series; do not download replacement candles",
+    "fee_per_side": 0.001,
+    "trading_mode": "futures",
+    "margin_mode": "isolated",
+    "leverage": 1.0,
+    "run_modes_allowed": [
+      "backtesting",
+      "lookahead-analysis"
+    ],
+    "live_and_dry_run_forbidden_in_this_experiment": true,
+    "official_docs": [
+      "https://www.freqtrade.io/en/2026.8/data-download/",
+      "https://www.freqtrade.io/en/stable/strategy-101/",
+      "https://www.freqtrade.io/en/stable/strategy-callbacks/",
+      "https://www.freqtrade.io/en/stable/backtesting/",
+      "https://www.freqtrade.io/en/stable/lookahead-analysis/"
+    ]
+  },
+  "audit_gate": {
+    "open_only_if_development_gate_passes": true,
+    "mean_net_bp": ">0",
+    "matched_control_excess_bp": ">0",
+    "paired_signflip_p_one_sided": "<0.01",
+    "2025H1_and_2025H2_mean_net_bp": ">0 each",
+    "holdout_action": "never opened by this experiment without a new explicit configuration-specific owner authorization"
+  },
+  "eligibility": {
+    "training_eligible": false,
+    "production_eligible": false,
+    "holdout_consumed": false,
+    "active_or_frozen_mutation_allowed": false,
+    "live_orders_allowed": false
+  }
+}

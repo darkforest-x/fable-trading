@@ -4405,3 +4405,29 @@ experiments:
       Candidate came from the committed 2023 causal failure map. Confirmation
       used 2024 with exact full-state replay and matched random controls. Audit
       was not opened and repository holdout rows read remained zero.
+
+  - experiment_id: exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d4ff6bf"
+    status: active
+    question: >-
+      Does changing K2 from one candle into a causal touch-to-confirmation
+      interval of at most two later bars create stable net edge on BTCUSDT.P
+      15m versus the frozen same-bar K2 baseline?
+    single_variable: >-
+      K2 event representation: same-bar touch plus rejection -> touch followed
+      by the earliest qualifying rejection at delay 0, 1 or 2; all numeric
+      thresholds, barriers, costs and clocks remain frozen.
+    result: preregistered_before_development_outcomes
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btcusdtp_k1k2_15m_two_stage_k2_preholdout_20260904.md
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      The hypothesis came from one owner-supplied 2026 chart example, which is
+      excluded from scoring. Development is limited to 2023-2024 and the audit
+      remains closed unless all preregistered gates pass. Freqtrade 2026.8 is
+      authorized as a full Docker-isolated second research implementation;
+      live and dry-run modes remain out of scope.
