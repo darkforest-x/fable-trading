@@ -1287,7 +1287,23 @@ def selection_phase(config: dict[str, Any]) -> None:
         [nominated, "signal_score", "rule_confluence_vote", "legacy_28"],
     )
     write_csv(events, RESULTS / "development_feature_ledger.csv.gz")
-    write_csv(scored, RESULTS / "development_oof_scores.csv.gz")
+    write_csv(
+        scored[
+            [
+                "fold",
+                "variant_id",
+                "setup_id",
+                "signal_time",
+                "entry_time",
+                "direction",
+                "net_return",
+                "model_score",
+                "score_threshold",
+                "selected",
+            ]
+        ],
+        RESULTS / "development_oof_scores.csv.gz",
+    )
     write_csv(folds, RESULTS / "development_fold_metrics.csv")
     write_csv(summary, RESULTS / "development_variant_summary.csv")
     write_json(MODEL_CONTRACT, {"nominated_variant": nominated, "contracts": contracts})
