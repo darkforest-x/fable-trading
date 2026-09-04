@@ -13363,3 +13363,139 @@ artifacts:
     config_hash: "1b115978b69795a61529ca2029e72d60e081ff2af31ea3a218a21233e91094cf"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: Self-contained owner-facing HTML generated from the canonical report.
+
+  - artifact_id: btcusdtp-k1k2-causal-failure-map-selection-20260904-v1
+    artifact_type: manifest
+    role: frozen_2023_causal_failure_map_selection_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1458fb1"
+    source_path: experiments/active/exp-btcusdtp-k1k2-causal-failure-map-20260904-v1/results/selection_receipt.json
+    sha256: "3ee6dc74ab99ee5626e9a85d5338887390260a828013dd8bf655956e81075fde"
+    size_bytes: 10602
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-causal-failure-map-20260904-v1/results/selection_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1458fb1"
+    config_hash: "ec7db75322c9fdcfd241def28301e816c58124066a2fe18a7906db651bef256f"
+    data_cutoff: "2024-01-01T00:00:00Z"
+    notes: 2023-only diagnostic selection; audit and holdout rows read were zero.
+
+  - artifact_id: btcusdtp-k1k2-causal-failure-map-report-receipt-20260904-v1
+    artifact_type: manifest
+    role: hashes_for_causal_failure_map_results_and_reports
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c8e1f18"
+    source_path: experiments/active/exp-btcusdtp-k1k2-causal-failure-map-20260904-v1/results/report_receipt.json
+    sha256: "d1481c8ca055010f336f61be8012f428aec8a851b3da7041c83b2cd39ee62f6c"
+    size_bytes: 1680
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-causal-failure-map-20260904-v1/results/report_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c8e1f18"
+    config_hash: "ec7db75322c9fdcfd241def28301e816c58124066a2fe18a7906db651bef256f"
+    data_cutoff: "2024-01-01T00:00:00Z"
+    notes: Frozen hashes for the diagnostic receipt, plots and owner reports.
+
+  - artifact_id: btcusdtp-k1k2-causal-failure-map-report-20260904-v1
+    artifact_type: report
+    role: canonical_chinese_causal_failure_map_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c8e1f18"
+    source_path: analysis/p1_btcusdtp_k1k2_causal_failure_map_20260904.md
+    sha256: "789e3fc6e25460b63b0604a74741a51fcaacc2b48a858ee2eebe252be696c216"
+    size_bytes: 8674
+    storage_uri: "repo://analysis/p1_btcusdtp_k1k2_causal_failure_map_20260904.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c8e1f18"
+    config_hash: "ec7db75322c9fdcfd241def28301e816c58124066a2fe18a7906db651bef256f"
+    data_cutoff: "2024-01-01T00:00:00Z"
+    notes: Full 5m/15m causal failure segmentation, max-statistic null and risks.
+
+  - artifact_id: btcusdtp-k1k2-causal-failure-map-html-20260904-v1
+    artifact_type: report
+    role: owner_facing_html_causal_failure_map_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c8e1f18"
+    source_path: analysis/html/p1_btcusdtp_k1k2_causal_failure_map_20260904.html
+    sha256: "040f223be8ecdf2f4dd3b696746a33c7b7864af0bde888fcbd7eb7a8fbbacccc"
+    size_bytes: 309693
+    storage_uri: "repo://analysis/html/p1_btcusdtp_k1k2_causal_failure_map_20260904.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c8e1f18"
+    config_hash: "ec7db75322c9fdcfd241def28301e816c58124066a2fe18a7906db651bef256f"
+    data_cutoff: "2024-01-01T00:00:00Z"
+    notes: Self-contained owner-facing HTML generated from the canonical report.
+
+  - artifact_id: btcusdtp-k1k2-15m-gap-confirmation-receipt-20260904-v1
+    artifact_type: manifest
+    role: frozen_2024_exact_gap_min_confirmation_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9ca3f4d"
+    source_path: experiments/active/exp-btcusdtp-k1k2-15m-gap-min-confirmation-20260904-v1/results/confirmation_receipt.json
+    sha256: "e153a48e4129a561da729d4fa3e8db4494c3e90d424534a08a66f24fe8c3f991"
+    size_bytes: 5467
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-15m-gap-min-confirmation-20260904-v1/results/confirmation_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "9ca3f4d"
+    config_hash: "f7155ed34aeb22775fb599df9ad621dc4af9ff75bde2200e7ae2cd9ee6a4a704"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Exact 2024 replay failed all six gates; audit and holdout stayed closed.
+
+  - artifact_id: btcusdtp-k1k2-15m-gap-confirmation-report-receipt-20260904-v1
+    artifact_type: manifest
+    role: hashes_for_gap_min_confirmation_and_reports
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c8e1f18"
+    source_path: experiments/active/exp-btcusdtp-k1k2-15m-gap-min-confirmation-20260904-v1/results/report_receipt.json
+    sha256: "da8cc004598f7daefe639deb984cd57d4e3264d7f84b4da5000b7dbbf069f8e7"
+    size_bytes: 1295
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-15m-gap-min-confirmation-20260904-v1/results/report_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c8e1f18"
+    config_hash: "f7155ed34aeb22775fb599df9ad621dc4af9ff75bde2200e7ae2cd9ee6a4a704"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Frozen hashes for the exact confirmation receipt and owner reports.
+
+  - artifact_id: btcusdtp-k1k2-15m-gap-confirmation-report-20260904-v1
+    artifact_type: report
+    role: canonical_chinese_gap_min_confirmation_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c8e1f18"
+    source_path: analysis/p1_btcusdtp_k1k2_15m_gap_min_confirmation_20260904.md
+    sha256: "487ca534a9694d6dbc60e31c3abbe046f7ea0e3923141074e657c202c609866e"
+    size_bytes: 6825
+    storage_uri: "repo://analysis/p1_btcusdtp_k1k2_15m_gap_min_confirmation_20260904.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c8e1f18"
+    config_hash: "f7155ed34aeb22775fb599df9ad621dc4af9ff75bde2200e7ae2cd9ee6a4a704"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Exact replay, matched controls, gate results and cooldown attribution.
+
+  - artifact_id: btcusdtp-k1k2-15m-gap-confirmation-html-20260904-v1
+    artifact_type: report
+    role: owner_facing_html_gap_min_confirmation_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c8e1f18"
+    source_path: analysis/html/p1_btcusdtp_k1k2_15m_gap_min_confirmation_20260904.html
+    sha256: "ac90ff8b8d193f0616194707e05a77eda1d4de4e60676eff160d5c18962ff962"
+    size_bytes: 11161
+    storage_uri: "repo://analysis/html/p1_btcusdtp_k1k2_15m_gap_min_confirmation_20260904.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c8e1f18"
+    config_hash: "f7155ed34aeb22775fb599df9ad621dc4af9ff75bde2200e7ae2cd9ee6a4a704"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Self-contained owner-facing HTML generated from the canonical report.

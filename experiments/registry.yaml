@@ -4345,42 +4345,63 @@ experiments:
   - experiment_id: exp-btcusdtp-k1k2-causal-failure-map-20260904-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "587ad78"
-    status: active
+    status: accepted
     question: >-
       Which entry-time causal segment consistently separates better and worse
       frozen K1-to-K2 outcomes in both halves of 2023 for 15m and 5m?
     single_variable: >-
       n/a -- diagnostic only. It does not mutate a trading rule. Any nominated
       segment must become a separate preregistered single-variable experiment.
-    result: preregistered_before_outcomes
+    result: >-
+      completed_hypothesis_generation. On 2023 only, 15m gap_bars >= 5 was
+      the sole nominated arm: +18.02bp worst-half improvement, +5.63bp
+      combined net and max-statistic familywise p=0.0393. No 5m arm survived:
+      its best arm remained -12.73bp net with familywise p=0.9618. The 15m
+      nomination was subsequently rejected by its separate exact 2024 replay.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: null
-    artifacts: []
+    canonical_report: analysis/p1_btcusdtp_k1k2_causal_failure_map_20260904.md
+    artifacts:
+      - btcusdtp-k1k2-causal-failure-map-selection-20260904-v1
+      - btcusdtp-k1k2-causal-failure-map-report-receipt-20260904-v1
+      - btcusdtp-k1k2-causal-failure-map-report-20260904-v1
+      - btcusdtp-k1k2-causal-failure-map-html-20260904-v1
     reuse_allowed: false
     notes: >-
       Only 2023 outcomes may be used. Continuous thresholds come from the
-      outcome-blind H1 feature distribution, stability is checked in H1/H2,
-      and a 20,000-resample max-statistic null measures multiple-search bias.
-      2024 confirmation, 2025-2026 audit and repository holdout remain closed.
+      outcome-blind H1 feature distribution, stability was checked in H1/H2,
+      and a 20,000-resample max-statistic null controlled multiple-search bias.
+      Diagnostic completion does not accept a strategy rule. The nominated
+      15m rule received a separate exact replay; 2025-2026 audit and repository
+      holdout remained closed throughout this diagnostic.
 
   - experiment_id: exp-btcusdtp-k1k2-15m-gap-min-confirmation-20260904-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "f080bc8"
-    status: active
+    status: rejected
     question: >-
       Does changing only the 15m minimum K1-to-K2 distance from 2 to 5 bars
       survive an exact before-cooldown replay on later 2024 data?
     single_variable: "15m gap_min_bars: 2 -> 5; gap_max_bars remains 8"
-    result: preregistered_before_confirmation_outcomes
+    result: >-
+      rejected_on_exact_2024_confirmation. Changing only gap_min from 2 to 5
+      produced 130 trades, -12.02bp mean net and -13.27bp robust score. Robust
+      improvement was only +2.83bp and paired matched-control p=0.0811; all six
+      preregistered gates failed. Full replay retained 70 baseline trades,
+      removed 124 and added 60 replacements, explaining why the posthoc edge
+      did not survive cooldown and same-K2 selection.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: null
-    artifacts: []
+    canonical_report: analysis/p1_btcusdtp_k1k2_15m_gap_min_confirmation_20260904.md
+    artifacts:
+      - btcusdtp-k1k2-15m-gap-confirmation-receipt-20260904-v1
+      - btcusdtp-k1k2-15m-gap-confirmation-report-receipt-20260904-v1
+      - btcusdtp-k1k2-15m-gap-confirmation-report-20260904-v1
+      - btcusdtp-k1k2-15m-gap-confirmation-html-20260904-v1
     reuse_allowed: false
     notes: >-
       Candidate came from the committed 2023 causal failure map. Confirmation
-      is 2024 with exact full-state replay and matched random controls. Audit
-      and repository holdout remain closed until every confirmation gate passes.
+      used 2024 with exact full-state replay and matched random controls. Audit
+      was not opened and repository holdout rows read remained zero.
