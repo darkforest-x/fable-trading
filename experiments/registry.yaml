@@ -4147,7 +4147,7 @@ experiments:
   - experiment_id: exp-btcusdtp-k1k2-stop-buffer-preholdout-20260904-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "20eeddc"
-    status: active
+    status: rejected
     question: >-
       Does an ATR14 buffer outside the K2 extreme repair the 15m/5m
       stop-sweep failure without changing signal morphology or another
@@ -4156,15 +4156,25 @@ experiments:
       K2 stop buffer only: 0/0.10/0.20/0.30/0.50 ATR14. The independently
       selected MA/gap/score settings, next-open entry, 3R target, 12-hour
       horizon, 1.5R fee-cover protection, cooldown and 20bp cost remain fixed.
-    result: preregistered_before_outcomes
+    result: >-
+      rejected_at_development_futility_gate. Both timeframes retained the
+      zero-buffer baseline. 15m robust score / mean net were -16.35 / -13.51bp;
+      5m were -17.68 / -17.32bp. Every wider arm reduced robust score, so the
+      audit remained closed.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_btcusdtp_k1k2_stop_buffer_preholdout_20260904.md
+    artifacts:
+      - btcusdtp-k1k2-stop-buffer-selection-20260904-v1
+      - btcusdtp-k1k2-stop-buffer-report-receipt-20260904-v1
+      - btcusdtp-k1k2-stop-buffer-report-20260904-v1
+      - btcusdtp-k1k2-stop-buffer-html-20260904-v1
     reuse_allowed: false
     notes: >-
-      Development is 2023-2024 in four chronological half-year folds. The
-      non-pristine 2025 through 2026-02 audit may open only for a timeframe
-      that first passes the registered development gate. The physical source
-      ends before holdout; no Pine, ACTIVE/frozen/forward, deployment,
-      messaging or live order is in scope.
+      Development used 2023-2024 in four chronological half-year folds. The
+      non-pristine 2025 through 2026-02 audit did not open and no row at or
+      after the 2026-05-04 repository holdout was read. Fixed-cohort diagnosis
+      confirms that risk-scaled 3R targets, not just newly admitted trades,
+      make wider stops worse. No Pine, ACTIVE/frozen/forward, deployment,
+      messaging or live order changed.
