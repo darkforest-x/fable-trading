@@ -143,3 +143,18 @@ def test_protected_schedule_banks_thirty_percent_at_one_r() -> None:
     assert trade["bank_hits"] == 1
     assert trade["banked_fraction"] == 0.30
     assert trade["remaining_fraction"] == 0.70
+
+
+def test_symbol_without_a_setup_is_a_valid_zero_event_partition() -> None:
+    parent_config, config = _configs()
+    trades, rejected = repair._resolve_symbol(
+        pd.DataFrame(),
+        _frame([(100, 101, 99, 100), (100, 101, 99, 100)]),
+        parent_config,
+        config,
+        config["selection"]["initial"],
+        phase_end=pd.Timestamp("2025-01-03", tz="UTC"),
+    )
+
+    assert trades.empty
+    assert rejected.empty

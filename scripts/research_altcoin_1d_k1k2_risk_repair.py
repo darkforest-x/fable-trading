@@ -349,6 +349,8 @@ def _resolve_symbol(
     *,
     phase_end: pd.Timestamp,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    if setups.empty:
+        return pd.DataFrame(), pd.DataFrame()
     trades: list[dict[str, Any]] = []
     rejected: list[dict[str, Any]] = []
     occupied_through = -1
