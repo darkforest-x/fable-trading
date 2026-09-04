@@ -4107,7 +4107,7 @@ experiments:
   - experiment_id: exp-btcusdtp-k1k2-15m-5m-independent-preholdout-20260904-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "863121a"
-    status: active
+    status: rejected
     question: >-
       Can separately defined 15m and 5m K1/K2 systems increase usable signal
       density without sacrificing pre-holdout net expectancy?
@@ -4118,16 +4118,28 @@ experiments:
       score floor in sequence. K1 true cross, K2 wick-only touch, next-open
       entry, exact K2 stop, 3R target, 12-hour horizon, 1.5R protection,
       six-hour cooldown, and 20bp cost stay fixed.
-    result: preregistered_before_new_outcomes
+    result: >-
+      Rejected. Separate settings restored signal density (15m 53->181,
+      5m 74->418 in the frozen audit) but not edge: mean net was -25.00bp and
+      -19.26bp per trade, matched-control excess was +0.138bp (p=0.486) and
+      -0.194bp (p=0.529), and score AUC was below 0.5 on both timeframes.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_btcusdtp_k1k2_15m_5m_independent_research_20260904.md
-    reuse_allowed: false
+    artifacts:
+      - btcusdtp-k1k2-independent-selection-20260904-v1
+      - btcusdtp-k1k2-independent-audit-20260904-v1
+      - btcusdtp-k1k2-independent-report-receipt-20260904-v1
+      - btcusdtp-k1k2-independent-report-20260904-v1
+      - btcusdtp-k1k2-independent-html-20260904-v1
+    reuse_allowed: true
     notes: >-
       Development is 2023-2024. The 2025 through 2026-02 audit is explicitly
       not pristine because predecessor aggregate outcomes were already seen;
       it cannot be advertised as untouched validation. The physical source
       ends before repository holdout and no row at or after 2026-05-04 may be
       read. No training, promotion, deployment, ACTIVE/frozen/forward mutation,
-      messaging or order is authorized.
+      messaging or order occurred. Reuse is limited to negative research
+      evidence and the next preregistration; this result is not production
+      eligible and did not update the TradingView Pine indicator.

@@ -12839,3 +12839,101 @@ artifacts:
     config_hash: "b7d5e2644d0f0b81b3689f3b67e9952a984e70ff25ef734128e2ae31586ec278"
     data_cutoff: "2026-02-28T16:00:00Z"
     notes: Browser-verified HTML with nine tables, two embedded figures and zero broken images.
+
+  - artifact_id: btcusdtp-k1k2-independent-selection-20260904-v1
+    artifact_type: config
+    role: frozen_independent_15m_5m_development_selection_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "0e03236"
+    source_path: experiments/active/exp-btcusdtp-k1k2-15m-5m-independent-preholdout-20260904-v1/results/selection_receipt.json
+    sha256: "7d4489687f2026622691fb7449f956a45baedef9b0732618299ffe2329e0c11e"
+    size_bytes: 35980
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-15m-5m-independent-preholdout-20260904-v1/results/selection_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "0e03236"
+    config_hash: "0a6a5d2a6f5a0039c74cc9ed9e65ec02528a6ba6dbe3266582a0eb8d21711140"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: >-
+      Frozen after the single preregistered 2023-2024 coordinate pass and
+      before the non-pristine audit was opened. 15m selected SMA120 with gap
+      2-8; 5m selected SMA40 with gap 6-24; both retained score floor 0.40.
+
+  - artifact_id: btcusdtp-k1k2-independent-audit-20260904-v1
+    artifact_type: manifest
+    role: frozen_exploratory_audit_summary_with_matched_controls_and_ranking
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4d28b5d"
+    source_path: experiments/active/exp-btcusdtp-k1k2-15m-5m-independent-preholdout-20260904-v1/results/audit_summary.json
+    sha256: "6efbed0985c48791efcd714a7a4d331bf7d904508782b6a7bc99ad97eb4348ca"
+    size_bytes: 5614
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-15m-5m-independent-preholdout-20260904-v1/results/audit_summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4d28b5d"
+    config_hash: "0a6a5d2a6f5a0039c74cc9ed9e65ec02528a6ba6dbe3266582a0eb8d21711140"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: >-
+      Both independently defined timeframes failed. The audit is explicitly
+      non-pristine because predecessor aggregate outcomes were already seen;
+      no row at or after the 2026-05-04 repository holdout was read.
+
+  - artifact_id: btcusdtp-k1k2-independent-report-receipt-20260904-v1
+    artifact_type: manifest
+    role: hashes_for_frozen_ledgers_diagnostics_figures_and_canonical_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4d28b5d"
+    source_path: experiments/active/exp-btcusdtp-k1k2-15m-5m-independent-preholdout-20260904-v1/results/report_receipt.json
+    sha256: "098e1087fd9afd06d7dd6078b3e110932d3ed432721d46ddf5d51c2f1dcfe5b2"
+    size_bytes: 2812
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-15m-5m-independent-preholdout-20260904-v1/results/report_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4d28b5d"
+    config_hash: "0a6a5d2a6f5a0039c74cc9ed9e65ec02528a6ba6dbe3266582a0eb8d21711140"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: >-
+      Hash receipt for eleven inputs and outputs, including the independent
+      22-check verifier result. It declares rejected status and zero holdout rows.
+
+  - artifact_id: btcusdtp-k1k2-independent-report-20260904-v1
+    artifact_type: report
+    role: canonical_chinese_independent_15m_5m_failure_mechanism_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4d28b5d"
+    source_path: analysis/p1_btcusdtp_k1k2_15m_5m_independent_research_20260904.md
+    sha256: "1daae5a58dc717f5f51d07e5111575884514e0efbc6e039e596e34124bc87fcf"
+    size_bytes: 16115
+    storage_uri: "repo://analysis/p1_btcusdtp_k1k2_15m_5m_independent_research_20260904.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4d28b5d"
+    config_hash: "0a6a5d2a6f5a0039c74cc9ed9e65ec02528a6ba6dbe3266582a0eb8d21711140"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: >-
+      Full rules, separate development selection, frozen audit, matched random
+      controls, score AUC/top-decile baseline, time slices, post-stop
+      continuation, risk bins, risks and reproduction commands.
+
+  - artifact_id: btcusdtp-k1k2-independent-html-20260904-v1
+    artifact_type: report
+    role: owner_facing_self_contained_html_independent_15m_5m_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4d28b5d"
+    source_path: analysis/html/p1_btcusdtp_k1k2_15m_5m_independent_research_20260904.html
+    sha256: "e37169d620be11051224da7b5016b1e2cc2aa080672b5b269218c548e7ee7d09"
+    size_bytes: 356783
+    storage_uri: "repo://analysis/html/p1_btcusdtp_k1k2_15m_5m_independent_research_20260904.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4d28b5d"
+    config_hash: "0a6a5d2a6f5a0039c74cc9ed9e65ec02528a6ba6dbe3266582a0eb8d21711140"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: >-
+      Browser-verified self-contained HTML at desktop and 390px mobile width;
+      four figures are embedded and the browser console reported zero errors.
