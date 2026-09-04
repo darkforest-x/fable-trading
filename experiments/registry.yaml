@@ -4944,3 +4944,30 @@ experiments:
       March-April confirmation. Repository holdout begins 2026-05-04 and zero
       holdout rows were read. No TradingView, ACTIVE/frozen, forward,
       deployment or order state changed.
+
+  - experiment_id: exp-altcoin-1d-k1k2-episode-runner-preholdout-20260905-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5aca289acea8276655ce188d90dadd537cfe15b3"
+    status: active
+    question: >-
+      Can a daily, neutral-anchored K1->K2 launch episode with gradual profit
+      banking and an MA-following runner produce sparse trend exposure that
+      transports across a frozen 52-altcoin OKX perpetual universe?
+    single_variable: >-
+      Seven factors are changed sequentially, one at a time: MA profile,
+      neutral-to-K1 recency, transition-vote threshold, K1-to-K2 maximum gap,
+      trail reference, runner ATR buffer, then banked fraction. Each stage keeps
+      its incumbent and requires the preregistered sample, robust-score and
+      right-tail gates.
+    result: preregistered_not_run
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: >-
+      The explicit current-instrument cache has survivorship and listing bias;
+      it is not presented as a point-in-time historical market universe. Daily
+      bars require exactly 96 contiguous 15m UTC rows. Selection, audit and
+      confirmation are opened in order, all before the 2026-05-04 repository
+      holdout. No training, TradingView, ACTIVE/frozen, forward, deployment,
+      sizing, API-key or live-order state may change.
