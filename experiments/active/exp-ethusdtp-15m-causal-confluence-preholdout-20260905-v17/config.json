@@ -1,0 +1,161 @@
+{
+  "experiment_id": "exp-ethusdtp-15m-causal-confluence-preholdout-20260905-v17",
+  "parent_experiment_id": "exp-ethusdtp-15m-micro-profit-ladder-preholdout-20260905-v16",
+  "purpose": "Select one causal, Pine-portable confluence gate for the frozen ETHUSDT.P 15m V16 entry ledger without changing its exit, stop, bank ladder, cost, or position sizing.",
+  "owner_directive": "Add independent confluence to reduce range-market entries and retain large trend winners.",
+  "only_selected_variable": "confluence_gate_id",
+  "sources": {
+    "eth_15m": {
+      "path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+      "venue": "OKX",
+      "symbol": "ETH-USDT-SWAP",
+      "loader": "chunked prefix; stop before phase end; never hash or parse the full future-bearing file"
+    },
+    "btc_15m": {
+      "path": "data/kline_deep/okx_BTC_USDT_SWAP_15m_158499.csv",
+      "venue": "OKX",
+      "symbol": "BTC-USDT-SWAP",
+      "role": "causal market-regime proxy only",
+      "loader": "chunked prefix; stop before phase end; never hash or parse the full future-bearing file"
+    },
+    "development_ledger": {
+      "path": "experiments/active/exp-ethusdtp-15m-micro-profit-ladder-preholdout-20260905-v16/results/selection_candidate_trades.csv.gz",
+      "sha256": "d0b8e4942d83978fd83793c3558f0af1a78ab55bc479cebdebf90d57dd43dc63"
+    },
+    "audit_ledger": {
+      "path": "experiments/active/exp-ethusdtp-15m-micro-profit-ladder-preholdout-20260905-v16/results/audit_candidate_trades.csv.gz",
+      "sha256": "a1ccbc577802b33d989627fdb58cba5f9b99e7e8e26c4d813129206620bde044"
+    },
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "repository_holdout_rows_allowed": 0
+  },
+  "splits": {
+    "development_start_inclusive": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2025-01-01T00:00:00Z",
+    "development_folds": ["2023H1", "2023H2", "2024H1", "2024H2"],
+    "audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "audit_end_exclusive": "2026-03-01T00:00:00Z",
+    "audit_folds": ["2025H1", "2025H2", "2026P1"],
+    "audit_is_not_pristine": true,
+    "bar_minutes": 15,
+    "random_split": false
+  },
+  "frozen_system": {
+    "entry": "exact V16 one-signal-per-live-regime K1/K2 ledger; next-bar open",
+    "entry_reference": "EMA30(HL2) with SMA60(HL2) regime",
+    "bank_levels_signal_atr": [2.0, 4.0, 8.0, 12.0],
+    "bank_fraction_each": 0.025,
+    "runner_fraction": 0.90,
+    "initial_stop_atr": 2.0,
+    "runner_arm_atr": 2.0,
+    "runner_reference": "SMA60(HL2) plus or minus one current ATR",
+    "horizon_bars": 96,
+    "round_trip_cost_fraction": 0.002,
+    "same_bar_priority": "active stop first",
+    "changed_by_this_experiment": false
+  },
+  "feature_contract": {
+    "decision_time": "signal_time plus 15 minutes",
+    "causality": "Every feature uses K2 or earlier; 1h/4h bars require all component 15m bars and are exposed only at aggregate close.",
+    "eth_1h": {
+      "ema": 8,
+      "sma": 21,
+      "slope_bars": 3,
+      "return_bars": 6,
+      "pass": "at least two of direction-aligned EMA/SMA order, EMA slope, and return"
+    },
+    "eth_4h": {
+      "ema": 5,
+      "sma": 13,
+      "slope_bars": 2,
+      "pass": "direction-aligned EMA/SMA order and EMA slope"
+    },
+    "btc_stack": {
+      "btc_15m_ema": 30,
+      "btc_15m_sma": 60,
+      "btc_15m_slope_bars": 4,
+      "btc_1h_ema": 8,
+      "btc_1h_sma": 21,
+      "pass": "both BTC 15m and latest complete BTC 1h EMA/SMA order align with the ETH trade direction, and at least one fast EMA slope aligns"
+    },
+    "participation": {
+      "volume_median_lookback": 96,
+      "volume_ratio_min": 1.10,
+      "directional_volume_balance_lookback": 12,
+      "directional_volume_balance_min": 0.0
+    },
+    "expansion": {
+      "atr_length": 14,
+      "atr_median_lookback": 96,
+      "atr_ratio_min": 1.0,
+      "bb_length": 20,
+      "bb_width_median_lookback": 96,
+      "bb_width_ratio_min": 1.0
+    },
+    "structure": {
+      "directional_efficiency_lookback": 24,
+      "directional_efficiency_min": 0.20,
+      "directional_close_range_lookback": 48,
+      "directional_close_range_min": 0.60,
+      "ma_side_flips_24_max": 6.0
+    }
+  },
+  "candidate_gates": [
+    {"id": "eth_1h", "expression": "axis_eth_1h"},
+    {"id": "eth_4h", "expression": "axis_eth_4h"},
+    {"id": "btc_stack", "expression": "axis_btc_stack"},
+    {"id": "participation", "expression": "axis_participation"},
+    {"id": "expansion", "expression": "axis_expansion"},
+    {"id": "structure", "expression": "axis_structure"},
+    {"id": "eth_multitimeframe", "expression": "axis_eth_1h and axis_eth_4h"},
+    {"id": "market_stack", "expression": "axis_eth_1h and axis_btc_stack"},
+    {"id": "trend_quality", "expression": "axis_eth_1h and axis_structure"},
+    {"id": "confirmed_expansion", "expression": "axis_eth_1h and axis_structure and (axis_participation or axis_expansion)"},
+    {"id": "vote_3_of_6", "expression": "axis_count >= 3"},
+    {"id": "vote_4_of_6", "expression": "axis_count >= 4"}
+  ],
+  "selection": {
+    "minimum_events_total": 45,
+    "minimum_events_per_fold": 6,
+    "selection_rate_min": 0.20,
+    "selection_rate_max": 0.70,
+    "candidate_minus_baseline_mean_net_bp_min": 10.0,
+    "candidate_mean_net_bp_min": -10.0,
+    "candidate_profit_factor_min": 0.80,
+    "positive_absolute_folds_min": 1,
+    "folds_beating_baseline_min": 3,
+    "baseline_top_decile_positive_pnl_capture_min": 0.45,
+    "candidate_p95_net_retention_min": 0.85,
+    "familywise_permutation_p_max": 0.20,
+    "familywise_permutation_resamples": 50000,
+    "seed": 2026090517,
+    "ranking": "Among gates passing every opening condition, maximize median fold net bp minus half the population standard deviation; then maximize top-decile PnL capture, mean net bp, and event count.",
+    "audit_rule": "Open the already-seen transport audit only for the single selected gate after the selection receipt is committed."
+  },
+  "audit_gate": {
+    "minimum_events_total": 25,
+    "minimum_events_per_fold": 4,
+    "mean_net_bp_gt": 0.0,
+    "profit_factor_gt": 1.0,
+    "candidate_minus_baseline_mean_net_bp_min": 10.0,
+    "positive_folds_min": 2,
+    "matched_random_excess_bp_gt": 0.0,
+    "matched_random_signflip_p_lt": 0.01,
+    "baseline_top_decile_positive_pnl_capture_min": 0.45
+  },
+  "matched_control": {
+    "controls_per_event": 8,
+    "exclude_radius_bars": 96,
+    "strata": ["calendar month", "UTC six-hour block", "within-month ATR14 quintile", "direction inherited from candidate"],
+    "seed": "ethusdtp-15m-causal-confluence-20260905-v17"
+  },
+  "safety": {
+    "holdout_consumed": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "automatic_promote": false,
+    "active_or_forward_change": false,
+    "tradingview_change": false,
+    "live_order_change": false
+  }
+}

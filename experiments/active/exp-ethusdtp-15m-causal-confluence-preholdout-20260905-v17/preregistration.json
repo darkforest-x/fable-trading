@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp-ethusdtp-15m-causal-confluence-preholdout-20260905-v17",
+  "registered_at": "2026-09-05T13:40:00+08:00",
+  "hypothesis": "A small set of causal and independently motivated trend, market, participation, expansion, and structure axes can remove false ETH 15m V16 launches without destroying the strategy's large-winner right tail.",
+  "single_selected_variable": "one gate id from the twelve fixed candidate gates",
+  "frozen_components": [
+    "V16 K1/K2 setup ledger",
+    "next-open entry",
+    "10% four-stage bank ladder",
+    "90% SMA60/ATR runner",
+    "2 ATR initial stop",
+    "96-bar horizon",
+    "20bp round-trip cost",
+    "position sizing"
+  ],
+  "development_data": "committed V16 2023-2024 candidate ledger only",
+  "audit_data": "committed V16 2025-through-February-2026 ledger; already seen and diagnostic only",
+  "audit_opening_rule": "No audit ledger may be loaded unless exactly one development gate passes all registered opening conditions and the selection receipt is committed.",
+  "multiplicity": "A 50,000-resample max-statistic outcome permutation covers all twelve fixed masks; the selected arm must pass the familywise p gate.",
+  "right_tail_rule": "A gate must retain at least 45% of the baseline top-decile positive PnL and at least 85% of baseline P95 net return in development.",
+  "causality_test": "Mutating every ETH and BTC raw row at or after 2024-07-01 must not change any feature attached to signals before that boundary.",
+  "holdout_start": "2026-05-04T00:00:00Z",
+  "repository_holdout_rows_allowed": 0,
+  "production_claim_allowed": false
+}

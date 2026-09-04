@@ -4796,3 +4796,30 @@ experiments:
       compilation used a 2024 historical anchor and did not score post-boundary
       prices. No ACTIVE, frozen, forward, deployment, sizing, API-key or live
       order state changed; there was no automatic promote.
+
+  - experiment_id: exp-ethusdtp-15m-causal-confluence-preholdout-20260905-v17
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending-preregistration
+    status: active
+    question: >-
+      Can a causal and Pine-portable confluence gate remove false ETHUSDT.P 15m
+      V16 launches while preserving its large-winner right tail?
+    single_variable: >-
+      One gate id from twelve fixed masks over six preregistered axes: complete
+      ETH 1h trend, complete ETH 4h trend, BTC 15m plus complete-1h market
+      alignment, ETH participation, volatility expansion, and structure quality.
+      V16 entry events, exits, stops, bank ladder, cost and sizing remain frozen.
+    result: >-
+      preregistered_not_yet_run. Development is limited to the committed
+      2023-2024 V16 ledger and includes max-statistic multiplicity correction,
+      fold stability, sample-size and right-tail gates. The already-seen
+      2025-through-February-2026 transport audit remains physically unopened
+      until a passing selection receipt is committed.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: >-
+      Repository holdout begins 2026-05-04 and is out of scope. This experiment
+      cannot change TradingView, ACTIVE/frozen, forward execution, deployment,
+      position sizing, API keys, or live orders.
