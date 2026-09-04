@@ -4341,3 +4341,26 @@ experiments:
       target received a descriptive matched random control excluded from
       selection. Audit did not open and holdout_rows_read=0. No Pine,
       ACTIVE/frozen/forward, deployment, messaging or live order changed.
+
+  - experiment_id: exp-btcusdtp-k1k2-causal-failure-map-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "587ad78"
+    status: active
+    question: >-
+      Which entry-time causal segment consistently separates better and worse
+      frozen K1-to-K2 outcomes in both halves of 2023 for 15m and 5m?
+    single_variable: >-
+      n/a -- diagnostic only. It does not mutate a trading rule. Any nominated
+      segment must become a separate preregistered single-variable experiment.
+    result: preregistered_before_outcomes
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: null
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Only 2023 outcomes may be used. Continuous thresholds come from the
+      outcome-blind H1 feature distribution, stability is checked in H1/H2,
+      and a 20,000-resample max-statistic null measures multiple-search bias.
+      2024 confirmation, 2025-2026 audit and repository holdout remain closed.
