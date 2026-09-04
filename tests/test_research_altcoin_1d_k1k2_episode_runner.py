@@ -40,6 +40,24 @@ def test_daily_aggregation_keeps_only_exact_96_bar_utc_days() -> None:
     assert quality["discarded_wrong_count"] == 1
 
 
+def test_late_listing_is_not_mistaken_for_a_broken_source(monkeypatch) -> None:
+    config = _config()
+    config["universe"]["instruments"] = {"LATE": "data/late.csv"}
+
+    def no_rows(*args, **kwargs):
+        raise ValueError("no development rows in /tmp/late.csv")
+
+    monkeypatch.setattr(research, "load_development_frame", no_rows)
+    frames, quality, summary = research.load_universe(
+        config, end_exclusive=pd.Timestamp("2024-01-01", tz="UTC")
+    )
+
+    assert frames == {}
+    assert quality.loc[0, "phase_source_status"] == "not_listed_yet"
+    assert summary["eligible_symbols"] == 0
+    assert summary["repository_holdout_rows_read"] == 0
+
+
 def test_one_neutral_episode_cannot_emit_repeated_k1_k2_pairs() -> None:
     config = _config()
     config["source_contract"]["minimum_daily_history_bars"] = 0

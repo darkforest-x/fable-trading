@@ -166,12 +166,37 @@ def load_universe(
     frames: dict[str, pd.DataFrame] = {}
     quality_rows: list[dict[str, Any]] = []
     for symbol, relative in sorted(config["universe"]["instruments"].items()):
-        raw = load_development_frame(
-            ROOT / str(relative),
-            safe_end=end,
-            holdout_start=holdout,
-            chunksize=int(source["parser_chunksize"]),
-        ).copy()
+        try:
+            raw = load_development_frame(
+                ROOT / str(relative),
+                safe_end=end,
+                holdout_start=holdout,
+                chunksize=int(source["parser_chunksize"]),
+            ).copy()
+        except ValueError as error:
+            if not str(error).startswith("no development rows in "):
+                raise
+            quality_rows.append(
+                {
+                    "symbol": symbol,
+                    "path": relative,
+                    "source_rows_read": 0,
+                    "source_prefix_sha256": None,
+                    "source_days_seen": 0,
+                    "complete_days": 0,
+                    "discarded_days": 0,
+                    "discarded_wrong_count": 0,
+                    "discarded_duplicate": 0,
+                    "discarded_off_grid": 0,
+                    "first_daily_bar": pd.NaT,
+                    "last_daily_bar": pd.NaT,
+                    "daily_prefix_sha256": None,
+                    "eligible_minimum_history": False,
+                    "phase_source_status": "not_listed_yet",
+                    "holdout_rows_read": 0,
+                }
+            )
+            continue
         holdout_rows = int(raw["open_time"].ge(holdout).sum())
         if holdout_rows != int(source["repository_holdout_rows_allowed"]):
             raise RuntimeError(f"{symbol} loader materialized repository holdout")
@@ -198,6 +223,7 @@ def load_universe(
                 if len(daily)
                 else None,
                 "eligible_minimum_history": bool(eligible),
+                "phase_source_status": "eligible" if eligible else "insufficient_history",
                 "holdout_rows_read": holdout_rows,
             }
         )
