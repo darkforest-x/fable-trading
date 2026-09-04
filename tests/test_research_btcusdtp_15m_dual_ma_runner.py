@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from scripts.research_btcusdtp_15m_dual_ma_runner import (
+    _assignment_metrics,
     accept_with_policy,
     add_dual_references,
     resolve_runner,
@@ -129,3 +130,21 @@ def test_half_runner_is_mean_of_two_legs_before_single_cost() -> None:
     fixed = resolve_runner(enriched, event, "fixed_5atr", 50, 2.0, 5.0)
     runner = resolve_runner(enriched, event, "ma_close2_after_1atr", 50, 2.0, 5.0)
     assert np.isclose(split["gross_return"], 0.5 * (fixed["gross_return"] + runner["gross_return"]))
+
+
+def test_control_assignment_metrics_require_risk_normalized_fields() -> None:
+    controls = pd.DataFrame(
+        {
+            "assignment": [0, 0],
+            "gross_return": [0.01, -0.005],
+            "net_return": [0.008, -0.007],
+            "net_return_r": [0.4, -0.35],
+            "hold_bars": [8, 4],
+            "horizon_mfe_atr": [2.0, 0.25],
+            "capture_of_horizon_mfe": [0.5, -0.2],
+        }
+    )
+    summary = _assignment_metrics(controls)
+    assert len(summary) == 1
+    assert summary[0]["events"] == 2
+    assert np.isfinite(summary[0]["mean_net_bp"])

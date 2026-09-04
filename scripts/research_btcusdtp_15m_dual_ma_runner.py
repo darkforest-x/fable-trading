@@ -749,7 +749,16 @@ def matched_controls(
             if not result.get("resolved"):
                 continue
             result = dict(result)
-            result["net_return"] = float(result["gross_return"]) - cost
+            gross = float(result["gross_return"])
+            risk_fraction = (
+                float(contract["initial_disaster_stop_atr"])
+                * float(control_event["signal_atr"])
+                / float(control_event["entry_price"])
+            )
+            result["net_return"] = gross - cost
+            result["risk_fraction"] = risk_fraction
+            result["return_r"] = gross / risk_fraction
+            result["net_return_r"] = (gross - cost) / risk_fraction
             current.append(float(result["net_return"]))
             controls.append(
                 {
