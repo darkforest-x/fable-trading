@@ -632,7 +632,9 @@ def atr_quintiles(featured: pd.DataFrame, eligible: pd.Series) -> np.ndarray:
     valid = helper[helper["eligible"] & helper["atr"].notna()]
     for _, group in valid.groupby("month", sort=True):
         ranks = group["atr"].rank(method="first")
-        labels = pd.qcut(ranks, q=5, labels=False, duplicates="drop").astype(int)
+        quantiles = min(5, len(group))
+        labels = pd.qcut(ranks, q=quantiles, labels=False, duplicates="drop")
+        labels = labels.fillna(0).astype(int)
         buckets[group["i"].to_numpy(dtype=int)] = labels.to_numpy(dtype=int)
     return buckets
 

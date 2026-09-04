@@ -5,6 +5,7 @@ import math
 import pandas as pd
 
 from scripts.backtest_btcusdtp_1h_owner_causal_v2_preholdout import (
+    atr_quintiles,
     choose_protection_trigger,
     fee_to_risk_ratio,
     k2_wick_only_pass,
@@ -69,6 +70,19 @@ def test_path_gate_requires_both_close_side_and_ma_colour_continuity() -> None:
 def test_fee_to_risk_is_round_trip_cost_divided_by_risk_fraction() -> None:
     assert math.isclose(fee_to_risk_ratio(0.002, 400.0, 100_000.0), 0.5)
     assert math.isinf(fee_to_risk_ratio(0.002, 0.0, 100_000.0))
+
+
+def test_atr_buckets_handle_boundary_month_with_fewer_than_five_rows() -> None:
+    featured = pd.DataFrame(
+        {
+            "open_time": pd.to_datetime(
+                ["2025-01-31T22:00:00Z", "2025-01-31T23:00:00Z"]
+            ),
+            "atr": [1.0, 2.0],
+        }
+    )
+    buckets = atr_quintiles(featured, pd.Series([True, True]))
+    assert buckets.tolist() == [0, 1]
 
 
 def test_profit_protection_arms_on_close_and_acts_next_bar() -> None:
