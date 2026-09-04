@@ -1,0 +1,120 @@
+{
+  "experiment_id": "exp-btcusdtp-15m-ma-state-trend-preholdout-20260904-v1",
+  "purpose": "Rebuild the BTCUSDT.P 15m signal as causal MA-state launches and separately test MA-following exits without using repository holdout for selection.",
+  "source": {
+    "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+    "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "native_bar": "5m",
+    "analysis_bar": "15m",
+    "aggregation": "UTC-aligned groups of exactly three contiguous 5m rows"
+  },
+  "window": {
+    "development_start_inclusive": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2025-01-01T00:00:00Z",
+    "development_folds": ["2023H1", "2023H2", "2024H1", "2024H2"],
+    "validation_start_inclusive": "2025-01-01T00:00:00Z",
+    "validation_end_exclusive": "2026-02-28T16:00:00Z",
+    "validation_slices": ["2025H1", "2025H2", "2026P1"],
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "validation_retuning": false
+  },
+  "causal_signal": {
+    "source": "HL2",
+    "atr_length": 14,
+    "lookback_bars": 8,
+    "slope_lag_bars": 4,
+    "cooldown_bars": 24,
+    "direct": {
+      "previous_signed_close_atr_max": 0.1,
+      "current_signed_close_atr_min": 0.1,
+      "signed_body_atr_min": 0.2,
+      "range_atr_min": 0.65,
+      "directional_close_location_min": 0.6,
+      "signed_ma_slope_atr_per_bar_min": -0.04
+    },
+    "rejection": {
+      "current_signed_close_atr_min": 0.05,
+      "signed_body_atr_min": 0.1,
+      "directional_close_location_min": 0.65,
+      "signed_ma_slope_atr_per_bar_min": -0.03,
+      "requires_physical_ma_touch": true
+    },
+    "coil": {
+      "current_signed_close_atr_min": 0.15,
+      "prior_breakout_atr_min": 0.05,
+      "signed_body_atr_min": 0.25,
+      "range_atr_min": 0.7,
+      "directional_close_location_min": 0.6,
+      "prior_near_ma_share_min": 0.5,
+      "prior_range_atr_max": 2.75,
+      "signed_ma_slope_atr_per_bar_min": -0.03
+    }
+  },
+  "execution": {
+    "entry": "next_bar_open",
+    "round_trip_cost_fraction": 0.002,
+    "initial_disaster_stop_atr": 2.0,
+    "fixed_target_atr": 5.0,
+    "horizon_bars": 96,
+    "same_bar_priority": "stop_first",
+    "gap_fill": "next_bar_open_if_open_gaps_beyond_active_stop",
+    "ma_exit_fill": "next_bar_open_after_completed_close_confirmation"
+  },
+  "coordinate_pass": {
+    "initial": {
+      "ma_reference": "SMA40",
+      "entry_family": "all",
+      "exit_policy": "fixed_5atr"
+    },
+    "ordered_factors": [
+      {
+        "factor": "ma_reference",
+        "values": ["SMA20", "EMA20", "SMA30", "EMA30", "SMA40", "EMA40", "SMA60", "EMA60", "SMA80", "EMA80", "SMA120", "EMA120"]
+      },
+      {
+        "factor": "entry_family",
+        "values": ["direct", "direct_rejection", "direct_coil", "all"]
+      },
+      {
+        "factor": "exit_policy",
+        "values": ["fixed_5atr", "ma_close_1", "ma_close_2", "ma_trail_0_5", "ma_trail_1_0"]
+      }
+    ],
+    "minimum_events_total": 80,
+    "minimum_events_per_fold": 12,
+    "minimum_robust_improvement_bp": 2.0,
+    "maximum_worst_fold_degradation_bp": 3.0,
+    "selection_metric": "median(fold mean net bp) - 0.5 * population std(fold mean net bp)",
+    "one_factor_at_a_time": true
+  },
+  "matched_control": {
+    "controls_per_event": 8,
+    "strata": ["calendar_month", "UTC six-hour block", "monthly ATR quintile", "direction"],
+    "exclude_radius_bars": 97,
+    "seed": "btc15m-ma-state-trend-20260904"
+  },
+  "owner_examples": {
+    "role": "owner-selected contaminated morphology diagnostics only; never used for economic parameter selection or generalization claims",
+    "holdout_use_for_this_configuration": 1,
+    "authorization_basis": "Owner supplied the five screenshots, explicitly requested the 15m rebuild, and previously authorized autonomous exploration. Only their exact local source windows are inspected.",
+    "match_window": "descriptive only: signal from four bars before the selected crosshair through the first visible release; no success metric",
+    "rows": [
+      {"id": "img1", "anchor_time_utc": "2026-08-14T04:45:00Z", "direction": "SHORT", "source": "analysis/output/owner_short_gold_center_recent15d_top10_20260821/kline_snapshot/BTC_USDT_SWAP.csv"},
+      {"id": "img2", "anchor_time_utc": "2026-08-03T13:30:00Z", "direction": "LONG", "source": "analysis/output/owner_short_gold_center_recent15d_top10_20260821/kline_snapshot/BTC_USDT_SWAP.csv"},
+      {"id": "img3", "anchor_time_utc": "2026-08-03T00:30:00Z", "direction": "SHORT", "source": "analysis/output/owner_short_gold_center_recent15d_top10_20260821/kline_snapshot/BTC_USDT_SWAP.csv"},
+      {"id": "img4", "anchor_time_utc": "2026-07-29T05:15:00Z", "direction": "LONG", "source": "data/kline_fetched/okx_BTC_USDT_SWAP_15m_42007.csv"},
+      {"id": "img5", "anchor_time_utc": "2026-07-27T17:30:00Z", "direction": "SHORT", "source": "data/kline_fetched/okx_BTC_USDT_SWAP_15m_42007.csv"}
+    ]
+  },
+  "gates": {
+    "research_pass": [
+      "validation mean net return > 0 after 20bp round-trip cost",
+      "validation paired excess versus all eight exact matched-control assignments > 0",
+      "paired sign-flip p < 0.01",
+      "each complete validation slice with >= 12 events has mean net return > 0"
+    ],
+    "production_eligible": false,
+    "automatic_promote": false
+  }
+}

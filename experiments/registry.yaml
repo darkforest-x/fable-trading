@@ -4478,3 +4478,30 @@ experiments:
       contribution. The development gate failed, so 2025-2026-02 audit outcomes
       and repository holdout remained closed. No TradingView, ACTIVE, frozen,
       forward, deployment, API-key or live-order mutation occurred.
+
+  - experiment_id: exp-btcusdtp-15m-ma-state-trend-preholdout-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending_builder_commit
+    status: active
+    question: >-
+      Can a dedicated BTCUSDT.P 15m MA-state launch detector recover direct
+      crosses, same-bar rejections and near-MA coil releases, and can a causal
+      MA-following exit retain the long winner tail after 20bp cost?
+    single_variable: >-
+      Preregistered ordered categorical coordinate pass: first ma_reference,
+      then entry_family, then exit_policy. Each step freezes all prior choices;
+      numeric morphology thresholds, next-open entry, 2ATR disaster stop,
+      96-bar horizon, cooldown and 20bp cost do not change.
+    result: pending
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btcusdtp_15m_ma_state_trend_20260904.md
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Economic selection and validation use the physical pre-holdout source
+      ending 2026-02-28. Five Owner-provided July/August screenshots are a
+      separately recorded contaminated morphology diagnostic only and cannot
+      support an economic or generalization claim. No automatic promotion,
+      deployment, forward mutation, API-key change or live order is allowed.
