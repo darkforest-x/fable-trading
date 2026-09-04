@@ -4281,7 +4281,7 @@ experiments:
   - experiment_id: exp-btcusdtp-k1k2-partial-runner-preholdout-20260904-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "43acd1d"
-    status: active
+    status: rejected
     question: >-
       Can banking part of the position at 3R while retaining an 8R runner
       monetize the observed winner tail better than either whole-position endpoint?
@@ -4289,18 +4289,26 @@ experiments:
       Runner fraction after 3R only: 0/10/25/50/75/100%; the remainder exits
       at 3R and the runner targets 8R. Signal, entry, K2 stop, 1.5R protection,
       horizon, risk gates and one weighted 20bp cost remain frozen.
-    result: preregistered_before_outcomes
+    result: >-
+      rejected_at_development_futility_gate. Every added runner fraction
+      worsened 15m. On 5m the 100% runner improved robust net by only 1.17bp
+      versus the 3R full-exit baseline, below the registered +2bp move gate,
+      and remained net negative at -15.86bp. Both timeframes retain 0% runner.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: null
-    artifacts: []
+    canonical_report: analysis/p1_btcusdtp_k1k2_partial_runner_preholdout_20260904.md
+    artifacts:
+      - btcusdtp-k1k2-partial-runner-selection-20260904-v1
+      - btcusdtp-k1k2-partial-runner-report-receipt-20260904-v1
+      - btcusdtp-k1k2-partial-runner-report-20260904-v1
+      - btcusdtp-k1k2-partial-runner-html-20260904-v1
     reuse_allowed: false
     notes: >-
-      Development is 2023-2024 in four chronological half-year folds. Both
-      endpoint state machines have unit parity tests. Audit opens only after
-      every gate; no Pine, ACTIVE/frozen/forward, deployment, messaging or
-      live-order mutation is authorized.
+      Development used 2023-2024 in four chronological half-year folds. Both
+      endpoint state machines passed setup and outcome-label parity tests.
+      Audit did not open and holdout_rows_read=0. No Pine,
+      ACTIVE/frozen/forward, deployment, messaging or live order changed.
 
   - experiment_id: exp-btcusdtp-k1k2-fixed-target-preholdout-20260904-v1
     source_repo: darkforest-x/fable-trading

@@ -13293,3 +13293,73 @@ artifacts:
     config_hash: "8da78e6b556017ca71bcabbaa6b1bcc08f884b45e242ea3fd9b7545588a839cc"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: Self-contained owner-facing HTML generated from the canonical report.
+
+  - artifact_id: btcusdtp-k1k2-partial-runner-selection-20260904-v1
+    artifact_type: config
+    role: frozen_15m_5m_partial_runner_development_selection
+    source_repo: darkforest-x/fable-trading
+    source_commit: "013450f"
+    source_path: experiments/active/exp-btcusdtp-k1k2-partial-runner-preholdout-20260904-v1/results/selection_receipt.json
+    sha256: "ede45242c4e5d1584f921980b83afc6e354007d41911b4f0086b23715dd797e4"
+    size_bytes: 13723
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-partial-runner-preholdout-20260904-v1/results/selection_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "013450f"
+    config_hash: "1b115978b69795a61529ca2029e72d60e081ff2af31ea3a218a21233e91094cf"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Both timeframes retained the 3R full-position exit and zero runner.
+
+  - artifact_id: btcusdtp-k1k2-partial-runner-report-receipt-20260904-v1
+    artifact_type: manifest
+    role: hashes_for_partial_runner_selection_and_reports
+    source_repo: darkforest-x/fable-trading
+    source_commit: "013450f"
+    source_path: experiments/active/exp-btcusdtp-k1k2-partial-runner-preholdout-20260904-v1/results/report_receipt.json
+    sha256: "19f06af572386c8f8e0c4029f9413f1114f2ab11a8db0bbb46bf0c12900238ea"
+    size_bytes: 1392
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-partial-runner-preholdout-20260904-v1/results/report_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "013450f"
+    config_hash: "1b115978b69795a61529ca2029e72d60e081ff2af31ea3a218a21233e91094cf"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Frozen hash receipt; audit_opened=false and holdout_rows_read=0.
+
+  - artifact_id: btcusdtp-k1k2-partial-runner-report-20260904-v1
+    artifact_type: report
+    role: canonical_chinese_partial_runner_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "013450f"
+    source_path: analysis/p1_btcusdtp_k1k2_partial_runner_preholdout_20260904.md
+    sha256: "cd539757d6bc6db546d604de6f70d6f8b6e40b379fdd2de5748cfb3046809465"
+    size_bytes: 6766
+    storage_uri: "repo://analysis/p1_btcusdtp_k1k2_partial_runner_preholdout_20260904.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "013450f"
+    config_hash: "1b115978b69795a61529ca2029e72d60e081ff2af31ea3a218a21233e91094cf"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: >-
+      Full 0%-100% runner grid, four time folds, matched controls and exact
+      endpoint state-machine parity evidence.
+
+  - artifact_id: btcusdtp-k1k2-partial-runner-html-20260904-v1
+    artifact_type: report
+    role: owner_facing_html_partial_runner_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "013450f"
+    source_path: analysis/html/p1_btcusdtp_k1k2_partial_runner_preholdout_20260904.html
+    sha256: "99cbe73ca5216b577dbd71560c0ac8f54c472fe0839efee5fe293652f1a288b3"
+    size_bytes: 10843
+    storage_uri: "repo://analysis/html/p1_btcusdtp_k1k2_partial_runner_preholdout_20260904.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "013450f"
+    config_hash: "1b115978b69795a61529ca2029e72d60e081ff2af31ea3a218a21233e91094cf"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Self-contained owner-facing HTML generated from the canonical report.
