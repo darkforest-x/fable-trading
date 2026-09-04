@@ -80,9 +80,20 @@ def test_partial_runner_weights_barrier_fills_and_charges_cost_once() -> None:
 def test_stop_target_collision_is_stop_first() -> None:
     prices = frame([(108.2, 98.8, 104.0), (104.0, 100.0, 102.0), (103.0, 100.0, 102.0), (103.0, 100.0, 102.0)])
     actual = resolve_runner_exit(prices, event(), config(), "5m", 0.5)
-    assert actual["outcome"] == "sl"
+    assert actual["outcome"] == "sl_ambiguous"
     assert actual["gross_return"] == pytest.approx(-0.01)
     assert "ambiguous_stop_first" in actual["runner_outcome"]
+
+
+def test_full_runner_ignores_zero_size_first_take_for_ambiguity() -> None:
+    prices = frame([(103.2, 98.8, 101.0), (102.0, 100.0, 101.0), (102.0, 100.0, 101.0), (102.0, 100.0, 101.0)])
+    endpoint = config()
+    endpoint["execution_frozen"]["target_r"] = 8.0
+    expected = resolve_exit(prices, event(), endpoint, "5m")
+    actual = resolve_runner_exit(prices, event(), config(), "5m", 1.0)
+    assert expected["outcome"] == "sl"
+    assert actual["outcome"] == expected["outcome"]
+    assert actual["gross_return"] == pytest.approx(expected["gross_return"])
 
 
 def selection_row(fraction: float, robust: float, worst: float) -> dict:

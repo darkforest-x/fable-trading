@@ -127,15 +127,26 @@ def resolve_runner_exit(
             exit_i = i
             last_exit_price = active_stop
             final_leg_gross = direction * (active_stop / entry - 1.0)
+            target_hit_is_execution_relevant = (
+                hit_runner if runner_fraction >= 1.0 else hit_first
+            )
             if first_take_i is None:
                 aggregate_gross = final_leg_gross
-                outcome = "protected_stop" if protection_active else "sl"
+                outcome = (
+                    "protected_stop_ambiguous"
+                    if protection_active and target_hit_is_execution_relevant
+                    else "sl_ambiguous"
+                    if target_hit_is_execution_relevant
+                    else "protected_stop"
+                    if protection_active
+                    else "sl"
+                )
                 runner_outcome = "pre_take_protected_stop" if protection_active else "pre_take_sl"
             else:
                 aggregate_gross = first_take_gross + runner_fraction * final_leg_gross
                 outcome = "protected_stop" if protection_active else "sl"
                 runner_outcome = "runner_protected_stop" if protection_active else "runner_sl"
-            if hit_first or hit_runner:
+            if target_hit_is_execution_relevant:
                 runner_outcome += "_ambiguous_stop_first"
             continue
 
