@@ -4249,7 +4249,7 @@ experiments:
   - experiment_id: exp-btcusdtp-k1k2-protection-trigger-preholdout-20260904-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "b2339c2"
-    status: active
+    status: rejected
     question: >-
       Does the existing close-based fee-cover stop arm too early, and can a
       different trigger retain more of the large winning paths?
@@ -4257,15 +4257,23 @@ experiments:
       Profit-protection trigger only: 0.75/1.00/1.25/1.50/2.00/2.50R or
       disabled. Signal, immediate next-open entry, exact K2 stop, 3R target,
       horizon, cooldown, risk gates and 20bp cost remain frozen.
-    result: preregistered_before_outcomes
+    result: >-
+      rejected_at_development_futility_gate. 15m retained 1.5R; disabling
+      protection improved mean net by only 0.28bp and slightly worsened robust
+      score. 5m also retained 1.5R; disabling improved mean net by 0.41bp and
+      robust score by 0.37bp, below the registered +2bp move gate.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: null
-    artifacts: []
+    canonical_report: analysis/p1_btcusdtp_k1k2_protection_trigger_preholdout_20260904.md
+    artifacts:
+      - btcusdtp-k1k2-protection-selection-20260904-v1
+      - btcusdtp-k1k2-protection-report-receipt-20260904-v1
+      - btcusdtp-k1k2-protection-report-20260904-v1
+      - btcusdtp-k1k2-protection-html-20260904-v1
     reuse_allowed: false
     notes: >-
-      Development is 2023-2024 in four chronological half-year folds. Audit
-      opens only after every registered development gate; the physical source
-      ends before the repository holdout. No Pine, ACTIVE/frozen/forward,
-      deployment, messaging or live-order mutation is authorized.
+      Development used 2023-2024 in four chronological half-year folds. Each
+      arm received a descriptive matched random control excluded from
+      selection. Audit did not open and holdout_rows_read=0. No Pine,
+      ACTIVE/frozen/forward, deployment, messaging or live order changed.
