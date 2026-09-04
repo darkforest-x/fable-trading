@@ -897,7 +897,7 @@ def component_plot(metrics: pd.DataFrame, output: Path, title: str) -> None:
     axis.set_title(title, loc="left", fontweight="bold")
     axis.grid(axis="x", color=GRID, alpha=0.65)
     axis.spines[["top", "right", "left"]].set_visible(False)
-    for bar, count in zip(bars, shown["events"], strict=True):
+    for bar, count in zip(bars, shown["events"]):
         value = bar.get_width()
         axis.text(
             value + (0.8 if value >= 0 else -0.8),
