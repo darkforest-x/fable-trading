@@ -1,0 +1,263 @@
+{
+  "experiment_id": "exp-btcusdtp-k1k2-15m-dynamic-stop-preholdout-20260904-v1",
+  "status": "preregistered_before_dynamic_stop_outcomes",
+  "predecessor": {
+    "experiment_id": "exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1",
+    "config_path": "experiments/active/exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1/config.json",
+    "config_sha256": "bc4633ee99db16128464f63abba3d9ccbaf52e314364903accb079c99ae648f6",
+    "decision_ledger_path": "experiments/active/exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1/results/development_candidate_two_stage_decisions.csv.gz",
+    "decision_ledger_sha256": "61cb0c4d3f2575f6b176c9977bc587b37a63dc71b7b4de66442ad9e579cdb8f8",
+    "reference_trade_ledger_path": "experiments/active/exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1/results/development_candidate_two_stage_trades.csv.gz",
+    "reference_trade_ledger_sha256": "44372f310a654b847cb15d7bee4f6b1f7f5624e02ccc747dd6d666c2cb0c43b7"
+  },
+  "question": "Can a causal dynamic or automatic stop manager repair the negative expectancy of the frozen BTCUSDT.P 15m two-stage K1-to-K2 entry cohort, and which failure paths can each manager actually affect?",
+  "owner_authorization": {
+    "verbatim": "继续下一步？动态止损，或者自动止损啊，不会去试试？详细分析失败的原因",
+    "authorized_on": "2026-09-04",
+    "scope": "research-only comparison of dynamic stop and automatic exit policies on the frozen pre-holdout 15m cohort",
+    "holdout_reuse_authorized_for_this_configuration": false,
+    "live_trading_authorized": false
+  },
+  "instrument": {
+    "tradingview_symbol": "OKX:BTCUSDT.P",
+    "okx_instrument": "BTC-USDT-SWAP",
+    "timeframe": "15m",
+    "timezone": "UTC"
+  },
+  "source": {
+    "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+    "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "rows": 341567,
+    "last_time": "2026-02-28T15:55:00Z",
+    "aggregation": "complete UTC-aligned groups of three contiguous 5m rows",
+    "holdout_ohlcv_rows_materialized": 0
+  },
+  "window": {
+    "development_start_inclusive": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2025-01-01T00:00:00Z",
+    "development_folds": [
+      "2023H1",
+      "2023H2",
+      "2024H1",
+      "2024H2"
+    ],
+    "audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "audit_end_exclusive": "2026-02-28T16:00:00Z",
+    "validation_end_exclusive": "2026-02-28T16:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "audit_open_only_after_committed_development_pass": true
+  },
+  "signal_and_entry_frozen": {
+    "cohort": "the predecessor two-stage K2 accepted decision ledger, filtered to the registered development window with a complete 48-bar path",
+    "signal": "K1 crosses SMA40(HL2); K2 is the earliest valid touch-to-confirm interval of zero to two bars",
+    "entry": "open immediately after the completed confirmation bar",
+    "entries_expected": 100,
+    "initial_structure_stop": "touch-to-confirm interval extreme",
+    "risk_unit": "absolute distance from next open to the original structure stop",
+    "target": "3R from the original risk unit",
+    "cooldown_and_selection": "already frozen in the predecessor causal decision ledger"
+  },
+  "execution_frozen": {
+    "target_r": 3.0,
+    "horizon_bars": 48,
+    "same_bar_collision": "active stop first, then target",
+    "gap_policy": "scheduled market exits fill at the next bar open; barrier exits fill at the barrier price",
+    "timeout_exit": "close of final horizon bar",
+    "round_trip_cost_fraction": 0.002,
+    "funding": "excluded",
+    "slippage_beyond_round_trip_cost": "excluded",
+    "baseline_profit_protection_trigger_close_r": 1.5,
+    "baseline_profit_protection_effective": "following bar",
+    "baseline_profit_protection_stop": "entry price plus direction times the 0.20 percent round-trip cost"
+  },
+  "factor": {
+    "name": "stop_manager_policy",
+    "single_variable_claim": "Every arm receives the identical frozen entry, original risk unit, 3R target, 48-bar horizon and cost; only the causal stop/exit state machine changes.",
+    "baseline_label": "baseline_close_fee_cover_1p5r",
+    "arms": [
+      {
+        "label": "baseline_close_fee_cover_1p5r",
+        "kind": "baseline",
+        "rule": "Use the original structure stop. If a completed close reaches 1.5R, move the following bar stop to fee cover."
+      },
+      {
+        "label": "wick_r_ladder",
+        "kind": "dynamic_r_ladder",
+        "trigger_source": "running favourable intrabar high or low, observed only after the bar completes",
+        "effective": "following bar",
+        "levels": [
+          {"trigger_r": 1.5, "locked_r": "fee_cover"},
+          {"trigger_r": 2.0, "locked_r": 0.5},
+          {"trigger_r": 2.5, "locked_r": 1.0}
+        ],
+        "rule": "The stop is monotone and never below the original structure stop for a long or above it for a short."
+      },
+      {
+        "label": "close_r_ladder",
+        "kind": "dynamic_r_ladder",
+        "trigger_source": "best completed close in R",
+        "effective": "following bar",
+        "levels": [
+          {"trigger_r": 1.5, "locked_r": "fee_cover"},
+          {"trigger_r": 2.0, "locked_r": 0.5},
+          {"trigger_r": 2.5, "locked_r": 1.0}
+        ],
+        "rule": "The stop is monotone and uses no current-bar stop update."
+      },
+      {
+        "label": "atr_chandelier_1p5",
+        "kind": "atr_chandelier",
+        "activation_close_r": 1.5,
+        "atr_multiple": 1.5,
+        "effective": "following bar",
+        "rule": "After activation, trail the completed-bar favourable high-water mark by 1.5 times that completed bar's ATR14, floored at fee cover and made monotone."
+      },
+      {
+        "label": "sma40_close_invalidation",
+        "kind": "automatic_structure_exit",
+        "rule": "Preserve the baseline stop and fee-cover protection. If a surviving completed candle closes on the wrong side of SMA40(HL2), schedule a market exit at the next bar open."
+      },
+      {
+        "label": "soft_structure_reclaim_0p25atr",
+        "kind": "conditional_soft_structure_stop",
+        "catastrophe_buffer_atr": 0.25,
+        "rule": "Before fee-cover protection activates, replace the original hard structure stop with a catastrophe barrier 0.25 confirmation-ATR farther away. A touch of the original stop may continue only when that bar closes back inside the original stop and on the intended SMA40 side; otherwise exit at the next open. The original risk unit, 3R target and position-risk accounting are not rescaled, so losses may exceed 1R."
+      }
+    ]
+  },
+  "development_gate": {
+    "minimum_events_total": 80,
+    "minimum_events_per_fold": 12,
+    "candidate_mean_net_bp": ">0",
+    "candidate_robust_score_bp": ">0",
+    "candidate_worst_fold_net_bp": ">-5",
+    "candidate_each_halfyear_mean_gross_bp": ">0",
+    "candidate_robust_improvement_vs_baseline_bp": ">=5",
+    "candidate_matched_control_excess_bp": ">0",
+    "candidate_matched_control_p_one_sided": "<0.01",
+    "candidate_vs_baseline_familywise_signflip_p_one_sided": "<0.05",
+    "selection_tie_break": "higher robust score, then higher worst fold, then higher mean net, then lexical label",
+    "failure_action": "retain baseline for comparison only, keep audit and repository holdout closed, and do not modify TradingView or production state"
+  },
+  "multiple_comparison": {
+    "method": "paired sign-flip max statistic across all five candidate-minus-baseline per-trade mean improvements",
+    "resamples": 100000,
+    "seed": 20260904
+  },
+  "matched_control": {
+    "controls_per_trade": 3,
+    "strata": [
+      "calendar month",
+      "UTC six-hour block",
+      "within-month ATR14 quintile"
+    ],
+    "copied": [
+      "direction",
+      "original stop distance in ATR",
+      "stop manager policy",
+      "3R target",
+      "48-bar horizon",
+      "20bp cost"
+    ],
+    "exclude_within_horizon_plus_one_bars_of_any_predecessor_signal": true,
+    "insufficient_exact_stratum_policy": "do not relax",
+    "seed": "btcusdtp-k1k2-15m-dynamic-stop-20260904-v1"
+  },
+  "failure_diagnostics": {
+    "baseline_path_buckets": [
+      "stop before 0.5R",
+      "stop after 0.5R but before 1.5R",
+      "wick reached at least 1.5R without close-based protection",
+      "protected flat",
+      "3R target",
+      "timeout"
+    ],
+    "stop_bar_classes": [
+      "same entry bar",
+      "within two bars",
+      "later",
+      "wick crossed original stop but close reclaimed stop and intended SMA40 side",
+      "close through original stop",
+      "close lost intended SMA40 side"
+    ],
+    "counterfactual_warning": "Any recovery after the baseline exit and any oracle rescue ceiling are post-exit diagnostics, not causal trading rules.",
+    "early_failure_label": "baseline stop with realised pre-exit MFE below 0.5R",
+    "causal_classifier": {
+      "purpose": "test whether entry-time features can identify early failures; never select a policy or mutate the strategy",
+      "models": [
+        "L2 logistic regression with StandardScaler, C=1, balanced class weights",
+        "depth-2 decision tree with minimum leaf 10 and balanced class weights",
+        "training-prior dummy baseline"
+      ],
+      "time_splits": [
+        "train 2023H1, test 2023H2",
+        "train through 2023H2, test 2024H1",
+        "train through 2024H1, test 2024H2"
+      ],
+      "features": [
+        "gap_bars",
+        "confirmation_delay_bars",
+        "k1_body_ratio",
+        "k1_range_atr",
+        "k1_close_location",
+        "k1_sma40_cross_depth_atr",
+        "touch_wick_share",
+        "touch_body_ratio",
+        "touch_rejection_close_location",
+        "touch_depth_atr",
+        "confirmation_wick_share",
+        "confirmation_body_ratio",
+        "confirmation_rejection_close_location",
+        "secondary_score",
+        "stop_distance_atr",
+        "fee_to_risk",
+        "confirmation_volume_ratio_20",
+        "confirmation_atr_release_24",
+        "directional_sma_slope_6_atr",
+        "entry_gap_directional_atr"
+      ],
+      "metrics": [
+        "walk-forward ROC AUC",
+        "Brier score",
+        "top-30-percent predicted-risk early-failure rate",
+        "coverage"
+      ]
+    }
+  },
+  "chart_contract": [
+    {
+      "question": "Which stop policy changes net expectancy and robustness?",
+      "form": "horizontal paired bar chart",
+      "fields": ["policy", "mean_net_bp", "robust_score_bp"],
+      "palette": "single blue root plus open fills and neutral zero line",
+      "output": "results/chart_stop_policy_performance.png"
+    },
+    {
+      "question": "Where does the baseline loss come from and which policies alter each path?",
+      "form": "signed contribution bars",
+      "fields": ["failure_path", "baseline_contribution_bp", "policy_improvement_bp"],
+      "palette": "blue and orange roots with direct labels",
+      "output": "results/chart_failure_contribution_and_rescue.png"
+    },
+    {
+      "question": "Are policy effects stable across chronological halves?",
+      "form": "policy by half-year heatmap",
+      "fields": ["policy", "half_year", "mean_net_bp"],
+      "palette": "diverging blue-orange with numeric cells",
+      "output": "results/chart_policy_halfyear_heatmap.png"
+    }
+  ],
+  "audit_gate": {
+    "open_only_if_development_gate_passes": true,
+    "holdout_action": "never read the repository holdout without new configuration-specific owner authorization"
+  },
+  "eligibility": {
+    "training_eligible": false,
+    "production_eligible": false,
+    "holdout_consumed": false,
+    "active_or_frozen_mutation_allowed": false,
+    "tradingview_mutation_allowed": false,
+    "live_orders_allowed": false
+  }
+}
