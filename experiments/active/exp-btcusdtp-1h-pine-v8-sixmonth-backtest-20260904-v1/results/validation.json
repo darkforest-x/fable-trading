@@ -1,0 +1,44 @@
+{
+  "status": "pass",
+  "checks": {
+    "owner_authorization_exact": true,
+    "configuration_frozen_before_outcomes": true,
+    "pine_source_hash_exact": true,
+    "source_hash_exact": true,
+    "source_is_gapless_valid_full_window": true,
+    "crosscheck_ohlc_exact_where_overlapping": true,
+    "event_ids_unique": true,
+    "entry_is_immediately_after_k2": true,
+    "recorded_gap_matches_indices": true,
+    "events_inside_preregistered_window": true,
+    "six_bar_global_cooldown": true,
+    "exact_k2_stop_and_target": true,
+    "risk_positive_and_inside_frozen_band": true,
+    "full_trade_replay_exact": true,
+    "returns_recompute_with_frozen_cost": true,
+    "three_controls_for_every_exact_matched_trade": true,
+    "unmatched_pairs_are_explicit_and_unscored": true,
+    "controls_exact_replay": true,
+    "paired_excess_recomputes": true,
+    "controls_outside_signal_exclusion_radius": true,
+    "sampled_future_mutation_causality": true,
+    "summary_counts_match_ledgers": true,
+    "no_training_tuning_promotion_or_live_eligibility": true
+  },
+  "failed": [],
+  "counts": {
+    "source_bars": 9579,
+    "raw_best_k1_candidates": 163,
+    "accepted_analysis_signals": 49,
+    "resolved_signals": 49,
+    "matched_controls": 141,
+    "future_mutations": 3
+  },
+  "assessment": "share_with_caveats",
+  "caveats": [
+    "Python replay is pinned to the Pine source hash but is not a TradingView Strategy Tester export.",
+    "OHLC bars cannot order an intrabar stop/target collision; the frozen rule assigns it to stop.",
+    "Funding and slippage beyond the frozen 0.2% round-trip cost are excluded.",
+    "Pre-entry flags are descriptive associations and must not be called causes or tuned on this snapshot."
+  ]
+}

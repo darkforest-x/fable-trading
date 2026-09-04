@@ -3938,7 +3938,7 @@ experiments:
   - experiment_id: exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "2364ae0180f96d8013ef7dd6024d3b5638334986"
-    status: active
+    status: rejected
     question: >-
       How did the current Pine-v8 Core Recall K1-to-K2 rule perform on
       OKX:BTCUSDT.P 1h over the latest six-month window, and what observable
@@ -3950,15 +3950,26 @@ experiments:
       3R target, 12-bar horizon, conservative same-bar stop and 0.2% round-trip
       cost. All diagnostics and matched controls were frozen before outcomes.
     result: >-
-      preregistered_before_holdout_outcome_read. Owner approved reading prices
-      at and after 2026-05-04; outcomes remain unread at this registry state.
-    holdout_consumed: false
+      no_stable_post_cost_edge. The frozen rule produced 49 resolved trades:
+      16 TP, 30 SL and 3 profitable timeouts. Equal-notional mean was +20.60bp
+      gross but only +0.60bp after the frozen 20bp cost (PF 1.017, one-sided
+      sign-flip p=0.4807, bootstrap 95% CI -23.31..+27.23bp). The 47 exactly
+      matched candidates themselves lost -6.51bp versus -15.08bp for 141
+      controls; +8.57bp paired excess was not significant (p=0.2829). The two
+      unmatched partial-September winners supplied 1139% of total net return.
+      Equal 1% risk sizing lost 13.31%, so the research economic gate failed.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_btcusdtp_1h_pine_v8_sixmonth_backtest_20260904.md
-    reuse_allowed: false
+    reuse_allowed: true
     notes: >-
-      Configuration-specific holdout use #1. Source will be a frozen, confirmed,
-      gapless official OKX 1H snapshot ending 2026-09-04 03:00 UTC, stored only
-      inside this experiment. This run cannot tune thresholds, train, promote,
-      deploy, mutate ACTIVE/frozen/forward state, message anyone or place orders.
+      Configuration-specific holdout use #1, explicitly authorized by Owner.
+      The 9,579-row official OKX source was gapless and matched three overlapping
+      sources on OHLC. The first run fail-closed on an empty exact control
+      stratum before result persistence; amendment 01 kept the candidate in the
+      primary ledger without relaxing or fabricating controls. Independent
+      replay passed 23/23 checks including three future mutations. Frozen factor
+      diagnostics were exploratory and none survived Holm correction. No
+      tuning, training, promotion, deployment, ACTIVE/frozen/forward mutation,
+      messaging or order occurred.

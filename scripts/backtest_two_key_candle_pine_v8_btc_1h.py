@@ -26,10 +26,10 @@ import hashlib
 import json
 import math
 import time
-from collections import Counter
+from collections.abc import Iterable
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -37,6 +37,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.patches import Rectangle
+from scipy.stats import fisher_exact
 
 from scripts.research_two_key_candle_ma_retest_1h import (
     add_features,
@@ -45,7 +46,6 @@ from scripts.research_two_key_candle_ma_retest_1h import (
     profit_factor,
     sha256_file,
 )
-
 
 PROJECT = Path(__file__).resolve().parents[1]
 EXPERIMENT = (
@@ -664,9 +664,7 @@ def accept_pine_events(candidates: pd.DataFrame, featured: pd.DataFrame, config:
             row["causal_flag_count"] = len(flags)
             row["causal_flags"] = "|".join(flags)
             row["event_id"] = hashlib.sha256(
-                f"BTC-USDT-SWAP|1H|{direction}|{featured.loc[k2_i, 'open_time'].isoformat()}|{row['k1_i']}".encode(
-                    "utf-8"
-                )
+                f"BTC-USDT-SWAP|1H|{direction}|{featured.loc[k2_i, 'open_time'].isoformat()}|{row['k1_i']}".encode()
             ).hexdigest()[:16]
             accepted.append(row)
             last_accepted_entry = entry_i
@@ -918,7 +916,7 @@ def build_matched_controls(
         ranked = sorted(
             choices,
             key=lambda index: hashlib.sha256(
-                f"{seed}|{event['event_id']}|{index}".encode("utf-8")
+                f"{seed}|{event['event_id']}|{index}".encode()
             ).hexdigest(),
         )
         if len(ranked) < required:
@@ -1069,13 +1067,85 @@ def one_position_sensitivity(events: pd.DataFrame) -> tuple[pd.DataFrame, dict[s
     return output, summary
 
 
+def equal_risk_sensitivity(events: pd.DataFrame, risk_fraction: float = 0.01) -> dict[str, Any]:
+    """Size each sequential trade to the same equity risk using frozen net R."""
+
+    resolved = events[events["resolved"].astype(bool)].sort_values("entry_i")
+    equity = 1.0
+    peak = 1.0
+    max_drawdown = 0.0
+    for net_r in resolved["net_return_r"].astype(float):
+        equity *= 1.0 + risk_fraction * net_r
+        peak = max(peak, equity)
+        max_drawdown = min(max_drawdown, equity / peak - 1.0)
+    return {
+        "posthoc_sensitivity": True,
+        "risk_fraction_per_trade": risk_fraction,
+        "n": len(resolved),
+        "mean_net_return_r": float(resolved["net_return_r"].mean()),
+        "sum_net_return_r": float(resolved["net_return_r"].sum()),
+        "compounded_return": equity - 1.0,
+        "max_drawdown": max_drawdown,
+    }
+
+
+def _holm_adjust(p_values: Iterable[float]) -> list[float]:
+    values = np.asarray(list(p_values), dtype=float)
+    output = np.full(len(values), np.nan, dtype=float)
+    finite = np.flatnonzero(np.isfinite(values))
+    order = finite[np.argsort(values[finite])]
+    running = 0.0
+    total = len(order)
+    for rank, index in enumerate(order):
+        running = max(running, float(values[index]) * (total - rank))
+        output[index] = min(1.0, running)
+    return output.tolist()
+
+
+def _binary_mean_permutation_p(
+    returns: np.ndarray,
+    mask: np.ndarray,
+    *,
+    resamples: int,
+    seed: int,
+) -> float:
+    if not mask.any() or mask.all():
+        return float("nan")
+    observed = float(returns[mask].mean() - returns[~mask].mean())
+    rng = np.random.default_rng(seed)
+    exceed = 0
+    done = 0
+    while done < resamples:
+        current = min(5_000, resamples - done)
+        shuffled = np.vstack([rng.permutation(returns) for _ in range(current)])
+        differences = shuffled[:, mask].mean(axis=1) - shuffled[:, ~mask].mean(axis=1)
+        exceed += int(np.sum(np.abs(differences) >= abs(observed) - 1e-15))
+        done += current
+    return float((exceed + 1) / (resamples + 1))
+
+
 def factor_diagnostics(events: pd.DataFrame, config: dict[str, Any]) -> pd.DataFrame:
+    """Describe frozen pre-entry flags; inference is exploratory and multiplicity-corrected."""
+
     resolved = events[events["resolved"].astype(bool)].copy()
     rows: list[dict[str, Any]] = []
-    for flag, description in config["diagnostics"]["causal_flags"].items():
-        present = resolved["causal_flags"].fillna("").str.split("|").apply(lambda values: flag in values)
+    returns = resolved["net_return"].to_numpy(dtype=float)
+    wins = resolved["net_return"].gt(0.0).to_numpy(dtype=bool)
+    for flag_index, (flag, description) in enumerate(config["diagnostics"]["causal_flags"].items()):
+        present = (
+            resolved["causal_flags"]
+            .fillna("")
+            .str.split("|")
+            .apply(lambda values, current_flag=flag: current_flag in values)
+        )
+        present_array = present.to_numpy(dtype=bool)
         with_flag = resolved[present]
         without_flag = resolved[~present]
+        table = [
+            [int(np.sum(present_array & wins)), int(np.sum(present_array & ~wins))],
+            [int(np.sum(~present_array & wins)), int(np.sum(~present_array & ~wins))],
+        ]
+        _, fisher_p = fisher_exact(table, alternative="two-sided")
         rows.append(
             {
                 "flag": flag,
@@ -1096,10 +1166,22 @@ def factor_diagnostics(events: pd.DataFrame, config: dict[str, Any]) -> pd.DataF
                     if len(with_flag) and len(without_flag)
                     else np.nan
                 ),
+                "win_rate_fisher_p_two_sided": float(fisher_p),
+                "mean_net_permutation_p_two_sided": _binary_mean_permutation_p(
+                    returns,
+                    present_array,
+                    resamples=int(config["evaluation"]["permutation_resamples"]),
+                    seed=2026090410 + flag_index,
+                ),
                 "exploratory_only": True,
             }
         )
-    return pd.DataFrame(rows)
+    output = pd.DataFrame(rows)
+    output["win_rate_fisher_p_holm"] = _holm_adjust(output["win_rate_fisher_p_two_sided"])
+    output["mean_net_permutation_p_holm"] = _holm_adjust(
+        output["mean_net_permutation_p_two_sided"]
+    )
+    return output
 
 
 def monthly_summary(events: pd.DataFrame, pairs: pd.DataFrame) -> pd.DataFrame:
@@ -1218,6 +1300,59 @@ def plot_factor_diagnostics(factors: pd.DataFrame, output: Path) -> None:
     plt.close(fig)
 
 
+def plot_reason_diagnostics(events: pd.DataFrame, output: Path) -> None:
+    """Show realized failure modes and the cost/sizing sensitivity."""
+
+    resolved = events[events["resolved"].astype(bool)].sort_values("entry_i").copy()
+    order = [
+        "fast_clean_tp",
+        "ordinary_tp",
+        "timeout_gain",
+        "timeout_loss",
+        "immediate_reversal_sl",
+        "giveback_then_sl",
+        "ordinary_sl",
+    ]
+    labels = {
+        "fast_clean_tp": "fast clean TP",
+        "ordinary_tp": "ordinary TP",
+        "timeout_gain": "timeout gain",
+        "timeout_loss": "timeout loss",
+        "immediate_reversal_sl": "immediate reversal SL",
+        "giveback_then_sl": "giveback then SL",
+        "ordinary_sl": "ordinary SL",
+    }
+    counts = resolved["path_class"].value_counts().reindex(order, fill_value=0)
+    fig, axes = plt.subplots(1, 2, figsize=(15, 6.5))
+    colours = [TEAL if "tp" in key or "gain" in key else ORANGE for key in order]
+    axes[0].barh([labels[key] for key in order], counts.values, color=colours, edgecolor=INK)
+    axes[0].invert_yaxis()
+    axes[0].set_title("Why trades resolved as success or failure")
+    axes[0].set_xlabel("Trades")
+    for index, value in enumerate(counts.values):
+        axes[0].text(value + 0.15, index, str(int(value)), va="center", color=INK)
+
+    trade_number = np.arange(len(resolved) + 1)
+    gross_equity = np.r_[1.0, np.cumprod(1.0 + resolved["gross_return"].to_numpy(dtype=float))]
+    net_equity = np.r_[1.0, np.cumprod(1.0 + resolved["net_return"].to_numpy(dtype=float))]
+    risk_equity = np.r_[1.0, np.cumprod(1.0 + 0.01 * resolved["net_return_r"].to_numpy(dtype=float))]
+    axes[1].plot(trade_number, gross_equity, color=TEAL, linewidth=2.0, label="equal notional, zero cost")
+    axes[1].plot(trade_number, net_equity, color=BLUE, linewidth=2.0, label="equal notional, cost included")
+    axes[1].plot(trade_number, risk_equity, color=ORANGE, linewidth=2.0, label="equal 1% risk, cost included")
+    axes[1].axhline(1.0, color=INK, linewidth=0.8, linestyle="--")
+    axes[1].set_title("Cost and position-sizing sensitivity")
+    axes[1].set_xlabel("Chronological resolved trades")
+    axes[1].set_ylabel("Equity, start = 1.0")
+    axes[1].legend(frameon=False)
+
+    for axis in axes:
+        axis.grid(axis="y", color=GRID, linewidth=0.65)
+        axis.spines[["top", "right"]].set_visible(False)
+    fig.tight_layout()
+    fig.savefig(output, dpi=180, facecolor="white")
+    plt.close(fig)
+
+
 def _plot_trade_panel(axis: plt.Axes, featured: pd.DataFrame, trade: dict[str, Any], rank: int) -> None:
     k1_i = int(trade["k1_i"])
     k2_i = int(trade["k2_i"])
@@ -1322,6 +1457,7 @@ def run(config: dict[str, Any], source_path: Path) -> dict[str, Any]:
     monthly = monthly_summary(events, pairs)
     factors = factor_diagnostics(events, config)
     one_position, one_position_summary = one_position_sensitivity(events)
+    equal_risk_summary = equal_risk_sensitivity(events)
     resolved = events[events["resolved"].astype(bool)].copy()
     paired_differences = (
         pairs["paired_excess_return"].dropna().to_numpy(dtype=float)
@@ -1334,6 +1470,10 @@ def run(config: dict[str, Any], source_path: Path) -> dict[str, Any]:
         seed=2026090401,
     )
     control_summary = summarize_returns(controls)
+    terminal_month_start = snapshot_end.normalize().replace(day=1)
+    before_terminal_month = resolved[resolved["entry_time"].lt(terminal_month_start)].copy()
+    matched_event_ids = set(pairs.loc[pairs["match_status"].eq("matched_exact"), "event_id"])
+    matched_candidates = resolved[resolved["event_id"].isin(matched_event_ids)].copy()
     summary = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "experiment_id": config["experiment_id"],
@@ -1355,8 +1495,26 @@ def run(config: dict[str, Any], source_path: Path) -> dict[str, Any]:
         "outcome_counts": {str(key): int(value) for key, value in events["outcome"].value_counts().items()},
         "path_class_counts": {str(key): int(value) for key, value in events["path_class"].value_counts().items()},
         "primary_every_signal": summarize_returns(resolved),
+        "primary_additive_net_return": float(resolved["net_return"].sum()),
+        "primary_equal_notional_compounded_return": float(np.prod(1.0 + resolved["net_return"]) - 1.0),
+        "zero_cost_equal_notional_compounded_return": float(np.prod(1.0 + resolved["gross_return"]) - 1.0),
+        "primary_mean_net_signflip_p_one_sided": signflip_p(
+            resolved["net_return"],
+            resamples=int(config["evaluation"]["permutation_resamples"]),
+            seed=2026090404,
+        ),
         "primary_mean_net_bp_bootstrap_95_ci": [ci_low * 10_000.0, ci_high * 10_000.0],
+        "excluding_terminal_partial_month": {
+            **summarize_returns(before_terminal_month),
+            "end_exclusive": terminal_month_start,
+            "mean_net_signflip_p_one_sided": signflip_p(
+                before_terminal_month["net_return"],
+                resamples=int(config["evaluation"]["permutation_resamples"]),
+                seed=2026090405,
+            ),
+        },
         "matched_controls": control_summary,
+        "matched_candidates": summarize_returns(matched_candidates),
         "matched_pair_count": int(pairs["match_status"].eq("matched_exact").sum()),
         "unmatched_pair_count": int(pairs["match_status"].ne("matched_exact").sum()),
         "unmatched_event_ids": pairs.loc[
@@ -1369,6 +1527,7 @@ def run(config: dict[str, Any], source_path: Path) -> dict[str, Any]:
             seed=2026090402,
         ),
         "one_position_sensitivity": one_position_summary,
+        "equal_risk_1pct_sensitivity": equal_risk_summary,
         "auc": None,
         "auc_reason": config["evaluation"]["auc"],
         "top_decile": None,
@@ -1389,6 +1548,7 @@ def run(config: dict[str, Any], source_path: Path) -> dict[str, Any]:
     write_json(RESULTS / "summary.json", summary)
     plot_overview(events, pairs, monthly, one_position, RESULTS / "overview.png")
     plot_factor_diagnostics(factors, RESULTS / "causal_flag_diagnostics.png")
+    plot_reason_diagnostics(events, RESULTS / "reason_diagnostics.png")
     pages = plot_trade_pages(events, featured, RESULTS / "trade_pages")
     summary["trade_page_paths"] = [path.relative_to(PROJECT) for path in pages]
     write_json(RESULTS / "summary.json", summary)

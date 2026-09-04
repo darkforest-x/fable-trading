@@ -11,7 +11,6 @@ import pandas as pd
 
 from scripts import backtest_two_key_candle_pine_v8_btc_1h as replay
 
-
 PROJECT = Path(__file__).resolve().parents[1]
 RESULTS = replay.RESULTS
 
@@ -34,7 +33,7 @@ def _same_frame(left: pd.DataFrame, right: pd.DataFrame, columns: list[str]) -> 
         if pd.api.types.is_numeric_dtype(left[column]) and pd.api.types.is_numeric_dtype(right[column]):
             if not _close(left[column], right[column]):
                 return False
-        elif list(left[column].astype(str)) != list(right[column].astype(str)):
+        elif list(left[column].fillna("").astype(str)) != list(right[column].fillna("").astype(str)):
             return False
     return True
 
@@ -63,6 +62,8 @@ def _future_mutation_checks(
         featured = replay.add_features(mutated)
         candidates = replay.detect_raw_candidates(featured, config)
         accepted = replay.accept_pine_events(candidates, featured, config)
+        analysis_start = replay._utc(config["window"]["analysis_start_inclusive"])
+        accepted = accepted[accepted["entry_time"].ge(analysis_start)].reset_index(drop=True)
         earlier = accepted[accepted["entry_i"].le(entry_i)].reset_index(drop=True)
         original = events[events["entry_i"].le(entry_i)].reset_index(drop=True)
         if not _same_frame(
