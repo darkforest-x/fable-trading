@@ -17,7 +17,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import math
 import subprocess
 from copy import deepcopy
 from pathlib import Path
@@ -750,18 +749,16 @@ def select_coordinate(
     eligible = [row for row in rows if bool(row["eligible"])]
     if not eligible:
         return None, "retain_no_eligible_candidate"
-    incumbent_eligible = bool(incumbent["eligible"])
-    incumbent_score = float(incumbent["robust_score_bp"]) if incumbent_eligible else -math.inf
-    incumbent_worst = float(incumbent["worst_fold_net_bp"]) if incumbent_eligible else -math.inf
+    incumbent_score = float(incumbent["robust_score_bp"])
+    incumbent_worst = float(incumbent["worst_fold_net_bp"])
+    if not np.isfinite(incumbent_score) or not np.isfinite(incumbent_worst):
+        return None, "retain_incumbent_has_no_comparable_fold_score"
     passing = [
         row
         for row in eligible
         if (
-            not incumbent_eligible
-            or (
-                float(row["robust_score_bp"]) >= incumbent_score + 2.0
-                and float(row["worst_fold_net_bp"]) >= incumbent_worst - 3.0
-            )
+            float(row["robust_score_bp"]) >= incumbent_score + 2.0
+            and float(row["worst_fold_net_bp"]) >= incumbent_worst - 3.0
         )
     ]
     if not passing:

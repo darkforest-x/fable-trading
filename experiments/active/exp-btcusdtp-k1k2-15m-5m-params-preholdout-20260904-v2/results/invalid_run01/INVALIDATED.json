@@ -1,0 +1,12 @@
+{
+  "status": "invalidated_before_validation",
+  "selection_receipt_sha256": "28d2ef50e2c7469135bc42663414a3c32f57d33b3bbd44f13acd6ade70f6e6aa",
+  "development_rows_only": true,
+  "holdout_rows_read": 0,
+  "validation_rows_read": 0,
+  "bug": "An ineligible incumbent incorrectly waived the preregistered +2bp improvement condition.",
+  "observed_effect": "The invalid run moved 5m fee_to_risk_max from 1.25 to 2.0 even though robust score deteriorated from -18.29bp to -18.96bp.",
+  "correction": "Eligibility remains required for the candidate, but never waives the +2bp robust-score and -3bp worst-fold conditions.",
+  "search_grid_or_gate_changed": false,
+  "reusable": false
+}

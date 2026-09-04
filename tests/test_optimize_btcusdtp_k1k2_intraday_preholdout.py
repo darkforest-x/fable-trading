@@ -109,3 +109,20 @@ def test_coordinate_move_requires_preregistered_margin() -> None:
     selected, reason = select_coordinate(rows, incumbent)
     assert reason == "move_by_preregistered_rule"
     assert selected is not None and selected["value_json"] == "0.75"
+
+
+def test_ineligible_incumbent_does_not_waive_improvement_margin() -> None:
+    incumbent = {"eligible": False, "robust_score_bp": -18.0, "worst_fold_net_bp": -24.0}
+    rows = [
+        {
+            "eligible": True,
+            "robust_score_bp": -19.0,
+            "worst_fold_net_bp": -23.0,
+            "events": 200,
+            "distance_from_inherited": 1.0,
+            "value_json": "2.0",
+        }
+    ]
+    selected, reason = select_coordinate(rows, incumbent)
+    assert selected is None
+    assert reason == "retain_no_preregistered_improvement"
