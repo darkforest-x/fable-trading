@@ -13725,6 +13725,26 @@ artifacts:
       Owner-approved post-boundary screenshots influenced display recall only;
       the script is explicitly research-only and not an executable strategy.
 
+  - artifact_id: btcusdtp-15m-k1k2-episode-pine-20260904-v3
+    artifact_type: config
+    role: tradingview_15m_clean_k1k2_episode_display_with_internal_sma60_runner
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9b2337a"
+    source_path: experiments/active/exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1/pine/fable_15m_k1_k2_episode_v3.pine
+    sha256: "324df3f01ce3b4a79b440a9634219ca3199c4ae2997104f36be7119db22b19c3"
+    size_bytes: 15823
+    storage_uri: "repo://experiments/active/exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1/pine/fable_15m_k1_k2_episode_v3.pine"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "9b2337a"
+    config_hash: "e85d1e168da45ab2b66347027a7505e5683fb3cc504ee60129813a52bbd5c5ad"
+    notes: >-
+      TradingView Pine v6 compiled and cloud-saved as Fable 15m K1→K2
+      Episode V3. Owner-supplied and live post-boundary chart views were used
+      only to verify display density and styling; no economic return was
+      scored, and the artifact remains research-only.
+
   - artifact_id: btcusdtp-15m-l2-shap-audit-20260904-v1
     artifact_type: manifest
     role: frozen_failed_l2_shap_explanation_receipt
