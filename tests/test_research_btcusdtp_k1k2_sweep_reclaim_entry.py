@@ -40,7 +40,7 @@ def _frame() -> pd.DataFrame:
             "low": [99.0, 99.5, 99.8, 98.8, 101.0, 101.5, 102.0, 102.5],
             "close": [100.5, 100.8, 100.6, 101.5, 102.5, 102.5, 103.0, 103.5],
             "atr": [2.0] * 8,
-            "ma": [100.0] * 8,
+            "sma40_hl2": [100.0] * 8,
             "segment_id": [0] * 8,
         }
     )
@@ -105,7 +105,9 @@ def test_entry_decision_stops_reading_after_first_confirmation() -> None:
     )
     before, _ = run_sweep_arm(*args)
     mutated = frame.copy()
-    mutated.loc[5:, ["open", "high", "low", "close", "ma"]] = 1_000_000.0
+    mutated.loc[
+        5:, ["open", "high", "low", "close", "sma40_hl2"]
+    ] = 1_000_000.0
     after, _ = run_sweep_arm(args[0], mutated, *args[2:])
     cols = ["confirmation_i", "entry_i", "entry_price", "stop_price", "decision"]
     pd.testing.assert_frame_equal(before[cols], after[cols])

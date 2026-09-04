@@ -81,14 +81,14 @@ def is_sweep_reclaim(
         swept = float(row["low"]) < k2_extreme
         reclaimed = (
             float(row["close"]) > k2_extreme
-            and float(row["close"]) > float(row["ma"])
+            and float(row["close"]) > float(row["sma40_hl2"])
             and float(row["close"]) > float(row["open"])
         )
     else:
         swept = float(row["high"]) > k2_extreme
         reclaimed = (
             float(row["close"]) < k2_extreme
-            and float(row["close"]) < float(row["ma"])
+            and float(row["close"]) < float(row["sma40_hl2"])
             and float(row["close"]) < float(row["open"])
         )
     return bool(swept and reclaimed)
