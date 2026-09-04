@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>BTCUSDT.P K1→K2：K2 极值外 ATR 止损缓冲实验（15m / 5m）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>BTCUSDT.P K1→K2：K2 极值外 ATR 止损缓冲实验（15m / 5m）</h1>
+<p>日期：2026-09-04</p>
+<p>实验：<code>exp-btcusdtp-k1k2-stop-buffer-preholdout-20260904-v1</code></p>
+<p>状态：<strong>REJECTED；两周期均保留 0 ATR 缓冲，audit 未打开，holdout 读取 0 行</strong></p>
+<h2>结论先行</h2>
+<p>“很多止损后来又走到 3R”不等于“把止损放宽就能救回来”。在冻结信号、下一根开盘入场、3R 目标、12 小时持有、1.5R 盈利保护和 20bp 往返成本后，只把 K2 极值外缓冲从 0 增至 0.10/0.20/0.30/0.50 ATR：</p>
+<ul>
+<li>15m 的最佳臂仍是 0 ATR：稳健分 -16.35bp、均值净收益 -13.51bp。其余四臂稳健分为 -19.15 至 -23.07bp。</li>
+<li>5m 的最佳臂也仍是 0 ATR：稳健分 -17.68bp、均值净收益 -17.32bp。其余四臂稳健分为 -18.21 至 -20.48bp。</li>
+<li>真实执行中，宽止损让更多窄风险候选通过经济门，15m 交易数从 345 增至 521，5m 从 755 增至 1,250；但新增密度没有变成毛收益，反而稀释了优势。</li>
+<li>锁定完全相同的原始交易 cohort 后只重算止损和 3R 目标，结果仍恶化。这排除了“只是新增劣质信号拖累”的单一解释。</li>
+</ul>
+<p>因此本轮不打开 2025-01 至 2026-02 的非纯净 audit，更不读取 2026-05-04 起的最终 holdout。下一实验应只改变<strong>入场确认时机</strong>，而不是继续扩大结构止损。</p>
+<h2>冻结规则</h2>
+<h3>信号形态</h3>
+<ul>
+<li>K1：方向实体真实贯穿 <code>SMA(HL2)</code>。</li>
+<li>K2：影线触及均线；实体和收盘完整留在交易方向一侧。</li>
+<li>K1→K2 路径、K 线颜色、均线侧颜色及 12 项等权因果形态分沿用上一轮，不重调。</li>
+<li>15m：SMA120，K1→K2 距离 2–8 根，分数下限 0.40。</li>
+<li>5m：SMA40，K1→K2 距离 6–24 根，分数下限 0.40。</li>
+</ul>
+<h3>执行与唯一变量</h3>
+<ul>
+<li>入场：K2 完成后的下一根开盘。</li>
+<li>基准止损：多头 K2 最低点、空头 K2 最高点。</li>
+<li><strong>唯一变量</strong> <code>k2_stop_buffer_atr ∈ {0, 0.10, 0.20, 0.30, 0.50}</code>：多头止损再下移、空头止损再上移相应 ATR14。</li>
+<li>止盈：固定 3R；止损变宽时目标同步远离，这是 R 倍数执行的必要结果。</li>
+<li>保护：收盘达到 1.5R 后启用冻结的成本覆盖保护。</li>
+<li>持有：12 小时；同根碰 TP/SL 时保守按 SL；超时按末根收盘。</li>
+<li>成本：往返 0.20% = 20bp；未另计 funding 或 20bp 之外的滑点。</li>
+<li>经济门：风险 0.15–2.50 ATR，<code>fee_to_risk ≤ 1.25</code>；15m/5m 冷却均为 6 小时。</li>
+</ul>
+<h2>数据与切分</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>15m</th>
+<th>5m</th>
+</tr></thead><tbody>
+<tr><td>物理源</td><td>同一份原生 OKX 5m 快照</td><td>同左</td></tr>
+<tr><td>源 SHA256</td><td><code>767f67c2…eed5ac</code></td><td>同左</td></tr>
+<tr><td>源总行数</td><td>341,567 个原生 5m；聚合后读取 113,855</td><td>341,567</td></tr>
+<tr><td>源时间</td><td>2022-11-30 16:00 UTC 至 2026-02-28 15:55 UTC</td><td>同左</td></tr>
+<tr><td>development</td><td>2023-01-01 至 2025-01-01，4 个半年时间折</td><td>同左</td></tr>
+<tr><td>宽配对数</td><td>11,580</td><td>117,393</td></tr>
+<tr><td>分数与距离后候选</td><td>1,661</td><td>9,343</td></tr>
+<tr><td>基准成交</td><td>345</td><td>755</td></tr>
+<tr><td>基准净正交易率</td><td>34.49%</td><td>38.28%</td></tr>
+<tr><td>最小半年样本</td><td>62</td><td>114</td></tr>
+<tr><td>audit / holdout 读取</td><td>0 / 0</td><td>0 / 0</td></tr>
+</tbody></table>
+<p>这里不存在训练正类率；“净正交易率”只描述冻结回测交易，不是分类标签。所有选择按时间折进行，禁止随机切分。</p>
+<h2>预注册筛选结果</h2>
+<p>稳健分定义为四个半年净收益均值的中位数减去 0.5 倍总体标准差。候选必须相对 0 ATR 至少改善 2bp，且最差半年不能恶化超过 3bp；开发成功还要求均值净收益、稳健分均大于 0、最差半年高于 -5bp，并且每半年毛收益都为正。</p>
+<table><thead><tr>
+<th>周期</th>
+<th>缓冲 ATR</th>
+<th>成交</th>
+<th>毛 bp/单</th>
+<th>净 bp/单</th>
+<th>稳健分 bp</th>
+<th>最差半年 bp</th>
+<th>胜率</th>
+<th>PF</th>
+<th>TP / SL / 保护 / 超时</th>
+<th>匹配超额 bp</th>
+<th>配对 p</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td><strong>0.00</strong></td><td>345</td><td>6.49</td><td>-13.51</td><td><strong>-16.35</strong></td><td>-20.54</td><td>34.49%</td><td>0.580</td><td>79 / 221 / 39 / 6</td><td>+9.27</td><td>0.0066</td></tr>
+<tr><td>15m</td><td>0.10</td><td>401</td><td>3.17</td><td>-16.83</td><td>-20.43</td><td>-22.18</td><td>30.92%</td><td>0.507</td><td>84 / 273 / 39 / 5</td><td>+3.87</td><td>0.1548</td></tr>
+<tr><td>15m</td><td>0.20</td><td>445</td><td>2.42</td><td>-17.58</td><td>-20.81</td><td>-22.89</td><td>32.81%</td><td>0.484</td><td>90 / 293 / 56 / 6</td><td>+3.72</td><td>0.1762</td></tr>
+<tr><td>15m</td><td>0.30</td><td>471</td><td>2.44</td><td>-17.56</td><td>-19.15</td><td>-26.02</td><td>33.76%</td><td>0.488</td><td>94 / 305 / 66 / 6</td><td>+1.50</td><td>0.3353</td></tr>
+<tr><td>15m</td><td>0.50</td><td>521</td><td>-2.77</td><td>-22.77</td><td>-23.07</td><td>-28.56</td><td>30.90%</td><td>0.395</td><td>80 / 350 / 81 / 10</td><td>-1.39</td><td>0.6504</td></tr>
+<tr><td>5m</td><td><strong>0.00</strong></td><td>755</td><td>2.68</td><td>-17.32</td><td><strong>-17.68</strong></td><td>-21.07</td><td>38.28%</td><td>0.355</td><td>141 / 454 / 158 / 2</td><td>+2.34</td><td>0.0966</td></tr>
+<tr><td>5m</td><td>0.10</td><td>889</td><td>2.22</td><td>-17.78</td><td>-18.21</td><td>-19.90</td><td>36.78%</td><td>0.349</td><td>157 / 546 / 183 / 3</td><td>+3.09</td><td>0.0313</td></tr>
+<tr><td>5m</td><td>0.20</td><td>1,005</td><td>1.87</td><td>-18.13</td><td>-19.48</td><td>-19.92</td><td>37.41%</td><td>0.340</td><td>181 / 618 / 203 / 3</td><td>+1.09</td><td>0.2551</td></tr>
+<tr><td>5m</td><td>0.30</td><td>1,097</td><td>1.37</td><td>-18.63</td><td>-19.03</td><td>-22.40</td><td>36.10%</td><td>0.343</td><td>207 / 688 / 198 / 4</td><td>+1.07</td><td>0.2635</td></tr>
+<tr><td>5m</td><td>0.50</td><td>1,250</td><td>0.64</td><td>-19.36</td><td>-20.48</td><td>-21.72</td><td>34.24%</td><td>0.349</td><td>225 / 807 / 212 / 6</td><td>+0.27</td><td>0.4396</td></tr>
+</tbody></table>
+<p>结论不是“某个较宽值差一点”，而是两个周期的 0 ATR 都是网格内稳健分最高值；不存在可按预注册规则接受的移动。</p>
+<h2>时间稳定性</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>缓冲 ATR</th>
+<th>2023H1</th>
+<th>2023H2</th>
+<th>2024H1</th>
+<th>2024H2</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>0.00</td><td>-7.70</td><td>-20.54</td><td>-7.91</td><td>-18.82</td></tr>
+<tr><td>15m</td><td>0.10</td><td>-9.58</td><td>-22.18</td><td>-15.21</td><td>-20.68</td></tr>
+<tr><td>15m</td><td>0.20</td><td>-10.72</td><td>-22.89</td><td>-17.13</td><td>-19.98</td></tr>
+<tr><td>15m</td><td>0.30</td><td>-15.58</td><td>-26.02</td><td>-12.14</td><td>-17.61</td></tr>
+<tr><td>15m</td><td>0.50</td><td>-20.21</td><td>-28.56</td><td>-20.56</td><td>-22.21</td></tr>
+<tr><td>5m</td><td>0.00</td><td>-21.07</td><td>-16.26</td><td>-16.91</td><td>-15.34</td></tr>
+<tr><td>5m</td><td>0.10</td><td>-19.90</td><td>-15.91</td><td>-18.38</td><td>-16.46</td></tr>
+<tr><td>5m</td><td>0.20</td><td>-19.92</td><td>-19.72</td><td>-17.72</td><td>-16.22</td></tr>
+<tr><td>5m</td><td>0.30</td><td>-22.40</td><td>-17.95</td><td>-17.91</td><td>-16.59</td></tr>
+<tr><td>5m</td><td>0.50</td><td>-21.72</td><td>-19.11</td><td>-20.07</td><td>-16.80</td></tr>
+</tbody></table>
+<p>所有 40 个“周期 × 缓冲 × 半年”净收益均为负。5m 的 0.10 ATR 虽把最差半年从 -21.07 改善至 -19.90bp，但整体稳健分和均值同时恶化，不能挑单一好看的切片接受。</p>
+<h2>为什么更宽止损没有救回交易</h2>
+<h3>1. 固定原始交易 cohort 的反事实</h3>
+<p>为排除新入选信号的影响，锁定 0 ATR 的 345/755 笔入场，只重算更宽止损及同步变化的 3R 目标。</p>
+<table><thead><tr>
+<th>周期</th>
+<th>缓冲 ATR</th>
+<th>固定笔数</th>
+<th>毛 bp/单</th>
+<th>净 bp/单</th>
+<th>胜率</th>
+<th>TP</th>
+<th>SL</th>
+<th>保护</th>
+<th>超时</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>0.00</td><td>345</td><td>6.49</td><td>-13.51</td><td>34.49%</td><td>79</td><td>221</td><td>39</td><td>6</td></tr>
+<tr><td>15m</td><td>0.10</td><td>345</td><td>6.05</td><td>-13.95</td><td>33.33%</td><td>78</td><td>225</td><td>36</td><td>6</td></tr>
+<tr><td>15m</td><td>0.20</td><td>345</td><td>5.10</td><td>-14.90</td><td>33.62%</td><td>72</td><td>222</td><td>42</td><td>9</td></tr>
+<tr><td>15m</td><td>0.30</td><td>345</td><td>2.88</td><td>-17.12</td><td>32.75%</td><td>64</td><td>225</td><td>46</td><td>10</td></tr>
+<tr><td>15m</td><td>0.50</td><td>345</td><td>0.53</td><td>-19.47</td><td>33.33%</td><td>58</td><td>221</td><td>50</td><td>16</td></tr>
+<tr><td>5m</td><td>0.00</td><td>755</td><td>2.68</td><td>-17.32</td><td>38.28%</td><td>141</td><td>454</td><td>158</td><td>2</td></tr>
+<tr><td>5m</td><td>0.10</td><td>755</td><td>2.31</td><td>-17.69</td><td>36.82%</td><td>144</td><td>463</td><td>145</td><td>3</td></tr>
+<tr><td>5m</td><td>0.20</td><td>755</td><td>1.58</td><td>-18.42</td><td>36.29%</td><td>142</td><td>468</td><td>142</td><td>3</td></tr>
+<tr><td>5m</td><td>0.30</td><td>755</td><td>1.46</td><td>-18.54</td><td>35.36%</td><td>146</td><td>473</td><td>132</td><td>4</td></tr>
+<tr><td>5m</td><td>0.50</td><td>755</td><td>2.23</td><td>-17.77</td><td>35.76%</td><td>151</td><td>472</td><td>125</td><td>7</td></tr>
+</tbody></table>
+<p>宽止损确实救回一部分原 SL，但它同时把 3R 目标推远，使另一批原先 TP/保护离场的交易变成 SL 或超时。固定 cohort 的毛收益仍下降，说明问题并非只来自新增交易。</p>
+<h3>2. 真实执行 cohort 会被经济门和冷却重新洗牌</h3>
+<table><thead><tr>
+<th>周期</th>
+<th>缓冲</th>
+<th>总成交</th>
+<th>保留原成交</th>
+<th>被挤走原成交</th>
+<th>新成交</th>
+<th>新成交毛 bp</th>
+<th><code>fee_to_risk</code> 中位数</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>0.10</td><td>401</td><td>308</td><td>37</td><td>93</td><td>-2.25</td><td>0.833</td></tr>
+<tr><td>15m</td><td>0.30</td><td>471</td><td>256</td><td>89</td><td>215</td><td>+3.75</td><td>0.778</td></tr>
+<tr><td>15m</td><td>0.50</td><td>521</td><td>234</td><td>111</td><td>287</td><td>-0.77</td><td>0.691</td></tr>
+<tr><td>5m</td><td>0.10</td><td>889</td><td>662</td><td>93</td><td>227</td><td>-0.94</td><td>0.953</td></tr>
+<tr><td>5m</td><td>0.30</td><td>1,097</td><td>488</td><td>267</td><td>609</td><td>+2.66</td><td>0.930</td></tr>
+<tr><td>5m</td><td>0.50</td><td>1,250</td><td>374</td><td>381</td><td>876</td><td>+0.91</td><td>0.896</td></tr>
+</tbody></table>
+<p>缓冲降低费用相对风险，从而放行更多候选；这些更早出现的候选又占用 6 小时冷却，挤掉原交易。即使部分新增交易毛收益为正，其量级仍远小于 20bp 成本，不能形成可交易优势。</p>
+<h3>3. 匹配随机对照只证明“相对少亏”，不证明系统赚钱</h3>
+<p>15m 基准相对同月、同 UTC 六小时块、同 ATR 五分位的随机入场超额 +9.27bp，配对符号翻转 p=0.0066；这是一个真实的<strong>相对形态信息</strong>。但绝对净收益仍为 -13.51bp，意味着随机环境更差，形态优势不足以覆盖交易成本。5m 的相对超额只有 +2.34bp，p=0.0966，也不显著。</p>
+<p>随着缓冲增加，15m 的匹配超额从 +9.27bp 单调式衰减到 -1.39bp；5m 也总体衰减至 +0.27bp。止损缓冲没有增强形态本身，只是在扩大风险和成交池。</p>
+<h2>分数排序与单特征基线</h2>
+<p>本实验不重调形态分，但仍报告冻结 0 ATR 交易的排序能力：</p>
+<table><thead><tr>
+<th>周期</th>
+<th>样本</th>
+<th>分数 AUC（净正）</th>
+<th>top 10% 笔数</th>
+<th>top 10% 毛 bp</th>
+<th>top 10% 净 bp</th>
+<th>top 10% 胜率</th>
+<th>排序置换 p</th>
+<th>单特征 top 10% 净 bp</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>345</td><td>0.549</td><td>35</td><td>14.71</td><td>-5.29</td><td>42.86%</td><td>0.2063</td><td>-10.98</td></tr>
+<tr><td>5m</td><td>755</td><td>0.489</td><td>76</td><td>0.91</td><td>-19.09</td><td>34.21%</td><td>0.6552</td><td>-21.02</td></tr>
+</tbody></table>
+<p>15m 的复合分比单特征好，但 permutation p 未过 0.01 且 top-decile 仍亏；5m 基本没有排序力。AUC 不是本项目成功标准，不能用 15m 的 0.549 掩盖净亏损。</p>
+<h2>失败归因与下一假设</h2>
+<ol>
+<li><strong>主因不是止损离 K2 太近。</strong> 固定 cohort 下宽止损仍差，且两个周期都呈跨半年失败。</li>
+<li><strong>原始形态在 15m 有相对信息，但强度小于摩擦。</strong> 需要减少低质量入场，而不是用更大风险承接它们。</li>
+<li><strong>5m 的形态分排序近似随机。</strong> 后续不能只提高 score floor；应验证 K2 后是否真正出现方向确认。</li>
+<li><strong>下一轮只改入场确认。</strong> 预注册“在固定分钟窗内首次收盘突破 K2 方向极值，下一根开盘入场；确认前触及原止损则取消”，保持原止损、3R、保护、成本等不变。15m 和 5m 使用同一时钟长度、各自换算成 bar 数。</li>
+</ol>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>development 被用于选参，表中 p 值是描述性证据，不是最终确认。</li>
+<li>2025–2026-02 audit 因开发门失败而没有打开；2026-05-04 后 holdout 读取为 0 行。因此这里不能声称“近半年实盘有效”或“最终失败”。</li>
+<li>数据只有 BTC-USDT-SWAP；结论不能自动推广至 ETH 或其他币。</li>
+<li>20bp 固定成本未拆分 maker/taker，也未另加 funding；降低假设成本会机械改善净收益，但不是策略优势。</li>
+<li>固定 cohort 反事实会保留那些在宽缓冲真实执行中可能因门禁/冷却消失的交易，因此只用于机制归因，不用于选择。</li>
+<li>本轮没有修改 TradingView Pine、ACTIVE、frozen、forward log、部署、消息或真实订单。</li>
+</ul>
+<h2>复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+PYTHONPATH=. python3 -m pytest -q \
+  tests/test_research_btcusdtp_k1k2_stop_buffer.py \
+  tests/test_optimize_btcusdtp_k1k2_independent_timeframes.py
+PYTHONPATH=. python3 -m scripts.research_btcusdtp_k1k2_stop_buffer \
+  --phase development
+PYTHONPATH=. python3 -m scripts.diagnose_btcusdtp_k1k2_stop_buffer
+python3 scripts/md_to_html.py \
+  analysis/p1_btcusdtp_k1k2_stop_buffer_preholdout_20260904.md \
+  --out-dir analysis/html
+</code></pre>
+<p>冻结选择见 <code>experiments/active/exp-btcusdtp-k1k2-stop-buffer-preholdout-20260904-v1/results/selection_receipt.json</code>；全网格、匹配对照和机制拆解位于同目录。下一实验仍是研究态，只有通过 development 与冻结 audit 后才有资格消耗一次最终 holdout。</p>
+</body>
+</html>
