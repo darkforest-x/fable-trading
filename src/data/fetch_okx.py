@@ -40,6 +40,7 @@ from pathlib import Path
 import pandas as pd
 
 from src.data.bars import BAR_CHOICES, normalize_bar
+from yoyo.data.okx_archive_bars import ARCHIVE_BAR_MINUTES, aggregate_complete_ohlcv
 
 FETCH_DIR = Path(__file__).resolve().parents[2] / "data" / "kline_fetched"
 API = "https://www.okx.com/api/v5/market/history-candles"
@@ -146,8 +147,15 @@ def aggregate_archive_bytes(
     *,
     symbol: str,
     month: pd.Timestamp,
+    bar: str = "15m",
 ) -> tuple[pd.DataFrame, dict[str, object]]:
-    """Aggregate one official monthly 1m ZIP into complete UTC 15m candles."""
+    """Aggregate one official monthly 1m ZIP into complete UTC candles."""
+
+    if bar not in ARCHIVE_BAR_MINUTES:
+        expected = ", ".join(sorted(ARCHIVE_BAR_MINUTES))
+        raise ArchiveFetchError(
+            f"unsupported archive output bar {bar!r}; expected {expected}"
+        )
 
     month = _utc(month)
     # Official monthly files use the exchange's UTC+8 calendar.  For example,
@@ -224,28 +232,7 @@ def aggregate_archive_bytes(
     if bool((frame["low"] > frame[["open", "close"]].min(axis=1)).any()):
         raise ArchiveFetchError("archive low is above a candle body")
 
-    frame["bucket_ms"] = (frame["open_time"].astype("int64") // 900_000) * 900_000
-    grouped = frame.groupby("bucket_ms", sort=True)
-    counts = grouped.size()
-    first_ts = grouped["open_time"].min()
-    last_ts = grouped["open_time"].max()
-    complete = (counts == 15) & ((last_ts - first_ts) == 14 * 60_000)
-    complete_buckets = set(int(value) for value in counts.index[complete])
-    kept = frame[frame["bucket_ms"].isin(complete_buckets)]
-    aggregated = (
-        kept.groupby("bucket_ms", sort=True)
-        .agg(
-            open=("open", "first"),
-            high=("high", "max"),
-            low=("low", "min"),
-            close=("close", "last"),
-            volume=("vol", "sum"),
-        )
-        .reset_index()
-        .rename(columns={"bucket_ms": "ts"})
-    )
-    aggregated["open_time"] = pd.to_datetime(aggregated["ts"], unit="ms", utc=True)
-    aggregated = aggregated[["ts", "open", "high", "low", "close", "volume", "open_time"]]
+    aggregated, incomplete_groups = aggregate_complete_ohlcv(frame, bar=bar)
     audit: dict[str, object] = {
         "month": month.strftime("%Y-%m"),
         "archive_calendar_timezone": "UTC+08:00",
@@ -257,12 +244,16 @@ def aggregate_archive_bytes(
         "raw_1m_rows_before_exact_dedupe": int(raw_rows_before_exact_dedupe),
         "raw_1m_rows": int(len(frame)),
         "exact_duplicate_rows_dropped": exact_duplicate_rows_dropped,
-        "complete_15m_rows": int(len(aggregated)),
-        "incomplete_15m_groups_dropped": int((~complete).sum()),
+        "output_bar": bar,
+        "complete_bar_rows": int(len(aggregated)),
+        "incomplete_bar_groups_dropped": incomplete_groups,
         "confirm_values": sorted(str(value) for value in frame["confirm"].unique()),
         "first_raw_ts": int(frame["open_time"].min()),
         "last_raw_ts": int(frame["open_time"].max()),
     }
+    if bar == "15m":
+        audit["complete_15m_rows"] = int(len(aggregated))
+        audit["incomplete_15m_groups_dropped"] = incomplete_groups
     return aggregated, audit
 
 
@@ -299,12 +290,16 @@ def fetch_archive_symbol(
     months: list[pd.Timestamp],
     output_dir: Path,
     max_exclusive: object,
+    bar: str = "15m",
 ) -> dict[str, object]:
     """Fetch, aggregate and atomically publish one symbol's safe monthly prefix."""
 
+    if bar not in ARCHIVE_BAR_MINUTES:
+        raise ArchiveFetchError(f"unsupported archive output bar: {bar}")
     output_dir.mkdir(parents=True, exist_ok=True)
     contract = {
         "symbol": symbol,
+        "bar": bar,
         "months_requested": [month.strftime("%Y-%m") for month in months],
         "max_exclusive": _utc(max_exclusive).isoformat(),
         "archive_calendar_timezone": "UTC+08:00",
@@ -312,9 +307,14 @@ def fetch_archive_symbol(
     audit_path = output_dir / f"archive_{symbol}.json"
     if audit_path.exists():
         prior = json.loads(audit_path.read_text(encoding="utf-8"))
-        legacy_contract = dict(contract)
-        legacy_contract.pop("archive_calendar_timezone")
-        if prior.get("contract") == legacy_contract:
+        legacy_with_timezone = dict(contract)
+        legacy_with_timezone.pop("bar")
+        legacy_without_timezone = dict(legacy_with_timezone)
+        legacy_without_timezone.pop("archive_calendar_timezone")
+        if bar == "15m" and prior.get("contract") in (
+            legacy_with_timezone,
+            legacy_without_timezone,
+        ):
             # Early task-local receipts were written before the official
             # archive's UTC+8 calendar boundary was made explicit.  Their
             # output rows are already UTC-aligned and strictly pre-boundary;
@@ -344,7 +344,9 @@ def fetch_archive_symbol(
             missing_months.append(month.strftime("%Y-%m"))
             continue
         try:
-            frame, audit = aggregate_archive_bytes(payload, symbol=symbol, month=month)
+            frame, audit = aggregate_archive_bytes(
+                payload, symbol=symbol, month=month, bar=bar
+            )
         except ArchiveFetchError as exc:
             raise ArchiveFetchError(
                 f"{symbol} {month:%Y-%m}: {exc}"
@@ -368,7 +370,7 @@ def fetch_archive_symbol(
         boundary_ms = int(_utc(max_exclusive).value // 1_000_000)
         if int(combined["ts"].max()) >= boundary_ms:
             raise ArchiveFetchError(f"aggregated archive crossed exclusive boundary for {symbol}")
-        filename = f"okx_{symbol}_15m_{len(combined)}.csv"
+        filename = f"okx_{symbol}_{bar}_{len(combined)}.csv"
         output_path = output_dir / filename
         temporary = output_path.with_suffix(".csv.part")
         combined.to_csv(temporary, index=False)
@@ -393,6 +395,7 @@ def fetch_archive_universe(
     output_dir: Path,
     max_exclusive: object,
     workers: int,
+    bar: str = "15m",
 ) -> dict[str, object]:
     """Fetch multiple symbols with symbol-level resumability."""
 
@@ -405,6 +408,7 @@ def fetch_archive_universe(
                 months=months,
                 output_dir=output_dir,
                 max_exclusive=max_exclusive,
+                bar=bar,
             ): symbol
             for symbol in symbols
         }
@@ -534,7 +538,7 @@ def main() -> int:
                              "deep-history pulls kept apart from the live universe)")
     parser.add_argument(
         "--archive-monthly-start",
-        help="inclusive YYYY-MM; enables official monthly 1m archive aggregation to 15m",
+        help="inclusive YYYY-MM; enables official monthly 1m archive aggregation to 5m/15m",
     )
     parser.add_argument("--archive-monthly-end", help="inclusive YYYY-MM")
     parser.add_argument(
@@ -550,8 +554,8 @@ def main() -> int:
     bar = normalize_bar(args.bar)
     archive_mode = args.archive_monthly_start is not None
     if archive_mode:
-        if bar != "15m":
-            parser.error("official monthly archive mode is fixed to 15m output")
+        if bar not in ARCHIVE_BAR_MINUTES:
+            parser.error("official monthly archive mode supports only 5m and 15m output")
         if not args.archive_monthly_end or not args.archive_max_exclusive:
             parser.error(
                 "archive mode requires --archive-monthly-end and --archive-max-exclusive"
@@ -582,6 +586,7 @@ def main() -> int:
             output_dir=args.out_dir.resolve(),
             max_exclusive=args.archive_max_exclusive,
             workers=args.workers,
+            bar=bar,
         )
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         return 0

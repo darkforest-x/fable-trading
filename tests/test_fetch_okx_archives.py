@@ -104,6 +104,26 @@ def test_archive_aggregation_keeps_only_complete_utc_15m_groups() -> None:
     assert audit["archive_window_start_utc"] == "2023-12-31T16:00:00+00:00"
 
 
+def test_archive_aggregation_supports_complete_utc_5m_groups() -> None:
+    frame, audit = aggregate_archive_bytes(
+        _archive_payload(missing_minute=22),
+        symbol="BTC_USDT_SWAP",
+        month=pd.Timestamp("2024-01-01T00:00:00Z"),
+        bar="5m",
+    )
+    assert len(frame) == 5
+    assert frame["open_time"].tolist() == [
+        pd.Timestamp("2023-12-31T16:00:00Z"),
+        pd.Timestamp("2023-12-31T16:05:00Z"),
+        pd.Timestamp("2023-12-31T16:10:00Z"),
+        pd.Timestamp("2023-12-31T16:15:00Z"),
+        pd.Timestamp("2023-12-31T16:25:00Z"),
+    ]
+    assert audit["output_bar"] == "5m"
+    assert audit["complete_bar_rows"] == 5
+    assert audit["incomplete_bar_groups_dropped"] == 1
+
+
 def test_archive_aggregation_rejects_wrong_instrument() -> None:
     with pytest.raises(ArchiveFetchError, match="instrument drift"):
         aggregate_archive_bytes(
