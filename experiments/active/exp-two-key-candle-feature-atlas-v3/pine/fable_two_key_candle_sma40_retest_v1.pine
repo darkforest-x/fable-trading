@@ -11,9 +11,10 @@
 //   update of the following bar, when that bar's open is observable.
 // - No request.* call, lower-timeframe data, or future bar is used.
 //
-// Display defaults mirror the owner's MA Shift reference: teal/orange candles,
-// one blue SMA40, one compact L/S marker, and a one-line status chip. Research
-// diagnostics remain in the Data Window rather than covering the price pane.
+// Display defaults reproduce the open-source ChartPrime MA Shift rendering:
+// hl2-vs-SMA40 state colours both candles and the SMA, with a 2 px main line
+// plus a 7 px/80%-transparent glow. Signals use one compact L/S marker and two
+// small TP/SL zones; research diagnostics stay in the Data Window.
 //
 // Pine v6 references:
 // https://www.tradingview.com/pine-script-docs/concepts/bar-states/
@@ -25,7 +26,8 @@ indicator(
      "Fable K1→K2 · Clean Recall",
      shorttitle = "Fable K1→K2",
      overlay = true,
-     max_labels_count = 100)
+     max_labels_count = 100,
+     max_boxes_count = 200)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Inputs
@@ -107,6 +109,9 @@ bool customUseState = input.bool(false, "Require owner oscillator + structure st
 bool showSma40 = input.bool(true, "Show SMA40(HL2)", group = GROUP_DISPLAY)
 bool colourBars = input.bool(true, "Colour candles by HL2 vs SMA40", group = GROUP_DISPLAY)
 bool showSignals = input.bool(true, "Show compact L / S signals", group = GROUP_DISPLAY)
+bool showPositionBoxes = input.bool(true, "Show compact TP / SL zones", group = GROUP_DISPLAY)
+float targetR = input.float(3.0, "Visual target (R)", minval = 0.25, maxval = 20.0, step = 0.25, group = GROUP_DISPLAY)
+int projectionBars = input.int(12, "TP / SL zone width (bars)", minval = 1, maxval = 100, group = GROUP_DISPLAY)
 bool showPanel = input.bool(true, "Show compact status", group = GROUP_DISPLAY)
 
 bool alertK2Close = input.bool(true, "Dynamic alert on confirmed K2", group = GROUP_ALERTS)
@@ -559,18 +564,37 @@ if barstate.isnew
 
 float eventEntry = open
 float eventStop = longEntryEvent ? low[1] : shortEntryEvent ? high[1] : na
+float eventRisk = longEntryEvent ? eventEntry - eventStop : shortEntryEvent ? eventStop - eventEntry : na
+float eventTarget =
+     longEntryEvent ? eventEntry + eventRisk * targetR :
+     shortEntryEvent ? eventEntry - eventRisk * targetR : na
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TradingView-style chart rendering
+// ChartPrime MA Shift source-style chart rendering
 // ─────────────────────────────────────────────────────────────────────────────
-color LONG = #26A69A
-color SHORT = #EF8E3B
-color TEAL = #26A69A
-color ORANGE = #EF8E3B
-color MA_BLUE = #2962FF
+color MA_UP = #17A297
+color MA_DOWN = color.orange
+color LONG = MA_UP
+color SHORT = MA_DOWN
+color TARGET = #089981
+color RISK = #F23645
+color maShiftColor = maCandleSide == 1 ? MA_UP : MA_DOWN
 
-barcolor(colourBars and not na(sma40) ? (maCandleSide == 1 ? TEAL : ORANGE) : na)
-plot(showSma40 ? sma40 : na, "SMA40(HL2)", color = MA_BLUE, linewidth = 2)
+// Source parity with Moving Average Shift [ChartPrime]: the state is based on
+// hl2 >= SMA(hl2, 40), not candle direction. Both the MA and full OHLC candle
+// take that state colour. The second plot is the source's soft outer glow.
+plot(showSma40 ? sma40 : na, "MA Shift 40 · main", color = maShiftColor, linewidth = 2)
+plot(showSma40 ? sma40 : na, "MA Shift 40 · glow", color = color.new(maShiftColor, 80), linewidth = 7)
+barcolor(colourBars and not na(sma40) ? maShiftColor : na, title = "MA Shift bar colour · source")
+plotcandle(
+     colourBars and not na(sma40) ? open : na,
+     colourBars and not na(sma40) ? high : na,
+     colourBars and not na(sma40) ? low : na,
+     colourBars and not na(sma40) ? close : na,
+     title = "MA Shift candles · source",
+     color = maShiftColor,
+     wickcolor = maShiftColor,
+     bordercolor = maShiftColor)
 
 // Data-window values preserve the original indicator semantics without forcing
 // oscillator-scale values into the price pane.
@@ -600,6 +624,37 @@ plotshape(
      size = size.small,
      text = "S",
      offset = -1)
+
+// One compact profit zone and one compact stop zone. The event remains causal:
+// price is the next bar's open and the stop is the confirmed K2 extreme.
+if (longEntryEvent or shortEntryEvent) and showPositionBoxes
+    int rightX = bar_index + projectionBars
+    box.new(
+         left = bar_index,
+         top = math.max(eventEntry, eventTarget),
+         right = rightX,
+         bottom = math.min(eventEntry, eventTarget),
+         border_color = color.new(TARGET, 25),
+         border_width = 1,
+         bgcolor = color.new(TARGET, 84),
+         text = "TP",
+         text_color = color.new(color.white, 25),
+         text_size = size.tiny,
+         text_halign = text.align_right,
+         text_valign = text.align_center)
+    box.new(
+         left = bar_index,
+         top = math.max(eventEntry, eventStop),
+         right = rightX,
+         bottom = math.min(eventEntry, eventStop),
+         border_color = color.new(RISK, 25),
+         border_width = 1,
+         bgcolor = color.new(RISK, 84),
+         text = "SL",
+         text_color = color.new(color.white, 25),
+         text_size = size.tiny,
+         text_halign = text.align_right,
+         text_valign = text.align_center)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Alerts

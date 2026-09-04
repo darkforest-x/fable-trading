@@ -67,7 +67,10 @@ results/pine_compile_receipt.json binds the official TradingView Pine v6
 compile result to the exact source SHA. The source compiled with zero errors;
 adding it to the owner's current chart was blocked only because that Basic
 layout had already reached its indicator-count limit. The reference-style
-source is saved privately and is not published. Its price pane mirrors the
-owner's MA Shift reference with teal/orange candles, one blue SMA40, one compact
-L/S marker and a one-line tiny status chip. Labels, relation lines, six-MA
-clouds and risk/reward boxes are absent from the rendering path.
+source is saved privately and is not published. Its price pane now follows the
+open-source `Moving Average Shift [ChartPrime]` rendering contract directly:
+`hl2 >= SMA(hl2, 40)` selects `#17A297` or Pine `color.orange` for both the full
+OHLC candle and the MA, and the MA uses the source's 2 px line plus 7 px/80%
+transparent glow. Each accepted signal keeps one compact L/S marker and two
+small TP/SL zones; verbose K1/K2/entry labels, relation lines and six-MA clouds
+remain absent.

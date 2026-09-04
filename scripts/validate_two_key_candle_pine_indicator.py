@@ -135,11 +135,13 @@ def validate() -> dict[str, Any]:
         and "shortEntryEvent ? high[1]" in code,
         "dynamic_and_selectable_alerts": "alert(" in code
         and "alertcondition(" in code,
-        "single_signal_marker": "box.new(" not in code
+        "compact_signal_and_zones": code.count("box.new(") == 2
         and "label.new(" not in code
         and "line.new(" not in code
         and 'text = "L"' in code
         and 'text = "S"' in code
+        and 'text = "TP"' in code
+        and 'text = "SL"' in code
         and "offset = -1" in code,
         "frozen_research_broad_gap": 'profile == "Research broad · 2–8"' in code
         and "coreRecallProfile or broadProfile ? 2" in code
@@ -150,15 +152,21 @@ def validate() -> dict[str, Any]:
         and "coreRecallProfile ? 0.25" in code
         and "coreRecallProfile ? 0.50" in code,
         "visual_score_disclaimed": "not a probability" in source,
-        "reference_style_palette": "color LONG = #26A69A" in code
-        and "color SHORT = #EF8E3B" in code
-        and "color MA_BLUE = #2962FF" in code,
+        "chartprime_source_style": "color MA_UP = #17A297" in code
+        and "color MA_DOWN = color.orange" in code
+        and "maShiftColor = maCandleSide == 1 ? MA_UP : MA_DOWN" in code
+        and '"MA Shift 40 · main", color = maShiftColor, linewidth = 2' in code
+        and '"MA Shift 40 · glow", color = color.new(maShiftColor, 80), linewidth = 7' in code
+        and "plotcandle(" in code
+        and "wickcolor = maShiftColor" in code
+        and "bordercolor = maShiftColor" in code,
         "compact_reference_style_defaults": all(
             token in code
             for token in (
                 'showSma40 = input.bool(true,',
                 'colourBars = input.bool(true,',
                 'showSignals = input.bool(true,',
+                'showPositionBoxes = input.bool(true,',
                 'showPanel = input.bool(true,',
             )
         ),
