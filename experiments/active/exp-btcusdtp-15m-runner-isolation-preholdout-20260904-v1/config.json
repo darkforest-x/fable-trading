@@ -1,0 +1,156 @@
+{
+  "experiment_id": "exp-btcusdtp-15m-runner-isolation-preholdout-20260904-v1",
+  "purpose": "Determine whether the BTCUSDT.P 15m trades that later activate the frozen +2ATR/SMA60 trend runner can be isolated causally at K2 close or during the first completed bars after entry.",
+  "owner_authorization": {
+    "date": "2026-09-04",
+    "scope": "Owner asked how to catch as nearly as possible only the 170 runner-armed trades and had already authorized autonomous multifactor, feature-engineering, dynamic-stop, and automatic-stop research.",
+    "research_only": true,
+    "not_authorized": [
+      "ACTIVE or frozen promotion",
+      "TradingView overwrite",
+      "forward or live execution changes",
+      "orders or position changes"
+    ]
+  },
+  "lineage": {
+    "parent_experiment": "exp-btcusdtp-15m-multifactor-confluence-preholdout-20260904-v1",
+    "parent_config": {
+      "path": "experiments/active/exp-btcusdtp-15m-multifactor-confluence-preholdout-20260904-v1/config.json",
+      "sha256": "d5f43d7848d37e2fc89d5a127f6ad16b835b05b7193dd603b0b30c71f5fb6d0b"
+    },
+    "parent_runner": {
+      "path": "scripts/research_btcusdtp_15m_multifactor_confluence.py",
+      "sha256": "08d0abb75df19da9e1afd9ae6fe3efa6e76b750502339ca14aa5ffaf482ce209"
+    },
+    "known_result": "The parent's audit-selected cohort has 375 trades: 170 runner_armed trades average +69.37bp and 205 never-armed trades average -83.06bp. This is an outcome-conditioned decomposition, not an ex-ante classifier result.",
+    "known_evidence_warning": "All three preholdout periods have been inspected before. This run is a retrospective causal diagnostic and hypothesis screen, not a pristine confirmation or final holdout."
+  },
+  "sources": {
+    "feature_ledgers": {
+      "development": {
+        "path": "experiments/active/exp-btcusdtp-15m-multifactor-confluence-preholdout-20260904-v1/results/development_feature_ledger.csv.gz",
+        "sha256": "71949cbb4c37d663c778651561d49775a0ce1ba57e71202a3d414272565e09b2"
+      },
+      "confirmation": {
+        "path": "experiments/active/exp-btcusdtp-15m-multifactor-confluence-preholdout-20260904-v1/results/confirmation_feature_ledger.csv.gz",
+        "sha256": "584e9081d5f00191b25748d236a5bcee255d4d598a20278bf934e2d487dd8543"
+      },
+      "audit": {
+        "path": "experiments/active/exp-btcusdtp-15m-multifactor-confluence-preholdout-20260904-v1/results/audit_feature_ledger.csv.gz",
+        "sha256": "f0c4f0f340088cb403c4d1f85385bb2379161f0d3bcd7f5d63fcf28ec2fe43b6"
+      },
+      "audit_selected": {
+        "path": "experiments/active/exp-btcusdtp-15m-multifactor-confluence-preholdout-20260904-v1/results/audit_selected_trades.csv.gz",
+        "sha256": "553ded34d1e763dcce4e96700ec94c1b502a3e236ea17633b48022484178f8a1"
+      }
+    },
+    "btc_5m": {
+      "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+      "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac"
+    },
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "repository_holdout_rows_allowed": 0
+  },
+  "periods": {
+    "development": ["2023-01-01T00:00:00Z", "2024-01-01T00:00:00Z"],
+    "confirmation": ["2024-01-01T00:00:00Z", "2025-01-01T00:00:00Z"],
+    "diagnostic_audit": ["2025-01-01T00:00:00Z", "2026-02-28T16:00:00Z"],
+    "purge_bars": 96,
+    "bar_minutes": 15,
+    "random_split": false
+  },
+  "labels": {
+    "primary": "runner_armed: completed-bar close reaches +2 signal ATR before the frozen initial stop or 96-bar expiry",
+    "secondary": "profitable_runner: runner_armed and final net_return > 0 after 0.2 percent round-trip cost",
+    "feature_time": "K2/signal bar close for ex-ante models; checkpoint close for early-management models; labels alone may read later bars"
+  },
+  "execution_frozen": {
+    "entry": "next bar open",
+    "runner_policy": "ma_trail1_after_2atr",
+    "initial_disaster_stop_atr": 2.0,
+    "runner_activation_close_atr": 2.0,
+    "trend_reference": "SMA60(HL2) +/- 1 ATR14",
+    "runner_horizon_bars": 96,
+    "round_trip_cost_fraction": 0.002,
+    "same_bar_priority": "active stop first"
+  },
+  "matched_control": {
+    "controls_per_event": 8,
+    "strata": [
+      "calendar month",
+      "UTC six-hour block",
+      "monthly ATR quintile",
+      "direction"
+    ],
+    "exclude_radius_bars": 97,
+    "exclude_scope": "per candidate",
+    "seed": "btc15m-runner-isolation-20260904"
+  },
+  "ex_ante_screen": {
+    "registered_variants": [
+      "signal_score",
+      "best_single_feature_arm",
+      "strict_k1k2_rule",
+      "lgb_arm_all103",
+      "lgb_profitable_runner_all103",
+      "lgb_two_stage_expected_net",
+      "aeon_minirocket_arm_seq64"
+    ],
+    "training_quantile": 0.9,
+    "sensitivity_quantiles": [0.5, 0.7, 0.8, 0.9, 0.95, 0.975, 0.99],
+    "lightgbm": {
+      "version": "4.6.0",
+      "n_estimators": 160,
+      "learning_rate": 0.03,
+      "num_leaves": 7,
+      "max_depth": 3,
+      "min_child_samples": 100,
+      "reg_lambda": 10.0,
+      "colsample_bytree": 0.8,
+      "subsample": 1.0,
+      "class_weight": "balanced",
+      "seed": 42
+    },
+    "aeon": {
+      "version": "1.3.0",
+      "reason_for_version": "The isolated Python 3.10 evaluator cannot install aeon 1.4+, which requires Python 3.11+.",
+      "window_bars": 64,
+      "channels": [
+        "directional close return / ATR",
+        "directional candle body / ATR",
+        "directional close minus EMA30 / ATR",
+        "directional EMA30 four-bar slope / ATR",
+        "range / ATR",
+        "log volume / prior 20-bar median"
+      ],
+      "n_kernels": 5000,
+      "classifier": "balanced logistic regression C=0.05",
+      "seed": 42,
+      "isolated_environment": "/tmp/fable_eval_aeon_20260904_v1"
+    }
+  },
+  "causal_management_probes": {
+    "delayed_confirmation_entry_atr": 2.0,
+    "progress_stop_deadline_bars": [4, 8, 12, 16, 24],
+    "progress_stop_required_close_atr": [0.0, 0.25, 0.5, 0.75, 1.0, 1.5],
+    "early_classifier_checkpoints_bars": [2, 4, 8, 12],
+    "early_classifier_keep_training_quantiles": [0.3, 0.5, 0.7, 0.8, 0.9]
+  },
+  "success_gates": {
+    "runner_arm_auc_min": 0.55,
+    "q90_arm_precision_lift_min": 0.1,
+    "q90_net_mean_bp_min": 0.0,
+    "q90_profit_factor_min": 1.0,
+    "q90_minimum_events": 120,
+    "score_permutation_p_max": 0.01,
+    "matched_control_p_max": 0.01,
+    "all_complete_half_year_slices_positive": true
+  },
+  "inference": {
+    "score_permutation_resamples": 100000,
+    "matched_control_signflip_resamples": 100000,
+    "seed": 20260904
+  },
+  "production_eligible": false,
+  "training_eligible": false
+}
