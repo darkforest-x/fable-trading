@@ -19,6 +19,14 @@ executable equity curve. Three matched random entries per resolved signal copy
 direction, ATR risk, target, horizon, month, UTC time block and volatility
 bucket.
 
+Run-time amendment 01: the first replay stopped before writing or inspecting
+trade results because one partial-September exact control stratum contained no
+eligible rows. The signal, execution, primary metrics and exact matching keys
+remain unchanged. A candidate with fewer than three exact controls stays in the
+primary result, is explicitly marked unmatched, and is excluded only from the
+paired test; matching is never relaxed. The timestamp and observed failure are
+recorded in `protocol_amendment_01.json`.
+
 The pre-entry diagnostic flags are frozen owner-morphology dimensions, not
 holdout-selected rules. Their relationship with success/failure is exploratory;
 no threshold may be changed and retested on this snapshot as if it were a fresh
@@ -29,7 +37,7 @@ confirmation.
 ```bash
 PYTHONPATH=. .venv/bin/python scripts/backtest_two_key_candle_pine_v8_btc_1h.py --fetch
 PYTHONPATH=. .venv/bin/python scripts/validate_two_key_candle_pine_v8_btc_1h.py
-PYTHONPATH=. .venv/bin/pytest -q tests/test_two_key_candle_pine_v8_btc_1h.py
+PYTHONPATH=. .venv/bin/pytest -q tests/test_backtest_two_key_candle_pine_v8_btc_1h.py
 python3 scripts/md_to_html.py analysis/p1_btcusdtp_1h_pine_v8_sixmonth_backtest_20260904.md --out-dir analysis/html
 ```
 

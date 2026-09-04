@@ -922,7 +922,17 @@ def build_matched_controls(
             ).hexdigest(),
         )
         if len(ranked) < required:
-            raise RuntimeError(f"matched-control stratum {key} has {len(ranked)} rows for {event['event_id']}")
+            pair_rows.append(
+                {
+                    "event_id": event["event_id"],
+                    "candidate_net_return": float(event["net_return"]),
+                    "matched_control_count": len(ranked),
+                    "match_status": "unmatched_insufficient_exact_stratum",
+                    "control_mean_net_return": np.nan,
+                    "paired_excess_return": np.nan,
+                }
+            )
+            continue
         selected = ranked[:required]
         for rank, control_i in enumerate(selected):
             entry_i = control_i + 1
@@ -960,6 +970,8 @@ def build_matched_controls(
             {
                 "event_id": event["event_id"],
                 "candidate_net_return": float(event["net_return"]),
+                "matched_control_count": required,
+                "match_status": "matched_exact",
                 "control_mean_net_return": float(np.mean([float(row["net_return"]) for row in current])),
                 "paired_excess_return": float(event["net_return"])
                 - float(np.mean([float(row["net_return"]) for row in current])),
@@ -1311,7 +1323,11 @@ def run(config: dict[str, Any], source_path: Path) -> dict[str, Any]:
     factors = factor_diagnostics(events, config)
     one_position, one_position_summary = one_position_sensitivity(events)
     resolved = events[events["resolved"].astype(bool)].copy()
-    paired_differences = pairs["paired_excess_return"].to_numpy(dtype=float) if len(pairs) else np.array([])
+    paired_differences = (
+        pairs["paired_excess_return"].dropna().to_numpy(dtype=float)
+        if len(pairs)
+        else np.array([])
+    )
     ci_low, ci_high = bootstrap_mean_ci(
         resolved["net_return"],
         resamples=int(config["evaluation"]["bootstrap_resamples"]),
@@ -1341,6 +1357,11 @@ def run(config: dict[str, Any], source_path: Path) -> dict[str, Any]:
         "primary_every_signal": summarize_returns(resolved),
         "primary_mean_net_bp_bootstrap_95_ci": [ci_low * 10_000.0, ci_high * 10_000.0],
         "matched_controls": control_summary,
+        "matched_pair_count": int(pairs["match_status"].eq("matched_exact").sum()),
+        "unmatched_pair_count": int(pairs["match_status"].ne("matched_exact").sum()),
+        "unmatched_event_ids": pairs.loc[
+            pairs["match_status"].ne("matched_exact"), "event_id"
+        ].tolist(),
         "candidate_minus_control_mean_bp": float(paired_differences.mean() * 10_000.0) if len(paired_differences) else None,
         "paired_signflip_p_one_sided": signflip_p(
             paired_differences,

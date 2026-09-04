@@ -1,0 +1,19 @@
+{
+  "amendment_id": "runtime-control-stratum-fail-closed-01",
+  "recorded_at_utc": "2026-09-04T03:20:33Z",
+  "trigger": "The first replay stopped before result persistence because exact control stratum ('2026-09', 2, 2) contained zero eligible rows for candidate 75b76a22ffa87a5f.",
+  "outcome_inspection_before_amendment": false,
+  "unchanged": [
+    "signal detection",
+    "entry",
+    "stop",
+    "target",
+    "horizon",
+    "same-bar collision rule",
+    "cost",
+    "primary every-signal metrics",
+    "control matching strata and exclusion radius"
+  ],
+  "amendment": "Keep every candidate in the primary analysis. Require all three exact controls for paired inference. If fewer than three exist, do not relax or backfill the match; mark the candidate unmatched and exclude only its nonexistent pair from the paired test.",
+  "holdout_accounting": "Same configuration-specific holdout use 1; this is recovery of the interrupted run, not a new parameter configuration."
+}

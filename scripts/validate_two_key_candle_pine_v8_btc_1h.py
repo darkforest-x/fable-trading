@@ -163,9 +163,20 @@ def main() -> int:
     )
     resolved_ids = set(events.loc[events["resolved"], "event_id"])
     control_counts = controls.groupby("candidate_event_id").size()
-    checks["three_controls_for_every_resolved_trade"] = bool(
-        set(control_counts.index) == resolved_ids
+    matched_ids = set(pairs.loc[pairs["match_status"].eq("matched_exact"), "event_id"])
+    unmatched_ids = set(pairs.loc[pairs["match_status"].ne("matched_exact"), "event_id"])
+    checks["three_controls_for_every_exact_matched_trade"] = bool(
+        set(control_counts.index) == matched_ids
         and control_counts.eq(config["matched_control"]["controls_per_trade"]).all()
+        and matched_ids | unmatched_ids == resolved_ids
+        and matched_ids.isdisjoint(unmatched_ids)
+    )
+    checks["unmatched_pairs_are_explicit_and_unscored"] = bool(
+        pairs.loc[pairs["event_id"].isin(unmatched_ids), "matched_control_count"].lt(
+            config["matched_control"]["controls_per_trade"]
+        ).all()
+        and pairs.loc[pairs["event_id"].isin(unmatched_ids), "control_mean_net_return"].isna().all()
+        and pairs.loc[pairs["event_id"].isin(unmatched_ids), "paired_excess_return"].isna().all()
     )
     checks["controls_exact_replay"] = bool(
         len(controls) == len(replayed_controls)
@@ -193,7 +204,9 @@ def main() -> int:
         summary["analysis_signals"] == len(events)
         and summary["resolved_signals"] == int(events["resolved"].sum())
         and summary["unresolved_signals"] == int((~events["resolved"]).sum())
-        and len(controls) == int(events["resolved"].sum()) * config["matched_control"]["controls_per_trade"]
+        and summary["matched_pair_count"] == len(matched_ids)
+        and summary["unmatched_pair_count"] == len(unmatched_ids)
+        and len(controls) == len(matched_ids) * config["matched_control"]["controls_per_trade"]
     )
     checks["no_training_tuning_promotion_or_live_eligibility"] = bool(
         summary["thresholds_tuned_after_holdout"] is False

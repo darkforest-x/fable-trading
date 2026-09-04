@@ -76,6 +76,7 @@
     "copied": ["direction", "risk distance in ATR", "3R target", "12-bar horizon", "0.2% round-trip cost"],
     "exclude_signal_bars": true,
     "exclude_within_bars_of_signal": 13,
+    "insufficient_exact_stratum_policy": "keep the candidate in primary metrics, do not relax matching, mark it unmatched, and exclude only that pair from the paired test",
     "seed": "btcusdtp-1h-pine-v8-sixmonth-holdout-use-1"
   },
   "diagnostics": {
