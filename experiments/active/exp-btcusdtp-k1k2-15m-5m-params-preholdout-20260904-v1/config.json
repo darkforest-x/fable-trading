@@ -121,7 +121,7 @@
     "controls_per_trade": 3,
     "strata": ["calendar month", "UTC six-hour block", "within-month ATR14 quintile"],
     "copied": ["direction", "risk distance in ATR", "exit rule", "horizon", "cost"],
-    "exclude_within_horizon_plus_one_bars_of_any_broad_candidate": true,
+    "exclude_within_horizon_plus_one_bars_of_any_inherited_accepted_signal": true,
     "insufficient_exact_stratum_policy": "do not relax",
     "seed": "btcusdtp-k1k2-intraday-preholdout-20260904"
   },
