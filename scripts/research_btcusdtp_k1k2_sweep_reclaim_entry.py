@@ -94,6 +94,26 @@ def is_sweep_reclaim(
     return bool(swept and reclaimed)
 
 
+def is_direction_breakout(
+    row: pd.Series,
+    direction: int,
+    k2_direction_extreme: float,
+) -> bool:
+    """Confirm continuation using only the completed confirmation candle."""
+
+    if direction > 0:
+        return bool(
+            float(row["close"]) > k2_direction_extreme
+            and float(row["close"]) > float(row["sma40_hl2"])
+            and float(row["close"]) > float(row["open"])
+        )
+    return bool(
+        float(row["close"]) < k2_direction_extreme
+        and float(row["close"]) < float(row["sma40_hl2"])
+        and float(row["close"]) < float(row["open"])
+    )
+
+
 def run_sweep_arm(
     candidates: pd.DataFrame,
     frame: pd.DataFrame,
@@ -120,6 +140,11 @@ def run_sweep_arm(
         return decisions, events
 
     bars = wait_bars(config, bar, max_wait_minutes)
+    confirmation_mode = str(
+        config.get("factor", {}).get("confirmation_mode", "sweep_reclaim")
+    )
+    if confirmation_mode not in {"sweep_reclaim", "direction_breakout"}:
+        raise ValueError(f"unsupported confirmation_mode: {confirmation_mode}")
     execution = config["execution_frozen"]
     fixed = config["timeframe_fixed"][bar]
     horizon = int(fixed["horizon_bars"])
@@ -133,19 +158,35 @@ def run_sweep_arm(
         k2_extreme = float(
             frame.loc[k2_i, "low"] if direction > 0 else frame.loc[k2_i, "high"]
         )
+        k2_direction_extreme = float(
+            frame.loc[k2_i, "high"] if direction > 0 else frame.loc[k2_i, "low"]
+        )
+        trigger_extreme = (
+            k2_extreme
+            if confirmation_mode == "sweep_reclaim"
+            else k2_direction_extreme
+        )
         confirmation_i: int | None = None
         for index in range(k2_i + 1, min(k2_i + bars + 1, len(frame) - 1)):
             if int(frame.loc[index, "segment_id"]) != int(
                 frame.loc[k2_i, "segment_id"]
             ):
                 break
-            if is_sweep_reclaim(frame.loc[index], direction, k2_extreme):
+            confirmed = (
+                is_sweep_reclaim(frame.loc[index], direction, trigger_extreme)
+                if confirmation_mode == "sweep_reclaim"
+                else is_direction_breakout(
+                    frame.loc[index], direction, trigger_extreme
+                )
+            )
+            if confirmed:
                 confirmation_i = index
                 break
         common = {
             **base,
             "bar": bar,
             "entry_rule": str(arm["label"]),
+            "confirmation_mode": confirmation_mode,
             "max_wait_minutes": max_wait_minutes,
             "k2_extreme_price": k2_extreme,
             "k2_stop_buffer_atr": 0.0,
@@ -251,7 +292,7 @@ def run_sweep_arm(
         setup = (
             f"BTC-USDT-SWAP|{bar}|ma{int(params['ma_period'])}|{direction}|"
             f"{frame.loc[int(proposal['k2_i']), 'open_time'].isoformat()}|"
-            f"{int(proposal['k1_i'])}|sweep{max_wait_minutes}|"
+            f"{int(proposal['k1_i'])}|{confirmation_mode}{max_wait_minutes}|"
             f"confirm{int(proposal['confirmation_i'])}"
         )
         event = {
@@ -317,15 +358,24 @@ def select_entry(
     return passing[0], "move_by_preregistered_rule"
 
 
-def development_phase(config: dict[str, Any]) -> None:
-    RESULTS.mkdir(parents=True, exist_ok=True)
+def development_phase(
+    config: dict[str, Any],
+    *,
+    results: Path = RESULTS,
+    selection_path: Path = SELECTION_PATH,
+    config_path: Path = CONFIG_PATH,
+    script_path: Path = SCRIPT_PATH,
+    engine_path: Path = SCRIPT_PATH,
+) -> None:
+    results.mkdir(parents=True, exist_ok=True)
     start = utc(config["window"]["development_start_inclusive"])
     end = utc(config["window"]["development_end_exclusive"])
     folds = list(config["window"]["development_folds"])
     receipt: dict[str, Any] = {
         "phase": "development_complete_audit_unopened",
-        "config_sha256": sha256_file(CONFIG_PATH),
-        "script_sha256": sha256_file(SCRIPT_PATH),
+        "config_sha256": sha256_file(config_path),
+        "script_sha256": sha256_file(script_path),
+        "engine_sha256": sha256_file(engine_path),
         "holdout_rows_read": 0,
         "audit_rows_read": 0,
         "timeframes": {},
@@ -389,7 +439,7 @@ def development_phase(config: dict[str, Any]) -> None:
             rows.append(row)
             ledgers[label] = decisions, events, controls, pairs
             safe = label.replace("_", "-")
-            write_csv(events, RESULTS / f"development_{bar}_{safe}_trades.csv.gz")
+            write_csv(events, results / f"development_{bar}_{safe}_trades.csv.gz")
             print(
                 f"[{bar}] {label}: robust={metrics['robust_score_bp']:.2f}bp "
                 f"net={metrics['mean_net_bp']:.2f}bp n={metrics['events']}",
@@ -410,7 +460,7 @@ def development_phase(config: dict[str, Any]) -> None:
             and float(selected["worst_fold_net_bp"]) > -5.0
             and bool(selected["all_folds_gross_positive"])
         )
-        prefix = RESULTS / f"development_{bar}"
+        prefix = results / f"development_{bar}"
         write_csv(pd.DataFrame(rows), prefix.with_name(prefix.name + "_trace.csv"))
         write_csv(events, prefix.with_name(prefix.name + "_selected_trades.csv.gz"))
         write_csv(decisions, prefix.with_name(prefix.name + "_selected_decisions.csv.gz"))
@@ -439,18 +489,27 @@ def development_phase(config: dict[str, Any]) -> None:
         }
         print(f"[{bar}] {reason}; audit_open_allowed={success}", flush=True)
 
-    write_csv(pd.concat(traces, ignore_index=True), RESULTS / "development_trace.csv")
-    write_csv(pd.DataFrame(sources), RESULTS / "source_receipt.csv")
-    write_json(SELECTION_PATH, receipt)
+    write_csv(pd.concat(traces, ignore_index=True), results / "development_trace.csv")
+    write_csv(pd.DataFrame(sources), results / "source_receipt.csv")
+    write_json(selection_path, receipt)
     print(json.dumps(json_value(receipt), ensure_ascii=False, indent=2))
 
 
-def assert_selection_committed(selection: dict[str, Any]) -> None:
+def assert_selection_committed(
+    selection: dict[str, Any],
+    *,
+    selection_path: Path = SELECTION_PATH,
+    config_path: Path = CONFIG_PATH,
+    script_path: Path = SCRIPT_PATH,
+    engine_path: Path = SCRIPT_PATH,
+) -> None:
     paths = [
-        str(SELECTION_PATH.relative_to(PROJECT)),
-        str(SCRIPT_PATH.relative_to(PROJECT)),
-        str(CONFIG_PATH.relative_to(PROJECT)),
+        str(selection_path.relative_to(PROJECT)),
+        str(script_path.relative_to(PROJECT)),
+        str(config_path.relative_to(PROJECT)),
     ]
+    if engine_path not in {selection_path, script_path, config_path}:
+        paths.append(str(engine_path.relative_to(PROJECT)))
     for relative in paths:
         subprocess.run(
             ["git", "ls-files", "--error-unmatch", relative],
@@ -469,15 +528,31 @@ def assert_selection_committed(selection: dict[str, Any]) -> None:
         raise RuntimeError(f"selection/config/script must be committed before audit: {dirty}")
     if selection.get("phase") != "development_complete_audit_unopened":
         raise RuntimeError("selection phase drift")
-    if selection.get("config_sha256") != sha256_file(CONFIG_PATH):
+    if selection.get("config_sha256") != sha256_file(config_path):
         raise RuntimeError("selection config SHA drift")
-    if selection.get("script_sha256") != sha256_file(SCRIPT_PATH):
+    if selection.get("script_sha256") != sha256_file(script_path):
         raise RuntimeError("selection script SHA drift")
+    if selection.get("engine_sha256") != sha256_file(engine_path):
+        raise RuntimeError("selection engine SHA drift")
 
 
-def audit_phase(config: dict[str, Any]) -> None:
-    selection = json.loads(SELECTION_PATH.read_text(encoding="utf-8"))
-    assert_selection_committed(selection)
+def audit_phase(
+    config: dict[str, Any],
+    *,
+    results: Path = RESULTS,
+    selection_path: Path = SELECTION_PATH,
+    config_path: Path = CONFIG_PATH,
+    script_path: Path = SCRIPT_PATH,
+    engine_path: Path = SCRIPT_PATH,
+) -> None:
+    selection = json.loads(selection_path.read_text(encoding="utf-8"))
+    assert_selection_committed(
+        selection,
+        selection_path=selection_path,
+        config_path=config_path,
+        script_path=script_path,
+        engine_path=engine_path,
+    )
     qualified = [
         bar
         for bar in ("15m", "5m")
@@ -534,11 +609,11 @@ def audit_phase(config: dict[str, Any]) -> None:
             and complete["mean_net_bp"].gt(0.0).all()
         )
         rows.append({"bar": bar, "entry_rule": label, **metrics, "success_gate_passed": passed})
-        write_csv(events, RESULTS / f"audit_{bar}_selected_trades.csv.gz")
-        write_csv(decisions, RESULTS / f"audit_{bar}_selected_decisions.csv.gz")
-        write_csv(slices, RESULTS / f"audit_{bar}_selected_slices.csv")
-        write_csv(controls, RESULTS / f"audit_{bar}_matched_controls.csv.gz")
-        write_csv(pairs, RESULTS / f"audit_{bar}_matched_pairs.csv")
+        write_csv(events, results / f"audit_{bar}_selected_trades.csv.gz")
+        write_csv(decisions, results / f"audit_{bar}_selected_decisions.csv.gz")
+        write_csv(slices, results / f"audit_{bar}_selected_slices.csv")
+        write_csv(controls, results / f"audit_{bar}_matched_controls.csv.gz")
+        write_csv(pairs, results / f"audit_{bar}_matched_pairs.csv")
         summary["timeframes"][bar] = {
             "selected_entry_rule": label,
             "metrics": metrics,
@@ -546,8 +621,8 @@ def audit_phase(config: dict[str, Any]) -> None:
             "success_gate_passed": passed,
             "source": quality,
         }
-    write_csv(pd.DataFrame(rows), RESULTS / "audit_metrics.csv")
-    write_json(RESULTS / "audit_summary.json", summary)
+    write_csv(pd.DataFrame(rows), results / "audit_metrics.csv")
+    write_json(results / "audit_summary.json", summary)
     print(json.dumps(json_value(summary), ensure_ascii=False, indent=2))
 
 

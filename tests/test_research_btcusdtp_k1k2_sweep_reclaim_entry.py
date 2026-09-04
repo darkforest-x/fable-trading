@@ -3,6 +3,7 @@ from __future__ import annotations
 import pandas as pd
 
 from scripts.research_btcusdtp_k1k2_sweep_reclaim_entry import (
+    is_direction_breakout,
     is_sweep_reclaim,
     run_sweep_arm,
     select_entry,
@@ -73,6 +74,18 @@ def test_long_sweep_reclaim_is_directional_and_strict() -> None:
     assert not is_sweep_reclaim(changed, 1, 99.8)
 
 
+def test_direction_breakout_is_symmetric() -> None:
+    long_row = pd.Series(
+        {"open": 100.0, "close": 102.0, "sma40_hl2": 100.5}
+    )
+    short_row = pd.Series(
+        {"open": 100.0, "close": 98.0, "sma40_hl2": 99.5}
+    )
+    assert is_direction_breakout(long_row, 1, 101.0)
+    assert is_direction_breakout(short_row, -1, 99.0)
+    assert not is_direction_breakout(long_row, 1, 102.0)
+
+
 def test_sweep_entry_uses_next_open_and_original_k2_stop() -> None:
     frame = _frame()
     decisions, events = run_sweep_arm(
@@ -90,6 +103,25 @@ def test_sweep_entry_uses_next_open_and_original_k2_stop() -> None:
     assert float(events.iloc[0]["entry_price"]) == 101.5
     assert float(events.iloc[0]["stop_price"]) == 99.8
     assert decisions["decision"].eq("accepted").sum() == 1
+
+
+def test_breakout_mode_uses_direction_extreme_but_keeps_opposite_stop() -> None:
+    frame = _frame()
+    config = _config()
+    config["factor"] = {"confirmation_mode": "direction_breakout"}
+    _, events = run_sweep_arm(
+        _candidate(),
+        frame,
+        config,
+        "15m",
+        {"ma_period": 40, "score_floor": 0.4, "gap_min_bars": 1, "gap_max_bars": 4},
+        {"label": "direction_breakout_30m", "max_wait_minutes": 30},
+        pd.Timestamp("2024-01-02", tz="UTC"),
+    )
+    assert len(events) == 1
+    assert int(events.iloc[0]["confirmation_i"]) == 3
+    assert float(events.iloc[0]["stop_price"]) == 99.8
+    assert events.iloc[0]["confirmation_mode"] == "direction_breakout"
 
 
 def test_entry_decision_stops_reading_after_first_confirmation() -> None:
