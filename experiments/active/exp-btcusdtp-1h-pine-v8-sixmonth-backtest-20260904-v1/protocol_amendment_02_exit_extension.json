@@ -1,0 +1,82 @@
+{
+  "amendment_id": "exit-extension-diagnostic-v1",
+  "recorded_on": "2026-09-04",
+  "status": "frozen_before_exit-arm_replay",
+  "owner_authorization": {
+    "verbatim": "你没发现很多盈利的交易 其实止盈可以再高点吗。",
+    "scope": "reuse the already-frozen post-2026-05-04 BTCUSDT.P 1h snapshot for an exit-only diagnostic",
+    "configuration_holdout_use": 2
+  },
+  "question": "Does the frozen 3R target truncate a repeatable right tail, and can a higher fixed target or a predeclared split runner improve realized post-cost results without changing entries, stops, or horizon?",
+  "fixed_inputs": {
+    "source": "results/source/okx_BTC_USDT_SWAP_1H.csv.gz",
+    "source_sha256": "01984275dc57b263fdeb209ee996e599a6759da8f6ade649442e1ac132ef2c04",
+    "signal_ledger": "results/trade_ledger.csv",
+    "signal_ledger_sha256": "17231b982cec42852a583ba632b4a387b7cbd1d35d31a52d30079eedaa0f2e5f",
+    "matched_controls": "results/matched_controls.csv",
+    "matched_controls_sha256": "87e9d183030796aaa201be935bdb5c2e51e3488132999761dc966128a1ad9539",
+    "entry": "unchanged next-open entry",
+    "stop": "unchanged exact K2 extreme",
+    "horizon_bars": 12,
+    "same_bar_collision": "conservative stop first",
+    "timeout_exit": "twelfth path-bar close",
+    "round_trip_cost_fraction": 0.002,
+    "funding_and_extra_slippage": "excluded"
+  },
+  "predeclared_arms": [
+    {
+      "arm": "fixed_3R",
+      "rule": "all size exits at 3R; frozen baseline"
+    },
+    {
+      "arm": "fixed_4R",
+      "rule": "all size exits at 4R"
+    },
+    {
+      "arm": "fixed_5R",
+      "rule": "all size exits at 5R"
+    },
+    {
+      "arm": "fixed_6R",
+      "rule": "all size exits at 6R"
+    },
+    {
+      "arm": "split_3R_6R",
+      "rule": "50% exits at 3R; the remaining 50% keeps the original stop and exits at 6R or the twelfth-bar close"
+    },
+    {
+      "arm": "split_3R_runner",
+      "rule": "50% exits at 3R; the remaining 50% has no profit target, keeps the original stop, and exits at the twelfth-bar close"
+    }
+  ],
+  "split_execution": {
+    "stop_before_first_scale": "if the original stop and 3R are both inside the first-hit bar, record the full-position stop",
+    "remaining_leg_collision": "after 3R has been confirmed on a prior bar, if the remaining target and original stop share a later bar, record the stop first",
+    "cost": "subtract 0.2% once per original full notional; partial exits do not multiply total notional fee"
+  },
+  "metrics": [
+    "target hit, stop, timeout and net-profitable counts",
+    "mean and median net bp, profit factor and equal-notional compounded return",
+    "equal-risk 1% compounded return and maximum drawdown",
+    "paired per-entry net-return delta versus fixed 3R",
+    "one-sided deterministic sign-flip p and paired bootstrap 95% CI for each delta",
+    "Holm correction across fixed 4R, 5R and 6R comparisons",
+    "candidate-minus-exact-matched-control mean for each arm",
+    "monthly and pre-boundary/post-boundary direction consistency",
+    "count of baseline 3R winners that subsequently reach 4R, 5R or 6R before the unchanged stop within 12 bars"
+  ],
+  "decision_rule": {
+    "diagnostic_only": true,
+    "no_arm_can_be_promoted_from_this_snapshot": true,
+    "no_post_result_target_additions": true,
+    "candidate_for_new_unseen_data": "an arm must improve candidate mean net return versus fixed 3R, avoid worse equal-risk drawdown, keep the same sign before and after 2026-05-04 excluding partial September, and retain positive candidate-minus-control excess",
+    "statistical_note": "all arms are post-hoc to holdout use 1; p-values quantify uncertainty but do not restore confirmatory status"
+  },
+  "forbidden_changes": [
+    "signal thresholds or signal identities",
+    "K1/K2 morphology, gap, colour, path or state gates",
+    "entry, original stop or 12-bar horizon",
+    "cost assumption",
+    "training, promotion, deployment, ACTIVE/frozen/forward mutation or live orders"
+  ]
+}
