@@ -4481,7 +4481,7 @@ experiments:
 
   - experiment_id: exp-btcusdtp-15m-ma-state-trend-preholdout-20260904-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "11cfaf7"
+    source_commit: "51876a8"
     status: rejected
     question: >-
       Can a dedicated BTCUSDT.P 15m MA-state launch detector recover direct
@@ -4500,24 +4500,25 @@ experiments:
       the move gate. Immediate MA exits preserved a +1102bp extreme winner but
       worsened robust expectancy through early whipsaw, so fixed 5ATR remained
       selected. Frozen 2025-2026 validation stayed unopened.
-    holdout_consumed: false
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    canonical_report: analysis/p1_btcusdtp_15m_ma_state_trend_20260904.md
+    canonical_report: analysis/p1_btcusdtp_15m_trend_refactor_20260904.md
     artifacts:
       - btcusdtp-15m-ma-state-trend-selection-20260904-v1
     reuse_allowed: false
     notes: >-
-      Economic selection and validation use the physical pre-holdout source
-      ending 2026-02-28. Five Owner-provided July/August screenshots are a
-      separately recorded contaminated morphology diagnostic only and cannot
-      support an economic or generalization claim. No automatic promotion,
-      deployment, forward mutation, API-key change or live order is allowed.
+      Economic selection uses the physical pre-holdout source ending
+      2026-02-28 and reads zero repository-holdout price rows. Owner explicitly
+      supplied and approved five July/August screenshots; their only use is one
+      declared holdout-contaminated morphology diagnostic, never economic
+      scoring or generalization. No automatic promotion, deployment, forward
+      mutation, API-key change or live order is allowed.
 
   - experiment_id: exp-btcusdtp-15m-dual-ma-runner-preholdout-20260904-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "8bd873e"
-    status: active
+    source_commit: "fb99e77"
+    status: rejected
     question: >-
       Can a fast launch reference, separate SMA60 trend reference, transition
       dedupe and delayed MA runner recognize 15m releases earlier while keeping
@@ -4528,25 +4529,28 @@ experiments:
       runner_policy. Exact 2024 confirmation stays closed until the selection
       receipt and builder are committed.
     result: >-
-      in_progress_selection_not_run. Numeric launch morphology, next-open entry,
-      2ATR disaster stop, SMA60 trend reference, 96-bar horizon and 20bp cost
-      are frozen before selection.
-    holdout_consumed: false
+      rejected_on_exact_2024_confirmation. The selected SMA60/global24/
+      ma_close2_after_1atr runner produced 682 trades at -17.57bp mean net and
+      PF 0.677 versus -17.69bp for fixed 5ATR. The +0.12bp paired improvement
+      was not stable (monthly sign-flip p=0.444); matched-control excess was
+      +4.03bp with p=0.233 and both half-years were negative.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    canonical_report: analysis/p1_btcusdtp_15m_dual_ma_runner_20260904.md
+    canonical_report: analysis/p1_btcusdtp_15m_trend_refactor_20260904.md
+    artifacts:
+      - btcusdtp-15m-dual-ma-confirmation-20260904-v1
     reuse_allowed: false
     notes: >-
-      2023 is acknowledged reused hypothesis data. A later exact 2024 replay,
-      matched random controls and two half-year checks decide the research gate;
-      2025-2026 audit remains closed unless that gate passes. Owner screenshots
-      are excluded from economic selection and will be declared separately if
-      inspected for this configuration.
+      2023 is acknowledged reused hypothesis data; exact 2024 and matched
+      controls decide the rejection, so the later audit stayed closed. One
+      Owner-approved July/August screenshot morphology use is declared but was
+      excluded from economic selection. Repository holdout price rows read: 0.
 
   - experiment_id: exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "fb99e77"
-    status: active
+    source_commit: "96f52dd"
+    status: rejected
     question: >-
       Can a deterministic causal L2 isolate the small tradeable subset of a
       high-recall EMA30 state-transition pool and hold those entries with an
@@ -4557,17 +4561,60 @@ experiments:
       stop, +2ATR runner activation, SMA60-minus-ATR trail, 96-bar horizon and
       cost remain frozen.
     result: >-
-      in_progress_selection_not_run. The Huber objective and 97.5th score
-      percentile are explicitly recorded as post-hoc 2023/2024 hypotheses;
-      their only acceptance evidence can come from the untouched 2025-01
-      through 2026-02 validation.
-    holdout_consumed: false
+      rejected_on_frozen_2025_to_2026-02_validation. The 3,746-event pool
+      yielded 113 frozen-gate events at -8.92bp mean net, PF 0.825 and AUC
+      0.509. Model top-decile remained -8.43bp; score permutation p=0.281 and
+      matched-control excess +8.32bp had p=0.269. All economic gates failed.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    canonical_report: analysis/p1_btcusdtp_15m_high_recall_l2_trend_runner_20260904.md
+    canonical_report: analysis/p1_btcusdtp_15m_trend_refactor_20260904.md
+    artifacts:
+      - btcusdtp-15m-high-recall-l2-validation-20260904-v1
+      - btcusdtp-15m-trend-research-pine-20260904-v2
+      - btcusdtp-15m-l2-shap-audit-20260904-v1
     reuse_allowed: false
     notes: >-
       The five Owner screenshots only select the display-recall surface and are
-      never scored economically. The selection receipt, model bytes, feature
-      schema, imputation medians and absolute score threshold must be committed
-      before validation can run. No promote, deployment or live-order mutation.
+      never scored economically; that approved morphology use is the declared
+      holdout consumption. Model, schema, medians and absolute threshold were
+      committed before validation. Repository holdout price rows read: 0. No
+      promote, deployment or live-order mutation.
+
+  - experiment_id: exp-btcusdtp-15m-ma-runner-grid-preholdout-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "3cc3bc8"
+    status: rejected
+    question: >-
+      Holding every high-recall EMA30 state-reset event fixed, can a causal
+      moving-average runner, optional fixed leg, activation level, ATR buffer
+      and hold length turn the 15m entry pool positive while retaining large
+      trend winners after 20bp cost?
+    single_variable: >-
+      One deterministic categorical coordinate pass in the order trend MA,
+      exit style, activation ATR, buffer ATR, max hold and leg mix. Each step
+      changes only that factor; entry pool, next-open fill, 2ATR initial stop,
+      cost, folds and gates remain fixed.
+    result: >-
+      rejected_on_fresh_preholdout_validation. The locked EMA30/+3ATR/0-buffer/
+      192-bar runner produced 525 trades at -19.40bp mean net and PF 0.649,
+      only +0.98bp versus fixed 5ATR (weekly p=0.231), with matched-control
+      excess -0.34bp (p=0.523). A posthoc audit of the saved SMA60/+2ATR/
+      1ATR-buffer/96-bar Pine improved right-tail capture and mean to -16.18bp
+      but remained negative and non-significant; it is display-only.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btcusdtp_15m_trend_refactor_20260904.md
+    artifacts:
+      - btcusdtp-15m-ma-runner-validation-20260904-v1
+      - btcusdtp-15m-trend-refactor-summary-20260904-v1
+      - btcusdtp-15m-trend-refactor-report-20260904-v1
+      - btcusdtp-15m-trend-refactor-html-20260904-v1
+    reuse_allowed: false
+    notes: >-
+      Development ends 2026-02-28; fresh validation is physically cut at
+      2026-05-04 and reads zero holdout price rows. The experiment inherits one
+      approved holdout-contaminated display-morphology decision from its parent,
+      so holdout_consumed remains true despite pre-holdout economics. No ACTIVE,
+      forward, frozen, deployment, position sizing or live-order mutation.

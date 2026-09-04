@@ -13671,3 +13671,143 @@ artifacts:
     notes: >-
       SMA60/all/fixed5ATR development selection; all four half-years remained
       net negative after 20bp cost, so frozen validation was not opened.
+
+  - artifact_id: btcusdtp-15m-dual-ma-confirmation-20260904-v1
+    artifact_type: manifest
+    role: exact_2024_dual_ma_runner_confirmation
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fb99e77"
+    source_path: experiments/active/exp-btcusdtp-15m-dual-ma-runner-preholdout-20260904-v1/results/confirmation_summary.json
+    sha256: "581671edc8493c3881eda46edcb9347df03331e6b81f27edf1153666ade080be"
+    size_bytes: 7913
+    storage_uri: "repo://experiments/active/exp-btcusdtp-15m-dual-ma-runner-preholdout-20260904-v1/results/confirmation_summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fb99e77"
+    config_hash: "d36387a3a20489803456e50176990ecc3c18c108163576f30fadc4a8fe865338"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Runner and fixed 5ATR were both net negative; every economic gate failed.
+
+  - artifact_id: btcusdtp-15m-high-recall-l2-validation-20260904-v1
+    artifact_type: manifest
+    role: frozen_high_recall_l2_preholdout_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: "96f52dd"
+    source_path: experiments/active/exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1/results/validation_summary.json
+    sha256: "eb2cf45ce891eaa64f32db65699e0a3b5d2f27318ef6c6cd973474f312ca3e73"
+    size_bytes: 8123
+    storage_uri: "repo://experiments/active/exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1/results/validation_summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "96f52dd"
+    config_hash: "e85d1e168da45ab2b66347027a7505e5683fb3cc504ee60129813a52bbd5c5ad"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: Frozen L2 failed net-return, score-permutation and matched-control gates.
+
+  - artifact_id: btcusdtp-15m-trend-research-pine-20260904-v2
+    artifact_type: config
+    role: tradingview_15m_high_recall_research_display_with_sma60_runner
+    source_repo: darkforest-x/fable-trading
+    source_commit: "96f52dd"
+    source_path: experiments/active/exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1/pine/fable_15m_trend_research_v2.pine
+    sha256: "c54cc851b5abb684668a3b8d89f4e5cc1c15daba5a2e8932504fb9fe378606c9"
+    size_bytes: 13854
+    storage_uri: "repo://experiments/active/exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1/pine/fable_15m_trend_research_v2.pine"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "96f52dd"
+    config_hash: "e85d1e168da45ab2b66347027a7505e5683fb3cc504ee60129813a52bbd5c5ad"
+    notes: >-
+      Compiled and cloud-saved as Fable 15m Trend Research V2. Five
+      Owner-approved post-boundary screenshots influenced display recall only;
+      the script is explicitly research-only and not an executable strategy.
+
+  - artifact_id: btcusdtp-15m-l2-shap-audit-20260904-v1
+    artifact_type: manifest
+    role: frozen_failed_l2_shap_explanation_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4cdb50e"
+    source_path: experiments/active/exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1/results/shap_audit/metadata.json
+    sha256: "b40e8152e845ad5e3eb7d71476b9af4f3295a45ffed3305640043460c10d16cc"
+    size_bytes: 1521
+    storage_uri: "repo://experiments/active/exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1/results/shap_audit/metadata.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4cdb50e"
+    config_hash: "e85d1e168da45ab2b66347027a7505e5683fb3cc504ee60129813a52bbd5c5ad"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: SHAP explains a rejected frozen model; attribution is descriptive, not causal.
+
+  - artifact_id: btcusdtp-15m-ma-runner-validation-20260904-v1
+    artifact_type: manifest
+    role: fresh_preholdout_moving_average_runner_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: "3cc3bc8"
+    source_path: experiments/active/exp-btcusdtp-15m-ma-runner-grid-preholdout-20260904-v1/results/validation_summary.json
+    sha256: "bd5bdcc5d8586f052c936e9f6142949797b7cf65396348625b9e3649402b43da"
+    size_bytes: 9257
+    storage_uri: "repo://experiments/active/exp-btcusdtp-15m-ma-runner-grid-preholdout-20260904-v1/results/validation_summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "3cc3bc8"
+    config_hash: "51ebb3d1da933d43d8fa70b6d2d59ef2853210c051a678d73c2e8869da2e6feb"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Locked runner stayed net negative and failed weekly and matched-control gates.
+
+  - artifact_id: btcusdtp-15m-trend-refactor-summary-20260904-v1
+    artifact_type: manifest
+    role: corrected_exit_giveback_failure_map_and_profit_floor_counterfactuals
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4cdb50e"
+    source_path: analysis/output/btcusdtp_15m_trend_refactor_20260904/summary.json
+    sha256: "b2336db2fa9df329f9b9376b1def94d45ec4cead6c90dac924664b1908f9645c"
+    size_bytes: 12058
+    storage_uri: "repo://analysis/output/btcusdtp_15m_trend_refactor_20260904/summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4cdb50e"
+    config_hash: "51ebb3d1da933d43d8fa70b6d2d59ef2853210c051a678d73c2e8869da2e6feb"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: >-
+      Economics use only pre-holdout rows; holdout status is inherited from the
+      Owner-approved screenshot-informed display contract evaluated posthoc.
+
+  - artifact_id: btcusdtp-15m-trend-refactor-report-20260904-v1
+    artifact_type: report
+    role: canonical_chinese_15m_entry_and_trend_exit_failure_analysis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4cdb50e"
+    source_path: analysis/p1_btcusdtp_15m_trend_refactor_20260904.md
+    sha256: "7cd974417805504ad9f020f75fde4782613a7c37995e754f02c27fa40a53752b"
+    size_bytes: 20187
+    storage_uri: "repo://analysis/p1_btcusdtp_15m_trend_refactor_20260904.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4cdb50e"
+    config_hash: "51ebb3d1da933d43d8fa70b6d2d59ef2853210c051a678d73c2e8869da2e6feb"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Full rules, time splits, controls, SHAP, failure causes and next episode design.
+
+  - artifact_id: btcusdtp-15m-trend-refactor-html-20260904-v1
+    artifact_type: report
+    role: owner_facing_self_contained_html_15m_trend_refactor
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4cdb50e"
+    source_path: analysis/html/p1_btcusdtp_15m_trend_refactor_20260904.html
+    sha256: "2a6229d0e90712a66cd882b0a43169ca65253b9f8d6cd5e8b09ce578880f570f"
+    size_bytes: 1161608
+    storage_uri: "repo://analysis/html/p1_btcusdtp_15m_trend_refactor_20260904.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "4cdb50e"
+    config_hash: "51ebb3d1da933d43d8fa70b6d2d59ef2853210c051a678d73c2e8869da2e6feb"
+    data_cutoff: "2026-05-04T00:00:00Z"
+    notes: Self-contained HTML with embedded exit, failure, path, floor and SHAP figures.
