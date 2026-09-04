@@ -1,0 +1,47 @@
+{
+  "experiment_id": "exp-btcusdtp-15m-trend-regime-live-entry-preholdout-20260904-v1",
+  "parent_experiment_id": "exp-btcusdtp-15m-trend-regime-episode-preholdout-20260904-v1",
+  "owner_directive": "我们是趋势策略，行情大部分时间在盘整，不要随便开仓",
+  "single_change": "At K2 close, require direction * (EMA30(HL2)-SMA60(HL2)) > 0 and direction * EMA30 four-bar slope >= 0.",
+  "fixed_parent_parameters": {
+    "entry_spread_atr": 1.0,
+    "entry_slope_atr_per_bar": 0.05,
+    "strong_dwell_bars": 12,
+    "neutral_dwell_bars": 8
+  },
+  "live_entry_gate": {
+    "signed_fast_slow_spread_atr_min_exclusive": 0.0,
+    "signed_fast_slope4_atr_per_bar_min_inclusive": 0.0,
+    "parameter_grid": false,
+    "reason": "A remembered trend regime is not evidence that the trend is still alive at K2. Zero crossings express direction without post-audit magnitude tuning."
+  },
+  "splits": {
+    "development_start_inclusive": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2025-01-01T00:00:00Z",
+    "development_folds": ["2023H1", "2023H2", "2024H1", "2024H2"],
+    "audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "audit_end_exclusive": "2026-02-28T16:00:00Z",
+    "audit_slices": ["2025H1", "2025H2", "2026P1"],
+    "random_split": false,
+    "audit_is_not_pristine": true
+  },
+  "unchanged_execution": {
+    "entry": "next_bar_open",
+    "initial_disaster_stop_atr": 2.0,
+    "runner_arm_profit_atr": 2.0,
+    "runner_policy": "SMA60(HL2) minus direction times ATR14 after completed close reaches +2ATR",
+    "runner_buffer_atr": 1.0,
+    "horizon_bars": 96,
+    "round_trip_cost_fraction": 0.002,
+    "same_bar_priority": "active stop first"
+  },
+  "safety": {
+    "repository_holdout_rows_allowed": 0,
+    "economic_holdout_rows_allowed": 0,
+    "training_eligible": false,
+    "production_eligible": false,
+    "automatic_promote": false,
+    "active_or_forward_change": false,
+    "live_order_change": false
+  }
+}

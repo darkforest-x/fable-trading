@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp-btcusdtp-15m-trend-regime-live-entry-preholdout-20260904-v1",
+  "registered_at": "2026-09-04T23:40:00+08:00",
+  "hypothesis": "Requiring trend direction to remain live at K2 will remove stale-regime range entries while preserving the parent one-signal-per-regime behavior.",
+  "only_change": "directional current EMA30-SMA60 spread > 0 and directional current EMA30 four-bar slope >= 0 at K2",
+  "tuned_parameters": [],
+  "primary_metrics": [
+    "signals_per_30d",
+    "within_24h_previous_share",
+    "median_hours_between_signals"
+  ],
+  "economic_guardrails": [
+    "mean_net_bp after 0.2% round-trip cost",
+    "profit_factor",
+    "matched-control paired excess and sign-flip p"
+  ],
+  "success_interpretation": "A density/semantic correction may be used as a research display only; it is not a profitable or production-ready strategy unless economic gates also pass.",
+  "repository_holdout_rows_allowed": 0
+}
