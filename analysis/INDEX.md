@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **247** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **248** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,6 +10,7 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-09-05 | [`p1_ethusdtp_15m_causal_confluence_20260905.md`](p1_ethusdtp_15m_causal_confluence_20260905.md) | ETHUSDT.P 15m：因果共振筛选与扩张门外推失败审计（V17/V18） | 本轮把“加入一些共振”真正做成了两级时间外验证，而不是往脚本里多堆几个勾选项。先在冻结的 |
 | 2026-09-05 | [`p1_ethusdtp_15m_gradual_take_profit_20260905.md`](p1_ethusdtp_15m_gradual_take_profit_20260905.md) | P1：ETHUSDT.P 15m 趋势单渐进止盈 V16（2026-09-05） | Owner 指出的执行问题成立：真实止盈和抬高止损是两件事，不能互相冒充。** 本轮冻结入场和原 |
 | 2026-09-04 | [`p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.md`](p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.md) | 15m Grade-A 六均线 close→HL2 单变量复训（2026-09-03/04） | **HL2 有“正例更容易被检出”的迹象，但没有证明整体优于 close，本轮不建议替换现有表示。** |
 | 2026-09-02 | [`p3_15m_ma_launch_l2_feature_addition_20260902.md`](p3_15m_ma_launch_l2_feature_addition_20260902.md) | 15m L2 因果特征增量实验（2026-09-02） | 最终裁决：**REJECT**。LONG tune 入选 **full_110**，SHORT tune 入选 **plus_ma_family**。本轮只允许在旧 28 列上增加特征；候选、标签、时间切分、模型参数、成本和匹配对照均保持不变。 |

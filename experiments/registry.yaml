@@ -4819,6 +4819,12 @@ experiments:
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
+    canonical_report: analysis/p1_ethusdtp_15m_causal_confluence_20260905.md
+    artifacts:
+      - ethusdtp-15m-confluence-v17-selection
+      - ethusdtp-15m-confluence-v17-v18-report
+      - ethusdtp-15m-confluence-v17-v18-html
+      - ethusdtp-15m-confluence-v17-v18-figure
     reuse_allowed: false
     notes: >-
       Audit ledger rows read: 0; repository holdout rows read: 0. A future-row
@@ -4828,8 +4834,8 @@ experiments:
 
   - experiment_id: exp-ethusdtp-15m-expansion-confluence-preholdout-20260905-v18
     source_repo: darkforest-x/fable-trading
-    source_commit: pending-preregistration
-    status: active
+    source_commit: "ea4b8d7ca2db66bd8d6a2a3b489482f355432491"
+    status: rejected
     question: >-
       Does a broader, fixed ETH volatility-expansion floor retain enough V16
       signals and right-tail PnL while excluding non-expanding range entries?
@@ -4839,15 +4845,26 @@ experiments:
       gradual bank ladder, SMA60 runner, stops, horizon, cost and sizing remain
       unchanged.
     result: >-
-      preregistered_not_yet_run. The 0.85 threshold is explicitly disclosed as
-      a hypothesis derived after inspecting fourteen V17 development
-      sensitivities. Development can only freeze the candidate; the already-seen
-      2025-through-February-2026 phase can diagnose transport, not confirm edge.
+      research_gate_fail. Development selected 54/182 events at +4.59bp and
+      PF 1.077, but the threshold was post-hoc and familywise p was 0.2756.
+      The fixed gate then selected 37/114 transport-audit events at -42.97bp
+      and PF 0.475 versus V16 at +5.19bp and PF 1.065. It retained only one of
+      twelve top-decile winners (6.34% of positive PnL) and underperformed
+      matched random entries by 31.73bp; one-sided p=0.8929.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
+    canonical_report: analysis/p1_ethusdtp_15m_causal_confluence_20260905.md
+    artifacts:
+      - ethusdtp-15m-expansion-v18-audit
+      - ethusdtp-15m-confluence-v17-v18-diagnostics
+      - ethusdtp-15m-confluence-v17-v18-report
+      - ethusdtp-15m-confluence-v17-v18-html
+      - ethusdtp-15m-confluence-v17-v18-figure
     reuse_allowed: false
     notes: >-
-      Repository holdout begins 2026-05-04 and remains out of scope. Audit is
-      blocked until the fixed candidate passes every descriptive freeze gate
-      and its receipt is committed. No TradingView or execution state changes.
+      Repository holdout begins 2026-05-04; returned/scored holdout rows were
+      zero. The audit parent lineage was already seen and is a transport
+      diagnostic, not pristine OOS. Future-row mutation left all 22 pre-boundary
+      features unchanged. No TradingView, ACTIVE/frozen, forward, deployment,
+      sizing, API-key or live-order state changed.

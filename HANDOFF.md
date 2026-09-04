@@ -2,6 +2,24 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-05 — ETHUSDT.P 15m 共振 V17/V18 全部拒绝）
+
+Owner 要求加入多因子/多周期共振并减少盘整误开。本轮冻结 V16 K1→K2、渐进 TP、SMA60 runner、
+2ATR 止损、96 根与 20bp 成本，先测 ETH 完整 1h/4h、BTC 15m+1h、量能、波动扩张、路径结构
+六轴及 12 个门。方向类共振多数重复 V16 已有趋势状态；12 门没有一个通过全部样本、跨期、经济、
+右尾与多重检验门。V17 因此 `rejected_before_audit`。
+
+唯一诊断候选扩张轴被单独冻结为 V18：`min(ATR ratio96, BB-width ratio96) >= 0.85`。开发期
+54/182 笔由 -22.32 改善到 +4.59bp/PF1.077，但阈值来自已看过的 14 组合，FWER p=0.2756。
+固定后搬到 2025–2026-02 transport audit，37/114 笔为 **-42.97bp/PF0.475**，而 V16 全体
++5.19bp/PF1.065；比同月×时段×ATR桶×方向匹配随机差 -31.73bp，p=0.8929。最强 12 笔只留
+1 笔、仅留 6.34% 正收益，说明绝对扩张门删掉了从压缩状态起步的大趋势，不是退出参数问题。
+
+全部候选 REJECT，未改 Pine/TradingView、ACTIVE/frozen/forward、部署、仓位或订单；repository
+holdout 返回 0 行。下一条有效假设只能是因果“压缩→K1 有向释放→K2 承接”的状态变化分数，且需
+新前向数据，不能再用本次 audit 调阈值。完整报告：
+`analysis/html/p1_ethusdtp_15m_causal_confluence_20260905.html`。
+
 ## ⚡ 当前真相（2026-09-05 — ETHUSDT.P 15m 渐进止盈 V16 已保存，未证明优于纯 runner）
 
 Owner 明确要求“慢慢 TP”，不能用抬高整仓止损冒充止盈。本轮冻结 V5 稀疏趋势 K1→K2 入场、

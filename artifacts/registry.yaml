@@ -14161,3 +14161,105 @@ artifacts:
     config_hash: "f761a52ba52febfeb6f2d8d54d204d231893e8941e3247f0a2c320a0b1598c72"
     data_cutoff: "2026-03-01T00:00:00Z"
     notes: English-labeled two-panel diagnostic for robust font rendering.
+
+  - artifact_id: ethusdtp-15m-confluence-v17-selection
+    artifact_type: manifest
+    role: causal_six_axis_confluence_development_rejection_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "80a56ec715a4f7e16ef38634bf1bf23951f2448b"
+    source_path: experiments/active/exp-ethusdtp-15m-causal-confluence-preholdout-20260905-v17/results/selection_receipt.json
+    sha256: "faf59ecb575f30d1f61b81c651a7061625ccf60161573267ff2db5dca40288e4"
+    size_bytes: 4710
+    storage_uri: "repo://experiments/active/exp-ethusdtp-15m-causal-confluence-preholdout-20260905-v17/results/selection_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "80a56ec715a4f7e16ef38634bf1bf23951f2448b"
+    config_hash: "ea40188a4d174e165a19fc83368af927b4ee54f1ff8dfe331f3b1b3fa00c62b8"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Twelve preregistered causal gates; no gate passed all opening conditions.
+
+  - artifact_id: ethusdtp-15m-expansion-v18-audit
+    artifact_type: manifest
+    role: fixed_expansion_gate_transport_failure_and_matched_control_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ea4b8d7ca2db66bd8d6a2a3b489482f355432491"
+    source_path: experiments/active/exp-ethusdtp-15m-expansion-confluence-preholdout-20260905-v18/results/audit_receipt.json
+    sha256: "f4f74d4b4e03e1fdfe235985a977b64be151df17a4491bf456d5528ca73c6b25"
+    size_bytes: 5197
+    storage_uri: "repo://experiments/active/exp-ethusdtp-15m-expansion-confluence-preholdout-20260905-v18/results/audit_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ea4b8d7ca2db66bd8d6a2a3b489482f355432491"
+    config_hash: "7a5e16fd1e4b21747913ab261f0ec2682167d33945e3f4b2ce7c279babaeaa67"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: Fixed 0.85 gate failed every economic, right-tail and matched-control gate.
+
+  - artifact_id: ethusdtp-15m-confluence-v17-v18-diagnostics
+    artifact_type: manifest
+    role: bounded_direction_runner_and_top_decile_failure_diagnostics
+    source_repo: darkforest-x/fable-trading
+    source_commit: "dc8df9c4121094c218584b5cf5142daf17684f4b"
+    source_path: analysis/output/ethusdtp_15m_confluence_v17_v18/diagnostic_summary.json
+    sha256: "efb5b053fa3d700e45a0dbeaf620f907242a2a7d6ca388df17282531db2fad57"
+    size_bytes: 3274
+    storage_uri: "repo://analysis/output/ethusdtp_15m_confluence_v17_v18/diagnostic_summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "dc8df9c4121094c218584b5cf5142daf17684f4b"
+    config_hash: "7a5e16fd1e4b21747913ab261f0ec2682167d33945e3f4b2ce7c279babaeaa67"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: No audit threshold search; records one-of-twelve winner retention and zero holdout rows.
+
+  - artifact_id: ethusdtp-15m-confluence-v17-v18-report
+    artifact_type: report
+    role: canonical_chinese_causal_confluence_transport_failure_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "dc8df9c4121094c218584b5cf5142daf17684f4b"
+    source_path: analysis/p1_ethusdtp_15m_causal_confluence_20260905.md
+    sha256: "73424aa339c97fd28c2511587074e19596004cec5393339cf8298c27fda3dcee"
+    size_bytes: 15352
+    storage_uri: "repo://analysis/p1_ethusdtp_15m_causal_confluence_20260905.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "dc8df9c4121094c218584b5cf5142daf17684f4b"
+    config_hash: "7a5e16fd1e4b21747913ab261f0ec2682167d33945e3f4b2ce7c279babaeaa67"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: Full six-axis screen, fixed-gate transport audit, matched control and failure mechanics.
+
+  - artifact_id: ethusdtp-15m-confluence-v17-v18-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_causal_confluence_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "dc8df9c4121094c218584b5cf5142daf17684f4b"
+    source_path: analysis/html/p1_ethusdtp_15m_causal_confluence_20260905.html
+    sha256: "3a76ec2ade434e190102b8ba5d7b54edcfd38117b2c5181b26080fb7bdbd1fef"
+    size_bytes: 261884
+    storage_uri: "repo://analysis/html/p1_ethusdtp_15m_causal_confluence_20260905.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "dc8df9c4121094c218584b5cf5142daf17684f4b"
+    config_hash: "7a5e16fd1e4b21747913ab261f0ec2682167d33945e3f4b2ce7c279babaeaa67"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: Self-contained HTML with the transport and right-tail diagnostic embedded.
+
+  - artifact_id: ethusdtp-15m-confluence-v17-v18-figure
+    artifact_type: report
+    role: mean_fold_and_right_tail_transport_diagnostic_figure
+    source_repo: darkforest-x/fable-trading
+    source_commit: "dc8df9c4121094c218584b5cf5142daf17684f4b"
+    source_path: analysis/figures/ethusdtp_15m_confluence_v17_v18.png
+    sha256: "d2b73dfe241340ceabbf9c0b1e2a3752be16265d57fc483d95c0081b161cdefa"
+    size_bytes: 180956
+    storage_uri: "repo://analysis/figures/ethusdtp_15m_confluence_v17_v18.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "dc8df9c4121094c218584b5cf5142daf17684f4b"
+    config_hash: "7a5e16fd1e4b21747913ab261f0ec2682167d33945e3f4b2ce7c279babaeaa67"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: Static three-panel figure with non-color distinction and direct labels.
