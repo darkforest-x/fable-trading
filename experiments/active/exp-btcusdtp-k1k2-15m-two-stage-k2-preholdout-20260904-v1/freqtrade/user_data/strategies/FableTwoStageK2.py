@@ -32,7 +32,9 @@ class FableTwoStageK2(IStrategy):
     minimal_roi = {"0": 1000.0}
     stoploss = -0.99
     trailing_stop = False
-    use_exit_signal = False
+    # Freqtrade gates ``custom_exit`` behind this switch.  The explicit exit
+    # columns remain zero; this enables only the registered 48-bar timeout.
+    use_exit_signal = True
     use_custom_stoploss = True
     use_custom_roi = True
 
