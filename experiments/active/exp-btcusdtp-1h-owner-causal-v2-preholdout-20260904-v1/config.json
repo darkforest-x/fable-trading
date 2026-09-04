@@ -1,0 +1,136 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-owner-causal-v2-preholdout-20260904-v1",
+  "status": "preregistered_before_development_outcomes",
+  "question": "Do the owner-approved causal K1/K2 corrections, a fee-to-risk gate, and an optional causal profit-protection exit improve the BTCUSDT.P 1h rule before holdout?",
+  "owner_authorization": {
+    "verbatim": "去改吧  改完之后做回测",
+    "authorized_on": "2026-09-04",
+    "scope": "implement the annotated signal corrections and backtest them on pre-holdout BTCUSDT.P data",
+    "holdout_reuse_authorized": false
+  },
+  "instrument": {
+    "tradingview_symbol": "OKX:BTCUSDT.P",
+    "okx_instrument": "BTC-USDT-SWAP",
+    "source_bar_minutes": 15,
+    "analysis_bar_minutes": 60,
+    "resample_contract": "UTC clock hours; require exactly four consecutive 15-minute bars",
+    "timezone": "UTC"
+  },
+  "source": {
+    "path": "data/kline_deep/okx_BTC_USDT_SWAP_15m_158499.csv",
+    "sha256": "1d8ba1a07963743ca2e8d0acc21af102544dbe36125bda87793de29f5032a3b3",
+    "physical_last_hour_from_existing_receipt": "2026-02-28T23:00:00Z",
+    "existing_receipt": "experiments/active/exp-two-key-candle-ma-retest-1h-preholdout-v1/results/data_quality.csv"
+  },
+  "window": {
+    "development_start_inclusive": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2025-01-01T00:00:00Z",
+    "validation_start_inclusive": "2025-01-01T00:00:00Z",
+    "validation_end_exclusive": "2026-03-01T00:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "development_folds": ["2023H1", "2023H2", "2024H1", "2024H2"],
+    "validation_retuning": false
+  },
+  "baseline_signal": {
+    "pine_source": "experiments/active/exp-two-key-candle-feature-atlas-v3/pine/fable_two_key_candle_sma40_retest_v1.pine",
+    "profile": "Core recall · 2–8",
+    "sma": "SMA40(HL2)",
+    "atr": "Pine/Wilder ATR14",
+    "gap_min_bars": 2,
+    "gap_max_bars": 8,
+    "k1_min_body_ratio": 0.5,
+    "k1_min_range_atr": 0.95,
+    "k1_min_directional_close_location": 0.7,
+    "k1_min_sma40_cross_depth_atr": -0.05,
+    "k2_min_rejection_wick_share": 0.25,
+    "k2_max_body_ratio": 0.5,
+    "k2_min_rejection_close_location": 0.25,
+    "k2_touch_depth_atr_min": -0.05,
+    "k2_touch_depth_atr_max": 1.5,
+    "k2_min_close_back_depth_atr": 0.0,
+    "next_open_risk_atr_min": 0.15,
+    "next_open_risk_atr_max": 2.5,
+    "cooldown_bars": 6
+  },
+  "fixed_logic_bundle": {
+    "k1_ma_colour_aligned": "HL2 at K1 must be on the intended side of SMA40",
+    "intermediate_path": "every bar strictly between K1 and K2 must close on the intended SMA40 side and have intended MA-side colour",
+    "k2_true_wick_touch": "touch depth must be non-negative and SMA40 may intersect only the rejection wick, never the K2 body",
+    "k1_min_body_ratio": 0.65
+  },
+  "fee_to_risk_selection": {
+    "definition": "0.002 / (risk_price / entry_price)",
+    "maximum_grid": [0.35, 0.5, 0.75, 1.0, 1.25],
+    "reference_arm": "no fee-to-risk gate",
+    "minimum_events_total": 20,
+    "minimum_events_per_development_fold": 2,
+    "robust_score": "median half-year candidate net bp minus 0.5 times population standard deviation",
+    "tie_break": "higher worst-fold net bp, then more events, then less restrictive maximum",
+    "insufficient_data_fallback": "use the least restrictive finite maximum 1.25 and label the selection insufficient"
+  },
+  "profit_protection_selection": {
+    "trigger_close_r_grid": [1.0, 1.5, 2.0],
+    "reference_arm": "disabled",
+    "activation": "after a completed bar closes at or beyond the trigger; the fee-cover stop becomes active only from the next bar",
+    "protected_stop": "gross +0.2% from entry, so a barrier-price exit nets 0 after the frozen round-trip cost",
+    "same_bar_collision": "active stop before 3R target",
+    "enable_rule": "enable only if eligible robust score improves by at least 1 bp and worst-fold net bp does not decline versus disabled",
+    "otherwise": "leave disabled"
+  },
+  "execution": {
+    "entry": "open immediately after confirmed K2",
+    "initial_stop": "exact completed K2 low for long and K2 high for short",
+    "target_r": 3.0,
+    "horizon_bars": 12,
+    "same_bar_collision": "conservative stop first",
+    "gap_policy": "barrier price",
+    "timeout_exit": "close of the twelfth entry-path bar",
+    "round_trip_cost_fraction": 0.002,
+    "funding": "excluded",
+    "slippage_beyond_round_trip_cost": "excluded"
+  },
+  "matched_control": {
+    "controls_per_trade": 3,
+    "strata": ["calendar month", "UTC six-hour block", "within-month ATR14 quintile"],
+    "copied": ["direction", "risk distance in ATR", "exit rule", "horizon", "cost"],
+    "exclude_within_bars_of_any_baseline_candidate": 13,
+    "insufficient_exact_stratum_policy": "do not relax; keep primary trade but exclude unmatched pair from paired test",
+    "seed": "btcusdtp-owner-causal-v2-preholdout-20260904"
+  },
+  "evaluation": {
+    "component_arms": [
+      "baseline",
+      "k1_colour_only",
+      "path_only",
+      "k2_wick_only",
+      "k1_body_065_only",
+      "fixed_bundle",
+      "fixed_bundle_without_k1_colour",
+      "fixed_bundle_without_path",
+      "fixed_bundle_without_k2_wick",
+      "fixed_bundle_without_k1_body_065",
+      "fixed_plus_fee",
+      "final"
+    ],
+    "primary_metrics": [
+      "events",
+      "mean net bp",
+      "profit factor",
+      "win rate",
+      "equal-risk 1% compounded return",
+      "maximum drawdown",
+      "matched-control excess bp",
+      "one-sided sign-flip p"
+    ],
+    "success_gate": "validation mean net and matched-control excess both positive, paired p < 0.01, and both complete 2025 half-years positive",
+    "auc": "not applicable: deterministic binary rules have no score-ranked arm",
+    "top_decile": "not applicable: no ranking model or score threshold is selected"
+  },
+  "eligibility": {
+    "training_eligible": false,
+    "production_eligible": false,
+    "holdout_consumed": false,
+    "active_or_frozen_mutation_allowed": false,
+    "live_orders_allowed": false
+  }
+}
