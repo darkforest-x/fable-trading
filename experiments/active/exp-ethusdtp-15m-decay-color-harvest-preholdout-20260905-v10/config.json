@@ -1,0 +1,95 @@
+{
+  "experiment_id": "exp-ethusdtp-15m-decay-color-harvest-preholdout-20260905-v10",
+  "parent_experiment_id": "exp-ethusdtp-15m-color-harvest-preholdout-20260905-v9",
+  "owner_directive": "利用 K 线颜色慢慢 TP，同时保留大趋势的核心仓位",
+  "approved_bundle": "Owner authorized autonomous exploration. V9 showed that equal releases require too much total banking. V10 fixes a decaying 4:2:1:1 release shape and selects only the total bank budget.",
+  "only_tuned_variable": "maximum_bank_fraction",
+  "instrument": {
+    "research_source": "OKX",
+    "research_symbol": "ETH-USDT-SWAP",
+    "tradingview_symbol": "OKX:ETHUSDT.P",
+    "bar_minutes": 15,
+    "data_path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+    "tick_size": 0.01
+  },
+  "source_contract": {
+    "safe_end_exclusive": "2026-03-01T00:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "parser_chunksize": 1000,
+    "repository_holdout_rows_allowed": 0
+  },
+  "splits": {
+    "development_start_inclusive": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2025-01-01T00:00:00Z",
+    "development_folds": ["2023H1", "2023H2", "2024H1", "2024H2"],
+    "audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "audit_end_exclusive": "2026-03-01T00:00:00Z",
+    "audit_folds": ["2025H1", "2025H2", "2026P1"],
+    "audit_is_not_pristine": true
+  },
+  "frozen_entry": {
+    "entry_spread_atr": 1.0,
+    "entry_slope_atr_per_bar": 0.05,
+    "strong_dwell_bars": 12,
+    "neutral_dwell_bars": 8,
+    "current_signed_spread_min_exclusive": 0.0,
+    "current_signed_slope_min_inclusive": 0.0,
+    "contract": "Exact V5 K1/K2 morphology and one-signal-per-live-regime ledger."
+  },
+  "frozen_execution": {
+    "entry": "next_bar_open",
+    "initial_disaster_stop_atr": 2.0,
+    "runner_arm_on_completed_close_atr": 2.0,
+    "runner_reference": "SMA60(HL2)",
+    "runner_buffer_atr": 1.0,
+    "horizon_bars": 96,
+    "round_trip_cost_fraction": 0.002,
+    "gap_stop_fill": "bar open when it gaps beyond the active stop",
+    "state_update_timing": "adverse candle and SMA trail calculated at close t become actionable on t+1"
+  },
+  "decay_color_harvest": {
+    "earned_slot_levels_atr": [2.0, 4.0, 8.0, 12.0],
+    "normalized_stage_weights": [0.5, 0.25, 0.125, 0.125],
+    "release_event": "completed adverse-color candle while the close is net-profitable",
+    "fill": "one earned stage at next bar open; if the open gaps through the active stop, stop has priority",
+    "stop_change_after_bank": "none",
+    "remainder": "unchanged SMA60 minus direction times one current ATR runner"
+  },
+  "weakness_harvest": {
+    "earned_slot_levels_atr": [2.0, 4.0, 8.0, 12.0],
+    "maximum_stages": 4,
+    "release_line": "current candle open, so adverse-side means long red or short green",
+    "release_condition": "completed adverse-color candle while net-profitable",
+    "fill": "next bar open",
+    "stop_change_after_bank": "none"
+  },
+  "selection": {
+    "factor": "maximum_bank_fraction",
+    "maximum_bank_fraction_candidates": [0.3, 0.35, 0.4, 0.45, 0.5],
+    "minimum_events_total": 80,
+    "minimum_events_per_fold": 12,
+    "rank": "Among arms meeting every gate, maximize robust half-year net bp and then preserve more runner. If none pass, retain the baseline and report failure.",
+    "success_gates": {
+      "runner_armed_to_nonpositive_relative_reduction_min": 0.25,
+      "candidate_minus_baseline_mean_net_bp_min": -1.0,
+      "candidate_worst_fold_degradation_bp_max": 3.0,
+      "candidate_p95_net_retention_min": 0.9
+    },
+    "audit_rule": "Audit only the development-selected bank budget when every gate passes."
+  },
+  "matched_control": {
+    "controls_per_event": 3,
+    "exclude_radius_bars": 96,
+    "strata": ["calendar month", "UTC six-hour block", "within-month ATR14 quintile"],
+    "seed": "ethusdtp-15m-decay-color-harvest-20260905-v10"
+  },
+  "safety": {
+    "holdout_consumed": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "automatic_promote": false,
+    "active_or_forward_change": false,
+    "live_order_change": false,
+    "tradingview_write_before_result": false
+  }
+}
