@@ -2,6 +2,24 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-05 — ETHUSDT.P 15m 渐进止盈 V16 已保存，未证明优于纯 runner）
+
+Owner 明确要求“慢慢 TP”，不能用抬高整仓止损冒充止盈。本轮冻结 V5 稀疏趋势 K1→K2 入场、
+2ATR 初始止损、完成 K 线 +2ATR 激活、SMA60(HL2)±1ATR runner、96 根和 20bp 成本，
+连续排除大比例固定减仓、颜色/弱势触发、未来强趋势标签和因果路径分类后，留下 V16：
+`+2/+4/+8/+12` signal ATR 各真实平原仓 2.5%，总计只平 10%，90% 继续跟原 runner；
+部分止盈代码块绝不写 stop。
+
+开发 182 笔中 V16 是 10/15/20% 候选里唯一保留至少 95% P95 的方案。非 pristine 审计
+114 笔中纯 runner +7.36bp/PF1.091，V16 +5.19bp/PF1.065，配对差 -2.17bp、
+p=0.914；P95 保留 93.58%。它给 runner 非正交易合计补 +150bp，却从前 10% 大赢家拿走
+-445bp，净 -248bp。这证明真实落袋可减少 giveback，但仍是对趋势右尾征税，不能宣称提高收益。
+
+Pine v6 官方编译 0 错，已私有保存为 `Fable ETH 15m Trend · Gradual TP V16` 并挂图；只作
+研究显示，不 promote。完整报告：
+`analysis/html/p1_ethusdtp_15m_gradual_take_profit_20260905.html`。所有行情读取止于
+2026-03-01 前，仓库 holdout 行数 0；没有改 ACTIVE/frozen/forward/部署/仓位/API key/订单。
+
 ## ⚡ 当前真相（2026-09-04 — BTCUSDT.P 15m 震荡重复信号已做状态机修复）
 
 Owner 指出 15m 图在同一盘整区间出现四组 K1/K2，不符合趋势策略。根因不是单一形态阈值：

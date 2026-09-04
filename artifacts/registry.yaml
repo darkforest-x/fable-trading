@@ -14061,3 +14061,103 @@ artifacts:
     config_hash: "debca83b55dfa0fbc8b4eb95999805ac99ef278488cdb6c5a250253612232478"
     data_cutoff: "2026-02-28T16:00:00Z"
     notes: Self-contained HTML with embedded pre-holdout comparison and TradingView visual evidence.
+
+  - artifact_id: ethusdtp-15m-gradual-tp-v16-audit
+    artifact_type: manifest
+    role: pre_holdout_micro_scaleout_paired_and_matched_control_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "87b4c4fec6a6e93331bd5e9859df851ce7b38e64"
+    source_path: experiments/active/exp-ethusdtp-15m-micro-profit-ladder-preholdout-20260905-v16/results/audit_summary.json
+    sha256: "719377cd6db31ef9df63eb15084e9f1d359bcaada7641cd6b57de46e2926801e"
+    size_bytes: 3526
+    storage_uri: "repo://experiments/active/exp-ethusdtp-15m-micro-profit-ladder-preholdout-20260905-v16/results/audit_summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "87b4c4fec6a6e93331bd5e9859df851ce7b38e64"
+    config_hash: "f761a52ba52febfeb6f2d8d54d204d231893e8941e3247f0a2c320a0b1598c72"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: 114 non-pristine audit trades; zero repository holdout rows read.
+
+  - artifact_id: ethusdtp-15m-gradual-tp-v16-pine
+    artifact_type: config
+    role: private_tradingview_15m_gradual_take_profit_research_indicator
+    source_repo: darkforest-x/fable-trading
+    source_commit: "972f3972a82b180df9b020651e704ce9db5cb915"
+    source_path: experiments/active/exp-ethusdtp-15m-micro-profit-ladder-preholdout-20260905-v16/pine/fable_eth_15m_trend_gradual_tp_v16.pine
+    sha256: "e780c26989530ec6be8ccb4c6c2ba3d8f6611b9cd04bb6a94feb5b12809ab5a2"
+    size_bytes: 20595
+    storage_uri: "repo://experiments/active/exp-ethusdtp-15m-micro-profit-ladder-preholdout-20260905-v16/pine/fable_eth_15m_trend_gradual_tp_v16.pine"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "972f3972a82b180df9b020651e704ce9db5cb915"
+    config_hash: "f761a52ba52febfeb6f2d8d54d204d231893e8941e3247f0a2c320a0b1598c72"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: Four true partial exits; no partial-exit block mutates the runner stop.
+
+  - artifact_id: ethusdtp-15m-gradual-tp-v16-tradingview-receipt
+    artifact_type: manifest
+    role: official_pine_compile_private_save_and_attachment_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "972f3972a82b180df9b020651e704ce9db5cb915"
+    source_path: experiments/active/exp-ethusdtp-15m-micro-profit-ladder-preholdout-20260905-v16/results/tradingview_compile_receipt.json
+    sha256: "5dd0be2e6f7edaf2f2248dab1cd8c7864dc9b78bd6185b2549c51b1774ff9b76"
+    size_bytes: 830
+    storage_uri: "repo://experiments/active/exp-ethusdtp-15m-micro-profit-ladder-preholdout-20260905-v16/results/tradingview_compile_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "972f3972a82b180df9b020651e704ce9db5cb915"
+    config_hash: "f761a52ba52febfeb6f2d8d54d204d231893e8941e3247f0a2c320a0b1598c72"
+    notes: Official compiler zero errors; saved privately, attached, not published.
+
+  - artifact_id: ethusdtp-15m-gradual-tp-v16-report
+    artifact_type: report
+    role: canonical_chinese_gradual_take_profit_failure_and_rule_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9ac67c91f228403b9e3a21777cdc0b5c829dfb77"
+    source_path: analysis/p1_ethusdtp_15m_gradual_take_profit_20260905.md
+    sha256: "cf631ead7f134bd140b46afc48c467e0da3c93590ab9a58537ed423814cc2ce0"
+    size_bytes: 14241
+    storage_uri: "repo://analysis/p1_ethusdtp_15m_gradual_take_profit_20260905.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "9ac67c91f228403b9e3a21777cdc0b5c829dfb77"
+    config_hash: "f761a52ba52febfeb6f2d8d54d204d231893e8941e3247f0a2c320a0b1598c72"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: Full V1-V16 failure diagnosis, execution rules, matched control and risks.
+
+  - artifact_id: ethusdtp-15m-gradual-tp-v16-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_gradual_take_profit_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9ac67c91f228403b9e3a21777cdc0b5c829dfb77"
+    source_path: analysis/html/p1_ethusdtp_15m_gradual_take_profit_20260905.html
+    sha256: "0263da8b3da5417235ce7ecd2469749e9f3527d02800b5356b293552b877c244"
+    size_bytes: 225102
+    storage_uri: "repo://analysis/html/p1_ethusdtp_15m_gradual_take_profit_20260905.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "9ac67c91f228403b9e3a21777cdc0b5c829dfb77"
+    config_hash: "f761a52ba52febfeb6f2d8d54d204d231893e8941e3247f0a2c320a0b1598c72"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: Self-contained Owner-facing HTML with the paired-impact figure embedded.
+  - artifact_id: ethusdtp-15m-gradual-tp-v16-figure
+    artifact_type: report
+    role: audit_frontier_and_paired_right_tail_impact_figure
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9ac67c91f228403b9e3a21777cdc0b5c829dfb77"
+    source_path: analysis/figures/ethusdtp_15m_gradual_tp_v16.png
+    sha256: "fc5cfffe3e0aed07331e6713d1351c86cd4406eebe4c36b8a0ace3d6c2692902"
+    size_bytes: 154096
+    storage_uri: "repo://analysis/figures/ethusdtp_15m_gradual_tp_v16.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "9ac67c91f228403b9e3a21777cdc0b5c829dfb77"
+    config_hash: "f761a52ba52febfeb6f2d8d54d204d231893e8941e3247f0a2c320a0b1598c72"
+    data_cutoff: "2026-03-01T00:00:00Z"
+    notes: English-labeled two-panel diagnostic for robust font rendering.

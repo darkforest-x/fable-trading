@@ -4756,3 +4756,43 @@ experiments:
       visual check of the 2026-08-05 chart. No parameters or economic results
       changed afterward. No ACTIVE, frozen, forward, deployment or live order
       state changed.
+
+  - experiment_id: exp-ethusdtp-15m-micro-profit-ladder-preholdout-20260905-v16
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9ac67c91f228403b9e3a21777cdc0b5c829dfb77"
+    status: rejected
+    question: >-
+      Can ETHUSDT.P 15m realize profit gradually at +2/+4/+8/+12 signal ATR
+      without using a stop ratchet as a substitute for take-profit and without
+      destroying the SMA60 trend runner's right tail?
+    single_variable: >-
+      Total bank fraction only: 10%, 15%, or 20%, equally divided across four
+      fixed targets. Entry, 2ATR hard stop, +2ATR close arm, SMA60 one-ATR
+      runner, 96-bar horizon, stop-first ordering and 20bp cost remain frozen.
+    result: >-
+      research_display_selected_but_economic_improvement_rejected. The 10%
+      ladder was the only development candidate retaining at least 95% of
+      baseline P95. On the non-pristine 114-trade audit it stayed positive at
+      +5.19bp mean net and retained 93.58% of P95, but the pure runner was
+      +7.36bp. Candidate-minus-runner was -2.17bp with sign-flip p=0.9141.
+      Matched-random excess was +28.00bp with p=0.1650, so no edge or promotion
+      claim passes. Pine compiled and was privately saved for research display.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_ethusdtp_15m_gradual_take_profit_20260905.md
+    artifacts:
+      - ethusdtp-15m-gradual-tp-v16-audit
+      - ethusdtp-15m-gradual-tp-v16-pine
+      - ethusdtp-15m-gradual-tp-v16-tradingview-receipt
+      - ethusdtp-15m-gradual-tp-v16-report
+      - ethusdtp-15m-gradual-tp-v16-html
+      - ethusdtp-15m-gradual-tp-v16-figure
+    reuse_allowed: true
+    notes: >-
+      Data are physically prefix-bounded before 2026-03-01; repository holdout
+      begins 2026-05-04 and rows read are zero. The 2025--2026P1 audit had been
+      viewed in the parent lineage and is explicitly non-pristine. TradingView
+      compilation used a 2024 historical anchor and did not score post-boundary
+      prices. No ACTIVE, frozen, forward, deployment, sizing, API-key or live
+      order state changed; there was no automatic promote.
