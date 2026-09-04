@@ -13901,3 +13901,54 @@ artifacts:
     config_hash: "d5f43d7848d37e2fc89d5a127f6ad16b835b05b7193dd603b0b30c71f5fb6d0b"
     data_cutoff: "2026-02-28T16:00:00Z"
     notes: Self-contained HTML with embedded factor, density, resonance and failure figures.
+
+  - artifact_id: btcusdtp-15m-runner-isolation-summary-20260904-v1
+    artifact_type: manifest
+    role: causal_entry_and_early_management_runner_isolatability_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d68b046"
+    source_path: experiments/active/exp-btcusdtp-15m-runner-isolation-preholdout-20260904-v1/results/summary.json
+    sha256: "85c5782a1962deee9d2f0f3b0be3875c9665122784483c8158e5e01b31d504ff"
+    size_bytes: 5898
+    storage_uri: "repo://experiments/active/exp-btcusdtp-15m-runner-isolation-preholdout-20260904-v1/results/summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d68b046"
+    config_hash: "3eb9b0de1192b11a2d2f7385c641417aa62b9e2e1d8fc8f8a4661fec4ca132ab"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: Seven entry selectors, matched controls, delayed confirmation, progress stops and early learned exits; zero repository-holdout rows.
+
+  - artifact_id: btcusdtp-15m-runner-isolation-report-20260904-v1
+    artifact_type: report
+    role: canonical_chinese_runner_isolatability_and_execution_diagnosis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d68b046"
+    source_path: analysis/p1_btcusdtp_15m_runner_isolation_20260904.md
+    sha256: "99fd79d4199ea2e81b5137697566b776d24bc6481481a4dd7dcf9a438a460c62"
+    size_bytes: 13927
+    storage_uri: "repo://analysis/p1_btcusdtp_15m_runner_isolation_20260904.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d68b046"
+    config_hash: "3eb9b0de1192b11a2d2f7385c641417aa62b9e2e1d8fc8f8a4661fec4ca132ab"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: Corrects outcome-conditioned runner claims and gives the precision-recall, execution and next-hypothesis decision.
+
+  - artifact_id: btcusdtp-15m-runner-isolation-html-20260904-v1
+    artifact_type: report
+    role: owner_facing_self_contained_html_runner_isolation_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d68b046"
+    source_path: analysis/html/p1_btcusdtp_15m_runner_isolation_20260904.html
+    sha256: "f058a85c469d04c6dcdabadbf8a9d11fe501857e34023070773f3b0dd1e50035"
+    size_bytes: 642811
+    storage_uri: "repo://analysis/html/p1_btcusdtp_15m_runner_isolation_20260904.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d68b046"
+    config_hash: "3eb9b0de1192b11a2d2f7385c641417aa62b9e2e1d8fc8f8a4661fec4ca132ab"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: Self-contained HTML with embedded selector, density, management and early-classifier figures.
