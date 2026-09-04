@@ -1,0 +1,151 @@
+{
+  "experiment_id": "exp-btcusdtp-k1k2-15m-5m-independent-preholdout-20260904-v1",
+  "status": "preregistered_before_new_outcomes",
+  "predecessor": "exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v2",
+  "question": "Can separately defined 15m and 5m K1/K2 systems increase usable signal density without sacrificing pre-holdout net expectancy?",
+  "owner_authorization": {
+    "verbatim": "行，那单独针对 5min  15min 做",
+    "authorized_on": "2026-09-04",
+    "scope": "separate 15m and 5m strategy research using timeframe-specific MA, gap and secondary-score parameters",
+    "holdout_reuse_authorized": false,
+    "cost_change_authorized": false,
+    "barrier_parameter_change_authorized": false,
+    "live_or_promotion_authorized": false
+  },
+  "instrument": {
+    "tradingview_symbol": "OKX:BTCUSDT.P",
+    "okx_instrument": "BTC-USDT-SWAP",
+    "timezone": "UTC"
+  },
+  "source": {
+    "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+    "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "rows": 341567,
+    "first_time": "2022-11-30T16:00:00Z",
+    "last_time": "2026-02-28T15:55:00Z",
+    "holdout_ohlcv_rows_materialized": 0,
+    "15m_contract": "UTC-aligned groups of exactly three contiguous 5m rows; incomplete groups dropped before features",
+    "5m_contract": "native complete UTC 5m archive bars"
+  },
+  "window": {
+    "development_start_inclusive": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2025-01-01T00:00:00Z",
+    "audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "audit_end_exclusive": "2026-02-28T16:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "development_folds": ["2023H1", "2023H2", "2024H1", "2024H2"],
+    "audit_slices": ["2025H1", "2025H2", "2026P1"],
+    "audit_contamination": "aggregate outcomes from this period were already seen in predecessor experiments; never claim untouched validation",
+    "audit_retuning": false
+  },
+  "core_morphology": {
+    "k1": "directional real body starts on the wrong side of the selected SMA(HL2) and closes on the directional side; zero crossing tolerance",
+    "k2": "rejection wick reaches the selected SMA(HL2), close is on the directional side, and the complete body stays on that side",
+    "minimum_gap_bars": 2,
+    "path_hard_veto": false,
+    "ma_colour_hard_veto": false
+  },
+  "secondary_score": {
+    "aggregation": "unweighted arithmetic mean of twelve causal components, each clipped to [0,1]",
+    "components": {
+      "k1_body": "clip((body_ratio - 0.35) / 0.45)",
+      "k1_range": "clip((range_atr - 0.50) / 1.50)",
+      "k1_close": "clip((directional_close_location - 0.50) / 0.40)",
+      "k1_cross": "clip(cross_depth_atr / 0.50)",
+      "k2_wick": "clip((rejection_wick_share - 0.10) / 0.50)",
+      "k2_compact_body": "clip((0.75 - body_ratio) / 0.60)",
+      "k2_rejection_close": "clip((directional_close_location - 0.50) / 0.40)",
+      "k2_touch": "clip(1 - touch_depth_atr / 2.00)",
+      "k1_ma_colour": "1 when selected-MA candle colour is directional else 0",
+      "k2_ma_colour": "1 when selected-MA candle colour is directional else 0",
+      "path_close_share": "share of completed middle bars closing on the directional MA side",
+      "path_colour_share": "share of completed middle bars with directional selected-MA candle colour"
+    },
+    "weights_fitted_from_outcomes": false
+  },
+  "timeframe_design": {
+    "15m": {
+      "initial": {"ma_period": 40, "gap_window": [2, 8], "score_floor": 0.40},
+      "coordinate_order": ["ma_period", "gap_window", "score_floor"],
+      "grids": {
+        "ma_period": [40, 80, 120, 160],
+        "gap_window": [[2, 8], [4, 16], [8, 32], [12, 48]],
+        "score_floor": [0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70]
+      },
+      "maximum_pair_gap_bars": 48,
+      "horizon_bars": 48,
+      "cooldown_bars": 24,
+      "minimum_events_total": 160,
+      "minimum_events_per_development_fold": 25,
+      "density_target_per_month": 7.5
+    },
+    "5m": {
+      "initial": {"ma_period": 40, "gap_window": [2, 8], "score_floor": 0.40},
+      "coordinate_order": ["ma_period", "gap_window", "score_floor"],
+      "grids": {
+        "ma_period": [40, 120, 240, 480],
+        "gap_window": [[2, 8], [6, 24], [12, 48], [24, 96]],
+        "score_floor": [0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70]
+      },
+      "maximum_pair_gap_bars": 96,
+      "horizon_bars": 144,
+      "cooldown_bars": 72,
+      "minimum_events_total": 240,
+      "minimum_events_per_development_fold": 40,
+      "density_target_per_month": 10.0
+    }
+  },
+  "selection": {
+    "method": "one preregistered coordinate pass per timeframe on development only",
+    "score": "median half-year net bp minus 0.5 times population standard deviation",
+    "move_rule": "candidate must meet sample eligibility, improve robust score by at least 2bp, and not reduce worst-fold net bp by more than 3bp",
+    "tie_break": "higher robust score, higher worst fold, more events, then closest to initial setting",
+    "no_pass": "retain incumbent and report best observed arm separately",
+    "success_requires": "development mean net bp > 0, robust score > 0, and worst fold net bp > -5",
+    "claim_limit": "exploratory coordinate-selected research default, never global optimum"
+  },
+  "timeframe_fixed": {
+    "15m": {"horizon_bars": 48, "cooldown_bars": 24},
+    "5m": {"horizon_bars": 144, "cooldown_bars": 72}
+  },
+  "execution_frozen": {
+    "entry": "open immediately after completed K2",
+    "initial_stop": "exact K2 low for long and K2 high for short",
+    "next_open_risk_atr_min": 0.15,
+    "next_open_risk_atr_max": 2.50,
+    "fee_to_risk_max": 1.25,
+    "target_r": 3.0,
+    "horizon_clock_hours": 12,
+    "same_bar_collision": "conservative stop first",
+    "gap_policy": "barrier price",
+    "timeout_exit": "close of final horizon bar",
+    "profit_protection_trigger_close_r": 1.5,
+    "round_trip_cost_fraction": 0.002,
+    "funding": "excluded",
+    "slippage_beyond_round_trip_cost": "excluded"
+  },
+  "matched_control": {
+    "controls_per_trade": 3,
+    "strata": ["calendar month", "UTC six-hour block", "within-month ATR14 quintile"],
+    "copied": ["direction", "risk distance in ATR", "exit rule", "horizon", "cost"],
+    "exclude_within_horizon_plus_one_bars_of_any_selected_signal": true,
+    "insufficient_exact_stratum_policy": "do not relax",
+    "seed": "btcusdtp-k1k2-independent-timeframes-20260904-v1"
+  },
+  "audit_success_gate": {
+    "mean_net_bp": ">0",
+    "matched_control_excess_bp": ">0",
+    "paired_signflip_p_one_sided": "<0.01",
+    "2025H1_and_2025H2_mean_net_bp": ">0 each",
+    "ranking_permutation_p_one_sided": "<0.01",
+    "interpretation": "exploratory only because the audit window is not pristine"
+  },
+  "eligibility": {
+    "training_eligible": false,
+    "production_eligible": false,
+    "holdout_consumed": false,
+    "active_or_frozen_mutation_allowed": false,
+    "live_orders_allowed": false
+  }
+}
