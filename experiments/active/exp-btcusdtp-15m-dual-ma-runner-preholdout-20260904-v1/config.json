@@ -76,6 +76,7 @@
     "controls_per_event": 8,
     "strata": ["calendar_month", "UTC six-hour block", "monthly ATR quintile", "direction"],
     "exclude_radius_bars": 97,
+    "exclude_scope": "per candidate; every exact candidate signal bar is excluded globally, and each control must be more than 97 bars from its paired candidate",
     "seed": "btc15m-dual-ma-runner-20260904"
   },
   "owner_examples": {

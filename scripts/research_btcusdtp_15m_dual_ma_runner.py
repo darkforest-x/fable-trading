@@ -693,15 +693,15 @@ def matched_controls(
             and np.isfinite(float(frame.loc[signal_i, "atr"]))
             and np.isfinite(float(frame.loc[signal_i, "trend_ma"]))
         )
-    excluded = np.zeros(len(frame), dtype=bool)
     radius = int(match["exclude_radius_bars"])
-    for signal_i in events["signal_i"].astype(int):
-        excluded[max(0, signal_i - radius) : min(len(frame), signal_i + radius + 1)] = True
+    signal_indices = set(events["signal_i"].astype(int))
     buckets = _atr_buckets(frame, eligible)
     months = frame["open_time"].dt.strftime("%Y-%m").to_numpy()
     blocks = (frame["open_time"].dt.hour.to_numpy(dtype=int) // 6).astype(int)
     pool: dict[tuple[str, int, int], list[int]] = {}
-    for i in np.flatnonzero(eligible & ~excluded & (buckets >= 0)):
+    for i in np.flatnonzero(eligible & (buckets >= 0)):
+        if int(i) in signal_indices:
+            continue
         pool.setdefault((str(months[i]), int(blocks[i]), int(buckets[i])), []).append(int(i))
 
     required = int(match["controls_per_event"])
@@ -713,7 +713,7 @@ def matched_controls(
         signal_i = int(event["signal_i"])
         key = (str(months[signal_i]), int(blocks[signal_i]), int(buckets[signal_i]))
         choices = sorted(
-            pool.get(key, []),
+            (i for i in pool.get(key, []) if abs(i - signal_i) > radius),
             key=lambda i: hashlib.sha256(
                 f"{seed}|{event['setup_id']}|{i}".encode()
             ).hexdigest(),
