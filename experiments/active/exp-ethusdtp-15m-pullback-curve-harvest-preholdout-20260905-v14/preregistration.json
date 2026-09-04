@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp-ethusdtp-15m-pullback-curve-harvest-preholdout-20260905-v14",
+  "registered_at": "2026-09-05T05:15:00+08:00",
+  "bundled_architecture_change_owner_authorized": true,
+  "reason": "V13 historical audit showed that adverse candle colour releases 20-30% before future super-trend strength is causally observable.",
+  "fixed_entry": "V5 sparse EMA30/SMA60 trend-regime K1/K2 ledger",
+  "fixed_harvest_arm": "+2 signal ATR MFE",
+  "fixed_stage_fractions": [0.05, 0.05, 0.10, 0.20],
+  "fixed_pullback_multipliers": [1.0, 2.0, 3.0, 4.0],
+  "fixed_supertrend_definition": "+8 signal ATR MFE already observed by the completed decision close",
+  "fixed_supertrend_bank_cap": 0.10,
+  "fixed_ordinary_bank_cap": 0.40,
+  "selected_variable_only": "base pullback depth in signal ATR",
+  "selection_candidates": [0.50, 0.75, 1.00, 1.25, 1.50, 2.00],
+  "key_exclusion": "No partial-profit decision, fill, cap, or milestone changes the active stop.",
+  "selection_data": "2023-2024 only",
+  "audit_rule": "Run the reused 2025 through February 2026 audit only after one winner passes every gate and its receipt is committed.",
+  "repository_holdout_rows_allowed": 0,
+  "production_claim_allowed": false
+}
