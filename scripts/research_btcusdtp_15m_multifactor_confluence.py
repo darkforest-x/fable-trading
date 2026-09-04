@@ -1408,6 +1408,25 @@ def evaluate_contract(
     return scored, selected, _fold_metrics(events, selected, scores)
 
 
+def compact_scored(parts: Iterable[pd.DataFrame]) -> pd.DataFrame:
+    """Keep the auditable score decision ledger without repeating 104 features."""
+
+    combined = pd.concat(list(parts), ignore_index=True)
+    return combined[
+        [
+            "variant_id",
+            "setup_id",
+            "signal_time",
+            "entry_time",
+            "direction",
+            "net_return",
+            "model_score",
+            "score_threshold",
+            "selected",
+        ]
+    ]
+
+
 def _phase_half_table(events: pd.DataFrame) -> pd.DataFrame:
     labels = pd.to_datetime(events["entry_time"], utc=True).map(
         lambda stamp: f"{stamp.year}H{1 if stamp.month <= 6 else 2}"
@@ -1529,7 +1548,7 @@ def confirmation_phase(config: dict[str, Any]) -> None:
     }
     gates["all_pass"] = bool(all(gates.values()))
     write_csv(events, RESULTS / "confirmation_feature_ledger.csv.gz")
-    write_csv(pd.concat(scored_parts, ignore_index=True), RESULTS / "confirmation_scored_variants.csv.gz")
+    write_csv(compact_scored(scored_parts), RESULTS / "confirmation_scored_variants.csv.gz")
     write_csv(pd.DataFrame(comparison), RESULTS / "confirmation_variant_comparison.csv")
     write_csv(selected, RESULTS / "confirmation_selected_trades.csv.gz")
     write_csv(half, RESULTS / "confirmation_selected_folds.csv")
@@ -1655,7 +1674,7 @@ def audit_phase(config: dict[str, Any]) -> None:
         ordered = [str(model_record.get("score_column", "signal_score"))]
     quartiles = _feature_quartiles(events, ordered)
     write_csv(events, RESULTS / "audit_feature_ledger.csv.gz")
-    write_csv(pd.concat(scored_parts, ignore_index=True), RESULTS / "audit_scored_variants.csv.gz")
+    write_csv(compact_scored(scored_parts), RESULTS / "audit_scored_variants.csv.gz")
     write_csv(pd.DataFrame(comparison), RESULTS / "audit_variant_comparison.csv")
     write_csv(selected, RESULTS / "audit_selected_trades.csv.gz")
     write_csv(half, RESULTS / "audit_selected_folds.csv")
