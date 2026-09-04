@@ -332,7 +332,11 @@ def familywise_permutation_p(
         count = matrix.sum(axis=1)
         matrices.append(matrix)
         counts.append(count)
-        observed_improvements.append(matrix @ y[half] / count - float(y[half].mean()))
+        # NumPy 1.26 linked to macOS Accelerate emits spurious floating-point
+        # warnings for these small, finite boolean-mask matmuls. Explicit
+        # einsum avoids that backend path and keeps the arithmetic auditable.
+        observed_sum = np.einsum("ij,j->i", matrix, y[half], optimize=False)
+        observed_improvements.append(observed_sum / count - float(y[half].mean()))
     observed_scores = np.minimum(observed_improvements[0], observed_improvements[1])
     observed_max = float(np.max(observed_scores))
     rng = np.random.default_rng(seed)
@@ -345,8 +349,9 @@ def familywise_permutation_p(
         for half, matrix, count in zip(halves, matrices, counts):
             values = y[half]
             shuffled = np.column_stack([rng.permutation(values) for _ in range(batch)])
+            perm_sum = np.einsum("ij,jk->ik", matrix, shuffled, optimize=False)
             perm_improvements.append(
-                matrix @ shuffled / count[:, None] - float(values.mean())
+                perm_sum / count[:, None] - float(values.mean())
             )
         maxima = np.minimum(perm_improvements[0], perm_improvements[1]).max(axis=0)
         exceed += int(np.count_nonzero(maxima >= observed_max - 1e-12))

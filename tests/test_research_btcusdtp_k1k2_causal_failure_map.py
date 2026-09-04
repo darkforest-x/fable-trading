@@ -61,3 +61,21 @@ def test_familywise_permutation_is_deterministic() -> None:
     second = familywise_permutation_p(y, labels, masks, 200, 17)
     assert first == second
     assert 0.0 < first["familywise_permutation_p"] <= 1.0
+
+
+def test_familywise_permutation_matches_direct_observed_maximum() -> None:
+    y = np.array([-3.0, 1.0, 2.0, -1.0, 4.0, -2.0, 3.0, 0.0])
+    labels = np.array(["2023H1"] * 4 + ["2023H2"] * 4)
+    masks = [
+        np.array([True, True, False, False, True, True, False, False]),
+        np.array([False, True, True, False, False, True, True, False]),
+    ]
+    expected = max(
+        min(
+            y[mask & (labels == half)].mean() - y[labels == half].mean()
+            for half in ("2023H1", "2023H2")
+        )
+        for mask in masks
+    )
+    actual = familywise_permutation_p(y, labels, masks, 20, 17)
+    assert actual["observed_max_stable_improvement_bp"] == expected
