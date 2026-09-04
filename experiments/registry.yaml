@@ -4868,3 +4868,56 @@ experiments:
       diagnostic, not pristine OOS. Future-row mutation left all 22 pre-boundary
       features unchanged. No TradingView, ACTIVE/frozen, forward, deployment,
       sizing, API-key or live-order state changed.
+
+  - experiment_id: exp-ethusdtp-15m-asset-specific-k1k2-preholdout-20260905-v19
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending_preregistration_commit
+    status: active
+    question: >-
+      Which asset-specific MA architecture, causal compression-release-
+      acceptance threshold, runner buffer and micro-bank fraction best preserve
+      sparse ETHUSDT.P 15m K1->K2 trend launches across time?
+    single_variable: >-
+      Four preregistered factors are changed sequentially, one at a time:
+      ma_profile, transition_min_votes, runner_buffer_atr, then
+      bank_total_fraction. Every stage includes the incumbent and requires a
+      minimum robust-score gain plus right-tail retention.
+    result: pending
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: pending
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Selection is 2023-2024; audit is the already-seen 2025 through February
+      2026 lineage; March-April 2026 is sealed confirmation. Repository holdout
+      begins 2026-05-04 and zero holdout rows are allowed. No automatic
+      TradingView, ACTIVE/frozen, forward, deployment or order change.
+
+  - experiment_id: exp-xauusdtp-15m-asset-specific-k1k2-preholdout-20260905-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending_preregistration_commit
+    status: active
+    question: >-
+      Which asset-specific MA architecture, causal compression-release-
+      acceptance threshold, runner buffer and micro-bank fraction best preserve
+      sparse XAUUSDT.P 15m K1->K2 trend launches across time?
+    single_variable: >-
+      Four preregistered factors are changed sequentially, one at a time:
+      ma_profile, transition_min_votes, runner_buffer_atr, then
+      bank_total_fraction. Every stage includes the incumbent and requires a
+      minimum robust-score gain plus right-tail retention.
+    result: pending
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: pending
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Exact OKX XAU swap data begin 2025-06-03, so evidence is explicitly
+      lower-powered: June-October selection, November-February audit and
+      March-April confirmation. Repository holdout begins 2026-05-04 and zero
+      holdout rows are allowed. No automatic TradingView, ACTIVE/frozen,
+      forward, deployment or order change.

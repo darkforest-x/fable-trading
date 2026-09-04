@@ -1,0 +1,141 @@
+{
+  "experiment_id": "exp-ethusdtp-15m-asset-specific-k1k2-preholdout-20260905-v19",
+  "owner_directive": "为 ETHUSDT.P 单独建立继续使用 K1->K2 核心的趋势策略，并探索品种专属均线、共振与动态退出。",
+  "instrument": {
+    "research_source": "OKX",
+    "research_symbol": "ETH-USDT-SWAP",
+    "tradingview_symbol": "OKX:ETHUSDT.P",
+    "bar_minutes": 15,
+    "data_path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+    "tick_size": 0.01
+  },
+  "source_contract": {
+    "safe_end_exclusive": "2026-05-01T00:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "parser_chunksize": 64,
+    "repository_holdout_rows_allowed": 0
+  },
+  "splits": {
+    "selection": {
+      "start_inclusive": "2023-01-01T00:00:00Z",
+      "end_exclusive": "2025-01-01T00:00:00Z",
+      "folds": [
+        {"id": "2023H1", "start_inclusive": "2023-01-01T00:00:00Z", "end_exclusive": "2023-07-01T00:00:00Z"},
+        {"id": "2023H2", "start_inclusive": "2023-07-01T00:00:00Z", "end_exclusive": "2024-01-01T00:00:00Z"},
+        {"id": "2024H1", "start_inclusive": "2024-01-01T00:00:00Z", "end_exclusive": "2024-07-01T00:00:00Z"},
+        {"id": "2024H2", "start_inclusive": "2024-07-01T00:00:00Z", "end_exclusive": "2025-01-01T00:00:00Z"}
+      ]
+    },
+    "audit": {
+      "start_inclusive": "2025-01-01T00:00:00Z",
+      "end_exclusive": "2026-03-01T00:00:00Z",
+      "folds": [
+        {"id": "2025H1", "start_inclusive": "2025-01-01T00:00:00Z", "end_exclusive": "2025-07-01T00:00:00Z"},
+        {"id": "2025H2", "start_inclusive": "2025-07-01T00:00:00Z", "end_exclusive": "2026-01-01T00:00:00Z"},
+        {"id": "2026P1", "start_inclusive": "2026-01-01T00:00:00Z", "end_exclusive": "2026-03-01T00:00:00Z"}
+      ],
+      "is_not_pristine": true
+    },
+    "confirmation": {
+      "start_inclusive": "2026-03-01T00:00:00Z",
+      "end_exclusive": "2026-05-01T00:00:00Z",
+      "folds": [
+        {"id": "2026-03", "start_inclusive": "2026-03-01T00:00:00Z", "end_exclusive": "2026-04-01T00:00:00Z"},
+        {"id": "2026-04", "start_inclusive": "2026-04-01T00:00:00Z", "end_exclusive": "2026-05-01T00:00:00Z"}
+      ],
+      "parameter_selection_after_open": false
+    }
+  },
+  "ma_profiles": {
+    "ema20_sma50": {"fast": "EMA20", "slow": "SMA50"},
+    "ema30_sma60": {"fast": "EMA30", "slow": "SMA60"},
+    "ema40_sma80": {"fast": "EMA40", "slow": "SMA80"}
+  },
+  "morphology": {
+    "k1_k2_gap_min": 2,
+    "k1_k2_gap_max": 8,
+    "k1_body_atr_min": 0.2,
+    "k1_range_atr_min": 0.65,
+    "k1_close_location_min": 0.6,
+    "k2_wick_share_min": 0.15,
+    "k2_body_ratio_max": 0.75,
+    "k2_touch_depth_atr_max": 1.5,
+    "wrong_side_close_tolerance_atr": -0.05
+  },
+  "trend_regime": {
+    "neutral_abs_spread_atr_max": 0.1,
+    "neutral_abs_slope_atr_per_bar_max": 0.005
+  },
+  "entry_liveness": {
+    "entry_spread_atr": 1.0,
+    "entry_slope_atr_per_bar": 0.05,
+    "strong_dwell_bars": 12,
+    "neutral_dwell_bars": 8,
+    "current_signed_spread_min_exclusive": 0.0,
+    "current_signed_slope_min_inclusive": 0.0,
+    "one_signal_per_regime": true
+  },
+  "transition_vote": {
+    "pre_k1_bb_ratio_max": 1.0,
+    "k1_release_ratio_min": 1.25,
+    "k2_close_side_atr_min": 0.05,
+    "k2_touch_depth_atr_max": 1.0,
+    "k2_wick_share_min": 0.25
+  },
+  "execution": {
+    "entry": "next_bar_open",
+    "initial_disaster_stop_atr": 2.0,
+    "runner_arm_on_completed_close_atr": 2.0,
+    "horizon_bars": 96,
+    "round_trip_cost_fraction": 0.002,
+    "bank_levels_atr": [2.0, 4.0, 8.0, 12.0],
+    "same_bar_priority": "active stop before bank milestones",
+    "partial_profit_stop_change": "none",
+    "trail_update_timing": "completed close t becomes active on t+1"
+  },
+  "selection": {
+    "initial": {
+      "ma_profile": "ema30_sma60",
+      "transition_min_votes": 0,
+      "runner_buffer_atr": 1.0,
+      "bank_total_fraction": 0.1
+    },
+    "ordered_factors": ["ma_profile", "transition_min_votes", "runner_buffer_atr", "bank_total_fraction"],
+    "candidates": {
+      "ma_profile": ["ema20_sma50", "ema30_sma60", "ema40_sma80"],
+      "transition_min_votes": [0, 1, 2],
+      "runner_buffer_atr": [0.75, 1.0, 1.25, 1.5],
+      "bank_total_fraction": [0.05, 0.1, 0.15]
+    },
+    "minimum_robust_gain_bp": 2.0,
+    "p95_retention_min": 0.85,
+    "phase_minimums": {
+      "selection": {"events_total": 80, "events_per_fold": 12},
+      "audit": {"events_total": 50, "events_per_fold": 8},
+      "confirmation": {"events_total": 12, "events_per_fold": 5}
+    },
+    "audit_rule": "Commit the selection receipt before opening audit. Audit cannot alter parameters.",
+    "confirmation_rule": "Commit audit before opening March-April 2026 confirmation. Confirmation always runs once for transport diagnosis and cannot alter parameters."
+  },
+  "matched_control": {
+    "controls_per_event": 3,
+    "exclude_radius_bars": 96,
+    "strata": ["calendar month", "UTC six-hour block", "within-month ATR14 quintile", "copied direction"],
+    "seed": "ethusdtp-asset-specific-k1k2-20260905-v19",
+    "p_seed": 190051
+  },
+  "acceptance_gates": {
+    "positive_fold_share_min": 0.5,
+    "matched_random_p_max": 0.01,
+    "p95_vs_baseline_retention_min": 0.8
+  },
+  "safety": {
+    "holdout_consumed": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "automatic_promote": false,
+    "active_or_forward_change": false,
+    "live_order_change": false,
+    "tradingview_write_before_result": false
+  }
+}

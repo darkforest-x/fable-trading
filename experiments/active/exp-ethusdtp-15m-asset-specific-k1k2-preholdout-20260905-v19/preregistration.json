@@ -1,0 +1,18 @@
+{
+  "experiment_id": "exp-ethusdtp-15m-asset-specific-k1k2-preholdout-20260905-v19",
+  "registered_at": "2026-09-05T18:00:00+08:00",
+  "hypothesis": "ETH needs an asset-specific MA speed and causal compression-release-acceptance state score, while retaining a mostly intact completed-close MA runner.",
+  "shared_invariant": "Completed K1 crosses the fast MA, K2 wick retests it 2-8 bars later, every middle close stays on the directional side, and one signal is consumed per live directional regime.",
+  "ordered_single_factors": ["ma_profile", "transition_min_votes", "runner_buffer_atr", "bank_total_fraction"],
+  "selection_data": "2023-01-01 through 2024-12-31 only",
+  "audit_data": "2025-01-01 through 2026-02-28; already seen parent lineage",
+  "confirmation_data": "2026-03-01 through 2026-04-30; opened only after committed audit and never used to retune",
+  "fixed_cost_fraction": 0.002,
+  "fixed_initial_stop_atr": 2.0,
+  "fixed_runner_arm_completed_close_atr": 2.0,
+  "fixed_horizon_bars": 96,
+  "repository_holdout_start": "2026-05-04T00:00:00Z",
+  "repository_holdout_rows_allowed": 0,
+  "production_claim_requires": "Positive net, PF>1, fold transport, right-tail retention, and matched-random p<0.01 in audit and confirmation.",
+  "production_claim_allowed_before_completion": false
+}
