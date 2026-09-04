@@ -4103,3 +4103,31 @@ experiments:
       files are research-only and were not promoted or saved as production
       indicators. No training, promotion, ACTIVE/frozen/forward mutation,
       deployment, messaging or order occurred.
+
+  - experiment_id: exp-btcusdtp-k1k2-15m-5m-independent-preholdout-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "863121a"
+    status: active
+    question: >-
+      Can separately defined 15m and 5m K1/K2 systems increase usable signal
+      density without sacrificing pre-holdout net expectancy?
+    single_variable: >-
+      Owner approved the lower-timeframe redesign bundle before outcomes. Each
+      timeframe then follows one preregistered coordinate pass that changes
+      only reference SMA(HL2) period, gap window, and equal-weight secondary
+      score floor in sequence. K1 true cross, K2 wick-only touch, next-open
+      entry, exact K2 stop, 3R target, 12-hour horizon, 1.5R protection,
+      six-hour cooldown, and 20bp cost stay fixed.
+    result: preregistered_before_new_outcomes
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btcusdtp_k1k2_15m_5m_independent_research_20260904.md
+    reuse_allowed: false
+    notes: >-
+      Development is 2023-2024. The 2025 through 2026-02 audit is explicitly
+      not pristine because predecessor aggregate outcomes were already seen;
+      it cannot be advertised as untouched validation. The physical source
+      ends before repository holdout and no row at or after 2026-05-04 may be
+      read. No training, promotion, deployment, ACTIVE/frozen/forward mutation,
+      messaging or order is authorized.
