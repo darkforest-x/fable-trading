@@ -1,0 +1,331 @@
+{
+  "experiment_id": "exp-btcusdtp-15m-multifactor-confluence-preholdout-20260904-v1",
+  "purpose": "Test whether causal K1-K2 relations, trend maturity, completed-1h context, volatility, participation, momentum/structure, ETH market resonance, sequence shape, and calendar context improve the high-recall BTCUSDT.P 15m entry ranking while the SMA60 runner is fixed.",
+  "owner_authorization": {
+    "date": "2026-09-04",
+    "scope": "Owner explicitly requested trying additional confluence, multifactor, and feature-engineering ideas together.",
+    "single_variable_interpretation": "The execution contract, source event ledger, model family, model hyperparameters, cost, and score retention are frozen. The experimental factor is the registered feature bundle; grouped screening is explicitly authorized and multiplicity is measured.",
+    "not_authorized": [
+      "repository holdout use",
+      "ACTIVE or frozen promotion",
+      "TradingView overwrite",
+      "forward or live execution changes",
+      "orders or position changes"
+    ]
+  },
+  "lineage": {
+    "parent_experiment": "exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1",
+    "parent_entry": "EMA30 all-family state_reset3",
+    "parent_exit": "SMA60 ma_trail1_after_2atr with 2ATR disaster stop and 96-bar horizon",
+    "known_evidence_warning": "The parent 2023, 2024 and 2025-through-2026-02 outcomes have already been inspected in earlier work. This experiment is therefore retrospective hypothesis generation. The committed 2024 phase is an exact protocol replay, not a pristine unseen confirmation; the 2025-through-2026-02 phase is diagnostic audit only."
+  },
+  "sources": {
+    "btc_5m": {
+      "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+      "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+      "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac"
+    },
+    "eth_15m": {
+      "path": "data/kline_preholdout_binance_um15m/series/binance_um_ETHUSDT_15m_221952.csv",
+      "audit": "data/kline_preholdout_binance_um15m/audits/ETHUSDT.json",
+      "sha256": "07013f996a13a0b205f9df6df2af5deab5d601e7e34b42bfc308dc13aef400bd",
+      "audit_sha256": "900143b3ee778503a4080ee506cf8569634d7bb32f90fdb78ab4ce5bb9b74d76",
+      "source_caveat": "Cross-market context is Binance ETHUSDT perpetual while the traded BTC ledger is OKX BTC-USDT-SWAP. It is a causal market-regime proxy, not execution-price input."
+    },
+    "event_ledgers": {
+      "development": {
+        "path": "experiments/active/exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1/results/train_scored_events.csv.gz",
+        "sha256": "6ba93f6cf3a6b1b8f16f3fd20582cec304fc94d2eb903ffc94f8e59888d3c03a"
+      },
+      "confirmation": {
+        "path": "experiments/active/exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1/results/selection_scored_events.csv.gz",
+        "sha256": "bb799804a367aca28391e13041d2df583f576c740136dd40bfb1d2a78ef3d529"
+      },
+      "audit": {
+        "path": "experiments/active/exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1/results/validation_scored_pool.csv.gz",
+        "sha256": "cc92e142ed87b692425823110292a7d8593dbdfe2430a962b67d0b6e7286a4a1"
+      }
+    },
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "repository_holdout_rows_allowed": 0
+  },
+  "splits": {
+    "development_start_inclusive": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2024-01-01T00:00:00Z",
+    "development_folds": [
+      {
+        "fold": "2023Q2",
+        "train_start_inclusive": "2023-01-01T00:00:00Z",
+        "test_start_inclusive": "2023-04-01T00:00:00Z",
+        "test_end_exclusive": "2023-07-01T00:00:00Z"
+      },
+      {
+        "fold": "2023Q3",
+        "train_start_inclusive": "2023-01-01T00:00:00Z",
+        "test_start_inclusive": "2023-07-01T00:00:00Z",
+        "test_end_exclusive": "2023-10-01T00:00:00Z"
+      },
+      {
+        "fold": "2023Q4",
+        "train_start_inclusive": "2023-01-01T00:00:00Z",
+        "test_start_inclusive": "2023-10-01T00:00:00Z",
+        "test_end_exclusive": "2024-01-01T00:00:00Z"
+      }
+    ],
+    "confirmation_start_inclusive": "2024-01-01T00:00:00Z",
+    "confirmation_end_exclusive": "2025-01-01T00:00:00Z",
+    "diagnostic_audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "diagnostic_audit_end_exclusive": "2026-02-28T16:00:00Z",
+    "purge_bars_at_boundaries": 96,
+    "bar_minutes": 15,
+    "random_split": false
+  },
+  "execution_frozen": {
+    "entry": "next_bar_open",
+    "runner_policy": "ma_trail1_after_2atr",
+    "runner_arm_profit_atr": 2.0,
+    "initial_disaster_stop_atr": 2.0,
+    "trend_reference": "SMA60_HL2",
+    "horizon_bars": 96,
+    "round_trip_cost_fraction": 0.002,
+    "same_bar_priority": "active stop first"
+  },
+  "feature_contract": {
+    "feature_time": "completed 15m signal bar t or the latest fully completed 1h bar available at t close; no feature reads t+1 or later",
+    "k1_search": {
+      "reference": "EMA30_HL2",
+      "min_gap_bars": 2,
+      "max_gap_bars": 24,
+      "open_side_max_atr": 0.1,
+      "close_side_min_atr": 0.15,
+      "body_min_atr": 0.35,
+      "range_min_atr": 0.7,
+      "selection": "most recent qualifying same-direction body-through candle"
+    },
+    "higher_timeframe": {
+      "bar": "1h",
+      "availability": "four complete 15m bars; usable only at the fourth bar close",
+      "partial_hour_allowed": false
+    },
+    "sequence_window_bars": 32,
+    "feature_groups": {
+      "legacy_28": [
+        "direction",
+        "signal_score",
+        "signed_close_atr",
+        "signed_slope_atr_per_bar",
+        "signed_body_atr",
+        "breakout_atr",
+        "prior_near_ma_share",
+        "prior_range_atr",
+        "fee_to_risk",
+        "atr_pct",
+        "volume_ratio20",
+        "atr_ratio96",
+        "range_ratio20",
+        "eff12",
+        "eff24",
+        "adx14",
+        "signed_di_balance",
+        "ema20_sma60_spread_atr",
+        "ema30_sma60_spread_atr",
+        "sma60_sma120_spread_atr",
+        "sma60_sma160_spread_atr",
+        "sma120_sma240_spread_atr",
+        "signed_return8_atr",
+        "signed_return24_atr",
+        "prior24_range_atr",
+        "family_has_direct",
+        "family_has_rejection",
+        "family_has_coil"
+      ],
+      "k1k2_relations": [
+        "k1_found",
+        "k1_gap_bars",
+        "k1_body_atr",
+        "k1_range_atr",
+        "k1_close_location",
+        "k1_volume_ratio20",
+        "k1_to_k2_move_atr",
+        "k1_to_k2_peak_atr",
+        "k1_to_k2_retrace_atr",
+        "between_wrong_side_share",
+        "between_ma_side_continuity",
+        "k2_touch_depth_atr",
+        "k2_body_clearance_atr",
+        "k2_rejection_wick_share",
+        "k2_to_k1_volume_ratio"
+      ],
+      "trend_maturity": [
+        "ema30_side_age",
+        "ema30_sma60_alignment_age",
+        "ema30_slope4_dir_atr",
+        "ema30_accel4_dir_atr",
+        "sma60_slope4_dir_atr",
+        "sma60_accel4_dir_atr",
+        "ema30_sma60_spread_delta4_dir_atr",
+        "ma_order_score_dir",
+        "ma_bundle_width_atr",
+        "price_extension_sma60_atr"
+      ],
+      "higher_timeframe_1h": [
+        "htf_age_minutes",
+        "htf_close_ema30_dir_atr",
+        "htf_ema30_sma60_spread_dir_atr",
+        "htf_sma60_slope4_dir_atr",
+        "htf_return6_dir_atr",
+        "htf_rsi14_dir",
+        "htf_adx14",
+        "htf_ma_alignment"
+      ],
+      "volatility_regime": [
+        "atr_percentile384",
+        "atr_change24",
+        "rv12_ratio96",
+        "bb_width_atr",
+        "bb_width_ratio96",
+        "bb_release24",
+        "range_percentile96"
+      ],
+      "participation": [
+        "volume_ratio96",
+        "volume_impulse4",
+        "signed_volume_balance12",
+        "signed_volume_balance48",
+        "obv_slope12_norm",
+        "price_volume_corr24"
+      ],
+      "structure_momentum": [
+        "rsi14_dir",
+        "macd_hist_dir_atr",
+        "donchian20_position_dir",
+        "close_location_dir",
+        "pullback_from_extreme8_atr",
+        "breakout_prior24_atr",
+        "return_accel_dir_atr",
+        "candle_streak_dir"
+      ],
+      "market_resonance": [
+        "eth_return4_dir",
+        "eth_return16_dir",
+        "eth_return96_dir",
+        "eth_close_ema30_dir_atr",
+        "eth_ema30_sma60_spread_dir_atr",
+        "eth_rsi14_dir",
+        "eth_adx14",
+        "btc_eth_return_corr96",
+        "eth_btc_relative16_dir"
+      ],
+      "sequence_shape": [
+        "ret_autocorr1_32",
+        "ret_autocorr4_32",
+        "return_sign_entropy32",
+        "return_sign_change32",
+        "return_skew32_dir",
+        "return_kurt32",
+        "close_range_position32_dir",
+        "drawdown_from_high32_dir",
+        "path_efficiency32"
+      ],
+      "calendar": [
+        "utc_hour_sin",
+        "utc_hour_cos",
+        "weekend"
+      ]
+    }
+  },
+  "candidate_variants": [
+    {"id": "signal_score", "kind": "single_score", "groups": []},
+    {"id": "rule_confluence_vote", "kind": "single_score", "score_column": "confluence_vote", "groups": []},
+    {"id": "legacy_28", "kind": "lightgbm", "groups": ["legacy_28"]},
+    {"id": "legacy_plus_k1k2", "kind": "lightgbm", "groups": ["legacy_28", "k1k2_relations"]},
+    {"id": "legacy_plus_trend", "kind": "lightgbm", "groups": ["legacy_28", "trend_maturity"]},
+    {"id": "legacy_plus_1h", "kind": "lightgbm", "groups": ["legacy_28", "higher_timeframe_1h"]},
+    {"id": "legacy_plus_volatility", "kind": "lightgbm", "groups": ["legacy_28", "volatility_regime"]},
+    {"id": "legacy_plus_participation", "kind": "lightgbm", "groups": ["legacy_28", "participation"]},
+    {"id": "legacy_plus_structure", "kind": "lightgbm", "groups": ["legacy_28", "structure_momentum"]},
+    {"id": "legacy_plus_market", "kind": "lightgbm", "groups": ["legacy_28", "market_resonance"]},
+    {"id": "legacy_plus_sequence", "kind": "lightgbm", "groups": ["legacy_28", "sequence_shape"]},
+    {"id": "legacy_plus_calendar", "kind": "lightgbm", "groups": ["legacy_28", "calendar"]},
+    {"id": "physics_only", "kind": "lightgbm", "groups": ["k1k2_relations", "trend_maturity", "higher_timeframe_1h", "volatility_regime", "participation", "structure_momentum", "market_resonance", "sequence_shape"]},
+    {"id": "full_all", "kind": "lightgbm", "groups": ["legacy_28", "k1k2_relations", "trend_maturity", "higher_timeframe_1h", "volatility_regime", "participation", "structure_momentum", "market_resonance", "sequence_shape", "calendar"]}
+  ],
+  "model": {
+    "library": "lightgbm 4.6.0",
+    "type": "LGBMRegressor",
+    "objective": "huber",
+    "alpha": 0.8,
+    "n_estimators": 160,
+    "learning_rate": 0.03,
+    "num_leaves": 7,
+    "max_depth": 3,
+    "min_child_samples": 100,
+    "reg_lambda": 10.0,
+    "colsample_bytree": 0.8,
+    "subsample": 1.0,
+    "deterministic": true,
+    "force_col_wise": true,
+    "num_threads": 1,
+    "seed": 42,
+    "target": "fixed-runner net return clipped to each training fold's 1st and 99th percentiles",
+    "imputation": "training median, then zero only for an all-missing training feature"
+  },
+  "score_gate": {
+    "training_quantile": 0.9,
+    "reason": "Keep roughly the strongest 10 percent instead of the parent's post-hoc 2.5 percent gate, so the 15m research does not manufacture signal scarcity.",
+    "deployment_style": "absolute score threshold learned from past training scores and applied unchanged to the next period"
+  },
+  "development_nomination": {
+    "minimum_selected_events_total": 120,
+    "minimum_selected_events_per_fold": 30,
+    "ranking": [
+      "positive_fold_count descending",
+      "worst_fold_net_bp descending",
+      "median_fold_net_bp descending",
+      "mean_net_bp descending",
+      "variant_id ascending"
+    ],
+    "familywise_permutation_resamples": 20000,
+    "seed": 20260904,
+    "always_nominate_one_eligible_variant": true,
+    "warning": "Nomination is hypothesis selection, not evidence of edge."
+  },
+  "matched_control": {
+    "controls_per_event": 8,
+    "strata": [
+      "calendar month",
+      "UTC six-hour block",
+      "monthly ATR quintile",
+      "direction"
+    ],
+    "exclude_radius_bars": 97,
+    "exclude_scope": "per candidate",
+    "seed": "btc15m-multifactor-confluence-20260904"
+  },
+  "confirmation_gate": {
+    "minimum_selected_events": 200,
+    "mean_net_bp_gt": 0.0,
+    "profit_factor_gt": 1.0,
+    "score_permutation_p_lt": 0.01,
+    "paired_control_p_lt": 0.01,
+    "all_eight_control_assignments_beaten": true,
+    "both_halfyears_positive": true,
+    "beat_signal_score_mean_net": true,
+    "beat_legacy_28_mean_net": true
+  },
+  "multiplicity_and_interpretation": {
+    "development": "The max-statistic null covers every registered candidate selection mask on expanding-time OOF rows.",
+    "confirmation": "Only the single committed nominated variant is tested against 2024; baselines are comparisons, not alternative nominations.",
+    "audit": "2025-through-2026-02 is already-seen lineage and can diagnose transport failure only.",
+    "shap": "Run only if the nominated model clears the 2024 mean-net and score-permutation basic gates; SHAP describes model behavior and never causality."
+  },
+  "safety": {
+    "holdout_rows_allowed": 0,
+    "research_fit_only": true,
+    "training_eligible": false,
+    "production_eligible": false,
+    "automatic_promote": false,
+    "tradingview_change": false,
+    "live_order_change": false
+  }
+}

@@ -186,3 +186,15 @@
 
 - holdout 上（仅跑一次）：扣费后收益为正，PF ≥ 1.3，最大回撤 ≤ 20%，交易数 ≥ 100 笔；
 - 不满足则回到阶段 2，禁止在 holdout 上迭代。
+# Owner-approved grouped 15m confluence screen (2026-09-04)
+
+The Owner explicitly authorized one grouped multifactor/feature-engineering
+screen for the BTCUSDT.P 15m high-recall entry system. The execution contract
+is frozen at EMA30 `state_reset3` entries plus the SMA60
+`ma_trail1_after_2atr` runner; the registered feature bundle is the experiment
+factor. The screen covers K1→K2 relations, trend maturity, completed 1h context,
+volatility, participation, structure/momentum, ETH market resonance, sequence
+shape and calendar context. It uses expanding-time OOF development, a committed
+single nomination before the 2024 replay, multiplicity correction, and matched
+random controls. Repository holdout, promotion, TradingView overwrite, forward
+state and live execution remain out of scope.
