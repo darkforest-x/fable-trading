@@ -850,6 +850,10 @@ def build_features(
             eth_raw.loc[eth_mask, column] = eth_raw.loc[eth_mask, column].astype(float) * multiplier
     _assert_event_alignment(events, frame)
     market = add_market_features(frame)
+    # The frozen matched-control executor names the management reference
+    # ``trend_ma``. It is exactly the already-computed SMA60(HL2); exposing the
+    # contract alias changes no feature or candidate score.
+    market["trend_ma"] = market["sma60"]
     eth = add_eth_features(eth_raw)
     output = events.copy()
     indices = output["signal_i"].astype(int).to_numpy()
