@@ -200,6 +200,7 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
         "exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1",
         "exp-btcusdtp-15m-ma-runner-grid-preholdout-20260904-v1",
         "exp-btcusdtp-15m-ma-state-trend-preholdout-20260904-v1",
+        "exp-btcusdtp-15m-multifactor-confluence-preholdout-20260904-v1",
         "exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v1",
         "exp-pine-eth-15m-v1",
         "exp-yoyo-trading-fixed-w10-classifier-holdout3d",

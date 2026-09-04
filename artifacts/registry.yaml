@@ -13811,3 +13811,73 @@ artifacts:
     config_hash: "51ebb3d1da933d43d8fa70b6d2d59ef2853210c051a678d73c2e8869da2e6feb"
     data_cutoff: "2026-05-04T00:00:00Z"
     notes: Self-contained HTML with embedded exit, failure, path, floor and SHAP figures.
+
+  - artifact_id: btcusdtp-15m-multifactor-audit-20260904-v1
+    artifact_type: manifest
+    role: frozen_15m_multifactor_transport_and_failure_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bc6ea8b"
+    source_path: experiments/active/exp-btcusdtp-15m-multifactor-confluence-preholdout-20260904-v1/results/audit_receipt.json
+    sha256: "88f12aa6cae97c40d5345ecc419b03cb3bcf37d55093284de2801fce9bc18175"
+    size_bytes: 9985
+    storage_uri: "repo://experiments/active/exp-btcusdtp-15m-multifactor-confluence-preholdout-20260904-v1/results/audit_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bc6ea8b"
+    config_hash: "d5f43d7848d37e2fc89d5a127f6ad16b835b05b7193dd603b0b30c71f5fb6d0b"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: >-
+      Zero repository-holdout price rows; contaminated status is inherited from
+      the screenshot-informed parent display event contract. Candidate rejected.
+
+  - artifact_id: btcusdtp-15m-multifactor-summary-20260904-v1
+    artifact_type: manifest
+    role: 15m_multifactor_density_resonance_and_corrected_failure_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2da9c2b"
+    source_path: analysis/output/btcusdtp_15m_multifactor_confluence_20260904/summary.json
+    sha256: "ec762a239d3b05c5a9c0d327914c2db71257104ae1ec95d04c80e6fcb372b5aa"
+    size_bytes: 9978
+    storage_uri: "repo://analysis/output/btcusdtp_15m_multifactor_confluence_20260904/summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2da9c2b"
+    config_hash: "d5f43d7848d37e2fc89d5a127f6ad16b835b05b7193dd603b0b30c71f5fb6d0b"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: Deterministic posthoc sensitivity tables are diagnostic only; q90 remains rejected.
+
+  - artifact_id: btcusdtp-15m-multifactor-report-20260904-v1
+    artifact_type: report
+    role: canonical_chinese_15m_multifactor_confluence_failure_analysis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2da9c2b"
+    source_path: analysis/p1_btcusdtp_15m_multifactor_confluence_20260904.md
+    sha256: "14ec165721b98caa5fcb1e577bcba5132bfe9be2e6ed69018f47194357858892"
+    size_bytes: 17292
+    storage_uri: "repo://analysis/p1_btcusdtp_15m_multifactor_confluence_20260904.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2da9c2b"
+    config_hash: "d5f43d7848d37e2fc89d5a127f6ad16b835b05b7193dd603b0b30c71f5fb6d0b"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: Full factor-family, density, matched-control and corrected-state-machine report.
+
+  - artifact_id: btcusdtp-15m-multifactor-html-20260904-v1
+    artifact_type: report
+    role: owner_facing_self_contained_html_15m_multifactor_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2da9c2b"
+    source_path: analysis/html/p1_btcusdtp_15m_multifactor_confluence_20260904.html
+    sha256: "18eb6555552ed7ed80c6ebb8db04fa4d94cc1b6b7e33df8c27153fa01f8922a3"
+    size_bytes: 695800
+    storage_uri: "repo://analysis/html/p1_btcusdtp_15m_multifactor_confluence_20260904.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2da9c2b"
+    config_hash: "d5f43d7848d37e2fc89d5a127f6ad16b835b05b7193dd603b0b30c71f5fb6d0b"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: Self-contained HTML with embedded factor, density, resonance and failure figures.

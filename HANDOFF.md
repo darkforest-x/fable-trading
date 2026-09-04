@@ -2,6 +2,29 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-04 — BTCUSDT.P 15m 多因子共振全数拒绝）
+
+Owner 要求把既有多因子、特征工程和其他共振都试一遍。本轮固定 EMA30 高召回候选、下一根开盘、
+2ATR 初止损、收盘 +2ATR 激活、SMA60±1ATR runner、96 根 horizon 与 20bp 成本，构建
+**103 个模型输入 + 1 个共振票数**，预注册 14 个因子包：K1→K2、趋势年龄、完整 1h、波动、
+量价参与、结构动量、ETH 共振、32 根序列形态和时段。
+
+14 个候选在 2023 expanding OOF 全部 0/3 正折；规则提名的 `legacy_plus_participation`
+为 -17.15bp/PF 0.654/FWER p=0.799。冻结后 2024 为 314 笔 -7.14bp/PF 0.881，
+2025–2026P1 为 375 笔 -13.96bp/PF 0.733；score p=0.0427/0.4002，匹配随机超额
++3.70bp(p=0.359)/+0.81bp(p=0.463)，全部经济门失败。q99 汇总转正是看过结果后的 25/21
+笔稀疏尾部，拆半年后 2024H2 与 2026H1 已反转，禁止改默认阈值。
+
+失败状态机已修正：旧表把盘中 MFE≥2ATR 混作“收盘已激活”。真实账本中 205/375 从未激活，
+合计 -17,027bp；170 笔激活仓合计 +11,792bp，104 个已激活赢家贡献 +14,396bp。
+退出仍能保留右尾，下一优先级是严格 K1→K2 episode、多空分模和“是否收盘激活”的两阶段任务，
+不是再堆指标或收紧止盈。完整报告：
+`analysis/html/p1_btcusdtp_15m_multifactor_confluence_20260904.html`。
+
+本轮经济数据最晚至 2026-02-27，仓库 holdout 价格读取/评分 0 行；但继承父级截图影响的显示候选，
+所以 lineage 仍标记 holdout-contaminated。未修改 TradingView、ACTIVE/frozen/forward、部署、
+仓位或真实订单，`training_eligible=false`、`production_eligible=false`。
+
 ## ⚡ 当前真相（2026-09-04 — OKX 全市场 1h 模型先检、代码后检 Top-10 已交付）
 
 Owner 明确取消“只看已经冻结的非 holdout 历史候选”限制。本轮重新冻结当时全部合资格 OKX

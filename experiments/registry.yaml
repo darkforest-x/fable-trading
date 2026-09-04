@@ -4618,3 +4618,40 @@ experiments:
       approved holdout-contaminated display-morphology decision from its parent,
       so holdout_consumed remains true despite pre-holdout economics. No ACTIVE,
       forward, frozen, deployment, position sizing or live-order mutation.
+
+  - experiment_id: exp-btcusdtp-15m-multifactor-confluence-preholdout-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2da9c2b"
+    status: rejected
+    question: >-
+      Can causal K1-K2 relations, trend maturity, completed-1h context,
+      volatility, participation, structure/momentum, ETH resonance, sequence
+      shape and calendar context rank a tradeable subset of the BTCUSDT.P 15m
+      high-recall pool while the SMA60 runner remains fixed?
+    single_variable: >-
+      Owner-authorized grouped screen of 14 preregistered feature bundles. The
+      event ledger, next-open entry, 2ATR hard stop, close-confirmed +2ATR arm,
+      SMA60 one-ATR trail, 96-bar horizon, 20bp cost, Huber LightGBM parameters,
+      time folds and q90 past-training score gate remain frozen.
+    result: >-
+      rejected_after_exact_replay_and_transport_audit. All 14 variants had zero
+      positive 2023 OOF folds. The rules-nominated participation bundle scored
+      -17.15bp OOF, -7.14bp on 2024 and -13.96bp on 2025-2026P1; PF was
+      0.654/0.881/0.733. Score and matched-control tests failed. Posthoc q99 was
+      sparse and changed sign by half-year, so no threshold or factor was adopted.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btcusdtp_15m_multifactor_confluence_20260904.md
+    artifacts:
+      - btcusdtp-15m-multifactor-audit-20260904-v1
+      - btcusdtp-15m-multifactor-summary-20260904-v1
+      - btcusdtp-15m-multifactor-report-20260904-v1
+      - btcusdtp-15m-multifactor-html-20260904-v1
+    reuse_allowed: false
+    notes: >-
+      Economic rows end 2026-02-27 and repository holdout price rows read are
+      zero. Holdout status remains consumed/contaminated because the fixed
+      parent display-candidate contract inherited Owner-approved post-boundary
+      screenshot morphology. No TradingView, ACTIVE, frozen, forward, deploy,
+      sizing, API-key or live-order mutation occurred.

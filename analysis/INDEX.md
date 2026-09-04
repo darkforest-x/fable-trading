@@ -509,6 +509,7 @@
 
 ## 2026-09-04 BTCUSDT.P K1→K2 低周期研究
 
+- [`p1_btcusdtp_15m_multifactor_confluence_20260904.md`](p1_btcusdtp_15m_multifactor_confluence_20260904.md) — 15m 103 个因果模型特征 + 1 个规则共振票数、14 个预注册因子包的 expanding-OOF / 冻结重放 / 失败状态机审计；多因子未救活负期望候选池，全部拒绝。
 - [`p1_btcusdtp_15m_trend_refactor_20260904.md`](p1_btcusdtp_15m_trend_refactor_20260904.md) — 15m 非 SMA40 高召回、L2 失败、均线趋势 runner、利润底线反事实与 K1→K2 关系层重构；runner 放大右尾但系统净期望仍负。
 - [`p1_btcusdtp_k1k2_15m_5m_parameter_optimization_preholdout_20260904.md`](p1_btcusdtp_k1k2_15m_5m_parameter_optimization_preholdout_20260904.md) — 15m / 5m 独立参数优化、冻结验证与失败归因；两周期均拒绝。
 - [`p1_btcusdtp_k1k2_stop_buffer_preholdout_20260904.md`](p1_btcusdtp_k1k2_stop_buffer_preholdout_20260904.md) — K2 极值外 0–0.50 ATR 止损缓冲单变量实验；两周期均保留 0 ATR，audit 未打开。
