@@ -280,7 +280,10 @@ def development_phase(config: dict[str, Any]) -> None:
             filter_candidates(universe, params), frame, config, bar, start, end
         )
         rows: list[dict[str, Any]] = []
-        ledgers: dict[float, tuple[pd.DataFrame, pd.DataFrame]] = {}
+        ledgers: dict[
+            float,
+            tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame],
+        ] = {}
         for value in config["factor"]["grid"]:
             buffer_atr = float(value)
             decisions, events = run_arm(
@@ -296,6 +299,15 @@ def development_phase(config: dict[str, Any]) -> None:
                     ]
                 ),
             )
+            controls, pairs = build_matched_controls(
+                events,
+                frame,
+                config,
+                bar,
+                start,
+                end,
+                set(events["k2_i"].astype(int)) if len(events) else set(),
+            )
             row = {
                 "bar": bar,
                 "k2_stop_buffer_atr": buffer_atr,
@@ -305,9 +317,12 @@ def development_phase(config: dict[str, Any]) -> None:
                     events, folds
                 ),
                 **metrics,
+                # Descriptive negative control only; it is deliberately not a
+                # selection field in ``select_buffer``.
+                **add_control_metrics({}, pairs),
             }
             rows.append(row)
-            ledgers[buffer_atr] = decisions, events
+            ledgers[buffer_atr] = decisions, events, controls, pairs
             print(
                 f"[{bar}] buffer={buffer_atr:.2f}: robust="
                 f"{metrics['robust_score_bp']:.2f}bp net="
@@ -324,7 +339,12 @@ def development_phase(config: dict[str, Any]) -> None:
         )
         selected, reason = select_buffer(rows, baseline)
         selected_buffer = float(selected["k2_stop_buffer_atr"])
-        selected_decisions, selected_events = ledgers[selected_buffer]
+        (
+            selected_decisions,
+            selected_events,
+            selected_controls,
+            selected_pairs,
+        ) = ledgers[selected_buffer]
         success = bool(
             bool(selected["eligible"])
             and float(selected["mean_net_bp"]) > 0.0
@@ -341,6 +361,14 @@ def development_phase(config: dict[str, Any]) -> None:
         write_csv(
             selected_decisions,
             prefix.with_name(prefix.name + "_selected_decisions.csv.gz"),
+        )
+        write_csv(
+            selected_controls,
+            prefix.with_name(prefix.name + "_selected_matched_controls.csv.gz"),
+        )
+        write_csv(
+            selected_pairs,
+            prefix.with_name(prefix.name + "_selected_matched_pairs.csv"),
         )
         write_csv(
             fold_table(selected_events, folds),
