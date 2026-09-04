@@ -981,7 +981,7 @@ def make_charts(
             ax.text(j, i, f"{value:+.1f}", ha="center", va="center", color=INK, fontsize=9)
     fig.suptitle("BTCUSDT.P 15m stop-manager half-year net expectancy", y=0.98)
     ax.set_title(
-        "bp per trade; chronological folds; orange is negative and purple-blue is positive",
+        "bp per trade; chronological folds; purple is negative and orange is positive",
         fontsize=10,
         color="#4B5563",
         pad=10,
