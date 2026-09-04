@@ -11,6 +11,10 @@
 //   update of the following bar, when that bar's open is observable.
 // - No request.* call, lower-timeframe data, or future bar is used.
 //
+// Display defaults mirror the owner's MA Shift reference: teal/orange candles,
+// one thin SMA40, and compact pattern markers. Diagnostic MA context, position
+// boxes, and the HUD remain available as opt-in layers.
+//
 // Pine v6 references:
 // https://www.tradingview.com/pine-script-docs/concepts/bar-states/
 // https://www.tradingview.com/pine-script-docs/language/execution-model/
@@ -101,16 +105,16 @@ float customK2K1VolumeMax = input.float(1.50, "Maximum K2 / K1 volume", minval =
 bool customUseState = input.bool(false, "Require owner oscillator + structure state", group = GROUP_CUSTOM_PATH)
 
 bool showSma40 = input.bool(true, "Show SMA40(HL2)", group = GROUP_DISPLAY)
-bool showSixMa = input.bool(true, "Show SMA/EMA 20·60·120 context", group = GROUP_DISPLAY)
-bool showRopeFill = input.bool(true, "Fill six-MA rope", group = GROUP_DISPLAY)
+bool showSixMa = input.bool(false, "Show SMA/EMA 20·60·120 context", group = GROUP_DISPLAY)
+bool showRopeFill = input.bool(false, "Fill six-MA rope", group = GROUP_DISPLAY)
 bool showPivotLevels = input.bool(false, "Show confirmed 10/10 pivot levels", group = GROUP_DISPLAY)
 bool colourBars = input.bool(true, "Colour candles by HL2 vs SMA40", group = GROUP_DISPLAY)
-bool showK2Preview = input.bool(true, "Show confirmed K2 preview", group = GROUP_DISPLAY)
+bool showK2Preview = input.bool(false, "Show confirmed K2 preview", group = GROUP_DISPLAY)
 bool showKeyLabels = input.bool(true, "Show K1 / K2 / entry labels", group = GROUP_DISPLAY)
-bool showPositionBoxes = input.bool(true, "Show risk/reward boxes", group = GROUP_DISPLAY)
+bool showPositionBoxes = input.bool(false, "Show risk/reward boxes", group = GROUP_DISPLAY)
 float targetR = input.float(3.0, "Visual target (R)", minval = 0.25, maxval = 20.0, step = 0.25, group = GROUP_DISPLAY)
 int projectionBars = input.int(20, "Risk/reward projection bars", minval = 1, maxval = 500, group = GROUP_DISPLAY)
-bool showHud = input.bool(true, "Show status table", group = GROUP_DISPLAY)
+bool showHud = input.bool(false, "Show status table", group = GROUP_DISPLAY)
 
 bool alertK2Close = input.bool(true, "Dynamic alert on confirmed K2", group = GROUP_ALERTS)
 bool alertNextOpen = input.bool(true, "Dynamic alert on causal next-open entry", group = GROUP_ALERTS)
@@ -572,16 +576,15 @@ float eventTarget =
 // ─────────────────────────────────────────────────────────────────────────────
 // TradingView-style chart rendering
 // ─────────────────────────────────────────────────────────────────────────────
-color LONG = #089981
-color SHORT = #F23645
-color K1 = #2962FF
-color K2 = #FF9800
+color LONG = #26A69A
+color SHORT = #EF8E3B
+color RISK = #F23645
 color TEAL = #26A69A
 color ORANGE = #EF8E3B
 color MUTED = #787B86
 
 barcolor(colourBars and not na(sma40) ? (maCandleSide == 1 ? TEAL : ORANGE) : na)
-plot(showSma40 ? sma40 : na, "SMA40(HL2)", color = #2962FF, linewidth = 2)
+plot(showSma40 ? sma40 : na, "SMA40(HL2)", color = color.new(MUTED, 10), linewidth = 1)
 plot(showSixMa ? sma20 : na, "SMA20", color = color.new(#00BCD4, 15), linewidth = 1)
 plot(showSixMa ? ema20 : na, "EMA20", color = color.new(#26A69A, 15), linewidth = 1)
 plot(showSixMa ? sma60 : na, "SMA60", color = color.new(#FFC107, 20), linewidth = 1)
@@ -605,35 +608,35 @@ plot(eventRiskAtr, "Next-open stop distance / ATR", color = na, display = displa
 plotshape(
      showK2Preview and longK2Setup,
      title = "Long K2 confirmed",
-     style = shape.circle,
+     style = shape.diamond,
      location = location.belowbar,
-     color = color.new(LONG, 20),
+     color = LONG,
      size = size.tiny,
-     text = "K2")
+     text = "")
 plotshape(
      showK2Preview and shortK2Setup,
      title = "Short K2 confirmed",
-     style = shape.circle,
+     style = shape.diamond,
      location = location.abovebar,
-     color = color.new(SHORT, 20),
+     color = SHORT,
      size = size.tiny,
-     text = "K2")
+     text = "")
 plotshape(
      longEntryEvent,
      title = "Causal long entry",
      style = shape.triangleup,
      location = location.belowbar,
      color = LONG,
-     size = size.small,
-     text = "多")
+     size = size.tiny,
+     text = "")
 plotshape(
      shortEntryEvent,
      title = "Causal short entry",
      style = shape.triangledown,
      location = location.abovebar,
      color = SHORT,
-     size = size.small,
-     text = "空")
+     size = size.tiny,
+     text = "")
 
 if (longEntryEvent or shortEntryEvent) and showKeyLabels
     bool isLong = longEntryEvent
@@ -642,41 +645,34 @@ if (longEntryEvent or shortEntryEvent) and showKeyLabels
     int k2X = bar_index - 1
     float k1Y = isLong ? low[k1Offset] : high[k1Offset]
     float k2Y = isLong ? low[1] : high[1]
+    color signalColor = isLong ? LONG : SHORT
+    line.new(
+         k1X,
+         k1Y,
+         k2X,
+         k2Y,
+         xloc = xloc.bar_index,
+         color = color.new(signalColor, 62),
+         style = line.style_dotted,
+         width = 1)
     label.new(
          k1X,
          k1Y,
-         isLong ? "K1 多头贯穿" : "K1 空头贯穿",
+         "◆",
          xloc = xloc.bar_index,
          yloc = isLong ? yloc.belowbar : yloc.abovebar,
-         style = isLong ? label.style_label_up : label.style_label_down,
-         color = K1,
-         textcolor = color.white,
-         size = size.small)
+         style = label.style_none,
+         textcolor = signalColor,
+         size = size.tiny)
     label.new(
          k2X,
          k2Y,
-         (isLong ? "K2 下影回踩" : "K2 上影回踩") +
-              "\ngap=" + str.tostring(eventGap),
+         "●",
          xloc = xloc.bar_index,
          yloc = isLong ? yloc.belowbar : yloc.abovebar,
-         style = isLong ? label.style_label_up : label.style_label_down,
-         color = K2,
-         textcolor = color.white,
-         size = size.small)
-    label.new(
-         bar_index,
-         eventEntry,
-         (isLong ? "因果多头入场" : "因果空头入场") +
-              "\nentry " + str.tostring(eventEntry, format.mintick) +
-              "\nstop " + str.tostring(eventStop, format.mintick) +
-              "\nrisk " + str.tostring(eventRiskAtr, "#.00") + " ATR" +
-              "\n形态分 " + str.tostring(eventScore, "#.0"),
-         xloc = xloc.bar_index,
-         yloc = yloc.price,
-         style = label.style_label_left,
-         color = isLong ? LONG : SHORT,
-         textcolor = color.white,
-         size = size.small)
+         style = label.style_none,
+         textcolor = signalColor,
+         size = size.tiny)
 
 if (longEntryEvent or shortEntryEvent) and showPositionBoxes
     bool isLong = longEntryEvent
@@ -697,14 +693,14 @@ if (longEntryEvent or shortEntryEvent) and showPositionBoxes
          top = math.max(eventEntry, eventStop),
          right = rightX,
          bottom = math.min(eventEntry, eventStop),
-         border_color = color.new(SHORT, 15),
+         border_color = color.new(RISK, 15),
          border_width = 1,
-         bgcolor = color.new(SHORT, 82),
+         bgcolor = color.new(RISK, 82),
          text = "SL",
-         text_color = color.new(SHORT, 0),
+         text_color = color.new(RISK, 0),
          text_halign = text.align_right)
     line.new(bar_index, eventEntry, rightX, eventEntry, color = color.white, width = 1)
-    line.new(bar_index, eventStop, rightX, eventStop, color = SHORT, style = line.style_dashed, width = 1)
+    line.new(bar_index, eventStop, rightX, eventStop, color = RISK, style = line.style_dashed, width = 1)
     line.new(bar_index, eventTarget, rightX, eventTarget, color = LONG, style = line.style_dashed, width = 1)
 
 // ─────────────────────────────────────────────────────────────────────────────

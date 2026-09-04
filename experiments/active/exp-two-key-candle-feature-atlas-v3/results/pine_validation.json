@@ -2,7 +2,7 @@
   "status": "pass",
   "purpose": "Pine source/static/owner-anchor parity; no trading evaluation",
   "pine_source": "experiments/active/exp-two-key-candle-feature-atlas-v3/pine/fable_two_key_candle_sma40_retest_v1.pine",
-  "pine_source_sha256": "8df89cb961a9ac50df10af6cbd8be9a9a980286dffa077c7a0b657194082aeda",
+  "pine_source_sha256": "fce2b9c245184aafdd88c1cffc76b489e3c4607dc19fa7b71393d94aba9561c7",
   "static_checks": {
     "pine_v6": true,
     "indicator_not_strategy": true,
@@ -15,13 +15,16 @@
     "dynamic_and_selectable_alerts": true,
     "risk_reward_drawings": true,
     "frozen_broad_gap": true,
-    "visual_score_disclaimed": true
+    "visual_score_disclaimed": true,
+    "reference_style_palette": true,
+    "compact_reference_style_defaults": true,
+    "compact_pattern_markers": true
   },
   "compile_checks": {
     "official_compiler_run": true,
     "official_compiler_zero_errors": true,
     "compiled_source_hash_matches": true,
-    "not_saved_or_published": true
+    "private_script_saved_not_published": true
   },
   "anchor_parity": [
     {
@@ -90,9 +93,12 @@
     "risk_reward_drawings": true,
     "frozen_broad_gap": true,
     "visual_score_disclaimed": true,
+    "reference_style_palette": true,
+    "compact_reference_style_defaults": true,
+    "compact_pattern_markers": true,
     "official_compiler_run": true,
     "official_compiler_zero_errors": true,
     "compiled_source_hash_matches": true,
-    "not_saved_or_published": true
+    "private_script_saved_not_published": true
   }
 }

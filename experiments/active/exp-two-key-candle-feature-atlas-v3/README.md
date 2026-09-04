@@ -59,5 +59,8 @@ Static, official-compiler and two-anchor parity:
 results/pine_compile_receipt.json binds the official TradingView Pine v6
 compile result to the exact source SHA. The source compiled with zero errors;
 adding it to the owner's current chart was blocked only because that Basic
-layout had already reached its indicator-count limit. Nothing was saved,
-published or removed from the layout.
+layout had already reached its indicator-count limit. The reference-style
+source was saved privately as version 2; it was not published and no existing
+indicator was removed from the layout. Its default view mirrors the owner's MA
+Shift reference with teal/orange candles, a thin SMA40 and compact K1/K2 marks;
+the six-MA rope, HUD and position boxes remain opt-in diagnostics.

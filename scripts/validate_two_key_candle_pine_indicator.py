@@ -139,6 +139,21 @@ def validate() -> dict[str, Any]:
         "frozen_broad_gap": "broadProfile ? 2" in code
         and "broadProfile ? 8" in code,
         "visual_score_disclaimed": "形态≠盈利概率" in source,
+        "reference_style_palette": "color LONG = #26A69A" in code
+        and "color SHORT = #EF8E3B" in code
+        and "color RISK = #F23645" in code,
+        "compact_reference_style_defaults": all(
+            token in code
+            for token in (
+                'showSixMa = input.bool(false,',
+                'showRopeFill = input.bool(false,',
+                'showK2Preview = input.bool(false,',
+                'showPositionBoxes = input.bool(false,',
+                'showHud = input.bool(false,',
+            )
+        ),
+        "compact_pattern_markers": "style = label.style_none" in code
+        and "style = line.style_dotted" in code,
     }
 
     source_hash = sha256_file(PINE)
@@ -146,8 +161,10 @@ def validate() -> dict[str, Any]:
         "official_compiler_run": receipt["official_pine_compiler_run"] is True,
         "official_compiler_zero_errors": int(receipt["pine_compile_error_count"]) == 0,
         "compiled_source_hash_matches": receipt["source_sha256"] == source_hash,
-        "not_saved_or_published": receipt["script_saved_to_tradingview"] is False
-        and receipt["script_published"] is False,
+        "private_script_saved_not_published": (
+            receipt["script_saved_to_tradingview"] is True
+            and receipt["script_published"] is False
+        ),
     }
 
     expected_by_name = expected.set_index("name")
