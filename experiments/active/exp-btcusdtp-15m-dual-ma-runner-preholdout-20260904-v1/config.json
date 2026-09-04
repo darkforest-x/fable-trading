@@ -1,0 +1,93 @@
+{
+  "experiment_id": "exp-btcusdtp-15m-dual-ma-runner-preholdout-20260904-v1",
+  "purpose": "Test the diagnosis that 15m needs a fast trigger reference, a separate slow trend reference, state-transition dedupe, and a delayed MA runner instead of one SMA40 doing every job.",
+  "lineage": {
+    "parent_experiment": "exp-btcusdtp-15m-ma-state-trend-preholdout-20260904-v1",
+    "parent_selection_receipt": "experiments/active/exp-btcusdtp-15m-ma-state-trend-preholdout-20260904-v1/results/selection_receipt.json",
+    "parent_result": "SMA60 improved the broad launch union but remained net negative; immediate MA exits enlarged the maximum winner and worsened average expectancy through early whipsaw.",
+    "development_reuse_warning": "2023 is hypothesis-selection data already seen by the parent; only the later 2024 confirmation can reject or retain this reconstruction."
+  },
+  "source": {
+    "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+    "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac"
+  },
+  "window": {
+    "selection_start_inclusive": "2023-01-01T00:00:00Z",
+    "selection_end_exclusive": "2024-01-01T00:00:00Z",
+    "selection_folds": ["2023H1", "2023H2"],
+    "confirmation_start_inclusive": "2024-01-01T00:00:00Z",
+    "confirmation_end_exclusive": "2025-01-01T00:00:00Z",
+    "confirmation_folds": ["2024H1", "2024H2"],
+    "audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "audit_end_exclusive": "2026-02-28T16:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z"
+  },
+  "signal_contract": {
+    "inherit_numeric_thresholds_from": "experiments/active/exp-btcusdtp-15m-ma-state-trend-preholdout-20260904-v1/config.json",
+    "entry_family": "all",
+    "trend_reference": "SMA60",
+    "entry": "next_bar_open",
+    "initial_disaster_stop_atr": 2.0,
+    "fixed_target_atr": 5.0,
+    "horizon_bars": 96,
+    "round_trip_cost_fraction": 0.002
+  },
+  "ordered_factors": [
+    {
+      "factor": "trigger_reference",
+      "initial": "SMA60",
+      "values": ["SMA60", "EMA20", "EMA30", "EMA40", "SMA40"]
+    },
+    {
+      "factor": "dedupe_policy",
+      "initial": "global24",
+      "values": ["global24", "direction8", "state_reset3"]
+    },
+    {
+      "factor": "runner_policy",
+      "initial": "fixed_5atr",
+      "values": [
+        "fixed_5atr",
+        "ma_close2_after_1atr",
+        "ma_close2_after_2atr",
+        "ma_trail1_after_1atr",
+        "ma_trail1_after_2atr",
+        "half_fixed5_half_ma_close2_after_1atr",
+        "half_fixed5_half_ma_trail1_after_1atr"
+      ]
+    }
+  ],
+  "selection_gate": {
+    "minimum_events_total": 180,
+    "minimum_events_per_halfyear": 70,
+    "minimum_robust_improvement_bp": 2.0,
+    "maximum_worst_fold_degradation_bp": 3.0,
+    "one_factor_at_a_time": true
+  },
+  "confirmation_gate": {
+    "candidate_mean_net_bp_gt": 0.0,
+    "candidate_minus_baseline_mean_net_bp_gt": 2.0,
+    "candidate_minus_baseline_p_lt": 0.05,
+    "candidate_both_halfyears_net_positive": true,
+    "minimum_events_total": 180
+  },
+  "matched_control": {
+    "controls_per_event": 8,
+    "strata": ["calendar_month", "UTC six-hour block", "monthly ATR quintile", "direction"],
+    "exclude_radius_bars": 97,
+    "seed": "btc15m-dual-ma-runner-20260904"
+  },
+  "owner_examples": {
+    "role": "contaminated morphology diagnostic only",
+    "holdout_use_for_this_configuration": 1,
+    "required_display_surface": "all raw state-transition signals are shown even if economic confirmation rejects live execution",
+    "rows_from": "experiments/active/exp-btcusdtp-15m-ma-state-trend-preholdout-20260904-v1/config.json"
+  },
+  "safety": {
+    "production_eligible": false,
+    "training_eligible": false,
+    "automatic_promote": false,
+    "live_order_change": false
+  }
+}

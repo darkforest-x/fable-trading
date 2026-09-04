@@ -13652,3 +13652,22 @@ artifacts:
     config_hash: "1dafb9535b711eef93894cb76f7ffb3a6708e4394a3a51c62e8b4d920c4cc1bd"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: Self-contained owner-facing HTML with four embedded diagnostic charts.
+
+  - artifact_id: btcusdtp-15m-ma-state-trend-selection-20260904-v1
+    artifact_type: manifest
+    role: preregistered_15m_ma_state_selection_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8bd873e"
+    source_path: experiments/active/exp-btcusdtp-15m-ma-state-trend-preholdout-20260904-v1/results/selection_receipt.json
+    sha256: "a81f0652f936000bee4d5160734d207f1d6d26cf16bf66db57ee94cf0185aca3"
+    size_bytes: 11434
+    storage_uri: "repo://experiments/active/exp-btcusdtp-15m-ma-state-trend-preholdout-20260904-v1/results/selection_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8bd873e"
+    config_hash: "c10ed3fdcfb0fb9562b5ed58b8906f4b3ba878123250d512b572b701e4940afb"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: >-
+      SMA60/all/fixed5ATR development selection; all four half-years remained
+      net negative after 20bp cost, so frozen validation was not opened.
