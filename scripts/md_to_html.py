@@ -26,7 +26,6 @@ import base64
 import html
 import mimetypes
 import re
-import sys
 from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -35,10 +34,11 @@ ORDERED = re.compile(r"^\s*\d+\.\s+")
 
 CSS = """
 :root { color-scheme: light dark; }
-body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
        font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
              "Microsoft YaHei", system-ui, sans-serif;
-       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
 h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
      margin: 2.4rem 0 1rem; }
 h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
@@ -137,7 +137,7 @@ def convert(
         stripped = candidate.strip()
         if not stripped:
             return True
-        if candidate.startswith("```") or candidate.startswith(">"):
+        if candidate.startswith(("```", ">")):
             return True
         if re.match(r"^#{1,6}\s+", candidate):
             return True

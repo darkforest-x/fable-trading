@@ -4,13 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:,">
-<title>ETHUSDT.P / XAUUSDT.P 15m 品种专属 K1→K2 趋势策略审计</title>
+<title>ETH / XAU 15m：品种专属 K1→K2 趋势策略审计</title>
 <style>
 :root { color-scheme: light dark; }
-body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
        font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
              "Microsoft YaHei", system-ui, sans-serif;
-       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
 h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
      margin: 2.4rem 0 1rem; }
 h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
@@ -46,8 +47,8 @@ li { margin: .25rem 0; }
 </style>
 </head>
 <body>
-<h1>ETHUSDT.P / XAUUSDT.P 15m 品种专属 K1→K2 趋势策略审计</h1>
-<p>生成日期：2026-09-05 实验：<code>exp-ethusdtp-15m-asset-specific-k1k2-preholdout-20260905-v19</code>、 <code>exp-xauusdtp-15m-asset-specific-k1k2-preholdout-20260905-v1</code> 状态：<strong>两套品种专属候选均未通过；仅保留研究账本，不写入 TradingView，不改 ACTIVE / forward / 实盘</strong></p>
+<h1>ETH / XAU 15m：品种专属 K1→K2 趋势策略审计</h1>
+<p>生成日期：2026-09-05 实验：<code>ETH V19</code> / <code>XAU V1</code> 状态：<strong>两套品种专属候选均未通过；仅保留研究账本，不写入 TradingView，不改 ACTIVE / forward / 实盘</strong></p>
 <h2>技术结论：参数已经分品种，但两套都没有可部署优势</h2>
 <p>本轮没有把 BTC 参数直接复制到 ETH 和黄金，而是分别预注册并按时间顺序选择：触线均线组合、 “压缩→K1 释放→K2 承接”票数、慢线 runner 缓冲和渐进止盈总比例。ETH 的开发选择结果是 <code>EMA30 + SMA60</code>、至少 2/3 个状态变化票、runner 缓冲 <code>1.25 ATR</code>、总止盈 10%；XAU 是 <code>EMA20 + SMA50</code>、不加票数硬门、runner 缓冲 <code>1.0 ATR</code>、总止盈 10%。</p>
 <p>它们只是各自开发区间里的“最不差组合”，不是最优赚钱参数。冻结后搬到 2026 年 3–4 月确认窗：</p>

@@ -1,8 +1,7 @@
-# ETHUSDT.P / XAUUSDT.P 15m 品种专属 K1→K2 趋势策略审计
+# ETH / XAU 15m：品种专属 K1→K2 趋势策略审计
 
 生成日期：2026-09-05
-实验：`exp-ethusdtp-15m-asset-specific-k1k2-preholdout-20260905-v19`、
-`exp-xauusdtp-15m-asset-specific-k1k2-preholdout-20260905-v1`
+实验：`ETH V19` / `XAU V1`
 状态：**两套品种专属候选均未通过；仅保留研究账本，不写入 TradingView，不改 ACTIVE / forward / 实盘**
 
 ## 技术结论：参数已经分品种，但两套都没有可部署优势

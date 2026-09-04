@@ -2,7 +2,14 @@
 
 from pathlib import Path
 
-from scripts.md_to_html import convert
+from scripts.md_to_html import CSS, convert
+
+
+def test_report_css_keeps_body_inside_mobile_viewport() -> None:
+    """Padding must be included in the body's declared 100% viewport width."""
+    assert "*, *::before, *::after { box-sizing: border-box; }" in CSS
+    assert "body { width: 100%; max-width: 62rem;" in CSS
+    assert "overflow-wrap: anywhere;" in CSS
 
 
 def test_convert_joins_wrapped_paragraphs_and_list_items() -> None:
