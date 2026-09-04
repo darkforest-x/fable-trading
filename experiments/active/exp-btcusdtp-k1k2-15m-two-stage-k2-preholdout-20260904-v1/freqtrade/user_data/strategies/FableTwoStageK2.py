@@ -159,7 +159,10 @@ class FableTwoStageK2(IStrategy):
         events = self._event_rows(dataframe)
         dataframe["fable_long"] = 0
         dataframe["fable_short"] = 0
-        dataframe["enter_tag"] = ""
+        # Freqtrade resets ``enter_tag`` immediately before
+        # ``populate_entry_trend``.  Keep the causal event payload in a
+        # strategy-owned column until that hand-off point.
+        dataframe["fable_entry_tag"] = ""
         for row in events:
             i = int(row["confirm_i"])
             side = "L" if int(row["direction"]) > 0 else "S"
@@ -171,8 +174,10 @@ class FableTwoStageK2(IStrategy):
                 dataframe.iat[i, dataframe.columns.get_loc("fable_long")] = 1
             else:
                 dataframe.iat[i, dataframe.columns.get_loc("fable_short")] = 1
-            existing = str(dataframe.iat[i, dataframe.columns.get_loc("enter_tag")])
-            dataframe.iat[i, dataframe.columns.get_loc("enter_tag")] = (
+            existing = str(
+                dataframe.iat[i, dataframe.columns.get_loc("fable_entry_tag")]
+            )
+            dataframe.iat[i, dataframe.columns.get_loc("fable_entry_tag")] = (
                 tag if not existing else f"{existing}|{tag}"
             )
         return dataframe
@@ -322,6 +327,9 @@ class FableTwoStageK2(IStrategy):
         return selected
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        dataframe["enter_long"] = 0
+        dataframe["enter_short"] = 0
+        dataframe["enter_tag"] = dataframe["fable_entry_tag"]
         dataframe.loc[dataframe["fable_long"].eq(1), "enter_long"] = 1
         dataframe.loc[dataframe["fable_short"].eq(1), "enter_short"] = 1
         return dataframe
