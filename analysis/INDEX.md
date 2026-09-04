@@ -519,4 +519,5 @@
 - [`p1_btcusdtp_k1k2_causal_failure_map_20260904.md`](p1_btcusdtp_k1k2_causal_failure_map_20260904.md) — 35 个因果连续特征 + 10 个分类条件的 2023 稳定分段；15m 仅提名 gap≥5，5m 无候选。
 - [`p1_btcusdtp_k1k2_15m_gap_min_confirmation_20260904.md`](p1_btcusdtp_k1k2_15m_gap_min_confirmation_20260904.md) — 15m gap 下限 2→5 的 2024 精确冷却重放；改善不足且仍净亏，候选拒绝。
 - [`p1_btcusdtp_k1k2_15m_two_stage_k2_freqtrade_preholdout_20260904.md`](p1_btcusdtp_k1k2_15m_two_stage_k2_freqtrade_preholdout_20260904.md) — 15m 触线→延迟确认 K2；Freqtrade 100/100 入场对齐且无前视，但四个开发半年全负，候选拒绝。
+- [`p1_btcusdtp_k1k2_15m_dynamic_stop_preholdout_20260904.md`](p1_btcusdtp_k1k2_15m_dynamic_stop_preholdout_20260904.md) — 15m 六种动态/自动止损因果对照；最好仅改善 0.66bp 且 p=0.829，根因是触发前早败与右尾截断，全部拒绝。
 - [`p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md`](p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md) — 旧 1h 报告的 holdout 读取声明勘误。

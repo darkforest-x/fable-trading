@@ -13584,3 +13584,71 @@ artifacts:
     config_hash: "bc4633ee99db16128464f63abba3d9ccbaf52e314364903accb079c99ae648f6"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: Self-contained owner-facing HTML with the three diagnostic charts embedded.
+
+  - artifact_id: btcusdtp-k1k2-15m-dynamic-stop-development-receipt-20260904-v1
+    artifact_type: manifest
+    role: causal_dynamic_stop_development_results_and_gate_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f801b2c"
+    source_path: experiments/active/exp-btcusdtp-k1k2-15m-dynamic-stop-preholdout-20260904-v1/results/development_receipt.json
+    sha256: "b5aead491b7857177814f4dfed81042af0f4e86513e8760a83ed0382946c1e8a"
+    size_bytes: 10630
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-15m-dynamic-stop-preholdout-20260904-v1/results/development_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f801b2c"
+    config_hash: "1dafb9535b711eef93894cb76f7ffb3a6708e4394a3a51c62e8b4d920c4cc1bd"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Six stop policies rejected; audit and holdout rows read were zero.
+
+  - artifact_id: btcusdtp-k1k2-15m-dynamic-stop-report-receipt-20260904-v1
+    artifact_type: manifest
+    role: hashes_for_dynamic_stop_results_and_owner_reports
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f801b2c"
+    source_path: experiments/active/exp-btcusdtp-k1k2-15m-dynamic-stop-preholdout-20260904-v1/results/report_receipt.json
+    sha256: "a0016e4e4f36bc9da6d62157a422461ca9d5ac423767b56909e0685ed79dc065"
+    size_bytes: 3501
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-15m-dynamic-stop-preholdout-20260904-v1/results/report_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f801b2c"
+    config_hash: "1dafb9535b711eef93894cb76f7ffb3a6708e4394a3a51c62e8b4d920c4cc1bd"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Frozen hashes for causal policy metrics, diagnostics and reports.
+
+  - artifact_id: btcusdtp-k1k2-15m-dynamic-stop-report-20260904-v1
+    artifact_type: report
+    role: canonical_chinese_dynamic_and_automatic_stop_failure_analysis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f801b2c"
+    source_path: analysis/p1_btcusdtp_k1k2_15m_dynamic_stop_preholdout_20260904.md
+    sha256: "2e986796cb9e4f20e6f0a3c4e23ddb097b2f63f663dd22eca273274d8cd93387"
+    size_bytes: 20668
+    storage_uri: "repo://analysis/p1_btcusdtp_k1k2_15m_dynamic_stop_preholdout_20260904.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f801b2c"
+    config_hash: "1dafb9535b711eef93894cb76f7ffb3a6708e4394a3a51c62e8b4d920c4cc1bd"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Full system rules, six-arm result, path attribution and OOS automatic-failure diagnosis.
+
+  - artifact_id: btcusdtp-k1k2-15m-dynamic-stop-html-20260904-v1
+    artifact_type: report
+    role: owner_facing_self_contained_html_dynamic_stop_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f801b2c"
+    source_path: analysis/html/p1_btcusdtp_k1k2_15m_dynamic_stop_preholdout_20260904.html
+    sha256: "a128b048c8ca1b89d19b0b9147d694442db5c0d19f35e731083c7604ab90d1ce"
+    size_bytes: 488636
+    storage_uri: "repo://analysis/html/p1_btcusdtp_k1k2_15m_dynamic_stop_preholdout_20260904.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f801b2c"
+    config_hash: "1dafb9535b711eef93894cb76f7ffb3a6708e4394a3a51c62e8b4d920c4cc1bd"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Self-contained owner-facing HTML with four embedded diagnostic charts.

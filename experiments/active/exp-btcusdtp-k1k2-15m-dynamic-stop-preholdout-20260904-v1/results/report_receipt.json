@@ -1,0 +1,76 @@
+{
+  "experiment_id": "exp-btcusdtp-k1k2-15m-dynamic-stop-preholdout-20260904-v1",
+  "status": "rejected_development_audit_unopened",
+  "generated_at": "2026-09-04T19:34:50+08:00",
+  "source_commit": "f801b2c",
+  "config_sha256": "1dafb9535b711eef93894cb76f7ffb3a6708e4394a3a51c62e8b4d920c4cc1bd",
+  "source_data_sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+  "development": {
+    "entries": 100,
+    "policies": 6,
+    "baseline_mean_net_bp": -16.085564437149326,
+    "best_observed_policy": "wick_r_ladder",
+    "best_observed_mean_net_bp": -15.4246649383875,
+    "best_paired_improvement_bp": 0.6608994987618243,
+    "best_familywise_signflip_p_one_sided": 0.8292417075829241,
+    "negative_policy_halfyear_cells": 24,
+    "total_policy_halfyear_cells": 24,
+    "development_gate_passed": false
+  },
+  "failure_diagnostics": {
+    "stops_before_0p5r": 30,
+    "stops_after_0p5r_before_1p5r": 20,
+    "baseline_stops": 61,
+    "post_exit_later_3r": 25,
+    "median_extra_stop_atr_before_later_3r": 0.8548445827620296,
+    "later_3r_surviving_extra_0p25atr": 4,
+    "logistic_walk_forward_auc": 0.411525974025974,
+    "tree_walk_forward_auc": 0.3956980519480519
+  },
+  "files": {
+    "development_receipt": {
+      "path": "experiments/active/exp-btcusdtp-k1k2-15m-dynamic-stop-preholdout-20260904-v1/results/development_receipt.json",
+      "sha256": "b5aead491b7857177814f4dfed81042af0f4e86513e8760a83ed0382946c1e8a",
+      "size_bytes": 10630
+    },
+    "policy_metrics": {
+      "path": "experiments/active/exp-btcusdtp-k1k2-15m-dynamic-stop-preholdout-20260904-v1/results/development_policy_metrics.csv",
+      "sha256": "244a2504e2e19532c35a8ab746ac34b4cdba92151d7fd9bf382e40a3e7992001",
+      "size_bytes": 3872
+    },
+    "familywise_tests": {
+      "path": "experiments/active/exp-btcusdtp-k1k2-15m-dynamic-stop-preholdout-20260904-v1/results/development_policy_familywise_tests.csv",
+      "sha256": "24d8f76a2120c8599e4bace973f7edd3e7466530d9fa68827e8c92c88a88b7dd",
+      "size_bytes": 382
+    },
+    "failure_contributions": {
+      "path": "experiments/active/exp-btcusdtp-k1k2-15m-dynamic-stop-preholdout-20260904-v1/results/development_failure_contributions.csv",
+      "sha256": "2aa642bd5590cc4ff38db3c19fd31877014e1003dd07990c1b1c9fea1bfd51d9",
+      "size_bytes": 4955
+    },
+    "stop_diagnostics": {
+      "path": "experiments/active/exp-btcusdtp-k1k2-15m-dynamic-stop-preholdout-20260904-v1/results/development_baseline_stop_bar_diagnostics.csv.gz",
+      "sha256": "dd5c6e158787d8073a3ab8edafbcc11216a0e4c337f62d8f12430d155b56a59a",
+      "size_bytes": 4920
+    },
+    "classifier_metrics": {
+      "path": "experiments/active/exp-btcusdtp-k1k2-15m-dynamic-stop-preholdout-20260904-v1/results/development_early_failure_classifier_metrics.csv",
+      "sha256": "fd29137be9a29ca055edfea882e3d000229cfc9f6687c9d463cf011740859a59",
+      "size_bytes": 467
+    },
+    "canonical_markdown": {
+      "path": "analysis/p1_btcusdtp_k1k2_15m_dynamic_stop_preholdout_20260904.md",
+      "sha256": "2e986796cb9e4f20e6f0a3c4e23ddb097b2f63f663dd22eca273274d8cd93387",
+      "size_bytes": 20668
+    },
+    "owner_html": {
+      "path": "analysis/html/p1_btcusdtp_k1k2_15m_dynamic_stop_preholdout_20260904.html",
+      "sha256": "a128b048c8ca1b89d19b0b9147d694442db5c0d19f35e731083c7604ab90d1ce",
+      "size_bytes": 488636
+    }
+  },
+  "audit_outcomes_read": 0,
+  "holdout_rows_read": 0,
+  "tradingview_replacement_allowed": false,
+  "live_orders_placed": 0
+}

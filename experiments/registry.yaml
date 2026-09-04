@@ -4446,8 +4446,8 @@ experiments:
 
   - experiment_id: exp-btcusdtp-k1k2-15m-dynamic-stop-preholdout-20260904-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "f4204c1"
-    status: active
+    source_commit: "f801b2c"
+    status: rejected
     question: >-
       Can a causal dynamic or automatic stop manager repair the negative
       expectancy of the frozen BTCUSDT.P 15m two-stage K1-to-K2 entry cohort,
@@ -4457,16 +4457,24 @@ experiments:
       state machines; signal, 100-entry cohort, original risk unit, 3R target,
       48-bar horizon and 20bp cost remain identical.
     result: >-
-      preregistered_before_outcomes. Candidate constants, chronological folds,
-      matched controls, familywise paired test and failure diagnostics were
-      committed before calculating any dynamic-stop result.
+      Development rejected all six policies. The best observed wick R ladder
+      remained -15.42bp/trade versus the exact-parity baseline at -16.09bp;
+      its +0.66bp paired improvement had familywise p=0.829. Every one of the
+      24 policy-by-half-year cells was net negative. Walk-forward early-failure
+      classifiers also failed (logistic AUC 0.412; depth-2 tree AUC 0.396).
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-k1k2-15m-dynamic-stop-development-receipt-20260904-v1
+      - btcusdtp-k1k2-15m-dynamic-stop-report-receipt-20260904-v1
+      - btcusdtp-k1k2-15m-dynamic-stop-report-20260904-v1
+      - btcusdtp-k1k2-15m-dynamic-stop-html-20260904-v1
     reuse_allowed: false
     notes: >-
-      Development is limited to 2023-2024. The 2025-2026-02 audit can open only
-      if every registered development gate passes. The repository holdout at
-      or after 2026-05-04 remains closed; no TradingView, ACTIVE, frozen,
-      forward, deployment, API-key or live-order mutation is authorized.
+      Development was limited to the frozen 100 entries in 2023-2024. The
+      primary loss occurred before dynamic-profit rules could activate, while
+      wick protection rescued givebacks but truncated nearly equal 3R winner
+      contribution. The development gate failed, so 2025-2026-02 audit outcomes
+      and repository holdout remained closed. No TradingView, ACTIVE, frozen,
+      forward, deployment, API-key or live-order mutation occurred.
