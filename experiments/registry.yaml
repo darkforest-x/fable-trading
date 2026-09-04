@@ -4245,3 +4245,27 @@ experiments:
       Matched controls were descriptive and excluded from selection. Audit did
       not open and holdout_rows_read=0. No Pine, ACTIVE/frozen/forward,
       deployment, messaging or live order changed.
+
+  - experiment_id: exp-btcusdtp-k1k2-protection-trigger-preholdout-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b2339c2"
+    status: active
+    question: >-
+      Does the existing close-based fee-cover stop arm too early, and can a
+      different trigger retain more of the large winning paths?
+    single_variable: >-
+      Profit-protection trigger only: 0.75/1.00/1.25/1.50/2.00/2.50R or
+      disabled. Signal, immediate next-open entry, exact K2 stop, 3R target,
+      horizon, cooldown, risk gates and 20bp cost remain frozen.
+    result: preregistered_before_outcomes
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: null
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Development is 2023-2024 in four chronological half-year folds. Audit
+      opens only after every registered development gate; the physical source
+      ends before the repository holdout. No Pine, ACTIVE/frozen/forward,
+      deployment, messaging or live-order mutation is authorized.
