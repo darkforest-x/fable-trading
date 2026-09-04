@@ -47,6 +47,8 @@ The owner-anchor morphology is also available as a Pine Script v6 overlay:
 It is deliberately an indicator, not a strategy. The default Core Recall
 profile follows the owner's minimal visual definition: a directional K1 crosses
 SMA40 and a later K2 wick touches the line and closes back on the signal side.
+The default timeframe gate accepts both native 15-minute and 1-hour charts;
+each timeframe uses its own OHLCV bars, SMA40 and ATR14 without resampling.
 The frozen V2 broad thresholds remain available as Research Broad instead of
 being silently changed. A signal is accepted on the next bar's first update,
 when both the next open and exact K2-extreme risk are known, then rendered back

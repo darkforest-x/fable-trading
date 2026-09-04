@@ -127,6 +127,20 @@ def validate() -> dict[str, Any]:
         "indicator_not_strategy": "indicator(" in code and "strategy(" not in code,
         "no_external_data_request": "request." not in code,
         "no_negative_history_offset": re.search(r"\[\s*-\s*\d+", code) is None,
+        "native_15m_and_1h_timeframe_gate": all(
+            token in code
+            for token in (
+                'allowedTimeframes = input.string(',
+                '"15m + 1h",',
+                'options = ["15m + 1h", "1h only", "15m only", "Any"]',
+                "isFifteenMinute = timeframe.in_seconds() == 900",
+                "isOneHour = timeframe.in_seconds() == 3600",
+                'allowedTimeframes == "15m + 1h" and (isFifteenMinute or isOneHour)',
+                'isFifteenMinute ? "15M"',
+                'isOneHour ? "1H"',
+            )
+        )
+        and "request." not in code,
         "k2_requires_confirmed_bar": "barstate.isconfirmed and longK2Found" in code,
         "entry_uses_previous_k2": "longK2Found[1]" in code
         and "shortK2Found[1]" in code,

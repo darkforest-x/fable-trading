@@ -10,6 +10,8 @@
 // - The exact K2-extreme stop and next-open risk are accepted on the first
 //   update of the following bar, when that bar's open is observable.
 // - No request.* call, lower-timeframe data, or future bar is used.
+// - The default timeframe gate accepts native 15m and 1h chart calculations;
+//   each timeframe uses its own bars, SMA40 and ATR14.
 //
 // Display defaults reproduce the open-source ChartPrime MA Shift rendering:
 // hl2-vs-SMA40 state colours both candles and the SMA. The owner-facing default
@@ -20,6 +22,7 @@
 //
 // Pine v6 references:
 // https://www.tradingview.com/pine-script-docs/concepts/bar-states/
+// https://www.tradingview.com/pine-script-docs/concepts/timeframes/
 // https://www.tradingview.com/pine-script-docs/language/execution-model/
 // https://www.tradingview.com/pine-script-docs/visuals/lines-and-boxes/
 // https://www.tradingview.com/pine-script-docs/visuals/text-and-shapes/
@@ -63,10 +66,13 @@ string sideMode = input.string(
      "Direction",
      options = ["Both", "Long only", "Short only"],
      group = GROUP_SCOPE)
-bool requireOneHour = input.bool(
-     true,
-     "Require 1-hour chart",
-     tooltip = "The researched bar-distance and thresholds are defined on 1h candles.",
+string allowedTimeframes = input.string(
+     "15m + 1h",
+     "Allowed chart timeframes",
+     options = ["15m + 1h", "1h only", "15m only", "Any"],
+     tooltip =
+          "Default: calculate natively on either 15-minute or 1-hour chart bars. " +
+          "This changes only the timeframe gate, not morphology thresholds or profit claims.",
      group = GROUP_SCOPE)
 bool applyDedupe = input.bool(
      true,
@@ -477,7 +483,13 @@ f_findBestK1(int direction) =>
      shortIntermediateMaShare,
      shortVolumeRelation] = f_findBestK1(-1)
 
-bool timeframeOk = not requireOneHour or timeframe.in_seconds() == 3600
+bool isFifteenMinute = timeframe.in_seconds() == 900
+bool isOneHour = timeframe.in_seconds() == 3600
+bool timeframeOk =
+     allowedTimeframes == "Any" or
+     allowedTimeframes == "15m + 1h" and (isFifteenMinute or isOneHour) or
+     allowedTimeframes == "1h only" and isOneHour or
+     allowedTimeframes == "15m only" and isFifteenMinute
 bool longAllowed = sideMode != "Short only"
 bool shortAllowed = sideMode != "Long only"
 bool longK2Setup = timeframeOk and longAllowed and barstate.isconfirmed and longK2Found
@@ -775,7 +787,9 @@ var table hud = table.new(
      frame_width = 0,
      border_width = 0)
 if barstate.islast
-    string timeframeText = timeframeOk ? "1H" : "TF!"
+    string timeframeText =
+         isFifteenMinute ? "15M" :
+         isOneHour ? "1H" : "TF!"
     string profileText =
          coreRecallProfile ? "CORE" :
          broadProfile ? "BROAD" :
