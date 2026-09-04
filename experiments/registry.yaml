@@ -4143,3 +4143,28 @@ experiments:
       messaging or order occurred. Reuse is limited to negative research
       evidence and the next preregistration; this result is not production
       eligible and did not update the TradingView Pine indicator.
+
+  - experiment_id: exp-btcusdtp-k1k2-stop-buffer-preholdout-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "20eeddc"
+    status: active
+    question: >-
+      Does an ATR14 buffer outside the K2 extreme repair the 15m/5m
+      stop-sweep failure without changing signal morphology or another
+      execution family?
+    single_variable: >-
+      K2 stop buffer only: 0/0.10/0.20/0.30/0.50 ATR14. The independently
+      selected MA/gap/score settings, next-open entry, 3R target, 12-hour
+      horizon, 1.5R fee-cover protection, cooldown and 20bp cost remain fixed.
+    result: preregistered_before_outcomes
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btcusdtp_k1k2_stop_buffer_preholdout_20260904.md
+    reuse_allowed: false
+    notes: >-
+      Development is 2023-2024 in four chronological half-year folds. The
+      non-pristine 2025 through 2026-02 audit may open only for a timeframe
+      that first passes the registered development gate. The physical source
+      ends before holdout; no Pine, ACTIVE/frozen/forward, deployment,
+      messaging or live order is in scope.
