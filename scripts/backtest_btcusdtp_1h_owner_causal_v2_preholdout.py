@@ -1107,8 +1107,8 @@ def run_development(config: dict[str, Any], featured: pd.DataFrame, quality: dic
         "development_protection_grid_sha256": sha256_file(
             RESULTS / "development_protection_grid.csv"
         ),
-        "validation_read": false,
-        "production_mutation": false,
+        "validation_read": False,
+        "production_mutation": False,
     }
     write_json(SELECTION_PATH, receipt)
     print(json.dumps(json_value(receipt), ensure_ascii=False, indent=2))
@@ -1248,7 +1248,7 @@ def run_validation(config: dict[str, Any], featured: pd.DataFrame, quality: dict
         "overlap": overlap,
         "success_gate_passed": success,
         "final_metrics": final_metric.to_dict(),
-        "production_mutation": false,
+        "production_mutation": False,
     }
     write_json(RESULTS / "validation_summary.json", summary)
     component_plot(metrics, RESULTS / "validation_components.png", "Frozen validation: component and bundle results")
