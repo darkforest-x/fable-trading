@@ -1,0 +1,161 @@
+{
+  "experiment_id": "exp-btcusdtp-k1k2-causal-failure-map-20260904-v1",
+  "status": "preregistered_before_outcomes",
+  "predecessor": "exp-btcusdtp-k1k2-partial-runner-preholdout-20260904-v1",
+  "question": "Which causal entry-time morphology, trend, pullback, volatility, volume, structure, direction, or clock segment consistently separates better and worse K1-to-K2 outcomes on both halves of 2023?",
+  "owner_authorization": {
+    "verbatim": "批准\n所有的你自行探索啊，后面的都不需要我批准，直接去执行，开始目标模式",
+    "authorized_on": "2026-09-04",
+    "scope": "autonomous 5min/15min research; this stage is diagnostic and does not mutate a trading rule",
+    "holdout_policy": "one final use only after a later single-variable candidate clears every pre-holdout gate",
+    "live_or_promotion_authorized": false
+  },
+  "instrument": {
+    "tradingview_symbol": "OKX:BTCUSDT.P",
+    "okx_instrument": "BTC-USDT-SWAP",
+    "timezone": "UTC"
+  },
+  "source": {
+    "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+    "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "rows": 341567,
+    "first_time": "2022-11-30T16:00:00Z",
+    "last_time": "2026-02-28T15:55:00Z",
+    "holdout_ohlcv_rows_materialized": 0
+  },
+  "window": {
+    "discovery_start_inclusive": "2023-01-01T00:00:00Z",
+    "discovery_end_exclusive": "2024-01-01T00:00:00Z",
+    "discovery_folds": ["2023H1", "2023H2"],
+    "future_confirmation_start_inclusive": "2024-01-01T00:00:00Z",
+    "future_confirmation_end_exclusive": "2025-01-01T00:00:00Z",
+    "audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "audit_end_exclusive": "2026-02-28T16:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "outcomes_allowed_in_this_experiment": "2023 only",
+    "confirmation_audit_and_holdout_rows_read": 0
+  },
+  "signal_frozen": {
+    "core": "K1 directional real body truly crosses SMA(HL2); K2 wick touches it while the full body and close remain on the directional side",
+    "secondary_score": "same twelve-component equal-weight causal score as predecessor",
+    "15m": {
+      "ma_period": 120,
+      "gap_min_bars": 2,
+      "gap_max_bars": 8,
+      "score_floor": 0.40,
+      "maximum_pair_gap_bars": 48
+    },
+    "5m": {
+      "ma_period": 40,
+      "gap_min_bars": 6,
+      "gap_max_bars": 24,
+      "score_floor": 0.40,
+      "maximum_pair_gap_bars": 96
+    }
+  },
+  "timeframe_fixed": {
+    "15m": {
+      "horizon_bars": 48,
+      "cooldown_bars": 24,
+      "minimum_arm_events_total": 36,
+      "minimum_arm_events_per_discovery_fold": 12
+    },
+    "5m": {
+      "horizon_bars": 144,
+      "cooldown_bars": 72,
+      "minimum_arm_events_total": 72,
+      "minimum_arm_events_per_discovery_fold": 24
+    }
+  },
+  "execution_frozen": {
+    "entry": "open immediately after completed K2",
+    "k2_stop_buffer_atr": 0.0,
+    "next_open_risk_atr_min": 0.15,
+    "next_open_risk_atr_max": 2.50,
+    "fee_to_risk_max": 1.25,
+    "target_r": 3.0,
+    "horizon_clock_hours": 12,
+    "same_bar_collision": "conservative stop first",
+    "gap_policy": "barrier price",
+    "timeout_exit": "close of final horizon bar",
+    "profit_protection_trigger_close_r": 1.5,
+    "round_trip_cost_fraction": 0.002,
+    "funding": "excluded",
+    "slippage_beyond_round_trip_cost": "excluded"
+  },
+  "diagnostic_design": {
+    "continuous_arm_grid": ["<=H1_q25", "<=H1_q50", ">=H1_q50", ">=H1_q75"],
+    "threshold_source": "feature values of baseline-accepted 2023H1 trades; outcomes do not set thresholds",
+    "binary_arms": [
+      "long_only",
+      "short_only",
+      "structure_aligned",
+      "structure_not_opposite",
+      "weekend",
+      "weekday",
+      "utc_00_06",
+      "utc_06_12",
+      "utc_12_18",
+      "utc_18_24"
+    ],
+    "score": "minimum of the arm-minus-baseline mean net bp improvements in 2023H1 and 2023H2",
+    "familywise_null": "shuffle net outcomes within each half-year, preserve all causal arm memberships, and compare the observed maximum stable score with 20000 permutation maxima",
+    "nomination_rule": "nominate exactly one arm per timeframe only when sample-eligible, stable improvement is at least 5bp in both halves, combined arm net is at least -10bp per trade, and neither half has zero observations",
+    "tie_break": "higher stable improvement, higher combined net, more events, then lexical arm id",
+    "claim_limit": "post-entry outcome segmentation on the frozen accepted ledger; any nomination must be preregistered as a new single-variable experiment and rerun before cooldown before it can be called a strategy improvement"
+  },
+  "continuous_features": [
+    "gap_bars",
+    "secondary_score",
+    "k1_body_ratio",
+    "k1_range_atr",
+    "k1_close_location",
+    "k1_cross_depth_atr",
+    "k2_wick_share",
+    "k2_body_ratio",
+    "k2_rejection_close_location",
+    "k2_touch_depth_atr",
+    "path_close_share",
+    "path_colour_share",
+    "stop_distance_atr",
+    "fee_to_risk",
+    "reference_ma_slope_4_dir_atr",
+    "reference_ma_slope_12_dir_atr",
+    "reference_ma_accel_4_dir_atr",
+    "k2_extension_dir_atr",
+    "momentum_12_dir_atr",
+    "momentum_48_dir_atr",
+    "approach_pullback_3_dir_atr",
+    "k1_to_k2_retrace_dir_atr",
+    "path_peak_extension_dir_atr",
+    "path_retrace_from_peak_atr",
+    "k1_volume_ratio_20",
+    "k2_volume_ratio_20",
+    "k2_atr_release_24",
+    "k2_atr_release_96",
+    "ma_shift_osc_dir",
+    "ma_shift_osc_delta_dir",
+    "k2_range_atr",
+    "prior_ma_side_share_12_dir",
+    "prior_ma_side_share_48_dir",
+    "prior_native_colour_share_12_dir",
+    "entry_gap_dir_atr"
+  ],
+  "permutation": {
+    "resamples": 20000,
+    "seed": 20260904
+  },
+  "matched_control": {
+    "role": "not used to select a diagnostic arm; a later exact single-variable experiment must build the registered matched random control",
+    "controls_per_trade": 3,
+    "seed": "btcusdtp-k1k2-causal-filter-20260904-v1"
+  },
+  "eligibility": {
+    "training_eligible": false,
+    "production_eligible": false,
+    "holdout_consumed": false,
+    "active_or_frozen_mutation_allowed": false,
+    "live_orders_allowed": false
+  }
+}
