@@ -12,9 +12,10 @@
 // - No request.* call, lower-timeframe data, or future bar is used.
 //
 // Display defaults reproduce the open-source ChartPrime MA Shift rendering:
-// hl2-vs-SMA40 state colours both candles and the SMA, with a 2 px main line
-// plus a 7 px/80%-transparent glow. Signals use one compact L/S marker and two
-// small TP/SL zones; research diagnostics stay in the Data Window.
+// hl2-vs-SMA40 state colours both candles and the SMA. The owner-facing default
+// uses a thin 1 px main line with the 7 px/80%-transparent glow hidden. Signals
+// use one compact L/S marker and two unlabelled TP/SL zones; research diagnostics
+// stay in the Data Window.
 //
 // Pine v6 references:
 // https://www.tradingview.com/pine-script-docs/concepts/bar-states/
@@ -26,6 +27,7 @@ indicator(
      "Fable K1→K2 · Clean Recall",
      shorttitle = "Fable K1→K2",
      overlay = true,
+     behind_chart = false,
      max_labels_count = 100,
      max_boxes_count = 200)
 
@@ -582,9 +584,11 @@ color maShiftColor = maCandleSide == 1 ? MA_UP : MA_DOWN
 
 // Source parity with Moving Average Shift [ChartPrime]: the state is based on
 // hl2 >= SMA(hl2, 40), not candle direction. Both the MA and full OHLC candle
-// take that state colour. The second plot is the source's soft outer glow.
-plot(showSma40 ? sma40 : na, "MA Shift 40 · main", color = maShiftColor, linewidth = 2)
-plot(showSma40 ? sma40 : na, "MA Shift 40 · glow", color = color.new(maShiftColor, 80), linewidth = 7)
+// take that state colour. This indicator renders in front of the native chart
+// so its candle body, border and wick cannot be covered by the chart defaults.
+// The main line is thin by default; the optional source glow starts unchecked.
+plot(showSma40 ? sma40 : na, "MA Shift 40 · main", color = maShiftColor, linewidth = 1)
+plot(showSma40 ? sma40 : na, "MA Shift 40 · glow", color = color.new(maShiftColor, 80), linewidth = 7, display = display.none)
 barcolor(colourBars and not na(sma40) ? maShiftColor : na, title = "MA Shift bar colour · source")
 plotcandle(
      colourBars and not na(sma40) ? open : na,
@@ -636,12 +640,7 @@ if (longEntryEvent or shortEntryEvent) and showPositionBoxes
          bottom = math.min(eventEntry, eventTarget),
          border_color = color.new(TARGET, 25),
          border_width = 1,
-         bgcolor = color.new(TARGET, 84),
-         text = "TP",
-         text_color = color.new(color.white, 25),
-         text_size = size.tiny,
-         text_halign = text.align_right,
-         text_valign = text.align_center)
+         bgcolor = color.new(TARGET, 84))
     box.new(
          left = bar_index,
          top = math.max(eventEntry, eventStop),
@@ -649,12 +648,7 @@ if (longEntryEvent or shortEntryEvent) and showPositionBoxes
          bottom = math.min(eventEntry, eventStop),
          border_color = color.new(RISK, 25),
          border_width = 1,
-         bgcolor = color.new(RISK, 84),
-         text = "SL",
-         text_color = color.new(color.white, 25),
-         text_size = size.tiny,
-         text_halign = text.align_right,
-         text_valign = text.align_center)
+         bgcolor = color.new(RISK, 84))
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Alerts

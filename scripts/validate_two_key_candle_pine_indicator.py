@@ -140,8 +140,8 @@ def validate() -> dict[str, Any]:
         and "line.new(" not in code
         and 'text = "L"' in code
         and 'text = "S"' in code
-        and 'text = "TP"' in code
-        and 'text = "SL"' in code
+        and 'text = "TP"' not in code
+        and 'text = "SL"' not in code
         and "offset = -1" in code,
         "frozen_research_broad_gap": 'profile == "Research broad · 2–8"' in code
         and "coreRecallProfile or broadProfile ? 2" in code
@@ -155,8 +155,9 @@ def validate() -> dict[str, Any]:
         "chartprime_source_style": "color MA_UP = #17A297" in code
         and "color MA_DOWN = color.orange" in code
         and "maShiftColor = maCandleSide == 1 ? MA_UP : MA_DOWN" in code
-        and '"MA Shift 40 · main", color = maShiftColor, linewidth = 2' in code
-        and '"MA Shift 40 · glow", color = color.new(maShiftColor, 80), linewidth = 7' in code
+        and "behind_chart = false" in code
+        and '"MA Shift 40 · main", color = maShiftColor, linewidth = 1' in code
+        and '"MA Shift 40 · glow", color = color.new(maShiftColor, 80), linewidth = 7, display = display.none' in code
         and "plotcandle(" in code
         and "wickcolor = maShiftColor" in code
         and "bordercolor = maShiftColor" in code,

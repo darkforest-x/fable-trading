@@ -70,7 +70,8 @@ layout had already reached its indicator-count limit. The reference-style
 source is saved privately and is not published. Its price pane now follows the
 open-source `Moving Average Shift [ChartPrime]` rendering contract directly:
 `hl2 >= SMA(hl2, 40)` selects `#17A297` or Pine `color.orange` for both the full
-OHLC candle and the MA, and the MA uses the source's 2 px line plus 7 px/80%
-transparent glow. Each accepted signal keeps one compact L/S marker and two
-small TP/SL zones; verbose K1/K2/entry labels, relation lines and six-MA clouds
-remain absent.
+OHLC candle and the MA. The candle overlay is rendered in front of the native
+chart so its body, border and wick all keep that state colour. The MA defaults
+to a 1 px line, while the 7 px/80%-transparent glow starts hidden. Each accepted
+signal keeps one compact L/S marker and two small unlabelled TP/SL zones;
+verbose K1/K2/entry labels, relation lines and six-MA clouds remain absent.
