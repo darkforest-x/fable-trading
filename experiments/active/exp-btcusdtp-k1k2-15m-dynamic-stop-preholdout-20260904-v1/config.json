@@ -217,6 +217,12 @@
         "directional_sma_slope_6_atr",
         "entry_gap_directional_atr"
       ],
+      "derived_feature_definitions": {
+        "confirmation_volume_ratio_20": "confirmation-bar volume divided by the trailing 20-bar mean already present in the causal frame",
+        "confirmation_atr_release_24": "confirmation ATR14 divided by its causal trailing reference already present in the causal frame",
+        "directional_sma_slope_6_atr": "direction times SMA40(HL2)[confirmation] minus SMA40(HL2)[confirmation-6], divided by confirmation ATR14",
+        "entry_gap_directional_atr": "direction times next-open entry minus completed confirmation close, divided by confirmation ATR14"
+      },
       "metrics": [
         "walk-forward ROC AUC",
         "Brier score",
