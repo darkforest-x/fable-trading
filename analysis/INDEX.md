@@ -509,6 +509,7 @@
 
 ## 2026-09-04 BTCUSDT.P K1→K2 低周期研究
 
+- [`p1_btcusdtp_15m_trend_regime_live_entry_20260904.md`](p1_btcusdtp_15m_trend_regime_live_entry_20260904.md) — 15m 持仓/趋势双状态机、每 regime 一单与 K2 当前趋势活性门；重复信号显著下降，但扣成本收益与匹配随机检验仍失败，仅保存为 TradingView 研究显示 V5。
 - [`p1_btcusdtp_15m_multifactor_confluence_20260904.md`](p1_btcusdtp_15m_multifactor_confluence_20260904.md) — 15m 103 个因果模型特征 + 1 个规则共振票数、14 个预注册因子包的 expanding-OOF / 冻结重放 / 失败状态机审计；多因子未救活负期望候选池，全部拒绝。
 - [`p1_btcusdtp_15m_runner_isolation_20260904.md`](p1_btcusdtp_15m_runner_isolation_20260904.md) — 15m 趋势接管交易的事前可识别性审计；入场选择、+2ATR 后追入、进度止损与早期学习退出均未跨期转正，全部拒绝。
 - [`p1_btcusdtp_15m_trend_refactor_20260904.md`](p1_btcusdtp_15m_trend_refactor_20260904.md) — 15m 非 SMA40 高召回、L2 失败、均线趋势 runner、利润底线反事实与 K1→K2 关系层重构；runner 放大右尾但系统净期望仍负。

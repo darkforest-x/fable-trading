@@ -198,6 +198,8 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
         "exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1",
         "exp-btcusdtp-15m-dual-ma-runner-preholdout-20260904-v1",
         "exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1",
+        "exp-btcusdtp-15m-trend-regime-episode-preholdout-20260904-v1",
+        "exp-btcusdtp-15m-trend-regime-live-entry-preholdout-20260904-v1",
         "exp-btcusdtp-15m-ma-runner-grid-preholdout-20260904-v1",
         "exp-btcusdtp-15m-ma-state-trend-preholdout-20260904-v1",
         "exp-btcusdtp-15m-multifactor-confluence-preholdout-20260904-v1",

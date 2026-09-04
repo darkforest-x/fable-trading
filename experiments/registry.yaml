@@ -4691,3 +4691,68 @@ experiments:
       display-candidate contract inherited Owner-approved post-boundary
       screenshot morphology. No TradingView, ACTIVE, frozen, forward, deploy,
       sizing, API-key or live-order mutation occurred.
+
+  - experiment_id: exp-btcusdtp-15m-trend-regime-episode-preholdout-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "331866a"
+    status: superseded
+    question: >-
+      Can a causal trend-regime episode ledger prevent BTCUSDT.P 15m from
+      repeatedly accepting K1/K2 patterns in the same range after each stop or
+      timeout?
+    single_variable: >-
+      Owner-authorized semantic bundle separates position lifetime from regime
+      lifetime; numeric spread, slope, strong-dwell and neutral-dwell values are
+      selected one factor at a time on 2023-2024 only.
+    result: >-
+      V4 reduced development density from 36.61 to 8.50 signals/30d and audit
+      density from 36.89 to 10.41, but audit mean net remained -3.89bp and
+      matched excess was non-significant (p=0.163). It was superseded after
+      finding that remembered regimes could accept a K2 after current trend
+      alignment had decayed.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btcusdtp_15m_trend_regime_live_entry_20260904.md
+    artifacts:
+      - btcusdtp-15m-trend-regime-v4-audit-20260904-v1
+    reuse_allowed: false
+    notes: >-
+      Economic rows end 2026-02-28 15:45 UTC and repository holdout price rows
+      read are zero. This configuration consumed one Owner-approved post-freeze
+      TradingView visual check around 2026-08-05; no economic scoring followed.
+
+  - experiment_id: exp-btcusdtp-15m-trend-regime-live-entry-preholdout-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "331866a"
+    status: rejected
+    question: >-
+      After one-signal-per-regime de-duplication, does requiring the EMA30/SMA60
+      direction and EMA30 four-bar slope to remain live at K2 remove stale-range
+      entries without pretending that sparse signals are automatically profitable?
+    single_variable: >-
+      Exactly one preregistered semantic eligibility change: direction times
+      EMA30-SMA60 spread must be positive and direction times EMA30 four-bar
+      slope must be non-negative at K2. No magnitude threshold was tuned.
+    result: >-
+      Audit density fell to 8.71 signals/30d, 24h repeats to 9.76% and median
+      spacing rose to 73.88h. Economics failed: 123 trades at -10.41bp mean net,
+      PF 0.806, matched excess +5.54bp with p=0.353, and score top-decile
+      -53.08bp. Saved to TradingView as research-only V5, not production.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btcusdtp_15m_trend_regime_live_entry_20260904.md
+    artifacts:
+      - btcusdtp-15m-trend-regime-live-summary-20260904-v1
+      - btcusdtp-15m-trend-regime-live-pine-20260904-v1
+      - btcusdtp-15m-trend-regime-live-tradingview-receipt-20260904-v1
+      - btcusdtp-15m-trend-regime-live-report-20260904-v1
+      - btcusdtp-15m-trend-regime-live-html-20260904-v1
+    reuse_allowed: false
+    notes: >-
+      Economic rows end 2026-02-28 15:45 UTC; repository holdout rows read: 0.
+      Holdout use #1 for this configuration was an Owner-approved post-freeze
+      visual check of the 2026-08-05 chart. No parameters or economic results
+      changed afterward. No ACTIVE, frozen, forward, deployment or live order
+      state changed.

@@ -13952,3 +13952,112 @@ artifacts:
     config_hash: "3eb9b0de1192b11a2d2f7385c641417aa62b9e2e1d8fc8f8a4661fec4ca132ab"
     data_cutoff: "2026-02-28T16:00:00Z"
     notes: Self-contained HTML with embedded selector, density, management and early-classifier figures.
+
+  - artifact_id: btcusdtp-15m-trend-regime-v4-audit-20260904-v1
+    artifact_type: manifest
+    role: causal_one_signal_per_trend_regime_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "331866a"
+    source_path: experiments/active/exp-btcusdtp-15m-trend-regime-episode-preholdout-20260904-v1/results/audit_summary.json
+    sha256: "e0b14b8eed59f489b084c7ab7d976a3a74cf9365dd4e4fdabb3a53f36b64a4bf"
+    size_bytes: 8617
+    storage_uri: "repo://experiments/active/exp-btcusdtp-15m-trend-regime-episode-preholdout-20260904-v1/results/audit_summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "331866a"
+    config_hash: "0f3fa8ac0203bef21f822b370a46ef30b04df9d9d739bd0faf355e95c4b2d990"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: >-
+      One-signal-per-regime semantics reduced density but was superseded by V5
+      because historical regime memory did not guarantee current trend liveness.
+      Zero repository holdout rows; one approved post-freeze visual check.
+
+  - artifact_id: btcusdtp-15m-trend-regime-live-summary-20260904-v1
+    artifact_type: manifest
+    role: current_trend_liveness_density_and_economic_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "331866a"
+    source_path: experiments/active/exp-btcusdtp-15m-trend-regime-live-entry-preholdout-20260904-v1/results/summary.json
+    sha256: "e60a0a8543badaf6d57945dbcec89ee8a643c3e40144692614f82f19e897aa14"
+    size_bytes: 12271
+    storage_uri: "repo://experiments/active/exp-btcusdtp-15m-trend-regime-live-entry-preholdout-20260904-v1/results/summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "331866a"
+    config_hash: "debca83b55dfa0fbc8b4eb95999805ac99ef278488cdb6c5a250253612232478"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: >-
+      V5 density passed the sparse-display gates but net expectancy and matched
+      random significance failed. Repository holdout rows read: zero.
+
+  - artifact_id: btcusdtp-15m-trend-regime-live-pine-20260904-v1
+    artifact_type: config
+    role: tradingview_15m_one_live_signal_per_trend_regime_display
+    source_repo: darkforest-x/fable-trading
+    source_commit: "331866a"
+    source_path: experiments/active/exp-btcusdtp-15m-trend-regime-live-entry-preholdout-20260904-v1/pine/fable_15m_trend_regime_live_v5.pine
+    sha256: "8005ba90216d41529b63e6533c8d3a7259715e8e137c3d4fca2f330da67e3ff1"
+    size_bytes: 17596
+    storage_uri: "repo://experiments/active/exp-btcusdtp-15m-trend-regime-live-entry-preholdout-20260904-v1/pine/fable_15m_trend_regime_live_v5.pine"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "331866a"
+    config_hash: "debca83b55dfa0fbc8b4eb95999805ac99ef278488cdb6c5a250253612232478"
+    notes: >-
+      Pine v6 compiled and cloud-saved as private script version 5. One visible
+      EMA30, internal SMA60, fixed-width zones, no fixed TP/SL labels; research only.
+
+  - artifact_id: btcusdtp-15m-trend-regime-live-tradingview-receipt-20260904-v1
+    artifact_type: manifest
+    role: tradingview_compile_save_and_owner_range_visual_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "331866a"
+    source_path: experiments/active/exp-btcusdtp-15m-trend-regime-live-entry-preholdout-20260904-v1/results/tradingview_save_receipt.json
+    sha256: "acef9987e8bc3b99b4862d613525d924c3d0f5da744d14d4a4654aa118ab37b8"
+    size_bytes: 1444
+    storage_uri: "repo://experiments/active/exp-btcusdtp-15m-trend-regime-live-entry-preholdout-20260904-v1/results/tradingview_save_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "331866a"
+    config_hash: "debca83b55dfa0fbc8b4eb95999805ac99ef278488cdb6c5a250253612232478"
+    notes: >-
+      Records Owner-approved holdout use #1 for this configuration: visual-only
+      check after freeze; no parameter or economic change followed.
+
+  - artifact_id: btcusdtp-15m-trend-regime-live-report-20260904-v1
+    artifact_type: report
+    role: canonical_chinese_trend_regime_state_machine_failure_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "331866a"
+    source_path: analysis/p1_btcusdtp_15m_trend_regime_live_entry_20260904.md
+    sha256: "0cb9461302ee08c18aab49baece35662edc47981057a79015500ce26ec9aff13"
+    size_bytes: 11535
+    storage_uri: "repo://analysis/p1_btcusdtp_15m_trend_regime_live_entry_20260904.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "331866a"
+    config_hash: "debca83b55dfa0fbc8b4eb95999805ac99ef278488cdb6c5a250253612232478"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: Full rules, density, fold stability, matched controls, top-decile failure and visual receipt.
+
+  - artifact_id: btcusdtp-15m-trend-regime-live-html-20260904-v1
+    artifact_type: report
+    role: owner_facing_self_contained_html_trend_regime_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "331866a"
+    source_path: analysis/html/p1_btcusdtp_15m_trend_regime_live_entry_20260904.html
+    sha256: "cac66896d19c6bfd2724b66e5ca670a43b821b14034bb67ede48f0404554ef26"
+    size_bytes: 604424
+    storage_uri: "repo://analysis/html/p1_btcusdtp_15m_trend_regime_live_entry_20260904.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "331866a"
+    config_hash: "debca83b55dfa0fbc8b4eb95999805ac99ef278488cdb6c5a250253612232478"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: Self-contained HTML with embedded pre-holdout comparison and TradingView visual evidence.
