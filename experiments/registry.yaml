@@ -4216,7 +4216,7 @@ experiments:
   - experiment_id: exp-btcusdtp-k1k2-breakout-entry-preholdout-20260904-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "d39b090"
-    status: active
+    status: rejected
     question: >-
       Does waiting for a directional close beyond the K2 continuation extreme
       identify direct follow-through better than immediate entry?
@@ -4225,14 +4225,23 @@ experiments:
       close beyond K2 high for long / K2 low for short and beyond the causal MA
       within 15/30/60/120 clock minutes, then enter next open. Original K2
       opposite-extreme stop and all other execution settings remain frozen.
-    result: preregistered_before_outcomes
+    result: >-
+      rejected_at_development_futility_gate. Every 15m and 5m breakout window
+      was worse than immediate entry. Breakout raised median risk from
+      0.826 to about 1.20 ATR on 15m and from 1.06 to about 1.42 ATR on 5m,
+      expanded the admitted pool, and reduced gross expectancy to at most 0.50bp.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_btcusdtp_k1k2_breakout_entry_preholdout_20260904.md
+    artifacts:
+      - btcusdtp-k1k2-breakout-selection-20260904-v1
+      - btcusdtp-k1k2-breakout-report-receipt-20260904-v1
+      - btcusdtp-k1k2-breakout-report-20260904-v1
+      - btcusdtp-k1k2-breakout-html-20260904-v1
     reuse_allowed: false
     notes: >-
-      Development is 2023-2024 in four chronological half-year folds. Matched
-      controls are descriptive and excluded from selection. Audit opens only
-      after the full development success gate; no Pine, ACTIVE/frozen/forward,
-      deployment, messaging or live order is in scope.
+      Development used 2023-2024 in four chronological half-year folds.
+      Matched controls were descriptive and excluded from selection. Audit did
+      not open and holdout_rows_read=0. No Pine, ACTIVE/frozen/forward,
+      deployment, messaging or live order changed.

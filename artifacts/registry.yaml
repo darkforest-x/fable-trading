@@ -13083,3 +13083,73 @@ artifacts:
     config_hash: "7f0c34711278c3ae180949a86d43bac093269a6f16b0fee2ac64c2f2e4a0cf54"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: Self-contained owner-facing HTML generated from the canonical report.
+
+  - artifact_id: btcusdtp-k1k2-breakout-selection-20260904-v1
+    artifact_type: config
+    role: frozen_15m_5m_direction_breakout_development_selection
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de94b17"
+    source_path: experiments/active/exp-btcusdtp-k1k2-breakout-entry-preholdout-20260904-v1/results/selection_receipt.json
+    sha256: "ccb94819444cb66ef198180457902f9edc98cb44175699b1e53f04e5e3de0610"
+    size_bytes: 13599
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-breakout-entry-preholdout-20260904-v1/results/selection_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de94b17"
+    config_hash: "a516afc1a07ede05d7d8077e17db28f8e7c96679012bde6a8c8a2d84cae05a2c"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Both timeframes retained immediate entry; every breakout arm was worse.
+
+  - artifact_id: btcusdtp-k1k2-breakout-report-receipt-20260904-v1
+    artifact_type: manifest
+    role: hashes_for_direction_breakout_selection_and_reports
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de94b17"
+    source_path: experiments/active/exp-btcusdtp-k1k2-breakout-entry-preholdout-20260904-v1/results/report_receipt.json
+    sha256: "a5f12c7aaae21fe3344f61ab6570b6ea7201cd165751e615bd1b06b8aa651f56"
+    size_bytes: 1220
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-breakout-entry-preholdout-20260904-v1/results/report_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de94b17"
+    config_hash: "a516afc1a07ede05d7d8077e17db28f8e7c96679012bde6a8c8a2d84cae05a2c"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Frozen hash receipt; audit_opened=false and holdout_rows_read=0.
+
+  - artifact_id: btcusdtp-k1k2-breakout-report-20260904-v1
+    artifact_type: report
+    role: canonical_chinese_direction_breakout_entry_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de94b17"
+    source_path: analysis/p1_btcusdtp_k1k2_breakout_entry_preholdout_20260904.md
+    sha256: "9b27b66fa21b3551dd8452232ddd39ca36538b34dedc62638bebcaad189859cf"
+    size_bytes: 5130
+    storage_uri: "repo://analysis/p1_btcusdtp_k1k2_breakout_entry_preholdout_20260904.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de94b17"
+    config_hash: "a516afc1a07ede05d7d8077e17db28f8e7c96679012bde6a8c8a2d84cae05a2c"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: >-
+      Full grid, four time folds, matched controls and risk-expansion diagnosis
+      for the post-K2 direction-breakout entry family.
+
+  - artifact_id: btcusdtp-k1k2-breakout-html-20260904-v1
+    artifact_type: report
+    role: owner_facing_html_direction_breakout_entry_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "de94b17"
+    source_path: analysis/html/p1_btcusdtp_k1k2_breakout_entry_preholdout_20260904.html
+    sha256: "aaaa1a96bc9c921be5b58618e87833e52177fe93592cb068de814a0cb5f50b62"
+    size_bytes: 8842
+    storage_uri: "repo://analysis/html/p1_btcusdtp_k1k2_breakout_entry_preholdout_20260904.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "de94b17"
+    config_hash: "a516afc1a07ede05d7d8077e17db28f8e7c96679012bde6a8c8a2d84cae05a2c"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Self-contained owner-facing HTML generated from the canonical report.
