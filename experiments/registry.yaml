@@ -3937,7 +3937,7 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "2364ae0180f96d8013ef7dd6024d3b5638334986"
+    source_commit: "22cfe1b5118c563eb2d1d95efeb9efe8294b6275"
     status: rejected
     question: >-
       How did the current Pine-v8 Core Recall K1-to-K2 rule perform on
@@ -3958,6 +3958,10 @@ experiments:
       controls; +8.57bp paired excess was not significant (p=0.2829). The two
       unmatched partial-September winners supplied 1139% of total net return.
       Equal 1% risk sizing lost 13.31%, so the research economic gate failed.
+      A separately frozen holdout-use-2 exit replay found that 13/9/7 of the 16
+      original 3R targets continued to 4R/5R/6R. Fixed 5R improved the full-
+      sample mean to +12.16bp but was period-unstable and still lost 8.31% at
+      equal risk after excluding partial September; no exit arm was promoted.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
@@ -3969,6 +3973,11 @@ experiments:
       - btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-trade-ledger
       - btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-matched-controls
       - btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-validation
+      - btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-exit-protocol
+      - btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-exit-diagnostics
+      - btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-exit-ledger
+      - btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-exit-validation
+      - btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-exit-chart
       - btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-report
       - btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-html
     reuse_allowed: true
@@ -3985,6 +3994,11 @@ experiments:
       path jointly separated 17 passing from 32 failing setups, but this is an
       unvalidated hypothesis for a new unseen window rather than a revised
       holdout result. Immediate reversal, giveback and ordinary-stop losses need
-      separate entry/path/exit remedies. No
+      separate entry/path/exit remedies. Owner's higher-TP question authorized
+      configuration-specific holdout use #2; the six exit arms were frozen
+      before replay and kept every signal, entry, K2 stop, 12-bar horizon, cost
+      and matched control unchanged. Fixed 5R exposed a real but concentrated
+      right tail; 3R partial plus runner is the more stable next development-
+      window hypothesis, not a confirmed parameter. No
       tuning, training, promotion, deployment, ACTIVE/frozen/forward mutation,
       messaging or order occurred.

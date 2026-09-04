@@ -698,46 +698,135 @@ artifacts:
     data_cutoff: "2026-09-04T03:00:00Z"
     notes: Passed 23/23 checks including full trade and control replay, exact costs, hashes, exclusion radius and three future-data mutations.
 
+  - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-exit-protocol
+    artifact_type: config
+    role: preregistered_exit_only_holdout_use_2_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a27950c75c9b9a966fdbed2114c8f2782981568c"
+    source_path: experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/protocol_amendment_02_exit_extension.json
+    sha256: "4f8933ce25353c177ac928fb572371b2c20175ed281390b0e09817e99dedcef4"
+    size_bytes: 3989
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/protocol_amendment_02_exit_extension.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a27950c75c9b9a966fdbed2114c8f2782981568c"
+    config_hash: "4f8933ce25353c177ac928fb572371b2c20175ed281390b0e09817e99dedcef4"
+    data_cutoff: "2026-09-04T03:00:00Z"
+    notes: Frozen before exit replay; keeps all 49 signals, entries, K2 stops, 12-bar paths, 20bp cost and 141 exact controls unchanged across six exit arms.
+
+  - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-exit-diagnostics
+    artifact_type: manifest
+    role: six_arm_exit_only_posthoc_diagnostic
+    source_repo: darkforest-x/fable-trading
+    source_commit: "22cfe1b5118c563eb2d1d95efeb9efe8294b6275"
+    source_path: experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_diagnostics.json
+    sha256: "658337490d600f3b615bb472891961055b756a8ba81ec186470bd1b9bedcbe90"
+    size_bytes: 16251
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_diagnostics.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "22cfe1b5118c563eb2d1d95efeb9efe8294b6275"
+    config_hash: "4f8933ce25353c177ac928fb572371b2c20175ed281390b0e09817e99dedcef4"
+    data_cutoff: "2026-09-04T03:00:00Z"
+    notes: >-
+      Configuration-specific holdout use 2. Fixed 5R improved full-sample mean
+      but failed cross-period stability; all arms remain exploratory and
+      non-promotable.
+
+  - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-exit-ledger
+    artifact_type: manifest
+    role: all_candidate_and_control_rows_for_six_exit_arms
+    source_repo: darkforest-x/fable-trading
+    source_commit: "22cfe1b5118c563eb2d1d95efeb9efe8294b6275"
+    source_path: experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_trade_ledger.csv
+    sha256: "7ca02ba3e958c8b6a123216066187a9d4d85fe9ece9bbc8d92572178375981b9"
+    size_bytes: 333515
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_trade_ledger.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "22cfe1b5118c563eb2d1d95efeb9efe8294b6275"
+    config_hash: "4f8933ce25353c177ac928fb572371b2c20175ed281390b0e09817e99dedcef4"
+    data_cutoff: "2026-09-04T03:00:00Z"
+    notes: Contains 1,140 candidate/control-by-arm rows with unchanged identity, entry, stop and full resolved exit accounting.
+
+  - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-exit-validation
+    artifact_type: manifest
+    role: independent_exit_replay_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: "22cfe1b5118c563eb2d1d95efeb9efe8294b6275"
+    source_path: experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_validation.json
+    sha256: "d22b7860d547e031bc59804fe792a8768e4a26051bfb1c0a24f666934d3f7a96"
+    size_bytes: 1983
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_validation.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "22cfe1b5118c563eb2d1d95efeb9efe8294b6275"
+    config_hash: "4f8933ce25353c177ac928fb572371b2c20175ed281390b0e09817e99dedcef4"
+    data_cutoff: "2026-09-04T03:00:00Z"
+    notes: Passed 23/23 independent checks covering input hashes, baseline parity, arm identity, cost/payoff arithmetic, summaries, paired deltas and continuation counts.
+
+  - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-exit-chart
+    artifact_type: report
+    role: owner_facing_exit_arm_and_target_hit_diagnostic
+    source_repo: darkforest-x/fable-trading
+    source_commit: "22cfe1b5118c563eb2d1d95efeb9efe8294b6275"
+    source_path: experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_diagnostics.png
+    sha256: "721a29e033bace784584617cf1a79b9a157dc20ae5afed3e6590a227b5196929"
+    size_bytes: 145249
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_diagnostics.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "22cfe1b5118c563eb2d1d95efeb9efe8294b6275"
+    config_hash: "4f8933ce25353c177ac928fb572371b2c20175ed281390b0e09817e99dedcef4"
+    data_cutoff: "2026-09-04T03:00:00Z"
+    notes: Compares candidate/control mean net return across six arms and the fixed-target hit/timeout/stop tradeoff.
+
   - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-report
     artifact_type: report
     role: canonical_chinese_backtest_report
     source_repo: darkforest-x/fable-trading
-    source_commit: "c03d9895b0bdff4314309626bb4c0de3a19d9ecf"
+    source_commit: "22cfe1b5118c563eb2d1d95efeb9efe8294b6275"
     source_path: analysis/p1_btcusdtp_1h_pine_v8_sixmonth_backtest_20260904.md
-    sha256: "9d8002071bf75d46b80bc0788bcdfe77838269ed86894aad46fd501fddb19dda"
-    size_bytes: 47115
+    sha256: "4868c2a61e0d38def2e34478470fd21aeb7d0d01a830669a43ab71eb97e562a1"
+    size_bytes: 55814
     storage_uri: "repo://analysis/p1_btcusdtp_1h_pine_v8_sixmonth_backtest_20260904.md"
     holdout_status: holdout_consumed
     training_eligible: false
     production_eligible: false
-    generator_commit: "c03d9895b0bdff4314309626bb4c0de3a19d9ecf"
+    generator_commit: "22cfe1b5118c563eb2d1d95efeb9efe8294b6275"
     config_hash: "90ee08de9b9d5b7c795f6d68438c248a4541ed0d6f8b83fc1d96b55009e58f49"
     data_cutoff: "2026-09-04T03:00:00Z"
     notes: >-
       Canonical report includes exact current rules, three realized loss
       mechanisms, post-hoc semantic-integrity diagnostics, adjustment
       priorities, matched random controls, costs, all 49 trade explanations,
-      risks and reproduction commands.
+      risks and reproduction commands. Holdout-use-2 exit diagnostics add six
+      fixed/split arms and all 16 original-3R-winner continuation paths.
 
   - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-html
     artifact_type: report
     role: owner_facing_self_contained_html_with_all_trades
     source_repo: darkforest-x/fable-trading
-    source_commit: "c03d9895b0bdff4314309626bb4c0de3a19d9ecf"
+    source_commit: "22cfe1b5118c563eb2d1d95efeb9efe8294b6275"
     source_path: analysis/html/p1_btcusdtp_1h_pine_v8_sixmonth_backtest_20260904.html
-    sha256: "567a3e9b7778fefde3b92ad2011d14435a51ab53f6490b6a01a078e25095fa33"
-    size_bytes: 4101402
+    sha256: "174a5cc8895ec4eaff2218a36a2409aff137b6cc9f575480774c5db637b9b8d4"
+    size_bytes: 4306037
     storage_uri: "repo://analysis/html/p1_btcusdtp_1h_pine_v8_sixmonth_backtest_20260904.html"
     holdout_status: holdout_consumed
     training_eligible: false
     production_eligible: false
-    generator_commit: "c03d9895b0bdff4314309626bb4c0de3a19d9ecf"
+    generator_commit: "22cfe1b5118c563eb2d1d95efeb9efe8294b6275"
     config_hash: "90ee08de9b9d5b7c795f6d68438c248a4541ed0d6f8b83fc1d96b55009e58f49"
     data_cutoff: "2026-09-04T03:00:00Z"
     notes: >-
-      Self-contained mobile-readable HTML with 16 embedded figures, 16 tables,
-      the exact current rule contract, adjustment matrix and all 49
-      success/failure rows.
+      Self-contained mobile-readable HTML with 17 embedded figures, 19 tables,
+      the exact current rule contract, exit-arm diagnostics, adjustment matrix
+      and all 49 success/failure rows.
 
   # ---- ETH 15m causal dense-start / literal-release negative results -------
   - artifact_id: pine-eth-15m-dense-report
