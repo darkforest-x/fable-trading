@@ -136,12 +136,20 @@ def validate() -> dict[str, Any]:
         "dynamic_and_selectable_alerts": "alert(" in code
         and "alertcondition(" in code,
         "compact_signal_and_zones": code.count("box.new(") == 2
-        and "label.new(" not in code
-        and "line.new(" not in code
+        and code.count("label.new(") == 2
+        and code.count("line.new(") == 5
+        and 'text = "K1"' in code
+        and 'text = "K2"' in code
         and 'text = "L"' in code
         and 'text = "S"' in code
         and 'text = "TP"' not in code
         and 'text = "SL"' not in code
+        and "color KEY_LONG = #00D7BD" in code
+        and "color KEY_SHORT = #FFB020" in code
+        and "width = 5" in code
+        and "bgcolor = color.new(TARGET, 88)" in code
+        and "bgcolor = color.new(RISK, 88)" in code
+        and "color = color.new(ENTRY_LINE, 18)" in code
         and "offset = -1" in code,
         "frozen_research_broad_gap": 'profile == "Research broad · 2–8"' in code
         and "coreRecallProfile or broadProfile ? 2" in code
@@ -166,6 +174,7 @@ def validate() -> dict[str, Any]:
             for token in (
                 'showSma40 = input.bool(true,',
                 'colourBars = input.bool(true,',
+                'showKeyCandles = input.bool(true,',
                 'showSignals = input.bool(true,',
                 'showPositionBoxes = input.bool(true,',
                 'showPanel = input.bool(true,',

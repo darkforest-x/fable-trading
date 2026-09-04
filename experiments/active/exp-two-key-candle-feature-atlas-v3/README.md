@@ -65,13 +65,14 @@ return or TP/SL outcome is calculated.
 
 results/pine_compile_receipt.json binds the official TradingView Pine v6
 compile result to the exact source SHA. The source compiled with zero errors;
-adding it to the owner's current chart was blocked only because that Basic
-layout had already reached its indicator-count limit. The reference-style
-source is saved privately and is not published. Its price pane now follows the
+the current saved instance replaced historical private version 5 and remained
+applied after a full layout reload. The reference-style source is saved privately and
+is not published. Its price pane now follows the
 open-source `Moving Average Shift [ChartPrime]` rendering contract directly:
 `hl2 >= SMA(hl2, 40)` selects `#17A297` or Pine `color.orange` for both the full
 OHLC candle and the MA. The candle overlay is rendered in front of the native
 chart so its body, border and wick all keep that state colour. The MA defaults
 to a 1 px line, while the 7 px/80%-transparent glow starts hidden. Each accepted
-signal keeps one compact L/S marker and two small unlabelled TP/SL zones;
-verbose K1/K2/entry labels, relation lines and six-MA clouds remain absent.
+signal adds tiny K1/K2 tags and brighter body/wick overlays, keeps one compact
+L/S marker, and uses two subtle unlabelled TP/SL zones with a shared entry line;
+verbose relation text and six-MA clouds remain absent.

@@ -13,8 +13,9 @@
 //
 // Display defaults reproduce the open-source ChartPrime MA Shift rendering:
 // hl2-vs-SMA40 state colours both candles and the SMA. The owner-facing default
-// uses a thin 1 px main line with the 7 px/80%-transparent glow hidden. Signals
-// use one compact L/S marker and two unlabelled TP/SL zones; research diagnostics
+// uses a thin 1 px main line with the 7 px/80%-transparent glow hidden. Accepted
+// pairs get compact K1/K2 tags and brighter candle overlays. Signals use one
+// compact L/S marker plus two unlabelled position zones; research diagnostics
 // stay in the Data Window.
 //
 // Pine v6 references:
@@ -28,7 +29,9 @@ indicator(
      shorttitle = "Fable K1→K2",
      overlay = true,
      behind_chart = false,
-     max_labels_count = 100,
+     max_bars_back = 500,
+     max_labels_count = 200,
+     max_lines_count = 500,
      max_boxes_count = 200)
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -110,6 +113,7 @@ bool customUseState = input.bool(false, "Require owner oscillator + structure st
 
 bool showSma40 = input.bool(true, "Show SMA40(HL2)", group = GROUP_DISPLAY)
 bool colourBars = input.bool(true, "Colour candles by HL2 vs SMA40", group = GROUP_DISPLAY)
+bool showKeyCandles = input.bool(true, "Show K1/K2 tags + highlights", group = GROUP_DISPLAY)
 bool showSignals = input.bool(true, "Show compact L / S signals", group = GROUP_DISPLAY)
 bool showPositionBoxes = input.bool(true, "Show compact TP / SL zones", group = GROUP_DISPLAY)
 float targetR = input.float(3.0, "Visual target (R)", minval = 0.25, maxval = 20.0, step = 0.25, group = GROUP_DISPLAY)
@@ -580,6 +584,9 @@ color LONG = MA_UP
 color SHORT = MA_DOWN
 color TARGET = #089981
 color RISK = #F23645
+color KEY_LONG = #00D7BD
+color KEY_SHORT = #FFB020
+color ENTRY_LINE = #787B86
 color maShiftColor = maCandleSide == 1 ? MA_UP : MA_DOWN
 
 // Source parity with Moving Average Shift [ChartPrime]: the state is based on
@@ -607,6 +614,67 @@ plot(maShiftOscillatorDelta, "MA Shift oscillator delta", color = na, display = 
 plot(marketBreakState, "Market Break state", color = na, display = display.data_window)
 plot(eventScore, "Owner visual similarity score", color = na, display = display.data_window)
 plot(eventRiskAtr, "Next-open stop distance / ATR", color = na, display = display.data_window)
+
+// A pair is accepted on the next bar's first update. Drawing objects can use
+// dynamic bar-index coordinates, so they can mark the selected 2–8 bar K1 gap
+// without relying on a dynamic plot offset (which Pine v6 does not allow).
+// Two vertical strokes recreate each key candle above the base plot: a thin
+// full-range wick and a brighter body stroke.
+if showKeyCandles and (longEntryEvent or shortEntryEvent)
+    bool keyLong = longEntryEvent
+    int k2History = 1
+    int k1History = 1 + eventGap
+    int k2X = bar_index - k2History
+    int k1X = bar_index - k1History
+    color keyColor = keyLong ? KEY_LONG : KEY_SHORT
+
+    line.new(
+         x1 = k1X,
+         y1 = low[k1History],
+         x2 = k1X,
+         y2 = high[k1History],
+         color = keyColor,
+         width = 2)
+    line.new(
+         x1 = k1X,
+         y1 = open[k1History],
+         x2 = k1X,
+         y2 = close[k1History],
+         color = keyColor,
+         width = 5)
+    line.new(
+         x1 = k2X,
+         y1 = low[k2History],
+         x2 = k2X,
+         y2 = high[k2History],
+         color = keyColor,
+         width = 2)
+    line.new(
+         x1 = k2X,
+         y1 = open[k2History],
+         x2 = k2X,
+         y2 = close[k2History],
+         color = keyColor,
+         width = 5)
+
+    label.new(
+         x = k1X,
+         y = keyLong ? low[k1History] : high[k1History],
+         text = "K1",
+         yloc = keyLong ? yloc.belowbar : yloc.abovebar,
+         style = keyLong ? label.style_label_up : label.style_label_down,
+         color = color.new(keyColor, 5),
+         textcolor = #131722,
+         size = size.tiny)
+    label.new(
+         x = k2X,
+         y = keyLong ? high[k2History] : low[k2History],
+         text = "K2",
+         yloc = keyLong ? yloc.abovebar : yloc.belowbar,
+         style = keyLong ? label.style_label_down : label.style_label_up,
+         color = color.new(keyColor, 5),
+         textcolor = #131722,
+         size = size.tiny)
 
 plotshape(
      showSignals and longEntryEvent,
@@ -638,17 +706,27 @@ if (longEntryEvent or shortEntryEvent) and showPositionBoxes
          top = math.max(eventEntry, eventTarget),
          right = rightX,
          bottom = math.min(eventEntry, eventTarget),
-         border_color = color.new(TARGET, 25),
+         border_color = color.new(TARGET, 32),
          border_width = 1,
-         bgcolor = color.new(TARGET, 84))
+         border_style = line.style_solid,
+         bgcolor = color.new(TARGET, 88))
     box.new(
          left = bar_index,
          top = math.max(eventEntry, eventStop),
          right = rightX,
          bottom = math.min(eventEntry, eventStop),
-         border_color = color.new(RISK, 25),
+         border_color = color.new(RISK, 32),
          border_width = 1,
-         bgcolor = color.new(RISK, 84))
+         border_style = line.style_solid,
+         bgcolor = color.new(RISK, 88))
+    line.new(
+         x1 = bar_index,
+         y1 = eventEntry,
+         x2 = rightX,
+         y2 = eventEntry,
+         color = color.new(ENTRY_LINE, 18),
+         style = line.style_solid,
+         width = 1)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Alerts
