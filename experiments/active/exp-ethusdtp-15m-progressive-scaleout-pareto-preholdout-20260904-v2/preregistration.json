@@ -1,0 +1,17 @@
+{
+  "experiment_id": "exp-ethusdtp-15m-progressive-scaleout-pareto-preholdout-20260904-v2",
+  "registered_at": "2026-09-05T00:18:00+08:00",
+  "single_tuned_variable": "step_atr",
+  "fixed_management": "Four 15-percent tranches and a 40-percent SMA60/ATR runner with a banked-profit floor.",
+  "metric_correction": "Profit giveback is measured only from favourable excursion observed before exit or from a completed close that actually armed the runner. Post-exit horizon MFE is a counterfactual missed-opportunity metric and cannot label realised giveback.",
+  "selection_data": "2023-2024 only",
+  "audit_data": "2025 through February 2026; parameters frozen first",
+  "primary_metrics": [
+    "banked tranche then final net non-positive",
+    "completed-close runner arm then final net non-positive",
+    "mean and robust net basis points",
+    "p95 net return retention"
+  ],
+  "repository_holdout_rows_allowed": 0,
+  "production_claim_allowed": false
+}

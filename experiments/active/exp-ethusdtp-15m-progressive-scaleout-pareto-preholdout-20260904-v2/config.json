@@ -1,0 +1,89 @@
+{
+  "experiment_id": "exp-ethusdtp-15m-progressive-scaleout-pareto-preholdout-20260904-v2",
+  "parent_experiment_id": "exp-ethusdtp-15m-progressive-scaleout-preholdout-20260904-v1",
+  "reason_for_new_version": "V1 proved that banking prevents confirmed profit from becoming a loss, but its lexicographic metric used horizon MFE after exit and selected 75 percent banking, which over-truncated the right tail.",
+  "owner_directive": "明显能慢慢 tp 啊，而不是无脑提高止损，不止盈变止损玩个毛",
+  "instrument": {
+    "research_source": "OKX",
+    "research_symbol": "ETH-USDT-SWAP",
+    "tradingview_symbol": "OKX:ETHUSDT.P",
+    "bar_minutes": 15,
+    "data_path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+    "tick_size": 0.01
+  },
+  "source_contract": {
+    "safe_end_exclusive": "2026-03-01T00:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "parser_chunksize": 1000,
+    "repository_holdout_rows_allowed": 0
+  },
+  "splits": {
+    "development_start_inclusive": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2025-01-01T00:00:00Z",
+    "development_folds": ["2023H1", "2023H2", "2024H1", "2024H2"],
+    "audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "audit_end_exclusive": "2026-03-01T00:00:00Z",
+    "audit_folds": ["2025H1", "2025H2", "2026P1"],
+    "audit_is_not_pristine": true
+  },
+  "frozen_entry": {
+    "entry_spread_atr": 1.0,
+    "entry_slope_atr_per_bar": 0.05,
+    "strong_dwell_bars": 12,
+    "neutral_dwell_bars": 8,
+    "current_signed_spread_min_exclusive": 0.0,
+    "current_signed_slope_min_inclusive": 0.0,
+    "contract": "Exact V5 K1/K2 morphology, current-liveness gate, and one-signal-per-regime ledger; no ETH entry parameter is tuned."
+  },
+  "frozen_execution": {
+    "entry": "next_bar_open",
+    "initial_disaster_stop_atr": 2.0,
+    "runner_arm_on_completed_close_atr": 2.0,
+    "runner_reference": "SMA60(HL2)",
+    "runner_buffer_atr": 1.0,
+    "horizon_bars": 96,
+    "round_trip_cost_fraction": 0.002,
+    "same_bar_priority": "active stop before any new profit milestone",
+    "gap_stop_fill": "bar open when it gaps beyond the active stop",
+    "state_update_timing": "updates from bar t become active for t+1"
+  },
+  "progressive_scaleout": {
+    "stage_count": 4,
+    "bank_total_fraction": 0.6,
+    "bank_fraction_per_stage": 0.15,
+    "levels_formula": ["step_atr", "2 * step_atr", "3 * step_atr", "4 * step_atr"],
+    "remaining_runner_fraction": 0.4,
+    "remainder": "SMA60 minus direction times one current ATR",
+    "profit_floor": "After each fill, remaining stop covers full 0.2 percent cost while preserving banked gross profit, subject only to gaps.",
+    "floor_is_monotone": true
+  },
+  "selection": {
+    "factor": "step_atr",
+    "step_atr_candidates": [1.5, 2.0, 2.5, 3.0],
+    "minimum_events_total": 80,
+    "minimum_events_per_fold": 12,
+    "rank": "Among arms with banked-to-nonpositive share <=5 percent and p95 retention >=60 percent, maximize robust half-year mean net bp; otherwise minimize banked-to-nonpositive share, then maximize robust score.",
+    "success_gates": {
+      "banked_to_nonpositive_share_max": 0.05,
+      "confirmed_profit_to_nonpositive_relative_reduction_min": 0.75,
+      "candidate_minus_baseline_mean_net_bp_min": -5.0,
+      "candidate_worst_fold_degradation_bp_max": 5.0,
+      "candidate_p95_net_retention_min": 0.6
+    }
+  },
+  "matched_control": {
+    "controls_per_event": 3,
+    "exclude_radius_bars": 96,
+    "strata": ["calendar month", "UTC six-hour block", "within-month ATR14 quintile"],
+    "seed": "ethusdtp-15m-progressive-scaleout-pareto-20260904-v2"
+  },
+  "safety": {
+    "holdout_consumed": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "automatic_promote": false,
+    "active_or_forward_change": false,
+    "live_order_change": false,
+    "tradingview_write_before_result": false
+  }
+}
