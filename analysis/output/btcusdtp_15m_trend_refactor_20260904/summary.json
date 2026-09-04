@@ -1,0 +1,337 @@
+{
+  "artifacts": {
+    "exit_policy_comparison.csv": {
+      "bytes": 888,
+      "sha256": "0b87535d14a41cc505b7e63d1618923c1ba9651ee00789eb19a5c7d78b402d95"
+    },
+    "exit_policy_comparison.png": {
+      "bytes": 74910,
+      "sha256": "3992158ed294baf20a0bd1581ae7157d8a7567eaf773738b163d72a9478129c5"
+    },
+    "failure_mechanics.csv": {
+      "bytes": 706,
+      "sha256": "767503fd1a074b6b86182bb6b57a36c873a691cd4a15da4f5d3a16abf45a26fe"
+    },
+    "failure_mechanics.png": {
+      "bytes": 62634,
+      "sha256": "49ef49eae08c1695dd103b4a8a553063a0264f12cd17286c11bf367415619b6a"
+    },
+    "family_stability.csv": {
+      "bytes": 3736,
+      "sha256": "8bb883b10c2a6d1b2d1889bd5ea8c3d5bf749395b1b199745d6d98529fc64b8d"
+    },
+    "feature_quartiles.csv": {
+      "bytes": 2428,
+      "sha256": "40f692fb715bda78a7baa38fbd92fa5b27f14d8553418d370844cdd306b406fb"
+    },
+    "fresh_profit_floor_break_even_trades.csv.gz": {
+      "bytes": 178385,
+      "sha256": "3fa6a775918ca818f55fe0276a2c2fa7134679b8adb17473baae74da4ad5eea5"
+    },
+    "fresh_profit_floor_fee_cover_trades.csv.gz": {
+      "bytes": 179573,
+      "sha256": "3831e5607191b3cb3a79058909e3aec2994c22854b63c83ed52f9bcccf90f8a3"
+    },
+    "fresh_profit_floor_none_trades.csv.gz": {
+      "bytes": 181078,
+      "sha256": "d79a9fac691203d8c6360021f7803fabd8a9581f629c3de0fc24f0c8a96b980b"
+    },
+    "fresh_profit_floor_plus_0.5atr_trades.csv.gz": {
+      "bytes": 180872,
+      "sha256": "86aec0dbfaf391b9daea4be76d518634bf25caf7db8c7a5495122872da9f8ad0"
+    },
+    "fresh_profit_floor_plus_1atr_trades.csv.gz": {
+      "bytes": 179622,
+      "sha256": "715184326cab0c918558f5d60ec4781b9424a8c05016f30a21e11b502f198e2a"
+    },
+    "fresh_saved_pine_sma60_trades.csv.gz": {
+      "bytes": 208907,
+      "sha256": "e833a40c6a8df58c373bd71c0259d8efbb4202edb762f40d762520de6dbeb583"
+    },
+    "profit_floor_comparison.csv": {
+      "bytes": 1351,
+      "sha256": "7426b413134157d1a179c5fcf5ed0b147f56a592aee6244a6b53a6b741a1708c"
+    },
+    "profit_floor_tradeoff.png": {
+      "bytes": 102914,
+      "sha256": "d5bf8cffa369ee77e5d0e097b2df5d5b07048afe13b3d09f44f6876bcb5fe8d7"
+    },
+    "saved_pine_matched_control_pairs.csv": {
+      "bytes": 51908,
+      "sha256": "1b2f73a62858d017b0133b292728998b0a440a0c9cfb670dc77076500aea8db0"
+    },
+    "saved_pine_matched_controls.csv.gz": {
+      "bytes": 528754,
+      "sha256": "a8f823656cb563801526d7f1df0d0abc991684bfed5f2bd0594274cc14c923d4"
+    },
+    "shap_beeswarm.png": {
+      "bytes": 190712,
+      "sha256": "15c8c54f446f721e25c492d3d69e1d4092b4a758edf5745ec0497ce430a3fcdb"
+    },
+    "shap_highest_scored_loss.png": {
+      "bytes": 160611,
+      "sha256": "2687d5cb24dd60885a38470b7578b0fcf65324c391803fbd6d085549a3174521"
+    },
+    "shap_loser_winner_delta.png": {
+      "bytes": 67762,
+      "sha256": "1d28dd56f522df9d73e9110884ebad7461a37ddcd0e531b52f9443ae0f508ae3"
+    },
+    "side_metrics.csv": {
+      "bytes": 647,
+      "sha256": "23befca24fde772a21dbd442e60ff20dc4ca77db69da276d419b5131f14e0e87"
+    },
+    "temporal_stability.csv": {
+      "bytes": 1920,
+      "sha256": "d012be86a576b95a1f57822ed04d89f0f5073cf64e173611d6fb99b4de92e11b"
+    },
+    "trade_path_examples.png": {
+      "bytes": 191954,
+      "sha256": "b6b78a9cf3e17e9bb3bf6ccc6167501d06c28a02ea4c18b73056bce96fc3d881"
+    }
+  },
+  "decision": "reject_for_economic_use_keep_research_display_only",
+  "diagnostic_correction": {
+    "exit_giveback_atr": "mfe_at_exit_atr - realized_atr",
+    "horizon_opportunity_gap_atr": "horizon_mfe_atr - realized_atr",
+    "selection_impact": "none; the erroneous label was only a tertiary diagnostic and did not alter the frozen parameter path",
+    "warning": "OHLC cannot reveal intrabar order; exit-candle MFE is an observed upper bound."
+  },
+  "exit_policy_comparison": [
+    {
+      "armed_events": 149,
+      "armed_net_loss_rate": 0.0,
+      "armed_rate": 0.2838095238095238,
+      "events": 525,
+      "max_net_bp": 277.9392002754322,
+      "mean_exit_giveback_atr": 2.723652196086123,
+      "mean_gross_bp": -0.37979670145472816,
+      "mean_net_bp": -20.37979670145474,
+      "median_hold_bars": 14.0,
+      "median_net_bp": -68.61461926128685,
+      "p95_net_bp": 179.06602914134328,
+      "p99_net_bp": 248.5887922647666,
+      "policy": "Fixed +5ATR",
+      "profit_factor": 0.6476582767274651,
+      "win_rate": 0.31047619047619046
+    },
+    {
+      "armed_events": 183,
+      "armed_net_loss_rate": 0.1092896174863388,
+      "armed_rate": 0.3485714285714286,
+      "events": 525,
+      "max_net_bp": 678.0131918811128,
+      "mean_exit_giveback_atr": 3.379242445349171,
+      "mean_gross_bp": 0.6019763415863231,
+      "mean_net_bp": -19.39802365841369,
+      "median_hold_bars": 18.0,
+      "median_net_bp": -65.72363674124614,
+      "p95_net_bp": 244.83598836126038,
+      "p99_net_bp": 430.85943239044013,
+      "policy": "Grid locked EMA30",
+      "profit_factor": 0.6486008980572706,
+      "win_rate": 0.31238095238095237
+    },
+    {
+      "armed_events": 233,
+      "armed_net_loss_rate": 0.45064377682403434,
+      "armed_rate": 0.4438095238095238,
+      "events": 525,
+      "max_net_bp": 599.8134838308599,
+      "mean_exit_giveback_atr": 3.67746491497422,
+      "mean_gross_bp": 3.817453945487762,
+      "mean_net_bp": -16.182546054512247,
+      "median_hold_bars": 21.0,
+      "median_net_bp": -60.51490907390543,
+      "p95_net_bp": 306.9289548857827,
+      "p99_net_bp": 444.0608452126972,
+      "policy": "Saved Pine SMA60",
+      "profit_factor": 0.7024598904333891,
+      "win_rate": 0.24571428571428572
+    }
+  ],
+  "failure_mechanics": [
+    {
+      "cumulative_net_bp": -24307.230008319428,
+      "events": 291,
+      "failure_category": "failed_before_activation",
+      "mean_exit_giveback_atr": 2.891787371396272,
+      "mean_mfe_at_exit_atr": 0.8917873713962696,
+      "mean_net_bp": -83.5300000285891
+    },
+    {
+      "cumulative_net_bp": -4036.7840332591136,
+      "events": 85,
+      "failure_category": "armed_then_reversed_to_loss",
+      "mean_exit_giveback_atr": 5.1483270299874,
+      "mean_mfe_at_exit_atr": 4.269282982227713,
+      "mean_net_bp": -47.49157686187193
+    },
+    {
+      "cumulative_net_bp": -209.57051881483085,
+      "events": 20,
+      "failure_category": "cost_erased_after_arm",
+      "mean_exit_giveback_atr": 4.733973474399663,
+      "mean_mfe_at_exit_atr": 5.056440111980802,
+      "mean_net_bp": -10.478525940741541
+    },
+    {
+      "cumulative_net_bp": 20.612308653547036,
+      "events": 1,
+      "failure_category": "small_win_unarmed",
+      "mean_exit_giveback_atr": 0.4353487691338713,
+      "mean_mfe_at_exit_atr": 1.9635691899824577,
+      "mean_net_bp": 20.612308653547036
+    },
+    {
+      "cumulative_net_bp": 5320.857046949126,
+      "events": 24,
+      "failure_category": "armed_winner_retained",
+      "mean_exit_giveback_atr": 1.2751193592316101,
+      "mean_mfe_at_exit_atr": 8.28554869631134,
+      "mean_net_bp": 221.70237695621358
+    },
+    {
+      "cumulative_net_bp": 14716.27852617177,
+      "events": 104,
+      "failure_category": "armed_winner_large_giveback",
+      "mean_exit_giveback_atr": 5.05609110439938,
+      "mean_mfe_at_exit_atr": 10.839295477754488,
+      "mean_net_bp": 141.50267813626704
+    }
+  ],
+  "holdout_rows_read": 0,
+  "l2_diagnostics": {
+    "frozen_gate_events": 113,
+    "frozen_gate_mean_net_bp": -8.917858604507751,
+    "matched_control_excess_bp": 8.324127284947267,
+    "matched_control_p_one_sided": 0.2690973090269097,
+    "model_top_decile_mean_net_bp": -8.431996139847962,
+    "model_top_decile_win_rate": 0.2693333333333333,
+    "pool_events": 3746,
+    "pool_net_positive_rate": 0.22824345969033635,
+    "score_permutation_p_one_sided": 0.2811971880281197,
+    "single_feature_signal_score_top_decile_mean_net_bp": -5.944836376235622,
+    "single_feature_signal_score_top_decile_win_rate": 0.25333333333333335,
+    "top_decile_events": 375,
+    "validation_auc_net_positive": 0.5094058795091037
+  },
+  "locked_grid_params": {
+    "arm_atr": 3.0,
+    "buffer_atr": 0.0,
+    "exit_style": "trail",
+    "leg_mix": "full",
+    "max_hold_bars": 192,
+    "trend_ma": "EMA30"
+  },
+  "phase": "post_validation_failure_analysis_complete",
+  "profit_floor_comparison": [
+    {
+      "armed_events": 233,
+      "armed_net_loss_rate": 0.45064377682403434,
+      "armed_rate": 0.4438095238095238,
+      "events": 525,
+      "max_net_bp": 599.8134838308599,
+      "mean_exit_giveback_atr": 3.67746491497422,
+      "mean_gross_bp": 3.817453945487762,
+      "mean_net_bp": -16.182546054512247,
+      "median_hold_bars": 21.0,
+      "median_net_bp": -60.51490907390543,
+      "p95_net_bp": 306.9289548857827,
+      "p99_net_bp": 444.0608452126972,
+      "profit_factor": 0.7024598904333891,
+      "profit_floor": "none",
+      "win_rate": 0.24571428571428572
+    },
+    {
+      "armed_events": 233,
+      "armed_net_loss_rate": 0.5278969957081545,
+      "armed_rate": 0.4438095238095238,
+      "events": 525,
+      "max_net_bp": 599.8134838308599,
+      "mean_exit_giveback_atr": 3.488797003469499,
+      "mean_gross_bp": 1.2543380465953506,
+      "mean_net_bp": -18.745661953404657,
+      "median_hold_bars": 18.0,
+      "median_net_bp": -50.34498454363322,
+      "p95_net_bp": 285.2622452634204,
+      "p99_net_bp": 427.5144254614799,
+      "profit_factor": 0.6300680343802453,
+      "profit_floor": "break_even",
+      "win_rate": 0.21142857142857144
+    },
+    {
+      "armed_events": 233,
+      "armed_net_loss_rate": 0.09012875536480687,
+      "armed_rate": 0.4438095238095238,
+      "events": 525,
+      "max_net_bp": 599.8134838308599,
+      "mean_exit_giveback_atr": 3.2326822162035103,
+      "mean_gross_bp": 1.0398294975480902,
+      "mean_net_bp": -18.96017050245192,
+      "median_hold_bars": 15.0,
+      "median_net_bp": -50.34498454363322,
+      "p95_net_bp": 227.49501437194849,
+      "p99_net_bp": 421.17441450899474,
+      "profit_factor": 0.5905036298188442,
+      "profit_floor": "fee_cover",
+      "win_rate": 0.4057142857142857
+    },
+    {
+      "armed_events": 233,
+      "armed_net_loss_rate": 0.45064377682403434,
+      "armed_rate": 0.4438095238095238,
+      "events": 525,
+      "max_net_bp": 599.8134838308599,
+      "mean_exit_giveback_atr": 3.344757712935494,
+      "mean_gross_bp": 1.861543204342005,
+      "mean_net_bp": -18.138456795658005,
+      "median_hold_bars": 16.0,
+      "median_net_bp": -50.34498454363322,
+      "p95_net_bp": 260.92204058457213,
+      "p99_net_bp": 426.01142485784544,
+      "profit_factor": 0.6191061302337052,
+      "profit_floor": "plus_0.5atr",
+      "win_rate": 0.24571428571428572
+    },
+    {
+      "armed_events": 233,
+      "armed_net_loss_rate": 0.0944206008583691,
+      "armed_rate": 0.4438095238095238,
+      "events": 525,
+      "max_net_bp": 599.8134838308599,
+      "mean_exit_giveback_atr": 3.168066205421503,
+      "mean_gross_bp": 3.148756175359961,
+      "mean_net_bp": -16.851243824640047,
+      "median_hold_bars": 14.0,
+      "median_net_bp": -50.34498454363322,
+      "p95_net_bp": 222.34701768468253,
+      "p99_net_bp": 421.17441450899474,
+      "profit_factor": 0.6380059107140205,
+      "profit_floor": "plus_1atr",
+      "win_rate": 0.4038095238095238
+    }
+  ],
+  "saved_pine_matched_control_audit": {
+    "matched_events": 524,
+    "mean_candidate_minus_control_bp": 3.5080440679278566,
+    "trade_level_signflip_p_one_sided": 0.27304726952730474,
+    "warning": "posthoc on an already opened pre-holdout validation slice; descriptive only"
+  },
+  "saved_pine_params": {
+    "arm_atr": 2.0,
+    "buffer_atr": 1.0,
+    "exit_style": "trail",
+    "leg_mix": "full",
+    "max_hold_bars": 96,
+    "trend_ma": "SMA60"
+  },
+  "source": {
+    "first_time": "2022-01-03T14:45:00+00:00",
+    "holdout_rows_read": 0,
+    "last_time": "2026-05-03T23:45:00+00:00",
+    "rows_read": 151813,
+    "segments": 1,
+    "source_path": "data/kline_preholdout_okx_15m_may4/okx_BTC_USDT_SWAP_15m_preholdout_20260504.csv",
+    "source_sha256": "7eec6db01922a2748924e40574950f79dbad1d82ce2a0bcb2da849e1e8d48ff3"
+  }
+}

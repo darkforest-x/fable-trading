@@ -1,0 +1,34 @@
+{
+  "background_index_sha256": "4d9cc83ba0120d2599fe7007ca755163ef1499759195ee67fc2e1b04fc46fcd6",
+  "background_rows": 100,
+  "background_rule": "2023 training matrix sample(n=100, random_state=20260904)",
+  "contract_sha256": "4fa416809c35381294d60613677c49beb1362314c1ec1d52d2c6996fac92705e",
+  "evaluation_rows": 113,
+  "explained_output": "LightGBM raw regression score; predicted net-return fraction",
+  "highest_scored_loss_prediction": 0.004353917932273535,
+  "highest_scored_loss_realized_net_return": -0.0147254874276099,
+  "highest_scored_loss_setup_id": "1bef9640928adab8",
+  "importance_rank_spearman": 0.9956200383246647,
+  "interventional_additivity_max_abs_error": 1.977966987247448e-10,
+  "limitations": [
+    "The fixed model already failed predictive validation; SHAP explains its behavior, not a valid trading edge.",
+    "Correlated market features compete for attribution; interventional masks can be off-manifold.",
+    "Attributions are descriptive, not causal and not a feature-selection result."
+  ],
+  "maskers": [
+    "interventional with explicit 100-row training background",
+    "tree_path_dependent sensitivity check"
+  ],
+  "model_sha256": "8114c6e85089310ca3c1dba66e38b320a3be6422fbfc4f305d84aa2b97775aa1",
+  "packages": {
+    "lightgbm": "4.6.0",
+    "matplotlib": "3.11.1",
+    "numpy": "2.5.2",
+    "pandas": "3.0.5",
+    "scipy": "1.18.1",
+    "shap": "0.52.0"
+  },
+  "path_dependent_additivity_max_abs_error": 5.637851296924623e-18,
+  "python": "3.12.12",
+  "training_rows": 3533
+}
