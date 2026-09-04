@@ -1,0 +1,125 @@
+{
+  "experiment_id": "exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1",
+  "purpose": "Use a high-recall EMA30 state-transition L1, then ask whether a frozen causal L2 can isolate the small subset worth holding with an SMA60 trend runner.",
+  "lineage": {
+    "parent_experiment": "exp-btcusdtp-15m-dual-ma-runner-preholdout-20260904-v1",
+    "owner_example_role": "contaminated display-recall diagnostic only; EMA30 plus state-reset matched all five supplied examples but cannot validate economics",
+    "hypothesis_generation_warning": "The Huber objective and 97.5th score percentile were nominated after exploratory 2023/2024 work. They are not evidence; only the untouched 2025-01-01 through 2026-02-28 validation can accept or reject them."
+  },
+  "source": {
+    "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+    "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "holdout_start": "2026-05-04T00:00:00Z"
+  },
+  "splits": {
+    "train_start_inclusive": "2023-01-01T00:00:00Z",
+    "train_end_exclusive": "2024-01-01T00:00:00Z",
+    "selection_start_inclusive": "2024-01-01T00:00:00Z",
+    "selection_end_exclusive": "2025-01-01T00:00:00Z",
+    "validation_start_inclusive": "2025-01-01T00:00:00Z",
+    "validation_end_exclusive": "2026-02-28T16:00:00Z",
+    "validation_slices": ["2025H1", "2025H2", "2026P1"],
+    "purge_bars_at_boundaries": 96,
+    "random_split": false
+  },
+  "l1": {
+    "trigger_reference": "EMA30",
+    "trend_reference": "SMA60",
+    "entry_family": "all",
+    "dedupe_policy": "state_reset3",
+    "numeric_thresholds_from": "experiments/active/exp-btcusdtp-15m-ma-state-trend-preholdout-20260904-v1/config.json",
+    "display_surface": "every state-reset transition; L2 qualification is shown separately"
+  },
+  "execution": {
+    "entry": "next_bar_open",
+    "runner_policy": "ma_trail1_after_2atr",
+    "runner_arm_profit_atr": 2.0,
+    "runner_stop": "SMA60 minus direction times ATR14, calculated on completed close t and active from t+1",
+    "initial_disaster_stop_atr": 2.0,
+    "fixed_target": null,
+    "horizon_bars": 96,
+    "round_trip_cost_fraction": 0.002,
+    "same_bar_priority": "active stop first"
+  },
+  "features": {
+    "price_source": "HL2 for all moving averages",
+    "numeric": [
+      "direction",
+      "signal_score",
+      "signed_close_atr",
+      "signed_slope_atr_per_bar",
+      "signed_body_atr",
+      "breakout_atr",
+      "prior_near_ma_share",
+      "prior_range_atr",
+      "fee_to_risk",
+      "atr_pct",
+      "volume_ratio20",
+      "atr_ratio96",
+      "range_ratio20",
+      "eff12",
+      "eff24",
+      "adx14",
+      "signed_di_balance",
+      "ema20_sma60_spread_atr",
+      "ema30_sma60_spread_atr",
+      "sma60_sma120_spread_atr",
+      "sma60_sma160_spread_atr",
+      "sma120_sma240_spread_atr",
+      "signed_return8_atr",
+      "signed_return24_atr",
+      "prior24_range_atr",
+      "family_has_direct",
+      "family_has_rejection",
+      "family_has_coil"
+    ],
+    "imputation": "training median then zero only for an all-missing training column",
+    "feature_time": "completed signal bar only"
+  },
+  "model": {
+    "library": "lightgbm 4.6.0",
+    "type": "LGBMRegressor",
+    "objective": "huber",
+    "alpha": 0.8,
+    "n_estimators": 160,
+    "learning_rate": 0.03,
+    "num_leaves": 7,
+    "max_depth": 3,
+    "min_child_samples": 100,
+    "reg_lambda": 10.0,
+    "colsample_bytree": 0.8,
+    "deterministic": true,
+    "force_col_wise": true,
+    "num_threads": 1,
+    "seed": 42,
+    "target": "trade net return under the frozen runner, clipped to training 1st/99th percentiles"
+  },
+  "score_gate": {
+    "selection_quantile": 0.975,
+    "validation_rule": "absolute model-score threshold frozen from the 2024 selection score distribution",
+    "single_feature_baseline": "same 2.5 percent selection rate by signal_score; absolute threshold frozen from 2024"
+  },
+  "matched_control": {
+    "controls_per_event": 8,
+    "strata": ["calendar month", "UTC six-hour block", "monthly ATR quintile", "direction"],
+    "exclude_radius_bars": 97,
+    "exclude_scope": "per candidate",
+    "seed": "btc15m-high-recall-l2-runner-20260904"
+  },
+  "validation_gate": {
+    "minimum_selected_events": 30,
+    "mean_net_bp_gt": 0.0,
+    "score_permutation_p_lt": 0.01,
+    "paired_control_p_lt": 0.01,
+    "all_eight_control_assignments_beaten": true,
+    "every_slice_with_at_least_12_events_positive": true
+  },
+  "safety": {
+    "repository_holdout_rows_allowed": 0,
+    "training_eligible": false,
+    "production_eligible": false,
+    "automatic_promote": false,
+    "live_order_change": false
+  }
+}

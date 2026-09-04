@@ -4542,3 +4542,32 @@ experiments:
       2025-2026 audit remains closed unless that gate passes. Owner screenshots
       are excluded from economic selection and will be declared separately if
       inspected for this configuration.
+
+  - experiment_id: exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fb99e77"
+    status: active
+    question: >-
+      Can a deterministic causal L2 isolate the small tradeable subset of a
+      high-recall EMA30 state-transition pool and hold those entries with an
+      SMA60-minus-ATR runner after 20bp round-trip cost?
+    single_variable: >-
+      L2 score qualification versus the frozen high-recall L1 pool. The EMA30
+      transition detector, state-reset dedupe, next-open entry, 2ATR disaster
+      stop, +2ATR runner activation, SMA60-minus-ATR trail, 96-bar horizon and
+      cost remain frozen.
+    result: >-
+      in_progress_selection_not_run. The Huber objective and 97.5th score
+      percentile are explicitly recorded as post-hoc 2023/2024 hypotheses;
+      their only acceptance evidence can come from the untouched 2025-01
+      through 2026-02 validation.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btcusdtp_15m_high_recall_l2_trend_runner_20260904.md
+    reuse_allowed: false
+    notes: >-
+      The five Owner screenshots only select the display-recall surface and are
+      never scored economically. The selection receipt, model bytes, feature
+      schema, imputation medians and absolute score threshold must be committed
+      before validation can run. No promote, deployment or live-order mutation.
