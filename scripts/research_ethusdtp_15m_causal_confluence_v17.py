@@ -709,7 +709,8 @@ def _familywise_permutation_p(
         [events[f"gate_{gate_id}"].to_numpy(dtype=bool) for gate_id in gate_ids]
     )
     counts = masks.sum(axis=1).astype(float)
-    observed = masks.astype(float) @ values / counts - float(values.mean())
+    weights = masks.astype(float)
+    observed = np.sum(weights * values[None, :], axis=1) / counts - float(values.mean())
     rng = np.random.default_rng(seed)
     exceed = np.zeros(len(gate_ids), dtype=int)
     done = 0
@@ -718,7 +719,9 @@ def _familywise_permutation_p(
         current = min(chunk, resamples - done)
         orders = np.argsort(rng.random((current, len(values))), axis=1)
         permuted = values[orders]
-        statistics = permuted @ masks.astype(float).T / counts - float(values.mean())
+        statistics = np.sum(
+            permuted[:, None, :] * weights[None, :, :], axis=2
+        ) / counts - float(values.mean())
         maximum = statistics.max(axis=1)
         exceed += (maximum[:, None] >= observed[None, :] - 1e-12).sum(axis=0)
         done += current

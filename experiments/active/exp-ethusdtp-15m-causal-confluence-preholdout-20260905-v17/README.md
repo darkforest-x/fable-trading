@@ -17,12 +17,12 @@ change TradingView, ACTIVE/frozen, forward execution, or live orders.
 Run after the preregistration and script are committed:
 
 ```bash
-python3 scripts/research_ethusdtp_15m_causal_confluence_v17.py --phase selection
+python3 -m scripts.research_ethusdtp_15m_causal_confluence_v17 --phase selection
 ```
 
 If and only if `results/selection_receipt.json` says `frozen_for_audit`, commit
 that receipt and then run:
 
 ```bash
-python3 scripts/research_ethusdtp_15m_causal_confluence_v17.py --phase audit
+python3 -m scripts.research_ethusdtp_15m_causal_confluence_v17 --phase audit
 ```
