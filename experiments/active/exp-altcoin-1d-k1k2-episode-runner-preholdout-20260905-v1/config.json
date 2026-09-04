@@ -1,0 +1,229 @@
+{
+  "experiment_id": "exp-altcoin-1d-k1k2-episode-runner-preholdout-20260905-v1",
+  "owner_directive": "Develop a separate daily K1->K2 trend strategy for altcoin perpetual swaps, with sparse launch episodes, gradual profit banking, and MA-following runners.",
+  "universe": {
+    "research_source": "OKX",
+    "bar_source_minutes": 15,
+    "research_bar": "1D UTC",
+    "selection_rule": "All locally cached current OKX USDT perpetual instruments in data/kline_deep except BTC and ETH, frozen by explicit path before outcome inspection.",
+    "survivorship_warning": "This is a current-instrument cache, not a point-in-time historical exchange universe.",
+    "instruments": {
+      "AAVE": "data/kline_deep/okx_AAVE_USDT_SWAP_15m_158499.csv",
+      "ADA": "data/kline_deep/okx_ADA_USDT_SWAP_15m_158499.csv",
+      "APE": "data/kline_deep/okx_APE_USDT_SWAP_15m_151496.csv",
+      "APT": "data/kline_deep/okx_APT_USDT_SWAP_15m_130807.csv",
+      "ARB": "data/kline_deep/okx_ARB_USDT_SWAP_15m_115876.csv",
+      "ATOM": "data/kline_deep/okx_ATOM_USDT_SWAP_15m_158499.csv",
+      "AVAX": "data/kline_deep/okx_AVAX_USDT_SWAP_15m_158499.csv",
+      "BCH": "data/kline_deep/okx_BCH_USDT_SWAP_15m_158499.csv",
+      "BNB": "data/kline_deep/okx_BNB_USDT_SWAP_15m_124547.csv",
+      "CFX": "data/kline_deep/okx_CFX_USDT_SWAP_15m_158499.csv",
+      "CHZ": "data/kline_deep/okx_CHZ_USDT_SWAP_15m_158499.csv",
+      "CRV": "data/kline_deep/okx_CRV_USDT_SWAP_15m_158499.csv",
+      "DOGE": "data/kline_deep/okx_DOGE_USDT_SWAP_15m_158499.csv",
+      "DOT": "data/kline_deep/okx_DOT_USDT_SWAP_15m_158499.csv",
+      "EIGEN": "data/kline_deep/okx_EIGEN_USDT_SWAP_15m_62341.csv",
+      "ENA": "data/kline_deep/okx_ENA_USDT_SWAP_15m_28642.csv",
+      "ETC": "data/kline_deep/okx_ETC_USDT_SWAP_15m_158499.csv",
+      "ETHFI": "data/kline_deep/okx_ETHFI_USDT_SWAP_15m_81231.csv",
+      "FIL": "data/kline_deep/okx_FIL_USDT_SWAP_15m_158499.csv",
+      "GALA": "data/kline_deep/okx_GALA_USDT_SWAP_15m_158499.csv",
+      "GRT": "data/kline_deep/okx_GRT_USDT_SWAP_15m_158499.csv",
+      "HBAR": "data/kline_deep/okx_HBAR_USDT_SWAP_15m_101898.csv",
+      "HYPE": "data/kline_deep/okx_HYPE_USDT_SWAP_15m_48613.csv",
+      "ICP": "data/kline_deep/okx_ICP_USDT_SWAP_15m_158499.csv",
+      "INJ": "data/kline_deep/okx_INJ_USDT_SWAP_15m_91699.csv",
+      "JTO": "data/kline_deep/okx_JTO_USDT_SWAP_15m_87975.csv",
+      "LINK": "data/kline_deep/okx_LINK_USDT_SWAP_15m_158499.csv",
+      "LTC": "data/kline_deep/okx_LTC_USDT_SWAP_15m_158499.csv",
+      "NEAR": "data/kline_deep/okx_NEAR_USDT_SWAP_15m_158499.csv",
+      "OKB": "data/kline_deep/okx_OKB_USDT_SWAP_15m_29915.csv",
+      "ONDO": "data/kline_deep/okx_ONDO_USDT_SWAP_15m_67705.csv",
+      "OP": "data/kline_deep/okx_OP_USDT_SWAP_15m_144244.csv",
+      "ORDI": "data/kline_deep/okx_ORDI_USDT_SWAP_15m_110236.csv",
+      "PENGU": "data/kline_deep/okx_PENGU_USDT_SWAP_15m_54916.csv",
+      "PEPE": "data/kline_deep/okx_PEPE_USDT_SWAP_15m_111988.csv",
+      "PI": "data/kline_deep/okx_PI_USDT_SWAP_15m_48704.csv",
+      "POL": "data/kline_deep/okx_POL_USDT_SWAP_15m_63010.csv",
+      "SAND": "data/kline_deep/okx_SAND_USDT_SWAP_15m_158499.csv",
+      "SHIB": "data/kline_deep/okx_SHIB_USDT_SWAP_15m_158499.csv",
+      "SOL": "data/kline_deep/okx_SOL_USDT_SWAP_15m_158499.csv",
+      "SUI": "data/kline_deep/okx_SUI_USDT_SWAP_15m_111797.csv",
+      "TIA": "data/kline_deep/okx_TIA_USDT_SWAP_15m_94555.csv",
+      "TRUMP": "data/kline_deep/okx_TRUMP_USDT_SWAP_15m_51790.csv",
+      "TRX": "data/kline_deep/okx_TRX_USDT_SWAP_15m_158499.csv",
+      "UNI": "data/kline_deep/okx_UNI_USDT_SWAP_15m_158499.csv",
+      "VIRTUAL": "data/kline_deep/okx_VIRTUAL_USDT_SWAP_15m_55517.csv",
+      "WLD": "data/kline_deep/okx_WLD_USDT_SWAP_15m_104087.csv",
+      "XLM": "data/kline_deep/okx_XLM_USDT_SWAP_15m_158499.csv",
+      "XRP": "data/kline_deep/okx_XRP_USDT_SWAP_15m_158499.csv",
+      "ZEC": "data/kline_deep/okx_ZEC_USDT_SWAP_15m_23866.csv",
+      "ZK": "data/kline_deep/okx_ZK_USDT_SWAP_15m_72422.csv",
+      "ZRO": "data/kline_deep/okx_ZRO_USDT_SWAP_15m_72214.csv"
+    }
+  },
+  "source_contract": {
+    "safe_end_exclusive": "2026-05-01T00:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "parser_chunksize": 64,
+    "repository_holdout_rows_allowed": 0,
+    "daily_timezone": "UTC",
+    "intraday_bars_per_complete_day": 96,
+    "discard_incomplete_or_duplicate_days": true,
+    "minimum_daily_history_bars": 140
+  },
+  "splits": {
+    "selection": {
+      "start_inclusive": "2022-01-01T00:00:00Z",
+      "end_exclusive": "2024-01-01T00:00:00Z",
+      "folds": [
+        {"id": "2022H1", "start_inclusive": "2022-01-01T00:00:00Z", "end_exclusive": "2022-07-01T00:00:00Z"},
+        {"id": "2022H2", "start_inclusive": "2022-07-01T00:00:00Z", "end_exclusive": "2023-01-01T00:00:00Z"},
+        {"id": "2023H1", "start_inclusive": "2023-01-01T00:00:00Z", "end_exclusive": "2023-07-01T00:00:00Z"},
+        {"id": "2023H2", "start_inclusive": "2023-07-01T00:00:00Z", "end_exclusive": "2024-01-01T00:00:00Z"}
+      ]
+    },
+    "audit": {
+      "start_inclusive": "2024-01-01T00:00:00Z",
+      "end_exclusive": "2025-07-01T00:00:00Z",
+      "folds": [
+        {"id": "2024H1", "start_inclusive": "2024-01-01T00:00:00Z", "end_exclusive": "2024-07-01T00:00:00Z"},
+        {"id": "2024H2", "start_inclusive": "2024-07-01T00:00:00Z", "end_exclusive": "2025-01-01T00:00:00Z"},
+        {"id": "2025H1", "start_inclusive": "2025-01-01T00:00:00Z", "end_exclusive": "2025-07-01T00:00:00Z"}
+      ],
+      "parameter_selection_after_open": false
+    },
+    "confirmation": {
+      "start_inclusive": "2025-07-01T00:00:00Z",
+      "end_exclusive": "2026-05-01T00:00:00Z",
+      "folds": [
+        {"id": "2025Q3", "start_inclusive": "2025-07-01T00:00:00Z", "end_exclusive": "2025-10-01T00:00:00Z"},
+        {"id": "2025Q4", "start_inclusive": "2025-10-01T00:00:00Z", "end_exclusive": "2026-01-01T00:00:00Z"},
+        {"id": "2026P1", "start_inclusive": "2026-01-01T00:00:00Z", "end_exclusive": "2026-05-01T00:00:00Z"}
+      ],
+      "parameter_selection_after_open": false
+    }
+  },
+  "ma_profiles": {
+    "ema8_sma21": {"fast_kind": "EMA", "fast_length": 8, "slow_kind": "SMA", "slow_length": 21},
+    "ema13_sma34": {"fast_kind": "EMA", "fast_length": 13, "slow_kind": "SMA", "slow_length": 34},
+    "ema20_sma50": {"fast_kind": "EMA", "fast_length": 20, "slow_kind": "SMA", "slow_length": 50}
+  },
+  "episode": {
+    "neutral_spread_atr_max": 0.45,
+    "neutral_fast_slope3_atr_max": 0.10,
+    "neutral_bb_width_ratio120_max": 1.10,
+    "neutral_streak_bars": 3,
+    "initial_neutral_recency_bars": 10,
+    "one_k1_attempt_per_neutral_episode": true,
+    "first_valid_k2_only": true
+  },
+  "morphology": {
+    "k1_k2_gap_min": 1,
+    "initial_k1_k2_gap_max": 5,
+    "k1_body_atr_min": 0.20,
+    "k1_range_atr_min": 0.65,
+    "k1_close_location_min": 0.60,
+    "k1_slow_side_tolerance_atr": -0.25,
+    "middle_wrong_side_close_tolerance_atr": -0.05,
+    "k2_touch_tolerance_atr": 0.10,
+    "k2_touch_depth_atr_max": 1.25,
+    "k2_body_side_tolerance_atr": -0.05,
+    "k2_close_side_atr_min": 0.05,
+    "k2_wick_share_min": 0.15,
+    "k2_body_ratio_max": 0.75,
+    "k2_directional_body_required": true
+  },
+  "transition_votes": {
+    "k1_range_vs_prior20_min": 1.25,
+    "k1_volume_vs_prior20_min": 1.25,
+    "k1_close_beyond_slow_atr_min": 0.00,
+    "k2_signed_spread_atr_min": 0.00,
+    "k2_signed_fast_slope3_atr_min": 0.00,
+    "initial_min_votes": 2,
+    "vote_names": ["k1_range_release", "k1_volume_release", "k1_slow_break", "k2_trend_acceptance"]
+  },
+  "execution": {
+    "entry": "next_complete_UTC_day_open",
+    "initial_stop": "K2 extreme plus 0.10 ATR outward buffer",
+    "stop_buffer_atr": 0.10,
+    "minimum_risk_atr": 0.50,
+    "maximum_risk_atr": 4.00,
+    "maximum_horizon_bars": 90,
+    "minimum_phase_remaining_bars": 20,
+    "round_trip_cost_fraction": 0.002,
+    "bank_levels_r": [1.5, 3.0, 6.0, 10.0],
+    "bank_level_weights": [0.40, 0.20, 0.20, 0.20],
+    "runner_arm_on_completed_close_r": 1.5,
+    "initial_trail_reference": "slow",
+    "initial_runner_buffer_atr": 1.25,
+    "same_bar_priority": "active stop before gradual bank milestones",
+    "partial_profit_stop_change": "none",
+    "trail_update_timing": "completed close t becomes active on t+1",
+    "phase_boundary": "force close at the final available complete bar before phase end"
+  },
+  "portfolio": {
+    "risk_fraction_per_trade": 0.005,
+    "maximum_concurrent_positions": 6,
+    "maximum_open_risk_fraction": 0.03,
+    "same_day_rank": ["transition_votes descending", "signal_score descending", "symbol ascending"],
+    "equity_curve": "closed-equity; intratrade mark-to-market drawdown reported separately as an exposure stress bound"
+  },
+  "selection": {
+    "initial": {
+      "ma_profile": "ema13_sma34",
+      "neutral_recency_bars": 10,
+      "transition_min_votes": 2,
+      "k1_k2_gap_max": 5,
+      "trail_reference": "slow",
+      "runner_buffer_atr": 1.25,
+      "bank_total_fraction": 0.20
+    },
+    "ordered_factors": ["ma_profile", "neutral_recency_bars", "transition_min_votes", "k1_k2_gap_max", "trail_reference", "runner_buffer_atr", "bank_total_fraction"],
+    "candidates": {
+      "ma_profile": ["ema8_sma21", "ema13_sma34", "ema20_sma50"],
+      "neutral_recency_bars": [5, 10, 20],
+      "transition_min_votes": [1, 2, 3],
+      "k1_k2_gap_max": [3, 5, 8],
+      "trail_reference": ["slow", "fast"],
+      "runner_buffer_atr": [0.75, 1.25, 1.75],
+      "bank_total_fraction": [0.10, 0.20, 0.30]
+    },
+    "minimum_robust_gain_bp": 5.0,
+    "p95_retention_min": 0.85,
+    "phase_minimums": {
+      "selection": {"events_total": 120, "events_per_fold": 20, "symbols_total": 20},
+      "audit": {"events_total": 80, "events_per_fold": 15, "symbols_total": 18},
+      "confirmation": {"events_total": 50, "events_per_fold": 10, "symbols_total": 15}
+    },
+    "audit_rule": "Commit the selection receipt before reading audit outcomes; audit cannot change parameters.",
+    "confirmation_rule": "Commit the audit receipt before reading confirmation outcomes; confirmation cannot change parameters."
+  },
+  "matched_control": {
+    "controls_per_event": 3,
+    "exclude_radius_bars": 30,
+    "strata": ["same symbol", "calendar half-year", "copied direction", "within-symbol-phase ATR14 quintile"],
+    "seed": "altcoin-1d-k1k2-20260905-v1",
+    "p_seed": 105905
+  },
+  "acceptance_gates": {
+    "mean_net_positive": true,
+    "profit_factor_above_one": true,
+    "positive_fold_share_min": 0.6666666667,
+    "positive_symbol_share_min": 0.55,
+    "week_cluster_signflip_p_max": 0.01,
+    "matched_random_p_max": 0.01,
+    "p95_vs_baseline_retention_min": 0.80,
+    "portfolio_total_return_positive": true,
+    "portfolio_closed_equity_max_drawdown_max": 0.20
+  },
+  "safety": {
+    "holdout_consumed": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "automatic_promote": false,
+    "active_or_forward_change": false,
+    "live_order_change": false,
+    "tradingview_write_before_result": false
+  }
+}
