@@ -4364,3 +4364,23 @@ experiments:
       outcome-blind H1 feature distribution, stability is checked in H1/H2,
       and a 20,000-resample max-statistic null measures multiple-search bias.
       2024 confirmation, 2025-2026 audit and repository holdout remain closed.
+
+  - experiment_id: exp-btcusdtp-k1k2-15m-gap-min-confirmation-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f080bc8"
+    status: active
+    question: >-
+      Does changing only the 15m minimum K1-to-K2 distance from 2 to 5 bars
+      survive an exact before-cooldown replay on later 2024 data?
+    single_variable: "15m gap_min_bars: 2 -> 5; gap_max_bars remains 8"
+    result: preregistered_before_confirmation_outcomes
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: null
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Candidate came from the committed 2023 causal failure map. Confirmation
+      is 2024 with exact full-state replay and matched random controls. Audit
+      and repository holdout remain closed until every confirmation gate passes.
