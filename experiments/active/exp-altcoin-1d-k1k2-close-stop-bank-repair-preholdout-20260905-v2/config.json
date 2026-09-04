@@ -1,0 +1,162 @@
+{
+  "experiment_id": "exp-altcoin-1d-k1k2-close-stop-bank-repair-preholdout-20260905-v2",
+  "owner_directive": "Repair the daily altcoin K1->K2 execution so a daily wick sweep does not automatically kill the trend and a reached profit milestone cannot be almost entirely surrendered.",
+  "parent": {
+    "experiment_id": "exp-altcoin-1d-k1k2-episode-runner-preholdout-20260905-v1",
+    "config_path": "experiments/active/exp-altcoin-1d-k1k2-episode-runner-preholdout-20260905-v1/config.json",
+    "config_sha256": "dafee19bb45db8cc44be3a4f468f606ae1e8a795c8e801aa4d736fd6770bb55d",
+    "selection_receipt_path": "experiments/active/exp-altcoin-1d-k1k2-episode-runner-preholdout-20260905-v1/results/selection_receipt.json",
+    "selection_receipt_sha256": "db1c3a48d5b41890bb6afc005867e1309cb57915f87212f27cb94eb463d0d40d",
+    "audit_receipt_path": "experiments/active/exp-altcoin-1d-k1k2-episode-runner-preholdout-20260905-v1/results/audit_receipt.json",
+    "audit_receipt_sha256": "a0f83c3b7fd0386a56ba749d31eb8b3186d638fe93f2358459c826c4889a8f46",
+    "fixed_signal_params": {
+      "ma_profile": "ema13_sma34",
+      "neutral_recency_bars": 10,
+      "transition_min_votes": 2,
+      "k1_k2_gap_max": 5
+    }
+  },
+  "splits": {
+    "development": {
+      "start_inclusive": "2022-07-01T00:00:00Z",
+      "end_exclusive": "2025-07-01T00:00:00Z",
+      "folds": [
+        {"id": "2022H2", "start_inclusive": "2022-07-01T00:00:00Z", "end_exclusive": "2023-01-01T00:00:00Z"},
+        {"id": "2023H1", "start_inclusive": "2023-01-01T00:00:00Z", "end_exclusive": "2023-07-01T00:00:00Z"},
+        {"id": "2023H2", "start_inclusive": "2023-07-01T00:00:00Z", "end_exclusive": "2024-01-01T00:00:00Z"},
+        {"id": "2024H1", "start_inclusive": "2024-01-01T00:00:00Z", "end_exclusive": "2024-07-01T00:00:00Z"},
+        {"id": "2024H2", "start_inclusive": "2024-07-01T00:00:00Z", "end_exclusive": "2025-01-01T00:00:00Z"},
+        {"id": "2025H1", "start_inclusive": "2025-01-01T00:00:00Z", "end_exclusive": "2025-07-01T00:00:00Z"}
+      ],
+      "contains_seen_parent_selection_and_audit": true
+    },
+    "confirmation": {
+      "start_inclusive": "2025-07-01T00:00:00Z",
+      "end_exclusive": "2026-05-01T00:00:00Z",
+      "folds": [
+        {"id": "2025Q3", "start_inclusive": "2025-07-01T00:00:00Z", "end_exclusive": "2025-10-01T00:00:00Z"},
+        {"id": "2025Q4", "start_inclusive": "2025-10-01T00:00:00Z", "end_exclusive": "2026-01-01T00:00:00Z"},
+        {"id": "2026P1", "start_inclusive": "2026-01-01T00:00:00Z", "end_exclusive": "2026-05-01T00:00:00Z"}
+      ],
+      "parameter_selection_after_open": false
+    }
+  },
+  "stop_policies": {
+    "wick_structure": {
+      "structure_trigger": "intraday_wick",
+      "runner_trigger": "intraday_wick",
+      "hard_stop_floor_atr": 0.0,
+      "wrong_side_closes_required": 0
+    },
+    "wick_floor_1_0": {
+      "structure_trigger": "intraday_wick",
+      "runner_trigger": "intraday_wick",
+      "hard_stop_floor_atr": 1.0,
+      "wrong_side_closes_required": 0
+    },
+    "wick_floor_1_5": {
+      "structure_trigger": "intraday_wick",
+      "runner_trigger": "intraday_wick",
+      "hard_stop_floor_atr": 1.5,
+      "wrong_side_closes_required": 0
+    },
+    "close_structure_hard_2_0": {
+      "structure_trigger": "completed_close_then_next_open",
+      "runner_trigger": "intraday_wick",
+      "hard_stop_floor_atr": 2.0,
+      "wrong_side_closes_required": 1
+    },
+    "close_all_hard_2_0": {
+      "structure_trigger": "completed_close_then_next_open",
+      "runner_trigger": "completed_close_then_next_open",
+      "hard_stop_floor_atr": 2.0,
+      "wrong_side_closes_required": 1
+    },
+    "two_close_all_hard_2_0": {
+      "structure_trigger": "completed_close_then_next_open",
+      "runner_trigger": "completed_close_then_next_open",
+      "hard_stop_floor_atr": 2.0,
+      "wrong_side_closes_required": 2
+    }
+  },
+  "bank_schedules": {
+    "v1_tail80": {
+      "levels_r": [1.5, 3.0, 6.0, 10.0],
+      "fractions": [0.08, 0.04, 0.04, 0.04],
+      "runner_fraction_after_all": 0.80
+    },
+    "balanced_tail45": {
+      "levels_r": [1.0, 1.5, 3.0, 6.0, 10.0],
+      "fractions": [0.20, 0.15, 0.10, 0.05, 0.05],
+      "runner_fraction_after_all": 0.45
+    },
+    "protected_tail30": {
+      "levels_r": [1.0, 1.5, 3.0, 6.0, 10.0],
+      "fractions": [0.30, 0.20, 0.10, 0.05, 0.05],
+      "runner_fraction_after_all": 0.30
+    }
+  },
+  "execution": {
+    "entry": "next_complete_UTC_day_open",
+    "structural_level": "K2 extreme plus 0.10 ATR outward buffer",
+    "stop_buffer_atr": 0.10,
+    "maximum_initial_risk_atr": 4.0,
+    "maximum_horizon_bars": 90,
+    "minimum_phase_remaining_bars": 20,
+    "round_trip_cost_fraction": 0.002,
+    "runner_arm_on_completed_close_r": 1.5,
+    "same_bar_priority": "hard disaster stop, then bank milestones; close exits fill only at the next daily open",
+    "partial_profit_stop_change": "none",
+    "phase_boundary": "force close at the final available complete bar before phase end"
+  },
+  "selection": {
+    "initial": {
+      "stop_policy": "wick_structure",
+      "bank_schedule": "v1_tail80",
+      "trail_reference": "slow",
+      "runner_buffer_atr": 1.25
+    },
+    "ordered_factors": ["stop_policy", "bank_schedule", "trail_reference", "runner_buffer_atr"],
+    "candidates": {
+      "stop_policy": ["wick_structure", "wick_floor_1_0", "wick_floor_1_5", "close_structure_hard_2_0", "close_all_hard_2_0", "two_close_all_hard_2_0"],
+      "bank_schedule": ["v1_tail80", "balanced_tail45", "protected_tail30"],
+      "trail_reference": ["slow", "fast"],
+      "runner_buffer_atr": [0.75, 1.25, 1.75]
+    },
+    "primary_robust_score": "median half-year mean capped net R minus 0.5 times its population standard deviation; individual net R clipped to [-1.5, +10] only for selection scoring",
+    "minimum_robust_gain_r": 0.10,
+    "p95_raw_net_r_retention_min": 0.80,
+    "minimums": {"events_total": 30, "events_per_fold": 3, "symbols_total": 20},
+    "confirmation_rule": "Commit the development receipt before opening confirmation. Confirmation always runs once and cannot alter parameters."
+  },
+  "matched_control": {
+    "controls_per_event": 3,
+    "exclude_radius_bars": 30,
+    "strata": ["same symbol", "calendar half-year", "copied direction", "within-symbol-confirmation ATR14 quintile"],
+    "seed": "altcoin-1d-k1k2-risk-repair-20260905-v2",
+    "p_seed": 205905
+  },
+  "confirmation_minimums": {"events_total": 15, "events_per_fold": 3, "symbols_total": 10},
+  "acceptance_gates": {
+    "mean_net_positive": true,
+    "capped_mean_net_r_positive": true,
+    "profit_factor_above_one": true,
+    "positive_fold_share_min": 0.6666666667,
+    "positive_symbol_share_min": 0.55,
+    "week_cluster_signflip_p_max": 0.01,
+    "matched_random_p_max": 0.01,
+    "portfolio_total_return_positive": true,
+    "portfolio_closed_equity_max_drawdown_max": 0.20
+  },
+  "safety": {
+    "repository_holdout_start": "2026-05-04T00:00:00Z",
+    "repository_holdout_rows_allowed": 0,
+    "holdout_consumed": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "automatic_promote": false,
+    "active_or_forward_change": false,
+    "live_order_change": false,
+    "tradingview_write_before_result": false
+  }
+}

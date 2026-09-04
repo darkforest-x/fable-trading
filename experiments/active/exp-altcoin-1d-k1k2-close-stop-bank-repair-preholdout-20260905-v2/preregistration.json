@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp-altcoin-1d-k1k2-close-stop-bank-repair-preholdout-20260905-v2",
+  "registered_at": "2026-09-05T03:05:00+08:00",
+  "observed_parent_failure_before_registration": "In the frozen 2024-01 through 2025-06 parent audit, 15 of 23 trades stopped before a bank and 11 losing trades later had at least 6R same-direction horizon MFE. Seven more trades banked at least once but still finished negative. The parent lost 482.17bp/trade and underperformed matched random by 374.14bp.",
+  "hypothesis": "Daily altcoin K1->K2 direction may remain useful, but intraday K2-wick invalidation is too fragile and a 20% total bank is economically incapable of protecting a reached trend milestone.",
+  "fixed_signal": "Parent EMA13/SMA34 neutral-episode K1->K2 signal, recency 10, at least two transition votes, maximum K1-to-K2 gap five. No morphology, signal, universe or entry retuning is permitted.",
+  "ordered_single_factors": ["stop_policy", "bank_schedule", "trail_reference", "runner_buffer_atr"],
+  "development_data": "2022-07-01 through 2025-06-30; explicitly contains already-seen parent selection and audit and is used only to select execution parameters",
+  "one_shot_confirmation_data": "2025-07-01 through 2026-04-30; not opened by the parent and not used for parameter selection",
+  "selection_response": "Half-year robust capped net R; clipping [-1.5,+10] prevents one listing-era winner such as ORDI from selecting the policy alone. Raw returns remain fully reported.",
+  "stop_factor": "Compare intraday structural stop, 1.0/1.5 ATR intraday floors, one-close structure exit with intraday or close-based MA runner behind a 2 ATR disaster stop, and two-close structure/MA exit behind the same disaster stop.",
+  "bank_factor": "Compare the parent 20% total ladder with 55% and 70% gradual ladders. Profit-taking and stop behavior remain separate sequential factors.",
+  "fixed_cost_fraction": 0.002,
+  "matched_random": "Three controls per event, without reuse, blocked by same symbol, half-year, copied direction, and within-symbol ATR quintile; paired excess is sign-flipped at entry-week level.",
+  "repository_holdout_start": "2026-05-04T00:00:00Z",
+  "repository_holdout_rows_allowed": 0,
+  "production_claim_allowed_before_repository_holdout": false,
+  "automatic_trading_or_promotion_allowed": false
+}
