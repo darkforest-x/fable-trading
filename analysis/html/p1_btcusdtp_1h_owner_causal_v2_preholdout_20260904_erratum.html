@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>勘误：BTCUSDT.P 1h Owner Causal V2 的 holdout 读取声明</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>勘误：BTCUSDT.P 1h Owner Causal V2 的 holdout 读取声明</h1>
+<p>日期：2026-09-04&lt;br&gt; 原报告：<code>analysis/p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904.md</code>&lt;br&gt; 影响实验：<code>exp-btcusdtp-1h-owner-causal-v2-preholdout-20260904-v1</code></p>
+<h2>勘误结论</h2>
+<p>原报告关于 <code>data/kline_deep/okx_BTC_USDT_SWAP_15m_158499.csv</code> “物理截止于 2026-02-28、holdout 读取 0 行”的声明是错误的。</p>
+<p>2026-09-04 为 15m / 5m 新实验做 fail-closed 源预检时，实际解析该文件的时间戳最大值已经到达项目 holdout（起点 <code>2026-05-04T00:00:00Z</code>）之后。旧 1h 脚本会先对整文件执行 SHA256，再由 <code>resample_hourly()</code> 整表读取 CSV，最后才按 <code>safe_end</code> 截取，因此即使特征和收益只使用 2026-02-28 之前的行，<strong>读取行为本身仍然接触了 holdout 价格</strong>。</p>
+<p>据此更正：</p>
+<ul>
+<li><code>holdout_consumed: false</code> → <strong><code>true</code></strong>；</li>
+<li>“holdout rows read = 0” → <strong>错误，不能成立</strong>；</li>
+<li>记为该 1h 配置的<strong>意外 holdout 访问 #1</strong>；当时没有逐次授权；</li>
+<li>原报告的收益数字不因本次勘误被重新计算，但不再具有“未触碰 holdout 的纯预留验证”证据资格；</li>
+<li>该规则原本已经因成本后收益为负而 <code>rejected</code>，状态保持 <code>rejected</code>，不得据此 promote、部署或实盘。</li>
+</ul>
+<h2>为什么数字可能不变、证据资格仍然变化</h2>
+<p>旧脚本在整表读入后、生成 1h 特征与交易之前，按 <code>validation_end_exclusive</code> 过滤，所以 2026-05-04 之后的行没有进入已报告的信号或 PnL。由此可推断原数值大概率仍对应 pre-holdout 前缀；但项目铁律约束的是“不得读取”，不是只约束“不得用于计算”。因此数值不变不能修复违规读取，也不能恢复 OOS 身份。</p>
+<h2>发现、隔离与替代源</h2>
+<ul>
+<li>发现收据：<code>experiments/active/exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v1/results/preflight_failure.json</code>；新实验在只完成时间戳预检、尚未计算任何信号或结果时停止并废弃。</li>
+<li>替代源：OKX 官方月度 1m 归档因果聚合出的独立 5m 文件，物理末端 <code>2026-02-28T15:55:00Z</code>，SHA256 <code>767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac</code>。</li>
+<li>替代源验证：39/39 月份成功，物理 holdout 行为 0；本次 15m / 5m v2 实验只从该安全源派生。</li>
+</ul>
+<h2>零假设对照与适用范围</h2>
+<p>这是一项数据访问纪律勘误，不是方向策略收益实验，因此 AUC、top-decile、匹配随机入场和收益置换检验不适用。严格零假设是“当前被打开的源物理末端早于 holdout”；旧源预检明确拒绝该假设。安全替代源则以文件物理末端和月度归档清单独立通过该门。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>这是事后发现并主动更正的访问纪律事件，不能回写成当时已知。</li>
+<li>没有重新打开 1h 验证、没有利用意外读到的 holdout 调参，也没有训练、promote、ACTIVE/frozen/forward 变更、部署、消息或订单。</li>
+<li>原报告其余交易统计暂不改写；引用原报告时必须同时附上本勘误。</li>
+</ul>
+<h2>复核命令</h2>
+<pre><code>
+python3 -m pytest tests/test_fetch_okx_archives.py tests/test_optimize_btcusdtp_k1k2_intraday_preholdout.py -q
+python3 scripts/md_to_html.py \
+  analysis/p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md \
+  --out-dir analysis/html
+</code></pre>
+</body>
+</html>

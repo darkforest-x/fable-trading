@@ -506,3 +506,8 @@
 - [`two_day_pre_final_audit_20260710.md`](two_day_pre_final_audit_20260710.md) — 两日任务预终审（2026-07-10）
 - [`week_plan_20260720.md`](week_plan_20260720.md) — 一周执行计划(2026-07-20 → 07-27)— 交给 Grok 执行版
 - [`week_plan_20260803.md`](week_plan_20260803.md) — 一周执行计划（2026-08-03 → 08-09）
+
+## 2026-09-04 BTCUSDT.P K1→K2 低周期研究
+
+- [`p1_btcusdtp_k1k2_15m_5m_parameter_optimization_preholdout_20260904.md`](p1_btcusdtp_k1k2_15m_5m_parameter_optimization_preholdout_20260904.md) — 15m / 5m 独立参数优化、冻结验证与失败归因；两周期均拒绝。
+- [`p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md`](p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md) — 旧 1h 报告的 holdout 读取声明勘误。

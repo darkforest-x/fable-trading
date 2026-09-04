@@ -306,8 +306,8 @@ def main() -> None:
 
     report = f"""# BTCUSDT.P 15m / 5m K1→K2 独立参数优化（pre-holdout）
 
-生成日期：2026-09-04  
-实验：`{config['experiment_id']}`  
+生成日期：2026-09-04<br>
+实验：`{config['experiment_id']}`<br>
 结论：**15m 与 5m 均未通过冻结验证，不可用于实盘。**
 
 ## 先说结论

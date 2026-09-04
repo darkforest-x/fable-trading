@@ -194,7 +194,9 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
         "exp-1h-filusdt-model-first-breakout-gate-20260904-v1",
         "exp-1h-filusdt-model-first-standing-gate-20260904-v2",
         "exp-1h-okx-model-first-standing-top10-20260904-v1",
+        "exp-btcusdtp-1h-owner-causal-v2-preholdout-20260904-v1",
         "exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1",
+        "exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v1",
         "exp-pine-eth-15m-v1",
         "exp-yoyo-trading-fixed-w10-classifier-holdout3d",
     }, (

@@ -12707,3 +12707,135 @@ artifacts:
     config_hash: "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba"
     data_cutoff: "2026-05-03T20:30:00Z"
     notes: Owner-facing HTML generated from the canonical Markdown immediately after report completion.
+
+  - artifact_id: btcusdtp-1h-owner-causal-v2-preholdout-20260904-holdout-erratum
+    artifact_type: report
+    role: holdout_access_correction_for_prior_1h_preholdout_claim
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2726ebe"
+    source_path: analysis/p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md
+    sha256: "c6fa6162ca4c2d27e6375c4a2f3f4eece49a51f728cacef16002fd3f79ca702b"
+    size_bytes: 3361
+    storage_uri: "repo://analysis/p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2726ebe"
+    config_hash: "4f27970113d941cac3e645cb4e0ad717bbad027e62d424db8228d7da39335047"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: >-
+      Revokes the prior zero-holdout-read claim. The legacy loader hashed and
+      loaded a CSV that had been extended into holdout before filtering; this
+      accidental configuration-specific access was not Owner-authorized.
+
+  - artifact_id: btcusdtp-k1k2-intraday-preflight-failure-20260904-v1
+    artifact_type: manifest
+    role: fail_closed_legacy_source_holdout_access_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ea6183a"
+    source_path: experiments/active/exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v1/results/preflight_failure.json
+    sha256: "ca7dbd56051adbe94f0a4503ae8dbddc76147929d57ba61ddf2fd4622108134a"
+    size_bytes: 708
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v1/results/preflight_failure.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ea6183a"
+    config_hash: "4f27970113d941cac3e645cb4e0ad717bbad027e62d424db8228d7da39335047"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: >-
+      Records the unauthorized v1 preflight read and zero signals, outcomes or
+      result persistence. Reuse is prohibited; the official-archive v2 replaces it.
+
+  - artifact_id: btcusdtp-k1k2-intraday-selection-20260904-v2
+    artifact_type: config
+    role: frozen_separate_15m_5m_development_selection_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5bd491c"
+    source_path: experiments/active/exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v2/results/selection_receipt.json
+    sha256: "a3649bad0509db144ec58e0b409c81d3a734c1544a7f83ea4d4c996343844d23"
+    size_bytes: 91779
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v2/results/selection_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5bd491c"
+    config_hash: "b7d5e2644d0f0b81b3689f3b67e9952a984e70ff25ef734128e2ae31586ec278"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: >-
+      Frozen before validation. 15m accepted two morphology moves; 5m retained
+      every inherited parameter because no candidate cleared all registered gates.
+
+  - artifact_id: btcusdtp-k1k2-15m-research-pine-20260904-v2
+    artifact_type: config
+    role: research_only_15m_visual_indicator_with_selected_defaults
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2726ebe"
+    source_path: experiments/active/exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v2/pine/fable_k1_k2_15m_research_v1.pine
+    sha256: "28cb8353806d515826e5e8b6ff311bf0801d52baacef4eefd86c25f9b62e8496"
+    size_bytes: 20923
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v2/pine/fable_k1_k2_15m_research_v1.pine"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2726ebe"
+    config_hash: "b7d5e2644d0f0b81b3689f3b67e9952a984e70ff25ef734128e2ae31586ec278"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: >-
+      15m-only research indicator with 0.80 ATR K1 range and 0.65 K2 rejection
+      close defaults. Frozen validation failed; this must not be used as a live edge.
+
+  - artifact_id: btcusdtp-k1k2-5m-research-pine-20260904-v2
+    artifact_type: config
+    role: research_only_5m_visual_indicator_with_inherited_defaults
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2726ebe"
+    source_path: experiments/active/exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v2/pine/fable_k1_k2_5m_research_v1.pine
+    sha256: "e70e7d2f574c608344eace3990779aa6cac6a5f44b4e45bed756be8ff9850171"
+    size_bytes: 20851
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v2/pine/fable_k1_k2_5m_research_v1.pine"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2726ebe"
+    config_hash: "b7d5e2644d0f0b81b3689f3b67e9952a984e70ff25ef734128e2ae31586ec278"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: >-
+      5m-only research indicator. No parameter move passed development gates,
+      so defaults remain inherited; frozen validation failed.
+
+  - artifact_id: btcusdtp-k1k2-intraday-report-20260904-v2
+    artifact_type: report
+    role: canonical_chinese_15m_5m_parameter_optimization_and_failure_analysis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2726ebe"
+    source_path: analysis/p1_btcusdtp_k1k2_15m_5m_parameter_optimization_preholdout_20260904.md
+    sha256: "ab332ddc41fb282ed37ed8da821d5fdf1ee67035a6f5a1f40339280b70f5916b"
+    size_bytes: 13678
+    storage_uri: "repo://analysis/p1_btcusdtp_k1k2_15m_5m_parameter_optimization_preholdout_20260904.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2726ebe"
+    config_hash: "b7d5e2644d0f0b81b3689f3b67e9952a984e70ff25ef734128e2ae31586ec278"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: >-
+      Full rules, preregistered development selection, frozen validation,
+      matched controls, time slices, failure modes and post-TP path diagnostics.
+
+  - artifact_id: btcusdtp-k1k2-intraday-html-20260904-v2
+    artifact_type: report
+    role: owner_facing_self_contained_html_15m_5m_optimization_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2726ebe"
+    source_path: analysis/html/p1_btcusdtp_k1k2_15m_5m_parameter_optimization_preholdout_20260904.html
+    sha256: "4577c0fdfe932582217e7fb25f73b8675c157ece072075d3a3afb07a4b741360"
+    size_bytes: 521529
+    storage_uri: "repo://analysis/html/p1_btcusdtp_k1k2_15m_5m_parameter_optimization_preholdout_20260904.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2726ebe"
+    config_hash: "b7d5e2644d0f0b81b3689f3b67e9952a984e70ff25ef734128e2ae31586ec278"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: Browser-verified HTML with nine tables, two embedded figures and zero broken images.

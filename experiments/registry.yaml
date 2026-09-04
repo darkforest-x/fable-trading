@@ -4024,16 +4024,82 @@ experiments:
       at p=0.1994. Nine of 13 stops failed before 0.5R; the 1.5R protection rule
       armed five times and changed zero exits. Gap response reversed between
       development and validation, so no narrower gap was selected.
-    holdout_consumed: false
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904.md
+    artifacts:
+      - btcusdtp-1h-owner-causal-v2-preholdout-20260904-holdout-erratum
+    reuse_allowed: false
+    notes: >-
+      ERRATUM 2026-09-04: the legacy 15m source had been extended through the
+      repository holdout. The script hashed and loaded the whole CSV before
+      applying its safe_end filter, so this is configuration-specific accidental
+      holdout access #1 and the prior zero-read claim is revoked. Reported signal
+      and PnL calculations were filtered before features, but the result no longer
+      has untouched-OOS status. The rejection stands and the artifact must not be
+      reused without its erratum. No retraining, promotion, ACTIVE/frozen/forward
+      mutation, deployment, messaging or order occurred.
+
+  - experiment_id: exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ea6183a"
+    status: superseded
+    question: >-
+      Can the K1-to-K2 rule be tuned separately for BTCUSDT.P 15m and 5m
+      without touching the repository holdout?
+    single_variable: >-
+      Source preflight only; no signal, parameter or outcome was evaluated.
+    result: >-
+      invalidated_before_signal_or_outcome_computation. The legacy 15m source
+      failed its physical-cutoff check after timestamp parsing because it had
+      reached the repository holdout. Zero signals, outcomes or development
+      metrics were produced, and no parameter may be reused from this run.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btcusdtp_k1k2_15m_5m_parameter_optimization_preholdout_20260904.md
+    artifacts:
+      - btcusdtp-k1k2-intraday-preflight-failure-20260904-v1
+    reuse_allowed: false
+    notes: >-
+      This was an unauthorized configuration-specific holdout touch #1 caused
+      by trusting a stale physical-cutoff claim. Execution stopped before
+      features, signals or PnL. The clean official-archive v2 supersedes it.
+
+  - experiment_id: exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2726ebe"
+    status: rejected
+    question: >-
+      Which separately selected K1/K2 morphology parameters, if any, produce a
+      stable post-cost edge for BTCUSDT.P 15m and 5m on clean pre-holdout data?
+    single_variable: >-
+      One preregistered coordinate pass per timeframe. Every accepted move had
+      to clear sample, +2bp robust-improvement and worst-fold gates while the
+      next-open entry, exact K2 stop, 3R target, 12-hour horizon, 1.5R fee-cover
+      protection, 6-hour cooldown and 20bp cost stayed fixed.
+    result: >-
+      both_timeframes_failed_frozen_validation. 15m selected K1 range >=0.80
+      ATR and K2 rejection-close location >=0.65, improving validation by
+      4.66bp/trade versus inherited parameters but still returning -21.12bp
+      net (PF 0.403). No 5m move passed development gates; unchanged 5m
+      returned -18.60bp net (PF 0.374). Corrected matched-control excess was
+      +4.39bp and +2.35bp with p=0.333 and p=0.359 respectively.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btcusdtp_k1k2_15m_5m_parameter_optimization_preholdout_20260904.md
+    artifacts:
+      - btcusdtp-k1k2-intraday-selection-20260904-v2
+      - btcusdtp-k1k2-15m-research-pine-20260904-v2
+      - btcusdtp-k1k2-5m-research-pine-20260904-v2
+      - btcusdtp-k1k2-intraday-report-20260904-v2
+      - btcusdtp-k1k2-intraday-html-20260904-v2
     reuse_allowed: true
     notes: >-
-      The physical source ended at 2026-02-28, before the 2026-05-04 holdout;
-      holdout rows read was zero. The result supports the causal structure and
-      fee-to-risk directions as research hypotheses, but not deployment: gross
-      expectancy remained below the frozen 20bp round-trip cost and time-slice
-      stability failed. The research Pine was compiled and saved separately as
-      Fable K1→K2 Owner Causal V2; no training, promotion, ACTIVE/frozen/forward
-      mutation, messaging or order occurred.
+      The clean v2 source physically ends on 2026-02-28 and reads zero holdout
+      rows. The negative result is reusable as research evidence only; both Pine
+      files are research-only and were not promoted or saved as production
+      indicators. No training, promotion, ACTIVE/frozen/forward mutation,
+      deployment, messaging or order occurred.
