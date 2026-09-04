@@ -1,0 +1,98 @@
+{
+  "status": "pass",
+  "purpose": "Pine source/static/owner-anchor parity; no trading evaluation",
+  "pine_source": "experiments/active/exp-two-key-candle-feature-atlas-v3/pine/fable_two_key_candle_sma40_retest_v1.pine",
+  "pine_source_sha256": "8df89cb961a9ac50df10af6cbd8be9a9a980286dffa077c7a0b657194082aeda",
+  "static_checks": {
+    "pine_v6": true,
+    "indicator_not_strategy": true,
+    "no_external_data_request": true,
+    "no_negative_history_offset": true,
+    "k2_requires_confirmed_bar": true,
+    "entry_uses_previous_k2": true,
+    "entry_runs_on_new_bar": true,
+    "exact_k2_extreme_stop": true,
+    "dynamic_and_selectable_alerts": true,
+    "risk_reward_drawings": true,
+    "frozen_broad_gap": true,
+    "visual_score_disclaimed": true
+  },
+  "compile_checks": {
+    "official_compiler_run": true,
+    "official_compiler_zero_errors": true,
+    "compiled_source_hash_matches": true,
+    "not_saved_or_published": true
+  },
+  "anchor_parity": [
+    {
+      "name": "short",
+      "direction": "short",
+      "k1_time": "2026-09-01 08:00:00+00:00",
+      "k2_time": "2026-09-01 14:00:00+00:00",
+      "eligible_gaps": [
+        6
+      ],
+      "selected_gap": 6,
+      "expected_gap": 6,
+      "causal_entry": 78135.5,
+      "expected_entry": 78135.5,
+      "exact_stop": 78388.0,
+      "expected_stop": 78388.0,
+      "stop_distance_atr": 0.5566971756753519,
+      "morphology_score": 81.53774243839398,
+      "expected_score": 81.53774243839398,
+      "reverse_direction_gaps": [],
+      "passes": true
+    },
+    {
+      "name": "long",
+      "direction": "long",
+      "k1_time": "2026-09-03 02:00:00+00:00",
+      "k2_time": "2026-09-03 05:00:00+00:00",
+      "eligible_gaps": [
+        3
+      ],
+      "selected_gap": 3,
+      "expected_gap": 3,
+      "causal_entry": 77771.9,
+      "expected_entry": 77771.9,
+      "exact_stop": 77050.0,
+      "expected_stop": 77050.0,
+      "stop_distance_atr": 1.6096987043149265,
+      "morphology_score": 83.4443335039823,
+      "expected_score": 83.4443335039823,
+      "reverse_direction_gaps": [],
+      "passes": true
+    }
+  ],
+  "null_control": {
+    "definition": "invert each owner anchor's direction at the same K2 timestamp",
+    "result": {
+      "owner_anchor_matches": 2,
+      "owner_anchor_total": 2,
+      "all_owner_anchors_match": true,
+      "reverse_direction_null_matches": 0,
+      "reverse_direction_null_total": 2,
+      "reverse_direction_null_passes": true
+    }
+  },
+  "holdout_statement": "Only the two owner-specified 2026-09 morphology timestamps and their causal next opens were reconstructed; no post-K2 return, outcome, aggregate signal scan, score selection, or parameter tuning was performed.",
+  "checks": {
+    "pine_v6": true,
+    "indicator_not_strategy": true,
+    "no_external_data_request": true,
+    "no_negative_history_offset": true,
+    "k2_requires_confirmed_bar": true,
+    "entry_uses_previous_k2": true,
+    "entry_runs_on_new_bar": true,
+    "exact_k2_extreme_stop": true,
+    "dynamic_and_selectable_alerts": true,
+    "risk_reward_drawings": true,
+    "frozen_broad_gap": true,
+    "visual_score_disclaimed": true,
+    "official_compiler_run": true,
+    "official_compiler_zero_errors": true,
+    "compiled_source_hash_matches": true,
+    "not_saved_or_published": true
+  }
+}

@@ -37,3 +37,27 @@ these additional families are diagnostic rather than confirmatory.
 PYTHONPATH=. .venv/bin/python scripts/analyze_two_key_candle_feature_atlas_v3.py
 PYTHONPATH=. .venv/bin/python scripts/validate_two_key_candle_feature_atlas_v3.py
 ```
+
+## Pine indicator
+
+The owner-anchor morphology is also available as a Pine Script v6 overlay:
+
+    pine/fable_two_key_candle_sma40_retest_v1.pine
+
+It is deliberately an indicator, not a strategy. The broad profile marks K2
+only after the bar closes and emits the causal entry on the next bar's first
+update, when both the next open and exact K2-extreme risk are known. It also
+offers the strict owner-morphology and owner-state profiles for visual
+inspection, but labels the similarity score as non-predictive because V2/V3
+found no stable post-cost edge.
+
+Static, official-compiler and two-anchor parity:
+
+    PYTHONPATH=. .venv/bin/python scripts/validate_two_key_candle_pine_indicator.py
+    PYTHONPATH=. .venv/bin/pytest -q tests/test_two_key_candle_pine_indicator.py
+
+results/pine_compile_receipt.json binds the official TradingView Pine v6
+compile result to the exact source SHA. The source compiled with zero errors;
+adding it to the owner's current chart was blocked only because that Basic
+layout had already reached its indicator-count limit. Nothing was saved,
+published or removed from the layout.

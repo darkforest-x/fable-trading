@@ -1,0 +1,791 @@
+//@version=6
+// Fable two-key-candle SMA40 retest V1.
+//
+// Research/annotation indicator only. It does not place orders and its visual
+// similarity score is not a probability, expected return, or position-sizing
+// input. The broad profile reproduces the frozen V2 causal morphology contract.
+//
+// Causality:
+// - K1 and K2 are recognized only after K2 is confirmed.
+// - The exact K2-extreme stop and next-open risk are accepted on the first
+//   update of the following bar, when that bar's open is observable.
+// - No request.* call, lower-timeframe data, or future bar is used.
+//
+// Pine v6 references:
+// https://www.tradingview.com/pine-script-docs/concepts/bar-states/
+// https://www.tradingview.com/pine-script-docs/language/execution-model/
+// https://www.tradingview.com/pine-script-docs/visuals/lines-and-boxes/
+// https://www.tradingview.com/pine-script-docs/visuals/text-and-shapes/
+// https://www.tradingview.com/pine-script-docs/concepts/alerts/
+indicator(
+     "Fable Two-Key Candle + SMA40 Retest V1 · Research",
+     shorttitle = "Fable K1→K2 SMA40 V1",
+     overlay = true,
+     max_labels_count = 500,
+     max_lines_count = 500,
+     max_boxes_count = 300)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inputs
+// ─────────────────────────────────────────────────────────────────────────────
+string GROUP_SCOPE = "1 · Scope"
+string GROUP_CUSTOM_K1 = "2 · Custom K1"
+string GROUP_CUSTOM_K2 = "3 · Custom K2"
+string GROUP_CUSTOM_PATH = "4 · Custom path / state"
+string GROUP_DISPLAY = "5 · Display"
+string GROUP_ALERTS = "6 · Alerts"
+
+string profile = input.string(
+     "Broad recall · 2–8",
+     "Profile",
+     options = [
+          "Broad recall · 2–8",
+          "Owner morphology · 3–6",
+          "Owner morphology + state · 3–6",
+          "Custom"],
+     tooltip =
+          "Broad recall is the frozen V2 candidate surface. Owner profiles are " +
+          "visual-fidelity diagnostics, not validated profit filters.",
+     group = GROUP_SCOPE)
+string sideMode = input.string(
+     "Both",
+     "Direction",
+     options = ["Both", "Long only", "Short only"],
+     group = GROUP_SCOPE)
+bool requireOneHour = input.bool(
+     true,
+     "Require 1-hour chart",
+     tooltip = "The researched bar-distance and thresholds are defined on 1h candles.",
+     group = GROUP_SCOPE)
+bool applyDedupe = input.bool(
+     true,
+     "Apply earliest-K2 + cooldown de-duplication",
+     tooltip =
+          "Keeps the first accepted K2 for a K1 and enforces a global signal " +
+          "cooldown, matching the offline event-selection intent.",
+     group = GROUP_SCOPE)
+int cooldownBars = input.int(
+     6,
+     "Cooldown bars",
+     minval = 1,
+     maxval = 100,
+     group = GROUP_SCOPE)
+
+int customGapMin = input.int(2, "Minimum K1→K2 gap", minval = 1, maxval = 20, group = GROUP_CUSTOM_K1)
+int customGapMax = input.int(8, "Maximum K1→K2 gap", minval = 1, maxval = 20, group = GROUP_CUSTOM_K1)
+float customK1BodyMin = input.float(0.50, "K1 minimum body / range", minval = 0.0, maxval = 1.0, step = 0.05, group = GROUP_CUSTOM_K1)
+float customK1RangeAtrMin = input.float(1.00, "K1 minimum range / ATR", minval = 0.0, step = 0.05, group = GROUP_CUSTOM_K1)
+float customK1CloseLocationMin = input.float(0.75, "K1 directional close location", minval = 0.0, maxval = 1.0, step = 0.05, group = GROUP_CUSTOM_K1)
+float customK1CrossDepthMin = input.float(-0.05, "K1 SMA40 cross depth / ATR", step = 0.01, group = GROUP_CUSTOM_K1)
+bool customRequireK1Volume = input.bool(false, "Require K1 volume ratio", group = GROUP_CUSTOM_K1)
+float customK1VolumeMin = input.float(1.25, "K1 volume / prior-20 mean", minval = 0.0, step = 0.05, group = GROUP_CUSTOM_K1)
+bool customRequireK1MaColour = input.bool(false, "Require K1 MA-side colour", group = GROUP_CUSTOM_K1)
+
+float customK2WickMin = input.float(0.45, "K2 minimum rejection wick / range", minval = 0.0, maxval = 1.0, step = 0.05, group = GROUP_CUSTOM_K2)
+float customK2BodyMax = input.float(0.50, "K2 maximum body / range", minval = 0.0, maxval = 1.0, step = 0.05, group = GROUP_CUSTOM_K2)
+float customK2RejectMin = input.float(0.65, "K2 directional rejection location", minval = 0.0, maxval = 1.0, step = 0.05, group = GROUP_CUSTOM_K2)
+float customTouchMin = input.float(-0.05, "K2 minimum SMA40 touch depth / ATR", step = 0.01, group = GROUP_CUSTOM_K2)
+float customTouchMax = input.float(1.50, "K2 maximum SMA40 touch depth / ATR", step = 0.05, group = GROUP_CUSTOM_K2)
+float customCloseSideMin = input.float(0.00, "K2 minimum close-back depth / ATR", step = 0.05, group = GROUP_CUSTOM_K2)
+float customRiskMin = input.float(0.15, "Next-open minimum stop distance / ATR", minval = 0.0, step = 0.05, group = GROUP_CUSTOM_K2)
+float customRiskMax = input.float(2.50, "Next-open maximum stop distance / ATR", minval = 0.05, step = 0.05, group = GROUP_CUSTOM_K2)
+bool customRequireK2MaColour = input.bool(false, "Require K2 MA-side colour", group = GROUP_CUSTOM_K2)
+
+bool customUsePath = input.bool(false, "Enable path filters", group = GROUP_CUSTOM_PATH)
+float customCloseDistanceMax = input.float(0.75, "Maximum |K2 close − K1 close| / K1 ATR", minval = 0.0, step = 0.05, group = GROUP_CUSTOM_PATH)
+float customExtensionMax = input.float(1.00, "Maximum pre-retest extension / K1 ATR", minval = 0.0, step = 0.05, group = GROUP_CUSTOM_PATH)
+int customWrongCloseMax = input.int(0, "Maximum intermediate wrong-side closes", minval = 0, maxval = 20, group = GROUP_CUSTOM_PATH)
+float customIntermediateMaShareMin = input.float(1.00, "Minimum intermediate MA-colour share", minval = 0.0, maxval = 1.0, step = 0.05, group = GROUP_CUSTOM_PATH)
+float customK2K1VolumeMin = input.float(0.50, "Minimum K2 / K1 volume", minval = 0.0, step = 0.05, group = GROUP_CUSTOM_PATH)
+float customK2K1VolumeMax = input.float(1.50, "Maximum K2 / K1 volume", minval = 0.05, step = 0.05, group = GROUP_CUSTOM_PATH)
+bool customUseState = input.bool(false, "Require owner oscillator + structure state", group = GROUP_CUSTOM_PATH)
+
+bool showSma40 = input.bool(true, "Show SMA40(HL2)", group = GROUP_DISPLAY)
+bool showSixMa = input.bool(true, "Show SMA/EMA 20·60·120 context", group = GROUP_DISPLAY)
+bool showRopeFill = input.bool(true, "Fill six-MA rope", group = GROUP_DISPLAY)
+bool showPivotLevels = input.bool(false, "Show confirmed 10/10 pivot levels", group = GROUP_DISPLAY)
+bool colourBars = input.bool(true, "Colour candles by HL2 vs SMA40", group = GROUP_DISPLAY)
+bool showK2Preview = input.bool(true, "Show confirmed K2 preview", group = GROUP_DISPLAY)
+bool showKeyLabels = input.bool(true, "Show K1 / K2 / entry labels", group = GROUP_DISPLAY)
+bool showPositionBoxes = input.bool(true, "Show risk/reward boxes", group = GROUP_DISPLAY)
+float targetR = input.float(3.0, "Visual target (R)", minval = 0.25, maxval = 20.0, step = 0.25, group = GROUP_DISPLAY)
+int projectionBars = input.int(20, "Risk/reward projection bars", minval = 1, maxval = 500, group = GROUP_DISPLAY)
+bool showHud = input.bool(true, "Show status table", group = GROUP_DISPLAY)
+
+bool alertK2Close = input.bool(true, "Dynamic alert on confirmed K2", group = GROUP_ALERTS)
+bool alertNextOpen = input.bool(true, "Dynamic alert on causal next-open entry", group = GROUP_ALERTS)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Profile contract
+// ─────────────────────────────────────────────────────────────────────────────
+bool broadProfile = profile == "Broad recall · 2–8"
+bool ownerMorphProfile =
+     profile == "Owner morphology · 3–6" or
+     profile == "Owner morphology + state · 3–6"
+bool ownerStateProfile = profile == "Owner morphology + state · 3–6"
+bool customProfile = profile == "Custom"
+
+int effectiveGapMin = broadProfile ? 2 : ownerMorphProfile ? 3 : math.min(customGapMin, customGapMax)
+int effectiveGapMax = broadProfile ? 8 : ownerMorphProfile ? 6 : math.max(customGapMin, customGapMax)
+float effectiveK1BodyMin = ownerMorphProfile ? 0.65 : customProfile ? customK1BodyMin : 0.50
+float effectiveK1RangeMin = ownerMorphProfile ? 1.25 : customProfile ? customK1RangeAtrMin : 1.00
+float effectiveK1CloseMin = ownerMorphProfile ? 0.85 : customProfile ? customK1CloseLocationMin : 0.75
+float effectiveK1CrossMin = customProfile ? customK1CrossDepthMin : -0.05
+bool effectiveRequireK1Volume = ownerMorphProfile or (customProfile and customRequireK1Volume)
+float effectiveK1VolumeMin = ownerMorphProfile ? 1.25 : customK1VolumeMin
+bool effectiveRequireK1Ma = ownerMorphProfile or (customProfile and customRequireK1MaColour)
+
+float effectiveK2WickMin = ownerMorphProfile ? 0.60 : customProfile ? customK2WickMin : 0.45
+float effectiveK2BodyMax = ownerMorphProfile ? 0.35 : customProfile ? customK2BodyMax : 0.50
+float effectiveK2RejectMin = ownerMorphProfile ? 0.65 : customProfile ? customK2RejectMin : 0.65
+float effectiveTouchMin = ownerMorphProfile ? 0.10 : customProfile ? customTouchMin : -0.05
+float effectiveTouchMax = ownerMorphProfile ? 1.00 : customProfile ? customTouchMax : 1.50
+float effectiveCloseSideMin = ownerMorphProfile ? 0.25 : customProfile ? customCloseSideMin : 0.00
+float effectiveRiskMin = ownerMorphProfile ? 0.25 : customProfile ? customRiskMin : 0.15
+float effectiveRiskMax = ownerMorphProfile ? 2.00 : customProfile ? customRiskMax : 2.50
+bool effectiveRequireK2Ma = ownerMorphProfile or (customProfile and customRequireK2MaColour)
+
+bool effectiveUsePath = ownerMorphProfile or (customProfile and customUsePath)
+float effectiveCloseDistanceMax = ownerMorphProfile ? 0.75 : customCloseDistanceMax
+float effectiveExtensionMax = ownerMorphProfile ? 1.00 : customExtensionMax
+int effectiveWrongCloseMax = ownerMorphProfile ? 0 : customWrongCloseMax
+float effectiveIntermediateMaShareMin = ownerMorphProfile ? 1.00 : customIntermediateMaShareMin
+float effectiveVolumeRelationMin = ownerMorphProfile ? 0.50 : customK2K1VolumeMin
+float effectiveVolumeRelationMax = ownerMorphProfile ? 1.50 : customK2K1VolumeMax
+bool effectiveUseState = ownerStateProfile or (customProfile and customUseState)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Causal indicators on the chart symbol/timeframe
+// ─────────────────────────────────────────────────────────────────────────────
+float atr14 = ta.atr(14)
+float sma40 = ta.sma(hl2, 40)
+float sma20 = ta.sma(close, 20)
+float ema20 = ta.ema(close, 20)
+float sma60 = ta.sma(close, 60)
+float ema60 = ta.ema(close, 60)
+float sma120 = ta.sma(close, 120)
+float ema120 = ta.ema(close, 120)
+float ropeHigh = math.max(
+     math.max(math.max(sma20, ema20), math.max(sma60, ema60)),
+     math.max(sma120, ema120))
+float ropeLow = math.min(
+     math.min(math.min(sma20, ema20), math.min(sma60, ema60)),
+     math.min(sma120, ema120))
+float ropeMid = (sma20 + ema20 + sma60 + ema60 + sma120 + ema120) / 6.0
+
+float priorVolumeMean20 = ta.sma(volume[1], 20)
+float volumeRatio20 = priorVolumeMean20 > 0.0 ? volume / priorVolumeMean20 : na
+
+float maDifference = hl2 - sma40
+float percentile99 = ta.percentile_linear_interpolation(maDifference, 1000, 99.0)
+float normalizedDifference =
+     not na(percentile99) and percentile99 != 0.0 ?
+     maDifference / percentile99 : na
+float maShiftOscillator = ta.hma(normalizedDifference - normalizedDifference[15], 10)
+float maShiftOscillatorDelta = maShiftOscillator - maShiftOscillator[1]
+int maCandleSide = hl2 >= sma40 ? 1 : -1
+
+float confirmedPivotHigh = ta.pivothigh(high, 10, 10)
+float confirmedPivotLow = ta.pivotlow(low, 10, 10)
+var float lastPivotHigh = na
+var float lastPivotLow = na
+if not na(confirmedPivotHigh)
+    lastPivotHigh := confirmedPivotHigh
+if not na(confirmedPivotLow)
+    lastPivotLow := confirmedPivotLow
+bool structureBreakUp =
+     not na(lastPivotHigh) and
+     close > lastPivotHigh and
+     close[1] <= nz(lastPivotHigh[1], lastPivotHigh)
+bool structureBreakDown =
+     not na(lastPivotLow) and
+     close < lastPivotLow and
+     close[1] >= nz(lastPivotLow[1], lastPivotLow)
+var int marketBreakState = 0
+if structureBreakUp
+    marketBreakState := 1
+else if structureBreakDown
+    marketBreakState := -1
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Feature helpers
+// ─────────────────────────────────────────────────────────────────────────────
+f_clamp01(float value) =>
+    math.max(0.0, math.min(1.0, nz(value, 0.0)))
+
+f_unit(float value, float lowValue, float highValue) =>
+    f_clamp01((value - lowValue) / (highValue - lowValue))
+
+// Returns:
+// found, gap, K1-score, K2-five-feature sum, path-score, state-score,
+// close-distance, extension, wrong-close count, intermediate MA share,
+// K2/K1 volume ratio.
+f_findBestK1(int direction) =>
+    bool found = false
+    int bestGap = na
+    float bestQuality = na
+    float bestK1Score = na
+    float bestK2FiveSum = na
+    float bestPathScore = na
+    float bestStateScore = na
+    float bestCloseDistance = na
+    float bestExtension = na
+    int bestWrongCloses = na
+    float bestIntermediateMaShare = na
+    float bestVolumeRelation = na
+
+    float k2Range = high - low
+    float k2Body = math.abs(close - open)
+    float k2BodyRatio = k2Range > 0.0 ? k2Body / k2Range : na
+    float k2Wick =
+         direction == 1 ?
+         math.min(open, close) - low :
+         high - math.max(open, close)
+    float k2WickShare = k2Range > 0.0 ? k2Wick / k2Range : na
+    float k2RejectLocation =
+         direction == 1 ?
+         (close - low) / k2Range :
+         (high - close) / k2Range
+    float k2TouchDepth =
+         direction == 1 ?
+         (sma40 - low) / atr14 :
+         (high - sma40) / atr14
+    float k2CloseSide =
+         direction == 1 ?
+         (close - sma40) / atr14 :
+         (sma40 - close) / atr14
+    bool k2MaAligned = maCandleSide == direction
+    bool k2Morphology =
+         not na(k2BodyRatio) and
+         not na(k2TouchDepth) and
+         k2WickShare >= effectiveK2WickMin and
+         k2BodyRatio <= effectiveK2BodyMax and
+         k2RejectLocation >= effectiveK2RejectMin and
+         k2TouchDepth >= effectiveTouchMin and
+         k2TouchDepth <= effectiveTouchMax and
+         k2CloseSide >= effectiveCloseSideMin and
+         (not effectiveRequireK2Ma or k2MaAligned)
+
+    if k2Morphology
+        for gap = effectiveGapMin to effectiveGapMax
+            float k1Range = high[gap] - low[gap]
+            float k1Body = math.abs(close[gap] - open[gap])
+            float k1Atr = atr14[gap]
+            float k1BodyRatio = k1Range > 0.0 ? k1Body / k1Range : na
+            float k1RangeAtr = k1Atr > 0.0 ? k1Range / k1Atr : na
+            float k1CloseLocation =
+                 direction == 1 ?
+                 (close[gap] - low[gap]) / k1Range :
+                 (high[gap] - close[gap]) / k1Range
+            float k1EntryDepth =
+                 direction == 1 ?
+                 (sma40[gap] - open[gap]) / k1Atr :
+                 (open[gap] - sma40[gap]) / k1Atr
+            float k1ExitDepth =
+                 direction == 1 ?
+                 (close[gap] - sma40[gap]) / k1Atr :
+                 (sma40[gap] - close[gap]) / k1Atr
+            float k1CrossDepth = math.min(k1EntryDepth, k1ExitDepth)
+            bool k1DirectionalBody = direction * (close[gap] - open[gap]) > 0.0
+            bool k1MaAligned = maCandleSide[gap] == direction
+            bool k1Morphology =
+                 not na(k1BodyRatio) and
+                 not na(k1CrossDepth) and
+                 k1DirectionalBody and
+                 k1BodyRatio >= effectiveK1BodyMin and
+                 k1RangeAtr >= effectiveK1RangeMin and
+                 k1CloseLocation >= effectiveK1CloseMin and
+                 k1CrossDepth >= effectiveK1CrossMin and
+                 k1EntryDepth >= effectiveK1CrossMin and
+                 k1ExitDepth >= effectiveK1CrossMin and
+                 (not effectiveRequireK1Volume or volumeRatio20[gap] >= effectiveK1VolumeMin) and
+                 (not effectiveRequireK1Ma or k1MaAligned)
+
+            if k1Morphology and not na(ropeHigh[gap]) and not na(ropeLow[gap])
+                int wrongCloses = 0
+                int alignedMaBars = 0
+                float variation = 0.0
+                float extremeBefore = close[gap]
+                for step = 1 to gap - 1
+                    bool wrong =
+                         direction == 1 ?
+                         close[step] < sma40[step] :
+                         close[step] > sma40[step]
+                    if wrong
+                        wrongCloses += 1
+                    int middleMaSide = hl2[step] >= sma40[step] ? 1 : -1
+                    if middleMaSide == direction
+                        alignedMaBars += 1
+                    extremeBefore :=
+                         direction == 1 ?
+                         math.max(extremeBefore, high[step]) :
+                         math.min(extremeBefore, low[step])
+                for step = 1 to gap
+                    variation += math.abs(close[step - 1] - close[step])
+
+                float intermediateMaShare = alignedMaBars / float(gap - 1)
+                float closeDistance = direction * (close - close[gap]) / k1Atr
+                float extension = direction * (extremeBefore - close[gap]) / k1Atr
+                float volumeRelation = volume[gap] > 0.0 ? volume / volume[gap] : na
+                bool pathPass =
+                     not effectiveUsePath or (
+                          math.abs(closeDistance) <= effectiveCloseDistanceMax and
+                          extension <= effectiveExtensionMax and
+                          wrongCloses <= effectiveWrongCloseMax and
+                          intermediateMaShare >= effectiveIntermediateMaShareMin and
+                          volumeRelation >= effectiveVolumeRelationMin and
+                          volumeRelation <= effectiveVolumeRelationMax)
+
+                bool k1OscAccelerationAligned =
+                     maShiftOscillatorDelta[gap] * direction > 0.0
+                bool k2OscillatorSignAligned =
+                     maShiftOscillator * direction > 0.0
+                bool k2OscillatorAccelerationAligned =
+                     maShiftOscillatorDelta * direction > 0.0
+                bool structureAligned = marketBreakState == direction
+                bool statePass =
+                     not effectiveUseState or (
+                          k1OscAccelerationAligned and
+                          k2OscillatorSignAligned and
+                          not k2OscillatorAccelerationAligned and
+                          structureAligned)
+
+                if pathPass and statePass
+                    float k1BodyLow = math.min(open[gap], close[gap])
+                    float k1BodyHigh = math.max(open[gap], close[gap])
+                    float ropeWidth = ropeHigh[gap] - ropeLow[gap]
+                    float ropeOverlap = math.max(
+                         0.0,
+                         math.min(k1BodyHigh, ropeHigh[gap]) -
+                         math.max(k1BodyLow, ropeLow[gap]))
+                    float ropeCoverage =
+                         ropeWidth > 0.0 ?
+                         math.min(1.0, ropeOverlap / ropeWidth) :
+                         (k1BodyLow <= ropeMid[gap] and k1BodyHigh >= ropeMid[gap] ? 1.0 : 0.0)
+                    float ropeEntryDepth =
+                         direction == 1 ?
+                         (ropeLow[gap] - open[gap]) / k1Atr :
+                         (open[gap] - ropeHigh[gap]) / k1Atr
+                    float ropeExitDepth =
+                         direction == 1 ?
+                         (close[gap] - ropeHigh[gap]) / k1Atr :
+                         (ropeLow[gap] - close[gap]) / k1Atr
+                    float ropeCrossDepth = math.min(ropeEntryDepth, ropeExitDepth)
+                    float k1Quality = (
+                         math.min(1.0, ropeCoverage) +
+                         math.min(1.0, math.max(0.0, k1BodyRatio)) +
+                         math.min(1.0, math.max(0.0, k1RangeAtr / 2.0)) +
+                         math.min(1.0, math.max(0.0, (ropeCrossDepth + 0.15) / 0.50))
+                         ) / 4.0
+
+                    float k1Score = (
+                         f_unit(k1BodyRatio, 0.50, 0.90) +
+                         f_unit(k1RangeAtr, 1.00, 2.00) +
+                         f_unit(k1CloseLocation, 0.75, 0.95) +
+                         f_unit(volumeRatio20[gap], 1.00, 2.00) +
+                         f_unit(k1CrossDepth, -0.05, 0.35)
+                         ) / 5.0
+                    float touchQuality = math.exp(-math.pow((k2TouchDepth - 0.40) / 0.45, 2.0))
+                    float k2FiveSum =
+                         f_unit(k2WickShare, 0.45, 0.90) +
+                         f_unit(0.50 - k2BodyRatio, 0.00, 0.40) +
+                         f_unit(k2RejectLocation, 0.65, 0.95) +
+                         f_clamp01(touchQuality) +
+                         f_unit(k2CloseSide, 0.00, 0.75)
+                    float gapQuality =
+                         gap >= 3 and gap <= 6 ? 1.0 :
+                         gap == 2 or gap == 7 or gap == 8 ? 0.65 : 0.0
+                    float volumeRelationQuality =
+                         not na(volumeRelation) and volumeRelation > 0.0 ?
+                         math.exp(-math.abs(math.log(volumeRelation)) / math.log(3.0)) : 0.0
+                    float pathScore = (
+                         gapQuality +
+                         f_clamp01(1.0 - extension / 1.50) +
+                         (wrongCloses == 0 ? 1.0 : 0.0) +
+                         f_clamp01(intermediateMaShare) +
+                         math.exp(-math.abs(closeDistance) / 0.75) +
+                         f_clamp01(volumeRelationQuality)
+                         ) / 6.0
+                    float stateScore = (
+                         (k1MaAligned ? 1.0 : 0.0) +
+                         (k2MaAligned ? 1.0 : 0.0) +
+                         (k1OscAccelerationAligned ? 1.0 : 0.0) +
+                         (k2OscillatorSignAligned ? 1.0 : 0.0) +
+                         (not k2OscillatorAccelerationAligned ? 1.0 : 0.0) +
+                         (structureAligned ? 1.0 : 0.0)
+                         ) / 6.0
+
+                    if not found or k1Quality > bestQuality
+                        found := true
+                        bestGap := gap
+                        bestQuality := k1Quality
+                        bestK1Score := k1Score
+                        bestK2FiveSum := k2FiveSum
+                        bestPathScore := pathScore
+                        bestStateScore := stateScore
+                        bestCloseDistance := closeDistance
+                        bestExtension := extension
+                        bestWrongCloses := wrongCloses
+                        bestIntermediateMaShare := intermediateMaShare
+                        bestVolumeRelation := volumeRelation
+
+    [
+         found,
+         bestGap,
+         bestK1Score,
+         bestK2FiveSum,
+         bestPathScore,
+         bestStateScore,
+         bestCloseDistance,
+         bestExtension,
+         bestWrongCloses,
+         bestIntermediateMaShare,
+         bestVolumeRelation]
+
+[
+     longK2Found,
+     longK1Gap,
+     longK1ScoreBase,
+     longK2FiveSum,
+     longPathScore,
+     longStateScore,
+     longCloseDistance,
+     longExtension,
+     longWrongCloses,
+     longIntermediateMaShare,
+     longVolumeRelation] = f_findBestK1(1)
+
+[
+     shortK2Found,
+     shortK1Gap,
+     shortK1ScoreBase,
+     shortK2FiveSum,
+     shortPathScore,
+     shortStateScore,
+     shortCloseDistance,
+     shortExtension,
+     shortWrongCloses,
+     shortIntermediateMaShare,
+     shortVolumeRelation] = f_findBestK1(-1)
+
+bool timeframeOk = not requireOneHour or timeframe.in_seconds() == 3600
+bool longAllowed = sideMode != "Short only"
+bool shortAllowed = sideMode != "Long only"
+bool longK2Setup = timeframeOk and longAllowed and barstate.isconfirmed and longK2Found
+bool shortK2Setup = timeframeOk and shortAllowed and barstate.isconfirmed and shortK2Found
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Causal next-open entry event and exact K2-extreme stop
+// ─────────────────────────────────────────────────────────────────────────────
+float longRiskAtr =
+     longK2Found[1] and atr14[1] > 0.0 ?
+     (open - low[1]) / atr14[1] : na
+float shortRiskAtr =
+     shortK2Found[1] and atr14[1] > 0.0 ?
+     (high[1] - open) / atr14[1] : na
+bool rawLongEntry =
+     timeframeOk and
+     longAllowed and
+     longK2Found[1] and
+     longRiskAtr >= effectiveRiskMin and
+     longRiskAtr <= effectiveRiskMax
+bool rawShortEntry =
+     timeframeOk and
+     shortAllowed and
+     shortK2Found[1] and
+     shortRiskAtr >= effectiveRiskMin and
+     shortRiskAtr <= effectiveRiskMax
+
+varip bool longEntryEvent = false
+varip bool shortEntryEvent = false
+varip int eventGap = na
+varip float eventScore = na
+varip float eventRiskAtr = na
+varip int lastAcceptedBar = na
+varip int lastLongK1Bar = na
+varip int lastShortK1Bar = na
+varip string lastEvent = "none"
+
+if barstate.isnew
+    longEntryEvent := false
+    shortEntryEvent := false
+    eventGap := na
+    eventScore := na
+    eventRiskAtr := na
+    bool cooldownReady =
+         not applyDedupe or
+         na(lastAcceptedBar) or
+         bar_index - lastAcceptedBar >= cooldownBars
+    int proposedLongK1Bar =
+         rawLongEntry and not na(longK1Gap[1]) ?
+         bar_index - 1 - longK1Gap[1] : na
+    int proposedShortK1Bar =
+         rawShortEntry and not na(shortK1Gap[1]) ?
+         bar_index - 1 - shortK1Gap[1] : na
+    bool longK1Unused =
+         not applyDedupe or
+         na(lastLongK1Bar) or
+         proposedLongK1Bar != lastLongK1Bar
+    bool shortK1Unused =
+         not applyDedupe or
+         na(lastShortK1Bar) or
+         proposedShortK1Bar != lastShortK1Bar
+
+    // Long priority only matters in the extremely rare case where both sides
+    // survive on the same bar. It matches lexical long-before-short ordering.
+    if rawLongEntry and cooldownReady and longK1Unused
+        longEntryEvent := true
+        eventGap := longK1Gap[1]
+        eventRiskAtr := longRiskAtr
+        float riskQuality = longRiskAtr >= 0.25 and longRiskAtr <= 2.00 ? 1.0 : 0.0
+        float k2Score = (longK2FiveSum[1] + riskQuality) / 6.0
+        eventScore := 25.0 * (
+             longK1ScoreBase[1] +
+             k2Score +
+             longPathScore[1] +
+             longStateScore[1])
+        lastAcceptedBar := bar_index
+        lastLongK1Bar := proposedLongK1Bar
+        lastEvent := "LONG · gap " + str.tostring(eventGap) + " · score " + str.tostring(eventScore, "#.0")
+    else if rawShortEntry and cooldownReady and shortK1Unused
+        shortEntryEvent := true
+        eventGap := shortK1Gap[1]
+        eventRiskAtr := shortRiskAtr
+        float riskQuality = shortRiskAtr >= 0.25 and shortRiskAtr <= 2.00 ? 1.0 : 0.0
+        float k2Score = (shortK2FiveSum[1] + riskQuality) / 6.0
+        eventScore := 25.0 * (
+             shortK1ScoreBase[1] +
+             k2Score +
+             shortPathScore[1] +
+             shortStateScore[1])
+        lastAcceptedBar := bar_index
+        lastShortK1Bar := proposedShortK1Bar
+        lastEvent := "SHORT · gap " + str.tostring(eventGap) + " · score " + str.tostring(eventScore, "#.0")
+
+float eventEntry = open
+float eventStop = longEntryEvent ? low[1] : shortEntryEvent ? high[1] : na
+float eventRisk = longEntryEvent ? eventEntry - eventStop : shortEntryEvent ? eventStop - eventEntry : na
+float eventTarget =
+     longEntryEvent ? eventEntry + eventRisk * targetR :
+     shortEntryEvent ? eventEntry - eventRisk * targetR : na
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TradingView-style chart rendering
+// ─────────────────────────────────────────────────────────────────────────────
+color LONG = #089981
+color SHORT = #F23645
+color K1 = #2962FF
+color K2 = #FF9800
+color TEAL = #26A69A
+color ORANGE = #EF8E3B
+color MUTED = #787B86
+
+barcolor(colourBars and not na(sma40) ? (maCandleSide == 1 ? TEAL : ORANGE) : na)
+plot(showSma40 ? sma40 : na, "SMA40(HL2)", color = #2962FF, linewidth = 2)
+plot(showSixMa ? sma20 : na, "SMA20", color = color.new(#00BCD4, 15), linewidth = 1)
+plot(showSixMa ? ema20 : na, "EMA20", color = color.new(#26A69A, 15), linewidth = 1)
+plot(showSixMa ? sma60 : na, "SMA60", color = color.new(#FFC107, 20), linewidth = 1)
+plot(showSixMa ? ema60 : na, "EMA60", color = color.new(#FF9800, 20), linewidth = 1)
+plot(showSixMa ? sma120 : na, "SMA120", color = color.new(#AB47BC, 25), linewidth = 1)
+plot(showSixMa ? ema120 : na, "EMA120", color = color.new(#EC407A, 25), linewidth = 1)
+ropeHighPlot = plot(showRopeFill ? ropeHigh : na, "Six-MA rope high", color = color.new(MUTED, 100))
+ropeLowPlot = plot(showRopeFill ? ropeLow : na, "Six-MA rope low", color = color.new(MUTED, 100))
+fill(ropeHighPlot, ropeLowPlot, color = color.new(MUTED, 90), title = "Six-MA context rope")
+plot(showPivotLevels ? lastPivotHigh : na, "Confirmed pivot high", color = color.new(SHORT, 55), style = plot.style_linebr)
+plot(showPivotLevels ? lastPivotLow : na, "Confirmed pivot low", color = color.new(LONG, 55), style = plot.style_linebr)
+
+// Data-window values preserve the original indicator semantics without forcing
+// oscillator-scale values into the price pane.
+plot(maShiftOscillator, "MA Shift oscillator", color = na, display = display.data_window)
+plot(maShiftOscillatorDelta, "MA Shift oscillator delta", color = na, display = display.data_window)
+plot(marketBreakState, "Market Break state", color = na, display = display.data_window)
+plot(eventScore, "Owner visual similarity score", color = na, display = display.data_window)
+plot(eventRiskAtr, "Next-open stop distance / ATR", color = na, display = display.data_window)
+
+plotshape(
+     showK2Preview and longK2Setup,
+     title = "Long K2 confirmed",
+     style = shape.circle,
+     location = location.belowbar,
+     color = color.new(LONG, 20),
+     size = size.tiny,
+     text = "K2")
+plotshape(
+     showK2Preview and shortK2Setup,
+     title = "Short K2 confirmed",
+     style = shape.circle,
+     location = location.abovebar,
+     color = color.new(SHORT, 20),
+     size = size.tiny,
+     text = "K2")
+plotshape(
+     longEntryEvent,
+     title = "Causal long entry",
+     style = shape.triangleup,
+     location = location.belowbar,
+     color = LONG,
+     size = size.small,
+     text = "多")
+plotshape(
+     shortEntryEvent,
+     title = "Causal short entry",
+     style = shape.triangledown,
+     location = location.abovebar,
+     color = SHORT,
+     size = size.small,
+     text = "空")
+
+if (longEntryEvent or shortEntryEvent) and showKeyLabels
+    bool isLong = longEntryEvent
+    int k1Offset = eventGap + 1
+    int k1X = bar_index - k1Offset
+    int k2X = bar_index - 1
+    float k1Y = isLong ? low[k1Offset] : high[k1Offset]
+    float k2Y = isLong ? low[1] : high[1]
+    label.new(
+         k1X,
+         k1Y,
+         isLong ? "K1 多头贯穿" : "K1 空头贯穿",
+         xloc = xloc.bar_index,
+         yloc = isLong ? yloc.belowbar : yloc.abovebar,
+         style = isLong ? label.style_label_up : label.style_label_down,
+         color = K1,
+         textcolor = color.white,
+         size = size.small)
+    label.new(
+         k2X,
+         k2Y,
+         (isLong ? "K2 下影回踩" : "K2 上影回踩") +
+              "\ngap=" + str.tostring(eventGap),
+         xloc = xloc.bar_index,
+         yloc = isLong ? yloc.belowbar : yloc.abovebar,
+         style = isLong ? label.style_label_up : label.style_label_down,
+         color = K2,
+         textcolor = color.white,
+         size = size.small)
+    label.new(
+         bar_index,
+         eventEntry,
+         (isLong ? "因果多头入场" : "因果空头入场") +
+              "\nentry " + str.tostring(eventEntry, format.mintick) +
+              "\nstop " + str.tostring(eventStop, format.mintick) +
+              "\nrisk " + str.tostring(eventRiskAtr, "#.00") + " ATR" +
+              "\n形态分 " + str.tostring(eventScore, "#.0"),
+         xloc = xloc.bar_index,
+         yloc = yloc.price,
+         style = label.style_label_left,
+         color = isLong ? LONG : SHORT,
+         textcolor = color.white,
+         size = size.small)
+
+if (longEntryEvent or shortEntryEvent) and showPositionBoxes
+    bool isLong = longEntryEvent
+    int rightX = bar_index + projectionBars
+    box.new(
+         left = bar_index,
+         top = math.max(eventEntry, eventTarget),
+         right = rightX,
+         bottom = math.min(eventEntry, eventTarget),
+         border_color = color.new(LONG, 15),
+         border_width = 1,
+         bgcolor = color.new(LONG, 84),
+         text = str.tostring(targetR, "#.##") + "R",
+         text_color = color.new(LONG, 0),
+         text_halign = text.align_right)
+    box.new(
+         left = bar_index,
+         top = math.max(eventEntry, eventStop),
+         right = rightX,
+         bottom = math.min(eventEntry, eventStop),
+         border_color = color.new(SHORT, 15),
+         border_width = 1,
+         bgcolor = color.new(SHORT, 82),
+         text = "SL",
+         text_color = color.new(SHORT, 0),
+         text_halign = text.align_right)
+    line.new(bar_index, eventEntry, rightX, eventEntry, color = color.white, width = 1)
+    line.new(bar_index, eventStop, rightX, eventStop, color = SHORT, style = line.style_dashed, width = 1)
+    line.new(bar_index, eventTarget, rightX, eventTarget, color = LONG, style = line.style_dashed, width = 1)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Alerts
+// ─────────────────────────────────────────────────────────────────────────────
+alertcondition(longK2Setup, "Long K2 confirmed", "Fable K1→K2: confirmed LONG K2 on {{ticker}} {{interval}}")
+alertcondition(shortK2Setup, "Short K2 confirmed", "Fable K1→K2: confirmed SHORT K2 on {{ticker}} {{interval}}")
+alertcondition(longEntryEvent, "Causal long next-open", "Fable K1→K2: causal LONG next-open on {{ticker}} {{interval}}")
+alertcondition(shortEntryEvent, "Causal short next-open", "Fable K1→K2: causal SHORT next-open on {{ticker}} {{interval}}")
+
+if alertK2Close and longK2Setup
+    alert(
+         "Fable K1→K2 | LONG K2 confirmed | " + syminfo.tickerid +
+              " | gap=" + str.tostring(longK1Gap),
+         alert.freq_once_per_bar_close)
+else if alertK2Close and shortK2Setup
+    alert(
+         "Fable K1→K2 | SHORT K2 confirmed | " + syminfo.tickerid +
+              " | gap=" + str.tostring(shortK1Gap),
+         alert.freq_once_per_bar_close)
+
+if alertNextOpen and barstate.isnew and longEntryEvent
+    alert(
+         "Fable K1→K2 | CAUSAL LONG | " + syminfo.tickerid +
+              " | entry=" + str.tostring(eventEntry, format.mintick) +
+              " | stop=" + str.tostring(eventStop, format.mintick) +
+              " | target=" + str.tostring(eventTarget, format.mintick) +
+              " | gap=" + str.tostring(eventGap) +
+              " | morphology_score=" + str.tostring(eventScore, "#.0"),
+         alert.freq_once_per_bar)
+else if alertNextOpen and barstate.isnew and shortEntryEvent
+    alert(
+         "Fable K1→K2 | CAUSAL SHORT | " + syminfo.tickerid +
+              " | entry=" + str.tostring(eventEntry, format.mintick) +
+              " | stop=" + str.tostring(eventStop, format.mintick) +
+              " | target=" + str.tostring(eventTarget, format.mintick) +
+              " | gap=" + str.tostring(eventGap) +
+              " | morphology_score=" + str.tostring(eventScore, "#.0"),
+         alert.freq_once_per_bar)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Status HUD
+// ─────────────────────────────────────────────────────────────────────────────
+var table hud = table.new(
+     position.top_right,
+     2,
+     8,
+     bgcolor = color.new(#131722, 8),
+     frame_color = color.new(MUTED, 40),
+     frame_width = 1)
+if barstate.islast
+    string oscState =
+         maShiftOscillator > 0.0 and maShiftOscillatorDelta > 0.0 ? "多 · 加速" :
+         maShiftOscillator > 0.0 ? "多 · 冷却" :
+         maShiftOscillator < 0.0 and maShiftOscillatorDelta < 0.0 ? "空 · 加速" :
+         maShiftOscillator < 0.0 ? "空 · 冷却" : "未就绪"
+    string structureText =
+         marketBreakState == 1 ? "多" :
+         marketBreakState == -1 ? "空" : "中性"
+    string timeframeText = timeframeOk ? timeframe.period + " ✓" : timeframe.period + " ≠ 1h"
+    color statusColor = timeframeOk ? LONG : SHORT
+    table.cell(hud, 0, 0, "Fable K1→K2", text_color = color.white, bgcolor = #1E222D)
+    table.cell(hud, 1, 0, "RESEARCH", text_color = #FFB74D, bgcolor = #1E222D)
+    table.cell(hud, 0, 1, "周期", text_color = color.silver)
+    table.cell(hud, 1, 1, timeframeText, text_color = statusColor)
+    table.cell(hud, 0, 2, "档位", text_color = color.silver)
+    table.cell(hud, 1, 2, profile, text_color = color.white)
+    table.cell(hud, 0, 3, "K1→K2", text_color = color.silver)
+    table.cell(hud, 1, 3, str.tostring(effectiveGapMin) + "–" + str.tostring(effectiveGapMax) + " bars", text_color = color.white)
+    table.cell(hud, 0, 4, "MA 色", text_color = color.silver)
+    table.cell(hud, 1, 4, maCandleSide == 1 ? "青 · 多侧" : "橙 · 空侧", text_color = maCandleSide == 1 ? TEAL : ORANGE)
+    table.cell(hud, 0, 5, "振荡器", text_color = color.silver)
+    table.cell(hud, 1, 5, oscState, text_color = color.white)
+    table.cell(hud, 0, 6, "结构 10/10", text_color = color.silver)
+    table.cell(hud, 1, 6, structureText, text_color = color.white)
+    table.cell(hud, 0, 7, "最近信号", text_color = color.silver)
+    table.cell(
+         hud,
+         1,
+         7,
+         showHud ? lastEvent + "\n形态≠盈利概率" : "",
+         text_color = #FFB74D)
+    if not showHud
+        table.clear(hud, 0, 0, 1, 7)
