@@ -131,9 +131,9 @@ def main() -> None:
         RESULTS / "validation_artifact_correction_receipt.json",
         {
             "status": "reporting_and_control_artifacts_corrected",
-            "frozen_trade_ledgers_changed": false,
-            "parameters_changed": false,
-            "validation_retuned": false,
+            "frozen_trade_ledgers_changed": False,
+            "parameters_changed": False,
+            "validation_retuned": False,
             "holdout_rows_read": 0,
             "selection_receipt": str(SELECTION_PATH),
             "config": str(CONFIG_PATH),
