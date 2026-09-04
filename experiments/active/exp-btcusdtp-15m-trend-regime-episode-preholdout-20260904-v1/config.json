@@ -1,0 +1,98 @@
+{
+  "experiment_id": "exp-btcusdtp-15m-trend-regime-episode-preholdout-20260904-v1",
+  "purpose": "Replace position-lifetime de-duplication with a causal trend-regime episode ledger so BTCUSDT.P 15m emits at most one K1->K2 trade per directional trend regime and does not repeatedly fire inside one range.",
+  "owner_directive": {
+    "date": "2026-09-04",
+    "text": "我们是趋势策略，行情大部分时间在盘整，不要随便开仓",
+    "bundled_refactor_approval": "The owner explicitly requested a trend-strategy refactor after showing repeated same-range K1/K2 entries. This authorizes the coherent regime-state plus semantic rearm bundle; numeric thresholds are still selected one factor at a time."
+  },
+  "source": {
+    "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+    "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "native_bar": "5m",
+    "analysis_bar": "15m",
+    "holdout_start": "2026-05-04T00:00:00Z"
+  },
+  "splits": {
+    "development_start_inclusive": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2025-01-01T00:00:00Z",
+    "development_folds": ["2023H1", "2023H2", "2024H1", "2024H2"],
+    "audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "audit_end_exclusive": "2026-02-28T16:00:00Z",
+    "audit_slices": ["2025H1", "2025H2", "2026P1"],
+    "random_split": false,
+    "audit_is_not_pristine": true
+  },
+  "baseline": {
+    "pine_source": "experiments/active/exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1/pine/fable_15m_k1_k2_episode_v3.pine",
+    "trigger_ma": "EMA30(HL2)",
+    "runner_ma": "SMA60(HL2)",
+    "k1_k2_gap_min": 2,
+    "k1_k2_gap_max": 8,
+    "k1_body_atr_min": 0.2,
+    "k1_range_atr_min": 0.65,
+    "k1_close_location_min": 0.6,
+    "k2_wick_share_min": 0.15,
+    "k2_body_ratio_max": 0.75,
+    "k2_touch_depth_atr_max": 1.5,
+    "wrong_side_close_tolerance_atr": -0.05,
+    "dedupe": "one active position only; exits immediately rearm the detector"
+  },
+  "trend_regime": {
+    "fast_ma": "EMA30(HL2)",
+    "slow_ma": "SMA60(HL2)",
+    "slope_lag_bars": 4,
+    "entry_spread_atr_candidates": [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
+    "entry_slope_atr_per_bar_candidates": [0.0, 0.01, 0.02, 0.03, 0.04, 0.05],
+    "strong_dwell_bar_candidates": [1, 2, 3, 4, 6, 8, 10, 12, 16],
+    "neutral_dwell_bar_candidates": [8, 16, 24, 32, 48, 64],
+    "neutral_abs_spread_atr_max": 0.1,
+    "neutral_abs_slope_atr_per_bar_max": 0.005,
+    "one_signal_per_regime": true,
+    "exit_does_not_rearm": true,
+    "opposite_strong_regime_can_switch": true
+  },
+  "selection": {
+    "ordered_single_factors": [
+      "entry_spread_atr",
+      "entry_slope_atr_per_bar",
+      "strong_dwell_bars",
+      "neutral_dwell_bars"
+    ],
+    "initial": {
+      "entry_spread_atr": 0.0,
+      "entry_slope_atr_per_bar": 0.0,
+      "strong_dwell_bars": 1,
+      "neutral_dwell_bars": 8
+    },
+    "objective": "move median fold density toward 8 signals per 30d, then maximize median runner-armed precision, subject to retaining at least 25% of baseline runner-armed episodes; final audit separately reports whether every slice stays at or below 10 signals per 30d",
+    "minimum_runner_recall": 0.25,
+    "target_signals_per_30d": 8.0,
+    "maximum_signals_per_30d_per_fold": 10.0
+  },
+  "execution": {
+    "entry": "next_bar_open",
+    "initial_disaster_stop_atr": 2.0,
+    "runner_arm_profit_atr": 2.0,
+    "runner_policy": "SMA60(HL2) minus direction times ATR14 after completed close reaches +2ATR",
+    "runner_buffer_atr": 1.0,
+    "horizon_bars": 96,
+    "round_trip_cost_fraction": 0.002,
+    "same_bar_priority": "active stop first"
+  },
+  "matched_control": {
+    "controls_per_event": 8,
+    "strata": ["calendar month", "UTC six-hour block", "monthly ATR quintile", "direction"],
+    "exclude_radius_bars": 97,
+    "seed": "btc15m-trend-regime-episode-20260904"
+  },
+  "safety": {
+    "repository_holdout_rows_allowed": 0,
+    "training_eligible": false,
+    "production_eligible": false,
+    "automatic_promote": false,
+    "active_or_forward_change": false,
+    "live_order_change": false
+  }
+}
