@@ -1,0 +1,94 @@
+{
+  "experiment_id": "exp-btcusdtp-15m-ma-runner-grid-preholdout-20260904-v1",
+  "purpose": "Isolate whether delayed moving-average exits retain the large right tail better than the frozen 5 ATR target for the broad EMA30 15m launch surface.",
+  "owner_authorization": {
+    "multivariable_bundle": "Owner explicitly authorized autonomous parameter exploration in this conversation and specifically requested moving-average profit/stop management for large trends.",
+    "production_change": false,
+    "live_order_change": false
+  },
+  "lineage": {
+    "entry_experiment": "exp-btcusdtp-15m-high-recall-l2-trend-runner-preholdout-20260904-v1",
+    "entry_contract": "EMA30(HL2), direct/rejection/coil, state_reset3, next-open entry",
+    "entry_economics_warning": "The parent L2 failed its frozen validation. This experiment isolates exit mechanics; it cannot rehabilitate the entry edge by itself.",
+    "pine_research_name": "Fable 15m Trend Research V2"
+  },
+  "source": {
+    "development": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+    "development_sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "fresh_validation": "data/kline_preholdout_okx_15m_may4/okx_BTC_USDT_SWAP_15m_preholdout_20260504.csv",
+    "fresh_validation_sha256": "7eec6db01922a2748924e40574950f79dbad1d82ce2a0bcb2da849e1e8d48ff3",
+    "direct_15m_parity_rule": "OHLC must match the prior complete 3x5m aggregation exactly on the overlapping 2026-01-01 through 2026-02-28 interval; volume tolerance is 1e-8.",
+    "holdout_start": "2026-05-04T00:00:00Z"
+  },
+  "splits": {
+    "development_start_inclusive": "2024-01-01T00:00:00Z",
+    "development_end_exclusive": "2026-02-28T16:00:00Z",
+    "development_folds": ["2024H1", "2024H2", "2025H1", "2025H2", "2026P1"],
+    "fresh_validation_start_inclusive": "2026-03-01T00:00:00Z",
+    "fresh_validation_end_exclusive": "2026-05-04T00:00:00Z",
+    "fresh_validation_blocks": ["2026-03", "2026-04", "2026-05P"],
+    "analysis_horizon_bars": 384,
+    "random_split": false
+  },
+  "entry": {
+    "surface": "all EMA30 state_reset3 L1 events",
+    "direction": "both",
+    "entry": "next_bar_open",
+    "initial_stop_atr": 2.0,
+    "round_trip_cost_fraction": 0.002,
+    "same_bar_priority": "active stop before fixed target",
+    "parent_l2_threshold_is_diagnostic_only": true
+  },
+  "selection": {
+    "method": "one deterministic coordinate pass; one factor changes per step",
+    "initial": {
+      "trend_ma": "SMA60",
+      "exit_style": "trail",
+      "arm_atr": 2.0,
+      "buffer_atr": 1.0,
+      "max_hold_bars": 96,
+      "leg_mix": "full"
+    },
+    "ordered_factors": [
+      {"factor": "trend_ma", "values": ["EMA20", "EMA30", "EMA40", "SMA40", "SMA60", "SMA90"]},
+      {"factor": "exit_style", "values": ["trail", "close2"]},
+      {"factor": "arm_atr", "values": [1.0, 1.5, 2.0, 2.5, 3.0]},
+      {"factor": "buffer_atr", "values": [0.0, 0.5, 1.0, 1.5, 2.0]},
+      {"factor": "max_hold_bars", "values": [96, 192, 384]},
+      {"factor": "leg_mix", "values": ["full", "half_fixed3"]}
+    ],
+    "score": "median half-year mean net bp minus 0.5 times population standard deviation of half-year means",
+    "minimum_robust_improvement_bp": 0.25,
+    "maximum_worst_fold_degradation_bp": 2.0,
+    "minimum_events_total": 3000,
+    "minimum_events_per_fold": 100
+  },
+  "exit_semantics": {
+    "trail": "After a completed close arms the runner, update a monotone stop to MA minus direction times buffer ATR14; it can act from the next bar.",
+    "close2": "After arming, two consecutive completed closes beyond MA plus the adverse buffer trigger an exit at the next open.",
+    "half_fixed3": "Half exits at +3 ATR or the initial stop; half follows the selected runner. Gross returns are weighted 50/50 and one round-trip cost is charged.",
+    "timeout": "Close at the selected maximum-hold bar close.",
+    "fixed_reference": "Full position, 2 ATR stop, +5 ATR target, 96-bar timeout."
+  },
+  "matched_control": {
+    "controls_per_event": 8,
+    "strata": ["calendar month", "UTC six-hour block", "monthly ATR quintile", "direction"],
+    "exclude_radius_bars": 385,
+    "exclude_scope": "per candidate",
+    "seed": "btc15m-ma-runner-grid-20260904"
+  },
+  "validation_gate": {
+    "paired_exit_improvement_bp_gt": 0.0,
+    "weekly_block_signflip_p_lt": 0.05,
+    "mean_net_bp_gt": 0.0,
+    "paired_random_control_p_lt": 0.01,
+    "all_complete_month_blocks_positive": true
+  },
+  "safety": {
+    "repository_holdout_rows_allowed": 0,
+    "production_eligible": false,
+    "automatic_promote": false,
+    "active_bundle_change": false,
+    "live_execution_change": false
+  }
+}
