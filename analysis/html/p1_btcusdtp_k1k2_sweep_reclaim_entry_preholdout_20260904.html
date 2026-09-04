@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>BTCUSDT.P K1→K2：扫过 K2 极值后收复入场（15m / 5m）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>BTCUSDT.P K1→K2：扫过 K2 极值后收复入场（15m / 5m）</h1>
+<p>日期：2026-09-04</p>
+<p>实验：<code>exp-btcusdtp-k1k2-sweep-reclaim-entry-preholdout-20260904-v1</code></p>
+<p>状态：<strong>REJECTED；保留 K2 后立即开盘入场，audit/holdout 均未打开</strong></p>
+<h2>结论</h2>
+<p>本轮只改变入场规则：基准为 K2 完成后下一根开盘；候选要求随后 15/30/60/120 分钟内，先严格扫过原 K2 极值，再由一根方向 K 线收盘收回 K2 极值和当时均线，下一根开盘才进场。原 K2 极值止损、3R、12 小时、1.5R 保护、6 小时冷却和 20bp 成本全部冻结。</p>
+<ul>
+<li>15m：短窗有高均值但样本和时间稳定性不足。15 分钟臂毛收益 12.25bp、净 -7.75bp，但只有 47 笔，最小半年 7 笔，最差半年 -39.02bp。30 分钟臂的稳健分只比基准改善 0.31bp且最小半年 11 笔，未过门。</li>
+<li>5m：30 分钟出现平滑局部峰值，毛收益从 2.68bp 提至 4.51bp，四个半年毛收益都为正，最差半年也改善；但稳健分只改善 1.34bp，低于预注册 2bp，绝对净收益仍 -15.49bp。</li>
+<li>所有候选净收益仍为负，所有匹配对照 p 值均未过 0.01。因此不允许选择、不打开 audit。</li>
+</ul>
+<h2>数据与冻结规则</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>15m</th>
+<th>5m</th>
+</tr></thead><tbody>
+<tr><td>数据源</td><td>OKX BTC-USDT-SWAP 原生 5m 快照聚合</td><td>原生 5m</td></tr>
+<tr><td>源 SHA256</td><td><code>767f67c2…eed5ac</code></td><td>同左</td></tr>
+<tr><td>development</td><td>2023-01-01 至 2025-01-01，四个半年折</td><td>同左</td></tr>
+<tr><td>信号参数</td><td>SMA120、gap 2–8、score ≥0.40</td><td>SMA40、gap 6–24、score ≥0.40</td></tr>
+<tr><td>形态后候选</td><td>1,661</td><td>9,343</td></tr>
+<tr><td>基准成交</td><td>345</td><td>755</td></tr>
+<tr><td>audit / holdout 行</td><td>0 / 0</td><td>0 / 0</td></tr>
+</tbody></table>
+<p>扫回定义只使用已完成确认 K 线的 OHLC 和当时因果均线；交易在下一根开盘才存在，所以确认前扫过 K2 极值不是“持仓内止损”。真实持仓的止损仍是原 K2 极值。</p>
+<h2>全网格结果</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>入场规则</th>
+<th>成交</th>
+<th>最小折</th>
+<th>合格样本</th>
+<th>毛 bp</th>
+<th>净 bp</th>
+<th>稳健分</th>
+<th>最差折</th>
+<th>胜率</th>
+<th>PF</th>
+<th>全折毛&gt;0</th>
+<th>匹配超额 bp</th>
+<th>配对 p</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td><strong>立即</strong></td><td>345</td><td>62</td><td>是</td><td>6.49</td><td>-13.51</td><td><strong>-16.35</strong></td><td>-20.54</td><td>34.49%</td><td>0.580</td><td>否</td><td>+7.62</td><td>0.0345</td></tr>
+<tr><td>15m</td><td>扫回 15m</td><td>47</td><td>7</td><td>否</td><td><strong>12.25</strong></td><td>-7.75</td><td>-20.34</td><td>-39.02</td><td>42.55%</td><td>0.719</td><td>否</td><td>+19.63</td><td>0.0200</td></tr>
+<tr><td>15m</td><td>扫回 30m</td><td>80</td><td>11</td><td>否</td><td>7.42</td><td>-12.58</td><td>-16.05</td><td>-28.15</td><td>37.50%</td><td>0.575</td><td>否</td><td>+5.90</td><td>0.1941</td></tr>
+<tr><td>15m</td><td>扫回 60m</td><td>115</td><td>14</td><td>是</td><td>5.26</td><td>-14.74</td><td>-19.37</td><td>-28.71</td><td>37.39%</td><td>0.490</td><td>否</td><td>+2.52</td><td>0.3233</td></tr>
+<tr><td>15m</td><td>扫回 120m</td><td>145</td><td>18</td><td>是</td><td>1.40</td><td>-18.60</td><td>-21.10</td><td>-29.03</td><td>33.79%</td><td>0.412</td><td>否</td><td>+1.73</td><td>0.3581</td></tr>
+<tr><td>5m</td><td><strong>立即</strong></td><td>755</td><td>114</td><td>是</td><td>2.68</td><td>-17.32</td><td><strong>-17.68</strong></td><td>-21.07</td><td>38.28%</td><td>0.355</td><td>否</td><td>+0.86</td><td>0.3192</td></tr>
+<tr><td>5m</td><td>扫回 15m</td><td>241</td><td>28</td><td>是</td><td>3.81</td><td>-16.19</td><td>-17.70</td><td>-17.27</td><td>38.59%</td><td>0.396</td><td>是</td><td>+3.62</td><td>0.1299</td></tr>
+<tr><td>5m</td><td>扫回 30m</td><td>315</td><td>35</td><td>是</td><td><strong>4.51</strong></td><td>-15.49</td><td><strong>-16.35</strong></td><td><strong>-16.22</strong></td><td>39.05%</td><td>0.413</td><td>是</td><td>+3.27</td><td>0.1144</td></tr>
+<tr><td>5m</td><td>扫回 60m</td><td>387</td><td>48</td><td>是</td><td>3.94</td><td>-16.06</td><td>-17.34</td><td>-18.88</td><td>37.47%</td><td>0.404</td><td>是</td><td>+2.91</td><td>0.1237</td></tr>
+<tr><td>5m</td><td>扫回 120m</td><td>450</td><td>57</td><td>是</td><td>2.82</td><td>-17.18</td><td>-18.12</td><td>-19.28</td><td>36.67%</td><td>0.378</td><td>是</td><td>+0.75</td><td>0.3755</td></tr>
+</tbody></table>
+<p>选择规则要求：样本合格、稳健分至少改善 2bp、最差折不得恶化超过 3bp。即使 5m 30 分钟臂在多个次要指标更好，稳健分改善只有 <code>-16.35 - (-17.68) = 1.34bp</code>，不能事后降低门槛。</p>
+<h2>时间折解释</h2>
+<table><thead><tr>
+<th>周期 / 规则</th>
+<th>2023H1</th>
+<th>2023H2</th>
+<th>2024H1</th>
+<th>2024H2</th>
+</tr></thead><tbody>
+<tr><td>15m 立即</td><td>-7.70</td><td>-20.54</td><td>-7.91</td><td>-18.82</td></tr>
+<tr><td>15m 扫回 15m</td><td>+15.64</td><td>-39.02</td><td>-8.15</td><td>-13.11</td></tr>
+<tr><td>15m 扫回 30m</td><td>-5.91</td><td>-28.15</td><td>-12.48</td><td>-11.34</td></tr>
+<tr><td>15m 扫回 60m</td><td>-15.77</td><td>-28.71</td><td>-7.29</td><td>-15.31</td></tr>
+<tr><td>15m 扫回 120m</td><td>-18.52</td><td>-29.03</td><td>-14.57</td><td>-18.30</td></tr>
+<tr><td>5m 立即</td><td>-21.07</td><td>-16.26</td><td>-16.91</td><td>-15.34</td></tr>
+<tr><td>5m 扫回 15m</td><td>-17.27</td><td>-16.90</td><td>-14.12</td><td>-17.19</td></tr>
+<tr><td>5m 扫回 30m</td><td>-15.70</td><td>-12.70</td><td>-16.22</td><td>-15.62</td></tr>
+<tr><td>5m 扫回 60m</td><td>-14.77</td><td>-17.86</td><td>-18.88</td><td>-13.98</td></tr>
+<tr><td>5m 扫回 120m</td><td>-16.05</td><td>-19.28</td><td>-18.69</td><td>-15.91</td></tr>
+</tbody></table>
+<p>5m 在 15–60 分钟有一致的“少亏”区间，30 分钟最好；这支持“立即入场偏早”的机制假设，但幅度远不足以覆盖 20bp。15m 的短窗峰值由极小样本和 2023H1 拉高，不能当作稳定规律。</p>
+<h2>排序基线</h2>
+<p>本轮没有改变 12 项形态分。冻结立即入场的开发期排序结果仍为：15m AUC 0.549、top-decile 净 -5.29bp、排序置换 p=0.206；5m AUC 0.489、top-decile 净 -19.09bp、p=0.655。单特征 top-decile 分别为 -10.98bp 与 -21.02bp。AUC 和局部均值都不能替代扣成本后的成功门。</p>
+<h2>下一假设</h2>
+<p>扫回形态要求先逆向越过 K2 极值，可能筛掉了最强的直接延续。下一轮只测试另一种入场族：K2 后首次<strong>方向收盘突破 K2 方向极值</strong>，随后下一根开盘入场；仍使用 15/30/60/120 分钟窗口，其他变量不变。这样能区分“先清流动性再走”与“直接确认延续”两种机制。</p>
+<p>若方向突破仍只改善数个 bp，就停止继续打磨入场，转向已预注册的盈利保护/目标族；不读取 audit 或最终 holdout。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>结果来自 development 选参期，匹配对照 p 值仅为描述性证据。</li>
+<li>2025–2026-02 audit 因门禁失败没有打开，2026-05-04 后 holdout 读取 0 行。</li>
+<li>15m 15 分钟臂的 +12.25bp 毛收益是低样本不稳定峰值，不是正期望证明。</li>
+<li>5m 30 分钟臂虽四折毛收益为正，净收益仍每单 -15.49bp，不具生产资格。</li>
+<li>未修改 Pine、ACTIVE/frozen/forward、部署、通知或真实订单。</li>
+</ul>
+<h2>复现</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+PYTHONPATH=. python3 -m pytest -q \
+  tests/test_research_btcusdtp_k1k2_sweep_reclaim_entry.py
+PYTHONPATH=. python3 -m scripts.research_btcusdtp_k1k2_sweep_reclaim_entry \
+  --phase development
+python3 scripts/md_to_html.py \
+  analysis/p1_btcusdtp_k1k2_sweep_reclaim_entry_preholdout_20260904.md \
+  --out-dir analysis/html
+</code></pre>
+<p>冻结选择、各臂交易账本、时间折和匹配对照均位于 <code>experiments/active/exp-btcusdtp-k1k2-sweep-reclaim-entry-preholdout-20260904-v1/results/</code>。</p>
+</body>
+</html>

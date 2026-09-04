@@ -511,4 +511,5 @@
 
 - [`p1_btcusdtp_k1k2_15m_5m_parameter_optimization_preholdout_20260904.md`](p1_btcusdtp_k1k2_15m_5m_parameter_optimization_preholdout_20260904.md) — 15m / 5m 独立参数优化、冻结验证与失败归因；两周期均拒绝。
 - [`p1_btcusdtp_k1k2_stop_buffer_preholdout_20260904.md`](p1_btcusdtp_k1k2_stop_buffer_preholdout_20260904.md) — K2 极值外 0–0.50 ATR 止损缓冲单变量实验；两周期均保留 0 ATR，audit 未打开。
+- [`p1_btcusdtp_k1k2_sweep_reclaim_entry_preholdout_20260904.md`](p1_btcusdtp_k1k2_sweep_reclaim_entry_preholdout_20260904.md) — K2 极值扫过后收复的延迟入场实验；5m 30 分钟局部改善但未过门，两周期均拒绝。
 - [`p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md`](p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md) — 旧 1h 报告的 holdout 读取声明勘误。
