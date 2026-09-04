@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>BTCUSDT.P K1→K2：3R 部分止盈 + 8R Runner（15m / 5m）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>BTCUSDT.P K1→K2：3R 部分止盈 + 8R Runner（15m / 5m）</h1>
+<p>日期：2026-09-04</p>
+<p>实验：<code>exp-btcusdtp-k1k2-partial-runner-preholdout-20260904-v1</code></p>
+<p>状态：<strong>REJECTED；两周期保留 3R 全平，audit / holdout 未打开</strong></p>
+<h2>结论</h2>
+<p>本轮把用户看到的长赢家尾部做成可执行的分批退出：首次触及 3R 时，保留 0%、10%、25%、50%、75% 或 100% 仓位继续看 8R；其余仓位在 3R 兑现。信号、入场、K2 止损、1.5R 收盘保护、12 小时、冷却和一次性加权 20bp 成本全部冻结。</p>
+<p>结果没有隐藏的“最佳分批比例”：</p>
+<ul>
+<li>15m 每增加 runner 都单调变差；0% runner（3R 全平）最好。</li>
+<li>5m 每增加 runner 都单调改善，但 100% runner 也只把稳健分提高 1.17bp、平均净值提高 1.46bp，没达到 +2bp 移动门，且仍为 -15.86bp/笔。</li>
+<li>所有中间比例都是 3R 和 8R 两个端点的加权组合，无法凭空创造超过较好端点的平均收益。退出结构至此不能修复当前入场池，audit 与最终 holdout 都不应消耗。</li>
+</ul>
+<h2>数据、状态机与门槛</h2>
+<ul>
+<li>数据：OKX <code>BTC-USDT-SWAP</code>；原生 5m 快照 341,567 行，SHA256 <code>767f67c2…eed5ac</code>，物理截止 2026-02-28。</li>
+<li>development：2023–2024 四个连续半年折；15m 345 笔，5m 755 笔。</li>
+<li>3R 时兑现比例为 <code>1 - runner_fraction</code>；runner 目标固定 8R。</li>
+<li>若同根同时碰止损与任一有实际仓位的目标，按止损优先；3R 与 8R 同根而未碰止损时，两段分别按障碍价格成交。</li>
+<li>费用按各段仓位权重合计后只扣一次完整 20bp；不会把分批退出误扣成两次完整费用。</li>
+<li>移动门：稳健分相对 0% runner 至少 +2bp，最差折不得恶化超过 3bp；开发成功还要求净值和稳健分 &gt;0、最差折 &gt;-5bp、四折毛收益均 &gt;0。</li>
+<li>audit 读取 0 行；最终 holdout（≥2026-05-04）读取 0 行。</li>
+</ul>
+<h2>全网格结果</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>留给 8R</th>
+<th>交易</th>
+<th>触发 3R</th>
+<th>到达 8R</th>
+<th>毛 bp</th>
+<th>净 bp</th>
+<th>稳健分</th>
+<th>最差折</th>
+<th>胜率</th>
+<th>PF</th>
+<th>匹配超额 bp</th>
+<th>p</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td><strong>0%</strong></td><td>345</td><td>79</td><td>0</td><td><strong>+6.49</strong></td><td><strong>-13.51</strong></td><td><strong>-16.35</strong></td><td><strong>-20.54</strong></td><td>34.49%</td><td><strong>0.580</strong></td><td>+6.81</td><td>0.0465</td></tr>
+<tr><td>15m</td><td>10%</td><td>345</td><td>79</td><td>10</td><td>+5.73</td><td>-14.27</td><td>-17.11</td><td>-20.88</td><td>34.49%</td><td>0.556</td><td>+5.63</td><td>0.0786</td></tr>
+<tr><td>15m</td><td>25%</td><td>345</td><td>79</td><td>10</td><td>+4.58</td><td>-15.42</td><td>-18.25</td><td>-21.38</td><td>34.49%</td><td>0.521</td><td>+3.86</td><td>0.1607</td></tr>
+<tr><td>15m</td><td>50%</td><td>345</td><td>79</td><td>10</td><td>+2.67</td><td>-17.33</td><td>-20.19</td><td>-22.22</td><td>34.20%</td><td>0.461</td><td>+0.92</td><td>0.4051</td></tr>
+<tr><td>15m</td><td>75%</td><td>345</td><td>79</td><td>10</td><td>+0.77</td><td>-19.23</td><td>-22.17</td><td>-23.07</td><td>34.20%</td><td>0.403</td><td>-2.03</td><td>0.6982</td></tr>
+<tr><td>15m</td><td>100%</td><td>345</td><td>79</td><td>10</td><td>-1.14</td><td>-21.14</td><td>-24.24</td><td>-23.91</td><td>33.04%</td><td>0.345</td><td>-4.97</td><td>0.8917</td></tr>
+<tr><td>5m</td><td><strong>0%</strong></td><td>755</td><td>141</td><td>0</td><td>+2.68</td><td>-17.32</td><td>-17.68</td><td>-21.07</td><td>38.28%</td><td>0.355</td><td>+2.05</td><td>0.1248</td></tr>
+<tr><td>5m</td><td>10%</td><td>755</td><td>141</td><td>49</td><td>+2.83</td><td>-17.17</td><td>-17.56</td><td>-20.99</td><td>38.28%</td><td>0.360</td><td>+2.25</td><td>0.1060</td></tr>
+<tr><td>5m</td><td>25%</td><td>755</td><td>141</td><td>49</td><td>+3.05</td><td>-16.95</td><td>-17.38</td><td>-20.87</td><td>38.28%</td><td>0.369</td><td>+2.56</td><td>0.0859</td></tr>
+<tr><td>5m</td><td>50%</td><td>755</td><td>141</td><td>49</td><td>+3.41</td><td>-16.59</td><td>-17.08</td><td>-20.68</td><td>38.15%</td><td>0.382</td><td>+3.06</td><td>0.0655</td></tr>
+<tr><td>5m</td><td>75%</td><td>755</td><td>141</td><td>49</td><td>+3.78</td><td>-16.22</td><td>-16.80</td><td>-20.48</td><td>38.15%</td><td>0.396</td><td>+3.57</td><td>0.0565</td></tr>
+<tr><td>5m</td><td>100%</td><td>755</td><td>141</td><td>49</td><td><strong>+4.14</strong></td><td><strong>-15.86</strong></td><td><strong>-16.52</strong></td><td><strong>-20.29</strong></td><td>37.35%</td><td><strong>0.410</strong></td><td>+4.08</td><td>0.0526</td></tr>
+</tbody></table>
+<p>匹配对照按同月 × UTC 六小时块 × 当月 ATR14 五分位构造，并用完全相同的分批状态机。对照只用于描述，不参与选择。所有绝对净值均为负，p 值也均未通过最终要求。</p>
+<h2>端点与实现校验</h2>
+<p>新状态机在真实 2023–2024 全账本上做了两个逐笔退化检查：</p>
+<ul>
+<li>0% runner 对原 3R：15m 345/345、5m 755/755 setup 一致；最大毛收益误差分别 <code>2.0e-16</code>、<code>1.0e-16</code>，outcome 100% 一致。</li>
+<li>100% runner 对原 8R：同样全部 setup 与 outcome 一致；最大毛收益误差约 <code>1.0e-16</code>。</li>
+</ul>
+<p>首次核对曾发现收益一致但 ambiguous 碰撞标签漂移，已在重跑前修正并补回归测试。这不改变 PnL，却避免把同根止损/目标冲突误分类为普通失败。</p>
+<h2>为什么中间比例不能创造 edge</h2>
+<p>在相同入场、相同路径、相同两个障碍和按仓位比例计费的前提下，runner 比例为 <code>f</code> 的单笔收益严格等于 <code>3R 全平收益 × (1-f) + 8R 全平收益 × f</code>；没到 3R 的交易两个端点本来就相同。因此全池平均收益也是两个端点的仿射组合。</p>
+<p>这解释了观测曲线：15m 的 8R 端点比 3R 差，所以所有分批都随 <code>f</code> 单调变差；5m 的 8R 端点略好，所以随 <code>f</code> 单调改善，但上限就是已经失败的 8R。分批可以改变收益分布与心理体验，不能在该状态机下提高平均值超过较好端点。</p>
+<p>四折也没有反例。15m 从 0% 到 100% runner 的每一折都恶化；5m 每一折都改善，但 100% 时仍为 -20.29 / -16.09 / -14.40 / -13.75bp。没有任何时期转正。</p>
+<h2>排序基线与真正问题</h2>
+<p>退出不改变信号排序。3R 基准 15m AUC 0.549、top-decile 净 -5.29bp、置换 p=0.206；5m AUC 0.489、top-decile 净 -19.09bp、p=0.655。连续的止损缓冲、两类确认入场、保护、固定目标与 runner 都未产生扣成本优势，证据一致指向：<strong>问题在信号/入场池的毛优势不足，而不是 TP/SL 框怎么画或退出比例怎么分。</strong></p>
+<h2>决策</h2>
+<ul>
+<li>15m 与 5m 都保留 3R 全平作为研究基准；不采用 runner。</li>
+<li>不再继续搜索退出参数，也不读取 audit / holdout。</li>
+<li>下一阶段应先做只读、因果的失败分层：按多空、趋势/震荡、K1/K2 几何、距离、波动扩张、交易时段与费用风险比找跨时间重复差异，再预注册一个最有证据的拒绝门；不能从同一账本直接挑一串组合规则。</li>
+</ul>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>这是 development 内筛选；所有结论限于该入场池和 3R/8R 固定端点。</li>
+<li>20bp 未另计 funding；但毛收益本身已不足，不能靠忽略成本修饰结果。</li>
+<li>只覆盖 BTC；不外推其他币。</li>
+<li>audit / holdout 均未打开；未修改 Pine、ACTIVE、frozen、forward、部署或真实订单。</li>
+</ul>
+<h2>复现</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+PYTHONPATH=. python3 -m pytest -q \
+  tests/test_research_btcusdtp_k1k2_partial_runner.py \
+  tests/test_research_btcusdtp_k1k2_fixed_target.py \
+  tests/test_research_btcusdtp_k1k2_protection_trigger.py
+PYTHONPATH=. python3 -m scripts.research_btcusdtp_k1k2_partial_runner \
+  --phase development
+python3 scripts/md_to_html.py \
+  analysis/p1_btcusdtp_k1k2_partial_runner_preholdout_20260904.md \
+  --out-dir analysis/html
+</code></pre>
+<p>全网格、端点可核对账本、四折与匹配对照位于 <code>experiments/active/exp-btcusdtp-k1k2-partial-runner-preholdout-20260904-v1/results/</code>。</p>
+</body>
+</html>
