@@ -590,6 +590,28 @@ def baseline_failure_bucket(row: pd.Series) -> str:
     return "timeout"
 
 
+def outcome_group(outcome: str) -> str:
+    """Collapse policy-specific reasons into mutually exclusive exit families."""
+
+    if outcome == "tp":
+        return "target"
+    if outcome.startswith("sl"):
+        return "original_stop"
+    if outcome.startswith("protected"):
+        return "fee_cover_stop"
+    if outcome.startswith("dynamic"):
+        return "dynamic_profit_stop"
+    if outcome.startswith("catastrophe"):
+        return "catastrophe_stop"
+    if outcome == "structure_invalid_next_open":
+        return "structure_next_open"
+    if outcome == "sma40_invalid_next_open":
+        return "sma40_next_open"
+    if outcome == "timeout":
+        return "timeout"
+    raise ValueError(f"unknown outcome: {outcome}")
+
+
 def failure_contributions(ledgers: dict[str, pd.DataFrame], baseline_label: str) -> pd.DataFrame:
     baseline = ledgers[baseline_label][["setup_id", "net_return", "outcome", "mfe_r"]].copy()
     baseline["failure_path"] = baseline.apply(baseline_failure_bucket, axis=1)
@@ -655,6 +677,32 @@ def stop_bar_diagnostics(
         else:
             post_favourable = math.nan
             post_adverse = math.nan
+
+        target = entry + direction * float(config["execution_frozen"]["target_r"]) * risk
+        first_post_exit_3r_i: int | None = None
+        for future_i in range(future_first, future_last + 1):
+            low = float(frame.loc[future_i, "low"])
+            high = float(frame.loc[future_i, "high"])
+            if _target_hit(low, high, target, direction):
+                first_post_exit_3r_i = future_i
+                break
+        adverse_before_recovery_r = math.nan
+        required_extra_stop_r = math.nan
+        required_extra_stop_atr = math.nan
+        bars_to_recovery = math.nan
+        if first_post_exit_3r_i is not None:
+            recovery_path = frame.loc[future_first:first_post_exit_3r_i]
+            adverse_before_recovery = (
+                entry - float(recovery_path["low"].min())
+                if direction > 0
+                else float(recovery_path["high"].max()) - entry
+            )
+            adverse_before_recovery_r = adverse_before_recovery / risk
+            required_extra_stop_r = max(0.0, adverse_before_recovery_r - 1.0)
+            required_extra_stop_atr = (
+                required_extra_stop_r * float(event["stop_distance_atr"])
+            )
+            bars_to_recovery = first_post_exit_3r_i - i
         rows.append(
             {
                 "setup_id": event["setup_id"],
@@ -683,6 +731,11 @@ def stop_bar_diagnostics(
                 "post_exit_hit_3r": bool(post_favourable >= 3.0 * risk)
                 if np.isfinite(post_favourable)
                 else False,
+                "first_post_exit_3r_i": first_post_exit_3r_i,
+                "bars_from_stop_to_post_exit_3r": bars_to_recovery,
+                "max_adverse_before_post_exit_3r_r": adverse_before_recovery_r,
+                "required_extra_stop_r_before_post_exit_3r": required_extra_stop_r,
+                "required_extra_stop_atr_before_post_exit_3r": required_extra_stop_atr,
             }
         )
     return pd.DataFrame(rows)
@@ -1026,6 +1079,34 @@ def development_phase(config: dict[str, Any]) -> None:
             **add_control_metrics({}, pairs),
             **ranking_metrics(events, resamples=20_000),
         }
+        groups = events["outcome"].astype(str).map(outcome_group)
+        for group in (
+            "target",
+            "original_stop",
+            "fee_cover_stop",
+            "dynamic_profit_stop",
+            "catastrophe_stop",
+            "structure_next_open",
+            "sma40_next_open",
+            "timeout",
+        ):
+            metrics[f"exit_{group}"] = int(groups.eq(group).sum())
+        ordered_events = events.sort_values("setup_id")
+        ordered_baseline = ledgers[baseline_label].sort_values("setup_id")
+        delta = (
+            ordered_events["net_return"].to_numpy(dtype=float)
+            - ordered_baseline["net_return"].to_numpy(dtype=float)
+        )
+        metrics["changed_trades_vs_baseline"] = int(
+            np.count_nonzero(np.abs(delta) > EPSILON)
+        )
+        metrics["improved_trades_vs_baseline"] = int(
+            np.count_nonzero(delta > EPSILON)
+        )
+        metrics["worsened_trades_vs_baseline"] = int(
+            np.count_nonzero(delta < -EPSILON)
+        )
+        metrics["mean_net_r"] = float(events["net_return_r"].mean())
         metric_rows.append(metrics)
         fold = fold_table(events, folds)
         fold.insert(0, "stop_policy", label)
@@ -1107,6 +1188,23 @@ def development_phase(config: dict[str, Any]) -> None:
             "close_lost_intended_sma40_side": int(stop_bars["close_lost_intended_sma40_side"].sum()),
             "post_exit_hit_1r": int(stop_bars["post_exit_hit_1r"].sum()),
             "post_exit_hit_3r": int(stop_bars["post_exit_hit_3r"].sum()),
+            "post_exit_3r_median_bars": float(
+                stop_bars.loc[
+                    stop_bars["post_exit_hit_3r"].astype(bool),
+                    "bars_from_stop_to_post_exit_3r",
+                ].median()
+            ),
+            "post_exit_3r_median_required_extra_stop_atr": float(
+                stop_bars.loc[
+                    stop_bars["post_exit_hit_3r"].astype(bool),
+                    "required_extra_stop_atr_before_post_exit_3r",
+                ].median()
+            ),
+            "post_exit_3r_survives_extra_0p25atr": int(
+                stop_bars["required_extra_stop_atr_before_post_exit_3r"]
+                .le(0.25)
+                .sum()
+            ),
         },
         "early_failure_classifier": classifier_metrics.to_dict("records"),
         "tradingview_replacement_allowed": False,
