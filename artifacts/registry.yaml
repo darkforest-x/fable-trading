@@ -13499,3 +13499,88 @@ artifacts:
     config_hash: "f7155ed34aeb22775fb599df9ad621dc4af9ff75bde2200e7ae2cd9ee6a4a704"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: Self-contained owner-facing HTML generated from the canonical report.
+
+  - artifact_id: btcusdtp-k1k2-15m-two-stage-k2-report-receipt-20260904-v1
+    artifact_type: manifest
+    role: hashes_for_two_stage_k2_freqtrade_results_and_reports
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9ec25c9"
+    source_path: experiments/active/exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1/results/report_receipt.json
+    sha256: "57463618fc033e4af0ce45f3e296d8afc35db4140fc14941e1c3d84e63c7549b"
+    size_bytes: 2622
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1/results/report_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "9ec25c9"
+    config_hash: "bc4633ee99db16128464f63abba3d9ccbaf52e314364903accb079c99ae648f6"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Frozen hashes and rejection decision; audit and holdout rows read were zero.
+
+  - artifact_id: btcusdtp-k1k2-15m-two-stage-k2-freqtrade-backtest-20260904-v1
+    artifact_type: manifest
+    role: freqtrade_2026_8_full_strategy_backtest_archive
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9ec25c9"
+    source_path: experiments/active/exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1/results/freqtrade/backtest-result-2026-09-04_09-59-42.zip
+    sha256: "9dbfc378d9721c3ffa8917a089d38cf0fb02494fe1e62b5d9c8b6b143b085361"
+    size_bytes: 1260990
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1/results/freqtrade/backtest-result-2026-09-04_09-59-42.zip"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "9ec25c9"
+    config_hash: "bc4633ee99db16128464f63abba3d9ccbaf52e314364903accb079c99ae648f6"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: 100 trades; exact native entry and stop parity; -15.77bp mean net.
+
+  - artifact_id: btcusdtp-k1k2-15m-two-stage-k2-freqtrade-lookahead-20260904-v1
+    artifact_type: manifest
+    role: freqtrade_2026_8_lookahead_analysis_result
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9ec25c9"
+    source_path: experiments/active/exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1/results/freqtrade/lookahead_analysis.csv
+    sha256: "ffa1acd2f0b8283ce66b49cd6fa251147842d15ba5979328d255d30da7eaca92"
+    size_bytes: 150
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1/results/freqtrade/lookahead_analysis.csv"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "9ec25c9"
+    config_hash: "bc4633ee99db16128464f63abba3d9ccbaf52e314364903accb079c99ae648f6"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: 100 signals; has_bias=false; zero biased entry and exit signals.
+
+  - artifact_id: btcusdtp-k1k2-15m-two-stage-k2-report-20260904-v1
+    artifact_type: report
+    role: canonical_chinese_two_stage_k2_freqtrade_failure_analysis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9ec25c9"
+    source_path: analysis/p1_btcusdtp_k1k2_15m_two_stage_k2_freqtrade_preholdout_20260904.md
+    sha256: "171db56fa63745ca1e579138ba596c25504b05e84613d0059d1bd4a0d449671b"
+    size_bytes: 20582
+    storage_uri: "repo://analysis/p1_btcusdtp_k1k2_15m_two_stage_k2_freqtrade_preholdout_20260904.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "9ec25c9"
+    config_hash: "bc4633ee99db16128464f63abba3d9ccbaf52e314364903accb079c99ae648f6"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Full rules, matched controls, failure map, target sensitivity and Freqtrade parity.
+
+  - artifact_id: btcusdtp-k1k2-15m-two-stage-k2-html-20260904-v1
+    artifact_type: report
+    role: owner_facing_self_contained_html_two_stage_k2_freqtrade_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9ec25c9"
+    source_path: analysis/html/p1_btcusdtp_k1k2_15m_two_stage_k2_freqtrade_preholdout_20260904.html
+    sha256: "06cb37fd00dafc108a5fcac24faaabcf2471f88008239d058e3b8eb919e696e4"
+    size_bytes: 371779
+    storage_uri: "repo://analysis/html/p1_btcusdtp_k1k2_15m_two_stage_k2_freqtrade_preholdout_20260904.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "9ec25c9"
+    config_hash: "bc4633ee99db16128464f63abba3d9ccbaf52e314364903accb079c99ae648f6"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Self-contained owner-facing HTML with the three diagnostic charts embedded.

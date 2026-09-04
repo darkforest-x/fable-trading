@@ -4408,8 +4408,8 @@ experiments:
 
   - experiment_id: exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "d4ff6bf"
-    status: active
+    source_commit: "9ec25c9"
+    status: rejected
     question: >-
       Does changing K2 from one candle into a causal touch-to-confirmation
       interval of at most two later bars create stable net edge on BTCUSDT.P
@@ -4418,16 +4418,28 @@ experiments:
       K2 event representation: same-bar touch plus rejection -> touch followed
       by the earliest qualifying rejection at delay 0, 1 or 2; all numeric
       thresholds, barriers, costs and clocks remain frozen.
-    result: preregistered_before_development_outcomes
+    result: >-
+      Rejected on the registered 2023-2024 development window. The two-stage
+      candidate produced 100 trades at -16.09bp net per trade, -18.93bp robust
+      score and -26.33bp worst half-year; all four half-years were negative and
+      matched-control p=0.2313. Freqtrade 2026.8 reproduced 100/100 entry keys,
+      returned -15.77bp per trade and reported zero lookahead-biased signals.
+      None of 26 post-hoc one-coordinate replays passed the original full gate.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: analysis/p1_btcusdtp_k1k2_15m_two_stage_k2_preholdout_20260904.md
-    artifacts: []
+    canonical_report: analysis/p1_btcusdtp_k1k2_15m_two_stage_k2_freqtrade_preholdout_20260904.md
+    artifacts:
+      - btcusdtp-k1k2-15m-two-stage-k2-report-receipt-20260904-v1
+      - btcusdtp-k1k2-15m-two-stage-k2-freqtrade-backtest-20260904-v1
+      - btcusdtp-k1k2-15m-two-stage-k2-freqtrade-lookahead-20260904-v1
+      - btcusdtp-k1k2-15m-two-stage-k2-report-20260904-v1
+      - btcusdtp-k1k2-15m-two-stage-k2-html-20260904-v1
     reuse_allowed: false
     notes: >-
       The hypothesis came from one owner-supplied 2026 chart example, which is
-      excluded from scoring. Development is limited to 2023-2024 and the audit
-      remains closed unless all preregistered gates pass. Freqtrade 2026.8 is
-      authorized as a full Docker-isolated second research implementation;
-      live and dry-run modes remain out of scope.
+      excluded from scoring. Development was limited to 2023-2024; because the
+      registered gate failed, the 2025-2026-02 audit and repository holdout both
+      remained unopened. Freqtrade ran as a full Docker-isolated research
+      implementation, not merely a design reference. No TradingView, ACTIVE,
+      frozen, forward, deployment, API-key or order mutation occurred.

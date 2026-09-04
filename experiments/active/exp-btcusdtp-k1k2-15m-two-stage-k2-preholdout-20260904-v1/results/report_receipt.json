@@ -1,0 +1,62 @@
+{
+  "experiment_id": "exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1",
+  "status": "rejected_development_audit_unopened",
+  "generated_at": "2026-09-04T18:23:00+08:00",
+  "source_commit": "9ec25c9",
+  "config_sha256": "bc4633ee99db16128464f63abba3d9ccbaf52e314364903accb079c99ae648f6",
+  "source_data_sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+  "development": {
+    "baseline_trades": 89,
+    "candidate_trades": 100,
+    "candidate_mean_net_bp": -16.085564437149326,
+    "candidate_robust_score_bp": -18.927951453059116,
+    "candidate_worst_fold_net_bp": -26.33319522810579,
+    "matched_control_excess_bp": 5.483494666130208,
+    "paired_signflip_p_one_sided": 0.2312676873231267,
+    "development_gate_passed": false
+  },
+  "freqtrade": {
+    "version": "2026.8",
+    "trades": 100,
+    "exact_entry_keys": 100,
+    "entry_price_max_abs_error": 0.0,
+    "stop_price_max_abs_error": 0.0,
+    "delay_mismatches": 0,
+    "mean_net_bp": -15.770411721076046,
+    "profit_factor": 0.5382132180061192,
+    "lookahead_has_bias": false,
+    "biased_entry_signals": 0,
+    "biased_exit_signals": 0
+  },
+  "files": {
+    "diagnostic_receipt": {
+      "path": "experiments/active/exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1/results/development_diagnostic_receipt.json",
+      "sha256": "e0915d20725e0dfad6f0848dac7b554f7d05e3c00aba2a6ea1efe39b600f3adf",
+      "size_bytes": 7006
+    },
+    "freqtrade_backtest": {
+      "path": "experiments/active/exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1/results/freqtrade/backtest-result-2026-09-04_09-59-42.zip",
+      "sha256": "9dbfc378d9721c3ffa8917a089d38cf0fb02494fe1e62b5d9c8b6b143b085361",
+      "size_bytes": 1260990
+    },
+    "freqtrade_lookahead": {
+      "path": "experiments/active/exp-btcusdtp-k1k2-15m-two-stage-k2-preholdout-20260904-v1/results/freqtrade/lookahead_analysis.csv",
+      "sha256": "ffa1acd2f0b8283ce66b49cd6fa251147842d15ba5979328d255d30da7eaca92",
+      "size_bytes": 150
+    },
+    "canonical_markdown": {
+      "path": "analysis/p1_btcusdtp_k1k2_15m_two_stage_k2_freqtrade_preholdout_20260904.md",
+      "sha256": "171db56fa63745ca1e579138ba596c25504b05e84613d0059d1bd4a0d449671b",
+      "size_bytes": 20582
+    },
+    "owner_html": {
+      "path": "analysis/html/p1_btcusdtp_k1k2_15m_two_stage_k2_freqtrade_preholdout_20260904.html",
+      "sha256": "06cb37fd00dafc108a5fcac24faaabcf2471f88008239d058e3b8eb919e696e4",
+      "size_bytes": 371779
+    }
+  },
+  "audit_outcomes_read": 0,
+  "holdout_rows_read": 0,
+  "tradingview_replacement_allowed": false,
+  "live_orders_placed": 0
+}
