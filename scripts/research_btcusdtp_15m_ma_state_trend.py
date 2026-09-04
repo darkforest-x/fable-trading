@@ -1040,6 +1040,10 @@ def _read_owner_window(path: Path, start: pd.Timestamp, end: pd.Timestamp) -> pd
                     },
                 }
             )
+    if not rows:
+        return pd.DataFrame(
+            columns=["open_time", "open", "high", "low", "close", "volume"]
+        )
     return pd.DataFrame(rows).sort_values("open_time", kind="mergesort").drop_duplicates(
         "open_time", keep="last"
     )
