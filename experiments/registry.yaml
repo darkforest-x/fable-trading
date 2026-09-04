@@ -4481,8 +4481,8 @@ experiments:
 
   - experiment_id: exp-btcusdtp-15m-ma-state-trend-preholdout-20260904-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending_builder_commit
-    status: active
+    source_commit: "11cfaf7"
+    status: rejected
     question: >-
       Can a dedicated BTCUSDT.P 15m MA-state launch detector recover direct
       crosses, same-bar rejections and near-MA coil releases, and can a causal
@@ -4492,12 +4492,20 @@ experiments:
       then entry_family, then exit_policy. Each step freezes all prior choices;
       numeric morphology thresholds, next-open entry, 2ATR disaster stop,
       96-bar horizon, cooldown and 20bp cost do not change.
-    result: pending
+    result: >-
+      rejected_at_development_gate. SMA60 beat SMA40 under the same broad
+      launch union, improving gross expectancy from -0.18bp to +4.51bp and
+      robust net score from -22.42bp to -16.17bp, but all four half-years
+      remained net negative after 20bp cost. Entry-family pruning did not pass
+      the move gate. Immediate MA exits preserved a +1102bp extreme winner but
+      worsened robust expectancy through early whipsaw, so fixed 5ATR remained
+      selected. Frozen 2025-2026 validation stayed unopened.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_btcusdtp_15m_ma_state_trend_20260904.md
-    artifacts: []
+    artifacts:
+      - btcusdtp-15m-ma-state-trend-selection-20260904-v1
     reuse_allowed: false
     notes: >-
       Economic selection and validation use the physical pre-holdout source
