@@ -418,6 +418,7 @@ def main() -> None:
     write_csv(exits, OUTPUT_DIR / "exit_sensitivity.csv")
     figure = render_figure(phase_summary, mechanics, horizons)
     write_json(
+        OUTPUT_DIR / "summary.json",
         {
             "status": "both_profiles_failed_registered_confirmation_gates",
             "registered_experiments": {
@@ -436,7 +437,6 @@ def main() -> None:
             "sources": sources,
             "production_or_live_changed": False,
         },
-        OUTPUT_DIR / "summary.json",
     )
 
 
