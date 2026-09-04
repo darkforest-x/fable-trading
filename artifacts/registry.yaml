@@ -595,6 +595,143 @@ artifacts:
     notes: >-
       Full recent-window diagnostic only; not the independent fresh-start chart.
 
+  # ---- BTCUSDT.P 1h Pine-v8 frozen six-month replay ----------------------
+  - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-config
+    artifact_type: config
+    role: preregistered_frozen_pine_v8_replay_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    source_path: experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/config.json
+    sha256: "90ee08de9b9d5b7c795f6d68438c248a4541ed0d6f8b83fc1d96b55009e58f49"
+    size_bytes: 6926
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/config.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    config_hash: "90ee08de9b9d5b7c795f6d68438c248a4541ed0d6f8b83fc1d96b55009e58f49"
+    data_cutoff: "2026-09-04T03:00:00Z"
+    notes: Frozen before outcome read; records Pine SHA, exact 1h rule, execution, cost, diagnostics and matched-control contract.
+
+  - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-source-receipt
+    artifact_type: manifest
+    role: official_okx_gapless_source_and_crosscheck_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    source_path: experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/source_receipt.json
+    sha256: "6fe3a17020ef9198a763f8db57b13d4752ca3ccbf99a3122be759091884b69c0"
+    size_bytes: 969
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/source_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    config_hash: "90ee08de9b9d5b7c795f6d68438c248a4541ed0d6f8b83fc1d96b55009e58f49"
+    data_cutoff: "2026-09-04T03:00:00Z"
+    notes: Records the 9,579-row frozen OKX source hash, continuity checks and three overlapping OHLC cross-checks.
+
+  - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-summary
+    artifact_type: manifest
+    role: canonical_aggregate_backtest_result
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    source_path: experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/summary.json
+    sha256: "19ebd95883b63583e13b3e2e4c7d638d5e60d25505f108be56a50471127dc592"
+    size_bytes: 9510
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    config_hash: "90ee08de9b9d5b7c795f6d68438c248a4541ed0d6f8b83fc1d96b55009e58f49"
+    data_cutoff: "2026-09-04T03:00:00Z"
+    notes: Aggregate equal-notional, equal-risk, monthly, matched-control and multiplicity-corrected diagnostic result; research gate rejected.
+
+  - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-trade-ledger
+    artifact_type: manifest
+    role: all_49_trades_with_causal_features_and_path_reasons
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    source_path: experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/trade_ledger.csv
+    sha256: "17231b982cec42852a583ba632b4a387b7cbd1d35d31a52d30079eedaa0f2e5f"
+    size_bytes: 88311
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/trade_ledger.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    config_hash: "90ee08de9b9d5b7c795f6d68438c248a4541ed0d6f8b83fc1d96b55009e58f49"
+    data_cutoff: "2026-09-04T03:00:00Z"
+    notes: Every accepted trade has K1/K2 measurements, next-open execution, TP/SL/timeout path, MFE/MAE, outcome reason and pre-entry diagnostic flags.
+
+  - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-matched-controls
+    artifact_type: manifest
+    role: month_utc_block_atr_quintile_exact_matched_controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    source_path: experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/matched_controls.csv
+    sha256: "87e9d183030796aaa201be935bdb5c2e51e3488132999761dc966128a1ad9539"
+    size_bytes: 47561
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/matched_controls.csv"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    config_hash: "90ee08de9b9d5b7c795f6d68438c248a4541ed0d6f8b83fc1d96b55009e58f49"
+    data_cutoff: "2026-09-04T03:00:00Z"
+    notes: Contains 141 exact-stratum controls for 47 trades; two partial-September trades remain explicitly unmatched rather than backfilled.
+
+  - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-validation
+    artifact_type: manifest
+    role: independent_full_replay_and_causality_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    source_path: experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/validation.json
+    sha256: "93ef0418b6001c7bcdcd1e03ca6d12ecbff27abcb6dfda314a44882e9847a795"
+    size_bytes: 1730
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/validation.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    config_hash: "90ee08de9b9d5b7c795f6d68438c248a4541ed0d6f8b83fc1d96b55009e58f49"
+    data_cutoff: "2026-09-04T03:00:00Z"
+    notes: Passed 23/23 checks including full trade and control replay, exact costs, hashes, exclusion radius and three future-data mutations.
+
+  - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-report
+    artifact_type: report
+    role: canonical_chinese_backtest_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    source_path: analysis/p1_btcusdtp_1h_pine_v8_sixmonth_backtest_20260904.md
+    sha256: "15a141639528478043002dc0ae2e9bc9880523d4d3c8b0f29435ae342829bd43"
+    size_bytes: 37757
+    storage_uri: "repo://analysis/p1_btcusdtp_1h_pine_v8_sixmonth_backtest_20260904.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    config_hash: "90ee08de9b9d5b7c795f6d68438c248a4541ed0d6f8b83fc1d96b55009e58f49"
+    data_cutoff: "2026-09-04T03:00:00Z"
+    notes: Canonical report includes matched random controls, costs, all 49 trade explanations, diagnostics, risks and reproduction commands.
+
+  - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_with_all_trades
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    source_path: analysis/html/p1_btcusdtp_1h_pine_v8_sixmonth_backtest_20260904.html
+    sha256: "840cb0781d448ac05801d3797bfb004ee5ec0d2eaaedbc3a06105953a7e24146"
+    size_bytes: 4090059
+    storage_uri: "repo://analysis/html/p1_btcusdtp_1h_pine_v8_sixmonth_backtest_20260904.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    config_hash: "90ee08de9b9d5b7c795f6d68438c248a4541ed0d6f8b83fc1d96b55009e58f49"
+    data_cutoff: "2026-09-04T03:00:00Z"
+    notes: Self-contained mobile-readable HTML with 16 embedded figures, 11 tables and all 49 success/failure rows.
+
   # ---- ETH 15m causal dense-start / literal-release negative results -------
   - artifact_id: pine-eth-15m-dense-report
     artifact_type: report
