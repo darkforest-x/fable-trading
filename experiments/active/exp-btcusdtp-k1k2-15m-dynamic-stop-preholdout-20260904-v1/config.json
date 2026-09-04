@@ -186,7 +186,7 @@
     "causal_classifier": {
       "purpose": "test whether entry-time features can identify early failures; never select a policy or mutate the strategy",
       "models": [
-        "L2 logistic regression with StandardScaler, C=1, balanced class weights",
+        "L2 logistic regression with StandardScaler, C=1, balanced class weights and liblinear solver",
         "depth-2 decision tree with minimum leaf 10 and balanced class weights",
         "training-prior dummy baseline"
       ],

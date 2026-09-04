@@ -47,6 +47,9 @@ from scripts.optimize_btcusdtp_k1k2_intraday_preholdout import (
     write_csv,
     write_json,
 )
+from scripts.research_btcusdtp_k1k2_15m_two_stage_k2 import (
+    build_k2_event_candidates,
+)
 from scripts.research_two_key_candle_ma_retest_1h import sha256_file
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -349,6 +352,23 @@ def load_frozen_decisions(
     if len(selected) != expected:
         raise RuntimeError(f"expected {expected} frozen entries, got {len(selected)}")
     return selected
+
+
+def predecessor_signal_indices(
+    config: dict[str, Any], frame: pd.DataFrame
+) -> set[int]:
+    """Return every predecessor signal endpoint, not just accepted entries."""
+
+    predecessor_config = json.loads(
+        (PROJECT / config["predecessor"]["config_path"]).read_text(encoding="utf-8")
+    )
+    same_bar = build_k2_event_candidates(
+        frame, predecessor_config, maximum_confirmation_delay_bars=0
+    )
+    two_stage = build_k2_event_candidates(
+        frame, predecessor_config, maximum_confirmation_delay_bars=2
+    )
+    return set(same_bar["k2_i"].astype(int)) | set(two_stage["k2_i"].astype(int))
 
 
 def run_policy(
@@ -734,7 +754,11 @@ def _classifier_pipeline(name: str, feature_count: int) -> Any:
     )
     if name == "logistic_l2":
         model: Any = LogisticRegression(
-            C=1.0, class_weight="balanced", max_iter=2000, random_state=20260904
+            C=1.0,
+            class_weight="balanced",
+            max_iter=2000,
+            random_state=20260904,
+            solver="liblinear",
         )
     elif name == "tree_depth2":
         model = DecisionTreeClassifier(
@@ -970,7 +994,12 @@ def development_phase(config: dict[str, Any]) -> None:
         )
 
     control_specs, matches = build_control_specs(
-        baseline, frame, config, start, end, set(decisions["k2_i"].astype(int))
+        baseline,
+        frame,
+        config,
+        start,
+        end,
+        predecessor_signal_indices(config, frame),
     )
     write_csv(control_specs, RESULTS / "development_control_specs.csv.gz")
     write_csv(matches, RESULTS / "development_control_matches.csv")
