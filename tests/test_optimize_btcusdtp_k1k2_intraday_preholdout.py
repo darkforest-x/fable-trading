@@ -8,6 +8,7 @@ from scripts.optimize_btcusdtp_k1k2_intraday_preholdout import (
     load_config,
     select_coordinate,
 )
+from scripts.repair_btcusdtp_k1k2_intraday_validation_artifacts import slice_label
 
 
 def _featured_fixture() -> pd.DataFrame:
@@ -126,3 +127,8 @@ def test_ineligible_incumbent_does_not_waive_improvement_margin() -> None:
     selected, reason = select_coordinate(rows, incumbent)
     assert selected is None
     assert reason == "retain_no_preregistered_improvement"
+
+
+def test_partial_2026_validation_slice_has_configured_label() -> None:
+    assert slice_label(pd.Timestamp("2025-08-01T00:00:00Z")) == "2025H2"
+    assert slice_label(pd.Timestamp("2026-02-01T00:00:00Z")) == "2026P1"
