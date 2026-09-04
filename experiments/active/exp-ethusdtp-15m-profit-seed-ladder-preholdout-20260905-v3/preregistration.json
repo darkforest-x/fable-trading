@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-ethusdtp-15m-profit-seed-ladder-preholdout-20260905-v3",
+  "registered_at": "2026-09-05T00:42:00+08:00",
+  "single_tuned_variable": "bank_total_fraction",
+  "fixed_levels_atr": [2.0, 4.0, 6.0, 8.0],
+  "fixed_stage_count": 4,
+  "fixed_remainder": "SMA60/ATR runner",
+  "metric_contract": "Only in-position MFE, actual bank fills, and completed-close runner arms define realised giveback; future path after exit is not used for that label.",
+  "selection_data": "2023-2024 only",
+  "audit_data": "2025 through February 2026 after selection receipt commit",
+  "repository_holdout_rows_allowed": 0,
+  "production_claim_allowed": false
+}
