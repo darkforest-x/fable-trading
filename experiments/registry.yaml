@@ -4182,7 +4182,7 @@ experiments:
   - experiment_id: exp-btcusdtp-k1k2-sweep-reclaim-entry-preholdout-20260904-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "c3f2d47"
-    status: active
+    status: rejected
     question: >-
       Can a causal post-K2 sweep-and-reclaim entry filter remove early false
       entries while preserving the original K2 structural stop?
@@ -4192,15 +4192,23 @@ experiments:
       extreme and closes back beyond that extreme and its contemporaneous MA;
       entry is the following open. Stop, 3R, horizon, protection, signal and
       20bp cost remain frozen.
-    result: preregistered_before_outcomes
+    result: >-
+      rejected_at_development_futility_gate. 15m's short-window mean was
+      unstable and underpowered. 5m sweep-reclaim at 30 minutes improved gross
+      expectancy to 4.51bp and robust score by 1.34bp, below the registered
+      2bp move gate and still -15.49bp net. Both retained immediate entry.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_btcusdtp_k1k2_sweep_reclaim_entry_preholdout_20260904.md
+    artifacts:
+      - btcusdtp-k1k2-sweep-reclaim-selection-20260904-v1
+      - btcusdtp-k1k2-sweep-reclaim-report-receipt-20260904-v1
+      - btcusdtp-k1k2-sweep-reclaim-report-20260904-v1
+      - btcusdtp-k1k2-sweep-reclaim-html-20260904-v1
     reuse_allowed: false
     notes: >-
-      Development is 2023-2024 in four chronological half-year folds. Each
-      arm receives a descriptive exact-stratum matched random control that is
-      excluded from selection. Audit opens only after the full development
-      success gate; no Pine, ACTIVE/frozen/forward, deployment, messaging or
-      live order is in scope.
+      Development used 2023-2024 in four chronological half-year folds. Each
+      arm received a descriptive exact-stratum matched random control excluded
+      from selection. Audit did not open and holdout_rows_read=0. No Pine,
+      ACTIVE/frozen/forward, deployment, messaging or live order changed.

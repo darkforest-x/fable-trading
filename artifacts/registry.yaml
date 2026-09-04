@@ -13011,3 +13011,75 @@ artifacts:
     config_hash: "b7e8c48b826783615a74be6321ce3cb686bbb2fdf05453017e523e935c95ad7e"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: Self-contained owner-facing HTML generated from the canonical report.
+
+  - artifact_id: btcusdtp-k1k2-sweep-reclaim-selection-20260904-v1
+    artifact_type: config
+    role: frozen_15m_5m_sweep_reclaim_development_selection
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2993def"
+    source_path: experiments/active/exp-btcusdtp-k1k2-sweep-reclaim-entry-preholdout-20260904-v1/results/selection_receipt.json
+    sha256: "d9b7a95ff2b4b8a22ef2a041a528ac2be9206519d3a4f8deefaf2862a5236158"
+    size_bytes: 13487
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-sweep-reclaim-entry-preholdout-20260904-v1/results/selection_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2993def"
+    config_hash: "7f0c34711278c3ae180949a86d43bac093269a6f16b0fee2ac64c2f2e4a0cf54"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: >-
+      Both timeframes retained immediate entry; the 5m 30-minute local peak
+      missed the preregistered robust-score gate and remained net negative.
+
+  - artifact_id: btcusdtp-k1k2-sweep-reclaim-report-receipt-20260904-v1
+    artifact_type: manifest
+    role: hashes_for_sweep_reclaim_selection_and_reports
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2993def"
+    source_path: experiments/active/exp-btcusdtp-k1k2-sweep-reclaim-entry-preholdout-20260904-v1/results/report_receipt.json
+    sha256: "871b273deb74d157ea23f9af04a3097c90a603225222db04b98501006acb202a"
+    size_bytes: 1367
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-sweep-reclaim-entry-preholdout-20260904-v1/results/report_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2993def"
+    config_hash: "7f0c34711278c3ae180949a86d43bac093269a6f16b0fee2ac64c2f2e4a0cf54"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Frozen hash receipt; audit_opened=false and holdout_rows_read=0.
+
+  - artifact_id: btcusdtp-k1k2-sweep-reclaim-report-20260904-v1
+    artifact_type: report
+    role: canonical_chinese_sweep_reclaim_entry_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2993def"
+    source_path: analysis/p1_btcusdtp_k1k2_sweep_reclaim_entry_preholdout_20260904.md
+    sha256: "a3386658f12d78059016d9bd13a4f68c495d1bce61dea98561cd023301b159a2"
+    size_bytes: 6232
+    storage_uri: "repo://analysis/p1_btcusdtp_k1k2_sweep_reclaim_entry_preholdout_20260904.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2993def"
+    config_hash: "7f0c34711278c3ae180949a86d43bac093269a6f16b0fee2ac64c2f2e4a0cf54"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: >-
+      Full grid, four time folds, matched controls, cost coverage and rejection
+      rationale for the causal post-K2 sweep-reclaim entry family.
+
+  - artifact_id: btcusdtp-k1k2-sweep-reclaim-html-20260904-v1
+    artifact_type: report
+    role: owner_facing_html_sweep_reclaim_entry_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2993def"
+    source_path: analysis/html/p1_btcusdtp_k1k2_sweep_reclaim_entry_preholdout_20260904.html
+    sha256: "424754a82a229bec0c99bb850623ebf22e51a4e98c8ab19dc150b02672ec98e9"
+    size_bytes: 10620
+    storage_uri: "repo://analysis/html/p1_btcusdtp_k1k2_sweep_reclaim_entry_preholdout_20260904.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2993def"
+    config_hash: "7f0c34711278c3ae180949a86d43bac093269a6f16b0fee2ac64c2f2e4a0cf54"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Self-contained owner-facing HTML generated from the canonical report.
