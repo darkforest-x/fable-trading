@@ -1,0 +1,87 @@
+{
+  "experiment_id": "exp-ethusdtp-15m-micro-profit-ladder-preholdout-20260905-v16",
+  "parent_experiment_id": "exp-ethusdtp-15m-wide-profit-ladder-preholdout-20260905-v6",
+  "owner_directive": "趋势中逐级真实止盈，不能用提高整仓止损代替，且必须保留大部分 runner",
+  "only_tuned_variable": "bank_total_fraction",
+  "instrument": {
+    "research_source": "OKX",
+    "research_symbol": "ETH-USDT-SWAP",
+    "tradingview_symbol": "OKX:ETHUSDT.P",
+    "bar_minutes": 15,
+    "data_path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+    "tick_size": 0.01
+  },
+  "source_contract": {
+    "safe_end_exclusive": "2026-03-01T00:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "parser_chunksize": 1000,
+    "repository_holdout_rows_allowed": 0
+  },
+  "splits": {
+    "development_start_inclusive": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2025-01-01T00:00:00Z",
+    "development_folds": ["2023H1", "2023H2", "2024H1", "2024H2"],
+    "audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "audit_end_exclusive": "2026-03-01T00:00:00Z",
+    "audit_folds": ["2025H1", "2025H2", "2026P1"],
+    "audit_is_not_pristine": true
+  },
+  "frozen_entry": {
+    "entry_spread_atr": 1.0,
+    "entry_slope_atr_per_bar": 0.05,
+    "strong_dwell_bars": 12,
+    "neutral_dwell_bars": 8,
+    "current_signed_spread_min_exclusive": 0.0,
+    "current_signed_slope_min_inclusive": 0.0,
+    "contract": "Exact V5 K1/K2 morphology and one-signal-per-live-regime ledger."
+  },
+  "frozen_execution": {
+    "entry": "next_bar_open",
+    "initial_disaster_stop_atr": 2.0,
+    "runner_arm_on_completed_close_atr": 2.0,
+    "runner_reference": "SMA60(HL2)",
+    "runner_buffer_atr": 1.0,
+    "horizon_bars": 96,
+    "round_trip_cost_fraction": 0.002,
+    "same_bar_priority": "active stop before any new bank milestone",
+    "gap_stop_fill": "bar open when it gaps beyond the active stop",
+    "state_update_timing": "SMA trail calculated at close t becomes active on t+1"
+  },
+  "bank_only_scaleout": {
+    "stage_count": 4,
+    "step_atr": 2.0,
+    "levels_atr": [2.0, 4.0, 8.0, 12.0],
+    "equal_fraction_per_stage": true,
+    "stop_change_after_bank": "none",
+    "remainder": "unchanged SMA60 minus direction times one current ATR runner"
+  },
+  "selection": {
+    "factor": "bank_total_fraction",
+    "bank_total_fraction_candidates": [0.10, 0.15, 0.20],
+    "minimum_events_total": 80,
+    "minimum_events_per_fold": 12,
+    "rank": "Among candidates passing every tail and transport gate, maximize four-fold robust net bp and then preserve more runner.",
+    "success_gates": {
+      "runner_armed_to_nonpositive_relative_reduction_min": 0.0,
+      "candidate_minus_baseline_mean_net_bp_min": -1.0,
+      "candidate_worst_fold_degradation_bp_max": 3.0,
+      "candidate_p95_net_retention_min": 0.95
+    },
+    "audit_rule": "Audit only the development-selected bank fraction after every gate passes and the receipt is committed."
+  },
+  "matched_control": {
+    "controls_per_event": 3,
+    "exclude_radius_bars": 96,
+    "strata": ["calendar month", "UTC six-hour block", "within-month ATR14 quintile"],
+    "seed": "ethusdtp-15m-micro-profit-ladder-20260905-v16"
+  },
+  "safety": {
+    "holdout_consumed": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "automatic_promote": false,
+    "active_or_forward_change": false,
+    "live_order_change": false,
+    "tradingview_write_before_result": false
+  }
+}

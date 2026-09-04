@@ -1,0 +1,15 @@
+{
+  "experiment_id": "exp-ethusdtp-15m-micro-profit-ladder-preholdout-20260905-v16",
+  "registered_at": "2026-09-05T05:42:00+08:00",
+  "single_selected_variable": "total bank fraction",
+  "selection_candidates": [0.10, 0.15, 0.20],
+  "fixed_levels_atr": [2.0, 4.0, 8.0, 12.0],
+  "fixed_equal_stage_sizes": true,
+  "fixed_entry": "V5 sparse EMA30/SMA60 trend-regime K1/K2 ledger",
+  "fixed_tail_gate": "retain at least 95% of baseline p95 net return",
+  "fixed_stop_contract": "partial fills never update the disaster or SMA60/ATR runner stop",
+  "selection_data": "2023-2024 only",
+  "audit_rule": "Run the reused 2025 through February 2026 audit only after one winner passes every gate and its receipt is committed.",
+  "repository_holdout_rows_allowed": 0,
+  "production_claim_allowed": false
+}
