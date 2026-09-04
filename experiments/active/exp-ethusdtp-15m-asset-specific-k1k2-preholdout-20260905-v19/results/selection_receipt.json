@@ -1,0 +1,93 @@
+{
+  "audit_rows_read": 0,
+  "baseline": {
+    "eligible": true,
+    "equal_risk_1pct_return": -0.34117700538769913,
+    "events": 182,
+    "max_drawdown": -0.4675804960373835,
+    "max_net_bp": 811.3530622687604,
+    "mean_capture_of_horizon_mfe": 0.3593083837736424,
+    "mean_gross_bp": -2.323628653739128,
+    "mean_net_bp": -22.32362865373913,
+    "median_hold_bars": 20.5,
+    "median_net_bp": -65.13609525839846,
+    "minimum_fold_events": 41,
+    "p90_net_bp": 132.0026400297184,
+    "p95_net_bp": 273.69915667331355,
+    "positive_folds": 0,
+    "profit_factor": 0.6375765668493572,
+    "robust_score_bp": -24.086411359436767,
+    "runner_armed_events": 77,
+    "runner_armed_share": 0.4230769230769231,
+    "signals_per_30d": 7.46922024623803,
+    "top_decile_positive_pnl_share": 0.8537624992829376,
+    "total_folds": 4,
+    "win_rate": 0.2087912087912088
+  },
+  "baseline_params": {
+    "bank_total_fraction": 0.1,
+    "ma_profile": "ema30_sma60",
+    "runner_buffer_atr": 1.0,
+    "transition_min_votes": 0
+  },
+  "candidate": {
+    "eligible": true,
+    "equal_risk_1pct_return": -0.18772374980442186,
+    "events": 161,
+    "max_drawdown": -0.35887250389730263,
+    "max_net_bp": 805.083853097084,
+    "mean_capture_of_horizon_mfe": 0.4231850412136319,
+    "mean_gross_bp": 7.404223191518836,
+    "mean_net_bp": -12.595776808481165,
+    "median_hold_bars": 23.0,
+    "median_net_bp": -60.87843968494309,
+    "minimum_fold_events": 35,
+    "p90_net_bp": 181.0764717049605,
+    "p95_net_bp": 359.01289693923326,
+    "positive_folds": 0,
+    "profit_factor": 0.7832969793906186,
+    "robust_score_bp": -15.9302989417715,
+    "runner_armed_events": 73,
+    "runner_armed_share": 0.453416149068323,
+    "signals_per_30d": 6.607387140902873,
+    "top_decile_positive_pnl_share": 0.8444488492854142,
+    "total_folds": 4,
+    "win_rate": 0.21739130434782608
+  },
+  "causality_mutation": {
+    "compared_rows": 3197,
+    "cutoff_i": 87417,
+    "cutoff_time": "2024-07-02T05:45:00+00:00",
+    "different_rows": 0,
+    "passed": true
+  },
+  "confirmation_rows_read": 0,
+  "experiment_id": "exp-ethusdtp-15m-asset-specific-k1k2-preholdout-20260905-v19",
+  "frozen": true,
+  "hashes": {
+    "config_sha256": "a37addee4cef108f7b9c21bc0b6bcaeb9ad3ddf74176d0f5be8cbd159a7295e1",
+    "grid_sha256": "ceaf6bfec967f1be3a8a1a46430154407ea8913f30af85d80dce64c38795fd3f",
+    "preregistration_sha256": "becb6c439c19cb6af2f58cba6cc55109f4ac6957092a79da9972a9798dc9b363",
+    "script_sha256": "f2c8789fee4aad33ef035db3f035c06483d9de0109b91c4c968ba123f6375a90"
+  },
+  "phase": "selection",
+  "repository_holdout_rows_read": 0,
+  "selected_params": {
+    "bank_total_fraction": 0.1,
+    "ma_profile": "ema30_sma60",
+    "runner_buffer_atr": 1.25,
+    "transition_min_votes": 2
+  },
+  "source": {
+    "bounded_end_exclusive": "2025-01-01T00:00:00+00:00",
+    "bounded_prefix_sha256": "dbc1c3643ba19d05050ab4afffbb7d289c3f67d4646ad1c46c4ba6a3ac90229d",
+    "first_bar": "2022-01-03T15:30:00+00:00",
+    "holdout_rows_read": 0,
+    "holdout_start": "2026-05-04T00:00:00+00:00",
+    "last_bar": "2024-12-31T23:45:00+00:00",
+    "path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+    "rows_read": 104962,
+    "segments": 1
+  },
+  "status": "frozen_for_audit"
+}
