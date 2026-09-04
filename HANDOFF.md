@@ -2,6 +2,24 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-05 — ETH/XAU 15m 品种专属 K1→K2 均确认失败）
+
+Owner 要求分别为 `ETHUSDT.P` 与 `XAUUSDT.P` 研发 15m K1→K2 趋势策略。本轮已按品种独立完成
+MA 架构、压缩→释放→承接票数、慢线 runner 缓冲和 10% 微止盈的顺序单变量选择。冻结结果为：
+ETH `EMA30/SMA60 + 2票 + 1.25ATR runner`；XAU `EMA20/SMA50 + 0票 + 1ATR runner`。
+
+两者都不能上线。ETH 2026-03/04 确认 19 笔为 **-77.26bp/笔、PF0.086、0/2 月为正**，比
+匹配随机差 68.04bp（p=0.9929）；XAU 15 笔为 **-50.41bp/笔、PF0.135、0/2 月为正**，
+比匹配随机差 9.35bp（p=0.7086）。确认期 runner 激活率只有 21.05%/13.33%，硬止损占
+73.68%/86.67%。XAU selection 的 20bp 成本还是中位 2ATR 风险的 114%。
+
+关键结构病因是 12 根强趋势状态没有把 K1 锚成启动点：信号距 regime 起点中位仍达 ETH 98 根、
+XAU 46 根。趋势年龄、效率、翻色数、fee/risk 和 90 组固定 TP/SL 事后压力测试均没有跨期稳定解。
+下一版只能将 episode 时钟改为“中性/压缩后的首个 K1 arm，2–8 根内首个 K2 consume”，并用新
+前向数据验证；K2 影线成交还需同 venue 1m 数据或把所有失败触线纳入探针账本。仓库 holdout 读取
+0 行；未改 TradingView、ACTIVE/frozen/forward、部署、仓位或订单。完整报告：
+`analysis/html/p1_eth_xau_15m_asset_specific_k1k2_20260905.html`。
+
 ## ⚡ 当前真相（2026-09-05 — ETHUSDT.P 15m 共振 V17/V18 全部拒绝）
 
 Owner 要求加入多因子/多周期共振并减少盘整误开。本轮冻结 V16 K1→K2、渐进 TP、SMA60 runner、

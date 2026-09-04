@@ -10,6 +10,7 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-09-05 | [`p1_eth_xau_15m_asset_specific_k1k2_20260905.md`](p1_eth_xau_15m_asset_specific_k1k2_20260905.md) | ETH / XAU 15m：品种专属 K1→K2 趋势策略审计 | ETH 与 XAU 已分别完成均线、状态变化票、runner 和微止盈参数选择，但冻结确认期分别为 -77.26/-50.41bp 每笔，均未通过；不写入 TradingView 或生产。 |
 | 2026-09-05 | [`p1_ethusdtp_15m_causal_confluence_20260905.md`](p1_ethusdtp_15m_causal_confluence_20260905.md) | ETHUSDT.P 15m：因果共振筛选与扩张门外推失败审计（V17/V18） | 本轮把“加入一些共振”真正做成了两级时间外验证，而不是往脚本里多堆几个勾选项。先在冻结的 |
 | 2026-09-05 | [`p1_ethusdtp_15m_gradual_take_profit_20260905.md`](p1_ethusdtp_15m_gradual_take_profit_20260905.md) | P1：ETHUSDT.P 15m 趋势单渐进止盈 V16（2026-09-05） | Owner 指出的执行问题成立：真实止盈和抬高止损是两件事，不能互相冒充。** 本轮冻结入场和原 |
 | 2026-09-04 | [`p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.md`](p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.md) | 15m Grade-A 六均线 close→HL2 单变量复训（2026-09-03/04） | **HL2 有“正例更容易被检出”的迹象，但没有证明整体优于 close，本轮不建议替换现有表示。** |
@@ -302,6 +303,7 @@
 - [`p15_h5_vol_adaptive.md`](p15_h5_vol_adaptive.md) — P1.5 H5：波动率自适应障碍
 - [`p15_h9_report.md`](p15_h9_report.md) — P1.5 R1'：H9 高层趋势过滤复测与推广
 - [`p1_b2_short_l2_backtest_20260811.md`](p1_b2_short_l2_backtest_20260811.md) — Local Signal V2 B2：候选密度与收益诊断
+- [`p1_eth_xau_15m_asset_specific_k1k2_20260905.md`](p1_eth_xau_15m_asset_specific_k1k2_20260905.md) — ETH / XAU 15m：品种专属 K1→K2 趋势策略审计
 - [`p1_fixed_w10_blind_audit_pack_20260820.md`](p1_fixed_w10_blind_audit_pack_20260820.md) — P1 fixed-W10 门禁修复、artifact 谱系与盲审包（2026-08-20）
 - [`p1_fixed_w10_canonical_ohlc_triage_v2_20260821.md`](p1_fixed_w10_canonical_ohlc_triage_v2_20260821.md) — P1 统一原始 OHLC 全量筛选包 v2（2026-08-21）
 - [`p1_fixed_w10_original_source_triage_20260821.md`](p1_fixed_w10_original_source_triage_20260821.md) — P1 fixed-W10 原始来源图全量筛选包（2026-08-21）

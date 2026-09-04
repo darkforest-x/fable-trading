@@ -14263,3 +14263,105 @@ artifacts:
     config_hash: "7a5e16fd1e4b21747913ab261f0ec2682167d33945e3f4b2ce7c279babaeaa67"
     data_cutoff: "2026-03-01T00:00:00Z"
     notes: Static three-panel figure with non-color distinction and direct labels.
+
+  - artifact_id: ethusdtp-15m-asset-k1k2-v19-confirmation
+    artifact_type: manifest
+    role: frozen_preholdout_confirmation_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ac1c47c3ed9ebc80562abb07c06ad07baed9b321"
+    source_path: experiments/active/exp-ethusdtp-15m-asset-specific-k1k2-preholdout-20260905-v19/results/confirmation_receipt.json
+    sha256: "914134575881d14d93906d44e5ab6e3d4bee4af26978186ec962fc13396398cd"
+    size_bytes: 3383
+    storage_uri: "repo://experiments/active/exp-ethusdtp-15m-asset-specific-k1k2-preholdout-20260905-v19/results/confirmation_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ac1c47c3ed9ebc80562abb07c06ad07baed9b321"
+    config_hash: "a37addee4cef108f7b9c21bc0b6bcaeb9ad3ddf74176d0f5be8cbd159a7295e1"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: 19 confirmation trades; -77.26bp/trade, PF 0.086, zero repository holdout rows.
+
+  - artifact_id: xauusdtp-15m-asset-k1k2-v1-confirmation
+    artifact_type: manifest
+    role: frozen_preholdout_confirmation_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ac1c47c3ed9ebc80562abb07c06ad07baed9b321"
+    source_path: experiments/active/exp-xauusdtp-15m-asset-specific-k1k2-preholdout-20260905-v1/results/confirmation_receipt.json
+    sha256: "2b03c3ea6198019117847290adffd96dcc00f2766f49f197c8998c2b67aa8131"
+    size_bytes: 3387
+    storage_uri: "repo://experiments/active/exp-xauusdtp-15m-asset-specific-k1k2-preholdout-20260905-v1/results/confirmation_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ac1c47c3ed9ebc80562abb07c06ad07baed9b321"
+    config_hash: "bbb948271ce388d1d98d72eaa1fc11850f93101e1d6c3cc629fdacd47ea6aef3"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: 15 confirmation trades; -50.41bp/trade, PF 0.135, zero repository holdout rows.
+
+  - artifact_id: eth-xau-15m-asset-k1k2-diagnostics
+    artifact_type: manifest
+    role: registered_results_and_postmortem_failure_diagnostics
+    source_repo: darkforest-x/fable-trading
+    source_commit: "27e39cc5186a29923be2db678d86931231244d4b"
+    source_path: analysis/output/asset_specific_k1k2_15m_20260905/summary.json
+    sha256: "cf59de78a36bc717be72490b2915f044588c5eaa35bbbe253730e61abda80642"
+    size_bytes: 1531
+    storage_uri: "repo://analysis/output/asset_specific_k1k2_15m_20260905/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "27e39cc5186a29923be2db678d86931231244d4b"
+    config_hash: "75ccc2faeace51b7d07bde2fcf9f81bbb890c0f56bb0bc5c426539912b5c9f1e"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: Registered metrics are separated from 78 gate and 90 exit postmortem rows; zero holdout rows.
+
+  - artifact_id: eth-xau-15m-asset-k1k2-report
+    artifact_type: report
+    role: canonical_chinese_asset_specific_k1k2_validation_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2672bb56bd9927d6f22828f5efc7d1b87ab2080b"
+    source_path: analysis/p1_eth_xau_15m_asset_specific_k1k2_20260905.md
+    sha256: "f0d6e50fb78d23e53402e7fc245fedcade11264911ace49c79c0f2c876c4a980"
+    size_bytes: 17438
+    storage_uri: "repo://analysis/p1_eth_xau_15m_asset_specific_k1k2_20260905.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2672bb56bd9927d6f22828f5efc7d1b87ab2080b"
+    config_hash: "75ccc2faeace51b7d07bde2fcf9f81bbb890c0f56bb0bc5c426539912b5c9f1e"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: Full rules, time-split results, matched random controls, failure causes and next hypothesis.
+
+  - artifact_id: eth-xau-15m-asset-k1k2-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_asset_specific_k1k2_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2672bb56bd9927d6f22828f5efc7d1b87ab2080b"
+    source_path: analysis/html/p1_eth_xau_15m_asset_specific_k1k2_20260905.html
+    sha256: "6b9c1096b20af13b4ede7d526f32a91fba1e52d1df9910a2f78084090760c9bf"
+    size_bytes: 258843
+    storage_uri: "repo://analysis/html/p1_eth_xau_15m_asset_specific_k1k2_20260905.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2672bb56bd9927d6f22828f5efc7d1b87ab2080b"
+    config_hash: "75ccc2faeace51b7d07bde2fcf9f81bbb890c0f56bb0bc5c426539912b5c9f1e"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: Self-contained HTML with embedded four-panel evidence figure and audit tables.
+
+  - artifact_id: eth-xau-15m-asset-k1k2-figure
+    artifact_type: report
+    role: phase_transport_matched_control_runner_and_horizon_figure
+    source_repo: darkforest-x/fable-trading
+    source_commit: "27e39cc5186a29923be2db678d86931231244d4b"
+    source_path: analysis/output/asset_specific_k1k2_15m_20260905/asset_specific_k1k2_diagnosis.png
+    sha256: "fdd47b564b34eae54209912802f7d9e78755046387d268913a56edfd05b66448"
+    size_bytes: 176435
+    storage_uri: "repo://analysis/output/asset_specific_k1k2_15m_20260905/asset_specific_k1k2_diagnosis.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "27e39cc5186a29923be2db678d86931231244d4b"
+    config_hash: "75ccc2faeace51b7d07bde2fcf9f81bbb890c0f56bb0bc5c426539912b5c9f1e"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: Static four-panel figure; registered and postmortem claims are separated in the report.

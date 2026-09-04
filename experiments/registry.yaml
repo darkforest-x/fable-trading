@@ -4871,8 +4871,8 @@ experiments:
 
   - experiment_id: exp-ethusdtp-15m-asset-specific-k1k2-preholdout-20260905-v19
     source_repo: darkforest-x/fable-trading
-    source_commit: pending_preregistration_commit
-    status: active
+    source_commit: "ac1c47c3ed9ebc80562abb07c06ad07baed9b321"
+    status: rejected
     question: >-
       Which asset-specific MA architecture, causal compression-release-
       acceptance threshold, runner buffer and micro-bank fraction best preserve
@@ -4882,23 +4882,35 @@ experiments:
       ma_profile, transition_min_votes, runner_buffer_atr, then
       bank_total_fraction. Every stage includes the incumbent and requires a
       minimum robust-score gain plus right-tail retention.
-    result: pending
+    result: >-
+      research_gate_fail. Selection chose EMA30/SMA60, at least two of three
+      causal transition votes, a 1.25 ATR slow-MA runner buffer and 10% total
+      micro-banking. It produced -12.60bp/trade in selection, +5.48bp in the
+      non-pristine audit and -77.26bp in the frozen March-April confirmation
+      (19 events, PF 0.086, 0/2 positive months). Confirmation underperformed
+      matched random by 68.04bp/trade; one-sided p=0.9929.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: pending
-    artifacts: []
+    canonical_report: analysis/p1_eth_xau_15m_asset_specific_k1k2_20260905.md
+    artifacts:
+      - ethusdtp-15m-asset-k1k2-v19-confirmation
+      - eth-xau-15m-asset-k1k2-diagnostics
+      - eth-xau-15m-asset-k1k2-report
+      - eth-xau-15m-asset-k1k2-html
+      - eth-xau-15m-asset-k1k2-figure
     reuse_allowed: false
     notes: >-
       Selection is 2023-2024; audit is the already-seen 2025 through February
-      2026 lineage; March-April 2026 is sealed confirmation. Repository holdout
-      begins 2026-05-04 and zero holdout rows are allowed. No automatic
-      TradingView, ACTIVE/frozen, forward, deployment or order change.
+      2026 lineage; March-April 2026 confirmation was opened once after the
+      audit receipt was committed. Repository holdout begins 2026-05-04 and
+      zero holdout rows were read. No TradingView, ACTIVE/frozen, forward,
+      deployment or order state changed.
 
   - experiment_id: exp-xauusdtp-15m-asset-specific-k1k2-preholdout-20260905-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending_preregistration_commit
-    status: active
+    source_commit: "ac1c47c3ed9ebc80562abb07c06ad07baed9b321"
+    status: rejected
     question: >-
       Which asset-specific MA architecture, causal compression-release-
       acceptance threshold, runner buffer and micro-bank fraction best preserve
@@ -4908,16 +4920,27 @@ experiments:
       ma_profile, transition_min_votes, runner_buffer_atr, then
       bank_total_fraction. Every stage includes the incumbent and requires a
       minimum robust-score gain plus right-tail retention.
-    result: pending
+    result: >-
+      research_gate_fail. Selection chose EMA20/SMA50, no transition-vote hard
+      gate, a 1.0 ATR slow-MA runner buffer and 10% total micro-banking. It
+      produced -22.52bp/trade in selection, -10.38bp in audit and -50.41bp in
+      frozen March-April confirmation (15 events, PF 0.135, 0/2 positive
+      months). Confirmation underperformed matched random by 9.35bp/trade;
+      one-sided p=0.7086.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: pending
-    artifacts: []
+    canonical_report: analysis/p1_eth_xau_15m_asset_specific_k1k2_20260905.md
+    artifacts:
+      - xauusdtp-15m-asset-k1k2-v1-confirmation
+      - eth-xau-15m-asset-k1k2-diagnostics
+      - eth-xau-15m-asset-k1k2-report
+      - eth-xau-15m-asset-k1k2-html
+      - eth-xau-15m-asset-k1k2-figure
     reuse_allowed: false
     notes: >-
       Exact OKX XAU swap data begin 2025-06-03, so evidence is explicitly
       lower-powered: June-October selection, November-February audit and
       March-April confirmation. Repository holdout begins 2026-05-04 and zero
-      holdout rows are allowed. No automatic TradingView, ACTIVE/frozen,
-      forward, deployment or order change.
+      holdout rows were read. No TradingView, ACTIVE/frozen, forward,
+      deployment or order state changed.
