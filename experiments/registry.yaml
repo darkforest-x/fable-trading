@@ -4443,3 +4443,30 @@ experiments:
       remained unopened. Freqtrade ran as a full Docker-isolated research
       implementation, not merely a design reference. No TradingView, ACTIVE,
       frozen, forward, deployment, API-key or order mutation occurred.
+
+  - experiment_id: exp-btcusdtp-k1k2-15m-dynamic-stop-preholdout-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f4204c1"
+    status: active
+    question: >-
+      Can a causal dynamic or automatic stop manager repair the negative
+      expectancy of the frozen BTCUSDT.P 15m two-stage K1-to-K2 entry cohort,
+      and which failure paths can each manager actually affect?
+    single_variable: >-
+      stop_manager_policy: frozen baseline versus five preregistered causal
+      state machines; signal, 100-entry cohort, original risk unit, 3R target,
+      48-bar horizon and 20bp cost remain identical.
+    result: >-
+      preregistered_before_outcomes. Candidate constants, chronological folds,
+      matched controls, familywise paired test and failure diagnostics were
+      committed before calculating any dynamic-stop result.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Development is limited to 2023-2024. The 2025-2026-02 audit can open only
+      if every registered development gate passes. The repository holdout at
+      or after 2026-05-04 remains closed; no TradingView, ACTIVE, frozen,
+      forward, deployment, API-key or live-order mutation is authorized.
