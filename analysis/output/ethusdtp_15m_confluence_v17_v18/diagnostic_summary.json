@@ -1,0 +1,84 @@
+{
+  "threshold_reoptimized_on_audit": false,
+  "selection_rule": "expansion_floor >= 0.85",
+  "audit_events": 114,
+  "audit_top_decile_events": 12,
+  "audit_top_decile_selected_events": 1,
+  "audit_top_decile_selected_rate": 0.08333333333333333,
+  "audit_top_decile_selected_net_bp": 501.90716964597897,
+  "audit_top_decile_total_net_bp": 7921.371632025388,
+  "audit_top_decile_selected_net_share": 0.06336114412519339,
+  "source": {
+    "selection": {
+      "phase": "selection",
+      "events": 182,
+      "first_signal": "2023-01-01T09:15:00+00:00",
+      "last_signal": "2024-12-26T23:45:00+00:00",
+      "feature_columns": 22,
+      "candidate_gates": 12,
+      "minimum_feature_finite_rate": 1.0,
+      "minimum_feature_finite_name": "eth_volume_ratio96",
+      "eth_source": {
+        "path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+        "rows_returned": 104962,
+        "rows_physically_parsed": 105024,
+        "first_returned": "2022-01-03T15:30:00+00:00",
+        "last_returned": "2024-12-31T23:45:00+00:00",
+        "max_physically_parsed_time": "2025-01-01T15:15:00+00:00",
+        "end_exclusive": "2025-01-01T00:00:00+00:00",
+        "holdout_start": "2026-05-04T00:00:00+00:00",
+        "holdout_rows_parsed": 0,
+        "segments": 1
+      },
+      "btc_source": {
+        "path": "data/kline_deep/okx_BTC_USDT_SWAP_15m_158499.csv",
+        "rows_returned": 104965,
+        "rows_physically_parsed": 105024,
+        "first_returned": "2022-01-03T14:45:00+00:00",
+        "last_returned": "2024-12-31T23:45:00+00:00",
+        "max_physically_parsed_time": "2025-01-01T14:30:00+00:00",
+        "end_exclusive": "2025-01-01T00:00:00+00:00",
+        "holdout_start": "2026-05-04T00:00:00+00:00",
+        "holdout_rows_parsed": 0,
+        "segments": 1
+      },
+      "repository_holdout_rows_read": 0
+    },
+    "audit": {
+      "phase": "audit",
+      "events": 114,
+      "first_signal": "2025-01-01T04:00:00+00:00",
+      "last_signal": "2026-02-26T05:15:00+00:00",
+      "feature_columns": 22,
+      "candidate_gates": 12,
+      "minimum_feature_finite_rate": 1.0,
+      "minimum_feature_finite_name": "eth_volume_ratio96",
+      "eth_source": {
+        "path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+        "rows_returned": 145666,
+        "rows_physically_parsed": 145728,
+        "first_returned": "2022-01-03T15:30:00+00:00",
+        "last_returned": "2026-02-28T23:45:00+00:00",
+        "max_physically_parsed_time": "2026-03-01T15:15:00+00:00",
+        "end_exclusive": "2026-03-01T00:00:00+00:00",
+        "holdout_start": "2026-05-04T00:00:00+00:00",
+        "holdout_rows_parsed": 0,
+        "segments": 1
+      },
+      "btc_source": {
+        "path": "data/kline_deep/okx_BTC_USDT_SWAP_15m_158499.csv",
+        "rows_returned": 145669,
+        "rows_physically_parsed": 145728,
+        "first_returned": "2022-01-03T14:45:00+00:00",
+        "last_returned": "2026-02-28T23:45:00+00:00",
+        "max_physically_parsed_time": "2026-03-01T14:30:00+00:00",
+        "end_exclusive": "2026-03-01T00:00:00+00:00",
+        "holdout_start": "2026-05-04T00:00:00+00:00",
+        "holdout_rows_parsed": 0,
+        "segments": 1
+      },
+      "repository_holdout_rows_read": 0
+    }
+  },
+  "repository_holdout_rows_read": 0
+}
