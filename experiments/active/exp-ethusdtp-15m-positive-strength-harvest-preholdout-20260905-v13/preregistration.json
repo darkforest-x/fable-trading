@@ -1,0 +1,18 @@
+{
+  "experiment_id": "exp-ethusdtp-15m-positive-strength-harvest-preholdout-20260905-v13",
+  "registered_at": "2026-09-05T04:34:00+08:00",
+  "confirmation_only": true,
+  "fixed_strong_trend_release_multiplier": 0.25,
+  "owner_semantic_constraint": "A super-trend must still realize profit progressively; zero is not an acceptable setting.",
+  "fixed_base_stage_fractions": [0.2, 0.1, 0.05, 0.05],
+  "fixed_effective_strong_stage_fractions": [0.05, 0.025, 0.0125, 0.0125],
+  "fixed_earned_slots_atr": [2.0, 4.0, 8.0, 12.0],
+  "fixed_strong_threshold": "+8 ATR already observed before release",
+  "fixed_adverse_color_streak_bars": 2,
+  "fixed_release_timing": "one stage at next open per qualifying completed streak bar",
+  "key_exclusion": "No break-even, cost floor, ratchet, or other stop update is caused by a profit release.",
+  "selection_data": "2023-2024 only",
+  "audit_rule": "Run 2025 through February 2026 only after the fixed candidate passes every development gate and its receipt is committed.",
+  "repository_holdout_rows_allowed": 0,
+  "production_claim_allowed": false
+}
