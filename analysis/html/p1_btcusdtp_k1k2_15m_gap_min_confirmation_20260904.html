@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>BTCUSDT.P 15min K1→K2 最小距离确认（2026-09-04）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>BTCUSDT.P 15min K1→K2 最小距离确认（2026-09-04）</h1>
+<p>性质：P1、pre-holdout、单变量时间外推确认。</p>
+<p>最终裁决：<strong>REJECTED；<code>gap_min_bars 2→5</code> 的真实改善远小于事后分组，audit 与 holdout 不打开。</strong></p>
+<h2>Executive Summary</h2>
+<p>2023 因果失败地图提名了一个清晰假设：15min K1 与 K2 至少相隔 5 根，可能给启动后的趋势更多 时间完成回踩。该假设在任何 2024 分组结果被查看之前冻结；本轮只把 gap 下限从 2 改为 5， 上限仍为 8，其余形态、SMA120、入场、K2 极值止损、风险门、3R、1.5R 保护、12 小时、六小时 冷却和 20bp 成本全部不动。</p>
+<p>精确重放否定了假设。候选从 -13.93bp/笔改善到 -12.02bp/笔，平均只增加 1.91bp；稳健分只增加 2.83bp，未达到预注册的 +5bp，更没有转正。2024H1/H2 分别为 -9.00/-14.69bp。严格匹配随机 对照的超额为 +8.55bp，但单侧 p=0.0811，未达到 0.01。</p>
+<p>最重要的机制证据是交易身份：基线 194 笔中只有 70 笔在候选中保留，124 笔被删除；冷却位释放 后又加入 60 笔此前未成交的交易。正因如此，2023 已成交账本上约 +18bp 的稳定改善不能映射为 真实执行改善。</p>
+<h2>单变量合同</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>基线</th>
+<th>候选</th>
+</tr></thead><tbody>
+<tr><td>周期</td><td>15min</td><td>15min</td></tr>
+<tr><td>SMA(HL2)</td><td>120</td><td>120</td></tr>
+<tr><td>K1→K2 gap</td><td>2–8</td><td><strong>5–8</strong></td></tr>
+<tr><td>score floor</td><td>0.40</td><td>0.40</td></tr>
+<tr><td>入场</td><td>K2 后下一根开盘</td><td>相同</td></tr>
+<tr><td>止损</td><td>K2 极值</td><td>相同</td></tr>
+<tr><td>目标 / 保护</td><td>3R / 收盘 1.5R 后保本费</td><td>相同</td></tr>
+<tr><td>时限 / cooldown</td><td>12h / 6h</td><td>相同</td></tr>
+<tr><td>往返成本</td><td>20bp</td><td>相同</td></tr>
+</tbody></table>
+<p>过滤发生在同 K2 排序、风险门、cooldown 和 K1 复用之前。测试证明同一 K2 上如果高分短 gap 被 删除，较长 gap 的 K1 可以重新参与排序；这不是对旧账本做 <code>gap &gt;= 5</code> 的简单切片。</p>
+<h2>2024 确认结果</h2>
+<table><thead><tr>
+<th>指标</th>
+<th>gap 2–8 基线</th>
+<th>gap 5–8 候选</th>
+<th>候选变化</th>
+</tr></thead><tbody>
+<tr><td>交易数</td><td>194</td><td>130</td><td>-64</td></tr>
+<tr><td>毛收益 bp/笔</td><td>+6.07</td><td>+7.98</td><td>+1.91</td></tr>
+<tr><td>净收益 bp/笔</td><td>-13.93</td><td><strong>-12.02</strong></td><td>+1.91</td></tr>
+<tr><td>稳健分 bp</td><td>-16.09</td><td><strong>-13.27</strong></td><td>+2.83</td></tr>
+<tr><td>最差半年 bp/笔</td><td>-18.82</td><td>-14.69</td><td>+4.13</td></tr>
+<tr><td>胜率</td><td>33.0%</td><td>41.5%</td><td>+8.5pp</td></tr>
+<tr><td>PF</td><td>0.592</td><td>0.588</td><td>-0.004</td></tr>
+<tr><td>TP / SL / 保护 / 超时</td><td>40 / 127 / 25 / 2</td><td>29 / 75 / 24 / 2</td><td>—</td></tr>
+</tbody></table>
+<p>候选胜率提高，但每笔止盈/止损的价格风险不同，PF 没有提高，平均毛 edge 仍只有 7.98bp，无法覆盖 冻结的 20bp 往返成本。它的经验 break-even 成本约为 7.98bp；这只是归因，不授权把成本假设调低。</p>
+<table><thead><tr>
+<th>候选切片</th>
+<th>n</th>
+<th>毛 bp/笔</th>
+<th>净 bp/笔</th>
+<th>胜率</th>
+<th>PF</th>
+</tr></thead><tbody>
+<tr><td>2024H1</td><td>61</td><td>+11.00</td><td>-9.00</td><td>45.9%</td><td>0.653</td></tr>
+<tr><td>2024H2</td><td>69</td><td>+5.31</td><td>-14.69</td><td>37.7%</td><td>0.542</td></tr>
+</tbody></table>
+<p>两个半年毛收益都为正，却都不足以支付成本；这不是某个半年偶发拖累。</p>
+<h2>为什么事后看起来很好，精确重放却只改善一点</h2>
+<table><thead><tr>
+<th>交易身份变化</th>
+<th>笔数</th>
+<th>含义</th>
+</tr></thead><tbody>
+<tr><td>retained</td><td>70</td><td>K1、K2、方向都与基线一致</td></tr>
+<tr><td>removed</td><td>124</td><td>原基线交易因 gap&lt;5 或同 K2 重新排序而消失</td></tr>
+<tr><td>added_after_replay</td><td>60</td><td>过滤释放 cooldown 后新增的真实候选</td></tr>
+</tbody></table>
+<p>候选总数 130 并不是旧 194 笔中的一个固定子集。60 笔新增交易占候选 46.2%，足以重写收益分布。 因此 2023 账本子集的 +18.02bp 稳定改善只能回答“哪里值得再查”，不能回答“改参数后赚多少”。</p>
+<h2>匹配随机对照与排序</h2>
+<p>随机对照按同月 × UTC 六小时块 × 当月 ATR14 五分位精确匹配，每笔复制方向、ATR 风险距离、 3R/保护/时限和成本；每笔 3 个控制点，找不到精确层不放宽。</p>
+<table><thead><tr>
+<th>指标</th>
+<th>基线</th>
+<th>候选</th>
+</tr></thead><tbody>
+<tr><td>完整匹配 n</td><td>194</td><td>130</td></tr>
+<tr><td>策略−随机 bp/笔</td><td>+8.52</td><td>+8.55</td></tr>
+<tr><td>单侧符号置换 p</td><td>0.1036</td><td><strong>0.0811</strong></td></tr>
+<tr><td>等权 score AUC</td><td>0.607</td><td>0.574</td></tr>
+<tr><td>score top10% n</td><td>20</td><td>13</td></tr>
+<tr><td>score top10% 净 bp</td><td>+1.81</td><td>-6.91</td></tr>
+<tr><td>score 排序置换 p</td><td>0.161</td><td>0.342</td></tr>
+<tr><td>K1 range 单特征 top10% 净 bp</td><td>-32.54</td><td>-37.00</td></tr>
+</tbody></table>
+<p>候选相对随机点有正差，但不显著，而且自身净收益仍为负。原 12 项等权 score 在候选内部也没有 形成可靠排序：AUC 0.574、top-decile 仍净亏 -6.91bp，p=0.342。</p>
+<h2>预注册确认门逐条裁决</h2>
+<table><thead><tr>
+<th>门</th>
+<th>结果</th>
+<th>通过？</th>
+</tr></thead><tbody>
+<tr><td>n≥60 且每半年≥20</td><td>130；61/69</td><td>是</td></tr>
+<tr><td>平均净收益 &gt;0</td><td>-12.02bp</td><td>否</td></tr>
+<tr><td>稳健分 &gt;0</td><td>-13.27bp</td><td>否</td></tr>
+<tr><td>最差半年 &gt;-5bp</td><td>-14.69bp</td><td>否</td></tr>
+<tr><td>两个半年净收益都 &gt;0</td><td>-9.00/-14.69bp</td><td>否</td></tr>
+<tr><td>稳健分相对基线改善 ≥5bp</td><td>+2.83bp</td><td>否</td></tr>
+<tr><td>匹配随机超额 &gt;0</td><td>+8.55bp</td><td>是</td></tr>
+<tr><td>配对 p&lt;0.01</td><td>0.0811</td><td>否</td></tr>
+</tbody></table>
+<p>确认门失败 6 项。按合同，2025-01-01 至 2026-02-28 的 audit 不读取，仓库 holdout 不读取，候选 判为 rejected，保留原研究规则但它本身仍不可交易。</p>
+<h2>数据、可复现性与边界</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>合约</td><td>OKX <code>BTC-USDT-SWAP</code> / TradingView <code>OKX:BTCUSDT.P</code></td></tr>
+<tr><td>原生源</td><td><code>data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv</code></td></tr>
+<tr><td>SHA256</td><td><code>767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac</code></td></tr>
+<tr><td>确认窗口</td><td>2024-01-01 ～ 2025-01-01 UTC</td></tr>
+<tr><td>nomination receipt</td><td><code>3ee6dc74ab99ee5626e9a85d5338887390260a828013dd8bf655956e81075fde</code></td></tr>
+<tr><td>confirmation receipt</td><td><code>e153a48e4129a561da729d4fa3e8db4494c3e90d424534a08a66f24fe8c3f991</code></td></tr>
+<tr><td>audit 行读取</td><td>0</td></tr>
+<tr><td>holdout 行读取</td><td>0</td></tr>
+</tbody></table>
+<p>复现命令：</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+python3 -m pytest tests/test_research_btcusdtp_k1k2_15m_gap_min_confirmation.py -q
+PYTHONPATH=. python3 -m scripts.research_btcusdtp_k1k2_15m_gap_min_confirmation --phase confirmation
+python3 scripts/md_to_html.py analysis/p1_btcusdtp_k1k2_15m_gap_min_confirmation_20260904.md --out-dir analysis/html
+</code></pre>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>2024 的基线聚合结果在旧实验中出现过；候选 exact replay 在本次预注册后才计算，因此是较晚时间 复验，但不是绝对 pristine holdout。</li>
+<li>20bp 成本不含 funding，也不额外模拟超过 20bp 的滑点。即便忽略成本，+7.98bp 毛 edge 的配对 证据仍只有 p=0.0811。</li>
+<li>本轮只确认一个由 2023 提名的变量，没有在看到 2024 失败后改成 gap 6–7 或追加第二个过滤器。</li>
+<li>没有读取 audit/holdout，没有修改 TradingView Pine、ACTIVE/frozen/forward、部署、通知或真金仓位。</li>
+</ul>
+<p>最终建议：<strong>不要把 15min gap 改为 5–8，也不要给 5min/15min Pine 增加新的交易信号。</strong>当前证据 支持的产品状态是“研究可视化”，不是“可交易策略”。继续开发应等待新的时间外数据，或改变信号 表示/成本结构后重新预注册；不能继续在已看过的 2023–2024 上挑阈值。</p>
+</body>
+</html>

@@ -516,4 +516,6 @@
 - [`p1_btcusdtp_k1k2_protection_trigger_preholdout_20260904.md`](p1_btcusdtp_k1k2_protection_trigger_preholdout_20260904.md) — 盈利保护触发点单变量实验；关闭保护仅改善 0.28/0.41bp，两周期均保留 1.5R。
 - [`p1_btcusdtp_k1k2_fixed_target_preholdout_20260904.md`](p1_btcusdtp_k1k2_fixed_target_preholdout_20260904.md) — 固定止盈 2–8R 单变量实验；长尾存在但整单抬目标未过门，两周期保留 3R。
 - [`p1_btcusdtp_k1k2_partial_runner_preholdout_20260904.md`](p1_btcusdtp_k1k2_partial_runner_preholdout_20260904.md) — 3R 部分止盈 + 8R runner；中间比例受固定端点约束，两周期均拒绝。
+- [`p1_btcusdtp_k1k2_causal_failure_map_20260904.md`](p1_btcusdtp_k1k2_causal_failure_map_20260904.md) — 35 个因果连续特征 + 10 个分类条件的 2023 稳定分段；15m 仅提名 gap≥5，5m 无候选。
+- [`p1_btcusdtp_k1k2_15m_gap_min_confirmation_20260904.md`](p1_btcusdtp_k1k2_15m_gap_min_confirmation_20260904.md) — 15m gap 下限 2→5 的 2024 精确冷却重放；改善不足且仍净亏，候选拒绝。
 - [`p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md`](p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md) — 旧 1h 报告的 holdout 读取声明勘误。
