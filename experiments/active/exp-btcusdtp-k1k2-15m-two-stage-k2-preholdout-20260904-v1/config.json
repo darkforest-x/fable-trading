@@ -90,7 +90,7 @@
       "mode": "touch_then_confirm",
       "maximum_confirmation_delay_bars": 2,
       "touch_bar": "passes every frozen K2 condition except minimum rejection close location",
-      "confirmation_bar": "earliest bar at delay 0, 1 or 2 with wick share, body ratio, rejection close, body-side, close-side and MA-colour conditions; physical touch is not repeated",
+      "confirmation_bar": "earliest bar at delay 0, 1 or 2 with wick share, body ratio, rejection close, body-side and close-side conditions; delay 1 or 2 additionally requires the MA colour to remain direction-aligned, while delay 0 exactly preserves the baseline morphology",
       "between_touch_and_confirmation": "every completed bar closes and colours on the intended SMA40 side",
       "stop_anchor": "lowest low for long or highest high for short across the inclusive touch-to-confirmation interval",
       "selection_order": "for one touch choose earliest confirmation; for one confirmation and direction prefer shortest delay, then higher K1 quality, then smaller K1-to-touch gap, then later touch",
